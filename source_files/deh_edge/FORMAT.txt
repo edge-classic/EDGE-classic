@@ -1,0 +1,69 @@
+
+Dehacked Patch FORMATS
+======================
+
+REALLY OLD:
+
+first byte is 12: DEH 1.2 or DEH 1.3
+|
+|__ second byte either 1 (DEH 1.2) or 2 (DEH 1.3).
+    |
+    |__ if   (EXE is DOOM 1.2) -> LoadDirect
+    |   else (EXE is DOOM 1.6) -> Convertpatch
+    |
+    |__ LoadDirect(1) -> raw thing table, raw ammo data, raw weapons.
+    |
+    |__ LoadDirect(2) -> also has raw frame data.
+ 
+
+NORMAL:
+
+initial string "Patch File for DeHackEd v#.#"
+|
+|__ #.# = DEH 2.0 .. 2.2 -> LoadOld
+|
+|__ #.# = DEH 2.3 or 3.0 -> LoadDiff
+
+LoadOld:
+|
+|__ next byte is DOOM VER (12 or 16-20)
+|__ next byte is patch format (3 invalid, must be 4).
+    |
+    |___ raw thing table, ammo data, weapons, frames,
+         sounds, sprites, raw text data.
+
+LoadDiff:
+|
+|__ skip until next '\n' character.
+|__ "Doom version = #.#" (12, 16-21).
+|__ "Patch format = #" 5 --> DEH 2.3, 6 --> DEH 3.0
+    |
+    |__ Format 5 -> ^Thing, ^Sound, ^Frame, ^Sprite, ^Ammo,
+    |               ^Weapon, ^Text.
+    |
+    |__ Format 6 -> also has ^Pointer, ^Misc, ^Cheat.
+
+
+BEX (BOOM Extended)
+-------------------
+
+DHE version (at top of file) is normal (3.0).
+Patch format has remained at 6 (ouch !).
+
+Note well: magic value and version strings can be absent !
+
+Values allowed to be hexadecimal (scanf "%i").
+
+INCLUDE directive.
+
+^Thing -> Bits can use FLAG+FLAG+FLAG format.
+          (Some flags only settable this way: TOUCHY, BOUNCES).
+
+[CODEPTR] section, with text names for code pointers.
+[PARS] section.
+
+[STRINGS] section, with names for text strings.
+
+[SPRITES], [SOUNDS] and [MUSIC] sections, undocumented in boomdeh.txt.
+[HELPER] section, undocumented in boomdeh.txt.
+

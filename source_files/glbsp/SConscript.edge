@@ -1,0 +1,27 @@
+#
+# SConscript file, builds GLBSP for EDGE
+#
+import os
+
+Import('build_info')
+Import('base_env')
+
+env = base_env.Clone()
+
+env.Append(CCFLAGS = ['-DGLBSP_PLUGIN'])
+env.Append(CCFLAGS = ['-DINLINE_G=inline'])
+
+#FIXME: ZLIB include directory
+
+glbsp_sources = [
+    'src/analyze.c', 'src/blockmap.c', 'src/glbsp.c',
+    'src/level.c', 'src/node.c', 'src/reject.c',
+    'src/seg.c', 'src/system.c', 'src/util.c',
+    'src/wad.c' ]
+
+env.Prepend(CPPPATH = './src')
+
+env.StaticLibrary('glbsp', glbsp_sources)
+
+##--- editor settings ---
+## vi:ts=4:sw=4:expandtab

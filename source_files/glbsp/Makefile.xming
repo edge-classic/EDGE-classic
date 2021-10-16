@@ -1,0 +1,137 @@
+#####################################################
+#
+# glBSP Makefile for Cross-Compiling Win32 binaries
+#
+# Targets:
+#    libglbsp.a
+#    glbsp.exe
+#    glBSPX.exe
+#    glbsp.txt
+#
+#    all     : makes the library, cmdline program and docs
+#    clean   : removes targets and intermediate files
+#
+
+LIB_NAME=libglbsp.a
+CMD_NAME=glbsp.exe
+GUI_NAME=glBSPX.exe
+DOC_NAME=glbsp.txt
+
+CC=i586-mingw32msvc-gcc
+CXX=i586-mingw32msvc-g++
+AR=i586-mingw32msvc-ar rc
+RANLIB=i586-mingw32msvc-ranlib
+STRIP=i586-mingw32msvc-strip --strip-unneeded
+WINDRES=i586-mingw32msvc-windres
+
+BASE_FLAGS=-Wall -O2 -I./src -DWIN32 -DINLINE_G=inline
+
+ZLIB_DIR=./zlib-1.2.3-win32
+FLTK_DIR=./fltk-1.1.7-win32
+
+
+# ----- GENERAL STUFF ----------------------------------------------
+
+all:    $(LIB_NAME) $(CMD_NAME) $(DOC_NAME)
+
+clean:
+	rm -f $(LIB_NAME) $(CMD_NAME) $(GUI_NAME) $(DOC_NAME)
+	rm -f src/*.o cmdline/*.o gui/*.o
+	rm -f ./core ./ERRS ./gb_debug.txt 
+
+.PHONY: all clean
+
+
+# ----- LIBRARY ----------------------------------------------------
+
+LIB_FLAGS=$(BASE_FLAGS) -I$(ZLIB_DIR)
+
+LIB_OBJS=\
+	src/analyze.o  \
+	src/blockmap.o \
+	src/glbsp.o    \
+	src/level.o    \
+	src/node.o     \
+	src/reject.o   \
+	src/seg.o      \
+	src/system.o   \
+	src/util.o     \
+	src/wad.o
+
+src/%.o: src/%.c
+	$(CC) $(LIB_FLAGS) -c $^ -o $@
+
+$(LIB_NAME): $(LIB_OBJS)
+	$(AR) $@ $(LIB_OBJS)
+	$(RANLIB) $@
+
+
+# ----- CMDLINE PROGRAM ---------------------------------------------
+
+CMD_FLAGS=$(BASE_FLAGS) -I$(ZLIB_DIR)
+CMD_LIBS=$(ZLIB_DIR)/libz.a -lm
+
+CMD_OBJS=cmdline/main.o cmdline/display.o  
+
+cmdline/%.o: cmdline/%.c
+	$(CC) $(CMD_FLAGS) -c $^ -o $@
+
+$(CMD_NAME): $(LIB_NAME) $(CMD_OBJS)
+	$(CC) $(CMD_FLAGS) $(CMD_OBJS) -o $@ $(LIB_NAME) $(CMD_LIBS)
+	$(STRIP) $@
+
+
+# ----- GUI PROGRAM ---------------------------------------------
+
+FLTK_FLAGS=-I$(FLTK_DIR) -I$(FLTK_DIR)/zlib
+FLTK_LIBS=-L$(FLTK_DIR)/lib \
+          -lfltk_images -lfltk_png -lfltk_z -lfltk_jpeg -lfltk
+
+WIN32_LIBS=-mwindows -lole32 -luuid -lgdi32 -lcomctl32 \
+	   -lwsock32 -lsupc++
+
+GUI_FLAGS=$(BASE_FLAGS) $(FLTK_FLAGS)
+GUI_LIBS=$(FLTK_LIBS) $(WIN32_LIBS) -lm
+
+GUI_OBJS=\
+	gui/main.o     \
+	gui/about.o    \
+	gui/book.o     \
+	gui/booktext.o \
+	gui/cookie.o   \
+	gui/dialog.o   \
+	gui/files.o    \
+	gui/helper.o   \
+	gui/images.o   \
+	gui/license.o  \
+	gui/menu.o     \
+	gui/options.o  \
+	gui/prefs.o    \
+	gui/progress.o \
+	gui/textbox.o  \
+	gui/window.o   \
+	gui/glbsp_res.o
+
+gui/%.o: gui/%.cc
+	$(CXX) $(GUI_FLAGS) -c $^ -o $@
+
+gui/glbsp_res.o: gui/glBSPX.rc
+	$(WINDRES) -i $^ --input-format=rc -o $@ -O coff
+
+$(GUI_NAME): $(LIB_NAME) $(GUI_OBJS)
+	$(CXX) $(GUI_FLAGS) $(GUI_OBJS) -o $@ $(LIB_NAME) $(GUI_LIBS)
+	$(STRIP) $@
+
+
+# ----- DOCUMENTATION ---------------------------------------------
+
+DOC_FILES=README.txt USAGE.txt TRICKS.txt CHANGES.txt
+
+$(DOC_NAME): $(DOC_FILES)
+	cat $(DOC_FILES) > glbsp_doc.tmp
+	awk 'sub("$$", "\r")' glbsp_doc.tmp > $@
+	rm -f glbsp_doc.tmp
+
+
+#--- editor settings ------------
+# vi:ts=8:sw=8:noexpandtab

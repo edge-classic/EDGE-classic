@@ -1,0 +1,615 @@
+
+NEW SAVE SYSTEM
+===============
+
+Last Updated: 10 March 2001
+
+
+GOALS
+-----
+
+1. Provide backwards (and forwards, when feasible) compatibility
+   between EDGE versions and savegame files.  Loading old savegames
+   with newer versions of the executable should work without new code
+   (perhaps some information is lost due to changes in the code
+   structures though).  It should be possible to code up "fudging"
+   reading routines that do best-fit conversions.
+ 
+2. Simplicity.  Clearly achieving goal #1 requires something more
+   involved that just writing every significant structure more-or-less
+   directly into the file (with fix-ups for pointers).
+
+3. Robustness.  Different WAD, DDF and RTS files may be active when
+   trying to load a savegame than when it was saved -- potentially
+   causing problems, ranging from the subtle to downright FUBAR and
+   unplayable.
+
+
+CHUNKS
+------
+
+The savegame format is like IFF, and contains numerous chunks.  Each
+chunk has the following format:
+
+      0   [Start Marker]
+      4   [Length]           // only the following data
+      8   [data......]       // padded to multiple of 4 bytes
+     ???  [End Marker]
+
+The markers consist of 4 letters.  Start and end markers are the same
+word, only the case is different.  Start markers begin with an
+uppercase letter with the rest lowercase, whereas end markers are all
+uppercase.  For example: << Glob .... GLOB >>.
+
+You may think end markers are redundant, and strictly speaking you'd
+be right.  They are there to make debugging easier.
+
+The format of the chunk data depends on the type (given by the
+marker).  Some chunks are just containers for a set of sub-chunks.
+The length field only counts the data inside the chunk, i.e. does not
+include the markers or the length field itself. 
+
+Unknown chunks should be ignored by the file reader.  Order of chunks
+is usually significant (unless otherwise noted).
+
+Top level chunks have their data trivially encrypted (using XOR on
+each byte) and then compressed with LZO (using the miniLZO library).
+This is to prevent trivial tampering and to keep savegame files small.
+All other chunks behave normally.  NOTE: for compressed chunks, the
+length field is the in-file length, the original length must be stored
+as part of the compressed data.
+
+Chunks are also used for storing data structures in the file (like a
+whole mobj_t or sector_t), including complete sub-structures, but not
+pointers.  The start marker of these chunks is all lowercase.  For
+example: << mobj .... MOBJ >>.  The contents of these chunks are the
+field values of the structure in question.  The savegame contains
+information on the format of these chunks, so that unknown fields can
+be ignored and missing/redundant fields can be reasonably emulated
+(e.g. set to default values).
+
+
+File Format
+-----------
+
+The savegame file contains a header, followed by a fixed sequence of
+chunks, followed by a trailer.  Like this:
+
+-  HEADER.  Non-chunked.  Contains:
+
+   +  MAGIC NUMBER (`EdgeSave')
+   +  PADDING: 0x0D 0x0A 0x1A 0x00.
+   +  EDGE version that wrote the savegame (32 bit BCD, e.g. 0x125).
+
+-  Global Area.  [GLOB]
+
+   +  Variables: multiple lots of [VARI]
+   +  Wad file check  [WADS]
+   +  View image  [VIEW] (duke-nukem style).  Optional.
+ 
+-  Structure Area.
+
+   +  multiple set of: Structure Def  [STRU]
+
+-  Array Area.
+
+   +  multiple set of: Array Def      [ARRY]
+
+-  Data Area.
+
+   +  multiple set of: Array Storage  [DATA]
+
+-  TRAILER.  Non-chunked.  Contains:
+
+   +  Data end marker (`ENDE').
+   +  MAGIC NUMBER (`EdgeSave'). 
+   +  Data CRC (every data byte in file before this CRC).
+
+The Global area contains the important nitty-gritty details, such as
+which map this savegame came from, the skill level, the user's
+description, etc...  When creating the load-game menu, only this lump
+needs to be read and decoded.
+
+The Structure/Array/Data areas are for storing all the normal dynamic
+information (objects, sector heights, etc...).  The Structure and
+Array areas are merely definitional, the Data area contains the actual
+data (the meat).  They are described in more detail below.
+
+NOTE: Serious problems like bad-CRC or magic values, chunks with
+non-matching start/end markers, etc... should produce an error dialog
+(i.e. definitely NOT ignored).
+
+NOTE 2: all integer values are written in Little-Endian byte order
+(i.e. least significant byte first).  Floating point is written as a
+16-bit signed exponent value followed by a 32-bit signed mantissa
+value.
+
+
+Globals
+-------
+
+The global information consists mainly of VAR = VALUE pairs, for
+example: LEVEL_NAME = MAP05 and SKILL = 3.  These are stored in [VARI]
+chunks in the top-level [GLOB] chunk.  There are a few things that
+don't quite fit this mold, e.g. the screenshot, and these have their
+own chunks, such as [VIEW].  The order of chunks in [GLOB] is not
+significant.
+
+These global variables also contain information needed to check that
+the level from which the savegame was saved is exactly the same as the
+one being loaded into.  For example, trying to load a PLUTONIA
+savegame into TNT will be detected and prevented (or at least warn the
+user).
+
+It also contains the information on RTS scripts and DDF entries that
+exist.  For multiplayer modes, this is also used to guarantee that
+everyone is playing on the same map and with the same DDF/RTS files
+(i.e. prevents trivial cheating).  For single player, the user should
+just get a warning if DDF/RTS has changed.
+
+
+Structures
+----------
+
+The Structure area of the savegame file contains a list of all the
+needed structure types and the fields thereof.  Each of these
+structure definitions occur within a top-level STRU chunk.
+
+Each definition contains:
+
+  -  structure name, e.g. "player_ammo_t".
+  -  the 4 letter marker, e.g. "PAMO".  (must be unique).
+  -  list of fields.
+
+Each field contains:
+
+  -  field name (e.g. "num" and "max").
+
+  -  primitive type, one of: NUMERIC, INDEX, STRING, STRUCT.
+
+  -  how many elements (usually 1).  Elements are stored in sequence.
+     If the savegame has more elements then expected, they are
+     ignored, and if it has fewer, they will simply end up having the
+     default values.
+  
+  -  for NUMERIC: how many bytes (1, 2, 4 or 6).  String and Struct
+     types are auto-sizing.  Strings are IBM cp437 charset.  
+     INDEX values are always 4 bytes.
+
+  -  for STRUCT: the name of the structure.
+
+Structure definitions are used for:
+
+  -  the type of an array (see below).
+  -  the type of another structure's field.
+
+Unknown fields can be ignored during reading (they represent data that
+this engine doesn't know about).  Missing fields will just end up with
+default values.  Either of these may produce a warning dialog.
+
+NOTE: No problem if a structure within a savegame is unknown by the
+reading engine, since the arrays and/or fields using that structure
+_must_ also be unknown by the engine.
+
+This leads to an important rule: once a field name or array name is
+used, it is fixed for all time to remain that same type.  Use a new
+name if the type gets changed, e.g. if a "height" field got changed
+from integer to floating point, then the new field name (as far as
+savegames are concerned) must be something different, like "height_f".
+
+
+Arrays
+------
+
+Pointers, of course, cannot be stored directly in the savegame file.
+
+Instead, we pretend that anything that is a pointer (e.g. a pointer in
+mobj_t to another mobj_t) is actually just an integer value, an index
+into an array of whatever (e.g. array of mobj_ts).  This goes even for
+something stored in a linked-list (though the swizzling / unswizzling
+would be harder).
+
+NOTE: These index values start at 1.  Zero is used for NULL.
+
+The Array area defines these "virtual arrays".  They are defined
+within top-level ARRY chunks.  Each array definition contains:
+
+  -  the array name (e.g. "mobjs").
+  -  the array type (e.g. "mobj_t", a structure name).
+  -  number of elements stored in the savegame (e.g. 321).
+
+When the file is read, but before any actual data fields are decoded,
+_ALL_ arrays (like mobjs, players, etc..) are set to the correct size
+and initialised with default values.  Thus unswizzling an index value
+back into a pointer could be as easy as &array_of_foo[index-1].
+
+Unknown arrays can be ignored during reading (but may cause a warning
+message to be displayed).
+
+Missing arrays are treated exactly as if they existed and had zero
+elements in them (but may cause a warning dialog).  They should not
+cause any problems, since nothing else in the savegame file should
+refer to them.
+
+
+Lump Formats
+============
+
+VARI
+----
+
+STRING for variable name.
+STRING for value.
+
+VIEW
+----
+
+32 bits for width  (should be 160).
+32 bits for height (should be 100).
+
+then all the pixels in normal (row-major) order.  Each pixel is a
+standard 16-bit RGB 5:5:5 value.
+
+WADS
+----
+
+32 bits for number of WADs.
+
+then a STRING for the filename of each WAD, in the same order as
+appearing in W_InitMultipleFiles().  The list does not include
+EDGE.WAD, GWA files, or any raw lumps given with -file.  Filenames
+include the extension (though anything other than ".wad" wouldn't make
+much sense), and any path (using `/' for the directory separator),
+though the paths should be ignored for comparison purposes.
+
+STRU
+----
+
+32 bits for number of fields.
+
+STRING for structure name.
+STRING for structure marker.  Must have length 4 and be lowercase.
+
+then each field definition, which has this format:
+
+   8  bits for field type
+   8  bits for field size (for NUMERIC).
+   16 bits for number of elements (usually 1).
+   STRING for field name.
+   [ STRING for embedded structure name, for structure type ]
+   [ STRING for index array name, for index type ]
+
+ARRY
+----
+
+32 bits for number of elements in array.
+
+STRING for array name.
+STRING for array type (a structure name).
+
+DATA
+----
+
+STRING for array name (to look up in definition list).
+
+then a sequence of structures.  Number and type of structures is given
+by the ARRY definition lump.
+
+
+EDGE INVENTORY
+==============
+
+Here is a list of all the globals, structures and arrays needed by the
+current version of EDGE (1.25-WIP-2). 
+
+Globals
+-------
+
+(Note: `dual num' here means two numbers separated by a space).
+
+GAME: name of game (mission), e.g. "HELL_ON_EARTH".
+LEVEL: name of level, e.g. "MAP01".
+FLAGS: level flags, numeric.
+GRAVITY: numeric, usually "8".
+
+LEVEL_TIME: numeric (tics).
+P_RANDOM: numeric.
+TOTAL_KILLS, TOTAL_ITEMS, TOTAL_SECRETS: numeric.
+
+CONSOLE_PLAYER: numeric, starts at 0.
+SKILL: numeric, range is 1-5.
+NETGAME: numeric, "0" is SP, "1" is COOP, "2" and up is DM.
+
+DESCRIPTION: the user's description for the savegame.
+DESC_DATE: date/time (preferred format: "5:20 PM  01/Jan/2001").
+
+level check info:
+  MAPSECTOR: dual num, first is count, second is CRC (in hex).
+  MAPLINE: dual num (includes vertex and sidedef info).
+  MAPTHING: dual num (Note: static map things, not mobjs).
+
+ddf/rts check info:
+  RSCRIPT: dual num (Note: static RTS scripts).
+  DDFATK:  dual num, first is count, second is CRC (hex).
+  DDFGAME: dual num.
+  DDFLEVL: dual num.
+  DDFLINE: dual num.
+  DDFSECT: dual num.
+  DDFMOBJ: dual num.
+  DDFWEAP: dual num.
+
+Note: it is less serious when there are RTS/DDF mismatches, a single
+player game could continue and might work fine, but in multiplayer
+modes it will be strictly disallowed (to prevent trivial cheating).
+
+Note 2: when each object in question has it's own pre-computed CRC
+(especially for DDF), then "CRC over all XXX" is computed like this:
+
+   for (cur=0, i=0; i < NUM; i++)
+   {
+      cur = ((cur << 12) | ((cur & 0xFFF00000) >> 20)) ^ CRC[i];
+   }
+
+Structures
+----------
+
+playerammo_t:
+
+  -  current number.
+  -  current maximum.
+
+playerweapon_t:
+
+  -  weapon type (STRING).
+  -  owned flag.
+  -  shot counts.
+ 
+psprite_t:
+
+  -  current state (INDEX to state).
+  -  tics remaining.
+  -  screen x/y offsets.
+ 
+player_t:
+
+  -  corresponding object (INDEX to mobj).
+  -  current player state (Note: for SP, always PST_Live).
+  -  player number.
+  -  player in game ?
+  -  view height stuff (viewz, viewheight, deltaviewheight, bob).
+  -  kick offset(s).
+  -  frag values.
+  -  health and armour.
+  -  keys held (32 bit value).
+  -  ammo held (limit to 8 different types) (STRUCT playerammo_t).
+  -  powerups in effect (limit to 16 types).
+  -  first weapon (INDEX to playerweapon).
+  -  ready and pending weapon values.
+  -  weapon key choices and refire value.
+  -  remember_atk values.
+  -  cheats in effect.
+  -  kill, item & secret count.
+  -  extralight and flash values.
+  -  jump wait tics.
+  -  damage, bonus, grin & attackdown counts.
+  -  weapon psprite (STRUCT psprite_t).
+  -  flash psprite  (STRUCT psprite_t).
+  -  crosshair psprite (STRUCT psprite_t).
+
+spawnpoint_t:
+
+  -  x/y/angle/type/options.
+ 
+mobj_t:
+
+  -  current position x/y/z/angle/mlook.
+  -  floorz and ceilingz.
+  -  momentum x/y/z.
+  -  speed and fuse.
+  -  info type (STRING).
+  -  current state and tics, next state and tic_skip.
+  -  current health.
+  -  current flags and extended flags.
+  -  movement direction and count.
+  -  reaction time and threshold.
+  -  player (INDEX to player).
+  -  last look value, side value, orig_height value.
+  -  spawn point (STRUCT spawnpoint_t).
+  -  visibility and target visibility.
+  -  current attack (STRING) and spread count.
+  -  path trigger (INDEX to trigger).
+  -  source mobj (INDEX into mobjs).
+  -  target mobj (INDEX into mobjs).
+  -  tracer mobj (INDEX into mobjs).
+  -  supportobj (INDEX into mobjs).
+  -  ride_em (INDEX into mobjs).
+  -  ride_dx & ride_dy.
+
+iteminque_t:
+
+  -  mapthing: x/y/angle/type/options.
+  -  time tics remaining.
+ 
+vert_region_t:
+
+  -  floor/ceiling plane (INDEX to sector + 1 extra bit).
+  -  properties (INDEX to sector).
+  -  extrafloor type (STRING).
+  -  extraside (INDEX to side + 2 extra bits)
+ 
+sector_t:
+
+  -  floor/ceiling:
+     -  current height.
+     -  current texture (STRING).
+     -  x and y offsets.
+     -  translucency.
+  
+  -  properties:
+     -  light level.
+     -  colourmap (STRING).
+     -  special type (STRING).
+     -  gravity, friction, viscosity.
+
+  -  first region (INDEX to region).
+  -  floor/ceiling specialdata (INDEX to activesec)
+ 
+line_t:
+
+  -  flags and tag number.
+  -  activation count.
+  -  special type (STRING).
+
+side_t:
+
+  -  top/middle/bottom:
+     -  current texture (STRING).
+     -  x and y offsets.
+     -  translucency.
+
+rad_trigger_t:
+
+  -  parent script (INDEX to script).
+  -  disabled and active flags.
+  -  current state (INDEX to rts states).
+  -  repeats left and wait tics.
+
+light_t:
+
+  -  sector (INDEX to sector).
+  -  light type.
+  -  minimum, maximum, direction.
+  -  lighttime, darktime, probability.
+
+button_t:
+
+  -  line (INDEX to lines).
+  -  original texture (STRING).
+  -  where value.
+  -  timer value.
+ 
+sec_move_t:
+
+  -  movingplane type (INDEX + 1 extra bit).
+  -  sector (INDEX to sector).
+  -  floor-or-ceiling and crush.
+  -  startheight, destheight, speed.
+  -  direction and olddir.
+  -  tag and wait value.
+  -  sfxstarted and completed.
+  -  new special.
+  -  new texture (STRING).
+ 
+slider_move_t:
+
+  -  sliding door type (INDEX).
+  -  line (INDEX to lines).
+  -  current opening.
+  -  direction.
+  -  waited tics.
+  -  sfxstarted & final_open.
+ 
+
+Arrays
+------
+
+players         :  player_t
+mobjs           :  mobj_t
+itemqueue       :  iteminque_t
+r_triggers      :  rad_trigger_t
+lights          :  light_t
+buttons         :  button_t
+activesecs      :  sec_move_t
+active_sliders  :  slider_move_t
+regions         :  vert_region_t
+sectors         :  sector_t
+sides           :  side_t
+lines           :  line_t
+
+
+Map CRCs
+--------
+
+sector:
+
+  -  original tag and type.
+  -  original floor & ceiling heights.
+  -  bounding box.
+  -  number of lines.
+
+linedef:
+
+  -  original tag and type.
+  -  vertex coordinates (v1 & v2).
+  -  some original flags (blocking, passthru).
+  -  a bit for the presence of each side.
+
+things:
+
+  -  original type.
+  -  original x/y/angle.
+  -  option flags (skill, ambush, etc).
+
+rts scripts:
+
+  -  appear flags.
+  -  min/max players.
+  -  coordinates (x/y/z1/z2) and radius.
+  -  name and tag number.
+  -  triggering info (disabled, use, independent, immediate).
+  -  repeat info.
+  -  path info.
+  -  ondeath and onheight info.
+  -  states (tics, label, and action-specific info).
+ 
+ddf entries:
+
+  -  name and number.
+  -  any fields that effect gameplay (i.e. not just visuals/sounds
+     like PALETTE_REMAP).  For example: radius, height, states,
+     etc...
+
+
+Implementation Details
+======================
+
+Structure Tables
+----------------
+
+For each structure in the savegame, there will normally be a table in
+the code describing the structure.  Each element of the table
+contains:
+
+  -  the field name (e.g. "num" and "max").
+
+  -  primitive type (see above).  Used for writing the STRU chunk.
+
+  -  a routine to read the storage.  E.G. SV_MobjGetHeight.  The
+     routine is passed a pointer to the current structure.
+
+  -  a routine to write the storage.  E.G. SV_MobjPutHeight.  This can
+     be NULL, meaning that this field only exists for backwards
+     compatibility with older savegames (the read function will be a
+     fudging routine).  These fields don't get written to the STRU
+     chunk.
+
+Outside of this table, there is also:
+
+  -  a routine to create the array of structures, size NNN.  The
+     structures are initialised with default values.  For certain
+     arrays (e.g. sectors & linedefs) this routine does nothing since
+     those arrays are created when loading the level data.
+  
+  -  a routine to finalise the set of structures.  This can be used to
+     set up links or compute reference counts (etc...), which are not
+     done during reading.  For example, it is used to link mobjs into
+     the correct subsector and/or blockmap lists.
+ 
+Reading a valid structure is as simple as calling:
+
+   SV_ReadStruct(&info, struct_ptr);
+
+Writing a valid structure is as simple as calling:
+
+   SV_WriteStruct(&info, struct_ptr);
+

@@ -1,0 +1,99 @@
+John Coles Log
+-----------------------------------------------------------------------------
+Date: 31 May 1998 
+
+DOOMSTAT.H      /
+V_VIDEO*.C      /
+DJGPP/I_VIDEO.C - Fixed the problem with the global variables by removing
+                  SCREENWMULTIPLIER, SCREENHMULTIPLIER etc. (Sorry Andy)
+                  It display's properly again in higher resolutions.
+
+                  Now uses vars : int DX,DXI,DY,DYI,DY2,DYI2;
+
+
+                  Also in v_video1.c for some reason it was using Y Co-ords
+                  for both x & y in the follwing :
+
+                         V_DrawPatchInDirect8
+                         V_DrawPatchInDirectFlipped8
+                         V_DrawPatchShrink8
+                         V_DrawPatchInDirectTrans8    (Why didn't I see it?)
+                         V_DrawPatchInDirect8
+
+                  Funnily enough they were correct in all the 16-bit
+                  functions (v_video2.c).
+
+DJGPP/I_ALLEGV.C /
+M_MISC.C         /
+M_OPTION.C     -  Added "No Vert" to the main option menu, "Vertical Retrace"
+                  to the Video Menu. VRetrace stops the screen shearing.
+                  (Both options are now saved into the DEFAULT.CFG file)
+
+                  No Vert is only useful if you are like me and don't believe
+                  in using MLOOK with Doom :)
+
+                  Vertical Retrace will be overridden if the "-dblbuffer"
+                  parameter is specified at the command line.
+
+-----------------------------------------------------------------------------
+Date: 28 May 1998 
+
+RAD_TRIG.C - (DoRadiTrigger)Fixed a bug which cause SpawnThing to crash. 
+             Caused by items respawning without any thing info in mapthing_t.
+R_MAIN.C   - (R_ExecuteViewSize) Now displays the status bar properly at
+             any resolution (Looks good at 400x300 now).
+
+-----------------------------------------------------------------------------
+Date: 21 May 1998 
+Removed lastepisode var from game.c (not used anymore)
+Finalised rad_trig.c
+
+-----------------------------------------------------------------------------
+Date: 11 May 1998 
++ Added Radius_Trigger(TM) :) Scripting Language, with TIP handling functions.
+  Files Added    : djgpp/rad_trig.c - Parser / Scripting Language / Trigger
+                                      handler / Tip Processor
+                   djgpp/rad_trig.h - Function Prototypes
+
+  Files Modified : djgpp/d_main.c   (D_DoomMain)   -Script Loader/Parser
+                   djgpp/p_user.c   (P_PlayerThink)-Trigger Event Handler Call
+                   djgpp/hu_stuff.c (HU_Drawer)    -Tip Event Handler Call
+                   djgpp/g_game.c   
+                       + Added lastmap var(global) to accomodate the script
+                         function GOTO_MAP <mapno>, ensures map names are
+                         displayed correctly. (Used in function G_DoLoadLevel)
+                       (G_DoReborn)
+                       (G_Ticker) - No also resets/restarts radius triggers
+                                    depending on whether the player has died,
+                                    gone to a new level or is playing a
+                                    netgame.
+
++ Some code cleanup.
+                   djgpp/r_things.c (R_DrawVisSprite)
+                                    - Commented out a block of code which is
+                                      now irrelevant. To render a translated
+                                      player the engine relies on the playxtra
+                                      var to contain the palette translation
+                                      offset multiplier.
+                   djgpp/p_mobj.c   (P_SpawnPlayer)
+                                    - Reworked most of the code. It should
+                                      be easier to understand and now just
+                                      sets playxtra to define the players
+                                      translation colours.
+                   djgpp/g_game.c   (G_CheckDemoStatus)
+                                    - Rolled up code which set playersingame
+                                      1..MAXPLAYERS to 0;
+                                    (G_DoNewGame)
+                                    - Same as previous entry.
+                   djgpp/d_net.c    (D_TryRunTics)
+                                    - I misunderstood the original code
+                                      thinking it did something else (when
+                                      I was figuring out the 8 player stuff
+                                      back in the CTFDoom days :) ).
+                                      So the old code has been put back in.
+                   djgpp/hu_stuff.c (HU_Drawer)
+                                    - Show info cheat shows the x & y co-ords
+                                      normally rather than a fixed point
+                                      number. Will make it easier when using
+                                      the Radius Triggers when finding
+                                      coordinates.

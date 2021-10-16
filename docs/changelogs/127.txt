@@ -1,0 +1,117 @@
+
+CHANGELOG FOR 1.27 (since 1.26)
+===============================
+
+(Date: NOVEMBER 11th 2001)
+
+Bug fixes:
+----------
+
+-  savegames enabled under DOS !
+-  glitches with shrunk-down view in software mode fixed.
+-  problem when using light-transfer linetypes fixed.
+-  fixed a bug causing some RTS tip stuff to crash.
+-  crash bug with elevator in QD10 (savegame + RTS issue) fixed.
+-  problems with crushers/continuous ceilings (e.g. MAP04) fixed.
+-  timing problem in RTS (initial WAIT command) fixed.
+-  fixed bug with new 16-rotation sprite code.
+-  zooming no longer shows the weapon sprite.
+-  rendering problems (HOM) in GLEDGE when FOV > 90 fixed.
+-  fixed automap bug not displaying the level's name.
+-  another timing problem in RTS (retriggerables) fixed.
+-  issues with the UPGRADES command in weapons.ddf fixed.
+-  a couple of sound and MP3 problems fixed.
+-  problem with missing weapons (e.g. IDKFA) fixed.
+-  fixed another MP3 bug, not playing files with ID3 tags.
+-  thin sliding doors were broken in GLEDGE -- fixed.
+-  closed sliding doors now block sight/sound properly.
+
+
+Features removed:
+-----------------
+
+none.
+
+
+Changes to existing features
+----------------------------
+
+none.
+
+
+New features:
+-------------
+
+-  Wipes and crosshairs now work in GLEDGE.
+
+-  Better checking when loading savegame files.  If the level data is
+   detected to be different, e.g. loading a DOOM2 mad when playing
+   PLUTONIA, then the load is aborted.  Unfortunately EDGE also
+   crashes out -- recovering from a partial loadgame is a really hard
+   problem to fix.
+
+-  The weapon kick effect can now be disabled.  The easiest way is
+   through the Gameplay Option menu.  Another way is by using the
+   -nokick cmdline option (or -kick to enable).  For DDF writers there
+   is also the "WEAPON_KICK" and "NO_WEAPON_KICK" level specials which
+   can be used (in LEVELS.DDF) to override the user's preference.
+
+-  New cmdline option "-fastsprites".  Causes sprite images to be
+   pre-cached at the start of the level, making gameplay smoother.  It
+   isn't enabled by default since it can cause long delays on slower
+   machines, and is not much use on machines with low memory (< 64K).
+
+-  New DDF action for flickering dynamic lights:
+
+      DLIGHT_RANDOM(low,high)
+
+   where `low' and `high' are numbers.  The intensity of the dynamic
+   light will be set to a random value within the given range.
+   
+-  New DDF command for dynamic lights:
+
+      DLIGHT.HEIGHT=75%;
+   
+   which specifies at which height within the object the light comes
+   from, for example: 0% at the foot, 50% midway (the default), 100%
+   at the top of the head.
+
+-  New weapons.ddf command STATES(ZOOM).  When present, that sprite
+   frame will be shown on screen when zooming is active.
+
+-  New attack special NO_TRIGGER_LINES.  Shot and projectile attacks
+   with this flag never activate special linedefs.
+
+-  New command for radius triggers:
+
+      UNBLOCK_LINES  [tag]
+   
+   All lines on the map with the same tag will be unblocked, allowing
+   players and monsters to pass.  Only affects two-sided lines.
+
+-  New things.ddf command:
+
+      BOUNCE_UP=6.0;
+
+   which controls how far up a bouncing object bounces when it hits
+   the floor (or how far down for ceilings).  Higher values make it
+   bounce higher.  The default is 0.5 (previously hard-coded).
+
+-  Limited support for multiple palettes.  Works in GLEDGE only.  When
+   a PWAD contains a palette (PLAYPAL lump), then all images in the
+   PWAD (sprites, flats, textures, patches) will use that palette
+   instead of the "GLOBAL" palette (the one in the IWAD).
+
+   One thing this allows: using the resources from Heretic and/or
+   Hexen in addition to the normal DOOM/DOOM2 resources, for example:
+
+      gledge32 -iwad doom2.wad -file heretic.wad mylevel.wad
+   
+   Note that font patches (STCFN### and others) in a PWAD containing
+   a different palette than normal DOOM won't work properly.
+
+-  New levels.ddf special "BOOM_COMPAT" and "NO_BOOM_COMPAT" which can
+   be used to specify whether the level requires BOOM compatibility
+   enabled or disabled.  This special overrides the user's preference
+   in the Gameplay Option menu.
+

@@ -1,0 +1,85 @@
+// 
+//    EDGE IMAGES.DDF -redefine or add new images.
+//    For documentation, see http://edge.sourceforge.net/
+//    DDF Version 6.1
+//
+
+<IMAGES>
+
+#VERSION 1.35
+
+[gfx:STDCROSS1]
+image_data = LUMP:PNG:"CROSSHR1";
+special = FORCE_SMOOTH;
+
+[gfx:STDCROSS2]
+image_data = LUMP:PNG:"CROSSHR2";
+special = FORCE_SMOOTH;
+
+[gfx:STDCROSS3]
+image_data = LUMP:PNG:"CROSSHR3";
+special = FORCE_SMOOTH;
+
+[gfx:STDCROSS4]
+image_data = LUMP:PNG:"CROSSHR4";
+special = FORCE_SMOOTH;
+
+[gfx:STDCROSS5]
+image_data = LUMP:PNG:"CROSSHR5";
+special = FORCE_SMOOTH;
+
+[gfx:STDCROSS6]
+image_data = LUMP:PNG:"CROSSHR6";
+special = FORCE_SMOOTH;
+
+[gfx:STDCROSS7]
+image_data = LUMP:PNG:"CROSSHR7";
+special = FORCE_SMOOTH;
+
+[gfx:STDCROSS8]
+image_data = LUMP:PNG:"CROSSHR8";
+special = FORCE_SMOOTH;
+
+[gfx:STDCROSS9]
+image_data = LUMP:PNG:"CROSSHR9";
+special = FORCE_SMOOTH;
+
+[tex:PORTAL7]
+IMAGE_DATA=LUMP:JPEG:"PORTAL7A";
+SCALE=0.5;
+
+[tex:PORTAL7B]
+IMAGE_DATA=LUMP:JPEG:"PORTAL7B";
+SCALE=0.5;
+
+[tex:PORTAL7C]
+IMAGE_DATA=LUMP:JPEG:"PORTAL7C";
+SCALE=0.5;
+
+[tex:PORTAL7D]
+IMAGE_DATA=LUMP:JPEG:"PORTAL7D";
+SCALE=0.5;
+
+[tex:PORTAL7E]
+IMAGE_DATA=LUMP:JPEG:"PORTAL7E";
+SCALE=0.5;
+
+[tex:PORTAL7F]
+IMAGE_DATA=LUMP:JPEG:"PORTAL7F";
+SCALE=0.5;
+
+[tex:PORTAL7G]
+IMAGE_DATA=LUMP:JPEG:"PORTAL7G";
+SCALE=0.5;
+
+[gfx:SOLID_BLACK]
+IMAGE_DATA=COLOUR:#000000;
+
+[gfx:SOLID_WHITE]
+IMAGE_DATA=COLOUR:#FFFFFF;
+
+// compatibility cruft
+[gfx:EDGETTL]  IMAGE_DATA=COLOUR:#000000;
+[gfx:CREDIT2]  IMAGE_DATA=COLOUR:#000000;
+[flat:CONSOLE] IMAGE_DATA=COLOUR:#000000;
+

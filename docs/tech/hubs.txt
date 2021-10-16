@@ -1,0 +1,37 @@
+
+Hub System V2.0
+---------------
+
+Hubs are implemented mainly by managing savegame files.
+
+Assume $SAVEDIR is the directory for savegames.
+
+Each full savegame has it's own folder: $SAVEDIR/slot###/
+There is also one for the current game: $SAVEDIR/current/
+
+Within one of these folders, there is a savegame for the
+current map, called "head.esg", and there can be savegames
+for previously visited levels, which are just the map name
+with the "esg" extension, for example: "map01.esg".
+
+PERFORM SAVE GAME:
+  -  save map into $SAVEDIR/current/head.esg
+  -  create or clear the $SAVEDIR/slot### folder
+  -  copy contents of $SAVEDIR/current --> $SAVEDIR/slot###
+
+PERFORM LOAD GAME:
+  -  clear contents of $SAVEDIR/current
+  -  copy contents of $SAVEDIR/slot### --> $SAVEDIR/current
+  -  load map from $SAVEDIR/current/head.esg
+
+LEAVE MAPxx / ENTER MAPyy:
+  -  save map into $SAVEDIR/current/mapXX.esg
+  -  if $SAVEDIR/current/mapYY.esg exists, load it (but skip players)
+     otherwise load fresh map
+  -  connect players to start things in special sector with same tag
+
+CLEAN UP OPERATION:
+  -  clear contents of $SAVEDIR/current
+     (do this at engine startup, begin new game, leave game,
+      also when begin a non-hub level).
+

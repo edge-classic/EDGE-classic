@@ -1,0 +1,366 @@
+
+CHANGELOG FOR 1.26 (since 1.25-WIP)
+===================================
+
+(Date: AUGUST 17th 2001)
+
+Bug fixes:
+----------
+
+-  improved keyboard/mouse handling under Win32.
+-  a few issues with the Win32 console not updating correctly.
+-  re-implemented MUS music under DOS and Win32.
+-  fixed a problem with '-infight' and changing levels.
+-  improved volume and panning for sounds under Win32.
+-  an ugly effect of invisible extrafloors in 8 bit mode fixed.
+-  weirdness using both mouse/keyboard in Linux is gone.
+-  improved sprite drawing in TrueBSP renderer.
+-  onesided lines with the TWOSIDED flag reduced to a warning.
+-  linux sound code now plays non-11KHz sounds properly.
+-  sound panning now works in the linux sound code.
+-  fixed translucent + remapped sprites in TrueBSP code.
+-  the "slide really fast along walls" bug fixed.
+-  monsters can no longer see you behind a large (but 2S) wall.
+-  "voodoo dolls" now work as they should.
+-  the ugly cracks/lines on translucent water are now gone.
+-  nailed down one slime-trail producing bug.
+-  fixed GL weapon sprite when the light goggles are in effect.
+-  monsters no longer get stuck on the edge of a rising lift.
+-  fixed the medusa effect.
+-  a bug making certain switches/doors really loud fixed.
+-  fixed a bug allowing jumping really high out of water regions.
+-  the player's initial health comes from DDF.
+-  better detection of wads with missing nodes.
+-  bouncing missiles now bounce off most 2S walls properly.
+-  archviles can no longer raise monsters on unreachable extrafloors.
+-  fixed a bug with TRACKER attacks that could crash EDGE.
+-  fixed the bug not executing the first action in a DDF thing.
+-  blockmap generation code no longer crashes on certain levels.
+-  the infrared goggles powerup no longer overrides watery colmaps.
+-  fixed some problems with looping sounds.
+-  a problem when quickly mlooking up/down fixed.
+-  the sound/music sliders in the main option menu now work properly.
+-  single frames of a sprite can now exist in a PWAD.
+
+
+Features removed:
+-----------------
+
+-  the "MISSILE" tag for the ACTIVATORS line in lines.ddf.  The rule
+   now is that missiles can activate _any_ TYPE=SHOOT linedef (but
+   only missiles from players can trigger player-only lines, etc).
+
+
+Changes to existing features
+----------------------------
+
+-  the TAGGED_REPEATABLE command for RTS now accepts no parameters,
+   which means infinite repeats and zero delay.
+
+
+New features:
+-------------
+
+-  complete support for GL rendering.
+
+-  support for playing MP3 music, both as external files and as lumps
+   within a PWAD.  It is used via PLAYLIST.DDF with the new "MP3"
+   music type, for example:
+
+      [01] MUSICINFO=MP3:FILE:"DUHAST.MP3";
+
+-  EDGE can now run in a window under Win32.
+
+-  BeOS mouse support was improved.
+
+-  supports "V2 GL Nodes" that glBSP 1.91 generates.  This should
+   completely eliminate slimetrails for good.
+
+-  new options for linux sound code:
+
+      -freq [value]   Sets the desired sample rate of the sound card.
+      -mono           Disables stereo sound.
+
+-  new -version option, shows the version of EDGE and quits.
+
+-  new -strict option.  Most problems in DDF/RTS no longer crash out
+   with an error message, but display a warning instead.  This
+   provides better backwards compatibility, since unknown commands
+   will be ignored (with a warning).
+   
+   The -strict option makes EDGE do what it did before: crash out on
+   the first DDF/RTS error.  Good for TC authors who want to catch
+   every single mistake/problem that occurs.
+
+-  new -nowarn option turns off warning messages.  When using a TC
+   designed for an older version of EDGE, there may be a huge number
+   of warnings.  This option can be used to prevent seeing them all.
+
+-  new -noobsolete option turns off the messages when obsolete DDF or
+   RTS commands are used.
+
+-  new -blockmap option will generate the blockmap in EDGE instead of
+   using the one in the PWAD.
+
+-  automap colours can be controlled via COLMAP.DDF, the
+   AUTOMAP_NORMAL entry is for the normal automap, and AUTOMAP_OVERLAY
+   entry is for the overlaid version.
+
+-  there are four new ammo types: PELLETS, NAILS, GRENADES, GAS.
+   These names are fairly arbitrary -- use them for whatever you want.
+
+-  Pseudo-Shadows, drawn under things.  Use the -shadows option to
+   enable them.  They can be controlled in DDF either with the
+   NOSHADOW special, or the SHADOW_TRANSLUCENCY command (which takes a
+   percentage).  Shadows can be enabled/disabled on a level-by-level
+   basis using the level specials "SHADOWS" and "NOSHADOWS".
+
+-  Crouching (aka Ducking).  Uses the `Move Down' key.  The
+   CROUCH_HEIGHT command in THINGS.DDF controls how low a player
+   crouches.  The level special "NOCROUCHING" disables crouching for
+   the level.
+
+-  mipmapping in the software and GL renderers.  Use the -nomipmap
+   option to turn it off, or change it in the Video option menu.  The
+   software version is not optimal yet.  Note too that setting it to
+   "TriLinear" in the GL version can produce strange results (seems to
+   be a driver problem).
+
+-  EDGE now contains a special cut-down version of GLBSP, and will
+   build the GWA files automatically when they GL-Friendly nodes are
+   absent.
+
+-  support for an extra 8 sprite rotations.  A sprite with all 16
+   rotations goes like this: 1,9,2,A,3,B,4,C,5,D,6,E,7,F,8,G.  Good
+   for sprites where 8 rots aren't enough.  The old flipping thing
+   will work with these too, e.g. TROOA9AG, TROOAAAF, TROOABAE,
+   TROOACAD.
+
+
+New DDF features:
+-----------------
+
+-  new STATS command for LEVELS.DDF, determines the type of stats
+   shown in the intermission.  Possible values are "DOOM" (normal) and
+   "NONE" (skips the stats altogether).  Other types may be added in
+   the future.
+
+-  new LIGHTING command for LEVELS.DDF determines the type of lighting
+   used (TrueBSP only).  Possible values are "DOOM" (normal),
+   "DOOMISH" (same as DOOM, but without the special effect on N/S/E/W
+   walls), and "FLAT" for flat lighting (i.e. no distance-based
+   shading).  Other types may be added in the future.
+
+-  the RIDE_FRICTION command for THINGS.DDF determines how ridable an
+   object is, 0.0 would make things (e.g. you) slip off right away, up
+   to 1.0 which is perfect ridability.
+
+-  new commands VIEW_HEIGHT and SHOT_HEIGHT for players in THINGS.DDF.
+   They take percentages (of the full height), and control where the
+   view is drawn from, and where bullet shots come from.
+
+-  for WEAPONS.DDF, the "SHOW_CLIP=TRUE" command causes the ammo field
+   in the status bar to show the current clip size, instead of the
+   total ammo.
+
+-  new DROPITEM() action for DDF for dropping stuff.  The name of the
+   item to drop should be placed in the brackets.
+
+-  scenery items can be made to block bullets, give them the
+   BLOCK_SHOTS special.
+
+-  new TUNNEL thing special, causes missiles to pass through enemies
+   rather than blowing up on impact.  Still damaging them though, but
+   only once.
+
+-  monsters can be made immune to certain attacks.  
+
+   Firstly, each attack can be given a "class", which is a letter from
+   `A' to `Z', using the ATTACK_CLASS command.  Three classes are
+   already used by EDGE: `M' is the default class for missiles, `B' is
+   the default class for bullet attacks, and `C' is for close-combat
+   attacks.
+
+   Secondly, each monster can use the IMMUNITY_CLASS command to
+   specify which attack classes it is immune to.  For example,
+   IMMUNITY_CLASS=B would make the monster immune to all bullet
+   weapons.  IMMUNITY_CLASS=M makes the monster immune to all the
+   missiles.  The letters can be combined, e.g. IMMUNITY_CLASS=BM
+   makes the monster (or player) immune to _both_ bullets and
+   missiles -- you'd need the fist/chainsaw to kill it.
+
+   Example: say you created a flame-thrower weapon.  You could put
+   this in attacks.ddf:
+
+      [FLAME_ATTACK]
+      ...
+      ATTACK_CLASS=F;  // `F' for Flames
+
+   and then add this to the archvile in things.ddf:
+
+      [ARCHVILE]
+      ...
+      IMMUNITY_CLASS=F;
+
+   and voila, the archvile will be immune to the flamethrower.
+   
+-  arbitrary sounds can now be used in THINGS.DDF and WEAPONS.DDF.
+   The PLAYSOUND() action takes the name of the sound in the brackets.
+   The KILLSOUND() action will stop any currently played sound.
+
+-  implemented thin horizontal sliding doors.  Thin means they are
+   just a mid-masked texture on a two-sided linedef, but one that
+   opens and closes.  The following commands are used in LINES.DDF:
+
+      SLIDER.TYPE = LEFT;      // also RIGHT and CENTER
+      SLIDER.SPEED = 2;        // open/close speed (distance per tic)
+      SLIDER.PAUSE_TIME = 150T;   // time to pause after opening
+      SLIDER.SEE_THROUGH = FALSE; // texture is see-through or not
+      SLIDER.SFX_START = XXX;  // sound made when door starts moving
+      SLIDER.SFX_OPEN = XXX;   // sound made while door opens
+      SLIDER.SFX_CLOSE = XXX;  // sound made while door closes
+      SLIDER.SFX_STOP = XXX;   // sound made when door stops moving
+
+-  new ACTIVATE_SOUND command for LINES.DDF, when the line is
+   activated then this sound is played.  If the line is a switch, then
+   this command overrides the normal switch sound.
+
+-  removed many hard-coded sounds.  The following new commands in
+   GAMES.DDF are available:
+
+      ACCEL_SOUND="SLOP";
+      FRAG_SOUND="PLDETH";
+
+   Plus the following new commands for players in THINGS.DDF:
+
+      NOWAY_SOUND="NOWAY";
+      OOF_SOUND="OOF";
+
+-  user-defined states can now be used in DDF with the STATES()
+   command, e.g.:
+
+      STATES(FOO)=FOOJ:A:5:NORMAL:NOTHING,#FOO;
+
+   This is mostly useful when combined with the JUMP() action, or when
+   using damage overrides or THING_EVENT above.
+   
+-  new lines.ddf commands SECTOR_EFFECT and LINE_EFFECT, which take a
+   comma-separated list of keywords that enable certain property
+   transfers.  LINE_EFFECT is for line -> line effects, and
+   SECTOR_EFFECT is for line -> sector effects.  The affected
+   lines/sectors are those with the same tag as the special line.
+   (See below about LINE_PARTS too).
+
+   These commands are used for BOOM compatibility, the LINE_EFFECT
+   keywords TRANSLUCENT, VECTOR_SCROLL and OFFSET_SCROLL handle
+   linetypes #260, #254 and #255.  The SECTOR_EFFECT keywords
+   LIGHT_FLOOR, LIGHT_CEILING, SCROLL_FLOOR, SCROLL_CEILING and
+   PUSH_THINGS handle linetypes #213, #261, and #250 to #253.
+ 
+-  New DDF thing actions for rotating and self-propulsion:
+
+      FACE(angle)             // turn to face the absolute [angle]
+      TURN(angle)             // turn by [angle] degrees
+      TURN_RANDOM(angle)      // turn between 0 and [angle] degrees
+
+      MLOOK_FACE(angle)       // mlook to the absolute [angle]
+      MLOOK_TURN(angle)       // mlook turn by [angle] degrees
+
+      MOVE_FWD(amount)        // move forwards/backwards by [amount]
+      MOVE_RIGHT(amount)      // move right/left by [amount]
+      MOVE_UP(amount)         // move up/down by [amount]
+      STOP                    // stop moving
+
+   The FACE and TURN action ideas were copied from MBF.  For all these
+   actions, if the [angle] or [amount] is omitted, then 0 is used (not
+   usually useful).  For the move actions, use a negative value to go
+   the opposite way.
+   
+   NOTE: the amount in the move actions is a _momentum_ value, not a
+   distance.  Objects that are not affected by friction or gravity
+   will keep moving in the direction until they hit something solid or
+   perform another movement action (e.g. STOP).
+
+
+New RTS features:
+-----------------
+
+-  improved RTS tip system, with the following new commands:
+
+      TIP_SLOT  [num]
+      // Sets the current "slot" that future tip functions will use.
+      // Each slot can display a single tip, but multiple slots can be
+      // active at any one time.  Slots are numbered from 1 to 40,
+      // where 1 is the default slot.  Slots 1 to 9 have fixed
+      // properties and don't respond to the TIP_SET_XXX commands, use
+      // slot 10 or greater if you want to set your own properties.
+
+      TIP_SET_POS  [x]  [y]
+      // Change the positioning for the current slot.  X and Y are
+      // _percentages_ for the on-screen position.  Default position
+      // is "50% 50%" which is the center of the screen.  For
+      // graphical tips, X and Y specify the top/left corner position
+      // of the image.
+
+      TIP_SET_ALIGN  [alignment]
+      // Change the alignmet, which must be either "CENTER" or "LEFT".
+      // CENTER causes multi-line tips to be centered horizontally
+      // (the default mode), and LEFT causes left alignment.  Text
+      // tips are always centered vertically.
+
+      TIP_SET_COLOUR  [colourmap]
+      // Changes the colouring for the current slot.  The name must
+      // refer to an entry in COLMAP.DDF, for example "TEXT_YELLOW".
+
+      TIP_SET_TRANS  [translucency]  ( time )
+      // Changes the translucency for the current slot (which is
+      // normally 100%, fully opaque).  It is a percentage from 0% to
+      // 100%.  The second value is optional, and gives a time value,
+      // causing the tip to fade towards the new translucency (e.g.
+      // "5" for five second fade).
+
+-  new RTS command for changing textures on lines or sectors.  It
+   looks like this:
+
+      CHANGE_TEX  [where]  [texname]  [tag]  ( subtag )
+
+   the `where' part is one of: RIGHT_UPPER, RIGHT_MIDDLE, RIGHT_LOWER,
+   LEFT_UPPER, LEFT_MIDDLE, LEFT_LOWER (these change line textures),
+   FLOOR or CEILING (for sector flats) or lastly SKY (for changing the
+   sky texture).  The `texname' is the name of the texture or flat.
+   The `tag' specified what tag the lines or sectors have, all
+   lines/sectors with the same tag are affected.
+   
+   The optional `subtag' part allows more control over what is
+   affected: for line changers, only the sidedefs whose sector has tag
+   = subtag is changed.  For sector changers, only the sectors that
+   border a line with tag = subtag are changed.
+ 
+-  new RTS command THING_EVENT which makes all things that are within
+   the radius go into a specified state.  It is used like this:
+
+      THING_EVENT  [thing type]  [state]
+   
+   where the thing type can be a name (e.g. OUR_HERO) or a number
+   (e.g. 3001).  The idea behind it is to allow "events" where
+   certain scripted actions take place (e.g. to play out the story).
+
+-  Rectangle Triggers are a new variation on Radius Triggers, where
+   the trigger area can be a rectangle (e.g. wide horizontally and
+   narrow vertically).  They are defined like this:
+   
+      RECT_TRIGGER  [x1]  [y1]  [x2]  [y2]  ( [z1]  [z2] )
+        ... normal scripting stuff ...
+      END_RADIUSTRIGGER
+   
+   x1,y1 is the lower left corner (on the map) and x2,y2 is the upper
+   right corner.  The height range z1,z2 is optional.
+
+-  new PLAYSOUND_BOSSMAN command for RTS.  The sound is heard at full
+   volume from any point on the map.  Takes the same parameters as
+   the regular PLAYSOUND command.
+
+-  new CHANGE_MUSIC command for RTS.  It takes a single parameter: a
+   number which references an entry in PLAYLIST.DDF.
+
+

@@ -1,0 +1,144 @@
+
+BOT STUFF
+=========
+
+Puzzle Solving Algorithm
+------------------------
+
+PUSH target for EXIT switch onto stack (no associated obstacle).
+
+WHILE target stack not empty DO
+
+  PATH FIND from current location to current target, treating all
+       obstacles as passable EXCEPT any obstacle associated with
+	     a target in the stack.  Remember the first obstacle of this
+	     path in variable OBST.
+
+  if (path finding failed)
+  {
+	  select next alternative for current target.
+
+	  if (no more alternatives)
+	  {
+		  assume target is unreachable (i.e. obstacle unpassable).
+		  pop current target off stack.
+	  }	  
+	  CONTINUE:
+  }
+
+  if (OBST is unset)
+  {
+	  EXECUTE current target, returning here when done.
+
+	  pop current target off stack.
+
+	  if (target was KEY or once-only SWITCH/WALK-OVER)
+	  {
+		  pop all targets except first one.
+	  }
+	  CONTINUE;
+  }
+
+  find all solutions to obstacle in OBST.
+
+  if (no solutions found)
+  {
+	  select next alternative for current target.
+
+	  if (no more alternatives)
+	  {
+		  assume target is unreachable (I.E. obstacle unpassable)
+		  pop current target off stack.
+	  }	  
+	  CONTINUE:
+  }
+
+  PUSH group of targets (one for each solution) and associated
+       obstacle onto target stack.  These become the current target.
+
+WEND
+
+===========================================================================
+
+
+Map Traversal Issues
+--------------------
+
++ Manual Doors / platforms
+
+PROBLEM 1: 
+  Pathing through a door, how to do it ?  Just marking the sector as
+  "open" for the rest of the path-finding may have problems.
+
+..........................................................................
+
++ Switched Doors / Floors / etc.  (e.g. E1M7)
+
+PROBLEM 1:
+   
+
+..........................................................................
+
++ Platforms with walk-over lines
+
+PROBLEM 1:
+  These lines are separated away from the platform (or even door) which
+  they activate.  The level may be setup so that all paths to the
+  platform will cross an activator line -- if not, then the Bot needs
+  to treat the activate line as a switch.  Detecting whether all paths
+  will cross an activate line is very difficult (and may change over
+  time).
+
+SOLUTION:
+  Treat walk-over acivation lines as switches.  But ignore them if the
+  Platform can be self-activated (like a door).
+
+PROBLEM 2:
+ 
+..........................................................................
+
++ Walk-over gaps (e.g. MAP06, near the crusher)
++ Jump-over gaps (e.g. MAP02)
+
+PROBLEM 1:
+  Detection of the places in the map where these walk-overs and
+  jump-overs are possible (or needed).  The distance between the
+  cliffs, their height difference and "run-up space" are all
+  factors.  The walk-over/jump-over state needs to be recorded,
+  e.g. the Bot will be in mid-air in the intervening subsector(s)
+  and hence shouldn't look down.
+
+  Also, changing sector heights can create new jumps or destroy
+  existing jumps.  Any detection should not be static (at least,
+  not if the sectors involved can move).  For example: raising steps
+  in MAP09 (near the hell-knight).
+
+PROBLEM 2:
+  The Bot needs to know when "dropping off" a cliff whether it needs to
+  drop down or to land on the opposite cliff, and control its speed
+  accordingly.  The Bot may "fail" (not make the jump) or even jump
+  across when it intended to fall down -- it needs to be able to
+  handle this.  It should never fall into an unescapable pit.
+
+ANALYSIS:
+  This formula gives how far the Bot could jump given the delta_y
+  value (in range +20 to -72) and momentum reached at edge:
+
+    dist = 32 + mom * (2.5 + (20 - delta_y) / 92);
+
+  This is a lower bound (and hence safe), though at the highest
+  momentum values it under-estimates by quite a large margin. 
+
+..........................................................................
+
++ Teleporters
+
+PROBLEM 1:
+  Teleporters add an element of non-linearity into the map.  The
+  cost of crossing a teleporter line will not be the simple 2D distance.
+  After teleporting, the Bot will lost momentum and unable to move for
+  a short while -- factors that need to be taking into account (also
+  the risk of being telefragged in DM games).
+
+..........................................................................
+

@@ -1,0 +1,494 @@
+
+CHANGELOG FOR 1.29 (since 1.28A)
+================================
+
+(Date: JULY 2007)
+
+
+Bugs fixed
+----------
+
++ crash loading a savegame with dynamic lights when D/L disabled.
++ fixed crash when starting a level in deathmatch mode.
++ quotes (") usable in response files (for filenames with spaces).
++ fixed "jerk up/down" when player steps onto a lowering lift.
+
+- Arch-vile no longer resurrects monsters into itself.
+- don't display "Entering" on intermission when map is last one.
+- fix for ONCONDITION-WEAPON in RTS scripts.
+- fix for teleport on MAP06 (going to wrong place).
+- boss brain can now be hurt from rocket explosions.
+- DDF parser will catch angles over 360 degrees.
+- watching a moving monster while dead is now smoother.
+- allow KEY_GREENCARD and KEY_GREENSKULL in DDF.
+- berserk strength now lasts the whole level.
+- night vision wasn't affecting the sky, fixed.
+- damage over 1000 no longer hurts invulnerable players.
+- monsters on different sides now attack each other.
+- problems mlooking up/down while zoomed are fixed.
+- sides of extrafloors would not scroll properly, fixed.
+- autorun is remembered in the config file again.
+- fixed some missing mid-masked textures (Eternal MAP28).
+- smoking tracers sometimes wouldn't produce smoke.
+- Revenant missiles fixed to match the original.
+- Archvile flame fixed to play the crackle sounds.
+- fixed stair-building bug (e.g. TNT MAP16).
+- some problems handling the mouse-wheel were fixed.
+- rotated automap could omit parts of a map, fixed.
+- fixed an issue with window positioning on Win32.
+- fixed MUS playback on certain devices in Win32
+- some continuous floors had wrong heights, fixed.
+- '+' syntax for KEYS in DDF was finally fixed.
+- the CAPSLOCK and NUMLOCK keys work a bit better.
+- improved spawning of voodoo dolls (Darren Salt).
+- fixed old deathmatch mode so weapons stay on the map.
+- fixed 'detuning' problem with MUS playback on Win32.
+
+
+Features removed / changed
+--------------------------
+
++ software rendering has been removed.  We don't have the time to
+  maintain the software renderer anymore, and keeping two renderers
+  means that adding new features (like slopes and models) needs
+  twice as much work (if not more -- doing things with OpenGL is
+  usually a lot easier than doing it with software).
+
++ the demo format has changed, and previously recorded demos won't
+  work anymore.  The new format has the ".EDM" extension (but omit
+  this when using the -record and -playdemo options).
+
++ Looping sounds have changed.  To keep a sound looping,
+  it must be continally replayed (in addition to having
+  LOOP=TRUE line in SOUNDS.DDF).  A good rule of thumb is
+  to wait half the length of the sound, e.g. if the sound
+  lasts 1.6 seconds then replay it every 0.8 seconds (28
+  ticks) to guarantee that it loops continuously.
+
+- the EDGE-specific sector types have been renumbered to the
+  range 4400-4499.  This may affect old mods, which can be
+  made to work using the new -ecompat option.
+
+- screenshots are now available in JPEG or PNG format.  New 
+  "screenshot" console command (Note: it does not capture the 
+  console itself).  Screenshots are now placed in a folder
+  called "screenshots".
+
+- Set Resolution menu: removed 'TEST RESOLUTION' button.
+
+- renamed -debugfile option to -debug, and the filename is now
+  hardcoded as "debug.txt" (stored in same place as "edge.log").
+
+- the "CONSTANT" dynamic lighting type (in DDF) was removed.
+
+- replaced the [DOG] sprites and sounds in EDGE.WAD with a
+  colormapped demon, due to copyright/license concerns.
+
+
+General improvements
+--------------------
+
++ drag and drop support.  You no longer have to use the -file option
+  to specify filenames (wad files etc).  Everything before the first
+  option is considered a filename to add.  This allows you to drag a
+  (self-contained) WAD onto the EDGE executable to play it.
+
++ improved BOOM compatibility:
+  - handle the ELEVATOR linetypes.
+  - support for Current/Wind/Push/Pull forces.
+  - support for Icy/Muddy floors.
+  - handle BOOM colormaps.
+  - load the SWITCHES and ANIMATED lumps.
+  - support for line-to-line teleporters.
+  - support for platform toggle linetypes.
+  - always allow generalised sector types.
+
++ native support for DeHackEd and BEX patches, both as normal files
+  (with .DEH or .BEX extension), and also as DEHACKED lump in a wad.
+  Patch files can be added with the -deh option (like in other Doom
+  engines).  EDGE converts the patches to DDF, and stores the result
+  in files with the .HWA extension, which are loaded automatically.
+
++ support for OGG/Vorbis Music playing.  OGG/Vorbis is music format
+  similar to MP3, but is free from patents and does not require any
+  royalty fees.  You can use them as normal files, or as lumps in a
+  WAD file, as these examples (for playlist.ddf) show:
+
+     [01] MUSICINFO=OGG:FILE:"d_runnin.ogg";
+     [02] MUSICINFO=OGG:LUMP:"OGGRULEZ";
+
+- ability to use 32-bit screen modes (16.7 million colours).  You
+  may need to change your desktop to 32-bit mode for this to work.
+
+- new startup, with progress bar.  The console window that used to
+  appear (Win32) is gone, and under Linux messages are no longer
+  printed to the terminal.  When GL-Nodes must be built for a wad,
+  this is also done during startup.
+
+- video startup: new -directx, -gdi and -videodriver options
+  for better control over what SDL video driver to use.
+
+- sound startup: try hard to find a working sound mode.
+  Also support for specifying the SDL audio driver, with
+  new -waveout, -dsound and -audiodriver options.
+
+- Linux: fatal errors produce a pop-up dialog box.  EDGE can now be
+  run by double clicking the executable.  Support for CD music.
+
+- GWA and HWA files are stored in a separate cache folder,
+  allowing EDGE to run wads from read-only media (CDROM) or
+  from read-only locations (/usr/share).
+
+- support V3 and V5 GL-NODES.  EDGE now includes glBSP 2.22, which
+  can handle very complex levels (which overflow the old limits),
+  e.g. Deus Vult MAP05.
+
+- the DeathBot is back!  He is still pretty dumb though.  Use
+  the option "-bots #" (where # is the number of bots) to add
+  bots to a deathmatch game.
+
+- source code uses more C++ features, and more of the EPI (Edge Platform
+  Interface).  The "Zone" memory manager has mostly been replaced.
+
+- emulation for Doom's original lighting (optional).
+- can toggle window/fullscreen mode in set-resolution screen.
+- new gameplay option to disable automatic weapon switches.
+- sky looks a bit better, with a stretch option in Video menu.
+- the old "sky flooding" mapping trick is now emulated.
+- option 'Shoot-thru Scenery' emulates old missile behaviour.
+- emulate the FRIEND bit on things in the map.
+- missing wad files (given with -file) now produce an error.
+- monster spawning will keep the parent's AMBUSH status.
+- night vision and god-mode effects use colour from colourmap.
+- correct map names for TNT Evilution and Plutonia Experiment.
+- detects and repairs TNT's MAP31 bug (missing yellow key).
+- can use numbers with -warp and IDCLEV cheats again.
+- can use mouse-wheel in automap and in menus.
+- intermission text screens can now be skipped.
+- console now slides up/down, smaller font.
+- can disable mouse-look in the gameplay options.
+- support for 16 players in a multiplayer game.
+- limit the number of skulls from pain elementals.
+- number of RTS tip slots has increased to 45.
+- RTS tip messages are shown on the console.
+- fixes for 64-bit architectures (Darren Salt).
+
+
+New DDF features:
+-----------------
+
++ can load DDF files (with ".ddf" or ".ldf" extension) directly from the
+  command line.  Drag and dropping them should also work.
+
++ new IMAGES.DDF file.  The corresponding wad lump is DDFIMAGE.  You
+  can define any type of images in this file (textures, flats, sprites
+  and screen patches), and they will override any from the WAD file
+  with the same name.  There are three supported types so far: solid
+  colours, image files, and built-in types, as follows:
+
+     IMAGE_DATA = COLOUR:#FF7F00;
+     IMAGE_DATA = BUILTIN:QUADRATIC;
+     IMAGE_DATA = FILE:"retex/startan3.png";
+     IMAGE_DATA = LUMP:JPG:"JFLOOR48";
+
+  The built-in types are only used to create special images for
+  dynamic lighting and shadows.  The FILE and LUMP types are the most
+  useful, and support both PNG and JPG images.
+  
+  NOTE: When using filenames, directories must be separated by / instead
+  of the \ character which is normally used under Windows.  The reason
+  is because the \ character has a special meaning in DDF: it is the
+  escape character, and "\n" is used to put newlines into DDF strings.
+
+  The following commands are also available:
+
+     X_OFFSET = 10;  // specify the X and Y offset, e.g. sprites.
+     Y_OFFSET = 20;  //
+
+     SCALE  = 2.0;   // scaling and aspect.  Bigger scale makes the
+     ASPECT = 1.0;   // image bigger (cover more space).  Bigger aspect
+                     // makes the image wider (height is unchanged).
+
+     SPECIAL = XXX, YYY;
+
+  The following general purpose specials are available:
+
+     CROSSHAIR   // for weapon crosshair sprites: center it on screen
+
++ new FONTS.DDF file.  The equivalent wad lump is DDFFONT.  This is used
+  to define fonts (the set of character images for drawing text).  The
+  following example shows the available features:
+
+    [FOO]
+    TYPE=PATCH;                 // PATCH is the only type so far
+    PATCHES=FONTP33("!"),       // put a character in "" quotes
+            FONTP65("A":"Z");   // use : for a range of characters
+    MISSING_PATCH=FONTP00;
+
+  where the FONTPxx names above are the patch names.  When using
+  ranges, the name (e.g. FONTP65) is for the first character.  It
+  must end with digits so that EDGE can work out the other patches
+  properly (FONTP66 will be "B", etc).  The missing patch is optional.
+  Having a patch for a space (" ") is also optional.
+
+- new STYLES.DDF file.  THIS IS EXPERIMENTAL !!  The idea is to
+  define the background colour/image and text font/colour/scaling
+  information (and sounds too) for various parts of EDGE's user
+  interface.  It may undergo significant changes (without keeping
+  compatibility), and it might even be scrapped!  USE AT OWN RISK.
+
+- RELOAD states for monsters.  This is controlled by the new command
+  RELOAD_SHOTS and the new action RELOAD_CHECK, which increases the
+  monster's shot count and if the limit has been reached, it enters
+  the RELOAD states.  RELOAD_RESET will reset the shot count to zero
+  (not normally needed, but could be handy for special effects).
+
+  For players, RELOAD states are used whenever their weapon reloads.
+  They are optional though.
+
+- new SEQUENCE command for ANIMS.DDF.  Use it to specify the full
+  animation sequence.  Names cannot be used twice.  For example:
+
+    SEQUENCE = TEX1, TEX2, TEX3, TEX5, TEX8;
+ 
+- PICKUP_EFFECT = SWITCH_WEAPON(xxx).  The standard POWERUP_BERSERK
+  will use this automatically to change to the FIST, there is also a
+  new keyword POWERUP_BARE_BERSERK which doesn't do that.
+
+- able to specify a colour directly in COLMAP.DDF, without needing any
+  wad lumps.  The command is:
+
+    GL_COLOUR = #FF9030;   // orange
+
+- NOTARGET attack special, causes the bullet or missile to go straight
+  ahead and ignore the monster/player being aimed at.
+
+- ULTRA_LOYAL thing special.  Friendly monsters don't turn into enemies
+  when hurt by your weapon fire.
+
+- SIDE_IMMUNE thing special.  Friendly monsters are completely immune
+  from your weapon fire.
+
+- support for "Ghosts", which means that a bullet or projectile attack
+  will pass straight through an enemy.  The new things.ddf GHOST_CLASS
+  command takes a set of letter flags (just like IMMUNITY_CLASS).  The
+  new SIDE_GHOST special is similar to SIDE_IMMUNE, except that it makes
+  bullets/missiles from "friendly fire" pass straight through.
+
+- EXPLODE_RADIUS command for things and attacks.  Normally the explosion
+  radius is the same as the damage caused, but this command forces the
+  explosion radius to a particular value (e.g. 200).  The amount of
+  damage is not affected.
+
+- EXPLODE_IMMUNE and ALWAYS_LOUD thing specials.  These attributes
+  are both set by the BOSSMAN special, but now they can be specified
+  individually.
+
+- NOZBUFFER thing special for "particles" (smoke puffs etc) which
+  prevents visual glitches when many are floating near each other.
+
+- HOVER thing special, like in Heretic.  Sprite must be above the
+  ground for it to work properly.
+
+- BERSERK_MULTIPLY for attacks.ddf controls how much damage the
+  attack causes when the player has the Berserk powerup.
+
+- SILENT_TO_MONSTERS is now an attack special too.
+- FORCE_PICKUP special for thing.ddf (items).
+- DIE action for things and attacks (mainly for BEX compatibility).
+
+- WHEN_APPEAR in DDF and RTS now accepts simpler values.  You can
+  use a range for the skill (e.g. "3-5"), you can omit the skill or
+  the netmode part (e.g. "DM" means deathmatch on any skill, and "3"
+  means Hurt-Me-Plenty on any netmode).  Finally, you can add the '!'
+  character to the beginning to negate it, e.g. "!SP" means never in
+  single-player, and "!4:5" means never in skills 4 or 5.
+
+
+New RTS features:
+-----------------
+
++ new RTS menu system:
+
+    SHOW_MENU      title choice1 choice2 ...
+    SHOW_MENU_LDF  title choice1 choice2 ...
+         
+    JUMP_ON  MENU  label1 label2 ...
+
+    MENU_STYLE  style_name
+
+  The RTS menu will pause the game (including all scripts) until the user
+  presses a valid number key (or SPACE/ENTER when less than two choices).
+  Savegames are disabled while the RTS menu is shown.  Once the menu is
+  finished, the JUMP_ON command will test the result, and jump to the
+  matching label.  It will fail to jump if there aren't enough labels,
+  or if the user cancels (with 'Q' or 'X' keys).
+
+  The title can contain newlines (given by "\n"), to make multi-line
+  titles.  Newlines don't work in the choices however.  The MENU_STYLE
+  command sets the style for the next SHOW_MENU command.  If you don't
+  specify a style, the default style is [RTS_MENU].
+
++ "ALL" keyword for the START_MAP line, which causes the script to be
+  spawned on every map.
+
+- each thing in the level can have a "tag number" (like the TID in
+  Hexen).  The RTS SPAWN_THING command can specify the tag number
+  to give a new thing, and the DAMAGE_MONSTERS and THING_EVENT
+  commands can take a tag number to limit what they apply to.
+
+  Tag numbers are given to these commands by using 'TAG=xxxx'
+  (where xxxx is the number) at the end of the command.
+  NOTE: there must not be any spaces before or after the '='.
+  Some examples:
+
+    SPAWN_THING Cacodemon 1376 3040 TAG=1234
+    DAMAGE_MONSTERS ANY 200 TAG=1234
+    THING_EVENT ANY PAIN TAG=1234
+
+- new BLOCK_LINES command, does the opposite of UNBLOCK_LINES.
+
+- lines in RTS scripts can be extended over two (or more) actual lines
+  by placing the \ character at the end.  A silly example:
+
+     SHOW_MENU "title" \
+         "choice one"  \
+         "choice two"  \
+         "choice three"
+
+  Note: there must not be any spaces after the \ character.
+
+
+New weapon stuff
+----------------
+
++ weapon handling has been generally improved (especially the way clips
+  work).  Anything using the CLIPSIZE command is considered a "clip weapon",
+  and will store ammo inside of its clip, even when not selected.
+
++ support for manual reloading (new key in Keyboard Options), and
+  also next-weapon and previous-weapon keys.
+
++ eight new ammo types, AMMO9, AMMO10 ... upto AMMO16.  The old ammo
+  types can (optionally) be called AMMO1 ... AMMO8.  The limit on
+  holdable weapons has also been increased from 32 to 64.
+
+- there are many new specials.  The following new command is used to
+  give specials for the secondary attack:
+
+    SEC_SPECIAL = xxx;
+
+  The ones in the plain "SPECIAL" command apply to the primary attack
+  (some might apply to the whole weapon).  The following specials are
+  available:
+
+    SILENT_TO_MONSTERS : don't wake up those demons
+    ANIMATED           : UP and DOWN states are animated
+    NO_SWITCH          : don't switch to new weapon if ammo runs out
+
+    NO_TRIGGER   : prevent reloading by pressing fire button
+    FRESH        : reload empty clip when fresh ammo is picked up
+    NO_MANUAL    : disable manual reloading key
+    NO_PARTIAL   : manual reload: clip must be empty to refill it
+
+  When using the ANIMATED special, the weapon sprite doesn't raise up
+  or lower down.  Instead the UP and DOWN states should show an
+  animation.  The RAISE and LOWER commands _must_ occur once, in the
+  very last frame.
+
+- there are now empty states.  These are shown (instead of ready
+  states) when the primary attack runs out of ammo.  You must use
+  the "EMPTY" action in the empty states, for example:
+
+    STATES(EMPTY) = ABCD:E:1:NORMAL:EMPTY;
+
+- there are also WARMUP and SECWARMUP states.  These will be entered
+  when firing the weapon from the READY states (not for refiring).
+  These states jump to the ATTACK and SECATTACK states when finished
+  (i.e. you don't need #ATTACK at the end).
+
+- Edge now supports IDLE states.  These are entered from the READY
+  or EMPTY states after a certain time has elapsed.  The minimum
+  time is given with the IDLE_WAIT command.  There is also an
+  IDLE_CHANCE command which is the chance to enter the idle states 
+  when the timer runs out.  If the timer runs out and the random
+  test fails, then the timer is reset to 1/10th of IDLE_WAIT.
+
+  For example, "IDLE_WAIT=20" means that the random test occurs
+  at 20 seconds, 22 seconds, 24 seconds, and so forth, until it
+  succeeds.  If the chance is 100%, is succeeds on the first try.
+
+- Crosshair actions have been re-enabled.  The following actions
+  are now available.
+
+    SETCROSS(FRAME)    : crosshair jumps to the given frame
+    TARGET_JUMP(FRAME) : crosshair jumps IF player has a target
+    FRIEND_JUMP(FRAME) : crosshair jumps IF player target is a friend
+
+  SETCROSS can be used anywhere, but TARGET_JUMP and FRIEND_JUMP
+  can only be used in the crosshair states.  The old "TARGET" action
+  (disabled for a long time) has been made obsolete.
+
+- SHOW_CLIP weapons: the HUD shows clip divided by ammopershot.
+
+- Finally, there are now DISCARD and SECDISCARD states.  They are
+  similar to the PARTIAL special: if you press the reload key with
+  a half-empty clip (i.e. neither empty nor full), then the clip is
+  discarded and the DISCARD states are entered.  These states must
+  end with the CHECKRELOAD action to cause the weapon to reload.
+
+
+New command-line options | console variables
+--------------------------------------------
+
+  -videodriver [name]   Specify what SDL video driver to use.
+  -directx              The -directx and -gdi options are shortcuts
+  -gdi                  for using -videodriver with the same names.
+                        The 'gdi' driver is the default on WIN32.
+  
+  -audiodriver [name]   Specify what SDL audio driver to use.
+  -waveout              The -waveout and -dsound options are shortcuts
+  -dsound               for using -audiodriver with the same names.
+                        The 'dsound' driver is the default on WIN32.
+  
+  -sound16              Try to use 16-bit sound output.
+  -sound8               Try to use 8-bit sound output.
+  
+  -deh  [file]          Specify a DeHackEd (or BEX) patch file.  You can
+                        have multiple patch files after the -deh option.
+
+  -gamma [n]            Give a gamma setting to use (from 0 to 4).
+
+  -nocdmusic            Disable CD music.
+
+
+  -nearclip [n]   NEARCLIP    Control the OpenGL distance clipping.
+  -farclip [n]    FARCLIP     Increasing farclip allows a huge level
+                              to be fully seen, but decreases depth
+                              accuracy (may cause glitches).
+
+  -(no)hqscale    HQSCALE     Turn on/off "High Quality" image scaling.
+  -(no)hqall      HQALL       Use HQ2X on _all_ images (textures and
+                              sprites).  Normally only the HUD gfx are
+                              scaled.  This option can slow things down,
+                              since it needs 4 times more video memory.
+
+  -(no)smoothmap  SMOOTHMAP   Turn on/off anti-aliasing of automap.
+  -(no)diskicon   DISKICON    Turn on/off the flashing disk icon.
+  -(no)fadepower  FADEPOWER   Turn on/off fading of powerup effects.
+
+  -(no)hogcpu     HOGCPU      Turn on/off the behaviour of hogging
+                              the CPU.  When enabled, gameplay may
+                              be smoother, but disabling it gives
+                              more time for other programs to run.
+
+
+Hats off to...
+--------------
+
+Special mention to Erik Sandberg's contribution to EDGE. It's worth a
+note that he did a shedload of quality work and made a special effort
+to make sure we were GPL legal - something we maintain now.  We do
+this since because we have recently removed the software renderer,
+we removed about 90% of the work he put into EDGE.
+

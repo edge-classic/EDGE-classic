@@ -1,0 +1,37 @@
+DaveEL's Log
+
+2000/07/03
+
+Inital BeOS checkin. major issues on BeOS are sound the mouse support.
+
+2000/07/18
+
+changed i_defs.c to reflect the cvs tree using edge/beos instead of edge/BeOS
+spent some time rebuilding my project file. 
+(did my project file not get checkouted when i used cvs for any particular reason??)
+
+incorporated a new fudge to get round BeIDE bugs. edge/i386/i_asm.c has been copied to edge/beos/b_asm.c
+
+upgraded to the current sdl video and sound code from the linux port. All working correctly
+the Mouse is still a problem even now its fixed on the linux sdl port. This will
+have to wait till the BeOS SDL port is fixed (its one of the 2 BeOS specific bugs
+according to the docs). Sound support is fine appart from i still have no MUS/midi support and 
+the cd support has yet to be tested (SDL refuses to detect my cd drives). 
+
+
+2001/01/29
+
+Thought it was about time to get the beos code up to scratch the software mode works again will start work
+on the gl stuff at some point but its not a priority as beos 5 doesn't have hardware opengl support (gotta
+find my beos 4.5 cd for a start).
+
+SDL on beos has been updated to support SDL_WarpMouse however it doesn't work quite right
+rewrote portions of handlemouseevent code to compensate. also added code to blittoscreen code
+to fix the fact that SDL_GrabInput doesn't work on beos.
+
+once above modification were complete the mouse works properly and smoothly so all mouse related bugs appear to be fixed.
+
+MUS/midi support has not moved forward because i still can't get my head around the beos api.
+
+cd audio still not tested as SDL cd stuff (including the test application) doesn't work on my system.
+

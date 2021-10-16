@@ -1,0 +1,100 @@
+//
+//    EDGE LANG_PLUT.LDF - messages for The Plutonia Experiment.
+//    For documentation, see http://edge.sourceforge.net/
+//    DDF Version 6.1
+//
+
+<LANGUAGES>
+
+#VERSION 1.35
+
+// ------ English Language Definition File ----------
+
+[ENGLISH]
+
+Map01Desc="level 1: congo";
+Map02Desc="level 2: well of souls";
+Map03Desc="level 3: aztec";
+Map04Desc="level 4: caged";
+Map05Desc="level 5: ghost town";
+Map06Desc="level 6: baron's lair";
+Map07Desc="level 7: caughtyard";
+Map08Desc="level 8: realm";
+Map09Desc="level 9: abattoire";
+Map10Desc="level 10: onslaught";
+Map11Desc="level 11: hunted";
+Map12Desc="level 12: speed";
+Map13Desc="level 13: the crypt";
+Map14Desc="level 14: genesis";
+Map15Desc="level 15: the twilight";
+Map16Desc="level 16: the omen";
+Map17Desc="level 17: compound";
+Map18Desc="level 18: neurosphere";
+Map19Desc="level 19: nme";
+Map20Desc="level 20: the death domain";
+Map21Desc="level 21: slayer";
+Map22Desc="level 22: impossible mission";
+Map23Desc="level 23: tombstone";
+Map24Desc="level 24: the final frontier";
+Map25Desc="level 25: the temple of darkness";
+Map26Desc="level 26: bunker";
+Map27Desc="level 27: anti-christ";
+Map28Desc="level 28: the sewers";
+Map29Desc="level 29: odyssey of noises";
+Map30Desc="level 30: the gateway of hell";
+Map31Desc="level 31: cyberden";
+Map32Desc="level 32: go 2 it";
+
+Level7Text="You gloat over the steaming carcass of the\n"
+  "Guardian.  With its death, you've wrested\n"
+  "the Accelerator from the stinking claws\n"
+  "of Hell.  You relax and glance around the\n"
+  "room.  Damn!  There was supposed to be at\n"
+  "least one working prototype, but you can't\n"
+  "see it. The demons must have taken it.\n"
+  "\n"
+  "You must find the prototype, or all your\n"
+  "struggles will have been wasted. Keep\n"
+  "moving, keep fighting, keep killing.\n"
+  "Oh yes, keep living, too.";
+
+Level12Text="Even the deadly Arch-Vile labyrinth could\n"
+  "not stop you, and you've gotten to the\n"
+  "prototype Accelerator which is soon\n"
+  "efficiently and permanently deactivated.\n"
+  "\n"
+  "You're good at that kind of thing.";
+
+Level21Text="You've bashed and battered your way into\n"
+  "the heart of the devil-hive.  Time for a\n"
+  "Search-and-Destroy mission, aimed at the\n"
+  "Gatekeeper, whose foul offspring is\n"
+  "cascading to Earth.  Yeah, he's bad. But\n"
+  "you know who's worse!\n"
+  "\n"
+  "Grinning evilly, you check your gear, and\n"
+  "get ready to give the bastard a little Hell\n"
+  "of your own making!";
+
+EndGameText="The Gatekeeper's evil face is splattered\n"
+  "all over the place.  As its tattered corpse\n"
+  "collapses, an inverted Gate forms and\n"
+  "sucks down the shards of the last\n"
+  "prototype Accelerator, not to mention the\n"
+  "few remaining demons.  You're done. Hell\n"
+  "has gone back to pounding bad dead folks \n"
+  "instead of good live ones.  Remember to\n"
+  "tell your grandkids to put a rocket\n"
+  "launcher in your coffin. If you go to Hell\n"
+  "when you die, you'll need it for some\n"
+  "final cleaning-up ...";
+
+Level31Text="You've found the second-hardest level we\n"
+  "got. Hope you have a saved game a level or\n"
+  "two previous.  If not, be prepared to die\n"
+  "aplenty. For master marines only.";
+
+Level32Text="Betcha wondered just what WAS the hardest\n"
+  "level we had ready for ya?  Now you know.\n"
+  "No one gets out alive.";
+

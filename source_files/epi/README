@@ -1,0 +1,7 @@
+EPI Library V1.0
+
+This is a general purpose library written in C++, but with no
+reliance on templates and other advanced C++ features. The
+intention is a lightweight lib biases towards use in game engines.
+
+Please refer to INSTALL for installation instructions.

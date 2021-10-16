@@ -1,0 +1,854 @@
+
+README for glBSP
+================
+
+by Andrew Apted.  JULY 2007
+
+
+Introduction
+------------
+
+glBSP is a nodes builder specially designed to be used with OpenGL-based
+DOOM game engines. It adheres to the "GL-Friendly Nodes" specification,
+which means it adds some new special nodes to a WAD file that makes it
+very easy for an OpenGL DOOM engine to compute the polygons needed for
+drawing the levels.
+
+There are many DOOM ports that understand the GL Nodes which glBSP
+creates, including: EDGE, Doomsday (JDOOM), PrBoom, Vavoom, ZDoomGL,
+Legacy 2.0, and Doom3D.  See the links below.
+
+
+Status
+------
+
+The current version of glBSP is 2.24.  It has been tested and known to
+work on numerous large wads, including DOOM I, DOOM II, TeamTNT's
+Eternal III, Fanatic's QDOOM, and many others.
+
+
+Copyright
+---------
+
+glBSP is Copyright (C) 2000-2007 Andrew Apted.  It was originally
+based on "BSP 2.3" (C) Colin Reed and Lee Killough, which was created
+from the basic theory stated in DEU5 (OBJECTS.C) by Raphael Quinet.
+
+The GUI version (glBSPX) is based in part on the work of the FLTK
+project, see http://www.fltk.org.
+
+All trademarks are the propriety of their owners.
+
+
+License
+-------
+
+Thanks to Lee Killough and André Majorel (former maintainer of BSP,
+and devil-may-care French flying ace, respectively), glBSP is under
+the GNU General Public License (GPL).  See the file 'COPYING.txt' in
+the source package (or go to http://www.gnu.org) for the full text,
+but to summarise:
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+
+Links
+-----
+
+The homepage for glBSP can be found here:
+   http://glbsp.sourceforge.net/
+
+The "GL Friendly Nodes" specifications is here:
+   http://glbsp.sourceforge.net/glnodes.html
+
+The EDGE homepage can be found here:
+   http://edge.sourceforge.net/
+
+The DoomsDay (JDOOM) homepage is here:
+   http://www.doomsdayhq.com/
+
+Look here for PrBOOM:
+   http://prboom.sourceforge.net/
+
+Legacy info can be found here:
+   http://legacy.newdoom.com/
+
+The Vavoom site is here:
+   http://www.vavoom-engine.com/
+
+ZDoomGL is known to hang out around here:
+   http://zdoomgl.mancubus.net/
+
+The Doom3D site can be found here:
+   http://doomworld.com/doom3d/
+
+
+Acknowledgements
+----------------
+
+Andy Baker, for making binaries, writing code and other help.
+
+Marc A. Pullen, for testing and helping with the documentation.
+
+Lee Killough and André Majorel, for giving their permission to put
+glBSP under the GNU GPL.
+
+Janis Legzdinsh for fixing many problems with Hexen wads.
+
+Darren Salt has sent in numerous patches.
+
+Jaakko Keränen, who gave some useful feedback on the "GL Friendly
+Nodes" specification.
+
+The authors of FLTK (Fast Light Tool Kit), for a nice LGPL C++ GUI
+toolkit that even I can get working on both Linux and Win32.
+
+Marc Rousseau (author of ZenNode 1.0), Robert Fenske Jr (author
+of Warm 1.6), L.M. Witek (author of Reject 1.1), and others, for
+releasing the source code to their WAD utilities, and giving me
+lots of ideas to "borrow" :), like blockmap packing.
+
+Lee Killough and Colin Reed (and others), who wrote the original
+BSP 2.3 which glBSP was based on.
+
+Matt Fell, for the Doom Specs v1.666.
+
+Raphael Quinet, for DEU and the original idea.
+
+id Software, for not only creating such an irresistable game, but
+releasing the source code for so much of their stuff.
+
+... and everyone else who deserves it ! 
+
+
+
+---------------------------------------------------------------------------
+
+
+USING glBSP
+===========
+
+by Andrew Apted.  JULY 2007
+
+
+Running glBSP
+-------------
+
+There are two versions of glBSP: normal 'glbsp' (the text version),
+and 'glBSPX' (offering a graphical interface).  This documentation
+applies to the text version only.  Under Windows, the text version
+must be run from the command shell (cmd.exe).
+
+There are two main ways of using glBSP:
+
+  1. Create the GL nodes and store them in a separate file with the
+     GWA extension.  This is called "GWA mode".
+
+  2. Create the GL nodes and store them in the WAD file itself, just
+     like how a normal node builder works.
+
+These ways are described in more detail below.
+
+
+1. GWA Mode
+-----------
+
+For general use, when you just want to use some wad (e.g. FOO.WAD)
+with a compliant OpenGL DOOM port, then this method is the recommended
+way.  It is also the simplest method, just type:
+
+   glbsp foo.wad
+
+and then glBSP will create the file "foo.gwa".  A compliant OpenGL
+DOOM port (such as EDGE) will notice the GWA file automatically and
+load it appropriately.  Nothing more needs to be done.
+
+You can also specify multiple wads here, even wildcards should
+work.  For example:
+
+   glbsp foo.wad fred.wad simon*.wad
+
+Note!  You should not give these GWA files to the DOOM port using
+the command line (i.e. with the -file option), doing so will confuse
+it and it'll probably crash.  The port should notice the GWA file
+automatically.
+
+Note 2: when using GWA mode, the output file does not contain any
+information for things, linedefs, sidedefs, sectors, reject, or
+blockmap, all it contains is the GL node information.  This is
+where the name "GWA" comes from, it is short for "GL WAD" (in
+case you were wondering).
+
+
+2. Non-GWA Mode
+---------------
+
+This method is intended for WAD authors, so they can create a single
+WAD file for distribution that contains all the needed information.
+Using this method looks like this:
+
+   glbsp foo1.wad -o foo2.wad
+
+and then glBSP will build the GL nodes and output the new file
+"foo2.wad" containing them.  It will also build the normal node
+information if it is absent.
+
+
+Response Files
+--------------
+
+New in version 2.20 is support for response files.  These are
+files containing a list of options.  You specify the response
+file by prefixing it with '@'.  For example:
+
+   glbsp @arg_list.rsp
+
+The "@arg_list.rsp" on the command line will be replaced with
+the contents of that file.  New-line characters are treated like
+spaces.  Recursion (using '@' inside a response file) is not
+supported.
+
+
+Option Descriptions
+-------------------
+
+The following is a list of all the available options.
+Each option has a short form and a long form.
+
+  -q -quiet     Quieter output.  Information about each level (like
+                the number of linedefs, blockmap size, etc) is not
+                displayed when this option is given, and a few other
+                messages are skipped.  Important messages, like
+                failure to build a certain level, are still shown.
+              
+  -f -fast      Allows glBSP to cheat a bit and re-use the original node
+                information to create the GL nodes, doing it much faster.
+                Use this option to enable this feature.  The message
+                "Using original nodes to speed things up" will be shown.
+
+                The downside to reusing the original nodes is that they
+                may not be as good as the ones glBSP normally creates,
+                e.g. the special checks to minimise slime-trails don't
+                kick in, and the -factor value doesn't have any effect.
+              
+  -w -warn      Shows extra warning messages, which detail various
+                non-serious problems that glBSP has while analysing the
+                level structure.  Often these warnings show a real
+                problem in the level (e.g. a non-closed sector or
+                invalid sidedef), so they are worth checking now and
+                then.
+              
+  -n -normal    glBSP usually detects if the normal node info (i.e.
+                the non-GL variety) is present: when yes, it is left
+                untouched, otherwise glBSP creates it.  This option
+                forces glBSP to replace the normal node data with
+                newly constructed nodes.
+
+  -c -factor <num>
+                Sets the cost assigned to seg splits.  Factor can be
+                any number from 1 to 32, and larger values make seg
+                splits more costly (and thus glBSP tries harder to
+                avoid them), but smaller values produce better BSP
+                trees.  See the section below for more info.  The
+                default value is known to be a good compromise.
+               
+  -p -pack      Pack sidedefs, by detecting which sidedefs are
+                identical and removing the duplicates, producing a
+                smaller PWAD.
+               
+                NOTE: this will make your level a lot harder to edit!
+                Therefore this is most useful when producing your final
+                WAD for public release.
+
+  -xr -noreject
+                Normally glBSP will create an simple REJECT map for
+                each level.  This options prevents any existing
+                REJECT map, such as one time-consumingly built by
+                a dedicated reject builder, from being clobbered.
+
+These options are rarely needed:
+
+  -v1 .. -v5    Specify the version of the "GL Nodes" spec to use.
+                The default is -v2.  Using -v1 produces an obsolete
+                format.  Giving -v3 or -v5 will force certain lumps
+                to use the new formats, but is only useful for testing
+                since glBSP will automatically switch to V5 format
+                when certain limits are exceeded.
+
+  -m -mergevert
+                Merge duplicate vertices at the same location into a
+                single vertex.  This is usually safe, but is not done
+                by default because some engines (e.g. Risen3D) need the
+                duplicate vertices to stay separate for special effect.
+
+  -y -windowfx  Lets glBSP detect and handle the "One-Sided Window"
+                mapping trick.  This can cause problems in some engines
+                so it is disabled by default.
+ 
+  -u -prunesec  Removes any unused sectors found in the level.  Only
+                works when normal nodes are being built.  This is
+                not done by default since some scripting languages
+                (Fragglescript, old versions of RTS) refer directly
+                to the sector numbers and removing even one will
+                change all the numbering.
+               
+  -b -maxblock <num>
+                Sets the limit of the number of blocks the BLOCKMAP may
+                contain before we truncate it.  Default is 16000.  When
+                the level is too large to fit, glBSP will truncate the
+                blockmap, so it covers less area on the level.  This
+                means that in the parts it doesn't cover (at the outer
+                edges) there is no collision detection: you can walk
+                through walls and other objects and bullets/missiles
+                don't hit anything.  On very large but sparse levels,
+                using a larger value (e.g. 30000) may help.
+               
+                A more serious problem is when the blockmap overflows.
+                The blockmap created would be invalid, and could crash
+                the DOOM engine when used.  glBSP will create an empty
+                blockmap instead, causing modern ports to build their
+                own blockmap.
+
+  -xp -noprog   Turn off the progress indicator.
+
+  -xn -nonormal
+                Forces glBSP to not create the normal node information
+                when it detects that it is absent.
+
+  -xu -noprune  Prevents glBSP from removing zero-length linedefs and
+                unused sidedefs.
+
+
+ZDBSP Format Nodes
+------------------
+
+When the normal nodes overflow, older versions of glBSP would simply
+write out the invalid node data.  glBSP 2.20 and higher will write
+out the node data in the ZDBSP format (originally created for the
+ZDoom engine).
+
+
+Interaction with other tools
+----------------------------
+
+As far as I know, none of the various WAD tools that exist (such
+as DSHRINK, CLEANWAD, DEUTEX, etc..) are "glBSP aware", they will
+rearrange or even remove some of the special GL entries, and
+everything goes pear shaped.
+
+When using a reject building tool (such as RMB), you need to give
+the -noreject to glBSP to prevent the good REJECT data from being
+overwritten.
+
+*** DO NOT: ***
+
+  + Run DSHRINK on your map WADs at any time!
+
+  + Run CLEANWAD on your map WADs *after* you have compiled your GL
+    friendly nodes!  (The GL nodes will be removed).
+
+  + Use Wintex/DEUSF to merge map WADs with GL friendly nodes in them!
+    (The GL node entries will be rearranged, causing problems).
+
+
+How glBSP works
+---------------
+
+A node builder works like this: say you are looking at your level in
+the automap or in the level editor.  The node builder needs to pick a
+line (stretching to infinity) that divides the whole map in two halves
+(can be rough).  Now cover up one half with your hand, and repeat the
+process on the remaining half.  The node builder keeps doing this
+until the areas that remain are convex (i.e. none of the walls can
+block the view of any other walls when you are inside that area).
+
+Those infinite lines are called "partition lines", and when they cross
+a linedef, the linedef has to be split.  Each split piece is called a
+"seg", and every split causes more segs to be created.  Having fewer
+segs is good: less to draw & smaller files, so partition lines are
+chosen so that they minimise splits.  The "-factor" value controls how
+costly these splits are.  Higher values cause the node builder to try
+harder to avoid splits.
+
+So, each "partition" line splits an area (or "space") of the level
+into *two* smaller spaces.  This is where the term "Binary Space
+Partition" (BSP) comes from.
+
+Another thing: having a good BSP tree is also important, and helps for
+faster rendering & smaller files.  Thus the node builder also tries to
+make the BSP tree good (by making it balanced, and keeping it small).
+If the "-factor" value is too high, it will care too much about the
+splits, and probably make a bad BSP tree.  How good the BSP tree is
+can be gauged by the output line that reads:
+
+   Heights of left and right subtrees = (12,24)
+
+Lower values are better (the BSP tree is smaller), and values that
+are closer together are also better (the BSP is more balanced).
+
+
+Differences to BSP 2.3
+----------------------
+
+As mentioned in the readme file, glBSP was originally based on BSP 2.3.
+Most of the code has been rewritten, however, and some features of BSP
+were changed or abandoned.  Features that are different:
+
+  +  When the output file is not specified (i.e. no -o option), then
+     the default output file will be a GWA file with the same name.
+     Under BSP 2.3, the default output file would be "tmp.wad".
+
+  +  All code for doing visplane checks has been removed.  It was very
+     complex stuff, and for OpenGL DOOM ports this checking is not
+     needed.  Thus glBSP does not accept the following options that
+     BSP 2.3 supports: -thold, -vp, -vpmark, -vpwarn.
+
+  +  glBSP works on big-endian platforms (like MacOS X).
+
+  +  The "just for a grin" special feature where a linedef with tag
+     999 would cause an angle adjustment was removed.
+
+  +  glBSP has Hexen support.
+
+  +  glBSP compresses the blockmap, and can pack sidedefs.
+
+  +  glBSP has a much more modular architecture, and can even serve as
+     a plug-in for other programs.
+
+  +  The GUI version, glBSPX, is completely new.
+
+
+
+---------------------------------------------------------------------------
+
+
+glBSP and Map-Tricks/Errors
+===========================
+
+1. Self-referencing Lines
+
+This trick involves linedefs with the same sector reference
+on both sidedefs.  In the original DOOM renderer, segs from
+these lines are virtually ignored (though any mid-masked
+texture is still drawn).  Hence by using a sector which is
+different from the surrounding sector, people could create
+the following special physics effects:
+
+  1. invisible walkways (self-ref sector floor is higher)
+  2. deep water (self-ref sector floor is lower)
+  3. force fields (self-ref sector blocks movement)
+  4. railings you can jump over.
+ 
+glBSP detects these lines and does two things: prevents
+spurious warnings about mismatched sectors, and adjusts
+the final subsector so that the FIRST seg is not one on
+a self-reference line.  It does the latter because most
+engines use the very first seg to decide what sector to
+associate the subsector with.
+
+Engines should be aware of the trick and perform their
+own analysis to emulate it.  NOTE this trick will cause
+some subsectors to contain segs from multiple sectors.
+
+
+2. Overlapping Lines
+
+This trick is mostly used to make higher mid-masking textures.
+
+glBSP can detect perfectly overlapping linedefs (ones using
+the same start and end vertices, possibly swapped), and will
+IGNORE them (producing no segs from the second and subsequent
+lines).
+
+Engines should also detect overlapping lines and emulate
+the trick (by rendering the additional mid-masked textures).
+
+
+3. One-Sided Windows
+
+This trick uses a one-sided linedef where a two-sided linedef
+should be, so the back of the one-sided line faces into a
+normal sector.  In the original DOOM renderer, there was no
+back-facing seg in the BSP, hence you could see through the
+line when viewed from the back.  When viewed from the front,
+the one-sided linedef acted normally (blocked your view).
+
+glBSP can detect many usages of this trick (although not 100%
+since that would require much more expensive analysis).  It
+has to be explicitly enabled with the -windowfx option (or
+for libglbsp via a field in nodebuildinfo_t).
+
+When found, glBSP will add a REAL seg along the back of the
+one-sided linedef.  This is the only time that segs are
+placed on a linedef with no corresponding sidedef.
+
+Engines should detect that and emulate the trick accordingly.
+Depending on how your renderer does occlusion culling, it may
+not be necessary to do anything special.
+
+
+4. Missing Lowers/Uppers
+
+This trick is mentioned since it is very common, though it
+doesn't affect or interfere with node building in any way.
+
+When the DOOM renderer encounters a missing lower texture,
+and the floor on the back side is visible (z < camera.z)
+then the space where the lower texture should be will be
+filled by that floor texture.  The same thing happens with
+missing uppers too.
+
+This effect can be used to create a deep water effect, or
+for drawing a dark ceiling over a bright lava sector.
+
+When the back floor is out of view (z > camera.z), then
+the missing lower is not drawn at all.  Same for missing
+uppers.  This is sometimes used to create "invisible"
+doors and platforms.
+
+
+5. Map Errors
+
+PWADs often contain a few mapping errors in them, and even
+the IWADs contain some small errors, for example:
+
+  Doom1 E3M2:  Linedef #156 has a wrong sector reference.
+  Doom2 MAP02: Sector #23 is not properly closed.
+  Doom2 MAP14: Linedefs #964 and #966 are missing back sidedefs.
+  Hexen MAP02: Vertex #1370 is not joined to linedef #668.
+
+glBSP is not psychic and cannot automatically fix errors
+in maps (and besides, sometimes they are used deliberately
+for special effects, as described above).
+
+When a linedef has a wrong sector reference, the usual
+result is that the subsector (or subsectors) near that
+spot will contain segs belonging to different sectors.
+I cannot say what best way to handle it is -- engine
+developers should at least be aware of the possibility.
+
+Other map errors are more serious and cause structural
+problems, like degenerate subsectors (which contain only
+one or two segs).  There is nothing glBSP or the engine
+can do in these cases.
+
+
+---------------------------------------------------------------------------
+
+
+CHANGELOG
+=========
+
+Changes in V2.24  (26th July 2007)
+----------------------------------
+
+ - level name detection: allow some variation in the order of
+   the level lumps (thanks to Darren Salt for the patch).
+
+ - fixed potential crash passing NULL to the SetErrorMsg()
+   function (it depended on the compiler).
+
+ - avoid some potential buffer overflows in printf calls.
+
+ - abbreviations for most cmdline options, generally using single
+   letters (like -f for -fast, -n for -normal).  Negative options
+   use an 'x' prefix (like -xr for -noreject, -xu for -noprune).
+
+ - reduced default blockmap limit to 16000 (was 44000), since the
+   existing limit could never be reached (they overflow at 65536,
+   hence the absolute minimum is around 65535/3 = 21845, assuming
+   no compression).
+
+ - added TRICKS.txt document which describes various map tricks
+   and how glBSP handles them.
+ 
+ - added new option "-windowfx" to enable the test for the
+   One-Sided Window trick, which is now disabled by default.
+   The test was made more robust by checking both sides of the
+   linedef.  Most importantly, the seg added to the back side
+   is now a REAL seg (not a MINISEG like before, as that caused
+   many problems).
+ 
+ - new option in nodebuildinfo_t "skip_self_ref" which means no
+   segs are created for self-referencing linedefs.  The default
+   is FALSE (disabled).  When enabled, the engine needs to find
+   self-referencing linedefs and render their middle textures
+   with special code (e.g. treat them similar to sprites).
+ 
+ - improved directory layout, with main glbsp code in the 'src'
+   directory.  Unfortunately this made all of the IDE Project
+   files invalid, so they have been removed.  The existing
+   Makefiles have been fixed and consolidated, so each type of
+   target (lib/cmdline/gui) is handled in the same makefile.
+ 
+
+Changes in V2.20  (14th September 2005)
+---------------------------------------
+
+ - support for response files, which work the same as Doom: use a
+   filename prefixed with '@' (e.g. @list.rsp) and the contents of
+   the response file are inserted into the command line.
+
+ - create an empty BLOCKMAP lump when the blockmap overflows (force
+   the engine to generate it).
+
+ - support V5 GL-Nodes (removes all limits), which is now the default
+   format when limits overflow (e.g. too many GL segs).
+
+ - support for writing ZDBSP format for regular nodes.  This kicks
+   in whenever V5 is used: either explicitly (the -v5 option), or
+   implicitly when the limits overflow.
+
+ - store keyword/value pairs in the GL level marker lump.  This
+   includes a checksum over the plain level data (CHECKSUM keyword),
+   as well as the BUILDER and TIME keywords.
+
+ - allow level names longer than 5 characters, using the special GL
+   level marker "GL_LEVEL" and the LEVEL keyword (inside the lump).
+
+ - significantly decreased number of mini warnings, firstly by not
+   showing mismatch warnings for self-referencing linedefs, and
+   secondly by limiting the number of certain warnings to only one
+   per sector.
+
+ - duplicate vertices are no longer merged (request from Graham
+   Jackson), unless the new -mergevert option is given.
+
+ - unused sectors are no longer removed by default (to prevent
+   problems with sector numbers used in scripts, e.g. Doom Legacy).
+   The old option -keepsect option is now ignored (for backwards
+   compatibility), replaced by the new -prunesec option.
+
+ - increased default -factor to 11 (advice from Jack Vermeulen,
+   although he suggested an even higher default).
+
+ - handle some cases (like Hexen MAP02) where two vertices at the
+   same spot could suppress a miniseg where it was needed.  The code
+   for creating intersections is a lot simpler now.
+
+ - added code to detect the 'One-Sided Window' effect, where a
+   one-sided linedef can be looked through from behind (e.g. MAP07
+   in 10SECTO2.WAD).  When found, a miniseg is added along the back
+   side of the wall.  Based on an idea by Graham Jackson.
+
+ - fixed a bug with the overlapping linedef detection.
+
+ - fixed the sint8_g typedef, it was missing the 'signed' qualifier
+   (needed on some platforms where plain 'char' is unsigned).
+
+
+Changes in V2.10  (27th September 2004)
+---------------------------------------
+
+ - support V3 GL-Nodes (handle more than 65534 segs in GL_SEGS lump, and
+   more than 32767 vertices in GL_VERT lump).
+
+ - produce a much more comprehensive problem report when levels fail (or
+   have possibly failed) to build properly (by overflowing limits, etc).
+
+ - allow levels to contain more than 32767 sidedefs.
+
+ - choose first seg in a subsector better, avoid self-referenced lines.
+
+ - removed the ability to build plain nodes (without the GL nodes).
+
+ - removed -fresh option (now the default), and added a -fast option.
+
+ - removed code to detect and ignore dummy sectors (which was causing a
+   crash under jHexen).  The -keepdummy option is still accepted but
+   ignored.
+
+ - glBSP now detects overlapping linedefs (used to make higher mid-maskers)
+   and ignores them (produces no segs from the second and subsequent ones).
+   It's now up to the Engine to detect this old trick and emulate it.
+
+ - v1 vertex coords are now rounded to integers (not truncated).
+
+ - generalised the -v1 option, allowing -v2 and -v3 as well.  Using -v3
+   will force the GL_SEGS and GL_SSECT lumps to be the new V3 format
+   (mainly useful for testing an engine's support).
+
+ - when truncating the blockmap, it is now centered on the average of all
+   linedef vertices.
+
+ - fixed potential inaccuracy in the NODES and GL_NODES lumps.
+
+ - modified the "based on BSP" messages in the program output and in the
+   documentation, so that people don't get the impression that glBSP is
+   100% backwards compatible with the original BSP (it isn't).
+
+ - the Unix and MacOS X makefiles now have "make install" targets.  Also
+   converted the docs into a manual page for the Unix installation.
+
+ - moved makefiles and project files into top-level directory.  Removed
+   the support for building with Borland C++Builder.
+
+
+Changes in V2.05  (31st December 2003)
+--------------------------------------
+
+ - ported glbsp and glBSPX to MacOS X.
+
+ - fixed blockmap bug when building on big-endian CPUs.
+
+ - fixed the "-noprog" option (it must have been broken for quite a while,
+   maybe since version 1.95).
+
+ - added a new option "-quiet" for less cluttered output.
+
+ - fixed some C++ interfacing problems (thanks, indirectly, to Andy Baker).
+
+ - added some 'near miss' names for certain command-line options.
+
+ - glbsp now handles multiple input files (GWA mode).
+
+ - lumps are now aligned on 4-byte boundaries within the output WAD.
+
+ - improved the 'about' image in the GUI version.
+
+ - fixed massive slow-down in GUI version under MacOSX (maybe others).
+
+ - automatically ignores extrafloor dummy sectors.
+
+ - renamed GUI version to glBSPX (was: glbspX).
+
+ - split level.c into two files, new file is analyze.c.
+
+ - reduced the amount of global symbols, and renamed some things for
+   more consistency (e.g. UtilStrCaseCmp).
+
+ - glBSPX: gave the manual/license windows a nicer interface.
+
+
+Changes in V2.00  (25th September 2002)
+---------------------------------------
+
+ - fixed compilation problems under Digital Unix 4.0 (thanks to André
+   Majorel for the patch). 
+
+ - fixed a problem running on big-endian CPUs (thanks to Jussi
+   Pakkanen for testing on an IRIX 6.5 machine).
+ 
+ - made the endian checks run-time instead of compile-time, and added
+   sanity checks on the type sizes.
+
+ - made building GWA files *much* faster, by reusing the existing node
+   information (up to a point anyway).  It is now between 3 and 5
+   times faster than before.  It comes at a price though, the original
+   nodes may not be as good as the ones GLBSP can make.  There is a
+   new option "-fresh" to force GLBSP to build nodes from scratch.
+ 
+ - some more Hexen / ZDoom fixes, thanks to Janis Legzdinsh.
+ 
+ - now if any level fails to build properly (e.g. blockmap too big,
+   or too many segs) then a large "ATTENTION" message is shown at the
+   very end, showing which levels failed (perhaps all of them).
+ 
+ - glBSPX: new misc option "Fresh Partition Lines".
+
+ - fixed (hopefully) some rare sectors that were marked as precious
+   but were being split anyway, because the partition line passed
+   through the sector via vertices (not hitting any linedefs).  Thanks
+   to Janis Legzdinsh for spotting this bug.
+
+-  The "-forcenormal" option is now just "-normal", and has been
+   elevated to General Option status.  Backwards compatibility has
+   been kept.
+ 
+
+Changes in V1.96  (1st January 2002)
+------------------------------------
+
+ - implemented the "SaveLog" feature in glBSPX.
+
+ - improved the preference dialog in glBSPX, with a new option to
+   automatically replace missing extensions.
+   
+ - a few changes to upgrade to FLTK version 1.1.0.  This means an
+   improved file browser and the new radio/check buttons.
+
+ - updated various bits of documentation.
+
+ - updated copyright in headers (etc) for 2002.
+
+ - fixed a bug in glBSPX when changing extensions on files that
+   contain ".." in their path.
+
+ - fixed a glBSPX bug with the case-insensitive string comparison
+   functions.
+
+ - made various glBSPX dialogs a bit more user friendly.
+ 
+
+Changes in V1.95  (24th September 2001)
+---------------------------------------
+
+ - new GUI version using the FLTK toolkit.
+ 
+ - many fixes for Hexen wads, thanks to Janis Legzdinsh, including
+   auto-detection of a hexen wad (don't need -hexen option).
+
+ - level names (MAP01, E2M3, etc) are detected automatically now,
+   allowing arbitrary names (e.g. RUINS, QD05, etc).
+ 
+ - improved wad.c to return error values instead of doing
+   FatalError(), setting up the comms->message appropriately.
+ 
+ - removed 'display_setText' function from nodebuildfuncs API.
+
+ - fixed the memory semantics for the glbsp API, with new functions
+   GlbspStrDup() and GlbspFree().
+ 
+ - documented the nodebuildfuncs in glbsp.h.
+
+ - improved the semantics of the GlbspCheckInfo() function, adding a
+   new error code GLBSP_E_BadInfoFixed to show that (a) there was a
+   problem but (b) the parameter causing it has been reset.
+
+
+Changes in V1.94  (6th June 2001)
+---------------------------------
+
+ - shows percentage while loading and saving.
+ - shows warnings when results overflow normal DOOM limits.
+ - shows warnings for extremely long linedefs and nodes.
+ - fixed serious bug with blockmap truncation code.
+ - new -maxblock option gives control over blockmap truncation.
+ - fixed some build problems with very narrow subsectors.
+ - fixed warnings about 2s linedefs with no left side.
+ - new "slightly better than nothing" reject support.
+ - code is much more modular: UI has been separated out.
+ - improved debugging code.
+
+
+Changes in V1.91  (10th September 2000)
+---------------------------------------
+
+ - optimised, DOOM2.WAD: 50% faster, ETERNAL.WAD: 3 times faster.
+ - builds "V2 GL Nodes" which are more accurate.
+ - no longer balks at bad sidedefs (with sector of #-1).
+ - removes unused sectors & sidedefs.
+ - packs the blockmap, and can pack identical sidedefs.
+ - shows the percentage complete while building.
+ - floatified: nodes are computed using high precision math.
+ - source code is now under the GNU General Public License.
+
+
+Changes in V1.8  (20th June 2000)
+---------------------------------
+
+ - fixed major bug causing thin (but ugly looking) gaps to appear
+   between some subsectors.
+
+ - fixed some bugs with partner segs not being split properly.
+
+ - fixed crashing bug when splitting very short segs.
+

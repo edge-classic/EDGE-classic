@@ -1,0 +1,24 @@
+
+CHANGELOG FOR 1.22 (since 1.21)
+===============================
+
+(Date: APRIL 3rd 2000)
+
+Bugs fixed:
+
+ - the sprites disappearing on MAP26/MAP28/etc bug fixed.
+ - problem with mid-masked textures in QDOOM MAP01 fixed.
+ - skill 1/5 no longers gives you twice as much initial ammo.
+ - disappearing missiles when shooting right into a wall fixed.
+ - shooting missiles right into a wall: you now thrust in right dir.
+ - sprites in QDOOM should be visible in GL renderer now.
+ - most transparent doors should work properly now in TrueBSP & GL.
+ 
+Changes:
+
+ none.
+
+New features:
+
+ none.
+

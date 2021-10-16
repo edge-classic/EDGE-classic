@@ -1,0 +1,44 @@
+// 
+//    EDGE FONTS.DDF -redefine or add new fonts.
+//    For documentation, see http://edge.sourceforge.net/
+//    DDF Version 6.1
+//
+
+<FONTS>
+
+#VERSION 1.35
+
+[DOOM]
+TYPE=PATCH;
+PATCHES=STCFN033("!":"_"),STCFN121("|"),
+          STCFN132("ä"),STCFN134("å"),STCFN148("ö");  // FIXME: charset
+MISSING_PATCH="STCFN000";
+
+[HEXEN]
+TYPE=PATCH;
+PATCHES=FONTA01("!":"Z"),FONTA59("_");
+
+[HEXEN_BIG]
+TYPE=PATCH;
+PATCHES=FONTB01("!":"Z");
+
+[BIG_DIGIT]
+TYPE=PATCH;
+PATCHES=STTNUM0("0":"9"),STTMINUS("-"),STTPRCNT("%");
+
+[STAT_DIGIT]
+TYPE=PATCH;
+PATCHES=WINUM0("0":"9"),WIMINUS("-"),WIPCNT("%"),WICOLON(":");
+
+[GREY_DIGIT]
+TYPE=PATCH;
+PATCHES=STGNUM0("0":"9");
+
+[YELLOW_DIGIT]
+TYPE=PATCH;
+PATCHES=STYSNUM0("0":"9");
+
+[AUTOMAP_DIGIT]
+TYPE=PATCH;
+PATCHES=AMMNUM0("0":"9");
+

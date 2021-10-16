@@ -1,0 +1,106 @@
+
+CHANGELOG for EDGE 1.35 (since 1.34)
+====================================
+
+(Date: APRIL 2011)
+
+
+Bugs fixed
+----------
+
++ fixed serious bug with COAL scripts, where replacing the draw_all()
+  and begin_level() functions did not work -- EDGE would always use
+  the original one.
+
+- fixed music on MAP32 of DOOM II
+- fixed the marks on the automap
+- fixed texture offsets on mirrored walls
+- fixed behavior of doors with self-referencing linedefs
+
+- E2M8, E3M8 (etc) are playable without any bosses
+- got GL_COLOUR feature of COLORMAPS.DDF working
+
+
+General Improvements
+--------------------
+
++ wide screen support, via new "Monitor Size" setting in the Video
+  Options menu.  Custom values can be set in the "r_aspect" cvar.
+
++ weapon and automap key bindings can be changed.
+
+- recognise HacX 1.2 as an IWAD.
+
+- renamed "Host Net Game" menu to "Advanced Start" and removed
+  the references to networking stuff and the player list screen,
+  so that people don't get the impression that Multiplayer is
+  supported (it is not).
+
+- use Makefiles for building the code, ditching SCons.
+
+- control over automap grid spacing via 'am_gridsize' cvar.
+
+- better pre-caching of sprites, textures (etc), controllable
+  via new cvars which begin with r_precache.
+
+- detail slopes: no limit to ceiling height difference, and the
+  limit on floor height difference is now 24 units.
+
+- when thing numbers in the level are unknown, limit the warnings
+  to two specific things of that type and a "more found" message.
+
+- less warning messages when using old mods (like QDoom).
+
+- reviewed #CLEARALL behavior, made it ignored (with a warning)
+  for several kinds of DDF where it was not safe or useful.
+
+- new console vars:
+      am_gridsize  r_fov  r_zoomfov  r_aspect
+
+
+New Features
+------------
+
++ inheritance for DDF.  This allows a new DDF entry to be based
+  off an existing one, instead of all fields getting default values.
+  It can be used in ATTACKS.DDF, THINGS.DDF, WEAPONS.DDF, GAMES.DDF,
+  LEVELS.DDF, LINES.DDF and SECTORS.DDF.
+  
+  The syntax is:
+
+    [NEW_IMP:3333]
+    TEMPLATE = IMP;
+    SPEED = 20;
+    ... etc ...
+
+  Note that when overriding state frames, it occasionally leads to
+  unexpected behavior (where the old states are being used instead
+  of your new ones).  If this happens, it can be fixed by providing
+  the full set of different states.
+
++ can modify existing DDF entries.  Place ++ before the entry name
+  inside the [] brackets, as shown in this example:
+
+    [++IMP]
+    SPAWNHEALTH = 1;
+
++ support for new textures between TX_START/TX_END markers, and
+  high-resolution replacements between HI_START/HI_END markers.
+  They can be either DOOM patch format or PNG format.
+
+- RTS: added new WAIT_UNTIL_DEAD command, which takes a list of
+  monster types to wait for.  Unlike ONDEATH, this honors the
+  trigger area, and it also waits forever if there are no such
+  monsters alive (inside the trigger area).
+
+- MD2 models will be vertically tilted (using the mlook angle)
+  for all missiles and anything using the new "TILT" special.
+
+- DDF: new weapon command UNZOOM which forces the screen to be
+  unzoomed if zoom is active.
+
+- DDF: new FAILED_SFX command for LINES.DDF, which plays a sound
+  when the player tries to use a locked door without the key.
+
+- support for the ZDoom TEXTURE1/2 scaling extension.
+

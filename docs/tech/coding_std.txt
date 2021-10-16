@@ -1,0 +1,252 @@
+EDGE Coding Conventions, v1.11
+
+By the EDGE Team, 1999/09/18.
+
+A consistent coding style is important for big projects like EDGE, since
+it makes the code more readable and nice-looking.
+
+Therefore we have decided to follow a few commenting conventions. They are
+selected to follow the style we mostly use in the Team, which is a mixture
+of the style from the original DOOM sources and our own coding styles.
+
+At the time of the writing of this document, all of our sources don't match
+all these conventions. However, whenever we find the style of the existing
+code inconsistent, we try to fix it.
+
+We are happy if all contributions to the EDGE project are written with
+the new conventions. However we don't think it's fair to make these
+conventions strict rules, since the current codebase doesn't follow them.
+Following them does not require much work though, so we don't see any
+reason not to.
+
+To make the code examples in this docunebt stand out a bit more, they are
+indented by two extra spaces. This does not mean that the code should have
+that indentation in the EDGE source files.
+
+So, here they are:
+
+Naming conventions
+--------------------
+All identifier names and comments should be written in British English. This
+is not because we dislike American English (that's also a nice dialect), but
+because it's confusing to have a mixture of the two, and it was easier to
+convert the code to British than to American English.
+
+All variable names should be written in small letters, words should optionally
+(but preferably) be separated by an underscore.
+Types should be named like variables, but with suffixes as follows:
+Structs should end with _s, typedefs should end with _t. Enum typedefs should
+end with _e. For example:
+
+    typedef long fixed_t;
+
+    typedef struct foo_s
+    {
+        ...
+    } 
+    foo_t;
+
+    typedef enum
+    {
+        ...
+    } 
+    bar_e;
+
+Names of static functions should generally be written without underscores,
+words should instead start with capital letters. Like
+static void FooBar(void)
+Global functions should in addition have a prefix, showing which module they
+come from. Each module or group of modules has its own prefix. For example,
+functions in the r_* (rendering) modules should start with R_, and functions
+in the DDF modules should start with the module name (e.g. DDF_Main for all
+functions in ddf_main.c).
+Functions that unique for a certain colour depth, like the V_CopyRect
+routines, should be suffixed by the colour depth, in bits. E.g., the two
+versions of V_CopyRect are named V_CopyRect8 and CopyRect16.
+When there are sets of functions that do the same task, and in some way
+the one that best does the task in the current context is chosen, then the
+function should be suffixed by an underscore followed by a brief
+desctiption. For example the different R_DrawColumn8 routines are named
+R_DrawColumn8_CVersion, R_DrawColumn8_BLF, R_DrawColumn8_Pentium, etc.
+
+Macros should be written in capitals. Exception: If they work as synonyms or
+almost synonyms for identifiers, they may be named in the same way as those
+identifiers.
+
+Enum values should be named like functions, except that the prefix should be
+unique for the enum type (the module prefix should not be used).
+
+Indentation and spaces
+------------------------
+The file indent.pro in the EDGE Source Distribution defines most of our
+spacing conventions. It's a setting file for GNU Indent 1.9.1. A brief
+description of the most important ones:
+-i4 -ts0
+Use an indentation of 4 spaces. Don't use tabs in the source files.
+-bap
+Always have at least one blank line between functions.
+-nbc -nip -npsl
+Declarations of functions, function parameters, and variables should look
+like in this example:
+
+    int *X_Foo(char *a, int b, bar_t * c, bar_t d, bar_t ** e)
+    {
+        int f, g;
+        char *h, *i, j;
+        bar_t *k, l, **m;
+    }
+
+The extra space in 'bar_t * c' is there because of a
+limitation in indent: All user defined types should have a space after the *
+in the parameter declarations. This is not the case for builtin types though.
+
+-bl -bli0 -npcs
+Spacing in blocks and function calls should look like
+
+    if (foo)
+    {
+        X_Bar();
+    }
+
+-cli2
+Switch statements should look like
+
+  switch (foo)
+  {
+      case bar1:
+        statement_1;
+        break;
+
+      default:
+      {
+        statement_2;
+        statement_3;
+      }
+  }
+
+-nce
+No braces on the same line as 'else'.
+-ci4 -nlp
+Continued lines are indented by 4 spaces
+-l78
+Lines shouldn't be longer than 78 chars.
+
+Because of a bug in Indent, the ... operator in array initialisations and
+switch statements must be surrounded by empty comments (i.e. /**/).
+
+Comments
+----------
+C++ style line comments, '//', should be used for all comments in the code.
+If a block of code is commented out, the classical /* */ commenting can
+be used instead. If larger blocks of code, like entire big functions or
+groups of functions, are commented out, #if 0 / #endif could be used instead.
+
+Comments should be placed on separate lines, right before and with the same
+indentation as the line they describe. An exception is structure and array
+initialisation: Comments that just tell the member names of the struct or
+the indexes of the array can be placed at the end of the line with the
+initialisations. However, any comments that are more descriptive should be
+on their own lines.
+For example, if a structure looks like
+
+    typedef struct foo_s
+    {
+        int x;
+        int y;
+        bar_t *bar;
+        struct foo_s *next, *prev;
+    } 
+    foo_t;
+
+then an initialisation may look like
+
+    foo_t foo =
+    {
+        1, 3, // x,y
+        &bar, // bar
+       // it will be inserted into the list later
+       NULL, NULL // next, prev
+    }
+
+and an array initialisation may look like
+
+    int i[20] =
+    {
+        3234, 54675, 456654, 4564545, 46556, // 0-4
+        54645, 35643, 35434, 534, 35, // 5-9
+        34534, 45343, 5435, 85, 3, // 10-14
+        645, 3453, 0, 234, 2 // 15-19
+    };
+
+Most big changes in the code should be marked with the contributor's
+initials, the date, and a brief description of what's added. For example,
+
+    // -ES- 1999/09/04 Added signature convention
+
+The date should be written like YYYY/MM/DD or YYYY-MM-DD.
+
+Before a global function, there should be some lines with comments: First
+a // on its own line, then a // followed by a space and the function name,
+then another // on a separate line, and finally optionally a description
+of the function followed by another separate // line. After that the function
+is declared. Like:
+
+    //
+    // X_FooBar
+    //
+    // Here's the description of what the function does.
+    //
+    void X_FooBar(void)
+    {
+
+Static functions or callbacks may use a different style, either with no
+comment at all, or with only the comment surrounded by two blank comment
+lines. Like:
+
+    //
+    // Here's the description of the function.
+    //
+    void FooBar(void)
+    {
+
+Comments with FIXME indicate that there is something there that should be
+fixed some time.
+
+Header files
+--------------
+extern declarations should only be done in the header files.
+
+The first thing of every C file after any leading comments must be to
+include i_defs.h. After that they must explicitely include their own
+header file, if they have one.
+After that, any other EDGE headers can be included (preferably in
+fairly alphabetical order), followed by any library header includes.
+
+E.g., the first lines of foo_bar.c could look like
+
+    #include "i_defs.h"
+    #include "foo_bar.h"
+
+    #include "ddf_main.h"
+    #include "r_main.h"
+
+    #include <stdio.h>
+
+Inlines
+---------
+All inline functions belong to a file (e.g. m_math.c). This should
+always contain a comment a comment saying that the routine has been
+moved to m_inline.h. E.g.:
+
+//
+// M_Sin
+//
+// This has been moved to m_inline.h.
+
+Namespaces
+----------
+<...>
+
+Classes
+-------
+<...>

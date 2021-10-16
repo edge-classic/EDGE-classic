@@ -1,0 +1,4 @@
+10/23/00
+
+Noticed that the SDL target didn't link properly with the lines that were in
+the Makefile. Fixed.

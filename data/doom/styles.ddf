@@ -1,0 +1,131 @@
+// 
+//    EDGE STYLES.DDF -redefine or add new styles.
+//    For documentation, see http://edge.sourceforge.net/
+//    DDF Version 6.1
+//
+//    NOTE: STYLES.DDF IS EXPERIMENTAL !!
+//
+//    It may change completely in the next version,
+//    or could even be scrapped!  USE AT OWN RISK.
+//
+
+<STYLES>
+
+#VERSION 1.35
+
+[DEFAULT]
+BACKGROUND.COLOUR=#000000;
+BACKGROUND.TRANSLUCENCY=64%;
+TEXT.FONT="DOOM";
+ALT.FONT="DOOM";
+TITLE.FONT="DOOM";
+HELP.FONT="DOOM";
+
+[MENU]
+BACKGROUND.COLOUR=#000000;
+BACKGROUND.TRANSLUCENCY=64%;
+TEXT.FONT="DOOM";
+ALT.FONT="DOOM";
+ALT.COLOURMAP="TEXT_YELLOW";
+TITLE.FONT="DOOM";
+TITLE.COLOURMAP="TEXT_WHITE";
+HELP.FONT="DOOM";
+HELP.COLOURMAP="TEXT_GREEN";
+SOUND.BEGIN  = "SWTCHN";
+SOUND.END    = "SWTCHX";
+SOUND.SELECT = "PISTOL";
+SOUND.BACK   = "SWTCHN";
+SOUND.ERROR  = "OOF";
+SOUND.MOVE   = "PSTOP";
+SOUND.SLIDER = "STNMOV";
+
+[OPTIONS]
+BACKGROUND.COLOUR=#000000;
+BACKGROUND.TRANSLUCENCY=64%;
+TEXT.FONT="DOOM";
+ALT.FONT="DOOM";
+ALT.COLOURMAP="TEXT_WHITE";
+TITLE.FONT="DOOM";
+TITLE.COLOURMAP="TEXT_YELLOW";
+HELP.FONT="DOOM";
+HELP.COLOURMAP="TEXT_GREEN";
+SOUND.BEGIN  = "SWTCHN";
+SOUND.END    = "SWTCHX";
+SOUND.SELECT = "PISTOL";
+SOUND.BACK   = "SWTCHN";
+SOUND.ERROR  = "OOF";
+SOUND.MOVE   = "PSTOP";
+SOUND.SLIDER = "STNMOV";
+
+[MESSAGES]
+TEXT.FONT="DOOM";
+
+[CHAT]
+TEXT.FONT="DOOM";
+TEXT.COLOURMAP="TEXT_GREEN";
+
+[AUTOMAP]
+BACKGROUND.COLOUR=#000000;
+TEXT.FONT="DOOM";
+ALT.FONT="AUTOMAP_DIGIT";
+
+[STATS]
+TEXT.FONT="STAT_DIGIT";
+// don't apply any colourmap
+ALT.FONT="STAT_DIGIT";  // par times
+// Fixme: sounds !!
+
+[NET_STATS]
+TITLE.FONT="DOOM";
+// leave title as red
+TEXT.FONT="DOOM";
+TEXT.COLOURMAP="TEXT_WHITE";
+ALT.FONT="DOOM";   // alt used for highlighted player
+ALT.COLOURMAP="TEXT_YELLOW";
+// Fixme: sounds !!
+
+[RTS_TIP]
+TEXT.FONT="DOOM";
+SOUND.BEGIN="TINK";
+
+[CONSOLE]
+BACKGROUND.COLOUR=#000010;
+BACKGROUND.TRANSLUCENCY=75%;
+// SPECIAL=TILED;
+TEXT.FONT="DOOM";
+TEXT.COLOURMAP="TEXT_WHITE";
+ALT.FONT="DOOM";
+ALT.COLOURMAP="TEXT_YELLOW";
+
+[CAST_SCREEN]
+BACKGROUND.IMAGE="BOSSBACK";
+TEXT.FONT="DOOM";
+TEXT.COLOURMAP="TEXT_YELLOW";
+
+//------------------------------------------------------------
+// Menu styles:
+//------------------------------------------------------------
+//
+// [MAIN_MENU]
+//   [CHOOSE_EPISODE]
+//   [CHOOSE_SKILL]
+// [LOAD_MENU]
+// [SAVE_MENU]
+// [DIALOG]
+// [RTS_MENU]
+
+//------------------------------------------------------------
+// Option styles:
+//------------------------------------------------------------
+//
+// [KEYBOARD_CONTROLS]
+// [MOUSE_CONTROLS]
+// [GAMEPLAY_OPTIONS]
+// [VIDEO_OPTIONS]
+// [SET_RESOLUTION]
+// [SOUND_VOLUME]
+//
+// [HOST_NETGAME]
+// [JOIN_NETGAME]
+// [NET_PLAYER_LIST]
+

@@ -1,0 +1,780 @@
+//------------------------------------------------------------------------
+//  Fixed-point type
+//------------------------------------------------------------------------
+//
+//  Copyright (c) 2004-2005  The EDGE Team.
+//
+//  This program is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU General Public License
+//  as published by the Free Software Foundation; either version 2
+//  of the License, or (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//------------------------------------------------------------------------
+
+#include "epi.h"
+
+#include "fxp_fixed.h"
+#include "math_angle.h"
+#include "str_format.h"
+
+#undef TABLE_BASED_SINE
+#undef TABLE_BASED_TAN
+
+namespace epi
+{
+
+std::string fix_c::ToStr(int precision) const
+{
+	char buffer[128];
+	char *pos = buffer;
+
+	fix_c local(*this);
+
+	if (local < 0)
+	{
+		*pos++ = '-';
+		local = -local;
+	}
+
+	int I = local.ToInt();  local -= I;
+
+	if (I >= 10000) *pos++ = '0' + ((I / 10000) % 10);
+	if (I >= 1000 ) *pos++ = '0' + ((I / 1000 ) % 10);
+	if (I >= 100  ) *pos++ = '0' + ((I / 100  ) % 10);
+	if (I >= 10   ) *pos++ = '0' + ((I / 10   ) % 10);
+
+	*pos++ = '0' + (I % 10);
+
+	if (precision > 0)
+		*pos++ = '.';
+
+	for (; precision > 0; precision--)
+	{
+		local *= 10;  I = local.ToInt();  local -= I;
+		
+		*pos++ = '0' + (I % 10);
+	}
+
+	*pos = 0;
+
+	return std::string(buffer);
+}
+
+fix_c fix_c::Parse(const char *str)
+{
+	while (isspace(*str))
+		str++;
+
+	bool negate = false;
+
+	if (*str == '+')
+		str++;
+	else if (*str == '-')
+		negate = true, str++;
+
+	int decimal = 0;
+
+	for (; isdigit(*str); str++)
+	{
+		decimal = (decimal * 10) + int(*str - '0');
+
+		if (decimal >= 32768)
+		{
+			decimal = 32767;
+			break;
+		}
+	}
+
+	if (*str == '\\')  // fraction syntax e.g. 3\5
+	{
+		str++;
+
+		int bottom = 0;
+
+		for (; isdigit(*str); str++)
+		{
+			bottom = (bottom * 10) + int(*str - '0');
+
+			if (bottom >= 32768)
+			{
+				bottom = 32767;
+				break;
+			}
+		}
+
+		if (bottom == 0)
+			return negate ? fix_c::MinVal() : fix_c::MaxVal();
+
+		return fix_c(short(decimal), short(bottom));
+	}
+
+	fix_c result(decimal);
+
+	int small = 0;
+	int divide = 1;
+
+	if (*str == '.')
+	{
+		str++;
+
+		for (; isdigit(*str) && divide < 1000000; str++, divide *= 10)
+			small = (small * 10) + (*str - '0');
+
+		for (; divide < 1000000; divide *= 10)
+			small *= 10;
+
+		// we rely on the fact 10^6 = 2^6 * 5^6, so factor out the 2^6
+		// [plus a little bit of rounding up]
+		result.raw += (small * 1024 + 1000) / 15625;
+
+		// skip remaining digits
+		while (isdigit(*str))
+			str++;
+	}
+
+	if (*str == '%')  // percentages
+	{
+		result /= 100;
+	}
+	else if (*str == 'e')  // exponent syntax e.g. 1.72e+3
+	{
+		str++;
+
+		bool exp_neg = false;
+
+		if (*str == '+')
+			str++;
+		else if (*str == '-')
+			exp_neg = true, str++;
+
+		if (isdigit(*str))
+		{
+			int exponent = isdigit(str[1]) ? 10 : int(*str - '0');
+
+			for (; exponent > 0; exponent--)
+			{
+				if (exp_neg)
+					result /= 10;
+				else
+				{
+					if (result < fix_c::MaxVal() / 10)
+						result *= 10;
+					else
+						result = fix_c::MaxVal();
+				}
+			}
+		}
+	}
+
+	return negate ? -result : result;
+}
+
+fix_c fix_c::Parse(const std::string& str)
+{
+	return Parse(str.c_str());
+}
+
+std::string fix_c::ToHexStr() const
+{
+	if (raw < 0)
+		return STR_Format("-%X", -raw);
+	else
+		return STR_Format("%X", raw);
+}
+
+fix_c fix_c::FromHexStr(const char *str)
+{
+        return fix_c(strtol(str, NULL, 16), DUMMY_E);
+}
+
+fix_c fix_c::FromHexStr(const std::string& str)
+{
+	return FromHexStr(str.c_str());
+}
+
+//------------------------------------------------------------------------
+
+fix_c fxmuldiv(const fix_c& A, const fix_c& B, const fix_c& C)
+{
+    return fix_c( (i64_t)A.raw * (i64_t)B.raw / (i64_t)C.raw, fix_c::DUMMY_E );
+}
+
+const u32_t fix_c::sqrt_table[257] =
+{
+	0x00000000, 0x08000000, 0x0b504f33, 0x0ddb3d74,
+	0x10000000, 0x11e3779b, 0x13988e14, 0x152a7fa9,
+	0x16a09e66, 0x18000000, 0x194c583a, 0x1a887293,
+	0x1bb67ae8, 0x1cd82b44, 0x1deeea11, 0x1efbdeb1,
+	0x20000000, 0x20fc1ecd, 0x21f0ed99, 0x22df0668,
+	0x23c6ef37, 0x24a91d72, 0x2585f8b2, 0x265ddcea,
+	0x27311c28, 0x28000000, 0x28cacabe, 0x2991b85c,
+	0x2a54ff53, 0x2b14d149, 0x2bd15ba4, 0x2c8ac80a,
+	0x2d413ccc, 0x2df4dd42, 0x2ea5ca1b, 0x2f5421a3,
+	0x30000000, 0x30a97f66, 0x3150b849, 0x31f5c182,
+	0x3298b075, 0x33399933, 0x33d88e94, 0x3475a254,
+	0x3510e527, 0x35aa66d2, 0x36423638, 0x36d86170,
+	0x376cf5d0, 0x38000000, 0x38918c00, 0x3921a53a,
+	0x39b05688, 0x3a3daa40, 0x3ac9aa3c, 0x3b545fdf,
+	0x3bddd422, 0x3c660f98, 0x3ced1a73, 0x3d72fc8a,
+	0x3df7bd62, 0x3e7b642e, 0x3efdf7d7, 0x3f7f7efd,
+	0x40000000, 0x407f80fd, 0x40fe07d8, 0x417b9a3b,
+	0x41f83d9a, 0x4273f736, 0x42eecc1e, 0x4368c136,
+	0x43e1db33, 0x445a1ea2, 0x44d18fe8, 0x45483344,
+	0x45be0cd1, 0x46332087, 0x46a7723d, 0x471b05ac,
+	0x478dde6e, 0x48000000, 0x48716dc3, 0x48e22b00,
+	0x49523ae4, 0x49c1a086, 0x4a305ee4, 0x4a9e78e8,
+	0x4b0bf165, 0x4b78cb19, 0x4be508b0, 0x4c50acc2,
+	0x4cbbb9d5, 0x4d26325e, 0x4d9018c1, 0x4df96f50,
+	0x4e623850, 0x4eca75f5, 0x4f322a66, 0x4f9957bb,
+	0x50000000, 0x50662530, 0x50cbc93e, 0x5130ee0f,
+	0x5195957c, 0x51f9c152, 0x525d7355, 0x52c0ad3d,
+	0x532370b9, 0x5385bf6b, 0x53e79aef, 0x544904d5,
+	0x54a9fea7, 0x550a89e3, 0x556aa800, 0x55ca5a6e,
+	0x5629a292, 0x568881cd, 0x56e6f975, 0x57450adb,
+	0x57a2b748, 0x58000000, 0x585ce63c, 0x58b96b34,
+	0x59159015, 0x59715609, 0x59ccbe34, 0x5a27c9b1,
+	0x5a827999, 0x5adcceff, 0x5b36caee, 0x5b906e6f,
+	0x5be9ba85, 0x5c42b02d, 0x5c9b5060, 0x5cf39c13,
+	0x5d4b9436, 0x5da339b4, 0x5dfa8d75, 0x5e51905b,
+	0x5ea84346, 0x5efea710, 0x5f54bc91, 0x5faa849b,
+	0x60000000, 0x60552f89, 0x60aa1401, 0x60feae2d,
+	0x6152fecd, 0x61a706a1, 0x61fac664, 0x624e3ecd,
+	0x62a17093, 0x62f45c68, 0x634702f9, 0x639964f5,
+	0x63eb8305, 0x643d5dcf, 0x648ef5f8, 0x64e04c22,
+	0x653160eb, 0x658234f1, 0x65d2c8cd, 0x66231d17,
+	0x66733266, 0x66c3094c, 0x6712a25a, 0x6761fe1f,
+	0x67b11d28, 0x68000000, 0x684ea72e, 0x689d133a,
+	0x68eb44a8, 0x69393bfb, 0x6986f9b3, 0x69d47e51,
+	0x6a21ca4f, 0x6a6ede2b, 0x6abbba5e, 0x6b085f5f,
+	0x6b54cda5, 0x6ba105a4, 0x6bed07d0, 0x6c38d49a,
+	0x6c846c71, 0x6ccfcfc5, 0x6d1aff01, 0x6d65fa91,
+	0x6db0c2e0, 0x6dfb5856, 0x6e45bb5a, 0x6e8fec51,
+	0x6ed9eba1, 0x6f23b9ac, 0x6f6d56d5, 0x6fb6c37b,
+	0x70000000, 0x70490cbf, 0x7091ea17, 0x70da9864,
+	0x71231800, 0x716b6944, 0x71b38c8a, 0x71fb8228,
+	0x72434a74, 0x728ae5c5, 0x72d2546d, 0x731996c0,
+	0x7360ad11, 0x73a797b0, 0x73ee56ee, 0x7434eb1a,
+	0x747b5481, 0x74c19373, 0x7507a83a, 0x754d9323,
+	0x75935478, 0x75d8ec83, 0x761e5b8d, 0x7663a1de,
+	0x76a8bfbe, 0x76edb573, 0x77328343, 0x77772972,
+	0x77bba845, 0x78000000, 0x784430e4, 0x78883b34,
+	0x78cc1f31, 0x790fdd1b, 0x79537533, 0x7996e7b7,
+	0x79da34e6, 0x7a1d5cfd, 0x7a60603a, 0x7aa33ed9,
+	0x7ae5f915, 0x7b288f2a, 0x7b6b0153, 0x7bad4fc8,
+	0x7bef7ac5, 0x7c318280, 0x7c736733, 0x7cb52915,
+	0x7cf6c85d, 0x7d384541, 0x7d799ff7, 0x7dbad8b4,
+	0x7dfbefae, 0x7e3ce518, 0x7e7db926, 0x7ebe6c0b,
+	0x7efefdfa, 0x7f3f6f26, 0x7f7fbfbf, 0x7fbfeff7,
+	0x7fffffff
+};
+
+fix_c fxsqrt(const fix_c& X)
+{
+	if (X < 0)
+		I_Error("epi::fxsqrt : negative number!\n");
+
+	if (X == 0)
+		return X;
+
+	u32_t shift = 15;
+	u32_t B = X.raw;
+
+	// convert integer value to be in the range 0x0000 - 0xFFFF.
+	// The top byte is index into sqrt_tab[], the bottom byte is
+	// used for linearly interpolating.
+
+	if (B > 0x3FFFFF)  B >>= 8, shift -= 4;
+	while (B > 0xFFFF) B >>= 2, shift -= 1;
+
+	if (B < 0x0100)    B <<= 8, shift += 4;
+	while (B < 0x4000) B <<= 2, shift += 1;
+	
+	u32_t A = (B >> 8);
+	B &= 0xFF;
+
+	// assert(0 <= shift <= 31);
+	// assert(0 <= A <= 191);
+	// assert(0 <= B <= 255);
+
+	u32_t v1 = fix_c::sqrt_table[A];
+	u32_t v2 = fix_c::sqrt_table[A+1];
+
+	// linearly interpolate.  The multiplication cannot overflow
+	// since A cannot be less than 64.
+	v1 += ((v2 - v1) * B) >> 8;
+
+	return fix_c( (s32_t)(v1 >> shift), fix_c::DUMMY_E );
+}
+
+fix_c fxdist2(const fix_c& X, const fix_c& Y)
+{
+    fix_c AX(fxabs(X));
+    fix_c AY(fxabs(Y));
+
+	if (AX == 0 && AY == 0)
+		return 0;
+
+    if (AX < AY)
+    {
+        return AY / fxcos(fxatan(AX / AY));
+    }
+    else
+        return AX / fxcos(fxatan(AY / AX));
+}
+
+//------------------------------------------------------------------------
+//
+
+#ifndef TABLE_BASED_SINE
+fix_c fxsin(const angle_c& ang)
+{
+    /* -AJA- 
+     * original formula (x in radians) : x - x^3/6 + x^5/120 - x^7/5040
+     * I've set it up to use x in range 0.000 to 3.999 (fixed point).
+	 * The accuracy is pretty good.
+     */
+
+    if (ang > angle_c::Ang180())
+        return -fxsin(-ang);
+
+    if (ang > angle_c::Ang90())
+        return fxsin(angle_c::Ang180() - ang);
+
+    fix_c x(ang.bam / 10431, fix_c::DUMMY_E);
+
+    fix_c x2(x  * x);
+    fix_c x3(x2 * x);
+    fix_c x5(x3 * x2);
+    fix_c x7(x5 * x2);
+
+    return x - x3 / 6 + x5 / 120 - x7 / 5040;
+}
+
+#else // TABLE_BASED_SINE
+
+const u32_t fix_c::sine_table[257] =
+{
+	0x000000, 0x01921f, 0x03243a, 0x04b64d,
+	0x064855, 0x07da4d, 0x096c32, 0x0afe00,
+	0x0c8fb2, 0x0e2146, 0x0fb2b7, 0x114401,
+	0x12d520, 0x146611, 0x15f6d0, 0x178758,
+	0x1917a6, 0x1aa7b7, 0x1c3785, 0x1dc70e,
+	0x1f564e, 0x20e540, 0x2273e1, 0x24022d,
+	0x259020, 0x271db7, 0x28aaed, 0x2a37bf,
+	0x2bc428, 0x2d5026, 0x2edbb3, 0x3066cd,
+	0x31f170, 0x337b97, 0x350540, 0x368e65,
+	0x381704, 0x399f19, 0x3b269f, 0x3cad94,
+	0x3e33f2, 0x3fb9b8, 0x413ee0, 0x42c367,
+	0x444749, 0x45ca83, 0x474d10, 0x48ceee,
+	0x4a5018, 0x4bd08b, 0x4d5043, 0x4ecf3b,
+	0x504d72, 0x51cae2, 0x534789, 0x54c362,
+	0x563e69, 0x57b89c, 0x5931f7, 0x5aaa75,
+	0x5c2214, 0x5d98d0, 0x5f0ea4, 0x60838e,
+	0x61f78a, 0x636a94, 0x64dca9, 0x664dc5,
+	0x67bde5, 0x692d04, 0x6a9b20, 0x6c0835,
+	0x6d7440, 0x6edf3c, 0x704927, 0x71b1fd,
+	0x7319ba, 0x74805b, 0x75e5dd, 0x774a3c,
+	0x78ad74, 0x7a0f83, 0x7b7065, 0x7cd016,
+	0x7e2e93, 0x7f8bd9, 0x80e7e4, 0x8242b1,
+	0x839c3c, 0x84f483, 0x864b82, 0x87a135,
+	0x88f59a, 0x8a48ad, 0x8b9a6b, 0x8cead0,
+	0x8e39d9, 0x8f8784, 0x90d3cc, 0x921eaf,
+	0x93682a, 0x94b039, 0x95f6d9, 0x973c07,
+	0x987fbf, 0x99c200, 0x9b02c5, 0x9c420c,
+	0x9d7fd1, 0x9ebc11, 0x9ff6ca, 0xa12ff8,
+	0xa26799, 0xa39da8, 0xa4d224, 0xa6050a,
+	0xa73655, 0xa86604, 0xa99414, 0xaac081,
+	0xabeb49, 0xad1469, 0xae3bdd, 0xaf61a4,
+	0xb085ba, 0xb1a81d, 0xb2c8c9, 0xb3e7bc,
+	0xb504f3, 0xb6206b, 0xb73a22, 0xb85215,
+	0xb96841, 0xba7ca4, 0xbb8f3a, 0xbca002,
+	0xbdaef9, 0xbebc1b, 0xbfc767, 0xc0d0d9,
+	0xc1d870, 0xc2de28, 0xc3e200, 0xc4e3f4,
+	0xc5e403, 0xc6e229, 0xc7de65, 0xc8d8b3,
+	0xc9d112, 0xcac77f, 0xcbbbf7, 0xccae79,
+	0xcd9f02, 0xce8d8f, 0xcf7a1f, 0xd064af,
+	0xd14d3d, 0xd233c6, 0xd31848, 0xd3fac2,
+	0xd4db31, 0xd5b992, 0xd695e4, 0xd77025,
+	0xd84852, 0xd91e6a, 0xd9f269, 0xdac44f,
+	0xdb941a, 0xdc61c6, 0xdd2d53, 0xddf6be,
+	0xdebe05, 0xdf8327, 0xe04621, 0xe106f1,
+	0xe1c597, 0xe28210, 0xe33c59, 0xe3f472,
+	0xe4aa59, 0xe55e0b, 0xe60f87, 0xe6becc,
+	0xe76bd7, 0xe816a7, 0xe8bf3b, 0xe96591,
+	0xea09a6, 0xeaab7a, 0xeb4b0b, 0xebe858,
+	0xec835e, 0xed1c1d, 0xedb293, 0xee46be,
+	0xeed89d, 0xef682f, 0xeff573, 0xf08066,
+	0xf10908, 0xf18f57, 0xf21352, 0xf294f8,
+	0xf31447, 0xf3913e, 0xf40bdd, 0xf48421,
+	0xf4fa0a, 0xf56d97, 0xf5dec6, 0xf64d96,
+	0xf6ba07, 0xf72417, 0xf78bc5, 0xf7f110,
+	0xf853f7, 0xf8b47a, 0xf91297, 0xf96e4e,
+	0xf9c79d, 0xfa1e84, 0xfa7301, 0xfac515,
+	0xfb14be, 0xfb61fb, 0xfbaccd, 0xfbf531,
+	0xfc3b27, 0xfc7eaf, 0xfcbfc9, 0xfcfe72,
+	0xfd3aab, 0xfd7474, 0xfdabcb, 0xfde0b0,
+	0xfe1323, 0xfe4323, 0xfe70af, 0xfe9bc8,
+	0xfec46d, 0xfeea9c, 0xff0e57, 0xff2f9d,
+	0xff4e6d, 0xff6ac7, 0xff84ab, 0xff9c18,
+	0xffb10f, 0xffc38e, 0xffd397, 0xffe128,
+	0xffec43, 0xfff4e5, 0xfffb10, 0xfffec4,
+	0xffffff
+};
+
+fix_c base_sin(u32_t bam)
+{
+	// assert (bam < 0x40000000)
+
+	u32_t B = bam >> 14;
+	u32_t A = (B >> 8);
+	
+	B &= 0xFF;
+
+	// assert(0 <= A <= 255);
+	// assert(0 <= B <= 255);
+
+	u32_t v1 = fix_c::sine_table[A];
+	u32_t v2 = fix_c::sine_table[A+1];
+
+	// linearly interpolate
+	v1 += ((v2 - v1) * B) >> 8;
+
+	return fix_c( (s32_t)(v1 >> 8), fix_c::DUMMY_E );
+}
+
+fix_c fxsin(const angle_c& ang)
+{
+	switch (ang.bam & 0xC0000000)
+	{
+		case 0xC0000000:
+			return - base_sin(ang.bam ^ 0xffffffff);
+
+		case 0x80000000:
+			return - base_sin(ang.bam ^ 0x80000000);
+	
+		case 0x40000000:
+			return base_sin(ang.bam ^ 0x7fffffff);
+
+		default: /* 0x00000000 */
+			return base_sin(ang.bam);
+	}
+}
+#endif // TABLE_BASED_SINE
+
+fix_c fxcos(const angle_c& ang)
+{
+    return fxsin(ang + angle_c::Ang90());
+}
+
+
+#ifndef TABLE_BASED_TAN
+fix_c fxtan(const angle_c& ang)
+{
+	// prevent overflow, divide by zero
+	if (0x3FFFAC00 < ang.bam && ang.bam < 0x40005400)
+		return fix_c::MaxVal();
+
+	if (0xBFFFAC00 < ang.bam && ang.bam < 0xC0005400)
+		return fix_c::MinVal();
+
+    return fxsin(ang) / fxcos(ang);
+}
+
+#else // TABLE_BASED_TAN
+
+const u32_t fix_c::tangent_table[257] =
+{
+	0x000000, 0x00c910, 0x019221, 0x025b33,
+	0x032449, 0x03ed63, 0x04b682, 0x057fa6,
+	0x0648d1, 0x071204, 0x07db40, 0x08a485,
+	0x096dd5, 0x0a3731, 0x0b0099, 0x0bca0f,
+	0x0c9393, 0x0d5d27, 0x0e26cc, 0x0ef082,
+	0x0fba4a, 0x108426, 0x114e17, 0x12181d,
+	0x12e239, 0x13ac6d, 0x1476b9, 0x15411f,
+	0x160b9f, 0x16d63a, 0x17a0f2, 0x186bc7,
+	0x1936bb, 0x1a01ce, 0x1acd02, 0x1b9856,
+	0x1c63ce, 0x1d2f68, 0x1dfb28, 0x1ec70c,
+	0x1f9318, 0x205f4b, 0x212ba6, 0x21f82b,
+	0x22c4db, 0x2391b6, 0x245ebe, 0x252bf4,
+	0x25f958, 0x26c6ed, 0x2794b2, 0x2862aa,
+	0x2930d4, 0x29ff33, 0x2acdc7, 0x2b9c91,
+	0x2c6b93, 0x2d3acd, 0x2e0a40, 0x2ed9ee,
+	0x2fa9d8, 0x3079ff, 0x314a64, 0x321b07,
+	0x32ebeb, 0x33bd10, 0x348e78, 0x356023,
+	0x363213, 0x370449, 0x37d6c6, 0x38a98b,
+	0x397c99, 0x3a4ff2, 0x3b2397, 0x3bf788,
+	0x3ccbc7, 0x3da056, 0x3e7535, 0x3f4a66,
+	0x401fe9, 0x40f5c1, 0x41cbee, 0x42a271,
+	0x43794d, 0x445081, 0x45280f, 0x45fffa,
+	0x46d840, 0x47b0e5, 0x4889ea, 0x49634f,
+	0x4a3d16, 0x4b1740, 0x4bf1cf, 0x4cccc4,
+	0x4da820, 0x4e83e5, 0x4f6014, 0x503cae,
+	0x5119b5, 0x51f72a, 0x52d50e, 0x53b363,
+	0x54922b, 0x557166, 0x565117, 0x57313e,
+	0x5811dd, 0x58f2f6, 0x59d489, 0x5ab699,
+	0x5b9927, 0x5c7c35, 0x5d5fc3, 0x5e43d4,
+	0x5f286a, 0x600d84, 0x60f326, 0x61d951,
+	0x62c006, 0x63a747, 0x648f15, 0x657773,
+	0x666062, 0x6749e3, 0x6833f8, 0x691ea3,
+	0x6a09e6, 0x6af5c2, 0x6be239, 0x6ccf4c,
+	0x6dbcff, 0x6eab51, 0x6f9a46, 0x7089de,
+	0x717a1c, 0x726b01, 0x735c90, 0x744eca,
+	0x7541b2, 0x763548, 0x77298f, 0x781e89,
+	0x791438, 0x7a0a9d, 0x7b01bc, 0x7bf995,
+	0x7cf22b, 0x7deb80, 0x7ee596, 0x7fe06e,
+	0x80dc0c, 0x81d872, 0x82d5a0, 0x83d39a,
+	0x84d262, 0x85d1fa, 0x86d264, 0x87d3a3,
+	0x88d5b8, 0x89d8a7, 0x8adc70, 0x8be118,
+	0x8ce69f, 0x8ded0a, 0x8ef458, 0x8ffc8f,
+	0x9105af, 0x920fbb, 0x931ab7, 0x9426a4,
+	0x953384, 0x96415c, 0x97502c, 0x985ff9,
+	0x9970c4, 0x9a8290, 0x9b9561, 0x9ca938,
+	0x9dbe19, 0x9ed406, 0x9feb03, 0xa10312,
+	0xa21c36, 0xa33673, 0xa451cb, 0xa56e40,
+	0xa68bd8, 0xa7aa93, 0xa8ca77, 0xa9eb85,
+	0xab0dc1, 0xac312e, 0xad55d0, 0xae7baa,
+	0xafa2bf, 0xb0cb12, 0xb1f4a8, 0xb31f84,
+	0xb44ba8, 0xb5791a, 0xb6a7db, 0xb7d7f1,
+	0xb9095f, 0xba3c28, 0xbb7050, 0xbca5dc,
+	0xbddccf, 0xbf152d, 0xc04efa, 0xc18a3a,
+	0xc2c6f1, 0xc40524, 0xc544d7, 0xc6860d,
+	0xc7c8cb, 0xc90d16, 0xca52f3, 0xcb9a64,
+	0xcce370, 0xce2e1a, 0xcf7a68, 0xd0c85e,
+	0xd21801, 0xd36955, 0xd4bc61, 0xd61128,
+	0xd767af, 0xd8bffd, 0xda1a16, 0xdb75ff,
+	0xdcd3be, 0xde3358, 0xdf94d2, 0xe0f833,
+	0xe25d80, 0xe3c4be, 0xe52df4, 0xe69927,
+	0xe8065e, 0xe9759e, 0xeae6ed, 0xec5a52,
+	0xedcfd4, 0xef4778, 0xf0c145, 0xf23d42,
+	0xf3bb75, 0xf53be6, 0xf6be9a, 0xf8439a,
+	0xf9caec, 0xfb5498, 0xfce0a5, 0xfe6f1a,
+	0xffffff
+};
+
+fix_c base_tan(u32_t bam)
+{
+	// assert (bam < 0x20000000)
+
+	u32_t B = bam >> 13;
+	u32_t A = (B >> 8);
+	
+	B &= 0xFF;
+
+	// assert(0 <= A <= 255);
+	// assert(0 <= B <= 255);
+
+	u32_t v1 = fix_c::tangent_table[A];
+	u32_t v2 = fix_c::tangent_table[A+1];
+
+	// linearly interpolate
+	v1 += ((v2 - v1) * B) >> 8;
+
+	return fix_c( (s32_t)(v1 >> 8), fix_c::DUMMY_E );
+}
+
+fix_c fxtan(const angle_c& ang)
+{
+    // We take advantage of this fact: 1/tan(x) = tan(pi/2 - x)
+
+	u32_t bam = (ang.bam & 0x7FFFFFFF);
+	fix_c tmp;
+
+	switch (ang.bam & 0x60000000)
+	{
+		case 0x60000000:
+			return - base_tan(bam ^ 0x7fffffff);
+
+		case 0x40000000:
+			tmp = base_tan(bam ^ 0x40000000);
+
+			if (tmp.raw < 3)
+				return fix_c::MaxVal();
+
+			return - (fix_c(1) / tmp);
+
+		case 0x20000000:
+			tmp = base_tan(bam ^ 0x3fffffff);
+
+			if (tmp.raw < 3)
+				return fix_c::MaxVal();
+
+			return fix_c(1) / tmp;
+
+		default: /* 0x00000000 */
+			return base_tan(bam);
+	}
+}
+#endif // TABLE_BASED_TAN
+
+
+#if 0 // DISABLED: too inaccurate for low values
+angle_c fxatan(const fix_c& fx)
+{
+    if (fx < 0)
+        return -fxatan(-fx);
+    
+    if (fx > 1)
+    {
+        fix_c rx( ((fx-1) / (fx+1)) << 4 );
+        fix_c cx(rx * rx * rx);
+
+        angle_c value(angle_c::Ang45());
+
+        value.bam += (u32_t)rx.raw * 640;
+        value.bam -= (u32_t)cx.raw >> 1;
+
+        return value;
+    }
+    else
+    {
+        fix_c rx( ((fix_c(1)-fx) << 4) / (fix_c(1)+fx) );
+        fix_c cx(rx * rx * rx);
+
+        angle_c value(angle_c::Ang45());
+
+        value.bam -= (u32_t)rx.raw * 640;
+        value.bam += (u32_t)cx.raw >> 1;
+
+        return value;
+    }
+}
+#endif
+
+const u32_t fix_c::arctan_table[257] =
+{
+	0x000000, 0x0145f2, 0x028be2, 0x03d1cd,
+	0x0517b0, 0x065d8a, 0x07a356, 0x08e913,
+	0x0a2ebf, 0x0b7456, 0x0cb9d6, 0x0dff3d,
+	0x0f4487, 0x1089b4, 0x11cebf, 0x1313a7,
+	0x14586a, 0x159d03, 0x16e172, 0x1825b4,
+	0x1969c5, 0x1aada4, 0x1bf14f, 0x1d34c2,
+	0x1e77fc, 0x1fbaf9, 0x20fdb9, 0x224037,
+	0x238272, 0x24c467, 0x260615, 0x274778,
+	0x28888e, 0x29c956, 0x2b09cc, 0x2c49ee,
+	0x2d89bb, 0x2ec92f, 0x300849, 0x314707,
+	0x328565, 0x33c363, 0x3500fd, 0x363e32,
+	0x377aff, 0x38b763, 0x39f35a, 0x3b2ee4,
+	0x3c69fe, 0x3da4a6, 0x3eded9, 0x401897,
+	0x4151dc, 0x428aa7, 0x43c2f6, 0x44fac8,
+	0x463219, 0x4768e8, 0x489f33, 0x49d4f9,
+	0x4b0a38, 0x4c3eed, 0x4d7317, 0x4ea6b4,
+	0x4fd9c2, 0x510c40, 0x523e2d, 0x536f85,
+	0x54a048, 0x55d073, 0x570007, 0x582eff,
+	0x595d5c, 0x5a8b1c, 0x5bb83c, 0x5ce4bc,
+	0x5e109a, 0x5f3bd4, 0x60666a, 0x619059,
+	0x62b9a1, 0x63e23f, 0x650a33, 0x66317c,
+	0x675817, 0x687e04, 0x69a341, 0x6ac7ce,
+	0x6beba8, 0x6d0ecf, 0x6e3142, 0x6f52ff,
+	0x707406, 0x719455, 0x72b3eb, 0x73d2c7,
+	0x74f0e9, 0x760e4e, 0x772af7, 0x7846e1,
+	0x79620d, 0x7a7c79, 0x7b9625, 0x7caf0f,
+	0x7dc737, 0x7ede9c, 0x7ff53d, 0x810b19,
+	0x822030, 0x833481, 0x84480a, 0x855acc,
+	0x866cc6, 0x877df7, 0x888e5e, 0x899dfb,
+	0x8aacce, 0x8bbad5, 0x8cc810, 0x8dd47f,
+	0x8ee021, 0x8feaf5, 0x90f4fc, 0x91fe34,
+	0x93069e, 0x940e38, 0x951503, 0x961afe,
+	0x972028, 0x982482, 0x99280c, 0x9a2ac4,
+	0x9b2caa, 0x9c2dbf, 0x9d2e01, 0x9e2d72,
+	0x9f2c10, 0xa029db, 0xa126d3, 0xa222f9,
+	0xa31e4b, 0xa418ca, 0xa51276, 0xa60b4f,
+	0xa70353, 0xa7fa85, 0xa8f0e2, 0xa9e66c,
+	0xaadb22, 0xabcf04, 0xacc213, 0xadb44e,
+	0xaea5b6, 0xaf9649, 0xb0860a, 0xb174f7,
+	0xb26310, 0xb35057, 0xb43cca, 0xb5286a,
+	0xb61337, 0xb6fd32, 0xb7e65a, 0xb8ceb0,
+	0xb9b633, 0xba9ce5, 0xbb82c5, 0xbc67d4,
+	0xbd4c11, 0xbe2f7d, 0xbf1219, 0xbff3e4,
+	0xc0d4de, 0xc1b509, 0xc29464, 0xc372f0,
+	0xc450ad, 0xc52d9c, 0xc609bc, 0xc6e50e,
+	0xc7bf92, 0xc89949, 0xc97233, 0xca4a51,
+	0xcb21a3, 0xcbf829, 0xcccde4, 0xcda2d3,
+	0xce76f9, 0xcf4a54, 0xd01ce5, 0xd0eeae,
+	0xd1bfae, 0xd28fe5, 0xd35f55, 0xd42dfd,
+	0xd4fbdf, 0xd5c8fa, 0xd6954f, 0xd760df,
+	0xd82baa, 0xd8f5b0, 0xd9bef3, 0xda8772,
+	0xdb4f2f, 0xdc1629, 0xdcdc61, 0xdda1d8,
+	0xde668e, 0xdf2a85, 0xdfedbb, 0xe0b033,
+	0xe171ec, 0xe232e7, 0xe2f324, 0xe3b2a5,
+	0xe47169, 0xe52f72, 0xe5ecc0, 0xe6a953,
+	0xe7652c, 0xe8204c, 0xe8dab3, 0xe99462,
+	0xea4d59, 0xeb059a, 0xebbd24, 0xec73f8,
+	0xed2a17, 0xeddf82, 0xee9438, 0xef483b,
+	0xeffb8c, 0xf0ae2a, 0xf16017, 0xf21153,
+	0xf2c1df, 0xf371bb, 0xf420e9, 0xf4cf67,
+	0xf57d38, 0xf62a5c, 0xf6d6d4, 0xf782a0,
+	0xf82dc0, 0xf8d836, 0xf98202, 0xfa2b24,
+	0xfad39e, 0xfb7b70, 0xfc229a, 0xfcc91d,
+	0xfd6efb, 0xfe1433, 0xfeb8c6, 0xff5cb4,
+	0xffffff
+};
+
+angle_c base_atan(const fix_c& X)
+{
+	// assert (X > 0 && X <= 1);
+	
+	u32_t B = X.raw;
+	if (B > 0xFFFF) B = 0xFFFF;
+
+	u32_t A = (B >> 8);
+	B &= 0xFF;
+
+	// assert(0 <= A <= 255);
+	// assert(0 <= B <= 255);
+
+	u32_t v1 = fix_c::arctan_table[A];
+	u32_t v2 = fix_c::arctan_table[A+1];
+
+	// linearly interpolate
+	v1 += ((v2 - v1) * B) >> 8;
+
+	return angle_c(v1 << 5, false);
+
+}
+
+angle_c fxatan(const fix_c& X)
+{
+    // We take advantage of this fact: atan(1/x) = pi/2 - atan(x)
+
+    if (X < 0)
+	{
+		if (X < -1)
+			return angle_c::Ang90() + base_atan(fix_c(1) / -X); 
+
+        return - base_atan(-X);
+   	}
+	else // (X >= 0)
+	{
+		if (X > 1)
+			return angle_c::Ang90() - base_atan(fix_c(1) / X);
+
+		return base_atan(X);
+	}
+}
+
+angle_c fxatan2(const fix_c& X, const fix_c& Y)
+{
+    // check against this value to prevent overflow in division
+    fix_c CY(fxabs(Y) >> 14);
+
+    if (X > CY)
+    {
+        return angle_c::Ang90() - fxatan(Y / X);
+    }
+    else if (X < -CY)
+    {
+        return angle_c::Ang270() - fxatan(Y / X);
+    }
+    else
+        return (Y > 0) ? angle_c::Ang0() : angle_c::Ang180();
+}
+
+} // namespace epi
+
+//--- editor settings ---
+// vi:ts=4:sw=4:noexpandtab

@@ -1,0 +1,74 @@
+
+CHANGELOG FOR 1.20 (since 1.19)
+===============================
+
+(Date: MARCH 21st 2000)
+
+(Unreleased EDGE version)
+
+Bugs fixed:
+
+ - the RTS parse problem with tics (e.g. 1T) should be fixed.
+ - the RTS SLEEP primitive was broken but is fixed now.
+ - improved RTS error messages.
+ - fixed tips where the delay was 35 times longer than it should be.
+ - the problem with ENDOOM _may_ be better (untested by me).
+ - for SHADOW things, the modulation never stops.
+ - the "bouncy bouncy" bug with the noclip cheat is fixed.
+ - you don't climb over dying monsters now (they lose CLIMBABLE tag).
+ - intermission cameras cannot see players now.
+ - no longers stays in zoom mode when you die.
+ - killing yourself no longer gives you a frag.
+ - the WHOLE_REGION sector special was broken, fixed now.
+ - bug with weapons changing when you pick up ammo fixed.
+ - shadow, translated & translucent sprites now drawn in TrueBSP mode.
+ - fixed y offsets for mid-masked textures in TrueBSP mode.
+ - textures no longer slosh about horizontally in TrueBSP mode.
+ - bug in OpenGL renderer not drawing certain uppers/lowers fixed.
+
+Changes:
+
+ - the b.c. MAPNUMBER= field of things.ddf and TRIGGER= field of
+   lines.ddf and sectors.ddf have been removed.
+   
+ - the ACCURACY field of attacks.ddf has changed, it has been replaced
+   with ACCURACY_ANGLE (the horizontal accuracy) and ACCURACY_SLOPE
+   (for the vertical accuracy).  They are both angle values.  0 would
+   mean perfect accuracy, 45 would be woeful accuracy.
+
+ - TAGGED_INDEPENDANT in RTS no longer accepted -- spell it right.
+
+ - Chance values have changed, they now need a percentage value from 0
+   to 100 percent _and_ a trailing `%' sign.  Converting is easy: grab
+   a calculator and divide by 2.55.  The stuff affected:
+
+     attacks.ddf:  NO_TRACE_CHANCE, KEEP_FIRING_CHANCE.
+     things.ddf:   PAINCHANCE, MINATTACK_CHANCE.
+     rts scripts:  JUMP.
+ 
+ - the semantics for X/Y offsets for the sides of extrafloors has been
+   nailed down: the X offset comes from the "real" line and the Y
+   offset comes from the "dummy" line.  The y offset on the real line
+   and the x offset on the dummy line are ignored.
+ 
+New Features:
+
+ - when you teleport, your MLOOK angle is set to the MLOOK angle of
+   the teleport thing (mapnumber 14).  Just for kicks.
+ 
+ - wall textures, sky, sprites and player's weapon now drawn in OpenGL
+   renderer.  More or less anyway, still lots to do.
+
+ - something for you Covert Ops dudes: zooming can now be limited to
+   certain weapons, i.e. unusable unless that weapon is being held in
+   front of you, also each weapon can have a different zoom factor.
+
+   Firstly, there is a new levels.ddf special LIMIT_ZOOM, which means
+   that zooming will only work when the player is holding a weapon
+   with zoom capability.  When LIMIT_ZOOM is absent, zooming will work
+   as normal (i.e. anytime, anywhere).
+
+   Secondly, there is a new weapons.ddf field ZOOM_FOV which marks the
+   weapon as having zoom capability.  The value is the "Field Of View"
+   angle, e.g. 10 is the same as normal zooming.  The range is from 5
+   to 90, smaller angles give greater magnification.

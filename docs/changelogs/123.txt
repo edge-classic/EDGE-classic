@@ -1,0 +1,74 @@
+
+CHANGELOG FOR 1.23 (since 1.22)
+===============================
+
+(Date: APRIL 28th 2000)
+
+Bugs fixed:
+
+ - problem with finding IWADs under Win32 fixed.
+ - the -lang option now works again.
+ - the not-playing-OOF-sound bug has been fixed.
+ - fixed some problems with singular sounds cutting out.
+ - projectile attacks no longer crash if there's no target.
+ - fixed bugs with the RSCRIPT lump (loaded too early, etc).
+ - TrueBSP and GL now ignore missing textures on one-sided walls.
+ 
+Changes:
+
+ - the VFI span and column drawers were improved.
+
+New features:
+
+ - new option in the standard control menu: `Toggle Autorun',
+   defaulting to the capslock key.
+ 
+ - new option in the main menu: `Language'.  The language can be
+   changed on-the-fly, though not everything has been LDF-ified yet.
+
+ - scrolling flats.  The following entries in sectors.ddf do the
+   trick:
+
+     FLOOR.SCROLL_ANGLE=[num];    // 0 is east, 90 is north, etc..
+     FLOOR.SCROLL_SPEED=[num];    // 32 is one pixel per tic
+
+     CEILING.SCROLL_ANGLE=[num];
+     CEILING.SCROLL_SPEED=[num];
+
+   Note that they also work for extrafloors (when used in the dummy
+   sector).
+
+ - pushing sectors.  Looks like this in sectors.ddf:
+
+     PUSH_ANGLE=[num];    // 0 is east, 90 is north, etc..
+     PUSH_SPEED=[num];    // 0 is none, 50 is quite fast
+     PUSH_ZSPEED=[num];   // 0 is normal, positive is upwards
+
+   only objects inside the sector are affected.  The following sector
+   specials come into play (the last two are new) :
+   
+     WHOLE_REGION   -  the push occurs no matter where you are.  When
+                       absent, the push only occurs when you are
+                       touching the floor.
+                       
+     PUSH_CONSTANT  -  the push is a constant amount.  Good for
+                       conveyor belts.  When absent, the push is like
+                       a force and things with more MASS will move
+                       slower.
+
+     PUSH_ALL       -  all things are pushed.  When absent, certain
+                       things are not affected, in particular ones
+                       with the NOGRAVITY tag (though the exact
+                       criteria is subject to change).
+
+ - A new sounds.ddf entry "MAX_DISTANCE=###", which means that this
+   sound will never be played if the listener is further away than the
+   given distance.  Note that this entry doesn't affect the normal
+   attenuation of the sound.
+ 
+ - Another new sounds.ddf entry "PRECIOUS=TRUE", which means that
+   instead of chopping off this sound with a new sound with the same
+   singularity (or same priority, if all the channels are full), this
+   sound should keep playing and the new sound is ignored.  Not
+   terribly useful, but provided for completeness.
+

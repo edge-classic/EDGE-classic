@@ -1,0 +1,33 @@
+#
+# DEH_EDGE : Win32 MAKEFILE
+#
+
+BIN=deh_edge.exe
+
+CXX=mingw32-g++.exe
+CXXFLAGS=-O -Wall
+LDFLAGS=-Xlinker --warn-common
+DEFINES=-DWIN32
+LIBS=-lm
+
+OBJS=convert.o main.o system.o util.o wad.o info.o mobj.o \
+     sounds.o frames.o things.o attacks.o weapons.o ammo.o \
+	 misc.o text.o storage.o patch.o rscript.o buffer.o
+
+all: $(BIN)
+
+clean:
+	rm -f $(BIN) $(OBJS) ERRS core core.* deh_debug.log libdehedge.a
+
+.PHONY: all clean
+
+#
+# Main Source Compilation
+#
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(DEFINES) -c $< -o $@
+
+$(BIN): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) -o $@ $(LIBS)
+

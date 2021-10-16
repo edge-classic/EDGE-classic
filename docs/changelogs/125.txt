@@ -1,0 +1,339 @@
+
+CHANGELOG FOR 1.25-WIP (since 1.24)
+===================================
+
+(EDGE 1.25 was the WIP "Work in Progress" release)
+
+(Date: FEBRUARY 19th 2001)
+
+Bugs fixed
+----------
+
+-  fixed the extreme bobbing that was in the WIP-1.
+-  bouncing objects in WIP-1 didn't enter bounce states -- fixed.
+-  SINGLESIDED tag is now respected for bullet/missile activation.
+-  fixed some possible crashes when using certain DDF actions.
+-  some subtle DDF searching issues (e.g. CASTORDER) fixed.
+-  removed a thin slither at the top of some weapons in GLEDGE.
+-  fixed numerous problems with sprite scaling (both renderers).
+-  flat-lighting weapon-too-dark problem in sofware mode fixed.
+-  problems with continuous floors (e.g. end of MAP12) fixed.
+-  DDF/RTS errors in win32 pop-up box now show full context.
+-  infinite loop when no episodes are defined fixed.
+-  fixed problem causing error with read-only IWADs.
+-  bug with "ACTIVATE_LINETYPE 138" fixed.
+-  thin horizontally sliding doors now work in GL.
+-  fixed a bug not auto-aiming at monsters lower than you.
+-  fixed monsters seeing you through thick extrafloors.
+-  bug causing the wrong switches to light up sometimes fixed.
+-  problems with some intermission screens (e.g. bunny) fixed.
+
+
+Features removed:
+-----------------
+
+-  the NOAMMO attack special from DDF is gone.  It's only useful
+   purpose was for ejecting shells, but the EJECT() code pointer
+   is good for that (and doesn't use ammo).
+
+-  the "SAVE" command in RTS, quite non-useful, even dangerous.
+
+-  the "BITS" and "STEREO" commands from sounds.ddf.  They never did
+   anything.
+
+-  the colmap.ddf "NOSKY" special and "PRIORITY" command.
+
+
+Changes to existing features
+----------------------------
+
+-  RANDOMJUMP action has been removed.  The new JUMP() code pointer
+   should be used instead, like this:
+
+      TROO:A:5:NORMAL:JUMP(Label)      // jumps always to label
+      TROO:A:5:NORMAL:JUMP(Label,50%)  // jumps randomly to label
+ 
+   where Label is the name of a state, either a plain name like
+   "CHASE", or a name followed by a ":" and a number like "IDLE:3".
+
+-  the ALTERTRANSLUC, ALTERVISIBILITY, LESSVISIBLE and MOREVISIBLE
+   actions have been replaced with new ones:
+
+      TRANS_SET(30%)       : set it immediately to new value
+      TRANS_FADE(95%)      : fades to new value over a second or two
+      TRANS_MORE(10%)      : increase translucency
+      TRANS_LESS(10%)      : decrease translucency
+      TRANS_ALTERNATE(10%) : alternate between visible and invisible
+
+   values range from 0% (invisible) to 100% (opaque).  The parameters
+   are optional: for TRANS_SET, the default is 100%.  For TRANS_FADE,
+   the default is 0%.  For the last three, the default is 5%.
+
+   Note: TRANS_SET() and TRANS_FADE() can also be used in weapon
+   frames.
+
+-  the way damage (for attacks, etc) is expressed has changed.  The
+   old ddf commands DAMAGE, DAMAGE_RANGE, DAMAGE_MULTI, plus the
+   things.ddf counterparts (which begin with EXPLOD_ (and still do))
+   have been replaced with the following:
+
+     // simple damage, amount is constant (20)
+     DAMAGE.VAL=20;
+
+     // linear damage, amount is a random value in the range 10-40
+     DAMAGE.VAL=10;
+     DAMAGE.MAX=40;
+
+     // weighted error damage, amount is a random value near the base
+     // value (64), which can get as far away as the error value.  In
+     // this example, the full range is 32-96, but values near 64 are
+     // much more likely than values near 32 or 96.
+     DAMAGE.VAL=64;
+     DAMAGE.ERROR=32;
+
+   and the other fields:
+
+      DAMAGE.DELAY=10T;
+         // delay time between applying damaging.  Only used for sector
+         // damage (slime), where it replaces the old DAMAGETIME command.
+
+      DAMAGE.PAIN_STATE=BURN_PAIN;
+      DAMAGE.DEATH_STATE=DROWNED;
+      DAMAGE.OVERKILL_STATE=ALL_CRISPY;
+         // if the applied damage causes pain/death/overkill, and the
+         // damaged thing has the state/label specified by these
+         // commands, then those states are used instead of the default
+         // ones.  This allows attacks, explosions and sector damage to
+         // make their victims enter special states -- this could be
+         // used, for example, to make monsters that go all crispy when
+         // shot with a flamethrower, or players make a gurgling noise
+         // when dying at the bottom of a slime-filled pit.
+
+-  EXPLOD_DAMAGE is now spelled EXPLODE_DAMAGE.
+
+-  SWITCH.DDF has been updated, firstly the SOUND command has been
+   renamed to "ON_SOUND".  Secondly, there is a new "OFF_SOUND" that
+   the switch makes when the button texture changed back (previously
+   the off sound was hardcoded).  Thirdly, there is a new "TIME"
+   command that specifies how long the button waits before changing
+   back (defaults to 1 second).
+
+-  the SOUND command in LINES.DDF and SECTORS.DDF has been renamed to
+   "AMBIENT_SOUND", better describing what it does (starts an ambient
+   sound).
+
+-  the EXIT command in LINES.DDF and SECTORS.DDF has changed,
+   acceptable values are now "NORMAL" and "SECRET".
+
+-  LIGHT_PROBABILITY in LINES.DDF and SECTORS.DDF has been renamed to
+   LIGHT_CHANCE and now takes a percentage value.
+
+-  TRANSLUCENCY now takes a percentage value, from 0% to 100%.
+
+-  EXTRAFLOOR_TRANSLUCENCY in lines.ddf should be replaced with the
+   simpler TRANSLUCENCY.
+
+-  the (rarely used) #XDEATH redirector is now #OVERKILL.
+
+-  the [FUZZSHADOW] colourmap was renamed to just [FUZZY], and EDGE
+   now requires a colourmap called [SHADOW].
+
+-  weapons that contain PRIORITY=-1 (e.g. rocket launcher) should now
+   have a normal priority value, and should be given the new command
+   "DANGEROUS=TRUE".
+
+-  the GIB command in DDF has been removed, in favour of using
+   STATES(GIB).
+
+
+New Features:
+-------------
+
+-  Ladders.  They are linedef based, if you are sitting on a ladder
+   linedef (two-sided line) and the heights match, then pressing
+   MoveUp/Down lets you climb the ladder.  The following LINES.DDF
+   command defines a ladder:
+
+      LADDER.HEIGHT = 128;
+
+   which gives the height of the ladder, which should match the
+   texture used.  The ladder linetype should be a two sided line that
+   has the same sector on both sides, and about 24 units away from the
+   actual ladder texture.  Ladders normally start on the ground, but
+   can be raised by setting the Y_OFFSET in the first sidedef.
+
+-  MOVE_SECTOR and LIGHT_SECTOR RTS commands replace SECTORV/L.
+   They take the same arguments, except that the sector number is a
+   _tag_ number instead of an absolute sector reference.  This allows
+   you to affect many sectors at once, and is more robust (sector
+   numbers can change just by editing the level).
+
+-  Support for both fullscreen mode and in-a-window mode.  The default is
+   fullscreen.  The -windowed option and the -fullscreen option can be
+   used to change it, as well as the "windowed" line in the EDGE.CFG
+   file.  Changing it with the "Set Resolution" menu is not possible
+   yet, but is planned.
+
+-  Dithering for GLEDGE, with -dither option (or line in config file).
+   Can give slight improvement in image quality (depending on driver).
+
+-  New SEC_NOFIRE_RETURN action for weapons.ddf, works just like
+   NOFIRE_RETURN but for the second attack.
+
+-  The DEST_REF command for lines.ddf and sectors.ddf accepts an
+   optional tag after the normal reference tag.  The optional tag is
+   either "INCLUDE" or "EXCLUDE".  Examples:
+
+      FLOOR.DEST_REF = LOSURROUNDINGFLOOR, EXCLUDE;
+      CEIL.DEST_REF  = HISURROUNDINGFLOOR, INCLUDE;
+   
+   The INCLUDE tag means include the moving sector in the calculation,
+   whereas the EXCLUDE tag means don't include it.  All the normal
+   refs (HISURROUNDINGCEILING etc) have EXCLUDE by default, *except*
+   LOSURROUNDINGFLOOR which (for compatibility) has INCLUDE by
+   default.
+ 
+-  New commands OTHER_REF and OTHER_OFFSET for lines.ddf and
+   sectors.ddf.  These are just like the DEST_REF and DEST_OFFSET
+   commands, but are used for CONTINUOUS floor/ceiling types and
+   specify the other height that is moved to while bouncing up and
+   down.  The default value keeps the normal DOOM behaviour.
+
+-  New -hom command line option and `IDHOM' cheat code.  Shows HOM as
+   areas of bright green (both renderers).
+
+-  New DRAG command for LINES.DDF and SECTORS.DDF.  It is a companion
+   for the GRAVITY, FRICTION and VISCOSITY commands.  DRAG means "air
+   friction" -- it is how much objects get slowed down by the air when
+   they are airborne (i.e. not touching the ground).  The default
+   value (0.99) provides backwards compat.  Lower values (e.g.  0.91)
+   makes liquids more "sticky".
+
+-  New sector SPECIAL "SWIM".  When you're in such a sector or liquid,
+   then it activates "swimming mode".  In swimming mode you can swim
+   up/down, plus moving forwards swims in the MLOOK direction.  Also
+   the jump key works differently.  For swimming mode to work well,
+   the sectortype should a low GRAVITY value (e.g. 0), and have
+   FRICTION and DRAG values the same and around 0.9 or so.  Viscosity
+   is an optional extra :-).
+
+-  Support for breathing under water.  The sector SPECIAL "AIRLESS"
+   denotes the sector as not containing air, and while player is in
+   it, they use up air in their lungs.  The things.ddf command
+   LUNG_CAPACITY determines how long (seconds) the player can stay
+   underwater before choking.  Choking is controlled by the
+   CHOKE_DAMAGE command in things.ddf -- it sets the damage amount,
+   delay and override pain/death states (See Damage system above).
+   Default LUNG_CAPACITY is 20 seconds.
+
+   When the player leaves the airless sector, they will usually gasp
+   for air.  The new GASP_SOUND command specifies the sound, and
+   GASP_START specifies a minimum time the player must be in the water
+   before making the sound.  Default GASP_START is 2 seconds.
+
+   There is a new powerup "SCUBA" that gives the player another source
+   of air (e.g. oxygen tank).  While the powerup remains in effect,
+   the player won't start choking.
+ 
+   Finally, an air indicator is shown while the player is underwater.
+   Twenty one patches are used: AIRBAR01, AIRBAR02, ..., AIRBAR21,
+   They are placed on the screen just like weapon sprites.
+
+-  The #CLEARALL directive can be used in DDF files.  It must occur
+   after the <XXXX> file tag and before the first entry.  It will
+   clear out all previous entries for that file type (e.g. THINGS).
+
+   Mainly useful for TCs, and then mainly with the GAMES.DDF and
+   WEAPONS.DDF files.
+
+-  Ten new keys were added: GREENCARD, GREENSKULL, GOLDKEY, SILVERKEY,
+   BRASSKEY, COPPERKEY, STEELKEY, WOODENKEY, FIREKEY and WATERKEY.
+   That brings the total to 16.
+
+-  Better compatibility with BOOM maps.  Use the -boom option or the
+   "Boom Line/Sec Types" entry in the gameplay menu, which enables
+   support for the BOOM generalised linetypes and sectortypes.  Not
+   all of the features are supported, e.g. reversable stairs, and
+   there are many bugs in the code.
+
+   Disable this option when playing EDGE-designed maps and TCs,
+   otherwise the BOOM sectortypes (and maybe linetypes) will interfere
+   with any new ones defined in DDF.
+
+-  New RTS command ONCONDITION, which is like ONDEATH and ONHEIGHT:
+   the trigger will not run unless the condition is satisfied.  Used
+   like this:
+
+      ONCONDITION  [condition]
+
+   Where condition is something that the player is holding or is
+   doing.  It is one of these:
+  
+      HEALTH(num)
+      BULLETS(num)        // and the other ammo names
+      GREEN_ARMOUR(num)   // and the other armours
+      KEY_BLUECARD        // and the other keys
+      CHAINGUN            // and the other weapons
+      POWERUP_PARTINVIS   // and the other powerups
+
+      JUMPING     ATTACKING
+      CROUCHING   RAMPAGING
+      SWIMMING    USING
+
+   The brackets on health, ammo and armour conditions are optional,
+   when present they are a minimum needed, e.g. HEALTH(50) requires
+   health 50 or higher to run.  Without the brackets, they mean "any
+   above zero".
+
+   Those words can be prefixed with "NOT_", which negates the
+   condition, e.g. NOT_KEY_REDSKULL means that the trigger will only
+   run when the player *doesn't* have the red skull key.
+
+   Multiple ONCONDITION lines can be used in each trigger script, and
+   they _all_ have to be satisfied before the trigger will run.
+
+-  New RTS command RETRIGGER.  Can only be used in TAGGED_INDEPENDENT
+   scripts, and causes the conditions that activated the trigger to
+   be re-checked (possibly pausing the trigger again).  Most useful
+   used at the bottom of a TAGGED_REPEATABLE sleep-less script.
+
+-  New LOSE_BENEFIT command for things.ddf (pickups).  Like
+   PICKUP_BENEFIT but the player _loses_ the items instead.
+
+   Also, PICKUP_BENEFIT and LOSE_BENEFIT are available as RTS
+   commands.  They take one parameter: the benefit to give the player
+   or take away.
+
+-  JUMP_DELAY command for things.ddf.  Determines how long soon after
+   jumping the player can jump again.  Default: one second (previously
+   hard-coded).
+
+-  New LINE_EFFECT "LIGHT_WALL", works like the floor/ceiling lighting
+   transfers, except that all lines with the same tag are affected:
+   they will be lit using the tagging line's front sector properties.
+   SCROLL_PARTS can be used to affect specific parts of tagged lines.
+
+-  New LINE_PARTS command for lines.ddf.  Should be used with the
+   LINE_EFFECT command, and gives fine-grain control on what parts
+   of the wall(s) are affected.  Takes the same keywords as the
+   SCROLL_PARTS command (e.g. "RIGHT_MIDDLE").
+ 
+-  Dynamic lighting.  Currently this is GLEDGE only.  The following
+   commands can be used in things.ddf and attacks.ddf to make an
+   object throw light on neighbouring walls/floors/objects:
+
+      DLIGHT.TYPE = QUADRATIC;   // "LINEAR" is the other type
+      DLIGHT.INTENSITY = 300;    // higher is brighter
+      DLIGHT.COLOUR = #FFFF00;   // colour of lighting, HTML format
+    
+   Note: objects must be in a BRIGHT state frame to light up stuff
+   around them.  When in a NORMAL state frame, nothing happens.
+   
+   There are two DDF actions:
+
+      DLIGHT_SET(amount)    // set the intensity to new value
+      DLIGHT_FADE(amount)   // fade intensity over time to new value
+    
+   Dynamic lighting can be enabled or disabled through the Video
+   Options menu, or by running EDGE with the -dlights option.
+

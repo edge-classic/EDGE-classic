@@ -1,0 +1,3162 @@
+//
+//    EDGE LANGUAGE.LDF -redefine or add new messages.
+//    For documentation, see http://edge.sourceforge.net/
+//    DDF Version 6.1
+//
+
+<LANGUAGES>
+
+#VERSION 1.35
+
+// ------ English Language Definition File ----------
+
+[ENGLISH]
+DevelopmentMode="Development Mode is enabled.\n";
+PressKey="Press A Key";
+PressYorN="Press Y or N";
+
+QuickSaveOver="quicksave over your game named\n\n'%s'?\n\npress y or n.";
+NoQuickSaveSlot="you haven't picked a quicksave slot yet!\n\npress a key.";
+SaveWhenNotPlaying="you can't save if you aren't playing!\n\npress a key.";
+
+NoLoadInNetGame="you can't load while in a net game!\n\npress a key.";
+NoQLoadInNetGame="you can't quickload during a netgame!\n\npress a key." ;
+QuickLoad="do you want to quickload the game named\n\n'%s'?\n\npress y or n.";
+
+NewNetGame="you can't start a new game\n"
+           "while in a network game.\n\npress a key.";
+EpisodeNonExist="You don't have this episode!\n\npress a key.";
+NightmareCheck="Are you sure ? this skill level\n"
+               "isn't even remotely fair.\n\npress y or n.";
+
+MessagesOff="Messages OFF";
+MessagesOn="Messages ON";
+
+EndNetGame="you can't end a netgame!\n\npress a key.";
+EndGameCheck="are you sure you want to end the game?\n\npress y or n.";
+
+PressToQuit="(press y to quit)";
+
+GammaOff="Gamma correction OFF";
+GammaLevelOne  ="Gamma correction level 1";
+GammaLevelTwo  ="Gamma correction level 2";
+GammaLevelThree="Gamma correction level 3";
+GammaLevelFour ="Gamma correction level 4";
+GammaLevelFive ="Gamma correction level 5";
+
+EmptySlot="Empty Slot";
+
+GotArmour="Picked up the armor.";
+GotMegaArmour="Picked up the megaarmor!";
+
+GotHealthPotion="Picked up a health bonus.";
+GotArmourHelmet="Picked up a armour bonus.";
+
+GotStim="Picked up a stimpack.";
+GotMedi="Picked up a medikit.";
+GotSoul="Supercharge!";
+
+GotBlueCard="Picked up a blue keycard.";
+GotBlueSkull="Picked up a blue skull key.";
+GotYellowCard="Picked up a yellow keycard.";
+GotYellowSkull="Picked up a yellow skull key.";
+GotRedCard="Picked up a red keycard.";
+GotRedSkull="Picked up a red skull key.";
+GotGreenCard="Picked up a green keycard.";
+GotGreenSkull="Picked up a green skull key.";
+
+GotInvulner="Invulnerability!";
+GotBerserk="Berserk!";
+GotJetPack="JetPack!";
+GotInvis="Partial Invisibility";
+GotSuit="Radiation Shielding Suit";
+GotMap="Computer Area Map";
+GotNight="Nightvision goggles";
+GotVisor="Light Amplification Visor";
+GotMega="MegaSphere!";
+
+GotClip="Picked up a clip.";
+GotClipBox="Picked up a box of bullets.";
+GotShells="Picked up 4 shotgun shells.";
+GotShellBox="Picked up a box of shotgun shells.";
+GotRocket="Picked up a rocket.";
+GotRocketBox="Picked up a box of rockets.";
+GotCell="Picked up an energy cell.";
+GotCellPack="Picked up an energy cell pack.";
+GotBackpack="Picked up a backpack full of ammo!";
+
+GotBFG="You got the BFG9000!  Oh, yes.";
+GotChainGun="You got the chaingun!";
+GotChainSaw="A chainsaw!  Find some meat!";
+GotDoubleBarrel="You got the super shotgun!";
+GotRocketLauncher="You got the rocket launcher!";
+GotPlasmaGun="You got the plasma gun!";
+GotShotgun="You got the shotgun!";
+
+NeedBlueForObject="You need a blue key to activate this object";
+NeedBlueForDoor="You need a blue key to open this door";
+NeedYellowForObject="You need a yellow key to activate this object";
+NeedYellowForDoor="You need a yellow key to open this door";
+NeedRedForObject="You need a red key to activate this object";
+NeedRedForDoor="You need a red key to open this door";
+NeedGreenForObject="You need a green key to activate this object";
+NeedGreenForDoor="You need a green key to open this door";
+NeedAnyForDoor="You need at least one key to open this door";
+NeedAllForDoor="You need all keys to open this door";
+
+NeedGoldKey  ="You need a gold key to open this door";
+NeedSilverKey="You need a silver key to open this door";
+NeedBrassKey ="You need a brass key to open this door";
+NeedCopperKey="You need a copper key to open this door";
+NeedSteelKey ="You need a steel key to open this door";
+NeedWoodenKey="You need a wooden key to open this door";
+NeedFireKey  ="You need a fire key to open this door";
+NeedWaterKey ="You need a water key to open this door";
+
+GameSaved="game saved.";
+
+UnsentMsg="[Message unsent]";
+Sent="[Message Sent]";
+
+OB_CRUSH    = "%o was crushed.";
+OB_EXPLODE  = "%o was blown up.";
+OB_DROWN    = "%o drowned";
+OB_SECTOR   = "%o melted.";
+OB_SUICIDE  = "%o suicided.";
+OB_SLIME    = "%o choked on the slime.";
+OB_LAVA     = "%o was burnt to a crisp.";
+
+OB_Arachnotron = "%o was melted by an Arachnotron.";
+OB_Archvile    = "%o was charred by an Archvile.";
+OB_Baron       = "%o was killed by a Baron of Hell.";
+OB_BaronClaw   = "%o was clawed by a Baron of Hell.";
+OB_CacoBite    = "A Cacodemon chewed up %o!";
+OB_Cacodemon   = "%o was killed by a Cacodemon.";
+OB_ChaingunGuy = "%o was mowed down by a Chaingunner.";
+OB_Cyberdemon  = "%o was blown to bits by a Cyberdemon.";
+OB_Mastermind  = "A Spider Mastermind ripped %o apart!";
+OB_WolfSS      = "%o was executed by a Nazi.";
+
+OB_Demon       = "%o was mauled by a Demon.";
+OB_Dog         = "%o was bitten by a Dog.";
+OB_Imp         = "%o was killed by an Imp.";
+OB_ImpClaw     = "An Imp tore %o a new one!";
+OB_Mancubus    = "%o was killed by a Mancubus.";
+OB_Revenant    = "%o was killed by a Revenant.";
+OB_RevPunch    = "A revenant knocked %o's head off.";
+OB_ShotgunGuy  = "%o was shot by a Shotgun Sergeant.";
+OB_Skull       = "%o was eaten by a Lost Soul!";
+OB_Zombie      = "%o was gunned down by a Zombie.";
+
+OB_Chaingun  = "%o was torn apart by %k.";
+OB_Pistol    = "%o was gunned down by %k.";
+OB_Missile   = "%o was blown up by %k.";
+OB_Plasma    = "%o was melted by %k.";
+OB_Punch     = "%k punched %o's lights out.";
+OB_Saw       = "%k sawed %o's head off.";
+OB_Shotgun   = "%o was shot by %k.";
+OB_BFG       = "%k annihilated %o.";
+
+Map01Desc="level 1: entryway";
+Map02Desc="level 2: underhalls";
+Map03Desc="level 3: the gantlet";
+Map04Desc="level 4: the focus";
+Map05Desc="level 5: the waste tunnels";
+Map06Desc="level 6: the crusher";
+Map07Desc="level 7: dead simple";
+Map08Desc="level 8: tricks and traps";
+Map09Desc="level 9: the pit";
+Map10Desc="level 10: refueling base";
+Map11Desc="level 11: 'o' of destruction!";
+Map12Desc="level 12: the factory";
+Map13Desc="level 13: downtown";
+Map14Desc="level 14: the inmost dens";
+Map15Desc="level 15: industrial zone";
+Map16Desc="level 16: suburbs";
+Map17Desc="level 17: tenements";
+Map18Desc="level 18: the courtyard";
+Map19Desc="level 19: the citadel";
+Map20Desc="level 20: gotcha!";
+Map21Desc="level 21: nirvana";
+Map22Desc="level 22: the catacombs";
+Map23Desc="level 23: barrels o' fun";
+Map24Desc="level 24: the chasm";
+Map25Desc="level 25: bloodfalls";
+Map26Desc="level 26: the abandoned mines";
+Map27Desc="level 27: monster condo";
+Map28Desc="level 28: the spirit world";
+Map29Desc="level 29: the living end";
+Map30Desc="level 30: icon of sin";
+Map31Desc="level 31: wolfenstein";
+Map32Desc="level 32: grosse";
+
+E1M1Desc="E1M1: Hangar";
+E1M2Desc="E1M2: Nuclear Plant";
+E1M3Desc="E1M3: Toxin Refinery";
+E1M4Desc="E1M4: Command Control";
+E1M5Desc="E1M5: Phobos Lab";
+E1M6Desc="E1M6: Central Processing";
+E1M7Desc="E1M7: Computer Station";
+E1M8Desc="E1M8: Phobos Anomaly";
+E1M9Desc="E1M9: Military Base";
+
+E2M1Desc="E2M1: Deimos Anomaly";
+E2M2Desc="E2M2: Containment Area";
+E2M3Desc="E2M3: Refinery";
+E2M4Desc="E2M4: Deimos Lab";
+E2M5Desc="E2M5: Command Center";
+E2M6Desc="E2M6: Halls of the Damned";
+E2M7Desc="E2M7: Spawning Vats";
+E2M8Desc="E2M8: Tower of Babel";
+E2M9Desc="E2M9: Fortress of Mystery";
+
+E3M1Desc="E3M1: Hell Keep";
+E3M2Desc="E3M2: Slough of Despair";
+E3M3Desc="E3M3: Pandemonium";
+E3M4Desc="E3M4: House of Pain";
+E3M5Desc="E3M5: Unholy Cathedral";
+E3M6Desc="E3M6: Mt. Erebus";
+E3M7Desc="E3M7: Limbo";
+E3M8Desc="E3M8: Dis";
+E3M9Desc="E3M9: Warrens";
+
+E4M1Desc="E4M1: Hell Beneath";
+E4M2Desc="E4M2: Perfect Hatred";
+E4M3Desc="E4M3: Sever The Wicked";
+E4M4Desc="E4M4: Unruly Evil";
+E4M5Desc="E4M5: They Will Repent";
+E4M6Desc="E4M6: Against Thee Wickedly";
+E4M7Desc="E4M7: And Hell Followed";
+E4M8Desc="E4M8: Unto The Cruel";
+E4M9Desc="E4M9: Fear";
+
+TALKTOSELF1="You mumble to yourself";
+TALKTOSELF2="Who's there?";
+TALKTOSELF3="You scare yourself";
+TALKTOSELF4="You start to rave";
+TALKTOSELF5="You've lost it...";
+
+Player1Name="Green: ";
+Player2Name="Indigo: ";
+Player3Name="Brown: ";
+Player4Name="Red: ";
+Player5Name="Gold: ";
+Player6Name="Blue: ";
+Player7Name="DkBlue: ";
+Player8Name="Pink: ";
+
+AutoMapFollowOn="Follow Mode ON";
+AutoMapFollowOff="Follow Mode OFF";
+AutoMapGridOn="Grid ON";
+AutoMapGridOff="Grid OFF";
+AutoMapMarkedSpot="Marked Spot";
+AutoMapMarksClear="All Marks Cleared";
+
+MusChange="Music Change";
+ImpossibleChange="IMPOSSIBLE SELECTION";
+GodModeON="Degreelessness Mode On";
+GodModeOFF="Degreelessness Mode Off";
+HomDetectOn="HOM Detection ON";
+HomDetectOff="HOM Detection OFF";
+
+VeryHappyAmmo="Very Happy Ammo Added";
+AmmoAdded="Ammo (no keys) Added";
+
+ClipON="No Clipping Mode ON";
+ClipOFF="No Clipping Mode OFF";
+
+BEHOLDNote="inVul, Str, Invis, Rad, mAp, Lite-amp, or Jetpack";
+BEHOLDUsed="Power-up Toggled";
+
+ChoppersNote="... doesn't suck - GM";
+LevelChange="Changing Level...";
+
+SuicideCheat="Loser!";
+StuffRemoval="Stuff removed";
+PlayerTargetingOff="Monsters will not target player";
+PlayerTargetingOn="Monsters will target player";
+UnlockCheat="Got all the keys!";
+LoadedCheat="Full ammo added!";
+MonstersKilled="%d Monsters Killed.";
+CDdisabled="CD Audio has not been enabled";
+CDPlayTrack="Now Playing Track %d";
+
+LevelQ="Level Change!\nEnter Level Name:\n\n";
+MusicQ="Music Change!\nEnter Music Name:\n\n";
+
+TestQ="Test:\n\n";
+
+Episode1Text="Once you beat the big badasses and\n"
+"clean out the moon base you're supposed\n"
+"to win, aren't you? Aren't you? Where's\n"
+"your fat reward and ticket home? What\n"
+"the hell is this? It's not supposed to\n"
+"end this way!\n"
+"\n"
+"It stinks like rotten meat, but looks\n"
+"like the lost Deimos base.  Looks like\n"
+"you're stuck on The Shores of Hell.\n"
+"The only way out is through.\n"
+"\n"
+"To continue the DOOM experience, play\n"
+"The Shores of Hell and its amazing\n"
+"sequel, Inferno!\n";
+
+
+Episode2Text="You've done it! The hideous cyber-\n"
+"demon lord that ruled the lost Deimos\n"
+"moon base has been slain and you\n"
+"are triumphant! But ... where are\n"
+"you? You clamber to the edge of the\n"
+"moon and look down to see the awful\n"
+"truth.\n"
+"\n"
+"Deimos floats above Hell itself!\n"
+"You've never heard of anyone escaping\n"
+"from Hell, but you'll make the bastards\n"
+"sorry they ever heard of you! Quickly,\n"
+"you rappel down to  the surface of\n"
+"Hell.\n"
+"\n"
+"Now, it's on to the final chapter of\n"
+"DOOM! -- Inferno.";
+
+
+Episode3Text="The loathsome spiderdemon that\n"
+"masterminded the invasion of the moon\n"
+"bases and caused so much death has had\n"
+"its ass kicked for all time.\n"
+"\n"
+"A hidden doorway opens and you enter.\n"
+"You've proven too tough for Hell to\n"
+"contain, and now Hell at last plays\n"
+"fair -- for you emerge from the door\n"
+"to see the green fields of Earth!\n"
+"Home at last.\n"
+"\n"
+"You wonder what's been happening on\n"
+"Earth while you were battling evil\n"
+"unleashed. It's good that no Hell-\n"
+"spawn could have come through that\n"
+"door with you ...";
+
+
+Episode4Text="the spider mastermind must have sent forth\n"
+"its legions of hellspawn before your\n"
+"final confrontation with that terrible\n"
+"beast from hell.  but you stepped forward\n"
+"and brought forth eternal damnation and\n"
+"suffering upon the horde as a true hero\n"
+"would in the face of something so evil.\n"
+"\n"
+"besides, someone was gonna pay for what\n"
+"happened to daisy, your pet rabbit.\n"
+"\n"
+"but now, you see spread before you more\n"
+"potential pain and gibbitude as a nation\n"
+"of demons run amok among our cities.\n"
+"\n"
+"next stop, hell on earth!";
+
+Level7Text="YOU HAVE ENTERED DEEPLY INTO THE INFESTED\n" 
+           "STARPORT. BUT SOMETHING IS WRONG. THE\n" 
+           "MONSTERS HAVE BROUGHT THEIR OWN REALITY\n" 
+           "WITH THEM, AND THE STARPORT'S TECHNOLOGY\n" 
+           "IS BEING SUBVERTED BY THEIR PRESENCE.\n" 
+           "\n"
+           "AHEAD, YOU SEE AN OUTPOST OF HELL, A\n" 
+           "FORTIFIED ZONE. IF YOU CAN GET PAST IT,\n" 
+           "YOU CAN PENETRATE INTO THE HAUNTED HEART\n" 
+           "OF THE STARBASE AND FIND THE CONTROLLING\n" 
+           "SWITCH WHICH HOLDS EARTH'S POPULATION\n" 
+           "HOSTAGE.";
+
+Level12Text="YOU HAVE WON! YOUR VICTORY HAS ENABLED\n" 
+            "HUMANKIND TO EVACUATE EARTH AND ESCAPE\n"
+            "THE NIGHTMARE.  NOW YOU ARE THE ONLY\n"
+            "HUMAN LEFT ON THE FACE OF THE PLANET.\n"
+            "CANNIBAL MUTATIONS, CARNIVOROUS ALIENS,\n"
+            "AND EVIL SPIRITS ARE YOUR ONLY NEIGHBORS.\n"
+            "YOU SIT BACK AND WAIT FOR DEATH, CONTENT\n"
+            "THAT YOU HAVE SAVED YOUR SPECIES.\n"
+            "\n"
+            "BUT THEN, EARTH CONTROL BEAMS DOWN A\n"
+            "MESSAGE FROM SPACE: \"SENSORS HAVE LOCATED\n"
+            "THE SOURCE OF THE ALIEN INVASION. IF YOU\n"
+            "GO THERE, YOU MAY BE ABLE TO BLOCK THEIR\n"
+            "ENTRY.  THE ALIEN BASE IS IN THE HEART OF\n"
+            "YOUR OWN HOME CITY, NOT FAR FROM THE\n"
+            "STARPORT.\" SLOWLY AND PAINFULLY YOU GET\n"
+            "UP AND RETURN TO THE FRAY.";
+
+Level21Text="YOU ARE AT THE CORRUPT HEART OF THE CITY,\n"
+            "SURROUNDED BY THE CORPSES OF YOUR ENEMIES.\n"
+            "YOU SEE NO WAY TO DESTROY THE CREATURES'\n"
+            "ENTRYWAY ON THIS SIDE, SO YOU CLENCH YOUR\n"
+            "TEETH AND PLUNGE THROUGH IT.\n"
+            "\n"
+            "THERE MUST BE A WAY TO CLOSE IT ON THE\n"
+            "OTHER SIDE. WHAT DO YOU CARE IF YOU'VE\n"
+            "GOT TO GO THROUGH HELL TO GET TO IT?";
+
+EndGameText="THE HORRENDOUS VISAGE OF THE BIGGEST\n"
+            "DEMON YOU'VE EVER SEEN CRUMBLES BEFORE\n"
+            "YOU, AFTER YOU PUMP YOUR ROCKETS INTO\n"
+            "HIS EXPOSED BRAIN. THE MONSTER SHRIVELS\n"
+            "UP AND DIES, ITS THRASHING LIMBS\n"
+            "DEVASTATING UNTOLD MILES OF HELL'S\n"
+            "SURFACE.\n"
+            "\n"
+            "YOU'VE DONE IT. THE INVASION IS OVER.\n"
+            "EARTH IS SAVED. HELL IS A WRECK. YOU\n"
+            "WONDER WHERE BAD FOLKS WILL GO WHEN THEY\n"
+            "DIE, NOW. WIPING THE SWEAT FROM YOUR\n"
+            "FOREHEAD YOU BEGIN THE LONG TREK BACK\n"
+            "HOME. REBUILDING EARTH OUGHT TO BE A\n"
+            "LOT MORE FUN THAN RUINING IT WAS.\n";
+
+Level31Text="CONGRATULATIONS, YOU'VE FOUND THE SECRET\n"
+            "LEVEL! LOOKS LIKE IT'S BEEN BUILT BY\n"
+            "HUMANS, RATHER THAN DEMONS. YOU WONDER\n"
+            "WHO THE INMATES OF THIS CORNER OF HELL\n"
+            "WILL BE.";
+
+Level32Text="CONGRATULATIONS, YOU'VE FOUND THE\n"
+            "SUPER SECRET LEVEL!  YOU'D BETTER\n"
+            "BLAZE THROUGH THIS ONE!\n";
+
+
+CheckNetGame=    "D_CheckNetGame: Checking network game status.\n";
+HeadsUpInit=     "HU_Init: Setting up heads up display.\n";
+InitMachine=     "I_Init: Setting up machine state.\n";
+ListenNet=       "Listening for network start info...\n";
+DefaultLoad=     "M_LoadDefaults: Loaded system defaults.\n";
+MiscInfo=        "M_Init: Init Miscellaneous Info.\n";
+RefreshDaemon=   "R_Init: Init DOOM refresh daemon.\n";
+PlayState=       "P_Init: Init Playloop state.\n";
+SoundInit=       "S_Init: Setting up sound.\n";
+STBarInit=       "ST_Init: Init status bar.\n";
+SendNet=         "sending network start info...\n";
+TurboScale=      "turbo scale: %i%%\n";
+IsTurbo=         "%s is turbo!";
+AllocScreens=    "V_Init: allocate screens.\n";
+WadFileInit=     "W_Init: Init WADfiles.\n";
+ZoneMemoryAlloc= "Z_Init: Init Zone Memory Allocation. \n";
+
+ArachnotronName=     "ARACHNOTRON";
+ArchVileName=        "ARCH-VILE";
+BaronOfHellName=     "BARON OF HELL";
+CacodemonName=       "CACODEMON";
+CyberdemonName=      "THE CYBERDEMON";
+DemonName=           "DEMON";
+HeavyWeaponDudeName= "HEAVY WEAPON DUDE";
+HellKnightName=      "HELL KNIGHT";
+ImpName=             "IMP";
+LostSoulName=        "LOST SOUL";
+MancubusName=        "MANCUBUS";
+OurHeroName=         "OUR HERO";
+PainElementalName=   "PAIN ELEMENTAL";
+RevenantName=        "REVENANT";
+ShotgunGuyName=      "SHOTGUN GUY";
+SpiderMastermindName="THE SPIDER MASTERMIND";
+ZombiemanName=       "ZOMBIEMAN";
+
+Notice=
+ "==============================================================================\n"
+ " This is EDGE: a project that is based upon the Doom Source Code released by  \n"
+ " John Carmack of Id Software in December 1997. The work on this project is    \n"
+ " designed, and implemented by the EDGE Team (http://edge.sourceforge.net/).    \n"
+ "==============================================================================\n";
+
+JoystickCentre= "CENTRE the joystick\n\npress a key.";
+JoystickTL=     "Push the joystick to the UPPER LEFT corner\n\npress a key.";
+JoystickBR=     "Push the joystick to the BOTTOM RIGHT corner\n\npress a key.";
+JoystickHAT=    "Move the hat to the %s position\n\npress a key.";
+JoyThrottleMAX= "Set the throttle to MAXIMUM\n\npress a key.";
+JoyThrottleMIN= "Set the throttle to MINIMUM\n\npress a key.";
+JoystickCentreT= "CENTRE the joystick and press a key:";
+JoystickTLT=     "Push the joystick to the UPPER LEFT corner and press a key:";
+JoystickBRT=     "Push the joystick to the BOTTOM RIGHT corner and press a key:";
+JoystickHATT=    "Move the hat to the %s position and press a key:";
+JoyThrottleMAXT= "Set the throttle to MAXIMUM and press a key:";
+JoyThrottleMINT= "Set the throttle to MINIMUM and press a key:";
+
+ModeSelErrT=      "Unable to Initialise Graphics Mode %d x %d x %dbpp!";
+ModeSelErr=       "Unable to Initialise\nGraphics Mode %d x %d x %dbpp!\n\npress a key.";
+
+// Menu option text (so menu's can change to other languages)
+
+OptStandardControls="Standard Controls";
+OptExtendedControls="Extended Controls";
+OptSetResolution="Set Resolution";
+OptVideoOptions="Video Options";
+OptSoundOptions="Video Options";
+OptGameplayOptions="Gameplay Options";
+OptAnalogueOptions="Analogue Options";
+OptLanguage="Language";
+OptMessages="Messages";
+OptSwapStereo="Swap Stereo";
+OptSoundVolume="Sound Volume";
+OptMusicVolume="Music Volume";
+OptResetToRecommended="Reset to Recommended";
+OptResetToOriginalDoom="Reset to Original Doom";
+OptBrightness="Brightness";
+OptScreensize="Screensize";
+OptFieldOfView="Field Of View";
+OptZoomedFOV="Zoomed FOV";
+OptTranslucency="Translucency";
+OptMipmapping="Mipmapping";
+OptSmoothing="Smoothing";
+OptShadows="Shadows";
+OptDynamicLighting="Dynamic Lighting";
+OptCrosshair="Crosshair";
+OptMapRotation="Map Rotation";
+OptMapOverlay="Map Overlay";
+OptScreenComposition="Screen Composition";
+OptTeleportationeffect="Teleportation effect";
+OptReverseeffect="Reverse effect";
+OptTeleportFlash="Teleport Flash";
+OptWipemethod="Wipe method";
+OptReversedwipe="Reversed wipe";
+OptStretchSky="Stretch Sky";
+OptCyanRed3dEffect="Cyan/Red 3d effect";
+OptChangeSize="Change Size";
+OptChangeDepth="Change Depth";
+OptSetResolution="Set Resolution";
+OptTestResolution="Test Resolution";
+Optanalogueoptionssize="analogueoptionssize";
+OptInvertMouse="Invert Mouse";
+OptMouseXAxis="Mouse X Axis";
+OptMouseYAxis="Mouse Y Axis";
+OptMouseSpeed="MouseSpeed";
+OptMLookSpeed="MLook Speed";
+OptTwoStageTurning="Two-Stage Turning";
+OptTurningSpeed="Turning Speed";
+OptSideMoveSpeed="Side Move Speed";
+OptForwardMoveSpeed="Forward Move Speed";
+OptJoystickXAxis="Joystick X Axis";
+OptJoystickYAxis="Joystick Y Axis";
+OptCalibrateJoystick="Calibrate Joystick";
+Optplayoptionssize="playoptionssize";
+OptTrue3DGameplay="True 3D Gameplay";
+OptAutoAiming="AutoAiming";
+OptJumping="Jumping";
+OptCrouching="Crouching";
+OptMoreBlood="More Blood";
+OptExtras="Extras";
+OptGravity="Gravity";
+OptEnemyRespawnMode="Enemy Respawn Mode";
+OptItemRespawn="Item Respawn";
+OptFastMonsters="Fast Monsters";
+OptRespawn="Respawn";
+OptPrimaryAttack="Primary Attack";
+OptSecondaryAtk="Secondary Atk";
+OptUseItem="Use Item";
+OptWalkForward="Walk Forward";
+OptWalkBackwards="Walk Backwards";
+OptTurnLeft="Turn Left";
+OptTurnRight="Turn Right";
+OptMoveUp="Move Up";
+OptMoveDown="Move Down";
+OptToggleAutorun="Toggle Autorun";
+OptRun="Run";
+OptStrafeLeft="Strafe Left";
+OptStrafeRight="Strafe Right";
+OptStrafe="Strafe";
+OptLookUp="Look Up";
+OptLookDown="Look Down";
+OptCenterView="Center View";
+OptZoomInOut="Zoom in/out";
+Opt180DegreeTurn="180 degree turn";
+OptJump="Jump";
+OptMouseLook="Mouse Look";
+OptMapToggle="Map Toggle";
+OptMultiplayTalk="Multiplay Talk";
+
+Controls="Setup Standard Doom Controls";
+Controls2="Setup Extended EDGE Controls";
+VideoOptions="Setup Translucency, Resolutions, etc...";
+SoundOptions="Setup Volume, Frequency, Stereo, etc...";
+GameplayOptions="Setup Respawn, Gravity, 3D Options etc...";
+AnalogueOptions="Setup mouse and joystick options";
+SwapStereo="Swap the left and right sound channels";
+Messages="Show informational messages";
+CDOptions="CD Audio Config: Off/On/Atmosphere";
+ResetEDGE="Resets all configs to EDGE Extended mode";
+ResetDoom="Resets all configs to be like original DOOM";
+NeedRestart="This is applied when EDGE is restarted";
+
+Gravity="Changes the global gravity setting";
+Blood="Enables extra gore mode...";
+True3d="Enables jumping over things, flight etc...";
+
+ChangeRes="Sets Screen resolution, hicolour mode";
+
+QuitMsg1="please don't leave, there's more\ndemons to toast!";
+QuitMsg2="let's beat it -- this is turning\ninto a bloodbath!";
+QuitMsg3="i wouldn't leave if i were you.\ndos is much worse.";
+QuitMsg4="you're trying to say you like dos\nbetter than me, right?";
+QuitMsg5="don't leave yet -- there's a\ndemon around that corner!";
+QuitMsg6="ya know, next time you come in here\ni'm gonna toast ya.";
+QuitMsg7="go ahead and leave. see if i care.";
+QuitMsg8="you want to quit?\nthen, thou hast lost an eighth!";
+QuitMsg9="don't go now, there's a \ndimensional shambler waiting\nat the dos prompt!";
+QuitMsg10="get outta here and go back\nto your boring programs.";
+QuitMsg11="if i were your boss, i'd \n deathmatch ya in a minute!";
+QuitMsg12="look, bud. you leave now\nand you forfeit your body count!";
+QuitMsg13="just leave. when you come\nback, i'll be waiting with a bat.";
+QuitMsg14="you're lucky i don't smack\nyou for thinking about leaving.";
+
+QuitMsg15="don't quit now! we're \nstill spending your money!";
+
+QuitMsg16="THIS IS NO MESSAGE!\nPage intentionally left blank.";
+
+QuitSnd1="pldeth";
+QuitSnd2="dmpain";
+QuitSnd3="popain";
+QuitSnd4="slop";
+QuitSnd5="telept";
+QuitSnd6="posit1";
+QuitSnd7="posit3";
+QuitSnd8="sgtatk";
+QuitSnd9="vilact";
+QuitSnd10="getpow";
+QuitSnd11="boscub";
+QuitSnd12="slop";
+QuitSnd13="skeswg";
+QuitSnd14="kntdth";
+QuitSnd15="bspact";
+QuitSnd16="sgtatk";
+
+ChatKeys="gibr";
+
+iddt="iddt";
+idmus="idmus";
+iddqd="iddqd";
+idkfa="idkfa";
+idfa="idfa";
+idspispopd="idspispopd";
+idclip="idclip";
+idbehold1="idbeholdv";
+idbehold2="idbeholds";
+idbehold3="idbeholdi";
+idbehold4="idbeholdr";
+idbehold5="idbeholda";
+idbehold6="idbeholdl";
+idbehold7="idbeholdj";
+idbehold8="idbeholdn";
+idbehold9="idbeholdb";
+idchoppers="idchoppers";
+idclev="idclev";
+idmypos="idmypos";
+cdnext="cdnext";
+cdprev="cdprev";
+idkillall="killall";
+idinfo="idinfo";
+idsuicide="idsuicide";
+idunlock="idunlock";
+idloaded="idloaded";
+idtakeall="idtakeall";
+idgive0="idgive";
+idgive1="idgive1";
+idgive2="idgive2";
+idgive3="idgive3";
+idgive4="idgive4";
+idgive5="idgive5";
+idgive6="idgive6";
+idgive7="idgive7";
+idgive8="idgive8";
+idgive9="idgive9";
+idgive10="idgive10";
+idbot="idbot";
+idtst="idtst";
+BotSpawn="Death Bot Spawn Detected...";
+idhom="idhom";
+
+// ---- French Language Definition File ----------
+
+[FRENCH]
+DevelopmentMode = "MODE DEVELOPPEMENT ON.\n";
+PressKey = "APPUYEZ SUR UNE TOUCHE.";
+PressYorN = "APPUYEZ SUR Y OU N";
+
+QuickSaveOver = "SAUVEGARDE RAPIDE DANS LE FICHIER \n"
+	"\n"
+	"'%s'?\n"
+	"\n"
+	"APPUYEZ SUR Y OU N";
+NoQuickSaveSlot = "VOUS N'AVEZ PAS CHOISI UN EMPLACEMENT!\n"
+	"\n"
+	"APPUYEZ SUR UNE TOUCHE.";
+SaveWhenNotPlaying = "VOUS NE POUVEZ PAS SAUVER SI VOUS NE JOUEZ PAS!\n"
+	"\n"
+	"APPUYEZ SUR UNE TOUCHE.";
+
+NoLoadInNetGame = "VOUS NE POUVEZ PAS CHARGER\n"
+	"UN JEU EN RESEAU!\n"
+	"\n"
+	"APPUYEZ SUR UNE TOUCHE.";
+NoQLoadInNetGame = "CHARGEMENT RAPIDE INTERDIT EN RESEAU!\n"
+	"\n"
+	"APPUYEZ SUR UNE TOUCHE.";
+QuickLoad = "VOULEZ-VOUS CHARGER LA SAUVEGARDE\n"
+	"\n"
+	"'%s'?\n"
+	"\n"
+	"APPUYEZ SUR Y OU N";
+
+AllocScreens = "V_Init: allocate screens.\n";
+DefaultLoad = "M_LoadDefaults: Load system defaults.\n";
+ZoneMemoryAlloc = "Z_Init: Init zone memory allocation daemon. \n";
+WadFileInit = "W_Init: Init WADfiles.\n";
+MiscInfo = "M_Init: Init miscellaneous info.\n";
+RefreshDaemon = "R_Init: Init DOOM refresh daemon.\n";
+PlayState = "P_Init: Init Playloop state.\n\n";
+InitMachine = "I_Init: Setting up machine state.\n";
+CheckNetGame = "D_CheckNetGame: Checking network game status.\n";
+SoundInit = "S_Init: Setting up sound.\n";
+HeadsUpInit = "HU_Init: Setting up heads up display.\n";
+STBarInit = "ST_Init: Init status bar.\n";
+ListenNet = "listening for network start info...\n";
+SendNet = "sending network start info...\n";
+TurboScale = "turbo scale: %i%%\n";
+IsTurbo = "%s is turbo!";
+
+
+NewNetGame = "VOUS NE POUVEZ PAS LANCER\n"
+	"UN NOUVEAU JEU SUR RESEAU.\n"
+	"\n"
+	"APPUYEZ SUR UNE TOUCHE.";
+
+NightmareCheck = "VOUS CONFIRMEZ? CE NIVEAU EST\n"
+	"VRAIMENT IMPITOYABLE!\n"
+	"\n"
+	"APPUYEZ SUR Y OU N";
+
+MessagesOff = "MESSAGES OFF";
+MessagesOn = "MESSAGES ON";
+
+EndNetGame = "VOUS NE POUVEZ PAS METTRE FIN A UN JEU SUR RESEAU!\n"
+	"\n"
+	"APPUYEZ SUR UNE TOUCHE.";
+EndGameCheck = "VOUS VOULEZ VRAIMENT METTRE FIN AU JEU?\n"
+	"\n"
+	"APPUYEZ SUR Y OU N";
+
+PressToQuit = "(APPUYEZ SUR Y POUR REVENIR AU OS.)";
+
+GammaOff = "CORRECTION GAMMA OFF";
+GammaLevelOne = "CORRECTION GAMMA NIVEAU 1";
+GammaLevelTwo = "CORRECTION GAMMA NIVEAU 2";
+GammaLevelThree = "CORRECTION GAMMA NIVEAU 3";
+GammaLevelFour = "CORRECTION GAMMA NIVEAU 4";
+
+EmptySlot = "EMPLACEMENT VIDE";
+
+GotArmour = "ARMURE RECUPEREE.";
+GotMegaArmour = "MEGA-ARMURE RECUPEREE!";
+
+GotHealthPotion = "BONUS DE SANTE RECUPERE.";
+GotArmourHelmet = "BONUS D'ARMURE RECUPERE.";
+
+GotStim = "STIMPACK RECUPERE.";
+GotMedi = "MEDIKIT RECUPERE.";
+GotSoul = "SUPERCHARGE!";
+
+GotBlueCard = "CARTE MAGNETIQUE BLEUE RECUPEREE.";
+GotYellowCard = "CARTE MAGNETIQUE JAUNE RECUPEREE.";
+GotRedCard = "CARTE MAGNETIQUE ROUGE RECUPEREE.";
+GotBlueSkull = "CLEF CRANE BLEUE RECUPEREE.";
+GotYellowSkull = "CLEF CRANE JAUNE RECUPEREE.";
+GotRedSkull = "CLEF CRANE ROUGE RECUPEREE.";
+
+GotInvulner = "INVULNERABILITE!";
+GotBerserk = "BERSERK!";
+GotInvis = "INVISIBILITE PARTIELLE ";
+GotSuit = "COMBINAISON ANTI-RADIATIONS ";
+GotMap = "CARTE INFORMATIQUE ";
+GotNight = "Nightvision goggles";
+GotVisor = "VISEUR A AMPLIFICATION DE LUMIERE ";
+GotMega = "MEGASPHERE!";
+
+GotClip = "CHARGEUR RECUPERE.";
+GotClipBox = "BOITE DE BALLES RECUPEREE.";
+GotShells = "4 CARTOUCHES RECUPEREES.";
+GotShellBox = "BOITE DE CARTOUCHES RECUPEREE.";
+GotRocket = "ROQUETTE RECUPEREE.";
+GotRocketBox = "CAISSE DE ROQUETTES RECUPEREE.";
+GotCell = "CELLULE D'ENERGIE RECUPEREE.";
+GotCellPack = "PACK DE CELLULES D'ENERGIE RECUPERE.";
+GotBackpack = "SAC PLEIN DE MUNITIONS RECUPERE!";
+
+GotBFG = "VOUS AVEZ UN BFG9000!  OH, OUI!";
+GotChainGun = "VOUS AVEZ LA MITRAILLEUSE!";
+GotChainSaw = "UNE TRONCONNEUSE!";
+GotDoubleBarrel = "VOUS AVEZ UN SUPER FUSIL!";
+GotRocketLauncher = "VOUS AVEZ UN LANCE-ROQUETTES!";
+GotPlasmaGun = "VOUS AVEZ UN FUSIL A PLASMA!";
+GotShotgun = "VOUS AVEZ UN FUSIL!";
+
+NeedBlueForObject = "IL VOUS FAUT UNE CLEF BLEUE";
+NeedRedForObject = "IL VOUS FAUT UNE CLEF ROUGE";
+NeedYellowForObject = "IL VOUS FAUT UNE CLEF JAUNE";
+NeedBlueForDoor = "IL VOUS FAUT UNE CLEF BLEUE";
+NeedYellowForDoor = "IL VOUS FAUT UNE CLEF JAUNE";
+NeedRedForDoor = "IL VOUS FAUT UNE CLEF ROUGE";
+
+GameSaved = "JEU SAUVEGARDE.";
+
+UnsentMsg = "[MESSAGE NON ENVOYE]";
+Sent = "[MESSAGE ENVOYE]";
+
+Map01Desc = "NIVEAU 1: ENTREE ";
+Map02Desc = "NIVEAU 2: HALLS SOUTERRAINS ";
+Map03Desc = "NIVEAU 3: LE FEU NOURRI ";
+Map04Desc = "NIVEAU 4: LE FOYER ";
+Map05Desc = "NIVEAU 5: LES EGOUTS ";
+Map06Desc = "NIVEAU 6: LE BROYEUR ";
+Map07Desc = "NIVEAU 7: L'HERBE DE LA MORT";
+Map08Desc = "NIVEAU 8: RUSES ET PIEGES ";
+Map09Desc = "NIVEAU 9: LE PUITS ";
+Map10Desc = "NIVEAU 10: BASE DE RAVITAILLEMENT ";
+Map11Desc = "NIVEAU 11: LE CERCLE DE LA MORT!";
+Map12Desc = "NIVEAU 12: L'USINE ";
+Map13Desc = "NIVEAU 13: LE CENTRE VILLE";
+Map14Desc = "NIVEAU 14: LES ANTRES PROFONDES ";
+Map15Desc = "NIVEAU 15: LA ZONE INDUSTRIELLE ";
+Map16Desc = "NIVEAU 16: LA BANLIEUE";
+Map17Desc = "NIVEAU 17: LES IMMEUBLES";
+Map18Desc = "NIVEAU 18: LA COUR ";
+Map19Desc = "NIVEAU 19: LA CITADELLE ";
+Map20Desc = "NIVEAU 20: JE T'AI EU!";
+Map21Desc = "NIVEAU 21: LE NIRVANA";
+Map22Desc = "NIVEAU 22: LES CATACOMBES ";
+Map23Desc = "NIVEAU 23: LA GRANDE FETE ";
+Map24Desc = "NIVEAU 24: LE GOUFFRE ";
+Map25Desc = "NIVEAU 25: LES CHUTES DE SANG";
+Map26Desc = "NIVEAU 26: LES MINES ABANDONNEES ";
+Map27Desc = "NIVEAU 27: CHEZ LES MONSTRES ";
+Map28Desc = "NIVEAU 28: LE MONDE DE L'ESPRIT ";
+Map29Desc = "NIVEAU 29: LA LIMITE ";
+Map30Desc = "NIVEAU 30: L'ICONE DU PECHE ";
+Map31Desc = "NIVEAU 31: WOLFENSTEIN";
+Map32Desc = "NIVEAU 32: LE MASSACRE";
+
+TALKTOSELF1 = "VOUS PARLEZ TOUT SEUL ";
+TALKTOSELF2 = "QUI EST LA?";
+TALKTOSELF3 = "VOUS VOUS FAITES PEUR ";
+TALKTOSELF4 = "VOUS COMMENCEZ A DELIRER ";
+TALKTOSELF5 = "VOUS ETES LARGUE...";
+
+PlayerOneName = "VERT: ";
+PlayerTwoName = "INDIGO: ";
+PlayerThreeName = "BRUN: ";
+PlayerFourName = "ROUGE: ";
+PlayerFiveName = "Gold: ";
+PlayerSixName = "Blue: ";
+PlayerSevenName = "DkBlue: ";
+PlayerEightName = "Pink: ";
+
+AutoMapFollowOn = "MODE POURSUITE ON";
+AutoMapFollowOff = "MODE POURSUITE OFF";
+AutoMapGridOn = "GRILLE ON";
+AutoMapGridOff = "GRILLE OFF";
+AutoMapMarkedSpot = "REPERE MARQUE ";
+AutoMapMarksClear = "REPERES EFFACES ";
+
+MusChange = "CHANGEMENT DE MUSIQUE ";
+ImpossibleChange = "IMPOSSIBLE SELECTION";
+GodModeOn = "INVULNERABILITE ON ";
+GodModeOff = "INVULNERABILITE OFF";
+
+VeryHappyAmmo = "ARMEMENT MAXIMUM! ";
+AmmoAdded = "ARMES (SAUF CLEFS) AJOUTEES";
+
+ClipON = "BARRIERES ON";
+ClipOFF = "BARRIERES OFF";
+
+BEHOLDNote = " inVuln, Str, Inviso, Rad, Allmap, Lite-amp, or Jetpack";
+BEHOLDUsed = "AMELIORATION ACTIVEE";
+
+ChoppersNote = "... DOESN'T SUCK - GM";
+LevelChange = "CHANGEMENT DE NIVEAU...";
+
+SuicideCheat = "Loser!";
+StuffRemoval = "Stuff Removed";
+PlayerTargetingOff = "Monsters will not target player";
+PlayerTargetingOn = "Monsters will target player";
+UnlockCheat = "Got all the keys!";
+LoadedCheat = "Full ammo added!";
+MonstersKilled = "%d Monsters Killed";
+CDdisabled = "CD Audio is not enabled";
+CDPlayTrack = "Now Playing Track %d";
+
+LevelQ = "Level Change!\n"
+	"Enter Level Name:\n"
+	"\n";
+MusicQ = "Music Change!\n"
+	"Enter Music Name:\n"
+	"\n";
+
+Episode1Text="APRES AVOIR VAINCU LES GROS MECHANTS\n"
+     "ET NETTOYE LA BASE LUNAIRE, VOUS AVEZ\n"
+     "GAGNE, NON? PAS VRAI? OU EST DONC VOTRE\n"
+     " RECOMPENSE ET VOTRE BILLET DE\n"
+     "RETOUR? QU'EST-QUE CA VEUT DIRE?CEN'EST PAS LA FIN ESPEREE!\n"
+     "\n"
+     "CA SENT LA VIANDE PUTREFIEE, MAIS\n"
+     "ON DIRAIT LA BASE DEIMOS. VOUS ETES\n"
+     "APPAREMMENT BLOQUE AUX PORTES DE L'ENFER.\n"
+     "LA SEULE ISSUE EST DE L'AUTRE COTE.\n"
+     "\n"
+     "POUR VIVRE LA SUITE DE DOOM, JOUEZ\n"
+     "A 'AUX PORTES DE L'ENFER' ET A\n"
+     "L'EPISODE SUIVANT, 'L'ENFER'!\n";
+
+Episode2Text="VOUS AVEZ REUSSI. L'INFAME DEMON\n"
+     "QUI CONTROLAIT LA BASE LUNAIRE DE\n"
+     "DEIMOS EST MORT, ET VOUS AVEZ\n"
+     "TRIOMPHE! MAIS... OU ETES-VOUS?\n"
+     "VOUS GRIMPEZ JUSQU'AU BORD DE LA\n"
+     "LUNE ET VOUS DECOUVREZ L'ATROCE\n"
+     "VERITE.\n"
+     "\n"
+     "DEIMOS EST AU-DESSUS DE L'ENFER!\n"
+     "VOUS SAVEZ QUE PERSONNE NE S'EN\n"
+     "EST JAMAIS ECHAPPE, MAIS CES FUMIERS\n"
+     "VONT REGRETTER DE VOUS AVOIR CONNU!\n"
+     "VOUS REDESCENDEZ RAPIDEMENT VERS\n"
+     "LA SURFACE DE L'ENFER.\n"
+     "\n"
+     "VOICI MAINTENANT LE CHAPITRE FINAL DE\n"
+     "DOOM! -- L'ENFER.";
+
+Episode3Text="LE DEMON ARACHNEEN ET REPUGNANT\n"
+     "QUI A DIRIGE L'INVASION DES BASES\n"
+     "LUNAIRES ET SEME LA MORT VIENT DE SE\n"
+     "FAIRE PULVERISER UNE FOIS POUR TOUTES.\n"
+     "\n"
+     "UNE PORTE SECRETE S'OUVRE. VOUS ENTREZ.\n"
+     "VOUS AVEZ PROUVE QUE VOUS POUVIEZ\n"
+     "RESISTER AUX HORREURS DE L'ENFER.\n"
+     "IL SAIT ETRE BEAU JOUEUR, ET LORSQUE\n"
+     "VOUS SORTEZ, VOUS REVOYEZ LES VERTES\n"
+     "PRAIRIES DE LA TERRE, VOTRE PLANETE.\n"
+     "\n"
+     "VOUS VOUS DEMANDEZ CE QUI S'EST PASSE\n"
+     "SUR TERRE PENDANT QUE VOUS AVEZ\n"
+     "COMBATTU LE DEMON. HEUREUSEMENT,\n"
+     "AUCUN GERME DU MAL N'A FRANCHI\n"
+     "CETTE PORTE AVEC VOUS...";
+
+Episode4Text="the spider mastermind must have sent forth\n"
+     "its legions of hellspawn before your\n"
+     "final confrontation with that terrible\n"
+     "beast from hell.  but you stepped forward\n"
+     "and brought forth eternal damnation and\n"
+     "suffering upon the horde as a true hero\n"
+     "would in the face of something so evil.\n"
+     "\n"
+     "besides, someone was gonna pay for what\n"
+     "happened to daisy, your pet rabbit.\n"
+     "\n"
+     "but now, you see spread before you more\n"
+     "potential pain and gibbitude as a nation\n"
+     "of demons run amok among our cities.\n"
+     "\n"
+     "next stop, hell on earth!";
+
+E1M1Desc="E1M1: HANGAR";
+E1M2Desc="E1M2: USINE NUCLEAIRE ";
+E1M3Desc="E1M3: RAFFINERIE DE TOXINES ";
+E1M4Desc="E1M4: CENTRE DE CONTROLE ";
+E1M5Desc="E1M5: LABORATOIRE PHOBOS ";
+E1M6Desc="E1M6: TRAITEMENT CENTRAL ";
+E1M7Desc="E1M7: CENTRE INFORMATIQUE ";
+E1M8Desc="E1M8: ANOMALIE PHOBOS ";
+E1M9Desc="E1M9: BASE MILITAIRE ";
+
+E2M1Desc="E2M1: ANOMALIE DEIMOS ";
+E2M2Desc="E2M2: ZONE DE CONFINEMENT ";
+E2M3Desc="E2M3: RAFFINERIE";
+E2M4Desc="E2M4: LABORATOIRE DEIMOS ";
+E2M5Desc="E2M5: CENTRE DE CONTROLE ";
+E2M6Desc="E2M6: HALLS DES DAMNES ";
+E2M7Desc="E2M7: CUVES DE REPRODUCTION ";
+E2M8Desc="E2M8: TOUR DE BABEL ";
+E2M9Desc="E2M9: FORTERESSE DU MYSTERE ";
+
+E3M1Desc="E3M1: DONJON DE L'ENFER ";
+E3M2Desc="E3M2: BOURBIER DU DESESPOIR ";
+E3M3Desc="E3M3: PANDEMONIUM";
+E3M4Desc="E3M4: MAISON DE LA DOULEUR ";
+E3M5Desc="E3M5: CATHEDRALE PROFANE ";
+E3M6Desc="E3M6: MONT EREBUS";
+E3M7Desc="E3M7: LIMBES";
+E3M8Desc="E3M8: DIS";
+E3M9Desc="E3M9: CLAPIERS";
+
+E4M1Desc="E4M1: Hell Beneath";
+E4M2Desc="E4M2: Perfect Hatred";
+E4M3Desc="E4M3: Sever The Wicked";
+E4M4Desc="E4M4: Unruly Evil";
+E4M5Desc="E4M5: They Will Repent";
+E4M6Desc="E4M6: Against Thee Wickedly";
+E4M7Desc="E4M7: And Hell Followed";
+E4M8Desc="E4M8: Unto The Cruel";
+E4M9Desc="E4M9: Fear";
+
+Level7Text = "VOUS ETES AU PLUS PROFOND DE L'ASTROPORT\n"
+	"INFESTE DE MONSTRES, MAIS QUELQUE CHOSE\n"
+	"NE VA PAS. ILS ONT APPORTE LEUR PROPRE\n"
+	"REALITE, ET LA TECHNOLOGIE DE L'ASTROPORT\n"
+	"EST AFFECTEE PAR LEUR PRESENCE.\n"
+	"\n"
+	"DEVANT VOUS, VOUS VOYEZ UN POSTE AVANCE\n"
+	"DE L'ENFER, UNE ZONE FORTIFIEE. SI VOUS\n"
+	"POUVEZ PASSER, VOUS POURREZ PENETRER AU\n"
+	"COEUR DE LA BASE HANTEE ET TROUVER \n"
+	"L'INTERRUPTEUR DE CONTROLE QUI GARDE LA \n"
+	"POPULATION DE LA TERRE EN OTAGE.";
+Level12Text = "VOUS AVEZ GAGNE! VOTRE VICTOIRE A PERMIS\n"
+	"A L'HUMANITE D'EVACUER LA TERRE ET \n"
+	"D'ECHAPPER AU CAUCHEMAR. VOUS ETES \n"
+	"MAINTENANT LE DERNIER HUMAIN A LA SURFACE \n"
+	"DE LA PLANETE. VOUS ETES ENTOURE DE \n"
+	"MUTANTS CANNIBALES, D'EXTRATERRESTRES \n"
+	"CARNIVORES ET D'ESPRITS DU MAL. VOUS \n"
+	"ATTENDEZ CALMEMENT LA MORT, HEUREUX \n"
+	"D'AVOIR PU SAUVER VOTRE RACE.\n"
+	"MAIS UN MESSAGE VOUS PARVIENT SOUDAIN\n"
+        "DE L'ESPACE: \"NOS CAPTEURS ONT LOCALISE\n"
+	"LA SOURCE DE L'INVASION EXTRATERRESTRE.\n"
+	"SI VOUS Y ALLEZ, VOUS POURREZ PEUT-ETRE\n"
+	"LES ARRETER. LEUR BASE EST SITUEE AU COEUR\n"
+        "DE VOTRE VILLE NATALE, PRES DE L'ASTROPORT.\"\n"
+	"VOUS VOUS RELEVEZ LENTEMENT ET PENIBLEMENT\n"
+	"ET VOUS REPARTEZ POUR LE FRONT.";
+Level21Text = "VOUS ETES AU COEUR DE LA CITE CORROMPUE,\n"
+	"ENTOURE PAR LES CADAVRES DE VOS ENNEMIS.\n"
+	"VOUS NE VOYEZ PAS COMMENT DETRUIRE LA PORTE\n"
+	"DES CREATURES DE CE COTE. VOUS SERREZ\n"
+	"LES DENTS ET PLONGEZ DANS L'OUVERTURE.\n"
+	"\n"
+	"IL DOIT Y AVOIR UN MOYEN DE LA FERMER\n"
+	"DE L'AUTRE COTE. VOUS ACCEPTEZ DE\n"
+	"TRAVERSER L'ENFER POUR LE FAIRE?";
+EndGameText = "LE VISAGE HORRIBLE D'UN DEMON D'UNE\n"
+	"TAILLE INCROYABLE S'EFFONDRE DEVANT\n"
+	"VOUS LORSQUE VOUS TIREZ UNE SALVE DE\n"
+	"ROQUETTES DANS SON CERVEAU. LE MONSTRE\n"
+	"SE RATATINE, SES MEMBRES DECHIQUETES\n"
+	"SE REPANDANT SUR DES CENTAINES DE\n"
+	"KILOMETRES A LA SURFACE DE L'ENFER.\n"
+	"\n"
+	"VOUS AVEZ REUSSI. L'INVASION N'AURA.\n"
+	"PAS LIEU. LA TERRE EST SAUVEE. L'ENFER\n"
+	"EST ANEANTI. EN VOUS DEMANDANT OU IRONT\n"
+	"MAINTENANT LES DAMNES, VOUS ESSUYEZ\n"
+	"VOTRE FRONT COUVERT DE SUEUR ET REPARTEZ\n"
+	"VERS LA TERRE. SA RECONSTRUCTION SERA\n"
+	"BEAUCOUP PLUS DROLE QUE SA DESTRUCTION.\n";
+Level31Text = "FELICITATIONS! VOUS AVEZ TROUVE LE\n"
+	"NIVEAU SECRET! IL SEMBLE AVOIR ETE\n"
+	"CONSTRUIT PAR LES HUMAINS. VOUS VOUS\n"
+	"DEMANDEZ QUELS PEUVENT ETRE LES\n"
+	"HABITANTS DE CE COIN PERDU DE L'ENFER.";
+Level32Text = "FELICITATIONS! VOUS AVEZ DECOUVERT\n"
+	"LE NIVEAU SUPER SECRET! VOUS FERIEZ\n"
+	"MIEUX DE FONCER DANS CELUI-LA!\n";
+
+ArachnotronName=     "ARACHNOTRON";
+ArchVileName=        "ARCHI-INFAME";
+BaronOfHellName=     "BARON DE L'ENFER";
+CacodemonName=       "CACODEMON";
+DemonName=           "DEMON";
+HeavyWeaponDudeName= "MEC SUPER-ARME";
+HellKnightName=      "CHEVALIER DE L'ENFER";
+ImpName=             "DIABLOTIN";
+LostSoulName=        "AME PERDUE";
+MancubusName=        "MANCUBUS";
+OurHeroName=         "NOTRE HEROS";
+PainElementalName=   "ELEMENTAIRE DE LA DOULEUR";
+RevenantName=        "REVENANT";
+ShotgunGuyName=      "TYPE AU FUSIL";
+CyberdemonName=      "LE CYBERDEMON";
+SpiderMastermindName="L'ARAIGNEE CERVEAU";
+ZombiemanName=       "ZOMBIE";
+
+Notice = 
+"==============================================================================\n"
+" This is EDGE: a project that is based upon the Doom Source Code released by  \n"
+" John Carmack of Id Software in December 1997. The work on this project is    \n"
+" designed and implemented by the EDGE Team (http://edge.sourceforge.net/).     \n"
+"==============================================================================\n";
+
+JoystickCentre = "CENTRE the joystick\n"
+	"\n"
+	"press a key.";
+JoystickTL = "Push the joystick to the UPPER LEFT corner\n"
+	"\n"
+	"press a key.";
+JoystickBR = "Push the joystick to the BOTTOM RIGHT corner\n"
+	"\n"
+	"press a key.";
+JoystickHAT = "Move the hat to the %s position\n"
+	"\n"
+	"press a key.";
+JoyThrottleMAX = "Set the throttle to MAXIMUM\n"
+	"\n"
+	"press a key.";
+JoyThrottleMIN = "Set the throttle to MINIMUM\n"
+	"\n"
+	"press a key.";
+JoystickCentreT = "CENTRE the joystick and press a key:";
+JoystickTLT = "Push the joystick to the UPPER LEFT corner and press a key:";
+JoystickBRT = "Push the joystick to the BOTTOM RIGHT corner and press a key:";
+JoystickHATT = "Move the hat to the %s position and press a key:";
+JoyThrottleMAXT = "Set the throttle to MAXIMUM and press a key:";
+JoyThrottleMINT = "Set the throttle to MINIMUM and press a key:";
+
+ModeSelErrT = "Unable to Initialise Graphics Mode %d x %d x %dc!";
+ModeSelErr = "Unable to Initialise\n"
+	"Graphics Mode %d x %d x %dc!\n"
+	"\n"
+	"press a key.";
+
+// --------- Spanish Language Definition File --------------
+
+[SPANISH]
+DevelopmentMode = "Modo de Desarrollo ON.\n";
+PressKey = "Presiona una tecla.";
+PressYorN = "Presiona y o n.";
+
+QuickSaveOver = "Salvado rapido sobre tu juego llamado\n"
+	"\n"
+	"'%s'?\n"
+	"\n"
+	"presiona y o n.";
+NoQuickSaveSlot = "No has elegido una casilla de salvado rapido todavia!\n"
+	"\n"
+	"presiona una tecla.";
+SaveWhenNotPlaying = "No puedes salvar si no estas jugando!\n"
+	"\n"
+	"presiona una tecla.";
+
+NoLoadInNetGame = "No puedes usar cargar durante un juego en red!\n"
+	"\n"
+	"presiona una tecla.";
+NoQLoadInNetGame = "No puedes usar cargado rapido durante un juego en red!\n"
+	"\n"
+	"presiona una tecla.";
+QuickLoad = "Quieres cargar rapido el juego llamado\n"
+	"\n"
+	"'%s'?\n"
+	"\n"
+	"presiona y o n.";
+
+NewNetGame = "No puedes empezar un juego nuevo\n"
+	"mientras estes en un juego en red.\n"
+	"\n"
+	"presiona una tecla.";
+
+NightmareCheck = "Estas seguro? este nivel de dificultad\n"
+	"no es ni remotamente justo.\n"
+	"\n"
+	"presiona y o n.";
+
+MessagesOff = "Mensajes APAGADOS";
+MessagesOn = "Mensajes PRENDIDOS";
+
+EndNetGame = "No puedes terminar un juego en red!\n"
+	"\n"
+	"presiona una tecla.";
+EndGameCheck = "Estas seguro que quieres terminar el juego?\n"
+	"\n"
+	"presiona y o n.";
+
+PressToQuit = "(presiona 'y' para terminar)";
+
+GammaOff = "Correccion Gamma APAGADO";
+GammaLevelOne = "Correccion Gamma nivel 1";
+GammaLevelTwo = "Correccion Gamma nivel 2";
+GammaLevelThree = "Correccion Gamma nivel 3";
+GammaLevelFour = "Correccion Gamma nivel 4";
+
+EmptySlot = "casilla vacia";
+
+GotArmour = "Recogiste la armadura.";
+GotMegaArmour = "Recogiste la MegaArmadura!";
+
+GotHealthPotion = "Recogiste bonos de Salud.";
+GotArmourHelmet = "Recogiste bonos de Armadura.";
+
+GotStim = "Recogiste un botiquin.";
+GotMedi = "Recogiste un Kit-medico.";
+GotSoul = "Supercarga!";
+
+GotBlueCard = "Recogiste una tarjeta-llave azul.";
+GotYellowCard = "Recogiste una tarjeta-llave amarilla.";
+GotRedCard = "Recogiste una tarjeta-llave roja.";
+GotBlueSkull = "Recogiste un craneo-llave azul.";
+GotYellowSkull = "Recogiste un craneo-llave amarillo.";
+GotRedSkull = "Recogiste un craneo-llave rojo.";
+
+GotInvulner = "Invulnerabilidad!";
+GotBerserk = "Berserk!";
+GotInvis = "Invisibilidad Parcial";
+GotSuit = "Traje Protector de Radiacion";
+GotMap = "Mapa del Area Computarizado";
+GotNight = "Nightvision goggles";
+GotVisor = "Visor Amplificador de Luz";
+GotMega = "MegaEsfera!";
+
+GotClip = "Recogiste un cargador.";
+GotClipBox = "Recogiste una caja de balas.";
+GotShells = "Recogiste 4 cartuchos de escopeta.";
+GotShellBox = "Recogiste una caja de cartuchos de escopeta.";
+GotRocket = "Recogiste un cohete.";
+GotRocketBox = "Recogiste una caja de cohetes.";
+GotCell = "Recogiste una celula de Energia.";
+GotCellPack = "Recogiste un paquetes de celulas de energia.";
+GotBackpack = "Recogiste una mochila llena de municiones!";
+
+GotBFG = "Obtuviste el BFG9000!  Oh, si.";
+GotChainGun = "Obtuviste la ametralladora!";
+GotChainSaw = "Una motosierra!  Encontremos algo de carne!";
+GotDoubleBarrel = "Obtuviste la super-escopeta!";
+GotRocketLauncher = "Obtuviste el lanzacohetes!";
+GotPlasmaGun = "Obtuviste el arma de plasma!";
+GotShotgun = "Obtuviste la escopeta!";
+
+NeedBlueForObject = "Necesitas una tarjeta-llave azul para activar este objeto";
+NeedRedForObject = "Necesitas una tarjeta-llave roja para activar este objeto";
+NeedYellowForObject = "Necesitas una tarjeta-llave amarilla para activar este objeto";
+NeedBlueForDoor = "Necesitas una llave azul para abrir esta puerta";
+NeedYellowForDoor = "Necesitas una llave amarilla para abrir esta puerta";
+NeedRedForDoor = "Necesitas una llave roja para abrir esta puerta";
+
+GameSaved = "Juego salvado.";
+
+UnsentMsg = "[Mensaje no enviado]";
+Sent = "[Mensaje Enviado]";
+
+Map01Desc = "Nivel 1: la entrada";
+Map02Desc = "Nivel 2: masmorras";
+Map03Desc = "Nivel 3: la manopla";
+Map04Desc = "Nivel 4: el foco";
+Map05Desc = "Nivel 5: los tuneles de desperdicio";
+Map06Desc = "Nivel 6: la trituradora";
+Map07Desc = "Nivel 7: muerte simple";
+Map08Desc = "Nivel 8: trucos y trampas";
+Map09Desc = "Nivel 9: el foso";
+Map10Desc = "Nivel 10: base de reabastecimiento";
+Map11Desc = "Nivel 11: 'o' de destruccion!";
+Map12Desc = "Nivel 12: la fabrica";
+Map13Desc = "Nivel 13: el centro";
+Map14Desc = "Nivel 14: lo mas denso";
+Map15Desc = "Nivel 15: zona industrial";
+Map16Desc = "Nivel 16: suburbios";
+Map17Desc = "Nivel 17: vecindades";
+Map18Desc = "Nivel 18: el patio";
+Map19Desc = "Nivel 19: la ciudadela";
+Map20Desc = "Nivel 20: gotcha!";
+Map21Desc = "Nivel 21: nirvana";
+Map22Desc = "Nivel 22: las catacumbas";
+Map23Desc = "Nivel 23: barriles de diversion";
+Map24Desc = "Nivel 24: el precipicio";
+Map25Desc = "Nivel 25: Cascadas de Sangre";
+Map26Desc = "Nivel 26: las minas abandonadas";
+Map27Desc = "Nivel 27: condominio de monstruos";
+Map28Desc = "Nivel 28: el mundo de espiritus";
+Map29Desc = "Nivel 29: el fin viviente";
+Map30Desc = "Nivel 30: icono del pecado";
+Map31Desc = "Nivel 31: wolfenstein";
+Map32Desc = "Nivel 32: grosse";
+
+TALKTOSELF1 = "Te recriminas tu mismo";
+TALKTOSELF2 = "Quien esta ahi?";
+TALKTOSELF3 = "Te asustas tu mismo";
+TALKTOSELF4 = "Empiezas a delirar";
+TALKTOSELF5 = "Lo perdiste...";
+
+PlayerOneName = "Green: ";
+PlayerTwoName = "Indigo: ";
+PlayerThreeName = "Brown: ";
+PlayerFourName = "Red: ";
+PlayerFiveName = "Gold: ";
+PlayerSixName = "Blue: ";
+PlayerSevenName = "DkBlue: ";
+PlayerEightName = "Pink: ";
+
+AutoMapFollowOn = "Modo de Seguimiento PRENDIDO";
+AutoMapFollowOff = "Mode de Segumiento APAGADO";
+AutoMapGridOn = "Rejilla PRENDIDA";
+AutoMapGridOff = "Rejilla APAGADA";
+AutoMapMarkedSpot = "Lugar Marcado";
+AutoMapMarksClear = "Todas las marcas eliminadas";
+
+MusChange = "Cambio de Musica";
+ImpossibleChange = "SELECCION IMPOSIBLE";
+GodModeOn = "Modo Degreelessness Prendido";
+GodModeOff = "Modo Degreelessness Apagado";
+
+VeryHappyAmmo = "Muy feliz Armado Agrgado";
+AmmoAdded = "Armado (sin llaves) Agregado";
+
+ClipON = "Modo sin Recorte PRENDIDO";
+ClipOFF = "Modo sin Recorte APAGADO";
+
+BEHOLDNote = "inVuln, Str, Inviso, Rad, Allmap, Lite-amp or Jetpack";
+BEHOLDUsed = "Poder Activado";
+
+ChoppersNote = "... no apesta - GM";
+LevelChange = "Cambiando nivel...";
+
+SuicideCheat = "Loser!";
+StuffRemoval = "Stuff Removed";
+PlayerTargetingOff = "Monsters will not target player";
+PlayerTargetingOn = "Monsters will target player";
+UnlockCheat = "Got all the keys!";
+LoadedCheat = "Full ammo added!";
+MonstersKilled = "%d Monsters Killed";
+CDdisabled = "CD Audio is not enabled";
+CDPlayTrack = "Now Playing Track %d";
+
+LevelQ = "Level Change!\n"
+	"Enter Level Name:\n"
+	"\n";
+MusicQ = "Music Change!\n"
+	"Enter Music Name:\n"
+	"\n";
+
+Episode1Text="Una vez que has vencido a los malos y\n"
+     "limpiado la base lunar supones que\n"
+     "ganaste, o no? Oh no? Donde esta\n"
+     "tu gorda recompensa y tu boleto a casa? Que\n"
+     "rayos es esto? No se suponia que\n"
+     "debia terminar de esta forma!\n"
+     "\n"
+     "Esto apesta como carne podrida, pero parece\n"
+     "como la base perdida de Deimos.  Parece que\n"
+     "estas atrapado en Las Playas del Infierno.\n"
+     "La unica forma de salir es a traves de ellas.\n"
+     "\n"
+     "Para continuar la experiencia de DOOM, juega\n"
+     "Las Playas del Infierno y su sorprendente\n"
+     "sequela, Inferno!\n";
+
+Episode2Text="Lo has hecho! El horrible senor\n"
+     "cyber-demonio que goberno la perdida base\n"
+     "lunar de Deimos ha sido eliminado y tu eres\n"
+     "el triunfador! Pero ... Donde estas?\n"
+     "Escalas al la orilla de la\n"
+     "luna y ves hacia abajo para ver la espantosa\n"
+     "realidad.\n"
+     "\n"
+     "Deimos flota encima del infierno!\n"
+     "Nunca has oido de alguien que haya esacapado\n"
+     "del infierno, pero haras que los bastardos\n"
+     "sientan haber oido de ti! Rapidamente,\n"
+     "bajas a rapel hasta la superficie del\n"
+     "Infierno.\n"
+     "\n"
+     "Ahora, estas en el capitulo final de\n"
+     "DOOM! -- Inferno.";
+
+Episode3Text="La repugnate arana-demonio que\n"
+     "comando la invasion de la bases\n"
+     "lunares y causo tanta muerte ha recibido\n"
+     "una patada en su culo para siempre.\n"
+     "\n"
+     "Un pasaje secreto se abre y entras.\n"
+     "Has probado ser demasiado rudo para el\n"
+     "infierno, y ahora el infierno al fin juega\n"
+     "justo -- por fin emerges de la puerta\n"
+     "para ver los verdes campos de la tierra!\n"
+     "Hogar al fin.\n"
+     "\n"
+     "Piensas que habra estado pasando en\n"
+     "la tierra mientras peleabas con las\n"
+     "fuerzas del mal. Es bueno que ninguna\n"
+     "reencarnacion infernal haya atravezado\n"
+     "la puerta contigo ...";
+
+Episode4Text="la arana mente maestra debe ser enviada delante\n"
+     "de sus legiones infernales antes de tu\n"
+     "confrontacion final con esa terrible\n"
+     "bestia del infierno.  Pero tu das un paso\n"
+     "y traes delante una maldicion eterna y\n"
+     "sufriendo ante la horda como un verdadero heroe\n"
+     "en la cara de algo tan siniestro.\n"
+     "\n"
+     "Ademas, alguien va a pagar por lo que le\n"
+     "paso a daisy, tu conejita.\n"
+     "\n"
+     "pero ahora, ves una propagacion de\n"
+     "potencial dolor y una nacion de\n"
+     "demonios corriendo en nuestras ciudades.\n"
+     "\n"
+     "siguiente parada, infierno en la tierra!";
+
+E1M1Desc="E1M1: Hangar";
+E1M2Desc="E1M2: Planta Nuclear";
+E1M3Desc="E1M3: Refineria de Toxinas";
+E1M4Desc="E1M4: Control de Comando";
+E1M5Desc="E1M5: Laboratorio de Phobos";
+E1M6Desc="E1M6: Procesadora Central";
+E1M7Desc="E1M7: Estacion Computarizada";
+E1M8Desc="E1M8: Anomalia de Phobos";
+E1M9Desc="E1M9: Base Militar";
+
+E2M1Desc="E2M1: Anomalia de Deimos";
+E2M2Desc="E2M2: Area de Contencion";
+E2M3Desc="E2M3: Refineria";
+E2M4Desc="E2M4: Laboratorio de Deimos";
+E2M5Desc="E2M5: Centro de Comando";
+E2M6Desc="E2M6: Pasillos de los Malditos";
+E2M7Desc="E2M7: Probetas de Reproduccion";
+E2M8Desc="E2M8: Torre de Babel";
+E2M9Desc="E2M9: Fortaleza del Misterio";
+
+E3M1Desc="E3M1: Infierno Mantenido";
+E3M2Desc="E3M2: Pantano de la Desesperacion";
+E3M3Desc="E3M3: Pandemonium";
+E3M4Desc="E3M4: Casa del Dolor";
+E3M5Desc="E3M5: Catedral Profana";
+E3M6Desc="E3M6: Monte Erebus";
+E3M7Desc="E3M7: Limbo";
+E3M8Desc="E3M8: Dis";
+E3M9Desc="E3M9: Consejeros";
+
+E4M1Desc="E4M1: Infierno Indigno";
+E4M2Desc="E4M2: Aborrecimiento Perfecto";
+E4M3Desc="E4M3: Separa lo Perverso";
+E4M4Desc="E4M4: Mal Indomito";
+E4M5Desc="E4M5: Ellos se Arrepentiran";
+E4M6Desc="E4M6: Contra la Perversion";
+E4M7Desc="E4M7: Y el infierno siguio";
+E4M8Desc="E4M8: Hasta Lo Cruel";
+E4M9Desc="E4M9: Miedo";
+
+Level7Text = "HAS ENTRADO EN LAS PROFUNDIDAES INFESTADAS DEL\n"
+	"PUERTO ESTELAR. PERO ALGO ESTA MAL. LOS\n"
+	"MONSTRUOS HAN TRAIDO SU PROPIA REALIDAD\n"
+	"CON ELLOS, Y LA TECNOLOGIA DEL PUERTO ESTELAR\n"
+	"ESTA SIENDO INVERTIDA POR SU PRESENCIA.\n"
+	"\n"
+	"ADELANTE, VES UN ADELANTO DEL INFIERNO, A\n"
+	"UNA ZONA FORTIFICADA. SI PUEDES PASARLA,\n"
+	"PENTRARAS EL CORAZON EMBRUJADO\n"
+	"DE LA BASE ESTELAR Y ENCONTRARAS EL INTERRUPTOR\n"
+	"QUE APRISIONA LA PROBLACION DE LA TIERRA\n"
+	"COMO REHEN.";
+Level12Text = "HAS GANADO! TU VICTORIA HA PERMITIDO A LA\n"
+	"HUMANIDAD EVACUAR LA TIERRA Y ESCAPAR\n"
+	"DE LA PESADILLA.  AHORA ERES EL UNICO\n"
+	"HUMANO EN LA FAZ DEL PLANETA.\n"
+	"MUTACIONES CANIBALES, ALIENS CARNIVOROS,\n"
+	"Y ESPIRITUS MALIGNOS SON TUS UNICOS VECINOS.\n"
+	"TE SIENTAS Y ESPERAS LA MUERTE, CONTENTO\n"
+	"DE QUE HAS SALVADO TU ESPECIE.\n"
+	"\n"
+	"PERO ENTONCES, EL CONTROL TERRESTRE ENVIA UN\n"
+	"MENSAJE DEL ESPACIO: \"LOS SENSORES HAN LOCALIZADO\n"
+	"LA FUENTE DE LA INVASION ALIENIGENA. SI VAS\n"
+	"AHI, PODRIAS BLOQUEAR SU ENTRADA.\n"
+	"LA BASE ALIENIGENA ESTA EN EL CORAZON DE\n"
+	"SU PROPIA CIUDAD, NO MUY LEJOS DE EL PUERTO\n"
+	"ESTELAR.\" LENTA Y DOLOROSAMENTE TE LEVANTAS\n"
+	"Y REGRESAS A LA BATALLA.";
+Level21Text = "ESTAS EN EL CORRUPTO CORAZON DE LA CIUDAD,\n"
+	"RODEADO POR LOS CUERPOS DE TUS ENEMIGOS.\n"
+	"NO VES FORMA ALGUNA DE DESTRUIR A LAS CRIATURAS'\n"
+	"DE ESTE LADO, ASI QUE APRIETAS TUS\n"
+	"DIENTES Y PASAS A TRAVES DE EL.\n"
+	"\n"
+	"DEBE DE HABER ALGUNA FORMA DE CERRARLO EN EL\n"
+	"OTRO LADO. QUE IMPORTA SI TIENES QUE\n"
+	"IR A TRAVES DEL INFIERNO PARA HACERLO?";
+EndGameText = "LA HORRENDA VISION DEL DEMONIO MAS GRANDE\n"
+	"QUE HAS VISTO SE DESMORONA ANTE TI,\n"
+	"DESPUES DE DISPARAR TUS COHETES DENTRO SU\n"
+	"CEREBRO EXPUESTO. EL MONSTRUO SE MARCHITA\n"
+	"Y MUERE, SUS MIEMBROS DEVASTADORES\n"
+	"DA%ARON INCONTABLES MILLAS DE LA SUPERFICIE\n"
+	"DEL INFIERNO.\n"
+	"\n"
+	"LO HAS HECHO. LA INVASION HA TERMINADO.\n"
+	"LA TIERRA ESTA A SALVO. EL INFIERNO ES UNA RUINA.\n"
+	"PIENSAS ADONDE IRAN LOS MALOS CUANDO\n"
+	"MUERAN, AHORA. LIMPIANDOTE EL SUDOR DE TU\n"
+	"FRENTE EMPIEZAS EL LARGO CAMINO DE REGESO A\n"
+	"CASA. RECONSTRUIR LA TIERRA DEBE DE SER MUCHO\n"
+	"MAS DIVERTIDO QUE LO FUE DESTRUIRLA.\n";
+Level31Text = "FELICIDADES , ENCONTRASTE EL NIVEL\n"
+	"SECRETO! PARECE COMO SI HUBIERA SIDO CONSTRUIDO POR\n"
+	"HUMANOS, EN LUGAR DE DEMONIOS. PIENSAS QUIENES\n"
+	"SERAN LOS RESIDENTES DE ESTA ESQUINA DEL\n"
+	"INFIERNO.";
+Level32Text = "FELICIDADES, HAS ENCONTRADO EL\n"
+	"NIVEL SUPER SECRETO!  MEJOR TE APURAS\n"
+	"A PASAR A TRAVES DE ESTE!\n";
+
+AllocScreens = "V_Init: allocate screens.\n";
+DefaultLoad = "M_LoadDefaults: Load system defaults.\n";
+ZoneMemoryAlloc = "Z_Init: Init zone memory allocation daemon. \n";
+WadFileInit = "W_Init: Init WADfiles.\n";
+MiscInfo = "M_Init: Init miscellaneous info.\n";
+RefreshDaemon = "R_Init: Init DOOM refresh daemon.\n";
+PlayState = "P_Init: Init Playloop state.\n\n";
+InitMachine = "I_Init: Setting up machine state.\n";
+CheckNetGame = "D_CheckNetGame: Checking network game status.\n";
+SoundInit = "S_Init: Setting up sound.\n";
+HeadsUpInit = "HU_Init: Setting up heads up display.\n";
+STBarInit = "ST_Init: Init status bar.\n";
+ListenNet = "listening for network start info...\n";
+SendNet = "sending network start info...\n";
+TurboScale = "turbo scale: %i%%\n";
+IsTurbo = "%s is turbo!";
+
+ArachnotronName=      "ARACHNOTRON";
+ArchVileName=         "ARCH-VILE";
+BaronOfHellName=      "BARON DEL INFIERNO";
+CacodemonName=        "CACODEMONIO";
+CyberdemonName=       "EL CIBERDEMONIO";
+DemonName=            "DEMONIO";
+HeavyWeaponDudeName=  "TIO DE ARMAS PESADAS";
+HellKnightName=       "CABALLERO DEL INFIERNO";
+ImpName=              "DIABLILLO";
+LostSoulName=         "ALMA PERDIDA";
+MancubusName=         "MANCUBUS";
+OurHeroName=          "NUESTRO HEROE";
+PainElementalName=    "ELEMENTAL DE DOLOR";
+RevenantName=         "REVENANT";
+ShotgunGuyName=       "TIO DE ESCOPETA";
+SpiderMastermindName= "LA MAESTRA-MENTE ARANA";
+ZombiemanName=        "HOMBRE ZOMBIE";
+
+Notice = 
+"==============================================================================\n"
+" This is EDGE: a project that is based upon the Doom Source Code released by  \n"
+" John Carmack of Id Software in December 1997. The work on this project is    \n"
+" designed, and implemented by the EDGE Team (http://edge.sourceforge.net/).    \n"
+"==============================================================================\n";
+
+JoystickCentre = "CENTRE the joystick\n"
+	"\n"
+	"press a key.";
+JoystickTL = "Push the joystick to the UPPER LEFT corner\n"
+	"\n"
+	"press a key.";
+JoystickBR = "Push the joystick to the BOTTOM RIGHT corner\n"
+	"\n"
+	"press a key.";
+JoystickHAT = "Move the hat to the %s position\n"
+	"\n"
+	"press a key.";
+JoyThrottleMAX = "Set the throttle to MAXIMUM\n"
+	"\n"
+	"press a key.";
+JoyThrottleMIN = "Set the throttle to MINIMUM\n"
+	"\n"
+	"press a key.";
+JoystickCentreT = "CENTRE the joystick and press a key:";
+JoystickTLT = "Push the joystick to the UPPER LEFT corner and press a key:";
+JoystickBRT = "Push the joystick to the BOTTOM RIGHT corner and press a key:";
+JoystickHATT = "Move the hat to the %s position and press a key:";
+JoyThrottleMAXT = "Set the throttle to MAXIMUM and press a key:";
+JoyThrottleMINT = "Set the throttle to MINIMUM and press a key:";
+
+ModeSelErrT = "Unable to Initialise Graphics Mode %d x %d x %dc!";
+ModeSelErr = "Unable to Initialise\n"
+	"Graphics Mode %d x %d x %dc!\n"
+	"\n"
+	"press a key.";
+
+// -------- Swedish Language Definition File ------------
+//
+// =======================================================
+//         TRANSLATIONS MADE BY FREDRIK EHNBOM
+//             (fredrik.ehnbom@linux.nu)
+// 
+//        Spelling corrections, interpunction,
+//        additional translations and overall
+//             a nice guy: Anton Berglin
+//            (berglin@mbox301.swipnet.se)
+// 
+//   Additional fine-tuning by Team Member Erik Sandberg
+// =======================================================
+
+[SWEDISH]
+DevelopmentMode="Development Mode is enabled.";
+PressKey="Tryck p� valfri tangent.";
+PressYorN="Tryck Y eller N";
+
+QuickSaveOver="Vill du verkligen skriva �ver\n\n\"%s\"?\n\ntryck y eller n";
+NoQuickSaveSlot="du har inte valt ett snabbsparsf�lt �nnu!\n\ntryck p� valfri tangent";
+SaveWhenNotPlaying="du kan inte spara om du inte spelar!\n\ntryck p� valfri tangent";
+
+NoLoadInNetGame="du kan inte ladda i ett n�tverksspel!\n\ntryck p� valfri tangent";
+NoQLoadInNetGame="du kan inte snabbladda i ett n�tverksspel!\n\ntryck p� valfri tangent";
+QuickLoad="vill du snabbladda spelet\n\n\"%s\"?\n\ntryck y eller n";
+
+NewNetGame="Du kan inte starta ett nytt spel\n"
+           "i ett n�tverksspel.\n\ntryck p� valfri tangent";
+
+NightmareCheck="�r du s�ker? den h�r sv�righetsgraden �r\n"
+               "inte ens n�rap� r�ttvis.\n\ntryck y eller n";
+
+MessagesOff="Meddelanden AV";
+MessagesOn="Meddelanden P�";
+
+EndNetGame="Du kan inte avsluta ett n�tverksspel!\n\ntryck p� valfri tangent";
+EndGameCheck="�r du s�ker p� att du vill avsluta spelet?\n\ntryck y eller n";
+
+PressToQuit="(tryck y f�r att avsluta)";
+
+GammaOff="Gammakorrektion AV";
+GammaLevelOne  ="Gammakorrektion niv� 1";
+GammaLevelTwo  ="Gammakorrektion niv� 2";
+GammaLevelThree="Gammakorrektion niv� 3";
+GammaLevelFour ="Gammakorrektion niv� 4";
+
+EmptySlot="Ledigt f�lt";
+
+GotArmour="Plockade upp pansaret.";
+GotMegaArmour="Plockade upp megapansaret!";
+
+GotHealthPotion="Plockade upp en h�lsobonus.";
+GotArmourHelmet="Plockade upp en pansarbonus.";
+
+GotStim="Plockade upp ett stimpack.";
+GotMedi="Plockade upp en medikit.";
+GotSoul="Sj�lasf�r!";
+
+GotBlueCard="Plockade upp ett bl�tt nyckelkort.";
+GotYellowCard="Plockade upp ett gult nyckelkort.";
+GotRedCard="Plockade upp ett r�tt nyckelkort.";
+GotBlueSkull="Plockade upp en bl� d�dskallenyckel.";
+GotYellowSkull="Plockade upp en gul d�dskallenyckel.";
+GotRedSkull="Plockade upp en r�d d�dskallenyckel.";
+
+GotInvulner="Od�dlighet!";
+GotBerserk="B�rs�rk!";
+GotJetPack="JetPack!";
+GotInvis="Osynlighet!";
+GotSuit="Str�lningsskyddsdr�kt";
+GotMap="Karta �ver banan";
+GotNight="IR-glas�gon";
+GotVisor="ljusf�rst�rkande visir";
+GotMega="Megasf�r!";
+
+GotClip="Plockade upp ett magasin.";
+GotClipBox="Plockade upp en l�da kulor.";
+GotShells="Plockade upp 4 patroner.";
+GotShellBox="Plockade upp en l�da patroner.";
+GotRocket="Plockade upp en raket.";
+GotRocketBox="Plockade upp en l�da raketer.";
+GotCell="Plockade upp ett energibatteri.";
+GotCellPack="Plockade upp en l�da energibatterier.";
+GotBackpack="Plockade upp en ryggs�ck full med ammo!";
+
+GotBFG="Du fick BFG9000!  Jajemen.";
+GotChainGun="Du fick gatlinggev�ret!";
+GotChainSaw="En motors�g!  K�tta!!";
+GotDoubleBarrel="Du fick det dubbelpipiga hagelgev�ret!";
+GotRocketLauncher="Du fick raketgev�ret!";
+GotPlasmaGun="Du fick plasmagev�ret!";
+GotShotgun="Du fick hagelgev�ret!";
+
+NeedBlueForObject="Du beh�ver en bl� nyckel f�r att aktivera det h�r objektet";
+NeedYellowForObject="Du beh�ver en gul nyckel f�r att aktivera det h�r objektet";
+NeedRedForObject="Du beh�ver en r�d nyckel f�r att aktivera det h�r objektet";
+NeedBlueForDoor="Du beh�ver en bl� nyckel f�r att �ppna den h�r d�rren";
+NeedYellowForDoor="Du beh�ver en gul nyckel f�r att �ppna den h�r d�rren";
+NeedRedForDoor="Du beh�ver en r�d nyckel f�r att �ppna den h�r d�rren";
+
+GameSaved="spelet sparat.";
+
+UnsentMsg="(skickade inte meddelandet)";
+Sent="(skickade meddelandet)";
+
+// It would just sound silly with level names translated into Swedish.
+// Made two changes, though: Removed the � in level 11 and 23 -ES
+
+Map01Desc="level 1: entryway";
+Map02Desc="level 2: underhalls";
+Map03Desc="level 3: the gantlet";
+Map04Desc="level 4: the focus";
+Map05Desc="level 5: the waste tunnels";
+Map06Desc="level 6: the crusher";
+Map07Desc="level 7: dead simple";
+Map08Desc="level 8: tricks and traps";
+Map09Desc="level 9: the pit";
+Map10Desc="level 10: refueling base";
+Map11Desc="level 11: \"o\" of destruction!";
+Map12Desc="level 12: the factory";
+Map13Desc="level 13: downtown";
+Map14Desc="level 14: the inmost dens";
+Map15Desc="level 15: industrial zone";
+Map16Desc="level 16: suburbs";
+Map17Desc="level 17: tenements";
+Map18Desc="level 18: the courtyard";
+Map19Desc="level 19: the citadel";
+Map20Desc="level 20: gotcha!";
+Map21Desc="level 21: nirvana";
+Map22Desc="level 22: the catacombs";
+Map23Desc="level 23: barrels o fun";
+Map24Desc="level 24: the chasm";
+Map25Desc="level 25: bloodfalls";
+Map26Desc="level 26: the abandoned mines";
+Map27Desc="level 27: monster condo";
+Map28Desc="level 28: the spirit world";
+Map29Desc="level 29: the living end";
+Map30Desc="level 30: icon of sin";
+Map31Desc="level 31: wolfenstein";
+Map32Desc="level 32: grosse";
+
+TALKTOSELF1="du mumlar f�r dig sj�lv";
+TALKTOSELF2="Vem d�r?";
+TALKTOSELF3="Du skr�mmer dig sj�lv";
+TALKTOSELF4="Du b�rjar gorma";
+TALKTOSELF5="Du �r ju inte riktigt frisk...";
+
+PlayerOneName="Gr�n: ";
+PlayerTwoName="Indigo: ";
+PlayerThreeName="Brun: ";
+PlayerFourName="R�d: ";
+PlayerFiveName="Guld: ";
+PlayerSixName="Bl�: ";
+PlayerSevenName="M�rkBl�: ";
+PlayerEightName="Rosa: ";
+
+// FIXME: Bad translation "F�ljl�ge"
+AutoMapFollowOn="F�ljl�ge P�";
+AutoMapFollowOff="F�ljl�ge AV";
+AutoMapGridOn="Rutn�t P�";
+AutoMapGridOff="Rutn�t AV";
+AutoMapMarkedSpot="Markerade position";
+AutoMapMarksClear="Alla markeringar raderade";
+
+MusChange="Musik�ndring";
+ImpossibleChange="OM�JLIGT VAL";
+GodModeON="Od�dlighet p�";
+GodModeOFF="Od�dlighet av";
+
+VeryHappyAmmo="Ammo och nycklar tillkom";
+AmmoAdded="Ammo (inga nycklar) tillkom";
+
+ClipON="G� igenom v�ggar P�";
+ClipOFF="G� igenom v�ggar AV";
+
+BEHOLDNote="inVul, Str, Invis, Rad, mAp, Lite-amp, or Jetpack";
+BEHOLDUsed="Power-up Toggled";
+
+ChoppersNote="... suger inte - GM";
+LevelChange="Byter bana...";
+
+SuicideCheat = "Mes!";
+StuffRemoval = "Stuff Removed";
+PlayerTargetingOff = "Monsters will not target player";
+PlayerTargetingOn = "Monsters will target player";
+UnlockCheat = "Alla nycklar!";
+LoadedCheat = "Full ammunition!";
+MonstersKilled = "D�dade %d monster";
+CDdisabled = "CD Audio �r inaktiverat";
+CDPlayTrack = "Spelar nu sp�r %d";
+
+LevelQ = "Byter bana!\n"
+	"Skriv in banans namn:\n"
+	"\n";
+MusicQ = "Byter l�t!\n"
+	"Skriv in namnet p� den nya l�ten:\n"
+	"\n";
+
+Episode1Text="N�r du v�l har d�dat alla dom stora bovarna\n"
+     "och rensat rent p� m�nbasen �r du f�rmodad\n"
+     "att vinna, �r du inte det? �r du inte det? Var\n"
+     "�r din feta bel�ning och biljett hem? Vad\n"
+     "i helvete �r det h�r? Det �r inte menat att\n"
+     "sluta p� det h�r s�ttet!\n"
+     "\n"
+     "Det stinker som ruttet k�tt, men ser ut\n"
+     "som den f�rlorade Deimos basen.  Ser ut som\n"
+     "du �r fast p� helvettets strand.\n"
+     "Den enda v�gen ut �r rakt igenom.\n"
+     "\n"
+     "F�r att forts�tta DOOM upplevelsen, spela\n"
+     "The Shores of Hell och dess f�rbluffande\n"
+     "forts�ttning, Inferno!\n";
+
+Episode2Text="Du har gjort det! Den ot�cka cyber-\n"
+     "demon lorden som styrde p� den f�rlorade\n"
+     "Deimos m�nbasen har blivit dr�pt och du\n"
+     "firar! Men ... var �r du?\n"
+     "Du kl�ttrar till kanten av m�nen\n"
+     "och ser ner f�r att se den hemska\n"
+     "sanningen.\n"
+     "\n"
+     "Deimos sv�var �ver sj�lvaste Helvetet!\n"
+     "Du har aldrig h�rt om n�gon som lyckats fly\n"
+     "fr�n Helvetet, men du ska f� dom j�vlarna\n"
+     "att �ngra att dom n�gonsin fick h�ra om dig!\n"
+     "Snabbt, kutar du ner till ytan av\n"
+     "Helvetet.\n"
+     "\n"
+     "Nu, �r det det sista kapitlet av\n"
+     "DOOM! -- Inferno.";
+
+Episode3Text="Den vidriga spindeldemonen som\n"
+     "ledde invasionen till m�nbaserna\n"
+     "och orsakade s� mycket d�d har f�tt\n"
+     "sitt arsle sparkat en sista g�ng.\n"
+     "\n"
+     "En g�md port �ppnas och du kliver in.\n"
+     "Du har bevisat att du �r f�r tuff f�r\n"
+     "helvetet att beh�lla, och nu spelar\n"
+     "Helvetet �ntligen r�ttvist -- du dyker\n"
+     "upp ur d�rren f�r att se Jordens gr�na\n"
+     "f�lt! �ntligen hemma.\n"
+     "\n"
+     "Du undrar vad som har h�nt p� Jorden\n"
+     "undertiden du har slagits mot de onda.\n"
+     "Det �r bra att inget Helvettesyngel\n"
+     "skulle ha kunnat komma igenom d�rren\n"
+     "tillsammans med dig...";
+
+Episode4Text="Ledar spindeln m�ste ha sent sina\n"
+     "trupper av Helvetesavkommor innan din\n"
+     "sista konfrontation med den f�rskr�ckliga\n"
+     "besten fr�n Helvetet.  Men du steg fram�t\n"
+     "och tog med dig evig f�rd�melse och\n"
+     "lidande �t horden som en sann hj�lte\n"
+     "skulle ha gjort i ansiktet p� n�got s�\n"
+     "elakt.\n"
+     "\n"
+     "�nd�, n�gon skulle f� betala f�r vad\n"
+     "som h�nde daisy, din favorit kanin.\n"
+     "\n"
+     "men nu, ser du brett framf�r din mer\n"
+     "m�jliga sm�rta och gibbitude som en nation\n"
+     "av demoner som l�per amok i v�ra st�der.\n"
+     "\n"
+     "n�sta h�llplats, hell on earth!";
+
+E1M1Desc="E1M1: Hangar";
+E1M2Desc="E1M2: Nuclear Plant";
+E1M3Desc="E1M3: Toxin Refinery";
+E1M4Desc="E1M4: Command Control";
+E1M5Desc="E1M5: Phobos Lab";
+E1M6Desc="E1M6: Central Processing";
+E1M7Desc="E1M7: Computer Station";
+E1M8Desc="E1M8: Phobos Anomaly";
+E1M9Desc="E1M9: Military Base";
+
+E2M1Desc="E2M1: Deimos Anomaly";
+E2M2Desc="E2M2: Containment Area";
+E2M3Desc="E2M3: Refinery";
+E2M4Desc="E2M4: Deimos Lab";
+E2M5Desc="E2M5: Command Center";
+E2M6Desc="E2M6: Halls of the Damned";
+E2M7Desc="E2M7: Spawning Vats";
+E2M8Desc="E2M8: Tower of Babel";
+E2M9Desc="E2M9: Fortress of Mystery";
+
+E3M1Desc="E3M1: Hell Keep";
+E3M2Desc="E3M2: Slough of Despair";
+E3M3Desc="E3M3: Pandemonium";
+E3M4Desc="E3M4: House of Pain";
+E3M5Desc="E3M5: Unholy Cathedral";
+E3M6Desc="E3M6: Mt. Erebus";
+E3M7Desc="E3M7: Limbo";
+E3M8Desc="E3M8: Dis";
+E3M9Desc="E3M9: Warrens";
+
+E4M1Desc="E4M1: Hell Beneath";
+E4M2Desc="E4M2: Perfect Hatred";
+E4M3Desc="E4M3: Sever The Wicked";
+E4M4Desc="E4M4: Unruly Evil";
+E4M5Desc="E4M5: They Will Repent";
+E4M6Desc="E4M6: Against Thee Wickedly";
+E4M7Desc="E4M7: And Hell Followed";
+E4M8Desc="E4M8: Unto The Cruel";
+E4M9Desc="E4M9: Fear";
+
+Level7Text=
+"DU HAR STIGIT DJUPT IN I DEN ANGRIPNA\n"
+"RYMDBASEN. MEN N�GOT �R FEL.\n"
+"MONSTRENA HAR TAGIT MED SIG SIN EGEN\n"
+"VERKLIGHET, OCH DERAS N�RVARO G�R\n"
+"RYMDBASENS TEKNOLOGI OANV�NDBAR\n"
+"\n"
+"FRAMF�R DIG SER DU EN AV HELVETETS UTPOSTER, EN\n"
+"FORTIFIERAD ZON. OM DU KAN KOMMA F�RBI\n"
+"DEN, KAN DU TR�NGA IN I RYMDBASENS HEMS�KTA\n"
+"HJ�RTA OCH HITTA KONTROLLSPAKEN SOM H�LLER\n"
+"JORDENS BEFOLKNING SOM GISSLAN.";
+
+Level12Text=
+"DU HAR VUNNIT! DIN SEGER HAR GJORT DET\n"
+"M�JLIGT F�R M�NNISKOSL�KTET ATT UTYMMA\n"
+"JORDEN OCH RYMMA FR�N MARDR�MMEN. NU �R\n"
+"DU DEN ENDA M�NNISKAN KVAR P� PLANETENS YTA.\n"
+"KANNIBALMUTATIONER, K�TT�TANDE UTOMJORDINGAR\n"
+"OCH ONDA ANDAR �R DINA ENDA GRANNAR.\n"
+"DU LUTAR DIG BAK�T OCH V�NTAR P� D�DEN,\n"
+"N�JD MED ATT HA R�DDAT DIN ART.\n"
+"\n"
+"MEN D� TAR DU EMOT ETT MEDDELANDE FR�N\n"
+"RYMDEN: \"SENSORER HAR SP�RAT INVASIONENS\n"
+"K�LLA. OM DU �KER DIT, KAN DU KANSKE\n"
+"BLOCKERA DERAS ING�NG. BASEN LIGGER I DIN\n"
+"EGEN HEMSTADS HJ�RTA, INTE L�NGT IFR�N\n"
+"RYMDBASEN.\" L�NGSAMT OCH SM�RTSAMT STIGER\n"
+"DU UPP OCH �TERV�NDER TILL STRIDEN.";
+
+Level21Text=
+"DU BEFINNER DIG I STADENS F�RD�RVADE HJ�RTA,\n"
+"OMRINGAD AV DINA FIENDERS LIK.  DU SER\n"
+"INGET S�TT ATT F�RST�RA VARELSERNAS\n"
+"ING�NG FR�N DEN H�R SIDAN, S� DU BITER\n"
+"IHOP OCH HOPPAR IGENOM DEN.\n"
+"\n"
+"DET M�STE FINNAS ETT S�TT ATT ST�NGA DEN\n"
+"FR�N ANDRA SIDAN. VAD BRYR DU DIG OM DU\n"
+"M�STE KORSA HELVETET F�R ATT KOMMA FRAM?";
+
+EndGameText=
+"DET F�RSKR�CKLIGA ANSIKTET AV DEN\n"\
+"ST�RSTA DEMONEN DU N�GONSIN SETT SMULAS\n"\
+"S�NDER FRAMF�R DIG, EFTER ATT DU PUMPAT\n"\
+"DINA RAKETER IN I HANS BLOTTADE HJ�RNA.\n"\
+"MONSTRET SKRUMPNAR IHOP OCH D�R, DESS\n"\
+"LEMMAR �DEL�GGER HELVETETS O�NDLIGA YTA.\n"\
+"\n"\
+"\n"\
+"DU HAR GJORT DET. INVASIONEN �R �VER.\n"\
+"JORDEN �R R�DDAD. HELVETET �R �DELAGT.\n"\
+"DU UNDRAR VAR ELAKA M�NNISKOR KOMMER\n"\
+"N�R DOM D�R NU. MEDAN DU TORKAR SVETTEN\n"\
+"FR�N PANNAN B�RJAR DU DEN L�NGA\n"\
+"VANDRINGEN HEM. ATT �TERUPPBYGGA JORDEN\n"\
+"B�R VARA ROLIGARE �N DET VAR ATT\n" \
+"F�RD�RVA DEN.\n";
+
+Level31Text=
+"GRATULERAR, DU HAR HITTAT DEN HEMLIGA\n"\
+"BANAN! DET SER UT SOM OM DEN SNARARE �R\n"\
+"BYGGD AV M�NNISKOR �N AV DEMONER. DU\n"\
+"UNDRAR VILKA SOM HAMNAT I DEN H�R DELEN"\
+"AV HELVETET.";
+
+Level32Text=
+"GRATULERAR, DU HAR HITTAT DEN SUPER-\n"\
+"HEMLIGA BANAN!  B�ST ATT DU\n"\
+"MOSAR IGENOM DEN H�R!\n";
+
+CheckNetGame=    "D_CheckNetGame: Checking network game status.\n";
+HeadsUpInit=     "HU_Init: Setting up heads up display.\n";
+InitMachine=     "I_Init: Setting up machine state.\n";
+ListenNet=       "Listening for network start info...\n";
+DefaultLoad=     "M_LoadDefaults: Loaded system defaults.\n";
+MiscInfo=        "M_Init: Init Miscellaneous Info.\n";
+RefreshDaemon=   "R_Init: Init DOOM refresh daemon.\n";
+PlayState=       "P_Init: Init Playloop state.\n";
+SoundInit=       "S_Init: Setting up sound.\n";
+STBarInit=       "ST_Init: Init status bar.\n";
+SendNet=         "sending network start info...\n";
+TurboScale=      "turbo scale: %i%%\n";
+IsTurbo=         "%s is turbo!";
+AllocScreens=    "V_Init: allocate screens.\n";
+WadFileInit=     "W_Init: Init WADfiles.\n";
+ZoneMemoryAlloc= "Z_Init: Init Zone Memory Allocation. \n";
+
+Notice=
+"==============================================================================\n"
+" Detta �r EDGE: ett projekt baserat p� Dooms k�llkod, sl�ppd av John\n"
+" Carmack fr�n Id Software i december 1997. Allt arbete p� detta projekt har\n"
+" planerats och utf�rts av EDGEteamet (http://edge.sourceforge.net//).\n"
+"==============================================================================\n";
+
+JoystickCentre = "CENTRERA joysticken\n"
+	"\n"
+	"tryck p� valfri tangent.";
+JoystickTL = "Drag joysticken maximalt UPP�T och �t V�NSTER\n"
+	"\n"
+	"tryck p� valfri tangent.";
+JoystickBR = "Drag joysticken maximalt NED�T och �t H�GER\n"
+	"\n"
+	"tryck p� valfri tangent.";
+JoystickHAT = "Move the hat to the %s position\n"
+	"\n"
+	"tryck p� valfri tangent.";
+JoyThrottleMAX = "Set the throttle to MAXIMUM\n"
+	"\n"
+	"tryck p� valfri tangent.";
+JoyThrottleMIN = "Set the throttle to MINIMUM\n"
+	"\n"
+	"tryck p� valfri tangent.";
+JoystickCentreT = "CENTRE the joystick and press a key:";
+JoystickTLT = "Push the joystick to the UPPER LEFT corner and press a key:";
+JoystickBRT = "Push the joystick to the BOTTOM RIGHT corner and press a key:";
+JoystickHATT = "Move the hat to the %s position and press a key:";
+JoyThrottleMAXT = "Set the throttle to MAXIMUM and press a key:";
+JoyThrottleMINT = "Set the throttle to MINIMUM and press a key:";
+
+ModeSelErrT = "Kunde inte s�tta uppl�sningen till %d x %d x %dc!";
+ModeSelErr = "Kunte inte �ndra\n"
+	"uppl�sningen till %d x %d x %dc!\n"
+	"\n"
+	"tryck p� valfri tangent.";
+
+
+// ------ Dutch Language Definition File ---------------
+
+[DUTCH]
+DevelopmentMode = "Ontwikkelingsmodus AAN.\n";
+PressKey = "druk op een toets.";
+PressYorN = "toets y of n.";
+
+QuickSaveOver = "versneld opslaan over je spel genaamd\n"
+	"\n"
+	"'%s'?\n"
+	"\n"
+	"toets y of n.";
+NoQuickSaveSlot = "je hebt nog geen quicksave veld gekozen!\n"
+	"\n"
+	"druk op een toets.";
+SaveWhenNotPlaying = "je kunt niet opslaan als je niet speelt!\n"
+	"\n"
+	"druk op een toets.";
+
+NoLoadInNetGame = "je kunt niet laden in netwerkmodus!\n"
+	"\n"
+	"druk op een toets.";
+NoQLoadInNetGame = "je kunt niet versneld laden in netwerkmodus!\n"
+	"\n"
+	"druk op een toets.";
+QuickLoad = "wil je het spel\n"
+	"\n"
+	"'%s' versneld laden?\n"
+	"\n"
+	"toets y of n.";
+
+NewNetGame = "je kunt geen nieuw spel\n"
+	"in netwerkmodus beginnen.\n"
+	"\n"
+	"druk op een toets.";
+
+NightmareCheck = "weet je het zeker? dit skill level\n"
+	"is zelfs niet een beetje fair.\n"
+	"\n"
+	"press y or n.";
+
+MessagesOff = "Boodschappen UIT";
+MessagesOn = "Boodschappen AAN";
+
+EndNetGame = "je kunt geen netwerkspel beeindigen!\n"
+	"\n"
+	"druk op een toets.";
+EndGameCheck = "weet je zeker dat je het spel wilt beeindigen?\n"
+	"\n"
+	"toets y of n.";
+
+PressToQuit = "(toets y om te stoppen)";
+
+GammaOff = "Gamma correctie UIT";
+GammaLevelOne = "Gamma correctie niveau 1";
+GammaLevelTwo = "Gamma correctie niveau 2";
+GammaLevelThree = "Gamma correctie niveau 3";
+GammaLevelFour = "Gamma correctie niveau 4";
+
+EmptySlot = "Leeg veld";
+
+GotArmour = "Armor opgeraapt.";
+GotMegaArmour = "MegaArmor opgeraapt!";
+
+GotHealthPotion = "Health bonus opgeraapt.";
+GotArmourHelmet = "Armor bonus opgeraapt.";
+
+GotStim = "Stimpack opgeraapt.";
+GotMedi = "Medikit opgeraapt.";
+GotSoul = "Supercharge!";
+
+GotBlueCard = "Blauwe sleutelkaart opgeraapt.";
+GotYellowCard = "Gele sleutelkaart opgeraapt.";
+GotRedCard = "Rode sleutelkaart opgeraapt.";
+GotBlueSkull = "Blauwe doodshoofdsleutel opgeraapt.";
+GotYellowSkull = "Gele doodshoofdsleutel opgeraapt.";
+GotRedSkull = "Rode doodshoofdsleutel opgeraapt.";
+
+GotInvulner = "Onkwetsbaarheid!";
+GotBerserk = "Razernij!";
+GotInvis = "Gedeeltelijke onzichtbaarheid";
+GotSuit = "Beschermingspak";
+GotMap = "Computerkaart";
+GotNight = "Nightvision goggles";
+GotVisor = "Nachtkijker";
+GotMega = "MegaSphere!";
+
+GotClip = "Kogels opgeraapt.";
+GotClipBox = "Een doos met kogels opgeraapt.";
+GotShells = "4 geweerpatronen opgeraapt.";
+GotShellBox = "Een doos met geweerpatronen opgeraapt.";
+GotRocket = "Een raket opgeraapt.";
+GotRocketBox = "Een doos met raketten opgeraapt.";
+GotCell = "Een energiecel opgeraapt.";
+GotCellPack = "Een pakket energiecellen opgeraapt.";
+GotBackpack = "Een rugzak vol met munitie opgeraapt!";
+
+GotBFG = "Je hebt de BFG9000!  Tjakka!";
+GotChainGun = "Je hebt het machinegeweer!";
+GotChainSaw = "Je hebt de kettingzaag!  Ga vlees zoeken!";
+GotDoubleBarrel = "Je hebt het supergeweer!";
+GotRocketLauncher = "Je hebt de rakettenwerper!";
+GotPlasmaGun = "Je hebt het plasma kanon!";
+GotShotgun = "Je hebt het geweer!";
+
+NeedBlueForObject = "Je hebt een blauwe sleutel nodig.";
+NeedRedForObject = "Je hebt een rode sleutel nodig.";
+NeedYellowForObject = "Je hebt een gele sleutel nodig.";
+NeedBlueForDoor = "Je hebt een blauwe sleutel nodig.";
+NeedYellowForDoor = "Je hebt een gele sleutel nodig.";
+NeedRedForDoor = "Je hebt een rode sleutel nodig.";
+
+GameSaved = "spel opgeslagen.";
+
+UnsentMsg = "[Boodschap niet verzonden]";
+Sent = "[Boodschap verzonden]";
+
+Map01Desc = "level 1: entryway";
+Map02Desc = "level 2: underhalls";
+Map03Desc = "level 3: the gantlet";
+Map04Desc = "level 4: the focus";
+Map05Desc = "level 5: the waste tunnels";
+Map06Desc = "level 6: the crusher";
+Map07Desc = "level 7: dead simple";
+Map08Desc = "level 8: tricks and traps";
+Map09Desc = "level 9: the pit";
+Map10Desc = "level 10: refueling base";
+Map11Desc = "level 11: 'o' of destruction!";
+Map12Desc = "level 12: the factory";
+Map13Desc = "level 13: downtown";
+Map14Desc = "level 14: the inmost dens";
+Map15Desc = "level 15: industrial zone";
+Map16Desc = "level 16: suburbs";
+Map17Desc = "level 17: tenements";
+Map18Desc = "level 18: the courtyard";
+Map19Desc = "level 19: the citadel";
+Map20Desc = "level 20: gotcha!";
+Map21Desc = "level 21: nirvana";
+Map22Desc = "level 22: the catacombs";
+Map23Desc = "level 23: barrels o' fun";
+Map24Desc = "level 24: the chasm";
+Map25Desc = "level 25: bloodfalls";
+Map26Desc = "level 26: the abandoned mines";
+Map27Desc = "level 27: monster condo";
+Map28Desc = "level 28: the spirit world";
+Map29Desc = "level 29: the living end";
+Map30Desc = "level 30: icon of sin";
+Map31Desc = "level 31: wolfenstein";
+Map32Desc = "level 32: grosse";
+
+TALKTOSELF1 = "Je praat tegen jezelf";
+TALKTOSELF2 = "Wie is daar?";
+TALKTOSELF3 = "Je maakt jezelf bang";
+TALKTOSELF4 = "Je begint te flippen";
+TALKTOSELF5 = "Je hebt het verloren...";
+
+PlayerOneName = "Groen: ";
+PlayerTwoName = "Indigo: ";
+PlayerThreeName = "Bruin: ";
+PlayerFourName = "Rood: ";
+PlayerFiveName = "Goud: ";
+PlayerSixName = "Blauw: ";
+PlayerSevenName = "DkBluw: ";
+PlayerEightName = "Roze: ";
+
+AutoMapFollowOn = "Volgmodus AAN";
+AutoMapFollowOff = "Volgmodus UIT";
+AutoMapGridOn = "Raster AAN";
+AutoMapGridOff = "Raster UIT";
+AutoMapMarkedSpot = "Gemarkeerd punt";
+AutoMapMarksClear = "Alle markeringen gewist";
+
+MusChange = "Andere muziek";
+ImpossibleChange = "ONMOGELIJKE SELECTIE";
+GodModeOn = "Onkwetsbaarheidsmodus Aan";
+GodModeOff = "Onkwetsbaarheidsmodus Uit";
+
+VeryHappyAmmo = "Volledige munitie toegevoegd";
+AmmoAdded = "Munitie (geen sleutels) toegevoegd";
+
+ClipON = "Botsingvrije modus AAN";
+ClipOFF = "Botsingvrije modus UIT";
+
+BEHOLDNote = "leVen, berSerk, onzIchtbaar, bescheRmingspak, kAart, Licht, of jetpack";
+BEHOLDUsed = "Power-up gekregen";
+
+ChoppersNote = "...geeft niet - GM";
+LevelChange = "Level veranderen...";
+
+SuicideCheat = "Loser!";
+StuffRemoval = "Stuff Removed";
+PlayerTargetingOff = "Monsters will not target player";
+PlayerTargetingOn = "Monsters will target player";
+UnlockCheat = "Got all the keys!";
+LoadedCheat = "Full ammo added!";
+MonstersKilled = "%d Monsters Killed";
+CDdisabled = "CD Audio is not enabled";
+CDPlayTrack = "Now Playing Track %d";
+
+LevelQ = "Level Change!\n"
+	"Enter Level Name:\n"
+	"\n";
+MusicQ = "Music Change!\n"
+	"Enter Music Name:\n"
+	"\n";
+Episode1Text="Nu je de grote slechterikken verslagen\n"
+     "en de maanbasis gereinigd hebt, zou je\n"
+     "gewonnen moeten hebben, toch? Waar is\n"
+     "dan je vette beloning en je ticket naar\n"
+     "huis? Wat is dit verdorie? Zo mag het\n"
+     "toch niet aflopen!\n"
+     "\n"
+     "Het stinkt naar rottend vlees, maar\n"
+     "lijkt op de verloren Deimos basis. Het\n"
+     "lijkt wel of je vastzit op de Shores of\n"
+     "Hell. De enige uitweg is er doorheen!\n"
+     "\n"
+     "Om de Doom ervaring voort te zetten,\n"
+     "speel The Shores of Hell en zijn\n"
+     "geweldige vervolg Inferno!\n";
+
+Episode2Text="Het is je gelukt! De vreselijke cyber-\n"
+     "demon lord die over de verloren Deimos\n"
+     "maanbasis regeerde is geslacht en jij\n"
+     "bent de overwinnaar! Maar ... waar ben\n"
+     "je? Je klautert naar de rand van de\n"
+     "maan en kijkt naar beneden om de ver-\n"
+     "schrikkelijke waarheid te aanschouwen.\n"
+     "\n"
+     "Deimos drijft boven de hel!\n"
+     "Nog nooit is het iemand gelukt uit de\n"
+     "hel te ontsnappen, maar jij zal ervoor\n"
+     "zorgen dat men het zal berouwen ooit van\n"
+     "jou gehoord te hebben! Snel daal je af\n"
+     "naar het oppervlak van de hel\n"
+     "\n"
+     "Nu is het tijd voor het laatste hoofd-\n"
+     "stuk van DOOM! -- Inferno.";
+
+Episode3Text="De walgelijke spiderdemon die de\n"
+     "invasie van de maanbases geleid had\n"
+     "en zoveel dood en verderf zaaide\n"
+     "zal voor eeuwig die trap onder zijn\n"
+     "kont blijven voelen.\n"
+     "Een verborgen deur opent zich en\n"
+     "jij gaat naar binnen. Je bent te\n"
+     "taai voor de hel gebleken en nu is\n"
+     "de hel uiteindelijk eerlijk -- achter\n"
+     "de deur zul je de groene velden van\n"
+     "de aarde weer kunnen zien\n"
+     "Eindelijk thuis.\n"
+     "Je vraagt je af wat er is gebeurd\n"
+     "op aarde terwijl jij het kwaad aan\n"
+     "het bestrijden was. Het is maar goed\n"
+     "dat geen hellegebroed met je door die\n"
+     "deur heeft kunnen komen ...";
+
+Episode4Text="de spider mastermind moet zijn legioenen\n"
+     "van hellegebroed voor zich uit hebben\n"
+     "gestuurd voordat je dat verschrikkelijke\n"
+     "beest uit de hel uiteindelijk ontmoette.\n"
+     "maar jij ging gewoon door en zaaide voor\n"
+     "eeuwig dood en verderf onder de horden,\n"
+     "zoals het een held betaamt bij iets dat zo\n"
+     "slecht is.\n"
+     "\n"
+     "daarnaast, iemand moest toch boeten voor\n"
+     "wat er gebeurd is met daisy, je konijn.\n"
+     "\n"
+     "maar nu zie je nog meer pijn en ellende\n"
+     "opdoemen, want een natie van demonen is\n"
+     "onze steden onveilig aan het maken.\n"
+     "\n"
+     "volgende halte, hell on earth!";
+
+E1M1Desc="E1M1: Hangar";
+E1M2Desc="E1M2: Nuclear Plant";
+E1M3Desc="E1M3: Toxin Refinery";
+E1M4Desc="E1M4: Command Control";
+E1M5Desc="E1M5: Phobos Lab";
+E1M6Desc="E1M6: Central Processing";
+E1M7Desc="E1M7: Computer Station";
+E1M8Desc="E1M8: Phobos Anomaly";
+E1M9Desc="E1M9: Military Base";
+
+E2M1Desc="E2M1: Deimos Anomaly";
+E2M2Desc="E2M2: Containment Area";
+E2M3Desc="E2M3: Refinery";
+E2M4Desc="E2M4: Deimos Lab";
+E2M5Desc="E2M5: Command Center";
+E2M6Desc="E2M6: Halls of the Damned";
+E2M7Desc="E2M7: Spawning Vats";
+E2M8Desc="E2M8: Tower of Babel";
+E2M9Desc="E2M9: Fortress of Mystery";
+
+E3M1Desc="E3M1: Hell Keep";
+E3M2Desc="E3M2: Slough of Despair";
+E3M3Desc="E3M3: Pandemonium";
+E3M4Desc="E3M4: House of Pain";
+E3M5Desc="E3M5: Unholy Cathedral";
+E3M6Desc="E3M6: Mt. Erebus";
+E3M7Desc="E3M7: Limbo";
+E3M8Desc="E3M8: Dis";
+E3M9Desc="E3M9: Warrens";
+
+E4M1Desc="E4M1: Hell Beneath";
+E4M2Desc="E4M2: Perfect Hatred";
+E4M3Desc="E4M3: Sever The Wicked";
+E4M4Desc="E4M4: Unruly Evil";
+E4M5Desc="E4M5: They Will Repent";
+E4M6Desc="E4M6: Against Thee Wickedly";
+E4M7Desc="E4M7: And Hell Followed";
+E4M8Desc="E4M8: Unto The Cruel";
+E4M9Desc="E4M9: Fear";
+
+
+Level7Text = "JE BENT DIEP DOORGEDRONGEN IN DE BEZETTE\n"
+	"RUIMTEBASIS. MAAR ER KLOPT IETS NIET. DE\n"
+	"MONSTERS HEBBEN HUN EIGEN VORM VAN REALI-\n"
+	"TEIT MEEGEBRACHT EN DE TECHNOLOGIE VAN DE\n"
+	"RUIMTEBASIS IS VAN SLAG GERAAKT DOOR HUN\n"
+	"AANWEZIGHEID.\n"
+	"\n"
+	"VOOR JE ZIE JE EEN VOORPOST VAN DE HEL,\n"
+	"EEN ZWAAR BELEGERDE ZONE. ALS JE ER LANGS\n"
+	"KAN KOMEN KUN JE DOORDRINGEN TOT HET\n"
+	"BEHEKSTE HART VAN DE RUIMTEBASIS EN KUN\n"
+	"JE DE SCHAKELAAR VINDEN DIE DE BEVOLKING\n"
+	"VAN DE AARDE GEVANGEN HOUDT.";
+Level12Text = "JE HEBT GEWONNEN! JOUW OVERWINNING ZORGT\n"
+	"ERVOOR DAT DE MENSHEID KAN EVACUEREN VAN\n"
+	"DE AARDE OM DE NACHTMERRIE TE ONTVLUCHTEN.\n"
+	"NU BEN JE DE ENIGE OVERGEBLEVEN MENS OP DE\n"
+	"PLANEET. MENSETENDE MUTATIES, VLEESETENDE\n"
+	"WEZENS EN BOZE GEESTEN ZIJN JE ENIGE BUREN.\n"
+	"JE LEUNT ACHTEROVER EN WACHT OP DE DOOD,\n"
+	"BLIJ ZIJNDE DAT JE JE SOORTGENOTEN HEBT\n"
+	"KUNNEN REDDEN.\n"
+	"\n"
+	"MAAR DAN ZENDT DE LEIDING VAN DE MENSHEID\n"
+	"JE EEN BOODSCHAP VANUIT DE RUIMTE.\n"
+	"SENSOREN HEBBEN DE BRON VAN EEN BUITEN-\n"
+	"AARDSE INVASIE ONTDEKT. ALS JE DAAR NAAR\n"
+	"TOE GAAT KUN JE HEN MISSCHIEN TEGENHOUDEN.\n"
+	"HUN BASIS IS IN HET HART VAN JE EIGEN\n"
+	"WOONPLAATS, NIET VER VAN DE RUIMTEBASIS.\n"
+	"LANGZAAM EN MET PIJN STA JE OP EN KEERT\n"
+	"TERUG NAAR HET STRIJDPERK.";
+Level21Text = "JE BENT IN HET CORRUPTE HART VAN DE STAD,\n"
+	"OMRINGD DOOR DE LIJKEN VAN JE VIJANDEN.\n"
+	"JE WEET GEEN MANIER OM DE INGANG VAN DE\n"
+	"WEZENS AAN DEZE KANT TE VERNIETIGEN, DUS\n"
+	"JE BALT JE VUISTEN EN STORMT NAAR BINNEN.\n"
+	"\n"
+	"ER MOET EEN MANIER ZIJN OM HET AAN DE\n"
+	"ANDERE KANT TE SLUITEN. WAT KAN JOU HET\n"
+	"SCHELEN ALS JE DOOR DE HEL MOET OM ER\n"
+	"TE KOMEN?";
+EndGameText = "DE ANGSTAANJAGENDE AANBLIK VAN HET\n"
+	"GROOTSTE MONSTER DAT JE OOIT HEBT GEZIEN\n"
+	"BROKKELT LANGZAAM AF, NADAT JIJ JE\n"
+	"RAKETTEN IN ZIJN BLOOTGELEGDE BREIN HEBT\n"
+	"GEPOMPT. HET MONSTER SCHROMPELT INEEN EN\n"
+	"STERFT, TERWIJL ZIJN AFVALLENDE LEDEMATEN\n"
+	"KILOMETERS AARDOPPERVLAK VERWOESTEN.\n"
+	"\n"
+	"HET IS JE GELUKT. DE INVASIE IS VOORBIJ.\n"
+	"DE AARDE IS GERED. DE HEL IS EEN RUINE.\n"
+	"JE VRAAGT JE AF WAAR SLECHTERIKKEN NU\n"
+	"NAAR TOE ZULLEN GAAN NA HUN DOOD.\n"
+	"HET ZWEET VAN JE VOORHOOFD WISSEND BEGIN\n"
+	"JE AAN DE LANGE REIS NAAR HUIS. HET\n"
+	"WEER OPBOUWEN VAN DE AARDE MOET VEEL\n"
+	"LEUKER ZIJN DAN HET AFBREKEN WAS.";
+Level31Text = "GEFELICITEERD, JE HEBT HET GEHEIME\n"
+	"LEVEL GEVONDEN! HET LIJKT WEL OF HET\n"
+	"GEBOUWD IS DOOR MENSEN IN PLAATS VAN\n"
+	"DEMONEN. WIE ZULLEN DE BEWONERS VAN\n"
+	"DEZE UITHOEK VAN DE HEL ZIJN?";
+Level32Text = "GEFELICITEERD, JE HEBT HET SUPER\n"
+	"GEHEIME LEVEL GEVONDEN!  HIER KAN\n"
+	"JE MAAR BETER DOORHEEN RAZEN!\n";
+
+AllocScreens = "V_Init: schermen alloceren.\n";
+DefaultLoad = "M_LoadDefaults: Systeem defaults laden.\n";
+ZoneMemoryAlloc = "Z_Init: Init zone geheugen allocatie daemon. \n";
+WadFileInit = "W_Init: Init WADbestanden.\n";
+MiscInfo = "M_Init: Init verschillende info.\n";
+RefreshDaemon = "R_Init: Init DOOM ververs daemon.\n";
+PlayState = "P_Init: Init Playloop status.\n\n";
+InitMachine = "I_Init: Setting up machine status.\n";
+CheckNetGame = "D_CheckNetGame: Checken netwerk spel status.\n";
+SoundInit = "S_Init: Setting up geluid.\n";
+HeadsUpInit = "HU_Init: Setting up heads up display.\n";
+STBarInit = "ST_Init: Init status balk.\n";
+ListenNet = "luisteren naar netwerk start info...\n";
+SendNet = "verzenden netwerk start info...\n";
+TurboScale = "turbo schaal: %i%%\n";
+IsTurbo = "%s is turbo!";
+
+Notice = 
+"==============================================================================\n"
+" This is EDGE: a project that is based upon the Doom Source Code released by\n"
+" John Carmack of Id Software in December 1997. The work on this project is\n"
+" designed, and implemented by the EDGE Team (http://edge.sourceforge.net/).\n"
+"==============================================================================\n";
+
+JoystickCentre = "CENTRE the joystick\n"
+	"\n"
+	"press a key.";
+JoystickTL = "Push the joystick to the UPPER LEFT corner\n"
+	"\n"
+	"press a key.";
+JoystickBR = "Push the joystick to the BOTTOM RIGHT corner\n"
+	"\n"
+	"press a key.";
+JoystickHAT = "Move the hat to the %s position\n"
+	"\n"
+	"press a key.";
+JoyThrottleMAX = "Set the throttle to MAXIMUM\n"
+	"\n"
+	"press a key.";
+JoyThrottleMIN = "Set the throttle to MINIMUM\n"
+	"\n"
+	"press a key.";
+JoystickCentreT = "CENTRE the joystick and press a key:";
+JoystickTLT = "Push the joystick to the UPPER LEFT corner and press a key:";
+JoystickBRT = "Push the joystick to the BOTTOM RIGHT corner and press a key:";
+JoystickHATT = "Move the hat to the %s position and press a key:";
+JoyThrottleMAXT = "Set the throttle to MAXIMUM and press a key:";
+JoyThrottleMINT = "Set the throttle to MINIMUM and press a key:";
+
+ModeSelErrT = "Unable to Initialise Graphics Mode %d x %d x %dc!";
+ModeSelErr = "Unable to Initialise\n"
+	"Graphics Mode %d x %d x %dc!\n"
+	"\n"
+	"press a key.";
+
+// -------- Formal German Language Definition File -----------
+
+[GERMAN]
+DevelopmentMode = "Entwicklungsmodus AN.\n";
+PressKey = "Bitte eine Taste druecken.";
+PressYorN = "Bitte Taste Y oder N druecken.";
+
+QuickSaveOver = "Schnellspeicherung entfernt vorhandene Speicherung\n"
+	"\n"
+	"'%s'?\n"
+	"\n"
+	"Bitte Taste Y oder N druecken.";
+NoQuickSaveSlot = "Du hast noch kein Schnellspeicherungsfeld gewaehlt!\n"
+	"\n"
+	"Bitte eine Taste druecken.";
+SaveWhenNotPlaying = "Du kannst nicht speichern, wenn Du nicht spielst!\n"
+	"Bitte eine Taste druecken.";
+
+NoLoadInNetGame = "Du kannst im Netzwerk-Modus nicht laden.\n"
+	"\n"
+	"Bitte eine Taste druecken.";
+NoQLoadInNetGame = "Du kannst im Netzwerk-Modus nicht schnellladen\n"
+	"\n"
+	"Bitte eine Taste druecken.";
+QuickLoad = "Willst du die Schnellspeicherung laden?\n"
+	"\n"
+	"'%s'?\n"
+	"\n"
+	"Bitte Taste Y oder N druecken.";
+
+NewNetGame = "Du kannst kein neues Spiel im\n"
+	"Netzwerkmodus anfangen."
+	"\n"
+	"Bitte eine Taste druecken.";
+
+NightmareCheck = "Bist du sicher? Diese Schwierig-\n"
+	"keitsstufe ist nicht sehr fair.\n"
+	"\n"
+	"Bitte Taste Y oder N druecken.";
+
+MessagesOff = "Nachrichten AUS";
+MessagesOn = "Nachrichten AN";
+
+EndNetGame = "Du kannst kein Netzwerkspiel beenden.\n"
+	"\n"
+	"Bitte eine Taste druecken.";
+EndGameCheck = "Moechtest du das Spiel wirklich beenden?\n"
+	"\n"
+	"Bitte Taste Y oder N druecken.";
+
+PressToQuit = "(\"y\" beendet)";
+
+GammaOff = "Helligkeitsregelung AUS";
+GammaLevelOne = "Helligkeitsregelung Stufe 1";
+GammaLevelTwo = "Helligkeitsregelung Stufe 2";
+GammaLevelThree = "Helligkeitsregelung Stufe 3";
+GammaLevelFour = "Helligkeitsregelung Stufe 4";
+
+EmptySlot = "Leerer Platz";
+
+GotArmour = "Ruestung aufgenommen.";
+GotMegaArmour = "MegaRuestung aufgenommen!";
+
+GotHealthPotion = "Health Bonus aufgenommen.";
+GotArmourHelmet = "Ruestungsbonus aufgenommen.";
+
+GotStim = "Stimpack aufgenommen.";
+GotMedi = "Medikit aufgenommen.";
+GotSoul = "Supercharge!";
+
+GotBlueCard = "Blaue Zugangskarte aufgenommen.";
+GotYellowCard = "Gelbe Zugangskarte aufgenommen.";
+GotRedCard = "Rote Zugangskarte aufgenommen.";
+GotBlueSkull = "Blauen Kopf aufgenommen.";
+GotYellowSkull = "Gelben Kopf aufgenommen.";
+GotRedSkull = "Roten Kopf aufgenommen.";
+
+GotInvulner = "Unverwundbarkeit!";
+GotBerserk = "Berserker!";
+GotInvis = "Teilweise Unsichtbarkeit";
+GotSuit = "Strahlungsanzug";
+GotMap = "Computer Levelkarte";
+GotNight = "Nachtsichtbrille";
+GotVisor = "Restlichtverstaerker";
+GotMega = "MegaSphere!";
+
+GotClip = "Patronen aufgenommen";
+GotClipBox = "Schachtel Patronen aufgenommen";
+GotShells = "4 Schrotpatronen aufgenommen.";
+GotShellBox = "Schachtel Schrotpatronen aufgenommen.";
+GotRocket = "Rakete aufgenommen.";
+GotRocketBox = "Kiste Raketen aufgenommen.";
+GotCell = "Energiezelle aufgenommen.";
+GotCellPack = "Energiezellenpack aufgenommen.";
+GotBackpack = "Rucksack voller Munition aufgenommen!";
+
+GotBFG = "Du hast die BFG9000 gefunden!  Oh, ja.";
+GotChainGun = "Maschinengewehr!";
+GotChainSaw = "Eine Kettensaege!  Her mit dem Fleisch!";
+GotDoubleBarrel = "Du hast die Super Schrotflinte gefunden!";
+GotRocketLauncher = "Raketenwerfer gefunden!";
+GotPlasmaGun = "Plasmagewehr gefunden!";
+GotShotgun = "Schrotflinte gefunden!";
+
+NeedBlueForObject = "Um dieses Objekt zu aktivieren brauchst du eine blaue Zugangskarte!";
+NeedRedForObject = "Um dieses Objekt zu aktivieren brauchst du eine rote Zugangskarte!";
+NeedYellowForObject = "Um dieses Objekt zu aktivieren brauchst du eine gelbe Zugangskarte!";
+NeedBlueForDoor = "Du brauchst die blaue Zugangskarte";
+NeedYellowForDoor = "Du brauchst die gelbe Zugangskarte";
+NeedRedForDoor = "Du brauchst die rote Zugangskarte";
+
+GameSaved = "Spiel gespeichert.";
+
+UnsentMsg = "[Nachricht nicht gesendet]";
+Sent = "[Nachricht gesendet]";
+
+Map01Desc = "Level 1: entryway";
+Map02Desc = "Level 2: underhalls";
+Map03Desc = "Level 3: the gantlet";
+Map04Desc = "Level 4: the focus";
+Map05Desc = "Level 5: the waste tunnels";
+Map06Desc = "Level 6: the crusher";
+Map07Desc = "Level 7: dead simple";
+Map08Desc = "Level 8: tricks and traps";
+Map09Desc = "Level 9: the pit";
+Map10Desc = "Level 10: refueling base";
+Map11Desc = "Level 11: 'o' of destruction!";
+Map12Desc = "Level 12: the factory";
+Map13Desc = "Level 13: downtown";
+Map14Desc = "Level 14: the inmost dens";
+Map15Desc = "Level 15: industrial zone";
+Map16Desc = "Level 16: suburbs";
+Map17Desc = "Level 17: tenements";
+Map18Desc = "Level 18: the courtyard";
+Map19Desc = "Level 19: the citadel";
+Map20Desc = "Level 20: gotcha!";
+Map21Desc = "Level 21: nirvana";
+Map22Desc = "Level 22: the catacombs";
+Map23Desc = "Level 23: barrels o' fun";
+Map24Desc = "Level 24: the chasm";
+Map25Desc = "Level 25: bloodfalls";
+Map26Desc = "Level 26: the abandoned mines";
+Map27Desc = "Level 27: monster condo";
+Map28Desc = "Level 28: the spirit world";
+Map29Desc = "Level 29: the living end";
+Map30Desc = "Level 30: icon of sin";
+Map31Desc = "Level 31: wolfenstein";
+Map32Desc = "Level 32: grosse";
+
+TALKTOSELF1 = "Du murmelst zu dirselbst";
+TALKTOSELF2 = "Wer ist da?";
+TALKTOSELF3 = "Du erschrickst dich";
+TALKTOSELF4 = "Du beginnst zu toben";
+TALKTOSELF5 = "Du hast es verloren...";
+
+PlayerOneName = "Gruen: ";
+PlayerTwoName = "Schwarz: ";
+PlayerThreeName = "Braun: ";
+PlayerFourName = "Rot: ";
+PlayerFiveName = "Gold: ";
+PlayerSixName = "Blau: ";
+PlayerSevenName = "DkBlau: ";
+PlayerEightName = "Pink: ";
+
+AutoMapFollowOn = "Verfolger Modus AN";
+AutoMapFollowOff = "Verfolger Modus AUS";
+AutoMapGridOn = "Gitter AN";
+AutoMapGridOff = "Gitter AUS";
+AutoMapMarkedSpot = "Stelle markiert";
+AutoMapMarksClear = "Alle Marker entfernt";
+
+MusChange = "Musikwechsel";
+ImpossibleChange = "FAlSCHE AUSWAHL";
+GodModeOn = "Unverwundbarkeit An";
+GodModeOff = "Unverwundbarkeit Aus";
+HomDetectOn="HOM Entdeckung AN";
+HomDetectOff="HOM Entdeckung AUS";
+
+VeryHappyAmmo = "Volle Munition erhalten";
+AmmoAdded = "Munition (keine Karten) erhalten";
+
+ClipON = "No Clipping Modus AN";
+ClipOFF = "No Clipping Modus AUS";
+
+BEHOLDNote = "unVerwundbar, Str, unsIchtbar, stRahlenschutz , kArte, Licht oder Jetpack";
+BEHOLDUsed = "Power-Up aufgenommen";
+
+ChoppersNote = "... Macht nix - GM";
+LevelChange = "Wechsle Level...";
+
+SuicideCheat = "Verlierer!";
+StuffRemoval = "Kram entfernt";
+PlayerTargetingOff = "Die Monster werden nicht auf den Spieler zielen";
+PlayerTargetingOn = "Die Monster werden auf den Spieler zielen";
+UnlockCheat = "Du habst alle Schluessel gefunden!";
+LoadedCheat = "Volle Munition!";
+MonstersKilled = "%d Monster getoetet";
+CDdisabled = "CD Audio ist nicht eingeschaltet";
+CDPlayTrack = "Abspielen von Track %d";
+
+LevelQ = "Levelwechsel!\n"
+	"Bitte Levelnamen eingeben:\n"
+	"\n";
+MusicQ = "Musikwechsel!\n"
+	"Bitte Levelnamen eingeben:\n"
+	"\n";
+
+Episode1Text="Nun, da du die ganzen Schweine\n"
+     "erledigt und die Mondbasis gereinigt\n"
+     "haben, wo ist der verdammte Gewinn? Wo\n"
+     "ist die Belohnung, und das Ticket nach\n"
+     "Hause? Was zum Teufel ist das? So soll\n"
+     "es nicht enden!\n"
+     "\n"
+     "Es stinkt wie verrottetes Fleisch,\n"
+     "sieht aber aus wie die Lost Deimons\n"
+     "Base. Du steckst an den Kuesten der Hoelle\n"
+     "fest. Es gibt nur einen Ausweg - Durch!\n"
+     "\n"
+     "Um das DOOM Erlebnis fortzusetzen,\n"
+     "spiel 'The Shores of Hell' und die\n"
+     "grossartige Folge, 'Inferno'!\n";
+
+Episode2Text="Du habst es vollbracht! Der riesige\n"
+     "Cyber Demon Lord, der die Lost Deimos\n"
+     "Mondbasis regiert hat wurde vernichtet!\n"
+     "Du triumphierst! Aber... wo bist\n"
+     "du? Du erklimmst den Rand des Mondes\n"
+     "und blicken herunter, um die schreck-\n"
+     "liche Wahrheit zu sehen.\n"
+     "\n"
+     "Monster nehmen alles ein!\n"
+     "Noch niemals hat jemand die Hoelle\n"
+     "wieder verlassen, aber du wirst es\n"
+     "den Bastarden zeigen! So schnell wie\n"
+     "es geht kletterst Du auf die Oberflaeche der Hoelle.\n"
+     "\n"
+     "Nun liegt es am letzten Kapitel von\n"
+     "DOOM -- 'Inferno'.";
+
+Episode3Text="Der verhasste Spider Demon,\n"
+     "der die ganze Invasion auf die Erde\n"
+     "angefuehrt, und so viel Tod und Zerstoerung\n"
+	 "zu verantworten hat, ist endlich tot.\n"
+     "\n"
+     "Du betrittst eine versteckte Tuer, die\n"
+     "sich vor dir oeffnet. Du hast\n"
+     "gesiegt. In der Ferne kannst du\n"
+     "die gruenen Felder der Erde erkennen.\n"
+     "Du trittst den Heimweg an...\n"
+     "Endlich zu Hause.\n"
+     "\n"
+     "Du fragst dich, was sich auf der\n"
+     "Erde wohl alles veraendert hat,\n"
+     "waehrend du das Uebel bekaempft hast.\n"
+     "Es ist gut, das nichts mit dir\n"
+     "durch die Tuer kommen konnte ...";
+
+Episode4Text="Der Spider Demon muss seine Legionen der\n"
+     "Hoelle vor eurer letzten Konfrontation ausgesendet haben.\n"
+     "Aber du bist weitergelaufen, und brachtest\n"
+     "ewige Verdammnis und Leiden ueber die\n"
+     "Horden, wie es ein Held im Gesicht des Boesen tut...\n"
+     "\n"
+     "Nebenbei, jemand wird fuer das, was\n"
+     "deinem Hasen Daisy passiert ist, buessen!\n"
+     "\n"
+     "Aber nun beeil' dich lieber, und\n"
+     "vernichte die Horde Daemonen, die in\n"
+     "unseren Staedten Amok laufen...\n"
+     "\n"
+     "Naechster Halt, 'Hell on Earth'!";
+
+E1M1Desc="E1M1: Hangar";
+E1M2Desc="E1M2: Nuclear Plant";
+E1M3Desc="E1M3: Toxin Refinery";
+E1M4Desc="E1M4: Command Control";
+E1M5Desc="E1M5: Phobos Lab";
+E1M6Desc="E1M6: Central Processing";
+E1M7Desc="E1M7: Computer Station";
+E1M8Desc="E1M8: Phobos Anomaly";
+E1M9Desc="E1M9: Military Base";
+
+E2M1Desc="E2M1: Deimos Anomaly";
+E2M2Desc="E2M2: Containment Area";
+E2M3Desc="E2M3: Refinery";
+E2M4Desc="E2M4: Deimos Lab";
+E2M5Desc="E2M5: Command Center";
+E2M6Desc="E2M6: Halls of the Damned";
+E2M7Desc="E2M7: Spawning Vats";
+E2M8Desc="E2M8: Tower of Babel";
+E2M9Desc="E2M9: Fortress of Mystery";
+
+E3M1Desc="E3M1: Hell Keep";
+E3M2Desc="E3M2: Slough of Despair";
+E3M3Desc="E3M3: Pandemonium";
+E3M4Desc="E3M4: House of Pain";
+E3M5Desc="E3M5: Unholy Cathedral";
+E3M6Desc="E3M6: Mt. Erebus";
+E3M7Desc="E3M7: Limbo";
+E3M8Desc="E3M8: Dis";
+E3M9Desc="E3M9: Warrens";
+
+E4M1Desc="E4M1: Hell Beneath";
+E4M2Desc="E4M2: Perfect Hatred";
+E4M3Desc="E4M3: Sever The Wicked";
+E4M4Desc="E4M4: Unruly Evil";
+E4M5Desc="E4M5: They Will Repent";
+E4M6Desc="E4M6: Against Thee Wickedly";
+E4M7Desc="E4M7: And Hell Followed";
+E4M8Desc="E4M8: Unto The Cruel";
+E4M9Desc="E4M9: Fear";
+
+Level7Text = "DU BIST TIEF IN DEN BEFALLENEN FLUG-\n"
+       	"HAFEN EINGEDRUNGEN. ABER ETWAS IST FALSCH.\n"
+	       "DIE MONSTER HABEN IHRE EIGENE REALITAET\n"
+       	"MITGEBRACHT, UND DIE TECHNOLOGIE DES\n"
+       	"FLUGHAFENS WIRD VON IHNEN UNTERBUNDEN.\n"
+		"\n"
+	       "IN DER FERNE SIEHST DU EINEN VORPOSTEN\n"
+	       "DER HOELLE. WENN DU ZU IHM GELANGST,\n"
+	       "KOENNST DU IN DAS HERZ DES FLUGHAFENS\n"
+		"EINDRINGEN, UND DEN KONTROLLHEBEL,\n"
+	       "DER DIE ERDBEVOELKERUNG ALS GEISEL\n"
+		"FESTHAELLT, DEAKTIVIEREN...";
+Level12Text = "DU HAST GEWONNEN! DEIN SIEG ERMOEGLICHTE\n"
+	  	 "ES DEN MENSCHEN, DEM ALPTRAUM ZU ENT-\n"
+	        "KOMMEN. NUN BIST DU DER EINZIGE MENSCH\n"
+	     	 "AUF DEM PLANETEN...\n"
+		 "SCHRECKLICHE MUTATIONEN, ALIENS,\n"
+		 "UND UNTOTE WESEN SIND DEINE EINZIGEN\n"
+		 "NACHBARN. DU LEHNST DICH ZURUECK, UND\n"
+		 "WARTEST AUF IHREN TOD. ALLE GERETTET...\n"
+		 "\n"
+	        "DOCH DIE ERDKONTROLLE BEAMT EINE\n"
+		 "NACHRICHT VOM ALL: \"SENSOREN HABEN DIE\n"
+		 "QUELLE DER ALIENINVASION ENTDECKT!\n"
+		 "WENN SIE DORT HINGEHEN, SIND SIE\n"
+		 "VIELLEICHT IN DER LAGE, DIESEN ALPTRAUM\n"
+		 "ZU STOPPEN. DAS HERZ DES GANZEN IST\n"
+		 "IM FLUGHAFEN.\" LANGSAM ERHEBEN DU DICH,\n"
+		 "UND MACHST DICH WIEDER AUF DEN WEG.";
+Level21Text = "DU BIST IM HERZEN DER STADT, UMZINGELT\n"
+		 "VON DEN LEICHNAMEN DEINER FEINDE.\n"
+		 "DU SIEHST KEINEN WEG DEN EINGANG AUF\n"
+		 "DIESER SEITE ZU BLOCKIEREN, ALSO BETRITTST\n"
+		 "DU DAS TOR.\n"
+		 "\n"
+		 "ES MUSS EINEN WEG GEBEN, DAS TOR VON\n"
+		 "DER ANDEREN SEITE ZU VERSCHLIESSEN.\n"
+		 "DU WEISST: DER FEIND WARTET SCHON...";
+EndGameText = "DIE SCHRECKLICHE VISAGE DES GROESSTEN\n"
+		 "MONSTERS DAS DU JE GESEHEN HAST\n"
+		 "KRIECHT VOR DIR, NACHDEM DU SEIN\n"
+		 "GEHIRN MIT RAKETEN VOLLGEPUMPT HAST.\n"
+		 "NOCH EINMAL ZUCKT ES ZUSAMMEN, DANN\n"
+		 "VERSCHWINDET ES, MIT ALL DEM BOESEN,\n"
+		 "WELCHES ES EINMAL KONTROLLIERT HAT...\n"
+		 "\n"
+		 "DU HAST ES GESCHAFFT. DIE ERDE IST\n"
+		 "GERETTET. DIE HOELLE IST ZERSTOERT.\n"
+		 "DU FRAGST DICH, WO DIE GANZEN VERBRECHER\n"
+		 "HINKOMMEN,  WENN SIE STERBEN...\n"
+		 "DU WISCHST DIR DEN SCHWEISS VON DER\n"
+		 "STIRN. EIN LANGER RUECKWEG WARTET AUF\n"
+		 "DICH, ABER DAS WAR ES WERT...\n";
+Level31Text = "GRATULATION! DU HAST DEN SECRET LEVEL\n"
+		 "GEFUNDEN! SIEHT SO AUS, ALS WAERE ER\n"
+	        "VON MENSCHEN ERBAUT WORDEN. DU FRAGST\n"
+	        "DICH, WELCHE AUSGEBURTEN DER HOELLE DICH\n"
+	       "HIER ERWARTEN.";
+Level32Text = "GRATULATION! DU HABST DEN SUPER\n"
+		 "SECRET LEVEL GEFUNDEN! DU HAETTEST\n"
+		 "IHN BESSER AUSLASSEN SOLLEN!\n";
+
+AllocScreens = "V_Init: allocate screens.\n";
+DefaultLoad = "M_LoadDefaults: Load system defaults.\n";
+ZoneMemoryAlloc = "Z_Init: Init zone memory allocation daemon. \n";
+WadFileInit = "W_Init: Init WADfiles.\n";
+MiscInfo = "M_Init: Init miscellaneous info.\n";
+RefreshDaemon = "R_Init: Init DOOM refresh daemon.\n";
+PlayState = "P_Init: Init Playloop state.\n\n";
+InitMachine = "I_Init: Setting up machine state.\n";
+CheckNetGame = "D_CheckNetGame: Checking network game status.\n";
+SoundInit = "S_Init: Setting up sound.\n";
+HeadsUpInit = "HU_Init: Setting up heads up display.\n";
+STBarInit = "ST_Init: Init status bar.\n";
+ListenNet = "listening for network start info...\n";
+SendNet = "sending network start info...\n";
+TurboScale = "Turbo-Skala: %i%%\n";
+IsTurbo = "%s ist turbo!";
+
+Notice = 
+"==============================================================================\n"
+" This is EDGE: a project that is based upon the Doom Source Code released by\n"
+" John Carmack of Id Software in December 1997. The work on this project is\n"
+" designed, and implemented by the EDGE Team (http://edge.sourceforge.net/).\n"
+"==============================================================================\n";
+
+JoystickCentre = "Joystick ZENTRIEREN\n"
+	"\n"
+	"Bitte eine Taste druecken.";
+JoystickTL = "Joystick nach OBEN LINKS bewegen\n"
+	"\n"
+	"Bitte eine Taste druecken.";
+JoystickBR = "Joystick nach UNTEN RECHTS bewegen\n"
+	"\n"
+	"Bitte eine Taste druecken.";
+JoystickHAT = "Bitte Huetchen in Position %s bringen\n"
+	"\n"
+	"Bitte eine Taste druecken.";
+JoyThrottleMAX = "Schub auf MAXIMUM stellen\n"
+	"\n"
+	"Bitte eine Taste druecken.";
+JoyThrottleMIN = "Schub auf MINIMUM stellen\n"
+	"\n"
+	"Bitte eine Taste druecken.";
+JoystickCentreT = "Joystick zentrieren und eine Taste druecken:";
+JoystickTLT = "Joystick nach OBEN LINKS bewegen und eine Taste druecken:";
+JoystickBRT = "Joystick nach UNTEN RECHTS bewegen und eine Taste druecken:";
+JoystickHATT = "Bitte Huetchen in Position %s bringen und eine Taste druecken:";
+JoyThrottleMAXT = "Geschwindigkeitsregler auf MAXIMUM einstellen und eine Taste druecken:";
+JoyThrottleMINT = "Geschwindigkeitsregler auf MINIMUM einstellen und eine Taste druecken:";
+
+ModeSelErrT = "Fehler beim Starten des Grafikmodus %d x %d x %dc!";
+ModeSelErr = "Fehler beim Starten des\n"
+        "Grafikmodus %d x %d x %dc!\n"
+	"\n"
+	"Bitte eine Taste druecken.";
+
+// -------- Finnish Language Definition File -------------
+
+[FINNISH]
+DevelopmentMode="Rakennus moodi p��ll�.\n";
+PressKey="Paina nappia";
+PressYorN="Paina Y tai N";
+
+QuickSaveOver="pikatallennus nimell�\n\n'%s'?\n\npaina y tai n.";
+NoQuickSaveSlot="et ole valinnut pikatallennuspaikkaa viel�!\n\npaina jotain nappia.";
+SaveWhenNotPlaying="et voi tallentaa jos et pelaa!\n\npaina jotain nappia.";
+
+NoLoadInNetGame="et voi ladata peli� nettipeliss�!\n\npaina nappia.";
+NoQLoadInNetGame="et voi pika-ladata peli� nettipeliss�!\n\npaina nappia." ;
+QuickLoad="haluatko pika-ladata pelin nimelt�\n\n'%s'?\n\npaina y tai n.";
+
+NewNetGame="et voi aloittaa uutta peli�\n"
+           "nettipeliss�\n\npaina nappia.";
+
+NightmareCheck="oletko varma? t�m� vaikeusaste\n"
+               "ei ole todellakaan reilu.\n\npaina y tai n.";
+
+MessagesOff="Viestit p��ll�";
+MessagesOn="Viestit pois p��lt�";
+
+EndNetGame="Et voi lopettaa nettipeli�!\n\npaina jotain nappia.";
+EndGameCheck="Haluatko varmasti lopettaa pelin?\n\npaina y tai n.";
+
+PressToQuit="(Paina y lopettaaksesi)";
+
+GammaOff="Gamma korjaus pois p��lt�";
+GammaLevelOne  ="Gamma korjaus taso 1";
+GammaLevelTwo  ="Gamma korjaus taso 2";
+GammaLevelThree="Gamma korjaus taso 3";
+GammaLevelFour ="Gamma korjaus taso 4";
+
+EmptySlot="Tyhj�";
+
+GotArmour="Poimit panssarin.";
+GotMegaArmour="Poimit Megapanssarin!";
+
+GotHealthPotion="Poimit lis�energiaa";
+GotArmourHelmet="Poimit lis�panssaria";
+
+GotStim="Poimit ensiapulaukun.";
+GotMedi="Poimit l��kepakkauksen.";
+GotSoul="Superenergia!";
+
+GotBlueCard="Poimit sinisen avainkortin";
+GotYellowCard="Poimit keltaisen avainkortin.";
+GotRedCard="Poimit punaisen avainkortin.";
+GotBlueSkull="Poimit sinisen kalloavaimen.";
+GotYellowSkull="Poimit keltaisen kalloavaimen.";
+GotRedSkull="Poimit punaisen kalloavaimen.";
+
+GotInvulner="KUOLEMATTOMUUS!";
+GotBerserk="Raivo!";
+GotJetPack="Jettilaukku!";
+GotInvis="Osittainen n�kym�tt�myys";
+GotSuit="Myrkkypuku";
+GotMap="Datakartta";
+GotNight="Infrapunalasit";
+GotVisor="Y�lasit";
+GotMega="Megavoimat!";
+
+GotClip="Poimit lippaan.";
+GotClipBox="Poimit laatikollisen ammuksia.";
+GotShells="Poimit 4 haulikonpanosta.";
+GotShellBox="Poimit laatikollisen haulikonpanoksia.";
+GotRocket="Poimit raketin.";
+GotRocketBox="Poimit laatikollisen raketteja.";
+GotCell="Poimit energia-akun.";
+GotCellPack="Poimit energia-akku paketin.";
+GotBackpack="Poimit repullisen ammuksia!";
+
+GotBFG="Poimit BFG9000:n!! Jeah..";
+GotChainGun="Poimit konekiv��rin!";
+GotChainSaw="Moottorisaha! etsi lihaa!";
+GotDoubleBarrel="Poimit kaksipiippuisen haulikon!";
+GotRocketLauncher="Poimit raketinheittimen!";
+GotPlasmaGun="Poimit plasmatykin!";
+GotShotgun="Poimit haulikon!";
+
+NeedBlueForObject="Tarvitset sinisen avaimen aktivoidaksesi t�m�n";
+NeedYellowForObject="Tarvitset keltaisen avaimen aktivoidaksesi t�m�n";
+NeedRedForObject="Tarvitset punaisen avaimen aktivoidaksesi t�m�n";
+NeedBlueForDoor="Tarvitset sinisen avaimen avataksesi t�m�n oven";
+NeedYellowForDoor="Tarvitset keltaisen avaimen avataksesi t�m�n oven";
+NeedRedForDoor="Tarvitset punaisen avaimen avataksesi t�m�n oven";
+
+GameSaved="Peli tallennettu.";
+
+UnsentMsg="[Viesti� ei l�hetetty]";
+Sent="[Viesti l�hetetty]";
+
+Map01Desc="kentt� 1: entryway";
+Map02Desc="kentt� 2: underhalls";
+Map03Desc="kentt� 3: the gantlet";
+Map04Desc="kentt� 4: the focus";
+Map05Desc="kentt� 5: the waste tunnels";
+Map06Desc="kentt� 6: the crusher";
+Map07Desc="kentt� 7: dead simple";
+Map08Desc="kentt� 8: tricks and traps";
+Map09Desc="kentt� 9: the pit";
+Map10Desc="kentt� 10: refueling base";
+Map11Desc="kentt� 11: 'o' of destruction!";
+Map12Desc="kentt� 12: the factory";
+Map13Desc="kentt� 13: downtown";
+Map14Desc="kentt� 14: the inmost dens";
+Map15Desc="kentt� 15: industrial zone";
+Map16Desc="kentt� 16: suburbs";
+Map17Desc="kentt� 17: tenements";
+Map18Desc="kentt� 18: the courtyard";
+Map19Desc="kentt� 19: the citadel";
+Map20Desc="kentt� 20: gotcha!";
+Map21Desc="kentt� 21: nirvana";
+Map22Desc="kentt� 22: the catacombs";
+Map23Desc="kentt� 23: barrels o' fun";
+Map24Desc="kentt� 24: the chasm";
+Map25Desc="kentt� 25: bloodfalls";
+Map26Desc="kentt� 26: the abandoned mines";
+Map27Desc="kentt� 27: monster condo";
+Map28Desc="kentt� 28: the spirit world";
+Map29Desc="kentt� 29: the living end";
+Map30Desc="kentt� 30: icon of sin";
+Map31Desc="kentt� 31: wolfenstein";
+Map32Desc="kentt� 32: grosse";
+
+TALKTOSELF1="Puhut itesellesi..";
+TALKTOSELF2="Kuka siell�?";
+TALKTOSELF3="Pelottelet itse�si";
+TALKTOSELF4="Miksi puhut itsellesi?";
+TALKTOSELF5="Hullu...";
+
+PlayerOneName="Vihre�: ";
+PlayerTwoName="Harmaa: ";
+PlayerThreeName="Ruskea: ";
+PlayerFourName="Punainen: ";
+PlayerFiveName="Kultainen: ";
+PlayerSixName="Sininen: ";
+PlayerSevenName="Tumma: ";
+PlayerEightName="Pinkki: ";
+
+AutoMapFollowOn="Seuraus p��ll�";
+AutoMapFollowOff="Seuraus pois p��lt�";
+AutoMapGridOn="Ruudukko p��ll�";
+AutoMapGridOff="Ruudukko pois p��lt�";
+AutoMapMarkedSpot="Paikka merkitty";
+AutoMapMarksClear="Kaikki merkit poistettu";
+
+MusChange="Musiikin vaihto";
+ImpossibleChange="MAHDOTON VALINTA";
+GodModeON="Kuolemattomuus p��ll�";
+GodModeOFF="Kuolemattomuus pois p��lt�";
+
+VeryHappyAmmo="Ihan mukavasti ammuksia";
+AmmoAdded="Ammuksia (ei avaimia)";
+
+ClipON="Haamuk�vely p��ll�";
+ClipOFF="Haamuk�vely pois p��lt�";
+
+BEHOLDNote="inVul, Str, Invis, Rad, mAp, Lite-amp, tai Jetpack";
+BEHOLDUsed="voiman lis�ys muunnettu";
+
+ChoppersNote="... doesn't suck - GM";
+LevelChange="Vaihdetaan kentt��..";
+
+SuicideCheat="Luuseri!";
+StuffRemoval="Tavarat poistettu";
+PlayerTargetingOff="Hirvi�t eiv�t hy�kk��";
+PlayerTargetingOn="Hirvi�t hy�kk��v�t";
+UnlockCheat="Kaikki avaimet!";
+LoadedCheat="T�ydet ammukset!";
+MonstersKilled="%d Hirvi�t� tapettu.";
+CDdisabled="CD-musiikki ei ole p��ll�";
+CDPlayTrack="Soitetaan raitaa %d";
+
+LevelQ="Kent�n vaihto!\nAnna kent�n nimi:\n\n";
+MusicQ="Musiikin vaihto!\nAnna musiikin nimi:\n\n";
+
+Level7Text="OLET ASTUNUT SIS��N AVARUUSPORTISTA.\n" 
+           "JOKIN ON VINOSSA.HIRVI�T OVAT MANIPULOINEET\n" 
+           "AVARUUSASEMAN TEKNOLOGIAN OMAAN K�YTT��NS�.\n" 
+           "\n"
+           "EDESS�SI N��T HELVETIN PORTIT, MIEHITETYN\n" 
+           "LINNAKKEEN T�YNN� DEMONEJA.\n" 
+           "JOS ONNISTUT P��SEM��N SEN L�PI, VOIT\n" 
+           "TUNKEUTUA AVARUUSASEMAN SYD�MMEEN JA L�YT��\n" 
+           "KYTKIMEN JOKA PIT�� MAIILMAN KANSAA\n" 
+           "PANTTIVAKINAAN.";
+
+Level12Text="SIN� TEIT SEN! SAAVUTUKSESI MAHDOLLISTI\n" 
+            "MAIILMAN KANSAN EVAKUOIMISEN JA\n"
+            "PAKENEMISEN T�LT� PAINAJAISELTA.\n"
+            "NYT OLET AINOA IHMINEN PLANEETALLA.\n"
+            "KANNIBAALI MUTANTIT, LIHANSY�J�T JA \n"
+            "PAHATHENGET OVAT NYT AINOAT SEURALAISESI.\n"
+            "ISTUT ALAS JA ODOTAT KUOLEMAA, TIET�EN\n"
+            "ETT� OLET PELASTANUT IHMISKUNNAN.\n"
+            "\n"
+            "MUTTA SITTEN, SAAT VIESTIN AVARUUESTA:\n"
+            "'SENSORIT PAIKANTANEET DEMONIEN L�HTEEN.\n"
+            "JOS P��SET SINNE, VOIT EHK� TUKKIA NIIDEN \n"
+            "TIEN.PAIKKA ON OMAN KOTIKAUPUNKISI SYD�MMESS�,\n"
+            "L�HELL� AVARUUSASEMAA.'\n"
+            "HITAASTI JA TUSKAISESTI NOUSET YL�S JA \n"
+            "TARTUT HAULIKKOOSI.";
+
+Level21Text="OLET TURMELTUNEEN KAUPUNGIN SYD�MMESS�,\n"
+            "VIHOLLISIESI RUUMIDEN YMP�R�IM�N�.\n"
+            "ET PYSTY TUKKIMAAN HIRVI�IDEN TIET�\n"
+            "T�LT� PUOLELTA, JOTEN SY�KSYT PORTIN \n"
+            "L�PI.\n"
+            "\n"
+            "T�YTYY OLLA JOKIN KEINO TUKKIA TIE\n"
+            "TOISELTA PUOLELTA.MIT� V�LI� VAIKKA SINUN\n"
+            "PIT�ISI KAHLATA L�PI HELVETIN?";
+
+EndGameText="SUURIMMAN KOSKAAN N�KEM�SI DEMONIN\n"
+            "VALTAVAT KASVOT SORTUVAT ETEESI, PUMPATESSASI\n"
+            "RAKETTISI SEN SUOJAAMATTOMIIN AIVOIHIN.\n"
+            "HIRVI� KUOLEE, JA SEN J�SENET LENTELEV�T\n"
+            "YMP�RI HELVETTI�\n"
+            "\n"
+            "SIN� TEIT SEN. MAAHAN HY�KK�YS ON OHI.\n"
+            "MAAILMA ON PELASTETTU.HELVETTI ON RAUNIOINA.\n"
+            "MIETIT ETT� MINNE PAHAT TYYPIT NYT\n"
+            "JOUTUVAT KUOLTUAAN. PYYHIT HIEN OTSALTASI\n"
+            "JA ALOITAT PITK�N MATKAN TAKAISIN KOTIIN.\n"
+            "MAAILMAN UUDELLEEN RAKENTAMINEN TULEE OLEMAAN\n"
+	    "PALJON HAUSKEMPAA KUIN SEN TUHOAMINEN\n";
+
+Level31Text="ONNEKSI OLKOON, L�YSIT SALAKENT�N!\n"
+            "SE N�YTT�� IHMISTEN RAKENTAMALTA, EI\n"
+            "DEMONIEN. MIETIT KUINKA JOKU VOI JOUTUA\n"
+            "VANGIKSI T�H�N HELVETIN KOLKKAAN\n";
+
+Level32Text="ONNEKSI OLKOON, L�YSIT ERITT�IN\n"
+            "SALAISEN KENT�N!  SINUN ON PARASTA\n"
+            "L�P�IST� T�M�!\n";
+
+
+CheckNetGame=    "D_CheckNetGame: Tarkistetaan verkkopelin tilaa.\n";
+HeadsUpInit=     "HU_Init: Setting up heads up display.\n";
+InitMachine=     "I_Init: Setting up machine state.\n";
+ListenNet=       "Vastaanotetaan verkkodataa...\n";
+DefaultLoad=     "M_LoadDefaults: Loaded system defaults.\n";
+MiscInfo=        "M_Init: Init Miscellaneous Info.\n";
+RefreshDaemon=   "R_Init: Init DOOM refresh daemon.\n";
+PlayState=       "P_Init: Init Playloop state.\n";
+SoundInit=       "S_Init: Setting up sound.\n";
+STBarInit=       "ST_Init: Init status bar.\n";
+SendNet=         "L�hetet��n verkkodataa...\n";
+TurboScale=      "turbo scale: %i%%\n";
+IsTurbo=         "%s is turbo!";
+AllocScreens=    "V_Init: allocate screens.\n";
+WadFileInit=     "W_Init: Init WADfiles.\n";
+ZoneMemoryAlloc= "Z_Init: Init Zone Memory Allocation. \n";
+
+Notice=
+"==============================================================================\n"
+" T�m� on EDGE: projekti joka perustuu Doomin l�hdekoodiin jonka\n"
+" John Carmack Id Softwaresta julkaisi joulukuussa 1997. Projektin suunnittelun\n"
+" ja toteutuksen takana on EDGE Team (http://edge.sourceforge.net/).\n"
+" Finnish Translation by Jari Nevala.\n"
+"==============================================================================\n";
+
+JoystickCentre= "KESKIT� joystickki\n\npaino jotain nappia.";
+JoystickTL=     "Ty�nn� joystickki vasempaan yl�kulmaan\n\npaina jotain nappia.";
+JoystickBR=     "Ty�nn� joystickki oikeaan alakulmaan\n\npaina jotain nappia.";
+JoystickHAT=    "Siirr� hattu %s paikkaan\n\npaina jotain nappia.";
+JoyThrottleMAX= "Aseta kuristin MAKSIMIIN\n\npaina jotain nappia.";
+JoyThrottleMIN= "Aseta kuristin MINIMIIN\n\npaina jotain nappia.";
+JoystickCentreT= "KESKIT� joystickkija paina jotain nappia:";
+JoystickTLT=     "Ty�nn� joystickki vasempaan yl�kulmaan ja paina jotain nappia:";
+JoystickBRT=     "Ty�nn� joystickki oikeaan alakulmaan ja paina jotain nappia:";
+JoystickHATT=    "Siirr� hattu %s paikkaan ja paina jotain nappia:";
+JoyThrottleMAXT= "Aseta kuristin MAKSIMIIN ja paina jotain nappia:";
+JoyThrottleMINT= "Aseta kuristin MINIMIIN ja paina jotain nappia:";
+
+ModeSelErrT=      "Ei pystyt� k�ytt�m��n Grafiikka Moodia %d x %d x %dc!";
+ModeSelErr=       "Ei pystyt� k�ytt�m��n\nGrafiikka Moodia %d x %d x %dc!\n\npaina nappia.";

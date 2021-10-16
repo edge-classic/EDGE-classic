@@ -1,0 +1,42 @@
+
+DDF RULES
+=========
+
+1. Some DDF files are number-only (lines.ddf, sectors.ddf and
+   playlist.ddf).  Some DDF files (things.ddf) have both a name and a
+   number (in the format "[XXXX:1234]" -- the number is optional,
+   defaulting to zero when it (and the colon) are absent.  All other
+   DDF files have just a name in the square brackets.
+
+2  For named DDF files, the name is allowed to be missing.  The engine
+   will generate an internal name guaranteed to be unique.  The
+   usefulness of this is questionable, it prevents the entry from
+   being referenced anywhere else in DDF.  None of our own DDF files
+   should omit the name.
+   
+3. The initial DDF files (usually read from EDGE.WAD) will not be
+   treated any different to DDF files or lumps (such as the DDFXXX
+   lumps found in WAD files) that are read later on.
+
+4. When a new DDF entry has the same name as an older one (or the same
+   number, for number-only files), then the older one is removed.  The
+   new entry replaces it.  The new entry uses the same memory as the
+   previous one, preventing any alias issues (no need to do a
+   replacement scan on all potential references).
+
+   For things.ddf, the new number in [] replaces the old number too.
+   This can cause the old number to disappear.  The only implication
+   is that future number lookups of the thing would either find a
+   different thing or fail.
+
+5. For things.ddf, when the number is missing, zero or negative, then
+   it means that the entry is be considered as having no number at
+   all.  Lookups on these numbers don't happen, so the thing will
+   never be found via number lookups, only via name lookups.
+
+6. For things.ddf, when a new DDF entry has the same number as an
+   older one (but a different name), then the new entry is used for
+   lookups on that number.  The older entry is not removed, and can
+   still be referred to by name, but can no longer be referred to by
+   that number.
+

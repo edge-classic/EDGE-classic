@@ -1,0 +1,23 @@
+==========================
+|                        |
+|  EDGE.WAD VERSION 6.1  |
+|                        |
+==========================
+
+LICENSE
+-------
+
+The material in EDGE.WAD is:
+    Copyright (C) 1999-2009 the Edge Team.
+    Copyright (C) 1993-1996 id Software, Inc.
+
+This material is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This material is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+

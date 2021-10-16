@@ -1,0 +1,229 @@
+RTS -> LUA Conversion
+=====================
+
+[INTRODUCTION]
+This document is intended to provided the basis for discussion on the
+use of LUA as the language for Radius Trigger Scripting (RTS) in EDGE.
+
+[OVERVIEW RADIUS TRIGGER SCRIPTING (RTS)]
+The RTS is a state-based scripting language based on the concept of triggers 
+within the maps. The trigger are configured per map and each one maintains 
+its own state. The original idea was simplicity itself: object enters a radius 
+and an action is triggered. This has been expanded over time to include global
+triggers which are triggered by the death of a particular type of monster and
+design to manually run a linedef type against sectors of a certain tag or
+exit the level. This functionality successfully replaced the hard-coding
+of specific events in the Doom series, most notably emulating the opening
+of exit doorways and auto-exit of levels in the boss-stages of the first
+three episodes.
+
+[REASONS FOR REDEVELOPMENT]
+The development of RTS has been driven by user requirements and is therefore 
+covers a fairly rich number of features, yet retains its simplicity. However, 
+during the development of example levels, certain effects are difficult
+to reproduce. 
+
+[EXAMPLE]
+Detailed below is a script which is intended to raise and drop the light
+level in a given sector, the second on the map, with a tag of number 1; the
+top left of the sector is (224,-288) and the bottom right coordinate is 
+(352,-1056). The method below use rectangle triggers as detect pads at the
+each end of the corridor to light and darken with regards to the movement
+of the player:
+
+START_MAP map01
+    // Light switch off trigger
+    RECT_TRIGGER 224 -288 352 -256
+        TAG 1
+        TAGGED_REPEATABLE
+        TAGGED_DISABLED
+        TAGGED_INDEPENDENT
+        ENABLE_TAGGED 101
+        SLEEP
+        RETRIGGER
+    END_RADIUS_TRIGGER
+    RECT_TRIGGER 224 -1088 352 -1056
+        TAG 1
+        TAGGED_REPEATABLE
+        TAGGED_DISABLED
+        TAGGED_INDEPENDENT
+        ENABLE_TAGGED 101
+        SLEEP
+        RETRIGGER
+    END_RADIUS_TRIGGER
+
+    // Light switch off action
+    RADIUS_TRIGGER 0 0 -1
+        TAG 101
+        TAGGED_REPEATABLE
+        TAGGED_DISABLED
+
+        // Disable switch on
+        DISABLE_TAGGED 1
+
+        // Enable switch off
+        ENABLE_TAGGED 2
+  
+        LIGHT_SECTOR 1 -32
+        WAIT 17T
+        LIGHT_SECTOR 1 -32
+        WAIT 17T
+        SLEEP
+    END_RADIUS_TRIGGER
+
+    // Light switch on triggers
+    RECT_TRIGGER 224 -1024 352 -992
+        TAG 2
+        TAGGED_REPEATABLE
+        TAGGED_INDEPENDENT
+        ENABLE_TAGGED 102
+        SLEEP
+        RETRIGGER
+    END_RADIUS_TRIGGER
+    RECT_TRIGGER 224 -352 352 -320
+        TAG 2
+        TAGGED_REPEATABLE
+        TAGGED_INDEPENDENT
+        ENABLE_TAGGED 102
+        SLEEP
+        RETRIGGER
+    END_RADIUS_TRIGGER
+
+    // Light switch on action
+    RADIUS_TRIGGER 0 0 -1
+        TAG 102
+        TAGGED_REPEATABLE
+        TAGGED_DISABLED
+
+        // Disable switch on
+        DISABLE_TAGGED 2
+
+        // Enable switch off
+        ENABLE_TAGGED 1
+  
+        LIGHT_SECTOR 1 -32
+        WAIT 17T
+        LIGHT_SECTOR 1 -32
+        WAIT 17T
+
+        SLEEP
+    END_RADIUS_TRIGGER
+END_MAP
+
+At first glance, this would seem to function adequately, however in the
+event of a multiplayer game or the player crossing the 'on' trigger,
+followed quickly by the 'off' trigger, would result in the two triggers
+cancelling each other out. The intention to implement light detectors
+would not be smooth. Ideally, the last trigger activated would take 
+precedence by stopping a proceeding action. However, there is no way of
+specifying a limit to the sector brightness. 
+
+[PROPOSED SOLUTION]
+It is accepted that a new trigger state, including a small modification to the 
+LIGHT_SECTOR command to allow a min or max light value, would be fairly
+trival development. One would suggest that, in order to get the highest 
+level of flexibility out of the engine, it would be simplier to allow for 
+test of object properties. This objects being sectors, lines and 'things'. It 
+is also suggested that these tests can be carried out at any point during the 
+execution of a script, as opposed to just the trigger start.
+
+Given the development of RTS flow control to include 'loops' and 'if'
+condition sounds very much like reinvention and the testing of
+object properties is now provided by the LUA HUD code. It would
+seem sensible to provide RTS functionality via LUA scripts. Triggers
+would still exist and maintain a 'state', but the information in that
+state would be greatly reduced. 
+
+At this point, the example scenario is provided as an LUA script. This
+function 'map01_corridor_lighting' is called every tick by a 
+trigger. Three modules with following functionality are provided:
+
+* rts - RTS Interface: trigger and script interface
+=> set_trigger_wait(time) - Set the name time the trigger script should
+                            be executed.
+
+* util - Utility code (same as HUD)
+=> parseTime(time_value) - Converts a string into a time in tics
+
+* world - Game simulation interface
+=> get_sector_light(sector_no) - Get light value for sector
+=> player_in_sector(sector_no) - Returns true if player in sector
+=> set_sector_light(sector_no, value) - Set light value for sector 
+
+-- =====================================================================
+-- Start: Example LUA equilvalent
+-- =====================================================================
+
+CORRIDOR_MIN_LIGHT = 64
+CORRIDOR_MAX_LIGHT = 192
+LIGHT_CHANGE = 32
+
+----====| TRIGGERS |====----
+
+function map01_corridor_lighting()
+    corridor_sector = 2
+    light_level = world.get_sector_light(corridor_sector)
+
+    if world.player_in_sector(corridor_sector) then
+        if light_level < CORRIDOR_MAX_LIGHT then
+            light_level = light_level + LIGHT_CHANGE
+
+            if light_level > CORRIDOR_MAX_LIGHT then
+                light_level = CORRIDOR_MAX_LIGHT
+            end   
+
+            world.set_sector_light(light_level)
+
+            rts.set_trigger_wait(util.parseTime("17T"))
+        end
+    else
+        if light_level > CORRIDOR_MIN_LIGHT then
+            light_level = light_level - LIGHT_CHANGE
+
+            if light_level < CORRIDOR_MIN_LIGHT then
+                light_level = CORRIDOR_MIN_LIGHT
+            end
+
+            world.set_sector_light(light_level)
+
+            rts.set_trigger_wait(util.parseTime("17T"))
+        end
+    end
+end
+
+-- =====================================================================
+-- End: Example LUA equilvalent
+-- =====================================================================
+
+[NOTES]
+No attempt has been made to explain how the trigger is setup in the
+first place. One assumes there is function called at the beginning
+of every map with a predefined name, which includes the map name itself,
+although it has been left undefined as something to be considered in
+the design stage should this proceed.
+
+[QUESTIONS RAISED]
+There are a number of questions to be answered:
+1) Is the potential drop in engine performance justified?
+2) Would the use of LUA scripting be considered too complex for end users?
+3) How would the modules structured and what would they be named?
+4) Could the LUA replace the console parser?
+6) How would the system convert existing RTS scripts?
+
+[INITIAL RESPONSES]
+1) No idea. The HUD seems to function adequately. 
+2) C is simple language which is made complex by the API. The same would
+apply to LUA. Therefore the key is to design a relative simple, but
+flexible API.
+3) Pass.
+4) YES! The console would become an extremely powerful development tool
+and the existing parser could be quietly retired.
+5) This could be an external preprocessor or embedded in the engine. 90%
+of the functionality of the RTS commands would be functions and replaced
+with logic with test for values and sets a wait state. The most 
+difficult aspect would be conversion of the JUMP commands, all of which could
+be remedied by allowing the trigger to hold a 'stage' property. This value
+could be tested. Existing RTS scripts could potentially look quite
+difficult to read. The real question is how difficult the user base would
+find this, when generating new scripts. Incidently, it is considered that
+the results of an conversion could be written to the 'cache' directory.

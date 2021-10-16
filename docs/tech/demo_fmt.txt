@@ -1,0 +1,231 @@
+
+EDGE Demo Format
+================
+
+Last updated: March 2005.
+
+This document assumes familiarity with the savegame system,
+as described in 'docs/tech/save_sys.txt'.
+
+
+General overview
+----------------
+
+Demo files have the extension '.EDM'.
+
+Demo files begin with a header, then some chunks which contain
+the info about the game, and then a stream of chunks for the
+events of each game tic.
+
+Chunks begin with a four letter marker and are followed by a
+four byte length field.  The length only includes the data
+following the chunk header.  Chunks are padded to a multiple
+of four bytes (the padding is NOT included in the length).
+
+All numbers are stored in little-endian order.  Floating point is
+stored as a 16-bit signed exponent followed by a 32-bit signed
+mantissa.
+
+
+File Format
+-----------
+
+-  HEADER (Non-chunked)
+
+   +  MAGIC NUMBER (`EdgeDemo')
+   +  PADDING: 0x0D 0x0A 0x1A 0x00.
+   +  EDGE version that wrote the demo file (32 bit BCD, e.g. 0x129).
+
+-  Game definition.  [GLOB]
+
+   +  variables: multiple lots of [VARI] chunks.
+   +  player information: multiple [PLYR] chunks.
+   +  list of wad files.  [WADS]
+
+-  Tic Area: stream of [TICK] chunks
+
+   +  player ticcmds.   [PCMD]
+   +  synchronisation.  [SYNC]  (optional)
+
+-  TRAILER (Non-chunked)
+
+   +  End marker [ENDE].
+   +  Data CRC (32 bits, every data byte in file before this CRC).
+
+
+Player Synchronisation
+----------------------
+
+These chunks store the real position and angles of a player
+at a certain game tic.  To keep the filesize down, they are
+spread out so that there is roughly two [SYNC] chunks per
+player per second.
+
+
+Game Variables
+--------------
+
+The game information consists mainly of VAR = VALUE pairs, for
+example: LEVEL_NAME = MAP05 and SKILL = 3.  These are stored in
+[VARI] chunks in the top-level [GLOB] chunk.  The following is
+the list of variables needed:
+
+standard info:
+
+  GAME: name of game (mission), e.g. "HELL_ON_EARTH".
+  LEVEL: name of level, e.g. "MAP01".
+  FLAGS: level flags, numeric.
+  GRAVITY: numeric, usually "8".
+
+  SKILL: numeric, range is 1-5.
+  NETGAME: numeric, "0" is SP, "1" is COOP, "2" and up is DM.
+  P_RANDOM: numeric.
+  CONSOLE_PLAYER: numeric
+
+level check info:
+
+  MAPSECTOR: dual num, first is count, second is CRC (in hex).
+  MAPLINE:   dual num (includes vertex and sidedef info).
+  MAPTHING:  dual num (Note: static map things, not mobjs).
+
+ddf/rts check info:
+
+  RSCRIPT: dual num (Note: static RTS scripts).
+  DDFATK:  dual num, first is count, second is CRC (hex).
+  DDFGAME: dual num.
+  DDFLEVL: dual num.
+  DDFLINE: dual num.
+  DDFSECT: dual num.
+  DDFMOBJ: dual num.
+  DDFWEAP: dual num.
+
+
+Chunk Formats
+=============
+
+VARI
+----
+
+STRING for variable name.
+STRING for value.
+
+PLYR
+----
+
+32 bits for player ID (0 to MAXPLAYERS-1).
+32 bits for player flags:
+  0x0004 : player was a bot
+  0x0008 : player was remote (over the network)
+
+STRING for player name.
+STRING for mobj info type (e.g. "OUR_HERO").
+
+WADS
+----
+
+32 bits for number of wads.
+
+STRING for filename of first WAD.
+STRING for filename of second WAD.
+etc...
+
+PCMD
+----
+
+Multiple lots (one per player) of :-
+
+16 bits for ticcmd angle.
+16 bits for ticcmd mlook angle.
+16 bits for ticcmd consistency.
+16 bits for ticcmd unused1.
+
+3 bytes for ticcmd movement (fwd, side, up/down).
+2 bytes for ticcmd buttons (normal, extended).
+3 bytes for ticcmd other stuff.
+
+SYNC
+----
+
+16 bits for player number.
+
+FLOAT for their x position.
+FLOAT for their y position.
+FLOAT for their z position.
+FLOAT for their view_height.
+
+32 bits for their turn angle.
+32 bits for their mlook angle.
+
+FLOAT for their x momentum.
+FLOAT for their y momentum.
+FLOAT for their z momentum.
+FLOAT for their health.
+
+
+
+---------------------------------------------------------------------------
+  FUTURE IDEAS
+---------------------------------------------------------------------------
+
+
+Significant events
+------------------
+
+Certain game events are very significant, and should be recorded
+explicitly in the demo file.  For example: a player dying.  Other
+significant events (such as a line activation) could be optional,
+recorded for more robustness, or left out for smaller file size.
+Many events (such as a bullet puff being spawned) are not
+significant enough to be put into the demo file.
+
+Always recorded:
+
+  -  player enters map (new or reborn).
+  -  player dies.
+  -  player activates a certain linedef (incl. doors, RTS).
+
+  -  monster is spawned.
+  -  monster dies.
+
+  -  item is spawned (respawned).
+  -  item is picked up.
+
+Optionally record:
+
+  -  player uses a certain attack.
+  -  monster uses a certain attack.
+  -  monster activates a certain linedef (incl. doors).
+  -  player/monster is hurt.
+
+
+Random numbers
+--------------
+
+A significant source of de-syncing is the use of a global random
+number generator (P_Random).  It only takes a single extra call
+to P_Random() to make _ALL_ future uses of P_Random() get
+different values.
+
+Lee Killough worked out a good system with BOOM: for different
+uses of P_Random, have different random number generators.  So if
+one gets out of sync, the remaining will still be OK (only a
+single subsystem is affected).
+
+I think this system can be improved upon, so that if any subsystem
+gets out of sync, it will only remain out of sync for ONE TIC.
+
+Firstly we use a very high quality random number generator (like
+Mersenne Twister) to generate N random bytes per tic (e.g. 32).
+Each subsystem keeps an index value, which is cleared to zero when
+these random bytes are generated, and incremented for each call to
+P_Random().  Let SUB be the subsystem, RAND[] be the generated
+bytes, and IDX be the index, then:
+
+    value = RAND[(SUB * 23 + IDX) % N];
+
+Assumption 1: each subsystem doesn't require more than N values
+per tic, and in the odd case where it happens, it won't matter.
+
+Assumption 2: it doesn't matter that different subsystems are
+(potentially) using the same set of values.
+

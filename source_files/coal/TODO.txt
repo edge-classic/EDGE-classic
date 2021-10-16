@@ -1,0 +1,16 @@
+
+COAL TODO
+=========
+
+!! BUG: replacement functions do not update the existing entry in
+        the functions[] array -- it is merely added to the end.
+        Hence the FindFunction() API call finds the old one.
+
+-  describe new language (notes.txt)
+
++  InternaliseString: find an existing matching string 
+
++  support vector access with .x .y .z
+
++  WISH: interactive mode for the burner
+

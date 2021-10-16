@@ -1,0 +1,182 @@
+.\" -*-nroff-*-
+.TH glbsp 1 "July 2007"
+.\" .UC 4
+.SH NAME
+glbsp \- GL Nodes builder for DOOM ports
+.SH SYNOPSIS
+.B glbsp
+.RI "[" options "] "
+input.wad ... [\-o output.wad]
+.PP
+.B glbsp
+.I @argfile.rsp
+.PP
+.SH DESCRIPTION
+.I glBSP
+is a nodes builder specially designed to be used with OpenGL-based
+DOOM game engines.  It adheres to the "GL-Friendly Nodes" specification,
+which means it adds some new special nodes to a WAD file that makes it
+very easy for an OpenGL DOOM engine to compute the polygons needed for
+drawing the levels.
+.SH OPTIONS
+Options begin with a single dash
+(you can also use two dashes like in many GNU programs).
+Running glBSP without any options will show an informational screen.
+.TP
+.B \-h \-help
+Show a summary of all the options.
+.TP
+.B \-q \-quiet
+Quieter output.  Information about each level (like
+the number of linedefs, blockmap size, etc) is not
+displayed when this option is given, and a few other
+messages are skipped.  Important messages, like
+failure to build a certain level, are still shown.
+.TP
+.B \-f \-fast
+Allows glBSP to cheat a bit and
+re-use the original node information to create the GL
+nodes, doing it much faster.  Use this option to
+enable this feature.  The message "Using original nodes
+to speed things up" will be shown.
+
+The downside to reusing the original nodes is that they
+may not be as good as the ones glBSP normally creates,
+e.g. the special checks to minimise slime-trails don't
+kick in, and the \-factor value doesn't have much effect.
+.TP
+.B \-w \-warn
+Shows extra warning messages, which detail various
+non-serious problems that glBSP has while analysing the
+level structure.  Often these warnings show a real
+problem in the level (e.g. a non-closed sector or
+invalid sidedef), so they are worth checking now and
+then.
+.TP
+.B \-n \-normal
+glBSP usually detects if the normal node info (i.e.
+the non-GL variety) is present: when yes, it is left untouched,
+otherwise glBSP creates it.  This option forces
+glBSP to replace the normal node data with newly
+constructed nodes.
+.TP
+.BI "\-c \-factor" " <num>" 
+Sets the cost assigned to seg splits.  Factor can
+be any number from 1 to 32, and larger values make seg
+splits more costly (and thus glBSP tries harder to
+avoid them), but smaller values produce better BSP trees.
+The default value is known to be a good compromise.
+.TP
+.B \-p \-pack
+Pack sidedefs, by detecting which sidedefs are
+identical and removing the duplicates, producing a
+smaller PWAD.
+
+NOTE: this may make your level a lot harder to edit!
+Therefore this is most useful when producing the
+final WAD for public release.
+.TP
+.B \-xr \-noreject
+Normally glBSP will create an simple REJECT map for
+each level.  This options prevents any existing
+REJECT map, such as one time-consumingly built by a
+dedicated reject builder, from being clobbered.
+.PP
+The following options are rarely needed:
+.TP
+.B \-v1 .. \-v5
+Specify the version of the "GL Nodes" spec to use
+(either 1, 2, 3 or 5).
+V1 is considered obsolete now.
+The default is V2.
+Giving \-v3 or \-v5 will force certain lumps
+to use the new formats, but is only useful for
+testing since glBSP will automatically switch to V5
+format whenever the ordinary limits are exceeded.
+.TP
+.B \-m \-mergevert
+Merge duplicate vertices at the same location
+into a single vertex.
+This is usually safe, but is not done by default
+because some engines (e.g. Risen3D) need the
+duplicate vertices to stay separate for a special
+effect.
+.TP
+.B \-y \-windowfx
+Lets glBSP detect and handle the "One-Sided Window"
+mapping trick.  This can cause problems in some engines
+so it is disabled by default.
+.TP
+.BI "\-b \-maxblock" " <num>"
+Sets the limit of the number of blocks the BLOCKMAP may
+contain before we truncate it.  Default is 16000.  When
+the level is too large to fit, glBSP will truncate the
+blockmap, so it covers less area on the level.  This
+means that in the parts it doesn't cover (at the outer
+edges) there is no collision detection: you can walk
+through walls and other objects and bullets/missiles
+don't hit anything.  On very large but sparse levels,
+using a larger value (e.g. 30000) may help.
+
+A more serious problem is when the blockmap overflows.
+The blockmap created would be invalid, and could crash
+the DOOM engine when used.  glBSP will create an empty
+blockmap instead, causing modern ports to build their
+own blockmap.
+.TP
+.B \-xp \-noprog
+Turn off the progress indicator.
+.TP
+.B \-xn \-nonormal
+Forces glBSP to not create the normal node information
+when it detects that it is absent.
+.TP
+.B \-xu \-prunesec
+Removes any unused sectors that are found in the level.
+This has the potential to cause problems, since in
+certain scripting languages (e.g. EDGE's RTS, or Doom
+Legacy's Fragglescript) some commands use sector
+numbers directly, and pruning unused sectors can
+cause those references to become invalid.
+.SH RESPONSE FILES
+New in version 2.20 is support for response files.  These are
+files containing a list of options.  You specify the response
+file by prefixing it with '@'.  For example:
+.PP
+.B glbsp
+.I @argfile.rsp
+.PP
+The "@argfile.rsp" on the command line will be replaced with
+the contents of that file.  New-line characters are treated like spaces.
+Recursion (using '@' inside a response file) is not supported.
+.SH ZDBSP NODES
+When the normal nodes overflow, older versions of glBSP would
+simply write out the invalid node data.  glBSP 2.20 and higher now write
+the node data in the ZDBSP format (originally created for the
+ZDoom engine).
+.SH AUTHORS
+Andrew Apted created glBSP and glBSPX and continues to maintain
+them.
+.PP
+Andrew Baker, Janis Legzdinsh, Andr\('e Majoral and Darren Salt
+have contributed code, and Marc Pullen helped with the documentation.
+.PP
+glBSP was originally
+based on BSP 2.3 (C) Colin Reed and Lee Killough, which was created
+from the basic theory stated in DEU5 (OBJECTS.C) by Raphael Quinet.
+.SH LICENSE
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+.PP
+This program is is distributed in the hope that it
+will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License for more details.
+.SH "SEE ALSO"
+.PP
+The glBSP Homepage:
+.UR http://glbsp.sourceforge.net/
+http://glbsp.sourceforge.net/
+.UE

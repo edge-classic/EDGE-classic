@@ -1,0 +1,170 @@
+
+CHANGELOG FOR 1.28 (since 1.27)
+===============================
+
+(Date: MAY 24th 2004)
+
+Bugs fixed
+----------
+
++ serious crash bug loading textures from PWads fixed.
++ savegame problem which could cause crashes fixed.
++ windows version now detects out-of-date GWA files properly.
++ windows version now handles filenames with double quotes.
++ fixed crash when a door closed on a dead player.
++ fixed (potential) crash in GL mode when depth was 8 bits.
++ crash on cast parade with flipped sprites (HellKnight) fixed.
+
+- fixed the FACE() action.
+- fix for MAXFALL when swimming. (UNTESTED)
+- fix for too much bobbing.
+- berserk: if already showing fist, don't lower/raise it.
+- fix problem with really fast scrolling walls/floors.
+- fix for floor textures in GL (wrong scale, no transparency).
+- PRE.TEXT now works on first level (MAP01, E1M1).
+- powerup tints (berserk etc) now fade out after dying.
+- projectiles causing no damage when coming directly down.
+- removed DOOM I warnings about missing sprites/textures.
+- fixed RTS JUMP command which was seriously broken.
+- fixed RTS problems when using WAIT before a LABEL.
+- PALETTE_REMAP now works in GL mode.
+- chat macros in the config file were being overridden by DDF.
+- shot attacks now honour the RANGE setting in DDF.
+- fixed ceilings not opening because of stuck things (MAP06).
+- sky image (changeable in RTS) now saved in savegames.
+- fixed how armour is shown in the status bar.
+- certain fonts are no longer forced red (QDOOM).
+- numerous small fixes to DDF, e.g. Cyberdemon walk sound.
+- potential crash when subsectors have only 1 or 2 segs (MAP22).
+- sound replacements via DDF no longer jumbles up all sounds.
+- fixed transparent doors (again !), both software and GL.
+- fixed the issue with monsters resurrecting into another.
+- screenshots in GL mode now work again.
+- render sprites (S/W mode) with posts exceeding 128 pixels.
+- visibility clipping in GL was broken (causing excessive overdraw).
+- RTS graphical tips were not scaled properly.
+- flipped sprites now use the X offset correctly.
+- fixed player sprite, which wasn't walking when you move.
+- bugs when changing screensize with +/- and in the menu fixed.
+- night vision in GL mode was not lighting things up.
+- fix for console which was drawn behind the menus.
+
+Features removed:
+-----------------
+
+* MP3 music support, due to MP3 licensing which is incompatible with
+  open source software.
+
+- stretchsky option and related code.
+
+
+General improvements
+--------------------
+
++ new directories for config file and savegames.  If your machine support
+  multiple users (newer versions of Windows, and Linux), then the config
+  file and savegame directory are now in a user-specific location.  This
+  allows multiple users to have separate configuration and savegames.
+
+  To allow easy upgrading, we have included a tool 'UPGRADER.EXE' with
+  the EDGE binaries, which should be run before running EDGE.  If your
+  version of Windows is single-user, then it will say `Nothing to do',
+  otherwise it moves the config file and savegames to the new place.
+
++ better default configuration: e.g. 640x400 mode, 16 bit colour.
+
++ full Mlook range in GL mode.
+
++ improved handling of music volume under Windows.
+
++ better sky drawing in GL: drawn using a fake skybox (created from
+  sky image) to cope with Mlook.  Never wobbles anymore, and is drawn
+  a lot faster than before.
+
++ windows version prevents more than one instance of EDGE running at
+  the same time.  Also, S/W and GL window handling has been reworked.
+
++ the GL renderer emulates the flat-flooding and deep-water tricks.
+
+- the sprite name "NULL" is now hard-coded, and always shows nothing.
+- RTS SPAWNTHING: when thing is unknown, show warning instead of error.
+- better images for when you have both keycard and skullkey.
+- non-terminated strings in DDF cause a warning.
+- zooming: always use current weapon's zoom factor if set in DDF.
+- config file remembers current language and current Save/Load page.
+- the first 9 RTS tip slots are no longer unchangeable.
+- better invulnerability fade-out in GL.
+- Pixelfade wipe has been implemented for OpenGL mode.
+- text strings look better in modes smaller than 640x400.
+- friendly monsters now work a bit better.
+
+
+New features:
+-------------
+
++ very basic overlay HUD.  (Better one will be made when HUD.DDF is
+  implemented).
+
++ EDGE.log file, automatically remembers all startup messages.
+
++ new #VERSION directive for DDF files and RTS scripts.  It is followed by
+  the version of EDGE needed to use the DDF/RTS.  E.g. "#VERSION 1.28".
+  This directive is _required_ to use new features in EDGE 1.28, but it
+  also prevents you using obsolete features (they produce a fatal error).
+
+- when a path follower hits an RTS node, the trigger is enabled. (UNTESTED)
+
+- new RTS ON_CONDITION: WALKING.  Requires that the player is walking
+  (moving and on the ground).  Doesn't activate when swimming or flying.
+  A number in () can be used to specify how fast the player is moving.
+
+- ON_CONDITION support for amounts with powerups e.g. POWERUP_PARTINVIS(10)
+  which means 10 seconds or more remaining.
+
+- RESISTANCE_CLASS for DDF.  Used the same way as IMMUNITY_CLASS, but the
+  monster only suffers 40% of the original damage.
+
+- SPECIAL_MUSIC command for games.ddf.  Specifies the music played during
+  the cast parade and the bunny screen.
+
+- the console background is now a texture or flat called "CONSOLE".
+
+- new PRE.COLOURMAP and END.COLOURMAP commands for levels.ddf, changes the
+  colour of the text in the finale screens.
+
+- new colourmap special WHITEN, used for fonts.  Automatic when the
+  colourmap begins with "TEXT_".
+
+- TIP_GRAPHIC supports scaling via fourth parameter, which is a value
+  like 0.5, 1.0, 2.0.  For example:
+
+    TIP_GRAPHIC  M_PAUSE  3  false  0.5
+
+- CAST_TITLE command for things.ddf.  Refers to an entry in LANGUAGES.DDF,
+  and determines the monster's name in the DOOM II cast parade.  We have
+  English, French and Spanish translations so far.
+
+- the RTS command GOTOMAP now supports a "SKIP_ALL" keyword, placed after
+  the map name, and causes the intermission stats and any pre/post text
+  screens to be skipped.
+
+
+New console variables:
+----------------------
+
+  LIGHTING       \   Allow debugging OpenGL driver bugs. Each takes
+  COLORMATERIAL   |  a boolean value (TRUE or FALSE).  Some combinations
+  VERTEXARRAYS   /   don't make sense (especially LI + no_CM + VA).
+
+  DUMBSKY            Use a simpler method for OpenGL sky drawing.
+                     (A few drivers have problems, e.g. Voodoo 3).
+
+
+New command-line options:
+-------------------------
+
+  -nolog             Disables creation of EDGE.LOG file.
+
+  -sound16  (Linux)  Force using 16 bit sound.  Default is to only
+                     switch to 16 bit when 8 bits is unavailable.
+

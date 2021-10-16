@@ -1,0 +1,51 @@
+
+EDGE 1.35 Required Libraries
+============================
+
+Internal (in SVN)
+-----------------
+
+EPI      : Edge Platform Interface (utility code)
+Deh_Edge : DeHackEd/BEX patch to DDF converter
+COAL     : Coal language compiler / VM
+Timidity : MIDI playback library
+
+
+External
+--------
+
+LibSDL   : Simple DirectMedia Library
+
+OpenGL   : 3D Graphics library
+GLEW     : OpenGL Extension Wrangler library
+
+OGG + Vorbis + VorbisFile : Compressed sound and music
+
+LibPNG   : PNG image handling (Portable Network Graphics)
+Jpeglib  : JPEG image handling
+Zlib     : Compression library (used by LibPNG too)
+
+FLTK     : Fast Light ToolKit, for error dialogs  [Linux only]
+
+
+LINKS
+=====
+
+http://edge.sourceforge.net/
+http://glbsp.sourceforge.net/
+
+http://www.libsdl.org/
+http://www.libsdl.org/projects/SDL_net/
+
+http://www.vorbis.com/
+http://www.fltk.org/
+http://enet.bespin.org/
+
+http://www.opengl.org/
+http://glew.sourceforge.net/
+http://www.microsoft.com/windows/directx/default.aspx
+
+http://libpng.org/
+http://www.gzip.org/zlib
+http://www.jpeg.org/jpeg/index.html
+

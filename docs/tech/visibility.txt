@@ -1,0 +1,32 @@
+Quoting Ken:
+
+The goal is not to find the nearest wall, but the unoccluded wall.
+Depending on the scene, the unoccluded wall could be far away. A
+simple method is to compare every wall to every other wall at
+every step. This isn't fast, but it will work. Before you draw
+each wall, you make a list of 'potentially unoccluded walls'. You
+then check every pair of walls. If any wall is in front of
+another, then you can cross the occluded wall off the list. Once
+you finish, there should always be at least 1 unoccluded wall.
+(This is assuming you are using a 4dof engine, and none of the
+walls intersect). Here are the steps to do a wall vs.  wall test:
+
+1. In the 2D overhead view, clip your walls to the left and right
+   edges of the screen view.
+
+2. Project the wall's left and right edges to screen-x coordinates.
+
+3. Using the projected coordinates, test whether the walls
+   overlap. If they do not overlap, then you are done with this pair
+   (i.e. neither wall can be crossed off your list of potential
+   unoccluded walls)
+
+4. Look at wall A. Are the 2 endpoints of B on the same side of
+   line A? If not, then swap the walls and do step 5, remembering to
+   invert your final result.
+
+5. Looking at wall A, is your viewpoint on the same side of it as
+   wall B? If yes, then wall B is in front, and wall A is occluded,
+   meaning it can be crossed off your list. If no, then wall A is in
+   front, and wall B can be eliminated.
+

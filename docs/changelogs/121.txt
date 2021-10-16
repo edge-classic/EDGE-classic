@@ -1,0 +1,97 @@
+
+CHANGELOG FOR 1.21 (since 1.20)
+===============================
+
+(Date: MARCH 28th 2000)
+
+(Unreleased EDGE version)
+
+Bugs fixed:
+
+ - the infamous DJGPP free() crash.
+ - textures lacking some texture columns no longer crash the engine.
+ - an 'invalid x87 operation' bug caused by uninitialised mem.
+ - problems with liquids eating other floors (etc) when moving fixed.
+ - DDF/RTS errors now show the contents of the line.
+ - textures getting out of sync on switches pressed quickly fixed.
+ - starting the game with no weapons now works again.
+ - the bug causing missing mid-masked textures in non-Truebsp fixed.
+ - alignment of mid-masked textures should be OK in all renderers.
+ - GL code now draws non-power-of-2 textures and mid-masked textures.
+ - fixed keyboard handling in linux/GL code.
+ - fixed textures inadvertently turning odd colours in GL renderer.
+ - disappearing walls (at edge of screen) in the GL renderer fixed.
+ - issues with translucency in the GL code fixed.
+ - SHADOW sprites now supported by the GL code (different though).
+ - most problems with MLOOK in the GL code have been rectified.
+ 
+Changes:
+
+ - the VOLUME field of sounds.ddf now uses a percentage.
+
+ - the GRAVITY field of sectors.ddf and lines.ddf now accepts floating
+   point values (like 0.5).  The values may be different too, I'm not
+   sure what the old value for "normal" gravity was, but the new value
+   for normal gravity is 8.0 (or just 8 if you prefer).
+
+ - ACCURACY_ANGLE and ACCURACY_SLOPE are a bit different, now they are
+   the absolute maximum error that can occur.  Current values will
+   need increasing (I think multiply by 2, but I'm not sure).
+ 
+ - EXTRAFLOOR has changed, and should be considered a moving target
+   since I'm not 100% sure yet how it ought to be, but what it changed
+   to will be pretty close.  The EXTRAFLOOR and EXTRAFLOOR_SPECIAL
+   fields of lines.ddf have been merged into one new field:
+   EXTRAFLOOR_TYPE=...  Some examples:
+
+     before:
+       EXTRAFLOOR=LIQUID;
+       EXTRAFLOOR_SPECIAL=WATER,FLOODER;
+
+     after:
+       EXTRAFLOOR_TYPE=LIQUID,WATER,FLOODER;
+
+     before:
+       EXTRAFLOOR=THICK;
+       EXTRAFLOOR_SPECIAL=SIDE_UPPER;
+
+     after:
+       EXTRAFLOOR_TYPE=THICK,SIDE_UPPER;
+   
+   It is a comma-separated list of tags.  You specify the main type
+   (THIN, THICK or LIQUID) and then any other modifiers you want, like
+   WATER, FLOODER, SEE_THROUGH, SHOOT_THROUGH, SIDE_UPPER, etc...
+
+   Shootable glass has not been implemented yet, but when it is, you
+   will use this:
+
+     EXTRAFLOOR_TYPE=THICK, SEE_THROUGH, ...;
+   
+   Similiarly liquid boxes (with sides) have not been implemented yet,
+   but will look like this:
+
+     EXTRAFLOOR_TYPE=LIQUID, THICK, ...;
+
+   Note that the "LIQUID" tag implies SEE_THROUGH and SHOOT_THROUGH.
+   If you wanted a liquid that cannot be shot through, you would have
+   to type this:
+
+     EXTRAFLOOR_TYPE=LIQUID, NO_SHOOT_THROUGH, ...;
+
+   (that's the reason I'm not entirely happy with this system).
+
+   Note too that the SEE_THROUGH tag now means players as well as
+   monsters -- only extrafloors which have this tag (explicitly or
+   implicity via LIQUID) can be translucent, otherwise an error will
+   occur.
+
+New features:
+
+ - the linux port now has music code, mostly complete.
+
+ - the linux port now has sound code -- preliminary though.
+ 
+ - VISCOSITY field can now be used in lines.ddf.  It works like the
+   GRAVITY and FRICTION fields that were already available: transfers
+   the new viscosity into the tagged sector.
+ 

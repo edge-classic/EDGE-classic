@@ -1,0 +1,774 @@
+Kester Maddock's Log File.
+----------------------------------------------------------------------------------------------------------------------------
+NOTES:
+----------------------------------------------------------------------------------------------------------------------------
+Suggested changes to Allegro:
+  Boost sound volume:mixer.c:185
+	 mix_vol_table[j][i] = (i-128) * j * 768 / MIX_VOLUME_LEVELS / mix_voices;
+  Disable detection of default.cfg in current directory:digmid.c:416
+   {
+     char path[256];
+     replace_filename(path, __crt0_argv[0], "", sizeof(path));
+     if (strcmp(where, path))
+     {
+       /* could it be a directory containing default.cfg? */
+       append_filename(dir, where, "default.cfg", 256);
+       if (file_exists(dir, FA_RDONLY | FA_ARCH, NULL)) {
+          append_filename(dir, where, "", 256);
+          strcpy(file, "default.cfg");
+          return TRUE;
+       }
+     }
+   }
+  Fix BCD 1.2:bcd.c:457  If someone has v1.3 please send it to me
+    tracks = calloc(num_tracks+1, sizeof(Track));
+----------------------------------------------------------------------------------------------------------------------------
+9-7-99
+----------------------------------------------------------------------------------------------------------------------------
+Started GUI + console system
+Added clipping functionality to v_video?.c
+GUI WILL CRASH IF OBJECTS ARE MOVED OFF THE SCREEN!
+----------------------------------------------------------------------------------------------------------------------------
+16-04-99
+----------------------------------------------------------------------------------------------------------------------------
+Wrote deathbots (p_bot.*)
+Removed maxplayers
+Added crosshair states to weapons.ddf
+Allegro 3.11 is out, removed mus_midi.c, changed music code.
+Fixed DDF in wad files.  Also ddf lumps will always be loaded
+in correct order from wad files.
+DDF:  Added respawn time to things.ddf
+New network intermission for more than four players.
+Fixed bug in m_menu.c new game menu which would crash win32 version.
+Network code will be called in prot mode if possible.
+New joystick code.
+New action functions: RANDOM_JUMP, SETCROSSHAIR and GOTTARGET.
+Fixed bug with explosions overhead/underneath
+Respawned players telefrag (better than getting stuck) deathmatch 3.0
+Raise and change sectors work.
+Improved P_GetSectorSurrounding.  A pillar raising in the middle of a
+pit of slime will work properly.
+Fixed faded teleportation.  Only fade if you are the player who teleported
+ (had problems in deathmatch)
+
+
+----------------------------------------------------------------------------------------------------------------------------
+29-01-99
+----------------------------------------------------------------------------------------------------------------------------
+Changed all MAXINT to INT_MAX, MININT to INT_MIN etc. since that is what is defined
+ by limits.h, which is more portable.
+Fixed Network play.
+Close the debug file on exit.
+The debug file name is different.  Each debug file gives a different name, debug0.txt,
+ debug1.txt, debug2.txt ...
+-skill uses the correct numbers: 1 - easiest, not 0.
+Removed conio.h from the list of headers for ddf, unused.
+Merged all types of things (scenery, items, and creatures) into one file.  This means
+ that all commands are available for all types.
+Merged thing types into attacks, so all thing commands are available for attack
+ projectiles.
+Added the player_attack flag to attacks.  This means that accuracy is not affected
+ by a target's invisibility.
+Added (on request) option for autoaim disable.  Options are Off (no auto aiming)/On
+ (auto aiming)/mlook (mlook will change to view the target)
+Improved lines.ddf scrolling.  Scrolling can take place in any direction, through
+ use of x speed and y speed instead of direction and speed. (Retained compatibility)
+Fixed bugs in DDF:
+ games.filename is not initialised to NULL.
+ defines work.
+ numeric accepts hex (and octal) as well as decimal
+Created a p_action.h file.  This is the header for ddf_main.c.  To add action pointers,
+ you only have to edit p_action.c to add the code, and p_action.h to add the ddf names.
+Removed stacks of commented out bits of code.
+Externalised everything still in the exe (blood and bullet puffs) except for the
+ MAP30 brain.  The only reason I can't externalise this is making that wall fill
+ with explosions when it dies.
+Added the bounce flag for mobjs.  Mobjs with this flag bounce of walls. (Like balls
+ and grenades.)  Also bounce on floor.
+Found code that wasn't being called in dstrings.c.  Removed dstrings.c.  Relevant
+ code is in ddf_main.c: chat macros, gamma messages
+Added things to mobj:
+ lifespan, gib, and side.
+Changed backpack weapon info to use weapon names.
+Fixed strncasecmpwild
+Added Clipsize to weapons.
+Remove dstrings.c from project
+Added rangecheck to vertangle
+G_DeathMatchSpawnPlayer will use more than 20 spawn spots.
+The spawn code can spawn more than 8 players! The only thing left now is to
+ dynamicly allocate anything based on MAXPLAYERS, and we have removed the limit
+ on players! Pity network code's max is 128... :-)
+Updated hacked code from allegro from v3.1: mus_midi.c i_alleg.h i_allgdj.h
+ Sent message to Shawn, this code will not be necessary when the next version of
+ allegro comes out. :-)
+-forcevga comes into effect before memory is allocated for screens.
+Added #defines to music code: NOMIDI, NOMP3, NOMOD, NOCD to disable midi, mp3, mod, and
+ cd music.
+Reduced redundancy in i_net.c
+Fixed pitch shift in i_sound.c, removed steptable (unused)
+Added some comments to i_sound.c
+Fixed swapstereo in i_sound.c.
+If numlock is on, pad-5 selects rocket launcher.  This was a 'feature' of regular
+ doom, and someone asked for it.  If numlock is off, pad-5 acts as it used to in
+ DOSDoom. (I use it for jump.)
+Zone memory now allocates based on available free memory.  Gives a low memory warning.
+-noirq param gets tics from clock instead of interrupt.  This allows DOSDoom to run
+ in background win95 windows.
+On exit and quit, the debug file is closed.  Errors are printed to the debugfile.
+Removed I_Textattr, I_ClrScr, and I_Window
+Added Bilinear filtering spanfunc by Vitek Kavan, optimised by Erik
+Reorginised I_CheckCPU: -UseC bypasses check since check_cpu crashes on 386s.
+Added low resolution column drawers for slow computers.  (Like low detail on DOOM.)
+Externalised cheat codes to default.ldf
+Externalised quit sounds to default.ldf
+Externalised quit messages to default.ldf
+Removed m_swap.c from the project, inlined byte swap functions in m_swap.h
+Made a makefile that works
+Added P_ActMakeActiveSound.
+Added 'sides.'  Objects on the same side don't attack each other.  0 is neutral.
+ side is a binary value, so side 6 is an alliance between sides 4 + 2.  Players on
+ the same side should not get frags for killing their own side.
+SmartProjectiles will now also calculate how high to throw objects without MF_NOGRAVITY
+ (grenades.)
+Object spawning should now explode spawns against walls instead of removing them.
+Fixed Skullfly for nightmare mode.
+Stopped skulls being able to move stationary objects like pillars.
+Added CheckBlood action which stops blood from disappearing in blood mode.
+Added CheckMoving action which returns an object to it's spawn state when not moving
+ (for player objs)
+Fixed high speed objects.  Old max speed was 30, is now 100.  Can be increased by
+ changing the define, 100 is pretty quick
+Sphere attack does more damage.  Distance from explosion point was not taking into
+ account the target's radius in the z axis.
+PIT_CheckBlocking Line fixed
+Added fuse (and lifespan) for grenades
+EV_Teleport searches only the sector, not the entire map.
+Fixed Autofire weapons.  Semiauto weapons work now.
+Fixed savegames, yay.
+Fixed pwads that replace textures, but use id's PNAMES or TEXTURE1
+Swapped around R_PointToAngle and R_PointToAngle2 so that R_PointToAngle always works.
+Added Doppler shifts to the sound code. :-)
+Removed P_Random in S_StartSound.  Otherwise opening a menu will desync net + demo games
+V_DarkenScreen8 does pixels 4 at a time, and V_DarkenScreen16 works properly for both
+ 15 an 16 bits per pixel displays.
+DDF lumps in a wad file are always loaded in the correct order now.
+If malloc of Zone memory fails, error is generated instead of warning.
+Dynamic allocation of sound channels in i_sound.c: Allows more than 16 sound channels
+ (Allegro max is 64...)
+Wrote a null network driver for testing net code on one machine.
+ASM optimisation in MP3 code has rotted. Don't use -DARCH_i586 when compiling libamp.
+Why have I done so much for portability?  I have a win32 port, using cygwin and
+ WinAlleg.  Differences from DOS version: No cd music, no midi music, -forcevga runs
+ in a window (desktop must be in 256 colour mode) no asm drawing funcs, can't have
+ mp3 and mus music in the same session (use -mp3 to enable mp3 music, disable mus
+ music.) You can still use mp3 music without -mp3, it just sounds crap. No network
+ play.
+Fixed makefile.  make makes dos version, make clean cleans everything but exes,
+ make win32 makes win32 port.
+
+----------------------------------------------------------------------------------------------------------------------------
+23-12-98
+----------------------------------------------------------------------------------------------------------------------------
+Recompiled for without PPro flags!
+Fixed respawnsetting
+Fixed faded teleportation
+Fixed DDF loading.
+
+----------------------------------------------------------------------------------------------------------------------------
+21-12-98
+----------------------------------------------------------------------------------------------------------------------------
+Fixed Network play.
+States can handle misc1 and misc2 refs.
+Smoothed invisibility.
+Fixed BFG
+
+----------------------------------------------------------------------------------------------------------------------------
+17-12-98
+----------------------------------------------------------------------------------------------------------------------------
+Fixed DOS mode Bugs:
+  ddf_weap.c:176 realloc errors.
+  i_system.c:754 Error in I_Error.  Use nosound variable instead of cmd check.
+  s_sound.c:764  Cannot assume channels[i].sfxinfo != NULL
+Changed CD mode to non loop.
+Removed default for mlook.
+Added world map status to savegames.
+Give a default to nosound
+Cleared intermission status on new game.
+
+----------------------------------------------------------------------------------------------------------------------------
+16-12-98
+----------------------------------------------------------------------------------------------------------------------------
+Moved all flags that affect gameplay into a special struct: gameflags_t.  There
+  is a gameflags struct and a settingflags struct.  The gameflags struct holds
+  the flags for the current game/demo and the settingflags hold the user's
+  preferences.  This is so eg demos do not change user's prefs.
+All iwads in the current directory will be loaded. -iwad parameter changes
+  which dir to look in and also can be used to load a single iwad.
+Added a shareware version check.
+Added left + right monitors as seen in v1.1 of Doom.  Use -viewangle 90 for left
+  and -viewangle 270 for right.  As you may have guessed, you can use any angle
+  specified in degrees.
+Made freelook smooth.
+Infinite number of ammo types.
+Finished Intermission screens.
+DDF files can be loaded from wad files:  ddfanim, ddfatk, ddfgame, ddflang, ddflevl,
+  ddfline, ddfcrtr, ddfitem, ddfcnry, ddfsect, ddfsfx, ddfswth, ddfweap.
+Also the -ddf param specifies the dir to look for base ddf files.
+Attack projectiles flags are no longer implicit.
+Added fast param to creature and attack ddf files.  This is how much that monster/
+ missile is speeded up in nightmare.
+Added episode param to levels.ddf.
+Removed limits on states and spritenames.
+Added #define command to ddf files.
+Fixed another bug in the ddf fixed_t getter.
+Made players part of ddf in creatures.ddf
+Added Jumpheight and maxfall to creatures.ddf
+Finished weapons.ddf:  finished chainsaw and plasma.  Added weapon feedback effects!
+Added viscosity to sectors.ddf.  This specifies how 'thick' a sector is: 0 is air,
+  1 is solid. 0.5 should be about water.  This is mainly designed for zero gravity
+  sectors, so the player can get down without a jetpack.
+Fixed major bugs in backpack code: writing to null pointers meant backpacks crashed
+  the game.
+Removed a lot of bastard sfxs.  Added jetpack sounds to this list.
+Added 8 button joystick support.
+Removed old hi colour trans routines. (Erik's made new ones.)
+Fixed SFX Decaching routine.
+On startup, I_CalibrateJoystick accepts joystick buttons as well as keys.
+Hicolour I_SetPalette works properly now for non DOOM palettes.
+Inlined Fixed point funcs into m_fixed.h for more speed.
+Made most of the funcs in m_options.c static.
+Added a help line to the bottom of the options screen.
+Added Z check to melee attack for true3d
+Made smart projectiles work.  These make the cyberdemon a nast foe now... Enemies
+  using this attack style can work out how much to lead a target, so the hit rate
+  should increase big time.  Try the levels e2m8 and map32 with this enabled.  I
+  dare you.
+Fixed not being able to close doors.
+Discovered save games were clobbered! Fixed them.
+Ignore missing animations.
+Fixed colourmap changing in hicolour.
+Finished my smoothing draw column. Doesn't give much framerate past 400x300, but
+  it looks awesome.  Compile with -DSMOOTHING to allow, -UseSpan KM -UseCol KM to
+  activate. Uses Erik's trans routines in hicolour.  Unfortunately, I cannot smooth
+  sprites.
+Added savegame radius trigger.
+New SFX code: Mobjs can make more than one sound at once.  A sound will only be
+  cut if that mobj makes another sound with the same singularity.
+Added some wad file checking funcs compile with -DWAD_CHECK, but be warned: this
+  will print every wad cache request to the debug file.  It takes less than 30
+  seconds to make a 40 meg debug file.
+Added Title screens etc to mission.ddf
+Removed mus database and lu_sound.c.  Unnecessary.
+Episode Menu generated dynamically.
+
+I think we are quite close to release now. :-)
+----------------------------------------------------------------------------------------------------------------------------
+25-11-98
+----------------------------------------------------------------------------------------------------------------------------
+RAD_Scripts can be loaded from wad files and be included from disk or wad files.
+Weapons.ddf more or less finished. (Chainsaw vibrations not.)
+DOSDoom now takes advantage of Erik's trans routines, objects have 65536 levels
+  of translucency.
+Finales generalised.
+Monster accuracy is now a fixed_t
+Fixed a bug in DDF_MainGetFixedHelper which means decimals with more than one
+  decimal place work.
+Wrote some radius scripts to take care of specials in Doom, eg Exit level on
+  cyberdemon's death in E2M8.
+Rocket Jumping.
+Fixed Bug in Wi_stuff.c that meant MAP30 crashed.
+Added z coordinate to idinfo cheat.
+Removed MMX disable check as Allegro October 25 has fixed FPU bugs in it.
+Removed Screen Resolutions with extreme aspect ratios.
+Added ability to scroll backwards through list.
+Made Blood more violent. :-)
+Changing gravity in menu affects instantly instead of next level.
+Faded teleportation has three settings: Off, On, and No teleflash.
+Rewrote my super-smooth span texture mapping routine.  Maps in two directions now.
+  Looks fantastic, but slows a P2 266 down to 10fps!
+New Radius trigger commmands: #version, #include, ondeath.
+Radius trigger Tip functions can handle graphics.
+
+
+BUGS:
+  Chainsaw doesn't vibrate.
+  Chainsaw gets pumped up for berserk.
+
+
+----------------------------------------------------------------------------------------------------------------------------
+29-10-98
+----------------------------------------------------------------------------------------------------------------------------
+Moved RAD_Script init so rad scripts can be loaded from wad files. (TODO)
+Languages all contained in one file. (default.ldf)
+Tons of stuff added to lines.ddf + sectors.ddf
+New attack type: LaunchSmartProjectile.  This attack attempts to lead the
+ target, (usually :-) increasing the chance of hit.
+Changed SFX to eliminate runtime lookups, and allow random sfx on everything.
+Foreign characters like '„' are allowed in translations.  Note some of them
+ don't have graphics.  All the ones needed now have graphics.
+Seperated out CD audio, so CD audio can be started/stopped from menu.
+Fixed SFX Caching.  This is important for DDF, because SFX used to be preloaded.
+ Adding new sfx would eventually limit memory.
+Added a timeout to the shutdown sound loop.
+Extended keys defined by macro.
+Joystick calibration routine works.  It used to ask you to move the joystick to
+ the lower right corner, then end.  But because you had right pressed, joystick
+ would trigger calibration again.  Fixed by asking to calibrate centre again.
+Wrote a 16-bit blended column drawing routine.
+Fixed sector raise and change, by searching backwards.  Fixes MAP03, but somewhere
+ else probably doesn't work... :-(
+Added #defines so you can compile a version without MOD/MP3 music. NOMOD and NOMP3
+Fixed P_SphereAttack not damaging according to range.
+Changed chaingun sound to chgun from pistol?
+Changed the linedef security system.  In the ddf file, if a + prefixes the key
+  then that key is required, eg BLUE_CARD,BLUE_SKULL is blue keycard OR skull,
+  but +BLUE_CARD,+BLUE_SKULL is blue keycard AND blue skullkey.
+Added colfuncs for Translated + Translucent objects.
+Radius triggers fixed for DDF: START_MAP x (x) changed to START_MAP xxx, where
+ xxx is the level name eg MAP01
+Zone is aligned to 32 (cache line) on Pentium Pros.
+
+Checked everything compiled optimised
+Checked everything compiled debug-mode
+Wrote this update
+Prepared for send
+
+TODO: allow searching through hi-res list backwards.
+
+----------------------------------------------------------------------------------------------------------------------------
+30-9-98
+----------------------------------------------------------------------------------------------------------------------------
+Used a modified qsort on vissprites.  Eliminated the need for an extra sorting stage.
+Finished Sectors.ddf
+Cache SFX
+
+
+----------------------------------------------------------------------------------------------------------------------------
+27-9-98
+----------------------------------------------------------------------------------------------------------------------------
+Fixed Blood + bullet puffs in true3dmode. Added MF_NOCLIP flag
+Fixed bullet puffs not exploding against floors/ceilings.
+Merged in Martin's True 3d/Jetpack code.  This is the coolest.
+Generalised Lights.
+Added a fix from Erik p_maputl.c P_InterceptVector
+Added fix as suggested by Erik concerning SFX Init failure and resulting lockup at exit.
+Wrote DDF file for Sectors.  Need to generalise Floors/Ceilings even more to finish.
+Finished DDF file for SFX.
+Bug (reported by Erik:)  Probably fixed.  Floors not going back up.
+Fixed bug introduced by True3d whereby monster missiles don't aim upward.
+
+Known Bugs:
+  Where a sector raises and changes texture eg MAP03.
+  Special sectors 10 + 14 (Doors) don't work.  Need to merge p_floors.c + p_ceilng.c
+
+TODO: Stuff I want:
+  Use better sorting methods on vissprites and visplanes.
+  Make DDF storable into wad files.
+  Add an #include directive to DDF to allow a patch file to include the stock doom DDFs
+  Multiple languages in LDF file, eg under header
+    [DEFAULT]
+    string1="my string one";
+    string2="my string two";
+  
+    [GERMAN]
+    string1="my string one in german";
+    If a string doesn't exist, it should fall back to the default
+  Cache SFX
+  Help text in options menu
+
+----------------------------------------------------------------------------------------------------------------------------
+17-9-98
+----------------------------------------------------------------------------------------------------------------------------
+Merged in Andy's update.
+Changed Fixed point/Time DDF.
+Merged update by Erik.
+Profiled ColumnFuncs for P2.
+Changed linedef tag 33 back to red???
+
+----------------------------------------------------------------------------------------------------------------------------
+6-9-98
+----------------------------------------------------------------------------------------------------------------------------
+Changes:
+        MMX is not enabled by default, as it crashes with sound turned on.  Crashes
+         in draw column func.  The only thing I could think of was to disable
+         interrupts while drawing, but that didn't work.  I'm fairly sure there is
+         no fpu code in the sound library.
+        Had tons of fun with the dynamic res changing... :)
+            Test mode works, time delay is 5 secs
+            No crash if res mode isn't available.
+            Added all of Allegro's constant resolutions, ie ModeX, and SVGA 640x480
+            Moved res config info from dosdoom.cfg to default.cfg
+        Started a sounds.ddf, gave up because of all the tables that rely on sfx numbers
+         Will be easier to complete when more of ddf is finished.
+        Pressing Escape when the joystick asks you to calibrate it at the init phase
+         will load config data from the config file.
+
+Bugs Fixed:
+     In the menu.c, wierd bug to do with M_Responder recieving an extra keypress. (And
+       acting on it.) (if (ch == -1) )
+     Added fix by Erik to R_InitPlanes()
+
+Ideas:
+      I found I can run multiple DOSDooms in Windows95.  By writing a network driver
+       that can link them all I can test network code.
+
+----------------------------------------------------------------------------------------------------------------------------
+3-9-98
+----------------------------------------------------------------------------------------------------------------------------
+Changes:
+     Joystick/Mouse code combined within DOSDoom, you can individually assign
+       a joystick/mouse axis to a function.  Also support for a hat switch.
+       Hey, so my brother bought a Wingman Warrior, and I just had to make it
+       work somehow...
+     Removed the wait at the start:  Should load as fast as possible. :-)
+     Changed the way SFX pitching works
+     P_Ceilng.c + P_Floor.c rewritten for DDF
+     P_Enemy.c Lines.DDF breaks end of level special effects, ie, when you kill
+       both Barons at the end of episode 1, the walls come down to allow you to
+       finish the level.  Fixed this.
+     P_Saveg.c Changed for Lines.DDF.
+     P_Spec.c Lines.DDF :)  Shooting/Walking/Pushing lines all call P_ActivateLine
+       to determine what happens
+     P_Switch.c push special line calls P_ActivateLine.
+
+     When activating a special line, walking can now cause a switch to change texture.
+     This could lead to interesting effects, eg walk onto a hot plate, and the lights
+     around it light up.
+
+     R_Defs.h Seperate pointer for ceilings/floors/lights.  A sector can now have
+       all three at once.
+
+     P_Doors.c/P_Plats.c No longer needed.  Functionality is in p_ceilng.c/p_floors.c
+
+New Stuff:
+     Added a get boolean func to DDF
+     Lines.ddf file
+     Added support for looped SFX to the sound code.
+     Options in m_option.c to choose analogue binding
+
+Bugs Fixed:
+     DDF_Main.c: In the sprite list, NULL terminator was omitted
+                 GetSound func: error made helpful.
+                 Found splitstateinfo, version m is already fixed :-)
+     This won't be a bug until we move to the next WIP of Allegro, but fixed it
+       anyway in i_music.c concerning finding the end of a midi song
+     A bug in p_map.c after I noticed Skulls slamming into boxes of rockets.
+
+TODO:  Stuff that should be addressed:
+     DOSDoom is slower than it ever was.  My P2 starts struggling at 640x400. (30fps)
+     This shouldn't happen, but comparing with Chi's framerate table, there isn't too
+     much difference.
+     MMX + Sound don't mix.
+     P_Ceilng.c and p_floor.c are close enough to be merged into one file.
+     Lots of visplanes/vissprites could slow down DOSDoom.  Suggest change sprite's
+       linked list to a heap, visplanes to a hash table.
+
+----------------------------------------------------------------------------------------------------------------------------
+31-8-98
+----------------------------------------------------------------------------------------------------------------------------
+Notes to self:
+     Crushing ceilings stop 8*fracunit above floor
+     fastCrushAndRaise ceilingspeed = 2 * ceilingspeed
+     doors rise to -4 * frac below ceiling
+     blazing door speed = 4 * VDOORSPEED
+     linedef special 53 is now buggered with respect to demos
+     MMX doesn't work with sound.
+     Dosdoom is slow
+     Grill Andy about leaving limits in DDF :-)
+
+TODO:
+Linedefs.ddf
+     linedeftype 53
+     combine floors/ceilings.
+
+Misc
+     SFX - Chainsaw stops when oof sound is played
+----------------------------------------------------------------------------------------------------------------------------
+31-7-98
+----------------------------------------------------------------------------------------------------------------------------
+Bugs Fixed:
+     d_debug.h: Z_CheckPointer(p) checks a pointer returned from Z_(Re)Malloc
+     d_items.c: Deathstate.  Had to fix this to get a test version running;
+       still crashes on barrels :-(
+New Stuff:
+     DDF Switchs and Wall/Flat Animations - changes in
+       ddf_anim.c ddf_swth.c p_spec.? p_switch.c ddf_main.h ddf_locl.h
+     The disk icon that appeared when DOOM was loading stuff is back.
+       i_video.c, w_wad.c
+
+Changes:
+     Episode 3 bunny is fixed.
+     Sound volume dynamic range changed from 0 - 240 -> 0 - 255
+     Changed Cheat inputs: Music Change!\nEnter Music Name: etc...
+       Music cheat accepts RUNNIN instead of D_RUNNIN; E1M1 instead of D_E1M1
+     User input from messages in a different colour.
+     Options menu changes: M_CalibrateJoystick etc functions can calibrate the
+       joystick from within DOSDoom
+     F5 (used to be change Detail; not implemented) now brings up options menu.
+     R_bsp.c r_segs.c r_plane.c couple more error checks made, skytexture can be
+       animated now. :-)
+     z_zone.c: detect if OS failed memory allocation attempt.
+
+
+----------------------------------------------------------------------------------------------------------------------------
+21-7-98
+----------------------------------------------------------------------------------------------------------------------------
+New Stuff:
+     Z_CheckPointer(p) in d_debug.h.  Checks a Zone pointer.
+     V_ClearPageBackground(int x): clears the space around a scaled pic.  Doesn't blank the
+       whole screen, just the border left when drawing a pic. Example:
+       +---------------------------------------------------+
+       |***************************************************|
+       |***************************************************|
+       |***+-------------------------------------------+***|
+       |***|                                           |***|
+       |***|                                           |***|
+       |***|                                           |***|
+       |***|           Scaled Pic.                     |***|
+       |***|                                           |***|
+       |***|                                           |***|
+       |***|                                           |***|
+       |***+-------------------------------------------+***|
+       |***************************************************|
+       |***************************************************|
+       +---------------------------------------------------+
+       The * bits are all blanked.
+       x is the screen to blank, it is substituted directly into screens[x]
+        (Needed for intermission)
+Changes:
+     Blood is no longer a slider, but a toggle.
+     Removed quit messages limit.  Again.  Andy was using #define NUM_QUITMESSAGES,
+       but I count them dynamically.  I also don't see any problem with
+       "Don't quit now. We're still spending you money."
+     Removed Ad from startup.
+Bugs Fixed:
+     Blood floating in air when a lift goes down.
+Limits Removed:
+        none. Sorry.
+Limits remain:
+	openings:  used like malloc system.  Resizing it invalidates a lot of pointers :-(
+        events:	   ring buffer.
+        maxplayers: Tons of stuff depends on this.
+        braintargets:  Possible.
+        basedefault:   used once.
+Known Bugs:
+        Somewhere in visplanes.  R_MapPlane gets passed 65535.  Only occurs with
+          large heapsizes, and hi-res.
+        True3DGameplay can cause blood to float upwards, and crashes to dos when
+          using the chaingun.
+        IDFA doesn't give you any form of shotgun.
+        Bunny scene isn't scaled.
+----------------------------------------------------------------------------------------------------------------------------
+10-7-98
+----------------------------------------------------------------------------------------------------------------------------
+Changes:
+	Savegames are saved to the savegame directory.  Number of savegames changed to 65536
+        Max Number of Screenshots changed to 10000
+        Added a backup plan for flats in wadfiles.  Fix gothic2.wad
+        Begin preparation for dynamic screen res changing.
+        M_StartMessage made global, use for things that used to be errors, but
+         can be resolved, eg wrong demo version.  Puts a message in the middle
+         of the screen (like the quit messages.)
+
+Bugs Fixed:
+	dosdoom.wad is now loaded after main wad, allowing patches such as titlepic.
+        midi music fixed. (Thanks to Capt Mellow for pointing this out)
+
+Limits removed:
+	Demo recording. (-maxdemo is now ignored)
+        Savegame size.
+
+Limits remain:
+	openings:  used like malloc system.  Resizing it invalidates a lot of pointers :-(
+        events:	   ring buffer.
+        maxplayers: Tons of stuff depends on this.
+        braintargets
+        basedefault
+----------------------------------------------------------------------------------------------------------------------------
+23-6-98
+----------------------------------------------------------------------------------------------------------------------------
+
+Limits Removed:
+	Clipsegs.  I think this may fix ddbug12.wad crashing :-)
+
+Changes:
+	Added a line to the idinfo cheat showing how much memory is allocated for how many visplanes/vissprites/drawsegs/clipsegs.
+          Say the number shown for visplanes is 128.  We have allocated enough memory for 128 visplanes.
+        Wrote a C version of the pseudo code to build a block map.
+	Blockmap is now an array of ints, not shorts, to aid building larger maps.
+        DOSDoom Version is now in hex.  This allows versions such as 0.65a for an alpha release.
+        DOSDoom Version updated to 0.65
+
+Bugs Fixed:
+	Fixed a bug in the visplanes limit.
+        Dropped init allocation of drawsegs memory to 128 drawsegs, 'cause memory is now allocated dynamically.
+        Blockmap load code was loading the pointers signed, changed to unsigned.
+          This should fix runbuddy.wad.
+        Allegro blit.  Now it blits the whole screen instead of just the bits that have changed.  Slow, but actually works.
+        Bug in m_menu.c fixed whereby if you don't have the episode, the message wasn't printing, because the string array
+          wasn't visibly global.
+
+Known Bugs
+	None :-)
+----------------------------------------------------------------------------------------------------------------------------
+13-6-98
+----------------------------------------------------------------------------------------------------------------------------
+Eliminated Limits:
+	maxintercepts
+        maxspecialcross
+        maxanims (in p_spec.c)
+        maxlineanims
+        v_res.c
+          maxheight
+          maxwidth
+	Savegame buffer
+
+Bugs Fixed:
+	Skytexture bug for doom 2 missions 12 through 21
+
+        Discovered a bug present in some limit removal: if limit is indexed with an int, it is ok; if indexed with a pointer,
+          when the memory is Z_ReMalloced, the pointer will still point to the old place.
+
+        	Limits Fixed			Limits unaffected
+		deathmatchstarts		activeplats
+                visplanes			activeceilings
+                vissprites                      wadfiles
+                drawsegs                        linespeciallist
+		anims				switchlist
+                intercepts			buttonlist
+                                                maxspecialcross
+                                                maxwidth
+                                                maxheight
+Changes:
+	Removed a goto from r_bsp.c
+        Changed the order wadfiles are loaded, Ultimate Doom wad is quite dodgy!
+
+
+----------------------------------------------------------------------------------------------------------------------------
+13-6-98
+----------------------------------------------------------------------------------------------------------------------------
+Created this log
+
+After a long and arduous :) process, applied Andy's updates.
+
+Eliminated limits:
+	deathmatchstarts,
+        acitveplats,
+        activeceilings,
+        visplanes,
+        vissprites,
+        drawsegs,
+        wadfiles,
+        linespeciallist,
+        switchlist,
+        maxlineanims,
+        buttons
+  Note that elimanting limits means they are dynamically allocated.  This means that where you used to get an overflow,
+    it will just eat more memory (and keep working.)  The limit now depends on the heapsize and available memory.
+    The problem is this: if you go from a large level that has extended the limits, to a small level then this extra
+    memory is wasted (not leaked though.)  Between each level, the memory should be downsized to its default value.
+Limits still left:
+	maxplayers: leave till last
+        maxnetnodes: leave till last
+        maxspecialcross
+        maxintercepts
+        maxanims
+        maxlightscale, maxlightz - this might be non removeable, linked with colourmaps
+        r_bsp.c
+          maxsegs - this might be non removeable
+        v_res.c
+          maxheight
+          maxwidth
+
+Bugs Fixed:
+	sfx volume bug
+        sfx length bug
+        gamemission bug
+        supershotgun in doom 1 bug (a different (better?) way to Andy ;-)
+
+Changes:
+	d_main.c::IdentifyVersion() made more advanced.  Uses a loop instead of hard coding
+        w_wad.h   functions made __attribute__((const)) to aid gcc's optimisation :-)
+        sprites in a pwad done a different way
+        flats are mixed properly
+	moved i_net.h djgpp/i_net.h -- note you will have to do this manually as this patch
+          can't fix that
+
+New Stuff:
+        gamemode = dosdoom.  This means that it will now load all the wads at once, and allow you to choose
+          any episode from ultimate doom to doom 2.  Not tested with non ultimate doom, or plutonia/tnt, but
+          should work. :-)  You can still use -doom -doom2 -tnt etc. to override this.
+        Until DDF, the wad file location is found from dosdoom.cfg.  Change to the DDF get routine in
+          d_main.c::IdentifyVersion() when it comes about.
+        Texture files are mixed.
+        Blood trails: increasing the tics for S_BLOOD3 means they stay on the floor, whereby you can track down
+          your enemy by his trails of blood.  Check out what happens to anything facing a spiderdemon!
+        In F_BunnyScroll, after the end is shot out, the background fades to black.
+
+-----------------------------------------------------------------------------
+17-5-98 
+-----------------------------------------------------------------------------
+** All changes have been made to the RHIDE project file **
+
+Cleanup of functions + names.  NORMALUNIX removed.  Dehacked removed.
+ strings.* tables.* sounds.* info.* => lu_str.* lu_math.* lu_sound.* lu_info.*
+ allegvid.* multires.* optmenu.* mus.* mp3.* midi.*
+   => i_allegv.* v_res.* m_option.* mus_mus.* mus_mp3.* mus_midi.*
+
+Support for a dosdoom.wad: if you merge a doom 2 wad and an ultimate doom wad
+ (mixing the texture resources of course) you get a dosdoom.wad.  This means
+ misc changes throughout the source, ie gamemode == commercial to gamemission
+ == doom.
+
+To print stuff use I_Printf instead of printf or fprintf(stderr, )  The format
+ is the same as printf, and it will also print to the debug file.  Also, in
+ graphics modes, will print to the message line instead of 40x25 text (yuk!)
+
+Use Debug_Printf to print to the debug file.  This only works with DEVELOPERS
+ #defined,  if it is undefined Debug_Printf optimises to nothing.  It will print
+ a report of the form FUNCTION: string to the debug file, automatically putting
+ the function name in :-)
+Doom's red status line at the top of startup has been implemented.  Shows
+ DOSDoom version and DOOM compatibility version.
+Skytexture on Floor and Ceiling in large sectors bug fixed.
+Cleaned up some stuff in the sound code.
+Number of Demos limit removed.
+Changed mallocs to Z_Mallocs
+
+-----------------------------------------------------------------------------
+4-5-98 
+-----------------------------------------------------------------------------
+Nearptr removed from djgpp/allegvid.c djgpp/i_main.c djgpp/i_net.c (correction
+  of idea sent to Andy in d_net.c)  There was no good reason why DOSDoom runs
+  with Nearptrs enabled, as it relies on __djgpp_conventional_base etc being
+  constant
+djgpp/i_system.c djgpp/i_video.c
+  Clean up.  System functions put in i_system.c from i_video.c.  Timer changed
+  from 200Hz to 35Hz. I_GetMilliTime removed (and it's use in hu_stuff.c changed
+  to use I_GetTime)
+  I_Quit uses puttext instead of nearptr
+  I_GetEvent moved to i_system.c from i_video.c
+  Fixed devparm problem in I_FinishUpdate
+  Allegro startup code is now in I_Init
+st_stuff.c
+  Uses CD_Next and CD_Prev and CD_Play instead of accessing CD direct.
+optmenu.c
+  Added a slider for CD music volume.
+s_sound.?
+djgpp/i_sound.?
+djgpp/mus.?           Handles Standard Music
+djgpp/mus_mod.c       Handles MOD music
+djgpp/mod.h
+djgpp/mp3.?           Handles MP3 music
+djgpp/libjgmod/*.*    Library of MOD functions
+djgpp/libamp/*.*      Library of MP3 functions
+linux/i_sound.c
+  All new sound code :-)  Volume sent to low level routines now ranges from 1-255.
+d_net.c
+  Calls to music code in loops while waiting for a tick, to keep MP3 music fed.
+z_zone.?
+  Wrote a Z_ReMalloc routine.  Currently, there are a few optimisations to be made.
+  (If the old size is larger that the new size - if MINFRAGMENT was reached or the
+  block is to be reduced in size.)  Start removing all those limits!
+
+

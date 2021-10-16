@@ -1,0 +1,222 @@
+
+EDGE Networking
+===============
+
+
+Topology
+--------
+
+Each "client" will be connected to the "host" computer
+using a "reliable link", which will be TCP/IP.
+
+There is also the "broadcast link" which each client
+normally uses for sending/receiving "ticcmd" packets.
+This link will be UDP/IP.
+
+The host always uses the broadcast link if any client does.
+
+When a client doesn't use the broadcast link, the host is
+responsible for emulating the broadcast, in two ways:
+  (1) ticcmds received from non-BC --> broadcasted to ALL clients
+  (2) ticcmds received from BC --> transmitted to non-BC clients
+
+STATE: client: is_using_broadcast_link [true/false]
+       (host needs to know this state).
+
+We assume the broadcast link can be unreliable in two ways:
+  (1) a sent packet may not reach every client, or even any client
+  (2) sent packets may arrive out of order.
+
+When a client thinks it has missed a broadcast packet,
+it asks the host for the packet using the reliable link
+and receives that packet (possibly some time later) also
+over the reliable link.
+
+When the _HOST_ thinks it missed a broadcast packet,
+it asks the client directly via the reliable link,
+and the client responds over the reliable link.
+
+Clients are comparable to what was called "Nodes" in the
+original DOOM networking code.  Each client can be responsible
+for multiple players, however in practice there will only be a
+single _human_ player per client (and possibly some bots).
+
+
+Ports
+-----
+
+The BASE port is set via the -port option.
+The default value is 26710.
+
+The reliable  port on the host will always be BASE+0.
+The broadcast port on the host will always be BASE+1.
+
+
+Formats
+-------
+
+There are two fundamental types of packets: binary packets
+and text packets, and each has their own structure.
+
+Binary packets begin with a '@' character followed by a
+three-letter identifier (e.g. @TIC).  Then follows a 4-byte
+little-endian count of the data bytes in the payload,
+followed by the payload itself.  As a sanity check the
+packet is terminated with a ^Z (decimal 26) byte.
+
+Text packets are Unicode UTF-8 encoded, and are a single
+command line which is terminated by an ^Z (decimal 26) byte.
+The line is a series of keywords/values separated by a
+single space.  Command names may finish with a '?' for
+queries and '!' for important commands.
+
+String values are delimited by double quotes (""),
+and the '\' character can escape a single character.
+Integer values may be preceded by '0x' to denote
+hexadecimal numbers.
+
+Both types of packets can be sent on both the reliable and
+broadcast links.  However the broadcast link is generally
+reserved for two packet types: host-discovery and ticcmds.
+
+Ticcmds are the basic aim/move/shoot messages exchanged
+between all the clients in the game, and are binary format.
+
+
+Protocol
+--------
+
+For clients to discover the host via broadcasting:
+
+   client broadcasts:
+      HOST?
+   
+   host broadcasts back:
+      HOSTADDR 192.168.0.151 26710
+
+For client connecting to host:
+
+   client makes reliable connection
+
+   client sends:
+     CLIENT "Andrew" 0/1
+                     ^___ broadcast flag
+
+   host replies:
+     WELCOME
+   or
+     ERROR "You ain't welcome here fella!"
+
+
+Host will send to clients (and itself) game parameters
+before game starts (possibly multiple times) :-
+
+     GAME_NAME "HELL ON EARTH"
+     GAME_MAP  "MAP01"
+     GAME_SKILL 3
+     GAME_MODE "OLDDM"    (NEWDM  COOP  CTF  LASTMAN)
+     GAME_FLAGS 0x000104c7
+     RANDOM_SEED 0x12345678
+
+     ADD_PLAYER <pnum> <name> LOCAL/REMOTE HUMAN/BOT
+     DEL_PLAYER <pnum>
+
+To begin the game, Host sends to everyone:
+
+     LOAD!
+
+The clients respond with:
+
+     READY
+
+Finally the host sends to everyone:
+
+     BEGIN!
+
+All clients + the host will exchange Ticcmd packets:
+    
+     @TIC
+     (4-byte data length)
+     full_ticcmd_t
+     full_ticcmd_t
+     ...
+     (as many as fit into data length)
+
+     Each full_ticcmd_t structure contains a 4-byte gametic
+     value (little endian) followed by a normal ticcmd_t.
+     The plain ticcmd_t contains a 'player_idx' field.
+
+
+Other packets:
+
+     BYE! [message]    (can be sent both ways)
+
+     RETRANSMIT? <tic> <player>
+
+
+Networking API
+--------------
+
+low level:
+
+N_OpenBroadcastLink
+N_CloseBroadcastLink
+
+N_BroadcastSend
+N_BroadcastRecv
+
+N_CreateReliableLink (host only)
+N_AcceptReliableConn (host only)
+
+N_OpenReliableLink   (client only)
+N_CloseReliableLink  (client only)
+
+N_ReliableSend
+N_ReliableRecv
+
+
+higher level:
+
+???
+
+
+
+Ideas about In-Game Joining
+---------------------------
+
+Client connects to host in usual way and sends CLIENT command.
+
+Host replies with WELCOME command.
+
+Host sends to all other clients (and itself) :
+
+    PAUSE! <tic>  (NOTE: all maketics after this are forefeit)
+
+    ADD_PLAYER ...
+
+Host send game parameters and players as normal.
+Instead of load/begin command, host sends:
+
+    JOIN! <tic num>
+
+Host then sends a savegame to new client:
+
+    @SAV  (length)  (data................)
+
+the other clients then must wait until new client has
+finished receiving the savegame data.  Perhaps host could
+send progress messages to waiting clients:
+
+    PROGRESS 75
+
+when client has loaded the savegame, it notifies the host:
+    
+    READY
+
+at this stage, the new client should be in exactly the same
+state as the existing clients.  Another join could happen now...
+
+Finally host sends to every client (old, new, and itself) :
+
+    CONTINUE!
+

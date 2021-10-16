@@ -1,0 +1,98 @@
+
+Compiling glBSP
+===============
+
+by Andrew Apted.  JULY 2007
+
+
+glBSP comes in three flavors: a command-line utility "glbsp", a
+graphical/GUI version "glBSPX", and a library for programs to use
+called: "libglbsp".  The source code is structured so that both
+programs link against the library, hence libglbsp is always built.
+
+The GUI version, glBSPX, requires a graphical toolkit called FLTK
+(Fast Light Tool Kit) version 1.1.7.  Other versions may work, but
+you're on your own there.  See the "Links" section below if you
+need to download it.  
+
+Sorry to say, but there is no support for compiling with an IDE
+(like Dev-C++ or Visual Studio) in this release.  The directory
+layout was improved when the code moved to the SVN repository,
+but unfortunately this broke all the existing project files.
+
+
+NOTE WELL: glBSP is under the GNU General Public License (GPL),
+           hence you cannot use the library (libglbsp) in your
+           own program unless it is also under the GPL.
+
+           The file COPYING.txt contains a copy of the GPL
+           license, and there is a lot of useful information
+           at this web page: http://www.gnu.org/licenses/
+
+
+Linux / Unix Builds
+-------------------
+
+The makefile is called "Makefile.unx".  You may need to open it
+in an editor and edit some stuff near the top, especially if you
+want to use another compiler (only GNU GCC has been well tested)
+or to change the directory where FLTK can be found.
+
+To build the library and command-line program:
+
+   > make -f Makefile.unx
+
+To build the GUI version:
+
+   > make -f Makefile.unx glBSPX
+
+To install the command-line program and manual page:
+
+   > sudo make -f Makefile.unx install
+
+
+Windows Builds
+--------------
+
+The makefile is called "Makefile.w32" and uses the MinGW tools
+(see the link below) for compiling, and you may need MSYS too.
+You will also need the ZLIB library (version 1.2.3) and should
+compile it first.
+
+To build the library and command-line program:
+
+   > mingw32-make -f Makefile.w32
+
+There is no support yet for building the GUI binary natively
+under Windows (sorry).
+
+
+Cross-Compiling Win32 Binaries
+------------------------------
+
+The "Makefile.xming" makefile lets you compile Win32 binaries
+without leaving the comfort of Linux.  You will need to compile
+FLTK and ZLIB libraries first (maybe edit the makefile to set
+their location).
+
+To build the library and command-line program:
+
+   > make -f Makefile.xming
+
+To build the GUI version:
+
+   > make -f Makefile.xming glBSPX.exe
+
+
+Links
+-----
+
+Minimum GNU Windows compiler:
+    http://www.mingw.org
+
+Fast Light Toolkit home page:
+    http://www.fltk.org
+
+ZLib Compression library:
+    http://www.zlib.net
+

@@ -1,0 +1,877 @@
+Erik Sandberg's Log
+
+2000/06/20
+
+Re-implemented the mlook smoothing (acceleration) in a cleaner way.
+
+2000/06/17
+
+Reworked the argv system. Now you can only read one parameter at a time.
+
+Generalised the cache flushing system, now anyone can register a flusher to
+the z_zone system.
+
+2000/06/16
+
+The 06/14 code was accidentally deleted, so I rewrote it.
+
+2000/06/14
+
+Attempt to make networking work again.
+
+2000/06/11
+
+Fixed a few more bot issues (netgame is now true when there are bots).
+
+Fixed the weapon code for 'old deathmatch'.
+
+2000/06/07
+
+Fixed a few bot issues (they can diagonal strafe now)
+
+Removed MAXPLAYERS.
+
+Fixed the map overlay feature.
+
+Fixed a finale bug.
+
+Fixed a great number of misc other bugs.
+
+2000/06/04
+
+Config files are now only saved at normal exit (through F10)
+
+2000/05/21
+
+Re-added real networking.
+
+Converted the bot to a true player. Activate n bots with -players n+1 -bots n
+
+2000/05/07
+
+Made tons of local functions static and removed their prefixes.
+Removed loads of warnings (GCC -O2 -W -Wall -Wno-unused).
+Fixed a few math errors (div-by-zero).
+Fixed a sound bug: Priority should now work better. If there are no free
+channels, the lowest priority sound is stopped.
+Further player_t cleanups. The player_t input interface is now general enough
+to allow bots to be true player_ts.
+
+2000/05/01
+
+Fixed coding conventions in wi_stuff.c
+Improved intolerant Z_Malloc a bit
+
+2000/04/30
+
+Fixed a few FPEs.
+
+Added a system to handle disappearing sound sources.
+
+Placed the parameter files from the -game parameter before -game rather than
+at the end (this makes its -file arguments overridable).
+
+2000/04/28
+
+Inserted a fflush in order to make it possible to record crashes.
+
+2000/04/23
+
+Cleaned up event_t
+Removed didsecret: unused
+Changed player_t to linked list
+Misc bugfixes and cleanups
+
+Started the work on cleaning up all the bot code.
+
+The new bot will be almost indistinguishable to a player. Earlier it was
+a hybrid between a mobj and a player, which now will change.
+
+Each player has his own ticcmd_t, which is the only way to control his
+movements. He will also have a private routine, which initialises
+the ticcmd_t. The routine of the console player will copy what G_Responder
+created, and the routine of a player on the network will get it from the
+networking system. The routine of a bot on the local system will think
+and then initialise the ticcmd_t.
+
+All bots will act like real players over the network, and their ticcmd_ts
+will be sent to the other machines (each bot will be controlled from one
+machine). Therefore bots over the network will be handled in exactly the
+same way as players over the network.
+
+2000/03/26
+
+Fixed a few bugs:
+- The infamous DJGPP free() crash
+- Textures lacking some texture columns do no longer crash the engine.
+- An 'invalid x87 operation' bug that was caused by uninitialised mem.
+
+2000/03/24
+
+Made DJGPP version crash on invalid x87 operations and div-by-zero.
+
+2000/03/18
+
+Changed the format for probabilities in DDF/RTS: Instead of being integers
+0-255, they are now written as percentages, 0%-100%. The following are
+affected:
+DDF:
+MINATTACK_CHANCE
+PAINCHANCE
+KEEP_FIRING_CHANCE
+RTS:
+JUMP
+
+2000/03/17
+
+Changed the format of ACCURACY in DDF. There are now two values,
+ACCURACY_SLOPE and ACCURACY_ANGLE, which show the maximum angle error.
+
+2000/03/11
+
+Cleaned up the mechanism for skipping finale stages.
+
+Finale text is now skipped in two stages (first view all the text, then
+skip).
+
+Changed strncpys to Z_StrNCpy.
+
+Cleaned up the W_Reload feature a bit.
+
+2000/03/07
+
+Fixed the psprite bug (they disappeared & caused crashes in alternate
+screen composition modes)
+
+2000/03/05
+
+Added check for EDGEVER lump in EDGE.WAD.
+
+Added microsecond timer, and re-implemented the auto detail mode.
+
+2000/03/03
+
+Cleanups & fixes in i_ code.
+
+Changed time syntax in RTS parser code to DDF style.
+
+Changed state syntax from
+FOO_STATES = ...
+to
+STATES(FOO) = ...
+
+Got BC 5.5 running, removed misc. warnings.
+
+2000/02/29
+
+Added check for tags at the beginning of DDF files.
+
+2000/02/28
+
+Removed game action ga_victory (unused).
+
+Now possible to accelerate the text stage of the final final.
+
+2000/02/27
+
+Fixed status bar bugs: Ammo field wasn't cleared when switching to fist,
+and 'weapons owned' fields were not always updated when they should.
+
+2000/02/18
+
+Converted loads of memsets and memcpys to Z_Clear and Z_MoveData.
+
+Misc bugfixes.
+
+2000/02/15
+
+Removed iQSORT.
+
+Added Z_Resize and Z_ClearNew, and converted most Z_Calloc & Z_ReMalloc calls.
+
+Fixed a bug that made it possible to pick up the same item twice.
+
+2000/02/13
+
+Changed loads of Z_Mallocs to Z_New.
+
+Removed the thinker_t system: It has been split up into four parts:
+Map Objects (mobj_t)
+Active Sectors (sec_move_t)
+Light Effects (light_t)
+Sector Sounds (sectorsfx_t)
+
+Fixed "fire flicker" light effect.
+
+2000/02/12
+
+Added new module w_textur.c for texture caching.
+
+Added 2 new macros:
+Z_New: Should replace all normal Z_Malloc calls.
+DEV_ASSERT: Should replace all #ifdef DEVELOPERS / if (cond) I_Error / #endif
+sequences.
+
+Added EAT console command. Will eat memory. It is useful when testing
+cache flushing.
+
+Updated the NULL port
+
+2000/02/07
+
+Added sound cache. Unused sounds will be freed when we are low on memory,
+and at emergency sounds may even stop playing to free some more mem.
+
+Quite many changes were made to the sound code, and some items were changed
+in the API.
+
+2000/02/05
+
+Renamed grow_array to stack_array. They are stack-shaped (i.e. FIFO), though
+the access interface is not quite like the stack's
+(hence 'stack_array' instead of just 'stack').
+
+Converted some arrays to stack_array.
+
+Added Z_LockStackArray/Z_UnlockStackArray, which should be used to
+temporarily avoid size changes of the stack arrays.
+
+2000/02/04
+
+Removed most occurances of 'extern' in c files. Cleaned up a bit.
+
+Optimised DDF_LanguageLookup and added a new function DDF_LanguageValidRef.
+
+Added M_SeedRandom and I_PureRandom.
+
+2000/02/02
+
+Changed code for extras, for future backward compatibility.
+
+Killed a leak in ddf_main.
+
+2000/02/01
+
+Major constifications, based on DDF_Lookup*. Some small fixes.
+
+2000/01/31
+
+Converted to native malloc. Fixed misc bugs.
+
+2000/01/29
+
+Removed all usage of the zone allocation code except for Z_Malloc, Z_ReMalloc
+and Z_Free (i.e. removed tags, and Z_MallocLevel). The allocation is now ready
+to be converted to native malloc.
+
+2000/01/28
+
+Rewrote the caching system. Now using new W_CacheLumpNum, which needs a
+corresponding W_DoneWithLump for each call.
+
+Heavy constifications.
+
+2000/01/25
+
+Repaired 3d glasses system.
+
+2000/01/15
+
+Added extra checks for leak hunt.
+
+2000/01/03
+
+Made parameter files recursive.
+
+2000/01/01
+
+Rewrote the directory handling system, and added some path handling stuff
+to i_system.c.
+
+-game is now used instead of -gwaddir.
+
+1999/12/30
+
+Optimised FloatToFixed
+Inlined some functions
+EDGE is now compilable & working without -DDEVELOPERS
+
+1999/12/25
+
+Re-implemented CPU checking.
+
+Fixed a few bugs in the rendering assembler.
+
+1999/12/22
+
+Removed Major Bug, which sometimes crashed EDGE after level exit.
+
+1999/12/19
+
+Fixed the grow_array system, and implemented it on a few arrays.
+
+1999/12/18
+
+Wrote a preliminary FlushCaches.
+Re-implemented -heapsize in the null & djgpp ports.
+Added Z_OutsideHeap, which verifies that pointers aren't trashed.
+Now used in Z_Free and P_UnsetThingPosition, which are the 2 places where
+we have seen this kind of error.
+
+1999/12/17
+
+Fixed minor viewangle bug.
+
+Added the memory leak detection system. Requires recompilation with
+-DLEAK_HUNT. The console command LEAKINFO will output memory leak info to
+the file LEAKINFO. It will list all code rows that are the source of
+at least two simultaneously allocated memory blocks. There are less than
+100 lines of code with this property. If LEAKINFO is called repeatedly
+with quite big time intervals, the numbers of leaking rows may grow.
+Certain other rows may also grow, but the leak detection will give you
+a good hint of which rows that may be bad.
+
+One leak has been found & destroyed so far.
+
+1999/12/13
+
+Added memory info to the idinfo cheat.
+
+1999/12/11
+
+Fixed a VERY evil bug.
+
+1999/12/04
+
+Added the I_TraceBack, which is supposed to exit and display a call stack
+or similar. This is done by crashing (execute illegal instruction) in DJGPP,
+it is not yet implemented in the other systems.
+
+Found & fixed an evil thing-related bug that resulted in strange crashes.
+
+1999/11/22
+
+Completed the assembler conversion.
+
+1999/12/18
+
+Wrote a preliminary FlushCaches.
+Re-implemented -heapsize in the null & djgpp ports.
+Added Z_OutsideHeap, which verifies that pointers aren't trashed.
+Now used in Z_Free and P_UnsetThingPosition, which are the 2 places where
+we have seen this kind of error.
+
+1999/12/17
+
+Fixed minor viewangle bug.
+
+Added the memory leak detection system. Requires recompilation with
+-DLEAK_HUNT. The console command LEAKINFO will output memory leak info to
+the file LEAKINFO. It will list all code rows that are the source of
+at least two simultaneously allocated memory blocks. There are less than
+100 lines of code with this property. If LEAKINFO is called repeatedly
+with quite big time intervals, the numbers of leaking rows may grow.
+Certain other rows may also grow, but the leak detection will give you
+a good hint of which rows that may be bad.
+
+One leak has been found & destroyed so far.
+
+1999/12/13
+
+Added memory info to the idinfo cheat.
+
+1999/12/11
+
+Fixed a VERY evil bug.
+
+1999/12/04
+
+Added the I_TraceBack, which is supposed to exit and display a call stack
+or similar. This is done by crashing (execute illegal instruction) in DJGPP,
+it is not yet implemented in the other systems.
+
+Found & fixed an evil thing-related bug that resulted in strange crashes.
+
+1999/11/22
+
+Completed the assembler conversion.
+
+1999/11/10
+
+Floatified health and armour. Misc other fixes.
+
+1999/11/03
+
+Finally updated the log.
+
+Finished the floatification.
+
+Added funclist_t and function_t. These are a special kind of extended enum
+cvars, which control a function pointer. A list contains several functions
+that do the same task, but in different ways or with different optimisations.
+R_DrawColumn8 is perhaps the best example of this.
+To use it, just create a funclist_t, initialise it with CON_InitFunctionList,
+and then add functions with CON_AddFunctionToList. You must pass a default
+function to InitFunctionList.
+
+Used this function list stuff to re-implement the assembler routines.
+
+Also NASM-ified the assembler. All i386 assembler and a C interface to them
+is in /i386/, a dummy C interface file for assemblerless systems is in
+/noasm/.
+
+Added a dummy port with as much as possible of the system specifics removed.
+No graphics, no sound, no mouse, very bad timer, very bad keyboard.
+The purpose of the port is that it makes it easier for people to port EDGE
+to new platforms (it's easier to get something to base the work on). The port
+is in the /null/ directory.
+
+Added a system for handling references between mobjs: If a mobj is removed,
+all references to it from other mobjs will now be cleared.
+
+1999/10/17
+
+Fixed another bug that didn't show up earlier: an yslope value was set to
++Infinity, which resulted in a crash.
+
+1999/10/16
+
+Floatified mobj_t plus loads of p_ code.
+
+Fixed a bug in P_XYMovement that didn't show up until the floatification
+increased the precision of some vars.
+
+1999/10/11
+
+Lots of more floatifications, r_*.h is now done.
+
+1999/09/27
+
+Improved DJGPP's i_video.c: Re-added i_allegv stuff from v1.00 as statics
+
+Continued floatification: con_cvar, r_view and r_vbinit are now 100% done.
+
+1999/09/26
+
+Cleaned up name usage & blur code in r_vbinit.c.
+
+Added Z_StrDup
+
+Fixed a few bugs
+
+Started to work on the floatification of EDGE. Added module m_math.c.
+
+Changed some stuff regarding ZONEID in z_zone, to track a few more bugs.
+
+1999/09/14
+
+Added a new time constant, MAXT, which is defined as the maximal time.
+
+Renamed the project to EDGE.
+
+1999/09/12
+
+Changed Z_Malloc: It's now a simple single-parameter routine, that works like
+the old Z_Malloc(size, PU_STATIC, 0). The old three-parameter version is now
+called Z_MallocAdvanced.
+
+Added V_DrawScaledPatchClip.
+
+1999/09/11
+
+Improved the m_argv code: Added M_GetParm and cleaned up response file code.
+
+Constified lots of char* variables & parameters.
+
+1999/09/04
+
+Fixed #include statements to comply to codestd.txt
+Improved 3D glasses effect
+
+1999/08/26
+
+Added new wiping method CORNERS
+
+Ran INDENT on everything
+
+Wrote codestd.txt
+
+New functions CON_Message and CON_MessageLDF fixes the player message problem.
+
+Fixed some bugs
+
+1999/08/21
+
+Replaced the console interface with the one from v0.656, and improved it
+further. Now it uses the new screen and wiping systems.
+
+I also un-guiified the console a bit. Gui code needs to be reworked.
+
+1999/08/19
+
+Screenified status bar code a bit, and added doublebuffer.
+
+1999/08/15
+
+Added some new wiping methods.
+
+Generalised the faded teleportation: it now uses the generic wiping system.
+
+Cleaned up v_video further: Some routines were hard-coded for main_scr.
+
+1999/08/09
+
+Fixed another bug in V_DrawPatchClip: One pixel too much down and to the
+right were removed (you could see this on the status bar bottom).
+
+Cleaned up and screenified wiping. Two new files:
+wp_main: Wiping handler kernel.
+wp_wipe: Wiping code for the different wipe types.
+
+1999/08/07
+
+Added "ENUM" cvar type.
+
+1999/08/06
+
+Cleaned up cvar usage. Added new module, con_cvar.c, that handles cvars.
+There are now four types of cvars: strings, ints, real numbers (translates
+to fix point) and booleans.
+
+1999/07/31
+
+Added the screen_t system, and removed the screens[] array. The old screens
+have been translated like:
+screens[0] => main_scr
+screens[1] => back_scr
+screens[4] => sbar_scr
+
+viewbitmaps and views have also been translated to supersets of screens.
+
+Debugfiles can now be used without -DDEVELOPERS, and then they only redirect
+the console output to a file.
+
+Fixed the "displaced face"-bug.
+
+Made the mouse pointer default
+
+1999/07/25
+
+Fixed some console bugs.
+
+Added a cyan-red glasses 3D effect.
+
+Changed the meaning of SCREENDEPTH from width*bpp to address difference
+between two vertically adjacent pixels. Then increased SCREENDEPTH to always
+be divisible by 32 but never by 64. This Speeds up the rendering of columns
+by more than 150% in some cases, it works around a limitation of the cache.
+
+Screen wiping has been temporarily removed, since it didn't like the
+SCREENDEPTH fix, plus it needs cleanup anyways.
+
+1999/07/17
+
+Replaced my console with Kester's.
+
+Wrote two asm-optimised versions of increase_detail_2_2, for faster low detail modes.
+
+1999/06/26
+
+Improved keyboard routine, and restructured input code. All input is now handled in i_input.c.
+
+1999/06/23
+
+Added two new screen composition options, blur 1 and 2. 2 is a bit more blurry
+than 1.
+
+Created r_vbinit.c, and moved lots of code there from r_main.c. The new module
+handles composition of viewbitmaps.
+
+Added a console, and thereby some new modules (c*.c).
+
+New keyboard input system, module i_input.c
+
+1999/06/14
+
+Changed the translucency system again. A 32K RGB table is now used instead of
+a 8K one.
+
+Changed SMOOTHING to NOSMOOTHING: The default is to support smoothing, if
+you want it marginally faster you can pass -DNOSMOOTHING to gcc.
+
+1999/06/13
+
+Finished all the view and aspect code.
+
+Wrote some implementations of the new view system. Use -screencomp <mode>,
+where <mode> is 0-7, or select screen composition in video menu to use them.
+The low detail modes currently only works in 8 bit colour.
+
+Improved one of David Finch's vfi routines and deleted the other one - the
+better-looking one is now also faster...
+
+1999/05/31
+
+Small change to routine checking code: Replaced the booleans in
+colfunc/spanfunc with a single flag variable, and added a few flags
+(most of them are unused atm, though).
+
+Renamed the drawing primitive versions called "old" to "chi", since they aren't
+very old (compared to id's), and since they were written by Chi Hoang
+(or by someone else while he was in charge).
+
+1999/05/24
+
+View Bitmap system improved.
+Different views can be used simultaneous, they may be of different size and
+of different aspect and with different cameras. New struct, aspect_t, keeps
+info about x and y scale, plus a lot of precalculated tables, that views can
+use. Many views can share the same aspect. New struct camera_t for camera
+(very primitive atm, though).
+
+New module, r_view.c, contains routines for creation/modification/destruction
+of views and related structs.
+
+1999/05/01
+
+Further view generalisation: Added splitscreen mode. Like the old 3 monitor
+mode, but all of them are on the same screen.
+
+Started implementing the View Bitmap systems. This splitscreen is a very
+early fruit of this one, more will come when I've improved it.
+
+1999/04/19
+
+Translated all DOSDoom-specific identifiers I could find to British English.
+Mainly:
+armor -> armour
+color -> colour (plus hicolor, colormap etc)
+optimize -> optimise
+initialize -> initialise
+
+Implemented David Finch's vfi span & column routines and fixed some small
+bugs in them
+
+Some small optimisations of R_*_CVersion
+
+1999/04/07
+
+Added R_Draw*8_MIP, that use mipmapping. This doesn't yet result in any
+speedups, it just shows a preview of how it can look like.
+
+Added ldb blitting function. It's not intended to be useful, it's just
+intended to show how DOSDoom can look later.
+
+1999/03/30
+
+Finally added a proper system to change the FOV. The zoom key (default tilde)
+toggles between normal fov and zoomed fov, both of these are configurable in
+the menu.
+
+1999/03/28
+
+Enabled the enter key on the numeric keypad.
+
+-debugfile can now be followed by the name of the output file. If no name is
+given it will be debug<d>.txt, where <d> is the lowest integer that doesn't
+result in a name conflict.
+
+Fixed some bugs that made low resolutions like 80x80 impossible.
+
+Made -fast_startup the default setting, pass -slow_startup instead for the
+slower startup. The slowdown that -fast_startup results in is not even
+possible to measure.
+
+Wrote BLF versions of 8- and 16-bit R_DrawColumn routines.
+
+1999/03/21
+
+Cleaned up mlook, and finished all the FOV code.
+
+There is no good fov interface yet, but there will come one soon. There is
+support for weird asymmetric fovs, but currently the player view will only
+use a normal fov type.
+
+Variables:
+FIELDOFVIEW is back (I removed a week ago). It shows the x fov.
+aspect_ratio shows the normal texel w/h ratio on the monitor (ie 5/8).
+top/bottom/left/rightangle show the angles of the edges of the screen.
+0 is straight forward (focus), negative is down/right and positive is up/left
+top/bottom/left/rightslope show the slopes of the edges of the screen. These
+are the variables that actually are used. slope = tan(angle).
+
+1999/03/20
+
+Asymmetric X FOV, including cleanup. Added leftangle and rightangle.
+Fixed mlook, so that any fractional mlook angles work (prepares for
+asymmetric Y FOV)
+
+Change in *ALL* DrawColumn routines: Frac calculation now works in a different
+way: Previously, the initial frac was calculated as
+(dc_texturemid + (dc_yl-centery)*dc_iscale). Now centery*dc_iscale is
+subtracted from dc_texturemid before the call, so the frac is instead
+calculated as (dc_texturemid + dc_yl*dc_iscale). This change was necessary to
+make mlook steps smaller than 1 pixel possible.
+
+1999/03/14
+
+Continued the FIELDOFVIEW improvements: Replaced FIELDOFVIEW variable by
+X_FOV and Y_FOV. These can be changed dynamically. Boosted up the maximal
+X FOV from 127 to 176 degrees (Bigger FOVs would result in texture
+scale overwrapping).
+
+1999/03/07
+
+Made FIELDOFVIEW dynamic, fixed the aspect ratio problem in weird gfx modes
+
+1999/02/12
+
+Improved the 8-bit translucency. Four bits more precision, but mariginally
+slower (1 more assembler instruction required per pixel)
+
+1999/02/12
+
+Improved & optimised the R_DrawColumn16_BLF routine, and made an 8-bit version
+
+1998/12/18
+
+Made 8-bit versions of Kester's R_DrawSpan16_KM and R_DrawColumn16_KM.
+
+1998/11/29
+
+Optimised the 16-bit translucency algorithm.
+
+1998/11/28
+
+Made the new teleport settings togglable from the menu. Fixed a few small
+bugs.
+
+1998/11/08
+
+Used the new translucency to improve the ColorXForm wipe algorithm. Also
+created slow 16-bit versions of the new translucency routines.
+
+1998/10/29
+
+Implemented a new translucency algorithm for 8-bit colour, and used it to
+create a fading effect at teleportation.
+
+1998/09/11
+
+Improved multires handling at startup: It now just does some first time stuff
+like transtable inits, followed by a R_ChangeResolution call.
+
+1998/08/25
+
+Added a -fast_startup parameter.
+Fixed the alignment of the R_Draw*_id routines
+
+1998/08/24
+
+Some minor cleanups
+
+1998/08/20
+
+Added dynamic resolution changing.
+
+1998/08/14
+
+Added a routine for run-time alignment in v_res.c. Changed r_span.S and
+r_column.S to get aligned run-time.
+
+1998/08/13
+
+i_system.c, i_system.h, v_res.c: Minor change in the cputype_t struct.
+Corrected some incorrect detections. Added -list parameter (lists all
+available routines).
+
+Added R_DrawSpan8_id and R_DrawSpan8_id_Erik, and optimised
+R_DrawColumn8_id_Erik further.
+
+1998/08/06
+
+Minor change in the MMX routines: Stack is used instead of mmxcomm variable,
+as a workaround for DJGPP's misalignment. Should speed up the routines on
+Intel MMX processors by either 0% or about 50% (randomly), and generally
+less on non-Intel MMX processors.
+
+1998/08/05
+
+Fixed bug in original R_DrawColumn16 asm version and moved the routine to
+r_column.S. Also simplified the screenwidth patching in r_draw2.c
+
+1998/08/05
+
+New CPU checking system. Each known CPU type (486, Pentium, K6, Pentium II...)
+now has its own struct telling its attributes (CPU name and which routines to
+use). Each CPU-specific routine also has an own struct, telling its name,
+location and MMX usage.
+
+Added cmd-line options "-UseCol" and "-UseSpan" to choose drawing routine,
+overriding the default. For example, -UseCol Rasem means that Rasem's asm
+version of R_DrawColumn is used.
+
+Files affected:
+i_system.c: CPU detecting code, routine choosing
+i_system.h: CPU structs
+v_res.c: Actual modification of function pointers
+
+1998/08/05
+
+Made the following .c files include their own .h files:
+d_net.c
+i_video.c
+lu_str.c
+m_argv.c
+m_random.c
+p_mobj.c
+p_saveg.c
+p_setup.c
+p_spec.c
+p_tick.c
+rad_trig.c
+r_bsp.c
+r_draw1.c
+r_draw2.c
+r_main.c
+r_plane.c
+r_segs.c
+r_things.c
+(ie. added #include "p_mobj.h" in p_mobj.c, etc)
+I do this because if any function prototype changes, and you forget to change
+that in the .h file, you'll now get a warning. Else it would result in a bug
+that may be hard to trace.
+
+1998/08/04
+
+Converted id's original R_DrawColumn code to .S format. This is
+self-modifying, which is very time-consuming on newer CPUs, but I guess it is
+fast on a 486. Also made a further optimised version of it, optimised
+according to the optimisation rules I know for 486. The names are
+R_DrawColumn8_id and R_DrawColumn8_id_Erik, respectively.
+
+Files affected:
+r_column.s: The routines
+r_draw1.h: Prototypes
+
+1998/08/01
+
+Optimised R_DrawColumn8 for Pentium and Pentium MMX. Moved all inline asm
+routines from r_draw1.c to r_column.s and r_span.s, and simplified the system
+for run-time screenwidth patching in r_draw1.c.
+
+Files affected:
+r_column.s
+r_span.s
+r_draw1.c
+r_draw1.h
+
+1998/07/24
+
+Optimised R_DrawSpan8 for MMX processors (K6, PII, PMMX).
+
+1998/07/05
+
+Optimised R_DrawColumn8 for K6/PII, using MMX instructions.
+
+

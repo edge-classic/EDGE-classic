@@ -1,0 +1,528 @@
+
+CHANGELOG FOR 1.31 (since 1.29)
+===============================
+
+(Date: JULY 2008)
+
+
+SUMMARY
+-------
+
++ MD2 models for things and weapons
++ Lua-scripted HUDs
++ Detail Slopes
++ Mirrors with multiple reflections
++ Nicer dynamic lighting, Sector glow effects
++ Timidity music playback
+
+- Rendering glitches fixed
+- Good emulation of partial-invis effect
+- More compatible sky rendering in 3D
+- Improved way of emulating DOOM light fading
+- More robust emulation of flat-flooding trick
+- Nicer looking console
+
+* TGA (targa) image format supported
+* WAV and OGG/Vorbis loaders for sound effects
+* Flat alignment and scaling line-types
+* Weak spots for monsters
+* DDF BECOME() action for changing type
+* Armor properties can be modified
+* Weapons can share a clip for both attacks
+
+
+------------------------------------------------------------------------
+
+
+Bugs fixed
+----------
+
++ glitches/small gaps between polygons are fixed.
++ crash with Scuba Steve's flamethrow DEH patch.
++ Boom generalised linetypes were not saved in savegames.
+
+- fixed firing rate of Super Shotgun (was too slow).
+- fixed attack range of hit-scan weapons.
+- ID(K)FA cheats now give clip weapons full ammo.
+- fixed problem saving the 'mipmapping' setting.
+- custom sky-boxes should always be used when present.
+- fix for filenames (like "foo.bar.wad") containing two dots.
+- proper test for existing titlepics in GAMES.DDF.
+- fixed console PLAYSOUND command when sound is not found.
+- no sprite check for spawned map-things (easier debugging).
+- fixed badly synchronised flash state of Super Shotgun.
+- prevent blood splats when Demon attacks a GOD-mode player.
+- allow binding of DELETE key (distinct from BACKSPACE).
+- close-wait-open linetypes were not waiting, fixed.
+
+
+General improvements
+--------------------
+
++ music now supported on Linux via the Timidity MIDI player
+  library.  This can also be used on WIN32 instead of the
+  native MIDI system -- see the Sound Options menu.
+
++ good emulation of DOOM's Partial-Invisibility effect.
+
++ new method to emulate DOOM's lighting model.
+
++ new dynamic lighting code.  The old way would split polygons
+  into small pieces which caused a lot of glitches.  The new way
+  uses the method of rendering a light texture into the level.
+  
+  The 'DLIGHT.INTENSITY' has been replaced with 'DLIGHT.RADIUS'
+  which is the furthest distance that a light can reach (every
+  wall and thing beyond that distance is unaffected by it).
+
+  The "QUADRATIC" and "LINEAR" types have been replaced with
+  'MODULATE' (similar to the old way, the light is multiplied
+  with the wall texture) and 'ADD' which simply adds the light
+  to the texture.
+
+  There is a new command: DLIGHT.LEAKY=TRUE which causes the light
+  to affect all surfaces.  Normally a light will not affect a
+  surface that the light is behind.
+
+  Lastly there is support for a secondary dynamic light using the
+  'DLIGHT2' prefix (e.g. DLIGHT2.RADIUS, DLIGHT2.COLOUR etc...)
+  This of course will be twice as slow, so use sparingly!
+
+  Example of the new syntax:
+
+    DLIGHT.TYPE=ADD;
+    DLIGHT.RADIUS=400;
+    DLIGHT.COLOUR=#FF5500;
+    DLIGHT.LEAKY=TRUE;
+
++ improved sky emulation, replacing all the 'SKY STRETCH' options
+  with a single mode based on the old MIRROR mode, but tweaked for
+  better compatibility with existing DOOM skies.  The old ORIGINAL
+  mode now kicks in automatically when MLOOK is disabled.
+
+- new "H.Q.2x Scaling" option in the Video Options menu.
+
+- new "Invulnerability" option in the Video Options menu.
+
+- a working HOST-GAME menu which allows you to start deathmatch
+  games with Bots.  There's also a new Team-Damage setting and
+  basic skill levels for the Bots.
+
+- better gamma handling (now done by the video driver).
+- more robust emulation of the flat-flooding trick.
+- improved, more consistent handling of alpha channels.
+- thin sliding doors can be activated remotely.
+- better way to gauge the player's actual speed.
+- sped up turning for path-following monsters.
+- players will jump out of water at the edge.
+- new -fullbright option for debugging.
+- merged JUMP and MOVE-UP into a single key.
+- nicer looking console (better font, colors).
+- better keyboard controls menu.
+- console key is configurable.
+
+
+Features Removed:
+-----------------
+
+- demo support (playback and recording) was removed.
+
+- CD Music playback (via PLAYLIST.DDF) was removed, since that
+  code caused a total lack of sound under Windows Vista.
+
+- the old shadows feature (which never looked particularly good)
+  did not survive an overhaul of the rendering code.
+
+- removed the LZO library.  This means very old savegames won't
+  work.  Savegames made with EDGE 1.29 should be fine.
+
+
+New features:
+-------------
+
++ MD2 models (from Quake 2) are now supported for map things and
+  player weapons.  Any state frame can specify a model by using
+  the special '@123' or '@framename' syntax for the frame (instead
+  of a letter).  The number is the absolute frame number in the MD2
+  model, beginning at 1, or you can use the frame name.  Examples:
+
+    STATES(IDLE)=TROO:@5:7:NORMAL:NOTHING;  // the 5th frame
+
+    STATES(IDLE)=TROO:@run3:7:NORMAL:NOTHING;  // frame called "run3"
+
+  The model itself must be stored in a wad, and the lump name is
+  the sprite base ("TROO") plus "MD2" on the end --> "TROOMD2".
+
+  The skin of the model is the sprite base ("TROO") plus "SKN1"
+  on the end --> "TROOSKN1".  There should be a definition for it
+  in IMAGES.DDF using the sprite namespace --> [spr:TROOSKN1].
+
+  Other skins can be used.  The command "MODEL_SKIN=3" in a thing
+  or weapon definition will use the third skin --> "TROOSKN3".
+  Upto nine skins can currently be used (1 to 9).  The skin can
+  also be changed dynamically by using the SET_SKIN(##) action
+  in the state frames.
+
+  These extra commands can be used in THINGS.DDF:
+
+    MODEL_SCALE=1.5;      // draw the model bigger
+    MODEL_ASPECT=0.7;     // make the model fatter/skinnier
+    MODEL_BIAS=24.0;      // add this to every z coordinate
+
+  These commands can be used in WEAPONS.DDF:
+
+    MODEL_ASPECT=1.0;     // make the weapon fatter/skinnier
+    MODEL_BIAS=0.0;       // add this to every z coordinate
+    MODEL_FORWARD=2.2;    // move the weapon forward/backward
+    MODEL_SIDE=-3.5;      // move the weapon right/left
+
+  Note: there is no MODEL_SCALE command for WEAPONS.DDF (scaling
+  has no effect because the model is drawn at the camera point).
+  Changing MODEL_FORWARD, MODEL_SIDE and/or MODEL_BIAS can have
+  a huge impact on the apparent size of the weapon.
+
++ Lua-scripted HUDS allow new status bars, automaps and other
+  Head Up Display elements to be created by writing a script in
+  the Lua programming language.
+
+  See the Lua-HUD manual for full details.
+
++ Detail Slopes are a limited rendering-only form of slopes
+  supported by EDGE 1.31, mainly useful for adding some detail
+  your map.  They work by putting a special linetype on the
+  front linedef of a stair step, and that step will be sloped
+  down to the lower floor (for ceilings, they slope up to the
+  higher ceiling).
+
+  The following Slope types are defined in EDGE.WAD:
+
+    [567] : EDGE Detail Slope, FLOOR
+    [568] : EDGE Detail Slope, CEILING
+    [569] : EDGE Detail Slope, FLOOR+CEILING
+
++ mirrors are one-sided linedefs with a special linetype.
+  They have a glassy look, and can be tinted with a color,
+  plus they can reflect other mirrors (within reason).
+
+  The sky is never flipped in mirrors, this is a limitation
+  of the way EDGE handles skies and cannot be fixed.
+
+  List of mirror linetypes now in EDGE.WAD:
+
+    [462] : EDGE Mirror, Plain
+    [463] : EDGE Mirror, White
+    [464] : EDGE Mirror, Blue
+    [465] : EDGE Mirror, Red
+    [466] : EDGE Mirror, Green
+
++ portals are similar to mirrors: a one-sided line which pairs
+  up with another one-sided line with the same tag, and each
+  line renders the view through the partnering line.  Both
+  linedefs must be the same length and have sectors that are
+  the same height (a little bit of leeway is permitted).
+
+  To allow the player to cross portals, use a boom line-to-line
+  teleporter (such as type 244) slightly in front of each portal
+  line.  Otherwise use a blockline linedef there since the
+  portal lines themselves do not block players.
+
+  Note that missiles and hitscan shots do not cross portals.
+  Monsters and bots don't know about them and will not cross
+  them deliberately and cannot see across them.
+
+  Portal linetypes in EDGE.WAD:
+
+    [480] : EDGE Portal, Dark 50%
+    [481] : EDGE Portal, Light 30%
+    [482] : EDGE Portal, Light 70%
+    [483] : EDGE Portal, Blue 70%
+    [484] : EDGE Portal, Green 70%
+
++ security cameras are portals which are one-way, and which
+  allow shrinking the viewed area.  The shrinking is done by
+  using a short line for the "screen" side, and a long line
+  for the "camera" side, as well as a height difference.
+
+  For example, the light blue screens in the PortalDemo are
+  32x32, and their partner lines are 128x128.
+
+  Security camera linetypes in EDGE.WAD:
+
+    [485] : EDGE Camera Portal, Plain
+    [486] : EDGE Camera Portal, White
+    [487] : EDGE Camera Portal, Cyan
+    [488] : EDGE Camera Portal, Rusty
+    [489] : EDGE Camera Portal, Green
+
++ sector glow effects.  Using one of these commands:
+
+    GLOW_TYPE=FLOOR;
+    GLOW_TYPE=CEILING;
+
+  in conjunction with the DLIGHT commands means that the
+  dynamic light is transformed into a floor or ceiling glow.
+  The brightness and range of the lighting can be adjusted as
+  per normal dynamic lights.  The glow is limited to a single
+  sector.
+  
+  The following new things are provided by EDGE.WAD:
+
+    [7041] : EDGE Nukage Glow
+    [7042] : EDGE Lava Glow
+    [7043] : EDGE Water Glow
+
++ support for OGG/Vorbis and WAV formats for SFX.  Sounds can now
+  be external files using the new FILE_NAME command in SOUNDS.DDF.
+
++ map support for placing things on Extrafloors.  Bits 10-13 of
+  the options field is used as a 4 bit number for the extrafloor
+  to place the thing on.  Zero means the lowest ground (same as
+  before), 1 means the next extrafloor up, and so on...
+  
+  Note: the BOOM MTF_RESERVED flag (bit 8) must also be clear for
+  this field to be considered valid and usable.
+
++ TGA images are now supported by IMAGES.DDF.
+
++ flat alignment/scaling linetypes have been added to EDGE.WAD.
+  There are 3 basic types: Align + Rotate, Align + Rotate + Scale,
+  and just Scaling.  They can be applied to three areas: FLOOR,
+  CEILING and FLOOR + CEILING.  Finally you can use them either
+  with a tag (all tagged sectors are changed) or without a tag
+  (then the front or back sector of the linedef is changed).
+
+  List of new types:
+
+    [800] : Align and rotate front sector's FLOOR
+    [801] : Align and rotate back  sector's FLOOR
+    [802] : Align and rotate front sector's CEILING
+    [803] : Align and rotate back  sector's CEILING
+    [804] : Align and rotate front sector's FLOOR+CEILING
+    [805] : Align and rotate back  sector's FLOOR+CEILING
+
+    [810] : Align, scale and rotate front sector's FLOOR
+    [811] : Align, scale and rotate back  sector's FLOOR
+    [812] : Align, scale and rotate front sector's CEILING
+    [813] : Align, scale and rotate back  sector's CEILING
+    [814] : Align, scale and rotate front sector's FLOOR+CEILING
+    [815] : Align, scale and rotate back  sector's FLOOR+CEILING
+
+    [820] : Scale front sector's FLOOR
+    [821] : Scale back  sector's FLOOR
+    [822] : Scale front sector's CEILING
+    [823] : Scale back  sector's CEILING
+    [824] : Scale front sector's FLOOR+CEILING
+    [825] : Scale back  sector's FLOOR+CEILING
+
+- three new armour things were added to EDGE.WAD for people to
+  use in their maps:
+
+    [7031] : PURPLE_ARMOUR
+    [7032] : YELLOW_ARMOUR
+    [7033] : RED_ARMOUR
+
+- two new key things were added to EDGE.WAD:
+
+    [7015] : GREEN_KEY
+    [7017] : GREEN_SKULLKEY
+
+- these locked door linetypes were also added to EDGE.WAD:
+
+    [490] : EDGE Green Key DOOR - DR
+    [491] : EDGE Green Key DOOR - D1
+    [492] : EDGE Green Key DOOR - SR
+    [493] : EDGE Green Key DOOR - S1
+    [494] : EDGE Green Key BLAZING DOOR - D1
+
+    [580] : EDGE Gold Key DOOR - DR
+    [581] : EDGE Gold Key DOOR - D1
+    [582] : EDGE Gold Key DOOR - SR
+    [583] : EDGE Gold Key DOOR - S1
+
+    [584] : EDGE Silver Key DOOR - DR
+    [585] : EDGE Silver Key DOOR - D1
+    [586] : EDGE Silver Key DOOR - SR
+    [587] : EDGE Silver Key DOOR - S1
+
+    [588] : EDGE Brass Key DOOR - DR
+    [589] : EDGE Brass Key DOOR - D1
+    [590] : EDGE Copper Key DOOR - DR
+    [591] : EDGE Copper Key DOOR - D1
+    [592] : EDGE Steel Key DOOR - DR
+    [593] : EDGE Steel Key DOOR - D1
+
+    [594] : EDGE Wooden Key DOOR - DR
+    [595] : EDGE Wooden Key DOOR - D1
+    [596] : EDGE Fire Key DOOR - DR
+    [597] : EDGE Fire Key DOOR - D1
+    [598] : EDGE Water Key DOOR - DR
+    [599] : EDGE Water Key DOOR - D1
+
+- some LADDER linetypes were added to EDGE.WAD:
+
+    [470] : EDGE Ladder,  48 units high
+    [471] : EDGE Ladder,  80 units high
+    [472] : EDGE Ladder, 120 units high
+    [473] : EDGE Ladder, 160 units high
+    [474] : EDGE Ladder, 192 units high
+    [475] : EDGE Ladder, 256 units high
+    [476] : EDGE Ladder, 384 units high
+    [477] : EDGE Ladder, 512 units high
+    [478] : EDGE Ladder, 768 units high
+    [479] : EDGE Ladder, no limit
+
+
+DDF / RTS Goodies
+-----------------
+
++ new WEAKNESS feature allows a monster to receive more damage
+  from certain attacks than others.  You can also specify a zone
+  where the monster must be hit (when hit in other places, the
+  weakness does not apply).  The weakness zone can be a height
+  range (in percentages) and/or an angle range (in degrees).
+
+  The weakness feature requires 'WEAKNESS.CLASS' to be present,
+  specifying what attack classes the monster is weak against.
+  Note that it will also _override_ any IMMUNITY or RESISTANCE
+  that the monster has (except for the INVULNERABLE special).
+
+  The following example shows all the commands.  Everything
+  except 'WEAKNESS.CLASS' is optional.
+
+    WEAKNESS.CLASS=ABC;
+    WEAKNESS.HEIGHTS=75%:100%;
+    WEAKNESS.ANGLES=150:210;
+    WEAKNESS.MULTIPLY=3.0;
+    WEAKNESS.PAINCHANCE=100%;
+
+  When a thing is hurt via the weakness feature, it will try to
+  enter 'WEAKPAIN' states, but if it doesn't have them then the
+  normal PAIN states are used.
+
+  When a thing is killed, it will try to enter 'WEAKDEATH' states,
+  but if they don't exist then it will try OVERKILL states, and
+  finally it falls back to the normal DEATH states.
+
++ BECOME action for THINGS.DDF allows a thing to turn into another
+  type of thing.  Can be used on players too.  HEALTH and SIDE
+  values remain the same.  The new state frame can also be given
+  (the default is IDLE:1).  For example:
+
+    BECOME(CACODEMON)
+    BECOME(CACODEMON,CHASE:2)
+
+  Note that becoming something larger (i.e. bigger RADIUS) can
+  cause the thing to get stuck in walls or other objects.
+
++ armour association feature.  When you pick up some armour, and
+  the thing DDF uses the ARMOUR_PROTECTION command, then various
+  properties are remembered for that color of armour.  The new
+  ARMOUR_PROTECTION command is the percentage of damage which is
+  saved by the armour (100% for all) which overrides the default
+  protection rates (e.g. BLUE_ARMOUR is normally 50%).
+
+  Summary of armour-assocation commands:
+
+    ARMOUR_PROTECTION=99%; // high protection
+    ARMOUR_DEPLETION=10%;  // low depletion rate
+    ARMOUR_CLASS=B;        // only protects against Bullets
+    IMMUNITY_CLASS=C;      // total protection from Close-Combat
+    RESISTANCE_CLASS=M;    // resistance against Missiles
+
+  Note: ARMOUR_CLASS overrides the immunity/resistance classes,
+  so the above example would fail to provide any immunity or
+  resistance because 'C' and 'M' are not in ARMOUR_CLASS. 
+
+- PURPLE armour was added, bringing the number of armours to 5.
+  The default protection is 66%, and the layering order (from
+  innermost to outermost) is: GREEN, BLUE, PURPLE, YELLOW, RED.
+
+- SIMPLE_ARMOUR special for armour pickups.  It prevents the
+  wacky Doom-emulation from kicking in.
+
+- SPAWN action is similar to DROPITEM action, but it doesn't
+  force the object to be non-SOLID like DROPITEM does, plus the
+  spawned object will have the same Angle and Side as the parent
+  object.  The name must be given in brackets, e.g. SPAWN(IMP).
+
+- INVULNERABLE special makes the thing completely immune to
+  all attacks.  There are also two new actions to dynamically
+  change it: SET_INVULNERABLE and CLEAR_INVULNERABLE, which
+  can be used to make monsters with blocking states (like the
+  Centaurs in Hexen).
+
+- DLIGHT_COLOUR(#FF00FF) action will change the color of the
+  dynamic light.  Note: the secondary dlight, if used, is not
+  affected.
+
+- for object brightness, LIT00 - LIT99 can be used in state
+  frames where the keywords 'NORMAL' and 'BRIGHT' are used.
+  This allows fine-grained control of dynamic lights.
+
+- new way to get FLAT lighting, which doesn't diminish by
+  distance.  The following command in GAMES.DDF enables flat
+  lighting:
+
+    LIGHTING=FLAT;
+
+  The default is "DOOM".  There is also a "DOOMISH" setting
+  which is the same as DOOM but without the adjustment of
+  walls that are purple horizontal or vertical.  The previous
+  method (LIGHTING command in LEVELS.DDF) has been removed.
+
+- SPLASH_SOUND command for SECTORS.DDF, which is played whenever
+  a player enters the water.  Requires the SWIM special.
+
+- FIX_TRANS=BLACKEN command for IMAGES.DDF which ensures that
+  every completely transparent pixel (alpha=0) in the image is
+  black.  Useful for fixing the "white borders" problem.
+
+- the existing RESISTANCE_CLASS feature has been supplemented by
+  a new RESISTANCE_MULTIPLY command which lets you control how
+  much to multiply the damage caused.  The default is 0.4 which
+  matches the previously hard-coded value.  Values over 1.0 can
+  be used (makes it a weakness instead of resistance).
+
+  Also RESISTANCE_PAINCHANCE can give a different (typically
+  lower) chance of entering the pain states from a resisted
+  attack.
+ 
+- VAMPIRE attack special and thing special (for monsters and
+  players) which causes the inflictor of damage to gain the
+  health from the damage done to the victim.  The health/damage
+  ratio is hard-coded as 25% for monsters and 50% for players.
+
+- CHECK_ACTIVITY action for players will cause the player to
+  enter SWIM, FLY, or CLIMB states if the player is currently
+  swimming, flying (jetpack) or climbing a ladder.  Also JUMP
+  states are entered when the player jumps.  These new states
+  are all optional.
+
+- SHARED_CLIP=TRUE for WEAPONS.DDF means that the primary and
+  secondary attacks are using a single (shared) clip.  Hence
+  you cannot use SEC_AMMOTYPE, SEC_AMMOPERSHOT or SEC_CLIPSIZE
+  commands when using SHARED_CLIP.  There can only be a single
+  reload animation (SECRELOAD states will be ignored).
+
+  You should use SEC_SHOOT, SEC_REFIRE and SEC_NOFIRE actions
+  in your SECATTACK states, and you may have SECFLASH states.
+
+- FLOOR.CRUSH_DAMAGE and CEILING.CRUSH_DAMAGE is the new and
+  preferred way for making crushers in LINES.DDF.  It gives the
+  amount of damage when crushing (the rate of damage is still
+  hard-coded to be every 4 tics).
+
+- Weapons.ddf: allow 'SEC_ATTACK' to mean 'SECOND_ATTACK' for
+  consistency with all the other SEC_XXX commands.
+
+- Anims.ddf: new type "GRAPHIC" is now supported, which can
+  animate graphics used for the UI (backgrounds, menus, hud).
+  You need to use the SEQUENCE command (because FIRST/LAST
+  doesn't make any sense for graphics), and the graphics must
+  have the same size and X/Y offsets.
+
+- RTS: 'WHEN=xxx' tag for SPAWNTHING commands.
+
+- RTS: SECRET_EXIT command which is like EXIT_LEVEL but
+  takes you to the secret level instead.
+

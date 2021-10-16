@@ -1,0 +1,60 @@
+
+RTS RULES
+=========
+
+RTS Execution Semantics:
+
+   (a) At the start of each level, triggers are spawned on the map
+       from their definitions in the script file.  The WHEN_APPEAR and
+       WHEN_PLAYER_NUM commands affect which triggers get spawned on
+       the map.  When triggers have finished all the commands (and for
+       repeatable triggers, all the loops), they are removed from the
+       map.  
+   
+   (b) Triggers on the map can either be enabled or disabled.  Only
+       enabled triggers can run or react to players.  Disabled
+       triggers do nothing -- they are totally inert, and just wait to
+       be enabled from an external source (e.g. another trigger).
+
+   (c) Enabled triggers only run their commands when _all_ of their
+       conditions are satisfied.
+
+   (d) The main condition to satisfy is the player touching the
+       trigger area on the map.  When a radius of -1 is used, or
+       TAGGED_IMMEDIATE, this position check is always satisfied
+       no matter where the player is.
+       
+       When TAGGED_USE is used, in addition to touching the trigger,
+       the player must also be pressing the `use' button (usually
+       SPACEBAR).
+ 
+   (e) The other conditions to satisfy are given by the ONDEATH,
+       ONHEIGHT and ONCONDITION commands.
+
+   (f) When TAGGED_INDEPENDENT is used, once all conditions of the
+       trigger have been satisfied, they don't need to remain
+       satisfied for the trigger to keep running.
+ 
+       When TAGGED_INDEPENDENT is not used, all conditions need to
+       _remain_ satisfied for the trigger to keep running.  The
+       conditions are re-checked after each command (or group of
+       commands) is executed.
+ 
+   (g) New command "RETRIGGER", only usable in TAGGED_INDEPENDENT
+       scripts, which requires all of the conditions to be met again
+       before the trigger continues.  This can be useful, since
+       TAGGED_INDEPENDENT triggers normally never check the conditions
+       again, and non-independent triggers can stop mid-way through a
+       group of commands if the conditions change (e.g. player moves
+       out of radius).
+
+   (h) In multiplayer games, any one of the players can satisfy
+       the player-based conditions (inside the radius, pressing
+       USE key, etc) and that will allow the script to run.
+
+       When only a single player activates the script, that
+       player will be responsible for hurting monsters and
+       activating linetypes.  Otherwise those actions will be
+       performed without anyone responsible (as if done solely
+       by the environment).
+

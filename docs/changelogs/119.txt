@@ -1,0 +1,182 @@
+
+CHANGELOG FOR 1.19 (since 1.18)
+===============================
+
+(Date: MARCH 8th 2000)
+
+(Unreleased EDGE version)
+
+Bugs fixed:
+
+ - Problem with ammo icons in the status bar.
+ - Problems with weapons (especially second attacks) fixed.
+ - Player weapons are drawn with correct colourmap when underwater.
+ - TrueBSP sprites now work a lot better.
+ - TrueBSP will now ignore walls with "-" texture (no more AASHITTY)
+ - Fixed bugs in the TrueBSP polygoniser (no more AdjacentSeg errors)
+ - Berserk red-ness is better (not sure if 100%)
+ - Bug with final cast screen and Pain Elemental fixed.
+ - Numerous fixes for non-truebsp extrafloor rendering.
+ - Fixed the problem with spawners not spawning (e.g. Pain Elemental).
+ - Fixed problem with Imps (etc) failing to shoot fireballs.
+ - Fixed the white-text-showing-up-as-red problem.
+ - NoClip cheat no longer sinks down when running up stairs.
+ - Plasma balls (etc) no longer hit monsters strangely above them.
+ 
+Features removed:
+
+ - NO_BRIGHT special in colmap.ddf.
+ - LUMPEXISTS in lines.ddf and sectors.ddf.
+ - LINK field in sounds.ddf.
+ - COLOURMAP= and COLOURMAPLUMP= in lines.ddf and sectors.ddf.
+   (use USE_COLOURMAP=[colmap-name] instead).
+ 
+Changes:
+
+ - All weapon code pointers lost their "WEAPON_" prefix.
+ - WEAPON_SPAWN() code pointer has become EJECT().
+ - EJECT_ATTACK= in weapons.ddf sets default attack for EJECT func.
+ - The -andymagic cmdline option is currently broken.
+ 
+ - The [] headers in lines.ddf, sectors.ddf and playlist.ddf no longer
+   need the colon `:', just the number, e.g. [123].
+
+ - States in attacks.ddf, things.ddf and weapons.ddf have changed.
+   Instead of SPAWN_STATES=XXX, the new syntax is STATES(SPAWN)=XXX.
+   Thus "CHASING_STATES" becomes "STATES(CHASE)", PAINSTATES becomes
+   STATES(PAIN), UPSTATE in weapons.ddf becomes STATES(UP), etc...
+  
+ - Extrafloors have changed.  There are now three types: THICK, THIN,
+   and LIQUID.  The first two are solid, and cannot exist anywhere
+   else that is also solid.  LIQUID is just that, non-solid and can
+   exist anywhere (e.g. below the real sectors floor).
+
+   In keeping with that, the "FALL_THROUGH" special was removed, now
+   you can only fall through LIQUID types (unless WATERWALKER comes
+   into play).
+
+ - The LDF file was renamed from "default.ldf" to "language.ldf", and
+   the [DEFAULT] entry was renamed to [ENGLISH].
+ 
+ - The DDF file "mission.ddf" was renamed to "games.ddf".
+
+ - The DDF lump DDFMOBJ has been renamed to DDFTHING, and support the
+   other names (DDFCNRY, DDFCRTR and DDITEM) have been removed.
+
+ - All DDF files and lumps now need a "tag" near the top, before any
+   entries beginning with [].  This tag determines the type of the
+   entries.  For now, the tag must coincide with the filename.  These
+   are the supported tags:
+
+      <ANIMATIONS>   <ATTACKS>   <COLOURMAPS>  <GAMES>
+      <LANGUAGES>    <LEVELS>    <LINES>       <THINGS>
+      <PLAYLISTS>    <SECTORS>   <SOUNDS>      <SWITCHES>
+      <WEAPONS>
+
+ - New benefit/backpack system.  See the DDF docs for the full
+   details, but in summary: the old fields (BENEFIT_TYPE,
+   BENEFIT_AMOUNT, BENEFIT_LIMIT, BACKPACK_XXXX) have been replaced by
+   a single field "PICKUP_BENEFIT" which contains a comma separated
+   list of benefits to give to the player.
+ 
+ - There are now four levels of armour: GREEN, BLUE, YELLOW and RED
+   (from weakest to strongest).  Green saves 33% of damage, as before,
+   Blue saves 50% of damage, no change there either.  The new ones
+   well I need feedback on what their semantics should be.  For now it
+   is this: Yellow saves 75% of damage, and Red saves 90% of damage.
+ 
+ - The format of the GIVEARMOUR RTS primitive has changed, it is now:
+
+       GIVEARMOUR  [type]  [amount]
+   or
+       GIVEARMOUR  [type]  [amount]  [limit]
+ 
+   The [type] is one of GREEN, BLUE, YELLOW or RED.  The limit is now
+   optional, it defaults to 200 when absent.
+   
+ - For the HEALPLAYERS RTS primitive, like above the [limit] is
+   optional and defaults to 200 health points.  BTW, let me know if
+   100 would be a better default limit.
+ 
+ - The SECTORV primitive in RTS has changed, but only when used on
+   ceilings.  The old way would subtract the value from the ceiling
+   height.  The new way adds the value to the ceiling height, it is
+   now consistent with floors.
+ 
+ - The initial ammo and ammo-limits for players is not longer fixed, the
+   new method works just like the PICKUP_BENEFIT field, like this:
+
+       INITIAL_BENEFIT = [benefit] , [benefit] , ... ;
+ 
+   You can give ammo and set ammo limits this way (used in things.ddf
+   for the player things), but it is not limited to just ammo stuff
+   (e.g. keys, powerups, more health/armour could be given too).
+ 
+ - The initial weapon of a player is no longer hard-coded to "PISTOL".
+   It will be the weapon with FREE=TRUE in weapons.ddf, and which has
+   the highest priority.  If there are no free weapons, you begin the
+   game with no weapon at all.
+ 
+ - The PALETTE_REMAP field of things.ddf has changed, it is no longer
+   a number, now it is a colourmap name within colmap.ddf.
+ 
+ - The VOLUME= field in sounds.ddf used to only be used with the
+   now-defunct LINK feature.  But now VOLUME= controls how much softer
+   than normal the sound is played.  255 is normal value, 128 is half
+   as quiet, and 1 would be barely audible.  Values greater than 255
+   will make the sound louder than normal, but only upto a point.
+   (Totally untested, no sound support in Linux yet).
+ 
+ - In lines.ddf and ceilings.ddf, the fields that begin with "FLOOR_"
+   and "CEILING_" (e.g. FLOOR_TYPE) now must begin with "FLOOR." and
+   "CEILING." (e.g. FLOOR.TYPE).  The dot is a separator, for example
+   "FLOOR.TYPE" means the field `FLOOR' and the _subfield_ `TYPE'.
+   It's hard to explain, the main benefit is to make our code smaller
+   and more robust.
+
+ - In levels.ddf, the fields that begin with "END" or "PRE" (e.g.
+   PRETEXT) now have a dot after the END/PRE (e.g. PRE.TEXT).  Same
+   reason as above.
+ 
+ - The following DDF fields have been renamed:
+
+   anims.ddf:
+     TICS -> SPEED
+     ISTEXTURE=0 -> TYPE=FLAT
+     ISTEXTURE=1 -> TYPE=TEXTURE
+
+   switches.ddf:
+     SWITCHON -> ON_TEXTURE
+     SWITCHOFF -> OFF_TEXTURE
+     SWITCHSOUND -> SOUND
+
+   games.ddf:
+     BACKGROUND -> INTERMISSION_GRAPHIC
+     BACKGROUND_CAMERA -> INTERMISSION_CAMERA
+     MUSIC -> INTERMISSION_MUSIC
+     SPLAT -> SPLAT_GRAPHIC
+     YAH# -> YAH#_GRAPHIC
+     TITLE_PIC -> TITLE_GRAPHIC
+     GRAPHIC_NAME -> NAME_GRAPHIC
+
+   levels.ddf:
+     GRAPHIC_NAME -> NAME_GRAPHIC
+     ENDPIC -> END.GRAPHIC
+     PREPIC -> PRE.GRAPHIC
+     ENDPICWAIT -> END.GRAPHIC_WAIT
+     PREPICWAIT -> PRE.GRAPHIC_WAIT
+
+  - Default RTS scripts are now in the `edge.scr' file in the same
+    directory as the DDF files.  (i.e. no longer in edge.wad).
+
+New features:
+
+ - Able to accelerate the text stage of the final final.
+ 
+ - Able to have no weapon at all, you just run around with nothing in
+   front of you.
+
+ - Flats drawn in OpenGL version :).
+
+ - SPIT_SPOT= field for things.ddf, which defines the thing type where
+   the SHOOT_TO_SPOT attack shoots to (for the MAP30 brain shooter).

@@ -1,0 +1,207 @@
+
+Wad System II
+=============
+
+by The EDGE Team.  October 2004.
+
+
+Storage
+-------
+
+The new system will represent a normal filesystem heirarchy,
+with directories and files.  All files will have an extension
+(e.g. "foo.png").  All filenames should be in lowercase, to
+avoid issues with different operating systems (Win32 is not
+case-sensitive, but Linux and MacOS X both are).
+
+This filesystem will be stored in standard ZIP files, but
+with a different extension (possibly "EPK", an abbreviation
+of "EDGE PacKage").
+
+The normal lumps in a WAD, when loaded by EDGE, will be given
+a spot in the WAD II directory structure with a suitable
+extension.  For example: the flats between F_START and F_END
+will be placed in a "flats/" directory and given the ".rdf"
+(Raw Doom Flat) extension.  If there is a conflict between
+the WAD and the new system, the new filesystem wins.
+
+Mod and TC developers will be able to use the real filesystem
+when creating and testing their projects, so they won't have
+to build the WAD for every change.  But finished projects
+should still be distributed as self-contained WAD files.
+
+
+Heirarchy
+---------
+
+The WAD II format can contain two main types of data: levels
+and resources.  "Resources" are the graphics, sounds, sprites,
+textures, flats, DDF, RTS, etc...
+
+The heirarchy is scoped: the top level contains a directory
+for each "game".  Each game directory contains some "episode"
+directories.  Then each episode will contain a directory
+for each level.  [Side note: if we ever implement hubs, each
+additional hub will be a sub-directory under the level].
+
+For example:
+
+/doom/kditd/e1m1/things.raw
+/doom/kditd/e1m1/linedefs.raw   (etc....)
+/doom/kditd/e1m9/...
+
+/doom/tsoh/e2m1...
+/doom/inferno/e3m1...
+/doom/tfc/e4m1...
+
+/doom/hoe/map01/...
+/doom/evilution/map01/...
+/doom/plutonia/map01/...
+
+/heretic/...
+
+The episode names are "kditd" for "Knee Deep in the Dead", "hoe"
+for "Hell on Earth", etc...
+
+Resources can exist at any of these scopes.  Those at the top
+level apply to the engine as a whole.  Then you can have
+game-specific resources, episode-specific resoures, and
+perhaps even level-specific resources.
+
+Conceptually, when EDGE loads a level and requires resource X,
+it will search in a bottom-up fashion: if X doesn't exist in
+the level directory, try the episode, then try the game
+directory, and lastly look in the top level directory.
+
+User-made Mods and Partial Conversions can have their own
+episode name, like:
+
+/doom/my_new_doom_mod/...
+/doom/jasons_doom2_pc/...
+
+For Total Conversions which really replace EVERYTHING,
+these can have their own top-level directory, like:
+
+/my_tc/...
+
+EDGE will allow any combination of games and episodes to be
+loaded (and co-exist) at the same time.  This has certain
+implications.  To cite one example: the -warp option, since
+level names like "MAP01" can be ambiguous.
+
+
+Resource directories
+--------------------
+
+Compatibility with WADs requires the following sub-dirs:
+
+flat/xxx.rdf     : stuff between F_START and F_END, or equiv.
+patch/xxx.rdi    : stuff between P_START and P_END, or equiv.
+sprite/zz/xx.rdi : stuff between S_START and S_END, or equiv.
+colmap/xxx.cmp   : stuff between C_START and C_END.
+
+texture/xxx.rdt  : stuff defined in the TEXTURE1/2 lumps.
+
+
+The following sub-directories are also proposed:
+
+gfx/xxx.png      : misc graphics, like for menus and backgrounds.
+font/xxx.rdi     : font characters.
+
+sound/xxx.rds    : sounds.  Also ".wav" format.
+music/xxx.mus    : music.   Also ".mid" and ".ogg" formats.
+
+ddf/lines.ddf    : DDF files (use same names as externally).
+ddf/edge.scr     : RTS scripts.
+
+model/troo/xxx.md2  : model meshes.  (MD2 only shown as an example)
+model/troo/xxx.png  : model skin images.
+
+plskin/name/xxx.rdi : player skin sprites
+
+
+File Formats / Extensions
+-------------------------
+
+One important feature of the new WAD-II system is being able
+to used good file formats (such as PNG for graphics, WAV for
+sound, OGG-Vorbis for music).  We also need to give the
+original Doom formats a meaningful extension.
+
+Old formats:
+
+.pal  : Raw Palette  (N * 256 RGB colours)
+.cmp  : Raw Colormap (N * 256-byte tables)
+
+.rdi  : Raw Doom Image (using posts).
+.rdf  : Raw Doom Flat (64x64).
+.rdt  : Raw Doom Texture (a definition: size + patch list).
+.rds  : Raw Doom Sound.
+.rdm  : Raw Doom Demo.   (The .lmp extension is too ambiguous)
+
+.rhb  : Raw Heretic/Hexen Background (320x200).
+
+.vga  : VGA Text Screen (80x25 chars).
+.mus  : Doom Music format.
+
+.deh  : DeHackEd patch files.
+.skn  : Skin definition files.
+
+
+New formats:
+
+.png  : flats, sprites, textures, gfx, skins.
+.jpeg : flats, textures, gfx, skins.
+
+.wav  : sounds.
+.ogg  : music, sounds.
+.mid  : music.
+
+.gl   : glBSP level lumps (nodes.gl, segs.gl, etc).
+
+.ddf  : DDF files.
+.scr  : RTS scripts.
+
+
+Stuff that can use the ".raw" extension:
+
+-  level lumps (things.raw, linedefs.raw, etc).
+
+
+Lumps that won't remain after conversion:
+
+-  Any of the markers (MAP01, F_START, etc).
+-  PNAMES and TEXTURE1/2. 
+-  GENMIDI and DMXGUS: aren't needed with modern PCs.
+-  PC Speaker sounds: totally useless.
+
+
+Authoring Information
+---------------------
+
+Each package file will contain a compulsory top-level file that
+describes it.
+
+<< Not Yet Specified >>
+
+
+Animations
+----------
+
+Flat and texture animations are a bit of a nuisance since they
+depend on the order they occur in the WAD file.  The solution
+suggested here is this: WADs which are loaded into the new
+directory system will keep the same ordering (e.g. if the
+flats go <XXX,CCC,YYY,MMM> then that order is retained in the
+"flat/" directory).  However, our pack/unpack utility will
+store files in the __PACK__ structure in alphabetical order. @@@@ FIXME
+
+It's also suggested that using FIRST/LAST in anims.ddf will be
+deprecated for new Mods, and that a new syntax which specifies
+the exact image sequence is implemented, for example:
+
+[MY_SLIME]
+TYPE = FLAT;
+SEQUENCE = "XXX","CCC","MMM","YYY";
+SPEED = 8T;
+

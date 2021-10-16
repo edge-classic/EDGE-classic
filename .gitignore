@@ -1,0 +1,12 @@
+# VS Code
+.vscode/
+build/
+cache/
+
+# Main program/DLLs
+edge.exe
+*.dll
+
+# EDGE game folders
+/screenshot
+/savegame

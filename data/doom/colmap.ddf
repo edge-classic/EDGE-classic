@@ -1,0 +1,268 @@
+// 
+//    EDGE COLMAP.DDF -redefine or add new color maps.
+//    For documentation, see http://edge.sourceforge.net/
+//    DDF Version 6.1
+//
+
+<COLOURMAPS>
+
+#VERSION 1.35
+
+[NORMAL]
+lump = "COLORMAP";
+start = 0;
+length = 32;
+
+[FONTWHITEN]
+lump = "FNWHTMAP";
+start = 0;
+length = 1;
+
+[AUTOMAP_NORMAL]
+lump = "AUTOMAPS";
+start = 0;
+length = 1;
+
+[AUTOMAP_OVERLAY]
+lump = "AUTOMAPS";
+start = 1;
+length = 1;
+
+[YELLOW_THING]
+lump = "TXTYLWS2";
+start = 1;
+length = 1;
+
+// --- Powerup effects -------------
+
+// For the invulnerability effect
+[ALLWHITE]
+lump = "COLORMAP";
+start = 32;
+length = 1;
+
+// For the EDGE night-vision effect
+[ALLGREEN]
+lump = "NITEVMAP";
+start = 0;
+length = 1;
+
+// --- Environment effects ------------
+
+[WATER] // BLUE WATER HUE
+lump = "WATERMAP";
+start = 0;
+length = 32;
+special = NO_FLASH;
+
+[SLIME] // GREEN WATER HUE
+lump = "SLIMEMAP";
+start = 0;
+length = 32;
+special = NO_FLASH;
+
+[LAVA] // RED WATER HUE
+lump = "LAVAMAP";
+start = 0;
+length = 32;
+special = NO_FLASH;
+
+// ----- Text Colour remaps ---------------
+
+[TEXT_RED]
+gl_colour = #FF2222;
+
+[TEXT_WHITE]
+gl_colour = #FFFFFF;
+
+[TEXT_GREY]
+gl_colour = #AAAAAA;
+
+[TEXT_GREEN]
+gl_colour = #33FF33;
+
+[TEXT_LT_BLUE]
+gl_colour = #77BBFF;
+
+[TEXT_BLUE]
+gl_colour = #2222FF;
+
+[TEXT_YELLOW]
+gl_colour = #FFFF22;
+
+[TEXT_ORANGE]
+gl_colour = #FFAA22;
+
+[TEXT_BROWN]
+gl_colour = #993311;
+
+[TEXT_BEIGE]
+gl_colour = #BB7B4B;
+
+[TEXT_PINK]
+gl_colour = #FFBBBB;
+
+[TEXT_PURPLE]
+gl_colour = #FF33FF;
+
+// ----- Player Colour Remaps ---------------
+
+[PLAYER_GREEN]
+lump = "COLORMAP";
+start = 0;
+length = 1;
+
+[PLAYER_GREY] 
+lump = "PLYRMAPS"; 
+start = 14; 
+length = 1;
+
+[PLAYER_LT_GREY] 
+lump = "PLYRMAPS"; 
+start = 4; 
+length = 1;
+
+[PLAYER_DK_GREY] 
+lump = "PLYRMAPS"; 
+start = 0; 
+length = 1;
+
+[PLAYER_BROWN] 
+lump = "PLYRMAPS"; 
+start = 1; 
+length = 1;
+
+[PLAYER_DULL_RED] 
+lump = "PLYRMAPS"; 
+start = 2; 
+length = 1;
+
+[PLAYER_LT_RED] 
+lump = "PLYRMAPS"; 
+start = 5; 
+length = 1;
+
+[PLAYER_DK_RED] 
+lump = "PLYRMAPS"; 
+start = 11; 
+length = 1;
+
+[PLAYER_ORANGE] 
+lump = "PLYRMAPS"; 
+start = 3; 
+length = 1;
+
+[PLAYER_PINK] 
+lump = "PLYRMAPS"; 
+start = 6; 
+length = 1;
+
+[PLAYER_GOLD] 
+lump = "PLYRMAPS"; 
+start = 7; 
+length = 1;
+
+[PLAYER_BLUE] 
+lump = "PLYRMAPS"; 
+start = 8; 
+length = 1;
+
+[PLAYER_DK_BLUE] 
+lump = "PLYRMAPS"; 
+start = 9; 
+length = 1;
+
+[PLAYER_DK_GREEN] 
+lump = "PLYRMAPS"; 
+start = 10; 
+length = 1;
+
+[PLAYER_RED_SKIN] 
+lump = "PLYRMAPS"; 
+start = 12; 
+length = 1;
+
+[PLAYER_PALE_SKIN] 
+lump = "PLYRMAPS"; 
+start = 13; 
+length = 1;
+
+// ----- Monster Skin Remaps ---------------
+
+[SKIN_PALE] 
+lump = "SKINMAPS"; 
+start = 0; 
+length = 1;
+
+[SKIN_GREY] 
+lump = "SKINMAPS"; 
+start = 1; 
+length = 1;
+
+[SKIN_BLUE] 
+lump = "SKINMAPS"; 
+start = 2; 
+length = 1;
+
+[SKIN_GREEN] 
+lump = "SKINMAPS"; 
+start = 3; 
+length = 1;
+
+[SKIN_LT_RED] 
+lump = "SKINMAPS"; 
+start = 4; 
+length = 1;
+
+[SARG_BLACK] 
+lump = "SARGMAPS"; 
+start = 0; 
+length = 1;
+
+[SARG_BLUE] 
+lump = "SARGMAPS"; 
+start = 1; 
+length = 1;
+
+[SARG_BROWN] 
+lump = "SARGMAPS"; 
+start = 2; 
+length = 1;
+
+[SARG_GRAY] 
+lump = "SARGMAPS"; 
+start = 3; 
+length = 1;
+
+[SARG_GREEN] 
+lump = "SARGMAPS"; 
+start = 4; 
+length = 1;
+
+[SARG_RED] 
+lump = "SARGMAPS"; 
+start = 5; 
+length = 1;
+
+// --- Backwards Compatibility cruft ---------
+
+[SKY]
+lump = "COLORMAP";
+start = 0;
+length = 1;
+
+[FUZZY]
+gl_colour = #777777;
+
+[SHADOW]
+gl_colour = #777777;
+
+[FOG]
+gl_colour = #777777;
+
+[DIMSCREEN]
+gl_colour = #777777;
+
+[ALLBRIGHT]
+gl_colour = #777777;
+

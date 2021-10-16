@@ -1,0 +1,87 @@
+//
+//    EDGE Radius Triggers
+//
+//    These scripts replace hardcoded events for both DOOM 1 and 2.
+//    For documentation, see http://edge.sourceforge.net/
+//    DDF Version 6.1
+//
+
+#VERSION 1.35
+
+// *****************
+// * DOOM1 scripts *
+// *****************
+
+// lower the star shaped wall when all Baron's are killed
+
+START_MAP e1m8
+  RADIUS_TRIGGER 0 0 -1
+    WAIT_UNTIL_DEAD Baron_of_Hell
+    ACTIVATE_LINETYPE 38 666
+  END_RADIUS_TRIGGER
+END_MAP
+
+
+// end the map when the Cyberdemon is killed
+
+START_MAP e2m8
+  RADIUS_TRIGGER 0 0 -1
+    WAIT_UNTIL_DEAD The_Cyberdemon
+    EXIT_LEVEL 5
+  END_RADIUS_TRIGGER
+END_MAP
+
+
+// end the map when the Spider Demon is killed
+
+START_MAP e3m8
+  RADIUS_TRIGGER 0 0 -1
+    WAIT_UNTIL_DEAD The_Spider_Mastermind
+    EXIT_LEVEL 5
+  END_RADIUS_TRIGGER
+END_MAP
+
+
+// open the 4 South bars when the Cyberdemon is killed
+
+START_MAP e4m6
+  RADIUS_TRIGGER 0 0 -1
+    WAIT_UNTIL_DEAD The_Cyberdemon
+    ACTIVATE_LINETYPE 2 666
+  END_RADIUS_TRIGGER
+END_MAP
+
+
+// raise center circular floor when Spider Demon is killed
+
+START_MAP e4m8
+  RADIUS_TRIGGER 0 0 -1
+    WAIT_UNTIL_DEAD The_Spider_Mastermind
+    ACTIVATE_LINETYPE 38 666
+  END_RADIUS_TRIGGER
+END_MAP
+
+
+// *****************
+// * DOOM2 scripts *
+// *****************
+
+START_MAP map07
+
+// lower the outer walls when all Mancubi are killed
+
+  RADIUS_TRIGGER 0 0 -1
+    WAIT_UNTIL_DEAD Mancubus
+    ACTIVATE_LINETYPE 38 666
+  END_RADIUS_TRIGGER
+
+// raise inner step when all Aracnotron are killed
+
+  RADIUS_TRIGGER 0 0 -1
+    WAIT_UNTIL_DEAD Arachnotron
+    ACTIVATE_LINETYPE 30 667
+  END_RADIUS_TRIGGER
+
+END_MAP
+
+// --------EOF-----------

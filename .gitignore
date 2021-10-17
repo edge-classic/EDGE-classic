@@ -5,6 +5,8 @@ cache/
 
 # Main program/DLLs
 edge.exe
+edge.log
+debug.txt
 *.dll
 
 # EDGE game folders

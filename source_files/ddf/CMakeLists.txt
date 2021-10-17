@@ -4,8 +4,6 @@ project(
   VERSION 0.1.0
 )
 
-set(CMAKE_CXX_FLAGS "-DWIN32")
-
 add_library(
   edge_ddf
   anim.cc

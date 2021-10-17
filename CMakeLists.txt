@@ -135,12 +135,16 @@ add_executable(
 	source_files/edge/w32_system.cc
 )
 
+# I imagine these will be used instead in non-MSYS environments - Dasho
+#find_package(PNG REQUIRED)
+#find_package(JPEG REQUIRED)
+
 find_package(Ogg REQUIRED)
-find_package(SDL REQUIRED)
-find_package(PNG REQUIRED)
-find_package(JPEG REQUIRED)
-find_package(ZLIB REQUIRED)
 find_package(Vorbis REQUIRED)
+find_package(SDL REQUIRED)
+find_library(PNGLIB REQUIRED NAMES libpng16.a)
+find_library(JPEGLIB REQUIRED NAMES libjpeg.a)
+find_library(ZLIB REQUIRED NAMES libz.a)
 
 target_include_directories(edge PRIVATE source_files/coal)
 target_include_directories(edge PRIVATE source_files/ddf)
@@ -171,13 +175,13 @@ target_link_libraries(
           edge_deh
           edge_epi
           edge_glbsp
-		  glew
+		  glew_s
 		  opengl32
 		  ${Ogg_LIBRARIES}
 		  ${SDL_LIBRARIES}
-		  ${PNG_LIBRARIES}
-		  ${JPEG_LIBRARIES}
-		  ${ZLIB_LIBRARIES}
+		  ${PNGLIB}
+		  ${JPEGLIB}
+		  ${ZLIB}
 		  Vorbis::vorbis
 		  Vorbis::vorbisfile
 		  Vorbis::vorbisenc

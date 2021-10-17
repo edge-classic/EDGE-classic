@@ -27,7 +27,7 @@
 #include "i_defs.h"
 #include "i_net.h"
 
-#ifdef LINUX
+#ifdef __linux__
 #include <linux/if.h>
 #include <linux/sockios.h>
 #endif

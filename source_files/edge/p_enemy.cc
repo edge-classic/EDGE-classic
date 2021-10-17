@@ -528,7 +528,7 @@ void P_FreeShootSpots(void)
 	if (brain_spots.number < 0)
 		return;
 
-	if (brain_spots.targets > 0)
+	if (brain_spots.number > 0) // Changed from brain_spots.targets, hopefully I don't blow it up - Dasho
 	{
 		SYS_ASSERT(brain_spots.targets);
 

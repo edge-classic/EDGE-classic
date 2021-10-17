@@ -24,7 +24,7 @@
 #include "macros.h"
 #include "asserts.h"
 
-#ifdef LINUX
+#ifdef __linux__
 #include "epi_linux.h"
 #endif
 

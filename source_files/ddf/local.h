@@ -24,6 +24,7 @@
 
 #include "types.h"
 #include "main.h"
+#include <cstddef>
 #include "states.h"
 
 // defines for parser stuff.

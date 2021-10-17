@@ -68,7 +68,7 @@ namespace Deh_Edge
 #endif
 
 // LINUX
-#elif defined(LINUX)
+#elif defined(__linux__)
 
 namespace Deh_Edge
 {

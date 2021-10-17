@@ -29,7 +29,7 @@
 
 bool nonet = true;
 
-#ifdef LINUX
+#ifdef __linux__
 #include <linux/if.h>
 #include <linux/sockios.h>
 #endif
@@ -203,7 +203,7 @@ static bool GetLocalAddress(void)
 	return false;
 }
 
-#ifdef LINUX
+#ifdef __linux__
 static bool Scan_IFCONFIG(bool got_local)
 {
 	if (M_CheckParm("-noifconfig"))

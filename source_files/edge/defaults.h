@@ -81,7 +81,7 @@
 #define CFGDEF_MIX_CHANNELS     (2)  // 32 channels
 #define CFGDEF_QUIET_FACTOR     (1)
 
-#ifdef LINUX
+#ifdef __linux__
 #define CFGDEF_MUSIC_DEVICE     (1)  // Timidity
 #else
 #define CFGDEF_MUSIC_DEVICE     (1)  // Timidity

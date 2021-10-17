@@ -202,7 +202,7 @@ static const char *config_base_dirs[] =
 	"\\",
 #endif
 
-#ifdef LINUX
+#ifdef __linux__
 	"/etc",
 	"/usr/local/lib",
 	"/usr/local/share",

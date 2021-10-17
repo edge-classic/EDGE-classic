@@ -118,7 +118,7 @@ void System_Startup(void)
 	{
 		setbuf(stdout, NULL);
 
-#if defined(LINUX) || defined(UNIX)
+#if defined(__linux__) || defined(UNIX)
 		// no whirling baton if stderr is redirected
 		if (! isatty(2))
 			disable_progress = true;

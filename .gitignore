@@ -4,11 +4,11 @@
 cache/
 
 # Main program/DLLs
+/edge
 edge.exe
 edge.log
 debug.txt
 *.dll
-doom_ddf/
 edge.cfg
 
 # EDGE game folders

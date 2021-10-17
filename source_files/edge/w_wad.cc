@@ -631,7 +631,9 @@ static void AddLump(data_file_c *df, int lump, int pos, int size, int file,
 	lump_p->kind = LMKIND_Normal;
 
 	Z_StrNCpy(lump_p->name, name, 8);
-	strupr(lump_p->name);
+	for (int i=0;i<strlen(lump_p->name);i++) {
+		lump_p->name[i] = toupper(lump_p->name[i]);
+	}
  
 	// -- handle special names --
 
@@ -1132,7 +1134,9 @@ static void AddFile(const char *filename, int kind, int dyn_index)
                 I_Error("Filename base of %s >8 chars", filename);
 
             strcpy(lump_name, base.c_str());
-			strupr(lump_name);    // Required to be uppercase
+			for (int i=0;i<strlen(lump_name);i++) {
+				lump_name[i] = toupper(lump_name[i]);
+			}
         }
 
 		// calculate MD5 hash over whole file

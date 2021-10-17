@@ -82,7 +82,7 @@ extern cvar_c debug_fps,        debug_pos;
 extern cvar_c debug_nomonsters, debug_subsector;
 
 
-#ifndef LINUX
+#ifndef __linux__
 #define S_MUSICDEV_CFG  "0"  // native
 #else
 #define S_MUSICDEV_CFG  "1"  // timidity

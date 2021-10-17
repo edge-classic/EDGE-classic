@@ -209,7 +209,7 @@ void HandleKeyEvent(SDL_Event* ev)
 		//       key behaves differently on Win32 and Linux.  Under Win32
 		//       we get the "long press" behaviour, but on Linux we get
 		//       "faked key-ups" behaviour.  Oi oi oi.
-#ifdef LINUX
+#ifdef __linux__
 		if (ev->type != SDL_KEYDOWN)
 			return;
 #endif

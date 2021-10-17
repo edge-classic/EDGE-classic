@@ -261,7 +261,9 @@ int CMD_ShowLumps(char **argv, int argc)
 	if (argc >= 3)
 	{
 		match = argv[2];
-		strupr(match);
+		for(int i=0;i<strlen(match);i++) {
+			match[i] = toupper(match[i]);
+		}
 	}
 
 	W_ShowLumps(for_file, match);

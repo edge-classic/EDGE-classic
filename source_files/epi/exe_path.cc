@@ -68,7 +68,7 @@ const char *GetExecutablePath(const char *argv0)
 #endif
 
 
-#ifdef LINUX
+#ifdef __linux__
 	dir = new char[PATH_MAX+2];
 
 	int length = readlink("/proc/self/exe", dir, PATH_MAX);

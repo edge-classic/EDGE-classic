@@ -107,7 +107,7 @@ extern net_address_c n_broadcast_listen;
 void I_StartupNetwork(void);
 void I_ShutdownNetwork(void);
 
-#ifdef LINUX  // TO BE REPLACED or REMOVED
+#ifdef __linux__ // TO BE REPLACED or REMOVED
 const char * I_LocalIPAddrString(const char *eth_name);
 // LINUX ONLY: determine IP address from an ethernet adaptor.
 // The given string is "eth0" or "eth1".  Returns NULL if something

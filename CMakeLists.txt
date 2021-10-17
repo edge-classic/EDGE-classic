@@ -26,6 +26,7 @@ if(MSYS)
   set(CMAKE_EXE_LINKER_FLAGS "-static -mwindows")
 endif()
 
+if(MSYS OR MINGW OR WIN32)
 add_executable(
   edge
 	source_files/edge/i_main.cc     
@@ -126,28 +127,134 @@ add_executable(
 	source_files/edge/vm_coal.cc    
 	source_files/edge/vm_hud.cc     
 	source_files/edge/vm_player.cc  
-	#source_files/edge/unx_music.cc  
-	#source_files/edge/unx_net.cc    
-	#source_files/edge/unx_system.cc
 	source_files/edge/w32_mus.cc
 	source_files/edge/w32_music.cc
 	source_files/edge/w32_net.cc
 	source_files/edge/w32_res.rc
 	source_files/edge/w32_system.cc
 )
+else()
+add_executable(
+  edge
+	source_files/edge/i_main.cc     
+	source_files/edge/i_ctrl.cc     
+	source_files/edge/i_video.cc    
+	source_files/edge/i_sound.cc    
+	source_files/edge/i_net.cc      
+	source_files/edge/am_map.cc     
+	source_files/edge/con_con.cc    
+	source_files/edge/con_main.cc   
+	source_files/edge/con_link.cc   
+	source_files/edge/con_var.cc    
+	source_files/edge/e_input.cc    
+	source_files/edge/e_main.cc     
+	source_files/edge/e_player.cc   
+	source_files/edge/f_finale.cc   
+	source_files/edge/f_interm.cc   
+	source_files/edge/g_game.cc     
+	source_files/edge/hu_draw.cc    
+	source_files/edge/hu_font.cc    
+	source_files/edge/hu_stuff.cc   
+	source_files/edge/hu_style.cc   
+	source_files/edge/l_glbsp.cc    
+	source_files/edge/l_deh.cc      
+	source_files/edge/m_argv.cc     
+	source_files/edge/m_bbox.cc     
+	source_files/edge/m_cheat.cc    
+	source_files/edge/m_math.cc     
+	source_files/edge/m_menu.cc     
+	source_files/edge/m_misc.cc     
+	source_files/edge/m_option.cc   
+	source_files/edge/m_netgame.cc  
+	source_files/edge/m_random.cc   
+	source_files/edge/n_bcast.cc    
+	source_files/edge/n_reliable.cc 
+	source_files/edge/n_network.cc  
+	source_files/edge/p_action.cc   
+	source_files/edge/p_blockmap.cc 
+	source_files/edge/p_bot.cc      
+	source_files/edge/p_enemy.cc    
+	source_files/edge/p_inter.cc    
+	source_files/edge/p_lights.cc   
+	source_files/edge/p_map.cc      
+	source_files/edge/p_maputl.cc   
+	source_files/edge/p_mobj.cc     
+	source_files/edge/p_plane.cc    
+	source_files/edge/p_setup.cc    
+	source_files/edge/p_sight.cc    
+	source_files/edge/p_spec.cc     
+	source_files/edge/p_switch.cc   
+	source_files/edge/p_tick.cc     
+	source_files/edge/p_user.cc     
+	source_files/edge/p_forces.cc   
+	source_files/edge/p_telept.cc   
+	source_files/edge/p_weapon.cc   
+	source_files/edge/rad_act.cc    
+	source_files/edge/rad_pars.cc   
+	source_files/edge/rad_trig.cc   
+	source_files/edge/r_draw.cc     
+	source_files/edge/r_shader.cc   
+	source_files/edge/r_render.cc   
+	source_files/edge/r_effects.cc  
+	source_files/edge/r_main.cc     
+	source_files/edge/r_occlude.cc  
+	source_files/edge/m_logo.cc     
+	source_files/edge/r_things.cc   
+	source_files/edge/r_units.cc    
+	source_files/edge/r_wipe.cc     
+	source_files/edge/r_misc.cc     
+	source_files/edge/r_sky.cc      
+	source_files/edge/r_colormap.cc 
+	source_files/edge/r_modes.cc    
+	source_files/edge/r_md2.cc      
+	source_files/edge/r_image.cc    
+	source_files/edge/r_doomtex.cc  
+	source_files/edge/r_texgl.cc    
+	source_files/edge/s_blit.cc     
+	source_files/edge/s_cache.cc    
+	source_files/edge/s_sound.cc    
+	source_files/edge/s_music.cc    
+	source_files/edge/s_ogg.cc      
+	source_files/edge/s_timid.cc    
+	source_files/edge/sv_chunk.cc   
+	source_files/edge/sv_glob.cc    
+	source_files/edge/sv_level.cc   
+	source_files/edge/sv_load.cc    
+	source_files/edge/sv_main.cc    
+	source_files/edge/sv_misc.cc    
+	source_files/edge/sv_mobj.cc    
+	source_files/edge/sv_play.cc    
+	source_files/edge/sv_save.cc    
+	source_files/edge/w_flat.cc     
+	source_files/edge/w_model.cc    
+	source_files/edge/w_sprite.cc   
+	source_files/edge/w_texture.cc  
+	source_files/edge/w_wad.cc      
+	source_files/edge/z_zone.cc     
+	source_files/edge/vm_coal.cc    
+	source_files/edge/vm_hud.cc     
+	source_files/edge/vm_player.cc  
+	source_files/edge/unx_music.cc  
+	source_files/edge/unx_net.cc    
+	source_files/edge/unx_system.cc
+)
+endif()
 
-# I imagine these will be used instead in non-MSYS environments - Dasho
-#find_package(PNG REQUIRED)
-#find_package(JPEG REQUIRED)
-#find_package(ZLIB REQUIRED)
-#find_package(GLEW REQUIRED)
+find_package(SDL REQUIRED)
+find_package(GLEW REQUIRED)
 
+if(MSYS)
 find_package(Ogg REQUIRED)
 find_package(Vorbis REQUIRED)
-find_package(SDL REQUIRED)
 find_library(PNGLIB REQUIRED NAMES libpng16.a)
 find_library(JPEGLIB REQUIRED NAMES libjpeg.a)
 find_library(ZLIB REQUIRED NAMES libz.a)
+else()
+find_package(SDL_sound REQUIRED)
+find_package(PNG REQUIRED)
+find_package(JPEG REQUIRED)
+find_package(ZLIB REQUIRED)
+endif()
 
 target_include_directories(edge PRIVATE source_files/coal)
 target_include_directories(edge PRIVATE source_files/ddf)
@@ -171,6 +278,7 @@ add_custom_command(
           "${CMAKE_CURRENT_LIST_DIR}"
 )
 
+if(MSYS)
 target_link_libraries(
   edge
   PRIVATE edge_coal
@@ -192,3 +300,22 @@ target_link_libraries(
 		  winmm
 		  wsock32
   )
+else()
+target_link_libraries(
+  edge
+  PRIVATE edge_coal
+          edge_ddf
+          edge_deh
+          edge_epi
+          edge_glbsp
+		  OpenGL
+		  ${GLEW_LIBRARIES}
+		  ${SDL_LIBRARIES}
+		  ${SDL_sound_LIBRARIES}
+		  vorbisfile
+		  ${PNG_LIBRARIES}
+		  ${JPEG_LIBRARIES}
+		  ${ZLIB_LIBRARIES}
+		  timidity
+  )
+endif()

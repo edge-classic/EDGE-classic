@@ -830,7 +830,9 @@ static void RAD_ParseStartMap(int pnum, const char **pars)
 	ClearPreviousScripts(pars[1]);
 
 	this_map = Z_StrDup(pars[1]);
-	strupr(this_map);
+	for (int i=0;i<strlen(this_map);i++) {
+		this_map[i] = toupper(this_map[i]);
+	}
 
 	rad_cur_level++;
 	rad_has_start_map = true;

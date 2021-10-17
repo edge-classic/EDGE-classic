@@ -38,7 +38,7 @@
 
 // The macros used to swap values.  Try to use superfast macros on systems
 // that support them, otherwise use C++ inline functions.
-#ifdef LINUX
+#ifdef __linux__
 #include <endian.h>
 #ifdef __arch__swab16
 #define EPI_Swap16  __arch__swab16

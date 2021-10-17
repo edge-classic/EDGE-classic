@@ -370,7 +370,9 @@ bool SV_PushReadChunk(const char *id)
 
 	strcpy(cur->s_mark, id);
 	strcpy(cur->e_mark, id);
-	strupr(cur->e_mark);
+	for (int i=0;i<strlen(cur->e_mark);i++) {
+		cur->e_mark[i] = toupper(cur->e_mark[i]);
+	}
 
 	// top level chunk ?
 	if (chunk_stack_size == 0)
@@ -558,7 +560,9 @@ bool SV_PushWriteChunk(const char *id)
 
 	strcpy(cur->s_mark, id);
 	strcpy(cur->e_mark, id);
-	strupr(cur->e_mark);
+	for (int i=0;i<strlen(cur->e_mark);i++) {
+		cur->e_mark[i] = toupper(cur->e_mark[i]);
+	}
 
 	// create initial buffer
 	cur->start = new byte[1024];

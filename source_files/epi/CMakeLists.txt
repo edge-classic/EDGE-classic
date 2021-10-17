@@ -6,17 +6,16 @@ project(
 
 set(CMAKE_CXX_FLAGS "-DINLINE_G=inline")
 
+if(MSYS)
 add_library(
   edge_epi
   arrays.cc
   bytearray.cc
-  #epi_linux.cc
   epi_win32.cc
   exe_path.cc
   file_memory.cc
   file_sub.cc
   file.cc
-  #filesystem_linux.cc
   filesystem_win32.cc
   filesystem.cc
   image_data.cc
@@ -43,6 +42,43 @@ add_library(
   timestamp.cc
   utility.cc
 )
+else()
+add_library(
+  edge_epi
+  arrays.cc
+  bytearray.cc
+  epi_linux.cc
+  exe_path.cc
+  file_memory.cc
+  file_sub.cc
+  file.cc
+  filesystem_linux.cc
+  filesystem.cc
+  image_data.cc
+  image_hq2x.cc
+  image_jpeg.cc
+  image_png.cc
+  image_tga.cc
+  math_angle.cc
+  math_bbox.cc
+  math_color.cc
+  math_crc.cc
+  math_matrix.cc
+  math_md5.cc
+  math_oddity.cc
+  math_random.cc
+  math_vector.cc
+  mersenne_twist.cc
+  mus_2_midi.cc
+  path.cc
+  sound_data.cc
+  sound_gather.cc
+  sound_wav.cc
+  str_format.cc
+  timestamp.cc
+  utility.cc
+)
+endif()
 
 target_include_directories(edge_epi PRIVATE ../libjpeg/libjpeg)
 target_include_directories(edge_epi PRIVATE ../libpng)

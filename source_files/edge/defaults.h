@@ -113,7 +113,7 @@
 #define CFGDEF_MLOOK            (1)
 #define CFGDEF_JUMP             (1)
 #define CFGDEF_CROUCH           (1)
-#define CFGDEF_KICKING          (0)
+#define CFGDEF_KICKING          (1)
 #define CFGDEF_WEAPON_SWITCH    (1)
 #define CFGDEF_MORE_BLOOD       (0)
 #define CFGDEF_HAVE_EXTRA       (0)

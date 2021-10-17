@@ -10,7 +10,6 @@ debug.txt
 *.dll
 doom_ddf/
 edge.cfg
-edge.wad
 
 # EDGE game folders
 /screenshot

@@ -1,6 +1,6 @@
 # VS Code
 .vscode/
-./build/
+/build/
 cache/
 
 # Main program/DLLs

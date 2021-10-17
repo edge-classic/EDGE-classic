@@ -132,12 +132,15 @@ add_executable(
 	source_files/edge/w32_mus.cc
 	source_files/edge/w32_music.cc
 	source_files/edge/w32_net.cc
+	source_files/edge/w32_res.rc
 	source_files/edge/w32_system.cc
 )
 
 # I imagine these will be used instead in non-MSYS environments - Dasho
 #find_package(PNG REQUIRED)
 #find_package(JPEG REQUIRED)
+#find_package(ZLIB REQUIRED)
+#find_package(GLEW REQUIRED)
 
 find_package(Ogg REQUIRED)
 find_package(Vorbis REQUIRED)

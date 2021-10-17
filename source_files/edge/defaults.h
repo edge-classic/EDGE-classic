@@ -84,7 +84,7 @@
 #ifdef LINUX
 #define CFGDEF_MUSIC_DEVICE     (1)  // Timidity
 #else
-#define CFGDEF_MUSIC_DEVICE     (0)  // System
+#define CFGDEF_MUSIC_DEVICE     (1)  // Timidity
 #endif
 
 // Video Options

@@ -311,8 +311,10 @@ target_link_libraries(
           edge_glbsp
 		  OpenGL
 		  ${GLEW_LIBRARIES}
-		  ${SDL_LIBRARIES}
-		  ${SDL_sound_LIBRARIES}
+		  SDL
+		  SDL_sound
+		  #${SDL_LIBRARIES}
+		  #${SDL_sound_LIBRARIES}
 		  vorbisfile
 		  ${PNG_LIBRARIES}
 		  ${JPEG_LIBRARIES}

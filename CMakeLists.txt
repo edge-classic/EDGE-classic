@@ -250,6 +250,7 @@ find_library(PNGLIB REQUIRED NAMES libpng16.a)
 find_library(JPEGLIB REQUIRED NAMES libjpeg.a)
 find_library(ZLIB REQUIRED NAMES libz.a)
 else()
+find_package(OpenGL REQUIRED)
 find_package(SDL_sound REQUIRED)
 find_package(PNG REQUIRED)
 find_package(JPEG REQUIRED)
@@ -308,7 +309,7 @@ target_link_libraries(
           edge_deh
           edge_epi
           edge_glbsp
-		  OpenGL
+		  ${OpenGL_LIBRARIES}
 		  ${GLEW_LIBRARIES}
 		  ${SDL_LIBRARIES}
 		  ${SDL_sound_LIBRARIES}

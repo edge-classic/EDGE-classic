@@ -309,7 +309,7 @@ target_link_libraries(
           edge_deh
           edge_epi
           edge_glbsp
-		  ${OpenGL_LIBRARIES}
+		  OpenGL
 		  ${GLEW_LIBRARIES}
 		  ${SDL_LIBRARIES}
 		  ${SDL_sound_LIBRARIES}

@@ -332,6 +332,7 @@ static void ReloadWeapon(player_t *p, int idx, int ATK)
 
 	SYS_ASSERT(qty > 0);
 
+	p->weapons[idx].reload_count[ATK] = qty;
 	p->weapons[idx].clip_size[ATK] += qty;
 	p->ammo[info->ammo[ATK]].num   -= qty;
 }
@@ -1588,6 +1589,36 @@ void A_WeaponJump(mobj_t * mo)
 			(states + psp->state->jumpstate);
 	}
 }
+
+void A_WeaponDJNE(mobj_t * mo)
+{
+	player_t *p = mo->player;
+	pspdef_t *psp = &p->psprites[p->action_psp];
+
+	weapondef_c *info = p->weapons[p->ready_wp].info;
+
+	act_jump_info_t *jump;
+
+	if (!psp->state || !psp->state->action_par)
+	{
+		M_WarnError("DJNE used in weapon [%s] without a label !\n",
+				info->name.c_str());
+		return;
+	}
+
+	jump = (act_jump_info_t *) psp->state->action_par;
+
+	SYS_ASSERT(jump->chance >= 0);
+	SYS_ASSERT(jump->chance <= 1);
+	int ATK = jump->chance > 0 ? 1 : 0;
+
+	if (--p->weapons[p->ready_wp].reload_count[ATK] > 0)
+	{
+		psp->next_state = (psp->state->jumpstate == S_NULL) ? NULL :
+			(states + psp->state->jumpstate);
+	}
+}
+
 
 
 void A_WeaponTransSet(mobj_t * mo)

@@ -87,7 +87,7 @@ function select_new_face() =
     // being attacked ?
     if (player.hurt_by())
     {
-        if (player.hurt_pain() > 50)
+        if (player.hurt_pain() > 20)
         {
             face_image = "STFOUCH" + pain_digit()
             face_time = 26

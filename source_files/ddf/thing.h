@@ -336,8 +336,10 @@ typedef enum
 
 	AM_9,  AM_10, AM_11, AM_12,
 	AM_13, AM_14, AM_15, AM_16,
+	AM_17, AM_18, AM_19, AM_20,
+	AM_21, AM_22, AM_23, AM_24,
 
-	NUMAMMO  // Total count (16)
+	NUMAMMO  // Total count (24)
 }
 ammotype_e;
 
@@ -811,6 +813,8 @@ public:
 	struct sfx_s *noway_sound;
 	struct sfx_s *oof_sound;
 	struct sfx_s *gasp_sound;
+	struct sfx_s *secretsound;
+	struct sfx_s *falling_sound;
 
 	int fuse;
 	int reload_shots;

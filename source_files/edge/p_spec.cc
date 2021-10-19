@@ -1492,6 +1492,11 @@ static inline void PlayerInProperties(player_t *player,
 	{
 		player->secretcount++;
 
+		CON_Message("You found a Secret!");
+		S_StartFX(player->mo->info->secretsound,
+				P_MobjGetSfxCategory(player->mo),
+				player->mo);
+		
 		props->type = 0;
 		props->special = NULL;
 	}

@@ -170,7 +170,7 @@ static default_t defaults[] =
     {CFGT_Int,      "var_sidespeed",     &var_sidespeed,    CFGDEF_SIDEMOVESPEED},
     {CFGT_Int,      "var_flyspeed",      &var_flyspeed,     CFGDEF_SIDEMOVESPEED},
 
-    {CFGT_Int,      "joystick_device",   &joystick_device, 0},
+    {CFGT_Int,      "joystick_device",   &joystick_device, 1},
     {CFGT_Int,      "joy_axis1",         &joy_axis[0],    CFGDEF_JOY_XAXIS},
     {CFGT_Int,      "joy_axis2",         &joy_axis[1],    CFGDEF_JOY_YAXIS},
     {CFGT_Int,      "joy_axis3",         &joy_axis[2],    AXIS_DISABLE},

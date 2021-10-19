@@ -112,6 +112,29 @@ static void CalcHeight(player_t * player)
 		}
 	}
 
+
+	//----CALCULATE FREEFALL EFFECT, WITH SOUND EFFECTS (code based on HEXEN)
+	//  CORBIN, on:
+	//  6/6/2011 - Fix this so RTS does NOT interfere with fracunits (it does in Hypertension's E1M1 starting script)!
+    //  6/7/2011 - Ajaped said to remove FRACUNIT...seeya oldness.
+
+	//if ((player->mo->mom.z <= -35.0)&&(player->mo->mom.z >= -40.0))
+	if ((player->mo->mom.z <= -35.0)&&(player->mo->mom.z >= -36.0))
+	if (player->mo->info->falling_sound)
+	{
+	    int sfx_cat;
+
+		if (player == players[consoleplayer])
+			sfx_cat = SNCAT_Player;
+		else
+			sfx_cat = SNCAT_Opponent;
+
+			{
+					S_StartFX(player->mo->info->falling_sound, sfx_cat, player->mo);
+			}
+	}
+
+
 	// don't apply bobbing when jumping, but have a smooth
 	// transition at the end of the jump.
 	if (player->jumpwait > 0)

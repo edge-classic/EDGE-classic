@@ -89,6 +89,9 @@ typedef struct
 
 	// current clip sizes
 	int clip_size[2];
+	
+	// reload clip counts
+	int reload_count[2];
 
 	int model_skin;
 }

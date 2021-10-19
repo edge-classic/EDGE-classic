@@ -708,7 +708,7 @@ void R_PaletteStuff(void)
 	if (cnt)
 	{
 		palette = PALETTE_PAIN;
-		amount = (cnt + 7) / 64.0f;
+		amount = (cnt + 7) / 160.0f; //64.0f;
 	}
 	else if (p->bonuscount)
 	{

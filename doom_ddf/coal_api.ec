@@ -97,6 +97,23 @@ module strings
 }
 
 
+//dummy function just to shut up any 2.x mod
+module cam
+{
+    var bob_z_scale
+	var bob_r_scale
+	
+	function set_vert_bob (bob_z_scale : float) = 
+	{ 
+		bob_z_scale = 0 
+	}
+	function set_roll_bob (bob_r_scale : float) = 
+	{ 
+		bob_r_scale = 0
+	}
+}
+
+
 // HUD LIBRARY
 
 module hud

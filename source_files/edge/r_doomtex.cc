@@ -118,31 +118,28 @@ static byte dummy_graphic[DUMMY_X * DUMMY_Y] =
 #define GAMMA_GRN(pix)  GAMMA_CONV(PIXEL_GRN(pix))
 #define GAMMA_BLU(pix)  GAMMA_CONV(PIXEL_BLU(pix))
 
-//
-// DrawColumnIntoBlock
-//
-// Clip and draw an old-style column from a patch into a block.
-//
+
 static void DrawColumnIntoEpiBlock(image_c *rim, epi::image_data_c *img,
-   const column_t *patchcol, int x, int y)
+	const column_t *patchcol, int x, int y)
 {
 	SYS_ASSERT(patchcol);
 
 	int w1 = rim->actual_w;
 	int h1 = rim->actual_h;
 	int w2 = rim->total_w;
-//	int h2 = rim->total_h;
+	//int h2 = rim->total_h;
 
 	// clip horizontally
 	if (x < 0 || x >= w1)
 		return;
 
-	while (patchcol->topdelta != P_SENTINEL)
+	while (patchcol->topdelta != 0xFF)
 	{
-		int top = y + (int) patchcol->topdelta;
+		int top = ((int)patchcol->topdelta <= y) ? y + (int)patchcol->topdelta : (int)patchcol->topdelta;
 		int count = patchcol->length;
+		y = top;
 
-		byte *src = (byte *) patchcol + 3;
+		byte *src = (byte *)patchcol + 3;
 		byte *dest = img->pixels + x;
 
 		if (top < 0)
@@ -161,10 +158,12 @@ static void DrawColumnIntoEpiBlock(image_c *rim, epi::image_data_c *img,
 				dest[(h1-1-top) * w2] = TRANS_REPLACE;
 			else
 				dest[(h1-1-top) * w2] = *src;
+
+
 		}
 
-		patchcol = (const column_t *) ((const byte *) patchcol + 
-									   patchcol->length + 4);
+		patchcol = (const column_t *)((const byte *)patchcol +
+			patchcol->length + 4);
 	}
 }
 
@@ -224,6 +223,24 @@ static epi::image_data_c *ReadFlatAsEpiBlock(image_c *rim)
 	}
 
 	W_DoneWithLump(src);
+
+	// CW: Textures MUST tile! If actual size not total size, manually tile
+	if (rim->actual_w != rim->total_w)
+	{
+		// tile horizontally
+		byte *buf = img->pixels;
+		for (int x = 0; x < (rim->total_w - rim->actual_w); x++)
+			for (int y = 0; y < rim->total_h; y++)
+				buf[y*rim->total_w + rim->actual_w + x] = buf[y*rim->total_w + x];
+	}
+	if (rim->actual_h != rim->total_h)
+	{
+		// tile vertically
+		byte *buf = img->pixels;
+		for (int y = 0; y < (rim->total_h - rim->actual_h); y++)
+			for (int x = 0; x < rim->total_w; x++)
+				buf[(rim->actual_h + y)*rim->total_w + x] = buf[y*rim->total_w + x];
+	}
 
 	return img;
 }
@@ -298,6 +315,24 @@ static epi::image_data_c *ReadTextureAsEpiBlock(image_c *rim)
 		}
 
 		W_DoneWithLump(realpatch);
+	}
+
+	// CW: Textures MUST tile! If actual size not total size, manually tile
+	if (rim->actual_w != rim->total_w)
+	{
+		// tile horizontally
+		byte *buf = img->pixels;
+		for (int x = 0; x < (rim->total_w - rim->actual_w); x++)
+			for (int y = 0; y < rim->total_h; y++)
+				buf[y*rim->total_w + rim->actual_w + x] = buf[y*rim->total_w + x];
+	}
+	if (rim->actual_h != rim->total_h)
+	{
+		// tile vertically
+		byte *buf = img->pixels;
+		for (int y = 0; y < (rim->total_h - rim->actual_h); y++)
+			for (int x = 0; x < rim->total_w; x++)
+				buf[(rim->actual_h + y)*rim->total_w + x] = buf[y*rim->total_w + x];
 	}
 
 	return img;
@@ -546,6 +581,38 @@ static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 	SYS_ASSERT(rim->total_w == img->width);
 	SYS_ASSERT(rim->total_h == img->height);
 
+	
+
+	// CW: Textures MUST tile! If actual size not total size, manually tile
+	if (img->bpp == 3)
+	{
+		if (rim->actual_w != rim->total_w)
+		{
+			// tile horizontally
+			byte *buf = img->pixels;
+			for (int x = 0; x < (rim->total_w - rim->actual_w); x++)
+				for (int y = 0; y < rim->total_h; y++)
+				{
+					buf[(y*rim->total_w + rim->actual_w + x) * 3] = buf[(y*rim->total_w + x) * 3];
+					buf[(y*rim->total_w + rim->actual_w + x) * 3 + 2] = buf[(y*rim->total_w + x) * 3 + 1];
+					buf[(y*rim->total_w + rim->actual_w + x) * 3 + 2] = buf[(y*rim->total_w + x) * 3 + 2];
+				}
+		}
+		if (rim->actual_h != rim->total_h)
+		{
+			// tile vertically
+			byte *buf = img->pixels;
+			for (int y = 0; y < (rim->total_h - rim->actual_h); y++)
+				for (int x = 0; x < rim->total_w; x++)
+				{
+					buf[((rim->actual_h + y)*rim->total_w + x) * 3] = buf[(y*rim->total_w + x) * 3];
+					buf[((rim->actual_h + y)*rim->total_w + x) * 3 + 1] = buf[(y*rim->total_w + x) * 3 + 1];
+					buf[((rim->actual_h + y)*rim->total_w + x) * 3 + 2] = buf[(y*rim->total_w + x) * 3 + 2];
+				}
+		}
+	}
+	
+	
 	return img;
 }
 

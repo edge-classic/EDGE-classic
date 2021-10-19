@@ -990,7 +990,7 @@ static void ShowDateAndVersion(void)
 
 	// 23-6-98 KM Changed to hex to allow versions such as 0.65a etc
 	I_Printf("EDGE v" EDGEVERSTR " compiled on " __DATE__ " at " __TIME__ "\n");
-	I_Printf("EDGE homepage is at http://edge.sourceforge.net/\n");
+	I_Printf("EDGE homepage is at https://github.com/dashodanger/EDGE-classic/\n");
 	I_Printf("EDGE is based on DOOM by id Software http://www.idsoftware.com/\n");
 
 #ifdef WIN32

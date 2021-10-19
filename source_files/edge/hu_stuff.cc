@@ -117,13 +117,27 @@ void HU_Drawer(void)
 {
 	CON_ShowFPS();
 
+	/*
 	if (message_on)
 	{
 		HUD_SetScale(0.8f);
 		HUD_DrawText(HU_MSGX, HU_MSGY, w_message.c_str());
 		HUD_SetScale();
 	}
-
+	*/
+	
+	if (message_on)
+	{
+		HUD_SetAlpha(1.0f); //r_textalpha, defaults to "1.0f";
+		HUD_SetScale(0.8f);	 //TODO: Should make this user-definable in the Options Menu.
+		HUD_SetAlignment(0, 0); //use this to set alignment?
+		//OLD. NON CENTERED. HUD_DrawText(HU_MSGX, HU_MSGY, w_message.c_str());
+		HUD_DrawText(160, 3, w_message.c_str()); //r_text_x = 160 - 3/ 2 (keep this 160 int), r_text_y = 3;
+		HUD_SetScale();
+		HUD_SetAlignment();
+		HUD_SetAlpha();
+	}
+	
 // TODO: chat messages
 }
 

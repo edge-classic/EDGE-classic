@@ -161,6 +161,8 @@ const commandlist_t thing_commands[] =
 	DF("NOWAY_SOUND", noway_sound, DDF_MainLookupSound),
 	DF("OOF_SOUND", oof_sound, DDF_MainLookupSound),
 	DF("GASP_SOUND", gasp_sound, DDF_MainLookupSound),
+	DF("SECRET_SOUND", secretsound, DDF_MainLookupSound),
+	DF("FALLING_SOUND", falling_sound, DDF_MainLookupSound),
 
 	DF("FLOAT_SPEED", float_speed, DDF_MainGetFloat),
 	DF("STEP_SIZE", step_size, DDF_MainGetFloat),
@@ -1825,6 +1827,8 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	noway_sound = src.noway_sound; 
 	oof_sound = src.oof_sound; 
 	gasp_sound = src.gasp_sound; 
+	secretsound = src.secretsound;
+	falling_sound = src.falling_sound;
 
     fuse = src.fuse; 
 	reload_shots = src.reload_shots;
@@ -1953,6 +1957,8 @@ void mobjtype_c::Default()
 	noway_sound = sfx_None;
 	oof_sound = sfx_None;
 	gasp_sound = sfx_None;
+	secretsound = sfx_None;
+	falling_sound = sfx_None;
 
     fuse = 0;
 	reload_shots = 5;

@@ -498,10 +498,11 @@ void M_ScreenShot(bool show_msg)
 	RGL_ReadScreen(0, 0, SCREENWIDTH, SCREENHEIGHT, img->PixelAt(0,0));
 
 	bool result;
-    if (png_scrshots)
+    if (png_scrshots) {
         result = epi::PNG_Save(fp, img);
-    else
+	} else {
         result = epi::JPEG_Save(fp, img);
+	}
 
 	if (show_msg)
 	{

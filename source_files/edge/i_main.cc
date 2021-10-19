@@ -41,8 +41,9 @@ int main(int argc, char *argv[])
     I_SetupSignalHandlers(allow_coredump);
 
 #ifdef WIN32
+	const char* title_string = "EDGE Engine";
 	// -AJA- give us a proper name in the Task Manager
-	SDL_RegisterApp(TITLE, 0, 0);
+	SDL_RegisterApp((char *)title_string, 0, 0);
 #endif
 
     I_CheckAlreadyRunning();

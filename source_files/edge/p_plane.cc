@@ -908,8 +908,7 @@ bool EV_ManualPlane(line_t * line, mobj_t * thing, const movplanedef_c * def)
 
     // if the sector has an active thinker, use it
     sector_t *sec = side ? line->frontsector : line->backsector;
-    if (!sec)
-        return false;
+    if (!sec) return false;
 
 	plane_move_t *pmov = def->is_ceiling ? sec->ceil_move : sec->floor_move;
 

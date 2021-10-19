@@ -246,10 +246,11 @@ void oggplayer_c::PostOpenInit()
     vorbis_inf = ov_info(&ogg_stream, -1);
 	SYS_ASSERT(vorbis_inf);
 
-    if (vorbis_inf->channels == 1)
+    if (vorbis_inf->channels == 1) {
         is_stereo = false;
-    else
+	} else {
         is_stereo = true;
+	}
     
 	// Loaded, but not playing
 	status = STOPPED;
@@ -480,8 +481,7 @@ void oggplayer_c::Resume()
 
 void oggplayer_c::Play(bool loop)
 {
-    if (status != NOT_LOADED && status != STOPPED)
-        return;
+    if (status != NOT_LOADED && status != STOPPED) return;
 
 	status = PLAYING;
 	looping = loop;

@@ -181,7 +181,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 		texture->patchcount = patchcount;
 
 		Z_StrNCpy(texture->name, mtexture->name, 8);
-		for (int i=0;i<strlen(texture->name);i++) {
+		for (size_t i=0;i<strlen(texture->name);i++) {
 			texture->name[i] = toupper(texture->name[i]);
 		}
 

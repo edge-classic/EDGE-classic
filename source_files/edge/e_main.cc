@@ -741,8 +741,7 @@ void InitDirectories(void)
         }
     }
 
-    if (home_dir.empty())
-        home_dir = "."; // Default to current directory
+    if (home_dir.empty()) home_dir = "."; // Default to current directory
 
 	// Get the Game Directory from parameter.
 	s = epi::GetResourcePath();
@@ -805,8 +804,7 @@ void InitDirectories(void)
 	// savegame directory
     save_dir = epi::PATH_Join(home_dir.c_str(), SAVEGAMEDIR);
 	
-    if (! epi::FS_IsDir(save_dir.c_str()))
-        epi::FS_MakeDir(save_dir.c_str());
+    if (! epi::FS_IsDir(save_dir.c_str())) epi::FS_MakeDir(save_dir.c_str());
 
 	SV_ClearSlot("current");
 

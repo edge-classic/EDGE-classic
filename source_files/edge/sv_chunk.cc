@@ -370,7 +370,7 @@ bool SV_PushReadChunk(const char *id)
 
 	strcpy(cur->s_mark, id);
 	strcpy(cur->e_mark, id);
-	for (int i=0;i<strlen(cur->e_mark);i++) {
+	for (size_t i=0; i < strlen(cur->e_mark); i++) {
 		cur->e_mark[i] = toupper(cur->e_mark[i]);
 	}
 
@@ -560,7 +560,7 @@ bool SV_PushWriteChunk(const char *id)
 
 	strcpy(cur->s_mark, id);
 	strcpy(cur->e_mark, id);
-	for (int i=0;i<strlen(cur->e_mark);i++) {
+	for (size_t i=0; i < strlen(cur->e_mark); i++) {
 		cur->e_mark[i] = toupper(cur->e_mark[i]);
 	}
 

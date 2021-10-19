@@ -813,18 +813,15 @@ void M_OptDrawer()
 	// -ACB- 1998/06/15 Calculate height for menu and then center it.
 	menutop = 68 - ((curr_menu->item_num * font_h) / 2);
 
-	if (curr_menu->key_page[0])
-		menutop = 9 * font_h / 2;
+	if (curr_menu->key_page[0]) menutop = 9 * font_h / 2;
 
+	const image_c *image;
 
-		const image_c *image;
+	if (! curr_menu->title_image) curr_menu->title_image = W_ImageLookup(curr_menu->title_name);
 
-		if (! curr_menu->title_image)
-			curr_menu->title_image = W_ImageLookup(curr_menu->title_name);
+	image = curr_menu->title_image;
 
-		image = curr_menu->title_image;
-
-		HUD_DrawImage(curr_menu->title_x, menutop, image);
+	HUD_DrawImage(curr_menu->title_x, menutop, image);
 
 
 	//now, draw all the menuitems

@@ -124,14 +124,12 @@ static void CalcHeight(player_t * player)
 	{
 	    int sfx_cat;
 
-		if (player == players[consoleplayer])
+		if (player == players[consoleplayer]) {
 			sfx_cat = SNCAT_Player;
-		else
+		} else {
 			sfx_cat = SNCAT_Opponent;
-
-			{
-					S_StartFX(player->mo->info->falling_sound, sfx_cat, player->mo);
-			}
+		}
+		S_StartFX(player->mo->info->falling_sound, sfx_cat, player->mo);
 	}
 
 

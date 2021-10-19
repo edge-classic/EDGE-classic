@@ -130,7 +130,7 @@ cvar_link_t  all_cvars[] =
 
 	/* Rendering Stuff */
 
-	{ "r_aspect",       &r_aspect,       "c",   "1.333" },
+	{ "r_aspect",       &r_aspect,       "c",   "1.777" },
 	{ "r_fov",          &r_fov,          "c",   "90" },
 	{ "r_zoomfov",      &r_zoomfov,      "c",   "10" },
 

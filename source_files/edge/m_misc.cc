@@ -117,7 +117,7 @@ static default_t defaults[] =
     {CFGT_Int,      "sound_stereo",      &var_sound_stereo, CFGDEF_SOUND_STEREO},
     {CFGT_Int,      "mix_channels",      &var_mix_channels, CFGDEF_MIX_CHANNELS},
     {CFGT_Int,      "quiet_factor",      &var_quiet_factor, CFGDEF_QUIET_FACTOR},
-    {CFGT_Int,      "timidity_quiet",    &var_timid_factor, CFGDEF_QUIET_FACTOR},
+    {CFGT_Int,      "timidity_quiet",    &var_timid_factor, CFGDEF_TIMID_FACTOR},
 
     {CFGT_Int,      "show_messages",     &showMessages,   CFGDEF_SHOWMESSAGES},
 
@@ -178,7 +178,7 @@ static default_t defaults[] =
     {CFGT_Int,      "joy_axis5",         &joy_axis[4],    AXIS_DISABLE},
     {CFGT_Int,      "joy_axis6",         &joy_axis[5],    AXIS_DISABLE},
 
-    {CFGT_Int,      "monitor_size",      &monitor_size,   0},
+    {CFGT_Int,      "monitor_size",      &monitor_size,   1},
     {CFGT_Int,      "screen_hud",        &screen_hud,     CFGDEF_SCREEN_HUD},
     {CFGT_Int,      "save_page",         &save_page, 0},
     {CFGT_Boolean,  "png_scrshots",      &png_scrshots,   CFGDEF_PNG_SCRSHOTS},

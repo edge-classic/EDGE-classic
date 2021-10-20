@@ -682,7 +682,7 @@ static void P_PortalEffect(line_t *ld)
 
 	if (ld->side[1])
 	{
-		I_Warning("Portal on line #%d disabled: Not one-sided!\n", ld - lines);
+		I_Warning("Portal on line #%d disabled: Not one-sided!\n", (int)(ld - lines));
 		return;
 	}
 
@@ -694,7 +694,7 @@ static void P_PortalEffect(line_t *ld)
 
 	if (ld->tag <= 0)
 	{
-		I_Warning("Portal on line #%d disabled: Missing tag.\n", ld - lines);
+		I_Warning("Portal on line #%d disabled: Missing tag.\n", (int)(ld - lines));
 		return;
 	}
 
@@ -715,7 +715,7 @@ static void P_PortalEffect(line_t *ld)
 
 		if (h1 < 1 || h2 < 1)
 		{
-			I_Warning("Portal on line #%d disabled: sector is closed.\n", ld - lines);
+			I_Warning("Portal on line #%d disabled: sector is closed.\n", (int)(ld - lines));
 			return;
 		}
 
@@ -730,13 +730,13 @@ static void P_PortalEffect(line_t *ld)
 
 		if (other->portal_pair)
 		{
-			I_Warning("Portal on line #%d disabled: Partner already a portal.\n", ld - lines);
+			I_Warning("Portal on line #%d disabled: Partner already a portal.\n", (int)(ld - lines));
 			return;
 		}
 
 		if (other->side[1])
 		{
-			I_Warning("Portal on line #%d disabled: Partner not one-sided.\n", ld - lines);
+			I_Warning("Portal on line #%d disabled: Partner not one-sided.\n", (int)(ld - lines));
 			return;
 		}
 
@@ -744,7 +744,7 @@ static void P_PortalEffect(line_t *ld)
 
 		if (h_ratio < 0.95f || h_ratio > 1.05f)
 		{
-			I_Warning("Portal on line #%d disabled: Partner is different height.\n", ld - lines);
+			I_Warning("Portal on line #%d disabled: Partner is different height.\n", (int)(ld - lines));
 			return;
 		}
 
@@ -752,7 +752,7 @@ static void P_PortalEffect(line_t *ld)
 
 		if (len_ratio < 0.95f || len_ratio > 1.05f)
 		{
-			I_Warning("Portal on line #%d disabled: Partner is different length.\n", ld - lines);
+			I_Warning("Portal on line #%d disabled: Partner is different length.\n", (int)(ld - lines));
 			return;
 		}
 
@@ -765,7 +765,7 @@ static void P_PortalEffect(line_t *ld)
 		return; // Success !!
 	}
 
-	I_Warning("Portal on line #%d disabled: Cannot find partner!\n", ld - lines);
+	I_Warning("Portal on line #%d disabled: Cannot find partner!\n", (int)(ld - lines));
 }
 
 
@@ -798,11 +798,11 @@ static slope_plane_t * DetailSlope_BoundIt(line_t *ld, sector_t *sec, float dz1,
 		}
 	}
 
-L_WriteDebug("DETAIL SLOPE in #%d: dists %1.3f -> %1.3f\n", sec - sectors, d_close, d_far);
+L_WriteDebug("DETAIL SLOPE in #%d: dists %1.3f -> %1.3f\n", (int)(sec - sectors), d_close, d_far);
 
 	if (d_far - d_close < 0.5)
 	{
-		I_Warning("Detail slope in sector #%d disabled: no area?!?\n", sec - sectors);
+		I_Warning("Detail slope in sector #%d disabled: no area?!?\n", (int)(sec - sectors));
 		return NULL;
 	}
 
@@ -823,7 +823,7 @@ static void DetailSlope_Floor(line_t *ld)
 {
 	if (! ld->side[1])
 	{
-		I_Warning("Detail slope on line #%d disabled: Not two-sided!\n", ld - lines);
+		I_Warning("Detail slope on line #%d disabled: Not two-sided!\n", (int)(ld - lines));
 		return;
 	}
 
@@ -834,7 +834,7 @@ static void DetailSlope_Floor(line_t *ld)
 
 	if (fabs(z1 - z2) < 0.5)
 	{
-		I_Warning("Detail slope on line #%d disabled: floors are same height\n", ld - lines);
+		I_Warning("Detail slope on line #%d disabled: floors are same height\n", (int)(ld - lines));
 		return;
 	}
 
@@ -848,7 +848,7 @@ static void DetailSlope_Floor(line_t *ld)
 
 	if (sec->f_slope)
 	{
-		I_Warning("Detail slope in sector #%d disabled: floor already sloped!\n", sec - sectors);
+		I_Warning("Detail slope in sector #%d disabled: floor already sloped!\n", (int)(sec - sectors));
 		return;
 	}
 
@@ -870,7 +870,7 @@ static void DetailSlope_Ceiling(line_t *ld)
 
 	if (fabs(z1 - z2) < 0.5)
 	{
-		I_Warning("Detail slope on line #%d disabled: ceilings are same height\n", ld - lines);
+		I_Warning("Detail slope on line #%d disabled: ceilings are same height\n", (int)(ld - lines));
 		return;
 	}
 
@@ -884,7 +884,7 @@ static void DetailSlope_Ceiling(line_t *ld)
 
 	if (sec->c_slope)
 	{
-		I_Warning("Detail slope in sector #%d disabled: ceiling already sloped!\n", sec - sectors);
+		I_Warning("Detail slope in sector #%d disabled: ceiling already sloped!\n", (int)(sec - sectors));
 		return;
 	}
 

@@ -82,8 +82,7 @@ file_c* FS_Open(const char *name, unsigned int flags)
         return NULL;
 
     FILE *fp = fopen(name, mode);
-    if (!fp)
-        return NULL;
+    if (!fp) return NULL;
 
 	return new ansi_file_c(fp);
 }

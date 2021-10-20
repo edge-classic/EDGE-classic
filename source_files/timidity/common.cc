@@ -182,7 +182,7 @@ void *safe_malloc(size_t count)
 {
 	if (count > (1<<21))
 	{
-		I_Error("Timidity felt like allocating %d bytes. This must be a bug.\n", count);
+		I_Error("Timidity felt like allocating %d bytes. This must be a bug.\n", (int)count);
 		/* NOT REACHED */
 	}
 
@@ -190,7 +190,7 @@ void *safe_malloc(size_t count)
 
 	if (! p)
 	{
-		I_Error("Timidity: Couldn't malloc %d bytes.\n", count);
+		I_Error("Timidity: Couldn't malloc %d bytes.\n", (int)count);
 		/* NOT REACHED */
 	}
 

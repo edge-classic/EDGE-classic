@@ -720,21 +720,21 @@ static void TabComplete(void)
 
 	if (match_vars.size() > 0)
 	{
-		CON_Printf("%u Possible variables:\n", match_vars.size());
+		CON_Printf("%u Possible variables:\n", (int)match_vars.size());
 
 		ListCompletions(match_vars, input_pos, 7, RGB_MAKE(0,208,72));
 	}
 
 	if (match_keys.size() > 0)
 	{
-		CON_Printf("%u Possible keys:\n", match_keys.size());
+		CON_Printf("%u Possible keys:\n", (int)match_keys.size());
 
 		ListCompletions(match_keys, input_pos, 4, RGB_MAKE(0,208,72));
 	}
 
 	if (match_cmds.size() > 0)
 	{
-		CON_Printf("%u Possible commands:\n", match_cmds.size());
+		CON_Printf("%u Possible commands:\n", (int)match_cmds.size());
 
 		ListCompletions(match_cmds, input_pos, 3, T_ORANGE);
 	}

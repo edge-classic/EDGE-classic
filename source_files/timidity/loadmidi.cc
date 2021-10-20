@@ -1117,7 +1117,7 @@ past_riff:
 					return 0;
 				}
 				else curr_track++;
-				break;
+			break;
 	}
 
 	int count;

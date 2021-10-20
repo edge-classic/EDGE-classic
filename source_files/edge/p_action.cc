@@ -1237,10 +1237,10 @@ static inline bool Weakness_CheckHit(mobj_t *target,
 	
 I_Debugf("Weakness_CheckHit: target=[%s] classes=0x%08x\n", target->info->name.c_str(), weak->classes); 
 
-	/*
+	
 	if (BITSET_EMPTY != (attack->attack_class & ~weak->classes))
 		return false;
-	*/
+	
 
 	if (target->height < 1)
 		return false;

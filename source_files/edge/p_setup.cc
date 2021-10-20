@@ -286,7 +286,7 @@ static void SegCommonStuff(seg_t *seg, int linedef  )
 	else
 	{
 		if (linedef >= numlines)  // sanity check
-			I_Error("Bad GWA file: seg #%d has invalid linedef.\n", seg - segs);
+			I_Error("Bad GWA file: seg #%d has invalid linedef.\n", (int)(seg - segs));
 
 		seg->miniseg = false;
 		seg->linedef = &lines[linedef];
@@ -299,7 +299,7 @@ static void SegCommonStuff(seg_t *seg, int linedef  )
 		seg->sidedef = seg->linedef->side[seg->side];
 
 		if (! seg->sidedef)
-			I_Error("Bad GWA file: missing side for seg #%d\n", seg - segs);
+			I_Error("Bad GWA file: missing side for seg #%d\n", (int)(seg - segs));
 
 		seg->frontsector = seg->sidedef->sector;
 

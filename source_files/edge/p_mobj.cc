@@ -90,8 +90,8 @@ void P_DumpMobjs(void)
 			mo, mo->next, mo->prev,
 			mo->info->name.c_str(),
 			mo->x, mo->y, mo->z,
-			mo->state ? mo->state - states : -1,
-			mo->next_state ? mo->next_state - states : -1,
+			(int)(mo->state ? mo->state - states : -1),
+			(int)(mo->next_state ? mo->next_state - states : -1),
 			mo->tics);
 	}
 

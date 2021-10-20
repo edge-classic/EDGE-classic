@@ -9,7 +9,7 @@ add_subdirectory(source_files/glew/build/cmake)
 add_subdirectory(source_files/timidity)
 
 project(
-  edge
+  edge135
   LANGUAGES CXX
   VERSION 0.1.0
 )
@@ -28,7 +28,7 @@ endif()
 
 if(MSYS OR MINGW OR WIN32)
 add_executable(
-  edge
+  edge135
 	source_files/edge/i_main.cc     
 	source_files/edge/i_ctrl.cc     
 	source_files/edge/i_video.cc    
@@ -135,7 +135,7 @@ add_executable(
 )
 else()
 add_executable(
-  edge
+  edge135
 	source_files/edge/i_main.cc     
 	source_files/edge/i_ctrl.cc     
 	source_files/edge/i_video.cc    
@@ -257,31 +257,31 @@ find_package(JPEG REQUIRED)
 find_package(ZLIB REQUIRED)
 endif()
 
-target_include_directories(edge PRIVATE source_files/coal)
-target_include_directories(edge PRIVATE source_files/ddf)
-target_include_directories(edge PRIVATE source_files/deh_edge)
-target_include_directories(edge PRIVATE source_files/epi)
-target_include_directories(edge PRIVATE source_files/glew/include/GL)
-target_include_directories(edge PRIVATE source_files/glbsp/src)
-target_include_directories(edge PRIVATE source_files/timidity)
+target_include_directories(edge135 PRIVATE source_files/coal)
+target_include_directories(edge135 PRIVATE source_files/ddf)
+target_include_directories(edge135 PRIVATE source_files/deh_edge)
+target_include_directories(edge135 PRIVATE source_files/epi)
+target_include_directories(edge135 PRIVATE source_files/glew/include/GL)
+target_include_directories(edge135 PRIVATE source_files/glbsp/src)
+target_include_directories(edge135 PRIVATE source_files/timidity)
 
 if(MINGW OR WIN32 OR MSYS)
-  target_compile_definitions(edge PRIVATE WIN32)
+  target_compile_definitions(edge135 PRIVATE WIN32)
 else()
-  target_compile_definitions(edge PRIVATE UNIX)
+  target_compile_definitions(edge135 PRIVATE UNIX)
 endif()
 
 # Copies executables to local install directory after build
 add_custom_command(
-  TARGET edge
+  TARGET edge135
   POST_BUILD
-  COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge>"
+  COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge135>"
           "${CMAKE_CURRENT_LIST_DIR}"
 )
 
 if(MSYS)
 target_link_libraries(
-  edge
+  edge135
   PRIVATE edge_coal
           edge_ddf
           edge_deh
@@ -303,7 +303,7 @@ target_link_libraries(
   )
 else()
 target_link_libraries(
-  edge
+  edge135
   PRIVATE edge_coal
           edge_ddf
           edge_deh

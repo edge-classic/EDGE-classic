@@ -4,7 +4,7 @@ project(
   VERSION 0.1.0
 )
 
-set(CMAKE_CXX_FLAGS "-DDEH_EDGE_PLUGIN")
+set(CMAKE_CXX_FLAGS "-O2 -ffast-math -fno-strict-aliasing -DINLINE_G=inline -Wall -DDEH_EDGE_PLUGIN")
 
 add_library(
   edge_deh

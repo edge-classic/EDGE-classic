@@ -4,7 +4,7 @@ project(
   VERSION 0.1.0
 )
 
-set(CMAKE_C_FLAGS "-DINLINE_G=inline -DGLBSP_PLUGIN")
+set(CMAKE_C_FLAGS "-O2 -ffast-math -fno-strict-aliasing -DINLINE_G=inline -DGLBSP_PLUGIN")
 
 add_library(
   edge_glbsp

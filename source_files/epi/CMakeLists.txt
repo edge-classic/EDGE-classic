@@ -4,7 +4,7 @@ project(
   VERSION 0.1.0
 )
 
-set(CMAKE_CXX_FLAGS "-DINLINE_G=inline")
+set(CMAKE_CXX_FLAGS "-O2 -ffast-math -fno-strict-aliasing -DINLINE_G=inline -Wall")
 
 if(MSYS)
 add_library(

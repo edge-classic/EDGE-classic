@@ -3,6 +3,11 @@ project(jpeg-cmake VERSION 1.1.0)
 
 set(CMAKE_C_FLAGS "-DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON -DBUILD_TESTS=OFF")
 
+if (UNIX)
+  find_package(JPEG REQUIRED)
+  return()
+endif()
+
 # Use configure_file insted of file(COPY)
 # to ensure files are updated in src directory
 configure_file(

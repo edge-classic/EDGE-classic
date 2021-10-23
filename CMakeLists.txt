@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12..3.20)
 
+list(PREPEND CMAKE_MODULE_PATH cmake)
+
 add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/deh_edge)

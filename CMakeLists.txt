@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12..3.20)
 
-list(PREPEND CMAKE_MODULE_PATH cmake)
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)

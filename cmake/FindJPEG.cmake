@@ -66,7 +66,7 @@ endforeach()
 if(NOT JPEG_LIBRARY)
   find_library(JPEG_LIBRARY_RELEASE NAMES ${jpeg_names} PATHS /lib /usr/lib NO_DEFAULT_PATH NAMES_PER_DIR)
   find_library(JPEG_LIBRARY_DEBUG NAMES ${jpeg_names_debug} PATHS /lib /usr/lib NO_DEFAULT_PATH NAMES_PER_DIR)
-  include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+  include(SelectLibraryConfigurations)
   select_library_configurations(JPEG)
   mark_as_advanced(JPEG_LIBRARY_RELEASE JPEG_LIBRARY_DEBUG)
 endif()
@@ -102,7 +102,7 @@ if(JPEG_INCLUDE_DIR)
   unset(_JPEG_CONFIG_HEADERS_DEBIAN)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(JPEG
   REQUIRED_VARS JPEG_LIBRARY JPEG_INCLUDE_DIR
   VERSION_VAR JPEG_VERSION)

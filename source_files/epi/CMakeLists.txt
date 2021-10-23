@@ -80,5 +80,5 @@ add_library(
 )
 endif()
 
-target_include_directories(edge_epi PRIVATE ../libjpeg/libjpeg)
+target_include_directories(edge_epi PRIVATE ../libjpeg)
 target_include_directories(edge_epi PRIVATE ../libpng)

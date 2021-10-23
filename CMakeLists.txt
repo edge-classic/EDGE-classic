@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12..3.20)
 
-list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+#list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
@@ -251,10 +251,6 @@ find_package(GLEW REQUIRED)
 
 if(NOT MSYS)
 find_package(OpenGL REQUIRED)
-find_package(SDL_sound REQUIRED)
-find_package(PNG REQUIRED)
-find_package(JPEG REQUIRED)
-find_package(ZLIB REQUIRED)
 endif()
 
 target_include_directories(edge135 PRIVATE source_files/coal)
@@ -263,7 +259,7 @@ target_include_directories(edge135 PRIVATE source_files/deh_edge)
 target_include_directories(edge135 PRIVATE source_files/epi)
 target_include_directories(edge135 PRIVATE source_files/glew/include/GL)
 target_include_directories(edge135 PRIVATE source_files/glbsp/src)
-target_include_directories(edge135 PRIVATE source_files/libjpeg/libjpeg)
+target_include_directories(edge135 PRIVATE source_files/libjpeg)
 target_include_directories(edge135 PRIVATE source_files/libogg/include/ogg)
 target_include_directories(edge135 PRIVATE source_files/libpng)
 target_include_directories(edge135 PRIVATE source_files/libvorbis/include/vorbis)
@@ -316,12 +312,14 @@ target_link_libraries(
           edge_glbsp
 		  OpenGL
 		  ${GLEW_LIBRARIES}
+		  Ogg::ogg
 		  SDL
-		  SDL_sound
+		  vorbis
 		  vorbisfile
-		  ${PNG_LIBRARIES}
-		  ${JPEG_LIBRARIES}
-		  ${ZLIB_LIBRARIES}
+		  vorbisenc
+		  png_static
+		  jpeg_static
+		  zlibstatic
 		  timidity
   )
 endif()

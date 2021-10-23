@@ -151,7 +151,7 @@ image_data_c *JPEG_Load(file_c *f, int read_flags)
 
 	JPEG::setup_epifile_src(&cinfo, f);
 
-	jpeg_read_header(&cinfo, 1);
+	jpeg_read_header(&cinfo, (boolean)1);
 
 	cinfo.quantize_colors = (boolean)FALSE;
 	cinfo.out_color_space = JCS_RGB;
@@ -211,7 +211,7 @@ bool JPEG_GetInfo(file_c *f, int *width, int *height, bool *solid)
 
 	JPEG::setup_epifile_src(&cinfo, f);
 
-	jpeg_read_header(&cinfo, 1);
+	jpeg_read_header(&cinfo, (boolean)1);
 
 	cinfo.quantize_colors = (boolean)FALSE;
 	cinfo.out_color_space = JCS_RGB;

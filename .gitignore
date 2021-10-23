@@ -6,6 +6,7 @@ cache/
 # Main program/DLLs
 /edge
 edge135.exe
+edge135
 edge.log
 debug.txt
 *.dll

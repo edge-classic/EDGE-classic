@@ -6,6 +6,7 @@ add_subdirectory(source_files/deh_edge)
 add_subdirectory(source_files/epi)
 add_subdirectory(source_files/glbsp)
 add_subdirectory(source_files/glew/build/cmake)
+add_subdirectory(source_files/libpng)
 add_subdirectory(source_files/libogg)
 add_subdirectory(source_files/libvorbis)
 add_subdirectory(source_files/timidity)
@@ -246,7 +247,6 @@ find_package(SDL REQUIRED)
 find_package(GLEW REQUIRED)
 
 if(MSYS)
-find_library(PNGLIB REQUIRED NAMES libpng16.a)
 find_library(JPEGLIB REQUIRED NAMES libjpeg.a)
 find_library(ZLIB REQUIRED NAMES libz.a)
 else()
@@ -264,6 +264,7 @@ target_include_directories(edge135 PRIVATE source_files/epi)
 target_include_directories(edge135 PRIVATE source_files/glew/include/GL)
 target_include_directories(edge135 PRIVATE source_files/glbsp/src)
 target_include_directories(edge135 PRIVATE source_files/libogg/include/ogg)
+target_include_directories(edge135 PRIVATE source_files/libpng)
 target_include_directories(edge135 PRIVATE source_files/libvorbis/include/vorbis)
 target_include_directories(edge135 PRIVATE source_files/timidity)
 
@@ -293,7 +294,7 @@ target_link_libraries(
 		  opengl32
 		  Ogg::ogg
 		  ${SDL_LIBRARIES}
-		  ${PNGLIB}
+		  png_static
 		  ${JPEGLIB}
 		  ${ZLIB}
 		  vorbis

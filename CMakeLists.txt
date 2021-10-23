@@ -11,6 +11,7 @@ add_subdirectory(source_files/libpng)
 add_subdirectory(source_files/libogg)
 add_subdirectory(source_files/libvorbis)
 add_subdirectory(source_files/timidity)
+add_subdirectory(source_files/zlib)
 
 project(
   edge135
@@ -18,7 +19,6 @@ project(
   VERSION 0.1.0
 )
 
-#set(CMAKE_MODULE_PATH cmake)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS "-O2 -ffast-math -fno-strict-aliasing -DINLINE_G=inline -Wall")
@@ -247,9 +247,7 @@ endif()
 find_package(SDL REQUIRED)
 find_package(GLEW REQUIRED)
 
-if(MSYS)
-find_library(ZLIB REQUIRED NAMES libz.a)
-else()
+if(NOT MSYS)
 find_package(OpenGL REQUIRED)
 find_package(SDL_sound REQUIRED)
 find_package(PNG REQUIRED)
@@ -268,6 +266,7 @@ target_include_directories(edge135 PRIVATE source_files/libogg/include/ogg)
 target_include_directories(edge135 PRIVATE source_files/libpng)
 target_include_directories(edge135 PRIVATE source_files/libvorbis/include/vorbis)
 target_include_directories(edge135 PRIVATE source_files/timidity)
+target_include_directories(edge135 PRIVATE source_files/zlib)
 
 if(MINGW OR WIN32 OR MSYS)
   target_compile_definitions(edge135 PRIVATE WIN32)
@@ -297,7 +296,7 @@ target_link_libraries(
 		  ${SDL_LIBRARIES}
 		  png_static
 		  jpeg_static
-		  ${ZLIB}
+		  zlibstatic
 		  vorbis
 		  vorbisfile
 		  vorbisenc

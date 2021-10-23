@@ -6,12 +6,14 @@ add_subdirectory(source_files/deh_edge)
 add_subdirectory(source_files/epi)
 add_subdirectory(source_files/glbsp)
 add_subdirectory(source_files/glew/build/cmake)
+add_subdirectory(source_files/timidity)
+if(MSYS OR MINGW OR WIN32)
 add_subdirectory(source_files/libjpeg)
 add_subdirectory(source_files/libpng)
 add_subdirectory(source_files/libogg)
 add_subdirectory(source_files/libvorbis)
-add_subdirectory(source_files/timidity)
 add_subdirectory(source_files/zlib)
+endif()
 
 project(
   edge135
@@ -247,7 +249,7 @@ endif()
 find_package(SDL REQUIRED)
 find_package(GLEW REQUIRED)
 
-if(NOT MSYS)
+if(NOT(MSYS OR MINGW OR WIN32))
 find_package(OpenGL REQUIRED)
 find_package(SDL_sound REQUIRED)
 find_package(PNG REQUIRED)
@@ -261,12 +263,14 @@ target_include_directories(edge135 PRIVATE source_files/deh_edge)
 target_include_directories(edge135 PRIVATE source_files/epi)
 target_include_directories(edge135 PRIVATE source_files/glew/include/GL)
 target_include_directories(edge135 PRIVATE source_files/glbsp/src)
+target_include_directories(edge135 PRIVATE source_files/timidity)
+if(MSYS OR MINGW OR WIN32)
 target_include_directories(edge135 PRIVATE source_files/libjpeg/libjpeg)
 target_include_directories(edge135 PRIVATE source_files/libogg/include/ogg)
 target_include_directories(edge135 PRIVATE source_files/libpng)
 target_include_directories(edge135 PRIVATE source_files/libvorbis/include/vorbis)
-target_include_directories(edge135 PRIVATE source_files/timidity)
 target_include_directories(edge135 PRIVATE source_files/zlib)
+endif()
 
 if(MINGW OR WIN32 OR MSYS)
   target_compile_definitions(edge135 PRIVATE WIN32)
@@ -282,7 +286,7 @@ add_custom_command(
           "${CMAKE_CURRENT_LIST_DIR}"
 )
 
-if(MSYS)
+if(MSYS OR MINGW OR WIN32)
 target_link_libraries(
   edge135
   PRIVATE edge_coal

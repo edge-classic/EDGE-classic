@@ -6,6 +6,7 @@ add_subdirectory(source_files/deh_edge)
 add_subdirectory(source_files/epi)
 add_subdirectory(source_files/glbsp)
 add_subdirectory(source_files/glew/build/cmake)
+add_subdirectory(source_files/libjpeg)
 add_subdirectory(source_files/libpng)
 add_subdirectory(source_files/libogg)
 add_subdirectory(source_files/libvorbis)
@@ -247,7 +248,6 @@ find_package(SDL REQUIRED)
 find_package(GLEW REQUIRED)
 
 if(MSYS)
-find_library(JPEGLIB REQUIRED NAMES libjpeg.a)
 find_library(ZLIB REQUIRED NAMES libz.a)
 else()
 find_package(OpenGL REQUIRED)
@@ -263,6 +263,7 @@ target_include_directories(edge135 PRIVATE source_files/deh_edge)
 target_include_directories(edge135 PRIVATE source_files/epi)
 target_include_directories(edge135 PRIVATE source_files/glew/include/GL)
 target_include_directories(edge135 PRIVATE source_files/glbsp/src)
+target_include_directories(edge135 PRIVATE source_files/libjpeg/libjpeg)
 target_include_directories(edge135 PRIVATE source_files/libogg/include/ogg)
 target_include_directories(edge135 PRIVATE source_files/libpng)
 target_include_directories(edge135 PRIVATE source_files/libvorbis/include/vorbis)
@@ -295,7 +296,7 @@ target_link_libraries(
 		  Ogg::ogg
 		  ${SDL_LIBRARIES}
 		  png_static
-		  ${JPEGLIB}
+		  jpeg_static
 		  ${ZLIB}
 		  vorbis
 		  vorbisfile

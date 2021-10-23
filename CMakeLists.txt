@@ -6,6 +6,8 @@ add_subdirectory(source_files/deh_edge)
 add_subdirectory(source_files/epi)
 add_subdirectory(source_files/glbsp)
 add_subdirectory(source_files/glew/build/cmake)
+add_subdirectory(source_files/libogg)
+add_subdirectory(source_files/libvorbis)
 add_subdirectory(source_files/timidity)
 
 project(
@@ -14,7 +16,7 @@ project(
   VERSION 0.1.0
 )
 
-set(CMAKE_MODULE_PATH cmake)
+#set(CMAKE_MODULE_PATH cmake)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS "-O2 -ffast-math -fno-strict-aliasing -DINLINE_G=inline -Wall")
@@ -244,8 +246,6 @@ find_package(SDL REQUIRED)
 find_package(GLEW REQUIRED)
 
 if(MSYS)
-find_package(Ogg REQUIRED)
-find_package(Vorbis REQUIRED)
 find_library(PNGLIB REQUIRED NAMES libpng16.a)
 find_library(JPEGLIB REQUIRED NAMES libjpeg.a)
 find_library(ZLIB REQUIRED NAMES libz.a)
@@ -263,6 +263,8 @@ target_include_directories(edge135 PRIVATE source_files/deh_edge)
 target_include_directories(edge135 PRIVATE source_files/epi)
 target_include_directories(edge135 PRIVATE source_files/glew/include/GL)
 target_include_directories(edge135 PRIVATE source_files/glbsp/src)
+target_include_directories(edge135 PRIVATE source_files/libogg/include/ogg)
+target_include_directories(edge135 PRIVATE source_files/libvorbis/include/vorbis)
 target_include_directories(edge135 PRIVATE source_files/timidity)
 
 if(MINGW OR WIN32 OR MSYS)
@@ -289,14 +291,14 @@ target_link_libraries(
           edge_glbsp
 		  glew_s
 		  opengl32
-		  ${Ogg_LIBRARIES}
+		  Ogg::ogg
 		  ${SDL_LIBRARIES}
 		  ${PNGLIB}
 		  ${JPEGLIB}
 		  ${ZLIB}
-		  Vorbis::vorbis
-		  Vorbis::vorbisfile
-		  Vorbis::vorbisenc
+		  vorbis
+		  vorbisfile
+		  vorbisenc
 		  timidity
 		  winmm
 		  wsock32
@@ -313,8 +315,6 @@ target_link_libraries(
 		  ${GLEW_LIBRARIES}
 		  SDL
 		  SDL_sound
-		  #${SDL_LIBRARIES}
-		  #${SDL_sound_LIBRARIES}
 		  vorbisfile
 		  ${PNG_LIBRARIES}
 		  ${JPEG_LIBRARIES}

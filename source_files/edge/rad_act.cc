@@ -644,7 +644,10 @@ void RAD_ActPlaySound(rad_trigger_t *R, void *param)
 	else
 		R->sfx_origin.z = ambient->z;
 
-	S_StartFX(ambient->sfx, SNCAT_Level, &R->sfx_origin, flags);
+	if (ambient->kind == PSOUND_BossMan) 
+		S_StartFX(ambient->sfx); //Lobo: want BOSSMAN to sound from the player
+	else
+		S_StartFX(ambient->sfx, SNCAT_Level, &R->sfx_origin, flags);
 }
 
 void RAD_ActKillSound(rad_trigger_t *R, void *param)

@@ -293,6 +293,10 @@ typedef enum
 
 	// -AJA- 2010/12/23: force models to tilt by viewangle
 	HF_TILT = (1 << 15),
+	
+	// -Lobo- 2021/10/24: immortal flag
+	HF_IMMORTAL = (1 << 16),
+	
 }
 mobjhyperflag_t;
 

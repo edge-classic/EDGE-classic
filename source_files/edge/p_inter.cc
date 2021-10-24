@@ -993,6 +993,10 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 		return;
 	}
 
+	// check for immortality
+	if (target->hyperflags & HF_IMMORTAL)
+		damage = 0.0f; //do no damage
+
 	// check for partial resistance against the attack
 	if (!weak_spot && damage >= 0.1f && inflictor && inflictor->currentattack &&
 		BITSET_EMPTY == (inflictor->currentattack->attack_class & ~target->info->resistance))

@@ -1316,6 +1316,7 @@ static specflags_t hyper_specials[] =
 	{"VAMPIRE", HF_VAMPIRE, 0},
 	{"AUTOAIM", HF_NO_AUTOAIM, 1},
 	{"TILT", HF_TILT, 0},
+	{"IMMORTAL", HF_IMMORTAL, 0},
 	{NULL, 0, 0}
 };
 

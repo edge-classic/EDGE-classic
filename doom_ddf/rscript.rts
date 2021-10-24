@@ -71,7 +71,7 @@ START_MAP map07
 // lower the outer walls when all Mancubi are killed
 
   RADIUS_TRIGGER 0 0 -1
-    WAIT_UNTIL_DEAD Mancubus
+	WAIT_UNTIL_DEAD Mancubus
     ACTIVATE_LINETYPE 38 666
   END_RADIUS_TRIGGER
 

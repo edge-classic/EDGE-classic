@@ -426,8 +426,11 @@ static void DDF_ParseVersion(const char *str, int len)
 	if (ddf_version < 123)
 		DDF_Error("Illegal #VERSION number: %s\n", str);
 
+	/*
 	if (ddf_version > engine_version)
 		DDF_Error("This version of EDGE cannot handle this DDF.\n");
+	
+	*/
 }
 
 

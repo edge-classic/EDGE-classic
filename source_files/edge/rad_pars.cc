@@ -790,8 +790,10 @@ static void RAD_ParseVersion(int pnum, const char **pars)
 
 	int rts_version = I_ROUND(vers * 100);
 
+	/*
 	if (rts_version > EDGEVER)
 		RAD_Error("This version of EDGE cannot handle this RTS script\n");
+	*/
 }
 
 static void RAD_ParseClearAll(int pnum, const char **pars)
@@ -1329,9 +1331,9 @@ static void RAD_ParseTip(int pnum, const char **pars)
 
 	if (pnum >= 5)
 	{
-		if (! tip->tip_graphic)
+		/*if (! tip->tip_graphic)
 			RAD_Error("%s: scale value only works with TIP_GRAPHIC.\n", pars[0]);
-
+		*/
 		RAD_CheckForFloat(pars[4], &tip->gfx_scale);
 	}
 

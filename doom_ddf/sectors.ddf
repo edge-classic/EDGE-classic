@@ -108,6 +108,19 @@ HUB=TRUE;
 //   Use -ecompat option for compatibility with old mods.
 //
 
+//Area in vacuum
+[50] 
+SPECIAL=AIRLESS;
+
+//Low Gravity area
+[65] 
+SPECIAL=SWIM;
+GRAVITY=0.5;
+FRICTION=0.9;
+DRAG=0.9; 
+
+
+
 // -- WATER --
 
 [4418] // EDGE Water Extrafloor Scroll/Push NORTH

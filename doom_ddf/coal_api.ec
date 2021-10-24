@@ -131,13 +131,18 @@ module hud
     constant BLACK  = '0 0 0'
     constant WHITE  = '255 255 255'
     constant RED    = '255 0 0'
+	constant LIGHTRED    = '220 0 0'
     constant GREEN  = '0 255 0'
+	constant LIGHTGREEN  = '0 255 144'
     constant BLUE   = '0 0 255'
+	constant LIGHTBLUE   = '0 0 255'
     constant YELLOW = '255 255 0'
     constant PURPLE = '255 0 255'
     constant CYAN   = '0 255 255'
     constant ORANGE = '255 160 0'
     constant GRAY   = '128 128 128'
+	constant LIGHTGRAY   = '192 192 192'
+
 
     // automap options
     constant AM_GRID     = 1   // also a color

@@ -1,7 +1,7 @@
 # EDGE-classic
-Fork of the EDGE 1.35 release
+Fork of the EDGE 1.35 release.
 
 # Current Status
-Main program builds under MSYS2 for Windows executables. Linux compilation is working as well, but there are likely some bugs to squash.
+Program builds successfully for both Windows and Linux. Windows executables are currently compiled using MSYS2.
 
-There is now an included soundfont and timidity.cfg for immediate use (Patches are derived from Deemster's SC-55 soundfont (https://www.vogons.org/viewtopic.php?f=9&t=45600))
+Please refer to CHANGELONG-135.1.txt for more detailed changes.

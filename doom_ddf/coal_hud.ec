@@ -169,6 +169,10 @@ function doom_little_ammo() =
 function doom_status_bar() =
 {
     hud.draw_image(  0, 168, "STBAR")
+	
+    hud.draw_image(  -83, 168, "STBARL") // Widescreen border
+    hud.draw_image(  320, 168, "STBARR") // Widescreen border
+	
     hud.draw_image( 90, 171, "STTPRCNT")
     hud.draw_image(221, 171, "STTPRCNT")
 
@@ -229,6 +233,133 @@ function doom_overlay_status() =
 }
 
 
+function new_overlay_status() = 
+ {
+	
+	if (player.has_key(1))
+		hud.draw_image(  86, 170, "STKEYS0")
+
+	if (player.has_key(2))
+		hud.draw_image(  86, 180, "STKEYS1")
+
+	if (player.has_key(3))
+		hud.draw_image(  86, 190, "STKEYS2")
+
+	if (player.has_key(5))
+		hud.draw_image(  96, 170, "STKEYS3")
+
+	if (player.has_key(6))
+		hud.draw_image(  96, 180, "STKEYS4")
+
+	if (player.has_key(7))
+		hud.draw_image(  96, 190, "STKEYS5")
+
+
+    hud.set_alpha(0.9) //**Alters Transparency of HUD Elements**
+    hud.text_font("BIG_DIGIT")
+	hud.set_scale(0.80)
+	
+    if (player.cur_weapon() == "PISTOL")
+    hud.draw_num2( 295, 180, 3, player.ammo(1))
+
+    if (player.cur_weapon() == "SHOTGUN")
+    hud.draw_num2( 295, 180, 3, player.main_ammo(1))
+
+    if (player.cur_weapon() == "SUPERSHOTGUN")
+    hud.draw_num2( 295, 180, 3, player.ammo(2))
+
+    if (player.cur_weapon() == "CHAINGUN")
+    hud.draw_num2( 295, 180, 3, player.main_ammo(1))
+
+    if (player.cur_weapon() == "ROCKET_LAUNCHER")
+    hud.draw_num2( 295, 180, 3, player.main_ammo(1))
+
+    if (player.cur_weapon() == "PLASMA_RIFLE")
+    hud.draw_num2( 295, 180, 3, player.main_ammo(1))
+
+    if (player.cur_weapon() == "BFG9000")
+    hud.draw_num2( 295, 180, 3, player.main_ammo(1))
+	
+	hud.text_color(hud.NO_COLOR)
+
+   if (player.health() < 35)
+        hud.text_color(hud.RED) 
+    else
+    if (player.health() < 65)
+        hud.text_color(hud.RED)
+    else
+    if (player.health() < 100)
+        hud.text_color(hud.RED)
+    else
+        hud.text_color(hud.RED)
+		
+	hud.set_scale(0.75)
+	hud.text_color(hud.NO_COLOR)
+	hud.draw_num2(60, 180, 3, player.health()) // 100
+	hud.text_color(hud.NO_COLOR)
+
+//start armour hud edits
+
+if (player.total_armor() > 0)
+{
+    hud.text_color(hud.NO_COLOR)
+
+    if (player.total_armor() <= 99)
+        hud.draw_image(3, 165, "ARM1A0")
+    else
+    if (player.total_armor() > 200)
+        hud.text_color(hud.NO_COLOR)
+    else
+    if (player.total_armor() > 300)
+        hud.text_color(hud.NO_COLOR)
+    else
+        hud.text_color(hud.NO_COLOR)
+    
+	hud.set_scale(0.75)
+    hud.draw_num2(60, 165, 3, player.total_armor())
+	
+		if (player.armor(1))
+	hud.draw_image(3, 165, "ARM1A0")
+	
+		if (player.armor(2))
+	hud.draw_image(3, 165, "ARM2A0")
+
+//end armour hud edits	
+}
+    hud.text_color(hud.NO_COLOR)
+
+    hud.text_font("DOOM")
+    hud.text_color(hud.WHITE)
+	
+    hud.set_scale(0.85) //scales medikit in hud
+    hud.draw_image(3, 180, "MEDIA0") //HEALTH GFX in HUD
+	hud.text_color(hud.NO_COLOR)
+
+
+    if (player.cur_weapon() == "PISTOL")
+    hud.draw_image(297, 180, "CLIPA0")
+
+    if (player.cur_weapon() == "SHOTGUN")
+    hud.draw_image(297, 180, "SHELA0")
+
+    if (player.cur_weapon() == "SUPERSHOTGUN")
+    hud.draw_image(297, 180, "SHELA0")
+
+    if (player.cur_weapon() == "CHAINGUN")
+    hud.draw_image(297, 180, "CLIPA0")
+
+    if (player.cur_weapon() == "ROCKET_LAUNCHER")
+    hud.draw_image(297, 175, "ROCKA0")
+
+    if (player.cur_weapon() == "PLASMA_RIFLE")
+    hud.draw_image(297, 180, "CELLA0")
+
+    if (player.cur_weapon() == "BFG9000")
+    hud.draw_image(297, 180, "CELLA0")
+
+}
+
+
 function doom_automap() =
 {
     // Background is already black, only need to use 'solid_box'
@@ -247,24 +378,27 @@ function doom_automap() =
 
 function edge_air_bar() =
 {
+	var TopX = 250
+	var TopY = 10
+	var BarHeight = 8
+	var BarLength = 51
+	var BarValue = 51
+	
+	
     if (player.health() <= 0)
         return
 
     if (! player.under_water())
         return
 
-    var air = player.air_in_lungs()
-
-    air = math.floor(1 + 21 * ((100 - air) / 100.1))
-
-    var barname : string;
-    
-    if (air < 10)
-        barname = "AIRBAR0" + air
-    else
-        barname = "AIRBAR" + air
-
-    hud.draw_image(0, 0, barname)
+	BarValue = math.floor(player.air_in_lungs() / 2)
+	
+    hud.thin_box(TopX, TopY, BarLength, BarHeight, hud.GRAY)
+	
+	if (BarValue > 1)
+	{
+		hud.gradient_box(TopX + 1, TopY + 1, BarValue - 1, BarHeight - 2, hud.BLUE, hud.LIGHTBLUE, hud.BLUE, hud.LIGHTBLUE)
+	}
 }
 
 
@@ -282,6 +416,8 @@ function draw_all() =
         doom_automap()
         return
     }
+	
+	
 
     // there are three standard HUDs
     var which = hud.which_hud() % 3
@@ -294,8 +430,10 @@ function draw_all() =
     if (which == 0)
         doom_status_bar()
     else if (which == 2)
-        doom_overlay_status()
-
-    edge_air_bar()
+        //doom_overlay_status()
+		new_overlay_status()
+		
+	edge_air_bar()
+    
 }
 

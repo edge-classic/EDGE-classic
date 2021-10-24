@@ -152,7 +152,8 @@ static void SendTip(rad_trigger_t *R, s_tip_t * tip, int slot)
 	current->tip_graphic = tip->tip_graphic ?
 		W_ImageLookup(tip->tip_graphic) : NULL;
 	current->playsound   = tip->playsound ? true : false;
-	current->scale       = tip->tip_graphic ? tip->gfx_scale : 1.0f;
+	//current->scale       = tip->tip_graphic ? tip->gfx_scale : 1.0f;
+	current->scale       = tip->gfx_scale;
 	current->fade_time   = 0;
 
 	// mark it as "set me up please"

@@ -228,6 +228,8 @@ gameflags_t;
 #define KEYD_JOY14      (0x110+14)
 #define KEYD_JOY15      (0x110+15)
 
+
+
 // -KM- 1998/09/27 Analogue binding, added a fly axis
 #define AXIS_DISABLE     0
 #define AXIS_TURN        1

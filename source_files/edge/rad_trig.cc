@@ -140,25 +140,50 @@ public:
 		HUD_Reset();
 
 		HUD_SetAlignment(0, -1);
-		HUD_SetTextColor(T_WHITE);  // TODO changeable
+		
 
 		float total_h = HUD_StringHeight(title.c_str());
 		total_h += HUD_FontHeight() * (NumChoices() + 1);
 
 		float y = 100 - total_h / 2.0f;
 
+		if (style->def->text[2].colmap)
+		{
+			HUD_SetTextColor(V_GetFontColor(style->def->text[2].colmap)); //LOBO: Use TITLE.COLOURMAP from styles.ddf
+		}
+		else
+		{	
+			HUD_SetTextColor(T_WHITE);  
+		}
+		HUD_SetScale(style->def->text[2].scale); //LOBO: Use TITLE.SCALE from styles.ddf
+		HUD_SetFont(style->fonts[2]); //LOBO: Use TITLE.FONT from styles.ddf
+		
 		HUD_DrawText(160, y, title.c_str());
+
+		HUD_SetScale();
+		HUD_SetFont();
+		HUD_SetTextColor();
 
 		y += HUD_StringHeight(title.c_str());
 		y += HUD_FontHeight();
 
-		HUD_SetTextColor(T_LTBLUE);  // TODO changeable
-
+		if (style->def->text[0].colmap)
+		{	
+			HUD_SetTextColor(V_GetFontColor(style->def->text[0].colmap)); //LOBO: Use TEXT.COLOURMAP from styles.ddf
+		}
+		else
+		{
+			HUD_SetTextColor(T_LTBLUE);
+		}
+		HUD_SetScale(style->def->text[0].scale); //LOBO: Use TEXT.SCALE from styles.ddf
+		HUD_SetFont(style->fonts[0]); //LOBO: Use TEXT.FONT from styles.ddf
+		
 		for (int c = 0; c < NumChoices(); c++, y += HUD_FontHeight())
 		{
 			HUD_DrawText(160, y, choices[c].c_str());
 		}
-
+		HUD_SetScale();
+		HUD_SetFont();
 		HUD_SetAlignment();
 		HUD_SetTextColor();
 	}
@@ -175,7 +200,7 @@ public:
 			return key - '0';
 
 		if (NumChoices() < 2 &&
-			(key == KEYD_SPACE || key == KEYD_ENTER || key == 'Y'))
+			(key == KEYD_SPACE || key == KEYD_ENTER || key == 'Y' || key == KEYD_JOY4))//LOBO: added a controller button
 			return 1;
 
 		return -1;  /* invalid */

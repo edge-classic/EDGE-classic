@@ -1,0 +1,91 @@
+
+CHANGELOG for EDGE 1.35.1 (since 1.35)
+====================================
+
+(Date: OCTOBER 2021)
+
+
+Bugs fixed
+----------
+
+- TuttiFrutti effect. When the texture was shorter than the wall it was being applied to, the blank space was either filled with black or left invisible causing all sorts of graphical anomalies.
+
+- OUCH face on the hud was using incorrect damage value.
+
+- Linetypes [268](Monster-only Silent Teleport W1 (Boom)) and [269](Monster-only Silent Teleport WR (Boom)) were incorrectly set as PUSH instead of WALK.
+
+
+General Improvements
+--------------------
+
++ Added more ammotypes:  Now we have from AMMO01 to AMMO24.
+
++ Ignore COAL bobbing commands "cam.set_vert_bob" and "cam.set_roll_bob"
+
++ Improved HUD: 
+  -Added widescreen status bar courtesy of CeeJay. 
+  -Revamped Overlay hud.
+
++ Lines.ddf
+  -Edited all Slider doors to use BDOPN sfx.
+  
++ Removed #VERSION check for both DDF and RTS. 
+
++ Made single option RTS MENUs respond to KEYD_JOY4 button.
+
++ Reduced Arachnotron width by 1. (Even though tecnically it is 64, this avoids issue with some pwads).
+
++ Reduced the lighting on several enemy attacks.
+
++ Default monitor ratio is set to 16:9 instead of 4:3 to accommodate most modern monitors.
+
++ Dynamic lighting and weapon kick are now on by default to better highlight some of EDGE's features.
+
+
+New Features
+------------
+
++ THINGS.DDF: FALLING_SOUND for the player when they fall long distances.
+
++ THINGS:DDF: SECRET_SOUND entry for the player which plays when he enters a sector marked SECRET. DSSECRET SFX from K8vavoom.
+
++ WEAPONS.DDF: new DJNE weapon action for more robust weapon reloading.
+Used just like JUMP(state_name:frame,xx%), but decrements the reload quantity for the specified attack and jumps if it's not zero. The jump chance is now interpreted as the attack specifier: 0% is the primary attack ammo, and non-zero percent is the secondary attack ammo.
+
++ Lines.ddf
+  -Edited all Slider doors to use BDOPN sfx.
+  -Added Hub Exit switches: [2000] to [2039]
+  -Added Transparent Thick Extrafloors (for glass effect): [600]Most transparent to [603]Least transparent
+
++ Sectors.ddf
+  -Added 2 new sector types: [50](Airless/Vacuum) and [65](Low Gravity)
+ 
++ Things.ddf
+  -Added several dynamic light sources:
+  [WHITE_LIGHT_FLOOR:7044] 
+  [YELLOW_LIGHT_FLOOR:7045]
+  [RED_LIGHT_FLOOR:7046]
+  [BLUE_LIGHT_FLOOR:7047]
+  [GREEN_LIGHT_FLOOR:7048]
+  [ORANGE_LIGHT_FLOOR:7049]
+     and
+  [WHITE_LIGHT_CEILING:7054]
+  [YELLOW_LIGHT_CEILING:7055]
+  [RED_LIGHT_CEILING:7056]
+  [BLUE_LIGHT_CEILING:7057]
+  [GREEN_LIGHT_CEILING:7058]
+  [ORANGE_LIGHT_CEILING:7059]
+  -Added the relevant entries for FALLING_SOUND and SECRET_SOUND to player thing.
+
++ Styles.ddf
+  -TITLE.COLOURMAP, TITLE.SCALE and TITLE.FONT will now affect the Title in an RTS MENU (via the MENU_STYLE RTS command).
+  -TEXT.COLOURMAP, TEXT.SCALE and TEXT.FONT will now affect the Options in an RTS MENU (via the MENU_STYLE RTS command).
+  
++ RTS
+  - Text TIPs now accept a 4th parameter (like TIP_GRAPHICs) which is the scaling to apply.
+
++ Timidity
+  - Roland SC-55 styled soundfont by Deemster (https://www.vogons.org/viewtopic.php?f=9&t=45600) and timidity.cfg are now included.
+Users with existing Timidity setups can remove or rename timidity.cfg accordingly if they prefer to use their existing soundfonts.
+  - Default sampling rate is 44Khz and quiet factor set to 'Soft' by default.
+  - Timidity is now the default music player for both Linux and Window builds.

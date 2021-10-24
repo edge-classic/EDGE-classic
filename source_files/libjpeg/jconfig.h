@@ -142,7 +142,7 @@ typedef unsigned char boolean;
  * your system can't cope with binary I/O to stdin/stdout.  See comments at
  * head of cjpeg.c or djpeg.c.
  */
-/* #undef TWO_FILE_COMMANDLINE */
+#define TWO_FILE_COMMANDLINE
 
 /* Define this if your system needs explicit cleanup of temporary files.
  * This is crucial under MS-DOS, where the temporary "files" may be areas

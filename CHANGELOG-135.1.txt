@@ -1,3 +1,4 @@
+https://github.com/dashodanger/EDGE-classic
 
 CHANGELOG for EDGE 1.35.1 (since 1.35)
 ====================================
@@ -25,6 +26,7 @@ General Improvements
 + Improved HUD: 
   -Added widescreen status bar courtesy of CeeJay. 
   -Revamped Overlay hud.
+  -Removed AIRBAR graphics from edge.wad and rewrote the coal function to not use them.
 
 + Lines.ddf
   -Edited all Slider doors to use BDOPN sfx.
@@ -41,13 +43,13 @@ General Improvements
 
 + Dynamic lighting and weapon kick are now on by default to better highlight some of EDGE's features.
 
-
 New Features
 ------------
 
-+ THINGS.DDF: FALLING_SOUND for the player when they fall long distances.
-
-+ THINGS:DDF: SECRET_SOUND entry for the player which plays when he enters a sector marked SECRET. DSSECRET SFX from K8vavoom.
++ THINGS.DDF: 
+  -FALLING_SOUND for the player when they fall long distances.
+  -SECRET_SOUND entry for the player which plays when he enters a sector marked SECRET. DSSECRET SFX from K8vavoom.
+  -New SPECIAL flag: IMMORTAL. This thing never recieves damage from any attacks, but will go into pain states etc as usual.
 
 + WEAPONS.DDF: new DJNE weapon action for more robust weapon reloading.
 Used just like JUMP(state_name:frame,xx%), but decrements the reload quantity for the specified attack and jumps if it's not zero. The jump chance is now interpreted as the attack specifier: 0% is the primary attack ammo, and non-zero percent is the secondary attack ammo.
@@ -83,9 +85,11 @@ Used just like JUMP(state_name:frame,xx%), but decrements the reload quantity fo
   
 + RTS
   - Text TIPs now accept a 4th parameter (like TIP_GRAPHICs) which is the scaling to apply.
+  - PLAYSOUND_BOSSMAN: sfx location now set on player.
 
 + Timidity
   - Roland SC-55 styled soundfont by Deemster (https://www.vogons.org/viewtopic.php?f=9&t=45600) and timidity.cfg are now included.
 Users with existing Timidity setups can remove or rename timidity.cfg accordingly if they prefer to use their existing soundfonts.
   - Default sampling rate is 44Khz and quiet factor set to 'Soft' by default.
-  - Timidity is now the default music player for both Linux and Window builds.
+  - Timidity is now the default music player for both Linux and Window builds.  
+  

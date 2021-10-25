@@ -43,6 +43,7 @@ General Improvements
 
 + Dynamic lighting and weapon kick are now on by default to better highlight some of EDGE's features.
 
+
 New Features
 ------------
 

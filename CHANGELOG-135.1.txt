@@ -15,6 +15,8 @@ Bugs fixed
 
 - Linetypes [268](Monster-only Silent Teleport W1 (Boom)) and [269](Monster-only Silent Teleport WR (Boom)) were incorrectly set as PUSH instead of WALK.
 
+- Longstanding bug where melee attacks against a thing with NO_AUTOAIM flag would result in no sfx being played.
+
 
 General Improvements
 --------------------

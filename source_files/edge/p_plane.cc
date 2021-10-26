@@ -1218,7 +1218,12 @@ bool EV_DoSlider(line_t * door, line_t *act_line, mobj_t * thing,
 
     P_AddActiveSlider(smov);
 
-    S_StartFX(special->s.sfx_start, SNCAT_Level, &sec->sfx_origin);
+    //Lobo: SFX_OPEN would not play for monsters.
+    //Going forward, I think it's better just to use SFX_OPEN and SFX_CLOSE
+    //and quietly forget about SFX_START.
+
+    //S_StartFX(special->s.sfx_start, SNCAT_Level, &sec->sfx_origin);
+    S_StartFX(special->s.sfx_open, SNCAT_Level, &sec->sfx_origin);
 
 	return true;
 }

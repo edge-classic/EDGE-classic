@@ -710,6 +710,10 @@ static void AM_WalkSeg(seg_t *seg)
 			{
 				DrawMLine(&l, am_colors[AMCOL_Allmap]);
 			}
+			else if (line->slide_door)
+			{ //Lobo: draw sliding doors on automap
+				DrawMLine(&l, am_colors[AMCOL_Ceil]);
+			}
 		}
 	}
 	else if (f_focus->player && (show_allmap || f_focus->player->powers[PW_AllMap] != 0))

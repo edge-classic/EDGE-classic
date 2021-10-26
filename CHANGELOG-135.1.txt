@@ -15,6 +15,10 @@ Bugs fixed
 
 - Linetypes [268](Monster-only Silent Teleport W1 (Boom)) and [269](Monster-only Silent Teleport WR (Boom)) were incorrectly set as PUSH instead of WALK.
 
+- Longstanding bug where melee attacks against a thing with NO_AUTOAIM flag would result in no sfx being played.
+
+- Sliding doors activated by monsters now make the appropriate SFX.
+
 
 General Improvements
 --------------------
@@ -42,6 +46,8 @@ General Improvements
 + Default monitor ratio is set to 16:9 instead of 4:3 to accommodate most modern monitors.
 
 + Dynamic lighting and weapon kick are now on by default to better highlight some of EDGE's features.
+
++ Sliding doors now show on the Automap. 
 
 
 New Features

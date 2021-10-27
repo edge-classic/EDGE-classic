@@ -1206,7 +1206,8 @@ static bool PTR_AimTraverse(intercept_t * in, void *dataptr)
 	if (! (mo->flags & MF_SHOOTABLE))
 		return true;  // has to be able to be shot
 	
-	
+	if (mo->hyperflags & HF_NO_AUTOAIM)
+		return true;  // never should be aimed at
 
 	if (aim_I.source && !aim_I.forced && (aim_I.source->side & mo->side) != 0)
 		return true;  // don't aim at our good friend
@@ -1229,16 +1230,7 @@ static bool PTR_AimTraverse(intercept_t * in, void *dataptr)
 	if (thingbottomslope < aim_I.bottomslope)
 		thingbottomslope = aim_I.bottomslope;
 
-	if (mo->hyperflags & HF_NO_AUTOAIM)
-	{
-		//Lobo: never should be aimed at
-		aim_I.slope = M_Tan(mo->vertangle);
-	}
-	else
-	{
-		aim_I.slope = (thingtopslope + thingbottomslope) / 2;
-	}
-	
+	aim_I.slope = (thingtopslope + thingbottomslope) / 2;
 	aim_I.target = mo;
 
 	return false;  // don't go any farther

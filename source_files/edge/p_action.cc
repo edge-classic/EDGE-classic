@@ -1235,8 +1235,10 @@ static inline bool Weakness_CheckHit(mobj_t *target,
 	if (weak->classes == BITSET_EMPTY)
 		return false;
 	
-I_Debugf("Weakness_CheckHit: target=[%s] classes=0x%08x\n", target->info->name.c_str(), weak->classes); 
-
+	if(!attack) //Lobo: This fixes the long standing bug where EDGE crashes out sometimes.
+	{
+		return false; 
+	}
 	
 	if (BITSET_EMPTY != (attack->attack_class & ~weak->classes))
 		return false;
@@ -1245,6 +1247,8 @@ I_Debugf("Weakness_CheckHit: target=[%s] classes=0x%08x\n", target->info->name.c
 	if (target->height < 1)
 		return false;
 
+I_Debugf("Weakness_CheckHit: target=[%s] classes=0x%08x\n", target->info->name.c_str(), weak->classes); 	
+	
 	// compute vertical position.  Clamping it means that a missile
 	// which hits the target on the head (coming sharply down) will
 	// still register as a head-shot.

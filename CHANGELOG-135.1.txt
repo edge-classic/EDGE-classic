@@ -89,6 +89,7 @@ Used just like JUMP(state_name:frame,xx%), but decrements the reload quantity fo
 + Styles.ddf
   -TITLE.COLOURMAP, TITLE.SCALE and TITLE.FONT will now affect the Title in an RTS MENU (via the MENU_STYLE RTS command).
   -TEXT.COLOURMAP, TEXT.SCALE and TEXT.FONT will now affect the Options in an RTS MENU (via the MENU_STYLE RTS command).
+  -BACKGROUND images are now centered and obey scaling defined either in styles.ddf or images.ddf.
   
 + RTS
   - Text TIPs now accept a 4th parameter (like TIP_GRAPHICs) which is the scaling to apply.

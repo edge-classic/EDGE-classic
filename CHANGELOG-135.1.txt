@@ -17,6 +17,8 @@ Bugs fixed
 
 - Sliding doors activated by monsters now make the appropriate SFX.
 
+- Crash-to-desktop bug when using WEAKNESS class finally fixed.
+
 
 General Improvements
 --------------------

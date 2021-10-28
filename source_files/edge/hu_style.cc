@@ -68,7 +68,7 @@ void style_c::Load()
 void style_c::DrawBackground()
 {
 	float alpha = PERCENT_2_FLOAT(def->bg.translucency);
-
+	
 	if (alpha < 0.02)
 		return;
 
@@ -83,6 +83,12 @@ void style_c::DrawBackground()
 		return;
 	}
 
+	//Lobo: calculate centering on screen
+	float CenterX = 0;
+
+	CenterX = 160;
+	CenterX -= (bg_image->actual_w * bg_image->scale_x)/ 2;
+
 	if (def->special & (SYLSP_Tiled | SYLSP_TiledNoScale))
 	{
 		HUD_SetScale(def->bg.scale);
@@ -91,9 +97,14 @@ void style_c::DrawBackground()
 
 		HUD_SetScale();
 	}
-	else
+	else //Lobo: this is almost always the case
 	{
-		HUD_StretchImage(0, 0, 320, 200, bg_image);
+		HUD_SetScale(def->bg.scale);
+
+		//HUD_StretchImage(0, 0, 320, 200, bg_image);
+		HUD_DrawImage(CenterX, 0, bg_image);
+
+		HUD_SetScale();
 	}
 
 	HUD_SetAlpha();

@@ -141,6 +141,9 @@ public:
 
 		HUD_SetAlignment(0, -1);
 		
+		HUD_SetScale(style->def->text[2].scale); //LOBO: Use TITLE.SCALE from styles.ddf
+		HUD_SetFont(style->fonts[2]); //LOBO: Use TITLE.FONT from styles.ddf
+		
 
 		float total_h = HUD_StringHeight(title.c_str());
 		total_h += HUD_FontHeight() * (NumChoices() + 1);
@@ -155,14 +158,16 @@ public:
 		{	
 			HUD_SetTextColor(T_WHITE);  
 		}
-		HUD_SetScale(style->def->text[2].scale); //LOBO: Use TITLE.SCALE from styles.ddf
-		HUD_SetFont(style->fonts[2]); //LOBO: Use TITLE.FONT from styles.ddf
 		
 		HUD_DrawText(160, y, title.c_str());
 
 		HUD_SetScale();
 		HUD_SetFont();
 		HUD_SetTextColor();
+
+		HUD_SetScale(style->def->text[0].scale); //LOBO: Use TEXT.SCALE from styles.ddf
+		HUD_SetFont(style->fonts[0]); //LOBO: Use TEXT.FONT from styles.ddf
+		
 
 		y += HUD_StringHeight(title.c_str());
 		y += HUD_FontHeight();
@@ -175,8 +180,6 @@ public:
 		{
 			HUD_SetTextColor(T_LTBLUE);
 		}
-		HUD_SetScale(style->def->text[0].scale); //LOBO: Use TEXT.SCALE from styles.ddf
-		HUD_SetFont(style->fonts[0]); //LOBO: Use TEXT.FONT from styles.ddf
 		
 		for (int c = 0; c < NumChoices(); c++, y += HUD_FontHeight())
 		{

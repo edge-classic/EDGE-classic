@@ -384,8 +384,11 @@ abstract_music_c * S_PlayTimidity(byte *data, int length, bool is_mus,
 
 	delete[] data;
 
-	if (! song)
-		I_Error("Timidity player: failed to load MIDI file!\n");
+	if (! song) //Lobo: quietly log it instead of completely exiting EDGE
+	{
+		I_Debugf("Timidity player: failed to load MIDI file!\n");
+		return NULL;
+	}
 
 	S_ChangeTimidQuiet();
 

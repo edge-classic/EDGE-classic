@@ -49,6 +49,8 @@ General Improvements
 
 + Sliding doors now show on the Automap. 
 
++ Quietly ignore music lumps which aren't MIDI/OGG instead of erroring out to Desktop.
+
 
 New Features
 ------------

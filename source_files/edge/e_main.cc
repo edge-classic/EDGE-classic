@@ -619,9 +619,13 @@ static const image_c *title_image = NULL;
 static void E_TitleDrawer(void)
 {
 	if (title_image)
-		HUD_StretchImage(0, 0, 320, 200, title_image);
+	{
+		HUD_DrawImageTitleWS(title_image); //Lobo: Widescreen titlescreen support
+	}	
 	else
+	{
 		HUD_SolidBox(0, 0, 320, 200, RGB_MAKE(64,64,64));
+	}
 }
 
 

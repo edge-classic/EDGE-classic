@@ -351,8 +351,19 @@ static void TextWrite(void)
 	if (finale_textback)
 	{
 		HUD_SetScale(finale_textbackscale);
-		//HUD_TileImage(0, 0, 320, 200, finale_textback);
-		HUD_TileImage(-240, 0, 820, 200, finale_textback); //Lobo: Widescreen support
+		
+		if (finale->text_flat[0])
+		{
+			//Lobo: if it's a flat, tile it
+  			HUD_TileImage(-240, 0, 820, 200, finale_textback); //Lobo: Widescreen support
+			//HUD_TileImage(0, 0, 320, 200, finale_textback);
+		}
+		else
+		{
+			//Lobo: if it's a normal graphic, no tile and center it
+			HUD_DrawImageTitleWS(finale_textback); //Lobo: Widescreen support
+			//HUD_TileImage(-240, 0, 820, 200, finale_textback); //Lobo: Widescreen support
+		}
 		HUD_SetScale();
 	}
 

@@ -351,7 +351,8 @@ static void TextWrite(void)
 	if (finale_textback)
 	{
 		HUD_SetScale(finale_textbackscale);
-		HUD_TileImage(0, 0, 320, 200, finale_textback);
+		//HUD_TileImage(0, 0, 320, 200, finale_textback);
+		HUD_TileImage(-240, 0, 820, 200, finale_textback); //Lobo: Widescreen support
 		HUD_SetScale();
 	}
 
@@ -645,7 +646,8 @@ static void CastDrawer(void)
 {
 	const image_c *image = W_ImageLookup("BOSSBACK");
 
-	HUD_StretchImage(0, 0, 320, 200, image);
+	HUD_DrawImageTitleWS(image); //Lobo: Widescreen support
+	//HUD_StretchImage(0, 0, 320, 200, image);
 
 	HUD_SetAlignment(0, -1);
 	HUD_SetTextColor(T_YELLOW);
@@ -785,7 +787,8 @@ void F_Drawer(void)
 			{
 				const image_c *image = W_ImageLookup(finale->pics[picnum]);
 
-				HUD_StretchImage(0, 0, 320, 200, image);
+				HUD_DrawImageTitleWS(image); //Lobo: Widescreen support
+				//HUD_StretchImage(0, 0, 320, 200, image);
 			}
 			break;
 

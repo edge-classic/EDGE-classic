@@ -1402,8 +1402,9 @@ void WI_Drawer(void)
 	} 
 	else
 	{
-		HUD_StretchImage(0, 0, 320, 200, bg_image);
-
+		//HUD_StretchImage(0, 0, 320, 200, bg_image);
+		HUD_DrawImageTitleWS(bg_image); //Lobo: Widescreen support
+		
 		for (int i = 0; i < worldint.numanims; i++)
 		{
 			wi_anim_c *a = &worldint.anims[i];

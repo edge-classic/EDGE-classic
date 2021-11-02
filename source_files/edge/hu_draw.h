@@ -88,6 +88,7 @@ void HUD_GradientBox(float x1, float y1, float x2, float y2, rgbcol_t *cols);
 // be specified individually.
 
 void HUD_DrawImage(float x, float y, const image_c *image);
+void HUD_DrawImageTitleWS(const image_c *image);
 void HUD_StretchImage(float x, float y, float w, float h, const image_c *image);
 void HUD_TileImage(float x, float y, float w, float h, const image_c *image,
 				   float offset_x = 0.0f, float offset_y = 0.0f);

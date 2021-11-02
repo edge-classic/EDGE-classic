@@ -9,7 +9,7 @@ CHANGELOG for EDGE 1.35.1 (since 1.35)
 Bugs fixed
 ----------
 
-- TuttiFrutti effect. When the texture was shorter than the wall it was being applied to, the blank space was either filled with black or left invisible causing all sorts of graphical anomalies.
+- TuttiFrutti effect. When the texture was shorter than the wall it was being applied to, the blank space was either filled with black or left invisible causing all sorts of graphical anomalies. Backported from EDGE 2.x branch.
 
 - OUCH face on the hud was using incorrect damage value.
 
@@ -51,16 +51,18 @@ General Improvements
 
 + Quietly ignore music lumps which aren't MIDI/OGG instead of erroring out to Desktop.
 
++ Reduced the red tint while using the berserk power up.
+
 
 New Features
 ------------
 
 + THINGS.DDF: 
-  -FALLING_SOUND for the player when they fall long distances.
-  -SECRET_SOUND entry for the player which plays when he enters a sector marked SECRET. DSSECRET SFX from K8vavoom.
+  -FALLING_SOUND for the player when they fall long distances. Backported from EDGE 2.x branch.
+  -SECRET_SOUND entry for the player which plays when he enters a sector marked SECRET. Backported from EDGE 2.x branch. DSSECRET SFX from K8vavoom.
   -New SPECIAL flag: IMMORTAL. This thing never recieves damage from any attacks, but will go into pain states etc as usual.
 
-+ WEAPONS.DDF: new DJNE weapon action for more robust weapon reloading.
++ WEAPONS.DDF: new DJNE weapon action for more robust weapon reloading. Backported from EDGE 2.x branch.
 Used just like JUMP(state_name:frame,xx%), but decrements the reload quantity for the specified attack and jumps if it's not zero. The jump chance is now interpreted as the attack specifier: 0% is the primary attack ammo, and non-zero percent is the secondary attack ammo.
 
 + Lines.ddf
@@ -102,4 +104,8 @@ Used just like JUMP(state_name:frame,xx%), but decrements the reload quantity fo
 Users with existing Timidity setups can remove or rename timidity.cfg accordingly if they prefer to use their existing soundfonts.
   - Default sampling rate is 44Khz and quiet factor set to 'Soft' by default.
   - Timidity is now the default music player for both Linux and Window builds.  
+  
++ Titlescreen and intermission are now Widescreen compatible with https://forum.zdoom.org/viewtopic.php?f=46&t=67843
+
+
   

@@ -355,6 +355,32 @@ void HUD_StretchImage(float x, float y, float w, float h, const image_c *img)
     HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha);
 }
 
+void HUD_DrawImageTitleWS(const image_c *title_image)
+{
+	
+	//Lobo: Widescreen titlescreen support.
+	//In the case of titlescreens we will ignore any scaling
+	//set in DDFImages and always calculate our own.
+	//This is to ensure that we always get 200 height.
+	//The width we don't care about, hence widescreen ;)
+	float TempWidth = 0;
+	float TempHeight = 0;
+	float TempScale = 0;
+	float CenterX = 0;
+
+	//1. Calculate scaling to apply.
+	TempScale = 200;
+	TempScale /= title_image->actual_h;
+	TempWidth = title_image->actual_w * TempScale;
+	TempHeight = title_image->actual_h * TempScale;
+	
+	//2. Calculate centering on screen.
+	CenterX = 160;
+	CenterX -= (title_image->actual_w * TempScale)/ 2;
+
+	//3. Draw it.
+	HUD_StretchImage(CenterX, 0, TempWidth, TempHeight, title_image);
+}
 
 void HUD_DrawImage(float x, float y, const image_c *img)
 {

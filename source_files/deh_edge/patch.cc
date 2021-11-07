@@ -1181,8 +1181,8 @@ namespace Patch
 			{
 				if (got_info)
 				{
-					SetErrorMsg("Patch format is specified twice.\n");
-					return DEH_E_ParseError;
+					// Dasho: Just ignore extra version declarations and continue loading?
+					continue;
 				}
 
 				got_info = true;

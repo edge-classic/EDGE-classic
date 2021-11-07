@@ -38,6 +38,7 @@
 #include "r_image.h"
 #include "r_sky.h"
 
+#include "f_interm.h" //Lobo: need this to get access to wi_stats
 
 extern coal::vm_c *ui_vm;
 
@@ -706,6 +707,65 @@ static void PL_hurt_angle(coal::vm_c *vm, int argc)
 }
 
 
+// player.kills()
+// Lobo: November 2021
+static void PL_kills(coal::vm_c *vm, int argc)
+{
+	vm->ReturnFloat(ui_player_who->killcount);
+}
+
+// player.secrets()
+// Lobo: November 2021
+static void PL_secrets(coal::vm_c *vm, int argc)
+{
+	vm->ReturnFloat(ui_player_who->secretcount);
+}
+
+// player.items()
+// Lobo: November 2021
+static void PL_items(coal::vm_c *vm, int argc)
+{
+	vm->ReturnFloat(ui_player_who->itemcount);
+}
+
+
+// player.map_enemies()
+// Lobo: November 2021
+static void PL_map_enemies(coal::vm_c *vm, int argc)
+{
+	vm->ReturnFloat(wi_stats.kills);
+}
+
+// player.map_secrets()
+// Lobo: November 2021
+static void PL_map_secrets(coal::vm_c *vm, int argc)
+{
+	vm->ReturnFloat(wi_stats.secret);
+}
+
+// player.map_items()
+// Lobo: November 2021
+static void PL_map_items(coal::vm_c *vm, int argc)
+{
+	vm->ReturnFloat(wi_stats.items);
+}
+
+
+// player.floor_flat()
+// Lobo: November 2021
+static void PL_floor_flat(coal::vm_c *vm, int argc)
+{
+	vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
+}
+
+// player.sector_tag()
+// Lobo: November 2021
+static void PL_sector_tag(coal::vm_c *vm, int argc)
+{
+	vm->ReturnFloat(ui_player_who->mo->subsector->sector->tag);
+}
+
+
 //------------------------------------------------------------------------
 
 
@@ -761,6 +821,16 @@ void VM_RegisterPlaysim()
     ui_vm->AddNativeFunction("player.hurt_pain",       PL_hurt_pain);
     ui_vm->AddNativeFunction("player.hurt_dir",        PL_hurt_dir);
     ui_vm->AddNativeFunction("player.hurt_angle",      PL_hurt_angle);
+
+	// Lobo: November 2021
+	ui_vm->AddNativeFunction("player.kills",      PL_kills);
+	ui_vm->AddNativeFunction("player.secrets",      PL_secrets);
+	ui_vm->AddNativeFunction("player.items",      PL_items);
+	ui_vm->AddNativeFunction("player.map_enemies",      PL_map_enemies);
+	ui_vm->AddNativeFunction("player.map_secrets",      PL_map_secrets);
+	ui_vm->AddNativeFunction("player.map_items",      PL_map_items);
+	ui_vm->AddNativeFunction("player.floor_flat",      PL_floor_flat);
+	ui_vm->AddNativeFunction("player.sector_tag",      PL_sector_tag);
 }
 
 

@@ -962,14 +962,18 @@ static void IdentifyVersion(void)
 // Add optional EWads (widepix, skyboxes, etc) - Dasho
 static void Add_Extras(void) {
 
-	const char *loaded_game = iwad_base.c_str();
+	std::string loaded_game = iwad_base;
+
+	for (size_t i = 0; i < loaded_game.size(); i++) {
+		loaded_game.at(i) = std::tolower(loaded_game.at(i));
+	}
 
 	const char *game_extras[] = { "base", "extras", NULL };
 
 	for (size_t i = 0; game_extras[i]; i++) {
 		if (game_extras[i]) {
 			std::string optwad = "edge_base\\";
-			optwad.append(loaded_game).append("_").append(game_extras[i]).append(".wad");
+			optwad.append(loaded_game.c_str()).append("_").append(game_extras[i]).append(".wad");
 			optwad = epi::PATH_Join(game_dir.c_str(), optwad.c_str());
 			if (epi::FS_Access(optwad.c_str(), epi::file_c::ACCESS_READ)) {
 				W_AddRawFilename(optwad.c_str(), FLKIND_PWad);

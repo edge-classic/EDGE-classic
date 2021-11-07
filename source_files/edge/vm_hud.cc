@@ -395,6 +395,59 @@ static void HD_draw_num2(coal::vm_c *vm, int argc)
 }
 
 
+//Lobo November 2021:  hud.draw_number(x, y, len, num, align_right)
+//
+static void HD_draw_number(coal::vm_c *vm, int argc)
+{
+	float x = *vm->AccessParam(0);
+	float y = *vm->AccessParam(1);
+
+	int len = (int) *vm->AccessParam(2);
+	int num = (int) *vm->AccessParam(3);
+	int align_right = (int) *vm->AccessParam(4);
+
+	if (len < 1 || len > 20)
+		I_Error("hud.draw_number: bad field length: %d\n", len);
+
+	bool is_neg = false;
+
+	if (num < 0 && len > 1)
+	{
+		is_neg = true; len--;
+	}
+
+	// build the integer backwards
+
+	char buffer[200];
+	char *pos = &buffer[sizeof(buffer)-4];
+
+	*--pos = 0;
+
+	if (num == 0)
+	{
+		*--pos = '0';
+	}
+	else
+	{
+		for (; num > 0 && len > 0; num /= 10, len--)
+			*--pos = '0' + (num % 10);
+
+		if (is_neg)
+			*--pos = '-';
+	}
+
+	if (align_right == 0)
+	{
+		HUD_DrawText(x, y, pos);
+	}
+	else
+	{
+		HUD_SetAlignment(+1, -1);
+		HUD_DrawText(x, y, pos);
+		HUD_SetAlignment();
+	}
+}
+
 // hud.render_world(x, y, w, h)
 //
 static void HD_render_world(coal::vm_c *vm, int argc)
@@ -571,6 +624,9 @@ void VM_RegisterHUD()
     ui_vm->AddNativeFunction("hud.draw_text",       HD_draw_text);
     ui_vm->AddNativeFunction("hud.draw_num2",       HD_draw_num2);
 
+	//Lobo: new function
+	ui_vm->AddNativeFunction("hud.draw_number",     HD_draw_number);
+	
     ui_vm->AddNativeFunction("hud.render_world",    HD_render_world);
     ui_vm->AddNativeFunction("hud.render_automap",  HD_render_automap);
 

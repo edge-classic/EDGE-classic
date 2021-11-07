@@ -946,7 +946,7 @@ static void IdentifyVersion(void)
 
     if (! epi::FS_Access(reqwad.c_str(), epi::file_c::ACCESS_READ))
     {
-        reqwad = epi::PATH_Join(game_dir.c_str(), "edge_wads\\" REQUIREDWAD "." EDGEWADEXT);
+        reqwad = epi::PATH_Join(game_dir.c_str(), REQUIREDWAD "." EDGEWADEXT);
 
         if (! epi::FS_Access(reqwad.c_str(), epi::file_c::ACCESS_READ))
         {
@@ -964,11 +964,11 @@ static void Add_Extras(void) {
 
 	const char *loaded_game = iwad_base.c_str();
 
-	const char *game_extras[] = { "widepix", "skyboxes", NULL };
+	const char *game_extras[] = { "base", "extras", NULL };
 
 	for (size_t i = 0; game_extras[i]; i++) {
 		if (game_extras[i]) {
-			std::string optwad = "edge_wads\\";
+			std::string optwad = "edge_base\\";
 			optwad.append(loaded_game).append("_").append(game_extras[i]).append(".wad");
 			optwad = epi::PATH_Join(game_dir.c_str(), optwad.c_str());
 			if (epi::FS_Access(optwad.c_str(), epi::file_c::ACCESS_READ)) {

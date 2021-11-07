@@ -626,6 +626,12 @@ void RAD_ActExitLevel(rad_trigger_t *R, void *param)
 		G_ExitLevel(exit->exittime);
 }
 
+//Lobo November 2021
+void RAD_ActExitGame(rad_trigger_t *R, void *param)
+{
+	G_DeferredEndGame();
+}
+
 void RAD_ActPlaySound(rad_trigger_t *R, void *param)
 {
 	s_sound_t *ambient = (s_sound_t *) param;

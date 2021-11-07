@@ -1290,6 +1290,14 @@ static void RAD_ParseExitLevel(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActExitLevel, exit);
 }
 
+//Lobo November 2021
+static void RAD_ParseExitGame(int pnum, const char **pars)
+{
+	// ExitGame to TitleScreen
+
+	AddStateToScript(this_rad, 0, RAD_ActExitGame, NULL);
+}
+
 static void RAD_ParseTip(int pnum, const char **pars)
 {
 	// Tip "<text>"
@@ -2256,6 +2264,7 @@ static const rts_parser_t radtrig_parsers[] =
 	{2, "JUMP",  2,3, RAD_ParseJump},
 	{2, "LABEL", 2,2, RAD_ParseLabel},
 	{2, "SLEEP", 1,1, RAD_ParseSleep},
+	{2, "EXITGAME", 1,1, RAD_ParseExitGame},
 	{2, "RETRIGGER", 1,1, RAD_ParseRetrigger},
 	{2, "CHANGE_TEX", 3,5, RAD_ParseChangeTex},
 	{2, "CHANGE_MUSIC", 2,2, RAD_ParseChangeMusic},

@@ -51,6 +51,7 @@ void RAD_ActThingEvent(rad_trigger_t *R, void *param);
 void RAD_ActSkill(rad_trigger_t *R, void *param);
 void RAD_ActGotoMap(rad_trigger_t *R, void *param);
 void RAD_ActExitLevel(rad_trigger_t *R, void *param);
+void RAD_ActExitGame(rad_trigger_t *R, void *param);
 void RAD_ActShowMenu(rad_trigger_t *R, void *param);
 void RAD_ActMenuStyle(rad_trigger_t *R, void *param);
 void RAD_ActJumpOn(rad_trigger_t *R, void *param);

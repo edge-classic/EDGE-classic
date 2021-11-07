@@ -46,6 +46,9 @@ module math
       return low + (high - low) * random()
     }
 
+	//Lobo: always a number between 0 and 10
+    	function random2() : float = native
+
     function getx(v : vector) : float = { return v * '1 0 0' }
     function gety(v : vector) : float = { return v * '0 1 0' }
     function getz(v : vector) : float = { return v * '0 0 1' }
@@ -197,6 +200,9 @@ module hud
     function draw_text(x, y, text : string) = native
     function draw_num2(x, y, w, num) = native
 
+	//Lobo: new function
+    function draw_number(x, y, len, num, align_right) = native
+
     function render_world(x, y, w, h)   = native
     function render_automap(x, y, w, h) = native
 
@@ -319,5 +325,15 @@ module player
     function hurt_pain()  : float = native
     function hurt_dir()   : float = native
     function hurt_angle() : float = native
+    
+    //Lobo 2021
+    function kills()      : float = native
+    function secrets()      : float = native
+    function items()      : float = native
+    function map_enemies()      : float = native
+    function map_secrets()      : float = native
+    function map_items()      : float = native
+    function floor_flat()      : string = native
+    function sector_tag()      : float = native
 }
 

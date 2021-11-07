@@ -972,7 +972,11 @@ static void Add_Extras(void) {
 
 	for (size_t i = 0; game_extras[i]; i++) {
 		if (game_extras[i]) {
+			#ifdef __linux__
+			std::string optwad = "edge_base/";
+			#else
 			std::string optwad = "edge_base\\";
+			#endif
 			optwad.append(loaded_game.c_str()).append("_").append(game_extras[i]).append(".wad");
 			optwad = epi::PATH_Join(game_dir.c_str(), optwad.c_str());
 			if (epi::FS_Access(optwad.c_str(), epi::file_c::ACCESS_READ)) {

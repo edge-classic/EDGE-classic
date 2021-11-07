@@ -55,8 +55,11 @@ function pain_digit() : string =
 
 function turn_digit() : string =
 {
-    var r = math.floor(math.random() * 2.99)
-
+    //Lobo: this never gives > 1 so face never looks left
+    //var r = math.floor(math.random() * 2.99)
+    
+    var r = math.floor(math.random2() / 4 ) //always between 0 and 2
+    
     return "" + r
 }
 
@@ -368,11 +371,26 @@ function doom_automap() =
     // hud.solid_box(0, 0, 320, 200 - 32, '80 80 80')
 
     hud.render_automap(0, 0, 320, 200 - 32)
-
-    doom_status_bar()
+	
+    new_overlay_status()
 
     hud.text_font("DOOM")
+    hud.text_color(hud.GREEN)
+    
     hud.draw_text(0, 200 - 32 - 10, hud.map_title())
+    
+    hud.set_scale(0.75)
+    hud.draw_text(10, 20, "Kills:    " + player.kills() + "/" + player.map_enemies())
+
+	if (player.map_secrets() > 0)
+	{
+		hud.draw_text(10, 25, "Secrets: " + player.secrets() + "/" + player.map_secrets())
+	}
+	if (player.map_items() > 0)
+	{
+		hud.draw_text(10, 30, "Items:    " + player.items() + "/" + player.map_items())
+	}
+	hud.set_scale(1.0)
 }
 
 
@@ -400,6 +418,84 @@ function edge_air_bar() =
 		hud.gradient_box(TopX + 1, TopY + 1, BarValue - 1, BarHeight - 2, hud.BLUE, hud.LIGHTBLUE, hud.BLUE, hud.LIGHTBLUE)
 	}
 }
+
+//***********************
+// Start footsteps code
+var walk_speed = 12
+var wait_time  : float
+
+function DoesNameStartWith(TheName : string, ThePart : string) : float =
+{
+	var tempstr : string
+	var templen : float
+	
+	tempstr = strings.sub(TheName, 1, strings.len(ThePart))
+	
+	//hud.draw_text(10, 10, tempstr)
+	
+	if (tempstr == ThePart)
+		return 1
+	
+	return 0
+}
+
+function edge_footsteps() =
+{
+    if (player.is_swimming())
+        return
+        
+    if (player.is_jumping())
+        return    
+
+	if (! player.on_ground())
+	return 
+
+	if (player.move_speed() <= 2)
+	{	
+		wait_time  = walk_speed
+		return
+	}
+    
+    wait_time = wait_time - hud.passed_time
+    
+   	/*
+   	hud.text_font("DOOM")
+    hud.draw_text(10, 10, player.floor_flat()) 
+    hud.draw_text(10, 50,"speed:" + player.move_speed())
+    hud.draw_text(10, 30,"sector tag:" + player.sector_tag())
+    */
+    if (wait_time > 0)
+    	return
+    
+    if (DoesNameStartWith(player.floor_flat(), "SLIME") == 1)
+    	hud.play_sound("FSWAT?")
+    else
+    if (DoesNameStartWith(player.floor_flat(), "BLOOD") == 1)
+    	hud.play_sound("FSWAT?")
+    else
+    if (DoesNameStartWith(player.floor_flat(), "FWATER") == 1)
+    	hud.play_sound("FSWAT?")
+    else
+   	if (DoesNameStartWith(player.floor_flat(), "NUKAGE") == 1)
+    	hud.play_sound("FSWAT?")
+    
+    //var loopCounter = 0
+    //for (loopCounter = 1, 5) 
+    //{
+    //	hud.draw_text(loopCounter * 10, 30, ".")
+    //}
+    
+    if (player.move_speed() > 10) //we're running so speed up time between sfx
+	{	
+		wait_time  = walk_speed - 3
+	}	
+	else
+	{
+		wait_time  = walk_speed
+    }
+}
+// End footsteps code
+//***********************
 
 
 function begin_level() =
@@ -434,6 +530,7 @@ function draw_all() =
 		new_overlay_status()
 		
 	edge_air_bar()
-    
+    	edge_footsteps()
+
 }
 

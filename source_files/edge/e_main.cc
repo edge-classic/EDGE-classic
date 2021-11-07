@@ -946,7 +946,7 @@ static void IdentifyVersion(void)
 
     if (! epi::FS_Access(reqwad.c_str(), epi::file_c::ACCESS_READ))
     {
-        reqwad = epi::PATH_Join(game_dir.c_str(), REQUIREDWAD "." EDGEWADEXT);
+        reqwad = epi::PATH_Join(game_dir.c_str(), "edge_wads\\" REQUIREDWAD "." EDGEWADEXT);
 
         if (! epi::FS_Access(reqwad.c_str(), epi::file_c::ACCESS_READ))
         {
@@ -956,6 +956,27 @@ static void IdentifyVersion(void)
     }
 
     W_AddRawFilename(reqwad.c_str(), FLKIND_EWad);
+
+}
+
+// Add optional EWads (widepix, skyboxes, etc) - Dasho
+static void Add_Extras(void) {
+
+	const char *loaded_game = iwad_base.c_str();
+
+	const char *game_extras[] = { "widepix", "skyboxes", NULL };
+
+	for (size_t i = 0; game_extras[i]; i++) {
+		if (game_extras[i]) {
+			std::string optwad = "edge_wads\\";
+			optwad.append(loaded_game).append("_").append(game_extras[i]).append(".wad");
+			optwad = epi::PATH_Join(game_dir.c_str(), optwad.c_str());
+			if (epi::FS_Access(optwad.c_str(), epi::file_c::ACCESS_READ)) {
+				W_AddRawFilename(optwad.c_str(), FLKIND_PWad);
+			}
+		}
+	}
+
 }
 
 static void CheckTurbo(void)
@@ -1200,6 +1221,7 @@ startuporder_t startcode[] =
 {
 	{  1, InitDDF              },
 	{  1, IdentifyVersion      },
+	{  1, Add_Extras		   },
 	{  1, AddCommandLineFiles  },
 	{  1, CheckTurbo           },
 	{  1, RAD_Init             },

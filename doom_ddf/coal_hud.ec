@@ -467,17 +467,40 @@ function edge_footsteps() =
     if (wait_time > 0)
     	return
     
-    if (DoesNameStartWith(player.floor_flat(), "SLIME") == 1)
-    	hud.play_sound("FSWAT?")
-    else
-    if (DoesNameStartWith(player.floor_flat(), "BLOOD") == 1)
-    	hud.play_sound("FSWAT?")
-    else
     if (DoesNameStartWith(player.floor_flat(), "FWATER") == 1)
     	hud.play_sound("FSWAT?")
     else
    	if (DoesNameStartWith(player.floor_flat(), "NUKAGE") == 1)
     	hud.play_sound("FSWAT?")
+    else
+    if (DoesNameStartWith(player.floor_flat(), "BLOOD") == 1)
+    	hud.play_sound("FSWAT?")
+    else //slime is a special case :(
+    if (player.floor_flat() == "SLIME1")
+    	hud.play_sound("FSWAT?")
+    else
+    if (player.floor_flat() == "SLIME2")
+    	hud.play_sound("FSWAT?")
+    else
+    if (player.floor_flat() == "SLIME3")
+    	hud.play_sound("FSWAT?")
+    else
+    if (player.floor_flat() == "SLIME4")
+    	hud.play_sound("FSWAT?")
+    else
+    if (player.floor_flat() == "SLIME5")
+    	hud.play_sound("FSWAT?")
+    else
+    if (player.floor_flat() == "SLIME6")
+    	hud.play_sound("FSWAT?")
+    else
+    if (player.floor_flat() == "SLIME7")
+    	hud.play_sound("FSWAT?")
+        else
+    if (player.floor_flat() == "SLIME8")
+    	hud.play_sound("FSWAT?")
+  
+    
     
     //var loopCounter = 0
     //for (loopCounter = 1, 5) 

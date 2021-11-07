@@ -3,7 +3,7 @@ https://github.com/dashodanger/EDGE-classic
 CHANGELOG for EDGE 1.35.1 (since 1.35)
 ====================================
 
-(Date: OCTOBER 2021)
+(Date: NOVEMBER 2021)
 
 
 Bugs fixed
@@ -12,6 +12,8 @@ Bugs fixed
 - TuttiFrutti effect. When the texture was shorter than the wall it was being applied to, the blank space was either filled with black or left invisible causing all sorts of graphical anomalies. Backported from EDGE 2.x branch.
 
 - OUCH face on the hud was using incorrect damage value.
+
+- Face on hud never looked left because random number was never > 1.
 
 - Linetypes [268](Monster-only Silent Teleport W1 (Boom)) and [269](Monster-only Silent Teleport WR (Boom)) were incorrectly set as PUSH instead of WALK.
 
@@ -98,6 +100,7 @@ Used just like JUMP(state_name:frame,xx%), but decrements the reload quantity fo
 + RTS
   - Text TIPs now accept a 4th parameter (like TIP_GRAPHICs) which is the scaling to apply.
   - PLAYSOUND_BOSSMAN: sfx location now set on player.
+  - New Command "EXIT_GAME": exits out of the map and back to the main title screen.
 
 + Timidity
   - Roland SC-55 styled soundfont by Deemster (https://www.vogons.org/viewtopic.php?f=9&t=45600) and timidity.cfg are now included.
@@ -107,5 +110,19 @@ Users with existing Timidity setups can remove or rename timidity.cfg accordingl
   
 + Titlescreen and intermission are now Widescreen compatible with https://forum.zdoom.org/viewtopic.php?f=46&t=67843
 
++ COALHUDS: 10 new commands
+  player.kills() returns how many enemies killed on the current map.
+  player.secrets() returns how many secrets discovered on current map.
+  player.items() returns how many items picked up on the current map.
+  player.map_enemies() returns total enemies on current map.
+  player.map_secrets() returns total number of secrets on current map.
+  player.map_items() returns total items on current map.
+  player.floor_flat() returns the floor flat of the current sector we are in.
+  player.sector_tag() returns the tag of the current sector we are in.
+  hud.draw_number(x, y, len, num, align_right). hud.draw_num2() always 
+    starts drawing the numbers from right-to-left. This new function 
+    allows left-to right if we pass 0 for the align_right parameter, 
+    or the usual draw_num2() right-to-left if we pass 1.
+  math.random2() returns a random number between 0 and 10.
 
   

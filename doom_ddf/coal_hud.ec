@@ -447,9 +447,12 @@ function edge_footsteps() =
     if (player.is_jumping())
         return    
 
-	if (! player.on_ground())
+     if (! player.on_ground())
+	return
+	
+    if (hud.game_paused() == 1)
 	return 
-
+	
 	if (player.move_speed() <= 2)
 	{	
 		wait_time  = walk_speed

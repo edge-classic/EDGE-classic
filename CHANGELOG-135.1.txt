@@ -21,6 +21,8 @@ Bugs fixed
 
 - Crash-to-desktop bug when using WEAKNESS class finally fixed.
 
+- Black screen after endgame: backported from 2.x branch.
+
 
 General Improvements
 --------------------
@@ -33,6 +35,7 @@ General Improvements
   -Added widescreen status bar courtesy of CeeJay. 
   -Revamped Overlay hud.
   -Removed AIRBAR graphics from edge.wad and rewrote the coal function to not use them.
+  -Splash footsteps sfx when walking on liquid flats.
 
 + Lines.ddf
   -Edited all Slider doors to use BDOPN sfx.
@@ -54,6 +57,8 @@ General Improvements
 + Quietly ignore music lumps which aren't MIDI/OGG instead of erroring out to Desktop.
 
 + Reduced the red tint while using the berserk power up.
+
++ M_SKULL1 menu cursor now uses DDFANIM (instead of being hardcoded to 2 frames). 
 
 
 New Features
@@ -110,7 +115,7 @@ Users with existing Timidity setups can remove or rename timidity.cfg accordingl
   
 + Titlescreen and intermission are now Widescreen compatible with https://forum.zdoom.org/viewtopic.php?f=46&t=67843
 
-+ COALHUDS: 10 new commands
++ COALHUDS: 11 new commands
   player.kills() returns how many enemies killed on the current map.
   player.secrets() returns how many secrets discovered on current map.
   player.items() returns how many items picked up on the current map.
@@ -124,5 +129,7 @@ Users with existing Timidity setups can remove or rename timidity.cfg accordingl
     allows left-to right if we pass 0 for the align_right parameter, 
     or the usual draw_num2() right-to-left if we pass 1.
   math.random2() returns a random number between 0 and 10.
+  hud.game_paused() returns 1 if the game is currently paused or 
+    on the title menu screen.
 
   

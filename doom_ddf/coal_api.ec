@@ -200,9 +200,10 @@ module hud
     function draw_text(x, y, text : string) = native
     function draw_num2(x, y, w, num) = native
 
-	//Lobo: new function
+	//Lobo: new functions
     function draw_number(x, y, len, num, align_right) = native
-
+    function game_paused() : float = native
+    
     function render_world(x, y, w, h)   = native
     function render_automap(x, y, w, h) = native
 

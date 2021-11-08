@@ -372,7 +372,7 @@ function doom_automap() =
 
     hud.render_automap(0, 0, 320, 200 - 32)
 	
-    new_overlay_status()
+    doom_status_bar()
 
     hud.text_font("DOOM")
     hud.text_color(hud.GREEN)

@@ -60,6 +60,8 @@ General Improvements
 
 + M_SKULL1 menu cursor now uses DDFANIM (instead of being hardcoded to 2 frames). 
 
++ Much improved Doom skyboxes from https://forum.zdoom.org/viewtopic.php?f=46&t=53873&hilit=doom+skyboxes
+
 
 New Features
 ------------

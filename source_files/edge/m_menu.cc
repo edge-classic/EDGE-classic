@@ -2019,8 +2019,10 @@ void M_Drawer(void)
 	{
 		int sx = x + SKULLXOFF;
 		int sy = currentMenu->y - 5 + itemOn * LINEHEIGHT;
-
-		HUD_DrawImage(sx, sy, menu_skull[whichSkull]);
+		//Lobo: just use M_SKULL1, and any DDFANIM magic it has ;)
+		HUD_DrawImage(sx, sy, menu_skull[0]);
+		//HUD_DrawImage(sx, sy, menu_skull[whichSkull]);
+		
 	}
 }
 

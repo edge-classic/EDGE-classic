@@ -261,12 +261,16 @@ bool F_Responder(event_t * event)
 
 	if (finalecount > TICRATE)
 	{
+		if (finalestage == f_pic && finale->picwait == INT_MAX)
+			return false;
+
 		skip_finale = true;
 		return true;
 	}
 
 	return false;
 }
+
 
 
 void F_Ticker(void)

@@ -8,6 +8,11 @@
 
 #VERSION 1.35
 
+[M_SKULL1]
+TYPE =GRAPHIC;
+SEQUENCE="M_SKULL1","M_SKULL2";
+SPEED=8T;
+
 // ------ Flat Animations ------------------
 
 [NUKAGE1]

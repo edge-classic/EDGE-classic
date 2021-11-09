@@ -448,6 +448,20 @@ static void HD_draw_number(coal::vm_c *vm, int argc)
 	}
 }
 
+// hud.game_paused()
+//
+static void HD_game_paused(coal::vm_c *vm, int argc)
+{
+	if (paused || menuactive)
+	{
+		vm->ReturnFloat(1);
+	}
+	else 
+	{
+		vm->ReturnFloat(0);
+	}
+}
+
 // hud.render_world(x, y, w, h)
 //
 static void HD_render_world(coal::vm_c *vm, int argc)
@@ -624,8 +638,9 @@ void VM_RegisterHUD()
     ui_vm->AddNativeFunction("hud.draw_text",       HD_draw_text);
     ui_vm->AddNativeFunction("hud.draw_num2",       HD_draw_num2);
 
-	//Lobo: new function
+	//Lobo: new functions
 	ui_vm->AddNativeFunction("hud.draw_number",     HD_draw_number);
+	ui_vm->AddNativeFunction("hud.game_paused",     HD_game_paused);
 	
     ui_vm->AddNativeFunction("hud.render_world",    HD_render_world);
     ui_vm->AddNativeFunction("hud.render_automap",  HD_render_automap);

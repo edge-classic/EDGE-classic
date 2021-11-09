@@ -372,7 +372,7 @@ function doom_automap() =
 
     hud.render_automap(0, 0, 320, 200 - 32)
 	
-    new_overlay_status()
+    doom_status_bar()
 
     hud.text_font("DOOM")
     hud.text_color(hud.GREEN)
@@ -447,9 +447,12 @@ function edge_footsteps() =
     if (player.is_jumping())
         return    
 
-	if (! player.on_ground())
+     if (! player.on_ground())
+	return
+	
+    if (hud.game_paused() == 1)
 	return 
-
+	
 	if (player.move_speed() <= 2)
 	{	
 		wait_time  = walk_speed

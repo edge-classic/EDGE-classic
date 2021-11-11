@@ -109,11 +109,11 @@ Used just like JUMP(state_name:frame,xx%), but decrements the reload quantity fo
   - PLAYSOUND_BOSSMAN: sfx location now set on player.
   - New Command "EXIT_GAME": exits out of the map and back to the main title screen.
 
-+ Timidity
-  - Roland SC-55 styled soundfont by Deemster (https://www.vogons.org/viewtopic.php?f=9&t=45600) and timidity.cfg are now included.
-Users with existing Timidity setups can remove or rename timidity.cfg accordingly if they prefer to use their existing soundfonts.
-  - Default sampling rate is 44Khz and quiet factor set to 'Soft' by default.
-  - Timidity is now the default music player for both Linux and Window builds.  
++ New Music Player
+  - Timidity has been replaced by TinySoundfont, with support for *.sf2 soundfont files instead of GUS patch sets
+  - A Roland SC-55 style default soundfont by Deemster has been included (https://www.vogons.org/viewtopic.php?f=9&t=45600).
+Users with existing soundfonts can replace soundfont/default.sf2 with their own font if desired (must be named default.sf2; selector is in progress).
+  - TinySoundfont is now the default music player for both Linux and Window builds.  
   
 + Titlescreen and intermission are now Widescreen compatible with https://forum.zdoom.org/viewtopic.php?f=46&t=67843
 

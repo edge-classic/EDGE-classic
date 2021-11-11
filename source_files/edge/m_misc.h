@@ -85,7 +85,6 @@ extern int var_sound_bits;
 extern int var_sound_stereo;
 extern int var_mix_channels;
 extern int var_quiet_factor;
-extern int var_timid_factor;
 
 #endif  /* __M_MISC__ */
 

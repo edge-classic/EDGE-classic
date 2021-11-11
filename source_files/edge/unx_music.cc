@@ -27,7 +27,7 @@
 
 #include "s_sound.h"
 #include "s_music.h"
-#include "s_timid.h"
+#include "s_tsf.h"
 #include "unx_sysinc.h"
 
 
@@ -51,19 +51,19 @@ void I_StartupMusic(void)
 #if 1
 	if (! nosound)
 	{
-		if (S_StartupTimidity())
+		if (S_StartupTSF())
 		{
-			I_Printf("I_StartupMusic: Timidity Init OK\n");
+			I_Printf("I_StartupMusic: TinySoundfont Init OK\n");
 		}
 		else
 		{
-			I_Printf("I_StartupMusic: Timidity Init FAILED\n");
+			I_Printf("I_StartupMusic: TinySoundfont Init FAILED\n");
 		}
 	}
 	else
 #endif
     {
-		I_Printf("I_StartupMusic: Timidity Disabled\n");
+		I_Printf("I_StartupMusic: TinySoundfont Disabled\n");
     }
 
 	// Music is not paused by default

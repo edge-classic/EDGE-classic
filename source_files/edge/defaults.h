@@ -80,12 +80,11 @@
 #define CFGDEF_SOUND_STEREO     (1)  // Stereo
 #define CFGDEF_MIX_CHANNELS     (2)  // 32 channels
 #define CFGDEF_QUIET_FACTOR     (1)
-#define CFGDEF_TIMID_FACTOR     (2)
 
 #ifdef __linux__
-#define CFGDEF_MUSIC_DEVICE     (1)  // Timidity
+#define CFGDEF_MUSIC_DEVICE     (1)  // TinySoundfont
 #else
-#define CFGDEF_MUSIC_DEVICE     (1)  // Timidity
+#define CFGDEF_MUSIC_DEVICE     (1)  // TinySoundfont
 #endif
 
 // Video Options

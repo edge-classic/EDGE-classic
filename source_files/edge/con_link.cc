@@ -85,7 +85,7 @@ extern cvar_c debug_nomonsters, debug_subsector;
 #ifndef __linux__
 #define S_MUSICDEV_CFG  "0"  // native
 #else
-#define S_MUSICDEV_CFG  "1"  // timidity
+#define S_MUSICDEV_CFG  "1"  // tinysoundfont
 #endif
 
 

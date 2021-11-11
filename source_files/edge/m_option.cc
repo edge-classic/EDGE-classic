@@ -95,7 +95,6 @@
 #include "r_gldefs.h"
 #include "s_sound.h"
 #include "s_music.h"
-#include "s_timid.h"
 #include "am_map.h"
 #include "r_draw.h"
 #include "r_modes.h"
@@ -189,7 +188,7 @@ static char SoundBits[]   = "8 bit/16 bit";
 static char StereoNess[]  = "Off/On/Swapped";
 static char MixChans[]    = "8/16/32/64/96";
 static char QuietNess[]   = "Loud (distorted)/Normal/Soft/Very Soft";
-static char MusicDevs[]   = "System/Timidity";
+static char MusicDevs[]   = "System/TinySoundfont";
 
 // Screen resolution changes
 static scrmode_c new_scrmode;
@@ -285,12 +284,6 @@ static void M_ChangeMixChan(int keypressed)
 {
 	S_ChangeChannelNum();
 }
-
-static void M_ChangeTimidQuiet(int keypressed)
-{
-	S_ChangeTimidQuiet();
-}
-
 
 static int M_GetCurrentSwitchValue(optmenuitem_t *item)
 {
@@ -473,7 +466,6 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Switch,  "Quiet Factor",    QuietNess, 3, &var_quiet_factor, NULL, NULL},
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Music Device",    MusicDevs, 2, &var_music_dev, NULL, NULL},
-	{OPT_Switch,  "Timidity Factor", QuietNess, 3, &var_timid_factor, M_ChangeTimidQuiet, NULL},
 };
 
 static menuinfo_t sound_optmenu = 

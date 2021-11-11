@@ -12,7 +12,6 @@ add_subdirectory(source_files/libjpeg)
 add_subdirectory(source_files/libpng)
 add_subdirectory(source_files/libogg)
 add_subdirectory(source_files/libvorbis)
-add_subdirectory(source_files/timidity)
 add_subdirectory(source_files/zlib)
 
 project(
@@ -24,7 +23,7 @@ project(
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS "-O2 -ffast-math -fno-strict-aliasing -DINLINE_G=inline -Wall")
-if(WIN32 AND NOT MINGW AND NOT MSYS)
+if(WIN32 AND NOT MSYS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHa")
   set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS")
 endif()
@@ -32,7 +31,7 @@ if(MSYS)
   set(CMAKE_EXE_LINKER_FLAGS "-static -mwindows")
 endif()
 
-if(MSYS OR MINGW OR WIN32)
+if(WIN32 OR MSYS)
 add_executable(
   edge135
 	source_files/edge/i_main.cc     
@@ -114,7 +113,7 @@ add_executable(
 	source_files/edge/s_sound.cc    
 	source_files/edge/s_music.cc    
 	source_files/edge/s_ogg.cc      
-	source_files/edge/s_timid.cc    
+	source_files/edge/s_tsf.cc    
 	source_files/edge/sv_chunk.cc   
 	source_files/edge/sv_glob.cc    
 	source_files/edge/sv_level.cc   
@@ -221,7 +220,7 @@ add_executable(
 	source_files/edge/s_sound.cc    
 	source_files/edge/s_music.cc    
 	source_files/edge/s_ogg.cc      
-	source_files/edge/s_timid.cc    
+	source_files/edge/s_tsf.cc    
 	source_files/edge/sv_chunk.cc   
 	source_files/edge/sv_glob.cc    
 	source_files/edge/sv_level.cc   
@@ -263,10 +262,10 @@ target_include_directories(edge135 PRIVATE source_files/libjpeg)
 target_include_directories(edge135 PRIVATE source_files/libogg/include/ogg)
 target_include_directories(edge135 PRIVATE source_files/libpng)
 target_include_directories(edge135 PRIVATE source_files/libvorbis/include/vorbis)
-target_include_directories(edge135 PRIVATE source_files/timidity)
+target_include_directories(edge135 PRIVATE source_files/tinysoundfont)
 target_include_directories(edge135 PRIVATE source_files/zlib)
 
-if(MINGW OR WIN32 OR MSYS)
+if(WIN32 OR MSYS)
   target_compile_definitions(edge135 PRIVATE WIN32)
 else()
   target_compile_definitions(edge135 PRIVATE UNIX)
@@ -280,7 +279,7 @@ add_custom_command(
           "${CMAKE_CURRENT_LIST_DIR}"
 )
 
-if(MSYS)
+if(WIN32 OR MSYS)
 target_link_libraries(
   edge135
   PRIVATE edge_coal
@@ -298,7 +297,6 @@ target_link_libraries(
 		  vorbis
 		  vorbisfile
 		  vorbisenc
-		  timidity
 		  winmm
 		  wsock32
   )
@@ -320,6 +318,5 @@ target_link_libraries(
 		  png_static
 		  jpeg_static
 		  zlibstatic
-		  timidity
   )
 endif()

@@ -50,7 +50,7 @@ struct subsector_s;
 struct touch_node_s;
 
 #define STOPSPEED   		0.07f
-#define OOF_SPEED   		20.0f
+#define OOF_SPEED   		9.0f //Lobo: original value 20.0f too high, almost never played oof
 
 //
 // NOTES: mobj_t

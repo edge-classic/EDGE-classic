@@ -59,9 +59,11 @@ private:
 	double current_time;
 
 	tml_message *song;
+	byte *data;
+	int length;
 
 public:
-	tsf_player_c(tml_message *_song) : status(NOT_LOADED), song(_song)
+	tsf_player_c(tml_message *_song, byte *_data, int _length) : status(NOT_LOADED), song(_song), data(_data), length(_length)
 	{ }
 
 	~tsf_player_c()
@@ -80,6 +82,11 @@ public:
 		if (status != STOPPED)
 		  Stop();
 	
+		tsf_reset(edge_tsf);
+
+		if (data)
+			delete[] data;
+
 		status = NOT_LOADED;
 	}
 
@@ -103,7 +110,7 @@ public:
 		if (! (status == PLAYING || status == PAUSED))
 			return;
 
-		tsf_reset(edge_tsf);
+		tsf_note_off_all(edge_tsf);
 
 		S_QueueStop();
 
@@ -160,11 +167,9 @@ public:
 
 private:
 
-	int PlaySome(s16_t *data_buf, int samples) {
+	bool PlaySome(s16_t *data_buf, int samples) {
 
 		int SampleBlock, SampleCount = samples;
-
-		int samples_played = 0;
 
 		for (SampleBlock = TSF_RENDER_EFFECTSAMPLEBLOCK; SampleCount; SampleCount -= SampleBlock, data_buf += (SampleBlock * (dev_stereo ? 2 : 1 * sizeof(float))))
 		{
@@ -195,34 +200,36 @@ private:
 
 			// Render the block of audio samples in short format
 			tsf_render_short(edge_tsf, data_buf, SampleBlock, 0);
-			samples_played += SampleBlock;
 		}
-		
-		return samples_played;
+		return (song == NULL);
 	}
 
 	bool StreamIntoBuffer(epi::sound_data_c *buf)
 	{
 		int samples = 0;
 
+		bool song_done = false;
+
 		while (samples < TSF_NUM_SAMPLES)
 		{
 			s16_t *data_buf = buf->data_L + samples * (dev_stereo ? 2 : 1);
 
-			int got_num = PlaySome(data_buf, TSF_NUM_SAMPLES - samples);
+			song_done = PlaySome(data_buf, TSF_NUM_SAMPLES - samples);
 
-			if (got_num <= 0)  /* EOF */
+			if (song_done)  /* EOF */
 			{
 				if (looping)
 				{
+					tml_free(song);
+					song = tml_load_memory(data, length);
 					current_time = 0;
 					continue; // try again
 				}
 
-				return (samples == TSF_NUM_SAMPLES);
+				return (false);
 			}
 
-			samples += got_num;
+			samples += TSF_NUM_SAMPLES;
 		}
 
 		return true;
@@ -281,7 +288,7 @@ abstract_music_c * S_PlayTSF(byte *data, int length, bool is_mus,
 
 	tml_message *song = tml_load_memory(data, length);
 
-	delete[] data;
+	//delete[] data;
 
 	if (!song) //Lobo: quietly log it instead of completely exiting EDGE
 	{
@@ -289,7 +296,7 @@ abstract_music_c * S_PlayTSF(byte *data, int length, bool is_mus,
 		return NULL;
 	}
 
-	tsf_player_c *player = new tsf_player_c(song);
+	tsf_player_c *player = new tsf_player_c(song, data, length);
 
 	player->Volume(volume);
 	player->Play(loop);

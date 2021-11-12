@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.12..3.20)
 
-#list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-
 add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/deh_edge)
@@ -110,7 +108,8 @@ add_executable(
 	source_files/edge/r_texgl.cc    
 	source_files/edge/s_blit.cc     
 	source_files/edge/s_cache.cc    
-	source_files/edge/s_sound.cc    
+	source_files/edge/s_sound.cc 
+	#source_files/edge/s_mp3.cc   
 	source_files/edge/s_music.cc    
 	source_files/edge/s_ogg.cc      
 	source_files/edge/s_tsf.cc    
@@ -217,7 +216,8 @@ add_executable(
 	source_files/edge/r_texgl.cc    
 	source_files/edge/s_blit.cc     
 	source_files/edge/s_cache.cc    
-	source_files/edge/s_sound.cc    
+	source_files/edge/s_sound.cc
+	#source_files/edge/s_mp3.cc   
 	source_files/edge/s_music.cc    
 	source_files/edge/s_ogg.cc      
 	source_files/edge/s_tsf.cc    
@@ -262,6 +262,7 @@ target_include_directories(edge135 PRIVATE source_files/libjpeg)
 target_include_directories(edge135 PRIVATE source_files/libogg/include/ogg)
 target_include_directories(edge135 PRIVATE source_files/libpng)
 target_include_directories(edge135 PRIVATE source_files/libvorbis/include/vorbis)
+target_include_directories(edge135 PRIVATE source_files/minimp3)
 target_include_directories(edge135 PRIVATE source_files/tinysoundfont)
 target_include_directories(edge135 PRIVATE source_files/zlib)
 

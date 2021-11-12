@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
-//  EDGE TinySoundfont Music Player
+//  EDGE MP3 Music Player (HEADER)
 //----------------------------------------------------------------------------
 // 
 //  Copyright (c) 2004-2009  The EDGE Team.
-//  Converted from the original Timidity-based player in 2021 - Dashodanger
+//  Adapted from the EDGE OGG Player in 2021 - Dashodanger
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -16,18 +16,29 @@
 //  GNU General Public License for more details.
 //
 //----------------------------------------------------------------------------
-
-#ifndef __S_TSF_H__
-#define __S_TSF_H__
+//
+// -ACB- 2004/08/18 Written
+//
+#ifndef __MP3PLAYER_H__
+#define __MP3PLAYER_H__
 
 #include "i_defs.h"
 
-bool S_StartupTSF(void);
+#include <vorbis/vorbisfile.h>
 
-abstract_music_c * S_PlayTSF(byte *data, int length, bool is_mus,
-			float volume, bool loop);
+#include "sound_data.h"
 
-#endif /* __S_TSF_H__ */
+class pl_entry_c;
+
+/* FUNCTIONS */
+
+abstract_music_c * S_PlayMP3Music(const pl_entry_c *musdat, float volume, bool looping);
+
+bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length);
+
+bool S_CheckMP3(byte *data, int length);
+
+#endif  /* __MP3PLAYER_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

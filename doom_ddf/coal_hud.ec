@@ -453,7 +453,7 @@ function edge_footsteps() =
     if (hud.game_paused() == 1)
 	return 
 	
-	if (player.move_speed() <= 2)
+	if (player.move_speed() <= 1.4)
 	{	
 		wait_time  = walk_speed
 		return
@@ -470,13 +470,25 @@ function edge_footsteps() =
     if (wait_time > 0)
     	return
     
+    if (DoesNameStartWith(player.floor_flat(), "OSLUDG01") == 1) // OTEX/Eviternity
+    	hud.play_sound("FSWAT?")
+    else
+    if (DoesNameStartWith(player.floor_flat(), "OTAR__01") == 1) // OTEX/Eviternity
+    	hud.play_sound("FSWAT?")
+    else
+    if (DoesNameStartWith(player.floor_flat(), "OWATER") == 1) // OTEX/Eviternity
+    	hud.play_sound("FSWAT?")
+    else
     if (DoesNameStartWith(player.floor_flat(), "FWATER") == 1)
     	hud.play_sound("FSWAT?")
     else
-   	if (DoesNameStartWith(player.floor_flat(), "NUKAGE") == 1)
+    if (DoesNameStartWith(player.floor_flat(), "NUKAGE") == 1)
     	hud.play_sound("FSWAT?")
     else
     if (DoesNameStartWith(player.floor_flat(), "BLOOD") == 1)
+    	hud.play_sound("FSWAT?")
+    else	
+    if (DoesNameStartWith(player.floor_flat(), "LAVA") == 1)
     	hud.play_sound("FSWAT?")
     else //slime is a special case :(
     if (player.floor_flat() == "SLIME1")

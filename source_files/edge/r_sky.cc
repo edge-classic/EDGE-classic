@@ -881,6 +881,15 @@ int RGL_UpdateSkyBoxTextures(void)
 	info->face[WSKY_North] = W_ImageLookup(
 			UserSkyFaceName(sky_image->name, WSKY_North), INS_Texture, ILF_Null);
 
+	//decide what to do for this maps sky i.e. Use a skybox or not
+	if (W_LoboDisableSkybox(UserSkyFaceName(sky_image->name, WSKY_North)))
+	{
+		info->face[WSKY_North] = NULL;
+		//I_Printf("Skybox turned OFF\n");
+	}
+	
+	
+	
 	if (info->face[WSKY_North])
 	{
 		custom_sky_box = true;

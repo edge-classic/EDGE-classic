@@ -23,6 +23,9 @@ Bugs fixed
 
 - Black screen after endgame: backported from 2.x branch.
 
+- oof sfx behaviour now closer to original doom.
+
+
 
 General Improvements
 --------------------

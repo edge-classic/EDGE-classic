@@ -112,6 +112,10 @@ int W_GetFileForLump(int lump);
 void W_ShowLumps(int for_file, const char *match);
 void W_ShowFiles(void);
 
+//auxiliary functions to help us deal with when to use skyboxes
+int W_LoboFindSkyImage(int for_file, const char *match);
+bool W_LoboDisableSkybox(const char *ActualSky);
+
 // Define this only in an emergency.  All these debug printfs quickly
 // add up, and it takes only a few seconds to end up with a 40 meg debug file!
 #ifdef WAD_CHECK

@@ -23,8 +23,6 @@
 
 #include "i_defs.h"
 
-#include <vorbis/vorbisfile.h>
-
 #include "sound_data.h"
 
 class pl_entry_c;

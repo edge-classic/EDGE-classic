@@ -39,6 +39,11 @@
 
 #define OGGV_NUM_SAMPLES  8192
 
+#define OV_EXCLUDE_STATIC_CALLBACKS
+#define OGG_IMPL
+#define VORBIS_IMPL
+#include "minivorbis.h"
+
 extern bool dev_stereo;  // FIXME: encapsulation
 
 

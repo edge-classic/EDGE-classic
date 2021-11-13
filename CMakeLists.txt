@@ -8,8 +8,6 @@ add_subdirectory(source_files/glbsp)
 add_subdirectory(source_files/glew/build/cmake)
 add_subdirectory(source_files/libjpeg)
 add_subdirectory(source_files/libpng)
-add_subdirectory(source_files/libogg)
-add_subdirectory(source_files/libvorbis)
 add_subdirectory(source_files/zlib)
 
 project(
@@ -260,9 +258,8 @@ target_include_directories(edge135 PRIVATE source_files/epi)
 target_include_directories(edge135 PRIVATE source_files/glew/include/GL)
 target_include_directories(edge135 PRIVATE source_files/glbsp/src)
 target_include_directories(edge135 PRIVATE source_files/libjpeg)
-target_include_directories(edge135 PRIVATE source_files/libogg/include/ogg)
 target_include_directories(edge135 PRIVATE source_files/libpng)
-target_include_directories(edge135 PRIVATE source_files/libvorbis/include/vorbis)
+target_include_directories(edge135 PRIVATE source_files/minivorbis)
 target_include_directories(edge135 PRIVATE source_files/tinysoundfont)
 target_include_directories(edge135 PRIVATE source_files/zlib)
 
@@ -290,14 +287,10 @@ target_link_libraries(
           edge_glbsp
 		  glew_s
 		  opengl32
-		  Ogg::ogg
 		  ${SDL_LIBRARIES}
 		  png_static
 		  jpeg_static
 		  zlibstatic
-		  vorbis
-		  vorbisfile
-		  vorbisenc
 		  winmm
 		  wsock32
   )
@@ -311,11 +304,7 @@ target_link_libraries(
           edge_glbsp
 		  OpenGL
 		  ${GLEW_LIBRARIES}
-		  Ogg::ogg
 		  SDL
-		  vorbis
-		  vorbisfile
-		  vorbisenc
 		  png_static
 		  jpeg_static
 		  zlibstatic

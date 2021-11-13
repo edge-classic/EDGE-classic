@@ -84,11 +84,11 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 	float volume = slider_to_gain[mus_volume];
 
-	/*if (play->type == MUS_MP3)
+	if (play->type == MUS_MP3)
 	{
 		music_player = S_PlayMP3Music(play, volume, loop);
 		return;
-	}*/
+	}
 
 ///	if (play->type == MUS_CD)
 ///	{
@@ -170,14 +170,14 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	/*if (S_CheckMP3(data, length))
+	if (S_CheckMP3(data, length))
 	{
 		delete F;
 		delete data;
 
 		music_player = S_PlayMP3Music(play, volume, loop);
 		return;
-	}*/
+	}
 	
 	bool is_mus = (data[0] == 'M' && data[1] == 'U' && data[2] == 'S');
 

@@ -288,8 +288,6 @@ abstract_music_c * S_PlayTSF(byte *data, int length, bool is_mus,
 
 	tml_message *song = tml_load_memory(data, length);
 
-	//delete[] data;
-
 	if (!song) //Lobo: quietly log it instead of completely exiting EDGE
 	{
 		I_Debugf("TinySoundfont player: failed to load MIDI file!\n");

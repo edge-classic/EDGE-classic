@@ -109,7 +109,7 @@ add_executable(
 	source_files/edge/s_blit.cc     
 	source_files/edge/s_cache.cc    
 	source_files/edge/s_sound.cc 
-	#source_files/edge/s_mp3.cc   
+	source_files/edge/s_mp3.cc   
 	source_files/edge/s_music.cc    
 	source_files/edge/s_ogg.cc      
 	source_files/edge/s_tsf.cc    
@@ -217,7 +217,7 @@ add_executable(
 	source_files/edge/s_blit.cc     
 	source_files/edge/s_cache.cc    
 	source_files/edge/s_sound.cc
-	#source_files/edge/s_mp3.cc   
+	source_files/edge/s_mp3.cc   
 	source_files/edge/s_music.cc    
 	source_files/edge/s_ogg.cc      
 	source_files/edge/s_tsf.cc    
@@ -255,6 +255,7 @@ endif()
 target_include_directories(edge135 PRIVATE source_files/coal)
 target_include_directories(edge135 PRIVATE source_files/ddf)
 target_include_directories(edge135 PRIVATE source_files/deh_edge)
+target_include_directories(edge135 PRIVATE source_files/dr_mp3)
 target_include_directories(edge135 PRIVATE source_files/epi)
 target_include_directories(edge135 PRIVATE source_files/glew/include/GL)
 target_include_directories(edge135 PRIVATE source_files/glbsp/src)
@@ -262,7 +263,6 @@ target_include_directories(edge135 PRIVATE source_files/libjpeg)
 target_include_directories(edge135 PRIVATE source_files/libogg/include/ogg)
 target_include_directories(edge135 PRIVATE source_files/libpng)
 target_include_directories(edge135 PRIVATE source_files/libvorbis/include/vorbis)
-target_include_directories(edge135 PRIVATE source_files/minimp3)
 target_include_directories(edge135 PRIVATE source_files/tinysoundfont)
 target_include_directories(edge135 PRIVATE source_files/zlib)
 

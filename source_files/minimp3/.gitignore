@@ -1,8 +1,0 @@
-.vscode
-fate-suite.ffmpeg.org
-player/SDL
-minimp3
-minimp3_arm
-*.gcda
-*.gcno
-*.gcov

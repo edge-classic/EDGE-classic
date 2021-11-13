@@ -47,7 +47,7 @@ General Improvements
 
 + Made single option RTS MENUs respond to KEYD_JOY4 button.
 
-+ Reduced Arachnotron width by 1. (Even though tecnically it is 64, this avoids issue with some pwads).
++ Reduced Arachnotron width by 1. (Even though technically it is 64, this avoids issue with some pwads).
 
 + Reduced the lighting on several enemy attacks.
 

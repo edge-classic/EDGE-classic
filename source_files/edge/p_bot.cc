@@ -179,6 +179,11 @@ static int BOT_EvaluateWeapon(bot_t *bot, int w_num)
 			value *= 2;
 			break;
 
+		//Lobo 2021: doom64 pain elemental
+		case ATK_DOUBLESPAWNER:
+			value *= 4;
+			break;
+
 		case ATK_TRIPLESPAWNER:
 			value *= 6;
 			break;

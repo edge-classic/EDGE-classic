@@ -8,7 +8,7 @@ CXX=g++
 
 CXXFLAGS=-O -Wall
 LDFLAGS=
-DEFINES=-DMACOSX -DDEH_EDGE_PLUGIN
+DEFINES=-DDEH_EDGE_PLUGIN
 
 OBJS=convert.o main.o system.o util.o wad.o info.o mobj.o \
      sounds.o frames.o things.o attacks.o weapons.o ammo.o \

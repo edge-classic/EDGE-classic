@@ -32,7 +32,7 @@
 #include "epi_win32.h"
 #endif
 
-#ifdef MACOSX
+#ifdef __APPLE__
 #include "epi_macosx.h"
 #endif
 

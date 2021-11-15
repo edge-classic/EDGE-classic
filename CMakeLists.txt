@@ -244,9 +244,9 @@ add_executable(
 endif()
 
 find_package(SDL REQUIRED)
-find_package(GLEW REQUIRED)
 
-if(NOT MSYS)
+if(NOT WIN32 AND NOT MSYS)
+find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
 endif()
 
@@ -254,7 +254,9 @@ target_include_directories(edge135 PRIVATE source_files/coal)
 target_include_directories(edge135 PRIVATE source_files/ddf)
 target_include_directories(edge135 PRIVATE source_files/deh_edge)
 target_include_directories(edge135 PRIVATE source_files/epi)
-target_include_directories(edge135 PRIVATE source_files/glew/include/GL)
+if(NOT WIN32 AND NOT MSYS)
+  target_include_directories(edge135 PRIVATE source_files/glew/include/GL)
+endif()
 target_include_directories(edge135 PRIVATE source_files/glbsp/src)
 target_include_directories(edge135 PRIVATE source_files/libjpeg)
 target_include_directories(edge135 PRIVATE source_files/libpng)

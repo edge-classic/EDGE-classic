@@ -23,7 +23,7 @@
 
 #include <sys/ioctl.h>
 
-#ifndef MACOSX
+#ifndef __APPLE__
 #include <linux/cdrom.h>
 #endif
 

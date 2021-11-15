@@ -39,7 +39,7 @@
 #include <GL/glext.h>
 #endif
 
-#ifdef MACOSX
+#ifdef __APPLE__
 #include <GL/glew.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glext.h>

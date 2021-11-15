@@ -76,7 +76,7 @@ namespace Deh_Edge
 }
 
 // MacOS X
-#elif defined (MACOSX)
+#elif defined (__APPLE__)
 
 namespace Deh_Edge
 {
@@ -84,7 +84,7 @@ namespace Deh_Edge
 }
 
 #else
-#error Unknown System (not DJGPP, WIN32, LINUX or MACOSX)
+#error Unknown System (not DJGPP, WIN32, LINUX or APPLE)
 #endif
 
 #endif /*__SYSTEM_SPECIFIC_DEFS__*/

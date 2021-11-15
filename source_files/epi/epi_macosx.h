@@ -28,7 +28,11 @@
 
 #define DIRSEPARATOR '/'
 
-#define GCCATTR(xyz) __attribute__ (xyz)
+#ifdef GNUC
+#define GCCATTR(xyz) attribute (xyz)
+#else
+#define GCCATTR(xyz) /* nothing */
+#endif
 
 #define stricmp   strcasecmp
 #define strnicmp  strncasecmp

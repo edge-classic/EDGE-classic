@@ -28,7 +28,7 @@
 #include <unistd.h>  // access(), readlink()
 #endif
 
-#ifdef MACOSX
+#ifdef __APPLE__
 #include <sys/param.h>
 #include <mach-o/dyld.h> // _NSGetExecutablePath
 #endif
@@ -89,7 +89,7 @@ const char *GetExecutablePath(const char *argv0)
 #endif
 
 
-#ifdef MACOSX
+#ifdef __APPLE__
 	/*
 	   from http://www.hmug.org/man/3/NSModule.html
 
@@ -120,7 +120,7 @@ const char *GetExecutablePath(const char *argv0)
 
 	// --- fallback method: use argv[0] ---
 
-#ifdef MACOSX
+#ifdef __APPLE__
 	// FIXME: check if _inside_ the .app folder
 #endif
 
@@ -135,7 +135,7 @@ const char* GetResourcePath()
 {
 	std::string path = ".";
 
-#ifdef MACOSX
+#ifdef __APPLE__
 	// Used infrequently, hence the code is not as brutally 
 	// efficiently as it could. Clarity came first here.
 	const std::string appdir_suffix = ".app";

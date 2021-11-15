@@ -27,7 +27,7 @@
 #include <sys/ioctl.h>
 
 // -AJA- 2005/04/01: Yet another work-around for the huge pile of shit called C++
-#ifndef MACOSX
+#ifndef __APPLE__
 #define ntohl  ntohl_CRUD
 #define ntohs  ntohs_CRUD
 #define htonl  htonl_CRUD
@@ -36,7 +36,7 @@
 
 #include <arpa/inet.h>
 
-#ifdef MACOSX
+#ifdef __APPLE__
 #include <net/if.h>
 #else
 #include <linux/netdevice.h> 

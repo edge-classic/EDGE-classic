@@ -24,7 +24,7 @@
 
 #include <unistd.h>
 
-#ifdef MACOSX
+#ifdef __APPLE__
 #include <SDL.h>  // needed for proper SDL main linkage
 #endif
 
@@ -68,7 +68,7 @@ void ChangeToExeDir(const char *full_path)
 	if (r == NULL || r == full_path)
 		return;
 
-#ifdef MACOSX
+#ifdef __APPLE__
         // -AJA- It seems argv[0] points directly to the "gledge" binary
         //       inside of the Edge.app folder (when run from the Finder).
         //       Hence we need to strip the extra bits off.
@@ -99,7 +99,7 @@ void ChangeToExeDir(const char *full_path)
 #endif
 
 
-#ifdef MACOSX
+#ifdef __APPLE__
 int main(int argc, char *argv[])
 #else
 int main(int argc, const char **argv)

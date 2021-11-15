@@ -457,11 +457,6 @@ void I_Sleep(int millisecs)
 	usleep(millisecs * 1000);
 }
 
-
-#ifndef MACOSX // Defined separately under Mac OS X. -ACB- 2010/12/20
-//
-// I_MessageBox
-//
 void I_MessageBox(const char *message, const char *title)
 {
 #ifdef USE_FLTK
@@ -473,7 +468,6 @@ void I_MessageBox(const char *message, const char *title)
 	fprintf(stderr, "\n%s\n", message);
 #endif // USE_FLTK
 }
-#endif // !MACOSX
 
 
 //--- editor settings ---

@@ -7,7 +7,6 @@ BIN=deh_edge
 CXX=g++
 CXXFLAGS=-O -Wall
 LDFLAGS=
-DEFINES=-DMACOSX
 LIBS=-lm
 
 OBJS=convert.o main.o system.o util.o wad.o info.o mobj.o \

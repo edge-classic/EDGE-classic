@@ -88,13 +88,13 @@
 #endif
 
 // Video Options
-#define CFGDEF_CURRENT_GAMMA    (2)
-#define CFGDEF_USE_SMOOTHING    (0)
+#define CFGDEF_CURRENT_GAMMA    (0)
+#define CFGDEF_USE_SMOOTHING    (1)
 #define CFGDEF_USE_DLIGHTS      (1)
 #define CFGDEF_DOOM_FADING      (1)
-#define CFGDEF_DETAIL_LEVEL     (1)
-#define CFGDEF_USE_MIPMAPPING   (0)
-#define CFGDEF_HQ2X_SCALING     (0)
+#define CFGDEF_DETAIL_LEVEL     (2)
+#define CFGDEF_USE_MIPMAPPING   (2)
+#define CFGDEF_HQ2X_SCALING     (3)
 #define CFGDEF_SCREEN_HUD       (0)
 #define CFGDEF_SHADOWS          (0)
 #define CFGDEF_CROSSHAIR        (0)
@@ -109,14 +109,14 @@
 #define CFGDEF_WIPE_REVERSE     (0)
 
 // Gameplay Options
-#define CFGDEF_AUTOAIM          (1)
+#define CFGDEF_AUTOAIM          (0)
 #define CFGDEF_MLOOK            (1)
 #define CFGDEF_JUMP             (1)
 #define CFGDEF_CROUCH           (1)
-#define CFGDEF_KICKING          (1)
+#define CFGDEF_KICKING          (0)
 #define CFGDEF_WEAPON_SWITCH    (1)
 #define CFGDEF_MORE_BLOOD       (0)
-#define CFGDEF_HAVE_EXTRA       (0)
+#define CFGDEF_HAVE_EXTRA       (1)
 #define CFGDEF_TRUE3DGAMEPLAY   (1)
 #define CFGDEF_PASS_MISSILE     (1)
 #define CFGDEF_MENU_GRAV        (MENU_GRAV_NORMAL)

@@ -28,29 +28,27 @@
 #include "endianess.h"
 #include "file.h"
 #include "filesystem.h"
+#include "sound_gather.h"
 
 #include "playlist.h"
 
+#include "s_cache.h"
 #include "s_blit.h"
 #include "s_music.h"
 #include "s_mp3.h"
 #include "w_wad.h"
 
-#define DR_MP3_IMPLEMENTATION
-#include "dr_mp3.h"
+#define MINIMP3_ONLY_MP3
+#define MINIMP3_IMPLEMENTATION
+#include "minimp3_ex.h"
 
-#define MP3V_NUM_SAMPLES  18432 // Max pcm frames per mp3 frame times 16 - Dasho
+#define MP3V_NUM_SAMPLES  MINIMP3_MAX_SAMPLES_PER_FRAME
 
 extern bool dev_stereo;  // FIXME: encapsulation
 
-// Function for s_music.cc to check if a song lump is in .mp3 format
+// Function for s_music.cc to check if a lump is in .mp3 format
 bool S_CheckMP3 (byte *data, int length) {
-	drmp3 mp3_checker;
-	if (drmp3_init_memory(&mp3_checker, data, length, NULL)) {
-		drmp3_uninit(&mp3_checker);
-		return true;
-	}
-	return false;
+	return (mp3dec_detect_buf(data, length) == 0);
 }
 
 class mp3player_c : public abstract_music_c
@@ -68,7 +66,7 @@ private:
 	int status;
 	bool looping;
 
-	drmp3 mp3_track;
+	mp3dec_ex_t mp3_track;
 
 	bool is_stereo;
 
@@ -94,7 +92,7 @@ private:
 	void PostOpenInit(void);
 
 	bool StreamIntoBuffer(epi::sound_data_c *buf);
-
+	
 };
 
 //----------------------------------------------------------------------------
@@ -114,7 +112,7 @@ mp3player_c::~mp3player_c()
 
 void mp3player_c::PostOpenInit()
 {
-    if (mp3_track.channels == 1) {
+    if (mp3_track.info.channels == 1) {
         is_stereo = false;
 	} else {
         is_stereo = true;
@@ -147,13 +145,13 @@ bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	else
 		data_buf = buf->data_L;
 
-	int got_size = drmp3_read_pcm_frames_s16(&mp3_track, MP3V_NUM_SAMPLES, data_buf);
+	int got_size = mp3dec_ex_read(&mp3_track, data_buf, MP3V_NUM_SAMPLES * 2);
 
 	if (got_size == 0)  /* EOF */
 	{
 		if (! looping)
 			return false;
-		drmp3_seek_to_start_of_stream(&mp3_track);
+		mp3dec_ex_seek(&mp3_track, 0);
 	}
 
 	if (got_size < 0)  /* ERROR */
@@ -211,7 +209,7 @@ bool mp3player_c::OpenLump(const char *lumpname)
 		return false;
 	}
 
-    if (!drmp3_init_memory(&mp3_track, data, length, NULL))
+    if (mp3dec_ex_open_buf(&mp3_track, data, length, MP3D_SEEK_TO_SAMPLE) != 0)
     {
 		I_Error("[mp3player_c::Open](DataLump) Failed!\n");
 		return false; /* NOT REACHED */
@@ -228,7 +226,7 @@ bool mp3player_c::OpenFile(const char *filename)
 	if (status != NOT_LOADED)
 		Close();
 
-    if (!drmp3_init_file(&mp3_track, filename, NULL))
+    if (mp3dec_ex_open(&mp3_track, filename, MP3D_SEEK_TO_SAMPLE) != 0)
     {
 		I_Warning("mp3player_c: Could not open file: '%s'\n", filename);
 		return false;
@@ -248,8 +246,8 @@ void mp3player_c::Close()
 	if (status != STOPPED)
 		Stop();
 
-	drmp3_uninit(&mp3_track);
-	
+	mp3dec_ex_close(&mp3_track);
+
 	status = NOT_LOADED;
 }
 
@@ -307,7 +305,7 @@ void mp3player_c::Ticker()
 
 		if (StreamIntoBuffer(buf))
 		{
-			S_QueueAddBuffer(buf, mp3_track.sampleRate);
+			S_QueueAddBuffer(buf, mp3_track.info.hz);
 		}
 		else
 		{
@@ -348,6 +346,70 @@ abstract_music_c * S_PlayMP3Music(const pl_entry_c *musdat, float volume, bool l
 	player->Play(looping);
 
 	return player;
+}
+
+bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length)
+{
+
+	mp3dec_ex_t mp3_sound;
+
+     if (mp3dec_ex_open_buf(&mp3_sound, data, length, MP3D_SEEK_TO_SAMPLE) != 0)
+    {
+		I_Warning("Failed to load MP3 sound (corrupt mp3?)\n");
+ 
+		return false;
+    }
+
+	I_Debugf("MP3 SFX Loader: freq %d Hz, %d channels\n",
+			 mp3_sound.info.hz, mp3_sound.info.channels);
+
+	if (mp3_sound.info.channels > 2)
+	{
+		I_Warning("MP3 SFX Loader: too many channels: %d\n", mp3_sound.info.channels);
+
+		mp3dec_ex_close(&mp3_sound);
+
+		return false;
+	}
+
+	bool is_stereo = (mp3_sound.info.channels > 1);
+
+	buf->freq = mp3_sound.info.hz;
+
+	epi::sound_gather_c gather;
+
+	while (true)
+	{
+		int want = MP3V_NUM_SAMPLES;
+
+		s16_t *buffer = gather.MakeChunk(want, is_stereo);
+
+		int got_size = mp3dec_ex_read(&mp3_sound, buffer, want);
+
+		if (got_size == 0)  /* EOF */
+		{
+			gather.DiscardChunk();
+			break;
+		}
+		else if (got_size < 0)  /* ERROR */
+		{
+			gather.DiscardChunk();
+
+			I_Warning("Problem occurred while loading MP3 (%d)\n", got_size);
+			break;
+		}
+
+		got_size /= (is_stereo ? 2 : 1) * sizeof(s16_t);
+
+		gather.CommitChunk(got_size);
+	}
+
+	if (! gather.Finalise(buf, false /* want_stereo */))
+		I_Error("MP3 SFX Loader: no samples!\n");
+
+	mp3dec_ex_close(&mp3_sound);
+
+	return true;
 }
 
 //--- editor settings ---

@@ -53,11 +53,11 @@ General Improvements
 
 + Default monitor ratio is set to 16:9 instead of 4:3 to accommodate most modern monitors.
 
-+ Dynamic lighting and weapon kick are now on by default to better highlight some of EDGE's features.
++ Dynamic lighting, HQ2x, and Smoothing are now on by default to better highlight some of EDGE's rendering features.
 
 + Sliding doors now show on the Automap. 
 
-+ Quietly ignore music lumps which aren't MIDI/OGG instead of erroring out to Desktop.
++ Quietly ignore music lumps which aren't MIDI/OGG/MP3 instead of erroring out to Desktop.
 
 + Reduced the red tint while using the berserk power up.
 
@@ -122,6 +122,8 @@ Users with existing soundfonts can replace soundfont/default.sf2 with their own 
   - TinySoundfont is now the default music player for both Linux and Window builds. 
 
 + MP3 Music Support
+
++ MP3 Sound Effects Support
   
 + Titlescreen and intermission are now Widescreen compatible with https://forum.zdoom.org/viewtopic.php?f=46&t=67843
 

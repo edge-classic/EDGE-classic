@@ -42,8 +42,6 @@
 #define MINIMP3_IMPLEMENTATION
 #include "minimp3_ex.h"
 
-#define MP3V_NUM_SAMPLES  MINIMP3_MAX_SAMPLES_PER_FRAME
-
 extern bool dev_stereo;  // FIXME: encapsulation
 
 // Function for s_music.cc to check if a lump is in .mp3 format
@@ -99,7 +97,7 @@ private:
 
 mp3player_c::mp3player_c() : status(NOT_LOADED)
 {
-	mono_buffer = new s16_t[MP3V_NUM_SAMPLES * 2];
+	mono_buffer = new s16_t[MINIMP3_IO_SIZE * 2];
 }
 
 mp3player_c::~mp3player_c()
@@ -145,7 +143,7 @@ bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	else
 		data_buf = buf->data_L;
 
-	int got_size = mp3dec_ex_read(&mp3_track, data_buf, MP3V_NUM_SAMPLES * 2);
+	int got_size = mp3dec_ex_read(&mp3_track, data_buf, MINIMP3_IO_SIZE * 2);
 
 	if (got_size == 0)  /* EOF */
 	{
@@ -297,7 +295,7 @@ void mp3player_c::Ticker()
 {
 	while (status == PLAYING)
 	{
-		epi::sound_data_c *buf = S_QueueGetFreeBuffer(MP3V_NUM_SAMPLES, 
+		epi::sound_data_c *buf = S_QueueGetFreeBuffer(MINIMP3_IO_SIZE, 
 				(is_stereo && dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 
 		if (! buf)
@@ -380,7 +378,7 @@ bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length)
 
 	while (true)
 	{
-		int want = MP3V_NUM_SAMPLES;
+		int want = MINIMP3_BUF_SIZE;
 
 		s16_t *buffer = gather.MakeChunk(want, is_stereo);
 

@@ -432,7 +432,6 @@ static const char *attack_class[NUMATKCLASS] =
     "NONE",
     "PROJECTILE",
     "SPAWNER",
-    "DOUBLE_SPAWNER", //Lobo 2021: doom64 pain elemental
     "TRIPLE_SPAWNER",
     "FIXED_SPREADER",
     "RANDOM_SPREADER",

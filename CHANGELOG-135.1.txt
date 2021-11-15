@@ -77,9 +77,6 @@ New Features
 + WEAPONS.DDF: new DJNE weapon action for more robust weapon reloading. Backported from EDGE 2.x branch.
 Used just like JUMP(state_name:frame,xx%), but decrements the reload quantity for the specified attack and jumps if it's not zero. The jump chance is now interpreted as the attack specifier: 0% is the primary attack ammo, and non-zero percent is the secondary attack ammo.
 
-+ ATTACKS.DDF:
-  -New attack type: DOUBLE_SPAWNER to mimic the pain elemental in Doom64.
-  
 + Lines.ddf
   -Edited all Slider doors to use BDOPN sfx.
   -Added Hub Exit switches: [2000] to [2039]

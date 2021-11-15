@@ -2238,24 +2238,6 @@ static void ObjectTripleSpawn(mobj_t * object)
 	ObjectSpawning(object, object->angle + ANG270);
 }
 
-//
-// P_ActObjectDoubleSpawn
-//
-// Spawns two objects at 90 and 270 degrees.
-// Like the death sequence of the Pain
-// elemental. 
-//
-// Lobo: 2021 to mimic the Doom64 pain elemental
-//
-
-static void ObjectDoubleSpawn(mobj_t * object)
-{
-	ObjectSpawning(object, object->angle + ANG90);
-	//ObjectSpawning(object, object->angle + ANG180);
-	ObjectSpawning(object, object->angle + ANG270);
-}
-
-
 //-------------------------------------------------------------------
 //-------------------SKULLFLY HANDLING ROUTINES----------------------
 //-------------------------------------------------------------------
@@ -2663,13 +2645,6 @@ static void P_DoAttack(mobj_t * object)
 			break;
 		}
 
-		//Lobo 2021: added doublespawner like the Doom64 elemental
-		case ATK_DOUBLESPAWNER:
-		{
-			ObjectDoubleSpawn(object);
-			break;
-		}
-	
 		case ATK_TRIPLESPAWNER:
 		{
 			ObjectTripleSpawn(object);

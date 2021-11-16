@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12..3.20)
 
+option(USE_SDL12_COMPAT "Build sdl12-compat library for SDL 2.x" OFF)
+
 add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/deh_edge)
@@ -8,6 +10,9 @@ add_subdirectory(source_files/glbsp)
 add_subdirectory(source_files/glew/build/cmake)
 add_subdirectory(source_files/libjpeg)
 add_subdirectory(source_files/libpng)
+if(USE_SDL12_COMPAT)
+  add_subdirectory(source_files/sdl12-compat)
+endif()
 add_subdirectory(source_files/zlib)
 
 project(
@@ -265,12 +270,27 @@ else()
 endif()
 
 # Copies executables to local install directory after build
-add_custom_command(
-  TARGET edge135
-  POST_BUILD
-  COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge135>"
-          "${CMAKE_CURRENT_LIST_DIR}"
-)
+if(USE_SDL12_COMPAT)
+	add_custom_command(
+	TARGET edge135
+	POST_BUILD
+	COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge135>"
+			"${CMAKE_CURRENT_LIST_DIR}"
+	COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:SDL>"
+			"${CMAKE_CURRENT_LIST_DIR}"
+	)
+else()
+	add_custom_command(
+	TARGET edge135
+	POST_BUILD
+	COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge135>"
+			"${CMAKE_CURRENT_LIST_DIR}"
+	)
+endif()
+
+if(USE_SDL12_COMPAT)
+  add_dependencies(edge135 SDL)
+endif()
 
 if(WIN32 OR MSYS)
 target_link_libraries(

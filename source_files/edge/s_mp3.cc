@@ -348,10 +348,10 @@ abstract_music_c * S_PlayMP3Music(const pl_entry_c *musdat, float volume, bool l
 
 bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length)
 {
+	mp3dec_t mp3_sound;
+	mp3dec_file_info_t sound_info;
 
-	mp3dec_ex_t mp3_sound;
-
-     if (mp3dec_ex_open_buf(&mp3_sound, data, length, MP3D_SEEK_TO_SAMPLE) != 0)
+    if (mp3dec_load_buf(&mp3_sound, data, length, &sound_info, NULL, NULL) != 0)
     {
 		I_Warning("Failed to load MP3 sound (corrupt mp3?)\n");
  
@@ -359,53 +359,39 @@ bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length)
     }
 
 	I_Debugf("MP3 SFX Loader: freq %d Hz, %d channels\n",
-			 mp3_sound.info.hz, mp3_sound.info.channels);
+			 sound_info.hz, sound_info.channels);
 
-	if (mp3_sound.info.channels > 2)
+	if (sound_info.channels > 2)
 	{
-		I_Warning("MP3 SFX Loader: too many channels: %d\n", mp3_sound.info.channels);
+		I_Warning("MP3 SFX Loader: too many channels: %d\n", sound_info.channels);
 
-		mp3dec_ex_close(&mp3_sound);
+		free(sound_info.buffer);
 
 		return false;
 	}
 
-	bool is_stereo = (mp3_sound.info.channels > 1);
+	if (sound_info.samples <= 0) // I think the initial loading would fail if this were the case, but just as a sanity check - Dasho
+	{
+		I_Error("MP3 SFX Loader: no samples!\n");
+		return false;
+	}
 
-	buf->freq = mp3_sound.info.hz;
+	bool is_stereo = (sound_info.channels > 1);
+
+	buf->freq = sound_info.hz;
 
 	epi::sound_gather_c gather;
 
-	while (true)
-	{
-		int want = MINIMP3_BUF_SIZE;
+	s16_t *buffer = gather.MakeChunk(sound_info.samples, is_stereo);
 
-		s16_t *buffer = gather.MakeChunk(want, is_stereo);
+	memcpy(buffer, sound_info.buffer, sound_info.samples * (is_stereo ? 2 : 1) * sizeof(s16_t));
 
-		int got_size = mp3dec_ex_read(&mp3_sound, buffer, want);
-
-		if (got_size == 0)  /* EOF */
-		{
-			gather.DiscardChunk();
-			break;
-		}
-		else if (got_size < 0)  /* ERROR */
-		{
-			gather.DiscardChunk();
-
-			I_Warning("Problem occurred while loading MP3 (%d)\n", got_size);
-			break;
-		}
-
-		got_size /= (is_stereo ? 2 : 1) * sizeof(s16_t);
-
-		gather.CommitChunk(got_size);
-	}
+	gather.CommitChunk(sound_info.samples);
 
 	if (! gather.Finalise(buf, false /* want_stereo */))
 		I_Error("MP3 SFX Loader: no samples!\n");
 
-	mp3dec_ex_close(&mp3_sound);
+	free(sound_info.buffer);
 
 	return true;
 }

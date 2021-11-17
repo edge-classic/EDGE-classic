@@ -65,6 +65,8 @@ General Improvements
 
 + Much improved Doom skyboxes from https://forum.zdoom.org/viewtopic.php?f=46&t=53873&hilit=doom+skyboxes
 
++ Merged CeeJays lines.ddf with ours to create the ULTIMATE lines.ddf ;)
+
 
 New Features
 ------------

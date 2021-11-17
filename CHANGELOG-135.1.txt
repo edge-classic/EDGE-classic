@@ -70,6 +70,10 @@ General Improvements
 
 New Features
 ------------
++ More game IWADs supported: HACX, Herectic, Harmony.
+  -HACX: full support. Includes bug fixes and widescreen support by CeeJay. Some graphics from HACX 2 team.
+  -Heretic: parcial support. Item menus don't work.
+  -Harmony: parcial support. Mostly playable, may be some (hopefully) minor differences.
 
 + THINGS.DDF: 
   -FALLING_SOUND for the player when they fall long distances. Backported from EDGE 2.x branch.

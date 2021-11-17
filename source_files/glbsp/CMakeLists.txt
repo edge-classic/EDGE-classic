@@ -1,21 +1,21 @@
 project(
   edge_glbsp
-  LANGUAGES C
+  LANGUAGES CXX
   VERSION 0.1.0
 )
 
-set(CMAKE_C_FLAGS "-O2 -ffast-math -fno-strict-aliasing -DINLINE_G=inline -DGLBSP_PLUGIN")
+set(CMAKE_CXX_FLAGS "-O2 -ffast-math -fno-strict-aliasing -DINLINE_G=inline")
 
 add_library(
   edge_glbsp
-  src/analyze.c
-  src/blockmap.c
-  src/glbsp.c
-  src/level.c
-  src/node.c
-  src/reject.c
-  src/seg.c
-  src/system.c
-  src/util.c
-  src/wad.c
+  analyze.cc
+  blockmap.cc
+  glbsp.cc
+  level.cc
+  node.cc
+  reject.cc
+  seg.cc
+  system.cc
+  util.cc
+  wad.cc
 )

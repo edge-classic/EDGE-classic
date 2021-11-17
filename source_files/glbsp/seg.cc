@@ -56,6 +56,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 #define PRECIOUS_MULTIPLY  100
 
 #define SEG_FAST_THRESHHOLD  200
@@ -98,7 +101,7 @@ static intersection_t *NewIntersection(void)
   }
   else
   {
-    cut = UtilCalloc(sizeof(intersection_t));
+    cut = (intersection_t *) UtilCalloc(sizeof(intersection_t));
   }
 
   return cut;
@@ -1241,3 +1244,5 @@ void AddMinisegs(seg_t *part,
   }
 }
 
+
+}  // namespace glbsp

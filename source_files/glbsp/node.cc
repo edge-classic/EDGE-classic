@@ -54,6 +54,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 #define DEBUG_BUILDER  0
 #define DEBUG_SORTER   0
 #define DEBUG_SUBSEC   0
@@ -141,7 +144,7 @@ static superblock_t *NewSuperBlock(void)
   superblock_t *block;
 
   if (quick_alloc_supers == NULL)
-    return UtilCalloc(sizeof(superblock_t));
+    return (superblock_t *)UtilCalloc(sizeof(superblock_t));
 
   block = quick_alloc_supers;
   quick_alloc_supers = block->subs[0];
@@ -497,6 +500,9 @@ static void DetermineMiddle(subsec_t *sub)
   float_g mid_x=0, mid_y=0;
   int total=0;
 
+  if (sub->is_dummy)
+    return;
+
   // compute middle coordinates
   for (cur=sub->seg_list; cur; cur=cur->next)
   {
@@ -540,7 +546,7 @@ static void ClockwiseOrder(subsec_t *sub)
   if (total <= 32)
     array = seg_buffer;
   else
-    array = UtilCalloc(total * sizeof(seg_t *));
+    array = (seg_t **) UtilCalloc(total * sizeof(seg_t *));
 
   for (cur=sub->seg_list, i=0; cur; cur=cur->next, i++)
     array[i] = cur;
@@ -865,6 +871,65 @@ static void DebugShowSegs(superblock_t *seg_list)
 }
 #endif
 
+
+static seg_t * CreateDummySeg(seg_t *orig)
+{
+  seg_t *dummy = NewSeg();
+
+  // copy most stuff from original seg
+  memcpy(dummy, orig, sizeof(seg_t));
+
+  dummy->next = NULL;
+  dummy->partner = NULL;
+  dummy->block = NULL;
+
+  dummy->index = num_complete_seg;
+  num_complete_seg++;
+
+  return dummy;
+}
+
+
+static node_t * CreateDummyNode(superblock_t *seg_list)
+{
+  node_t *node;
+
+  seg_t *best;
+  
+  PrintWarn("LEVEL TOO SIMPLE, creating a dummy node...\n");
+
+  // first seg of the whole list will be our partition line
+  // (the choice is totally arbitrary)
+  best = seg_list->segs;
+
+  node = NewNode();
+
+  node->x  = best->linedef->start->x;
+  node->y  = best->linedef->start->y;
+  node->dx = best->linedef->end->x - node->x;
+  node->dy = best->linedef->end->y - node->y;
+
+  FindLimits(seg_list, &node->l.bounds);
+  FindLimits(seg_list, &node->r.bounds);
+
+  // the right side will have a normal subsector
+
+  node->r.subsec = CreateSubsec(seg_list);
+
+  // the left side gets a fake subsector
+
+  node->l.subsec = NewSubsec();
+
+  node->l.subsec->seg_list = CreateDummySeg(best);
+  node->l.subsec->seg_count = 1;
+
+  node->l.subsec->index = num_subsecs - 1;
+  node->l.subsec->is_dummy = TRUE;
+
+  return node;
+}
+
+
 //
 // BuildNodes
 //
@@ -904,7 +969,29 @@ glbsp_ret_e BuildNodes(superblock_t *seg_list,
     PrintDebug("Build: CONVEX\n");
 #   endif
 
-    *S = CreateSubsec(seg_list);
+#if 0  // turns out this was bogus -- AJA nov/2015
+    if (depth == 0)
+    {
+      /* -AJA- welcome to Hack Central, hope you enjoy your stay.
+       *
+       * Vanilla DOOM (and some source ports) do not function when
+       * there are no nodes at all.  For this case we create a dummy
+       * node with the real subsector on one side, and a fake-ish
+       * subsector (containing a copy of a seg) on the other side. 
+       *
+       * Tested in Chocolate Doom, PrBoom, Legacy and Odamex, with
+       * no problems. 
+       *
+       * [ P.S. no need to set *S here ]
+       */
+      *N = CreateDummyNode(seg_list);
+    }
+    else
+#endif
+    {
+      *S = CreateSubsec(seg_list);
+    }
+
     return GLBSP_E_OK;
   }
 
@@ -1018,6 +1105,9 @@ void ClockwiseBspTree(node_t *root)
   {
     subsec_t *sub = LookupSubsec(i);
 
+    if (sub->is_dummy)
+      continue;
+
     ClockwiseOrder(sub);
     RenumberSubsecSegs(sub);
 
@@ -1032,6 +1122,9 @@ static void NormaliseSubsector(subsec_t *sub)
 {
   seg_t *new_head = NULL;
   seg_t *new_tail = NULL;
+
+  if (sub->is_dummy)
+    return;
 
 # if DEBUG_SUBSEC
   PrintDebug("Subsec: Normalising %d\n", sub->index);
@@ -1110,6 +1203,9 @@ static void RoundOffSubsector(subsec_t *sub)
 
   int real_total  = 0;
   int degen_total = 0;
+
+  if (sub->is_dummy)
+    return;
 
 # if DEBUG_SUBSEC
   PrintDebug("Subsec: Rounding off %d\n", sub->index);
@@ -1291,3 +1387,6 @@ void RoundOffBspTree(node_t *root)
 // When there is no more Seg in CreateNodes' list, then they are all in the
 // global list and ready to be saved to disk.
 //
+
+
+}  // namespace glbsp

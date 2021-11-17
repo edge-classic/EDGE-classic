@@ -40,6 +40,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 #define DEBUG_WALLTIPS   0
 #define DEBUG_POLYOBJ    0
 #define DEBUG_WINDOW_FX  0
@@ -365,7 +368,7 @@ static int SidedefCompare(const void *p1, const void *p2)
 void DetectDuplicateVertices(void)
 {
   int i;
-  uint16_g *array = UtilCalloc(num_vertices * sizeof(uint16_g));
+  uint16_g *array = (uint16_g *)UtilCalloc(num_vertices * sizeof(uint16_g));
 
   DisplayTicker();
 
@@ -395,7 +398,7 @@ void DetectDuplicateVertices(void)
 void DetectDuplicateSidedefs(void)
 {
   int i;
-  uint16_g *array = UtilCalloc(num_sidedefs * sizeof(uint16_g));
+  uint16_g *array = (uint16_g *)UtilCalloc(num_sidedefs * sizeof(uint16_g));
 
   DisplayTicker();
 
@@ -687,7 +690,7 @@ void DetectOverlappingLines(void)
   //   Note: does not detect partially overlapping lines.
 
   int i;
-  int *array = UtilCalloc(num_linedefs * sizeof(int));
+  int *array = (int *)UtilCalloc(num_linedefs * sizeof(int));
   int count = 0;
 
   DisplayTicker();
@@ -1128,3 +1131,5 @@ sector_t * VertexCheckOpen(vertex_t *vert, float_g dx, float_g dy)
   return FALSE;
 }
 
+
+}  // namespace glbsp

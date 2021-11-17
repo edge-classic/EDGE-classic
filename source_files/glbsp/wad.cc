@@ -40,6 +40,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 static FILE *in_file = NULL;
 static FILE *out_file = NULL;
 
@@ -181,7 +184,7 @@ static level_t *NewLevel(int flags)
 {
   level_t *cur;
 
-  cur = UtilCalloc(sizeof(level_t));
+  cur = (level_t *) UtilCalloc(sizeof(level_t));
 
   cur->flags = flags;
 
@@ -198,7 +201,7 @@ static lump_t *NewLump(char *name)
 {
   lump_t *cur;
 
-  cur = UtilCalloc(sizeof(lump_t));
+  cur = (lump_t *) UtilCalloc(sizeof(lump_t));
 
   cur->name = name;
   cur->start = cur->new_start = -1;
@@ -982,9 +985,9 @@ static int WriteDirectory(void)
 
 
 //
-// CheckExtension
+// UtilCheckExtension
 //
-int CheckExtension(const char *filename, const char *ext)
+int UtilCheckExtension(const char *filename, const char *ext)
 {
   int A = (int)strlen(filename) - 1;
   int B = (int)strlen(ext) - 1;
@@ -1002,9 +1005,9 @@ int CheckExtension(const char *filename, const char *ext)
 }
 
 //
-// ReplaceExtension
+// UtilReplaceExtension
 //
-char *ReplaceExtension(const char *filename, const char *ext)
+char *UtilReplaceExtension(const char *filename, const char *ext)
 {
   char *dot_pos;
   char buffer[512];
@@ -1166,10 +1169,10 @@ void AddGLTextLine(const char *keyword, const char *value)
   PrintDebug("[%s] Adding: %s=%s\n", gl_level->name, keyword, value);
 # endif
 
-  AppendLevelLump(gl_level, keyword, strlen(keyword));
+  AppendLevelLump(gl_level, keyword, (int)strlen(keyword));
   AppendLevelLump(gl_level, "=", 1);
 
-  AppendLevelLump(gl_level, value, strlen(value));
+  AppendLevelLump(gl_level, value, (int)strlen(value));
   AppendLevelLump(gl_level, "\n", 1);
 }
 
@@ -1383,7 +1386,7 @@ glbsp_ret_e WriteWadFile(const char *filename)
 //
 void DeleteGwaFile(const char *base_wad_name)
 {
-  char *gwa_file = ReplaceExtension(base_wad_name, "gwa");
+  char *gwa_file = UtilReplaceExtension(base_wad_name, "gwa");
 
   if (remove(gwa_file) == 0)
     PrintMsg("Deleted GWA file: %s\n", gwa_file);
@@ -1739,3 +1742,5 @@ void ReportFailedLevels(void)
   PrintMsg("\nEnd of problem report.\n");
 }
 
+
+}  // namespace glbsp

@@ -49,7 +49,7 @@ static char message_buf[1024];
 static char wad_name_buf[256];
 
 
-static int display_mode = DIS_INVALID;
+static int display_mode = glbsp::DIS_INVALID;
 
 static int build_progress = 0;
 static int build_limit = 0;
@@ -98,7 +98,7 @@ static void GB_Ticker(void)
 //
 // GB_DisplayOpen
 //
-static boolean_g GB_DisplayOpen(displaytype_e type)
+static glbsp::boolean_g GB_DisplayOpen(glbsp::displaytype_e type)
 {
 	display_mode = type;
 
@@ -122,7 +122,7 @@ static void GB_DisplaySetTitle(const char *str)
 //
 static void GB_DisplaySetBarText(int barnum, const char *str)
 {
-	if (display_mode != DIS_BUILDPROGRESS)
+	if (display_mode != glbsp::DIS_BUILDPROGRESS)
 	{
 		E_NodeMessage(str);
 		return;
@@ -159,7 +159,7 @@ static void GB_DisplaySetBarLimit(int barnum, int limit)
 {
 	SYS_ASSERT(1 <= barnum && barnum <= 2);
 
-	if (display_mode == DIS_BUILDPROGRESS && barnum == 2)
+	if (display_mode == glbsp::DIS_BUILDPROGRESS && barnum == 2)
 	{
 		build_limit = limit;
 		build_progress = 0;
@@ -174,7 +174,7 @@ static void GB_DisplaySetBar(int barnum, int count)
 {
 	SYS_ASSERT(1 <= barnum && barnum <= 2);
 
-	if (display_mode == DIS_BUILDPROGRESS && barnum == 2)
+	if (display_mode == glbsp::DIS_BUILDPROGRESS && barnum == 2)
 	{
 		if (count < 0 || count > build_limit || build_limit <= 0)
 			return;
@@ -199,7 +199,7 @@ static void GB_DisplayClose(void)
 	/* does nothing */
 }
 
-static const nodebuildfuncs_t edge_build_funcs =
+static const glbsp::nodebuildfuncs_t edge_build_funcs =
 {
 	GB_FatalError,
 	GB_PrintMsg,
@@ -226,22 +226,22 @@ bool GB_BuildNodes(const char *filename, const char *outname)
 	L_WriteDebug("# source: '%s'\n", filename);
 	L_WriteDebug("#   dest:  '%s'\n", outname);
 
-	nodebuildinfo_t nb_info;
-	volatile nodebuildcomms_t nb_comms;
+	glbsp::nodebuildinfo_t nb_info;
+	volatile glbsp::nodebuildcomms_t nb_comms;
 
-	nb_info = default_buildinfo;
+	nb_info = glbsp::default_buildinfo;
 
 	// nb_comms = default_buildcomms;
-	memcpy((void *)&nb_comms, (void *)&default_buildcomms, sizeof(nb_comms));
+	memcpy((void *)&nb_comms, (void *)&glbsp::default_buildcomms, sizeof(nb_comms));
 
-	nb_info.input_file  = GlbspStrDup(filename);
-	nb_info.output_file = GlbspStrDup(outname);
+	nb_info.input_file  = glbsp::GlbspStrDup(filename);
+	nb_info.output_file = glbsp::GlbspStrDup(outname);
 	nb_info.fast  = 1;
 	nb_info.quiet = 1;
 
 	// FIXME: user-controllable build options (factor, fresh, etc).
 
-	if (GLBSP_E_OK != GlbspCheckInfo(&nb_info, &nb_comms))
+	if (glbsp::GLBSP_E_OK != glbsp::CheckInfo(&nb_info, &nb_comms))
 	{
 		GB_PrintMsg("Param Check FAILED:\n");
 		GB_PrintMsg("- %s\n", nb_comms.message);
@@ -253,11 +253,11 @@ bool GB_BuildNodes(const char *filename, const char *outname)
 
 	GB_InitProgress();
 
-	glbsp_ret_e ret = GlbspBuildNodes(&nb_info, &edge_build_funcs, &nb_comms);
+	glbsp::glbsp_ret_e ret = glbsp::BuildNodes(&nb_info, &edge_build_funcs, &nb_comms);
 
 	GB_TermProgress();
 
-	if (ret != GLBSP_E_OK)
+	if (ret != glbsp::GLBSP_E_OK)
 	{
 		GB_PrintMsg("Building FAILED:\n");
 		GB_PrintMsg("- %s\n\n", nb_comms.message);
@@ -276,7 +276,7 @@ bool GB_BuildNodes(const char *filename, const char *outname)
 
 void GB_InitProgress(void)
 {
-	display_mode = DIS_INVALID;
+	display_mode = glbsp::DIS_INVALID;
 	
 	wad_name_buf[0] = 0;
 }

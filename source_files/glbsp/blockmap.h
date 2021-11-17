@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------
-// REJECT : Generate the reject table
+// BLOCKMAP : Generate the blockmap
 //------------------------------------------------------------------------
 //
 //  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
@@ -18,13 +18,31 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __GLBSP_REJECT_H__
-#define __GLBSP_REJECT_H__
+#ifndef __GLBSP_BLOCKMAP_H__
+#define __GLBSP_BLOCKMAP_H__
 
 #include "structs.h"
 #include "level.h"
 
-// build the reject table and write it into the REJECT lump
-void PutReject(void);
+namespace glbsp
+{
 
-#endif /* __GLBSP_REJECT_H__ */
+#define DEFAULT_BLOCK_LIMIT  16000
+
+// compute blockmap origin & size (the block_x/y/w/h variables)
+// based on the set of loaded linedefs.
+//
+void InitBlockmap(void);
+
+// build the blockmap and write the data into the BLOCKMAP lump
+void PutBlockmap(void);
+
+// utility routines...
+void GetBlockmapBounds(int *x, int *y, int *w, int *h);
+
+int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
+    int x1, int y1, int x2, int y2);
+
+}  // namespace glbsp
+
+#endif /* __GLBSP_BLOCKMAP_H__ */

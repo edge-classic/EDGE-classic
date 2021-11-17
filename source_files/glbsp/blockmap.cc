@@ -38,6 +38,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 #define DEBUG_BLOCKMAP  0
 
 
@@ -165,8 +168,7 @@ static void BlockAdd(int blk_num, int line_index)
   if (! cur)
   {
     // create empty block
-    block_lines[blk_num] = cur = UtilCalloc(BK_QUANTUM * 
-        sizeof(uint16_g));
+    block_lines[blk_num] = cur = (uint16_g *)UtilCalloc(BK_QUANTUM * sizeof(uint16_g));
     cur[BK_NUM] = 0;
     cur[BK_MAX] = BK_QUANTUM;
     cur[BK_XOR] = 0x1234;
@@ -177,8 +179,7 @@ static void BlockAdd(int blk_num, int line_index)
     // no more room, so allocate some more...
     cur[BK_MAX] += BK_QUANTUM;
 
-    block_lines[blk_num] = cur = UtilRealloc(cur, cur[BK_MAX] * 
-        sizeof(uint16_g));
+    block_lines[blk_num] = cur = (uint16_g *)UtilRealloc(cur, cur[BK_MAX] * sizeof(uint16_g));
   }
 
   // compute new checksum
@@ -262,7 +263,7 @@ static void CreateBlockmap(void)
 {
   int i;
 
-  block_lines = UtilCalloc(block_count * sizeof(uint16_g *));
+  block_lines = (uint16_g **) UtilCalloc(block_count * sizeof(uint16_g *));
 
   DisplayTicker();
 
@@ -314,8 +315,8 @@ static void CompressBlockmap(void)
 
   int orig_size, new_size;
 
-  block_ptrs = UtilCalloc(block_count * sizeof(uint16_g));
-  block_dups = UtilCalloc(block_count * sizeof(uint16_g));
+  block_ptrs = (uint16_g *)UtilCalloc(block_count * sizeof(uint16_g));
+  block_dups = (uint16_g *)UtilCalloc(block_count * sizeof(uint16_g));
 
   DisplayTicker();
 
@@ -617,3 +618,5 @@ void PutBlockmap(void)
   FreeBlockmap();
 }
 
+
+}  // namespace glbsp

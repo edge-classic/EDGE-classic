@@ -38,6 +38,9 @@
 #endif
 
 
+namespace glbsp
+{
+
 //
 // UtilCalloc
 //
@@ -91,7 +94,7 @@ char *UtilStrDup(const char *str)
   char *result;
   int len = (int)strlen(str);
 
-  result = UtilCalloc(len+1);
+  result = (char *) UtilCalloc(len+1);
 
   if (len > 0)
     memcpy(result, str, len);
@@ -114,7 +117,7 @@ char *UtilStrNDup(const char *str, int size)
   for (len=0; len < size && str[len]; len++)
   { }
 
-  result = UtilCalloc(len+1);
+  result = (char *) UtilCalloc(len+1);
 
   if (len > 0)
     memcpy(result, str, len);
@@ -139,7 +142,7 @@ char *UtilFormat(const char *str, ...)
 
     buf_size *= 2;
 
-    buf = realloc(buf, buf_size);
+    buf = (char *) realloc(buf, buf_size);
     if (!buf)
       FatalError("Out of memory (formatting string)");
 
@@ -292,3 +295,5 @@ void Adler32_Finish(uint32_g *crc)
   /* nothing to do */
 }
 
+
+}  // namespace glbsp

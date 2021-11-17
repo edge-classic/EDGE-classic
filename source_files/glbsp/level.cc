@@ -44,6 +44,9 @@
 #include "wad.h"
 
 
+namespace glbsp
+{
+
 #define DEBUG_LOAD      0
 #define DEBUG_BSP       0
 
@@ -87,8 +90,7 @@ int num_complete_seg = 0;
 {  \
   if ((NUMVAR % ALLOC_BLKNUM) == 0)  \
   {  \
-    BASEVAR = UtilRealloc(BASEVAR, (NUMVAR + ALLOC_BLKNUM) *   \
-        sizeof(TYPE *));  \
+    BASEVAR = (TYPE **) UtilRealloc(BASEVAR, (NUMVAR + ALLOC_BLKNUM) * sizeof(TYPE *));  \
   }  \
   BASEVAR[NUMVAR] = (TYPE *) UtilCalloc(sizeof(TYPE));  \
   NUMVAR += 1;  \
@@ -644,7 +646,7 @@ static const uint8_g *lev_v2_magic = (uint8_g *) "gNd2";
 static const uint8_g *lev_v3_magic = (uint8_g *) "gNd3";
 static const uint8_g *lev_v5_magic = (uint8_g *) "gNd5";
 
-void PutVertices(char *name, int do_gl)
+void PutVertices(const char *name, int do_gl)
 {
   int count, i;
   lump_t *lump;
@@ -1031,7 +1033,7 @@ void PutV3Segs(int do_v5)
       num_complete_seg);
 }
 
-void PutSubsecs(char *name, int do_gl)
+void PutSubsecs(const char *name, int do_gl)
 {
   int i;
   lump_t *lump;
@@ -1199,7 +1201,7 @@ static void PutOneV5Node(node_t *node, lump_t *lump)
 # endif
 }
 
-void PutNodes(char *name, int do_gl, int do_v5, node_t *root)
+void PutNodes(const char *name, int do_gl, int do_v5, node_t *root)
 {
   lump_t *lump;
 
@@ -1598,12 +1600,12 @@ void PutGLChecksum(void)
   lump = FindLevelLump("VERTEXES");
 
   if (lump && lump->length > 0)
-    Adler32_AddBlock(&crc, lump->data, lump->length);
+    Adler32_AddBlock(&crc, (uint8_g*) lump->data, lump->length);
 
   lump = FindLevelLump("LINEDEFS");
 
   if (lump && lump->length > 0)
-    Adler32_AddBlock(&crc, lump->data, lump->length);
+    Adler32_AddBlock(&crc, (uint8_g*) lump->data, lump->length);
 
   Adler32_Finish(&crc);
 
@@ -1732,3 +1734,5 @@ void SaveLevel(node_t *root_node)
   PutGLChecksum();
 }
 
+
+}  // namespace glbsp

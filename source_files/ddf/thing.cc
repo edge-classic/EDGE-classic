@@ -1317,6 +1317,7 @@ static specflags_t hyper_specials[] =
 	{"AUTOAIM", HF_NO_AUTOAIM, 1},
 	{"TILT", HF_TILT, 0},
 	{"IMMORTAL", HF_IMMORTAL, 0},
+	{"FLOOR_CLIP", HF_FLOORCLIP, 0}, //Lobo: new FLOOR_CLIP flag
 	{NULL, 0, 0}
 };
 

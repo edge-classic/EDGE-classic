@@ -1028,6 +1028,11 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 	{
 		y_clipping = YCLIP_Never;
 	}
+	else if (mo->hyperflags & HF_FLOORCLIP) //Lobo: new FLOOR_CLIP flag
+	{
+		// do nothing? just skip the other elseifs below
+		y_clipping = YCLIP_Hard;
+	}
 	else if (sprite_kludge==0 && gzb < mo->floorz)
 	{
 		// explosion ?

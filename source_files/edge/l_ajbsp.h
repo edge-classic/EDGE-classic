@@ -1,8 +1,9 @@
 //----------------------------------------------------------------------------
-//  EDGE<->GLBSP Bridging code
+//  EDGE<->AJBSP Bridging code
 //----------------------------------------------------------------------------
 // 
 //  Copyright (c) 1999-2009  The EDGE Team.
+//  Adapted for AJBSP - Dashodanger 2021
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -23,12 +24,12 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __L_GLBSP__
-#define __L_GLBSP__
+#ifndef __L_AJBSP__
+#define __L_AJBSP__
 
-bool GB_BuildNodes(const char *filename, const char *outname);
+bool AJ_BuildNodes(const char *filename, const char *outname);
 
-#endif  // __L_GLBSP__
+#endif  // __L_AJBSP__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

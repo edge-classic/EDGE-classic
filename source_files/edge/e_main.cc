@@ -57,7 +57,7 @@
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_stuff.h"
-#include "l_glbsp.h"
+#include "l_ajbsp.h"
 #include "m_argv.h"
 #include "m_bbox.h"
 #include "m_cheat.h"

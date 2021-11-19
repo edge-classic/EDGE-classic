@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.12..3.20)
 
 option(USE_SDL12_COMPAT "Build sdl12-compat library for SDL 2.x" OFF)
 
+add_subdirectory(source_files/ajbsp)
 add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/deh_edge)
 add_subdirectory(source_files/epi)
-add_subdirectory(source_files/glbsp)
 add_subdirectory(source_files/glew/build/cmake)
 add_subdirectory(source_files/libjpeg)
 add_subdirectory(source_files/libpng)
@@ -55,7 +55,7 @@ add_executable(
 	source_files/edge/hu_font.cc    
 	source_files/edge/hu_stuff.cc   
 	source_files/edge/hu_style.cc   
-	source_files/edge/l_glbsp.cc    
+	source_files/edge/l_ajbsp.cc    
 	source_files/edge/l_deh.cc      
 	source_files/edge/m_argv.cc     
 	source_files/edge/m_bbox.cc     
@@ -163,7 +163,7 @@ add_executable(
 	source_files/edge/hu_font.cc    
 	source_files/edge/hu_stuff.cc   
 	source_files/edge/hu_style.cc   
-	source_files/edge/l_glbsp.cc    
+	source_files/edge/l_ajbsp.cc    
 	source_files/edge/l_deh.cc      
 	source_files/edge/m_argv.cc     
 	source_files/edge/m_bbox.cc     
@@ -250,12 +250,12 @@ endif()
 
 find_package(SDL REQUIRED)
 
+target_include_directories(edge135 PRIVATE source_files/ajbsp)
 target_include_directories(edge135 PRIVATE source_files/coal)
 target_include_directories(edge135 PRIVATE source_files/ddf)
 target_include_directories(edge135 PRIVATE source_files/deh_edge)
 target_include_directories(edge135 PRIVATE source_files/epi)
 target_include_directories(edge135 PRIVATE source_files/glew/include/GL)
-target_include_directories(edge135 PRIVATE source_files/glbsp)
 target_include_directories(edge135 PRIVATE source_files/libjpeg)
 target_include_directories(edge135 PRIVATE source_files/libpng)
 target_include_directories(edge135 PRIVATE source_files/minimp3)
@@ -295,11 +295,11 @@ endif()
 if(WIN32 OR MSYS)
 target_link_libraries(
   edge135
-  PRIVATE edge_coal
+  PRIVATE edge_ajbsp
+  		  edge_coal
           edge_ddf
           edge_deh
           edge_epi
-          edge_glbsp
 		  glew_s
 		  opengl32
 		  ${SDL_LIBRARIES}
@@ -312,11 +312,11 @@ target_link_libraries(
 else()
 target_link_libraries(
   edge135
-  PRIVATE edge_coal
+  PRIVATE edge_ajbsp
+  		  edge_coal
           edge_ddf
           edge_deh
           edge_epi
-          edge_glbsp
 		  OpenGL
 		  glew_s
 		  SDL

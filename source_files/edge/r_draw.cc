@@ -197,7 +197,7 @@ void RGL_DrawProgress(int perc, int glbsp_perc)
 	ProgressSection(logo_lum, lw, lh, text_lum, tw, th,
 		0.4f, 0.6f, 1.0f, &y, perc, 1.0f);
 
-	y -= 40;
+	y -= 10;
 
 	if (glbsp_perc >= 0 || glbsp_last_prog_time > 0)
 	{
@@ -220,10 +220,9 @@ void RGL_DrawProgress(int perc, int glbsp_perc)
 			glbsp_perc = 100;
 		}
 
-		logo_lum = RGL_GlbspImage(&lw, &lh);
 		text_lum = RGL_BuildImage(&tw, &th);
 
-		ProgressSection(logo_lum, lw, lh, text_lum, tw, th,
+		ProgressSection(0, 0, 0, text_lum, tw, th,
 			1.0f, 0.2f, 0.1f, &y, glbsp_perc, alpha);
 	}
 

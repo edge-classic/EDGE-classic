@@ -39,7 +39,7 @@
 #include "dm_structs.h"
 #include "e_main.h"
 #include "g_game.h"
-#include "l_glbsp.h"
+#include "l_ajbsp.h"
 #include "m_argv.h"
 #include "m_bbox.h"
 #include "m_misc.h"
@@ -250,7 +250,7 @@ static void LoadGLVertexes(int lump)
 		data[0] == 'g' && data[1] == 'N' &&
 		data[2] == 'd' && data[3] == '4')
 	{
-		I_Error("V4 Nodes not supported, please rebuild nodes with glBSP.\n");
+		I_Error("V4 Nodes not supported, please rebuild nodes with AJBSP.\n");
 	}
 
 	// Determine number of vertices:

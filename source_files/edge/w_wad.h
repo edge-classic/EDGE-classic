@@ -36,7 +36,7 @@ typedef enum
 	FLKIND_IWad = 0,  // iwad file
 	FLKIND_PWad,      // normal .wad file
 	FLKIND_EWad,      // EDGE.wad
-	FLKIND_GWad,      // glbsp node wad
+	FLKIND_GWad,      // ajbsp node wad
 	FLKIND_HWad,      // deHacked wad
 
 	FLKIND_Lump,      // raw lump (no extension)

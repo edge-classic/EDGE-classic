@@ -64,7 +64,7 @@
 #include "e_main.h"
 #include "e_search.h"
 #include "l_deh.h"
-#include "l_glbsp.h"
+#include "l_ajbsp.h"
 #include "m_misc.h"
 #include "r_image.h"
 #include "rad_trig.h"
@@ -1028,7 +1028,7 @@ static bool FindCacheFilename (std::string& out_name,
 // AddFile
 //
 // -AJA- New `dyn_index' parameter -- this is for adding GWA files
-//       which have been built by the GLBSP plugin.  Nothing else is
+//       which have been built by the AJBSP plugin.  Nothing else is
 //       supported, e.g. wads with textures/sprites/DDF/RTS.
 //
 //       The dyn_index value is -1 for normal (non-dynamic) files,
@@ -1208,8 +1208,9 @@ static void AddFile(const char *filename, int kind, int dyn_index)
 			{
 				I_Printf("Building GL Nodes for: %s\n", filename);
 
-				if (! GB_BuildNodes(filename, gwa_filename.c_str()))
+				if (! AJ_BuildNodes(filename, gwa_filename.c_str()))
 					I_Error("Failed to build GL nodes for: %s\n", filename);
+
             }
 
 			// Load it.  This recursion bit is rather sneaky,

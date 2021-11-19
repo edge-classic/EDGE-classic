@@ -1,10 +1,8 @@
 //------------------------------------------------------------------------
-// REJECT : Generate the reject table
+//  Type definitions
 //------------------------------------------------------------------------
 //
-//  GL-Friendly Node Builder (C) 2000-2007 Andrew Apted
-//
-//  Based on 'BSP 2.3' by Colin Reed, Lee Killough and others.
+//  Copyright (C) 2006-2008 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -18,18 +16,22 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __GLBSP_REJECT_H__
-#define __GLBSP_REJECT_H__
+#ifndef __SYS_TYPE_H__
+#define __SYS_TYPE_H__
 
-#include "structs.h"
-#include "level.h"
+// basic types
 
-namespace glbsp
-{
+typedef char  s8_t;
+typedef short s16_t;
+typedef int   s32_t;
 
-// build the reject table and write it into the REJECT lump
-void PutReject(void);
+typedef unsigned char  u8_t;
+typedef unsigned short u16_t;
+typedef unsigned int   u32_t;
 
-}  // namespace glbsp
+typedef u8_t byte;
 
-#endif /* __GLBSP_REJECT_H__ */
+#endif  /* __SYS_TYPE_H__ */
+
+//--- editor settings ---
+// vi:ts=4:sw=4:noexpandtab

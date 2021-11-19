@@ -53,15 +53,6 @@ int AJ_DisplayOpen(displaytype_e type)
 	return 1;
 }
 
-//
-// AJ_InitProgress
-//
-
-void AJ_InitProgress(void)
-{
-	display_mode = DIS_INVALID;
-}
-
 static const nodebuildfuncs_t display_funcs =
 {
 	I_Printf,
@@ -80,8 +71,6 @@ bool AJ_BuildNodes(const char *filename, const char *outname)
 	L_WriteDebug("AJ_BuildNodes: STARTED\n");
 	L_WriteDebug("# source: '%s'\n", filename);
 	L_WriteDebug("#   dest:  '%s'\n", outname);
-
-	AJ_InitProgress();
 
 	AJ_DisplayOpen(DIS_BUILDPROGRESS);
 

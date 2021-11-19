@@ -297,6 +297,9 @@ typedef enum
 	// -Lobo- 2021/10/24: immortal flag
 	HF_IMMORTAL = (1 << 16),
 	
+	// -Lobo- 2021/11/18: floorclip flag
+	HF_FLOORCLIP = (1 << 17),
+	
 }
 mobjhyperflag_t;
 

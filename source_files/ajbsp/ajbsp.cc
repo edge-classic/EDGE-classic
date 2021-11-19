@@ -523,6 +523,8 @@ int AJBSP_Build(const char *filename, const char *outname, const nodebuildfuncs_
 
 	UpdateProgress(100);
 
+	total_built_maps = 0;
+
 	cur_funcs = NULL;
 
 	wad_list.clear();

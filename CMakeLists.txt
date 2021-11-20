@@ -250,6 +250,10 @@ endif()
 
 find_package(SDL REQUIRED)
 
+if(APPLE)
+  find_package(OpenGL REQUIRED)
+endif()
+
 target_include_directories(edge135 PRIVATE source_files/ajbsp)
 target_include_directories(edge135 PRIVATE source_files/coal)
 target_include_directories(edge135 PRIVATE source_files/ddf)
@@ -309,7 +313,7 @@ target_link_libraries(
 		  winmm
 		  wsock32
   )
-else()
+elseif(NOT APPLE)
 target_link_libraries(
   edge135
   PRIVATE edge_ajbsp
@@ -320,6 +324,21 @@ target_link_libraries(
 		  OpenGL
 		  glew_s
 		  SDL
+		  png_static
+		  jpeg_static
+		  zlibstatic
+  )
+else()
+target_link_libraries(
+  edge135
+  PRIVATE edge_ajbsp
+  		  edge_coal
+          edge_ddf
+          edge_deh
+          edge_epi
+		  ${OPENGL_LIBRARIES}
+		  glew_s
+		  ${SDL_LIBRARIES}
 		  png_static
 		  jpeg_static
 		  zlibstatic

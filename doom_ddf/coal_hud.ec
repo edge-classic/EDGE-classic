@@ -285,60 +285,37 @@ function new_overlay_status() =
 	
 	hud.text_color(hud.NO_COLOR)
 
-   if (player.health() < 35)
+    if (player.health() < 35)
         hud.text_color(hud.RED) 
-    else
-    if (player.health() < 65)
-        hud.text_color(hud.RED)
-    else
-    if (player.health() < 100)
-        hud.text_color(hud.RED)
-    else
-        hud.text_color(hud.RED)
+		
+    if (player.health() > 34)
+        hud.text_color(hud.GREEN)
+
 		
 	hud.set_scale(0.75)
-	hud.text_color(hud.NO_COLOR)
 	hud.draw_num2(60, 180, 3, player.health()) // 100
 	hud.text_color(hud.NO_COLOR)
 
-//start armour hud edits
+	if (player.total_armor() > 0)
+	{
 
-if (player.total_armor() > 0)
-{
-    hud.text_color(hud.NO_COLOR)
-
-    if (player.total_armor() <= 99)
-        hud.draw_image(3, 165, "ARM1A0")
-    else
-    if (player.total_armor() > 200)
-        hud.text_color(hud.NO_COLOR)
-    else
-    if (player.total_armor() > 300)
-        hud.text_color(hud.NO_COLOR)
-    else
-        hud.text_color(hud.NO_COLOR)
-    
-	hud.set_scale(0.75)
-    hud.draw_num2(60, 165, 3, player.total_armor())
-	
+		if (player.total_armor() > 0)
+			hud.text_color(hud.GREEN)
+		
+		hud.set_scale(0.75)
+		hud.draw_num2(60, 165, 3, player.total_armor())
+		
 		if (player.armor(1))
-	hud.draw_image(3, 165, "ARM1A0")
-	
+			hud.draw_image(3, 165, "ARM1A0")
+		
 		if (player.armor(2))
-	hud.draw_image(3, 165, "ARM2A0")
+			hud.draw_image(3, 165, "ARM2A0")
 
-//end armour hud edits	
-}
-    hud.text_color(hud.NO_COLOR)
+	}
 
-    hud.text_font("DOOM")
-    hud.text_color(hud.WHITE)
-	
     hud.set_scale(0.85) //scales medikit in hud
     hud.draw_image(3, 180, "MEDIA0") //HEALTH GFX in HUD
-	hud.text_color(hud.NO_COLOR)
-
-
+	
     if (player.cur_weapon() == "PISTOL")
     hud.draw_image(297, 180, "CLIPA0")
 
@@ -359,7 +336,10 @@ if (player.total_armor() > 0)
 
     if (player.cur_weapon() == "BFG9000")
     hud.draw_image(297, 180, "CELLA0")
-
+	
+	hud.text_font("DOOM")
+	hud.text_color(hud.NO_COLOR)
+	
 }
 
 

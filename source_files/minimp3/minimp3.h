@@ -263,27 +263,19 @@ static uint32_t get_bits(bs_t *bs, int n)
 
 static int hdr_valid(const uint8_t *h)
 {
-    if (h[0] && h[1]) {
-        return h[0] == 0xff &&
-            ((h[1] & 0xF0) == 0xf0 || (h[1] & 0xFE) == 0xe2) &&
-            (HDR_GET_LAYER(h) != 0) &&
-            (HDR_GET_BITRATE(h) != 15) &&
-            (HDR_GET_SAMPLE_RATE(h) != 3);
-    } else {
-        return 0;
-    }
+    return h[0] == 0xff &&
+        ((h[1] & 0xF0) == 0xf0 || (h[1] & 0xFE) == 0xe2) &&
+        (HDR_GET_LAYER(h) != 0) &&
+        (HDR_GET_BITRATE(h) != 15) &&
+        (HDR_GET_SAMPLE_RATE(h) != 3);
 }
 
 static int hdr_compare(const uint8_t *h1, const uint8_t *h2)
 {
-    if (h1[1] && h1[2] && h2[1] && h2[2]) {
-        return hdr_valid(h2) &&
-            ((h1[1] ^ h2[1]) & 0xFE) == 0 &&
-            ((h1[2] ^ h2[2]) & 0x0C) == 0 &&
-            !(HDR_IS_FREE_FORMAT(h1) ^ HDR_IS_FREE_FORMAT(h2));
-    } else {
-        return 0;
-    }
+    return hdr_valid(h2) &&
+        ((h1[1] ^ h2[1]) & 0xFE) == 0 &&
+        ((h1[2] ^ h2[2]) & 0x0C) == 0 &&
+        !(HDR_IS_FREE_FORMAT(h1) ^ HDR_IS_FREE_FORMAT(h2));
 }
 
 static unsigned hdr_bitrate_kbps(const uint8_t *h)
@@ -318,11 +310,7 @@ static int hdr_frame_bytes(const uint8_t *h, int free_format_size)
 
 static int hdr_padding(const uint8_t *h)
 {
-    if (h[1] && h[2]) {
-        return HDR_TEST_PADDING(h) ? (HDR_IS_LAYER_1(h) ? 4 : 1) : 0;
-    } else {
-        return 0;
-    }
+    return HDR_TEST_PADDING(h) ? (HDR_IS_LAYER_1(h) ? 4 : 1) : 0;
 }
 
 #ifndef MINIMP3_ONLY_MP3

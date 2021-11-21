@@ -2126,7 +2126,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 			int totalskies = W_LoboFindSkyImage(m+1,ActualSky);
 			if (totalskies != 0 )
 			{	//we have a skybox
-				I_Printf("%s has a skybox\n",df->file_name);
+				I_Debugf("%s has a skybox\n",df->file_name);
 				TurnOffSkyBox = false;
 			}
 			else
@@ -2135,7 +2135,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 				totalskies = W_LoboFindSkyImage(m+1,"SKY");
 				if (totalskies != 0 )
 				{	//assume it is a replacement sky
-					I_Printf("%s has %i sky patches\n",df->file_name,totalskies);
+					I_Debugf("%s has %i sky patches\n",df->file_name,totalskies);
 					TurnOffSkyBox = true;
 				}
 			}

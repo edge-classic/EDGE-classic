@@ -375,7 +375,7 @@ static void *DDF_MainCacheFile(readinfo_t * readinfo)
 	file = fopen(filename.c_str(), "rb");
 	if (file == NULL)
 	{
-		I_Warning("DDF_MainReadFile: Unable to open: '%s'\n", filename.c_str());
+		I_Debugf("DDF_MainReadFile: Unable to open: '%s'\n", filename.c_str());
 		return NULL;
 	}
 

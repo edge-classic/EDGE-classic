@@ -983,6 +983,8 @@ bool RAD_ReadScript(void *data, int size)
 {
 	if (data == NULL)
 	{
+		if (ddf_dir.empty()) return false;
+		
 		std::string fn = M_ComposeFileName(ddf_dir.c_str(), "rscript.rts");
 
 		if (! epi::FS_Access(fn.c_str(), epi::file_c::ACCESS_READ))

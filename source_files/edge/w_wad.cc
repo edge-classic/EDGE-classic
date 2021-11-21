@@ -143,6 +143,7 @@ public:
 	int deh_lump;
 
 	// COAL scripts
+	int coal_apis;
 	int coal_huds;
 
 	// BOOM stuff
@@ -163,7 +164,7 @@ public:
 		sprite_lumps(), flat_lumps(), patch_lumps(),
 		colmap_lumps(), tx_lumps(), hires_lumps(),
 		level_markers(), skin_markers(),
-		wadtex(), deh_lump(-1), coal_huds(-1),
+		wadtex(), deh_lump(-1), coal_apis(-1), coal_huds(-1),
 		animated(-1), switches(-1),
 		companion_gwa(-1), dir_hash()
 	{
@@ -669,6 +670,12 @@ static void AddLump(data_file_c *df, int lump, int pos, int size, int file,
 		df->deh_lump = lump;
 		return;
 	}
+	else if (strncmp(name, "COALAPI", 8) == 0)
+	{
+		lump_p->kind = LMKIND_DDFRTS;
+		df->coal_apis = lump;
+		return;
+	}
 	else if (strncmp(name, "COALHUDS", 8) == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
@@ -695,6 +702,8 @@ static void AddLump(data_file_c *df, int lump, int pos, int size, int file,
 		{
 			if (strncmp(name, DDF_Readers[j].name, 8) == 0)
 			{
+				I_Printf("LUMP NAME: %s\n", name);
+				I_Printf("LUMP NUM: %d\n", lump);
 				lump_p->kind = LMKIND_DDFRTS;
 				df->ddf_lumps[j] = lump;
 				return;
@@ -1109,7 +1118,7 @@ static void AddFile(const char *filename, int kind, int dyn_index)
 					datafile, 
                     (dyn_index >= 0) ? dyn_index : datafile, 
 					curinfo->name,
-					(kind == FLKIND_PWad) || (kind == FLKIND_HWad) );
+					(kind == FLKIND_EWad) || (kind == FLKIND_PWad) || (kind == FLKIND_HWad) );
 
 			if (kind != FLKIND_HWad)
 				CheckForLevel(df, j, lumpinfo[j].name, curinfo, numlumps-1 - j);
@@ -1307,35 +1316,6 @@ void W_InitMultipleFiles(void)
 		I_Error("W_InitMultipleFiles: no files found!\n");
 }
 
-static bool TryLoadExtraLanguage(const char *name)
-{
-	int lumpnum = W_CheckNumForName(name);
-
-	if (lumpnum < 0)
-		return false;
-
-	I_Printf("Loading Languages from %s\n", name);
-
-	int length;
-	char *data = (char *) W_ReadLumpAlloc(lumpnum, &length);
-
-	DDF_ReadLangs(data, length);
-	delete[] data;
-
-	return true;
-}
-
-// MUNDO HACK, but if only fixable by a new wad structure...
-static void LoadTntPlutStrings(void)
-{
-	if (DDF_CompareName(iwad_base.c_str(), "TNT") == 0)
-		TryLoadExtraLanguage("TNTLANG");
-
-	if (DDF_CompareName(iwad_base.c_str(), "PLUTONIA") == 0)
-		TryLoadExtraLanguage("PLUTLANG");
-}
-
-
 void W_ReadDDF(void)
 {
 	// -AJA- the order here may look strange.  Since DDF files
@@ -1368,15 +1348,6 @@ void W_ReadDDF(void)
 
 			if (df->kind >= FLKIND_Demo)
 				continue;
-
-			if (df->kind == FLKIND_EWad)
-			{
-				// special handling for TNT and Plutonia
-				if (d == LANG_READER)
-					LoadTntPlutStrings();
-
-				continue;
-			}
 
 			int lump = df->ddf_lumps[d];
 
@@ -1445,10 +1416,9 @@ void W_ReadCoalLumps(void)
 		if (df->kind > FLKIND_Lump)
 			continue;
 
-		if (df->coal_huds < 0)
-			continue;
+		if (df->coal_apis >= 0) VM_LoadLumpOfCoal(df->coal_apis);
 
-		VM_LoadLumpOfCoal(df->coal_huds);
+		if (df->coal_huds >= 0)	VM_LoadLumpOfCoal(df->coal_huds);
 	}
 }
 

@@ -769,13 +769,11 @@ void InitDirectories(void)
 	if (s)
 	{
 		ddf_dir = std::string(s);
+		DDF_SetWhere(ddf_dir);
 	} 
-	else
 	{
-		ddf_dir = epi::PATH_Join(game_dir.c_str(), "doom_ddf");
+		ddf_dir = "";
 	}
-
-	DDF_SetWhere(ddf_dir);
 
 	// config file
 	s = M_GetParm("-config");
@@ -823,7 +821,7 @@ void InitDirectories(void)
 //
 // Adds an IWAD and EDGE.WAD. -ES-  2000/01/01 Rewritten.
 //
-const char *wadname[] = { "doom2", "doom", "plutonia", "tnt", "hacx", "freedoom", "freedm", NULL };
+const char *wadname[] = { "doom2", "doom", "doom1", "plutonia", "tnt", "hacx", "freedoom", "freedm", NULL };
 
 static void IdentifyVersion(void)
 {
@@ -956,7 +954,6 @@ static void IdentifyVersion(void)
     }
 
     W_AddRawFilename(reqwad.c_str(), FLKIND_EWad);
-
 }
 
 // Add optional EWads (widepix, skyboxes, etc) - Dasho

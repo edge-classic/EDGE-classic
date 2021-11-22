@@ -821,7 +821,7 @@ void InitDirectories(void)
 //
 // Adds an IWAD and EDGE.WAD. -ES-  2000/01/01 Rewritten.
 //
-const char *wadname[] = { "doom2", "doom", "doom1", "plutonia", "tnt", "hacx", "freedoom", "freedm", NULL };
+const char *wadname[] = { "blasphemer", "doom2", "doom", "doom1", "plutonia", "tnt", "hacx", "freedoom", "freedm", NULL };
 
 static void IdentifyVersion(void)
 {

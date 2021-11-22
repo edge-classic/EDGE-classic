@@ -8,7 +8,6 @@ CHANGELOG for EDGE 1.35.1 (since 1.35)
 
 Bugs fixed
 ----------
-
 - TuttiFrutti effect. When the texture was shorter than the wall it was being applied to, the blank space was either filled with black or left invisible causing all sorts of graphical anomalies. Backported from EDGE 2.x branch.
 
 - OUCH face on the hud was using incorrect damage value.
@@ -29,7 +28,6 @@ Bugs fixed
 
 General Improvements
 --------------------
-
 + Added more ammotypes:  Now we have from AMMO01 to AMMO24.
 
 + Ignore COAL bobbing commands "cam.set_vert_bob" and "cam.set_roll_bob"
@@ -67,14 +65,16 @@ General Improvements
 
 + Merged CeeJays lines.ddf with ours to create the ULTIMATE lines.ddf ;)
 
++ doom_ddf folder content merged into edge.wad and the folder removed. The past is the future...again ;)
+
 
 New Features
 ------------
 + More game IWADs supported: HACX, Herectic, Harmony.
   -HACX: full support. Includes bug fixes and widescreen support by CeeJay. Some graphics credited to HACX 2 team.
-  -Heretic: parcial support. Item iventory doesn't work.
-  -Harmony: parcial support. Mostly playable, may be some (hopefully) minor differences.
-
+  -Harmony: Full support. May be some (hopefully) minor differences.
+  -Heretic: parcial support. Item inventory doesn't work.
+  
 + THINGS.DDF: 
   -FALLING_SOUND for the player when they fall long distances. Backported from EDGE 2.x branch.
   -SECRET_SOUND entry for the player which plays when he enters a sector marked SECRET. Backported from EDGE 2.x branch. DSSECRET SFX from K8vavoom.

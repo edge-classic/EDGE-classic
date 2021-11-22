@@ -821,7 +821,7 @@ void InitDirectories(void)
 //
 // Adds an IWAD and EDGE.WAD. -ES-  2000/01/01 Rewritten.
 //
-const char *wadname[] = { "blasphemer", "doom2", "doom", "doom1", "plutonia", "tnt", "hacx", "freedoom", "freedm", NULL };
+const char *wadname[] = { "blasphem", "blasphemer", "doom2", "doom", "doom1", "plutonia", "tnt", "hacx", "freedoom", "freedm", NULL };
 
 static void IdentifyVersion(void)
 {
@@ -934,6 +934,10 @@ static void IdentifyVersion(void)
     W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad);
 
     iwad_base = epi::PATH_GetBasename(iwad_file.c_str());
+
+	// Quick 'n dirty, but works for now - Dasho
+
+	if (iwad_base == "blasphemer" || iwad_base == "blasphem") iwad_base = "heretic";
 
 	I_Debugf("IWAD BASE = [%s]\n", iwad_base.c_str());
 

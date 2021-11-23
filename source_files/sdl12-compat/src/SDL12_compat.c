@@ -923,6 +923,7 @@ static char *WindowTitle = NULL;
 static char *WindowIconTitle = NULL;
 static SDL_Surface *VideoIcon20 = NULL;
 static int EnabledUnicode = 0;
+static SDL_bool EnabledKeyRepeat = SDL_TRUE;
 /* Windows SDL1.2 never uses translated keyboard layouts for compatibility with
 DirectInput, which didn't support them. Other platforms (MacOS, Linux) seem to,
 but with varying levels of bugginess. So default to Translated Layouts on
@@ -1259,6 +1260,7 @@ SDL_SetModuleHandle(void *handle)
     (void) handle;/* handled internally by SDL2 - nothing to do.. */
 }
 
+/* FIXME: forward these two to the SDL2 versions ? */
 DECLSPEC int SDLCALL
 SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 {
@@ -1568,6 +1570,12 @@ GetVideoDisplay(void)
         variable = SDL20_getenv("SDL_VIDEO_FULLSCREEN_HEAD");
     }
     if (variable) {
+        int preferred_display = SDL20_atoi(variable);
+        
+        if (preferred_display < 0 || preferred_display >= SDL20_GetNumVideoDisplays()) {
+            return 0;
+        }
+
         return SDL20_atoi(variable);
     } else {
         return 0;
@@ -3778,7 +3786,7 @@ EventFilter20to12(void *data, SDL_Event *event20)
 
         case SDL_KEYDOWN:
             FlushPendingKeydownEvent(0);
-            if (event20->key.repeat) {
+            if (event20->key.repeat && !EnabledKeyRepeat) {
                 return 1;  /* ignore 2.0-style key repeat events */
             }
 
@@ -4578,6 +4586,9 @@ GetEnvironmentWindowPosition(int *x, int *y)
     if (center) {
         *x = SDL_WINDOWPOS_CENTERED_DISPLAY(display);
         *y = SDL_WINDOWPOS_CENTERED_DISPLAY(display);
+    } else {
+        *x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(display);
+        *y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(display);
     }
 }
 
@@ -4885,7 +4896,7 @@ InitializeOpenGLScaling(const int w, const int h)
         OpenGLFuncs.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, OpenGLLogicalScalingMultisampleColor);
         OpenGLFuncs.glGenRenderbuffers(1, &OpenGLLogicalScalingMultisampleDepth);
         OpenGLFuncs.glBindRenderbuffer(GL_RENDERBUFFER, OpenGLLogicalScalingMultisampleDepth);
-        OpenGLFuncs.glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);  FIXME("is an extension (or core 3.0)?");
+        OpenGLFuncs.glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
         OpenGLFuncs.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, OpenGLLogicalScalingMultisampleDepth);
         OpenGLFuncs.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, OpenGLLogicalScalingMultisampleDepth);
         OpenGLFuncs.glBindRenderbuffer(GL_RENDERBUFFER, 0);
@@ -4968,8 +4979,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags12)
         return NULL;
     }
 
-    FIXME("There's an environment variable to choose a display");
-    if (SDL20_GetCurrentDisplayMode(0, &dmode) < 0) {
+    if (SDL20_GetCurrentDisplayMode(VideoDisplayIndex, &dmode) < 0) {
         return NULL;
     }
 
@@ -5572,6 +5582,26 @@ UpdateRect12to20(SDL12_Surface *surface12, const SDL12_Rect *rect12, SDL_Rect *r
     }
 }
 
+/* For manual throttling of screen updates. */
+static int
+GetDesiredMillisecondsPerFrame()
+{
+    SDL_DisplayMode mode;
+    if (VideoSurface12->flags & SDL12_FULLSCREEN) {
+       if (SDL20_GetWindowDisplayMode(VideoWindow20, &mode) == 0) {
+           if (mode.refresh_rate) {
+               return 1000 / mode.refresh_rate;
+           }
+       }
+    } else if (SDL20_GetCurrentDisplayMode(VideoDisplayIndex, &mode) == 0) {
+        /* If we're windowed, assume we're on the default screen. */
+        if (mode.refresh_rate) {
+            return 1000 / mode.refresh_rate;
+        }
+    }
+    return 15;
+}
+
 /* SDL_OPENGLBLIT support APIs. https://discourse.libsdl.org/t/ogl-and-sdl/2775/3 */
 DECLSPEC void SDLCALL
 SDL_GL_Lock(void)
@@ -5758,9 +5788,7 @@ SDL_UpdateRects(SDL12_Surface *surface12, int numrects, SDL12_Rect *rects12)
         if (whole_screen) {
             PresentScreen();  /* flip it now. */
         } else {
-            FIXME("Don't hardcode 15, do this based on display refresh rate.");
-            FIXME("Maybe just flip it immediately in PumpEvents if this flag is set, instead?");
-            VideoSurfacePresentTicks = VideoSurfaceLastPresentTicks + 15;  /* flip it later. */
+            VideoSurfacePresentTicks = VideoSurfaceLastPresentTicks + GetDesiredMillisecondsPerFrame();  /* flip it later. */
         }
     }
 }
@@ -6318,7 +6346,7 @@ SDL_DisplayYUVOverlay(SDL12_Overlay *overlay12, SDL12_Rect *dstrect12)
     FIXME("is it legal to display multiple yuv overlays?");  /* if so, this will need to be a list instead of a single pointer. */
     QueuedDisplayOverlay12 = overlay12;
     SDL20_memcpy(&QueuedDisplayOverlayDstRect12, dstrect12, sizeof (SDL12_Rect));
-    VideoSurfacePresentTicks = VideoSurfaceLastPresentTicks + 15;  /* flip it later. */
+    VideoSurfacePresentTicks = VideoSurfaceLastPresentTicks + GetDesiredMillisecondsPerFrame();  /* flip it later. */
 
     return 0;
 }
@@ -6542,21 +6570,22 @@ SDL_GetGammaRamp(Uint16 *red, Uint16 *green, Uint16 *blue)
 DECLSPEC int SDLCALL
 SDL_EnableKeyRepeat(int delay, int interval)
 {
-    FIXME("write me");
-    (void) delay;
+    FIXME("Support non-default delay and interval for Key Repeat");
     (void) interval;
+
+    EnabledKeyRepeat = (delay != 0) ? SDL_TRUE : SDL_FALSE;
+
     return 0;
 }
 
 DECLSPEC void SDLCALL
 SDL_GetKeyRepeat(int *delay, int *interval)
 {
-    FIXME("write me");
     if (delay) {
-        *delay = SDL12_DEFAULT_REPEAT_DELAY;
+        *delay = EnabledKeyRepeat ? SDL12_DEFAULT_REPEAT_DELAY : 0;
     }
     if (interval) {
-        *interval = SDL12_DEFAULT_REPEAT_INTERVAL;
+        *interval = EnabledKeyRepeat ? SDL12_DEFAULT_REPEAT_INTERVAL : 0;
     }
 }
 

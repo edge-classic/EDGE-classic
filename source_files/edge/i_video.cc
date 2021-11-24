@@ -27,7 +27,7 @@
 #include "r_modes.h"
 
 
-SDL_Surface *my_vis;
+SDL_Window *my_vis;
 
 int graphics_shutdown = 0;
 
@@ -39,7 +39,7 @@ static int display_W, display_H;
 
 
 // Possible Screen Modes
-static struct { int w, h; } possible_modes[] =
+/*static struct { int w, h; } possible_modes[] =
 {
 	{  320, 200, },
 	{  320, 240, },
@@ -53,7 +53,7 @@ static struct { int w, h; } possible_modes[] =
 	{ 1600,1200, },
 
 	{  -1,  -1, }
-};
+};*/
 
 
 void I_GrabCursor(bool enable)
@@ -65,13 +65,11 @@ void I_GrabCursor(bool enable)
 
 	if (grab_state && in_grab.d)
 	{
-		SDL_ShowCursor(0);
-		SDL_WM_GrabInput(SDL_GRAB_ON);
+		SDL_SetRelativeMouseMode(SDL_TRUE);
 	}
 	else
 	{
-		SDL_ShowCursor(1);
-		SDL_WM_GrabInput(SDL_GRAB_OFF);
+		SDL_SetRelativeMouseMode(SDL_FALSE);
 	}
 }
 
@@ -101,9 +99,7 @@ void I_StartupGraphics(void)
 
 	if (stricmp(driver, "default") != 0)
 	{
-		char buffer[200];
-		snprintf(buffer, sizeof(buffer), "SDL_VIDEODRIVER=%s", driver);
-		SDL_putenv(buffer);
+		SDL_setenv("SDL_VIDEODRIVER", driver, 1);
 	}
 
 	I_Printf("SDL_Video_Driver: %s\n", driver);
@@ -124,40 +120,40 @@ void I_StartupGraphics(void)
 
 	
     // -DS- 2005/06/27 Detect SDL Resolutions
-	const SDL_VideoInfo *info = SDL_GetVideoInfo();
+	SDL_DisplayMode info;
+	SDL_GetDesktopDisplayMode(0, &info); // Is it always 0? - Dasho
 
-	display_W = info->current_w;
-	display_H = info->current_h;
+	display_W = info.w;
+	display_H = info.h;
 
 	I_Printf("Desktop resolution: %dx%d\n", display_W, display_H);
 
-	SDL_Rect **modes = SDL_ListModes(info->vfmt,
-					  SDL_OPENGL | SDL_DOUBLEBUF | SDL_FULLSCREEN);
+	int num_modes = SDL_GetNumDisplayModes(0);
 
-	if (modes && modes != (SDL_Rect **)-1)
+	for (int i = 0; i < num_modes; i++ )
 	{
-		for (; *modes; modes++)
-		{
-			scrmode_c test_mode;
+		SDL_DisplayMode possible_mode;
+		SDL_GetDisplayMode(0, i, &possible_mode);
 
-			test_mode.width  = (*modes)->w;
-			test_mode.height = (*modes)->h;
-			test_mode.depth  = info->vfmt->BitsPerPixel;  // HMMMM ???
-			test_mode.full   = true;
+		scrmode_c test_mode;
 
-			if ((test_mode.width & 15) != 0)
-				continue;
+		test_mode.width  = possible_mode.w;
+		test_mode.height = possible_mode.h;
+		//test_mode.depth  = info->vfmt->BitsPerPixel;  // Not sure what the equivalent is for this yet - Dasho
+		test_mode.full   = true;
 
-			if (test_mode.depth == 15 || test_mode.depth == 16 ||
+		if ((test_mode.width & 15) != 0)
+			continue;
+
+			/*if (test_mode.depth == 15 || test_mode.depth == 16 ||
 			    test_mode.depth == 24 || test_mode.depth == 32)
-			{
-				R_AddResolution(&test_mode);
-			}
-		}
+			{*/
+		R_AddResolution(&test_mode);
+			//}
 	}
 
 	// -ACB- 2000/03/16 Test for possible windowed resolutions
-	for (int full = 0; full <= 1; full++)
+	/*for (int full = 0; full <= 1; full++)
 	{
 		for (int depth = 16; depth <= 32; depth = depth+16)
 		{
@@ -180,7 +176,7 @@ void I_StartupGraphics(void)
 				}
 			}
 		}
-	}
+	}*/
 
 	I_Printf("I_StartupGraphics: initialisation OK\n");
 }
@@ -194,9 +190,7 @@ bool I_SetScreenSize(scrmode_c *mode)
 			 mode->width, mode->height, mode->depth,
 			 mode->full ? "fullscreen" : "windowed");
 
-	my_vis = SDL_SetVideoMode(mode->width, mode->height, mode->depth, 
-					SDL_OPENGL | SDL_DOUBLEBUF |
-					(mode->full ? SDL_FULLSCREEN : 0));
+	my_vis = SDL_CreateWindow("EDGE-Classic", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height, SDL_WINDOW_OPENGL | (mode->full ? SDL_WINDOW_FULLSCREEN : 0));
 
 	if (my_vis == NULL)
 	{
@@ -204,15 +198,17 @@ bool I_SetScreenSize(scrmode_c *mode)
 		return false;
 	}
 
-	if (my_vis->format->BytesPerPixel <= 1)
+	SDL_GL_CreateContext(my_vis);
+
+	/*if (my_vis->format->BytesPerPixel <= 1)
 	{
 		I_Printf("I_SetScreenSize: 8-bit mode set (not suitable)\n");
 		return false;
-	}
+	}*/
 
-	I_Printf("I_SetScreenSize: mode now %dx%d %dbpp flags:0x%x\n",
+	/*I_Printf("I_SetScreenSize: mode now %dx%d %dbpp flags:0x%x\n",
 			 my_vis->w, my_vis->h,
-			 my_vis->format->BitsPerPixel, my_vis->flags);
+			 my_vis->format->BitsPerPixel, my_vis->flags);*/
 
 	// -AJA- turn off cursor -- BIG performance increase.
 	//       Plus, the combination of no-cursor + grab gives 
@@ -228,7 +224,7 @@ bool I_SetScreenSize(scrmode_c *mode)
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	SDL_GL_SwapBuffers();
+	SDL_GL_SwapWindow(my_vis);
 
 	return true;
 }
@@ -243,7 +239,7 @@ void I_StartFrame(void)
 
 void I_FinishFrame(void)
 {
-	SDL_GL_SwapBuffers();
+	SDL_GL_SwapWindow(my_vis);
 
 	if (in_grab.CheckModified())
 		I_GrabCursor(grab_state);
@@ -252,12 +248,12 @@ void I_FinishFrame(void)
 
 void I_PutTitle(const char *title)
 {
-	SDL_WM_SetCaption(title, title);
+	SDL_SetWindowTitle(my_vis, title); // Superfluous? - Dasho
 }
 
 void I_SetGamma(float gamma)
 {
-	if (SDL_SetGamma(gamma, gamma, gamma) < 0)
+	if (SDL_SetWindowBrightness(my_vis, gamma) < 0)
 		I_Printf("Failed to change gamma.\n");
 }
 

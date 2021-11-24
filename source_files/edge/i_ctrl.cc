@@ -63,8 +63,8 @@ int TranslateSDLKey(int key)
 	// if keypad is not wanted, convert to normal keys
 	if (! in_keypad.d)
 	{
-		if (SDLK_KP0 <= key && key <= SDLK_KP9)
-			return '0' + (key - SDLK_KP0);
+		if (SDLK_KP_0 <= key && key <= SDLK_KP_9)
+			return '0' + (key - SDLK_KP_0);
 
 		switch (key)
 		{
@@ -112,16 +112,16 @@ int TranslateSDLKey(int key)
 		case SDLK_F11: return KEYD_F11;
 		case SDLK_F12: return KEYD_F12;
 
-		case SDLK_KP0: return KEYD_KP0;
-		case SDLK_KP1: return KEYD_KP1;
-		case SDLK_KP2: return KEYD_KP2;
-		case SDLK_KP3: return KEYD_KP3;
-		case SDLK_KP4: return KEYD_KP4;
-		case SDLK_KP5: return KEYD_KP5;
-		case SDLK_KP6: return KEYD_KP6;
-		case SDLK_KP7: return KEYD_KP7;
-		case SDLK_KP8: return KEYD_KP8;
-		case SDLK_KP9: return KEYD_KP9;
+		case SDLK_KP_0: return KEYD_KP0;
+		case SDLK_KP_1: return KEYD_KP1;
+		case SDLK_KP_2: return KEYD_KP2;
+		case SDLK_KP_3: return KEYD_KP3;
+		case SDLK_KP_4: return KEYD_KP4;
+		case SDLK_KP_5: return KEYD_KP5;
+		case SDLK_KP_6: return KEYD_KP6;
+		case SDLK_KP_7: return KEYD_KP7;
+		case SDLK_KP_8: return KEYD_KP8;
+		case SDLK_KP_9: return KEYD_KP9;
 
 		case SDLK_KP_PERIOD:   return KEYD_KP_DOT;
 		case SDLK_KP_PLUS:     return KEYD_KP_PLUS;
@@ -131,19 +131,19 @@ int TranslateSDLKey(int key)
 		case SDLK_KP_EQUALS:   return KEYD_KP_EQUAL;
 		case SDLK_KP_ENTER:    return KEYD_KP_ENTER;
 
-		case SDLK_PRINT:     return KEYD_PRTSCR;
+		case SDLK_PRINTSCREEN:     return KEYD_PRTSCR;
 		case SDLK_CAPSLOCK:  return KEYD_CAPSLOCK;
-		case SDLK_NUMLOCK:   return KEYD_NUMLOCK;
-		case SDLK_SCROLLOCK: return KEYD_SCRLOCK;
+		case SDLK_NUMLOCKCLEAR:   return KEYD_NUMLOCK;
+		case SDLK_SCROLLLOCK: return KEYD_SCRLOCK;
 		case SDLK_PAUSE:     return KEYD_PAUSE;
 
 		case SDLK_LSHIFT:
 		case SDLK_RSHIFT: return KEYD_RSHIFT;
 		case SDLK_LCTRL:
 		case SDLK_RCTRL:  return KEYD_RCTRL;
-		case SDLK_LMETA:
+		case SDLK_LGUI:
 		case SDLK_LALT:   return KEYD_LALT;
-		case SDLK_RMETA:
+		case SDLK_RGUI:
 		case SDLK_RALT:   return KEYD_RALT;
 
 		default: break;
@@ -196,10 +196,9 @@ void HandleKeyEvent(SDL_Event* ev)
 
 	event_t event;
 	event.value.key.sym = TranslateSDLKey(sym);
-	event.value.key.unicode = ev->key.keysym.unicode;
 
 	// handle certain keys which don't behave normally
-	if (sym == SDLK_CAPSLOCK || sym == SDLK_NUMLOCK)
+	if (sym == SDLK_CAPSLOCK || sym == SDLK_NUMLOCKCLEAR)
 	{
 #ifdef DEBUG_KB
 		L_WriteDebug("   HandleKey: CAPS or NUMLOCK\n");
@@ -224,12 +223,11 @@ void HandleKeyEvent(SDL_Event* ev)
 	event.type = (ev->type == SDL_KEYDOWN) ? ev_keydown : ev_keyup;
 
 #ifdef DEBUG_KB
-	L_WriteDebug("   HandleKey: sym=%d scan=%d unicode=%d --> key=%d\n",
-			sym, ev->key.keysym.scancode, ev->key.keysym.unicode, event.value.key);
+	L_WriteDebug("   HandleKey: sym=%d scan=%d --> key=%d\n",
+			sym, ev->key.keysym.scancode, event.value.key);
 #endif
 
-	if (event.value.key.sym < 0 &&
-	    event.value.key.unicode == 0)
+	if (event.value.key.sym < 0)
 	{
 		// No translation possible for SDL symbol and no unicode value
 		return;
@@ -381,10 +379,10 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 {
 	switch(sdl_ev->type)
 	{
-		case SDL_ACTIVEEVENT:
+		case SDL_WINDOWEVENT:
 		{
-			if ((sdl_ev->active.state & SDL_APPINPUTFOCUS) &&
-				(sdl_ev->active.gain == 0))
+			//sdl_ev->window.event == SDL_WINDOWEVENT_FOCUS_LOST
+			if (app_state == APP_STATE_ACTIVE && sdl_ev->window.event == SDL_WINDOWEVENT_FOCUS_LOST)
 			{
 				HandleFocusLost();
 			}
@@ -435,15 +433,14 @@ void InactiveEventProcess(SDL_Event *sdl_ev)
 {
 	switch(sdl_ev->type)
 	{
-		case SDL_ACTIVEEVENT:
+		case SDL_WINDOWEVENT:
 			if (app_state & APP_STATE_PENDING_QUIT)
 				break; // Don't care: we're going to exit
 			
-			if (!sdl_ev->active.gain)
-				break;
+			/*if (!sdl_ev->active.gain)
+				break;*/
 				
-			if (sdl_ev->active.state & SDL_APPACTIVE ||
-                sdl_ev->active.state & SDL_APPINPUTFOCUS)
+			if (app_state == APP_STATE_ACTIVE && sdl_ev->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
 				HandleFocusGain();
 			break;
 
@@ -461,7 +458,7 @@ void InactiveEventProcess(SDL_Event *sdl_ev)
 
 void I_CentreMouse(void)
 {
-	SDL_WarpMouse(SCREENWIDTH/2, SCREENHEIGHT/2);
+	SDL_WarpMouseInWindow(NULL, SCREENWIDTH/2, SCREENHEIGHT/2);
 }
 
 
@@ -483,7 +480,7 @@ void I_ShowJoysticks(void)
 
 	for (int i = 0; i < num_joys; i++)
 	{
-		const char *name = SDL_JoystickName(i);
+		const char *name = SDL_JoystickNameForIndex(i);
 		if (! name)
 			name = "(UNKNOWN)";
 
@@ -505,7 +502,7 @@ void I_OpenJoystick(int index)
 
 	cur_joy = index;
 
-	const char *name = SDL_JoystickName(cur_joy-1);
+	const char *name = SDL_JoystickName(joy_info);
 	if (! name)
 		name = "(UNKNOWN)";
 
@@ -585,8 +582,6 @@ void CheckJoystickChanged(void)
 void I_StartupControl(void)
 {
 	alt_is_down = false;
-
-	SDL_EnableUNICODE(1);
 
 	I_StartupJoystick();
 }

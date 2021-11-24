@@ -184,9 +184,7 @@ void I_StartupSound(void)
 
 	if (stricmp(driver, "default") != 0)
 	{
-		char buffer[200];
-		snprintf(buffer, sizeof(buffer), "SDL_AUDIODRIVER=%s", driver);
-		SDL_putenv(buffer);
+		SDL_setenv("SDL_AUDIODRIVER", driver, 1);
 	}
 
 	I_Printf("SDL_Audio_Driver: %s\n", driver);

@@ -10,6 +10,8 @@
  * and license in png.h
  */
 
+#if defined NOT_APPLE_SILICON
+
 /* Below, after checking __linux__, various non-C90 POSIX 1003.1 functions are
  * called.
  */
@@ -134,3 +136,4 @@ png_init_filter_functions_neon(png_structp pp, unsigned int bpp)
 }
 #endif /* PNG_ARM_NEON_OPT > 0 */
 #endif /* READ */
+#endif /* NOT_APPLE_SILICON */

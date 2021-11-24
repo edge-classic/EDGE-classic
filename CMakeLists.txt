@@ -31,6 +31,11 @@ endif()
 if(MSYS)
   set(CMAKE_EXE_LINKER_FLAGS "-static -mwindows")
 endif()
+if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64" AND APPLE)
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" )
+elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" AND APPLE)
+	set( CMAKE_CXX_FLAGS NOT_APPLE_SILICON "${CMAKE_CXX_FLAGS}" )
+endif()
 
 if(WIN32 OR MSYS)
 add_executable(

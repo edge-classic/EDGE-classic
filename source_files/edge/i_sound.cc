@@ -17,7 +17,7 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
-#include "i_sdlinc.h"
+#include "i_sound.h"
 
 #include <fcntl.h>
 #include <signal.h>
@@ -43,6 +43,7 @@ static const int sample_bits[2]  = { 8, 16 };
 
 
 static SDL_AudioSpec mydev;
+SDL_AudioDeviceID mydev_id;
 
 int dev_freq;
 int dev_bits;
@@ -75,12 +76,14 @@ static bool audio_is_locked = false;
 
 void SoundFill_Callback(void *udata, Uint8 *stream, int len)
 {
+	SDL_memset(stream, 0, len);
 	S_MixAllChannels(stream, len);
 }
 
 static bool I_TryOpenSound(const sound_mode_t *mode)
 {
 	SDL_AudioSpec firstdev;
+	SDL_zero(firstdev);
 
 	int samples = 512;
 
@@ -98,21 +101,12 @@ static bool I_TryOpenSound(const sound_mode_t *mode)
 	firstdev.samples  = samples;
 	firstdev.callback = SoundFill_Callback;
 
-	if (SDL_OpenAudio(&firstdev, &mydev) >= 0)
+	mydev_id = SDL_OpenAudioDevice(NULL, 0, &firstdev, &mydev, 0);
+
+	if (mydev_id > 0)
 		return true;
 
 	I_Printf("  failed: %s\n", SDL_GetError());
-
-	// --- try again, but with the less common formats ---
-
-	firstdev.freq     = mode->freq;
-	firstdev.format   = (mode->bits < 12) ? AUDIO_S8 : AUDIO_U16SYS;
-	firstdev.channels = mode->stereo ? 2 : 1;
-	firstdev.samples  = samples;
-	firstdev.callback = SoundFill_Callback;
-
-	if (SDL_OpenAudio(&firstdev, &mydev) >= 0)
-		return true;
 
 	return false;
 }

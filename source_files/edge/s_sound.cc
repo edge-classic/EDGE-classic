@@ -18,6 +18,7 @@
 
 #include "i_defs.h"
 #include "i_sdlinc.h"
+#include "i_sound.h"
 
 #include "dm_state.h"
 #include "m_argv.h"
@@ -267,18 +268,18 @@ void S_Init(void)
 	S_QueueInit();
 
 	// okidoke, start the ball rolling!
-	SDL_PauseAudio(0);
+	SDL_PauseAudioDevice(mydev_id, 0);
 }
 
 void S_Shutdown(void)
 {
 	if (nosound) return;
 
-	SDL_PauseAudio(1);
+	SDL_PauseAudioDevice(mydev_id, 1);
 
 	// make sure mixing thread is not running our code
-	SDL_LockAudio();
-	SDL_UnlockAudio();
+	SDL_LockAudioDevice(mydev_id);
+	SDL_UnlockAudioDevice(mydev_id);
 
 	S_QueueShutdown();
 

@@ -86,9 +86,6 @@
 #include "vm_coal.h"
 #include "z_zone.h"
 
-
-#define E_TITLE  "EDGE v" EDGEVERSTR
-
 // Application active?
 int app_state = APP_STATE_ACTIVE;
 
@@ -1302,8 +1299,6 @@ static void E_Startup(void)
 	SetGlobalVars();
 
 	DoSystemStartup();
-
-	I_PutTitle(E_TITLE); // Needs to be done once the system is up and running
 
 	// RGL_FontStartup();
 

@@ -58,11 +58,6 @@ void I_Printf(const char *message,...) GCCATTR((format(printf, 1, 2)));
 void I_Debugf(const char *message,...) GCCATTR((format(printf, 1, 2)));
 // The generic debugging function.
 
-void I_PutTitle(const char *title);
-// This function should clear the text mode screen (or window), and
-// write the given title in a banner at the top (in a stand-out way,
-// e.g. bright white on a red background).
-
 void I_Error(const char *error,...) GCCATTR((format(printf, 1, 2)));
 // The error function.  All fatal errors call I_Error().  This
 // I_CloseProgram).

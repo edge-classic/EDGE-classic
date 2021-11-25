@@ -39,7 +39,7 @@ static int display_W, display_H;
 
 
 // Possible Screen Modes
-/*static struct { int w, h; } possible_modes[] =
+static struct { int w, h; } possible_modes[] =
 {
 	{  320, 200, },
 	{  320, 240, },
@@ -53,7 +53,7 @@ static int display_W, display_H;
 	{ 1600,1200, },
 
 	{  -1,  -1, }
-};*/
+};
 
 
 void I_GrabCursor(bool enable)
@@ -121,7 +121,7 @@ void I_StartupGraphics(void)
 	
     // -DS- 2005/06/27 Detect SDL Resolutions
 	SDL_DisplayMode info;
-	SDL_GetDesktopDisplayMode(0, &info); // Is it always 0? - Dasho
+	SDL_GetDesktopDisplayMode(0, &info);
 
 	display_W = info.w;
 	display_H = info.h;
@@ -139,44 +139,48 @@ void I_StartupGraphics(void)
 
 		test_mode.width  = possible_mode.w;
 		test_mode.height = possible_mode.h;
-		//test_mode.depth  = info->vfmt->BitsPerPixel;  // Not sure what the equivalent is for this yet - Dasho
+		test_mode.depth  = SDL_BITSPERPIXEL(possible_mode.format);  // Not sure what the equivalent is for this yet - Dasho
 		test_mode.full   = true;
 
 		if ((test_mode.width & 15) != 0)
 			continue;
 
-			/*if (test_mode.depth == 15 || test_mode.depth == 16 ||
-			    test_mode.depth == 24 || test_mode.depth == 32)
-			{*/
-		R_AddResolution(&test_mode);
-			//}
+		if (test_mode.depth == 15 || test_mode.depth == 16 ||
+		    test_mode.depth == 24 || test_mode.depth == 32)
+		{
+			R_AddResolution(&test_mode);
+		}
 	}
 
 	// -ACB- 2000/03/16 Test for possible windowed resolutions
-	/*for (int full = 0; full <= 1; full++)
+	for (int full = 0; full <= 1; full++)
 	{
 		for (int depth = 16; depth <= 32; depth = depth+16)
 		{
 			for (int i = 0; possible_modes[i].w != -1; i++)
 			{
 				scrmode_c mode;
+				SDL_DisplayMode test_mode;
+				SDL_DisplayMode closest_mode;
 
-				mode.width  = possible_modes[i].w;
+				mode.width = possible_modes[i].w;
 				mode.height = possible_modes[i].h;
 				mode.depth  = depth;
-				mode.full   = full;
+				mode.full   = false;
 
-				int got_depth = SDL_VideoModeOK(mode.width, mode.height,
-						mode.depth, SDL_OPENGL | SDL_DOUBLEBUF |
-						(mode.full ? SDL_FULLSCREEN : 0));
+				test_mode.w = possible_modes[i].w;
+				test_mode.h = possible_modes[i].h;
+				test_mode.format = (depth << 8);
 
-				if (R_DepthIsEquivalent(got_depth, mode.depth))
+				SDL_GetClosestDisplayMode(0, &test_mode, &closest_mode);
+
+				if (R_DepthIsEquivalent(SDL_BITSPERPIXEL(closest_mode.format), mode.depth))
 				{
 					R_AddResolution(&mode);
 				}
 			}
 		}
-	}*/
+	}
 
 	I_Printf("I_StartupGraphics: initialisation OK\n");
 }
@@ -190,25 +194,37 @@ bool I_SetScreenSize(scrmode_c *mode)
 			 mode->width, mode->height, mode->depth,
 			 mode->full ? "fullscreen" : "windowed");
 
-	my_vis = SDL_CreateWindow("EDGE-Classic", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, mode->width, mode->height, SDL_WINDOW_OPENGL | (mode->full ? SDL_WINDOW_FULLSCREEN : 0));
-
-	if (my_vis == NULL)
+	if (my_vis)
 	{
-		I_Printf("I_SetScreenSize: (mode not possible)\n");
-		return false;
+		if (mode->full) 
+		{
+			SDL_DisplayMode new_mode;
+			new_mode.h = mode->height;
+			new_mode.w = mode->width;
+			new_mode.format = (mode->depth << 8);
+			if (SDL_SetWindowDisplayMode(my_vis, &new_mode) < 0)
+			{
+				I_Printf("I_SetScreenSize: (mode not possible)\n");
+				return false;
+			}
+			SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN);
+			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
+				mode->width, mode->height, mode->depth);
+		}
+		else
+		{
+			SDL_SetWindowFullscreen(my_vis, 0);
+			SDL_SetWindowSize(my_vis, mode->width, mode->height);
+			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
+				mode->width, mode->height, mode->depth);
+		}
 	}
-
-	SDL_GL_CreateContext(my_vis);
-
-	/*if (my_vis->format->BytesPerPixel <= 1)
+	else
 	{
-		I_Printf("I_SetScreenSize: 8-bit mode set (not suitable)\n");
-		return false;
-	}*/
-
-	/*I_Printf("I_SetScreenSize: mode now %dx%d %dbpp flags:0x%x\n",
-			 my_vis->w, my_vis->h,
-			 my_vis->format->BitsPerPixel, my_vis->flags);*/
+		my_vis = SDL_CreateWindow("EDGE v1.35.1", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, mode->width, mode->height,
+			SDL_WINDOW_OPENGL | (mode->full ? SDL_WINDOW_FULLSCREEN : 0));
+		SDL_GL_CreateContext(my_vis);
+	}
 
 	// -AJA- turn off cursor -- BIG performance increase.
 	//       Plus, the combination of no-cursor + grab gives 
@@ -243,12 +259,6 @@ void I_FinishFrame(void)
 
 	if (in_grab.CheckModified())
 		I_GrabCursor(grab_state);
-}
-
-
-void I_PutTitle(const char *title)
-{
-	SDL_SetWindowTitle(my_vis, title); // Superfluous? - Dasho
 }
 
 void I_SetGamma(float gamma)

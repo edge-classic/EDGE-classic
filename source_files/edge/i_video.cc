@@ -198,15 +198,8 @@ bool I_SetScreenSize(scrmode_c *mode)
 	{
 		if (mode->full) 
 		{
-			SDL_DisplayMode new_mode;
-			new_mode.h = mode->height;
-			new_mode.w = mode->width;
-			new_mode.format = (mode->depth << 8);
-			if (SDL_SetWindowDisplayMode(my_vis, &new_mode) < 0)
-			{
-				I_Printf("I_SetScreenSize: (mode not possible)\n");
-				return false;
-			}
+			SDL_SetWindowFullscreen(my_vis, 0);
+			SDL_SetWindowSize(my_vis, mode->width, mode->height);
 			SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN);
 			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
 				mode->width, mode->height, mode->depth);
@@ -215,13 +208,14 @@ bool I_SetScreenSize(scrmode_c *mode)
 		{
 			SDL_SetWindowFullscreen(my_vis, 0);
 			SDL_SetWindowSize(my_vis, mode->width, mode->height);
+			SDL_SetWindowPosition(my_vis, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
 				mode->width, mode->height, mode->depth);
 		}
 	}
 	else
 	{
-		my_vis = SDL_CreateWindow("EDGE v1.35.1", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, mode->width, mode->height,
+		my_vis = SDL_CreateWindow("EDGE v1.35.1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
 			SDL_WINDOW_OPENGL | (mode->full ? SDL_WINDOW_FULLSCREEN : 0));
 		SDL_GL_CreateContext(my_vis);
 	}

@@ -1,7 +1,7 @@
 # WARNING! This branch is tracking implementation of SDL2 and is not fully stable! Please use the main branch for regular use!
 Known bugs:
 - Audio continues to play after losing window focus
-- Keymapping not accurate yet (Caps Lock doesn't register as a toggle, for instance)
+- EDGE Initialization/Nodebuilding progress bars don't show in fullscreen unless at native resolution; no effect on gameplay
 
 # EDGE-classic
 Fork of the EDGE 1.35 release.

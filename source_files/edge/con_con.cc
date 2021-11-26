@@ -992,10 +992,6 @@ static int GetKeycode(event_t *ev)
 			break;
     }
 
-    int unicode = ev->value.key.unicode;
-    if (HU_IS_PRINTABLE(unicode))
-        return unicode;
-
     if (HU_IS_PRINTABLE(sym))
         return sym;
 

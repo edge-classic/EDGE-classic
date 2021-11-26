@@ -17,7 +17,7 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
-#include "i_sdlinc.h"
+#include "i_video.h"
 #include "i_defs_gl.h"
 
 #include <signal.h>

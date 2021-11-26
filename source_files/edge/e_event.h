@@ -51,7 +51,6 @@ typedef struct
 		struct
 		{
 			int sym;
-			int unicode;
 		}
 		key;
 	

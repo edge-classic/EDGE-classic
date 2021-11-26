@@ -17,7 +17,7 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
-#include "i_sdlinc.h"
+#include "i_video.h" // i_sdlinc.h is also covered here - Dasho
 
 #include "dm_defs.h"
 #include "dm_state.h"
@@ -38,7 +38,6 @@ bool alt_is_down;
 bool eat_mouse_motion = true;
 
 cvar_c in_keypad;
-cvar_c in_warpmouse;
 
 
 bool nojoy;  // what a wowser, joysticks completely disabled
@@ -310,23 +309,8 @@ void HandleMouseMotionEvent(SDL_Event * ev)
 {
 	int dx, dy;
 
-	if (in_warpmouse.d)
-	{
-		// -DEL- 2001/01/29 SDL_WarpMouse doesn't work properly on beos so
-		// calculate relative movement manually.
-
-		dx = ev->motion.x - (SCREENWIDTH/2);
-		dy = ev->motion.y - (SCREENHEIGHT/2);
-
-		// don't warp if we don't need to
-		if (dx || dy)
-			I_CentreMouse();
-	}
-	else
-	{
-		dx = ev->motion.xrel;
-		dy = ev->motion.yrel;
-	}
+	dx = ev->motion.xrel;
+	dy = ev->motion.yrel;
 
 	if (dx || dy)
 	{
@@ -458,7 +442,7 @@ void InactiveEventProcess(SDL_Event *sdl_ev)
 
 void I_CentreMouse(void)
 {
-	SDL_WarpMouseInWindow(NULL, SCREENWIDTH/2, SCREENHEIGHT/2);
+	SDL_WarpMouseInWindow(my_vis, SCREENWIDTH/2, SCREENHEIGHT/2);
 }
 
 

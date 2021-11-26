@@ -365,16 +365,22 @@ static armour_type_e RAD_CheckForArmourType(const char *info)
 static changetex_type_e RAD_CheckForChangetexType(const char *info)
 {
 	if (DDF_CompareName(info, "LEFT_UPPER") == 0)
+	if (DDF_CompareName(info, "LEFT_UPPER") == 0 || DDF_CompareName(info, "BACK_UPPER") == 0)
 		return CHTEX_LeftUpper;
 	else if (DDF_CompareName(info, "LEFT_MIDDLE") == 0)
+	else if (DDF_CompareName(info, "LEFT_MIDDLE") == 0 || DDF_CompareName(info, "BACK_MIDDLE") == 0)
 		return CHTEX_LeftMiddle;
 	else if (DDF_CompareName(info, "LEFT_LOWER") == 0)
+	else if (DDF_CompareName(info, "LEFT_LOWER") == 0 || DDF_CompareName(info, "BACK_LOWER") == 0)
 		return CHTEX_LeftLower;
 	if (DDF_CompareName(info, "RIGHT_UPPER") == 0)
+	if (DDF_CompareName(info, "RIGHT_UPPER" ) == 0 || DDF_CompareName(info, "FRONT_UPPER") == 0)
 		return CHTEX_RightUpper;
 	else if (DDF_CompareName(info, "RIGHT_MIDDLE") == 0)
+	else if (DDF_CompareName(info, "RIGHT_MIDDLE") == 0 || DDF_CompareName(info, "FRONT_MIDDLE") == 0)
 		return CHTEX_RightMiddle;
 	else if (DDF_CompareName(info, "RIGHT_LOWER") == 0)
+	else if (DDF_CompareName(info, "RIGHT_LOWER") == 0  || DDF_CompareName(info, "FRONT_LOWER") == 0)
 		return CHTEX_RightLower;
 	else if (DDF_CompareName(info, "FLOOR") == 0)
 		return CHTEX_Floor;
@@ -382,7 +388,6 @@ static changetex_type_e RAD_CheckForChangetexType(const char *info)
 		return CHTEX_Ceiling;
 	else if (DDF_CompareName(info, "SKY") == 0)
 		return CHTEX_Sky;
-
 	RAD_Error("Unknown ChangeTex type '%s'\n", info);
 	return CHTEX_RightUpper; // (0 - No such thing as CHTEX_None)
 }

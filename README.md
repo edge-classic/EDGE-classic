@@ -1,3 +1,8 @@
+# WARNING! This branch is tracking implementation of SDL2 and is not fully stable! Please use the main branch for regular use!
+Known bugs:
+- Lose ability to interact with window after switching focus
+- Keymapping not accurate yet (Caps Lock doesn't register as a toggle, for instance)
+
 # EDGE-classic
 Fork of the EDGE 1.35 release.
 

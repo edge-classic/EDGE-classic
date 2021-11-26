@@ -67,6 +67,8 @@ General Improvements
 
 + Merged CeeJays lines.ddf with ours to create the ULTIMATE lines.ddf ;)
 
++ Replaced GLBSP with AJBSP for a more up-to-date nodebuilder
+
 
 New Features
 ------------

@@ -202,15 +202,8 @@ void HandleKeyEvent(SDL_Event* ev)
 #ifdef DEBUG_KB
 		L_WriteDebug("   HandleKey: CAPS or NUMLOCK\n");
 #endif
-
-		// -AJA- for some reason (perhaps not SDL's fault), the CAPSLOCK
-		//       key behaves differently on Win32 and Linux.  Under Win32
-		//       we get the "long press" behaviour, but on Linux we get
-		//       "faked key-ups" behaviour.  Oi oi oi.
-#ifdef __linux__
 		if (ev->type != SDL_KEYDOWN)
 			return;
-#endif
 		event.type = ev_keydown;
 		E_PostEvent(&event);
 

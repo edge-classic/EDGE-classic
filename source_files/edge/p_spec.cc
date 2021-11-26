@@ -640,14 +640,22 @@ static void P_SectorEffect(sector_t *target, line_t *source,
 	{
 		target->floor.offset.x = -source->v1->x;
 		target->floor.offset.y = -source->v1->y;
-
+		if (source->side[0]) //Lobo: Experiment to read and apply line offsets to floor offsets
+		{
+			target->floor.offset.x += source->side[0]->bottom.offset.x;
+			target->floor.offset.y += source->side[0]->bottom.offset.y;
+		}
 		M_Angle2Matrix(angle, &target->floor.x_mat, &target->floor.y_mat);
 	}
 	if (special->sector_effect & SECTFX_AlignCeiling)
 	{
 		target->ceil.offset.x = -source->v1->x;
 		target->ceil.offset.y = -source->v1->y;
-
+		if (source->side[0]) //Lobo: Experiment to read and apply line offsets to floor offsets
+		{
+			target->ceil.offset.x += source->side[0]->bottom.offset.x;
+			target->ceil.offset.y += source->side[0]->bottom.offset.y;
+		}
 		M_Angle2Matrix(angle, &target->ceil.x_mat, &target->ceil.y_mat);
 	}
 

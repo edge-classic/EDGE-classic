@@ -257,17 +257,34 @@ void HandleMouseButtonEvent(SDL_Event * ev)
 		case 1: event.value.key.sym = KEYD_MOUSE1; break;
 		case 2: event.value.key.sym = KEYD_MOUSE2; break;
 		case 3: event.value.key.sym = KEYD_MOUSE3; break;
-
-		// handle the mouse wheel
-		case 4: event.value.key.sym = KEYD_WHEEL_UP; break; 
-		case 5: event.value.key.sym = KEYD_WHEEL_DN; break; 
-
-		case 6: event.value.key.sym = KEYD_MOUSE4; break;
-		case 7: event.value.key.sym = KEYD_MOUSE5; break;
-		case 8: event.value.key.sym = KEYD_MOUSE6; break;
+		case 4: event.value.key.sym = KEYD_MOUSE4; break; 
+		case 5: event.value.key.sym = KEYD_MOUSE5; break; 
+		case 6: event.value.key.sym = KEYD_MOUSE6; break;
 
 		default:
 			return;
+	}
+
+	E_PostEvent(&event);
+}
+
+void HandleMouseWheelEvent(SDL_Event * ev)
+{
+	event_t event;
+	
+	event.type = ev_keydown;
+
+	if (ev->wheel.y > 0) 
+	{
+		event.value.key.sym = KEYD_WHEEL_UP;
+	} 
+	else if (ev->wheel.y < 0)
+	{
+		event.value.key.sym = KEYD_WHEEL_DN;
+	}
+	else
+	{
+		return;
 	}
 
 	E_PostEvent(&event);
@@ -373,6 +390,10 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
 			HandleMouseButtonEvent(sdl_ev);
+			break;
+
+		case SDL_MOUSEWHEEL:
+			HandleMouseWheelEvent(sdl_ev);
 			break;
 		
 		case SDL_JOYBUTTONDOWN:

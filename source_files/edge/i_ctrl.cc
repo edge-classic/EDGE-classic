@@ -271,23 +271,27 @@ void HandleMouseButtonEvent(SDL_Event * ev)
 void HandleMouseWheelEvent(SDL_Event * ev)
 {
 	event_t event;
+	event_t release;
 	
 	event.type = ev_keydown;
+	release.type = ev_keyup;
 
 	if (ev->wheel.y > 0) 
 	{
 		event.value.key.sym = KEYD_WHEEL_UP;
+		release.value.key.sym = KEYD_WHEEL_UP;
 	} 
 	else if (ev->wheel.y < 0)
 	{
 		event.value.key.sym = KEYD_WHEEL_DN;
+		release.value.key.sym = KEYD_WHEEL_DN;
 	}
 	else
 	{
 		return;
 	}
-
 	E_PostEvent(&event);
+	E_PostEvent(&release);
 }
 
 

@@ -69,6 +69,8 @@ General Improvements
 
 + Replaced GLBSP with AJBSP for a more up-to-date nodebuilder
 
++ Migrated from SDL1 to SDL2 for longevity and potential new features
+
 
 New Features
 ------------

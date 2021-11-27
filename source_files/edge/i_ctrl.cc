@@ -379,7 +379,7 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 	{
 		case SDL_WINDOWEVENT:
 		{
-			if (sdl_ev->window.type == SDL_WINDOWEVENT_FOCUS_LOST)
+			if (sdl_ev->window.event == SDL_WINDOWEVENT_FOCUS_LOST)
 			{
 				HandleFocusLost();
 			}
@@ -437,7 +437,7 @@ void InactiveEventProcess(SDL_Event *sdl_ev)
 			if (app_state & APP_STATE_PENDING_QUIT)
 				break; // Don't care: we're going to exit
 						
-			if (sdl_ev->window.type == SDL_WINDOWEVENT_FOCUS_GAINED)
+			if (sdl_ev->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
 				HandleFocusGain();
 			break;
 

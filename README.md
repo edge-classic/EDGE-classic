@@ -1,6 +1,5 @@
 # WARNING! This branch is tracking implementation of SDL2 and is not fully stable! Please use the main branch for regular use!
 Known bugs:
-- Audio continues to play after losing window focus
 - EDGE Initialization/Nodebuilding progress bars don't show in fullscreen unless at native resolution; no effect on gameplay
 
 # EDGE-classic

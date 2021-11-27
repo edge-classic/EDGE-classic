@@ -139,7 +139,7 @@ void I_StartupGraphics(void)
 
 		test_mode.width  = possible_mode.w;
 		test_mode.height = possible_mode.h;
-		test_mode.depth  = SDL_BITSPERPIXEL(possible_mode.format);  // Not sure what the equivalent is for this yet - Dasho
+		test_mode.depth  = SDL_BITSPERPIXEL(possible_mode.format);
 		test_mode.full   = true;
 
 		if ((test_mode.width & 15) != 0)

@@ -24,7 +24,10 @@ Bugs fixed
 
 - oof sfx behaviour now closer to original doom.
 
+- Dropping the console with a movement key held down would preserve that movement while in the console. Now toggling the console properly drops (movement) input
 
+- Games with only one selectable episode will now skip episode selection and proceed directly to the skill choice menu. This prevents the "Hell on Earth" episode from appearing
+  when it is not appropriate.
 
 General Improvements
 --------------------
@@ -66,6 +69,8 @@ General Improvements
 + Merged CeeJays lines.ddf with ours to create the ULTIMATE lines.ddf ;)
 
 + doom_ddf folder content merged into edge.wad and the folder removed. The past is the future...again ;)
+
++ Migrated from SDL1 to SDL2 for longevity and potential new features
 
 
 New Features
@@ -133,6 +138,8 @@ Users with existing soundfonts can replace soundfont/default.sf2 with their own 
 + MP3 Sound Effects Support
   
 + Titlescreen and intermission are now Widescreen compatible with https://forum.zdoom.org/viewtopic.php?f=46&t=67843
+
++ AJBSP replaces GLBSP as EDGE-Classic's internal nodebuilder
 
 + COALHUDS: 11 new commands
   player.kills() returns how many enemies killed on the current map.

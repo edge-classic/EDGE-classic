@@ -1067,44 +1067,37 @@ static void CreateEpisodeMenu(void)
 	if (gamedefs.GetSize() == 0)
 		I_Error("No defined episodes !\n");
 
-	if (gamedefs.GetSize() == 1)
+	EpisodeMenu = Z_New(menuitem_t, gamedefs.GetSize());
+
+	Z_Clear(EpisodeMenu, menuitem_t, gamedefs.GetSize());
+
+	int e = 0;
+	epi::array_iterator_c it;
+
+	for (it = gamedefs.GetBaseIterator(); it.IsValid(); it++)
 	{
-		M_Episode(1);
+		gamedef_c *g = ITERATOR_TO_TYPE(it, gamedef_c*);
+		if (! g) continue;
+
+		if (W_CheckNumForName(g->firstmap.c_str()) == -1)
+			continue;
+
+		EpisodeMenu[e].status = 1;
+		EpisodeMenu[e].select_func = M_Episode;
+		EpisodeMenu[e].image = NULL;
+		EpisodeMenu[e].alpha_key = '1' + e;
+
+		Z_StrNCpy(EpisodeMenu[e].patch_name, g->namegraphic.c_str(), 8);
+		EpisodeMenu[e].patch_name[8] = 0;
+
+		e++;
 	}
-	else
-	{
-		EpisodeMenu = Z_New(menuitem_t, gamedefs.GetSize());
 
-		Z_Clear(EpisodeMenu, menuitem_t, gamedefs.GetSize());
+	if (e == 0)
+		I_Error("No available episodes !\n");
 
-		int e = 0;
-		epi::array_iterator_c it;
-
-		for (it = gamedefs.GetBaseIterator(); it.IsValid(); it++)
-		{
-			gamedef_c *g = ITERATOR_TO_TYPE(it, gamedef_c*);
-			if (! g) continue;
-
-			if (W_CheckNumForName(g->firstmap.c_str()) == -1)
-				continue;
-
-			EpisodeMenu[e].status = 1;
-			EpisodeMenu[e].select_func = M_Episode;
-			EpisodeMenu[e].image = NULL;
-			EpisodeMenu[e].alpha_key = '1' + e;
-
-			Z_StrNCpy(EpisodeMenu[e].patch_name, g->namegraphic.c_str(), 8);
-			EpisodeMenu[e].patch_name[8] = 0;
-
-			e++;
-		}
-
-		if (e == 0)
-			I_Error("No available episodes !\n");
-
-		EpiDef.numitems  = e;
-		EpiDef.menuitems = EpisodeMenu;
-	}
+	EpiDef.numitems  = e;
+	EpiDef.menuitems = EpisodeMenu;
 }
 
 
@@ -1113,7 +1106,14 @@ void M_DrawEpisode(void)
 	if (!EpisodeMenu)
 		CreateEpisodeMenu();
     
-	HUD_DrawImage(54, 38, menu_episode);
+	if (EpiDef.numitems == 1)
+	{
+		M_Episode(0); // Just go directly to the skill menu if there's only one selectable episode - Dasho
+	}
+	else
+	{
+		HUD_DrawImage(54, 38, menu_episode);
+	}
 }
 
 static void ReallyDoStartLevel(skill_t skill, gamedef_c *g)

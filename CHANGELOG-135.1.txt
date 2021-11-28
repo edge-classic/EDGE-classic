@@ -67,10 +67,6 @@ General Improvements
 
 + doom_ddf folder content merged into edge.wad and the folder removed. The past is the future...again ;)
 
-+ Replaced GLBSP with AJBSP for a more up-to-date nodebuilder
-
-+ Migrated from SDL1 to SDL2 for longevity and potential new features
-
 
 New Features
 ------------

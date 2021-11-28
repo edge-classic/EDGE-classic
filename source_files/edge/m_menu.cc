@@ -1067,37 +1067,44 @@ static void CreateEpisodeMenu(void)
 	if (gamedefs.GetSize() == 0)
 		I_Error("No defined episodes !\n");
 
-	EpisodeMenu = Z_New(menuitem_t, gamedefs.GetSize());
-
-	Z_Clear(EpisodeMenu, menuitem_t, gamedefs.GetSize());
-
-	int e = 0;
-	epi::array_iterator_c it;
-
-	for (it = gamedefs.GetBaseIterator(); it.IsValid(); it++)
+	if (gamedefs.GetSize() == 1)
 	{
-		gamedef_c *g = ITERATOR_TO_TYPE(it, gamedef_c*);
-		if (! g) continue;
-
-		if (W_CheckNumForName(g->firstmap.c_str()) == -1)
-			continue;
-
-		EpisodeMenu[e].status = 1;
-		EpisodeMenu[e].select_func = M_Episode;
-		EpisodeMenu[e].image = NULL;
-		EpisodeMenu[e].alpha_key = '1' + e;
-
-		Z_StrNCpy(EpisodeMenu[e].patch_name, g->namegraphic.c_str(), 8);
-		EpisodeMenu[e].patch_name[8] = 0;
-
-		e++;
+		M_Episode(1);
 	}
+	else
+	{
+		EpisodeMenu = Z_New(menuitem_t, gamedefs.GetSize());
 
-	if (e == 0)
-		I_Error("No available episodes !\n");
+		Z_Clear(EpisodeMenu, menuitem_t, gamedefs.GetSize());
 
-	EpiDef.numitems  = e;
-	EpiDef.menuitems = EpisodeMenu;
+		int e = 0;
+		epi::array_iterator_c it;
+
+		for (it = gamedefs.GetBaseIterator(); it.IsValid(); it++)
+		{
+			gamedef_c *g = ITERATOR_TO_TYPE(it, gamedef_c*);
+			if (! g) continue;
+
+			if (W_CheckNumForName(g->firstmap.c_str()) == -1)
+				continue;
+
+			EpisodeMenu[e].status = 1;
+			EpisodeMenu[e].select_func = M_Episode;
+			EpisodeMenu[e].image = NULL;
+			EpisodeMenu[e].alpha_key = '1' + e;
+
+			Z_StrNCpy(EpisodeMenu[e].patch_name, g->namegraphic.c_str(), 8);
+			EpisodeMenu[e].patch_name[8] = 0;
+
+			e++;
+		}
+
+		if (e == 0)
+			I_Error("No available episodes !\n");
+
+		EpiDef.numitems  = e;
+		EpiDef.menuitems = EpisodeMenu;
+	}
 }
 
 

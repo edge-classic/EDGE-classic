@@ -1005,6 +1005,7 @@ bool CON_Responder(event_t * ev)
 
 	if (ev->type == ev_keydown && E_MatchesKey(key_console, ev->value.key.sym))
 	{
+		E_ClearInput();
 		CON_SetVisible(vs_toggle);
 		return true;
 	}

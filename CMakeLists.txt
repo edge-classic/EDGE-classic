@@ -16,6 +16,8 @@ project(
   VERSION 0.1.0
 )
 
+set(CMAKE_MODULE_PATH cmake)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS "-O2 -ffast-math -fno-strict-aliasing -DINLINE_G=inline -Wall")
@@ -248,7 +250,7 @@ add_executable(
 )
 endif()
 
-find_package(SDL REQUIRED)
+find_package(SDL2 REQUIRED)
 
 if(APPLE)
   find_package(OpenGL REQUIRED)
@@ -291,7 +293,7 @@ target_link_libraries(
           edge_epi
 		  glew_s
 		  opengl32
-		  ${SDL_LIBRARIES}
+		  ${SDL2_LIBRARIES}
 		  png_static
 		  jpeg_static
 		  zlibstatic
@@ -308,7 +310,7 @@ target_link_libraries(
           edge_epi
 		  OpenGL
 		  glew_s
-		  SDL
+		  SDL2
 		  png_static
 		  jpeg_static
 		  zlibstatic
@@ -323,7 +325,7 @@ target_link_libraries(
           edge_epi
 		  ${OPENGL_LIBRARIES}
 		  glew_s
-		  ${SDL_LIBRARIES}
+		  ${SDL2_LIBRARIES}
 		  png_static
 		  jpeg_static
 		  zlibstatic

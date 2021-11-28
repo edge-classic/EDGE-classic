@@ -19,15 +19,7 @@
 #ifndef __SDL_SYSTEM_INTERNAL_H__
 #define __SDL_SYSTEM_INTERNAL_H__
 
-#include <SDL/SDL.h>
-
-
-// workaround for old SDL version (< 1.2.10)
-#if (SDL_PATCHLEVEL < 10)
-#include <stdlib.h>
-#define SDL_getenv  getenv
-#define SDL_putenv  putenv
-#endif
+#include <SDL2/SDL.h>
 
 #include "i_local.h"  // FIXME: remove
 

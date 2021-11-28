@@ -1106,7 +1106,14 @@ void M_DrawEpisode(void)
 	if (!EpisodeMenu)
 		CreateEpisodeMenu();
     
-	HUD_DrawImage(54, 38, menu_episode);
+	if (EpiDef.numitems == 1)
+	{
+		M_Episode(0); // Just go directly to the skill menu if there's only one selectable episode - Dasho
+	}
+	else
+	{
+		HUD_DrawImage(54, 38, menu_episode);
+	}
 }
 
 static void ReallyDoStartLevel(skill_t skill, gamedef_c *g)

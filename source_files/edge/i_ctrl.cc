@@ -17,7 +17,7 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
-#include "i_sdlinc.h"
+#include "i_video.h" // i_sdlinc.h is also covered here - Dasho
 
 #include "dm_defs.h"
 #include "dm_state.h"
@@ -38,7 +38,6 @@ bool alt_is_down;
 bool eat_mouse_motion = true;
 
 cvar_c in_keypad;
-cvar_c in_warpmouse;
 
 
 bool nojoy;  // what a wowser, joysticks completely disabled
@@ -63,8 +62,8 @@ int TranslateSDLKey(int key)
 	// if keypad is not wanted, convert to normal keys
 	if (! in_keypad.d)
 	{
-		if (SDLK_KP0 <= key && key <= SDLK_KP9)
-			return '0' + (key - SDLK_KP0);
+		if (SDLK_KP_0 <= key && key <= SDLK_KP_9)
+			return '0' + (key - SDLK_KP_0);
 
 		switch (key)
 		{
@@ -112,16 +111,16 @@ int TranslateSDLKey(int key)
 		case SDLK_F11: return KEYD_F11;
 		case SDLK_F12: return KEYD_F12;
 
-		case SDLK_KP0: return KEYD_KP0;
-		case SDLK_KP1: return KEYD_KP1;
-		case SDLK_KP2: return KEYD_KP2;
-		case SDLK_KP3: return KEYD_KP3;
-		case SDLK_KP4: return KEYD_KP4;
-		case SDLK_KP5: return KEYD_KP5;
-		case SDLK_KP6: return KEYD_KP6;
-		case SDLK_KP7: return KEYD_KP7;
-		case SDLK_KP8: return KEYD_KP8;
-		case SDLK_KP9: return KEYD_KP9;
+		case SDLK_KP_0: return KEYD_KP0;
+		case SDLK_KP_1: return KEYD_KP1;
+		case SDLK_KP_2: return KEYD_KP2;
+		case SDLK_KP_3: return KEYD_KP3;
+		case SDLK_KP_4: return KEYD_KP4;
+		case SDLK_KP_5: return KEYD_KP5;
+		case SDLK_KP_6: return KEYD_KP6;
+		case SDLK_KP_7: return KEYD_KP7;
+		case SDLK_KP_8: return KEYD_KP8;
+		case SDLK_KP_9: return KEYD_KP9;
 
 		case SDLK_KP_PERIOD:   return KEYD_KP_DOT;
 		case SDLK_KP_PLUS:     return KEYD_KP_PLUS;
@@ -131,19 +130,19 @@ int TranslateSDLKey(int key)
 		case SDLK_KP_EQUALS:   return KEYD_KP_EQUAL;
 		case SDLK_KP_ENTER:    return KEYD_KP_ENTER;
 
-		case SDLK_PRINT:     return KEYD_PRTSCR;
+		case SDLK_PRINTSCREEN:     return KEYD_PRTSCR;
 		case SDLK_CAPSLOCK:  return KEYD_CAPSLOCK;
-		case SDLK_NUMLOCK:   return KEYD_NUMLOCK;
-		case SDLK_SCROLLOCK: return KEYD_SCRLOCK;
+		case SDLK_NUMLOCKCLEAR:   return KEYD_NUMLOCK;
+		case SDLK_SCROLLLOCK: return KEYD_SCRLOCK;
 		case SDLK_PAUSE:     return KEYD_PAUSE;
 
 		case SDLK_LSHIFT:
 		case SDLK_RSHIFT: return KEYD_RSHIFT;
 		case SDLK_LCTRL:
 		case SDLK_RCTRL:  return KEYD_RCTRL;
-		case SDLK_LMETA:
+		case SDLK_LGUI:
 		case SDLK_LALT:   return KEYD_LALT;
-		case SDLK_RMETA:
+		case SDLK_RGUI:
 		case SDLK_RALT:   return KEYD_RALT;
 
 		default: break;
@@ -196,23 +195,15 @@ void HandleKeyEvent(SDL_Event* ev)
 
 	event_t event;
 	event.value.key.sym = TranslateSDLKey(sym);
-	event.value.key.unicode = ev->key.keysym.unicode;
 
 	// handle certain keys which don't behave normally
-	if (sym == SDLK_CAPSLOCK || sym == SDLK_NUMLOCK)
+	if (sym == SDLK_CAPSLOCK || sym == SDLK_NUMLOCKCLEAR)
 	{
 #ifdef DEBUG_KB
 		L_WriteDebug("   HandleKey: CAPS or NUMLOCK\n");
 #endif
-
-		// -AJA- for some reason (perhaps not SDL's fault), the CAPSLOCK
-		//       key behaves differently on Win32 and Linux.  Under Win32
-		//       we get the "long press" behaviour, but on Linux we get
-		//       "faked key-ups" behaviour.  Oi oi oi.
-#ifdef __linux__
 		if (ev->type != SDL_KEYDOWN)
 			return;
-#endif
 		event.type = ev_keydown;
 		E_PostEvent(&event);
 
@@ -224,12 +215,11 @@ void HandleKeyEvent(SDL_Event* ev)
 	event.type = (ev->type == SDL_KEYDOWN) ? ev_keydown : ev_keyup;
 
 #ifdef DEBUG_KB
-	L_WriteDebug("   HandleKey: sym=%d scan=%d unicode=%d --> key=%d\n",
-			sym, ev->key.keysym.scancode, ev->key.keysym.unicode, event.value.key);
+	L_WriteDebug("   HandleKey: sym=%d scan=%d --> key=%d\n",
+			sym, ev->key.keysym.scancode, event.value.key);
 #endif
 
-	if (event.value.key.sym < 0 &&
-	    event.value.key.unicode == 0)
+	if (event.value.key.sym < 0)
 	{
 		// No translation possible for SDL symbol and no unicode value
 		return;
@@ -267,20 +257,41 @@ void HandleMouseButtonEvent(SDL_Event * ev)
 		case 1: event.value.key.sym = KEYD_MOUSE1; break;
 		case 2: event.value.key.sym = KEYD_MOUSE2; break;
 		case 3: event.value.key.sym = KEYD_MOUSE3; break;
-
-		// handle the mouse wheel
-		case 4: event.value.key.sym = KEYD_WHEEL_UP; break; 
-		case 5: event.value.key.sym = KEYD_WHEEL_DN; break; 
-
-		case 6: event.value.key.sym = KEYD_MOUSE4; break;
-		case 7: event.value.key.sym = KEYD_MOUSE5; break;
-		case 8: event.value.key.sym = KEYD_MOUSE6; break;
+		case 4: event.value.key.sym = KEYD_MOUSE4; break; 
+		case 5: event.value.key.sym = KEYD_MOUSE5; break; 
+		case 6: event.value.key.sym = KEYD_MOUSE6; break;
 
 		default:
 			return;
 	}
 
 	E_PostEvent(&event);
+}
+
+void HandleMouseWheelEvent(SDL_Event * ev)
+{
+	event_t event;
+	event_t release;
+	
+	event.type = ev_keydown;
+	release.type = ev_keyup;
+
+	if (ev->wheel.y > 0) 
+	{
+		event.value.key.sym = KEYD_WHEEL_UP;
+		release.value.key.sym = KEYD_WHEEL_UP;
+	} 
+	else if (ev->wheel.y < 0)
+	{
+		event.value.key.sym = KEYD_WHEEL_DN;
+		release.value.key.sym = KEYD_WHEEL_DN;
+	}
+	else
+	{
+		return;
+	}
+	E_PostEvent(&event);
+	E_PostEvent(&release);
 }
 
 
@@ -312,23 +323,8 @@ void HandleMouseMotionEvent(SDL_Event * ev)
 {
 	int dx, dy;
 
-	if (in_warpmouse.d)
-	{
-		// -DEL- 2001/01/29 SDL_WarpMouse doesn't work properly on beos so
-		// calculate relative movement manually.
-
-		dx = ev->motion.x - (SCREENWIDTH/2);
-		dy = ev->motion.y - (SCREENHEIGHT/2);
-
-		// don't warp if we don't need to
-		if (dx || dy)
-			I_CentreMouse();
-	}
-	else
-	{
-		dx = ev->motion.xrel;
-		dy = ev->motion.yrel;
-	}
+	dx = ev->motion.xrel;
+	dy = ev->motion.yrel;
 
 	if (dx || dy)
 	{
@@ -381,14 +377,12 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 {
 	switch(sdl_ev->type)
 	{
-		case SDL_ACTIVEEVENT:
+		case SDL_WINDOWEVENT:
 		{
-			if ((sdl_ev->active.state & SDL_APPINPUTFOCUS) &&
-				(sdl_ev->active.gain == 0))
+			if (sdl_ev->window.event == SDL_WINDOWEVENT_FOCUS_LOST)
 			{
 				HandleFocusLost();
 			}
-			
 			break;
 		}
 		
@@ -400,6 +394,10 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
 			HandleMouseButtonEvent(sdl_ev);
+			break;
+
+		case SDL_MOUSEWHEEL:
+			HandleMouseWheelEvent(sdl_ev);
 			break;
 		
 		case SDL_JOYBUTTONDOWN:
@@ -435,15 +433,11 @@ void InactiveEventProcess(SDL_Event *sdl_ev)
 {
 	switch(sdl_ev->type)
 	{
-		case SDL_ACTIVEEVENT:
+		case SDL_WINDOWEVENT:
 			if (app_state & APP_STATE_PENDING_QUIT)
 				break; // Don't care: we're going to exit
-			
-			if (!sdl_ev->active.gain)
-				break;
-				
-			if (sdl_ev->active.state & SDL_APPACTIVE ||
-                sdl_ev->active.state & SDL_APPINPUTFOCUS)
+						
+			if (sdl_ev->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
 				HandleFocusGain();
 			break;
 
@@ -461,7 +455,7 @@ void InactiveEventProcess(SDL_Event *sdl_ev)
 
 void I_CentreMouse(void)
 {
-	SDL_WarpMouse(SCREENWIDTH/2, SCREENHEIGHT/2);
+	SDL_WarpMouseInWindow(my_vis, SCREENWIDTH/2, SCREENHEIGHT/2);
 }
 
 
@@ -483,7 +477,7 @@ void I_ShowJoysticks(void)
 
 	for (int i = 0; i < num_joys; i++)
 	{
-		const char *name = SDL_JoystickName(i);
+		const char *name = SDL_JoystickNameForIndex(i);
 		if (! name)
 			name = "(UNKNOWN)";
 
@@ -505,7 +499,7 @@ void I_OpenJoystick(int index)
 
 	cur_joy = index;
 
-	const char *name = SDL_JoystickName(cur_joy-1);
+	const char *name = SDL_JoystickName(joy_info);
 	if (! name)
 		name = "(UNKNOWN)";
 
@@ -585,8 +579,6 @@ void CheckJoystickChanged(void)
 void I_StartupControl(void)
 {
 	alt_is_down = false;
-
-	SDL_EnableUNICODE(1);
 
 	I_StartupJoystick();
 }

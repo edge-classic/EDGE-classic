@@ -17,7 +17,7 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
-#include "i_sdlinc.h"
+#include "i_video.h"
 #include "i_defs_gl.h"
 
 #include <signal.h>
@@ -27,7 +27,7 @@
 #include "r_modes.h"
 
 
-SDL_Surface *my_vis;
+SDL_Window *my_vis;
 
 int graphics_shutdown = 0;
 
@@ -65,13 +65,11 @@ void I_GrabCursor(bool enable)
 
 	if (grab_state && in_grab.d)
 	{
-		SDL_ShowCursor(0);
-		SDL_WM_GrabInput(SDL_GRAB_ON);
+		SDL_SetRelativeMouseMode(SDL_TRUE);
 	}
 	else
 	{
-		SDL_ShowCursor(1);
-		SDL_WM_GrabInput(SDL_GRAB_OFF);
+		SDL_SetRelativeMouseMode(SDL_FALSE);
 	}
 }
 
@@ -101,9 +99,7 @@ void I_StartupGraphics(void)
 
 	if (stricmp(driver, "default") != 0)
 	{
-		char buffer[200];
-		snprintf(buffer, sizeof(buffer), "SDL_VIDEODRIVER=%s", driver);
-		SDL_putenv(buffer);
+		SDL_setenv("SDL_VIDEODRIVER", driver, 1);
 	}
 
 	I_Printf("SDL_Video_Driver: %s\n", driver);
@@ -124,35 +120,35 @@ void I_StartupGraphics(void)
 
 	
     // -DS- 2005/06/27 Detect SDL Resolutions
-	const SDL_VideoInfo *info = SDL_GetVideoInfo();
+	SDL_DisplayMode info;
+	SDL_GetDesktopDisplayMode(0, &info);
 
-	display_W = info->current_w;
-	display_H = info->current_h;
+	display_W = info.w;
+	display_H = info.h;
 
 	I_Printf("Desktop resolution: %dx%d\n", display_W, display_H);
 
-	SDL_Rect **modes = SDL_ListModes(info->vfmt,
-					  SDL_OPENGL | SDL_DOUBLEBUF | SDL_FULLSCREEN);
+	int num_modes = SDL_GetNumDisplayModes(0);
 
-	if (modes && modes != (SDL_Rect **)-1)
+	for (int i = 0; i < num_modes; i++ )
 	{
-		for (; *modes; modes++)
+		SDL_DisplayMode possible_mode;
+		SDL_GetDisplayMode(0, i, &possible_mode);
+
+		scrmode_c test_mode;
+
+		test_mode.width  = possible_mode.w;
+		test_mode.height = possible_mode.h;
+		test_mode.depth  = SDL_BITSPERPIXEL(possible_mode.format);
+		test_mode.full   = true;
+
+		if ((test_mode.width & 15) != 0)
+			continue;
+
+		if (test_mode.depth == 15 || test_mode.depth == 16 ||
+		    test_mode.depth == 24 || test_mode.depth == 32)
 		{
-			scrmode_c test_mode;
-
-			test_mode.width  = (*modes)->w;
-			test_mode.height = (*modes)->h;
-			test_mode.depth  = info->vfmt->BitsPerPixel;  // HMMMM ???
-			test_mode.full   = true;
-
-			if ((test_mode.width & 15) != 0)
-				continue;
-
-			if (test_mode.depth == 15 || test_mode.depth == 16 ||
-			    test_mode.depth == 24 || test_mode.depth == 32)
-			{
-				R_AddResolution(&test_mode);
-			}
+			R_AddResolution(&test_mode);
 		}
 	}
 
@@ -164,17 +160,21 @@ void I_StartupGraphics(void)
 			for (int i = 0; possible_modes[i].w != -1; i++)
 			{
 				scrmode_c mode;
+				SDL_DisplayMode test_mode;
+				SDL_DisplayMode closest_mode;
 
-				mode.width  = possible_modes[i].w;
+				mode.width = possible_modes[i].w;
 				mode.height = possible_modes[i].h;
 				mode.depth  = depth;
-				mode.full   = full;
+				mode.full   = false;
 
-				int got_depth = SDL_VideoModeOK(mode.width, mode.height,
-						mode.depth, SDL_OPENGL | SDL_DOUBLEBUF |
-						(mode.full ? SDL_FULLSCREEN : 0));
+				test_mode.w = possible_modes[i].w;
+				test_mode.h = possible_modes[i].h;
+				test_mode.format = (depth << 8);
 
-				if (R_DepthIsEquivalent(got_depth, mode.depth))
+				SDL_GetClosestDisplayMode(0, &test_mode, &closest_mode);
+
+				if (R_DepthIsEquivalent(SDL_BITSPERPIXEL(closest_mode.format), mode.depth))
 				{
 					R_AddResolution(&mode);
 				}
@@ -194,25 +194,31 @@ bool I_SetScreenSize(scrmode_c *mode)
 			 mode->width, mode->height, mode->depth,
 			 mode->full ? "fullscreen" : "windowed");
 
-	my_vis = SDL_SetVideoMode(mode->width, mode->height, mode->depth, 
-					SDL_OPENGL | SDL_DOUBLEBUF |
-					(mode->full ? SDL_FULLSCREEN : 0));
-
-	if (my_vis == NULL)
+	if (my_vis)
 	{
-		I_Printf("I_SetScreenSize: (mode not possible)\n");
-		return false;
+		if (mode->full) 
+		{
+			SDL_SetWindowFullscreen(my_vis, 0);
+			SDL_SetWindowSize(my_vis, mode->width, mode->height);
+			SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN);
+			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
+				mode->width, mode->height, mode->depth);
+		}
+		else
+		{
+			SDL_SetWindowFullscreen(my_vis, 0);
+			SDL_SetWindowSize(my_vis, mode->width, mode->height);
+			SDL_SetWindowPosition(my_vis, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
+				mode->width, mode->height, mode->depth);
+		}
 	}
-
-	if (my_vis->format->BytesPerPixel <= 1)
+	else
 	{
-		I_Printf("I_SetScreenSize: 8-bit mode set (not suitable)\n");
-		return false;
+		my_vis = SDL_CreateWindow("EDGE v1.35.1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
+			SDL_WINDOW_OPENGL | (mode->full ? SDL_WINDOW_FULLSCREEN : 0));
+		SDL_GL_CreateContext(my_vis);
 	}
-
-	I_Printf("I_SetScreenSize: mode now %dx%d %dbpp flags:0x%x\n",
-			 my_vis->w, my_vis->h,
-			 my_vis->format->BitsPerPixel, my_vis->flags);
 
 	// -AJA- turn off cursor -- BIG performance increase.
 	//       Plus, the combination of no-cursor + grab gives 
@@ -228,7 +234,7 @@ bool I_SetScreenSize(scrmode_c *mode)
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	SDL_GL_SwapBuffers();
+	SDL_GL_SwapWindow(my_vis);
 
 	return true;
 }
@@ -243,21 +249,15 @@ void I_StartFrame(void)
 
 void I_FinishFrame(void)
 {
-	SDL_GL_SwapBuffers();
+	SDL_GL_SwapWindow(my_vis);
 
 	if (in_grab.CheckModified())
 		I_GrabCursor(grab_state);
 }
 
-
-void I_PutTitle(const char *title)
-{
-	SDL_WM_SetCaption(title, title);
-}
-
 void I_SetGamma(float gamma)
 {
-	if (SDL_SetGamma(gamma, gamma, gamma) < 0)
+	if (SDL_SetWindowBrightness(my_vis, gamma) < 0)
 		I_Printf("Failed to change gamma.\n");
 }
 

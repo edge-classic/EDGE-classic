@@ -630,7 +630,6 @@ void E_ReleaseAllKeys(void)
 			
 			ev.type = ev_keyup;
 			ev.value.key.sym = i;
-			ev.value.key.unicode = 0;
 
 			E_PostEvent(&ev);
 		}

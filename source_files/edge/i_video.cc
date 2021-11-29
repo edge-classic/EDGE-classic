@@ -215,7 +215,7 @@ bool I_SetScreenSize(scrmode_c *mode)
 	}
 	else
 	{
-		my_vis = SDL_CreateWindow("EDGE v1.35.1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
+		my_vis = SDL_CreateWindow("EDGE Classic", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
 			SDL_WINDOW_OPENGL | (mode->full ? SDL_WINDOW_FULLSCREEN : 0));
 		SDL_GL_CreateContext(my_vis);
 	}

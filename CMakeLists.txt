@@ -11,7 +11,7 @@ add_subdirectory(source_files/libpng)
 add_subdirectory(source_files/zlib)
 
 project(
-  edge135
+  edge-classic
   LANGUAGES CXX
   VERSION 0.1.0
 )
@@ -36,7 +36,7 @@ endif()
 
 if(WIN32 OR MSYS)
 add_executable(
-  edge135
+  edge-classic
 	source_files/edge/i_main.cc     
 	source_files/edge/i_ctrl.cc     
 	source_files/edge/i_video.cc    
@@ -144,7 +144,7 @@ add_executable(
 )
 else()
 add_executable(
-  edge135
+  edge-classic
 	source_files/edge/i_main.cc     
 	source_files/edge/i_ctrl.cc     
 	source_files/edge/i_video.cc    
@@ -256,36 +256,36 @@ if(APPLE)
   find_package(OpenGL REQUIRED)
 endif()
 
-target_include_directories(edge135 PRIVATE source_files/ajbsp)
-target_include_directories(edge135 PRIVATE source_files/coal)
-target_include_directories(edge135 PRIVATE source_files/ddf)
-target_include_directories(edge135 PRIVATE source_files/deh_edge)
-target_include_directories(edge135 PRIVATE source_files/epi)
-target_include_directories(edge135 PRIVATE source_files/glew/include/GL)
-target_include_directories(edge135 PRIVATE source_files/libjpeg)
-target_include_directories(edge135 PRIVATE source_files/libpng)
-target_include_directories(edge135 PRIVATE source_files/minimp3)
-target_include_directories(edge135 PRIVATE source_files/minivorbis)
-target_include_directories(edge135 PRIVATE source_files/tinysoundfont)
-target_include_directories(edge135 PRIVATE source_files/zlib)
+target_include_directories(edge-classic PRIVATE source_files/ajbsp)
+target_include_directories(edge-classic PRIVATE source_files/coal)
+target_include_directories(edge-classic PRIVATE source_files/ddf)
+target_include_directories(edge-classic PRIVATE source_files/deh_edge)
+target_include_directories(edge-classic PRIVATE source_files/epi)
+target_include_directories(edge-classic PRIVATE source_files/glew/include/GL)
+target_include_directories(edge-classic PRIVATE source_files/libjpeg)
+target_include_directories(edge-classic PRIVATE source_files/libpng)
+target_include_directories(edge-classic PRIVATE source_files/minimp3)
+target_include_directories(edge-classic PRIVATE source_files/minivorbis)
+target_include_directories(edge-classic PRIVATE source_files/tinysoundfont)
+target_include_directories(edge-classic PRIVATE source_files/zlib)
 
 if(WIN32 OR MSYS)
-  target_compile_definitions(edge135 PRIVATE WIN32)
+  target_compile_definitions(edge-classic PRIVATE WIN32)
 else()
-  target_compile_definitions(edge135 PRIVATE UNIX)
+  target_compile_definitions(edge-classic PRIVATE UNIX)
 endif()
 
 # Copies executables to local install directory after build
 add_custom_command(
-TARGET edge135
+TARGET edge-classic
 POST_BUILD
-COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge135>"
+COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge-classic>"
 		"${CMAKE_CURRENT_LIST_DIR}"
 )
 
 if(WIN32 OR MSYS)
 target_link_libraries(
-  edge135
+  edge-classic
   PRIVATE edge_ajbsp
   		  edge_coal
           edge_ddf
@@ -302,7 +302,7 @@ target_link_libraries(
   )
 elseif(NOT APPLE)
 target_link_libraries(
-  edge135
+  edge-classic
   PRIVATE edge_ajbsp
   		  edge_coal
           edge_ddf
@@ -317,7 +317,7 @@ target_link_libraries(
   )
 else()
 target_link_libraries(
-  edge135
+  edge-classic
   PRIVATE edge_ajbsp
   		  edge_coal
           edge_ddf

@@ -935,7 +935,7 @@ int RGL_UpdateSkyBoxTextures(void)
 		what_pal_cached = true;
 	}
 
-	DeleteSkyTexGroup(SK);
+	//DeleteSkyTexGroup(SK); // Commented out to see if this fixes the skybox switching issue without bugs - Dasho
 
 	info->tex[WSKY_North]  = BuildFace(block, WSKY_North,  info, what_pal);
 	info->tex[WSKY_East]   = BuildFace(block, WSKY_East,   info, what_pal);

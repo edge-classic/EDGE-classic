@@ -1,9 +1,9 @@
 https://github.com/dashodanger/EDGE-classic
 
-CHANGELOG for EDGE 1.35.1 (since 1.35)
+CHANGELOG for EDGE-Classic Preview 2 (since forking from EDGE 1.35)
 ====================================
 
-(Date: NOVEMBER 2021)
+(Date: DECEMBER 2021)
 
 
 Bugs fixed
@@ -28,6 +28,8 @@ Bugs fixed
 
 - Games with only one selectable episode will now skip episode selection and proceed directly to the skill choice menu. This prevents the "Hell on Earth" episode from appearing
   when it is not appropriate.
+
+- Fixed bug with valid skybox texture references being deleted when cycling between real and psuedo-skyboxes
 
 General Improvements
 --------------------
@@ -72,6 +74,10 @@ General Improvements
 
 + Migrated from SDL1 to SDL2 for longevity and potential new features
 
++ Replaced GLBSP with AJBSP as EDGE-Classic's internal nodebuilder
+
++ Added missing graphics for Harmony and HacX option menus (Sound, Mouse, Gameplay, etc.) so that they don't use the fallback/incorrectly
+paletted Doom menu graphics
 
 New Features
 ------------
@@ -130,7 +136,7 @@ Used just like JUMP(state_name:frame,xx%), but decrements the reload quantity fo
 + New MIDI Player
   - Timidity has been replaced by TinySoundfont, with support for *.sf2 soundfont files instead of GUS patch sets
   - A Roland SC-55 style default soundfont by Deemster has been included (https://www.vogons.org/viewtopic.php?f=9&t=45600).
-Users with existing soundfonts can replace soundfont/default.sf2 with their own font if desired (must be named default.sf2; selector is in progress).
+Users with existing soundfonts can replace soundfont/default.sf2 with their own font if desired (must be named default.sf2; selector may be built in the future).
   - TinySoundfont is now the default music player for both Linux and Window builds. 
 
 + MP3 Music Support
@@ -138,8 +144,6 @@ Users with existing soundfonts can replace soundfont/default.sf2 with their own 
 + MP3 Sound Effects Support
   
 + Titlescreen and intermission are now Widescreen compatible with https://forum.zdoom.org/viewtopic.php?f=46&t=67843
-
-+ AJBSP replaces GLBSP as EDGE-Classic's internal nodebuilder
 
 + COALHUDS: 11 new commands
   player.kills() returns how many enemies killed on the current map.

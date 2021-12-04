@@ -155,8 +155,15 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 
 		// -ES- 2000/02/10 Texture must have patches.
 		int patchcount = EPI_LE_S16(mtexture->patch_count);
+		
+		//Lobo 2021: Changed this to a warning. Allows us to run several DBPs
+		// which have this issue
 		if (!patchcount)
-			I_Error("W_InitTextures: Texture '%.8s' has no patches", mtexture->name);
+		{
+			I_Warning("W_InitTextures: Texture '%.8s' has no patches", mtexture->name);
+			//I_Error("W_InitTextures: Texture '%.8s' has no patches", mtexture->name);
+			patchcount = 1; //pretend we have 1
+		} 
 
 		int width = EPI_LE_S16(mtexture->width);
 		if (width == 0)

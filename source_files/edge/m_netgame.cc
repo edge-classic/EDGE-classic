@@ -426,7 +426,7 @@ static void ChangeLevel(newgame_params_c *param, int dir)
 
 static void HostChangeOption(int opt, int key)
 {
-	int dir = (key == KEYD_LEFTARROW) ? -1 : +1;
+	int dir = (key == KEYD_LEFTARROW || key == KEYD_DPAD_LEFT) ? -1 : +1;
 
 	switch (opt)
 	{
@@ -587,18 +587,18 @@ bool M_NetHostResponder(event_t * ev, int ch)
 		}
 	}
 
-	if (ch == KEYD_DOWNARROW || ch == KEYD_WHEEL_DN)
+	if (ch == KEYD_DOWNARROW || ch == KEYD_WHEEL_DN || ch == KEYD_DPAD_DOWN)
 	{
 		host_pos = (host_pos + 1) % HOST_OPTIONS;
 		return true;
 	}
-	else if (ch == KEYD_UPARROW || ch == KEYD_WHEEL_UP)
+	else if (ch == KEYD_UPARROW || ch == KEYD_WHEEL_UP || ch == KEYD_DPAD_UP)
 	{
 		host_pos = (host_pos + HOST_OPTIONS - 1) % HOST_OPTIONS;
 		return true;
 	}
 
-	if (ch == KEYD_LEFTARROW || ch == KEYD_RIGHTARROW ||
+	if (ch == KEYD_LEFTARROW || ch == KEYD_RIGHTARROW || ch == KEYD_DPAD_LEFT || ch == KEYD_DPAD_RIGHT ||
 		ch == KEYD_ENTER)
 	{
 		HostChangeOption(host_pos, ch);
@@ -641,7 +641,7 @@ static void JoinConnect(void)
 
 static void JoinChangeOption(int opt, int key)
 {
-	int dir = (key == KEYD_LEFTARROW) ? -1 : +1;
+	int dir = (key == KEYD_LEFTARROW || key == KEYD_DPAD_LEFT) ? -1 : +1;
 
 	if (join_connect_timer > 0)
 	{
@@ -740,18 +740,18 @@ void M_DrawJoinMenu(void)
 
 bool M_NetJoinResponder(event_t * ev, int ch)
 {
-	if (ch == KEYD_DOWNARROW || ch == KEYD_WHEEL_DN)
+	if (ch == KEYD_DOWNARROW || ch == KEYD_WHEEL_DN || ch == KEYD_DPAD_DOWN)
 	{
 		join_pos = (join_pos + 1) % JOIN_OPTIONS;
 		return true;
 	}
-	else if (ch == KEYD_UPARROW || ch == KEYD_WHEEL_UP)
+	else if (ch == KEYD_UPARROW || ch == KEYD_WHEEL_UP || ch == KEYD_DPAD_UP)
 	{
 		join_pos = (join_pos + JOIN_OPTIONS - 1) % JOIN_OPTIONS;
 		return true;
 	}
 
-	if (ch == KEYD_LEFTARROW || ch == KEYD_RIGHTARROW ||
+	if (ch == KEYD_LEFTARROW || ch == KEYD_RIGHTARROW || ch == KEYD_DPAD_LEFT || ch == KEYD_DPAD_RIGHT ||
 		ch == KEYD_ENTER)
 	{
 		JoinChangeOption(join_pos, ch);

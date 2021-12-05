@@ -203,7 +203,7 @@ float JoyAxisFromRaw(int raw)
 
 static void UpdateJoyAxis(int n)
 {
-	if (joy_axis[n] == AXIS_DISABLE)
+	if (joy_axis[n] == AXIS_DISABLE || joy_axis[n] == AXIS_LEFT_TRIGGER || joy_axis[n] == AXIS_RIGHT_TRIGGER)
 		return;
 
 	int raw = I_JoyGetAxis(n);
@@ -781,6 +781,14 @@ static specialkey_t special_keys[] =
     { KEYD_JOY13, "Joy13" },
     { KEYD_JOY14, "Joy14" },
     { KEYD_JOY15, "Joy15" },
+
+	// gamepad buttons/axes
+    { KEYD_DPAD_UP, "Dpad Up" },
+    { KEYD_DPAD_DOWN, "Dpad Down" },
+    { KEYD_DPAD_LEFT, "Dpad Left" },
+    { KEYD_DPAD_RIGHT, "Dpad Right" },
+	{ KEYD_TRIGGER_LEFT, "Left Trigger" },
+	{ KEYD_TRIGGER_RIGHT, "Right Trigger" },
 
 	// THE END
     { -1, NULL }

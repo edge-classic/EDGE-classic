@@ -1737,6 +1737,7 @@ bool M_Responder(event_t * ev)
 	{
 		case KEYD_DOWNARROW:
 		case KEYD_WHEEL_DN:
+		case KEYD_DPAD_DOWN:
 			do
 			{
 				if (itemOn + 1 > currentMenu->numitems - 1)
@@ -1750,6 +1751,7 @@ bool M_Responder(event_t * ev)
 
 		case KEYD_UPARROW:
 		case KEYD_WHEEL_UP:
+		case KEYD_DPAD_UP:
 			do
 			{
 				if (itemOn == 0)
@@ -1763,6 +1765,7 @@ bool M_Responder(event_t * ev)
 
 		case KEYD_PGUP:
 		case KEYD_LEFTARROW:
+		case KEYD_DPAD_LEFT:
 			if (currentMenu->menuitems[itemOn].select_func &&
 				currentMenu->menuitems[itemOn].status == 2)
 			{
@@ -1774,6 +1777,7 @@ bool M_Responder(event_t * ev)
 
 		case KEYD_PGDN:
 		case KEYD_RIGHTARROW:
+		case KEYD_DPAD_RIGHT:
 			if (currentMenu->menuitems[itemOn].select_func &&
 				currentMenu->menuitems[itemOn].status == 2)
 			{

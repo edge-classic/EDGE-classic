@@ -103,6 +103,8 @@
 #include "w_wad.h"
 #include "r_wipe.h"
 
+#include "i_ctrl.h"
+
 #include "defaults.h"
 
 
@@ -169,7 +171,7 @@ static void M_ChangeLanguage(int keypressed);
 static char YesNo[]     = "Off/On";  // basic on/off
 static char CrossH[]    = "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double";
 static char Respw[]     = "Teleport/Resurrect";  // monster respawning
-static char Axis[]      = "Off/+Turn/-Turn/+MLook/-MLook/+Forward/-Forward/+Strafe/-Strafe/+Fly/-Fly";
+static char Axis[]      = "Off/+Turn/-Turn/+MLook/-MLook/+Forward/-Forward/+Strafe/-Strafe/+Fly/-Fly/Left Trigger/Right Trigger";
 static char JoyDevs[]   = "None/1/2/3/4/5/6";
 static char DLMode[]    = "Off/On";
 static char JpgPng[]    = "JPEG/PNG";  // basic on/off
@@ -427,18 +429,19 @@ static optmenuitem_t analogueoptions[] =
 	{OPT_Plain,    "",                   NULL, 0,  NULL, NULL, NULL},
 
 	{OPT_Switch,   "Joystick Device", JoyDevs, 7,  &joystick_device, NULL, NULL},
-	{OPT_Switch,   "First Axis",         Axis, 11, &joy_axis[0], NULL, NULL},
-	{OPT_Switch,   "Second Axis",        Axis, 11, &joy_axis[1], NULL, NULL},
-	{OPT_Switch,   "Third Axis",         Axis, 11, &joy_axis[2], NULL, NULL},
-	{OPT_Switch,   "Fourth Axis",        Axis, 11, &joy_axis[3], NULL, NULL},
-	{OPT_Switch,   "Fifth Axis",         Axis, 11, &joy_axis[4], NULL, NULL},
-	{OPT_Switch,   "Sixth Axis",         Axis, 11, &joy_axis[5], NULL, NULL},
+	{OPT_Switch,   "First Axis",         Axis, 13, &joy_axis[0], NULL, NULL},
+	{OPT_Switch,   "Second Axis",        Axis, 13, &joy_axis[1], NULL, NULL},
+	{OPT_Switch,   "Third Axis",         Axis, 13, &joy_axis[2], NULL, NULL},
+	{OPT_Switch,   "Fourth Axis",        Axis, 13, &joy_axis[3], NULL, NULL},
+	{OPT_Switch,   "Fifth Axis",         Axis, 13, &joy_axis[4], NULL, NULL},
+	{OPT_Switch,   "Sixth Axis",         Axis, 13, &joy_axis[5], NULL, NULL},
 
 	{OPT_Plain,    "",                   NULL, 0,  NULL, NULL, NULL},
 	{OPT_Slider,   "Turning Speed",      NULL, 12, &var_turnspeed,    NULL, NULL},
 	{OPT_Slider,   "MLook Speed",        NULL, 12, &var_mlookspeed,   NULL, NULL},
 	{OPT_Slider,   "Forward Move Speed", NULL, 8,  &var_forwardspeed, NULL, NULL},
-	{OPT_Slider,   "Side Move Speed",    NULL, 8,  &var_sidespeed,    NULL, NULL}
+	{OPT_Slider,   "Side Move Speed",    NULL, 8,  &var_sidespeed,    NULL, NULL},
+	{OPT_Slider,   "Trigger Sensitivity",    NULL, 7,  &var_triggerthreshold,    NULL, NULL},
 };
 
 static menuinfo_t analogue_optmenu = 
@@ -1073,6 +1076,7 @@ bool M_OptResponder(event_t * ev, int ch)
 
 		case KEYD_DOWNARROW:
 		case KEYD_WHEEL_DN:
+		case KEYD_DPAD_DOWN:
 		{
 			do
 			{
@@ -1089,6 +1093,7 @@ bool M_OptResponder(event_t * ev, int ch)
 
 		case KEYD_UPARROW:
 		case KEYD_WHEEL_UP:
+		case KEYD_DPAD_UP:
 		{
 			do
 			{
@@ -1104,6 +1109,7 @@ bool M_OptResponder(event_t * ev, int ch)
 		}
 
 		case KEYD_LEFTARROW:
+		case KEYD_DPAD_LEFT:
 		{
 			if (curr_menu->key_page[0])
 			{
@@ -1181,6 +1187,7 @@ bool M_OptResponder(event_t * ev, int ch)
 		}
 
 		case KEYD_RIGHTARROW:
+		case KEYD_DPAD_RIGHT:
 			if (curr_menu->key_page[0])
 			{
 				KeyMenu_Next();
@@ -1576,7 +1583,7 @@ static void M_ChangeCrossHair(int keypressed)
 //
 static void M_ChangeLanguage(int keypressed)
 {
-	if (keypressed == KEYD_LEFTARROW)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
 	{
 		int idx, max;
 		
@@ -1588,7 +1595,7 @@ static void M_ChangeLanguage(int keypressed)
 			
 		language.Select(idx);
 	}
-	else if (keypressed == KEYD_RIGHTARROW)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
 	{
 		int idx, max;
 		
@@ -1613,11 +1620,11 @@ static void M_ChangeLanguage(int keypressed)
 //
 static void M_ChangeResSize(int keypressed)
 {
-	if (keypressed == KEYD_LEFTARROW)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Size, -1);
 	}
-	else if (keypressed == KEYD_RIGHTARROW)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Size, +1);
 	}
@@ -1630,11 +1637,11 @@ static void M_ChangeResSize(int keypressed)
 //
 static void M_ChangeResDepth(int keypressed)
 {
-	if (keypressed == KEYD_LEFTARROW)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Depth, -1);
 	}
-	else if (keypressed == KEYD_RIGHTARROW)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Depth, +1);
 	}
@@ -1647,11 +1654,11 @@ static void M_ChangeResDepth(int keypressed)
 //
 static void M_ChangeResFull(int keypressed)
 {
-	if (keypressed == KEYD_LEFTARROW)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Full, +1);
 	}
-	else if (keypressed == KEYD_RIGHTARROW)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Full, +1);
 	}

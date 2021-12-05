@@ -64,6 +64,8 @@
 #include "r_wipe.h"
 #include "version.h"
 
+#include "i_ctrl.h"
+
 #include "defaults.h"
 
 //
@@ -167,6 +169,7 @@ static default_t defaults[] =
     {CFGT_Int,      "var_forwardspeed",  &var_forwardspeed, CFGDEF_FORWARDMOVESPEED},
     {CFGT_Int,      "var_sidespeed",     &var_sidespeed,    CFGDEF_SIDEMOVESPEED},
     {CFGT_Int,      "var_flyspeed",      &var_flyspeed,     CFGDEF_SIDEMOVESPEED},
+	{CFGT_Int, 		"var_triggerthreshold", &var_triggerthreshold, CFGDEF_TRIGGERTHRESHOLD},
 
     {CFGT_Int,      "joystick_device",   &joystick_device, 1},
     {CFGT_Int,      "joy_axis1",         &joy_axis[0],    CFGDEF_JOY_XAXIS},

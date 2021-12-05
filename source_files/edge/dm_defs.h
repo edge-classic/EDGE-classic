@@ -228,7 +228,13 @@ gameflags_t;
 #define KEYD_JOY14      (0x110+14)
 #define KEYD_JOY15      (0x110+15)
 
+#define KEYD_DPAD_UP	(0x110+16)
+#define KEYD_DPAD_DOWN	(0x110+17)
+#define KEYD_DPAD_LEFT	(0x110+18)
+#define KEYD_DPAD_RIGHT	(0x110+19)
 
+#define KEYD_TRIGGER_LEFT (0x110+20)
+#define KEYD_TRIGGER_RIGHT (0x110+21)
 
 // -KM- 1998/09/27 Analogue binding, added a fly axis
 #define AXIS_DISABLE     0
@@ -237,6 +243,10 @@ gameflags_t;
 #define AXIS_FORWARD     3
 #define AXIS_STRAFE      4
 #define AXIS_FLY         5  // includes SWIM up/down
+
+// Since I can't guarantee which axes are the analog triggers; give the user the ability to designate this - Dasho
+#define AXIS_LEFT_TRIGGER 11
+#define AXIS_RIGHT_TRIGGER 12
 
 #endif // __DEFINITIONS__
 

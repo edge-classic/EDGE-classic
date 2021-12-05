@@ -1,10 +1,61 @@
 https://github.com/dashodanger/EDGE-classic
 
-CHANGELOG for EDGE-Classic Preview 2 (since forking from EDGE 1.35)
+Current as of: DECEMBER 2021
+
+CHANGELOG for EDGE-Classic Preview 2 (since EDGE-Classic Preview 1)
 ====================================
 
-(Date: DECEMBER 2021)
+Bugs fixed
+----------
+- Apple compilation now works, thanks to testing and PRs from atsb/Gibbon
 
+- Dropping the console with a movement key held down would preserve that movement while in the console. Now toggling the console properly drops (movement) input
+
+- Games with only one selectable episode will now skip episode selection and proceed directly to the skill choice menu. This prevents the "Hell on Earth" episode from appearing
+  when it is not appropriate.
+
+- Fixed bug with valid skybox texture references being deleted when cycling between real and psuedo-skyboxes
+
+- Downgraded textures without patches from being an error (ending the program) to a warning
+
+General Improvements
+--------------------
++ Merged CeeJay's LINES DDF with ours to create the ULTIMATE LINES DDF ;)
+
++ Replaced GLBSP with AJBSP as EDGE-Classic's internal nodebuilder
+
++ doom_ddf folder content merged into edge.wad and the folder removed. The past is the future...again ;)
+
++ Migrated from SDL1 to SDL2 for longevity and potential new features
+
++ Allow for FRONT/BACK to be recognized as RIGHT/LEFT textures in the RTS CHANGE_TEX function to suit modder preferences
+
++ Added missing graphics for Harmony and HacX option menus (Sound, Mouse, Gameplay, etc.) so that they don't use the fallback/incorrectly
+paletted Doom menu graphics
+
++ Improved joystick/gamepad handling; added ability to map dpad (hat) buttons and analog triggers to actions
+
++ Added menu navigation when using dpad
+
+New Features
+------------
++ MP3 Sound Effects Support
+
++ ATTACKS.DDF:
+  -New attack type: DOUBLE_SPAWNER to mimic the pain elemental in Doom64.
+
++ THINGS.DDF: 
+  -New SPECIAL flag: FLOOR_CLIP. This things sprites will always stick to the floor in the case that it's too tall for the sector it's in.
+
++ More game IWADs supported: HACX, Herectic, Harmony, Blasphemer
+  -HACX: Full support. Includes bug fixes and widescreen support by CeeJay. Some graphics credited to HACX 2 team.
+  -Harmony: Full support. May be some (hopefully) minor differences.
+  -Heretic: Partial support. Item inventory not implemented in the base engine yet.
+  -Blasphemer: Rudimentary support. Support is less thorough compared to Heretic, but IWAD will now be recognized and launch.
+
+
+CHANGELOG for EDGE-Classic Preview 1 (since forking from EDGE 1.35)
+====================================
 
 Bugs fixed
 ----------
@@ -23,13 +74,6 @@ Bugs fixed
 - Black screen after endgame: backported from 2.x branch.
 
 - oof sfx behaviour now closer to original doom.
-
-- Dropping the console with a movement key held down would preserve that movement while in the console. Now toggling the console properly drops (movement) input
-
-- Games with only one selectable episode will now skip episode selection and proceed directly to the skill choice menu. This prevents the "Hell on Earth" episode from appearing
-  when it is not appropriate.
-
-- Fixed bug with valid skybox texture references being deleted when cycling between real and psuedo-skyboxes
 
 General Improvements
 --------------------
@@ -68,36 +112,16 @@ General Improvements
 
 + Much improved Doom skyboxes from https://forum.zdoom.org/viewtopic.php?f=46&t=53873&hilit=doom+skyboxes
 
-+ Merged CeeJays lines.ddf with ours to create the ULTIMATE lines.ddf ;)
-
-+ doom_ddf folder content merged into edge.wad and the folder removed. The past is the future...again ;)
-
-+ Migrated from SDL1 to SDL2 for longevity and potential new features
-
-+ Replaced GLBSP with AJBSP as EDGE-Classic's internal nodebuilder
-
-+ Added missing graphics for Harmony and HacX option menus (Sound, Mouse, Gameplay, etc.) so that they don't use the fallback/incorrectly
-paletted Doom menu graphics
-
 New Features
 ------------
-+ More game IWADs supported: HACX, Herectic, Harmony.
-  -HACX: full support. Includes bug fixes and widescreen support by CeeJay. Some graphics credited to HACX 2 team.
-  -Harmony: Full support. May be some (hopefully) minor differences.
-  -Heretic: parcial support. Item inventory doesn't work.
-  
 + THINGS.DDF: 
   -FALLING_SOUND for the player when they fall long distances. Backported from EDGE 2.x branch.
   -SECRET_SOUND entry for the player which plays when he enters a sector marked SECRET. Backported from EDGE 2.x branch. DSSECRET SFX from K8vavoom.
   -New SPECIAL flag: IMMORTAL. This thing never recieves damage from any attacks, but will go into pain states etc as usual.
-  -New SPECIAL flag: FLOOR_CLIP. This things sprites will always stick to the floor in the case that it's too tall for the sector it's in.
 
 + WEAPONS.DDF: new DJNE weapon action for more robust weapon reloading. Backported from EDGE 2.x branch.
 Used just like JUMP(state_name:frame,xx%), but decrements the reload quantity for the specified attack and jumps if it's not zero. The jump chance is now interpreted as the attack specifier: 0% is the primary attack ammo, and non-zero percent is the secondary attack ammo.
-
-+ ATTACKS.DDF:
-  -New attack type: DOUBLE_SPAWNER to mimic the pain elemental in Doom64.
-  
+ 
 + Lines.ddf
   -Edited all Slider doors to use BDOPN sfx.
   -Added Hub Exit switches: [2000] to [2039]
@@ -141,8 +165,6 @@ Users with existing soundfonts can replace soundfont/default.sf2 with their own 
 
 + MP3 Music Support
 
-+ MP3 Sound Effects Support
-  
 + Titlescreen and intermission are now Widescreen compatible with https://forum.zdoom.org/viewtopic.php?f=46&t=67843
 
 + COALHUDS: 11 new commands
@@ -161,5 +183,3 @@ Users with existing soundfonts can replace soundfont/default.sf2 with their own 
   math.random2() returns a random number between 0 and 10.
   hud.game_paused() returns 1 if the game is currently paused or 
     on the title menu screen.
-
-  

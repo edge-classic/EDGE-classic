@@ -53,6 +53,19 @@ static int joy_num_buttons;
 static int joy_num_hats;
 static int joy_num_balls;
 
+Uint8 last_hat; // Track last dpad input
+
+int var_triggerthreshold;
+
+// Track trigger state to avoid pushing multiple unnecessary trigger events
+bool right_trigger_pulled = false;
+bool left_trigger_pulled = false;
+
+s16_t trigger_thresholds[7] = 
+{
+	30000, 20000, 10000, 0, -10000, -20000, -30000
+};
+
 //
 // Translates a key from SDL -> EDGE
 // Returns -1 if no suitable translation exists.
@@ -318,6 +331,108 @@ void HandleJoystickButtonEvent(SDL_Event * ev)
 	E_PostEvent(&event);
 }
 
+void HandleJoystickHatEvent(SDL_Event * ev)
+{
+	// ignore other joysticks;
+	if ((int)ev->jhat.which != cur_joy-1)
+		return;
+
+	Uint8 hat = SDL_JoystickGetHat(joy_info, 0); // Assuming that modern gamepads will only have one 'hat', that being the dpad - Dasho
+
+	event_t event;
+	if (hat == SDL_HAT_CENTERED)
+	{
+		event.type = ev_keyup;
+		if (last_hat & SDL_HAT_DOWN) 
+		{
+			event.value.key.sym = KEYD_DPAD_DOWN;
+		}
+		else if (last_hat & SDL_HAT_UP) 
+		{
+			event.value.key.sym = KEYD_DPAD_UP;
+		}
+		else if (last_hat & SDL_HAT_LEFT) 
+		{
+			event.value.key.sym = KEYD_DPAD_LEFT;
+		}
+		else if (last_hat & SDL_HAT_RIGHT) 
+		{
+			event.value.key.sym = KEYD_DPAD_RIGHT;
+		}
+	}
+	else
+	{
+		event.type = ev_keydown;
+	}
+	// Avoiding hat diagonals at this time - Dasho
+	if (hat & SDL_HAT_DOWN)
+	{
+		event.value.key.sym = KEYD_DPAD_DOWN;
+	}
+	else if (hat & SDL_HAT_UP)
+	{
+		event.value.key.sym = KEYD_DPAD_UP;
+	}
+	else if (hat & SDL_HAT_LEFT)
+	{
+		event.value.key.sym = KEYD_DPAD_LEFT;
+	}
+	else if (hat & SDL_HAT_RIGHT)
+	{
+		event.value.key.sym = KEYD_DPAD_RIGHT;
+	}
+	E_PostEvent(&event);
+	last_hat = hat;
+}
+
+void HandleJoystickTriggerEvent(SDL_Event * ev)
+{
+	// ignore other joysticks
+	if ((int)ev->jaxis.which != cur_joy-1)
+		return;
+
+	Uint8 current_axis = ev->jaxis.axis;
+
+	// ignore axes not bound to left/right trigger
+	if ((joy_axis[current_axis] != AXIS_LEFT_TRIGGER) && (joy_axis[current_axis] != AXIS_RIGHT_TRIGGER)) return;
+
+	event_t event;
+
+	if (joy_axis[current_axis] == AXIS_LEFT_TRIGGER) 
+	{
+		event.value.key.sym = KEYD_TRIGGER_LEFT;
+		if (ev->jaxis.value < trigger_thresholds[var_triggerthreshold])
+		{
+			if (!left_trigger_pulled) return;
+			event.type = ev_keyup;
+			left_trigger_pulled = false;
+		}
+		else
+		{
+			if (left_trigger_pulled) return;
+			event.type = ev_keydown;
+			left_trigger_pulled = true;
+		}
+	}
+	else
+	{
+		event.value.key.sym = KEYD_TRIGGER_RIGHT;
+		if (ev->jaxis.value < trigger_thresholds[var_triggerthreshold])
+		{
+			if (!right_trigger_pulled) return;
+			event.type = ev_keyup;
+			right_trigger_pulled = false;
+		}
+		else
+		{
+			if (right_trigger_pulled) return;
+			event.type = ev_keydown;
+			right_trigger_pulled = true;
+		}
+	}
+
+	E_PostEvent(&event);
+}
 
 void HandleMouseMotionEvent(SDL_Event * ev)
 {
@@ -346,25 +461,6 @@ int I_JoyGetAxis(int n)  // n begins at 0
 
 	if (n < joy_num_axes)
 		return SDL_JoystickGetAxis(joy_info, n);
-	
-	n -= joy_num_axes;
-
-	// -AJA- handle joystick HATS by mapping it to axes
-	if (n/2 < joy_num_hats)
-	{
-		Uint8 hat = SDL_JoystickGetHat(joy_info, n/2);
-
-		if (n & 1)
-		{
-			return (hat & SDL_HAT_DOWN) ? -32767 :
-				   (hat & SDL_HAT_UP)   ? +32767 : 0;
-		}
-		else
-		{
-			return (hat & SDL_HAT_LEFT)  ? -32767 :
-				   (hat & SDL_HAT_RIGHT) ? +32767 : 0;
-		}
-	}
 
 	return 0;
 }
@@ -403,6 +499,15 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 		case SDL_JOYBUTTONDOWN:
 		case SDL_JOYBUTTONUP:
 			HandleJoystickButtonEvent(sdl_ev);
+			break;
+
+		case SDL_JOYHATMOTION:
+			HandleJoystickHatEvent(sdl_ev);
+			break;
+
+		// Analog triggers should be the only thing handled here -Dasho
+		case SDL_JOYAXISMOTION:
+			HandleJoystickTriggerEvent(sdl_ev);
 			break;
 
 		case SDL_MOUSEMOTION:

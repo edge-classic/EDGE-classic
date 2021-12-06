@@ -105,8 +105,7 @@ public:
 
 		current_choice = 0;
 
-		// Set cursor to first choice, with a sanity to make sure I'm not accessing an empty choice list - Dasho
-		if(!choices.empty()) {
+		if(choices.size() > 1) {
 			choices[0].pop_back();
 			choices[0].append("<");
 		}
@@ -229,22 +228,22 @@ public:
 	int CheckKey(int key)
 	{
 
-		if (key == KEYD_DOWNARROW || key == KEYD_DPAD_DOWN || key == KEYD_MENU_DOWN)
+		if (key == KEYD_DOWNARROW || key == KEYD_DPAD_DOWN || key == KEYD_MENU_DOWN || key == KEYD_WHEEL_DN)
 			ChoiceDown();
 
-		if (key == KEYD_UPARROW || key == KEYD_DPAD_UP || key == KEYD_MENU_UP)
+		if (key == KEYD_UPARROW || key == KEYD_DPAD_UP || key == KEYD_MENU_UP || key == KEYD_WHEEL_UP)
 			ChoiceUp();
 
 		if ('a' <= key && key <= 'z')
 			key = toupper(key);
 
-		if (key == 'Q' || key == 'X' || key == KEYD_MENU_CANCEL)  // cancel (Does this actually cancel? - Dasho)
+		if (key == 'Q' || key == 'X' || key == KEYD_MENU_CANCEL || key == KEYD_MOUSE2 || key == KEYD_MOUSE3)  // cancel (Does this actually cancel? - Dasho)
 			return 0;
 
 		if ('1' <= key && key <= ('0' + NumChoices()))
 			return key - '0';
 
-		if (key == KEYD_SPACE || key == KEYD_ENTER || key == 'Y' || key == KEYD_MENU_SELECT) //LOBO: added a controller button
+		if (key == KEYD_SPACE || key == KEYD_ENTER || key == 'Y' || key == KEYD_MENU_SELECT || key == KEYD_MOUSE1) //LOBO: added a controller button
 			return current_choice + 1;
 
 		return -1;  /* invalid */

@@ -22,6 +22,8 @@ Bugs fixed
 
 General Improvements
 --------------------
++ "Found Secret" message now uses DDFLANG.
+
 + Merged CeeJay's LINES DDF with ours to create the ULTIMATE LINES DDF ;)
 
 + Replaced GLBSP with AJBSP as EDGE-Classic's internal nodebuilder

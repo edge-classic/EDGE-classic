@@ -18,6 +18,8 @@ Bugs fixed
 
 - Downgraded textures without patches from being an error (ending the program) to a warning
 
+- Fixed occasional bug where attempting to bind a key would map it to the wrong command
+
 General Improvements
 --------------------
 + Merged CeeJay's LINES DDF with ours to create the ULTIMATE LINES DDF ;)
@@ -35,7 +37,7 @@ paletted Doom menu graphics
 
 + Improved joystick/gamepad handling; added ability to map dpad (hat) buttons and analog triggers to actions
 
-+ Added menu navigation when using dpad
++ Added "Menu Navigation" option in Controls to bind Menu Open/Up/Down/Left/Right/Select/Cancel
 
 New Features
 ------------

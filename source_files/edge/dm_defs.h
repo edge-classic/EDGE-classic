@@ -236,6 +236,15 @@ gameflags_t;
 #define KEYD_TRIGGER_LEFT (0x110+20)
 #define KEYD_TRIGGER_RIGHT (0x110+21)
 
+// Psuedo-keycodes for menu navigation - Dasho
+#define KEYD_MENU_OPEN (0x110+22)
+#define KEYD_MENU_UP (0x110+23)
+#define KEYD_MENU_DOWN (0x110+24)
+#define KEYD_MENU_LEFT (0x110+25)
+#define KEYD_MENU_RIGHT (0x110+26)
+#define KEYD_MENU_SELECT (0x110+27)
+#define KEYD_MENU_CANCEL (0x110+28)
+
 // -KM- 1998/09/27 Analogue binding, added a fly axis
 #define AXIS_DISABLE     0
 #define AXIS_TURN        1

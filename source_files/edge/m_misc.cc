@@ -49,6 +49,7 @@
 #include "hu_draw.h"
 #include "hu_stuff.h"  // only for showMessages
 #include "m_argv.h"
+#include "m_menu.h"
 #include "m_misc.h"
 #include "m_option.h"
 #include "n_network.h"
@@ -249,6 +250,14 @@ static default_t defaults[] =
 	{CFGT_Key,      "key_am_grid",       &key_am_grid,    'g'},
 	{CFGT_Key,      "key_am_mark",       &key_am_mark,    'm'},
 	{CFGT_Key,      "key_am_clear",      &key_am_clear,   'c'},
+
+	{CFGT_Key,      "key_menu_open",      &key_menu_open,   0},
+	{CFGT_Key,      "key_menu_up",      &key_menu_up,   0},
+	{CFGT_Key,      "key_menu_down",      &key_menu_down,  0},
+	{CFGT_Key,      "key_menu_left",      &key_menu_left,   0},
+	{CFGT_Key,      "key_menu_right",      &key_menu_right,   0},
+	{CFGT_Key,      "key_menu_select",      &key_menu_select,   0},
+	{CFGT_Key,      "key_menu_cancel",      &key_menu_cancel,   0},
 };
 
 

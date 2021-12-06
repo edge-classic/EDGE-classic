@@ -65,6 +65,22 @@
 #include "z_zone.h"
 
 
+// Menu navigation stuff
+int key_menu_open;
+int key_menu_up;
+int key_menu_down;
+int key_menu_left;
+int key_menu_right;
+int key_menu_select;
+int key_menu_cancel;
+
+// Copy of E_Matches Key so I don't have to pull in e_input.h
+bool M_MatchesKey(int keyvar, int key)
+{
+	return ((keyvar >> 16) == key) ||
+	       ((keyvar & 0xffff) == key);
+}
+
 //
 // defaulted values
 //
@@ -892,7 +908,7 @@ void M_SaveGame(int choice)
 
 static void QuickSaveResponse(int ch)
 {
-	if (ch == 'y')
+	if (ch == 'y' || ch == KEYD_MENU_SELECT)
 	{
 		M_DoSave(quickSavePage, quickSaveSlot);
 		S_StartFX(sfx_swtchx);
@@ -928,7 +944,7 @@ void M_QuickSave(void)
 
 static void QuickLoadResponse(int ch)
 {
-	if (ch == 'y')
+	if (ch == 'y' || ch == KEYD_MENU_SELECT)
 	{
 		int tempsavepage = save_page;
 
@@ -1188,7 +1204,7 @@ static void DoStartLevel(skill_t skill)
 
 static void VerifyNightmare(int ch)
 {
-	if (ch != 'y')
+	if (ch != 'y' && ch != KEYD_MENU_SELECT)
 		return;
 
 	DoStartLevel(sk_nightmare);
@@ -1229,7 +1245,7 @@ void M_ChangeMessages(int choice)
 
 static void EndGameResponse(int ch)
 {
-	if (ch != 'y')
+	if (ch != 'y' && ch != KEYD_MENU_SELECT)
 		return;
 
 	G_DeferredEndGame();
@@ -1279,7 +1295,7 @@ void M_FinishReadThis(int choice)
 //
 static void QuitResponse(int ch)
 {
-	if (ch != 'y')
+	if (ch != 'y' && ch != KEYD_MENU_SELECT)
 		return;
 		
 	if (!netgame)
@@ -1477,6 +1493,36 @@ bool M_Responder(event_t * ev)
 
 	int ch = ev->value.key.sym;
 
+	// Produce psuedo keycodes from menu navigation buttons bound in the options menu
+	if (M_MatchesKey(key_menu_open, ch))
+	{
+		ch = KEYD_MENU_OPEN;
+	}
+	else if (M_MatchesKey(key_menu_up, ch))
+	{
+		ch = KEYD_MENU_UP;
+	}
+	else if (M_MatchesKey(key_menu_down, ch))
+	{
+		ch = KEYD_MENU_DOWN;
+	}
+	else if (M_MatchesKey(key_menu_left, ch))
+	{
+		ch = KEYD_MENU_LEFT;
+	}
+	else if (M_MatchesKey(key_menu_right, ch))
+	{
+		ch = KEYD_MENU_RIGHT;
+	}
+	else if (M_MatchesKey(key_menu_select, ch))
+	{
+		ch = KEYD_MENU_SELECT;
+	}
+	else if (M_MatchesKey(key_menu_cancel, ch))
+	{
+		ch = KEYD_MENU_CANCEL;
+	}
+
 	// -ACB- 1999/10/11 F1 is responsible for print screen at any time
 	if (ch == KEYD_F1 || ch == KEYD_PRTSCR)
 	{
@@ -1489,7 +1535,7 @@ bool M_Responder(event_t * ev)
 	if (msg_mode == 1)
 	{
 		if (msg_needsinput == true &&
-			!(ch == ' ' || ch == 'n' || ch == 'y' || ch == KEYD_ESCAPE))
+			!(ch == ' ' || ch == 'n' || ch == 'y' || ch == KEYD_ESCAPE || ch == KEYD_MENU_CANCEL || ch == KEYD_MENU_SELECT))
 			return false;
 
 		msg_mode = 0;
@@ -1723,7 +1769,7 @@ bool M_Responder(event_t * ev)
 		}
 
 		// Pop-up menu?
-		if (ch == KEYD_ESCAPE)
+		if (ch == KEYD_ESCAPE || ch == KEYD_MENU_OPEN)
 		{
 			M_StartControlPanel();
 			S_StartFX(sfx_swtchn);
@@ -1738,6 +1784,7 @@ bool M_Responder(event_t * ev)
 		case KEYD_DOWNARROW:
 		case KEYD_WHEEL_DN:
 		case KEYD_DPAD_DOWN:
+		case KEYD_MENU_DOWN:
 			do
 			{
 				if (itemOn + 1 > currentMenu->numitems - 1)
@@ -1752,6 +1799,7 @@ bool M_Responder(event_t * ev)
 		case KEYD_UPARROW:
 		case KEYD_WHEEL_UP:
 		case KEYD_DPAD_UP:
+		case KEYD_MENU_UP:
 			do
 			{
 				if (itemOn == 0)
@@ -1766,6 +1814,7 @@ bool M_Responder(event_t * ev)
 		case KEYD_PGUP:
 		case KEYD_LEFTARROW:
 		case KEYD_DPAD_LEFT:
+		case KEYD_MENU_LEFT:
 			if (currentMenu->menuitems[itemOn].select_func &&
 				currentMenu->menuitems[itemOn].status == 2)
 			{
@@ -1778,6 +1827,7 @@ bool M_Responder(event_t * ev)
 		case KEYD_PGDN:
 		case KEYD_RIGHTARROW:
 		case KEYD_DPAD_RIGHT:
+		case KEYD_MENU_RIGHT:
 			if (currentMenu->menuitems[itemOn].select_func &&
 				currentMenu->menuitems[itemOn].status == 2)
 			{
@@ -1789,6 +1839,7 @@ bool M_Responder(event_t * ev)
 
 		case KEYD_ENTER:
 		case KEYD_MOUSE1:
+		case KEYD_MENU_SELECT:
 			if (currentMenu->menuitems[itemOn].select_func &&
 				currentMenu->menuitems[itemOn].status)
 			{
@@ -1801,12 +1852,14 @@ bool M_Responder(event_t * ev)
 		case KEYD_ESCAPE:
 		case KEYD_MOUSE2:
 		case KEYD_MOUSE3:
+		case KEYD_MENU_OPEN:
 			currentMenu->lastOn = itemOn;
 			M_ClearMenus();
 			S_StartFX(sfx_swtchx);
 			return true;
 
 		case KEYD_BACKSPACE:
+		case KEYD_MENU_CANCEL:
 			currentMenu->lastOn = itemOn;
 			if (currentMenu->prevMenu)
 			{

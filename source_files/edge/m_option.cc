@@ -323,7 +323,7 @@ static int M_GetCurrentSwitchValue(optmenuitem_t *item)
 
 static optmenuitem_t mainoptions[] =
 {
-	{OPT_Function, "Keyboard Controls", NULL,  0, NULL, M_KeyboardOptions, "Controls"},
+	{OPT_Function, "Controls", NULL,  0, NULL, M_KeyboardOptions, "Controls"},
 	{OPT_Function, "Mouse / Joystick",  NULL,  0, NULL, M_AnalogueOptions, "AnalogueOptions"},
 	{OPT_Function, "Gameplay Options",  NULL,  0, NULL, M_GameplayOptions, "GameplayOptions"},
 	{OPT_Plain,    "",                  NULL,  0, NULL, NULL, NULL},
@@ -677,10 +677,33 @@ static menuinfo_t automap_optmenu =
 	"Automap Keys"
 };
 
+//
+//  KEY CONFIG : MENU NAVIGATION
+//
+static optmenuitem_t menu_nav_keyconfig[] =
+{
+	{OPT_KeyConfig, "Open/Close Menu",   NULL, 0, &key_menu_open, NULL, NULL},
+	{OPT_Plain,     "",                 NULL, 0, NULL, NULL, NULL},
+	{OPT_KeyConfig, "Menu Up",         NULL, 0, &key_menu_up, NULL, NULL},
+	{OPT_KeyConfig, "Menu Down",           NULL, 0, &key_menu_down, NULL, NULL},
+	{OPT_KeyConfig, "Menu Left",              NULL, 0, &key_menu_left, NULL, NULL},
+	{OPT_KeyConfig, "Menu Right",   NULL, 0, &key_menu_right, NULL, NULL},
+	{OPT_Plain,     "",                 NULL, 0, NULL, NULL, NULL},
+	{OPT_KeyConfig, "Select Option",       NULL, 0, &key_menu_select, NULL, NULL},
+	{OPT_KeyConfig, "Back/Cancel",          NULL, 0, &key_menu_cancel, NULL, NULL},
+};
+
+static menuinfo_t menu_nav_optmenu = 
+{
+	menu_nav_keyconfig, sizeof(menu_nav_keyconfig) / sizeof(optmenuitem_t),
+	&keyboard_style, 140, 98, "M_CONTRL", NULL, 0,
+	"Menu Navigation"
+};
+
 /*
  * ALL KEYBOARD MENUS
  */
-#define NUM_KEY_MENUS  5
+#define NUM_KEY_MENUS  6
 
 static menuinfo_t * all_key_menus[NUM_KEY_MENUS] =
 {
@@ -688,7 +711,8 @@ static menuinfo_t * all_key_menus[NUM_KEY_MENUS] =
 	&attack_optmenu,
 	&otherkey_optmenu,
 	&weapon_optmenu,
-	&automap_optmenu
+	&automap_optmenu,
+	&menu_nav_optmenu
 };
 
 static char keystring1[] = "Enter to change, Backspace to Clear";
@@ -1032,6 +1056,8 @@ bool M_OptResponder(event_t * ev, int ch)
 	{
 		int *blah;
 
+		curr_item = curr_menu->items + curr_menu->pos; // Should help the accidentally key binding to other options - Dasho
+
 		if (ev->type != ev_keydown)
 			return false;
 		int key = ev->value.key.sym;
@@ -1077,6 +1103,7 @@ bool M_OptResponder(event_t * ev, int ch)
 		case KEYD_DOWNARROW:
 		case KEYD_WHEEL_DN:
 		case KEYD_DPAD_DOWN:
+		case KEYD_MENU_DOWN:
 		{
 			do
 			{
@@ -1094,6 +1121,7 @@ bool M_OptResponder(event_t * ev, int ch)
 		case KEYD_UPARROW:
 		case KEYD_WHEEL_UP:
 		case KEYD_DPAD_UP:
+		case KEYD_MENU_UP:
 		{
 			do
 			{
@@ -1110,6 +1138,7 @@ bool M_OptResponder(event_t * ev, int ch)
 
 		case KEYD_LEFTARROW:
 		case KEYD_DPAD_LEFT:
+		case KEYD_MENU_LEFT:
 		{
 			if (curr_menu->key_page[0])
 			{
@@ -1188,6 +1217,7 @@ bool M_OptResponder(event_t * ev, int ch)
 
 		case KEYD_RIGHTARROW:
 		case KEYD_DPAD_RIGHT:
+		case KEYD_MENU_RIGHT:
 			if (curr_menu->key_page[0])
 			{
 				KeyMenu_Next();
@@ -1198,6 +1228,7 @@ bool M_OptResponder(event_t * ev, int ch)
      
 		case KEYD_ENTER:
 		case KEYD_MOUSE1:
+		case KEYD_MENU_SELECT:
 		{
 			switch (curr_item->type)
 			{
@@ -1275,6 +1306,7 @@ bool M_OptResponder(event_t * ev, int ch)
 		case KEYD_ESCAPE:
 		case KEYD_MOUSE2:
 		case KEYD_MOUSE3:
+		case KEYD_MENU_CANCEL:
 		{
 			if (curr_menu == &main_optmenu)
 			{

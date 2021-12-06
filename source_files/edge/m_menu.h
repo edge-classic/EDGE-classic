@@ -30,6 +30,15 @@
 
 struct sfx_s;
   
+// Menu navigation stuff
+extern int key_menu_open;
+extern int key_menu_up;
+extern int key_menu_down;
+extern int key_menu_left;
+extern int key_menu_right;
+extern int key_menu_select;
+extern int key_menu_cancel;
+
 // the so-called "bastard sfx" used for the menus
 extern struct sfx_s * sfx_swtchn;
 extern struct sfx_s * sfx_tink;

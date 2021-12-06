@@ -956,7 +956,23 @@ void CON_HandleKey(int key, bool shift, bool ctrl)
 		if (input_pos >= MAX_CON_INPUT-1)
 			break;
 
-		InsertChar(key);
+
+		// Do we need more than letters, numbers, and the underscore for the console? Time will tell - Dasho		
+		if (shift)
+		{
+			if (key == 45)
+			{
+				InsertChar(95);
+			}
+			else
+			{
+				InsertChar(toupper(key));
+			}
+		}
+		else
+		{
+			InsertChar(key);
+		}
 		
 		TabbedLast = false;
 		con_cursor = 0;

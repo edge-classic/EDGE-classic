@@ -90,7 +90,7 @@ public:
 
 public:
 	rts_menu_c(s_show_menu_t *menu, rad_trigger_t *_trigger, style_c *_style) :
-		trigger(_trigger), style(_style), title(), choices(), current_choice(0)
+		trigger(_trigger), style(_style), title(), choices()
 	{
 		const char * text = menu->title;
 		if (menu->use_ldf)
@@ -104,8 +104,6 @@ public:
 			AddChoice(no_choices ? 0 : ('1' + idx), menu->options[idx], menu->use_ldf);
 
 		current_choice = 0;
-
-		I_Printf("CURRENT CHOICE: %d\n", (int)current_choice);
 
 		// Set cursor to first choice, with a sanity to make sure I'm not accessing an empty choice list - Dasho
 		if(!choices.empty()) {

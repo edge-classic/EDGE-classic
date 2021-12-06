@@ -994,18 +994,32 @@ void RAD_ActJumpOn(rad_trigger_t *R, void *param)
 	while ((count < 9) && jm->labels[count])
 		count++;
 
-	if (R->menu_result < 1 || R->menu_result > count)
+	if (R->menu_result < 0 || R->menu_result > count)
 		return;
 
-	char *label = jm->labels[R->menu_result - 1];
+	rts_state_t *cache_state;
+	char *label;
 
-	// FIXME: do this in a post-parsing analysis
-	rts_state_t *cache_state = RAD_FindStateByLabel(R->info, label);
+	if (R->menu_result > 0)
+	{
+		label = jm->labels[R->menu_result - 1];
 
-	if (! cache_state)
+		// FIXME: do this in a post-parsing analysis
+		cache_state = RAD_FindStateByLabel(R->info, label);
+		R->state = cache_state;
+	}
+	else
+	{
+		cache_state = R->info->first_state;
+		R->state = cache_state;
+		R->activated = false;
+	}
+
+	if (!cache_state && label)
 		I_Error("RTS: No such label `%s' for JUMP_ON primitive.\n", label);
 
-	R->state = cache_state;
+	if (!cache_state)
+		I_Error("RTS: No state to jump to!\n");
 
 	// Jumps have a one tic surcharge, to prevent accidental infinite
 	// loops within radius scripts.

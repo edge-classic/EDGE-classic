@@ -20,6 +20,8 @@ Bugs fixed
 
 - Fixed occasional bug where attempting to bind a key would map it to the wrong command
 
+- Fixed bug where canceling out of an RTS Menu would instead select the first option; now it should exit with no result
+
 General Improvements
 --------------------
 + "Found Secret" message now uses DDFLANG.

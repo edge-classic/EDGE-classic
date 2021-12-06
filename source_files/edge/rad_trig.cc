@@ -107,8 +107,7 @@ public:
 		current_choice = 0;
 
 		if(choices.size() > 1) {
-			choices[0].pop_back();
-			choices[0].append("<");
+			choices[0].replace(0, 1, ">");
 		}
 	}
 
@@ -127,7 +126,7 @@ private:
 			char buffer[8];
 			sprintf(buffer, "%c. ", key);
 
-			choice_line = std::string(buffer) + choice_line + "   ";
+			choice_line = "  " + std::string(buffer) + choice_line;
 		}
 
 		choices.push_back(choice_line);
@@ -148,11 +147,9 @@ public:
 	{
 		if (current_choice + 1 < (int)choices.size())
 		{
-			choices[current_choice].pop_back();
-			choices[current_choice].append(" ");
+			choices[current_choice].replace(0, 1, " ");
 			current_choice +=1;
-			choices[current_choice].pop_back();
-			choices[current_choice].append("<");
+			choices[current_choice].replace(0, 1, ">");
 		}
 	}
 
@@ -160,11 +157,9 @@ public:
 	{
 		if (current_choice - 1 >= 0)
 		{
-			choices[current_choice].pop_back();
-			choices[current_choice].append(" ");
+			choices[current_choice].replace(0, 1, " ");
 			current_choice -=1;
-			choices[current_choice].pop_back();
-			choices[current_choice].append("<");
+			choices[current_choice].replace(0, 1, ">");
 		}
 	}
 

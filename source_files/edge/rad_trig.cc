@@ -39,12 +39,14 @@
 
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "e_input.h"
 #include "e_main.h"
 #include "hu_draw.h"
 #include "hu_style.h"
 #include "hu_stuff.h"
 #include "g_game.h"
 #include "m_argv.h"
+#include "m_menu.h"
 #include "m_misc.h"
 #include "m_random.h"
 #include "p_local.h"
@@ -69,7 +71,6 @@ rad_script_t *r_scripts = NULL;
 
 // Dynamic Triggers.  These only exist for the current level.
 rad_trigger_t *active_triggers = NULL;
-
 
 class rts_menu_c
 {
@@ -228,6 +229,23 @@ public:
 	int CheckKey(int key)
 	{
 
+		if (E_MatchesKey(key_menu_up, key))
+		{
+			key = KEYD_MENU_UP;
+		}
+		if (E_MatchesKey(key_menu_down, key))
+		{
+			key = KEYD_MENU_DOWN;
+		}
+		if (E_MatchesKey(key_menu_select, key) || E_MatchesKey(key_use, key))
+		{
+			key = KEYD_MENU_SELECT;
+		}
+		if (E_MatchesKey(key_menu_cancel, key))
+		{
+			key = KEYD_MENU_CANCEL;
+		}
+
 		if (key == KEYD_DOWNARROW || key == KEYD_DPAD_DOWN || key == KEYD_MENU_DOWN || key == KEYD_WHEEL_DN)
 			ChoiceDown();
 
@@ -237,7 +255,7 @@ public:
 		if ('a' <= key && key <= 'z')
 			key = toupper(key);
 
-		if (key == 'Q' || key == 'X' || key == KEYD_MENU_CANCEL || key == KEYD_MOUSE2 || key == KEYD_MOUSE3)  // cancel (Does this actually cancel? - Dasho)
+		if (key == 'Q' || key == 'X' || key == KEYD_MENU_CANCEL || key == KEYD_MOUSE2 || key == KEYD_MOUSE3)
 			return 0;
 
 		if ('1' <= key && key <= ('0' + NumChoices()))

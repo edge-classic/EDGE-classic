@@ -86,8 +86,11 @@ private:
 	std::vector< std::string > choices;
 
 public:
+	int current_choice;
+
+public:
 	rts_menu_c(s_show_menu_t *menu, rad_trigger_t *_trigger, style_c *_style) :
-		trigger(_trigger), style(_style), title(), choices()
+		trigger(_trigger), style(_style), title(), choices(), current_choice(0)
 	{
 		const char * text = menu->title;
 		if (menu->use_ldf)
@@ -99,6 +102,16 @@ public:
 
 		for (int idx = 0; (idx < 9) && menu->options[idx]; idx++)
 			AddChoice(no_choices ? 0 : ('1' + idx), menu->options[idx], menu->use_ldf);
+
+		current_choice = 0;
+
+		I_Printf("CURRENT CHOICE: %d\n", (int)current_choice);
+
+		// Set cursor to first choice, with a sanity to make sure I'm not accessing an empty choice list - Dasho
+		if(!choices.empty()) {
+			choices[0].pop_back();
+			choices[0].append("<");
+		}
 	}
 
 	~rts_menu_c() { /* nothing to do */ }
@@ -116,7 +129,7 @@ private:
 			char buffer[8];
 			sprintf(buffer, "%c. ", key);
 
-			choice_line = std::string(buffer) + choice_line;
+			choice_line = std::string(buffer) + choice_line + "   ";
 		}
 
 		choices.push_back(choice_line);
@@ -131,6 +144,30 @@ public:
 	void NotifyResult(int result)
 	{
 		trigger->menu_result = result;
+	}
+
+	void ChoiceDown() 
+	{
+		if (current_choice + 1 < (int)choices.size())
+		{
+			choices[current_choice].pop_back();
+			choices[current_choice].append(" ");
+			current_choice +=1;
+			choices[current_choice].pop_back();
+			choices[current_choice].append("<");
+		}
+	}
+
+	void ChoiceUp()
+	{
+		if (current_choice - 1 >= 0)
+		{
+			choices[current_choice].pop_back();
+			choices[current_choice].append(" ");
+			current_choice -=1;
+			choices[current_choice].pop_back();
+			choices[current_choice].append("<");
+		}
 	}
 
 	void Drawer()
@@ -193,18 +230,24 @@ public:
 
 	int CheckKey(int key)
 	{
+
+		if (key == KEYD_DOWNARROW || key == KEYD_DPAD_DOWN || key == KEYD_MENU_DOWN)
+			ChoiceDown();
+
+		if (key == KEYD_UPARROW || key == KEYD_DPAD_UP || key == KEYD_MENU_UP)
+			ChoiceUp();
+
 		if ('a' <= key && key <= 'z')
 			key = toupper(key);
 
-		if (key == 'Q' || key == 'X')  // cancel
+		if (key == 'Q' || key == 'X' || key == KEYD_MENU_CANCEL)  // cancel (Does this actually cancel? - Dasho)
 			return 0;
 
 		if ('1' <= key && key <= ('0' + NumChoices()))
 			return key - '0';
 
-		if (NumChoices() < 2 &&
-			(key == KEYD_SPACE || key == KEYD_ENTER || key == 'Y' || key == KEYD_JOY4))//LOBO: added a controller button
-			return 1;
+		if (key == KEYD_SPACE || key == KEYD_ENTER || key == 'Y' || key == KEYD_MENU_SELECT) //LOBO: added a controller button
+			return current_choice + 1;
 
 		return -1;  /* invalid */
 	}

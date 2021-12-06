@@ -39,6 +39,8 @@ paletted Doom menu graphics
 
 + Added "Menu Navigation" option in Controls to bind Menu Open/Up/Down/Left/Right/Select/Cancel
 
++ Added ability to navigate RTS menus and select options using the new Menu Navigation controls
+
 New Features
 ------------
 + MP3 Sound Effects Support

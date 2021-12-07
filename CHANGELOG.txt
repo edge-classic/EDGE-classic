@@ -24,6 +24,8 @@ Bugs fixed
 
 General Improvements
 --------------------
++ Creating a new Save Game with a blank name will now generate a default name (gamepad users can now create new saves without a keyboard)
+
 + "Found Secret" message now uses DDFLANG.
 
 + Merged CeeJay's LINES DDF with ours to create the ULTIMATE LINES DDF ;)

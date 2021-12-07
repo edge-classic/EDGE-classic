@@ -26,6 +26,8 @@ General Improvements
 --------------------
 + "Found Secret" message now uses DDFLANG.
 
++ Berserk colour tint is no longer hardcoded and can be modified via DDFCOLM.
+
 + Merged CeeJay's LINES DDF with ours to create the ULTIMATE LINES DDF ;)
 
 + Replaced GLBSP with AJBSP as EDGE-Classic's internal nodebuilder

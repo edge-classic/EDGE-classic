@@ -1550,7 +1550,7 @@ bool M_Responder(event_t * ev)
 	}
 	else if (msg_mode == 2)
 	{		
-		if (ch == KEYD_ENTER)
+		if (ch == KEYD_ENTER || ch == KEYD_MENU_SELECT || ch == KEYD_MOUSE1)
 		{
 			menuactive = msg_lastmenu?true:false;
 			msg_mode = 0;
@@ -1565,8 +1565,7 @@ bool M_Responder(event_t * ev)
 			return true;
 		}
 
-		if (ch == KEYD_ESCAPE)
-		{
+		if (ch == KEYD_ESCAPE || ch == KEYD_MENU_CANCEL || ch == KEYD_MOUSE2 || ch == KEYD_MOUSE3)		{
 			menuactive = msg_lastmenu?true:false;
 			msg_mode = 0;
       

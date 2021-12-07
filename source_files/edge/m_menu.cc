@@ -1629,14 +1629,31 @@ bool M_Responder(event_t * ev)
 				break;
 
 			case KEYD_ESCAPE:
+			case KEYD_MENU_CANCEL:
+			case KEYD_MOUSE2:
+			case KEYD_MOUSE3:
 				saveStringEnter = 0;
 				strcpy(ex_slots[save_slot].desc, saveOldString);
 				break;
 
 			case KEYD_ENTER:
+			case KEYD_MENU_SELECT:
+			case KEYD_MOUSE1:
 				saveStringEnter = 0;
 				if (ex_slots[save_slot].desc[0])
+				{
 					M_DoSave(save_page, save_slot);
+				}
+				else
+				{
+					std::string default_name = epi::STR_Format("SAVE-%d", save_slot+1);
+					for (; (size_t) saveCharIndex < default_name.size(); saveCharIndex++)
+					{
+						ex_slots[save_slot].desc[saveCharIndex] = default_name[saveCharIndex];
+					}
+					ex_slots[save_slot].desc[saveCharIndex] = 0;
+					M_DoSave(save_page, save_slot);
+				}
 				break;
 
 			default:

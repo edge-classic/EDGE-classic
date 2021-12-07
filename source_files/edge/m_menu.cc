@@ -1565,7 +1565,8 @@ bool M_Responder(event_t * ev)
 			return true;
 		}
 
-		if (ch == KEYD_ESCAPE || ch == KEYD_MENU_CANCEL || ch == KEYD_MOUSE2 || ch == KEYD_MOUSE3)		{
+		if (ch == KEYD_ESCAPE || ch == KEYD_MENU_CANCEL || ch == KEYD_MOUSE2 || ch == KEYD_MOUSE3)
+		{
 			menuactive = msg_lastmenu?true:false;
 			msg_mode = 0;
       

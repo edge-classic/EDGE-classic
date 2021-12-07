@@ -565,6 +565,13 @@ static void P_UpdatePowerups(player_t *player)
 		player->effect_colourmap = colourmaps.Lookup("ALLGREEN");
 		player->effect_left = (s <= 0) ? 0 : MIN(int(s), EFFECT_MAX_TIME);
 	}
+	else if (player->powers[PW_Berserk] > 0)	// Lobo 2021: Un-Hardcode Berserk colour tint
+	{
+		float s = player->powers[PW_Berserk];
+
+		player->effect_colourmap = colourmaps.Lookup("BERSERK");
+		player->effect_left = (s <= 0) ? 0 : MIN(int(s), EFFECT_MAX_TIME);
+	}
 }
 
 

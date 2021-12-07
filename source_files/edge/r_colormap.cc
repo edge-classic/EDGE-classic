@@ -697,14 +697,6 @@ void R_PaletteStuff(void)
 
 	int cnt = p->damagecount;
 
-	if (p->powers[PW_Berserk] > 0)
-	{
-		int bzc = MIN(20, (int) p->powers[PW_Berserk]); // slowly fade berzerk out
-
-		if (bzc > cnt)
-			cnt = bzc;
-	}
-
 	if (cnt)
 	{
 		palette = PALETTE_PAIN;

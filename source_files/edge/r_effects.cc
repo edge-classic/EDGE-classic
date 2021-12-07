@@ -115,6 +115,22 @@ void RGL_RainbowEffect(player_t *player)
 		ren_extralight = int(s * 255);
 		return;
 	}
+	
+	//Lobo 2021: un-hardcode berserk color tint
+	if (s > 0 && player->powers[PW_Berserk] > 0 &&
+		player->effect_colourmap && !debug_fullbright.d)
+	{
+		float r, g, b;
+
+		V_GetColmapRGB(player->effect_colourmap, &r, &g, &b);
+
+		ren_red_mul = 1.0f - (1.0f - r) * s;
+		ren_grn_mul = 1.0f - (1.0f - g) * s;
+		ren_blu_mul = 1.0f - (1.0f - b) * s;
+
+		return;
+	}
+	
 }
 
 

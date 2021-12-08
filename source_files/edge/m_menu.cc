@@ -780,7 +780,7 @@ void M_DrawSaveLoadBorder(float x, float y, int len)
 //
 void M_LoadSelect(int choice)
 {
-	if (choice < 0)
+	if (choice < 0 || ex_slots[choice].empty)
 	{
 		M_LoadSavePage(choice);
 		return;

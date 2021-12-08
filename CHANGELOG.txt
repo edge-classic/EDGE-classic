@@ -14,13 +14,15 @@ Bugs fixed
 - Games with only one selectable episode will now skip episode selection and proceed directly to the skill choice menu. This prevents the "Hell on Earth" episode from appearing
   when it is not appropriate.
 
-- Fixed bug with valid skybox texture references being deleted when cycling between real and psuedo-skyboxes
+- Fixed bug with valid skybox texture references being deleted when cycling between real and pseudo-skyboxes
 
 - Downgraded textures without patches from being an error (ending the program) to a warning
 
 - Fixed occasional bug where attempting to bind a key would map it to the wrong command
 
 - Fixed bug where canceling out of an RTS Menu would instead select the first option; now it should exit with no result
+
+- Fixed player being allowed to attempt to load a game from an empty slot
 
 General Improvements
 --------------------

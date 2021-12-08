@@ -24,6 +24,7 @@ Bugs fixed
 
 - Fixed player being allowed to attempt to load a game from an empty slot
 
+
 General Improvements
 --------------------
 + Creating a new Save Game with a blank name will now generate a default name (gamepad users can now create new saves without a keyboard)
@@ -53,6 +54,7 @@ paletted Doom menu graphics
 
 + Added ability to remap functions previously hardcoded to the function keys (Quicksave, Quickload, etc)
 
+
 New Features
 ------------
 + MP3 Sound Effects Support
@@ -68,6 +70,8 @@ New Features
   -Harmony: Full support. May be some (hopefully) minor differences.
   -Heretic: Partial support. Item inventory not implemented in the base engine yet.
   -Blasphemer: Rudimentary support. Support is less thorough compared to Heretic, but IWAD will now be recognized and launch.
+
++ Experimental floor offset: any linetype that uses the SPECIALs "ALIGN FLOOR" or "ALIGN CEILING", if the line has texture offsets applied then EDGE will use those to offset the floor flat.
 
 
 CHANGELOG for EDGE-Classic Preview 1 (since forking from EDGE 1.35)

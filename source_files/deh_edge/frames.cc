@@ -830,20 +830,11 @@ void Frames::SpecialAction(char *act_name, state_t *st, bool use_spawn)
 	switch (st->action)
 	{
 		case A_Die:
-			if (target_version >= 129)
-				strcpy(act_name, "DIE");
-			else
-			{
-				PrintWarn("Action A_DIE only supported in EDGE 1.29 and higher.\n");
-				strcpy(act_name, "EXPLODE");
-			}
+			strcpy(act_name, "DIE");
 			break;
 
 		case A_KeenDie:
-			if (target_version >= 129)
-				strcpy(act_name, "KEEN_DIE");
-			else
-				strcpy(act_name, "NOTHING");
+			strcpy(act_name, "KEEN_DIE");
 			break;
 
 		case A_RandomJump:
@@ -888,10 +879,7 @@ void Frames::SpecialAction(char *act_name, state_t *st, bool use_spawn)
 			break;
 
 		case A_Spawn:
-			if (target_version < 131)
-				PrintWarn("Action A_SPAWN only supported in EDGE 1.31 and higher.\n");
-			
-			else if (st->misc1 < 1 || st->misc1 > NUMMOBJTYPES_BEX)
+			if (st->misc1 < 1 || st->misc1 > NUMMOBJTYPES_BEX)
 				PrintWarn("Action A_SPAWN: illegal type (%d)\n", st->misc1);
 
 			else

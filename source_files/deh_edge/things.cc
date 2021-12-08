@@ -89,9 +89,6 @@ namespace Things
 		WAD::Printf(GEN_BY_COMMENT);
 
 		WAD::Printf("<THINGS>\n\n");
-
-		if (target_version >= 129)
-			WAD::Printf("#VERSION 1.29\n");
 	}
 
 	void FinishLump(void)
@@ -256,7 +253,7 @@ namespace Things
 			case MT_SPIDER: return "BHR";
 
 			case MT_BOSSSPIT: return "B";
-			case MT_BOSSBRAIN: return (target_version >= 129) ? "L" : "B";
+			case MT_BOSSBRAIN: return "L";
 
 			default:
 				break;
@@ -586,21 +583,6 @@ namespace Things
 				Frames::OutputGroup(S_VILE_HEAL1, 'H');
 			}
 		}
-
-		// Workaround for EDGE 1.27, which does not Remove a thing when
-		// it has no see-states but does a successful A_Look().
-
-		if (target_version <= 127 && (Frames::act_flags & AF_LOOK) &&
-			info->seestate == S_NULL && info->spawnstate != S_NULL)
-		{
-			state_t *st = states + info->spawnstate;
-
-			WAD::Printf("\n");
-			WAD::Printf("// A_Look with missing seestate workaround\n");
-			WAD::Printf("STATES(CHASE) = %s:%c:1:NORMAL:NOTHING,#REMOVE;\n",
-				TextStr::GetSprite(st->sprite),
-				'A' + ((int) st->frame & 31));
-		}
 	}
 
 	const int NUMPLAYERS = 8;
@@ -647,18 +629,15 @@ namespace Things
 		WAD::Printf(    "NAILS.LIMIT(%d), ",   100);
 		WAD::Printf(    "GRENADES.LIMIT(%d), ", 50);
 		WAD::Printf(    "GAS.LIMIT(%d),\n",    300);
-		
-		if (target_version >= 129)
-		{
-			WAD::Printf("    AMMO9.LIMIT(%d), ",   100);
-			WAD::Printf(    "AMMO10.LIMIT(%d), ",  200);
-			WAD::Printf(    "AMMO11.LIMIT(%d), ",  50);
-			WAD::Printf(    "AMMO12.LIMIT(%d),\n", 300);
-			WAD::Printf("    AMMO13.LIMIT(%d), ",  100);
-			WAD::Printf(    "AMMO14.LIMIT(%d), ",  200);
-			WAD::Printf(    "AMMO15.LIMIT(%d), ",  50);
-			WAD::Printf(    "AMMO16.LIMIT(%d),\n", 300);
-		}
+
+		WAD::Printf("    AMMO9.LIMIT(%d), ",   100);
+		WAD::Printf(    "AMMO10.LIMIT(%d), ",  200);
+		WAD::Printf(    "AMMO11.LIMIT(%d), ",  50);
+		WAD::Printf(    "AMMO12.LIMIT(%d),\n", 300);
+		WAD::Printf("    AMMO13.LIMIT(%d), ",  100);
+		WAD::Printf(    "AMMO14.LIMIT(%d), ",  200);
+		WAD::Printf(    "AMMO15.LIMIT(%d), ",  50);
+		WAD::Printf(    "AMMO16.LIMIT(%d),\n", 300);
 
 		WAD::Printf("    BULLETS(%d);\n",      Misc::init_ammo);
 	}
@@ -739,8 +718,7 @@ namespace Things
 			WAD::Printf("PICKUP_BENEFIT = POWERUP_BERSERK(60:60),HEALTH(100:100);\n");
 			WAD::Printf("PICKUP_MESSAGE = GotBerserk;\n");
 			WAD::Printf("PICKUP_SOUND = %s;\n", Sounds::GetSound(sfx_getpow));
-			if (target_version >= 129)
-				WAD::Printf("PICKUP_EFFECT = SWITCH_WEAPON(FIST);\n");
+			WAD::Printf("PICKUP_EFFECT = SWITCH_WEAPON(FIST);\n");
 			return;
 		}
 		else if (spr_num == SPR_MEGA)  // Megasphere
@@ -900,8 +878,7 @@ namespace Things
 
 		WAD::Printf("CASTORDER = %d;\n", order);
 
-		if (target_version >= 128)
-			WAD::Printf("CAST_TITLE = %s;\n", cast_titles[pos - 1]);
+		WAD::Printf("CAST_TITLE = %s;\n", cast_titles[pos - 1]);
 	}
 
 	void HandleDropItem(const mobjinfo_t *info, int mt_num)
@@ -939,8 +916,7 @@ namespace Things
 			WAD::Printf("CLOSE_ATTACK = %s;\n",
 				Frames::attack_slot[Frames::COMBAT]);
 		}
-		else if (info->meleestate && info->name[0] != '*' &&
-			     target_version < 129)
+		else if (info->meleestate && info->name[0] != '*')
 		{
 			PrintWarn("No close attack in melee states of [%s].\n",
 				info->name);
@@ -1016,7 +992,7 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player)
 	else if (Frames::act_flags & AF_DETONATE)
 		WAD::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
 
-	if ((Frames::act_flags & AF_KEENDIE) && target_version < 129)
+	if ((Frames::act_flags & AF_KEENDIE))
 		Rscript::MarkKeenDie(mt_num);
 
 	WAD::Printf("\n");

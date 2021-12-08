@@ -44,10 +44,6 @@
 namespace Deh_Edge
 {
 
-// workaround for EDGE 1.27 bug with sound replacements
-#define EDGE127_BUG  (target_version <= 127)
-
-
 //
 // Information about all the music
 //
@@ -382,25 +378,10 @@ namespace Sounds
 
 		WAD::Printf(GEN_BY_COMMENT);
 		WAD::Printf("<SOUNDS>\n\n");
-
-		if (EDGE127_BUG)
-			WAD::Printf("#CLEARALL\n\n");
 	}
 
 	void FinishSoundLump(void)
 	{
-		if (EDGE127_BUG)
-		{
-			WAD::Printf(
-				"[JPRISE] LUMP_NAME=\"DSJPRISE\"; SINGULAR=29;\n"
-				"[JPMOVE] LUMP_NAME=\"DSJPMOVE\"; SINGULAR=29;\n"
-				"[JPIDLE] LUMP_NAME=\"DSJPIDLE\"; SINGULAR=29;\n"
-				"[JPDOWN] LUMP_NAME=\"DSJPDOWN\"; SINGULAR=29;\n"
-				"[JPFLOW] LUMP_NAME=\"DSJPFLOW\"; SINGULAR=29;\n"
-				"[CRUSH] LUMP_NAME=\"DSCRUSH\"; PRIORITY=100;\n"
-			);
-		}
-
 		WAD::Printf("\n");
 		WAD::FinishLump();
 	}
@@ -479,7 +460,7 @@ void Sounds::ConvertSFX(void)
 
 	for (int i = 1; i < NUMSFX_BEX; i++)
 	{
-	    if (! EDGE127_BUG && ! all_mode && S_sfx[i].new_name == NULL)
+	    if (! all_mode && S_sfx[i].new_name == NULL)
 			continue;
 
 		WriteSound(i);

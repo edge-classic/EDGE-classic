@@ -82,7 +82,7 @@ int num_inputs = 0;
 
 const char *output_file = NULL;
 
-#define DEFAULT_TARGET  128
+#define DEFAULT_TARGET  100
 
 int target_version;
 bool quiet_mode;
@@ -391,7 +391,7 @@ void ParseArgs(int argc, char **argv)
 		output_file = StringNew(strlen(base_name) + 16);
 
 		strcpy((char *)output_file, base_name);
-		strcat((char *)output_file, (target_version >= 128) ? ".hwa" : "_deh.wad");
+		strcat((char *)output_file, ".hwa");
 	}
 }
 
@@ -427,8 +427,7 @@ dehret_e ValidateArgs(void)
 
 	if (CheckExtension(output_file, NULL))
 	{
-		output_file = StringDup(ReplaceExtension(output_file,
-			(target_version >= 128) ? "hwa" : "wad"));
+		output_file = StringDup(ReplaceExtension(output_file, "hwa"));
 	}
 
 	return DEH_OK;

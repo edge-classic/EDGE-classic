@@ -244,8 +244,7 @@ namespace Attacks
 		WAD::Printf("SPAWNED_OBJECT = LOST_SOUL;\n");
 		WAD::Printf("SPAWN_OBJECT_STATE = %s;\n", spawn_at);
 
-		if (target_version >= 129)
-			WAD::Printf("SPAWN_LIMIT = 21;\n");
+		WAD::Printf("SPAWN_LIMIT = 21;\n");
 
 		WAD::Printf("\n");
 		WAD::Printf("[ELEMENTAL_DEATHSPAWN]\n");
@@ -344,9 +343,7 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 	{
 		WAD::Printf("NO_TRACE_CHANCE = 50%%;\n");
 
-		// workaround for EDGE's behaviour of A_Tracer
-		if (target_version >= 129)
-			WAD::Printf("TRACE_ANGLE = 9;\n");
+		WAD::Printf("TRACE_ANGLE = 9;\n");
 	}
 
 	if (strchr(ext->flags, KF_KEEP_FIRE))

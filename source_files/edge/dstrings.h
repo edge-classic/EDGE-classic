@@ -28,8 +28,8 @@
 
 // Misc. other strings.
 #define REQUIREDWAD    "edge-defs"
-#define EDGECONFIGFILE "edge.cfg"
-#define EDGELOGFILE    "edge.log"
+#define EDGECONFIGFILE "edge-classic.cfg"
+#define EDGELOGFILE    "edge-classic.log"
 
 #define EDGEGWAEXT     "gwa"
 #define EDGEHWAEXT     "hwa"

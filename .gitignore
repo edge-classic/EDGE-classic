@@ -7,10 +7,10 @@ cache/
 /edge
 edge-classic.exe
 edge-classic
-edge.log
+edge-classic.log
 debug.txt
 *.dll
-edge.cfg
+edge-classic.cfg
 
 # EDGE game folders
 /screenshot

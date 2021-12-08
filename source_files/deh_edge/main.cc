@@ -405,7 +405,7 @@ dehret_e ValidateArgs(void)
 		return DEH_E_BadArgs;
 	}
 
-	if (target_version < 123 || target_version >= 300)
+	if (target_version < 100 || target_version >= 300)
 	{
 		SetErrorMsg("Illegal version number: %d.%02d\n", target_version / 100,
 			target_version % 100);

@@ -921,7 +921,7 @@ void M_SaveGame(int choice)
 
 static void QuickSaveResponse(int ch)
 {
-	if (ch == 'y' || ch == KEYD_MENU_SELECT)
+	if (ch == 'y' || ch == KEYD_MENU_SELECT || ch == KEYD_MOUSE1)
 	{
 		M_DoSave(quickSavePage, quickSaveSlot);
 		S_StartFX(sfx_swtchx);
@@ -957,7 +957,7 @@ void M_QuickSave(void)
 
 static void QuickLoadResponse(int ch)
 {
-	if (ch == 'y' || ch == KEYD_MENU_SELECT)
+	if (ch == 'y' || ch == KEYD_MENU_SELECT || ch == KEYD_MOUSE1)
 	{
 		int tempsavepage = save_page;
 
@@ -1217,7 +1217,7 @@ static void DoStartLevel(skill_t skill)
 
 static void VerifyNightmare(int ch)
 {
-	if (ch != 'y' && ch != KEYD_MENU_SELECT)
+	if (ch != 'y' && ch != KEYD_MENU_SELECT && ch != KEYD_MOUSE1)
 		return;
 
 	DoStartLevel(sk_nightmare);
@@ -1258,7 +1258,7 @@ void M_ChangeMessages(int choice)
 
 static void EndGameResponse(int ch)
 {
-	if (ch != 'y' && ch != KEYD_MENU_SELECT)
+	if (ch != 'y' && ch != KEYD_MENU_SELECT && ch != KEYD_MOUSE1)
 		return;
 
 	G_DeferredEndGame();
@@ -1308,7 +1308,7 @@ void M_FinishReadThis(int choice)
 //
 static void QuitResponse(int ch)
 {
-	if (ch != 'y' && ch != KEYD_MENU_SELECT)
+	if (ch != 'y' && ch != KEYD_MENU_SELECT && ch != KEYD_MOUSE1)
 		return;
 		
 	if (!netgame)
@@ -1548,7 +1548,7 @@ bool M_Responder(event_t * ev)
 	if (msg_mode == 1)
 	{
 		if (msg_needsinput == true &&
-			!(ch == ' ' || ch == 'n' || ch == 'y' || ch == KEYD_ESCAPE || ch == KEYD_MENU_CANCEL || ch == KEYD_MENU_SELECT))
+			!(ch == ' ' || ch == 'n' || ch == 'y' || ch == KEYD_ESCAPE || ch == KEYD_MENU_CANCEL || ch == KEYD_MENU_SELECT || ch == KEYD_MOUSE1 || ch == KEYD_MOUSE2 || ch == KEYD_MOUSE3))
 			return false;
 
 		msg_mode = 0;

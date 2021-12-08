@@ -2115,14 +2115,14 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
 	// --- handle sky (using the depth buffer) ---
 
-	bool upper_sky = false;
+	//bool upper_sky = false; - Doesn't seem to affect anything - Dasho
 	bool lower_sky = false;
 
 	if (backsector && IS_SKY(frontsector->floor) && IS_SKY(backsector->floor))
 		lower_sky = true;
 
-	if (backsector && IS_SKY(frontsector->ceil) && IS_SKY(backsector->ceil))
-		upper_sky = true;
+	//if (backsector && IS_SKY(frontsector->ceil) && IS_SKY(backsector->ceil))
+		//upper_sky = true;
 
 	if (lower_sky && frontsector->f_h < backsector->f_h)
 	{

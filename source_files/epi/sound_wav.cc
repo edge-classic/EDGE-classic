@@ -482,11 +482,11 @@ static int read_sample_fmt_adpcm(s16_t *buffer, int max_samples)
 /*
  * Sound_FreeSample() lands here for ADPCM-encoded WAVs...
  */
-static void free_fmt_adpcm(fmt_t *fmt)
+/*static void free_fmt_adpcm(fmt_t *fmt)
 {
     delete fmt->fmt.adpcm.aCoef;
     delete fmt->fmt.adpcm.blockheaders;
-}
+}*/
 
 
 

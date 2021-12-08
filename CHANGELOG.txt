@@ -2,7 +2,7 @@ https://github.com/dashodanger/EDGE-classic
 
 Current as of: DECEMBER 2021
 
-CHANGELOG for EDGE-Classic Preview 2 (since EDGE-Classic Preview 1)
+CHANGELOG for EDGE-Classic 1.0 (since EDGE-Classic Preview 1)
 ====================================
 
 Bugs fixed
@@ -50,7 +50,7 @@ paletted Doom menu graphics
 
 + Added "Menu Navigation" option in Controls to bind Menu Open/Up/Down/Left/Right/Select/Cancel
 
-+ Added ability to navigate RTS menus and select options using the new Menu Navigation controls
++ Added cursor to navigate RTS menus and select options in addition to using the number keys.
 
 + Added ability to remap functions previously hardcoded to the function keys (Quicksave, Quickload, etc)
 
@@ -69,7 +69,7 @@ New Features
   -HACX: Full support. Includes bug fixes and widescreen support by CeeJay. Some graphics credited to HACX 2 team.
   -Harmony: Full support. May be some (hopefully) minor differences.
   -Heretic: Partial support. Item inventory not implemented in the base engine yet.
-  -Blasphemer: Rudimentary support. Support is less thorough compared to Heretic, but IWAD will now be recognized and launch.
+  -Blasphemer: Rudimentary support; less thorough compared to Heretic, but IWAD will now be recognized and launch.
 
 + Experimental floor offset: any linetype that uses the SPECIALs "ALIGN FLOOR" or "ALIGN CEILING", if the line has texture offsets applied then EDGE will use those to offset the floor flat.
 

@@ -19,6 +19,7 @@
 #include "i_defs.h"
 #include "i_video.h"
 #include "i_defs_gl.h"
+#include "version.h"
 
 #include <signal.h>
 
@@ -215,7 +216,9 @@ bool I_SetScreenSize(scrmode_c *mode)
 	}
 	else
 	{
-		my_vis = SDL_CreateWindow("EDGE Classic", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
+		std::string temp_title = TITLE;
+		temp_title.append(" ").append(EDGEVERSTR);
+		my_vis = SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
 			SDL_WINDOW_OPENGL | (mode->full ? SDL_WINDOW_FULLSCREEN : 0));
 		SDL_GL_CreateContext(my_vis);
 	}

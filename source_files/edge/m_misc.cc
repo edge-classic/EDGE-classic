@@ -387,7 +387,7 @@ void M_LoadDefaults(void)
 		int parm;
 
 		std::string newstr;
-		bool isstring = false;
+		//bool isstring = false; - This doesn't seem to have an impact on anything other than being set to true in this function - Dasho
 
 		if (fscanf(f, "%79s %[^\n]\n", def, strparm) != 2)
 			continue;
@@ -408,7 +408,7 @@ void M_LoadDefaults(void)
 		if (strparm[0] == '"')
 		{
 			// get a string default
-			isstring = true;
+			//isstring = true;
 			// overwrite the last "
 			strparm[strlen(strparm) - 1] = 0;
 			// skip the first "

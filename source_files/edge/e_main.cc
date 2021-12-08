@@ -391,7 +391,7 @@ static void SpecialWadVerify(void)
 {
 	int lump = W_CheckNumForName("EDGEVER");
 	if (lump < 0)
-		I_Error("EDGEVER lump not found. Get EDGE.WAD at http://edge.sourceforge.net/");
+		I_Error("EDGEVER lump not found. Get EDGE.WAD at https://github.com/dashodanger/EDGE-classic");
 
 	const void *data = W_CacheLumpNum(lump);
 
@@ -409,7 +409,7 @@ static void SpecialWadVerify(void)
 
 	if (wad_ver < EDGE_WAD_VERSION)
 	{
-		I_Warning("EDGE.WAD is an older version (expected %1.2f)\n",
+		I_Error("EDGE.WAD is an older version (expected %1.2f)\nMake sure you are using edge.wad from EDGE-Classic and not EDGE v1.35!\n",
 		          EDGE_WAD_VERSION / 100.0);
 	}
 	else if (wad_ver > EDGE_WAD_VERSION)
@@ -1020,9 +1020,9 @@ static void ShowDateAndVersion(void)
 	I_Debugf("[Debug file created at %s]\n\n", timebuf);
 
 	// 23-6-98 KM Changed to hex to allow versions such as 0.65a etc
-	I_Printf("EDGE v" EDGEVERSTR " compiled on " __DATE__ " at " __TIME__ "\n");
-	I_Printf("EDGE homepage is at https://github.com/dashodanger/EDGE-classic/\n");
-	I_Printf("EDGE is based on DOOM by id Software http://www.idsoftware.com/\n");
+	I_Printf("EDGE-Classic v" EDGEVERSTR " compiled on " __DATE__ " at " __TIME__ "\n");
+	I_Printf("EDGE-Classic homepage is at https://github.com/dashodanger/EDGE-classic/\n");
+	I_Printf("EDGE-Classic is based on DOOM by id Software http://www.idsoftware.com/\n");
 
 #ifdef WIN32
 	I_Printf("Executable path: '%s'\n", win32_exe_path);
@@ -1462,7 +1462,7 @@ void E_Main(int argc, const char **argv)
 		E_InitialState();
 
 		CON_MessageColor(RGB_MAKE(255,255,0));
-		I_Printf("EDGE v" EDGEVERSTR " initialisation complete.\n");
+		I_Printf("EDGE-Classic v" EDGEVERSTR " initialisation complete.\n");
 
 		I_Debugf("- Entering game loop...\n");
 

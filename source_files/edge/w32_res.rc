@@ -18,8 +18,8 @@ MAIN_MENU MENU DISCARDABLE
 MAIN_ICON ICON "edge135.ico"
 
 1 VERSIONINFO
-FILEVERSION 4, 1, 35, 6
-PRODUCTVERSION 4, 1, 35, 6
+FILEVERSION 4, 1, 00, 6
+PRODUCTVERSION 4, 1, 00, 6
 FILEFLAGSMASK 0x0
 FILEOS 0x40004 // VOS_NT_WINDOWS32
 FILETYPE 1     // VFT_APP
@@ -30,14 +30,14 @@ BEGIN
     // 0409 means "US English"; 04B0 means "Unicode encoding"
     BLOCK "040904B0"
     BEGIN
-      VALUE "CompanyName",      "The EDGE Team\0"
-      VALUE "FileDescription",  "Enhanced Doom Gaming Engine\0"
-      VALUE "FileVersion",      "1.35\0"
-      VALUE "InternalName",     "EDGE135\0"
-      VALUE "LegalCopyright",   "\251 The EDGE Team, GNU General Public License\0"
-      VALUE "OriginalFilename", "EDGE135.EXE\0"
-      VALUE "ProductName",      "EDGE\0"
-      VALUE "ProductVersion",   "1.35\0"
+      VALUE "CompanyName",      "The EDGE-Classic Community\0"
+      VALUE "FileDescription",  "Enhanced Doom Gaming Engine - Classic Branch\0"
+      VALUE "FileVersion",      "1.00\0"
+      VALUE "InternalName",     "EDGE100\0"
+      VALUE "LegalCopyright",   "\251 The EDGE Team, et al., GNU General Public License\0"
+      VALUE "OriginalFilename", "EDGE-CLASSIC.EXE\0"
+      VALUE "ProductName",      "EDGE-CLASSIC\0"
+      VALUE "ProductVersion",   "1.00\0"
     END
   END
   BLOCK "VarFileInfo"

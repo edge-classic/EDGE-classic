@@ -39,8 +39,6 @@
 
 #define PROGRESS_STEP  2  // percent
 
-static void AJ_InitProgress(void);
-
 static int display_mode = DIS_INVALID;
 
 //

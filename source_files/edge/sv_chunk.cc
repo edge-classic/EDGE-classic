@@ -206,10 +206,10 @@ bool SV_VerifyHeader(int *version)
 		return false;
 	}
 
-	if (savegame_version < 0x13401)
+	if (savegame_version < 0x10001)
 	{
 		I_Printf("LOADGAME: Savegame is too old (0x%05x < 0x%05x)\n",
-		         savegame_version, 0x13401);
+		         savegame_version, 0x10001);
 		return false;
 	}
 

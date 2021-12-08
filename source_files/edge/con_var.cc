@@ -241,11 +241,11 @@ int CON_MatchAllVars(std::vector<const char *>& list,
 
 bool CON_SetVar(const char *name, const char *flags, const char *value)
 {
-	bool no_alias = false;
+	//bool no_alias = false; - Doesn't seem to actually affect anything - Dasho
 
 	if (*flags == 'A')
 	{
-		no_alias = true;
+		//no_alias = true;
 		flags++;
 	}
 

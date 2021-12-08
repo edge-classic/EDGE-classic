@@ -787,7 +787,7 @@ static void RAD_ParseVersion(int pnum, const char **pars)
 	if (vers < 0.99f || vers > 9.99f)
 		RAD_Error("Illegal #VERSION number.\n");
 
-	int rts_version = I_ROUND(vers * 100);
+	//int rts_version = I_ROUND(vers * 100); -- Keep commented in case we feel like reviving this again for some reason, but unlikely - Dasho
 
 	/*
 	if (rts_version > EDGEVER)

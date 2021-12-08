@@ -634,7 +634,7 @@ void P_NextPrevWeapon(player_t * p, int dir)
 //
 void P_SelectNewWeapon(player_t * p, int priority, ammotype_e ammo)
 {
-	int key = -1;
+	//int key = -1; - Seems to be unused - Dasho
 	weapondef_c *info;
 
 	for (int i = 0; i < MAXWEAPONS; i++)
@@ -658,7 +658,7 @@ void P_SelectNewWeapon(player_t * p, int priority, ammotype_e ammo)
 
 		p->pending_wp = (weapon_selection_e) i;
 		priority = info->priority;
-		key = info->bind_key;
+		//key = info->bind_key;
 	}
 
 	// all out of choices ?

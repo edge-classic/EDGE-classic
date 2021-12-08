@@ -391,7 +391,7 @@ static void SpecialWadVerify(void)
 {
 	int lump = W_CheckNumForName("EDGEVER");
 	if (lump < 0)
-		I_Error("EDGEVER lump not found. Get EDGE.WAD at https://github.com/dashodanger/EDGE-classic");
+		I_Error("EDGEVER lump not found. Get EDGE-DEFS.WAD at https://github.com/dashodanger/EDGE-classic");
 
 	const void *data = W_CacheLumpNum(lump);
 
@@ -405,16 +405,16 @@ static void SpecialWadVerify(void)
 
 	W_DoneWithLump(data);
 
-	I_Printf("EDGE.WAD version %1.2f found.\n", wad_ver / 100.0);
+	I_Printf("EDGE-DEFS.WAD version %1.2f found.\n", wad_ver / 100.0);
 
 	if (wad_ver < EDGE_WAD_VERSION)
 	{
-		I_Error("EDGE.WAD is an older version (expected %1.2f)\nMake sure you are using edge.wad from EDGE-Classic and not EDGE v1.35!\n",
+		I_Error("EDGE-DEFS.WAD is an older version (expected %1.2f)\n",
 		          EDGE_WAD_VERSION / 100.0);
 	}
 	else if (wad_ver > EDGE_WAD_VERSION)
 	{
-		I_Warning("EDGE.WAD is a newer version (expected %1.2f)\n",
+		I_Warning("EDGE-DEFS.WAD is a newer version (expected %1.2f)\n",
 		          EDGE_WAD_VERSION / 100.0);
 	}
 }
@@ -791,7 +791,7 @@ void InitDirectories(void)
 	}
 	else
     {
-        ewadfile = epi::PATH_Join(home_dir.c_str(), "edge.wad");
+        ewadfile = epi::PATH_Join(home_dir.c_str(), "edge-defs.wad");
 	}
 
 	// cache directory

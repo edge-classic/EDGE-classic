@@ -26,7 +26,7 @@
 #define EDGEPATCH  1
 
 // -ES- 2000/03/04 The version of EDGE.WAD we require.
-#define EDGE_WAD_VERSION  701
+#define EDGE_WAD_VERSION  100
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

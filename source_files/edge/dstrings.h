@@ -27,7 +27,7 @@
 #define __DOOM_STRINGS__
 
 // Misc. other strings.
-#define REQUIREDWAD    "edge"
+#define REQUIREDWAD    "edge-defs"
 #define EDGECONFIGFILE "edge.cfg"
 #define EDGELOGFILE    "edge.log"
 

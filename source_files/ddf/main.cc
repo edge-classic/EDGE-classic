@@ -424,7 +424,7 @@ static void DDF_ParseVersion(const char *str, int len)
 				       (str[3] - '0');
 
 	if (ddf_version < 100)
-		DDF_Error("Illegal #VERSION number: %s\n", str);
+		DDF_Error("Illegal #VERSION number: %i\n", ddf_version);
 
 	/*
 	if (ddf_version > engine_version)

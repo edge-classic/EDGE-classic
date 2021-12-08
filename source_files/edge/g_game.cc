@@ -87,6 +87,7 @@ int exittime = INT_MAX;
 bool exit_skipall = false;  // -AJA- temporary (maybe become "exit_mode")
 int exit_hub_tag  = 0;
 
+int key_show_players;
 
 // GAMEPLAY MODES:
 //
@@ -332,7 +333,7 @@ bool G_Responder(event_t * ev)
 		return false;
 	}
 
-	if (ev->type == ev_keydown && ev->value.key.sym == KEYD_F12)
+	if (ev->type == ev_keydown && E_MatchesKey(key_show_players, ev->value.key.sym))
 	{
 		// 25-6-98 KM Allow spy mode for demos even in deathmatch
 		if (gamestate == GS_LEVEL) //!!!! && !DEATHMATCH())

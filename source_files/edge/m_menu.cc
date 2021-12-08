@@ -74,7 +74,20 @@ int key_menu_right;
 int key_menu_select;
 int key_menu_cancel;
 
-// Copy of E_Matches Key so I don't have to pull in e_input.h
+// Program stuff
+int key_screenshot;
+int key_save_game;
+int key_load_game;
+int key_sound_controls;
+int key_options_menu;
+int key_quick_save;
+int key_end_game;
+int key_message_toggle;
+int key_quick_load;
+int key_quit_edge;
+int key_gamma_toggle;
+
+// Copy of E_MatchesKey so I don't have to pull in e_input.h
 bool M_MatchesKey(int keyvar, int key)
 {
 	return ((keyvar >> 16) == key) ||
@@ -1675,6 +1688,52 @@ bool M_Responder(event_t * ev)
 	// F-Keys
 	if (!menuactive)
 	{
+
+		if (M_MatchesKey(key_screenshot, ch))
+		{
+			ch = KEYD_SCREENSHOT;
+		}
+		if (M_MatchesKey(key_save_game, ch))
+		{
+			ch = KEYD_SAVEGAME;
+		}
+		if (M_MatchesKey(key_load_game, ch))
+		{
+			ch = KEYD_LOADGAME;
+		}
+		if (M_MatchesKey(key_sound_controls, ch))
+		{
+			ch = KEYD_SOUNDCONTROLS;
+		}
+		if (M_MatchesKey(key_options_menu, ch))
+		{
+			ch = KEYD_OPTIONSMENU;
+		}
+		if (M_MatchesKey(key_quick_save, ch))
+		{
+			ch = KEYD_QUICKSAVE;
+		}
+		if (M_MatchesKey(key_end_game, ch))
+		{
+			ch = KEYD_ENDGAME;
+		}
+		if (M_MatchesKey(key_message_toggle, ch))
+		{
+			ch = KEYD_MESSAGETOGGLE;
+		}
+		if (M_MatchesKey(key_quick_load, ch))
+		{
+			ch = KEYD_QUICKLOAD;
+		}
+		if (M_MatchesKey(key_quit_edge, ch))
+		{
+			ch = KEYD_QUITEDGE;
+		}
+		if (M_MatchesKey(key_gamma_toggle, ch))
+		{
+			ch = KEYD_GAMMATOGGLE;
+		}
+
 		switch (ch)
 		{
 			case KEYD_MINUS:  // Screen size down
@@ -1697,21 +1756,21 @@ bool M_Responder(event_t * ev)
 				S_StartFX(sfx_stnmov);
 				return true;
 
-			case KEYD_F2:  // Save
+			case KEYD_SAVEGAME:  // Save
 
 				M_StartControlPanel();
 				S_StartFX(sfx_swtchn);
 				M_SaveGame(0);
 				return true;
 
-			case KEYD_F3:  // Load
+			case KEYD_LOADGAME:  // Load
 
 				M_StartControlPanel();
 				S_StartFX(sfx_swtchn);
 				M_LoadGame(0);
 				return true;
 
-			case KEYD_F4:  // Sound Volume
+			case KEYD_SOUNDCONTROLS:  // Sound Volume
 
 				M_StartControlPanel();
 				currentMenu = &SoundDef;
@@ -1719,7 +1778,7 @@ bool M_Responder(event_t * ev)
 				S_StartFX(sfx_swtchn);
 				return true;
 
-			case KEYD_F5:  // Detail toggle, now loads options menu
+			case KEYD_OPTIONSMENU:  // Detail toggle, now loads options menu
 				// -KM- 1998/07/31 F5 now loads options menu, detail is obsolete.
 
 				S_StartFX(sfx_swtchn);
@@ -1727,37 +1786,37 @@ bool M_Responder(event_t * ev)
 				M_Options(0);
 				return true;
 
-			case KEYD_F6:  // Quicksave
+			case KEYD_QUICKSAVE:  // Quicksave
 
 				S_StartFX(sfx_swtchn);
 				M_QuickSave();
 				return true;
 
-			case KEYD_F7:  // End game
+			case KEYD_ENDGAME:  // End game
 
 				S_StartFX(sfx_swtchn);
 				M_EndGame(0);
 				return true;
 
-			case KEYD_F8:  // Toggle messages
+			case KEYD_MESSAGETOGGLE:  // Toggle messages
 
 				M_ChangeMessages(0);
 				S_StartFX(sfx_swtchn);
 				return true;
 
-			case KEYD_F9:  // Quickload
+			case KEYD_QUICKLOAD:  // Quickload
 
 				S_StartFX(sfx_swtchn);
 				M_QuickLoad();
 				return true;
 
-			case KEYD_F10:  // Quit DOOM
+			case KEYD_QUITEDGE:  // Quit DOOM
 
 				S_StartFX(sfx_swtchn);
 				M_QuitEDGE(0);
 				return true;
 
-			case KEYD_F11:  // gamma toggle
+			case KEYD_GAMMATOGGLE:  // gamma toggle
 
 				var_gamma++;
 				if (var_gamma > 5)

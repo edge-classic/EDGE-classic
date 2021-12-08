@@ -46,6 +46,7 @@
 #include "dm_state.h"
 #include "e_input.h"
 #include "e_player.h"
+#include "g_game.h"
 #include "hu_draw.h"
 #include "hu_stuff.h"  // only for showMessages
 #include "m_argv.h"
@@ -258,6 +259,19 @@ static default_t defaults[] =
 	{CFGT_Key,      "key_menu_right",      &key_menu_right,   0},
 	{CFGT_Key,      "key_menu_select",      &key_menu_select,   0},
 	{CFGT_Key,      "key_menu_cancel",      &key_menu_cancel,   0},
+
+	{CFGT_Key,      "key_screenshot",      &key_screenshot,   KEYD_F1},
+	{CFGT_Key,      "key_save_game",      &key_save_game,   KEYD_F2},
+	{CFGT_Key,      "key_load_game",      &key_load_game,  KEYD_F3},
+	{CFGT_Key,      "key_sound_controls",      &key_sound_controls,   KEYD_F4},
+	{CFGT_Key,      "key_options_menu",      &key_options_menu,   KEYD_F5},
+	{CFGT_Key,      "key_quick_save",      &key_quick_save,   KEYD_F6},
+	{CFGT_Key,      "key_end_game",      &key_end_game,   KEYD_F7},
+	{CFGT_Key,      "key_message_toggle",      &key_message_toggle,   KEYD_F8},
+	{CFGT_Key,      "key_quick_load",      &key_quick_load,   KEYD_F9},
+	{CFGT_Key,      "key_quit_edge",      &key_quit_edge,   KEYD_F10},
+	{CFGT_Key,      "key_gamma_toggle",      &key_gamma_toggle,   KEYD_F11},
+	{CFGT_Key,      "key_show_players",      &key_show_players,   KEYD_F12},
 };
 
 

@@ -700,10 +700,52 @@ static menuinfo_t menu_nav_optmenu =
 	"Menu Navigation"
 };
 
+//
+//  KEY CONFIG : PROGRAM
+//
+static optmenuitem_t program_keyconfig1[] =
+{
+	{OPT_KeyConfig, "Screenshot",   NULL, 0, &key_screenshot, NULL, NULL},
+	{OPT_KeyConfig, "Save Game",         NULL, 0, &key_save_game, NULL, NULL},
+	{OPT_KeyConfig, "Load Game",           NULL, 0, &key_load_game, NULL, NULL},
+	{OPT_Plain,     "",                 NULL, 0, NULL, NULL, NULL},
+	{OPT_KeyConfig, "Sound Controls",              NULL, 0, &key_sound_controls, NULL, NULL},
+	{OPT_KeyConfig, "Options",   NULL, 0, &key_options_menu, NULL, NULL},
+	{OPT_KeyConfig, "Quicksave",       NULL, 0, &key_quick_save, NULL, NULL},
+};
+
+static menuinfo_t program_optmenu1 = 
+{
+	program_keyconfig1, sizeof(program_keyconfig1) / sizeof(optmenuitem_t),
+	&keyboard_style, 140, 98, "M_CONTRL", NULL, 0,
+	"Program (1/2)"
+};
+
+//
+//  KEY CONFIG : PROGRAM
+//
+static optmenuitem_t program_keyconfig2[] =
+{
+	{OPT_KeyConfig, "End Game",          NULL, 0, &key_end_game, NULL, NULL},
+	{OPT_KeyConfig, "Toggle Messages",       NULL, 0, &key_message_toggle, NULL, NULL},
+	{OPT_KeyConfig, "Quickload",          NULL, 0, &key_quick_load, NULL, NULL},
+	{OPT_Plain,     "",                 NULL, 0, NULL, NULL, NULL},
+	{OPT_KeyConfig, "Quit EDGE",          NULL, 0, &key_quit_edge, NULL, NULL},
+	{OPT_KeyConfig, "Toggle Gamma",       NULL, 0, &key_gamma_toggle, NULL, NULL},
+	{OPT_KeyConfig, "Show Players",          NULL, 0, &key_show_players, NULL, NULL},
+};
+
+static menuinfo_t program_optmenu2 = 
+{
+	program_keyconfig2, sizeof(program_keyconfig2) / sizeof(optmenuitem_t),
+	&keyboard_style, 140, 98, "M_CONTRL", NULL, 0,
+	"Program (2/2)"
+};
+
 /*
  * ALL KEYBOARD MENUS
  */
-#define NUM_KEY_MENUS  6
+#define NUM_KEY_MENUS  8
 
 static menuinfo_t * all_key_menus[NUM_KEY_MENUS] =
 {
@@ -712,7 +754,9 @@ static menuinfo_t * all_key_menus[NUM_KEY_MENUS] =
 	&otherkey_optmenu,
 	&weapon_optmenu,
 	&automap_optmenu,
-	&menu_nav_optmenu
+	&menu_nav_optmenu,
+	&program_optmenu1,
+	&program_optmenu2
 };
 
 static char keystring1[] = "Enter to change, Backspace to Clear";

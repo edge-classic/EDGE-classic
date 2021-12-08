@@ -51,6 +51,8 @@ paletted Doom menu graphics
 
 + Added ability to navigate RTS menus and select options using the new Menu Navigation controls
 
++ Added ability to remap functions previously hardcoded to the function keys (Quicksave, Quickload, etc)
+
 New Features
 ------------
 + MP3 Sound Effects Support

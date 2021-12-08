@@ -39,6 +39,19 @@ extern int key_menu_right;
 extern int key_menu_select;
 extern int key_menu_cancel;
 
+// Program stuff
+extern int key_screenshot;
+extern int key_save_game;
+extern int key_load_game;
+extern int key_sound_controls;
+extern int key_options_menu;
+extern int key_quick_save;
+extern int key_end_game;
+extern int key_message_toggle;
+extern int key_quick_load;
+extern int key_quit_edge;
+extern int key_gamma_toggle;
+
 // the so-called "bastard sfx" used for the menus
 extern struct sfx_s * sfx_swtchn;
 extern struct sfx_s * sfx_tink;

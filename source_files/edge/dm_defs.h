@@ -236,7 +236,7 @@ gameflags_t;
 #define KEYD_TRIGGER_LEFT (0x110+20)
 #define KEYD_TRIGGER_RIGHT (0x110+21)
 
-// Psuedo-keycodes for menu navigation - Dasho
+// Pseudo-keycodes for menu navigation - Dasho
 #define KEYD_MENU_OPEN (0x110+22)
 #define KEYD_MENU_UP (0x110+23)
 #define KEYD_MENU_DOWN (0x110+24)
@@ -244,6 +244,19 @@ gameflags_t;
 #define KEYD_MENU_RIGHT (0x110+26)
 #define KEYD_MENU_SELECT (0x110+27)
 #define KEYD_MENU_CANCEL (0x110+28)
+
+// Pseudo-keycodes for program functions - Dasho
+#define KEYD_SCREENSHOT (0x110+29)
+#define KEYD_SAVEGAME (0x110+30)
+#define KEYD_LOADGAME (0x110+31)
+#define KEYD_SOUNDCONTROLS (0x110+32)
+#define KEYD_OPTIONSMENU (0x110+33)
+#define KEYD_QUICKSAVE (0x110+34)
+#define KEYD_ENDGAME (0x110+35)
+#define KEYD_MESSAGETOGGLE (0x110+36)
+#define KEYD_QUICKLOAD (0x110+37)
+#define KEYD_QUITEDGE (0x110+38)
+#define KEYD_GAMMATOGGLE (0x110+39)
 
 // -KM- 1998/09/27 Analogue binding, added a fly axis
 #define AXIS_DISABLE     0

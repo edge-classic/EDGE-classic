@@ -37,6 +37,8 @@ extern int starttime;    //
 
 extern int exittime;  // for savegame code
 
+extern int key_show_players;
+
 // -KM- 1998/11/25 Added support for finales before levels
 typedef enum
 {

@@ -74,8 +74,7 @@ New Features
 + Experimental floor offset: any linetype that uses the SPECIALs "ALIGN FLOOR" or "ALIGN CEILING", if the line has texture offsets applied then EDGE will use those to offset the floor flat.
 
 + COALHUDS: New command
-  strings.find(s,TextToFind): which will find a sub-string at any position. 
-    Returns position it was found at or -1 if not found.
+  strings.find(s,TextToFind): will find a sub-string at ANY position. Returns position it was found at or -1 if not found.
 
 
 CHANGELOG for EDGE-Classic Preview 1 (since forking from EDGE 1.35)

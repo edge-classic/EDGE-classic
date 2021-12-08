@@ -249,6 +249,23 @@ static void STRINGS_len(coal::vm_c *vm, int argc)
 }
 
 
+//Lobo: December 2021
+// strings.find(s,TextToFind)
+// returns substring position or -1 if not found
+//
+static void STRINGS_find(coal::vm_c *vm, int argc)
+{
+	const char * s1 = vm->AccessParamString(0);
+	const char * s2 = vm->AccessParamString(1);
+
+	std::string str (s1);
+  	std::string str2 (s2);
+
+	int found = str.find(str2);
+
+	vm->ReturnFloat(found);
+}
+
 // strings.sub(s, start, end)
 //
 static void STRINGS_sub(coal::vm_c *vm, int argc)
@@ -326,6 +343,9 @@ void VM_RegisterBASE(coal::vm_c *vm)
     vm->AddNativeFunction("strings.len",    STRINGS_len);
     vm->AddNativeFunction("strings.sub",    STRINGS_sub);
     vm->AddNativeFunction("strings.tonumber", STRINGS_tonumber);
+
+    //Lobo December 2021
+    vm->AddNativeFunction("strings.find",    STRINGS_find);
 }
 
 

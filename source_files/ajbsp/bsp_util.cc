@@ -34,50 +34,25 @@ namespace ajbsp
 static char message_buf[SYS_MSG_BUFLEN];
 
 
-void Failure(const char *fmt, ...)
+void Failure(const char *fmt)
 {
-	va_list args;
-
-	va_start(args, fmt);
-	vsnprintf(message_buf, sizeof(message_buf), fmt, args);
-	va_end(args);
-
-	if (opt_verbosity >= 2)
-		PrintVerbose("    FAILURE: %s", message_buf);
-	else
-		PrintVerbose("    %s", message_buf);
+	PrintMsg(fmt);
 }
 
 
-void Warning(const char *fmt, ...)
+void Warning(const char *fmt)
 {
-	va_list args;
 
-	va_start(args, fmt);
-	vsnprintf(message_buf, sizeof(message_buf), fmt, args);
-	va_end(args);
-
-	if (opt_verbosity >= 2)
-		PrintVerbose("    WARNING: %s", message_buf);
-	else
-		PrintVerbose("    %s", message_buf);
+	PrintMsg(fmt);
 
 	cur_info->total_warnings++;
 }
 
 
-void MinorIssue(const char *fmt, ...)
+void MinorIssue(const char *fmt)
 {
-	if (opt_verbosity >= 3)
-	{
-		va_list args;
 
-		va_start(args, fmt);
-		vsnprintf(message_buf, sizeof(message_buf), fmt, args);
-		va_end(args);
-
-		PrintVerbose("    ISSUE: %s", message_buf);
-	}
+	PrintMsg(fmt);
 
 	cur_info->total_minor_issues++;
 }
@@ -347,7 +322,7 @@ static void MarkPolyobjPoint(double x, double y)
 
 	if (! best_match)
 	{
-		Warning("Bad polyobj thing at (%1.0f,%1.0f).\n", x, y);
+		Warning("Bad polyobj thing.\n");
 		return;
 	}
 
@@ -383,7 +358,7 @@ static void MarkPolyobjPoint(double x, double y)
 
 	if (! sector)
 	{
-		Warning("Invalid Polyobj thing at (%1.0f,%1.0f).\n", x, y);
+		Warning("Invalid Polyobj thing.\n");
 		return;
 	}
 
@@ -565,8 +540,6 @@ void PruneVerticesAtEnd(void)
 	{
 		int unused = num_vertices - new_num;
 
-		PrintDetail("    Pruned %d unused vertices at end\n", unused);
-
 		num_vertices = new_num;
 	}
 
@@ -671,11 +644,6 @@ void DetectOverlappingLines(void)
 				count++;
 			}
 		}
-	}
-
-	if (count > 0)
-	{
-		PrintDetail("    Detected %d overlapped linedefs\n", count);
 	}
 
 	UtilFree(array);

@@ -132,9 +132,9 @@ typedef double angle_g;  // degrees, 0 is E, 90 is N
 // UTILITY : general purpose functions
 //------------------------------------------------------------------------
 
-void Failure(const char *fmt, ...);
-void Warning(const char *fmt, ...);
-void MinorIssue(const char *fmt, ...);
+void Failure(const char *fmt);
+void Warning(const char *fmt);
+void MinorIssue(const char *fmt);
 
 // allocate and clear some memory.  guaranteed not to fail.
 void *UtilCalloc(int size);

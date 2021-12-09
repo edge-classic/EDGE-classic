@@ -608,8 +608,6 @@ void Wad_file::DetectLevels()
 		if (part_count == 4)
 		{
 			levels.push_back(k);
-
-			DebugPrintf("Detected level : %s\n", directory[k]->name);
 		}
 	}
 
@@ -1108,8 +1106,6 @@ int Wad_file::PositionForWrite(int max_size)
 			FatalError("Error seeking to new write position.\n");
 	}
 
-	DebugPrintf("POSITION FOR WRITE: %d  (total_size %d)\n", want_pos, total_size);
-
 	return want_pos;
 }
 
@@ -1167,9 +1163,6 @@ void Wad_file::WriteDirectory()
 	dir_start = PositionForWrite();
 	dir_count = NumLumps();
 
-	DebugPrintf("WriteDirectory...\n");
-	DebugPrintf("dir_start:%d  dir_count:%d\n", dir_start, dir_count);
-
 	for (short k = 0 ; k < dir_count ; k++)
 	{
 		Lump_c *lump = directory[k];
@@ -1186,7 +1179,6 @@ void Wad_file::WriteDirectory()
 	fflush(fp);
 
 	total_size = (int)ftell(fp);
-	DebugPrintf("total_size: %d\n", total_size);
 
 	if (total_size < 0)
 		FatalError("Error determining WAD size.\n");

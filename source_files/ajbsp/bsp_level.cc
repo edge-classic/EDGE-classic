@@ -543,9 +543,6 @@ void InitBlockmap()
 	// find limits of linedefs, and store as map limits
 	FindBlockmapLimits(&map_bbox);
 
-	PrintDetail("    Map limits: (%d,%d) to (%d,%d)\n",
-			map_bbox.minx, map_bbox.miny, map_bbox.maxx, map_bbox.maxy);
-
 	block_x = map_bbox.minx - (map_bbox.minx & 0x7);
 	block_y = map_bbox.miny - (map_bbox.miny & 0x7);
 
@@ -590,9 +587,6 @@ void PutBlockmap()
 	else
 	{
 		WriteBlockmap();
-
-		PrintDetail("    Blockmap size: %dx%d (compression: %d%%)\n",
-				block_w, block_h, block_compression);
 	}
 
 	FreeBlockmap();
@@ -795,8 +789,6 @@ void PutReject()
 
 	Reject_WriteLump();
 	Reject_Free();
-
-	PrintDetail("    Reject size: %d\n", rej_total_size);
 }
 
 
@@ -1699,7 +1691,7 @@ void PutSubsecs(const char *name, int do_gl)
 
 	if (num_subsecs > 32767)
 	{
-		Failure("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
+		Failure("Number of GL subsectors has overflowed.\n");
 		MarkOverflow(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
 	}
 }
@@ -2210,8 +2202,7 @@ void LoadLevel()
 		GetThings();
 	}
 
-	PrintDetail("    Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
-				num_vertices, num_sectors, num_sidedefs, num_linedefs, num_things);
+	PrintDetail(": Level Loaded...\n");
 
 	// always prune vertices at end of lump, otherwise all the
 	// unused vertices from seg splits would keep accumulating.
@@ -2350,7 +2341,7 @@ static void AddMissingLump(const char *name, const char *after)
 	// if this happens, the level structure is very broken
 	if (exist < 0)
 	{
-		Warning("Missing %s lump -- level structure is broken\n", after);
+		Warning("Lump missing -- level structure is broken\n");
 
 		exist = edit_wad->LevelLastLump(lev_current_idx);
 	}
@@ -2647,16 +2638,6 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 
 	if (ret == BUILD_OK)
 	{
-		PrintDetail("    Built %d NODES, %d SSECTORS, %d SEGS, %d VERTEXES\n",
-					num_nodes, num_subsecs, num_segs, num_old_vert + num_new_vert);
-
-		if (root_node)
-		{
-			PrintDetail("    Heights of subtrees: %d / %d\n",
-						ComputeBspHeight(root_node->r.node),
-						ComputeBspHeight(root_node->l.node));
-		}
-
 		ClockwiseBspTree();
 
 		ret = SaveLevel(root_node);

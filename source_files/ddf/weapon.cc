@@ -300,10 +300,11 @@ static void WeaponParseField(const char *field, const char *contents,
 
 static void WeaponFinishEntry(void)
 {
-	if (! dynamic_weapon->state_grp.back().first)
+	//Lobo December 2021: this check seems wrong and breaks DDFWEAP inheritance
+	/*if (! dynamic_weapon->state_grp.back().first)
 		DDF_Error("Weapon `%s' has missing states.\n",
 			dynamic_weapon->name.c_str());
-
+	*/
 	DDF_StateFinishRange(dynamic_weapon->state_grp);
 
 	// check stuff...

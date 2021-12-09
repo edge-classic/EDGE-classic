@@ -27,22 +27,16 @@
 #define __SYSTEM_SPECIFIC_DEFS_OPENGL__
 
 #ifdef __linux__
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glext.h>
+#include "glew.h"
 #endif
 
 #ifdef WIN32
 #define GLEW_STATIC  1
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glext.h>
+#include "glew.h"
 #endif
 
 #ifdef __APPLE__
-#include <GL/glew.h>
-#include <OpenGL/gl.h>
-#include <OpenGL/glext.h>
+#include "glew.h"
 #endif
 
 #define USING_GL_TYPES 1

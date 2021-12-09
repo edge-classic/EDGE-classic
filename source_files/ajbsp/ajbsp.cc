@@ -242,20 +242,8 @@ static build_result_e BuildFile()
 
 	if (failures > 0)
 	{
-		PrintMsg("  Failed maps: %d (out of %d)\n", failures, visited);
-
 		// allow building other files
 		total_failed_files += 1;
-	}
-
-	if (true)
-	{
-		PrintMsg("  Serious warnings: %d\n", nb_info.total_warnings);
-	}
-
-	if (opt_verbosity >= 1)
-	{
-		PrintMsg("  Minor issues: %d\n", nb_info.total_minor_issues);
 	}
 
 	return BUILD_OK;
@@ -313,9 +301,6 @@ void BackupFile(const char *filename)
 
 void VisitFile(unsigned int idx, const char *filename)
 {
-
-	PrintMsg("\n");
-	PrintMsg("Building %s\n", opt_output);
 
 	edit_wad = Wad_file::Open(filename, 'r');
 	if (! edit_wad)
@@ -492,14 +477,9 @@ int AJBSP_Build(const char *filename, const char *outname, const nodebuildfuncs_
 
 	if (total_failed_files > 0)
 	{
-		PrintMsg("FAILURES occurred on %d map%s in %d file%s.\n",
-				total_failed_maps,  total_failed_maps  == 1 ? "" : "s",
-				total_failed_files, total_failed_files == 1 ? "" : "s");
+		PrintMsg("Non-fatal errors occurred on at least one map!.\n");
 
-		if (opt_verbosity == 0)
-			PrintMsg("Rerun with --verbose to see more details.\n");
-
-		return 0; // Some failures are tolerable and shouldn't close EDGE
+		return 0; // "Failures" in this case can mean things like overflowing the original Doom engine limits and shouldn't close EDGE
 	}
 	else if (total_built_maps == 0)
 	{
@@ -516,9 +496,7 @@ int AJBSP_Build(const char *filename, const char *outname, const nodebuildfuncs_
 		int built = total_files - total_empty_files;
 		int empty = total_empty_files;
 
-		PrintMsg("Ok, built %d file%s, %d file%s empty.\n",
-				built, (built == 1 ? "" : "s"),
-				empty, (empty == 1 ? " was" : "s were"));
+		PrintMsg("Done, but at least one file is empty!\n");
 	}
 
 	UpdateProgress(100);

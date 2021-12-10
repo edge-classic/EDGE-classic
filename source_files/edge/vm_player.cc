@@ -760,6 +760,10 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
 	{
 		vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
 	}
+	else
+	{
+		vm->ReturnString("    ");
+	}
 }
 
 // player.sector_tag()

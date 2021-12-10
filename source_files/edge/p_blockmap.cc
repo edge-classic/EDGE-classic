@@ -335,22 +335,31 @@ void P_UnsetThingPosition(mobj_t * mo)
 
 		if (mo->snext)
 		{
-			SYS_ASSERT(mo->snext->sprev == mo);
+			if(mo->snext->sprev)
+			{
+				SYS_ASSERT(mo->snext->sprev == mo);
 
-			mo->snext->sprev = mo->sprev;
+				mo->snext->sprev = mo->sprev;
+			}
 		}
 
 		if (mo->sprev)
 		{
-			SYS_ASSERT(mo->sprev->snext == mo);
+			if(mo->sprev->snext)
+			{
+				SYS_ASSERT(mo->sprev->snext == mo);
 
-			mo->sprev->snext = mo->snext;
+				mo->sprev->snext = mo->snext;
+			}
 		}
 		else
 		{
-			SYS_ASSERT(mo->subsector->thinglist == mo);
+			if(mo->subsector->thinglist)
+			{
+				SYS_ASSERT(mo->subsector->thinglist == mo);
 
-			mo->subsector->thinglist = mo->snext;
+				mo->subsector->thinglist = mo->snext;
+			}
 		}
 
 		mo->snext = NULL;
@@ -371,16 +380,22 @@ void P_UnsetThingPosition(mobj_t * mo)
 		// inert things don't need to be in blockmap
 		if (mo->bnext)
 		{
-			SYS_ASSERT(mo->bnext->bprev == mo);
+			if(mo->bnext->bprev)
+			{
+				SYS_ASSERT(mo->bnext->bprev == mo);
 
-			mo->bnext->bprev = mo->bprev;
+				mo->bnext->bprev = mo->bprev;
+			}
 		}
 
 		if (mo->bprev)
 		{
-			SYS_ASSERT(mo->bprev->bnext == mo);
+			if(mo->bprev->bnext)
+			{
+				SYS_ASSERT(mo->bprev->bnext == mo);
 
-			mo->bprev->bnext = mo->bnext;
+				mo->bprev->bnext = mo->bnext;
+			}
 		}
 		else
 		{
@@ -408,16 +423,22 @@ void P_UnsetThingPosition(mobj_t * mo)
 	{
 		if (mo->dlnext)
 		{
-			SYS_ASSERT(mo->dlnext->dlprev == mo);
+			if(mo->dlnext->dlprev)
+			{
+				SYS_ASSERT(mo->dlnext->dlprev == mo);
 
-			mo->dlnext->dlprev = mo->dlprev;
+				mo->dlnext->dlprev = mo->dlprev;
+			}
 		}
 
 		if (mo->dlprev)
 		{
-			SYS_ASSERT(mo->dlprev->dlnext == mo);
+			if(mo->dlprev->dlnext)
+			{
+				SYS_ASSERT(mo->dlprev->dlnext == mo);
 
-			mo->dlprev->dlnext = mo->dlnext;
+				mo->dlprev->dlnext = mo->dlnext;
+			}
 		}
 		else
 		{
@@ -446,22 +467,31 @@ void P_UnsetThingPosition(mobj_t * mo)
 
 		if (mo->dlnext)
 		{
-			SYS_ASSERT(mo->dlnext->dlprev == mo);
+			if(mo->dlnext->dlprev)
+			{
+				SYS_ASSERT(mo->dlnext->dlprev == mo);
 
-			mo->dlnext->dlprev = mo->dlprev;
+				mo->dlnext->dlprev = mo->dlprev;
+			}
 		}
 
 		if (mo->dlprev)
 		{
-			SYS_ASSERT(mo->dlprev->dlnext == mo);
+			if(mo->dlprev->dlnext)
+			{
+				SYS_ASSERT(mo->dlprev->dlnext == mo);
 
-			mo->dlprev->dlnext = mo->dlnext;
+				mo->dlprev->dlnext = mo->dlnext;
+			}
 		}
 		else
 		{
-			SYS_ASSERT(sec->glow_things == mo);
+			if(sec->glow_things)
+			{
+				SYS_ASSERT(sec->glow_things == mo);
 
-			sec->glow_things = mo->dlnext;
+				sec->glow_things = mo->dlnext;
+			}
 		}
 
 		mo->dlprev = NULL;

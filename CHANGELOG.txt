@@ -11,8 +11,7 @@ Bugs fixed
 
 - Dropping the console with a movement key held down would preserve that movement while in the console. Now toggling the console properly drops (movement) input
 
-- Games with only one selectable episode will now skip episode selection and proceed directly to the skill choice menu. This prevents the "Hell on Earth" episode from appearing
-  when it is not appropriate.
+- Games with only one selectable episode will now skip episode selection and proceed directly to the skill choice menu. This prevents the "Hell on Earth" episode from appearing when it is not appropriate
 
 - Fixed bug with valid skybox texture references being deleted when cycling between real and pseudo-skyboxes
 
@@ -23,6 +22,8 @@ Bugs fixed
 - Fixed bug where canceling out of an RTS Menu would instead select the first option; now it should exit with no result
 
 - Fixed player being allowed to attempt to load a game from an empty slot
+
+- Fixed inheritance for DDFWEAP
 
 
 General Improvements

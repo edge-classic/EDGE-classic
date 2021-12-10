@@ -755,7 +755,15 @@ static void PL_map_items(coal::vm_c *vm, int argc)
 // Lobo: November 2021
 static void PL_floor_flat(coal::vm_c *vm, int argc)
 {
-	vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
+	//Only return the flat if it's not a 3d extrafloor
+	if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
+	{
+		vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
+	}
+	else
+	{
+		vm->ReturnString("    ");
+	}
 }
 
 // player.sector_tag()

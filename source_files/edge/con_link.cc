@@ -124,7 +124,7 @@ cvar_link_t  all_cvars[] =
   	{ "mouse_filter",   &mouse_filter,   "c",   "0"  },
 
 	{ "goobers",        &m_goobers,      "",    "0" },
-	{ "m_diskicon",     &m_diskicon,     "c",   "1"  },
+	{ "m_diskicon",     &m_diskicon,     "c",   "0"  },
 	{ "m_busywait",     &m_busywait,     "c",   "1"  },
 
 	/* Rendering Stuff */

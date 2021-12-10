@@ -182,7 +182,7 @@ Used just like JUMP(state_name:frame,xx%), but decrements the reload quantity fo
 
 + New MIDI Player
   - Timidity has been replaced by TinySoundfont, with support for *.sf2 soundfont files instead of GUS patch sets
-  - A Roland SC-55 style default soundfont by Deemster has been included (https://www.vogons.org/viewtopic.php?f=9&t=45600).
+  - A Roland Sound Canvas style default soundfont by Nando Florestan has been included (http://dev.nando.audio/pages/soundfonts.html).
 Users with existing soundfonts can replace soundfont/default.sf2 with their own font if desired (must be named default.sf2; selector may be built in the future).
   - TinySoundfont is now the default music player for both Linux and Window builds. 
 

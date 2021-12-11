@@ -37,7 +37,7 @@
 #define TML_IMPLEMENTATION
 #include "tml.h"
 
-#define TSF_NUM_SAMPLES  4096
+#define TSF_NUM_SAMPLES  128
 
 extern bool dev_stereo;
 extern int  dev_freq; 
@@ -171,7 +171,7 @@ private:
 
 		int SampleBlock, SampleCount = samples;
 
-		for (SampleBlock = TSF_RENDER_EFFECTSAMPLEBLOCK; SampleCount; SampleCount -= SampleBlock, data_buf += (SampleBlock * (dev_stereo ? 2 : 1 * sizeof(float))))
+		for (SampleBlock = TSF_RENDER_EFFECTSAMPLEBLOCK; SampleCount; SampleCount -= SampleBlock, data_buf += (SampleBlock * (dev_stereo ? 2 : 1)))
 		{
 			//We progress the MIDI playback and then process TSF_RENDER_EFFECTSAMPLEBLOCK samples at once
 			if (SampleBlock > SampleCount) SampleBlock = SampleCount;

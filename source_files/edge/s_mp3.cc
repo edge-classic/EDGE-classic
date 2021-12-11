@@ -169,7 +169,7 @@ bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
 		return false;
 	}
 
-	got_size /= (is_stereo ? 2 : 1) * sizeof(s16_t);
+	got_size /= (is_stereo ? 2 : 1);
 
 	if (is_stereo && !dev_stereo)
 		ConvertToMono(buf->data_L, mono_buffer, got_size);

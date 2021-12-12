@@ -37,7 +37,7 @@
 #define TML_IMPLEMENTATION
 #include "tml.h"
 
-#define TSF_NUM_SAMPLES  128
+#define TSF_NUM_SAMPLES  4096
 
 extern bool dev_stereo;
 extern int  dev_freq; 

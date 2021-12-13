@@ -47,48 +47,6 @@
 extern FILE *logfile;
 extern FILE *debugfile;
 
-#ifdef USE_FLTK
-
-// remove some problematic #defines
-#undef VISIBLE
-#undef INVISIBLE
-
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/fl_ask.H>
-
-#endif // USE_FLTK
-
-#ifndef USE_FLTK
-
-static char cp437_to_ascii[160] =
-{ 
-	'.', '.', '.', '.', '.', '.', '.', '.',   // 0x00 - 0x07
-	'.', '.', '.', '.', '.', '.', '.', '.',   // 0x08 - 0x0F
-	'>', '<', '.', '.', '.', '.', '.', '.',   // 0x10 - 0x17
-	'.', '.', '.', '<', '.', '.', 'A', 'V',   // 0x18 - 0x1F
-
-	'.', '.', '.', '.', '.', '.', '.', '.',   // 0x80 - 0x87
-	'.', '.', '.', '.', '.', '.', '.', '.',   // 0x88 - 0x8F
-	'.', '.', '.', '.', '.', '.', '.', '.',   // 0x90 - 0x97
-	'.', '.', '.', '.', '.', '.', '.', '.',   // 0x98 - 0x9F
-	'.', '.', '.', '.', '.', '.', '.', '.',   // 0xA0 - 0xA7
-	'.', '.', '.', '.', '.', '.', '.', '.',   // 0xA8 - 0xAF
-
-	'.', '%', '.', '|', '+', '+', '+', '.',   // 0xB0 - 0xB7
-	'.', '+', '|', '+', '+', '.', '.', '+',   // 0xB8 - 0xBF
-	'+', '+', '+', '+', '-', '+', '+', '|',   // 0xC0 - 0xC7
-	'+', '+', '+', '+', '+', '-', '+', '-',   // 0xC8 - 0xCF
-	'+', '-', '.', '.', '.', '.', '.', '+',   // 0xD0 - 0xD7
-	'+', '+', '+', '.', '.', '.', '.', '.',   // 0xD8 - 0xDF
-
-	'.', '.', '.', '.', '.', '.', '.', '.',   // 0xE0 - 0xE7
-	'.', '.', '.', '.', '.', '.', '.', '.',   // 0xE8 - 0xEF
-	'.', '.', '>', '<', '.', '.', '.', '.',   // 0xF0 - 0xF7
-	'.', '.', '.', '.', '.', '.', '.', '.'    // 0xF8 - 0xFF
-};
-#endif
-
 // cleanup handling -- killough:
 
 static void I_SignalHandler(int s)
@@ -269,34 +227,6 @@ void I_Error(const char *error, ...)
 	I_CloseProgram(-1);
 }
 
-// -AJA- Routine which emulates IBM charset.
-#ifndef USE_FLTK
-static void PrintString(char *str)
-{
-	for (; *str; str++)
-	{
-		int ch = (unsigned char) *str;
-
-		if (ch == 0x7F || ch == '\r')
-			continue;
-
-		if ((0x20 <= ch && ch <= 0x7E) ||
-				ch == '\n' || ch == '\t')
-		{
-			putchar(ch);
-			continue;
-		}
-
-		if (ch >= 0x80)
-			ch -= 0x60;
-
-		putchar(cp437_to_ascii[ch]);
-	}
-
-	fflush(stdout);
-}
-#endif
-
 void I_Printf(const char *message,...)
 {
 	va_list argptr;
@@ -327,11 +257,6 @@ void I_Printf(const char *message,...)
 
 	// Send the message to the console.
 	CON_Printf("%s", printbuf);
-
-	// And the text screen if in text mode
-#ifndef USE_FLTK
-	PrintString(printbuf);
-#endif
 
 	va_end(argptr);
 }
@@ -459,16 +384,7 @@ void I_Sleep(int millisecs)
 
 void I_MessageBox(const char *message, const char *title)
 {
-#ifdef USE_FLTK
-	Fl::scheme(NULL);
-	fl_message_font(FL_HELVETICA /*_BOLD*/, 18);	
-	fl_message("%s", message);
-
-#else // USE_FLTK
-	fprintf(stderr, "\n%s\n", message);
-#endif // USE_FLTK
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, NULL);
 }
-
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

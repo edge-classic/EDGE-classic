@@ -377,6 +377,10 @@ void RGL_DrawSkyBox(void)
 	// top
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_Top]);
         glNormal3i(0, 0, -1);
+	#ifdef APPLE_SILICON
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	#endif
 
 	glBegin(GL_QUADS);
 	glTexCoord2f(v0, v0); glVertex3f(-dist,  dist, +dist);
@@ -388,6 +392,10 @@ void RGL_DrawSkyBox(void)
 	// bottom
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_Bottom]);
         glNormal3i(0, 0, +1);
+	#ifdef APPLE_SILICON
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	#endif
 
 	glBegin(GL_QUADS);
 	glTexCoord2f(v0, v0); glVertex3f(-dist, -dist, -dist);
@@ -399,6 +407,10 @@ void RGL_DrawSkyBox(void)
 	// north
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_North]);
         glNormal3i(0, -1, 0);
+	#ifdef APPLE_SILICON
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	#endif
 
 	glBegin(GL_QUADS);
 	glTexCoord2f(v0, v0); glVertex3f(-dist,  dist, -dist);
@@ -410,6 +422,10 @@ void RGL_DrawSkyBox(void)
 	// east
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_East]);
         glNormal3i(-1, 0, 0);
+	#ifdef APPLE_SILICON
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	#endif
 
 	glBegin(GL_QUADS);
 	glTexCoord2f(v0, v0); glVertex3f( dist,  dist, -dist);
@@ -421,6 +437,10 @@ void RGL_DrawSkyBox(void)
 	// south
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_South]);
         glNormal3i(0, +1, 0);
+	#ifdef APPLE_SILICON
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	#endif
 
 	glBegin(GL_QUADS);
 	glTexCoord2f(v0, v0); glVertex3f( dist, -dist, -dist);
@@ -432,6 +452,10 @@ void RGL_DrawSkyBox(void)
 	// west
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_West]);
         glNormal3i(+1, 0, 0);
+	#ifdef APPLE_SILICON
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	#endif
 
 	glBegin(GL_QUADS);
 	glTexCoord2f(v0, v0); glVertex3f(-dist, -dist, -dist);
@@ -464,7 +488,11 @@ void RGL_DrawSkyOriginal(void)
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex_id);
- 
+ 	#ifdef APPLE_SILICON
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	#endif
+
 	// divide screen into 32 vertical strips, since mapping is non-linear
 	glBegin(GL_QUAD_STRIP);
  

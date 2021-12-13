@@ -151,8 +151,11 @@ cvar_link_t  all_cvars[] =
 	{ "r_dumbsky",      &r_dumbsky,       "",   "0"  },
 	{ "r_dumbmulti",    &r_dumbmulti,     "",   "0"  },
 	{ "r_dumbcombine",  &r_dumbcombine,   "",   "0"  },
-	{ "r_dumbclamp",    &r_dumbclamp,     "",   "0"  },
-
+	#ifdef APPLE_SILICON
+		{ "r_dumbclamp",    &r_dumbclamp,     "",   "1"  },
+	#else
+		{ "r_dumbclamp",    &r_dumbclamp,     "",   "0"  },	
+	#endif
 	{ "am_smoothing",   &am_smoothing,   "c",   "1"  },
 	{ "am_gridsize",    &am_gridsize,    "c",   "128" },
 

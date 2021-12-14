@@ -382,6 +382,10 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
 
 	// -AJA- 1999/09/11: Support for supplying Z value.
 
+	// Catch to prevent RTS sector glows with a z value messing up the blockmap - Dasho
+	if (minfo->glow_type != GLOW_None)
+		t->z = ONFLOORZ;
+
 	if (t->spawn_effect)
 	{
 		mo = P_MobjCreateObject(t->x, t->y, t->z, minfo->respawneffect);

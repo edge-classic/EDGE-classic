@@ -25,6 +25,8 @@ Bugs fixed
 
 - Fixed inheritance for DDFWEAP
 
+- Sloped sectors underneath an extrafloor will now actually use their slope instead of 0 (fix backported from EDGE 2.x)
+
 
 General Improvements
 --------------------

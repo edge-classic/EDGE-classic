@@ -1,7 +1,21 @@
-# EDGE-classic
-Fork of the EDGE 1.35 release with bugfixes as well as new features.
+
+**EDGE-Classic** is a Doom source port that provides advanced features, ease of modding, and attractive visuals while keeping hardware requirements very modest. It is a revival of the [EDGE 1.35](http://edge.sourceforge.net/) codebase for modern systems.
+\
+\
+# Notable Improvements over EDGE 1.35
+
+- Migration from SDL1 to SDL2
+- Improved support for gamepads
+- Support for MP3 music and sound effects
+- A soundfont-capable MIDI player
+- Full support for both HacX 1.2 and Harmony IWADs
+- Widescreen statusbar, intermission, and title screens
+- Expanded DDF, RTS, and COAL features
+
+Bugfixes and detailed changes can be found in CHANGELOG.txt
 
 # Current Status
-Program builds successfully for Windows, Linux, and Mac. Windows executables are currently compiled using MSYS2.
 
-Please refer to CHANGELOG.txt for more detailed changes.
+Program builds successfully for 32 and 64-bit Windows, Linux, and Mac platforms. Windows executables are currently compiled using MSYS2.
+
+To learn more about EDGE-Classic, DDF, RTS, or COAL, please visit [our wiki](https://github.com/dashodanger/EDGE-classic/wiki).

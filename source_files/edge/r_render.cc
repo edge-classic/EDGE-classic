@@ -2294,10 +2294,10 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	
 	slope_plane_t *slope = NULL;
 
-	if (face_dir > 0 && dfloor->prev_R == NULL)
+	if (face_dir > 0 && dfloor->is_lowest)
 		slope = cur_sub->sector->f_slope;
 
-	if (face_dir < 0 && dfloor->next_R == NULL)
+	if (face_dir < 0 && dfloor->is_highest)
 		slope = cur_sub->sector->c_slope;
 
 

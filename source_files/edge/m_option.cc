@@ -195,6 +195,7 @@ static char MusicDevs[]   = "System/TinySoundfont";
 // Screen resolution changes
 static scrmode_c new_scrmode;
 
+bool splash_screen;
 
 // -ES- 1998/11/28 Wipe and Faded teleportation options
 //static char FadeT[] = "Off/On, flash/On, no flash";
@@ -371,7 +372,9 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Switch,  "Teleport Flash",  YesNo,   2, &telept_flash, NULL, NULL},
 	{OPT_Switch,  "Invulnerability", Invuls, NUM_INVULFX,  &var_invul_fx, NULL, NULL},
 	{OPT_Switch,  "Wipe method",     WIPE_EnumStr, WIPE_NUMWIPES, &wipe_method, NULL, NULL},
-	{OPT_Boolean, "Screenshot Format", JpgPng, 2, &png_scrshots, NULL, NULL}
+	{OPT_Boolean, "Screenshot Format", JpgPng, 2, &png_scrshots, NULL, NULL},
+	{OPT_Boolean, "Splash Screen",    YesNo,   2, &splash_screen, NULL, NULL}
+	
 
 #if 0  // TEMPORARILY DISABLED (we need an `Advanced Options' menu)
 	{OPT_Switch,  "Teleportation effect", WIPE_EnumStr, WIPE_NUMWIPES, 

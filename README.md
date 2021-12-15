@@ -3,6 +3,7 @@
 
 **EDGE-Classic** is a Doom source port that provides advanced features, ease of modding, and attractive visuals while keeping hardware requirements very modest. It is a revival of the [EDGE 1.35](http://edge.sourceforge.net/) codebase for modern systems.
 
+[EMUS](http://firstgen.no-ip.info/emus/about.htm), the EDGE Modder's Utility Suite, has also been updated to stay current with EDGE-Classic's new features, and is an excellent all-in-one tool for both the beginning and experienced modder.
 
 # Notable Improvements over EDGE 1.35
 

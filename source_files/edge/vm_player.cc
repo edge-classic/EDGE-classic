@@ -40,6 +40,8 @@
 
 #include "f_interm.h" //Lobo: need this to get access to wi_stats
 
+//#include <unordered_map> // Dasho: Test for footstep noise lookup prototype
+
 extern coal::vm_c *ui_vm;
 
 extern void VM_SetFloat(coal::vm_c *vm, const char *name, double value);
@@ -48,6 +50,29 @@ extern void VM_CallFunction(coal::vm_c *vm, const char *name);
 
 player_t * ui_player_who = NULL;
 
+/*std::unordered_map<std::string, std::string> footstep_table =
+{
+	{"OSLUDG01", "FSWAT?"},
+	{"OTAR__01", "FSWAT?"},
+	{"ONUKE", "FSWAT?"},
+	{"OICYWA", "FSWAT?"},
+	{"FWATER1", "FSWAT?"},
+	{"WATER", "FSWAT?"},
+	{"FLTWAWA", "FSWAT?"},
+	{"FLTFLWW", "FSWAT?"},
+	{"FLTSLUD", "FSWAT?"},
+	{"NUKAGE", "FSWAT?"},
+	{"BLOOD", "FSWAT?"},
+	{"LAVA", "FSWAT?"},
+	{"SLIME1", "FSWAT?"},
+	{"SLIME2", "FSWAT?"},
+	{"SLIME3", "FSWAT?"},
+	{"SLIME4", "FSWAT?"},
+	{"SLIME5", "FSWAT?"},
+	{"SLIME6", "FSWAT?"},
+	{"SLIME7", "FSWAT?"},
+	{"SLIME8", "FSWAT?"},
+};*/
 
 //------------------------------------------------------------------------
 //  PLAYER MODULE
@@ -755,16 +780,57 @@ static void PL_map_items(coal::vm_c *vm, int argc)
 // Lobo: November 2021
 static void PL_floor_flat(coal::vm_c *vm, int argc)
 {
-	//Only return the flat if it's not a 3d extrafloor
-	if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
+    // If no 3D floors, just return the flat
+    if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
+    {
+        vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
+    }
+    // Start from the lowest exfloor and check if the player is standing on it, then return the control sector's flat
+    else
+    {
+        float player_floor_height = ui_player_who->mo->floorz;
+        extrafloor_t *exfloor_check = ui_player_who->mo->subsector->sector->exfloor_first;
+        while (exfloor_check->lower) {
+            exfloor_check = exfloor_check->lower;
+        }
+		if (player_floor_height < exfloor_check->top_h) {
+			vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
+		}
+        do {
+            if (player_floor_height == exfloor_check->top_h) {
+                vm->ReturnString(exfloor_check->ef_line->frontsector->floor.image->name);
+            }
+            if (exfloor_check->higher)
+                exfloor_check = exfloor_check->higher;
+        } while (exfloor_check->higher);
+		if (ui_player_who->mo->subsector->sector->bottom_liq) {
+			exfloor_check = ui_player_who->mo->subsector->sector->bottom_liq;
+		}
+        do {
+            if (player_floor_height == exfloor_check->top_h) {
+                vm->ReturnString(exfloor_check->ef_line->frontsector->floor.image->name);
+            }
+            if (exfloor_check->higher)
+                exfloor_check = exfloor_check->higher;
+        } while (exfloor_check->higher);
+    }
+}
+
+// Prototype for table access alternative to footstep noise function - Dasho
+/*static void PL_noise_for_flat(coal::vm_c *vm, int argc)
+{
+	std::string flat = vm->AccessParamString(0);
+	if (flat.empty())
+		I_Error("player.noise_for_flat: No flat name given!\n");
+	if (!footstep_table[flat].empty())
 	{
-		vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
+		vm->ReturnString(footstep_table[flat].c_str());
 	}
 	else
 	{
-		vm->ReturnString("    ");
+		vm->ReturnString("");
 	}
-}
+}*/
 
 // player.sector_tag()
 // Lobo: November 2021
@@ -839,6 +905,7 @@ void VM_RegisterPlaysim()
 	ui_vm->AddNativeFunction("player.map_items",      PL_map_items);
 	ui_vm->AddNativeFunction("player.floor_flat",      PL_floor_flat);
 	ui_vm->AddNativeFunction("player.sector_tag",      PL_sector_tag);
+	//ui_vm->AddNativeFunction("player.noise_for_flat", PL_noise_for_flat);
 }
 
 

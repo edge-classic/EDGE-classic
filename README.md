@@ -35,7 +35,7 @@ Download from MediaFire [here.](http://www.mediafire.com/file/83sefztzxzaes57/Du
 
 ## Aliens: Stranded
 
-![aliens](https://user-images.githubusercontent.com/58537100/146609832-5a1d200d-8d72-4208-a216-1584601b0eb0.jpg)
+![aliens](https://user-images.githubusercontent.com/58537100/146612407-03b874b1-bec5-43ac-8214-cb9bde6fd9bf.jpg)
 
 A Total Conversion themed on the Aliens movies. New weapons, enemies, music, textures etc. Heavy use of 3D models.
 

@@ -161,6 +161,8 @@ bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
 		if (! looping)
 			return false;
 		mp3dec_ex_seek(&mp3_track, 0);
+		buf->Free();
+		return true;
 	}
 
 	if (got_size < 0)  /* ERROR */
@@ -170,6 +172,8 @@ bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	}
 
 	got_size /= (is_stereo ? 2 : 1);
+
+	buf->length = got_size;
 
 	if (is_stereo && !dev_stereo)
 		ConvertToMono(buf->data_L, mono_buffer, got_size);
@@ -314,7 +318,10 @@ void mp3player_c::Ticker()
 
 		if (StreamIntoBuffer(buf))
 		{
-			S_QueueAddBuffer(buf, mp3_track.info.hz);
+			if (buf->length > 0)
+				S_QueueAddBuffer(buf, mp3_track.info.hz);
+			else
+				S_QueueReturnBuffer(buf);
 		}
 		else
 		{

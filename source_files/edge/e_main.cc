@@ -957,8 +957,8 @@ static void IdentifyVersion(void)
     W_AddRawFilename(reqwad.c_str(), FLKIND_EWad);
 }
 
-// Add optional EWads (widepix, skyboxes, etc) - Dasho
-static void Add_Extras(void) {
+// Add game-specific base EWADs (widepix, skyboxes, etc) - Dasho
+static void Add_Base(void) {
 
 	std::string loaded_game = iwad_base;
 
@@ -1093,9 +1093,11 @@ static void AddSingleCmdLineFile(const char *name)
 			 stricmp(ext.c_str(), "bex") == 0)
 		kind = FLKIND_Deh;
 
-	std::string fn = M_ComposeFileName(game_dir.c_str(), name);
-
-	W_AddRawFilename(fn.c_str(), kind);
+	if (kind != FLKIND_Lump)
+	{
+		std::string fn = M_ComposeFileName(game_dir.c_str(), name);
+		W_AddRawFilename(fn.c_str(), kind);
+	}
 }
 
 static void AddCommandLineFiles(void)
@@ -1192,6 +1194,31 @@ static void AddCommandLineFiles(void)
 	}
 }
 
+static void Add_Autoload(void) {
+	
+	epi::filesystem_dir_c fsd;
+	#ifdef __linux__
+	const char *folder = "autoload/";
+	#else
+	const char *folder = "autoload\\";
+	#endif
+
+	if (!FS_ReadDir(&fsd, folder, "*.*"))
+	{
+		I_Warning("Failed to read autoload directory!\n");
+	}
+	else
+	{
+		for (int i = 0; i < fsd.GetSize(); i++) 
+		{
+			if(!fsd[i]->is_dir)
+			{
+				AddSingleCmdLineFile(epi::PATH_Join(folder, fsd[i]->name.c_str()).c_str());
+			}
+		}
+	}
+}
+
 static void InitDDF(void)
 {
 	I_Debugf("- Initialising DDF\n");
@@ -1227,7 +1254,8 @@ startuporder_t startcode[] =
 {
 	{  1, InitDDF              },
 	{  1, IdentifyVersion      },
-	{  1, Add_Extras		   },
+	{  1, Add_Base		   },
+	{  1, Add_Autoload		   },
 	{  1, AddCommandLineFiles  },
 	{  1, CheckTurbo           },
 	{  1, RAD_Init             },

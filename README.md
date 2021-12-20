@@ -15,7 +15,7 @@ A 19-level Total Conversion for Doom 2 set in the Wolfenstein 3D universe.
 
 _For months now, Allied Intelligence has suspected that the German navy has been attempting to construct a nuclear-powered submarine somewhere in the Arctic Circle that would rule the Atlantic and threaten the east coast of the United States. The existence of this submarine, codenamed Seeteufel (Sea Devil), has been confirmed. Reconnaissance photos have pinpointed the site where this sub is being built as a u-boat base in a fjord in northern Norway, and although several spies have been dispatched to this location, none of them has been heard from again. Your mission is to infiltrate the base, rescue these missing operatives, and destroy the new submarine before its construction is completed._
 
-Download from MediaFire [here.](https://www.mediafire.com/file/r2rnsd56b35rx2j/arcticre_2021.zip/file)
+Download from MediaFire [here.](https://www.mediafire.com/file/u1mgxtuszwnqd3k/Arcticwolf_Revisited_4.0.zip/file)
 
 ## Heathen
 

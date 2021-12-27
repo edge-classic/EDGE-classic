@@ -39,6 +39,7 @@
 #include "m_misc.h"
 #include "r_misc.h"
 #include "z_zone.h"
+#include "vm_player.h"
 
 
 extern bool CON_Responder(event_t *ev);
@@ -98,6 +99,11 @@ int key_flyup;
 int key_flydown;
 
 int key_weapons[10];
+
+// Dasho, December 2021: Inventory keys
+int key_inv_prev;
+int key_inv_use;
+int key_inv_next;
 
 #define MAXPLMOVE  (forwardmove[1])
 
@@ -313,6 +319,9 @@ static int CmdChecksum(ticcmd_t * cmd)
 static bool allow180 = true;
 static bool allowzoom = true;
 static bool allowautorun = true;
+static bool allowinv_prev = true;
+static bool allowinv_use = true;
+static bool allowinv_next = true;
 
 void E_BuildTiccmd(ticcmd_t * cmd)
 {
@@ -509,6 +518,37 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 	else
 		allowautorun = true;
 
+	if (E_IsKeyPressed(key_inv_prev))
+	{
+		if (allowinv_prev)
+		{
+			cmd->extbuttons |= EBT_INVPREV;
+			allowinv_prev = false;
+		}
+	} else
+		allowinv_prev = true;
+
+	if (E_IsKeyPressed(key_inv_use))
+	{
+		if (allowinv_use)
+		{
+			cmd->extbuttons |= EBT_INVUSE;
+			allowinv_use = false;
+		}
+	}
+	else
+		allowinv_use = true;
+
+	if (E_IsKeyPressed(key_inv_next))
+	{
+		if (allowinv_next)
+		{
+			cmd->extbuttons |= EBT_INVNEXT;
+			allowinv_next = false;
+		}
+	}
+	else
+		allowinv_next = true;
 
 	cmd->chatchar = HU_DequeueChatChar();
 

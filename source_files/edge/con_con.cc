@@ -368,14 +368,17 @@ static void SolidBox(int x, int y, int w, int h, rgbcol_t col, float alpha)
   
 	glColor4f(RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, alpha);
   
-	glBegin(GL_QUADS);
-
-	glVertex2i(x,   y);
-	glVertex2i(x,   y+h);
-	glVertex2i(x+w, y+h);
-	glVertex2i(x+w, y);
-  
-	glEnd();
+	glEnableClientState(GL_VERTEX_ARRAY);
+	GLint box_vertices[] =
+	{
+		x, y,
+		x, y+h,
+		x+w, y+h,
+		x+w, y
+	};
+	glVertexPointer(2, GL_INT, 0, box_vertices);
+	glDrawArrays(GL_QUADS, 0, 4);
+	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisable(GL_BLEND);
 }
 
@@ -406,21 +409,23 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 	float ty1 = (py  ) / 16.0;
 	float ty2 = (py+1) / 16.0;
 
-	glBegin(GL_POLYGON);
-  
-	glTexCoord2f(tx1, ty1);
-	glVertex2i(x, y);
-
-	glTexCoord2f(tx1, ty2); 
-	glVertex2i(x, y + FNSZ);
-  
-	glTexCoord2f(tx2, ty2);
-	glVertex2i(x + FNSZ, y + FNSZ);
-  
-	glTexCoord2f(tx2, ty1);
-	glVertex2i(x + FNSZ, y);
-  
-	glEnd();
+	GLint char_vertices[] =
+	{
+		x, y,
+		x, y + FNSZ,
+		x + FNSZ, y + FNSZ,
+		x + FNSZ, y
+	};
+	GLfloat char_texcoords[] =
+	{
+		tx1, ty1,
+		tx1, ty2,
+		tx2, ty2,
+		tx2, ty1
+	};
+	glVertexPointer(2, GL_INT, 0, char_vertices);
+	glTexCoordPointer(2, GL_FLOAT, 0, char_texcoords);
+	glDrawArrays(GL_POLYGON, 0, 4);
 }
 
 // writes the text on coords (x,y) of the console
@@ -435,6 +440,9 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0);
 
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
 	for (; *s; s++)
 	{
 		DrawChar(x, y, *s, col);
@@ -444,6 +452,9 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 		if (x >= SCREENWIDTH)
 			break;
 	}
+
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_ALPHA_TEST);

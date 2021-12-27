@@ -79,6 +79,68 @@ bool P_CheckForBenefit(benefit_t *list, int kind)
 
 
 //
+// P_GiveInventory
+//
+// Returns false if the ammo can't be picked up at all
+//
+//
+static void GiveInventory(pickup_info_t *pu, benefit_t *be)
+{
+	int inv  = be->sub.type;  
+	int num   = I_ROUND(be->amount);
+
+	if (inv < 0 || inv >= NUMINV)
+		I_Error("GiveInventory: bad type %i", inv);
+
+	if (pu->lose_em)
+	{
+		if (pu->player->inventory[inv].num == 0)
+			return;
+
+		pu->player->inventory[inv].num -= num;
+
+		if (pu->player->inventory[inv].num < 0)
+			pu->player->inventory[inv].num = 0;
+
+		pu->got_it = true;
+		return;
+	}
+
+	pu->player->inventory[inv].num += num;
+
+	if (pu->player->inventory[inv].num > pu->player->inventory[inv].max)
+		pu->player->inventory[inv].num = pu->player->inventory[inv].max;
+
+	pu->got_it = true;
+}
+
+//
+// GiveInventoryLimit
+//
+static void GiveInventoryLimit(pickup_info_t *pu, benefit_t *be)
+{
+	int inv  = be->sub.type;  
+	int limit = I_ROUND(be->amount);
+
+	if (inv < 0 || inv >= NUMINV)
+		I_Error("GiveInventoryLimit: bad type %i", inv);
+
+	if ((!pu->lose_em && limit < pu->player->inventory[inv].max) ||
+		( pu->lose_em && limit > pu->player->inventory[inv].max))
+	{
+		return;
+	}
+
+	pu->player->inventory[inv].max = limit;
+
+	// new limit could be lower...
+	if (pu->player->inventory[inv].num > pu->player->inventory[inv].max)
+		pu->player->inventory[inv].num = pu->player->inventory[inv].max;
+
+	pu->got_it = true;
+}
+
+//
 // P_GiveAmmo
 //
 // Returns false if the ammo can't be picked up at all
@@ -492,6 +554,14 @@ void DoGiveBenefitList(pickup_info_t *pu)
 
 			case BENEFIT_Powerup:
 				GivePower(pu, be);
+				break;
+
+			case BENEFIT_Inventory:
+				GiveInventory(pu, be);
+				break;
+
+			case BENEFIT_InventoryLimit:
+				GiveInventoryLimit(pu, be);
 				break;
 
 			default:

@@ -122,6 +122,9 @@ int RAD_StringHashFunc(const char *s)
 		s++;
 	}
 
+	if (r < 0)
+		r = -r;
+
 	return r;
 }
 
@@ -1007,7 +1010,19 @@ static void RAD_ParseTag(int pnum, const char **pars)
 	if (this_rad->tag != 0)
 		RAD_Error("Script already has a tag: '%d'\n", this_rad->tag);
 
-	RAD_CheckForInt(pars[1], &this_rad->tag);
+	// Modified RAD_CheckForInt
+	const char *pos = pars[1];
+	int count = 0;
+	int length = strlen(pars[1]);
+
+	while (isdigit(*pos++))
+		count++;
+
+	// Is the value an integer?
+	if (length != count)
+		this_rad->tag = RAD_StringHashFunc(pars[1]);
+	else
+		this_rad->tag = atoi(pars[1]);
 }
 
 static void RAD_ParseWhenAppear(int pnum, const char **pars)
@@ -1256,7 +1271,19 @@ static void RAD_ParseEnableTagged(int pnum, const char **pars)
 
 	Z_Clear(t, s_enabler_t, 1);
 
-	RAD_CheckForInt(pars[1], &t->tag);
+	// Modified RAD_CheckForInt
+	const char *pos = pars[1];
+	int count = 0;
+	int length = strlen(pars[1]);
+
+	while (isdigit(*pos++))
+		count++;
+
+	// Is the value an integer?
+	if (length != count)
+		t->tag = RAD_StringHashFunc(pars[1]);
+	else
+		t->tag = atoi(pars[1]);
 
 	if (t->tag <= 0)
 		RAD_Error("Bad tag value: %s\n", pars[1]);

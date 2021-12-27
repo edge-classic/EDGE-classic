@@ -56,7 +56,9 @@ typedef struct
 	// -MH- 1998/08/23 upward movement
 	s8_t upwardmove;
 
-	byte buttons, extbuttons;
+	byte buttons;
+
+	u16_t extbuttons;
 
 	byte chatchar;
 
@@ -112,6 +114,10 @@ typedef enum
 	// -AJA- 2009/09/07: custom action buttons
 	EBT_ACTION1 = 64,
 	EBT_ACTION2 = 128,
+
+	EBT_INVPREV = 256,
+	EBT_INVUSE  = 512,
+	EBT_INVNEXT = 1024
 }
 extbuttoncode_e;
 

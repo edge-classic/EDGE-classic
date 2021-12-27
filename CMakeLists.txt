@@ -5,7 +5,6 @@ add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/deh_edge)
 add_subdirectory(source_files/epi)
-add_subdirectory(source_files/glew/build/cmake)
 add_subdirectory(source_files/libjpeg)
 add_subdirectory(source_files/libpng)
 add_subdirectory(source_files/zlib)
@@ -261,7 +260,7 @@ target_include_directories(edge-classic PRIVATE source_files/coal)
 target_include_directories(edge-classic PRIVATE source_files/ddf)
 target_include_directories(edge-classic PRIVATE source_files/deh_edge)
 target_include_directories(edge-classic PRIVATE source_files/epi)
-target_include_directories(edge-classic PRIVATE source_files/glew/include/GL)
+target_include_directories(edge-classic PRIVATE source_files/glatter)
 target_include_directories(edge-classic PRIVATE source_files/libjpeg)
 target_include_directories(edge-classic PRIVATE source_files/libpng)
 target_include_directories(edge-classic PRIVATE source_files/minimp3)
@@ -291,7 +290,6 @@ target_link_libraries(
           edge_ddf
           edge_deh
           edge_epi
-		  glew_s
 		  opengl32
 		  ${SDL2_LIBRARIES}
 		  png_static
@@ -309,7 +307,6 @@ target_link_libraries(
           edge_deh
           edge_epi
 		  OpenGL
-		  glew_s
 		  SDL2
 		  png_static
 		  jpeg_static
@@ -324,7 +321,6 @@ target_link_libraries(
           edge_deh
           edge_epi
 		  ${OPENGL_LIBRARIES}
-		  glew_s
 		  ${SDL2_LIBRARIES}
 		  png_static
 		  jpeg_static

@@ -27,16 +27,15 @@
 #define __SYSTEM_SPECIFIC_DEFS_OPENGL__
 
 #ifdef __linux__
-#include "glew.h"
+#include "glatter.h"
 #endif
 
 #ifdef WIN32
-#define GLEW_STATIC  1
-#include "glew.h"
+#include "glatter.h"
 #endif
 
 #ifdef __APPLE__
-#include "glew.h"
+#include "glatter.h"
 #endif
 
 #define USING_GL_TYPES 1

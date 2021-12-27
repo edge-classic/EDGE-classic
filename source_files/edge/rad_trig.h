@@ -49,6 +49,7 @@ rad_script_t *RAD_FindScriptByName(const char *map_name, const char *name);
 rad_trigger_t *RAD_FindTriggerByName(const char *name);
 rts_state_t *RAD_FindStateByLabel(rad_script_t *scr, char *label);
 void RAD_EnableByTag(mobj_t *actor, int tag, bool disable);
+void RAD_EnableByTag(mobj_t *actor, const char *name, bool disable);
 void RAD_MonsterIsDead(mobj_t *mo);
 
 // Menu support

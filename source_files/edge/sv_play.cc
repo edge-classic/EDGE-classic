@@ -23,6 +23,7 @@
 //   player_t        [PLAY]
 //   playerweapon_t  [WEAP]
 //   playerammo_t    [AMMO]
+//   playerinv_t     [INVY]
 //   psprite_t       [PSPR]
 //
 
@@ -49,6 +50,7 @@ void * SV_PlayerGetElem(int index);
 void SV_PlayerCreateElems(int num_elems);
 void SV_PlayerFinaliseElems(void);
 
+bool SR_PlayerGetInv(void *storage, int index, void *extra);
 bool SR_PlayerGetAmmo(void *storage, int index, void *extra);
 bool SR_PlayerGetWeapon(void *storage, int index, void *extra);
 bool SR_PlayerGetPSprite(void *storage, int index, void *extra);
@@ -56,6 +58,7 @@ bool SR_PlayerGetName(void *storage, int index, void *extra);
 bool SR_PlayerGetState(void *storage, int index, void *extra);
 bool SR_WeaponGetInfo(void *storage, int index, void *extra);
 
+void SR_PlayerPutInv(void *storage, int index, void *extra);
 void SR_PlayerPutAmmo(void *storage, int index, void *extra);
 void SR_PlayerPutWeapon(void *storage, int index, void *extra);
 void SR_PlayerPutPSprite(void *storage, int index, void *extra);
@@ -101,8 +104,10 @@ static savefield_t sv_fields_player[] =
 	SF(pending_wp, "pending_wp", 1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(weapons[0], "weapons", MAXWEAPONS, SVT_STRUCT("playerweapon_t"), 
         SR_PlayerGetWeapon, SR_PlayerPutWeapon),
-	SF(ammo[0], "ammo", NUMAMMO, SVT_STRUCT("playerammo_t"), 
+	SF(ammo[0], "ammo", NUMAMMO, SVT_STRUCT("playerammo_t"),
 	SR_PlayerGetAmmo, SR_PlayerPutAmmo),
+	SF(inventory[0], "inv", NUMINV, SVT_STRUCT("playerinv_t"),
+	SR_PlayerGetInv, SR_PlayerPutInv),
 	SF(cheats, "cheats", 1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(refire, "refire", 1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(killcount, "killcount", 1, SVT_INT, SR_GetInt, SR_PutInt),
@@ -193,6 +198,34 @@ savestruct_t sv_struct_playerweapon =
 
 #undef SV_F_BASE
 
+//----------------------------------------------------------------------------
+//
+//  INVENTORY STRUCTURE
+//
+static playerinv_t sv_dummy_playerinv;
+
+#define SV_F_BASE  sv_dummy_playerinv
+
+static savefield_t sv_fields_playerinv[] =
+{
+	SF(num, "num", 1, SVT_INT, SR_GetInt, SR_PutInt),
+	SF(max, "max", 1, SVT_INT, SR_GetInt, SR_PutInt),
+
+	SVFIELD_END
+};
+
+savestruct_t sv_struct_playerinv =
+{
+	NULL,          // link in list
+	"playerinv_t",    // structure name
+	"invy",        // start marker
+	sv_fields_playerinv,  // field descriptions
+	SVDUMMY,       // dummy base
+	true,          // define_me
+	NULL           // pointer to known struct
+};
+
+#undef SV_F_BASE
 
 //----------------------------------------------------------------------------
 //
@@ -443,6 +476,29 @@ void SV_PlayerFinaliseElems(void)
 
 
 //----------------------------------------------------------------------------
+
+//
+// SR_PlayerGetInv
+//
+bool SR_PlayerGetInv(void *storage, int index, void *extra)
+{
+	playerinv_t *dest = (playerinv_t *)storage + index;
+
+	if (sv_struct_playerinv.counterpart)
+		return SV_LoadStruct(dest, sv_struct_playerinv.counterpart);
+
+	return true;  // presumably
+}
+
+//
+// SR_PlayerPutInv
+//
+void SR_PlayerPutInv(void *storage, int index, void *extra)
+{
+	playerinv_t *src = (playerinv_t *)storage + index;
+
+	SV_SaveStruct(src, &sv_struct_playerinv);
+}
 
 //
 // SR_PlayerGetAmmo

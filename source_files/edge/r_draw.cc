@@ -28,6 +28,8 @@
 #include "r_modes.h"
 #include "r_image.h"
 
+#include <vector>
+
 
 static int glbsp_last_prog_time = 0;
 
@@ -88,22 +90,27 @@ void RGL_DrawImage(float x, float y, float w, float h, const image_c *image,
 
 	glColor4f(r, g, b, alpha);
 
-	glBegin(GL_QUADS);
-  
-	glTexCoord2f(tx1, ty1);
-	glVertex2i(x1, y1);
-
-	glTexCoord2f(tx2, ty1); 
-	glVertex2i(x2, y1);
-  
-	glTexCoord2f(tx2, ty2);
-	glVertex2i(x2, y2);
-  
-	glTexCoord2f(tx1, ty2);
-	glVertex2i(x1, y2);
-  
-	glEnd();
-
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	GLint image_vertices[] =
+	{
+		x1, y1,
+		x2, y1,
+		x2, y2,
+		x1, y2
+	};
+	GLfloat image_texcoords[] =
+	{
+		tx1, ty1,
+		tx2, ty1,
+		tx2, ty2,
+		tx1, ty2
+	};
+	glVertexPointer(2, GL_INT, 0, image_vertices);
+	glTexCoordPointer(2, GL_FLOAT, 0, image_texcoords);
+	glDrawArrays(GL_QUADS, 0, 4);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_ALPHA_TEST);
@@ -155,24 +162,70 @@ static void ProgressSection(const byte *logo_lum, int lw, int lh,
 
 	int x = (pw-8) * perc / 100;
 
-	glColor4f(0.6f, 0.6f, 0.6f, alpha);
-	glBegin(GL_POLYGON);
-	glVertex2i(px, py);  glVertex2i(px, py+ph);
-	glVertex2i(px+pw, py+ph); glVertex2i(px+pw, py);
-	glVertex2i(px, py);
-	glEnd();
+	std::vector<GLint> progress_vertices;
+	std::vector<GLfloat> progress_colors;
 
-	glColor4f(0.0f, 0.0f, 0.0f, alpha);
-	glBegin(GL_POLYGON);
-	glVertex2i(px+2, py+2);  glVertex2i(px+2, py+ph-2);
-	glVertex2i(px+pw-2, py+ph-2); glVertex2i(px+pw-2, py+2);
-	glEnd();
-
-	glColor4f(cr, cg, cb, alpha);
-	glBegin(GL_POLYGON);
-	glVertex2i(px+4, py+4);  glVertex2i(px+4, py+ph-4);
-	glVertex2i(px+4+x, py+ph-4); glVertex2i(px+4+x, py+4);
-	glEnd();
+  	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	progress_vertices =
+	{
+		px, py,
+		px, py+ph,
+		px+pw, py+ph,
+		px+pw, py,
+		px, py,
+	};
+	progress_colors =
+	{
+		0.6f, 0.6f, 0.6f, alpha,
+		0.6f, 0.6f, 0.6f, alpha,
+		0.6f, 0.6f, 0.6f, alpha,
+		0.6f, 0.6f, 0.6f, alpha,
+		0.6f, 0.6f, 0.6f, alpha,
+	};
+	glVertexPointer(2, GL_INT, 0, progress_vertices.data());
+	glColorPointer(4, GL_FLOAT, 0, progress_colors.data());
+	glDrawArrays(GL_POLYGON, 0, 4);
+	progress_vertices.clear();
+	progress_colors.clear();
+	progress_vertices =
+	{
+		px+2, py+2,
+		px+2, py+ph-2,
+		px+pw-2, py+ph-2,
+		px+pw-2, py+2,
+	};
+	progress_colors =
+	{
+		0.0f, 0.0f, 0.0f, alpha,
+		0.0f, 0.0f, 0.0f, alpha,
+		0.0f, 0.0f, 0.0f, alpha,
+		0.0f, 0.0f, 0.0f, alpha,
+	};
+	glVertexPointer(2, GL_INT, 0, progress_vertices.data());
+	glColorPointer(4, GL_FLOAT, 0, progress_colors.data());
+	glDrawArrays(GL_POLYGON, 0, 4);
+	progress_vertices.clear();
+	progress_colors.clear();
+	progress_vertices =
+	{
+		px+4, py+4,
+		px+4, py+ph-4,
+		px+4+x, py+ph-4,
+		px+4+x, py+4
+	};
+	progress_colors =
+	{
+		cr, cg, cb, alpha,
+		cr, cg, cb, alpha,
+		cr, cg, cb, alpha,
+		cr, cg, cb, alpha,
+	};
+	glVertexPointer(2, GL_INT, 0, progress_vertices.data());
+	glColorPointer(4, GL_FLOAT, 0, progress_colors.data());
+	glDrawArrays(GL_POLYGON, 0, 4);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	(*y) = py;
 }

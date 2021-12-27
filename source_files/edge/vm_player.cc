@@ -39,8 +39,15 @@
 #include "r_sky.h"
 
 #include "f_interm.h" //Lobo: need this to get access to wi_stats
+#include "rad_trig.h" //Lobo: need this to access RTS
+
+#include <charconv>
 
 //#include <unordered_map> // Dasho: Test for footstep noise lookup prototype
+
+bool inv_prev_pressed = false;
+bool inv_use_pressed = false;
+bool inv_next_pressed = false;
 
 extern coal::vm_c *ui_vm;
 
@@ -486,6 +493,35 @@ static void PL_ammomax(coal::vm_c *vm, int argc)
 	vm->ReturnFloat(ui_player_who->ammo[ammo].max);
 }
 
+// player.inventory(type)
+//
+static void PL_inventory(coal::vm_c *vm, int argc)
+{
+	int inv = (int) *vm->AccessParam(0);
+
+	if (inv < 1 || inv > NUMINV)
+		I_Error("player.inv: bad inv number: %d\n", inv);
+
+	inv--;
+
+	vm->ReturnFloat(ui_player_who->inventory[inv].num);
+}
+
+
+// player.inventorymax(type)
+//
+static void PL_inventorymax(coal::vm_c *vm, int argc)
+{
+	int inv = (int) *vm->AccessParam(0);
+
+	if (inv < 1 || inv > NUMINV)
+		I_Error("player.inventorymax: bad inv number: %d\n", inv);
+
+	inv--;
+
+	vm->ReturnFloat(ui_player_who->inventory[inv].max);
+}
+
 
 // player.main_ammo(clip)
 //
@@ -816,6 +852,14 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
     }
 }
 
+// player.sector_tag()
+// Lobo: November 2021
+static void PL_sector_tag(coal::vm_c *vm, int argc)
+{
+	vm->ReturnFloat(ui_player_who->mo->subsector->sector->tag);
+}
+
+// Dasho: December 2021
 // Prototype for table access alternative to footstep noise function - Dasho
 /*static void PL_noise_for_flat(coal::vm_c *vm, int argc)
 {
@@ -832,11 +876,54 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
 	}
 }*/
 
-// player.sector_tag()
-// Lobo: November 2021
-static void PL_sector_tag(coal::vm_c *vm, int argc)
+static void PL_inventory_events(coal::vm_c *vm, int argc)
 {
-	vm->ReturnFloat(ui_player_who->mo->subsector->sector->tag);
+	double v[3] = {0, 0, 0};
+
+	v[0] = inv_prev_pressed;
+	v[1] = inv_use_pressed;
+	v[2] = inv_next_pressed;
+
+	vm->ReturnVector(v);
+}
+
+// player.useinventory(type)
+//
+static void PL_useinventory(coal::vm_c *vm, int argc)
+{
+	std::string name = vm->AccessParamString(0);
+	std::string suffix;
+	int inv = 0;
+	// Check for either one or two digit number after INVENTORY
+	if (std::isdigit(name.at(name.size() - 1)))
+	{
+		if (std::isdigit(name.at(name.size() - 2)))
+		{
+			suffix = name.substr(name.size() - 2, 2);
+		}
+		else
+		{
+			suffix = name.substr(name.size() - 1, 1);
+		}
+	}
+
+	if (!suffix.empty())
+	{
+		static_cast<void>(std::from_chars(suffix.data(), suffix.data() + suffix.size(),	inv));
+	}
+
+	if (inv < 1 || inv > NUMINV)
+		I_Error("player.useinventory: bad inventory number: %d\n", inv);
+
+	inv--;
+
+	if (ui_player_who->inventory[inv].num > 0)
+	{
+		ui_player_who->inventory[inv].num -= 1;
+		RAD_EnableByTag(NULL, name.c_str(), false);
+	}
+	
+	vm->ReturnFloat(ui_player_who->inventory[inv].num);
 }
 
 
@@ -905,7 +992,14 @@ void VM_RegisterPlaysim()
 	ui_vm->AddNativeFunction("player.map_items",      PL_map_items);
 	ui_vm->AddNativeFunction("player.floor_flat",      PL_floor_flat);
 	ui_vm->AddNativeFunction("player.sector_tag",      PL_sector_tag);
+
+	// Dasho: December 2021
 	//ui_vm->AddNativeFunction("player.noise_for_flat", PL_noise_for_flat);
+	ui_vm->AddNativeFunction("player.inventory_events",		PL_inventory_events);
+
+	ui_vm->AddNativeFunction("player.useinventory",        PL_useinventory);
+    ui_vm->AddNativeFunction("player.inventory",        PL_inventory);
+    ui_vm->AddNativeFunction("player.inventorymax",     PL_inventorymax);
 }
 
 

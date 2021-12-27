@@ -42,7 +42,7 @@
 #include "p_blockmap.h"
 #include "m_math.h"
 
-
+#include <vector>
 
 extern float P_ApproxDistance(float dx, float dy, float dz);
 
@@ -1068,11 +1068,17 @@ void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame,
 	else
 		glColor4f(1, 1, 1, 1.0f);
 
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+
+	std::vector<GLfloat> model_vertices;
+	std::vector<GLfloat> model_texcoords;
+	std::vector<GLfloat> model_normals;
+
 	for (int i = 0; i < md->num_strips; i++)
 	{
 		const md2_strip_c *strip = & md->strips[i];
-
-		glBegin(strip->mode);
 
 		for (int v_idx=0; v_idx < md->strips[i].count; v_idx++)
 		{
@@ -1084,27 +1090,39 @@ void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame,
 			const md2_point_c *point = &md->points[strip->first + v_idx];
 			const md2_vertex_c *vert = &frame_ptr->vertices[point->vert_idx];
 
-			glTexCoord2f(point->skin_s * im_right, point->skin_t * im_top);
-
-
+			model_texcoords.push_back(point->skin_s * im_right);
+			model_texcoords.push_back(point->skin_t * im_top);
+			
 			short n = vert->normal_idx;
 
 			float norm_x = md2_normals[n].x;
 			float norm_y = md2_normals[n].y;
 			float norm_z = md2_normals[n].z;
 
-			glNormal3f(norm_y, norm_z, norm_x);
-
+			model_normals.push_back(norm_y);
+			model_normals.push_back(norm_z);
+			model_normals.push_back(norm_x);
 
 			float dx = vert->x * xscale;
 			float dy = vert->y * xscale;
 			float dz = (vert->z + info->model_bias) * yscale;
 
-			glVertex3f(x + dy, y + dz, dx / 256.0f);
+			model_vertices.push_back(x + dy);
+			model_vertices.push_back(y + dz);
+			model_vertices.push_back(dx / 256.0f);
 		}
-
-		glEnd();
+		glVertexPointer(3, GL_FLOAT, 0, model_vertices.data());
+		glTexCoordPointer(2, GL_FLOAT, 0, model_texcoords.data());
+		glNormalPointer(GL_FLOAT, 0, model_normals.data());
+		glDrawArrays(strip->mode, 0, model_vertices.size() / 3);
+		model_vertices.clear();
+		model_texcoords.clear();
+		model_normals.clear();
 	}
+
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);

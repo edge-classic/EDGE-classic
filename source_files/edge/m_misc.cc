@@ -261,6 +261,10 @@ static default_t defaults[] =
 	{CFGT_Key,      "key_menu_select",      &key_menu_select,   0},
 	{CFGT_Key,      "key_menu_cancel",      &key_menu_cancel,   0},
 
+	{CFGT_Key,      "key_inv_prev",      &key_inv_prev,   0},
+	{CFGT_Key,      "key_inv_use",      &key_inv_use,   0},
+	{CFGT_Key,      "key_inv_next",      &key_inv_next,   0},
+
 	{CFGT_Key,      "key_screenshot",      &key_screenshot,   KEYD_F1},
 	{CFGT_Key,      "key_save_game",      &key_save_game,   KEYD_F2},
 	{CFGT_Key,      "key_load_game",      &key_load_game,  KEYD_F3},

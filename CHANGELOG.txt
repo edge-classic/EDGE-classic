@@ -2,6 +2,34 @@ https://github.com/dashodanger/EDGE-classic
 
 Current as of: DECEMBER 2021
 
+CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)
+====================================
+
+Bugs fixed
+----------
+
+
+General Improvements
+--------------------
++ RTS Scripts can now use either a number or a string for their TAGs
+
++ Replaced GLEW with Glatter 
+
++ Converted drawing functions to use vertex arrays to reduce the number of GL calls needed (in progress)
+
+
+New Features
+------------
++ Added inventory system
+  + DDF: INV01-INV25 are usable as PICKUP_BENEFIT options; syntax is the same as giving ammo
+  + COAL: player.inventory_events(): event-based handling for keys based on Inventory Previous, Inventory Use, and Inventory Next bindings
+  + COAL/RTS:  player.useinventory(): will call RTS script of appropriate tag when inventory item is used; naming convention for inventory script tags is INVENTORY1 - INVENTORY25
+
++ Heretic COALHUDS updated with game-approriate inventory display
+
++ Added 'autoload' folder which is scanned for valid file types on startup
+
+
 CHANGELOG for EDGE-Classic 1.0 (since EDGE-Classic Preview 1)
 ====================================
 

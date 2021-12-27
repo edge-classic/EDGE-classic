@@ -61,6 +61,7 @@ extern savearray_t sv_array_iteminque;
 extern savestruct_t sv_struct_player;
 extern savestruct_t sv_struct_playerweapon;
 extern savestruct_t sv_struct_playerammo;
+extern savestruct_t sv_struct_playerinv;
 extern savestruct_t sv_struct_psprite;
 
 extern savearray_t sv_array_player;
@@ -263,6 +264,7 @@ void SV_MainInit(void)
 	AddKnownStruct(&sv_struct_player);
 	AddKnownStruct(&sv_struct_playerweapon);
 	AddKnownStruct(&sv_struct_playerammo);
+	AddKnownStruct(&sv_struct_playerinv);
 	AddKnownStruct(&sv_struct_psprite);
 
 	AddKnownArray(&sv_array_player);

@@ -310,22 +310,27 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 
 	glColor4f(r, g, b, alpha);
 
-	glBegin(GL_QUADS);
-  
-	glTexCoord2f(tx1, ty1);
-	glVertex2i(x1, y1);
-
-	glTexCoord2f(tx2, ty1); 
-	glVertex2i(x2, y1);
-  
-	glTexCoord2f(tx2, ty2);
-	glVertex2i(x2, y2);
-  
-	glTexCoord2f(tx1, ty2);
-	glVertex2i(x1, y2);
-  
-	glEnd();
-
+  	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	GLint raw_vertices[] =
+	{
+		x1, y1,
+		x2, y1,
+		x2, y2,
+		x1, y2
+	};
+	GLfloat raw_texcoords[] =
+	{
+		tx1, ty1,
+		tx2, ty1,
+		tx2, ty2,
+		tx1, ty2
+	};
+	glVertexPointer(2, GL_INT, 0, raw_vertices);
+	glTexCoordPointer(2, GL_FLOAT, 0, raw_texcoords);
+	glDrawArrays(GL_QUADS, 0, 4);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_ALPHA_TEST);
@@ -441,15 +446,19 @@ void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col)
 		glEnable(GL_BLEND);
   
 	glColor4f(RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha);
-  
-	glBegin(GL_QUADS);
 
-	glVertex2f(x1, y1);
-	glVertex2f(x1, y2);
-	glVertex2f(x2, y2);
-	glVertex2f(x2, y1);
-  
-	glEnd();
+  	glEnableClientState(GL_VERTEX_ARRAY);
+	GLfloat box_vertices[] =
+	{
+		x1, y1,
+		x1, y2,
+		x2, y2,
+		x2, y1
+	};
+	glVertexPointer(2, GL_FLOAT, 0, box_vertices);
+	glDrawArrays(GL_QUADS, 0, 4);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
 	glDisable(GL_BLEND);
 }
 
@@ -474,12 +483,15 @@ void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col,
   
 	glColor4f(RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha);
   
-	glBegin(GL_LINES);
-
-	glVertex2i((int)x1 + (int)dx, (int)y1 + (int)dy);
-	glVertex2i((int)x2 + (int)dx, (int)y2 + (int)dy);
-  
-	glEnd();
+  	glEnableClientState(GL_VERTEX_ARRAY);
+	GLint line_vertices[] =
+	{
+		(int)x1 + (int)dx, (int)y1 + (int)dy,
+		(int)x2 + (int)dx, (int)y2 + (int)dy
+	};
+	glVertexPointer(2, GL_INT, 0, line_vertices);
+	glDrawArrays(GL_LINES, 0, 2);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_BLEND);
 	glDisable(GL_LINE_SMOOTH);
@@ -499,25 +511,29 @@ void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col)
   
 	glColor4f(RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha);
   
-	glBegin(GL_QUADS);
-	glVertex2f(x1,   y1); glVertex2f(x1,   y2);
-	glVertex2f(x1+2, y2); glVertex2f(x1+2, y1);
-	glEnd();
-
-	glBegin(GL_QUADS);
-	glVertex2f(x2-2, y1); glVertex2f(x2-2, y2);
-	glVertex2f(x2,   y2); glVertex2f(x2,   y1);
-	glEnd();
-
-	glBegin(GL_QUADS);
-	glVertex2f(x1+2, y1);   glVertex2f(x1+2, y1+2);
-	glVertex2f(x2-2, y1+2); glVertex2f(x2-2, y1);
-	glEnd();
-
-	glBegin(GL_QUADS);
-	glVertex2f(x1+2,  y2-2); glVertex2f(x1+2, y2);
-	glVertex2f(x2-2,  y2);   glVertex2f(x2-2, y2-2);
-	glEnd();
+  	glEnableClientState(GL_VERTEX_ARRAY);
+	GLfloat box_vertices[] =
+	{
+		x1, y1,
+		x1, y2,
+		x1+2, y2,
+		x1+2, y1,
+		x2-2, y1,
+		x2-2, y2,
+		x2, y2,
+		x2, y1,
+		x1+2, y1,
+		x1+2, y1+2,
+		x2-2, y1+2,
+		x2-2, y1,
+		x1+2, y2-2,
+		x1+2, y2,
+		x2-2, y2,
+		x2-2, y2-2
+	};
+	glVertexPointer(2, GL_FLOAT, 0, box_vertices);
+	glDrawArrays(GL_QUADS, 0, 16);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_BLEND);
 }
@@ -532,26 +548,29 @@ void HUD_GradientBox(float x1, float y1, float x2, float y2, rgbcol_t *cols)
 
 	if (cur_alpha < 0.99f)
 		glEnable(GL_BLEND);
-  
-	glBegin(GL_QUADS);
 
-	glColor4f(RGB_RED(cols[1])/255.0, RGB_GRN(cols[1])/255.0,
-	          RGB_BLU(cols[1])/255.0, cur_alpha);
-	glVertex2f(x1, y1);
+  	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	GLfloat box_vertices[] =
+	{
+		x1, y1,
+		x1, y2,
+		x2, y2,
+		x2, y1
+	};
+	GLdouble box_colors[] =
+	{
+		RGB_RED(cols[1])/255.0, RGB_GRN(cols[1])/255.0, RGB_BLU(cols[1])/255.0, cur_alpha,
+		RGB_RED(cols[0])/255.0, RGB_GRN(cols[0])/255.0, RGB_BLU(cols[0])/255.0, cur_alpha,
+		RGB_RED(cols[2])/255.0, RGB_GRN(cols[2])/255.0, RGB_BLU(cols[2])/255.0, cur_alpha,
+		RGB_RED(cols[3])/255.0, RGB_GRN(cols[3])/255.0, RGB_BLU(cols[3])/255.0, cur_alpha
+	};
+	glVertexPointer(2, GL_FLOAT, 0, box_vertices);
+	glColorPointer(4, GL_DOUBLE, 0, box_colors);
+	glDrawArrays(GL_QUADS, 0, 4);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
-	glColor4f(RGB_RED(cols[0])/255.0, RGB_GRN(cols[0])/255.0,
-	          RGB_BLU(cols[0])/255.0, cur_alpha);
-	glVertex2f(x1, y2);
-
-	glColor4f(RGB_RED(cols[2])/255.0, RGB_GRN(cols[2])/255.0,
-	          RGB_BLU(cols[2])/255.0, cur_alpha);
-	glVertex2f(x2, y2);
-
-	glColor4f(RGB_RED(cols[3])/255.0, RGB_GRN(cols[3])/255.0,
-	          RGB_BLU(cols[3])/255.0, cur_alpha);
-	glVertex2f(x2, y1);
-  
-	glEnd();
 	glDisable(GL_BLEND);
 }
 

@@ -320,7 +320,9 @@ typedef enum
 	BENEFIT_Key,
 	BENEFIT_Health,
 	BENEFIT_Armour,
-	BENEFIT_Powerup
+	BENEFIT_Powerup,
+	BENEFIT_Inventory,
+	BENEFIT_InventoryLimit
 }
 benefit_type_e;
 
@@ -349,6 +351,18 @@ typedef enum
 	NUMAMMO  // Total count (24)
 }
 ammotype_e;
+
+// Inventory types defined.
+typedef enum
+{
+	INV_01,	INV_02,	INV_03,	INV_04,	INV_05,
+	INV_06,	INV_07,	INV_08,	INV_09,	INV_10,
+	INV_11,	INV_12,	INV_13,	INV_14,	INV_15,
+	INV_16,	INV_17,	INV_18,	INV_19,	INV_20,
+	INV_21,	INV_22,	INV_23,	INV_24,	INV_25,
+	NUMINV  // Total count (25)
+}
+invtype_e;
 
 typedef enum
 {
@@ -414,10 +428,10 @@ typedef struct benefit_s
 	struct benefit_s *next;
 
     // type of benefit (ammo, ammo-limit, weapon, key, health, armour,
-    // or powerup).
+    // powerup, inventory, or inventory-limit).
 	benefit_type_e type;
   
-	// sub-type (specific type of ammo, weapon, key or powerup).  For
+	// sub-type (specific type of ammo, weapon, key, powerup, or inventory).  For
 	// armour this is the class, for health it is unused.
 	union
 	{

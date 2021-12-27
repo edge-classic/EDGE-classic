@@ -121,6 +121,11 @@ extern int key_am_grid;
 extern int key_am_mark;
 extern int key_am_clear;
 
+// Dasho: Inventory handling
+extern int key_inv_prev;
+extern int key_inv_use;
+extern int key_inv_next;
+
 #endif  /* __E_INPUT_H__ */
 
 //--- editor settings ---

@@ -122,6 +122,16 @@ typedef struct
 }
 playerammo_t;
 
+typedef struct
+{
+	// amount of stock available
+	int num;
+
+	// maximum stock carryable
+	int max;
+}
+playerinv_t;
+
 typedef enum
 {
 	// (for pending_wp only) no change is occuring
@@ -218,6 +228,9 @@ typedef struct player_s
 
 	// ammunition, one for each ammotype_e (except AM_NoAmmo)
 	playerammo_t ammo[NUMAMMO];
+
+	// inventory stock, one for each invtype_e
+	playerinv_t inventory[NUMINV];
 
 	// True if button down last tic.
 	bool attackdown[2];

@@ -1721,7 +1721,7 @@ checkflag_result_e DDF_MainCheckSpecialFlag(const char *name,
 
 	// try plain name...
 	index = FindSpecialFlag("", name, flag_set);
-  
+
 	if (allow_prefixes)
 	{
 		// try name with ENABLE_ prefix...

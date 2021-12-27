@@ -38,6 +38,7 @@
 #include "rad_trig.h"
 #include "s_sound.h"
 #include "z_zone.h"
+#include "vm_player.h"
 
 
 static void P_UpdatePowerups(player_t *player);
@@ -737,6 +738,10 @@ void P_PlayerThink(player_t * player)
 	player->actiondown[0] = (cmd->extbuttons & EBT_ACTION1) ? true : false;
 	player->actiondown[1] = (cmd->extbuttons & EBT_ACTION2) ? true : false;
 
+	inv_prev_pressed = (cmd->extbuttons & EBT_INVPREV) ? true : false;
+	inv_use_pressed = (cmd->extbuttons & EBT_INVUSE) ? true : false;
+	inv_next_pressed = (cmd->extbuttons & EBT_INVNEXT) ? true : false;
+
 	// decrement jumpwait counter
 	if (player->jumpwait > 0)
 		player->jumpwait--;
@@ -1064,6 +1069,12 @@ void P_GiveInitialBenefits(player_t *p, const mobjtype_c *info)
 	for (i=0; i < NUMAMMO; i++)
 	{
 		p->ammo[i].num = p->ammo[i].max = 0;
+	}
+
+	// clear out inventory & inventory-limits
+	for (i=0; i < NUMINV; i++)
+	{
+		p->inventory[i].num = p->inventory[i].max = 0;
 	}
 
 	// set health and armour

@@ -363,21 +363,27 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 		L_r = L_g = L_b = 50;
 	glColor4f(LT_RED(L_r), LT_GRN(L_g), LT_BLU(L_b), trans);
 
-	glBegin(GL_QUADS);
-  
-	glTexCoord2f(tex_x1, tex_bot_h);
-	glVertex2f(x1b, y1b);
-  
-	glTexCoord2f(tex_x1, tex_top_h);
-	glVertex2f(x1t, y1t);
-  
-	glTexCoord2f(tex_x2, tex_top_h);
-	glVertex2f(x2t, y1t);
-  
-	glTexCoord2f(tex_x2, tex_bot_h);
-	glVertex2f(x2b, y2b);
-  
-	glEnd();
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	GLfloat crosshair_vertices[] =
+	{
+		x1b, y1b,
+		x1t, y1t,
+		x2t, y1t,
+		x2b, y2b
+	};
+	GLfloat crosshair_texcoords[] =
+	{
+		tex_x1, tex_bot_h,
+		tex_x1, tex_top_h,
+		tex_x2, tex_top_h,
+		tex_x2, tex_bot_h
+	};
+	glVertexPointer(2, GL_FLOAT, 0, crosshair_vertices);
+	glTexCoordPointer(2, GL_FLOAT, 0, crosshair_texcoords);
+	glDrawArrays(GL_QUADS, 0, 4);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_ALPHA_TEST);
@@ -435,10 +441,10 @@ static void DrawStdCrossHair(void)
 	float b = RGB_BLU(color) * intensity / 255.0f;
 
 
-	int x = viewwindow_x + viewwindow_w / 2;
-	int y = viewwindow_y + viewwindow_h / 2;
+	float x = viewwindow_x + viewwindow_w / 2;
+	float y = viewwindow_y + viewwindow_h / 2;
 
-	int w = I_ROUND(SCREENWIDTH * r_crosssize.f / 640.0f);
+	float w = I_ROUND(SCREENWIDTH * r_crosssize.f / 640.0f);
 
 
 	glEnable(GL_TEXTURE_2D);
@@ -451,14 +457,27 @@ static void DrawStdCrossHair(void)
 
 	glColor3f(r, g, b);
 
-	glBegin(GL_POLYGON);
-  
-	glTexCoord2f(0.0f, 0.0f); glVertex2f(x-w, y-w);
-	glTexCoord2f(0.0f, 1.0f); glVertex2f(x-w, y+w);
-	glTexCoord2f(1.0f, 1.0f); glVertex2f(x+w, y+w);
-	glTexCoord2f(1.0f, 0.0f); glVertex2f(x+w, y-w);
-  
-	glEnd();
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	GLfloat crosshair_vertices[] =
+	{
+		x-w, y-w,
+		x-w, y+w,
+		x+w, y+w,
+		x+w, y-w
+	};
+	GLfloat crosshair_texcoords[] =
+	{
+		0.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 1.0f,
+		1.0f, 0.0f
+	};
+	glVertexPointer(2, GL_FLOAT, 0, crosshair_vertices);
+	glTexCoordPointer(2, GL_FLOAT, 0, crosshair_texcoords);
+	glDrawArrays(GL_POLYGON, 0, 4);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

@@ -704,6 +704,23 @@ static menuinfo_t menu_nav_optmenu =
 };
 
 //
+//  KEY CONFIG : INVENTORY
+//
+static optmenuitem_t menu_nav_inventory[] =
+{
+	{OPT_KeyConfig, "Previous Item",   NULL, 0, &key_inv_prev, NULL, NULL},
+	{OPT_KeyConfig, "Use Item",         NULL, 0, &key_inv_use, NULL, NULL},
+	{OPT_KeyConfig, "Next Item",           NULL, 0, &key_inv_next, NULL, NULL},
+};
+
+static menuinfo_t inventory_optmenu = 
+{
+	menu_nav_inventory, sizeof(menu_nav_inventory) / sizeof(optmenuitem_t),
+	&keyboard_style, 140, 98, "M_CONTRL", NULL, 0,
+	"Inventory"
+};
+
+//
 //  KEY CONFIG : PROGRAM
 //
 static optmenuitem_t program_keyconfig1[] =
@@ -748,7 +765,7 @@ static menuinfo_t program_optmenu2 =
 /*
  * ALL KEYBOARD MENUS
  */
-#define NUM_KEY_MENUS  8
+#define NUM_KEY_MENUS  9
 
 static menuinfo_t * all_key_menus[NUM_KEY_MENUS] =
 {
@@ -758,6 +775,7 @@ static menuinfo_t * all_key_menus[NUM_KEY_MENUS] =
 	&weapon_optmenu,
 	&automap_optmenu,
 	&menu_nav_optmenu,
+	&inventory_optmenu,
 	&program_optmenu1,
 	&program_optmenu2
 };

@@ -163,21 +163,24 @@ void RGL_ColourmapEffect(player_t *player)
 		glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
 
 		glEnable(GL_BLEND);
-
-		glBegin(GL_QUADS);
-	  
+  
 		x1 = viewwindow_x;
 		x2 = viewwindow_x + viewwindow_w;
 
 		y1 = viewwindow_y + viewwindow_h;
 		y2 = viewwindow_y;
 
-		glVertex2i(x1, y1);
-		glVertex2i(x2, y1);
-		glVertex2i(x2, y2);
-		glVertex2i(x1, y2);
-
-		glEnd();
+		glEnableClientState(GL_VERTEX_ARRAY);
+		GLint view_vertices[] =
+		{
+			x1, y1,
+			x2, y1,
+			x2, y2,
+			x1, y2
+		};
+		glVertexPointer(2, GL_INT, 0, view_vertices);
+		glDrawArrays(GL_QUADS, 0, 4);
+		glDisableClientState(GL_VERTEX_ARRAY);
 	  
 		glDisable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -201,7 +204,7 @@ void RGL_PaletteEffect(player_t *player)
 		if (var_invul_fx != INVULFX_Complex)
 			return;
 
-		if (GLEW_ARB_imaging || GLEW_SGI_color_matrix)
+		if (glatter_GL_ARB_imaging || glatter_GL_SGI_color_matrix)
 		{
 			glFlush();
 
@@ -255,14 +258,17 @@ void RGL_PaletteEffect(player_t *player)
 
 	glEnable(GL_BLEND);
 
-	glBegin(GL_QUADS);
-  
-	glVertex2i(0, SCREENHEIGHT);
-	glVertex2i(SCREENWIDTH, SCREENHEIGHT);
-	glVertex2i(SCREENWIDTH, 0);
-	glVertex2i(0, 0);
-
-	glEnd();
+	glEnableClientState(GL_VERTEX_ARRAY);
+	GLint effect_vertices[] =
+	{
+		0, SCREENHEIGHT,
+		SCREENWIDTH, SCREENHEIGHT,
+		SCREENWIDTH, 0,
+		0, 0
+	};
+	glVertexPointer(2, GL_INT, 0, effect_vertices);
+	glDrawArrays(GL_QUADS, 0, 4);
+	glDisableClientState(GL_VERTEX_ARRAY);
   
 	glDisable(GL_BLEND);
 }

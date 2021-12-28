@@ -5,8 +5,6 @@ add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/deh_edge)
 add_subdirectory(source_files/epi)
-add_subdirectory(source_files/libjpeg)
-add_subdirectory(source_files/libpng)
 add_subdirectory(source_files/zlib)
 
 project(
@@ -261,8 +259,6 @@ target_include_directories(edge-classic PRIVATE source_files/ddf)
 target_include_directories(edge-classic PRIVATE source_files/deh_edge)
 target_include_directories(edge-classic PRIVATE source_files/epi)
 target_include_directories(edge-classic PRIVATE source_files/glatter)
-target_include_directories(edge-classic PRIVATE source_files/libjpeg)
-target_include_directories(edge-classic PRIVATE source_files/libpng)
 target_include_directories(edge-classic PRIVATE source_files/minimp3)
 target_include_directories(edge-classic PRIVATE source_files/minivorbis)
 target_include_directories(edge-classic PRIVATE source_files/tinysoundfont)
@@ -292,8 +288,6 @@ target_link_libraries(
           edge_epi
 		  opengl32
 		  ${SDL2_LIBRARIES}
-		  png_static
-		  jpeg_static
 		  zlibstatic
 		  winmm
 		  wsock32
@@ -308,8 +302,6 @@ target_link_libraries(
           edge_epi
 		  OpenGL
 		  SDL2
-		  png_static
-		  jpeg_static
 		  zlibstatic
   )
 else()
@@ -322,8 +314,6 @@ target_link_libraries(
           edge_epi
 		  ${OPENGL_LIBRARIES}
 		  ${SDL2_LIBRARIES}
-		  png_static
-		  jpeg_static
 		  zlibstatic
   )
 endif()

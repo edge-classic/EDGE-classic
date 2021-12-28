@@ -44,8 +44,7 @@
 
 #include "image_data.h"
 #include "image_hq2x.h"
-#include "image_png.h"
-#include "image_jpeg.h"
+#include "image_funcs.h"
 #include "image_tga.h"
 
 #include "dm_data.h"

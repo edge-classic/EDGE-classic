@@ -20,8 +20,7 @@ add_library(
   filesystem.cc
   image_data.cc
   image_hq2x.cc
-  image_jpeg.cc
-  image_png.cc
+  image_funcs.cc
   image_tga.cc
   math_angle.cc
   math_bbox.cc
@@ -56,8 +55,7 @@ add_library(
   filesystem.cc
   image_data.cc
   image_hq2x.cc
-  image_jpeg.cc
-  image_png.cc
+  image_funcs.cc
   image_tga.cc
   math_angle.cc
   math_bbox.cc
@@ -80,5 +78,4 @@ add_library(
 )
 endif()
 
-target_include_directories(edge_epi PRIVATE ../libjpeg)
-target_include_directories(edge_epi PRIVATE ../libpng)
+target_include_directories(edge_epi PRIVATE ../stb)

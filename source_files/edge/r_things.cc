@@ -29,7 +29,7 @@
 #include <math.h>
 
 #include "image_data.h"
-#include "image_jpeg.h"
+#include "image_funcs.h"
 
 #include "dm_data.h"
 #include "dm_defs.h"

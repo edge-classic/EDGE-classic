@@ -38,8 +38,7 @@
 #include "str_format.h"
 
 #include "image_data.h"
-#include "image_jpeg.h"
-#include "image_png.h"
+#include "image_funcs.h"
 
 #include "con_main.h"
 #include "dm_defs.h"
@@ -513,24 +512,15 @@ void M_ScreenShot(bool show_msg)
         }
 	}
 
-	FILE *fp = fopen(fn.c_str(), "wb");
-	if (fp == NULL)
-	{
-		if (show_msg)
-			I_Printf("Unable to create file: %s\n", fn.c_str());
-
-		return;
-	}
-
 	epi::image_data_c *img = new epi::image_data_c(SCREENWIDTH, SCREENHEIGHT, 3);
 
 	RGL_ReadScreen(0, 0, SCREENWIDTH, SCREENHEIGHT, img->PixelAt(0,0));
 
 	bool result;
     if (png_scrshots) {
-        result = epi::PNG_Save(fp, img);
+        result = epi::PNG_Save(fn.c_str(), img);
 	} else {
-        result = epi::JPEG_Save(fp, img);
+        result = epi::JPEG_Save(fn.c_str(), img);
 	}
 
 	if (show_msg)
@@ -542,8 +532,6 @@ void M_ScreenShot(bool show_msg)
 	}
 
 	delete img;
-
-	fclose(fp);
 }
 
 

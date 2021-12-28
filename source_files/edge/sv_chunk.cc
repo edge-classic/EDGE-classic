@@ -24,7 +24,7 @@
 
 #include "i_defs.h"
 
-#include <zlib.h>
+#include "miniz.h"
 
 #include "math_crc.h"
 

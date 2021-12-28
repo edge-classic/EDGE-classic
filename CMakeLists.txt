@@ -5,7 +5,7 @@ add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/deh_edge)
 add_subdirectory(source_files/epi)
-add_subdirectory(source_files/zlib)
+add_subdirectory(source_files/miniz)
 
 project(
   edge-classic
@@ -261,8 +261,8 @@ target_include_directories(edge-classic PRIVATE source_files/epi)
 target_include_directories(edge-classic PRIVATE source_files/glatter)
 target_include_directories(edge-classic PRIVATE source_files/minimp3)
 target_include_directories(edge-classic PRIVATE source_files/minivorbis)
+target_include_directories(edge-classic PRIVATE source_files/miniz)
 target_include_directories(edge-classic PRIVATE source_files/tinysoundfont)
-target_include_directories(edge-classic PRIVATE source_files/zlib)
 
 if(WIN32 OR MSYS)
   target_compile_definitions(edge-classic PRIVATE WIN32)
@@ -288,7 +288,7 @@ target_link_libraries(
           edge_epi
 		  opengl32
 		  ${SDL2_LIBRARIES}
-		  zlibstatic
+		  miniz
 		  winmm
 		  wsock32
   )
@@ -302,7 +302,7 @@ target_link_libraries(
           edge_epi
 		  OpenGL
 		  SDL2
-		  zlibstatic
+		  miniz
   )
 else()
 target_link_libraries(
@@ -314,6 +314,6 @@ target_link_libraries(
           edge_epi
 		  ${OPENGL_LIBRARIES}
 		  ${SDL2_LIBRARIES}
-		  zlibstatic
+		  miniz
   )
 endif()

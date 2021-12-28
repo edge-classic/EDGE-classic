@@ -58,7 +58,7 @@ image_data_c *JPEG_Load(file_c *f, int read_flags)
 
 	int total_pixels = 0;
 
-	for (int y = 0; y < height; y++)
+	for (int y = height - 1; y > -1; y--)
 	{
 		for (int x = 0; x < width; x++)
 		{
@@ -66,8 +66,6 @@ image_data_c *JPEG_Load(file_c *f, int read_flags)
 			total_pixels++;
 		}
 	}
-
-	img->Invert();
 
 	delete[] raw_image;
 
@@ -104,7 +102,7 @@ image_data_c *PNG_Load(file_c *f, int read_flags)
 
 	int total_pixels = 0;
 
-	for (int y = 0; y < height; y++)
+	for (int y = height - 1; y > -1; y--)
 	{
 		for (int x = 0; x < width; x++)
 		{
@@ -112,8 +110,6 @@ image_data_c *PNG_Load(file_c *f, int read_flags)
 			total_pixels++;
 		}
 	}
-
-	img->Invert();
 
 	delete[] raw_image;
 

@@ -81,7 +81,7 @@ bool P_CheckForBenefit(benefit_t *list, int kind)
 //
 // P_GiveInventory
 //
-// Returns false if the ammo can't be picked up at all
+// Returns false if the inventory item can't be picked up at all
 //
 //
 static void GiveInventory(pickup_info_t *pu, benefit_t *be)
@@ -103,6 +103,11 @@ static void GiveInventory(pickup_info_t *pu, benefit_t *be)
 			pu->player->inventory[inv].num = 0;
 
 		pu->got_it = true;
+		return;
+	}
+	
+	if (pu->player->inventory[inv].num == pu->player->inventory[inv].max)
+	{
 		return;
 	}
 

@@ -887,9 +887,9 @@ static void PL_inventory_events(coal::vm_c *vm, int argc)
 	vm->ReturnVector(v);
 }
 
-// player.useinventory(type)
+// player.use_inventory(type)
 //
-static void PL_useinventory(coal::vm_c *vm, int argc)
+static void PL_use_inventory(coal::vm_c *vm, int argc)
 {
 	std::string name = vm->AccessParamString(0);
 	std::string suffix;
@@ -913,7 +913,7 @@ static void PL_useinventory(coal::vm_c *vm, int argc)
 	}
 
 	if (inv < 1 || inv > NUMINV)
-		I_Error("player.useinventory: bad inventory number: %d\n", inv);
+		I_Error("player.use_inventory: bad inventory number: %d\n", inv);
 
 	inv--;
 
@@ -997,7 +997,7 @@ void VM_RegisterPlaysim()
 	//ui_vm->AddNativeFunction("player.noise_for_flat", PL_noise_for_flat);
 	ui_vm->AddNativeFunction("player.inventory_events",		PL_inventory_events);
 
-	ui_vm->AddNativeFunction("player.useinventory",        PL_useinventory);
+	ui_vm->AddNativeFunction("player.use_inventory",        PL_use_inventory);
     ui_vm->AddNativeFunction("player.inventory",        PL_inventory);
     ui_vm->AddNativeFunction("player.inventorymax",     PL_inventorymax);
 }

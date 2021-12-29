@@ -1,8 +1,9 @@
 //------------------------------------------------------------------------
-//  JPEG/PNG Image Handling
+//  Image Handling
 //------------------------------------------------------------------------
 // 
 //  Copyright (c) 2003-2008  The EDGE Team.
+//  Migrated to use stb_image in 2021 - Dashodanger
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -27,14 +28,19 @@ namespace epi
 
 const int JPEG_DEF_QUALITY = 90;
 
-image_data_c *JPEG_Load(file_c *f, int read_flags = IRF_NONE);
-// loads the given JPEG image.  Returns 0 if something went wrong.
+const int PNG_DEF_COMPRESS = 4;
+
+bool PNG_IsDataPNG(const byte *data, int length);
+// returns true if the data looks like a PNG file.
+
+image_data_c *Image_Load(file_c *f, int read_flags, int format);
+// loads the given image.  Returns 0 if something went wrong.
 // The image will be RGB or RGBA (never paletted).  The size of
 // image (width and height) will be rounded to the next highest
-// power-of-two if read_flags contains IRF_Round_POW2.
+// power-of-two when 'read_flags' contains IRF_Round_POW2.
 
-bool JPEG_GetInfo(file_c *f, int *width, int *height, bool *solid);
-// reads the principle information from the PNG header.
+bool Image_GetInfo(file_c *f, int *width, int *height, bool *solid, int format);
+// reads the principle information from the TGA header.
 // (should be much faster than loading the whole image).
 // Returns false if something went wrong.
 // Note: size returned here is the real size, and may be different
@@ -45,24 +51,6 @@ bool JPEG_Save(const char *fn, image_data_c *img, int quality = JPEG_DEF_QUALITY
 // something went wrong.  The 'quality' parameter is a percentage, the
 // range is roughly 70 to 95 (values outside of this are possible).
 // The image _MUST_ be RGB (bpp == 3).
-
-const int PNG_DEF_COMPRESS = 4;
-
-bool PNG_IsDataPNG(const byte *data, int length);
-// returns true if the data looks like a PNG file.
-
-image_data_c *PNG_Load(file_c *f, int read_flags);
-// loads the given PNG image.  Returns 0 if something went wrong.
-// The image will be RGB or RGBA (never paletted).  The size of
-// image (width and height) will be rounded to the next highest
-// power-of-two when 'read_flags' contains IRF_Round_POW2.
-
-bool PNG_GetInfo(file_c *f, int *width, int *height, bool *solid);
-// reads the principle information from the PNG header.
-// (should be much faster than loading the whole image).
-// Returns false if something went wrong.
-// Note: size returned here is the real size, and may be different
-// from the image returned by Load() which rounds to power-of-two.
 
 bool PNG_Save(const char *fn, image_data_c *img, int compress = PNG_DEF_COMPRESS);
 // saves the image (in PNG format) to the given file.  The compression

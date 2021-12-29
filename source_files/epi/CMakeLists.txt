@@ -21,7 +21,6 @@ add_library(
   image_data.cc
   image_hq2x.cc
   image_funcs.cc
-  image_tga.cc
   math_angle.cc
   math_bbox.cc
   math_color.cc
@@ -56,7 +55,6 @@ add_library(
   image_data.cc
   image_hq2x.cc
   image_funcs.cc
-  image_tga.cc
   math_angle.cc
   math_bbox.cc
   math_color.cc

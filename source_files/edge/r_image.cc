@@ -45,7 +45,6 @@
 #include "image_data.h"
 #include "image_hq2x.h"
 #include "image_funcs.h"
-#include "image_tga.h"
 
 #include "dm_data.h"
 #include "dm_defs.h"
@@ -331,7 +330,7 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 	{
 		is_png = true;
 
-		if (! PNG_GetInfo(f, &width, &height, &solid) ||
+		if (! Image_GetInfo(f, &width, &height, &solid, LIF_PNG) ||
 		    width <= 0 or height <= 0)
 		{
 			I_Error("Error scanning PNG image in '%s' lump\n", W_GetLumpName(lump));
@@ -505,12 +504,7 @@ static image_c *AddImageUser(imagedef_c *def)
 
 			bool got_info;
 
-			if (def->format == LIF_JPEG)
-				got_info = epi::JPEG_GetInfo(f, &w, &h, &solid);
-			else if (def->format == LIF_TGA)
-				got_info = epi::TGA_GetInfo(f, &w, &h, &solid);
-			else
-				got_info = epi::PNG_GetInfo(f, &w, &h, &solid);
+			got_info = epi::Image_GetInfo(f, &w, &h, &solid, def->format);
 
 			if (! got_info)
 				I_Error("Error occurred scanning image: %s\n", basename);

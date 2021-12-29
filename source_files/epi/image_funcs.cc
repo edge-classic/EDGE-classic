@@ -1,8 +1,9 @@
 //------------------------------------------------------------------------
-//  JPEG/PNG Image Handling
+//  Image Handling
 //------------------------------------------------------------------------
 //
 //  Copyright (c) 2003-2008  The EDGE Team.
+//  Migrated to use stb_image in 2021 - Dashodanger
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -22,6 +23,7 @@
 
 #define STBI_ONLY_JPEG
 #define STBI_ONLY_PNG
+#define STBI_ONLY_TGA
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -30,58 +32,27 @@
 namespace epi
 {
 
-image_data_c *JPEG_Load(file_c *f, int read_flags)
+// Header check backported from EDGE 2.x - Dasho
+bool PNG_IsDataPNG(const byte *data, int length)
 {
-	int width;
-	int height;
-	int channels;
-	byte *raw_image = f->LoadIntoMemory();
+    static byte png_sig[4] = { 0x89, 0x50, 0x4E, 0x47 };
+	if (length < 4)
+		return false;
 
-	unsigned char *jpeg_img = stbi_load_from_memory(raw_image, f->GetLength(), &width, &height, &channels, 3);
-
-	int tot_W = width;
-	int tot_H = height;
-
-	if (read_flags & IRF_Round_POW2)
-	{
-		tot_W = 1; while (tot_W < (int)width)  tot_W <<= 1;
-		tot_H = 1; while (tot_H < (int)height) tot_H <<= 1;
-	}
-
-	image_data_c *img = new image_data_c(tot_W, tot_H, 3);
-
-	img->used_w = width;
-	img->used_h = height;
-
-	if (width != tot_W || height != tot_H)
-		img->Clear();
-
-	int total_pixels = 0;
-
-	for (int y = height - 1; y > -1; y--)
-	{
-		for (int x = 0; x < width; x++)
-		{
-			memcpy(img->PixelAt(x, y), jpeg_img + (total_pixels * 3), 3);
-			total_pixels++;
-		}
-	}
-
-	delete[] raw_image;
-
-	stbi_image_free(jpeg_img);
-
-	return img;
+	return memcmp(data, png_sig, 4) == 0;
 }
 
-image_data_c *PNG_Load(file_c *f, int read_flags)
+image_data_c *Image_Load(file_c *f, int read_flags, int format)
 {
 	int width;
 	int height;
 	int channels;
 	byte *raw_image = f->LoadIntoMemory();
 
-	unsigned char *png_img = stbi_load_from_memory(raw_image, f->GetLength(), &width, &height, &channels, 0);
+	unsigned char *decoded_img = stbi_load_from_memory(raw_image, f->GetLength(), &width, &height, &channels, format == 1 ? 3 : 0);
+
+	if (!decoded_img)
+		return NULL;
 
 	int tot_W = width;
 	int tot_H = height;
@@ -106,57 +77,35 @@ image_data_c *PNG_Load(file_c *f, int read_flags)
 	{
 		for (int x = 0; x < width; x++)
 		{
-			memcpy(img->PixelAt(x, y), png_img + (total_pixels * channels), channels);
+			memcpy(img->PixelAt(x, y), decoded_img + (total_pixels * channels), channels);
 			total_pixels++;
 		}
 	}
 
 	delete[] raw_image;
 
-	stbi_image_free(png_img);
+	stbi_image_free(decoded_img);
 
 	return img;
 }
 
-bool JPEG_GetInfo(file_c *f, int *width, int *height, bool *solid)
-{
-	int channels;
-	byte *raw_image = f->LoadIntoMemory();
-
-	int result = stbi_info_from_memory(raw_image, f->GetLength(), width, height, &channels);
-
-	*solid  = true;  // JPEG images never have transparent parts
-
-	delete[] raw_image;
-
-	return result;
-}
-
-bool PNG_GetInfo(file_c *f, int *width, int *height, bool *solid)
+bool Image_GetInfo(file_c *f, int *width, int *height, bool *solid, int format)
 {
 	int channels = 0;
 	byte *raw_image = f->LoadIntoMemory();
 
 	int result = stbi_info_from_memory(raw_image, f->GetLength(), width, height, &channels);
 
-	if (channels == 2 || channels == 4) // Do we need to check for two? Are we ever using grayscale with alpha? - Dasho
-		*solid  = false;
+	if (format == 1)
+		*solid = true;
+	else if (channels == 4)
+		*solid = false;
 	else
 		*solid = true;
 
 	delete[] raw_image;
 
 	return result;
-}
-
-// Header check backported from EDGE 2.x - Dasho
-bool PNG_IsDataPNG(const byte *data, int length)
-{
-    static byte png_sig[4] = { 0x89, 0x50, 0x4E, 0x47 };
-	if (length < 4)
-		return false;
-
-	return memcmp(data, png_sig, 4) == 0;
 }
 
 //------------------------------------------------------------------------

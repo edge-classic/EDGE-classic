@@ -43,7 +43,6 @@
 #include "image_data.h"
 #include "image_hq2x.h"
 #include "image_funcs.h"
-#include "image_tga.h"
 
 #include "dm_state.h"
 #include "e_search.h"
@@ -361,7 +360,7 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 	{
 		epi::file_c * f = W_OpenLump(lump);
 
-		epi::image_data_c *img = epi::PNG_Load(f, epi::IRF_Round_POW2);
+		epi::image_data_c *img = epi::Image_Load(f, epi::IRF_Round_POW2, LIF_PNG);
 
 		// close it
 		delete f;
@@ -550,14 +549,7 @@ static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 	if (! f)
 		I_Error("Missing image file: %s\n", def->info.c_str());
 
-	epi::image_data_c *img;
-
-	if (def->format == LIF_JPEG)
-		img = epi::JPEG_Load(f, epi::IRF_Round_POW2);
-	else if (def->format == LIF_TGA)
-		img = epi::TGA_Load (f, epi::IRF_Round_POW2);
-	else
-		img = epi::PNG_Load (f, epi::IRF_Round_POW2);
+	epi::image_data_c *img = epi::Image_Load(f, epi::IRF_Round_POW2, def->format);
 
 	CloseUserFileOrLump(def, f);
 

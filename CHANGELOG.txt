@@ -15,11 +15,11 @@ General Improvements
 
 + Replaced GLEW with Glatter 
 
-+ Replaced libpng/libjpeg with stb_image
++ Replaced libpng, libjpeg and image_tga.cc with stb_image
 
 + Replaced zlib with miniz
 
-+ Converted drawing functions to use vertex arrays to reduce the number of GL calls needed (in progress)
++ Converted drawing functions to use vertex arrays to reduce the number of GL calls needed
 
 
 New Features

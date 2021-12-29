@@ -37,6 +37,13 @@
 #include "r_texgl.h"
 #include "r_shader.h"
 
+#include <vector>
+
+std::vector<GLfloat> unit_vertices;
+std::vector<GLfloat> unit_normals;
+std::vector<GLboolean> unit_edgeflags;
+std::vector<GLfloat> unit_texcoords0;
+std::vector<GLfloat> unit_texcoords1;
 
 cvar_c r_colorlighting;
 cvar_c r_colormaterial;
@@ -288,14 +295,26 @@ static inline void RGL_SendRawVector(const local_gl_vert_t *V)
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, V->rgba);
 	}
 
-	myMultiTexCoord2f(GL_TEXTURE0, V->texc[0].x, V->texc[0].y);
-	myMultiTexCoord2f(GL_TEXTURE1, V->texc[1].x, V->texc[1].y);
+	unit_texcoords0.push_back(V->texc[0].x);
+	unit_texcoords0.push_back(V->texc[0].y);
+	glClientActiveTexture(GL_TEXTURE0);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glTexCoordPointer(2, GL_FLOAT, 0, unit_texcoords0.data());
+	unit_texcoords1.push_back(V->texc[1].x);
+	unit_texcoords1.push_back(V->texc[1].y);
+	glClientActiveTexture(GL_TEXTURE1);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glTexCoordPointer(2, GL_FLOAT, 0, unit_texcoords1.data());
 
-	glNormal3f(V->normal.x, V->normal.y, V->normal.z);
-	glEdgeFlag(V->edge);
+	unit_normals.push_back(V->normal.x);
+	unit_normals.push_back(V->normal.y);
+	unit_normals.push_back(V->normal.z);
 
-	// vertex must be last
-	glVertex3f(V->pos.x, V->pos.y, V->pos.z);
+	unit_edgeflags.push_back(V->edge);
+
+	unit_vertices.push_back(V->pos.x);
+	unit_vertices.push_back(V->pos.y);
+	unit_vertices.push_back(V->pos.z);
 }
 
 //
@@ -456,15 +475,35 @@ void RGL_DrawUnits(void)
 				r_dumbclamp.d ? GL_CLAMP : GL_CLAMP_TO_EDGE);
 		}
 
-		glBegin(unit->shape);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_NORMAL_ARRAY);
+		glEnableClientState(GL_EDGE_FLAG_ARRAY);
 
 		for (int v_idx=0; v_idx < unit->count; v_idx++)
 		{
 			RGL_SendRawVector(local_verts + unit->first + v_idx);
 		}
 
-		glEnd();
+		glEdgeFlagPointer(0, unit_edgeflags.data());
+		glNormalPointer(GL_FLOAT, 0, unit_normals.data());
+		glVertexPointer(3, GL_FLOAT, 0, unit_vertices.data());
+		glDrawArrays(unit->shape, 0, unit->shape < GL_POLYGON ? (unit_vertices.size() / 3) : unit->count);
 
+		glClientActiveTexture(GL_TEXTURE0);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glClientActiveTexture(GL_TEXTURE1);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glDisableClientState(GL_EDGE_FLAG_ARRAY);
+		glDisableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glClientActiveTexture(GL_TEXTURE0);
+
+		unit_edgeflags.clear();
+		unit_normals.clear();
+		unit_vertices.clear();
+		unit_texcoords0.clear();
+		unit_texcoords1.clear();
+		
 		// restore the clamping mode
 		if (old_clamp != DUMMY_CLAMP)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, old_clamp);

@@ -168,6 +168,7 @@ void player_s::Reborn()
 	memset(weapons, 0, sizeof(weapons));
 	memset(avail_weapons, 0, sizeof(avail_weapons));
 	memset(ammo, 0, sizeof(ammo));
+	memset(inventory, 0, sizeof(inventory));
 
 	for (int w=0; w <= 9; w++)
 		key_choices[w] = WPSEL_None;
@@ -621,6 +622,17 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 					return false;
 
 				temp = (p->ammo[cond->sub.type].num >= i_amount);
+
+				if ((!cond->negate && !temp) || (cond->negate && temp))
+					return false;
+
+				break;
+				
+			case COND_Inventory:
+				if (!p)
+					return false;
+
+				temp = (p->inventory[cond->sub.type].num >= i_amount);
 
 				if ((!cond->negate && !temp) || (cond->negate && temp))
 					return false;

@@ -1645,6 +1645,24 @@ static void DDF_MobjGetAngleRange(const char *info, void *storage)
 //  accodingly.  Otherwise returns false.
 //
 
+static bool ConditionTryInventory(const char *name, const char *sub,
+								  condition_check_t *cond)
+{
+	if (CHKF_Positive != DDF_MainCheckSpecialFlag(name, inv_types, 
+		&cond->sub.type, false, false))
+	{
+		return false;
+	}
+
+
+	if (sub[0])
+		sscanf(sub, " %f ", &cond->amount);
+
+	cond->cond_type = COND_Inventory;
+	return true;
+}
+
+
 static bool ConditionTryAmmo(const char *name, const char *sub,
 								  condition_check_t *cond)
 {
@@ -1806,6 +1824,7 @@ bool DDF_MainParseCondition(const char *info, condition_check_t *cond)
 	}
 
 	if (ConditionTryAmmo(typebuf + t_off, sub_buf, cond) ||
+	    ConditionTryInventory(typebuf + t_off, sub_buf, cond) ||
 		ConditionTryWeapon(typebuf + t_off, sub_buf, cond) ||
 		ConditionTryKey(typebuf + t_off, sub_buf, cond) ||
 		ConditionTryHealth(typebuf + t_off, sub_buf, cond) ||

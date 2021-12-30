@@ -28,7 +28,7 @@ New Features
   + Controls: Inventory Previous, Inventory Use, and Inventory Next can now be bound to keys
   + DDF: INV01-INV25 are usable as PICKUP_BENEFIT options; syntax is the same as giving ammo
   + COAL: player.inventory_events(): event-based handling for keys based on Inventory Previous, Inventory Use, and Inventory Next bindings
-  + COAL/RTS:  player.useinventory(): will call RTS script of appropriate tag when inventory item is used; naming convention for inventory script tags is INVENTORY1 - INVENTORY25
+  + COAL/RTS:  player.use_inventory(): will call RTS script of appropriate tag when inventory item is used; naming convention for inventory script tags is INVENTORY1 - INVENTORY25
 
 + Heretic COALHUDS updated with game-approriate inventory display
 

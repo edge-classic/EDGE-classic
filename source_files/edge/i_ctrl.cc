@@ -70,23 +70,23 @@ s16_t trigger_thresholds[7] =
 // Translates a key from SDL -> EDGE
 // Returns -1 if no suitable translation exists.
 //
-int TranslateSDLKey(int key)
+int TranslateSDLKey(SDL_Scancode key)
 {
 	// if keypad is not wanted, convert to normal keys
 	if (! in_keypad.d)
 	{
-		if (SDLK_KP_0 <= key && key <= SDLK_KP_9)
-			return '0' + (key - SDLK_KP_0);
+		if (SDL_SCANCODE_KP_0 <= key && key <= SDL_SCANCODE_KP_9)
+			return '0' + (key - SDL_SCANCODE_KP_0);
 
 		switch (key)
 		{
-			case SDLK_KP_PLUS:     return '+';
-			case SDLK_KP_MINUS:    return '-';
-			case SDLK_KP_PERIOD:   return '.';
-			case SDLK_KP_MULTIPLY: return '*';
-			case SDLK_KP_DIVIDE:   return '/';
-			case SDLK_KP_EQUALS:   return '=';
-			case SDLK_KP_ENTER:    return KEYD_ENTER;
+			case SDL_SCANCODE_KP_PLUS:     return '+';
+			case SDL_SCANCODE_KP_MINUS:    return '-';
+			case SDL_SCANCODE_KP_PERIOD:   return '.';
+			case SDL_SCANCODE_KP_MULTIPLY: return '*';
+			case SDL_SCANCODE_KP_DIVIDE:   return '/';
+			case SDL_SCANCODE_KP_EQUALS:   return '=';
+			case SDL_SCANCODE_KP_ENTER:    return KEYD_ENTER;
 
 			default: break;
 		}
@@ -94,75 +94,79 @@ int TranslateSDLKey(int key)
 
 	switch (key) 
 	{
-		case SDLK_TAB: return KEYD_TAB;
-		case SDLK_RETURN: return KEYD_ENTER;
-		case SDLK_ESCAPE: return KEYD_ESCAPE;
-		case SDLK_BACKSPACE: return KEYD_BACKSPACE;
+		case SDL_SCANCODE_GRAVE: return KEYD_TILDE;
+		case SDL_SCANCODE_MINUS: return KEYD_MINUS;
+		case SDL_SCANCODE_EQUALS: return KEYD_EQUALS;
 
-		case SDLK_UP:    return KEYD_UPARROW;
-		case SDLK_DOWN:  return KEYD_DOWNARROW;
-		case SDLK_LEFT:  return KEYD_LEFTARROW;
-		case SDLK_RIGHT: return KEYD_RIGHTARROW;
+		case SDL_SCANCODE_TAB: return KEYD_TAB;
+		case SDL_SCANCODE_RETURN: return KEYD_ENTER;
+		case SDL_SCANCODE_ESCAPE: return KEYD_ESCAPE;
+		case SDL_SCANCODE_BACKSPACE: return KEYD_BACKSPACE;
 
-		case SDLK_HOME:   return KEYD_HOME;
-		case SDLK_END:    return KEYD_END;
-		case SDLK_INSERT: return KEYD_INSERT;
-		case SDLK_DELETE: return KEYD_DELETE;
-		case SDLK_PAGEUP: return KEYD_PGUP;
-		case SDLK_PAGEDOWN: return KEYD_PGDN;
+		case SDL_SCANCODE_UP:    return KEYD_UPARROW;
+		case SDL_SCANCODE_DOWN:  return KEYD_DOWNARROW;
+		case SDL_SCANCODE_LEFT:  return KEYD_LEFTARROW;
+		case SDL_SCANCODE_RIGHT: return KEYD_RIGHTARROW;
 
-		case SDLK_F1:  return KEYD_F1;
-		case SDLK_F2:  return KEYD_F2;
-		case SDLK_F3:  return KEYD_F3;
-		case SDLK_F4:  return KEYD_F4;
-		case SDLK_F5:  return KEYD_F5;
-		case SDLK_F6:  return KEYD_F6;
-		case SDLK_F7:  return KEYD_F7;
-		case SDLK_F8:  return KEYD_F8;
-		case SDLK_F9:  return KEYD_F9;
-		case SDLK_F10: return KEYD_F10;
-		case SDLK_F11: return KEYD_F11;
-		case SDLK_F12: return KEYD_F12;
+		case SDL_SCANCODE_HOME:   return KEYD_HOME;
+		case SDL_SCANCODE_END:    return KEYD_END;
+		case SDL_SCANCODE_INSERT: return KEYD_INSERT;
+		case SDL_SCANCODE_DELETE: return KEYD_DELETE;
+		case SDL_SCANCODE_PAGEUP: return KEYD_PGUP;
+		case SDL_SCANCODE_PAGEDOWN: return KEYD_PGDN;
 
-		case SDLK_KP_0: return KEYD_KP0;
-		case SDLK_KP_1: return KEYD_KP1;
-		case SDLK_KP_2: return KEYD_KP2;
-		case SDLK_KP_3: return KEYD_KP3;
-		case SDLK_KP_4: return KEYD_KP4;
-		case SDLK_KP_5: return KEYD_KP5;
-		case SDLK_KP_6: return KEYD_KP6;
-		case SDLK_KP_7: return KEYD_KP7;
-		case SDLK_KP_8: return KEYD_KP8;
-		case SDLK_KP_9: return KEYD_KP9;
+		case SDL_SCANCODE_F1:  return KEYD_F1;
+		case SDL_SCANCODE_F2:  return KEYD_F2;
+		case SDL_SCANCODE_F3:  return KEYD_F3;
+		case SDL_SCANCODE_F4:  return KEYD_F4;
+		case SDL_SCANCODE_F5:  return KEYD_F5;
+		case SDL_SCANCODE_F6:  return KEYD_F6;
+		case SDL_SCANCODE_F7:  return KEYD_F7;
+		case SDL_SCANCODE_F8:  return KEYD_F8;
+		case SDL_SCANCODE_F9:  return KEYD_F9;
+		case SDL_SCANCODE_F10: return KEYD_F10;
+		case SDL_SCANCODE_F11: return KEYD_F11;
+		case SDL_SCANCODE_F12: return KEYD_F12;
 
-		case SDLK_KP_PERIOD:   return KEYD_KP_DOT;
-		case SDLK_KP_PLUS:     return KEYD_KP_PLUS;
-		case SDLK_KP_MINUS:    return KEYD_KP_MINUS;
-		case SDLK_KP_MULTIPLY: return KEYD_KP_STAR;
-		case SDLK_KP_DIVIDE:   return KEYD_KP_SLASH;
-		case SDLK_KP_EQUALS:   return KEYD_KP_EQUAL;
-		case SDLK_KP_ENTER:    return KEYD_KP_ENTER;
+		case SDL_SCANCODE_KP_0: return KEYD_KP0;
+		case SDL_SCANCODE_KP_1: return KEYD_KP1;
+		case SDL_SCANCODE_KP_2: return KEYD_KP2;
+		case SDL_SCANCODE_KP_3: return KEYD_KP3;
+		case SDL_SCANCODE_KP_4: return KEYD_KP4;
+		case SDL_SCANCODE_KP_5: return KEYD_KP5;
+		case SDL_SCANCODE_KP_6: return KEYD_KP6;
+		case SDL_SCANCODE_KP_7: return KEYD_KP7;
+		case SDL_SCANCODE_KP_8: return KEYD_KP8;
+		case SDL_SCANCODE_KP_9: return KEYD_KP9;
 
-		case SDLK_PRINTSCREEN:     return KEYD_PRTSCR;
-		case SDLK_CAPSLOCK:  return KEYD_CAPSLOCK;
-		case SDLK_NUMLOCKCLEAR:   return KEYD_NUMLOCK;
-		case SDLK_SCROLLLOCK: return KEYD_SCRLOCK;
-		case SDLK_PAUSE:     return KEYD_PAUSE;
+		case SDL_SCANCODE_KP_PERIOD:   return KEYD_KP_DOT;
+		case SDL_SCANCODE_KP_PLUS:     return KEYD_KP_PLUS;
+		case SDL_SCANCODE_KP_MINUS:    return KEYD_KP_MINUS;
+		case SDL_SCANCODE_KP_MULTIPLY: return KEYD_KP_STAR;
+		case SDL_SCANCODE_KP_DIVIDE:   return KEYD_KP_SLASH;
+		case SDL_SCANCODE_KP_EQUALS:   return KEYD_KP_EQUAL;
+		case SDL_SCANCODE_KP_ENTER:    return KEYD_KP_ENTER;
 
-		case SDLK_LSHIFT:
-		case SDLK_RSHIFT: return KEYD_RSHIFT;
-		case SDLK_LCTRL:
-		case SDLK_RCTRL:  return KEYD_RCTRL;
-		case SDLK_LGUI:
-		case SDLK_LALT:   return KEYD_LALT;
-		case SDLK_RGUI:
-		case SDLK_RALT:   return KEYD_RALT;
+		case SDL_SCANCODE_PRINTSCREEN:     return KEYD_PRTSCR;
+		case SDL_SCANCODE_CAPSLOCK:  return KEYD_CAPSLOCK;
+		case SDL_SCANCODE_NUMLOCKCLEAR:   return KEYD_NUMLOCK;
+		case SDL_SCANCODE_SCROLLLOCK: return KEYD_SCRLOCK;
+		case SDL_SCANCODE_PAUSE:     return KEYD_PAUSE;
+
+		case SDL_SCANCODE_LSHIFT:
+		case SDL_SCANCODE_RSHIFT: return KEYD_RSHIFT;
+		case SDL_SCANCODE_LCTRL:
+		case SDL_SCANCODE_RCTRL:  return KEYD_RCTRL;
+		case SDL_SCANCODE_LGUI:
+		case SDL_SCANCODE_LALT:   return KEYD_LALT;
+		case SDL_SCANCODE_RGUI:
+		case SDL_SCANCODE_RALT:   return KEYD_RALT;
 
 		default: break;
 	}
 
 	if (key <= 0x7f)
-		return tolower(key);
+		return tolower(SDL_GetKeyFromScancode(key));
 
 	return -1;
 }
@@ -204,13 +208,13 @@ void HandleKeyEvent(SDL_Event* ev)
 		L_WriteDebug("  HandleKey: UP\n");
 #endif
 
-	int sym = (int)ev->key.keysym.sym;
+	SDL_Scancode sym = ev->key.keysym.scancode;
 
 	event_t event;
 	event.value.key.sym = TranslateSDLKey(sym);
 
 	// handle certain keys which don't behave normally
-	if (sym == SDLK_CAPSLOCK || sym == SDLK_NUMLOCKCLEAR)
+	if (sym == SDL_SCANCODE_CAPSLOCK || sym == SDL_SCANCODE_NUMLOCKCLEAR)
 	{
 #ifdef DEBUG_KB
 		L_WriteDebug("   HandleKey: CAPS or NUMLOCK\n");

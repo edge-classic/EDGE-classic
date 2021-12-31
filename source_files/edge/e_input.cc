@@ -28,6 +28,7 @@
 //
 
 #include "i_defs.h"
+#include "i_sdlinc.h"
 
 #include "dm_defs.h"
 #include "dm_state.h"
@@ -758,7 +759,7 @@ static specialkey_t special_keys[] =
     { KEYD_END, "End" },
     { '\'', "\'" },
     { KEYD_SPACE, "Space" },
-    { KEYD_TILDE, "Tilde" },
+    { KEYD_TILDE, SDL_GetKeyName((SDL_GetKeyFromScancode(SDL_SCANCODE_GRAVE))) },
     { KEYD_PAUSE, "Pause" },
 
 	// function keys

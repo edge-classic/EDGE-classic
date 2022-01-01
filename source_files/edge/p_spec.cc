@@ -493,24 +493,26 @@ static void P_DoLineEffectDebris(line_t *target, const linetype_c *special)
 {
 
 	//1. Unblock the line
-	if (target->side[0] && target->side[1])
+	if (special->glass)
 	{
-		// clear standard flags
-		target->flags &= ~(MLF_Blocking | MLF_BlockMonsters);
-		
-		// clear EDGE's extended lineflags too
-		target->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
+		if (target->side[0] && target->side[1])
+		{
+			// clear standard flags
+			target->flags &= ~(MLF_Blocking | MLF_BlockMonsters);
 
-		//2. Remove existing texture from line
-		const image_c *image;
-		image = W_ImageLookup("-", INS_Texture);
-		target->side[0]->middle.image = image;
-		target->side[1]->middle.image = image;
+			// clear EDGE's extended lineflags too
+			target->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
+
+			//2. Remove existing texture from line
+			const image_c *image;
+			image = W_ImageLookup("-", INS_Texture);
+			target->side[0]->middle.image = image;
+			target->side[1]->middle.image = image;
+		}
 	}
 
 	//3. Spawn our debris thing
 	const mobjtype_c *info;
-	mobj_t *th;
 
 	info = special->effectobject;
 	if (! info) return; //found nothing so exit
@@ -530,7 +532,7 @@ static void P_DoLineEffectDebris(line_t *target, const linetype_c *special)
 	//move slightly forward to spawn the debris
 	midx += dx + info->radius;
 	midy += dy + info->radius;
-	th = P_MobjCreateObject(midx, midy, midz, info);
+	P_MobjCreateObject(midx, midy, midz, info);
 
 	midx = (target->v1->x + target->v2->x) / 2;
 	midy = (target->v1->y + target->v2->y) / 2;
@@ -538,8 +540,7 @@ static void P_DoLineEffectDebris(line_t *target, const linetype_c *special)
 	//move slightly backward to spawn the debris
 	midx -= dx + info->radius;
 	midy -= dy + info->radius;
-	th = P_MobjCreateObject(midx, midy, midz, info);
-	
+	P_MobjCreateObject(midx, midy, midz, info);	
 }
 
 //
@@ -1165,6 +1166,26 @@ static bool P_ActivateSpecialLine(line_t * line,
 	// Check if button already pressed
 	if (line && P_ButtonIsPressed(line))
 		return false;
+	
+	// Tagged line effect_object
+	if (line && special->effectobject)
+	{
+		if (!tag)
+		{
+			P_DoLineEffectDebris(line, special);
+		}
+		else
+		{
+			for (i=0; i < numlines; i++)
+			{
+				if (lines[i].tag == tag)
+				{
+					P_DoLineEffectDebris(lines + i, special);
+				}
+			}
+		}
+	}
+
 
 	// Do lights
 	// -KM- 1998/09/27 Generalised light types.
@@ -1333,6 +1354,15 @@ static bool P_ActivateSpecialLine(line_t * line,
 		{
 			P_LineEffect(line, line, special);
 			texSwitch = true;
+			//We need to make sure these are still turned off
+			if (special->glass)
+			{
+				if (line->side[0] && line->side[1])
+				{
+					// clear EDGE's extended lineflags too
+					line->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
+				}
+			}
 		}
 		else
 		{
@@ -1342,6 +1372,15 @@ static bool P_ActivateSpecialLine(line_t * line,
 				{
 					P_LineEffect(lines + i, line, special);
 					texSwitch = true;
+					//We need to make sure these are still turned off
+					if (special->glass)
+					{
+						if (lines[i].side[0] && lines[i].side[1])
+						{
+							// clear EDGE's extended lineflags too
+							lines[i].flags &= ~(MLF_SightBlock | MLF_ShootBlock);
+						}
+					}
 				}
 			}
 		}
@@ -1426,28 +1465,6 @@ static bool P_ActivateSpecialLine(line_t * line,
 		P_ChangeSwitchTexture(line, line->special && (special->newtrignum == 0),
 				special->special_flags, playedSound);
 	}
-	
-	// Tagged line effects
-	if (line && special->effectobject)
-	{
-		if (!tag)
-		{
-			P_DoLineEffectDebris(line, special);
-			texSwitch = true;
-		}
-		else
-		{
-			for (i=0; i < numlines; i++)
-			{
-				if (lines[i].tag == tag)
-				{
-					P_DoLineEffectDebris(lines + i, special);
-					texSwitch = true;
-				}
-			}
-		}
-	}
-
 	return true;
 }
 
@@ -1907,11 +1924,8 @@ void P_SpawnSpecials1(void)
 			DetailSlope_Ceiling(&lines[i]);
 		}
 		
-		//handle our debris type now
-		const mobjtype_c *info;
-		info = special->effectobject;
-
-		if (info)
+		// Handle our Glass line type now
+		if (special->glass)
 		{
 			P_LineEffectDebris(&lines[i], special);	
 		}

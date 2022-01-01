@@ -209,6 +209,9 @@ static const commandlist_t linedef_commands[] =
 	// -AJA- backwards compatibility cruft...
 	DF("EXTRAFLOOR_TRANSLUCENCY", translucency, DDF_MainGetPercent),
 
+	//Lobo: 2021
+	DF("EFFECT_OBJECT", effectobject_ref, DDF_MainGetString),
+	
 	DDF_CMD_END
 };
 
@@ -514,6 +517,10 @@ void DDF_LinedefCleanUp(void)
 
 		l->t.outspawnobj = l->t.outspawnobj_ref ?
 			mobjtypes.Lookup(l->t.outspawnobj_ref) : NULL;
+		
+		//Lobo: 2021
+		l->effectobject = l->effectobject_ref ?
+			mobjtypes.Lookup(l->effectobject_ref) : NULL;
 
 		cur_ddf_entryname.clear();
 	}
@@ -1683,6 +1690,10 @@ void linetype_c::CopyDetail(linetype_c &src)
 	portal_effect = src.portal_effect;
 	slope_type = src.slope_type;
 	fx_color = src.fx_color;
+	
+	//lobo 2021
+	effectobject = src.effectobject;	
+	effectobject_ref = src.effectobject_ref;
 }
 
 
@@ -1737,6 +1748,10 @@ void linetype_c::Default(void)
 	portal_effect = PORTFX_None;
 	slope_type = SLP_NONE;
 	fx_color = RGB_MAKE(0,0,0);
+	
+	//lobo 2021
+	effectobject = NULL;	
+	effectobject_ref.clear();
 }
 
 

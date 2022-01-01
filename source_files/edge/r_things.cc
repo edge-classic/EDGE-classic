@@ -142,6 +142,13 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 	if (!image)
 		return;
 
+	// Trying to fix edge case where an empty sprite is used in a state that has a duration greater than 0 - Dasho
+	if (image->actual_w == 1 && image->actual_h == 1)
+	{
+		image = R2_GetOtherSprite(state->sprite + 1, state->frame, &flip);
+		if (!image) return;
+	}	
+
 	GLuint tex_id = W_ImageCache(image, false,
 					  (which == ps_crosshair) ? NULL : ren_fx_colmap);
 

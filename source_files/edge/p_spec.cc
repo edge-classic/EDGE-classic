@@ -457,6 +457,92 @@ static void P_EFTransferTrans(sector_t *ctrl, sector_t *sec, line_t *line,
 }
 
 //
+// Lobo:2021 Setup our special debris linetype.
+//
+// This is because we want to set the "LINE_EFFECT="" specials
+// BLOCK_SHOTS and BLOCK_SIGHT
+// without actually activating the line.
+//
+static void P_LineEffectDebris(line_t *target, const linetype_c *special)
+{
+	if (target->side[0] && target->side[1])
+	{
+		// block bullets/missiles
+		if (special->line_effect & LINEFX_BlockShots)
+		{
+			target->flags |= MLF_ShootBlock;
+		}
+
+		// block monster sight
+		if (special->line_effect & LINEFX_BlockSight)
+		{
+			target->flags |= MLF_SightBlock;
+		}
+
+		//It should be set in the map editor like this
+		//anyway, but force it just in case
+		target->flags |= MLF_Blocking;
+		target->flags |= MLF_BlockMonsters;
+	}	
+}
+
+//
+// Lobo:2021 Activate our special debris linetype.
+//
+static void P_DoLineEffectDebris(line_t *target, const linetype_c *special)
+{
+
+	//1. Unblock the line
+	if (target->side[0] && target->side[1])
+	{
+		// clear standard flags
+		target->flags &= ~(MLF_Blocking | MLF_BlockMonsters);
+		
+		// clear EDGE's extended lineflags too
+		target->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
+
+		//2. Remove existing texture from line
+		const image_c *image;
+		image = W_ImageLookup("-", INS_Texture);
+		target->side[0]->middle.image = image;
+		target->side[1]->middle.image = image;
+	}
+
+	//3. Spawn our debris thing
+	const mobjtype_c *info;
+	mobj_t *th;
+
+	info = special->effectobject;
+	if (! info) return; //found nothing so exit
+
+	float midx = 0;
+	float midy = 0;
+	float midz = 0;
+
+	//calculate midpoint
+	midx = (target->v1->x + target->v2->x) / 2;
+	midy = (target->v1->y + target->v2->y) / 2;
+	midz = ONFLOORZ;
+
+	float dx = P_Random() * info->radius / 255.0f;
+	float dy = P_Random() * info->radius / 255.0f;
+
+	//move slightly forward to spawn the debris
+	midx += dx + info->radius;
+	midy += dy + info->radius;
+	th = P_MobjCreateObject(midx, midy, midz, info);
+
+	midx = (target->v1->x + target->v2->x) / 2;
+	midy = (target->v1->y + target->v2->y) / 2;
+
+	//move slightly backward to spawn the debris
+	midx -= dx + info->radius;
+	midy -= dy + info->radius;
+	th = P_MobjCreateObject(midx, midy, midz, info);
+	
+}
+
+//
 // Handles BOOM's line -> tagged line transfers.
 //
 static void P_LineEffect(line_t *target, line_t *source,
@@ -1340,6 +1426,27 @@ static bool P_ActivateSpecialLine(line_t * line,
 		P_ChangeSwitchTexture(line, line->special && (special->newtrignum == 0),
 				special->special_flags, playedSound);
 	}
+	
+	// Tagged line effects
+	if (line && special->effectobject)
+	{
+		if (!tag)
+		{
+			P_DoLineEffectDebris(line, special);
+			texSwitch = true;
+		}
+		else
+		{
+			for (i=0; i < numlines; i++)
+			{
+				if (lines[i].tag == tag)
+				{
+					P_DoLineEffectDebris(lines + i, special);
+					texSwitch = true;
+				}
+			}
+		}
+	}
 
 	return true;
 }
@@ -1798,6 +1905,15 @@ void P_SpawnSpecials1(void)
 		if (special->slope_type & SLP_DetailCeiling)
 		{
 			DetailSlope_Ceiling(&lines[i]);
+		}
+		
+		//handle our debris type now
+		const mobjtype_c *info;
+		info = special->effectobject;
+
+		if (info)
+		{
+			P_LineEffectDebris(&lines[i], special);	
 		}
 	}
 }

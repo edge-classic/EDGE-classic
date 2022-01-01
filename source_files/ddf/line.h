@@ -723,6 +723,11 @@ public:
 
 	// Teleporter
 	teleportdef_c t;
+	
+	//Lobo: item to spawn (or NULL).  The mobjdef pointer is only valid after
+	// DDF_MobjCleanUp() has been called.
+	const mobjtype_c *effectobject;
+	epi::strent_c effectobject_ref;
 
 	// LIGHT SPECIFIC
 	// Things may be added here; start strobing/flashing glowing lights.

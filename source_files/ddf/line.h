@@ -728,6 +728,9 @@ public:
 	// DDF_MobjCleanUp() has been called.
 	const mobjtype_c *effectobject;
 	epi::strent_c effectobject_ref;
+	
+	// Handle this line differently
+	bool glass;
 
 	// LIGHT SPECIFIC
 	// Things may be added here; start strobing/flashing glowing lights.

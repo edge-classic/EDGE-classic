@@ -413,7 +413,7 @@ static optmenuitem_t resoptions[] =
 static menuinfo_t res_optmenu = 
 {
 	resoptions, sizeof(resoptions) / sizeof(optmenuitem_t),
-	&setres_style, 150, 77, "M_VIDEO", NULL, 3, ""
+	&setres_style, 150, 77, "M_SETRES", NULL, 3, ""
 };
 
 //

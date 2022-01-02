@@ -1279,6 +1279,30 @@ static inline bool ShootCheckGap(float z,
 	return false;
 }
 
+//
+// Lobo:2021 Unblock and remove texture from our special debris linetype.
+//
+static void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
+{
+	//Unblock the line
+	if (special->glass)
+	{
+		if (TheLine->side[0] && TheLine->side[1])
+		{
+			// clear standard flags
+			TheLine->flags &= ~(MLF_Blocking | MLF_BlockMonsters);
+
+			// clear EDGE's extended lineflags too
+			TheLine->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
+
+			//2. Remove existing texture from line
+			const image_c *image;
+			image = W_ImageLookup("-", INS_Texture);
+			TheLine->side[0]->middle.image = image;
+			TheLine->side[1]->middle.image = image;
+		}
+	}
+}
 
 static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 {
@@ -1300,6 +1324,10 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 
 		int sidenum = PointOnLineSide(trace.x, trace.y, ld);
 		side_t *side = ld->side[sidenum];
+		
+		//P_ShootSpecialLine()->P_ActivateSpecialLine() can remove
+		// the special so we need to get the info before calling it
+		const linetype_c *tempspecial = ld->special;
 
 		// Line is a special, Cause action....
 		// -AJA- honour the NO_TRIGGER_LINES attack special too
@@ -1382,6 +1410,23 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 		// Spawn bullet puffs.
 		if (shoot_I.puff)
 			P_SpawnPuff(x, y, z, shoot_I.puff, shoot_I.angle + ANG180);
+		
+		//Lobo:2022
+		//Check if we're using EFFECT_OBJECT for this line
+		//and spawn that as well as the previous bullet puff
+		if (tempspecial)
+		{
+			I_Warning("LOBO:pmap 1393!\n");
+			const mobjtype_c *info;
+			info = tempspecial->effectobject;
+
+			if (info && tempspecial->type == line_shootable)
+			{
+				//P_SpawnPuff(x, y, z, info, shoot_I.angle + ANG180);
+				P_SpawnBlood(x, y, z, 0, shoot_I.angle + ANG180, info);
+			}
+			P_UnblockLineEffectDebris(ld, tempspecial);
+		}
 
 		// don't go any farther
 		return false;

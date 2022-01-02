@@ -43,7 +43,8 @@
 
 #include <charconv>
 
-//#include <unordered_map> // Dasho: Test for footstep noise lookup prototype
+#include "flat.h" // DDFFLAT - Dasho
+#include "s_sound.h" // play_footstep() - Dasho
 
 bool inv_prev_pressed = false;
 bool inv_use_pressed = false;
@@ -54,32 +55,7 @@ extern coal::vm_c *ui_vm;
 extern void VM_SetFloat(coal::vm_c *vm, const char *name, double value);
 extern void VM_CallFunction(coal::vm_c *vm, const char *name);
 
-
 player_t * ui_player_who = NULL;
-
-/*std::unordered_map<std::string, std::string> footstep_table =
-{
-	{"OSLUDG01", "FSWAT?"},
-	{"OTAR__01", "FSWAT?"},
-	{"ONUKE", "FSWAT?"},
-	{"OICYWA", "FSWAT?"},
-	{"FWATER1", "FSWAT?"},
-	{"WATER", "FSWAT?"},
-	{"FLTWAWA", "FSWAT?"},
-	{"FLTFLWW", "FSWAT?"},
-	{"FLTSLUD", "FSWAT?"},
-	{"NUKAGE", "FSWAT?"},
-	{"BLOOD", "FSWAT?"},
-	{"LAVA", "FSWAT?"},
-	{"SLIME1", "FSWAT?"},
-	{"SLIME2", "FSWAT?"},
-	{"SLIME3", "FSWAT?"},
-	{"SLIME4", "FSWAT?"},
-	{"SLIME5", "FSWAT?"},
-	{"SLIME6", "FSWAT?"},
-	{"SLIME7", "FSWAT?"},
-	{"SLIME8", "FSWAT?"},
-};*/
 
 //------------------------------------------------------------------------
 //  PLAYER MODULE
@@ -859,22 +835,27 @@ static void PL_sector_tag(coal::vm_c *vm, int argc)
 	vm->ReturnFloat(ui_player_who->mo->subsector->sector->tag);
 }
 
-// Dasho: December 2021
-// Prototype for table access alternative to footstep noise function - Dasho
-/*static void PL_noise_for_flat(coal::vm_c *vm, int argc)
+// Dasho: January 2022
+// Now uses the new DDFFLAT construct
+static void PL_play_footstep(coal::vm_c *vm, int argc)
 {
-	std::string flat = vm->AccessParamString(0);
-	if (flat.empty())
+	const char *flat = vm->AccessParamString(0);
+	if (!flat)
 		I_Error("player.noise_for_flat: No flat name given!\n");
-	if (!footstep_table[flat].empty())
-	{
-		vm->ReturnString(footstep_table[flat].c_str());
-	}
+	
+	flatdef_c *current_flatdef = flatdefs.Find(flat);
+
+	if (!current_flatdef)
+		return;
+
+	if (!current_flatdef->footstep)
+		return;
 	else
 	{
-		vm->ReturnString("");
+		// Probably need to add check to see if the sfx is valid - Dasho
+		S_StartFX(current_flatdef->footstep);
 	}
-}*/
+}
 
 static void PL_inventory_events(coal::vm_c *vm, int argc)
 {
@@ -994,7 +975,7 @@ void VM_RegisterPlaysim()
 	ui_vm->AddNativeFunction("player.sector_tag",      PL_sector_tag);
 
 	// Dasho: December 2021
-	//ui_vm->AddNativeFunction("player.noise_for_flat", PL_noise_for_flat);
+	ui_vm->AddNativeFunction("player.play_footstep", PL_play_footstep);
 	ui_vm->AddNativeFunction("player.inventory_events",		PL_inventory_events);
 
 	ui_vm->AddNativeFunction("player.use_inventory",        PL_use_inventory);

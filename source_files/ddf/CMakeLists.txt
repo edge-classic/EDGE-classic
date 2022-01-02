@@ -12,6 +12,7 @@ add_library(
   attack.cc
   boom.cc
   colormap.cc
+  flat.cc
   font.cc
   game.cc
   image.cc

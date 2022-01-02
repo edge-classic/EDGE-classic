@@ -55,6 +55,7 @@
 #include "image.h"
 #include "style.h"
 #include "switch.h"
+#include "flat.h"
 
 #include "dm_data.h"
 #include "dm_defs.h"
@@ -99,6 +100,7 @@ static ddf_reader_t DDF_Readers[] =
 	{ "DDFANIM", "Anims",      DDF_ReadAnims },
 	{ "DDFGAME", "Games",      DDF_ReadGames },
 	{ "DDFLEVL", "Levels",     DDF_ReadLevels },
+	{ "DDFFLAT", "Flats",     DDF_ReadFlat },
 	{ "RSCRIPT", "RadTrig",    RAD_ReadScript }       // -AJA- 2000/04/21.
 };
 
@@ -108,7 +110,7 @@ static ddf_reader_t DDF_Readers[] =
 #define COLM_READER  2
 #define SWTH_READER  12
 #define ANIM_READER  13
-#define RTS_READER   16
+#define RTS_READER   17
 
 class data_file_c
 {

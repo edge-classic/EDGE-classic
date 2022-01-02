@@ -463,67 +463,80 @@ static void P_EFTransferTrans(sector_t *ctrl, sector_t *sec, line_t *line,
 // BLOCK_SHOTS and BLOCK_SIGHT
 // without actually activating the line.
 //
-static void P_LineEffectDebris(line_t *target, const linetype_c *special)
+static void P_LineEffectDebris(line_t *TheLine, const linetype_c *special)
 {
-	if (target->side[0] && target->side[1])
+	if (TheLine->side[0] && TheLine->side[1])
 	{
 		// block bullets/missiles
 		if (special->line_effect & LINEFX_BlockShots)
 		{
-			target->flags |= MLF_ShootBlock;
+			TheLine->flags |= MLF_ShootBlock;
 		}
 
 		// block monster sight
 		if (special->line_effect & LINEFX_BlockSight)
 		{
-			target->flags |= MLF_SightBlock;
+			TheLine->flags |= MLF_SightBlock;
 		}
 
 		//It should be set in the map editor like this
 		//anyway, but force it just in case
-		target->flags |= MLF_Blocking;
-		target->flags |= MLF_BlockMonsters;
+		TheLine->flags |= MLF_Blocking;
+		TheLine->flags |= MLF_BlockMonsters;
 	}	
 }
 
+/*
 //
-// Lobo:2021 Activate our special debris linetype.
+// Lobo:2021 Unblock and remove texture from our special debris linetype.
 //
-static void P_DoLineEffectDebris(line_t *target, const linetype_c *special)
+static void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
 {
-
+	
 	//1. Unblock the line
 	if (special->glass)
 	{
-		if (target->side[0] && target->side[1])
+		I_Warning("LOBO:p_spec 498! unblock lines\n");
+		if (TheLine->side[0] && TheLine->side[1])
 		{
 			// clear standard flags
-			target->flags &= ~(MLF_Blocking | MLF_BlockMonsters);
+			TheLine->flags &= ~(MLF_Blocking | MLF_BlockMonsters);
 
 			// clear EDGE's extended lineflags too
-			target->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
+			TheLine->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
 
 			//2. Remove existing texture from line
 			const image_c *image;
 			image = W_ImageLookup("-", INS_Texture);
-			target->side[0]->middle.image = image;
-			target->side[1]->middle.image = image;
+			TheLine->side[0]->middle.image = image;
+			TheLine->side[1]->middle.image = image;
 		}
 	}
+}
+*/
+//
+// Lobo:2021 Spawn debris on our special linetype.
+//
+static void P_SpawnLineEffectDebris(line_t *TheLine, const linetype_c *special)
+{
+	if (! special) return; //found nothing so exit
 
-	//3. Spawn our debris thing
+	//Spawn our debris thing
 	const mobjtype_c *info;
 
 	info = special->effectobject;
 	if (! info) return; //found nothing so exit
+
+	//if it's shootable we've already handled this elsewhere
+	if(special->type == line_shootable) return;
 
 	float midx = 0;
 	float midy = 0;
 	float midz = 0;
 
 	//calculate midpoint
-	midx = (target->v1->x + target->v2->x) / 2;
-	midy = (target->v1->y + target->v2->y) / 2;
+	midx = (TheLine->v1->x + TheLine->v2->x) / 2;
+	midy = (TheLine->v1->y + TheLine->v2->y) / 2;
 	midz = ONFLOORZ;
 
 	float dx = P_Random() * info->radius / 255.0f;
@@ -532,15 +545,18 @@ static void P_DoLineEffectDebris(line_t *target, const linetype_c *special)
 	//move slightly forward to spawn the debris
 	midx += dx + info->radius;
 	midy += dy + info->radius;
-	P_MobjCreateObject(midx, midy, midz, info);
+	//P_MobjCreateObject(midx, midy, midz, info);
 
-	midx = (target->v1->x + target->v2->x) / 2;
-	midy = (target->v1->y + target->v2->y) / 2;
+	P_SpawnBlood(midx, midy, midz, 0, 0 + ANG180, info);
+
+	midx = (TheLine->v1->x + TheLine->v2->x) / 2;
+	midy = (TheLine->v1->y + TheLine->v2->y) / 2;
 
 	//move slightly backward to spawn the debris
 	midx -= dx + info->radius;
 	midy -= dy + info->radius;
-	P_MobjCreateObject(midx, midy, midz, info);	
+	//P_MobjCreateObject(midx, midy, midz, info);	
+	P_SpawnBlood(midx, midy, midz, 0, 0 + ANG180, info);
 }
 
 //
@@ -1172,7 +1188,7 @@ static bool P_ActivateSpecialLine(line_t * line,
 	{
 		if (!tag)
 		{
-			P_DoLineEffectDebris(line, special);
+			P_SpawnLineEffectDebris(line, special);
 		}
 		else
 		{
@@ -1180,7 +1196,7 @@ static bool P_ActivateSpecialLine(line_t * line,
 			{
 				if (lines[i].tag == tag)
 				{
-					P_DoLineEffectDebris(lines + i, special);
+					P_SpawnLineEffectDebris(lines + i, special);
 				}
 			}
 		}
@@ -1354,15 +1370,6 @@ static bool P_ActivateSpecialLine(line_t * line,
 		{
 			P_LineEffect(line, line, special);
 			texSwitch = true;
-			//We need to make sure these are still turned off
-			if (special->glass)
-			{
-				if (line->side[0] && line->side[1])
-				{
-					// clear EDGE's extended lineflags too
-					line->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
-				}
-			}
 		}
 		else
 		{
@@ -1372,15 +1379,6 @@ static bool P_ActivateSpecialLine(line_t * line,
 				{
 					P_LineEffect(lines + i, line, special);
 					texSwitch = true;
-					//We need to make sure these are still turned off
-					if (special->glass)
-					{
-						if (lines[i].side[0] && lines[i].side[1])
-						{
-							// clear EDGE's extended lineflags too
-							lines[i].flags &= ~(MLF_SightBlock | MLF_ShootBlock);
-						}
-					}
 				}
 			}
 		}

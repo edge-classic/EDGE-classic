@@ -179,7 +179,7 @@ void RGL_ColourmapEffect(player_t *player)
 			x1, y2
 		};
 		glVertexPointer(2, GL_INT, 0, view_vertices);
-		glDrawArrays(GL_QUADS, 0, 4);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 		glDisableClientState(GL_VERTEX_ARRAY);
 	  
 		glDisable(GL_BLEND);
@@ -267,7 +267,7 @@ void RGL_PaletteEffect(player_t *player)
 		0, 0
 	};
 	glVertexPointer(2, GL_INT, 0, effect_vertices);
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_VERTEX_ARRAY);
   
 	glDisable(GL_BLEND);

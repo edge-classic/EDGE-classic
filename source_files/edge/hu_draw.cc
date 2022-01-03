@@ -328,7 +328,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 	};
 	glVertexPointer(2, GL_INT, 0, raw_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, raw_texcoords);
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
@@ -456,7 +456,7 @@ void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col)
 		x2, y1
 	};
 	glVertexPointer(2, GL_FLOAT, 0, box_vertices);
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_BLEND);
@@ -532,7 +532,7 @@ void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col)
 		x2-2, y2-2
 	};
 	glVertexPointer(2, GL_FLOAT, 0, box_vertices);
-	glDrawArrays(GL_QUADS, 0, 16);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 16);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_BLEND);
@@ -567,7 +567,7 @@ void HUD_GradientBox(float x1, float y1, float x2, float y2, rgbcol_t *cols)
 	};
 	glVertexPointer(2, GL_FLOAT, 0, box_vertices);
 	glColorPointer(4, GL_DOUBLE, 0, box_colors);
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 

@@ -377,7 +377,7 @@ static void SolidBox(int x, int y, int w, int h, rgbcol_t col, float alpha)
 		x+w, y
 	};
 	glVertexPointer(2, GL_INT, 0, box_vertices);
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisable(GL_BLEND);
 }
@@ -425,7 +425,7 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 	};
 	glVertexPointer(2, GL_INT, 0, char_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, char_texcoords);
-	glDrawArrays(GL_POLYGON, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
 // writes the text on coords (x,y) of the console

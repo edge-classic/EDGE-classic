@@ -865,7 +865,7 @@ static void DLIT_Wall(mobj_t *mo, void *dataptr)
 
 	int blending = (data->blending & ~BL_Alpha) | BL_Add;
 	
-	mo->dlight.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id,
+	mo->dlight.shader->WorldMix(GL_TRIANGLE_FAN, data->v_count, data->tex_id,
 			data->trans, &data->pass, blending, data->mid_masked,
 			data, WallCoordFunc);
 }
@@ -878,7 +878,7 @@ static void GLOWLIT_Wall(mobj_t *mo, void *dataptr)
 
 	int blending = (data->blending & ~BL_Alpha) | BL_Add;
 
-	mo->dlight.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id,
+	mo->dlight.shader->WorldMix(GL_TRIANGLE_FAN, data->v_count, data->tex_id,
 			data->trans, &data->pass, blending, data->mid_masked,
 			data, WallCoordFunc);
 }
@@ -906,7 +906,7 @@ static void DLIT_Plane(mobj_t *mo, void *dataptr)
 
 	int blending = (data->blending & ~BL_Alpha) | BL_Add;
 
-	mo->dlight.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id,
+	mo->dlight.shader->WorldMix(GL_TRIANGLE_FAN, data->v_count, data->tex_id,
 			data->trans, &data->pass, blending, false /* masked */,
 			data, PlaneCoordFunc);
 }
@@ -919,7 +919,7 @@ static void GLOWLIT_Plane(mobj_t *mo, void *dataptr)
 
 	int blending = (data->blending & ~BL_Alpha) | BL_Add;
 
-	mo->dlight.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id,
+	mo->dlight.shader->WorldMix(GL_TRIANGLE_FAN, data->v_count, data->tex_id,
 			data->trans, &data->pass, blending, false,
 			data, PlaneCoordFunc);
 }
@@ -1176,7 +1176,7 @@ static void DrawWallPart(drawfloor_t *dfloor,
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props, lit_adjust);
 
-	cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
+	cmap_shader->WorldMix(GL_TRIANGLE_FAN, data.v_count, data.tex_id,
 			trans, &data.pass, data.blending, data.mid_masked,
 			&data, WallCoordFunc);
 
@@ -1689,7 +1689,7 @@ static void DLIT_Flood(mobj_t *mo, void *dataptr)
 			data->vert[col*2 + 1].Set(x, y, z + data->dh / data->piece_row);
 		}
 
-		mo->dlight.shader->WorldMix(GL_QUAD_STRIP, data->v_count,
+		mo->dlight.shader->WorldMix(GL_TRIANGLE_STRIP, data->v_count,
 				data->tex_id, 1.0, &data->pass, blending, false,
 				data, FloodCoordFunc);
 	}
@@ -1814,7 +1814,7 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor,
 		data.B = (64 + 90 * (row & 2))  / 255.0;
 #endif
 
-		cmap_shader->WorldMix(GL_QUAD_STRIP, data.v_count,
+		cmap_shader->WorldMix(GL_TRIANGLE_STRIP, data.v_count,
 				data.tex_id, 1.0, &data.pass, BL_NONE, false,
 				&data, FloodCoordFunc);
 	}
@@ -2424,7 +2424,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
 
-	cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
+	cmap_shader->WorldMix(GL_TRIANGLE_FAN, data.v_count, data.tex_id,
 			trans, &data.pass, data.blending, false /* masked */,
 			&data, PlaneCoordFunc);
 
@@ -2735,7 +2735,7 @@ static void DrawMirrorPolygon(drawmirror_c *mir)
 		x2, y2, z1
 	};
 	glVertexPointer(3, GL_FLOAT, 0, mirror_vertices);
-	glDrawArrays(GL_POLYGON, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_BLEND);
@@ -2820,7 +2820,7 @@ static void DrawPortalPolygon(drawmirror_c *mir)
 	};
 	glVertexPointer(3, GL_FLOAT, 0, portal_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, portal_texcoords);
-	glDrawArrays(GL_POLYGON, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 

@@ -402,7 +402,7 @@ void RGL_DrawSkyBox(void)
 	};
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
 	// bottom
@@ -421,7 +421,7 @@ void RGL_DrawSkyBox(void)
 	};
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
 	// north
@@ -440,7 +440,7 @@ void RGL_DrawSkyBox(void)
 	};
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
 	// east
@@ -459,7 +459,7 @@ void RGL_DrawSkyBox(void)
 	};
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
 	// south
@@ -478,7 +478,7 @@ void RGL_DrawSkyBox(void)
 	};
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
 	// west
@@ -497,7 +497,7 @@ void RGL_DrawSkyBox(void)
 	};
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -578,7 +578,7 @@ I_Printf("[%i] --> %1.2f  tx %1.4f\n", i, ANG_2_FLOAT(ang), tx);
 
 	glVertexPointer(2, GL_INT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
-	glDrawArrays(GL_QUAD_STRIP, 0, sky_vertices.size() / 2);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, sky_vertices.size() / 2);
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -615,7 +615,7 @@ void RGL_DrawSkyPlane(subsector_t *sub, float h)
 		plane_vertices.push_back(h);
 	}
 	glVertexPointer(3, GL_FLOAT, 0, plane_vertices.data());
-	glDrawArrays(GL_POLYGON, 0, plane_vertices.size() / 3);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, plane_vertices.size() / 3);
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
@@ -649,7 +649,7 @@ void RGL_DrawSkyWall(seg_t *seg, float h1, float h2)
 		x2, y2, h1
 	};
 	glVertexPointer(3, GL_FLOAT, 0, wall_vertices);
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 

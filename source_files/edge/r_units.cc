@@ -63,7 +63,7 @@ cvar_c r_dumbclamp;
 // a single unit (polygon, quad, etc) to pass to the GL
 typedef struct local_gl_unit_s
 {
-	// unit mode (e.g. GL_POLYGON)
+	// unit mode (e.g. GL_TRIANGLE_FAN)
 	GLuint shape;
 
 	// environment modes (GL_REPLACE, GL_MODULATE, GL_DECAL, GL_ADD)
@@ -487,7 +487,7 @@ void RGL_DrawUnits(void)
 		glEdgeFlagPointer(0, unit_edgeflags.data());
 		glNormalPointer(GL_FLOAT, 0, unit_normals.data());
 		glVertexPointer(3, GL_FLOAT, 0, unit_vertices.data());
-		glDrawArrays(unit->shape, 0, unit->shape < GL_POLYGON ? (unit_vertices.size() / 3) : unit->count);
+		glDrawArrays(unit->shape, 0, unit->shape < GL_TRIANGLE_FAN ? unit->count : (unit_vertices.size() / 3));
 
 		glClientActiveTexture(GL_TEXTURE0);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);

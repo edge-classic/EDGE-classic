@@ -108,7 +108,7 @@ void RGL_DrawImage(float x, float y, float w, float h, const image_c *image,
 	};
 	glVertexPointer(2, GL_INT, 0, image_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, image_texcoords);
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
@@ -185,7 +185,7 @@ static void ProgressSection(const byte *logo_lum, int lw, int lh,
 	};
 	glVertexPointer(2, GL_INT, 0, progress_vertices.data());
 	glColorPointer(4, GL_FLOAT, 0, progress_colors.data());
-	glDrawArrays(GL_POLYGON, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	progress_vertices.clear();
 	progress_colors.clear();
 	progress_vertices =
@@ -204,7 +204,7 @@ static void ProgressSection(const byte *logo_lum, int lw, int lh,
 	};
 	glVertexPointer(2, GL_INT, 0, progress_vertices.data());
 	glColorPointer(4, GL_FLOAT, 0, progress_colors.data());
-	glDrawArrays(GL_POLYGON, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	progress_vertices.clear();
 	progress_colors.clear();
 	progress_vertices =
@@ -223,7 +223,7 @@ static void ProgressSection(const byte *logo_lum, int lw, int lh,
 	};
 	glVertexPointer(2, GL_INT, 0, progress_vertices.data());
 	glColorPointer(4, GL_FLOAT, 0, progress_colors.data());
-	glDrawArrays(GL_POLYGON, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 

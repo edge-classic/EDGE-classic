@@ -204,7 +204,7 @@ static void RGL_Wipe_Fading(float how_far)
 
 	glVertexPointer(2, GL_INT, 0, wipe_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, wipe_texcoords);
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -244,7 +244,7 @@ static void RGL_Wipe_Pixelfade(float how_far)
 
 	glVertexPointer(2, GL_INT, 0, wipe_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, wipe_texcoords);
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -291,7 +291,7 @@ static void RGL_Wipe_Melt(void)
 
 	glVertexPointer(2, GL_FLOAT, 0, wipe_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, wipe_texcoords.data());
-	glDrawArrays(GL_QUAD_STRIP, 0, wipe_vertices.size() / 2);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, wipe_vertices.size() / 2);
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -331,7 +331,7 @@ static void RGL_Wipe_Slide(float how_far, float dx, float dy)
 
 	glVertexPointer(2, GL_FLOAT, 0, wipe_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, wipe_texcoords);
-	glDrawArrays(GL_QUADS, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -391,7 +391,7 @@ static void RGL_Wipe_Doors(float how_far)
 			}
 			glVertexPointer(2, GL_FLOAT, 0, wipe_vertices.data());
 			glTexCoordPointer(2, GL_FLOAT, 0, wipe_texcoords.data());
-			glDrawArrays(GL_QUAD_STRIP, 0, wipe_vertices.size() / 2);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, wipe_vertices.size() / 2);
 			wipe_vertices.clear();
 			wipe_texcoords.clear();
 		}

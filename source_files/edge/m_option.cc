@@ -324,8 +324,8 @@ static int M_GetCurrentSwitchValue(optmenuitem_t *item)
 
 static optmenuitem_t mainoptions[] =
 {
-	{OPT_Function, "Controls", NULL,  0, NULL, M_KeyboardOptions, "Controls"},
-	{OPT_Function, "Mouse / Joystick",  NULL,  0, NULL, M_AnalogueOptions, "AnalogueOptions"},
+	{OPT_Function, "Key Bindings", NULL,  0, NULL, M_KeyboardOptions, "Controls"},
+	{OPT_Function, "Mouse / Controller",  NULL,  0, NULL, M_AnalogueOptions, "AnalogueOptions"},
 	{OPT_Function, "Gameplay Options",  NULL,  0, NULL, M_GameplayOptions, "GameplayOptions"},
 	{OPT_Plain,    "",                  NULL,  0, NULL, NULL, NULL},
 	{OPT_Function, "Sound Options",     NULL,  0, NULL, M_SoundOptions, "SoundOptions"},

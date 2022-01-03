@@ -1271,15 +1271,20 @@ static inline bool ShootCheckGap(float z,
 
 	z = (z < shoot_I.prev_z) ? f_h + 2 : f_h - 2;
 	
-	const char *flat = floor->image->name;
-	flatdef_c *current_flatdef = flatdefs.Find(flat);
-	if (current_flatdef)
-	{ 
-		if (current_flatdef->effectobject)
-		{
-			P_SpawnPuff(x, y, z, current_flatdef->effectobject, shoot_I.angle + ANG180);
-			// don't go any farther
-			return false;
+	//Lobo 2021: respect our NO_TRIGGER_LINES attack flag
+	if (! shoot_I.source || ! shoot_I.source->currentattack ||
+			! (shoot_I.source->currentattack->flags & AF_NoTriggerLines))
+	{
+		const char *flat = floor->image->name;
+		flatdef_c *current_flatdef = flatdefs.Find(flat);
+		if (current_flatdef)
+		{ 
+			if (current_flatdef->effectobject)
+			{
+				P_SpawnPuff(x, y, z, current_flatdef->effectobject, shoot_I.angle + ANG180);
+				// don't go any farther
+				return false;
+			}
 		}
 	}
 
@@ -1341,16 +1346,10 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 		// the special so we need to get the info before calling it
 		const linetype_c *tempspecial = ld->special;
 
-		// Line is a special, Cause action....
-		// -AJA- honour the NO_TRIGGER_LINES attack special too
-		if (ld->special &&
-			(! shoot_I.source || ! shoot_I.source->currentattack ||
-			! (shoot_I.source->currentattack->flags & AF_NoTriggerLines)))
-		{
-			P_ShootSpecialLine(ld, sidenum, shoot_I.source);
-		}
-
-		// check if shot has hit a floor or ceiling...
+		//Lobo 2021: moved the line check (2.) to be after
+		//the floor/ceiling check (1.)
+		
+		//(1.) check if shot has hit a floor or ceiling...
 		if (side)
 		{
 			extrafloor_t *ef;
@@ -1374,6 +1373,15 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 			}
 		}
 
+		//(2.) Line is a special, Cause action....
+		// -AJA- honour the NO_TRIGGER_LINES attack special too
+		if (ld->special &&
+			(! shoot_I.source || ! shoot_I.source->currentattack ||
+			! (shoot_I.source->currentattack->flags & AF_NoTriggerLines)))
+		{
+			P_ShootSpecialLine(ld, sidenum, shoot_I.source);
+		}
+		
 		// shot doesn't go through a one-sided line, since one sided lines
 		// do not have a sector on the other side.
 
@@ -1426,9 +1434,10 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 		//Lobo:2022
 		//Check if we're using EFFECT_OBJECT for this line
 		//and spawn that as well as the previous bullet puff
-		if (tempspecial)
+		if (tempspecial &&
+			(! shoot_I.source || ! shoot_I.source->currentattack ||
+			! (shoot_I.source->currentattack->flags & AF_NoTriggerLines)))
 		{
-			I_Warning("LOBO:pmap 1393!\n");
 			const mobjtype_c *info;
 			info = tempspecial->effectobject;
 

@@ -382,6 +382,10 @@ void DDF_StyleCleanUp (void);
 void DDF_ImageInit (void);
 void DDF_ImageCleanUp (void);
 
+// DDF_FLAT Code 2022
+void DDF_FlatInit (void);
+void DDF_FlatCleanUp (void);
+
 // Miscellaneous stuff needed here & there
 extern const commandlist_t floor_commands[];
 extern const commandlist_t damage_commands[];

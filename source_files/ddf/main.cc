@@ -174,6 +174,7 @@ void DDF_Init(int _engine_ver)
 	DDF_GameInit();
 	DDF_LevelInit();
 	DDF_MusicPlaylistInit();
+	DDF_FlatInit();
 }
 
 void DDF_SetWhere(const std::string& dir)
@@ -256,6 +257,7 @@ void DDF_CleanUp(void)
 	DDF_GameCleanUp();
 	DDF_LevelCleanUp();
 	DDF_MusicPlaylistCleanUp();
+	DDF_FlatCleanUp();
 }
 
 static const char *tag_conversion_table[] =
@@ -263,6 +265,7 @@ static const char *tag_conversion_table[] =
     "ANIMATIONS",  "DDFANIM",
     "ATTACKS",     "DDFATK",
     "COLOURMAPS",  "DDFCOLM",
+    "FLATS",       "DDFFLAT",
     "FONTS",       "DDFFONT",
     "GAMES",       "DDFGAME",
     "IMAGES",      "DDFIMAGE",

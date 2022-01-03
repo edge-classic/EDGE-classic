@@ -1270,6 +1270,18 @@ static inline bool ShootCheckGap(float z,
 	float y = trace.y + trace.dy * frac;
 
 	z = (z < shoot_I.prev_z) ? f_h + 2 : f_h - 2;
+	
+	const char *flat = floor->image->name;
+	flatdef_c *current_flatdef = flatdefs.Find(flat);
+	if (current_flatdef)
+	{ 
+		if (current_flatdef->effectobject)
+		{
+			P_SpawnPuff(x, y, z, current_flatdef->effectobject, shoot_I.angle + ANG180);
+			// don't go any farther
+			return false;
+		}
+	}
 
 	// Spawn bullet puff
 	if (shoot_I.puff)

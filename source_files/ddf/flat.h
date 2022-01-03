@@ -38,6 +38,10 @@ public:
 
 	struct sfx_s *footstep;
 	lumpname_c splash;
+	//Lobo: item to spawn (or NULL).  The mobjdef pointer is only valid after
+	// DDF_flatCleanUp() has been called.
+	const mobjtype_c *effectobject;
+	epi::strent_c effectobject_ref;
 
 private:
 	// disable copy construct and assignment operator

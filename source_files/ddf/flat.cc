@@ -31,6 +31,7 @@ static const commandlist_t flat_commands[] =
 {
 	DDF_FIELD("FOOTSTEP",   footstep, DDF_MainLookupSound),
 	DDF_FIELD("SPLASH", splash, DDF_MainGetLumpName),
+	DDF_FIELD("EFFECT_OBJECT", effectobject_ref, DDF_MainGetString),
 
 	DDF_CMD_END
 };
@@ -152,6 +153,22 @@ void DDF_FlatInit(void)
 //
 void DDF_FlatCleanUp(void)
 {
+	epi::array_iterator_c it;
+	flatdef_c *f;
+	
+	for (it=flatdefs.GetBaseIterator(); it.IsValid(); it++)
+	{
+		f = ITERATOR_TO_TYPE(it, flatdef_c*);
+		cur_ddf_entryname = epi::STR_Format("[%s]  (flats.ddf)", f->name.c_str());
+
+		f->effectobject = f->effectobject_ref ?
+			mobjtypes.Lookup(f->effectobject_ref) : NULL;
+
+		//f->effectobject = f->effectobject_ref.empty() ? 
+		//		NULL : mobjtypes.Lookup(f->effectobject_ref);
+		cur_ddf_entryname.clear();
+	}
+	
 	flatdefs.Trim();
 }
 
@@ -204,6 +221,8 @@ void flatdef_c::CopyDetail(flatdef_c &src)
 {
 	footstep = src.footstep;
 	splash = src.splash;
+	effectobject = src.effectobject;	
+	effectobject_ref = src.effectobject_ref;
 }
 
 //
@@ -213,6 +232,8 @@ void flatdef_c::Default()
 {
 	footstep = sfx_None;
 	splash.clear();
+	effectobject = NULL;	
+	effectobject_ref.clear();
 }
 
 

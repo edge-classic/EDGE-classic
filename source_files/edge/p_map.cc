@@ -1299,7 +1299,7 @@ static inline bool ShootCheckGap(float z,
 //
 // Lobo:2021 Unblock and remove texture from our special debris linetype.
 //
-static void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
+void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
 {
 	if(!TheLine)
 	{

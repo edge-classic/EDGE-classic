@@ -486,34 +486,7 @@ static void P_LineEffectDebris(line_t *TheLine, const linetype_c *special)
 	}	
 }
 
-/*
-//
-// Lobo:2021 Unblock and remove texture from our special debris linetype.
-//
-static void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
-{
-	
-	//1. Unblock the line
-	if (special->glass)
-	{
-		I_Warning("LOBO:p_spec 498! unblock lines\n");
-		if (TheLine->side[0] && TheLine->side[1])
-		{
-			// clear standard flags
-			TheLine->flags &= ~(MLF_Blocking | MLF_BlockMonsters);
 
-			// clear EDGE's extended lineflags too
-			TheLine->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
-
-			//2. Remove existing texture from line
-			const image_c *image;
-			image = W_ImageLookup("-", INS_Texture);
-			TheLine->side[0]->middle.image = image;
-			TheLine->side[1]->middle.image = image;
-		}
-	}
-}
-*/
 //
 // Lobo:2021 Spawn debris on our special linetype.
 //

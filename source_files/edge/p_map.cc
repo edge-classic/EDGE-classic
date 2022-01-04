@@ -1301,6 +1301,10 @@ static inline bool ShootCheckGap(float z,
 //
 static void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
 {
+	if(!TheLine)
+	{
+		return;
+	}
 	//Unblock the line
 	if (special->glass)
 	{

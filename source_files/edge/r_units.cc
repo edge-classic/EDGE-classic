@@ -44,6 +44,7 @@ std::vector<GLfloat> unit_normals;
 std::vector<GLboolean> unit_edgeflags;
 std::vector<GLfloat> unit_texcoords0;
 std::vector<GLfloat> unit_texcoords1;
+std::vector<GLfloat> unit_colors;
 
 cvar_c r_colorlighting;
 cvar_c r_colormaterial;
@@ -287,14 +288,6 @@ static void EnableCustomEnv(GLuint env, bool enable)
 
 static inline void RGL_SendRawVector(const local_gl_vert_t *V)
 {
-	if (r_colormaterial.d || ! r_colorlighting.d)
-		glColor4fv(V->rgba);
-	else
-	{
-		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, V->rgba);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, V->rgba);
-	}
-
 	unit_texcoords0.push_back(V->texc[0].x);
 	unit_texcoords0.push_back(V->texc[0].y);
 	glClientActiveTexture(GL_TEXTURE0);
@@ -315,6 +308,11 @@ static inline void RGL_SendRawVector(const local_gl_vert_t *V)
 	unit_vertices.push_back(V->pos.x);
 	unit_vertices.push_back(V->pos.y);
 	unit_vertices.push_back(V->pos.z);
+
+	unit_colors.push_back(V->rgba[0]);
+	unit_colors.push_back(V->rgba[1]);
+	unit_colors.push_back(V->rgba[2]);
+	unit_colors.push_back(V->rgba[3]);
 }
 
 //
@@ -478,16 +476,30 @@ void RGL_DrawUnits(void)
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_NORMAL_ARRAY);
 		glEnableClientState(GL_EDGE_FLAG_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);
+
+		if (!r_colormaterial.d || r_colorlighting.d)
+		{
+			glEnable(GL_LIGHTING);
+			glEnable(GL_COLOR_MATERIAL);
+		}
 
 		for (int v_idx=0; v_idx < unit->count; v_idx++)
 		{
 			RGL_SendRawVector(local_verts + unit->first + v_idx);
 		}
 
+		glColorPointer(4, GL_FLOAT, 0, unit_colors.data());
 		glEdgeFlagPointer(0, unit_edgeflags.data());
 		glNormalPointer(GL_FLOAT, 0, unit_normals.data());
 		glVertexPointer(3, GL_FLOAT, 0, unit_vertices.data());
 		glDrawArrays(unit->shape, 0, unit->shape < GL_TRIANGLE_FAN ? unit->count : (unit_vertices.size() / 3));
+
+		if (!r_colormaterial.d || r_colorlighting.d)
+		{
+			glDisable(GL_LIGHTING);
+			glDisable(GL_COLOR_MATERIAL);
+		}
 
 		glClientActiveTexture(GL_TEXTURE0);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -496,8 +508,10 @@ void RGL_DrawUnits(void)
 		glDisableClientState(GL_EDGE_FLAG_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);
 		glClientActiveTexture(GL_TEXTURE0);
 
+		unit_colors.clear();
 		unit_edgeflags.clear();
 		unit_normals.clear();
 		unit_vertices.clear();

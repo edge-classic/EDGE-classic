@@ -29,6 +29,7 @@ static flatdef_c dummy_flatdef;
 
 static const commandlist_t flat_commands[] =
 {
+	DDF_FIELD("LIQUID", liquid, DDF_MainGetBoolean),
 	DDF_FIELD("FOOTSTEP",   footstep, DDF_MainLookupSound),
 	DDF_FIELD("SPLASH", splash, DDF_MainGetLumpName),
 	DDF_FIELD("EFFECT_OBJECT", effectobject_ref, DDF_MainGetString),
@@ -77,11 +78,15 @@ static void FlatFinishEntry(void)
 {
 	// These are only warnings to inform the user in case they actually did want a footstep or splash - Dasho
 
+	//Lobo 2022: very annoying warnings. Silenced ;)
+	/*
 	if (!dynamic_flatdef->footstep)
 		DDF_Warning("DDFFLAT: No footstep sound defined for %s.\n", dynamic_flatdef->name.c_str());
 
 	if (!dynamic_flatdef->splash[0])
 		DDF_Warning("DDFFLAT: No splash sprite defined for %s.\n", dynamic_flatdef->name.c_str());
+
+	*/
 }
 
 static void FlatParseField(const char *field, const char *contents,
@@ -219,6 +224,7 @@ flatdef_c::flatdef_c() : name()
 //
 void flatdef_c::CopyDetail(flatdef_c &src)
 {
+	liquid = src.liquid;
 	footstep = src.footstep;
 	splash = src.splash;
 	effectobject = src.effectobject;	
@@ -230,6 +236,7 @@ void flatdef_c::CopyDetail(flatdef_c &src)
 //
 void flatdef_c::Default()
 {
+	liquid = false;
 	footstep = sfx_None;
 	splash.clear();
 	effectobject = NULL;	

@@ -294,6 +294,7 @@ void P_SlideMove(mobj_t * mo, float x, float y);
 void P_UseLines(player_t * player);
 void P_LineAttack(mobj_t * t1, angle_t angle, float distance, float slope, float damage, const damage_c * damtype, const mobjtype_c *puff);
 
+void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special);
 
 //
 // P_SETUP

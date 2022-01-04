@@ -159,7 +159,6 @@ void RGL_ColourmapEffect(player_t *player)
 		r = 1.0f; // MAX(0.5f, r) * (s + 1.0f) / 2.0f;
 		g = b = r;
 
-		glColor4f(r, g, b, 0.0f);
 		glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
 
 		glEnable(GL_BLEND);
@@ -171,6 +170,7 @@ void RGL_ColourmapEffect(player_t *player)
 		y2 = viewwindow_y;
 
 		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);
 		GLint view_vertices[] =
 		{
 			x1, y1,
@@ -178,8 +178,17 @@ void RGL_ColourmapEffect(player_t *player)
 			x2, y2,
 			x1, y2
 		};
+		GLfloat view_colors[] =
+		{
+			r, g, b, 0.0f,
+			r, g, b, 0.0f,
+			r, g, b, 0.0f,
+			r, g, b, 0.0f
+		};
+		glColorPointer(4, GL_FLOAT, 0, view_colors);
 		glVertexPointer(2, GL_INT, 0, view_vertices);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+		glDisableClientState(GL_COLOR_ARRAY);
 		glDisableClientState(GL_VERTEX_ARRAY);
 	  
 		glDisable(GL_BLEND);
@@ -197,6 +206,8 @@ void RGL_PaletteEffect(player_t *player)
 	byte rgb_data[3];
 
 	float s = EffectStrength(player);
+
+	std::vector<GLfloat> effect_colors;
 
 	if (s > 0 && player->powers[PW_Invulnerable] > 0 &&
 	    player->effect_colourmap && (player->effect_left & 8))
@@ -237,7 +248,22 @@ void RGL_PaletteEffect(player_t *player)
 	{
 		float r, g, b;
 		V_GetColmapRGB(player->effect_colourmap, &r, &g, &b);
-		glColor4f(r, g, b, 0.20f * s);
+		effect_colors.push_back(r);
+		effect_colors.push_back(g);
+		effect_colors.push_back(b);
+		effect_colors.push_back(0.20f * s);
+		effect_colors.push_back(r);
+		effect_colors.push_back(g);
+		effect_colors.push_back(b);
+		effect_colors.push_back(0.20f * s);
+		effect_colors.push_back(r);
+		effect_colors.push_back(g);
+		effect_colors.push_back(b);
+		effect_colors.push_back(0.20f * s);
+		effect_colors.push_back(r);
+		effect_colors.push_back(g);
+		effect_colors.push_back(b);
+		effect_colors.push_back(0.20f * s);
 	}
 	else
 	{
@@ -250,15 +276,28 @@ void RGL_PaletteEffect(player_t *player)
 	  
 		rgb_max = MIN(200, rgb_max);
 
-		glColor4f((float) rgb_data[0] / (float) rgb_max,
-				  (float) rgb_data[1] / (float) rgb_max,
-				  (float) rgb_data[2] / (float) rgb_max,
-			      (float) rgb_max / 255.0f);
+		effect_colors.push_back((float) rgb_data[0] / (float) rgb_max);
+		effect_colors.push_back((float) rgb_data[1] / (float) rgb_max);
+		effect_colors.push_back((float) rgb_data[2] / (float) rgb_max);
+		effect_colors.push_back((float) rgb_max / 255.0f);
+		effect_colors.push_back((float) rgb_data[0] / (float) rgb_max);
+		effect_colors.push_back((float) rgb_data[1] / (float) rgb_max);
+		effect_colors.push_back((float) rgb_data[2] / (float) rgb_max);
+		effect_colors.push_back((float) rgb_max / 255.0f);
+		effect_colors.push_back((float) rgb_data[0] / (float) rgb_max);
+		effect_colors.push_back((float) rgb_data[1] / (float) rgb_max);
+		effect_colors.push_back((float) rgb_data[2] / (float) rgb_max);
+		effect_colors.push_back((float) rgb_max / 255.0f);
+		effect_colors.push_back((float) rgb_data[0] / (float) rgb_max);
+		effect_colors.push_back((float) rgb_data[1] / (float) rgb_max);
+		effect_colors.push_back((float) rgb_data[2] / (float) rgb_max);
+		effect_colors.push_back((float) rgb_max / 255.0f);
 	}
 
 	glEnable(GL_BLEND);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 	GLint effect_vertices[] =
 	{
 		0, SCREENHEIGHT,
@@ -266,8 +305,10 @@ void RGL_PaletteEffect(player_t *player)
 		SCREENWIDTH, 0,
 		0, 0
 	};
+	glColorPointer(4, GL_FLOAT, 0, effect_colors.data());
 	glVertexPointer(2, GL_INT, 0, effect_vertices);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
   
 	glDisable(GL_BLEND);

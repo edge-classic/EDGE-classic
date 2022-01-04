@@ -182,10 +182,10 @@ static void RGL_Wipe_Fading(float how_far)
 	glEnable(GL_BLEND);
 
 	glBindTexture(GL_TEXTURE_2D, cur_wipe_tex);
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f - how_far);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 
 	GLint wipe_vertices[] =
 	{
@@ -201,11 +201,20 @@ static void RGL_Wipe_Fading(float how_far)
 		cur_wipe_right, cur_wipe_top,
 		cur_wipe_right, 0.0f
 	};
+	GLfloat wipe_colors[] =
+	{
+		1.0f, 1.0f, 1.0f, 1.0f - how_far,
+		1.0f, 1.0f, 1.0f, 1.0f - how_far,
+		1.0f, 1.0f, 1.0f, 1.0f - how_far,
+		1.0f, 1.0f, 1.0f, 1.0f - how_far
+	};
 
+	glColorPointer(4, GL_FLOAT, 0, wipe_colors);
 	glVertexPointer(2, GL_INT, 0, wipe_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, wipe_texcoords);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
@@ -222,10 +231,10 @@ static void RGL_Wipe_Pixelfade(float how_far)
 	glAlphaFunc(GL_GEQUAL, how_far);
 
 	glBindTexture(GL_TEXTURE_2D, cur_wipe_tex);
-	glColor3f(1.0f, 1.0f, 1.0f);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 
 	GLint wipe_vertices[] =
 	{
@@ -241,11 +250,20 @@ static void RGL_Wipe_Pixelfade(float how_far)
 		cur_wipe_right, cur_wipe_top,
 		cur_wipe_right, 0.0f
 	};
+	GLfloat wipe_colors[] =
+	{
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f
+	};
 
+	glColorPointer(3, GL_FLOAT, 0, wipe_colors);
 	glVertexPointer(2, GL_INT, 0, wipe_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, wipe_texcoords);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
@@ -262,13 +280,14 @@ static void RGL_Wipe_Melt(void)
 	glEnable(GL_BLEND);
 
 	glBindTexture(GL_TEXTURE_2D, cur_wipe_tex);
-	glColor3f(1.0f, 1.0f, 1.0f);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 
 	std::vector<GLfloat> wipe_vertices;
 	std::vector<GLfloat> wipe_texcoords;
+	std::vector<GLfloat> wipe_colors;
 
 	for (int x=0; x <= MELT_DIVS; x++)
 	{
@@ -287,12 +306,20 @@ static void RGL_Wipe_Melt(void)
 		wipe_texcoords.push_back(cur_wipe_top);
 		wipe_texcoords.push_back(tx);
 		wipe_texcoords.push_back(0.0f);
+		wipe_colors.push_back(1.0f);
+		wipe_colors.push_back(1.0f);
+		wipe_colors.push_back(1.0f);
+		wipe_colors.push_back(1.0f);
+		wipe_colors.push_back(1.0f);
+		wipe_colors.push_back(1.0f);
 	}
 
+	glColorPointer(3, GL_FLOAT, 0, wipe_colors.data());
 	glVertexPointer(2, GL_FLOAT, 0, wipe_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, wipe_texcoords.data());
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, wipe_vertices.size() / 2);
 
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
@@ -309,10 +336,10 @@ static void RGL_Wipe_Slide(float how_far, float dx, float dy)
 	glEnable(GL_BLEND);
 
 	glBindTexture(GL_TEXTURE_2D, cur_wipe_tex);
-	glColor3f(1.0f, 1.0f, 1.0f);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 
 	GLfloat wipe_vertices[] =
 	{
@@ -328,11 +355,20 @@ static void RGL_Wipe_Slide(float how_far, float dx, float dy)
 		cur_wipe_right, cur_wipe_top,
 		cur_wipe_right, 0.0f
 	};
+	GLfloat wipe_colors[] =
+	{
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f
+	};
 
+	glColorPointer(3, GL_FLOAT, 0, wipe_colors);
 	glVertexPointer(2, GL_FLOAT, 0, wipe_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, wipe_texcoords);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
@@ -349,13 +385,14 @@ static void RGL_Wipe_Doors(float how_far)
 	glEnable(GL_BLEND);
 
 	glBindTexture(GL_TEXTURE_2D, cur_wipe_tex);
-	glColor3f(1.0f, 1.0f, 1.0f);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 
 	std::vector<GLfloat> wipe_vertices;
 	std::vector<GLfloat> wipe_texcoords;
+	std::vector<GLfloat> wipe_colors;
 
 	for (int column = 0; column < 5; column++)
 	{
@@ -388,15 +425,24 @@ static void RGL_Wipe_Doors(float how_far)
 				wipe_texcoords.push_back(t_y);
 				wipe_texcoords.push_back(t_x1 * cur_wipe_right);
 				wipe_texcoords.push_back(t_y);
+				wipe_colors.push_back(1.0f);
+				wipe_colors.push_back(1.0f);
+				wipe_colors.push_back(1.0f);
+				wipe_colors.push_back(1.0f);
+				wipe_colors.push_back(1.0f);
+				wipe_colors.push_back(1.0f);
 			}
+			glColorPointer(3, GL_FLOAT, 0, wipe_colors.data());
 			glVertexPointer(2, GL_FLOAT, 0, wipe_vertices.data());
 			glTexCoordPointer(2, GL_FLOAT, 0, wipe_texcoords.data());
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, wipe_vertices.size() / 2);
+			wipe_colors.clear();
 			wipe_vertices.clear();
 			wipe_texcoords.clear();
 		}
 	}
 
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 

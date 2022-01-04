@@ -26,17 +26,7 @@
 #ifndef __SYSTEM_SPECIFIC_DEFS_OPENGL__
 #define __SYSTEM_SPECIFIC_DEFS_OPENGL__
 
-#ifdef __linux__
 #include "glatter.h"
-#endif
-
-#ifdef WIN32
-#include "glatter.h"
-#endif
-
-#ifdef __APPLE__
-#include "glatter.h"
-#endif
 
 #define USING_GL_TYPES 1
 

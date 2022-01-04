@@ -296,9 +296,6 @@ void RGL_BeginSky(void)
 
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	glDisable(GL_TEXTURE_2D);
-
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	glEdgeFlag(GL_TRUE);
 }
 
 
@@ -365,6 +362,13 @@ void RGL_DrawSkyBox(void)
 		v1, v1,
 		v1, v0
 	};
+	std::vector<GLboolean> sky_edgeflags =
+	{
+		GL_TRUE,
+		GL_TRUE,
+		GL_TRUE,
+		GL_TRUE
+	};
 
 	glEnable(GL_TEXTURE_2D);
 
@@ -385,6 +389,7 @@ void RGL_DrawSkyBox(void)
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_EDGE_FLAG_ARRAY);
 
 	// top
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_Top]);
@@ -402,6 +407,7 @@ void RGL_DrawSkyBox(void)
 	};
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
+	glEdgeFlagPointer(0, sky_edgeflags.data());
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
@@ -421,6 +427,7 @@ void RGL_DrawSkyBox(void)
 	};
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
+	glEdgeFlagPointer(0, sky_edgeflags.data());
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
@@ -440,6 +447,7 @@ void RGL_DrawSkyBox(void)
 	};
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
+	glEdgeFlagPointer(0, sky_edgeflags.data());
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
@@ -459,6 +467,7 @@ void RGL_DrawSkyBox(void)
 	};
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
+	glEdgeFlagPointer(0, sky_edgeflags.data());
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
@@ -478,6 +487,7 @@ void RGL_DrawSkyBox(void)
 	};
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
+	glEdgeFlagPointer(0, sky_edgeflags.data());
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
@@ -497,8 +507,10 @@ void RGL_DrawSkyBox(void)
 	};
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
+	glEdgeFlagPointer(0, sky_edgeflags.data());
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
+	glDisableClientState(GL_EDGE_FLAG_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
@@ -533,10 +545,12 @@ void RGL_DrawSkyOriginal(void)
 
 	std::vector<GLint> sky_vertices;
 	std::vector<GLfloat> sky_texcoords;
+	std::vector<GLboolean> sky_edgeflags;
 
 	// divide screen into 32 vertical strips, since mapping is non-linear
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_EDGE_FLAG_ARRAY);
 
 	// FIXME for widescreen
 	float FIELDOFVIEW = CLAMP(5, r_fov.f, 175);
@@ -574,12 +588,17 @@ I_Printf("[%i] --> %1.2f  tx %1.4f\n", i, ANG_2_FLOAT(ang), tx);
 		sky_texcoords.push_back(1.0f -ty2);
 		sky_vertices.push_back(sx);
 		sky_vertices.push_back(SCREENHEIGHT);
+
+		sky_edgeflags.push_back(GL_TRUE);
+		sky_edgeflags.push_back(GL_TRUE);
  	}
 
+	glEdgeFlagPointer(0, sky_edgeflags.data());
 	glVertexPointer(2, GL_INT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, sky_vertices.size() / 2);
 
+	glDisableClientState(GL_EDGE_FLAG_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 

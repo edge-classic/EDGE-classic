@@ -308,10 +308,9 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 	if (image->opacity == OPAC_Complex || alpha < 0.99f)
 		glEnable(GL_BLEND);
 
-	glColor4f(r, g, b, alpha);
-
   	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 	GLint raw_vertices[] =
 	{
 		x1, y1,
@@ -326,9 +325,18 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 		tx2, ty2,
 		tx1, ty2
 	};
+	GLfloat raw_colors[] =
+	{
+		r, g, b, alpha,
+		r, g, b, alpha,
+		r, g, b, alpha,
+		r, g, b, alpha
+	};
+	glColorPointer(4, GL_FLOAT, 0, raw_colors);
 	glVertexPointer(2, GL_INT, 0, raw_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, raw_texcoords);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
@@ -445,9 +453,8 @@ void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col)
 	if (cur_alpha < 0.99f)
 		glEnable(GL_BLEND);
   
-	glColor4f(RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha);
-
   	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 	GLfloat box_vertices[] =
 	{
 		x1, y1,
@@ -455,8 +462,17 @@ void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col)
 		x2, y2,
 		x2, y1
 	};
+	GLdouble box_colors[] =
+	{
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha
+	};
+	glColorPointer(4, GL_DOUBLE, 0, box_colors);
 	glVertexPointer(2, GL_FLOAT, 0, box_vertices);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_BLEND);
@@ -481,16 +497,22 @@ void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col,
 	if (smooth || cur_alpha < 0.99f)
 		glEnable(GL_BLEND);
   
-	glColor4f(RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha);
-  
   	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 	GLint line_vertices[] =
 	{
 		(int)x1 + (int)dx, (int)y1 + (int)dy,
 		(int)x2 + (int)dx, (int)y2 + (int)dy
 	};
+	GLdouble line_colors[] =
+	{
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha
+	};
+	glColorPointer(4, GL_DOUBLE, 0, line_colors);
 	glVertexPointer(2, GL_INT, 0, line_vertices);
 	glDrawArrays(GL_LINES, 0, 2);
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_BLEND);
@@ -508,31 +530,78 @@ void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col)
 
 	if (cur_alpha < 0.99f)
 		glEnable(GL_BLEND);
-  
-	glColor4f(RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha);
-  
+
   	glEnableClientState(GL_VERTEX_ARRAY);
-	GLfloat box_vertices[] =
+	glEnableClientState(GL_COLOR_ARRAY);
+	std::vector<GLfloat> box_vertices =
 	{
 		x1, y1,
 		x1, y2,
 		x1+2, y2,
-		x1+2, y1,
+		x1+2, y1
+	};
+	std::vector<GLdouble> box_colors =
+	{
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha
+	};
+	glColorPointer(4, GL_DOUBLE, 0, box_colors.data());
+	glVertexPointer(2, GL_FLOAT, 0, box_vertices.data());
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	box_vertices.clear();
+	box_colors.clear();
+	box_vertices =
+	{
 		x2-2, y1,
 		x2-2, y2,
 		x2, y2,
-		x2, y1,
+		x2, y1
+	};
+	box_colors =
+	{
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha
+	};
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	box_vertices.clear();
+	box_colors.clear();
+	box_vertices =
+	{
 		x1+2, y1,
 		x1+2, y1+2,
 		x2-2, y1+2,
-		x2-2, y1,
+		x2-2, y1
+	};
+	box_colors =
+	{
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha
+	};
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	box_vertices.clear();
+	box_colors.clear();
+	box_vertices =
+	{
 		x1+2, y2-2,
 		x1+2, y2,
 		x2-2, y2,
 		x2-2, y2-2
 	};
-	glVertexPointer(2, GL_FLOAT, 0, box_vertices);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 16);
+	box_colors =
+	{
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha,
+		RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha
+	};
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_BLEND);

@@ -720,8 +720,6 @@ static void CastDrawer(void)
 	width  *= scale_x;
 	height *= scale_y;
 
-	// TODO: support FUZZY effect (glColor4f 0/0/0/0.5).
-
 	RGL_DrawImage(pos_x - offset_x, pos_y + offset_y,
 			      width, height, image, 
 				  flip ? IM_RIGHT(image) : 0, 0,

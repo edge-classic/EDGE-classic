@@ -1063,18 +1063,15 @@ void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame,
 	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
 
-	if (info->flags & MF_FUZZY)
-		glColor4f(0, 0, 0, 0.5f);
-	else
-		glColor4f(1, 1, 1, 1.0f);
-
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 
 	std::vector<GLfloat> model_vertices;
 	std::vector<GLfloat> model_texcoords;
 	std::vector<GLfloat> model_normals;
+	std::vector<GLfloat> model_colors;
 
 	for (int i = 0; i < md->num_strips; i++)
 	{
@@ -1110,14 +1107,31 @@ void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame,
 			model_vertices.push_back(x + dy);
 			model_vertices.push_back(y + dz);
 			model_vertices.push_back(dx / 256.0f);
+
+			if (info->flags & MF_FUZZY)
+			{
+				model_colors.push_back(0);
+				model_colors.push_back(0);
+				model_colors.push_back(0);
+				model_colors.push_back(0.5f);
+			}
+			else
+			{
+				model_colors.push_back(1);
+				model_colors.push_back(1);
+				model_colors.push_back(1);
+				model_colors.push_back(1.0f);
+			}
 		}
 		glVertexPointer(3, GL_FLOAT, 0, model_vertices.data());
 		glTexCoordPointer(2, GL_FLOAT, 0, model_texcoords.data());
 		glNormalPointer(GL_FLOAT, 0, model_normals.data());
+		glColorPointer(4, GL_FLOAT, 0, model_colors.data());
 		glDrawArrays(strip->mode, 0, model_vertices.size() / 3);
 		model_vertices.clear();
 		model_texcoords.clear();
 		model_normals.clear();
+		model_colors.clear();
 	}
 
 	glDisableClientState(GL_NORMAL_ARRAY);

@@ -365,37 +365,6 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 
 	RGL_FinishUnits();
 
-#if 0  // OLD WAY (KEEP FOR CROSSHAIRS !!!)
-	if (fuzzy)
-		L_r = L_g = L_b = 50;
-	glColor4f(LT_RED(L_r), LT_GRN(L_g), LT_BLU(L_b), trans);
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	GLfloat crosshair_vertices[] =
-	{
-		x1b, y1b,
-		x1t, y1t,
-		x2t, y1t,
-		x2b, y2b
-	};
-	GLfloat crosshair_texcoords[] =
-	{
-		tex_x1, tex_bot_h,
-		tex_x1, tex_top_h,
-		tex_x2, tex_top_h,
-		tex_x2, tex_bot_h
-	};
-	glVertexPointer(2, GL_FLOAT, 0, crosshair_vertices);
-	glTexCoordPointer(2, GL_FLOAT, 0, crosshair_texcoords);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
-
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_ALPHA_TEST);
-	glDisable(GL_BLEND);
-#endif
 	glDisable(GL_SCISSOR_TEST);
 }
 
@@ -462,10 +431,9 @@ static void DrawStdCrossHair(void)
 	// additive blending
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-	glColor3f(r, g, b);
-
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 	GLfloat crosshair_vertices[] =
 	{
 		x-w, y-w,
@@ -480,9 +448,18 @@ static void DrawStdCrossHair(void)
 		1.0f, 1.0f,
 		1.0f, 0.0f
 	};
+	GLfloat crosshair_colors[] =
+	{
+		r, g, b,
+		r, g, b,
+		r, g, b,
+		r, g, b
+	};
+	glColorPointer(3, GL_FLOAT, 0, crosshair_colors);
 	glVertexPointer(2, GL_FLOAT, 0, crosshair_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, crosshair_texcoords);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 

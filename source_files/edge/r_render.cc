@@ -2699,22 +2699,6 @@ static void DrawMirrorPolygon(drawmirror_c *mir)
 	line_t *ld = mir->seg->linedef;
 	SYS_ASSERT(ld);
 
-	if (ld->special)
-	{
-		float R = RGB_RED(ld->special->fx_color) / 255.0;
-		float G = RGB_GRN(ld->special->fx_color) / 255.0;
-		float B = RGB_BLU(ld->special->fx_color) / 255.0;
-
-		// looks better with reduced color in multiple reflections
-		float reduce = 1.0f / (1 + 1.5 * num_active_mirrors);
-
-		R *= reduce; G *= reduce; B *= reduce;
-
-		glColor4f(R, G, B, alpha);
-	}
-	else
-		glColor4f(1.0, 0.0, 0.0, alpha);
-
 	float x1 = mir->seg->v1->x;
 	float y1 = mir->seg->v1->y;
 	float z1 = ld->frontsector->f_h;
@@ -2727,6 +2711,7 @@ static void DrawMirrorPolygon(drawmirror_c *mir)
 	MIR_Coordinate(x2, y2);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 	GLfloat mirror_vertices[] =
 	{
 		x1, y1, z1,
@@ -2734,8 +2719,58 @@ static void DrawMirrorPolygon(drawmirror_c *mir)
 		x2, y2, z2,
 		x2, y2, z1
 	};
+	std::vector<GLfloat> mirror_colors;
+	if (ld->special)
+	{
+		float R = RGB_RED(ld->special->fx_color) / 255.0;
+		float G = RGB_GRN(ld->special->fx_color) / 255.0;
+		float B = RGB_BLU(ld->special->fx_color) / 255.0;
+
+		// looks better with reduced color in multiple reflections
+		float reduce = 1.0f / (1 + 1.5 * num_active_mirrors);
+
+		R *= reduce; G *= reduce; B *= reduce;
+
+		mirror_colors.push_back(R);
+		mirror_colors.push_back(G);
+		mirror_colors.push_back(B);
+		mirror_colors.push_back(alpha);
+		mirror_colors.push_back(R);
+		mirror_colors.push_back(G);
+		mirror_colors.push_back(B);
+		mirror_colors.push_back(alpha);
+		mirror_colors.push_back(R);
+		mirror_colors.push_back(G);
+		mirror_colors.push_back(B);
+		mirror_colors.push_back(alpha);
+		mirror_colors.push_back(R);
+		mirror_colors.push_back(G);
+		mirror_colors.push_back(B);
+		mirror_colors.push_back(alpha);
+	}
+	else
+	{
+		mirror_colors.push_back(1.0);
+		mirror_colors.push_back(0.0);
+		mirror_colors.push_back(0.0);
+		mirror_colors.push_back(alpha);
+		mirror_colors.push_back(1.0);
+		mirror_colors.push_back(0.0);
+		mirror_colors.push_back(0.0);
+		mirror_colors.push_back(alpha);
+		mirror_colors.push_back(1.0);
+		mirror_colors.push_back(0.0);
+		mirror_colors.push_back(0.0);
+		mirror_colors.push_back(alpha);
+		mirror_colors.push_back(1.0);
+		mirror_colors.push_back(0.0);
+		mirror_colors.push_back(0.0);
+		mirror_colors.push_back(alpha);
+	}
+	glColorPointer(4, GL_FLOAT, 0, mirror_colors.data());
 	glVertexPointer(3, GL_FLOAT, 0, mirror_vertices);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_BLEND);
@@ -2772,8 +2807,6 @@ static void DrawPortalPolygon(drawmirror_c *mir)
 	float G = RGB_GRN(ld->special->fx_color) / 255.0;
 	float B = RGB_BLU(ld->special->fx_color) / 255.0;
 
-	glColor4f(R, G, B, alpha);
-
 	// get polygon coordinates
 	float x1 = mir->seg->v1->x;
 	float y1 = mir->seg->v1->y;
@@ -2804,6 +2837,7 @@ static void DrawPortalPolygon(drawmirror_c *mir)
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 	GLfloat portal_vertices[] =
 	{
 		x1, y1, z1,
@@ -2818,9 +2852,18 @@ static void DrawPortalPolygon(drawmirror_c *mir)
 		tx2, ty2,
 		tx2, ty1
 	};
+	GLfloat portal_colors[] =
+	{
+		R, G, B, alpha,
+		R, G, B, alpha,
+		R, G, B, alpha,
+		R, G, B, alpha
+	};
+	glColorPointer(4, GL_FLOAT, 0, portal_colors);
 	glVertexPointer(3, GL_FLOAT, 0, portal_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, portal_texcoords);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 

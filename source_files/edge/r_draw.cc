@@ -88,10 +88,9 @@ void RGL_DrawImage(float x, float y, float w, float h, const image_c *image,
 		b = RGB_BLU(col) / 255.0;
 	}
 
-	glColor4f(r, g, b, alpha);
-
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 	GLint image_vertices[] =
 	{
 		x1, y1,
@@ -106,9 +105,18 @@ void RGL_DrawImage(float x, float y, float w, float h, const image_c *image,
 		tx2, ty2,
 		tx1, ty2
 	};
+	GLfloat image_colors[] =
+	{
+		r, g, b, alpha,
+		r, g, b, alpha,
+		r, g, b, alpha,
+		r, g, b, alpha
+	};
+	glColorPointer(4, GL_FLOAT, 0, image_colors);
 	glVertexPointer(2, GL_INT, 0, image_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, image_texcoords);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 

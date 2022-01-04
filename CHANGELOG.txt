@@ -1,6 +1,6 @@
 https://github.com/dashodanger/EDGE-classic
 
-Current as of: DECEMBER 2021
+Current as of: JANUARY 2022
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)
 ====================================
@@ -34,6 +34,18 @@ New Features
 + Heretic COALHUDS updated with game-approriate inventory display
 
 + Added 'autoload' folder which is scanned for valid file types on startup
+
++ LINES.DDF
+  - New command: EFFECT_OBJECT=<thing> where <thing> is an entry in THINGS.DDF. When the line is activated, the <thing> will be spawned in the center of the line (e.g. for sparks from a switch). If the line is of type SHOOT then we spawn the object at the spot where the shot impacts instead.(e.g. a flesh wall that spurts blood when shot).
+  - New command: GLASS=TRUE which causes this line type to (a)be blocking and (b)will apply the LINE_EFFECT= specials BLOCK_SHOTS and BLOCK_SIGHT if specified.
+    Once the line is activated(normally via SHOOT) then (1) line will be set to unblocking, (2)BLOCK_SHOTS and BLOCK_SIGHT will be removed, (3) the mid-texture will be removed. If combined with EFFECT_OBJECT then you can spawn shards of broken glass when the line "breaks" for example. 
+	NOTE: GLASS=TRUE should be used with COUNT=1.
+
++ FLATS.DDF (wad lump "DDFFLAT") which can be used to associate certain sounds, objects etc. with specific flats.
+
++ COALHUDS: new commands
+  -player.play_footstep(flatname) checks FLATS.DDF for corresponding entry and plays the sfx associated with this flat.
+
 
 
 CHANGELOG for EDGE-Classic 1.0 (since EDGE-Classic Preview 1)

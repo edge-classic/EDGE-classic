@@ -35,6 +35,8 @@ public:
 
 	// Member vars....
 	epi::strent_c name;
+	
+	bool liquid;
 
 	struct sfx_s *footstep;
 	lumpname_c splash;
@@ -67,7 +69,7 @@ public:
 	flatdef_c* operator[](int idx) { return *(flatdef_c**)FetchObject(idx); } 
 };
 
-extern flatdef_container_c flatdefs; 	// -ACB- 2004/06/04 Implemented
+extern flatdef_container_c flatdefs; 	// -DASHO- 2022 Implemented
 
 bool DDF_ReadFlat(void *data, int size);
 

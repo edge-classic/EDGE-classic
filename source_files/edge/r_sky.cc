@@ -372,24 +372,24 @@ void RGL_DrawSkyBox(void)
 
 	glEnable(GL_TEXTURE_2D);
 
-	std::vector<GLfloat> sky_colors =
-	{
-		LT_RED(255), LT_GRN(255), LT_BLU(255), 1.0f,
-		LT_RED(255), LT_GRN(255), LT_BLU(255), 1.0f,
-		LT_RED(255), LT_GRN(255), LT_BLU(255), 1.0f,
-		LT_RED(255), LT_GRN(255), LT_BLU(255), 1.0f
-	};
+	float col[4];
 
-	if (!r_colormaterial.d || r_colorlighting.d)
+	col[0] = LT_RED(255);
+	col[1] = LT_GRN(255);
+	col[2] = LT_BLU(255);
+	col[3] = 1.0f;
+
+	if (r_colormaterial.d || ! r_colorlighting.d)
+		glColor4fv(col);
+	else
 	{
-		glEnable(GL_LIGHTING);
-		glEnable(GL_COLOR_MATERIAL);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, col);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, col);
 	}
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_EDGE_FLAG_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
 
 	// top
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_Top]);
@@ -408,7 +408,6 @@ void RGL_DrawSkyBox(void)
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
 	glEdgeFlagPointer(0, sky_edgeflags.data());
-	glColorPointer(4, GL_FLOAT, 0, sky_colors.data());
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
@@ -429,7 +428,6 @@ void RGL_DrawSkyBox(void)
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
 	glEdgeFlagPointer(0, sky_edgeflags.data());
-	glColorPointer(4, GL_FLOAT, 0, sky_colors.data());
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
@@ -450,7 +448,6 @@ void RGL_DrawSkyBox(void)
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
 	glEdgeFlagPointer(0, sky_edgeflags.data());
-	glColorPointer(4, GL_FLOAT, 0, sky_colors.data());
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
@@ -471,7 +468,6 @@ void RGL_DrawSkyBox(void)
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
 	glEdgeFlagPointer(0, sky_edgeflags.data());
-	glColorPointer(4, GL_FLOAT, 0, sky_colors.data());
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
@@ -492,7 +488,6 @@ void RGL_DrawSkyBox(void)
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
 	glEdgeFlagPointer(0, sky_edgeflags.data());
-	glColorPointer(4, GL_FLOAT, 0, sky_colors.data());
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	sky_vertices.clear();
 
@@ -513,10 +508,8 @@ void RGL_DrawSkyBox(void)
 	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
 	glEdgeFlagPointer(0, sky_edgeflags.data());
-	glColorPointer(4, GL_FLOAT, 0, sky_colors.data());
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_EDGE_FLAG_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -531,10 +524,14 @@ void RGL_DrawSkyOriginal(void)
 {
 	RGL_SetupSkyMatrices2D();
 
-	if (!r_colormaterial.d || r_colorlighting.d)
+	float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	if (r_colormaterial.d || ! r_colorlighting.d)
+		glColor4fv(white);
+	else
 	{
-		glEnable(GL_LIGHTING);
-		glEnable(GL_COLOR_MATERIAL);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, white);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, white);
 	}
 
 	GLuint tex_id = W_ImageCache(sky_image, false, ren_fx_colmap);
@@ -549,13 +546,11 @@ void RGL_DrawSkyOriginal(void)
 	std::vector<GLint> sky_vertices;
 	std::vector<GLfloat> sky_texcoords;
 	std::vector<GLboolean> sky_edgeflags;
-	std::vector<GLfloat> sky_colors;
 
 	// divide screen into 32 vertical strips, since mapping is non-linear
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_EDGE_FLAG_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
 
 	// FIXME for widescreen
 	float FIELDOFVIEW = CLAMP(5, r_fov.f, 175);
@@ -596,33 +591,16 @@ I_Printf("[%i] --> %1.2f  tx %1.4f\n", i, ANG_2_FLOAT(ang), tx);
 
 		sky_edgeflags.push_back(GL_TRUE);
 		sky_edgeflags.push_back(GL_TRUE);
-
-		sky_colors.push_back(1.0f);
-		sky_colors.push_back(1.0f);
-		sky_colors.push_back(1.0f);
-		sky_colors.push_back(1.0f);
-		sky_colors.push_back(1.0f);
-		sky_colors.push_back(1.0f);
-		sky_colors.push_back(1.0f);
-		sky_colors.push_back(1.0f);
  	}
 
-	glColorPointer(4, GL_FLOAT, 0, sky_colors.data());
 	glEdgeFlagPointer(0, sky_edgeflags.data());
 	glVertexPointer(2, GL_INT, 0, sky_vertices.data());
 	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, sky_vertices.size() / 2);
 
-	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_EDGE_FLAG_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
-
-	if (!r_colormaterial.d || r_colorlighting.d)
-	{
-		glDisable(GL_LIGHTING);
-		glDisable(GL_COLOR_MATERIAL);
-	}
 
 	glDisable(GL_TEXTURE_2D);
 

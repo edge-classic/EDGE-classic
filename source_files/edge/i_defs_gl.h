@@ -26,6 +26,7 @@
 #ifndef __SYSTEM_SPECIFIC_DEFS_OPENGL__
 #define __SYSTEM_SPECIFIC_DEFS_OPENGL__
 
+#define GLATTER_HEADER_ONLY
 #include "glatter.h"
 
 #define USING_GL_TYPES 1

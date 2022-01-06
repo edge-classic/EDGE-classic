@@ -249,7 +249,7 @@ endif()
 
 find_package(SDL2 REQUIRED)
 
-if(APPLE)
+if(NOT MSYS AND NOT WIN32)
   find_package(OpenGL REQUIRED)
 endif()
 
@@ -300,8 +300,8 @@ target_link_libraries(
           edge_ddf
           edge_deh
           edge_epi
-		  OpenGL
-		  SDL2
+		  ${OPENGL_LIBRARIES}
+		  ${SDL2_LIBRARIES}
 		  miniz
   )
 else()

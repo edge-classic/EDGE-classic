@@ -934,7 +934,7 @@ static void IdentifyVersion(void)
 
 	// Quick 'n dirty, but works for now - Dasho
 
-	if (iwad_base == "blasphemer" || iwad_base == "blasphem") iwad_base = "heretic";
+	if (iwad_base == "blasphem") iwad_base = "blasphemer";
 
 	I_Debugf("IWAD BASE = [%s]\n", iwad_base.c_str());
 

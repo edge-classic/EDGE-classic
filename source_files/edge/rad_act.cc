@@ -1091,6 +1091,60 @@ void RAD_ActWaitUntilDead(rad_trigger_t *R, void *param)
 	}
 }
 
+void RAD_ActSwitchWeapon(rad_trigger_t *R, void *param)
+{
+	s_weapon_t *weaparg = (s_weapon_t *) param;
+
+	player_t *player = GetWhoDunnit(R);
+	weapondef_c *weap = weapondefs.Lookup(weaparg->name);
+
+	if(weap) 
+	{
+		P_PlayerSwitchWeapon(player, weap);
+	}
+}
+
+void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
+{
+	player_t *p = GetWhoDunnit(R);
+
+	spawnpoint_t *point = G_FindCoopPlayer(1);//start 1
+
+	if(!point) return; //should never happen but who knows...
+
+	//1. Stop the player movement and turn him
+	p->mo->mom.x = p->mo->mom.y = p->mo->mom.z = 0;
+	p->actual_speed = 0;
+	p->mo->angle = point->angle;
+
+	//2. Don't move for a bit
+    int waitAbit = 30;
+
+	p->mo->reactiontime = waitAbit;
+	R_StartFading(0, (waitAbit * 5) / 2);
+
+	//3. Do our teleport fog effect
+	float x = point->x;
+	float y = point->y;
+	float z = point->z;
+
+	// spawn teleport fog 
+	mobj_t *fog;
+	x += 20 * M_Cos(point->angle);
+	y += 20 * M_Sin(point->angle);
+	fog = P_MobjCreateObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
+	// never use this object as a teleport destination
+	fog->extendedflags |= EF_NEVERTARGET;
+
+	if (fog->info->chase_state)
+		P_SetMobjStateDeferred(fog, fog->info->chase_state, 0);
+
+	//4. Teleport him
+	// Don't get stuck spawned in things: telefrag them.
+	P_TeleportMove(p->mo, point->x, point->y, point->z);
+	
+}
+
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

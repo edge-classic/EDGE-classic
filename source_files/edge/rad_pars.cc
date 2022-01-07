@@ -2215,6 +2215,33 @@ static void RAD_ParseWaitUntilDead(int pnum, const char **pars)
 }
 
 
+static void RAD_ParseSwitchWeapon(int pnum, const char **pars)
+{
+	// SwitchWeapon <WeaponName>
+
+	char * WeaponName;
+
+	if (pars[1][0] == '"')
+		WeaponName = RAD_UnquoteString(pars[1]);
+	else
+		WeaponName = Z_StrDup(pars[1]);
+
+	s_weapon_t *weaparg = Z_New(s_weapon_t, 1);
+	Z_Clear(weaparg, s_weapon_t, 1);
+
+	weaparg->name = WeaponName;
+
+	AddStateToScript(this_rad, 0, RAD_ActSwitchWeapon, weaparg);
+}
+
+static void RAD_ParseTeleportToStart(int pnum, const char **pars)
+{
+	// TELEPORT_TO_START
+
+	AddStateToScript(this_rad, 0, RAD_ActTeleportToStart, NULL);
+}
+
+
 //  PARSER TABLE
 
 static const rts_parser_t radtrig_parsers[] =
@@ -2299,6 +2326,9 @@ static const rts_parser_t radtrig_parsers[] =
 	{2, "MENU_STYLE", 2,2, RAD_ParseMenuStyle},
 	{2, "JUMP_ON", 3,99, RAD_ParseJumpOn},
 	{2, "WAIT_UNTIL_DEAD", 2,11, RAD_ParseWaitUntilDead},
+	
+	{2, "SWITCH_WEAPON", 2,2, RAD_ParseSwitchWeapon},
+	{2, "TELEPORT_TO_START", 1,1, RAD_ParseTeleportToStart},
 
 	// old crud
 	{2, "SECTORV", 4,4, RAD_ParseMoveSector},

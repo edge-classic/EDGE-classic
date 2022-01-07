@@ -30,6 +30,12 @@ struct rts_state_s;
 struct rad_script_s;
 struct rad_trigger_s;
 
+typedef struct s_weapon_s
+{
+	char *name;
+}
+s_weapon_t;
+
 typedef struct s_tip_s
 {
 	// tip text or graphic.  Two of these must be NULL.

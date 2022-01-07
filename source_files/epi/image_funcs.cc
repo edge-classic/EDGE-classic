@@ -47,9 +47,10 @@ image_data_c *Image_Load(file_c *f, int read_flags, int format)
 	int width;
 	int height;
 	int channels;
+	int desired_channels = format == 1 ? 3 : 0;
 	byte *raw_image = f->LoadIntoMemory();
 
-	unsigned char *decoded_img = stbi_load_from_memory(raw_image, f->GetLength(), &width, &height, &channels, format == 1 ? 3 : 0);
+	unsigned char *decoded_img = stbi_load_from_memory(raw_image, f->GetLength(), &width, &height, &channels, desired_channels);
 
 	if (!decoded_img)
 		return NULL;
@@ -63,7 +64,7 @@ image_data_c *Image_Load(file_c *f, int read_flags, int format)
 		tot_H = 1; while (tot_H < (int)height) tot_H <<= 1;
 	}
 
-	image_data_c *img = new image_data_c(tot_W, tot_H, channels);
+	image_data_c *img = new image_data_c(tot_W, tot_H, format == 1 ? desired_channels : channels);
 
 	img->used_w = width;
 	img->used_h = height;
@@ -77,7 +78,7 @@ image_data_c *Image_Load(file_c *f, int read_flags, int format)
 	{
 		for (int x = 0; x < width; x++)
 		{
-			memcpy(img->PixelAt(x, y), decoded_img + (total_pixels * channels), channels);
+			memcpy(img->PixelAt(x, y), decoded_img + (total_pixels * (format == 1 ? desired_channels : channels)), format == 1 ? desired_channels : channels);
 			total_pixels++;
 		}
 	}

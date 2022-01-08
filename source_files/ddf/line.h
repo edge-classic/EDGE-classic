@@ -731,6 +731,9 @@ public:
 	
 	// Handle this line differently
 	bool glass;
+	
+	// line texture to change to.
+	lumpname_c brokentex;
 
 	// LIGHT SPECIFIC
 	// Things may be added here; start strobing/flashing glowing lights.

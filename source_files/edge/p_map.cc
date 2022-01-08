@@ -1318,7 +1318,14 @@ void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
 
 			//2. Remove existing texture from line
 			const image_c *image;
-			image = W_ImageLookup("-", INS_Texture);
+			if (special->brokentex)
+			{
+				image = W_ImageLookup(special->brokentex.c_str(), INS_Texture);
+			}
+			else
+			{
+				image = W_ImageLookup("-", INS_Texture);
+			}
 			TheLine->side[0]->middle.image = image;
 			TheLine->side[1]->middle.image = image;
 		}

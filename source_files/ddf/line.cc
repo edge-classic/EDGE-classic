@@ -209,9 +209,10 @@ static const commandlist_t linedef_commands[] =
 	// -AJA- backwards compatibility cruft...
 	DF("EXTRAFLOOR_TRANSLUCENCY", translucency, DDF_MainGetPercent),
 
-	//Lobo: 2021
+	//Lobo: 2022
 	DF("EFFECT_OBJECT", effectobject_ref, DDF_MainGetString),
 	DF("GLASS", glass, DDF_MainGetBoolean),
+	DF("BROKEN_TEXTURE", brokentex, DDF_MainGetLumpName),
 	
 	DDF_CMD_END
 };
@@ -1692,10 +1693,11 @@ void linetype_c::CopyDetail(linetype_c &src)
 	slope_type = src.slope_type;
 	fx_color = src.fx_color;
 	
-	//lobo 2021
+	//lobo 2022
 	effectobject = src.effectobject;	
 	effectobject_ref = src.effectobject_ref;
 	glass = src.glass;
+	brokentex = src.brokentex;
 }
 
 
@@ -1751,10 +1753,11 @@ void linetype_c::Default(void)
 	slope_type = SLP_NONE;
 	fx_color = RGB_MAKE(0,0,0);
 	
-	//lobo 2021
+	//lobo 2022
 	effectobject = NULL;	
 	effectobject_ref.clear();
 	glass = false;
+	brokentex.clear();
 }
 
 

@@ -3,6 +3,8 @@
 /build/
 cache/
 
+/autoload
+
 # Main program/DLLs
 /edge
 edge-classic.exe

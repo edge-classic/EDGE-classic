@@ -26,8 +26,13 @@
 #ifndef __SYSTEM_SPECIFIC_DEFS_OPENGL__
 #define __SYSTEM_SPECIFIC_DEFS_OPENGL__
 
+#ifdef USING_PORTABLEGL
+#define PORTABLEGL_IMPLEMENTATION
+#include "portablegl.h"
+#else
 #define GLATTER_HEADER_ONLY
 #include "glatter.h"
+#endif
 
 #define USING_GL_TYPES 1
 

@@ -88,7 +88,9 @@ void RGL_DrawImage(float x, float y, float w, float h, const image_c *image,
 		b = RGB_BLU(col) / 255.0;
 	}
 
-	glEnableClientState(GL_VERTEX_ARRAY);
+	glColor4f(r, g, b, alpha);
+
+	/*glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	GLint image_vertices[] =
@@ -118,7 +120,7 @@ void RGL_DrawImage(float x, float y, float w, float h, const image_c *image,
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);*/
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_ALPHA_TEST);
@@ -170,7 +172,26 @@ static void ProgressSection(const byte *logo_lum, int lw, int lh,
 
 	int x = (pw-8) * perc / 100;
 
-	std::vector<GLint> progress_vertices;
+	glColor4f(0.6f, 0.6f, 0.6f, alpha);
+	glBegin(GL_POLYGON);
+	glVertex2i(px, py);  glVertex2i(px, py+ph);
+	glVertex2i(px+pw, py+ph); glVertex2i(px+pw, py);
+	glVertex2i(px, py);
+	glEnd();
+
+	glColor4f(0.0f, 0.0f, 0.0f, alpha);
+	glBegin(GL_POLYGON);
+	glVertex2i(px+2, py+2);  glVertex2i(px+2, py+ph-2);
+	glVertex2i(px+pw-2, py+ph-2); glVertex2i(px+pw-2, py+2);
+	glEnd();
+
+	glColor4f(cr, cg, cb, alpha);
+	glBegin(GL_POLYGON);
+	glVertex2i(px+4, py+4);  glVertex2i(px+4, py+ph-4);
+	glVertex2i(px+4+x, py+ph-4); glVertex2i(px+4+x, py+4);
+	glEnd();
+
+	/*std::vector<GLint> progress_vertices;
 	std::vector<GLfloat> progress_colors;
 
   	glEnableClientState(GL_VERTEX_ARRAY);
@@ -233,7 +254,7 @@ static void ProgressSection(const byte *logo_lum, int lw, int lh,
 	glColorPointer(4, GL_FLOAT, 0, progress_colors.data());
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);*/
 
 	(*y) = py;
 }

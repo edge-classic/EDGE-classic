@@ -365,8 +365,19 @@ static void SolidBox(int x, int y, int w, int h, rgbcol_t col, float alpha)
 {
 	if (alpha < 0.99f)
 		glEnable(GL_BLEND);
-  
-	glEnableClientState(GL_VERTEX_ARRAY);
+
+	glColor4f(RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, alpha);
+
+	glBegin(GL_QUADS);
+
+	glVertex2i(x,   y);
+	glVertex2i(x,   y+h);
+	glVertex2i(x+w, y+h);
+	glVertex2i(x+w, y);
+
+	glEnd();
+
+	/*glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	GLint box_vertices[] =
 	{
@@ -386,7 +397,8 @@ static void SolidBox(int x, int y, int w, int h, rgbcol_t col, float alpha)
 	glColorPointer(4, GL_DOUBLE, 0, box_colors);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);*/
+
 	glDisable(GL_BLEND);
 }
 
@@ -405,6 +417,9 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 
 	float alpha = 1.0f;
 
+	glColor4f(RGB_RED(col)/255.0f, RGB_GRN(col)/255.0f, 
+				RGB_BLU(col)/255.0f, alpha);
+
 	int px =      int((byte)ch) % 16;
 	int py = 15 - int((byte)ch) / 16;
 
@@ -414,7 +429,23 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 	float ty1 = (py  ) / 16.0;
 	float ty2 = (py+1) / 16.0;
 
-	GLint char_vertices[] =
+	glBegin(GL_POLYGON);
+
+	glTexCoord2f(tx1, ty1);
+	glVertex2i(x, y);
+
+	glTexCoord2f(tx1, ty2); 
+	glVertex2i(x, y + FNSZ);
+
+	glTexCoord2f(tx2, ty2);
+	glVertex2i(x + FNSZ, y + FNSZ);
+
+	glTexCoord2f(tx2, ty1);
+	glVertex2i(x + FNSZ, y);
+
+	glEnd();
+
+	/*GLint char_vertices[] =
 	{
 		x, y,
 		x, y + FNSZ,
@@ -438,7 +469,7 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 	glVertexPointer(2, GL_INT, 0, char_vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, char_texcoords);
 	glColorPointer(4, GL_DOUBLE, 0, char_colors);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);*/
 }
 
 // writes the text on coords (x,y) of the console
@@ -453,9 +484,9 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
+	/*glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);*/
 
 	for (; *s; s++)
 	{
@@ -467,9 +498,9 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 			break;
 	}
 
-	glDisableClientState(GL_COLOR_ARRAY);
+	/*glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);*/
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_ALPHA_TEST);

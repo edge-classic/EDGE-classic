@@ -317,7 +317,7 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 
 		GLuint fuzz_tex = is_fuzzy ? W_ImageCache(fuzz_image, false) : 0;
 
-		local_gl_vert_t * glvert = RGL_BeginUnit(GL_TRIANGLE_FAN, 4,
+		local_gl_vert_t * glvert = RGL_BeginUnit(GL_POLYGON, 4,
 				 is_additive ? ENV_SKIP_RGB : GL_MODULATE, tex_id,
 				 is_fuzzy ? GL_MODULATE : ENV_NONE, fuzz_tex,
 				 pass, blending);
@@ -431,7 +431,18 @@ static void DrawStdCrossHair(void)
 	// additive blending
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
+	glColor3f(r, g, b);
+
+	glBegin(GL_POLYGON);
+
+	glTexCoord2f(0.0f, 0.0f); glVertex2f(x-w, y-w);
+	glTexCoord2f(0.0f, 1.0f); glVertex2f(x-w, y+w);
+	glTexCoord2f(1.0f, 1.0f); glVertex2f(x+w, y+w);
+	glTexCoord2f(1.0f, 0.0f); glVertex2f(x+w, y-w);
+
+	glEnd();
+
+	/*glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	GLfloat crosshair_vertices[] =
@@ -461,7 +472,7 @@ static void DrawStdCrossHair(void)
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);*/
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -1369,7 +1380,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
 		GLuint fuzz_tex = is_fuzzy ? W_ImageCache(fuzz_image, false) : 0;
 
-		local_gl_vert_t * glvert = RGL_BeginUnit(GL_TRIANGLE_FAN, 4,
+		local_gl_vert_t * glvert = RGL_BeginUnit(GL_POLYGON, 4,
 				 is_additive ? ENV_SKIP_RGB : GL_MODULATE, tex_id,
 				 is_fuzzy ? GL_MODULATE : ENV_NONE, fuzz_tex,
 				 pass, blending);

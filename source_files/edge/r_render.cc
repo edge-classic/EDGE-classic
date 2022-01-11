@@ -865,7 +865,7 @@ static void DLIT_Wall(mobj_t *mo, void *dataptr)
 
 	int blending = (data->blending & ~BL_Alpha) | BL_Add;
 	
-	mo->dlight.shader->WorldMix(GL_TRIANGLE_FAN, data->v_count, data->tex_id,
+	mo->dlight.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id,
 			data->trans, &data->pass, blending, data->mid_masked,
 			data, WallCoordFunc);
 }
@@ -878,7 +878,7 @@ static void GLOWLIT_Wall(mobj_t *mo, void *dataptr)
 
 	int blending = (data->blending & ~BL_Alpha) | BL_Add;
 
-	mo->dlight.shader->WorldMix(GL_TRIANGLE_FAN, data->v_count, data->tex_id,
+	mo->dlight.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id,
 			data->trans, &data->pass, blending, data->mid_masked,
 			data, WallCoordFunc);
 }
@@ -906,7 +906,7 @@ static void DLIT_Plane(mobj_t *mo, void *dataptr)
 
 	int blending = (data->blending & ~BL_Alpha) | BL_Add;
 
-	mo->dlight.shader->WorldMix(GL_TRIANGLE_FAN, data->v_count, data->tex_id,
+	mo->dlight.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id,
 			data->trans, &data->pass, blending, false /* masked */,
 			data, PlaneCoordFunc);
 }
@@ -919,7 +919,7 @@ static void GLOWLIT_Plane(mobj_t *mo, void *dataptr)
 
 	int blending = (data->blending & ~BL_Alpha) | BL_Add;
 
-	mo->dlight.shader->WorldMix(GL_TRIANGLE_FAN, data->v_count, data->tex_id,
+	mo->dlight.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id,
 			data->trans, &data->pass, blending, false,
 			data, PlaneCoordFunc);
 }
@@ -1176,7 +1176,7 @@ static void DrawWallPart(drawfloor_t *dfloor,
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props, lit_adjust);
 
-	cmap_shader->WorldMix(GL_TRIANGLE_FAN, data.v_count, data.tex_id,
+	cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 			trans, &data.pass, data.blending, data.mid_masked,
 			&data, WallCoordFunc);
 
@@ -1689,7 +1689,7 @@ static void DLIT_Flood(mobj_t *mo, void *dataptr)
 			data->vert[col*2 + 1].Set(x, y, z + data->dh / data->piece_row);
 		}
 
-		mo->dlight.shader->WorldMix(GL_TRIANGLE_STRIP, data->v_count,
+		mo->dlight.shader->WorldMix(GL_QUAD_STRIP, data->v_count,
 				data->tex_id, 1.0, &data->pass, blending, false,
 				data, FloodCoordFunc);
 	}
@@ -1814,7 +1814,7 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor,
 		data.B = (64 + 90 * (row & 2))  / 255.0;
 #endif
 
-		cmap_shader->WorldMix(GL_TRIANGLE_STRIP, data.v_count,
+		cmap_shader->WorldMix(GL_QUAD_STRIP, data.v_count,
 				data.tex_id, 1.0, &data.pass, BL_NONE, false,
 				&data, FloodCoordFunc);
 	}
@@ -2424,7 +2424,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
 
-	cmap_shader->WorldMix(GL_TRIANGLE_FAN, data.v_count, data.tex_id,
+	cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 			trans, &data.pass, data.blending, false /* masked */,
 			&data, PlaneCoordFunc);
 
@@ -2699,6 +2699,22 @@ static void DrawMirrorPolygon(drawmirror_c *mir)
 	line_t *ld = mir->seg->linedef;
 	SYS_ASSERT(ld);
 
+	if (ld->special)
+	{
+		float R = RGB_RED(ld->special->fx_color) / 255.0;
+		float G = RGB_GRN(ld->special->fx_color) / 255.0;
+		float B = RGB_BLU(ld->special->fx_color) / 255.0;
+
+		// looks better with reduced color in multiple reflections
+		float reduce = 1.0f / (1 + 1.5 * num_active_mirrors);
+
+		R *= reduce; G *= reduce; B *= reduce;
+
+		glColor4f(R, G, B, alpha);
+	}
+	else
+		glColor4f(1.0, 0.0, 0.0, alpha);
+
 	float x1 = mir->seg->v1->x;
 	float y1 = mir->seg->v1->y;
 	float z1 = ld->frontsector->f_h;
@@ -2710,7 +2726,16 @@ static void DrawMirrorPolygon(drawmirror_c *mir)
 	MIR_Coordinate(x1, y1);
 	MIR_Coordinate(x2, y2);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
+	glBegin(GL_POLYGON);
+
+	glVertex3f(x1, y1, z1);
+	glVertex3f(x1, y1, z2);
+	glVertex3f(x2, y2, z2);
+	glVertex3f(x2, y2, z1);
+
+	glEnd();
+
+	/*glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	GLfloat mirror_vertices[] =
 	{
@@ -2771,7 +2796,7 @@ static void DrawMirrorPolygon(drawmirror_c *mir)
 	glVertexPointer(3, GL_FLOAT, 0, mirror_vertices);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);*/
 
 	glDisable(GL_BLEND);
 }
@@ -2807,6 +2832,8 @@ static void DrawPortalPolygon(drawmirror_c *mir)
 	float G = RGB_GRN(ld->special->fx_color) / 255.0;
 	float B = RGB_BLU(ld->special->fx_color) / 255.0;
 
+	glColor4f(R, G, B, alpha);
+
 	// get polygon coordinates
 	float x1 = mir->seg->v1->x;
 	float y1 = mir->seg->v1->y;
@@ -2835,7 +2862,16 @@ static void DrawPortalPolygon(drawmirror_c *mir)
 	ty1 = ty1 * surf->y_mat.y / total_h;
 	ty2 = ty2 * surf->y_mat.y / total_h;
 
-	glEnableClientState(GL_VERTEX_ARRAY);
+	glBegin(GL_POLYGON);
+
+	glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, z1);
+	glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, z2);
+	glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, z2);
+	glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, z1);
+
+	glEnd();
+
+	/*glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	GLfloat portal_vertices[] =
@@ -2865,7 +2901,7 @@ static void DrawPortalPolygon(drawmirror_c *mir)
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);*/
 
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);

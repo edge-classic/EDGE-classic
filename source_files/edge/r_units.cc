@@ -37,13 +37,11 @@
 #include "r_texgl.h"
 #include "r_shader.h"
 
-#include <vector>
-
-std::vector<GLfloat> unit_vertices;
+/*std::vector<GLfloat> unit_vertices;
 std::vector<GLfloat> unit_normals;
 std::vector<GLboolean> unit_edgeflags;
 std::vector<GLfloat> unit_texcoords0;
-std::vector<GLfloat> unit_texcoords1;
+std::vector<GLfloat> unit_texcoords1;*/
 
 cvar_c r_colorlighting;
 cvar_c r_colormaterial;
@@ -295,7 +293,16 @@ static inline void RGL_SendRawVector(const local_gl_vert_t *V)
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, V->rgba);
 	}
 
-	unit_texcoords0.push_back(V->texc[0].x);
+	myMultiTexCoord2f(GL_TEXTURE0, V->texc[0].x, V->texc[0].y);
+	myMultiTexCoord2f(GL_TEXTURE1, V->texc[1].x, V->texc[1].y);
+
+	glNormal3f(V->normal.x, V->normal.y, V->normal.z);
+	glEdgeFlag(V->edge);
+
+	// vertex must be last
+	glVertex3f(V->pos.x, V->pos.y, V->pos.z);
+
+	/*unit_texcoords0.push_back(V->texc[0].x);
 	unit_texcoords0.push_back(V->texc[0].y);
 	glClientActiveTexture(GL_TEXTURE0);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -314,7 +321,7 @@ static inline void RGL_SendRawVector(const local_gl_vert_t *V)
 
 	unit_vertices.push_back(V->pos.x);
 	unit_vertices.push_back(V->pos.y);
-	unit_vertices.push_back(V->pos.z);
+	unit_vertices.push_back(V->pos.z);*/
 }
 
 //
@@ -474,17 +481,19 @@ void RGL_DrawUnits(void)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
 				r_dumbclamp.d ? GL_CLAMP : GL_CLAMP_TO_EDGE);
 		}
+		glBegin(unit->shape);
 
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_NORMAL_ARRAY);
-		glEnableClientState(GL_EDGE_FLAG_ARRAY);
+		//glEnableClientState(GL_VERTEX_ARRAY);
+		//glEnableClientState(GL_NORMAL_ARRAY);
+		//glEnableClientState(GL_EDGE_FLAG_ARRAY);
 
 		for (int v_idx=0; v_idx < unit->count; v_idx++)
 		{
 			RGL_SendRawVector(local_verts + unit->first + v_idx);
 		}
 
-		glEdgeFlagPointer(0, unit_edgeflags.data());
+		glEnd();
+		/*glEdgeFlagPointer(0, unit_edgeflags.data());
 		glNormalPointer(GL_FLOAT, 0, unit_normals.data());
 		glVertexPointer(3, GL_FLOAT, 0, unit_vertices.data());
 		glDrawArrays(unit->shape, 0, unit->shape < GL_TRIANGLE_FAN ? unit->count : (unit_vertices.size() / 3));
@@ -502,7 +511,7 @@ void RGL_DrawUnits(void)
 		unit_normals.clear();
 		unit_vertices.clear();
 		unit_texcoords0.clear();
-		unit_texcoords1.clear();
+		unit_texcoords1.clear();*/
 		
 		// restore the clamping mode
 		if (old_clamp != DUMMY_CLAMP)

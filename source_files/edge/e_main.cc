@@ -37,6 +37,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
+#include <filesystem>
 
 #include "exe_path.h"
 #include "file.h"
@@ -1197,13 +1198,9 @@ static void AddCommandLineFiles(void)
 static void Add_Autoload(void) {
 	
 	epi::filesystem_dir_c fsd;
-	#ifdef __linux__
-	const char *folder = "autoload/";
-	#else
-	const char *folder = "autoload\\";
-	#endif
+	std::filesystem::path folder = "autoload";
 
-	if (!FS_ReadDir(&fsd, folder, "*.*"))
+	if (!FS_ReadDir(&fsd, folder.string().c_str(), "*.*"))
 	{
 		I_Warning("Failed to read autoload directory!\n");
 	}
@@ -1213,13 +1210,14 @@ static void Add_Autoload(void) {
 		{
 			if(!fsd[i]->is_dir)
 			{
-				AddSingleCmdLineFile(epi::PATH_Join(folder, fsd[i]->name.c_str()).c_str());
+				AddSingleCmdLineFile((folder /= fsd[i]->name).string().c_str());
+				folder.remove_filename();
 			}
 		}
 	}
 	fsd.Clear();
-	folder = epi::PATH_Join(folder, iwad_base.c_str()).c_str();
-	if (!FS_ReadDir(&fsd, folder, "*.*"))
+	folder /= iwad_base;
+	if (!FS_ReadDir(&fsd, folder.string().c_str(), "*.*"))
 	{
 		I_Warning("Failed to read game-specific autoload directory!\n");
 	}
@@ -1229,7 +1227,8 @@ static void Add_Autoload(void) {
 		{
 			if(!fsd[i]->is_dir)
 			{
-				AddSingleCmdLineFile(epi::PATH_Join(folder, fsd[i]->name.c_str()).c_str());
+				AddSingleCmdLineFile((folder /= fsd[i]->name).string().c_str());
+				folder.remove_filename();
 			}
 		}		
 	}

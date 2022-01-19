@@ -1217,6 +1217,22 @@ static void Add_Autoload(void) {
 			}
 		}
 	}
+	fsd.Clear();
+	folder = epi::PATH_Join(folder, iwad_base.c_str()).c_str();
+	if (!FS_ReadDir(&fsd, folder, "*.*"))
+	{
+		I_Warning("Failed to read game-specific autoload directory!\n");
+	}
+	else
+	{
+		for (int i = 0; i < fsd.GetSize(); i++) 
+		{
+			if(!fsd[i]->is_dir)
+			{
+				AddSingleCmdLineFile(epi::PATH_Join(folder, fsd[i]->name.c_str()).c_str());
+			}
+		}		
+	}
 }
 
 static void InitDDF(void)

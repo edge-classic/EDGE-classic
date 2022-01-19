@@ -108,6 +108,25 @@ void HUD_Reset()
 	cur_x_align = cur_y_align = -1;
 }
 
+float HUD_Aspect(void)
+{
+	// determine pixel_aspect
+	float aspect = CLAMP(0.2, r_aspect.f, 5.0);
+
+	if (FULLSCREEN)
+	{
+		pixel_aspect = aspect * SCREENHEIGHT / (float)SCREENWIDTH;
+	}
+	else
+	{
+		int width, height;
+
+		I_GetDesktopSize(&width, &height);
+
+		pixel_aspect = aspect * height / (float)width;
+	}
+	return pixel_aspect;
+}
 
 void HUD_FrameSetup(void)
 {

@@ -597,6 +597,18 @@ static void HD_play_sound(coal::vm_c *vm, int argc)
 }
 
 
+// hud.screen_aspect()
+//
+static void HD_screen_aspect(coal::vm_c *vm, int argc)
+{
+	//1.333, 1.777, 1.6, 1.5, 2.4
+	float TempAspect= HUD_Aspect();
+	TempAspect= std::ceil(TempAspect * 100.0) / 100.0;
+	
+	vm->ReturnFloat(TempAspect);
+}
+
+
 //------------------------------------------------------------------------
 // HUD Functions
 //------------------------------------------------------------------------
@@ -641,6 +653,7 @@ void VM_RegisterHUD()
 	//Lobo: new functions
 	ui_vm->AddNativeFunction("hud.draw_number",     HD_draw_number);
 	ui_vm->AddNativeFunction("hud.game_paused",     HD_game_paused);
+	ui_vm->AddNativeFunction("hud.screen_aspect",  HD_screen_aspect);
 	
     ui_vm->AddNativeFunction("hud.render_world",    HD_render_world);
     ui_vm->AddNativeFunction("hud.render_automap",  HD_render_automap);

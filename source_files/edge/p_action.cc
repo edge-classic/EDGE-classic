@@ -3456,6 +3456,18 @@ void P_ActCheckActivity(mobj_t *mo)
 
 		return;
 	}
+	
+	//Lobo 2022: use crouch states if we have them and we are, you know, crouching ;)
+	if(pl->mo->extendedflags & EF_CROUCHING)
+	{
+		// enter the CROUCH states (if present)
+		statenum_t crouch_st = P_MobjFindLabel(pl->mo, "CROUCH");
+		
+		if (crouch_st != S_NULL)
+			P_SetMobjStateDeferred(pl->mo, crouch_st, 0);
+
+		return;
+	}
 
 	/* Otherwise: do nothing */
 }

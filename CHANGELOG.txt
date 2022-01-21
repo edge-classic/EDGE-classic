@@ -19,8 +19,7 @@ General Improvements
 
 + Replaced zlib with miniz
 
-+ Converted drawing functions to use vertex arrays to reduce the number of GL calls needed
-
++ Consolidated some EPI filesystem functions so that platform-specific source files aren't required
 
 New Features
 ------------

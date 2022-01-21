@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.12..3.20)
 
-option(USE_PORTABLEGL "Use Portable GL software implementation" OFF)
-
 add_subdirectory(source_files/ajbsp)
 add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
@@ -31,9 +29,6 @@ if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64" AND APPLE)
 	add_compile_definitions(APPLE_SILICON)
 elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" AND APPLE)
 	add_compile_definitions(NOT_APPLE_SILICON)
-endif()
-if(USE_PORTABLEGL)
-	add_compile_definitions(USING_PORTABLEGL)
 endif()
 
 if(WIN32 OR MSYS)
@@ -254,7 +249,7 @@ endif()
 
 find_package(SDL2 REQUIRED)
 
-if(NOT MSYS AND NOT WIN32 AND NOT USE_PORTABLEGL)
+if(NOT MSYS AND NOT WIN32)
   find_package(OpenGL REQUIRED)
 endif()
 
@@ -263,15 +258,10 @@ target_include_directories(edge-classic PRIVATE source_files/coal)
 target_include_directories(edge-classic PRIVATE source_files/ddf)
 target_include_directories(edge-classic PRIVATE source_files/deh_edge)
 target_include_directories(edge-classic PRIVATE source_files/epi)
-if(NOT USE_PORTABLEGL)
-  target_include_directories(edge-classic PRIVATE source_files/glatter)
-endif()
+target_include_directories(edge-classic PRIVATE source_files/glatter)
 target_include_directories(edge-classic PRIVATE source_files/minimp3)
 target_include_directories(edge-classic PRIVATE source_files/minivorbis)
 target_include_directories(edge-classic PRIVATE source_files/miniz)
-if(USE_PORTABLEGL)
-  target_include_directories(edge-classic PRIVATE source_files/portablegl)
-endif()
 target_include_directories(edge-classic PRIVATE source_files/tinysoundfont)
 
 if(WIN32 OR MSYS)
@@ -288,81 +278,42 @@ COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge-classic>"
 		"${CMAKE_CURRENT_LIST_DIR}"
 )
 
-if(USE_PORTABLEGL)
-	if(WIN32 OR MSYS)
-		target_link_libraries(
-		edge-classic
-		PRIVATE edge_ajbsp
-				edge_coal
-				edge_ddf
-				edge_deh
-				edge_epi
-				${SDL2_LIBRARIES}
-				miniz
-				winmm
-				wsock32
-		)
-	elseif(NOT APPLE)
-		target_link_libraries(
-		edge-classic
-		PRIVATE edge_ajbsp
-				edge_coal
-				edge_ddf
-				edge_deh
-				edge_epi
-				${SDL2_LIBRARIES}
-				miniz
-		)
-	else()
-		target_link_libraries(
-		edge-classic
-		PRIVATE edge_ajbsp
-				edge_coal
-				edge_ddf
-				edge_deh
-				edge_epi
-				${SDL2_LIBRARIES}
-				miniz
-		)
-	endif()
+if(WIN32 OR MSYS)
+	target_link_libraries(
+	edge-classic
+	PRIVATE edge_ajbsp
+			edge_coal
+			edge_ddf
+			edge_deh
+			edge_epi
+			opengl32
+			${SDL2_LIBRARIES}
+			miniz
+			winmm
+			wsock32
+	)
+elseif(NOT APPLE)
+	target_link_libraries(
+	edge-classic
+	PRIVATE edge_ajbsp
+			edge_coal
+			edge_ddf
+			edge_deh
+			edge_epi
+			${OPENGL_LIBRARIES}
+			${SDL2_LIBRARIES}
+			miniz
+	)
 else()
-	if(WIN32 OR MSYS)
-		target_link_libraries(
-		edge-classic
-		PRIVATE edge_ajbsp
-				edge_coal
-				edge_ddf
-				edge_deh
-				edge_epi
-				opengl32
-				${SDL2_LIBRARIES}
-				miniz
-				winmm
-				wsock32
-		)
-	elseif(NOT APPLE)
-		target_link_libraries(
-		edge-classic
-		PRIVATE edge_ajbsp
-				edge_coal
-				edge_ddf
-				edge_deh
-				edge_epi
-				${OPENGL_LIBRARIES}
-				${SDL2_LIBRARIES}
-				miniz
-		)
-	else()
-		target_link_libraries(
-		edge-classic
-		PRIVATE edge_ajbsp
-				edge_coal
-				edge_ddf
-				edge_deh
-				edge_epi
-				${OPENGL_LIBRARIES}
-				${SDL2_LIBRARIES}
-				miniz
-		)
-	endif()
+	target_link_libraries(
+	edge-classic
+	PRIVATE edge_ajbsp
+			edge_coal
+			edge_ddf
+			edge_deh
+			edge_epi
+			${OPENGL_LIBRARIES}
+			${SDL2_LIBRARIES}
+			miniz
+	)
 endif()

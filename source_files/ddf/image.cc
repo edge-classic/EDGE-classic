@@ -155,12 +155,12 @@ static void ImageFinishEntry(void)
 		// determine format
         std::string ext(epi::PATH_GetExtension(filename));
 
-		if (DDF_CompareName(ext.c_str(), "png") == 0)
+		if (DDF_CompareName(ext.c_str(), ".png") == 0)
 			dynamic_image->format = LIF_PNG;
-		else if (DDF_CompareName(ext.c_str(), "jpg")  == 0 ||
-				 DDF_CompareName(ext.c_str(), "jpeg") == 0)
+		else if (DDF_CompareName(ext.c_str(), ".jpg")  == 0 ||
+				 DDF_CompareName(ext.c_str(), ".jpeg") == 0)
 			dynamic_image->format = LIF_JPEG;
-		else if (DDF_CompareName(ext.c_str(), "tga") == 0)
+		else if (DDF_CompareName(ext.c_str(), ".tga") == 0)
 			dynamic_image->format = LIF_TGA;
 		else
 			DDF_Error("Unknown image extension for '%s'\n", filename);

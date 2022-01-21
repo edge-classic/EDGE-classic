@@ -40,9 +40,6 @@ std::string PATH_GetFilename(const char *path);
 // Returns true if the given is an absolute path
 bool PATH_IsAbsolute(const char *path);
 
-// Returns true if the character could act as a seperator
-bool PATH_IsDirSep(const char c);
-
 // Join two paths together
 std::string PATH_Join(const char *lhs, const char *rhs);
 

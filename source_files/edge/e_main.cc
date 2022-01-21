@@ -37,7 +37,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
-#include <filesystem>
 
 #include "exe_path.h"
 #include "file.h"
@@ -1076,22 +1075,22 @@ static void AddSingleCmdLineFile(const char *name)
     std::string ext = epi::PATH_GetExtension(name);
 	int kind = FLKIND_Lump;
 
-	if (stricmp(ext.c_str(), "edm") == 0)
+	if (stricmp(ext.c_str(), ".edm") == 0)
 		I_Error("Demos are no longer supported\n");
 
 	// no need to check for GWA (shouldn't be added manually)
 
-	if (stricmp(ext.c_str(), "wad") == 0)
+	if (stricmp(ext.c_str(), ".wad") == 0)
 		kind = FLKIND_PWad;
-	else if (stricmp(ext.c_str(), "hwa") == 0)
+	else if (stricmp(ext.c_str(), ".hwa") == 0)
 		kind = FLKIND_HWad;
-	else if (stricmp(ext.c_str(), "rts") == 0)
+	else if (stricmp(ext.c_str(), ".rts") == 0)
 		kind = FLKIND_RTS;
-	else if (stricmp(ext.c_str(), "ddf") == 0 ||
-			 stricmp(ext.c_str(), "ldf") == 0)
+	else if (stricmp(ext.c_str(), ".ddf") == 0 ||
+			 stricmp(ext.c_str(), ".ldf") == 0)
 		kind = FLKIND_DDF;
-	else if (stricmp(ext.c_str(), "deh") == 0 ||
-			 stricmp(ext.c_str(), "bex") == 0)
+	else if (stricmp(ext.c_str(), ".deh") == 0 ||
+			 stricmp(ext.c_str(), ".bex") == 0)
 		kind = FLKIND_Deh;
 
 	if (kind != FLKIND_Lump)
@@ -1144,12 +1143,12 @@ static void AddCommandLineFiles(void)
 			std::string ext = epi::PATH_GetExtension(ps);
 
 			// sanity check...
-			if (stricmp(ext.c_str(), "wad") == 0 || 
-                stricmp(ext.c_str(), "gwa") == 0 ||
-			    stricmp(ext.c_str(), "hwa") == 0 ||
-                stricmp(ext.c_str(), "ddf") == 0 ||
-			    stricmp(ext.c_str(), "deh") == 0 ||
-			    stricmp(ext.c_str(), "bex") == 0)
+			if (stricmp(ext.c_str(), ".wad") == 0 || 
+                stricmp(ext.c_str(), ".gwa") == 0 ||
+			    stricmp(ext.c_str(), ".hwa") == 0 ||
+                stricmp(ext.c_str(), ".ddf") == 0 ||
+			    stricmp(ext.c_str(), ".deh") == 0 ||
+			    stricmp(ext.c_str(), ".bex") == 0)
 			{
 				I_Error("Illegal filename for -script: %s\n", ps);
 			}
@@ -1177,11 +1176,11 @@ static void AddCommandLineFiles(void)
 			std::string ext(epi::PATH_GetExtension(ps));
 
 			// sanity check...
-			if (stricmp(ext.c_str(), "wad") == 0 || 
-                stricmp(ext.c_str(), "gwa") == 0 ||
-			    stricmp(ext.c_str(), "hwa") == 0 ||
-                stricmp(ext.c_str(), "ddf") == 0 ||
-			    stricmp(ext.c_str(), "rts") == 0)
+			if (stricmp(ext.c_str(), ".wad") == 0 || 
+                stricmp(ext.c_str(), ".gwa") == 0 ||
+			    stricmp(ext.c_str(), ".hwa") == 0 ||
+                stricmp(ext.c_str(), ".ddf") == 0 ||
+			    stricmp(ext.c_str(), ".rts") == 0)
 			{
 				I_Error("Illegal filename for -deh: %s\n", ps);
 			}
@@ -1198,9 +1197,9 @@ static void AddCommandLineFiles(void)
 static void Add_Autoload(void) {
 	
 	epi::filesystem_dir_c fsd;
-	std::filesystem::path folder = "autoload";
+	std::string folder = "autoload";
 
-	if (!FS_ReadDir(&fsd, folder.string().c_str(), "*.*"))
+	if (!FS_ReadDir(&fsd, folder.c_str(), "*.*"))
 	{
 		I_Warning("Failed to read autoload directory!\n");
 	}
@@ -1210,14 +1209,13 @@ static void Add_Autoload(void) {
 		{
 			if(!fsd[i]->is_dir)
 			{
-				AddSingleCmdLineFile((folder /= fsd[i]->name).string().c_str());
-				folder.remove_filename();
+				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i]->name.c_str()).c_str());
 			}
 		}
 	}
 	fsd.Clear();
-	folder /= iwad_base;
-	if (!FS_ReadDir(&fsd, folder.string().c_str(), "*.*"))
+	folder = epi::PATH_Join(folder.c_str(), iwad_base.c_str());
+	if (!FS_ReadDir(&fsd, folder.c_str(), "*.*"))
 	{
 		I_Warning("Failed to read game-specific autoload directory!\n");
 	}
@@ -1227,8 +1225,7 @@ static void Add_Autoload(void) {
 		{
 			if(!fsd[i]->is_dir)
 			{
-				AddSingleCmdLineFile((folder /= fsd[i]->name).string().c_str());
-				folder.remove_filename();
+				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i]->name.c_str()).c_str());
 			}
 		}		
 	}

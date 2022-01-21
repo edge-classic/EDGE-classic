@@ -21,6 +21,7 @@
 
 #include "arrays.h"
 #include "timestamp.h"
+#include <filesystem>
 
 namespace epi
 {
@@ -66,8 +67,8 @@ public:
 // ---- The Filesystem ----
 
 // Directory Functions
-bool FS_GetCurrDir(char *dir, unsigned int bufsize); 
-bool FS_SetCurrDir(const char *dir);
+std::filesystem::path FS_GetCurrDir(); 
+bool FS_SetCurrDir(std::filesystem::path dir);
 
 bool FS_IsDir(const char *dir);
 bool FS_MakeDir(const char *dir);

@@ -577,6 +577,39 @@ void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col,
 	glLineWidth(1.0f);
 }
 
+void HUD_SolidFatLine(float x1, float y1, float x2, float y2, rgbcol_t col,
+                   bool thick, bool smooth, float dx, float dy)
+{
+	x1 = COORD_X(x1); y1 = COORD_Y(y1);
+	x2 = COORD_X(x2); y2 = COORD_Y(y2);
+
+	dx = COORD_X(dx) - COORD_X(0);
+	dy = COORD_Y( 0) - COORD_Y(dy);
+
+	glLineWidth(3.5f);
+	
+	if (thick)
+		glLineWidth(3.5f);
+
+	if (smooth)
+		glEnable(GL_LINE_SMOOTH);
+
+	if (smooth || cur_alpha < 0.99f)
+		glEnable(GL_BLEND);
+
+	glColor4f(RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha);
+
+	glBegin(GL_LINES);
+
+	glVertex2i((int)x1 + (int)dx, (int)y1 + (int)dy);
+	glVertex2i((int)x2 + (int)dx, (int)y2 + (int)dy);
+
+	glEnd();
+
+	glDisable(GL_BLEND);
+	glDisable(GL_LINE_SMOOTH);
+	glLineWidth(1.0f);
+}
 
 void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col)
 {

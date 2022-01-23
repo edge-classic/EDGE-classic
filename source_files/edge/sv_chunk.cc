@@ -830,7 +830,7 @@ void SV_PutMarker(const char *id)
 {
 	int i;
 
-	I_Printf("ID: %s\n", id);
+	//I_Printf("ID: %s\n", id);
 
 	SYS_ASSERT(id);
 	SYS_ASSERT(strlen(id) == 4);

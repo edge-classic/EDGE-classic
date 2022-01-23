@@ -694,7 +694,8 @@ void P_PlayerThink(player_t * player)
 
 	if (player->mo->props->special ||
 		player->mo->subsector->sector->exfloor_used > 0 ||
-		player->underwater)
+		player->underwater ||
+		player->swimming)
 	{
 		P_PlayerInSpecialSector(player, player->mo->subsector->sector);
 	}

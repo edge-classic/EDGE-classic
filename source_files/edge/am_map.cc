@@ -536,6 +536,20 @@ static void DrawMLine(mline_t * ml, rgbcol_t rgb, bool thick = true)
 	HUD_SolidLine(x1, y1, x2, y2, rgb, thick, thick, dx, dy);
 }
 
+//Lobo 2022: keyed doors automap colouring
+static void DrawMLineDoor(mline_t * ml, rgbcol_t rgb)
+{
+	float x1 = f_x + f_w*0.5 + MTOF(ml->a.x);
+	float y1 = f_y + f_h*0.5 - MTOF(ml->a.y);
+
+	float x2 = f_x + f_w*0.5 + MTOF(ml->b.x);
+	float y2 = f_y + f_h*0.5 - MTOF(ml->b.y);
+
+	float dx = MTOF(- m_cx);
+	float dy = MTOF(- m_cy);
+
+	HUD_SolidFatLine(x1, y1, x2, y2, rgb, true, true, dx, dy);
+}
 
 //
 // Draws flat (floor/ceiling tile) aligned grid lines.
@@ -676,6 +690,38 @@ static void AM_WalkSeg(seg_t *seg)
 		}
 		else
 		{
+			//Lobo 2022: give keyed doors the colour of the required key
+			if (line->special)
+			{ 	
+				if (line->special->keys)
+				{
+					if(line->special->keys & KF_STRICTLY_ALL)
+					{
+						DrawMLineDoor(&l, RGB_MAKE(255,0,255)); //purple
+					}
+					else if(line->special->keys & KF_BlueCard || line->special->keys & KF_BlueSkull)
+					{
+						DrawMLineDoor(&l, RGB_MAKE(0,0,255)); //blue
+					}
+					else if(line->special->keys & KF_YellowCard || line->special->keys & KF_YellowSkull)
+					{
+						DrawMLineDoor(&l, RGB_MAKE(255,255,0)); //yellow
+					}
+					else if(line->special->keys & KF_RedCard || line->special->keys & KF_RedSkull)
+					{
+						DrawMLineDoor(&l, RGB_MAKE(255,0,0)); //red
+					}
+					else if(line->special->keys & KF_GreenCard || line->special->keys & KF_GreenSkull)
+					{
+						DrawMLineDoor(&l, RGB_MAKE(0,255,0)); //green
+					}
+					else
+					{
+						DrawMLineDoor(&l, RGB_MAKE(255,0,255)); //purple
+					}
+					return;
+				}
+			}
 			if (line->flags & MLF_Secret)
 			{  
 				// secret door

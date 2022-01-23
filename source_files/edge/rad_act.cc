@@ -1007,7 +1007,7 @@ void RAD_ActJumpOn(rad_trigger_t *R, void *param)
 		return;
 
 	rts_state_t *cache_state;
-	char *label;
+	char *label = NULL;
 
 	if (R->menu_result > 0)
 	{

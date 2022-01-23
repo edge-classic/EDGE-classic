@@ -23,7 +23,11 @@
 #include <signal.h>
 
 #include <sys/types.h>
+#ifdef _MSC_VER
+#include <ctime>
+#else
 #include <sys/time.h>
+#endif
 
 #include "m_argv.h"
 #include "m_misc.h"

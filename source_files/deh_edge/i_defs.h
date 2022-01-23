@@ -46,11 +46,14 @@ namespace Deh_Edge
 }
 
 // Windows
-#elif defined(WIN32)
+#elif defined(WIN32) || defined(_WIN32) || defined(_WIN64)
 
 #define STRICT
 #define _WINDOWS
 #define WIN32_LEAN_AND_MEAN
+#ifndef WIN32
+#define WIN32
+#endif
 
 namespace Deh_Edge
 {

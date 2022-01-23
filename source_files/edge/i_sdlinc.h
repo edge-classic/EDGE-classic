@@ -19,7 +19,11 @@
 #ifndef __SDL_SYSTEM_INTERNAL_H__
 #define __SDL_SYSTEM_INTERNAL_H__
 
+#ifdef _MSC_VER
+#include "SDL.h"
+#else
 #include <SDL2/SDL.h>
+#endif
 
 #include "i_local.h"  // FIXME: remove
 

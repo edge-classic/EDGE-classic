@@ -36,6 +36,9 @@
 #include "am_map.h"     // AM_Drawer
 #include "r_colormap.h"
 #include "s_sound.h"
+#ifdef _MSC_VER
+#include <cmath>
+#endif
 
 
 extern coal::vm_c *ui_vm;

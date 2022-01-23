@@ -28,7 +28,7 @@
 #include "epi_linux.h"
 #endif
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
 #include "epi_win32.h"
 #endif
 

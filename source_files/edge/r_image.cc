@@ -331,7 +331,7 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 		is_png = true;
 
 		if (! Image_GetInfo(f, &width, &height, &solid, LIF_PNG) ||
-		    width <= 0 or height <= 0)
+		    width <= 0 || height <= 0)
 		{
 			I_Error("Error scanning PNG image in '%s' lump\n", W_GetLumpName(lump));
 		}

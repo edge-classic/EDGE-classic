@@ -21,6 +21,8 @@ General Improvements
 
 + Consolidated some EPI filesystem functions so that platform-specific source files aren't required
 
++ Compilation now works with MSVC Build Tools. SDL2 development headers/libs included for this purpose
+
 New Features
 ------------
 + Added inventory system

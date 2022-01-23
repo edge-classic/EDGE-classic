@@ -104,7 +104,7 @@ void R_AddResolution(scrmode_c *mode)
 		{
 			// depth is different but equivalent.  Update current
 			// member in list, giving preference to power-of-two.
-			if (mode->depth == 16 or mode->depth == 32)
+			if (mode->depth == 16 || mode->depth == 32)
 				exist->depth = mode->depth;
 		}
 

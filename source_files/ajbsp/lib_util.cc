@@ -19,7 +19,11 @@
 
 #include "ajbsp.h"
 
+#ifdef _MSC_VER
+#include <ctime>
+#else
 #include <sys/time.h>
+#endif
 #include <time.h>
 
 

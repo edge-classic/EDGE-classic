@@ -284,7 +284,7 @@ bool oggplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
     {
 		s16_t *data_buf;
 
-		if (is_stereo and !dev_stereo)
+		if (is_stereo && !dev_stereo)
 			data_buf = mono_buffer;
 		else
 			data_buf = buf->data_L + samples * (is_stereo ? 2 : 1);
@@ -321,7 +321,7 @@ bool oggplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 
 		got_size /= (is_stereo ? 2 : 1) * sizeof(s16_t);
 
-		if (is_stereo and !dev_stereo)
+		if (is_stereo && !dev_stereo)
 			ConvertToMono(buf->data_L + samples, mono_buffer, got_size);
 
 		samples += got_size;

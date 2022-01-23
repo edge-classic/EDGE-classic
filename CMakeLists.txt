@@ -14,6 +14,9 @@ project(
 )
 
 set(CMAKE_MODULE_PATH cmake)
+if(WIN32 AND NOT MSYS)
+  set(SDL2_DIR "${CMAKE_SOURCE_DIR}/source_files/sdl2")
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -262,6 +265,9 @@ target_include_directories(edge-classic PRIVATE source_files/glatter)
 target_include_directories(edge-classic PRIVATE source_files/minimp3)
 target_include_directories(edge-classic PRIVATE source_files/minivorbis)
 target_include_directories(edge-classic PRIVATE source_files/miniz)
+if(WIN32 AND NOT MSYS)
+  target_include_directories(edge-classic PRIVATE source_files/sdl2/include)
+endif()
 target_include_directories(edge-classic PRIVATE source_files/tinysoundfont)
 
 if(WIN32 OR MSYS)
@@ -277,6 +283,25 @@ POST_BUILD
 COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge-classic>"
 		"${CMAKE_CURRENT_LIST_DIR}"
 )
+
+# Copy appropriate SDL2.dll to local install directory when built with MSVC
+if(WIN32 AND NOT MSYS)
+  if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
+    add_custom_command(
+	TARGET edge-classic
+	POST_BUILD
+	COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/source_files/sdl2/lib/x64/SDL2.dll"
+			"${CMAKE_CURRENT_LIST_DIR}"
+	)
+  else ()
+    add_custom_command(
+	TARGET edge-classic
+	POST_BUILD
+	COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/source_files/sdl2/lib/x86/SDL2.dll"
+			"${CMAKE_CURRENT_LIST_DIR}"
+	)
+  endif ()
+endif()
 
 if(WIN32 OR MSYS)
 	target_link_libraries(

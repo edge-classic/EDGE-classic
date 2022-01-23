@@ -34,7 +34,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef _MSC_VER // Haven't yet noticed consequences of just leaving this out with MSVC - Dasho
 #include <unistd.h>
+#endif
 
 namespace Deh_Edge
 {

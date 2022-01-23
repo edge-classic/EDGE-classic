@@ -110,10 +110,9 @@
        		}                                                                \
      	}                                                                  \
                                                                         \
-     	if (!top)                                                          \
-       		break;                                                           \
-       																	\
-		b = stk[--top];                                                    \
+     	if (!top) break;                                                     \
+										\
+	b = stk[--top];                                                    \
      	a = stk[--top];                                                    \
    	}                                                                    \
                                                                         \

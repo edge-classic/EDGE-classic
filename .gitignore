@@ -9,7 +9,7 @@ edge-classic.exe
 edge-classic
 edge-classic.log
 debug.txt
-*.dll
+/*.dll
 edge-classic.cfg
 
 # EDGE game folders

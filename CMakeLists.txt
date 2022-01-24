@@ -276,7 +276,7 @@ else()
   target_compile_definitions(edge-classic PRIVATE UNIX)
 endif()
 
-# Copies executables to local install directory after build
+# Copies executable to local install directory after build
 add_custom_command(
 TARGET edge-classic
 POST_BUILD
@@ -301,6 +301,23 @@ if(WIN32 AND NOT MSYS)
 			"${CMAKE_CURRENT_LIST_DIR}"
 	)
   endif ()
+# Copy appropriate SDL2.dll to local install directory when built with MSYS2
+elseif(MSYS)
+	if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
+	add_custom_command(
+	TARGET edge-classic
+	POST_BUILD
+	COMMAND "${CMAKE_COMMAND}" -E copy "/mingw64/bin/SDL2.dll"
+			"${CMAKE_CURRENT_LIST_DIR}"
+	)
+	else ()
+	add_custom_command(
+	TARGET edge-classic
+	POST_BUILD
+	COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/SDL2.dll"
+			"${CMAKE_CURRENT_LIST_DIR}"
+	)
+	endif ()
 endif()
 
 if(WIN32 OR MSYS)

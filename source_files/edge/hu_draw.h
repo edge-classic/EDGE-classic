@@ -80,6 +80,10 @@ void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col,
 // to the current scissor rectangle.  The dx/dy fields are used by
 // the automap code to reduce the wobblies.
 
+void HUD_SolidFatLine(float x1, float y1, float x2, float y2, rgbcol_t col,
+                   bool thick=false, bool smooth=true, float dx=0, float dy=0);
+
+
 void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col);
 // Draw a thin outline of a box.
 

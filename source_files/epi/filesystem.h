@@ -20,7 +20,6 @@
 #define __EPI_FILESYSTEM_H__
 
 #include "arrays.h"
-#include "timestamp.h"
 #include <filesystem>
 
 namespace epi
@@ -85,8 +84,6 @@ file_c *FS_Open(const char *name, unsigned int flags);
 bool FS_Copy(const char *src, const char *dest);
 bool FS_Delete(const char *name);
 bool FS_Rename(const char *oldname, const char *newname);
-
-bool FS_GetModifiedTime(const char *filename, timestamp_c& t);
 
 } // namespace epi
 

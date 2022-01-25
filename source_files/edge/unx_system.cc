@@ -27,8 +27,6 @@
 #include <sys/time.h>
 #include <time.h>
 
-#include "timestamp.h"
-
 #include "version.h"
 #include "con_main.h"
 #include "dm_state.h"

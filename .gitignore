@@ -1,6 +1,7 @@
 # VS Code
 /build/
 cache/
+/.vscode/settings.json
 
 # Main program/DLLs
 /edge

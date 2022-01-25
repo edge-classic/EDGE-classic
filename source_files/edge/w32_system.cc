@@ -25,8 +25,6 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#include "timestamp.h"
-
 #include "con_main.h"
 #include "dm_defs.h"
 #include "e_main.h"

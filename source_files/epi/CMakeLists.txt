@@ -37,7 +37,6 @@ add_library(
   sound_gather.cc
   sound_wav.cc
   str_format.cc
-  timestamp.cc
   utility.cc
 )
 

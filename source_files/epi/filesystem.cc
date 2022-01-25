@@ -197,34 +197,6 @@ bool FS_Rename(const char *oldname, const char *newname)
 	return true;
 }
 
-//
-// FS_GetModifiedTime
-//
-// Fills in 'timestamp_c' to match the modified time of 'filename'. Returns
-// true on success.
-//
-// -ACB- 2001/06/14
-// -ACB- 2004/02/15 Use native win32 functions: they should work!
-// Jan 2022 - Converted to decode std::filesystem last_write_time function - Dasho
-bool FS_GetModifiedTime(const char *filename, timestamp_c& t)
-{
-	// Check the sanity of the coders...
-	SYS_ASSERT(filename);
-
-	try
-	{
-		const std::time_t last_modified = std::chrono::duration_cast<std::chrono::seconds>(std::filesystem::last_write_time(filename).time_since_epoch()).count();
-		t.DecodeDate(last_modified);
-		t.DecodeTime(last_modified);
-	}
-	catch (std::filesystem::filesystem_error const& ex)
-	{
-		I_Warning("Failed to read file modification time! Error: %s\n", ex.what());
-		return false;
-	}
-	return true;
-}
-
 } // namespace epi
 
 //--- editor settings ---

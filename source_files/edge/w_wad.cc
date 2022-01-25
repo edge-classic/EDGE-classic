@@ -1015,11 +1015,11 @@ static bool FindCacheFilename (std::string& out_name,
 
 	// Check whether the waddir gwa is out of date
 	if (has_local) 
-		has_local = (L_CompareFileTimes(filename, local_name.c_str()) <= 0);
+		has_local = std::filesystem::last_write_time(local_name) > std::filesystem::last_write_time(filename);
 
 	// Check whether the cached gwa is out of date
 	if (has_cache) 
-		has_cache = (L_CompareFileTimes(filename, cache_name.c_str()) <= 0);
+		has_cache = std::filesystem::last_write_time(cache_name) > std::filesystem::last_write_time(filename);
 
 	I_Debugf("FindCacheFilename: has_local=%s  has_cache=%s\n",
 		has_local ? "YES" : "NO", has_cache ? "YES" : "NO");

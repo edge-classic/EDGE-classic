@@ -757,24 +757,5 @@ void I_Logf(const char *message,...)
 	fflush(logfile);
 }
 
-
-//
-// Just like L_CompareTimeStamps above, but give the filenames.
-//
-int L_CompareFileTimes(const char *A, const char *B)
-{
-	epi::timestamp_c A_time;
-	epi::timestamp_c B_time;
-
-	if (! FS_GetModifiedTime(A, A_time))
-		I_Error("AddFile: I_GetModifiedTime failed on %s\n", A);
-
-	if (! FS_GetModifiedTime(B, B_time))
-		I_Error("AddFile: I_GetModifiedTime failed on %s\n", B);
-
-	return A_time.Cmp(B_time);
-}
-
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

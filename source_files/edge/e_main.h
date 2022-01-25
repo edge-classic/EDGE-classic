@@ -59,6 +59,8 @@ extern int app_state;
 extern bool m_screenshot_required;
 extern bool need_save_screenshot;
 
+extern bool custom_menu;
+
 #endif // __E_MAIN__
 
 //--- editor settings ---

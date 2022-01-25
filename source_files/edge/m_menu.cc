@@ -228,6 +228,9 @@ typedef struct
 
 	// hotkey in menu
 	char alpha_key;
+
+	// Printed name test
+	const char *name;
 }
 menuitem_t;
 
@@ -328,13 +331,13 @@ main_e;
 
 static menuitem_t MainMenu[] =
 {
-	{1, "M_NGAME",   NULL, M_NewGame, 'n'},
-	{1, "M_OPTION",  NULL, M_Options, 'o'},
-	{1, "M_LOADG",   NULL, M_LoadGame, 'l'},
-	{1, "M_SAVEG",   NULL, M_SaveGame, 's'},
+	{1, "M_NGAME",   NULL, M_NewGame, 'n', language["MainNewGame"]},
+	{1, "M_OPTION",  NULL, M_Options, 'o', language["MainOptions"]},
+	{1, "M_LOADG",   NULL, M_LoadGame, 'l', language["MainLoadGame"]},
+	{1, "M_SAVEG",   NULL, M_SaveGame, 's', language["MainSaveGame"]},
 	// Another hickup with Special edition.
-	{1, "M_RDTHIS",  NULL, M_ReadThis, 'r'},
-	{1, "M_QUITG",   NULL, M_QuitEDGE, 'q'}
+	{1, "M_RDTHIS",  NULL, M_ReadThis, 'r', language["MainReadThis"]},
+	{1, "M_QUITG",   NULL, M_QuitEDGE, 'q', language["MainQuitGame"]}
 };
 
 static menu_t MainDef =
@@ -2150,9 +2153,16 @@ void M_Drawer(void)
 			currentMenu->menuitems[i].image = W_ImageLookup(
 				currentMenu->menuitems[i].patch_name);
 
-		const image_c *image = currentMenu->menuitems[i].image;
+		if (true) // Replace this with custom_menu when things are ready - Dasho
+		{
+			const image_c *image = currentMenu->menuitems[i].image;
 
-		HUD_DrawImage(x, y, image);
+			HUD_DrawImage(x, y, image);
+		} 
+		else
+		{		
+			HL_WriteText(style,3, x, y, currentMenu->menuitems[i].name, 1.0);
+		}
 	}
 
 	// DRAW SKULL

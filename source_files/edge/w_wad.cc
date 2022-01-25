@@ -814,6 +814,14 @@ static void AddLump(data_file_c *df, int lump, int pos, int size, int file,
 	// ignore zero size lumps or dummy markers
 	if (lump_p->size > 0 && !IsDummySF(lump_p->name))
 	{
+		// Disable text-drawing main menu if PWad supplies menu images - Dasho
+		if(df->kind == FLKIND_PWad)
+		{
+			char *checker = strstr(lump_p->name, "M_");
+			if(checker)
+				custom_menu = true;
+		}
+
 		if (within_sprite_list)
 		{
 			lump_p->kind = LMKIND_Sprite;

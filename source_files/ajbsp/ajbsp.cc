@@ -306,7 +306,7 @@ void VisitFile(unsigned int idx, const char *filename)
 	if (! edit_wad)
 		FatalError("Cannot open file: %s\n", filename);
 
-	gwa_wad = Wad_file::Open(opt_output, 'a');
+	gwa_wad = Wad_file::Open(opt_output, 'w');
 
 	if (gwa_wad->IsReadOnly())
 	{

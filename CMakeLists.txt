@@ -20,10 +20,12 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_FLAGS "-O2 -ffast-math -fno-strict-aliasing -DINLINE_G=inline -Wall")
+set(CMAKE_CXX_FLAGS "-O2 -DINLINE_G=inline -Wall")
 if(WIN32 AND NOT MSYS)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHa")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs")
   set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS")
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -fno-strict-aliasing")
 endif()
 if(MSYS)
   set(CMAKE_EXE_LINKER_FLAGS "-static -mwindows")
@@ -315,6 +317,12 @@ elseif(MSYS)
 	TARGET edge-classic
 	POST_BUILD
 	COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/SDL2.dll"
+			"${CMAKE_CURRENT_LIST_DIR}"
+		COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libgcc_s_dw2-1.dll"
+			"${CMAKE_CURRENT_LIST_DIR}"
+		COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libstdc++-6.dll"
+			"${CMAKE_CURRENT_LIST_DIR}"
+		COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libwinpthread-1.dll"
 			"${CMAKE_CURRENT_LIST_DIR}"
 	)
 	endif ()

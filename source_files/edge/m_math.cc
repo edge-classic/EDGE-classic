@@ -46,7 +46,7 @@ float M_Tan (angle_t ang)
 
 angle_t M_ATan (float slope)
 {
-	return (angle_t) ((float) ANG180 * atan (slope) / M_PI);
+	return (s32_t)((float)ANG180 * atan(slope) / M_PI); // Updated M_ATan from EDGE 2.x branch, works properly with MSVC now
 }
 
 void M_Angle2Matrix (angle_t ang, vec2_t * x, vec2_t * y)

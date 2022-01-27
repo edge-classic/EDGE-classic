@@ -962,11 +962,13 @@ static void IdentifyVersion(void)
 // Add game-specific base EWADs (widepix, skyboxes, etc) - Dasho
 static void Add_Base(void) 
 {
-	std::string base_wad = epi::PATH_Join(game_dir.c_str(), "edge_base");
-	base_wad = epi::PATH_Join(base_wad.c_str(), iwad_base.append("_base.wad").c_str());
-	if (epi::FS_Access(base_wad.c_str(), epi::file_c::ACCESS_READ)) 
+	std::string base_path = epi::PATH_Join(game_dir.c_str(), "edge_base");
+	std::string base_wad = iwad_base;
+	std::transform(base_wad.begin(), base_wad.end(), base_wad.begin(), ::tolower);
+	base_path = epi::PATH_Join(base_path.c_str(), base_wad.append("_base.wad").c_str());
+	if (epi::FS_Access(base_path.c_str(), epi::file_c::ACCESS_READ)) 
 	{
-		W_AddRawFilename(base_wad.c_str(), FLKIND_EWad);
+		W_AddRawFilename(base_path.c_str(), FLKIND_EWad);
 	}
 	else
 	{

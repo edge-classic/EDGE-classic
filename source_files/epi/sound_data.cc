@@ -177,7 +177,7 @@ void sound_data_c::Float_To_Signed(float *data_float, s16_t *data_signed, int sa
 	{
 		float v = *data_float++;
 		v = ((v < -1) ? -1 : ((v > 1) ? 1 : v));
-    	*data_signed++ = (s16_t)(v * 32768);
+    	*data_signed++ = (s16_t)(v * (v < 0 ? 32768 : 32767));
 	}
 }
 
@@ -188,7 +188,7 @@ void sound_data_c::Signed_To_Float(s16_t *data_signed, float *data_float, int sa
 	while (data_float != data_float_end)
 	{
 		s16_t v = *data_signed++;
-		*data_float++ = (float)v / 32768;
+		*data_float++ = (float)v / (v < 0 ? 32768 : 32767);
 	}
 }
 

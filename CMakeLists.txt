@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12..3.20)
 
 add_subdirectory(source_files/ajbsp)
+add_subdirectory(source_files/biquad)
 add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/deh_edge)
@@ -336,6 +337,7 @@ if(WIN32 OR MSYS)
 			edge_ddf
 			edge_deh
 			edge_epi
+			biquad
 			opengl32
 			${SDL2_LIBRARIES}
 			miniz
@@ -350,6 +352,7 @@ elseif(NOT APPLE)
 			edge_ddf
 			edge_deh
 			edge_epi
+			biquad
 			${OPENGL_LIBRARIES}
 			${SDL2_LIBRARIES}
 			miniz
@@ -362,6 +365,7 @@ else()
 			edge_ddf
 			edge_deh
 			edge_epi
+			biquad
 			${OPENGL_LIBRARIES}
 			${SDL2_LIBRARIES}
 			miniz

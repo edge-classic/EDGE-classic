@@ -256,7 +256,22 @@ static void MixMono(mix_channel_c *chan, int *dest, int pairs)
 {
 	SYS_ASSERT(pairs > 0);
 
-	const s16_t *src_L = chan->data->data_L;
+	s16_t *src_L;
+
+	if (players[consoleplayer])
+	{
+		if (players[consoleplayer]->underwater || players[consoleplayer]->swimming)
+		{
+			if (chan->data->lowpass_data_L)
+				src_L = chan->data->lowpass_data_L;
+			else
+				src_L = chan->data->data_L;
+		}
+		else
+			src_L = chan->data->data_L;
+	}
+	else
+		src_L = chan->data->data_L;
 
 	int *d_pos = dest;
 	int *d_end = d_pos + pairs;
@@ -279,9 +294,36 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 {
 	SYS_ASSERT(pairs > 0);
 
-	const s16_t *src_L = chan->data->data_L;
-	const s16_t *src_R = chan->data->data_R;
+	s16_t *src_L;
+	s16_t *src_R;
 
+	if (players[consoleplayer])
+	{
+		if (players[consoleplayer]->underwater || players[consoleplayer]->swimming)
+		{
+			if (chan->data->lowpass_data_L && chan->data->lowpass_data_R)
+			{
+				src_L = chan->data->lowpass_data_L;
+				src_R = chan->data->lowpass_data_R;
+			}
+			else
+			{
+				src_L = chan->data->data_L;
+				src_R = chan->data->data_R;
+			}
+		}
+		else
+		{
+			src_L = chan->data->data_L;
+			src_R = chan->data->data_R;
+		}
+	}
+	else
+	{
+		src_L = chan->data->data_L;
+		src_R = chan->data->data_R;		
+	}
+	
 	int *d_pos = dest;
 	int *d_end = d_pos + pairs * 2;
 
@@ -307,7 +349,22 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 
 	SYS_ASSERT(pairs > 0);
 
-	const s16_t *src_L = chan->data->data_L;
+	s16_t *src_L;
+
+	if (players[consoleplayer])
+	{
+		if (players[consoleplayer]->underwater || players[consoleplayer]->swimming)
+		{
+			if (chan->data->lowpass_data_L)
+				src_L = chan->data->lowpass_data_L;
+			else
+				src_L = chan->data->data_L;
+		}
+		else
+			src_L = chan->data->data_L;
+	}
+	else
+		src_L = chan->data->data_L;
 
 	int *d_pos = dest;
 	int *d_end = d_pos + pairs * 2;

@@ -21,12 +21,15 @@
 
 #include <vector>
 
+#include "biquad.h"
+
 namespace epi
 {
 
 sound_data_c::sound_data_c() :
 	length(0), freq(0), mode(0),
 	data_L(NULL), data_R(NULL),
+	lowpass_data_L(NULL), lowpass_data_R(NULL),
 	priv_data(NULL), ref_count(0)
 { }
 
@@ -49,6 +52,18 @@ void sound_data_c::Free()
 	data_R = NULL;
 }
 
+void sound_data_c::Free_Lowpass()
+{
+	if (lowpass_data_R && lowpass_data_R != lowpass_data_L)
+		delete[] lowpass_data_R;
+
+	if (lowpass_data_L)
+		delete[] lowpass_data_L;
+
+	lowpass_data_L = NULL;
+	lowpass_data_R = NULL;
+}
+
 void sound_data_c::Allocate(int samples, int buf_mode)
 {
 	// early out when requirements are already met
@@ -61,6 +76,11 @@ void sound_data_c::Allocate(int samples, int buf_mode)
 	if (data_L || data_R)
 	{
 		Free();
+	}
+
+	if (lowpass_data_L || lowpass_data_R)
+	{
+		Free_Lowpass();
 	}
 
 	length = samples;
@@ -84,6 +104,91 @@ void sound_data_c::Allocate(int samples, int buf_mode)
 			break;
 
 		default: break;
+	}
+}
+
+void sound_data_c::Mix_Lowpass()
+{
+	float *data_L_float;
+	float *data_R_float;
+	Biquad *lpFilter = new Biquad();
+	lpFilter->setBiquad(bq_type_lowpass, 300.0 / freq, 0.707, 0);
+
+	switch (mode)
+	{
+		case SBUF_Mono:
+			lowpass_data_L = new s16_t[length];
+			memset(lowpass_data_L, 0, length * sizeof(s16_t));
+			lowpass_data_R = lowpass_data_L;
+			data_L_float = new float[length];
+			memset(data_L_float, 0, length * sizeof(float));
+			Signed_To_Float(data_L, data_L_float, length);
+			for (int i = 0; i < length; i++) 
+			{
+				data_L_float[i] = lpFilter->process(data_L_float[i]);
+			}
+			Float_To_Signed(data_L_float, lowpass_data_L, length);
+			break;
+
+		case SBUF_Stereo:
+			lowpass_data_L = new s16_t[length];
+			memset(lowpass_data_L, 0, length * sizeof(s16_t));
+			lowpass_data_R = new s16_t[length];
+			memset(lowpass_data_R, 0, length * sizeof(s16_t));
+			data_L_float = new float[length];
+			data_R_float = new float[length];
+			memset(data_L_float, 0, length * sizeof(float));
+			memset(data_R_float, 0, length * sizeof(float));
+			Signed_To_Float(data_L, data_L_float, length);
+			Signed_To_Float(data_R, data_R_float, length);
+			for (int i = 0; i < length; i++) 
+			{
+				data_L_float[i] = lpFilter->process(data_L_float[i]);
+			}
+			for (int i = 0; i < length; i++) 
+			{
+				data_R_float[i] = lpFilter->process(data_R_float[i]);
+			}
+			Float_To_Signed(data_L_float, lowpass_data_L, length);
+			Float_To_Signed(data_R_float, lowpass_data_R, length);
+			break;
+
+		case SBUF_Interleaved:
+			lowpass_data_L = new s16_t[length * 2];
+			memset(lowpass_data_L, 0, length * 2 * sizeof(s16_t));
+			lowpass_data_R = lowpass_data_L;
+			data_L_float = new float[length * 2];
+			memset(data_L_float, 0, length * 2 * sizeof(float));
+			Signed_To_Float(data_L, data_L_float, length * 2);
+			for (int i = 0; i < length; i++) 
+			{
+				data_L_float[i] = lpFilter->process(data_L_float[i]);
+			}
+			Float_To_Signed(data_L_float, lowpass_data_L, length * 2);
+			break;
+	}
+}
+
+void sound_data_c::Float_To_Signed(float *data_float, s16_t *data_signed, int samples)
+{
+	s16_t *data_signed_end = data_signed + samples;
+
+	while (data_signed != data_signed_end)
+	{
+		float v = *data_float++;
+		v = ((v < -1) ? -1 : ((v > 1) ? 1 : v));
+    	*data_signed++ = (s16_t)(v * 32768);
+	}
+}
+
+void sound_data_c::Signed_To_Float(s16_t *data_signed, float *data_float, int samples)
+{
+	float *data_float_end = data_float + samples;
+
+	while (data_float != data_float_end)
+	{
+		s16_t v = *data_signed++;
+		*data_float++ = (float)v / 32768;
 	}
 }
 

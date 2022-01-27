@@ -190,6 +190,10 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	else
 		OK = Load_DOOM(buf, data, length);
 
+	// Create lowpass'd sounds - Dasho
+	if (OK)
+		buf->Mix_Lowpass();
+
 	return OK;
 }
 

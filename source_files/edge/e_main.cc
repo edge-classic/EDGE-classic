@@ -960,31 +960,18 @@ static void IdentifyVersion(void)
 }
 
 // Add game-specific base EWADs (widepix, skyboxes, etc) - Dasho
-static void Add_Base(void) {
-
-	std::string loaded_game = iwad_base;
-
-	for (size_t i = 0; i < loaded_game.size(); i++) {
-		loaded_game.at(i) = std::tolower(loaded_game.at(i));
+static void Add_Base(void) 
+{
+	std::string base_wad = epi::PATH_Join(game_dir.c_str(), "edge_base");
+	base_wad = epi::PATH_Join(base_wad.c_str(), iwad_base.append("_base.wad").c_str());
+	if (epi::FS_Access(base_wad.c_str(), epi::file_c::ACCESS_READ)) 
+	{
+		W_AddRawFilename(base_wad.c_str(), FLKIND_EWad);
 	}
-
-	const char *game_extras[] = { "base", "extras", NULL };
-
-	for (size_t i = 0; game_extras[i]; i++) {
-		if (game_extras[i]) {
-			#ifdef __linux__
-			std::string optwad = "edge_base/";
-			#else
-			std::string optwad = "edge_base\\";
-			#endif
-			optwad.append(loaded_game.c_str()).append("_").append(game_extras[i]).append(".wad");
-			optwad = epi::PATH_Join(game_dir.c_str(), optwad.c_str());
-			if (epi::FS_Access(optwad.c_str(), epi::file_c::ACCESS_READ)) {
-				W_AddRawFilename(optwad.c_str(), FLKIND_PWad);
-			}
-		}
+	else
+	{
+		I_Error("Base WAD not found for the %s IWAD! Check the /edge_base folder of your EDGE-Classic install!\n", iwad_base.c_str());
 	}
-
 }
 
 static void CheckTurbo(void)

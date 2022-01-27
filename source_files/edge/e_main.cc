@@ -970,7 +970,7 @@ static void Add_Base(void)
 	}
 	else
 	{
-		I_Error("Base WAD not found for the %s IWAD! Check the /edge_base folder of your EDGE-Classic install!\n", iwad_base.c_str());
+		I_Warning("Base WAD not found for the %s IWAD! Check the /edge_base folder of your EDGE-Classic install!\n", iwad_base.c_str());
 	}
 }
 

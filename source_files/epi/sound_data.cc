@@ -111,8 +111,8 @@ void sound_data_c::Mix_Lowpass()
 {
 	float *data_L_float;
 	float *data_R_float;
-	Biquad *lpFilter = new Biquad();
-	lpFilter->setBiquad(bq_type_lowpass, 300.0 / freq, 0.707, 0);
+	Biquad *lpFilter = new Biquad(bq_type_lowpass, 300.0 / freq, 0.707, 0);
+	Biquad *hsFilter = new Biquad(bq_type_highshelf, 20.0 / freq, 1.0, 12.5);
 
 	switch (mode)
 	{
@@ -126,6 +126,7 @@ void sound_data_c::Mix_Lowpass()
 			for (int i = 0; i < length; i++) 
 			{
 				data_L_float[i] = lpFilter->process(data_L_float[i]);
+				data_L_float[i] = hsFilter->process(data_L_float[i]);
 			}
 			Float_To_Signed(data_L_float, lowpass_data_L, length);
 			break;
@@ -144,10 +145,12 @@ void sound_data_c::Mix_Lowpass()
 			for (int i = 0; i < length; i++) 
 			{
 				data_L_float[i] = lpFilter->process(data_L_float[i]);
+				data_L_float[i] = hsFilter->process(data_L_float[i]);
 			}
 			for (int i = 0; i < length; i++) 
 			{
 				data_R_float[i] = lpFilter->process(data_R_float[i]);
+				data_R_float[i] = hsFilter->process(data_R_float[i]);
 			}
 			Float_To_Signed(data_L_float, lowpass_data_L, length);
 			Float_To_Signed(data_R_float, lowpass_data_R, length);
@@ -163,6 +166,7 @@ void sound_data_c::Mix_Lowpass()
 			for (int i = 0; i < length; i++) 
 			{
 				data_L_float[i] = lpFilter->process(data_L_float[i]);
+				data_L_float[i] = hsFilter->process(data_L_float[i]);
 			}
 			Float_To_Signed(data_L_float, lowpass_data_L, length * 2);
 			break;

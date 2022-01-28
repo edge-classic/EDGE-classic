@@ -61,6 +61,9 @@
 mix_channel_c *mix_chan[MAX_CHANNELS];
 int num_chan;
 
+bool vacuum_sfx = false;
+bool submerged_sfx = false;
+
 static int *mix_buffer;
 static int mix_buf_len;
 
@@ -258,17 +261,18 @@ static void MixMono(mix_channel_c *chan, int *dest, int pairs)
 
 	s16_t *src_L;
 
-	if (players[consoleplayer])
+	// Process environmental sound FX in order of precedence, currently Vaccum->Submerged->Normal - Dasho
+	if (vacuum_sfx)
 	{
-		if (players[consoleplayer]->underwater)
-		{
-			if (chan->data->airless_data_L && !players[consoleplayer]->swimming)
-				src_L = chan->data->airless_data_L;
-			else if (chan->data->underwater_data_L)
-				src_L = chan->data->underwater_data_L;
-			else
-				src_L = chan->data->data_L;
-		}
+		if (chan->data->airless_data_L)
+			src_L = chan->data->airless_data_L;
+		else
+			src_L = chan->data->data_L;
+	}
+	else if (submerged_sfx)
+	{
+		if (chan->data->underwater_data_L)
+			src_L = chan->data->underwater_data_L;
 		else
 			src_L = chan->data->data_L;
 	}
@@ -299,25 +303,26 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 	s16_t *src_L;
 	s16_t *src_R;
 
-	if (players[consoleplayer])
+	// Process environmental sound FX in order of precedence, currently Vaccum->Submerged->Normal - Dasho
+	if (vacuum_sfx)
 	{
-		if (players[consoleplayer]->underwater)
+		if (chan->data->airless_data_L && chan->data->airless_data_R)
 		{
-			if (chan->data->airless_data_L && chan->data->airless_data_R && !players[consoleplayer]->swimming)
-			{
-				src_L = chan->data->airless_data_L;
-				src_R = chan->data->airless_data_R;
-			}
-			else if (chan->data->underwater_data_L && chan->data->underwater_data_R)
-			{
-				src_L = chan->data->underwater_data_L;
-				src_R = chan->data->underwater_data_R;
-			}
-			else
-			{
-				src_L = chan->data->data_L;
-				src_R = chan->data->data_R;
-			}
+			src_L = chan->data->airless_data_L;
+			src_R = chan->data->airless_data_R;
+		}
+		else
+		{
+			src_L = chan->data->data_L;
+			src_R = chan->data->data_R;
+		}
+	}
+	else if (submerged_sfx)
+	{
+		if (chan->data->underwater_data_L && chan->data->underwater_data_R)
+		{
+			src_L = chan->data->underwater_data_L;
+			src_R = chan->data->underwater_data_R;
 		}
 		else
 		{
@@ -328,7 +333,7 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 	else
 	{
 		src_L = chan->data->data_L;
-		src_R = chan->data->data_R;		
+		src_R = chan->data->data_R;
 	}
 	
 	int *d_pos = dest;
@@ -358,17 +363,18 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 
 	s16_t *src_L;
 
-	if (players[consoleplayer])
+	// Process environmental sound FX in order of precedence, currently Vaccum->Submerged->Normal - Dasho
+	if (vacuum_sfx)
 	{
-		if (players[consoleplayer]->underwater)
-		{
-			if (chan->data->airless_data_L && !players[consoleplayer]->swimming)
-				src_L = chan->data->airless_data_L;
-			else if (chan->data->underwater_data_L)
-				src_L = chan->data->underwater_data_L;
-			else
-				src_L = chan->data->data_L;
-		}
+		if (chan->data->airless_data_L)
+			src_L = chan->data->airless_data_L;
+		else
+			src_L = chan->data->data_L;
+	}
+	else if (submerged_sfx)
+	{
+		if (chan->data->underwater_data_L)
+			src_L = chan->data->underwater_data_L;
 		else
 			src_L = chan->data->data_L;
 	}

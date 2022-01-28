@@ -36,6 +36,7 @@
 #include "p_bot.h"
 #include "p_local.h"
 #include "rad_trig.h"
+#include "s_blit.h"
 #include "s_sound.h"
 #include "z_zone.h"
 #include "vm_player.h"
@@ -691,6 +692,10 @@ void P_PlayerThink(player_t * player)
 		MovePlayer(player);
 
 	CalcHeight(player);
+
+	// Reset environmental FX in case player has left sector in which they apply - Dasho
+	vacuum_sfx = false;
+	submerged_sfx = false;
 
 	if (player->mo->props->special ||
 		player->mo->subsector->sector->exfloor_used > 0 ||

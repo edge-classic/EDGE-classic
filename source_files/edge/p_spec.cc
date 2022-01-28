@@ -42,6 +42,7 @@
 #include "p_local.h"
 #include "p_spec.h"
 #include "rad_trig.h"
+#include "s_blit.h"
 #include "s_sound.h"
 #include "s_music.h"
 #include "z_zone.h"
@@ -1542,6 +1543,8 @@ static inline void PlayerInProperties(player_t *player,
 	{
 		player->swimming = true;
 		*swim_special = special;
+		if (special->special_flags & SECSP_SubmergedSFX)
+			submerged_sfx = true;
 	}
 
 	if ((special->special_flags & SECSP_Swimming) &&
@@ -1549,6 +1552,9 @@ static inline void PlayerInProperties(player_t *player,
 	{
 		player->wet_feet = true;
 	}
+
+	if (special->special_flags & SECSP_VacuumSFX)
+		vacuum_sfx = true;
 
 	factor = 1.0f;
 

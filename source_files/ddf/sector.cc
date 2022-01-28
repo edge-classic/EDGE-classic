@@ -242,6 +242,8 @@ static specflags_t sector_specials[] =
 	{"PUSH_CONSTANT", SECSP_PushConstant, 0},
 	{"AIRLESS", SECSP_AirLess, 0},
 	{"SWIM", SECSP_Swimming, 0},
+	{"SUBMERGED_SFX", SECSP_SubmergedSFX, 0},
+	{"VACUUM_SFX", SECSP_VacuumSFX, 0},
 	{NULL, 0, 0}
 };
 

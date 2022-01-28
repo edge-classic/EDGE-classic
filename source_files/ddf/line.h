@@ -861,7 +861,13 @@ typedef enum
 	SECSP_AirLess = 0x0020,
 
 	// player can swim in this sector
-	SECSP_Swimming = 0x0040
+	SECSP_Swimming = 0x0040,
+
+	// sounds will apply underwater effects in this sector
+	SECSP_SubmergedSFX = 0x0080,
+
+	// sounds will be heavily muffled in this sector
+	SECSP_VacuumSFX = 0x0100
 }
 sector_flag_e;
 

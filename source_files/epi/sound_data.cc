@@ -21,7 +21,7 @@
 
 #include <vector>
 
-#include "biquad.h"
+#include "Biquad.h"
 #include "nh_hall.hpp"
 
 namespace epi

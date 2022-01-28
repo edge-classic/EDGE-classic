@@ -196,7 +196,7 @@ void sound_data_c::Mix_Airless()
 {
 	float *data_L_float;
 	float *data_R_float;
-	Biquad *lpFilter = new Biquad(bq_type_lowpass, 300.0 / freq, 0.707, 0);
+	Biquad *lpFilter = new Biquad(bq_type_lowpass, 100.0 / freq, 0.707, 0);
 
 	switch (mode)
 	{

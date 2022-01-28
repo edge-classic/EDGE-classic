@@ -45,9 +45,13 @@ public:
 	s16_t *data_L;
 	s16_t *data_R;
 
-	// Lowpass-filtered version of the above samples (underwater-type effects)
-	s16_t *lowpass_data_L;
-	s16_t *lowpass_data_R;
+	// Reverb+lowpass filter of original sound (underwater-type effects)
+	s16_t *underwater_data_L;
+	s16_t *underwater_data_R;
+
+	// Heavy lowpass filter of original sound (airless-type effects)
+	s16_t *airless_data_L;
+	s16_t *airless_data_R;
 
 	// values for the engine to use
 	void *priv_data;
@@ -60,8 +64,10 @@ public:
 
 	void Allocate(int samples, int buf_mode);
 	void Free();
-	void Free_Lowpass();
-	void Mix_Lowpass();
+	void Free_Underwater();
+	void Free_Airless();
+	void Mix_Underwater();
+	void Mix_Airless();
 	void Float_To_Signed(float *data_float, s16_t *data_signed, int samples);
 	void Signed_To_Float(s16_t *data_signed, float *data_float, int samples);
 };

@@ -262,8 +262,8 @@ static void MixMono(mix_channel_c *chan, int *dest, int pairs)
 	{
 		if (players[consoleplayer]->underwater)
 		{
-			if (chan->data->lowpass_data_L)
-				src_L = chan->data->lowpass_data_L;
+			if (chan->data->underwater_data_L)
+				src_L = chan->data->underwater_data_L;
 			else
 				src_L = chan->data->data_L;
 		}
@@ -301,10 +301,10 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 	{
 		if (players[consoleplayer]->underwater)
 		{
-			if (chan->data->lowpass_data_L && chan->data->lowpass_data_R)
+			if (chan->data->underwater_data_L && chan->data->underwater_data_R)
 			{
-				src_L = chan->data->lowpass_data_L;
-				src_R = chan->data->lowpass_data_R;
+				src_L = chan->data->underwater_data_L;
+				src_R = chan->data->underwater_data_R;
 			}
 			else
 			{
@@ -355,8 +355,8 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 	{
 		if (players[consoleplayer]->underwater)
 		{
-			if (chan->data->lowpass_data_L)
-				src_L = chan->data->lowpass_data_L;
+			if (chan->data->underwater_data_L)
+				src_L = chan->data->underwater_data_L;
 			else
 				src_L = chan->data->data_L;
 		}

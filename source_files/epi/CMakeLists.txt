@@ -46,4 +46,5 @@ add_library(
 )
 
 target_include_directories(edge_epi PRIVATE ../biquad)
+target_include_directories(edge_epi PRIVATE ../nh_hall)
 target_include_directories(edge_epi PRIVATE ../stb)

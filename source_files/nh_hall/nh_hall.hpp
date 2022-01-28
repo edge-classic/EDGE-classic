@@ -268,7 +268,7 @@ public:
     }
 
     void set_rate(float rate) {
-        rate = max(rate, 0.0f);
+        rate = std::max<float>(rate, 0.0f);
         m_frequency =
             k_min_frequency
             + rate * (k_max_frequency - k_min_frequency);
@@ -276,7 +276,7 @@ public:
     }
 
     void set_depth(float depth) {
-        depth = max(min(depth, 1.0f), 0.0f);
+        depth = std::max<float>(std::min<float>(depth, 1.0f), 0.0f);
         m_depth = depth;
         update_amplitude();
     }
@@ -640,7 +640,7 @@ public:
 
     inline void set_low_shelf_parameters(float frequency, float ratio) {
         float k = powf(m_k, 1.0f / ratio - 1.0f);
-        k = max(k, 0.01f);
+        k = std::max<float>(k, 0.01f);
         for (auto& x : m_low_shelves) {
             x.set_parameters(frequency, k);
         }
@@ -648,7 +648,7 @@ public:
 
     inline void set_hi_shelf_parameters(float frequency, float ratio) {
         float k = powf(m_k, 1.0f / ratio - 1.0f);
-        k = max(k, 0.01f);
+        k = std::max<float>(k, 0.01f);
         for (auto& x : m_hi_shelves) {
             x.set_parameters(frequency, k);
         }

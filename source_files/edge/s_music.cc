@@ -34,6 +34,7 @@
 #include "s_ogg.h"
 #include "s_mp3.h"
 #include "s_tsf.h"
+#include "s_xmp.h"
 #include "m_misc.h"
 #include "w_wad.h"
 
@@ -176,6 +177,15 @@ void S_ChangeMusic(int entrynum, bool loop)
 		delete data;
 
 		music_player = S_PlayMP3Music(play, volume, loop);
+		return;
+	}
+
+	if (S_CheckXMP(data, length))
+	{
+		delete F;
+		delete data;
+
+		music_player = S_PlayXMPMusic(play, volume, loop);
 		return;
 	}
 	

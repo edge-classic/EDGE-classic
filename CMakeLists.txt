@@ -5,6 +5,7 @@ add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/deh_edge)
 add_subdirectory(source_files/epi)
+add_subdirectory(source_files/libxmp-lite)
 add_subdirectory(source_files/miniz)
 
 project(
@@ -119,7 +120,8 @@ add_executable(
 	source_files/edge/s_mp3.cc   
 	source_files/edge/s_music.cc    
 	source_files/edge/s_ogg.cc      
-	source_files/edge/s_tsf.cc    
+	source_files/edge/s_tsf.cc
+	source_files/edge/s_xmp.cc    
 	source_files/edge/sv_chunk.cc   
 	source_files/edge/sv_glob.cc    
 	source_files/edge/sv_level.cc   
@@ -227,7 +229,8 @@ add_executable(
 	source_files/edge/s_mp3.cc   
 	source_files/edge/s_music.cc    
 	source_files/edge/s_ogg.cc      
-	source_files/edge/s_tsf.cc    
+	source_files/edge/s_tsf.cc
+	source_files/edge/s_xmp.cc    
 	source_files/edge/sv_chunk.cc   
 	source_files/edge/sv_glob.cc    
 	source_files/edge/sv_level.cc   
@@ -264,6 +267,7 @@ target_include_directories(edge-classic PRIVATE source_files/ddf)
 target_include_directories(edge-classic PRIVATE source_files/deh_edge)
 target_include_directories(edge-classic PRIVATE source_files/epi)
 target_include_directories(edge-classic PRIVATE source_files/glatter)
+target_include_directories(edge-classic PRIVATE source_files/libxmp-lite)
 target_include_directories(edge-classic PRIVATE source_files/minimp3)
 target_include_directories(edge-classic PRIVATE source_files/minivorbis)
 target_include_directories(edge-classic PRIVATE source_files/miniz)
@@ -338,6 +342,7 @@ if(WIN32 OR MSYS)
 			edge_epi
 			opengl32
 			${SDL2_LIBRARIES}
+			libxmp-lite
 			miniz
 			winmm
 			wsock32
@@ -352,6 +357,7 @@ elseif(NOT APPLE)
 			edge_epi
 			${OPENGL_LIBRARIES}
 			${SDL2_LIBRARIES}
+			libxmp-lite
 			miniz
 	)
 else()
@@ -364,6 +370,7 @@ else()
 			edge_epi
 			${OPENGL_LIBRARIES}
 			${SDL2_LIBRARIES}
+			libxmp-lite
 			miniz
 	)
 endif()

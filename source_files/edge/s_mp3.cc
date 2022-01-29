@@ -45,7 +45,8 @@
 extern bool dev_stereo;  // FIXME: encapsulation
 
 // Function for s_music.cc to check if a lump is in .mp3 format
-bool S_CheckMP3 (byte *data, int length) {
+bool S_CheckMP3 (byte *data, int length) 
+{
 	mp3dec_t mp3_sound;
 	mp3dec_file_info_t sound_info;
     if (mp3dec_load_buf(&mp3_sound, data, length, &sound_info, NULL, NULL) != 0) {
@@ -224,8 +225,8 @@ bool mp3player_c::OpenLump(const char *lumpname)
 
     if (mp3dec_ex_open_buf(&mp3_track, data, length, MP3D_SEEK_TO_SAMPLE) != 0)
     {
-		I_Error("[mp3player_c::Open](DataLump) Failed!\n");
-		return false; /* NOT REACHED */
+		I_Warning("[mp3player_c::Open](DataLump) Failed!\n");
+		return false;
     }
 
 	PostOpenInit();

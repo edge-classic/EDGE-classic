@@ -264,7 +264,9 @@ void xmpplayer_c::Close()
 	// Stop playback
 	if (status != STOPPED)
 		Stop();
-
+		
+	xmp_end_player(mod_track);
+	xmp_release_module(mod_track);
 	xmp_free_context(mod_track);
 
 	status = NOT_LOADED;
@@ -312,8 +314,7 @@ void xmpplayer_c::Stop()
 
 	S_QueueStop();
 
-	xmp_end_player(mod_track);
-	xmp_release_module(mod_track);
+	xmp_stop_module(mod_track);
 
 	status = STOPPED;
 }

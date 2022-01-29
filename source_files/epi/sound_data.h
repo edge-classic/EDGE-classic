@@ -46,12 +46,12 @@ public:
 	s16_t *data_R;
 
 	// Reverb+lowpass filter of original sound (underwater-type effects)
-	s16_t *underwater_data_L;
-	s16_t *underwater_data_R;
+	s16_t *submerged_data_L;
+	s16_t *submerged_data_R;
 
 	// Heavy lowpass filter of original sound (airless-type effects)
-	s16_t *airless_data_L;
-	s16_t *airless_data_R;
+	s16_t *vacuum_data_L;
+	s16_t *vacuum_data_R;
 
 	// values for the engine to use
 	void *priv_data;

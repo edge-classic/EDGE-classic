@@ -33,7 +33,7 @@
 
 #include "xmp.h"
 
-#define XMP_FIVE_SECONDS XMP_MAX_FRAMESIZE * 250 // From XMP's site, one second of a song is roughly 50 frames - Dasho
+#define XMP_15_SECONDS XMP_MAX_FRAMESIZE * 750 // From XMP's site, one second of a song is roughly 50 frames - Dasho
 
 extern bool dev_stereo;  // FIXME: encapsulation
 extern int  dev_freq;
@@ -107,7 +107,7 @@ private:
 
 xmpplayer_c::xmpplayer_c() : status(NOT_LOADED)
 {
-	mono_buffer = new s16_t[XMP_FIVE_SECONDS * 2];
+	mono_buffer = new s16_t[XMP_15_SECONDS * 2];
 }
 
 xmpplayer_c::~xmpplayer_c()
@@ -144,7 +144,7 @@ bool xmpplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	else
 		data_buf = buf->data_L;
 
-	int did_play = xmp_play_buffer(mod_track, data_buf, XMP_FIVE_SECONDS, 0);
+	int did_play = xmp_play_buffer(mod_track, data_buf, XMP_15_SECONDS, 0);
 
 	if (did_play < -XMP_END) // ERROR
 	{
@@ -155,7 +155,7 @@ bool xmpplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	if (did_play == -XMP_END)
 		song_done = true;
 
-	buf->length = XMP_FIVE_SECONDS * sizeof(s16_t);
+	buf->length = XMP_15_SECONDS * sizeof(s16_t);
 
 	if (!dev_stereo)
 		ConvertToMono(buf->data_L, mono_buffer, buf->length);
@@ -324,7 +324,7 @@ void xmpplayer_c::Ticker()
 {
 	while (status == PLAYING)
 	{
-		epi::sound_data_c *buf = S_QueueGetFreeBuffer(XMP_FIVE_SECONDS, 
+		epi::sound_data_c *buf = S_QueueGetFreeBuffer(XMP_15_SECONDS, 
 				(dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 
 		if (! buf)

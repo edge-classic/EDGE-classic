@@ -226,11 +226,7 @@ void RGL_PaletteEffect(player_t *player)
 		if (var_invul_fx != INVULFX_Complex)
 			return;
 
-#ifndef __APPLE__
-		if (glatter_GL_ARB_imaging || glatter_GL_SGI_color_matrix)
-#else
 		if (GLEW_ARB_imaging || GLEW_SGI_color_matrix)
-#endif
 		{
 			glFlush();
 

@@ -26,8 +26,12 @@
 #ifndef __SYSTEM_SPECIFIC_DEFS_OPENGL__
 #define __SYSTEM_SPECIFIC_DEFS_OPENGL__
 
+#ifdef __APPLE__
+#include "glew.h"
+#else
 #define GLATTER_HEADER_ONLY
 #include "glatter.h"
+#endif
 
 #define USING_GL_TYPES 1
 

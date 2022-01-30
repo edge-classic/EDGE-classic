@@ -172,6 +172,15 @@ static inline const char *SafeStr(const void *s)
 //
 void RGL_CheckExtensions(void)
 {
+
+#ifdef __APPLE__
+	GLenum err = glewInit();
+
+	if (err != GLEW_OK)
+		I_Error("Unable to initialise GLEW: %s\n",
+			glewGetErrorString(err));
+#endif
+
 	// -ACB- 2004/08/11 Made local: these are not yet used elsewhere
 	std::string glstr_version (SafeStr(glGetString(GL_VERSION)));
 	std::string glstr_renderer(SafeStr(glGetString(GL_RENDERER)));
@@ -180,6 +189,9 @@ void RGL_CheckExtensions(void)
 	I_Printf("OpenGL: Version: %s\n", glstr_version.c_str());
 	I_Printf("OpenGL: Renderer: %s\n", glstr_renderer.c_str());
 	I_Printf("OpenGL: Vendor: %s\n", glstr_vendor.c_str());
+#ifdef __APPLE__
+	I_Printf("OpenGL: GLEW version: %s\n", glewGetString(GLEW_VERSION));
+#endif
 
 #if 0  // FIXME: this crashes (buffer overflow?)
 	I_Printf("OpenGL: EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
@@ -195,15 +207,24 @@ void RGL_CheckExtensions(void)
 	}
 
 	// Check for various extensions
-
+#ifndef __APPLE__
 	if (GL_VERSION_1_3 || glatter_GL_ARB_multitexture)
+#else
+	if (GLEW_VERSION_1_3 || GLEW_ARB_multitexture)
+#endif
 	{ /* OK */ }
 	else
 		I_Error("OpenGL driver does not support Multitexturing.\n");
 
+#ifndef __APPLE__
 	if (GL_VERSION_1_3 ||
 		glatter_GL_ARB_texture_env_combine ||
 		glatter_GL_EXT_texture_env_combine)
+#else
+	if (GLEW_VERSION_1_3 ||
+		GLEW_ARB_texture_env_combine ||
+		GLEW_EXT_texture_env_combine)
+#endif
 	{ /* OK */ }
 	else
 	{
@@ -211,8 +232,14 @@ void RGL_CheckExtensions(void)
 		r_dumbcombine = 1;
 	}
 
+#ifndef __APPLE__
 	if (GL_VERSION_1_2 ||
 		glatter_GL_SGIS_texture_edge_clamp)
+#else
+	if (GLEW_VERSION_1_2 ||
+		GLEW_EXT_texture_edge_clamp ||
+		GLEW_SGIS_texture_edge_clamp)
+#endif
 	{ /* OK */ }
 	else
 	{

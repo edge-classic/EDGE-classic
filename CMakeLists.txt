@@ -5,6 +5,9 @@ add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/deh_edge)
 add_subdirectory(source_files/epi)
+if(APPLE)
+  add_subdirectory(source_files/glew/build/cmake)
+endif()
 add_subdirectory(source_files/libxmp-lite)
 add_subdirectory(source_files/miniz)
 
@@ -266,7 +269,11 @@ target_include_directories(edge-classic PRIVATE source_files/coal)
 target_include_directories(edge-classic PRIVATE source_files/ddf)
 target_include_directories(edge-classic PRIVATE source_files/deh_edge)
 target_include_directories(edge-classic PRIVATE source_files/epi)
-target_include_directories(edge-classic PRIVATE source_files/glatter)
+if(APPLE)
+  target_include_directories(edge-classic PRIVATE source_files/glew/include/GL)
+else()
+  target_include_directories(edge-classic PRIVATE source_files/glatter)
+endif()
 target_include_directories(edge-classic PRIVATE source_files/libxmp-lite)
 target_include_directories(edge-classic PRIVATE source_files/minimp3)
 target_include_directories(edge-classic PRIVATE source_files/minivorbis)
@@ -369,6 +376,7 @@ else()
 			edge_deh
 			edge_epi
 			${OPENGL_LIBRARIES}
+			glew_s
 			${SDL2_LIBRARIES}
 			libxmp-lite
 			miniz

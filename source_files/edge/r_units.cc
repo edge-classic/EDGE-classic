@@ -145,7 +145,11 @@ void RGL_FinishUnits(void)
 
 static inline void myActiveTexture(GLuint id)
 {
+#ifndef __APPLE__
 	if (GL_VERSION_1_3)
+#else
+	if (GLEW_VERSION_1_3)
+#endif
 		glActiveTexture(id);
 	else /* GLEW_ARB_multitexture */
 		glActiveTextureARB(id);
@@ -153,7 +157,11 @@ static inline void myActiveTexture(GLuint id)
 
 static inline void myMultiTexCoord2f(GLuint id, GLfloat s, GLfloat t)
 {
+#ifndef __APPLE__
 	if (GL_VERSION_1_3)
+#else
+	if (GLEW_VERSION_1_3)
+#endif
 		glMultiTexCoord2f(id, s, t);
 	else /* GLEW_ARB_multitexture */
 		glMultiTexCoord2fARB(id, s, t);

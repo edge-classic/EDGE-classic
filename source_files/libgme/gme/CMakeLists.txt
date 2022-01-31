@@ -177,10 +177,6 @@ else()
     message("ZLib library not found, disabling support for compressed formats such as VGZ")
 endif()
 
-# Test stuff - Dasho
-#target_compile_definitions(gme PRIVATE -DHAVE_ZLIB_H)
-#target_include_directories(gme PRIVATE ../../miniz)
-
 if(USE_GME_SPC)
     if(UNRAR_FOUND)
         message(" ** unRAR library located, the RSN file format will be supported")

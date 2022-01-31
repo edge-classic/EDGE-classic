@@ -22,7 +22,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA */
 #include "blargg_source.h"
 
 #ifdef HAVE_ZLIB_H
-#include "miniz.h"
+#include <zlib.h>
 #include <stdlib.h>
 #include <errno.h>
 static const unsigned char gz_magic[2] = {0x1f, 0x8b}; /* gzip magic header */
@@ -346,21 +346,17 @@ Std_File_Reader::~Std_File_Reader() { close(); }
 
 blargg_err_t Std_File_Reader::open( const char* path )
 {
-	file_ = fopen( path, "rb" );
-
-	if ( !file_ )
-		return "Couldn't open file";
-
 #ifdef HAVE_ZLIB_H
 	// zlib transparently handles uncompressed data if magic header
 	// not present but we still need to grab size
 	RETURN_ERR( get_gzip_eof( path, &size_ ) );
-	bool zip_reader_inited = mz_zip_reader_init_mem(zip_reader, file_, size_, 0);
-	if ( !zip_reader_inited )
-		return "Couldn't initialize zip reader";
-	seeker = 0;
+	file_ = gzopen( path, "rb" );
+#else
+	file_ = fopen( path, "rb" );
 #endif
 
+	if ( !file_ )
+		return "Couldn't open file";
 	return nullptr;
 }
 
@@ -380,8 +376,9 @@ long Std_File_Reader::size() const
 long Std_File_Reader::read_avail( void* p, long s )
 {
 #ifdef HAVE_ZLIB_H
-	if ( zip_reader && file_ && s > 0 && static_cast<unsigned long>(s) <= UINT_MAX ) {
-		return mz_zip_read_archive_data(zip_reader, 0, p, s);
+	if ( file_ && s > 0 && static_cast<unsigned long>(s) <= UINT_MAX ) {
+		return gzread( reinterpret_cast<gzFile>(file_),
+			p, static_cast<unsigned>(s) );
 	}
 	return 0l;
 #else
@@ -395,18 +392,14 @@ blargg_err_t Std_File_Reader::read( void* p, long s )
 {
 	RETURN_VALIDITY_CHECK( s > 0 && static_cast<unsigned long>(s) <= UINT_MAX );
 #ifdef HAVE_ZLIB_H
-	if ( file_ && zip_reader )
+	if ( file_ )
 	{
-		long read_result = mz_zip_read_archive_data(zip_reader, seeker, p, s);
-		if ( read_result == s )
-		{
-			seeker = read_result;
+		const auto &gzfile = reinterpret_cast<gzFile>( file_ );
+		if ( s == gzread( gzfile, p, static_cast<unsigned>( s ) ) )
 			return nullptr;
-		}
-		else if ( mz_error(read_result) )
-			return "Couldn't read from compressed file";
-		else
+		if ( gzeof( gzfile ) )
 			return eof_error;
+		return "Couldn't read from GZ file";
 	}
 #endif
 	const auto &file = reinterpret_cast<FILE*>( file_ );
@@ -420,8 +413,8 @@ blargg_err_t Std_File_Reader::read( void* p, long s )
 long Std_File_Reader::tell() const
 {
 #ifdef HAVE_ZLIB_H
-	if ( zip_reader && file_ )
-		return seeker;
+	if ( file_ )
+		return gztell( reinterpret_cast<gzFile>( file_ ) );
 #endif
 	return ftell( reinterpret_cast<FILE*>( file_ ) );
 }
@@ -429,12 +422,13 @@ long Std_File_Reader::tell() const
 blargg_err_t Std_File_Reader::seek( long n )
 {
 #ifdef HAVE_ZLIB_H
-	if ( zip_reader && file_ )
+	if ( file_ )
 	{
+		if ( gzseek( reinterpret_cast<gzFile>( file_ ), n, SEEK_SET ) >= 0 )
+			return nullptr;
 		if ( n > size_ )
 			return eof_error;
-		seeker = n;
-		return nullptr;
+		return "Error seeking in GZ file";
 	}
 #endif
 	if ( !fseek( reinterpret_cast<FILE*>( file_ ), n, SEEK_SET ) )
@@ -449,13 +443,10 @@ void Std_File_Reader::close()
 	if ( file_ )
 	{
 #ifdef HAVE_ZLIB_H
-	if ( zip_reader )
-	{
-		mz_zip_reader_end(zip_reader);
-		zip_reader = nullptr;
-	}		
-#endif
+		gzclose( reinterpret_cast<gzFile>( file_ ) );
+#else
 		fclose( reinterpret_cast<FILE*>( file_ ) );
+#endif
 		file_ = nullptr;
 	}
 }

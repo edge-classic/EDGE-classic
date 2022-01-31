@@ -7,7 +7,7 @@
 #include "blargg_common.h"
 
 #ifdef HAVE_ZLIB_H
-#include "miniz.h"
+#include <zlib.h>
 #endif
 
 // Supports reading and finding out how many bytes are remaining
@@ -71,8 +71,6 @@ public:
 private:
 	void* file_; // Either FILE* or zlib's gzFile
 #ifdef HAVE_ZLIB_H
-	long seeker; // Fake position thingy? - Dasho
-	mz_zip_archive *zip_reader;
 	long size_; // TODO: Fix ABI compat
 #endif /* HAVE_ZLIB_H */
 };

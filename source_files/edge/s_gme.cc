@@ -145,7 +145,7 @@ bool gmeplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 
 	if (stream_error) // ERROR
 	{
-		I_Debugf("[gmeplayer_c::StreamIntoBuffer] Failed\n");
+		I_Debugf("[gmeplayer_c::StreamIntoBuffer] Failed: %s\n", stream_error);
 		return false;
 	}
 
@@ -217,7 +217,7 @@ bool gmeplayer_c::OpenLump(const char *lumpname)
 
     if (open_error)
     {
-		I_Warning("[gmeplayer_c::Open](DataLump) Failed!\n");
+		I_Warning("[gmeplayer_c::Open](DataLump) Failed: %s\n", open_error);
 		return false;
     }
 
@@ -238,7 +238,7 @@ bool gmeplayer_c::OpenFile(const char *filename)
 
     if (open_error)
     {
-		I_Warning("gmeplayer_c: Could not open file: '%s'\n", filename);
+		I_Warning("gmeplayer_c: Could not open file: '%s': %s\n", filename, open_error);
 		return false;
     }
 
@@ -359,7 +359,7 @@ abstract_music_c * S_PlayGMEMusic(const pl_entry_c *musdat, float volume, bool l
 		}
 	}
 	else
-		I_Error("S_PlayXMPMusic: bad format value %d\n", musdat->infotype);
+		I_Error("S_PlayGMEMusic: bad format value %d\n", musdat->infotype);
 
 	player->Volume(volume);
 	player->Play(looping);

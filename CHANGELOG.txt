@@ -55,9 +55,9 @@ New Features
 + THINGS:DDF
   -Crouching now triggers CROUCH states for the player when used with CHECK_ACTIVITY.
 
-+ New XMP-based music player; MOD/S3M/IT/XM Tracker format songs are now supported
++ New XMP-based music player; MOD/S3M/IT/XM Tracker format songs are now supported.
 
-+ New GME-based music player; many new formats supported (flesh this out after testing - Dasho)
++ New Game Music Emu-based music player; AY, GBS, GYM, HES, NSF, SAP, SPC, VGM format songs are now supported.
 
 
 CHANGELOG for EDGE-Classic 1.0 (since EDGE-Classic Preview 1)

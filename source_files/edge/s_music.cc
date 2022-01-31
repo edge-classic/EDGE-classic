@@ -105,6 +105,18 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
+	if (play->type == MUS_XMP)
+	{
+		music_player = S_PlayXMPMusic(play, volume, loop);
+		return;
+	}
+
+	if (play->type == MUS_GME)
+	{
+		music_player = S_PlayGMEMusic(play, volume, loop);
+		return;
+	}
+
 	// open the file or lump, and read it into memory
 	epi::file_c *F;
 

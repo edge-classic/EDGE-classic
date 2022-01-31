@@ -254,6 +254,9 @@ typedef struct menuinfo_s
 
 	// key config, with left and right sister menus ?
 	char key_page[20];
+	
+	// Printed name test
+	const char *name = "DEFAULT";
 }
 menuinfo_t;
 
@@ -265,11 +268,11 @@ static int curr_key_menu;
 static int keyscan;
 
 static style_c *opt_def_style;
-static style_c *keyboard_style;
-static style_c *mouse_style;
-static style_c *gameplay_style;
-static style_c *video_style;
-static style_c *setres_style;
+//static style_c *keyboard_style;
+//static style_c *mouse_style;
+//static style_c *gameplay_style;
+//static style_c *video_style;
+//static style_c *setres_style;
 
 
 
@@ -344,7 +347,7 @@ static optmenuitem_t mainoptions[] =
 static menuinfo_t main_optmenu = 
 {
 	mainoptions, sizeof(mainoptions) / sizeof(optmenuitem_t), 
-	&opt_def_style, 164, 108, "M_OPTTTL", NULL, 0, ""
+	&opt_def_style, 164, 108, "M_OPTTTL", NULL, 0, "", language["MenuOptions"]
 };
 
 //
@@ -388,7 +391,7 @@ static optmenuitem_t vidoptions[] =
 static menuinfo_t video_optmenu = 
 {
 	vidoptions, sizeof(vidoptions) / sizeof(optmenuitem_t),
-	&video_style, 150, 77, "M_VIDEO", NULL, 0, ""
+	&opt_def_style, 150, 77, "M_VIDEO", NULL, 0, "", language["MenuVideo"]
 };
 
 //
@@ -413,7 +416,7 @@ static optmenuitem_t resoptions[] =
 static menuinfo_t res_optmenu = 
 {
 	resoptions, sizeof(resoptions) / sizeof(optmenuitem_t),
-	&setres_style, 150, 77, "M_SETRES", NULL, 3, ""
+	&opt_def_style, 150, 77, "M_SETRES", NULL, 3, "", language["MenuResolution"]
 };
 
 //
@@ -450,7 +453,7 @@ static optmenuitem_t analogueoptions[] =
 static menuinfo_t analogue_optmenu = 
 {
 	analogueoptions, sizeof(analogueoptions) / sizeof(optmenuitem_t),
-	&mouse_style, 150, 75, "M_MSETTL", NULL, 0, ""
+	&opt_def_style, 150, 75, "M_MSETTL", NULL, 0, "", language["MenuMouse"]
 };
 
 //
@@ -477,7 +480,7 @@ static optmenuitem_t soundoptions[] =
 static menuinfo_t sound_optmenu = 
 {
 	soundoptions, sizeof(soundoptions) / sizeof(optmenuitem_t),
-	&mouse_style, 150, 75, "M_SFXOPT", NULL, 0, ""
+	&opt_def_style, 150, 75, "M_SFXOPT", NULL, 0, "", language["MenuSound"]
 };
 
 //
@@ -544,7 +547,7 @@ static optmenuitem_t playoptions[] =
 static menuinfo_t gameplay_optmenu = 
 {
 	playoptions, sizeof(playoptions) / sizeof(optmenuitem_t),
-	&gameplay_style, 160, 46, "M_GAMEPL", NULL, 0, ""
+	&opt_def_style, 160, 46, "M_GAMEPL", NULL, 0, "", language["MenuGameplay"]
 };
 
 //
@@ -571,8 +574,8 @@ static optmenuitem_t move_keyconfig[] =
 static menuinfo_t movement_optmenu = 
 {
 	move_keyconfig, sizeof(move_keyconfig) / sizeof(optmenuitem_t),
-	&keyboard_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Movement"
+	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
+	"Movement", language["MenuBinding"]
 };
 
 //
@@ -599,8 +602,8 @@ static optmenuitem_t attack_keyconfig[] =
 static menuinfo_t attack_optmenu = 
 {
 	attack_keyconfig, sizeof(attack_keyconfig) / sizeof(optmenuitem_t),
-	&keyboard_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Attack / Look"
+	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
+	"Attack / Look", language["MenuBinding"]
 };
 
 //
@@ -626,8 +629,8 @@ static optmenuitem_t other_keyconfig[] =
 static menuinfo_t otherkey_optmenu = 
 {
 	other_keyconfig, sizeof(other_keyconfig) / sizeof(optmenuitem_t),
-	&keyboard_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Other Keys"
+	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
+	"Other Keys", language["MenuBinding"]
 };
 
 //
@@ -651,8 +654,8 @@ static optmenuitem_t weapon_keyconfig[] =
 static menuinfo_t weapon_optmenu = 
 {
 	weapon_keyconfig, sizeof(weapon_keyconfig) / sizeof(optmenuitem_t),
-	&keyboard_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Weapon Keys"
+	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
+	"Weapon Keys", language["MenuBinding"]
 };
 
 //
@@ -676,8 +679,8 @@ static optmenuitem_t automap_keyconfig[] =
 static menuinfo_t automap_optmenu = 
 {
 	automap_keyconfig, sizeof(automap_keyconfig) / sizeof(optmenuitem_t),
-	&keyboard_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Automap Keys"
+	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
+	"Automap Keys", language["MenuBinding"]
 };
 
 //
@@ -699,8 +702,8 @@ static optmenuitem_t menu_nav_keyconfig[] =
 static menuinfo_t menu_nav_optmenu = 
 {
 	menu_nav_keyconfig, sizeof(menu_nav_keyconfig) / sizeof(optmenuitem_t),
-	&keyboard_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Menu Navigation"
+	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
+	"Menu Navigation", language["MenuBinding"]
 };
 
 //
@@ -716,8 +719,8 @@ static optmenuitem_t menu_nav_inventory[] =
 static menuinfo_t inventory_optmenu = 
 {
 	menu_nav_inventory, sizeof(menu_nav_inventory) / sizeof(optmenuitem_t),
-	&keyboard_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Inventory"
+	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
+	"Inventory", language["MenuBinding"]
 };
 
 //
@@ -737,8 +740,8 @@ static optmenuitem_t program_keyconfig1[] =
 static menuinfo_t program_optmenu1 = 
 {
 	program_keyconfig1, sizeof(program_keyconfig1) / sizeof(optmenuitem_t),
-	&keyboard_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Program (1/2)"
+	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
+	"Program (1/2)", language["MenuBinding"]
 };
 
 //
@@ -758,8 +761,8 @@ static optmenuitem_t program_keyconfig2[] =
 static menuinfo_t program_optmenu2 = 
 {
 	program_keyconfig2, sizeof(program_keyconfig2) / sizeof(optmenuitem_t),
-	&keyboard_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Program (2/2)"
+	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
+	"Program (2/2)", language["MenuBinding"]
 };
 
 /*
@@ -833,20 +836,22 @@ void M_OptMenuInit()
 	if (! def) def = default_style;
 	opt_def_style = hu_styles.Lookup(def);
 
-	def = styledefs.Lookup("KEYBOARD CONTROLS");
-	keyboard_style = def ? hu_styles.Lookup(def) : opt_def_style;
-
-	def = styledefs.Lookup("MOUSE CONTROLS");
-	mouse_style = def ? hu_styles.Lookup(def) : opt_def_style;
-
-	def = styledefs.Lookup("GAMEPLAY OPTIONS");
-	gameplay_style = def ? hu_styles.Lookup(def) : opt_def_style;
-
-	def = styledefs.Lookup("VIDEO OPTIONS");
-	video_style = def ? hu_styles.Lookup(def) : opt_def_style;
-
-	def = styledefs.Lookup("SET RESOLUTION");
-	setres_style = def ? hu_styles.Lookup(def) : opt_def_style;
+	//Lobo 2022: load our ddflang stuff
+	main_optmenu.name=language["MenuOptions"];
+	video_optmenu.name=language["MenuVideo"];
+	res_optmenu.name=language["MenuResolution"];
+	analogue_optmenu.name=language["MenuMouse"];
+	sound_optmenu.name=language["MenuSound"];
+	gameplay_optmenu.name=language["MenuGameplay"];
+	movement_optmenu.name=language["MenuBinding"];
+	attack_optmenu.name=language["MenuBinding"];
+	otherkey_optmenu.name=language["MenuBinding"];
+	weapon_optmenu.name=language["MenuBinding"];
+	automap_optmenu.name=language["MenuBinding"];
+	menu_nav_optmenu.name=language["MenuBinding"];
+	inventory_optmenu.name=language["MenuBinding"];
+	program_optmenu1.name=language["MenuBinding"];
+	program_optmenu2.name=language["MenuBinding"];
 
 	// Restore the config setting.
 	M_ChangeBlood(-1);
@@ -882,7 +887,7 @@ void M_OptDrawer()
 	int i, j;
 	unsigned int k;
 
-	HUD_SetAlpha(0.64f);
+	HUD_SetAlpha(0.9f);
 	HUD_SolidBox(0, 0, 320, 200, T_BLACK);
 	HUD_SetAlpha();
 
@@ -892,8 +897,16 @@ void M_OptDrawer()
 	if (! style->fonts[0])
 		return;
 
-	int font_h = style->fonts[0]->NominalHeight();
+	float TEXTscale = 1.0;
 
+	if(style->def->text[styledef_c::T_TEXT].scale)
+	{
+		TEXTscale=style->def->text[styledef_c::T_TEXT].scale;
+	}
+	
+	int font_h = style->fonts[0]->NominalHeight();
+	font_h *=TEXTscale;
+	
 	// -ACB- 1998/06/15 Calculate height for menu and then center it.
 	menutop = 68 - ((curr_menu->item_num * font_h) / 2);
 
@@ -905,8 +918,16 @@ void M_OptDrawer()
 
 	image = curr_menu->title_image;
 
-	HUD_DrawImage(curr_menu->title_x, menutop, image);
-
+	//Lobo 2022
+	bool custom_optionmenu = false;
+	if (custom_optionmenu) // Replace this with custom_menu when things are ready - Dasho
+	{
+		HUD_DrawImage(curr_menu->title_x, menutop, image);
+	} 
+	else
+	{		
+		HL_WriteText(style,styledef_c::T_TEXT, curr_menu->title_x, menutop, curr_menu->name,1.5);
+	}
 
 	//now, draw all the menuitems
 	deltay = 1 + font_h;
@@ -916,21 +937,21 @@ void M_OptDrawer()
 	if (curr_menu->key_page[0])
 	{
 		if (curr_key_menu > 0)
-			HL_WriteText(style,2, 60, 200-deltay*4, "< PREV");
+			HL_WriteText(style,styledef_c::T_TITLE, 60, 200-deltay*4, "< PREV");
 
 		if (curr_key_menu < NUM_KEY_MENUS-1)
-			HL_WriteText(style,2, 260 - style->fonts[2]->StringWidth("NEXT >"), 200-deltay*4, 
+			HL_WriteText(style,styledef_c::T_TITLE, 260 - style->fonts[2]->StringWidth("NEXT >"), 200-deltay*4, 
 							  "NEXT >");
 
-		HL_WriteText(style,3, 160 - style->fonts[2]->StringWidth(curr_menu->key_page)/2, 
+		HL_WriteText(style,styledef_c::T_HELP, 160 - style->fonts[3]->StringWidth(curr_menu->key_page)/2, 
 					 curry, curr_menu->key_page);
 		curry += font_h*2;
 
 		if (keyscan)
-			HL_WriteText(style,3, 160 - (style->fonts[3]->StringWidth(keystring2) / 2), 
+			HL_WriteText(style,styledef_c::T_HELP, 160 - (style->fonts[3]->StringWidth(keystring2) / 2), 
 							  200-deltay*2, keystring2);
 		else
-			HL_WriteText(style,3, 160 - (style->fonts[3]->StringWidth(keystring1) / 2), 
+			HL_WriteText(style,styledef_c::T_HELP, 160 - (style->fonts[3]->StringWidth(keystring1) / 2), 
 							  200-deltay*2, keystring1);
 	}
 	else if (curr_menu == &res_optmenu)
@@ -947,20 +968,20 @@ void M_OptDrawer()
 	{
 		bool is_selected = (i == curr_menu->pos);
 
-		HL_WriteText(style, is_selected ? 2 : 0,
+		HL_WriteText(style, is_selected ? styledef_c::T_TITLE : styledef_c::T_TEXT,
 		             (curr_menu->menu_center) - style->fonts[0]->StringWidth(curr_menu->items[i].name),
 					 curry, curr_menu->items[i].name);
-
+		
 		// -ACB- 1998/07/15 Menu Cursor is colour indexed.
 		if (is_selected)
 		{
-			HL_WriteText(style,2, (curr_menu->menu_center + 4), curry, "*");
+			HL_WriteText(style,styledef_c::T_TITLE, (curr_menu->menu_center + 4), curry, "*");
 
 			if (curr_menu->items[i].help)
 			{
 				const char *help = language[curr_menu->items[i].help];
 
-				HL_WriteText(style,3, 160 - (style->fonts[3]->StringWidth(help) / 2), 200 - deltay*2, 
+				HL_WriteText(style,styledef_c::T_HELP, 160 - (style->fonts[3]->StringWidth(help) / 2), 200 - deltay*2, 
 								  help);
 			}
 		}
@@ -995,7 +1016,7 @@ void M_OptDrawer()
 					sprintf(tempstring, "Invalid");
 				}
 
-				HL_WriteText(style,1, (curr_menu->menu_center) + 15, curry, tempstring);
+				HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, tempstring);
 				break;
 			}
 
@@ -1012,7 +1033,7 @@ void M_OptDrawer()
 			{
 				k = *(int*)(curr_menu->items[i].switchvar);
 				M_Key2String(k, tempstring);
-				HL_WriteText(style,1, (curr_menu->menu_center + 15), curry, tempstring);
+				HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center + 15), curry, tempstring);
 				break;
 			}
 
@@ -1034,6 +1055,19 @@ void M_OptDrawer()
 static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int centrex)
 {
 	char tempstring[80];
+	
+	float ALTscale = 1.0;
+	float HELPscale = 1.0;
+
+	if(style->def->text[styledef_c::T_ALT].scale)
+	{
+		ALTscale=style->def->text[styledef_c::T_ALT].scale;
+	}
+
+	if(style->def->text[styledef_c::T_HELP].scale)
+	{
+		HELPscale=style->def->text[styledef_c::T_HELP].scale;
+	}
 
 	// Draw current resolution
 	int y = topy;
@@ -1043,31 +1077,31 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
 	// Draw resolution selection option
 	y += (dy*2);
 	sprintf(tempstring, "%dx%d", new_scrmode.width, new_scrmode.height);
-	HL_WriteText(style,1, centrex+15, y, tempstring);
+	HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
 
 	// Draw depth selection option
 	y += dy;
 	sprintf(tempstring, "%d bit", (new_scrmode.depth < 20) ? 16:32);
-	HL_WriteText(style,1, centrex+15, y, tempstring);
+	HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
 
 	y += dy;
 	sprintf(tempstring, "%s", new_scrmode.full ? "Fullscreen" : "Windowed");
-	HL_WriteText(style,1, centrex+15, y, tempstring);
+	HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
 
 	// Draw selected resolution and mode:
 	y = bottomy;
 	y += (dy/2);
 
 	sprintf(tempstring, "Current Resolution:");
-	HL_WriteText(style,3, 160 - (style->fonts[0]->StringWidth(tempstring) / 2), y, tempstring);
+	HL_WriteText(style,styledef_c::T_HELP, 160 - (style->fonts[0]->StringWidth(tempstring) / 2), y, tempstring);
 
 	y += dy;
-
+	y += 10;
 	sprintf(tempstring, "%d x %d at %d-bit %s",
 			SCREENWIDTH, SCREENHEIGHT, (SCREENBITS < 20) ? 16 : 32,
 			FULLSCREEN ? "Fullscreen" : "Windowed");
 
-	HL_WriteText(style,1, 160 - (style->fonts[1]->StringWidth(tempstring) / 2), y, tempstring);
+	HL_WriteText(style,styledef_c::T_ALT, 160 - (style->fonts[1]->StringWidth(tempstring) / 2), y, tempstring);
 }
 
 //
@@ -1080,7 +1114,13 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
 
 static void M_LanguageDrawer(int x, int y, int deltay)
 {
-	HL_WriteText(opt_def_style,1, x+15, y + deltay * LANGUAGE_POS, language.GetName());
+	float ALTscale = 1.0;
+
+	if(opt_def_style->def->text[styledef_c::T_ALT].scale)
+	{
+		ALTscale=opt_def_style->def->text[styledef_c::T_ALT].scale;
+	}
+	HL_WriteText(opt_def_style,styledef_c::T_ALT, x+15, y + deltay * LANGUAGE_POS, language.GetName());
 }
 
 

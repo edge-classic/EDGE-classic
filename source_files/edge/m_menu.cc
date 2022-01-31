@@ -230,7 +230,7 @@ typedef struct
 	char alpha_key;
 
 	// Printed name test
-	const char *name;
+	const char *name = "DEFAULT";
 }
 menuitem_t;
 
@@ -364,7 +364,8 @@ static menuitem_t DefaultEpiMenu =
 	"Working",  // name
 	NULL,  // image
 	NULL,  // select_func
-	'w'  // alphakey
+	'w',  // alphakey
+	"DEFAULT"
 };
 
 static menu_t EpiDef =
@@ -380,11 +381,11 @@ static menu_t EpiDef =
 
 static menuitem_t SkillMenu[] =
 {
-	{1, "M_JKILL", NULL, M_ChooseSkill, 'p'},
-	{1, "M_ROUGH", NULL, M_ChooseSkill, 'r'},
-	{1, "M_HURT",  NULL, M_ChooseSkill, 'h'},
-	{1, "M_ULTRA", NULL, M_ChooseSkill, 'u'},
-	{1, "M_NMARE", NULL, M_ChooseSkill, 'n'}
+	{1, "M_JKILL", NULL, M_ChooseSkill, 'p', language["MenuDifficulty1"]},
+	{1, "M_ROUGH", NULL, M_ChooseSkill, 'r', language["MenuDifficulty2"]},
+	{1, "M_HURT",  NULL, M_ChooseSkill, 'h', language["MenuDifficulty3"]},
+	{1, "M_ULTRA", NULL, M_ChooseSkill, 'u', language["MenuDifficulty4"]},
+	{1, "M_NMARE", NULL, M_ChooseSkill, 'n', language["MenuDifficulty5"]}
 };
 
 static menu_t SkillDef =
@@ -781,12 +782,15 @@ void M_DrawSaveLoadBorder(float x, float y, int len)
 	const image_c *C = W_ImageLookup("M_LSCNTR");
 	const image_c *R = W_ImageLookup("M_LSRGHT");
 
-	HUD_DrawImage(x - IM_WIDTH(L), y + 7, L);
+	//HUD_DrawImage(x - IM_WIDTH(L), y + 7, L);
+	HUD_StretchImage(x - IM_WIDTH(L), y + (IM_HEIGHT(L)/2),IM_WIDTH(L),IM_HEIGHT(L),L);
 
 	for (int i = 0; i < len; i++, x += IM_WIDTH(C))
-		HUD_DrawImage(x, y + 7, C);
+		HUD_StretchImage(x, y + (IM_HEIGHT(C)/2),IM_WIDTH(C),IM_HEIGHT(C),C);
+		//HUD_DrawImage(x, y + 7, C);
 
-	HUD_DrawImage(x, y + 7, R);
+	//HUD_DrawImage(x, y + 7, R);
+	HUD_StretchImage(x, y + (IM_HEIGHT(R)/2),IM_WIDTH(R),IM_HEIGHT(R),R);
 }
 
 //
@@ -1074,8 +1078,10 @@ void M_DrawMainMenu(void)
 
 void M_DrawNewGame(void)
 {
-	HUD_DrawImage(96, 14, menu_newgame);
-	HUD_DrawImage(54, 38, menu_skill);
+	//HUD_DrawImage(96, 14, menu_newgame);
+	//HUD_DrawImage(54, 38, menu_skill);
+	HL_WriteText(skill_style,styledef_c::T_TITLE, 96, 14, language["MainNewGame"]);
+	HL_WriteText(skill_style,styledef_c::T_TITLE, 54, 38, language["MenuSkill"]);
 }
 
 void M_NewGame(int choice)
@@ -1121,6 +1127,15 @@ static void CreateEpisodeMenu(void)
 
 		Z_StrNCpy(EpisodeMenu[e].patch_name, g->namegraphic.c_str(), 8);
 		EpisodeMenu[e].patch_name[8] = 0;
+		
+		if(g->description) 
+		{
+			EpisodeMenu[e].name =  language[g->description];
+		}
+		else
+		{
+			EpisodeMenu[e].name =  g->name;
+		}
 
 		e++;
 	}
@@ -2130,7 +2145,7 @@ void M_Drawer(void)
 	style_c *style = currentMenu->style_var[0];
 	SYS_ASSERT(style);
 
-	HUD_SetAlpha(0.64f);
+	HUD_SetAlpha(0.85f);
 	HUD_SolidBox(0, 0, 320, 200, T_BLACK);
 	HUD_SetAlpha();
 
@@ -2142,8 +2157,25 @@ void M_Drawer(void)
 	x = currentMenu->x;
 	y = currentMenu->y;
 	max = currentMenu->numitems;
+	
+	int t_type = styledef_c::T_TEXT;
+	float txtscale = 1.0;
+	if(style->def->text[styledef_c::T_TEXT].scale)
+	{
+		txtscale=style->def->text[styledef_c::T_TEXT].scale;
+	}
+	float templineheight= (txtscale * style->fonts[0]->NominalHeight());
 
-	for (i = 0; i < max; i++, y += LINEHEIGHT)
+	if (custom_menu) // Replace this with custom_menu when things are ready - Dasho
+	{
+		templineheight = LINEHEIGHT;
+	}
+	else
+	{
+		templineheight = templineheight * txtscale;
+	}
+
+	for (i = 0; i < max; i++, y += templineheight) //LINEHEIGHT)
 	{
 		// ignore blank lines
 		if (! currentMenu->menuitems[i].patch_name[0])
@@ -2153,26 +2185,50 @@ void M_Drawer(void)
 			currentMenu->menuitems[i].image = W_ImageLookup(
 				currentMenu->menuitems[i].patch_name);
 
-		if (true) // Replace this with custom_menu when things are ready - Dasho
+		if (custom_menu) // Replace this with custom_menu when things are ready - Dasho
 		{
 			const image_c *image = currentMenu->menuitems[i].image;
 
 			HUD_DrawImage(x, y, image);
+			templineheight = IM_HEIGHT(image); //to scale the skull cursor later
 		} 
 		else
-		{		
-			HL_WriteText(style,3, x, y, currentMenu->menuitems[i].name, 1.0);
+		{	
+			HL_WriteText(style,t_type, x, y, currentMenu->menuitems[i].name);
 		}
 	}
 
 	// DRAW SKULL
 	{
 		int sx = x + SKULLXOFF;
-		int sy = currentMenu->y - 5 + itemOn * LINEHEIGHT;
-		//Lobo: just use M_SKULL1, and any DDFANIM magic it has ;)
-		HUD_DrawImage(sx, sy, menu_skull[0]);
-		//HUD_DrawImage(sx, sy, menu_skull[whichSkull]);
+		//int sy = currentMenu->y - 5 + itemOn * LINEHEIGHT;
+
+		// Replace this with custom_menu when things are ready - Dasho
+		if ((!custom_menu) && (currentMenu->draw_func == M_DrawLoad
+			|| currentMenu->draw_func == M_DrawSave)) 
+		{
+				//need to use the box gfx
+				const image_c *C = W_ImageLookup("M_LSCNTR");
+
+				templineheight = IM_HEIGHT(C);
+				//templineheight +=1;
+		}
 		
+		templineheight += (1 * txtscale); //space between items?
+
+		float sy = currentMenu->y - (templineheight/4);	
+		sy = sy + (itemOn * templineheight);
+		
+		//Lobo: just use M_SKULL1, and any DDFANIM magic it has ;)
+		//HUD_DrawImage(sx, sy, menu_skull[0]);
+
+		//scale it to match lineheight
+		float TempScale = 0;
+		float TempWidth = 0;
+		TempScale = templineheight / IM_HEIGHT(menu_skull[0]);
+		TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
+		HUD_StretchImage(sx,sy,TempWidth,templineheight,menu_skull[0]);
+	
 	}
 }
 
@@ -2259,10 +2315,24 @@ void M_Init(void)
 	def = styledefs.Lookup("DIALOG");
 	dialog_style = def ? hu_styles.Lookup(def) : menu_def_style;
 
-	def = styledefs.Lookup("SOUND VOLUME");
-	if (! def) def = styledefs.Lookup("OPTIONS");
+	def = styledefs.Lookup("OPTIONS");
 	if (! def) def = default_style;
 	sound_vol_style = hu_styles.Lookup(def);
+
+	language.Select(m_language.str);
+	//Lobo 2022: load our ddflang stuff
+	MainMenu[newgame].name = language["MainNewGame"];
+	MainMenu[options].name = language["MainOptions"];
+	MainMenu[loadgame].name = language["MainLoadGame"];
+	MainMenu[savegame].name = language["MainSaveGame"];
+	MainMenu[readthis].name = language["MainReadThis"];
+	MainMenu[quitdoom].name = language["MainQuitGame"];
+	
+	SkillMenu[0].name = language["MenuDifficulty1"];
+	SkillMenu[1].name = language["MenuDifficulty2"];
+	SkillMenu[2].name = language["MenuDifficulty3"];
+	SkillMenu[3].name = language["MenuDifficulty4"];
+	SkillMenu[4].name = language["MenuDifficulty5"];
 
 	// lookup required images
 	therm_l = W_ImageLookup("M_THERML");

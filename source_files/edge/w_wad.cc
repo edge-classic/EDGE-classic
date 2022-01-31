@@ -2127,7 +2127,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 		data_file_c *df = data_files[m];
 
 		//we only want pwads
-		if (FileKind_Strings[df->kind] == FileKind_Strings[FLKIND_PWad])
+		if (FileKind_Strings[df->kind] == FileKind_Strings[FLKIND_PWad] || FileKind_Strings[df->kind] == FileKind_Strings[FLKIND_EWad])
 		{
 			//I_Printf("Checking skies in %s\n",df->file_name);
 			//I_Printf(" %2d %-4s \"%s\"\n", m+1, FileKind_Strings[df->kind], df->file_name);

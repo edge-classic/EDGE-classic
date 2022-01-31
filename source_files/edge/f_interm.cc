@@ -415,8 +415,18 @@ static void DrawLevelFinished(void)
 
 	float w2 = IM_WIDTH(finished);
 
-	HUD_DrawImage(160 - w/2,  y, lnames[0]);
-	HUD_DrawImage(160 - w2/2, y + h * 5/4, finished);
+	// load styles
+	style_c *style;
+
+	style=wi_sp_style;
+	int t_type = styledef_c::T_TEXT;
+	HL_WriteText(style,t_type, 100 - w/2, y, language[wi_stats.cur->description.c_str()]);
+
+	t_type = styledef_c::T_TITLE;
+	HL_WriteText(style,t_type,160 - w2/2, y + h * 5/4, language["IntermissionFinished"]);
+
+	//HUD_DrawImage(160 - w/2,  y, lnames[0]);
+	//HUD_DrawImage(160 - w2/2, y + h * 5/4, finished);
 }
 
 // Draws "Entering <LevelName>"
@@ -433,8 +443,16 @@ static void DrawEnteringLevel(void)
 	float w = IM_WIDTH(entering);
 	float w2 = IM_WIDTH(lnames[1]);
 
-	HUD_DrawImage(160 - w/2,  y, entering);
-	HUD_DrawImage(160 - w2/2, y + h * 5/4, lnames[1]);
+	style_c *style;
+	style=wi_sp_style;
+	int t_type = styledef_c::T_TEXT;
+	HL_WriteText(style,t_type, 100 - w2/2, y + h * 5/4, language[wi_stats.next->description.c_str()]);
+	t_type = styledef_c::T_TITLE;
+	HL_WriteText(style,t_type,160 - w/2,  y, language["IntermissionEntering"]);
+	
+
+	//HUD_DrawImage(160 - w/2,  y, entering);
+	//HUD_DrawImage(160 - w2/2, y + h * 5/4, lnames[1]);
 }
 
 static void DrawOnLnode(wi_mappos_c* mappos, const image_c * images[2])

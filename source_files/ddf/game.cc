@@ -61,6 +61,7 @@ static const commandlist_t gamedef_commands[] =
 	DF("TITLE_TIME", titletics, DDF_MainGetTime),
 	DF("SPECIAL_MUSIC", special_music, DDF_MainGetNumeric),
 	DF("LIGHTING", lighting, DDF_GameGetLighting),
+	DF("DESCRIPTION", description, DDF_MainGetString),
 
 	DDF_CMD_END
 };
@@ -797,6 +798,7 @@ void gamedef_c::CopyDetail(gamedef_c &src)
 
 	special_music = src.special_music;
 	lighting = src.lighting;
+	description = src.description;
 }
 
 //
@@ -833,6 +835,7 @@ void gamedef_c::Default()
 
 	special_music = 0;
 	lighting = LMODEL_Doom;
+	description.clear();
 }
 
 

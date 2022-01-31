@@ -208,6 +208,10 @@ public:
 	int special_music;
 
 	lighting_model_e lighting;
+	
+	// Episode description, a reference to languages.ldf
+	epi::strent_c description;
+  
 
 private:
 	// disable copy construct and assignment operator

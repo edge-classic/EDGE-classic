@@ -35,6 +35,7 @@
 #include "s_mp3.h"
 #include "s_tsf.h"
 #include "s_xmp.h"
+#include "s_gme.h"
 #include "m_misc.h"
 #include "w_wad.h"
 
@@ -186,6 +187,15 @@ void S_ChangeMusic(int entrynum, bool loop)
 		delete data;
 
 		music_player = S_PlayXMPMusic(play, volume, loop);
+		return;
+	}
+
+	if (S_CheckGME(data, length))
+	{
+		delete F;
+		delete data;
+
+		music_player = S_PlayGMEMusic(play, volume, loop);
 		return;
 	}
 	

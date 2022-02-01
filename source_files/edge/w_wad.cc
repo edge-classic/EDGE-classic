@@ -814,14 +814,6 @@ static void AddLump(data_file_c *df, int lump, int pos, int size, int file,
 	// ignore zero size lumps or dummy markers
 	if (lump_p->size > 0 && !IsDummySF(lump_p->name))
 	{
-		// Disable text-drawing main menu if PWad supplies menu images - Dasho
-		if(df->kind == FLKIND_PWad)
-		{
-			char *checker = strstr(lump_p->name, "M_");
-			if(checker)
-				custom_menu = true;
-		}
-
 		if (within_sprite_list)
 		{
 			lump_p->kind = LMKIND_Sprite;
@@ -2156,6 +2148,47 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 	
 }
 
+//W_IsLumpInPwad
+//
+//check if a lump is in a pwad
+//
+//Returns true if found
+bool W_IsLumpInPwad(const char *name)
+{
+
+	//first check images.ddf
+	const image_c *tempImage;
+	
+	tempImage = W_ImageLookup(name);
+	if (tempImage)
+	{
+		if(tempImage->source_type ==IMSRC_User)//from images.ddf
+		{
+			return true;
+		}
+	}
+
+	//if we're here then check pwad lumps
+	int lumpnum = W_CheckNumForName2(name);
+	int filenum = -1;
+
+	if (lumpnum != -1)
+	{
+		filenum = W_GetFileForLump(lumpnum);
+
+		if (filenum == 0) return false; //it's the IWAD so we're done
+
+		data_file_c *df = data_files[filenum];
+
+		//we only want pwads
+		if (FileKind_Strings[df->kind] == FileKind_Strings[FLKIND_PWad])
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

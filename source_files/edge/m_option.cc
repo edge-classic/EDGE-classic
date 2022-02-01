@@ -920,13 +920,13 @@ void M_OptDrawer()
 
 	//Lobo 2022
 	bool custom_optionmenu = false;
-	if (custom_optionmenu) // Replace this with custom_menu when things are ready - Dasho
+	if (custom_optionmenu==false) 
 	{
-		HUD_DrawImage(curr_menu->title_x, menutop, image);
+		HL_WriteText(style,styledef_c::T_TEXT, curr_menu->title_x, menutop, curr_menu->name,1.5);
 	} 
 	else
 	{		
-		HL_WriteText(style,styledef_c::T_TEXT, curr_menu->title_x, menutop, curr_menu->name,1.5);
+		HUD_DrawImage(curr_menu->title_x, menutop, image);
 	}
 
 	//now, draw all the menuitems

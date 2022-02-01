@@ -99,7 +99,9 @@ static int screenshot_rate;
 bool m_screenshot_required = false;
 bool need_save_screenshot  = false;
 
-bool custom_menu = false;
+bool custom_MenuMain = false;
+bool custom_MenuEpisode = false;
+bool custom_MenuDifficulty = false;
 
 FILE *logfile = NULL;
 FILE *debugfile = NULL;

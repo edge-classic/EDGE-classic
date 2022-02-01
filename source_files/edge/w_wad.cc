@@ -2185,6 +2185,11 @@ bool W_IsLumpInPwad(const char *name)
 		{
 			return true;
 		}
+		//or ewads ;)
+		if (FileKind_Strings[df->kind] == FileKind_Strings[FLKIND_EWad])
+		{
+			return true;
+		}
 	}
 
 	return false;

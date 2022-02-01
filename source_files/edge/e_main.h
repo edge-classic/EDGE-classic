@@ -59,7 +59,9 @@ extern int app_state;
 extern bool m_screenshot_required;
 extern bool need_save_screenshot;
 
-extern bool custom_menu;
+extern bool custom_MenuMain;
+extern bool custom_MenuEpisode;
+extern bool custom_MenuDifficulty;
 
 #endif // __E_MAIN__
 

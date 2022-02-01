@@ -757,7 +757,14 @@ void M_DrawLoad(void)
 {
 	int i;
 
-	HUD_DrawImage(72, 8, menu_loadg);
+	if (custom_MenuMain==false)
+	{
+		HL_WriteText(load_style,styledef_c::T_TEXT, 72, 8, language["MainLoadGame"]);
+	}
+	else
+	{
+		HUD_DrawImage(72, 8, menu_loadg);
+	}
       
 	for (i = 0; i < SAVE_SLOTS; i++)
 		M_DrawSaveLoadBorder(LoadDef.x + 8, LoadDef.y + LINEHEIGHT * (i), 24);
@@ -782,15 +789,22 @@ void M_DrawSaveLoadBorder(float x, float y, int len)
 	const image_c *C = W_ImageLookup("M_LSCNTR");
 	const image_c *R = W_ImageLookup("M_LSRGHT");
 
-	//HUD_DrawImage(x - IM_WIDTH(L), y + 7, L);
-	HUD_StretchImage(x - IM_WIDTH(L), y + (IM_HEIGHT(L)/2),IM_WIDTH(L),IM_HEIGHT(L),L);
+	if (custom_MenuMain==false)
+	{
+		HUD_StretchImage(x - IM_WIDTH(L), y + (IM_HEIGHT(L)/2),IM_WIDTH(L),IM_HEIGHT(L),L);
+		for (int i = 0; i < len; i++, x += IM_WIDTH(C))
+			HUD_StretchImage(x, y + (IM_HEIGHT(C)/2),IM_WIDTH(C),IM_HEIGHT(C),C);
 
-	for (int i = 0; i < len; i++, x += IM_WIDTH(C))
-		HUD_StretchImage(x, y + (IM_HEIGHT(C)/2),IM_WIDTH(C),IM_HEIGHT(C),C);
-		//HUD_DrawImage(x, y + 7, C);
+		HUD_StretchImage(x, y + (IM_HEIGHT(R)/2),IM_WIDTH(R),IM_HEIGHT(R),R);
+	}
+	else
+	{
+		HUD_DrawImage(x - IM_WIDTH(L), y + 7, L);
+		for (int i = 0; i < len; i++, x += IM_WIDTH(C))
+			HUD_DrawImage(x, y + 7, C);
 
-	//HUD_DrawImage(x, y + 7, R);
-	HUD_StretchImage(x, y + (IM_HEIGHT(R)/2),IM_WIDTH(R),IM_HEIGHT(R),R);
+		HUD_DrawImage(x, y + 7, R);
+	}
 }
 
 //
@@ -832,7 +846,14 @@ void M_DrawSave(void)
 {
 	int i, len;
 
-	HUD_DrawImage(72, 8, menu_saveg);
+	if (custom_MenuMain==false)
+	{
+		HL_WriteText(load_style,styledef_c::T_TEXT, 72, 8, language["MainSaveGame"]);
+	}
+	else
+	{
+		HUD_DrawImage(72, 8, menu_saveg);
+	}
 
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
@@ -1078,10 +1099,16 @@ void M_DrawMainMenu(void)
 
 void M_DrawNewGame(void)
 {
-	//HUD_DrawImage(96, 14, menu_newgame);
-	//HUD_DrawImage(54, 38, menu_skill);
-	HL_WriteText(skill_style,styledef_c::T_TITLE, 96, 14, language["MainNewGame"]);
-	HL_WriteText(skill_style,styledef_c::T_TITLE, 54, 38, language["MenuSkill"]);
+	if (custom_MenuDifficulty==false)
+	{
+		HL_WriteText(skill_style,styledef_c::T_TITLE, 96, 14, language["MainNewGame"]);
+		HL_WriteText(skill_style,styledef_c::T_TITLE, 54, 38, language["MenuSkill"]);
+	}
+	else
+	{
+		HUD_DrawImage(96, 14, menu_newgame);
+		HUD_DrawImage(54, 38, menu_skill);
+	}
 }
 
 void M_NewGame(int choice)
@@ -1159,7 +1186,14 @@ void M_DrawEpisode(void)
 	}
 	else
 	{
-		HUD_DrawImage(54, 38, menu_episode);
+		if (custom_MenuEpisode==false)
+		{
+			HL_WriteText(episode_style,styledef_c::T_TITLE, 54, 38, language["MenuWhichEpisode"]);
+		}
+		else
+		{
+			HUD_DrawImage(54, 38, menu_episode);
+		}
 	}
 }
 
@@ -2141,6 +2175,24 @@ void M_Drawer(void)
 		M_NetGameDrawer();
 		return;
 	}
+	
+	//Lobo 2022: Check if we're going to use text-based menus
+	//or the users (custom)graphics
+	bool custom_menu = false;
+	if (custom_MenuMain == true) 
+	{
+		custom_menu=true;
+	}
+
+	if ((currentMenu->draw_func == M_DrawNewGame) && (custom_MenuDifficulty == true)) 
+	{
+		custom_menu=true;
+	}
+
+	if (currentMenu->draw_func == M_DrawEpisode && custom_MenuEpisode == true) 
+	{
+		custom_menu=true;
+	}
 
 	style_c *style = currentMenu->style_var[0];
 	SYS_ASSERT(style);
@@ -2166,15 +2218,17 @@ void M_Drawer(void)
 	}
 	float templineheight= (txtscale * style->fonts[0]->NominalHeight());
 
-	if (custom_menu) // Replace this with custom_menu when things are ready - Dasho
-	{
-		templineheight = LINEHEIGHT;
-	}
-	else
+	if (custom_menu==false)
 	{
 		templineheight = templineheight * txtscale;
 	}
+	else
+	{
+		templineheight = LINEHEIGHT;
+	}
 
+	float LastLineHeight = templineheight;
+	
 	for (i = 0; i < max; i++, y += templineheight) //LINEHEIGHT)
 	{
 		// ignore blank lines
@@ -2185,50 +2239,52 @@ void M_Drawer(void)
 			currentMenu->menuitems[i].image = W_ImageLookup(
 				currentMenu->menuitems[i].patch_name);
 
-		if (custom_menu) // Replace this with custom_menu when things are ready - Dasho
+		if (custom_menu==false)
 		{
-			const image_c *image = currentMenu->menuitems[i].image;
-
-			HUD_DrawImage(x, y, image);
-			templineheight = IM_HEIGHT(image); //to scale the skull cursor later
+			HL_WriteText(style,t_type, x, y, currentMenu->menuitems[i].name);
 		} 
 		else
 		{	
-			HL_WriteText(style,t_type, x, y, currentMenu->menuitems[i].name);
+			const image_c *image = currentMenu->menuitems[i].image;
+
+			HUD_DrawImage(x, y, image);
+			LastLineHeight = IM_HEIGHT(image); //to scale the skull cursor later
 		}
 	}
 
 	// DRAW SKULL
 	{
 		int sx = x + SKULLXOFF;
-		//int sy = currentMenu->y - 5 + itemOn * LINEHEIGHT;
-
-		// Replace this with custom_menu when things are ready - Dasho
-		if ((!custom_menu) && (currentMenu->draw_func == M_DrawLoad
-			|| currentMenu->draw_func == M_DrawSave)) 
+		
+		if (custom_menu==false)
 		{
-				//need to use the box gfx
-				const image_c *C = W_ImageLookup("M_LSCNTR");
+			if (currentMenu->draw_func == M_DrawLoad
+			|| currentMenu->draw_func == M_DrawSave) 
+			{
+					//need to use the box gfx
+					const image_c *C = W_ImageLookup("M_LSCNTR");
 
-				templineheight = IM_HEIGHT(C);
-				//templineheight +=1;
+					LastLineHeight = IM_HEIGHT(C);
+					LastLineHeight +=1;
+			}
+		
+			//LastLineHeight += (1 * txtscale); //space between items?
+			
+			float sy = currentMenu->y - (LastLineHeight/4);	
+			sy = sy + (itemOn * LastLineHeight);
+			//scale it to match lineheight
+			float TempScale = 0;
+			float TempWidth = 0;
+			TempScale = LastLineHeight / IM_HEIGHT(menu_skull[0]);
+			TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
+			HUD_StretchImage(sx,sy,TempWidth,LastLineHeight,menu_skull[0]);
 		}
-		
-		templineheight += (1 * txtscale); //space between items?
-
-		float sy = currentMenu->y - (templineheight/4);	
-		sy = sy + (itemOn * templineheight);
-		
-		//Lobo: just use M_SKULL1, and any DDFANIM magic it has ;)
-		//HUD_DrawImage(sx, sy, menu_skull[0]);
-
-		//scale it to match lineheight
-		float TempScale = 0;
-		float TempWidth = 0;
-		TempScale = templineheight / IM_HEIGHT(menu_skull[0]);
-		TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
-		HUD_StretchImage(sx,sy,TempWidth,templineheight,menu_skull[0]);
-	
+		else
+		{
+			int sy = currentMenu->y - 5 + itemOn * LINEHEIGHT;
+			//Lobo: just use M_SKULL1, and any DDFANIM magic it has ;)
+			HUD_DrawImage(sx, sy, menu_skull[0]);
+		}
 	}
 }
 
@@ -2348,6 +2404,37 @@ void M_Init(void)
 	menu_episode  = W_ImageLookup("M_EPISOD");
 	menu_skull[0] = W_ImageLookup("M_SKULL1");
 	menu_skull[1] = W_ImageLookup("M_SKULL2");
+	
+	//Check for custom menu graphics in pwads:
+	//If we have them then use them insetad of our 
+	// text-based ones.
+	if (W_IsLumpInPwad("M_NEWG"))
+		custom_MenuMain=true;
+
+	if (W_IsLumpInPwad("M_LOADG"))
+		custom_MenuMain=true;
+
+	if (W_IsLumpInPwad("M_SAVEG"))
+		custom_MenuMain=true;
+
+	if (W_IsLumpInPwad("M_EPISOD"))
+		custom_MenuEpisode=true;
+
+	if (W_IsLumpInPwad("M_EPI1"))
+		custom_MenuEpisode=true;
+	
+	if (W_IsLumpInPwad("M_EPI4"))
+		custom_MenuEpisode=true;
+	
+	if (W_IsLumpInPwad("M_JKILL"))
+		custom_MenuDifficulty=true;
+	
+	if (W_IsLumpInPwad("M_NMARE"))
+		custom_MenuDifficulty=true;
+	
+	I_Debugf("custom_MenuMain =%d \n",custom_MenuMain);
+	I_Debugf("custom_MenuEpisode =%d \n",custom_MenuEpisode);
+	I_Debugf("custom_MenuDifficulty =%d \n",custom_MenuDifficulty);
 
 	if (W_CheckNumForName("M_HTIC") >= 0)
 		menu_doom = W_ImageLookup("M_HTIC");

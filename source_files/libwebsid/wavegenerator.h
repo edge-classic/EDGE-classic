@@ -22,9 +22,9 @@
 
 class WaveGenerator {
 protected:
-	friend class SID;								// the only user of Voice
+	friend class WebSID;								// the only user of Voice
 
-	WaveGenerator(class SID* sid, uint8_t voice_idx);
+	WaveGenerator(class WebSID* sid, uint8_t voice_idx);
 
 	void reset(double cycles_per_sample);
 
@@ -92,7 +92,7 @@ private:
 	uint16_t pulseTriangleSawOutput();
 
 private:
-	class SID*	_sid;
+	class WebSID*	_sid;
 	uint8_t		_voice_idx;
 	double		_cycles_per_sample;
 

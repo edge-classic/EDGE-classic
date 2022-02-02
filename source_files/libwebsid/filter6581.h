@@ -37,7 +37,7 @@ public:
 	static double* getCutoff6581(int distort_level);
 
 protected:
-	Filter6581(class SID* sid);
+	Filter6581(class WebSID* sid);
 	virtual ~Filter6581();
 
 	static void init();
@@ -48,7 +48,7 @@ protected:
 
 	double cutoffMultiplier(double filter_out);
 	
-	friend class SID;		
+	friend class WebSID;		
 private:
 		// base curve
 	static double _base;				// curve's min

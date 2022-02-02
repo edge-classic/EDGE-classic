@@ -233,7 +233,7 @@ uint8_t FileLoader::getCurrentSongSpeed() {
 }
 
 void FileLoader::configureSids(uint16_t flags, uint8_t* addr_list) {
-	SIDConfigurator* cf = SID::getHWConfigurator();
+	SIDConfigurator* cf = WebSID::getHWConfigurator();
 	cf->configure(FileLoader::isExtendedSidFile(), _sid_file_version, flags, addr_list);
 }
 

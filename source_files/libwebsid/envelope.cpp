@@ -112,7 +112,7 @@ struct EnvelopeState* getState(Envelope* e) {
 	return (struct EnvelopeState*)e->_state;
 }
 
-Envelope::Envelope(SID* sid, uint8_t voice) {
+Envelope::Envelope(WebSID* sid, uint8_t voice) {
 	_sid = sid;
 	_voice = voice;
 	_state = (void*) malloc(sizeof(struct EnvelopeState));

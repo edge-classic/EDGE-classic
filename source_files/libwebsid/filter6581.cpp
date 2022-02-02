@@ -126,7 +126,7 @@ double* Filter6581::_distortion_tbl = 0;
 // used to interface with JavaScript side
 double Filter6581::_tmp_cutoff_tbl[CUTOFF_SIZE];
 
-Filter6581::Filter6581(SID* sid) : Filter(sid) {
+Filter6581::Filter6581(WebSID* sid) : Filter(sid) {
 	Filter6581::init();
 }
 

@@ -1,7 +1,7 @@
 /*
 * System level emulation stuff.
 *
-* WebSid (c) 2020 Jürgen Wothke
+* WebSid (c) 2020 Jï¿½rgen Wothke
 * version 0.94
 *
 * Terms of Use: This software is licensed under a CC BY-NC-SA 
@@ -54,7 +54,7 @@ extern "C" uint8_t sysClockTimeout() {
 	// this is probably overkill for PSID crap..
 	vicClock(); 
 	ciaClock(); 
-	SID::clockAll();
+	WebSID::clockAll();
 	
 	_cycles += 1;
 	return 1;
@@ -63,8 +63,8 @@ extern "C" uint8_t sysClockTimeout() {
 extern "C" void sysClockOpt() {
 	vicClock();
 	ciaClock();
-	if (SID::isAudible()) {
-		SID::clockAll(); 
+	if (WebSID::isAudible()) {
+		WebSID::clockAll(); 
 	}
 	cpuClock();
 	
@@ -74,7 +74,7 @@ extern "C" void sysClockOpt() {
 extern "C" void sysClock() {
 	vicClock();
 	ciaClock();
-	SID::clockAll();
+	WebSID::clockAll();
 	cpuClock();	
 	
 	_cycles += 1;

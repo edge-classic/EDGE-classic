@@ -118,6 +118,12 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
+	if (play->type == MUS_SID)
+	{
+		music_player = S_PlaySIDMusic(play, volume, loop);
+		return;
+	}
+
 	// open the file or lump, and read it into memory
 	epi::file_c *F;
 

@@ -41,9 +41,9 @@ typedef enum {
 
 class DigiDetector {
 protected:
-	friend class SID;
+	friend class WebSID;
 	
-	DigiDetector(class SID* sid);
+	DigiDetector(class WebSID* sid);
 	
 	// setup
 	void reset(uint32_t clock_rate, uint8_t is_rsid, uint8_t is_compatible);
@@ -92,7 +92,7 @@ private:
 	uint8_t getD418Sample( uint8_t value);
 
 private:
-	SID* _sid;
+	WebSID* _sid;
 	uint16_t _base_addr;
 
 	uint8_t _digi_enabled;	// for manual muting	

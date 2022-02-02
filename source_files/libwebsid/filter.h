@@ -44,7 +44,7 @@ struct FilterState {
 */
 class Filter {
 protected:
-	Filter(class SID* sid);
+	Filter(class WebSID* sid);
 	virtual ~Filter();
 		
 	void setSampleRate(uint32_t sample_rate);
@@ -73,11 +73,11 @@ protected:
 	virtual double doGetFilterOutput(double sum_filter_in, double sum_nofilter_in, double* band_pass, double* low_pass, double* hi_pass) = 0;
 
 private:
-	friend class SID;
+	friend class WebSID;
 	friend class DigiDetector;
 	void clearSimOut(uint8_t voice_idx);
 
-	class SID* _sid;
+	class WebSID* _sid;
 
 protected:
 	static uint32_t _sample_rate;		// target playback sample rate

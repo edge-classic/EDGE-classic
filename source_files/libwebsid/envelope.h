@@ -21,8 +21,8 @@ extern "C" {
 */
 class Envelope {
 protected:
-	friend class SID;
-	Envelope(class SID* sid, uint8_t voice);
+	friend class WebSID;
+	Envelope(class WebSID* sid, uint8_t voice);
 		
 	/**
 	* Reinitialize a specific instance to reuse it.
@@ -61,7 +61,7 @@ private:
 	friend struct EnvelopeState* getState(Envelope *e);
 
 	void* _state;	// don't want this header file cluttered with all the implementation details..
-	class SID* _sid;
+	class WebSID* _sid;
 	uint8_t _voice;
 };
 

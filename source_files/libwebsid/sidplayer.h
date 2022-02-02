@@ -90,7 +90,7 @@ static void resetTimings(uint8_t is_ntsc) {
 	uint8_t is_rsid=		FileLoader::isRSID();
 	uint8_t is_compatible=	FileLoader::getCompatibility();
 	
-	SID::resetAll(_sample_rate, clock_rate, is_rsid, is_compatible);
+	WebSID::resetAll(_sample_rate, clock_rate, is_rsid, is_compatible);
 }
 
 static void resetScopeBuffers() {
@@ -203,7 +203,7 @@ extern "C" int32_t EMSCRIPTEN_KEEPALIVE computeAudioSamples() {
 	if(!_ready_to_play) return 0;
 	
 	uint8_t is_simple_sid_mode =	!FileLoader::isExtendedSidFile();
-	int sid_voices =				SID::getNumberUsedChips() * 4;
+	int sid_voices =				WebSID::getNumberUsedChips() * 4;
 	uint8_t speed =					FileLoader::getCurrentSongSpeed();
 
 #ifdef TEST
@@ -225,7 +225,7 @@ extern "C" int32_t EMSCRIPTEN_KEEPALIVE computeAudioSamples() {
 									_synth_trace_buffers, _chunk_size);
 												
 				if (!_sound_started) {
-					if (SID::isAudible()) {
+					if (WebSID::isAudible()) {
 						_sound_started = 1;
 						break;
 					}
@@ -294,7 +294,7 @@ extern "C" uint32_t enableVoice(uint8_t sid_idx, uint8_t voice, uint8_t on);
 extern "C" uint32_t enableVoice(uint8_t sid_idx, uint8_t voice, uint8_t on)  __attribute__((noinline));
 #endif
 extern "C" uint32_t EMSCRIPTEN_KEEPALIVE enableVoice(uint8_t sid_idx, uint8_t voice, uint8_t on) {
-	SID::setMute(sid_idx, voice, !on);
+	WebSID::setMute(sid_idx, voice, !on);
 	
 	return 0;
 }
@@ -406,7 +406,7 @@ extern "C" uint8_t envIsSID6581();
 extern "C" uint8_t envIsSID6581()  __attribute__((noinline));
 #endif
 extern "C" uint8_t EMSCRIPTEN_KEEPALIVE envIsSID6581() {
-	return (uint8_t)SID::isSID6581();
+	return (uint8_t)WebSID::isSID6581();
 }
 #ifdef _MSC_VER
 extern "C" uint8_t envSetSID6581(uint8_t is6581);
@@ -414,7 +414,7 @@ extern "C" uint8_t envSetSID6581(uint8_t is6581);
 extern "C" uint8_t envSetSID6581(uint8_t is6581)  __attribute__((noinline));
 #endif
 extern "C" uint8_t EMSCRIPTEN_KEEPALIVE envSetSID6581(uint8_t is6581) {
-	return SID::setSID6581((bool)is6581);
+	return WebSID::setSID6581((bool)is6581);
 }
 #ifdef _MSC_VER
 extern "C" uint8_t getDigiType();
@@ -422,7 +422,7 @@ extern "C" uint8_t getDigiType();
 extern "C" uint8_t getDigiType()  __attribute__((noinline));
 #endif
 extern "C" uint8_t EMSCRIPTEN_KEEPALIVE getDigiType() {
-	return SID::getGlobalDigiType();
+	return WebSID::getGlobalDigiType();
 }
 #ifdef _MSC_VER
 extern "C" const char* getDigiTypeDesc();
@@ -430,7 +430,7 @@ extern "C" const char* getDigiTypeDesc();
 extern "C" const char* getDigiTypeDesc()  __attribute__((noinline));
 #endif
 extern "C" const char* EMSCRIPTEN_KEEPALIVE getDigiTypeDesc() {
-	return SID::getGlobalDigiTypeDesc();
+	return WebSID::getGlobalDigiTypeDesc();
 }
 #ifdef _MSC_VER
 extern "C" uint16_t getDigiRate();
@@ -438,7 +438,7 @@ extern "C" uint16_t getDigiRate();
 extern "C" uint16_t getDigiRate()  __attribute__((noinline));
 #endif
 extern "C" uint16_t EMSCRIPTEN_KEEPALIVE getDigiRate() {
-	return SID::getGlobalDigiRate()*vicFramesPerSecond();
+	return WebSID::getGlobalDigiRate()*vicFramesPerSecond();
 }
 #ifdef _MSC_VER
 extern "C" uint8_t envIsNTSC();
@@ -486,7 +486,7 @@ extern "C" uint16_t getGlobalDigiType();
 extern "C" uint16_t getGlobalDigiType() __attribute__((noinline));
 #endif
 extern "C" uint16_t EMSCRIPTEN_KEEPALIVE getGlobalDigiType() {
-	return SID::getGlobalDigiType();
+	return WebSID::getGlobalDigiType();
 }
 #ifdef _MSC_VER
 extern "C" const char * getGlobalDigiTypeDesc();
@@ -494,8 +494,8 @@ extern "C" const char * getGlobalDigiTypeDesc();
 extern "C" const char * getGlobalDigiTypeDesc() __attribute__((noinline));
 #endif
 extern "C" const char * EMSCRIPTEN_KEEPALIVE getGlobalDigiTypeDesc() {
-	uint16_t t = SID::getGlobalDigiType();
-	return (t > 0) ? SID::getGlobalDigiTypeDesc() : "";
+	uint16_t t = WebSID::getGlobalDigiType();
+	return (t > 0) ? WebSID::getGlobalDigiTypeDesc() : "";
 }
 #ifdef _MSC_VER
 extern "C" uint16_t getGlobalDigiRate();
@@ -503,8 +503,8 @@ extern "C" uint16_t getGlobalDigiRate();
 extern "C" uint16_t getGlobalDigiRate() __attribute__((noinline));
 #endif
 extern "C" uint16_t EMSCRIPTEN_KEEPALIVE getGlobalDigiRate() {
-	uint16_t t = SID::getGlobalDigiType();
-	return (t > 0) ? SID::getGlobalDigiRate() : 0;
+	uint16_t t = WebSID::getGlobalDigiType();
+	return (t > 0) ? WebSID::getGlobalDigiRate() : 0;
 }
 #ifdef _MSC_VER
 extern "C" int getNumberTraceStreams();
@@ -513,7 +513,7 @@ extern "C" int getNumberTraceStreams() __attribute__((noinline));
 #endif
 extern "C" int EMSCRIPTEN_KEEPALIVE getNumberTraceStreams() {
 	// always use additional stream for digi samples..
-	return SID::getNumberUsedChips() * 4;
+	return WebSID::getNumberUsedChips() * 4;
 }
 #ifdef _MSC_VER
 extern "C" const char** getTraceStreams();
@@ -563,7 +563,7 @@ extern "C" uint32_t enableVoices(uint32_t mask)  __attribute__((noinline));
 #endif
 extern "C" uint32_t EMSCRIPTEN_KEEPALIVE enableVoices(uint32_t mask) {
 	for(uint8_t i= 0; i<3; i++) {
-		SID::setMute(0, i, !(mask & 0x1));
+		WebSID::setMute(0, i, !(mask & 0x1));
 		mask = mask >> 1;
 	}
 	

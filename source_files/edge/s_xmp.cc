@@ -137,8 +137,6 @@ bool xmpplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 
 	bool song_done = false;
 
-	int got_size = 0;
-
 	if (!dev_stereo)
 		data_buf = mono_buffer;
 	else

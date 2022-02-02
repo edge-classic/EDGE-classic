@@ -750,7 +750,7 @@ uint8_t	WaveGenerator::getOsc() {
 }
 
 
-WaveGenerator::WaveGenerator(SID* sid, uint8_t voice_idx) {
+WaveGenerator::WaveGenerator(WebSID* sid, uint8_t voice_idx) {
 	_sid = sid;
 	_voice_idx = voice_idx;
 

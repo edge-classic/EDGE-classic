@@ -40,7 +40,8 @@ typedef enum
 	MUS_MP3       = 5,
 	MUS_XMP       = 6,
 	MUS_GME       = 7,
-	ENDOFMUSTYPES = 8
+	MUS_SID       = 8,
+	ENDOFMUSTYPES = 9
 }
 musictype_t;
 

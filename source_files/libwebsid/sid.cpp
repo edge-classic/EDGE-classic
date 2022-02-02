@@ -208,7 +208,7 @@ static SIDConfigurator _hw_config;
 static uint8_t _used_sids = 0;
 static uint8_t _is_audible = 0;
 
-static SID _sids[MAX_SIDS];	// allocate the maximum
+static WebSID _sids[MAX_SIDS];	// allocate the maximum
 
 // globally shared by all SIDs
 static double		_cycles_per_sample;
@@ -218,7 +218,7 @@ static uint32_t		_sample_rate;				// target playback sample rate
 /**
 * This class represents one specific MOS SID chip.
 */
-SID::SID() {
+WebSID::WebSID() {
 	_addr = 0;		// e.g. 0xd400
 	
 	_env_generators[0] = new Envelope(this, 0);
@@ -235,7 +235,7 @@ SID::SID() {
 	_digi = new DigiDetector(this);
 }
 
-void SID::setFilterModel(bool is_6581) {
+void WebSID::setFilterModel(bool is_6581) {
 	if (!_filter || (is_6581 != _is_6581)) {
 		_is_6581 = is_6581;
 		
@@ -249,11 +249,11 @@ void SID::setFilterModel(bool is_6581) {
 	}
 }
 
-WaveGenerator* SID::getWaveGenerator(uint8_t voice_idx) {
+WaveGenerator* WebSID::getWaveGenerator(uint8_t voice_idx) {
 	return _wave_generators[voice_idx];
 }
 
-void SID::resetEngine(uint32_t sample_rate, bool is_6581, uint32_t clock_rate) {
+void WebSID::resetEngine(uint32_t sample_rate, bool is_6581, uint32_t clock_rate) {
 	// note: structs are NOT packed and contain additional padding..
 	
 	_sample_rate = sample_rate;
@@ -275,7 +275,7 @@ void SID::resetEngine(uint32_t sample_rate, bool is_6581, uint32_t clock_rate) {
 	_ext_lp_out= _ext_hp_out= 0;
 }
 
-void SID::clockWaveGenerators() {
+void WebSID::clockWaveGenerators() {
 	// forward oscillators one CYCLE (required to properly time HARD SYNC)
 	for (uint8_t voice_idx= 0; voice_idx<3; voice_idx++) {
 		WaveGenerator* wave_gen = _wave_generators[voice_idx];
@@ -290,28 +290,28 @@ void SID::clockWaveGenerators() {
 	}
 }
 
-double SID::getCyclesPerSample() {
+double WebSID::getCyclesPerSample() {
 	return _cycles_per_sample;
 }
 
 // ------------------------- public API ----------------------------
 
-struct SIDConfigurator* SID::getHWConfigurator() {
+struct SIDConfigurator* WebSID::getHWConfigurator() {
 	// let loader directly manipulate respective state
 	_hw_config.init(_sid_addr, _sid_is_6581, _sid_target_chan, &_sid_2nd_chan_idx, &_ext_multi_sid);
 	return &_hw_config;
 }
 
-bool SID::isSID6581() {
+bool WebSID::isSID6581() {
 	return _sid_is_6581[0];		// only for the 1st chip
 }
 
-uint8_t SID::setSID6581(bool is_6581) {
+uint8_t WebSID::setSID6581(bool is_6581) {
 	// this minimal update should allow to toggle the
 	// used filter without disrupting playback in progress
 	
 	_sid_is_6581[0] = _sid_is_6581[1] = _sid_is_6581[2] = is_6581;
-	SID::setModels(_sid_is_6581);
+	WebSID::setModels(_sid_is_6581);
 	return 0;
 }
 
@@ -327,15 +327,15 @@ uint8_t SID::setSID6581(bool is_6581) {
 static double _vol_map[] = { 1.0f, 0.6f, 0.4f, 0.3f, 0.3f, 0.3f, 0.3f, 0.3f };
 static double _vol_scale;
 
-double SID::getScale() {
+double WebSID::getScale() {
 	return _vol_scale;
 }
 
-uint16_t SID::getBaseAddr() {
+uint16_t WebSID::getBaseAddr() {
 	return _addr;
 }
 
-void SID::resetModel(bool is_6581) {
+void WebSID::resetModel(bool is_6581) {
 	_bus_write = 0;
 		
 	// On the real hardware all audio outputs would result in some (positive)
@@ -370,7 +370,7 @@ void SID::resetModel(bool is_6581) {
 	_filter->setSampleRate(_sample_rate);
 }
 
-void SID::reset(uint16_t addr, uint32_t sample_rate, bool is_6581, uint32_t clock_rate,
+void WebSID::reset(uint16_t addr, uint32_t sample_rate, bool is_6581, uint32_t clock_rate,
 				 uint8_t is_rsid, uint8_t is_compatible, uint8_t output_channel) {
 	
 	_addr = addr;
@@ -385,15 +385,15 @@ void SID::reset(uint16_t addr, uint32_t sample_rate, bool is_6581, uint32_t cloc
 	poke(0x18, 0xf);
 }
 
-uint8_t SID::isModel6581() {
+uint8_t WebSID::isModel6581() {
 	return _is_6581;
 }
 
-uint8_t SID::peekMem(uint16_t addr) {
+uint8_t WebSID::peekMem(uint16_t addr) {
 	return MEM_READ_IO(addr);
 }
 
-uint8_t SID::readMem(uint16_t addr) {
+uint8_t WebSID::readMem(uint16_t addr) {
 	uint16_t offset = addr - _addr;
 	
 	switch (offset) {
@@ -422,7 +422,7 @@ bool isDebug(uint8_t voice_idx) {
 }
 #endif
 
-void SID::poke(uint8_t reg, uint8_t val) {
+void WebSID::poke(uint8_t reg, uint8_t val) {
     uint8_t voice_idx = 0;
 	if (reg < 7) {}
     else if (reg <= 13) { voice_idx = 1; reg -= 7; }
@@ -492,7 +492,7 @@ extern void recordPokeSID(uint32_t ts, uint8_t reg, uint8_t value);
 #include "system.h"
 #endif
 
-void SID::writeMem(uint16_t addr, uint8_t value) {
+void WebSID::writeMem(uint16_t addr, uint8_t value) {
 	_digi->detectSample(addr, value);
 	_bus_write = value;
 	
@@ -528,7 +528,7 @@ void SID::writeMem(uint16_t addr, uint8_t value) {
 	}
 }
 
-void SID::clock() {
+void WebSID::clock() {
 	clockWaveGenerators();		// for all 3 voices
 				
 	for (uint8_t voice_idx= 0; voice_idx<3; voice_idx++) {
@@ -554,7 +554,7 @@ void SID::clock() {
 	sample *= OUTPUT_SCALEDOWN /* fixme: opt? directly combine with _volume? */;
 
 	
-void SID::synthSample(int16_t* buffer, int16_t** synth_trace_bufs, uint32_t offset, double* scale, uint8_t do_clear) {
+void WebSID::synthSample(int16_t* buffer, int16_t** synth_trace_bufs, uint32_t offset, double* scale, uint8_t do_clear) {
 	// generate the two output signals (filtered / non-filtered)
 	int32_t outf = 0, outo = 0;	// outf and outo here end up with the sum of 3 voices..
 			
@@ -635,7 +635,7 @@ void SID::synthSample(int16_t* buffer, int16_t** synth_trace_bufs, uint32_t offs
 
 // same as above but without digi & no filter for trace buffers - once faster
 // PCs are more widely in use, then this optimization may be ditched..
-void SID::synthSampleStripped(int16_t* buffer, int16_t** synth_trace_bufs, uint32_t offset, double* scale, uint8_t do_clear) {
+void WebSID::synthSampleStripped(int16_t* buffer, int16_t** synth_trace_bufs, uint32_t offset, double* scale, uint8_t do_clear) {
 	int32_t outf = 0, outo = 0;	// outf and outo here end up with the sum of 3 voices..
 	
 	for (uint8_t voice_idx= 0; voice_idx<3; voice_idx++) {
@@ -674,43 +674,43 @@ void SID::synthSampleStripped(int16_t* buffer, int16_t** synth_trace_bufs, uint3
 }
 
 // "friends only" accessors
-uint8_t SID::getWave(uint8_t voice_idx) {
+uint8_t WebSID::getWave(uint8_t voice_idx) {
 	return _wave_generators[voice_idx]->getWave();
 }
 
-uint16_t SID::getFreq(uint8_t voice_idx) {
+uint16_t WebSID::getFreq(uint8_t voice_idx) {
 	return _wave_generators[voice_idx]->getFreq();
 }
 
-uint16_t SID::getPulse(uint8_t voice_idx) {
+uint16_t WebSID::getPulse(uint8_t voice_idx) {
 	return _wave_generators[voice_idx]->getPulse();
 }
 
-uint8_t SID::getAD(uint8_t voice_idx) {
+uint8_t WebSID::getAD(uint8_t voice_idx) {
 	return _env_generators[voice_idx]->getAD();
 }
 
-uint8_t SID::getSR(uint8_t voice_idx) {
+uint8_t WebSID::getSR(uint8_t voice_idx) {
 	return _env_generators[voice_idx]->getSR();
 }
 
-uint32_t SID::getSampleFreq() {
+uint32_t WebSID::getSampleFreq() {
 	return _sample_rate;
 }
 
-DigiType  SID::getDigiType() {
+DigiType  WebSID::getDigiType() {
 	return _digi->getType();
 }
 
-const char*  SID::getDigiTypeDesc() {
+const char*  WebSID::getDigiTypeDesc() {
 	return _digi->getTypeDesc();
 }
 
-uint16_t  SID::getDigiRate() {
+uint16_t  WebSID::getDigiRate() {
 	return _digi->getRate();
 }
 		
-void SID::setMute(uint8_t voice_idx, uint8_t is_muted) {
+void WebSID::setMute(uint8_t voice_idx, uint8_t is_muted) {
 	if (voice_idx > 3) voice_idx = 3; 	// no more than 4 voices per SID
 	
 	if (voice_idx == 3) {
@@ -721,7 +721,7 @@ void SID::setMute(uint8_t voice_idx, uint8_t is_muted) {
 	}
 }
 
-void SID::resetStatistics() {
+void WebSID::resetStatistics() {
 	_digi->resetCount();
 }
 
@@ -731,70 +731,70 @@ void SID::resetStatistics() {
 const int MEM_MAP_SIZE = 0xbff;
 static uint8_t _mem2sid[MEM_MAP_SIZE];	// maps memory area d400-dfff to available SIDs
 
-void SID::setMute(uint8_t sid_idx, uint8_t voice_idx, uint8_t is_muted) {
+void WebSID::setMute(uint8_t sid_idx, uint8_t voice_idx, uint8_t is_muted) {
 	if (sid_idx > 9) sid_idx = 9; 	// no more than 10 sids supported
 
 	_sids[sid_idx].setMute(voice_idx, is_muted);
 }
 
-DigiType SID::getGlobalDigiType() {
+DigiType WebSID::getGlobalDigiType() {
 	return _sids[0].getDigiType();
 }
 
-const char* SID::getGlobalDigiTypeDesc() {
+const char* WebSID::getGlobalDigiTypeDesc() {
 	return _sids[0].getDigiTypeDesc();
 }
 
-uint16_t SID::getGlobalDigiRate() {
+uint16_t WebSID::getGlobalDigiRate() {
 	return _sids[0].getDigiRate();
 }
 
-void SID::clockAll() {
+void WebSID::clockAll() {
 	for (uint8_t i= 0; i<_used_sids; i++) {
-		SID &sid = _sids[i];		
+		WebSID &sid = _sids[i];		
 		sid.clock();
 	}
 }
 
-void SID::synthSample(int16_t* buffer, int16_t** synth_trace_bufs, double* scale, uint32_t offset) {
+void WebSID::synthSample(int16_t* buffer, int16_t** synth_trace_bufs, double* scale, uint32_t offset) {
 	for (uint8_t i= 0; i<_used_sids; i++) {
-		SID &sid = _sids[i];
+		WebSID &sid = _sids[i];
 		int16_t **sub_buf = !synth_trace_bufs ? 0 : &synth_trace_bufs[i << 2];	// synthSample uses 4 entries..
 		sid.synthSample(buffer, sub_buf, offset, scale, !i);
 	}
 }
 
-void SID::synthSampleStripped(int16_t* buffer, int16_t** synth_trace_bufs, double* scale, uint32_t offset) {
+void WebSID::synthSampleStripped(int16_t* buffer, int16_t** synth_trace_bufs, double* scale, uint32_t offset) {
 	for (uint8_t i= 0; i<_used_sids; i++) {
-		SID &sid = _sids[i];
+		WebSID &sid = _sids[i];
 		int16_t **sub_buf = !synth_trace_bufs ? 0 : &synth_trace_bufs[i << 2];	// synthSample uses 4 entries..
 		sid.synthSampleStripped(buffer, sub_buf, offset, scale, (i == 0) || (i == _sid_2nd_chan_idx));
 	}
 }
 
-void SID::resetGlobalStatistics() {
+void WebSID::resetGlobalStatistics() {
 	for (uint8_t i= 0; i<_used_sids; i++) {
-		SID &sid = _sids[i];
+		WebSID &sid = _sids[i];
 		sid.resetStatistics();
 	}
 }
 
-void SID::setModels(const bool* is_6581) {
+void WebSID::setModels(const bool* is_6581) {
 	for (uint8_t i= 0; i<_used_sids; i++) {
-		SID &sid = _sids[i];
+		WebSID &sid = _sids[i];
 		sid.resetModel(is_6581[i]);
 	}
 }
 
-uint8_t SID::getNumberUsedChips() {
+uint8_t WebSID::getNumberUsedChips() {
 	return _used_sids;
 }
 
-uint8_t SID::isAudible() {
+uint8_t WebSID::isAudible() {
 	return _is_audible;
 }
 
-void SID::resetAll(uint32_t sample_rate, uint32_t clock_rate, uint8_t is_rsid, 
+void WebSID::resetAll(uint32_t sample_rate, uint32_t clock_rate, uint8_t is_rsid, 
 					uint8_t is_compatible) {
 
 	_used_sids = 0;
@@ -811,7 +811,7 @@ void SID::resetAll(uint32_t sample_rate, uint32_t clock_rate, uint8_t is_rsid,
 	// setup the configured SID chips & make map where to find them
 		
 	for (uint8_t i= 0; i<_used_sids; i++) {
-		SID &sid = _sids[i];
+		WebSID &sid = _sids[i];
 		sid.reset(_sid_addr[i], sample_rate, _sid_is_6581[i], clock_rate, is_rsid, is_compatible, _sid_target_chan[i]);	// stereo only used for my extended sid-file format
 			
 		if (i) {	// 1st entry is always the regular default SID
@@ -826,12 +826,12 @@ void SID::resetAll(uint32_t sample_rate, uint32_t clock_rate, uint8_t is_rsid,
 	}
 }
 
-uint8_t SID::isExtMultiSidMode() {
+uint8_t WebSID::isExtMultiSidMode() {
 	return _ext_multi_sid;
 }
 
 // gets what has actually been last written (even for write-only regs)
-uint8_t SID::peek(uint16_t addr) {
+uint8_t WebSID::peek(uint16_t addr) {
 	uint8_t sid_idx = _mem2sid[addr - 0xd400];
 	return _sids[sid_idx].peekMem(addr);
 }
@@ -841,7 +841,7 @@ uint8_t SID::peek(uint16_t addr) {
 #ifdef PSID_DEBUG_ADSR
 #include <stdio.h>
 
-void SID::debugVoice(uint8_t voice_idx) {
+void WebSID::debugVoice(uint8_t voice_idx) {
 	// hack to manually check stuff
 	fprintf(stderr, "%03d %02X ", _frame_count, _wave_generators[voice_idx].getWave());
 	_env_generators[voice_idx]->debug();
@@ -853,7 +853,7 @@ extern "C" void sidDebug(int16_t frame_count) {	// PSID specific
 	
 	uint8_t voice_idx = PSID_DEBUG_VOICE;
 	if (isDebug(voice_idx)) {
-		SID &sid = _sids[0];
+		WebSID &sid = _sids[0];
 		sid.debugVoice(voice_idx);
 	}
 }

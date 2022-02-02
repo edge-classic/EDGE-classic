@@ -19,14 +19,14 @@
 */
 class Filter8580 : public Filter{
 protected:
-	Filter8580(class SID* sid);
+	Filter8580(class WebSID* sid);
 	virtual ~Filter8580();
 
 	virtual void resyncCache();
 	
 	virtual double doGetFilterOutput(double sum_filter_in, double sum_nofilter_in, double* band_pass, double* low_pass, double* hi_pass);
 
-	friend class SID;
+	friend class WebSID;
 private:	
 	double _cutoff_ratio_8580;
 	double _cutoff;

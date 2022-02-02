@@ -51,7 +51,7 @@
 *  digi-signal to the output. The modulated voice-output will be all
 *  that is needed.
 *
-* WebSid (c) 2019 Jürgen Wothke
+* WebSid (c) 2019 Jï¿½rgen Wothke
 * version 0.94
 *
 * Terms of Use: This software is licensed under a CC BY-NC-SA
@@ -76,7 +76,7 @@ extern "C" {
 #define MASK_DIGI_UNUSED 0x80
 #define CENTER_SAMPLE 0x80
 
-DigiDetector::DigiDetector(SID* sid) {
+DigiDetector::DigiDetector(WebSID* sid) {
 	_sid = sid;
 	_base_addr = 0;	// not available at this point
 	_digi_source = MASK_DIGI_UNUSED;
@@ -632,8 +632,8 @@ int32_t DigiDetector::genPsidSample(int32_t sample_in)
 
         _frac_pos += _clock_rate / _sample_period;
 
-        if (_frac_pos > (int32_t)SID::getSampleFreq()) {
-            _frac_pos %= SID::getSampleFreq();
+        if (_frac_pos > (int32_t)WebSID::getSampleFreq()) {
+            _frac_pos %= WebSID::getSampleFreq();
 
 			// Naechstes Samples holen
             if (_sample_order == 0) {
@@ -793,14 +793,14 @@ uint8_t DigiDetector::getD418Sample( uint8_t value) {
 // which used SAX to write WF register)
 uint8_t DigiDetector::detectSample(uint16_t addr, uint8_t value) {
 
-	if (SID::isExtMultiSidMode()) return 0;	// optimization for multi-SID
+	if (WebSID::isExtMultiSidMode()) return 0;	// optimization for multi-SID
 
 	if (!_is_compatible) {
 		handlePsidDigi(addr, value);
 	} else {
 		// mask out alternative addresses of d400 SID (see 5-Channel_Digi-Tune)..
 		// use in PSID would crash playback of recorded samples
-		if (SID::getNumberUsedChips() == 1) addr &= ~(0x3e0);
+		if (WebSID::getNumberUsedChips() == 1) addr &= ~(0x3e0);
 
 		// for songs like MicroProse_Soccer_V1.sid tracks >5 (PSID digis must
 		// still be handled.. like Demi-Demo_4_PSID.sid)

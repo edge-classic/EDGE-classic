@@ -18,7 +18,7 @@
 #include <stdlib.h>
 
 
-Filter8580::Filter8580(SID* sid) : Filter(sid) {
+Filter8580::Filter8580(WebSID* sid) : Filter(sid) {
 }
 
 Filter8580::~Filter8580() {

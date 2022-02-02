@@ -30,7 +30,7 @@ protected:
 				
 	static uint16_t getSidAddr(uint8_t center_byte);
 		
-	friend class SID;
+	friend class WebSID;
 private:
 	uint16_t* _addr;			// array of addresses
 	bool* _is_6581;				// array of models
@@ -54,9 +54,9 @@ class Filter;
 * Some aspects of the implementation are delegated to separate helpers,
 * see digi.h, envelope.h, filter.h
 */
-class SID {
+class WebSID {
 public:
-	SID();
+	WebSID();
 	
 	/**
 	* Gets the base memory address that this SID is mapped to.

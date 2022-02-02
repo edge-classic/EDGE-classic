@@ -38,7 +38,7 @@ const double FILTERED_SCOPE_SCALEDOWN =  0.2;	// tuned using "424.sid"
 
 uint32_t Filter::_sample_rate;
 
-Filter::Filter(SID* sid) {
+Filter::Filter(WebSID* sid) {
 	_sid = sid;
 }
 

@@ -36,6 +36,7 @@
 #include "s_tsf.h"
 #include "s_xmp.h"
 #include "s_gme.h"
+#include "s_sid.h"
 #include "m_misc.h"
 #include "w_wad.h"
 
@@ -208,6 +209,15 @@ void S_ChangeMusic(int entrynum, bool loop)
 		delete data;
 
 		music_player = S_PlayGMEMusic(play, volume, loop);
+		return;
+	}
+
+	if (S_CheckSID(data, length))
+	{
+		delete F;
+		delete data;
+
+		music_player = S_PlaySIDMusic(play, volume, loop);
 		return;
 	}
 	

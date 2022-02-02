@@ -25,9 +25,9 @@ if (NOT DEFINED USE_GME_HES)
     SET(USE_GME_HES 1 CACHE BOOL "Enable PC Engine/TurboGrafx-16 music emulation")
 endif()
 
-if (NOT DEFINED USE_GME_KSS)
-    SET(USE_GME_KSS 1 CACHE BOOL "Enable MSX or other Z80 systems music emulation")
-endif()
+#if (NOT DEFINED USE_GME_KSS)
+    #SET(USE_GME_KSS 1 CACHE BOOL "Enable MSX or other Z80 systems music emulation")
+#endif()
 
 if (NOT DEFINED USE_GME_NSF)
     SET(USE_GME_NSF 1 CACHE BOOL "Enable NES NSF music emulation")

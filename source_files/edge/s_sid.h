@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE GME Music Player (HEADER)
+//  EDGE TinySID Music Player (HEADER)
 //----------------------------------------------------------------------------
 // 
 //  Copyright (c) 2022 - The EDGE-Classic Community
@@ -16,8 +16,8 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __GMEPLAYER_H__
-#define __GMEPLAYER_H__
+#ifndef __SIDPLAYER_H__
+#define __SIDPLAYER_H__
 
 #include "i_defs.h"
 
@@ -27,11 +27,11 @@ class pl_entry_c;
 
 /* FUNCTIONS */
 
-abstract_music_c * S_PlayGMEMusic(const pl_entry_c *musdat, float volume, bool looping);
+abstract_music_c * S_PlaySIDMusic(const pl_entry_c *musdat, float volume, bool looping);
 
-bool S_CheckGME(byte *data, int length);
+bool S_CheckSID(byte *data, int length);
 
-#endif  /* __GMEPLAYER_H__ */
+#endif  /* __SIDPLAYER_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -41,9 +41,9 @@ gme_type_t const* gme_type_list()
 	#ifdef USE_GME_HES
 	            gme_hes_type,
 	#endif
-	#ifdef USE_GME_KSS
+	/*#ifdef USE_GME_KSS
 	            gme_kss_type,
-	#endif
+	#endif*/
 	#ifdef USE_GME_NSF
 	            gme_nsf_type,
 	#endif
@@ -77,7 +77,7 @@ const char* gme_identify_header( void const* header )
 		case BLARGG_4CHAR('G','Y','M','X'):  return "GYM";
 		case BLARGG_4CHAR('H','E','S','M'):  return "HES";
 		case BLARGG_4CHAR('K','S','C','C'):
-		case BLARGG_4CHAR('K','S','S','X'):  return "KSS";
+		//case BLARGG_4CHAR('K','S','S','X'):  return "KSS";
 		case BLARGG_4CHAR('N','E','S','M'):  return "NSF";
 		case BLARGG_4CHAR('N','S','F','E'):  return "NSFE";
 		case BLARGG_4CHAR('S','A','P',0x0D): return "SAP";

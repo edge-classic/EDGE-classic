@@ -149,10 +149,13 @@ void mix_channel_c::ComputeVolume()
 		{
 			float dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
 
+			if (!P_CheckSightToPoint(players[consoleplayer]->mo, pos->x, pos->y, pos->z))
+				dist *= 1.5;
+
 			// -AJA- this equation was chosen to mimic the DOOM falloff
 			//       function, but instead of cutting out @ dist=1600 it
 			//       tapers off exponentially.
-			mul = exp(-MAX(1.0f, dist - S_CLOSE_DIST) / 800.0f);
+			mul = exp(-MAX(1.0f, dist - S_CLOSE_DIST) / 250.0f);
 		}
 	}
 

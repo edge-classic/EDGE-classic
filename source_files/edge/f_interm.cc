@@ -413,17 +413,21 @@ static void DrawLevelFinished(void)
 	float w = IM_WIDTH(lnames[0]);
 	float h = IM_HEIGHT(lnames[0]);
 
-	float w2 = IM_WIDTH(finished);
+	//float w2 = IM_WIDTH(finished);
 
 	// load styles
 	style_c *style;
 
 	style=wi_sp_style;
 	int t_type = styledef_c::T_TEXT;
-	HL_WriteText(style,t_type, 100 - w/2, y, language[wi_stats.cur->description.c_str()]);
+	
+	w = style->fonts[t_type]->StringWidth(language[wi_stats.cur->description.c_str()]);
+	HL_WriteText(style,t_type, 160 - w/2, y, language[wi_stats.cur->description.c_str()]);
 
 	t_type = styledef_c::T_TITLE;
-	HL_WriteText(style,t_type,160 - w2/2, y + h * 5/4, language["IntermissionFinished"]);
+	w = style->fonts[t_type]->StringWidth(language["IntermissionFinished"]);
+	HL_WriteText(style,t_type,160 - w/2, y + h * 5/4, language["IntermissionFinished"]);
+
 
 	//HUD_DrawImage(160 - w/2,  y, lnames[0]);
 	//HUD_DrawImage(160 - w2/2, y + h * 5/4, finished);
@@ -441,15 +445,17 @@ static void DrawEnteringLevel(void)
 
 	float h = IM_HEIGHT(entering);
 	float w = IM_WIDTH(entering);
-	float w2 = IM_WIDTH(lnames[1]);
+	//float w2 = IM_WIDTH(lnames[1]);
 
 	style_c *style;
 	style=wi_sp_style;
 	int t_type = styledef_c::T_TEXT;
-	HL_WriteText(style,t_type, 100 - w2/2, y + h * 5/4, language[wi_stats.next->description.c_str()]);
-	t_type = styledef_c::T_TITLE;
-	HL_WriteText(style,t_type,160 - w/2,  y, language["IntermissionEntering"]);
+	w = style->fonts[t_type]->StringWidth(language[wi_stats.next->description.c_str()]);
+	HL_WriteText(style,t_type, 160 - w/2, y + h * 5/4, language[wi_stats.next->description.c_str()]);
 	
+	t_type = styledef_c::T_TITLE;
+	w = style->fonts[t_type]->StringWidth(language["IntermissionEntering"]);
+	HL_WriteText(style,t_type,160 - w/2,  y, language["IntermissionEntering"]);
 
 	//HUD_DrawImage(160 - w/2,  y, entering);
 	//HUD_DrawImage(160 - w2/2, y + h * 5/4, lnames[1]);

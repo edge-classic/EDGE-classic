@@ -64,6 +64,11 @@ private:
 
 	s16_t *mono_buffer;
 
+	byte *sid_data;
+	int sid_length;
+
+	int empty_frame_counter;
+
 public:
 	bool OpenLump(const char *lumpname);
 	bool OpenFile(const char *filename);
@@ -126,46 +131,49 @@ bool sidplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 {
 	s16_t *data_buf;
 
-	int result = 0;
-
-	int got_size = 0;
-
-	bool song_done = false;
-
 	if (!dev_stereo)
 		data_buf = mono_buffer;
 	else
 		data_buf = buf->data_L;
 
-	result = computeAudioSamples();
+	computeAudioSamples();
 
-	if (result == 0)
-		return false;
+	buf->length = getSoundBufferLen();
 
-	if (result == -1)
-	{
-		song_done = true;
-		return false;
-	}
-
-	got_size = getSoundBufferLen();
-
-	memcpy(data_buf, getSoundBuffer(), got_size * sizeof(s16_t) * 2);
-	
-	buf->length = got_size;
+	memcpy(data_buf, getSoundBuffer(), buf->length * sizeof(s16_t) * 2);
 
 	if (!dev_stereo)
 		ConvertToMono(buf->data_L, mono_buffer, buf->length);
 
-	if (song_done)  // EOF
+	// End-of-track detection seems hit or miss, so if 5 empty frames are rendered in a row,
+	// restart the SID
+	for (int i = 0; i < buf->length; i++)
 	{
-		if (! looping)
-			return false;
-		sid_playTune(0, 0);
-		return true;
+		if (data_buf[i] != 0)
+		{
+			if (empty_frame_counter > 0)
+				empty_frame_counter--;
+			break;
+		}
+		if (i == buf->length - 1)
+		{
+			if (! looping)
+				return false;
+			else
+			{
+				empty_frame_counter++;
+				if (empty_frame_counter == 5)
+				{
+					empty_frame_counter = 0;
+					loadSidFile(0, sid_data, sid_length, dev_freq, NULL, NULL, NULL, NULL);
+					sid_playTune(0, 0);
+					break;
+				}
+			}
+		}
 	}
 
-    return (true);
+    return true;
 }
 
 
@@ -215,6 +223,11 @@ bool sidplayer_c::OpenLump(const char *lumpname)
 		return false;
     }
 
+	// Need to keep the song in memory for SID restarts
+	sid_length = length;
+	sid_data = new byte[sid_length];
+	memcpy(sid_data, data, sid_length);
+
 	PostOpenInit();
 	return true;
 }
@@ -231,7 +244,7 @@ bool sidplayer_c::OpenFile(const char *filename)
 		I_Warning("sidplayer_c: Could not open file: '%s'\n", filename);
 		return false;
     }
-
+	
 	PostOpenInit();
 	return true;
 }
@@ -275,6 +288,7 @@ void sidplayer_c::Play(bool loop)
 	status = PLAYING;
 	looping = loop;
 
+	empty_frame_counter = 0;
 	sid_playTune(0, 0);
 
 	// Load up initial buffer data

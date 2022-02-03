@@ -186,7 +186,7 @@ int font_c::NominalWidth() const
 	if (def->type == FNTYP_Patch)
 		return p_cache.width;
 
-	I_Error("font_c::NominalHeight : unknown FONT type %d\n", def->type);
+	I_Error("font_c::NominalWidth : unknown FONT type %d\n", def->type);
 	return 1; /* NOT REACHED */
 }
 

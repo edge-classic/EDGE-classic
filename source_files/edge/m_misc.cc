@@ -174,10 +174,10 @@ static default_t defaults[] =
 	{CFGT_Int, 		"var_triggerthreshold", &var_triggerthreshold, CFGDEF_TRIGGERTHRESHOLD},
 
     {CFGT_Int,      "joystick_device",   &joystick_device, 1},
-    {CFGT_Int,      "joy_axis1",         &joy_axis[0],    CFGDEF_JOY_XAXIS},
-    {CFGT_Int,      "joy_axis2",         &joy_axis[1],    CFGDEF_JOY_YAXIS},
-    {CFGT_Int,      "joy_axis3",         &joy_axis[2],    AXIS_DISABLE},
-    {CFGT_Int,      "joy_axis4",         &joy_axis[3],    AXIS_DISABLE},
+    {CFGT_Int,      "joy_axis1",         &joy_axis[0],    7},
+    {CFGT_Int,      "joy_axis2",         &joy_axis[1],    6},
+    {CFGT_Int,      "joy_axis3",         &joy_axis[2],    1},
+    {CFGT_Int,      "joy_axis4",         &joy_axis[3],    4},
     {CFGT_Int,      "joy_axis5",         &joy_axis[4],    AXIS_DISABLE},
     {CFGT_Int,      "joy_axis6",         &joy_axis[5],    AXIS_DISABLE},
 

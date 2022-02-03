@@ -59,7 +59,7 @@ New Features
 
 + New Game Music Emu-based music player; AY, GBS, GYM, HES, NSF, SAP, SPC, VGM format songs are now supported.
 
-+ New WebSID-based music player; Commodore-64 SID/MUS format songs are now supported
++ New WebSID-based music player; Commodore-64 SID format songs are now supported
 
 
 CHANGELOG for EDGE-Classic 1.0 (since EDGE-Classic Preview 1)

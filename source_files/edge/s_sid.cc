@@ -105,6 +105,9 @@ sidplayer_c::~sidplayer_c()
 
 	if (mono_buffer)
 		delete[] mono_buffer;
+
+	if (sid_data)
+		delete[] sid_data;
 }
 
 void sidplayer_c::PostOpenInit()
@@ -239,9 +242,42 @@ bool sidplayer_c::OpenFile(const char *filename)
 	if (status != NOT_LOADED)
 		Close();
 
-	if (loadSidFile(0, NULL, NULL, dev_freq, (char *)filename, NULL, NULL, NULL) != 0)
+	FILE *sid_loader = fopen(filename, "rb");
+
+	if (!sid_loader)
+	{
+		I_Warning("sidplayer_c: Could not open file: '%s'\n", filename);
+		return false;		
+	}
+
+	// Basically the same as EPI::File's GetLength() method
+	long cur_pos = ftell(sid_loader);      // Get existing position
+
+    fseek(sid_loader, 0, SEEK_END);        // Seek to the end of file
+    long len = ftell(sid_loader);          // Get the position - it our length
+
+    fseek(sid_loader, cur_pos, SEEK_SET);  // Reset existing position
+   
+   	sid_length = len;
+
+	sid_data = new byte[sid_length];
+
+	if (fread(sid_data, 1, sid_length, sid_loader) != sid_length)
+	{
+		I_Warning("sidplayer_c: Could not open file: '%s'\n", filename);
+		fclose(sid_loader);
+		if (sid_data)
+			delete []sid_data;
+		return false;		
+	}
+
+	fclose(sid_loader);
+
+	if (loadSidFile(0, sid_data, sid_length, dev_freq, NULL, NULL, NULL, NULL) != 0)
     {
 		I_Warning("sidplayer_c: Could not open file: '%s'\n", filename);
+		if (sid_data)
+			delete []sid_data;
 		return false;
     }
 	

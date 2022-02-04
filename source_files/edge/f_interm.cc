@@ -425,6 +425,8 @@ static void DrawLevelFinished(void)
 	HL_WriteText(style,t_type, 160 - w/2, y, language[wi_stats.cur->description.c_str()]);
 
 	t_type = styledef_c::T_TITLE;
+	if (!style->fonts[t_type]) 
+		t_type = styledef_c::T_TEXT;
 	w = style->fonts[t_type]->StringWidth(language["IntermissionFinished"]);
 	HL_WriteText(style,t_type,160 - w/2, y + h * 5/4, language["IntermissionFinished"]);
 
@@ -454,6 +456,8 @@ static void DrawEnteringLevel(void)
 	HL_WriteText(style,t_type, 160 - w/2, y + h * 5/4, language[wi_stats.next->description.c_str()]);
 	
 	t_type = styledef_c::T_TITLE;
+	if (!style->fonts[t_type]) 
+		t_type = styledef_c::T_TEXT;
 	w = style->fonts[t_type]->StringWidth(language["IntermissionEntering"]);
 	HL_WriteText(style,t_type,160 - w/2,  y, language["IntermissionEntering"]);
 

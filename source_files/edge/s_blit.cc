@@ -150,12 +150,12 @@ void mix_channel_c::ComputeVolume()
 			float dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
 
 			if (!P_CheckSightToPoint(players[consoleplayer]->mo, pos->x, pos->y, pos->z))
-				dist *= 1.5;
+				dist *= 1.25;
 
 			// -AJA- this equation was chosen to mimic the DOOM falloff
 			//       function, but instead of cutting out @ dist=1600 it
 			//       tapers off exponentially.
-			mul = exp(-MAX(1.0f, dist - S_CLOSE_DIST) / 250.0f);
+			mul = exp(-MAX(1.0f, dist - S_CLOSE_DIST) / 400.0f);
 		}
 	}
 
@@ -270,7 +270,7 @@ static void MixMono(mix_channel_c *chan, int *dest, int pairs)
 		src_L = chan->data->data_L;
 	else
 	{
-		// Process environmental sound FX in order of precedence, currently Vaccum->Submerged->Normal - Dasho
+		// Process environmental sound FX in order of precedence, currently Vacuum->Submerged->Normal - Dasho
 		if (vacuum_sfx)
 		{
 			if (chan->data->vacuum_data_L)
@@ -320,7 +320,7 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 	}
 	else
 	{
-		// Process environmental sound FX in order of precedence, currently Vaccum->Submerged->Normal - Dasho
+		// Process environmental sound FX in order of precedence, currently Vacuum->Submerged->Normal - Dasho
 		if (vacuum_sfx)
 		{
 			if (chan->data->vacuum_data_L && chan->data->vacuum_data_R)
@@ -385,7 +385,7 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 		src_L = chan->data->data_L;
 	else
 	{
-		// Process environmental sound FX in order of precedence, currently Vaccum->Submerged->Normal - Dasho
+		// Process environmental sound FX in order of precedence, currently Vacuum->Submerged->Normal - Dasho
 		if (vacuum_sfx)
 		{
 			if (chan->data->vacuum_data_L)

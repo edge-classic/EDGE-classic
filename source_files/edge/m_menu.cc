@@ -2128,13 +2128,15 @@ static void DrawMessage(void)
 			else
 				s = GetMiddle(input, oldpos, pos-oldpos);
 		
+			//Lobo: fixme We should be using font 1 not font 0.
+			//Code a check to fallback to 0 if 1 is missing.
 			if (s.size() > 0)
 			{
-				x = 160 - (dialog_style->fonts[1]->StringWidth(s.c_str()) / 2);
-				HL_WriteText(dialog_style,1, x, y, s.c_str());
+				x = 160 - (dialog_style->fonts[0]->StringWidth(s.c_str()) / 2);
+				HL_WriteText(dialog_style,0, x, y, s.c_str());
 			}
 			
-			y += dialog_style->fonts[1]->NominalHeight();
+			y += dialog_style->fonts[0]->NominalHeight();
 
 			oldpos = pos + 1;
 		}

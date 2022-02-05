@@ -39,6 +39,8 @@
 
 #include "dm_state.h"
 
+#include "p_blockmap.h"
+
 
 // Sound must be clipped to prevent distortion (clipping is
 // a kind of distortion of course, but it's much better than
@@ -109,6 +111,24 @@ extern int dev_frag_pairs;
 extern bool dev_signed;
 extern bool dev_stereo;
 
+// Test for potential reverb/echo/dropoff usage
+static bool S_SoundPath(intercept_t * in, void *dataptr)
+{
+	float *blockers = (float *)dataptr;
+
+	if (in->line)
+	{
+		line_t *ld = in->line;
+
+		if (ld->blocked)
+		{
+			(*blockers)++;
+		}
+	}
+
+	return true;
+}
+
 
 mix_channel_c::mix_channel_c() : state(CHAN_Empty), data(NULL)
 { }
@@ -149,9 +169,12 @@ void mix_channel_c::ComputeVolume()
 		{
 			float dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
 
-			if (!P_CheckSightToPoint(players[consoleplayer]->mo, pos->x, pos->y, pos->z))
-				dist *= 1.25;
+			float number_of_blockers = 0;
 
+			P_PathTraverse(pos->x, pos->y, listen_x, listen_y, PT_ADDLINES, S_SoundPath, &number_of_blockers);
+
+			dist *= (1 + (number_of_blockers / 5));
+			
 			// -AJA- this equation was chosen to mimic the DOOM falloff
 			//       function, but instead of cutting out @ dist=1600 it
 			//       tapers off exponentially.

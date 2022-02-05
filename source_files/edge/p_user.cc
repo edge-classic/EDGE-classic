@@ -41,6 +41,33 @@
 #include "z_zone.h"
 #include "vm_player.h"
 
+// Room size test - Dasho
+#include "p_blockmap.h"
+
+struct room_measure
+{
+	float x = 0;
+	float y = 0;
+};
+
+// Test for "measuring" size of room
+static bool P_RoomPath(intercept_t * in, void *dataptr)
+{
+	room_measure *blocker = (room_measure *)dataptr;
+
+	if (in->line)
+	{
+		line_t *ld = in->line;
+
+		if (ld->blocked)
+		{
+			blocker->x = (ld->v1->x + ld->v2->x) / 2;
+			blocker->y = (ld->v1->y + ld->v2->y) / 2;
+			return false;			
+		}
+	}
+	return true;
+}
 
 static void P_UpdatePowerups(player_t *player);
 
@@ -778,6 +805,33 @@ void P_PlayerThink(player_t * player)
 
 	player->kick_offset /= 1.6f;
 
+	if (players[consoleplayer] == player)
+	{
+		// Approximate "room size" determination for reverb system - test - Dasho
+		room_measure room_checker;
+		float north, south, east, west, northeast, northwest, southeast, southwest = 0;
+		float player_x = player->mo->x;
+		float player_y = player->mo->y;
+		P_PathTraverse(player_x, player_y, player_x, 32768.0f, PT_ADDLINES, P_RoomPath, &room_checker);
+		north = abs(room_checker.y - player_y);
+		P_PathTraverse(player_x, player_y, 32768.0f + player_x, 32768.0f + player_y, PT_ADDLINES, P_RoomPath, &room_checker);
+		northeast = R_PointToDist(player_x, player_y, room_checker.x, room_checker.y);
+		P_PathTraverse(player_x, player_y, -32768.0f + player_x, 32768.0f + player_y, PT_ADDLINES, P_RoomPath, &room_checker);
+		northwest = R_PointToDist(player_x, player_y, room_checker.x, room_checker.y);
+		P_PathTraverse(player_x, player_y, player_x, -32768.0f, PT_ADDLINES, P_RoomPath, &room_checker);
+		south = abs(player_y - room_checker.y);
+		P_PathTraverse(player_x, player_y, -32768.0f + player_x, -32768.0f + player_y, PT_ADDLINES, P_RoomPath, &room_checker);
+		southwest = R_PointToDist(player_x, player_y, room_checker.x, room_checker.y);
+		P_PathTraverse(player_x, player_y, 32768.0f + player_x, -32768.0f + player_y, PT_ADDLINES, P_RoomPath, &room_checker);
+		southeast = R_PointToDist(player_x, player_y, room_checker.x, room_checker.y);
+		P_PathTraverse(player_x, player_y, -32768.0f, player_y, PT_ADDLINES, P_RoomPath, &room_checker);
+		west = abs(player_x - room_checker.x);
+		P_PathTraverse(player_x, player_y, 32768.0f, player_y, PT_ADDLINES, P_RoomPath, &room_checker);
+		east = abs(room_checker.x - player_x);
+		float room_area = ((north + south) * (west + east) + (northwest + southeast) * (northeast + southwest)) / 2;
+		// Need to store this in a global or something
+		I_Printf("ROOM AREA: %f\n", room_area);
+	}
 }
 
 

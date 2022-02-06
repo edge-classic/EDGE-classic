@@ -108,6 +108,8 @@ void S_SoundTicker(void);
 void S_ChangeSoundVolume(void);
 void S_ChangeChannelNum(void);
 
+void S_PrecacheSounds(void);
+
 #endif /* __S_SOUND_H__ */
 
 //--- editor settings ---

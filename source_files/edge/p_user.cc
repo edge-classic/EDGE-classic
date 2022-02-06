@@ -44,6 +44,8 @@
 // Room size test - Dasho
 #include "p_blockmap.h"
 
+float room_area;
+
 struct room_measure
 {
 	float x = 0;
@@ -828,9 +830,7 @@ void P_PlayerThink(player_t * player)
 		west = abs(player_x - room_checker.x);
 		P_PathTraverse(player_x, player_y, 32768.0f, player_y, PT_ADDLINES, P_RoomPath, &room_checker);
 		east = abs(room_checker.x - player_x);
-		float room_area = ((north + south) * (west + east) + (northwest + southeast) * (northeast + southwest)) / 2;
-		// Need to store this in a global or something
-		I_Printf("ROOM AREA: %f\n", room_area);
+		room_area = ((north + south) * (west + east) + (northwest + southeast) * (northeast + southwest)) / 2;
 	}
 }
 

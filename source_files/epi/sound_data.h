@@ -30,6 +30,15 @@ typedef enum
 }
 sfx_buffer_mode_e;
 
+typedef struct
+{
+	s16_t *reverb_low_L;
+	s16_t *reverb_low_R;
+	s16_t *reverb_medium_L;
+	s16_t *reverb_medium_R;
+	s16_t *reverb_high_L;
+	s16_t *reverb_high_R;	
+} reverb_buffers;
 
 class sound_data_c
 {
@@ -53,6 +62,9 @@ public:
 	s16_t *vacuum_data_L;
 	s16_t *vacuum_data_R;
 
+	// Original sound with reverb applied. This will change during the course of the program
+	reverb_buffers *reverb_data;
+
 	// values for the engine to use
 	void *priv_data;
 
@@ -63,11 +75,15 @@ public:
 	~sound_data_c();
 
 	void Allocate(int samples, int buf_mode);
+	void Allocate_Reverb();
 	void Free();
 	void Free_Underwater();
 	void Free_Airless();
+	void Free_Reverb();
 	void Mix_Underwater();
 	void Mix_Airless();
+	void Mix_Reverb();
+	s16_t* Select_Reverb(int channel, float area);
 	void Float_To_Signed(float *data_float, s16_t *data_signed, int samples);
 	void Signed_To_Float(s16_t *data_signed, float *data_float, int samples);
 };

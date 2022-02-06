@@ -195,6 +195,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	{
 		buf->Mix_Underwater();
 		buf->Mix_Airless();
+		buf->Mix_Reverb();
 	}
 
 	return OK;

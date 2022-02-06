@@ -533,5 +533,13 @@ void S_ChangeChannelNum(void)
 	I_UnlockAudio();
 }
 
+void S_PrecacheSounds(void)
+{
+	for (int i =0; i < sfxdefs.GetSize(); i++)
+	{
+		S_CacheLoad(sfxdefs[i]);
+	}
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

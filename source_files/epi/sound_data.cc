@@ -32,6 +32,7 @@ sound_data_c::sound_data_c() :
 	data_L(NULL), data_R(NULL),
 	submerged_data_L(NULL), submerged_data_R(NULL),
 	vacuum_data_L(NULL), vacuum_data_R(NULL),
+	reverb_data(NULL),
 	priv_data(NULL), ref_count(0)
 { }
 
@@ -78,6 +79,25 @@ void sound_data_c::Free_Airless()
 	vacuum_data_R = NULL;
 }
 
+void sound_data_c::Free_Reverb()
+{
+	if (reverb_data->reverb_low_L)
+		delete[] reverb_data->reverb_low_L;
+	if (reverb_data->reverb_low_R)
+		delete[] reverb_data->reverb_low_R;
+	if (reverb_data->reverb_medium_L)
+		delete[] reverb_data->reverb_medium_L;
+	if (reverb_data->reverb_medium_R)
+		delete[] reverb_data->reverb_medium_R;
+	if (reverb_data->reverb_high_L)
+		delete[] reverb_data->reverb_high_L;
+	if (reverb_data->reverb_high_R)
+		delete[] reverb_data->reverb_high_R;
+
+	delete reverb_data;
+	reverb_data = NULL;
+}
+
 void sound_data_c::Allocate(int samples, int buf_mode)
 {
 	// early out when requirements are already met
@@ -100,6 +120,11 @@ void sound_data_c::Allocate(int samples, int buf_mode)
 	if (vacuum_data_L || vacuum_data_R)
 	{
 		Free_Airless();
+	}
+
+	if (reverb_data)
+	{
+		Free_Reverb();
 	}
 
 	length = samples;
@@ -181,7 +206,7 @@ void sound_data_c::Mix_Underwater()
 			data_L_float = new float[length * 2];
 			memset(data_L_float, 0, length * 2 * sizeof(float));
 			Signed_To_Float(data_L, data_L_float, length * 2);
-			for (int i = 0; i < length; i++) 
+			for (int i = 0; i < length * 2; i++) 
 			{
 				nh_ugens::Stereo result = reverb.process(data_L_float[i], data_L_float[i]);
 				data_L_float[i] = result[0];
@@ -241,12 +266,154 @@ void sound_data_c::Mix_Airless()
 			data_L_float = new float[length * 2];
 			memset(data_L_float, 0, length * 2 * sizeof(float));
 			Signed_To_Float(data_L, data_L_float, length * 2);
-			for (int i = 0; i < length; i++) 
+			for (int i = 0; i < length * 2; i++) 
 			{
 				data_L_float[i] = lpFilter->process(data_L_float[i]);
 			}
 			Float_To_Signed(data_L_float, vacuum_data_L, length * 2);
 			break;
+	}
+}
+
+void sound_data_c::Mix_Reverb()
+{
+	float *data_L_float;
+	float *data_R_float;
+	nh_ugens::NHHall<> reverb_low(freq);
+	nh_ugens::NHHall<> reverb_medium(freq);
+	nh_ugens::NHHall<> reverb_high(freq);
+	reverb_low.set_rt60(0.25f);
+	reverb_medium.set_rt60(0.5f);
+	reverb_high.set_rt60(0.75f);
+
+	reverb_data = new reverb_buffers;
+
+	/* These are the available settings to play with - Dasho
+
+    reverb_data.set_rt60(float rt60)
+        Set the 60 dB decay time for mid frequencies.
+
+    reverb_data.set_stereo(float stereo)
+        Set the stereo spread. 0 keeps the two channel paths separate, 1 causes
+        them to bleed into each other almost instantly.
+
+    reverb_data.set_low_shelf_parameters(float frequency, float ratio)
+    reverb_data.set_hi_shelf_parameters(float frequency, float ratio)
+        Set the frequency cutoffs and decay ratios of the damping filters.
+
+    reverb_data.set_early_diffusion(float diffusion)
+    reverb_data.set_late_diffusion(float diffusion)
+        Diffusion coefficients.
+
+    reverb_data.set_mod_rate(float mod_rate)
+    reverb_data.set_mod_depth(float mod_depth)
+        Rate and depth of LFO. These are arbitrarily scaled so that 0..1 offers
+        musically useful ranges.*/
+
+	switch (mode)
+	{
+		case SBUF_Mono:
+			reverb_data->reverb_low_L = new s16_t[length];
+			reverb_data->reverb_medium_L = new s16_t[length];
+			reverb_data->reverb_high_L = new s16_t[length];
+			memset(reverb_data->reverb_low_L, 0, length * sizeof(s16_t));
+			memset(reverb_data->reverb_medium_L, 0, length * sizeof(s16_t));
+			memset(reverb_data->reverb_high_L, 0, length * sizeof(s16_t));
+			reverb_data->reverb_low_R = reverb_data->reverb_low_L;
+			reverb_data->reverb_medium_R = reverb_data->reverb_medium_L;
+			reverb_data->reverb_high_R = reverb_data->reverb_high_L;
+			data_L_float = new float[length];
+			memset(data_L_float, 0, length * sizeof(float));
+			Signed_To_Float(data_L, data_L_float, length);
+			for (int i = 0; i < length; i++) 
+			{
+				nh_ugens::Stereo result = reverb_low.process(data_L_float[i], data_L_float[i]);
+				data_L_float[i] = result[0];
+			}
+			Float_To_Signed(data_L_float, reverb_data->reverb_low_L, length);
+			memset(data_L_float, 0, length * sizeof(float));
+			Signed_To_Float(data_L, data_L_float, length);
+			for (int i = 0; i < length; i++) 
+			{
+				nh_ugens::Stereo result = reverb_medium.process(data_L_float[i], data_L_float[i]);
+				data_L_float[i] = result[0];
+			}
+			Float_To_Signed(data_L_float, reverb_data->reverb_medium_L, length);
+			memset(data_L_float, 0, length * sizeof(float));
+			Signed_To_Float(data_L, data_L_float, length);
+			for (int i = 0; i < length; i++) 
+			{
+				nh_ugens::Stereo result = reverb_high.process(data_L_float[i], data_L_float[i]);
+				data_L_float[i] = result[0];
+			}
+			Float_To_Signed(data_L_float, reverb_data->reverb_high_L, length);
+			break;
+
+		case SBUF_Stereo:
+			reverb_data->reverb_low_L = new s16_t[length];
+			reverb_data->reverb_medium_L = new s16_t[length];
+			reverb_data->reverb_high_L = new s16_t[length];
+			reverb_data->reverb_low_R = new s16_t[length];
+			reverb_data->reverb_medium_R = new s16_t[length];
+			reverb_data->reverb_high_R = new s16_t[length];
+			memset(reverb_data->reverb_low_L, 0, length * sizeof(s16_t));
+			memset(reverb_data->reverb_medium_L, 0, length * sizeof(s16_t));
+			memset(reverb_data->reverb_high_L, 0, length * sizeof(s16_t));
+			memset(reverb_data->reverb_low_R, 0, length * sizeof(s16_t));
+			memset(reverb_data->reverb_medium_R, 0, length * sizeof(s16_t));
+			memset(reverb_data->reverb_high_R, 0, length * sizeof(s16_t));
+			data_L_float = new float[length];
+			data_R_float = new float[length];
+			memset(data_L_float, 0, length * sizeof(float));
+			memset(data_R_float, 0, length * sizeof(float));
+			Signed_To_Float(data_L, data_L_float, length);
+			Signed_To_Float(data_R, data_R_float, length);
+			for (int i = 0; i < length; i++) 
+			{
+				nh_ugens::Stereo result = reverb_low.process(data_L_float[i], data_R_float[i]);
+				data_L_float[i] = result[0];
+				data_R_float[i] = result[1];
+			}
+			Float_To_Signed(data_L_float, reverb_data->reverb_low_L, length);
+			Float_To_Signed(data_R_float, reverb_data->reverb_low_R, length);
+			break;
+
+		case SBUF_Interleaved:
+			reverb_data->reverb_low_L = new s16_t[length * 2];
+			reverb_data->reverb_medium_L = new s16_t[length * 2];
+			reverb_data->reverb_high_L = new s16_t[length * 2];
+			memset(reverb_data->reverb_low_L, 0, length * 2 * sizeof(s16_t));
+			memset(reverb_data->reverb_medium_L, 0, length * 2 * sizeof(s16_t));
+			memset(reverb_data->reverb_high_L, 0, length * 2 * sizeof(s16_t));
+			reverb_data->reverb_low_R = reverb_data->reverb_low_L;
+			reverb_data->reverb_medium_R = reverb_data->reverb_medium_L;
+			reverb_data->reverb_high_R = reverb_data->reverb_high_L;
+			data_L_float = new float[length * 2];
+			memset(data_L_float, 0, length * 2 * sizeof(float));
+			Signed_To_Float(data_L, data_L_float, length * 2);
+			for (int i = 0; i < length * 2; i++) 
+			{
+				nh_ugens::Stereo result = reverb_low.process(data_L_float[i], data_L_float[i]);
+				data_L_float[i] = result[0];
+			}
+			Float_To_Signed(data_L_float, reverb_data->reverb_low_L, length * 2);
+			break;
+	}
+}
+
+s16_t* sound_data_c::Select_Reverb(int channel, float area)
+{
+	if (area < 150000.0f)
+	{
+		return channel == 0 ? reverb_data->reverb_low_L : reverb_data->reverb_low_R;
+	}
+	else if (area < 800000.0f)
+	{
+		return channel == 0 ? reverb_data->reverb_medium_L : reverb_data->reverb_medium_R;
+	}
+	else
+	{
+		return channel == 0 ? reverb_data->reverb_high_L : reverb_data->reverb_high_R;
 	}
 }
 

@@ -39,7 +39,9 @@
 
 #include "dm_state.h"
 
+// Reverb and falloff stuff - Dasho
 #include "p_blockmap.h"
+#include "p_user.h"
 
 
 // Sound must be clipped to prevent distortion (clipping is
@@ -309,7 +311,14 @@ static void MixMono(mix_channel_c *chan, int *dest, int pairs)
 				src_L = chan->data->data_L;
 		}
 		else
-			src_L = chan->data->data_L;
+		{
+			if (chan->data->reverb_data)
+			{
+				src_L = chan->data->Select_Reverb(0, room_area);
+			}
+			else
+				src_L = chan->data->data_L;
+		}
 	}
 
 	int *d_pos = dest;
@@ -372,8 +381,16 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 		}
 		else
 		{
-			src_L = chan->data->data_L;
-			src_R = chan->data->data_R;
+			if (chan->data->reverb_data)
+			{
+				src_L = chan->data->Select_Reverb(0, room_area);
+				src_R = chan->data->Select_Reverb(1, room_area);
+			}
+			else
+			{
+				src_L = chan->data->data_L;
+				src_R = chan->data->data_R;
+			}
 		}
 	}
 	
@@ -424,7 +441,12 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 				src_L = chan->data->data_L;
 		}
 		else
-			src_L = chan->data->data_L;
+		{
+			if (chan->data->reverb_data)
+				src_L = chan->data->Select_Reverb(0, room_area);
+			else
+				src_L = chan->data->data_L;
+		}
 	}
 
 	int *d_pos = dest;

@@ -1051,7 +1051,7 @@ int RGL_UpdateSkyBoxTextures(void)
 	//If we do nothing, our EWAD skybox will be used for all maps.
 	//So we need to disable it if we have a pwad that contains it's
 	//own sky.
-	if (W_LoboDisableSkybox(UserSkyFaceName(sky_image->name, WSKY_North)))
+	if (W_LoboDisableSkybox(sky_image->name))
 	{
 		info->face[WSKY_North] = NULL;
 		//I_Printf("Skybox turned OFF\n");

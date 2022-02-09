@@ -72,6 +72,7 @@
 #include "vm_coal.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include "w_texture.h"
 
 // -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
 typedef struct ddf_reader_s
@@ -2109,7 +2110,7 @@ int W_LoboFindSkyImage(int for_file, const char *match)
 	return total;
 }
 
-bool W_LoboDisableSkybox(const char *ActualSky)
+bool W_LoboDisableSkybox_old(const char *ActualSky)
 {
 		bool TurnOffSkyBox = true;
 
@@ -2144,6 +2145,96 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 		}
 	}
 	//no sky patches detected
+	return TurnOffSkyBox;
+	
+}
+
+//W_LoboDisableSkybox
+//
+//Check if a loaded pwad has a custom sky.
+//If so, turn off our EWAD skybox.
+//
+//Returns true if found
+bool W_LoboDisableSkybox(const char *ActualSky)
+{
+	bool TurnOffSkyBox = false;
+	const image_c *tempImage;
+	int filenum = -1;
+	int lumpnum = -1;
+
+	//We should try for "SKY1_N"
+	//but only use it if it's in a pwad
+	tempImage = W_ImageLookup(UserSkyBoxName(ActualSky, 0), INS_Texture, ILF_Null);
+	if (tempImage)
+	{
+		if(tempImage->source_type ==IMSRC_User)//from images.ddf
+		{
+			lumpnum = W_CheckNumForName2(tempImage->name);
+			I_Debugf("LOBO 2182: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name, tempImage->source_type, lumpnum, filenum);
+			if (lumpnum != -1)
+			{
+				filenum = W_GetFileForLump(lumpnum);
+			}
+			
+			if (filenum != -1) //make sure we actually have a file
+			{
+				//we only want pwads
+				if (FileKind_Strings[data_files[filenum]->kind] == FileKind_Strings[FLKIND_PWad])
+				{
+					TurnOffSkyBox = false;
+					return TurnOffSkyBox; //get out of here
+				}
+			}
+		}
+		
+	}
+
+	tempImage = W_ImageLookup(ActualSky, INS_Texture, ILF_Null);
+	
+	if (tempImage)//this should always be true but check just in case
+	{
+		I_Debugf("LOBO 2194: Sky is: %s. Type:%d  \n", tempImage->name, tempImage->source_type);
+		if (tempImage->source_type == IMSRC_Texture) //Normal doom format sky
+		{
+			filenum = W_GetFileForLump(tempImage->source.texture.tdef->patches->patch);
+		}
+		else if(tempImage->source_type ==IMSRC_User)//from images.ddf
+		{
+			TurnOffSkyBox = false; //turn off or not? hmmm...
+			return TurnOffSkyBox;
+		}
+		else //could be a png or jpg i.e. TX_ or HI_
+		{
+			lumpnum = W_CheckNumForName2(tempImage->name);
+			lumpnum = tempImage->source.graphic.lump;
+			if (lumpnum != -1)
+			{
+				filenum = W_GetFileForLump(lumpnum);
+			}
+		}
+		
+		I_Debugf("LOBO 2214: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name, tempImage->source_type, lumpnum, filenum);
+		
+		if (tempImage->source_type == IMSRC_Dummy) //probably a skybox?
+		{
+			TurnOffSkyBox = false;
+		}
+
+		if (filenum == 0) //it's the IWAD so we're done
+		{
+			TurnOffSkyBox = false;
+		} 
+
+		if (filenum != -1) //make sure we actually have a file
+		{
+			//we only want pwads
+			if (FileKind_Strings[data_files[filenum]->kind] == FileKind_Strings[FLKIND_PWad])
+			{
+				TurnOffSkyBox = true;
+			}
+		}
+	}	
+	
 	return TurnOffSkyBox;
 	
 }

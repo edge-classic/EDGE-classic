@@ -883,7 +883,7 @@ static slope_plane_t * DetailSlope_BoundIt(line_t *ld, sector_t *sec, float dz1,
 		}
 	}
 
-L_WriteDebug("DETAIL SLOPE in #%d: dists %1.3f -> %1.3f\n", (int)(sec - sectors), d_close, d_far);
+//L_WriteDebug("DETAIL SLOPE in #%d: dists %1.3f -> %1.3f\n", (int)(sec - sectors), d_close, d_far);
 
 	if (d_far - d_close < 0.5)
 	{

@@ -1047,7 +1047,10 @@ int RGL_UpdateSkyBoxTextures(void)
 	info->face[WSKY_North] = W_ImageLookup(
 			UserSkyFaceName(sky_image->name, WSKY_North), INS_Texture, ILF_Null);
 
-	//decide what to do for this maps sky i.e. Use a skybox or not
+	//LOBO 2022:
+	//If we do nothing, our EWAD skybox will be used for all maps.
+	//So we need to disable it if we have a pwad that contains it's
+	//own sky.
 	if (W_LoboDisableSkybox(UserSkyFaceName(sky_image->name, WSKY_North)))
 	{
 		info->face[WSKY_North] = NULL;

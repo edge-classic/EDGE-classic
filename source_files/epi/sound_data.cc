@@ -282,33 +282,15 @@ void sound_data_c::Mix_Reverb()
 	nh_ugens::NHHall<> reverb_low(freq);
 	nh_ugens::NHHall<> reverb_medium(freq);
 	nh_ugens::NHHall<> reverb_high(freq);
-	reverb_low.set_rt60(0.25f);
-	reverb_medium.set_rt60(0.5f);
-	reverb_high.set_rt60(0.75f);
+
+	reverb_low.set_rt60(0.5f);
+	reverb_medium.set_rt60(0.75f);
+	reverb_high.set_rt60(1.0f);
+	reverb_low.set_early_diffusion(0);
+	reverb_medium.set_early_diffusion(0);
+	reverb_high.set_early_diffusion(0);
 
 	reverb_data = new reverb_buffers;
-
-	/* These are the available settings to play with - Dasho
-
-    reverb_data.set_rt60(float rt60)
-        Set the 60 dB decay time for mid frequencies.
-
-    reverb_data.set_stereo(float stereo)
-        Set the stereo spread. 0 keeps the two channel paths separate, 1 causes
-        them to bleed into each other almost instantly.
-
-    reverb_data.set_low_shelf_parameters(float frequency, float ratio)
-    reverb_data.set_hi_shelf_parameters(float frequency, float ratio)
-        Set the frequency cutoffs and decay ratios of the damping filters.
-
-    reverb_data.set_early_diffusion(float diffusion)
-    reverb_data.set_late_diffusion(float diffusion)
-        Diffusion coefficients.
-
-    reverb_data.set_mod_rate(float mod_rate)
-    reverb_data.set_mod_depth(float mod_depth)
-        Rate and depth of LFO. These are arbitrarily scaled so that 0..1 offers
-        musically useful ranges.*/
 
 	switch (mode)
 	{
@@ -403,7 +385,7 @@ void sound_data_c::Mix_Reverb()
 
 s16_t* sound_data_c::Select_Reverb(int channel, float area)
 {
-	if (area < 150000.0f)
+	if (area < 200000.0f)
 	{
 		return channel == 0 ? reverb_data->reverb_low_L : reverb_data->reverb_low_R;
 	}

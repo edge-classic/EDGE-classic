@@ -1277,7 +1277,7 @@ startuporder_t startcode[] =
 	{  1, SetLanguage          },
 	{  1, ShowNotice           },
 	{  1, SV_MainInit          },
-	{ 10, S_PrecacheSounds     },
+	{ 30, S_PrecacheSounds     },
 	{ 10, W_ImageCreateUser    },
 	{ 20, W_InitSprites        },
 	{  3, W_ProcessTX_HI       },

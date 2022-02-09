@@ -1111,17 +1111,6 @@ void M_DrawNewGame(void)
 	}
 }
 
-void M_NewGame(int choice)
-{
-	if (netgame)
-	{
-		M_StartMessage(language["NewNetGame"], NULL, false);
-		return;
-	}
-
-	M_SetupNextMenu(&EpiDef);
-}
-
 //
 //      M_Episode
 //
@@ -1174,26 +1163,37 @@ static void CreateEpisodeMenu(void)
 	EpiDef.menuitems = EpisodeMenu;
 }
 
+void M_NewGame(int choice)
+{
+	if (netgame)
+	{
+		M_StartMessage(language["NewNetGame"], NULL, false);
+		return;
+	}
+
+	if (gamedefs.GetSize() == 2) // EDGE compatibility "episode" + a single game episode
+	{
+		CreateEpisodeMenu();
+		M_Episode(0);
+	}
+	else
+		M_SetupNextMenu(&EpiDef);
+}
+
 
 void M_DrawEpisode(void)
 {
 	if (!EpisodeMenu)
 		CreateEpisodeMenu();
     
-	if (EpiDef.numitems == 1)
+
+	if (custom_MenuEpisode==false)
 	{
-		M_Episode(0); // Just go directly to the skill menu if there's only one selectable episode - Dasho
+		HL_WriteText(episode_style,styledef_c::T_TITLE, 54, 38, language["MenuWhichEpisode"]);
 	}
 	else
 	{
-		if (custom_MenuEpisode==false)
-		{
-			HL_WriteText(episode_style,styledef_c::T_TITLE, 54, 38, language["MenuWhichEpisode"]);
-		}
-		else
-		{
-			HUD_DrawImage(54, 38, menu_episode);
-		}
+		HUD_DrawImage(54, 38, menu_episode);
 	}
 }
 

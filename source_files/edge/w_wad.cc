@@ -2149,6 +2149,15 @@ bool W_LoboDisableSkybox_old(const char *ActualSky)
 	
 }
 
+static const char *UserSkyBoxName(const char *base, int face)
+{
+	static char buffer[64];
+	static const char letters[] = "NESWTB";
+
+	sprintf(buffer, "%s_%c", base, letters[face]);
+	return buffer;
+}
+
 //W_LoboDisableSkybox
 //
 //Check if a loaded pwad has a custom sky.

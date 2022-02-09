@@ -30,7 +30,7 @@
 #include "r_modes.h"
 #include "r_image.h"
 
-#define DUMMY_WIDTH  4
+#define DUMMY_WIDTH  8
 
 
 // all the fonts that's fit to print

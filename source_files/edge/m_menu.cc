@@ -1171,9 +1171,11 @@ void M_NewGame(int choice)
 		return;
 	}
 
-	if (gamedefs.GetSize() == 2) // EDGE compatibility "episode" + a single game episode
-	{
+	if (!EpisodeMenu)
 		CreateEpisodeMenu();
+
+	if (EpiDef.numitems == 1)
+	{
 		M_Episode(0);
 	}
 	else
@@ -1183,10 +1185,6 @@ void M_NewGame(int choice)
 
 void M_DrawEpisode(void)
 {
-	if (!EpisodeMenu)
-		CreateEpisodeMenu();
-    
-
 	if (custom_MenuEpisode==false)
 	{
 		HL_WriteText(episode_style,styledef_c::T_TITLE, 54, 38, language["MenuWhichEpisode"]);

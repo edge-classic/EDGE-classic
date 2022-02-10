@@ -2174,7 +2174,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 		else if(tempImage->source_type ==IMSRC_User)// texture from images.ddf
 		{
 			I_Debugf("SKYBOX: Sky is: %s. Type:%d  \n", tempImage->name, tempImage->source_type);
-			TurnOffSkyBox = false; //turn off or not? hmmm...
+			TurnOffSkyBox = true; //turn off or not? hmmm...
 			return TurnOffSkyBox;
 		}
 		else //could be a png or jpg i.e. TX_ or HI_

@@ -2110,44 +2110,7 @@ int W_LoboFindSkyImage(int for_file, const char *match)
 	return total;
 }
 
-bool W_LoboDisableSkybox_old(const char *ActualSky)
-{
-		bool TurnOffSkyBox = true;
 
-	//Run through all our loaded files
-	for (int m = 0; m < (int)data_files.size(); m++)
-	{
-		data_file_c *df = data_files[m];
-
-		//we only want pwads
-		if (FileKind_Strings[df->kind] == FileKind_Strings[FLKIND_PWad] || FileKind_Strings[df->kind] == FileKind_Strings[FLKIND_EWad])
-		{
-			//I_Printf("Checking skies in %s\n",df->file_name);
-			//I_Printf(" %2d %-4s \"%s\"\n", m+1, FileKind_Strings[df->kind], df->file_name);
-			
-			//first check if it has a sky box: this overrides normal skies
-			int totalskies = W_LoboFindSkyImage(m+1,ActualSky);
-			if (totalskies != 0 )
-			{	//we have a skybox
-				I_Debugf("%s has a skybox\n",df->file_name);
-				TurnOffSkyBox = false;
-			}
-			else
-			{
-				//3. does it have a patch with "SKY" in the name?
-				totalskies = W_LoboFindSkyImage(m+1,"SKY");
-				if (totalskies != 0 )
-				{	//assume it is a replacement sky
-					I_Debugf("%s has %i sky patches\n",df->file_name,totalskies);
-					TurnOffSkyBox = true;
-				}
-			}
-		}
-	}
-	//no sky patches detected
-	return TurnOffSkyBox;
-	
-}
 
 static const char *UserSkyBoxName(const char *base, int face)
 {
@@ -2171,15 +2134,15 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 	int filenum = -1;
 	int lumpnum = -1;
 
-	//We should try for "SKY1_N"
-	//but only use it if it's in a pwad
+	//First we should try for "SKY1_N" type names but only
+	//use it if it's in a pwad i.e. a users skybox
 	tempImage = W_ImageLookup(UserSkyBoxName(ActualSky, 0), INS_Texture, ILF_Null);
 	if (tempImage)
 	{
 		if(tempImage->source_type ==IMSRC_User)//from images.ddf
 		{
 			lumpnum = W_CheckNumForName2(tempImage->name);
-			I_Debugf("LOBO 2182: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name, tempImage->source_type, lumpnum, filenum);
+
 			if (lumpnum != -1)
 			{
 				filenum = W_GetFileForLump(lumpnum);
@@ -2190,39 +2153,39 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 				//we only want pwads
 				if (FileKind_Strings[data_files[filenum]->kind] == FileKind_Strings[FLKIND_PWad])
 				{
+					I_Debugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name, tempImage->source_type, lumpnum, filenum);
 					TurnOffSkyBox = false;
 					return TurnOffSkyBox; //get out of here
 				}
 			}
 		}
-		
 	}
 
+	//If we're here then there are no user skyboxes.
+	//Lets check for single texture ones instead.
 	tempImage = W_ImageLookup(ActualSky, INS_Texture, ILF_Null);
 	
 	if (tempImage)//this should always be true but check just in case
 	{
-		I_Debugf("LOBO 2194: Sky is: %s. Type:%d  \n", tempImage->name, tempImage->source_type);
 		if (tempImage->source_type == IMSRC_Texture) //Normal doom format sky
 		{
 			filenum = W_GetFileForLump(tempImage->source.texture.tdef->patches->patch);
 		}
-		else if(tempImage->source_type ==IMSRC_User)//from images.ddf
+		else if(tempImage->source_type ==IMSRC_User)// texture from images.ddf
 		{
-			TurnOffSkyBox = false; //turn off or not? hmmm...
+			I_Debugf("SKYBOX: Sky is: %s. Type:%d  \n", tempImage->name, tempImage->source_type);
+			TurnOffSkyBox = true; //turn off or not? hmmm...
 			return TurnOffSkyBox;
 		}
 		else //could be a png or jpg i.e. TX_ or HI_
 		{
 			lumpnum = W_CheckNumForName2(tempImage->name);
-			lumpnum = tempImage->source.graphic.lump;
+			//lumpnum = tempImage->source.graphic.lump;
 			if (lumpnum != -1)
 			{
 				filenum = W_GetFileForLump(lumpnum);
 			}
 		}
-		
-		I_Debugf("LOBO 2214: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name, tempImage->source_type, lumpnum, filenum);
 		
 		if (tempImage->source_type == IMSRC_Dummy) //probably a skybox?
 		{
@@ -2243,9 +2206,9 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 			}
 		}
 	}	
-	
+
+	I_Debugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name, tempImage->source_type, lumpnum, filenum);
 	return TurnOffSkyBox;
-	
 }
 
 //W_IsLumpInPwad

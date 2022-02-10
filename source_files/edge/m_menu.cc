@@ -2101,8 +2101,11 @@ static void DrawMessage(void)
 		
 			if (s.size() > 0)
 			{
-				x = 160 - (dialog_style->fonts[0]->StringWidth(s.c_str()) / 2);
-				HL_WriteText(dialog_style,0, x, y, s.c_str());
+				//x = 160 - (dialog_style->fonts[0]->StringWidth(s.c_str()) / 2);
+				//HL_WriteText(dialog_style,0, x, y, s.c_str());
+				HUD_SetAlignment(0, -1);//center it
+				HL_WriteText(dialog_style,0, 160, y, s.c_str());
+				HUD_SetAlignment(-1, -1);//set it back to usual
 			}
 			
 			y += dialog_style->fonts[0]->NominalHeight();
@@ -2130,8 +2133,11 @@ static void DrawMessage(void)
 			//Code a check to fallback to 0 if 1 is missing.
 			if (s.size() > 0)
 			{
-				x = 160 - (dialog_style->fonts[0]->StringWidth(s.c_str()) / 2);
-				HL_WriteText(dialog_style,0, x, y, s.c_str());
+				//x = 160 - (dialog_style->fonts[0]->StringWidth(s.c_str()) / 2);
+				//HL_WriteText(dialog_style,0, x, y, s.c_str());
+				HUD_SetAlignment(0, -1);//center it
+				HL_WriteText(dialog_style,0, 160, y, s.c_str());
+				HUD_SetAlignment(-1, -1);//set it back to usual
 			}
 			
 			y += dialog_style->fonts[0]->NominalHeight();

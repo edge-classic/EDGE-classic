@@ -421,15 +421,17 @@ static void DrawLevelFinished(void)
 	style=wi_sp_style;
 	int t_type = styledef_c::T_TEXT;
 	
-	w = style->fonts[t_type]->StringWidth(language[wi_stats.cur->description.c_str()]);
-	HL_WriteText(style,t_type, 160 - w/2, y, language[wi_stats.cur->description.c_str()]);
+	HUD_SetAlignment(0, -1);//center it
+	HL_WriteText(style,t_type, 160, y, language[wi_stats.cur->description.c_str()]);
+	HUD_SetAlignment(-1, -1);//set it back to usual
 
 	t_type = styledef_c::T_TITLE;
 	if (!style->fonts[t_type]) 
 		t_type = styledef_c::T_TEXT;
-	w = style->fonts[t_type]->StringWidth(language["IntermissionFinished"]);
-	HL_WriteText(style,t_type,160 - w/2, y + h * 5/4, language["IntermissionFinished"]);
-
+	
+	HUD_SetAlignment(0, -1);//center it
+	HL_WriteText(style,t_type,160, y + h * 5/4, language["IntermissionFinished"]);
+	HUD_SetAlignment(-1, -1);//set it back to usual
 
 	//HUD_DrawImage(160 - w/2,  y, lnames[0]);
 	//HUD_DrawImage(160 - w2/2, y + h * 5/4, finished);
@@ -452,14 +454,18 @@ static void DrawEnteringLevel(void)
 	style_c *style;
 	style=wi_sp_style;
 	int t_type = styledef_c::T_TEXT;
-	w = style->fonts[t_type]->StringWidth(language[wi_stats.next->description.c_str()]);
-	HL_WriteText(style,t_type, 160 - w/2, y + h * 5/4, language[wi_stats.next->description.c_str()]);
+	
+	HUD_SetAlignment(0, -1);//center it
+	HL_WriteText(style,t_type, 160, y + h * 5/4, language[wi_stats.next->description.c_str()]);
+	HUD_SetAlignment(-1, -1);//set it back to usual
 	
 	t_type = styledef_c::T_TITLE;
 	if (!style->fonts[t_type]) 
 		t_type = styledef_c::T_TEXT;
-	w = style->fonts[t_type]->StringWidth(language["IntermissionEntering"]);
-	HL_WriteText(style,t_type,160 - w/2,  y, language["IntermissionEntering"]);
+	
+	HUD_SetAlignment(0, -1);//center it
+	HL_WriteText(style,t_type,160,  y, language["IntermissionEntering"]);
+	HUD_SetAlignment(-1, -1);//set it back to usual
 
 	//HUD_DrawImage(160 - w/2,  y, entering);
 	//HUD_DrawImage(160 - w2/2, y + h * 5/4, lnames[1]);

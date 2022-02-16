@@ -41,8 +41,6 @@
 
 // Reverb and falloff stuff - Dasho
 #include "p_blockmap.h"
-#include "p_user.h"
-
 
 // Sound must be clipped to prevent distortion (clipping is
 // a kind of distortion of course, but it's much better than
@@ -291,46 +289,43 @@ static void MixMono(mix_channel_c *chan, int *dest, int pairs)
 
 	s16_t *src_L;
 
-	if (paused || menuactive)
-		src_L = chan->data->data_L;
-	else
-	{
-		// Process environmental sound FX in order of precedence, currently Vacuum->Submerged->Normal - Dasho
-		if (vacuum_sfx)
-		{
-			if (chan->data->vacuum_data_L)
-				src_L = chan->data->vacuum_data_L;
-			else
-				src_L = chan->data->data_L;
-		}
-		else if (submerged_sfx)
-		{
-			if (chan->data->submerged_data_L)
-				src_L = chan->data->submerged_data_L;
-			else
-				src_L = chan->data->data_L;
-		}
-		else
-		{
-			if (chan->data->reverb_data)
-			{
-				src_L = chan->data->Select_Reverb(0, room_area);
-			}
-			else
-				src_L = chan->data->data_L;
-		}
-	}
-
 	int *d_pos = dest;
 	int *d_end = d_pos + pairs;
 
 	fixed22_t offset = chan->offset;
 
-	while (d_pos < d_end)
+	if (paused || menuactive)
 	{
-		*d_pos++ += src_L[offset >> 10] * chan->volume_L;
+		src_L = chan->data->data_L;
+		while (d_pos < d_end)
+		{
+			*d_pos++ += src_L[offset >> 10] * chan->volume_L;
 
-		offset += chan->delta;
+			offset += chan->delta;
+		}
+	}
+	else
+	{
+		if (!chan->data->is_sfx)
+		{
+			src_L = chan->data->data_L;
+			while (d_pos < d_end)
+			{
+				*d_pos++ += src_L[offset >> 10] * chan->volume_L;
+
+				offset += chan->delta;
+			}
+		}
+		else
+		{
+			src_L = chan->data->fx_data_L;
+			while (d_pos < d_end)
+			{
+				*d_pos++ += src_L[offset >> 10] * chan->volume_L;
+
+				offset += chan->delta;
+			}
+		}
 	}
 
 	chan->offset = offset;
@@ -352,45 +347,20 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 	}
 	else
 	{
-		// Process environmental sound FX in order of precedence, currently Vacuum->Submerged->Normal - Dasho
 		if (vacuum_sfx)
 		{
-			if (chan->data->vacuum_data_L && chan->data->vacuum_data_R)
-			{
-				src_L = chan->data->vacuum_data_L;
-				src_R = chan->data->vacuum_data_R;
-			}
-			else
-			{
 				src_L = chan->data->data_L;
 				src_R = chan->data->data_R;
-			}
 		}
 		else if (submerged_sfx)
 		{
-			if (chan->data->submerged_data_L && chan->data->submerged_data_R)
-			{
-				src_L = chan->data->submerged_data_L;
-				src_R = chan->data->submerged_data_R;
-			}
-			else
-			{
 				src_L = chan->data->data_L;
 				src_R = chan->data->data_R;
-			}
 		}
 		else
 		{
-			if (chan->data->reverb_data)
-			{
-				src_L = chan->data->Select_Reverb(0, room_area);
-				src_R = chan->data->Select_Reverb(1, room_area);
-			}
-			else
-			{
 				src_L = chan->data->data_L;
 				src_R = chan->data->data_R;
-			}
 		}
 	}
 	
@@ -425,26 +395,16 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 		src_L = chan->data->data_L;
 	else
 	{
-		// Process environmental sound FX in order of precedence, currently Vacuum->Submerged->Normal - Dasho
 		if (vacuum_sfx)
 		{
-			if (chan->data->vacuum_data_L)
-				src_L = chan->data->vacuum_data_L;
-			else
 				src_L = chan->data->data_L;
 		}
 		else if (submerged_sfx)
 		{
-			if (chan->data->submerged_data_L)
-				src_L = chan->data->submerged_data_L;
-			else
 				src_L = chan->data->data_L;
 		}
 		else
 		{
-			if (chan->data->reverb_data)
-				src_L = chan->data->Select_Reverb(0, room_area);
-			else
 				src_L = chan->data->data_L;
 		}
 	}

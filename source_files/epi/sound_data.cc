@@ -30,10 +30,10 @@ namespace epi
 sound_data_c::sound_data_c() :
 	length(0), freq(0), mode(0),
 	data_L(NULL), data_R(NULL),
-	submerged_data_L(NULL), submerged_data_R(NULL),
-	vacuum_data_L(NULL), vacuum_data_R(NULL),
-	reverb_data(NULL),
-	priv_data(NULL), ref_count(0)
+	float_data_L(NULL), float_data_R(NULL),
+	fx_data_L(NULL), fx_data_R(NULL),
+	priv_data(NULL), ref_count(0), is_sfx(false),
+	current_mix(SFX_None)
 { }
 
 sound_data_c::~sound_data_c()
@@ -53,49 +53,33 @@ void sound_data_c::Free()
 
 	data_L = NULL;
 	data_R = NULL;
+
+	Free_Float();
+	Free_FX();
 }
 
-void sound_data_c::Free_Underwater()
+void sound_data_c::Free_Float()
 {
-	if (submerged_data_R && submerged_data_R != submerged_data_L)
-		delete[] submerged_data_R;
+	if (float_data_R && float_data_R != float_data_L)
+		delete[] float_data_R;
 
-	if (submerged_data_L)
-		delete[] submerged_data_L;
+	if (float_data_L)
+		delete[] float_data_L;
 
-	submerged_data_L = NULL;
-	submerged_data_R = NULL;
+	float_data_L = NULL;
+	float_data_R = NULL;
 }
 
-void sound_data_c::Free_Airless()
+void sound_data_c::Free_FX()
 {
-	if (vacuum_data_R && vacuum_data_R != vacuum_data_L)
-		delete[] vacuum_data_R;
+	if (fx_data_R && fx_data_R != fx_data_L)
+		delete[] fx_data_R;
 
-	if (vacuum_data_L)
-		delete[] vacuum_data_L;
+	if (fx_data_L)
+		delete[] fx_data_L;
 
-	vacuum_data_L = NULL;
-	vacuum_data_R = NULL;
-}
-
-void sound_data_c::Free_Reverb()
-{
-	if (reverb_data->reverb_low_L)
-		delete[] reverb_data->reverb_low_L;
-	if (reverb_data->reverb_low_R)
-		delete[] reverb_data->reverb_low_R;
-	if (reverb_data->reverb_medium_L)
-		delete[] reverb_data->reverb_medium_L;
-	if (reverb_data->reverb_medium_R)
-		delete[] reverb_data->reverb_medium_R;
-	if (reverb_data->reverb_high_L)
-		delete[] reverb_data->reverb_high_L;
-	if (reverb_data->reverb_high_R)
-		delete[] reverb_data->reverb_high_R;
-
-	delete reverb_data;
-	reverb_data = NULL;
+	fx_data_L = NULL;
+	fx_data_R = NULL;
 }
 
 void sound_data_c::Allocate(int samples, int buf_mode)
@@ -110,21 +94,6 @@ void sound_data_c::Allocate(int samples, int buf_mode)
 	if (data_L || data_R)
 	{
 		Free();
-	}
-
-	if (submerged_data_L || submerged_data_R)
-	{
-		Free_Underwater();
-	}
-
-	if (vacuum_data_L || vacuum_data_R)
-	{
-		Free_Airless();
-	}
-
-	if (reverb_data)
-	{
-		Free_Reverb();
 	}
 
 	length = samples;
@@ -151,274 +120,178 @@ void sound_data_c::Allocate(int samples, int buf_mode)
 	}
 }
 
-void sound_data_c::Mix_Underwater()
+void sound_data_c::Mix_Float()
 {
-	float *data_L_float;
-	float *data_R_float;
-	Biquad *lpFilter = new Biquad(bq_type_lowpass, 750.0 / freq, 0.707, 0);
-	nh_ugens::NHHall<> reverb(freq);
-
 	switch (mode)
 	{
 		case SBUF_Mono:
-			submerged_data_L = new s16_t[length];
-			memset(submerged_data_L, 0, length * sizeof(s16_t));
-			submerged_data_R = submerged_data_L;
-			data_L_float = new float[length];
-			memset(data_L_float, 0, length * sizeof(float));
-			Signed_To_Float(data_L, data_L_float, length);
+			float_data_L = new float[length];
 			for (int i = 0; i < length; i++) 
 			{
-				nh_ugens::Stereo result = reverb.process(data_L_float[i], data_L_float[i]);
-				data_L_float[i] = result[0];
-				data_L_float[i] = lpFilter->process(data_L_float[i]);
+				float_data_L[i] = (data_L[i] + 0.5) / (32767.5);
 			}
-			Float_To_Signed(data_L_float, submerged_data_L, length);
 			break;
 
 		case SBUF_Stereo:
-			submerged_data_L = new s16_t[length];
-			memset(submerged_data_L, 0, length * sizeof(s16_t));
-			submerged_data_R = new s16_t[length];
-			memset(submerged_data_R, 0, length * sizeof(s16_t));
-			data_L_float = new float[length];
-			data_R_float = new float[length];
-			memset(data_L_float, 0, length * sizeof(float));
-			memset(data_R_float, 0, length * sizeof(float));
-			Signed_To_Float(data_L, data_L_float, length);
-			Signed_To_Float(data_R, data_R_float, length);
+			float_data_L = new float[length];
+			float_data_R = new float[length];
 			for (int i = 0; i < length; i++) 
 			{
-				nh_ugens::Stereo result = reverb.process(data_L_float[i], data_R_float[i]);
-				data_L_float[i] = result[0];
-				data_R_float[i] = result[1];
-				data_L_float[i] = lpFilter->process(data_L_float[i]);
-				data_R_float[i] = lpFilter->process(data_R_float[i]);
+				float_data_L[i] = (data_L[i] + 0.5) / (32767.5);
+				float_data_R[i] = (data_R[i] + 0.5) / (32767.5);
 			}
-			Float_To_Signed(data_L_float, submerged_data_L, length);
-			Float_To_Signed(data_R_float, submerged_data_R, length);
 			break;
 
 		case SBUF_Interleaved:
-			submerged_data_L = new s16_t[length * 2];
-			memset(submerged_data_L, 0, length * 2 * sizeof(s16_t));
-			submerged_data_R = submerged_data_L;
-			data_L_float = new float[length * 2];
-			memset(data_L_float, 0, length * 2 * sizeof(float));
-			Signed_To_Float(data_L, data_L_float, length * 2);
+			float_data_L = new float[length * 2];
 			for (int i = 0; i < length * 2; i++) 
 			{
-				nh_ugens::Stereo result = reverb.process(data_L_float[i], data_L_float[i]);
-				data_L_float[i] = result[0];
-				data_L_float[i] = lpFilter->process(data_L_float[i]);
+				float_data_L[i] = (data_L[i] + 0.5) / (32767.5);
 			}
-			Float_To_Signed(data_L_float, submerged_data_L, length * 2);
 			break;
 	}
 }
 
-void sound_data_c::Mix_Airless()
+void sound_data_c::Mix_Submerged()
 {
-	float *data_L_float;
-	float *data_R_float;
-	Biquad *lpFilter = new Biquad(bq_type_lowpass, 200.0 / freq, 0.707, 0);
-
-	switch (mode)
+	if (current_mix != SFX_Submerged)
 	{
-		case SBUF_Mono:
-			vacuum_data_L = new s16_t[length];
-			memset(vacuum_data_L, 0, length * sizeof(s16_t));
-			vacuum_data_R = vacuum_data_L;
-			data_L_float = new float[length];
-			memset(data_L_float, 0, length * sizeof(float));
-			Signed_To_Float(data_L, data_L_float, length);
-			for (int i = 0; i < length; i++) 
-			{
-				data_L_float[i] = lpFilter->process(data_L_float[i]);
-			}
-			Float_To_Signed(data_L_float, vacuum_data_L, length);
-			break;
+		Biquad *lpFilter = new Biquad(bq_type_lowpass, 750.0 / freq, 0.707, 0);
+		nh_ugens::NHHall<> reverb(freq);
+		switch (mode)
+		{
+			case SBUF_Mono:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length];
+				fx_data_R = fx_data_L;
+				for (int i = 0; i < length; i++) 
+				{
+					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_L[i]);
+					fx_data_L[i] = lpFilter->process(result[0]) * 38767.5 - .5;
+				}
+				current_mix = SFX_Submerged;
+				break;
 
-		case SBUF_Stereo:
-			vacuum_data_L = new s16_t[length];
-			memset(vacuum_data_L, 0, length * sizeof(s16_t));
-			vacuum_data_R = new s16_t[length];
-			memset(vacuum_data_R, 0, length * sizeof(s16_t));
-			data_L_float = new float[length];
-			data_R_float = new float[length];
-			memset(data_L_float, 0, length * sizeof(float));
-			memset(data_R_float, 0, length * sizeof(float));
-			Signed_To_Float(data_L, data_L_float, length);
-			Signed_To_Float(data_R, data_R_float, length);
-			for (int i = 0; i < length; i++) 
-			{
-				data_L_float[i] = lpFilter->process(data_L_float[i]);
-				data_R_float[i] = lpFilter->process(data_R_float[i]);
-			}
-			Float_To_Signed(data_L_float, vacuum_data_L, length);
-			Float_To_Signed(data_R_float, vacuum_data_R, length);
-			break;
+			case SBUF_Stereo:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length];
+				if (!fx_data_R)
+					fx_data_R = new s16_t[length];
+				for (int i = 0; i < length; i++) 
+				{
+					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_R[i]);
+					fx_data_L[i] = lpFilter->process(result[0]) * 38767.5 - .5;
+					fx_data_R[i] = lpFilter->process(result[1]) * 38767.5 - .5;
+				}
+				current_mix = SFX_Submerged;
 
-		case SBUF_Interleaved:
-			vacuum_data_L = new s16_t[length * 2];
-			memset(vacuum_data_L, 0, length * 2 * sizeof(s16_t));
-			vacuum_data_R = vacuum_data_L;
-			data_L_float = new float[length * 2];
-			memset(data_L_float, 0, length * 2 * sizeof(float));
-			Signed_To_Float(data_L, data_L_float, length * 2);
-			for (int i = 0; i < length * 2; i++) 
-			{
-				data_L_float[i] = lpFilter->process(data_L_float[i]);
-			}
-			Float_To_Signed(data_L_float, vacuum_data_L, length * 2);
-			break;
+			case SBUF_Interleaved:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length * 2];
+				fx_data_R = fx_data_L;
+				for (int i = 0; i < length * 2; i++) 
+				{
+					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_L[i]);
+					fx_data_L[i] = lpFilter->process(result[0]) * 38767.5 - .5;
+				}
+				current_mix = SFX_Submerged;
+		}
 	}
 }
 
-void sound_data_c::Mix_Reverb()
+void sound_data_c::Mix_Vacuum()
 {
-	float *data_L_float;
-	float *data_R_float;
-	nh_ugens::NHHall<> reverb_low(freq);
-	nh_ugens::NHHall<> reverb_medium(freq);
-	nh_ugens::NHHall<> reverb_high(freq);
-
-	reverb_low.set_rt60(0.5f);
-	reverb_medium.set_rt60(0.75f);
-	reverb_high.set_rt60(1.0f);
-	reverb_low.set_early_diffusion(0);
-	reverb_medium.set_early_diffusion(0);
-	reverb_high.set_early_diffusion(0);
-
-	reverb_data = new reverb_buffers;
-
-	switch (mode)
+	if (current_mix != SFX_Vacuum)
 	{
-		case SBUF_Mono:
-			reverb_data->reverb_low_L = new s16_t[length];
-			reverb_data->reverb_medium_L = new s16_t[length];
-			reverb_data->reverb_high_L = new s16_t[length];
-			memset(reverb_data->reverb_low_L, 0, length * sizeof(s16_t));
-			memset(reverb_data->reverb_medium_L, 0, length * sizeof(s16_t));
-			memset(reverb_data->reverb_high_L, 0, length * sizeof(s16_t));
-			reverb_data->reverb_low_R = reverb_data->reverb_low_L;
-			reverb_data->reverb_medium_R = reverb_data->reverb_medium_L;
-			reverb_data->reverb_high_R = reverb_data->reverb_high_L;
-			data_L_float = new float[length];
-			memset(data_L_float, 0, length * sizeof(float));
-			Signed_To_Float(data_L, data_L_float, length);
-			for (int i = 0; i < length; i++) 
-			{
-				nh_ugens::Stereo result = reverb_low.process(data_L_float[i], data_L_float[i]);
-				data_L_float[i] = result[0];
-			}
-			Float_To_Signed(data_L_float, reverb_data->reverb_low_L, length);
-			memset(data_L_float, 0, length * sizeof(float));
-			Signed_To_Float(data_L, data_L_float, length);
-			for (int i = 0; i < length; i++) 
-			{
-				nh_ugens::Stereo result = reverb_medium.process(data_L_float[i], data_L_float[i]);
-				data_L_float[i] = result[0];
-			}
-			Float_To_Signed(data_L_float, reverb_data->reverb_medium_L, length);
-			memset(data_L_float, 0, length * sizeof(float));
-			Signed_To_Float(data_L, data_L_float, length);
-			for (int i = 0; i < length; i++) 
-			{
-				nh_ugens::Stereo result = reverb_high.process(data_L_float[i], data_L_float[i]);
-				data_L_float[i] = result[0];
-			}
-			Float_To_Signed(data_L_float, reverb_data->reverb_high_L, length);
-			break;
+		Biquad *lpFilter = new Biquad(bq_type_lowpass, 200.0 / freq, 0.707, 0);
+		switch (mode)
+		{
+			case SBUF_Mono:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length];
+				fx_data_R = fx_data_L;
+				for (int i = 0; i < length; i++) 
+				{
+					fx_data_L[i] = lpFilter->process(float_data_L[i]) * 38767.5 - .5;
+				}
+				current_mix = SFX_Vacuum;
+				break;
 
-		case SBUF_Stereo:
-			reverb_data->reverb_low_L = new s16_t[length];
-			reverb_data->reverb_medium_L = new s16_t[length];
-			reverb_data->reverb_high_L = new s16_t[length];
-			reverb_data->reverb_low_R = new s16_t[length];
-			reverb_data->reverb_medium_R = new s16_t[length];
-			reverb_data->reverb_high_R = new s16_t[length];
-			memset(reverb_data->reverb_low_L, 0, length * sizeof(s16_t));
-			memset(reverb_data->reverb_medium_L, 0, length * sizeof(s16_t));
-			memset(reverb_data->reverb_high_L, 0, length * sizeof(s16_t));
-			memset(reverb_data->reverb_low_R, 0, length * sizeof(s16_t));
-			memset(reverb_data->reverb_medium_R, 0, length * sizeof(s16_t));
-			memset(reverb_data->reverb_high_R, 0, length * sizeof(s16_t));
-			data_L_float = new float[length];
-			data_R_float = new float[length];
-			memset(data_L_float, 0, length * sizeof(float));
-			memset(data_R_float, 0, length * sizeof(float));
-			Signed_To_Float(data_L, data_L_float, length);
-			Signed_To_Float(data_R, data_R_float, length);
-			for (int i = 0; i < length; i++) 
-			{
-				nh_ugens::Stereo result = reverb_low.process(data_L_float[i], data_R_float[i]);
-				data_L_float[i] = result[0];
-				data_R_float[i] = result[1];
-			}
-			Float_To_Signed(data_L_float, reverb_data->reverb_low_L, length);
-			Float_To_Signed(data_R_float, reverb_data->reverb_low_R, length);
-			break;
+			case SBUF_Stereo:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length];
+				if (!fx_data_R)
+					fx_data_R = new s16_t[length];
+				for (int i = 0; i < length; i++) 
+				{
+					fx_data_L[i] = lpFilter->process(float_data_L[i]) * 38767.5 - .5;
+					fx_data_R[i] = lpFilter->process(float_data_R[i]) * 38767.5 - .5;
+				}
+				current_mix = SFX_Vacuum;
 
-		case SBUF_Interleaved:
-			reverb_data->reverb_low_L = new s16_t[length * 2];
-			reverb_data->reverb_medium_L = new s16_t[length * 2];
-			reverb_data->reverb_high_L = new s16_t[length * 2];
-			memset(reverb_data->reverb_low_L, 0, length * 2 * sizeof(s16_t));
-			memset(reverb_data->reverb_medium_L, 0, length * 2 * sizeof(s16_t));
-			memset(reverb_data->reverb_high_L, 0, length * 2 * sizeof(s16_t));
-			reverb_data->reverb_low_R = reverb_data->reverb_low_L;
-			reverb_data->reverb_medium_R = reverb_data->reverb_medium_L;
-			reverb_data->reverb_high_R = reverb_data->reverb_high_L;
-			data_L_float = new float[length * 2];
-			memset(data_L_float, 0, length * 2 * sizeof(float));
-			Signed_To_Float(data_L, data_L_float, length * 2);
-			for (int i = 0; i < length * 2; i++) 
-			{
-				nh_ugens::Stereo result = reverb_low.process(data_L_float[i], data_L_float[i]);
-				data_L_float[i] = result[0];
-			}
-			Float_To_Signed(data_L_float, reverb_data->reverb_low_L, length * 2);
-			break;
+			case SBUF_Interleaved:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length * 2];
+				fx_data_R = fx_data_L;
+				for (int i = 0; i < length * 2; i++) 
+				{
+					fx_data_L[i] = lpFilter->process(float_data_L[i]) * 38767.5 - .5;
+				}
+				current_mix = SFX_Vacuum;
+		}
 	}
 }
 
-s16_t* sound_data_c::Select_Reverb(int channel, float area)
+void sound_data_c::Mix_Reverb(float room_area)
 {
-	if (area < 200000.0f)
+	if (current_mix != SFX_Reverb)
 	{
-		return channel == 0 ? reverb_data->reverb_low_L : reverb_data->reverb_low_R;
-	}
-	else if (area < 800000.0f)
-	{
-		return channel == 0 ? reverb_data->reverb_medium_L : reverb_data->reverb_medium_R;
-	}
-	else
-	{
-		return channel == 0 ? reverb_data->reverb_high_L : reverb_data->reverb_high_R;
-	}
-}
+		nh_ugens::NHHall<> reverb(freq);
+		if (room_area > 1000000)
+			reverb.set_rt60(1.0f);
+		else if (room_area > 200000)
+			reverb.set_rt60(0.75f);
+		else
+			reverb.set_rt60(0.5f);
+		reverb.set_early_diffusion(0);
+		switch (mode)
+		{
+			case SBUF_Mono:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length];
+				fx_data_R = fx_data_L;
+				for (int i = 0; i < length; i++) 
+				{
+					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_L[i]);
+					fx_data_L[i] = CLAMP(INT16_MIN, result[0] * 38767.5 - .5, INT16_MAX);
+				}
+				current_mix = SFX_Reverb;
+				break;
 
-void sound_data_c::Float_To_Signed(float *data_float, s16_t *data_signed, int samples)
-{
-	s16_t *data_signed_end = data_signed + samples;
+			case SBUF_Stereo:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length];
+				if (!fx_data_R)
+					fx_data_R = new s16_t[length];
+				for (int i = 0; i < length; i++) 
+				{
+					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_R[i]);
+					fx_data_L[i] = CLAMP(INT16_MIN, result[0] * 38767.5 - .5, INT16_MAX);
+					fx_data_R[i] = CLAMP(INT16_MIN, result[1] * 38767.5 - .5, INT16_MAX);
+				}
+				current_mix = SFX_Reverb;
 
-	while (data_signed != data_signed_end)
-	{
-		float v = *data_float++;
-		v = ((v < -1) ? -1 : ((v > 1) ? 1 : v));
-    	*data_signed++ = (s16_t)(v * (v < 0 ? 32768 : 32767));
-	}
-}
-
-void sound_data_c::Signed_To_Float(s16_t *data_signed, float *data_float, int samples)
-{
-	float *data_float_end = data_float + samples;
-
-	while (data_float != data_float_end)
-	{
-		s16_t v = *data_signed++;
-		*data_float++ = (float)v / (v < 0 ? 32768 : 32767);
+			case SBUF_Interleaved:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length * 2];
+				fx_data_R = fx_data_L;
+				for (int i = 0; i < length * 2; i++) 
+				{
+					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_L[i]);
+					fx_data_L[i] = CLAMP(INT16_MIN, result[0] * 38767.5 - .5, INT16_MAX);
+				}
+				current_mix = SFX_Reverb;
+		}
 	}
 }
 

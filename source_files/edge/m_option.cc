@@ -473,6 +473,7 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Mix Channels",    MixChans,  4, &var_mix_channels, M_ChangeMixChan, NULL},
 	{OPT_Switch,  "Quiet Factor",    QuietNess, 3, &var_quiet_factor, NULL, NULL},
+	{OPT_Boolean, "Precache SFX",       YesNo, 2, &var_cache_sfx, NULL, "NeedRestart"},
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Music Device",    MusicDevs, 2, &var_music_dev, NULL, NULL},
 };

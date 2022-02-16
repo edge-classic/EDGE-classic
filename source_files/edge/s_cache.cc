@@ -193,9 +193,8 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	// Create "environmental" sounds - Dasho
 	if (OK)
 	{
-		buf->Mix_Underwater();
-		buf->Mix_Airless();
-		buf->Mix_Reverb();
+		buf->is_sfx = true;
+		buf->Mix_Float();
 	}
 
 	return OK;

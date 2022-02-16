@@ -31,6 +31,7 @@
 #include "s_blit.h"
 
 #include "p_local.h" // P_ApproxDistance
+#include "p_user.h" // room_area
 
 
 static bool allow_hogs = true;
@@ -39,6 +40,7 @@ extern float listen_x;
 extern float listen_y;
 extern float listen_z;
 
+bool var_cache_sfx = true;
 
 /* See m_option.cc for corresponding menu items */
 const int channel_counts[5] = { 8, 16, 32, 64, 96 };
@@ -306,14 +308,11 @@ sfxdef_c * LookupEffectDef(const sfx_t *s)
 	return sfxdefs[num];
 }
 
-static void S_PlaySound(int idx, sfxdef_c *def, int category, position_c *pos, int flags)
+static void S_PlaySound(int idx, sfxdef_c *def, int category, position_c *pos, int flags, epi::sound_data_c *buf)
 {
 //I_Printf("S_PlaySound on idx #%d DEF:%p\n", idx, def);
 
 //I_Printf("Looked up def: %p, caching...\n", def);
-	epi::sound_data_c *buf = S_CacheLoad(def);
-	if (! buf)
-		return;
 
 	mix_channel_c *chan = mix_chan[idx];
 
@@ -341,7 +340,7 @@ static void S_PlaySound(int idx, sfxdef_c *def, int category, position_c *pos, i
 //I_Printf("FINISHED: delta=0x%lx\n", chan->delta);
 }
 
-static void DoStartFX(sfxdef_c *def, int category, position_c *pos, int flags)
+static void DoStartFX(sfxdef_c *def, int category, position_c *pos, int flags, epi::sound_data_c *buf)
 {
 	CountPlayingCats();
 
@@ -365,7 +364,7 @@ static void DoStartFX(sfxdef_c *def, int category, position_c *pos, int flags)
 
 //I_Printf("@@ Killing sound for SINGULAR\n");
 			S_KillChannel(k);
-			S_PlaySound(k, def, category, pos, flags);
+			S_PlaySound(k, def, category, pos, flags, buf);
 			return;
 		}
 	}
@@ -409,7 +408,7 @@ static void DoStartFX(sfxdef_c *def, int category, position_c *pos, int flags)
 		S_KillChannel(k);
 	}
 
-	S_PlaySound(k, def, category, pos, flags);
+	S_PlaySound(k, def, category, pos, flags, buf);
 }
 
 
@@ -447,9 +446,20 @@ void S_StartFX(sfx_t *sfx, int category, position_c *pos, int flags)
 	while (cat_limits[category] == 0)
 		category++;
 
+	epi::sound_data_c *buf = S_CacheLoad(def);
+	if (! buf)
+		return;	
+
+	if (vacuum_sfx)
+		buf->Mix_Vacuum();
+	else if (submerged_sfx)
+		buf->Mix_Submerged();
+	else
+		buf->Mix_Reverb(room_area);
+
 	I_LockAudio();
 	{
-		DoStartFX(def, category, pos, flags);
+		DoStartFX(def, category, pos, flags, buf);
 	}
 	I_UnlockAudio();
 }
@@ -535,9 +545,12 @@ void S_ChangeChannelNum(void)
 
 void S_PrecacheSounds(void)
 {
-	for (int i =0; i < sfxdefs.GetSize(); i++)
+	if (var_cache_sfx)
 	{
-		S_CacheLoad(sfxdefs[i]);
+		for (int i =0; i < sfxdefs.GetSize(); i++)
+		{
+			S_CacheLoad(sfxdefs[i]);
+		}
 	}
 }
 

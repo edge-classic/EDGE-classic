@@ -90,7 +90,6 @@ fx_flag_e;
 // Vars
 extern int sfx_volume;  // 0 .. SND_SLIDER_NUM-1
 
-
 // Init/Shutdown
 void S_Init(void);
 void S_Shutdown(void);

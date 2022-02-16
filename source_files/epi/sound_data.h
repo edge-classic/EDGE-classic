@@ -30,15 +30,14 @@ typedef enum
 }
 sfx_buffer_mode_e;
 
-typedef struct
+typedef enum
 {
-	s16_t *reverb_low_L;
-	s16_t *reverb_low_R;
-	s16_t *reverb_medium_L;
-	s16_t *reverb_medium_R;
-	s16_t *reverb_high_L;
-	s16_t *reverb_high_R;	
-} reverb_buffers;
+	SFX_None = 0,
+	SFX_Vacuum = 1,
+	SFX_Submerged = 2,
+	SFX_Reverb = 3
+}
+mixed_sfx_type_e;
 
 class sound_data_c
 {
@@ -54,21 +53,22 @@ public:
 	s16_t *data_L;
 	s16_t *data_R;
 
-	// Reverb+lowpass filter of original sound (underwater-type effects)
-	s16_t *submerged_data_L;
-	s16_t *submerged_data_R;
+	// Floating-point versions of the above. Created and cached for FX mixing.
+	float *float_data_L;
+	float *float_data_R;
 
-	// Heavy lowpass filter of original sound (airless-type effects)
-	s16_t *vacuum_data_L;
-	s16_t *vacuum_data_R;
-
-	// Original sound with reverb applied. This will change during the course of the program
-	reverb_buffers *reverb_data;
+	// Temp buffer for mixed SFX. Will be overwritten as needed.
+	s16_t *fx_data_L;
+	s16_t *fx_data_R;
 
 	// values for the engine to use
 	void *priv_data;
 
 	int ref_count;
+
+	bool is_sfx;
+
+	mixed_sfx_type_e current_mix;
 
 public:
 	sound_data_c();
@@ -77,15 +77,12 @@ public:
 	void Allocate(int samples, int buf_mode);
 	void Allocate_Reverb();
 	void Free();
-	void Free_Underwater();
-	void Free_Airless();
-	void Free_Reverb();
-	void Mix_Underwater();
-	void Mix_Airless();
-	void Mix_Reverb();
-	s16_t* Select_Reverb(int channel, float area);
-	void Float_To_Signed(float *data_float, s16_t *data_signed, int samples);
-	void Signed_To_Float(s16_t *data_signed, float *data_float, int samples);
+	void Free_Float();
+	void Free_FX();
+	void Mix_Float();
+	void Mix_Vacuum();
+	void Mix_Submerged();
+	void Mix_Reverb(float room_area);
 };
 
 } // namespace epi

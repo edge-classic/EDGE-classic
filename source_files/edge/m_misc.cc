@@ -189,6 +189,7 @@ static default_t defaults[] =
 	// -------------------- VARS --------------------
 
 	{CFGT_Boolean,  "var_obituaries",    &var_obituaries, 1},
+	{CFGT_Boolean,  "var_cache_sfx",    &var_cache_sfx, 1},
 
 	// -------------------- KEYS --------------------
 

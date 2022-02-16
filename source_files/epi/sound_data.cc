@@ -244,8 +244,8 @@ void sound_data_c::Mix_Vacuum()
 
 void sound_data_c::Mix_Reverb(float room_area)
 {
-	if (current_mix != SFX_Reverb)
-	{
+	//if (current_mix != SFX_Reverb)
+	//{
 		nh_ugens::NHHall<> reverb(freq);
 		if (room_area > 1000000)
 			reverb.set_rt60(1.0f);
@@ -292,7 +292,7 @@ void sound_data_c::Mix_Reverb(float room_area)
 				}
 				current_mix = SFX_Reverb;
 		}
-	}
+	//}
 }
 
 }  // namespace epi

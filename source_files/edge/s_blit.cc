@@ -337,8 +337,8 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 		}
 		else
 		{
-			src_L = chan->data->data_L;
-			src_R = chan->data->data_R;
+			src_L = chan->data->fx_data_L;
+			src_R = chan->data->fx_data_R;
 		}
 	}
 

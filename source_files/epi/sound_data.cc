@@ -33,7 +33,7 @@ sound_data_c::sound_data_c() :
 	float_data_L(NULL), float_data_R(NULL),
 	fx_data_L(NULL), fx_data_R(NULL),
 	priv_data(NULL), ref_count(0), is_sfx(false),
-	current_mix(SFX_None)
+	current_mix(SFX_None), reverbed_room_size(RM_None)
 { }
 
 sound_data_c::~sound_data_c()
@@ -128,7 +128,7 @@ void sound_data_c::Mix_Float()
 			float_data_L = new float[length];
 			for (int i = 0; i < length; i++) 
 			{
-				float_data_L[i] = (data_L[i] + 0.5) / (32767.5);
+				float_data_L[i] = (data_L[i] + .5) / 32767.5;
 			}
 			break;
 
@@ -137,8 +137,8 @@ void sound_data_c::Mix_Float()
 			float_data_R = new float[length];
 			for (int i = 0; i < length; i++) 
 			{
-				float_data_L[i] = (data_L[i] + 0.5) / (32767.5);
-				float_data_R[i] = (data_R[i] + 0.5) / (32767.5);
+				float_data_L[i] = (data_L[i] + .5) / 32767.5;
+				float_data_R[i] = (data_R[i] + .5) / 32767.5;
 			}
 			break;
 
@@ -146,7 +146,7 @@ void sound_data_c::Mix_Float()
 			float_data_L = new float[length * 2];
 			for (int i = 0; i < length * 2; i++) 
 			{
-				float_data_L[i] = (data_L[i] + 0.5) / (32767.5);
+				float_data_L[i] = (data_L[i] + .5) / 32767.5;
 			}
 			break;
 	}
@@ -167,7 +167,7 @@ void sound_data_c::Mix_Submerged()
 				for (int i = 0; i < length; i++) 
 				{
 					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_L[i]);
-					fx_data_L[i] = lpFilter->process(result[0]) * 38767.5 - .5;
+					fx_data_L[i] = CLAMP(INT16_MIN, lpFilter->process(result[0]) * 32767.5 - .5, INT16_MAX);
 				}
 				current_mix = SFX_Submerged;
 				break;
@@ -180,10 +180,11 @@ void sound_data_c::Mix_Submerged()
 				for (int i = 0; i < length; i++) 
 				{
 					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_R[i]);
-					fx_data_L[i] = lpFilter->process(result[0]) * 38767.5 - .5;
-					fx_data_R[i] = lpFilter->process(result[1]) * 38767.5 - .5;
+					fx_data_L[i] = CLAMP(INT16_MIN, lpFilter->process(result[0]) * 32767.5 - .5, INT16_MAX);
+					fx_data_R[i] = CLAMP(INT16_MIN, lpFilter->process(result[1]) * 32767.5 - .5, INT16_MAX);
 				}
 				current_mix = SFX_Submerged;
+				break;
 
 			case SBUF_Interleaved:
 				if (!fx_data_L)
@@ -192,9 +193,10 @@ void sound_data_c::Mix_Submerged()
 				for (int i = 0; i < length * 2; i++) 
 				{
 					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_L[i]);
-					fx_data_L[i] = lpFilter->process(result[0]) * 38767.5 - .5;
+					fx_data_L[i] = CLAMP(INT16_MIN, lpFilter->process(result[0]) * 32767.5 - .5, INT16_MAX);
 				}
 				current_mix = SFX_Submerged;
+				break;
 		}
 	}
 }
@@ -203,7 +205,7 @@ void sound_data_c::Mix_Vacuum()
 {
 	if (current_mix != SFX_Vacuum)
 	{
-		Biquad *lpFilter = new Biquad(bq_type_lowpass, 200.0 / freq, 0.707, 0);
+		Biquad *lpFilter = new Biquad(bq_type_lowpass, 300.0 / freq, 0.707, 0);
 		switch (mode)
 		{
 			case SBUF_Mono:
@@ -212,7 +214,7 @@ void sound_data_c::Mix_Vacuum()
 				fx_data_R = fx_data_L;
 				for (int i = 0; i < length; i++) 
 				{
-					fx_data_L[i] = lpFilter->process(float_data_L[i]) * 38767.5 - .5;
+					fx_data_L[i] = CLAMP(INT16_MIN, lpFilter->process(float_data_L[i]) * 32767.5 - .5, INT16_MAX);
 				}
 				current_mix = SFX_Vacuum;
 				break;
@@ -224,10 +226,11 @@ void sound_data_c::Mix_Vacuum()
 					fx_data_R = new s16_t[length];
 				for (int i = 0; i < length; i++) 
 				{
-					fx_data_L[i] = lpFilter->process(float_data_L[i]) * 38767.5 - .5;
-					fx_data_R[i] = lpFilter->process(float_data_R[i]) * 38767.5 - .5;
+					fx_data_L[i] = CLAMP(INT16_MIN, lpFilter->process(float_data_L[i]) * 32767.5 - .5, INT16_MAX);
+					fx_data_R[i] = CLAMP(INT16_MIN, lpFilter->process(float_data_R[i]) * 32767.5 - .5, INT16_MAX);
 				}
 				current_mix = SFX_Vacuum;
+				break;
 
 			case SBUF_Interleaved:
 				if (!fx_data_L)
@@ -235,24 +238,39 @@ void sound_data_c::Mix_Vacuum()
 				fx_data_R = fx_data_L;
 				for (int i = 0; i < length * 2; i++) 
 				{
-					fx_data_L[i] = lpFilter->process(float_data_L[i]) * 38767.5 - .5;
+					fx_data_L[i] = CLAMP(INT16_MIN, lpFilter->process(float_data_L[i]) * 32767.5 - .5, INT16_MAX);
 				}
 				current_mix = SFX_Vacuum;
+				break;
 		}
 	}
 }
 
 void sound_data_c::Mix_Reverb(float room_area)
 {
-	//if (current_mix != SFX_Reverb)
-	//{
+	reverb_room_size_e current_room_size;
+	if (room_area > 1000000)
+		current_room_size = RM_Large;
+	else if (room_area > 200000)
+		current_room_size = RM_Medium;
+	else
+		current_room_size = RM_Small;
+
+	if (current_mix != SFX_Reverb || reverbed_room_size != current_room_size)
+	{
 		nh_ugens::NHHall<> reverb(freq);
-		if (room_area > 1000000)
-			reverb.set_rt60(1.0f);
-		else if (room_area > 200000)
-			reverb.set_rt60(0.75f);
-		else
-			reverb.set_rt60(0.5f);
+		switch (current_room_size)
+		{
+			case RM_Large:
+				reverb.set_rt60(1.0f);
+				break;
+			case RM_Medium:
+				reverb.set_rt60(0.75f);
+				break;
+			case RM_Small:
+				reverb.set_rt60(0.5f);
+				break;
+		}
 		reverb.set_early_diffusion(0);
 		switch (mode)
 		{
@@ -263,9 +281,10 @@ void sound_data_c::Mix_Reverb(float room_area)
 				for (int i = 0; i < length; i++) 
 				{
 					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_L[i]);
-					fx_data_L[i] = CLAMP(INT16_MIN, result[0] * 38767.5 - .5, INT16_MAX);
+					fx_data_L[i] = CLAMP(INT16_MIN, result[0] * 32767.5 - .5, INT16_MAX);
 				}
 				current_mix = SFX_Reverb;
+				reverbed_room_size = current_room_size;
 				break;
 
 			case SBUF_Stereo:
@@ -276,10 +295,12 @@ void sound_data_c::Mix_Reverb(float room_area)
 				for (int i = 0; i < length; i++) 
 				{
 					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_R[i]);
-					fx_data_L[i] = CLAMP(INT16_MIN, result[0] * 38767.5 - .5, INT16_MAX);
-					fx_data_R[i] = CLAMP(INT16_MIN, result[1] * 38767.5 - .5, INT16_MAX);
+					fx_data_L[i] = CLAMP(INT16_MIN, result[0] * 32767.5 - .5, INT16_MAX);
+					fx_data_R[i] = CLAMP(INT16_MIN, result[1] * 32767.5 - .5, INT16_MAX);
 				}
 				current_mix = SFX_Reverb;
+				reverbed_room_size = current_room_size;
+				break;
 
 			case SBUF_Interleaved:
 				if (!fx_data_L)
@@ -288,11 +309,13 @@ void sound_data_c::Mix_Reverb(float room_area)
 				for (int i = 0; i < length * 2; i++) 
 				{
 					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_L[i]);
-					fx_data_L[i] = CLAMP(INT16_MIN, result[0] * 38767.5 - .5, INT16_MAX);
+					fx_data_L[i] = CLAMP(INT16_MIN, result[0] * 32767.5 - .5, INT16_MAX);
 				}
 				current_mix = SFX_Reverb;
+				reverbed_room_size = current_room_size;
+				break;
 		}
-	//}
+	}
 }
 
 }  // namespace epi

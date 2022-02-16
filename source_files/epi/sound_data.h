@@ -39,6 +39,15 @@ typedef enum
 }
 mixed_sfx_type_e;
 
+typedef enum
+{
+	RM_None = 0,
+	RM_Small = 1,
+	RM_Medium = 2,
+	RM_Large = 3
+}
+reverb_room_size_e;
+
 class sound_data_c
 {
 public:
@@ -69,6 +78,8 @@ public:
 	bool is_sfx;
 
 	mixed_sfx_type_e current_mix;
+
+	reverb_room_size_e reverbed_room_size;
 
 public:
 	sound_data_c();

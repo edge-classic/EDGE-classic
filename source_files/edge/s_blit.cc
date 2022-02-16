@@ -289,43 +289,26 @@ static void MixMono(mix_channel_c *chan, int *dest, int pairs)
 
 	s16_t *src_L;
 
+	if (paused || menuactive)
+		src_L = chan->data->data_L;
+	else
+	{
+		if (!chan->data->is_sfx)
+			src_L = chan->data->data_L;
+		else
+			src_L = chan->data->fx_data_L;
+	}
+
 	int *d_pos = dest;
 	int *d_end = d_pos + pairs;
 
 	fixed22_t offset = chan->offset;
 
-	if (paused || menuactive)
+	while (d_pos < d_end)
 	{
-		src_L = chan->data->data_L;
-		while (d_pos < d_end)
-		{
-			*d_pos++ += src_L[offset >> 10] * chan->volume_L;
+		*d_pos++ += src_L[offset >> 10] * chan->volume_L;
 
-			offset += chan->delta;
-		}
-	}
-	else
-	{
-		if (!chan->data->is_sfx)
-		{
-			src_L = chan->data->data_L;
-			while (d_pos < d_end)
-			{
-				*d_pos++ += src_L[offset >> 10] * chan->volume_L;
-
-				offset += chan->delta;
-			}
-		}
-		else
-		{
-			src_L = chan->data->fx_data_L;
-			while (d_pos < d_end)
-			{
-				*d_pos++ += src_L[offset >> 10] * chan->volume_L;
-
-				offset += chan->delta;
-			}
-		}
+		offset += chan->delta;
 	}
 
 	chan->offset = offset;
@@ -340,22 +323,10 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 	s16_t *src_L;
 	s16_t *src_R;
 
-	int *d_pos = dest;
-	int *d_end = d_pos + pairs * 2;
-
-	fixed22_t offset = chan->offset;
-
 	if (paused || menuactive)
 	{
 		src_L = chan->data->data_L;
 		src_R = chan->data->data_R;
-		while (d_pos < d_end)
-		{
-			*d_pos++ += src_L[offset >> 10] * chan->volume_L;
-			*d_pos++ += src_R[offset >> 10] * chan->volume_R;
-
-			offset += chan->delta;
-		}
 	}
 	else
 	{
@@ -363,28 +334,27 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 		{
 			src_L = chan->data->data_L;
 			src_R = chan->data->data_R;
-			while (d_pos < d_end)
-			{
-				*d_pos++ += src_L[offset >> 10] * chan->volume_L;
-				*d_pos++ += src_R[offset >> 10] * chan->volume_R;
-
-				offset += chan->delta;
-			}
 		}
 		else
 		{
-			src_L = chan->data->fx_data_L;
-			src_R = chan->data->fx_data_R;
-			while (d_pos < d_end)
-			{
-				*d_pos++ += src_L[offset >> 10] * chan->volume_L;
-				*d_pos++ += src_R[offset >> 10] * chan->volume_R;
-
-				offset += chan->delta;
-			}	
+			src_L = chan->data->data_L;
+			src_R = chan->data->data_R;
 		}
 	}
-	
+
+	int *d_pos = dest;
+	int *d_end = d_pos + pairs * 2;
+
+	fixed22_t offset = chan->offset;
+
+	while (d_pos < d_end)
+	{
+		*d_pos++ += src_L[offset >> 10] * chan->volume_L;
+		*d_pos++ += src_R[offset >> 10] * chan->volume_R;
+
+		offset += chan->delta;
+	}
+
 	chan->offset = offset;
 
 	SYS_ASSERT(offset - chan->delta < chan->length);
@@ -399,43 +369,29 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 
 	s16_t *src_L;
 
+	if (paused || menuactive)
+		src_L = chan->data->data_L;
+	else
+	{
+		if (!chan->data->is_sfx)
+			src_L = chan->data->data_L;
+		else
+			src_L = chan->data->fx_data_L;
+	}
+
 	int *d_pos = dest;
 	int *d_end = d_pos + pairs * 2;
 
 	fixed22_t offset = chan->offset;
 
-	if (paused || menuactive)
+	while (d_pos < d_end)
 	{
-		src_L = chan->data->data_L;
-		while (d_pos < d_end)
-		{
-			*d_pos++ += src_L[offset >> 10] * chan->volume_L;
+		fixed22_t pos = (offset >> 9) & ~1;
 
-			offset += chan->delta;
-		}
-	}
-	else
-	{
-		if (!chan->data->is_sfx)
-		{
-			src_L = chan->data->data_L;
-			while (d_pos < d_end)
-			{
-				*d_pos++ += src_L[offset >> 10] * chan->volume_L;
+		*d_pos++ += src_L[pos  ] * chan->volume_L;
+		*d_pos++ += src_L[pos|1] * chan->volume_R;
 
-				offset += chan->delta;
-			}
-		}
-		else
-		{
-			src_L = chan->data->fx_data_L;
-			while (d_pos < d_end)
-			{
-				*d_pos++ += src_L[offset >> 10] * chan->volume_L;
-
-				offset += chan->delta;
-			}
-		}
+		offset += chan->delta;
 	}
 
 	chan->offset = offset;

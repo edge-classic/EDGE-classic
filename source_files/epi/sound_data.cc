@@ -126,6 +126,7 @@ void sound_data_c::Mix_Float()
 	{
 		case SBUF_Mono:
 			float_data_L = new float[length];
+			float_data_R = float_data_L;
 			for (int i = 0; i < length; i++) 
 			{
 				float_data_L[i] = data_L[i] / (data_L[i] < 0 ? 32768.0 : 32767.0);
@@ -144,6 +145,7 @@ void sound_data_c::Mix_Float()
 
 		case SBUF_Interleaved:
 			float_data_L = new float[length * 2];
+			float_data_R = float_data_L;
 			for (int i = 0; i < length * 2; i++) 
 			{
 				float_data_L[i] = data_L[i] / (data_L[i] < 0 ? 32768.0 : 32767.0);
@@ -315,7 +317,7 @@ void sound_data_c::Mix_Reverb(float room_area)
 					result[0] = ((result[0]  < -1) ? -1 : ((result[0]  > 1) ? 1 : result[0]));
 					fx_data_L[i] = result[0]  * (result[0]  < 0 ? 32768 : 32767);
 					result[1] = ((result[1]  < -1) ? -1 : ((result[1]  > 1) ? 1 : result[1]));
-					fx_data_L[i] = result[1]  * (result[1]  < 0 ? 32768 : 32767);
+					fx_data_R[i] = result[1]  * (result[1]  < 0 ? 32768 : 32767);
 				}
 				current_mix = SFX_Reverb;
 				reverbed_room_size = current_room_size;

@@ -62,10 +62,6 @@ public:
 	s16_t *data_L;
 	s16_t *data_R;
 
-	// Floating-point versions of the above. Created and cached for FX mixing.
-	float *float_data_L;
-	float *float_data_R;
-
 	// Temp buffer for mixed SFX. Will be overwritten as needed.
 	s16_t *fx_data_L;
 	s16_t *fx_data_R;
@@ -86,11 +82,8 @@ public:
 	~sound_data_c();
 
 	void Allocate(int samples, int buf_mode);
-	void Allocate_Reverb();
 	void Free();
-	void Free_Float();
 	void Free_FX();
-	void Mix_Float();
 	void Mix_Vacuum();
 	void Mix_Submerged();
 	void Mix_Reverb(float room_area);

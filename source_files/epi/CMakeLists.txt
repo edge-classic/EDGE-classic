@@ -45,5 +45,4 @@ add_library(
   utility.cc
 )
 
-target_include_directories(edge_epi PRIVATE ../filters)
 target_include_directories(edge_epi PRIVATE ../stb)

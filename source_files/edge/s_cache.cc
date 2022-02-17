@@ -190,12 +190,9 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	else
 		OK = Load_DOOM(buf, data, length);
 
-	// Create "environmental" sounds - Dasho
+	// Tag sound as SFX for environmental effects - Dasho
 	if (OK)
-	{
 		buf->is_sfx = true;
-		buf->Mix_Float();
-	}
 
 	return OK;
 }

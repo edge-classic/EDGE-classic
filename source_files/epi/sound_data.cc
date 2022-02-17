@@ -21,16 +21,12 @@
 
 #include <vector>
 
-#include "Biquad.h"
-#include "nh_hall.hpp"
-
 namespace epi
 {
 
 sound_data_c::sound_data_c() :
 	length(0), freq(0), mode(0),
 	data_L(NULL), data_R(NULL),
-	float_data_L(NULL), float_data_R(NULL),
 	fx_data_L(NULL), fx_data_R(NULL),
 	priv_data(NULL), ref_count(0), is_sfx(false),
 	current_mix(SFX_None), reverbed_room_size(RM_None)
@@ -54,20 +50,7 @@ void sound_data_c::Free()
 	data_L = NULL;
 	data_R = NULL;
 
-	Free_Float();
 	Free_FX();
-}
-
-void sound_data_c::Free_Float()
-{
-	if (float_data_R && float_data_R != float_data_L)
-		delete[] float_data_R;
-
-	if (float_data_L)
-		delete[] float_data_L;
-
-	float_data_L = NULL;
-	float_data_R = NULL;
 }
 
 void sound_data_c::Free_FX()
@@ -120,60 +103,44 @@ void sound_data_c::Allocate(int samples, int buf_mode)
 	}
 }
 
-void sound_data_c::Mix_Float()
-{
-	switch (mode)
-	{
-		case SBUF_Mono:
-			float_data_L = new float[length];
-			float_data_R = float_data_L;
-			for (int i = 0; i < length; i++) 
-			{
-				float_data_L[i] = data_L[i] / (data_L[i] < 0 ? 32768.0 : 32767.0);
-			}
-			break;
-
-		case SBUF_Stereo:
-			float_data_L = new float[length];
-			float_data_R = new float[length];
-			for (int i = 0; i < length; i++) 
-			{
-				float_data_L[i] = data_L[i] / (data_L[i] < 0 ? 32768.0 : 32767.0);
-				float_data_R[i] = data_R[i] / (data_R[i] < 0 ? 32768.0 : 32767.0);
-			}
-			break;
-
-		case SBUF_Interleaved:
-			float_data_L = new float[length * 2];
-			float_data_R = float_data_L;
-			for (int i = 0; i < length * 2; i++) 
-			{
-				float_data_L[i] = data_L[i] / (data_L[i] < 0 ? 32768.0 : 32767.0);
-			}
-			break;
-	}
-}
-
 void sound_data_c::Mix_Submerged()
 {
 	if (current_mix != SFX_Submerged)
 	{
-		Biquad *lpFilter = new Biquad(bq_type_lowpass, 750.0 / freq, 0.707, 0);
-		nh_ugens::NHHall<> reverb(freq);
+		// Setup lowpass + reverb parameters
+		int out_L = 0;
+		int accum_L = 0;
+    	int out_R = 0;
+    	int accum_R = 0;
+    	int k = 3;
+		s16_t *reverb_buffer_L;
+		s16_t *reverb_buffer_R;
+		int write_pos = 0;
+		int read_pos = 0;
+		int reverb_ratio = 20;
+		int reverb_delay = 200;
+
 		switch (mode)
 		{
 			case SBUF_Mono:
 				if (!fx_data_L)
 					fx_data_L = new s16_t[length];
 				fx_data_R = fx_data_L;
+				reverb_buffer_L = new s16_t[length];
+				memset(reverb_buffer_L, 0, length * sizeof(s16_t));
 				for (int i = 0; i < length; i++) 
 				{
-					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_L[i]);
-					float submerged = lpFilter->process(result[0]);
-					submerged = ((submerged < -1) ? -1 : ((submerged > 1) ? 1 : submerged));
-					fx_data_L[i] = submerged * (submerged < 0 ? 32768 : 32767);
+					fx_data_L[i] = out_L = accum_L >> k;
+                	accum_L = accum_L - out_L + data_L[i];
+					long long reverbed = fx_data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
+					fx_data_L[i] = CLAMP(INT16_MIN, reverbed, INT16_MAX);
+					reverb_buffer_L[write_pos] = reverbed;
+					write_pos = (write_pos + 1) % (length);
+					read_pos = (read_pos + 1) % (length);
 				}
 				current_mix = SFX_Submerged;
+				delete[] reverb_buffer_L;
+				reverb_buffer_L = NULL;
 				break;
 
 			case SBUF_Stereo:
@@ -181,31 +148,51 @@ void sound_data_c::Mix_Submerged()
 					fx_data_L = new s16_t[length];
 				if (!fx_data_R)
 					fx_data_R = new s16_t[length];
+				reverb_buffer_L = new s16_t[length];
+				reverb_buffer_R = new s16_t[length];
+				memset(reverb_buffer_L, 0, length * sizeof(s16_t));
+				memset(reverb_buffer_R, 0, length * sizeof(s16_t));
 				for (int i = 0; i < length; i++) 
 				{
-					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_R[i]);
-					float submerged = lpFilter->process(result[0]);
-					submerged = ((submerged < -1) ? -1 : ((submerged > 1) ? 1 : submerged));
-					fx_data_L[i] = submerged * (submerged < 0 ? 32768 : 32767);
-					submerged = lpFilter->process(result[1]);
-					submerged = ((submerged < -1) ? -1 : ((submerged > 1) ? 1 : submerged));
-					fx_data_R[i] = submerged * (submerged < 0 ? 32768 : 32767);
+					fx_data_L[i] = out_L = accum_L >> k;
+                	accum_L = accum_L - out_L + data_L[i];
+					fx_data_R[i] = out_R = accum_R >> k;
+                	accum_R = accum_R - out_R + data_R[i];
+					long long reverbed_L = fx_data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
+					long long reverbed_R = fx_data_R[i] + reverb_buffer_R[read_pos] * reverb_ratio / 100;
+					fx_data_L[i] = CLAMP(INT16_MIN, reverbed_L, INT16_MAX);
+					fx_data_R[i] = CLAMP(INT16_MIN, reverbed_R, INT16_MAX);
+					reverb_buffer_L[write_pos] = reverbed_L;
+					reverb_buffer_R[write_pos] = reverbed_R;
+					write_pos = (write_pos + 1) % (length);
+					read_pos = (read_pos + 1) % (length);
 				}
 				current_mix = SFX_Submerged;
+				delete[] reverb_buffer_L;
+				delete[] reverb_buffer_R;
+				reverb_buffer_L = NULL;
+				reverb_buffer_R = NULL;
 				break;
 
 			case SBUF_Interleaved:
 				if (!fx_data_L)
 					fx_data_L = new s16_t[length * 2];
 				fx_data_R = fx_data_L;
+				reverb_buffer_L = new s16_t[length * 2];
+				memset(reverb_buffer_L, 0, length * sizeof(s16_t) * 2);
 				for (int i = 0; i < length * 2; i++) 
 				{
-					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_L[i]);
-					float submerged = lpFilter->process(result[0]);
-					submerged = ((submerged < -1) ? -1 : ((submerged > 1) ? 1 : submerged));
-					fx_data_L[i] = submerged * (submerged < 0 ? 32768 : 32767);
+					fx_data_L[i] = out_L = accum_L >> k;
+                	accum_L = accum_L - out_L + data_L[i];
+					long long reverbed = fx_data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
+					fx_data_L[i] = CLAMP(INT16_MIN, reverbed, INT16_MAX);
+					reverb_buffer_L[write_pos] = reverbed;
+					write_pos = (write_pos + 1) % (length * 2);
+					read_pos = (read_pos + 1) % (length * 2);
 				}
 				current_mix = SFX_Submerged;
+				delete[] reverb_buffer_L;
+				reverb_buffer_L = NULL;
 				break;
 		}
 	}
@@ -215,7 +202,13 @@ void sound_data_c::Mix_Vacuum()
 {
 	if (current_mix != SFX_Vacuum)
 	{
-		Biquad *lpFilter = new Biquad(bq_type_lowpass, 200.0 / freq, 0.707, 0);
+		// Setup lowpass parameters
+		int out_L = 0;
+		int accum_L = 0;
+    	int out_R = 0;
+    	int accum_R = 0;
+    	int k = 4;
+
 		switch (mode)
 		{
 			case SBUF_Mono:
@@ -224,9 +217,8 @@ void sound_data_c::Mix_Vacuum()
 				fx_data_R = fx_data_L;
 				for (int i = 0; i < length; i++) 
 				{
-					float vacuumed = lpFilter->process(float_data_L[i]);
-					vacuumed = ((vacuumed < -1) ? -1 : ((vacuumed > 1) ? 1 : vacuumed));
-					fx_data_L[i] = vacuumed * (vacuumed < 0 ? 32768 : 32767);
+					fx_data_L[i] = out_L = accum_L >> k;
+                	accum_L = accum_L - out_L + data_L[i];
 				}
 				current_mix = SFX_Vacuum;
 				break;
@@ -238,12 +230,10 @@ void sound_data_c::Mix_Vacuum()
 					fx_data_R = new s16_t[length];
 				for (int i = 0; i < length; i++) 
 				{
-					float vacuumed = lpFilter->process(float_data_L[i]);
-					vacuumed = ((vacuumed < -1) ? -1 : ((vacuumed > 1) ? 1 : vacuumed));
-					fx_data_L[i] = vacuumed * (vacuumed < 0 ? 32768 : 32767);
-					vacuumed = lpFilter->process(float_data_R[i]);
-					vacuumed = ((vacuumed < -1) ? -1 : ((vacuumed > 1) ? 1 : vacuumed));
-					fx_data_R[i] = vacuumed * (vacuumed < 0 ? 32768 : 32767);
+					fx_data_L[i] = out_L = accum_L >> k;
+                	accum_L = accum_L - out_L + data_L[i];
+					fx_data_R[i] = out_R = accum_R >> k;
+                	accum_R = accum_R - out_R + data_R[i];
 				}
 				current_mix = SFX_Vacuum;
 				break;
@@ -254,9 +244,8 @@ void sound_data_c::Mix_Vacuum()
 				fx_data_R = fx_data_L;
 				for (int i = 0; i < length * 2; i++) 
 				{
-					float vacuumed = lpFilter->process(float_data_L[i]);
-					vacuumed = ((vacuumed < -1) ? -1 : ((vacuumed > 1) ? 1 : vacuumed));
-					fx_data_L[i] = vacuumed * (vacuumed < 0 ? 32768 : 32767);
+					fx_data_L[i] = out_L = accum_L >> k;
+                	accum_L = accum_L - out_L + data_L[i];
 				}
 				current_mix = SFX_Vacuum;
 				break;
@@ -276,34 +265,48 @@ void sound_data_c::Mix_Reverb(float room_area)
 
 	if (current_mix != SFX_Reverb || reverbed_room_size != current_room_size)
 	{
-		nh_ugens::NHHall<> reverb(freq);
+		// Setup reverb parameters
+		s16_t *reverb_buffer_L;
+		s16_t *reverb_buffer_R;
+		int write_pos = 0;
+		int read_pos = 0;
+		int reverb_ratio, reverb_delay;
 		switch (current_room_size)
 		{
 			case RM_Large:
-				reverb.set_rt60(1.0f);
+				reverb_ratio = 40;
+				reverb_delay = 200;
 				break;
 			case RM_Medium:
-				reverb.set_rt60(0.75f);
+				reverb_ratio = 30;
+				reverb_delay = 175;
 				break;
 			case RM_Small:
-				reverb.set_rt60(0.5f);
+				reverb_ratio = 20;
+				reverb_delay = 150;
 				break;
 		}
-		reverb.set_early_diffusion(0);
 		switch (mode)
 		{
 			case SBUF_Mono:
 				if (!fx_data_L)
 					fx_data_L = new s16_t[length];
 				fx_data_R = fx_data_L;
+				reverb_buffer_L = new s16_t[length];
+				memset(reverb_buffer_L, 0, length * sizeof(s16_t));
+				read_pos = ((write_pos - reverb_delay * freq / 1000) + length) % (length);
 				for (int i = 0; i < length; i++) 
 				{
-					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_L[i]);
-					result[0] = ((result[0]  < -1) ? -1 : ((result[0]  > 1) ? 1 : result[0]));
-					fx_data_L[i] = result[0]  * (result[0]  < 0 ? 32768 : 32767);
+					long long reverbed = data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
+					fx_data_L[i] = CLAMP(INT16_MIN, reverbed, INT16_MAX);
+					reverb_buffer_L[write_pos] = reverbed;
+					write_pos = (write_pos + 1) % (length);
+					read_pos = (read_pos + 1) % (length);
 				}
 				current_mix = SFX_Reverb;
 				reverbed_room_size = current_room_size;
+				delete[] reverb_buffer_L;
+				reverb_buffer_L = NULL;
 				break;
 
 			case SBUF_Stereo:
@@ -311,30 +314,48 @@ void sound_data_c::Mix_Reverb(float room_area)
 					fx_data_L = new s16_t[length];
 				if (!fx_data_R)
 					fx_data_R = new s16_t[length];
+				reverb_buffer_L = new s16_t[length];
+				reverb_buffer_R = new s16_t[length];
+				memset(reverb_buffer_L, 0, length * sizeof(s16_t));
+				memset(reverb_buffer_R, 0, length * sizeof(s16_t));
 				for (int i = 0; i < length; i++) 
 				{
-					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_R[i]);
-					result[0] = ((result[0]  < -1) ? -1 : ((result[0]  > 1) ? 1 : result[0]));
-					fx_data_L[i] = result[0]  * (result[0]  < 0 ? 32768 : 32767);
-					result[1] = ((result[1]  < -1) ? -1 : ((result[1]  > 1) ? 1 : result[1]));
-					fx_data_R[i] = result[1]  * (result[1]  < 0 ? 32768 : 32767);
+					long long reverbed_L = data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
+					long long reverbed_R = data_R[i] + reverb_buffer_R[read_pos] * reverb_ratio / 100;
+					fx_data_L[i] = CLAMP(INT16_MIN, reverbed_L, INT16_MAX);
+					fx_data_R[i] = CLAMP(INT16_MIN, reverbed_R, INT16_MAX);
+					reverb_buffer_L[write_pos] = reverbed_L;
+					reverb_buffer_R[write_pos] = reverbed_R;
+					write_pos = (write_pos + 1) % (length);
+					read_pos = (read_pos + 1) % (length);					
 				}
 				current_mix = SFX_Reverb;
 				reverbed_room_size = current_room_size;
+				delete[] reverb_buffer_L;
+				delete[] reverb_buffer_R;
+				reverb_buffer_L = NULL;
+				reverb_buffer_R = NULL;
 				break;
 
 			case SBUF_Interleaved:
 				if (!fx_data_L)
 					fx_data_L = new s16_t[length * 2];
 				fx_data_R = fx_data_L;
+				reverb_buffer_L = new s16_t[length * 2];
+				memset(reverb_buffer_L, 0, length * sizeof(s16_t) * 2);
+				read_pos = ((write_pos - reverb_delay * freq / 1000) + length * 2) % (length * 2);
 				for (int i = 0; i < length * 2; i++) 
 				{
-					nh_ugens::Stereo result = reverb.process(float_data_L[i], float_data_L[i]);
-					result[0] = ((result[0]  < -1) ? -1 : ((result[0]  > 1) ? 1 : result[0]));
-					fx_data_L[i] = result[0]  * (result[0]  < 0 ? 32768 : 32767);
+					long long reverbed = data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
+					fx_data_L[i] = CLAMP(INT16_MIN, reverbed, INT16_MAX);
+					reverb_buffer_L[write_pos] = reverbed;
+					write_pos = (write_pos + 1) % (length * 2);
+					read_pos = (read_pos + 1) % (length * 2);
 				}
 				current_mix = SFX_Reverb;
 				reverbed_room_size = current_room_size;
+				delete[] reverb_buffer_L;
+				reverb_buffer_L = NULL;
 				break;
 		}
 	}

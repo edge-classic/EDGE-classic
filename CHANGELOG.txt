@@ -8,7 +8,7 @@ CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)
 Bugs fixed
 ----------
 + Longstanding SWIM sector special bug fixed. EDGE would continue flagging the player as being in a SWIM sector even after leaving it. Happens if SWIM special is used without AIRLESS(underwater) also. Most noticeable side effect was being unable to jump/crouch and bizarre momentum/speed
-
++ Downgraded errors for incorrect 3D extrafloors to warnings instead. 
 
 General Improvements
 --------------------

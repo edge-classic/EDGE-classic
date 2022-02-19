@@ -843,17 +843,17 @@ void P_AddExtraFloor(sector_t *sec, line_t *line)
 			break;
 
 		case EXFIT_StuckInCeiling:
-			I_Error("Extrafloor with z range of %1.0f / %1.0f is stuck "
+			I_Warning("Extrafloor with z range of %1.0f / %1.0f is stuck "
 				"in sector #%d's ceiling.\n",
 				newbie->bottom_h, newbie->top_h, (int)(sec - sectors));
 
 		case EXFIT_StuckInFloor:
-			I_Error("Extrafloor with z range of %1.0f / %1.0f is stuck "
+			I_Warning("Extrafloor with z range of %1.0f / %1.0f is stuck "
 				"in sector #%d's floor.\n",
 				newbie->bottom_h, newbie->top_h, (int)(sec - sectors));
 
 		default:
-			I_Error("Extrafloor with z range of %1.0f / %1.0f is stuck "
+			I_Warning("Extrafloor with z range of %1.0f / %1.0f is stuck "
 				"in sector #%d in another extrafloor.\n",
 				newbie->bottom_h, newbie->top_h, (int)(sec - sectors));
 	}

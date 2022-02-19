@@ -883,18 +883,22 @@ static void P_XYMovement(mobj_t * mo, const region_properties_t *props)
 					//P_ShootSpecialLine()->P_ActivateSpecialLine() can remove
 					// the special so we need to get the info before calling it
 					const linetype_c *tempspecial = blockline->special;
+					const mobjtype_c *DebrisThing;
+
+					if(blockline->special->effectobject)
+					{
+						const char *EffectObjectName = blockline->special->effectobject->name;
+						DebrisThing = mobjtypes.Lookup(EffectObjectName);
+					}
 
 					P_ShootSpecialLine(blockline, 
 						PointOnLineSide(mo->x, mo->y, blockline), mo->source);
 					
-					const mobjtype_c *DebrisThing;
-					DebrisThing = tempspecial->effectobject;
+					//DebrisThing = blockline->special->effectobject;
 					if (DebrisThing && tempspecial->type == line_shootable)
 					{
-						//For some bizarre reason calling this deletes blockline?!
-						//P_SpawnBlood(mo->x, mo->y, mo->z, 0, mo->angle + ANG180, DebrisThing);
-
 						P_UnblockLineEffectDebris(blockline, tempspecial);
+						P_SpawnBlood(mo->x, mo->y, mo->z, 0, mo->angle + ANG180, DebrisThing);
 					}
 				}
 			}

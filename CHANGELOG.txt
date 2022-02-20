@@ -61,6 +61,11 @@ New Features
 
 + New WebSID-based music player; Commodore-64 SID format songs are now supported
 
++ Main menu UI by default is now text based and uses strings from language.ddf and colouring/fonts defined in styles.ddf.
+  If a pwad contains custom menu graphics then they will be used instead.
+  
++ 2 new custom fonts included in edge-defs.wad for use with our new dynamic menu: Verdana-style font and Doom-style
+
 
 CHANGELOG for EDGE-Classic 1.0 (since EDGE-Classic Preview 1)
 ====================================

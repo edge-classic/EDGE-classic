@@ -1779,6 +1779,14 @@ static bool PTR_UseTraverse(intercept_t * in, void *dataptr)
 	// can't use more than one special line in a row
 	// -AJA- 1999/09/25: ...unless the line has the PASSTHRU flag
 	//       (Boom compatibility).
+	
+	//Lobo 2022: slopes should be considered PASSTHRU by default
+	// otherwise you cant open a door if there's a slope just in front of it
+	if (ld->special)
+	{
+		if(ld->special->slope_type & SLP_DetailFloor || ld->special->slope_type & SLP_DetailCeiling)
+			return true;
+	}	
 
 	return (ld->flags & MLF_PassThru) ? true : false;
 }

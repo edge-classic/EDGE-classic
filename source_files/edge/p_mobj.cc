@@ -885,18 +885,12 @@ static void P_XYMovement(mobj_t * mo, const region_properties_t *props)
 					const linetype_c *tempspecial = blockline->special;
 					const mobjtype_c *DebrisThing;
 
-					if(blockline->special->effectobject)
-					{
-						const char *EffectObjectName = blockline->special->effectobject->name;
-						DebrisThing = mobjtypes.Lookup(EffectObjectName);
-					}
-
 					P_ShootSpecialLine(blockline, 
 						PointOnLineSide(mo->x, mo->y, blockline), mo->source);
 					
-					//DebrisThing = blockline->special->effectobject;
-					if (DebrisThing && tempspecial->type == line_shootable)
+					if (tempspecial->effectobject && tempspecial->type == line_shootable)
 					{
+						DebrisThing = tempspecial->effectobject;
 						P_UnblockLineEffectDebris(blockline, tempspecial);
 						P_SpawnBlood(mo->x, mo->y, mo->z, 0, mo->angle + ANG180, DebrisThing);
 					}

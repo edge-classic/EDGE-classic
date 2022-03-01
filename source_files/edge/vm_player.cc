@@ -802,29 +802,32 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
     {
         float player_floor_height = ui_player_who->mo->floorz;
         extrafloor_t *exfloor_check = ui_player_who->mo->subsector->sector->exfloor_first;
-        while (exfloor_check->lower) {
-            exfloor_check = exfloor_check->lower;
-        }
-		if (player_floor_height < exfloor_check->top_h) {
+		if (exfloor_check)
+		{
+			do {
+				if (exfloor_check->lower)
+					exfloor_check = exfloor_check->lower;
+			} while (exfloor_check->lower);
+			if (player_floor_height < exfloor_check->top_h) {
+				vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
+			}
+			do {
+				if (player_floor_height == exfloor_check->top_h)
+					vm->ReturnString(exfloor_check->ef_line->frontsector->floor.image->name);
+				if (exfloor_check->higher)
+					exfloor_check = exfloor_check->higher;
+			} while (exfloor_check->higher);
+			if (ui_player_who->mo->subsector->sector->bottom_liq)
+				exfloor_check = ui_player_who->mo->subsector->sector->bottom_liq;
+			do {
+				if (player_floor_height == exfloor_check->top_h)
+					vm->ReturnString(exfloor_check->ef_line->frontsector->floor.image->name);
+				if (exfloor_check->higher)
+					exfloor_check = exfloor_check->higher;
+			} while (exfloor_check->higher);
+		}
+		else
 			vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
-		}
-        do {
-            if (player_floor_height == exfloor_check->top_h) {
-                vm->ReturnString(exfloor_check->ef_line->frontsector->floor.image->name);
-            }
-            if (exfloor_check->higher)
-                exfloor_check = exfloor_check->higher;
-        } while (exfloor_check->higher);
-		if (ui_player_who->mo->subsector->sector->bottom_liq) {
-			exfloor_check = ui_player_who->mo->subsector->sector->bottom_liq;
-		}
-        do {
-            if (player_floor_height == exfloor_check->top_h) {
-                vm->ReturnString(exfloor_check->ef_line->frontsector->floor.image->name);
-            }
-            if (exfloor_check->higher)
-                exfloor_check = exfloor_check->higher;
-        } while (exfloor_check->higher);
     }
 }
 

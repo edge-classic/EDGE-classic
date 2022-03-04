@@ -169,16 +169,16 @@ void mix_channel_c::ComputeVolume()
 		{
 			float dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
 
-			float number_of_blockers = 0;
+			//float number_of_blockers = 0;
 
-			P_PathTraverse(pos->x, pos->y, listen_x, listen_y, PT_ADDLINES, S_SoundPath, &number_of_blockers);
+			//P_PathTraverse(pos->x, pos->y, listen_x, listen_y, PT_ADDLINES, S_SoundPath, &number_of_blockers);
 
-			dist *= (1 + (number_of_blockers / 5));
+			//dist *= (1 + (number_of_blockers / 5));
 			
 			// -AJA- this equation was chosen to mimic the DOOM falloff
 			//       function, but instead of cutting out @ dist=1600 it
 			//       tapers off exponentially.
-			mul = exp(-MAX(1.0f, dist - S_CLOSE_DIST) / 400.0f);
+			mul = exp(-MAX(1.0f, dist - S_CLOSE_DIST) / 800.0f);
 		}
 	}
 
@@ -289,15 +289,18 @@ static void MixMono(mix_channel_c *chan, int *dest, int pairs)
 
 	s16_t *src_L;
 
-	if (paused || menuactive)
+	src_L = chan->data->data_L;
+
+	/*if (paused || menuactive)
 		src_L = chan->data->data_L;
 	else
 	{
+		
 		if (!chan->data->is_sfx)
 			src_L = chan->data->data_L;
 		else
 			src_L = chan->data->fx_data_L;
-	}
+	}*/
 
 	int *d_pos = dest;
 	int *d_end = d_pos + pairs;
@@ -323,7 +326,10 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 	s16_t *src_L;
 	s16_t *src_R;
 
-	if (paused || menuactive)
+	src_L = chan->data->data_L;
+	src_R = chan->data->data_R;
+
+	/*if (paused || menuactive)
 	{
 		src_L = chan->data->data_L;
 		src_R = chan->data->data_R;
@@ -340,7 +346,7 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 			src_L = chan->data->fx_data_L;
 			src_R = chan->data->fx_data_R;
 		}
-	}
+	}*/
 
 	int *d_pos = dest;
 	int *d_end = d_pos + pairs * 2;
@@ -369,7 +375,9 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 
 	s16_t *src_L;
 
-	if (paused || menuactive)
+	src_L = chan->data->data_L;
+
+	/*if (paused || menuactive)
 		src_L = chan->data->data_L;
 	else
 	{
@@ -377,7 +385,7 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 			src_L = chan->data->data_L;
 		else
 			src_L = chan->data->fx_data_L;
-	}
+	}*/
 
 	int *d_pos = dest;
 	int *d_end = d_pos + pairs * 2;

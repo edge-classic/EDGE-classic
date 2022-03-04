@@ -289,9 +289,7 @@ static void MixMono(mix_channel_c *chan, int *dest, int pairs)
 
 	s16_t *src_L;
 
-	src_L = chan->data->data_L;
-
-	/*if (paused || menuactive)
+	if (paused || menuactive)
 		src_L = chan->data->data_L;
 	else
 	{
@@ -300,7 +298,7 @@ static void MixMono(mix_channel_c *chan, int *dest, int pairs)
 			src_L = chan->data->data_L;
 		else
 			src_L = chan->data->fx_data_L;
-	}*/
+	}
 
 	int *d_pos = dest;
 	int *d_end = d_pos + pairs;
@@ -326,10 +324,7 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 	s16_t *src_L;
 	s16_t *src_R;
 
-	src_L = chan->data->data_L;
-	src_R = chan->data->data_R;
-
-	/*if (paused || menuactive)
+	if (paused || menuactive)
 	{
 		src_L = chan->data->data_L;
 		src_R = chan->data->data_R;
@@ -346,7 +341,7 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 			src_L = chan->data->fx_data_L;
 			src_R = chan->data->fx_data_R;
 		}
-	}*/
+	}
 
 	int *d_pos = dest;
 	int *d_end = d_pos + pairs * 2;
@@ -375,9 +370,7 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 
 	s16_t *src_L;
 
-	src_L = chan->data->data_L;
-
-	/*if (paused || menuactive)
+	if (paused || menuactive)
 		src_L = chan->data->data_L;
 	else
 	{
@@ -385,7 +378,7 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 			src_L = chan->data->data_L;
 		else
 			src_L = chan->data->fx_data_L;
-	}*/
+	}
 
 	int *d_pos = dest;
 	int *d_end = d_pos + pairs * 2;

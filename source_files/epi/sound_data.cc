@@ -288,7 +288,35 @@ void sound_data_c::Mix_Reverb(float room_area)
 		}
 		switch (mode)
 		{
+
 			case SBUF_Mono:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length];
+				fx_data_R = fx_data_L;
+				memcpy(fx_data_L, data_L, length * sizeof(s16_t));
+				current_mix = SFX_Reverb;
+				reverbed_room_size = current_room_size;
+				break;
+			case SBUF_Stereo:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length];
+				if (!fx_data_R)
+					fx_data_R = new s16_t[length];
+				memcpy(fx_data_L, data_L, length * sizeof(s16_t));
+				memcpy(fx_data_R, data_R, length * sizeof(s16_t));
+				current_mix = SFX_Reverb;
+				reverbed_room_size = current_room_size;
+				break;
+			case SBUF_Interleaved:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length * 2];
+				fx_data_R = fx_data_L;
+				memcpy(fx_data_L, data_L, length * 2 * sizeof(s16_t));
+				current_mix = SFX_Reverb;
+				reverbed_room_size = current_room_size;
+				break;
+
+			/*case SBUF_Mono:
 				if (!fx_data_L)
 					fx_data_L = new s16_t[length];
 				fx_data_R = fx_data_L;
@@ -356,7 +384,7 @@ void sound_data_c::Mix_Reverb(float room_area)
 				reverbed_room_size = current_room_size;
 				delete[] reverb_buffer_L;
 				reverb_buffer_L = NULL;
-				break;
+				break;*/
 		}
 	}
 }

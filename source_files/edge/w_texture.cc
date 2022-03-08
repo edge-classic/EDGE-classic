@@ -162,7 +162,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 		{
 			I_Warning("W_InitTextures: Texture '%.8s' has no patches", mtexture->name);
 			//I_Error("W_InitTextures: Texture '%.8s' has no patches", mtexture->name);
-			patchcount = 1; //pretend we have 1
+			patchcount = 0; //mark it as a dud
 		} 
 
 		int width = EPI_LE_S16(mtexture->width);

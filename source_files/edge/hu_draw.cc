@@ -421,12 +421,13 @@ void HUD_DrawImageTitleWS(const image_c *title_image)
 	//1. Calculate scaling to apply.
 	TempScale = 200;
 	TempScale /= title_image->actual_h;
-	TempWidth = title_image->actual_w * TempScale;
+	//TempWidth = title_image->actual_w * TempScale;
+	TempWidth = IM_WIDTH(title_image) * TempScale; //respect ASPECT in images.ddf at least
 	TempHeight = title_image->actual_h * TempScale;
 	
 	//2. Calculate centering on screen.
 	CenterX = 160;
-	CenterX -= (title_image->actual_w * TempScale)/ 2;
+	CenterX -= TempWidth / 2;
 
 	//3. Draw it.
 	HUD_StretchImage(CenterX, 0, TempWidth, TempHeight, title_image);

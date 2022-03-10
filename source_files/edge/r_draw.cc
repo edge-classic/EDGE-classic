@@ -90,7 +90,7 @@ void RGL_DrawImage(float x, float y, float w, float h, const image_c *image,
 
 	glColor4f(r, g, b, alpha);
 
-	/*glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	GLint image_vertices[] =
@@ -120,7 +120,7 @@ void RGL_DrawImage(float x, float y, float w, float h, const image_c *image,
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);*/
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_ALPHA_TEST);

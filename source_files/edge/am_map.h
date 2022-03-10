@@ -101,6 +101,7 @@ typedef enum
 	AMST_Grid    = (1 << 0),  // draw the grid
 	AMST_Follow  = (1 << 4),  // follow the player
 	AMST_Rotate  = (1 << 5),  // rotate the map (disables grid)
+	AMST_HideLines  = (1 << 6),  // turn off all line drawing
 
 	AMST_Things  = (1 << 3),  // draw all objects
 	AMST_Walls   = (1 << 2),  // draw all walls (like IDDT)

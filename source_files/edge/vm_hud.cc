@@ -532,7 +532,7 @@ static void HD_automap_option(coal::vm_c *vm, int argc)
 	int which = (int) *vm->AccessParam(0);
 	int value = (int) *vm->AccessParam(1);
 
-	if (which < 1 || which > 6)
+	if (which < 1 || which > 7)
 		I_Error("hud.automap_color: bad color number: %d\n", which);
 
 	which--;

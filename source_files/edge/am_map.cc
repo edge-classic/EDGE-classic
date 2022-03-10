@@ -122,6 +122,7 @@ static int grid = 0;
 static bool show_things = false;
 static bool show_walls  = false;
 static bool show_allmap = false;
+static bool hide_lines = false;
 
 
 // location and size of window on screen
@@ -532,8 +533,9 @@ static void DrawMLine(mline_t * ml, rgbcol_t rgb, bool thick = true)
 
 	float dx = MTOF(- m_cx);
 	float dy = MTOF(- m_cy);
-
-	HUD_SolidLine(x1, y1, x2, y2, rgb, thick, thick, dx, dy);
+	
+	if (!hide_lines)
+		HUD_SolidLine(x1, y1, x2, y2, rgb, thick, thick, dx, dy);
 }
 
 //Lobo 2022: keyed doors automap colouring
@@ -547,8 +549,9 @@ static void DrawMLineDoor(mline_t * ml, rgbcol_t rgb)
 
 	float dx = MTOF(- m_cx);
 	float dy = MTOF(- m_cy);
-
-	HUD_SolidFatLine(x1, y1, x2, y2, rgb, true, true, dx, dy);
+	
+	if (!hide_lines)
+		HUD_SolidFatLine(x1, y1, x2, y2, rgb, true, true, dx, dy);
 }
 
 //
@@ -1147,6 +1150,9 @@ void AM_GetState(int *state, float *zoom)
 
 	if (show_walls)
 		*state |= AMST_Walls;
+	
+	if (hide_lines)
+		*state |= AMST_HideLines;
 
 	// nothing required for AMST_Allmap flag (no actual state)
 
@@ -1163,6 +1169,7 @@ void AM_SetState(int state, float zoom)
 	show_things  = (state & AMST_Things) ? true : false;
 	show_walls   = (state & AMST_Walls)  ? true : false;
 	show_allmap  = (state & AMST_Allmap) ? true : false;
+	hide_lines   = (state & AMST_HideLines) ? true : false;
 
 	m_scale = zoom;
 }

@@ -47,6 +47,7 @@ New Features
 + COALHUDS: new commands
   -player.play_footstep(flatname) checks FLATS.DDF for corresponding entry and plays the sfx associated with this flat.
   -hud.screen_aspect() returns the current screen aspect e.g. 1.0, 1.333 etc.
+  -hud.AM_HIDELINES for hud.automap_option() which hides all geometry on the automap.
 
 + RTS: new commands
   -SWITCH_WEAPON <weapon> which will force a switch to this <weapon> if the player has it.

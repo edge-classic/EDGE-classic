@@ -47,16 +47,12 @@ image_data_c *Image_Load(file_c *f, int read_flags, int format)
 	int width;
 	int height;
 	int channels;
-	int desired_channels = 0;
+	int desired_channels;
 	byte *raw_image = f->LoadIntoMemory();
-
-	// Need to check for grayscale - Dasho
-	if (!stbi_info_from_memory(raw_image, f->GetLength(), &width, &height, &channels))
-		return NULL;
 
 	if (format == 1)
 		desired_channels = 3;
-	else if (channels == 2)
+	else
 		desired_channels = 4;
 
 	unsigned char *decoded_img = stbi_load_from_memory(raw_image, f->GetLength(), &width, &height, &channels, desired_channels);
@@ -73,7 +69,7 @@ image_data_c *Image_Load(file_c *f, int read_flags, int format)
 		tot_H = 1; while (tot_H < (int)height) tot_H <<= 1;
 	}
 
-	image_data_c *img = new image_data_c(tot_W, tot_H, desired_channels > 0 ? desired_channels : channels);
+	image_data_c *img = new image_data_c(tot_W, tot_H, desired_channels);
 
 	img->used_w = width;
 	img->used_h = height;
@@ -87,7 +83,7 @@ image_data_c *Image_Load(file_c *f, int read_flags, int format)
 	{
 		for (int x = 0; x < width; x++)
 		{
-			memcpy(img->PixelAt(x, y), decoded_img + (total_pixels * (desired_channels > 0 ? desired_channels : channels)), desired_channels > 0 ? desired_channels : channels);
+			memcpy(img->PixelAt(x, y), decoded_img + (total_pixels * desired_channels), desired_channels);
 			total_pixels++;
 		}
 	}

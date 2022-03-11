@@ -442,38 +442,6 @@ static void DrawStdCrossHair(void)
 
 	glEnd();
 
-	/*glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	GLfloat crosshair_vertices[] =
-	{
-		x-w, y-w,
-		x-w, y+w,
-		x+w, y+w,
-		x+w, y-w
-	};
-	GLfloat crosshair_texcoords[] =
-	{
-		0.0f, 0.0f,
-		0.0f, 1.0f,
-		1.0f, 1.0f,
-		1.0f, 0.0f
-	};
-	GLfloat crosshair_colors[] =
-	{
-		r, g, b,
-		r, g, b,
-		r, g, b,
-		r, g, b
-	};
-	glColorPointer(3, GL_FLOAT, 0, crosshair_colors);
-	glVertexPointer(2, GL_FLOAT, 0, crosshair_vertices);
-	glTexCoordPointer(2, GL_FLOAT, 0, crosshair_texcoords);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);*/
-
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glDisable(GL_TEXTURE_2D);

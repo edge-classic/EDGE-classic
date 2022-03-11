@@ -38,8 +38,6 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-//#include <vector>
-
 #define DEBUG  0
 
 
@@ -358,20 +356,6 @@ void RGL_DrawSkyBox(void)
 		v0 = 0.5f / size;
 		v1 = 1.0f - v0;
 	}
-	/*std::vector<GLfloat> sky_texcoords = 
-	{
-		v0, v0,
-		v0, v1,
-		v1, v1,
-		v1, v0
-	};
-	std::vector<GLboolean> sky_edgeflags =
-	{
-		GL_TRUE,
-		GL_TRUE,
-		GL_TRUE,
-		GL_TRUE
-	};*/
 
 	glEnable(GL_TEXTURE_2D);
 
@@ -390,10 +374,6 @@ void RGL_DrawSkyBox(void)
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, col);
 	}
 
-	//glEnableClientState(GL_VERTEX_ARRAY);
-	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	//glEnableClientState(GL_EDGE_FLAG_ARRAY);
-
 	// top
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_Top]);
         glNormal3i(0, 0, -1);
@@ -407,18 +387,6 @@ void RGL_DrawSkyBox(void)
 	glTexCoord2f(v1, v1); glVertex3f( dist, -dist, +dist);
 	glTexCoord2f(v1, v0); glVertex3f( dist,  dist, +dist);
 	glEnd();
-	/*std::vector<GLfloat> sky_vertices = 
-	{
-		-dist, dist, +dist,
-		-dist, -dist, +dist,
-		dist, -dist, +dist,
-		dist, dist, +dist
-	};
-	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
-	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
-	glEdgeFlagPointer(0, sky_edgeflags.data());
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	sky_vertices.clear();*/
 
 	// bottom
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_Bottom]);
@@ -433,18 +401,6 @@ void RGL_DrawSkyBox(void)
 	glTexCoord2f(v1, v1); glVertex3f( dist,  dist, -dist);
 	glTexCoord2f(v1, v0); glVertex3f( dist, -dist, -dist);
 	glEnd();
-	/*sky_vertices = 
-	{
-		-dist, -dist, -dist,
-		-dist, dist, -dist,
-		dist, dist, -dist,
-		dist, -dist, -dist
-	};
-	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
-	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
-	glEdgeFlagPointer(0, sky_edgeflags.data());
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	sky_vertices.clear();*/
 
 	// north
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_North]);
@@ -459,18 +415,6 @@ void RGL_DrawSkyBox(void)
 	glTexCoord2f(v1, v1); glVertex3f( dist,  dist, +dist);
 	glTexCoord2f(v1, v0); glVertex3f( dist,  dist, -dist);
 	glEnd();
-	/*sky_vertices = 
-	{
-		-dist, dist, -dist,
-		-dist, dist, +dist,
-		dist, dist, +dist,
-		dist, dist, -dist
-	};
-	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
-	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
-	glEdgeFlagPointer(0, sky_edgeflags.data());
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	sky_vertices.clear();*/
 
 	// east
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_East]);
@@ -485,18 +429,6 @@ void RGL_DrawSkyBox(void)
 	glTexCoord2f(v1, v1); glVertex3f( dist, -dist, +dist);
 	glTexCoord2f(v1, v0); glVertex3f( dist, -dist, -dist);
 	glEnd();
-	/*sky_vertices = 
-	{
-		dist, dist, -dist,
-		dist, dist, +dist,
-		dist, -dist, +dist,
-		dist, -dist, -dist
-	};
-	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
-	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
-	glEdgeFlagPointer(0, sky_edgeflags.data());
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	sky_vertices.clear();*/
 
 	// south
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_South]);
@@ -511,18 +443,6 @@ void RGL_DrawSkyBox(void)
 	glTexCoord2f(v1, v1); glVertex3f(-dist, -dist, +dist);
 	glTexCoord2f(v1, v0); glVertex3f(-dist, -dist, -dist);
 	glEnd();
-	/*sky_vertices = 
-	{
-		dist, -dist, -dist,
-		dist, -dist, +dist,
-		-dist, -dist, +dist,
-		-dist, -dist, -dist
-	};
-	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
-	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
-	glEdgeFlagPointer(0, sky_edgeflags.data());
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	sky_vertices.clear();*/
 
 	// west
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_West]);
@@ -537,21 +457,6 @@ void RGL_DrawSkyBox(void)
 	glTexCoord2f(v1, v1); glVertex3f(-dist,  dist, +dist);
 	glTexCoord2f(v1, v0); glVertex3f(-dist,  dist, -dist);
 	glEnd();
-	/*sky_vertices = 
-	{
-		-dist, -dist, -dist,
-		-dist, -dist, +dist,
-		-dist, dist, +dist,
-		-dist, dist, -dist
-	};
-	glVertexPointer(3, GL_FLOAT, 0, sky_vertices.data());
-	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
-	glEdgeFlagPointer(0, sky_edgeflags.data());
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-	glDisableClientState(GL_EDGE_FLAG_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);*/
 
 	glDisable(GL_TEXTURE_2D);
 
@@ -582,14 +487,6 @@ void RGL_DrawSkyOriginal(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	#endif
 
-	//std::vector<GLint> sky_vertices;
-	//std::vector<GLfloat> sky_texcoords;
-	//std::vector<GLboolean> sky_edgeflags;
-
-	// divide screen into 32 vertical strips, since mapping is non-linear
-	//glEnableClientState(GL_VERTEX_ARRAY);
-	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	//glEnableClientState(GL_EDGE_FLAG_ARRAY);
 	glBegin(GL_QUAD_STRIP);
 
 	// FIXME for widescreen
@@ -624,30 +521,9 @@ I_Printf("[%i] --> %1.2f  tx %1.4f\n", i, ANG_2_FLOAT(ang), tx);
 
 		glTexCoord2f(tx, 1.0f - ty2); 
 		glVertex2i(sx, SCREENHEIGHT);
-		/*sky_texcoords.push_back(tx);
-		sky_texcoords.push_back(1.0f -ty1);
-		sky_vertices.push_back(sx);
-		sky_vertices.push_back(0);
-		
-		sky_texcoords.push_back(tx);
-		sky_texcoords.push_back(1.0f -ty2);
-		sky_vertices.push_back(sx);
-		sky_vertices.push_back(SCREENHEIGHT);
-
-		sky_edgeflags.push_back(GL_TRUE);
-		sky_edgeflags.push_back(GL_TRUE);*/
  	}
 
 	glEnd();
-
-	/*glEdgeFlagPointer(0, sky_edgeflags.data());
-	glVertexPointer(2, GL_INT, 0, sky_vertices.data());
-	glTexCoordPointer(2, GL_FLOAT, 0, sky_texcoords.data());
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, sky_vertices.size() / 2);
-
-	glDisableClientState(GL_EDGE_FLAG_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);*/
 
 	glDisable(GL_TEXTURE_2D);
 
@@ -662,15 +538,12 @@ void RGL_DrawSkyPlane(subsector_t *sub, float h)
 	if (r_dumbsky.d)
 		return;
 
-	//std::vector<GLfloat> plane_vertices;
-
 	MIR_Height(h);
 
 	glNormal3f(0, 0, (viewz > h) ? 1.0f : -1.0f);
 
 	glBegin(GL_POLYGON);
 
-	//glEnableClientState(GL_VERTEX_ARRAY);
 	for (seg_t *seg=sub->segs; seg; seg=seg->sub_next)
 	{
 		float x = seg->v1->x;
@@ -679,15 +552,9 @@ void RGL_DrawSkyPlane(subsector_t *sub, float h)
 		MIR_Coordinate(x, y);
 
 		glVertex3f(x, y, h);
-		//plane_vertices.push_back(x);
-		//plane_vertices.push_back(y);
-		//plane_vertices.push_back(h);
 	}
 
 	glEnd();
-	//glVertexPointer(3, GL_FLOAT, 0, plane_vertices.data());
-	//glDrawArrays(GL_TRIANGLE_FAN, 0, plane_vertices.size() / 3);
-	//glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 
@@ -719,18 +586,6 @@ void RGL_DrawSkyWall(seg_t *seg, float h1, float h2)
 	glVertex3f(x2, y2, h1);
 
 	glEnd();
-
-	/*glEnableClientState(GL_VERTEX_ARRAY);
-	GLfloat wall_vertices[] =
-	{
-		x1, y1, h1,
-		x1, y1, h2,
-		x2, y2, h2,
-		x2, y2, h1
-	};
-	glVertexPointer(3, GL_FLOAT, 0, wall_vertices);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	glDisableClientState(GL_VERTEX_ARRAY);*/
 }
 
 

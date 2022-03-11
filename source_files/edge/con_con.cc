@@ -377,28 +377,6 @@ static void SolidBox(int x, int y, int w, int h, rgbcol_t col, float alpha)
 
 	glEnd();
 
-	/*glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	GLint box_vertices[] =
-	{
-		x, y,
-		x, y+h,
-		x+w, y+h,
-		x+w, y
-	};
-	GLdouble box_colors[] =
-	{
-		RGB_RED(col)/255.0, RGB_GRN(col)/255.0,	RGB_BLU(col)/255.0,	alpha,
-		RGB_RED(col)/255.0, RGB_GRN(col)/255.0,	RGB_BLU(col)/255.0,	alpha,
-		RGB_RED(col)/255.0, RGB_GRN(col)/255.0,	RGB_BLU(col)/255.0,	alpha,
-		RGB_RED(col)/255.0, RGB_GRN(col)/255.0,	RGB_BLU(col)/255.0,	alpha
-	};
-	glVertexPointer(2, GL_INT, 0, box_vertices);
-	glColorPointer(4, GL_DOUBLE, 0, box_colors);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);*/
-
 	glDisable(GL_BLEND);
 }
 
@@ -445,31 +423,6 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 
 	glEnd();
 
-	/*GLint char_vertices[] =
-	{
-		x, y,
-		x, y + FNSZ,
-		x + FNSZ, y + FNSZ,
-		x + FNSZ, y
-	};
-	GLfloat char_texcoords[] =
-	{
-		tx1, ty1,
-		tx1, ty2,
-		tx2, ty2,
-		tx2, ty1
-	};
-	GLdouble char_colors[] =
-	{
-		RGB_RED(col)/255.0f, RGB_GRN(col)/255.0f, RGB_BLU(col)/255.0f, alpha,
-		RGB_RED(col)/255.0f, RGB_GRN(col)/255.0f, RGB_BLU(col)/255.0f, alpha,
-		RGB_RED(col)/255.0f, RGB_GRN(col)/255.0f, RGB_BLU(col)/255.0f, alpha,
-		RGB_RED(col)/255.0f, RGB_GRN(col)/255.0f, RGB_BLU(col)/255.0f, alpha
-	};
-	glVertexPointer(2, GL_INT, 0, char_vertices);
-	glTexCoordPointer(2, GL_FLOAT, 0, char_texcoords);
-	glColorPointer(4, GL_DOUBLE, 0, char_colors);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);*/
 }
 
 // writes the text on coords (x,y) of the console
@@ -484,10 +437,6 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0);
 
-	/*glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);*/
-
 	for (; *s; s++)
 	{
 		DrawChar(x, y, *s, col);
@@ -497,10 +446,6 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 		if (x >= SCREENWIDTH)
 			break;
 	}
-
-	/*glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);*/
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_ALPHA_TEST);

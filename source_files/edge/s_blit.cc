@@ -153,7 +153,9 @@ void mix_channel_c::ComputeDelta()
 void mix_channel_c::ComputeVolume()
 {
 	float sep = 0.5f;
-	float mul = 1.0f;
+	//float mul = 1.0f;
+	float dist = 1.0f;
+	
 
 	if (pos && category >= SNCAT_Opponent)
 	{
@@ -167,7 +169,7 @@ void mix_channel_c::ComputeVolume()
 
 		if (! boss)
 		{
-			float dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
+			dist = (P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z) + S_CLOSE_DIST) / 200.0f; 
 
 			//float number_of_blockers = 0;
 
@@ -178,13 +180,13 @@ void mix_channel_c::ComputeVolume()
 			// -AJA- this equation was chosen to mimic the DOOM falloff
 			//       function, but instead of cutting out @ dist=1600 it
 			//       tapers off exponentially.
-			mul = exp(-MAX(1.0f, dist - S_CLOSE_DIST) / 800.0f);
+			//mul = exp(-MAX(1.0f, dist - S_CLOSE_DIST) / 800.0f);
 		}
 	}
 
 	float MAX_VOL = (1 << (16 - SAFE_BITS - (var_quiet_factor-1))) - 3;
 
-	MAX_VOL = MAX_VOL * mul * slider_to_gain[sfx_volume];
+	MAX_VOL = boss ? MAX_VOL: MAX_VOL / dist * slider_to_gain[sfx_volume];
 
 	if (def)
 		MAX_VOL *= PERCENT_2_FLOAT(def->volume);

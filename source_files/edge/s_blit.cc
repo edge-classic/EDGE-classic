@@ -169,7 +169,7 @@ void mix_channel_c::ComputeVolume()
 
 		if (! boss)
 		{
-			dist = (P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z) + S_CLOSE_DIST) / 200.0f; 
+			dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z) / 400.0f; 
 
 			//float number_of_blockers = 0;
 
@@ -186,7 +186,7 @@ void mix_channel_c::ComputeVolume()
 
 	float MAX_VOL = (1 << (16 - SAFE_BITS - (var_quiet_factor-1))) - 3;
 
-	MAX_VOL = boss ? MAX_VOL: MAX_VOL / dist * slider_to_gain[sfx_volume];
+	MAX_VOL = boss ? MAX_VOL : MIN(MAX_VOL, MAX_VOL / dist) * slider_to_gain[sfx_volume];
 
 	if (def)
 		MAX_VOL *= PERCENT_2_FLOAT(def->volume);

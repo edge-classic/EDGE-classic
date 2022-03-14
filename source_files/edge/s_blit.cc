@@ -169,7 +169,7 @@ void mix_channel_c::ComputeVolume()
 
 		if (! boss)
 		{
-			dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z) / 400.0f; 
+			dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z) / 100.0f; 
 
 			//float number_of_blockers = 0;
 

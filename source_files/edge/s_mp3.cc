@@ -399,6 +399,13 @@ bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length)
 
 	buf->freq = sound_info.hz;
 
+	if (buf->freq < 18000)
+		buf->reverb_factor = 3;
+	else if (buf->freq < 40000)
+		buf->reverb_factor = 2;
+	else
+		buf->reverb_factor = 1;
+
 	epi::sound_gather_c gather;
 
 	s16_t *buffer = gather.MakeChunk(sound_info.samples, is_stereo);

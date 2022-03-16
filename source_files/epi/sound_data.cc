@@ -29,7 +29,8 @@ sound_data_c::sound_data_c() :
 	data_L(NULL), data_R(NULL),
 	fx_data_L(NULL), fx_data_R(NULL),
 	priv_data(NULL), ref_count(0), is_sfx(false),
-	current_mix(SFX_None), reverbed_room_size(RM_None)
+	current_mix(SFX_None), reverbed_room_size(RM_None),
+	reverb_factor(0)
 { }
 
 sound_data_c::~sound_data_c()
@@ -258,7 +259,7 @@ void sound_data_c::Mix_Reverb(float room_area)
 	reverb_room_size_e current_room_size;
 	if (room_area > 1000000)
 		current_room_size = RM_Large;
-	else if (room_area > 200000)
+	else if (room_area > 500000)
 		current_room_size = RM_Medium;
 	else
 		current_room_size = RM_Small;
@@ -270,26 +271,24 @@ void sound_data_c::Mix_Reverb(float room_area)
 		s16_t *reverb_buffer_R;
 		int write_pos = 0;
 		int read_pos = 0;
-		int reverb_ratio, reverb_delay;
+		int reverb_delay = 0;
+		int reverb_ratio = 12 * reverb_factor;
 		switch (current_room_size)
 		{
 			case RM_Large:
-				reverb_ratio = 20;
-				reverb_delay = 200;
+				reverb_delay = 150;
 				break;
 			case RM_Medium:
-				reverb_ratio = 20;
-				reverb_delay = 200;
+				reverb_delay = 100;
 				break;
 			case RM_Small:
-				reverb_ratio = 20;
-				reverb_delay = 200;
+				reverb_delay = 50;
 				break;
 		}
 		switch (mode)
 		{
 
-			case SBUF_Mono:
+			/*case SBUF_Mono:
 				if (!fx_data_L)
 					fx_data_L = new s16_t[length];
 				fx_data_R = fx_data_L;
@@ -314,9 +313,9 @@ void sound_data_c::Mix_Reverb(float room_area)
 				memcpy(fx_data_L, data_L, length * 2 * sizeof(s16_t));
 				current_mix = SFX_Reverb;
 				reverbed_room_size = current_room_size;
-				break;
+				break;*/
 
-			/*case SBUF_Mono:
+			case SBUF_Mono:
 				if (!fx_data_L)
 					fx_data_L = new s16_t[length];
 				fx_data_R = fx_data_L;
@@ -384,7 +383,7 @@ void sound_data_c::Mix_Reverb(float room_area)
 				reverbed_room_size = current_room_size;
 				delete[] reverb_buffer_L;
 				reverb_buffer_L = NULL;
-				break;*/
+				break;
 		}
 	}
 }

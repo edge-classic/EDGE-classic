@@ -77,6 +77,8 @@ public:
 
 	reverb_room_size_e reverbed_room_size;
 
+	int reverb_factor;
+
 public:
 	sound_data_c();
 	~sound_data_c();

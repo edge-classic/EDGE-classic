@@ -155,7 +155,7 @@ void mix_channel_c::ComputeVolume()
 			if (P_CheckSightToPoint(players[consoleplayer]->mo, pos->x, pos->y, pos->z))
 				dist /= 100.0f;
 			else
-				dist /= 75.0f;
+				dist /= 50.0f;
 		}
 	}
 

@@ -77,7 +77,7 @@ public:
 
 	reverb_room_size_e reverbed_room_size;
 
-	int reverb_factor;
+	int freq_factor; // Helps to scale reverb ratio and sound falloff distance based on frequency of initial sound - Dasho
 
 public:
 	sound_data_c();

@@ -134,7 +134,6 @@ void mix_channel_c::ComputeDelta()
 void mix_channel_c::ComputeVolume()
 {
 	float sep = 0.5f;
-	//float mul = 1.0f;
 	float dist = 1.0f;
 	
 
@@ -153,9 +152,9 @@ void mix_channel_c::ComputeVolume()
 			dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z); 
 
 			if (P_CheckSightToPoint(players[consoleplayer]->mo, pos->x, pos->y, pos->z))
-				dist /= 100.0f;
+				dist /= (100.0f * data->freq_factor);
 			else
-				dist /= 50.0f;
+				dist /= (50.0f * data->freq_factor);
 		}
 	}
 

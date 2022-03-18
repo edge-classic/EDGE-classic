@@ -77,11 +77,11 @@ static bool Load_DOOM(epi::sound_data_c *buf, const byte *lump, int length)
 		buf->freq = 4000;
 
 	if (buf->freq < 18000)
-		buf->reverb_factor = 3;
+		buf->freq_factor = 3;
 	else if (buf->freq < 40000)
-		buf->reverb_factor = 2;
+		buf->freq_factor = 2;
 	else
-		buf->reverb_factor = 1;
+		buf->freq_factor = 1;
 
 	length -= 8;
 

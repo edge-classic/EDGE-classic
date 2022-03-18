@@ -30,7 +30,7 @@ sound_data_c::sound_data_c() :
 	fx_data_L(NULL), fx_data_R(NULL),
 	priv_data(NULL), ref_count(0), is_sfx(false),
 	current_mix(SFX_None), reverbed_room_size(RM_None),
-	reverb_factor(0)
+	freq_factor(0)
 { }
 
 sound_data_c::~sound_data_c()
@@ -118,7 +118,7 @@ void sound_data_c::Mix_Submerged()
 		s16_t *reverb_buffer_R;
 		int write_pos = 0;
 		int read_pos = 0;
-		int reverb_ratio = 20;
+		int reverb_ratio = 12 * freq_factor;
 		int reverb_delay = 200;
 
 		switch (mode)
@@ -271,20 +271,8 @@ void sound_data_c::Mix_Reverb(float room_area)
 		s16_t *reverb_buffer_R;
 		int write_pos = 0;
 		int read_pos = 0;
-		int reverb_delay = 0;
-		int reverb_ratio = 12 * reverb_factor;
-		switch (current_room_size)
-		{
-			case RM_Large:
-				reverb_delay = 150;
-				break;
-			case RM_Medium:
-				reverb_delay = 100;
-				break;
-			case RM_Small:
-				reverb_delay = 50;
-				break;
-		}
+		int reverb_delay = 50 * current_room_size;
+		int reverb_ratio = 12 * freq_factor;
 		switch (mode)
 		{
 

@@ -188,7 +188,7 @@ const char WIPE_EnumStr[] = "none/melt/crossfade/pixelfade/top/bottom/left/right
 static char SampleRates[] = "11025 Hz/16000 Hz/22050 Hz/32000 Hz/44100 Hz";
 static char SoundBits[]   = "8 bit/16 bit";
 static char StereoNess[]  = "Off/On/Swapped";
-static char MixChans[]    = "8/16/32/64/96";
+static char MixChans[]    = "32/64/96";
 static char QuietNess[]   = "Loud (distorted)/Normal/Soft/Very Soft";
 static char MusicDevs[]   = "System/TinySoundfont";
 
@@ -471,7 +471,7 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},
-	{OPT_Switch,  "Mix Channels",    MixChans,  4, &var_mix_channels, M_ChangeMixChan, NULL},
+	{OPT_Switch,  "Mix Channels",    MixChans,  3, &var_mix_channels, M_ChangeMixChan, NULL},
 	{OPT_Switch,  "Quiet Factor",    QuietNess, 3, &var_quiet_factor, NULL, NULL},
 	{OPT_Boolean, "Precache SFX",       YesNo, 2, &var_cache_sfx, NULL, "NeedRestart"},
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},

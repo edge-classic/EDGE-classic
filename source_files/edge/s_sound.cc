@@ -43,7 +43,7 @@ extern float listen_z;
 bool var_cache_sfx = true;
 
 /* See m_option.cc for corresponding menu items */
-const int channel_counts[5] = { 8, 16, 32, 64, 96 };
+const int channel_counts[3] = { 32, 64, 96 };
 
 
 const int category_limit_table[3][8][3] =

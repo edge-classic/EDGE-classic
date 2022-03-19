@@ -1,13 +1,16 @@
 https://github.com/dashodanger/EDGE-classic
 
-Current as of: JANUARY 2022
+Current as of: MARCH 2022
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)
 ====================================
 
 Bugs fixed
 ----------
-+ Longstanding SWIM sector special bug fixed. EDGE would continue flagging the player as being in a SWIM sector even after leaving it. Happens if SWIM special is used without AIRLESS(underwater) also. Most noticeable side effect was being unable to jump/crouch and bizarre momentum/speed
++ Longstanding SWIM sector special bug fixed. EDGE would continue 
+  flagging the player as being in a SWIM sector even after leaving it. 
+  Happens if SWIM special is used without AIRLESS(underwater) also. 
+  Most noticeable side effect was being unable to jump/crouch and bizarre momentum/speed
 + Downgraded errors for incorrect 3D extrafloors to warnings instead. 
 
 General Improvements
@@ -37,10 +40,13 @@ New Features
 + Added 'autoload' folder which is scanned for valid file types on startup. Sub-folders can fine tune what is loaded for specific IWADs.
 
 + LINES.DDF
-  - New command: EFFECT_OBJECT=<thing> where <thing> is an entry in THINGS.DDF. When the line is activated, the <thing> will be spawned in the center of the line (e.g. for sparks from a switch). If the line is of type SHOOT then we spawn the object at the spot where the shot impacts instead.(e.g. a flesh wall that spurts blood when shot).
+  - New command: EFFECT_OBJECT=<thing> where <thing> is an entry in THINGS.DDF. When the line is activated, the <thing> will be spawned in the center of the line 
+    (e.g. for sparks from a switch). If the line is of type SHOOT then we spawn the object at the spot where the shot impacts instead.(e.g. a flesh wall that spurts blood when shot).
   - New command: GLASS=TRUE which causes this line type to (a)be blocking and (b)will apply the LINE_EFFECT= specials BLOCK_SHOTS and BLOCK_SIGHT if specified.
-    Once the line is activated(normally via SHOOT) then (1) line will be set to unblocking, (2)BLOCK_SHOTS and BLOCK_SIGHT will be removed, (3) the mid-texture will be removed. If combined with EFFECT_OBJECT then you can spawn shards of broken glass when the line "breaks" for example. NOTE: GLASS=TRUE should be used with COUNT=1.
-  - New command: BROKEN_TEXTURE=<texture> which, when combined with GLASS=TRUE, will replace the mid-texture with this one instead   of just removing it i.e. for shooting out a vent and replacing it with a broken vent.
+    Once the line is activated(normally via SHOOT) then (1) line will be set to unblocking, (2)BLOCK_SHOTS and BLOCK_SIGHT will be removed, (3) the mid-texture will be removed. 
+    If combined with EFFECT_OBJECT then you can spawn shards of broken glass when the line "breaks" for example. NOTE: GLASS=TRUE should be used with COUNT=1.
+  - New command: BROKEN_TEXTURE=<texture> which, when combined with GLASS=TRUE, will replace the mid-texture with this one instead of just removing it 
+    i.e. for shooting out a vent and replacing it with a broken vent.
 
 + FLATS.DDF (wad lump "DDFFLAT") which can be used to associate certain sounds, objects etc. with specific flats.
 
@@ -51,7 +57,7 @@ New Features
 
 + RTS: new commands
   -SWITCH_WEAPON <weapon> which will force a switch to this <weapon> if the player has it.
-  -TELEPORT_TO_START whcih will simply teleport the player back to player 1 start.
+  -TELEPORT_TO_START which will simply teleport the player back to player 1 start.
   
 + THINGS:DDF
   -Crouching now triggers CROUCH states for the player when used with CHECK_ACTIVITY.

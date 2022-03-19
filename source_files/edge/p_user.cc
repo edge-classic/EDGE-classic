@@ -965,7 +965,10 @@ bool P_AddWeapon(player_t *player, weapondef_c *info, int *index)
 
 	// cannot own weapons if sprites are missing
 	if (! P_CheckWeaponSprite(info))
+	{
+		I_Warning("WEAPON %s has no sprites and will not be added!\n", info->name);
 		return false;
+	}
 
 	for (int i=0; i < MAXWEAPONS; i++)
 	{

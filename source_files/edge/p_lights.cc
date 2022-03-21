@@ -204,6 +204,24 @@ void EV_LightTurnOn(int tag, int bright)
 						bright = temp->props.lightlevel;
 				}
 			}
+			// bright == 1 means to search for lowest light level
+			// surrounding sector
+			if (bright == 1)
+			{
+				bright = 255;
+				for (int j = 0; j < sector->linecount; j++)
+				{
+					line_t* templine = sector->lines[j];
+
+					sector_t* temp = P_GetNextSector(templine, sector);
+
+					if (!temp)
+						continue;
+
+					if (temp->props.lightlevel < bright)
+						bright = temp->props.lightlevel;
+				}
+			}
 			sector->props.lightlevel = bright;
 		}
 	}

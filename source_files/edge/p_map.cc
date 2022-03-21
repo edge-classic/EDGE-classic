@@ -2090,6 +2090,12 @@ bool P_CheckSolidSectorMove(sector_t *sec, bool is_ceiling,
 		return false;
 	}
 
+	// Test fix for Doom 1 E3M4 crusher bug - Dasho
+	if (is_ceiling && dh < 0 && sec->c_h == sec->f_h)
+	{
+		sec->ceil_move->destheight = sec->f_h - dh;
+	}
+
 	// don't allow a dummy sector to go FUBAR
 	if (sec->control_floors)
 	{

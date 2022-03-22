@@ -122,6 +122,9 @@ public:
 	// compute the average Hue of the RGB(A) image, storing the
 	// result in the 'hue' array (r, g, b).  The average intensity
 	// will be stored in 'ity' when given.
+
+	void Swirl(int leveltime);
+	// SMMU-style swirling
 };
 
 

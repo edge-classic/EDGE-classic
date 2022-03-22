@@ -41,6 +41,7 @@
 #include "file.h"
 #include "filesystem.h"
 #include "file_memory.h"
+#include "flat.h"
 
 #include "image_data.h"
 #include "image_hq2x.h"
@@ -280,6 +281,8 @@ static image_c *NewImage(int width, int height, int opacity = OPAC_Unknown)
 	rim->anim.next = NULL;
 	rim->anim.count = rim->anim.speed = 0;
 
+	rim->swirl_it = false;
+
 	return rim;
 }
 
@@ -462,6 +465,14 @@ static image_c *AddImageFlat(const char *name, int lump)
 	rim->source_type = IMSRC_Flat;
 	rim->source.flat.lump = lump;
 	rim->source_palette = W_GetPaletteForLump(lump);
+
+	flatdef_c *current_flatdef = flatdefs.Find(rim->name);
+
+	if (current_flatdef)
+	{
+		if (current_flatdef->swirly)
+			rim->swirl_it = true;
+	}
 
 	real_flats.push_back(rim);
 
@@ -933,7 +944,6 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
 		what_pal_cached = true;
 	}
 
-
 	epi::image_data_c *tmp_img = ReadAsEpiBlock(rim);
 
 	if (rim->opacity == OPAC_Unknown)
@@ -967,6 +977,10 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
 			R_PaletteRemapRGBA(tmp_img, what_palette, (const byte *) &playpal_data[0]);
 	}
 
+	if (rim->swirl_it)
+	{
+		tmp_img->Swirl(leveltime);
+	}
 
 	GLuint tex_id = R_UploadTexture(tmp_img,
 		(clamp  ? UPL_Clamp  : 0) |
@@ -1392,6 +1406,10 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 	}
 #endif
 
+	// Always clear tex_id if swirling - Dasho
+	if (rc->parent->swirl_it)
+		rc->tex_id = 0;
+
 	if (rc->tex_id == 0)
 	{
 		// load image into cache
@@ -1414,7 +1432,10 @@ GLuint W_ImageCache(const image_c *image, bool anim,
  
 	// handle animations
 	if (anim)
-		rim = rim->anim.cur;
+	{
+		if (!rim->swirl_it)
+			rim = rim->anim.cur;
+	}
 
 	cached_image_t *rc = ImageCacheOGL(rim, trans);
 

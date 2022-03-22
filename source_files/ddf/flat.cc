@@ -30,6 +30,7 @@ static flatdef_c dummy_flatdef;
 static const commandlist_t flat_commands[] =
 {
 	DDF_FIELD("LIQUID", liquid, DDF_MainGetBoolean),
+	DDF_FIELD("SWIRL", swirly, DDF_MainGetBoolean),
 	DDF_FIELD("FOOTSTEP",   footstep, DDF_MainLookupSound),
 	DDF_FIELD("SPLASH", splash, DDF_MainGetLumpName),
 	DDF_FIELD("EFFECT_OBJECT", effectobject_ref, DDF_MainGetString),
@@ -225,6 +226,7 @@ flatdef_c::flatdef_c() : name()
 void flatdef_c::CopyDetail(flatdef_c &src)
 {
 	liquid = src.liquid;
+	swirly = src.swirly;
 	footstep = src.footstep;
 	splash = src.splash;
 	effectobject = src.effectobject;	
@@ -237,6 +239,7 @@ void flatdef_c::CopyDetail(flatdef_c &src)
 void flatdef_c::Default()
 {
 	liquid = false;
+	swirly = false;
 	footstep = sfx_None;
 	splash.clear();
 	effectobject = NULL;	

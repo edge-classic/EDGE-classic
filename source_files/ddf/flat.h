@@ -38,6 +38,8 @@ public:
 	
 	bool liquid;
 
+	bool swirly;
+
 	struct sfx_s *footstep;
 	lumpname_c splash;
 	//Lobo: item to spawn (or NULL).  The mobjdef pointer is only valid after

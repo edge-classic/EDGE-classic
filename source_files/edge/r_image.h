@@ -84,6 +84,7 @@ public:
     // one of the OPAC_XXX values
 	int opacity;
 
+	bool swirl_it;
 
 //!!!!!! private:
 

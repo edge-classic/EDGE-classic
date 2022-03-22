@@ -73,6 +73,8 @@ New Features
   
 + 2 new custom fonts included in edge-defs.wad for use with our new dynamic menu: Verdana-style font and Doom-style
 
++ Added SMMU-style flat swirling; define "SWIRL = 1" in DDFFLAT to enable
+
 
 CHANGELOG for EDGE-Classic 1.0 (since EDGE-Classic Preview 1)
 ====================================

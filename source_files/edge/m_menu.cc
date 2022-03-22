@@ -2479,14 +2479,16 @@ void M_Init(void)
 		ReadMenu1[0].select_func = M_FinishReadThis;
 	}
 
- 	sfx_swtchn = sfxdefs.GetEffect("SWTCHN");
- 	sfx_tink   = sfxdefs.GetEffect("TINK");
- 	sfx_radio  = sfxdefs.GetEffect("RADIO");
- 	sfx_oof    = sfxdefs.GetEffect("OOF");
- 	sfx_pstop  = sfxdefs.GetEffect("PSTOP");
- 	sfx_stnmov = sfxdefs.GetEffect("STNMOV");
- 	sfx_pistol = sfxdefs.GetEffect("PISTOL");
- 	sfx_swtchx = sfxdefs.GetEffect("SWTCHX");
+ 	//Lobo 2022: Use new sfx definitions so we don't have to share names with
+	//normal doom sfx.
+ 	sfx_swtchn = sfxdefs.GetEffect("MENU_IN"); //Enter Menu
+ 	sfx_tink   = sfxdefs.GetEffect("TINK"); //unused
+ 	sfx_radio  = sfxdefs.GetEffect("RADIO"); //unused
+ 	sfx_oof    = sfxdefs.GetEffect("MENU_INV"); //invalid choice
+ 	sfx_pstop  = sfxdefs.GetEffect("MENU_MOV"); //moving cursor in a menu
+ 	sfx_stnmov = sfxdefs.GetEffect("MENU_SLD"); //slider move
+ 	sfx_pistol = sfxdefs.GetEffect("MENU_SEL"); //select in menu
+ 	sfx_swtchx = sfxdefs.GetEffect("MENU_OUT"); //cancel/exit menu
 
 	M_OptMenuInit();
 	M_NetGameInit();

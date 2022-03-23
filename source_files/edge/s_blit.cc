@@ -152,10 +152,13 @@ void mix_channel_c::ComputeVolume()
 		{
 			dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
 
-			if (P_CheckSightToPoint(players[consoleplayer]->mo, pos->x, pos->y, pos->z))
-				dist = MAX(1.25f, dist / (100.0f * data->freq_factor));
-			else
-				dist = MAX(1.25f, dist / (50.0f * data->freq_factor));
+			if (players[consoleplayer]->mo)
+			{
+				if (P_CheckSightToPoint(players[consoleplayer]->mo, pos->x, pos->y, pos->z))
+					dist = MAX(1.25f, dist / (100.0f * data->freq_factor));
+				else
+					dist = MAX(1.25f, dist / (50.0f * data->freq_factor));
+			}
 		}
 	}
 

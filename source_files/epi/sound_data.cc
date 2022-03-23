@@ -113,13 +113,13 @@ void sound_data_c::Mix_Submerged()
 		int accum_L = 0;
     	int out_R = 0;
     	int accum_R = 0;
-    	int k = 3;
-		s16_t *reverb_buffer_L;
-		s16_t *reverb_buffer_R;
+    	int k = 4;
+		int *reverb_buffer_L;
+		int *reverb_buffer_R;
 		int write_pos = 0;
 		int read_pos = 0;
 		int reverb_ratio = 12 * freq_factor;
-		int reverb_delay = 200;
+		int reverb_delay = 100;
 
 		switch (mode)
 		{
@@ -127,15 +127,16 @@ void sound_data_c::Mix_Submerged()
 				if (!fx_data_L)
 					fx_data_L = new s16_t[length];
 				fx_data_R = fx_data_L;
-				reverb_buffer_L = new s16_t[length];
-				memset(reverb_buffer_L, 0, length * sizeof(s16_t));
+				reverb_buffer_L = new int[length];
+				memset(reverb_buffer_L, 0, length * sizeof(int));
+				read_pos = ((write_pos - reverb_delay * freq / 1000) + length) % (length);
 				for (int i = 0; i < length; i++) 
 				{
 					fx_data_L[i] = out_L = accum_L >> k;
                 	accum_L = accum_L - out_L + data_L[i];
-					reverb_buffer_L[write_pos] = data_L[i];
-					int reverbed = fx_data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
+					int reverbed = fx_data_L[i] + reverb_buffer_L[MAX(0, read_pos)] * reverb_ratio / 100;
 					fx_data_L[i] = CLAMP(INT16_MIN, reverbed, INT16_MAX);
+					reverb_buffer_L[write_pos] = fx_data_L[i];
 					write_pos = (write_pos + 1) % (length);
 					read_pos = (read_pos + 1) % (length);
 				}
@@ -149,22 +150,23 @@ void sound_data_c::Mix_Submerged()
 					fx_data_L = new s16_t[length];
 				if (!fx_data_R)
 					fx_data_R = new s16_t[length];
-				reverb_buffer_L = new s16_t[length];
-				reverb_buffer_R = new s16_t[length];
-				memset(reverb_buffer_L, 0, length * sizeof(s16_t));
-				memset(reverb_buffer_R, 0, length * sizeof(s16_t));
+				reverb_buffer_L = new int[length];
+				reverb_buffer_R = new int[length];
+				memset(reverb_buffer_L, 0, length * sizeof(int));
+				memset(reverb_buffer_R, 0, length * sizeof(int));
+				read_pos = ((write_pos - reverb_delay * freq / 1000) + length) % (length);
 				for (int i = 0; i < length; i++) 
 				{
 					fx_data_L[i] = out_L = accum_L >> k;
                 	accum_L = accum_L - out_L + data_L[i];
 					fx_data_R[i] = out_R = accum_R >> k;
                 	accum_R = accum_R - out_R + data_R[i];
-					reverb_buffer_L[write_pos] = data_L[i];
-					reverb_buffer_R[write_pos] = data_R[i];
-					int reverbed_L = fx_data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
-					int reverbed_R = fx_data_R[i] + reverb_buffer_R[read_pos] * reverb_ratio / 100;
+					int reverbed_L = fx_data_L[i] + reverb_buffer_L[MAX(0, read_pos)] * reverb_ratio / 100;
+					int reverbed_R = fx_data_R[i] + reverb_buffer_R[MAX(0, read_pos)] * reverb_ratio / 100;
 					fx_data_L[i] = CLAMP(INT16_MIN, reverbed_L, INT16_MAX);
 					fx_data_R[i] = CLAMP(INT16_MIN, reverbed_R, INT16_MAX);
+					reverb_buffer_L[write_pos] = fx_data_L[i];
+					reverb_buffer_R[write_pos] = fx_data_R[i];
 					write_pos = (write_pos + 1) % (length);
 					read_pos = (read_pos + 1) % (length);
 				}
@@ -179,15 +181,16 @@ void sound_data_c::Mix_Submerged()
 				if (!fx_data_L)
 					fx_data_L = new s16_t[length * 2];
 				fx_data_R = fx_data_L;
-				reverb_buffer_L = new s16_t[length * 2];
-				memset(reverb_buffer_L, 0, length * sizeof(s16_t) * 2);
+				reverb_buffer_L = new int[length * 2];
+				memset(reverb_buffer_L, 0, length * sizeof(int) * 2);
+				read_pos = ((write_pos - reverb_delay * freq / 1000) + length) % (length * 2);
 				for (int i = 0; i < length * 2; i++) 
 				{
 					fx_data_L[i] = out_L = accum_L >> k;
                 	accum_L = accum_L - out_L + data_L[i];
-					reverb_buffer_L[write_pos] = data_L[i];
-					int reverbed = fx_data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
+					int reverbed = fx_data_L[i] + reverb_buffer_L[MAX(0, read_pos)] * reverb_ratio / 100;
 					fx_data_L[i] = CLAMP(INT16_MIN, reverbed, INT16_MAX);
+					reverb_buffer_L[write_pos] = fx_data_L[i];
 					write_pos = (write_pos + 1) % (length * 2);
 					read_pos = (read_pos + 1) % (length * 2);
 				}
@@ -208,7 +211,7 @@ void sound_data_c::Mix_Vacuum()
 		int accum_L = 0;
     	int out_R = 0;
     	int accum_R = 0;
-    	int k = 4;
+    	int k = 5;
 
 		switch (mode)
 		{
@@ -257,9 +260,9 @@ void sound_data_c::Mix_Vacuum()
 void sound_data_c::Mix_Reverb(float room_area, bool outdoor_reverb)
 {
 	reverb_room_size_e current_room_size;
-	if (room_area > 1000000)
+	if (room_area > 1200000)
 		current_room_size = RM_Large;
-	else if (room_area > 500000)
+	else if (room_area > 600000)
 		current_room_size = RM_Medium;
 	else
 		current_room_size = RM_Small;
@@ -292,8 +295,6 @@ void sound_data_c::Mix_Reverb(float room_area, bool outdoor_reverb)
 						reverb_buffer_L[write_pos] = reverbed;
 					write_pos = (write_pos + 1) % (length);
 					read_pos = (read_pos + 1) % (length);
-					CLAMP(0, write_pos, length - 1);
-					CLAMP(0, read_pos, length - 1);
 				}
 				current_mix = SFX_Reverb;
 				reverbed_room_size = current_room_size;
@@ -333,8 +334,6 @@ void sound_data_c::Mix_Reverb(float room_area, bool outdoor_reverb)
 					}
 					write_pos = (write_pos + 1) % (length);
 					read_pos = (read_pos + 1) % (length);
-					CLAMP(0, write_pos, length - 1);
-					CLAMP(0, read_pos, length - 1);				
 				}
 				current_mix = SFX_Reverb;
 				reverbed_room_size = current_room_size;
@@ -365,8 +364,6 @@ void sound_data_c::Mix_Reverb(float room_area, bool outdoor_reverb)
 						reverb_buffer_L[write_pos] = reverbed;
 					write_pos = (write_pos + 1) % (length * 2);
 					read_pos = (read_pos + 1) % (length * 2);
-					CLAMP(0, write_pos, length * 2 - 1);
-					CLAMP(0, read_pos, length * 2 - 1);
 				}
 				current_mix = SFX_Reverb;
 				reverbed_room_size = current_room_size;

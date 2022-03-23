@@ -1710,7 +1710,7 @@ void image_data_c::Swirl(int leveltime)
 
 	memcpy(old_pixels, pixels, width * height * bpp * sizeof(u8_t));
 
-	int x, y;
+    int x, y;
 
 	for (x = 0; x < width; x++)
 	{
@@ -1731,8 +1731,8 @@ void image_data_c::Swirl(int leveltime)
 			+ ((finesine[sinvalue] * amp) >> FRACBITS)
 			+ ((finesine[sinvalue2] * amp2) >> FRACBITS);
 
-			x1 &= 63;
-			y1 &= 63;
+			x1 &= width - 1;
+			y1 &= height - 1;
 
 			u8_t *src = old_pixels + (y1 * width + x1) * bpp;
 			u8_t *dest = pixels + (y * width + x) * bpp;

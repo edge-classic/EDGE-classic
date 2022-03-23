@@ -394,6 +394,17 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 
 	strcpy(rim->name, name);
 
+	if (swirling_flats)
+	{
+		flatdef_c *current_flatdef = flatdefs.Find(rim->name);
+
+		if (current_flatdef)
+		{
+			I_Printf("FLATDEF: %s\n", rim->name);
+			if (current_flatdef->swirly)
+				rim->swirl_it = true;
+		}
+	}
 	rim->source_type = type;
 	rim->source.graphic.lump = lump;
 	rim->source.graphic.is_png = is_png;

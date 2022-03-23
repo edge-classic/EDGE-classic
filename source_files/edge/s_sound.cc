@@ -455,7 +455,7 @@ void S_StartFX(sfx_t *sfx, int category, position_c *pos, int flags)
 	else if (submerged_sfx)
 		buf->Mix_Submerged();
 	else
-		buf->Mix_Reverb(room_area);
+		buf->Mix_Reverb(room_area, outdoor_reverb);
 
 	I_LockAudio();
 	{

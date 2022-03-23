@@ -67,6 +67,7 @@ int num_chan;
 
 bool vacuum_sfx = false;
 bool submerged_sfx = false;
+bool outdoor_reverb = false;
 
 static int *mix_buffer;
 static int mix_buf_len;

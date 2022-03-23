@@ -30,7 +30,7 @@ sound_data_c::sound_data_c() :
 	fx_data_L(NULL), fx_data_R(NULL),
 	priv_data(NULL), ref_count(0), is_sfx(false),
 	current_mix(SFX_None), reverbed_room_size(RM_None),
-	freq_factor(0)
+	freq_factor(0), reverb_is_outdoors(false)
 { }
 
 sound_data_c::~sound_data_c()
@@ -254,17 +254,17 @@ void sound_data_c::Mix_Vacuum()
 	}
 }
 
-void sound_data_c::Mix_Reverb(float room_area)
+void sound_data_c::Mix_Reverb(float room_area, bool outdoor_reverb)
 {
 	reverb_room_size_e current_room_size;
 	if (room_area > 1000000)
 		current_room_size = RM_Large;
-	else if (room_area > 300000)
+	else if (room_area > 500000)
 		current_room_size = RM_Medium;
 	else
 		current_room_size = RM_Small;
 
-	if (current_mix != SFX_Reverb || reverbed_room_size != current_room_size)
+	if (current_mix != SFX_Reverb || reverbed_room_size != current_room_size || reverb_is_outdoors != outdoor_reverb)
 	{
 		// Setup reverb parameters
 		s16_t *reverb_buffer_L;
@@ -284,15 +284,21 @@ void sound_data_c::Mix_Reverb(float room_area)
 				read_pos = ((write_pos - reverb_delay * freq / 1000) + length) % (length);
 				for (int i = 0; i < length; i++) 
 				{
-					//reverb_buffer_L[write_pos] = data_L[i];
+					if (outdoor_reverb)
+						reverb_buffer_L[write_pos] = data_L[i];
 					int reverbed = data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
 					fx_data_L[i] = CLAMP(INT16_MIN, reverbed, INT16_MAX);
-					reverb_buffer_L[write_pos] = reverbed;
+					if (!outdoor_reverb)
+						reverb_buffer_L[write_pos] = reverbed;
 					write_pos = (write_pos + 1) % (length);
 					read_pos = (read_pos + 1) % (length);
 				}
 				current_mix = SFX_Reverb;
 				reverbed_room_size = current_room_size;
+				if (outdoor_reverb)
+					reverb_is_outdoors = true;
+				else
+					reverb_is_outdoors = false;
 				delete[] reverb_buffer_L;
 				reverb_buffer_L = NULL;
 				break;
@@ -308,19 +314,29 @@ void sound_data_c::Mix_Reverb(float room_area)
 				memset(reverb_buffer_R, 0, length * sizeof(s16_t));
 				for (int i = 0; i < length; i++) 
 				{
-					//reverb_buffer_L[write_pos] = data_L[i];
-					//reverb_buffer_R[write_pos] = data_R[i];
+					if (outdoor_reverb)
+					{
+						reverb_buffer_L[write_pos] = data_L[i];
+						reverb_buffer_R[write_pos] = data_R[i];
+					}
 					int reverbed_L = data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
 					int reverbed_R = data_R[i] + reverb_buffer_R[read_pos] * reverb_ratio / 100;
 					fx_data_L[i] = CLAMP(INT16_MIN, reverbed_L, INT16_MAX);
 					fx_data_R[i] = CLAMP(INT16_MIN, reverbed_R, INT16_MAX);
-					reverb_buffer_L[write_pos] = reverbed_L;
-					reverb_buffer_R[write_pos] = reverbed_R;
+					if (!outdoor_reverb)
+					{
+						reverb_buffer_L[write_pos] = reverbed_L;
+						reverb_buffer_R[write_pos] = reverbed_R;
+					}
 					write_pos = (write_pos + 1) % (length);
 					read_pos = (read_pos + 1) % (length);					
 				}
 				current_mix = SFX_Reverb;
 				reverbed_room_size = current_room_size;
+				if (outdoor_reverb)
+					reverb_is_outdoors = true;
+				else
+					reverb_is_outdoors = false;
 				delete[] reverb_buffer_L;
 				delete[] reverb_buffer_R;
 				reverb_buffer_L = NULL;
@@ -336,15 +352,21 @@ void sound_data_c::Mix_Reverb(float room_area)
 				read_pos = ((write_pos - reverb_delay * freq / 1000) + length * 2) % (length * 2);
 				for (int i = 0; i < length * 2; i++) 
 				{
-					//reverb_buffer_L[write_pos] = data_L[i];
+					if (outdoor_reverb)
+						reverb_buffer_L[write_pos] = data_L[i];
 					int reverbed = data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
 					fx_data_L[i] = CLAMP(INT16_MIN, reverbed, INT16_MAX);
-					reverb_buffer_L[write_pos] = reverbed;
+					if (!outdoor_reverb)
+						reverb_buffer_L[write_pos] = reverbed;
 					write_pos = (write_pos + 1) % (length * 2);
 					read_pos = (read_pos + 1) % (length * 2);
 				}
 				current_mix = SFX_Reverb;
 				reverbed_room_size = current_room_size;
+				if (outdoor_reverb)
+					reverb_is_outdoors = true;
+				else
+					reverb_is_outdoors = false;
 				delete[] reverb_buffer_L;
 				reverb_buffer_L = NULL;
 				break;

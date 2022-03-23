@@ -725,6 +725,7 @@ void P_PlayerThink(player_t * player)
 	// Reset environmental FX in case player has left sector in which they apply - Dasho
 	vacuum_sfx = false;
 	submerged_sfx = false;
+	outdoor_reverb = false;
 
 	if (player->mo->props->special ||
 		player->mo->subsector->sector->exfloor_used > 0 ||
@@ -733,6 +734,9 @@ void P_PlayerThink(player_t * player)
 	{
 		P_PlayerInSpecialSector(player, player->mo->subsector->sector);
 	}
+
+	if (IS_SKY(player->mo->subsector->sector->ceil))
+		outdoor_reverb = true;
 
 	// Check for weapon change.
 	if (cmd->buttons & BT_CHANGE)

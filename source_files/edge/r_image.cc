@@ -283,6 +283,8 @@ static image_c *NewImage(int width, int height, int opacity = OPAC_Unknown)
 
 	rim->swirl_it = false;
 
+	rim->swirled_gametic = 0;
+
 	return rim;
 }
 
@@ -980,6 +982,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
 	if (rim->swirl_it)
 	{
 		tmp_img->Swirl(leveltime);
+		rim->swirled_gametic = gametic;
 	}
 
 	GLuint tex_id = R_UploadTexture(tmp_img,
@@ -1406,8 +1409,8 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 	}
 #endif
 
-	// Always clear tex_id if swirling - Dasho
-	if (rc->parent->swirl_it)
+	// Clear swirl tex_id if on different gametic - Dasho
+	if (rc->parent->swirl_it && (rc->parent->swirled_gametic != gametic))
 		rc->tex_id = 0;
 
 	if (rc->tex_id == 0)

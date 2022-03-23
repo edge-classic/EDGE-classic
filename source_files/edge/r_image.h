@@ -86,6 +86,8 @@ public:
 
 	bool swirl_it;
 
+	int swirled_gametic;
+
 //!!!!!! private:
 
 	// --- information about where this image came from ---

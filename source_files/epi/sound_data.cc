@@ -267,8 +267,8 @@ void sound_data_c::Mix_Reverb(float room_area, bool outdoor_reverb)
 	if (current_mix != SFX_Reverb || reverbed_room_size != current_room_size || reverb_is_outdoors != outdoor_reverb)
 	{
 		// Setup reverb parameters
-		s16_t *reverb_buffer_L;
-		s16_t *reverb_buffer_R;
+		long *reverb_buffer_L;
+		long *reverb_buffer_R;
 		int write_pos = 0;
 		int read_pos = 0;
 		int reverb_delay = 50 * current_room_size;
@@ -279,14 +279,14 @@ void sound_data_c::Mix_Reverb(float room_area, bool outdoor_reverb)
 				if (!fx_data_L)
 					fx_data_L = new s16_t[length];
 				fx_data_R = fx_data_L;
-				reverb_buffer_L = new s16_t[length];
-				memset(reverb_buffer_L, 0, length * sizeof(s16_t));
+				reverb_buffer_L = new long[length];
+				memset(reverb_buffer_L, 0, length * sizeof(long));
 				read_pos = ((write_pos - reverb_delay * freq / 1000) + length) % (length);
 				for (int i = 0; i < length; i++) 
 				{
 					if (outdoor_reverb)
 						reverb_buffer_L[write_pos] = data_L[i];
-					int reverbed = data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
+					long reverbed = data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
 					fx_data_L[i] = CLAMP(INT16_MIN, reverbed, INT16_MAX);
 					if (!outdoor_reverb)
 						reverb_buffer_L[write_pos] = reverbed;
@@ -308,10 +308,10 @@ void sound_data_c::Mix_Reverb(float room_area, bool outdoor_reverb)
 					fx_data_L = new s16_t[length];
 				if (!fx_data_R)
 					fx_data_R = new s16_t[length];
-				reverb_buffer_L = new s16_t[length];
-				reverb_buffer_R = new s16_t[length];
-				memset(reverb_buffer_L, 0, length * sizeof(s16_t));
-				memset(reverb_buffer_R, 0, length * sizeof(s16_t));
+				reverb_buffer_L = new long[length];
+				reverb_buffer_R = new long[length];
+				memset(reverb_buffer_L, 0, length * sizeof(long));
+				memset(reverb_buffer_R, 0, length * sizeof(long));
 				for (int i = 0; i < length; i++) 
 				{
 					if (outdoor_reverb)
@@ -319,8 +319,8 @@ void sound_data_c::Mix_Reverb(float room_area, bool outdoor_reverb)
 						reverb_buffer_L[write_pos] = data_L[i];
 						reverb_buffer_R[write_pos] = data_R[i];
 					}
-					int reverbed_L = data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
-					int reverbed_R = data_R[i] + reverb_buffer_R[read_pos] * reverb_ratio / 100;
+					long reverbed_L = data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
+					long reverbed_R = data_R[i] + reverb_buffer_R[read_pos] * reverb_ratio / 100;
 					fx_data_L[i] = CLAMP(INT16_MIN, reverbed_L, INT16_MAX);
 					fx_data_R[i] = CLAMP(INT16_MIN, reverbed_R, INT16_MAX);
 					if (!outdoor_reverb)
@@ -347,14 +347,14 @@ void sound_data_c::Mix_Reverb(float room_area, bool outdoor_reverb)
 				if (!fx_data_L)
 					fx_data_L = new s16_t[length * 2];
 				fx_data_R = fx_data_L;
-				reverb_buffer_L = new s16_t[length * 2];
-				memset(reverb_buffer_L, 0, length * sizeof(s16_t) * 2);
+				reverb_buffer_L = new long[length * 2];
+				memset(reverb_buffer_L, 0, length * sizeof(long) * 2);
 				read_pos = ((write_pos - reverb_delay * freq / 1000) + length * 2) % (length * 2);
 				for (int i = 0; i < length * 2; i++) 
 				{
 					if (outdoor_reverb)
 						reverb_buffer_L[write_pos] = data_L[i];
-					int reverbed = data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
+					long reverbed = data_L[i] + reverb_buffer_L[read_pos] * reverb_ratio / 100;
 					fx_data_L[i] = CLAMP(INT16_MIN, reverbed, INT16_MAX);
 					if (!outdoor_reverb)
 						reverb_buffer_L[write_pos] = reverbed;

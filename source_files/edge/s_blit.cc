@@ -150,18 +150,18 @@ void mix_channel_c::ComputeVolume()
 
 		if (! boss)
 		{
-			dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z); 
+			dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
 
 			if (P_CheckSightToPoint(players[consoleplayer]->mo, pos->x, pos->y, pos->z))
-				dist /= (100.0f * data->freq_factor);
+				dist = MAX(1.25f, dist / (100.0f * data->freq_factor));
 			else
-				dist /= (50.0f * data->freq_factor);
+				dist = MAX(1.25f, dist / (50.0f * data->freq_factor));
 		}
 	}
 
 	float MAX_VOL = (1 << (16 - SAFE_BITS - (var_quiet_factor-1))) - 3;
 
-	MAX_VOL = boss ? MAX_VOL : MIN(MAX_VOL, MAX_VOL / dist) * slider_to_gain[sfx_volume];
+	MAX_VOL = boss ? MAX_VOL : MAX_VOL / dist * slider_to_gain[sfx_volume];
 
 	if (def)
 		MAX_VOL *= PERCENT_2_FLOAT(def->volume);
@@ -271,7 +271,7 @@ static void MixMono(mix_channel_c *chan, int *dest, int pairs)
 	else
 	{
 		
-		if (!chan->data->is_sfx)
+		if (!chan->data->is_sfx || chan->category == SNCAT_UI)
 			src_L = chan->data->data_L;
 		else
 			src_L = chan->data->fx_data_L;
@@ -308,7 +308,7 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 	}
 	else
 	{
-		if (!chan->data->is_sfx)
+		if (!chan->data->is_sfx || chan->category == SNCAT_UI)
 		{
 			src_L = chan->data->data_L;
 			src_R = chan->data->data_R;
@@ -351,7 +351,7 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 		src_L = chan->data->data_L;
 	else
 	{
-		if (!chan->data->is_sfx)
+		if (!chan->data->is_sfx || chan->category == SNCAT_UI)
 			src_L = chan->data->data_L;
 		else
 			src_L = chan->data->fx_data_L;

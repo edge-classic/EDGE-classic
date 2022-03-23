@@ -66,6 +66,8 @@
 #include "z_zone.h"
 
 
+bool swirling_flats = false;
+
 // LIGHTING DEBUGGING
 // #define MAKE_TEXTURES_WHITE  1
 
@@ -82,7 +84,6 @@ extern void CloseUserFileOrLump(imagedef_c *def, epi::file_c *f);
 
 extern void DeleteSkyTextures(void);
 extern void DeleteColourmapTextures(void);
-
 
 //
 // This structure is for "cached" images (i.e. ready to be used for
@@ -150,6 +151,9 @@ static void do_Animate(real_image_container_c& bucket)
 		image_c *rim = *it;
 
 		if (rim->anim.speed == 0)  // not animated ?
+			continue;
+
+		if (rim->swirl_it)
 			continue;
 
 		SYS_ASSERT(rim->anim.count > 0);
@@ -468,12 +472,15 @@ static image_c *AddImageFlat(const char *name, int lump)
 	rim->source.flat.lump = lump;
 	rim->source_palette = W_GetPaletteForLump(lump);
 
-	flatdef_c *current_flatdef = flatdefs.Find(rim->name);
-
-	if (current_flatdef)
+	if (swirling_flats)
 	{
-		if (current_flatdef->swirly)
-			rim->swirl_it = true;
+		flatdef_c *current_flatdef = flatdefs.Find(rim->name);
+
+		if (current_flatdef)
+		{
+			if (current_flatdef->swirly)
+				rim->swirl_it = true;
+		}
 	}
 
 	real_flats.push_back(rim);
@@ -948,6 +955,12 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
 
 	epi::image_data_c *tmp_img = ReadAsEpiBlock(rim);
 
+	if (rim->swirl_it)
+	{
+		tmp_img->Swirl(leveltime);
+		rim->swirled_gametic = gametic;
+	}
+
 	if (rim->opacity == OPAC_Unknown)
 		rim->opacity = R_DetermineOpacity(tmp_img);
 
@@ -977,12 +990,6 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
 			tmp_img->Whiten();
 		else
 			R_PaletteRemapRGBA(tmp_img, what_palette, (const byte *) &playpal_data[0]);
-	}
-
-	if (rim->swirl_it)
-	{
-		tmp_img->Swirl(leveltime);
-		rim->swirled_gametic = gametic;
 	}
 
 	GLuint tex_id = R_UploadTexture(tmp_img,

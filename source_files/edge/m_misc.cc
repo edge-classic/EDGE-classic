@@ -140,6 +140,7 @@ static default_t defaults[] =
     {CFGT_Int,      "doom_fading",       &doom_fading,    CFGDEF_DOOM_FADING},
     {CFGT_Boolean,  "shootthru_scenery", &global_flags.pass_missile, CFGDEF_PASS_MISSILE},
 	{CFGT_Boolean,  "splash_screen",     &splash_screen, true},
+	{CFGT_Boolean,  "swirling_flats",     &swirling_flats, true},
 
     // -KM- 1998/07/21 Save the blood setting
     {CFGT_Boolean,  "blood",             &global_flags.more_blood, CFGDEF_MORE_BLOOD},

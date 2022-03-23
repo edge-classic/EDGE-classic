@@ -376,7 +376,8 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Switch,  "Invulnerability", Invuls, NUM_INVULFX,  &var_invul_fx, NULL, NULL},
 	{OPT_Switch,  "Wipe method",     WIPE_EnumStr, WIPE_NUMWIPES, &wipe_method, NULL, NULL},
 	{OPT_Boolean, "Screenshot Format", JpgPng, 2, &png_scrshots, NULL, NULL},
-	{OPT_Boolean, "Splash Screen",    YesNo,   2, &splash_screen, NULL, NULL}
+	{OPT_Boolean, "Splash Screen",    YesNo,   2, &splash_screen, NULL, NULL},
+	{OPT_Boolean, "Swirling Flats",    YesNo,   2, &swirling_flats, NULL, "NeedRestart"}
 	
 
 #if 0  // TEMPORARILY DISABLED (we need an `Advanced Options' menu)

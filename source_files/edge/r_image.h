@@ -202,6 +202,7 @@ extern int  var_mipmapping;
 extern int  var_smoothing;
 extern bool var_dithering;
 extern int  hq2x_scaling;
+extern bool swirling_flats;
 
 bool W_InitImages(void);
 void W_UpdateImageAnims(void);
@@ -232,7 +233,6 @@ const image_c ** W_ImageGetUserSprites(int *count);
 
 // internal routines -- only needed by rgl_wipe.c
 int W_MakeValidSize(int value);
-
 
 typedef enum
 {

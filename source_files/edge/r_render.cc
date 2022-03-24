@@ -44,6 +44,7 @@
 #include "r_occlude.h"
 #include "r_shader.h"
 #include "r_sky.h"
+#include "r_tables.h"
 #include "r_things.h"
 #include "r_units.h"
 
@@ -57,7 +58,6 @@
 
 #define DOOM_YSLOPE       (0.525)
 #define DOOM_YSLOPE_FULL  (0.625)
-
 
 // #define DEBUG_GREET_NEIGHBOUR
 
@@ -818,6 +818,22 @@ typedef struct
 }
 plane_coord_data_t;
 
+// Adapted from Quake 3 GPL release - Dasho
+void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
+{
+	float now;
+	float phase = 0;
+	float frequency = 1.0;
+	float amplitude = 0.05;
+
+	now = ( phase + leveltime / 15.0f * frequency );
+
+	float old_x = texc->x;
+	float old_y = texc->y;
+
+	texc->x = old_x + table_sin((pos->x + pos->z )* 1.0/128 * 0.125 + now) * amplitude;
+	texc->y = old_y + table_sin(pos->y * 1.0/128 * 0.125 + now ) * amplitude;
+}
 
 static void PlaneCoordFunc(void *d, int v_idx,
 		vec3_t *pos, float *rgb, vec2_t *texc,
@@ -837,6 +853,8 @@ static void PlaneCoordFunc(void *d, int v_idx,
 
 	texc->x = rx * data->x_mat.x + ry * data->x_mat.y;
 	texc->y = rx * data->y_mat.x + ry * data->y_mat.y;
+
+	//CalcTurbulentTexCoords(texc, pos);
 
 	*lit_pos = *pos;
 }
@@ -2420,7 +2438,6 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	data.blending = blending;
 	data.trans = trans;
 	data.slope = slope;
-
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
 

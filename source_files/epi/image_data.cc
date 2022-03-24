@@ -1702,7 +1702,7 @@ void image_data_c::Swirl(int leveltime)
 {
 	const int swirlfactor = 8192 / 64;
     const int swirlfactor2 = 8192 / 32;
-    const int amp = 2;
+    const int amp = 1 + (width / 64);
     const int amp2 = 2;
     const int speed = 40;
 

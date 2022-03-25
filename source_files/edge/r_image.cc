@@ -968,8 +968,10 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
 
 	if (rim->swirl_it)
 	{
+		//tmp_img->SetAlpha(255);
 		tmp_img->Swirl(leveltime);
 		rim->swirled_gametic = gametic;
+		//rim->opacity = OPAC_Complex;
 	}
 
 	if (rim->opacity == OPAC_Unknown)

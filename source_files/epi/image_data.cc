@@ -288,6 +288,37 @@ void image_data_c::RemoveAlpha()
 	bpp = 3;
 }
 
+void image_data_c::SetAlpha(int alphaness)
+{
+	if (bpp < 3)
+		return;
+
+	if (bpp == 3)
+	{
+		u8_t *new_pixels = new u8_t[width * height * 4];
+		u8_t *src   = pixels;
+		u8_t *s_end = src + (width * height * 3);
+		u8_t *dest  = new_pixels;
+		for (; src < s_end; src += 3)
+		{
+			*dest++ = src[0];
+			*dest++ = src[1];
+			*dest++ = src[2];
+			*dest++ = alphaness;
+		}
+		delete[] pixels;
+		pixels = new_pixels;
+		bpp = 4;
+	}
+	else
+	{
+		for (int i = 3; i < width * height * 4; i += 4)
+		{
+			pixels[i] = alphaness;
+		}
+	}
+}
+
 void image_data_c::ThresholdAlpha(u8_t alpha)
 {
 	if (bpp != 4)
@@ -415,7 +446,7 @@ void image_data_c::AverageHue(u8_t *hue, u8_t *ity)
 
 void image_data_c::Swirl(int leveltime)
 {
-	const int swirlfactor = 8192 / 64;
+	/*const int swirlfactor = 8192 / 64;
     const int swirlfactor2 = 8192 / 32;
     const int amp = 1 + (width / 64);
     const int amp2 = 0 + (width / 64);
@@ -456,7 +487,7 @@ void image_data_c::Swirl(int leveltime)
 			for (int i = 0; i < bpp; i++)
 				*dest++ = *src++;
 		}
-	}
+	}*/
 }
 
 } // namespace epi

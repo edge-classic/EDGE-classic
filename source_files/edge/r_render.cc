@@ -44,7 +44,6 @@
 #include "r_occlude.h"
 #include "r_shader.h"
 #include "r_sky.h"
-#include "r_tables.h"
 #include "r_things.h"
 #include "r_units.h"
 
@@ -824,15 +823,12 @@ void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 	float now;
 	float phase = 0;
 	float frequency = 1.0;
-	float amplitude = 0.05;
+	float amplitude = 0.1;
 
-	now = ( phase + leveltime / 15.0f * frequency );
+	now = ( phase + leveltime / 100.0f * frequency );
 
-	float old_x = texc->x;
-	float old_y = texc->y;
-
-	texc->x = old_x + table_sin((pos->x + pos->z )* 1.0/128 * 0.125 + now) * amplitude;
-	texc->y = old_y + table_sin(pos->y * 1.0/128 * 0.125 + now ) * amplitude;
+	texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z )* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_SIZE - 1)] * amplitude;
+	texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_SIZE - 1) ] * amplitude;
 }
 
 static void PlaneCoordFunc(void *d, int v_idx,
@@ -854,7 +850,7 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	texc->x = rx * data->x_mat.x + ry * data->x_mat.y;
 	texc->y = rx * data->y_mat.x + ry * data->y_mat.y;
 
-	//CalcTurbulentTexCoords(texc, pos);
+	CalcTurbulentTexCoords(texc, pos);
 
 	*lit_pos = *pos;
 }

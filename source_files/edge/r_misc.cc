@@ -102,6 +102,8 @@ int telept_reverse = 0;
 
 int var_invul_fx;
 
+float *r_sintable = new float[FUNCTABLE_SIZE];
+
 //
 // To get a global angle from cartesian coordinates,
 // the coordinates are flipped until they are in
@@ -224,7 +226,13 @@ float R_PointToDist(float x1, float y1, float x2, float y2)
 	return dist;
 }
 
-
+void R_InitShaderTables()
+{
+	for ( int i = 0; i < FUNCTABLE_SIZE; i++ )
+	{
+		r_sintable[i]		= sin( DEG2RAD( i * 360.0f / ( ( float ) ( FUNCTABLE_SIZE - 1 ) ) ) );
+	}
+}
 
 //
 // Called once at startup, to initialise some rendering stuff.
@@ -232,6 +240,8 @@ float R_PointToDist(float x1, float y1, float x2, float y2)
 void R_Init(void)
 {
 	E_ProgressMessage(language["RefreshDaemon"]);
+
+	R_InitShaderTables();
 
 	framecount = 0;
 

@@ -77,6 +77,8 @@ int use_dlights = 0;
 
 int doom_fading = 1;
 
+int swirl_offset = 0;
+
 
 float view_x_slope;
 float view_y_slope;
@@ -823,12 +825,12 @@ void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 	float now;
 	float phase = 0;
 	float frequency = 1.0;
-	float amplitude = 0.1;
+	float amplitude = 0.05 * swirl_offset;
 
 	now = ( phase + leveltime / 100.0f * frequency );
 
 	texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z )* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_SIZE - 1)] * amplitude;
-	texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_SIZE - 1) ] * amplitude;
+	texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_SIZE - 1) ] * amplitude;		
 }
 
 static void PlaneCoordFunc(void *d, int v_idx,
@@ -840,9 +842,18 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	*pos    = data->vert[v_idx];
 	*normal = data->normal;
 
-	rgb[0] = data->R;
-	rgb[1] = data->G;
-	rgb[2] = data->B;
+	if (swirl_offset > 1)
+	{
+		rgb[0] = 1.0 / data->R;
+		rgb[1] = 1.0 / data->G;
+		rgb[2] = 1.0 / data->B;
+	}
+	else
+	{
+		rgb[0] = data->R;
+		rgb[1] = data->G;
+		rgb[2] = data->B;		
+	}
 
 	float rx = (data->tx0 + pos->x) / data->image_w;
 	float ry = (data->ty0 + pos->y) / data->image_h;
@@ -2358,6 +2369,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 		num_vert = MAX_PLVERT;
 
 	vec3_t vertices[MAX_PLVERT];
+	vec3_t vertices2[MAX_PLVERT];
 
 	float v_bbox[4];
 
@@ -2390,6 +2402,10 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 			vertices[v_count].y = y;
 			vertices[v_count].z = z;
 
+			vertices2[v_count].x = x;
+			vertices2[v_count].y = y;
+			vertices2[v_count].z = z + 1;
+
 			v_count++;
 		}
 	}
@@ -2409,37 +2425,63 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 
 
 	plane_coord_data_t data;
+	plane_coord_data_t data2;
 
 	data.v_count = v_count;
 	data.vert = vertices;
-
 	data.R = data.G = data.B = 1.0f;
-
 	data.tx0 = surf->offset.x;
 	data.ty0 = surf->offset.y;
 	data.image_w = IM_WIDTH(surf->image);
 	data.image_h = IM_HEIGHT(surf->image);
-
 	data.x_mat = surf->x_mat;
 	data.y_mat = surf->y_mat;
-
 	float mir_scale = MIR_XYScale();
 	data.x_mat.x /= mir_scale; data.x_mat.y /= mir_scale;
 	data.y_mat.x /= mir_scale; data.y_mat.y /= mir_scale;
-
 	data.normal.Set(0, 0, (viewz > h) ? +1 : -1);
-
 	data.tex_id = tex_id;
 	data.pass   = 0;
 	data.blending = blending;
 	data.trans = trans;
 	data.slope = slope;
 
-	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
+	if (surf->image->swirl_it)
+		swirl_offset = 1;
 
+	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
+	
 	cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 			trans, &data.pass, data.blending, false /* masked */,
 			&data, PlaneCoordFunc);
+
+	if (surf->image->swirl_it)
+	{
+		data2.v_count = v_count;
+		data2.vert = vertices2;
+		data2.R = data.G = data.B = 1.0f;
+		data2.tx0 = surf->offset.x + 25;
+		data2.ty0 = surf->offset.y + 25;
+		data2.image_w = IM_WIDTH(surf->image);
+		data2.image_h = IM_HEIGHT(surf->image);
+		data2.x_mat = surf->x_mat;
+		data2.y_mat = surf->y_mat;
+		data2.x_mat.x /= mir_scale; data.x_mat.y /= mir_scale;
+		data2.y_mat.x /= mir_scale; data.y_mat.y /= mir_scale;
+		data2.normal.Set(0, 0, (viewz > h) ? +1 : -1);
+		swirl_offset = 2;
+		data2.tex_id = W_ImageCache(surf->image, true, ren_fx_colmap);
+		data2.pass   = 0;
+		data2.blending = BL_Masked | BL_Alpha;
+		data2.trans = 0.25f;
+		trans = 0.25f;
+		data2.slope = slope;
+		cmap_shader->WorldMix(GL_POLYGON, data2.v_count, data2.tex_id,
+					trans, &data2.pass, data2.blending, true /* masked */,
+					&data2, PlaneCoordFunc);
+	}
+
+	swirl_offset = 0; // Reset in case we swirled
 
 	if (use_dlights && ren_extralight < 250)
 	{

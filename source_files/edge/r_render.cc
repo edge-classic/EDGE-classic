@@ -823,7 +823,7 @@ plane_coord_data_t;
 void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
 {
 	int i;
-	float timeScale = leveltime / 100.0f;
+	float timeScale = leveltime / 75.0f;
 	float adjustedScrollS, adjustedScrollT;
 
 	adjustedScrollS = x_scroll * timeScale;
@@ -882,9 +882,12 @@ static void PlaneCoordFunc(void *d, int v_idx,
 
 	if (swirl_offset > 0)
 	{
-		CalcTurbulentTexCoords(texc, pos);
+		//CalcTurbulentTexCoords(texc, pos);
 
-		//CalcScrollTexCoords(0.5 * swirl_offset, 0.0, texc);
+		if (swirl_offset == 1)
+			CalcScrollTexCoords(0.10, 0.25, texc);
+		else
+			CalcScrollTexCoords(-0.10, 0.25, texc);
 	}
 
 	*lit_pos = *pos;
@@ -2393,7 +2396,6 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 		num_vert = MAX_PLVERT;
 
 	vec3_t vertices[MAX_PLVERT];
-	vec3_t vertices2[MAX_PLVERT];
 
 	float v_bbox[4];
 
@@ -2426,10 +2428,6 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 			vertices[v_count].y = y;
 			vertices[v_count].z = z;
 
-			vertices2[v_count].x = x;
-			vertices2[v_count].y = y;
-			vertices2[v_count].z = z + 1;
-
 			v_count++;
 		}
 	}
@@ -2449,7 +2447,6 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 
 
 	plane_coord_data_t data;
-	plane_coord_data_t data2;
 
 	data.v_count = v_count;
 	data.vert = vertices;
@@ -2481,31 +2478,18 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 
 	if (surf->image->swirl_it)
 	{
-		data2.v_count = v_count;
-		data2.vert = vertices2;
-		data2.R = data.G = data.B = 1.0f;
-		data2.tx0 = surf->offset.x + 25;
-		data2.ty0 = surf->offset.y + 25;
-		data2.image_w = IM_WIDTH(surf->image);
-		data2.image_h = IM_HEIGHT(surf->image);
-		data2.x_mat = surf->x_mat;
-		data2.y_mat = surf->y_mat;
-		data2.x_mat.x /= mir_scale; data.x_mat.y /= mir_scale;
-		data2.y_mat.x /= mir_scale; data.y_mat.y /= mir_scale;
-		data2.normal.Set(0, 0, (viewz > h) ? +1 : -1);
+		data.tx0 = surf->offset.x + 25;
+		data.ty0 = surf->offset.y + 25;
 		swirl_offset = 2;
-		data2.tex_id = tex_id;
-		data2.pass   = 0;
-		data2.blending = BL_Masked | BL_Alpha;
-		data2.trans = 0.25f;
-		trans = 0.25f;
-		data2.slope = slope;
-		cmap_shader->WorldMix(GL_POLYGON, data2.v_count, data2.tex_id,
-					trans, &data2.pass, data2.blending, false /* masked */,
-					&data2, PlaneCoordFunc);
+		data.blending = BL_Masked | BL_Alpha;
+		data.trans = 0.5f;
+		trans = 0.5f;
+		cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
+					trans, &data.pass, data.blending, false /* masked */,
+					&data, PlaneCoordFunc);
 	}
 
-	swirl_offset = 0; // Reset in case we swirled
+	swirl_offset = 0;
 
 	if (use_dlights && ren_extralight < 250)
 	{

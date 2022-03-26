@@ -58,7 +58,6 @@
 #include "r_defs.h"
 #include "r_gldefs.h"
 #include "r_image.h"
-#include "r_render.h"
 #include "r_sky.h"
 #include "r_texgl.h"
 #include "r_colormap.h"
@@ -1415,21 +1414,14 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 
 	SYS_ASSERT(rc);
 
-#if 0  // REMOVE
-	if (rc->invalidated)
+	if (rc->parent->swirl_it && rc->parent->swirled_gametic != gametic)
 	{
-		SYS_ASSERT(rc->tex_id != 0);
-
-		glDeleteTextures(1, &rc->tex_id);
-
-		rc->tex_id = 0;
-		rc->invalidated = false;
+		if (rc->tex_id != 0)
+		{
+			glDeleteTextures(1, &rc->tex_id);
+			rc->tex_id = 0;
+		}
 	}
-#endif
-
-	// Clear swirl tex_id if on different gametic or a different layer - Dasho
-	if (rc->parent->swirl_it && ((rc->parent->swirled_gametic != gametic) || swirl_offset > 1))
-		rc->tex_id = 0;
 
 	if (rc->tex_id == 0)
 	{

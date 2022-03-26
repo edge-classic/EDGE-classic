@@ -820,6 +820,25 @@ typedef struct
 plane_coord_data_t;
 
 // Adapted from Quake 3 GPL release - Dasho
+void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
+{
+	int i;
+	float timeScale = leveltime / 100.0f;
+	float adjustedScrollS, adjustedScrollT;
+
+	adjustedScrollS = x_scroll * timeScale;
+	adjustedScrollT = y_scroll * timeScale;
+
+	// clamp so coordinates don't continuously get larger, causing problems
+	// with hardware limits
+	adjustedScrollS = adjustedScrollS - floor( adjustedScrollS );
+	adjustedScrollT = adjustedScrollT - floor( adjustedScrollT );
+
+	texc->x += adjustedScrollS;
+	texc->y += adjustedScrollT;
+}
+
+// Adapted from Quake 3 GPL release - Dasho
 void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 {
 	float now;
@@ -861,7 +880,12 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	texc->x = rx * data->x_mat.x + ry * data->x_mat.y;
 	texc->y = rx * data->y_mat.x + ry * data->y_mat.y;
 
-	CalcTurbulentTexCoords(texc, pos);
+	if (swirl_offset > 0)
+	{
+		CalcTurbulentTexCoords(texc, pos);
+
+		//CalcScrollTexCoords(0.5 * swirl_offset, 0.0, texc);
+	}
 
 	*lit_pos = *pos;
 }
@@ -2470,14 +2494,14 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 		data2.y_mat.x /= mir_scale; data.y_mat.y /= mir_scale;
 		data2.normal.Set(0, 0, (viewz > h) ? +1 : -1);
 		swirl_offset = 2;
-		data2.tex_id = W_ImageCache(surf->image, true, ren_fx_colmap);
+		data2.tex_id = tex_id;
 		data2.pass   = 0;
 		data2.blending = BL_Masked | BL_Alpha;
 		data2.trans = 0.25f;
 		trans = 0.25f;
 		data2.slope = slope;
 		cmap_shader->WorldMix(GL_POLYGON, data2.v_count, data2.tex_id,
-					trans, &data2.pass, data2.blending, true /* masked */,
+					trans, &data2.pass, data2.blending, false /* masked */,
 					&data2, PlaneCoordFunc);
 	}
 

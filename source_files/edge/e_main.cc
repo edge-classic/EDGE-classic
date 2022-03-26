@@ -1511,8 +1511,9 @@ void E_Main(int argc, const char **argv)
 				E_Tick();
 		}
 	}
-	catch(...)
+	catch(const std::exception& e)
 	{
+		I_Printf("EXCEPTION THROWN: %s\n", e.what());
 		I_Error("Unexpected internal failure occurred!\n");
 	}
 

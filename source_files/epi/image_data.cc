@@ -495,6 +495,8 @@ void image_data_c::Swirl(int leveltime, int thickness)
 				*dest++ = *src++;
 		}
 	}
+	delete[] old_pixels;
+	old_pixels = NULL;
 }
 
 } // namespace epi

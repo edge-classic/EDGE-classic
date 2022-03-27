@@ -33,6 +33,7 @@
 #include "dm_state.h"
 #include "g_game.h"
 #include "m_bbox.h"
+//#include "m_oddity.h" // Fast inverse square root
 #include "p_local.h"
 #include "r_defs.h"
 #include "r_misc.h"
@@ -819,18 +820,59 @@ typedef struct
 }
 plane_coord_data_t;
 
+/*void CalcDeformVertexes( vec3_t *pos, vec3_t *old_normal )
+{
+	float	offset[3];
+	float	*xyz = ( float * ) pos;
+	float	*normal = ( float * ) old_normal;
+	float	*table;
+	float 	frequency = 0;
+	float 	scale;
+
+	if ( frequency == 0 )
+	{
+		scale = EvalWaveForm( &ds->deformationWave );
+
+		VectorScale( normal, scale, offset );
+			
+		xyz[0] += offset[0];
+		xyz[1] += offset[1];
+		xyz[2] += offset[2];
+	}
+	else
+	{
+		// TableForFunc refers to things like the sintable, etc - Dasho
+		table = TableForFunc( ds->deformationWave.func );
+
+		for ( i = 0; i < tess.numVertexes; i++, xyz += 4, normal += 4 )
+		{
+			float off = ( xyz[0] + xyz[1] + xyz[2] ) * ds->deformationSpread;
+
+			scale = WAVEVALUE( table, ds->deformationWave.base, 
+				ds->deformationWave.amplitude,
+				ds->deformationWave.phase + off,
+				ds->deformationWave.frequency );
+
+			VectorScale( normal, scale, offset );
+			
+			xyz[0] += offset[0];
+			xyz[1] += offset[1];
+			xyz[2] += offset[2];
+		}
+	}
+}*/
+
 // Adapted from Quake 3 GPL release - Dasho
 void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
 {
 	int i;
-	float timeScale = leveltime / 75.0f;
+	float timeScale = leveltime / 100.0f;
 	float adjustedScrollS, adjustedScrollT;
 
 	adjustedScrollS = x_scroll * timeScale;
 	adjustedScrollT = y_scroll * timeScale;
 
-	// clamp so coordinates don't continuously get larger, causing problems
-	// with hardware limits
+	// clamp so coordinates don't continuously get larger
 	adjustedScrollS = adjustedScrollS - floor( adjustedScrollS );
 	adjustedScrollT = adjustedScrollT - floor( adjustedScrollT );
 
@@ -2467,7 +2509,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	data.trans = trans;
 	data.slope = slope;
 
-	if (surf->image->swirl_it)
+	if (surf->image->liquid_type > LIQ_None)
 		swirl_offset = 1;
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
@@ -2476,7 +2518,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 			trans, &data.pass, data.blending, false /* masked */,
 			&data, PlaneCoordFunc);
 
-	if (surf->image->swirl_it)
+	if (surf->image->liquid_type > LIQ_None)
 	{
 		data.tx0 = surf->offset.x + 25;
 		data.ty0 = surf->offset.y + 25;

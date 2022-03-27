@@ -66,7 +66,7 @@
 #include "z_zone.h"
 
 
-bool swirling_flats = false;
+swirl_type_e swirling_flats = SWIRL_Vanilla;
 
 // LIGHTING DEBUGGING
 // #define MAKE_TEXTURES_WHITE  1
@@ -153,7 +153,7 @@ static void do_Animate(real_image_container_c& bucket)
 		if (rim->anim.speed == 0)  // not animated ?
 			continue;
 
-		if (rim->swirl_it)
+		if (rim->liquid_type > LIQ_None)
 			continue;
 
 		SYS_ASSERT(rim->anim.count > 0);
@@ -285,7 +285,7 @@ static image_c *NewImage(int width, int height, int opacity = OPAC_Unknown)
 	rim->anim.next = NULL;
 	rim->anim.count = rim->anim.speed = 0;
 
-	rim->swirl_it = false;
+	rim->liquid_type = LIQ_None;
 
 	rim->swirled_gametic = 0;
 
@@ -394,14 +394,16 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 
 	strcpy(rim->name, name);
 
-	if (swirling_flats)
+	if (swirling_flats > SWIRL_Vanilla)
 	{
 		flatdef_c *current_flatdef = flatdefs.Find(rim->name);
 
-		if (current_flatdef)
+		if (current_flatdef && !current_flatdef->liquid.empty())
 		{
-			if (current_flatdef->swirly)
-				rim->swirl_it = true;
+			if (strcasecmp(current_flatdef->liquid.c_str(), "THIN") == 0)
+				rim->liquid_type = LIQ_Thin;
+			else if (strcasecmp(current_flatdef->liquid.c_str(), "THICK") == 0)
+				rim->liquid_type = LIQ_Thick;
 		}
 	}
 	rim->source_type = type;
@@ -482,14 +484,16 @@ static image_c *AddImageFlat(const char *name, int lump)
 	rim->source.flat.lump = lump;
 	rim->source_palette = W_GetPaletteForLump(lump);
 
-	if (swirling_flats)
+	if (swirling_flats > SWIRL_Vanilla)
 	{
 		flatdef_c *current_flatdef = flatdefs.Find(rim->name);
 
-		if (current_flatdef)
+		if (current_flatdef && !current_flatdef->liquid.empty())
 		{
-			if (current_flatdef->swirly)
-				rim->swirl_it = true;
+			if (strcasecmp(current_flatdef->liquid.c_str(), "THIN") == 0)
+				rim->liquid_type = LIQ_Thin;
+			else if (strcasecmp(current_flatdef->liquid.c_str(), "THICK") == 0)
+				rim->liquid_type = LIQ_Thick;
 		}
 	}
 
@@ -965,7 +969,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
 
 	epi::image_data_c *tmp_img = ReadAsEpiBlock(rim);
 
-	if (rim->swirl_it)
+	if (rim->liquid_type > LIQ_None)
 	{
 		tmp_img->Swirl(leveltime);
 		rim->swirled_gametic = gametic;
@@ -1414,7 +1418,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 
 	SYS_ASSERT(rc);
 
-	if (rc->parent->swirl_it && rc->parent->swirled_gametic != gametic)
+	if (rc->parent->liquid_type > LIQ_None && rc->parent->swirled_gametic != gametic)
 	{
 		if (rc->tex_id != 0)
 		{
@@ -1446,7 +1450,7 @@ GLuint W_ImageCache(const image_c *image, bool anim,
 	// handle animations
 	if (anim)
 	{
-		if (!rim->swirl_it)
+		if (rim->liquid_type == LIQ_None)
 			rim = rim->anim.cur;
 	}
 

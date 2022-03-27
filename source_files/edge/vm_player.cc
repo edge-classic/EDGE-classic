@@ -851,11 +851,6 @@ static void PL_play_footstep(coal::vm_c *vm, int argc)
 	if (!current_flatdef)
 		return;
 	
-	/* testing new LIQUID=TRUE command
-	if (current_flatdef->liquid)
-		I_Warning("player.noise_for_flat: liquid flat detected!\n");
-	*/
-
 	if (!current_flatdef->footstep)
 		return;
 	else

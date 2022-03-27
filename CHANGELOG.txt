@@ -73,7 +73,9 @@ New Features
   
 + 2 new custom fonts included in edge-defs.wad for use with our new dynamic menu: Verdana-style font and Doom-style
 
-+ Added SMMU-style flat swirling; define "SWIRL = 1" in DDFFLAT to enable
++ DDFLAT Liquids; "LIQUID = THIN" or "LIQUID = THICK" can be added to a flat definition. Currently affects swirl/dynamic liquid parameters
+
++ Added "Animated Liquid Type" to Video Options menu; choices are "Vanilla", "SMMU", "SMMU + Swirl", and "Quake 3"
 
 
 CHANGELOG for EDGE-Classic 1.0 (since EDGE-Classic Preview 1)

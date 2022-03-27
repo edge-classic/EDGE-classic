@@ -46,6 +46,28 @@ inline u32_t str_hash(const char *str)
 	return hash;
 }
 
+// Single-iteration Fast Inverse Square Root with Dynamic Constants from
+// https://www.researchgate.net/publication/349378473_Modified_Fast_Inverse_Square_Root_and_Square_Root_Approximation_Algorithms_The_Method_of_Switching_Magic_Constants
+float FastInvSqrt(float x)
+{
+	int i = *(int*)&x;
+	int k = i & 0x00800000;
+	float y;
+	if (k != 0) 
+	{
+		i = 0x5ed9e91f - (i >> 1);
+		y = *(float*)&i;
+		y = 2.33124256f*y*fmaf(-x, y*y, 1.0749737f);
+	} 
+	else 
+	{
+		i = 0x5f19e8fc - (i >> 1);
+		y = *(float*)&i;
+		y = 0.824218631f*y*fmaf(-x, y*y, 2.1499474f);
+	}
+		return y;
+}
+
 } // namespace epi
 
 #endif /* __MATH_ODDITY_H__ */

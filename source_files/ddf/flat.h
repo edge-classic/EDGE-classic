@@ -36,9 +36,7 @@ public:
 	// Member vars....
 	epi::strent_c name;
 	
-	bool liquid;
-
-	bool swirly;
+	epi::strent_c liquid; // Values are "THIN" and "THICK" - determines swirl and shader params - Dasho
 
 	struct sfx_s *footstep;
 	lumpname_c splash;

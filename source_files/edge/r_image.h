@@ -58,6 +58,13 @@ typedef enum
 }
 image_opacity_e;
 
+typedef enum
+{
+	LIQ_None = 0,
+	LIQ_Thin = 1,
+	LIQ_Thick = 2
+}
+liquid_type_e;
 
 class image_c
 {
@@ -84,7 +91,7 @@ public:
     // one of the OPAC_XXX values
 	int opacity;
 
-	bool swirl_it;
+	liquid_type_e liquid_type;
 
 	int swirled_gametic;
 
@@ -202,7 +209,16 @@ extern int  var_mipmapping;
 extern int  var_smoothing;
 extern bool var_dithering;
 extern int  hq2x_scaling;
-extern bool swirling_flats;
+
+typedef enum
+{
+	SWIRL_Vanilla = 0,
+	SWIRL_SMMU = 1,
+	SWIRL_SMMUSWIRL = 2,
+	SWIRL_QUAKE3 = 3
+}
+swirl_type_e;
+extern swirl_type_e swirling_flats;
 
 bool W_InitImages(void);
 void W_UpdateImageAnims(void);

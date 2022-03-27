@@ -230,7 +230,7 @@ void R_InitShaderTables()
 {
 	for ( int i = 0; i < FUNCTABLE_SIZE; i++ )
 	{
-		r_sintable[i]		= sin( DEG2RAD( i * 360.0f / ( ( float ) ( FUNCTABLE_SIZE - 1 ) ) ) );
+		r_sintable[i] = sin(DEG2RAD(i * 360.0f / ((float)(FUNCTABLE_SIZE - 1))));
 	}
 }
 

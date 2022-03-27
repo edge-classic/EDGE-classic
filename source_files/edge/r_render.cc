@@ -739,88 +739,6 @@ static inline void TexCoord_PlaneLight(local_gl_vert_t *v, int t)
 }
 #endif
 
-
-typedef struct
-{
-	int v_count;
-	const vec3_t *vert;
-
-	GLuint tex_id;
-
-	int pass;
-	int blending;
-	
-	float R, G, B;
-	float trans;
-
-	divline_t div;
-
-	float tx0, ty0;
-	float tx_mul, ty_mul;
-
-	vec3_t normal;
-
-	bool mid_masked;
-}
-wall_coord_data_t;
-
-
-static void WallCoordFunc(void *d, int v_idx,
-		vec3_t *pos, float *rgb, vec2_t *texc,
-		vec3_t *normal, vec3_t *lit_pos)
-{
-	const wall_coord_data_t *data = (wall_coord_data_t *)d;
-
-	*pos    = data->vert[v_idx];
-	*normal = data->normal;
-
-	rgb[0] = data->R;
-	rgb[1] = data->G;
-	rgb[2] = data->B;
-
-	float along;
-
-	if (fabs(data->div.dx) > fabs(data->div.dy))
-	{
-		along = (pos->x - data->div.x) / data->div.dx;
-	}
-	else
-	{
-		along = (pos->y - data->div.y) / data->div.dy;
-	}
-
-	texc->x = data->tx0 + along  * data->tx_mul;
-	texc->y = data->ty0 + pos->z * data->ty_mul;
-
-	*lit_pos = *pos;
-}
-
-
-typedef struct
-{
-	int v_count;
-	const vec3_t *vert;
-
-	GLuint tex_id;
-
-	int pass;
-	int blending;
-
-	float R, G, B;
-	float trans;
-
-	float tx0, ty0;
-	float image_w, image_h;
-
-	vec2_t x_mat;
-	vec2_t y_mat;
-
-	vec3_t normal;
-
-	slope_plane_t *slope;
-}
-plane_coord_data_t;
-
 /*void CalcDeformVertexes( vec3_t *pos, vec3_t *old_normal )
 {
 	float	offset[3];
@@ -886,14 +804,133 @@ void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 {
 	float now;
 	float phase = 0;
-	float frequency = 1.0;
-	float amplitude = 0.05;
+	float frequency;
+	float amplitude;
+
+	if (thick_liquid)
+	{
+		frequency = 0.2;
+		amplitude = 0.5;
+	}
+	else
+	{
+		frequency = 1.0;
+		amplitude = 0.05;
+	}
 
 	now = ( phase + leveltime / 100.0f * frequency );
 
 	texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z )* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_SIZE - 1)] * amplitude;
 	texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_SIZE - 1) ] * amplitude;		
 }
+
+typedef struct
+{
+	int v_count;
+	const vec3_t *vert;
+
+	GLuint tex_id;
+
+	int pass;
+	int blending;
+	
+	float R, G, B;
+	float trans;
+
+	divline_t div;
+
+	float tx0, ty0;
+	float tx_mul, ty_mul;
+
+	vec3_t normal;
+
+	bool mid_masked;
+}
+wall_coord_data_t;
+
+
+static void WallCoordFunc(void *d, int v_idx,
+		vec3_t *pos, float *rgb, vec2_t *texc,
+		vec3_t *normal, vec3_t *lit_pos)
+{
+	const wall_coord_data_t *data = (wall_coord_data_t *)d;
+
+	*pos    = data->vert[v_idx];
+	*normal = data->normal;
+
+	if (swirl_pass > 1)
+	{
+		rgb[0] = 1.0 / data->R;
+		rgb[1] = 1.0 / data->G;
+		rgb[2] = 1.0 / data->B;
+	}
+	else
+	{
+		rgb[0] = data->R;
+		rgb[1] = data->G;
+		rgb[2] = data->B;		
+	}
+
+	float along;
+
+	if (fabs(data->div.dx) > fabs(data->div.dy))
+	{
+		along = (pos->x - data->div.x) / data->div.dx;
+	}
+	else
+	{
+		along = (pos->y - data->div.y) / data->div.dy;
+	}
+
+	texc->x = data->tx0 + along  * data->tx_mul;
+	texc->y = data->ty0 + pos->z * data->ty_mul;
+
+	if (swirl_pass > 0)
+	{
+		if (swirling_flats == SWIRL_QUAKE3)
+		{
+			if (thick_liquid)
+				CalcTurbulentTexCoords(texc, pos);
+			else
+			{
+				if (swirl_pass == 1)
+					CalcScrollTexCoords(0.25, 0.10, texc);
+				else
+					CalcScrollTexCoords(-0.10, 0.25, texc);
+			}
+		}
+		else
+			CalcTurbulentTexCoords(texc, pos);
+	}
+
+	*lit_pos = *pos;
+}
+
+
+typedef struct
+{
+	int v_count;
+	const vec3_t *vert;
+
+	GLuint tex_id;
+
+	int pass;
+	int blending;
+
+	float R, G, B;
+	float trans;
+
+	float tx0, ty0;
+	float image_w, image_h;
+
+	vec2_t x_mat;
+	vec2_t y_mat;
+
+	vec3_t normal;
+
+	slope_plane_t *slope;
+}
+plane_coord_data_t;
 
 static void PlaneCoordFunc(void *d, int v_idx,
 		vec3_t *pos, float *rgb, vec2_t *texc,
@@ -1276,12 +1313,34 @@ static void DrawWallPart(drawfloor_t *dfloor,
 	data.trans = trans;
 	data.mid_masked = mid_masked;
 
+	if (surf->image->liquid_type == LIQ_Thick)
+		thick_liquid = true;
+	else
+		thick_liquid = false;
+
+	if (surf->image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
+		swirl_pass = 1;
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props, lit_adjust);
 
 	cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 			trans, &data.pass, data.blending, data.mid_masked,
 			&data, WallCoordFunc);
+
+	if (surf->image->liquid_type == LIQ_Thin && swirling_flats == SWIRL_QUAKE3) // Only layer thin liquids? - Dasho
+	{
+		data.tx0 = surf->offset.x + 25;
+		data.ty0 = surf->offset.y + 25;
+		swirl_pass = 2;
+		data.blending = BL_Masked | BL_Alpha;
+		data.trans = 0.5f;
+		trans = 0.5f;
+		cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
+					trans, &data.pass, data.blending, data.mid_masked,
+					&data, WallCoordFunc);
+	}
+	
+	swirl_pass = 0;
 
 	if (use_dlights && ren_extralight < 250)
 	{

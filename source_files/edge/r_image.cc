@@ -971,7 +971,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
 
 	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
 	{
-		tmp_img->Swirl(leveltime, swirling_flats);
+		tmp_img->Swirl(leveltime, rim->liquid_type);
 		rim->swirled_gametic = gametic;
 	}
 
@@ -1418,12 +1418,15 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 
 	SYS_ASSERT(rc);
 
-	if (rc->parent->liquid_type > LIQ_None && rc->parent->swirled_gametic != gametic)
+	if (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL)
 	{
-		if (rc->tex_id != 0)
+		if (rc->parent->liquid_type > LIQ_None && rc->parent->swirled_gametic != gametic)
 		{
-			glDeleteTextures(1, &rc->tex_id);
-			rc->tex_id = 0;
+			if (rc->tex_id != 0)
+			{
+				glDeleteTextures(1, &rc->tex_id);
+				rc->tex_id = 0;
+			}
 		}
 	}
 

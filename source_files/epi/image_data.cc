@@ -450,7 +450,14 @@ void image_data_c::Swirl(int leveltime, int thickness)
     const int swirlfactor2 = 8192 / 32;
     const int amp = 1 + (width / 64);
     const int amp2 = 0 + (width / 64);
-    const int speed = 40;
+    int speed;
+
+	if (thickness == 1)
+		speed = 40;
+	else
+	{
+		speed = 10;
+	}
 
 	u8_t *old_pixels = new u8_t[width * height * bpp];
 

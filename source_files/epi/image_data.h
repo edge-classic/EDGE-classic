@@ -127,7 +127,7 @@ public:
 	// result in the 'hue' array (r, g, b).  The average intensity
 	// will be stored in 'ity' when given.
 
-	void Swirl(int leveltime);
+	void Swirl(int leveltime, int thickness);
 	// SMMU-style swirling
 };
 

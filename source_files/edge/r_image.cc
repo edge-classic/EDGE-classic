@@ -153,7 +153,7 @@ static void do_Animate(real_image_container_c& bucket)
 		if (rim->anim.speed == 0)  // not animated ?
 			continue;
 
-		if (rim->liquid_type > LIQ_None)
+		if (rim->liquid_type > LIQ_None && swirling_flats > SWIRL_Vanilla)
 			continue;
 
 		SYS_ASSERT(rim->anim.count > 0);
@@ -969,9 +969,9 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
 
 	epi::image_data_c *tmp_img = ReadAsEpiBlock(rim);
 
-	if (rim->liquid_type > LIQ_None)
+	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
 	{
-		tmp_img->Swirl(leveltime);
+		tmp_img->Swirl(leveltime, swirling_flats);
 		rim->swirled_gametic = gametic;
 	}
 
@@ -1450,7 +1450,7 @@ GLuint W_ImageCache(const image_c *image, bool anim,
 	// handle animations
 	if (anim)
 	{
-		if (rim->liquid_type == LIQ_None)
+		if (rim->liquid_type == LIQ_None || swirling_flats == SWIRL_Vanilla)
 			rim = rim->anim.cur;
 	}
 

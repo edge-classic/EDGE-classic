@@ -78,7 +78,8 @@ int use_dlights = 0;
 
 int doom_fading = 1;
 
-int swirl_offset = 0;
+int swirl_pass = 0;
+bool thick_liquid = false;
 
 
 float view_x_slope;
@@ -886,7 +887,7 @@ void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 	float now;
 	float phase = 0;
 	float frequency = 1.0;
-	float amplitude = 0.05 * swirl_offset;
+	float amplitude = 0.05;
 
 	now = ( phase + leveltime / 100.0f * frequency );
 
@@ -903,7 +904,7 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	*pos    = data->vert[v_idx];
 	*normal = data->normal;
 
-	if (swirl_offset > 1)
+	if (swirl_pass > 1)
 	{
 		rgb[0] = 1.0 / data->R;
 		rgb[1] = 1.0 / data->G;
@@ -922,14 +923,22 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	texc->x = rx * data->x_mat.x + ry * data->x_mat.y;
 	texc->y = rx * data->y_mat.x + ry * data->y_mat.y;
 
-	if (swirl_offset > 0)
+	if (swirl_pass > 0)
 	{
-		//CalcTurbulentTexCoords(texc, pos);
-
-		if (swirl_offset == 1)
-			CalcScrollTexCoords(0.10, 0.25, texc);
+		if (swirling_flats == SWIRL_QUAKE3)
+		{
+			if (thick_liquid)
+				CalcTurbulentTexCoords(texc, pos);
+			else
+			{
+				if (swirl_pass == 1)
+					CalcScrollTexCoords(0.10, 0.25, texc);
+				else
+					CalcScrollTexCoords(-0.10, 0.25, texc);
+			}
+		}
 		else
-			CalcScrollTexCoords(-0.10, 0.25, texc);
+			CalcTurbulentTexCoords(texc, pos);
 	}
 
 	*lit_pos = *pos;
@@ -2509,8 +2518,13 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	data.trans = trans;
 	data.slope = slope;
 
-	if (surf->image->liquid_type > LIQ_None)
-		swirl_offset = 1;
+	if (surf->image->liquid_type == LIQ_Thick)
+		thick_liquid = true;
+	else
+		thick_liquid = false;
+
+	if (surf->image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
+		swirl_pass = 1;
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
 	
@@ -2518,11 +2532,11 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 			trans, &data.pass, data.blending, false /* masked */,
 			&data, PlaneCoordFunc);
 
-	if (surf->image->liquid_type > LIQ_None)
+	if (surf->image->liquid_type == LIQ_Thin && swirling_flats == SWIRL_QUAKE3) // Only layer thin liquids? - Dasho
 	{
 		data.tx0 = surf->offset.x + 25;
 		data.ty0 = surf->offset.y + 25;
-		swirl_offset = 2;
+		swirl_pass = 2;
 		data.blending = BL_Masked | BL_Alpha;
 		data.trans = 0.5f;
 		trans = 0.5f;
@@ -2531,7 +2545,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 					&data, PlaneCoordFunc);
 	}
 
-	swirl_offset = 0;
+	swirl_pass = 0;
 
 	if (use_dlights && ren_extralight < 250)
 	{

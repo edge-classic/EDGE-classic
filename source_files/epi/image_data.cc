@@ -444,9 +444,9 @@ void image_data_c::AverageHue(u8_t *hue, u8_t *ity)
 	}
 }
 
-void image_data_c::Swirl(int leveltime)
+void image_data_c::Swirl(int leveltime, int thickness)
 {
-	/*const int swirlfactor = 8192 / 64;
+	const int swirlfactor = 8192 / 64;
     const int swirlfactor2 = 8192 / 32;
     const int amp = 1 + (width / 64);
     const int amp2 = 0 + (width / 64);
@@ -487,7 +487,7 @@ void image_data_c::Swirl(int leveltime)
 			for (int i = 0; i < bpp; i++)
 				*dest++ = *src++;
 		}
-	}*/
+	}
 }
 
 } // namespace epi

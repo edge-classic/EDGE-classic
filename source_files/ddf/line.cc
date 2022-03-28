@@ -934,6 +934,7 @@ static specflags_t line_effect_names[] =
 	{"UNBLOCK_THINGS", LINEFX_UnblockThings, 0},
 	{"BLOCK_SHOTS",    LINEFX_BlockShots,    0},
 	{"BLOCK_SIGHT",    LINEFX_BlockSight,    0},
+	{"SKY_TRANSFER",    LINEFX_SkyTransfer,    0}, //Lobo 2022
 	{NULL, 0, 0}
 };
 

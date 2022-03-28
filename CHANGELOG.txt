@@ -12,18 +12,23 @@ Bugs fixed
   Happens if SWIM special is used without AIRLESS(underwater) also. 
   Most noticeable side effect was being unable to jump/crouch and bizarre momentum/speed
 + Downgraded errors for incorrect 3D extrafloors to warnings instead. 
++ E3M4 crusher bug fixed.
 
 General Improvements
 --------------------
-+ RTS Scripts can now use either a number or a string for their TAGs
++ RTS Scripts can now use either a number or a string for their TAGs.
 
-+ Replaced libpng, libjpeg and image_tga.cc with stb_image
++ Replaced libpng, libjpeg and image_tga.cc with stb_image.
 
-+ Replaced zlib with miniz
++ Replaced zlib with miniz.
 
-+ Consolidated some EPI filesystem functions so that platform-specific source files aren't required
++ Consolidated some EPI filesystem functions so that platform-specific source files aren't required.
 
-+ Compilation now works with MSVC Build Tools. SDL2 development headers/libs included for this purpose
++ Compilation now works with MSVC Build Tools. SDL2 development headers/libs included for this purpose.
+
++ Player Crouch height reduced to 28, same as other ports.
+
++ Bumped up the number of sound channels: minimum 32, maximum 96.
 
 
 New Features
@@ -61,21 +66,26 @@ New Features
   
 + THINGS:DDF
   -Crouching now triggers CROUCH states for the player when used with CHECK_ACTIVITY.
+  -Added player crouch spites to edge-defs.wad.
 
 + New XMP-based music player; MOD/S3M/IT/XM Tracker format songs are now supported.
 
 + New Game Music Emu-based music player; AY, GBS, GYM, HES, NSF, SAP, SPC, VGM format songs are now supported.
 
-+ New WebSID-based music player; Commodore-64 SID format songs are now supported
++ New WebSID-based music player; Commodore-64 SID format songs are now supported.
 
 + Main menu UI by default is now text based and uses strings from language.ddf and colouring/fonts defined in styles.ddf.
   If a pwad contains custom menu graphics then they will be used instead.
   
-+ 2 new custom fonts included in edge-defs.wad for use with our new dynamic menu: Verdana-style font and Doom-style
++ New names and DDF definitions for our menu sfx so we don't have to share the same names as normal doom sfx.
+  
++ 2 new custom fonts included in edge-defs.wad for use with our new dynamic menu: Verdana-style font and Doom-style.
 
-+ DDFLAT Liquids; "LIQUID = THIN" or "LIQUID = THICK" can be added to a flat definition. Currently affects swirl/dynamic liquid parameters
++ DDFLAT Liquids; "LIQUID = THIN" or "LIQUID = THICK" can be added to a flat definition. Currently affects swirl/dynamic liquid parameters.
 
-+ Added "Animated Liquid Type" to Video Options menu; choices are "Vanilla", "SMMU", "SMMU + Swirl", and "Quake 3"
++ Added "Animated Liquid Type" to Video Options menu; choices are "Vanilla", "SMMU", "SMMU + Swirl", and "Quake 3".
+
++ MBF sky transfer linetypes 271 and 272 partially supported via new line Effect "SKY_TRANSFER".
 
 
 CHANGELOG for EDGE-Classic 1.0 (since EDGE-Classic Preview 1)

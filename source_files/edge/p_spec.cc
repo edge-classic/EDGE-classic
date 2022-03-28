@@ -47,6 +47,8 @@
 #include "s_music.h"
 #include "z_zone.h"
 
+#include "r_sky.h" //Lobo 2022: added for our Sky Transfer special
+
 // Level exit timer
 bool levelTimer;
 int levelTimeCount;
@@ -629,6 +631,12 @@ static void P_LineEffect(line_t *target, line_t *source,
 				&source->frontsector->props);
 		AdjustLightParts(target->side[1], 1, special->line_parts,
 				&source->frontsector->props);
+	}
+	
+	//Lobo 2022: experimental partial sky transfer support
+	if ((special->line_effect & LINEFX_SkyTransfer) && source->side[0])
+	{
+		sky_image = W_ImageLookup(source->side[0]->top.image->name, INS_Texture);
 	}
 }
 

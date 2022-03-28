@@ -580,6 +580,9 @@ typedef enum
 
 	// experimental: make tagged lines (incl) block monster sight
 	LINEFX_BlockSight = (1 << 8),
+	
+	// experimental: transfer upper texture to SKY
+	LINEFX_SkyTransfer = (1 << 9),
 }
 line_effect_type_e;
 

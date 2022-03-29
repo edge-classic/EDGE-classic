@@ -446,17 +446,19 @@ void image_data_c::AverageHue(u8_t *hue, u8_t *ity)
 
 void image_data_c::Swirl(int leveltime, int thickness)
 {
-	const int swirlfactor = 8192 / 64;
-    const int swirlfactor2 = 8192 / 32;
-    const int amp = 1 + (width / 64);
-    const int amp2 = 0 + (width / 64);
+	const int sizefactor = (height + width) / 128;
+	const int swirlmask = 10239 - ((sizefactor - 1) * 512);
+	const int swirlfactor =  swirlmask / 64;
+    const int swirlfactor2 = swirlmask / 32;
+    const int amp = 1 + sizefactor;
+    const int amp2 = 0 + sizefactor;
     int speed;
 
 	if (thickness == 1)
-		speed = 40;
+		speed = 20;
 	else
 	{
-		speed = 10;
+		speed = 15;
 	}
 
 	u8_t *old_pixels = new u8_t[width * height * bpp];
@@ -473,14 +475,14 @@ void image_data_c::Swirl(int leveltime, int thickness)
 			int x1, y1;
 			int sinvalue, sinvalue2;
 
-			sinvalue = (y * swirlfactor + leveltime * speed * 5 + 900) & 8191;
-			sinvalue2 = (x * swirlfactor2 + leveltime * speed * 4 + 300) & 8191;
+			sinvalue = (y * swirlfactor + leveltime * speed * 5 + 900) & swirlmask;
+			sinvalue2 = (x * swirlfactor2 + leveltime * speed * 4 + 300) & swirlmask;
 			x1 = x + width + height
 			+ ((finesine[sinvalue] * amp) >> FRACBITS)
 			+ ((finesine[sinvalue2] * amp2) >> FRACBITS);
 
-			sinvalue = (x * swirlfactor + leveltime * speed * 3 + 700) & 8191;
-			sinvalue2 = (y * swirlfactor2 + leveltime * speed * 4 + 1200) & 8191;
+			sinvalue = (x * swirlfactor + leveltime * speed * 3 + 700) & swirlmask;
+			sinvalue2 = (y * swirlfactor2 + leveltime * speed * 4 + 1200) & swirlmask;
 			y1 = y + width + height
 			+ ((finesine[sinvalue] * amp) >> FRACBITS)
 			+ ((finesine[sinvalue2] * amp2) >> FRACBITS);

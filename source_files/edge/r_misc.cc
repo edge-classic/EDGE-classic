@@ -46,7 +46,6 @@
 #include "r_modes.h"
 #include "r_units.h"
 
-
 cvar_c r_fov;
 cvar_c r_zoomfov;
 
@@ -103,6 +102,10 @@ int telept_reverse = 0;
 int var_invul_fx;
 
 float *r_sintable = new float[FUNCTABLE_SIZE];
+//float *r_squaretable = new float[FUNCTABLE_SIZE];
+//float *r_sawtoothtable = new float[FUNCTABLE_SIZE];
+//float *r_inversesawtoothtable = new float[FUNCTABLE_SIZE];
+//float *r_triangletable = new float[FUNCTABLE_SIZE];
 
 //
 // To get a global angle from cartesian coordinates,
@@ -231,6 +234,25 @@ void R_InitShaderTables()
 	for ( int i = 0; i < FUNCTABLE_SIZE; i++ )
 	{
 		r_sintable[i] = sin(DEG2RAD(i * 360.0f / ((float)(FUNCTABLE_SIZE - 1))));
+		/*r_squaretable[i]	= ( i < FUNCTABLE_SIZE/2 ) ? 1.0f : -1.0f;
+		r_sawtoothtable[i] = (float)i / FUNCTABLE_SIZE;
+		r_inversesawtoothtable[i] = 1.0f - r_sawtoothtable[i];
+
+		if ( i < FUNCTABLE_SIZE / 2 )
+		{
+			if ( i < FUNCTABLE_SIZE / 4 )
+			{
+				r_triangletable[i] = ( float ) i / ( FUNCTABLE_SIZE / 4 );
+			}
+			else
+			{
+				r_triangletable[i] = 1.0f - r_triangletable[i-FUNCTABLE_SIZE / 4];
+			}
+		}
+		else
+		{
+			r_triangletable[i] = -r_triangletable[i-FUNCTABLE_SIZE/2];
+		}*/
 	}
 }
 

@@ -969,7 +969,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
 
 	epi::image_data_c *tmp_img = ReadAsEpiBlock(rim);
 
-	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
+	if (rim->liquid_type > LIQ_None && swirling_flats > SWIRL_Vanilla)
 	{
 		tmp_img->Swirl(leveltime, rim->liquid_type);
 		rim->swirled_gametic = gametic;
@@ -1418,7 +1418,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 
 	SYS_ASSERT(rc);
 
-	if (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL)
+	if (swirling_flats > SWIRL_Vanilla)
 	{
 		if (rc->parent->liquid_type > LIQ_None && rc->parent->swirled_gametic != gametic)
 		{

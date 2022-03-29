@@ -33,7 +33,6 @@
 #include "dm_state.h"
 #include "g_game.h"
 #include "m_bbox.h"
-//#include "m_oddity.h" // Fast inverse square root
 #include "p_local.h"
 #include "r_defs.h"
 #include "r_misc.h"
@@ -78,7 +77,7 @@ int use_dlights = 0;
 
 int doom_fading = 1;
 
-int swirl_pass = 0;
+bool swirl_pass = false;
 bool thick_liquid = false;
 
 
@@ -739,65 +738,6 @@ static inline void TexCoord_PlaneLight(local_gl_vert_t *v, int t)
 }
 #endif
 
-/*void CalcDeformVertexes( vec3_t *pos, vec3_t *old_normal )
-{
-	float	offset[3];
-	float	*xyz = ( float * ) pos;
-	float	*normal = ( float * ) old_normal;
-	float	*table;
-	float 	frequency = 0;
-	float 	scale;
-
-	if ( frequency == 0 )
-	{
-		scale = EvalWaveForm( &ds->deformationWave );
-
-		VectorScale( normal, scale, offset );
-			
-		xyz[0] += offset[0];
-		xyz[1] += offset[1];
-		xyz[2] += offset[2];
-	}
-	else
-	{
-		// TableForFunc refers to things like the sintable, etc - Dasho
-		table = TableForFunc( ds->deformationWave.func );
-
-		for ( i = 0; i < tess.numVertexes; i++, xyz += 4, normal += 4 )
-		{
-			float off = ( xyz[0] + xyz[1] + xyz[2] ) * ds->deformationSpread;
-
-			scale = WAVEVALUE( table, ds->deformationWave.base, 
-				ds->deformationWave.amplitude,
-				ds->deformationWave.phase + off,
-				ds->deformationWave.frequency );
-
-			VectorScale( normal, scale, offset );
-			
-			xyz[0] += offset[0];
-			xyz[1] += offset[1];
-			xyz[2] += offset[2];
-		}
-	}
-}*/
-
-// Adapted from Quake 3 GPL release - Dasho
-void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
-{
-	int i;
-	float timeScale = leveltime / 100.0f;
-	float adjustedScrollS, adjustedScrollT;
-
-	adjustedScrollS = x_scroll * timeScale;
-	adjustedScrollT = y_scroll * timeScale;
-
-	// clamp so coordinates don't continuously get larger
-	adjustedScrollS = adjustedScrollS - floor( adjustedScrollS );
-	adjustedScrollT = adjustedScrollT - floor( adjustedScrollT );
-
-	texc->x += adjustedScrollS;
-	texc->y += adjustedScrollT;
-}
 
 // Adapted from Quake 3 GPL release - Dasho
 void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
@@ -805,23 +745,21 @@ void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 	float now;
 	float phase = 0;
 	float frequency;
-	float amplitude;
+	float amplitude = 0.05;
 
 	if (thick_liquid)
 	{
-		frequency = 0.2;
-		amplitude = 0.5;
+		frequency = 0.5;
 	}
 	else
 	{
 		frequency = 1.0;
-		amplitude = 0.05;
 	}
 
 	now = ( phase + leveltime / 100.0f * frequency );
 
-	texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z )* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_SIZE - 1)] * amplitude;
-	texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_SIZE - 1) ] * amplitude;		
+	texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+	texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
 }
 
 typedef struct
@@ -858,18 +796,9 @@ static void WallCoordFunc(void *d, int v_idx,
 	*pos    = data->vert[v_idx];
 	*normal = data->normal;
 
-	if (swirl_pass > 1)
-	{
-		rgb[0] = 1.0 / data->R;
-		rgb[1] = 1.0 / data->G;
-		rgb[2] = 1.0 / data->B;
-	}
-	else
-	{
-		rgb[0] = data->R;
-		rgb[1] = data->G;
-		rgb[2] = data->B;		
-	}
+	rgb[0] = 1.0 / data->R;
+	rgb[1] = 1.0 / data->G;
+	rgb[2] = 1.0 / data->B;
 
 	float along;
 
@@ -885,23 +814,8 @@ static void WallCoordFunc(void *d, int v_idx,
 	texc->x = data->tx0 + along  * data->tx_mul;
 	texc->y = data->ty0 + pos->z * data->ty_mul;
 
-	if (swirl_pass > 0)
-	{
-		if (swirling_flats == SWIRL_QUAKE3)
-		{
-			if (thick_liquid)
-				CalcTurbulentTexCoords(texc, pos);
-			else
-			{
-				if (swirl_pass == 1)
-					CalcScrollTexCoords(0.25, 0.10, texc);
-				else
-					CalcScrollTexCoords(-0.10, 0.25, texc);
-			}
-		}
-		else
-			CalcTurbulentTexCoords(texc, pos);
-	}
+	if (swirl_pass)
+		CalcTurbulentTexCoords(texc, pos);
 
 	*lit_pos = *pos;
 }
@@ -941,18 +855,9 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	*pos    = data->vert[v_idx];
 	*normal = data->normal;
 
-	if (swirl_pass > 1)
-	{
-		rgb[0] = 1.0 / data->R;
-		rgb[1] = 1.0 / data->G;
-		rgb[2] = 1.0 / data->B;
-	}
-	else
-	{
-		rgb[0] = data->R;
-		rgb[1] = data->G;
-		rgb[2] = data->B;		
-	}
+	rgb[0] = 1.0 / data->R;
+	rgb[1] = 1.0 / data->G;
+	rgb[2] = 1.0 / data->B;
 
 	float rx = (data->tx0 + pos->x) / data->image_w;
 	float ry = (data->ty0 + pos->y) / data->image_h;
@@ -960,23 +865,8 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	texc->x = rx * data->x_mat.x + ry * data->x_mat.y;
 	texc->y = rx * data->y_mat.x + ry * data->y_mat.y;
 
-	if (swirl_pass > 0)
-	{
-		if (swirling_flats == SWIRL_QUAKE3)
-		{
-			if (thick_liquid)
-				CalcTurbulentTexCoords(texc, pos);
-			else
-			{
-				if (swirl_pass == 1)
-					CalcScrollTexCoords(0.10, 0.25, texc);
-				else
-					CalcScrollTexCoords(-0.10, 0.25, texc);
-			}
-		}
-		else
-			CalcTurbulentTexCoords(texc, pos);
-	}
+	if (swirl_pass)
+		CalcTurbulentTexCoords(texc, pos);
 
 	*lit_pos = *pos;
 }
@@ -1318,29 +1208,14 @@ static void DrawWallPart(drawfloor_t *dfloor,
 	else
 		thick_liquid = false;
 
-	if (surf->image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
-		swirl_pass = 1;
+	if (surf->image->liquid_type > LIQ_None && swirling_flats == SWIRL_SMMUSWIRL)
+		swirl_pass = true;
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props, lit_adjust);
 
 	cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 			trans, &data.pass, data.blending, data.mid_masked,
 			&data, WallCoordFunc);
-
-	if (surf->image->liquid_type == LIQ_Thin && swirling_flats == SWIRL_QUAKE3) // Only layer thin liquids? - Dasho
-	{
-		data.tx0 = surf->offset.x + 25;
-		data.ty0 = surf->offset.y + 25;
-		swirl_pass = 2;
-		data.blending = BL_Masked | BL_Alpha;
-		data.trans = 0.5f;
-		trans = 0.5f;
-		cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
-					trans, &data.pass, data.blending, data.mid_masked,
-					&data, WallCoordFunc);
-	}
-	
-	swirl_pass = 0;
 
 	if (use_dlights && ren_extralight < 250)
 	{
@@ -1356,6 +1231,8 @@ static void DrawWallPart(drawfloor_t *dfloor,
 							 v_bbox[BOXRIGHT], v_bbox[BOXTOP],    top,
 							 GLOWLIT_Wall, &data);
 	}
+
+	swirl_pass = false;
 }
 
 static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f,
@@ -2582,29 +2459,14 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	else
 		thick_liquid = false;
 
-	if (surf->image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
-		swirl_pass = 1;
+	if (surf->image->liquid_type > LIQ_None && swirling_flats == SWIRL_SMMUSWIRL)
+		swirl_pass = true;
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
 	
 	cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 			trans, &data.pass, data.blending, false /* masked */,
 			&data, PlaneCoordFunc);
-
-	if (surf->image->liquid_type == LIQ_Thin && swirling_flats == SWIRL_QUAKE3) // Only layer thin liquids? - Dasho
-	{
-		data.tx0 = surf->offset.x + 25;
-		data.ty0 = surf->offset.y + 25;
-		swirl_pass = 2;
-		data.blending = BL_Masked | BL_Alpha;
-		data.trans = 0.5f;
-		trans = 0.5f;
-		cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
-					trans, &data.pass, data.blending, false /* masked */,
-					&data, PlaneCoordFunc);
-	}
-
-	swirl_pass = 0;
 
 	if (use_dlights && ren_extralight < 250)
 	{
@@ -2617,6 +2479,8 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 				             v_bbox[BOXRIGHT], v_bbox[BOXTOP],    h,
 							 GLOWLIT_Plane, &data);
 	}
+
+	swirl_pass = false;
 
 #ifdef SHADOW_PROTOTYPE
 	if (level_flags.shadows && solid_mode && face_dir > 0)

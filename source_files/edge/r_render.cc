@@ -774,7 +774,6 @@ void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 	}
 
 	now = ( phase + leveltime / 100.0f * frequency );
-
 	texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
 	texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
 }

@@ -437,6 +437,19 @@ static image_c *AddImageTexture(const char *name, texturedef_t *tdef)
  
 	strcpy(rim->name, name);
 
+	if (swirling_flats > SWIRL_Vanilla)
+	{
+		flatdef_c *current_flatdef = flatdefs.Find(rim->name);
+
+		if (current_flatdef && !current_flatdef->liquid.empty())
+		{
+			if (strcasecmp(current_flatdef->liquid.c_str(), "THIN") == 0)
+				rim->liquid_type = LIQ_Thin;
+			else if (strcasecmp(current_flatdef->liquid.c_str(), "THICK") == 0)
+				rim->liquid_type = LIQ_Thick;
+		}
+	}
+
 	if (tdef->scale_x) rim->scale_x = 8.0 / tdef->scale_x;
 	if (tdef->scale_y) rim->scale_y = 8.0 / tdef->scale_y;
 

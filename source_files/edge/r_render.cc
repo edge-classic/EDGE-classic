@@ -77,7 +77,7 @@ int use_dlights = 0;
 
 int doom_fading = 1;
 
-bool swirl_pass = false;
+int swirl_pass = 0;
 bool thick_liquid = false;
 
 
@@ -762,7 +762,7 @@ void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 	float now;
 	float phase = 0;
 	float frequency;
-	float amplitude = 0.05;
+	float amplitude = 0.05 * swirl_pass;
 
 	if (thick_liquid)
 	{
@@ -813,9 +813,18 @@ static void WallCoordFunc(void *d, int v_idx,
 	*pos    = data->vert[v_idx];
 	*normal = data->normal;
 
-	rgb[0] = 1.0 / data->R;
-	rgb[1] = 1.0 / data->G;
-	rgb[2] = 1.0 / data->B;
+	if (swirl_pass > 1)
+	{
+		rgb[0] = 1.0 / data->R;
+		rgb[1] = 1.0 / data->G;
+		rgb[2] = 1.0 / data->B;
+	}
+	else
+	{
+		rgb[0] = data->R;
+		rgb[1] = data->G;
+		rgb[2] = data->B;		
+	}
 
 	float along;
 
@@ -831,7 +840,7 @@ static void WallCoordFunc(void *d, int v_idx,
 	texc->x = data->tx0 + along  * data->tx_mul;
 	texc->y = data->ty0 + pos->z * data->ty_mul;
 
-	if (swirl_pass)
+	if (swirl_pass > 0)
 		CalcTurbulentTexCoords(texc, pos);
 
 	*lit_pos = *pos;
@@ -872,9 +881,18 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	*pos    = data->vert[v_idx];
 	*normal = data->normal;
 
-	rgb[0] = 1.0 / data->R;
-	rgb[1] = 1.0 / data->G;
-	rgb[2] = 1.0 / data->B;
+	if (swirl_pass > 1)
+	{
+		rgb[0] = 1.0 / data->R;
+		rgb[1] = 1.0 / data->G;
+		rgb[2] = 1.0 / data->B;
+	}
+	else
+	{
+		rgb[0] = data->R;
+		rgb[1] = data->G;
+		rgb[2] = data->B;		
+	}
 
 	float rx = (data->tx0 + pos->x) / data->image_w;
 	float ry = (data->ty0 + pos->y) / data->image_h;
@@ -882,7 +900,7 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	texc->x = rx * data->x_mat.x + ry * data->x_mat.y;
 	texc->y = rx * data->y_mat.x + ry * data->y_mat.y;
 
-	if (swirl_pass)
+	if (swirl_pass > 0)
 		CalcTurbulentTexCoords(texc, pos);
 
 	*lit_pos = *pos;
@@ -1225,8 +1243,8 @@ static void DrawWallPart(drawfloor_t *dfloor,
 	else
 		thick_liquid = false;
 
-	if (surf->image->liquid_type > LIQ_None && swirling_flats == SWIRL_SMMUSWIRL)
-		swirl_pass = true;
+	if (surf->image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
+		swirl_pass = 1;
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props, lit_adjust);
 
@@ -1234,7 +1252,7 @@ static void DrawWallPart(drawfloor_t *dfloor,
 			trans, &data.pass, data.blending, data.mid_masked,
 			&data, WallCoordFunc);
 
-	/*if (surf->image->liquid_type == LIQ_Thin && swirling_flats == SWIRL_QUAKE3) // Kept as an example for future effects
+	if (surf->image->liquid_type == LIQ_Thin && swirling_flats == SWIRL_QUAKE3) // Kept as an example for future effects
 	{
 		data.tx0 = surf->offset.x + 25;
 		data.ty0 = surf->offset.y + 25;
@@ -1245,7 +1263,7 @@ static void DrawWallPart(drawfloor_t *dfloor,
 		cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 					trans, &data.pass, data.blending, false,
 					&data, PlaneCoordFunc);
-	}*/
+	}
 
 	if (use_dlights && ren_extralight < 250)
 	{
@@ -1262,7 +1280,7 @@ static void DrawWallPart(drawfloor_t *dfloor,
 							 GLOWLIT_Wall, &data);
 	}
 
-	swirl_pass = false;
+	swirl_pass = 0;
 }
 
 static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f,
@@ -2489,8 +2507,8 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	else
 		thick_liquid = false;
 
-	if (surf->image->liquid_type > LIQ_None && swirling_flats == SWIRL_SMMUSWIRL)
-		swirl_pass = true;
+	if (surf->image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
+		swirl_pass = 1;
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
 	
@@ -2498,7 +2516,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 			trans, &data.pass, data.blending, false /* masked */,
 			&data, PlaneCoordFunc);
 
-	/*if (surf->image->liquid_type == LIQ_Thin && swirling_flats == SWIRL_QUAKE3) // Kept as an example for future effects
+	if (surf->image->liquid_type == LIQ_Thin && swirling_flats == SWIRL_QUAKE3) // Kept as an example for future effects
 	{
 		data.tx0 = surf->offset.x + 25;
 		data.ty0 = surf->offset.y + 25;
@@ -2509,7 +2527,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 		cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 					trans, &data.pass, data.blending, false,
 					&data, PlaneCoordFunc);
-	}*/
+	}
 
 	if (use_dlights && ren_extralight < 250)
 	{
@@ -2523,7 +2541,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 							 GLOWLIT_Plane, &data);
 	}
 
-	swirl_pass = false;
+	swirl_pass = 0;
 
 #ifdef SHADOW_PROTOTYPE
 	if (level_flags.shadows && solid_mode && face_dir > 0)

@@ -738,6 +738,23 @@ static inline void TexCoord_PlaneLight(local_gl_vert_t *v, int t)
 }
 #endif
 
+// Adapted from Quake 3 GPL release - Dasho (not used yet, but might be for future effects)
+void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
+{
+	int i;
+	float timeScale = leveltime / 100.0f;
+	float adjustedScrollS, adjustedScrollT;
+
+	adjustedScrollS = x_scroll * timeScale;
+	adjustedScrollT = y_scroll * timeScale;
+
+	// clamp so coordinates don't continuously get larger
+	adjustedScrollS = adjustedScrollS - floor( adjustedScrollS );
+	adjustedScrollT = adjustedScrollT - floor( adjustedScrollT );
+
+	texc->x += adjustedScrollS;
+	texc->y += adjustedScrollT;
+}
 
 // Adapted from Quake 3 GPL release - Dasho
 void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
@@ -1216,6 +1233,19 @@ static void DrawWallPart(drawfloor_t *dfloor,
 	cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 			trans, &data.pass, data.blending, data.mid_masked,
 			&data, WallCoordFunc);
+
+	/*if (surf->image->liquid_type == LIQ_Thin && swirling_flats == SWIRL_QUAKE3) // Kept as an example for future effects
+	{
+		data.tx0 = surf->offset.x + 25;
+		data.ty0 = surf->offset.y + 25;
+		swirl_pass = 2;
+		data.blending = BL_Masked | BL_Alpha;
+		data.trans = 0.5f;
+		trans = 0.5f;
+		cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
+					trans, &data.pass, data.blending, false,
+					&data, PlaneCoordFunc);
+	}*/
 
 	if (use_dlights && ren_extralight < 250)
 	{
@@ -2467,6 +2497,19 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 			trans, &data.pass, data.blending, false /* masked */,
 			&data, PlaneCoordFunc);
+
+	/*if (surf->image->liquid_type == LIQ_Thin && swirling_flats == SWIRL_QUAKE3) // Kept as an example for future effects
+	{
+		data.tx0 = surf->offset.x + 25;
+		data.ty0 = surf->offset.y + 25;
+		swirl_pass = 2;
+		data.blending = BL_Masked | BL_Alpha;
+		data.trans = 0.5f;
+		trans = 0.5f;
+		cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
+					trans, &data.pass, data.blending, false,
+					&data, PlaneCoordFunc);
+	}*/
 
 	if (use_dlights && ren_extralight < 250)
 	{

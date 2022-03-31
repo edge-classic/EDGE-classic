@@ -37,6 +37,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
+#include <algorithm> // std::transform
 
 #include "exe_path.h"
 #include "file.h"

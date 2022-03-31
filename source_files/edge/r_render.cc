@@ -762,7 +762,7 @@ void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 	float now;
 	float phase = 0;
 	float frequency;
-	float amplitude = 0.05 * swirl_pass;
+	float amplitude = 0.05;
 
 	if (thick_liquid)
 	{
@@ -774,8 +774,32 @@ void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 	}
 
 	now = ( phase + leveltime / 100.0f * frequency );
-	texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
-	texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
+	if (swirling_flats == SWIRL_QUAKE3)
+	{
+		if (thick_liquid)
+		{
+			texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+			texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
+		}
+		else
+		{
+			if (swirl_pass == 1)
+			{
+				texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z) * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
+			}
+			else
+			{
+				texc->x = texc->x - r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				texc->y = texc->y - r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+			}
+		}
+	}
+	else
+	{
+		texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+		texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
+	}		
 }
 
 typedef struct
@@ -1257,11 +1281,11 @@ static void DrawWallPart(drawfloor_t *dfloor,
 		data.ty0 = surf->offset.y + 25;
 		swirl_pass = 2;
 		data.blending = BL_Masked | BL_Alpha;
-		data.trans = 0.5f;
-		trans = 0.5f;
+		data.trans = 0.33f;
+		trans = 0.33f;
 		cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 					trans, &data.pass, data.blending, false,
-					&data, PlaneCoordFunc);
+					&data, WallCoordFunc);
 	}
 
 	if (use_dlights && ren_extralight < 250)
@@ -2521,8 +2545,8 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 		data.ty0 = surf->offset.y + 25;
 		swirl_pass = 2;
 		data.blending = BL_Masked | BL_Alpha;
-		data.trans = 0.5f;
-		trans = 0.5f;
+		data.trans = 0.33f;
+		trans = 0.33f;
 		cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 					trans, &data.pass, data.blending, false,
 					&data, PlaneCoordFunc);

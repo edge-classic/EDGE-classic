@@ -76,10 +76,10 @@ extern float pixel_aspect;
 #define FUNCTABLE_MASK FUNCTABLE_SIZE - 1
 #define DEG2RAD( a ) (( a * M_PI ) / 180.0f)
 extern float *r_sintable;
-//extern float *r_squaretable;
-//extern float *r_sawtoothtable;
-//extern float *r_inversesawtoothtable;
-//extern float *r_triangletable;
+extern float *r_squaretable;
+extern float *r_sawtoothtable;
+extern float *r_inversesawtoothtable;
+extern float *r_triangletable;
 
 //
 // Utility functions.

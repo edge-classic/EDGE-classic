@@ -738,6 +738,29 @@ static inline void TexCoord_PlaneLight(local_gl_vert_t *v, int t)
 }
 #endif
 
+void CalcWata(vec3_t *pos, vec2_t *texc)
+{
+	float ox = pos->x;
+	float oy = pos->y;
+	if (swirl_pass > 1)
+	{
+		ox += 25;
+		oy += 25;
+	}	
+	float rdt = leveltime / (thick_liquid ? 50.0f : 15.0f);
+
+	if (swirl_pass == 1)
+	{
+		texc->x = (ox + 4*sin(oy*0.05+rdt)*sin(0.05+rdt)) / 64;
+		texc->y = (oy + 4*sin(ox*0.05+rdt)*sin(0.05+rdt)) / 64;
+	}
+	else
+	{
+		texc->x = (ox - 4*sin(oy*0.05+rdt)*sin(0.05+rdt)) / 64;
+		texc->y = (oy - 4*sin(ox*0.05+rdt)*sin(0.05+rdt)) / 64;
+	}
+}
+
 // Adapted from Quake 3 GPL release - Dasho (not used yet, but might be for future effects)
 void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
 {
@@ -924,7 +947,8 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	texc->y = rx * data->y_mat.x + ry * data->y_mat.y;
 
 	if (swirl_pass > 0)
-		CalcTurbulentTexCoords(texc, pos);
+		//CalcTurbulentTexCoords(texc, pos);
+		CalcWata(pos, texc);
 
 	*lit_pos = *pos;
 }
@@ -2541,8 +2565,8 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 
 	if (surf->image->liquid_type == LIQ_Thin && swirling_flats == SWIRL_QUAKE3) // Kept as an example for future effects
 	{
-		data.tx0 = surf->offset.x + 25;
-		data.ty0 = surf->offset.y + 25;
+		//data.tx0 = surf->offset.x + 25;
+		//data.ty0 = surf->offset.y + 25;
 		swirl_pass = 2;
 		data.blending = BL_Masked | BL_Alpha;
 		data.trans = 0.33f;

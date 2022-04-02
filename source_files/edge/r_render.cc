@@ -738,7 +738,7 @@ static inline void TexCoord_PlaneLight(local_gl_vert_t *v, int t)
 }
 #endif
 
-void CalcWata(vec3_t *pos, vec2_t *texc)
+/*void CalcWata(vec3_t *pos, vec2_t *texc)
 {
 	float ox = pos->x;
 	float oy = pos->y;
@@ -759,7 +759,7 @@ void CalcWata(vec3_t *pos, vec2_t *texc)
 		texc->x = (ox - 4*sin(oy*0.05+rdt)*sin(0.05+rdt)) / 64;
 		texc->y = (oy - 4*sin(ox*0.05+rdt)*sin(0.05+rdt)) / 64;
 	}
-}
+}*/
 
 // Adapted from Quake 3 GPL release - Dasho (not used yet, but might be for future effects)
 void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
@@ -797,32 +797,9 @@ void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 	}
 
 	now = ( phase + leveltime / 100.0f * frequency );
-	if (swirling_flats == SWIRL_QUAKE3)
-	{
-		if (thick_liquid)
-		{
-			texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
-			texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
-		}
-		else
-		{
-			if (swirl_pass == 1)
-			{
-				texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z) * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
-				texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
-			}
-			else
-			{
-				texc->x = texc->x - r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
-				texc->y = texc->y - r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
-			}
-		}
-	}
-	else
-	{
-		texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
-		texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
-	}		
+
+	texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+	texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
 }
 
 typedef struct
@@ -887,7 +864,22 @@ static void WallCoordFunc(void *d, int v_idx,
 	texc->y = data->ty0 + pos->z * data->ty_mul;
 
 	if (swirl_pass > 0)
-		CalcTurbulentTexCoords(texc, pos);
+	{
+		if (swirling_flats == SWIRL_QUAKE3)
+		{
+			if (thick_liquid)
+				CalcTurbulentTexCoords(texc, pos);
+			else
+			{
+				if (swirl_pass == 1)
+					CalcScrollTexCoords(0.25, 0.10, texc);
+				else
+					CalcScrollTexCoords(-0.10, 0.25, texc);
+			}
+		}
+		else
+			CalcTurbulentTexCoords(texc, pos);
+	}
 
 	*lit_pos = *pos;
 }
@@ -947,8 +939,22 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	texc->y = rx * data->y_mat.x + ry * data->y_mat.y;
 
 	if (swirl_pass > 0)
-		//CalcTurbulentTexCoords(texc, pos);
-		CalcWata(pos, texc);
+	{
+		if (swirling_flats == SWIRL_QUAKE3)
+		{
+			if (thick_liquid)
+				CalcTurbulentTexCoords(texc, pos);
+			else
+			{
+				if (swirl_pass == 1)
+					CalcScrollTexCoords(0.10, 0.25, texc);
+				else
+					CalcScrollTexCoords(-0.10, 0.25, texc);
+			}
+		}
+		else
+			CalcTurbulentTexCoords(texc, pos);
+	}
 
 	*lit_pos = *pos;
 }
@@ -2565,8 +2571,8 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 
 	if (surf->image->liquid_type == LIQ_Thin && swirling_flats == SWIRL_QUAKE3) // Kept as an example for future effects
 	{
-		//data.tx0 = surf->offset.x + 25;
-		//data.ty0 = surf->offset.y + 25;
+		data.tx0 = surf->offset.x + 25;
+		data.ty0 = surf->offset.y + 25;
 		swirl_pass = 2;
 		data.blending = BL_Masked | BL_Alpha;
 		data.trans = 0.33f;

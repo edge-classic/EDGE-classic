@@ -784,22 +784,39 @@ void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 {
 	float now;
 	float phase = 0;
-	float frequency;
+	float frequency = thick_liquid ? 0.5 : 1.0;
 	float amplitude = 0.05;
-
-	if (thick_liquid)
-	{
-		frequency = 0.5;
-	}
-	else
-	{
-		frequency = 1.0;
-	}
 
 	now = ( phase + leveltime / 100.0f * frequency );
 
-	texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
-	texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
+	if (swirling_flats == SWIRL_QUAKE3)
+	{
+		frequency *= 2;
+		if (thick_liquid)
+		{
+			texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+			texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
+		}
+		else
+		{
+			if (swirl_pass == 1)
+			{
+				texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z) * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
+			}
+			else
+			{
+				amplitude = 0.01;
+				texc->x = texc->x - r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				texc->y = texc->y - r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+			}
+		}
+	}
+	else
+	{
+		texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+		texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
+	}
 }
 
 typedef struct
@@ -864,22 +881,7 @@ static void WallCoordFunc(void *d, int v_idx,
 	texc->y = data->ty0 + pos->z * data->ty_mul;
 
 	if (swirl_pass > 0)
-	{
-		if (swirling_flats == SWIRL_QUAKE3)
-		{
-			if (thick_liquid)
-				CalcTurbulentTexCoords(texc, pos);
-			else
-			{
-				if (swirl_pass == 1)
-					CalcScrollTexCoords(0.25, 0.10, texc);
-				else
-					CalcScrollTexCoords(-0.10, 0.25, texc);
-			}
-		}
-		else
-			CalcTurbulentTexCoords(texc, pos);
-	}
+		CalcTurbulentTexCoords(texc, pos);
 
 	*lit_pos = *pos;
 }
@@ -939,22 +941,7 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	texc->y = rx * data->y_mat.x + ry * data->y_mat.y;
 
 	if (swirl_pass > 0)
-	{
-		if (swirling_flats == SWIRL_QUAKE3)
-		{
-			if (thick_liquid)
-				CalcTurbulentTexCoords(texc, pos);
-			else
-			{
-				if (swirl_pass == 1)
-					CalcScrollTexCoords(0.10, 0.25, texc);
-				else
-					CalcScrollTexCoords(-0.10, 0.25, texc);
-			}
-		}
-		else
-			CalcTurbulentTexCoords(texc, pos);
-	}
+		CalcTurbulentTexCoords(texc, pos);
 
 	*lit_pos = *pos;
 }

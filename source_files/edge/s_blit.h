@@ -85,6 +85,7 @@ extern int num_chan;
 extern bool vacuum_sfx;
 extern bool submerged_sfx;
 extern bool outdoor_reverb;
+extern bool dynamic_reverb;
 
 
 void S_InitChannels(int total);

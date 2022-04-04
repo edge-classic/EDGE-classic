@@ -651,13 +651,6 @@ bool WAV_Load(sound_data_c *buf, file_c *f)
 
 	buf->freq = freq;
 
-	if (buf->freq < 18000)
-		buf->freq_factor = 3;
-	else if (buf->freq < 40000)
-		buf->freq_factor = 2;
-	else
-		buf->freq_factor = 1;
-
 	if (bits == 32)
 	{
         I_Warning("WAV Loader: Floating point not supported.\n");

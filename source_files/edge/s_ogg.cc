@@ -614,13 +614,6 @@ bool S_LoadOGGSound(epi::sound_data_c *buf, const byte *data, int length)
 
 	buf->freq = vorbis_inf->rate;
 
-	if (buf->freq < 18000)
-		buf->freq_factor = 3;
-	else if (buf->freq < 40000)
-		buf->freq_factor = 2;
-	else
-		buf->freq_factor = 1;
-	
 	epi::sound_gather_c gather;
 
 	while (true)

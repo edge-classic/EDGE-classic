@@ -68,6 +68,7 @@ int num_chan;
 bool vacuum_sfx = false;
 bool submerged_sfx = false;
 bool outdoor_reverb = false;
+bool dynamic_reverb = false;
 
 static int *mix_buffer;
 static int mix_buf_len;
@@ -155,9 +156,9 @@ void mix_channel_c::ComputeVolume()
 			if (players[consoleplayer]->mo)
 			{
 				if (P_CheckSightToPoint(players[consoleplayer]->mo, pos->x, pos->y, pos->z))
-					dist = MAX(1.25f, dist / (100.0f * data->freq_factor));
+					dist = MAX(1.25f, dist / 100.0f);
 				else
-					dist = MAX(1.25f, dist / (50.0f * data->freq_factor));
+					dist = MAX(1.25f, dist / 75.0f);
 			}
 		}
 	}

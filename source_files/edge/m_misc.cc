@@ -55,6 +55,7 @@
 #include "n_network.h"
 #include "p_spec.h"
 #include "r_gldefs.h"
+#include "s_blit.h"
 #include "s_music.h"  // mus_volume
 #include "s_sound.h"
 #include "am_map.h"
@@ -117,6 +118,7 @@ static default_t defaults[] =
     {CFGT_Int,      "sample_rate",       &var_sample_rate,  CFGDEF_SAMPLE_RATE},
     {CFGT_Int,      "sound_bits",        &var_sound_bits,   CFGDEF_SOUND_BITS},
     {CFGT_Int,      "sound_stereo",      &var_sound_stereo, CFGDEF_SOUND_STEREO},
+	{CFGT_Boolean,	"dynamic_reverb",	 &dynamic_reverb,  0},
     {CFGT_Int,      "mix_channels",      &var_mix_channels, CFGDEF_MIX_CHANNELS},
     {CFGT_Int,      "quiet_factor",      &var_quiet_factor, CFGDEF_QUIET_FACTOR},
 

@@ -77,8 +77,6 @@ public:
 
 	reverb_room_size_e reverbed_room_size;
 
-	int freq_factor; // Helps to scale reverb ratio and sound falloff distance based on frequency of initial sound - Dasho
-
 	bool reverb_is_outdoors;
 
 public:
@@ -90,7 +88,7 @@ public:
 	void Free_FX();
 	void Mix_Vacuum();
 	void Mix_Submerged();
-	void Mix_Reverb(float room_area, bool outdoor_reverb);
+	void Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor_reverb);
 };
 
 } // namespace epi

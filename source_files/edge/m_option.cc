@@ -93,6 +93,7 @@
 #include "p_local.h"
 #include "r_misc.h"
 #include "r_gldefs.h"
+#include "s_blit.h"
 #include "s_sound.h"
 #include "s_music.h"
 #include "am_map.h"
@@ -470,7 +471,8 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Switch,  "Sample Rate",  SampleRates, 5, &var_sample_rate,  NULL, "NeedRestart"},
 	{OPT_Switch,  "Sample Size",  SoundBits, 2,   &var_sound_bits,   NULL, "NeedRestart"},
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
-
+	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
+	{OPT_Boolean, "Dynamic Reverb",       YesNo, 2, &dynamic_reverb, NULL, NULL},
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Mix Channels",    MixChans,  3, &var_mix_channels, M_ChangeMixChan, NULL},
 	{OPT_Switch,  "Quiet Factor",    QuietNess, 3, &var_quiet_factor, NULL, NULL},

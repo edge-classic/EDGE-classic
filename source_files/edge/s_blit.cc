@@ -69,6 +69,10 @@ bool vacuum_sfx = false;
 bool submerged_sfx = false;
 bool outdoor_reverb = false;
 bool dynamic_reverb = false;
+bool ddf_reverb = false;
+int ddf_reverb_type = 0;
+int ddf_reverb_ratio = 0;
+int ddf_reverb_delay = 0;
 
 static int *mix_buffer;
 static int mix_buf_len;

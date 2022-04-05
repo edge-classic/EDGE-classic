@@ -870,7 +870,10 @@ typedef enum
 	SECSP_SubmergedSFX = 0x0080,
 
 	// sounds will be heavily muffled in this sector
-	SECSP_VacuumSFX = 0x0100
+	SECSP_VacuumSFX = 0x0100,
+
+	// sounds will reverberate/echo in this sector
+	SECSP_ReverbSFX = 0x0200
 }
 sector_flag_e;
 
@@ -932,6 +935,11 @@ public:
 	float push_speed;
 	float push_zspeed;
 	angle_t push_angle;
+
+	// Dasho 2022 - Params for user-defined reverb in sectors
+	epi::strent_c reverb_type;
+	float reverb_ratio;
+	float reverb_delay;
 
 private:
 	// disable copy construct and assignment operator

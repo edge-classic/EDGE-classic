@@ -737,6 +737,10 @@ void P_PlayerThink(player_t * player)
 	vacuum_sfx = false;
 	submerged_sfx = false;
 	outdoor_reverb = false;
+	ddf_reverb = false;
+	ddf_reverb_type = 0;
+	ddf_reverb_delay = 0;
+	ddf_reverb_ratio = 0;
 
 	if (player->mo->props->special ||
 		player->mo->subsector->sector->exfloor_used > 0 ||

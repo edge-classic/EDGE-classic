@@ -77,6 +77,10 @@ static const commandlist_t sect_commands[] =
 	DF("DAMAGE",     damage.nominal, DDF_MainGetFloat),
 	DF("DAMAGETIME", damage.delay,   DDF_MainGetTime),
 
+	DF("REVERB TYPE", reverb_type, DDF_MainGetString),
+	DF("REVERB RATIO", reverb_ratio, DDF_MainGetFloat),
+	DF("REVERB DELAY", reverb_delay, DDF_MainGetFloat),
+
 	DDF_CMD_END
 };
 
@@ -244,6 +248,7 @@ static specflags_t sector_specials[] =
 	{"SWIM", SECSP_Swimming, 0},
 	{"SUBMERGED_SFX", SECSP_SubmergedSFX, 0},
 	{"VACUUM_SFX", SECSP_VacuumSFX, 0},
+	{"REVERB_SFX", SECSP_ReverbSFX, 0},
 	{NULL, 0, 0}
 };
 
@@ -518,6 +523,10 @@ void sectortype_c::CopyDetail(sectortype_c &src)
 	push_speed = src.push_speed;
 	push_zspeed = src.push_zspeed;
 	push_angle = src.push_angle;
+
+	reverb_type = src.reverb_type;
+	reverb_ratio = src.reverb_ratio;
+	reverb_delay = src.reverb_delay;
 }
 
 //
@@ -552,6 +561,10 @@ void sectortype_c::Default()
 	push_zspeed = 0.0f;
 
 	push_angle = 0;
+
+	reverb_type = "NONE";
+	reverb_delay = 0;
+	reverb_ratio = 0;
 }
 
 

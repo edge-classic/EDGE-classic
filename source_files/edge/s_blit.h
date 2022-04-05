@@ -86,6 +86,10 @@ extern bool vacuum_sfx;
 extern bool submerged_sfx;
 extern bool outdoor_reverb;
 extern bool dynamic_reverb;
+extern bool ddf_reverb;
+extern int ddf_reverb_type; // 0 = None, 1 = Reverb, 2 = Echo
+extern int ddf_reverb_ratio;
+extern int ddf_reverb_delay;
 
 
 void S_InitChannels(int total);

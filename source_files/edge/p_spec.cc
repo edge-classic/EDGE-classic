@@ -1564,6 +1564,17 @@ static inline void PlayerInProperties(player_t *player,
 	if (special->special_flags & SECSP_VacuumSFX)
 		vacuum_sfx = true;
 
+	if (special->special_flags & SECSP_ReverbSFX)
+	{
+		ddf_reverb = true;
+		if (strcasecmp(special->reverb_type, "REVERB") == 0)
+			ddf_reverb_type = 1;
+		else if (strcasecmp(special->reverb_type, "ECHO") == 0)
+			ddf_reverb_type = 2;
+		ddf_reverb_delay = special->reverb_delay;
+		ddf_reverb_ratio = special->reverb_ratio;
+	}
+
 	factor = 1.0f;
 
 	if (special->special_flags & SECSP_WholeRegion)

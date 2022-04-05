@@ -30,7 +30,8 @@ sound_data_c::sound_data_c() :
 	fx_data_L(NULL), fx_data_R(NULL),
 	priv_data(NULL), ref_count(0), is_sfx(false),
 	current_mix(SFX_None), reverbed_room_size(RM_None),
-	reverb_is_outdoors(false)
+	current_ddf_delay(0), current_ddf_ratio(0),
+	current_ddf_type(0), reverb_is_outdoors(false)
 { }
 
 sound_data_c::~sound_data_c()
@@ -257,43 +258,128 @@ void sound_data_c::Mix_Vacuum()
 	}
 }
 
-void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor_reverb)
+void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor_reverb, int ddf_reverb_type, int ddf_reverb_ratio, int ddf_reverb_delay)
 {
-	if (!dynamic_reverb) // Later this option will be more fleshed out as DDFSECT support for reverb is added - Dasho
+	if (ddf_reverb_ratio > 0 && ddf_reverb_delay > 0 && ddf_reverb_type > 0)
 	{
-		I_Printf("NO REVERB!\n");
-		switch (mode)
+		if (current_mix != SFX_Reverb || ddf_reverb_ratio != current_ddf_ratio || ddf_reverb_delay != current_ddf_delay || ddf_reverb_type != current_ddf_type)
 		{
-			case SBUF_Mono:
-				if (!fx_data_L)
-					fx_data_L = new s16_t[length];
-				fx_data_R = fx_data_L;
-				memcpy(fx_data_L, data_L, length * sizeof(s16_t));
-				current_mix = SFX_None;
-				break;
+			// Setup reverb parameters
+			int *reverb_buffer_L;
+			int *reverb_buffer_R;
+			int write_pos = 0;
+			int read_pos = 0;
+			int reverb_ratio = ddf_reverb_ratio;
+			int reverb_delay = ddf_reverb_delay;
+			switch (mode)
+			{
+				case SBUF_Mono:
+					if (!fx_data_L)
+						fx_data_L = new s16_t[length];
+					fx_data_R = fx_data_L;
+					reverb_buffer_L = new int[length];
+					memset(reverb_buffer_L, 0, length * sizeof(int));
+					read_pos = ((write_pos - reverb_delay * freq / 1000) + length) % (length);
+					for (int i = 0; i < length; i++) 
+					{
+						if (outdoor_reverb)
+							reverb_buffer_L[write_pos] = data_L[i];
+						int reverbed = data_L[i] + reverb_buffer_L[MAX(0, read_pos)] * reverb_ratio / 100;
+						fx_data_L[i] = CLAMP(INT16_MIN, reverbed, INT16_MAX);
+						if (!outdoor_reverb)
+							reverb_buffer_L[write_pos] = reverbed;
+						write_pos = (write_pos + 1) % (length);
+						read_pos = (read_pos + 1) % (length);
+					}
+					current_mix = SFX_Reverb;
+					current_ddf_delay = ddf_reverb_delay;
+					current_ddf_ratio = ddf_reverb_ratio;
+					current_ddf_type = ddf_reverb_type;
+					if (outdoor_reverb)
+						reverb_is_outdoors = true;
+					else
+						reverb_is_outdoors = false;
+					delete[] reverb_buffer_L;
+					reverb_buffer_L = NULL;
+					break;
 
-			case SBUF_Stereo:
-				if (!fx_data_L)
-					fx_data_L = new s16_t[length];
-				if (!fx_data_R)
-					fx_data_R = new s16_t[length];
-				memcpy(fx_data_L, data_L, length * sizeof(s16_t));
-				memcpy(fx_data_R, data_R, length * sizeof(s16_t));
-				current_mix = SFX_None;
-				break;
+				case SBUF_Stereo:
+					if (!fx_data_L)
+						fx_data_L = new s16_t[length];
+					if (!fx_data_R)
+						fx_data_R = new s16_t[length];
+					reverb_buffer_L = new int[length];
+					reverb_buffer_R = new int[length];
+					memset(reverb_buffer_L, 0, length * sizeof(int));
+					memset(reverb_buffer_R, 0, length * sizeof(int));
+					read_pos = ((write_pos - reverb_delay * freq / 1000) + length) % (length);
+					for (int i = 0; i < length; i++) 
+					{
+						if (outdoor_reverb)
+						{
+							reverb_buffer_L[write_pos] = data_L[i];
+							reverb_buffer_R[write_pos] = data_R[i];
+						}
+						int reverbed_L = data_L[i] + reverb_buffer_L[MAX(0, read_pos)] * reverb_ratio / 100;
+						int reverbed_R = data_R[i] + reverb_buffer_R[MAX(0, read_pos)] * reverb_ratio / 100;
+						fx_data_L[i] = CLAMP(INT16_MIN, reverbed_L, INT16_MAX);
+						fx_data_R[i] = CLAMP(INT16_MIN, reverbed_R, INT16_MAX);
+						if (!outdoor_reverb)
+						{
+							reverb_buffer_L[write_pos] = reverbed_L;
+							reverb_buffer_R[write_pos] = reverbed_R;
+						}
+						write_pos = (write_pos + 1) % (length);
+						read_pos = (read_pos + 1) % (length);
+					}
+					current_mix = SFX_Reverb;
+					current_ddf_delay = ddf_reverb_delay;
+					current_ddf_ratio = ddf_reverb_ratio;
+					current_ddf_type = ddf_reverb_type;
+					if (outdoor_reverb)
+						reverb_is_outdoors = true;
+					else
+						reverb_is_outdoors = false;
+					delete[] reverb_buffer_L;
+					delete[] reverb_buffer_R;
+					reverb_buffer_L = NULL;
+					reverb_buffer_R = NULL;
+					break;
 
-			case SBUF_Interleaved:
-				if (!fx_data_L)
-					fx_data_L = new s16_t[length * 2];
-				fx_data_R = fx_data_L;
-				memcpy(fx_data_L, data_L, length * 2 * sizeof(s16_t));
-				current_mix = SFX_None;
-				break;
+				case SBUF_Interleaved:
+					if (!fx_data_L)
+						fx_data_L = new s16_t[length * 2];
+					fx_data_R = fx_data_L;
+					reverb_buffer_L = new int[length * 2];
+					memset(reverb_buffer_L, 0, length * sizeof(int) * 2);
+					read_pos = ((write_pos - reverb_delay * freq / 1000) + length * 2) % (length * 2);
+					for (int i = 0; i < length * 2; i++) 
+					{
+						if (outdoor_reverb)
+							reverb_buffer_L[write_pos] = data_L[i];
+						int reverbed = data_L[i] + reverb_buffer_L[MAX(0, read_pos)] * reverb_ratio / 100;
+						fx_data_L[i] = CLAMP(INT16_MIN, reverbed, INT16_MAX);
+						if (!outdoor_reverb)
+							reverb_buffer_L[write_pos] = reverbed;
+						write_pos = (write_pos + 1) % (length * 2);
+						read_pos = (read_pos + 1) % (length * 2);
+					}
+					current_mix = SFX_Reverb;
+					current_ddf_delay = ddf_reverb_delay;
+					current_ddf_ratio = ddf_reverb_ratio;
+					current_ddf_type = ddf_reverb_type;
+					if (outdoor_reverb)
+						reverb_is_outdoors = true;
+					else
+						reverb_is_outdoors = false;
+					delete[] reverb_buffer_L;
+					reverb_buffer_L = NULL;
+					break;
+			}
 		}
 	}
-	else
+	else if (dynamic_reverb)
 	{
-		I_Printf("REVERB!\n");
 		reverb_room_size_e current_room_size;
 		if (room_area > 700)
 		{
@@ -420,6 +506,37 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 					reverb_buffer_L = NULL;
 					break;
 			}
+		}
+	}
+	else // Just copy the original sound to the buffer - Dasho
+	{
+		switch (mode)
+		{
+			case SBUF_Mono:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length];
+				fx_data_R = fx_data_L;
+				memcpy(fx_data_L, data_L, length * sizeof(s16_t));
+				current_mix = SFX_None;
+				break;
+
+			case SBUF_Stereo:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length];
+				if (!fx_data_R)
+					fx_data_R = new s16_t[length];
+				memcpy(fx_data_L, data_L, length * sizeof(s16_t));
+				memcpy(fx_data_R, data_R, length * sizeof(s16_t));
+				current_mix = SFX_None;
+				break;
+
+			case SBUF_Interleaved:
+				if (!fx_data_L)
+					fx_data_L = new s16_t[length * 2];
+				fx_data_R = fx_data_L;
+				memcpy(fx_data_L, data_L, length * 2 * sizeof(s16_t));
+				current_mix = SFX_None;
+				break;
 		}
 	}
 }

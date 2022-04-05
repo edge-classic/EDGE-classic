@@ -77,6 +77,10 @@ public:
 
 	reverb_room_size_e reverbed_room_size;
 
+	int current_ddf_ratio;
+	int current_ddf_delay;
+	int current_ddf_type;
+
 	bool reverb_is_outdoors;
 
 public:
@@ -88,7 +92,7 @@ public:
 	void Free_FX();
 	void Mix_Vacuum();
 	void Mix_Submerged();
-	void Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor_reverb);
+	void Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor_reverb, int ddf_reverb_type, int ddf_reverb_ratio, int ddf_reverb_delay);
 };
 
 } // namespace epi

@@ -456,7 +456,10 @@ void S_StartFX(sfx_t *sfx, int category, position_c *pos, int flags)
 		buf->Mix_Submerged();
 	else
 	{
-		buf->Mix_Reverb(dynamic_reverb, room_area, outdoor_reverb);
+		if (ddf_reverb)
+			buf->Mix_Reverb(dynamic_reverb, room_area, outdoor_reverb, ddf_reverb_type, ddf_reverb_ratio, ddf_reverb_delay);
+		else
+			buf->Mix_Reverb(dynamic_reverb, room_area, outdoor_reverb, 0, 0, 0);
 	}
 
 	I_LockAudio();

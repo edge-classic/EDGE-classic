@@ -282,11 +282,11 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 					read_pos = ((write_pos - reverb_delay * freq / 1000) + length) % (length);
 					for (int i = 0; i < length; i++) 
 					{
-						if (outdoor_reverb)
+						if (ddf_reverb_type == 2)
 							reverb_buffer_L[write_pos] = data_L[i];
 						int reverbed = data_L[i] + reverb_buffer_L[MAX(0, read_pos)] * reverb_ratio / 100;
 						fx_data_L[i] = CLAMP(INT16_MIN, reverbed, INT16_MAX);
-						if (!outdoor_reverb)
+						if (ddf_reverb_type == 1)
 							reverb_buffer_L[write_pos] = reverbed;
 						write_pos = (write_pos + 1) % (length);
 						read_pos = (read_pos + 1) % (length);
@@ -295,10 +295,6 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 					current_ddf_delay = ddf_reverb_delay;
 					current_ddf_ratio = ddf_reverb_ratio;
 					current_ddf_type = ddf_reverb_type;
-					if (outdoor_reverb)
-						reverb_is_outdoors = true;
-					else
-						reverb_is_outdoors = false;
 					delete[] reverb_buffer_L;
 					reverb_buffer_L = NULL;
 					break;
@@ -315,7 +311,7 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 					read_pos = ((write_pos - reverb_delay * freq / 1000) + length) % (length);
 					for (int i = 0; i < length; i++) 
 					{
-						if (outdoor_reverb)
+						if (ddf_reverb_type == 2)
 						{
 							reverb_buffer_L[write_pos] = data_L[i];
 							reverb_buffer_R[write_pos] = data_R[i];
@@ -324,7 +320,7 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 						int reverbed_R = data_R[i] + reverb_buffer_R[MAX(0, read_pos)] * reverb_ratio / 100;
 						fx_data_L[i] = CLAMP(INT16_MIN, reverbed_L, INT16_MAX);
 						fx_data_R[i] = CLAMP(INT16_MIN, reverbed_R, INT16_MAX);
-						if (!outdoor_reverb)
+						if (ddf_reverb_type == 1)
 						{
 							reverb_buffer_L[write_pos] = reverbed_L;
 							reverb_buffer_R[write_pos] = reverbed_R;
@@ -336,10 +332,6 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 					current_ddf_delay = ddf_reverb_delay;
 					current_ddf_ratio = ddf_reverb_ratio;
 					current_ddf_type = ddf_reverb_type;
-					if (outdoor_reverb)
-						reverb_is_outdoors = true;
-					else
-						reverb_is_outdoors = false;
 					delete[] reverb_buffer_L;
 					delete[] reverb_buffer_R;
 					reverb_buffer_L = NULL;
@@ -355,11 +347,11 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 					read_pos = ((write_pos - reverb_delay * freq / 1000) + length * 2) % (length * 2);
 					for (int i = 0; i < length * 2; i++) 
 					{
-						if (outdoor_reverb)
+						if (ddf_reverb_type == 2)
 							reverb_buffer_L[write_pos] = data_L[i];
 						int reverbed = data_L[i] + reverb_buffer_L[MAX(0, read_pos)] * reverb_ratio / 100;
 						fx_data_L[i] = CLAMP(INT16_MIN, reverbed, INT16_MAX);
-						if (!outdoor_reverb)
+						if (ddf_reverb_type == 1)
 							reverb_buffer_L[write_pos] = reverbed;
 						write_pos = (write_pos + 1) % (length * 2);
 						read_pos = (read_pos + 1) % (length * 2);
@@ -368,10 +360,6 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 					current_ddf_delay = ddf_reverb_delay;
 					current_ddf_ratio = ddf_reverb_ratio;
 					current_ddf_type = ddf_reverb_type;
-					if (outdoor_reverb)
-						reverb_is_outdoors = true;
-					else
-						reverb_is_outdoors = false;
 					delete[] reverb_buffer_L;
 					reverb_buffer_L = NULL;
 					break;

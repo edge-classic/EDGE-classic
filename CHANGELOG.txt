@@ -64,7 +64,7 @@ New Features
   -SWITCH_WEAPON <weapon> which will force a switch to this <weapon> if the player has it.
   -TELEPORT_TO_START which will simply teleport the player back to player 1 start.
   
-+ THINGS:DDF
++ THINGS.DDF
   -Crouching now triggers CROUCH states for the player when used with CHECK_ACTIVITY.
   -Added player crouch spites to edge-defs.wad.
 
@@ -86,6 +86,12 @@ New Features
 + Added "Animated Liquid Type" to Video Options menu; choices are "Vanilla", "SMMU", and "SMMU + Swirl".
 
 + MBF sky transfer linetypes 271 and 272 partially supported via new line Effect "SKY_TRANSFER".
+
++ Dynamic Reverb option in Sound Menu. Will attempt to reverberate all sounds based on room size and being indoor/outdoors
+
++ SECTORS.DDF
+  -Can add specials VACUUM_SFX, SUBMERGED_SFX, and REVERB_SFX to affect sounds while in that sector
+  -REVERB_SFX has additional required parameters: REVERB_TYPE="REVERB" or "ECHO", REVERB_DELAY=(any number), and REVERB_RATIO=(0-100)
 
 
 CHANGELOG for EDGE-Classic 1.0 (since EDGE-Classic Preview 1)

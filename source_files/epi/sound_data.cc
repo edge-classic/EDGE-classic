@@ -295,6 +295,7 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 					current_ddf_delay = ddf_reverb_delay;
 					current_ddf_ratio = ddf_reverb_ratio;
 					current_ddf_type = ddf_reverb_type;
+					reverbed_room_size = RM_None;
 					delete[] reverb_buffer_L;
 					reverb_buffer_L = NULL;
 					break;
@@ -332,6 +333,7 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 					current_ddf_delay = ddf_reverb_delay;
 					current_ddf_ratio = ddf_reverb_ratio;
 					current_ddf_type = ddf_reverb_type;
+					reverbed_room_size = RM_None;
 					delete[] reverb_buffer_L;
 					delete[] reverb_buffer_R;
 					reverb_buffer_L = NULL;
@@ -360,6 +362,7 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 					current_ddf_delay = ddf_reverb_delay;
 					current_ddf_ratio = ddf_reverb_ratio;
 					current_ddf_type = ddf_reverb_type;
+					reverbed_room_size = RM_None;
 					delete[] reverb_buffer_L;
 					reverb_buffer_L = NULL;
 					break;

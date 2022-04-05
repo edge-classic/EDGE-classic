@@ -789,15 +789,10 @@ void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 
 	now = ( phase + leveltime / 100.0f * frequency );
 
-	if (swirling_flats == SWIRL_QUAKE3)
+	if (swirling_flats == SWIRL_PARALLAX)
 	{
 		frequency *= 2;
 		if (thick_liquid)
-		{
-			texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
-			texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
-		}
-		else
 		{
 			if (swirl_pass == 1)
 			{
@@ -806,7 +801,22 @@ void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 			}
 			else
 			{
-				amplitude = 0.01;
+				amplitude = 0;
+				texc->x = texc->x - r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				texc->y = texc->y - r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+			}
+		}
+		else
+		{
+			if (swirl_pass == 1)
+			{
+				amplitude = 0.025;
+				texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z) * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
+			}
+			else
+			{
+				amplitude = 0.015;
 				texc->x = texc->x - r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
 				texc->y = texc->y - r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
 			}
@@ -1292,7 +1302,7 @@ static void DrawWallPart(drawfloor_t *dfloor,
 			trans, &data.pass, data.blending, data.mid_masked,
 			&data, WallCoordFunc);
 
-	if (surf->image->liquid_type == LIQ_Thin && swirling_flats == SWIRL_QUAKE3) // Kept as an example for future effects
+	if (surf->image->liquid_type > LIQ_None && swirling_flats == SWIRL_PARALLAX) // Kept as an example for future effects
 	{
 		data.tx0 = surf->offset.x + 25;
 		data.ty0 = surf->offset.y + 25;
@@ -2556,7 +2566,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 			trans, &data.pass, data.blending, false /* masked */,
 			&data, PlaneCoordFunc);
 
-	if (surf->image->liquid_type == LIQ_Thin && swirling_flats == SWIRL_QUAKE3) // Kept as an example for future effects
+	if (surf->image->liquid_type > LIQ_None && swirling_flats == SWIRL_PARALLAX) // Kept as an example for future effects
 	{
 		data.tx0 = surf->offset.x + 25;
 		data.ty0 = surf->offset.y + 25;

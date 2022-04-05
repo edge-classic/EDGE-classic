@@ -215,7 +215,7 @@ typedef enum
 	SWIRL_Vanilla = 0,
 	SWIRL_SMMU = 1,
 	SWIRL_SMMUSWIRL = 2,
-	SWIRL_QUAKE3 = 3
+	SWIRL_PARALLAX = 3
 }
 swirl_type_e;
 extern swirl_type_e swirling_flats;

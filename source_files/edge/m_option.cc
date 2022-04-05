@@ -378,7 +378,7 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Switch,  "Wipe method",     WIPE_EnumStr, WIPE_NUMWIPES, &wipe_method, NULL, NULL},
 	{OPT_Boolean, "Screenshot Format", JpgPng, 2, &png_scrshots, NULL, NULL},
 	{OPT_Boolean, "Splash Screen",    YesNo,   2, &splash_screen, NULL, NULL},
-	{OPT_Switch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Quake 3",   4, &swirling_flats, NULL, NULL}
+	{OPT_Switch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax",   4, &swirling_flats, NULL, NULL}
 	
 
 #if 0  // TEMPORARILY DISABLED (we need an `Advanced Options' menu)

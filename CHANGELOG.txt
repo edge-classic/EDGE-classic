@@ -83,7 +83,7 @@ New Features
 
 + DDFLAT Liquids; "LIQUID = THIN" or "LIQUID = THICK" can be added to a flat definition. Currently affects swirl/dynamic liquid parameters.
 
-+ Added "Animated Liquid Type" to Video Options menu; choices are "Vanilla", "SMMU", and "SMMU + Swirl".
++ Added "Animated Liquid Type" to Video Options menu; choices are "Vanilla", "SMMU", "SMMU + Swirl", and "Parallax"
 
 + MBF sky transfer linetypes 271 and 272 partially supported via new line Effect "SKY_TRANSFER".
 

@@ -1279,9 +1279,9 @@ static inline bool ShootCheckGap(float z,
 		flatdef_c *current_flatdef = flatdefs.Find(flat);
 		if (current_flatdef)
 		{ 
-			if (current_flatdef->effectobject)
+			if (current_flatdef->impactobject)
 			{
-				P_SpawnPuff(x, y, z, current_flatdef->effectobject, shoot_I.angle + ANG180);
+				P_SpawnPuff(x, y, z, current_flatdef->impactobject, shoot_I.angle + ANG180);
 				// don't go any farther
 				return false;
 			}

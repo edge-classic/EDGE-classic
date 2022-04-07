@@ -32,7 +32,8 @@ static const commandlist_t flat_commands[] =
 	DDF_FIELD("LIQUID", liquid, DDF_MainGetString),
 	DDF_FIELD("FOOTSTEP",   footstep, DDF_MainLookupSound),
 	DDF_FIELD("SPLASH", splash, DDF_MainGetLumpName),
-	DDF_FIELD("EFFECT_OBJECT", effectobject_ref, DDF_MainGetString),
+	DDF_FIELD("IMPACT_OBJECT", impactobject_ref, DDF_MainGetString),
+	DDF_FIELD("GLOW_OBJECT", glowobject_ref, DDF_MainGetString),
 
 	DDF_CMD_END
 };
@@ -166,8 +167,11 @@ void DDF_FlatCleanUp(void)
 		f = ITERATOR_TO_TYPE(it, flatdef_c*);
 		cur_ddf_entryname = epi::STR_Format("[%s]  (flats.ddf)", f->name.c_str());
 
-		f->effectobject = f->effectobject_ref ?
-			mobjtypes.Lookup(f->effectobject_ref) : NULL;
+		f->impactobject = f->impactobject_ref ?
+			mobjtypes.Lookup(f->impactobject_ref) : NULL;
+		
+		f->glowobject = f->glowobject_ref ?
+			mobjtypes.Lookup(f->glowobject_ref) : NULL;
 
 		//f->effectobject = f->effectobject_ref.empty() ? 
 		//		NULL : mobjtypes.Lookup(f->effectobject_ref);
@@ -227,8 +231,10 @@ void flatdef_c::CopyDetail(flatdef_c &src)
 	liquid = src.liquid;
 	footstep = src.footstep;
 	splash = src.splash;
-	effectobject = src.effectobject;	
-	effectobject_ref = src.effectobject_ref;
+	impactobject = src.impactobject;	
+	impactobject_ref = src.impactobject_ref;
+	glowobject = src.glowobject;	
+	glowobject_ref = src.glowobject_ref;
 }
 
 //
@@ -239,8 +245,10 @@ void flatdef_c::Default()
 	liquid = "";
 	footstep = sfx_None;
 	splash.clear();
-	effectobject = NULL;	
-	effectobject_ref.clear();
+	impactobject = NULL;	
+	impactobject_ref.clear();
+	glowobject = NULL;	
+	glowobject_ref.clear();
 }
 
 

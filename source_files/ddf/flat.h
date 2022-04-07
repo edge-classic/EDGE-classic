@@ -42,8 +42,11 @@ public:
 	lumpname_c splash;
 	//Lobo: item to spawn (or NULL).  The mobjdef pointer is only valid after
 	// DDF_flatCleanUp() has been called.
-	const mobjtype_c *effectobject;
-	epi::strent_c effectobject_ref;
+	const mobjtype_c *impactobject;
+	epi::strent_c impactobject_ref;
+
+	const mobjtype_c *glowobject;
+	epi::strent_c glowobject_ref;
 
 private:
 	// disable copy construct and assignment operator

@@ -557,9 +557,12 @@ static image_c *AddImageUser(imagedef_c *def)
 				I_Error("Error occurred scanning image: %s\n", basename);
 
 			CloseUserFileOrLump(def, f);
+
+/* Lobo 2022: info overload. Shut up.
 #if 1
 			L_WriteDebug("GETINFO [%s] : size %dx%d\n", def->name.c_str(), w, h);
 #endif
+*/
 		}
 		break;
 

@@ -643,7 +643,9 @@ void W_PrecacheSprites(void)
 		if (! (sprite_present[i] || def->HasWeapon()))
 			continue;
 
+/* Lobo 2022: info overload. Shut up.
 		I_Debugf("Precaching sprite: %s\n", def->name);
+*/
 
 		SYS_ASSERT(def->frames);
 

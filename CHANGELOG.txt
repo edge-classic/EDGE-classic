@@ -49,6 +49,7 @@ New Features
 + FLATS.DDF (wad lump "DDFFLAT") which can be used to associate certain sounds, objects etc. with specific flats.
   - Command: LIQUID="THIN" or "THICK" can be added to a flat definition. Currently affects swirl/dynamic liquid parameters.
   - Command: IMPACT_OBJECT=<thing> where <thing> is an entry in THINGS.DDF. When the flat is shot, the <thing> will be spawned at the impact point (e.g. for splashes from water).
+  - Command: FOOTSTEP = <sound> where <sound> is an entry in SFX.DDF. Can be used via COALHUDS to make appropriate sfx when moving across this flat.
 
 + LINES.DDF
   - New command: EFFECT_OBJECT=<thing> where <thing> is an entry in THINGS.DDF. When the line is activated, the <thing> will be spawned in the center of the line (e.g. for sparks from a switch). If the line is of type SHOOT then we spawn the object at the spot where the shot impacts instead.(e.g. a flesh wall that spurts blood when shot).

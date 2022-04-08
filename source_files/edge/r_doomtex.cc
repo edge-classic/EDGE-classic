@@ -557,6 +557,7 @@ static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 		I_Error("Error occurred loading image file: %s\n",
 			def->info.c_str());
 
+/* Lobo 2022: info overload. Shut up.	
 #if 1  // DEBUGGING
 	L_WriteDebug("CREATE IMAGE [%s] %dx%d < %dx%d opac=%d --> %p %dx%d bpp %d\n",
 	rim->name,
@@ -565,7 +566,8 @@ static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 	rim->opacity,
 	img, img->width, img->height, img->bpp);
 #endif
-
+*/
+	
 	if (def->fix_trans == FIXTRN_Blacken)
 		R_BlackenClearAreas(img);
 

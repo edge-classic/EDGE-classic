@@ -43,13 +43,20 @@ Download from MediaFire [here.](https://www.mediafire.com/file/uk82uwkkqlj2nmw/A
 
 # Notable Improvements over EDGE 1.35
 
-- Migration from SDL1 to SDL2
-- Improved support for gamepads
-- Support for MP3 music and sound effects
-- A soundfont-capable MIDI player
-- Full support for both HacX 1.2 and Harmony IWADs
-- Widescreen statusbar, intermission, and title screens
-- Expanded DDF, RTS, and COAL features
+- A soundfont-capable MIDI player (.sf2 support).
+- Support for MP3 music and sound effects.
+- Migration from SDL1 to SDL2 (longevity and potential new features).
+- Improved support for gamepads.
+- Expanded DDF, RTS, and COAL features.
+- Full support for both HacX 1.2 and Harmony IWADs.
+- Widescreen statusbar, intermission, and title screens.
+- Replaced GLBSP with AJBSP as EDGE-Classic's internal nodebuilder.
+- A load of longstanding bugs fixed (see full changelog).
+- Inventory system.
+- Autoload folder.
+- New Liquid animation (SMMU and Parallax)
+- Many more music formats (MOD/S3M/IT/XM as well as  AY, GBS, GYM, HES, NSF, SAP, SPC, VGM and even C64 SID)
+- Sound Reverb options.
 
 Bugfixes and detailed changes can be found in CHANGELOG.txt
 

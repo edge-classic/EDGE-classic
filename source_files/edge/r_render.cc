@@ -1261,7 +1261,6 @@ static void DrawWallPart(drawfloor_t *dfloor,
 	if (mid_masked)
 		blending |= BL_ClampY;
 
-
 	wall_coord_data_t data;
 
 	data.v_count = v_count;
@@ -1582,6 +1581,13 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 
 			float lz2 = other->f_h + Slope_GetHeight(other->f_slope, seg->v1->x, seg->v1->y);
 			float rz2 = other->f_h + Slope_GetHeight(other->f_slope, seg->v2->x, seg->v2->y);
+
+			// Test fix for slope walls under 3D floors having 'flickering' light levels - Dasho
+			if (dfloor->ef && seg->sidedef->sector->tag == dfloor->ef->sector->tag)
+			{
+				dfloor->props->lightlevel = dfloor->ef->p->lightlevel;
+				seg->sidedef->sector->props.lightlevel = dfloor->ef->p->lightlevel;
+			}
 
 			AddWallTile2(seg, dfloor,
 				&sd->bottom, lz1, lz2, rz1, rz2,

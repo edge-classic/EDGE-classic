@@ -241,7 +241,7 @@ bool S_StartupTSF(void)
 
 	I_Printf("Initializing TinySoundFont...\n");
 
-	edge_tsf = tsf_load_filename("soundfont/default.sf2");
+	edge_tsf = tsf_load_filename(epi::PATH_Join(home_dir.c_str(), "soundfont/default.sf2").c_str());
 
 	if (!edge_tsf) {
 		I_Printf("Could not load soundfont! Ensure that default.sf2 is present in the soundfont directory!\n");

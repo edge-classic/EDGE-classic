@@ -602,8 +602,6 @@ void E_Display(void)
 	// draw console _after_ doing screenshots
 	CON_Drawer();
 
-	M_DisplayDisk();
-
 	I_FinishFrame();  // page flip or blit buffer
 }
 

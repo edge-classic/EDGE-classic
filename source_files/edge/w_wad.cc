@@ -1767,9 +1767,6 @@ static void W_ReadLump(int lump, void *dest)
 	lumpinfo_t *L = lumpinfo + lump;
 	data_file_c *df = data_files[L->file];
 
-	// -KM- 1998/07/31 This puts the loading icon in the corner of the screen :-)
-	display_disk = true;
-
     df->file->Seek(L->position, epi::file_c::SEEKPOINT_START);
 
     int c = df->file->Read(dest, L->size);

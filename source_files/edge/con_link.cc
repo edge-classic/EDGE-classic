@@ -39,7 +39,7 @@ extern cvar_c am_rotate, am_smoothing;
 extern cvar_c am_gridsize;
 
 extern cvar_c m_language;
-extern cvar_c m_diskicon, m_busywait, m_screenhud;
+extern cvar_c m_busywait, m_screenhud;
 extern cvar_c m_messages, m_obituaries;
 extern cvar_c m_goobers;
 
@@ -124,7 +124,6 @@ cvar_link_t  all_cvars[] =
   	{ "mouse_filter",   &mouse_filter,   "c",   "0"  },
 
 	{ "goobers",        &m_goobers,      "",    "0" },
-	{ "m_diskicon",     &m_diskicon,     "c",   "0"  },
 	{ "m_busywait",     &m_busywait,     "c",   "1"  },
 
 	/* Rendering Stuff */

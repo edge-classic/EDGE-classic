@@ -60,7 +60,6 @@ void M_LoadDefaults(void);
 void M_SaveDefaults(void);
 
 void M_InitMiscConVars(void);
-void M_DisplayDisk(void);
 void M_ScreenShot(bool show_msg);
 void M_MakeSaveScreenShot(void);
 
@@ -72,7 +71,6 @@ void M_WarnError(const char *error,...) GCCATTR((format(printf, 1, 2)));
 extern unsigned short save_screenshot[160][100];
 extern bool save_screenshot_valid;
 
-extern bool display_disk;
 extern int  display_desync;
 extern bool force_directx;
 extern bool force_waveout;

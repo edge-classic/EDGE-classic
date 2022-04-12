@@ -75,12 +75,7 @@
 //
 int monitor_size;
 
-cvar_c m_diskicon;
-
-bool display_disk = false;
 int  display_desync = 0;
-
-static const image_c *disk_image = NULL;
 
 bool force_directx = false;
 bool force_waveout = false;
@@ -464,26 +459,6 @@ void M_InitMiscConVars(void)
 		hq2x_scaling = 3;
 	else if (M_CheckParm("-nohqscale"))
 		hq2x_scaling = 0;
-}
-
-
-void M_DisplayDisk(void)
-{
-	/* displays disk icon during loading... */
-
-	if (!m_diskicon.d || !display_disk)
-		return;
-   
-	if (!disk_image)
-		disk_image = W_ImageLookup("STDISK");
-
-	// reset flag
-	display_disk = false;
-
-	float w = IM_WIDTH(disk_image);
-	float h = IM_HEIGHT(disk_image);
-
-	HUD_StretchImage(314 - w, 164 - h, w, h, disk_image);
 }
 
 

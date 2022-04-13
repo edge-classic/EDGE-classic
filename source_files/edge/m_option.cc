@@ -1210,7 +1210,6 @@ bool M_OptResponder(event_t * ev, int ch)
 		}
 
 		case KEYD_DOWNARROW:
-		case KEYD_WHEEL_DN:
 		case KEYD_DPAD_DOWN:
 		case KEYD_MENU_DOWN:
 		{
@@ -1227,8 +1226,30 @@ bool M_OptResponder(event_t * ev, int ch)
 			return true;
 		}
 
+		case KEYD_WHEEL_DN:
+		{
+			do
+			{
+				curr_menu->pos++;
+				if (curr_menu->pos >= curr_menu->item_num)
+				{
+					if (curr_menu->key_page[0])
+					{
+						KeyMenu_Next();
+						curr_menu->pos = 0;
+						return true;
+					}
+					curr_menu->pos = 0;
+				}
+				curr_item = curr_menu->items + curr_menu->pos;
+			}
+			while (curr_item->type == 0);
+
+			S_StartFX(sfx_pstop);
+			return true;
+		}
+
 		case KEYD_UPARROW:
-		case KEYD_WHEEL_UP:
 		case KEYD_DPAD_UP:
 		case KEYD_MENU_UP:
 		{
@@ -1237,6 +1258,29 @@ bool M_OptResponder(event_t * ev, int ch)
 				curr_menu->pos--;
 				if (curr_menu->pos < 0)
 					curr_menu->pos = curr_menu->item_num - 1;
+				curr_item = curr_menu->items + curr_menu->pos;
+			}
+			while (curr_item->type == 0);
+
+			S_StartFX(sfx_pstop);
+			return true;
+		}
+
+		case KEYD_WHEEL_UP:
+		{
+			do
+			{
+				curr_menu->pos--;
+				if (curr_menu->pos < 0)
+				{
+					if (curr_menu->key_page[0])
+					{
+						KeyMenu_Prev();
+						curr_menu->pos = curr_menu->item_num - 1;
+						return true;
+					}
+					curr_menu->pos = curr_menu->item_num - 1;
+				}
 				curr_item = curr_menu->items + curr_menu->pos;
 			}
 			while (curr_item->type == 0);

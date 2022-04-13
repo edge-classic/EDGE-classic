@@ -1205,12 +1205,7 @@ bool M_OptResponder(event_t * ev, int ch)
 		case KEYD_BACKSPACE:
 		{
 			if (curr_item->type == OPT_KeyConfig)
-			{
-				I_Printf("CURRENT MENU: %d\n", curr_menu);
-				I_Printf("CURRENT ITEM: %d\n", curr_item);
-				I_Printf("CURRENT SWITCHVAR: %d\n", curr_item->switchvar);
 				*(int*)(curr_item->switchvar) = 0;
-			}
 			return true;
 		}
 

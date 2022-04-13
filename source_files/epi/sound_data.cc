@@ -114,7 +114,7 @@ void sound_data_c::Mix_Submerged()
 		int accum_L = 0;
     	int out_R = 0;
     	int accum_R = 0;
-    	int k = 5;
+    	int k = 4;
 		int *reverb_buffer_L;
 		int *reverb_buffer_R;
 		int write_pos = 0;
@@ -212,7 +212,7 @@ void sound_data_c::Mix_Vacuum()
 		int accum_L = 0;
     	int out_R = 0;
     	int accum_R = 0;
-    	int k = 6;
+    	int k = 5;
 
 		switch (mode)
 		{

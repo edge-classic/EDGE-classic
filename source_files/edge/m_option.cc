@@ -1160,12 +1160,12 @@ bool M_OptResponder(event_t * ev, int ch)
 ///--  	if (testticker != -1)
 ///--  		return true;
 
+	curr_item = curr_menu->items + curr_menu->pos; // Should help the accidental key binding to other options - Dasho
+
 	// Scan for keycodes
 	if (keyscan)
 	{
 		int *blah;
-
-		curr_item = curr_menu->items + curr_menu->pos; // Should help the accidentally key binding to other options - Dasho
 
 		if (ev->type != ev_keydown)
 			return false;
@@ -1205,7 +1205,12 @@ bool M_OptResponder(event_t * ev, int ch)
 		case KEYD_BACKSPACE:
 		{
 			if (curr_item->type == OPT_KeyConfig)
+			{
+				I_Printf("CURRENT MENU: %d\n", curr_menu);
+				I_Printf("CURRENT ITEM: %d\n", curr_item);
+				I_Printf("CURRENT SWITCHVAR: %d\n", curr_item->switchvar);
 				*(int*)(curr_item->switchvar) = 0;
+			}
 			return true;
 		}
 

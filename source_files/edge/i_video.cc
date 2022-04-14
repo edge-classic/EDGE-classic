@@ -199,11 +199,16 @@ bool I_SetScreenSize(scrmode_c *mode)
 	{
 		if (mode->full) 
 		{
-			SDL_SetWindowFullscreen(my_vis, 0);
-			SDL_SetWindowSize(my_vis, mode->width, mode->height);
 			SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN);
+			SDL_DisplayMode *new_mode = new SDL_DisplayMode;
+			new_mode->h = mode->height;
+			new_mode->w = mode->width;
+			SDL_SetWindowDisplayMode(my_vis, new_mode);
+			SDL_SetWindowSize(my_vis, mode->width, mode->height);
 			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
 				mode->width, mode->height, mode->depth);
+			delete[] new_mode;
+			new_mode = NULL;
 		}
 		else
 		{

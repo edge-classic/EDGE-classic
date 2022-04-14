@@ -801,33 +801,19 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
     else
     {
         float player_floor_height = ui_player_who->mo->floorz;
-        extrafloor_t *exfloor_check = ui_player_who->mo->subsector->sector->exfloor_first;
-		if (exfloor_check)
+		extrafloor_t *floor_checker = ui_player_who->mo->subsector->sector->bottom_ef;
+		extrafloor_t *liquid_checker = ui_player_who->mo->subsector->sector->bottom_liq;
+		for (extrafloor_t *ef = floor_checker; ef; ef=ef->higher)
 		{
-			do {
-				if (exfloor_check->lower)
-					exfloor_check = exfloor_check->lower;
-			} while (exfloor_check->lower);
-			if (player_floor_height < exfloor_check->top_h) {
-				vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
-			}
-			do {
-				if (player_floor_height == exfloor_check->top_h)
-					vm->ReturnString(exfloor_check->ef_line->frontsector->floor.image->name);
-				if (exfloor_check->higher)
-					exfloor_check = exfloor_check->higher;
-			} while (exfloor_check->higher);
-			if (ui_player_who->mo->subsector->sector->bottom_liq)
-				exfloor_check = ui_player_who->mo->subsector->sector->bottom_liq;
-			do {
-				if (player_floor_height == exfloor_check->top_h)
-					vm->ReturnString(exfloor_check->ef_line->frontsector->floor.image->name);
-				if (exfloor_check->higher)
-					exfloor_check = exfloor_check->higher;
-			} while (exfloor_check->higher);
+			if (player_floor_height == ef->top_h)
+				vm->ReturnString(ef->ef_line->frontsector->floor.image->name);
 		}
-		else
-			vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
+		for (extrafloor_t *ef = liquid_checker; ef; ef=ef->higher)
+		{
+			if (player_floor_height == ef->top_h)
+				vm->ReturnString(ef->ef_line->frontsector->floor.image->name);
+		}
+		vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name); // Fallback if nothing else satisfies these conditions
     }
 }
 

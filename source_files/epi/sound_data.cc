@@ -269,8 +269,8 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 			int *reverb_buffer_R;
 			int write_pos = 0;
 			int read_pos = 0;
-			int reverb_ratio = ddf_reverb_ratio;
-			int reverb_delay = ddf_reverb_delay;
+			int reverb_ratio = CLAMP(0, ddf_reverb_ratio, 100);
+			int reverb_delay = MAX(0, ddf_reverb_delay);
 			switch (mode)
 			{
 				case SBUF_Mono:

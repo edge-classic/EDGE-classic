@@ -1571,8 +1571,8 @@ static inline void PlayerInProperties(player_t *player,
 			ddf_reverb_type = 1;
 		else if (strcasecmp(special->reverb_type, "ECHO") == 0)
 			ddf_reverb_type = 2;
-		ddf_reverb_delay = special->reverb_delay;
-		ddf_reverb_ratio = special->reverb_ratio;
+		ddf_reverb_delay = MAX(0, special->reverb_delay);
+		ddf_reverb_ratio = CLAMP(0, special->reverb_ratio, 100);
 	}
 
 	factor = 1.0f;

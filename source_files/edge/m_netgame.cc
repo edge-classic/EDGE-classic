@@ -934,7 +934,10 @@ bool M_NetGameResponder(event_t * ev, int ch)
 {
 	switch (ch)
 	{
+		case KEYD_MOUSE2:
+		case KEYD_MOUSE3:
 		case KEYD_ESCAPE:
+		case KEYD_MENU_CANCEL:
 		{
 			netgame_menuon = 0;
 			M_ClearMenus();

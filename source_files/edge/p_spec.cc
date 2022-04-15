@@ -1738,12 +1738,10 @@ void P_PlayerInSpecialSector(player_t * player, sector_t * sec)
 	}
 }
 
-static inline void ApplyScroll(vec2_t& offset, const vec2_t& delta)
+static inline void ApplyScroll(vec2_t& offset, const vec2_t& delta, unsigned short tex_w, unsigned short tex_h)
 {
-	// prevent loss of precision (eventually stops the scrolling)
-
-	offset.x = fmod(offset.x + delta.x, 4096.0f);
-	offset.y = fmod(offset.y + delta.y, 4096.0f);
+	offset.x = fmod(offset.x + delta.x, tex_w);
+	offset.y = fmod(offset.y + delta.y, tex_h);
 }
 
 //
@@ -1774,16 +1772,22 @@ void P_UpdateSpecials(void)
 		// -AJA- 1999/07/01: Handle both sidedefs.
 		if (ld->side[0])
 		{
-			ApplyScroll(ld->side[0]->top.offset,    ld->side[0]->top.scroll);
-			ApplyScroll(ld->side[0]->middle.offset, ld->side[0]->middle.scroll);
-			ApplyScroll(ld->side[0]->bottom.offset, ld->side[0]->bottom.scroll);
+			if (ld->side[0]->top.image)
+				ApplyScroll(ld->side[0]->top.offset,    ld->side[0]->top.scroll, ld->side[0]->top.image->actual_w, ld->side[0]->top.image->actual_h);
+			if (ld->side[0]->middle.image)
+				ApplyScroll(ld->side[0]->middle.offset, ld->side[0]->middle.scroll, ld->side[0]->middle.image->actual_w, ld->side[0]->middle.image->actual_h);
+			if (ld->side[0]->bottom.image)
+				ApplyScroll(ld->side[0]->bottom.offset, ld->side[0]->bottom.scroll, ld->side[0]->bottom.image->actual_w, ld->side[0]->bottom.image->actual_h);
 		}
 
 		if (ld->side[1])
 		{
-			ApplyScroll(ld->side[1]->top.offset,    ld->side[1]->top.scroll);
-			ApplyScroll(ld->side[1]->middle.offset, ld->side[1]->middle.scroll);
-			ApplyScroll(ld->side[1]->bottom.offset, ld->side[1]->bottom.scroll);
+			if (ld->side[1]->top.image)
+				ApplyScroll(ld->side[1]->top.offset,    ld->side[1]->top.scroll, ld->side[1]->top.image->actual_w, ld->side[1]->top.image->actual_h);
+			if (ld->side[1]->middle.image)
+				ApplyScroll(ld->side[1]->middle.offset, ld->side[1]->middle.scroll, ld->side[1]->middle.image->actual_w, ld->side[1]->middle.image->actual_h);
+			if (ld->side[1]->bottom.image)
+				ApplyScroll(ld->side[1]->bottom.offset, ld->side[1]->bottom.scroll, ld->side[1]->bottom.image->actual_w, ld->side[1]->bottom.image->actual_h);
 		}
 	}
 
@@ -1796,8 +1800,8 @@ void P_UpdateSpecials(void)
 	{
 		sector_t *sec = *SI;
 
-		ApplyScroll(sec->floor.offset, sec->floor.scroll);
-		ApplyScroll(sec->ceil.offset,  sec->ceil.scroll);
+		ApplyScroll(sec->floor.offset, sec->floor.scroll, sec->floor.image->actual_w, sec->floor.image->actual_h);
+		ApplyScroll(sec->ceil.offset,  sec->ceil.scroll, sec->ceil.image->actual_w, sec->ceil.image->actual_h);
 	}
 
 	// DO BUTTONS

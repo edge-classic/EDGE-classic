@@ -1,6 +1,27 @@
 https://github.com/dashodanger/EDGE-classic
 
-Current as of: MARCH 2022
+Current as of: APRIL 2022
+
+CHANGELOG for EDGE-Classic 1.2 (since EDGE-Classic 1.1)
+====================================
+
+Bugs fixed
+----------
++ Fixed bug preventing Backspace from clearing the top keybind entry in a menu without another key being pressed first
++ Fixed occasional crash when loading a save game containing 3D floors
+
+General Improvements
+--------------------
++ Mouse wheel up/down will now page through option menus that have Prev/Next pages (like the keybindings)
++ Improved changing resolutions while in fullscreen mode
++ DDF and RTS now use a consistent INVENTORY## naming scheme for inventory items and scripts
++ COALHUDS:
+  -player.use_inventory now only needs the inventory item number passed to it
+
+New Features
+------------
++ COALHUDS: new commands
+  -player.rts_enable_tagged(name) Will execute RTS script with matching tag, if one exists
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)
 ====================================

@@ -861,41 +861,42 @@ static void PL_inventory_events(coal::vm_c *vm, int argc)
 //
 static void PL_use_inventory(coal::vm_c *vm, int argc)
 {
-	std::string name = vm->AccessParamString(0);
-	std::string suffix;
-	int inv = 0;
-	// Check for either one or two digit number after INVENTORY
-	if (std::isdigit(name.at(name.size() - 1)))
-	{
-		if (std::isdigit(name.at(name.size() - 2)))
-		{
-			suffix = name.substr(name.size() - 2, 2);
-		}
-		else
-		{
-			suffix = name.substr(name.size() - 1, 1);
-		}
-	}
-
-	if (!suffix.empty())
-	{
-		static_cast<void>(std::from_chars(suffix.data(), suffix.data() + suffix.size(),	inv));
-	}
+	double *num = vm->AccessParam(0);
+	std::string script_name = "INVENTORY";
+	int inv;
+	if (!num)
+		I_Error("player.use_inventory: can't parse inventory number!\n");
+	else
+		inv = (int)*num;
 
 	if (inv < 1 || inv > NUMINV)
 		I_Error("player.use_inventory: bad inventory number: %d\n", inv);
+
+	if (inv < 10)
+		script_name.append("0").append(std::to_string(inv));
+	else
+		script_name.append(std::to_string(inv));
 
 	inv--;
 
 	if (ui_player_who->inventory[inv].num > 0)
 	{
 		ui_player_who->inventory[inv].num -= 1;
-		RAD_EnableByTag(NULL, name.c_str(), false);
+		RAD_EnableByTag(NULL, script_name.c_str(), false);
 	}
 	
 	vm->ReturnFloat(ui_player_who->inventory[inv].num);
 }
 
+// player.rts_enable_tagged(tag)
+//
+static void PL_rts_enable_tagged(coal::vm_c *vm, int argc)
+{
+	std::string name = vm->AccessParamString(0);
+
+	if (!name.empty())
+		RAD_EnableByTag(NULL, name.c_str(), false);
+}
 
 //------------------------------------------------------------------------
 
@@ -970,6 +971,8 @@ void VM_RegisterPlaysim()
 	ui_vm->AddNativeFunction("player.use_inventory",        PL_use_inventory);
     ui_vm->AddNativeFunction("player.inventory",        PL_inventory);
     ui_vm->AddNativeFunction("player.inventorymax",     PL_inventorymax);
+
+	ui_vm->AddNativeFunction("player.rts_enable_tagged",        PL_rts_enable_tagged);
 }
 
 

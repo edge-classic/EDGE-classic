@@ -513,7 +513,7 @@ typedef enum
 	// player must have ammo (subtype is AM_* value)
 	COND_Ammo,
 	
-	// player must have inventory (subtype is INV_* value)
+	// player must have inventory (subtype is INVENTORY* value)
 	COND_Inventory,
 
 	// player must be jumping

@@ -78,6 +78,9 @@ static bool Load_DOOM(epi::sound_data_c *buf, const byte *lump, int length)
 
 	length -= 8;
 
+	if (length <= 0)
+		return false;
+
 	buf->Allocate(length, epi::SBUF_Mono);
 
 	// convert to signed 16-bit format

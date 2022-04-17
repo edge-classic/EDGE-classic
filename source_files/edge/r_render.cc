@@ -1236,7 +1236,7 @@ static void DrawWallPart(drawfloor_t *dfloor,
 		blending |= BL_Alpha;
 
 	// -AJA- 2006-06-22: fix for midmask wrapping bug
-	if (mid_masked && cur_seg->linedef->special->s_yspeed == 0) // Allow vertical scroller midmasks - Dasho
+	if (mid_masked && (!cur_seg->linedef->special || cur_seg->linedef->special->s_yspeed == 0)) // Allow vertical scroller midmasks - Dasho
 		blending |= BL_ClampY;
 
 	wall_coord_data_t data;

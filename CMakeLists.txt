@@ -7,7 +7,6 @@ add_subdirectory(source_files/deh_edge)
 add_subdirectory(source_files/epi)
 add_subdirectory(source_files/glew)
 add_subdirectory(source_files/libgme)
-add_subdirectory(source_files/libxmp-lite)
 add_subdirectory(source_files/libwebsid)
 
 project(
@@ -123,7 +122,7 @@ add_executable(
 	source_files/edge/s_music.cc    
 	source_files/edge/s_ogg.cc      
 	source_files/edge/s_tsf.cc
-	source_files/edge/s_xmp.cc
+	source_files/edge/s_ibxm.cc
 	source_files/edge/s_gme.cc
 	source_files/edge/s_sid.cc   
 	source_files/edge/sv_chunk.cc   
@@ -234,7 +233,7 @@ add_executable(
 	source_files/edge/s_music.cc    
 	source_files/edge/s_ogg.cc      
 	source_files/edge/s_tsf.cc
-	source_files/edge/s_xmp.cc
+	source_files/edge/s_ibxm.cc
 	source_files/edge/s_gme.cc
 	source_files/edge/s_sid.cc    
 	source_files/edge/sv_chunk.cc   
@@ -273,8 +272,8 @@ target_include_directories(edge-classic PRIVATE source_files/ddf)
 target_include_directories(edge-classic PRIVATE source_files/deh_edge)
 target_include_directories(edge-classic PRIVATE source_files/epi)
 target_include_directories(edge-classic PRIVATE source_files/glew/include/GL)
+target_include_directories(edge-classic PRIVATE source_files/ibxm)
 target_include_directories(edge-classic PRIVATE source_files/libgme/gme)
-target_include_directories(edge-classic PRIVATE source_files/libxmp-lite)
 target_include_directories(edge-classic PRIVATE source_files/libwebsid)
 target_include_directories(edge-classic PRIVATE source_files/minimp3)
 target_include_directories(edge-classic PRIVATE source_files/minivorbis)
@@ -352,7 +351,6 @@ if(WIN32 OR MSYS)
 			opengl32
 			${SDL2_LIBRARIES}
 			gme
-			libxmp-lite
 			libwebsid
 			winmm
 			wsock32
@@ -369,7 +367,6 @@ elseif(NOT APPLE)
 			libglew_static
 			${SDL2_LIBRARIES}
 			gme
-			libxmp-lite
 			libwebsid
 	)
 else()
@@ -384,7 +381,6 @@ else()
 			libglew_static
 			${SDL2_LIBRARIES}
 			gme
-			libxmp-lite
 			libwebsid
 	)
 endif()

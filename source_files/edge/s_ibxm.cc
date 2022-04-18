@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE XMP Music Player
+//  EDGE IBXM Music Player
 //----------------------------------------------------------------------------
 // 
 //  Copyright (c) 2022 - The EDGE-Classic Community
@@ -28,44 +28,50 @@
 #include "s_cache.h"
 #include "s_blit.h"
 #include "s_music.h"
-#include "s_xmp.h"
+#include "s_ibxm.h"
 #include "w_wad.h"
 
-#include "xmp.h"
-
-#define XMP_15_SECONDS XMP_MAX_FRAMESIZE * 750 // From XMP's site, one second of a song is roughly 50 frames - Dasho
+#include "ibxm.h"
 
 extern bool dev_stereo;  // FIXME: encapsulation
 extern int  dev_freq;
 
 // Function for s_music.cc to check if a lump is in mod tracker format
-bool S_CheckXMP (byte *data, int length)
+bool S_CheckIBXM (byte *data, int length)
 {
-	xmp_context xmp_checker = xmp_create_context();
-
-	if (!xmp_checker)
+	ibxm_data *mod_check = new ibxm_data;
+	mod_check->buffer = (char *)data;
+	mod_check->length = length;
+	bool is_mod_music = false;
+	// Check for MOD format
+	switch( ibxm_data_u16be( mod_check, 1082 ) ) 
 	{
-		I_Warning("xmpplayer_c: failure to create xmp context\n");
-		return false;
+		case 0x4b2e: /* M.K. */
+		case 0x4b21: /* M!K! */
+		case 0x5434: /* FLT4 */
+		case 0x484e: /* xCHN */
+		case 0x4348: /* xxCH */
+			is_mod_music = true;
+			break;
+		default:
+			break;
 	}
-
-    if (xmp_load_module_from_memory(xmp_checker, data, length) != 0)
-    {
-		return false;
-    }
-	else
-	{
-		xmp_release_module(xmp_checker);
-		xmp_free_context(xmp_checker);
-		return true;		
-	}
+	// Check for XM format
+	if( ibxm_data_u16le( mod_check, 58 ) == 0x0104 )
+		is_mod_music = true;
+	// Check for S3M format
+	if( ibxm_data_u32le( mod_check, 44 ) == 0x4d524353 )
+		is_mod_music = true;
+	delete[] mod_check;
+	mod_check = NULL;
+	return is_mod_music;
 }
 
-class xmpplayer_c : public abstract_music_c
+class ibxmplayer_c : public abstract_music_c
 {
 public:
-	 xmpplayer_c();
-	~xmpplayer_c();
+	 ibxmplayer_c();
+	~ibxmplayer_c();
 private:
 
 	enum status_e
@@ -76,7 +82,10 @@ private:
 	int status;
 	bool looping;
 
-	xmp_context mod_track;
+	ibxm_module *mod_track;
+	ibxm_replay *mod_replay;
+	ibxm_data *mod_data;
+	int max_buf;
 
 	s16_t *mono_buffer;
 
@@ -105,12 +114,11 @@ private:
 
 //----------------------------------------------------------------------------
 
-xmpplayer_c::xmpplayer_c() : status(NOT_LOADED)
+ibxmplayer_c::ibxmplayer_c() : status(NOT_LOADED)
 {
-	mono_buffer = new s16_t[XMP_15_SECONDS * 2];
 }
 
-xmpplayer_c::~xmpplayer_c()
+ibxmplayer_c::~ibxmplayer_c()
 {
 	Close();
 
@@ -118,20 +126,27 @@ xmpplayer_c::~xmpplayer_c()
 		delete[] mono_buffer;
 }
 
-void xmpplayer_c::PostOpenInit()
+void ibxmplayer_c::PostOpenInit()
 {   
 	// Loaded, but not playing
+	max_buf = ibxm_calculate_mix_buf_len(dev_freq);
+	mono_buffer = new s16_t[max_buf * 2];
 	status = STOPPED;
 }
 
 
 static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
 {
-	// Unlike the other players, libxmp seems to already handle this internally, so just copy the buffer - Dasho
-	memcpy(dest, src, len);
+	const s16_t *s_end = src + len*2;
+
+	for (; src < s_end; src += 2)
+	{
+		// compute average of samples
+		*dest++ = ( (int)src[0] + (int)src[1] ) >> 1;
+	}
 }
 
-bool xmpplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
+bool ibxmplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 {
 	s16_t *data_buf;
 
@@ -142,18 +157,18 @@ bool xmpplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	else
 		data_buf = buf->data_L;
 
-	int did_play = xmp_play_buffer(mod_track, data_buf, XMP_15_SECONDS, 0);
+	int did_play = ibxm_replay_get_audio(mod_replay, (int *)data_buf, 0);
 
-	if (did_play < -XMP_END) // ERROR
+	if (did_play < 0) // ERROR
 	{
-		I_Debugf("[xmpplayer_c::StreamIntoBuffer] Failed\n");
+		I_Debugf("[ibxmplayer_c::StreamIntoBuffer] Failed\n");
 		return false;
 	}
 
-	if (did_play == -XMP_END)
+	if (did_play == 0)
 		song_done = true;
 
-	buf->length = XMP_15_SECONDS * sizeof(s16_t);
+	buf->length = did_play * 2;
 
 	if (!dev_stereo)
 		ConvertToMono(buf->data_L, mono_buffer, buf->length);
@@ -162,7 +177,7 @@ bool xmpplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	{
 		if (! looping)
 			return false;
-		xmp_restart_module(mod_track);
+		ibxm_replay_set_sequence_pos(mod_replay, 0);
 		return true;
 	}
 
@@ -170,14 +185,14 @@ bool xmpplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 }
 
 
-void xmpplayer_c::Volume(float gain)
+void ibxmplayer_c::Volume(float gain)
 {
 	// not needed, music volume is handled in s_blit.cc
 	// (see mix_channel_c::ComputeMusicVolume).
 }
 
 
-bool xmpplayer_c::OpenLump(const char *lumpname)
+bool ibxmplayer_c::OpenLump(const char *lumpname)
 {
 	SYS_ASSERT(lumpname);
 
@@ -187,7 +202,7 @@ bool xmpplayer_c::OpenLump(const char *lumpname)
 	int lump = W_CheckNumForName(lumpname);
 	if (lump < 0)
 	{
-		I_Warning("xmpplayer_c: LUMP '%s' not found.\n", lumpname);
+		I_Warning("ibxmplayer_c: LUMP '%s' not found.\n", lumpname);
 		return false;
 	}
 
@@ -200,27 +215,42 @@ bool xmpplayer_c::OpenLump(const char *lumpname)
 	if (! data)
 	{
 		delete F;
-		I_Warning("xmpplayer_c: Error loading data.\n");
+		I_Warning("ibxmplayer_c: Error loading data.\n");
 		return false;
 	}
 	if (length < 4)
 	{
 		delete F;
-		I_Debugf("xmpplayer_c: ignored short data (%d bytes)\n", length);
+		I_Debugf("ibxmplayer_c: ignored short data (%d bytes)\n", length);
 		return false;
 	}
 
-	mod_track = xmp_create_context();
+	mod_data = new ibxm_data;
+	mod_data->length = length;
+	mod_data->buffer = (char *)data;
+	char *err_msg = new char[64];
+	mod_track = ibxm_module_load(mod_data, err_msg);
 
 	if (!mod_track)
 	{
-		I_Warning("xmpplayer_c: failure to create xmp context\n");
+		I_Warning("modplayer_c: failure to load module: %s\n", err_msg);
+		delete[] mod_data;
+		mod_data = NULL;
+		delete[] err_msg;
+		err_msg = NULL;
 		return false;
 	}
 
-    if (xmp_load_module_from_memory(mod_track, data, length) != 0)
+	mod_replay = ibxm_new_replay(mod_track, dev_freq / 2, 0);
+
+    if (!mod_replay)
     {
-		I_Warning("[xmpplayer_c::Open](DataLump) Failed!\n");
+		I_Warning("[ibxmplayer_c::Open](DataLump) Failed!\n");
+		ibxm_dispose_module(mod_track);
+		delete[] mod_data;
+		mod_data = NULL;
+		delete[] err_msg;
+		err_msg = NULL;
 		return false;
     }
 
@@ -228,24 +258,67 @@ bool xmpplayer_c::OpenLump(const char *lumpname)
 	return true;
 }
 
-bool xmpplayer_c::OpenFile(const char *filename)
+bool ibxmplayer_c::OpenFile(const char *filename)
 {
 	SYS_ASSERT(filename);
 
 	if (status != NOT_LOADED)
 		Close();
 
-	mod_track = xmp_create_context();
+	FILE *mod_loader = fopen(filename, "rb");
+
+	if (!mod_loader)
+	{
+		I_Warning("sidplayer_c: Could not open file: '%s'\n", filename);
+		return false;		
+	}
+
+	// Basically the same as EPI::File's GetLength() method
+	long cur_pos = ftell(mod_loader);      // Get existing position
+
+    fseek(mod_loader, 0, SEEK_END);        // Seek to the end of file
+    long len = ftell(mod_loader);          // Get the position - it our length
+
+    fseek(mod_loader, cur_pos, SEEK_SET);  // Reset existing position
+   
+   	mod_data = new ibxm_data;
+	mod_data->length = len;
+	mod_data->buffer = (char *)new byte[len];
+
+	if (fread(mod_data->buffer, 1, len, mod_loader) != len)
+	{
+		I_Warning("sidplayer_c: Could not open file: '%s'\n", filename);
+		fclose(mod_loader);
+		if (mod_data)
+			delete []mod_data;
+		return false;		
+	}
+
+	fclose(mod_loader);
+
+	char *err_msg = new char[64];
+	mod_track = ibxm_module_load(mod_data, err_msg);
 
 	if (!mod_track)
 	{
-		I_Warning("xmpplayer_c: failure to create xmp context\n");
+		I_Warning("modplayer_c: failure to load module: %s\n", err_msg);
+		delete[] mod_data;
+		mod_data = NULL;
+		delete[] err_msg;
+		err_msg = NULL;
 		return false;
-	}	
+	}
 
-    if (xmp_load_module(mod_track, filename) != 0)
+	mod_replay = ibxm_new_replay(mod_track, dev_freq / 2, 0);
+
+    if (!mod_replay)
     {
-		I_Warning("xmpplayer_c: Could not open file: '%s'\n", filename);
+		I_Warning("[ibxmplayer_c::Open](DataLump) Failed!\n");
+		ibxm_dispose_module(mod_track);
+		delete[] mod_data;
+		mod_data = NULL;
+		delete[] err_msg;
+		err_msg = NULL;
 		return false;
     }
 
@@ -254,7 +327,7 @@ bool xmpplayer_c::OpenFile(const char *filename)
 }
 
 
-void xmpplayer_c::Close()
+void ibxmplayer_c::Close()
 {
 	if (status == NOT_LOADED)
 		return;
@@ -263,26 +336,25 @@ void xmpplayer_c::Close()
 	if (status != STOPPED)
 		Stop();
 		
-	xmp_end_player(mod_track);
-	xmp_release_module(mod_track);
-	xmp_free_context(mod_track);
+	ibxm_dispose_replay(mod_replay);
+	ibxm_dispose_module(mod_track);
+	delete[] mod_data;
+	mod_data = NULL;
 
 	status = NOT_LOADED;
 }
 
 
-void xmpplayer_c::Pause()
+void ibxmplayer_c::Pause()
 {
 	if (status != PLAYING)
 		return;
-
-	xmp_stop_module(mod_track);
 
 	status = PAUSED;
 }
 
 
-void xmpplayer_c::Resume()
+void ibxmplayer_c::Resume()
 {
 	if (status != PAUSED)
 		return;
@@ -291,38 +363,34 @@ void xmpplayer_c::Resume()
 }
 
 
-void xmpplayer_c::Play(bool loop)
+void ibxmplayer_c::Play(bool loop)
 {
     if (status != NOT_LOADED && status != STOPPED) return;
 
 	status = PLAYING;
 	looping = loop;
 
-	xmp_start_player(mod_track, dev_freq, dev_stereo ? 0 : XMP_FORMAT_MONO);
-
 	// Load up initial buffer data
 	Ticker();
 }
 
 
-void xmpplayer_c::Stop()
+void ibxmplayer_c::Stop()
 {
 	if (status != PLAYING && status != PAUSED)
 		return;
 
 	S_QueueStop();
 
-	xmp_stop_module(mod_track);
-
 	status = STOPPED;
 }
 
 
-void xmpplayer_c::Ticker()
+void ibxmplayer_c::Ticker()
 {
 	while (status == PLAYING)
 	{
-		epi::sound_data_c *buf = S_QueueGetFreeBuffer(XMP_15_SECONDS, 
+		epi::sound_data_c *buf = S_QueueGetFreeBuffer(max_buf, 
 				(dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 
 		if (! buf)
@@ -351,9 +419,9 @@ void xmpplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayXMPMusic(const pl_entry_c *musdat, float volume, bool looping)
+abstract_music_c * S_PlayIBXMMusic(const pl_entry_c *musdat, float volume, bool looping)
 {
-	xmpplayer_c *player = new xmpplayer_c();
+	ibxmplayer_c *player = new ibxmplayer_c();
 
 	if (musdat->infotype == MUSINF_LUMP)
 	{

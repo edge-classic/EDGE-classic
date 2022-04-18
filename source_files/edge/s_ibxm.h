@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE XMP Music Player (HEADER)
+//  EDGE IBXM Music Player (HEADER)
 //----------------------------------------------------------------------------
 // 
 //  Copyright (c) 2022 - The EDGE-Classic Community
@@ -16,8 +16,8 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __XMPPLAYER_H__
-#define __XMPPLAYER_H__
+#ifndef __IBXMPLAYER_H__
+#define __IBXMPLAYER_H__
 
 #include "i_defs.h"
 
@@ -27,9 +27,9 @@ class pl_entry_c;
 
 /* FUNCTIONS */
 
-abstract_music_c * S_PlayXMPMusic(const pl_entry_c *musdat, float volume, bool looping);
+abstract_music_c * S_PlayIBXMMusic(const pl_entry_c *musdat, float volume, bool looping);
 
-bool S_CheckXMP(byte *data, int length);
+bool S_CheckIBXM(byte *data, int length);
 
 #endif  /* __XMPPLAYER_H__ */
 

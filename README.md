@@ -55,7 +55,7 @@ Download from MediaFire [here.](https://www.mediafire.com/file/uk82uwkkqlj2nmw/A
 - Inventory system.
 - Autoload folder.
 - New Liquid animation (SMMU and Parallax)
-- Many more music formats (MOD/S3M/IT/XM as well as  AY, GBS, GYM, HES, NSF, SAP, SPC, VGM and even C64 SID)
+- Many more music formats (MOD/S3M/XM as well as AY, GBS, GYM, HES, NSF, SAP, SPC, VGM and even C64 SID)
 - Sound Reverb options.
 
 Bugfixes and detailed changes can be found in CHANGELOG.txt

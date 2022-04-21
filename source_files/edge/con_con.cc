@@ -32,6 +32,7 @@
 #include "con_main.h"
 #include "e_input.h"
 #include "e_player.h"
+#include "g_game.h"
 #include "hu_stuff.h"
 #include "hu_style.h"
 #include "m_argv.h"
@@ -945,7 +946,13 @@ void CON_HandleKey(int key, bool shift, bool ctrl)
 	
 		CON_SetVisible(vs_notvisible);
 		break;
-	
+
+	// Allow screenshotting of console too - Dasho
+	case KEYD_F1:
+	case KEYD_PRTSCR:
+		G_DeferredScreenShot();
+		break;
+
 	default:
 		if (key < 32 || key > 126)
 		{
@@ -1004,6 +1011,8 @@ static int GetKeycode(event_t *ev)
 		case KEYD_ENTER:
 		case KEYD_ESCAPE:
 		case KEYD_RSHIFT:
+		case KEYD_F1:
+		case KEYD_PRTSCR:
 			return sym;
 
 		default:

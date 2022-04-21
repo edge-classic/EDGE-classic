@@ -586,6 +586,8 @@ void E_Display(void)
 
 	N_NetUpdate();  // send out any new accumulation
 
+	CON_Drawer();
+
 	if (m_screenshot_required)
 	{
 		m_screenshot_required = false;
@@ -598,9 +600,6 @@ void E_Display(void)
 		if (leveltime % screenshot_rate == 0)
 			M_ScreenShot(false);
 	}
-
-	// draw console _after_ doing screenshots
-	CON_Drawer();
 
 	I_FinishFrame();  // page flip or blit buffer
 }
@@ -1206,7 +1205,9 @@ static void Add_Autoload(void) {
 		}
 	}
 	fsd.Clear();
-	folder = epi::PATH_Join(folder.c_str(), iwad_base.c_str());
+	std::string lowercase_base = iwad_base;
+	std::transform(lowercase_base.begin(), lowercase_base.end(), lowercase_base.begin(), ::tolower);
+	folder = epi::PATH_Join(folder.c_str(), lowercase_base.c_str());
 	if (!FS_ReadDir(&fsd, folder.c_str(), "*.*"))
 	{
 		I_Warning("Failed to read game-specific autoload directory!\n");

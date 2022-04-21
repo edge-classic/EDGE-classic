@@ -1060,7 +1060,8 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
 {
 	char tempstring[80];
 	
-	float ALTscale = 1.0;
+	// These seems ununsed for now -- Dasho
+	/*float ALTscale = 1.0;
 	float HELPscale = 1.0;
 
 	if(style->def->text[styledef_c::T_ALT].scale)
@@ -1071,7 +1072,7 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
 	if(style->def->text[styledef_c::T_HELP].scale)
 	{
 		HELPscale=style->def->text[styledef_c::T_HELP].scale;
-	}
+	}*/
 
 	// Draw current resolution
 	int y = topy;
@@ -1118,12 +1119,13 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
 
 static void M_LanguageDrawer(int x, int y, int deltay)
 {
-	float ALTscale = 1.0;
+	// This seems unused for now - Dasho
+	/*float ALTscale = 1.0;
 
 	if(opt_def_style->def->text[styledef_c::T_ALT].scale)
 	{
 		ALTscale=opt_def_style->def->text[styledef_c::T_ALT].scale;
-	}
+	}*/
 	HL_WriteText(opt_def_style,styledef_c::T_ALT, x+15, y + deltay * LANGUAGE_POS, language.GetName());
 }
 

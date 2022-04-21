@@ -2061,7 +2061,8 @@ static std::string GetMiddle(std::string& str, int pos, int len)
 
 static void DrawMessage(void)
 {
-	short x, y;
+	//short x; // Seems unused for now - Dasho
+	short y;
 
 	HUD_SetAlpha(0.64f);
 	HUD_SolidBox(0, 0, 320, 200, T_BLACK);

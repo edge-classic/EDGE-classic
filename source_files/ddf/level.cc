@@ -270,8 +270,8 @@ void DDF_LevelCleanUp(void)
 		m->episode = gamedefs.Lookup(m->episode_name.c_str());
 
 		if (! m->episode_name)
-			I_Printf("WARNING: Cannot find episode '%s' for map entry [%s]\n",
-					 m->episode_name.c_str(), m->name.c_str());
+			I_Printf("WARNING: Cannot find episode name for map entry [%s]\n",
+					 m->name.c_str());
 	}
 }
 

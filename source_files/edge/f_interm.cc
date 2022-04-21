@@ -410,7 +410,7 @@ static void DrawLevelFinished(void)
 	// draw <LevelName> 
 	SYS_ASSERT(lnames[0]);
 
-	float w = IM_WIDTH(lnames[0]);
+	//float w = IM_WIDTH(lnames[0]); // Seems to be unneeded for now - Dasho
 	float h = IM_HEIGHT(lnames[0]);
 
 	//float w2 = IM_WIDTH(finished);
@@ -448,7 +448,7 @@ static void DrawEnteringLevel(void)
 		return;
 
 	float h = IM_HEIGHT(entering);
-	float w = IM_WIDTH(entering);
+	//float w = IM_WIDTH(entering); // Seems to be unneeded for now - Dasho
 	//float w2 = IM_WIDTH(lnames[1]);
 
 	style_c *style;

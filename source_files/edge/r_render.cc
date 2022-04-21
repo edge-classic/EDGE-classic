@@ -741,7 +741,6 @@ static inline void TexCoord_PlaneLight(local_gl_vert_t *v, int t)
 // Adapted from Quake 3 GPL release - Dasho (not used yet, but might be for future effects)
 void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
 {
-	int i;
 	float timeScale = leveltime / 100.0f;
 	float adjustedScrollS, adjustedScrollT;
 

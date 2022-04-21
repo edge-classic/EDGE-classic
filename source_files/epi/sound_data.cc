@@ -30,7 +30,7 @@ sound_data_c::sound_data_c() :
 	fx_data_L(NULL), fx_data_R(NULL),
 	priv_data(NULL), ref_count(0), is_sfx(false),
 	current_mix(SFX_None), reverbed_room_size(RM_None),
-	current_ddf_delay(0), current_ddf_ratio(0),
+	current_ddf_ratio(0), current_ddf_delay(0),
 	current_ddf_type(0), reverb_is_outdoors(false)
 { }
 

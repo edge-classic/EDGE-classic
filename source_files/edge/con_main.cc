@@ -487,6 +487,7 @@ const con_cmd_t builtin_commands[] =
 	{ "args",           CMD_ArgList },
 	{ "crc",            CMD_Crc },
 	{ "dir",            CMD_Dir },
+	{ "ls",             CMD_Dir },
 	{ "exec",           CMD_Exec },
 	{ "help",           CMD_Help },
 	{ "map",            CMD_Map },

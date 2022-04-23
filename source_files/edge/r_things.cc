@@ -472,14 +472,39 @@ void RGL_DrawWeaponSprites(player_t * p)
 		// add all active psprites
 		// Note: order is significant
 
-		for (int i = 0; i < NUMPSPRITES; i++)
+		//Lobo 2022:
+		//Allow changing the order of weapon sprite 
+		//rendering so that FLASH states are
+		//drawn in front of the WEAPON states
+		bool FlashFirst = false;
+		if (p->ready_wp >= 0)
 		{
-			pspdef_t *psp = &p->psprites[i];
+			FlashFirst = p->weapons[p->ready_wp].info->render_invert;
+		}
+		
+		if (FlashFirst == false)
+		{
+			for (int i = 0; i < NUMPSPRITES; i++) // normal
+			{
+				pspdef_t *psp = &p->psprites[i];
 
-			if ((p->ready_wp < 0) || (psp->state == S_NULL))
-				continue;
+				if ((p->ready_wp < 0) || (psp->state == S_NULL))
+					continue;
 
-			RGL_DrawPSprite(psp, i, p, view_props, psp->state);
+				RGL_DrawPSprite(psp, i, p, view_props, psp->state);
+			}
+		}
+		else
+		{
+			for (int i = NUMPSPRITES - 1; i >= 0; i--) //go backwards
+			{
+				pspdef_t *psp = &p->psprites[i];
+
+				if ((p->ready_wp < 0) || (psp->state == S_NULL))
+					continue;
+
+				RGL_DrawPSprite(psp, i, p, view_props, psp->state);
+			}	
 		}
 	}
 }

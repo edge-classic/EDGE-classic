@@ -161,6 +161,10 @@ public:
 	float model_bias;
 	float model_forward;
 	float model_side;
+	
+	//Lobo 2022: render order is Crosshair, Flash, Weapon
+	// instead of Weapon, Flash, CrossHair
+	bool render_invert; 
 
 public:
 	inline int KeyPri(int idx) const  // next/prev order value

@@ -3139,9 +3139,26 @@ static void RGL_RenderTrueBSP(void)
 	RGL_FinishSky();
 
 	RGL_DrawSubList(drawsubs);
+	
+	//Lobo 2022:
+	//Allow changing the order of weapon model rendering to be
+	//after RGL_DrawWeaponSprites() so that FLASH states are
+	//drawn in front of the weapon
+	bool FlashFirst = false;
 
-	DoWeaponModel();
-
+	if (v_player)
+	{
+		if (v_player->ready_wp >= 0)
+		{
+			FlashFirst=v_player->weapons[v_player->ready_wp].info->render_invert;
+		}
+	}
+	
+	if (FlashFirst == false)
+	{
+		DoWeaponModel();
+	}
+	
 	glDisable(GL_DEPTH_TEST);
 
 	// now draw 2D stuff like psprites, and add effects
@@ -3155,6 +3172,16 @@ static void RGL_RenderTrueBSP(void)
 		RGL_PaletteEffect(v_player);
 
 		RGL_DrawCrosshair(v_player);
+	}
+	
+	if (FlashFirst == true)
+	{
+		RGL_SetupMatrices3D();
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
+		DoWeaponModel();
+		glDisable(GL_DEPTH_TEST);
+		RGL_SetupMatrices2D();
 	}
 
 #if (DEBUG >= 3) 

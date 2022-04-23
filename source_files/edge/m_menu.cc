@@ -2430,6 +2430,12 @@ void M_Init(void)
 	if (W_IsLumpInPwad("M_EPI1"))
 		custom_MenuEpisode=true;
 	
+	if (W_IsLumpInPwad("M_EPI2"))
+		custom_MenuEpisode=true;
+
+	if (W_IsLumpInPwad("M_EPI3"))
+		custom_MenuEpisode=true;
+	
 	if (W_IsLumpInPwad("M_EPI4"))
 		custom_MenuEpisode=true;
 	

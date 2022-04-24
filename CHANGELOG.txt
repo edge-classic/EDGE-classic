@@ -30,6 +30,13 @@ New Features
 ------------
 + COALHUDS: new commands
   -player.rts_enable_tagged(name) Will execute RTS script with matching tag, if one exists
+  
++ WEAPONS.DDF
+  -Command: RENDER_INVERT=TRUE which will cause this weapon to render the sprites in reverse order
+   i.e. Crosshair, flash, weapon. Mainly useful for not having to "cut out" the shape of the weapon
+   muzzle from flash sprites. Also good for MD2 models so that the flash sprites are obscured
+   by the weapon model.
+   
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)
 ====================================

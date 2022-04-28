@@ -13,6 +13,7 @@ Bugs fixed
 
 General Improvements
 --------------------
++ Pre-level story text/intermission will now be skipped when use IDCLEV/level warp cheat
 + Mouse wheel up/down will now page through option menus that have Prev/Next pages (like the keybindings)
 + Improved changing resolutions while in fullscreen mode
 + DDF and RTS now use a consistent INVENTORY## naming scheme for inventory items and scripts

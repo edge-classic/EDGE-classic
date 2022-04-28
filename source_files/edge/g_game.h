@@ -88,6 +88,8 @@ public:
 
 	gameflags_t *flags;  // can be NULL
 
+	bool level_skip = false;
+
 public:
 	newgame_params_c();
 	newgame_params_c(const newgame_params_c& src);

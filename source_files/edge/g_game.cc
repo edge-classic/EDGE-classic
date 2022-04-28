@@ -67,6 +67,7 @@ gamestate_e gamestate = GS_NOTHING;
 gameaction_e gameaction = ga_nothing;
 
 bool paused = false;
+bool pistol_starts = false;
 
 int key_pause;
 
@@ -163,7 +164,7 @@ void LoadLevel_Bits(void)
 		if (! p) continue;
 
 		if (p->playerstate == PST_DEAD ||
-			(currmap->force_on & MPF_ResetPlayer))
+			(currmap->force_on & MPF_ResetPlayer) || pistol_starts)
 		{
 			p->playerstate = PST_REBORN;
 		}

@@ -28,6 +28,9 @@ General Improvements
 
 New Features
 ------------
++ "Pistol Starts" option added to Gameplay Options menu (default Off). Will force player to default state upon
+  starting a new level. Works with all supported IWADs.
+
 + COALHUDS: new commands
   -player.rts_enable_tagged(name) Will execute RTS script with matching tag, if one exists
   

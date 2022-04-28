@@ -32,6 +32,8 @@
 #include "e_player.h"
 
 
+extern bool pistol_starts;
+
 extern int random_seed;  // for demo code
 extern int starttime;    //
 

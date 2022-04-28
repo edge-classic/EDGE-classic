@@ -1053,6 +1053,9 @@ void G_DeferredNewGame(newgame_params_c& params)
 
 	defer_params = new newgame_params_c(params);
 
+	if (params.level_skip)
+		defer_params->level_skip = true;
+
 	gameaction = ga_newgame;
 }
 
@@ -1077,12 +1080,17 @@ static void G_DoNewGame(void)
 
 	InitNew(*defer_params);
 
+	bool skip_pre = defer_params->level_skip;
+
 	delete defer_params;
 	defer_params = NULL;
 
 	// -AJA- 2003/10/09: support for pre-level briefing screen on first map.
 	//       FIXME: kludgy. All this game logic desperately needs rethinking.
-	F_StartFinale(&currmap->f_pre, ga_loadlevel);
+	if (skip_pre)
+		gameaction = ga_loadlevel;
+	else
+		F_StartFinale(&currmap->f_pre, ga_loadlevel);
 }
 
 //

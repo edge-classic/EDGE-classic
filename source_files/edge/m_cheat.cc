@@ -168,6 +168,8 @@ void M_ChangeLevelCheat(const char *string)
 
 	params.SinglePlayer(numbots);
 
+	params.level_skip = true;
+
 	G_DeferredNewGame(params);
 
 	CON_MessageLDF("LevelChange");

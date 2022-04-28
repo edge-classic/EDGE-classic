@@ -160,7 +160,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 		// which have this issue
 		if (!patchcount)
 		{
-			I_Warning("W_InitTextures: Texture '%.8s' has no patches", mtexture->name);
+			I_Warning("W_InitTextures: Texture '%.8s' has no patches\n", mtexture->name);
 			//I_Error("W_InitTextures: Texture '%.8s' has no patches", mtexture->name);
 			patchcount = 0; //mark it as a dud
 		} 

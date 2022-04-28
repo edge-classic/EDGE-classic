@@ -495,6 +495,9 @@ static menuinfo_t sound_optmenu =
 //
 static optmenuitem_t playoptions[] =
 {
+	{OPT_Boolean, "Pistol Starts",         YesNo, 2, 
+     &pistol_starts, NULL, NULL},
+
 	{OPT_Boolean, "Mouse Look",         YesNo, 2, 
      &global_flags.mlook, M_ChangeMLook, NULL},
 

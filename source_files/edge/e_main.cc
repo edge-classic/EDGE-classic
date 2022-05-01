@@ -608,7 +608,7 @@ void E_Display(void)
 
 
 //
-//  DEMO LOOP
+//  TITLE LOOP
 //
 static int title_game;
 static int title_pic;
@@ -631,7 +631,7 @@ static void E_TitleDrawer(void)
 
 
 //
-// This cycles through the demo sequences.
+// This cycles through the title sequences.
 // -KM- 1998/12/16 Fixed for DDF.
 //
 void E_AdvanceTitle(void)
@@ -1373,8 +1373,8 @@ static void E_InitialState(void)
 
 	const char *ps;
 
-	// do demos and loadgames first, as they contain all of the
-	// necessary state already (in the demo file / savegame).
+	// do loadgames first, as they contain all of the
+	// necessary state already (in the savegame).
 
 	if (M_CheckParm("-playdemo") || M_CheckParm("-timedemo") ||
 	    M_CheckParm("-record"))

@@ -1347,7 +1347,7 @@ void W_ReadDDF(void)
 				continue;
 			}
 
-			if (df->kind >= FLKIND_Demo)
+			if (df->kind >= FLKIND_RTS)
 				continue;
 
 			int lump = df->ddf_lumps[d];
@@ -2010,7 +2010,7 @@ void W_ProcessTX_HI(void)
 static const char *FileKind_Strings[] =
 {
 	"iwad", "pwad", "edge", "gwa", "hwa",
-	"lump", "ddf",  "demo", "rts", "deh",
+	"lump", "ddf", "rts", "deh",
 	"???",  "???",  "???",  "???"
 };
 

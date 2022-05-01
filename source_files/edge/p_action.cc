@@ -1544,10 +1544,7 @@ void P_ActCreateSmokeTrail(mobj_t * projectile)
 // is that - in conjuntion with the tic count for the
 // tracing object's states - the tracing will always fail or
 // pass the check: if it passes first time, it will always
-// pass and vice versa. The problem with this was two fold:
-// demos will go out of sync if the starting gametic if different
-// from when the demo was recorded (which admittly is easily
-// fixable), the second is that for someone designing a new
+// pass and vice versa. The problem is that for someone designing a new
 // tracing projectile it would be more than a bit confusing to
 // joe "dooming" public.
 //

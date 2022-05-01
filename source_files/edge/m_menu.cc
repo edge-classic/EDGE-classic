@@ -1419,7 +1419,7 @@ static void QuitResponse(int ch)
 //
 // -KM- 1998/07/21 Reinstated counting quit messages, so adding them to dstrings.c
 //                   is all you have to do.  Using P_Random for the random number
-//                   automatically kills the demo sync...
+//                   automatically kills the sync...
 //                   (hence M_Random()... -AJA-).
 //
 // -KM- 1998/07/31 Removed Limit. So there.

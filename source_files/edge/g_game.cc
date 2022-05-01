@@ -321,7 +321,7 @@ void G_DoLoadLevel(void)
 // 
 bool G_Responder(event_t * ev)
 {
-	// any other key pops up menu if in demos
+	// any other key pops up menu
 	if (gameaction == ga_nothing && (gamestate == GS_TITLESCREEN))
 	{
 		if (ev->type == ev_keydown)
@@ -336,7 +336,6 @@ bool G_Responder(event_t * ev)
 
 	if (ev->type == ev_keydown && E_MatchesKey(key_show_players, ev->value.key.sym))
 	{
-		// 25-6-98 KM Allow spy mode for demos even in deathmatch
 		if (gamestate == GS_LEVEL) //!!!! && !DEATHMATCH())
 		{
 			G_ToggleDisplayPlayer();
@@ -446,14 +445,6 @@ void G_BigStuff(void)
 
 			case ga_savegame:
 				G_DoSaveGame();
-				break;
-
-			case ga_playdemo:
-				// G_DoPlayDemo();
-				break;
-
-			case ga_recorddemo:
-				// G_DoRecordDemo();
 				break;
 
 			case ga_intermission:

@@ -81,18 +81,8 @@ extern angle_t viewanglebaseoffset;
 extern int leveltime;  // tics in game play for par
 extern bool fast_forward_active;
 
-// --------------------------------------
-// DEMO playback/recording related stuff.
-
-//?
-extern bool demoplayback;
-extern bool demorecording;
-
 // -AJA- 2000/12/07: auto quick-load feature
 extern bool autoquickload;
-
-// Quit after playing a demo from cmdline.
-extern bool singledemo;
 
 //?
 extern gamestate_e gamestate;

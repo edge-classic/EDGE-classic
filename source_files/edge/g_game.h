@@ -34,7 +34,7 @@
 
 extern bool pistol_starts;
 
-extern int random_seed;  // for demo code
+extern int random_seed;
 extern int starttime;    //
 
 extern int exittime;  // for savegame code
@@ -49,8 +49,6 @@ typedef enum
 	ga_loadlevel,
 	ga_loadgame,
 	ga_savegame,
-	ga_playdemo,
-	ga_recorddemo,
 	ga_intermission,
 	ga_finale,
 	ga_endgame
@@ -63,8 +61,6 @@ extern gameaction_e gameaction;
 //    ga_newgame     : defer_params
 //    ga_loadgame    : defer_load_slot
 //    ga_savegame    : defer_save_slot, defer_save_desc
-//    ga_playdemo    : defer_demoname, timingdemo, singledemo
-//    ga_recorddemo  : defer_demoname, defer_demo_parm
 // 
 //    ga_loadlevel   : currmap, players, gameskill+dm+level_flags ETC
 //    ga_intermission: currmap, nextmap, players, wi_stats ETC
@@ -141,7 +137,7 @@ extern const mapdef_c* nextmap;
 
 mapdef_c* G_LookupMap(const char *refname);
 
-void G_DoLoadLevel(void);         // for demo code
+void G_DoLoadLevel(void);
 void G_SpawnInitialPlayers(void); //
 
 #endif  /* __G_GAME__ */

@@ -230,7 +230,7 @@ bool M_CheatResponder(event_t * ev)
 	int i;
 	player_t *pl = players[consoleplayer];
 
-	// disable cheats while in RTS menu, or demos
+	// disable cheats while in RTS menu
 	if (rts_menuactive)
 		return false;
 

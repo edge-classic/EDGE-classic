@@ -936,7 +936,7 @@ static void AM_DrawPlayer(mobj_t *mo)
 	}
 
 #if 0 //!!!! TEMP DISABLED, NETWORK DEBUGGING
-	if ((DEATHMATCH() && !singledemo) && mo->player != p)
+	if (DEATHMATCH() && mo->player != p)
 		return;
 #endif
 

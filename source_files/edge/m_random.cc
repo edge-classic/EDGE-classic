@@ -59,7 +59,7 @@ static int p_step = 1;
 // Returns a number from 0 to 255.
 //
 // -AJA- Note: this function should be called for all random values
-// that do not interfere with demo/netgame synchronisation (for example,
+// that do not interfere with netgame synchronisation (for example,
 // selection of a random sound).
 //
 int M_Random(void)
@@ -73,7 +73,7 @@ int M_Random(void)
 // Returns a number from 0 to 255.
 //
 // -AJA- Note: that this function should be called for all random values
-// values that determine demo/netgame synchronisation (for example,
+// values that determine netgame synchronisation (for example,
 // which way a monster should travel).
 //
 int P_Random(void)

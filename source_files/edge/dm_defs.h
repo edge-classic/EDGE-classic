@@ -32,8 +32,8 @@
 //
 
 // The current state of the game: whether we are
-// playing, gazing at the intermission screen,
-// the game final animation, or a demo. 
+// playing, or gazing at the intermission screen/final animation
+
 typedef enum
 {
 	GS_NOTHING = 0,

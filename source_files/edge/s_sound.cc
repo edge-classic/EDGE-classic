@@ -293,7 +293,7 @@ sfxdef_c * LookupEffectDef(const sfx_t *s)
 { 
 	SYS_ASSERT(s->num >= 1);
 
-	// need to use M_Random here to prevent demos and net games 
+	// need to use M_Random here to prevent net games 
 	// getting out of sync.
 
 	int num;

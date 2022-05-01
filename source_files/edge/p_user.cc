@@ -826,9 +826,9 @@ void P_PlayerThink(player_t * player)
 
 	player->kick_offset /= 1.6f;
 
-	if (players[consoleplayer] == player)
+	if (players[consoleplayer] == player && dynamic_reverb)
 	{
-		// Approximate "room size" determination for reverb system - test - Dasho
+		// Approximate "room size" determination for reverb system - Dasho
 		room_measure room_checker;
 		float line_lengths = 0;
 		float player_x = player->mo->x;

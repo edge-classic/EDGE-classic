@@ -19,14 +19,8 @@
 #ifndef __SYSTEM_LOCAL_H__
 #define __SYSTEM_LOCAL_H__
 
-
 // I_CTRL
 void I_CentreMouse();
-
-// I_MUSIC
-extern bool musicpaused;
-void I_PostMusicError(const char *message);
-
 
 #endif /* __SYSTEM_LOCAL_H__ */
 

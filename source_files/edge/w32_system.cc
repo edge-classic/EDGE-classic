@@ -109,7 +109,6 @@ void I_SystemStartup(void)
 	I_StartupGraphics(); // SDL requires this to be called first
 	I_StartupControl();
 	I_StartupSound();
-	I_StartupMusic(); // Startup Music System
 	I_StartupNetwork();
 
 #ifndef INTOLERANT_MATH
@@ -279,7 +278,6 @@ void I_SystemShutdown(void)
 	I_UnlockAudio();
 
 	I_ShutdownNetwork();
-	I_ShutdownMusic();
 	I_ShutdownSound();
 	I_ShutdownControl();
 	I_ShutdownGraphics();

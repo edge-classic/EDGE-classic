@@ -35,32 +35,6 @@
 
 #include <sys/types.h> // Required for _stat()
 
-
-// Win32 Mixer
-typedef struct
-{
-	HMIXER handle;				// Handle
-	UINT id;					// ID
-
-	int channels;				// Channel count
-	DWORD volctrlid;			// Volume control ID
-	DWORD minvol;				// Min Volume
-	DWORD maxvol;				// Max Volume
-
-	DWORD originalvol;          // Original volume 
-}
-win32_mixer_t;
-
-// I_MUS.C - Win32 MUS Handling
-bool I_StartupMUS(void);
-void I_ShutdownMUS(void);
-
-// I_MUSIC.C
-win32_mixer_t *I_MusicLoadMixer(DWORD type);
-void I_MusicReleaseMixer(win32_mixer_t* mixer);
-bool I_MusicGetMixerVol(win32_mixer_t* mixer, DWORD *vol);
-bool I_MusicSetMixerVol(win32_mixer_t* mixer, DWORD vol);
-
 #endif /* __WIN32_SYSTEM_INTERNAL_H__ */
 
 

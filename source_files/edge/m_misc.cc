@@ -109,7 +109,6 @@ static default_t defaults[] =
  
     {CFGT_Int,      "sfx_volume",        &sfx_volume,     CFGDEF_SOUND_VOLUME},
     {CFGT_Int,      "music_volume",      &mus_volume,     CFGDEF_MUSIC_VOLUME},
-    {CFGT_Int,      "music_device",      &var_music_dev,  CFGDEF_MUSIC_DEVICE},
     {CFGT_Int,      "sample_rate",       &var_sample_rate,  CFGDEF_SAMPLE_RATE},
     {CFGT_Int,      "sound_bits",        &var_sound_bits,   CFGDEF_SOUND_BITS},
     {CFGT_Int,      "sound_stereo",      &var_sound_stereo, CFGDEF_SOUND_STEREO},

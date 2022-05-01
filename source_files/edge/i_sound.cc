@@ -35,6 +35,7 @@
 #include "s_sound.h"
 #include "s_cache.h"
 #include "s_blit.h"
+#include "s_tsf.h" // Needed for I_StartupMusic
 #include "w_wad.h"
 
 
@@ -358,6 +359,22 @@ void I_UnlockAudio(void)
 	}
 }
 
+// Moved I_StartupMusic from platform-specific system.cc files to here - Dasho
+void I_StartupMusic(void)
+{
+	if (nomusic) return;
+
+	if (S_StartupTSF())
+	{
+		I_Printf("I_StartupMusic: TinySoundfont Init OK\n");
+	}
+	else
+	{
+		I_Printf("I_StartupMusic: TinySoundfont Init FAILED\n");
+	}
+
+	return;
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

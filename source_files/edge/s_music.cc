@@ -43,8 +43,6 @@
 // music slider value
 int mus_volume;
 
-int var_music_dev;
-
 bool nomusic = false;
 bool nocdmusic = false;
 
@@ -222,12 +220,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 	
 	bool is_mus = (data[0] == 'M' && data[1] == 'U' && data[2] == 'S');
 
-	if (var_music_dev == 0 && is_mus) {
-		music_player = I_PlayNativeMusic(data, length, volume, loop);
-	}
-	else {
-		music_player = S_PlayTSF(data, length, is_mus, volume, loop);
-	}
+	music_player = S_PlayTSF(data, length, is_mus, volume, loop);
 
 #if 0
 	byte *data;

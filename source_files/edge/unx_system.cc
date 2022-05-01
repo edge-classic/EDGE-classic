@@ -315,7 +315,6 @@ void I_SystemStartup(void)
 	I_StartupGraphics();
 	I_StartupControl();
 	I_StartupSound();    // -ACB- 1999/09/20 Sets nosound directly
-	I_StartupMusic();
 	I_StartupNetwork();
 }
 
@@ -330,7 +329,6 @@ void I_SystemShutdown(void)
 	I_UnlockAudio();
 
 	I_ShutdownNetwork();
-	I_ShutdownMusic();
 	I_ShutdownSound();
 	I_ShutdownControl();
 	I_ShutdownGraphics();

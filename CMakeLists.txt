@@ -143,8 +143,6 @@ add_executable(
 	source_files/edge/vm_coal.cc    
 	source_files/edge/vm_hud.cc     
 	source_files/edge/vm_player.cc  
-	source_files/edge/w32_mus.cc
-	source_files/edge/w32_music.cc
 	source_files/edge/w32_net.cc
 	source_files/edge/w32_res.rc
 	source_files/edge/w32_system.cc
@@ -254,7 +252,6 @@ add_executable(
 	source_files/edge/vm_coal.cc    
 	source_files/edge/vm_hud.cc     
 	source_files/edge/vm_player.cc  
-	source_files/edge/unx_music.cc  
 	source_files/edge/unx_net.cc    
 	source_files/edge/unx_system.cc
 )

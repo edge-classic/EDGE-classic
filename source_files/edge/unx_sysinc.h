@@ -23,12 +23,7 @@
 
 #include <sys/ioctl.h>
 
-#ifndef __APPLE__
-#include <linux/cdrom.h>
-#endif
-
 #include "i_local.h"  // FIXME: remove
-
 
 #endif // __UNIX_SYSTEM_INTERNAL_H__
 

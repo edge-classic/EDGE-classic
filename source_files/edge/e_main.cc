@@ -444,6 +444,8 @@ static void DoSystemStartup(void)
 
 	I_SystemStartup();
 
+	I_StartupMusic(); // Now decoupled from I_SystemStartup - Dasho
+
 	// -ES- 1998/09/11 Use R_ChangeResolution to enter gfx mode
 
 	R_DumpResList();

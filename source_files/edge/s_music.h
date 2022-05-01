@@ -49,8 +49,6 @@ public:
 
 extern int mus_volume;  // 0 .. SND_SLIDER_NUM-1
 
-extern int var_music_dev;
-
 /* FUNCTIONS */
 
 void S_ChangeMusic(int entrynum, bool loop);

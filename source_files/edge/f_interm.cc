@@ -411,7 +411,7 @@ static void DrawLevelFinished(void)
 	SYS_ASSERT(lnames[0]);
 
 	//float w = IM_WIDTH(lnames[0]); // Seems to be unneeded for now - Dasho
-	float h = IM_HEIGHT(lnames[0]);
+	//float h = IM_HEIGHT(lnames[0]);
 
 	//float w2 = IM_WIDTH(finished);
 
@@ -420,6 +420,8 @@ static void DrawLevelFinished(void)
 
 	style=wi_sp_style;
 	int t_type = styledef_c::T_TEXT;
+	
+	int h = style->fonts[t_type]->NominalHeight();
 	
 	HUD_SetAlignment(0, -1);//center it
 	HL_WriteText(style,t_type, 160, y, language[wi_stats.cur->description.c_str()]);

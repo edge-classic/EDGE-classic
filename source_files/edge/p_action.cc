@@ -761,7 +761,7 @@ void P_ActPlaySound(mobj_t * mo)
 		return;
 	}
 
-	S_StartFX(sound, P_MobjGetSfxCategory(mo), mo);
+	S_StartFX(sound, P_MobjGetSfxCategory(mo), mo, SfxFlags(mo->info));
 }
 
 

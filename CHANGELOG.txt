@@ -10,6 +10,7 @@ Bugs fixed
 + Fixed bug preventing Backspace from clearing the top keybind entry in a menu without another key being pressed first
 + Fixed occasional crash when loading a save game containing 3D floors
 + Fixed Load_DOOM sound loading function trying to allocate memory for empty/stub sounds
++ Fixed ALWAYS_LOUD things.ddf special not working with non-enemy mobjs
 
 General Improvements
 --------------------

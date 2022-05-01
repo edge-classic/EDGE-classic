@@ -93,13 +93,6 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-///	if (play->type == MUS_CD)
-///	{
-///		int track = atoi(play->info);
-///		music_player = I_PlayCDMusic(track, volume, loop);
-///		return;
-///	}
-
 	if (play->type == MUS_OGG)
 	{
 		music_player = S_PlayOGGMusic(play, volume, loop);

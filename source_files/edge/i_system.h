@@ -171,10 +171,6 @@ void I_ShutdownMusic(void);
 abstract_music_c * I_PlayNativeMusic(const byte *data, int length,
 									 float volume, bool loop);
 
-#if 0
-abstract_music_c * I_PlayCDMusic(int track, float volume, bool looping);
-#endif
-
 
 //--------------------------------------------------------
 //  SOUND functions.

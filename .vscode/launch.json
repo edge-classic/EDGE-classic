@@ -9,7 +9,7 @@
         "type": "cppvsdbg",
         "request": "launch",
         "program": "${workspaceFolder}/edge-classic.exe",
-        "args": ["-iwad", "DOOM2.WAD"], // Replace with the IWAD/path you want to use for launching. I just throw it in the build directory
+        "args": ["-iwad", "DOOM2.WAD", "-file", "EC_DEMO.wad"], // Replace with the IWAD/path you want to use for launching. I just throw it in the build directory
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
         "environment": [],

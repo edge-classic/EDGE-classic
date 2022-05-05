@@ -867,8 +867,7 @@ static void WallCoordFunc(void *d, int v_idx,
 	texc->y = data->ty0 + pos->z * data->ty_mul;
 
 	if (swirl_pass > 0)
-		//CalcTurbulentTexCoords(texc, pos);
-		CalcScrollTexCoords(0.0, 0.25, texc);  // Just have liquid wall texes/flats scroll downward for now
+		CalcTurbulentTexCoords(texc, pos);
 
 	*lit_pos = *pos;
 }

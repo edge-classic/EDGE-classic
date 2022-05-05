@@ -394,18 +394,16 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 
 	strcpy(rim->name, name);
 
-	if (swirling_flats > SWIRL_Vanilla)
-	{
-		flatdef_c *current_flatdef = flatdefs.Find(rim->name);
+	flatdef_c *current_flatdef = flatdefs.Find(rim->name);
 
-		if (current_flatdef && !current_flatdef->liquid.empty())
-		{
-			if (strcasecmp(current_flatdef->liquid.c_str(), "THIN") == 0)
-				rim->liquid_type = LIQ_Thin;
-			else if (strcasecmp(current_flatdef->liquid.c_str(), "THICK") == 0)
-				rim->liquid_type = LIQ_Thick;
-		}
+	if (current_flatdef && !current_flatdef->liquid.empty())
+	{
+		if (strcasecmp(current_flatdef->liquid.c_str(), "THIN") == 0)
+			rim->liquid_type = LIQ_Thin;
+		else if (strcasecmp(current_flatdef->liquid.c_str(), "THICK") == 0)
+			rim->liquid_type = LIQ_Thick;
 	}
+
 	rim->source_type = type;
 	rim->source.graphic.lump = lump;
 	rim->source.graphic.is_png = is_png;
@@ -436,19 +434,6 @@ static image_c *AddImageTexture(const char *name, texturedef_t *tdef)
 	rim = NewImage(tdef->width, tdef->height);
  
 	strcpy(rim->name, name);
-
-	if (swirling_flats > SWIRL_Vanilla)
-	{
-		flatdef_c *current_flatdef = flatdefs.Find(rim->name);
-
-		if (current_flatdef && !current_flatdef->liquid.empty())
-		{
-			if (strcasecmp(current_flatdef->liquid.c_str(), "THIN") == 0)
-				rim->liquid_type = LIQ_Thin;
-			else if (strcasecmp(current_flatdef->liquid.c_str(), "THICK") == 0)
-				rim->liquid_type = LIQ_Thick;
-		}
-	}
 
 	if (tdef->scale_x) rim->scale_x = 8.0 / tdef->scale_x;
 	if (tdef->scale_y) rim->scale_y = 8.0 / tdef->scale_y;
@@ -497,17 +482,14 @@ static image_c *AddImageFlat(const char *name, int lump)
 	rim->source.flat.lump = lump;
 	rim->source_palette = W_GetPaletteForLump(lump);
 
-	if (swirling_flats > SWIRL_Vanilla)
-	{
-		flatdef_c *current_flatdef = flatdefs.Find(rim->name);
+	flatdef_c *current_flatdef = flatdefs.Find(rim->name);
 
-		if (current_flatdef && !current_flatdef->liquid.empty())
-		{
-			if (strcasecmp(current_flatdef->liquid.c_str(), "THIN") == 0)
-				rim->liquid_type = LIQ_Thin;
-			else if (strcasecmp(current_flatdef->liquid.c_str(), "THICK") == 0)
-				rim->liquid_type = LIQ_Thick;
-		}
+	if (current_flatdef && !current_flatdef->liquid.empty())
+	{
+		if (strcasecmp(current_flatdef->liquid.c_str(), "THIN") == 0)
+			rim->liquid_type = LIQ_Thin;
+		else if (strcasecmp(current_flatdef->liquid.c_str(), "THICK") == 0)
+			rim->liquid_type = LIQ_Thick;
 	}
 
 	real_flats.push_back(rim);

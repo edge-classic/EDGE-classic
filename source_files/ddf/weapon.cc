@@ -92,6 +92,7 @@ static const commandlist_t weapon_commands[] =
 	DF("SOUND3", sound3, DDF_MainLookupSound),
 	
 	DF("RENDER_INVERT", render_invert, DDF_MainGetBoolean),
+	DF("Y_ADJUST", y_adjust, DDF_MainGetFloat),
 
 	DDF_CMD_END
 };
@@ -638,6 +639,7 @@ void weapondef_c::CopyDetail(weapondef_c &src)
 	model_side = src.model_side;
 	
 	render_invert = src.render_invert;
+	y_adjust = src.y_adjust;
 }
 
 //
@@ -713,6 +715,7 @@ void weapondef_c::Default(void)
 	model_side = 0.0f;
 	
 	render_invert = false;
+	y_adjust = 0.0f;
 }
 
 

@@ -164,7 +164,10 @@ public:
 	
 	//Lobo 2022: render order is Crosshair, Flash, Weapon
 	// instead of Weapon, Flash, CrossHair
-	bool render_invert; 
+	bool render_invert;
+	
+	//Lobo 2022: sprite Y offset, mainly for Heretic weapons
+	float y_adjust;
 
 public:
 	inline int KeyPri(int idx) const  // next/prev order value

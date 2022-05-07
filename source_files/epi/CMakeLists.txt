@@ -40,7 +40,6 @@ add_library(
   path.cc
   sound_data.cc
   sound_gather.cc
-  sound_wav.cc
   str_format.cc
   utility.cc
 )

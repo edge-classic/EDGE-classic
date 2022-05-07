@@ -31,7 +31,6 @@
 #include "filesystem.h"
 #include "file_memory.h"
 #include "sound_data.h"
-#include "sound_wav.h"
 
 #include "main.h"
 #include "sfx.h"
@@ -40,6 +39,7 @@
 #include "s_cache.h"
 #include "s_ogg.h"
 #include "s_mp3.h"
+#include "s_wav.h"
 
 #include "dm_state.h"  // game_dir
 #include "m_argv.h"
@@ -97,9 +97,7 @@ static bool Load_DOOM(epi::sound_data_c *buf, const byte *lump, int length)
 
 static bool Load_WAV(epi::sound_data_c *buf, const byte *lump, int length)
 {
-	epi::mem_file_c F(lump, length, false);
-
-	return epi::WAV_Load(buf, &F);
+	return S_LoadWAVSound(buf, lump, length);
 }
 
 static bool Load_OGG(epi::sound_data_c *buf, const byte *lump, int length)

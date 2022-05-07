@@ -124,7 +124,8 @@ add_executable(
 	source_files/edge/s_tsf.cc
 	source_files/edge/s_ibxm.cc
 	source_files/edge/s_gme.cc
-	source_files/edge/s_sid.cc   
+	source_files/edge/s_sid.cc
+	source_files/edge/s_wav.cc  
 	source_files/edge/sv_chunk.cc   
 	source_files/edge/sv_glob.cc    
 	source_files/edge/sv_level.cc   
@@ -233,7 +234,8 @@ add_executable(
 	source_files/edge/s_tsf.cc
 	source_files/edge/s_ibxm.cc
 	source_files/edge/s_gme.cc
-	source_files/edge/s_sid.cc    
+	source_files/edge/s_sid.cc
+	source_files/edge/s_wav.cc    
 	source_files/edge/sv_chunk.cc   
 	source_files/edge/sv_glob.cc    
 	source_files/edge/sv_level.cc   
@@ -267,6 +269,7 @@ target_include_directories(edge-classic PRIVATE source_files/ajbsp)
 target_include_directories(edge-classic PRIVATE source_files/coal)
 target_include_directories(edge-classic PRIVATE source_files/ddf)
 target_include_directories(edge-classic PRIVATE source_files/deh_edge)
+target_include_directories(edge-classic PRIVATE source_files/dr_wav)
 target_include_directories(edge-classic PRIVATE source_files/epi)
 target_include_directories(edge-classic PRIVATE source_files/glew/include/GL)
 target_include_directories(edge-classic PRIVATE source_files/ibxm)

@@ -33,15 +33,14 @@
 typedef enum
 {
 	MUS_UNKNOWN   = 0,
-	MUS_CD        = 1,
-	MUS_MIDI      = 2,
-	MUS_MUS       = 3,
-	MUS_OGG       = 4,
-	MUS_MP3       = 5,
-	MUS_IBXM      = 6,
-	MUS_GME       = 7,
-	MUS_SID       = 8,
-	ENDOFMUSTYPES = 9
+	MUS_MIDI      = 1,
+	MUS_MUS       = 2,
+	MUS_OGG       = 3,
+	MUS_MP3       = 4,
+	MUS_IBXM      = 5,
+	MUS_GME       = 6,
+	MUS_SID       = 7,
+	ENDOFMUSTYPES = 8
 }
 musictype_t;
 

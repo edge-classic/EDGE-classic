@@ -149,7 +149,7 @@ void RGL_ColourmapEffect(player_t *player)
 	if (s > 0 && player->powers[PW_Invulnerable] > 0 &&
 	    player->effect_colourmap && (player->effect_left & 8))
 	{
-		if (var_invul_fx > INVULFX_Complex)
+		if (var_invul_fx == INVULFX_Textured)
 			return;
 
 		float r, g, b;
@@ -201,35 +201,6 @@ void RGL_PaletteEffect(player_t *player)
 	if (s > 0 && player->powers[PW_Invulnerable] > 0 &&
 	    player->effect_colourmap && (player->effect_left & 8))
 	{
-		if (var_invul_fx != INVULFX_Complex)
-			return;
-
-		if (GLEW_ARB_imaging || GLEW_SGI_color_matrix)
-		{
-			glFlush();
-
-			glMatrixMode(GL_COLOR);
-			
-			GLfloat gray_mat[16] =
-			{
-				0.33, 0.33, 0.33, 0,
-				0.33, 0.33, 0.33, 0,
-				0.33, 0.33, 0.33, 0,
-				0,    0,    0,    1
-			};
-
-			glLoadMatrixf(gray_mat);
-
-			int x = viewwindow_x;
-			int y = viewwindow_y;
-
-			glPixelZoom(1, 1);
-			glRasterPos2i(x, y);
-
-			glCopyPixels(x, y, viewwindow_w, viewwindow_h, GL_COLOR);
-
-			glLoadIdentity();
-		}
 		return;
 	}
 	else if (s > 0 && player->powers[PW_NightVision] > 0 &&

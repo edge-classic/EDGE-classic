@@ -180,11 +180,11 @@ static char AAim[]      = "Off/On/Mlook";
 static char MipMaps[]   = "None/Good/Best";
 static char Details[]   = "Low/Medium/High";
 static char Hq2xMode[]  = "Off/UI Only/UI & Sprites/All";
-static char Invuls[]    = "Simple/Complex/Textured";
+static char Invuls[]    = "Simple/Textured";
 static char MonitSiz[]  = "4:3/16:9/16:10/3:2/24:10";
 
 // for CVar enums
-const char WIPE_EnumStr[] = "none/melt/crossfade/pixelfade/top/bottom/left/right/spooky/doors";
+const char WIPE_EnumStr[] = "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors";
 
 static char StereoNess[]  = "Off/On/Swapped";
 static char MixChans[]    = "32/64/96";
@@ -375,7 +375,7 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Switch,  "Wipe method",     WIPE_EnumStr, WIPE_NUMWIPES, &wipe_method, NULL, NULL},
 	{OPT_Boolean, "Screenshot Format", JpgPng, 2, &png_scrshots, NULL, NULL},
 	{OPT_Boolean, "Splash Screen",    YesNo,   2, &splash_screen, NULL, NULL},
-	{OPT_Switch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax",   4, &swirling_flats, NULL, "NeedRestart"}
+	{OPT_Switch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax",   4, &swirling_flats, NULL, NULL}
 	
 
 #if 0  // TEMPORARILY DISABLED (we need an `Advanced Options' menu)
@@ -470,7 +470,7 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Boolean, "Dynamic Reverb",       YesNo, 2, &dynamic_reverb, NULL, NULL},
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Mix Channels",    MixChans,  3, &var_mix_channels, M_ChangeMixChan, NULL},
-	{OPT_Switch,  "Quiet Factor",    QuietNess, 3, &var_quiet_factor, NULL, NULL},
+	{OPT_Switch,  "Quiet Factor",    QuietNess, 4, &var_quiet_factor, NULL, NULL},
 	{OPT_Boolean, "Precache SFX",       YesNo, 2, &var_cache_sfx, NULL, "NeedRestart"},
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},
 };

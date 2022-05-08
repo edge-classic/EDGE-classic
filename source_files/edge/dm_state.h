@@ -166,7 +166,6 @@ extern int telept_reverse;
 typedef enum
 {
 	INVULFX_Simple = 0,  // plain inverse blending
-	INVULFX_Complex,     // inverse + grayscale (color_matrix)
 	INVULFX_Textured,    // upload new textures
 
 	NUM_INVULFX

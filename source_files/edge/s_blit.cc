@@ -110,11 +110,9 @@ float slider_to_gain[SND_SLIDER_NUM] =
 
 // FIXME: extern == hack
 extern int dev_freq;
-extern int dev_bits;
 extern int dev_bytes_per_sample;
 extern int dev_frag_pairs;
 
-extern bool dev_signed;
 extern bool dev_stereo;
 
 mix_channel_c::mix_channel_c() : state(CHAN_Empty), data(NULL)
@@ -206,51 +204,6 @@ void mix_channel_c::ComputeMusicVolume()
 }
 
 //----------------------------------------------------------------------------
-
-static void BlitToU8(const int *src, u8_t *dest, int length)
-{
-	const int *s_end = src + length;
-
-	while (src < s_end)
-	{
-		int val = *src++;
-
-		     if (val >  CLIP_THRESHHOLD) val =  CLIP_THRESHHOLD;
-		else if (val < -CLIP_THRESHHOLD) val = -CLIP_THRESHHOLD;
-
-		*dest++ = (u8_t) ((val >> (24-SAFE_BITS)) ^ 0x80);
-	}
-}
-
-static void BlitToS8(const int *src, s8_t *dest, int length)
-{
-	const int *s_end = src + length;
-
-	while (src < s_end)
-	{
-		int val = *src++;
-
-		     if (val >  CLIP_THRESHHOLD) val =  CLIP_THRESHHOLD;
-		else if (val < -CLIP_THRESHHOLD) val = -CLIP_THRESHHOLD;
-
-		*dest++ = (s8_t) (val >> (24-SAFE_BITS));
-	}
-}
-
-static void BlitToU16(const int *src, u16_t *dest, int length)
-{
-	const int *s_end = src + length;
-
-	while (src < s_end)
-	{
-		int val = *src++;
-
-		     if (val >  CLIP_THRESHHOLD) val =  CLIP_THRESHHOLD;
-		else if (val < -CLIP_THRESHHOLD) val = -CLIP_THRESHHOLD;
-
-		*dest++ = (u16_t) ((val >> (16-SAFE_BITS)) ^ 0x8000);
-	}
-}
 
 static void BlitToS16(const int *src, s16_t *dest, int length)
 {
@@ -565,20 +518,7 @@ void S_MixAllChannels(void *stream, int len)
 	MixQueues(pairs);
 
 	// blit to the SDL stream
-	if (dev_bits == 8)
-	{
-		if (dev_signed)
-			BlitToS8(mix_buffer, (s8_t *)stream, samples);
-		else
-			BlitToU8(mix_buffer, (u8_t *)stream, samples);
-	}
-	else
-	{
-		if (dev_signed)
-			BlitToS16(mix_buffer, (s16_t *)stream, samples);
-		else
-			BlitToU16(mix_buffer, (u16_t *)stream, samples);
-	}
+	BlitToS16(mix_buffer, (s16_t *)stream, samples);
 }
 
 

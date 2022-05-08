@@ -407,7 +407,7 @@ bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length)
 
 	gather.CommitChunk(sound_info.samples);
 
-	if (! gather.Finalise(buf, false /* want_stereo */))
+	if (! gather.Finalise(buf, is_stereo))
 		I_Error("MP3 SFX Loader: no samples!\n");
 
 	free(sound_info.buffer);

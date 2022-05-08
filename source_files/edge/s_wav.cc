@@ -76,7 +76,7 @@ bool S_LoadWAVSound(epi::sound_data_c *buf, const byte *data, int length)
 
 	gather.CommitChunk(drwav_read_pcm_frames_s16(&wav, wav.totalPCMFrameCount, buffer));
 
-	if (! gather.Finalise(buf, false /* want_stereo */))
+	if (! gather.Finalise(buf, is_stereo))
 		I_Error("WAV SFX Loader: no samples!\n");
 
 	drwav_uninit(&wav);

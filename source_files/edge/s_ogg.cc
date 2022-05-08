@@ -652,7 +652,7 @@ bool S_LoadOGGSound(epi::sound_data_c *buf, const byte *data, int length)
 		gather.CommitChunk(got_size);
 	}
 
-	if (! gather.Finalise(buf, false /* want_stereo */))
+	if (! gather.Finalise(buf, is_stereo))
 		I_Error("OGG SFX Loader: no samples!\n");
 
 	// HACK: we must not free the data (in oggplayer_memclose)

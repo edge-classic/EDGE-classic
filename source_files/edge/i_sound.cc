@@ -42,9 +42,6 @@
 // If true, sound system is off/not working. Changed to false if sound init ok.
 bool nosound = false;
 
-/* See m_option.cc for corresponding menu items */
-static const int sample_rates[6] = { 11025, 16000, 22050, 32000, 44100, 48000 };
-
 static SDL_AudioSpec mydev;
 SDL_AudioDeviceID mydev_id;
 
@@ -90,7 +87,8 @@ static bool I_TryOpenSound(int want_freq, bool want_stereo)
 	trydev.samples  = samples;
 	trydev.callback = SoundFill_Callback;
 
-	mydev_id = SDL_OpenAudioDevice(NULL, 0, &trydev, &mydev, 0);
+	// Ask for signed 16-bit @ 48khz by default; allow SDL to adjust frequency if needed but never the format
+	mydev_id = SDL_OpenAudioDevice(NULL, 0, &trydev, &mydev, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
 
 	if (mydev_id > 0)
 		return true;
@@ -142,7 +140,7 @@ void I_StartupSound(void)
 
 	const char *p;
 
-	int want_freq = sample_rates[var_sample_rate];
+	int want_freq = 48000;
 	bool want_stereo = (var_sound_stereo >= 1);
 
 	p = M_GetParm("-freq");
@@ -212,22 +210,6 @@ void I_StartupSound(void)
 	// update Sound Options menu
 	if (dev_stereo != (var_sound_stereo >= 1))
 		var_sound_stereo = dev_stereo ? 1 : 0;
-
-	if (dev_freq != sample_rates[var_sample_rate])
-	{
-		if (dev_freq > 46000)
-			var_sample_rate = 5; // 48 Khz
-		else if (dev_freq >= 38000)
-			var_sample_rate = 4; // 44 Khz
-		else if (dev_freq >= 27000)
-			var_sample_rate = 3; // 32 Khz
-		else if (dev_freq >= 19000)
-			var_sample_rate = 2; // 22 Khz
-		else if (dev_freq >= 13500)
-			var_sample_rate = 1; // 16 Khz
-		else
-			var_sample_rate = 0; // 11 Khz
-	}
 
 	// display some useful stuff
 	I_Printf("I_StartupSound: Success @ %d Hz %s\n",

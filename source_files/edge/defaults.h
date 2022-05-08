@@ -76,17 +76,9 @@
 // Sound and Music
 #define CFGDEF_SOUND_VOLUME     (8)
 #define CFGDEF_MUSIC_VOLUME     (8)
-#define CFGDEF_SAMPLE_RATE      (4)  // 44 Khz
-#define CFGDEF_SOUND_BITS       (1)  // 16-bit
 #define CFGDEF_SOUND_STEREO     (1)  // Stereo
 #define CFGDEF_MIX_CHANNELS     (2)  // 32 channels
 #define CFGDEF_QUIET_FACTOR     (1)
-
-#ifdef __linux__
-#define CFGDEF_MUSIC_DEVICE     (1)  // TinySoundfont
-#else
-#define CFGDEF_MUSIC_DEVICE     (1)  // TinySoundfont
-#endif
 
 // Video Options
 #define CFGDEF_CURRENT_GAMMA    (0)

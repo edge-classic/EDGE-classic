@@ -1,6 +1,6 @@
 https://github.com/dashodanger/EDGE-classic
 
-Current as of: APRIL 2022
+Current as of: MAY 2022
 
 CHANGELOG for EDGE-Classic 1.2 (since EDGE-Classic 1.1)
 ====================================
@@ -11,10 +11,11 @@ Bugs fixed
 + Fixed occasional crash when loading a save game containing 3D floors
 + Fixed Load_DOOM sound loading function trying to allocate memory for empty/stub sounds
 + Fixed ALWAYS_LOUD things.ddf special not working with non-enemy mobjs
++ Fixed SFX loaders treating all sounds as Mono regardless of original sound format
 
 General Improvements
 --------------------
-+ Pre-level story text/intermission will now be skipped when use IDCLEV/level warp cheat
++ Pre-level story text/intermission will now be skipped when using the IDCLEV/level warp cheat
 + Mouse wheel up/down will now page through option menus that have Prev/Next pages (like the keybindings)
 + Improved changing resolutions while in fullscreen mode
 + DDF and RTS now use a consistent INVENTORY## naming scheme for inventory items and scripts

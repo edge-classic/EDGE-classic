@@ -138,7 +138,7 @@ void mix_channel_c::ComputeDelta()
 void mix_channel_c::ComputeVolume()
 {
 	float sep = 0.5f;
-	float dist = 1.0f;
+	float dist = 1.25f;
 	
 
 	if (pos && category >= SNCAT_Opponent)

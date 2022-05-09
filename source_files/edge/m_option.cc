@@ -532,6 +532,9 @@ static optmenuitem_t playoptions[] =
 
 	{OPT_Plain,   "", NULL, 0, NULL, NULL, NULL},
 
+    {OPT_Boolean, "Respawn Enemies",            YesNo, 2, 
+     &global_flags.respawn, M_ChangeRespawn, NULL},
+
 	{OPT_Boolean, "Enemy Respawn Mode", Respw, 2, 
      &global_flags.res_respawn, M_ChangeMonsterRespawn, NULL},
 
@@ -539,10 +542,7 @@ static optmenuitem_t playoptions[] =
      &global_flags.itemrespawn, M_ChangeItemRespawn, NULL},
 	
     {OPT_Boolean, "Fast Monsters",      YesNo, 2, 
-     &global_flags.fastparm, M_ChangeFastparm, NULL},
-	
-    {OPT_Boolean, "Respawn",            YesNo, 2, 
-     &global_flags.respawn, M_ChangeRespawn, NULL}
+     &global_flags.fastparm, M_ChangeFastparm, NULL}
 };
 
 static menuinfo_t gameplay_optmenu = 

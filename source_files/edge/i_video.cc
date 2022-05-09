@@ -127,6 +127,9 @@ void I_StartupGraphics(void)
 	display_W = info.w;
 	display_H = info.h;
 
+	if (SCREENWIDTH > display_W) SCREENWIDTH = display_W;
+	if (SCREENHEIGHT > display_H) SCREENHEIGHT = display_H;
+
 	I_Printf("Desktop resolution: %dx%d\n", display_W, display_H);
 
 	int num_modes = SDL_GetNumDisplayModes(0);
@@ -135,6 +138,9 @@ void I_StartupGraphics(void)
 	{
 		SDL_DisplayMode possible_mode;
 		SDL_GetDisplayMode(0, i, &possible_mode);
+
+		if (possible_mode.w > display_W || possible_mode.h > display_H)
+			continue;
 
 		scrmode_c test_mode;
 
@@ -163,6 +169,9 @@ void I_StartupGraphics(void)
 				scrmode_c mode;
 				SDL_DisplayMode test_mode;
 				SDL_DisplayMode closest_mode;
+
+				if (possible_modes[i].w > display_W || possible_modes[i].h > display_H)
+					continue;
 
 				mode.width = possible_modes[i].w;
 				mode.height = possible_modes[i].h;

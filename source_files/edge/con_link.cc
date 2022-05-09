@@ -51,7 +51,6 @@ extern cvar_c in_grab;
 
 extern cvar_c mouse_x_axis, mouse_y_axis;
 extern cvar_c mouse_x_sens, mouse_y_sens;
-extern cvar_c mouse_accel,  mouse_filter;
 
 extern cvar_c joy_dead, joy_peak, joy_tuning;
 
@@ -120,8 +119,6 @@ cvar_link_t  all_cvars[] =
 	{ "joy_dead",       &joy_dead,       "c",   "0.15" },
 	{ "joy_peak",       &joy_peak,       "c",   "0.95" },
 	{ "joy_tuning",     &joy_peak,       "c",   "1.0"  },
-
-  	{ "mouse_filter",   &mouse_filter,   "c",   "0"  },
 
 	{ "goobers",        &m_goobers,      "",    "0" },
 	{ "m_busywait",     &m_busywait,     "c",   "1"  },
@@ -231,7 +228,6 @@ cvar_link_t  all_cvars[] =
 	{ "mouse_x.sens",   &mouse_x_sens,   "c",   "10"  },
 	{ "mouse_y.axis",   &mouse_y_axis,   "c",   "4" /* AXIS_MLOOK */ },
 	{ "mouse_y.sens",   &mouse_y_sens,   "c",   "10" },
-//	{ "mouse_accel",    &mouse_accel,    "c",   "0"  },
 
 	{ "debug_nomonsters", &debug_nomonsters, "h", "0" },
 	{ "debug_subsector",  &debug_subsector,  "h", "0" },

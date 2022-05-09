@@ -113,8 +113,12 @@ int option_menuon = 0;
 
 extern cvar_c m_language;
 extern cvar_c r_crosshair;
+extern cvar_c r_crosscolor;
+extern cvar_c r_crosssize;
 
-static int menu_crosshair;  // temp hack
+static int menu_crosshair;
+static int menu_crosscolor;
+static int menu_crosssize;
 extern int monitor_size;
 
 extern int joystick_device;
@@ -137,6 +141,8 @@ static void M_ChangeFastparm(int keypressed);
 static void M_ChangeRespawn(int keypressed);
 static void M_ChangePassMissile(int keypressed);
 static void M_ChangeCrossHair(int keypressed);
+static void M_ChangeCrossColor(int keypressed);
+static void M_ChangeCrossSize(int keypressed);
 
 static void M_ChangeBlood(int keypressed);
 static void M_ChangeMLook(int keypressed);
@@ -180,16 +186,17 @@ static char AAim[]      = "Off/On/Mlook";
 static char MipMaps[]   = "None/Good/Best";
 static char Details[]   = "Low/Medium/High";
 static char Hq2xMode[]  = "Off/UI Only/UI & Sprites/All";
-static char Invuls[]    = "Simple/Complex/Textured";
+static char Invuls[]    = "Simple/Textured";
 static char MonitSiz[]  = "4:3/16:9/16:10/3:2/24:10";
 
 // for CVar enums
-const char WIPE_EnumStr[] = "none/melt/crossfade/pixelfade/top/bottom/left/right/spooky/doors";
+const char WIPE_EnumStr[] = "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors";
 
-static char SampleRates[] = "11025 Hz/16000 Hz/22050 Hz/32000 Hz/44100 Hz/48000 Hz";
 static char StereoNess[]  = "Off/On/Swapped";
 static char MixChans[]    = "32/64/96";
 static char QuietNess[]   = "Loud (distorted)/Normal/Soft/Very Soft";
+
+static char CrosshairColor[] = "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange";
 
 // Screen resolution changes
 static scrmode_c new_scrmode;
@@ -370,13 +377,15 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Plain,   "",  NULL, 0, NULL, NULL, NULL},
 
 	{OPT_Switch,  "Crosshair",       CrossH, 10, &menu_crosshair, M_ChangeCrossHair, NULL},
+	{OPT_Switch,  "Crosshair Color", CrosshairColor,  8, &menu_crosscolor, M_ChangeCrossColor, NULL},
+	{OPT_Slider,  "Crosshair Size",    NULL,  4,  &menu_crosssize, M_ChangeCrossSize, NULL},
 	{OPT_Boolean, "Map Rotation",    YesNo,   2, &rotatemap, NULL, NULL},
 	{OPT_Switch,  "Teleport Flash",  YesNo,   2, &telept_flash, NULL, NULL},
 	{OPT_Switch,  "Invulnerability", Invuls, NUM_INVULFX,  &var_invul_fx, NULL, NULL},
 	{OPT_Switch,  "Wipe method",     WIPE_EnumStr, WIPE_NUMWIPES, &wipe_method, NULL, NULL},
 	{OPT_Boolean, "Screenshot Format", JpgPng, 2, &png_scrshots, NULL, NULL},
 	{OPT_Boolean, "Splash Screen",    YesNo,   2, &splash_screen, NULL, NULL},
-	{OPT_Switch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax",   4, &swirling_flats, NULL, "NeedRestart"}
+	{OPT_Switch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax",   4, &swirling_flats, NULL, NULL}
 	
 
 #if 0  // TEMPORARILY DISABLED (we need an `Advanced Options' menu)
@@ -466,13 +475,12 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Slider,  "Sound Volume", NULL, SND_SLIDER_NUM, &sfx_volume, M_ChangeSfxVol, NULL},
 	{OPT_Slider,  "Music Volume", NULL, SND_SLIDER_NUM, &mus_volume, M_ChangeMusVol, NULL},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
-	{OPT_Switch,  "Sample Rate",  SampleRates, 6, &var_sample_rate,  NULL, "NeedRestart"},
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Boolean, "Dynamic Reverb",       YesNo, 2, &dynamic_reverb, NULL, NULL},
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Mix Channels",    MixChans,  3, &var_mix_channels, M_ChangeMixChan, NULL},
-	{OPT_Switch,  "Quiet Factor",    QuietNess, 3, &var_quiet_factor, NULL, NULL},
+	{OPT_Switch,  "Quiet Factor",    QuietNess, 4, &var_quiet_factor, NULL, NULL},
 	{OPT_Boolean, "Precache SFX",       YesNo, 2, &var_cache_sfx, NULL, "NeedRestart"},
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},
 };
@@ -534,6 +542,9 @@ static optmenuitem_t playoptions[] =
 
 	{OPT_Plain,   "", NULL, 0, NULL, NULL, NULL},
 
+    {OPT_Boolean, "Respawn Enemies",            YesNo, 2, 
+     &global_flags.respawn, M_ChangeRespawn, NULL},
+
 	{OPT_Boolean, "Enemy Respawn Mode", Respw, 2, 
      &global_flags.res_respawn, M_ChangeMonsterRespawn, NULL},
 
@@ -541,10 +552,7 @@ static optmenuitem_t playoptions[] =
      &global_flags.itemrespawn, M_ChangeItemRespawn, NULL},
 	
     {OPT_Boolean, "Fast Monsters",      YesNo, 2, 
-     &global_flags.fastparm, M_ChangeFastparm, NULL},
-	
-    {OPT_Boolean, "Respawn",            YesNo, 2, 
-     &global_flags.respawn, M_ChangeRespawn, NULL}
+     &global_flags.fastparm, M_ChangeFastparm, NULL}
 };
 
 static menuinfo_t gameplay_optmenu = 
@@ -1761,6 +1769,16 @@ static void M_ChangeCrossHair(int keypressed)
 	r_crosshair = menu_crosshair;
 }
 
+static void M_ChangeCrossColor(int keypressed)
+{
+	r_crosscolor = menu_crosscolor;
+}
+
+static void M_ChangeCrossSize(int keypressed)
+{
+	r_crosssize = 8 + (menu_crosssize * 8);
+}
+
 
 //
 // M_ChangeLanguage
@@ -1917,6 +1935,8 @@ void M_Options(int choice)
 
 	// hack
 	menu_crosshair = CLAMP(0, r_crosshair.d, 9);
+	menu_crosscolor = CLAMP(0, r_crosscolor.d, 7);
+	menu_crosssize = CLAMP(0, (r_crosssize.d / 8 - 1), 3);
 }
 
 

@@ -151,7 +151,6 @@ cvar_c joy_tuning;
 
 cvar_c in_running;
 cvar_c in_stageturn;
-cvar_c mouse_filter;
 
 cvar_c debug_mouse;
 cvar_c debug_joyaxis;

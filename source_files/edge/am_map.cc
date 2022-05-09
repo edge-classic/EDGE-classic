@@ -412,7 +412,7 @@ bool AM_Responder(event_t * ev)
 	{
 		// -ACB- 1998/08/10 Use DDF Lang Reference
 		CON_PlayerMessage(consoleplayer, "%s %d",
-			language["AutoMapMarkedSpot"], markpointnum);
+			language["AutoMapMarkedSpot"], markpointnum + 1);
 		AddMark();
 		return true;
 	}

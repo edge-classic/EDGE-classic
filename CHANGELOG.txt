@@ -15,6 +15,7 @@ Bugs fixed
 
 General Improvements
 --------------------
++ Crosshair color and size can now be changed via the Video Options menu
 + Pre-level story text/intermission will now be skipped when using the IDCLEV/level warp cheat
 + Mouse wheel up/down will now page through option menus that have Prev/Next pages (like the keybindings)
 + Improved changing resolutions while in fullscreen mode

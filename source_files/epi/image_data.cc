@@ -462,9 +462,7 @@ void image_data_c::Swirl(int leveltime, int thickness)
 		speed = 10;
 	}
 
-	u8_t *old_pixels = new u8_t[width * height * bpp];
-
-	memcpy(old_pixels, pixels, width * height * bpp * sizeof(u8_t));
+	u8_t *new_pixels = new u8_t[width * height * bpp];
 
     int x, y;
 
@@ -491,15 +489,15 @@ void image_data_c::Swirl(int leveltime, int thickness)
 			x1 &= width - 1;
 			y1 &= height - 1;
 
-			u8_t *src = old_pixels + (y1 * width + x1) * bpp;
-			u8_t *dest = pixels + (y * width + x) * bpp;
+			u8_t *src = pixels + (y1 * width + x1) * bpp;
+			u8_t *dest = new_pixels + (y * width + x) * bpp;
 
 			for (int i = 0; i < bpp; i++)
 				*dest++ = *src++;
 		}
 	}
-	delete[] old_pixels;
-	old_pixels = NULL;
+	delete[] pixels;
+	pixels = new_pixels;
 }
 
 } // namespace epi

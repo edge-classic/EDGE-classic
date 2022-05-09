@@ -29,6 +29,8 @@ General Improvements
   will remain clamped per the existing implementation
 + Freedoom Phase 1 and 2 have their own base WAD, which provides corrected text and menu graphics
 + Added capturing of console content (if active) in screenshots
++ Heretic support improved (added missing attacks and ambient sfx, fixed secret level exit, added missing music
+ Overlay HUD remodelled).
 
 New Features
 ------------
@@ -43,6 +45,8 @@ New Features
    i.e. Crosshair, flash, weapon. Mainly useful for not having to "cut out" the shape of the weapon
    muzzle from flash sprites. Also good for MD2 models so that the flash sprites are obscured
    by the weapon model.
+  -Command: Y_ADJUST=<number> which will offset the weapon sprites in Y
+  (negative numbers move it down, positive numbers move it up). Mainly for Heretic compatibility.
    
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)

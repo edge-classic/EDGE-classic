@@ -113,8 +113,12 @@ int option_menuon = 0;
 
 extern cvar_c m_language;
 extern cvar_c r_crosshair;
+extern cvar_c r_crosscolor;
+extern cvar_c r_crosssize;
 
-static int menu_crosshair;  // temp hack
+static int menu_crosshair;
+static int menu_crosscolor;
+static int menu_crosssize;
 extern int monitor_size;
 
 extern int joystick_device;
@@ -137,6 +141,8 @@ static void M_ChangeFastparm(int keypressed);
 static void M_ChangeRespawn(int keypressed);
 static void M_ChangePassMissile(int keypressed);
 static void M_ChangeCrossHair(int keypressed);
+static void M_ChangeCrossColor(int keypressed);
+static void M_ChangeCrossSize(int keypressed);
 
 static void M_ChangeBlood(int keypressed);
 static void M_ChangeMLook(int keypressed);
@@ -189,6 +195,8 @@ const char WIPE_EnumStr[] = "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right
 static char StereoNess[]  = "Off/On/Swapped";
 static char MixChans[]    = "32/64/96";
 static char QuietNess[]   = "Loud (distorted)/Normal/Soft/Very Soft";
+
+static char CrosshairColor[] = "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange";
 
 // Screen resolution changes
 static scrmode_c new_scrmode;
@@ -369,6 +377,8 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Plain,   "",  NULL, 0, NULL, NULL, NULL},
 
 	{OPT_Switch,  "Crosshair",       CrossH, 10, &menu_crosshair, M_ChangeCrossHair, NULL},
+	{OPT_Switch,  "Crosshair Color", CrosshairColor,  8, &menu_crosscolor, M_ChangeCrossColor, NULL},
+	{OPT_Slider,  "Crosshair Size",    NULL,  4,  &menu_crosssize, M_ChangeCrossSize, NULL},
 	{OPT_Boolean, "Map Rotation",    YesNo,   2, &rotatemap, NULL, NULL},
 	{OPT_Switch,  "Teleport Flash",  YesNo,   2, &telept_flash, NULL, NULL},
 	{OPT_Switch,  "Invulnerability", Invuls, NUM_INVULFX,  &var_invul_fx, NULL, NULL},
@@ -1759,6 +1769,16 @@ static void M_ChangeCrossHair(int keypressed)
 	r_crosshair = menu_crosshair;
 }
 
+static void M_ChangeCrossColor(int keypressed)
+{
+	r_crosscolor = menu_crosscolor;
+}
+
+static void M_ChangeCrossSize(int keypressed)
+{
+	r_crosssize = 8 + (menu_crosssize * 8);
+}
+
 
 //
 // M_ChangeLanguage
@@ -1915,6 +1935,8 @@ void M_Options(int choice)
 
 	// hack
 	menu_crosshair = CLAMP(0, r_crosshair.d, 9);
+	menu_crosscolor = CLAMP(0, r_crosscolor.d, 7);
+	menu_crosssize = CLAMP(0, (r_crosssize.d / 8 - 1), 3);
 }
 
 

@@ -38,7 +38,6 @@ elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" AND APPLE)
 	add_compile_definitions(NOT_APPLE_SILICON)
 endif()
 
-if(WIN32 OR MSYS)
 add_executable(
   edge-classic
 	source_files/edge/i_main.cc     
@@ -145,118 +144,8 @@ add_executable(
 	source_files/edge/vm_coal.cc    
 	source_files/edge/vm_hud.cc     
 	source_files/edge/vm_player.cc  
-	source_files/edge/w32_res.rc
+	source_files/edge/w32_res.rc # I think this is ok to leave in regardless of OS (silently ignored on *nix?)
 )
-else()
-add_executable(
-  edge-classic
-	source_files/edge/i_main.cc     
-	source_files/edge/i_ctrl.cc     
-	source_files/edge/i_video.cc    
-	source_files/edge/i_sound.cc    
-	source_files/edge/i_net.cc      
-	source_files/edge/am_map.cc     
-	source_files/edge/con_con.cc    
-	source_files/edge/con_main.cc   
-	source_files/edge/con_link.cc   
-	source_files/edge/con_var.cc    
-	source_files/edge/e_input.cc    
-	source_files/edge/e_main.cc     
-	source_files/edge/e_player.cc   
-	source_files/edge/f_finale.cc   
-	source_files/edge/f_interm.cc   
-	source_files/edge/g_game.cc     
-	source_files/edge/hu_draw.cc    
-	source_files/edge/hu_font.cc    
-	source_files/edge/hu_stuff.cc   
-	source_files/edge/hu_style.cc   
-	source_files/edge/l_ajbsp.cc    
-	source_files/edge/l_deh.cc      
-	source_files/edge/m_argv.cc     
-	source_files/edge/m_bbox.cc     
-	source_files/edge/m_cheat.cc    
-	source_files/edge/m_math.cc     
-	source_files/edge/m_menu.cc     
-	source_files/edge/m_misc.cc     
-	source_files/edge/m_option.cc   
-	source_files/edge/m_netgame.cc  
-	source_files/edge/m_random.cc   
-	source_files/edge/n_bcast.cc    
-	source_files/edge/n_reliable.cc 
-	source_files/edge/n_network.cc  
-	source_files/edge/p_action.cc   
-	source_files/edge/p_blockmap.cc 
-	source_files/edge/p_bot.cc      
-	source_files/edge/p_enemy.cc    
-	source_files/edge/p_inter.cc    
-	source_files/edge/p_lights.cc   
-	source_files/edge/p_map.cc      
-	source_files/edge/p_maputl.cc   
-	source_files/edge/p_mobj.cc     
-	source_files/edge/p_plane.cc    
-	source_files/edge/p_setup.cc    
-	source_files/edge/p_sight.cc    
-	source_files/edge/p_spec.cc     
-	source_files/edge/p_switch.cc   
-	source_files/edge/p_tick.cc     
-	source_files/edge/p_user.cc     
-	source_files/edge/p_forces.cc   
-	source_files/edge/p_telept.cc   
-	source_files/edge/p_weapon.cc   
-	source_files/edge/rad_act.cc    
-	source_files/edge/rad_pars.cc   
-	source_files/edge/rad_trig.cc   
-	source_files/edge/r_draw.cc     
-	source_files/edge/r_shader.cc   
-	source_files/edge/r_render.cc   
-	source_files/edge/r_effects.cc  
-	source_files/edge/r_main.cc     
-	source_files/edge/r_occlude.cc  
-	source_files/edge/m_logo.cc     
-	source_files/edge/r_things.cc   
-	source_files/edge/r_units.cc    
-	source_files/edge/r_wipe.cc     
-	source_files/edge/r_misc.cc     
-	source_files/edge/r_sky.cc      
-	source_files/edge/r_colormap.cc 
-	source_files/edge/r_modes.cc    
-	source_files/edge/r_md2.cc      
-	source_files/edge/r_image.cc    
-	source_files/edge/r_doomtex.cc  
-	source_files/edge/r_texgl.cc    
-	source_files/edge/s_blit.cc     
-	source_files/edge/s_cache.cc    
-	source_files/edge/s_sound.cc
-	source_files/edge/s_mp3.cc   
-	source_files/edge/s_music.cc    
-	source_files/edge/s_ogg.cc      
-	source_files/edge/s_tsf.cc
-	source_files/edge/s_ibxm.cc
-	source_files/edge/s_gme.cc
-	source_files/edge/s_sid.cc
-	source_files/edge/s_wav.cc    
-	source_files/edge/sv_chunk.cc   
-	source_files/edge/sv_glob.cc    
-	source_files/edge/sv_level.cc   
-	source_files/edge/sv_load.cc    
-	source_files/edge/sv_main.cc    
-	source_files/edge/sv_misc.cc    
-	source_files/edge/sv_mobj.cc    
-	source_files/edge/sv_play.cc    
-	source_files/edge/sv_save.cc    
-	source_files/edge/w_flat.cc     
-	source_files/edge/w_model.cc    
-	source_files/edge/w_sprite.cc   
-	source_files/edge/w_texture.cc  
-	source_files/edge/w_wad.cc      
-	source_files/edge/z_zone.cc     
-	source_files/edge/vm_coal.cc    
-	source_files/edge/vm_hud.cc     
-	source_files/edge/vm_player.cc  
-	source_files/edge/unx_net.cc    
-	source_files/edge/unx_system.cc
-)
-endif()
 
 find_package(SDL2 REQUIRED)
 

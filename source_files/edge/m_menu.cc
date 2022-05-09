@@ -1409,8 +1409,7 @@ static void QuitResponse(int ch)
 	E_EngineShutdown();
 	I_SystemShutdown();
 
-	I_DisplayExitScreen();
-	I_CloseProgram(0);
+	I_CloseProgram(EXIT_SUCCESS);
 }
 
 //

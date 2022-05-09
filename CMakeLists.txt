@@ -60,7 +60,8 @@ add_executable(
 	source_files/edge/hu_draw.cc    
 	source_files/edge/hu_font.cc    
 	source_files/edge/hu_stuff.cc   
-	source_files/edge/hu_style.cc   
+	source_files/edge/hu_style.cc
+	source_files/edge/i_system.cc 
 	source_files/edge/l_ajbsp.cc    
 	source_files/edge/l_deh.cc      
 	source_files/edge/m_argv.cc     
@@ -144,9 +145,7 @@ add_executable(
 	source_files/edge/vm_coal.cc    
 	source_files/edge/vm_hud.cc     
 	source_files/edge/vm_player.cc  
-	source_files/edge/w32_net.cc
 	source_files/edge/w32_res.rc
-	source_files/edge/w32_system.cc
 )
 else()
 add_executable(
@@ -354,20 +353,6 @@ if(WIN32 OR MSYS)
 			libwebsid
 			winmm
 			wsock32
-	)
-elseif(NOT APPLE)
-	target_link_libraries(
-	edge-classic
-	PRIVATE edge_ajbsp
-			edge_coal
-			edge_ddf
-			edge_deh
-			edge_epi
-			${OPENGL_LIBRARIES}
-			libglew_static
-			${SDL2_LIBRARIES}
-			gme
-			libwebsid
 	)
 else()
 	target_link_libraries(

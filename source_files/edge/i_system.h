@@ -32,9 +32,6 @@
 
 // -ACB- 1999/09/20 Removed system specific attribs.
 
-void I_SetupSignalHandlers(bool allow_coredump);
-void I_CheckAlreadyRunning(void);
-
 void I_SystemStartup(void);
 // This routine is responsible for getting things off the ground, in
 // particular calling all the other platform initialisers (i.e.
@@ -60,10 +57,6 @@ void I_Error(const char *error,...) GCCATTR((format(printf, 1, 2)));
 // The error function.  All fatal errors call I_Error().  This
 // I_CloseProgram).
 
-void I_DisplayExitScreen(void);
-// Displays the exit screen on the text mode screen (or window).  The
-// text typically comes from the "ENDOOM" lump in the IWAD.
-
 void I_SystemShutdown(void);
 // The opposite of the I_SystemStartup routine.  This will shutdown
 // everything running in the platform code, by calling the other
@@ -75,12 +68,6 @@ void I_CloseProgram(int exitnum) GCCATTR((noreturn));
 // Exit the program immediately, using the given `exitnum' as the
 // program's exit status.  This is the very last thing done, and
 // I_SystemShutdown() is guaranteed to have already been called.
-
-void I_TraceBack(void);
-// Aborts the program, and displays a traceback if possible (which is
-// useful for debugging).  The system code should check for the
-// "-traceback" option, and when present call this routine instead of
-// I_CloseProgram() whenever a fatal error occurs.
 
 void I_Warning(const char *warning,...) GCCATTR((format(printf, 1, 2)));
 // Writes a warning to the console and the debug file (if any).  This

@@ -32,21 +32,11 @@ extern "C" {
 
 int main(int argc, char *argv[])
 {
-	// FIXME: setup argument handler NOW
-	bool allow_coredump = false;
-	for (int i = 1; i < argc; i++)
-		if (strcmp(argv[i], "-core") == 0)
-			allow_coredump = true;
-
-    I_SetupSignalHandlers(allow_coredump);
-
 #ifdef WIN32
 	const char* title_string = "EDGE Engine";
 	// -AJA- give us a proper name in the Task Manager
 	SDL_RegisterApp((char *)title_string, 0, 0);
 #endif
-
-    I_CheckAlreadyRunning();
 
 #ifdef WIN32
     // -AJA- change current dir to match executable

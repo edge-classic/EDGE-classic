@@ -36,16 +36,11 @@ int main(int argc, char *argv[])
 	const char* title_string = "EDGE Engine";
 	// -AJA- give us a proper name in the Task Manager
 	SDL_RegisterApp((char *)title_string, 0, 0);
-#endif
 
-#ifdef WIN32
     // -AJA- change current dir to match executable
 	win32_exe_path = epi::GetExecutablePath(argv[0]);
 
     ::SetCurrentDirectory(win32_exe_path);
-#else
-    // -ACB- 2005/11/26 We don't do on LINUX since we assume the 
-    //                  executable is globally installed
 #endif
 
 	// Run EDGE. it never returns

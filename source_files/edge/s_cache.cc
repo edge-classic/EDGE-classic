@@ -95,9 +95,9 @@ static bool Load_DOOM(epi::sound_data_c *buf, const byte *lump, int length)
 	return true;
 }
 
-static bool Load_WAV(epi::sound_data_c *buf, const byte *lump, int length)
+static bool Load_WAV(epi::sound_data_c *buf, byte *lump, int length, bool pc_speaker)
 {
-	return S_LoadWAVSound(buf, lump, length);
+	return S_LoadWAVSound(buf, lump, length, pc_speaker);
 }
 
 static bool Load_OGG(epi::sound_data_c *buf, const byte *lump, int length)
@@ -184,8 +184,10 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 
 	bool OK = false;
 	
-	if (memcmp(data, "RIFF", 4) == 0)
-		OK = Load_WAV(buf, data, length);
+	if (strcasecmp(std::string(def->lump_name.c_str()).substr(0, 2).c_str(), "DP") == 0) // Check for PC Speaker sounds
+		OK = Load_WAV(buf, data, length, true);
+	else if (memcmp(data, "RIFF", 4) == 0)
+		OK = Load_WAV(buf, data, length, false);
 	else if (memcmp(data, "Ogg", 3) == 0)
 		OK = Load_OGG(buf, data, length);
 	else if (S_CheckMP3(data, length))

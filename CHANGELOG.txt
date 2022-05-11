@@ -34,6 +34,8 @@ General Improvements
 
 New Features
 ------------
++ DP* sound lumps (PC speaker sounds) in the DOOM IWADs are now usable via DDFSFX
+
 + "Pistol Starts" option added to Gameplay Options menu (default Off). Will force player to default state upon
   starting a new level. Works with all supported IWADs.
 

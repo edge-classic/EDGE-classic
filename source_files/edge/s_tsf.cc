@@ -25,6 +25,7 @@
 #include "path.h"
 #include "str_format.h"
 
+#include "m_misc.h"
 #include "s_blit.h"
 #include "s_music.h"
 #include "s_tsf.h"
@@ -241,7 +242,10 @@ bool S_StartupTSF(void)
 
 	I_Printf("Initializing TinySoundFont...\n");
 
-	edge_tsf = tsf_load_filename(epi::PATH_Join(game_dir.c_str(), "soundfont/default.sf2").c_str());
+	if (var_pc_speaker_mode)
+		edge_tsf = tsf_load_filename(epi::PATH_Join(game_dir.c_str(), "soundfont/pcbeep.sf2").c_str());
+	else
+		edge_tsf = tsf_load_filename(epi::PATH_Join(game_dir.c_str(), "soundfont/default.sf2").c_str());
 
 	if (!edge_tsf) {
 		I_Printf("Could not load soundfont! Ensure that default.sf2 is present in the soundfont directory!\n");

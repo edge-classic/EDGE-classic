@@ -83,6 +83,7 @@ bool force_waveout = false;
 unsigned short save_screenshot[160][100];
 bool save_screenshot_valid = false;
 
+bool var_pc_speaker_mode = false;
 int var_sound_stereo = 0;
 int var_mix_channels = 0;
 int var_quiet_factor = 0;
@@ -108,6 +109,7 @@ static default_t defaults[] =
     {CFGT_Int,      "sfx_volume",        &sfx_volume,     CFGDEF_SOUND_VOLUME},
     {CFGT_Int,      "music_volume",      &mus_volume,     CFGDEF_MUSIC_VOLUME},
     {CFGT_Int,      "sound_stereo",      &var_sound_stereo, CFGDEF_SOUND_STEREO},
+	{CFGT_Boolean,	"pc_speaker_mode",	 &var_pc_speaker_mode,  0},
 	{CFGT_Boolean,	"dynamic_reverb",	 &dynamic_reverb,  0},
     {CFGT_Int,      "mix_channels",      &var_mix_channels, CFGDEF_MIX_CHANNELS},
     {CFGT_Int,      "quiet_factor",      &var_quiet_factor, CFGDEF_QUIET_FACTOR},

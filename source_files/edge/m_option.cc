@@ -477,6 +477,8 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
+	{OPT_Boolean,  "PC Speaker Mode",       YesNo, 2,  &var_pc_speaker_mode, NULL, "NeedRestart"},
+	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Boolean, "Dynamic Reverb",       YesNo, 2, &dynamic_reverb, NULL, NULL},
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Mix Channels",    MixChans,  3, &var_mix_channels, M_ChangeMixChan, NULL},

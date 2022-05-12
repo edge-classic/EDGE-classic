@@ -184,7 +184,7 @@ byte *Convert_PCSpeaker(const byte *data, int *length)
 
 	// Write chunks
 
-	*length = 20 + sizeof(WavFmtChunk) + (numsamples * FACTOR) + (header.samples % 2 == 0 ? 0 : 1);
+	*length = 20 + sizeof(WavFmtChunk) + (numsamples * FACTOR);
 	int write_counter = 0;
 	byte *new_data = new byte[*length];
 	memcpy(new_data + write_counter, &whdr, 8);
@@ -198,12 +198,6 @@ byte *Convert_PCSpeaker(const byte *data, int *length)
 	write_counter += 8;
 	memcpy(new_data + write_counter, nsamples.data(), numsamples * FACTOR);
 	write_counter += numsamples * FACTOR;
-	// Ensure data ends on even byte boundary
-	if (header.samples % 2 != 0)
-	{
-		char nullout[2] = "\0";
-		memcpy(new_data + write_counter, nullout, 2);
-	}
 
 	return new_data;
 }

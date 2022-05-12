@@ -204,6 +204,21 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 
 epi::sound_data_c *S_CacheLoad(sfxdef_c *def)
 {
+	bool pc_speaker_skip = false;
+
+	if (var_pc_speaker_mode)
+	{
+		std::string temp_name = def->lump_name.c_str();
+		if (strcasecmp(temp_name.substr(0, 2).c_str(), "DS") == 0)
+		{
+			temp_name.replace(1, 1, "P");
+			I_Printf("TRYING: %s\n", temp_name.c_str());
+			def->lump_name.Set(temp_name.c_str());
+		}
+		else
+			pc_speaker_skip = true;
+	}
+
 	for (int i = 0; i < (int)fx_cache.size(); i++)
 	{
 		if (fx_cache[i]->priv_data == (void*)def)
@@ -221,8 +236,11 @@ epi::sound_data_c *S_CacheLoad(sfxdef_c *def)
 	buf->priv_data = def;
 	buf->ref_count = 1;
 
-	if (! DoCacheLoad(def, buf))
-		Load_Silence(buf);	
+	if (pc_speaker_skip)
+		Load_Silence(buf);
+	else
+		if (! DoCacheLoad(def, buf))
+			Load_Silence(buf);	
 
 	return buf;
 }

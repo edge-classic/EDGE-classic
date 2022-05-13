@@ -1,11 +1,11 @@
-"P.C. Speaker" soundfont by Rich ¥Weeds¥ Nagel (richnagel@centurylink.net) licensed via CC BY-SA 4.0 International (https://creativecommons.org/licenses/by-sa/4.0/) with author's permission.
+"P.C. Speaker" soundfont by Rich ï¿½Weedsï¿½ Nagel (richnagel@centurylink.net) licensed via CC BY 4.0 International (https://creativecommons.org/licenses/by/4.0/) with author's permission.
 Original copyright and informational text follows.
 
 
 P.C. Speaker
 ============
 
-SF2 and MID Copyright (C)1998, Rich ¥Weeds¥ Nagel - All rights reserved
+SF2 and MID Copyright (C)1998, Rich ï¿½Weedsï¿½ Nagel - All rights reserved
 
 This sound bank was created from nothing but a 1/2 second P.C. speaker beep,
 and requires 29KB of AWE-32 RAM.
@@ -24,7 +24,7 @@ with any MIDI player. Surprising, isn't it <BG>?
 
 Enjoy!
 
-Rich ¥Weeds¥ Nagel
+Rich ï¿½Weedsï¿½ Nagel
 richnagel@earthlink.net
 RFNagel@juno.com
 http://www.richnagel.net

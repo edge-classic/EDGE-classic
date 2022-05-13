@@ -1891,11 +1891,16 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 
 	explode_damage = src.explode_damage;	
 	explode_radius = src.explode_radius;
+	
+	//pickup_message = src.pickup_message; 
+	if(src.pickup_message)
+	{
+		const char *pickup_message = src.pickup_message; 
+	}
+	//lose_benefits = src.lose_benefits; 
+	//pickup_benefits = src.pickup_benefits; 
 
-	lose_benefits = src.lose_benefits; 
-	pickup_benefits = src.pickup_benefits; 
 	pickup_effects = src.pickup_effects; 
-	pickup_message = src.pickup_message; 
 	initial_benefits = src.initial_benefits; 
 
     castorder = src.castorder; 

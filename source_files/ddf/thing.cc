@@ -1898,7 +1898,14 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 		const char *pickup_message = src.pickup_message; 
 	}
 	//lose_benefits = src.lose_benefits; 
-	//pickup_benefits = src.pickup_benefits; 
+	//pickup_benefits = src.pickup_benefits;
+	lose_benefits = NULL;
+	pickup_benefits = NULL;
+	if(src.pickup_benefits)
+	{
+		I_Debugf("%s: Benefits info not inherited from '%s', ",name, src.name.c_str());
+		I_Debugf("You should define it explicitly.\n");
+	}
 
 	pickup_effects = src.pickup_effects; 
 	initial_benefits = src.initial_benefits; 

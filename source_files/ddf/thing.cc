@@ -37,6 +37,8 @@
 
 #define DDF_MobjHashFunc(x)  (((x) + LOOKUP_CACHESIZE) % LOOKUP_CACHESIZE)
 
+const char *TemplateThing = NULL; //Lobo 2022: TEMPLATE inheritance fix
+
 mobjtype_container_c mobjtypes;
 
 static mobjtype_c * default_mobjtype;
@@ -480,6 +482,8 @@ static void ThingStartEntry(const char *buffer, bool extend)
 		buffer = "THING_WITH_NO_NAME";
 	}
 
+	TemplateThing = NULL;
+	
 	std::string name(buffer);
 	int number = 0;
 
@@ -554,25 +558,7 @@ static void ThingDoTemplate(const char *contents)
 
 	dynamic_mobj->CopyDetail(*other);
 	
-	//We only want to copy the parents benefit if the child has none
-	if(!dynamic_mobj->lose_benefits)
-	{
-		if(other->lose_benefits)
-		{
-			dynamic_mobj->lose_benefits = new benefit_t;
-			*dynamic_mobj->lose_benefits = *other->lose_benefits;
-		}
-	}
-	
-	//We only want to copy the parents benefit if the child has none
-	if(!dynamic_mobj->pickup_benefits)
-	{
-		if(other->pickup_benefits)
-		{
-			dynamic_mobj->pickup_benefits = new benefit_t;
-			*dynamic_mobj->pickup_benefits = *other->pickup_benefits;
-		}
-	}
+	TemplateThing = other->name;
 
 	DDF_StateBeginRange(dynamic_mobj->state_grp);
 }
@@ -693,6 +679,34 @@ static void ThingFinishEntry(void)
 		dynamic_mobj->idle_state = dynamic_mobj->spawn_state;
 
 	dynamic_mobj->DLightCompatibility();
+	
+	if (TemplateThing)
+	{
+		int idx = mobjtypes.FindFirst(TemplateThing, 0);
+		if (idx < 0)
+			DDF_Error("Unknown thing template: \n");
+
+		mobjtype_c *other = mobjtypes[idx];
+
+		if(!dynamic_mobj->lose_benefits)
+		{
+			if(other->lose_benefits)
+			{
+				dynamic_mobj->lose_benefits = new benefit_t;
+				*dynamic_mobj->lose_benefits = *other->lose_benefits;
+			}
+		}
+		
+		if(!dynamic_mobj->pickup_benefits)
+		{
+			if(other->pickup_benefits)
+			{
+				dynamic_mobj->pickup_benefits = new benefit_t;
+				*dynamic_mobj->pickup_benefits = *other->pickup_benefits;
+			}
+		}
+	}
+	TemplateThing = NULL;
 }
 
 

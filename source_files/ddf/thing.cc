@@ -553,6 +553,26 @@ static void ThingDoTemplate(const char *contents)
 		DDF_Error("Bad thing template: '%s'\n", contents);
 
 	dynamic_mobj->CopyDetail(*other);
+	
+	//We only want to copy the parents benefit if the child has none
+	if(!dynamic_mobj->lose_benefits)
+	{
+		if(other->lose_benefits)
+		{
+			dynamic_mobj->lose_benefits = new benefit_t;
+			*dynamic_mobj->lose_benefits = *other->lose_benefits;
+		}
+	}
+	
+	//We only want to copy the parents benefit if the child has none
+	if(!dynamic_mobj->pickup_benefits)
+	{
+		if(other->pickup_benefits)
+		{
+			dynamic_mobj->pickup_benefits = new benefit_t;
+			*dynamic_mobj->pickup_benefits = *other->pickup_benefits;
+		}
+	}
 
 	DDF_StateBeginRange(dynamic_mobj->state_grp);
 }
@@ -1892,20 +1912,23 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	explode_damage = src.explode_damage;	
 	explode_radius = src.explode_radius;
 	
-	//pickup_message = src.pickup_message; 
+	//pickup_message = src.pickup_message;
+	//lose_benefits = src.lose_benefits; 
+	//pickup_benefits = src.pickup_benefits;
 	if(src.pickup_message)
 	{
 		const char *pickup_message = src.pickup_message; 
 	}
-	//lose_benefits = src.lose_benefits; 
-	//pickup_benefits = src.pickup_benefits;
+	
 	lose_benefits = NULL;
 	pickup_benefits = NULL;
+	/*
 	if(src.pickup_benefits)
 	{
 		I_Debugf("%s: Benefits info not inherited from '%s', ",name, src.name.c_str());
 		I_Debugf("You should define it explicitly.\n");
 	}
+	*/
 
 	pickup_effects = src.pickup_effects; 
 	initial_benefits = src.initial_benefits; 

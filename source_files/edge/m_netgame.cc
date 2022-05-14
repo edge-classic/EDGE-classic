@@ -247,29 +247,24 @@ static void DrawKeyword(int index, style_c *style, int y,
 
 static const char *GetModeName(char mode)
 {
-	// FIXME: LDF these up
 	switch (mode)
 	{
-		case 0: return "CO-OPERATIVE";
-		case 1: return "OLD DEATHMATCH";
-		case 2: return "NEW DEATHMATCH";
-		case 3: return "LAST MAN STANDING";
-		case 4: return "CATCH THE FLAG";
-
+		case 0: return language["BotCoop"];
+		case 1: return language["BotOldDM"];
+		case 2: return language["BotNewDM"];
 		default: return "????";
 	}
 }
 
 static const char *GetSkillName(skill_t skill)
 {
-	// FIXME: LDF these up, OR BETTER: use shrunken images
 	switch (skill)
 	{
-		case sk_baby: return "I'm Too Young To Die";
-		case sk_easy: return "Hey, Not Too Rough";
-		case sk_medium: return "Hurt Me Plenty";
-		case sk_hard: return "Ultra-Violence";
-		case sk_nightmare: return "Nightmare!";
+		case sk_baby: return language["MenuDifficulty1"];
+		case sk_easy: return language["MenuDifficulty2"];
+		case sk_medium: return language["MenuDifficulty3"];
+		case sk_hard: return language["MenuDifficulty4"];
+		case sk_nightmare: return language["MenuDifficulty5"];
 
 		default: return "????";
 	}
@@ -279,9 +274,9 @@ static const char *GetBotSkillName(int sk)
 {
 	switch (sk)
 	{
-		case 0: return "Low";
-		case 1: return "Medium";
-		case 2: return "High";
+		case 0: return language["BotLow"];
+		case 1: return language["BotMedium"];
+		case 2: return language["BotHigh"];
 
 		default: return "????";
 	}
@@ -521,32 +516,22 @@ static void HostAccept(void)
 
 void M_DrawHostMenu(void)
 {
-	HUD_SetAlpha(0.64f);
+	HUD_SetAlpha(0.9f);
 	HUD_SolidBox(0, 0, 320, 200, T_BLACK);
 	HUD_SetAlpha();
 
-	HL_WriteText(ng_host_style,2, 80, 30, "ADVANCED START GAME");
+	HL_WriteText(ng_host_style,2, 80, 25, "Bot Game Settings");
 
 	char buffer[200];
 
-	int y = 30;
+	int y = 40;
 	int idx = 0;
 
-
-//	DrawKeyword(-1, ng_host_style, y, "LOCAL ADDRESS", n_local_addr.TempString(false));
-  	y += 10;
-
-//	DrawKeyword(-1, ng_join_style, y, "LOCAL PORT",
-//			LocalPrintf(buffer, sizeof(buffer), "%d", hosting_port));
-  	y += 18;
-
-
-	DrawKeyword(idx, ng_host_style, y, "GAME", ng_params->map->episode->name.c_str());
+	DrawKeyword(idx, ng_host_style, y, "EPISODE", language[ng_params->map->episode->description.c_str()]);
 	y += 10; idx++;
 
 	DrawKeyword(idx, ng_host_style, y, "LEVEL", ng_params->map->name.c_str());
 	y += 18; idx++;
-
 
 	DrawKeyword(idx, ng_host_style, y, "MODE", GetModeName(ng_params->deathmatch));
 	y += 10; idx++;

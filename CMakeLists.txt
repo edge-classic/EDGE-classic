@@ -148,10 +148,7 @@ add_executable(
 )
 
 find_package(SDL2 REQUIRED)
-
-if(NOT MSYS AND NOT WIN32)
-  find_package(OpenGL REQUIRED)
-endif()
+find_package(OpenGL REQUIRED)
 
 target_include_directories(edge-classic PRIVATE source_files/ajbsp)
 target_include_directories(edge-classic PRIVATE source_files/coal)
@@ -236,11 +233,10 @@ if(WIN32 OR MSYS)
 			edge_deh
 			edge_epi
 			libglew_static
-			opengl32
+			${OPENGL_LIBRARIES}
 			${SDL2_LIBRARIES}
 			gme
 			libwebsid
-			winmm
 			wsock32
 	)
 else()

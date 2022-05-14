@@ -37,12 +37,6 @@
 #include "r_texgl.h"
 #include "r_shader.h"
 
-/*std::vector<GLfloat> unit_vertices;
-std::vector<GLfloat> unit_normals;
-std::vector<GLboolean> unit_edgeflags;
-std::vector<GLfloat> unit_texcoords0;
-std::vector<GLfloat> unit_texcoords1;*/
-
 cvar_c r_colorlighting;
 cvar_c r_colormaterial;
 

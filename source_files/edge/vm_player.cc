@@ -52,7 +52,7 @@ bool inv_next_pressed = false;
 
 extern coal::vm_c *ui_vm;
 
-extern void VM_SetFloat(coal::vm_c *vm, const char *name, double value);
+extern void VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value);
 extern void VM_CallFunction(coal::vm_c *vm, const char *name);
 
 player_t * ui_player_who = NULL;

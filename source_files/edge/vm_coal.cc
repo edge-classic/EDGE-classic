@@ -411,6 +411,7 @@ void VM_LoadScripts()
 {
 	W_ReadCoalLumps();
 	// Test case for VM_SetFloat....this can be relocated if needs be - Dasho
+	VM_SetFloat(ui_vm, "sys", "gametic", gametic);
 	if (W_IsLumpInPwad("STBAR"))
 		VM_SetFloat(ui_vm, "hud", "custom_stbar", 1);
 }

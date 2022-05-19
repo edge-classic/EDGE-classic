@@ -37,6 +37,12 @@
 #include "m_argv.h"
 #include "m_random.h"
 
+#include "coal.h" // for coal::vm_c
+
+extern coal::vm_c *ui_vm;
+
+extern void VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value);
+
 // #define DEBUG_TICS 1
 
 // only true if packets are exchanged with a server
@@ -459,6 +465,8 @@ void N_TiccmdTicker(void)
 				p->consistency[buf] = P_ReadRandomState() & 0xff;
 		}
 	}
+
+	VM_SetFloat(ui_vm, "sys", "gametic", gametic);
 
 	gametic++;
 }

@@ -240,6 +240,9 @@ public:
 	void SetAsmDump(bool enable);
 	void SetTrace  (bool enable);
 
+	void SetFloat (const char *mod_name, const char *var_name, double value);
+	void SetString (const char *mod_name, const char *var_name, const char *value);
+
 	int FindFunction(const char *name);
 	int FindVariable(const char *name);
 

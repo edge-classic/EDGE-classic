@@ -59,17 +59,20 @@ void VM_Printer(const char *msg, ...)
 	I_Printf("COAL: %s", buffer);
 }
 
+// VM_SetFloat/VM_SetString usage:
+// mod_name = NULL to search global scope or a module name such as "hud", "math", etc
+// var_name = Variable name, without the module prefix, i.e. "custom_stbar" instead of "hud.custom_stbar"
+// value = Whatever is appropriate. SetString should allow a NULL string as this may be desired
 
-void VM_SetFloat(coal::vm_c *vm, const char *name, double value)
+void VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value)
 {
-	// FIXME !!!!!  VM_SetFloat
+	vm->SetFloat(mod_name, var_name, value);
 }
 
-void VM_SetString(coal::vm_c *vm, const char *name, const char *value)
+void VM_SetString(coal::vm_c *vm, const char *mod_name, const char *var_name, const char *value)
 {
-	// TODO
+	vm->SetString(mod_name, var_name, value);
 }
-
 
 void VM_CallFunction(coal::vm_c *vm, const char *name)
 {
@@ -407,6 +410,9 @@ void VM_LoadLumpOfCoal(int lump)
 void VM_LoadScripts()
 {
 	W_ReadCoalLumps();
+	// Test case for VM_SetFloat....this can be relocated if needs be - Dasho
+	if (W_IsLumpInPwad("STBAR"))
+		VM_SetFloat(ui_vm, "hud", "custom_stbar", 1);
 }
 
 

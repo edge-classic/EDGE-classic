@@ -1892,7 +1892,68 @@ void real_vm_c::SetAsmDump(bool enable)
 	comp.asm_dump = enable;
 }
 
+void real_vm_c::SetFloat(const char *mod_name, const char *var_name, double value)
+{
+	def_t *mod_def;
+	scope_c *mod_scope;
+	if (mod_name)
+	{
+		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+		if (!mod_def)
+		{
+			printer("SetFloat failed: Could not find module %s\n", mod_name);
+			return;
+		}
+		mod_scope = comp.all_modules[mod_def->ofs];
+	}
 
+	def_t *var;
+	if (mod_scope)
+		var = FindDef(&type_float, (char *)var_name, mod_scope);
+	else
+		var = FindDef(&type_float, (char *)var_name, &comp.global_scope);
+
+	if (var)
+	{
+		G_FLOAT(var->ofs) = value;
+		return;
+	}
+
+	printer("SetFloat failed: Could not find variable %s\n", var_name);
+	return;
+}
+
+void real_vm_c::SetString(const char *mod_name, const char *var_name, const char *value)
+{
+	// Do we want to allow NULL as a string value? May need to check for that here - Dasho	
+	def_t *mod_def;
+	scope_c *mod_scope;
+	if (mod_name)
+	{
+		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+		if (!mod_def)
+		{
+			printer("SetString failed: Could not find module %s\n", mod_name);
+			return;
+		}
+		mod_scope = comp.all_modules[mod_def->ofs];
+	}
+
+	def_t *var;
+	if (mod_scope)
+		var = FindDef(&type_string, (char *)var_name, mod_scope);
+	else
+		var = FindDef(&type_string, (char *)var_name, &comp.global_scope);
+
+	if (var)
+	{
+		*REF_GLOBAL(var->ofs) = (double) InternaliseString(value);
+		return;
+	}
+	
+	printer("SetString failed: Could not find variable %s\n", var_name);
+	return;
+}
 
 vm_c * CreateVM()
 {

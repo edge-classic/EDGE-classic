@@ -163,12 +163,6 @@ static void MATH_random(coal::vm_c *vm, int argc)
 	vm->ReturnFloat(C_Random() / double(0x10000));
 }
 
-//Lobo November 2021: math.random2() always between 0 and 10
-static void MATH_random2(coal::vm_c *vm, int argc)
-{
-	vm->ReturnFloat(C_Random() % 10);
-}
-
 // math.cos(val)
 static void MATH_cos(coal::vm_c *vm, int argc)
 {
@@ -326,9 +320,6 @@ void VM_RegisterBASE(coal::vm_c *vm)
     vm->AddNativeFunction("math.ceil",      MATH_ceil);
     vm->AddNativeFunction("math.random",    MATH_random);
 
-	//Lobo November 2021
-	vm->AddNativeFunction("math.random2",    MATH_random2);
-	
     vm->AddNativeFunction("math.cos",       MATH_cos);
     vm->AddNativeFunction("math.sin",       MATH_sin);
     vm->AddNativeFunction("math.tan",       MATH_tan);

@@ -166,9 +166,7 @@ static void MATH_random(coal::vm_c *vm, int argc)
 //Lobo November 2021: math.random2() always between 0 and 10
 static void MATH_random2(coal::vm_c *vm, int argc)
 {
-	int r = rand() % 10;
-	
-	vm->ReturnFloat(r);
+	vm->ReturnFloat(C_Random() % 10);
 }
 
 // math.cos(val)

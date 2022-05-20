@@ -17,7 +17,6 @@ add_library(
   edge_epi
   arrays.cc
   bytearray.cc
-  epi_win32.cc
   exe_path.cc
   file_memory.cc
   file_sub.cc

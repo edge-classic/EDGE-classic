@@ -1486,9 +1486,6 @@ void E_Main(int argc, const char **argv)
 	// Seed M_Random RNG
 	M_Random_Init();
 
-	// Start the EPI Interface 
-	epi::Init();
-
 	// Start memory allocation system at the very start (SCHEDULED FOR REMOVAL)
 	Z_Init();
 
@@ -1524,9 +1521,6 @@ void E_Main(int argc, const char **argv)
 	}
 
 	E_Shutdown();    // Shutdown whatever at this point
-
-	// Kill the epi interface
-	epi::Shutdown();
 }
 
 

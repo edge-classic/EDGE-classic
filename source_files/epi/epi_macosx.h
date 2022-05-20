@@ -37,8 +37,6 @@
 #define stricmp   strcasecmp
 #define strnicmp  strncasecmp
 
-void strupr(char *str);
-
 #endif /* __MACOSX_EPI_HEADER__ */
 
 //--- editor settings ---

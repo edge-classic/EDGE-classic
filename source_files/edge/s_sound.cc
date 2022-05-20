@@ -289,17 +289,21 @@ void S_Shutdown(void)
 }
 
 // Not-rejigged-yet stuff..
-sfxdef_c * LookupEffectDef(const sfx_t *s) 
+sfxdef_c * LookupEffectDef(sfx_t *s) 
 { 
 	SYS_ASSERT(s->num >= 1);
-
-	// need to use M_Random here to prevent net games 
-	// getting out of sync.
 
 	int num;
 
 	if (s->num > 1)
-		num = s->sounds[M_Random() % s->num];
+	{
+		// Prevent same random sound from being played twice in a row - Dasho
+		do
+		{
+			num = s->sounds[M_Random() % s->num];
+		} while (num == s->last_rand_played);
+		s->last_rand_played = num;
+	}
 	else
 		num = s->sounds[0];
 

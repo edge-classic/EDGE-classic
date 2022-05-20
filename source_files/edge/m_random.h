@@ -1,8 +1,9 @@
 //----------------------------------------------------------------------------
-//  EDGE Pseudo-Random Number Code (via LUT)
+//  EDGE-Classic RNG
 //----------------------------------------------------------------------------
 // 
 //  Copyright (c) 1999-2009  The EDGE Team.
+//  Transition to C++ STD random library 2022 - EDGE-Classic Community
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License

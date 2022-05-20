@@ -15,6 +15,7 @@ Bugs fixed
 
 General Improvements
 --------------------
++ Original RNG LUT for M_Random/P_Random replaced with improved quality generators from the C++ stdlib
 + Crosshair color and size can now be changed via the Video Options menu
 + Pre-level story text/intermission will now be skipped when using the IDCLEV/level warp cheat
 + Mouse wheel up/down will now page through option menus that have Prev/Next pages (like the keybindings)
@@ -35,6 +36,9 @@ General Improvements
 New Features
 ------------
 + DP* sound lumps (PC speaker sounds) in the DOOM IWADs are now usable via DDFSFX
+
++ "PC Speaker Mode" option added to Sound Options menu. Only PC speaker format sounds will be used, and
+  the MIDI player will switch to a PC speaker based soundfont
 
 + "Pistol Starts" option added to Gameplay Options menu (default Off). Will force player to default state upon
   starting a new level. Works with all supported IWADs.

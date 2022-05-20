@@ -38,7 +38,6 @@ typedef struct sfx_s
 	int num;
 	int sounds[1]; // -ACB- 1999/11/06 Zero based array is not ANSI compliant
 	// -AJA- I'm also relying on the [1] within sfxdef_c.
-	int last_rand_played;
 }
 sfx_t;
 

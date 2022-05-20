@@ -31,6 +31,7 @@
 std::ranlux24_base m_rand;
 std::ranlux24_base p_rand;
 std::uniform_int_distribution<unsigned short> rand_roll(0, 255);
+std::uniform_int_distribution<unsigned short> coal_roll(0, 0xFFFF);
 
 static int p_index = 0;
 static int p_step = 1;
@@ -74,6 +75,16 @@ int P_Random(void)
     p_rand.seed(p_index + p_step);
 
     return rand_roll(p_rand);
+}
+
+// 
+// C_Random
+//
+// Returns a number from 0 to 65535 for COALAPI usage
+//
+int C_Random(void)
+{
+	return coal_roll(m_rand);
 }
 
 // 

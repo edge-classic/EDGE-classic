@@ -39,6 +39,8 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
+#include "m_random.h"
+
 
 // user interface VM
 coal::vm_c *ui_vm;
@@ -158,11 +160,7 @@ static void MATH_ceil(coal::vm_c *vm, int argc)
 // math.random()
 static void MATH_random(coal::vm_c *vm, int argc)
 {
-	int r = rand();
-
-	r = (r ^ (r >> 18)) & 0xFFFF;
-
-	vm->ReturnFloat(r / double(0x10000));
+	vm->ReturnFloat(C_Random() / double(0x10000));
 }
 
 //Lobo November 2021: math.random2() always between 0 and 10

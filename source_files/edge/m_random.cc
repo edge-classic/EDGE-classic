@@ -25,6 +25,10 @@
 
 #include "i_defs.h"
 #include "m_random.h"
+#include <random>
+
+std::mt19937 m_rand;
+std::uniform_int_distribution<unsigned short> m_rand_roll(0, 255);
 
 unsigned char rndtable[256] =
 {
@@ -49,9 +53,13 @@ unsigned char rndtable[256] =
     120, 163, 236, 249
 };
 
-static int m_index = 0;
 static int p_index = 0;
 static int p_step = 1;
+
+void M_Random_Init(void)
+{
+    m_rand.seed(I_ReadMicroSeconds());
+}
 
 // 
 // M_Random
@@ -64,7 +72,7 @@ static int p_step = 1;
 //
 int M_Random(void)
 {
-	return rndtable[++m_index & 0xff];
+	return m_rand_roll(m_rand);
 }
 
 // 

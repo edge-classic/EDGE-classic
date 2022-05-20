@@ -35,7 +35,6 @@ add_library(
   math_oddity.cc
   math_random.cc
   math_vector.cc
-  mersenne_twist.cc
   mus_2_midi.cc
   path.cc
   sound_data.cc

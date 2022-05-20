@@ -64,6 +64,7 @@
 #include "m_cheat.h"
 #include "m_misc.h"
 #include "m_menu.h"
+#include "m_random.h"
 #include "n_network.h"
 #include "p_setup.h"
 #include "p_spec.h"
@@ -1482,6 +1483,9 @@ static void E_InitialState(void)
 //
 void E_Main(int argc, const char **argv)
 {
+	// Seed M_Random RNG
+	M_Random_Init();
+
 	// Start the EPI Interface 
 	epi::Init();
 

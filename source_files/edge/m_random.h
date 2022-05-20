@@ -28,6 +28,7 @@
 
 #include "types.h"
 
+void M_Random_Init(void);
 int M_Random(void);
 int P_Random(void);
 int P_RandomNegPos(void);

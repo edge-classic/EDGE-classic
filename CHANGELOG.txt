@@ -53,6 +53,9 @@ New Features
    by the weapon model.
   -Command: Y_ADJUST=<number> which will offset the weapon sprites in Y
   (negative numbers move it down, positive numbers move it up). Mainly for Heretic compatibility.
+  
++ STYLES.DDF
+  -PRE and END level texts now use style defined in entry [INTERLEVEL_TEXT] 
    
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)

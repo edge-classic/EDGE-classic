@@ -18,7 +18,6 @@ add_library(
   arrays.cc
   bytearray.cc
   exe_path.cc
-  file_memory.cc
   file_sub.cc
   file.cc
   filesystem.cc
@@ -27,12 +26,9 @@ add_library(
   image_funcs.cc
   math_angle.cc
   math_bbox.cc
-  math_color.cc
   math_crc.cc
-  math_matrix.cc
   math_md5.cc
   math_oddity.cc
-  math_random.cc
   math_vector.cc
   mus_2_midi.cc
   path.cc

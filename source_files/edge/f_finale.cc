@@ -2,7 +2,7 @@
 // EDGE Finale Code on Game Completion
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2009  The EDGE Team.
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -56,6 +56,7 @@
 #include "s_music.h"
 #include "w_wad.h"
 #include "w_model.h"
+#include "hu_style.h"
 
 
 typedef enum
@@ -100,6 +101,7 @@ static rgbcol_t finale_textcol;
 
 extern float pixel_aspect;
 
+static style_c *wi_leveltext_style;
 
 static bool HasFinale(const map_finaledef_c *F, finalestage_e cur)
 {
@@ -217,6 +219,13 @@ static void LookupFinaleStuff(void)
 		finale_textback = NULL;
 
 	finale_textcol = V_GetFontColor(finale->text_colmap);
+	
+	if (! wi_leveltext_style)
+	{
+		styledef_c *def = styledefs.Lookup("INTERLEVEL TEXT");
+		if (! def) def = default_style;
+		wi_leveltext_style = hu_styles.Lookup(def);
+	}
 }
 
 
@@ -370,10 +379,14 @@ static void TextWrite(void)
 		}
 		HUD_SetScale();
 	}
-
+	
+	style_c *style;
+	style=wi_leveltext_style;
+	int t_type = styledef_c::T_TEXT;
+	
 	// draw some of the text onto the screen
 	int cx = 10;
-	int cy = 10;
+	//int cy = 10;
 
 	const char *ch = finaletext;
 
@@ -383,9 +396,33 @@ static void TextWrite(void)
 
 	SYS_ASSERT(finale);
 
-	HUD_SetFont();
-	HUD_SetScale();
-	HUD_SetTextColor(finale_textcol);
+	//HUD_SetFont();
+	//HUD_SetScale();
+	HUD_SetTextColor(finale_textcol); //set a default
+	
+	float txtscale = 0.9; //set a default
+	if(style->def->text[t_type].scale)
+	{
+		txtscale=style->def->text[t_type].scale;
+		HUD_SetScale(txtscale);
+	}
+
+	if(style->def->text[t_type].colmap)
+	{
+		const colourmap_c *colmap = style->def->text[t_type].colmap;
+		HUD_SetTextColor(V_GetFontColor(colmap));
+	}
+	
+	int h = 11; //set a default
+	if(style->fonts[t_type])
+	{
+		HUD_SetFont(style->fonts[t_type]);
+		h = style->fonts[t_type]->NominalHeight();
+		h = h + (3 * txtscale); //bit of spacing
+		h = h * txtscale;
+	}
+
+	int cy = h;
 
 	char line[200];
 	int  pos = 0;
@@ -409,13 +446,18 @@ static void TextWrite(void)
 			pos = 0;
 			line[0] = 0;
 
-			cy += 11;  // FIXME: HUD_FontHeight()
+			cy += h; //11; 
 			continue;
 		}
 
 		line[pos++] = c;
 		line[pos] = 0;
 	}
+	
+	//set back to defaults
+	HUD_SetFont();
+	HUD_SetScale();
+	HUD_SetTextColor();
 }
 
 

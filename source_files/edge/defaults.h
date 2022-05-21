@@ -89,7 +89,6 @@
 #define CFGDEF_USE_MIPMAPPING   (2)
 #define CFGDEF_HQ2X_SCALING     (3)
 #define CFGDEF_SCREEN_HUD       (0)
-#define CFGDEF_SHADOWS          (0)
 #define CFGDEF_CROSSHAIR        (0)
 #define CFGDEF_MAP_OVERLAY      (0)
 #define CFGDEF_ROTATEMAP        (0)

@@ -155,7 +155,6 @@ static void M_ChangeKicking(int keypressed);
 static void M_ChangeWeaponSwitch(int keypressed);
 static void M_ChangeMipMap(int keypressed);
 static void M_ChangeDLights(int keypressed);
-// static void M_ChangeHalos(int keypressed);
 
 // -ES- 1998/08/20 Added resolution options
 // -ACB- 1998/08/29 Moved to top and tried different system
@@ -1726,24 +1725,6 @@ static void M_ChangeMipMap(int keypressed)
 {
 	W_DeleteAllImages();
 }
-
-#if 0
-static void M_ChangeShadows(int keypressed)
-{
-	if (currmap && ((currmap->force_on | currmap->force_off) & MPF_Shadows))
-		return;
-
-	level_flags.shadows = global_flags.shadows;
-}
-
-static void M_ChangeHalos(int keypressed)
-{
-	if (currmap && ((currmap->force_on | currmap->force_off) & MPF_Halos))
-		return;
-
-	level_flags.halos = global_flags.halos;
-}
-#endif
 
 static void M_ChangeKicking(int keypressed)
 {

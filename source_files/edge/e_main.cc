@@ -129,8 +129,6 @@ gameflags_t default_gameflags =
 	true,   // cheats
 	true,   // have_extra
 	false,  // limit_zoom
-	false,  // shadows
-	false,  // halos
 
 	false,    // edge_compat
 	true,     // kicking
@@ -314,14 +312,11 @@ static void SetGlobalVars(void)
 	M_CheckBooleanParm("rotatemap", &rotatemap, false);
 	M_CheckBooleanParm("sound", &nosound, true);
 	M_CheckBooleanParm("music", &nomusic, true);
-	M_CheckBooleanParm("cdmusic", &nocdmusic, true);
 	M_CheckBooleanParm("itemrespawn", &global_flags.itemrespawn, false);
 	M_CheckBooleanParm("mlook", &global_flags.mlook, false);
 	M_CheckBooleanParm("monsters", &global_flags.nomonsters, true);
 	M_CheckBooleanParm("fast", &global_flags.fastparm, false);
 	M_CheckBooleanParm("extras", &global_flags.have_extra, false);
-	M_CheckBooleanParm("shadows", &global_flags.shadows, false);
-	M_CheckBooleanParm("halos", &global_flags.halos, false);
 	M_CheckBooleanParm("kick", &global_flags.kicking, false);
 	M_CheckBooleanParm("singletics", &singletics, false);
 	M_CheckBooleanParm("true3d", &global_flags.true3dgameplay, false);
@@ -1262,7 +1257,7 @@ startuporder_t startcode[] =
 {
 	{  1, InitDDF              },
 	{  1, IdentifyVersion      },
-	{  1, Add_Base		   },
+	{  1, Add_Base		   	   },
 	{  1, Add_Autoload		   },
 	{  1, AddCommandLineFiles  },
 	{  1, CheckTurbo           },
@@ -1276,7 +1271,6 @@ startuporder_t startcode[] =
 	{  1, CON_Start            },
 	{  1, SpecialWadVerify     },
 	{  1, M_InitMiscConVars    },
-	// Old position of W_ReadDDF in case we need to revert - Dasho
 	{  1, DDF_CleanUp          },
 	{  1, SetLanguage          },
 	{  1, ShowNotice           },

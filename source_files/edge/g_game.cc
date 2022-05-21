@@ -193,8 +193,6 @@ void LoadLevel_Bits(void)
 	HANDLE_FLAG(level_flags.res_respawn, MPF_ResRespawn);
 	HANDLE_FLAG(level_flags.have_extra, MPF_Extras);
 	HANDLE_FLAG(level_flags.limit_zoom, MPF_LimitZoom);
-	HANDLE_FLAG(level_flags.shadows, MPF_Shadows);
-	HANDLE_FLAG(level_flags.halos, MPF_Halos);
 	HANDLE_FLAG(level_flags.kicking, MPF_Kicking);
 	HANDLE_FLAG(level_flags.weapon_switch, MPF_WeaponSwitch);
 	HANDLE_FLAG(level_flags.pass_missile, MPF_PassMissile);

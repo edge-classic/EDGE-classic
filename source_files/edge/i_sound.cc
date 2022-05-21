@@ -161,11 +161,6 @@ void I_StartupSound(void)
 		nosound = true;
 		return;
 	}
-#if 0
-	// get round SDL's signal handlers
-	signal(SIGFPE,  SIG_DFL);
-	signal(SIGSEGV, SIG_DFL);
-#endif
 
 	// These checks shouldn't really fail, as SDL2 allows us to force our desired format and convert silently if needed,
 	// but they might end up being a good safety net - Dasho

@@ -173,8 +173,6 @@ static void GV_GetLevelFlags(const char *info, void *storage)
 	HANDLE_FLAG(dest->res_respawn, MPF_ResRespawn);
 	HANDLE_FLAG(dest->have_extra, MPF_Extras);
 	HANDLE_FLAG(dest->limit_zoom, MPF_LimitZoom);
-	HANDLE_FLAG(dest->shadows, MPF_Shadows);
-	HANDLE_FLAG(dest->halos, MPF_Halos);
 	HANDLE_FLAG(dest->kicking, MPF_Kicking);
 	HANDLE_FLAG(dest->weapon_switch, MPF_WeaponSwitch);
 	HANDLE_FLAG(dest->pass_missile, MPF_PassMissile);
@@ -274,8 +272,6 @@ static const char *GV_PutLevelFlags(void *storage)
 	HANDLE_FLAG(src->res_respawn, MPF_ResRespawn);
 	HANDLE_FLAG(src->have_extra, MPF_Extras);
 	HANDLE_FLAG(src->limit_zoom, MPF_LimitZoom);
-	HANDLE_FLAG(src->shadows, MPF_Shadows);
-	HANDLE_FLAG(src->halos, MPF_Halos);
 	HANDLE_FLAG(src->kicking, MPF_Kicking);
 	HANDLE_FLAG(src->weapon_switch, MPF_WeaponSwitch);
 	HANDLE_FLAG(src->pass_missile, MPF_PassMissile);

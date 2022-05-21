@@ -118,8 +118,6 @@ typedef struct gameflags_s
 	bool cheats;
 	bool have_extra;
 	bool limit_zoom;
-	bool shadows;
-	bool halos;
 
 	bool edge_compat;
 	bool kicking;

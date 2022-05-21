@@ -482,42 +482,6 @@ static epi::image_data_c * CreateUserColourImage(image_c *rim, imagedef_c *def)
 	return img;
 }
 
-void R_CreateUserBuiltinShadow(epi::image_data_c *img, imagedef_c *def)
-{
-	SYS_ASSERT(img->bpp == 4);
-	SYS_ASSERT(img->width == img->height);
-
-	int hw = (img->width + 1) / 2;
-
-	for (int y = 0; y < hw; y++)
-	for (int x = y; x < hw; x++)
-	{
-		byte *dest = img->pixels + (y * img->width + x) * 4;
-
-		float dx = (hw-1 - x) / float(hw);
-		float dy = (hw-1 - y) / float(hw);
-
-		float horiz = sqrt(dx * dx + dy * dy);
-		float sq = 1.0f - horiz;
-
-		int v = int(sq * 170.4f);
-
-		if (v < 0 ||
-			x == 0 || x == img->width-1 ||
-			y == 0 || y == img->height-1)
-		{
-			v = 0;
-		}
-
-		*dest++ = 0;
-		*dest++ = 0;
-		*dest++ = 0;
-		*dest   = v;
-	}
-
-	img->EightWaySymmetry();
-}
-
 epi::file_c *OpenUserFileOrLump(imagedef_c *def)
 {
 	if (def->type == IMGDT_File)

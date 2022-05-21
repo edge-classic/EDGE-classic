@@ -140,8 +140,6 @@ static default_t defaults[] =
     // -KM- 1998/07/21 Save the blood setting
     {CFGT_Boolean,  "blood",             &global_flags.more_blood, CFGDEF_MORE_BLOOD},
     {CFGT_Boolean,  "extra",             &global_flags.have_extra, CFGDEF_HAVE_EXTRA},
-    {CFGT_Boolean,  "shadows",           &global_flags.shadows, CFGDEF_SHADOWS},
-    {CFGT_Boolean,  "halos",             &global_flags.halos, 0},
     {CFGT_Boolean,  "weaponkick",        &global_flags.kicking, CFGDEF_KICKING},
     {CFGT_Boolean,  "weaponswitch",      &global_flags.weapon_switch, CFGDEF_WEAPON_SWITCH},
     {CFGT_Boolean,  "mlook",             &global_flags.mlook, CFGDEF_MLOOK},
@@ -521,74 +519,6 @@ void M_MakeSaveScreenShot(void)
 	// glReadPixels(0, 0, SCREENWIDTH, SCREENHEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buffer);
 	// ...
 	// delete [] buffer;
-#endif
-
-#if 0  // OLD SOFTWARE VERSION
-	int x, y;
-	int ax, ay;
-
-	byte pixel;
-	unsigned short rgb;
-	truecol_info_t colinfo;
-
-	save_screenshot_valid = true;
-
-	I_GetTruecolInfo(&colinfo);
-
-	switch (main_scr->bytepp)
-	{
-		case 1:
-		{
-			byte *top = (byte *) main_scr->data;
-
-			top += viewwindowy * main_scr->pitch + viewwindowx;
-
-			for (y=0; y < 100; y++)
-				for (x=0; x < 160; x++)    
-				{
-					ax = x * viewwindowwidth  / 160;
-					ay = y * viewwindowheight / 100;
-
-					SYS_ASSERT(0 <= ax && ax < SCREENWIDTH);
-					SYS_ASSERT(0 <= ay && ay < SCREENHEIGHT);
-
-					pixel = top[ay * main_scr->pitch + ax];
-
-					rgb = ((PIXEL_RED(pixel) & 0xF8) << 7) |
-						((PIXEL_GRN(pixel) & 0xF8) << 2) |
-						((PIXEL_BLU(pixel) & 0xF8) >> 3);
-        
-					save_screenshot[x][y] = rgb;
-				}
-		}
-		break;
-
-		case 2:
-		{
-			unsigned short *top = (unsigned short *) main_scr->data;
-
-			top += viewwindowy * main_scr->pitch/2 + viewwindowx;
-
-			for (y=0; y < 100; y++)
-				for (x=0; x < 160; x++)    
-				{
-					ax = x * viewwindowwidth  / 160;
-					ay = y * viewwindowheight / 100;
-
-					SYS_ASSERT(0 <= ax && ax < SCREENWIDTH);
-					SYS_ASSERT(0 <= ay && ay < SCREENHEIGHT);
-
-					rgb = top[ay * main_scr->pitch/2 + ax];
-
-					// hack !
-					if (colinfo.green_bits == 6)
-						rgb = ((rgb & 0xFFC0) >> 1) | (rgb & 0x001F);
-        
-					save_screenshot[x][y] = rgb;
-				}
-		}
-		break;
-	}
 #endif
 }
 

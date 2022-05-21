@@ -269,8 +269,6 @@ void R_Init(void)
 
 	// -AJA- 1999/07/01: Setup colour tables.
 	V_InitColour();
-
-	RGL_LoadLights();
 }
 
 

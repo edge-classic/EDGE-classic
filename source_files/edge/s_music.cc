@@ -44,8 +44,6 @@
 int mus_volume;
 
 bool nomusic = false;
-bool nocdmusic = false;
-
 
 // Current music handle
 static abstract_music_c *music_player;

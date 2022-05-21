@@ -2,7 +2,6 @@
 
 #define FRACBITS 16
 
-// Finesine table for image swirl function...maybe see if there's a better way than this - Dasho
 int finesine[10240] =
 {
     25,75,125,175,226,276,326,376,

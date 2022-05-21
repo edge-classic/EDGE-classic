@@ -131,11 +131,6 @@ static bool solid_mode;
 
 static std::list<drawsub_c *> drawsubs;
 
-#ifdef SHADOW_PROTOTYPE
-static const image_c *shadow_image = NULL;
-#endif
-
-
 // ========= MIRROR STUFF ===========
 
 #define MAX_MIRRORS  3
@@ -605,138 +600,6 @@ typedef struct wall_plane_data_s
 	float emu_mx, emu_my;
 }
 wall_plane_data_t;
-
-
-#if 0
-static inline void Color_Std(local_gl_vert_t *v, int R, int G, int B, float alpha)
-{
-	v->col[0] = R / 255.0;
-	v->col[1] = G / 255.0;
-	v->col[2] = B / 255.0;
-	v->col[3] = alpha;
-}
-
-static inline void Color_Rainbow(local_gl_vert_t *v, int R, int G, int B, float alpha)
-{
-	v->col[0] = MIN(1.0, R * ren_red_mul / 255.0);
-	v->col[1] = MIN(1.0, G * ren_grn_mul / 255.0);
-	v->col[2] = MIN(1.0, B * ren_blu_mul / 255.0);
-	v->col[3] = alpha;
-}
-
-static inline void Color_Dimmed(local_gl_vert_t *v, int R, int G, int B, float mul)
-{
-	v->col[0] = mul * R / 255.0;
-	v->col[1] = mul * G / 255.0;
-	v->col[2] = mul * B / 255.0;
-	v->col[3] = 1.0;
-}
-
-static inline void Color_White(local_gl_vert_t *v)
-{
-	v->col[0] = 1.0;
-	v->col[1] = 1.0;
-	v->col[2] = 1.0;
-	v->col[3] = 1.0;
-}
-
-static inline void Color_Black(local_gl_vert_t *v)
-{
-	v->col[0] = 0.0;
-	v->col[1] = 0.0;
-	v->col[2] = 0.0;
-	v->col[3] = 1.0;
-}
-
-static inline void Vertex_Std(local_gl_vert_t *v, const vec3_t *src, GLboolean edge)
-{
-	v->x = src->x;
-	v->y = src->y;
-	v->z = src->z;
-
-	v->edge = edge;
-}
-
-static inline void Normal_Std(local_gl_vert_t *v, float nx, float ny, float nz)
-{
-	v->nx = nx;
-	v->ny = ny;
-	v->nz = nz;
-}
-
-static inline void TexCoord_Wall(local_gl_vert_t *v, int t,
-		const divline_t *div, float tx0, float ty0,
-		float tx_mul, float ty_mul)
-{
-	float along;
-
-	if (fabs(div->dx) > fabs(div->dy))
-	{
-		SYS_ASSERT(0 != div->dx);
-		along = (v->x - div->x) / div->dx;
-	}
-	else
-	{
-		SYS_ASSERT(0 != div->dy);
-		along = (v->y - div->y) / div->dy;
-	}
-
-	v->s[t] = tx0 + along * tx_mul;
-	v->t[t] = ty0 + v->z  * ty_mul;
-}
-
-static inline void TexCoord_Plane(local_gl_vert_t *v, int t,
-		float tx0, float ty0, float image_w, float image_h,
-		const vec2_t *x_mat, const vec2_t *y_mat)
-{
-	float rx = (tx0 + v->x) / image_w;
-	float ry = (ty0 + v->y) / image_h;
-
-	v->s[t] = rx * x_mat->x + ry * x_mat->y;
-	v->t[t] = rx * y_mat->x + ry * y_mat->y;
-}
-
-
-static inline void TexCoord_Shadow(local_gl_vert_t *v, int t)
-{
-#if 0
-	float rx = (v->x + data->tx);
-	float ry = (v->y + data->ty);
-
-	v->s[t] = rx * data->x_mat.x + ry * data->x_mat.y;
-	v->t[t] = rx * data->y_mat.x + ry * data->y_mat.y;
-#endif
-}
-
-static inline void TexCoord_FloorGlow(local_gl_vert_t *v, int t, float f_h)
-{
-	v->s[t] = 0.5;
-	v->t[t] = (v->z - f_h) / 64.0;
-}
-
-static inline void TexCoord_CeilGlow(local_gl_vert_t *v, int t, float c_h)
-{
-	v->s[t] = 0.5;
-	v->t[t] = (c_h - v->z) / 64.0;
-}
-
-static inline void TexCoord_WallGlow(local_gl_vert_t *v, int t,
-		float x1, float y1, float nx, float ny)
-{
-	float dist = (v->x - x1) * nx + (v->y - y1) * ny;
-
-	v->s[t] = 0.5;
-	v->t[t] = dist / 192.0;
-}
-
-static inline void TexCoord_WallLight(local_gl_vert_t *v, int t)
-{
-}
-
-static inline void TexCoord_PlaneLight(local_gl_vert_t *v, int t)
-{
-}
-#endif
 
 // Adapted from Quake 3 GPL release - Dasho (not used yet, but might be for future effects)
 void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
@@ -2574,51 +2437,6 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	}
 
 	swirl_pass = 0;
-
-#ifdef SHADOW_PROTOTYPE
-	if (level_flags.shadows && solid_mode && face_dir > 0)
-	{
-		wall_plane_data_t dat2;
-		memcpy(&dat2, &data, sizeof(dat2));
-
-		dat2.dlights = NULL;
-		dat2.trans = 0.5;
-		dat2.image = shadow_image;
-
-		tex_id = W_ImageCache(dat2.image);
-
-		for (drawthing_t *dthing=dfloor->things; dthing; dthing=dthing->next)
-		{
-			if (dthing->mo->info->shadow_trans <= 0 || dthing->mo->floorz >= viewz)
-				continue;
-
-			dat2.tx = -(dthing->mo->x - dthing->mo->radius);
-			dat2.ty = -(dthing->mo->y - dthing->mo->radius);
-
-			dat2.x_mat.x = 0.5f / dthing->mo->radius;
-			dat2.x_mat.y = 0;
-
-			dat2.y_mat.y = 0.5f / dthing->mo->radius;
-			dat2.y_mat.x = 0;
-
-			poly = RGL_NewPolyQuad(num_vert);
-
-			for (seg=cur_sub->segs, i=0; seg && (i < MAX_PLVERT); 
-				seg=seg->sub_next, i++)
-			{
-				PQ_ADD_VERT(poly, seg->v1->x, seg->v1->y, h);
-			}
-
-			RGL_BoundPolyQuad(poly);
-
-			RGL_RenderPolyQuad(poly, &data, ShadowCoordFunc, tex_id,0,
-				/* pass */ 2, BL_Alpha);
-
-			RGL_FreePolyQuad(poly);
-		}
-	}
-#endif
-
 }
 
 static inline void AddNewDrawFloor(drawsub_c *dsub, extrafloor_t *ef,
@@ -3086,16 +2904,6 @@ static void RGL_WalkBSPNode(unsigned int bspnum)
 	// Recursively divide back space.
 	if (RGL_CheckBBox(node->bbox[side ^ 1]))
 		RGL_WalkBSPNode(node->children[side ^ 1]);
-}
-
-//
-// RGL_LoadLights
-//
-void RGL_LoadLights(void)
-{
-#ifdef SHADOW_PROTOTYPE
-	shadow_image = W_ImageLookup("SHADOW_STD");
-#endif
 }
 
 //

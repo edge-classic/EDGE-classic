@@ -76,8 +76,6 @@ const byte *RGL_BuildImage(int *w, int *h);
 //  RGL_BSP
 //
 
-void RGL_LoadLights(void);
-
 extern int ren_extralight;
 
 extern float ren_red_mul;

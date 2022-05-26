@@ -137,6 +137,8 @@ static style_c *wi_net_style;
 
 // background
 static const image_c *bg_image;
+static const image_c *leaving_bg_image;
+static const image_c *entering_bg_image;
 
 // You Are Here graphic
 static const image_c *yah[2] = {NULL, NULL};
@@ -410,6 +412,12 @@ static void DrawLevelFinished(void)
 	// draw <LevelName> 
 	SYS_ASSERT(lnames[0]);
 
+	//Lobo 2022: if we have a per level image defined, use that instead
+	if (leaving_bg_image)
+	{
+		HUD_DrawImageTitleWS(leaving_bg_image); //Lobo: Widescreen support
+	}
+
 	//float w = IM_WIDTH(lnames[0]); // Seems to be unneeded for now - Dasho
 	//float h = IM_HEIGHT(lnames[0]);
 
@@ -448,6 +456,13 @@ static void DrawEnteringLevel(void)
 	//      (Stop Map30 from crashing)
 	if (! lnames[1])
 		return;
+
+	//Lobo 2022: if we have a per level image defined, use that instead
+	if (entering_bg_image)
+	{
+		HUD_DrawImageTitleWS(entering_bg_image); //Lobo: Widescreen support
+	}
+		
 
 	float h = IM_HEIGHT(entering);
 	//float w = IM_WIDTH(entering); // Seems to be unneeded for now - Dasho
@@ -1440,7 +1455,7 @@ void WI_Drawer(void)
 	{
 		//HUD_StretchImage(0, 0, 320, 200, bg_image);
 		HUD_DrawImageTitleWS(bg_image); //Lobo: Widescreen support
-		
+
 		for (int i = 0; i < worldint.numanims; i++)
 		{
 			wi_anim_c *a = &worldint.anims[i];
@@ -1508,7 +1523,12 @@ static void LoadData(void)
 
 	const gamedef_c *gd = wi_stats.cur->episode;
 
-	// background
+	
+	
+
+	//Lobo 2022: if we have a per level image defined, use that instead
+	leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic);
+	entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic);
 	bg_image = W_ImageLookup(gd->background);
 
 	lnames[0] = W_ImageLookup(wi_stats.cur->namegraphic);

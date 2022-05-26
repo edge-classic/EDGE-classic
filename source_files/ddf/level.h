@@ -132,6 +132,8 @@ public:
 	epi::strent_c description;
   
   	lumpname_c namegraphic;
+	lumpname_c leavingbggraphic;
+	lumpname_c enteringbggraphic;
   	lumpname_c lump;
    	lumpname_c sky;
    	lumpname_c surround;

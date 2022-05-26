@@ -81,6 +81,8 @@ static const commandlist_t level_commands[] =
 	DF("PARTIME", partime, DDF_MainGetTime),
 	DF("EPISODE", episode_name, DDF_MainGetString),
 	DF("STATS", wistyle, DDF_LevelGetWistyle),
+	DF("LEAVING_BACKGROUND", leavingbggraphic, DDF_MainGetLumpName),
+	DF("ENTERING_BACKGROUND", enteringbggraphic, DDF_MainGetLumpName),
 
 	DDF_CMD_END
 };
@@ -441,6 +443,8 @@ void mapdef_c::CopyDetail(mapdef_c &src)
 	autotag = src.autotag;
 
 	wistyle = src.wistyle;
+	leavingbggraphic = src.leavingbggraphic;
+	enteringbggraphic = src.enteringbggraphic;
 
 	f_pre = src.f_pre;
 	f_end = src.f_end;
@@ -469,6 +473,9 @@ void mapdef_c::Default()
 	autotag = 0;
 
 	wistyle = WISTYLE_Doom;
+
+	leavingbggraphic.clear();
+	enteringbggraphic.clear();
 
 	f_pre.Default();
 	f_end.Default();

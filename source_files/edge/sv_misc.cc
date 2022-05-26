@@ -647,12 +647,14 @@ void SV_TriggerCreateElems(int num_elems)
 
 void SV_TriggerFinaliseElems(void)
 {
+	/* Lobo: avoids a CTD when we have conflicting same named RTS scripts
 	rad_trigger_t *cur;
 
 	for (cur=active_triggers; cur; cur=cur->next)
 	{
 		RAD_GroupTriggerTags(cur);
 	}
+	*/
 }
 
 

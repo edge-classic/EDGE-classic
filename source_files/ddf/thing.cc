@@ -705,6 +705,15 @@ static void ThingFinishEntry(void)
 				*dynamic_mobj->pickup_benefits = *other->pickup_benefits;
 			}
 		}
+
+		if(!dynamic_mobj->pickup_message)
+		{
+				if(other->pickup_message)
+				{
+					dynamic_mobj->pickup_message = other->pickup_message; 
+				}
+		}
+
 	}
 	TemplateThing = NULL;
 }

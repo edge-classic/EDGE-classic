@@ -35,6 +35,7 @@
 #include "e_event.h"
 #include "e_input.h"
 #include "e_main.h"
+#include "e_player.h"
 #include "hu_stuff.h"
 #include "m_math.h"
 #include "m_misc.h"
@@ -442,7 +443,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 	if (E_IsKeyPressed(key_fire))
 		cmd->buttons |= BT_ATTACK;
 
-	if (E_IsKeyPressed(key_use))
+	if (E_IsKeyPressed(key_use) && players[cmd->player_idx]->playerstate != PST_REBORN) // Prevent passing use action when hitting 'use' to respawn
 		cmd->buttons |= BT_USE;
 
 	if (E_IsKeyPressed(key_secondatk))

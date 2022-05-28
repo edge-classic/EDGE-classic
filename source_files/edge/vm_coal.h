@@ -30,6 +30,7 @@ void VM_RegisterHUD();
 void VM_RegisterPlaysim();
 
 // HUD stuff
+void VM_NewGame(void);
 void VM_BeginLevel(void);
 void VM_RunHud(void);
 

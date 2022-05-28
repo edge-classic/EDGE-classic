@@ -1074,6 +1074,8 @@ static void G_DoNewGame(void)
 	delete defer_params;
 	defer_params = NULL;
 
+	VM_NewGame();
+
 	// -AJA- 2003/10/09: support for pre-level briefing screen on first map.
 	//       FIXME: kludgy. All this game logic desperately needs rethinking.
 	if (skip_pre)

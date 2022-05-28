@@ -12,9 +12,11 @@ Bugs fixed
 + Fixed Load_DOOM sound loading function trying to allocate memory for empty/stub sounds
 + Fixed ALWAYS_LOUD things.ddf special not working with non-enemy mobjs
 + Fixed SFX loaders treating all sounds as Mono regardless of original sound format
++ Fixed pressing the Use key to respawn activating linedefs when the player comes back to life
 
 General Improvements
 --------------------
++ COAL: new_game() hook added that will always be executed when starting a new game (can be used to reset variables, etc)
 + Original RNG LUT for M_Random/P_Random replaced with improved quality generators from the C++ stdlib
 + Crosshair color and size can now be changed via the Video Options menu
 + Pre-level story text/intermission will now be skipped when using the IDCLEV/level warp cheat

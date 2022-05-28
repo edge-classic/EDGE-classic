@@ -665,6 +665,11 @@ void VM_RegisterHUD()
 	ui_vm->AddNativeFunction("hud.play_sound",      HD_play_sound);
 }
 
+void VM_NewGame(void)
+{
+    VM_CallFunction(ui_vm, "new_game");
+}
+
 void VM_BeginLevel(void)
 {
     VM_CallFunction(ui_vm, "begin_level");

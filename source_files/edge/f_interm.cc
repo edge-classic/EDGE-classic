@@ -407,8 +407,6 @@ void WI_Clear(void)
 // Draws "<Levelname> Finished!"
 static void DrawLevelFinished(void)
 {
-	float y = WI_TITLEY;
-
 	// draw <LevelName> 
 	SYS_ASSERT(lnames[0]);
 
@@ -418,30 +416,27 @@ static void DrawLevelFinished(void)
 		HUD_DrawImageTitleWS(leaving_bg_image); //Lobo: Widescreen support
 	}
 
-	//float w = IM_WIDTH(lnames[0]); // Seems to be unneeded for now - Dasho
-	//float h = IM_HEIGHT(lnames[0]);
-
-	//float w2 = IM_WIDTH(finished);
+	float y = WI_TITLEY;
+	float w1 = 160;
+	float h1 = 15;
 
 	// load styles
 	style_c *style;
-
 	style=wi_sp_style;
 	int t_type = styledef_c::T_TEXT;
 	
-	int h = style->fonts[t_type]->NominalHeight();
-	
 	HUD_SetAlignment(0, -1);//center it
-
 	//If we have a custom mapname graphic e.g.CWILVxx then use that
 	if (W_IsLumpInPwad(lnames[0]->name))
 	{
-		float w2 = IM_WIDTH(lnames[0]); 
+		w1 = IM_WIDTH(lnames[0]);
+		h1 = IM_HEIGHT(lnames[0]);
 		HUD_SetAlignment(-1, -1);//center it
-		HUD_DrawImage(160 - w2/2, y, lnames[0]);
+		HUD_DrawImage(160 - w1/2, y, lnames[0]);
 	}
 	else
 	{
+		h1 = style->fonts[t_type]->NominalHeight();
 		HL_WriteText(style,t_type, 160, y, language[wi_stats.cur->description.c_str()]);
 	}
 	HUD_SetAlignment(-1, -1);//set it back to usual
@@ -450,19 +445,29 @@ static void DrawLevelFinished(void)
 	if (!style->fonts[t_type]) 
 		t_type = styledef_c::T_TEXT;
 	
+	y = y + h1;
+
 	HUD_SetAlignment(0, -1);//center it
-	HL_WriteText(style,t_type,160, y + h * 5/4, language["IntermissionFinished"]);
+	//If we have a custom Finished graphic e.g.WIF then use that
+	if (W_IsLumpInPwad(finished->name))
+	{
+		w1 = IM_WIDTH(finished);
+		h1 = IM_HEIGHT(finished);
+		HUD_SetAlignment(-1, -1);//center it
+		HUD_DrawImage(160 - w1/2, y * 5/4, finished);
+	}
+	else
+	{
+		h1 = style->fonts[t_type]->NominalHeight();
+		HL_WriteText(style,t_type,160, y * 5/4, language["IntermissionFinished"]);
+	}
 	HUD_SetAlignment(-1, -1);//set it back to usual
 
-	//HUD_DrawImage(160 - w/2,  y, lnames[0]);
-	//HUD_DrawImage(160 - w2/2, y + h * 5/4, finished);
 }
 
 // Draws "Entering <LevelName>"
 static void DrawEnteringLevel(void)
 {
-	float y = WI_TITLEY;
-
 	// -KM- 1998/11/25 If there is no level to enter, don't draw it.
 	//      (Stop Map30 from crashing)
 	if (! lnames[1])
@@ -473,41 +478,52 @@ static void DrawEnteringLevel(void)
 	{
 		HUD_DrawImageTitleWS(entering_bg_image); //Lobo: Widescreen support
 	}
-		
 
-	float h = IM_HEIGHT(entering);
-	//float w = IM_WIDTH(entering); // Seems to be unneeded for now - Dasho
-	//float w2 = IM_WIDTH(lnames[1]);
+	float y = WI_TITLEY;
+	float w1 = 160;
+	float h1 = 15;	
 
 	style_c *style;
 	style=wi_sp_style;
-	int t_type = styledef_c::T_TEXT;
-	
-	HUD_SetAlignment(0, -1);//center it
-
-	//If we have a custom mapname graphic e.g.CWILVxx then use that
-	if (W_IsLumpInPwad(lnames[1]->name))
-	{
-		float w2 = IM_WIDTH(lnames[1]);
-		HUD_SetAlignment(-1, -1);//center it
-		HUD_DrawImage(160 - w2/2, y + h * 5/4, lnames[1]);
-	}
-	else
-	{
-		HL_WriteText(style,t_type, 160, y + h * 5/4, language[wi_stats.next->description.c_str()]);
-	}
-	HUD_SetAlignment(-1, -1);//set it back to usual
-	
-	t_type = styledef_c::T_TITLE;
+	int t_type = styledef_c::T_TITLE;
 	if (!style->fonts[t_type]) 
 		t_type = styledef_c::T_TEXT;
 	
 	HUD_SetAlignment(0, -1);//center it
-	HL_WriteText(style,t_type,160,  y, language["IntermissionEntering"]);
+	//If we have a custom Entering graphic e.g.WIENTER then use that
+	if (W_IsLumpInPwad(entering->name))
+	{
+		w1 = IM_WIDTH(entering);
+		h1 = IM_HEIGHT(entering);
+		HUD_SetAlignment(-1, -1);//center it
+		HUD_DrawImage(160 - w1/2, y, entering);
+	}
+	else
+	{
+		h1 = style->fonts[t_type]->NominalHeight();
+		HL_WriteText(style,t_type,160, y, language["IntermissionEntering"]);
+	}
 	HUD_SetAlignment(-1, -1);//set it back to usual
 
-	//HUD_DrawImage(160 - w/2,  y, entering);
-	//HUD_DrawImage(160 - w2/2, y + h * 5/4, lnames[1]);
+	y = y + h1;
+
+	t_type = styledef_c::T_TEXT;
+	
+	HUD_SetAlignment(0, -1);//center it
+	//If we have a custom mapname graphic e.g.CWILVxx then use that
+	if (W_IsLumpInPwad(lnames[1]->name))
+	{
+		w1 = IM_WIDTH(lnames[1]);
+		h1 = IM_HEIGHT(lnames[1]);
+		HUD_SetAlignment(-1, -1);//center it
+		HUD_DrawImage(160 - w1/2, y * 5/4, lnames[1]);
+	}
+	else
+	{
+		HL_WriteText(style,t_type, 160, y * 5/4, language[wi_stats.next->description.c_str()]);
+	}
+	HUD_SetAlignment(-1, -1);//set it back to usual
+
 }
 
 static void DrawOnLnode(wi_mappos_c* mappos, const image_c * images[2])

@@ -192,7 +192,7 @@ static char MonitSiz[]  = "4:3/16:9/16:10/3:2/24:10";
 const char WIPE_EnumStr[] = "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors";
 
 static char StereoNess[]  = "Off/On/Swapped";
-static char MixChans[]    = "32/64/96";
+static char MixChans[]    = "32/64/96/128/160/192/224/256";
 static char QuietNess[]   = "Loud (distorted)/Normal/Soft/Very Soft";
 
 static char CrosshairColor[] = "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange";
@@ -480,7 +480,7 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Boolean, "Dynamic Reverb",       YesNo, 2, &dynamic_reverb, NULL, NULL},
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},
-	{OPT_Switch,  "Mix Channels",    MixChans,  3, &var_mix_channels, M_ChangeMixChan, NULL},
+	{OPT_Switch,  "Mix Channels",    MixChans,  8, &var_mix_channels, M_ChangeMixChan, NULL},
 	{OPT_Switch,  "Quiet Factor",    QuietNess, 4, &var_quiet_factor, NULL, NULL},
 	{OPT_Boolean, "Precache SFX",       YesNo, 2, &var_cache_sfx, NULL, "NeedRestart"},
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},

@@ -59,8 +59,8 @@
 #define QUIET_BITS  0
 
 
-#define MIN_CHANNELS    8
-#define MAX_CHANNELS  128
+#define MIN_CHANNELS    32
+#define MAX_CHANNELS  256
 
 mix_channel_c *mix_chan[MAX_CHANNELS];
 int num_chan;

@@ -45,7 +45,7 @@
 #include "r_misc.h"
 #include "r_draw.h"
 #include "r_modes.h"
-
+#include "w_wad.h"
 
 //
 // Data needed to add patches to full screen intermission pics.
@@ -432,7 +432,18 @@ static void DrawLevelFinished(void)
 	int h = style->fonts[t_type]->NominalHeight();
 	
 	HUD_SetAlignment(0, -1);//center it
-	HL_WriteText(style,t_type, 160, y, language[wi_stats.cur->description.c_str()]);
+
+	//If we have a custom mapname graphic e.g.CWILVxx then use that
+	if (W_IsLumpInPwad(lnames[0]->name))
+	{
+		float w2 = IM_WIDTH(lnames[0]); 
+		HUD_SetAlignment(-1, -1);//center it
+		HUD_DrawImage(160 - w2/2, y, lnames[0]);
+	}
+	else
+	{
+		HL_WriteText(style,t_type, 160, y, language[wi_stats.cur->description.c_str()]);
+	}
 	HUD_SetAlignment(-1, -1);//set it back to usual
 
 	t_type = styledef_c::T_TITLE;
@@ -473,7 +484,18 @@ static void DrawEnteringLevel(void)
 	int t_type = styledef_c::T_TEXT;
 	
 	HUD_SetAlignment(0, -1);//center it
-	HL_WriteText(style,t_type, 160, y + h * 5/4, language[wi_stats.next->description.c_str()]);
+
+	//If we have a custom mapname graphic e.g.CWILVxx then use that
+	if (W_IsLumpInPwad(lnames[1]->name))
+	{
+		float w2 = IM_WIDTH(lnames[1]);
+		HUD_SetAlignment(-1, -1);//center it
+		HUD_DrawImage(160 - w2/2, y + h * 5/4, lnames[1]);
+	}
+	else
+	{
+		HL_WriteText(style,t_type, 160, y + h * 5/4, language[wi_stats.next->description.c_str()]);
+	}
 	HUD_SetAlignment(-1, -1);//set it back to usual
 	
 	t_type = styledef_c::T_TITLE;

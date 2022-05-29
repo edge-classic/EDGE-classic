@@ -63,7 +63,7 @@ Bugfixes and detailed changes can be found in CHANGELOG.txt
 # Currently Supported Platforms
 
 - Windows 32/64-bit (x86 architecture)
-- Linux 32/64-bit (x86 and ARM64 architecture)
+- Linux 32/64-bit (x86 and ARM architecture)
 - Mac 64-bit (x86 and M1 architecture)
 
 To learn more about EDGE-Classic, DDF, RTS, or COAL, please visit [our wiki](https://github.com/dashodanger/EDGE-classic/wiki).

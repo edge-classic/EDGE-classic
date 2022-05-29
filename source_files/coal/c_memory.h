@@ -23,7 +23,12 @@ struct block_c
 {
 	int used;
 
+// Prevent SIGBUS errors on ARM32
+#ifdef __arm__
+	double data[4096];
+#else
 	char data[4096];
+#endif
 
 public:
 	 block_c() : used(0) { }

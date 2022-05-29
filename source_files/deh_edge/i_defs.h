@@ -70,16 +70,8 @@ namespace Deh_Edge
 #define W_OK    0x04
 #endif
 
-// LINUX
-#elif defined(__linux__)
-
-namespace Deh_Edge
-{
-	typedef long long Int64;
-}
-
-// MacOS X
-#elif defined (__APPLE__)
+// *NIX/APPLE
+#elif defined(__linux__) || defined (__unix__) || defined (__APPLE__)
 
 namespace Deh_Edge
 {
@@ -87,7 +79,7 @@ namespace Deh_Edge
 }
 
 #else
-#error Unknown System (not DJGPP, WIN32, LINUX or APPLE)
+#error Unknown System (not DJGPP, WIN32, LINUX, UNIX or APPLE)
 #endif
 
 #endif /*__SYSTEM_SPECIFIC_DEFS__*/

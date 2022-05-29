@@ -36,7 +36,7 @@
 #include "am_map.h"     // AM_Drawer
 #include "r_colormap.h"
 #include "s_sound.h"
-#if defined _MSC_VER || defined __APPLE__
+#if defined _MSC_VER || defined __APPLE__ || defined __unix__
 #include <cmath>
 #endif
 

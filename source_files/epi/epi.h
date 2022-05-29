@@ -36,6 +36,14 @@
 #include "epi_macosx.h"
 #endif
 
+ // The macos header should suffice for BSD as well in this particular case - Dasho
+#ifdef __unix__
+// I think APPLE would pass the __unix__ check too, so avoid duplicate includes
+#ifndef __APPLE__
+#include "epi_macosx.h"
+#endif
+#endif
+
 namespace epi
 {
 	// Base Functions

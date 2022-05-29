@@ -64,6 +64,7 @@ Bugfixes and detailed changes can be found in CHANGELOG.txt
 
 - Windows 32/64-bit (x86 architecture)
 - Linux 32/64-bit (x86 and ARM architecture)
+- BSD 32/64-bit (x86 architecture - tested with FreeBSD 13)
 - Mac 64-bit (x86 and M1 architecture)
 
 To learn more about EDGE-Classic, DDF, RTS, or COAL, please visit [our wiki](https://github.com/dashodanger/EDGE-classic/wiki).

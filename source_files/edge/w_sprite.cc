@@ -409,7 +409,7 @@ static void MarkCompletedFrames(void)
 					def->name, frame_ch, frame->rots - rot_count, frame->rots);
 					
 				//try to fix cases where some dumbass used A1 instead of A0
-				if (rot_count == 1) 
+				if (rot_count == 1 && !frame->is_weapon) 
 					frame->rots = 1;	
 			}
 		}

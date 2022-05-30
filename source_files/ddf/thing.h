@@ -299,6 +299,9 @@ typedef enum
 	
 	// -Lobo- 2021/11/18: floorclip flag
 	HF_FLOORCLIP = (1 << 17),
+
+	// -Lobo- 2022/05/30: this thing cannot trigger lines
+	HF_NOTRIGGERLINES = (1 << 18),
 	
 }
 mobjhyperflag_t;

@@ -1094,6 +1094,10 @@ static bool P_ActivateSpecialLine(line_t * line,
 			// Monsters don't trigger secrets
 			if (line && (line->flags & MLF_Secret))
 				return false;
+
+			// Monster is not allowed to trigger lines
+			if (thing->info->hyperflags & HF_NOTRIGGERLINES)
+				return false;
 		}
 		else
 		{

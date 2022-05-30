@@ -1454,6 +1454,7 @@ static specflags_t hyper_specials[] =
 	{"TILT", HF_TILT, 0},
 	{"IMMORTAL", HF_IMMORTAL, 0},
 	{"FLOOR_CLIP", HF_FLOORCLIP, 0}, //Lobo: new FLOOR_CLIP flag
+	{"TRIGGER_LINES", HF_NOTRIGGERLINES, 1},
 	{NULL, 0, 0}
 };
 

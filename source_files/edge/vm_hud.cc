@@ -682,6 +682,9 @@ void VM_SaveGame(void)
 
 void VM_BeginLevel(void)
 {
+	// Need to set these to prevent NULL references if using PL_setcounter in the begin_level hook
+	ui_hud_who    = players[displayplayer];
+	ui_player_who = players[displayplayer];
     VM_CallFunction(ui_vm, "begin_level");
 }
 

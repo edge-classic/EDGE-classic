@@ -252,8 +252,6 @@ void LoadLevel_Bits(void)
 	exit_skipall = false;
 	exit_hub_tag = 0;
 
-	VM_BeginLevel();
-
 	BOT_BeginLevel();
 
 	gamestate = GS_LEVEL;
@@ -299,6 +297,8 @@ void G_DoLoadLevel(void)
 
 			SpawnInitialPlayers();
 
+			// Need to investigate if VM_BeginLevel() needs to go here too now - Dasho
+
 			G_RemoveOldAvatars();
 
 			P_HubFastForward();
@@ -309,6 +309,8 @@ void G_DoLoadLevel(void)
 	LoadLevel_Bits();
 
 	SpawnInitialPlayers();
+
+	VM_BeginLevel();
 }
 
 

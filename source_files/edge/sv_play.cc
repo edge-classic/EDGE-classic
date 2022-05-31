@@ -109,7 +109,7 @@ static savefield_t sv_fields_player[] =
         SR_PlayerGetWeapon, SR_PlayerPutWeapon),
 	SF(ammo[0], "ammo", NUMAMMO, SVT_STRUCT("playerammo_t"),
 	SR_PlayerGetAmmo, SR_PlayerPutAmmo),
-	SF(inventory[0], "inv", NUMINV, SVT_STRUCT("playerinv_t"),
+	SF(inventory[0], "inventory", NUMINV, SVT_STRUCT("playerinv_t"),
 	SR_PlayerGetInv, SR_PlayerPutInv),
 	SF(counters[0], "counters", NUMCOUNTER, SVT_STRUCT("playercounter_t"),
 	SR_PlayerGetCounter, SR_PlayerPutCounter),

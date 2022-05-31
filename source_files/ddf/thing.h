@@ -372,7 +372,12 @@ invtype_e;
 // Counter types defined.
 typedef enum
 {
-	COUNT_01, COUNT_02,	COUNT_03, COUNT_04,	COUNT_05,
+	CT_Lives = 0, // Arbitrarily named Lives counter
+	CT_Score,      // Arbitrarily named Score counter
+	CT_Money,     // Arbitrarily named Money
+	CT_Experience,       // Arbitrarily named EXP counter
+
+	COUNT_05,
 	COUNT_06, COUNT_07,	COUNT_08, COUNT_09,	COUNT_10,
 	COUNT_11, COUNT_12,	COUNT_13, COUNT_14,	COUNT_15,
 	COUNT_16, COUNT_17,	COUNT_18, COUNT_19,	COUNT_20,

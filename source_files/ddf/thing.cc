@@ -441,13 +441,14 @@ const specflags_t inv_types[] =
 
 const specflags_t counter_types[] =
 {
-    {"LIVES", COUNT_01, 0},
-    {"SCORE", COUNT_02, 0},
-    {"MONEY", COUNT_03, 0},
-    {"COUNTER01", COUNT_01, 0},
-    {"COUNTER02", COUNT_02, 0},
-    {"COUNTER03", COUNT_03, 0},
-    {"COUNTER04", COUNT_04, 0},
+    {"LIVES", CT_Lives, 0},
+    {"SCORE", CT_Score, 0},
+    {"MONEY", CT_Money, 0},
+	{"EXPERIENCE", CT_Experience, 0},
+    {"COUNTER01", CT_Lives, 0},
+    {"COUNTER02", CT_Score, 0},
+    {"COUNTER03", CT_Money, 0},
+    {"COUNTER04", CT_Experience, 0},
     {"COUNTER05", COUNT_05, 0},
     {"COUNTER06", COUNT_06, 0},
     {"COUNTER07", COUNT_07, 0},

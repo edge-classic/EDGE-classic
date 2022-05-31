@@ -551,50 +551,6 @@ static void PL_set_counter(coal::vm_c *vm, int argc)
 	ui_player_who->counters[cntr].num = amt;
 }
 
-// player.set_named_counter(type, value)
-//
-static void PL_set_named_counter(coal::vm_c *vm, int argc)
-{
-	if (argc != 2)
-		I_Error("player.set_named_counter: wrong number of arguments given\n");
-
-	int cntr;
-	const char *string_cntr = vm->AccessParamString(0);
-
-	if (string_cntr)
-	{
-		if (strncasecmp(string_cntr, "LIVES", 5) == 0)
-			cntr = 1;
-		else if (strncasecmp(string_cntr, "SCORE", 5) == 0)
-			cntr = 2;
-		else if (strncasecmp(string_cntr, "MONEY", 5) == 0)
-			cntr = 3;
-		else if (strncasecmp(string_cntr, "EXP", 3) == 0)
-			cntr = 4;
-		else
-			I_Error("player.set_named_counter: bad counter alias: %s\n", string_cntr);
-	}
-	else
-		I_Error("player.set_named_counter: no counter alias given!\n");
-	
-	int amt = (int) *vm->AccessParam(1);
-
-	if (cntr < 1 || cntr > NUMCOUNTER)
-		I_Error("player.set_named_counter: bad counter number: %d\n", cntr);
-
-	cntr--;
-
-	if (amt < 0)
-		I_Error("player.set_named_counter: target amount cannot be negative!\n");
-
-	if (amt > ui_player_who->counters[cntr].max)
-	{
-		I_Error("player.set_named_counter: target amount %d exceeds limit for counter alias %s\n", amt, string_cntr);
-	}
-
-	ui_player_who->counters[cntr].num = amt;
-}
-
 // player.main_ammo(clip)
 //
 static void PL_main_ammo(coal::vm_c *vm, int argc)
@@ -1073,7 +1029,6 @@ void VM_RegisterPlaysim()
     ui_vm->AddNativeFunction("player.counter",        PL_counter);
     ui_vm->AddNativeFunction("player.counter_max",     PL_counter_max);
 	ui_vm->AddNativeFunction("player.set_counter",     PL_set_counter);
-	ui_vm->AddNativeFunction("player.set_named_counter",     PL_set_named_counter);
 }
 
 

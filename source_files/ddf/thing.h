@@ -322,7 +322,9 @@ typedef enum
 	BENEFIT_Armour,
 	BENEFIT_Powerup,
 	BENEFIT_Inventory,
-	BENEFIT_InventoryLimit
+	BENEFIT_InventoryLimit,
+	BENEFIT_Counter,
+	BENEFIT_CounterLimit
 }
 benefit_type_e;
 
@@ -363,6 +365,18 @@ typedef enum
 	NUMINV  // Total count (25)
 }
 invtype_e;
+
+// Counter types defined.
+typedef enum
+{
+	COUNT_01, COUNT_02,	COUNT_03, COUNT_04,	COUNT_05,
+	COUNT_06, COUNT_07,	COUNT_08, COUNT_09,	COUNT_10,
+	COUNT_11, COUNT_12,	COUNT_13, COUNT_14,	COUNT_15,
+	COUNT_16, COUNT_17,	COUNT_18, COUNT_19,	COUNT_20,
+	COUNT_21, COUNT_22,	COUNT_23, COUNT_24,	COUNT_25,
+	NUMCOUNTER  // Total count (25)
+}
+countertype_e;
 
 typedef enum
 {
@@ -516,6 +530,9 @@ typedef enum
 	// player must have inventory (subtype is INVENTORY* value)
 	COND_Inventory,
 
+	// player must have inventory (subtype is COUNTER* value)
+	COND_Counter,
+
 	// player must be jumping
 	COND_Jumping,
 
@@ -563,7 +580,7 @@ typedef struct condition_check_s
 	}
 	sub;
 
-	// required amount of health, armour, ammo or inventory,   Not used for
+	// required amount of health, armour, ammo, inventory or "counter",   Not used for
 	// weapon, key, powerup, jumping, crouching, etc.
 	float amount;
 }

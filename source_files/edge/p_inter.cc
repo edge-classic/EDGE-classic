@@ -77,6 +77,72 @@ bool P_CheckForBenefit(benefit_t *list, int kind)
 	return false;
 }
 
+//
+// P_GiveCounter
+//
+// Returns false if the "counter" item can't be picked up at all
+//
+//
+static void GiveCounter(pickup_info_t *pu, benefit_t *be)
+{
+	int cntr  = be->sub.type;  
+	int num   = I_ROUND(be->amount);
+
+	if (cntr < 0 || cntr >= NUMCOUNTER)
+		I_Error("GiveCounter: bad type %i", cntr);
+
+	if (pu->lose_em)
+	{
+		if (pu->player->counters[cntr].num == 0)
+			return;
+
+		pu->player->counters[cntr].num -= num;
+
+		if (pu->player->counters[cntr].num < 0)
+			pu->player->counters[cntr].num = 0;
+
+		pu->got_it = true;
+		return;
+	}
+	
+	if (pu->player->counters[cntr].num == pu->player->counters[cntr].max)
+	{
+		return;
+	}
+
+	pu->player->counters[cntr].num += num;
+
+	if (pu->player->counters[cntr].num > pu->player->counters[cntr].max)
+		pu->player->counters[cntr].num = pu->player->counters[cntr].max;
+
+	pu->got_it = true;
+}
+
+//
+// GiveCounterLimit
+//
+static void GiveCounterLimit(pickup_info_t *pu, benefit_t *be)
+{
+	int cntr  = be->sub.type;  
+	int limit = I_ROUND(be->amount);
+
+	if (cntr < 0 || cntr >= NUMCOUNTER)
+		I_Error("GiveCounterLimit: bad type %i", cntr);
+
+	if ((!pu->lose_em && limit < pu->player->counters[cntr].max) ||
+		( pu->lose_em && limit > pu->player->counters[cntr].max))
+	{
+		return;
+	}
+
+	pu->player->counters[cntr].max = limit;
+
+	// new limit could be lower...
+	if (pu->player->counters[cntr].num > pu->player->counters[cntr].max)
+		pu->player->counters[cntr].num = pu->player->counters[cntr].max;
+
+	pu->got_it = true;
+}
 
 //
 // P_GiveInventory
@@ -567,6 +633,14 @@ void DoGiveBenefitList(pickup_info_t *pu)
 
 			case BENEFIT_InventoryLimit:
 				GiveInventoryLimit(pu, be);
+				break;
+
+			case BENEFIT_Counter:
+				GiveCounter(pu, be);
+				break;
+
+			case BENEFIT_CounterLimit:
+				GiveCounterLimit(pu, be);
 				break;
 
 			default:

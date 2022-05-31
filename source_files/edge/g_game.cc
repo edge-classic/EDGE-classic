@@ -854,6 +854,8 @@ static void G_DoLoadGame(void)
 	HU_Start();
 
 	V_SetPalette(PALETTE_NORMAL, 0);
+
+	VM_LoadGame(); // Stub for now
 }
 
 //
@@ -939,6 +941,8 @@ static bool G_SaveGameToFile(const char *filename, const char *description)
 
 static void G_DoSaveGame(void)
 {
+	VM_SaveGame(); //Stub for now; eventually things like determining if saving is allowed, etc
+
 	std::string fn(SV_FileName("current", "head"));
 
 	if (G_SaveGameToFile(fn.c_str(), defer_save_desc))

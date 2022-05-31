@@ -439,6 +439,39 @@ const specflags_t inv_types[] =
     {NULL, 0, 0}
 };
 
+const specflags_t counter_types[] =
+{
+    {"LIVES", COUNT_01, 0},
+    {"SCORE", COUNT_02, 0},
+    {"MONEY", COUNT_03, 0},
+    {"COUNTER01", COUNT_01, 0},
+    {"COUNTER02", COUNT_02, 0},
+    {"COUNTER03", COUNT_03, 0},
+    {"COUNTER04", COUNT_04, 0},
+    {"COUNTER05", COUNT_05, 0},
+    {"COUNTER06", COUNT_06, 0},
+    {"COUNTER07", COUNT_07, 0},
+    {"COUNTER08", COUNT_08, 0},
+    {"COUNTER09", COUNT_09, 0},
+    {"COUNTER10", COUNT_10, 0},
+    {"COUNTER11", COUNT_11, 0},
+    {"COUNTER12", COUNT_12, 0},
+    {"COUNTER13", COUNT_13, 0},
+    {"COUNTER14", COUNT_14, 0},
+    {"COUNTER15", COUNT_15, 0},
+    {"COUNTER16", COUNT_16, 0},
+    {"COUNTER17", COUNT_17, 0},
+    {"COUNTER18", COUNT_18, 0},
+    {"COUNTER19", COUNT_19, 0},
+    {"COUNTER20", COUNT_20, 0},
+    {"COUNTER21", COUNT_21, 0},
+    {"COUNTER22", COUNT_22, 0},
+    {"COUNTER23", COUNT_23, 0},
+    {"COUNTER24", COUNT_24, 0},
+    {"COUNTER25", COUNT_25, 0},	
+    {NULL, 0, 0}
+};
+
 //
 // DDF_CompareName
 //
@@ -851,6 +884,67 @@ static int ParseBenefitString(const char *info, char *name, char *param,
 //  false.
 //
 
+static bool BenefitTryCounter(const char *name, benefit_t *be,
+								int num_vals)
+{
+	if (CHKF_Positive != DDF_MainCheckSpecialFlag(name, counter_types, 
+		&be->sub.type, false, false))
+	{
+		return false;
+	}
+
+	be->type = BENEFIT_Counter;
+
+	if (num_vals < 1)
+	{
+		DDF_WarnError("Counter benefit used, but amount is missing.\n");
+		return false;
+	}
+
+	if (num_vals < 2)
+	{
+		be->limit = be->amount;
+	}
+
+	return true;
+}
+
+static bool BenefitTryCounterLimit(const char *name, benefit_t *be,
+									 int num_vals)
+{
+	char namebuf[200];
+	int len = strlen(name);
+
+	// check for ".LIMIT" prefix
+	if (len < 7 || DDF_CompareName(name+len-6, ".LIMIT") != 0)
+		return false;
+
+	len -= 6;
+	Z_StrNCpy(namebuf, name, len);
+
+	if (CHKF_Positive != DDF_MainCheckSpecialFlag(namebuf, counter_types, 
+		&be->sub.type, false, false))
+	{
+		return false;
+	}
+
+	be->type = BENEFIT_CounterLimit;
+	be->limit = 0;
+
+	if (num_vals < 1)
+	{
+		DDF_WarnError("CounterLimit benefit used, but amount is missing.\n");
+		return false;
+	}
+
+	if (num_vals > 1)
+	{
+		DDF_WarnError("CounterLimit benefit cannot have a limit value.\n");
+		return false;
+	}
+	return true;
+}
+
 static bool BenefitTryInventory(const char *name, benefit_t *be,
 								int num_vals)
 {
@@ -1202,7 +1296,9 @@ void DDF_MobjGetBenefit(const char *info, void *storage)
 		BenefitTryArmour(namebuf, &temp, num_vals) ||
 		BenefitTryPowerup(namebuf, &temp, num_vals) ||
 		BenefitTryInventory(namebuf, &temp, num_vals) ||
-		BenefitTryInventoryLimit(namebuf, &temp, num_vals))
+		BenefitTryInventoryLimit(namebuf, &temp, num_vals) ||
+		BenefitTryCounter(namebuf, &temp, num_vals) ||
+		BenefitTryCounterLimit(namebuf, &temp, num_vals))
 	{
 		BenefitAdd((benefit_t **) storage, &temp);
 		return;
@@ -1688,6 +1784,23 @@ static void DDF_MobjGetAngleRange(const char *info, void *storage)
 //  accodingly.  Otherwise returns false.
 //
 
+static bool ConditionTryCounter(const char *name, const char *sub,
+								  condition_check_t *cond)
+{
+	if (CHKF_Positive != DDF_MainCheckSpecialFlag(name, counter_types, 
+		&cond->sub.type, false, false))
+	{
+		return false;
+	}
+
+
+	if (sub[0])
+		sscanf(sub, " %f ", &cond->amount);
+
+	cond->cond_type = COND_Counter;
+	return true;
+}
+
 static bool ConditionTryInventory(const char *name, const char *sub,
 								  condition_check_t *cond)
 {
@@ -1704,7 +1817,6 @@ static bool ConditionTryInventory(const char *name, const char *sub,
 	cond->cond_type = COND_Inventory;
 	return true;
 }
-
 
 static bool ConditionTryAmmo(const char *name, const char *sub,
 								  condition_check_t *cond)

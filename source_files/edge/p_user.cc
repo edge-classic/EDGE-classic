@@ -1159,6 +1159,12 @@ void P_GiveInitialBenefits(player_t *p, const mobjtype_c *info)
 		p->inventory[i].num = p->inventory[i].max = 0;
 	}
 
+	// clear out counter & counter-limits
+	for (i=0; i < NUMCOUNTER; i++)
+	{
+		p->counters[i].num = p->counters[i].max = 0;
+	}
+
 	// set health and armour
 	p->health = info->spawnhealth;
 	p->air_in_lungs = info->lung_capacity;

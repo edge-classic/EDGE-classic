@@ -24,6 +24,7 @@
 //   playerweapon_t  [WEAP]
 //   playerammo_t    [AMMO]
 //   playerinv_t     [INVY]
+//   playercounter_t [CNTR]
 //   psprite_t       [PSPR]
 //
 
@@ -50,6 +51,7 @@ void * SV_PlayerGetElem(int index);
 void SV_PlayerCreateElems(int num_elems);
 void SV_PlayerFinaliseElems(void);
 
+bool SR_PlayerGetCounter(void *storage, int index, void *extra);
 bool SR_PlayerGetInv(void *storage, int index, void *extra);
 bool SR_PlayerGetAmmo(void *storage, int index, void *extra);
 bool SR_PlayerGetWeapon(void *storage, int index, void *extra);
@@ -58,6 +60,7 @@ bool SR_PlayerGetName(void *storage, int index, void *extra);
 bool SR_PlayerGetState(void *storage, int index, void *extra);
 bool SR_WeaponGetInfo(void *storage, int index, void *extra);
 
+void SR_PlayerPutCounter(void *storage, int index, void *extra);
 void SR_PlayerPutInv(void *storage, int index, void *extra);
 void SR_PlayerPutAmmo(void *storage, int index, void *extra);
 void SR_PlayerPutWeapon(void *storage, int index, void *extra);
@@ -107,6 +110,8 @@ static savefield_t sv_fields_player[] =
 	SF(ammo[0], "ammo", NUMAMMO, SVT_STRUCT("playerammo_t"),
 	SR_PlayerGetAmmo, SR_PlayerPutAmmo),
 	SF(inventory[0], "inv", NUMINV, SVT_STRUCT("playerinv_t"),
+	SR_PlayerGetInv, SR_PlayerPutInv),
+	SF(counters[0], "counter", NUMCOUNTER, SVT_STRUCT("playercounter_t"),
 	SR_PlayerGetInv, SR_PlayerPutInv),
 	SF(cheats, "cheats", 1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(refire, "refire", 1, SVT_INT, SR_GetInt, SR_PutInt),
@@ -191,6 +196,35 @@ savestruct_t sv_struct_playerweapon =
 	"playerweapon_t",    // structure name
 	"weap",        // start marker
 	sv_fields_playerweapon,  // field descriptions
+	SVDUMMY,       // dummy base
+	true,          // define_me
+	NULL           // pointer to known struct
+};
+
+#undef SV_F_BASE
+
+//----------------------------------------------------------------------------
+//
+//  COUNTER STRUCTURE
+//
+static playercounter_t sv_dummy_playercounter;
+
+#define SV_F_BASE  sv_dummy_playercounter
+
+static savefield_t sv_fields_playercounter[] =
+{
+	SF(num, "num", 1, SVT_INT, SR_GetInt, SR_PutInt),
+	SF(max, "max", 1, SVT_INT, SR_GetInt, SR_PutInt),
+
+	SVFIELD_END
+};
+
+savestruct_t sv_struct_playercounter =
+{
+	NULL,          // link in list
+	"playercounter_t",    // structure name
+	"cntr",        // start marker
+	sv_fields_playercounter,  // field descriptions
 	SVDUMMY,       // dummy base
 	true,          // define_me
 	NULL           // pointer to known struct
@@ -476,6 +510,30 @@ void SV_PlayerFinaliseElems(void)
 
 
 //----------------------------------------------------------------------------
+
+//
+// SR_PlayerGetCounter
+//
+bool SR_PlayerGetCounter(void *storage, int index, void *extra)
+{
+	playercounter_t *dest = (playercounter_t *)storage + index;
+
+	if (sv_struct_playercounter.counterpart)
+		return SV_LoadStruct(dest, sv_struct_playercounter.counterpart);
+
+	return true;  // presumably
+}
+
+//
+// SR_PlayerPutCounter
+//
+void SR_PlayerPutCounter(void *storage, int index, void *extra)
+{
+	playercounter_t *src = (playercounter_t *)storage + index;
+
+	SV_SaveStruct(src, &sv_struct_playercounter);
+}
+
 
 //
 // SR_PlayerGetInv

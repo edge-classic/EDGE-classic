@@ -670,6 +670,16 @@ void VM_NewGame(void)
     VM_CallFunction(ui_vm, "new_game");
 }
 
+void VM_LoadGame(void)
+{
+    VM_CallFunction(ui_vm, "load_game");
+}
+
+void VM_SaveGame(void)
+{
+    VM_CallFunction(ui_vm, "save_game");
+}
+
 void VM_BeginLevel(void)
 {
     VM_CallFunction(ui_vm, "begin_level");

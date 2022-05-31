@@ -132,6 +132,16 @@ typedef struct
 }
 playerinv_t;
 
+typedef struct
+{
+	// current counter value
+	int num;
+
+	// max counter value
+	int max;
+}
+playercounter_t;
+
 typedef enum
 {
 	// (for pending_wp only) no change is occuring
@@ -231,6 +241,9 @@ typedef struct player_s
 
 	// inventory stock, one for each invtype_e
 	playerinv_t inventory[NUMINV];
+
+	// counters, one for each countertype_e
+	playercounter_t counters[NUMCOUNTER];
 
 	// True if button down last tic.
 	bool attackdown[2];

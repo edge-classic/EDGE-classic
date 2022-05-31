@@ -476,7 +476,7 @@ static void PL_inventory(coal::vm_c *vm, int argc)
 	int inv = (int) *vm->AccessParam(0);
 
 	if (inv < 1 || inv > NUMINV)
-		I_Error("player.inv: bad inv number: %d\n", inv);
+		I_Error("player.inventory: bad inv number: %d\n", inv);
 
 	inv--;
 
@@ -498,6 +498,34 @@ static void PL_inventorymax(coal::vm_c *vm, int argc)
 	vm->ReturnFloat(ui_player_who->inventory[inv].max);
 }
 
+// player.counter(type)
+//
+static void PL_counter(coal::vm_c *vm, int argc)
+{
+	int cntr = (int) *vm->AccessParam(0);
+
+	if (cntr < 1 || cntr > NUMCOUNTER)
+		I_Error("player.counter: bad counter number: %d\n", cntr);
+
+	cntr--;
+
+	vm->ReturnFloat(ui_player_who->counters[cntr].num);
+}
+
+
+// player.countermax(type)
+//
+static void PL_countermax(coal::vm_c *vm, int argc)
+{
+	int cntr = (int) *vm->AccessParam(0);
+
+	if (cntr < 1 || cntr > NUMCOUNTER)
+		I_Error("player.countermax: bad counter number: %d\n", cntr);
+
+	cntr--;
+
+	vm->ReturnFloat(ui_player_who->counters[cntr].max);
+}
 
 // player.main_ammo(clip)
 //
@@ -973,6 +1001,9 @@ void VM_RegisterPlaysim()
     ui_vm->AddNativeFunction("player.inventorymax",     PL_inventorymax);
 
 	ui_vm->AddNativeFunction("player.rts_enable_tagged",        PL_rts_enable_tagged);
+
+    ui_vm->AddNativeFunction("player.counter",        PL_counter);
+    ui_vm->AddNativeFunction("player.countermax",     PL_countermax);
 }
 
 

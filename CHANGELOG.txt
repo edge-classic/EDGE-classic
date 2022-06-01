@@ -58,6 +58,15 @@ New Features
   
 + STYLES.DDF
   -PRE and END level texts now use style defined in entry [INTERLEVEL_TEXT] 
+  
++ LEVELS.DDF
+  -Command: LEAVING_BACKGROUND = <graphic>
+  -Command: ENTERING_BACKGROUND = <graphic>  
+  which can be used to override the intermission background defined in games.ddf on a per level basis.
+  
++ THINGS.DDF
+  -New SPECIAL: NO_TRIGGER_LINES which is similar to the same SPECIAL in attacks.ddf. Monsters 
+   flagged with this special cannot activate special lines i.e. doors etc.
    
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)

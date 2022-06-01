@@ -1069,7 +1069,7 @@ bool EV_DoDonut(sector_t * s1, sfx_t *sfx[4])
 
 static inline bool SliderCanClose(line_t *line)
 {
-    return ! P_ThingsOnLine(line);
+    return ! P_ThingsOnSliderPath(line);
 }
 
 static bool MoveSlider(slider_move_t *smov)

@@ -215,7 +215,7 @@ void P_RecomputeGapsAroundSector(sector_t *sec);
 void P_FloodExtraFloors(sector_t *sector);
 
 bool P_ThingsInArea(float *bbox);
-bool P_ThingsOnLine(line_t *ld);
+bool P_ThingsOnSliderPath(line_t *ld);
 
 typedef enum
 {

@@ -1982,6 +1982,7 @@ bool DDF_MainParseCondition(const char *info, condition_check_t *cond)
 
 	if (ConditionTryAmmo(typebuf + t_off, sub_buf, cond) ||
 	    ConditionTryInventory(typebuf + t_off, sub_buf, cond) ||
+		ConditionTryCounter(typebuf + t_off, sub_buf, cond) ||
 		ConditionTryWeapon(typebuf + t_off, sub_buf, cond) ||
 		ConditionTryKey(typebuf + t_off, sub_buf, cond) ||
 		ConditionTryHealth(typebuf + t_off, sub_buf, cond) ||

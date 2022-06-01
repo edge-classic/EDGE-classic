@@ -1089,15 +1089,28 @@ bool P_ThingsInArea(float *bbox)
 }
 
 //
-// P_ThingsOnLine
+// P_ThingsOnSliderPath
 //
-// Checks if there are any things touching the given line.
+// Checks if there are any things touching the front or back sector of a slider
 //
-bool P_ThingsOnLine(line_t *ld)
+bool P_ThingsOnSliderPath(line_t *ld)
 {
-	checkempty_line = ld;
 
-	return ! P_SubsecThingIterator(ld->bbox, PST_CheckThingLine);
+	for (int i = 0; i < ld->backsector->linecount; i++)
+	{
+		checkempty_line = ld->backsector->lines[i];
+		if (!P_SubsecThingIterator(checkempty_line->bbox, PST_CheckThingLine))
+			return true;
+	}
+
+	for (int i = 0; i < ld->frontsector->linecount; i++)
+	{
+		checkempty_line = ld->frontsector->lines[i];
+		if (!P_SubsecThingIterator(checkempty_line->bbox, PST_CheckThingLine))
+			return true;
+	}
+
+	return false;
 }
 
 

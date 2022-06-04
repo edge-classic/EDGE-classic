@@ -688,6 +688,11 @@ void VM_BeginLevel(void)
     VM_CallFunction(ui_vm, "begin_level");
 }
 
+void VM_EndLevel(void)
+{
+    VM_CallFunction(ui_vm, "end_level");
+}
+
 void VM_RunHud(void)
 { 
 	HUD_Reset();

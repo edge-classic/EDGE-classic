@@ -41,6 +41,8 @@
 #include "p_bot.h"
 #include "p_local.h"
 
+#include "vm_coal.h" // For VM_EndLevel()
+
 
 //
 // PLAYER ARRAY
@@ -137,6 +139,8 @@ void G_PlayerFinishLevel(player_t *p, bool keep_cards)
 	p->damage_pain = 0;
 	p->bonuscount  = 0;
 	p->grin_count  = 0;
+
+	VM_EndLevel();
 }
 
 //

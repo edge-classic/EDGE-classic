@@ -237,6 +237,7 @@ const actioncode_t thing_actions[] =
 	{"COMBOATTACK",       P_ActComboAttack, NULL},
 	{"FACETARGET",        P_ActFaceTarget, NULL},
 	{"PLAYSOUND",         P_ActPlaySound, DDF_StateGetSound},
+	{"PLAYSOUND_BOSS",    P_ActPlaySoundBoss, DDF_StateGetSound},
 	{"KILLSOUND",         P_ActKillSound, NULL},
 	{"MAKESOUND",         P_ActMakeAmbientSound, NULL},
 	{"MAKEACTIVESOUND",   P_ActMakeActiveSound, NULL},

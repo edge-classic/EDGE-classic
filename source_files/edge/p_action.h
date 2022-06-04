@@ -62,6 +62,7 @@ void A_GunFlash(struct mobj_s *mo);
 void A_WeaponKick(struct mobj_s *mo);
 void A_WeaponSetSkin(struct mobj_s *mo);
 void A_WeaponUnzoom(struct mobj_s *mo);
+void A_WeaponBecome(struct mobj_s *mo);
 
 void A_WeaponShootSA(struct mobj_s *mo);
 void A_ReFireSA(struct mobj_s *mo);
@@ -86,6 +87,7 @@ void P_ActTransAlternate(struct mobj_s *mo);
 
 // Sound Actions
 void P_ActPlaySound(struct mobj_s *mo);
+void P_ActPlaySoundBoss(struct mobj_s *mo);
 void P_ActKillSound(struct mobj_s *mo);
 void P_ActMakeAmbientSound(struct mobj_s *mo);
 void P_ActMakeAmbientSoundRandom(struct mobj_s *mo);

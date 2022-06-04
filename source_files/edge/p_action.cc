@@ -761,7 +761,31 @@ void P_ActPlaySound(mobj_t * mo)
 		return;
 	}
 
-	S_StartFX(sound, P_MobjGetSfxCategory(mo), mo, SfxFlags(mo->info));
+	//S_StartFX(sound, P_MobjGetSfxCategory(mo), mo, SfxFlags(mo->info));
+	S_StartFX(sound, P_MobjGetSfxCategory(mo), mo);
+}
+
+//Same as above but always loud
+void P_ActPlaySoundBoss(mobj_t * mo)
+{
+	// Generate an arbitrary sound.
+
+	sfx_t *sound = NULL;
+
+	if (mo->state && mo->state->action_par)
+		sound = (sfx_t *) mo->state->action_par;
+
+	if (! sound)
+	{
+		M_WarnError("P_ActPlaySoundBoss: missing sound name in %s.\n", 
+					mo->info->name.c_str());
+		return;
+	}
+
+	int flags = 0;
+	flags |= FX_Boss;
+
+	S_StartFX(sound, P_MobjGetSfxCategory(mo), mo, flags);	
 }
 
 
@@ -818,7 +842,7 @@ void P_ActMakeActiveSound(mobj_t * mo)
 
 void P_ActMakeDyingSound(mobj_t * mo)
 {
-	// This procedure is like everyother sound generating
+	// This procedure is like every other sound generating
 	// procedure with the exception that if the object is
 	// a boss (EF_ALWAYSLOUD extended flag) then the sound is
 	// generated at full volume (source = NULL).

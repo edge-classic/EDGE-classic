@@ -125,6 +125,7 @@ const commandlist_t thing_commands[] =
 	DF("INITIAL_BENEFIT", initial_benefits, DDF_MobjGetBenefit),
 	DF("LOSE_BENEFIT", lose_benefits, DDF_MobjGetBenefit),
 	DF("PICKUP_BENEFIT", pickup_benefits, DDF_MobjGetBenefit),
+	DF("KILL_BENEFIT", kill_benefits, DDF_MobjGetBenefit),
 	DF("PICKUP_MESSAGE", pickup_message, DDF_MainGetString),
 	DF("PICKUP_EFFECT", pickup_effects, DDF_MobjGetPickupEffect),
 
@@ -738,6 +739,15 @@ static void ThingFinishEntry(void)
 			{
 				dynamic_mobj->pickup_benefits = new benefit_t;
 				*dynamic_mobj->pickup_benefits = *other->pickup_benefits;
+			}
+		}
+
+		if(!dynamic_mobj->kill_benefits)
+		{
+			if(other->kill_benefits)
+			{
+				dynamic_mobj->kill_benefits = new benefit_t;
+				*dynamic_mobj->kill_benefits = *other->kill_benefits;
 			}
 		}
 
@@ -2061,6 +2071,7 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	
 	lose_benefits = NULL;
 	pickup_benefits = NULL;
+	kill_benefits = NULL; // I think? - Dasho
 	/*
 	if(src.pickup_benefits)
 	{
@@ -2199,6 +2210,7 @@ void mobjtype_c::Default()
 
 	lose_benefits = NULL;
 	pickup_benefits = NULL;
+	kill_benefits = NULL;
 	pickup_effects = NULL;
 	pickup_message = NULL;
 	initial_benefits = NULL;

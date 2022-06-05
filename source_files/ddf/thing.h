@@ -819,6 +819,9 @@ public:
 	// linked list of pickup benefits, or NULL
 	benefit_t *pickup_benefits;
 
+	// linked list of kill benefits, or NULL
+	benefit_t *kill_benefits;
+
 	// linked list of pickup effects, or NULL
 	pickup_effect_c *pickup_effects;
 

@@ -953,6 +953,26 @@ void P_KillMobj(mobj_t * source, mobj_t * target, const damage_c *damtype,
 		if (target->flags & MF_COUNTKILL)
 			source->player->killcount++;
 
+		if (target->info->kill_benefits)
+		{
+			pickup_info_t info;
+			info.player  = source->player;
+			info.special = NULL;
+			info.dropped = false;
+
+			info.new_weap = -1; // the most recently added weapon (must be new)
+			info.new_ammo = -1; // got fresh ammo (old count was zero).
+
+			info.got_it  = false;
+			info.keep_it = false;
+			info.silent  = false;
+			info.no_ammo = false;
+
+			info.list    = target->info->kill_benefits;
+			info.lose_em = false;
+			DoGiveBenefitList(&info);
+		}
+
 		if (target->player)
 		{
 			// Killed a team mate?

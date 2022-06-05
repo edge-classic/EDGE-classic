@@ -16,7 +16,7 @@ Bugs fixed
 
 General Improvements
 --------------------
-+ COAL: new_game() hook added that will always be executed when starting a new game (can be used to reset variables, etc)
++ COAL: new_game(), load_game(), save_game(), and end_level() hooks added for more flexibility
 + Original RNG LUT for M_Random/P_Random replaced with improved quality generators from the C++ stdlib
 + Crosshair color and size can now be changed via the Video Options menu
 + Pre-level story text/intermission will now be skipped when using the IDCLEV/level warp cheat
@@ -67,6 +67,7 @@ New Features
 + THINGS.DDF
   -New SPECIAL: NO_TRIGGER_LINES which is similar to the same SPECIAL in attacks.ddf. Monsters 
    flagged with this special cannot activate special lines i.e. doors etc.
+  -KILL_BENEFIT: Will grant player benefits if they kill the mobj in question (does not apply when using KILLALL or similar cheats)
    
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)

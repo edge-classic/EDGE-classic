@@ -1140,22 +1140,63 @@ static bool MoveSlider(slider_move_t *smov)
 
 		// CLOSING
         case -1:
-			MakeMovingSound(&smov->sfxstarted, smov->info->sfx_close,
-                            &sec->sfx_origin);
 
-            smov->opening -= smov->info->speed;
-
-            // mark line as blocking (at some point)
-            P_ComputeGaps(smov->line);
-
-            if (smov->opening <= 0.0f)
+            if (SliderCanClose(smov->line))
             {
-                S_StartFX(smov->info->sfx_stop, 
-                               SNCAT_Level,
-                               &sec->sfx_origin);
+                MakeMovingSound(&smov->sfxstarted, smov->info->sfx_close,
+                                &sec->sfx_origin);
 
-                return true; // REMOVE ME
+                smov->opening -= smov->info->speed;
+
+                // mark line as blocking (at some point)
+                P_ComputeGaps(smov->line);
+
+                if (smov->opening <= 0.0f)
+                {
+                    S_StartFX(smov->info->sfx_stop, 
+                                SNCAT_Level,
+                                &sec->sfx_origin);
+
+                    return true; // REMOVE ME
+                }
             }
+            else
+            {
+                MakeMovingSound(&smov->sfxstarted, smov->info->sfx_open,
+                                &sec->sfx_origin);
+
+                smov->opening += smov->info->speed;
+
+                // mark line as non-blocking (at some point)
+                P_ComputeGaps(smov->line);
+
+                if (smov->opening >= smov->target)
+                {
+                    S_StartFX(smov->info->sfx_stop, 
+                                SNCAT_Level,
+                                &sec->sfx_origin);
+
+                    smov->opening = smov->target;
+                    smov->direction = DIRECTION_WAIT;
+                    smov->waited = smov->info->wait;
+
+                    if (smov->final_open)
+                    {
+                        line_t *ld = smov->line;
+
+                        // clear line special
+                        ld->slide_door = NULL;
+                        ld->special = NULL;
+
+                        // clear the side textures
+                        ld->side[0]->middle.image = NULL;
+                        ld->side[1]->middle.image = NULL;
+
+                        return true; // REMOVE ME
+                    }
+                }
+            }
+
             break;
 
         default:

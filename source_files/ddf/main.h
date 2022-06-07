@@ -95,6 +95,20 @@ public:
 }
 act_become_info_t;
 
+// Info for the weapon BECOME action
+typedef struct wep_become_info_s
+{
+	const weapondef_c *info;
+	epi::strent_c info_ref;
+
+	label_offset_c start;
+
+public:
+	 wep_become_info_s();
+	~wep_become_info_s();
+}
+wep_become_info_t;
+
 
 // ------------------------------------------------------------------
 // -------------------------EXTERNALISATIONS-------------------------

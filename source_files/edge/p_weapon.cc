@@ -1709,5 +1709,43 @@ void A_WeaponUnzoom(mobj_t * mo)
 	p->zoom_fov = 0;
 }
 
+
+void A_WeaponBecome(mobj_t * mo)
+{
+	player_t *p = mo->player;
+	pspdef_t *psp = &p->psprites[p->action_psp];
+
+	weapondef_c *oldWep = p->weapons[p->ready_wp].info;
+
+	if (!psp->state || !psp->state->action_par)
+	{
+		I_Error("BECOME used in weapon [%s] without a label !\n",
+				oldWep->name.c_str());
+		return; /* NOT REACHED */
+	}
+
+	wep_become_info_t *become = (wep_become_info_t *) psp->state->action_par;
+
+	if (! become->info)
+	{
+		become->info = weapondefs.Lookup(become->info_ref.c_str());
+		SYS_ASSERT(become->info);  // lookup should be OK (fatal error if not found)
+	}
+
+	weapondef_c *newWep = weapondefs.Lookup(become->info_ref.c_str());
+
+	p->weapons[p->ready_wp].info  = newWep; //here it BECOMES()
+
+	statenum_t state = DDF_StateFindLabel(newWep->state_grp, become->start.label.c_str(), true /* quiet */);
+	if (state == S_NULL)
+		I_Error("BECOME action: frame '%s' in [%s] not found!\n",
+		become->start.label.c_str(), newWep->name.c_str());
+
+	state += become->start.offset;
+	P_SetPspriteDeferred(p,ps_weapon,state); //refresh the sprite
+
+	//P_SetPspriteDeferred(p,ps_weapon,p->weapons[p->ready_wp].info->ready_state);
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

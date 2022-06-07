@@ -174,6 +174,8 @@ static const actioncode_t weapon_actions[] =
 	{"SOUND2",           A_SFXWeapon2, NULL},
 	{"SOUND3",           A_SFXWeapon3, NULL},
 
+	{"BECOME",            A_WeaponBecome, DDF_StateGetBecomeWeapon},
+
 	{NULL, NULL, NULL}
 };
 

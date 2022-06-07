@@ -1145,6 +1145,150 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
 	
 }
 
+static void RAD_SetPsprite(player_t * p, int position, int stnum, weapondef_c *info = NULL)
+{
+    pspdef_t *psp = &p->psprites[position];
+
+    if (stnum == S_NULL)
+    {
+        // object removed itself
+        psp->state = psp->next_state = NULL;
+        return;
+    }
+
+    // state is old? -- Mundo hack for DDF inheritance
+    if (info && stnum < info->state_grp.back().first)
+    {
+        state_t *st = &states[stnum];
+
+        if (st->label)
+        {
+            statenum_t new_state = DDF_StateFindLabel(info->state_grp, st->label, true /* quiet */);
+            if (new_state != S_NULL)
+                stnum = new_state;
+        }
+    }
+
+    state_t *st = &states[stnum];
+
+    // model interpolation stuff
+    if (psp->state &&
+        (st->flags & SFF_Model) && (psp->state->flags & SFF_Model) &&
+        (st->sprite == psp->state->sprite) && st->tics > 1)
+    {
+        p->weapon_last_frame = psp->state->frame;
+    }
+    else
+        p->weapon_last_frame = -1;
+
+    psp->state = st;
+    psp->tics  = st->tics;
+    psp->next_state = (st->nextstate == S_NULL) ? NULL : 
+        (states + st->nextstate);
+
+    // call action routine
+
+    p->action_psp = position;
+
+    if (st->action)
+        (* st->action)(p->mo);
+}
+
+//
+// P_SetPspriteDeferred
+//
+// -AJA- 2004/11/05: This is preferred method, doesn't run any actions,
+//       which (ideally) should only happen during P_MovePsprites().
+//
+void RAD_SetPspriteDeferred(player_t * p, int position, int stnum)
+{
+    pspdef_t *psp = &p->psprites[position];
+
+    if (stnum == S_NULL || psp->state == NULL)
+    {
+        RAD_SetPsprite(p, position, stnum);
+        return;
+    }
+
+    psp->tics = 0;
+    psp->next_state = (states + stnum);
+}
+
+// Replace one weapon with another instantly (no up/down states run)
+// It doesnt matter if we have the old one currently selected or not.
+void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param)
+{
+	s_weapon_replace_t *weaparg = (s_weapon_replace_t *) param;
+
+	player_t *p = GetWhoDunnit(R);
+	weapondef_c *oldWep = weapondefs.Lookup(weaparg->old_weapon);
+	weapondef_c *newWep = weapondefs.Lookup(weaparg->new_weapon);
+
+	if(!oldWep) 
+	{
+		I_Error("RTS: No such weapon `%s' for REPLACE_WEAPON.\n", weaparg->old_weapon);
+	}
+	if(!newWep) 
+	{
+		I_Error("RTS: No such weapon `%s' for REPLACE_WEAPON.\n", weaparg->new_weapon);
+	}
+
+	int i;
+	for (i=0; i < MAXWEAPONS; i++)
+	{
+		if (p->weapons[i].info == oldWep)
+		{
+			p->weapons[i].info  = newWep;
+		}
+	}
+
+	//refresh the sprite
+	if (p->weapons[p->ready_wp].info == newWep)
+	 	RAD_SetPspriteDeferred(p,ps_weapon,p->weapons[p->ready_wp].info->ready_state);
+	 	
+}
+
+
+
+// If we have the weapon we insta-switch to it and 
+// go to the STATE we indicated.
+void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
+{
+	s_weapon_event_t *tev = (s_weapon_event_t *) param;
+
+	player_t *p = GetWhoDunnit(R);
+	weapondef_c *oldWep = weapondefs.Lookup(tev->weapon_name);
+
+	if (!oldWep)
+	{
+		I_Error("RTS WEAPON_EVENT: Unknown weapon name '%s'.\n", tev->weapon_name);
+	}
+	
+	int pw_index;
+
+	// see if player owns this kind of weapon
+	for (pw_index=0; pw_index < MAXWEAPONS; pw_index++)
+	{
+		if (! p->weapons[pw_index].owned)
+			continue;
+
+		if (p->weapons[pw_index].info == oldWep)
+			break;
+	}
+
+	if (pw_index == MAXWEAPONS) //we dont have the weapon
+		return;
+
+	p->ready_wp = (weapon_selection_e) pw_index; //insta-switch to it
+
+	statenum_t state = DDF_StateFindLabel(oldWep->state_grp, tev->label, true /* quiet */);
+	if (state == S_NULL)
+		I_Error("RTS WEAPON_EVENT: frame '%s' in [%s] not found!\n",
+		tev->label, tev->weapon_name);
+	state += tev->offset;
+
+	RAD_SetPspriteDeferred(p,ps_weapon,state); //refresh the sprite
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

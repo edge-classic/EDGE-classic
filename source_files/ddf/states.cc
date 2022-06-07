@@ -906,6 +906,75 @@ void DDF_StateGetBecome(const char *arg, state_t * cur_state)
 }
 
 
+wep_become_info_s::wep_become_info_s() :
+	info(NULL), info_ref(), start()
+{ }
+
+wep_become_info_s::~wep_become_info_s()
+{ }
+
+void DDF_StateGetBecomeWeapon(const char *arg, state_t * cur_state)
+{
+	// BECOME(typename)
+	// BECOME(typename,label)
+  
+	if (!arg || !arg[0])
+		return;
+
+	wep_become_info_t *become = new wep_become_info_t;
+
+	become->start.label.Set("READY");
+
+	const char *s = strchr(arg, ',');
+
+	// get type name
+	char buffer[80];
+
+	int len = s ? (s - arg) : strlen(arg);
+
+	if (len == 0)
+		DDF_Error("DDF_StateGetBecomeWeapon: missing type name!\n");
+
+	if (len > 75)
+		DDF_Error("DDF_StateGetBecomeWeapon: type name too long!\n");
+
+	for (len=0; *arg && (*arg != ':') && (*arg != ','); len++, arg++)
+		buffer[len] = *arg;
+
+	buffer[len] = 0;
+
+	become->info_ref.Set(buffer);
+
+	
+	// get start label (if present)
+	if (s)
+	{
+		s++;
+
+		len = strlen(s);
+
+		if (len == 0)
+			DDF_Error("DDF_StateGetBecomeWeapon: missing label!\n");
+
+		if (len > 75)
+			DDF_Error("DDF_StateGetBecomeWeapon: label too long!\n");
+
+		for (len=0; *s && (*s != ':') && (*s != ','); len++, s++)
+			buffer[len] = *s;
+
+		buffer[len] = 0;
+
+		become->start.label.Set(buffer);
+
+		if (*s == ':')
+			become->start.offset = MAX(0, atoi(s+1) - 1);
+
+	}
+
+	cur_state->action_par = become;
+}
+
+
 void DDF_StateGetAngle(const char *arg, state_t * cur_state)
 {
 	angle_t *value;

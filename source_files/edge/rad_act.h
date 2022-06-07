@@ -59,6 +59,8 @@ void RAD_ActWaitUntilDead(rad_trigger_t *R, void *param);
 
 void RAD_ActSwitchWeapon(rad_trigger_t *R, void *param);
 void RAD_ActTeleportToStart(rad_trigger_t *R, void *param);
+void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param);
+void RAD_ActWeaponEvent(rad_trigger_t *R, void *param);
 
 
 #endif  /*__RAD_ACT_H__*/

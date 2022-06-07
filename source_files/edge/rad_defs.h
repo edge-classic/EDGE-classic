@@ -389,6 +389,25 @@ typedef struct s_thing_event_s
 }
 s_thing_event_t;
 
+// Weapon Event
+typedef struct s_weapon_event_s
+{
+	// DDF type name of weapon to cause the event. 
+	const char *weapon_name;
+
+	// label to jump to
+	const char *label;
+	int offset;
+}
+s_weapon_event_t;
+
+typedef struct s_weapon_replace_s
+{
+	const char *old_weapon;
+	const char *new_weapon;
+}
+s_weapon_replace_t;
+
 
 // A single RTS action, not unlike the ones for DDF things.
 //

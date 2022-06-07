@@ -2241,6 +2241,66 @@ static void RAD_ParseTeleportToStart(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActTeleportToStart, NULL);
 }
 
+// Replace one weapon with another instantly (no up/down states run)
+// It doesnt matter if we have the old one currently selected or not.
+static void RAD_ParseReplaceWeapon(int pnum, const char **pars)
+{
+	// ReplaceWeapon <OldWeaponName> <NewWeaponName>
+
+	char * OldWeaponName;
+	char * NewWeaponName;
+
+	if (pars[1][0] == '"')
+		OldWeaponName = RAD_UnquoteString(pars[1]);
+	else
+		OldWeaponName = Z_StrDup(pars[1]);
+
+	if (pars[2][0] == '"')
+		NewWeaponName = RAD_UnquoteString(pars[2]);
+	else
+		NewWeaponName = Z_StrDup(pars[2]);
+
+	s_weapon_replace_t *weaparg = Z_New(s_weapon_replace_t, 1);
+	Z_Clear(weaparg, s_weapon_replace_t, 1);
+
+	weaparg->old_weapon = OldWeaponName;
+	weaparg->new_weapon = NewWeaponName;
+
+	AddStateToScript(this_rad, 0, RAD_ActReplaceWeapon, weaparg);
+}
+
+// If we have the weapon we insta-switch to it and 
+// go to the STATE we indicated.
+static void RAD_ParseWeaponEvent(int pnum, const char **pars)
+{
+	// Weapon_Event <weapon> <label>
+	//
+
+	s_weapon_event_t *tev;
+	const char *div;
+	int i;
+
+	tev = Z_New(s_weapon_event_t, 1);
+
+	Z_Clear(tev, s_weapon_event_t, 1);
+
+	tev->weapon_name = Z_StrDup(pars[1]);
+
+	// parse the label name
+	div = strchr(pars[2], ':');
+
+	i = div ? (div - pars[2]) : strlen(pars[2]);
+
+	if (i <= 0)
+		RAD_Error("%s: Bad label '%s'.\n", pars[0], pars[2]);
+
+	tev->label = Z_New(const char, i + 1);
+	Z_StrNCpy((char *)tev->label, pars[2], i);
+
+	tev->offset = div ? MAX(0, atoi(div+1) - 1) : 0;
+
+	AddStateToScript(this_rad, 0, RAD_ActWeaponEvent, tev);
+}
 
 //  PARSER TABLE
 
@@ -2329,6 +2389,8 @@ static const rts_parser_t radtrig_parsers[] =
 	
 	{2, "SWITCH_WEAPON", 2,2, RAD_ParseSwitchWeapon},
 	{2, "TELEPORT_TO_START", 1,1, RAD_ParseTeleportToStart},
+	{2, "REPLACE_WEAPON", 3,3, RAD_ParseReplaceWeapon},
+	{2, "WEAPON_EVENT", 3,3, RAD_ParseWeaponEvent},
 
 	// old crud
 	{2, "SECTORV", 4,4, RAD_ParseMoveSector},

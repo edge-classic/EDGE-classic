@@ -863,6 +863,7 @@ namespace Sounds
 {
 	bool some_sound_modified = false;
 	bool got_one;
+	bool sound_modified[NUMSFX_BEX];
 
 	
 	void MarkSound(int s_num)
@@ -938,6 +939,12 @@ namespace Sounds
 		assert(sound_id != sfx_None);
 		assert(strlen(S_sfx[sound_id].orig_name) < 16);
 
+		if (sound_id >= 500)
+		{
+			sound_modified[sound_id] = true;
+			MarkSound(sound_id);
+		}
+
 		// handle random sounds
 		switch (sound_id)
 		{
@@ -960,6 +967,7 @@ namespace Sounds
 
 		sprintf(name_buf, "\"%s\"", StrUpper(GetEdgeSfxName(sound_id)));
 
+		
 		return name_buf;
 	}
 
@@ -1000,6 +1008,7 @@ namespace Sounds
 			got_one = true;
 			BeginSoundLump();
 		}
+
 
 		WAD::Printf("[%s]\n", StrUpper(GetEdgeSfxName(s_num)));
 
@@ -1054,7 +1063,8 @@ void Sounds::ConvertSFX(void)
 	    if (! all_mode && S_sfx[i].new_name == NULL)
 			continue;
 
-		WriteSound(i);
+		if(sound_modified[i] == true)
+			WriteSound(i);
 	}
 		
 	if (got_one)

@@ -192,7 +192,10 @@ const actioninfo_t action_info[NUMACTIONS_BEX] =
 	{ "NOTHING", AF_UNIMPL,  NULL, NULL,    "A_Scratch" },
 	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_PlaySound" },
 	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_RandomJump" },  // special
-	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_LineEffect" }
+	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_LineEffect" },
+	{ "NOTHING", AF_UNIMPL, NULL, NULL,    "A_FireOldBFG" },
+	{ "NOTHING", AF_UNIMPL, NULL, NULL,    "A_BetaSkullAttack" },
+
 };
 
 
@@ -355,6 +358,13 @@ const staterange_t thing_range[] =
 	{ MT_PULL, S_TNT1, S_TNT1, -1,-1 },
 	{ MT_DOGS, S_DOGS_STND, S_DOGS_RAISE6, -1,-1 },
 
+    { MT_PLASMA1, S_PLS1BALL, S_PLS1EXP5, -1,-1 },
+    { MT_PLASMA2, S_PLS2BALL, S_PLS2BALLX3, -1,-1 },
+    { MT_SCEPTRE, S_BON3, S_BON3, -1,-1 },
+    { MT_BIBLE, S_BON4, S_BON4, -1,-1 },
+    { MT_MUSICSOURCE, S_TNT1, S_TNT1, -1,-1 },
+    { MT_GIBDTH, S_TNT1, S_TNT1, -1,-1 },
+
     { MT_STEALTHBABY, S_BSPI_STND, S_BSPI_RAISE7, -1,-1 },
     { MT_STEALTHVILE, S_VILE_STND, S_VILE_DIE10, -1,-1 },
     { MT_STEALTHBRUISER, S_BOSS_STND, S_BOSS_RAISE7, -1,-1 },
@@ -367,6 +377,99 @@ const staterange_t thing_range[] =
     { MT_STEALTHUNDEAD, S_SKEL_STND, S_SKEL_RAISE6, -1,-1 },
     { MT_STEALTHSHOTGUY, S_SPOS_STND, S_SPOS_RAISE5, -1,-1 },
     { MT_STEALTHZOMBIE, S_POSS_STND, S_POSS_RAISE4, -1,-1 },
+
+	{ MT_EXTRA08, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA09, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA10, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA11, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA12, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA13, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA14, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA15, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA16, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA17, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA18, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA19, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA20, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA21, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA22, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA23, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA24, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA25, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA26, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA27, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA28, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA29, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA30, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA31, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA32, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA33, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA34, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA35, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA36, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA37, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA38, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA39, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA40, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA41, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA42, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA43, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA44, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA45, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA46, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA47, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA48, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA49, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA50, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA51, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA52, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA53, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA54, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA55, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA56, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA57, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA58, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA59, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA60, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA61, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA62, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA63, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA64, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA65, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA66, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA67, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA68, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA69, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA70, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA71, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA72, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA73, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA74, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA75, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA76, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA77, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA78, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA79, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA80, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA81, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA82, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA83, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA84, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA85, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA86, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA87, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA88, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA89, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA90, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA91, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA92, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA93, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA94, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA95, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA96, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA97, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA98, S_NULL, S_NULL, -1,-1 },
+	{ MT_EXTRA99, S_NULL, S_NULL, -1,-1 },
 
     { -1, -1,-1, -1, -1 }  // End sentinel
 };
@@ -479,6 +582,18 @@ void Frames::Startup(void)
 {
 	memset(state_modified, 0, sizeof(state_modified));
 	memset(state_dyn, 0, sizeof(state_dyn));
+
+	// Initialize DEHEXTRA states - Dasho
+	for (int i = EXTRASTATES; i < NUMSTATES_BEX; i++)
+	{
+		states[i].sprite = SPR_TNT1;
+		states[i].frame = 0;
+		states[i].tics = -1;
+		states[i].action = A_NULL;
+		states[i].nextstate = i;
+		states[i].misc1 = 0;
+		states[i].misc2 = 0;
+	}
 }
 
 void Frames::ResetAll(void)
@@ -1001,6 +1116,12 @@ void Frames::OutputState(char group, int cur, bool use_spawn)
 	}
 
 	int tics = (int) st->tics;
+
+	// Check for JUMP with tics < 0 (can happen with DEHEXTRA states)
+	if (action_info[st->action].act_flags & AF_SPECIAL)
+	{
+		if (StrCaseCmp(action_info[st->action].bex_name, "A_RandomJump") == 0 && tics < 0) tics = 0;
+	}
 
 	// kludge for EDGE and Batman TC.  EDGE waits 35 tics before exiting the
 	// level from A_BrainDie, but standard Doom does it immediately.  Oddly,

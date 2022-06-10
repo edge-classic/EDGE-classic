@@ -85,8 +85,35 @@ spritename_t sprnames[NUMSPRITES_BEX] =
 	{"HDB2",NULL}, {"HDB3",NULL}, {"HDB4",NULL}, {"HDB5",NULL},
 	{"HDB6",NULL}, {"POB1",NULL}, {"POB2",NULL}, {"BRS1",NULL},
 	{"TLMP",NULL}, {"TLP2",NULL},
-	// BOOM and MBF:
-	{"TNT1",NULL}, {"DOGS",NULL}
+	// BOOM/MBF/Doom Retro:
+	{"TNT1",NULL}, {"DOGS",NULL}, {"PLS1",NULL}, {"PLS2",NULL},
+    {"BON3",NULL}, {"BON4",NULL}, {"BLD2",NULL},
+    // DEHEXTRA
+    {"SP00",NULL},{"SP01",NULL}, {"SP02",NULL}, {"SP03",NULL},
+    {"SP04",NULL},{"SP05",NULL}, {"SP06",NULL}, {"SP07",NULL},
+    {"SP08",NULL},{"SP09",NULL}, {"SP10",NULL}, {"SP11",NULL},
+    {"SP12",NULL},{"SP13",NULL}, {"SP14",NULL}, {"SP15",NULL},
+    {"SP16",NULL},{"SP17",NULL}, {"SP18",NULL}, {"SP19",NULL},
+    {"SP20",NULL},{"SP21",NULL}, {"SP22",NULL}, {"SP23",NULL},
+    {"SP24",NULL},{"SP25",NULL}, {"SP26",NULL}, {"SP27",NULL},
+    {"SP28",NULL},{"SP29",NULL}, {"SP30",NULL}, {"SP31",NULL},
+    {"SP32",NULL},{"SP33",NULL}, {"SP34",NULL}, {"SP35",NULL},
+    {"SP36",NULL},{"SP37",NULL}, {"SP38",NULL}, {"SP39",NULL},
+    {"SP40",NULL},{"SP41",NULL}, {"SP42",NULL}, {"SP43",NULL},
+    {"SP44",NULL},{"SP45",NULL}, {"SP46",NULL}, {"SP47",NULL},
+    {"SP48",NULL},{"SP49",NULL}, {"SP50",NULL}, {"SP51",NULL},
+    {"SP52",NULL},{"SP53",NULL}, {"SP54",NULL}, {"SP55",NULL},
+    {"SP56",NULL},{"SP57",NULL}, {"SP58",NULL}, {"SP59",NULL},
+    {"SP60",NULL},{"SP61",NULL}, {"SP62",NULL}, {"SP63",NULL},
+    {"SP64",NULL},{"SP65",NULL}, {"SP66",NULL}, {"SP67",NULL},
+    {"SP68",NULL},{"SP69",NULL}, {"SP70",NULL}, {"SP71",NULL},
+    {"SP72",NULL},{"SP73",NULL}, {"SP74",NULL}, {"SP75",NULL},
+    {"SP76",NULL},{"SP77",NULL}, {"SP78",NULL}, {"SP79",NULL},
+    {"SP80",NULL},{"SP81",NULL}, {"SP82",NULL}, {"SP83",NULL},
+    {"SP84",NULL},{"SP85",NULL}, {"SP86",NULL}, {"SP87",NULL},
+    {"SP88",NULL},{"SP89",NULL}, {"SP90",NULL}, {"SP91",NULL},
+    {"SP92",NULL},{"SP93",NULL}, {"SP94",NULL}, {"SP95",NULL},
+    {"SP96",NULL},{"SP97",NULL}, {"SP98",NULL}, {"SP99",NULL},
 };
 
 

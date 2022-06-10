@@ -1,6 +1,6 @@
 https://github.com/dashodanger/EDGE-classic
 
-Current as of: MAY 2022
+Current as of: June 2022
 
 CHANGELOG for EDGE-Classic 1.2 (since EDGE-Classic 1.1)
 ====================================
@@ -16,6 +16,7 @@ Bugs fixed
 
 General Improvements
 --------------------
++ DEHEXTRA Support
 + COAL: new_game(), load_game(), save_game(), and end_level() hooks added for more flexibility
 + Original RNG LUT for M_Random/P_Random replaced with improved quality generators from the C++ stdlib
 + Crosshair color and size can now be changed via the Video Options menu
@@ -33,7 +34,7 @@ General Improvements
 + Freedoom Phase 1 and 2 have their own base WAD, which provides corrected text and menu graphics
 + Added capturing of console content (if active) in screenshots
 + Heretic support improved (added missing attacks and ambient sfx, fixed secret level exit, added missing music
- Overlay HUD remodelled).
+ Overlay HUD remodelled)
 
 New Features
 ------------
@@ -43,7 +44,7 @@ New Features
   the MIDI player will switch to a PC speaker based soundfont
 
 + "Pistol Starts" option added to Gameplay Options menu (default Off). Will force player to default state upon
-  starting a new level. Works with all supported IWADs.
+  starting a new level. Works with all supported IWADs
 
 + COALHUDS: new commands
   -player.rts_enable_tagged(name) Will execute RTS script with matching tag, if one exists
@@ -52,9 +53,11 @@ New Features
   -Command: RENDER_INVERT=TRUE which will cause this weapon to render the sprites in reverse order
    i.e. Crosshair, flash, weapon. Mainly useful for not having to "cut out" the shape of the weapon
    muzzle from flash sprites. Also good for MD2 models so that the flash sprites are obscured
-   by the weapon model.
+   by the weapon model
   -Command: Y_ADJUST=<number> which will offset the weapon sprites in Y
-  (negative numbers move it down, positive numbers move it up). Mainly for Heretic compatibility.
+  (negative numbers move it down, positive numbers move it up). Mainly for Heretic compatibility
+  -State Action: BECOME(<weapon name>,<state:frame>) Similar to the things.ddf action of the same 
+   name.<state:frame> is optional
   
 + STYLES.DDF
   -PRE and END level texts now use style defined in entry [INTERLEVEL_TEXT] 
@@ -68,6 +71,12 @@ New Features
   -New SPECIAL: NO_TRIGGER_LINES which is similar to the same SPECIAL in attacks.ddf. Monsters 
    flagged with this special cannot activate special lines i.e. doors etc.
   -KILL_BENEFIT: Will grant player benefits if they kill the mobj in question (does not apply when using KILLALL or similar cheats)
+
++ RTS: new commands
+  -REPLACE_WEAPON <OldWeapon> <NewWeapon> which will replace one weapon with another instantly(no up/down states run) 
+   if the player has it. It doesn't matter if we have the old one currently selected or not. Mainly for Heretic compatibility
+  -WEAPON_EVENT <weapon> <label> which is similar to THING_EVENT: If we have the weapon we 
+   insta-switch to it and go to the STATE we indicated
    
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)

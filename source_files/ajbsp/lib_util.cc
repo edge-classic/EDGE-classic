@@ -19,14 +19,6 @@
 
 #include "ajbsp.h"
 
-#ifdef _MSC_VER
-#include <ctime>
-#else
-#include <sys/time.h>
-#endif
-#include <time.h>
-
-
 //
 // a case-insensitive strcmp()
 //
@@ -215,38 +207,6 @@ char * StringTidy(const char *str, const char *bad_chars)
 
 	return buf;
 }
-
-
-void TimeDelay(unsigned int millies)
-{
-	SYS_ASSERT(millies < 300000);
-
-#ifdef WIN32
-	::Sleep(millies);
-
-#else // LINUX or MacOSX
-
-	usleep(millies * 1000);
-#endif
-}
-
-
-unsigned int TimeGetMillies()
-{
-	// Note: you *MUST* handle overflow (it *WILL* happen)
-
-#ifdef WIN32
-	return GetTickCount();
-#else
-	struct timeval tv;
-	struct timezone tz;
-
-	gettimeofday(&tv, &tz);
-
-	return ((int)tv.tv_sec * 1000 + (int)tv.tv_usec / 1000);
-#endif
-}
-
 
 //
 // sanity checks for the sizes and properties of certain types.

@@ -38,9 +38,6 @@ char *StringTidy(const char *str, const char *bad_chars = "");
 
 void CheckTypeSizes();
 
-void TimeDelay(unsigned int millies);
-unsigned int TimeGetMillies();
-
 unsigned int ComputeAngle (int, int);
 unsigned int ComputeDist  (int, int);
 

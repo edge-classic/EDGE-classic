@@ -845,18 +845,7 @@ sfxinfo_t S_sfx[NUMSFX_BEX] =
 
 void Sounds::Startup(void)
 {
-	// This seems to cause an issue when you provide a new_name entry other than NULL - Dasho
-	/*for (int s = 0; s < NUMSFX_BEX; s++)
-	{
-		free(S_sfx[s].new_name);
-		S_sfx[s].new_name = NULL;
-	}*/
 
-	for (int m = 0; m < NUMMUSIC; m++)
-	{
-		free(S_music[m].new_name);
-		S_music[m].new_name = NULL;
-	}
 }
 
 namespace Sounds
@@ -1012,13 +1001,13 @@ namespace Sounds
 
 		WAD::Printf("[%s]\n", StrUpper(GetEdgeSfxName(s_num)));
 
-		const char *lump = sound->new_name ? sound->new_name : sound->orig_name;
+		const char *lump = !sound->new_name.empty() ? sound->new_name.c_str() : sound->orig_name;
 
 		if (sound->link)
 		{
 			sfxinfo_t *link = S_sfx + sound->link;
 
-			lump = link->new_name ? link->new_name : GetEdgeSfxName(sound->link);
+			lump = !link->new_name.empty() ? link->new_name.c_str() : GetEdgeSfxName(sound->link);
 		}
 
 		WAD::Printf("LUMP_NAME = \"DS%s\";\n", StrUpper(lump));
@@ -1045,7 +1034,7 @@ namespace Sounds
 
 		WAD::Printf("[%02d] ", mus->ddf_num);
 
-		const char *lump = mus->new_name ? mus->new_name : mus->orig_name;
+		const char *lump = !mus->new_name.empty() ? mus->new_name.c_str() : mus->orig_name;
 
 		WAD::Printf("MUSICINFO = MUS:LUMP:\"D_%s\";\n", StrUpper(lump));
 	}
@@ -1060,7 +1049,7 @@ void Sounds::ConvertSFX(void)
 
 	for (int i = 1; i < NUMSFX_BEX; i++)
 	{
-	    if (! all_mode && S_sfx[i].new_name == NULL)
+	    if (! all_mode && S_sfx[i].new_name.empty())
 			continue;
 
 		if(sound_modified[i] == true)
@@ -1077,7 +1066,7 @@ void Sounds::ConvertMUS(void)
 
 	for (int i = 1; i < NUMMUSIC; i++)
 	{
-	    if (! all_mode && ! S_music[i].new_name)
+	    if (! all_mode && S_music[i].new_name.empty())
 			continue;
 
 		WriteMusic(i);
@@ -1097,8 +1086,8 @@ bool Sounds::ReplaceSound(const char *before, const char *after)
 		if (StrCaseCmp(S_sfx[i].orig_name, before) != 0)
 			continue;
 
-		if (S_sfx[i].new_name)
-			free(S_sfx[i].new_name);
+		if (!S_sfx[i].new_name.empty())
+			S_sfx[i].new_name.clear();
 
 		S_sfx[i].new_name = StringDup(after);
 
@@ -1117,8 +1106,8 @@ bool Sounds::ReplaceMusic(const char *before, const char *after)
 		if (StrCaseCmp(S_music[j].orig_name, before) != 0)
 			continue;
 
-		if (S_music[j].new_name)
-			free(S_music[j].new_name);
+		if (!S_music[j].new_name.empty())
+			S_music[j].new_name.clear();
 
 		S_music[j].new_name = StringDup(after);
 

@@ -13,6 +13,8 @@
 #ifndef __SOUNDS_HDR__
 #define __SOUNDS_HDR__
 
+#include <string>
+
 namespace Deh_Edge
 {
 
@@ -26,8 +28,8 @@ typedef struct
 
 	int ddf_num;
 
-	// changed name (NULL if not modified).  Space for 6 non-NUL characters.
-	char *new_name;
+	// changed name (empty if not modified).  Space for 6 non-NUL characters.
+	std::string new_name;
 }
 musicinfo_t;
 
@@ -89,8 +91,8 @@ typedef struct
     // volume if a link
     int volume;
 
-	// changed name (NULL if not modified).  Space for 6 non-NUL characters.
-	char *new_name;
+	// changed name (empty if not modified).  Space for 6 non-NUL characters.
+	std::string new_name;
 }
 sfxinfo_t;
 

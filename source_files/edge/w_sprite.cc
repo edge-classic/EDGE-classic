@@ -582,7 +582,8 @@ bool W_CheckSpritesExist(const state_group_t& group)
 				continue;
 
 			//if (sprites[states[i].sprite]->numframes > 0) // Changed frames to numframes, hope it doesn't break - Dasho
-			if (sprites[states[i].sprite]->frames > 0) //   It broke MD2 weapons ;) - Lobo
+			//if (sprites[states[i].sprite]->frames > 0) //   It broke MD2 weapons ;) - Lobo
+			if (sprites[states[i].sprite]->frames) //   It broke MSYS :( - Dasho
 				return true;	
 
 			// -AJA- only check one per group.  It _should_ check them all,

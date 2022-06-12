@@ -1328,7 +1328,7 @@ void W_ReadDDF(void)
 	{
 		if (true)
 		{
-			I_Printf("Loading external %s\n", DDF_Readers[d].print_name);
+			I_Printf("Loading %s\n", DDF_Readers[d].print_name);
 
 			// call read function
 			(* DDF_Readers[d].func)(NULL, 0);

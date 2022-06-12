@@ -975,6 +975,10 @@ static void SpawnMapThing(const mobjtype_c *info,
 	if (SP_MATCH() && (options & MTF_NOT_SINGLE))
 		return;
 
+	// Disable deathmatch weapons for vanilla coop...should probably be in the Gameplay Options menu - Dasho
+	if (COOP_MATCH() && (options & MTF_NOT_SINGLE))
+		return;
+
 	// -AJA- 1999/09/22: Boom compatibility flags.
 	if (COOP_MATCH() && (options & MTF_NOT_COOP))
 		return;

@@ -27,7 +27,6 @@ add_library(
   math_angle.cc
   math_bbox.cc
   math_crc.cc
-  math_md5.cc
   math_oddity.cc
   math_vector.cc
   mus_2_midi.cc

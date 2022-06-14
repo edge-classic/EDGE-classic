@@ -39,7 +39,6 @@
 #include <time.h>
 #include <algorithm>
 #include <array>
-#include <tuple>
 
 #include "exe_path.h"
 #include "file.h"
@@ -111,7 +110,7 @@ FILE *logfile = NULL;
 FILE *debugfile = NULL;
 
 // Combination of unique lumps needed to best identify an IWAD
-const std::array<std::tuple<const char*, const char*, const char*>, 11> iwad_unique_lumps =
+const std::array<std::array<const char*, 3>, 11> iwad_unique_lumps =
 {
 	{
 		{ "BLASPHEMER", "BLASPHEM", "E1M1"  },
@@ -907,10 +906,10 @@ static void IdentifyVersion(void)
 			epi::file_c *iwad_test = epi::FS_Open(iwad_file.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 			bool unique_lump_match = false;
 			for (int i=0; i < iwad_unique_lumps.size(); i++) {
-				if (W_CheckForUniqueLumps(iwad_test, std::get<1>(iwad_unique_lumps[i]), std::get<2>(iwad_unique_lumps[i])))
+				if (W_CheckForUniqueLumps(iwad_test, iwad_unique_lumps[i][1], iwad_unique_lumps[i][2]))
 				{
 					unique_lump_match = true;
-					iwad_base = std::get<0>(iwad_unique_lumps[i]);
+					iwad_base = iwad_unique_lumps[i][0];
 					break;
 				}
     		}
@@ -964,10 +963,10 @@ static void IdentifyVersion(void)
 						epi::file_c *iwad_test = epi::FS_Open(fsd[i]->name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 						bool unique_lump_match = false;
 						for (int i = 0; i < iwad_unique_lumps.size(); i++) {
-							if (W_CheckForUniqueLumps(iwad_test, std::get<1>(iwad_unique_lumps[i]), std::get<2>(iwad_unique_lumps[i])))
+							if (W_CheckForUniqueLumps(iwad_test, iwad_unique_lumps[i][1], iwad_unique_lumps[i][2]))
 							{
 								unique_lump_match = true;
-								iwad_base = std::get<0>(iwad_unique_lumps[i]);
+								iwad_base = iwad_unique_lumps[i][0];
 								break;
 							}
 						}

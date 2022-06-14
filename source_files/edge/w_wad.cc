@@ -43,7 +43,6 @@
 #include "file.h"
 #include "file_sub.h"
 #include "filesystem.h"
-#include "math_md5.h"
 #include "path.h"
 #include "str_format.h"
 #include "utility.h"
@@ -124,8 +123,6 @@ public:
 	// file object
     epi::file_c *file;
 
-	u32_t crc;
-
 	// lists for sprites, flats, patches (stuff between markers)
 	epi::u32array_c sprite_lumps;
 	epi::u32array_c flat_lumps;
@@ -159,24 +156,26 @@ public:
 	// temporarily before a new GWA files has been built and added).
 	int companion_gwa;
 
-	// MD5 hash of the contents of the WAD directory.
+	// CRC checksum of the contents of the WAD directory.
 	// This is used to disambiguate cached GWA/HWA filenames.
-	epi::md5hash_c dir_hash;
+	epi::crc32_c dir_crc;
 
 public:
-	data_file_c(const char *_fname, int _kind, epi::file_c* _file, u32_t _crc) :
-		file_name(_fname), kind(_kind), file(_file), crc(_crc),
+	data_file_c(const char *_fname, int _kind, epi::file_c* _file) :
+		file_name(_fname), kind(_kind), file(_file),
 		sprite_lumps(), flat_lumps(), patch_lumps(),
 		colmap_lumps(), tx_lumps(), hires_lumps(),
 		level_markers(), skin_markers(),
 		wadtex(), deh_lump(-1), coal_apis(-1), coal_huds(-1),
 		animated(-1), switches(-1),
-		companion_gwa(-1), dir_hash()
+		companion_gwa(-1), dir_crc()
 	{
 		file_name = strdup(_fname);
 
 		for (int d = 0; d < NUM_DDF_READERS; d++)
 			ddf_lumps[d] = -1;
+
+		dir_crc.Reset();
 	}
 
 	~data_file_c()
@@ -194,11 +193,10 @@ class raw_filename_c
 public:
 	std::string filename;
 	int kind;
-	u32_t crc;
 
 public:
-	raw_filename_c(const char *_name, int _kind, u32_t _crc) :
-			 filename(_name), kind(_kind), crc(_crc)
+	raw_filename_c(const char *_name, int _kind) :
+			 filename(_name), kind(_kind)
 	{ }
 
 	~raw_filename_c()
@@ -949,7 +947,7 @@ static bool HasInternalGLNodes(data_file_c *df, int datafile)
 	return levels == glnodes;
 }
 
-static void ComputeFileMD5hash(epi::md5hash_c& hash, epi::file_c *file)
+static void ComputeFileCRC(epi::crc32_c& crc, epi::file_c *file)
 {
 	int length = file->GetLength();
 
@@ -961,7 +959,7 @@ static void ComputeFileMD5hash(epi::md5hash_c& hash, epi::file_c *file)
 	// TODO: handle Read failure
 	file->Read(buffer, length);
 	
-	hash.Compute(buffer, length);
+	crc.AddBlock(buffer, length);
 
 	delete[] buffer;
 }
@@ -971,18 +969,15 @@ static bool FindCacheFilename (std::string& out_name,
 		const char *extension)
 {
 	std::string wad_dir;
-	std::string hash_string;
+	std::string crc_string;
 	std::string local_name;
 	std::string cache_name;
 
 	// Get the directory which the wad is currently stored
 	wad_dir = epi::PATH_GetDir(filename);
 
-	// Hash string used for files in the cache directory
-	hash_string = epi::STR_Format("-%02X%02X%02X-%02X%02X%02X",
-		df->dir_hash.hash[0], df->dir_hash.hash[1],
-		df->dir_hash.hash[2], df->dir_hash.hash[3],
-		df->dir_hash.hash[4], df->dir_hash.hash[5]);
+	// CRC string used for files in the cache directory
+	crc_string = epi::STR_Format("-%08x", df->dir_crc.crc);
 
 	// Determine the full path filename for "local" (same-directory) version
 	local_name = epi::PATH_GetBasename(filename);
@@ -993,7 +988,7 @@ static bool FindCacheFilename (std::string& out_name,
 
 	// Determine the full path filename for the cached version
 	cache_name = epi::PATH_GetBasename(filename);
-	cache_name += (hash_string);
+	cache_name += (crc_string);
 	cache_name += (".");
 	cache_name += (extension);
 
@@ -1107,7 +1102,7 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 //       otherwise it is the sort_index for the lumps (typically the
 //       file number of the wad which the GWA is a companion for).
 //
-static void AddFile(const char *filename, int kind, int dyn_index, u32_t crc)
+static void AddFile(const char *filename, int kind, int dyn_index)
 {
 	int j;
 	int length;
@@ -1135,7 +1130,7 @@ static void AddFile(const char *filename, int kind, int dyn_index, u32_t crc)
 
 	int datafile = (int)data_files.size();
 
-	data_file_c *df = new data_file_c(filename, kind, file, crc);
+	data_file_c *df = new data_file_c(filename, kind, file);
 	data_files.push_back(df);
 
 	// for RTS scripts, adding the data_file is enough
@@ -1168,8 +1163,8 @@ static void AddFile(const char *filename, int kind, int dyn_index, u32_t crc)
 		// TODO: handle Read failure
         file->Read(fileinfo, length);
 
-		// compute MD5 hash over wad directory
-		df->dir_hash.Compute((const byte *)fileinfo, length);
+		// compute CRC hash over wad directory
+		df->dir_crc.AddBlock((const byte *)fileinfo, length);
 
 		// Fill in lumpinfo
 		numlumps += header.num_entries;
@@ -1211,8 +1206,8 @@ static void AddFile(const char *filename, int kind, int dyn_index, u32_t crc)
 			}
         }
 
-		// calculate MD5 hash over whole file
-		ComputeFileMD5hash(df->dir_hash, file);
+		// calculate CRC hash over whole file
+		ComputeFileCRC(df->dir_crc, file);
 
 		// Fill in lumpinfo
 		numlumps++;
@@ -1223,11 +1218,7 @@ static void AddFile(const char *filename, int kind, int dyn_index, u32_t crc)
 				lump_name, true);
 	}
 
-	I_Debugf("   md5hash = %02x%02x%02x%02x...%02x%02x%02x%02x\n",
-			df->dir_hash.hash[0], df->dir_hash.hash[1],
-			df->dir_hash.hash[2], df->dir_hash.hash[3],
-			df->dir_hash.hash[12], df->dir_hash.hash[13],
-			df->dir_hash.hash[14], df->dir_hash.hash[15]);
+	I_Debugf("   CRC32 = %08x\n", df->dir_crc.crc);
 
 	SortLumps();
 	SortSpriteLumps(df);
@@ -1285,17 +1276,9 @@ static void AddFile(const char *filename, int kind, int dyn_index, u32_t crc)
 
             }
 
-			epi::file_c *gwa_file = epi::FS_Open(gwa_filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-			byte *gwa_data = gwa_file->LoadIntoMemory(gwa_file->GetLength());
-			epi::crc32_c result;
-			result.Reset();
-			result.AddBlock(gwa_data, gwa_file->GetLength());
-			delete[] gwa_data;
-			delete[] gwa_file;
-
 			// Load it.  This recursion bit is rather sneaky,
 			// hopefully it doesn't break anything...
-			AddFile(gwa_filename.c_str(), FLKIND_GWad, datafile, result.crc);
+			AddFile(gwa_filename.c_str(), FLKIND_GWad, datafile);
 
 			df->companion_gwa = datafile + 1;
 		}
@@ -1335,16 +1318,8 @@ static void AddFile(const char *filename, int kind, int dyn_index, u32_t crc)
 				W_DoneWithLump(data);
 			}
 
-		epi::file_c *hwa_file = epi::FS_Open(hwa_filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-		byte *hwa_data = hwa_file->LoadIntoMemory(hwa_file->GetLength());
-		epi::crc32_c result;
-		result.Reset();
-		result.AddBlock(hwa_data, hwa_file->GetLength());
-		delete[] hwa_data;
-		delete[] hwa_file;
-
 		// Load it (using good ol' recursion again).
-		AddFile(hwa_filename.c_str(), FLKIND_HWad, -1, result.crc);
+		AddFile(hwa_filename.c_str(), FLKIND_HWad, -1);
 	}
 }
 
@@ -1356,11 +1331,11 @@ static void InitCaches(void)
 //
 // W_AddRawFilename
 //
-void W_AddRawFilename(const char *file, int kind, u32_t crc)
+void W_AddRawFilename(const char *file, int kind)
 {
 	I_Debugf("Added filename: %s\n", file);
 
-    wadfiles.push_back(new raw_filename_c(file, kind, crc));
+    wadfiles.push_back(new raw_filename_c(file, kind));
 }
 
 //
@@ -1388,7 +1363,7 @@ void W_InitMultipleFiles(void)
 	for (it = wadfiles.begin(); it != wadfiles.end(); it++)
     {
         raw_filename_c *rf = *it;
-		AddFile(rf->filename.c_str(), rf->kind, -1, rf->crc);
+		AddFile(rf->filename.c_str(), rf->kind, -1);
     }
 
 	if (numlumps == 0)
@@ -2139,7 +2114,7 @@ void W_ShowFiles(void)
 	{
 		data_file_c *df = data_files[i];
 
-		I_Printf(" %2d %08x %-4s \"%s\"\n", i+1, df->crc, FileKind_Strings[df->kind], df->file_name);
+		I_Printf(" %2d %08x %-4s \"%s\"\n", i+1, df->dir_crc.crc, FileKind_Strings[df->kind], df->file_name);
 	}
 }
 

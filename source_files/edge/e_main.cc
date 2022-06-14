@@ -44,7 +44,6 @@
 #include "exe_path.h"
 #include "file.h"
 #include "filesystem.h"
-#include "math_crc.h"
 #include "path.h"
 #include "utility.h"
 
@@ -111,26 +110,7 @@ bool custom_MenuDifficulty = false;
 FILE *logfile = NULL;
 FILE *debugfile = NULL;
 
-// These are the Adler-32 checksums that our EPI library produces, not the CRC32 checksums on the Doom wiki.
-// I verified the IWAD MD5s (where available) before creating this list, though.
-// Source: Trust me, bro
-const std::map<u32_t, const char*> iwad_crcs =
-{
-	// Blasphemer support will start with 0.1.7, as that was the first single-player ready release
-	{ 0x78c05884, "BLASPHEMER" }, // Version 0.1.7
-	{ 0xbe41e224, "DOOM" 	   }, // Version 1.9ud (Ultimate Doom)
-	{ 0x3bca9a2a, "DOOM1"      }, // Version 1.9 (Shareware)
-	{ 0x03bcce6c, "DOOM2" 	   }, // Version 1.9
-	{ 0x56bf590f, "FREEDOOM1"  }, // Version 0.12.1
-	{ 0x8ec4f83c, "FREEDOOM2"  }, // Version 0.12.1
-	{ 0x59a32399, "HACX" 	   }, // Version 1.2
-	{ 0xfdee2f31, "HARMONY"    }, // Version 1.1
-	{ 0x065166bc, "HERETIC"    }, // Version 1.3
-	{ 0x63916b81, "PLUTONIA"   }, // Version 1.9
-	{ 0xcd062fca, "TNT" 	   } // Version 1.9
-};
-
-// Combination of unique lumps needed for a best guess?
+// Combination of unique lumps needed to best identify an IWAD
 const std::map<const char*, std::array<const char*, 2>> iwad_unique_lumps =
 {
 	{ "BLASPHEMER", { "BLASPHEM", "E1M1"  } },
@@ -923,39 +903,22 @@ static void IdentifyVersion(void)
 		else
 		{
 			epi::file_c *iwad_test = epi::FS_Open(iwad_file.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-			byte *iwad_data = iwad_test->LoadIntoMemory(iwad_test->GetLength());
-			iwad_test->Seek(0, epi::file_c::SEEKPOINT_START);
-			epi::crc32_c result;
-			result.Reset();
-			result.AddBlock(iwad_data, iwad_test->GetLength());
-			delete[] iwad_data;
-			auto search = iwad_crcs.find(result.crc);
-			if (search != iwad_crcs.end()) 
-			{
-				iwad_base = search->second;
-				W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad, result.crc);
-				delete[] iwad_test;
-			} 
-			else
-			{
-				bool unique_lump_match = false;
-				for (const auto& [key, value] : iwad_unique_lumps) {
-					if (W_CheckForUniqueLumps(iwad_test, value[0], value[1]))
-					{
-						unique_lump_match = true;
-						iwad_base = key;
-						break;
-					}
-    			}
-				if (unique_lump_match)
+			bool unique_lump_match = false;
+			for (const auto& [key, value] : iwad_unique_lumps) {
+				if (W_CheckForUniqueLumps(iwad_test, value[0], value[1]))
 				{
-					I_Printf("IdentifyVersion: IWAD matches no known CRC values. Best guess: %s\n", iwad_base.c_str());
-					W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad, result.crc);
-					delete[] iwad_test;
+					unique_lump_match = true;
+					iwad_base = key;
+					break;
 				}
-				else
-					I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
+    		}
+			delete[] iwad_test;
+			if (unique_lump_match)
+			{
+				W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad);
 			}
+			else
+				I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
 		}
     }
     else
@@ -997,39 +960,21 @@ static void IdentifyVersion(void)
 					if(!fsd[i]->is_dir)
 					{
 						epi::file_c *iwad_test = epi::FS_Open(fsd[i]->name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-						byte *iwad_data = iwad_test->LoadIntoMemory(iwad_test->GetLength());
-						iwad_test->Seek(0, epi::file_c::SEEKPOINT_START);
-						epi::crc32_c result;
-						result.Reset();
-						result.AddBlock(iwad_data, iwad_test->GetLength());
-						delete[] iwad_data;
-						auto search = iwad_crcs.find(result.crc);
-						if (search != iwad_crcs.end()) 
+						bool unique_lump_match = false;
+						for (const auto& [key, value] : iwad_unique_lumps) {
+							if (W_CheckForUniqueLumps(iwad_test, value[0], value[1]))
+							{
+								unique_lump_match = true;
+								iwad_base = key;
+								break;
+							}
+						}
+						if (unique_lump_match)
 						{
-							iwad_base = search->second;
-							W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad, result.crc);
+							W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad);
 							delete[] iwad_test;
 							goto foundlooseiwad;
-						} 
-						else
-						{
-							bool unique_lump_match = false;
-							for (const auto& [key, value] : iwad_unique_lumps) {
-								if (W_CheckForUniqueLumps(iwad_test, value[0], value[1]))
-								{
-									unique_lump_match = true;
-									iwad_base = key;
-									break;
-								}
-							}
-							if (unique_lump_match)
-							{
-								I_Printf("IdentifyVersion: IWAD matches no known CRC values. Best guess: %s\n", iwad_base.c_str());
-								W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad, result.crc);
-								delete[] iwad_test;
-								goto foundlooseiwad;
-							}
-						}						
+						}					
 					}
 				}
 			}
@@ -1056,15 +1001,7 @@ static void IdentifyVersion(void)
         }
     }
 
-	epi::file_c *reqwad_file = epi::FS_Open(reqwad.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-	byte *reqwad_data = reqwad_file->LoadIntoMemory(reqwad_file->GetLength());
-	epi::crc32_c result;
-	result.Reset();
-	result.AddBlock(reqwad_data, reqwad_file->GetLength());
-	delete[] reqwad_data;
-	delete[] reqwad_file;
-
-    W_AddRawFilename(reqwad.c_str(), FLKIND_EWad, result.crc);
+    W_AddRawFilename(reqwad.c_str(), FLKIND_EWad);
 }
 
 // Add game-specific base EWADs (widepix, skyboxes, etc) - Dasho
@@ -1075,20 +1012,9 @@ static void Add_Base(void)
 	std::transform(base_wad.begin(), base_wad.end(), base_wad.begin(), ::tolower);
 	base_path = epi::PATH_Join(base_path.c_str(), base_wad.append("_base.wad").c_str());
 	if (epi::FS_Access(base_path.c_str(), epi::file_c::ACCESS_READ)) 
-	{
-		epi::file_c *base_file = epi::FS_Open(base_path.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-		byte *base_data = base_file->LoadIntoMemory(base_file->GetLength());
-		epi::crc32_c result;
-		result.Reset();
-		result.AddBlock(base_data, base_file->GetLength());
-		delete[] base_data;
-		delete[] base_file;
-		W_AddRawFilename(base_path.c_str(), FLKIND_EWad, result.crc);
-	}
+		W_AddRawFilename(base_path.c_str(), FLKIND_EWad);
 	else
-	{
 		I_Warning("Base WAD not found for the %s IWAD! Check the /edge_base folder of your EDGE-Classic install!\n", iwad_base.c_str());
-	}
 }
 
 static void CheckTurbo(void)
@@ -1202,14 +1128,7 @@ static void AddSingleCmdLineFile(const char *name)
 	if (kind != FLKIND_Lump)
 	{
 		std::string fn = M_ComposeFileName(game_dir.c_str(), name);
-		epi::file_c *fn_file = epi::FS_Open(fn.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-		byte *fn_data = fn_file->LoadIntoMemory(fn_file->GetLength());
-		epi::crc32_c result;
-		result.Reset();
-		result.AddBlock(fn_data, fn_file->GetLength());
-		delete[] fn_data;
-		delete[] fn_file;
-		W_AddRawFilename(fn.c_str(), kind, result.crc);
+		W_AddRawFilename(fn.c_str(), kind);
 	}
 }
 
@@ -1268,15 +1187,7 @@ static void AddCommandLineFiles(void)
 
 			std::string fn = M_ComposeFileName(game_dir.c_str(), ps);
 
-			epi::file_c *fn_file = epi::FS_Open(fn.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-			byte *fn_data = fn_file->LoadIntoMemory(fn_file->GetLength());
-			epi::crc32_c result;
-			result.Reset();
-			result.AddBlock(fn_data, fn_file->GetLength());
-			delete[] fn_data;
-			delete[] fn_file;
-
-			W_AddRawFilename(fn.c_str(), FLKIND_RTS, result.crc);
+			W_AddRawFilename(fn.c_str(), FLKIND_RTS);
 		}
 
 		p = M_CheckNextParm("-script", p-1);
@@ -1309,14 +1220,8 @@ static void AddCommandLineFiles(void)
 			std::string fn = M_ComposeFileName(game_dir.c_str(), ps);
 
 			epi::file_c *fn_file = epi::FS_Open(fn.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-			byte *fn_data = fn_file->LoadIntoMemory(fn_file->GetLength());
-			epi::crc32_c result;
-			result.Reset();
-			result.AddBlock(fn_data, fn_file->GetLength());
-			delete[] fn_data;
-			delete[] fn_file;
 
-			W_AddRawFilename(fn.c_str(), FLKIND_Deh, result.crc);
+			W_AddRawFilename(fn.c_str(), FLKIND_Deh);
 		}
 
 		p = M_CheckNextParm("-deh", p-1);

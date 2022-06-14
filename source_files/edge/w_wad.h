@@ -71,7 +71,7 @@ lumplist_e;
 extern int numlumps;
 extern int addwadnum;
 
-void W_AddRawFilename(const char *file, int kind, u32_t crc);
+void W_AddRawFilename(const char *file, int kind);
 void W_InitMultipleFiles(void);
 void W_ReadDDF(void);
 void W_ReadCoalLumps(void);

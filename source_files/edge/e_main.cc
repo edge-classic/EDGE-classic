@@ -37,9 +37,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
-#include <algorithm> // std::transform
-#include <map>
+#include <algorithm>
 #include <array>
+#include <tuple>
 
 #include "exe_path.h"
 #include "file.h"
@@ -111,19 +111,21 @@ FILE *logfile = NULL;
 FILE *debugfile = NULL;
 
 // Combination of unique lumps needed to best identify an IWAD
-const std::map<const char*, std::array<const char*, 2>> iwad_unique_lumps =
+const std::array<std::tuple<const char*, const char*, const char*>, 11> iwad_unique_lumps =
 {
-	{ "BLASPHEMER", { "BLASPHEM", "E1M1"  } },
-	{ "DOOM",       { "BFGGA0",   "E2M1"  } },
-	{ "DOOM1",      { "SHOTA0",   "E1M1"  } },
-	{ "DOOM2",      { "BFGGA0",   "MAP01" } },
-	{ "FREEDOOM1",  { "FREEDOOM", "E1M1"  } },
-	{ "FREEDOOM2",  { "FREEDOOM", "MAP01" } },
-	{ "HACX",       { "HACX-R",   "MAP01" } },
-	{ "HARMONY",    { "0HAWK01",  "MAP01" } },
-	{ "HERETIC",    { "MUS_E1M1", "E1M1"  } },
-	{ "PLUTONIA",   { "CAMO1",    "MAP01" } },
-	{ "TNT",        { "REDTNT2",  "MAP01" } }
+	{
+		{ "BLASPHEMER", "BLASPHEM", "E1M1"  },
+		{ "FREEDOOM1",  "FREEDOOM", "E1M1"  },
+		{ "FREEDOOM2",  "FREEDOOM", "MAP01" },
+		{ "HACX",       "HACX-R",   "MAP01" },
+		{ "HARMONY",    "0HAWK01",  "MAP01" },
+		{ "HERETIC",    "MUS_E1M1", "E1M1"  },
+		{ "PLUTONIA",   "CAMO1",    "MAP01" },
+		{ "TNT",        "REDTNT2",  "MAP01" },
+		{ "DOOM",       "BFGGA0",   "E2M1"  },
+		{ "DOOM1",      "SHOTA0",   "E1M1"  },
+		{ "DOOM2",      "BFGGA0",   "MAP01" }
+	}
 };
 
 gameflags_t default_gameflags =
@@ -904,11 +906,11 @@ static void IdentifyVersion(void)
 		{
 			epi::file_c *iwad_test = epi::FS_Open(iwad_file.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 			bool unique_lump_match = false;
-			for (const auto& [key, value] : iwad_unique_lumps) {
-				if (W_CheckForUniqueLumps(iwad_test, value[0], value[1]))
+			for (int i=0; i < iwad_unique_lumps.size(); i++) {
+				if (W_CheckForUniqueLumps(iwad_test, std::get<1>(iwad_unique_lumps[i]), std::get<2>(iwad_unique_lumps[i])))
 				{
 					unique_lump_match = true;
-					iwad_base = key;
+					iwad_base = std::get<0>(iwad_unique_lumps[i]);
 					break;
 				}
     		}
@@ -961,11 +963,11 @@ static void IdentifyVersion(void)
 					{
 						epi::file_c *iwad_test = epi::FS_Open(fsd[i]->name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 						bool unique_lump_match = false;
-						for (const auto& [key, value] : iwad_unique_lumps) {
-							if (W_CheckForUniqueLumps(iwad_test, value[0], value[1]))
+						for (int i = 0; i < iwad_unique_lumps.size(); i++) {
+							if (W_CheckForUniqueLumps(iwad_test, std::get<1>(iwad_unique_lumps[i]), std::get<2>(iwad_unique_lumps[i])))
 							{
 								unique_lump_match = true;
-								iwad_base = key;
+								iwad_base = std::get<0>(iwad_unique_lumps[i]);
 								break;
 							}
 						}

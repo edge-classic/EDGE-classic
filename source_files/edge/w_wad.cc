@@ -1034,6 +1034,65 @@ static bool FindCacheFilename (std::string& out_name,
 	return false;
 }
 
+
+bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char *lumpname2)
+{
+	int j;
+	int length;
+	int startlump;
+	bool lump1_found = false;
+	bool lump2_found = false;
+
+	raw_wad_header_t header;
+	raw_wad_entry_t *curinfo;
+
+	if (file == NULL)
+	{
+		I_Error("W_CheckRawFileForLump: Received null file_c pointer!\n");
+	}
+
+	startlump = numlumps;
+
+	// WAD file
+	// TODO: handle Read failure
+    file->Read(&header, sizeof(raw_wad_header_t));
+
+	if (strncmp(header.identification, "IWAD", 4) != 0)
+	{
+		// Homebrew levels?
+		if (strncmp(header.identification, "PWAD", 4) != 0)
+		{
+			I_Error("W_CheckRawFileForLump: Wad file doesn't have IWAD or PWAD id!\n");
+		}
+	}
+
+	header.num_entries = EPI_LE_S32(header.num_entries);
+	header.dir_start = EPI_LE_S32(header.dir_start);
+
+	length = header.num_entries * sizeof(raw_wad_entry_t);
+
+    raw_wad_entry_t *fileinfo = new raw_wad_entry_t[header.num_entries];
+
+    file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
+	// TODO: handle Read failure
+    file->Read(fileinfo, length);
+
+	// Fill in lumpinfo
+	numlumps += header.num_entries;
+
+	for (j=startlump, curinfo=fileinfo; j < numlumps; j++,curinfo++)
+	{
+		if (strncmp(lumpname1, curinfo->name, strlen(lumpname1) < 8 ? strlen(lumpname1) : 8) == 0)
+			lump1_found = true;
+		if (strncmp(lumpname2, curinfo->name, strlen(lumpname2) < 8 ? strlen(lumpname2) : 8) == 0)
+			lump2_found = true;
+	}
+
+	delete[] fileinfo;
+	file->Seek(0, epi::file_c::SEEKPOINT_START);
+	return (lump1_found && lump2_found);
+}
+
 //
 // AddFile
 //

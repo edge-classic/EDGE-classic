@@ -38,10 +38,13 @@
 #include <sys/types.h>
 #include <time.h>
 #include <algorithm> // std::transform
+#include <map>
+#include <array>
 
 #include "exe_path.h"
 #include "file.h"
 #include "filesystem.h"
+#include "math_crc.h"
 #include "path.h"
 #include "utility.h"
 
@@ -107,6 +110,41 @@ bool custom_MenuDifficulty = false;
 
 FILE *logfile = NULL;
 FILE *debugfile = NULL;
+
+// These are the Adler-32 checksums that our EPI library produces, not the CRC32 checksums on the Doom wiki.
+// I verified the IWAD MD5s (where available) before creating this list, though.
+// Source: Trust me, bro
+const std::map<u32_t, const char*> iwad_crcs =
+{
+	// Blasphemer support will start with 0.1.7, as that was the first single-player ready release
+	{ 0x78c05884, "BLASPHEMER" }, // Version 0.1.7
+	{ 0xbe41e224, "DOOM" 	   }, // Version 1.9ud (Ultimate Doom)
+	{ 0x3bca9a2a, "DOOM1"      }, // Version 1.9 (Shareware)
+	{ 0x03bcce6c, "DOOM2" 	   }, // Version 1.9
+	{ 0x56bf590f, "FREEDOOM1"  }, // Version 0.12.1
+	{ 0x8ec4f83c, "FREEDOOM2"  }, // Version 0.12.1
+	{ 0x59a32399, "HACX" 	   }, // Version 1.2
+	{ 0xfdee2f31, "HARMONY"    }, // Version 1.1
+	{ 0x065166bc, "HERETIC"    }, // Version 1.3
+	{ 0x63916b81, "PLUTONIA"   }, // Version 1.9
+	{ 0xcd062fca, "TNT" 	   } // Version 1.9
+};
+
+// Combination of unique lumps needed for a best guess?
+const std::map<const char*, std::array<const char*, 2>> iwad_unique_lumps =
+{
+	{ "BLASPHEMER", { "BLASPHEM", "E1M1"  } },
+	{ "DOOM",       { "BFGGA0",   "E2M1"  } },
+	{ "DOOM1",      { "SHOTA0",   "E1M1"  } },
+	{ "DOOM2",      { "BFGGA0",   "MAP01" } },
+	{ "FREEDOOM1",  { "FREEDOOM", "E1M1"  } },
+	{ "FREEDOOM2",  { "FREEDOOM", "MAP01" } },
+	{ "HACX",       { "HACX-R",   "MAP01" } },
+	{ "HARMONY",    { "0HAWK01",  "MAP01" } },
+	{ "HERETIC",    { "MUS_E1M1", "E1M1"  } },
+	{ "PLUTONIA",   { "CAMO1",    "MAP01" } },
+	{ "TNT",        { "REDTNT2",  "MAP01" } }
+};
 
 gameflags_t default_gameflags =
 {
@@ -816,9 +854,9 @@ void InitDirectories(void)
 
 
 //
-// Adds an IWAD and EDGE.WAD. -ES-  2000/01/01 Rewritten.
+// Adds an IWAD and EDGE.WAD
+// First checks agains known Adler-32 checksums, then attempts to find unique lumps as a fallback
 //
-const char *wadname[] = { "blasphem", "doom", "doom1", "doom2", "freedoom1", "freedoom2", "hacx", "harm1", "plutonia", "tnt", NULL };
 
 static void IdentifyVersion(void)
 {
@@ -880,8 +918,45 @@ static void IdentifyVersion(void)
 
         if (!epi::FS_Access(iwad_file.c_str(), epi::file_c::ACCESS_READ))
         {
-			I_Error("IdentifyVersion: Unable to add specified '%s'", fn.c_str());
+			I_Error("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
         }
+		else
+		{
+			epi::file_c *iwad_test = epi::FS_Open(iwad_file.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+			byte *iwad_data = iwad_test->LoadIntoMemory(iwad_test->GetLength());
+			iwad_test->Seek(0, epi::file_c::SEEKPOINT_START);
+			epi::crc32_c result;
+			result.Reset();
+			result.AddBlock(iwad_data, iwad_test->GetLength());
+			delete[] iwad_data;
+			auto search = iwad_crcs.find(result.crc);
+			if (search != iwad_crcs.end()) 
+			{
+				iwad_base = search->second;
+				W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad);
+				delete[] iwad_test;
+			} 
+			else
+			{
+				bool unique_lump_match = false;
+				for (const auto& [key, value] : iwad_unique_lumps) {
+					if (W_CheckForUniqueLumps(iwad_test, value[0], value[1]))
+					{
+						unique_lump_match = true;
+						iwad_base = key;
+						break;
+					}
+    			}
+				if (unique_lump_match)
+				{
+					I_Printf("IdentifyVersion: IWAD matches no known CRC values. Best guess: %s\n", iwad_base.c_str());
+					W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad);
+					delete[] iwad_test;
+				}
+				else
+					I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
+			}
+		}
     }
     else
     {
@@ -903,39 +978,67 @@ static void IdentifyVersion(void)
 			location = (i == 0 ? iwad_dir.c_str() : game_dir.c_str());
 
 			//
-			// go through the available wad names constructing an access
-			// name for each, adding the file if they exist.
+			// go through the available wad names attempting IWAD
+			// detection for each, adding the file if they exist.
 			//
 			// -ACB- 2000/06/08 Quit after we found a file - don't load
 			//                  more than one IWAD
 			//
-			for (int w_idx=0; wadname[w_idx]; w_idx++)
+			epi::filesystem_dir_c fsd;
+
+			if (!FS_ReadDir(&fsd, location, "*.wad"))
 			{
-				std::string fn(epi::PATH_Join(location, wadname[w_idx]));
-
-                fn += ("." EDGEWADEXT);
-
-				if (epi::FS_Access(fn.c_str(), epi::file_c::ACCESS_READ))
+				I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location);
+			}
+			else
+			{
+				for (int i = 0; i < fsd.GetSize(); i++) 
 				{
-                    iwad_file = fn;
-					done = true;
-					break;
+					if(!fsd[i]->is_dir)
+					{
+						epi::file_c *iwad_test = epi::FS_Open(fsd[i]->name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+						byte *iwad_data = iwad_test->LoadIntoMemory(iwad_test->GetLength());
+						iwad_test->Seek(0, epi::file_c::SEEKPOINT_START);
+						epi::crc32_c result;
+						result.Reset();
+						result.AddBlock(iwad_data, iwad_test->GetLength());
+						delete[] iwad_data;
+						auto search = iwad_crcs.find(result.crc);
+						if (search != iwad_crcs.end()) 
+						{
+							iwad_base = search->second;
+							W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad);
+							delete[] iwad_test;
+							goto foundlooseiwad;
+						} 
+						else
+						{
+							bool unique_lump_match = false;
+							for (const auto& [key, value] : iwad_unique_lumps) {
+								if (W_CheckForUniqueLumps(iwad_test, value[0], value[1]))
+								{
+									unique_lump_match = true;
+									iwad_base = key;
+									break;
+								}
+							}
+							if (unique_lump_match)
+							{
+								I_Printf("IdentifyVersion: IWAD matches no known CRC values. Best guess: %s\n", iwad_base.c_str());
+								W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad);
+								delete[] iwad_test;
+								goto foundlooseiwad;
+							}
+						}						
+					}
 				}
 			}
 		}
     }
 
-	if (iwad_file.empty())
-		I_Error("IdentifyVersion: No IWADS found!\nSupported IWADS are: blasphem.wad, doom.wad, doom1.wad, doom2.wad, freedoom1.wad,\n\
-freedoom2.wad, hacx.wad, harm1.wad, plutonia.wad, tnt.wad\n");
-
-    W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad);
-
-    iwad_base = epi::PATH_GetBasename(iwad_file.c_str());
+	foundlooseiwad:
 
 	I_Debugf("IWAD BASE = [%s]\n", iwad_base.c_str());
-
-    // Emulate this behaviour?
 
     // Look for the required wad in the IWADs dir and then the gamedir
     std::string reqwad(epi::PATH_Join(iwad_dir.c_str(), REQUIREDWAD "." EDGEWADEXT));
@@ -960,9 +1063,6 @@ static void Add_Base(void)
 	std::string base_path = epi::PATH_Join(game_dir.c_str(), "edge_base");
 	std::string base_wad = iwad_base;
 	std::transform(base_wad.begin(), base_wad.end(), base_wad.begin(), ::tolower);
-	// Strip version from blasphemer release IWAD names for base WAD detection
-	if (base_wad.size() > 8 && strcasecmp(base_wad.substr(0, 8).c_str(), "blasphem") == 0)
-		base_wad = "blasphem";
 	base_path = epi::PATH_Join(base_path.c_str(), base_wad.append("_base.wad").c_str());
 	if (epi::FS_Access(base_path.c_str(), epi::file_c::ACCESS_READ)) 
 	{

@@ -1034,6 +1034,8 @@ static void IdentifyVersion(void)
 				}
 			}
 		}
+		// Should only get here if no loose IWADs were found - Dasho
+		I_Error("IdentifyVersion: No IWADs found!\n");
     }
 
 	foundlooseiwad:

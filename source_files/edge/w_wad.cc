@@ -124,6 +124,8 @@ public:
 	// file object
     epi::file_c *file;
 
+	u32_t crc;
+
 	// lists for sprites, flats, patches (stuff between markers)
 	epi::u32array_c sprite_lumps;
 	epi::u32array_c flat_lumps;
@@ -162,8 +164,8 @@ public:
 	epi::md5hash_c dir_hash;
 
 public:
-	data_file_c(const char *_fname, int _kind, epi::file_c* _file) :
-		file_name(_fname), kind(_kind), file(_file),
+	data_file_c(const char *_fname, int _kind, epi::file_c* _file, u32_t _crc) :
+		file_name(_fname), kind(_kind), file(_file), crc(_crc),
 		sprite_lumps(), flat_lumps(), patch_lumps(),
 		colmap_lumps(), tx_lumps(), hires_lumps(),
 		level_markers(), skin_markers(),
@@ -192,10 +194,11 @@ class raw_filename_c
 public:
 	std::string filename;
 	int kind;
+	u32_t crc;
 
 public:
-	raw_filename_c(const char *_name, int _kind) :
-			 filename(_name), kind(_kind)
+	raw_filename_c(const char *_name, int _kind, u32_t _crc) :
+			 filename(_name), kind(_kind), crc(_crc)
 	{ }
 
 	~raw_filename_c()
@@ -1104,7 +1107,7 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 //       otherwise it is the sort_index for the lumps (typically the
 //       file number of the wad which the GWA is a companion for).
 //
-static void AddFile(const char *filename, int kind, int dyn_index)
+static void AddFile(const char *filename, int kind, int dyn_index, u32_t crc)
 {
 	int j;
 	int length;
@@ -1132,7 +1135,7 @@ static void AddFile(const char *filename, int kind, int dyn_index)
 
 	int datafile = (int)data_files.size();
 
-	data_file_c *df = new data_file_c(filename, kind, file);
+	data_file_c *df = new data_file_c(filename, kind, file, crc);
 	data_files.push_back(df);
 
 	// for RTS scripts, adding the data_file is enough
@@ -1282,9 +1285,17 @@ static void AddFile(const char *filename, int kind, int dyn_index)
 
             }
 
+			epi::file_c *gwa_file = epi::FS_Open(gwa_filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+			byte *gwa_data = gwa_file->LoadIntoMemory(gwa_file->GetLength());
+			epi::crc32_c result;
+			result.Reset();
+			result.AddBlock(gwa_data, gwa_file->GetLength());
+			delete[] gwa_data;
+			delete[] gwa_file;
+
 			// Load it.  This recursion bit is rather sneaky,
 			// hopefully it doesn't break anything...
-			AddFile(gwa_filename.c_str(), FLKIND_GWad, datafile);
+			AddFile(gwa_filename.c_str(), FLKIND_GWad, datafile, result.crc);
 
 			df->companion_gwa = datafile + 1;
 		}
@@ -1324,8 +1335,16 @@ static void AddFile(const char *filename, int kind, int dyn_index)
 				W_DoneWithLump(data);
 			}
 
+		epi::file_c *hwa_file = epi::FS_Open(hwa_filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+		byte *hwa_data = hwa_file->LoadIntoMemory(hwa_file->GetLength());
+		epi::crc32_c result;
+		result.Reset();
+		result.AddBlock(hwa_data, hwa_file->GetLength());
+		delete[] hwa_data;
+		delete[] hwa_file;
+
 		// Load it (using good ol' recursion again).
-		AddFile(hwa_filename.c_str(), FLKIND_HWad, -1);
+		AddFile(hwa_filename.c_str(), FLKIND_HWad, -1, result.crc);
 	}
 }
 
@@ -1337,11 +1356,11 @@ static void InitCaches(void)
 //
 // W_AddRawFilename
 //
-void W_AddRawFilename(const char *file, int kind)
+void W_AddRawFilename(const char *file, int kind, u32_t crc)
 {
 	I_Debugf("Added filename: %s\n", file);
 
-    wadfiles.push_back(new raw_filename_c(file, kind));
+    wadfiles.push_back(new raw_filename_c(file, kind, crc));
 }
 
 //
@@ -1369,7 +1388,7 @@ void W_InitMultipleFiles(void)
 	for (it = wadfiles.begin(); it != wadfiles.end(); it++)
     {
         raw_filename_c *rf = *it;
-		AddFile(rf->filename.c_str(), rf->kind, -1);
+		AddFile(rf->filename.c_str(), rf->kind, -1, rf->crc);
     }
 
 	if (numlumps == 0)
@@ -2120,7 +2139,7 @@ void W_ShowFiles(void)
 	{
 		data_file_c *df = data_files[i];
 
-		I_Printf(" %2d %-4s \"%s\"\n", i+1, FileKind_Strings[df->kind], df->file_name);
+		I_Printf(" %2d %08x %-4s \"%s\"\n", i+1, df->crc, FileKind_Strings[df->kind], df->file_name);
 	}
 }
 

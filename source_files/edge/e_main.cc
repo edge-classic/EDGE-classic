@@ -933,7 +933,7 @@ static void IdentifyVersion(void)
 			if (search != iwad_crcs.end()) 
 			{
 				iwad_base = search->second;
-				W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad);
+				W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad, result.crc);
 				delete[] iwad_test;
 			} 
 			else
@@ -950,7 +950,7 @@ static void IdentifyVersion(void)
 				if (unique_lump_match)
 				{
 					I_Printf("IdentifyVersion: IWAD matches no known CRC values. Best guess: %s\n", iwad_base.c_str());
-					W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad);
+					W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad, result.crc);
 					delete[] iwad_test;
 				}
 				else
@@ -1007,7 +1007,7 @@ static void IdentifyVersion(void)
 						if (search != iwad_crcs.end()) 
 						{
 							iwad_base = search->second;
-							W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad);
+							W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad, result.crc);
 							delete[] iwad_test;
 							goto foundlooseiwad;
 						} 
@@ -1025,7 +1025,7 @@ static void IdentifyVersion(void)
 							if (unique_lump_match)
 							{
 								I_Printf("IdentifyVersion: IWAD matches no known CRC values. Best guess: %s\n", iwad_base.c_str());
-								W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad);
+								W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad, result.crc);
 								delete[] iwad_test;
 								goto foundlooseiwad;
 							}
@@ -1056,7 +1056,15 @@ static void IdentifyVersion(void)
         }
     }
 
-    W_AddRawFilename(reqwad.c_str(), FLKIND_EWad);
+	epi::file_c *reqwad_file = epi::FS_Open(reqwad.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+	byte *reqwad_data = reqwad_file->LoadIntoMemory(reqwad_file->GetLength());
+	epi::crc32_c result;
+	result.Reset();
+	result.AddBlock(reqwad_data, reqwad_file->GetLength());
+	delete[] reqwad_data;
+	delete[] reqwad_file;
+
+    W_AddRawFilename(reqwad.c_str(), FLKIND_EWad, result.crc);
 }
 
 // Add game-specific base EWADs (widepix, skyboxes, etc) - Dasho
@@ -1068,7 +1076,14 @@ static void Add_Base(void)
 	base_path = epi::PATH_Join(base_path.c_str(), base_wad.append("_base.wad").c_str());
 	if (epi::FS_Access(base_path.c_str(), epi::file_c::ACCESS_READ)) 
 	{
-		W_AddRawFilename(base_path.c_str(), FLKIND_EWad);
+		epi::file_c *base_file = epi::FS_Open(base_path.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+		byte *base_data = base_file->LoadIntoMemory(base_file->GetLength());
+		epi::crc32_c result;
+		result.Reset();
+		result.AddBlock(base_data, base_file->GetLength());
+		delete[] base_data;
+		delete[] base_file;
+		W_AddRawFilename(base_path.c_str(), FLKIND_EWad, result.crc);
 	}
 	else
 	{
@@ -1187,7 +1202,14 @@ static void AddSingleCmdLineFile(const char *name)
 	if (kind != FLKIND_Lump)
 	{
 		std::string fn = M_ComposeFileName(game_dir.c_str(), name);
-		W_AddRawFilename(fn.c_str(), kind);
+		epi::file_c *fn_file = epi::FS_Open(fn.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+		byte *fn_data = fn_file->LoadIntoMemory(fn_file->GetLength());
+		epi::crc32_c result;
+		result.Reset();
+		result.AddBlock(fn_data, fn_file->GetLength());
+		delete[] fn_data;
+		delete[] fn_file;
+		W_AddRawFilename(fn.c_str(), kind, result.crc);
 	}
 }
 
@@ -1246,7 +1268,15 @@ static void AddCommandLineFiles(void)
 
 			std::string fn = M_ComposeFileName(game_dir.c_str(), ps);
 
-			W_AddRawFilename(fn.c_str(), FLKIND_RTS);
+			epi::file_c *fn_file = epi::FS_Open(fn.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+			byte *fn_data = fn_file->LoadIntoMemory(fn_file->GetLength());
+			epi::crc32_c result;
+			result.Reset();
+			result.AddBlock(fn_data, fn_file->GetLength());
+			delete[] fn_data;
+			delete[] fn_file;
+
+			W_AddRawFilename(fn.c_str(), FLKIND_RTS, result.crc);
 		}
 
 		p = M_CheckNextParm("-script", p-1);
@@ -1278,7 +1308,15 @@ static void AddCommandLineFiles(void)
 
 			std::string fn = M_ComposeFileName(game_dir.c_str(), ps);
 
-			W_AddRawFilename(fn.c_str(), FLKIND_Deh);
+			epi::file_c *fn_file = epi::FS_Open(fn.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+			byte *fn_data = fn_file->LoadIntoMemory(fn_file->GetLength());
+			epi::crc32_c result;
+			result.Reset();
+			result.AddBlock(fn_data, fn_file->GetLength());
+			delete[] fn_data;
+			delete[] fn_file;
+
+			W_AddRawFilename(fn.c_str(), FLKIND_Deh, result.crc);
 		}
 
 		p = M_CheckNextParm("-deh", p-1);

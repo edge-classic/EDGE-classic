@@ -1312,6 +1312,7 @@ startuporder_t startcode[] =
 	{  1, V_InitPalette        },
 	{  2, HU_Init              },
 	{ 20, W_ReadDDF            },
+	{  2, W_CheckWADFixes      },
 	{  3, W_InitFlats          },
 	{ 10, W_InitTextures       },
 	{  1, CON_Start            },

@@ -32,6 +32,7 @@ add_library(
   style.cc
   switch.cc
   thing.cc
+  wadfixes.cc
   weapon.cc
 )
 

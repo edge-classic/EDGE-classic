@@ -78,7 +78,7 @@ bool DDF_ReadFlat(void *data, int size);
 
 void DDF_ParseFLATS(const byte *data, int size);
 
-#endif  /*__DDF_SWTH_H__*/
+#endif  /*__DDF_FLAT_H__*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

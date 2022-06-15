@@ -119,6 +119,8 @@ bool W_IsLumpInPwad(const char *name);
 
 bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char *lumpname2);
 
+void W_CheckWADFixes(void);
+
 // Define this only in an emergency.  All these debug printfs quickly
 // add up, and it takes only a few seconds to end up with a 40 meg debug file!
 #ifdef WAD_CHECK

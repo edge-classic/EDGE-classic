@@ -387,6 +387,10 @@ void DDF_ImageCleanUp (void);
 void DDF_FlatInit (void);
 void DDF_FlatCleanUp (void);
 
+// WADFIXES Code 2022
+void DDF_FixInit (void);
+void DDF_FixCleanUp (void);
+
 // Miscellaneous stuff needed here & there
 extern const commandlist_t floor_commands[];
 extern const commandlist_t damage_commands[];

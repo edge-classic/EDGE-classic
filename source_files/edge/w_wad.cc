@@ -43,6 +43,7 @@
 #include "file.h"
 #include "file_sub.h"
 #include "filesystem.h"
+#include "math_md5.h"
 #include "path.h"
 #include "str_format.h"
 #include "utility.h"
@@ -55,6 +56,7 @@
 #include "style.h"
 #include "switch.h"
 #include "flat.h"
+#include "wadfixes.h"
 
 #include "dm_data.h"
 #include "dm_defs.h"
@@ -100,7 +102,8 @@ static ddf_reader_t DDF_Readers[] =
 	{ "DDFANIM", "Anims",      DDF_ReadAnims },
 	{ "DDFGAME", "Games",      DDF_ReadGames },
 	{ "DDFLEVL", "Levels",     DDF_ReadLevels },
-	{ "DDFFLAT", "Flats",     DDF_ReadFlat },
+	{ "DDFFLAT", "Flats",      DDF_ReadFlat },
+	{ "WADFIXES","Fixes",	   DDF_ReadFixes },
 	{ "RSCRIPT", "RadTrig",    RAD_ReadScript }       // -AJA- 2000/04/21.
 };
 
@@ -110,7 +113,7 @@ static ddf_reader_t DDF_Readers[] =
 #define COLM_READER  2
 #define SWTH_READER  12
 #define ANIM_READER  13
-#define RTS_READER   17
+#define RTS_READER   18
 
 class data_file_c
 {
@@ -156,9 +159,11 @@ public:
 	// temporarily before a new GWA files has been built and added).
 	int companion_gwa;
 
-	// CRC checksum of the contents of the WAD directory.
+	// MD5 hash of the contents of the WAD directory.
 	// This is used to disambiguate cached GWA/HWA filenames.
-	epi::crc32_c dir_crc;
+	epi::md5hash_c dir_md5;
+
+	std::string md5_string;
 
 public:
 	data_file_c(const char *_fname, int _kind, epi::file_c* _file) :
@@ -168,14 +173,12 @@ public:
 		level_markers(), skin_markers(),
 		wadtex(), deh_lump(-1), coal_apis(-1), coal_huds(-1),
 		animated(-1), switches(-1),
-		companion_gwa(-1), dir_crc()
+		companion_gwa(-1), dir_md5()
 	{
 		file_name = strdup(_fname);
 
 		for (int d = 0; d < NUM_DDF_READERS; d++)
 			ddf_lumps[d] = -1;
-
-		dir_crc.Reset();
 	}
 
 	~data_file_c()
@@ -947,7 +950,7 @@ static bool HasInternalGLNodes(data_file_c *df, int datafile)
 	return levels == glnodes;
 }
 
-static void ComputeFileCRC(epi::crc32_c& crc, epi::file_c *file)
+static void ComputeFileMD5(epi::md5hash_c& md5, epi::file_c *file)
 {
 	int length = file->GetLength();
 
@@ -959,7 +962,7 @@ static void ComputeFileCRC(epi::crc32_c& crc, epi::file_c *file)
 	// TODO: handle Read failure
 	file->Read(buffer, length);
 	
-	crc.AddBlock(buffer, length);
+	md5.Compute(buffer, length);
 
 	delete[] buffer;
 }
@@ -969,15 +972,18 @@ static bool FindCacheFilename (std::string& out_name,
 		const char *extension)
 {
 	std::string wad_dir;
-	std::string crc_string;
+	std::string md5_file_string;
 	std::string local_name;
 	std::string cache_name;
 
 	// Get the directory which the wad is currently stored
 	wad_dir = epi::PATH_GetDir(filename);
 
-	// CRC string used for files in the cache directory
-	crc_string = epi::STR_Format("-%08x", df->dir_crc.crc);
+	// MD5 string used for files in the cache directory
+	md5_file_string = epi::STR_Format("-%02X%02X%02X-%02X%02X%02X",
+		df->dir_md5.hash[0], df->dir_md5.hash[1],
+		df->dir_md5.hash[2], df->dir_md5.hash[3],
+		df->dir_md5.hash[4], df->dir_md5.hash[5]);
 
 	// Determine the full path filename for "local" (same-directory) version
 	local_name = epi::PATH_GetBasename(filename);
@@ -988,7 +994,7 @@ static bool FindCacheFilename (std::string& out_name,
 
 	// Determine the full path filename for the cached version
 	cache_name = epi::PATH_GetBasename(filename);
-	cache_name += (crc_string);
+	cache_name += (md5_file_string);
 	cache_name += (".");
 	cache_name += (extension);
 
@@ -1163,8 +1169,8 @@ static void AddFile(const char *filename, int kind, int dyn_index)
 		// TODO: handle Read failure
         file->Read(fileinfo, length);
 
-		// compute CRC hash over wad directory
-		df->dir_crc.AddBlock((const byte *)fileinfo, length);
+		// compute MD5 hash over wad directory
+		df->dir_md5.Compute((const byte *)fileinfo, length);
 
 		// Fill in lumpinfo
 		numlumps += header.num_entries;
@@ -1206,8 +1212,8 @@ static void AddFile(const char *filename, int kind, int dyn_index)
 			}
         }
 
-		// calculate CRC hash over whole file
-		ComputeFileCRC(df->dir_crc, file);
+		// calculate MD5 hash over whole file
+		ComputeFileMD5(df->dir_md5, file);
 
 		// Fill in lumpinfo
 		numlumps++;
@@ -1218,7 +1224,17 @@ static void AddFile(const char *filename, int kind, int dyn_index)
 				lump_name, true);
 	}
 
-	I_Debugf("   CRC32 = %08x\n", df->dir_crc.crc);
+	df->md5_string = epi::STR_Format("%02x%02x%02x%02x%02x%02x%02x%02x", 
+			df->dir_md5.hash[0], df->dir_md5.hash[1],
+			df->dir_md5.hash[2], df->dir_md5.hash[3],
+			df->dir_md5.hash[4], df->dir_md5.hash[5],
+			df->dir_md5.hash[6], df->dir_md5.hash[7],
+			df->dir_md5.hash[8], df->dir_md5.hash[9],
+			df->dir_md5.hash[10], df->dir_md5.hash[11],
+			df->dir_md5.hash[12], df->dir_md5.hash[13],
+			df->dir_md5.hash[14], df->dir_md5.hash[15]);
+
+	I_Debugf("   md5hash = %s\n", df->md5_string.c_str());
 
 	SortLumps();
 	SortSpriteLumps(df);
@@ -2114,7 +2130,7 @@ void W_ShowFiles(void)
 	{
 		data_file_c *df = data_files[i];
 
-		I_Printf(" %2d %08x %-4s \"%s\"\n", i+1, df->dir_crc.crc, FileKind_Strings[df->kind], df->file_name);
+		I_Printf(" %2d %-4s \"%s\"\n", i+1, FileKind_Strings[df->kind], df->file_name);
 	}
 }
 
@@ -2306,6 +2322,93 @@ bool W_IsLumpInPwad(const char *name)
 	}
 
 	return false;
+}
+
+//W_CheckWADFixes
+//
+//check if WADFIXES has something for matching PWAD
+//
+void W_CheckWADFixes(void)
+{
+	for (int i = 0; i < data_files.size(); i++)
+	{
+		data_file_c *df = data_files[i];
+
+		//we only want pwads?
+		if (df->kind == FLKIND_PWad)
+		{
+			for (int j = 0; j < fixdefs.GetSize(); j++)
+			{
+				if (strcasecmp(df->md5_string.c_str(), fixdefs[j]->md5_string.c_str()) == 0)
+				{
+
+					std::string fix_path = epi::PATH_Join(game_dir.c_str(), "edge_fixes");
+					fix_path = epi::PATH_Join(fix_path.c_str(), df->md5_string.append(".wad").c_str());
+					if (epi::FS_Access(fix_path.c_str(), epi::file_c::ACCESS_READ)) 
+						AddFile(fix_path.c_str(), FLKIND_PWad, -1);
+					else
+					{
+						I_Warning("WADFIXES: %s defined, but no fix WAD located in edge_fixes!\n", fixdefs[j]->name.c_str());
+						return;
+					}
+
+					I_Printf("WADFIXES: Applying fixes for %s\n", fixdefs[j]->name.c_str());
+
+					data_file_c *df_fix = data_files.back();
+
+					for (int d = 0; d < NUM_DDF_READERS; d++)
+					{
+						int lump = df_fix->ddf_lumps[d];
+
+						if (lump >= 0)
+						{
+							I_Printf("Loading %s from: %s\n", DDF_Readers[d].name, df_fix->file_name);
+
+							int length;
+							char *data = (char *) W_ReadLumpAlloc(lump, &length);
+
+							// call read function
+							(* DDF_Readers[d].func)(data, length);
+							delete[] data;
+						}
+
+						// handle Boom's ANIMATED and SWITCHES lumps
+						if (d == ANIM_READER && df_fix->animated >= 0)
+						{
+							I_Printf("Loading ANIMATED from: %s\n", df_fix->file_name);
+
+							int length;
+							byte *data = W_ReadLumpAlloc(df_fix->animated, &length);
+
+							DDF_ParseANIMATED(data, length);
+							delete[] data;
+						}
+						if (d == SWTH_READER && df_fix->switches >= 0)
+						{
+							I_Printf("Loading SWITCHES from: %s\n", df_fix->file_name);
+
+							int length;
+							byte *data = W_ReadLumpAlloc(df_fix->switches, &length);
+
+							DDF_ParseSWITCHES(data, length);
+							delete[] data;
+						}
+
+						// handle BOOM Colourmaps (between C_START and C_END)
+						if (d == COLM_READER && df_fix->colmap_lumps.GetSize() > 0)
+						{
+							for (int i=0; i < df_fix->colmap_lumps.GetSize(); i++)
+							{
+								int lump = df_fix->colmap_lumps[i];
+
+								DDF_ColourmapAddRaw(W_GetLumpName(lump), W_LumpLength(lump));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 //--- editor settings ---

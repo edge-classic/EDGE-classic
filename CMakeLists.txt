@@ -144,6 +144,8 @@ add_executable(
 	source_files/edge/vm_coal.cc    
 	source_files/edge/vm_hud.cc     
 	source_files/edge/vm_player.cc  
+	source_files/edge/scanner.cc     
+	source_files/edge/umapinfo.cc  
 	source_files/edge/w32_res.rc # I think this is ok to leave in regardless of OS (silently ignored on *nix?)
 )
 

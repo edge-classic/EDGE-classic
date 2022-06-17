@@ -75,6 +75,9 @@
 #include "z_zone.h"
 #include "w_texture.h"
 
+#include "umapinfo.h" //Lobo 2022
+
+
 // -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
 typedef struct ddf_reader_s
 {
@@ -1386,6 +1389,69 @@ void W_InitMultipleFiles(void)
 		I_Error("W_InitMultipleFiles: no files found!\n");
 }
 
+void W_ReadUMAPINFOLumps(void)
+{
+	int p;
+	p= W_GetNumForName2("UMAPINFO");
+	int length;
+	const unsigned char * lump = (const unsigned char *)W_ReadLumpAlloc(p, &length);
+	ParseUMapInfo(lump, W_LumpLength(p), I_Error);
+
+	unsigned int i;
+	for(i = 0; i < Maps.mapcount; i++)
+	{
+		mapdef_c *temp_level = mapdefs.Lookup(M_Strupr(Maps.maps[i].mapname));
+		if (!temp_level)
+		{
+			temp_level = new mapdef_c;
+			temp_level->name = M_Strupr(Maps.maps[i].mapname);
+			temp_level->lump.Set(Maps.maps[i].mapname);
+
+			mapdefs.Insert(temp_level);
+		}
+			
+		if(Maps.maps[i].levelpic)
+			temp_level->namegraphic.Set(M_Strupr(Maps.maps[i].levelpic));
+
+		if(Maps.maps[i].skytexture[0] != NULL)	
+			temp_level->sky.Set(M_Strupr(Maps.maps[i].skytexture));
+
+		if(Maps.maps[i].levelname[0] != NULL)
+		{
+			//Lobo: Fix me. this should create an entry in
+			//languages...
+			//temp_level->description.Set(Maps.maps[i].levelname);
+		}
+
+		if(Maps.maps[i].music[0] != NULL)
+		{
+			//Lobo: Fix me. this should create an entry in
+			//playlist...
+			//
+			// --random stuff I might need---
+			//int val = 0;
+			//val = atoi(Maps.maps[i].music);
+			//const pl_entry_c *play = playlist.Find(entrynum);
+			//play->info=Maps.maps[i].music;
+			//temp_level->music = val;
+			//--------------------------------
+		}	
+		
+		if(Maps.maps[i].nextmap[0] != NULL)	
+			temp_level->nextmapname.Set(M_Strupr(Maps.maps[i].nextmap));
+
+		if(Maps.maps[i].nextsecret[0] != NULL)
+			temp_level->secretmapname.Set(M_Strupr(Maps.maps[i].nextsecret));
+		
+		if(Maps.maps[i].exitpic[0] != NULL)
+			temp_level->leavingbggraphic.Set(M_Strupr(Maps.maps[i].exitpic));
+
+		if(Maps.maps[i].enterpic[0] != NULL)
+			temp_level->enteringbggraphic.Set(M_Strupr(Maps.maps[i].enterpic));
+		
+	}
+}
+
 void W_ReadDDF(void)
 {
 	// -AJA- the order here may look strange.  Since DDF files
@@ -1475,7 +1541,10 @@ void W_ReadDDF(void)
 
 		E_LocalProgress(d, NUM_DDF_READERS);
 	}
+
 }
+
+
 
 void W_ReadCoalLumps(void)
 {
@@ -1490,7 +1559,13 @@ void W_ReadCoalLumps(void)
 
 		if (df->coal_huds >= 0)	VM_LoadLumpOfCoal(df->coal_huds);
 	}
+
+	//Lobo: just stuck it here for now while testing
+	W_ReadUMAPINFOLumps();
 }
+
+
+
 
 epi::file_c *W_OpenLump(int lump)
 {
@@ -2284,6 +2359,12 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 //Returns true if found
 bool W_IsLumpInPwad(const char *name)
 {
+
+	if(!name)
+		return false;
+
+	if(name[0] == NULL)
+		return false;
 
 	//first check images.ddf
 	const image_c *tempImage;

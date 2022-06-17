@@ -426,13 +426,17 @@ static void DrawLevelFinished(void)
 	int t_type = styledef_c::T_TEXT;
 	
 	HUD_SetAlignment(0, -1);//center it
+
 	//If we have a custom mapname graphic e.g.CWILVxx then use that
-	if (W_IsLumpInPwad(lnames[0]->name))
+	if(lnames[0])
 	{
-		w1 = IM_WIDTH(lnames[0]);
-		h1 = IM_HEIGHT(lnames[0]);
-		HUD_SetAlignment(-1, -1);//center it
-		HUD_DrawImage(160 - w1/2, y, lnames[0]);
+		if (W_IsLumpInPwad(lnames[0]->name))
+		{
+			w1 = IM_WIDTH(lnames[0]);
+			h1 = IM_HEIGHT(lnames[0]);
+			HUD_SetAlignment(-1, -1);//center it
+			HUD_DrawImage(160 - w1/2, y, lnames[0]);
+		}
 	}
 	else
 	{
@@ -470,8 +474,11 @@ static void DrawEnteringLevel(void)
 {
 	// -KM- 1998/11/25 If there is no level to enter, don't draw it.
 	//      (Stop Map30 from crashing)
+	// -Lobo- 2022 Seems we don't need this check anymore
+	/*
 	if (! lnames[1])
 		return;
+	*/
 
 	//Lobo 2022: if we have a per level image defined, use that instead
 	if (entering_bg_image)
@@ -490,6 +497,7 @@ static void DrawEnteringLevel(void)
 		t_type = styledef_c::T_TEXT;
 	
 	HUD_SetAlignment(0, -1);//center it
+
 	//If we have a custom Entering graphic e.g.WIENTER then use that
 	if (W_IsLumpInPwad(entering->name))
 	{
@@ -510,13 +518,17 @@ static void DrawEnteringLevel(void)
 	t_type = styledef_c::T_TEXT;
 	
 	HUD_SetAlignment(0, -1);//center it
+
 	//If we have a custom mapname graphic e.g.CWILVxx then use that
-	if (W_IsLumpInPwad(lnames[1]->name))
+	if(lnames[1])
 	{
-		w1 = IM_WIDTH(lnames[1]);
-		h1 = IM_HEIGHT(lnames[1]);
-		HUD_SetAlignment(-1, -1);//center it
-		HUD_DrawImage(160 - w1/2, y * 5/4, lnames[1]);
+		if (W_IsLumpInPwad(lnames[1]->name))
+		{
+			w1 = IM_WIDTH(lnames[1]);
+			h1 = IM_HEIGHT(lnames[1]);
+			HUD_SetAlignment(-1, -1);//center it
+			HUD_DrawImage(160 - w1/2, y * 5/4, lnames[1]);
+		}
 	}
 	else
 	{
@@ -1565,8 +1577,12 @@ static void LoadData(void)
 	
 
 	//Lobo 2022: if we have a per level image defined, use that instead
-	leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic);
-	entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic);
+	if(wi_stats.cur->leavingbggraphic[0] != NULL)
+		leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic);
+
+	if(wi_stats.cur->leavingbggraphic[0] != NULL)
+		entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic);
+		
 	bg_image = W_ImageLookup(gd->background);
 
 	lnames[0] = W_ImageLookup(wi_stats.cur->namegraphic);

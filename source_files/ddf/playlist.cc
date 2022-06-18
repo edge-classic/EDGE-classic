@@ -295,5 +295,50 @@ pl_entry_c* pl_entry_container_c::Find(int number)
 	return NULL;
 }
 
+int pl_entry_container_c::FindLast(const char *name)
+{
+	epi::array_iterator_c it;
+	pl_entry_c *p;
+
+	it = GetTailIterator();
+
+	while (it.IsValid())
+	{
+		p = ITERATOR_TO_TYPE(it, pl_entry_c*);
+		if (DDF_CompareName(p->info.c_str(), name) == 0)
+		{
+			//return it.GetPos();
+			return p->number;
+		}
+
+		it--;
+	}
+
+	return -1;
+}
+
+int pl_entry_container_c::FindFree()
+{
+	epi::array_iterator_c it;
+	pl_entry_c *p;
+	int HighestNum = 0;
+
+	it = GetBaseIterator();
+	
+	while (it.IsValid())
+	{
+		p = ITERATOR_TO_TYPE(it, pl_entry_c*);
+		if (p->number > HighestNum)
+		{
+			 HighestNum =p->number;
+		}
+
+		it++;
+	}
+	HighestNum = HighestNum + 1;
+	return HighestNum;
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

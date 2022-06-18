@@ -92,6 +92,8 @@ private:
 
 public:
 	pl_entry_c* Find(int number);
+	int FindLast(const char *name);
+	int FindFree();
 	int GetSize() {	return array_entries; } 
 	int Insert(pl_entry_c *p) { return InsertObject((void*)&p); }
 	pl_entry_c* operator[](int idx) { return *(pl_entry_c**)FetchObject(idx); } 

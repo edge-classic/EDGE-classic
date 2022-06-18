@@ -1389,6 +1389,8 @@ void W_InitMultipleFiles(void)
 		I_Error("W_InitMultipleFiles: no files found!\n");
 }
 
+
+
 void W_ReadUMAPINFOLumps(void)
 {
 	int p;
@@ -1430,16 +1432,24 @@ void W_ReadUMAPINFOLumps(void)
 
 		if(Maps.maps[i].music[0] != NULL)
 		{
-			//Lobo: Fix me. this should create an entry in
-			//playlist...
-			//
-			// --random stuff I might need---
-			//int val = 0;
-			//val = atoi(Maps.maps[i].music);
-			//const pl_entry_c *play = playlist.Find(entrynum);
-			//play->info=Maps.maps[i].music;
-			//temp_level->music = val;
-			//--------------------------------
+			int val = 0;
+			val = playlist.FindLast(Maps.maps[i].music);
+			if (val != -1) //we already have it
+			{
+				temp_level->music = val;
+			}
+			else //we need to add it
+			{
+					static pl_entry_c *dynamic_plentry;
+					dynamic_plentry = new pl_entry_c;
+					dynamic_plentry->number = playlist.FindFree();
+					dynamic_plentry->info.Set(Maps.maps[i].music);
+					dynamic_plentry->type = MUS_UNKNOWN; //MUS_MUS
+					dynamic_plentry->infotype = MUSINF_LUMP;
+					temp_level->music = dynamic_plentry->number;
+					playlist.Insert(dynamic_plentry);
+			}
+
 		}	
 		
 		if(Maps.maps[i].nextmap[0] != NULL)	

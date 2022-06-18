@@ -1393,11 +1393,11 @@ void W_ReadUMAPINFOLumps(void)
 {
 	int p;
 	p = W_CheckNumForName("UMAPINFO");
-	if (p == -1)
-	{
-		I_Debugf("W_ReadUMAPINFOLumps: No UMAPINFO Found!\n");
+	if (p == -1) //no UMAPINFO
 		return;
-	}
+	
+	L_WriteDebug("parsing UMAPINFO lump\n");
+
 	int length;
 	const unsigned char * lump = (const unsigned char *)W_ReadLumpAlloc(p, &length);
 	ParseUMapInfo(lump, W_LumpLength(p), I_Error);

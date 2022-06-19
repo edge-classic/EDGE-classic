@@ -118,13 +118,11 @@ void DebugPrintf(const char *fmt, ...)
 	cur_funcs->log_debugf(fmt);
 }
 
-void UpdateProgress(int perc)
+void UpdateProgress(const char *message)
 {
-	cur_funcs->display_setBar(perc);
+	cur_funcs->progress_message(message);
 }
-
 //------------------------------------------------------------------------
-
 
 static bool CheckMapInRange(const map_range_t *range, const char *name)
 {
@@ -170,8 +168,6 @@ static build_result_e BuildFile()
 		return BUILD_OK;
 	}
 
-	progress_chunk = 100 / num_levels;
-
 	int visited = 0;
 	int failures = 0;
 
@@ -212,7 +208,6 @@ static build_result_e BuildFile()
 			break;
 
 		total_built_maps += 1;
-		UpdateProgress(total_built_maps * progress_chunk);
 	}
 
 	StopHanging();
@@ -466,8 +461,6 @@ int AJBSP_Build(const char *filename, const char *outname, const nodebuildfuncs_
 			FatalError("no such file: %s\n", filename);
 	}
 
-	UpdateProgress(0);
-
 	for (unsigned int i = 0 ; i < wad_list.size() ; i++)
 	{
 		VisitFile(i, wad_list[i]);
@@ -498,8 +491,6 @@ int AJBSP_Build(const char *filename, const char *outname, const nodebuildfuncs_
 
 		PrintMsg("Done, but at least one file is empty!\n");
 	}
-
-	UpdateProgress(100);
 
 	total_built_maps = 0;
 

@@ -39,6 +39,7 @@
 #include <time.h>
 #include <algorithm>
 #include <array>
+#include <vector>
 
 #include "exe_path.h"
 #include "file.h"
@@ -190,50 +191,26 @@ cvar_c ddf_quiet;
 
 static void E_TitleDrawer(void);
 
-
 class startup_progress_c
 {
 private:
-	int perc;
-	int g_step, g_size, g_total;  // global progress
-	int l_step, l_total;   // local progress
+	std::vector<std::string> startup_messages;
 
 public:
-	startup_progress_c() :
-		perc(-1),  // force update on initial setting
-		g_step(0), g_size(0), g_total(0),
-		l_step(0), l_total(0) { }
+	startup_progress_c() { }
 
 	~startup_progress_c() { }
 
-	void recomputePercent()
+	void addMessage(const char *message)
 	{
-		int pp = (100 * g_step + (100 * g_size * l_step / l_total)) / g_total;
-
-		SYS_ASSERT(0 <= pp && pp <= 100);
-
-		if (pp != perc)
-		{
-			perc = pp; drawIt();
-		}
+		if (startup_messages.size() >= (SCREENHEIGHT / 2 / 10)) // These numbers are derived from the RGL_DrawProgress routine
+			startup_messages.erase(startup_messages.begin());
+		startup_messages.push_back(message);
 	}
 
-	void drawIt(int glbsp_perc = -1)  // a bit kludgy...
+	void drawIt()
 	{
-		RGL_DrawProgress(perc, glbsp_perc);
-	}
-
-	void setGlobal(int step, int size, int total)
-	{
-		g_step  = step;
-		g_size  = size;
-		g_total = total;
-	}
-
-	void setLocal(int step, int total)
-	{
-		l_step  = step;
-		l_total = total;
+		RGL_DrawProgress(startup_messages);
 	}
 };
 
@@ -241,31 +218,8 @@ static startup_progress_c s_progress;
 
 void E_ProgressMessage(const char *message)
 {
-	// FIXME: show message near progress bar
-	I_Printf("%s", message);
-}
-
-void E_LocalProgress(int step, int total)
-{
-	s_progress.setLocal(step, total);
-	s_progress.recomputePercent();
-}
-
-void E_GlobalProgress(int step, int size, int total)
-{
-	s_progress.setGlobal(step, size, total);
-
-	E_LocalProgress(0, 1);  // recomputes the percentage
-}
-
-void E_NodeMessage(const char *message)
-{
-	// FIXME: show message
-}
-
-void E_NodeProgress(int perc)
-{
-	s_progress.drawIt(perc);
+	s_progress.addMessage(message);
+	s_progress.drawIt();
 }
 
 //
@@ -458,8 +412,6 @@ static void DoSystemStartup(void)
 	I_Debugf("- System startup begun.\n");
 
 	I_SystemStartup();
-
-	I_StartupMusic(); // Now decoupled from I_SystemStartup - Dasho
 
 	// -ES- 1998/09/11 Use R_ChangeResolution to enter gfx mode
 
@@ -699,7 +651,6 @@ void E_AdvanceTitle(void)
 	title_image = NULL;
 	title_countdown = TICRATE;
 }
-
 
 void E_StartTitle(void)
 {
@@ -1292,53 +1243,46 @@ void E_EngineShutdown(void)
     S_Shutdown();
 }
 
-typedef struct
+void (*startcode[])() =
 {
-	int prog_time;  // rough indication of progress time
-	void (*function)(void);
-}
-startuporder_t;
-
-startuporder_t startcode[] =
-{
-	{  1, InitDDF              },
-	{  1, IdentifyVersion      },
-	{  1, Add_Base		   	   },
-	{  1, Add_Autoload		   },
-	{  1, AddCommandLineFiles  },
-	{  1, CheckTurbo           },
-	{  1, RAD_Init             },
-	{  4, W_InitMultipleFiles  },
-	{  1, V_InitPalette        },
-	{  2, HU_Init              },
-	{ 20, W_ReadDDF            },
-	{  2, W_CheckWADFixes      },
-	{  3, W_InitFlats          },
-	{ 10, W_InitTextures       },
-	{  1, CON_Start            },
-	{  1, SpecialWadVerify     },
-	{  1, M_InitMiscConVars    },
-	{  1, DDF_CleanUp          },
-	{  1, SetLanguage          },
-	{  1, ShowNotice           },
-	{  1, SV_MainInit          },
-	{ 30, S_PrecacheSounds     },
-	{ 10, W_ImageCreateUser    },
-	{ 20, W_InitSprites        },
-	{  3, W_ProcessTX_HI       },
-	{  1, W_InitModels         },
-	{  1, M_Init               },
-	{  3, R_Init               },
-	{  1, P_Init               },
-	{  1, P_MapInit            },
-	{  1, P_InitSwitchList     },
-	{  1, W_InitPicAnims       },
-	{  1, S_Init               },
-	{  1, N_InitNetwork        },
-	{  1, M_CheatInit          },
-	{  1, VM_InitCoal          },
-	{  8, VM_LoadScripts       },
-	{  0, NULL                 }
+	InitDDF,
+	IdentifyVersion,
+	Add_Base,
+	Add_Autoload,
+	AddCommandLineFiles,
+	CheckTurbo,
+	RAD_Init,
+	W_InitMultipleFiles,
+	V_InitPalette,
+	HU_Init,
+	W_ReadDDF,
+	W_CheckWADFixes,
+	W_InitFlats,
+	W_InitTextures,
+	CON_Start,
+	SpecialWadVerify,
+	M_InitMiscConVars,
+	DDF_CleanUp,
+	SetLanguage,
+	ShowNotice,
+	SV_MainInit,
+	S_PrecacheSounds,
+	W_ImageCreateUser,
+	W_InitSprites,
+	W_ProcessTX_HI,
+	W_InitModels,
+	M_Init,
+	R_Init,
+	P_Init,
+	P_MapInit,
+	P_InitSwitchList,
+	W_InitPicAnims,
+	S_Init,
+	N_InitNetwork,
+	M_CheatInit,
+	VM_InitCoal,
+	VM_LoadScripts,
+	NULL
 };
 
 extern void WLF_InitMaps(void); //!!!
@@ -1362,7 +1306,6 @@ static void E_Startup(void)
 	// -AJA- 2000/02/02: initialise global gameflags to defaults
 	global_flags = default_gameflags;
 
-	
 	InitDirectories();
 
 	SetupLogAndDebugFiles();
@@ -1379,27 +1322,11 @@ static void E_Startup(void)
 
 	DoSystemStartup();
 
-	// RGL_FontStartup();
-
-	E_GlobalProgress(0, 0, 1);
-
-	int total=0;
-	int cur=0;
-
-	for (p=0; startcode[p].function != NULL; p++)
-		total += startcode[p].prog_time;
-
 	// Cycle through all the startup functions
-	for (p=0; startcode[p].function != NULL; p++)
+	for (p=0; startcode[p] != NULL; p++)
 	{
-		E_GlobalProgress(cur, startcode[p].prog_time, total);
-
-		startcode[p].function();
-
-		cur += startcode[p].prog_time;
+		startcode[p]();
 	}
-
-	E_GlobalProgress(100, 0, 100);
 }
 
 

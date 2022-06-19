@@ -55,7 +55,7 @@ extern int glmax_tex_units;
 
 void RGL_Init(void);
 void RGL_SoftInit(void);
-void RGL_DrawProgress(int perc, int glbsp_perc);
+void RGL_DrawProgress(std::vector<std::string> messages);
 void RGL_SetupMatrices2D(void);
 void RGL_SetupMatrices3D(void);
 

@@ -110,9 +110,7 @@ void PrintDetail(const char *fmt, ...);
 
 void DebugPrintf(const char *fmt, ...);
 
-void PrintMapName(const char *name);
-
-void UpdateProgress(int perc);
+void UpdateProgress(const char *message);
 
 #define BugError  FatalError
 

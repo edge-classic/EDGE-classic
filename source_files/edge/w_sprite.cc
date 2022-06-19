@@ -305,8 +305,6 @@ static void FillSpriteFrames(int file, int prog_base, int prog_total)
 
 		L++;
 
-		// update startup progress bar
-		E_LocalProgress(prog_base + L * 100 / lumpnum, prog_total);
 	}
 }
 
@@ -363,8 +361,6 @@ static void FillSpriteFramesUser(int prog_base, int prog_total)
 
 		L++;
 
-		// update startup progress bar
-		E_LocalProgress(prog_base + L * 100 / img_num, prog_total);
 	}
 
 	delete[] images;

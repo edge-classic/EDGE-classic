@@ -248,6 +248,8 @@ void W_InitTextures(void)
 
 	I_Printf("W_InitTextures...\n");
 
+	E_ProgressMessage("Initializing Textures...\n");
+
 	SYS_ASSERT(tex_sets.GetSize() == 0);
 
 	// iterate over each file, creating our sets of textures
@@ -255,8 +257,7 @@ void W_InitTextures(void)
 
 	for (file=0; file < num_files; file++)
 	{
-		E_LocalProgress(file, num_files);
-
+		
 		wadtex_resource_c WT;
 
 		W_GetTextureLumps(file, &WT);

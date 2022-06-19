@@ -34,28 +34,12 @@
 
 #include "e_main.h"
 #include "l_ajbsp.h"
-#include "version.h"
-
-
-#define PROGRESS_STEP  2  // percent
-
-static int display_mode = DIS_INVALID;
-
-//
-// AJ_DisplayOpen
-//
-int AJ_DisplayOpen(displaytype_e type)
-{
-	display_mode = type;
-
-	return 1;
-}
 
 static const nodebuildfuncs_t display_funcs =
 {
 	I_Printf,
 	I_Debugf,
-	E_NodeProgress,
+	E_ProgressMessage
 };
 
 //
@@ -69,8 +53,6 @@ bool AJ_BuildNodes(const char *filename, const char *outname)
 	L_WriteDebug("AJ_BuildNodes: STARTED\n");
 	L_WriteDebug("# source: '%s'\n", filename);
 	L_WriteDebug("#   dest:  '%s'\n", outname);
-
-	AJ_DisplayOpen(DIS_BUILDPROGRESS);
 
 	int ret = AJBSP_Build(filename, outname, &display_funcs);
 

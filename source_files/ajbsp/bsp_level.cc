@@ -2181,7 +2181,7 @@ void LoadLevel()
 	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
 	lev_doing_hexen = (FindLevelLump("BEHAVIOR") != NULL);
 
-	PrintMapName(lev_current_name);
+	UpdateProgress(StringPrintf("Building nodes for %s...\n", lev_current_name));
 
 	num_new_vert = 0;
 	num_complete_seg = 0;

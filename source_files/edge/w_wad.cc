@@ -1548,13 +1548,11 @@ void W_ReadDDF(void)
 			}
 		}
 
-///		std::string msg_buf(epi::STR_Format(
-///			"Loaded %s %s\n", (d == NUM_DDF_READERS-1) ? "RTS" : "DDF",
-///				DDF_Readers[d].print_name));
-///
-///		E_ProgressMessage(msg_buf.c_str());
+		std::string msg_buf(epi::STR_Format(
+			"Loaded %s %s\n", (d == NUM_DDF_READERS-1) ? "RTS" : "DDF",
+				DDF_Readers[d].print_name));
 
-		E_LocalProgress(d, NUM_DDF_READERS);
+		E_ProgressMessage(msg_buf.c_str());
 	}
 
 }

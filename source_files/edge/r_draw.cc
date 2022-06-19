@@ -28,6 +28,8 @@
 #include "r_modes.h"
 #include "r_image.h"
 
+#include "stb_easy_font.h"
+
 #include <vector>
 
 
@@ -129,105 +131,38 @@ void RGL_ReadScreen(int x, int y, int w, int h, byte *rgb_buffer)
 	}
 }
 
-
-static void ProgressSection(const byte *logo_lum, int lw, int lh,
-	const byte *text_lum, int tw, int th,
-	float cr, float cg, float cb,
-	int *y, int perc, float alpha)
+void RGL_DrawProgress(std::vector<std::string> messages)
 {
-	float zoom = 1.0f;
-
-	(*y) -= (int)(lh * zoom);
-
-	glRasterPos2i(20, *y);
-	glPixelZoom(zoom, zoom);
-	glDrawPixels(lw, lh, GL_LUMINANCE, GL_UNSIGNED_BYTE, logo_lum);
-
-	(*y) -= th + 20;
-
-	glRasterPos2i(20, *y);
-	glPixelZoom(1.0f, 1.0f);
-	glDrawPixels(tw, th, GL_LUMINANCE, GL_UNSIGNED_BYTE, text_lum);
-
-	int px = 20;
-	int pw = SCREENWIDTH - 80;
-	int ph = 30;
-	int py = *y - ph - 20;
-
-	int x = (pw-8) * perc / 100;
-
-	glColor4f(0.6f, 0.6f, 0.6f, alpha);
-	glBegin(GL_POLYGON);
-	glVertex2i(px, py);  glVertex2i(px, py+ph);
-	glVertex2i(px+pw, py+ph); glVertex2i(px+pw, py);
-	glVertex2i(px, py);
-	glEnd();
-
-	glColor4f(0.0f, 0.0f, 0.0f, alpha);
-	glBegin(GL_POLYGON);
-	glVertex2i(px+2, py+2);  glVertex2i(px+2, py+ph-2);
-	glVertex2i(px+pw-2, py+ph-2); glVertex2i(px+pw-2, py+2);
-	glEnd();
-
-	glColor4f(cr, cg, cb, alpha);
-	glBegin(GL_POLYGON);
-	glVertex2i(px+4, py+4);  glVertex2i(px+4, py+ph-4);
-	glVertex2i(px+4+x, py+ph-4); glVertex2i(px+4+x, py+4);
-	glEnd();
-
-	(*y) = py;
-}
-
-
-void RGL_DrawProgress(int perc, int glbsp_perc)
-{
-	/* show EDGE logo and a progress indicator */
-
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glEnable(GL_BLEND);
 
-	int y = SCREENHEIGHT - 20;
+	glPushMatrix();
+
+	glScalef(2.0, 2.0, 0);
+
+	I_Printf("SCREENHEIGHT: %d\n", SCREENHEIGHT);
+
+	int y = SCREENHEIGHT / 2;
 	
-	const byte *logo_lum; int lw, lh;
-	const byte *text_lum; int tw, th;
-
-	logo_lum = RGL_LogoImage(&lw, &lh);
-	text_lum = RGL_InitImage(&tw, &th);
-
-	ProgressSection(logo_lum, lw, lh, text_lum, tw, th,
-		0.4f, 0.6f, 1.0f, &y, perc, 1.0f);
-
-	y -= 10;
-
-	if (glbsp_perc >= 0 || glbsp_last_prog_time > 0)
+	for (int i=0; i < messages.size(); i++)
 	{
-		// logic here is to avoid the brief flash of progress
-		int tim = I_GetTime();
-		float alpha = 1.0f;
+		static char buffer[20000]; // ~100 chars
+		int num_quads;
 
-		if (glbsp_perc >= 0)
-			glbsp_last_prog_time = tim;
-		else
-		{
-			alpha = 1.0f - float(tim - glbsp_last_prog_time) / (TICRATE*3/2);
+		num_quads = stb_easy_font_print(0, y, (char *)messages[i].c_str(), NULL, buffer, sizeof(buffer));
 
-			if (alpha < 0)
-			{
-				alpha = 0;
-				glbsp_last_prog_time = 0;
-			}
-
-			glbsp_perc = 100;
-		}
-
-		text_lum = RGL_BuildImage(&tw, &th);
-
-		ProgressSection(0, 0, 0, text_lum, tw, th,
-			1.0f, 0.2f, 0.1f, &y, glbsp_perc, alpha);
+		glColor3f(255,255,255);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_FLOAT, 16, buffer);
+		glDrawArrays(GL_QUADS, 0, num_quads*4);
+		glDisableClientState(GL_VERTEX_ARRAY);
+		y -= 10;
 	}
 
 	glDisable(GL_BLEND);
+
+	glPopMatrix();
 
 	I_FinishFrame();
 	I_StartFrame();

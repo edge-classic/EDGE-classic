@@ -102,8 +102,7 @@ add_executable(
 	source_files/edge/r_render.cc   
 	source_files/edge/r_effects.cc  
 	source_files/edge/r_main.cc     
-	source_files/edge/r_occlude.cc  
-	source_files/edge/m_logo.cc     
+	source_files/edge/r_occlude.cc   
 	source_files/edge/r_things.cc   
 	source_files/edge/r_units.cc    
 	source_files/edge/r_wipe.cc     
@@ -168,6 +167,7 @@ target_include_directories(edge-classic PRIVATE source_files/miniz)
 if(WIN32 AND NOT MSYS)
   target_include_directories(edge-classic PRIVATE source_files/sdl2/include)
 endif()
+target_include_directories(edge-classic PRIVATE source_files/stb)
 target_include_directories(edge-classic PRIVATE source_files/tinysoundfont)
 
 if(WIN32 OR MSYS)

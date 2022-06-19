@@ -141,8 +141,6 @@ void RGL_DrawProgress(std::vector<std::string> messages)
 
 	glScalef(2.0, 2.0, 0);
 
-	I_Printf("SCREENHEIGHT: %d\n", SCREENHEIGHT);
-
 	int y = SCREENHEIGHT / 2;
 	
 	for (int i=0; i < messages.size(); i++)

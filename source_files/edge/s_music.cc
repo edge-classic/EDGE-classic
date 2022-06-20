@@ -34,7 +34,7 @@
 #include "s_ogg.h"
 #include "s_mp3.h"
 #include "s_tsf.h"
-#include "s_ibxm.h"
+#include "s_xmp.h"
 #include "s_gme.h"
 #include "s_sid.h"
 #include "m_misc.h"
@@ -95,9 +95,9 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	if (play->type == MUS_IBXM)
+	if (play->type == MUS_XMP)
 	{
-		music_player = S_PlayIBXMMusic(play, volume, loop);
+		music_player = S_PlayXMPMusic(play, volume, loop);
 		return;
 	}
 
@@ -189,12 +189,12 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	if (S_CheckIBXM(data, length))
+	if (S_CheckXMP(data, length))
 	{
 		delete F;
 		delete data;
 
-		music_player = S_PlayIBXMMusic(play, volume, loop);
+		music_player = S_PlayXMPMusic(play, volume, loop);
 		return;
 	}
 

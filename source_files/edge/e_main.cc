@@ -798,6 +798,7 @@ static void IdentifyVersion(void)
     std::string iwad_par;
     std::string iwad_file;
     std::string iwad_dir;
+	std::vector<std::string> iwad_dir_vector;
 
 	const char *s = M_GetParm("-iwad");
 
@@ -827,6 +828,27 @@ static void IdentifyVersion(void)
     if (iwad_dir.empty())
         iwad_dir = ".";
 
+	// Add DOOMWADPATH directories if they exist
+	s = getenv("DOOMWADPATH");
+	if (s)
+	{
+		std::string dir_test = s;
+    	std::string::size_type oldpos = 0;
+    	std::string::size_type pos = 0;
+    	while (pos != std::string::npos) {
+#ifdef WIN32
+        	pos = dir_test.find(';', oldpos);
+#else
+			pos = dir_test.find(':', oldpos);
+#endif
+        	std::string dir_string = dir_test.substr(oldpos, (pos == std::string::npos ? dir_test.size() : pos) - oldpos);
+        	if (!dir_string.empty() && epi::FS_IsDir(dir_string.c_str()))
+            	iwad_dir_vector.push_back(dir_string);
+        	if (pos != std::string::npos)
+            	oldpos = pos + 1;
+    	}
+	}
+
     // Should the IWAD Parameter not be empty then it means
     // that one was given which is not a directory. Therefore
     // we assume it to be a name
@@ -850,28 +872,40 @@ static void IdentifyVersion(void)
 
         if (!epi::FS_Access(iwad_file.c_str(), epi::file_c::ACCESS_READ))
         {
-			I_Error("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
-        }
-		else
-		{
-			epi::file_c *iwad_test = epi::FS_Open(iwad_file.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-			bool unique_lump_match = false;
-			for (int i=0; i < iwad_unique_lumps.size(); i++) {
-				if (W_CheckForUniqueLumps(iwad_test, iwad_unique_lumps[i][1], iwad_unique_lumps[i][2]))
-				{
-					unique_lump_match = true;
-					iwad_base = iwad_unique_lumps[i][0];
-					break;
-				}
-    		}
-			delete[] iwad_test;
-			if (unique_lump_match)
+			// Check DOOMWADPATH directories if present
+			if (!iwad_dir_vector.empty())
 			{
-				W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad);
+				for (int i=0; i < iwad_dir_vector.size(); i++)
+				{
+					iwad_file = epi::PATH_Join(iwad_dir_vector[i].c_str(), fn.c_str());
+					if (epi::FS_Access(iwad_file.c_str(), epi::file_c::ACCESS_READ))
+						goto foundindoomwadpath;
+				}
+				I_Error("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
 			}
 			else
-				I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
+				I_Error("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
+        }
+
+		foundindoomwadpath:
+
+		epi::file_c *iwad_test = epi::FS_Open(iwad_file.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+		bool unique_lump_match = false;
+		for (int i=0; i < iwad_unique_lumps.size(); i++) {
+			if (W_CheckForUniqueLumps(iwad_test, iwad_unique_lumps[i][1], iwad_unique_lumps[i][2]))
+			{
+				unique_lump_match = true;
+				iwad_base = iwad_unique_lumps[i][0];
+				break;
+			}
+    	}
+		delete[] iwad_test;
+		if (unique_lump_match)
+		{
+			W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad);
 		}
+		else
+			I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
     }
     else
     {
@@ -887,13 +921,12 @@ static void IdentifyVersion(void)
             max++;
         } 
 
-		bool done = false;
-		for (int i = 0; i < max && !done; i++)
+		for (int i = 0; i < max; i++)
 		{
 			location = (i == 0 ? iwad_dir.c_str() : game_dir.c_str());
 
 			//
-			// go through the available wad names attempting IWAD
+			// go through the available *.wad files, attempting IWAD
 			// detection for each, adding the file if they exist.
 			//
 			// -ACB- 2000/06/08 Quit after we found a file - don't load
@@ -931,6 +964,49 @@ static void IdentifyVersion(void)
 				}
 			}
 		}
+
+		// Separate check for DOOMWADPATH stuff if it exists - didn't want to mess with the existing stuff above
+
+		if (!iwad_dir_vector.empty())
+		{
+			for (int i=0; i < iwad_dir_vector.size(); i++)
+			{
+				location = iwad_dir_vector[i].c_str();
+
+				epi::filesystem_dir_c fsd;
+
+				if (!FS_ReadDir(&fsd, location, "*.wad"))
+				{
+					I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location);
+				}
+				else
+				{
+					for (int i = 0; i < fsd.GetSize(); i++) 
+					{
+						if(!fsd[i]->is_dir)
+						{
+							epi::file_c *iwad_test = epi::FS_Open(fsd[i]->name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+							bool unique_lump_match = false;
+							for (int i = 0; i < iwad_unique_lumps.size(); i++) {
+								if (W_CheckForUniqueLumps(iwad_test, iwad_unique_lumps[i][1], iwad_unique_lumps[i][2]))
+								{
+									unique_lump_match = true;
+									iwad_base = iwad_unique_lumps[i][0];
+									break;
+								}
+							}
+							if (unique_lump_match)
+							{
+								W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad);
+								delete[] iwad_test;
+								goto foundlooseiwad;
+							}					
+						}
+					}
+				}
+			}
+		}
+
 		// Should only get here if no loose IWADs were found - Dasho
 		I_Error("IdentifyVersion: No IWADs found!\n");
     }

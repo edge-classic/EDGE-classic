@@ -34,7 +34,7 @@
 #include "s_ogg.h"
 #include "s_mp3.h"
 #include "s_tsf.h"
-#include "s_xmp.h"
+#include "s_mod.h"
 #include "s_gme.h"
 #include "s_sid.h"
 #include "m_misc.h"
@@ -95,9 +95,9 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	if (play->type == MUS_XMP)
+	if (play->type == MUS_MOD)
 	{
-		music_player = S_PlayXMPMusic(play, volume, loop);
+		music_player = S_PlayMODMusic(play, volume, loop);
 		return;
 	}
 
@@ -189,12 +189,12 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	if (S_CheckXMP(data, length))
+	if (S_CheckMOD(data, length))
 	{
 		delete F;
 		delete data;
 
-		music_player = S_PlayXMPMusic(play, volume, loop);
+		music_player = S_PlayMODMusic(play, volume, loop);
 		return;
 	}
 

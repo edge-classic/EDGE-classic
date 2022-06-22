@@ -26,9 +26,11 @@ General Improvements
 + DDF and RTS now use a consistent INVENTORY## naming scheme for inventory items and scripts
 + COALHUDS:
   -player.use_inventory now only needs the inventory item number passed to it
-+ MOD/S3M/XM Music:
-  -libxmp-lite music player replaced with IBXM, providing far better performance and load times,
-   but IT formatted tracker music is no longer supported
++ Module Music:
+  -libxmp-lite music player replaced with libmodplug, providing far better performance and load times,
+   with all of the following formats now supported:
+   MOD, S3M, XM, IT, 669, AMF (both of them), AMS, DBM, DMF, DSM, FAR,
+   MDL, MED, MTM, OKT, PTM, STM, ULT, UMX, MT2, PSM
 + Vertical offset scrolling will now work with midmask textures. Midmaskers without vertical scrolling
   will remain clamped per the existing implementation
 + Freedoom Phase 1 and 2 have their own base WAD, which provides corrected text and menu graphics

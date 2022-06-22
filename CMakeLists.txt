@@ -9,6 +9,7 @@ add_subdirectory(source_files/glew)
 add_subdirectory(source_files/libgme)
 add_subdirectory(source_files/libmodplug)
 add_subdirectory(source_files/libwebsid)
+add_subdirectory(source_files/miniz)
 
 project(
   edge-classic
@@ -239,6 +240,7 @@ if(WIN32 OR MSYS)
 			${OPENGL_LIBRARIES}
 			${SDL2_LIBRARIES}
 			gme
+			miniz
 			modplug
 			libwebsid
 			wsock32
@@ -255,6 +257,7 @@ else()
 			libglew_static
 			${SDL2_LIBRARIES}
 			gme
+			miniz
 			modplug
 			libwebsid
 	)

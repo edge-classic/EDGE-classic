@@ -899,7 +899,7 @@ static void IdentifyVersion(void)
 				break;
 			}
     	}
-		delete[] iwad_test;
+		delete iwad_test;
 		if (unique_lump_match)
 		{
 			W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad);
@@ -957,7 +957,7 @@ static void IdentifyVersion(void)
 						if (unique_lump_match)
 						{
 							W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad);
-							delete[] iwad_test;
+							delete iwad_test;
 							goto foundlooseiwad;
 						}					
 					}
@@ -998,7 +998,7 @@ static void IdentifyVersion(void)
 							if (unique_lump_match)
 							{
 								W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad);
-								delete[] iwad_test;
+								delete iwad_test;
 								goto foundlooseiwad;
 							}					
 						}
@@ -1249,7 +1249,11 @@ static void AddCommandLineFiles(void)
 
 			epi::file_c *fn_file = epi::FS_Open(fn.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 
-			W_AddRawFilename(fn.c_str(), FLKIND_Deh);
+			if (fn_file)
+			{
+				W_AddRawFilename(fn.c_str(), FLKIND_Deh);
+				delete fn_file;
+			}
 		}
 
 		p = M_CheckNextParm("-deh", p-1);

@@ -172,14 +172,7 @@ static build_result_e BuildFile()
 	int failures = 0;
 
 	// prepare the build info struct
-	nodebuildinfo_t nb_info;
-
-	nb_info.factor		= opt_split_cost;
-	nb_info.gl_nodes	= ! opt_no_gl;
-	nb_info.fast		= opt_fast;
-
-	nb_info.force_v5	= opt_force_v5;
-	nb_info.force_xnod	= opt_force_xnod;
+	nodebuildinfo_t *nb_info = new nodebuildinfo_t;
 
 	build_result_e res = BUILD_OK;
 
@@ -194,7 +187,7 @@ static build_result_e BuildFile()
 		if (n > 0 && opt_verbosity >= 2)
 			PrintMsg("\n");
 
-		res = AJBSP_BuildLevel(&nb_info, n);
+		res = AJBSP_BuildLevel(nb_info, n);
 
 		// handle a failed map (due to lump overflow)
 		if (res == BUILD_LumpOverflow)

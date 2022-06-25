@@ -1981,14 +1981,26 @@ build_result_e BuildNodes(superblock_t *seg_list,
 	}
 
 	/* check for really long partition (overflows dx,dy in NODES) */
-	if (best->p_length >= 30000)
+	if (fabs(node->dx) > 32000 || fabs(node->dy) > 32000)
 	{
-		if (node->dx && node->dy && ((node->dx & 1) || (node->dy & 1)))
+		if (Level_format == MAPF_UDMF)
 		{
-			MinorIssue("Loss of accuracy on VERY long node.\n");
+			// XGL3 nodes are 16.16 fixed point, hence we still need
+			// to reduce the delta.
+			node->dx *= 0.5;
+			node->dy *= 0.5;
 		}
+		else
+		{
+			if (((int)node->dx | (int)node->dy) & 1)
+			{
+				DebugPrintf("Loss of accuracy on VERY long node: "
+						"(%d,%d) -> (%d,%d)\n", node->x, node->y, node->x + node->dx, node->y + node->dy);
+			}
 
-		node->too_long = 1;
+			node->dx = round(node->dx * 0.5);
+			node->dy = round(node->dy * 0.5);
+		}
 	}
 
 	/* find limits of vertices */

@@ -20,10 +20,7 @@
 
 #include "ajbsp.h"
 
-#ifdef HAVE_ZLIB
-#include <zlib.h>
-#endif
-
+#include "miniz.h"
 
 namespace ajbsp
 {
@@ -1178,7 +1175,7 @@ void GetSidedefs(void)
 	}
 }
 
-static inline sidedef_t *SafeLookupSidedef(u16_t num)
+sidedef_t *SafeLookupSidedef(u16_t num)
 {
 	if (num == 0xFFFF)
 		return NULL;
@@ -1738,10 +1735,11 @@ static void PutOneNode(node_t *node, Lump_c *lump)
 
 	node->index = node_cur_index++;
 
-	raw.x  = LE_S16(node->x);
-	raw.y  = LE_S16(node->y);
-	raw.dx = LE_S16(node->dx / (node->too_long ? 2 : 1));
-	raw.dy = LE_S16(node->dy / (node->too_long ? 2 : 1));
+	// Note that x/y/dx/dy are always integral in non-UDMF maps
+	raw.x  = LE_S16(I_ROUND(node->x));
+	raw.y  = LE_S16(I_ROUND(node->y));
+	raw.dx = LE_S16(I_ROUND(node->dx));
+	raw.dy = LE_S16(I_ROUND(node->dy));
 
 	raw.b1.minx = LE_S16(node->r.bounds.minx);
 	raw.b1.miny = LE_S16(node->r.bounds.miny);
@@ -1790,10 +1788,10 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 
 	node->index = node_cur_index++;
 
-	raw.x  = LE_S16(node->x);
-	raw.y  = LE_S16(node->y);
-	raw.dx = LE_S16(node->dx / (node->too_long ? 2 : 1));
-	raw.dy = LE_S16(node->dy / (node->too_long ? 2 : 1));
+	raw.x  = LE_S16(I_ROUND(node->x));
+	raw.y  = LE_S16(I_ROUND(node->y));
+	raw.dx = LE_S16(I_ROUND(node->dx));
+	raw.dy = LE_S16(I_ROUND(node->dy));
 
 	raw.b1.minx = LE_S16(node->r.bounds.minx);
 	raw.b1.miny = LE_S16(node->r.bounds.miny);
@@ -1918,6 +1916,7 @@ void SortSegs()
 
 static const u8_t *lev_XNOD_magic = (u8_t *) "XNOD";
 static const u8_t *lev_ZNOD_magic = (u8_t *) "ZNOD";
+static const u8_t *lev_XGL3_magic = (u8_t *) "XGL3";
 
 void PutZVertices(void)
 {
@@ -1938,8 +1937,8 @@ void PutZVertices(void)
 		if (! vert->is_new)
 			continue;
 
-		raw.x = LE_S32((int)(vert->x * 65536.0));
-		raw.y = LE_S32((int)(vert->y * 65536.0));
+		raw.x = LE_S32(I_ROUND(vert->x * 65536.0));
+		raw.y = LE_S32(I_ROUND(vert->y * 65536.0));
 
 		ZLibAppendLump(&raw, sizeof(raw));
 
@@ -1976,8 +1975,8 @@ void PutZSubsecs(void)
 		for (seg = sub->seg_list ; seg ; seg = seg->next, cur_seg_index++)
 		{
 			// ignore minisegs and degenerate segs
-			if (! seg->linedef || seg->is_degenerate)
-				continue;
+			//if (! seg->linedef || seg->is_degenerate)
+				//continue;
 
 			if (cur_seg_index != seg->index)
 				BugError("PutZSubsecs: seg index mismatch in sub %d (%d != %d)\n",
@@ -2037,28 +2036,80 @@ void PutZSegs(void)
 				count, num_complete_seg);
 }
 
+void PutXGL3Segs()
+{
+	int i, count;
+	u32_t raw_num = LE_U32(num_segs);
 
-static void PutOneZNode(node_t *node)
+	ZLibAppendLump(&raw_num, 4);
+
+	for (i=0, count=0 ; i < num_segs ; i++)
+	{
+		seg_t *seg = segs[i];
+
+		if (count != seg->index)
+			BugError("PutXGL3Segs: seg index mismatch (%d != %d)\n",
+					count, seg->index);
+
+		{
+			u32_t v1   = LE_U32(VertexIndex_XNOD(seg->start));
+			u32_t partner = LE_U32(seg->partner ? seg->partner->index : -1);
+			u32_t line = LE_U32(seg->linedef ? seg->linedef->index : -1);
+			u8_t  side = seg->side;
+
+# if DEBUG_BSP
+			fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);
+# endif
+
+			ZLibAppendLump(&v1,      4);
+			ZLibAppendLump(&partner, 4);
+			ZLibAppendLump(&line,    4);
+			ZLibAppendLump(&side,    1);
+		}
+
+		count++;
+	}
+
+	if (count != num_segs)
+		BugError("PutXGL3Segs miscounted (%d != %d)\n", count, num_segs);
+}
+
+static void PutOneZNode(node_t *node, bool do_xgl3)
 {
 	raw_v5_node_t raw;
 
 	if (node->r.node)
-		PutOneZNode(node->r.node);
+		PutOneZNode(node->r.node, do_xgl3);
 
 	if (node->l.node)
-		PutOneZNode(node->l.node);
+		PutOneZNode(node->l.node, do_xgl3);
 
 	node->index = node_cur_index++;
 
-	raw.x  = LE_S16(node->x);
-	raw.y  = LE_S16(node->y);
-	raw.dx = LE_S16(node->dx / (node->too_long ? 2 : 1));
-	raw.dy = LE_S16(node->dy / (node->too_long ? 2 : 1));
+	if (do_xgl3)
+	{
+		u32_t x  = LE_S32(I_ROUND(node->x  * 65536.0));
+		u32_t y  = LE_S32(I_ROUND(node->y  * 65536.0));
+		u32_t dx = LE_S32(I_ROUND(node->dx * 65536.0));
+		u32_t dy = LE_S32(I_ROUND(node->dy * 65536.0));
 
-	ZLibAppendLump(&raw.x,  2);
-	ZLibAppendLump(&raw.y,  2);
-	ZLibAppendLump(&raw.dx, 2);
-	ZLibAppendLump(&raw.dy, 2);
+		ZLibAppendLump(&x,  4);
+		ZLibAppendLump(&y,  4);
+		ZLibAppendLump(&dx, 4);
+		ZLibAppendLump(&dy, 4);
+	}
+	else
+	{
+		raw.x  = LE_S16(node->x);
+		raw.y  = LE_S16(node->y);
+		raw.dx = LE_S16(node->dx);
+		raw.dy = LE_S16(node->dy);
+
+		ZLibAppendLump(&raw.x,  2);
+		ZLibAppendLump(&raw.y,  2);
+		ZLibAppendLump(&raw.dx, 2);
+		ZLibAppendLump(&raw.dy, 2);
+	}
 
 	raw.b1.minx = LE_S16(node->r.bounds.minx);
 	raw.b1.miny = LE_S16(node->r.bounds.miny);
@@ -2099,7 +2150,7 @@ static void PutOneZNode(node_t *node)
 }
 
 
-void PutZNodes(node_t *root)
+void PutZNodes(node_t *root, bool do_xgl3)
 {
 	u32_t raw_num = LE_U32(num_nodes);
 
@@ -2108,7 +2159,7 @@ void PutZNodes(node_t *root)
 	node_cur_index = 0;
 
 	if (root)
-		PutOneZNode(root);
+		PutOneZNode(root, do_xgl3);
 
 	if (node_cur_index != num_nodes)
 		BugError("PutZNodes miscounted (%d != %d)\n",
@@ -2163,11 +2214,31 @@ void SaveZDFormat(node_t *root_node)
 	PutZVertices();
 	PutZSubsecs();
 	PutZSegs();
-	PutZNodes(root_node);
+	PutZNodes(root_node, false /* do_xgl3 */);
 
 	ZLibFinishLump();
 }
 
+void SaveXGL3Format(node_t *root_node)
+{
+	// WISH : compute a max_size
+
+	Lump_c *lump = CreateLevelLump("ZNODES", -1);
+
+	lump->Write(lev_XGL3_magic, 4);
+
+	// disable compression
+	cur_info->force_compress = false;
+
+	ZLibBeginLump(lump);
+
+	PutZVertices();
+	PutZSubsecs();
+	PutXGL3Segs();
+	PutZNodes(root_node, true /* do_xgl3 */);
+
+	ZLibFinishLump();
+}
 
 /* ----- whole-level routines --------------------------- */
 
@@ -2187,26 +2258,48 @@ void LoadLevel()
 	num_complete_seg = 0;
 	num_real_lines = 0;
 
-	GetVertices();
-	GetSectors();
-	GetSidedefs();
-
-	if (lev_doing_hexen)
+	if (Level_format == MAPF_UDMF)
 	{
-		GetLinedefsHexen();
-		GetThingsHexen();
+		UDMF_LoadLevel();
 	}
 	else
 	{
-		GetLinedefs();
-		GetThings();
+		GetVertices();
+		GetSectors();
+		GetSidedefs();
+
+		if (lev_doing_hexen)
+		{
+			GetLinedefsHexen();
+			GetThingsHexen();
+		}
+		else
+		{
+			GetLinedefs();
+			GetThings();
+		}
+	}
+
+	for (int ld = 0 ; ld < num_linedefs ; ld++)
+	{
+		linedef_t *L = lev_linedefs[ld];
+
+		if (L->right >= 0 || L->left >= 0)
+			num_real_lines++;
+
+		// init some values (is this needed? - Dasho)
+		L->is_precious = 0;
+		L->overlap = NULL;
+
+		if (L->tag >= 900 && L->tag < 1000)
+			L->is_precious = 1;
 	}
 
 	PrintDetail(": Level Loaded...\n");
 
 	// always prune vertices at end of lump, otherwise all the
 	// unused vertices from seg splits would keep accumulating.
-	PruneVerticesAtEnd();
+	//PruneVerticesAtEnd();
 
 	DetectOverlappingVertices();
 	DetectOverlappingLines();
@@ -2219,7 +2312,6 @@ void LoadLevel()
 		DetectPolyobjSectors();
 	}
 }
-
 
 void FreeLevel(void)
 {
@@ -2416,15 +2508,48 @@ build_result_e SaveLevel(node_t *root_node)
 	return BUILD_OK;
 }
 
+build_result_e SaveUDMF(node_t *root_node)
+{
+	gwa_wad->BeginWrite();
+
+	// remove any existing ZNODES lump
+	//edit_wad->RemoveZNodes(lev_current_idx);
+
+	Lump_c * gl_marker = NULL;
+
+	if (num_real_lines > 0)
+	{
+		gl_marker = CreateGLMarker();
+
+		SortSegs();
+
+		SaveXGL3Format(root_node);
+	}
+
+	if (gl_marker)
+	{
+		UpdateGLMarker(gl_marker);
+	}
+
+	gwa_wad->EndWrite();
+
+	if (lev_overflows > 0)
+	{
+		cur_info->total_failed_maps++;
+		PrintMsg("FAILED with %d overflowed lumps\n", lev_overflows);
+
+		return BUILD_LumpOverflow;
+	}
+
+	return BUILD_OK;
+}
 
 //----------------------------------------------------------------------
 
 static Lump_c  *zout_lump;
 
-#ifdef HAVE_ZLIB
 static z_stream zout_stream;
 static Bytef    zout_buffer[1024];
-#endif
 
 
 void ZLibBeginLump(Lump_c *lump)
@@ -2434,9 +2559,6 @@ void ZLibBeginLump(Lump_c *lump)
 	if (! cur_info->force_compress)
 		return;
 
-#ifndef HAVE_ZLIB
-	FatalError("No zlib!\n");
-#else
 	zout_stream.zalloc = (alloc_func)0;
 	zout_stream.zfree  = (free_func)0;
 	zout_stream.opaque = (voidpf)0;
@@ -2446,7 +2568,6 @@ void ZLibBeginLump(Lump_c *lump)
 
 	zout_stream.next_out  = zout_buffer;
 	zout_stream.avail_out = sizeof(zout_buffer);
-#endif
 }
 
 
@@ -2461,9 +2582,6 @@ void ZLibAppendLump(const void *data, int length)
 		return;
 	}
 
-#ifndef HAVE_ZLIB
-	FatalError("No zlib!\n");
-#else
 	zout_stream.next_in  = (Bytef*)data;   // const override
 	zout_stream.avail_in = length;
 
@@ -2482,7 +2600,6 @@ void ZLibAppendLump(const void *data, int length)
 			zout_stream.avail_out = sizeof(zout_buffer);
 		}
 	}
-#endif
 }
 
 
@@ -2494,9 +2611,6 @@ void ZLibFinishLump(void)
 		return;
 	}
 
-#ifndef HAVE_ZLIB
-	FatalError("No zlib!\n");
-#else
 	int left_over;
 
 	// ASSERT(zout_stream.avail_out > 0)
@@ -2530,7 +2644,6 @@ void ZLibFinishLump(void)
 
 	deflateEnd(&zout_stream);
 	zout_lump = NULL;
-#endif
 }
 
 
@@ -2572,14 +2685,20 @@ Lump_c * CreateGLMarker()
 
 	if (strlen(lev_current_name) <= 5)
 	{
-		sprintf(name_buf, "GL_%s", lev_current_name);
+		if (Level_format == MAPF_UDMF)
+			sprintf(name_buf, "ZN_%s", lev_current_name);
+		else
+			sprintf(name_buf, "GL_%s", lev_current_name);
 
 		lev_long_name = false;
 	}
 	else
 	{
 		// support for level names longer than 5 letters
-		strcpy(name_buf, "GL_LEVEL");
+		if (Level_format == MAPF_UDMF)
+			strcpy(name_buf, "ZN_LEVEL");
+		else
+			strcpy(name_buf, "GL_LEVEL");
 
 		lev_long_name = true;
 	}
@@ -2614,6 +2733,8 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 	if (cur_info->cancelled)
 		return BUILD_Cancelled;
 
+	Level_format = edit_wad->LevelFormat(lev_idx);
+
 	lev_current_idx   = lev_idx;
 	lev_current_start = edit_wad->LevelHeader(lev_idx);
 
@@ -2640,7 +2761,10 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 	{
 		ClockwiseBspTree();
 
-		ret = SaveLevel(root_node);
+		if (Level_format == MAPF_UDMF)
+			ret = SaveUDMF(root_node);
+		else
+			ret = SaveLevel(root_node);
 	}
 	else
 	{

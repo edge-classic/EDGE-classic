@@ -344,6 +344,7 @@ static bool IsLevelLump(const char *name)
 	if (y_stricmp(name, "BLOCKMAP") == 0) return true;
 	if (y_stricmp(name, "BEHAVIOR") == 0) return true;
 	if (y_stricmp(name, "SCRIPTS")  == 0) return true;
+	if (y_stricmp(name, "TEXTMAP")  == 0) return true;
 
 	return WhatLevelPart(name) != 0;
 }
@@ -433,6 +434,23 @@ short Wad_file::LevelLastLump(short lev_num)
 
 	int count = 1;
 
+	// UDMF level?
+	if (y_stricmp(directory[start+1]->name, "TEXTMAP") == 0)
+	{
+		while (count < MAX_LUMPS_IN_A_LEVEL && start+count < NumLumps())
+		{
+			if (y_stricmp(directory[start+count]->name, "ENDMAP") == 0)
+			{
+				count++;
+				break;
+			}
+
+			count++;
+		}
+
+		return start + count - 1;
+	}
+
 	while (count < MAX_LUMPS_IN_A_LEVEL &&
 		   start+count < NumLumps() &&
 		   (IsLevelLump(directory[start+count]->name) ||
@@ -492,6 +510,9 @@ short Wad_file::LevelHeader(short lev_num)
 map_format_e Wad_file::LevelFormat(short lev_num)
 {
 	int start = LevelHeader(lev_num);
+
+	if (y_stricmp(directory[start+1]->name, "TEXTMAP") == 0)
+		return MAPF_UDMF;
 
 	if (start + LL_BEHAVIOR < (int)NumLumps())
 	{
@@ -588,6 +609,14 @@ void Wad_file::DetectLevels()
 	{
 		int part_mask  = 0;
 		int part_count = 0;
+
+		// check for UDMF levels
+		if (y_stricmp(directory[k+1]->name, "TEXTMAP") == 0)
+		{
+			levels.push_back(k);
+			DebugPrintf("Detected level : %s (UDMF)\n", directory[k]->name);
+			continue;
+		}
 
 		// check whether the next four lumps are level lumps
 		for (short i = 1 ; i <= 4 ; i++)

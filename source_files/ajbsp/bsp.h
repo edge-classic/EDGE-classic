@@ -65,10 +65,10 @@ public:
 
 		gl_nodes(true),
 
-		do_blockmap(true),
-		do_reject  (true),
+		do_blockmap(false),
+		do_reject  (false),
 
-		fast(false),
+		fast(true),
 		warnings(false),
 
 		force_v5(false),
@@ -126,7 +126,6 @@ extern nodebuildinfo_t * cur_info;
 /* ----- basic types --------------------------- */
 
 typedef double angle_g;  // degrees, 0 is E, 90 is N
-
 
 //------------------------------------------------------------------------
 // UTILITY : general purpose functions
@@ -474,8 +473,12 @@ child_t;
 
 typedef struct node_s
 {
-	int x, y;     // starting point
-	int dx, dy;   // offset to ending point
+	// these coordinates are high precision to support UDMF.
+	// in non-UDMF maps, they will actually be integral since a
+	// partition line *always* comes from a normal linedef.
+
+	double x, y;     // starting point
+	double dx, dy;   // offset to ending point
 
 	// right & left children
 	child_t r;
@@ -484,10 +487,6 @@ typedef struct node_s
 	// node index.  Only valid once the NODES or GL_NODES lump has been
 	// created.
 	int index;
-
-	// the node is too long, and the (dx,dy) values should be halved
-	// when writing into the NODES lump.
-	int too_long;
 }
 node_t;
 
@@ -536,6 +535,8 @@ extern int num_nodes;
 extern int num_old_vert;
 extern int num_new_vert;
 extern int num_complete_seg;
+
+extern int num_real_lines;
 
 
 /* ----- function prototypes ----------------------- */
@@ -774,6 +775,8 @@ void RoundOffBspTree();
 
 // free all the superblocks on the quick-alloc list
 void FreeQuickAllocSupers(void);
+
+sidedef_t *SafeLookupSidedef(u16_t num);
 
 }  // namespace ajbsp
 

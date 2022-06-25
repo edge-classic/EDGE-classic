@@ -12,6 +12,10 @@ add_library(
 	bsp_node.cc
 	bsp_util.cc
 	lib_file.cc
+	lib_udmf.cc
 	lib_util.cc
 	w_wad.cc
 )
+
+target_include_directories(edge_ajbsp PRIVATE ../miniz)
+target_link_libraries(edge_ajbsp PUBLIC miniz)

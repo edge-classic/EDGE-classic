@@ -911,6 +911,15 @@ static void CheckForLevel(data_file_c *df, int lump, const char *name,
 		df->level_markers.Insert(lump);
 		return;
 	}
+
+	// UDMF
+	// Commented out for now; AJBSP can now produce XGL3 ZNODES but more work is needed
+
+	/*if (strncmp(raw[1].name, "TEXTMAP",  8) == 0)
+	{
+		df->level_markers.Insert(lump);
+		return;
+	}*/
 }
 
 //

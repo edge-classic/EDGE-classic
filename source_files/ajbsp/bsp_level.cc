@@ -20,8 +20,6 @@
 
 #include "ajbsp.h"
 
-#include "miniz.h"
-
 namespace ajbsp
 {
 
@@ -288,202 +286,6 @@ static int BlockCompare(const void *p1, const void *p2)
 	return memcmp(A+BK_FIRST, B+BK_FIRST, A[BK_NUM] * sizeof(u16_t));
 }
 
-
-static void CompressBlockmap(void)
-{
-	int i;
-	int cur_offset;
-	int dup_count=0;
-
-	int orig_size, new_size;
-
-	block_ptrs = (u16_t *)UtilCalloc(block_count * sizeof(u16_t));
-	block_dups = (u16_t *)UtilCalloc(block_count * sizeof(u16_t));
-
-	// sort duplicate-detecting array.  After the sort, all duplicates
-	// will be next to each other.  The duplicate array gives the order
-	// of the blocklists in the BLOCKMAP lump.
-
-	for (i=0 ; i < block_count ; i++)
-		block_dups[i] = i;
-
-	qsort(block_dups, block_count, sizeof(u16_t), BlockCompare);
-
-	// scan duplicate array and build up offset array
-
-	cur_offset = 4 + block_count + 2;
-
-	orig_size = 4 + block_count;
-	new_size  = cur_offset;
-
-	for (i=0 ; i < block_count ; i++)
-	{
-		int blk_num = block_dups[i];
-		int count;
-
-		// empty block ?
-		if (block_lines[blk_num] == NULL)
-		{
-			block_ptrs[blk_num] = 4 + block_count;
-			block_dups[i] = DUMMY_DUP;
-
-			orig_size += 2;
-			continue;
-		}
-
-		count = 2 + block_lines[blk_num][BK_NUM];
-
-		// duplicate ?  Only the very last one of a sequence of duplicates
-		// will update the current offset value.
-
-		if (i+1 < block_count &&
-				BlockCompare(block_dups + i, block_dups + i+1) == 0)
-		{
-			block_ptrs[blk_num] = cur_offset;
-			block_dups[i] = DUMMY_DUP;
-
-			// free the memory of the duplicated block
-			UtilFree(block_lines[blk_num]);
-			block_lines[blk_num] = NULL;
-
-			dup_count++;
-
-			orig_size += count;
-			continue;
-		}
-
-		// OK, this block is either the last of a series of duplicates, or
-		// just a singleton.
-
-		block_ptrs[blk_num] = cur_offset;
-
-		cur_offset += count;
-
-		orig_size += count;
-		new_size  += count;
-	}
-
-	if (cur_offset > 65535)
-	{
-		block_overflowed = true;
-		return;
-	}
-
-# if DEBUG_BLOCKMAP
-	DebugPrintf("Blockmap: Last ptr = %d  duplicates = %d\n",
-			cur_offset, dup_count);
-# endif
-
-	block_compression = (orig_size - new_size) * 100 / orig_size;
-
-	// there's a tiny chance of new_size > orig_size
-	if (block_compression < 0)
-		block_compression = 0;
-}
-
-
-static int CalcBlockmapSize()
-{
-	// compute size of final BLOCKMAP lump.
-	// it does not need to be exact, but it *does* need to be bigger
-	// (or equal) to the actual size of the lump.
-
-	// header + null_block + a bit extra
-	int size = 20;
-
-	// the pointers (offsets to the line lists)
-	size = size + block_count * 2;
-
-	// add size of each block
-	for (int i=0 ; i < block_count ; i++)
-	{
-		int blk_num = block_dups[i];
-
-		// ignore duplicate or empty blocks
-		if (blk_num == DUMMY_DUP)
-			continue;
-
-		u16_t *blk = block_lines[blk_num];
-		SYS_ASSERT(blk);
-
-		size += (1 + (int)(blk[BK_NUM]) + 1) * 2;
-	}
-
-	return size;
-}
-
-
-static void WriteBlockmap(void)
-{
-	int i;
-
-	int max_size = CalcBlockmapSize();
-
-	Lump_c *lump = CreateLevelLump("BLOCKMAP", max_size);
-
-	u16_t null_block[2] = { 0x0000, 0xFFFF };
-	u16_t m_zero = 0x0000;
-	u16_t m_neg1 = 0xFFFF;
-
-	// fill in header
-	raw_blockmap_header_t header;
-
-	header.x_origin = LE_U16(block_x);
-	header.y_origin = LE_U16(block_y);
-	header.x_blocks = LE_U16(block_w);
-	header.y_blocks = LE_U16(block_h);
-
-	lump->Write(&header, sizeof(header));
-
-	// handle pointers
-	for (i=0 ; i < block_count ; i++)
-	{
-		u16_t ptr = LE_U16(block_ptrs[i]);
-
-		if (ptr == 0)
-			BugError(StringPrintf("WriteBlockmap: offset %d not set.\n", i));
-
-		lump->Write(&ptr, sizeof(u16_t));
-	}
-
-	// add the null block which *all* empty blocks will use
-	lump->Write(null_block, sizeof(null_block));
-
-	// handle each block list
-	for (i=0 ; i < block_count ; i++)
-	{
-		int blk_num = block_dups[i];
-
-		// ignore duplicate or empty blocks
-		if (blk_num == DUMMY_DUP)
-			continue;
-
-		u16_t *blk = block_lines[blk_num];
-		SYS_ASSERT(blk);
-
-		lump->Write(&m_zero, sizeof(u16_t));
-		lump->Write(blk + BK_FIRST, blk[BK_NUM] * sizeof(u16_t));
-		lump->Write(&m_neg1, sizeof(u16_t));
-	}
-
-	lump->Finish();
-}
-
-
-static void FreeBlockmap(void)
-{
-	for (int i=0 ; i < block_count ; i++)
-	{
-		if (block_lines[i])
-			UtilFree(block_lines[i]);
-	}
-
-	UtilFree(block_lines);
-	UtilFree(block_ptrs);
-	UtilFree(block_dups);
-}
-
-
 static void FindBlockmapLimits(bbox_t *bbox)
 {
 	int i;
@@ -549,246 +351,6 @@ void InitBlockmap()
 	block_count = block_w * block_h;
 }
 
-
-void PutBlockmap()
-{
-	if (! cur_info->do_blockmap || num_linedefs == 0)
-	{
-		// just create an empty blockmap lump
-		CreateLevelLump("BLOCKMAP")->Finish();
-		return;
-	}
-
-	block_overflowed = false;
-
-	// initial phase: create internal blockmap containing the index of
-	// all lines in each block.
-
-	CreateBlockmap();
-
-	// -AJA- second phase: compress the blockmap.  We do this by sorting
-	//       the blocks, which is a typical way to detect duplicates in
-	//       a large list.  This also detects BLOCKMAP overflow.
-
-	CompressBlockmap();
-
-	// final phase: write it out in the correct format
-
-	if (block_overflowed)
-	{
-		// leave an empty blockmap lump
-		CreateLevelLump("BLOCKMAP")->Finish();
-
-		Warning("Blockmap overflowed (lump will be empty)\n");
-	}
-	else
-	{
-		WriteBlockmap();
-	}
-
-	FreeBlockmap();
-}
-
-
-//------------------------------------------------------------------------
-// REJECT : Generate the reject table
-//------------------------------------------------------------------------
-
-
-#define DEBUG_REJECT  0
-
-static u8_t *rej_matrix;
-static int   rej_total_size;	// in bytes
-
-
-//
-// Allocate the matrix, init sectors into individual groups.
-//
-static void Reject_Init()
-{
-	rej_total_size = (num_sectors * num_sectors + 7) / 8;
-
-	rej_matrix = new u8_t[rej_total_size];
-
-	memset(rej_matrix, 0, rej_total_size);
-
-
-	for (int i=0 ; i < num_sectors ; i++)
-	{
-		sector_t *sec = LookupSector(i);
-
-		sec->rej_group = i;
-		sec->rej_next = sec->rej_prev = sec;
-	}
-}
-
-
-static void Reject_Free()
-{
-	delete[] rej_matrix;
-	rej_matrix = NULL;
-}
-
-
-//
-// Algorithm: Initially all sectors are in individual groups.  Now we
-// scan the linedef list.  For each 2-sectored line, merge the two
-// sector groups into one.  That's it !
-//
-static void Reject_GroupSectors()
-{
-	int i;
-
-	for (i=0 ; i < num_linedefs ; i++)
-	{
-		linedef_t *line = LookupLinedef(i);
-		sector_t *sec1, *sec2, *tmp;
-
-		if (! line->right || ! line->left)
-			continue;
-
-		// the standard DOOM engine will not allow sight past lines
-		// lacking the TWOSIDED flag, so we can skip them here too.
-		if (! line->two_sided)
-			continue;
-
-		sec1 = line->right->sector;
-		sec2 = line->left->sector;
-
-		if (! sec1 || ! sec2 || sec1 == sec2)
-			continue;
-
-		// already in the same group ?
-		if (sec1->rej_group == sec2->rej_group)
-			continue;
-
-		// swap sectors so that the smallest group is added to the biggest
-		// group.  This is based on the assumption that sector numbers in
-		// wads will generally increase over the set of linedefs, and so
-		// (by swapping) we'll tend to add small groups into larger
-		// groups, thereby minimising the updates to 'rej_group' fields
-		// that is required when merging.
-
-		if (sec1->rej_group > sec2->rej_group)
-		{
-			tmp = sec1; sec1 = sec2; sec2 = tmp;
-		}
-
-		// update the group numbers in the second group
-
-		sec2->rej_group = sec1->rej_group;
-
-		for (tmp=sec2->rej_next ; tmp != sec2 ; tmp=tmp->rej_next)
-			tmp->rej_group = sec1->rej_group;
-
-		// merge 'em baby...
-
-		sec1->rej_next->rej_prev = sec2;
-		sec2->rej_next->rej_prev = sec1;
-
-		tmp = sec1->rej_next;
-		sec1->rej_next = sec2->rej_next;
-		sec2->rej_next = tmp;
-	}
-}
-
-
-#if DEBUG_REJECT
-static void Reject_DebugGroups()
-{
-	// Note: this routine is destructive to the group numbers
-
-	int i;
-
-	for (i=0 ; i < num_sectors ; i++)
-	{
-		sector_t *sec = LookupSector(i);
-		sector_t *tmp;
-
-		int group = sec->rej_group;
-		int num = 0;
-
-		if (group < 0)
-			continue;
-
-		sec->rej_group = -1;
-		num++;
-
-		for (tmp=sec->rej_next ; tmp != sec ; tmp=tmp->rej_next)
-		{
-			tmp->rej_group = -1;
-			num++;
-		}
-
-		DebugPrintf("Group %d  Sectors %d\n", group, num);
-	}
-}
-#endif
-
-
-static void Reject_ProcessSectors()
-{
-	for (int view=0 ; view < num_sectors ; view++)
-	{
-		for (int target=0 ; target < view ; target++)
-		{
-			sector_t *view_sec = LookupSector(view);
-			sector_t *targ_sec = LookupSector(target);
-
-			int p1, p2;
-
-			if (view_sec->rej_group == targ_sec->rej_group)
-				continue;
-
-			// for symmetry, do both sides at same time
-
-			p1 = view * num_sectors + target;
-			p2 = target * num_sectors + view;
-
-			rej_matrix[p1 >> 3] |= (1 << (p1 & 7));
-			rej_matrix[p2 >> 3] |= (1 << (p2 & 7));
-		}
-	}
-}
-
-
-static void Reject_WriteLump()
-{
-	Lump_c *lump = CreateLevelLump("REJECT", rej_total_size);
-
-	lump->Write(rej_matrix, rej_total_size);
-
-	lump->Finish();
-}
-
-
-//
-// For now we only do very basic reject processing, limited to
-// determining all isolated groups of sectors (islands that are
-// surrounded by void space).
-//
-void PutReject()
-{
-	if (! cur_info->do_reject || num_sectors == 0)
-	{
-		// just create an empty reject lump
-		CreateLevelLump("REJECT")->Finish();
-		return;
-	}
-
-	Reject_Init();
-	Reject_GroupSectors();
-	Reject_ProcessSectors();
-
-# if DEBUG_REJECT
-	Reject_DebugGroups();
-# endif
-
-	Reject_WriteLump();
-	Reject_Free();
-}
-
-
 //------------------------------------------------------------------------
 // LEVEL : Level structure read/write functions.
 //------------------------------------------------------------------------
@@ -813,7 +375,6 @@ short lev_current_start;
 bool lev_doing_hexen;
 
 bool lev_force_v5;
-bool lev_force_xnod;
 
 bool lev_long_name;
 
@@ -1879,28 +1440,13 @@ void CheckLimits()
 		MarkOverflow(LIMIT_LINEDEFS);
 	}
 
-	if (cur_info->gl_nodes && !cur_info->force_v5)
+	if (num_old_vert > 32767 ||
+		num_new_vert > 32767 ||
+		num_segs > 65534 ||
+		num_nodes > 32767)
 	{
-		if (num_old_vert > 32767 ||
-			num_new_vert > 32767 ||
-			num_segs > 65534 ||
-			num_nodes > 32767)
-		{
-			Warning("Forcing V5 of GL-Nodes due to overflows.\n");
-			lev_force_v5 = true;
-		}
-	}
-
-	if (! cur_info->force_xnod)
-	{
-		if (num_old_vert > 32767 ||
-			num_new_vert > 32767 ||
-			num_segs > 32767 ||
-			num_nodes > 32767)
-		{
-			Warning("Forcing XNOD format nodes due to overflows.\n");
-			lev_force_xnod = true;
-		}
+		Warning("Forcing V5 of GL-Nodes due to overflows.\n");
+		lev_force_v5 = true;
 	}
 }
 
@@ -1914,8 +1460,6 @@ void SortSegs()
 
 /* ----- ZDoom format writing --------------------------- */
 
-static const u8_t *lev_XNOD_magic = (u8_t *) "XNOD";
-static const u8_t *lev_ZNOD_magic = (u8_t *) "ZNOD";
 static const u8_t *lev_XGL3_magic = (u8_t *) "XGL3";
 
 void PutZVertices(void)
@@ -1924,9 +1468,6 @@ void PutZVertices(void)
 
 	u32_t orgverts = LE_U32(num_old_vert);
 	u32_t newverts = LE_U32(num_new_vert);
-
-	ZLibAppendLump(&orgverts, 4);
-	ZLibAppendLump(&newverts, 4);
 
 	for (i=0, count=0 ; i < num_vertices ; i++)
 	{
@@ -1939,8 +1480,6 @@ void PutZVertices(void)
 
 		raw.x = LE_S32(I_ROUND(vert->x * 65536.0));
 		raw.y = LE_S32(I_ROUND(vert->y * 65536.0));
-
-		ZLibAppendLump(&raw, sizeof(raw));
 
 		count++;
 	}
@@ -1959,16 +1498,12 @@ void PutZSubsecs(void)
 
 	int cur_seg_index = 0;
 
-	ZLibAppendLump(&raw_num, 4);
-
 	for (i=0 ; i < num_subsecs ; i++)
 	{
 		subsec_t *sub = subsecs[i];
 		seg_t *seg;
 
 		raw_num = LE_U32(sub->seg_count);
-
-		ZLibAppendLump(&raw_num, 4);
 
 		// sanity check the seg index values
 		count = 0;
@@ -1995,53 +1530,10 @@ void PutZSubsecs(void)
 				cur_seg_index, num_complete_seg));
 }
 
-
-void PutZSegs(void)
-{
-	int i, count;
-	u32_t raw_num = LE_U32(num_complete_seg);
-
-	ZLibAppendLump(&raw_num, 4);
-
-	for (i=0, count=0 ; i < num_segs ; i++)
-	{
-		seg_t *seg = segs[i];
-
-		// ignore minisegs and degenerate segs
-		if (! seg->linedef || seg->is_degenerate)
-			continue;
-
-		if (count != seg->index)
-			BugError(StringPrintf("PutZSegs: seg index mismatch (%d != %d)\n",
-					count, seg->index));
-
-		{
-			u32_t v1 = LE_U32(VertexIndex_XNOD(seg->start));
-			u32_t v2 = LE_U32(VertexIndex_XNOD(seg->end));
-
-			u16_t line = LE_U16(seg->linedef->index);
-			u8_t  side = seg->side;
-
-			ZLibAppendLump(&v1,   4);
-			ZLibAppendLump(&v2,   4);
-			ZLibAppendLump(&line, 2);
-			ZLibAppendLump(&side, 1);
-		}
-
-		count++;
-	}
-
-	if (count != num_complete_seg)
-		BugError(StringPrintf("PutZSegs miscounted (%d != %d)\n",
-				count, num_complete_seg));
-}
-
 void PutXGL3Segs()
 {
 	int i, count;
 	u32_t raw_num = LE_U32(num_segs);
-
-	ZLibAppendLump(&raw_num, 4);
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
@@ -2060,11 +1552,6 @@ void PutXGL3Segs()
 # if DEBUG_BSP
 			fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);
 # endif
-
-			ZLibAppendLump(&v1,      4);
-			ZLibAppendLump(&partner, 4);
-			ZLibAppendLump(&line,    4);
-			ZLibAppendLump(&side,    1);
 		}
 
 		count++;
@@ -2074,42 +1561,22 @@ void PutXGL3Segs()
 		BugError(StringPrintf("PutXGL3Segs miscounted (%d != %d)\n", count, num_segs));
 }
 
-static void PutOneZNode(node_t *node, bool do_xgl3)
+static void PutOneZNode(node_t *node)
 {
 	raw_v5_node_t raw;
 
 	if (node->r.node)
-		PutOneZNode(node->r.node, do_xgl3);
+		PutOneZNode(node->r.node);
 
 	if (node->l.node)
-		PutOneZNode(node->l.node, do_xgl3);
+		PutOneZNode(node->l.node);
 
 	node->index = node_cur_index++;
 
-	if (do_xgl3)
-	{
-		u32_t x  = LE_S32(I_ROUND(node->x  * 65536.0));
-		u32_t y  = LE_S32(I_ROUND(node->y  * 65536.0));
-		u32_t dx = LE_S32(I_ROUND(node->dx * 65536.0));
-		u32_t dy = LE_S32(I_ROUND(node->dy * 65536.0));
-
-		ZLibAppendLump(&x,  4);
-		ZLibAppendLump(&y,  4);
-		ZLibAppendLump(&dx, 4);
-		ZLibAppendLump(&dy, 4);
-	}
-	else
-	{
-		raw.x  = LE_S16(node->x);
-		raw.y  = LE_S16(node->y);
-		raw.dx = LE_S16(node->dx);
-		raw.dy = LE_S16(node->dy);
-
-		ZLibAppendLump(&raw.x,  2);
-		ZLibAppendLump(&raw.y,  2);
-		ZLibAppendLump(&raw.dx, 2);
-		ZLibAppendLump(&raw.dy, 2);
-	}
+	u32_t x  = LE_S32(I_ROUND(node->x  * 65536.0));
+	u32_t y  = LE_S32(I_ROUND(node->y  * 65536.0));
+	u32_t dx = LE_S32(I_ROUND(node->dx * 65536.0));
+	u32_t dy = LE_S32(I_ROUND(node->dy * 65536.0));
 
 	raw.b1.minx = LE_S16(node->r.bounds.minx);
 	raw.b1.miny = LE_S16(node->r.bounds.miny);
@@ -2120,9 +1587,6 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 	raw.b2.miny = LE_S16(node->l.bounds.miny);
 	raw.b2.maxx = LE_S16(node->l.bounds.maxx);
 	raw.b2.maxy = LE_S16(node->l.bounds.maxy);
-
-	ZLibAppendLump(&raw.b1, sizeof(raw.b1));
-	ZLibAppendLump(&raw.b2, sizeof(raw.b2));
 
 	if (node->r.node)
 		raw.right = LE_U32(node->r.node->index);
@@ -2138,9 +1602,6 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 	else
 		BugError(StringPrintf("Bad left child in V5 node %d\n", node->index));
 
-	ZLibAppendLump(&raw.right, 4);
-	ZLibAppendLump(&raw.left,  4);
-
 # if DEBUG_BSP
 	DebugPrintf("PUT Z NODE %08X  Left %08X  Right %08X  "
 			"(%d,%d) -> (%d,%d)\n", node->index, LE_U32(raw.left),
@@ -2150,16 +1611,14 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 }
 
 
-void PutZNodes(node_t *root, bool do_xgl3)
+void PutZNodes(node_t *root)
 {
 	u32_t raw_num = LE_U32(num_nodes);
-
-	ZLibAppendLump(&raw_num, 4);
 
 	node_cur_index = 0;
 
 	if (root)
-		PutOneZNode(root, do_xgl3);
+		PutOneZNode(root);
 
 	if (node_cur_index != num_nodes)
 		BugError(StringPrintf("PutZNodes miscounted (%d != %d)\n",
@@ -2180,43 +1639,7 @@ static int CalcZDoomNodesSize()
 	size += 4 + num_complete_seg * 11;
 	size += 4 + num_nodes    * sizeof(raw_v5_node_t);
 
-	if (cur_info->force_compress)
-	{
-		// according to RFC1951, the zlib compression worst-case
-		// scenario is 5 extra bytes per 32KB (0.015% increase).
-		// we are significantly more conservative!
-
-		size += ((size + 255) >> 5);
-	}
-
 	return size;
-}
-
-
-void SaveZDFormat(node_t *root_node)
-{
-	// leave SEGS and SSECTORS empty
-	CreateLevelLump("SEGS")->Finish();
-	CreateLevelLump("SSECTORS")->Finish();
-
-	int max_size = CalcZDoomNodesSize();
-
-	Lump_c *lump = CreateLevelLump("NODES", max_size);
-
-	if (cur_info->force_compress)
-		lump->Write(lev_ZNOD_magic, 4);
-	else
-		lump->Write(lev_XNOD_magic, 4);
-
-	// the ZLibXXX functions do no compression for XNOD format
-	ZLibBeginLump(lump);
-
-	PutZVertices();
-	PutZSubsecs();
-	PutZSegs();
-	PutZNodes(root_node, false /* do_xgl3 */);
-
-	ZLibFinishLump();
 }
 
 void SaveXGL3Format(node_t *root_node)
@@ -2227,17 +1650,10 @@ void SaveXGL3Format(node_t *root_node)
 
 	lump->Write(lev_XGL3_magic, 4);
 
-	// disable compression
-	cur_info->force_compress = false;
-
-	ZLibBeginLump(lump);
-
 	PutZVertices();
 	PutZSubsecs();
 	PutXGL3Segs();
-	PutZNodes(root_node, true /* do_xgl3 */);
-
-	ZLibFinishLump();
+	PutZNodes(root_node);
 }
 
 /* ----- whole-level routines --------------------------- */
@@ -2300,7 +1716,8 @@ void LoadLevel()
 
 	// always prune vertices at end of lump, otherwise all the
 	// unused vertices from seg splits would keep accumulating.
-	//PruneVerticesAtEnd();
+	// Non-UDMF only? Need to test - Dasho
+	PruneVerticesAtEnd();
 
 	DetectOverlappingVertices();
 	DetectOverlappingLines();
@@ -2377,15 +1794,6 @@ static const char *CalcOptionsString()
 	if (cur_info->fast)
 		strcat(buffer, " --fast");
 
-	if (! cur_info->gl_nodes)
-		strcat(buffer, " --nogl");
-
-	if (cur_info->force_v5)
-		strcat(buffer, " --gl5");
-
-	if (cur_info->force_xnod)
-		strcat(buffer, " --xnod");
-
 	return buffer;
 }
 
@@ -2442,9 +1850,6 @@ build_result_e SaveLevel(node_t *root_node)
 	// Note: root_node may be NULL
 	gwa_wad->BeginWrite();
 
-	lev_force_v5   = cur_info->force_v5;
-	lev_force_xnod = cur_info->force_xnod;
-	
 	// check for overflows...
 
 	CheckLimits();
@@ -2453,7 +1858,7 @@ build_result_e SaveLevel(node_t *root_node)
 
 	Lump_c * gl_marker = NULL;
 
-	if (cur_info->gl_nodes && num_real_lines > 0)
+	if (num_real_lines > 0)
 	{
 		SortSegs();
 
@@ -2535,110 +1940,6 @@ build_result_e SaveUDMF(node_t *root_node)
 }
 
 //----------------------------------------------------------------------
-
-static Lump_c  *zout_lump;
-
-static z_stream zout_stream;
-static Bytef    zout_buffer[1024];
-
-
-void ZLibBeginLump(Lump_c *lump)
-{
-	zout_lump = lump;
-
-	if (! cur_info->force_compress)
-		return;
-
-	zout_stream.zalloc = (alloc_func)0;
-	zout_stream.zfree  = (free_func)0;
-	zout_stream.opaque = (voidpf)0;
-
-	if (Z_OK != deflateInit(&zout_stream, Z_DEFAULT_COMPRESSION))
-		FatalError(StringPrintf("Trouble setting up zlib compression\n"));
-
-	zout_stream.next_out  = zout_buffer;
-	zout_stream.avail_out = sizeof(zout_buffer);
-}
-
-
-void ZLibAppendLump(const void *data, int length)
-{
-	// ASSERT(zout_lump)
-	// ASSERT(length > 0)
-
-	if (! cur_info->force_compress)
-	{
-		zout_lump->Write(data, length);
-		return;
-	}
-
-	zout_stream.next_in  = (Bytef*)data;   // const override
-	zout_stream.avail_in = length;
-
-	while (zout_stream.avail_in > 0)
-	{
-		int err = deflate(&zout_stream, Z_NO_FLUSH);
-
-		if (err != Z_OK)
-			FatalError(StringPrintf("Trouble compressing %d bytes (zlib)\n", length));
-
-		if (zout_stream.avail_out == 0)
-		{
-			zout_lump->Write(zout_buffer, sizeof(zout_buffer));
-
-			zout_stream.next_out  = zout_buffer;
-			zout_stream.avail_out = sizeof(zout_buffer);
-		}
-	}
-}
-
-
-void ZLibFinishLump(void)
-{
-	if (! cur_info->force_compress)
-	{
-		zout_lump = NULL;
-		return;
-	}
-
-	int left_over;
-
-	// ASSERT(zout_stream.avail_out > 0)
-
-	zout_stream.next_in  = Z_NULL;
-	zout_stream.avail_in = 0;
-
-	for (;;)
-	{
-		int err = deflate(&zout_stream, Z_FINISH);
-
-		if (err == Z_STREAM_END)
-			break;
-
-		if (err != Z_OK)
-			FatalError(StringPrintf("Trouble finishing compression (zlib)\n"));
-
-		if (zout_stream.avail_out == 0)
-		{
-			zout_lump->Write(zout_buffer, sizeof(zout_buffer));
-
-			zout_stream.next_out  = zout_buffer;
-			zout_stream.avail_out = sizeof(zout_buffer);
-		}
-	}
-
-	left_over = sizeof(zout_buffer) - zout_stream.avail_out;
-
-	if (left_over > 0)
-		zout_lump->Write(zout_buffer, left_over);
-
-	deflateEnd(&zout_stream);
-	zout_lump = NULL;
-}
-
-
-/* ---------------------------------------------------------------- */
-
 
 Lump_c * FindLevelLump(const char *name)
 {

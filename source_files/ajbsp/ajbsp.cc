@@ -26,21 +26,7 @@
 //  global variables
 //
 
-int opt_verbosity = 0;  // 0 is normal, 1+ is verbose
-
-bool opt_backup		= false;
-bool opt_fast		= true;
-
-bool opt_no_gl		= false;
-bool opt_force_v5	= false;
-bool opt_force_xnod	= false;
-int  opt_split_cost	= DEFAULT_FACTOR;
-
 const char *opt_output = NULL;
-
-bool opt_help		= false;
-bool opt_version	= false;
-
 
 std::vector< const char * > wad_list;
 
@@ -252,20 +238,6 @@ void ValidateInputFilename(const char *filename)
 	}
 }
 
-
-void BackupFile(const char *filename)
-{
-	const char *dest_name = ReplaceExtension(filename, "bak");
-
-	if (! FileCopy(filename, dest_name))
-		FatalError(StringPrintf("failed to create backup: %s\n", dest_name));
-
-	PrintVerbose(StringPrintf("\nCreated backup: %s\n", dest_name));
-
-	StringFree(dest_name);
-}
-
-
 void VisitFile(unsigned int idx, const char *filename)
 {
 
@@ -412,9 +384,6 @@ int AJBSP_Build(const char *filename, const char *outname, const nodebuildfuncs_
 
 	if (opt_output != NULL)
 	{
-		if (opt_backup)
-			FatalError(StringPrintf("cannot use --backup with --output\n"));
-
 		if (total_files > 1)
 			FatalError(StringPrintf("cannot use multiple input files with --output\n"));
 

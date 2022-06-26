@@ -38,18 +38,9 @@ class nodebuildinfo_t
 public:
 	int factor;
 
-	bool gl_nodes;
-
-	// when these two are false, they create an empty lump
-	bool do_blockmap;
-	bool do_reject;
 
 	bool fast;
 	bool warnings;	// NOTE: not currently used
-
-	bool force_v5;
-	bool force_xnod;
-	bool force_compress;	// NOTE: only supported when HAVE_ZLIB is defined
 
 	// the GUI can set this to tell the node builder to stop
 	bool cancelled;
@@ -63,17 +54,9 @@ public:
 	nodebuildinfo_t() :
 		factor(DEFAULT_FACTOR),
 
-		gl_nodes(true),
-
-		do_blockmap(false),
-		do_reject  (false),
 
 		fast(true),
 		warnings(false),
-
-		force_v5(false),
-		force_xnod(false),
-		force_compress(false),
 
 		cancelled(false),
 
@@ -172,22 +155,12 @@ void Adler32_Finish(u32_t *crc);
 //
 void InitBlockmap();
 
-// build the blockmap and write the data into the BLOCKMAP lump
-void PutBlockmap();
-
 // utility routines...
 void GetBlockmapBounds(int *x, int *y, int *w, int *h);
 
 int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
     int x1, int y1, int x2, int y2);
 
-
-//------------------------------------------------------------------------
-// REJECT : Generate the reject table
-//------------------------------------------------------------------------
-
-// build the reject table and write it into the REJECT lump
-void PutReject();
 
 
 //------------------------------------------------------------------------
@@ -561,11 +534,6 @@ node_t *LookupNode(int index);
 Lump_c * CreateGLMarker();
 Lump_c * CreateLevelLump(const char *name, int max_size = -1);
 Lump_c * FindLevelLump(const char *name);
-
-// Zlib compression support
-void ZLibBeginLump(Lump_c *lump);
-void ZLibAppendLump(const void *data, int length);
-void ZLibFinishLump(void);
 
 /* limit flags, to show what went wrong */
 #define LIMIT_VERTEXES     0x000001

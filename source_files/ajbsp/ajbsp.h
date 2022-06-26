@@ -91,8 +91,6 @@
  *  Global variables
  */
 
-extern int opt_verbosity;	// 0 is normal, 1+ is verbose
-
 extern const char *Level_name;  // Name of map lump we are editing
 
 extern map_format_e Level_format; // format of current map

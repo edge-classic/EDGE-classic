@@ -16,6 +16,3 @@ add_library(
 	lib_util.cc
 	w_wad.cc
 )
-
-target_include_directories(edge_ajbsp PRIVATE ../miniz)
-target_link_libraries(edge_ajbsp PUBLIC miniz)

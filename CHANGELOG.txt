@@ -80,6 +80,19 @@ New Features
   -WEAPON_EVENT <weapon> <label> which is similar to THING_EVENT: If we have the weapon we 
    insta-switch to it and go to the STATE we indicated
    
++ New Benefit Type: COUNTER01-COUNTER99. The idea behind this is to be able to store arbrary values across savegames, for things
+  like LIVES, SCORE, EXPERIENCE etc. To reflect this (and for convenience) the first 4 COUNTERS can be referenced like this:
+	LIVES or COUNTER01
+	SCORE or COUNTER02
+	MONEY or COUNTER03
+	EXPERIENCE or COUNTER04
+  In DDF COUNTERs are usable as PICKUP_BENEFIT options; syntax is the same as giving ammo
+  In RTS COUNTERs are usable for various commands; syntax is the same as for ammo i.e. ON_CONDITION COUNTER01(3)
+  In COAL: 
+	+ player.counter(counter_num) returns the value of the COUNTER
+	+ player.set﻿_count﻿e﻿﻿﻿r﻿(counter_num, value) allows us to change a COUNTER value
+
+   
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)
 ====================================

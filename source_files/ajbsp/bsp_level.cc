@@ -2261,6 +2261,20 @@ void LoadLevel()
 	if (Level_format == MAPF_UDMF)
 	{
 		UDMF_LoadLevel();
+		for (int ld = 0 ; ld < num_linedefs ; ld++)
+		{
+			linedef_t *L = lev_linedefs[ld];
+
+			if (L->right || L->left)
+				num_real_lines++;
+
+			// init some values (is this needed? - Dasho)
+			L->is_precious = 0;
+			L->overlap = NULL;
+
+			if (L->tag >= 900 && L->tag < 1000)
+				L->is_precious = 1;
+		}
 	}
 	else
 	{
@@ -2278,21 +2292,6 @@ void LoadLevel()
 			GetLinedefs();
 			GetThings();
 		}
-	}
-
-	for (int ld = 0 ; ld < num_linedefs ; ld++)
-	{
-		linedef_t *L = lev_linedefs[ld];
-
-		if (L->right || L->left)
-			num_real_lines++;
-
-		// init some values (is this needed? - Dasho)
-		L->is_precious = 0;
-		L->overlap = NULL;
-
-		if (L->tag >= 900 && L->tag < 1000)
-			L->is_precious = 1;
 	}
 
 	PrintDetail(": Level Loaded...\n");
@@ -2511,9 +2510,6 @@ build_result_e SaveLevel(node_t *root_node)
 build_result_e SaveUDMF(node_t *root_node)
 {
 	gwa_wad->BeginWrite();
-
-	// remove any existing ZNODES lump
-	//edit_wad->RemoveZNodes(lev_current_idx);
 
 	Lump_c * gl_marker = NULL;
 

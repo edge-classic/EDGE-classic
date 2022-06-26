@@ -922,46 +922,6 @@ static void CheckForLevel(data_file_c *df, int lump, const char *name,
 	}*/
 }
 
-//
-// HasInternalGLNodes
-//
-// Determine if WAD file contains GL nodes for every level.
-//
-static bool HasInternalGLNodes(data_file_c *df, int datafile)
-{
-	int levels  = 0;
-	int glnodes = 0;
-	
-	for (int L = 0; L < df->level_markers.GetSize(); L++)
-	{
-		int lump = df->level_markers[L];
-
-		if (IsGL_Prefix(lumpinfo[lump].name))
-			continue;
-
-		levels++;
-
-		char gl_marker[10];
-
-		sprintf(gl_marker, "GL_%s", lumpinfo[lump].name);
-
-		for (int M = L+1; M < df->level_markers.GetSize(); M++)
-		{
-			int lump2 = df->level_markers[M];
-
-			if (strcmp(lumpinfo[lump2].name, gl_marker) == 0)
-			{
-				glnodes++;
-				break;
-			}
-		}
-	}
-
-	I_Debugf("Levels %d, Internal GL nodes %d\n", levels, glnodes);
-
-	return levels == glnodes;
-}
-
 static void ComputeFileMD5(epi::md5hash_c& md5, epi::file_c *file)
 {
 	int length = file->GetLength();

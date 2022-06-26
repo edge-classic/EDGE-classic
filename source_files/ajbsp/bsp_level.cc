@@ -2284,7 +2284,7 @@ void LoadLevel()
 	{
 		linedef_t *L = lev_linedefs[ld];
 
-		if (L->right >= 0 || L->left >= 0)
+		if (L->right || L->left)
 			num_real_lines++;
 
 		// init some values (is this needed? - Dasho)

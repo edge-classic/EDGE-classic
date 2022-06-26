@@ -1382,10 +1382,22 @@ void W_ReadUMAPINFOLumps(void)
 
 		if(Maps.maps[i].levelname[0] != NULL)
 		{
-			//Lobo: Fix me. this should create an entry in
-			//languages...
-			//temp_level->description.Set(Maps.maps[i].levelname);
+			//Hacky. If we don't have a valid language.ddf ref
+			//our default behaviour is to just show the unknown
+			//label so... ;)
+			std::string tempStr;
+			tempStr = epi::STR_Format(" %s ",Maps.maps[i].levelname);
+			temp_level->description.Set(tempStr.c_str());
 		}
+
+		if(Maps.maps[i].intertext[0] != NULL)
+		{
+			/*
+			std::string tempStr;
+			tempStr = epi::STR_Format("%s",Maps.maps[i].intertext);
+			temp_level->f_end.text.Set(tempStr.c_str());
+			*/
+		}	
 
 		if(Maps.maps[i].music[0] != NULL)
 		{

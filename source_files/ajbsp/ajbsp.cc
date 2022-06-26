@@ -20,13 +20,6 @@
 
 #include "ajbsp.h"
 
-#include <time.h>
-
-#ifndef WIN32
-#include <time.h>
-#endif
-
-
 #define MAX_SPLIT_COST  32
 
 //
@@ -74,36 +67,28 @@ const nodebuildfuncs_t *cur_funcs = NULL;
 
 int progress_chunk = 0;
 
-static void StopHanging()
-{
-	cur_funcs->log_printf("\n");
-}
-
-
 //
 //  show an error message and terminate the program
 //
-void FatalError(const char *fmt, ...)
+void FatalError(const char *fmt)
 {
-	cur_funcs->log_printf(fmt);
-
-	exit(3);
+	cur_funcs->log_error(fmt);
 }
 
-void PrintMsg(const char *fmt, ...)
-{
-	cur_funcs->log_printf(fmt);
-}
-
-void PrintVerbose(const char *fmt, ...)
+void PrintMsg(const char *fmt)
 {
 	cur_funcs->log_printf(fmt);
 }
 
-
-void PrintDetail(const char *fmt, ...)
+void PrintVerbose(const char *fmt)
 {
-	cur_funcs->log_printf(fmt);
+	cur_funcs->log_debugf(fmt);
+}
+
+
+void PrintDetail(const char *fmt)
+{
+	cur_funcs->log_debugf(fmt);
 }
 
 
@@ -113,7 +98,7 @@ void PrintMapName(const char *name)
 }
 
 
-void DebugPrintf(const char *fmt, ...)
+void DebugPrintf(const char *fmt)
 {
 	cur_funcs->log_debugf(fmt);
 }
@@ -184,8 +169,6 @@ static build_result_e BuildFile()
 
 		visited += 1;
 
-		if (n > 0 && opt_verbosity >= 2)
-			PrintMsg("\n");
 
 		res = AJBSP_BuildLevel(nb_info, n);
 
@@ -203,8 +186,6 @@ static build_result_e BuildFile()
 		total_built_maps += 1;
 	}
 
-	StopHanging();
-
 	if (res == BUILD_Cancelled)
 		return res;
 
@@ -214,8 +195,6 @@ static build_result_e BuildFile()
 		total_empty_files += 1;
 		return BUILD_OK;
 	}
-
-	PrintMsg("\n");
 
 	total_failed_maps += failures;
 
@@ -244,11 +223,11 @@ void ValidateInputFilename(const char *filename)
 
 	// files with ".bak" extension cannot be backed up, so refuse them
 	if (MatchExtension(filename, "bak"))
-		FatalError("cannot process a backup file: %s\n", filename);
+		FatalError(StringPrintf("cannot process a backup file: %s\n", filename));
 
 	// GWA files only contain GL-nodes, never any maps
 	if (MatchExtension(filename, "gwa"))
-		FatalError("cannot process a GWA file: %s\n", filename);
+		FatalError(StringPrintf("cannot process a GWA file: %s\n", filename));
 
 	// we do not support packages
 	if (MatchExtension(filename, "pak") || MatchExtension(filename, "pk2") ||
@@ -257,7 +236,7 @@ void ValidateInputFilename(const char *filename)
 		MatchExtension(filename, "epk") || MatchExtension(filename, "pack") ||
 		MatchExtension(filename, "zip") || MatchExtension(filename, "rar"))
 	{
-		FatalError("package files (like PK3) are not supported: %s\n", filename);
+		FatalError(StringPrintf("package files (like PK3) are not supported: %s\n", filename));
 	}
 
 	// check some very common formats
@@ -269,7 +248,7 @@ void ValidateInputFilename(const char *filename)
 		MatchExtension(filename, "gif") || MatchExtension(filename, "png") ||
 		MatchExtension(filename, "jpg") || MatchExtension(filename, "jpeg"))
 	{
-		FatalError("not a wad file: %s\n", filename);
+		FatalError(StringPrintf("not a wad file: %s\n", filename));
 	}
 }
 
@@ -279,9 +258,9 @@ void BackupFile(const char *filename)
 	const char *dest_name = ReplaceExtension(filename, "bak");
 
 	if (! FileCopy(filename, dest_name))
-		FatalError("failed to create backup: %s\n", dest_name);
+		FatalError(StringPrintf("failed to create backup: %s\n", dest_name));
 
-	PrintVerbose("\nCreated backup: %s\n", dest_name);
+	PrintVerbose(StringPrintf("\nCreated backup: %s\n", dest_name));
 
 	StringFree(dest_name);
 }
@@ -292,7 +271,7 @@ void VisitFile(unsigned int idx, const char *filename)
 
 	edit_wad = Wad_file::Open(filename, 'r');
 	if (! edit_wad)
-		FatalError("Cannot open file: %s\n", filename);
+		FatalError(StringPrintf("Cannot open file: %s\n", filename));
 
 	gwa_wad = Wad_file::Open(opt_output, 'w');
 
@@ -300,7 +279,7 @@ void VisitFile(unsigned int idx, const char *filename)
 	{
 		delete gwa_wad; gwa_wad = NULL;
 
-		FatalError("output file is read only: %s\n", filename);
+		FatalError(StringPrintf("output file is read only: %s\n", filename));
 	}
 
 	build_result_e res = BuildFile();
@@ -310,7 +289,7 @@ void VisitFile(unsigned int idx, const char *filename)
 	delete gwa_wad; gwa_wad = NULL;
 
 	if (res == BUILD_Cancelled)
-		FatalError("CANCELLED\n");
+		FatalError(StringPrintf("CANCELLED\n"));
 }
 
 bool ValidateMapName(char *name)
@@ -353,22 +332,22 @@ void ParseMapRange(char *tok)
 	}
 
 	if (! ValidateMapName(low))
-		FatalError("illegal map name: '%s'\n", low);
+		FatalError(StringPrintf("illegal map name: '%s'\n", low));
 
 	if (! ValidateMapName(high))
-		FatalError("illegal map name: '%s'\n", high);
+		FatalError(StringPrintf("illegal map name: '%s'\n", high));
 
 	if (strlen(low) < strlen(high))
-		FatalError("bad map range (%s shorter than %s)\n", low, high);
+		FatalError(StringPrintf("bad map range (%s shorter than %s)\n", low, high));
 
 	if (strlen(low) > strlen(high))
-		FatalError("bad map range (%s longer than %s)\n", low, high);
+		FatalError(StringPrintf("bad map range (%s longer than %s)\n", low, high));
 
 	if (low[0] != high[0])
-		FatalError("bad map range (%s and %s start with different letters)\n", low, high);
+		FatalError(StringPrintf("bad map range (%s and %s start with different letters)\n", low, high));
 
 	if (strcmp(low, high) > 0)
-		FatalError("bad map range (wrong order, %s > %s)\n", low, high);
+		FatalError(StringPrintf("bad map range (wrong order, %s > %s)\n", low, high));
 
 	// Ok
 
@@ -392,7 +371,7 @@ void ParseMapList(const char *from_arg)
 	while (*arg)
 	{
 		if (*arg == ',')
-			FatalError("bad map list (empty element)\n");
+			FatalError(StringPrintf("bad map list (empty element)\n"));
 
 		// find next comma
 		char *tok = arg;
@@ -427,20 +406,20 @@ int AJBSP_Build(const char *filename, const char *outname, const nodebuildfuncs_
 
 	if (total_files == 0)
 	{
-		FatalError("no files to process\n");
+		FatalError(StringPrintf("no files to process\n"));
 		return 0;
 	}
 
 	if (opt_output != NULL)
 	{
 		if (opt_backup)
-			FatalError("cannot use --backup with --output\n");
+			FatalError(StringPrintf("cannot use --backup with --output\n"));
 
 		if (total_files > 1)
-			FatalError("cannot use multiple input files with --output\n");
+			FatalError(StringPrintf("cannot use multiple input files with --output\n"));
 
 		if (y_stricmp(wad_list[0], opt_output) == 0)
-			FatalError("input and output files are the same\n");
+			FatalError(StringPrintf("input and output files are the same\n"));
 	}
 
 	// validate all filenames before processing any of them
@@ -451,15 +430,13 @@ int AJBSP_Build(const char *filename, const char *outname, const nodebuildfuncs_
 		ValidateInputFilename(filename);
 
 		if (! FileExists(filename))
-			FatalError("no such file: %s\n", filename);
+			FatalError(StringPrintf("no such file: %s\n", filename));
 	}
 
 	for (unsigned int i = 0 ; i < wad_list.size() ; i++)
 	{
 		VisitFile(i, wad_list[i]);
 	}
-
-	PrintMsg("\n");
 
 	if (total_failed_files > 0)
 	{
@@ -475,14 +452,14 @@ int AJBSP_Build(const char *filename, const char *outname, const nodebuildfuncs_
 	}
 	else if (total_empty_files == 0)
 	{
-		PrintMsg("Ok, built all files.\n");
+		PrintMsg("File processed successfully!\n");
 	}
 	else
 	{
 		int built = total_files - total_empty_files;
 		int empty = total_empty_files;
 
-		PrintMsg("Done, but at least one file is empty!\n");
+		PrintMsg("Done, but file is empty!\n");
 	}
 
 	total_built_maps = 0;

@@ -351,7 +351,7 @@ static void UDMF_ParseGlobalVar(Udmf_Parser& parser, Udmf_Token& name)
 	}
 	else
 	{
-		PrintMsg("skipping unknown global '%s' in UDMF\n", name.c_str());
+		PrintMsg(StringPrintf("skipping unknown global '%s' in UDMF\n", name.c_str()));
 	}
 }
 
@@ -410,7 +410,7 @@ static void UDMF_ParseThingField(thing_t *T, Udmf_Token& field, Udmf_Token& valu
 
 	else
 	{
-		DebugPrintf("thing #%d: unknown field '%s'\n", T->index, field.c_str());
+		DebugPrintf(StringPrintf("thing #%d: unknown field '%s'\n", T->index, field.c_str()));
 	}
 }
 
@@ -422,7 +422,7 @@ static void UDMF_ParseVertexField(vertex_t *V, Udmf_Token& field, Udmf_Token& va
 		V->y = value.DecodeFloat();
 	else
 	{
-		DebugPrintf("vertex #%d: unknown field '%s'\n", V->index, field.c_str());
+		DebugPrintf(StringPrintf("vertex #%d: unknown field '%s'\n", V->index, field.c_str()));
 	}
 }
 
@@ -491,7 +491,7 @@ static void UDMF_ParseLinedefField(linedef_t *LD, Udmf_Token& field, Udmf_Token&
 
 	else
 	{
-		DebugPrintf("linedef #%d: unknown field '%s'\n", LD->index, field.c_str());
+		DebugPrintf(StringPrintf("linedef #%d: unknown field '%s'\n", LD->index, field.c_str()));
 	}
 }
 
@@ -515,7 +515,7 @@ static void UDMF_ParseSidedefField(sidedef_t *SD, Udmf_Token& field, Udmf_Token&
 		SD->y_offset = value.DecodeInt();
 	else
 	{
-		DebugPrintf("sidedef #%d: unknown field '%s'\n", SD->index, field.c_str());
+		DebugPrintf(StringPrintf("sidedef #%d: unknown field '%s'\n", SD->index, field.c_str()));
 	}
 }
 
@@ -537,7 +537,7 @@ static void UDMF_ParseSectorField(sector_t *S, Udmf_Token& field, Udmf_Token& va
 		S->tag = value.DecodeInt();
 	else
 	{
-		DebugPrintf("sector #%d: unknown field '%s'\n", S->index, field.c_str());
+		DebugPrintf(StringPrintf("sector #%d: unknown field '%s'\n", S->index, field.c_str()));
 	}
 }
 
@@ -595,7 +595,7 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 	if (!kind.valid())
 	{
 		// unknown object kind
-		PrintMsg("skipping unknown block '%s' in UDMF\n", name.c_str());
+		PrintMsg(StringPrintf("skipping unknown block '%s' in UDMF\n", name.c_str()));
 	}
 
 	for (;;)

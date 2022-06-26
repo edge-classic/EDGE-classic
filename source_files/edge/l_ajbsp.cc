@@ -39,6 +39,7 @@ static const nodebuildfuncs_t display_funcs =
 {
 	I_Printf,
 	I_Debugf,
+	I_Error,
 	E_ProgressMessage
 };
 

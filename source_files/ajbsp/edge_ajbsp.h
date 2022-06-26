@@ -11,6 +11,9 @@ typedef struct nodebuildfuncs_s
   // EDGE I_Debugf
   void (* log_debugf)(const char *message, ...);
 
+  // EDGE I_Error
+  void (* log_error)(const char *message, ...);
+
   // EDGE E_ProgressMessage
   void (* progress_message)(const char *message);
 }

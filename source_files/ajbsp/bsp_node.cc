@@ -116,7 +116,7 @@ void RecomputeSeg(seg_t *seg)
 	seg->p_length = UtilComputeDist(seg->pdx, seg->pdy);
 
 	if (seg->p_length <= 0)
-		BugError("Seg %p has zero p_length.\n", seg);
+		BugError(StringPrintf("Seg %p has zero p_length.\n", seg));
 
 	seg->p_perp =  seg->psy * seg->pdx - seg->psx * seg->pdy;
 	seg->p_para = -seg->psx * seg->pdx - seg->psy * seg->pdy;
@@ -893,7 +893,7 @@ void SeparateSegs(superblock_t *seg_list, seg_t *part,
 			SeparateSegs(A, part, lefts, rights, cut_list);
 
 			if (A->real_num + A->mini_num > 0)
-				BugError("SeparateSegs: child %d not empty!\n", num);
+				BugError(StringPrintf("SeparateSegs: child %d not empty!\n", num));
 
 			FreeSuper(A);
 			seg_list->subs[num] = NULL;
@@ -983,8 +983,8 @@ void AddMinisegs(seg_t *part,
 		double len = next->along_dist - cur->along_dist;
 
 		if (len < -0.1)
-			BugError("Bad order in intersect list: %1.3f > %1.3f\n",
-					cur->along_dist, next->along_dist);
+			BugError(StringPrintf("Bad order in intersect list: %1.3f > %1.3f\n",
+					cur->along_dist, next->along_dist));
 
 		if (len > 0.2)
 		{
@@ -1320,8 +1320,8 @@ void TestSuper(superblock_t *block)
 	TestSuperWorker(block, &real_num, &mini_num);
 
 	if (real_num != block->real_num || mini_num != block->mini_num)
-		BugError("TestSuper FAILED: block=%p %d/%d != %d/%d\n",
-				block, block->real_num, block->mini_num, real_num, mini_num);
+		BugError(StringPrintf("TestSuper FAILED: block=%p %d/%d != %d/%d\n",
+				block, block->real_num, block->mini_num, real_num, mini_num));
 }
 #endif
 
@@ -1596,7 +1596,7 @@ static void ClockwiseOrder(subsec_t *sub)
 		array[i] = seg;
 
 	if (i != total)
-		BugError("ClockwiseOrder miscounted.\n");
+		BugError(StringPrintf("ClockwiseOrder miscounted.\n"));
 
 	// sort segs by angle (from the middle point to the start vertex).
 	// The desired order (clockwise) means descending angles.
@@ -1760,8 +1760,8 @@ static void SanityCheckHasRealSeg(subsec_t *sub)
 			return;
 	}
 
-	BugError("Subsector #%d near (%1.1f,%1.1f) has no real seg!\n",
-			sub->index, sub->mid_x, sub->mid_y);
+	BugError(StringPrintf("Subsector #%d near (%1.1f,%1.1f) has no real seg!\n",
+			sub->index, sub->mid_x, sub->mid_y));
 }
 
 
@@ -1818,7 +1818,7 @@ static void CreateSubsecWorker(subsec_t *sub, superblock_t *block)
 			CreateSubsecWorker(sub, A);
 
 			if (A->real_num + A->mini_num > 0)
-				BugError("CreateSubsec: child %d not empty!\n", num);
+				BugError(StringPrintf("CreateSubsec: child %d not empty!\n", num));
 
 			FreeSuper(A);
 			block->subs[num] = NULL;
@@ -1954,10 +1954,10 @@ build_result_e BuildNodes(superblock_t *seg_list,
 
 	/* sanity checks... */
 	if (rights->real_num + rights->mini_num == 0)
-		BugError("Separated seg-list has no RIGHT side\n");
+		BugError(StringPrintf("Separated seg-list has no RIGHT side\n"));
 
 	if (lefts->real_num + lefts->mini_num == 0)
-		BugError("Separated seg-list has no LEFT side\n");
+		BugError(StringPrintf("Separated seg-list has no LEFT side\n"));
 
 	AddMinisegs(best, lefts, rights, cut_list);
 
@@ -1994,8 +1994,8 @@ build_result_e BuildNodes(superblock_t *seg_list,
 		{
 			if (((int)node->dx | (int)node->dy) & 1)
 			{
-				DebugPrintf("Loss of accuracy on VERY long node: "
-						"(%d,%d) -> (%d,%d)\n", node->x, node->y, node->x + node->dx, node->y + node->dy);
+				DebugPrintf(StringPrintf("Loss of accuracy on VERY long node: "
+						"(%d,%d) -> (%d,%d)\n", node->x, node->y, node->x + node->dx, node->y + node->dy));
 			}
 
 			node->dx = round(node->dx * 0.5);
@@ -2098,7 +2098,7 @@ static void NormaliseSubsector(subsec_t *sub)
 	}
 
 	if (new_head == NULL)
-		BugError("Subsector %d normalised to being EMPTY\n", sub->index);
+		BugError(StringPrintf("Subsector %d normalised to being EMPTY\n", sub->index));
 
 	sub->seg_list = new_head;
 }
@@ -2181,8 +2181,8 @@ static void RoundOffSubsector(subsec_t *sub)
 	if (real_total == 0)
 	{
 		if (last_real_degen == NULL)
-			BugError("Subsector %d rounded off with NO real segs\n",
-					sub->index);
+			BugError(StringPrintf("Subsector %d rounded off with NO real segs\n",
+					sub->index));
 
 #   if DEBUG_SUBSEC
 		DebugPrintf("Degenerate before: (%1.2f,%1.2f) -> (%1.2f,%1.2f)\n",
@@ -2239,7 +2239,7 @@ static void RoundOffSubsector(subsec_t *sub)
 	}
 
 	if (new_head == NULL)
-		BugError("Subsector %d rounded off to being EMPTY\n", sub->index);
+		BugError(StringPrintf("Subsector %d rounded off to being EMPTY\n", sub->index));
 
 	sub->seg_list = new_head;
 }

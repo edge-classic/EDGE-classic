@@ -144,7 +144,7 @@ static void BlockAdd(int blk_num, int line_index)
 # endif
 
 	if (blk_num < 0 || blk_num >= block_count)
-		BugError("BlockAdd: bad block number %d\n", blk_num);
+		BugError(StringPrintf("BlockAdd: bad block number %d\n", blk_num));
 
 	if (! cur)
 	{
@@ -441,7 +441,7 @@ static void WriteBlockmap(void)
 		u16_t ptr = LE_U16(block_ptrs[i]);
 
 		if (ptr == 0)
-			BugError("WriteBlockmap: offset %d not set.\n", i);
+			BugError(StringPrintf("WriteBlockmap: offset %d not set.\n", i));
 
 		lump->Write(&ptr, sizeof(u16_t));
 	}
@@ -931,7 +931,7 @@ void FreeWallTips(void)
 #define LOOKERUPPER(BASEVAR, NUMVAR, NAMESTR)  \
 {  \
 	if (index < 0 || index >= NUMVAR)  \
-		BugError("No such %s number #%d\n", NAMESTR, index);  \
+		BugError(StringPrintf("No such %s number #%d\n", NAMESTR, index));  \
 	return BASEVAR[index];  \
 }
 
@@ -980,14 +980,14 @@ void GetVertices(void)
 		return;
 
 	if (! lump->Seek())
-		FatalError("Error seeking to vertices.\n");
+		FatalError(StringPrintf("Error seeking to vertices.\n"));
 
 	for (i = 0 ; i < count ; i++)
 	{
 		raw_vertex_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading vertices.\n");
+			FatalError(StringPrintf("Error reading vertices.\n"));
 
 		vertex_t *vert = NewVertex();
 
@@ -1014,7 +1014,7 @@ void GetSectors(void)
 		return;
 
 	if (! lump->Seek())
-		FatalError("Error seeking to sectors.\n");
+		FatalError(StringPrintf("Error seeking to sectors.\n"));
 
 # if DEBUG_LOAD
 	DebugPrintf("GetSectors: num = %d\n", count);
@@ -1025,7 +1025,7 @@ void GetSectors(void)
 		raw_sector_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading sectors.\n");
+			FatalError(StringPrintf("Error reading sectors.\n"));
 
 		sector_t *sector = NewSector();
 
@@ -1064,7 +1064,7 @@ void GetThings(void)
 		return;
 
 	if (! lump->Seek())
-		FatalError("Error seeking to things.\n");
+		FatalError(StringPrintf("Error seeking to things.\n"));
 
 # if DEBUG_LOAD
 	DebugPrintf("GetThings: num = %d\n", count);
@@ -1075,7 +1075,7 @@ void GetThings(void)
 		raw_thing_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading things.\n");
+			FatalError(StringPrintf("Error reading things.\n"));
 
 		thing_t *thing = NewThing();
 
@@ -1103,7 +1103,7 @@ void GetThingsHexen(void)
 		return;
 
 	if (! lump->Seek())
-		FatalError("Error seeking to things.\n");
+		FatalError(StringPrintf("Error seeking to things.\n"));
 
 # if DEBUG_LOAD
 	DebugPrintf("GetThingsHexen: num = %d\n", count);
@@ -1114,7 +1114,7 @@ void GetThingsHexen(void)
 		raw_hexen_thing_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading things.\n");
+			FatalError(StringPrintf("Error reading things.\n"));
 
 		thing_t *thing = NewThing();
 
@@ -1142,7 +1142,7 @@ void GetSidedefs(void)
 		return;
 
 	if (! lump->Seek())
-		FatalError("Error seeking to sidedefs.\n");
+		FatalError(StringPrintf("Error seeking to sidedefs.\n"));
 
 # if DEBUG_LOAD
 	DebugPrintf("GetSidedefs: num = %d\n", count);
@@ -1153,7 +1153,7 @@ void GetSidedefs(void)
 		raw_sidedef_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading sidedefs.\n");
+			FatalError(StringPrintf("Error reading sidedefs.\n"));
 
 		sidedef_t *side = NewSidedef();
 
@@ -1200,7 +1200,7 @@ void GetLinedefs(void)
 		return;
 
 	if (! lump->Seek())
-		FatalError("Error seeking to linedefs.\n");
+		FatalError(StringPrintf("Error seeking to linedefs.\n"));
 
 # if DEBUG_LOAD
 	DebugPrintf("GetLinedefs: num = %d\n", count);
@@ -1211,7 +1211,7 @@ void GetLinedefs(void)
 		raw_linedef_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading linedefs.\n");
+			FatalError(StringPrintf("Error reading linedefs.\n"));
 
 		linedef_t *line;
 
@@ -1276,7 +1276,7 @@ void GetLinedefsHexen(void)
 		return;
 
 	if (! lump->Seek())
-		FatalError("Error seeking to linedefs.\n");
+		FatalError(StringPrintf("Error seeking to linedefs.\n"));
 
 # if DEBUG_LOAD
 	DebugPrintf("GetLinedefsHexen: num = %d\n", count);
@@ -1287,7 +1287,7 @@ void GetLinedefsHexen(void)
 		raw_hexen_linedef_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading linedefs.\n");
+			FatalError(StringPrintf("Error reading linedefs.\n"));
 
 		linedef_t *line;
 
@@ -1378,10 +1378,10 @@ static int SegCompare(const void *p1, const void *p2)
 	const seg_t *B = ((const seg_t **) p2)[0];
 
 	if (A->index < 0)
-		BugError("Seg %p never reached a subsector !\n", A);
+		BugError(StringPrintf("Seg %p never reached a subsector !\n", A));
 
 	if (B->index < 0)
-		BugError("Seg %p never reached a subsector !\n", B);
+		BugError(StringPrintf("Seg %p never reached a subsector !\n", B));
 
 	return (A->index - B->index);
 }
@@ -1430,8 +1430,8 @@ void PutVertices(const char *name, int do_gl)
 	}
 
 	if (count != (do_gl ? num_new_vert : num_old_vert))
-		BugError("PutVertices miscounted (%d != %d)\n", count,
-				do_gl ? num_new_vert : num_old_vert);
+		BugError(StringPrintf("PutVertices miscounted (%d != %d)\n", count,
+				do_gl ? num_new_vert : num_old_vert));
 
 	if (! do_gl && count > 65534)
 	{
@@ -1473,7 +1473,7 @@ void PutGLVertices(int do_v5)
 	}
 
 	if (count != num_new_vert)
-		BugError("PutGLVertices miscounted (%d != %d)\n", count, num_new_vert);
+		BugError(StringPrintf("PutGLVertices miscounted (%d != %d)\n", count, num_new_vert));
 }
 
 
@@ -1544,8 +1544,8 @@ void PutSegs(void)
 	}
 
 	if (count != num_complete_seg)
-		BugError("PutSegs miscounted (%d != %d)\n", count,
-				num_complete_seg);
+		BugError(StringPrintf("PutSegs miscounted (%d != %d)\n", count,
+				num_complete_seg));
 
 	if (count > 65534)
 	{
@@ -1601,11 +1601,11 @@ void PutGLSegs(void)
 	}
 
 	if (count != num_complete_seg)
-		BugError("PutGLSegs miscounted (%d != %d)\n", count,
-				num_complete_seg);
+		BugError(StringPrintf("PutGLSegs miscounted (%d != %d)\n", count,
+				num_complete_seg));
 
 	if (count > 65534)
-		BugError("PutGLSegs with %d (> 65534) segs\n", count);
+		BugError(StringPrintf("PutGLSegs with %d (> 65534) segs\n", count));
 }
 
 
@@ -1656,8 +1656,8 @@ void PutGLSegs_V5()
 	}
 
 	if (count != num_complete_seg)
-		BugError("PutGLSegs miscounted (%d != %d)\n", count,
-				num_complete_seg);
+		BugError(StringPrintf("PutGLSegs miscounted (%d != %d)\n", count,
+				num_complete_seg));
 }
 
 
@@ -1756,14 +1756,14 @@ static void PutOneNode(node_t *node, Lump_c *lump)
 	else if (node->r.subsec)
 		raw.right = LE_U16(node->r.subsec->index | 0x8000);
 	else
-		BugError("Bad right child in node %d\n", node->index);
+		BugError(StringPrintf("Bad right child in node %d\n", node->index));
 
 	if (node->l.node)
 		raw.left = LE_U16(node->l.node->index);
 	else if (node->l.subsec)
 		raw.left = LE_U16(node->l.subsec->index | 0x8000);
 	else
-		BugError("Bad left child in node %d\n", node->index);
+		BugError(StringPrintf("Bad left child in node %d\n", node->index));
 
 	lump->Write(&raw, sizeof(raw));
 
@@ -1808,14 +1808,14 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 	else if (node->r.subsec)
 		raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
 	else
-		BugError("Bad right child in V5 node %d\n", node->index);
+		BugError(StringPrintf("Bad right child in V5 node %d\n", node->index));
 
 	if (node->l.node)
 		raw.left = LE_U32(node->l.node->index);
 	else if (node->l.subsec)
 		raw.left = LE_U32(node->l.subsec->index | 0x80000000U);
 	else
-		BugError("Bad left child in V5 node %d\n", node->index);
+		BugError(StringPrintf("Bad left child in V5 node %d\n", node->index));
 
 	lump->Write(&raw, sizeof(raw));
 
@@ -1848,8 +1848,8 @@ void PutNodes(const char *name, int do_v5, node_t *root)
 	}
 
 	if (node_cur_index != num_nodes)
-		BugError("PutNodes miscounted (%d != %d)\n",
-				node_cur_index, num_nodes);
+		BugError(StringPrintf("PutNodes miscounted (%d != %d)\n",
+				node_cur_index, num_nodes));
 
 	if (!do_v5 && node_cur_index > 32767)
 	{
@@ -1946,8 +1946,8 @@ void PutZVertices(void)
 	}
 
 	if (count != num_new_vert)
-		BugError("PutZVertices miscounted (%d != %d)\n",
-				count, num_new_vert);
+		BugError(StringPrintf("PutZVertices miscounted (%d != %d)\n",
+				count, num_new_vert));
 }
 
 
@@ -1979,20 +1979,20 @@ void PutZSubsecs(void)
 				//continue;
 
 			if (cur_seg_index != seg->index)
-				BugError("PutZSubsecs: seg index mismatch in sub %d (%d != %d)\n",
-						i, cur_seg_index, seg->index);
+				BugError(StringPrintf("PutZSubsecs: seg index mismatch in sub %d (%d != %d)\n",
+						i, cur_seg_index, seg->index));
 
 			count++;
 		}
 
 		if (count != sub->seg_count)
-			BugError("PutZSubsecs: miscounted segs in sub %d (%d != %d)\n",
-					i, count, sub->seg_count);
+			BugError(StringPrintf("PutZSubsecs: miscounted segs in sub %d (%d != %d)\n",
+					i, count, sub->seg_count));
 	}
 
 	if (cur_seg_index != num_complete_seg)
-		BugError("PutZSubsecs miscounted segs (%d != %d)\n",
-				cur_seg_index, num_complete_seg);
+		BugError(StringPrintf("PutZSubsecs miscounted segs (%d != %d)\n",
+				cur_seg_index, num_complete_seg));
 }
 
 
@@ -2012,8 +2012,8 @@ void PutZSegs(void)
 			continue;
 
 		if (count != seg->index)
-			BugError("PutZSegs: seg index mismatch (%d != %d)\n",
-					count, seg->index);
+			BugError(StringPrintf("PutZSegs: seg index mismatch (%d != %d)\n",
+					count, seg->index));
 
 		{
 			u32_t v1 = LE_U32(VertexIndex_XNOD(seg->start));
@@ -2032,8 +2032,8 @@ void PutZSegs(void)
 	}
 
 	if (count != num_complete_seg)
-		BugError("PutZSegs miscounted (%d != %d)\n",
-				count, num_complete_seg);
+		BugError(StringPrintf("PutZSegs miscounted (%d != %d)\n",
+				count, num_complete_seg));
 }
 
 void PutXGL3Segs()
@@ -2048,8 +2048,8 @@ void PutXGL3Segs()
 		seg_t *seg = segs[i];
 
 		if (count != seg->index)
-			BugError("PutXGL3Segs: seg index mismatch (%d != %d)\n",
-					count, seg->index);
+			BugError(StringPrintf("PutXGL3Segs: seg index mismatch (%d != %d)\n",
+					count, seg->index));
 
 		{
 			u32_t v1   = LE_U32(VertexIndex_XNOD(seg->start));
@@ -2071,7 +2071,7 @@ void PutXGL3Segs()
 	}
 
 	if (count != num_segs)
-		BugError("PutXGL3Segs miscounted (%d != %d)\n", count, num_segs);
+		BugError(StringPrintf("PutXGL3Segs miscounted (%d != %d)\n", count, num_segs));
 }
 
 static void PutOneZNode(node_t *node, bool do_xgl3)
@@ -2129,14 +2129,14 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 	else if (node->r.subsec)
 		raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
 	else
-		BugError("Bad right child in V5 node %d\n", node->index);
+		BugError(StringPrintf("Bad right child in V5 node %d\n", node->index));
 
 	if (node->l.node)
 		raw.left = LE_U32(node->l.node->index);
 	else if (node->l.subsec)
 		raw.left = LE_U32(node->l.subsec->index | 0x80000000U);
 	else
-		BugError("Bad left child in V5 node %d\n", node->index);
+		BugError(StringPrintf("Bad left child in V5 node %d\n", node->index));
 
 	ZLibAppendLump(&raw.right, 4);
 	ZLibAppendLump(&raw.left,  4);
@@ -2162,8 +2162,8 @@ void PutZNodes(node_t *root, bool do_xgl3)
 		PutOneZNode(root, do_xgl3);
 
 	if (node_cur_index != num_nodes)
-		BugError("PutZNodes miscounted (%d != %d)\n",
-				node_cur_index, num_nodes);
+		BugError(StringPrintf("PutZNodes miscounted (%d != %d)\n",
+				node_cur_index, num_nodes));
 }
 
 
@@ -2254,6 +2254,8 @@ void LoadLevel()
 
 	UpdateProgress(StringPrintf("Building nodes for %s...\n", lev_current_name));
 
+	PrintMsg(StringPrintf("Building nodes for %s...\n", lev_current_name));
+
 	num_new_vert = 0;
 	num_complete_seg = 0;
 	num_real_lines = 0;
@@ -2294,7 +2296,7 @@ void LoadLevel()
 		}
 	}
 
-	PrintDetail(": Level Loaded...\n");
+	PrintDetail(StringPrintf("%s: Level Loaded...\n", lev_current_name));
 
 	// always prune vertices at end of lump, otherwise all the
 	// unused vertices from seg splits would keep accumulating.
@@ -2340,7 +2342,7 @@ static u32_t CalcGLChecksum(void)
 
 		if (! lump->Seek() ||
 		    ! lump->Read(data, lump->Length()))
-			FatalError("Error reading vertices (for checksum).\n");
+			FatalError(StringPrintf("Error reading vertices (for checksum).\n"));
 
 		Adler32_AddBlock(&crc, data, lump->Length());
 		delete[] data;
@@ -2354,7 +2356,7 @@ static u32_t CalcGLChecksum(void)
 
 		if (! lump->Seek() ||
 		    ! lump->Read(data, lump->Length()))
-			FatalError("Error reading linedefs (for checksum).\n");
+			FatalError(StringPrintf("Error reading linedefs (for checksum).\n"));
 
 		Adler32_AddBlock(&crc, data, lump->Length());
 		delete[] data;
@@ -2407,14 +2409,6 @@ void UpdateGLMarker(Lump_c *marker)
 	marker->Printf("BUILDER=%s\n", "AJBSP " AJBSP_VERSION);
 
 	marker->Printf("OPTIONS=%s\n", CalcOptionsString());
-
-	char *time_str = UtilTimeString();
-
-	if (time_str)
-	{
-		marker->Printf("TIME=%s\n", time_str);
-		StringFree(time_str);
-	}
 
 	marker->Printf("CHECKSUM=0x%08x\n", crc);
 
@@ -2532,7 +2526,7 @@ build_result_e SaveUDMF(node_t *root_node)
 	if (lev_overflows > 0)
 	{
 		cur_info->total_failed_maps++;
-		PrintMsg("FAILED with %d overflowed lumps\n", lev_overflows);
+		PrintMsg(StringPrintf("FAILED with %d overflowed lumps\n", lev_overflows));
 
 		return BUILD_LumpOverflow;
 	}
@@ -2560,7 +2554,7 @@ void ZLibBeginLump(Lump_c *lump)
 	zout_stream.opaque = (voidpf)0;
 
 	if (Z_OK != deflateInit(&zout_stream, Z_DEFAULT_COMPRESSION))
-		FatalError("Trouble setting up zlib compression\n");
+		FatalError(StringPrintf("Trouble setting up zlib compression\n"));
 
 	zout_stream.next_out  = zout_buffer;
 	zout_stream.avail_out = sizeof(zout_buffer);
@@ -2586,7 +2580,7 @@ void ZLibAppendLump(const void *data, int length)
 		int err = deflate(&zout_stream, Z_NO_FLUSH);
 
 		if (err != Z_OK)
-			FatalError("Trouble compressing %d bytes (zlib)\n", length);
+			FatalError(StringPrintf("Trouble compressing %d bytes (zlib)\n", length));
 
 		if (zout_stream.avail_out == 0)
 		{
@@ -2622,7 +2616,7 @@ void ZLibFinishLump(void)
 			break;
 
 		if (err != Z_OK)
-			FatalError("Trouble finishing compression (zlib)\n");
+			FatalError(StringPrintf("Trouble finishing compression (zlib)\n"));
 
 		if (zout_stream.avail_out == 0)
 		{
@@ -2659,19 +2653,7 @@ Lump_c * FindLevelLump(const char *name)
 
 Lump_c * CreateLevelLump(const char *name, int max_size)
 {
-	// look for existing one
-	Lump_c *lump = FindLevelLump(name);
-
-	if (lump)
-	{
-		gwa_wad->RecreateLump(lump, max_size);
-	}
-	else
-	{
-		lump = gwa_wad->AddLump(name, max_size);
-	}
-
-	return lump;
+	return gwa_wad->AddLump(name, max_size);
 }
 
 

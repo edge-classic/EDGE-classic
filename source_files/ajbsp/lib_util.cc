@@ -100,7 +100,7 @@ char *StringNew(int length)
 	char *s = (char *) calloc(length + 1, 1);
 
 	if (! s)
-		FatalError("Out of memory (%d bytes for string)\n", length);
+		FatalError(StringPrintf("Out of memory (%d bytes for string)\n", length));
 
 	return s;
 }
@@ -116,7 +116,7 @@ char *StringDup(const char *orig, int limit)
 		char *s = strdup(orig);
 
 		if (! s)
-			FatalError("Out of memory (copy string)\n");
+			FatalError(StringPrintf("Out of memory (copy string)\n"));
 
 		return s;
 	}
@@ -157,7 +157,7 @@ char *StringPrintf(const char *str, ...)
 
 		buf = (char*)realloc(buf, buf_size);
 		if (!buf)
-			FatalError("Out of memory (formatting string)\n");
+			FatalError(StringPrintf("Out of memory (formatting string)\n"));
 
 		va_start(args, str);
 		out_len = vsnprintf(buf, buf_size, str, args);
@@ -217,8 +217,8 @@ char * StringTidy(const char *str, const char *bad_chars)
   do                  \
   {                 \
     if (sizeof (type) != size)            \
-      FatalError("sizeof " #type " is %d (should be " #size ")\n",  \
-  (int) sizeof (type));           \
+      FatalError(StringPrintf("sizeof " #type " is %d (should be " #size ")\n",  \
+  (int) sizeof (type)));           \
   }                 \
   while (0)
 
@@ -227,8 +227,8 @@ char * StringTidy(const char *str, const char *bad_chars)
   {                 \
     type n = high;              \
     if (++n != low)             \
-      FatalError("Type " #type " wraps around to %lu (should be " #low ")\n",\
-  (unsigned long) n);           \
+      FatalError(StringPrintf("Type " #type " wraps around to %lu (should be " #low ")\n",\
+  (unsigned long) n));           \
   }                 \
   while (0)
 

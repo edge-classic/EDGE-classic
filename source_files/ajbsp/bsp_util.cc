@@ -36,14 +36,14 @@ static char message_buf[SYS_MSG_BUFLEN];
 
 void Failure(const char *fmt)
 {
-	PrintMsg(fmt);
+	DebugPrintf(fmt);
 }
 
 
 void Warning(const char *fmt)
 {
 
-	PrintMsg(fmt);
+	DebugPrintf(fmt);
 
 	cur_info->total_warnings++;
 }
@@ -51,8 +51,7 @@ void Warning(const char *fmt)
 
 void MinorIssue(const char *fmt)
 {
-
-	PrintMsg(fmt);
+	DebugPrintf(fmt);
 
 	cur_info->total_minor_issues++;
 }
@@ -62,11 +61,6 @@ void MinorIssue(const char *fmt)
 // UTILITY : general purpose functions
 //------------------------------------------------------------------------
 
-#ifndef WIN32
-#include <time.h>
-#endif
-
-
 //
 // Allocate memory with error checking.  Zeros the memory.
 //
@@ -75,7 +69,7 @@ void *UtilCalloc(int size)
 	void *ret = calloc(1, size);
 
 	if (!ret)
-		FatalError("Out of memory (cannot allocate %d bytes)\n", size);
+		FatalError(StringPrintf("Out of memory (cannot allocate %d bytes)\n", size));
 
 	return ret;
 }
@@ -89,7 +83,7 @@ void *UtilRealloc(void *old, int size)
 	void *ret = realloc(old, size);
 
 	if (!ret)
-		FatalError("Out of memory (cannot reallocate %d bytes)\n", size);
+		FatalError(StringPrintf("Out of memory (cannot reallocate %d bytes)\n", size));
 
 	return ret;
 }
@@ -101,7 +95,7 @@ void *UtilRealloc(void *old, int size)
 void UtilFree(void *data)
 {
 	if (data == NULL)
-		BugError("Trying to free a NULL pointer\n");
+		BugError(StringPrintf("Trying to free a NULL pointer\n"));
 
 	free(data);
 }
@@ -124,41 +118,6 @@ angle_g UtilComputeAngle(double dx, double dy)
 
 	return angle;
 }
-
-
-char *UtilTimeString(void)
-{
-#ifdef WIN32
-
-	SYSTEMTIME sys_time;
-
-	GetSystemTime(&sys_time);
-
-	return StringPrintf("%04d-%02d-%02d %02d:%02d:%02d.%04d",
-			sys_time.wYear, sys_time.wMonth, sys_time.wDay,
-			sys_time.wHour, sys_time.wMinute, sys_time.wSecond,
-			sys_time.wMilliseconds * 10);
-
-#else // LINUX or MACOSX
-
-	time_t epoch_time;
-	struct tm *calend_time;
-
-	if (time(&epoch_time) == (time_t)-1)
-		return NULL;
-
-	calend_time = localtime(&epoch_time);
-	if (! calend_time)
-		return NULL;
-
-	return StringPrintf("%04d-%02d-%02d %02d:%02d:%02d.%04d",
-			calend_time->tm_year + 1900, calend_time->tm_mon + 1,
-			calend_time->tm_mday,
-			calend_time->tm_hour, calend_time->tm_min,
-			calend_time->tm_sec,  0);
-#endif
-}
-
 
 //------------------------------------------------------------------------
 //  Adler-32 CHECKSUM Code
@@ -838,7 +797,7 @@ sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
 		}
 	}
 
-	BugError("Vertex %d has no tips!\n", vert->index);
+	BugError(StringPrintf("Vertex %d has no tips!\n", vert->index));
 	return NULL;
 }
 

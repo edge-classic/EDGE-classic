@@ -144,10 +144,6 @@ void *UtilRealloc(void *old, int size);
 // free some memory or a string.
 void UtilFree(void *data);
 
-// return an allocated string for the current data and time,
-// or NULL if an error occurred.
-char *UtilTimeString(void);
-
 // compute angle & distance from (0,0) to (dx,dy)
 angle_g UtilComputeAngle(double dx, double dy);
 #define UtilComputeDist(dx,dy)  sqrt((dx) * (dx) + (dy) * (dy))

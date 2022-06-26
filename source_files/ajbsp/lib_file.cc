@@ -551,7 +551,7 @@ int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
 
 		if (stat(full_name, &finfo) != 0)
 		{
-			DebugPrintf(".... stat failed: %s\n", strerror(errno));
+			DebugPrintf(StringPrintf(".... stat failed: %s\n", strerror(errno)));
 			StringFree(full_name);
 			continue;
 		}

@@ -1281,35 +1281,28 @@ static void AddFile(const char *filename, int kind, int dyn_index)
   
 	if (kind <= FLKIND_EWad && df->level_markers.GetSize() > 0)
 	{
-		if (HasInternalGLNodes(df, datafile))
+		SYS_ASSERT(dyn_index < 0);
+
+		std::string gwa_filename;
+
+		bool exists = FindCacheFilename(gwa_filename, filename, df, EDGEGWAEXT);
+
+		I_Debugf("Actual_GWA_filename: %s\n", gwa_filename.c_str());
+
+		if (! exists)
 		{
-		    df->companion_gwa = datafile;
-		}
-		else
-		{
-			SYS_ASSERT(dyn_index < 0);
+			I_Printf("Building GL Nodes for: %s\n", filename);
 
-			std::string gwa_filename;
+			if (! AJ_BuildNodes(filename, gwa_filename.c_str()))
+				I_Error("Failed to build GL nodes for: %s\n", filename);
 
-			bool exists = FindCacheFilename(gwa_filename, filename, df, EDGEGWAEXT);
+        }
 
-			I_Debugf("Actual_GWA_filename: %s\n", gwa_filename.c_str());
+		// Load it.  This recursion bit is rather sneaky,
+		// hopefully it doesn't break anything...
+		AddFile(gwa_filename.c_str(), FLKIND_GWad, datafile);
 
-			if (! exists)
-			{
-				I_Printf("Building GL Nodes for: %s\n", filename);
-
-				if (! AJ_BuildNodes(filename, gwa_filename.c_str()))
-					I_Error("Failed to build GL nodes for: %s\n", filename);
-
-            }
-
-			// Load it.  This recursion bit is rather sneaky,
-			// hopefully it doesn't break anything...
-			AddFile(gwa_filename.c_str(), FLKIND_GWad, datafile);
-
-			df->companion_gwa = datafile + 1;
-		}
+		df->companion_gwa = datafile + 1;
 	}
 
 	// handle DeHackEd patch files

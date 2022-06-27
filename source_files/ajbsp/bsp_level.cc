@@ -1469,6 +1469,9 @@ void PutZVertices(void)
 	u32_t orgverts = LE_U32(num_old_vert);
 	u32_t newverts = LE_U32(num_new_vert);
 
+	ZLibAppendLump(&orgverts, 4);
+	ZLibAppendLump(&newverts, 4);
+
 	for (i=0, count=0 ; i < num_vertices ; i++)
 	{
 		raw_v2_vertex_t raw;
@@ -1480,6 +1483,8 @@ void PutZVertices(void)
 
 		raw.x = LE_S32(I_ROUND(vert->x * 65536.0));
 		raw.y = LE_S32(I_ROUND(vert->y * 65536.0));
+
+		ZLibAppendLump(&raw, sizeof(raw));
 
 		count++;
 	}
@@ -1498,12 +1503,16 @@ void PutZSubsecs(void)
 
 	int cur_seg_index = 0;
 
+	ZLibAppendLump(&raw_num, 4);
+
 	for (i=0 ; i < num_subsecs ; i++)
 	{
 		subsec_t *sub = subsecs[i];
 		seg_t *seg;
 
 		raw_num = LE_U32(sub->seg_count);
+
+		ZLibAppendLump(&raw_num, 4);
 
 		// sanity check the seg index values
 		count = 0;
@@ -1535,6 +1544,8 @@ void PutXGL3Segs()
 	int i, count;
 	u32_t raw_num = LE_U32(num_segs);
 
+	ZLibAppendLump(&raw_num, 4);
+
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
 		seg_t *seg = segs[i];
@@ -1547,11 +1558,15 @@ void PutXGL3Segs()
 			u32_t v1   = LE_U32(VertexIndex_XNOD(seg->start));
 			u32_t partner = LE_U32(seg->partner ? seg->partner->index : -1);
 			u32_t line = LE_U32(seg->linedef ? seg->linedef->index : -1);
-			u8_t  side = seg->side;
+			u8_t  side = ((seg->linedef && seg->linedef->two_sided) ? seg->side : 0);
 
 # if DEBUG_BSP
 			fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);
 # endif
+			ZLibAppendLump(&v1,      4);
+			ZLibAppendLump(&partner, 4);
+			ZLibAppendLump(&line,    4);
+			ZLibAppendLump(&side,    1);
 		}
 
 		count++;
@@ -1578,6 +1593,11 @@ static void PutOneZNode(node_t *node)
 	u32_t dx = LE_S32(I_ROUND(node->dx * 65536.0));
 	u32_t dy = LE_S32(I_ROUND(node->dy * 65536.0));
 
+	ZLibAppendLump(&x,  4);
+	ZLibAppendLump(&y,  4);
+	ZLibAppendLump(&dx, 4);
+	ZLibAppendLump(&dy, 4);
+
 	raw.b1.minx = LE_S16(node->r.bounds.minx);
 	raw.b1.miny = LE_S16(node->r.bounds.miny);
 	raw.b1.maxx = LE_S16(node->r.bounds.maxx);
@@ -1587,6 +1607,9 @@ static void PutOneZNode(node_t *node)
 	raw.b2.miny = LE_S16(node->l.bounds.miny);
 	raw.b2.maxx = LE_S16(node->l.bounds.maxx);
 	raw.b2.maxy = LE_S16(node->l.bounds.maxy);
+
+	ZLibAppendLump(&raw.b1, sizeof(raw.b1));
+	ZLibAppendLump(&raw.b2, sizeof(raw.b2));
 
 	if (node->r.node)
 		raw.right = LE_U32(node->r.node->index);
@@ -1602,6 +1625,9 @@ static void PutOneZNode(node_t *node)
 	else
 		BugError(StringPrintf("Bad left child in V5 node %d\n", node->index));
 
+	ZLibAppendLump(&raw.right, 4);
+	ZLibAppendLump(&raw.left,  4);
+
 # if DEBUG_BSP
 	DebugPrintf("PUT Z NODE %08X  Left %08X  Right %08X  "
 			"(%d,%d) -> (%d,%d)\n", node->index, LE_U32(raw.left),
@@ -1614,6 +1640,8 @@ static void PutOneZNode(node_t *node)
 void PutZNodes(node_t *root)
 {
 	u32_t raw_num = LE_U32(num_nodes);
+
+	ZLibAppendLump(&raw_num, 4);
 
 	node_cur_index = 0;
 
@@ -1650,10 +1678,14 @@ void SaveXGL3Format(node_t *root_node)
 
 	lump->Write(lev_XGL3_magic, 4);
 
+	ZLibBeginLump(lump);
+
 	PutZVertices();
 	PutZSubsecs();
 	PutXGL3Segs();
 	PutZNodes(root_node);
+
+	ZLibFinishLump();
 }
 
 /* ----- whole-level routines --------------------------- */
@@ -1679,19 +1711,57 @@ void LoadLevel()
 	if (Level_format == MAPF_UDMF)
 	{
 		UDMF_LoadLevel();
+		for (int sec = 0 ; sec < num_sectors ; sec++)
+		{
+			sector_t *S = lev_sectors[sec];
+
+			S->coalesce = (S->tag >= 900 && S->tag < 1000) ? 1 : 0;
+		}
+		for (int sd = 0 ; sd < num_sidedefs ; sd++)
+		{
+			sidedef_t *S = lev_sidedefs[sd];
+
+			S->sector = (S->udmf_sector_lookup == -1 ? NULL : LookupSector(S->udmf_sector_lookup));
+
+			if (S->sector)
+				S->sector->is_used = 1;
+		}
 		for (int ld = 0 ; ld < num_linedefs ; ld++)
 		{
 			linedef_t *L = lev_linedefs[ld];
 
+			L->start = LookupVertex(L->udmf_start_lookup);
+			L->start->is_used = 1;
+			L->end = LookupVertex(L->udmf_end_lookup);
+			L->end->is_used = 1;
+
+			L->zero_len = (fabs(L->start->x - L->end->x) < DIST_EPSILON) &&
+				(fabs(L->start->y - L->end->y) < DIST_EPSILON);
+
+			L->two_sided = (L->flags & MLF_TwoSided) ? 1 : 0;
+			L->is_precious = (L->tag >= 900 && L->tag < 1000) ? 1 : 0;
+
+			L->right = (L->udmf_right_lookup == -1 ? NULL : SafeLookupSidedef(L->udmf_right_lookup));
+
+			L->left = (L->udmf_left_lookup == -1 ? NULL : SafeLookupSidedef(L->udmf_left_lookup));
+
+			if (L->right)
+			{
+				L->right->is_used = 1;
+				L->right->on_special |= (L->type > 0) ? 1 : 0;
+			}
+
+			if (L->left)
+			{
+				L->left->is_used = 1;
+				L->left->on_special |= (L->type > 0) ? 1 : 0;
+			}
+
 			if (L->right || L->left)
 				num_real_lines++;
 
-			// init some values (is this needed? - Dasho)
-			L->is_precious = 0;
-			L->overlap = NULL;
-
-			if (L->tag >= 900 && L->tag < 1000)
-				L->is_precious = 1;
+			L->self_ref = (L->left && L->right &&
+				(L->left->sector == L->right->sector));
 		}
 	}
 	else
@@ -1940,6 +2010,28 @@ build_result_e SaveUDMF(node_t *root_node)
 }
 
 //----------------------------------------------------------------------
+
+static Lump_c  *zout_lump;
+
+void ZLibBeginLump(Lump_c *lump)
+{
+	zout_lump = lump;
+}
+
+void ZLibAppendLump(const void *data, int length)
+{
+	zout_lump->Write(data, length);
+	return;
+}
+
+void ZLibFinishLump(void)
+{
+	zout_lump = NULL;
+	return;
+}
+
+
+/* ---------------------------------------------------------------- */
 
 Lump_c * FindLevelLump(const char *name)
 {

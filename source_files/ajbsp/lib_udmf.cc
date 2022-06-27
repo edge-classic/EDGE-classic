@@ -440,18 +440,16 @@ static void UDMF_ParseLinedefField(linedef_t *LD, Udmf_Token& field, Udmf_Token&
 
 	if (field.Match("v1"))
 	{
-		LD->start = LookupVertex(LE_U16(value.DecodeInt()));
-		LD->start->is_used = 1;
+		LD->udmf_start_lookup = LE_U16(value.DecodeInt());
 	}
 	else if (field.Match("v2"))
 	{
-		LD->end = LookupVertex(LE_U16(value.DecodeInt()));
-		LD->end->is_used = 1;
+		LD->udmf_end_lookup = LE_U16(value.DecodeInt());
 	}
 	else if (field.Match("sidefront"))
-		LD->right = SafeLookupSidedef(LE_U16(value.DecodeInt()));
+		LD->udmf_right_lookup = value.DecodeInt();
 	else if (field.Match("sideback"))
-		LD->left = SafeLookupSidedef(LE_U16(value.DecodeInt()));
+		LD->udmf_left_lookup = value.DecodeInt();
 	else if (field.Match("special"))
 		LD->type = value.DecodeInt();
 
@@ -502,7 +500,7 @@ static void UDMF_ParseSidedefField(sidedef_t *SD, Udmf_Token& field, Udmf_Token&
 	// TODO: consider how to handle "offsetx_top" (etc), if at all
 
 	if (field.Match("sector"))
-		SD->sector = LookupSector(value.DecodeInt());
+		SD->udmf_sector_lookup = value.DecodeInt();
 	else if (field.Match("texturetop"))
 		memcpy(SD->upper_tex, value.DecodeTexture(), 8);
 	else if (field.Match("texturebottom"))
@@ -556,7 +554,6 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 	{
 		kind = Objid(OBJ_THINGS, 1);
 		new_T = NewThing();
-		new_T->options = MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM;
 		new_T->index = udmf_thing_index++;
 	}
 	else if (name.Match("vertex"))
@@ -590,6 +587,7 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 		new_S = NewSector();
 		new_S->light = 160;
 		new_S->index = udmf_sector_index++;
+		new_S->warned_facing = -1;
 	}
 
 	if (!kind.valid())

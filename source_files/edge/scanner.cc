@@ -457,23 +457,23 @@ void Scanner::IncrementLine()
 void Scanner::Error(int token)
 {
 	if (token < TK_NumSpecialTokens && this->token >= TK_Identifier && this->token < TK_NumSpecialTokens)
-		error("%d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), TokenNames[token], TokenNames[this->token]);
+		error("UMAPINFO: %d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), TokenNames[token], TokenNames[this->token]);
 	else if (token < TK_NumSpecialTokens && this->token >= TK_NumSpecialTokens)
-		error("%d:%d:Expected '%s' but got '%c' instead.", GetLine(), GetLinePos(), TokenNames[token], this->token);
+		error("UMAPINFO: %d:%d:Expected '%s' but got '%c' instead.", GetLine(), GetLinePos(), TokenNames[token], this->token);
 	else if (token < TK_NumSpecialTokens && this->token == TK_NoToken)
-		error("%d:%d:Expected '%s'", GetLine(), GetLinePos(), TokenNames[token]);
+		error("UMAPINFO: %d:%d:Expected '%s'", GetLine(), GetLinePos(), TokenNames[token]);
 	else if (token >= TK_NumSpecialTokens && this->token >= TK_Identifier && this->token < TK_NumSpecialTokens)
-		error("%d:%d:Expected '%c' but got '%s' instead.", GetLine(), GetLinePos(), token, TokenNames[this->token]);
+		error("UMAPINFO: %d:%d:Expected '%c' but got '%s' instead.", GetLine(), GetLinePos(), token, TokenNames[this->token]);
 	else
-		error("%d:%d:Expected '%c' but got '%c' instead.", GetLine(), GetLinePos(), token, this->token);
+		error("UMAPINFO: %d:%d:Expected '%c' but got '%c' instead.", GetLine(), GetLinePos(), token, this->token);
 }
 
 void Scanner::Error(const char *mustget)
 {
 	if (token < TK_NumSpecialTokens && this->token < TK_NumSpecialTokens)
-		error("%d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), mustget, TokenNames[this->token]);
+		error("UMAPINFO: %d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), mustget, TokenNames[this->token]);
 	else
-		error("%d:%d:Expected '%s' but got '%c' instead.", GetLine(), GetLinePos(), mustget, this->token);
+		error("UMAPINFO: %d:%d:Expected '%s' but got '%c' instead.", GetLine(), GetLinePos(), mustget, this->token);
 }
 
 void Scanner::ErrorF(const char *msg, ...)

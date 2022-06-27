@@ -404,7 +404,7 @@ static char *ParseMultiString(Scanner &scanner, int error)
 		}
 		else
 		{
-			scanner.ErrorF("Either 'clear' or string constant expected");
+			scanner.ErrorF("UMAPINFO: Either 'clear' or string constant expected");
 		}
 	}
 	
@@ -434,7 +434,7 @@ static int ParseLumpName(Scanner &scanner, char *buffer)
 	scanner.MustGetToken(TK_StringConst);
 	if (strlen(scanner.string) > 8)
 	{
-		scanner.ErrorF("String too long. Maximum size is 8 characters.");
+		scanner.ErrorF("UMAPINFO: String too long. Maximum size is 8 characters.");
 		return 0;
 	}
 	strncpy(buffer, scanner.string, 8);
@@ -472,7 +472,7 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape)
 			if (!stricmp(scanner.string, "clear")) ReplaceString(&mape->label, "-");
 			else
 			{
-				scanner.ErrorF("Either 'clear' or string constant expected");
+				scanner.ErrorF("UMAPINFO: Either 'clear' or string constant expected");
 				return 0;
 			}
 		}
@@ -487,7 +487,7 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape)
 		ParseLumpName(scanner, mape->nextmap);
 		if (!G_ValidateMapName(mape->nextmap, NULL, NULL))
 		{
-			scanner.ErrorF("Invalid map name %s.", mape->nextmap);
+			scanner.ErrorF("UMAPINFO: Invalid map name %s.", mape->nextmap);
 			return 0;
 		}
 	}
@@ -496,7 +496,7 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape)
 		ParseLumpName(scanner, mape->nextsecret);
 		if (!G_ValidateMapName(mape->nextsecret, NULL, NULL))
 		{
-			scanner.ErrorF("Invalid map name %s", mape->nextsecret);
+			scanner.ErrorF("UMAPINFO: Invalid map name %s", mape->nextsecret);
 			return 0;
 		}
 	}
@@ -584,7 +584,7 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape)
 			}
 			else
 			{
-				scanner.ErrorF("Either 'clear' or string constant expected");
+				scanner.ErrorF("UMAPINFO: Either 'clear' or string constant expected");
 				return 0;
 			}
 		}
@@ -634,7 +634,7 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape)
 			}
 			if (ActorNames[i] == NULL)
 			{
-				scanner.ErrorF("Unknown thing type %s", scanner.string);
+				scanner.ErrorF("UMAPINFO: Unknown thing type %s", scanner.string);
 				return 0;
 			}
 
@@ -689,7 +689,7 @@ static int ParseMapEntry(Scanner &scanner, MapEntry *val)
 	scanner.MustGetToken(TK_Identifier);
 	if (!G_ValidateMapName(scanner.string, NULL, NULL))
 	{
-		scanner.ErrorF("Invalid map name %s", scanner.string);
+		scanner.ErrorF("UMAPINFO: Invalid map name %s", scanner.string);
 		return 0;
 	}
 

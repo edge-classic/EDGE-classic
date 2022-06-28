@@ -408,7 +408,7 @@ void WI_Clear(void)
 static void DrawLevelFinished(void)
 {
 	// draw <LevelName> 
-	SYS_ASSERT(lnames[0]);
+	//SYS_ASSERT(lnames[0]);
 
 	//Lobo 2022: if we have a per level image defined, use that instead
 	if (leaving_bg_image)
@@ -479,6 +479,8 @@ static void DrawEnteringLevel(void)
 	if (! lnames[1])
 		return;
 	*/
+	if (! wi_stats.next)
+		return;
 
 	//Lobo 2022: if we have a per level image defined, use that instead
 	if (entering_bg_image)

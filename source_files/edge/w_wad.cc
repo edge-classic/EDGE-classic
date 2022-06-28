@@ -1432,6 +1432,18 @@ void W_ReadUMAPINFOLumps(void)
 
 		if(Maps.maps[i].enterpic[0] != NULL)
 			temp_level->enteringbggraphic.Set(M_Strupr(Maps.maps[i].enterpic));
+
+		if(Maps.maps[i].endpic[0] != NULL)
+		{
+			//temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].endpic));
+			temp_level->nextmapname.clear();
+			temp_level->f_end.pics.Insert(M_Strupr(Maps.maps[i].endpic));
+			temp_level->f_end.picwait = 350000; //1000 seconds
+			temp_level->f_end.docast = false;
+		}
+
+		if(Maps.maps[i].interbackdrop[0] != NULL)
+			temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
 		
 	}
 }

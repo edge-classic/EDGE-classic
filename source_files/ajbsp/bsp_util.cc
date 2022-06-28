@@ -26,9 +26,6 @@ namespace ajbsp
 
 #define DEBUG_ENABLED   0
 
-#define DEBUGGING_FILE  "gb_debug.txt"
-
-
 #define SYS_MSG_BUFLEN  4000
 
 static char message_buf[SYS_MSG_BUFLEN];
@@ -413,11 +410,11 @@ static int VertexCompare(const void *p1, const void *p2)
 	int vert1 = ((const u16_t *) p1)[0];
 	int vert2 = ((const u16_t *) p2)[0];
 
-	vertex_t *A = lev_vertices[vert1];
-	vertex_t *B = lev_vertices[vert2];
-
 	if (vert1 == vert2)
 		return 0;
+
+	vertex_t *A = lev_vertices[vert1];
+	vertex_t *B = lev_vertices[vert2];
 
 	if ((int)A->x != (int)B->x)
 		return (int)A->x - (int)B->x;
@@ -521,18 +518,15 @@ static int LineStartCompare(const void *p1, const void *p2)
 	int line1 = ((const int *) p1)[0];
 	int line2 = ((const int *) p2)[0];
 
-	linedef_t *A = lev_linedefs[line1];
-	linedef_t *B = lev_linedefs[line2];
-
-	vertex_t *C;
-	vertex_t *D;
-
 	if (line1 == line2)
 		return 0;
 
+	linedef_t *A = lev_linedefs[line1];
+	linedef_t *B = lev_linedefs[line2];
+
 	// determine left-most vertex of each line
-	C = LineVertexLowest(A) ? A->end : A->start;
-	D = LineVertexLowest(B) ? B->end : B->start;
+	vertex_t *C = LineVertexLowest(A) ? A->end : A->start;
+	vertex_t *D = LineVertexLowest(B) ? B->end : B->start;
 
 	if ((int)C->x != (int)D->x)
 		return (int)C->x - (int)D->x;
@@ -545,18 +539,15 @@ static int LineEndCompare(const void *p1, const void *p2)
 	int line1 = ((const int *) p1)[0];
 	int line2 = ((const int *) p2)[0];
 
-	linedef_t *A = lev_linedefs[line1];
-	linedef_t *B = lev_linedefs[line2];
-
-	vertex_t *C;
-	vertex_t *D;
-
 	if (line1 == line2)
 		return 0;
 
+	linedef_t *A = lev_linedefs[line1];
+	linedef_t *B = lev_linedefs[line2];
+
 	// determine right-most vertex of each line
-	C = LineVertexLowest(A) ? A->start : A->end;
-	D = LineVertexLowest(B) ? B->start : B->end;
+	vertex_t *C = LineVertexLowest(A) ? A->start : A->end;
+	vertex_t *D = LineVertexLowest(B) ? B->start : B->end;
 
 	if ((int)C->x != (int)D->x)
 		return (int)C->x - (int)D->x;

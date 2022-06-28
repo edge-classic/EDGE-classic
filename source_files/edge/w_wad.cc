@@ -1619,8 +1619,8 @@ int W_GetPaletteForLump(int lump)
 			return df->wadtex.palette;
 	}
 
-	// none found
-	return -1;
+	// Use last loaded PLAYPAL if no graphic-specific palette is found
+	return W_CheckNumForName2("PLAYPAL");
 }
 
 

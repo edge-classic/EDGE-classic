@@ -23,12 +23,6 @@
 namespace ajbsp
 {
 
-int udmf_vert_index = 0;
-int udmf_linedef_index = 0;
-int udmf_sector_index = 0;
-int udmf_sidedef_index = 0;
-int udmf_thing_index = 0;
-
 class Udmf_Token
 {
 private:
@@ -554,20 +548,20 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 	{
 		kind = Objid(OBJ_THINGS, 1);
 		new_T = NewThing();
-		new_T->index = udmf_thing_index++;
+		new_T->index = num_things - 1;
 	}
 	else if (name.Match("vertex"))
 	{
 		kind = Objid(OBJ_VERTICES, 1);
 		new_V = NewVertex();
-		new_V->index = udmf_vert_index++;
+		new_V->index = num_vertices - 1;
 		num_old_vert = num_vertices;
 	}
 	else if (name.Match("linedef"))
 	{
 		kind = Objid(OBJ_LINEDEFS, 1);
 		new_LD = NewLinedef();
-		new_LD->index = udmf_linedef_index++;
+		new_LD->index = num_linedefs - 1;
 	}
 	else if (name.Match("sidedef"))
 	{
@@ -579,14 +573,14 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 		memcpy(new_SD->upper_tex, "-", 1);
 		memset(new_SD->lower_tex, 0, 8);
 		memcpy(new_SD->lower_tex, "-", 1);
-		new_SD->index = udmf_sidedef_index++;
+		new_SD->index = num_sidedefs - 1;
 	}
 	else if (name.Match("sector"))
 	{
 		kind = Objid(OBJ_SECTORS, 1);
 		new_S = NewSector();
 		new_S->light = 160;
-		new_S->index = udmf_sector_index++;
+		new_S->index = num_sectors - 1;
 		new_S->warned_facing = -1;
 	}
 
@@ -644,17 +638,11 @@ void UDMF_LoadLevel()
 {
 	Lump_c *lump = FindLevelLump("TEXTMAP");
 
-	lump->Seek(0);
-
 	// we assume this cannot happen
 	if (! lump)
 		BugError("AJBSP: Null TEXTMAP lump passed to UDMF parser?\n");
 
-	udmf_linedef_index = 0;
-	udmf_sector_index = 0;
-	udmf_sidedef_index = 0;
-	udmf_thing_index = 0;
-	udmf_vert_index = 0;
+	lump->Seek(0);
 
 	Udmf_Parser parser(lump);
 

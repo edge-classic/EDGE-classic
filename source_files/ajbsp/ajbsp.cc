@@ -20,8 +20,6 @@
 
 #include "ajbsp.h"
 
-#define MAX_SPLIT_COST  32
-
 //
 //  global variables
 //

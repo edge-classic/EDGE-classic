@@ -519,6 +519,21 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape)
 	else if (!stricmp(pname, "endcast"))
 	{
 		scanner.MustGetToken(TK_BoolConst);
+		mape->docast = scanner.boolean;
+	}
+	else if (!stricmp(pname, "endbunny"))
+	{
+		scanner.MustGetToken(TK_BoolConst);
+		mape->dobunny = scanner.boolean;
+	}
+	else if (!stricmp(pname, "endgame"))
+	{
+		scanner.MustGetToken(TK_BoolConst);
+		mape->endgame = scanner.boolean;
+	}
+	/*else if (!stricmp(pname, "endcast"))
+	{
+		scanner.MustGetToken(TK_BoolConst);
 		if (scanner.boolean) strcpy(mape->endpic, "$CAST");
 		else strcpy(mape->endpic, "-");
 	}
@@ -533,7 +548,7 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape)
 		scanner.MustGetToken(TK_BoolConst);
 		if (scanner.boolean) strcpy(mape->endpic, "!");
 		else strcpy(mape->endpic, "-");
-	}
+	}*/
 	else if (!stricmp(pname, "exitpic"))
 	{
 		ParseLumpName(scanner, mape->exitpic);

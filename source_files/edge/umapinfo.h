@@ -52,6 +52,9 @@ struct MapEntry
 	int partime;
 	int nointermission;
 	int numbossactions;
+	int docast;
+	int dobunny;
+	int endgame;
 
 	unsigned int propertycount;
 	struct MapProperty *properties;

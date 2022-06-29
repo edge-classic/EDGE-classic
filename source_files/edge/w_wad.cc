@@ -1439,7 +1439,25 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->nextmapname.clear();
 			temp_level->f_end.pics.Insert(M_Strupr(Maps.maps[i].endpic));
 			temp_level->f_end.picwait = 350000; //1000 seconds
-			temp_level->f_end.docast = false;
+		}
+
+		if(Maps.maps[i].dobunny)
+		{
+			//temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].endpic));
+			temp_level->nextmapname.clear();
+			temp_level->f_end.dobunny = true;
+		}
+
+		if(Maps.maps[i].docast)
+		{
+			//temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].endpic));
+			temp_level->nextmapname.clear();
+			temp_level->f_end.docast = true;
+		}
+
+		if(Maps.maps[i].endgame)
+		{
+			temp_level->nextmapname.clear();
 		}
 
 		if(Maps.maps[i].interbackdrop[0] != NULL)

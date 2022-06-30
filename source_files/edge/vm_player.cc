@@ -46,10 +46,6 @@
 #include "flat.h" // DDFFLAT - Dasho
 #include "s_sound.h" // play_footstep() - Dasho
 
-bool inv_prev_pressed = false;
-bool inv_use_pressed = false;
-bool inv_next_pressed = false;
-
 extern coal::vm_c *ui_vm;
 
 extern void VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value);
@@ -898,17 +894,6 @@ static void PL_play_footstep(coal::vm_c *vm, int argc)
 	}
 }
 
-static void PL_inventory_events(coal::vm_c *vm, int argc)
-{
-	double v[3] = {0, 0, 0};
-
-	v[0] = inv_prev_pressed;
-	v[1] = inv_use_pressed;
-	v[2] = inv_next_pressed;
-
-	vm->ReturnVector(v);
-}
-
 // player.use_inventory(type)
 //
 static void PL_use_inventory(coal::vm_c *vm, int argc)
@@ -1018,7 +1003,6 @@ void VM_RegisterPlaysim()
 
 	// Dasho: December 2021
 	ui_vm->AddNativeFunction("player.play_footstep", PL_play_footstep);
-	ui_vm->AddNativeFunction("player.inventory_events",		PL_inventory_events);
 
 	ui_vm->AddNativeFunction("player.use_inventory",        PL_use_inventory);
     ui_vm->AddNativeFunction("player.inventory",        PL_inventory);

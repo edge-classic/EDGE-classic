@@ -41,8 +41,6 @@
 #include "m_misc.h"
 #include "r_misc.h"
 #include "z_zone.h"
-#include "vm_player.h"
-
 
 extern bool CON_Responder(event_t *ev);
 extern bool   M_Responder(event_t *ev);

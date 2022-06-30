@@ -39,10 +39,15 @@
 #include "s_blit.h"
 #include "s_sound.h"
 #include "z_zone.h"
-#include "vm_player.h"
 
 // Room size test - Dasho
 #include "p_blockmap.h"
+
+#include "coal.h" // for coal::vm_c
+
+extern coal::vm_c *ui_vm;
+
+extern void VM_SetVector(coal::vm_c *vm, const char *mod_name, const char *var_name, double val_1, double val_2, double val_3);
 
 float room_area;
 
@@ -792,9 +797,8 @@ void P_PlayerThink(player_t * player)
 	player->actiondown[0] = (cmd->extbuttons & EBT_ACTION1) ? true : false;
 	player->actiondown[1] = (cmd->extbuttons & EBT_ACTION2) ? true : false;
 
-	inv_prev_pressed = (cmd->extbuttons & EBT_INVPREV) ? true : false;
-	inv_use_pressed = (cmd->extbuttons & EBT_INVUSE) ? true : false;
-	inv_next_pressed = (cmd->extbuttons & EBT_INVNEXT) ? true : false;
+	VM_SetVector(ui_vm, "player", "inventory_event_handler", cmd->extbuttons & EBT_INVPREV ? 1 : 0, 
+		cmd->extbuttons & EBT_INVUSE ? 1 : 0, cmd->extbuttons & EBT_INVNEXT ? 1 : 0);
 
 	// decrement jumpwait counter
 	if (player->jumpwait > 0)

@@ -242,6 +242,7 @@ public:
 
 	void SetFloat (const char *mod_name, const char *var_name, double value);
 	void SetString (const char *mod_name, const char *var_name, const char *value);
+	void SetVector (const char *mod_name, const char *var_name, double val_1, double val_2, double val_3);
 
 	int FindFunction(const char *name);
 	int FindVariable(const char *name);

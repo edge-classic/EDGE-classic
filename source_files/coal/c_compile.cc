@@ -1955,6 +1955,39 @@ void real_vm_c::SetString(const char *mod_name, const char *var_name, const char
 	return;
 }
 
+void real_vm_c::SetVector(const char *mod_name, const char *var_name, double val_1, double val_2, double val_3)
+{
+	def_t *mod_def;
+	scope_c *mod_scope;
+	if (mod_name)
+	{
+		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+		if (!mod_def)
+		{
+			printer("SetVector failed: Could not find module %s\n", mod_name);
+			return;
+		}
+		mod_scope = comp.all_modules[mod_def->ofs];
+	}
+
+	def_t *var;
+	if (mod_scope)
+		var = FindDef(&type_vector, (char *)var_name, mod_scope);
+	else
+		var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+
+	if (var)
+	{
+		G_VECTOR(var->ofs)[0] = val_1;
+		G_VECTOR(var->ofs)[1] = val_2;
+		G_VECTOR(var->ofs)[2] = val_3;
+		return;
+	}
+
+	printer("SetVector failed: Could not find variable %s\n", var_name);
+	return;
+}
+
 vm_c * CreateVM()
 {
 	assert(sizeof(double) == 8);

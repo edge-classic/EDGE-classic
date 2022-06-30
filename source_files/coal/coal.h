@@ -56,6 +56,7 @@ public:
 
 	virtual void SetFloat  (const char *mod_name, const char *var_name, double value) = 0;
 	virtual void SetString  (const char *mod_name, const char *var_name, const char *value) = 0;
+	virtual void SetVector  (const char *mod_name, const char *var_name, double val_1, double val_2, double val_3) = 0;
 
 	virtual int FindFunction(const char *name) = 0;
 	virtual int FindVariable(const char *name) = 0;

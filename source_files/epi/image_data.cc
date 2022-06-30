@@ -444,6 +444,32 @@ void image_data_c::AverageHue(u8_t *hue, u8_t *ity)
 	}
 }
 
+void image_data_c::AverageColor(u8_t *rgb)
+{
+	// make sure we don't overflow
+	SYS_ASSERT(used_w * used_h <= 2048 * 2048);
+
+	int r_sum = 0;
+	int g_sum = 0;
+	int b_sum = 0;
+
+	for (int y = 0; y < used_h; y++)
+	{
+		const u8_t *src = PixelAt(0, y);
+
+		for (int x = 0; x < used_w; x++, src += bpp)
+		{
+			r_sum += src[0];
+			g_sum += src[1];
+			b_sum += src[2];
+		}
+	}
+
+	rgb[0] = r_sum / (used_w * used_h);
+	rgb[1] = g_sum / (used_w * used_h);
+	rgb[2] = b_sum / (used_w * used_h);
+}
+
 void image_data_c::Swirl(int leveltime, int thickness)
 {
 	const int sizefactor = (height + width) / 128;

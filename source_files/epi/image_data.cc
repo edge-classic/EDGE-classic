@@ -470,6 +470,70 @@ void image_data_c::AverageColor(u8_t *rgb)
 	rgb[2] = b_sum / (used_w * used_h);
 }
 
+void image_data_c::LightestColor(u8_t *rgb)
+{
+	// make sure we don't overflow
+	SYS_ASSERT(used_w * used_h <= 2048 * 2048);
+
+	int lightest_total = 0;
+	int lightest_r = 0;
+	int lightest_g = 0;
+	int lightest_b = 0;
+
+	for (int y = 0; y < used_h; y++)
+	{
+		const u8_t *src = PixelAt(0, y);
+
+		for (int x = 0; x < used_w; x++, src += bpp)
+		{
+			int current_total = src[0] + src[1] + src[2];
+			if (current_total > lightest_total)
+			{
+				lightest_r = src[0];
+				lightest_g = src[1];
+				lightest_b = src[2];
+				lightest_total = current_total;
+			}
+		}
+	}
+
+	rgb[0] = lightest_r;
+	rgb[1] = lightest_g;
+	rgb[2] = lightest_b;
+}
+
+void image_data_c::DarkestColor(u8_t *rgb)
+{
+	// make sure we don't overflow
+	SYS_ASSERT(used_w * used_h <= 2048 * 2048);
+
+	int darkest_total = 765;
+	int darkest_r = 0;
+	int darkest_g = 0;
+	int darkest_b = 0;
+
+	for (int y = 0; y < used_h; y++)
+	{
+		const u8_t *src = PixelAt(0, y);
+
+		for (int x = 0; x < used_w; x++, src += bpp)
+		{
+			int current_total = src[0] + src[1] + src[2];
+			if (current_total < darkest_total)
+			{
+				darkest_r = src[0];
+				darkest_g = src[1];
+				darkest_b = src[2];
+				darkest_total = current_total;
+			}
+		}
+	}
+
+	rgb[0] = darkest_r;
+	rgb[1] = darkest_g;
+	rgb[2] = darkest_b;
+}
+
 void image_data_c::Swirl(int leveltime, int thickness)
 {
 	const int sizefactor = (height + width) / 128;

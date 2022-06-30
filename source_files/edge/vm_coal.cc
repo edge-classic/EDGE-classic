@@ -22,7 +22,6 @@
 
 #include "file.h"
 #include "filesystem.h"
-#include "image_data.h"
 #include "path.h"
 
 #include "main.h"
@@ -36,18 +35,12 @@
 #include "e_player.h"
 #include "hu_font.h"
 #include "hu_draw.h"
-#include "r_colormap.h"
 #include "r_modes.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
 #include "m_random.h"
 
-
-extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
-
-extern epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src,
-									 const byte *palette, int opacity);
 
 // user interface VM
 coal::vm_c *ui_vm;
@@ -422,16 +415,6 @@ void VM_LoadScripts()
 	VM_SetFloat(ui_vm, "sys", "gametic", gametic);
 	if (W_IsLumpInPwad("STBAR"))
 	{
-		// Set color-match rgb vector for COALHUDS to thing missing widescreen areas - Dasho
-		// P.S. probably need some kind of check for custom widescreen status bars in a PWAD :/
-		const byte *what_palette = (const byte *) &playpal_data[0];
-		const image_c *tmp_img_c = W_ImageLookup("STBAR", INS_Graphic, 0);
-		if (tmp_img_c->source_palette >= 0)
-			what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
-		epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-		u8_t *temp_rgb = new u8_t[3];
-		tmp_img_data->AverageColor(temp_rgb);
-		VM_SetVector(ui_vm, "hud", "custom_stbar_hue", temp_rgb[0], temp_rgb[1], temp_rgb[2]);
 		VM_SetFloat(ui_vm, "hud", "custom_stbar", 1);
 	}
 }

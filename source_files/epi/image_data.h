@@ -128,9 +128,16 @@ public:
 	// will be stored in 'ity' when given.
 
 	void AverageColor(u8_t *rgb);
-	// compute the average Hue of the RGB(A) image, storing the
-	// result in the 'hue' array (r, g, b).  The average intensity
-	// will be stored in 'ity' when given.
+	// compute the average color of the RGB image, storing the
+	// result in the 'rgb' array (r, g, b).
+
+	void LightestColor(u8_t *rgb);
+	// compute the lightest color in the RGB image, storing the
+	// result in the 'rgb' array (r, g, b).
+
+	void DarkestColor(u8_t *rgb);
+	// compute the darkest color in the RGB image, storing the
+	// result in the 'rgb' array (r, g, b).
 
 	void Swirl(int leveltime, int thickness);
 	// SMMU-style swirling

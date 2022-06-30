@@ -23,6 +23,8 @@
 #include "main.h"
 #include "font.h"
 
+#include "image_data.h"
+
 #include "vm_coal.h"
 #include "dm_state.h"
 #include "e_main.h"
@@ -46,6 +48,11 @@ extern coal::vm_c *ui_vm;
 extern void VM_SetFloat(coal::vm_c *vm, const char *name, double value);
 extern void VM_CallFunction(coal::vm_c *vm, const char *name);
 
+// Needed for color functions
+extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
+
+extern epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src,
+									 const byte *palette, int opacity);
 
 player_t *ui_hud_who = NULL;
 
@@ -611,6 +618,85 @@ static void HD_screen_aspect(coal::vm_c *vm, int argc)
 	vm->ReturnFloat(TempAspect);
 }
 
+static void HD_get_average_color(coal::vm_c *vm, int argc)
+{
+	double rgb[3];
+	const char *name = vm->AccessParamString(0);
+	const byte *what_palette = (const byte *) &playpal_data[0];
+	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
+	if (tmp_img_c->source_palette >= 0)
+		what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
+	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+	u8_t *temp_rgb = new u8_t[3];
+	tmp_img_data->AverageColor(temp_rgb);
+	rgb[0] = temp_rgb[0];
+	rgb[1] = temp_rgb[1];
+	rgb[2] = temp_rgb[2];
+	delete tmp_img_data;
+	delete tmp_img_c;
+	delete[] temp_rgb;
+	vm->ReturnVector(rgb);
+}
+
+static void HD_get_lightest_color(coal::vm_c *vm, int argc)
+{
+	double rgb[3];
+	const char *name = vm->AccessParamString(0);
+	const byte *what_palette = (const byte *) &playpal_data[0];
+	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
+	if (tmp_img_c->source_palette >= 0)
+		what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
+	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+	u8_t *temp_rgb = new u8_t[3];
+	tmp_img_data->LightestColor(temp_rgb);
+	rgb[0] = temp_rgb[0];
+	rgb[1] = temp_rgb[1];
+	rgb[2] = temp_rgb[2];
+	delete tmp_img_data;
+	delete tmp_img_c;
+	delete[] temp_rgb;
+	vm->ReturnVector(rgb);
+}
+
+static void HD_get_darkest_color(coal::vm_c *vm, int argc)
+{
+	double rgb[3];
+	const char *name = vm->AccessParamString(0);
+	const byte *what_palette = (const byte *) &playpal_data[0];
+	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
+	if (tmp_img_c->source_palette >= 0)
+		what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
+	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+	u8_t *temp_rgb = new u8_t[3];
+	tmp_img_data->DarkestColor(temp_rgb);
+	rgb[0] = temp_rgb[0];
+	rgb[1] = temp_rgb[1];
+	rgb[2] = temp_rgb[2];
+	delete tmp_img_data;
+	delete tmp_img_c;
+	delete[] temp_rgb;
+	vm->ReturnVector(rgb);
+}
+
+static void HD_get_average_hue(coal::vm_c *vm, int argc)
+{
+	double rgb[3];
+	const char *name = vm->AccessParamString(0);
+	const byte *what_palette = (const byte *) &playpal_data[0];
+	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
+	if (tmp_img_c->source_palette >= 0)
+		what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
+	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+	u8_t *temp_rgb = new u8_t[3];
+	tmp_img_data->AverageHue(temp_rgb, NULL);
+	rgb[0] = temp_rgb[0];
+	rgb[1] = temp_rgb[1];
+	rgb[2] = temp_rgb[2];
+	delete tmp_img_data;
+	delete tmp_img_c;
+	delete[] temp_rgb;
+	vm->ReturnVector(rgb);
+}
 
 //------------------------------------------------------------------------
 // HUD Functions
@@ -663,6 +749,12 @@ void VM_RegisterHUD()
 
 	// sound functions
 	ui_vm->AddNativeFunction("hud.play_sound",      HD_play_sound);
+
+	// image color functions
+	ui_vm->AddNativeFunction("hud.get_average_color",      HD_get_average_color);
+	ui_vm->AddNativeFunction("hud.get_lightest_color",      HD_get_lightest_color);
+	ui_vm->AddNativeFunction("hud.get_darkest_color",      HD_get_darkest_color);
+	ui_vm->AddNativeFunction("hud.get_average_hue",      HD_get_average_hue);
 }
 
 void VM_NewGame(void)

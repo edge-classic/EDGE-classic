@@ -633,7 +633,6 @@ static void HD_get_average_color(coal::vm_c *vm, int argc)
 	rgb[1] = temp_rgb[1];
 	rgb[2] = temp_rgb[2];
 	delete tmp_img_data;
-	delete tmp_img_c;
 	delete[] temp_rgb;
 	vm->ReturnVector(rgb);
 }
@@ -653,7 +652,6 @@ static void HD_get_lightest_color(coal::vm_c *vm, int argc)
 	rgb[1] = temp_rgb[1];
 	rgb[2] = temp_rgb[2];
 	delete tmp_img_data;
-	delete tmp_img_c;
 	delete[] temp_rgb;
 	vm->ReturnVector(rgb);
 }
@@ -673,7 +671,6 @@ static void HD_get_darkest_color(coal::vm_c *vm, int argc)
 	rgb[1] = temp_rgb[1];
 	rgb[2] = temp_rgb[2];
 	delete tmp_img_data;
-	delete tmp_img_c;
 	delete[] temp_rgb;
 	vm->ReturnVector(rgb);
 }
@@ -693,7 +690,6 @@ static void HD_get_average_hue(coal::vm_c *vm, int argc)
 	rgb[1] = temp_rgb[1];
 	rgb[2] = temp_rgb[2];
 	delete tmp_img_data;
-	delete tmp_img_c;
 	delete[] temp_rgb;
 	vm->ReturnVector(rgb);
 }

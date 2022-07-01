@@ -52,6 +52,12 @@
 
 #include "m_misc.h"  // !!!! model test
 
+#include "coal.h"
+
+extern coal::vm_c *ui_vm;
+
+extern double VM_GetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name);
+
 
 #define DEBUG  0
 
@@ -192,12 +198,13 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 	float tx1 = (coord_W - IM_WIDTH(image)) / 2.0 + psp->sx - IM_OFFSETX(image);
 	float tx2 = tx1 + w;
 
-	float ty1 = - psp->sy + IM_OFFSETY(image);
-	float ty2 = ty1 + h;
+	float ty1 = - psp->sy + IM_OFFSETY(image) + VM_GetFloat(ui_vm, "hud", "universal_y_adjust");
 	
 	//Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons
 	if ((state->flags & SFF_Weapon) && (player->ready_wp >=0))
 		ty1 += player->weapons[player->ready_wp].info->y_adjust;
+
+	float ty2 = ty1 + h;
 	
 	float x1b, y1b, x1t, y1t, x2b, y2b, x2t, y2t;  // screen coords
 

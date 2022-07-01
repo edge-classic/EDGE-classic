@@ -61,7 +61,26 @@ void VM_Printer(const char *msg, ...)
 	I_Printf("COAL: %s", buffer);
 }
 
-// VM_SetFloat/VM_SetString usage:
+// VM_GetFloat/VM_GetString/VM_GetVector usage:
+// mod_name = NULL to search global scope or a module name such as "hud", "math", etc
+// var_name = Variable name, without the module prefix, i.e. "custom_stbar" instead of "hud.custom_stbar"
+
+double VM_GetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name)
+{
+	return vm->GetFloat(mod_name, var_name);
+}
+
+const char *VM_GetString(coal::vm_c *vm, const char *mod_name, const char *var_name)
+{
+	return vm->GetString(mod_name, var_name);
+}
+
+double *VM_GetVector(coal::vm_c *vm, const char *mod_name, const char *var_name)
+{
+	return vm->GetVector(mod_name, var_name);
+}
+
+// VM_SetFloat/VM_SetString/VM_SetVector usage:
 // mod_name = NULL to search global scope or a module name such as "hud", "math", etc
 // var_name = Variable name, without the module prefix, i.e. "custom_stbar" instead of "hud.custom_stbar"
 // value = Whatever is appropriate. SetString should allow a NULL string as this may be desired
@@ -411,7 +430,6 @@ void VM_LoadLumpOfCoal(int lump)
 void VM_LoadScripts()
 {
 	W_ReadCoalLumps();
-	// Test case for VM_SetFloat....this can be relocated if needs be - Dasho
 	VM_SetFloat(ui_vm, "sys", "gametic", gametic);
 	if (W_IsLumpInPwad("STBAR"))
 	{

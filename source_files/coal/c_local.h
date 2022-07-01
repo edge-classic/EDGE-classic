@@ -240,6 +240,10 @@ public:
 	void SetAsmDump(bool enable);
 	void SetTrace  (bool enable);
 
+	double GetFloat (const char *mod_name, const char *var_name);
+	const char *GetString (const char *mod_name, const char *var_name);
+	double *GetVector (const char *mod_name, const char *var_name);
+
 	void SetFloat (const char *mod_name, const char *var_name, double value);
 	void SetString (const char *mod_name, const char *var_name, const char *value);
 	void SetVector (const char *mod_name, const char *var_name, double val_1, double val_2, double val_3);

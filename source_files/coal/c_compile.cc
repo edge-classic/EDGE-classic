@@ -1892,6 +1892,88 @@ void real_vm_c::SetAsmDump(bool enable)
 	comp.asm_dump = enable;
 }
 
+double real_vm_c::GetFloat(const char *mod_name, const char *var_name)
+{
+	def_t *mod_def;
+	scope_c *mod_scope;
+	if (mod_name)
+	{
+		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+		if (!mod_def)
+		{
+			RunError("GetFloat failed: Could not find module %s\n", mod_name);
+		}
+		mod_scope = comp.all_modules[mod_def->ofs];
+	}
+
+	def_t *var;
+	if (mod_scope)
+		var = FindDef(&type_float, (char *)var_name, mod_scope);
+	else
+		var = FindDef(&type_float, (char *)var_name, &comp.global_scope);
+
+	if (var)
+		return G_FLOAT(var->ofs);
+
+	RunError("GetFloat failed: Could not find variable %s\n", var_name);
+}
+
+const char *real_vm_c::GetString(const char *mod_name, const char *var_name)
+{
+	def_t *mod_def;
+	scope_c *mod_scope;
+	if (mod_name)
+	{
+		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+		if (!mod_def)
+		{
+			RunError("GetString failed: Could not find module %s\n", mod_name);
+		}
+		mod_scope = comp.all_modules[mod_def->ofs];
+	}
+
+	def_t *var;
+	if (mod_scope)
+		var = FindDef(&type_string, (char *)var_name, mod_scope);
+	else
+		var = FindDef(&type_string, (char *)var_name, &comp.global_scope);
+
+	if (var)
+	{
+		return G_STRING(var->ofs);
+	}
+	
+	RunError("GetString failed: Could not find variable %s\n", var_name);
+}
+
+double *real_vm_c::GetVector(const char *mod_name, const char *var_name)
+{
+	def_t *mod_def;
+	scope_c *mod_scope;
+	if (mod_name)
+	{
+		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+		if (!mod_def)
+		{
+			RunError("SetVector failed: Could not find module %s\n", mod_name);
+		}
+		mod_scope = comp.all_modules[mod_def->ofs];
+	}
+
+	def_t *var;
+	if (mod_scope)
+		var = FindDef(&type_vector, (char *)var_name, mod_scope);
+	else
+		var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+
+	if (var)
+	{
+		return G_VECTOR(var->ofs);
+	}
+
+	RunError("SetVector failed: Could not find variable %s\n", var_name);
+}
+
 void real_vm_c::SetFloat(const char *mod_name, const char *var_name, double value)
 {
 	def_t *mod_def;
@@ -1925,7 +2007,6 @@ void real_vm_c::SetFloat(const char *mod_name, const char *var_name, double valu
 
 void real_vm_c::SetString(const char *mod_name, const char *var_name, const char *value)
 {
-	// Do we want to allow NULL as a string value? May need to check for that here - Dasho	
 	def_t *mod_def;
 	scope_c *mod_scope;
 	if (mod_name)

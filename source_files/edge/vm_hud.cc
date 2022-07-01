@@ -637,6 +637,44 @@ static void HD_get_average_color(coal::vm_c *vm, int argc)
 	vm->ReturnVector(rgb);
 }
 
+static void HD_get_average_top_border_color(coal::vm_c *vm, int argc)
+{
+	double rgb[3];
+	const char *name = vm->AccessParamString(0);
+	const byte *what_palette = (const byte *) &playpal_data[0];
+	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
+	if (tmp_img_c->source_palette >= 0)
+		what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
+	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+	u8_t *temp_rgb = new u8_t[3];
+	tmp_img_data->AverageTopBorderColor(temp_rgb);
+	rgb[0] = temp_rgb[0];
+	rgb[1] = temp_rgb[1];
+	rgb[2] = temp_rgb[2];
+	delete tmp_img_data;
+	delete[] temp_rgb;
+	vm->ReturnVector(rgb);
+}
+
+static void HD_get_average_bottom_border_color(coal::vm_c *vm, int argc)
+{
+	double rgb[3];
+	const char *name = vm->AccessParamString(0);
+	const byte *what_palette = (const byte *) &playpal_data[0];
+	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
+	if (tmp_img_c->source_palette >= 0)
+		what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
+	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+	u8_t *temp_rgb = new u8_t[3];
+	tmp_img_data->AverageBottomBorderColor(temp_rgb);
+	rgb[0] = temp_rgb[0];
+	rgb[1] = temp_rgb[1];
+	rgb[2] = temp_rgb[2];
+	delete tmp_img_data;
+	delete[] temp_rgb;
+	vm->ReturnVector(rgb);
+}
+
 static void HD_get_lightest_color(coal::vm_c *vm, int argc)
 {
 	double rgb[3];
@@ -748,6 +786,8 @@ void VM_RegisterHUD()
 
 	// image color functions
 	ui_vm->AddNativeFunction("hud.get_average_color",      HD_get_average_color);
+	ui_vm->AddNativeFunction("hud.get_average_top_border_color",      HD_get_average_top_border_color);
+	ui_vm->AddNativeFunction("hud.get_average_bottom_border_color",      HD_get_average_bottom_border_color);
 	ui_vm->AddNativeFunction("hud.get_lightest_color",      HD_get_lightest_color);
 	ui_vm->AddNativeFunction("hud.get_darkest_color",      HD_get_darkest_color);
 	ui_vm->AddNativeFunction("hud.get_average_hue",      HD_get_average_hue);

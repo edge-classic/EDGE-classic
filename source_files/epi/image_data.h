@@ -131,6 +131,14 @@ public:
 	// compute the average color of the RGB image, storing the
 	// result in the 'rgb' array (r, g, b).
 
+	void AverageTopBorderColor(u8_t *rgb);
+	// compute the average color of the RGB image, storing the
+	// result in the 'rgb' array (r, g, b).
+
+	void AverageBottomBorderColor(u8_t *rgb);
+	// compute the average color of the RGB image, storing the
+	// result in the 'rgb' array (r, g, b).
+
 	void LightestColor(u8_t *rgb);
 	// compute the lightest color in the RGB image, storing the
 	// result in the 'rgb' array (r, g, b).

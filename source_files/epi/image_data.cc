@@ -470,6 +470,52 @@ void image_data_c::AverageColor(u8_t *rgb)
 	rgb[2] = b_sum / (used_w * used_h);
 }
 
+void image_data_c::AverageTopBorderColor(u8_t *rgb)
+{
+	// make sure we don't overflow
+	SYS_ASSERT(used_w * used_h <= 2048 * 2048);
+
+	int r_sum = 0;
+	int g_sum = 0;
+	int b_sum = 0;
+
+	for (int x = 0; x < used_w; x++)
+	{
+		const u8_t *src = PixelAt(x, used_h - 1);
+
+		r_sum += src[0];
+		g_sum += src[1];
+		b_sum += src[2];
+	}
+
+	rgb[0] = r_sum / used_w;
+	rgb[1] = g_sum / used_w;
+	rgb[2] = b_sum / used_w;
+}
+
+void image_data_c::AverageBottomBorderColor(u8_t *rgb)
+{
+	// make sure we don't overflow
+	SYS_ASSERT(used_w * used_h <= 2048 * 2048);
+
+	int r_sum = 0;
+	int g_sum = 0;
+	int b_sum = 0;
+
+	for (int x = 0; x < used_w; x++)
+	{
+		const u8_t *src = PixelAt(x, 0);
+
+		r_sum += src[0];
+		g_sum += src[1];
+		b_sum += src[2];
+	}
+
+	rgb[0] = r_sum / used_w;
+	rgb[1] = g_sum / used_w;
+	rgb[2] = b_sum / used_w;
+}
+
 void image_data_c::LightestColor(u8_t *rgb)
 {
 	// make sure we don't overflow

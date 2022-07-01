@@ -1,6 +1,6 @@
 https://github.com/dashodanger/EDGE-classic
 
-Current as of: June 2022
+Current as of: July 2022
 
 CHANGELOG for EDGE-Classic 1.2 (since EDGE-Classic 1.1)
 ====================================
@@ -13,11 +13,17 @@ Bugs fixed
 + Fixed ALWAYS_LOUD things.ddf special not working with non-enemy mobjs
 + Fixed SFX loaders treating all sounds as Mono regardless of original sound format
 + Fixed pressing the Use key to respawn activating linedefs when the player comes back to life
++ Fixed player possibly getting stuck in slider doors if attempting to cross through while they are closing
++ Fixed PWAD PLAYPAL lumps not properly being applied to images
 
 General Improvements
 --------------------
 + DEHEXTRA Support
-+ COAL: new_game(), load_game(), save_game(), and end_level() hooks added for more flexibility
++ COAL/C++ Interop: 
+  -new_game(), load_game(), save_game(), and end_level() hooks added for more flexibility
++ COAL VM:
+  -GetFloat, GetString and GetVector added to retrieve COAL variable values from the C++ side
+  -SetFloat, SetString and SetVector added to set COAL variables from the C++ side
 + Original RNG LUT for M_Random/P_Random replaced with improved quality generators from the C++ stdlib
 + Crosshair color and size can now be changed via the Video Options menu
 + Pre-level story text/intermission will now be skipped when using the IDCLEV/level warp cheat
@@ -37,6 +43,14 @@ General Improvements
 + Added capturing of console content (if active) in screenshots
 + Heretic support improved (added missing attacks and ambient sfx, fixed secret level exit, added missing music
  Overlay HUD remodelled)
++ Number of available AMMO and INVENTORY types increased to 99
++ Widescreen ratio resolutions added to windowed resolution list
++ DOOMWADPATH environment variable now supported
++ Updated AJBSP with improvements from Eureka codebase
++ GWA file will always be built, regardless of a WAD having internal GL lumps
+  - This prevents crashes with malformed/orphaned GL lumps in a WAD
++ IWADs are now detected by combinations of unique lumps instead of simple filenames
++ Improved handling of PWADs with custom status bars that aren't widescreen
 
 New Features
 ------------
@@ -48,8 +62,15 @@ New Features
 + "Pistol Starts" option added to Gameplay Options menu (default Off). Will force player to default state upon
   starting a new level. Works with all supported IWADs
 
-+ COALHUDS: new commands
-  -player.rts_enable_tagged(name) Will execute RTS script with matching tag, if one exists
++ COALHUDS: new commands/variables
+  -player.rts_enable_tagged(name): Will execute RTS script with matching tag, if one exists
+  -hud.get_average_color(name): Will return an RGB vector with the average color of the named image lump
+  -hud.get_average_top_border_color(name): Will return an RGB vector with the average top border color of the named image lump
+  -hud.get_average_bottom_border_color(name): Will return an RGB vector with the average bottom border color of the named image lump
+  -hud.get_lightest_color(name): Will return an RGB vector with the lightest color of the named image lump
+  -hud.get_darkest_color(name): Will return an RGB vector with the darkest color of the named image lump
+  -hud.get_average_hue(name): Will return an RGB vector with the average hue of the named image lump
+  -hud.universal_y_adjust variable: Will apply a Y_ADJUST of this value to all weapon sprites
   
 + WEAPONS.DDF
   -Command: RENDER_INVERT=TRUE which will cause this weapon to render the sprites in reverse order
@@ -90,9 +111,24 @@ New Features
   In RTS COUNTERs are usable for various commands; syntax is the same as for ammo i.e. ON_CONDITION COUNTER01(3)
   In COAL: 
 	+ player.counter(counter_num) returns the value of the COUNTER
-	+ player.set﻿_count﻿e﻿﻿﻿r﻿(counter_num, value) allows us to change a COUNTER value
+	+ player.set_counter(counter_num, value) allows us to change a COUNTER value
 
-   
++ Partial UMAPINFO support
+  - The following UMAPINFO keys are recognized:
+  -- levelpic
+  -- skytexture
+  -- levelname
+  -- music
+  -- nextmap
+  -- nextsecret
+  -- exitpic
+  -- enterpic
+  -- endpic
+  -- dobunny
+  -- docast
+  -- endgame
+  -- interbackdrop
+  
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)
 ====================================

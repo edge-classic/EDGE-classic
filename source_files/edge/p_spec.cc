@@ -636,7 +636,8 @@ static void P_LineEffect(line_t *target, line_t *source,
 	//Lobo 2022: experimental partial sky transfer support
 	if ((special->line_effect & LINEFX_SkyTransfer) && source->side[0])
 	{
-		sky_image = W_ImageLookup(source->side[0]->top.image->name, INS_Texture);
+		if(source->side[0]->top.image)
+			sky_image = W_ImageLookup(source->side[0]->top.image->name, INS_Texture);
 	}
 }
 

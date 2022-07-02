@@ -379,6 +379,42 @@ void P_ActFaceTarget(mobj_t * object)
 		object->vertangle = ANG315;
 }
 
+//
+// P_ForceFaceTarget
+//
+// FaceTarget, but ignoring visibility modifiers
+//
+void P_ForceFaceTarget(mobj_t * object)
+{
+	mobj_t *target = object->target;
+
+	if (!target)
+		return;
+
+	if (object->flags & MF_STEALTH)
+		object->vis_target = VISIBLE;
+
+	object->flags &= ~MF_AMBUSH;
+
+	object->angle = R_PointToAngle(object->x, object->y, target->x, target->y);
+
+	float dist = R_PointToDist(object->x, object->y, target->x, target->y);
+
+	if (dist >= 0.1f)
+	{
+		float dz = MO_MIDZ(target) - MO_MIDZ(object);
+
+		object->vertangle = M_ATan(dz / dist);
+	}
+
+	// don't look up/down too far...
+	if (object->vertangle < ANG180 && object->vertangle > ANG45)
+		object->vertangle = ANG45;
+		
+	if (object->vertangle >= ANG180 && object->vertangle < ANG315)
+		object->vertangle = ANG315;
+}
+
 
 void P_ActMakeIntoCorpse(mobj_t * mo)
 {
@@ -3632,7 +3668,12 @@ void P_PlayerAttack(mobj_t * p_obj, const atkdef_c * attack)
 	p_obj->SetTarget(target);
 
 	if (attack->flags & AF_FaceTarget)
-		P_ActFaceTarget(p_obj);
+	{
+		if (attack->flags & AF_ForceAim)
+			P_ForceFaceTarget(p_obj);
+		else
+			P_ActFaceTarget(p_obj);
+	}
 
 	P_DoAttack(p_obj);
 }

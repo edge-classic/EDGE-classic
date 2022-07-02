@@ -736,6 +736,10 @@ void P_TouchSpecialThing(mobj_t * special, mobj_t * toucher)
 	if (toucher->health <= 0)
 		return;
 
+	// Do not pick up the item if completely still
+	if (toucher->mom.x == 0 && toucher->mom.y == 0 && toucher->mom.z == 0)
+		return;
+
 	// -KM- 1998/09/27 Sounds.ddf
 	sfx_t *sound = special->info->activesound;
 

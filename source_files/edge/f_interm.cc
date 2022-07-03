@@ -437,6 +437,11 @@ static void DrawLevelFinished(void)
 			HUD_SetAlignment(-1, -1);//center it
 			HUD_DrawImage(160 - w1/2, y, lnames[0]);
 		}
+		else
+		{
+			h1 = style->fonts[t_type]->NominalHeight();
+			HL_WriteText(style,t_type, 160, y, language[wi_stats.cur->description.c_str()]);
+		}
 	}
 	else
 	{
@@ -530,6 +535,10 @@ static void DrawEnteringLevel(void)
 			h1 = IM_HEIGHT(lnames[1]);
 			HUD_SetAlignment(-1, -1);//center it
 			HUD_DrawImage(160 - w1/2, y * 5/4, lnames[1]);
+		}
+		else
+		{
+			HL_WriteText(style,t_type, 160, y * 5/4, language[wi_stats.next->description.c_str()]);	
 		}
 	}
 	else

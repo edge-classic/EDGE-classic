@@ -738,10 +738,10 @@ static bool P_CheckRelPosition(mobj_t * thing, float x, float y)
 
 	float r = tm_I.mover->radius;
 
-	tm_I.bbox[BOXLEFT]   = x - (r / 2 - 1);
-	tm_I.bbox[BOXBOTTOM] = y - (r / 2 - 1);
-	tm_I.bbox[BOXRIGHT]  = x + (r / 2 - 1);
-	tm_I.bbox[BOXTOP]    = y + (r / 2 - 1);
+	tm_I.bbox[BOXLEFT]   = x - r;
+	tm_I.bbox[BOXBOTTOM] = y - r;
+	tm_I.bbox[BOXRIGHT]  = x + r;
+	tm_I.bbox[BOXTOP]    = y + r;
 
 	// The base floor / ceiling is from the sector that contains the
 	// point.  Any contacted lines the step closer together will adjust them.
@@ -921,8 +921,12 @@ static bool P_ThingHeightClip(mobj_t * thing)
 {
 	bool onfloor = (fabs(thing->z - thing->floorz) < 1);
 
+	thing->radius = thing->radius / 2 - 1;
+
 	P_CheckRelPosition(thing, thing->x, thing->y);
 
+	thing->radius = (thing->radius + 1) * 2;
+	
 	thing->floorz = tm_I.floorz;
 	thing->ceilingz = tm_I.ceilnz;
 	thing->dropoffz = tm_I.dropoff;

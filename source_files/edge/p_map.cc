@@ -738,10 +738,10 @@ static bool P_CheckRelPosition(mobj_t * thing, float x, float y)
 
 	float r = tm_I.mover->radius;
 
-	tm_I.bbox[BOXLEFT]   = x - r;
-	tm_I.bbox[BOXBOTTOM] = y - r;
-	tm_I.bbox[BOXRIGHT]  = x + r;
-	tm_I.bbox[BOXTOP]    = y + r;
+	tm_I.bbox[BOXLEFT]   = x - (r / 2 - 1);
+	tm_I.bbox[BOXBOTTOM] = y - (r / 2 - 1);
+	tm_I.bbox[BOXRIGHT]  = x + (r / 2 - 1);
+	tm_I.bbox[BOXTOP]    = y + (r / 2 - 1);
 
 	// The base floor / ceiling is from the sector that contains the
 	// point.  Any contacted lines the step closer together will adjust them.

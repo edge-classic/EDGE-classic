@@ -14,7 +14,7 @@ set(libgme_SRCS Blip_Buffer.cpp
                 Music_Emu.cpp
                 )
 
-find_package(ZLIB QUIET)
+# find_package(ZLIB QUIET)
 
 # Ay_Apu is very popular around here
 if (USE_GME_AY OR USE_GME_KSS)
@@ -165,31 +165,32 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # Add library to be compiled.
 add_library(gme ${libgme_SRCS})
 
-if(ZLIB_FOUND)
-    message(" ** ZLib library located, compressed file formats will be supported")
-    target_compile_definitions(gme PRIVATE -DHAVE_ZLIB_H)
-    target_include_directories(gme PRIVATE ${ZLIB_INCLUDE_DIRS})
-    target_link_libraries(gme ${ZLIB_LIBRARIES})
-    # Is not to be installed though
+#if(ZLIB_FOUND)
+#    message(" ** ZLib library located, compressed file formats will be supported")
+#    target_compile_definitions(gme PRIVATE -DHAVE_ZLIB_H)
+#    target_include_directories(gme PRIVATE ${ZLIB_INCLUDE_DIRS})
+#    target_link_libraries(gme ${ZLIB_LIBRARIES})
+#    # Is not to be installed though
+#
+#    set(PKG_CONFIG_ZLIB -lz) # evaluated in libgme.pc.in
+#else()
+#    message("ZLib library not found, disabling support for compressed formats such as VGZ")
+#endif()
 
-    set(PKG_CONFIG_ZLIB -lz) # evaluated in libgme.pc.in
-else()
-    message("ZLib library not found, disabling support for compressed formats such as VGZ")
-endif()
+#if(USE_GME_SPC)
+#    if(UNRAR_FOUND)
+#        message(" ** unRAR library located, the RSN file format will be supported")
+#        target_compile_definitions(gme PRIVATE -DRARDLL)
+#        target_include_directories(gme PRIVATE ${UNRAR_INCLUDE_DIRS})
+#        target_link_libraries(gme ${UNRAR_LIBRARIES})
+#        # Is not to be installed though
+#
+#        set(PKG_CONFIG_UNRAR -lunrar) # evaluated in libgme.pc.in
+#    else()
+#        message("unRAR library not found, disabling support for the RSN file format")
+#    endif()
+#endif()
 
-if(USE_GME_SPC)
-    if(UNRAR_FOUND)
-        message(" ** unRAR library located, the RSN file format will be supported")
-        target_compile_definitions(gme PRIVATE -DRARDLL)
-        target_include_directories(gme PRIVATE ${UNRAR_INCLUDE_DIRS})
-        target_link_libraries(gme ${UNRAR_LIBRARIES})
-        # Is not to be installed though
-
-        set(PKG_CONFIG_UNRAR -lunrar) # evaluated in libgme.pc.in
-    else()
-        message("unRAR library not found, disabling support for the RSN file format")
-    endif()
-endif()
 # The version is the release.  The "soversion" is the API version.  As long
 # as only build fixes are performed (i.e. no backwards-incompatible changes
 # to the API), the SOVERSION should be the same even when bumping up VERSION.

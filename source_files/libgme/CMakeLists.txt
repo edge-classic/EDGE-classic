@@ -25,9 +25,9 @@ if (NOT DEFINED USE_GME_HES)
     SET(USE_GME_HES 1 CACHE BOOL "Enable PC Engine/TurboGrafx-16 music emulation")
 endif()
 
-#if (NOT DEFINED USE_GME_KSS)
-    #SET(USE_GME_KSS 1 CACHE BOOL "Enable MSX or other Z80 systems music emulation")
-#endif()
+if (NOT DEFINED USE_GME_KSS)
+    SET(USE_GME_KSS 1 CACHE BOOL "Enable MSX or other Z80 systems music emulation")
+endif()
 
 if (NOT DEFINED USE_GME_NSF)
     SET(USE_GME_NSF 1 CACHE BOOL "Enable NES NSF music emulation")
@@ -93,14 +93,14 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     # potential uses; see https://bitbucket.org/mpyne/game-music-emu/issues/18/
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fwrapv")
 
-    if (USE_GME_SPC)
-        list(APPEND CMAKE_MODULE_PATH "${CMAKE_HOME_DIRECTORY}/cmake")
-        find_package(UNRAR QUIET)
-        if (UNRAR_FOUND)
-            # POSIX Threading for unRAR
-            set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-        endif()
-    endif()
+    #if (USE_GME_SPC)
+    #    list(APPEND CMAKE_MODULE_PATH "${CMAKE_HOME_DIRECTORY}/cmake")
+    #    find_package(UNRAR QUIET)
+    #    if (UNRAR_FOUND)
+    #        # POSIX Threading for unRAR
+    #        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+    #    endif()
+    #endif()
 
     if (ENABLE_UBSAN)
         # GCC needs -static-libubsan

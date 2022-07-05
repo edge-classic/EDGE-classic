@@ -921,11 +921,14 @@ static bool P_ThingHeightClip(mobj_t * thing)
 {
 	bool onfloor = (fabs(thing->z - thing->floorz) < 1);
 
-	thing->radius = thing->radius / 2 - 1;
-
-	P_CheckRelPosition(thing, thing->x, thing->y);
-
-	thing->radius = (thing->radius + 1) * 2;
+	if (!(thing->flags & MF_SOLID))
+	{
+		thing->radius = thing->radius / 2 - 1;
+		P_CheckRelPosition(thing, thing->x, thing->y);
+		thing->radius = (thing->radius + 1) * 2;
+	}
+	else
+		P_CheckRelPosition(thing, thing->x, thing->y);
 	
 	thing->floorz = tm_I.floorz;
 	thing->ceilingz = tm_I.ceilnz;

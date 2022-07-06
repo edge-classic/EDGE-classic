@@ -1437,8 +1437,8 @@ int P_MissileContact(mobj_t * object, mobj_t * target)
 	}
 
 	// Berserk handling
-	if (object->player && object->currentattack &&
-		object->player->powers[PW_Berserk] != 0.0f)
+	if (source->player && object->currentattack &&
+		source->player->powers[PW_Berserk] != 0.0f)
 	{
 		damage *= object->currentattack->berserk_mul;
 	}

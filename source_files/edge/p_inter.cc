@@ -1129,6 +1129,59 @@ void P_ThrustMobj(mobj_t * target, mobj_t * inflictor, float thrust)
 }
 
 //
+// P_PushMobj
+//
+// Like P_DamageMobj, but only pushes the target object around
+// (doesn't inflict any damage).  Parameters are:
+//
+// * target    - mobj to be thrust.
+// * inflictor - mobj causing the thrusting.
+// * thrust    - amount of thrust done (same values as damage).  Can
+//               be negative to "pull" instead of push.
+//
+// -Lobo- 2022/07/07: Created this routine.
+//
+void P_PushMobj(mobj_t * target, mobj_t * inflictor, float thrust)
+{
+	/*
+	if(tm_I.mover->mom.x > tm_I.mover->mom.y)
+		ThrustSpeed = fabsf(tm_I.mover->mom.x);
+	else
+		ThrustSpeed = fabsf(tm_I.mover->mom.y);
+	*/
+
+	float dx = target->x - inflictor->x;
+	float dy = target->y - inflictor->y;
+
+	// don't thrust if at the same location (no angle)
+	if (fabs(dx) < 1.0f && fabs(dy) < 1.0f)
+		return;
+
+	angle_t angle = R_PointToAngle(0, 0, dx, dy);
+
+	// -ACB- 2000/03/11 Div-by-zero check...
+	SYS_ASSERT(0 != target->info->mass);
+
+	float push = 12.0f * thrust / target->info->mass;
+
+	// limit thrust to reasonable values
+	if (push < -40.0f) push = -40.0f;
+	if (push >  40.0f) push =  40.0f;
+
+	target->mom.x += push * M_Cos(angle);
+	target->mom.y += push * M_Sin(angle);
+
+	if (level_flags.true3dgameplay)
+	{
+		float dz = MO_MIDZ(target) - MO_MIDZ(inflictor);
+		float slope = P_ApproxSlope(dx, dy, dz);
+
+		target->mom.z += push * slope / 2;
+	}
+}
+
+
+//
 // P_DamageMobj
 //
 // Damages both enemies and players, decreases the amount of health

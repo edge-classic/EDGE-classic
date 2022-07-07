@@ -74,11 +74,11 @@ weaponinfo_t weapon_info[NUMWEAPONS] =
 		S_CHAINUP, S_CHAINDOWN, S_CHAIN, S_CHAIN1, S_CHAINFLASH1
     },
     {
-		"ROCKET_LAUNCHER", am_rocket, 1,  5,7, "d",
+		"ROCKET_LAUNCHER", am_rocket, 1,  5,6, "d",
 		S_MISSILEUP, S_MISSILEDOWN, S_MISSILE, S_MISSILE1, S_MISSILEFLASH1
     },
     {
-		"PLASMA_RIFLE", am_cell, 1,  6,6, NULL,
+		"PLASMA_RIFLE", am_cell, 1,  6,7, NULL,
 		S_PLASMAUP, S_PLASMADOWN, S_PLASMA, S_PLASMA1, S_PLASMAFLASH1
     },
     {

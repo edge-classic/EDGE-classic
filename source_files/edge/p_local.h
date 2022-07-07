@@ -310,6 +310,7 @@ void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special);
 
 void P_TouchSpecialThing(mobj_t * special, mobj_t * toucher);
 void P_ThrustMobj(mobj_t * target, mobj_t * inflictor, float thrust);
+void P_PushMobj(mobj_t * target, mobj_t * inflictor, float thrust);
 void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 		float amount, const damage_c * damtype = NULL, bool weak_spot = false);
 void P_TelefragMobj(mobj_t * target, mobj_t * inflictor,

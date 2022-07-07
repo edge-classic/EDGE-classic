@@ -686,6 +686,13 @@ static bool PIT_CheckRelThing(mobj_t * thing, void *data)
 		P_TouchyContact(thing, tm_I.mover);
 		return !solid;
 	}
+	
+	if (thing->hyperflags & HF_PUSHY)
+    {                           // Push thing
+		float ThrustSpeed = 8;
+		P_PushMobj(thing, tm_I.mover, ThrustSpeed);
+		//return false;
+    }
 
 	// -AJA- 2000/06/09: Follow MBF semantics: allow the non-solid
 	// moving things to pass through solid things.

@@ -1436,12 +1436,16 @@ int P_MissileContact(mobj_t * object, mobj_t * target)
 		object->tunnel_hash[1] = hash;
 	}
 
-	// Berserk handling
-	if (object->player && object->currentattack &&
-		object->player->powers[PW_Berserk] != 0.0f)
+	if (source)
 	{
-		damage *= object->currentattack->berserk_mul;
+		// Berserk handling
+		if (source->player && object->currentattack &&
+			source->player->powers[PW_Berserk] != 0.0f)
+		{
+			damage *= object->currentattack->berserk_mul;
+		}
 	}
+	
 
 	if (!damage)
 	{

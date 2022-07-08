@@ -31,6 +31,7 @@
 
 void M_Random_Init(void);
 int M_Random(void);
+int M_RandomNegPos(void);
 int P_Random(void);
 int C_Random(void);
 int P_RandomNegPos(void);

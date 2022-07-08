@@ -56,6 +56,24 @@ int M_Random(void)
 }
 
 // 
+// M_RandomNegPos
+//
+// Returns a number between -255 and 255, but skewed so that values near
+// zero have a higher probability.  Replaces "P_Random()-P_Random()" in
+// the code, which as Lee Killough points out can produce different
+// results depending upon the order of evaluation.
+//
+// -AJA- Note: same usage rules as P_Random.
+//
+int M_RandomNegPos(void)
+{
+	int r1 = M_Random();
+	int r2 = M_Random();
+
+	return r1 - r2;
+}
+
+// 
 // P_Random
 //
 // Returns a number from 0 to 255.

@@ -225,8 +225,13 @@ bool P_Move(mobj_t * actor, bool path)
 
 	if (!(actor->flags & MF_FLOAT) &&
 		!(actor->extendedflags & EF_GRAVFALL))
-		actor->z = actor->floorz;
-
+		{
+			if (actor->z > actor->floorz)
+			{
+				P_HitFloor(actor);
+			}
+			actor->z = actor->floorz;
+		}
 	// -AJA- 2008/01/16: position interpolation
 	if ((actor->state->flags & SFF_Model) ||
 		(actor->flags & MF_FLOAT))
@@ -252,10 +257,15 @@ bool P_Move(mobj_t * actor, bool path)
 //
 static bool TryWalk(mobj_t * actor)
 {
+	P_HitFloor(actor);
+	
 	if (!P_Move(actor, false))
 		return false;
 
 	actor->movecount = P_Random() & 15;
+
+	
+
 	return true;
 }
 

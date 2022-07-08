@@ -1107,6 +1107,11 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 				mo->mom.z = 0;
 		}
 
+		if (mo->z - mo->mom.z > mo->floorz)
+        {                       // Spawn splashes, etc.
+            P_HitFloor(mo);
+        }
+		
 		mo->z = mo->floorz;
 
 		if ((mo->flags & MF_MISSILE) && !(mo->flags & MF_NOCLIP))
@@ -1726,6 +1731,85 @@ void P_SpawnBlood(float x, float y, float z, float damage,
 		if (damage <= 8 && th->state && th->next_state)
 			P_SetMobjState(th, th->next_state - states);
 	}
+}
+
+
+//---------------------------------------------------------------------------
+//
+// FUNC P_IsThingOnLiquidFloor
+//
+//---------------------------------------------------------------------------
+
+flatdef_c* P_IsThingOnLiquidFloor(mobj_t * thing)
+{
+    flatdef_c *current_flatdef;
+	// If no 3D floors, just return the flat
+    if (thing->subsector->sector->exfloor_used == 0)
+    {
+		current_flatdef = flatdefs.Find(thing->subsector->sector->floor.image->name);
+	}
+    // Start from the lowest exfloor and check if the player is standing on it, then return the control sector's flat
+    else
+    {
+        float player_floor_height = thing->floorz;
+		extrafloor_t *floor_checker = thing->subsector->sector->bottom_ef;
+		extrafloor_t *liquid_checker = thing->subsector->sector->bottom_liq;
+		for (extrafloor_t *ef = floor_checker; ef; ef=ef->higher)
+		{
+			if (player_floor_height == ef->top_h)
+				current_flatdef = flatdefs.Find(ef->ef_line->frontsector->floor.image->name);
+		}
+		for (extrafloor_t *ef = liquid_checker; ef; ef=ef->higher)
+		{
+			if (player_floor_height == ef->top_h)
+				current_flatdef = flatdefs.Find(ef->ef_line->frontsector->floor.image->name);
+		}
+		//if (!current_flatdef)
+		//	current_flatdef = flatdefs.Find(thing->subsector->sector->floor.image->name); // Fallback if nothing else satisfies these conditions
+    }
+	
+	
+	
+	if (!current_flatdef)
+		return NULL;
+	
+	if (current_flatdef->impactobject) //now check if it is has a splash object
+		return current_flatdef;
+	
+	return NULL;
+	
+}
+
+//---------------------------------------------------------------------------
+//
+// FUNC P_HitFloor
+//
+//---------------------------------------------------------------------------
+
+int P_HitFloor(mobj_t * thing)
+{
+    mobj_t *mo;
+
+    if (thing->floorz != thing->subsector->sector->f_h)
+    {                           // don't splash if landing on the edge above water/lava/etc....
+        return (1);
+    }
+
+	if (thing->flags & MF_FLOAT)
+		return 1;
+
+	flatdef_c *current_flatdef = P_IsThingOnLiquidFloor(thing);
+
+    if (current_flatdef)
+    {
+		int tempRandom = M_RandomNegPos() % 8;
+		P_SpawnPuff(thing->x + tempRandom, thing->y + tempRandom, thing->z + tempRandom, current_flatdef->impactobject, thing->angle);
+		
+		tempRandom = M_RandomNegPos() % 8;
+		P_SpawnPuff(thing->x + tempRandom, thing->y + tempRandom, thing->z + tempRandom, current_flatdef->impactobject, thing->angle);
+		
+		S_StartFX(current_flatdef->footstep, P_MobjGetSfxCategory(thing), thing);
+    }
 }
 
 //

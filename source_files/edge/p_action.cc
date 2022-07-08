@@ -427,6 +427,8 @@ void P_ActMakeIntoCorpse(mobj_t * mo)
 	mo->flags &= ~MF_SOLID;
 
 	mo->tag = 0;
+
+	P_HitFloor(mo);
 }
 
 

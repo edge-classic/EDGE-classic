@@ -463,6 +463,8 @@ void W_InitSprites(void)
 	if (numsprites <= 1)
 		I_Error("Missing sprite definitions !!\n");
 
+	E_ProgressMessage("Finding sprite patches...");
+
 	I_Printf("W_InitSprites: Finding sprite patches\n");
 
 	// 1. Allocate sprite definitions (ignore NULL sprite, #0)

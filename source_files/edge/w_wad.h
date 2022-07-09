@@ -121,6 +121,8 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 
 void W_CheckWADFixes(void);
 
+void W_BuildNodes(void);
+
 // Define this only in an emergency.  All these debug printfs quickly
 // add up, and it takes only a few seconds to end up with a 40 meg debug file!
 #ifdef WAD_CHECK

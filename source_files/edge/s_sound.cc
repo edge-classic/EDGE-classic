@@ -33,6 +33,7 @@
 #include "p_local.h" // P_ApproxDistance
 #include "p_user.h" // room_area
 
+extern void E_ProgressMessage(const char *message);
 
 static bool allow_hogs = true;
 
@@ -257,6 +258,8 @@ static int FindChannelToKill(int kill_cat, int real_cat, int new_score)
 void S_Init(void)
 {
 	if (nosound) return;
+
+	E_ProgressMessage("Initializing sound device...");
 
 	int want_chan = channel_counts[var_mix_channels];
 
@@ -549,6 +552,7 @@ void S_PrecacheSounds(void)
 {
 	if (var_cache_sfx)
 	{
+		E_ProgressMessage("Precaching SFX...");
 		for (int i =0; i < sfxdefs.GetSize(); i++)
 		{
 			S_CacheLoad(sfxdefs[i]);

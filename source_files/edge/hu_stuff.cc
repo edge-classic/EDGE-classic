@@ -76,7 +76,7 @@ style_c *automap_style;
 void HU_Init(void)
 {
 	// should use language["HeadsUpInit"], but LDF hasn't been loaded yet
-	E_ProgressMessage("HU_Init: Setting up heads up display.\n");
+	E_ProgressMessage("Setting up HUD...\n");
 }
 
 

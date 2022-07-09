@@ -246,9 +246,7 @@ void W_InitTextures(void)
 	texturedef_t ** cur;
 	int numtextures = 0;
 
-	I_Printf("W_InitTextures...\n");
-
-	E_ProgressMessage("Initializing Textures...\n");
+	I_Printf("Initializing Textures...\n");
 
 	SYS_ASSERT(tex_sets.GetSize() == 0);
 

@@ -374,6 +374,8 @@ void VM_RegisterBASE(coal::vm_c *vm)
 
 void VM_InitCoal()
 {
+	E_ProgressMessage("Starting COAL VM...");
+
 	ui_vm = coal::CreateVM();
 
 	ui_vm->SetPrinter(VM_Printer);

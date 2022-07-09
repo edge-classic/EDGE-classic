@@ -137,6 +137,8 @@ void W_InitModels(void)
 
 	SYS_ASSERT(nummodels >= 1);  // at least SPR_NULL
 
+	E_ProgressMessage("Setting up models...");
+
 	I_Printf("W_InitModels: Setting up\n");
 
 	models = new modeldef_c * [nummodels];

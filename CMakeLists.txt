@@ -169,7 +169,6 @@ target_include_directories(edge-classic PRIVATE source_files/miniz)
 if(WIN32 AND NOT MSYS)
   target_include_directories(edge-classic PRIVATE source_files/sdl2/include)
 endif()
-target_include_directories(edge-classic PRIVATE source_files/stb)
 target_include_directories(edge-classic PRIVATE source_files/tinysoundfont)
 
 if(WIN32 OR MSYS)

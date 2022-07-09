@@ -189,6 +189,8 @@ cvar_c ddf_strict;
 cvar_c ddf_lax;
 cvar_c ddf_quiet;
 
+static const image_c *loading_image = NULL;
+
 static void E_TitleDrawer(void);
 
 class startup_progress_c
@@ -203,14 +205,30 @@ public:
 
 	void addMessage(const char *message)
 	{
-		if (startup_messages.size() >= (SCREENHEIGHT / 2 / 10)) // These numbers are derived from the RGL_DrawProgress routine
+		if (startup_messages.size() >= 15)
 			startup_messages.erase(startup_messages.begin());
 		startup_messages.push_back(message);
 	}
 
 	void drawIt()
 	{
-		RGL_DrawProgress(startup_messages);
+		I_StartFrame();
+		HUD_FrameSetup();
+		if (loading_image)
+		{
+			HUD_DrawImageTitleWS(loading_image);
+			HUD_SolidBox(25, 25, 295, 175, RGB_MAKE(0, 0, 0));
+		}
+		int y = 26;
+		for (int i=0; i < startup_messages.size(); i++)
+		{
+			if (startup_messages[i].size() > 32)
+				HUD_DrawText(26, y, startup_messages[i].substr(0, 29).append("...").c_str());
+			else
+				HUD_DrawText(26, y, startup_messages[i].c_str());
+			y += 10;
+		}
+		I_FinishFrame();
 	}
 };
 
@@ -363,6 +381,8 @@ void SetLanguage(void)
 //
 static void SpecialWadVerify(void)
 {
+	E_ProgressMessage("Verifying EDGE-DEFS version...");
+
 	int lump = W_CheckNumForName("EDGEVER");
 	if (lump < 0)
 		I_Error("EDGEVER lump not found. Get EDGE-DEFS.WAD at https://github.com/dashodanger/EDGE-classic");
@@ -583,7 +603,6 @@ static int title_countdown;
 
 static const image_c *title_image = NULL;
 
-
 static void E_TitleDrawer(void)
 {
 	if (title_image)
@@ -596,6 +615,59 @@ static void E_TitleDrawer(void)
 	}
 }
 
+//
+// This cycles through the title sequences.
+// -KM- 1998/12/16 Fixed for DDF.
+//
+void E_PickLoadingScreen(void)
+{
+	// force pic overflow -> first available titlepic
+	title_game = gamedefs.GetSize() - 1;
+	title_pic = 29999;
+
+	// prevent an infinite loop
+	for (int loop=0; loop < 100; loop++)
+	{
+		gamedef_c *g = gamedefs[title_game];
+		SYS_ASSERT(g);
+
+		if (title_pic >= g->titlepics.GetSize())
+		{
+			title_game = (title_game + 1) % gamedefs.GetSize();
+			title_pic  = 0;
+			continue;
+		}
+
+		// ignore non-existing episodes.  Doesn't include title-only ones
+		// like [EDGE].
+		if (title_pic == 0 && g->firstmap && g->firstmap[0] &&
+			W_CheckNumForName(g->firstmap) == -1)
+		{
+			title_game = (title_game + 1) % gamedefs.GetSize();
+			title_pic  = 0;
+			continue;
+		}
+
+		// ignore non-existing images
+		loading_image = W_ImageLookup(g->titlepics[title_pic], INS_Graphic, ILF_Null);
+
+		if (! loading_image)
+		{
+			title_pic++;
+			continue;
+		}
+
+		// found one !!
+		title_game = gamedefs.GetSize() - 1;
+		title_pic = 29999;
+		return;
+	}
+
+	// not found
+	title_game = gamedefs.GetSize() - 1;
+	title_pic = 29999;
+	loading_image = NULL;
+}
 
 //
 // This cycles through the title sequences.
@@ -659,9 +731,6 @@ void E_StartTitle(void)
 
 	paused = false;
 
-	// force pic overflow -> first available titlepic
-	title_game = gamedefs.GetSize() - 1;
-	title_pic = 29999;
 	title_countdown = 1;
  
 	E_AdvanceTitle();
@@ -1334,20 +1403,22 @@ void (*startcode[])() =
 	RAD_Init,
 	W_InitMultipleFiles,
 	V_InitPalette,
-	HU_Init,
 	W_ReadDDF,
 	W_CheckWADFixes,
+	DDF_CleanUp,
 	W_InitFlats,
 	W_InitTextures,
+	W_ImageCreateUser,
+	E_PickLoadingScreen,
+	HU_Init,
 	CON_Start,
-	SpecialWadVerify,
+	SpecialWadVerify, // "Verifying EDGE-DEFS version..."
+	W_BuildNodes,
 	M_InitMiscConVars,
-	DDF_CleanUp,
 	SetLanguage,
 	ShowNotice,
 	SV_MainInit,
 	S_PrecacheSounds,
-	W_ImageCreateUser,
 	W_InitSprites,
 	W_ProcessTX_HI,
 	W_InitModels,

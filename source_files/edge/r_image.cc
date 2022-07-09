@@ -679,7 +679,7 @@ const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon)
 void W_ImageCreateUser(void)
 {
 
-	E_ProgressMessage("Adding DDFIMAGE definitions...\n");
+	I_Printf("Adding DDFIMAGE definitions...\n");
 
 	for (int i = 0; i < imagedefs.GetSize(); i++)
 	{

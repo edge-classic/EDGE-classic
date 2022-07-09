@@ -28,8 +28,6 @@
 #include "r_modes.h"
 #include "r_image.h"
 
-#include "stb_easy_font.h"
-
 #include <vector>
 
 
@@ -130,42 +128,6 @@ void RGL_ReadScreen(int x, int y, int w, int h, byte *rgb_buffer)
 		rgb_buffer += w * 3;
 	}
 }
-
-void RGL_DrawProgress(std::vector<std::string> messages)
-{
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glEnable(GL_BLEND);
-
-	glPushMatrix();
-
-	glScalef(2.0, 2.0, 0);
-
-	int y = SCREENHEIGHT / 2;
-	
-	for (int i=0; i < messages.size(); i++)
-	{
-		static char buffer[20000]; // ~100 chars
-		int num_quads;
-
-		num_quads = stb_easy_font_print(0, y, (char *)messages[i].c_str(), NULL, buffer, sizeof(buffer));
-
-		glColor3f(255,255,255);
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 16, buffer);
-		glDrawArrays(GL_QUADS, 0, num_quads*4);
-		glDisableClientState(GL_VERTEX_ARRAY);
-		y -= 10;
-	}
-
-	glDisable(GL_BLEND);
-
-	glPopMatrix();
-
-	I_FinishFrame();
-	I_StartFrame();
-}
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -60,6 +60,7 @@ static style_c *console_style;
 
 static rgbcol_t current_color;
 
+extern void E_ProgressMessage(const char *message);
 
 #define T_GREY176  RGB_MAKE(176,176,176)
  
@@ -1164,6 +1165,7 @@ void CON_Start(void)
 {
 	con_visible = vs_notvisible;
 	con_cursor  = 0;
+	E_ProgressMessage("Starting console...");
 }
 
 void CON_ShowFPS(void)

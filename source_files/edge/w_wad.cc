@@ -1064,6 +1064,8 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 	return (lump1_found && lump2_found);
 }
 
+
+
 //
 // AddFile
 //
@@ -1231,35 +1233,6 @@ static void AddFile(const char *filename, int kind, int dyn_index)
 	if (within_hires_list)
 		I_Warning("Missing HI_END marker in %s.\n", filename);
    
-	// -AJA- 1999/12/25: What did Santa bring EDGE ?  Just some support
-	//       for "GWA" files (part of the "GL-Friendly Nodes" specs).
-  
-	if (kind <= FLKIND_EWad && df->level_markers.GetSize() > 0)
-	{
-		SYS_ASSERT(dyn_index < 0);
-
-		std::string gwa_filename;
-
-		bool exists = FindCacheFilename(gwa_filename, filename, df, EDGEGWAEXT);
-
-		I_Debugf("Actual_GWA_filename: %s\n", gwa_filename.c_str());
-
-		if (! exists)
-		{
-			I_Printf("Building GL Nodes for: %s\n", filename);
-
-			if (! AJ_BuildNodes(filename, gwa_filename.c_str()))
-				I_Error("Failed to build GL nodes for: %s\n", filename);
-
-        }
-
-		// Load it.  This recursion bit is rather sneaky,
-		// hopefully it doesn't break anything...
-		AddFile(gwa_filename.c_str(), FLKIND_GWad, datafile);
-
-		df->companion_gwa = datafile + 1;
-	}
-
 	// handle DeHackEd patch files
 	if (kind == FLKIND_Deh || df->deh_lump >= 0)
 	{
@@ -1302,6 +1275,43 @@ static void AddFile(const char *filename, int kind, int dyn_index)
 static void InitCaches(void)
 {
 	lumphead.next = lumphead.prev = &lumphead;
+}
+
+//
+// W_BuildNodes
+//
+void W_BuildNodes(void)
+{
+	int datafile = (int)data_files.size();
+
+	for (int i=0; i < datafile; i++)
+	{
+		data_file_c *df = data_files[i];
+
+		if (df->kind <= FLKIND_EWad && df->level_markers.GetSize() > 0)
+		{
+			std::string gwa_filename;
+
+			bool exists = FindCacheFilename(gwa_filename, df->file_name, df, EDGEGWAEXT);
+
+			I_Debugf("Actual_GWA_filename: %s\n", gwa_filename.c_str());
+
+			if (! exists)
+			{
+				I_Printf("Building GL Nodes for: %s\n", df->file_name);
+
+				if (! AJ_BuildNodes(df->file_name, gwa_filename.c_str()))
+					I_Error("Failed to build GL nodes for: %s\n", df->file_name);
+
+			}
+
+			// Load it.  This recursion bit is rather sneaky,
+			// hopefully it doesn't break anything...
+			AddFile(gwa_filename.c_str(), FLKIND_GWad, datafile);
+
+			df->companion_gwa = datafile++ + 1;
+		}
+	}
 }
 
 //
@@ -1551,7 +1561,7 @@ void W_ReadDDF(void)
 			"Loaded %s %s\n", (d == NUM_DDF_READERS-1) ? "RTS" : "DDF",
 				DDF_Readers[d].print_name));
 
-		E_ProgressMessage(msg_buf.c_str());
+		I_Printf(msg_buf.c_str());
 	}
 
 }
@@ -2137,6 +2147,8 @@ void W_ProcessTX_HI(void)
 
 	// TODO: collect names, remove duplicates
 
+	E_ProgressMessage("Adding standalone textures...");
+
 	for (int file = 0; file < (int)data_files.size(); file++)
 	{
 		data_file_c *df = data_files[file];
@@ -2147,6 +2159,8 @@ void W_ProcessTX_HI(void)
 			W_ImageAddTX(lump, W_GetLumpName(lump), false);
 		}
 	}
+
+	E_ProgressMessage("Adding high-resolution textures...");
 
 	// Add the textures that occur in between HI_START/HI_END markers
 

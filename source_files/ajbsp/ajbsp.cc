@@ -56,6 +56,13 @@ int progress_chunk = 0;
 //
 void FatalError(const char *fmt)
 {
+	if (gwa_wad)
+	{
+		delete gwa_wad; 
+		gwa_wad = NULL;
+	}
+	if (FileExists(opt_output))
+		FileDelete(opt_output);
 	cur_funcs->log_error(fmt);
 }
 
@@ -155,14 +162,6 @@ static build_result_e BuildFile()
 
 
 		res = AJBSP_BuildLevel(nb_info, n);
-
-		// handle a failed map (due to lump overflow)
-		if (res == BUILD_LumpOverflow)
-		{
-			res = BUILD_OK;
-			failures += 1;
-			continue;
-		}
 
 		if (res != BUILD_OK)
 			break;

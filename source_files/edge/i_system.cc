@@ -109,7 +109,7 @@ void I_Error(const char *error,...)
 
 	I_SystemShutdown();
 
-	I_MessageBox(msgbuf, "EDGE Error");
+	I_MessageBox(msgbuf, "EDGE-Classic Error");
 
 	I_CloseProgram(EXIT_FAILURE);
 }

@@ -855,6 +855,62 @@ static void AddLump(data_file_c *df, int lump, int pos, int size, int file,
 	}
 }
 
+// We need this to distinguish between old versus new .gwa cache files to trigger a rebuild
+bool W_CheckForXGLNodes(std::string filename)
+{
+	int j;
+	int length;
+	int startlump;
+	bool xgl_nodes_found = false;
+
+	epi::file_c *file = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+
+	if (file == NULL)
+	{
+		I_Error("W_CheckForXGLNodes: Received null file_c pointer!\n");
+	}
+
+	raw_wad_header_t header;
+	raw_wad_entry_t *curinfo;
+
+	int oldlumps = numlumps;
+
+	startlump = numlumps;
+
+	// WAD file
+	// TODO: handle Read failure
+    file->Read(&header, sizeof(raw_wad_header_t));
+
+	header.num_entries = EPI_LE_S32(header.num_entries);
+	header.dir_start = EPI_LE_S32(header.dir_start);
+
+	length = header.num_entries * sizeof(raw_wad_entry_t);
+
+    raw_wad_entry_t *fileinfo = new raw_wad_entry_t[header.num_entries];
+
+    file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
+	// TODO: handle Read failure
+    file->Read(fileinfo, length);
+
+	// Fill in lumpinfo
+	numlumps += header.num_entries;
+
+	for (j=startlump, curinfo=fileinfo; j < numlumps; j++,curinfo++)
+	{
+		if (strncmp("XGLNODES", curinfo->name, 8) == 0)
+		{
+			xgl_nodes_found = true;
+			break;
+		}
+	}
+
+	numlumps = oldlumps;
+
+	delete[] fileinfo;
+	delete file;
+	return xgl_nodes_found;
+}
+
 //
 // CheckForLevel
 //
@@ -988,16 +1044,23 @@ static bool FindCacheFilename (std::string& out_name,
 	I_Debugf("FindCacheFilename: has_local=%s  has_cache=%s\n",
 		has_local ? "YES" : "NO", has_cache ? "YES" : "NO");
 
-
 	if (has_local)
 	{
-		out_name = local_name;
-		return true;
+		if (W_CheckForXGLNodes(local_name))
+		{
+			out_name = local_name;
+			return true;
+		}
 	}
 	else if (has_cache)
 	{
-		out_name = cache_name;
-		return true;
+		if (W_CheckForXGLNodes(cache_name))
+		{
+			out_name = cache_name;
+			return true;
+		}
+		else
+			epi::FS_Delete(cache_name.c_str());
 	}
 
 	// Neither is valid so create one in the cached directory
@@ -1021,6 +1084,8 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 	{
 		I_Error("W_CheckForUniqueLumps: Received null file_c pointer!\n");
 	}
+
+	int oldlumps = numlumps;
 
 	startlump = numlumps;
 
@@ -1056,6 +1121,7 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 			lump2_found = true;
 	}
 
+	numlumps = oldlumps;
 	delete[] fileinfo;
 	file->Seek(0, epi::file_c::SEEKPOINT_START);
 	return (lump1_found && lump2_found);
@@ -1299,7 +1365,6 @@ void W_BuildNodes(void)
 
 				if (! AJ_BuildNodes(df->file_name, gwa_filename.c_str()))
 					I_Error("Failed to build GL nodes for: %s\n", df->file_name);
-
 			}
 
 			// Load it.  This recursion bit is rather sneaky,

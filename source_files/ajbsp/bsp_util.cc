@@ -472,37 +472,6 @@ void DetectOverlappingVertices(void)
 	}
 }
 
-
-void PruneVerticesAtEnd(void)
-{
-	int new_num = num_vertices;
-
-	// scan all vertices.
-	// only remove from the end, so stop when hit a used one.
-
-	for (int i = num_vertices - 1 ; i >= 0 ; i--)
-	{
-		vertex_t *V = lev_vertices[i];
-
-		if (V->is_used)
-			break;
-
-		UtilFree(V);
-
-		new_num -= 1;
-	}
-
-	if (new_num < num_vertices)
-	{
-		int unused = num_vertices - new_num;
-
-		num_vertices = new_num;
-	}
-
-	num_old_vert = num_vertices;
-}
-
-
 static inline int LineVertexLowest(const linedef_t *L)
 {
 	// returns the "lowest" vertex (normally the left-most, but if the
@@ -704,48 +673,6 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 
 	return vert;
 }
-
-
-vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
-{
-	// this is only called when rounding off the BSP tree and
-	// all the segs are degenerate (zero length), hence we need
-	// to create at least one seg which won't be zero length.
-
-	double dx = end->x - start->x;
-	double dy = end->y - start->y;
-
-	double dlen = UtilComputeDist(dx, dy);
-
-	vertex_t *vert = NewVertex();
-
-	vert->is_new  = 0;
-	vert->is_used = 1;
-
-	vert->index = num_old_vert;
-	num_old_vert++;
-
-	// compute new coordinates
-
-	vert->x = start->x;
-	vert->y = start->x;
-
-	if (dlen == 0)
-		BugError("NewVertexDegenerate: bad delta!\n");
-
-	dx /= dlen;
-	dy /= dlen;
-
-	while (I_ROUND(vert->x) == I_ROUND(start->x) &&
-		   I_ROUND(vert->y) == I_ROUND(start->y))
-	{
-		vert->x += dx;
-		vert->y += dy;
-	}
-
-	return vert;
-}
-
 
 sector_t * VertexCheckOpen(vertex_t *vert, double dx, double dy)
 {

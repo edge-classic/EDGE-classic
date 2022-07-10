@@ -378,9 +378,6 @@ bool lev_force_v5;
 
 bool lev_long_name;
 
-int lev_overflows;
-
-
 #define LEVELARRAY(TYPE, BASEVAR, NUMVAR)  \
 	TYPE ** BASEVAR = NULL;  \
 	int NUMVAR = 0;
@@ -904,35 +901,6 @@ void GetLinedefsHexen(void)
 	}
 }
 
-
-static inline int VanillaSegDist(const seg_t *seg)
-{
-	double lx = seg->side ? seg->linedef->end->x : seg->linedef->start->x;
-	double ly = seg->side ? seg->linedef->end->y : seg->linedef->start->y;
-
-	// use the "true" starting coord (as stored in the wad)
-	double sx = I_ROUND(seg->start->x);
-	double sy = I_ROUND(seg->start->y);
-
-	return (int) floor(UtilComputeDist(sx - lx, sy - ly) + 0.5);
-}
-
-static inline int VanillaSegAngle(const seg_t *seg)
-{
-	// compute the "true" delta
-	double dx = I_ROUND(seg->end->x) - I_ROUND(seg->start->x);
-	double dy = I_ROUND(seg->end->y) - I_ROUND(seg->start->y);
-
-	double angle = UtilComputeAngle(dx, dy);
-
-	if (angle < 0)
-		angle += 360.0;
-
-	int result = (int) floor(angle * 65536.0 / 360.0 + 0.5);
-
-	return (result & 0xFFFF);
-}
-
 static int SegCompare(const void *p1, const void *p2)
 {
 	const seg_t *A = ((const seg_t **) p1)[0];
@@ -947,114 +915,7 @@ static int SegCompare(const void *p1, const void *p2)
 	return (A->index - B->index);
 }
 
-
 /* ----- writing routines ------------------------------ */
-
-static const u8_t *lev_v2_magic = (u8_t *) "gNd2";
-static const u8_t *lev_v5_magic = (u8_t *) "gNd5";
-
-
-void MarkOverflow(int flags)
-{
-	// flags are ignored
-
-	lev_overflows++;
-}
-
-
-void PutVertices(const char *name, int do_gl)
-{
-	int count, i;
-
-	// this size is worst-case scenario
-	int size = num_vertices * (int)sizeof(raw_vertex_t);
-
-	Lump_c *lump = CreateLevelLump(name, size);
-
-	for (i=0, count=0 ; i < num_vertices ; i++)
-	{
-		raw_vertex_t raw;
-
-		vertex_t *vert = lev_vertices[i];
-
-		if ((do_gl ? 1 : 0) != (vert->is_new ? 1 : 0))
-		{
-			continue;
-		}
-
-		raw.x = LE_S16(I_ROUND(vert->x));
-		raw.y = LE_S16(I_ROUND(vert->y));
-
-		lump->Write(&raw, sizeof(raw));
-
-		count++;
-	}
-
-	if (count != (do_gl ? num_new_vert : num_old_vert))
-		BugError(StringPrintf("PutVertices miscounted (%d != %d)\n", count,
-				do_gl ? num_new_vert : num_old_vert));
-
-	if (! do_gl && count > 65534)
-	{
-		Failure("Number of vertices has overflowed.\n");
-		MarkOverflow(LIMIT_VERTEXES);
-	}
-}
-
-
-void PutGLVertices(int do_v5)
-{
-	int count, i;
-
-	// this size is worst-case scenario
-	int size = 4 + num_vertices * (int)sizeof(raw_v2_vertex_t);
-
-	Lump_c *lump = CreateLevelLump("GL_VERT", size);
-
-	if (do_v5)
-		lump->Write(lev_v5_magic, 4);
-	else
-		lump->Write(lev_v2_magic, 4);
-
-	for (i=0, count=0 ; i < num_vertices ; i++)
-	{
-		raw_v2_vertex_t raw;
-
-		vertex_t *vert = lev_vertices[i];
-
-		if (! vert->is_new)
-			continue;
-
-		raw.x = LE_S32((int)(vert->x * 65536.0));
-		raw.y = LE_S32((int)(vert->y * 65536.0));
-
-		lump->Write(&raw, sizeof(raw));
-
-		count++;
-	}
-
-	if (count != num_new_vert)
-		BugError(StringPrintf("PutGLVertices miscounted (%d != %d)\n", count, num_new_vert));
-}
-
-
-static inline u16_t VertexIndex16Bit(const vertex_t *v)
-{
-	if (v->is_new)
-		return (u16_t) (v->index | 0x8000U);
-
-	return (u16_t) v->index;
-}
-
-
-static inline u32_t VertexIndex_V5(const vertex_t *v)
-{
-	if (v->is_new)
-		return (u32_t) (v->index | 0x80000000U);
-
-	return (u32_t) v->index;
-}
-
 
 static inline u32_t VertexIndex_XNOD(const vertex_t *v)
 {
@@ -1064,392 +925,25 @@ static inline u32_t VertexIndex_XNOD(const vertex_t *v)
 	return (u32_t) v->index;
 }
 
-
-void PutSegs(void)
-{
-	int i, count;
-
-	// this size is worst-case scenario
-	int size = num_segs * (int)sizeof(raw_seg_t);
-
-	Lump_c *lump = CreateLevelLump("SEGS", size);
-
-	for (i=0, count=0 ; i < num_segs ; i++)
-	{
-		raw_seg_t raw;
-
-		seg_t *seg = segs[i];
-
-		// ignore minisegs and degenerate segs
-		if (! seg->linedef || seg->is_degenerate)
-			continue;
-
-		raw.start   = LE_U16(VertexIndex16Bit(seg->start));
-		raw.end     = LE_U16(VertexIndex16Bit(seg->end));
-		raw.angle   = LE_U16(VanillaSegAngle(seg));
-		raw.linedef = LE_U16(seg->linedef->index);
-		raw.flip    = LE_U16(seg->side);
-		raw.dist    = LE_U16(VanillaSegDist(seg));
-
-		lump->Write(&raw, sizeof(raw));
-
-		count++;
-
-#   if DEBUG_BSP
-		DebugPrintf("PUT SEG: %04X  Vert %04X->%04X  Line %04X %s  "
-				"Angle %04X  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index,
-				LE_U16(raw.start), LE_U16(raw.end), LE_U16(raw.linedef),
-				seg->side ? "L" : "R", LE_U16(raw.angle),
-				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
-#   endif
-	}
-
-	if (count != num_complete_seg)
-		BugError(StringPrintf("PutSegs miscounted (%d != %d)\n", count,
-				num_complete_seg));
-
-	if (count > 65534)
-	{
-		Failure("Number of segs has overflowed.\n");
-		MarkOverflow(LIMIT_SEGS);
-	}
-}
-
-
-void PutGLSegs(void)
-{
-	int i, count;
-
-	// this size is worst-case scenario
-	int size = num_segs * (int)sizeof(raw_gl_seg_t);
-
-	Lump_c *lump = CreateLevelLump("GL_SEGS", size);
-
-	for (i=0, count=0 ; i < num_segs ; i++)
-	{
-		raw_gl_seg_t raw;
-
-		seg_t *seg = segs[i];
-
-		// ignore degenerate segs
-		if (seg->is_degenerate)
-			continue;
-
-		raw.start = LE_U16(VertexIndex16Bit(seg->start));
-		raw.end   = LE_U16(VertexIndex16Bit(seg->end));
-		raw.side  = LE_U16(seg->side);
-
-		if (seg->linedef)
-			raw.linedef = LE_U16(seg->linedef->index);
-		else
-			raw.linedef = LE_U16(0xFFFF);
-
-		if (seg->partner)
-			raw.partner = LE_U16(seg->partner->index);
-		else
-			raw.partner = LE_U16(0xFFFF);
-
-		lump->Write(&raw, sizeof(raw));
-
-		count++;
-
-#   if DEBUG_BSP
-		DebugPrintf("PUT GL SEG: %04X  Line %04X %s  Partner %04X  "
-				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, LE_U16(raw.linedef),
-				seg->side ? "L" : "R", LE_U16(raw.partner),
-				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
-#   endif
-	}
-
-	if (count != num_complete_seg)
-		BugError(StringPrintf("PutGLSegs miscounted (%d != %d)\n", count,
-				num_complete_seg));
-
-	if (count > 65534)
-		BugError(StringPrintf("PutGLSegs with %d (> 65534) segs\n", count));
-}
-
-
-void PutGLSegs_V5()
-{
-	int i, count;
-
-	// this size is worst-case scenario
-	int size = num_segs * (int)sizeof(raw_v5_seg_t);
-
-	Lump_c *lump = CreateLevelLump("GL_SEGS", size);
-
-	for (i=0, count=0 ; i < num_segs ; i++)
-	{
-		raw_v5_seg_t raw;
-
-		seg_t *seg = segs[i];
-
-		// ignore degenerate segs
-		if (seg->is_degenerate)
-			continue;
-
-		raw.start = LE_U32(VertexIndex_V5(seg->start));
-		raw.end   = LE_U32(VertexIndex_V5(seg->end));
-
-		raw.side  = LE_U16(seg->side);
-
-		if (seg->linedef)
-			raw.linedef = LE_U16(seg->linedef->index);
-		else
-			raw.linedef = LE_U16(0xFFFF);
-
-		if (seg->partner)
-			raw.partner = LE_U32(seg->partner->index);
-		else
-			raw.partner = LE_U32(0xFFFFFFFF);
-
-		lump->Write(&raw, sizeof(raw));
-
-		count++;
-
-#   if DEBUG_BSP
-		DebugPrintf("PUT V3 SEG: %06X  Line %04X %s  Partner %06X  "
-				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, LE_U16(raw.linedef),
-				seg->side ? "L" : "R", LE_U32(raw.partner),
-				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
-#   endif
-	}
-
-	if (count != num_complete_seg)
-		BugError(StringPrintf("PutGLSegs miscounted (%d != %d)\n", count,
-				num_complete_seg));
-}
-
-
-void PutSubsecs(const char *name, int do_gl)
-{
-	int i;
-
-	int size = num_subsecs * (int)sizeof(raw_subsec_t);
-
-	Lump_c * lump = CreateLevelLump(name, size);
-
-	for (i=0 ; i < num_subsecs ; i++)
-	{
-		raw_subsec_t raw;
-
-		subsec_t *sub = subsecs[i];
-
-		raw.first = LE_U16(sub->seg_list->index);
-		raw.num   = LE_U16(sub->seg_count);
-
-		lump->Write(&raw, sizeof(raw));
-
-#   if DEBUG_BSP
-		DebugPrintf("PUT SUBSEC %04X  First %04X  Num %04X\n",
-				sub->index, LE_U16(raw.first), LE_U16(raw.num));
-#   endif
-	}
-
-	if (num_subsecs > 32767)
-	{
-		Failure("Number of GL subsectors has overflowed.\n");
-		MarkOverflow(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
-	}
-}
-
-
-void PutGLSubsecs_V5()
-{
-	int i;
-
-	int size = num_subsecs * (int)sizeof(raw_v5_subsec_t);
-
-	Lump_c *lump = CreateLevelLump("GL_SSECT", size);
-
-	for (i=0 ; i < num_subsecs ; i++)
-	{
-		raw_v5_subsec_t raw;
-
-		subsec_t *sub = subsecs[i];
-
-		raw.first = LE_U32(sub->seg_list->index);
-		raw.num   = LE_U32(sub->seg_count);
-
-		lump->Write(&raw, sizeof(raw));
-
-#   if DEBUG_BSP
-		DebugPrintf("PUT V3 SUBSEC %06X  First %06X  Num %06X\n",
-					sub->index, LE_U32(raw.first), LE_U32(raw.num));
-#   endif
-	}
-}
-
-
 static int node_cur_index;
-
-static void PutOneNode(node_t *node, Lump_c *lump)
-{
-	raw_node_t raw;
-
-	if (node->r.node)
-		PutOneNode(node->r.node, lump);
-
-	if (node->l.node)
-		PutOneNode(node->l.node, lump);
-
-	node->index = node_cur_index++;
-
-	// Note that x/y/dx/dy are always integral in non-UDMF maps
-	raw.x  = LE_S16(I_ROUND(node->x));
-	raw.y  = LE_S16(I_ROUND(node->y));
-	raw.dx = LE_S16(I_ROUND(node->dx));
-	raw.dy = LE_S16(I_ROUND(node->dy));
-
-	raw.b1.minx = LE_S16(node->r.bounds.minx);
-	raw.b1.miny = LE_S16(node->r.bounds.miny);
-	raw.b1.maxx = LE_S16(node->r.bounds.maxx);
-	raw.b1.maxy = LE_S16(node->r.bounds.maxy);
-
-	raw.b2.minx = LE_S16(node->l.bounds.minx);
-	raw.b2.miny = LE_S16(node->l.bounds.miny);
-	raw.b2.maxx = LE_S16(node->l.bounds.maxx);
-	raw.b2.maxy = LE_S16(node->l.bounds.maxy);
-
-	if (node->r.node)
-		raw.right = LE_U16(node->r.node->index);
-	else if (node->r.subsec)
-		raw.right = LE_U16(node->r.subsec->index | 0x8000);
-	else
-		BugError(StringPrintf("Bad right child in node %d\n", node->index));
-
-	if (node->l.node)
-		raw.left = LE_U16(node->l.node->index);
-	else if (node->l.subsec)
-		raw.left = LE_U16(node->l.subsec->index | 0x8000);
-	else
-		BugError(StringPrintf("Bad left child in node %d\n", node->index));
-
-	lump->Write(&raw, sizeof(raw));
-
-# if DEBUG_BSP
-	DebugPrintf("PUT NODE %04X  Left %04X  Right %04X  "
-			"(%d,%d) -> (%d,%d)\n", node->index, LE_U16(raw.left),
-			LE_U16(raw.right), node->x, node->y,
-			node->x + node->dx, node->y + node->dy);
-# endif
-}
-
-
-static void PutOneNode_V5(node_t *node, Lump_c *lump)
-{
-	raw_v5_node_t raw;
-
-	if (node->r.node)
-		PutOneNode_V5(node->r.node, lump);
-
-	if (node->l.node)
-		PutOneNode_V5(node->l.node, lump);
-
-	node->index = node_cur_index++;
-
-	raw.x  = LE_S16(I_ROUND(node->x));
-	raw.y  = LE_S16(I_ROUND(node->y));
-	raw.dx = LE_S16(I_ROUND(node->dx));
-	raw.dy = LE_S16(I_ROUND(node->dy));
-
-	raw.b1.minx = LE_S16(node->r.bounds.minx);
-	raw.b1.miny = LE_S16(node->r.bounds.miny);
-	raw.b1.maxx = LE_S16(node->r.bounds.maxx);
-	raw.b1.maxy = LE_S16(node->r.bounds.maxy);
-
-	raw.b2.minx = LE_S16(node->l.bounds.minx);
-	raw.b2.miny = LE_S16(node->l.bounds.miny);
-	raw.b2.maxx = LE_S16(node->l.bounds.maxx);
-	raw.b2.maxy = LE_S16(node->l.bounds.maxy);
-
-	if (node->r.node)
-		raw.right = LE_U32(node->r.node->index);
-	else if (node->r.subsec)
-		raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
-	else
-		BugError(StringPrintf("Bad right child in V5 node %d\n", node->index));
-
-	if (node->l.node)
-		raw.left = LE_U32(node->l.node->index);
-	else if (node->l.subsec)
-		raw.left = LE_U32(node->l.subsec->index | 0x80000000U);
-	else
-		BugError(StringPrintf("Bad left child in V5 node %d\n", node->index));
-
-	lump->Write(&raw, sizeof(raw));
-
-# if DEBUG_BSP
-	DebugPrintf("PUT V5 NODE %08X  Left %08X  Right %08X  "
-			"(%d,%d) -> (%d,%d)\n", node->index, LE_U32(raw.left),
-			LE_U32(raw.right), node->x, node->y,
-			node->x + node->dx, node->y + node->dy);
-# endif
-}
-
-
-void PutNodes(const char *name, int do_v5, node_t *root)
-{
-	int struct_size = do_v5 ? (int)sizeof(raw_v5_node_t) : (int)sizeof(raw_node_t);
-
-	// this can be bigger than the actual size, but never smaller
-	int max_size = (num_nodes + 1) * struct_size;
-
-	Lump_c *lump = CreateLevelLump(name, max_size);
-
-	node_cur_index = 0;
-
-	if (root)
-	{
-		if (do_v5)
-			PutOneNode_V5(root, lump);
-		else
-			PutOneNode(root, lump);
-	}
-
-	if (node_cur_index != num_nodes)
-		BugError(StringPrintf("PutNodes miscounted (%d != %d)\n",
-				node_cur_index, num_nodes));
-
-	if (!do_v5 && node_cur_index > 32767)
-	{
-		Failure("Number of nodes has overflowed.\n");
-		MarkOverflow(LIMIT_NODES);
-	}
-}
-
 
 void CheckLimits()
 {
 	if (num_sectors > 65534)
 	{
-		Failure("Map has too many sectors.\n");
-		MarkOverflow(LIMIT_SECTORS);
+		FatalError(StringPrintf("AJBSP: %s in file %s has too many sectors! (%d)", lev_current_name, FindBaseName(edit_wad->PathName()), num_sectors));
 	}
 
 	if (num_sidedefs > 65534)
 	{
-		Failure("Map has too many sidedefs.\n");
-		MarkOverflow(LIMIT_SIDEDEFS);
+		FatalError(StringPrintf("AJBSP: %s in file %s has too many sidedefs! (%d)", lev_current_name, FindBaseName(edit_wad->PathName()), num_sidedefs));
 	}
 
 	if (num_linedefs > 65534)
 	{
-		Failure("Map has too many linedefs.\n");
-		MarkOverflow(LIMIT_LINEDEFS);
-	}
-
-	if (num_old_vert > 32767 ||
-		num_new_vert > 32767 ||
-		num_segs > 65534 ||
-		num_nodes > 32767)
-	{
-		Warning("Forcing V5 of GL-Nodes due to overflows.\n");
-		lev_force_v5 = true;
+		FatalError(StringPrintf("AJBSP: %s in file %s has too many linedefs (%d)", lev_current_name, FindBaseName(edit_wad->PathName()), num_linedefs));
 	}
 }
-
 
 void SortSegs()
 {
@@ -1457,20 +951,19 @@ void SortSegs()
 	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
 }
 
-
 /* ----- ZDoom format writing --------------------------- */
 
 static const u8_t *lev_XGL3_magic = (u8_t *) "XGL3";
 
-void PutZVertices(void)
+void PutXGL3Vertices(void)
 {
 	int count, i;
 
 	u32_t orgverts = LE_U32(num_old_vert);
 	u32_t newverts = LE_U32(num_new_vert);
 
-	ZLibAppendLump(&orgverts, 4);
-	ZLibAppendLump(&newverts, 4);
+	XGL3AppendLump(&orgverts, 4);
+	XGL3AppendLump(&newverts, 4);
 
 	for (i=0, count=0 ; i < num_vertices ; i++)
 	{
@@ -1484,18 +977,18 @@ void PutZVertices(void)
 		raw.x = LE_S32(I_ROUND(vert->x * 65536.0));
 		raw.y = LE_S32(I_ROUND(vert->y * 65536.0));
 
-		ZLibAppendLump(&raw, sizeof(raw));
+		XGL3AppendLump(&raw, sizeof(raw));
 
 		count++;
 	}
 
 	if (count != num_new_vert)
-		BugError(StringPrintf("PutZVertices miscounted (%d != %d)\n",
+		BugError(StringPrintf("PutXGL3Vertices miscounted (%d != %d)\n",
 				count, num_new_vert));
 }
 
 
-void PutZSubsecs(void)
+void PutXGL3Subsecs(void)
 {
 	int i;
 	int count;
@@ -1503,7 +996,7 @@ void PutZSubsecs(void)
 
 	int cur_seg_index = 0;
 
-	ZLibAppendLump(&raw_num, 4);
+	XGL3AppendLump(&raw_num, 4);
 
 	for (i=0 ; i < num_subsecs ; i++)
 	{
@@ -1512,30 +1005,26 @@ void PutZSubsecs(void)
 
 		raw_num = LE_U32(sub->seg_count);
 
-		ZLibAppendLump(&raw_num, 4);
+		XGL3AppendLump(&raw_num, 4);
 
 		// sanity check the seg index values
 		count = 0;
 		for (seg = sub->seg_list ; seg ; seg = seg->next, cur_seg_index++)
 		{
-			// ignore minisegs and degenerate segs
-			//if (! seg->linedef || seg->is_degenerate)
-				//continue;
-
 			if (cur_seg_index != seg->index)
-				BugError(StringPrintf("PutZSubsecs: seg index mismatch in sub %d (%d != %d)\n",
+				BugError(StringPrintf("PutXGL3Subsecs: seg index mismatch in sub %d (%d != %d)\n",
 						i, cur_seg_index, seg->index));
 
 			count++;
 		}
 
 		if (count != sub->seg_count)
-			BugError(StringPrintf("PutZSubsecs: miscounted segs in sub %d (%d != %d)\n",
+			BugError(StringPrintf("PutXGL3Subsecs: miscounted segs in sub %d (%d != %d)\n",
 					i, count, sub->seg_count));
 	}
 
 	if (cur_seg_index != num_complete_seg)
-		BugError(StringPrintf("PutZSubsecs miscounted segs (%d != %d)\n",
+		BugError(StringPrintf("PutXGL3Subsecs miscounted segs (%d != %d)\n",
 				cur_seg_index, num_complete_seg));
 }
 
@@ -1544,7 +1033,7 @@ void PutXGL3Segs()
 	int i, count;
 	u32_t raw_num = LE_U32(num_segs);
 
-	ZLibAppendLump(&raw_num, 4);
+	XGL3AppendLump(&raw_num, 4);
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
@@ -1563,10 +1052,10 @@ void PutXGL3Segs()
 # if DEBUG_BSP
 			fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);
 # endif
-			ZLibAppendLump(&v1,      4);
-			ZLibAppendLump(&partner, 4);
-			ZLibAppendLump(&line,    4);
-			ZLibAppendLump(&side,    1);
+			XGL3AppendLump(&v1,      4);
+			XGL3AppendLump(&partner, 4);
+			XGL3AppendLump(&line,    4);
+			XGL3AppendLump(&side,    1);
 		}
 
 		count++;
@@ -1576,15 +1065,15 @@ void PutXGL3Segs()
 		BugError(StringPrintf("PutXGL3Segs miscounted (%d != %d)\n", count, num_segs));
 }
 
-static void PutOneZNode(node_t *node)
+static void PutOneXGL3Node(node_t *node)
 {
 	raw_v5_node_t raw;
 
 	if (node->r.node)
-		PutOneZNode(node->r.node);
+		PutOneXGL3Node(node->r.node);
 
 	if (node->l.node)
-		PutOneZNode(node->l.node);
+		PutOneXGL3Node(node->l.node);
 
 	node->index = node_cur_index++;
 
@@ -1593,10 +1082,10 @@ static void PutOneZNode(node_t *node)
 	u32_t dx = LE_S32(I_ROUND(node->dx * 65536.0));
 	u32_t dy = LE_S32(I_ROUND(node->dy * 65536.0));
 
-	ZLibAppendLump(&x,  4);
-	ZLibAppendLump(&y,  4);
-	ZLibAppendLump(&dx, 4);
-	ZLibAppendLump(&dy, 4);
+	XGL3AppendLump(&x,  4);
+	XGL3AppendLump(&y,  4);
+	XGL3AppendLump(&dx, 4);
+	XGL3AppendLump(&dy, 4);
 
 	raw.b1.minx = LE_S16(node->r.bounds.minx);
 	raw.b1.miny = LE_S16(node->r.bounds.miny);
@@ -1608,25 +1097,25 @@ static void PutOneZNode(node_t *node)
 	raw.b2.maxx = LE_S16(node->l.bounds.maxx);
 	raw.b2.maxy = LE_S16(node->l.bounds.maxy);
 
-	ZLibAppendLump(&raw.b1, sizeof(raw.b1));
-	ZLibAppendLump(&raw.b2, sizeof(raw.b2));
+	XGL3AppendLump(&raw.b1, sizeof(raw.b1));
+	XGL3AppendLump(&raw.b2, sizeof(raw.b2));
 
 	if (node->r.node)
 		raw.right = LE_U32(node->r.node->index);
 	else if (node->r.subsec)
 		raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
 	else
-		BugError(StringPrintf("Bad right child in V5 node %d\n", node->index));
+		BugError(StringPrintf("Bad right child in node %d\n", node->index));
 
 	if (node->l.node)
 		raw.left = LE_U32(node->l.node->index);
 	else if (node->l.subsec)
 		raw.left = LE_U32(node->l.subsec->index | 0x80000000U);
 	else
-		BugError(StringPrintf("Bad left child in V5 node %d\n", node->index));
+		BugError(StringPrintf("Bad left child in node %d\n", node->index));
 
-	ZLibAppendLump(&raw.right, 4);
-	ZLibAppendLump(&raw.left,  4);
+	XGL3AppendLump(&raw.right, 4);
+	XGL3AppendLump(&raw.left,  4);
 
 # if DEBUG_BSP
 	DebugPrintf("PUT Z NODE %08X  Left %08X  Right %08X  "
@@ -1637,55 +1126,38 @@ static void PutOneZNode(node_t *node)
 }
 
 
-void PutZNodes(node_t *root)
+void PutXGL3Nodes(node_t *root)
 {
 	u32_t raw_num = LE_U32(num_nodes);
 
-	ZLibAppendLump(&raw_num, 4);
+	XGL3AppendLump(&raw_num, 4);
 
 	node_cur_index = 0;
 
 	if (root)
-		PutOneZNode(root);
+		PutOneXGL3Node(root);
 
 	if (node_cur_index != num_nodes)
 		BugError(StringPrintf("PutZNodes miscounted (%d != %d)\n",
 				node_cur_index, num_nodes));
 }
 
-
-static int CalcZDoomNodesSize()
-{
-	// compute size of the ZDoom format nodes.
-	// it does not need to be exact, but it *does* need to be bigger
-	// (or equal) to the actual size of the lump.
-
-	int size = 32;  // header + a bit extra
-
-	size += 8 + num_vertices * 8;
-	size += 4 + num_subsecs  * 4;
-	size += 4 + num_complete_seg * 11;
-	size += 4 + num_nodes    * sizeof(raw_v5_node_t);
-
-	return size;
-}
-
 void SaveXGL3Format(node_t *root_node)
 {
 	// WISH : compute a max_size
 
-	Lump_c *lump = CreateLevelLump("ZNODES", -1);
+	Lump_c *lump = CreateLevelLump("XGLNODES", -1);
 
 	lump->Write(lev_XGL3_magic, 4);
 
-	ZLibBeginLump(lump);
+	XGL3BeginLump(lump);
 
-	PutZVertices();
-	PutZSubsecs();
+	PutXGL3Vertices();
+	PutXGL3Subsecs();
 	PutXGL3Segs();
-	PutZNodes(root_node);
+	PutXGL3Nodes(root_node);
 
-	ZLibFinishLump();
+	XGL3FinishLump();
 }
 
 /* ----- whole-level routines --------------------------- */
@@ -1695,7 +1167,6 @@ void LoadLevel()
 	Lump_c *LEV = edit_wad->GetLump(lev_current_start);
 
 	lev_current_name = LEV->Name();
-	lev_overflows = 0;
 
 	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
 	lev_doing_hexen = (FindLevelLump("BEHAVIOR") != NULL);
@@ -1784,11 +1255,6 @@ void LoadLevel()
 
 	PrintDetail(StringPrintf("%s: Level Loaded...\n", lev_current_name));
 
-	// always prune vertices at end of lump, otherwise all the
-	// unused vertices from seg splits would keep accumulating.
-	// Non-UDMF only? Need to test - Dasho
-	PruneVerticesAtEnd();
-
 	DetectOverlappingVertices();
 	DetectOverlappingLines();
 
@@ -1854,7 +1320,6 @@ static u32_t CalcGLChecksum(void)
 	return crc;
 }
 
-
 static const char *CalcOptionsString()
 {
 	static char buffer[256];
@@ -1914,70 +1379,11 @@ static void AddMissingLump(const char *name, const char *after)
 	edit_wad->AddLump(name)->Finish();
 }
 
-
 build_result_e SaveLevel(node_t *root_node)
 {
-	// Note: root_node may be NULL
-	gwa_wad->BeginWrite();
+	if (Level_format != MAPF_UDMF)
+		CheckLimits();
 
-	// check for overflows...
-
-	CheckLimits();
-
-	/* --- GL Nodes --- */
-
-	Lump_c * gl_marker = NULL;
-
-	if (num_real_lines > 0)
-	{
-		SortSegs();
-
-		// create empty marker now, flesh it out later
-		gl_marker = CreateGLMarker();
-
-		PutGLVertices(lev_force_v5);
-
-		if (lev_force_v5)
-			PutGLSegs_V5();
-		else
-			PutGLSegs();
-
-		if (lev_force_v5)
-			PutGLSubsecs_V5();
-		else
-			PutSubsecs("GL_SSECT", true);
-
-		PutNodes("GL_NODES", lev_force_v5, root_node);
-
-		// -JL- Add empty PVS lump
-		CreateLevelLump("GL_PVS")->Finish();
-	}
-
-	// keyword support (v5.0 of the specs).
-	// must be done *after* doing normal nodes, for proper checksum.
-	if (gl_marker)
-	{
-		UpdateGLMarker(gl_marker);
-	}
-
-	gwa_wad->EndWrite();
-
-	if (lev_overflows > 0)
-	{
-		cur_info->total_failed_maps++;
-
-		// no message here
-		// [ in verbose mode, each overflow already printed a message ]
-		// [ in normal mode, we don't want any messages at all ]
-
-		return BUILD_LumpOverflow;
-	}
-
-	return BUILD_OK;
-}
-
-build_result_e SaveUDMF(node_t *root_node)
-{
 	gwa_wad->BeginWrite();
 
 	Lump_c * gl_marker = NULL;
@@ -1998,35 +1404,27 @@ build_result_e SaveUDMF(node_t *root_node)
 
 	gwa_wad->EndWrite();
 
-	if (lev_overflows > 0)
-	{
-		cur_info->total_failed_maps++;
-		PrintMsg(StringPrintf("FAILED with %d overflowed lumps\n", lev_overflows));
-
-		return BUILD_LumpOverflow;
-	}
-
 	return BUILD_OK;
 }
 
 //----------------------------------------------------------------------
 
-static Lump_c  *zout_lump;
+static Lump_c  *xgl3_lump;
 
-void ZLibBeginLump(Lump_c *lump)
+void XGL3BeginLump(Lump_c *lump)
 {
-	zout_lump = lump;
+	xgl3_lump = lump;
 }
 
-void ZLibAppendLump(const void *data, int length)
+void XGL3AppendLump(const void *data, int length)
 {
-	zout_lump->Write(data, length);
+	xgl3_lump->Write(data, length);
 	return;
 }
 
-void ZLibFinishLump(void)
+void XGL3FinishLump(void)
 {
-	zout_lump = NULL;
+	xgl3_lump = NULL;
 	return;
 }
 
@@ -2056,20 +1454,14 @@ Lump_c * CreateGLMarker()
 
 	if (strlen(lev_current_name) <= 5)
 	{
-		if (Level_format == MAPF_UDMF)
-			sprintf(name_buf, "ZN_%s", lev_current_name);
-		else
-			sprintf(name_buf, "GL_%s", lev_current_name);
+		sprintf(name_buf, "XG_%s", lev_current_name);
 
 		lev_long_name = false;
 	}
 	else
 	{
 		// support for level names longer than 5 letters
-		if (Level_format == MAPF_UDMF)
-			strcpy(name_buf, "ZN_LEVEL");
-		else
-			strcpy(name_buf, "GL_LEVEL");
+		strcpy(name_buf, "XG_LEVEL");
 
 		lev_long_name = true;
 	}
@@ -2132,10 +1524,7 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 	{
 		ClockwiseBspTree();
 
-		if (Level_format == MAPF_UDMF)
-			ret = SaveUDMF(root_node);
-		else
-			ret = SaveLevel(root_node);
+		SaveLevel(root_node);
 	}
 	else
 	{

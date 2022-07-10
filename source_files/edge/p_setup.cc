@@ -120,7 +120,6 @@ epi::crc32_c mapthing_CRC;
 int mapthing_NUM;
 
 static bool hexen_level;
-static bool v5_nodes;
 
 // a place to store sidedef numbers of the loaded linedefs.
 // There is two values for every line: side0 and side1.
@@ -195,91 +194,11 @@ static void LoadVertexes(int lump)
 	W_DoneWithLump(data);
 }
 
-static void LoadV2Vertexes(const byte *data, int length)
-{
-	int i;
-	const raw_v2_vertex_t *ml2;
-	vec2_t *vert;
-
-	num_gl_vertexes = length / sizeof(raw_v2_vertex_t);
-
-	gl_vertexes = new vec2_t[num_gl_vertexes];
-
-	ml2 = (const raw_v2_vertex_t *) data;
-	vert = gl_vertexes;
-
-	// Copy and convert vertex coordinates,
-	for (i = 0; i < num_gl_vertexes; i++, vert++, ml2++)
-	{
-		vert->x = (float)EPI_LE_S32(ml2->x) / 65536.0f;
-		vert->y = (float)EPI_LE_S32(ml2->y) / 65536.0f;
-	}
-}
-
-
-static void LoadGLVertexes(int lump)
-{
-	const byte *data;
-	int i, length;
-	const raw_vertex_t *ml;
-	vec2_t *vert;
-
-	if (!W_VerifyLumpName(lump, "GL_VERT"))
-		I_Error("Bad WAD: level %s missing GL_VERT.\n", currmap->lump.c_str());
-
-	// Load data into cache.
-	data = (byte *) W_CacheLumpNum(lump);
-
-	length = W_LumpLength(lump);
-
-	// Handle v2.0 of "GL Node" specs (fixed point vertices)
-	if (length >= 4 &&
-		data[0] == 'g' && data[1] == 'N' &&
-		data[2] == 'd' && (data[3] == '2' || data[3] == '5'))
-	{
-		if (data[3] == '5')
-			v5_nodes = true;
-
-		LoadV2Vertexes(data + 4, length - 4);
-		W_DoneWithLump(data);
-		return;
-	}
-
-	// check for non-compliant format
-	if (length >= 4 &&
-		data[0] == 'g' && data[1] == 'N' &&
-		data[2] == 'd' && data[3] == '4')
-	{
-		I_Error("V4 Nodes not supported, please rebuild nodes with AJBSP.\n");
-	}
-
-	// Determine number of vertices:
-	//  total lump length / vertex record length.
-	num_gl_vertexes = length / sizeof(raw_vertex_t);
-
-	gl_vertexes = new vec2_t[num_gl_vertexes];
-
-	ml = (const raw_vertex_t *) data;
-	vert = gl_vertexes;
-
-	// Copy and convert vertex coordinates,
-	// Internal representation is float.
-	for (i = 0; i < num_gl_vertexes; i++, vert++, ml++)
-	{
-		vert->x = EPI_LE_S16(ml->x);
-		vert->y = EPI_LE_S16(ml->y);
-	}
-
-	// Free buffer memory.
-	W_DoneWithLump(data);
-}
-
-
-static void SegCommonStuff(seg_t *seg, int linedef  )
+static void SegCommonStuff(seg_t *seg, int linedef)
 {
 	seg->frontsector = seg->backsector = NULL;
 
-	if (linedef == 0xFFFF)
+	if (linedef == -1)
 	{
 		seg->miniseg = true;
 	}
@@ -311,331 +230,6 @@ static void SegCommonStuff(seg_t *seg, int linedef  )
 				seg->backsector = other->sector;
 		}
 	}
-}
-
-static void LoadV3Segs(const byte *data, int length)
-{
-	numsegs = length / sizeof(raw_v3_seg_t);
-
-	if (numsegs == 0)
-		I_Error("Bad WAD: level %s contains 0 gl-segs (v3).\n",
-			currmap->lump.c_str());
-
-	segs = new seg_t[numsegs];
-
-	Z_Clear(segs, seg_t, numsegs);
-
-	// check both V3 and V5 bits
-	unsigned int VERTEX_V3_OR_V5 = SF_GL_VERTEX_V3 | SF_GL_VERTEX_V5;
-
-	seg_t *seg = segs;
-	const raw_v3_seg_t *ml = (const raw_v3_seg_t *) data;
-
-	for (int i = 0; i < numsegs; i++, seg++, ml++)
-	{
-		unsigned int v1num = EPI_LE_U32(ml->start);
-		unsigned int v2num = EPI_LE_U32(ml->end);
-
-		// FIXME: check if indices are valid
-		if (v1num & VERTEX_V3_OR_V5)
-			seg->v1 = &gl_vertexes[v1num & ~VERTEX_V3_OR_V5];
-		else
-			seg->v1 = &vertexes[v1num];
-
-		if (v2num & VERTEX_V3_OR_V5)
-			seg->v2 = &gl_vertexes[v2num & ~VERTEX_V3_OR_V5];
-		else
-			seg->v2 = &vertexes[v2num];
-
-		seg->angle  = R_PointToAngle(seg->v1->x, seg->v1->y,
-			seg->v2->x, seg->v2->y);
-
-		seg->length = R_PointToDist(seg->v1->x, seg->v1->y,
-			seg->v2->x, seg->v2->y);
-
-		seg->side = ml->side ? 1 : 0;
-
-		int linedef = EPI_LE_U16(ml->linedef);
-
-		SegCommonStuff(seg, linedef  );
-
-		int partner = EPI_LE_S32(ml->partner);
-
-		if (partner == -1)
-			seg->partner = NULL;
-		else
-		{
-			SYS_ASSERT(partner < numsegs);  // sanity check
-			seg->partner = &segs[partner];
-		}
-
-		// The following fields are filled out elsewhere:
-		//     sub_next, front_sub, back_sub, frontsector, backsector.
-
-		seg->sub_next = SEG_INVALID;
-		seg->front_sub = seg->back_sub = SUB_INVALID;
-	}
-}
-
-static void LoadGLSegs(int lump)
-{
-	SYS_ASSERT(lump < 0x10000);  // sanity check
-
-	if (! W_VerifyLumpName(lump, "GL_SEGS"))
-		I_Error("Bad WAD: level %s missing GL_SEGS.\n", currmap->lump.c_str());
-
-	const byte *data = (byte *) W_CacheLumpNum(lump);
-
-	int length = W_LumpLength(lump);
-
-	// Handle v3.0 of "GL Node" specs (new GL_SEGS format)
-	if (length >= 4 &&
-		data[0] == 'g' && data[1] == 'N' &&
-		data[2] == 'd' && data[3] == '3')
-	{
-		LoadV3Segs(data + 4, length - 4);
-		W_DoneWithLump(data);
-		return;
-	}
-
-	if (v5_nodes)
-	{
-		LoadV3Segs(data, length);
-		W_DoneWithLump(data);
-		return;
-	}
-
-	numsegs = length / sizeof(raw_gl_seg_t);
-
-	if (numsegs == 0)
-		I_Error("Bad WAD: level %s contains 0 gl-segs.\n", currmap->lump.c_str());
-
-	segs = new seg_t[numsegs];
-
-	Z_Clear(segs, seg_t, numsegs);
-
-	seg_t *seg = segs;
-	const raw_gl_seg_t *ml = (const raw_gl_seg_t *) data;
-
-	for (int i = 0; i < numsegs; i++, seg++, ml++)
-	{
-		int v1num = EPI_LE_U16(ml->start);
-		int v2num = EPI_LE_U16(ml->end);
-
-		// FIXME: check if indices are valid, abort loading
-
-		if (v1num & SF_GL_VERTEX)
-		{
-			SYS_ASSERT((v1num & ~SF_GL_VERTEX) < num_gl_vertexes);  // sanity check
-			seg->v1 = &gl_vertexes[v1num & ~SF_GL_VERTEX];
-		}
-		else
-		{
-			SYS_ASSERT(v1num < numvertexes);  // sanity check
-			seg->v1 = &vertexes[v1num];
-		}
-
-		if (v2num & SF_GL_VERTEX)
-		{
-			SYS_ASSERT((v2num & ~SF_GL_VERTEX) < num_gl_vertexes);  // sanity check
-			seg->v2 = &gl_vertexes[v2num & ~SF_GL_VERTEX];
-		}
-		else
-		{
-			SYS_ASSERT(v2num < numvertexes);  // sanity check
-			seg->v2 = &vertexes[v2num];
-		}
-
-		seg->angle  = R_PointToAngle(seg->v1->x, seg->v1->y,
-			seg->v2->x, seg->v2->y);
-
-		seg->length = R_PointToDist(seg->v1->x, seg->v1->y,
-			seg->v2->x, seg->v2->y);
-
-		seg->side = EPI_LE_U16(ml->side);
-
-		int linedef = EPI_LE_U16(ml->linedef);
-
-		SegCommonStuff(seg, linedef  );
-
-		int partner = EPI_LE_U16(ml->partner);
-
-		if (partner == 0xFFFF)
-			seg->partner = NULL;
-		else
-		{
-			SYS_ASSERT(partner < numsegs);  // sanity check
-			seg->partner = &segs[partner];
-		}
-
-		// The following fields are filled out elsewhere:
-		//     sub_next, front_sub, back_sub, frontsector, backsector.
-
-		seg->sub_next = SEG_INVALID;
-		seg->front_sub = seg->back_sub = SUB_INVALID;
-	}
-
-	W_DoneWithLump(data);
-}
-
-
-static void LoadV3Subsectors(const byte *data, int length)
-{
-	int i, j;
-	const raw_v3_subsec_t *ms;
-	subsector_t *ss;
-
-	numsubsectors = length / sizeof(raw_v3_subsec_t);
-
-	if (numsubsectors == 0)
-		I_Error("Bad WAD: level %s contains 0 ssectors (v3).\n",
-			currmap->lump.c_str());
-
-	subsectors = new subsector_t[numsubsectors];
-
-	Z_Clear(subsectors, subsector_t, numsubsectors);
-
-	ms = (const raw_v3_subsec_t *) data;
-	ss = subsectors;
-
-	for (i = 0; i < numsubsectors; i++, ss++, ms++)
-	{
-		int countsegs = EPI_LE_S32(ms->num);
-		int firstseg  = EPI_LE_S32(ms->first);
-
-		// -AJA- 1999/09/23: New linked list for the segs of a subsector
-		//       (part of true bsp rendering).
-		seg_t **prevptr = &ss->segs;
-
-		if (countsegs == 0 || firstseg == -1 || firstseg+countsegs > numsegs)
-			I_Error("Bad WAD: level %s has invalid SSECTORS (V3).\n",
-				currmap->lump.c_str());
-
-		ss->sector = NULL;
-		ss->thinglist = NULL;
-
-		// this is updated when the nodes are loaded
-		ss->bbox = dummy_bbox;
-
-		for (j = 0; j < countsegs; j++)
-		{
-			seg_t *cur = &segs[firstseg + j];
-
-			*prevptr = cur;
-			prevptr = &cur->sub_next;
-
-			cur->front_sub = ss;
-			cur->back_sub = NULL;
-
-			if (!ss->sector && !cur->miniseg)
-				ss->sector = cur->sidedef->sector;
-		}
-
-		if (ss->sector == NULL)
-			I_Error("Bad WAD: level %s has crazy SSECTORS (V3).\n",
-				currmap->lump.c_str());
-
-		*prevptr = NULL;
-
-		// link subsector into parent sector's list.
-		// order is not important, so add it to the head of the list.
-
-		ss->sec_next = ss->sector->subsectors;
-		ss->sector->subsectors = ss;
-	}
-}
-
-static void LoadSubsectors(int lump, const char *name)
-{
-	int i, j;
-	int length;
-	const byte *data;
-	const raw_subsec_t *ms;
-	subsector_t *ss;
-
-	if (! W_VerifyLumpName(lump, name))
-		I_Error("Bad WAD: level %s missing %s.\n", currmap->lump.c_str(), name);
-
-	// Load data into cache.
-	data = (byte *) W_CacheLumpNum(lump);
-
-	length = W_LumpLength(lump);
-
-	// Handle v3.0 of "GL Node" specs (new GL_SSECT format)
-	if (W_LumpLength(lump) >= 4 &&
-		data[0] == 'g' && data[1] == 'N' &&
-		data[2] == 'd' && data[3] == '3')
-	{
-		LoadV3Subsectors(data + 4, length - 4);
-		W_DoneWithLump(data);
-		return;
-	}
-
-	if (v5_nodes)
-	{
-		LoadV3Subsectors(data, length);
-		W_DoneWithLump(data);
-		return;
-	}
-
-	numsubsectors = length / sizeof(raw_subsec_t);
-
-	if (numsubsectors == 0)
-		I_Error("Bad WAD: level %s contains 0 ssectors.\n", currmap->lump.c_str());
-
-	subsectors = new subsector_t[numsubsectors];
-
-	Z_Clear(subsectors, subsector_t, numsubsectors);
-
-	ms = (const raw_subsec_t *) data;
-	ss = subsectors;
-
-	for (i = 0; i < numsubsectors; i++, ss++, ms++)
-	{
-		int countsegs = EPI_LE_U16(ms->num);
-		int firstseg  = EPI_LE_U16(ms->first);
-
-		// -AJA- 1999/09/23: New linked list for the segs of a subsector
-		//       (part of true bsp rendering).
-		seg_t **prevptr = &ss->segs;
-
-		if (countsegs == 0 || firstseg == 0xFFFF || firstseg+countsegs > numsegs)
-			I_Error("Bad WAD: level %s has invalid SSECTORS.\n", currmap->lump.c_str());
-
-		ss->sector = NULL;
-		ss->thinglist = NULL;
-
-		// this is updated when the nodes are loaded
-		ss->bbox = dummy_bbox;
-
-		for (j = 0; j < countsegs; j++)
-		{
-			seg_t *cur = &segs[firstseg + j];
-
-			*prevptr = cur;
-			prevptr = &cur->sub_next;
-
-			cur->front_sub = ss;
-			cur->back_sub = NULL;
-
-			if (!ss->sector && !cur->miniseg)
-				ss->sector = cur->sidedef->sector;
-		}
-
-		if (ss->sector == NULL)
-			I_Error("Bad WAD: level %s has crazy SSECTORS.\n",
-				currmap->lump.c_str());
-
-		*prevptr = NULL;
-
-		// link subsector into parent sector's list.
-		// order is not important, so add it to the head of the list.
-
-		ss->sec_next = ss->sector->subsectors;
-		ss->sector->subsectors = ss;
-	}
-
-	W_DoneWithLump(data);
 }
 
 //
@@ -783,118 +377,6 @@ static void SetupRootNode(void)
 		}
 	}
 }
-
-
-static void LoadV5Nodes(const void *data, int length)
-{
-	int i, j;
-	const raw_v5_node_t *mn;
-	node_t *nd;
-
-	numnodes = length / sizeof(raw_v5_node_t);
-
-	nodes = new node_t[numnodes+1];
-		
-	Z_Clear(nodes, node_t, numnodes);
-
-	mn = (const raw_v5_node_t *) data;
-	nd = nodes;
-
-	for (i = 0; i < numnodes; i++, nd++, mn++)
-	{
-		nd->div.x  = EPI_LE_S16(mn->x);
-		nd->div.y  = EPI_LE_S16(mn->y);
-		nd->div.dx = EPI_LE_S16(mn->dx);
-		nd->div.dy = EPI_LE_S16(mn->dy);
-
-		nd->div_len = R_PointToDist(0, 0, nd->div.dx, nd->div.dy);
-
-		for (j = 0; j < 2; j++)
-		{
-			nd->children[j] = EPI_LE_U32(mn->children[j]);
-
-			nd->bbox[j][BOXTOP]    = (float) EPI_LE_S16(mn->bbox[j].maxy);
-			nd->bbox[j][BOXBOTTOM] = (float) EPI_LE_S16(mn->bbox[j].miny);
-			nd->bbox[j][BOXLEFT]   = (float) EPI_LE_S16(mn->bbox[j].minx);
-			nd->bbox[j][BOXRIGHT]  = (float) EPI_LE_S16(mn->bbox[j].maxx);
-
-			// update bbox pointers in subsector
-			if (nd->children[j] & NF_V5_SUBSECTOR)
-			{
-				subsector_t *ss = subsectors + (nd->children[j] & ~NF_V5_SUBSECTOR);
-				ss->bbox = &nd->bbox[j][0];
-			}
-		}
-	}
-
-	SetupRootNode();
-}
-
-
-static void LoadNodes(int lump, const char *name)
-{
-	int i, j;
-	const raw_node_t *mn;
-	node_t *nd;
-
-	if (! W_VerifyLumpName(lump, name))
-		I_Error("Bad WAD: level %s missing %s.\n", 
-				currmap->lump.c_str(), name);
-
-	// Note: zero numnodes is valid.
-	int length = W_LumpLength(lump);
-	const void *data = W_CacheLumpNum(lump);
-
-	if (v5_nodes)
-	{
-		LoadV5Nodes(data, length);
-		W_DoneWithLump(data);
-		return;
-	}
-
-	numnodes = length / sizeof(raw_node_t);
-
-	nodes = new node_t[numnodes+1];
-		
-	Z_Clear(nodes, node_t, numnodes);
-
-	mn = (const raw_node_t *) data;
-	nd = nodes;
-
-	for (i = 0; i < numnodes; i++, nd++, mn++)
-	{
-		nd->div.x  = EPI_LE_S16(mn->x);
-		nd->div.y  = EPI_LE_S16(mn->y);
-		nd->div.dx = EPI_LE_S16(mn->dx);
-		nd->div.dy = EPI_LE_S16(mn->dy);
-
-		nd->div_len = R_PointToDist(0, 0, nd->div.dx, nd->div.dy);
-
-		for (j = 0; j < 2; j++)
-		{
-			nd->children[j] = EPI_LE_U16(mn->children[j]);
-
-			nd->bbox[j][BOXTOP]    = (float) EPI_LE_S16(mn->bbox[j].maxy);
-			nd->bbox[j][BOXBOTTOM] = (float) EPI_LE_S16(mn->bbox[j].miny);
-			nd->bbox[j][BOXLEFT]   = (float) EPI_LE_S16(mn->bbox[j].minx);
-			nd->bbox[j][BOXRIGHT]  = (float) EPI_LE_S16(mn->bbox[j].maxx);
-
-			// change to correct bit, and update bbox pointers
-			if (nd->children[j] & NF_SUBSECTOR)
-			{
-				nd->children[j] = NF_V5_SUBSECTOR | (nd->children[j] & ~NF_SUBSECTOR);
-
-				subsector_t *ss = subsectors + (nd->children[j] & ~NF_V5_SUBSECTOR);
-				ss->bbox = &nd->bbox[j][0];
-			}
-		}
-	}
-
-	W_DoneWithLump(data);
-
-	SetupRootNode();
-}
-
 
 static std::map<int, int> unknown_thing_map;
 
@@ -1379,6 +861,268 @@ static void LoadHexenLineDefs(int lump)
 	W_DoneWithLump(data);
 }
 
+// Adapted from EDGE 2.x's ZNode loading routine; only handles XGL3 as that is all
+// our built-in AJBSP produces now
+static void LoadXGL3Nodes(int lumpnum)
+{
+	int i, xglumpnum = 0, xglen = 0;
+	byte *xgldata;
+
+	I_Debugf("LoadXGL3Nodes:\n");
+
+	if (W_VerifyLumpName(lumpnum, "XGLNODES"))
+		xglumpnum = lumpnum;
+	else
+		I_Error("LoadXGL3Nodes: Couldn't find XGLNODES lump\n");
+
+	xglen = W_LumpLength(xglumpnum);
+	xgldata = (byte *)W_CacheLumpNum(xglumpnum);
+	if (!xgldata)
+		I_Error("LoadXGL3Nodes: Couldn't load XGLNODES lump\n");
+
+	if (xglen < 12)
+	{
+		W_DoneWithLump(xgldata);
+		I_Error("LoadXGL3Nodes: XGLNODES lump too short\n");
+	}
+
+	if(!memcmp(xgldata, "XGL3", 4))
+		I_Debugf(" AJBSP uncompressed GL nodes v3\n");
+	else
+	{
+		static char xgltemp[6];
+		Z_StrNCpy(xgltemp, (char *)xgldata, 4);
+		W_DoneWithLump(xgldata);
+		I_Error("LoadXGL3Nodes: Unrecognized node type %s\n", xgltemp);
+	}
+
+	byte *td = &xgldata[4];
+
+	// after signature, 1st u32 is number of original vertexes - should be <= numvertexes
+	int oVerts = EPI_LE_U32(*(uint32_t*)td);
+	td += 4;
+	if (oVerts > numvertexes)
+	{
+		W_DoneWithLump(xgldata);
+		I_Error("LoadXGL3Nodes: Vertex/Node mismatch\n");
+	}
+
+	// 2nd u32 is the number of extra vertexes added by ajbsp
+	int nVerts = EPI_LE_U32(*(uint32_t*)td);
+	td += 4;
+	I_Debugf("LoadXGL3Nodes: Orig Verts = %d, New Verts = %d, Map Verts = %d\n", oVerts, nVerts, numvertexes);
+
+	gl_vertexes = new vec2_t[nVerts];
+	num_gl_vertexes = nVerts;
+
+	// fill in new vertexes
+	vec2_t *vv = gl_vertexes;
+	for (i=0; i<nVerts; i++, vv++)
+	{
+		// convert signed 16.16 fixed point to float
+		vv->x = (float)EPI_LE_S32(*(int *)td) / 65536.0f;
+		td += 4;
+		vv->y = (float)EPI_LE_S32(*(int *)td) / 65536.0f;
+		td += 4;
+	}
+
+	// new vertexes is followed by the subsectors
+	numsubsectors = EPI_LE_S32(*(int *)td);
+	td += 4;
+	if (numsubsectors <= 0)
+	{
+		W_DoneWithLump(xgldata);
+		I_Error("LoadXGL3Nodes: No subsectors\n");
+	}
+	I_Debugf("LoadXGL3Nodes: Num SSECTORS = %d\n", numsubsectors);
+
+	subsectors = new subsector_t[numsubsectors];
+	Z_Clear(subsectors, subsector_t, numsubsectors);
+
+	int *ss_temp = new int[numsubsectors];
+	int xglSegs = 0;
+	for (i=0; i<numsubsectors; i++)
+	{
+		int countsegs = EPI_LE_S32(*(int*)td);
+		td += 4;
+		ss_temp[i] = countsegs;
+		xglSegs += countsegs;
+	}
+
+	// subsectors are followed by the segs
+	numsegs = EPI_LE_S32(*(int *)td);
+	td += 4;
+	if (numsegs != xglSegs)
+	{
+		W_DoneWithLump(xgldata);
+		I_Error("LoadXGL3Nodes: Incorrect number of segs in nodes\n");
+	}
+	I_Debugf("LoadXGL3Nodes: Num SEGS = %d\n", numsegs);
+
+	segs = new seg_t[numsegs];
+	Z_Clear(segs, seg_t, numsegs);
+	seg_t *seg = segs;
+
+	for (i = 0; i < numsegs; i++, seg++)
+	{
+		unsigned int v1num;
+		int linedef, partner, side;
+
+		v1num = EPI_LE_U32(*(uint32_t*)td);
+		td += 4;
+		partner = EPI_LE_S32(*(int32_t*)td);
+		td += 4;
+		linedef = EPI_LE_S32(*(int32_t*)td);
+		td += 4;
+		side = (int)(*td);
+		td += 1;
+
+		if (v1num < (uint32_t)numvertexes)
+			seg->v1 = &vertexes[v1num];
+		else
+			seg->v1 = &gl_vertexes[v1num - numvertexes];
+
+		seg->side = side ? 1 : 0;
+
+		if (partner == -1)
+			seg->partner = NULL;
+		else
+		{
+			SYS_ASSERT(partner < numsegs);  // sanity check
+			seg->partner = &segs[partner];
+		}
+
+		SegCommonStuff(seg, linedef);
+
+		// The following fields are filled out elsewhere:
+		//     sub_next, front_sub, back_sub, frontsector, backsector.
+
+		seg->sub_next = SEG_INVALID;
+		seg->front_sub = seg->back_sub = SUB_INVALID;
+	}
+
+	I_Debugf("LoadXGL3Nodes: Post-process subsectors\n");
+	// go back and fill in subsectors
+	subsector_t *ss = subsectors;
+	xglSegs = 0;
+	for (i=0; i<numsubsectors; i++, ss++)
+	{
+		int countsegs = ss_temp[i];
+		int firstseg  = xglSegs;
+		xglSegs += countsegs;
+
+		// go back and fill in v2 from v1 of next seg and do calcs that needed both
+		seg = &segs[firstseg];
+		for (int j = 0; j < countsegs; j++, seg++)
+		{
+			seg->v2 = j == (countsegs - 1) ? segs[firstseg].v1 : segs[firstseg + j + 1].v1;
+
+			seg->angle  = R_PointToAngle(seg->v1->x, seg->v1->y,
+				seg->v2->x, seg->v2->y);
+
+			seg->length = R_PointToDist(seg->v1->x, seg->v1->y,
+				seg->v2->x, seg->v2->y);
+		}
+
+		// -AJA- 1999/09/23: New linked list for the segs of a subsector
+		//       (part of true bsp rendering).
+		seg_t **prevptr = &ss->segs;
+
+		if (countsegs == 0)
+			I_Error("LoadXGL3Nodes: level %s has invalid SSECTORS.\n", currmap->lump.c_str());
+
+		ss->sector = NULL;
+		ss->thinglist = NULL;
+
+		// this is updated when the nodes are loaded
+		ss->bbox = dummy_bbox;
+
+		for (int j = 0; j < countsegs; j++)
+		{
+			seg_t *cur = &segs[firstseg + j];
+
+			*prevptr = cur;
+			prevptr = &cur->sub_next;
+
+			cur->front_sub = ss;
+			cur->back_sub = NULL;
+
+			if (!ss->sector && !cur->miniseg)
+				ss->sector = cur->sidedef->sector;
+
+			//I_Debugf("  ssec = %d, seg = %d\n", i, firstseg + j);
+		}
+		//I_Debugf("LoadZNodes: ssec = %d, fseg = %d, cseg = %d\n", i, firstseg, countsegs);
+
+		if (ss->sector == NULL)
+			I_Error("Bad WAD: level %s has crazy SSECTORS.\n",
+				currmap->lump.c_str());
+
+		*prevptr = NULL;
+
+		// link subsector into parent sector's list.
+		// order is not important, so add it to the head of the list.
+
+		ss->sec_next = ss->sector->subsectors;
+		ss->sector->subsectors = ss;
+	}
+	delete [] ss_temp; //CA 9.30.18: allocated with new but released using delete, added [] between delete and ss_temp
+
+	I_Debugf("LoadXGL3Nodes: Read GL nodes\n");
+	// finally, read the nodes
+	numnodes = EPI_LE_U32(*(uint32_t*)td);
+	td += 4;
+	if (numnodes == 0)
+	{
+		W_DoneWithLump(xgldata);
+		I_Error("LoadXGL3Nodes: No nodes\n");
+	}
+	I_Debugf("LoadXGL3Nodes: Num nodes = %d\n", numnodes);
+
+	nodes = new node_t[numnodes+1];
+	Z_Clear(nodes, node_t, numnodes);
+	node_t *nd = nodes;
+
+	for (i=0; i<numnodes; i++, nd++)
+	{
+		nd->div.x  = (float)EPI_LE_S32(*(int*)td) / 65536.0f;
+		td += 4;
+		nd->div.y  = (float)EPI_LE_S32(*(int*)td) / 65536.0f;
+		td += 4;
+		nd->div.dx = (float)EPI_LE_S32(*(int*)td) / 65536.0f;
+		td += 4;
+		nd->div.dy = (float)EPI_LE_S32(*(int*)td) / 65536.0f;
+		td += 4;
+
+		nd->div_len = R_PointToDist(0, 0, nd->div.dx, nd->div.dy);
+
+		for (int j=0; j<2; j++)
+			for (int k=0; k<4; k++)
+			{
+				nd->bbox[j][k] = (float)EPI_LE_S16(*(int16_t*)td);
+				td += 2;
+			}
+
+		for (int j=0; j<2; j++)
+		{
+			nd->children[j] = EPI_LE_U32(*(uint32_t*)td);
+			td += 4;
+
+			// update bbox pointers in subsector
+			if (nd->children[j] & NF_V5_SUBSECTOR)
+			{
+				subsector_t *ss = subsectors + (nd->children[j] & ~NF_V5_SUBSECTOR);
+				ss->bbox = &nd->bbox[j][0];
+			}
+		}
+	}
+
+	I_Debugf("LoadXGL3Nodes: Setup root node\n");
+	SetupRootNode();
+
+	I_Debugf("LoadXGL3Nodes: Finished\n");
+	W_DoneWithLump(xgldata);
+}
 
 static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd,
 							   bool two_sided)
@@ -2171,7 +1915,8 @@ void P_SetupLevel(void)
 	lumpnum = W_GetNumForName(currmap->lump);
 
 	// -AJA- 1999/12/20: Support for "GL-Friendly Nodes".
-	sprintf(gl_lumpname, "GL_%s", currmap->lump.c_str());
+	// Dasho - Changed to XG for our specific XGL3 nodes
+	sprintf(gl_lumpname, "XG_%s", currmap->lump.c_str());
 	gl_lumpnum = W_CheckNumForName(gl_lumpname);
 
 	// ignore GL info if the level marker occurs _before_ the normal
@@ -2218,9 +1963,6 @@ void P_SetupLevel(void)
 
 #undef SHOWLUMPNAME
 #endif
-
-	v5_nodes = false;
-
 	// check if the level is for Hexen
 	hexen_level = false;
 
@@ -2259,10 +2001,7 @@ void P_SetupLevel(void)
 
 	SYS_ASSERT(gl_lumpnum >= 0);
 
-	LoadGLVertexes(gl_lumpnum + ML_GL_VERT);
-	LoadGLSegs(gl_lumpnum + ML_GL_SEGS);
-	LoadSubsectors(gl_lumpnum + ML_GL_SSECT, "GL_SSECT");
-	LoadNodes(gl_lumpnum + ML_GL_NODES, "GL_NODES");
+	LoadXGL3Nodes(gl_lumpnum + 1);
 
 	// REJECT is ignored
 

@@ -80,9 +80,6 @@ typedef enum
 
 	// the WAD file was corrupt / empty / bad filename
 	BUILD_BadFile,
-
-	// when saving the map, one or more lumps overflowed
-	BUILD_LumpOverflow
 }
 build_result_e;
 
@@ -543,25 +540,9 @@ Lump_c * CreateGLMarker();
 Lump_c * CreateLevelLump(const char *name, int max_size = -1);
 Lump_c * FindLevelLump(const char *name);
 
-void ZLibBeginLump(Lump_c *lump);
-void ZLibAppendLump(const void *data, int length);
-void ZLibFinishLump(void);
-
-/* limit flags, to show what went wrong */
-#define LIMIT_VERTEXES     0x000001
-#define LIMIT_SECTORS      0x000002
-#define LIMIT_SIDEDEFS     0x000004
-#define LIMIT_LINEDEFS     0x000008
-
-#define LIMIT_SEGS         0x000010
-#define LIMIT_SSECTORS     0x000020
-#define LIMIT_NODES        0x000040
-
-#define LIMIT_GL_VERT      0x000100
-#define LIMIT_GL_SEGS      0x000200
-#define LIMIT_GL_SSECT     0x000400
-#define LIMIT_GL_NODES     0x000800
-
+void XGL3BeginLump(Lump_c *lump);
+void XGL3AppendLump(const void *data, int length);
+void XGL3FinishLump(void);
 
 //------------------------------------------------------------------------
 // ANALYZE : Analyzing level structures
@@ -573,9 +554,6 @@ void DetectOverlappingVertices(void);
 void DetectOverlappingLines(void);
 void DetectPolyobjSectors(void);
 
-// pruning routines
-void PruneVerticesAtEnd(void);
-
 // computes the wall tips for all of the vertices
 void CalculateWallTips(void);
 
@@ -583,13 +561,6 @@ void CalculateWallTips(void);
 // happens along the given seg at the given location.
 //
 vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y);
-
-// return a new end vertex to compensate for a seg that would end up
-// being zero-length (after integer rounding).  Doesn't compute the
-// wall_tip info (thus this routine should only be used _after_ node
-// building).
-//
-vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end);
 
 // check whether a line with the given delta coordinates and beginning
 // at this vertex is open.  Returns a sector reference if it's open,
@@ -736,18 +707,6 @@ int ComputeBspHeight(node_t *node);
 //   in the wrong place order-wise. ]
 //
 void ClockwiseBspTree();
-
-// traverse the BSP tree and do whatever is necessary to convert the
-// node information from GL standard to normal standard (for example,
-// removing minisegs).
-//
-void NormaliseBspTree();
-
-// traverse the BSP tree, doing whatever is necessary to round
-// vertices to integer coordinates (for example, removing segs whose
-// rounded coordinates degenerate to the same point).
-//
-void RoundOffBspTree();
 
 // free all the superblocks on the quick-alloc list
 void FreeQuickAllocSupers(void);

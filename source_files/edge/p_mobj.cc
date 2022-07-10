@@ -1743,6 +1743,8 @@ void P_SpawnBlood(float x, float y, float z, float damage,
 flatdef_c* P_IsThingOnLiquidFloor(mobj_t * thing)
 {
     flatdef_c *current_flatdef;
+	current_flatdef = NULL;
+
 	// If no 3D floors, just return the flat
     if (thing->subsector->sector->exfloor_used == 0)
     {
@@ -1770,7 +1772,7 @@ flatdef_c* P_IsThingOnLiquidFloor(mobj_t * thing)
 	
 	
 	
-	if (!current_flatdef)
+	if (! current_flatdef)
 		return NULL;
 	
 	if (current_flatdef->impactobject) //now check if it is has a splash object
@@ -1788,15 +1790,16 @@ flatdef_c* P_IsThingOnLiquidFloor(mobj_t * thing)
 
 int P_HitFloor(mobj_t * thing)
 {
-    mobj_t *mo;
-
-    if (thing->floorz != thing->subsector->sector->f_h)
-    {                           // don't splash if landing on the edge above water/lava/etc....
-        return (1);
-    }
-
 	if (thing->flags & MF_FLOAT)
-		return 1;
+		return (1);
+
+	// marked as not making splashes (e.g. a leaf)
+	if (thing->hyperflags & HF_NOSPLASH)
+		return (1);
+
+	// don't splash if landing on the edge above water/lava/etc....
+    if (thing->floorz != thing->subsector->sector->f_h)
+    	return (1);
 
 	flatdef_c *current_flatdef = P_IsThingOnLiquidFloor(thing);
 

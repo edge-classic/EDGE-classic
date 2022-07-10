@@ -687,8 +687,8 @@ static bool PIT_CheckRelThing(mobj_t * thing, void *data)
 		return !solid;
 	}
 	
-	if (thing->hyperflags & HF_PUSHY)
-    {                           // Push thing
+	if (thing->hyperflags & HF_SHOVEABLE)
+    {                           // Shoveable thing
 		float ThrustSpeed = 8;
 		P_PushMobj(thing, tm_I.mover, ThrustSpeed);
 		//return false;

@@ -1710,9 +1710,9 @@ static specflags_t hyper_specials[] =
 	{"TILT", HF_TILT, 0},
 	{"IMMORTAL", HF_IMMORTAL, 0},
 	{"FLOOR_CLIP", HF_FLOORCLIP, 0}, //Lobo: new FLOOR_CLIP flag
-	{"TRIGGER_LINES", HF_NOTRIGGERLINES, 1}, //Lobo: 
-	{"PUSHY", HF_PUSHY, 0}, //Lobo: can be pushed
-	{"SPLASHER", HF_SPLASHER, 0}, //Lobo: causes a splash on liquids
+	{"TRIGGER_LINES", HF_NOTRIGGERLINES, 1}, //Lobo: Cannot activate doors etc.
+	{"SHOVEABLE", HF_SHOVEABLE, 0}, //Lobo: can be pushed
+	{"SPLASH", HF_NOSPLASH, 1}, //Lobo: causes no splash on liquids
 	{NULL, 0, 0}
 };
 

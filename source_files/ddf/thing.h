@@ -303,11 +303,11 @@ typedef enum
 	// -Lobo- 2022/05/30: this thing cannot trigger lines
 	HF_NOTRIGGERLINES = (1 << 18),
 
-	// -Lobo- 2022/07/07: this thing can be pushed
-	HF_PUSHY = (1 << 19),
+	// -Lobo- 2022/07/07: this thing can be shoved/pushed
+	HF_SHOVEABLE = (1 << 19),
 
-	// -Lobo- 2022/07/07: this thing causes splashes
-	HF_SPLASHER = (1 << 20),
+	// -Lobo- 2022/07/07: this thing doesn't cause splashes
+	HF_NOSPLASH = (1 << 20),
 	
 }
 mobjhyperflag_t;

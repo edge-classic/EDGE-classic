@@ -1019,7 +1019,7 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 
 	if (file == NULL)
 	{
-		I_Error("W_CheckRawFileForLump: Received null file_c pointer!\n");
+		I_Error("W_CheckForUniqueLumps: Received null file_c pointer!\n");
 	}
 
 	startlump = numlumps;
@@ -1030,11 +1030,8 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 
 	if (strncmp(header.identification, "IWAD", 4) != 0)
 	{
-		// Homebrew levels?
-		if (strncmp(header.identification, "PWAD", 4) != 0)
-		{
-			I_Error("W_CheckRawFileForLump: Wad file doesn't have IWAD or PWAD id!\n");
-		}
+		file->Seek(0, epi::file_c::SEEKPOINT_START);
+		return false;
 	}
 
 	header.num_entries = EPI_LE_S32(header.num_entries);

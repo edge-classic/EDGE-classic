@@ -939,7 +939,7 @@ void CheckLimits()
 		FatalError(StringPrintf("AJBSP: %s in file %s has too many sidedefs! (%d)", lev_current_name, FindBaseName(edit_wad->PathName()), num_sidedefs));
 	}
 
-	if (num_linedefs > 65534)
+	if (num_linedefs > 65535)
 	{
 		FatalError(StringPrintf("AJBSP: %s in file %s has too many linedefs (%d)", lev_current_name, FindBaseName(edit_wad->PathName()), num_linedefs));
 	}
@@ -1138,7 +1138,7 @@ void PutXGL3Nodes(node_t *root)
 		PutOneXGL3Node(root);
 
 	if (node_cur_index != num_nodes)
-		BugError(StringPrintf("PutZNodes miscounted (%d != %d)\n",
+		BugError(StringPrintf("PutXGL3Nodes miscounted (%d != %d)\n",
 				node_cur_index, num_nodes));
 }
 
@@ -1161,6 +1161,26 @@ void SaveXGL3Format(node_t *root_node)
 }
 
 /* ----- whole-level routines --------------------------- */
+
+void PruneVerticesAtEnd(void)
+{
+	int new_num = num_vertices;
+
+	// scan all vertices.
+	// only remove from the end, so stop when hit a used one.
+
+	for (int i = num_vertices - 1 ; i >= 0 ; i--)
+	{
+		vertex_t *V = lev_vertices[i];
+
+		if (V->is_used)
+			break;
+
+		UtilFree(V);
+
+		num_vertices -= 1;
+	}
+}
 
 void LoadLevel()
 {
@@ -1254,6 +1274,8 @@ void LoadLevel()
 	}
 
 	PrintDetail(StringPrintf("%s: Level Loaded...\n", lev_current_name));
+
+	PruneVerticesAtEnd();
 
 	DetectOverlappingVertices();
 	DetectOverlappingLines();

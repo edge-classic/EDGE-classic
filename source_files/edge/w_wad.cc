@@ -964,13 +964,13 @@ static void CheckForLevel(data_file_c *df, int lump, const char *name,
 	}
 
 	// UDMF
-	// Commented out for now; AJBSP can now produce XGL3 ZNODES but more work is needed
+	// 1.1 Doom/Heretic namespaces supported at the moment
 
-	/*if (strncmp(raw[1].name, "TEXTMAP",  8) == 0)
+	if (strncmp(raw[1].name, "TEXTMAP",  8) == 0)
 	{
 		df->level_markers.Insert(lump);
 		return;
-	}*/
+	}
 }
 
 static void ComputeFileMD5(epi::md5hash_c& md5, epi::file_c *file)

@@ -384,7 +384,8 @@ static void UDMF_ParseThingField(thing_t *T, Udmf_Token& field, Udmf_Token& valu
 		T->arg4 = value.DecodeInt();
 	else if (field.Match("arg4"))
 		T->arg5 = value.DecodeInt();*/
-
+	else if (field.Match("skill1"))
+		T->options |= MTF_Easy;
 	else if (field.Match("skill2"))
 		T->options |= MTF_Easy;
 	else if (field.Match("skill3"))
@@ -401,11 +402,6 @@ static void UDMF_ParseThingField(thing_t *T, Udmf_Token& field, Udmf_Token& valu
 		T->options &= ~MTF_Not_COOP;
 	else if (field.Match("dm"))
 		T->options &= ~MTF_Not_DM;
-
-	else
-	{
-		DebugPrintf(StringPrintf("thing #%d: unknown field '%s'\n", T->index, field.c_str()));
-	}
 }
 
 static void UDMF_ParseVertexField(vertex_t *V, Udmf_Token& field, Udmf_Token& value)
@@ -414,10 +410,6 @@ static void UDMF_ParseVertexField(vertex_t *V, Udmf_Token& field, Udmf_Token& va
 		V->x = value.DecodeFloat();
 	else if (field.Match("y"))
 		V->y = value.DecodeFloat();
-	else
-	{
-		DebugPrintf(StringPrintf("vertex #%d: unknown field '%s'\n", V->index, field.c_str()));
-	}
 }
 
 static void UDMF_ParseLinedefField(linedef_t *LD, Udmf_Token& field, Udmf_Token& value)
@@ -480,11 +472,6 @@ static void UDMF_ParseLinedefField(linedef_t *LD, Udmf_Token& field, Udmf_Token&
 
 	else if (field.Match("passuse"))
 		LD->flags |= MLF_Boom_PassThru;
-
-	else
-	{
-		DebugPrintf(StringPrintf("linedef #%d: unknown field '%s'\n", LD->index, field.c_str()));
-	}
 }
 
 static void UDMF_ParseSidedefField(sidedef_t *SD, Udmf_Token& field, Udmf_Token& value)
@@ -505,10 +492,6 @@ static void UDMF_ParseSidedefField(sidedef_t *SD, Udmf_Token& field, Udmf_Token&
 		SD->x_offset = value.DecodeInt();
 	else if (field.Match("offsety"))
 		SD->y_offset = value.DecodeInt();
-	else
-	{
-		DebugPrintf(StringPrintf("sidedef #%d: unknown field '%s'\n", SD->index, field.c_str()));
-	}
 }
 
 static void UDMF_ParseSectorField(sector_t *S, Udmf_Token& field, Udmf_Token& value)
@@ -527,10 +510,6 @@ static void UDMF_ParseSectorField(sector_t *S, Udmf_Token& field, Udmf_Token& va
 		S->special = value.DecodeInt();
 	else if (field.Match("id"))
 		S->tag = value.DecodeInt();
-	else
-	{
-		DebugPrintf(StringPrintf("sector #%d: unknown field '%s'\n", S->index, field.c_str()));
-	}
 }
 
 static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)

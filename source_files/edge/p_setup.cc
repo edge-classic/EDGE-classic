@@ -2,7 +2,7 @@
 //  EDGE Level Loading/Setup Code
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2009  The EDGE Team.
+//  Copyright (c) 1999-2022  The EDGE-Classic Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -121,12 +121,193 @@ int mapthing_NUM;
 
 static bool hexen_level;
 
+static bool udmf_level;
+static int udmf_lumpnum;
+static char *udmf_lump;
+
 // a place to store sidedef numbers of the loaded linedefs.
 // There is two values for every line: side0 and side1.
 static int *temp_line_sides;
 
 cvar_c m_goobers;
 
+
+// UDMF parser and loading routines backported from EDGE 2.x codebase
+// with non-Vanilla namespace items removed for the time being
+typedef struct {
+	uint8_t *buffer;
+	uint8_t line[512];
+	int length;
+	int next;
+	int prev;
+} parser_t;
+
+static parser_t udmf_psr;
+
+static bool GetNextLine(parser_t *psr)
+{
+	if (psr->next >= psr->length)
+		return false; // no more lines
+
+	int i;
+	// get next line
+	psr->prev = psr->next;
+	uint8_t *lp = &psr->buffer[psr->next];
+	for (i=0; i<(psr->length - psr->next); i++, lp++)
+		if (*lp == 0x0A || *lp == 0x0D)
+			break;
+	if (i == (psr->length - psr->next))
+		lp = &psr->buffer[psr->length - 1]; // last line
+	psr->next = (int)(lp - psr->buffer) + 1;
+	memcpy(psr->line, &psr->buffer[psr->prev], MIN(511, psr->next - psr->prev - 1));
+	psr->line[MIN(511, psr->next - psr->prev) - 1] = 0;
+	// skip any more CR/LF
+	while (psr->buffer[psr->next] == 0x0A || psr->buffer[psr->next] == 0x0D)
+		psr->next++;
+
+	// check for comments
+	lp = psr->line;
+	while (lp[0] != 0 && lp[0] != 0x2F && lp[1] != 0x2F)
+		lp++; // find full line comment start (if present)
+	if (lp[0] != 0)
+	{
+		*lp = 0; // terminate at full line comment start
+	}
+	else
+	{
+		lp = psr->line;
+		while (lp[0] != 0 && lp[0] != 0x2F && lp[1] != 0x2A)
+			lp++; // find multi-line comment start (if present)
+		if (lp[0] != 0)
+		{
+			*lp = 0; // terminate at multi-line comment start
+			uint8_t *ep = &lp[2];
+			while (ep[0] != 0 && ep[0] != 0x2A && ep[1] != 0x2F)
+				ep++; // find multi-line comment end (if present)
+			if (ep[0] == 0)
+			{
+				ep = &psr->buffer[psr->next];
+				for (i=0; i<(psr->length - psr->next); i++, ep++)
+					if (ep[0] == 0x2A && ep[1] == 0x2F)
+						break;
+				if (i == (psr->length - psr->next))
+					ep = &psr->buffer[psr->length - 2];
+			}
+			psr->next = (int)(ep - psr->buffer) + 2; // skip comment for next line
+		}
+	}
+
+	//I_Debugf(" parser next line: %s\n", (char *)psr->line);
+	return true;
+}
+
+static bool GetNextAssign(parser_t *psr, uint8_t *ident, uint8_t *val)
+{
+	if (!GetNextLine(psr))
+		return false; // no more lines
+
+	int len = 0;
+	while (psr->line[len] != 0 && psr->line[len] != 0x7D)
+		len++;
+	if (psr->line[len] == 0x7D)
+	{
+		//I_Debugf(" parser: block end\n");
+		return false;
+	}
+	else if (len < 4)
+		return false; //line too short for assignment
+
+	uint8_t *lp = psr->line;
+	while (*lp != 0x3D && *lp != 0)
+		lp++; // find '='
+	if (lp[0] != 0x3D)
+		return false; // not an assignment line
+
+	*lp++ = 0; // split at assignment operator
+	int i = 0;
+	while (psr->line[i] == 0x20 || psr->line[i] == 0x09)
+		i++; // skip whitespace before indentifier
+	memcpy(ident, &psr->line[i], lp - &psr->line[i] - 1);
+	i = lp - &psr->line[i] - 2;
+	while (ident[i] == 0x20 || ident[i] == 0x09)
+		i--; // skip whitespace after identifier
+	ident[i+1] = 0;
+
+	i = 0;
+	while (lp[i] == 0x20 || lp[i] == 0x09 || lp[i] == 0x22)
+		i++; // skip whitespace and quotes before value
+	memcpy(val, &lp[i], &psr->line[len] - &lp[i]);
+	i = (int)(&psr->line[len] - &lp[i]) - 2;
+	while (val[i] == 0x20 || val[i] == 0x09 || val[i] == 0x22  || val[i] == 0x3B)
+		i--; // skip whitespace, quote, and semi-colon after value
+	val[i+1] = 0;
+
+	//I_Debugf(" parser: ident = %s, val = %s\n", (char *)ident, (char *)val);
+	return true;
+}
+
+static bool GetNextBlock(parser_t *psr, uint8_t *ident)
+{
+	if (!GetNextLine(psr))
+		return false; // no more lines
+
+	int len, i = 0;
+	while (psr->line[i] == 0x20 || psr->line[i] == 0x09)
+		i++; // skip whitespace
+blk_loop:
+	len = 0;
+	while (psr->line[len] != 0)
+		len++;
+
+	memcpy(ident, &psr->line[i], len - i);
+	i = len - i - 1;
+	while (ident[i] == 0x20 || ident[i] == 0x09)
+		i--; // skip whitespace from end of line
+	ident[i+1] = 0;
+
+	if (!GetNextLine(psr))
+		return false; // no more lines
+
+	i = 0;
+	while (psr->line[i] == 0x20 || psr->line[i] == 0x09)
+		i++; // skip whitespace before indentifier or block start
+	if (psr->line[i] != 0x7B)
+		goto blk_loop; // not a block start
+
+	//I_Debugf(" parser: block start = %s\n", ident);
+	return true;
+}
+
+static bool str2bool(char *val)
+{
+	if (strcasecmp(val, "true") == 0)
+		return true;
+
+	// default is always false
+	return false;
+}
+
+static int str2int(char *val, int def)
+{
+	int ret;
+
+	if (sscanf(val, "%d", &ret) == 1)
+		return ret;
+
+	// error - return default
+	return def;
+}
+
+static float str2float(char *val, float def)
+{
+	float ret;
+
+	if (sscanf(val, "%f", &ret) == 1)
+		return ret;
+
+	// error - return default
+	return def;
+}
 
 static void CheckEvilutionBug(byte *data, int length)
 {
@@ -726,8 +907,8 @@ static inline void ComputeLinedefData(line_t *ld, int side0, int side1)
 		ld->bbox[BOXTOP] = v1->y;
 	}
 
-	if (side0 == 0xFFFF) side0 = -1;
-	if (side1 == 0xFFFF) side1 = -1;
+	if (!udmf_level && side0 == 0xFFFF) side0 = -1;
+	if (!udmf_level && side1 == 0xFFFF) side1 = -1;
 
 	// handle missing RIGHT sidedef (idea taken from MBF)
 	if (side0 == -1)
@@ -1111,8 +1292,8 @@ static void LoadXGL3Nodes(int lumpnum)
 			// update bbox pointers in subsector
 			if (nd->children[j] & NF_V5_SUBSECTOR)
 			{
-				subsector_t *ss = subsectors + (nd->children[j] & ~NF_V5_SUBSECTOR);
-				ss->bbox = &nd->bbox[j][0];
+				subsector_t *sss = subsectors + (nd->children[j] & ~NF_V5_SUBSECTOR);
+				sss->bbox = &nd->bbox[j][0];
 			}
 		}
 	}
@@ -1122,6 +1303,788 @@ static void LoadXGL3Nodes(int lumpnum)
 
 	I_Debugf("LoadXGL3Nodes: Finished\n");
 	W_DoneWithLump(xgldata);
+}
+
+static void LoadUDMFVertexes(parser_t *psr)
+{
+	char ident[128];
+	char val[128];
+	int i = 0;
+
+	I_Debugf("LoadUDMFVertexes: parsing TEXTMAP\n");
+	numvertexes = 0;
+
+	psr->next = 0; // restart from start of lump
+	while (1)
+	{
+		if (!GetNextBlock(psr, (uint8_t*)ident))
+			break;
+
+		if (strcasecmp(ident, "vertex") == 0)
+		{
+			// count vertex blocks
+			while (1)
+			{
+				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				{
+					uint8_t *lp = psr->line;
+					while (*lp != 0 && *lp != 0x7D)
+						lp++; // find end of line or '}'
+					if (*lp == 0x7D)
+					{
+						numvertexes++;
+						break; // end of block
+					}
+					if (psr->next >= psr->length)
+					{
+						numvertexes++;
+						break; // end of lump
+					}
+
+					continue; // skip line
+				}
+			}
+		}
+	}
+
+	vertexes = new vec2_t[numvertexes];
+
+	psr->next = 0; // restart from start of lump
+	while (1)
+	{
+		if (!GetNextBlock(psr, (uint8_t*)ident))
+			break;
+
+		if (strcasecmp(ident, "vertex") == 0)
+		{
+			float x = 0.0f, y = 0.0f;
+
+			// process vertex block
+			while (1)
+			{
+				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				{
+					uint8_t *lp = psr->line;
+					while (*lp != 0 && *lp != 0x7D)
+						lp++; // find end of line or '}'
+					if (*lp == 0x7D)
+					{
+						break; // end of block
+					}
+					if (psr->next >= psr->length)
+					{
+						break; // end of lump
+					}
+
+					continue; // skip line
+				}
+				// process assignment
+				if (strcasecmp(ident, "x") == 0)
+				{
+					x = str2float(val, 0.0f);
+				}
+				else if (strcasecmp(ident, "y") == 0)
+				{
+					y = str2float(val, 0.0f);
+				}
+			}
+
+			vec2_t *vv = vertexes + i;
+			vv->x = x;
+			vv->y = y;
+
+			i++;
+		}
+	}
+
+	I_Debugf("LoadUDMFVertexes: finished parsing TEXTMAP\n");
+}
+
+static void LoadUDMFSectors(parser_t *psr)
+{
+	char ident[128];
+	char val[128];
+	int i = 0;
+
+	I_Debugf("LoadUDMFSectors: parsing TEXTMAP\n");
+	numsectors = 0;
+
+	psr->next = 0; // restart from start of lump
+	while (1)
+	{
+		if (!GetNextBlock(psr, (uint8_t*)ident))
+			break;
+
+		if (strcasecmp(ident, "sector") == 0)
+		{
+			// count sector blocks
+			while (1)
+			{
+				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				{
+					uint8_t *lp = psr->line;
+					while (*lp != 0 && *lp != 0x7D)
+						lp++; // find end of line or '}'
+					if (*lp == 0x7D)
+					{
+						numsectors++;
+						break; // end of block
+					}
+					if (psr->next >= psr->length)
+					{
+						numsectors++;
+						break; // end of lump
+					}
+
+					continue; // skip line
+				}
+			}
+		}
+	}
+
+	sectors = new sector_t[numsectors];
+	Z_Clear(sectors, sector_t, numsectors);
+
+	psr->next = 0; // restart from start of lump
+	while (1)
+	{
+		if (!GetNextBlock(psr, (uint8_t*)ident))
+			break;
+
+		if (strcasecmp(ident, "sector") == 0)
+		{
+			float cz = 0.0f, fz = 0.0f;
+			int light = 160, type = 0, tag = 0;
+			char floor_tex[10];
+			char ceil_tex[10];
+			strcpy(floor_tex, "-");
+			strcpy(ceil_tex, "-");
+
+			// process sector block
+			while (1)
+			{
+				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				{
+					uint8_t *lp = psr->line;
+					while (*lp != 0 && *lp != 0x7D)
+						lp++; // find end of line or '}'
+					if (*lp == 0x7D)
+					{
+						break; // end of block
+					}
+					if (psr->next >= psr->length)
+					{
+						break; // end of lump
+					}
+
+					continue; // skip line
+				}
+				// process assignment
+				if (strcasecmp(ident, "heightfloor") == 0)
+				{
+					fz = str2float(val, 0.0f);
+				}
+				else if (strcasecmp(ident, "heightceiling") == 0)
+				{
+					cz = str2float(val, 0.0f);
+				}
+				else if (strcasecmp(ident, "texturefloor") == 0)
+				{
+					Z_StrNCpy(floor_tex, val, 8);
+				}
+				else if (strcasecmp(ident, "textureceiling") == 0)
+				{
+					Z_StrNCpy(ceil_tex, val, 8);
+				}
+				else if (strcasecmp(ident, "lightlevel") == 0)
+				{
+					light = str2int(val, 160);
+				}
+				else if (strcasecmp(ident, "special") == 0)
+				{
+					type = str2int(val, 0);
+				}
+				else if (strcasecmp(ident, "id") == 0)
+				{
+					tag = str2int(val, 0);
+				}
+			}
+
+			sector_t *ss = sectors + i;
+
+			ss->f_h = fz;
+			ss->c_h = cz;
+
+			// return to wolfenstein?
+			if (m_goobers.d)
+			{
+				ss->f_h = 0;
+				ss->c_h = (fz == cz) ? 0 : 128.0f;
+			}
+
+			ss->floor.translucency = VISIBLE;
+			ss->floor.x_mat.x = 1;  ss->floor.x_mat.y = 0;
+			ss->floor.y_mat.x = 0;  ss->floor.y_mat.y = 1;
+
+			ss->ceil = ss->floor;
+
+			ss->floor.image = W_ImageLookup(floor_tex, INS_Flat);
+			ss->ceil.image = W_ImageLookup(ceil_tex, INS_Flat);
+
+			if (! ss->floor.image)
+			{
+				I_Warning("Bad Level: sector #%d has missing floor texture.\n", i);
+				ss->floor.image = W_ImageLookup("FLAT1", INS_Flat);
+			}
+			if (! ss->ceil.image)
+			{
+				I_Warning("Bad Level: sector #%d has missing ceiling texture.\n", i);
+				ss->ceil.image = ss->floor.image;
+			}
+
+			// convert negative tags to zero
+			ss->tag = MAX(0, tag);
+
+			ss->props.lightlevel = light;
+
+			// convert negative types to zero
+			ss->props.type = MAX(0, type);
+			ss->props.special = P_LookupSectorType(ss->props.type);
+
+			ss->exfloor_max = 0;
+
+			ss->props.colourmap = NULL;
+
+			ss->props.gravity   = GRAVITY;
+			ss->props.friction  = FRICTION;
+			ss->props.viscosity = VISCOSITY;
+			ss->props.drag      = DRAG;
+
+			ss->p = &ss->props;
+
+			ss->sound_player = -1;
+
+			// -AJA- 1999/07/29: Keep sectors with same tag in a list.
+			GroupSectorTags(ss, sectors, i);
+
+			i++;
+		}
+	}
+
+	I_Debugf("LoadUDMFSectors: finished parsing TEXTMAP\n");
+}
+
+static void LoadUDMFSideDefs(parser_t *psr)
+{
+	char ident[128];
+	char val[128];
+
+	int nummapsides = 0;
+
+	sides = new side_t[numsides];
+	Z_Clear(sides, side_t, numsides);
+
+	I_Debugf("LoadUDMFSideDefs: parsing TEXTMAP\n");
+	nummapsides = 0;
+
+	psr->next = 0; // restart from start of lump
+	while (1)
+	{
+		if (!GetNextBlock(psr, (uint8_t*)ident))
+			break;
+
+		if (strcasecmp(ident, "sidedef") == 0)
+		{
+			float x = 0, y = 0;
+			int sec_num = 0;
+			char top_tex[10];
+			char bottom_tex[10];
+			char middle_tex[10];
+			strcpy(top_tex, "-");
+			strcpy(bottom_tex, "-");
+			strcpy(middle_tex, "-");
+
+			// process sidedef block
+			while (1)
+			{
+				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				{
+					uint8_t *lp = psr->line;
+					while (*lp != 0 && *lp != 0x7D)
+						lp++; // find end of line or '}'
+					if (*lp == 0x7D)
+					{
+						nummapsides++;
+						break; // end of block
+					}
+					if (psr->next >= psr->length)
+					{
+						nummapsides++;
+						break; // end of lump
+					}
+
+					continue; // skip line
+				}
+				// process assignment
+				if (strcasecmp(ident, "offsetx") == 0)
+				{
+					x = str2float(val, 0);
+				}
+				else if (strcasecmp(ident, "offsety") == 0)
+				{
+					y = str2float(val, 0);
+				}
+				else if (strcasecmp(ident, "texturetop") == 0)
+				{
+					Z_StrNCpy(top_tex, val, 8);
+				}
+				else if (strcasecmp(ident, "texturebottom") == 0)
+				{
+					Z_StrNCpy(bottom_tex, val, 8);
+				}
+				else if (strcasecmp(ident, "texturemiddle") == 0)
+				{
+					Z_StrNCpy(middle_tex, val, 8);
+				}
+				else if (strcasecmp(ident, "sector") == 0)
+				{
+					sec_num = str2int(val, 0);
+				}
+			}
+
+			SYS_ASSERT(nummapsides <= numsides);  // sanity check
+
+			side_t *sd = sides + nummapsides - 1;
+
+			sd->top.translucency = VISIBLE;
+			sd->top.offset.x = x;
+			sd->top.offset.y = y;
+			sd->top.x_mat.x = 1;  sd->top.x_mat.y = 0;
+			sd->top.y_mat.x = 0;  sd->top.y_mat.y = 1;
+
+			sd->middle = sd->top;
+			sd->bottom = sd->top;
+
+			sd->sector = &sectors[sec_num];
+
+			sd->top.image = W_ImageLookup(top_tex, INS_Texture, ILF_Null);
+
+			if (m_goobers.d && ! sd->top.image)
+			{
+				sd->top.image = W_ImageLookup(bottom_tex, INS_Texture);
+			}
+
+			// handle air colourmaps with BOOM's [242] linetype
+			if (! sd->top.image)
+			{
+				sd->top.image = W_ImageLookup(top_tex, INS_Texture);
+				colourmap_c *cmap = colourmaps.Lookup(top_tex);
+				if (cmap) sd->sector->props.colourmap = cmap;
+			}
+
+			sd->bottom.image = W_ImageLookup(bottom_tex, INS_Texture, ILF_Null);
+
+			// handle water colourmaps with BOOM's [242] linetype
+			if (! sd->bottom.image)
+			{
+				sd->bottom.image = W_ImageLookup(bottom_tex, INS_Texture);
+				colourmap_c *cmap = colourmaps.Lookup(bottom_tex);
+				if (cmap) sd->sector->props.colourmap = cmap;
+			}
+
+			sd->middle.image = W_ImageLookup(middle_tex, INS_Texture);
+		}
+	}
+
+	I_Debugf("LoadUDMFSideDefs: post-processing linedefs & sidedefs\n");
+
+	// post-process linedefs & sidedefs
+
+	SYS_ASSERT(temp_line_sides);
+
+	side_t *sd = sides;
+
+	for (int i=0; i<numlines; i++)
+	{
+		line_t *ld = lines + i;
+
+		int side0 = temp_line_sides[i*2 + 0];
+		int side1 = temp_line_sides[i*2 + 1];
+
+		SYS_ASSERT(side0 != -1);
+
+		if (side0 >= nummapsides)
+		{
+			I_Warning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n",
+				currmap->lump.c_str(), i);
+			side0 = nummapsides-1;
+		}
+
+		if (side1 != -1 && side1 >= nummapsides)
+		{
+			I_Warning("Bad WAD: level %s linedef #%d has bad LEFT side.\n",
+				currmap->lump.c_str(), i);
+			side1 = nummapsides-1;
+		}
+
+		ld->side[0] = sd;
+		if (sd->middle.image && (side1 != -1))
+		{
+			sd->midmask_offset = sd->middle.offset.y;
+			sd->middle.offset.y = 0;
+		}
+		ld->frontsector = sd->sector;
+		sd++;
+
+		if (side1 != -1)
+		{
+			ld->side[1] = sd;
+			if (sd->middle.image)
+			{
+				sd->midmask_offset = sd->middle.offset.y;
+				sd->middle.offset.y = 0;
+			}
+			ld->backsector = sd->sector;
+			sd++;
+		}
+
+		SYS_ASSERT(sd <= sides + numsides);
+	}
+
+	SYS_ASSERT(sd == sides + numsides);
+
+	I_Debugf("LoadUDMFSideDefs: finished parsing TEXTMAP\n");
+}
+
+static void LoadUDMFLineDefs(parser_t *psr)
+{
+	char ident[128];
+	char val[128];
+	int i = 0;
+
+	I_Debugf("LoadUDMFLineDefs: parsing TEXTMAP\n");
+	numlines = 0;
+
+	psr->next = 0; // restart from start of lump
+	while (1)
+	{
+		if (!GetNextBlock(psr, (uint8_t*)ident))
+			break;
+
+		if (strcasecmp(ident, "linedef") == 0)
+		{
+			// count linedef blocks
+			while (1)
+			{
+				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				{
+					uint8_t *lp = psr->line;
+					while (*lp != 0 && *lp != 0x7D)
+						lp++; // find end of line or '}'
+					if (*lp == 0x7D)
+					{
+						numlines++;
+						break; // end of block
+					}
+					if (psr->next >= psr->length)
+					{
+						numlines++;
+						break; // end of lump
+					}
+
+					continue; // skip line
+				}
+			}
+		}
+	}
+
+	lines = new line_t[numlines];
+	Z_Clear(lines, line_t, numlines);
+	temp_line_sides = new int[numlines * 2];
+
+	psr->next = 0; // restart from start of lump
+	while (1)
+	{
+		if (!GetNextBlock(psr, (uint8_t*)ident))
+			break;
+
+		if (strcasecmp(ident, "linedef") == 0)
+		{
+			int flags = 0, v1 = 0, v2 = 0;
+			int side0 = -1, side1 = -1, tag = -1;
+			int special = 0;
+
+			// process lindef block
+			while (1)
+			{
+				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				{
+					uint8_t *lp = psr->line;
+					while (*lp != 0 && *lp != 0x7D)
+						lp++; // find end of line or '}'
+					if (*lp == 0x7D)
+					{
+						break; // end of block
+					}
+					if (psr->next >= psr->length)
+					{
+						break; // end of lump
+					}
+
+					continue; // skip line
+				}
+				// process assignment
+				if (strcasecmp(ident, "id") == 0)
+				{
+					tag = str2int(val, -1);
+				}
+				else if (strcasecmp(ident, "v1") == 0)
+				{
+					v1 = str2int(val, 0);
+				}
+				else if (strcasecmp(ident, "v2") == 0)
+				{
+					v2 = str2int(val, 0);
+				}
+				else if (strcasecmp(ident, "special") == 0)
+				{
+					special = str2int(val, 0);
+				}
+				else if (strcasecmp(ident, "sidefront") == 0)
+				{
+					side0 = str2int(val, -1);
+				}
+				else if (strcasecmp(ident, "sideback") == 0)
+				{
+					side1 = str2int(val, -1);
+				}
+				else if (strcasecmp(ident, "blocking") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0001;
+				}
+				else if (strcasecmp(ident, "blockmonsters") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0002;
+				}
+				else if (strcasecmp(ident, "twosided") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0004;
+				}
+				else if (strcasecmp(ident, "dontpegtop") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0008;
+				}
+				else if (strcasecmp(ident, "dontpegbottom") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0010;
+				}
+				else if (strcasecmp(ident, "secret") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0020;
+				}
+				else if (strcasecmp(ident, "blocksound") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0040;
+				}
+				else if (strcasecmp(ident, "dontdraw") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0080;
+				}
+				else if (strcasecmp(ident, "mapped") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0100;
+				}
+				else if (strcasecmp(ident, "passuse") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0200; // BOOM flag
+				}
+			}
+
+			line_t *ld = lines + i;
+
+			ld->flags = flags;
+			ld->tag = MAX(0, tag);
+			ld->v1 = &vertexes[v1];
+			ld->v2 = &vertexes[v2];
+
+			ld->special = P_LookupLineType(MAX(0, special));
+
+			ComputeLinedefData(ld, side0, side1);
+
+			if (ld->tag && ld->special && ld->special->ef.type)
+			{
+				for (int j=0; j < numsectors; j++)
+				{
+					if (sectors[j].tag != ld->tag)
+						continue;
+
+					sectors[j].exfloor_max++;
+					numextrafloors++;
+				}
+			}
+
+			i++;
+		}
+	}
+
+	I_Debugf("LoadUDMFLineDefs: finished parsing TEXTMAP\n");
+}
+
+static void LoadUDMFThings(parser_t *psr)
+{
+	char ident[128];
+	char val[128];
+
+	int numthings = 0;
+
+	I_Debugf("LoadUDMFThings: parsing TEXTMAP\n");
+
+	unknown_thing_map.clear();
+
+	psr->next = 0; // restart from start of lump
+	while (1)
+	{
+		if (!GetNextBlock(psr, (uint8_t*)ident))
+			break;
+
+		if (strcasecmp(ident, "thing") == 0)
+		{
+			float x = 0.0f, y = 0.0f, z = 0.0f;
+			angle_t angle = ANG0;
+			int options = MTF_NOT_SINGLE | MTF_NOT_DM | MTF_NOT_COOP;
+			int typenum = -1;
+			int tag = 0;
+			const mobjtype_c *objtype;
+
+			// process thing block
+			while (1)
+			{
+				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				{
+					uint8_t *lp = psr->line;
+					while (*lp != 0 && *lp != 0x7D)
+						lp++; // find end of line or '}'
+					if (*lp == 0x7D)
+						break; // end of block
+					if (psr->next >= psr->length)
+						break; // end of lump
+
+					continue; // skip line
+				}
+				// process assignment
+				if (strcasecmp(ident, "id") == 0)
+				{
+					tag = str2int(val, 0);
+				}
+				else if (strcasecmp(ident, "x") == 0)
+				{
+					x = str2float(val, 0.0f);
+				}
+				else if (strcasecmp(ident, "y") == 0)
+				{
+					y = str2float(val, 0.0f);
+				}
+				else if (strcasecmp(ident, "height") == 0)
+				{
+					z = str2float(val, 0.0f);
+				}
+				else if (strcasecmp(ident, "angle") == 0)
+				{
+					int ta = str2int(val, 0);
+					angle = FLOAT_2_ANG((float)ta);
+				}
+				else if (strcasecmp(ident, "type") == 0)
+				{
+					typenum = str2int(val, 0);
+				}
+				else if (strcasecmp(ident, "skill1") == 0)
+				{
+					options |= MTF_EASY;
+				}
+				else if (strcasecmp(ident, "skill2") == 0)
+				{
+					if (str2bool(val))
+						options |= MTF_EASY;
+				}
+				else if (strcasecmp(ident, "skill3") == 0)
+				{
+					if (str2bool(val))
+						options |= MTF_NORMAL;
+				}
+				else if (strcasecmp(ident, "skill4") == 0)
+				{
+					if (str2bool(val))
+						options |= MTF_HARD;
+				}
+				else if (strcasecmp(ident, "skill5") == 0)
+				{
+					if (str2bool(val))
+						options |= MTF_HARD;
+				}
+				else if (strcasecmp(ident, "ambush") == 0)
+				{
+					if (str2bool(val))
+						options |= MTF_AMBUSH;
+				}
+				else if (strcasecmp(ident, "single") == 0)
+				{
+					if (str2bool(val))
+						options &= ~MTF_NOT_SINGLE;
+				}
+				else if (strcasecmp(ident, "dm") == 0)
+				{
+					if (str2bool(val))
+						options &= ~MTF_NOT_DM;
+				}
+				else if (strcasecmp(ident, "coop") == 0)
+				{
+					if (str2bool(val))
+						options &= ~MTF_NOT_COOP;
+				}
+				// MBF flag
+				else if (strcasecmp(ident, "friend") == 0)
+				{
+					if (str2bool(val))
+						options |= MTF_FRIEND;
+				}
+			}
+
+			objtype = mobjtypes.Lookup(typenum);
+
+			// MOBJTYPE not found, don't crash out: JDS Compliance.
+			// -ACB- 1998/07/21
+			if (objtype == NULL)
+			{
+				UnknownThingWarning(typenum, x, y);
+				continue;
+			}
+
+			sector_t *sec = R_PointInSubsector(x, y)->sector;
+
+			if (objtype->flags & MF_SPAWNCEILING)
+				z += sec->c_h - objtype->height;
+			else
+				z += sec->f_h;
+
+			SpawnMapThing(objtype, x, y, z, sec, angle, options, tag);
+
+			numthings++;
+		}
+	}
+
+	mapthing_NUM = numthings;
+
+	I_Debugf("LoadUDMFThings: finished parsing TEXTMAP\n");
 }
 
 static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd,
@@ -1924,6 +2887,25 @@ void P_SetupLevel(void)
 	if (gl_lumpnum >= 0 && gl_lumpnum < lumpnum)
 		gl_lumpnum = -1;
 
+	// -CW- 2017/01/29: check for UDMF map lump
+	if (W_VerifyLumpName(lumpnum + 1, "TEXTMAP"))
+	{
+		udmf_level = true;
+		udmf_lumpnum = lumpnum + 1;
+		udmf_lump = (char *)W_CacheLumpNum(udmf_lumpnum);
+		if (!udmf_lump)
+			I_Error("Internal error: can't load UDMF lump.\n");
+		// initialize the parser
+		udmf_psr.buffer = (uint8_t *)udmf_lump;
+		udmf_psr.length = W_LumpLength(udmf_lumpnum);
+		udmf_psr.next = 0; // start at first line
+	}
+	else
+	{
+		udmf_level = false;
+		udmf_lumpnum = -1;
+	}
+
 	if (gl_lumpnum < 0)  // shouldn't happen
 		I_Error("Internal error: missing GL-Nodes.\n");
 
@@ -1973,6 +2955,17 @@ void P_SetupLevel(void)
 		hexen_level = true;
 	}
 
+	if (udmf_level)
+	{
+		char ident[128];
+		char value[128];
+
+		if (!GetNextAssign(&udmf_psr, (uint8_t*)ident, (uint8_t*)value) || strcasecmp(ident, "namespace"))
+			I_Error("UDMF: TEXTMAP must start with namespace assignment.\n");
+
+		// Dasho: I dont' think we're too concerned with WHICH namespace we're using, but it needs to exist per the spec so we are still checking
+	}
+
 	// note: most of this ordering is important
 	// 23-6-98 KM, eg, Sectors must be loaded before sidedefs,
 	// Vertexes must be loaded before LineDefs,
@@ -1983,15 +2976,25 @@ void P_SetupLevel(void)
 	numextrafloors = 0;
 	numvertgaps = 0;
 
-	LoadVertexes(lumpnum + ML_VERTEXES);
-	LoadSectors(lumpnum + ML_SECTORS);
-	
-	if (hexen_level)
-		LoadHexenLineDefs(lumpnum + ML_LINEDEFS);
-	else
-		LoadLineDefs(lumpnum + ML_LINEDEFS);
+	if (!udmf_level)
+	{
+		LoadVertexes(lumpnum + ML_VERTEXES);
+		LoadSectors(lumpnum + ML_SECTORS);
 
-	LoadSideDefs(lumpnum + ML_SIDEDEFS);
+		if (hexen_level)
+			LoadHexenLineDefs(lumpnum + ML_LINEDEFS);
+		else
+			LoadLineDefs(lumpnum + ML_LINEDEFS);
+
+		LoadSideDefs(lumpnum + ML_SIDEDEFS);
+	}
+	else
+	{
+		LoadUDMFVertexes(&udmf_psr);
+		LoadUDMFSectors(&udmf_psr);
+		LoadUDMFLineDefs(&udmf_psr);
+		LoadUDMFSideDefs(&udmf_psr);
+	}
 
 	SetupExtrafloors();
 	SetupSlidingDoors();
@@ -2026,10 +3029,19 @@ void P_SetupLevel(void)
 	// -AJA- 1999/10/21: Clear out player starts (ready to load).
 	G_ClearPlayerStarts();
 
-	if (hexen_level)
-		LoadHexenThings(lumpnum + ML_THINGS);
+	if (!udmf_level)
+	{
+		if (hexen_level)
+			LoadHexenThings(lumpnum + ML_THINGS);
+		else
+			LoadThings(lumpnum + ML_THINGS);
+	}
 	else
-		LoadThings(lumpnum + ML_THINGS);
+	{
+		LoadUDMFThings(&udmf_psr);
+
+		W_DoneWithLump(udmf_lump);
+	}
 
 	// OK, CRC values have now been computed
 #ifdef DEVELOPERS

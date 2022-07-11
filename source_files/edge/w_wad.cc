@@ -1093,10 +1093,10 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 	// TODO: handle Read failure
     file->Read(&header, sizeof(raw_wad_header_t));
 
-	if (strncmp(header.identification, "IWAD", 4) != 0)
+	if (strncmp(header.identification, "IWAD", 4) != 0 && strcasecmp("0HAWK01", lumpname1) != 0) // Harmony has a PWAD signature
 	{
-		file->Seek(0, epi::file_c::SEEKPOINT_START);
-		return false;
+			file->Seek(0, epi::file_c::SEEKPOINT_START);
+			return false;
 	}
 
 	header.num_entries = EPI_LE_S32(header.num_entries);

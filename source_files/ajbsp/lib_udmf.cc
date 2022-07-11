@@ -535,9 +535,6 @@ static void UDMF_ParseSectorField(sector_t *S, Udmf_Token& field, Udmf_Token& va
 
 static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 {
-	// create a new object of the specified type
-	Objid kind;
-
 	thing_t   *new_T  = NULL;
 	vertex_t  *new_V  = NULL;
 	linedef_t *new_LD = NULL;
@@ -546,26 +543,22 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 
 	if (name.Match("thing"))
 	{
-		kind = Objid(OBJ_THINGS, 1);
 		new_T = NewThing();
 		new_T->index = num_things - 1;
 	}
 	else if (name.Match("vertex"))
 	{
-		kind = Objid(OBJ_VERTICES, 1);
 		new_V = NewVertex();
 		new_V->index = num_vertices - 1;
 		num_old_vert = num_vertices;
 	}
 	else if (name.Match("linedef"))
 	{
-		kind = Objid(OBJ_LINEDEFS, 1);
 		new_LD = NewLinedef();
 		new_LD->index = num_linedefs - 1;
 	}
 	else if (name.Match("sidedef"))
 	{
-		kind = Objid(OBJ_SIDEDEFS, 1);
 		new_SD = NewSidedef();
 		memset(new_SD->mid_tex, 0, 8);
 		memcpy(new_SD->mid_tex, "-", 1);
@@ -577,14 +570,12 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 	}
 	else if (name.Match("sector"))
 	{
-		kind = Objid(OBJ_SECTORS, 1);
 		new_S = NewSector();
 		new_S->light = 160;
 		new_S->index = num_sectors - 1;
 		new_S->warned_facing = -1;
 	}
-
-	if (!kind.valid())
+	else
 	{
 		// unknown object kind
 		PrintMsg(StringPrintf("skipping unknown block '%s' in UDMF\n", name.c_str()));

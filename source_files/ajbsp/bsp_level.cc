@@ -1164,8 +1164,6 @@ void SaveXGL3Format(node_t *root_node)
 
 void PruneVerticesAtEnd(void)
 {
-	int new_num = num_vertices;
-
 	// scan all vertices.
 	// only remove from the end, so stop when hit a used one.
 

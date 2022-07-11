@@ -924,7 +924,7 @@ static void CheckForLevel(data_file_c *df, int lump, const char *name,
 {
 	// we only test four lumps (it is enough), but fewer definitely
 	// means this is not a level marker.
-	if (remaining < 4)
+	if (remaining < 2)
 		return;
 
 	if (strncmp(raw[1].name, "THINGS",   8) == 0 &&

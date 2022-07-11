@@ -605,7 +605,7 @@ void Wad_file::DetectLevels()
 	// vector.  The test here is rather lax, as I'm told certain
 	// wads exist with a non-standard ordering of level lumps.
 
-	for (short k = 0 ; k+5 < NumLumps() ; k++)
+	for (short k = 0 ; k+2 < NumLumps() ; k++)
 	{
 		int part_mask  = 0;
 		int part_count = 0;

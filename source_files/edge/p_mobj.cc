@@ -1083,6 +1083,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 				// ground (hard), and utter appropriate sound.
 				mo->player->deltaviewheight = zmove / 8.0f;
 				S_StartFX(mo->info->oof_sound, P_MobjGetSfxCategory(mo), mo);
+				P_HitFloor(mo);
 			}
 			// -KM- 1998/12/16 If bigger than max fall, take damage.
 			if (mo->info->maxfall > 0 && gravity > 0 && -mo->mom.z > hurt_momz &&
@@ -1669,6 +1670,32 @@ void P_RemoveItemsInQue(void)
 //
 
 //
+// P_SpawnSplash
+//
+void P_SpawnSplash(float x, float y, float z, const mobjtype_c * splash, angle_t angle)
+{
+	mobj_t *th;
+
+	z += (float) P_RandomNegPos() / 16.0f;
+
+	// -ACB- 1998/08/06 Specials table for non-negotiables....
+	th = P_MobjCreateObject(x, y, z, splash);
+
+	// -AJA- 1999/07/14: DDF-itised.
+	//th->mom.z = splash->float_speed;
+	angle += (angle_t) (M_RandomNegPos() * (int)(ANG1 / 2));
+
+	P_SetMobjDirAndSpeed(th, angle, 2.0f, 0.25f);
+
+	//th->angle = angle;
+
+	th->tics -= M_Random() & 3;
+
+	if (th->tics < 1)
+		th->tics = 1;
+}
+
+//
 // P_SpawnPuff
 //
 void P_SpawnPuff(float x, float y, float z, const mobjtype_c * puff, angle_t angle)
@@ -1806,10 +1833,10 @@ int P_HitFloor(mobj_t * thing)
     if (current_flatdef)
     {
 		int tempRandom = M_RandomNegPos() % 8;
-		P_SpawnPuff(thing->x + tempRandom, thing->y + tempRandom, thing->z + tempRandom, current_flatdef->impactobject, thing->angle);
+		P_SpawnSplash(thing->x + tempRandom, thing->y + tempRandom, thing->z + tempRandom, current_flatdef->impactobject, thing->angle);
 		
-		tempRandom = M_RandomNegPos() % 8;
-		P_SpawnPuff(thing->x + tempRandom, thing->y + tempRandom, thing->z + tempRandom, current_flatdef->impactobject, thing->angle);
+		//tempRandom = M_RandomNegPos() % 8;
+		//P_SpawnSplash(thing->x + tempRandom, thing->y + tempRandom, thing->z + tempRandom, current_flatdef->impactobject, thing->angle);
 		
 		S_StartFX(current_flatdef->footstep, P_MobjGetSfxCategory(thing), thing);
     }

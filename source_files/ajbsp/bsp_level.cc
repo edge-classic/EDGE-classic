@@ -41,6 +41,8 @@ static u16_t *block_dups;
 static int block_compression;
 static int block_overflowed;
 
+const char *lev_current_name;
+
 #define BLOCK_LIMIT  16000
 
 #define DUMMY_DUP  0xFFFF
@@ -299,6 +301,19 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
 
 	// linedef touches block
 	return true;
+}
+
+static void CheckUDMFNamespace(parser_t *psr)
+{
+	char ident[128];
+	char value[128];
+
+	if (!GetNextAssign(&udmf_psr, (uint8_t*)ident, (uint8_t*)value) || y_stricmp(ident, "namespace"))
+		FatalError(StringPrintf("AJBSP: Missing UDMF namespace in %s of %s!\n",	lev_current_name, FindBaseName(edit_wad->PathName())));
+
+	if (y_stricmp(value, "doom") != 0 && y_stricmp(value, "heretic") != 0 && y_strnicmp(value, "zdoomt", 6) != 0)
+		FatalError(StringPrintf("AJBSP: Incompatible UDMF namespace \"%s\" detected in %s of %s!\nNamespace must be \"Doom\", \"Heretic\", or \"ZDoomTranslated\"!\n",
+			value, lev_current_name, FindBaseName(edit_wad->PathName())));
 }
 
 static void LoadUDMFVertexes(parser_t *psr)
@@ -1026,8 +1041,6 @@ void InitBlockmap()
 
 
 // per-level variables
-
-const char *lev_current_name;
 
 short lev_current_idx;
 short lev_current_start;
@@ -1865,6 +1878,7 @@ void LoadLevel()
 		udmf_psr.buffer = (uint8_t *)udmf_lump;
 		udmf_psr.length = udmf_lump_len;
 		udmf_psr.next = 0; // start at first line
+		CheckUDMFNamespace(&udmf_psr);
 		LoadUDMFVertexes(&udmf_psr);
 		LoadUDMFSectors(&udmf_psr);
 		LoadUDMFSideDefs(&udmf_psr);

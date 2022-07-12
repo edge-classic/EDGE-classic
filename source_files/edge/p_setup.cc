@@ -2955,17 +2955,6 @@ void P_SetupLevel(void)
 		hexen_level = true;
 	}
 
-	if (udmf_level)
-	{
-		char ident[128];
-		char value[128];
-
-		if (!GetNextAssign(&udmf_psr, (uint8_t*)ident, (uint8_t*)value) || strcasecmp(ident, "namespace"))
-			I_Error("UDMF: TEXTMAP must start with namespace assignment.\n");
-
-		// Dasho: I dont' think we're too concerned with WHICH namespace we're using, but it needs to exist per the spec so we are still checking
-	}
-
 	// note: most of this ordering is important
 	// 23-6-98 KM, eg, Sectors must be loaded before sidedefs,
 	// Vertexes must be loaded before LineDefs,

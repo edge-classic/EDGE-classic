@@ -142,6 +142,7 @@ bool P_SetMobjState(mobj_t * mobj, statenum_t state);
 bool P_SetMobjStateDeferred(mobj_t * mobj, statenum_t state, int tic_skip);
 void P_SetMobjDirAndSpeed(mobj_t * mobj, angle_t angle, float slope, float speed);
 void P_RunMobjThinkers(void);
+void P_SpawnSplash(float x, float y, float z, const mobjtype_c * splash, angle_t angle);
 void P_SpawnPuff(float x, float y, float z, const mobjtype_c * puff, angle_t angle);
 void P_SpawnBlood(float x, float y, float z, float damage, angle_t angle, const mobjtype_c * blood);
 void P_RemoveQueuedMobjs(bool force_all);

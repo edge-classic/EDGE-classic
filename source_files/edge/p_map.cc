@@ -1295,7 +1295,7 @@ static inline bool ShootCheckGap(float z,
 		{ 
 			if (current_flatdef->impactobject)
 			{
-				P_SpawnPuff(x, y, z, current_flatdef->impactobject, shoot_I.angle + ANG180);
+				P_SpawnSplash(x, y, z, current_flatdef->impactobject, shoot_I.angle + ANG180);
 				// don't go any farther
 				return false;
 			}

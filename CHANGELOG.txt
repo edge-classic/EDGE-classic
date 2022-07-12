@@ -17,6 +17,10 @@ Bugs fixed
 + Fixed PWAD PLAYPAL lumps not properly being applied to images
 + Fixed being able to pick up items while completely still (for instance, voodoo doll spawn on top of an item would immediately
   give the player said item upon starting the level)
++ Fixed voodoo doll spawn points telefragging other objects (could result in instakill upon entering level)
++ Fixed DEH_EDGE giving wrong weapon priorities to the rocket launcher and plasma rifle
++ Fixed FORCE_AIM attacks being affected by visibility modifiers
++ Fixed BERSERK_MULTIPLY not being applied to projectiles
 
 General Improvements
 --------------------
@@ -48,11 +52,13 @@ General Improvements
 + Number of available AMMO and INVENTORY types increased to 99
 + Widescreen ratio resolutions added to windowed resolution list
 + DOOMWADPATH environment variable now supported
-+ Updated AJBSP with improvements from Eureka codebase
++ AJBSP updated to produce only XGL3 nodes compatible with both binary/UDMF map formats
 + GWA file will always be built, regardless of a WAD having internal GL lumps
   - This prevents crashes with malformed/orphaned GL lumps in a WAD
 + IWADs are now detected by combinations of unique lumps instead of simple filenames
 + Improved handling of PWADs with custom status bars that aren't widescreen
++ Improved height clipping for non-blocking map objects
++ New graphical startup sequence
 
 New Features
 ------------
@@ -130,7 +136,12 @@ New Features
   -- docast
   -- endgame
   -- interbackdrop
-  
+
++ UDMF 1.1 Support
+  - The following UDMF namespaces are currently supported:
+  -- Doom
+  -- Heretic
+  -- ZDoomTranslated  
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)
 ====================================

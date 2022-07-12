@@ -111,7 +111,7 @@ FILE *logfile = NULL;
 FILE *debugfile = NULL;
 
 // Combination of unique lumps needed to best identify an IWAD
-const std::array<std::array<const char*, 3>, 11> iwad_unique_lumps =
+const std::array<std::array<const char*, 3>, 13> iwad_unique_lumps =
 {
 	{
 		{ "BLASPHEMER", "BLASPHEM", "E1M1"  },
@@ -124,7 +124,9 @@ const std::array<std::array<const char*, 3>, 11> iwad_unique_lumps =
 		{ "TNT",        "REDTNT2",  "MAP01" },
 		{ "DOOM",       "BFGGA0",   "E2M1"  },
 		{ "DOOM1",      "SHOTA0",   "E1M1"  },
-		{ "DOOM2",      "BFGGA0",   "MAP01" }
+		{ "DOOM2",      "BFGGA0",   "MAP01" },
+		{ "HEXEN",      "HEXEN",    "BEHAVIOR" }, // Dev/internal use - Definitely nowhwere near playable
+		{ "STRIFE",     "VELLOGO",  "RGELOGO"} // Same as above
 	}
 };
 

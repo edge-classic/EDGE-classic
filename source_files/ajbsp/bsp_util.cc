@@ -404,11 +404,21 @@ void DetectPolyobjSectors(void)
 
 
 /* ----- analysis routines ----------------------------- */
+// cmpVertex and revised *Compare functions adapted from k8vavoom
+static inline int cmpVertex (const vertex_t *A, const vertex_t *B) {
+	const double xdiff = (A->x-B->x);
+	if (fabs(xdiff) > 0.0001) return (xdiff < 0 ? -1 : 1);
+
+	const double ydiff = (A->y-B->y);
+	if (fabs(ydiff) > 0.0001) return (ydiff < 0 ? -1 : 1);
+
+  return 0;
+}
 
 static int VertexCompare(const void *p1, const void *p2)
 {
-	int vert1 = ((const u16_t *) p1)[0];
-	int vert2 = ((const u16_t *) p2)[0];
+	int vert1 = ((const u32_t *) p1)[0];
+	int vert2 = ((const u32_t *) p2)[0];
 
 	if (vert1 == vert2)
 		return 0;
@@ -416,23 +426,20 @@ static int VertexCompare(const void *p1, const void *p2)
 	vertex_t *A = lev_vertices[vert1];
 	vertex_t *B = lev_vertices[vert2];
 
-	if ((int)A->x != (int)B->x)
-		return (int)A->x - (int)B->x;
-
-	return (int)A->y - (int)B->y;
+	return cmpVertex(A, B);
 }
 
 
 void DetectOverlappingVertices(void)
 {
 	int i;
-	u16_t *array = (u16_t *)UtilCalloc(num_vertices * sizeof(u16_t));
+	u32_t *array = (u32_t *)UtilCalloc(num_vertices * sizeof(u32_t));
 
 	// sort array of indices
 	for (i=0 ; i < num_vertices ; i++)
 		array[i] = i;
 
-	qsort(array, num_vertices, sizeof(u16_t), VertexCompare);
+	qsort(array, num_vertices, sizeof(u32_t), VertexCompare);
 
 	// now mark them off
 	for (i=0 ; i < num_vertices - 1 ; i++)
@@ -497,10 +504,7 @@ static int LineStartCompare(const void *p1, const void *p2)
 	vertex_t *C = LineVertexLowest(A) ? A->end : A->start;
 	vertex_t *D = LineVertexLowest(B) ? B->end : B->start;
 
-	if ((int)C->x != (int)D->x)
-		return (int)C->x - (int)D->x;
-
-	return (int)C->y - (int)D->y;
+	return cmpVertex(C, D);
 }
 
 static int LineEndCompare(const void *p1, const void *p2)
@@ -518,10 +522,7 @@ static int LineEndCompare(const void *p1, const void *p2)
 	vertex_t *C = LineVertexLowest(A) ? A->start : A->end;
 	vertex_t *D = LineVertexLowest(B) ? B->start : B->end;
 
-	if ((int)C->x != (int)D->x)
-		return (int)C->x - (int)D->x;
-
-	return (int)C->y - (int)D->y;
+	return cmpVertex(C, D);
 }
 
 

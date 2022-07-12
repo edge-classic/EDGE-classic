@@ -45,6 +45,184 @@ static int block_overflowed;
 
 #define DUMMY_DUP  0xFFFF
 
+// UDMF parser and loading routines backported from EDGE 2.x codebase
+// with non-Vanilla namespace items removed for the time being
+typedef struct {
+	uint8_t *buffer;
+	uint8_t line[512];
+	int length;
+	int next;
+	int prev;
+} parser_t;
+
+static byte *udmf_lump;
+
+static parser_t udmf_psr;
+
+static bool GetNextLine(parser_t *psr)
+{
+	if (psr->next >= psr->length)
+		return false; // no more lines
+
+	int i;
+	// get next line
+	psr->prev = psr->next;
+	uint8_t *lp = &psr->buffer[psr->next];
+	for (i=0; i<(psr->length - psr->next); i++, lp++)
+		if (*lp == 0x0A || *lp == 0x0D)
+			break;
+	if (i == (psr->length - psr->next))
+		lp = &psr->buffer[psr->length - 1]; // last line
+	psr->next = (int)(lp - psr->buffer) + 1;
+	memcpy(psr->line, &psr->buffer[psr->prev], MIN(511, psr->next - psr->prev - 1));
+	psr->line[MIN(511, psr->next - psr->prev) - 1] = 0;
+	// skip any more CR/LF
+	while (psr->buffer[psr->next] == 0x0A || psr->buffer[psr->next] == 0x0D)
+		psr->next++;
+
+	// check for comments
+	lp = psr->line;
+	while (lp[0] != 0 && lp[0] != 0x2F && lp[1] != 0x2F)
+		lp++; // find full line comment start (if present)
+	if (lp[0] != 0)
+	{
+		*lp = 0; // terminate at full line comment start
+	}
+	else
+	{
+		lp = psr->line;
+		while (lp[0] != 0 && lp[0] != 0x2F && lp[1] != 0x2A)
+			lp++; // find multi-line comment start (if present)
+		if (lp[0] != 0)
+		{
+			*lp = 0; // terminate at multi-line comment start
+			uint8_t *ep = &lp[2];
+			while (ep[0] != 0 && ep[0] != 0x2A && ep[1] != 0x2F)
+				ep++; // find multi-line comment end (if present)
+			if (ep[0] == 0)
+			{
+				ep = &psr->buffer[psr->next];
+				for (i=0; i<(psr->length - psr->next); i++, ep++)
+					if (ep[0] == 0x2A && ep[1] == 0x2F)
+						break;
+				if (i == (psr->length - psr->next))
+					ep = &psr->buffer[psr->length - 2];
+			}
+			psr->next = (int)(ep - psr->buffer) + 2; // skip comment for next line
+		}
+	}
+
+	//I_Debugf(" parser next line: %s\n", (char *)psr->line);
+	return true;
+}
+
+static bool GetNextAssign(parser_t *psr, uint8_t *ident, uint8_t *val)
+{
+	if (!GetNextLine(psr))
+		return false; // no more lines
+
+	int len = 0;
+	while (psr->line[len] != 0 && psr->line[len] != 0x7D)
+		len++;
+	if (psr->line[len] == 0x7D)
+	{
+		//I_Debugf(" parser: block end\n");
+		return false;
+	}
+	else if (len < 4)
+		return false; //line too short for assignment
+
+	uint8_t *lp = psr->line;
+	while (*lp != 0x3D && *lp != 0)
+		lp++; // find '='
+	if (lp[0] != 0x3D)
+		return false; // not an assignment line
+
+	*lp++ = 0; // split at assignment operator
+	int i = 0;
+	while (psr->line[i] == 0x20 || psr->line[i] == 0x09)
+		i++; // skip whitespace before indentifier
+	memcpy(ident, &psr->line[i], lp - &psr->line[i] - 1);
+	i = lp - &psr->line[i] - 2;
+	while (ident[i] == 0x20 || ident[i] == 0x09)
+		i--; // skip whitespace after identifier
+	ident[i+1] = 0;
+
+	i = 0;
+	while (lp[i] == 0x20 || lp[i] == 0x09 || lp[i] == 0x22)
+		i++; // skip whitespace and quotes before value
+	memcpy(val, &lp[i], &psr->line[len] - &lp[i]);
+	i = (int)(&psr->line[len] - &lp[i]) - 2;
+	while (val[i] == 0x20 || val[i] == 0x09 || val[i] == 0x22  || val[i] == 0x3B)
+		i--; // skip whitespace, quote, and semi-colon after value
+	val[i+1] = 0;
+
+	//I_Debugf(" parser: ident = %s, val = %s\n", (char *)ident, (char *)val);
+	return true;
+}
+
+static bool GetNextBlock(parser_t *psr, uint8_t *ident)
+{
+	if (!GetNextLine(psr))
+		return false; // no more lines
+
+	int len, i = 0;
+	while (psr->line[i] == 0x20 || psr->line[i] == 0x09)
+		i++; // skip whitespace
+blk_loop:
+	len = 0;
+	while (psr->line[len] != 0)
+		len++;
+
+	memcpy(ident, &psr->line[i], len - i);
+	i = len - i - 1;
+	while (ident[i] == 0x20 || ident[i] == 0x09)
+		i--; // skip whitespace from end of line
+	ident[i+1] = 0;
+
+	if (!GetNextLine(psr))
+		return false; // no more lines
+
+	i = 0;
+	while (psr->line[i] == 0x20 || psr->line[i] == 0x09)
+		i++; // skip whitespace before indentifier or block start
+	if (psr->line[i] != 0x7B)
+		goto blk_loop; // not a block start
+
+	//I_Debugf(" parser: block start = %s\n", ident);
+	return true;
+}
+
+static bool str2bool(char *val)
+{
+	if (y_stricmp(val, "true") == 0)
+		return true;
+
+	// default is always false
+	return false;
+}
+
+static int str2int(char *val, int def)
+{
+	int ret;
+
+	if (sscanf(val, "%d", &ret) == 1)
+		return ret;
+
+	// error - return default
+	return def;
+}
+
+static float str2float(char *val, float def)
+{
+	float ret;
+
+	if (sscanf(val, "%f", &ret) == 1)
+		return ret;
+
+	// error - return default
+	return def;
+}
 
 void GetBlockmapBounds(int *x, int *y, int *w, int *h)
 {
@@ -123,6 +301,488 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
 	return true;
 }
 
+static void LoadUDMFVertexes(parser_t *psr)
+{
+	char ident[128];
+	char val[128];
+
+	psr->next = 0; // restart from start of lump
+	while (1)
+	{
+		if (!GetNextBlock(psr, (uint8_t*)ident))
+			break;
+
+		if (y_stricmp(ident, "vertex") == 0)
+		{
+			float x = 0.0f, y = 0.0f;
+
+			// process vertex block
+			while (1)
+			{
+				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				{
+					uint8_t *lp = psr->line;
+					while (*lp != 0 && *lp != 0x7D)
+						lp++; // find end of line or '}'
+					if (*lp == 0x7D)
+					{
+						break; // end of block
+					}
+					if (psr->next >= psr->length)
+					{
+						break; // end of lump
+					}
+
+					continue; // skip line
+				}
+				// process assignment
+				if (y_stricmp(ident, "x") == 0)
+				{
+					x = str2float(val, 0.0f);
+				}
+				else if (y_stricmp(ident, "y") == 0)
+				{
+					y = str2float(val, 0.0f);
+				}
+			}
+
+			vertex_t *vv = NewVertex();
+			vv->x = x;
+			vv->y = y;
+			vv->index = num_vertices - 1;
+			num_old_vert = num_vertices;
+		}
+	}
+}
+
+static void LoadUDMFSectors(parser_t *psr)
+{
+	char ident[128];
+	char val[128];
+
+	psr->next = 0; // restart from start of lump
+	while (1)
+	{
+		if (!GetNextBlock(psr, (uint8_t*)ident))
+			break;
+
+		if (y_stricmp(ident, "sector") == 0)
+		{
+			float cz = 0.0f, fz = 0.0f;
+			int light = 160, type = 0, tag = 0;
+			char floor_tex[10];
+			char ceil_tex[10];
+			strcpy(floor_tex, "-");
+			strcpy(ceil_tex, "-");
+
+			// process sector block
+			while (1)
+			{
+				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				{
+					uint8_t *lp = psr->line;
+					while (*lp != 0 && *lp != 0x7D)
+						lp++; // find end of line or '}'
+					if (*lp == 0x7D)
+					{
+						break; // end of block
+					}
+					if (psr->next >= psr->length)
+					{
+						break; // end of lump
+					}
+
+					continue; // skip line
+				}
+				// process assignment
+				if (y_stricmp(ident, "heightfloor") == 0)
+				{
+					fz = str2float(val, 0.0f);
+				}
+				else if (y_stricmp(ident, "heightceiling") == 0)
+				{
+					cz = str2float(val, 0.0f);
+				}
+				else if (y_stricmp(ident, "texturefloor") == 0)
+				{
+					strncpy(floor_tex, val, 8);
+				}
+				else if (y_stricmp(ident, "textureceiling") == 0)
+				{
+					strncpy(ceil_tex, val, 8);
+				}
+				else if (y_stricmp(ident, "lightlevel") == 0)
+				{
+					light = str2int(val, 160);
+				}
+				else if (y_stricmp(ident, "special") == 0)
+				{
+					type = str2int(val, 0);
+				}
+				else if (y_stricmp(ident, "id") == 0)
+				{
+					tag = str2int(val, 0);
+				}
+			}
+
+			sector_t *ss = NewSector();
+			ss->light = light;
+			ss->index = num_sectors - 1;
+			ss->warned_facing = -1;
+			ss->floor_h = fz;
+			ss->ceil_h = cz;
+			strncpy(ss->ceil_tex, ceil_tex, 8);
+			strncpy(ss->floor_tex, floor_tex, 8);
+			ss->special = type;
+			ss->tag = tag;
+			ss->coalesce = (ss->tag >= 900 && ss->tag < 1000) ? 1 : 0;
+		}
+	}
+}
+
+static void LoadUDMFSideDefs(parser_t *psr)
+{
+	char ident[128];
+	char val[128];
+
+	psr->next = 0; // restart from start of lump
+	while (1)
+	{
+		if (!GetNextBlock(psr, (uint8_t*)ident))
+			break;
+
+		if (y_stricmp(ident, "sidedef") == 0)
+		{
+			float x = 0, y = 0;
+			int sec_num = 0;
+			char top_tex[10];
+			char bottom_tex[10];
+			char middle_tex[10];
+			strcpy(top_tex, "-");
+			strcpy(bottom_tex, "-");
+			strcpy(middle_tex, "-");
+
+			// process sidedef block
+			while (1)
+			{
+				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				{
+					uint8_t *lp = psr->line;
+					while (*lp != 0 && *lp != 0x7D)
+						lp++; // find end of line or '}'
+					if (*lp == 0x7D)
+					{
+						break; // end of block
+					}
+					if (psr->next >= psr->length)
+					{
+						break; // end of lump
+					}
+
+					continue; // skip line
+				}
+				// process assignment
+				if (y_stricmp(ident, "offsetx") == 0)
+				{
+					x = str2float(val, 0);
+				}
+				else if (y_stricmp(ident, "offsety") == 0)
+				{
+					y = str2float(val, 0);
+				}
+				else if (y_stricmp(ident, "texturetop") == 0)
+				{
+					strncpy(top_tex, val, 8);
+				}
+				else if (y_stricmp(ident, "texturebottom") == 0)
+				{
+					strncpy(bottom_tex, val, 8);
+				}
+				else if (y_stricmp(ident, "texturemiddle") == 0)
+				{
+					strncpy(middle_tex, val, 8);
+				}
+				else if (y_stricmp(ident, "sector") == 0)
+				{
+					sec_num = str2int(val, 0);
+				}
+			}
+			sidedef_t *sd = NewSidedef();
+			sd->index = num_sidedefs - 1;
+			sd->sector = sec_num == -1 ? NULL : LookupSector(sec_num);
+			if (sd->sector)
+				sd->sector->is_used = 1;
+			sd->x_offset = x;
+			sd->y_offset = y;
+			strncpy(sd->upper_tex, top_tex, 8);
+			strncpy(sd->mid_tex, middle_tex, 8);
+			strncpy(sd->lower_tex, bottom_tex, 8);
+		}
+	}
+}
+
+static void LoadUDMFLineDefs(parser_t *psr)
+{
+	char ident[128];
+	char val[128];
+	int i = 0;
+
+	psr->next = 0; // restart from start of lump
+	while (1)
+	{
+		if (!GetNextBlock(psr, (uint8_t*)ident))
+			break;
+
+		if (y_stricmp(ident, "linedef") == 0)
+		{
+			int flags = 0, v1 = 0, v2 = 0;
+			int side0 = -1, side1 = -1, tag = -1;
+			int special = 0;
+
+			// process lindef block
+			while (1)
+			{
+				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				{
+					uint8_t *lp = psr->line;
+					while (*lp != 0 && *lp != 0x7D)
+						lp++; // find end of line or '}'
+					if (*lp == 0x7D)
+					{
+						break; // end of block
+					}
+					if (psr->next >= psr->length)
+					{
+						break; // end of lump
+					}
+
+					continue; // skip line
+				}
+				// process assignment
+				if (y_stricmp(ident, "id") == 0)
+				{
+					tag = str2int(val, -1);
+				}
+				else if (y_stricmp(ident, "v1") == 0)
+				{
+					v1 = str2int(val, 0);
+				}
+				else if (y_stricmp(ident, "v2") == 0)
+				{
+					v2 = str2int(val, 0);
+				}
+				else if (y_stricmp(ident, "special") == 0)
+				{
+					special = str2int(val, 0);
+				}
+				else if (y_stricmp(ident, "arg0") == 0)
+				{
+					tag = str2int(val, 0);
+				}
+				else if (y_stricmp(ident, "sidefront") == 0)
+				{
+					side0 = str2int(val, -1);
+				}
+				else if (y_stricmp(ident, "sideback") == 0)
+				{
+					side1 = str2int(val, -1);
+				}
+				else if (y_stricmp(ident, "blocking") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0001;
+				}
+				else if (y_stricmp(ident, "blockmonsters") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0002;
+				}
+				else if (y_stricmp(ident, "twosided") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0004;
+				}
+				else if (y_stricmp(ident, "dontpegtop") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0008;
+				}
+				else if (y_stricmp(ident, "dontpegbottom") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0010;
+				}
+				else if (y_stricmp(ident, "secret") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0020;
+				}
+				else if (y_stricmp(ident, "blocksound") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0040;
+				}
+				else if (y_stricmp(ident, "dontdraw") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0080;
+				}
+				else if (y_stricmp(ident, "mapped") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0100;
+				}
+				else if (y_stricmp(ident, "passuse") == 0)
+				{
+					if (str2bool(val))
+						flags |= 0x0200; // BOOM flag
+				}
+			}
+
+			linedef_t *ld = NewLinedef();
+			ld->index = num_linedefs - 1;
+			ld->start = LookupVertex(v1);
+			ld->start->is_used = 1;
+			ld->end = LookupVertex(v2);
+			ld->end->is_used = 1;
+			ld->zero_len = (fabs(ld->start->x - ld->end->x) < DIST_EPSILON) &&
+				(fabs(ld->start->y - ld->end->y) < DIST_EPSILON);
+			ld->type = special;
+			ld->tag = tag;
+			ld->flags = flags;
+			ld->two_sided = (ld->flags & MLF_TwoSided) ? 1 : 0;
+			ld->right = side0 == -1 ? NULL : SafeLookupSidedef(side0);
+			ld->left = side1 == -1 ? NULL : SafeLookupSidedef(side1);
+			ld->is_precious = (ld->tag >= 900 && ld->tag < 1000) ? 1 : 0;
+			if (ld->right)
+			{
+				ld->right->is_used = 1;
+				ld->right->on_special |= (ld->type > 0) ? 1 : 0;			
+			}
+			if (ld->left)
+			{
+				ld->left->is_used = 1;
+				ld->left->on_special |= (ld->type > 0) ? 1 : 0;			
+			}
+			if (ld->right || ld->left)
+				num_real_lines++;
+			ld->self_ref = (ld->left && ld->right &&
+				(ld->left->sector == ld->right->sector));
+		}
+	}
+}
+
+static void LoadUDMFThings(parser_t *psr)
+{
+	char ident[128];
+	char val[128];
+
+	psr->next = 0; // restart from start of lump
+	while (1)
+	{
+		if (!GetNextBlock(psr, (uint8_t*)ident))
+			break;
+
+		if (y_stricmp(ident, "thing") == 0)
+		{
+			float x = 0.0f, y = 0.0f, z = 0.0f;
+			int options = MTF_Not_SP | MTF_Not_DM | MTF_Not_COOP;
+			int typenum = -1;
+			int tag = 0;
+
+			// process thing block
+			while (1)
+			{
+				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				{
+					uint8_t *lp = psr->line;
+					while (*lp != 0 && *lp != 0x7D)
+						lp++; // find end of line or '}'
+					if (*lp == 0x7D)
+						break; // end of block
+					if (psr->next >= psr->length)
+						break; // end of lump
+
+					continue; // skip line
+				}
+				// process assignment
+				if (y_stricmp(ident, "id") == 0)
+				{
+					tag = str2int(val, 0);
+				}
+				else if (y_stricmp(ident, "x") == 0)
+				{
+					x = str2float(val, 0.0f);
+				}
+				else if (y_stricmp(ident, "y") == 0)
+				{
+					y = str2float(val, 0.0f);
+				}
+				else if (y_stricmp(ident, "type") == 0)
+				{
+					typenum = str2int(val, 0);
+				}
+				else if (y_stricmp(ident, "skill1") == 0)
+				{
+					options |= MTF_Easy;
+				}
+				else if (y_stricmp(ident, "skill2") == 0)
+				{
+					if (str2bool(val))
+						options |= MTF_Easy;
+				}
+				else if (y_stricmp(ident, "skill3") == 0)
+				{
+					if (str2bool(val))
+						options |= MTF_Medium;
+				}
+				else if (y_stricmp(ident, "skill4") == 0)
+				{
+					if (str2bool(val))
+						options |= MTF_Hard;
+				}
+				else if (y_stricmp(ident, "skill5") == 0)
+				{
+					if (str2bool(val))
+						options |= MTF_Hard;
+				}
+				else if (y_stricmp(ident, "ambush") == 0)
+				{
+					if (str2bool(val))
+						options |= MTF_Ambush;
+				}
+				else if (y_stricmp(ident, "single") == 0)
+				{
+					if (str2bool(val))
+						options &= ~MTF_Not_SP;
+				}
+				else if (y_stricmp(ident, "dm") == 0)
+				{
+					if (str2bool(val))
+						options &= ~MTF_Not_DM;
+				}
+				else if (y_stricmp(ident, "coop") == 0)
+				{
+					if (str2bool(val))
+						options &= ~MTF_Not_COOP;
+				}
+				// MBF flag
+				else if (y_stricmp(ident, "friend") == 0)
+				{
+					if (str2bool(val))
+						options |= MTF_Friend;
+				}
+
+				thing_t *t = NewThing();
+				t->index = num_things - 1;
+				t->x = x;
+				t->y = y;
+				t->type = typenum;
+				t->options = options;
+			}
+		}
+	}
+}
 
 /* ----- create blockmap ------------------------------------ */
 
@@ -1199,59 +1859,17 @@ void LoadLevel()
 
 	if (Level_format == MAPF_UDMF)
 	{
-		UDMF_LoadLevel();
-		for (int sec = 0 ; sec < num_sectors ; sec++)
-		{
-			sector_t *S = lev_sectors[sec];
-
-			S->coalesce = (S->tag >= 900 && S->tag < 1000) ? 1 : 0;
-		}
-		for (int sd = 0 ; sd < num_sidedefs ; sd++)
-		{
-			sidedef_t *S = lev_sidedefs[sd];
-
-			S->sector = (S->udmf_sector_lookup == -1 ? NULL : LookupSector(S->udmf_sector_lookup));
-
-			if (S->sector)
-				S->sector->is_used = 1;
-		}
-		for (int ld = 0 ; ld < num_linedefs ; ld++)
-		{
-			linedef_t *L = lev_linedefs[ld];
-
-			L->start = LookupVertex(L->udmf_start_lookup);
-			L->start->is_used = 1;
-			L->end = LookupVertex(L->udmf_end_lookup);
-			L->end->is_used = 1;
-
-			L->zero_len = (fabs(L->start->x - L->end->x) < DIST_EPSILON) &&
-				(fabs(L->start->y - L->end->y) < DIST_EPSILON);
-
-			L->two_sided = (L->flags & MLF_TwoSided) ? 1 : 0;
-			L->is_precious = (L->tag >= 900 && L->tag < 1000) ? 1 : 0;
-
-			L->right = (L->udmf_right_lookup == -1 ? NULL : SafeLookupSidedef(L->udmf_right_lookup));
-
-			L->left = (L->udmf_left_lookup == -1 ? NULL : SafeLookupSidedef(L->udmf_left_lookup));
-
-			if (L->right)
-			{
-				L->right->is_used = 1;
-				L->right->on_special |= (L->type > 0) ? 1 : 0;
-			}
-
-			if (L->left)
-			{
-				L->left->is_used = 1;
-				L->left->on_special |= (L->type > 0) ? 1 : 0;
-			}
-
-			if (L->right || L->left)
-				num_real_lines++;
-
-			L->self_ref = (L->left && L->right &&
-				(L->left->sector == L->right->sector));
-		}
+		Lump_c *lump = FindLevelLump("TEXTMAP");
+		int udmf_lump_len = W_LoadLumpData(lump, &udmf_lump);
+		// initialize the parser
+		udmf_psr.buffer = (uint8_t *)udmf_lump;
+		udmf_psr.length = udmf_lump_len;
+		udmf_psr.next = 0; // start at first line
+		LoadUDMFVertexes(&udmf_psr);
+		LoadUDMFSectors(&udmf_psr);
+		LoadUDMFSideDefs(&udmf_psr);
+		LoadUDMFLineDefs(&udmf_psr);
+		LoadUDMFThings(&udmf_psr);
 	}
 	else
 	{

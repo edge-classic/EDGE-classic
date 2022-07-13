@@ -136,7 +136,10 @@ public:
 	weapon_flag_e specials[2];
 
 	// -AJA- 2000/03/18: when > 0, this weapon can zoom
-	angle_t zoom_fov;
+	int zoom_fov;
+
+	// Dasho - When > 0, this weapon can zoom and will use this value instead of zoom_fov
+	float zoom_factor;
 
 	// -AJA- 2000/05/23: weapon loses accuracy when refired.
 	bool refire_inacc;

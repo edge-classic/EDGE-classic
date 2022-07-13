@@ -431,10 +431,8 @@ static void P_BringUpWeapon(player_t * p)
 	{
 		if (info->zoom_fov < ANG_MAX)
 			p->zoom_fov = info->zoom_fov;
-		else if (level_flags.limit_zoom)
-			p->zoom_fov = 0;
 		else
-			p->zoom_fov = r_zoomfov.d;
+			p->zoom_fov = 0;
 	}
 
 	if (info->start)
@@ -1226,13 +1224,7 @@ void A_Lower(mobj_t * mo)
 	weapondef_c *info = p->weapons[p->ready_wp].info;
 
 	if (p->zoom_fov > 0)
-	{
-		// In `LimitZoom' mode, disable any current zoom
-		if (level_flags.limit_zoom)
-			p->zoom_fov = 0;
-		else
-			p->zoom_fov = r_zoomfov.d;
-	}
+		p->zoom_fov = 0;
 
 	psp->sy += LOWERSPEED;
 

@@ -70,7 +70,8 @@ static const commandlist_t weapon_commands[] =
 	DF("NOTHRUST", nothrust, DDF_MainGetBoolean),
 	DF("FEEDBACK", feedback, DDF_MainGetBoolean),
 	DF("KICK", kick, DDF_MainGetFloat),
-	DF("ZOOM_FOV", zoom_fov, DDF_MainGetAngle),
+	DF("ZOOM_FOV", zoom_fov, DDF_MainGetNumeric),
+	DF("ZOOM_FACTOR", zoom_factor, DDF_MainGetFloat),
 	DF("REFIRE_INACCURATE", refire_inacc, DDF_MainGetBoolean),
 	DF("SHOW_CLIP", show_clip, DDF_MainGetBoolean),
 	DF("SHARED_CLIP", shared_clip, DDF_MainGetBoolean),
@@ -458,6 +459,9 @@ static void WeaponFinishEntry(void)
 		dynamic_weapon->dangerous = true;
 		dynamic_weapon->priority = 10;
 	}
+
+	if (dynamic_weapon->zoom_factor > 0.0)
+		dynamic_weapon->zoom_fov = I_ROUND(90 / dynamic_weapon->zoom_factor);
 }
 
 
@@ -700,6 +704,7 @@ void weapondef_c::CopyDetail(weapondef_c &src)
   	bind_key = src.bind_key;
 
 	zoom_fov = src.zoom_fov;
+	zoom_factor = src.zoom_factor;
 	refire_inacc = src.refire_inacc;
 	show_clip = src.show_clip;
 	shared_clip = src.shared_clip;
@@ -776,6 +781,7 @@ void weapondef_c::Default(void)
 	nothrust = false;
 	bind_key = -1;
 	zoom_fov = ANG_MAX;
+	zoom_factor = 0.0;
 	refire_inacc = false;
 	show_clip = false;
 	shared_clip = false;

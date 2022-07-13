@@ -47,7 +47,6 @@
 #include "r_units.h"
 
 cvar_c r_fov;
-cvar_c r_zoomfov;
 
 int viewwindow_x;
 int viewwindow_y;

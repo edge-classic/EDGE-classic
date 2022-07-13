@@ -21,6 +21,9 @@ Bugs fixed
 + Fixed DEH_EDGE giving wrong weapon priorities to the rocket launcher and plasma rifle
 + Fixed FORCE_AIM attacks being affected by visibility modifiers
 + Fixed BERSERK_MULTIPLY not being applied to projectiles
++ Fixed internal colormaps having incorrect color application with non-Doom IWADs or PWADs that have their own colormap/palettes
++ Fixed ZOOM_FOV = 0 in DDFWEAP not disabling zoom for a weapon
++ Fixed erroneous missing sprite rotations when loading sprites from multiple sources
 
 General Improvements
 --------------------
@@ -53,6 +56,8 @@ General Improvements
 + Widescreen ratio resolutions added to windowed resolution list
 + DOOMWADPATH environment variable now supported
 + AJBSP updated to produce only XGL3 nodes compatible with both binary/UDMF map formats
+  - XGL3 node writing adapted from Eureka codebase
+  - XGL3 node loading functions adapted from EDGE 2.x
 + GWA file will always be built, regardless of a WAD having internal GL lumps
   - This prevents crashes with malformed/orphaned GL lumps in a WAD
 + IWADs are now detected by combinations of unique lumps instead of simple filenames
@@ -89,6 +94,8 @@ New Features
   (negative numbers move it down, positive numbers move it up). Mainly for Heretic compatibility
   -State Action: BECOME(<weapon name>,<state:frame>) Similar to the things.ddf action of the same 
    name.<state:frame> is optional
+  -Command: ZOOM_FACTOR=<float> which will function as a tradition zoom magnification factor (1.5, 2.0, etc)
+   and will be preferred over ZOOM_FOV if both are present
   
 + STYLES.DDF
   -PRE and END level texts now use style defined in entry [INTERLEVEL_TEXT] 
@@ -138,6 +145,7 @@ New Features
   -- interbackdrop
 
 + UDMF 1.1 Support
+  - TEXTMAP parser adapted from EDGE 2.x
   - The following UDMF namespaces are currently supported:
   -- Doom
   -- Heretic

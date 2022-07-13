@@ -215,8 +215,8 @@ static void InstallSpriteLump(spritedef_c *def, int lump,
 
 	if (frame->images[rot])
 	{
-		I_Warning("Sprite %s has two lumps mapped to it (frame %c).\n", 
-				lumpname, lumpname[pos]);
+		//I_Warning("Sprite %s has two lumps mapped to it (frame %c).\n", 
+				//lumpname, lumpname[pos]);
 		return;
 	}
 
@@ -243,8 +243,8 @@ static void InstallSpriteImage(spritedef_c *def, const image_c *img,
 
 	if (frame->images[rot])
 	{
-		I_Warning("Sprite %s has two images mapped to it (frame %c)\n", 
-				img_name, img_name[pos]);
+		//I_Warning("Sprite %s has two images mapped to it (frame %c)\n", 
+				//img_name, img_name[pos]);
 		return;
 	}
 
@@ -555,8 +555,9 @@ void W_InitSprites(void)
 	for (int file = numfiles - 1; file >= 0; file--)
 	{
 		FillSpriteFrames(file, (numfiles - file) * 100, (numfiles+1) * 100);
-		MarkCompletedFrames();
 	}
+
+	MarkCompletedFrames();
 
 	// 6. Perform checks and free stuff
 

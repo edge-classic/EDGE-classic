@@ -39,10 +39,25 @@ static const commandlist_t colmap_commands[] =
 	DDF_FIELD("LENGTH",  length,    DDF_MainGetNumeric),
 	DDF_FIELD("SPECIAL", special,   DDF_ColmapGetSpecial),
 	DDF_FIELD("GL_COLOUR", gl_colour, DDF_MainGetRGB),
+	DDF_FIELD("NEEDS_DOOM_PALETTE", needs_doom_palette, DDF_MainGetBoolean),
 
 	DDF_CMD_END
 };
 
+static const char *builtin_colourmaps[11] = 
+{
+	"FNWHTMAP",
+	"LAVAMAP",
+	"NITEVMAP",
+	"SHADEMAP",
+	"WATERMAP",
+	"SLIMEMAP",
+	"AUTOMAPS",
+	"PLYRMAPS",
+	"SARGMAPS",
+	"SKINMAPS",
+	"TEXTMAPS"
+};
 
 //
 //  DDF PARSE ROUTINES
@@ -124,6 +139,18 @@ static void ColmapFinishEntry(void)
 
 	if (dynamic_colmap->lump_name.empty() && dynamic_colmap->gl_colour == RGB_NO_VALUE)
 		DDF_Error("Colourmap entry missing LUMP or GL_COLOUR.\n");
+
+	if (! dynamic_colmap->lump_name.empty())
+	{
+		for (int i=0; i < 11; i++)
+		{
+			if (strcasecmp(dynamic_colmap->lump_name.c_str(), builtin_colourmaps[i]) == 0)
+			{
+				dynamic_colmap->needs_doom_palette = true;
+			}
+		}
+	}
+
 }
 
 
@@ -288,6 +315,8 @@ void colourmap_c::CopyDetail(colourmap_c &src)
 	// FIXME!!! Cache struct to class
 	cache.data = src.cache.data;
 	analysis = NULL;
+
+	needs_doom_palette = src.needs_doom_palette;
 }
 
 //
@@ -307,6 +336,8 @@ void colourmap_c::Default()
 	// FIXME!!! Cache struct to class
 	cache.data = NULL;
 	analysis = NULL;
+
+	needs_doom_palette = false;
 }
 
 

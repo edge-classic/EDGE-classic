@@ -429,7 +429,7 @@ static void P_BringUpWeapon(player_t * p)
 
 	if (p->zoom_fov > 0)
 	{
-		if (info->zoom_fov > 0)
+		if (info->zoom_fov < ANG_MAX)
 			p->zoom_fov = info->zoom_fov;
 		else if (level_flags.limit_zoom)
 			p->zoom_fov = 0;

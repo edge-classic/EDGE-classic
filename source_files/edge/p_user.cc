@@ -440,12 +440,16 @@ static void MovePlayer(player_t * player)
 
 		if (player->zoom_fov == 0)
 		{
-			if (! (player->ready_wp < 0 || player->pending_wp >= 0))
-				fov = player->weapons[player->ready_wp].info->zoom_fov;
+			angle_t weapon_zoom = player->weapons[player->ready_wp].info->zoom_fov;
 
-			// In `LimitZoom' mode, only allow zooming if weapon supports it
-			if (fov <= 0 && !level_flags.limit_zoom)
+			if (! (player->ready_wp < 0 || player->pending_wp >= 0))
+				fov = weapon_zoom;
+
+			if (!level_flags.limit_zoom && fov == ANG_MAX)
 				fov = r_zoomfov.d;
+			
+			if (level_flags.limit_zoom && fov == ANG_MAX)
+				fov = 0;
 		}
 
 		player->zoom_fov = fov;

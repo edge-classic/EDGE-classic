@@ -1237,10 +1237,24 @@ static void DoStartLevel(skill_t skill)
 	{ 
 		g = ITERATOR_TO_TYPE(it, gamedef_c*);
 
+		//Lobo 2022: lets use text instead of M_EPIxx graphic
+		if(g->description) 
+		{
+			if (!strcmp(language[g->description], EpisodeMenu[chosen_epi].name))
+				break;
+		}
+		else
+		{	
+			if (!strcmp(g->name.c_str(), EpisodeMenu[chosen_epi].name))
+				break;
+		}
+		
+		/*
 		if (!strcmp(g->namegraphic.c_str(), EpisodeMenu[chosen_epi].patch_name))
 		{
 			break;
 		}
+		*/
 	}
 
 	// Sanity checking...

@@ -479,8 +479,10 @@ void DDF_LanguageCleanUp(void)
 	//language.Dump();
 	//exit(1);
 	
+	language.buildinfo = lang_buildinfo;
+
 	// Dispose of the data
-	delete lang_buildinfo;
+	//delete lang_buildinfo;
 }
 
 //
@@ -497,6 +499,35 @@ language_c::language_c()
 language_c::~language_c()
 {
 	Clear();
+}
+
+void language_c::Recompile(void)
+{
+	// Convert build info into the language structure
+	int langcount = buildinfo->langnames.GetSize();
+	if (langcount == 0)
+		I_Error("Missing languages !\n");
+	
+	// Load the choice of languages
+	LoadLanguageChoices(buildinfo->langnames);
+	
+	// Load the reference table
+	buildinfo->CompileLanguageReferences();
+	LoadLanguageReferences(buildinfo->comp_langrefs);
+	
+	// Load the value table for each one of the languages
+	int i;
+	for (i=0; i<langcount; i++)
+	{
+		buildinfo->CompileLanguageValues(i);
+		LoadLanguageValues(i, buildinfo->comp_langvalues);
+	}
+}
+
+void language_c::AddOrReplace(const char *ref, const char *value)
+{
+	buildinfo->AddLangNode(ref, value);
+	Recompile();
 }
 
 //

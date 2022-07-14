@@ -23,6 +23,7 @@
 
 #include "types.h"
 
+class ddf_bi_lang_c;
 
 // ------------------------------------------------------------------
 // ---------------------------LANGUAGES------------------------------
@@ -43,6 +44,8 @@ private:
 
 	int Find(const char *ref);
 
+	void Recompile(void);
+
 public:
 	void Clear();
 	
@@ -61,7 +64,11 @@ public:
 	bool Select(int idx);
 	
 	const char* operator[](const char *refname);
+
+	ddf_bi_lang_c* buildinfo;
 	
+	void AddOrReplace(const char *ref, const char *value);
+
 	//void Dump(void);
 };
 

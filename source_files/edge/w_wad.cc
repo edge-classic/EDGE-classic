@@ -1441,31 +1441,31 @@ void W_ReadUMAPINFOLumps(void)
 		{
 			temp_level = new mapdef_c;
 			temp_level->name = M_Strupr(Maps.maps[i].mapname);
-			temp_level->lump.Set(Maps.maps[i].mapname);
+			temp_level->lump.Set(M_Strupr(Maps.maps[i].mapname));
 
 			mapdefs.Insert(temp_level);
 		}
 			
-		if(Maps.maps[i].levelpic)
+		if(Maps.maps[i].levelpic[0] != NULL)
 			temp_level->namegraphic.Set(M_Strupr(Maps.maps[i].levelpic));
 
 		if(Maps.maps[i].skytexture[0] != NULL)	
 			temp_level->sky.Set(M_Strupr(Maps.maps[i].skytexture));
 
-		if(Maps.maps[i].levelname[0] != NULL)
+		if(Maps.maps[i].levelname)
         {
             std::string temp_ref = epi::STR_Format("%sDesc", Maps.maps[i].mapname);
             std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].levelname);
             language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
+			temp_level->description.Set(temp_ref.c_str());
         }
 
-		if(Maps.maps[i].intertext[0] != NULL)
+		if(Maps.maps[i].intertext)
 		{
-			/*
-			std::string tempStr;
-			tempStr = epi::STR_Format("%s",Maps.maps[i].intertext);
-			temp_level->f_end.text.Set(tempStr.c_str());
-			*/
+			std::string temp_ref = epi::STR_Format("%sINTERTEXT", Maps.maps[i].mapname);
+            std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].intertext);
+            language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
+			temp_level->f_end.text.Set(temp_ref.c_str());
 		}	
 
 		if(Maps.maps[i].music[0] != NULL)

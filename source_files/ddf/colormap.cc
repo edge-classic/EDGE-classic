@@ -44,7 +44,7 @@ static const commandlist_t colmap_commands[] =
 	DDF_CMD_END
 };
 
-static const char *builtin_colourmaps[11] = 
+static const char *builtin_colourmaps[10] = 
 {
 	"FNWHTMAP",
 	"LAVAMAP",
@@ -56,7 +56,6 @@ static const char *builtin_colourmaps[11] =
 	"PLYRMAPS",
 	"SARGMAPS",
 	"SKINMAPS",
-	"TEXTMAPS"
 };
 
 //
@@ -86,7 +85,10 @@ static void ColmapStartEntry(const char *name, bool extend)
 		dynamic_colmap->Default();
 
 		if (strnicmp(name, "TEXT", 4) == 0)
+		{
 			dynamic_colmap->special = COLSP_Whiten;
+			dynamic_colmap->needs_doom_palette = true;
+		}
 
 		return;
 	}
@@ -98,7 +100,10 @@ static void ColmapStartEntry(const char *name, bool extend)
 
 	// make sure fonts get whitened properly (as the default)
 	if (strnicmp(name, "TEXT", 4) == 0)
+	{
 		dynamic_colmap->special = COLSP_Whiten;
+		dynamic_colmap->needs_doom_palette = true;
+	}
 
 	colourmaps.Insert(dynamic_colmap);
 }
@@ -142,7 +147,7 @@ static void ColmapFinishEntry(void)
 
 	if (! dynamic_colmap->lump_name.empty())
 	{
-		for (int i=0; i < 11; i++)
+		for (int i=0; i < 10; i++)
 		{
 			if (strcasecmp(dynamic_colmap->lump_name.c_str(), builtin_colourmaps[i]) == 0)
 			{

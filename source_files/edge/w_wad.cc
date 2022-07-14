@@ -1454,7 +1454,7 @@ void W_ReadUMAPINFOLumps(void)
 
 		if(Maps.maps[i].levelname[0] != NULL)
         {
-            std::string temp_ref = epi::STR_Format("%sBalls", Maps.maps[i].mapname);
+            std::string temp_ref = epi::STR_Format("%sDesc", Maps.maps[i].mapname);
             std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].levelname);
             language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
         }

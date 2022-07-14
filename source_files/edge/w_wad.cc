@@ -1453,14 +1453,11 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->sky.Set(M_Strupr(Maps.maps[i].skytexture));
 
 		if(Maps.maps[i].levelname[0] != NULL)
-		{
-			//Hacky. If we don't have a valid language.ddf ref
-			//our default behaviour is to just show the unknown
-			//label so... ;)
-			std::string tempStr;
-			tempStr = epi::STR_Format(" %s ",Maps.maps[i].levelname);
-			temp_level->description.Set(tempStr.c_str());
-		}
+        {
+            std::string temp_ref = epi::STR_Format("%sBalls", Maps.maps[i].mapname);
+            std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].levelname);
+            language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
+        }
 
 		if(Maps.maps[i].intertext[0] != NULL)
 		{
@@ -1643,9 +1640,6 @@ void W_ReadCoalLumps(void)
 
 		if (df->coal_huds >= 0)	VM_LoadLumpOfCoal(df->coal_huds);
 	}
-
-	//Lobo: just stuck it here for now while testing
-	W_ReadUMAPINFOLumps();
 }
 
 

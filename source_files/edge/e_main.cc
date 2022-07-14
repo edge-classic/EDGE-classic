@@ -1407,6 +1407,7 @@ void (*startcode[])() =
 	W_ReadDDF,
 	W_CheckWADFixes,
 	DDF_CleanUp,
+	W_ReadUMAPINFOLumps,
 	W_InitFlats,
 	W_InitTextures,
 	W_ImageCreateUser,

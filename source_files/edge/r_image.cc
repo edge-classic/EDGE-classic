@@ -951,7 +951,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
 
 	static byte trans_pal[256 * 3];
 
-	if (trans != NULL && (W_GetFileForLump(rim->source_palette) == 0 || !trans->needs_doom_palette))
+	if (trans != NULL && (!W_IsLumpInPwad("PLAYPAL") || trans->needs_doom_palette))
 	{
 		// Note: we don't care about source_palette here. It's likely that
 		// the translation table itself would not match the other palette,

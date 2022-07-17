@@ -105,6 +105,8 @@ typedef struct cached_image_s
 
 	// texture identifier within GL
 	GLuint tex_id;
+
+	bool is_whitened;
 }
 cached_image_t;
 
@@ -921,7 +923,7 @@ static int IM_PixelLimit(image_c *rim)
 }
 
 
-static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
+static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_whiten)
 {
 	bool clamp  = IM_ShouldClamp(rim);
 	bool mip    = IM_ShouldMipmap(rim);
@@ -951,7 +953,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
 
 	static byte trans_pal[256 * 3];
 
-	if (trans != NULL && (!W_IsLumpInPwad("PLAYPAL") || trans->needs_doom_palette))
+	if (trans != NULL)
 	{
 		// Note: we don't care about source_palette here. It's likely that
 		// the translation table itself would not match the other palette,
@@ -986,6 +988,9 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
 		epi::image_data_c *scaled_img =
 			epi::Hq2x::Convert(tmp_img, solid, false /* invert */);
 
+		if (do_whiten)
+			scaled_img->Whiten();
+
 		delete tmp_img;
 		tmp_img = scaled_img;
 	}
@@ -994,14 +999,17 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans)
 		epi::image_data_c *rgb_img =
 				R_PalettisedToRGB(tmp_img, what_palette, rim->opacity);
 
+		if (do_whiten)
+			rgb_img->Whiten();
+
 		delete tmp_img;
 		tmp_img = rgb_img;
 	}
-	else if (tmp_img->bpp >= 3 && trans != NULL)
+	else if (tmp_img->bpp >= 3)
 	{
-		if (trans == font_whiten_map)
+		if (do_whiten)
 			tmp_img->Whiten();
-		else
+		else if (trans != NULL)
 			R_PaletteRemapRGBA(tmp_img, what_palette, (const byte *) &playpal_data[0]);
 	}
 
@@ -1373,7 +1381,7 @@ const char *W_ImageGetName(const image_c *image)
 //
 
 static cached_image_t *ImageCacheOGL(image_c *rim,
-	const colourmap_c *trans)
+	const colourmap_c *trans, bool do_whiten)
 {
 	// check if image + translation is already cached
 
@@ -1391,8 +1399,19 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 			continue;
 		}
 
-		if (rc->trans_map == trans)
+		if (do_whiten && rc->is_whitened)
 			break;
+
+		if (rc->trans_map == trans)
+		{
+			if (do_whiten)
+			{
+				if (rc->is_whitened)
+					break;
+			}
+			else if (!rc->is_whitened)
+				break;
+		}
 
 		rc = NULL;
 	}
@@ -1406,6 +1425,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 		rc->trans_map = trans;
 		rc->hue = RGB_NO_VALUE;
 		rc->tex_id = 0;
+		rc->is_whitened = do_whiten ? true : false;
 
 		InsertAtTail(rc);
 
@@ -1432,7 +1452,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 	if (rc->tex_id == 0)
 	{
 		// load image into cache
-		rc->tex_id = LoadImageOGL(rim, trans);
+		rc->tex_id = LoadImageOGL(rim, trans, do_whiten);
 	}
 
 	return rc;
@@ -1444,7 +1464,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 // switch to more specialised routines.
 //
 GLuint W_ImageCache(const image_c *image, bool anim,
-				    const colourmap_c *trans)
+				    const colourmap_c *trans, bool do_whiten)
 {
 	// Intentional Const Override
 	image_c *rim = (image_c *) image;
@@ -1456,7 +1476,7 @@ GLuint W_ImageCache(const image_c *image, bool anim,
 			rim = rim->anim.cur;
 	}
 
-	cached_image_t *rc = ImageCacheOGL(rim, trans);
+	cached_image_t *rc = ImageCacheOGL(rim, trans, do_whiten);
 
 	SYS_ASSERT(rc->parent);
 

@@ -300,16 +300,17 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 
 	float r = 1.0f, g = 1.0f, b = 1.0f;
 
+	bool do_whiten = false;
+
 	if (text_col != RGB_NO_VALUE)
 	{
 		r = RGB_RED(text_col) / 255.0;
 		g = RGB_GRN(text_col) / 255.0;
 		b = RGB_BLU(text_col) / 255.0;
-
-		palremap = font_whiten_map;
+		do_whiten = true;
 	}
 
-	GLuint tex_id = W_ImageCache(image, true, palremap);
+	GLuint tex_id = W_ImageCache(image, true, palremap, do_whiten);
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex_id);

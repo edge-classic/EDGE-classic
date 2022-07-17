@@ -74,8 +74,6 @@ public:
 
 	void *analysis;
 
-	bool needs_doom_palette; // For built in colormaps like text whitening, night vision, etc
-
 private:
 	// disable copy construct and assignment operator
 	explicit colourmap_c(colourmap_c &rhs) { }

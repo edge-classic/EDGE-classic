@@ -234,7 +234,7 @@ void W_DrawSavePic(const byte *pixels);
 
 #ifdef USING_GL_TYPES
 GLuint W_ImageCache(const image_c *image, bool anim = true,
-					const colourmap_c *trans = NULL);
+					const colourmap_c *trans = NULL, bool do_whiten = false);
 #endif
 void W_ImagePreCache(const image_c *image);
 

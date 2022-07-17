@@ -92,9 +92,6 @@ abstract_shader_c *R_GetColormapShader(
 		const struct region_properties_s *props, int light_add = 0);
 
 // text translation tables
-extern const byte *font_whitener;
-extern const colourmap_c *font_whiten_map;
-
 extern const colourmap_c *text_red_map;
 extern const colourmap_c *text_white_map;
 extern const colourmap_c *text_grey_map;

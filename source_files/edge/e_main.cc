@@ -862,6 +862,14 @@ void InitDirectories(void)
 
 static void IdentifyVersion(void)
 {
+    std::string reqwad(epi::PATH_Join(game_dir.c_str(), REQUIREDWAD "." EDGEWADEXT));
+
+    if (! epi::FS_Access(reqwad.c_str(), epi::file_c::ACCESS_READ))
+        I_Error("IdentifyVersion: Could not find required %s.%s!\n", 
+            REQUIREDWAD, EDGEWADEXT);
+
+    W_AddRawFilename(reqwad.c_str(), FLKIND_EWad);
+
 	I_Debugf("- Identify Version\n");
 
 	// Check -iwad parameter, find out if it is the IWADs directory
@@ -1084,22 +1092,6 @@ static void IdentifyVersion(void)
 	foundlooseiwad:
 
 	I_Debugf("IWAD BASE = [%s]\n", iwad_base.c_str());
-
-    // Look for the required wad in the IWADs dir and then the gamedir
-    std::string reqwad(epi::PATH_Join(iwad_dir.c_str(), REQUIREDWAD "." EDGEWADEXT));
-
-    if (! epi::FS_Access(reqwad.c_str(), epi::file_c::ACCESS_READ))
-    {
-        reqwad = epi::PATH_Join(game_dir.c_str(), REQUIREDWAD "." EDGEWADEXT);
-
-        if (! epi::FS_Access(reqwad.c_str(), epi::file_c::ACCESS_READ))
-        {
-            I_Error("IdentifyVersion: Could not find required %s.%s!\n", 
-                    REQUIREDWAD, EDGEWADEXT);
-        }
-    }
-
-    W_AddRawFilename(reqwad.c_str(), FLKIND_EWad);
 }
 
 // Add game-specific base EWADs (widepix, skyboxes, etc) - Dasho
@@ -1405,7 +1397,6 @@ void (*startcode[])() =
 	W_InitMultipleFiles,
 	V_InitPalette,
 	W_ReadDDF,
-	W_CheckWADFixes,
 	DDF_CleanUp,
 	W_ReadUMAPINFOLumps,
 	W_InitFlats,

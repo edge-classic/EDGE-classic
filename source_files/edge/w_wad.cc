@@ -77,6 +77,8 @@
 
 #include "umapinfo.h" //Lobo 2022
 
+// forward declaration
+void W_ReadWADFIXES(void);
 
 // -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
 typedef struct ddf_reader_s
@@ -106,7 +108,6 @@ static ddf_reader_t DDF_Readers[] =
 	{ "DDFGAME", "Games",      DDF_ReadGames },
 	{ "DDFLEVL", "Levels",     DDF_ReadLevels },
 	{ "DDFFLAT", "Flats",      DDF_ReadFlat },
-	{ "WADFIXES","Fixes",	   DDF_ReadFixes },
 	{ "RSCRIPT", "RadTrig",    RAD_ReadScript }       // -AJA- 2000/04/21.
 };
 
@@ -116,7 +117,7 @@ static ddf_reader_t DDF_Readers[] =
 #define COLM_READER  2
 #define SWTH_READER  12
 #define ANIM_READER  13
-#define RTS_READER   18
+#define RTS_READER   17
 
 class data_file_c
 {
@@ -1127,8 +1128,6 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 	return (lump1_found && lump2_found);
 }
 
-
-
 //
 // AddFile
 //
@@ -1140,7 +1139,7 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 //       otherwise it is the sort_index for the lumps (typically the
 //       file number of the wad which the GWA is a companion for).
 //
-static void AddFile(const char *filename, int kind, int dyn_index)
+static void AddFile(const char *filename, int kind, int dyn_index, std::string md5_check)
 {
 	int j;
 	int length;
@@ -1167,6 +1166,9 @@ static void AddFile(const char *filename, int kind, int dyn_index)
 	startlump = numlumps;
 
 	int datafile = (int)data_files.size();
+
+	if (datafile == 1)
+		W_ReadWADFIXES();
 
 	data_file_c *df = new data_file_c(filename, kind, file);
 	data_files.push_back(df);
@@ -1331,7 +1333,34 @@ static void AddFile(const char *filename, int kind, int dyn_index)
 			}
 
 		// Load it (using good ol' recursion again).
-		AddFile(hwa_filename.c_str(), FLKIND_HWad, -1);
+		AddFile(hwa_filename.c_str(), FLKIND_HWad, -1, df->md5_string);
+	}
+
+	std::string fix_checker;
+
+	if (!md5_check.empty())
+		fix_checker = md5_check;
+	else
+		fix_checker = df->md5_string;
+
+	for (int i = 0; i < fixdefs.GetSize(); i++)
+	{
+		if (strcasecmp(fix_checker.c_str(), fixdefs[i]->md5_string.c_str()) == 0)
+		{
+
+			std::string fix_path = epi::PATH_Join(game_dir.c_str(), "edge_fixes");
+			fix_path = epi::PATH_Join(fix_path.c_str(), fix_checker.append(".wad").c_str());
+			if (epi::FS_Access(fix_path.c_str(), epi::file_c::ACCESS_READ))
+			{
+				AddFile(fix_path.c_str(), FLKIND_PWad, -1, "");
+				I_Printf("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name.c_str());
+			}
+			else
+			{
+				I_Warning("WADFIXES: %s defined, but no fix WAD located in edge_fixes!\n", fixdefs[i]->name.c_str());
+				return;
+			}
+		}
 	}
 }
 
@@ -1369,7 +1398,7 @@ void W_BuildNodes(void)
 
 			// Load it.  This recursion bit is rather sneaky,
 			// hopefully it doesn't break anything...
-			AddFile(gwa_filename.c_str(), FLKIND_GWad, datafile);
+			AddFile(gwa_filename.c_str(), FLKIND_GWad, datafile, "");
 
 			df->companion_gwa = datafile++ + 1;
 		}
@@ -1411,7 +1440,7 @@ void W_InitMultipleFiles(void)
 	for (it = wadfiles.begin(); it != wadfiles.end(); it++)
     {
         raw_filename_c *rf = *it;
-		AddFile(rf->filename.c_str(), rf->kind, -1);
+		AddFile(rf->filename.c_str(), rf->kind, -1, "");
     }
 
 	if (numlumps == 0)
@@ -1533,6 +1562,23 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
 		
 	}
+}
+
+void W_ReadWADFIXES(void)
+{
+	ddf_reader_t wadfix_reader = {"WADFIXES","Fixes", DDF_ReadFixes };
+
+	I_Printf("Loading %s\n", wadfix_reader.print_name);
+
+	// call read function
+	(* wadfix_reader.func)(NULL, 0);
+
+	int length;
+	char *data = (char *) W_ReadLumpAlloc(W_GetNumForName2("WADFIXES"), &length);
+
+	// call read function
+	(* wadfix_reader.func)(data, length);
+	delete[] data;
 }
 
 void W_ReadDDF(void)
@@ -2486,93 +2532,6 @@ bool W_IsLumpInPwad(const char *name)
 	}
 
 	return false;
-}
-
-//W_CheckWADFixes
-//
-//check if WADFIXES has something for matching PWAD
-//
-void W_CheckWADFixes(void)
-{
-	for (int i = 0; i < data_files.size(); i++)
-	{
-		data_file_c *df = data_files[i];
-
-		//we only want pwads?
-		if (df->kind == FLKIND_PWad)
-		{
-			for (int j = 0; j < fixdefs.GetSize(); j++)
-			{
-				if (strcasecmp(df->md5_string.c_str(), fixdefs[j]->md5_string.c_str()) == 0)
-				{
-
-					std::string fix_path = epi::PATH_Join(game_dir.c_str(), "edge_fixes");
-					fix_path = epi::PATH_Join(fix_path.c_str(), df->md5_string.append(".wad").c_str());
-					if (epi::FS_Access(fix_path.c_str(), epi::file_c::ACCESS_READ)) 
-						AddFile(fix_path.c_str(), FLKIND_PWad, -1);
-					else
-					{
-						I_Warning("WADFIXES: %s defined, but no fix WAD located in edge_fixes!\n", fixdefs[j]->name.c_str());
-						return;
-					}
-
-					I_Printf("WADFIXES: Applying fixes for %s\n", fixdefs[j]->name.c_str());
-
-					data_file_c *df_fix = data_files.back();
-
-					for (int d = 0; d < NUM_DDF_READERS; d++)
-					{
-						int lump = df_fix->ddf_lumps[d];
-
-						if (lump >= 0)
-						{
-							I_Printf("Loading %s from: %s\n", DDF_Readers[d].name, df_fix->file_name);
-
-							int length;
-							char *data = (char *) W_ReadLumpAlloc(lump, &length);
-
-							// call read function
-							(* DDF_Readers[d].func)(data, length);
-							delete[] data;
-						}
-
-						// handle Boom's ANIMATED and SWITCHES lumps
-						if (d == ANIM_READER && df_fix->animated >= 0)
-						{
-							I_Printf("Loading ANIMATED from: %s\n", df_fix->file_name);
-
-							int length;
-							byte *data = W_ReadLumpAlloc(df_fix->animated, &length);
-
-							DDF_ParseANIMATED(data, length);
-							delete[] data;
-						}
-						if (d == SWTH_READER && df_fix->switches >= 0)
-						{
-							I_Printf("Loading SWITCHES from: %s\n", df_fix->file_name);
-
-							int length;
-							byte *data = W_ReadLumpAlloc(df_fix->switches, &length);
-
-							DDF_ParseSWITCHES(data, length);
-							delete[] data;
-						}
-
-						// handle BOOM Colourmaps (between C_START and C_END)
-						if (d == COLM_READER && df_fix->colmap_lumps.GetSize() > 0)
-						{
-							for (int i=0; i < df_fix->colmap_lumps.GetSize(); i++)
-							{
-								int lump = df_fix->colmap_lumps[i];
-
-								DDF_ColourmapAddRaw(W_GetLumpName(lump), W_LumpLength(lump));
-							}
-						}
-					}
-				}
-			}
-		}
-	}
 }
 
 //--- editor settings ---

@@ -85,6 +85,7 @@
 #include "hu_draw.h"
 #include "hu_stuff.h"
 #include "hu_style.h"
+#include "i_ctrl.h"
 #include "m_menu.h"
 #include "m_misc.h"
 #include "m_netgame.h"
@@ -984,6 +985,43 @@ void M_OptDrawer()
 		             (curr_menu->menu_center) - style->fonts[0]->StringWidth(curr_menu->items[i].name),
 					 curry, curr_menu->items[i].name);
 		
+		if (curr_menu == &analogue_optmenu && strcasecmp("Joystick Device", curr_menu->items[i].name) == 0)
+		{
+			HL_WriteText(style, styledef_c::T_TEXT, 225, curry, "AXIS TEST");
+			std::string axis = "None";
+			for (int j = 0; j < 6; j++)
+			{
+				int joy = I_JoyGetAxis(j);
+				if (abs(joy) < 0x8000 && abs(joy) > 5000)
+				{
+					switch (j)
+					{
+						case 0:
+							axis = "First";
+							break;
+						case 1:
+							axis = "Second";
+							break;
+						case 2:
+							axis = "Third";
+							break;
+						case 3:
+							axis = "Fourth";
+							break;
+						case 4:
+							axis = "Fifth";
+							break;
+						case 5:
+							axis = "Sixth";
+							break;
+						default:
+							break;
+					}
+				}
+			}
+			HL_WriteText(style, styledef_c::T_ALT, 225 + (style->fonts[0]->StringWidth("AXIS TEST") / 2) - (style->fonts[0]->StringWidth(axis.c_str()) / 2), curry + deltay, axis.c_str());
+		}
+
 		// -ACB- 1998/07/15 Menu Cursor is colour indexed.
 		if (is_selected)
 		{

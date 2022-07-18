@@ -1405,7 +1405,7 @@ void (*startcode[])() =
 	E_PickLoadingScreen,
 	HU_Init,
 	CON_Start,
-	SpecialWadVerify, // "Verifying EDGE-DEFS version..."
+	SpecialWadVerify,
 	W_BuildNodes,
 	M_InitMiscConVars,
 	SetLanguage,

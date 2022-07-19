@@ -1815,18 +1815,18 @@ flatdef_c* P_IsThingOnLiquidFloor(mobj_t * thing)
 //
 //---------------------------------------------------------------------------
 
-int P_HitFloor(mobj_t * thing)
+void P_HitFloor(mobj_t * thing)
 {
 	if (thing->flags & MF_FLOAT)
-		return (1);
+		return;
 
 	// marked as not making splashes (e.g. a leaf)
 	if (thing->hyperflags & HF_NOSPLASH)
-		return (1);
+		return;
 
 	// don't splash if landing on the edge above water/lava/etc....
     if (thing->floorz != thing->subsector->sector->f_h)
-    	return (1);
+    	return;
 
 	flatdef_c *current_flatdef = P_IsThingOnLiquidFloor(thing);
 

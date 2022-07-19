@@ -20,13 +20,27 @@ This section assumes that you have completed the steps at https://www.msys2.org/
 From an MSYS prompt for your target architecture:
 
 Install the following additional packages:
-   * package: `mingw-w64-(arch)-cmake`
-   * package: `mingw-w64-(arch)-SDL2`
+* `mingw-w64-(arch)-cmake`
+* `mingw-w64-(arch)-SDL2`
 
 Then, after navigating to the project directory:
 
 ```
 > cmake -B build -G "MSYS Makefiles"
+> cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
+```
+
+## Linux Compilation
+
+Install the following packages with their dependencies (exact names may vary based on distribution):
+* `cmake`
+* `g++`
+* `libsdl2-dev`
+
+Then, after navigating to the project directory in a terminal:
+
+```
+> cmake -B build
 > cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
 ```
 

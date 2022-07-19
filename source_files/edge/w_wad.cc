@@ -1569,16 +1569,33 @@ void W_ReadUMAPINFOLumps(void)
 				std::string temp_ref = epi::STR_Format("%sPRETEXT", secret_level->name);
             	std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].intertextsecret);
             	language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
-				secret_level->f_pre.text.clear();
-				secret_level->f_pre.text.Set(temp_ref.c_str());
-				secret_level->f_pre.picwait = 350; //10 seconds
-				if (temp_level->f_end.music)
-					secret_level->f_pre.music=temp_level->f_end.music;
 
-				if(Maps.maps[i].interbackdrop[0])
-					secret_level->f_pre.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+				//hack for shitty dbp shennanigans :/
+				if (temp_level->nextmapname = temp_level->secretmapname)
+				{
+					temp_level->f_end.text.clear();
+					temp_level->f_end.text.Set(temp_ref.c_str());
+					temp_level->f_end.picwait = 350; //10 seconds
+
+					if(Maps.maps[i].interbackdrop[0])
+						temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+					else
+						temp_level->f_end.text_flat.Set("FLOOR4_8");
+				}
 				else
-					secret_level->f_pre.text_flat.Set("FLOOR4_8");
+				{
+					secret_level->f_pre.text.clear();
+					secret_level->f_pre.text.Set(temp_ref.c_str());
+					secret_level->f_pre.picwait = 350; //10 seconds
+					if (temp_level->f_end.music)
+						secret_level->f_pre.music=temp_level->f_end.music;
+
+					if(Maps.maps[i].interbackdrop[0])
+						secret_level->f_pre.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+					else
+						secret_level->f_pre.text_flat.Set("FLOOR4_8");
+				}
+				
 			}
 		}
 			

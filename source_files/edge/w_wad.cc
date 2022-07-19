@@ -1489,14 +1489,6 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->description.Set(temp_ref.c_str());
         }
 
-		if(Maps.maps[i].intertext)
-		{
-			std::string temp_ref = epi::STR_Format("%sINTERTEXT", Maps.maps[i].mapname);
-            std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].intertext);
-            language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
-			temp_level->f_end.text.Set(temp_ref.c_str());
-		}	
-
 		if(Maps.maps[i].music[0])
 		{
 			int val = 0;
@@ -1516,14 +1508,80 @@ void W_ReadUMAPINFOLumps(void)
 					temp_level->music = dynamic_plentry->number;
 					playlist.Insert(dynamic_plentry);
 			}
-
 		}	
 		
 		if(Maps.maps[i].nextmap[0])	
 			temp_level->nextmapname.Set(M_Strupr(Maps.maps[i].nextmap));
 
+		if(Maps.maps[i].interbackdrop[0])
+			temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+
+		if(Maps.maps[i].intertext)
+		{
+			std::string temp_ref = epi::STR_Format("%sINTERTEXT", Maps.maps[i].mapname);
+            std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].intertext);
+            language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
+			temp_level->f_end.text.clear();
+			temp_level->f_end.text.Set(temp_ref.c_str());
+			temp_level->f_end.picwait = 350; //10 seconds
+
+			if(Maps.maps[i].interbackdrop[0])
+				temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+				//temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].interbackdrop));
+			else
+				temp_level->f_end.text_flat.Set("FLOOR4_8");
+		}	
+
+		if(Maps.maps[i].intermusic[0])
+		{
+			int val = 0;
+			val = playlist.FindLast(Maps.maps[i].intermusic);
+			if (val != -1) //we already have it
+			{
+				temp_level->f_end.music = val;
+			}
+			else //we need to add it
+			{
+					static pl_entry_c *dynamic_plentry;
+					dynamic_plentry = new pl_entry_c;
+					dynamic_plentry->number = playlist.FindFree();
+					dynamic_plentry->info.Set(Maps.maps[i].intermusic);
+					dynamic_plentry->type = MUS_UNKNOWN; //MUS_MUS
+					dynamic_plentry->infotype = MUSINF_LUMP;
+					temp_level->f_end.music = dynamic_plentry->number;
+					playlist.Insert(dynamic_plentry);
+			}
+		}	
+
 		if(Maps.maps[i].nextsecret[0])
+		{
 			temp_level->secretmapname.Set(M_Strupr(Maps.maps[i].nextsecret));
+			if (Maps.maps[i].intertextsecret)
+			{
+				mapdef_c *secret_level = mapdefs.Lookup(M_Strupr(Maps.maps[i].nextsecret));
+				if (!secret_level)
+				{
+					secret_level = new mapdef_c;
+					secret_level->name = M_Strupr(Maps.maps[i].nextsecret);
+					secret_level->lump.Set(M_Strupr(Maps.maps[i].nextsecret));
+					mapdefs.Insert(secret_level);
+				}
+				std::string temp_ref = epi::STR_Format("%sPRETEXT", secret_level->name);
+            	std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].intertextsecret);
+            	language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
+				secret_level->f_pre.text.clear();
+				secret_level->f_pre.text.Set(temp_ref.c_str());
+				secret_level->f_pre.picwait = 350; //10 seconds
+				if (temp_level->f_end.music)
+					secret_level->f_pre.music=temp_level->f_end.music;
+
+				if(Maps.maps[i].interbackdrop[0])
+					secret_level->f_pre.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+				else
+					secret_level->f_pre.text_flat.Set("FLOOR4_8");
+			}
+		}
+			
 		
 		if(Maps.maps[i].exitpic[0])
 			temp_level->leavingbggraphic.Set(M_Strupr(Maps.maps[i].exitpic));
@@ -1533,7 +1591,6 @@ void W_ReadUMAPINFOLumps(void)
 
 		if(Maps.maps[i].endpic[0])
 		{
-			//temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].endpic));
 			temp_level->nextmapname.clear();
 			temp_level->f_end.pics.Insert(M_Strupr(Maps.maps[i].endpic));
 			temp_level->f_end.picwait = 350000; //1000 seconds
@@ -1541,14 +1598,12 @@ void W_ReadUMAPINFOLumps(void)
 
 		if(Maps.maps[i].dobunny)
 		{
-			//temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].endpic));
 			temp_level->nextmapname.clear();
 			temp_level->f_end.dobunny = true;
 		}
 
 		if(Maps.maps[i].docast)
 		{
-			//temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].endpic));
 			temp_level->nextmapname.clear();
 			temp_level->f_end.docast = true;
 		}
@@ -1558,8 +1613,8 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->nextmapname.clear();
 		}
 
-		if(Maps.maps[i].interbackdrop[0])
-			temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+		if(Maps.maps[i].partime > 0)
+			temp_level->partime = Maps.maps[i].partime;
 		
 	}
 }

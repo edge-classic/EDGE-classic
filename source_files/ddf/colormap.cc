@@ -43,20 +43,6 @@ static const commandlist_t colmap_commands[] =
 	DDF_CMD_END
 };
 
-static const char *builtin_colourmaps[10] = 
-{
-	"FNWHTMAP",
-	"LAVAMAP",
-	"NITEVMAP",
-	"SHADEMAP",
-	"WATERMAP",
-	"SLIMEMAP",
-	"AUTOMAPS",
-	"PLYRMAPS",
-	"SARGMAPS",
-	"SKINMAPS",
-};
-
 //
 //  DDF PARSE ROUTINES
 //

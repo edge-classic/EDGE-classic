@@ -1588,10 +1588,10 @@ static void LoadData(void)
 	
 
 	//Lobo 2022: if we have a per level image defined, use that instead
-	if(wi_stats.cur->leavingbggraphic[0] != NULL)
+	if(wi_stats.cur->leavingbggraphic[0])
 		leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic);
 
-	if(wi_stats.cur->leavingbggraphic[0] != NULL)
+	if(wi_stats.cur->leavingbggraphic[0])
 		entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic);
 		
 	bg_image = W_ImageLookup(gd->background);

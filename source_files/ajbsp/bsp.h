@@ -261,8 +261,6 @@ typedef struct sidedef_s
 	// adjacent sector.  Can be NULL (invalid sidedef)
 	sector_t *sector;
 
-	int udmf_sector_lookup = -1;
-
 	// offset values
 	int x_offset, y_offset;
 
@@ -297,14 +295,8 @@ typedef struct linedef_s
 	vertex_t *start;    // from this vertex...
 	vertex_t *end;      // ... to this vertex
 
-	int udmf_start_lookup = 0;
-	int udmf_end_lookup = 0;
-
 	sidedef_t *right;   // right sidedef
 	sidedef_t *left;    // left sidede, or NULL if none
-
-	int udmf_right_lookup = -1;
-	int udmf_left_lookup = -1;
 
 	// line is marked two-sided
 	char two_sided;

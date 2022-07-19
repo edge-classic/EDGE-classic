@@ -2216,7 +2216,7 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	//pickup_benefits = src.pickup_benefits;
 	if(src.pickup_message)
 	{
-		const char *pickup_message = src.pickup_message; 
+		pickup_message = src.pickup_message; 
 	}
 	
 	lose_benefits = NULL;

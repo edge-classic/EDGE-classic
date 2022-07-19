@@ -98,9 +98,6 @@ extern map_format_e Level_format; // format of current map
  *  Global functions
  */
 
-#ifdef __GNUC__
-__attribute__((noreturn))
-#endif
 void FatalError(const char *fmt);
 void PrintMsg(const char *fmt);
 void PrintVerbose(const char *fmt);

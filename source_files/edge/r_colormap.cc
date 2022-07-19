@@ -96,7 +96,7 @@ static int V_FindPureColour(int which);
 
 void V_InitPalette(void)
 {
-	int t, i, r, g, b, max_file, pal_lump;
+	int t, i;
 	wadtex_resource_c WT;
 
 	const byte *pal = (const byte*)W_CacheLumpName2("PLAYPAL");
@@ -110,13 +110,6 @@ void V_InitPalette(void)
 			playpal_data[t][i][1] = pal[(t * 256 + i) * 3 + 1];
 			playpal_data[t][i][2] = pal[(t * 256 + i) * 3 + 2];
 		}
-	}
-
-	for (i = 0; i < 256; i++)
-	{
-		r = playpal_data[0][i][0];
-		g = playpal_data[0][i][1];
-		b = playpal_data[0][i][2];
 	}
 
 	W_DoneWithLump(pal);

@@ -24,6 +24,8 @@ Bugs fixed
 + Fixed internal colormaps having incorrect color application with non-Doom IWADs or PWADs that have their own colormap/palettes
 + Fixed ZOOM_FOV = 0 in DDFWEAP not disabling zoom for a weapon
 + Fixed erroneous missing sprite rotations when loading sprites from multiple sources
++ Fixed possible CTD when a malformed lump name is passed to the W_CheckNumForName_GFX function
++ Fixed font recoloring appearing incorrect with non-Doom IWADs or certain PWADs that have their own COLORMAP/PLAYPAL lumps
 
 General Improvements
 --------------------
@@ -56,7 +58,7 @@ General Improvements
 + Widescreen ratio resolutions added to windowed resolution list
 + DOOMWADPATH environment variable now supported
 + AJBSP updated to produce only XGL3 nodes compatible with both binary/UDMF map formats
-  - XGL3 node writing adapted from Eureka codebase
+  - XGL3 node writing adapted from Eureka codebase with vertex comparison improvements from ketmar/k8vavoom
   - XGL3 node loading functions adapted from EDGE 2.x
 + GWA file will always be built, regardless of a WAD having internal GL lumps
   - This prevents crashes with malformed/orphaned GL lumps in a WAD
@@ -64,6 +66,7 @@ General Improvements
 + Improved handling of PWADs with custom status bars that aren't widescreen
 + Improved height clipping for non-blocking map objects
 + New graphical startup sequence
++ Axis Test added to Mouse/Joystick control options menu to assist in mapping thumbsticks/analog triggers
 
 New Features
 ------------

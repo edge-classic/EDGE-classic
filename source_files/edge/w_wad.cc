@@ -1475,10 +1475,10 @@ void W_ReadUMAPINFOLumps(void)
 			mapdefs.Insert(temp_level);
 		}
 			
-		if(Maps.maps[i].levelpic[0] != NULL)
+		if(Maps.maps[i].levelpic[0])
 			temp_level->namegraphic.Set(M_Strupr(Maps.maps[i].levelpic));
 
-		if(Maps.maps[i].skytexture[0] != NULL)	
+		if(Maps.maps[i].skytexture[0])	
 			temp_level->sky.Set(M_Strupr(Maps.maps[i].skytexture));
 
 		if(Maps.maps[i].levelname)
@@ -1497,7 +1497,7 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->f_end.text.Set(temp_ref.c_str());
 		}	
 
-		if(Maps.maps[i].music[0] != NULL)
+		if(Maps.maps[i].music[0])
 		{
 			int val = 0;
 			val = playlist.FindLast(Maps.maps[i].music);
@@ -1519,19 +1519,19 @@ void W_ReadUMAPINFOLumps(void)
 
 		}	
 		
-		if(Maps.maps[i].nextmap[0] != NULL)	
+		if(Maps.maps[i].nextmap[0])	
 			temp_level->nextmapname.Set(M_Strupr(Maps.maps[i].nextmap));
 
-		if(Maps.maps[i].nextsecret[0] != NULL)
+		if(Maps.maps[i].nextsecret[0])
 			temp_level->secretmapname.Set(M_Strupr(Maps.maps[i].nextsecret));
 		
-		if(Maps.maps[i].exitpic[0] != NULL)
+		if(Maps.maps[i].exitpic[0])
 			temp_level->leavingbggraphic.Set(M_Strupr(Maps.maps[i].exitpic));
 
-		if(Maps.maps[i].enterpic[0] != NULL)
+		if(Maps.maps[i].enterpic[0])
 			temp_level->enteringbggraphic.Set(M_Strupr(Maps.maps[i].enterpic));
 
-		if(Maps.maps[i].endpic[0] != NULL)
+		if(Maps.maps[i].endpic[0])
 		{
 			//temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].endpic));
 			temp_level->nextmapname.clear();
@@ -1558,7 +1558,7 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->nextmapname.clear();
 		}
 
-		if(Maps.maps[i].interbackdrop[0] != NULL)
+		if(Maps.maps[i].interbackdrop[0])
 			temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
 		
 	}
@@ -2490,9 +2490,6 @@ bool W_IsLumpInPwad(const char *name)
 {
 
 	if(!name)
-		return false;
-
-	if(name[0] == NULL)
 		return false;
 
 	//first check images.ddf

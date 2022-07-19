@@ -50,8 +50,8 @@ const char *lev_current_name;
 // UDMF parser and loading routines backported from EDGE 2.x codebase
 // with non-Vanilla namespace items removed for the time being
 typedef struct {
-	uint8_t *buffer;
-	uint8_t line[512];
+	u8_t *buffer;
+	u8_t line[512];
 	int length;
 	int next;
 	int prev;
@@ -69,7 +69,7 @@ static bool GetNextLine(parser_t *psr)
 	int i;
 	// get next line
 	psr->prev = psr->next;
-	uint8_t *lp = &psr->buffer[psr->next];
+	u8_t *lp = &psr->buffer[psr->next];
 	for (i=0; i<(psr->length - psr->next); i++, lp++)
 		if (*lp == 0x0A || *lp == 0x0D)
 			break;
@@ -98,7 +98,7 @@ static bool GetNextLine(parser_t *psr)
 		if (lp[0] != 0)
 		{
 			*lp = 0; // terminate at multi-line comment start
-			uint8_t *ep = &lp[2];
+			u8_t *ep = &lp[2];
 			while (ep[0] != 0 && ep[0] != 0x2A && ep[1] != 0x2F)
 				ep++; // find multi-line comment end (if present)
 			if (ep[0] == 0)
@@ -118,7 +118,7 @@ static bool GetNextLine(parser_t *psr)
 	return true;
 }
 
-static bool GetNextAssign(parser_t *psr, uint8_t *ident, uint8_t *val)
+static bool GetNextAssign(parser_t *psr, u8_t *ident, u8_t *val)
 {
 	if (!GetNextLine(psr))
 		return false; // no more lines
@@ -134,7 +134,7 @@ static bool GetNextAssign(parser_t *psr, uint8_t *ident, uint8_t *val)
 	else if (len < 4)
 		return false; //line too short for assignment
 
-	uint8_t *lp = psr->line;
+	u8_t *lp = psr->line;
 	while (*lp != 0x3D && *lp != 0)
 		lp++; // find '='
 	if (lp[0] != 0x3D)
@@ -163,7 +163,7 @@ static bool GetNextAssign(parser_t *psr, uint8_t *ident, uint8_t *val)
 	return true;
 }
 
-static bool GetNextBlock(parser_t *psr, uint8_t *ident)
+static bool GetNextBlock(parser_t *psr, u8_t *ident)
 {
 	if (!GetNextLine(psr))
 		return false; // no more lines
@@ -308,7 +308,7 @@ static void CheckUDMFNamespace(parser_t *psr)
 	char ident[128];
 	char value[128];
 
-	if (!GetNextAssign(&udmf_psr, (uint8_t*)ident, (uint8_t*)value) || y_stricmp(ident, "namespace"))
+	if (!GetNextAssign(&udmf_psr, (u8_t*)ident, (u8_t*)value) || y_stricmp(ident, "namespace"))
 		FatalError(StringPrintf("AJBSP: Missing UDMF namespace in %s of %s!\n",	lev_current_name, FindBaseName(edit_wad->PathName())));
 
 	if (y_stricmp(value, "doom") != 0 && y_stricmp(value, "heretic") != 0 && y_strnicmp(value, "zdoomt", 6) != 0)
@@ -324,7 +324,7 @@ static void LoadUDMFVertexes(parser_t *psr)
 	psr->next = 0; // restart from start of lump
 	while (1)
 	{
-		if (!GetNextBlock(psr, (uint8_t*)ident))
+		if (!GetNextBlock(psr, (u8_t*)ident))
 			break;
 
 		if (y_stricmp(ident, "vertex") == 0)
@@ -334,9 +334,9 @@ static void LoadUDMFVertexes(parser_t *psr)
 			// process vertex block
 			while (1)
 			{
-				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				if (!GetNextAssign(psr, (u8_t*)ident, (u8_t*)val))
 				{
-					uint8_t *lp = psr->line;
+					u8_t *lp = psr->line;
 					while (*lp != 0 && *lp != 0x7D)
 						lp++; // find end of line or '}'
 					if (*lp == 0x7D)
@@ -378,7 +378,7 @@ static void LoadUDMFSectors(parser_t *psr)
 	psr->next = 0; // restart from start of lump
 	while (1)
 	{
-		if (!GetNextBlock(psr, (uint8_t*)ident))
+		if (!GetNextBlock(psr, (u8_t*)ident))
 			break;
 
 		if (y_stricmp(ident, "sector") == 0)
@@ -393,9 +393,9 @@ static void LoadUDMFSectors(parser_t *psr)
 			// process sector block
 			while (1)
 			{
-				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				if (!GetNextAssign(psr, (u8_t*)ident, (u8_t*)val))
 				{
-					uint8_t *lp = psr->line;
+					u8_t *lp = psr->line;
 					while (*lp != 0 && *lp != 0x7D)
 						lp++; // find end of line or '}'
 					if (*lp == 0x7D)
@@ -463,7 +463,7 @@ static void LoadUDMFSideDefs(parser_t *psr)
 	psr->next = 0; // restart from start of lump
 	while (1)
 	{
-		if (!GetNextBlock(psr, (uint8_t*)ident))
+		if (!GetNextBlock(psr, (u8_t*)ident))
 			break;
 
 		if (y_stricmp(ident, "sidedef") == 0)
@@ -480,9 +480,9 @@ static void LoadUDMFSideDefs(parser_t *psr)
 			// process sidedef block
 			while (1)
 			{
-				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				if (!GetNextAssign(psr, (u8_t*)ident, (u8_t*)val))
 				{
-					uint8_t *lp = psr->line;
+					u8_t *lp = psr->line;
 					while (*lp != 0 && *lp != 0x7D)
 						lp++; // find end of line or '}'
 					if (*lp == 0x7D)
@@ -545,7 +545,7 @@ static void LoadUDMFLineDefs(parser_t *psr)
 	psr->next = 0; // restart from start of lump
 	while (1)
 	{
-		if (!GetNextBlock(psr, (uint8_t*)ident))
+		if (!GetNextBlock(psr, (u8_t*)ident))
 			break;
 
 		if (y_stricmp(ident, "linedef") == 0)
@@ -557,9 +557,9 @@ static void LoadUDMFLineDefs(parser_t *psr)
 			// process lindef block
 			while (1)
 			{
-				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				if (!GetNextAssign(psr, (u8_t*)ident, (u8_t*)val))
 				{
-					uint8_t *lp = psr->line;
+					u8_t *lp = psr->line;
 					while (*lp != 0 && *lp != 0x7D)
 						lp++; // find end of line or '}'
 					if (*lp == 0x7D)
@@ -695,7 +695,7 @@ static void LoadUDMFThings(parser_t *psr)
 	psr->next = 0; // restart from start of lump
 	while (1)
 	{
-		if (!GetNextBlock(psr, (uint8_t*)ident))
+		if (!GetNextBlock(psr, (u8_t*)ident))
 			break;
 
 		if (y_stricmp(ident, "thing") == 0)
@@ -708,9 +708,9 @@ static void LoadUDMFThings(parser_t *psr)
 			// process thing block
 			while (1)
 			{
-				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
+				if (!GetNextAssign(psr, (u8_t*)ident, (u8_t*)val))
 				{
-					uint8_t *lp = psr->line;
+					u8_t *lp = psr->line;
 					while (*lp != 0 && *lp != 0x7D)
 						lp++; // find end of line or '}'
 					if (*lp == 0x7D)
@@ -1875,7 +1875,7 @@ void LoadLevel()
 		Lump_c *lump = FindLevelLump("TEXTMAP");
 		int udmf_lump_len = W_LoadLumpData(lump, &udmf_lump);
 		// initialize the parser
-		udmf_psr.buffer = (uint8_t *)udmf_lump;
+		udmf_psr.buffer = (u8_t *)udmf_lump;
 		udmf_psr.length = udmf_lump_len;
 		udmf_psr.next = 0; // start at first line
 		CheckUDMFNamespace(&udmf_psr);

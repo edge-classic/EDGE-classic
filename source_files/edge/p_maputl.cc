@@ -1105,7 +1105,7 @@ bool P_ThingsOnSliderPath(line_t *ld)
 
 	bool slider_check = P_SubsecThingIterator(temp_line->bbox, PST_CheckThingLine);
 
-	delete[] temp_line;
+	delete temp_line;
 	temp_line = NULL;
 
 	return ! slider_check;

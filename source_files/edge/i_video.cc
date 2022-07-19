@@ -220,7 +220,7 @@ bool I_SetScreenSize(scrmode_c *mode)
 			SDL_SetWindowSize(my_vis, mode->width, mode->height);
 			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
 				mode->width, mode->height, mode->depth);
-			delete[] new_mode;
+			delete new_mode;
 			new_mode = NULL;
 		}
 		else

@@ -146,6 +146,9 @@ New Features
   -- docast
   -- endgame
   -- interbackdrop
+  -- intermusic
+  -- intertextsecret
+  -- partime
 
 + UDMF 1.1 Support
   - TEXTMAP parser adapted from EDGE 2.x

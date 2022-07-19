@@ -3,7 +3,8 @@
 
 ## Windows Compilation using MSVC Build Tools and VSCode
 
-1. Download the Visual Studio Build Tools Installer, and install the 'Desktop Development with C++' Workload
+1. Download the Visual Studio Build Tools Installer and install the 'Desktop Development with C++' Workload
+   - Also select the "C++ CMake tools for Windows" optional component
 
 2. Install VSCode as well as the C/C++ and CMake Tools Extensions
 
@@ -32,10 +33,27 @@ Then, after navigating to the project directory:
 
 ## Linux Compilation
 
+This section assumes that you have a display server and graphical environment installed
+
 Install the following packages with their dependencies (exact names may vary based on distribution):
 * `cmake`
 * `g++`
 * `libsdl2-dev`
+
+Then, after navigating to the project directory in a terminal:
+
+```
+> cmake -B build
+> cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
+```
+
+## BSD Compilation
+
+This section assumes that you have a display server and graphical environment installed
+
+Install the following packages with their dependencies (exact names may vary based on distribution):
+* `cmake`
+* `sdl2`
 
 Then, after navigating to the project directory in a terminal:
 

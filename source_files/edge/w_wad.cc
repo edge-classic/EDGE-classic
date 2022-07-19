@@ -1566,7 +1566,7 @@ void W_ReadUMAPINFOLumps(void)
 					secret_level->lump.Set(M_Strupr(Maps.maps[i].nextsecret));
 					mapdefs.Insert(secret_level);
 				}
-				std::string temp_ref = epi::STR_Format("%sPRETEXT", secret_level->name);
+				std::string temp_ref = epi::STR_Format("%sPRETEXT", secret_level->name.c_str());
             	std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].intertextsecret);
             	language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
 				secret_level->f_pre.text.clear();

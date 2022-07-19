@@ -291,7 +291,6 @@ static void HD_draw_image(coal::vm_c *vm, int argc)
 {
 	float x = *vm->AccessParam(0);
 	float y = *vm->AccessParam(1);
-
 	const char *name = vm->AccessParamString(2);
 
 	const image_c *img = W_ImageLookup(name, INS_Graphic);
@@ -299,6 +298,23 @@ static void HD_draw_image(coal::vm_c *vm, int argc)
 	if (img)
 	{
 		HUD_DrawImage(x, y, img);
+	}
+}
+
+// hud.draw_image_nooffsets(x, y, name)
+//
+// Lobo 2022: same as above but ignores X and Y offsets from doom or images.ddf
+static void HD_draw_image_NoOffsets(coal::vm_c *vm, int argc)
+{
+	float x = *vm->AccessParam(0);
+	float y = *vm->AccessParam(1);
+	const char *name = vm->AccessParamString(2);
+
+	const image_c *img = W_ImageLookup(name, INS_Graphic);
+
+	if (img)
+	{
+		HUD_DrawImageNoOffset(x, y, img);
 	}
 }
 
@@ -322,6 +338,25 @@ static void HD_stretch_image(coal::vm_c *vm, int argc)
 	}
 }
 
+// hud.stretch_image_nooffsets(x, y, w, h, name)
+//
+// Lobo 2022: same as above but ignores X and Y offsets from doom or images.ddf
+static void HD_stretch_imageNoOffsets(coal::vm_c *vm, int argc)
+{
+	float x = *vm->AccessParam(0);
+	float y = *vm->AccessParam(1);
+	float w = *vm->AccessParam(2);
+	float h = *vm->AccessParam(3);
+
+	const char *name = vm->AccessParamString(4);
+
+	const image_c *img = W_ImageLookup(name, INS_Graphic);
+
+	if (img)
+	{
+		HUD_StretchImageNoOffset(x, y, w, h, img);
+	}
+}
 
 // hud.tile_image(x, y, w, h, name, offset_x, offset_y)
 //
@@ -405,7 +440,8 @@ static void HD_draw_num2(coal::vm_c *vm, int argc)
 }
 
 
-//Lobo November 2021:  hud.draw_number(x, y, len, num, align_right)
+// Lobo November 2021:  
+// hud.draw_number(x, y, len, num, align_right)
 //
 static void HD_draw_number(coal::vm_c *vm, int argc)
 {
@@ -768,7 +804,9 @@ void VM_RegisterHUD()
     ui_vm->AddNativeFunction("hud.gradient_box",    HD_gradient_box);
 
     ui_vm->AddNativeFunction("hud.draw_image",      HD_draw_image);
+	ui_vm->AddNativeFunction("hud.draw_image_nooffsets",      HD_draw_image_NoOffsets);
     ui_vm->AddNativeFunction("hud.stretch_image",   HD_stretch_image);
+    ui_vm->AddNativeFunction("hud.stretch_image_nooffsets",   HD_stretch_imageNoOffsets);
     ui_vm->AddNativeFunction("hud.tile_image",      HD_tile_image);
     ui_vm->AddNativeFunction("hud.draw_text",       HD_draw_text);
     ui_vm->AddNativeFunction("hud.draw_num2",       HD_draw_num2);

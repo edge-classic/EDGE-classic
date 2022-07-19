@@ -872,13 +872,14 @@ static void PL_sector_tag(coal::vm_c *vm, int argc)
 	vm->ReturnFloat(ui_player_who->mo->subsector->sector->tag);
 }
 
+// player.play_footstep(flat name)
 // Dasho: January 2022
 // Now uses the new DDFFLAT construct
 static void PL_play_footstep(coal::vm_c *vm, int argc)
 {
 	const char *flat = vm->AccessParamString(0);
 	if (!flat)
-		I_Error("player.noise_for_flat: No flat name given!\n");
+		I_Error("player.play_footstep: No flat name given!\n");
 	
 	flatdef_c *current_flatdef = flatdefs.Find(flat);
 

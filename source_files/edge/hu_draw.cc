@@ -374,6 +374,26 @@ void HUD_StretchImage(float x, float y, float w, float h, const image_c *img)
     HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha);
 }
 
+void HUD_StretchImageNoOffset(float x, float y, float w, float h, const image_c *img)
+{
+	if (cur_x_align >= 0)
+		x -= w / (cur_x_align == 0 ? 2.0f : 1.0f);
+
+	if (cur_y_align >= 0)
+		y -= h / (cur_y_align == 0 ? 2.0f : 1.0f);
+
+	//x -= IM_OFFSETX(img);
+	//y -= IM_OFFSETY(img);
+
+	float x1 = COORD_X(x);
+	float x2 = COORD_X(x+w);
+
+	float y1 = COORD_Y(y+h);
+	float y2 = COORD_Y(y);
+
+    HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha);
+}
+
 void HUD_DrawImageTitleWS(const image_c *title_image)
 {
 	
@@ -408,6 +428,14 @@ void HUD_DrawImage(float x, float y, const image_c *img)
 	float h = IM_HEIGHT(img) * cur_scale;
 
     HUD_StretchImage(x, y, w, h, img);
+}
+
+void HUD_DrawImageNoOffset(float x, float y, const image_c *img)
+{
+	float w = IM_WIDTH(img)  * cur_scale;
+	float h = IM_HEIGHT(img) * cur_scale;
+
+    HUD_StretchImageNoOffset(x, y, w, h, img);
 }
 
 

@@ -359,7 +359,7 @@ static void DoStartFX(sfxdef_c *def, int category, position_c *pos, int flags, e
 		}
 		else if (flags & FX_Single)
 		{
-			if (flags & FX_Precious)
+			if (chan->def->precious)
 				return;
 
 //I_Printf("@@ Killing sound for SINGULAR\n");

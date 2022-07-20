@@ -972,7 +972,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 
 	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
 	{
-		tmp_img->Swirl(leveltime, rim->liquid_type);
+		tmp_img->Swirl(gametic, rim->liquid_type); // Using leveltime disabled swirl for intermission screens
 		rim->swirled_gametic = gametic;
 	}
 

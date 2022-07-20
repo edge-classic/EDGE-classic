@@ -42,6 +42,10 @@ static font_c *default_font;
 
 float pixel_aspect = 1.0f;
 
+extern int gametic;
+
+int hud_swirl_pass = 0;
+bool hud_thick_liquid = false;
 
 // current state
 static float cur_coord_W;
@@ -277,6 +281,55 @@ bool HUD_ScissorTest(float x1, float y1, float x2, float y2)
 	return ! (x2 < xy[0] || x1 > xy[2] || y2 < xy[1] || y1 > xy[3]);
 }
 
+//----------------------------------------------------------------------------
+void HUD_CalcTurbulentTexCoords( float *tx, float *ty, float x, float y )
+{
+	float now;
+	float phase = 0;
+	float frequency = hud_thick_liquid ? 0.5 : 1.0;
+	float amplitude = 0.05;
+
+	now = ( phase + gametic / 100.0f * frequency );
+
+	if (swirling_flats == SWIRL_PARALLAX)
+	{
+		frequency *= 2;
+		if (hud_thick_liquid)
+		{
+			if (hud_swirl_pass == 1)
+			{
+				*tx = *tx + r_sintable[(int)((x * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				*ty = *ty + r_sintable[(int)((y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+			}
+			else
+			{
+				amplitude = 0;
+				*tx = *tx - r_sintable[(int)((x * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				*ty = *ty - r_sintable[(int)((y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+			}
+		}
+		else
+		{
+			if (hud_swirl_pass == 1)
+			{
+				amplitude = 0.025;
+				*tx = *tx + r_sintable[(int)((x * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				*ty = *ty + r_sintable[(int)((y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+			}
+			else
+			{
+				amplitude = 0.015;
+				*tx = *tx - r_sintable[(int)((x * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				*ty = *ty - r_sintable[(int)((y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+			}
+		}
+	}
+	else
+	{
+		*tx = *tx + r_sintable[(int)((x * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+		*ty = *ty + r_sintable[(int)((y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+	}
+}
 
 //----------------------------------------------------------------------------
 
@@ -328,9 +381,26 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 	if (image->opacity == OPAC_Complex || alpha < 0.99f)
 		glEnable(GL_BLEND);
 
+	bool hud_swirl = false;
+
+	if (image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
+	{
+		hud_swirl_pass = 1;
+		hud_swirl = true;
+	}
+
+	if (image->liquid_type == LIQ_Thick)
+		hud_thick_liquid = true;
+
 	glColor4f(r, g, b, alpha);
 
 	glBegin(GL_QUADS);
+
+	if (hud_swirl)
+	{
+		HUD_CalcTurbulentTexCoords(&tx1, &ty1, x1, y1);
+		HUD_CalcTurbulentTexCoords(&tx2, &ty2, x2, y2);
+	}
 
 	glTexCoord2f(tx1, ty1);
 	glVertex2i(x1, y1);
@@ -345,6 +415,39 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 	glVertex2i(x1, y2);
 
 	glEnd();
+
+	if (hud_swirl && swirling_flats == SWIRL_PARALLAX)
+	{
+		hud_swirl_pass = 2;
+		tx1 += 0.2;
+		tx2 += 0.2;
+		ty1 += 0.2;
+		ty2 += 0.2;
+		HUD_CalcTurbulentTexCoords(&tx1, &ty1, x1, y1);
+		HUD_CalcTurbulentTexCoords(&tx2, &ty2, x2, y2);
+		alpha /= 2;
+		glEnable(GL_ALPHA_TEST);
+
+		glColor4f(r, g, b, alpha);
+
+		glEnable(GL_BLEND);
+		glBegin(GL_QUADS);
+		glTexCoord2f(tx1, ty1);
+		glVertex2i(x1, y1);
+
+		glTexCoord2f(tx2, ty1); 
+		glVertex2i(x2, y1);
+
+		glTexCoord2f(tx2, ty2);
+		glVertex2i(x2, y2);
+
+		glTexCoord2f(tx1, ty2);
+		glVertex2i(x1, y2);
+		glEnd();
+	}
+
+	hud_swirl_pass = 0;
+	hud_thick_liquid = false;
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_ALPHA_TEST);

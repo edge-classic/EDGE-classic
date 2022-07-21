@@ -318,6 +318,41 @@ static void HD_draw_image_NoOffsets(coal::vm_c *vm, int argc)
 	}
 }
 
+// Dasho 2022: Same as above but adds x/y texcoord scrolling
+// hud.scroll_image(x, y, name, sx, sy)
+//
+static void HD_scroll_image(coal::vm_c *vm, int argc)
+{
+	float x = *vm->AccessParam(0);
+	float y = *vm->AccessParam(1);
+	const char *name = vm->AccessParamString(2);
+	float sx = *vm->AccessParam(3);
+	float sy = *vm->AccessParam(4);
+
+	const image_c *img = W_ImageLookup(name, INS_Graphic);
+
+	if (img)
+	{
+		HUD_ScrollImage(x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
+	}
+}
+
+// hud.scroll_image_nooffsets(x, y, name, sx, sy)
+static void HD_scroll_image_NoOffsets(coal::vm_c *vm, int argc)
+{
+	float x = *vm->AccessParam(0);
+	float y = *vm->AccessParam(1);
+	const char *name = vm->AccessParamString(2);
+	float sx = *vm->AccessParam(3);
+	float sy = *vm->AccessParam(4);
+
+	const image_c *img = W_ImageLookup(name, INS_Graphic);
+
+	if (img)
+	{
+		HUD_ScrollImageNoOffset(x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
+	}
+}
 
 // hud.stretch_image(x, y, w, h, name)
 //
@@ -334,7 +369,7 @@ static void HD_stretch_image(coal::vm_c *vm, int argc)
 
 	if (img)
 	{
-		HUD_StretchImage(x, y, w, h, img);
+		HUD_StretchImage(x, y, w, h, img, 0.0, 0.0);
 	}
 }
 
@@ -354,7 +389,7 @@ static void HD_stretch_imageNoOffsets(coal::vm_c *vm, int argc)
 
 	if (img)
 	{
-		HUD_StretchImageNoOffset(x, y, w, h, img);
+		HUD_StretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
 	}
 }
 
@@ -807,6 +842,8 @@ void VM_RegisterHUD()
 	ui_vm->AddNativeFunction("hud.draw_image_nooffsets",      HD_draw_image_NoOffsets);
     ui_vm->AddNativeFunction("hud.stretch_image",   HD_stretch_image);
     ui_vm->AddNativeFunction("hud.stretch_image_nooffsets",   HD_stretch_imageNoOffsets);
+	ui_vm->AddNativeFunction("hud.scroll_image",   HD_scroll_image);
+    ui_vm->AddNativeFunction("hud.scroll_image_nooffsets",   HD_scroll_image_NoOffsets);
     ui_vm->AddNativeFunction("hud.tile_image",      HD_tile_image);
     ui_vm->AddNativeFunction("hud.draw_text",       HD_draw_text);
     ui_vm->AddNativeFunction("hud.draw_num2",       HD_draw_num2);

@@ -791,11 +791,11 @@ void M_DrawSaveLoadBorder(float x, float y, int len)
 
 	if (custom_MenuMain==false)
 	{
-		HUD_StretchImage(x - IM_WIDTH(L), y + (IM_HEIGHT(L)/2),IM_WIDTH(L),IM_HEIGHT(L),L);
+		HUD_StretchImage(x - IM_WIDTH(L), y + (IM_HEIGHT(L)/2),IM_WIDTH(L),IM_HEIGHT(L),L, 0.0, 0.0);
 		for (int i = 0; i < len; i++, x += IM_WIDTH(C))
-			HUD_StretchImage(x, y + (IM_HEIGHT(C)/2),IM_WIDTH(C),IM_HEIGHT(C),C);
+			HUD_StretchImage(x, y + (IM_HEIGHT(C)/2),IM_WIDTH(C),IM_HEIGHT(C),C, 0.0, 0.0);
 
-		HUD_StretchImage(x, y + (IM_HEIGHT(R)/2),IM_WIDTH(R),IM_HEIGHT(R),R);
+		HUD_StretchImage(x, y + (IM_HEIGHT(R)/2),IM_WIDTH(R),IM_HEIGHT(R),R, 0.0, 0.0);
 	}
 	else
 	{
@@ -1023,7 +1023,7 @@ void M_QuickLoad(void)
 //
 void M_DrawReadThis1(void)
 {
-	HUD_StretchImage(0, 0, 320, 200, menu_readthis[0]);
+	HUD_StretchImage(0, 0, 320, 200, menu_readthis[0], 0.0, 0.0);
 }
 
 //
@@ -1031,7 +1031,7 @@ void M_DrawReadThis1(void)
 //
 void M_DrawReadThis2(void)
 {
-	HUD_StretchImage(0, 0, 320, 200, menu_readthis[1]);
+	HUD_StretchImage(0, 0, 320, 200, menu_readthis[1], 0.0, 0.0);
 }
 
 
@@ -1489,18 +1489,18 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
 	// Note: the (step+1) here is for compatibility with the original
 	// code.  It seems required to make the thermo bar tile properly.
 
-	HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_l)/div, therm_l);
+	HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_l)/div, therm_l, 0.0, 0.0);
 
 	for (i=0, x += step; i < thermWidth; i++, x += step)
 	{
-		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_m)/div, therm_m);
+		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_m)/div, therm_m, 0.0, 0.0);
 	}
 
-	HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_r)/div, therm_r);
+	HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_r)/div, therm_r, 0.0, 0.0);
 
 	x = basex + step + thermDot * step;
 
-	HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_o)/div, therm_o);
+	HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_o)/div, therm_o, 0.0, 0.0);
 }
 
 void M_StartMessage(const char *string, void (* routine)(int response), 
@@ -2297,7 +2297,7 @@ void M_Drawer(void)
 			float TempWidth = 0;
 			TempScale = LastLineHeight / IM_HEIGHT(menu_skull[0]);
 			TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
-			HUD_StretchImage(sx,sy,TempWidth,LastLineHeight,menu_skull[0]);
+			HUD_StretchImage(sx,sy,TempWidth,LastLineHeight,menu_skull[0], 0.0, 0.0);
 		}
 		else
 		{

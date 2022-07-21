@@ -806,8 +806,8 @@ static void BunnyScroll(void)
 	if (scrolled < 0)
 		scrolled = 0;
 
-	HUD_StretchImage(CenterX  - scrolled, 0, TempWidth, TempHeight, p1);
-	HUD_StretchImage((CenterX + TempWidth) - (scrolled + 1), 0, TempWidth, TempHeight, p2);
+	HUD_StretchImage(CenterX  - scrolled, 0, TempWidth, TempHeight, p1, 0.0, 0.0);
+	HUD_StretchImage((CenterX + TempWidth) - (scrolled + 1), 0, TempWidth, TempHeight, p2, 0.0, 0.0);
 
 	if (finalecount < 1130)
 		return;

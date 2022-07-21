@@ -33,6 +33,7 @@
 
 
 #define DUMMY_WIDTH(font)  (4)
+#define DUMMY_CLAMP 789
 
 #define HU_CHAR(ch)  (islower(ch) ? toupper(ch) : (ch))
 #define HU_INDEX(c)  ((unsigned char) HU_CHAR(c))
@@ -281,7 +282,26 @@ bool HUD_ScissorTest(float x1, float y1, float x2, float y2)
 	return ! (x2 < xy[0] || x1 > xy[2] || y2 < xy[1] || y1 > xy[3]);
 }
 
-//----------------------------------------------------------------------------
+// Adapted from Quake 3 GPL release
+void HUD_CalcScrollTexCoords( float x_scroll, float y_scroll, float *tx1, float *ty1, float *tx2, float *ty2 )
+{
+	float timeScale = gametic / 100.0f;
+	float adjustedScrollS, adjustedScrollT;
+
+	adjustedScrollS = x_scroll * timeScale;
+	adjustedScrollT = y_scroll * timeScale;
+
+	// clamp so coordinates don't continuously get larger
+	adjustedScrollS = adjustedScrollS - floor( adjustedScrollS );
+	adjustedScrollT = adjustedScrollT - floor( adjustedScrollT );
+
+	*tx1 += adjustedScrollS;
+	*ty1 += adjustedScrollT;
+	*tx2 += adjustedScrollS;
+	*ty2 += adjustedScrollT;
+}
+
+// Adapted from Quake 3 GPL release
 void HUD_CalcTurbulentTexCoords( float *tx, float *ty, float x, float y )
 {
 	float now;
@@ -337,7 +357,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
                   const image_c *image, 
 				  float tx1, float ty1, float tx2, float ty2,
 				  float alpha, rgbcol_t text_col,
-				  const colourmap_c *palremap)
+				  const colourmap_c *palremap, float sx, float sy)
 {
 	int x1 = I_ROUND(hx1);
 	int y1 = I_ROUND(hy1);
@@ -380,6 +400,22 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 
 	if (image->opacity == OPAC_Complex || alpha < 0.99f)
 		glEnable(GL_BLEND);
+
+	GLint old_s_clamp = DUMMY_CLAMP;
+	GLint old_t_clamp = DUMMY_CLAMP;
+
+	if (sx != 0.0 || sy != 0.0)
+	{
+		glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, &old_s_clamp);
+		glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &old_t_clamp);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+				GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+				GL_REPEAT);
+
+		HUD_CalcScrollTexCoords(sx, sy, &tx1, &ty1, &tx2, &ty2);
+	}
 
 	bool hud_swirl = false;
 
@@ -449,6 +485,15 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 	hud_swirl_pass = 0;
 	hud_thick_liquid = false;
 
+
+	if (old_s_clamp != DUMMY_CLAMP)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+					old_s_clamp);
+
+	if (old_t_clamp != DUMMY_CLAMP)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+				old_t_clamp);
+
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);
@@ -457,7 +502,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 }
 
 
-void HUD_StretchImage(float x, float y, float w, float h, const image_c *img)
+void HUD_StretchImage(float x, float y, float w, float h, const image_c *img, float sx, float sy)
 {
 	if (cur_x_align >= 0)
 		x -= w / (cur_x_align == 0 ? 2.0f : 1.0f);
@@ -474,10 +519,10 @@ void HUD_StretchImage(float x, float y, float w, float h, const image_c *img)
 	float y1 = COORD_Y(y+h);
 	float y2 = COORD_Y(y);
 
-    HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha);
+    HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha, RGB_NO_VALUE, NULL, sx, sy);
 }
 
-void HUD_StretchImageNoOffset(float x, float y, float w, float h, const image_c *img)
+void HUD_StretchImageNoOffset(float x, float y, float w, float h, const image_c *img, float sx, float sy)
 {
 	if (cur_x_align >= 0)
 		x -= w / (cur_x_align == 0 ? 2.0f : 1.0f);
@@ -494,7 +539,7 @@ void HUD_StretchImageNoOffset(float x, float y, float w, float h, const image_c 
 	float y1 = COORD_Y(y+h);
 	float y2 = COORD_Y(y);
 
-    HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha);
+    HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha, RGB_NO_VALUE, NULL, sx, sy);
 }
 
 void HUD_DrawImageTitleWS(const image_c *title_image)
@@ -522,7 +567,7 @@ void HUD_DrawImageTitleWS(const image_c *title_image)
 	CenterX -= TempWidth / 2;
 
 	//3. Draw it.
-	HUD_StretchImage(CenterX, 0, TempWidth, TempHeight, title_image);
+	HUD_StretchImage(CenterX, 0, TempWidth, TempHeight, title_image, 0.0, 0.0);
 }
 
 void HUD_DrawImage(float x, float y, const image_c *img)
@@ -530,7 +575,7 @@ void HUD_DrawImage(float x, float y, const image_c *img)
 	float w = IM_WIDTH(img)  * cur_scale;
 	float h = IM_HEIGHT(img) * cur_scale;
 
-    HUD_StretchImage(x, y, w, h, img);
+    HUD_StretchImage(x, y, w, h, img, 0.0, 0.0);
 }
 
 void HUD_DrawImageNoOffset(float x, float y, const image_c *img)
@@ -538,9 +583,24 @@ void HUD_DrawImageNoOffset(float x, float y, const image_c *img)
 	float w = IM_WIDTH(img)  * cur_scale;
 	float h = IM_HEIGHT(img) * cur_scale;
 
-    HUD_StretchImageNoOffset(x, y, w, h, img);
+    HUD_StretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
 }
 
+void HUD_ScrollImage(float x, float y, const image_c *img, float sx, float sy)
+{
+	float w = IM_WIDTH(img)  * cur_scale;
+	float h = IM_HEIGHT(img) * cur_scale;
+
+    HUD_StretchImage(x, y, w, h, img, sx, sy);
+}
+
+void HUD_ScrollImageNoOffset(float x, float y, const image_c *img, float sx, float sy)
+{
+	float w = IM_WIDTH(img)  * cur_scale;
+	float h = IM_HEIGHT(img) * cur_scale;
+
+    HUD_StretchImageNoOffset(x, y, w, h, img, sx, sy);
+}
 
 void HUD_TileImage(float x, float y, float w, float h, const image_c *img,
 				   float offset_x, float offset_y)

@@ -1133,8 +1133,7 @@ static void CreateEpisodeMenu(void)
 		gamedef_c *g = ITERATOR_TO_TYPE(it, gamedef_c*);
 		if (! g) continue;
 
-		// Not sure why, but sometimes the built-in "EDGE" gamedef gets treated as a valid episode
-		if (strcasecmp(g->name.c_str(), "EDGE") == 0)
+		if (g->firstmap.empty())
 			continue;
 
 		if (W_CheckNumForName(g->firstmap.c_str()) == -1)

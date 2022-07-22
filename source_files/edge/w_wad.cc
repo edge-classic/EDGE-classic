@@ -1575,7 +1575,7 @@ void W_ReadUMAPINFOLumps(void)
 				{
 					temp_level->f_end.text.clear();
 					temp_level->f_end.text.Set(temp_ref.c_str());
-					temp_level->f_end.picwait = 350; //10 seconds
+					temp_level->f_end.picwait = 700; //20 seconds
 
 					if(Maps.maps[i].interbackdrop[0])
 						temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
@@ -1586,7 +1586,7 @@ void W_ReadUMAPINFOLumps(void)
 				{
 					secret_level->f_pre.text.clear();
 					secret_level->f_pre.text.Set(temp_ref.c_str());
-					secret_level->f_pre.picwait = 350; //10 seconds
+					secret_level->f_pre.picwait = 700; //20 seconds
 					if (temp_level->f_end.music)
 						secret_level->f_pre.music=temp_level->f_end.music;
 

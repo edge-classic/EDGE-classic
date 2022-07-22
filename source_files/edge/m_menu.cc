@@ -1233,6 +1233,8 @@ static void DoStartLevel(skill_t skill)
 	gamedef_c *g = NULL;
 	epi::array_iterator_c it;
 
+	std::string chosen_episode = epi::STR_Format("%s",EpisodeMenu[chosen_epi].name);
+
 	for (it = gamedefs.GetBaseIterator(); it.IsValid(); it++) 
 	{ 
 		g = ITERATOR_TO_TYPE(it, gamedef_c*);
@@ -1240,12 +1242,13 @@ static void DoStartLevel(skill_t skill)
 		//Lobo 2022: lets use text instead of M_EPIxx graphic
 		if(g->description) 
 		{
-			if (!strcmp(language[g->description], EpisodeMenu[chosen_epi].name))
-				break;
+			std::string gamedef_episode = epi::STR_Format("%s",language[g->description.c_str()]);
+			if (DDF_CompareName(gamedef_episode.c_str(), chosen_episode.c_str()) == 0)
+				break;		
 		}
 		else
 		{	
-			if (!strcmp(g->name.c_str(), EpisodeMenu[chosen_epi].name))
+			if (DDF_CompareName(g->name.c_str(), chosen_episode.c_str()) == 0)
 				break;
 		}
 		
@@ -1261,7 +1264,7 @@ static void DoStartLevel(skill_t skill)
 	if (! g)
 	{
 		I_Warning("Internal Error: no episode for '%s'.\n",
-			EpisodeMenu[chosen_epi].patch_name);
+			chosen_episode.c_str());
 		M_ClearMenus();
 		return;
 	}
@@ -1271,7 +1274,7 @@ static void DoStartLevel(skill_t skill)
 	{
 		I_Warning("Cannot find map for '%s' (episode %s)\n",
 			g->firstmap.c_str(),
-			EpisodeMenu[chosen_epi].patch_name);
+			chosen_episode.c_str());
 		M_ClearMenus();
 		return;
 	}

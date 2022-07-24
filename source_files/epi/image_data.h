@@ -115,6 +115,11 @@ public:
 	// other three corners.  When width or height is odd, the middle
 	// column/row must already be drawn.
 
+	void RemoveBackground();
+	// Intended for font spritesheets; will turn the background color
+	// (as determined by the first pixel of the image) transparent, if the
+	// background is not already transparent
+
 	void EightWaySymmetry();
 	// mirror the already-drawn half corner (1/8th of the image)
 	// into the rest of the image.  The source corner has lowest x/y

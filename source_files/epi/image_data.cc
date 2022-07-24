@@ -350,6 +350,41 @@ void image_data_c::FourWaySymmetry()
 	}
 }
 
+void image_data_c::RemoveBackground()
+{
+	if (bpp < 3)
+		return;
+
+	if (bpp == 3)
+	{
+		u8_t *new_pixels = new u8_t[width * height * 4];
+		u8_t *src   = pixels;
+		u8_t *s_end = src + (width * height * 3);
+		u8_t *dest  = new_pixels;
+		for (; src < s_end; src += 3)
+		{
+			*dest++ = src[0];
+			*dest++ = src[1];
+			*dest++ = src[2];
+			*dest++ = (src[0] == pixels[0] && src[1] == pixels[1] && src[2] == pixels[2]) ? 0 : 255;
+		}
+		delete[] pixels;
+		pixels = new_pixels;
+		bpp = 4;
+	}
+	else
+	{
+		// If first pixel is fully transparent, assume that image background is already transparent
+		if (pixels[3] == 0) return;
+
+		for (int i = 4; i < width * height * 4; i += 4)
+		{
+			if (pixels[i] == pixels[0] && pixels[i+1] == pixels[1] && pixels[i+2] == pixels[2])
+				pixels[i+3] = 0;
+		}
+	}
+}
+
 void image_data_c::EightWaySymmetry()
 {
 	SYS_ASSERT(width == height);

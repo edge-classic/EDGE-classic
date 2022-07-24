@@ -44,14 +44,14 @@ font_c::font_c(fontdef_c *_def) : def(_def)
 
 	p_cache.images = NULL;
 	p_cache.missing = NULL;
+
+	font_image = NULL;
 }
 
 font_c::~font_c()
 {
 	if (p_cache.images)
 		delete[] p_cache.images;
-
-	// FIXME: im_div.images
 }
 
 void font_c::BumpPatchName(char *name)
@@ -149,10 +149,17 @@ void font_c::LoadPatches()
 	p_cache.height = I_ROUND(IM_HEIGHT(Nom));
 }
 
-void font_c::LoadImage()
+void font_c::LoadFontImage()
 {
-	// TODO
-	I_Error("LoadImageDiv called??\n");
+	if (!font_image)
+	{
+		if (!def->image_name.empty())
+			font_image = W_ImageLookup(def->image_name.c_str(), INS_Graphic, ILF_Exact|ILF_Null);
+		else
+			I_Error("LoadFontImage: NULL image name provided for font %s!", def->name.c_str());
+		if (!font_image)
+			I_Error("LoadFontImage: Image %s not found for font %s!", def->image_name.c_str(), def->name.c_str());
+	}
 }
 
 
@@ -165,7 +172,7 @@ void font_c::Load()
 			break;
 
 		case FNTYP_Image:
-			LoadImage();
+			LoadFontImage();
 			break;
 
 		default:

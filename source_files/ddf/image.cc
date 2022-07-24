@@ -213,69 +213,8 @@ void DDF_ImageInit(void)
 	imagedefs.Clear();
 }
 
-
-static void AddEssentialImages(void)
-{
-	// -AJA- this is a hack, these really should just be added to
-	//       our standard IMAGES.DDF file.  However some Mods use
-	//       standalone DDF and in that case these essential images
-	//       would never get loaded.
-
-	if (! imagedefs.Lookup("DLIGHT_EXP", INS_Graphic))
-	{
-		imagedef_c *def = new imagedef_c;
-
-		def->name   = "DLIGHT_EXP";
-		def->belong = INS_Graphic;
-
-		def->info.Set("DLITEXPN");
-
-		def->type    = IMGDT_Lump;
-		def->format  = LIF_PNG;
-		def->special = (image_special_e) (IMGSP_Clamp | IMGSP_Smooth | IMGSP_NoMip);
-
-		imagedefs.Insert(def);
-	}
-
-	if (! imagedefs.Lookup("FUZZ_MAP", INS_Texture))
-	{
-		imagedef_c *def = new imagedef_c;
-
-		def->name   = "FUZZ_MAP";
-		def->belong = INS_Texture;
-
-		def->info.Set("FUZZMAP8");
-
-		def->type    = IMGDT_Lump;
-		def->format  = LIF_PNG;
-		def->special = (image_special_e) (IMGSP_NoSmooth | IMGSP_NoMip);
-
-		imagedefs.Insert(def);
-	}
-
-	if (! imagedefs.Lookup("CON_FONT_2", INS_Graphic))
-	{
-		imagedef_c *def = new imagedef_c;
-
-		def->name   = "CON_FONT_2";
-		def->belong = INS_Graphic;
-
-		def->info.Set("CONFONT2");
-
-		def->type    = IMGDT_Lump;
-		def->format  = LIF_PNG;
-		def->special = (image_special_e) (IMGSP_Clamp | IMGSP_Smooth | IMGSP_NoMip);
-		def->is_font = true;
-
-		imagedefs.Insert(def);
-	}
-}
-
-
 void DDF_ImageCleanUp(void)
 {
- 	AddEssentialImages();
-
 	imagedefs.Trim();		// <-- Reduce to allocated size
 }
 

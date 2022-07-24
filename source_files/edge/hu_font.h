@@ -48,8 +48,6 @@ public:
 	~font_c();
 
 private:
-	fontdef_c *def;
-
 	patchcache_t p_cache;
 
 public:
@@ -71,10 +69,14 @@ public:
 	// FIXME: maybe shouldn't be public (assumes FNTYP_Patch !!)
 	const image_c *CharImage(char ch) const;
 
+	fontdef_c *def;
+
+	const image_c *font_image;
+
 private:
 	void BumpPatchName(char *name);
 	void LoadPatches();
-	void LoadImage();
+	void LoadFontImage();
 };
 
 class font_container_c : public epi::array_c 

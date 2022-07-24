@@ -27,6 +27,7 @@
 #include "i_defs.h"
 #include "i_defs_gl.h"
 
+#include "font.h"
 #include "language.h"
 
 #include "con_main.h"
@@ -53,7 +54,7 @@ static visible_t con_visible;
 // stores the console toggle effect
 static int conwipeactive = 0;
 static int conwipepos = 0;
-static const image_c *con_font;
+font_c *con_font;
 
 // the console's background
 static style_c *console_style;
@@ -350,15 +351,15 @@ static void CalcSizes()
 	// Read default font size and xmul from IMAGE fontdef; YMUL values seem fine regardless ?
 	if (SCREENWIDTH < 400)
 	{
-		FNSZ = 10; XMUL = 7; YMUL = 12;
+		FNSZ = con_font->def->default_size - 6; XMUL = XMUL = con_font->def->spacing - 4; YMUL = 12;
 	}
 	else if (SCREENWIDTH < 700)
 	{
-		FNSZ = 13; XMUL = 9; YMUL = 15;
+		FNSZ = con_font->def->default_size - 3; XMUL = con_font->def->spacing - 2; YMUL = 15;
 	}
 	else
 	{
-		FNSZ = 16; XMUL = 11; YMUL = 19;
+		FNSZ = con_font->def->default_size; XMUL = con_font->def->spacing; YMUL = 19;
 	}
 }
 
@@ -403,11 +404,11 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 	int px =      int((byte)ch) % 16;
 	int py = 15 - int((byte)ch) / 16;
 
-	float tx1 = (px  ) * con_font->ratio_w;
-	float tx2 = (px+1) * con_font->ratio_w;
+	float tx1 = (px  ) * con_font->font_image->ratio_w;
+	float tx2 = (px+1) * con_font->font_image->ratio_w;
 
-	float ty1 = (py  ) * con_font->ratio_h;
-	float ty2 = (py+1) * con_font->ratio_h;
+	float ty1 = (py  ) * con_font->font_image->ratio_h;
+	float ty2 = (py+1) * con_font->font_image->ratio_h;
 
 	glBegin(GL_POLYGON);
 
@@ -430,7 +431,7 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 // writes the text on coords (x,y) of the console
 static void DrawText(int x, int y, const char *s, rgbcol_t col)
 {
-	GLuint tex_id = W_ImageCache(con_font);
+	GLuint tex_id = W_ImageCache(con_font->font_image);
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -459,9 +460,12 @@ void CON_SetupFont(void)
 {
 	if (! con_font)
 	{
-		con_font = W_ImageLookup("CON_FONT_2", INS_Graphic, ILF_Exact|ILF_Null);
-		if (! con_font)
-			I_Error("Cannot find essential image: CON_FONT_2\n");
+		fontdef_c *DEF = fontdefs.Lookup("CON_FONT_2");
+		SYS_ASSERT(DEF);
+
+		con_font = hu_fonts.Lookup(DEF);
+		SYS_ASSERT(con_font);
+		con_font->Load();
 	}
 
 	if (! console_style)

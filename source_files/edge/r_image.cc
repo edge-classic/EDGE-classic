@@ -283,6 +283,7 @@ static image_c *NewImage(int width, int height, int opacity = OPAC_Unknown)
 	rim->offset_x = rim->offset_y = 0;
 	rim->scale_x  = rim->scale_y = 1.0f;
 	rim->opacity  = opacity;
+	rim->is_font = false;
 
 	// set initial animation info
 	rim->anim.cur = rim;
@@ -574,6 +575,8 @@ static image_c *AddImageUser(imagedef_c *def)
 
 	rim->source_type = IMSRC_User;
 	rim->source.user.def = def;
+
+	rim->is_font = def->is_font;
 
 	if (def->special & IMGSP_Crosshair)
 	{

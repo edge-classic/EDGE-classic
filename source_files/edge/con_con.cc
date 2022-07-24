@@ -347,7 +347,7 @@ static int YMUL;
 
 static void CalcSizes()
 {
-	// determine font sizing and spacing
+	// Read default font size and xmul from IMAGE fontdef; YMUL values seem fine regardless ?
 	if (SCREENWIDTH < 400)
 	{
 		FNSZ = 10; XMUL = 7; YMUL = 12;
@@ -403,11 +403,11 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 	int px =      int((byte)ch) % 16;
 	int py = 15 - int((byte)ch) / 16;
 
-	float tx1 = (px  ) / 16.0;
-	float tx2 = (px+1) / 16.0;
+	float tx1 = (px  ) / 16.0 * con_font->ratio_w;
+	float tx2 = (px+1) / 16.0 * con_font->ratio_w;
 
-	float ty1 = (py  ) / 16.0;
-	float ty2 = (py+1) / 16.0;
+	float ty1 = (py  ) / 16.0 * con_font->ratio_h;
+	float ty2 = (py+1) / 16.0 * con_font->ratio_h;
 
 	glBegin(GL_POLYGON);
 

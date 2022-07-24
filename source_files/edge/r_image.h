@@ -79,6 +79,10 @@ public:
 	unsigned short total_w;
 	unsigned short total_h;
 
+	// ratio of actual w/h to total w/h of the image for calculating texcoords
+	float ratio_w;
+	float ratio_h;
+
     // offset values.  Only used for sprites and on-screen patches.
 	short offset_x;
 	short offset_y;

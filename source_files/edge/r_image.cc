@@ -253,6 +253,7 @@ static inline void Unlink(cached_image_t *rc)
 //
 
 image_c::image_c() : actual_w(0), actual_h(0), total_w(0), total_h(0),
+					 ratio_w(0.0), ratio_h(0.0),
 					 source_type(IMSRC_Dummy),
 					 source_palette(-1),
 					 cache()
@@ -277,6 +278,8 @@ static image_c *NewImage(int width, int height, int opacity = OPAC_Unknown)
 	rim->actual_h = height;
 	rim->total_w  = W_MakeValidSize(width);
 	rim->total_h  = W_MakeValidSize(height);
+	rim->ratio_w = (float)width / (float)rim->total_w;
+	rim->ratio_h = (float)height / (float)rim->total_h;
 	rim->offset_x = rim->offset_y = 0;
 	rim->scale_x  = rim->scale_y = 1.0f;
 	rim->opacity  = opacity;

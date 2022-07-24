@@ -278,8 +278,8 @@ static image_c *NewImage(int width, int height, int opacity = OPAC_Unknown)
 	rim->actual_h = height;
 	rim->total_w  = W_MakeValidSize(width);
 	rim->total_h  = W_MakeValidSize(height);
-	rim->ratio_w = (float)width / (float)rim->total_w;
-	rim->ratio_h = (float)height / (float)rim->total_h;
+	rim->ratio_w = (float)width / (float)rim->total_w * 0.0625;
+	rim->ratio_h = (float)height / (float)rim->total_h * 0.0625;
 	rim->offset_x = rim->offset_y = 0;
 	rim->scale_x  = rim->scale_y = 1.0f;
 	rim->opacity  = opacity;
@@ -991,6 +991,8 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 		epi::image_data_c *scaled_img =
 			epi::Hq2x::Convert(tmp_img, solid, false /* invert */);
 
+		if (rim->is_font)
+			scaled_img->RemoveBackground();
 		if (do_whiten)
 			scaled_img->Whiten();
 
@@ -1002,6 +1004,8 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 		epi::image_data_c *rgb_img =
 				R_PalettisedToRGB(tmp_img, what_palette, rim->opacity);
 
+		if (rim->is_font)
+			rgb_img->RemoveBackground();
 		if (do_whiten)
 			rgb_img->Whiten();
 
@@ -1010,6 +1014,8 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 	}
 	else if (tmp_img->bpp >= 3)
 	{
+		if (rim->is_font)
+			tmp_img->RemoveBackground();
 		if (do_whiten)
 			tmp_img->Whiten();
 		else if (trans != NULL)

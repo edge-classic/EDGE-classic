@@ -119,6 +119,8 @@ public:
 
 	int fix_trans;   // FIXTRN_XXX value
 
+	bool is_font;
+
 	// COMPOSE specifics:
 	//   rgbcol_t base_col;
 	//   percent_t base_trans;

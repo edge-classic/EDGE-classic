@@ -99,6 +99,8 @@ public:
 
 	int swirled_gametic;
 
+	bool is_font;
+
 //!!!!!! private:
 
 	// --- information about where this image came from ---

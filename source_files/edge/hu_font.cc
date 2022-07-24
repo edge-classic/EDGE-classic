@@ -44,9 +44,6 @@ font_c::font_c(fontdef_c *_def) : def(_def)
 
 	p_cache.images = NULL;
 	p_cache.missing = NULL;
-
-	im_div.sub_w = 0;
-	im_div.sub_h = 0;
 }
 
 font_c::~font_c()
@@ -152,7 +149,7 @@ void font_c::LoadPatches()
 	p_cache.height = I_ROUND(IM_HEIGHT(Nom));
 }
 
-void font_c::LoadImageDiv()
+void font_c::LoadImage()
 {
 	// TODO
 	I_Error("LoadImageDiv called??\n");
@@ -168,7 +165,7 @@ void font_c::Load()
 			break;
 
 		case FNTYP_Image:
-			LoadImageDiv();
+			LoadImage();
 			break;
 
 		default:
@@ -181,7 +178,7 @@ void font_c::Load()
 int font_c::NominalWidth() const
 {
 	if (def->type == FNTYP_Image)
-		return im_div.total_w / 16;
+		return def->default_size;
 
 	if (def->type == FNTYP_Patch)
 		return p_cache.width;
@@ -193,7 +190,7 @@ int font_c::NominalWidth() const
 int font_c::NominalHeight() const
 {
 	if (def->type == FNTYP_Image)
-		return im_div.total_w / 16;
+		return def->default_size;
 
 	if (def->type == FNTYP_Patch)
 		return p_cache.height;
@@ -244,7 +241,7 @@ const image_c *font_c::CharImage(char ch) const
 int font_c::CharWidth(char ch) const  // XXX: return float ???
 {
 	if (def->type == FNTYP_Image)
-		return im_div.total_w / 16;
+		return def->default_size;
 			
 	SYS_ASSERT(def->type == FNTYP_Patch);
 

@@ -39,21 +39,6 @@ typedef struct
 }
 patchcache_t;
 
-
-#define MAX_IMAGE_SUBDIV  4
-
-typedef struct
-{
-	int total_w, total_h;  // original image's dimensions
-
-	int sub_w, sub_h;  // number of pieces
-
-	const image_c *images[MAX_IMAGE_SUBDIV][MAX_IMAGE_SUBDIV];
-}
-image_subdiv_t;
-
-
-
 class font_c
 {
 friend class font_container_c;
@@ -66,8 +51,6 @@ private:
 	fontdef_c *def;
 
 	patchcache_t p_cache;
-
-	image_subdiv_t im_div;
 
 public:
 	void Load();
@@ -91,7 +74,7 @@ public:
 private:
 	void BumpPatchName(char *name);
 	void LoadPatches();
-	void LoadImageDiv();
+	void LoadImage();
 };
 
 class font_container_c : public epi::array_c 

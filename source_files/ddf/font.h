@@ -68,6 +68,9 @@ public:
 
 	epi::strent_c image_name;
 
+	int default_size;
+	int spacing;
+
 private:
 	// disable copy construct and assignment operator
 	explicit fontdef_c(fontdef_c &rhs) { }

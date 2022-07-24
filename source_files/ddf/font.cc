@@ -37,6 +37,8 @@ static const commandlist_t font_commands[] =
 	DDF_FIELD("PATCHES",  patches,    DDF_FontGetPatch),
 	DDF_FIELD("IMAGE",    image_name, DDF_MainGetString),
 	DDF_FIELD("MISSING_PATCH", missing_patch, DDF_MainGetString),
+	DDF_FIELD("DEFAULT_SIZE", default_size, DDF_MainGetNumeric),
+	DDF_FIELD("SPACING", spacing, DDF_MainGetNumeric),
 
 	DDF_CMD_END
 };
@@ -281,6 +283,8 @@ void fontdef_c::CopyDetail(const fontdef_c &src)
 	patches = src.patches;  // FIXME: copy list
 	image_name = src.image_name;
 	missing_patch = src.missing_patch;
+	default_size = src.default_size;
+	spacing = src.spacing;
 }
 
 //
@@ -292,6 +296,8 @@ void fontdef_c::Default()
 	patches = NULL;
 	image_name.clear();
 	missing_patch.clear();
+	default_size = 16;
+	spacing = 11;
 }
 
 

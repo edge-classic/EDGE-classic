@@ -46,6 +46,7 @@ static const commandlist_t image_commands[] =
 	DDF_FIELD("SCALE",      scale,    DDF_MainGetFloat),
 	DDF_FIELD("ASPECT",     aspect,   DDF_MainGetFloat),
 	DDF_FIELD("FIX_TRANS",  fix_trans, DDF_ImageGetFixTrans),
+	DDF_FIELD("IS_FONT",  is_font, DDF_MainGetBoolean),
 
 	DDF_CMD_END
 };
@@ -264,6 +265,7 @@ static void AddEssentialImages(void)
 		def->type    = IMGDT_Lump;
 		def->format  = LIF_PNG;
 		def->special = (image_special_e) (IMGSP_Clamp | IMGSP_Smooth | IMGSP_NoMip);
+		def->is_font = true;
 
 		imagedefs.Insert(def);
 	}
@@ -452,6 +454,7 @@ void imagedef_c::CopyDetail(const imagedef_c &src)
 	scale    = src.scale;
 	aspect   = src.aspect;
 	fix_trans = src.fix_trans;
+	is_font = src.is_font;
 }
 
 void imagedef_c::Default()
@@ -469,6 +472,7 @@ void imagedef_c::Default()
 	scale  = 1.0f;
 	aspect = 1.0f;
 	fix_trans = FIXTRN_None;
+	is_font = false;
 }
 
 

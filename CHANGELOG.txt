@@ -109,9 +109,13 @@ New Features
   which can be used to override the intermission background defined in games.ddf on a per level basis.
   
 + THINGS.DDF
-  -New SPECIAL: NO_TRIGGER_LINES which is similar to the same SPECIAL in attacks.ddf. Monsters 
-   flagged with this special cannot activate special lines i.e. doors etc.
+  -New SPECIAL: NO_TRIGGER_LINES which is similar to the same SPECIAL in attacks.ddf. Monsters flagged with 
+   this special cannot activate special lines i.e. doors etc.
+  -New SPECIAL: SHOVEABLE. If we push up against this thing then we can move it around. Mainly for
+   Heretics pods.
+  -New SPECIAL: NO_SPLASH. This thing causes no effects (i.e water splashes) on a floor defined in DDFFLAT as having an IMPACT_OBJECT.  
   -KILL_BENEFIT: Will grant player benefits if they kill the mobj in question (does not apply when using KILLALL or similar cheats)
+  -New ACTION: PLAYSOUND_BOSS(sfx) which will play the sound at full volume regardless of ALWAYS_LOUD flag.
 
 + RTS: new commands
   -REPLACE_WEAPON <OldWeapon> <NewWeapon> which will replace one weapon with another instantly(no up/down states run) 
@@ -119,7 +123,7 @@ New Features
   -WEAPON_EVENT <weapon> <label> which is similar to THING_EVENT: If we have the weapon we 
    insta-switch to it and go to the STATE we indicated
    
-+ New Benefit Type: COUNTER01-COUNTER99. The idea behind this is to be able to store arbrary values across savegames, for things
++ New Benefit Type: COUNTER01-COUNTER99. The idea behind this is to be able to store arbitrary values across savegames, for things
   like LIVES, SCORE, EXPERIENCE etc. To reflect this (and for convenience) the first 4 COUNTERS can be referenced like this:
 	LIVES or COUNTER01
 	SCORE or COUNTER02

@@ -348,18 +348,18 @@ static int YMUL;
 
 static void CalcSizes()
 {
-	// Read default font size and xmul from IMAGE fontdef; YMUL values seem fine regardless ?
+	// Would it be preferable to store the reduced sizes in the font_c class? Hmm
 	if (SCREENWIDTH < 400)
 	{
-		FNSZ = con_font->im_char_height - 6; XMUL = XMUL = con_font->def->spacing - 4; YMUL = 12;
+		FNSZ = I_ROUND((float)con_font->im_char_height * .5); XMUL = I_ROUND((float)con_font->spacing * .5); YMUL = FNSZ;
 	}
 	else if (SCREENWIDTH < 700)
 	{
-		FNSZ = con_font->im_char_height - 3; XMUL = con_font->def->spacing - 2; YMUL = 15;
+		FNSZ = I_ROUND((float)con_font->im_char_height * .75); XMUL = I_ROUND((float)con_font->spacing * .75); YMUL = FNSZ;
 	}
 	else
 	{
-		FNSZ = con_font->im_char_height; XMUL = con_font->def->spacing; YMUL = 19;
+		FNSZ = con_font->im_char_height; XMUL = con_font->spacing; YMUL = FNSZ;
 	}
 }
 

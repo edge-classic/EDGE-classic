@@ -76,6 +76,7 @@ public:
 	// For IMAGE type
 	int im_char_width;
 	int im_char_height;
+	int spacing;
 
 private:
 	void BumpPatchName(char *name);

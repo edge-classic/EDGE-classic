@@ -431,7 +431,7 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 // writes the text on coords (x,y) of the console
 static void DrawText(int x, int y, const char *s, rgbcol_t col)
 {
-	GLuint tex_id = W_ImageCache(con_font->font_image);
+	GLuint tex_id = W_ImageCache(con_font->font_image, true, (const colourmap_c *)0, true); // Always whiten the font when used with console output
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -461,8 +461,8 @@ void CON_SetupFont(void)
 	if (! con_font)
 	{
 		fontdef_c *DEF = fontdefs.Lookup("CON_FONT_2");
-		SYS_ASSERT(DEF);
-
+		if (!DEF)
+			I_Error("CON_FONT_2 definition missing from DDFFONT!\n");
 		con_font = hu_fonts.Lookup(DEF);
 		SYS_ASSERT(con_font);
 		con_font->Load();

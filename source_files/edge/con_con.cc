@@ -351,15 +351,15 @@ static void CalcSizes()
 	// Read default font size and xmul from IMAGE fontdef; YMUL values seem fine regardless ?
 	if (SCREENWIDTH < 400)
 	{
-		FNSZ = con_font->def->default_size - 6; XMUL = XMUL = con_font->def->spacing - 4; YMUL = 12;
+		FNSZ = con_font->im_char_height - 6; XMUL = XMUL = con_font->def->spacing - 4; YMUL = 12;
 	}
 	else if (SCREENWIDTH < 700)
 	{
-		FNSZ = con_font->def->default_size - 3; XMUL = con_font->def->spacing - 2; YMUL = 15;
+		FNSZ = con_font->im_char_height - 3; XMUL = con_font->def->spacing - 2; YMUL = 15;
 	}
 	else
 	{
-		FNSZ = con_font->def->default_size; XMUL = con_font->def->spacing; YMUL = 19;
+		FNSZ = con_font->im_char_height; XMUL = con_font->def->spacing; YMUL = 19;
 	}
 }
 

@@ -167,6 +167,13 @@ static void ImageFinishEntry(void)
 			DDF_Error("Unknown image extension for '%s'\n", filename);
 	}
 
+	// Add these automatically so modders don't have to remember them
+	if (dynamic_image->is_font)
+	{
+		dynamic_image->special = (image_special_e)(dynamic_image->special | IMGSP_Clamp);
+		dynamic_image->special = (image_special_e)(dynamic_image->special | IMGSP_NoMip);
+	}
+
 	// TODO: check more stuff...
 }
 

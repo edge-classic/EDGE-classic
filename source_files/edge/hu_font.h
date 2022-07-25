@@ -73,6 +73,10 @@ public:
 
 	const image_c *font_image;
 
+	// For IMAGE type
+	int im_char_width;
+	int im_char_height;
+
 private:
 	void BumpPatchName(char *name);
 	void LoadPatches();

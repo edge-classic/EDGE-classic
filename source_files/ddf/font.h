@@ -68,7 +68,6 @@ public:
 
 	epi::strent_c image_name;
 
-	int default_size;
 	int spacing;
 
 private:

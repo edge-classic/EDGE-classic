@@ -294,7 +294,7 @@ void fontdef_c::Default()
 	patches = NULL;
 	image_name.clear();
 	missing_patch.clear();
-	spacing = -1;
+	spacing = 0;
 }
 
 

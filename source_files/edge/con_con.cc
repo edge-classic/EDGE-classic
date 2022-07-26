@@ -351,15 +351,15 @@ static void CalcSizes()
 	// Would it be preferable to store the reduced sizes in the font_c class? Hmm
 	if (SCREENWIDTH < 400)
 	{
-		FNSZ = I_ROUND((float)con_font->im_char_height * .5); XMUL = I_ROUND((float)con_font->spacing * .5); YMUL = FNSZ;
+		FNSZ = 10; XMUL = 7 + I_ROUND((float)con_font->spacing * .5); YMUL = FNSZ;
 	}
 	else if (SCREENWIDTH < 700)
 	{
-		FNSZ = I_ROUND((float)con_font->im_char_height * .75); XMUL = I_ROUND((float)con_font->spacing * .75); YMUL = FNSZ;
+		FNSZ = 13; XMUL = 9 + I_ROUND((float)con_font->spacing * .75); YMUL = FNSZ;
 	}
 	else
 	{
-		FNSZ = con_font->im_char_height; XMUL = con_font->spacing; YMUL = FNSZ;
+		FNSZ = 16; XMUL = 11; YMUL = FNSZ;
 	}
 }
 

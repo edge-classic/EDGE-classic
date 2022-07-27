@@ -1552,7 +1552,8 @@ void real_vm_c::GLOB_Function()
 
 			if (strcmp(name, "optional") == 0)
 			{
-				optional_start = t_new.parm_num;
+				if (optional_start == -1)
+					optional_start = t_new.parm_num;
 				name = ParseName();
 			}
 			else

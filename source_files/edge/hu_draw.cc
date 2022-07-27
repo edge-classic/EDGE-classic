@@ -826,7 +826,7 @@ float HUD_StringHeight(const char *str)
 }
 
 
-void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch)
+void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, int size)
 {
 	float sc_x = cur_scale; // TODO * aspect;
 	float sc_y = cur_scale;
@@ -839,8 +839,8 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch)
 
 	if (img->is_font)
 	{
-		w = cur_font->spacing * sc_x;
-		h = cur_font->im_char_height * sc_y;
+		w = (size > 0 ? (size * cur_font->im_char_ratio) + cur_font->def->spacing : cur_font->spacing) * sc_x;
+		h = (size > 0 ? size : cur_font->im_char_height) * sc_y;
 		int px =      int((byte)ch) % 16;
 		int py = 15 - int((byte)ch) / 16;
 		tx1 = (px  ) * cur_font->font_image->ratio_w;
@@ -872,7 +872,7 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch)
 //
 // Write a string using the current font
 //
-void HUD_DrawText(float x, float y, const char *str)
+void HUD_DrawText(float x, float y, const char *str, int size)
 {
 	SYS_ASSERT(cur_font);
 
@@ -917,16 +917,16 @@ void HUD_DrawText(float x, float y, const char *str)
 			const image_c *img = cur_font->CharImage(ch);
 
 			if (img)
-				HUD_DrawChar(cx, cy, img, ch);
+				HUD_DrawChar(cx, cy, img, ch, size);
 
-			cx += cur_font->CharWidth(ch) * cur_scale;
+			cx += (size > 0 ? size * cur_font->im_char_ratio : cur_font->CharWidth(ch)) * cur_scale;
 		}
 
 		if (str[len] == 0)
 			break;
 
 		str += (len + 1);
-		cy  += HUD_FontHeight() + VERT_SPACING;
+		cy  += (size > 0 ? size : HUD_FontHeight()) + VERT_SPACING;
 	}
 }
 

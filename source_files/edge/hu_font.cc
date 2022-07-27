@@ -162,6 +162,7 @@ void font_c::LoadFontImage()
 		im_char_width = font_image->actual_w / 16;
 		im_char_height = font_image->actual_h / 16;
 		spacing = im_char_width + def->spacing;
+		im_char_ratio = (float)im_char_width / (float)im_char_height;
 	}
 }
 

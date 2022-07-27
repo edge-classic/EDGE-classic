@@ -78,8 +78,9 @@ static type_t	type_float = {ev_float};
 static type_t	type_vector = {ev_vector};
 static type_t	type_function = {ev_function, &type_void};
 static type_t	type_module = {ev_module};
+static type_t   type_null = {ev_null};
 
-static int		type_size[8] = {1,1,1,3,1,1,1,1};
+static int		type_size[10] = {1,1,1,3,1,1,1,1,1,1};
 
 
 // definition used for void return functions
@@ -821,8 +822,7 @@ def_t * real_vm_c::EXP_FunctionCall(def_t *func)
 	if (t->type != ev_function)
 		CompileError("not a function before ()\n");
 	
-//??	function_t *df = &functions[func->ofs];
-
+	function_t *df = functions[(int)*REF_GLOBAL(func->ofs)];
 	
 	// evaluate all parameters
 	def_t * exprs[MAX_PARMS];
@@ -852,7 +852,18 @@ def_t * real_vm_c::EXP_FunctionCall(def_t *func)
 		LEX_Expect(")");
 
 		if (arg != t->parm_num)
-			CompileError("too few parameters (needed %d)\n", t->parm_num);
+			if (df->optional_parm_start == -1)
+				CompileError("COAL: Too few parameters for function %s (needed %d)\n", df->name, t->parm_num);
+			else
+			{
+				if (t->parm_num <= df->optional_parm_start)
+					CompileError("COAL: Too few parameters for function %s (needed %d)\n", df->name, t->parm_num);
+				for (int i = arg; i < t->parm_num; i++)
+				{
+					exprs[i] = NewTemporary(&type_null);
+					arg++;
+				}
+			}
 	}
 
 
@@ -873,6 +884,11 @@ def_t * real_vm_c::EXP_FunctionCall(def_t *func)
 		{
 			EmitCode(OP_PARM_V, exprs[k]->ofs, parm_ofs);
 			parm_ofs += 3;
+		}
+		else if (exprs[k]->type->type == ev_null)
+		{
+			EmitCode(OP_PARM_NULL, 0, parm_ofs);
+			parm_ofs++;
 		}
 		else
 		{
@@ -1523,6 +1539,7 @@ void real_vm_c::GLOB_Function()
 	t_new.type = ev_function;
 	t_new.parm_num = 0;
 	t_new.aux_type = &type_void;
+	int optional_start = -1;
 
 	if (! LEX_Check(")"))
 	{
@@ -1532,6 +1549,17 @@ void real_vm_c::GLOB_Function()
 				CompileError("too many parameters (over %d)\n", MAX_PARMS);
 
 			char *name = ParseName();
+
+			if (strcmp(name, "optional") == 0)
+			{
+				optional_start = t_new.parm_num;
+				name = ParseName();
+			}
+			else
+			{
+				if (optional_start > -1)
+					CompileError("Function %s has required parameters declared after optional parameters!\n", func_name);
+			}
 
 			strcpy(comp.parm_names[t_new.parm_num], name);
 
@@ -1582,6 +1610,8 @@ void real_vm_c::GLOB_Function()
 ///---	stack_ofs += df->return_size;
 
 	df->parm_num = def->type->parm_num;
+
+	df->optional_parm_start = optional_start;
 
 	for (int i=0 ; i < df->parm_num ; i++)
 	{

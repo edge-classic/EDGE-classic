@@ -425,7 +425,9 @@ static void HD_draw_text(coal::vm_c *vm, int argc)
 
 	const char *str = vm->AccessParamString(2);
 
-	HUD_DrawText(x, y, str);
+	double *size = vm->AccessParam(3);
+
+	HUD_DrawText(x, y, str, size ? (int)*size : 0);
 }
 
 
@@ -438,6 +440,8 @@ static void HD_draw_num2(coal::vm_c *vm, int argc)
 
 	int len = (int) *vm->AccessParam(2);
 	int num = (int) *vm->AccessParam(3);
+
+	double *size = vm->AccessParam(4);
 
 	if (len < 1 || len > 20)
 		I_Error("hud.draw_number: bad field length: %d\n", len);
@@ -470,7 +474,7 @@ static void HD_draw_num2(coal::vm_c *vm, int argc)
 	}
 
 	HUD_SetAlignment(+1, -1);
-	HUD_DrawText(x, y, pos);
+	HUD_DrawText(x, y, pos, size ? (int)*size : 0);
 	HUD_SetAlignment();
 }
 
@@ -486,6 +490,7 @@ static void HD_draw_number(coal::vm_c *vm, int argc)
 	int len = (int) *vm->AccessParam(2);
 	int num = (int) *vm->AccessParam(3);
 	int align_right = (int) *vm->AccessParam(4);
+	double *size = vm->AccessParam(5);
 
 	if (len < 1 || len > 20)
 		I_Error("hud.draw_number: bad field length: %d\n", len);
@@ -519,12 +524,12 @@ static void HD_draw_number(coal::vm_c *vm, int argc)
 
 	if (align_right == 0)
 	{
-		HUD_DrawText(x, y, pos);
+		HUD_DrawText(x, y, pos, size ? (int)*size : 0);
 	}
 	else
 	{
 		HUD_SetAlignment(+1, -1);
-		HUD_DrawText(x, y, pos);
+		HUD_DrawText(x, y, pos, size ? (int)*size : 0);
 		HUD_SetAlignment();
 	}
 }

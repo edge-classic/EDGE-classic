@@ -407,7 +407,7 @@ void VM_LoadCoalFire(const char *filename)
 	byte *data = F->LoadIntoMemory();
 
 	if (! ui_vm->CompileFile((char *)data, filename))
-		I_Error("Errors compiling coal script: %s\n", filename);
+		I_Error("Errors compiling coal script: %s\nPlease see debug.txt for details.", filename);
 
 	delete[] data;
 	delete F;
@@ -423,7 +423,7 @@ void VM_LoadLumpOfCoal(int lump)
 	I_Printf("Compiling %s lump\n", name);
 
 	if (! ui_vm->CompileFile((char *)data, name))
-		I_Error("Errors compiling %s lump.\n", name);
+		I_Error("Errors compiling %s lump.\nPlease see debug.txt for details.", name);
 
 	delete[] data;
 }

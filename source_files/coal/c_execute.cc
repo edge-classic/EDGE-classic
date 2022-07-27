@@ -158,7 +158,10 @@ const char * real_vm_c::AccessParamString(int p)
 {
 	double *d = AccessParam(p);
 
-	return REF_STRING((int) *d);
+	if (d)
+		return REF_STRING((int) *d);
+	else
+		return NULL;
 }
 
 
@@ -407,6 +410,14 @@ void real_vm_c::DoExecute(int fnum)
 				if (exec.call_depth == exitdepth)
 					return;
 
+				continue;
+			}
+
+			case OP_PARM_NULL:
+			{
+				double *a = &exec.stack[exec.stack_depth + functions[exec.func]->locals_end + st->b];
+
+				*a = NULL;
 				continue;
 			}
 

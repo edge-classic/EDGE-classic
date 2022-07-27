@@ -50,7 +50,8 @@ typedef enum
 	ev_field,
 	ev_function,
 	ev_module,
-	ev_pointer
+	ev_pointer,
+	ev_null
 }
 etype_t;
 
@@ -72,6 +73,7 @@ enum
 	OP_CALL,
 	OP_RET,
 
+	OP_PARM_NULL,
 	OP_PARM_F,
 	OP_PARM_V,
 
@@ -151,6 +153,7 @@ typedef struct
 	int		parm_num;
 	short	parm_ofs[MAX_PARMS];
 	short	parm_size[MAX_PARMS];
+	int		optional_parm_start; // Param nums equal or higher to this are optional
 
 	int		locals_ofs;
 	int		locals_size;

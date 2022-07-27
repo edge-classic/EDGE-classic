@@ -77,6 +77,7 @@ public:
 	int im_char_width;
 	int im_char_height;
 	int spacing;
+	float im_char_ratio; // Useful when applying sizing to non-square image fonts
 
 private:
 	void BumpPatchName(char *name);

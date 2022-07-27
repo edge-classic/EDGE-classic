@@ -188,7 +188,7 @@ void font_c::Load()
 int font_c::NominalWidth() const
 {
 	if (def->type == FNTYP_Image)
-		return im_char_width;
+		return spacing;
 
 	if (def->type == FNTYP_Patch)
 		return p_cache.width;
@@ -225,6 +225,9 @@ bool font_c::HasChar(char ch) const
 
 const image_c *font_c::CharImage(char ch) const
 {
+	if (def->type == FNTYP_Image)
+		return font_image;
+
 	SYS_ASSERT(def->type == FNTYP_Patch);
 
 	if (! HasChar(ch))
@@ -251,7 +254,7 @@ const image_c *font_c::CharImage(char ch) const
 int font_c::CharWidth(char ch) const  // XXX: return float ???
 {
 	if (def->type == FNTYP_Image)
-		return im_char_width;
+		return spacing;
 			
 	SYS_ASSERT(def->type == FNTYP_Patch);
 

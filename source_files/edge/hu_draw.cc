@@ -826,7 +826,7 @@ float HUD_StringHeight(const char *str)
 }
 
 
-void HUD_DrawChar(float left_x, float top_y, const image_c *img)
+void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch)
 {
 	float sc_x = cur_scale; // TODO * aspect;
 	float sc_y = cur_scale;
@@ -834,8 +834,29 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img)
 	float x = left_x - IM_OFFSETX(img) * sc_x;
 	float y = top_y  - IM_OFFSETY(img) * sc_y;
 
-	float w = IM_WIDTH(img)  * sc_x;
-	float h = IM_HEIGHT(img) * sc_y;
+	float w, h;
+	float tx1, tx2, ty1, ty2;
+
+	if (img->is_font)
+	{
+		w = cur_font->spacing * sc_x;
+		h = cur_font->im_char_height * sc_y;
+		int px =      int((byte)ch) % 16;
+		int py = 15 - int((byte)ch) / 16;
+		tx1 = (px  ) * cur_font->font_image->ratio_w;
+		tx2 = (px+1) * cur_font->font_image->ratio_w;
+		ty1 = (py  ) * cur_font->font_image->ratio_h;
+		ty2 = (py+1) * cur_font->font_image->ratio_h;
+	}
+	else
+	{
+		w = IM_WIDTH(img) * sc_x;
+		h = IM_HEIGHT(img) * sc_y;
+		tx1 = 0;
+		ty1 = 0;
+		tx2 = IM_RIGHT(img);
+		ty2 = IM_TOP(img);
+	}
 
 	float x1 = COORD_X(x);
 	float x2 = COORD_X(x+w);
@@ -843,7 +864,7 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img)
 	float y1 = COORD_Y(y+h);
 	float y2 = COORD_Y(y);
 
-    HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img),
+    HUD_RawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2,
 				  cur_alpha, cur_color);
 }
 
@@ -896,7 +917,7 @@ void HUD_DrawText(float x, float y, const char *str)
 			const image_c *img = cur_font->CharImage(ch);
 
 			if (img)
-				HUD_DrawChar(cx, cy, img);
+				HUD_DrawChar(cx, cy, img, ch);
 
 			cx += cur_font->CharWidth(ch) * cur_scale;
 		}

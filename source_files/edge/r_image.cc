@@ -995,7 +995,10 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 			epi::Hq2x::Convert(tmp_img, solid, false /* invert */);
 
 		if (rim->is_font)
+		{
 			scaled_img->RemoveBackground();
+			rim->opacity = R_DetermineOpacity(tmp_img);
+		}
 		if (do_whiten)
 			scaled_img->Whiten();
 
@@ -1008,7 +1011,10 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 				R_PalettisedToRGB(tmp_img, what_palette, rim->opacity);
 
 		if (rim->is_font)
+		{
 			rgb_img->RemoveBackground();
+			rim->opacity = R_DetermineOpacity(tmp_img);
+		}
 		if (do_whiten)
 			rgb_img->Whiten();
 
@@ -1018,7 +1024,10 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 	else if (tmp_img->bpp >= 3)
 	{
 		if (rim->is_font)
+		{
 			tmp_img->RemoveBackground();
+			rim->opacity = R_DetermineOpacity(tmp_img);
+		}
 		if (do_whiten)
 			tmp_img->Whiten();
 		else if (trans != NULL)

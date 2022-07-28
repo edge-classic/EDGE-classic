@@ -150,7 +150,10 @@ double * real_vm_c::AccessParam(int p)
 	if (p >= functions[exec.func]->parm_num)
 		RunError("PR_Parameter: p=%d out of range\n", p);
 
-	return &exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]];
+	if (exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]] == -FLT_MAX)
+		return NULL;
+	else
+		return &exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]];
 }
 
 
@@ -417,7 +420,7 @@ void real_vm_c::DoExecute(int fnum)
 			{
 				double *a = &exec.stack[exec.stack_depth + functions[exec.func]->locals_end + st->b];
 
-				*a = NULL;
+				*a = -FLT_MAX; // Trying to pick a reliable but very unlikely value for a parameter - Dasho
 				continue;
 			}
 

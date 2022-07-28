@@ -301,7 +301,7 @@ static void HD_draw_image(coal::vm_c *vm, int argc)
 
 	if (img)
 	{
-		if (*noOffset > 0)
+		if (noOffset)
 			HUD_DrawImageNoOffset(x, y, img);
 		else
 			HUD_DrawImage(x, y, img);
@@ -327,7 +327,7 @@ static void HD_scroll_image(coal::vm_c *vm, int argc)
 
 	if (img)
 	{
-		if (*noOffset > 0)
+		if (noOffset)
 			HUD_ScrollImageNoOffset(x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
 		else
 			HUD_ScrollImage(x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
@@ -353,7 +353,7 @@ static void HD_stretch_image(coal::vm_c *vm, int argc)
 
 	if (img)
 	{
-		if (*noOffset > 0)
+		if (noOffset)
 			HUD_StretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
 		else
 			HUD_StretchImage(x, y, w, h, img, 0.0, 0.0);

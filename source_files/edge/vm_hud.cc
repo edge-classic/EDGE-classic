@@ -285,7 +285,9 @@ static void HD_gradient_box(coal::vm_c *vm, int argc)
 }
 
 
-// hud.draw_image(x, y, name)
+// hud.draw_image(x, y, name, [noOffset])
+// if we specify noOffset then it ignores 
+// X and Y offsets from doom or images.ddf
 //
 static void HD_draw_image(coal::vm_c *vm, int argc)
 {
@@ -294,29 +296,19 @@ static void HD_draw_image(coal::vm_c *vm, int argc)
 	const char *name = vm->AccessParamString(2);
 
 	const image_c *img = W_ImageLookup(name, INS_Graphic);
+	
+	double *noOffset = vm->AccessParam(3);
 
 	if (img)
 	{
-		HUD_DrawImage(x, y, img);
+		if (*noOffset > 0)
+			HUD_DrawImageNoOffset(x, y, img);
+		else
+			HUD_DrawImage(x, y, img);
 	}
 }
 
-// hud.draw_image_nooffsets(x, y, name)
-//
-// Lobo 2022: same as above but ignores X and Y offsets from doom or images.ddf
-static void HD_draw_image_NoOffsets(coal::vm_c *vm, int argc)
-{
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
-	const char *name = vm->AccessParamString(2);
 
-	const image_c *img = W_ImageLookup(name, INS_Graphic);
-
-	if (img)
-	{
-		HUD_DrawImageNoOffset(x, y, img);
-	}
-}
 
 // Dasho 2022: Same as above but adds x/y texcoord scrolling
 // hud.scroll_image(x, y, name, sx, sy)
@@ -330,31 +322,22 @@ static void HD_scroll_image(coal::vm_c *vm, int argc)
 	float sy = *vm->AccessParam(4);
 
 	const image_c *img = W_ImageLookup(name, INS_Graphic);
+	double *noOffset = vm->AccessParam(5);
+
 
 	if (img)
 	{
-		HUD_ScrollImage(x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
+		if (*noOffset > 0)
+			HUD_ScrollImageNoOffset(x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
+		else
+			HUD_ScrollImage(x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
 	}
 }
 
-// hud.scroll_image_nooffsets(x, y, name, sx, sy)
-static void HD_scroll_image_NoOffsets(coal::vm_c *vm, int argc)
-{
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
-	const char *name = vm->AccessParamString(2);
-	float sx = *vm->AccessParam(3);
-	float sy = *vm->AccessParam(4);
 
-	const image_c *img = W_ImageLookup(name, INS_Graphic);
-
-	if (img)
-	{
-		HUD_ScrollImageNoOffset(x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
-	}
-}
-
-// hud.stretch_image(x, y, w, h, name)
+// hud.stretch_image(x, y, w, h, name, [noOffset])
+// if we specify noOffset then it ignores 
+// X and Y offsets from doom or images.ddf
 //
 static void HD_stretch_image(coal::vm_c *vm, int argc)
 {
@@ -366,32 +349,17 @@ static void HD_stretch_image(coal::vm_c *vm, int argc)
 	const char *name = vm->AccessParamString(4);
 
 	const image_c *img = W_ImageLookup(name, INS_Graphic);
+	double *noOffset = vm->AccessParam(5);
 
 	if (img)
 	{
-		HUD_StretchImage(x, y, w, h, img, 0.0, 0.0);
+		if (*noOffset > 0)
+			HUD_StretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
+		else
+			HUD_StretchImage(x, y, w, h, img, 0.0, 0.0);
 	}
 }
 
-// hud.stretch_image_nooffsets(x, y, w, h, name)
-//
-// Lobo 2022: same as above but ignores X and Y offsets from doom or images.ddf
-static void HD_stretch_imageNoOffsets(coal::vm_c *vm, int argc)
-{
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
-	float w = *vm->AccessParam(2);
-	float h = *vm->AccessParam(3);
-
-	const char *name = vm->AccessParamString(4);
-
-	const image_c *img = W_ImageLookup(name, INS_Graphic);
-
-	if (img)
-	{
-		HUD_StretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
-	}
-}
 
 // hud.tile_image(x, y, w, h, name, offset_x, offset_y)
 //
@@ -416,7 +384,7 @@ static void HD_tile_image(coal::vm_c *vm, int argc)
 }
 
 
-// hud.draw_text(x, y, str)
+// hud.draw_text(x, y, str, [size])
 //
 static void HD_draw_text(coal::vm_c *vm, int argc)
 {
@@ -431,7 +399,7 @@ static void HD_draw_text(coal::vm_c *vm, int argc)
 }
 
 
-// hud.draw_num2(x, y, len, num)
+// hud.draw_num2(x, y, len, num, [size])
 //
 static void HD_draw_num2(coal::vm_c *vm, int argc)
 {
@@ -480,7 +448,7 @@ static void HD_draw_num2(coal::vm_c *vm, int argc)
 
 
 // Lobo November 2021:  
-// hud.draw_number(x, y, len, num, align_right)
+// hud.draw_number(x, y, len, num, align_right, [size])
 //
 static void HD_draw_number(coal::vm_c *vm, int argc)
 {
@@ -844,11 +812,11 @@ void VM_RegisterHUD()
     ui_vm->AddNativeFunction("hud.gradient_box",    HD_gradient_box);
 
     ui_vm->AddNativeFunction("hud.draw_image",      HD_draw_image);
-	ui_vm->AddNativeFunction("hud.draw_image_nooffsets",      HD_draw_image_NoOffsets);
+	//ui_vm->AddNativeFunction("hud.draw_image_nooffsets",      HD_draw_image_NoOffsets);
     ui_vm->AddNativeFunction("hud.stretch_image",   HD_stretch_image);
-    ui_vm->AddNativeFunction("hud.stretch_image_nooffsets",   HD_stretch_imageNoOffsets);
+    //ui_vm->AddNativeFunction("hud.stretch_image_nooffsets",   HD_stretch_imageNoOffsets);
 	ui_vm->AddNativeFunction("hud.scroll_image",   HD_scroll_image);
-    ui_vm->AddNativeFunction("hud.scroll_image_nooffsets",   HD_scroll_image_NoOffsets);
+    //ui_vm->AddNativeFunction("hud.scroll_image_nooffsets",   HD_scroll_image_NoOffsets);
     ui_vm->AddNativeFunction("hud.tile_image",      HD_tile_image);
     ui_vm->AddNativeFunction("hud.draw_text",       HD_draw_text);
     ui_vm->AddNativeFunction("hud.draw_num2",       HD_draw_num2);

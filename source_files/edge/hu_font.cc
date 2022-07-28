@@ -147,6 +147,7 @@ void font_c::LoadPatches()
 
 	p_cache.width  = I_ROUND(IM_WIDTH(Nom));  // XXX: make fields float???
 	p_cache.height = I_ROUND(IM_HEIGHT(Nom));
+	p_cache.ratio = IM_WIDTH(Nom) / IM_HEIGHT(Nom);
 }
 
 void font_c::LoadFontImage()
@@ -162,7 +163,7 @@ void font_c::LoadFontImage()
 		im_char_width = font_image->actual_w / 16;
 		im_char_height = font_image->actual_h / 16;
 		spacing = im_char_width + def->spacing;
-		im_char_ratio = (float)im_char_width / (float)im_char_height;
+		im_char_ratio = im_char_width / im_char_height;
 	}
 }
 

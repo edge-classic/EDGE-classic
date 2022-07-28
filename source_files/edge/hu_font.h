@@ -36,6 +36,7 @@ typedef struct
 	// than this, but these values give a good guess for formatting
 	// purposes.  Only valid once font has been loaded.
 	int width, height;
+	float ratio;
 }
 patchcache_t;
 
@@ -48,7 +49,6 @@ public:
 	~font_c();
 
 private:
-	patchcache_t p_cache;
 
 public:
 	void Load();
@@ -69,14 +69,16 @@ public:
 	// FIXME: maybe shouldn't be public (assumes FNTYP_Patch !!)
 	const image_c *CharImage(char ch) const;
 
+	patchcache_t p_cache;
+
 	fontdef_c *def;
 
 	const image_c *font_image;
 
 	// For IMAGE type
-	int im_char_width;
-	int im_char_height;
-	int spacing;
+	float im_char_width;
+	float im_char_height;
+	float spacing;
 	float im_char_ratio; // Useful when applying sizing to non-square image fonts
 
 private:

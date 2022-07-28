@@ -110,9 +110,9 @@ float HUD_Aspect(void);
 float HUD_StringWidth(const char *str);
 float HUD_StringHeight(const char *str);
 
-void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, int size = 0);
+void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float size = 0);
 
-void HUD_DrawText(float x, float y, const char *str, int size = 0);
+void HUD_DrawText(float x, float y, const char *str, float size = 0);
 // draw a text string with the current font, current color (etc).
 
 

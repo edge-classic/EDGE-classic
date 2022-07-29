@@ -162,7 +162,7 @@ void font_c::LoadFontImage()
 			I_Error("LoadFontImage: Image %s not found for font %s!", def->image_name.c_str(), def->name.c_str());
 		im_char_width = font_image->actual_w / 16;
 		im_char_height = font_image->actual_h / 16;
-		spacing = im_char_width + def->spacing;
+		spacing = def->spacing;
 		im_char_ratio = im_char_width / im_char_height;
 	}
 }
@@ -190,7 +190,7 @@ void font_c::Load()
 int font_c::NominalWidth() const
 {
 	if (def->type == FNTYP_Image)
-		return spacing;
+		return im_char_width;
 
 	if (def->type == FNTYP_Patch)
 		return p_cache.width;
@@ -256,7 +256,7 @@ const image_c *font_c::CharImage(char ch) const
 int font_c::CharWidth(char ch) const  // XXX: return float ???
 {
 	if (def->type == FNTYP_Image)
-		return spacing;
+		return im_char_width;
 			
 	SYS_ASSERT(def->type == FNTYP_Patch);
 

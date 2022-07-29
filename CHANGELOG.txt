@@ -1,6 +1,6 @@
 https://github.com/dashodanger/EDGE-classic
 
-Current as of: July 2022
+Current as of: August 2022
 
 CHANGELOG for EDGE-Classic 1.2 (since EDGE-Classic 1.1)
 ====================================
@@ -80,6 +80,7 @@ New Features
 
 + COALHUDS: new commands/variables
   -player.rts_enable_tagged(name): Will execute RTS script with matching tag, if one exists
+  -hud.scroll_image(x, y, name, sx, sy, [noOffset]): will scroll an image in horizontal and/or vertical directions
   -hud.get_average_color(name): Will return an RGB vector with the average color of the named image lump
   -hud.get_average_top_border_color(name): Will return an RGB vector with the average top border color of the named image lump
   -hud.get_average_bottom_border_color(name): Will return an RGB vector with the average bottom border color of the named image lump
@@ -87,6 +88,14 @@ New Features
   -hud.get_darkest_color(name): Will return an RGB vector with the darkest color of the named image lump
   -hud.get_average_hue(name): Will return an RGB vector with the average hue of the named image lump
   -hud.universal_y_adjust variable: Will apply a Y_ADJUST of this value to all weapon sprites
+  
++ COALHUDS: modified commands
+  -hud.draw_image(x, y, name, [noOffset]) has a new optional [noOffset] parameter which if set to 1, will ignore any X or Y offsets the image may have, both doom style and any defined in images.ddf
+  -hud.stretch_image(x, y, w, h, name, [noOffset]) has a new optional [noOffset] parameter which if set to 1, will ignore any X or Y offsets the image may have, both doom style and any defined in images.ddf
+  -hud.draw_text(x, y, str, [size]) has a new optional [size] argument to set the font size in pixels i.e. 16
+  -hud.draw_num2(x, y, len, num, [size]) has a new optional [size] argument to set the font size in pixels i.e. 16
+  -hud.draw_number(x, y, len, num, align_right, [size]) has a new optional [size] argument to set the font size in pixels i.e. 16
+  
   
 + WEAPONS.DDF
   -Command: RENDER_INVERT=TRUE which will cause this weapon to render the sprites in reverse order
@@ -113,9 +122,9 @@ New Features
    this special cannot activate special lines i.e. doors etc.
   -New SPECIAL: SHOVEABLE. If we push up against this thing then we can move it around. Mainly for
    Heretics pods.
-  -New SPECIAL: NO_SPLASH. This thing causes no effects (i.e water splashes) on a floor defined in DDFFLAT as having an IMPACT_OBJECT.  
+  -New SPECIAL: NO_SPLASH. This thing causes no effects (i.e water splashes) on a floor defined in DDFFLAT as having an IMPACT_OBJECT  
   -KILL_BENEFIT: Will grant player benefits if they kill the mobj in question (does not apply when using KILLALL or similar cheats)
-  -New ACTION: PLAYSOUND_BOSS(sfx) which will play the sound at full volume regardless of ALWAYS_LOUD flag.
+  -New ACTION: PLAYSOUND_BOSS(sfx) which will play the sound at full volume regardless of ALWAYS_LOUD flag
 
 + RTS: new commands
   -REPLACE_WEAPON <OldWeapon> <NewWeapon> which will replace one weapon with another instantly(no up/down states run) 

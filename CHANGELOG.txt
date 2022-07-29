@@ -105,7 +105,7 @@ New Features
   --Examples can be found at https://bmf.php5.cz/, https://dwarffortresswiki.org/index.php/Tileset_repository, and other sites that use spritesheet or bitmap fonts
   --Images can also be generated from TrueType fonts using https://lucide.github.io/Font-Atlas-Generator/
   --Required parameter: "IMAGE = <string>", which should refer to a DDFIMAGE definition of the image in question
-  --Optional parameter: "SIZING = <int>", accepts positive or negative values to have fine-grain control over horizontal spacing of letters
+  --Optional parameter: "SPACING = <int>", accepts positive or negative values to have fine-grain control over horizontal spacing of letters
 
 + IMAGES.DDF
   -New special: "IS_FONT = <bool>", needed when using an image in conjunction with the new IMAGE DDFFONT type. Will automatically set the background to transparent

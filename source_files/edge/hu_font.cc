@@ -160,8 +160,8 @@ void font_c::LoadFontImage()
 			I_Error("LoadFontImage: NULL image name provided for font %s!", def->name.c_str());
 		if (!font_image)
 			I_Error("LoadFontImage: Image %s not found for font %s!", def->image_name.c_str(), def->name.c_str());
-		im_char_width = font_image->actual_w / 16;
-		im_char_height = font_image->actual_h / 16;
+		im_char_width = (font_image->actual_w / 16) * font_image->scale_x;
+		im_char_height = (font_image->actual_h / 16) * font_image->scale_y;
 		spacing = def->spacing;
 		im_char_ratio = im_char_width / im_char_height;
 	}

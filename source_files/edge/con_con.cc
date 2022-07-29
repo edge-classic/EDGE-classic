@@ -359,7 +359,7 @@ static void CalcSizes()
 	}
 	else
 	{
-		FNSZ = 16; XMUL = 11; YMUL = FNSZ;
+		FNSZ = 16; XMUL = 11 + I_ROUND((float)con_font->spacing); YMUL = FNSZ;
 	}
 }
 

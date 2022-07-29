@@ -21,11 +21,12 @@ Bugs fixed
 + Fixed DEH_EDGE giving wrong weapon priorities to the rocket launcher and plasma rifle
 + Fixed FORCE_AIM attacks being affected by visibility modifiers
 + Fixed BERSERK_MULTIPLY not being applied to projectiles
-+ Fixed internal colormaps having incorrect color application with non-Doom IWADs or PWADs that have their own colormap/palettes
 + Fixed ZOOM_FOV = 0 in DDFWEAP not disabling zoom for a weapon
 + Fixed erroneous missing sprite rotations when loading sprites from multiple sources
 + Fixed possible CTD when a malformed lump name is passed to the W_CheckNumForName_GFX function
 + Fixed font recoloring appearing incorrect with non-Doom IWADs or certain PWADs that have their own COLORMAP/PLAYPAL lumps
++ Fixed occasional appearance of blank episode in episode selection menu with certain PWADs
++ Fixed SFX with SINGULAR+PRECIOUS flags being cutoff when another SINGULAR SFX in the same category is played
 
 General Improvements
 --------------------
@@ -35,6 +36,7 @@ General Improvements
 + COAL VM:
   -GetFloat, GetString and GetVector added to retrieve COAL variable values from the C++ side
   -SetFloat, SetString and SetVector added to set COAL variables from the C++ side
+  -Function parameters can now be declared optional; all required parameters must be defined first
 + Original RNG LUT for M_Random/P_Random replaced with improved quality generators from the C++ stdlib
 + Crosshair color and size can now be changed via the Video Options menu
 + Pre-level story text/intermission will now be skipped when using the IDCLEV/level warp cheat
@@ -67,6 +69,8 @@ General Improvements
 + Improved height clipping for non-blocking map objects
 + New graphical startup sequence
 + Axis Test added to Mouse/Joystick control options menu to assist in mapping thumbsticks/analog triggers
++ Widescreen status bars added for Freedoom 1/2, Heretic, and Blasphemer
++ Alternate liquid animations now apply when relevant graphics are used in HUD drawing functions (intermissions, etc)
 
 New Features
 ------------
@@ -96,7 +100,20 @@ New Features
   -hud.draw_num2(x, y, len, num, [size]) has a new optional [size] argument to set the font size in pixels i.e. 16
   -hud.draw_number(x, y, len, num, align_right, [size]) has a new optional [size] argument to set the font size in pixels i.e. 16
   
-  
++ FONTS.DDF
+  -New font type: IMAGE; an image with a 16x16 ASCII character layout with either a transparent or solid color background
+  --Examples can be found at https://bmf.php5.cz/, https://dwarffortresswiki.org/index.php/Tileset_repository, and other sites that use spritesheet or bitmap fonts
+  --Images can also be generated from TrueType fonts using https://lucide.github.io/Font-Atlas-Generator/
+  --Required parameter: "IMAGE = <string>", which should refer to a DDFIMAGE definition of the image in question
+  --Optional parameter: "SIZING = <int>", accepts positive or negative values to have fine-grain control over horizontal spacing of letters
+
++ IMAGES.DDF
+  -New special: "IS_FONT = <bool>", needed when using an image in conjunction with the new IMAGE DDFFONT type. Will automatically set the background to transparent
+   (if it isn't already), as well as apply the required mip/clamping flags to the texture
+
++ LANGUAGES.DDF
+  -AddOrReplace() function: Language entries can now be updated dynamically after initial DDFLANG setup
+
 + WEAPONS.DDF
   -Command: RENDER_INVERT=TRUE which will cause this weapon to render the sprites in reverse order
    i.e. Crosshair, flash, weapon. Mainly useful for not having to "cut out" the shape of the weapon

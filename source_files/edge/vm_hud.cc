@@ -311,7 +311,7 @@ static void HD_draw_image(coal::vm_c *vm, int argc)
 
 
 // Dasho 2022: Same as above but adds x/y texcoord scrolling
-// hud.scroll_image(x, y, name, sx, sy)
+// hud.scroll_image(x, y, name, sx, sy, [noOffset])
 //
 static void HD_scroll_image(coal::vm_c *vm, int argc)
 {

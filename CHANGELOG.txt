@@ -92,9 +92,9 @@ New Features
 + COALHUDS: modified commands
   -hud.draw_image(x, y, name, [noOffset]) has a new optional [noOffset] parameter which if set to 1, will ignore any X or Y offsets the image may have, both doom style and any defined in images.ddf
   -hud.stretch_image(x, y, w, h, name, [noOffset]) has a new optional [noOffset] parameter which if set to 1, will ignore any X or Y offsets the image may have, both doom style and any defined in images.ddf
-  -hud.draw_text(x, y, str, [size]) has a new optional [size] argument to scale the text(0.5 half, 2.0 double)
-  -hud.draw_num2(x, y, len, num, [size]) has a new optional [size] argument to scale the text(0.5 half, 2.0 double)
-  -hud.draw_number(x, y, len, num, align_right, [size]) has a new optional [size] argument to scale the text(0.5 half, 2.0 double)
+  -hud.draw_text(x, y, str, [size]) has a new optional [size] argument to set the font size in pixels i.e. 16
+  -hud.draw_num2(x, y, len, num, [size]) has a new optional [size] argument to set the font size in pixels i.e. 16
+  -hud.draw_number(x, y, len, num, align_right, [size]) has a new optional [size] argument to set the font size in pixels i.e. 16
   
   
 + WEAPONS.DDF

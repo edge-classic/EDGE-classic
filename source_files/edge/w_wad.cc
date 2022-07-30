@@ -1462,11 +1462,6 @@ void W_ReadUMAPINFOLumps(void)
 	const unsigned char * lump = (const unsigned char *)W_ReadLumpAlloc(p, &length);
 	ParseUMapInfo(lump, W_LumpLength(p), I_Error);
 
-	//Clear out some of our defaults if we're using umapinfo
-	mapdef_c *temp_level = mapdefs.Lookup("MAP07");
-	temp_level->f_pre.text.clear();
-	temp_level->f_pre.text_flat.clear();
-
 	unsigned int i;
 	for(i = 0; i < Maps.mapcount; i++)
 	{
@@ -1543,6 +1538,36 @@ void W_ReadUMAPINFOLumps(void)
 
 		if(Maps.maps[i].intertext)
 		{
+			if (!stricmp(temp_level->nextmapname.c_str(), "MAP07")) 
+			{
+				//Clear out some of our defaults on certain maps
+				mapdef_c *conflict_level = mapdefs.Lookup("MAP07");
+				conflict_level->f_pre.text.clear();
+				conflict_level->f_pre.text_flat.clear();
+			}
+			if (!stricmp(temp_level->nextmapname.c_str(), "MAP21")) 
+			{
+				//Clear out some of our defaults on certain maps
+				mapdef_c *conflict_level = mapdefs.Lookup("MAP21");
+				conflict_level->f_pre.text.clear();
+				conflict_level->f_pre.text_flat.clear();
+			}
+			if (!stricmp(temp_level->nextmapname.c_str(), "MAP31")) 
+			{
+				//Clear out some of our defaults on certain maps
+				mapdef_c *conflict_level = mapdefs.Lookup("MAP31");
+				conflict_level->f_pre.text.clear();
+				conflict_level->f_pre.text_flat.clear();
+			}
+			if (!stricmp(temp_level->nextmapname.c_str(), "MAP32")) 
+			{
+				//Clear out some of our defaults on certain maps
+				mapdef_c *conflict_level = mapdefs.Lookup("MAP32");
+				conflict_level->f_pre.text.clear();
+				conflict_level->f_pre.text_flat.clear();
+			}
+			
+
 			std::string temp_ref = epi::STR_Format("%sINTERTEXT", Maps.maps[i].mapname);
             std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].intertext);
             language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
@@ -1599,6 +1624,36 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->secretmapname.Set(M_Strupr(Maps.maps[i].nextsecret));
 			if (Maps.maps[i].intertextsecret)
 			{
+				
+				if (!stricmp(temp_level->secretmapname.c_str(), "MAP07")) 
+				{
+					//Clear out some of our defaults on certain maps
+					mapdef_c *conflict_level = mapdefs.Lookup("MAP07");
+					conflict_level->f_pre.text.clear();
+					conflict_level->f_pre.text_flat.clear();
+				}
+				if (!stricmp(temp_level->secretmapname.c_str(), "MAP21")) 
+				{
+					//Clear out some of our defaults on certain maps
+					mapdef_c *conflict_level = mapdefs.Lookup("MAP21");
+					conflict_level->f_pre.text.clear();
+					conflict_level->f_pre.text_flat.clear();
+				}
+				if (!stricmp(temp_level->secretmapname.c_str(), "MAP31")) 
+				{
+					//Clear out some of our defaults on certain maps
+					mapdef_c *conflict_level = mapdefs.Lookup("MAP31");
+					conflict_level->f_pre.text.clear();
+					conflict_level->f_pre.text_flat.clear();
+				}
+				if (!stricmp(temp_level->secretmapname.c_str(), "MAP32")) 
+				{
+					//Clear out some of our defaults on certain maps
+					mapdef_c *conflict_level = mapdefs.Lookup("MAP32");
+					conflict_level->f_pre.text.clear();
+					conflict_level->f_pre.text_flat.clear();
+				}
+				
 				mapdef_c *secret_level = mapdefs.Lookup(M_Strupr(Maps.maps[i].nextsecret));
 				if (!secret_level)
 				{

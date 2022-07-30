@@ -1462,6 +1462,11 @@ void W_ReadUMAPINFOLumps(void)
 	const unsigned char * lump = (const unsigned char *)W_ReadLumpAlloc(p, &length);
 	ParseUMapInfo(lump, W_LumpLength(p), I_Error);
 
+	//Clear out some of our defaults if we're using umapinfo
+	mapdef_c *temp_level = mapdefs.Lookup("MAP07");
+	temp_level->f_pre.text.clear();
+	temp_level->f_pre.text_flat.clear();
+
 	unsigned int i;
 	for(i = 0; i < Maps.mapcount; i++)
 	{
@@ -1474,7 +1479,7 @@ void W_ReadUMAPINFOLumps(void)
 
 			mapdefs.Insert(temp_level);
 		}
-			
+
 		if(Maps.maps[i].levelpic[0])
 			temp_level->namegraphic.Set(M_Strupr(Maps.maps[i].levelpic));
 
@@ -1513,8 +1518,28 @@ void W_ReadUMAPINFOLumps(void)
 		if(Maps.maps[i].nextmap[0])	
 			temp_level->nextmapname.Set(M_Strupr(Maps.maps[i].nextmap));
 
+/*
 		if(Maps.maps[i].interbackdrop[0])
-			temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+		{
+			const image_c *rim;
+
+			rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Flat, ILF_Null);
+
+			if (! rim) //no flat
+			{
+				rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Graphic, ILF_Null);
+				
+				if (! rim) // no graphic
+					temp_level->f_end.text_flat.Set("FLOOR4_8"); //should not happen
+				else //background is a graphic
+					temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].interbackdrop));
+			}
+			else //background is a flat
+			{
+				temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+			}
+		}
+*/			
 
 		if(Maps.maps[i].intertext)
 		{
@@ -1525,11 +1550,27 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->f_end.text.Set(temp_ref.c_str());
 			temp_level->f_end.picwait = 350; //10 seconds
 
+
 			if(Maps.maps[i].interbackdrop[0])
-				temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
-				//temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].interbackdrop));
-			else
-				temp_level->f_end.text_flat.Set("FLOOR4_8");
+			{
+				const image_c *rim;
+
+				rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Flat, ILF_Null);
+
+				if (! rim) //no flat
+				{
+					rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Graphic, ILF_Null);
+					
+					if (! rim) // no graphic
+						temp_level->f_end.text_flat.Set("FLOOR4_8"); //should not happen
+					else //background is a graphic
+						temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].interbackdrop));
+				}
+				else //background is a flat
+				{
+					temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+				}
+			}
 		}	
 
 		if(Maps.maps[i].intermusic[0])
@@ -1578,9 +1619,25 @@ void W_ReadUMAPINFOLumps(void)
 					temp_level->f_end.picwait = 700; //20 seconds
 
 					if(Maps.maps[i].interbackdrop[0])
-						temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
-					else
-						temp_level->f_end.text_flat.Set("FLOOR4_8");
+					{
+						const image_c *rim;
+
+						rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Flat, ILF_Null);
+
+						if (! rim) //no flat
+						{
+							rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Graphic, ILF_Null);
+							
+							if (! rim) // no graphic
+								temp_level->f_end.text_flat.Set("FLOOR4_8"); //should not happen
+							else //background is a graphic
+								temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].interbackdrop));
+						}
+						else //background is a flat
+						{
+							temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+						}
+					}
 				}
 				else
 				{
@@ -1591,9 +1648,25 @@ void W_ReadUMAPINFOLumps(void)
 						secret_level->f_pre.music=temp_level->f_end.music;
 
 					if(Maps.maps[i].interbackdrop[0])
-						secret_level->f_pre.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
-					else
-						secret_level->f_pre.text_flat.Set("FLOOR4_8");
+					{
+						const image_c *rim;
+
+						rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Flat, ILF_Null);
+
+						if (! rim) //no flat
+						{
+							rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Graphic, ILF_Null);
+							
+							if (! rim) // no graphic
+								secret_level->f_pre.text_flat.Set("FLOOR4_8"); //should not happen
+							else //background is a graphic
+								secret_level->f_pre.text_back.Set(M_Strupr(Maps.maps[i].interbackdrop));
+						}
+						else //background is a flat
+						{
+							secret_level->f_pre.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+						}
+					}
 				}
 				
 			}

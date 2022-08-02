@@ -900,7 +900,12 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 		float total_w = 0;
 
 		for (int i = 0; i < len; i++)
-			total_w += cur_font->CharWidth(str[i]) * cur_scale;
+		{
+			if (cur_font->def->type == FNTYP_Image)
+				total_w += (size > 0 ? size * cur_font->im_char_ratio + cur_font->spacing : cur_font->CharWidth(str[i])) * cur_scale;
+			else
+				total_w += (size > 0 ? size * cur_font->p_cache.ratio : cur_font->CharWidth(str[i])) * cur_scale;
+		}
 
 		if (cur_x_align >= 0)
 		{
@@ -920,7 +925,7 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 				HUD_DrawChar(cx, cy, img, ch, size);
 
 			if (cur_font->def->type == FNTYP_Image)
-				cx += (size > 0 ? size * cur_font->im_char_ratio + cur_font->spacing : cur_font->CharWidth(ch) + cur_font->spacing) * cur_scale;
+				cx += (size > 0 ? size * cur_font->im_char_ratio + cur_font->spacing : cur_font->CharWidth(ch)) * cur_scale;
 			else
 				cx += (size > 0 ? size * cur_font->p_cache.ratio : cur_font->CharWidth(ch)) * cur_scale;
 		}

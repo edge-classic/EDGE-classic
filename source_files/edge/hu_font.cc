@@ -256,7 +256,7 @@ const image_c *font_c::CharImage(char ch) const
 int font_c::CharWidth(char ch) const  // XXX: return float ???
 {
 	if (def->type == FNTYP_Image)
-		return im_char_width;
+		return im_char_width + spacing;
 			
 	SYS_ASSERT(def->type == FNTYP_Patch);
 

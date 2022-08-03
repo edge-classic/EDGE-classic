@@ -31,6 +31,8 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <cfloat>
+
 #include "coal.h"
 
 #include <vector>

@@ -1926,8 +1926,56 @@ bool M_Responder(event_t * ev)
 	// Keys usable within menu
 	switch (ch)
 	{
-		case KEYD_DOWNARROW:
+
 		case KEYD_WHEEL_DN:
+			do
+			{
+				if (itemOn + 1 > currentMenu->numitems - 1)
+				{
+					if (currentMenu->menuitems[itemOn].select_func &&
+						currentMenu->menuitems[itemOn].status == 2)
+					{
+						S_StartFX(sfx_stnmov);
+						// 98-7-10 KM Use new defines
+						(* currentMenu->menuitems[itemOn].select_func)(SLIDERRIGHT);
+						itemOn = 0;
+						return true;
+					}
+					else
+						itemOn = 0;
+				}
+				else
+					itemOn++;
+				S_StartFX(sfx_pstop);
+			}
+			while (currentMenu->menuitems[itemOn].status == -1);
+			return true;
+
+		case KEYD_WHEEL_UP:
+			do
+			{
+				if (itemOn == 0)
+				{
+					if (currentMenu->menuitems[itemOn].select_func &&
+						currentMenu->menuitems[itemOn].status == 2)
+					{
+						S_StartFX(sfx_stnmov);
+						// 98-7-10 KM Use new defines
+						(* currentMenu->menuitems[itemOn].select_func)(SLIDERLEFT);
+						itemOn = currentMenu->numitems - 1;
+						return true;
+					}
+					else
+						itemOn = currentMenu->numitems - 1;
+				}
+				else
+					itemOn--;
+				S_StartFX(sfx_pstop);
+			}
+			while (currentMenu->menuitems[itemOn].status == -1);
+			return true;
+		
+		case KEYD_DOWNARROW:
 		case KEYD_DPAD_DOWN:
 		case KEYD_MENU_DOWN:
 			do
@@ -1942,7 +1990,6 @@ bool M_Responder(event_t * ev)
 			return true;
 
 		case KEYD_UPARROW:
-		case KEYD_WHEEL_UP:
 		case KEYD_DPAD_UP:
 		case KEYD_MENU_UP:
 			do

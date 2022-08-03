@@ -72,6 +72,7 @@ General Improvements
 + Widescreen status bars added for Freedoom 1/2, Heretic, and Blasphemer
 + Alternate liquid animations now apply when relevant graphics are used in HUD drawing functions (intermissions, etc)
 
+
 New Features
 ------------
 + DP* sound lumps (PC speaker sounds) in the DOOM IWADs are now usable via DDFSFX
@@ -110,9 +111,6 @@ New Features
 + IMAGES.DDF
   -New special: "IS_FONT = <bool>", needed when using an image in conjunction with the new IMAGE DDFFONT type. Will automatically set the background to transparent
    (if it isn't already), as well as apply the required mip/clamping flags to the texture
-
-+ LANGUAGES.DDF
-  -AddOrReplace() function: Language entries can now be updated dynamically after initial DDFLANG setup
 
 + WEAPONS.DDF
   -Command: RENDER_INVERT=TRUE which will cause this weapon to render the sprites in reverse order
@@ -186,6 +184,9 @@ New Features
   -- Doom
   -- Heretic
   -- ZDoomTranslated  
+  
++ Heretic support: vastly improved. Now 100% completeable from start to finish.
+
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)
 ====================================

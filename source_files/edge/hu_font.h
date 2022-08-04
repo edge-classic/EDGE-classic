@@ -58,8 +58,8 @@ public:
 	int NominalWidth() const;
 	int NominalHeight() const;
 
-	int CharWidth(char ch) const;
-	int StringWidth(const char *str) const;
+	float CharWidth(char ch) const;
+	float StringWidth(const char *str) const;
 	int StringLines(const char *str) const;
 	int MaxFit(int pixel_w, const char *str) const;
 
@@ -80,6 +80,8 @@ public:
 	float im_char_height;
 	float spacing;
 	float im_char_ratio; // Useful when applying sizing to non-square image fonts
+	float individual_char_widths[256];
+
 
 private:
 	void BumpPatchName(char *name);

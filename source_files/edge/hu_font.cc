@@ -20,6 +20,7 @@
 
 #include "main.h"
 #include "font.h"
+#include "image_data.h"
 
 #include "dm_defs.h"
 #include "dm_state.h"
@@ -32,6 +33,7 @@
 
 #define DUMMY_WIDTH  8
 
+extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
 
 // all the fonts that's fit to print
 font_container_c hu_fonts;
@@ -160,10 +162,20 @@ void font_c::LoadFontImage()
 			I_Error("LoadFontImage: NULL image name provided for font %s!", def->name.c_str());
 		if (!font_image)
 			I_Error("LoadFontImage: Image %s not found for font %s!", def->image_name.c_str(), def->name.c_str());
-		im_char_width = (font_image->actual_w / 16) * font_image->scale_x;
-		im_char_height = (font_image->actual_h / 16) * font_image->scale_y;
+		int char_width = font_image->actual_w / 16;
+		int char_height = font_image->actual_h / 16;
+		im_char_width = char_width * font_image->scale_x;
+		im_char_height = char_height * font_image->scale_y;
 		spacing = def->spacing;
 		im_char_ratio = im_char_width / im_char_height;
+		// Determine individual character widths
+		for (int i = 0; i < 256; i++)
+		{
+			epi::image_data_c *char_data = ReadAsEpiBlock((image_c *)font_image);
+			int px =      i % 16;
+			int py = 15 - i / 16;
+			individual_char_widths[i] = char_data->ImageCharacterWidth(px * char_width, py * char_height, px * char_width + char_width, py * char_height + char_height) * font_image->scale_x;
+		}
 	}
 }
 
@@ -249,14 +261,18 @@ const image_c *font_c::CharImage(char ch) const
 	return p_cache.images[idx - p_cache.first];
 }
 
-
 //
 // Returns the width of the IBM cp437 char in the font.
 //
-int font_c::CharWidth(char ch) const  // XXX: return float ???
+float font_c::CharWidth(char ch) const  // XXX: return float ???
 {
 	if (def->type == FNTYP_Image)
-		return im_char_width + spacing;
+	{
+		if (ch == ' ')
+			return im_char_width * 2 / 5 + def->spacing;
+		else
+			return individual_char_widths[int((byte)ch)] + def->spacing;
+	}
 			
 	SYS_ASSERT(def->type == FNTYP_Patch);
 
@@ -268,7 +284,7 @@ int font_c::CharWidth(char ch) const  // XXX: return float ???
 	if (! im)
 		return DUMMY_WIDTH;
 
-	return I_ROUND(IM_WIDTH(im));
+	return IM_WIDTH(im);
 }
 
 
@@ -309,9 +325,9 @@ int font_c::MaxFit(int pixel_w, const char *str) const
 // Find string width from hu_font chars.  The string may not contain
 // any newline characters.
 //
-int font_c::StringWidth(const char *str) const
+float font_c::StringWidth(const char *str) const
 {
-	int w = 0;
+	float w = 0;
 
 	while (*str)
 		w += CharWidth(*str++);

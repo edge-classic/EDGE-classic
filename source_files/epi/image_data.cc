@@ -400,6 +400,42 @@ void image_data_c::EightWaySymmetry()
 	FourWaySymmetry();
 }
 
+int image_data_c::ImageCharacterWidth(int x1, int y1, int x2, int y2)
+{
+	u8_t *src   = pixels;
+	int last_last = x1;
+	int first_first = x2;
+	for (int i = y1; i < y2; i++)
+	{
+		bool found_first = false;
+		bool found_last = false;
+		int first;
+		int last;
+		for (int j = x1; j < x2; j++)
+		{
+			u8_t *checker = PixelAt(j, i);
+			if (src[0] != checker[0] || src[1] != checker[1] || src[2] != checker[2])
+			{
+				if (!found_first)
+				{
+					first = j;
+					found_first = true;
+				}
+				else
+				{
+					last = j;
+					found_last = true;
+				}
+			}
+		}
+		if (found_first && first >= x1 && first < first_first)
+			first_first = first;
+		if (found_last && last <= x2 && last > last_last)
+			last_last = last;
+	}
+	return MAX(last_last - first_first, 0) + 4; // Some padding on each side of the letter
+}
+
 void image_data_c::AverageHue(u8_t *hue, u8_t *ity)
 {
 	// make sure we don't overflow

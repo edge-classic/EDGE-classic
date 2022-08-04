@@ -127,6 +127,11 @@ public:
 	// pixels along the diagonal where (x == y).
 	// NOTE: the image must be SQUARE (width == height).
 
+	int ImageCharacterWidth(int x1, int y1, int x2, int y2);
+	// For the IMAGE DDFFONT type, determines the width of a character
+	// by finding the row with the largest distance between the first
+	// and last non-background-colored pixel
+
 	void AverageHue(u8_t *hue, u8_t *ity = NULL);
 	// compute the average Hue of the RGB(A) image, storing the
 	// result in the 'hue' array (r, g, b).  The average intensity

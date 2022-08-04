@@ -532,6 +532,9 @@ static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 #endif
 */
 	
+	if (def->is_font)
+		return img;
+
 	if (def->fix_trans == FIXTRN_Blacken)
 		R_BlackenClearAreas(img);
 

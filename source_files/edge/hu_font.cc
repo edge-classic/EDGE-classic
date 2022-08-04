@@ -169,13 +169,14 @@ void font_c::LoadFontImage()
 		spacing = def->spacing;
 		im_char_ratio = im_char_width / im_char_height;
 		// Determine individual character widths
+		epi::image_data_c *char_data = ReadAsEpiBlock((image_c *)font_image);
 		for (int i = 0; i < 256; i++)
 		{
-			epi::image_data_c *char_data = ReadAsEpiBlock((image_c *)font_image);
 			int px =      i % 16;
 			int py = 15 - i / 16;
 			individual_char_widths[i] = char_data->ImageCharacterWidth(px * char_width, py * char_height, px * char_width + char_width, py * char_height + char_height) * font_image->scale_x;
 		}
+		delete char_data;
 	}
 }
 

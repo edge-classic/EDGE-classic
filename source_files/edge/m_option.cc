@@ -931,11 +931,14 @@ void M_OptDrawer()
 
 	image = curr_menu->title_image;
 
+	int CenterX = 160;
+	CenterX -= (style->fonts[0]->StringWidth(curr_menu->name) * 1.5) / 2;
+
 	//Lobo 2022
 	bool custom_optionmenu = false;
 	if (custom_optionmenu==false) 
 	{
-		HL_WriteText(style,styledef_c::T_TEXT, curr_menu->title_x, menutop, curr_menu->name,1.5);
+		HL_WriteText(style,styledef_c::T_TEXT, CenterX, menutop, curr_menu->name,1.5);
 	} 
 	else
 	{		

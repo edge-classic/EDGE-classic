@@ -433,7 +433,7 @@ int image_data_c::ImageCharacterWidth(int x1, int y1, int x2, int y2)
 		if (found_last && last <= x2 && last > last_last)
 			last_last = last;
 	}
-	return MAX(last_last - first_first, 0) + 4; // Some padding on each side of the letter
+	return MAX(last_last - first_first, 0) + 3; // Some padding on each side of the letter
 }
 
 void image_data_c::AverageHue(u8_t *hue, u8_t *ity)

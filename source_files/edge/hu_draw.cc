@@ -928,11 +928,7 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 				HUD_DrawChar(cx, cy, img, ch, size);
 
 			if (cur_font->def->type == FNTYP_Image)
-			{
-				float blah = (size > 0 ? size * cur_font->im_char_ratio + cur_font->spacing : cur_font->CharWidth(ch)) * cur_scale;
-				cx += blah;
-				I_Printf("CHAR: %c     BLAH: %f\n", ch, blah);
-			}
+				cx += (size > 0 ? size * cur_font->im_char_ratio + cur_font->spacing : cur_font->CharWidth(ch)) * cur_scale;
 			else
 				cx += (size > 0 ? size * cur_font->p_cache.ratio : cur_font->CharWidth(ch)) * cur_scale;
 		}

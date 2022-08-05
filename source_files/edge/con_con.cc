@@ -41,6 +41,7 @@
 #include "r_image.h"
 #include "r_modes.h"
 #include "r_wipe.h"
+#include "w_wad.h"
 
 
 #define CON_WIPE_TICS  12
@@ -1261,6 +1262,51 @@ void CON_ShowFPS(void)
 	}
 }
 
+const rgbcol_t endoom_colors[16] = 
+{
+0x000000,
+0x0000AA,
+0x00AA00,
+0x00AAAA,
+0xAA0000,
+0xAA00AA,
+0xAA5500,
+0xAAAAAA,
+0x555555,
+0x5555FF,
+0x55FF55,
+0x55FFFF,
+0xFF5555,
+0xFF55FF,
+0xFFFF55,
+0xFFFFFF
+};
+
+void CON_PrintEndoom(int en_lump)
+{
+	int length;
+	byte *data = W_ReadLumpAlloc(en_lump, &length);
+	if (!data)
+		return;
+	if (length != 4000)
+	{
+		delete[] data;
+		return;
+	}
+	int row_counter = 0;
+	for (int i = 0; i < 4000; i+=2)
+	{
+		//CON_MessageColor(endoom_colors[(data[i+1] & 15)]);
+		CON_Printf("%c", (char)data[i]);
+		row_counter++;
+		if (row_counter == 80) 
+		{
+			CON_Printf("\n");
+			row_counter = 0;
+		}
+	}
+	delete[] data;
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

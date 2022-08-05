@@ -414,6 +414,19 @@ int CMD_Map(char **argv, int argc)
 	return 0;
 }
 
+int CMD_Endoom(char **argv, int argc)
+{
+	int en_lump = W_CheckNumForName("ENDOOM");
+	if (en_lump == -1)
+		en_lump = W_CheckNumForName("ENDTEXT");
+	if (en_lump == -1)
+	{
+		CON_Printf("No ENDOOM screen found for this WAD!\n");
+		return 0;
+	}
+	CON_PrintEndoom(en_lump);
+	return 0;
+}
 
 //----------------------------------------------------------------------------
 
@@ -488,6 +501,7 @@ const con_cmd_t builtin_commands[] =
 	{ "crc",            CMD_Crc },
 	{ "dir",            CMD_Dir },
 	{ "ls",             CMD_Dir },
+	{ "endoom", 		CMD_Endoom },
 	{ "exec",           CMD_Exec },
 	{ "help",           CMD_Help },
 	{ "map",            CMD_Map },

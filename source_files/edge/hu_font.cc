@@ -167,14 +167,16 @@ void font_c::LoadFontImage()
 		im_char_width = char_width * font_image->scale_x;
 		im_char_height = char_height * font_image->scale_y;
 		spacing = def->spacing;
-		im_char_ratio = im_char_width / im_char_height;
-		// Determine individual character widths
+		// Determine individual character widths and ratios
+		individual_char_widths = new float[256];
+		individual_char_ratios = new float[256];
 		epi::image_data_c *char_data = ReadAsEpiBlock((image_c *)font_image);
 		for (int i = 0; i < 256; i++)
 		{
 			int px =      i % 16;
 			int py = 15 - i / 16;
 			individual_char_widths[i] = char_data->ImageCharacterWidth(px * char_width, py * char_height, px * char_width + char_width, py * char_height + char_height) * font_image->scale_x;
+			individual_char_ratios[i] = individual_char_widths[i] / im_char_height;
 		}
 		delete char_data;
 	}
@@ -262,10 +264,20 @@ const image_c *font_c::CharImage(char ch) const
 	return p_cache.images[idx - p_cache.first];
 }
 
+float font_c::CharRatio(char ch) const
+{
+	SYS_ASSERT(def->type = FNTYP_Image);
+
+	if (ch == ' ')
+		return 0.4f;
+	else
+		return individual_char_ratios[int((byte)ch)];
+}
+
 //
 // Returns the width of the IBM cp437 char in the font.
 //
-float font_c::CharWidth(char ch) const  // XXX: return float ???
+float font_c::CharWidth(char ch) const
 {
 	if (def->type == FNTYP_Image)
 	{

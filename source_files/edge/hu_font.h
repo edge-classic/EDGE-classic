@@ -58,6 +58,7 @@ public:
 	int NominalWidth() const;
 	int NominalHeight() const;
 
+	float CharRatio(char ch) const;
 	float CharWidth(char ch) const;
 	float StringWidth(const char *str) const;
 	int StringLines(const char *str) const;
@@ -79,8 +80,8 @@ public:
 	float im_char_width;
 	float im_char_height;
 	float spacing;
-	float im_char_ratio; // Useful when applying sizing to non-square image fonts
-	float individual_char_widths[256];
+	float *individual_char_widths;
+	float *individual_char_ratios;
 
 
 private:

@@ -839,7 +839,7 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 
 	if (img->is_font)
 	{
-		w = (size > 0 ? (size * cur_font->im_char_ratio) : cur_font->CharWidth(ch)) * sc_x;
+		w = (size > 0 ? (size * cur_font->CharRatio(ch)) : cur_font->CharWidth(ch)) * sc_x;
 		h = (size > 0 ? size : cur_font->im_char_height) * sc_y;
 		int px =      int((byte)ch) % 16;
 		int py = 15 - int((byte)ch) / 16;
@@ -905,7 +905,7 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 		for (int i = 0; i < len; i++)
 		{
 			if (cur_font->def->type == FNTYP_Image)
-				total_w += (size > 0 ? size * cur_font->im_char_ratio + cur_font->spacing : cur_font->CharWidth(str[i])) * cur_scale;
+				total_w += (size > 0 ? size * cur_font->CharRatio(str[i]) + cur_font->spacing : cur_font->CharWidth(str[i])) * cur_scale;
 			else
 				total_w += (size > 0 ? size * cur_font->p_cache.ratio : cur_font->CharWidth(str[i])) * cur_scale;
 		}
@@ -928,7 +928,7 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 				HUD_DrawChar(cx, cy, img, ch, size);
 
 			if (cur_font->def->type == FNTYP_Image)
-				cx += (size > 0 ? size * cur_font->im_char_ratio + cur_font->spacing : cur_font->CharWidth(ch)) * cur_scale;
+				cx += (size > 0 ? size * cur_font->CharRatio(ch) + cur_font->spacing : cur_font->CharWidth(ch)) * cur_scale;
 			else
 				cx += (size > 0 ? size * cur_font->p_cache.ratio : cur_font->CharWidth(ch)) * cur_scale;
 		}

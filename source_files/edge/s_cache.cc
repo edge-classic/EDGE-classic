@@ -69,7 +69,7 @@ static bool Load_DOOM(epi::sound_data_c *buf, const byte *lump, int length)
 {
 	buf->freq = lump[2] + (lump[3] << 8);
 
-	if (buf->freq < 8000 || buf->freq > 44100)
+	if (buf->freq < 8000 || buf->freq > 48000)
 		I_Warning("Sound Load: weird frequency: %d Hz\n", buf->freq);
 
 	if (buf->freq < 4000)
@@ -158,7 +158,8 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 		int lump = W_CheckNumForName(def->lump_name.c_str());
 		if (lump < 0)
 		{
-			M_WarnError("SFX Loader: Missing sound lump: %s\n", def->lump_name.c_str());
+			// Just write a debug message for SFX lumps; this prevents spam amongst the various IWADs
+			M_DebugError("SFX Loader: Missing sound lump: %s\n", def->lump_name.c_str());
 			return false;
 		}
 

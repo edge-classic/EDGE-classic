@@ -1205,7 +1205,7 @@ static const image_c *BackupGraphic(const char *gfx_name, int flags)
 	if (flags & ILF_Null)
 		return NULL;
 
-	M_WarnError("Unknown graphic: '%s'\n", gfx_name);
+	M_DebugError("Unknown graphic: '%s'\n", gfx_name);
 
 	image_c *dummy;
 

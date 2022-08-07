@@ -607,6 +607,30 @@ void M_WarnError(const char *error,...)
 		I_Warning("%s", message_buf);
 }
 
+void M_DebugError(const char *error,...)
+{
+	// Either writes a debug message or produces a fatal error, depending
+	// on whether the "-strict" option is used.
+
+	char message_buf[4096];
+
+	message_buf[4095] = 0;
+
+	va_list argptr;
+
+	va_start(argptr, error);
+	vsprintf(message_buf, error, argptr);
+	va_end(argptr);
+
+	// I hope nobody is printing strings longer than 4096 chars...
+	SYS_ASSERT(message_buf[4095] == 0);
+
+	if (strict_errors)
+		I_Error("%s", message_buf);
+	else if (! no_warnings)
+		I_Debugf("%s", message_buf);
+}
+
 
 extern FILE *debugfile; // FIXME
 

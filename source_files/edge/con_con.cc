@@ -266,8 +266,8 @@ static void SplitIntoLines(char *src)
 			src++; continue;
 		}
 
-		// strip non-printing characters (including backspace)
-		if (! isprint(*src))
+		// disregard if outside of extended ASCII range
+		if (*src > 128 || *src < -128)
 		{
 			src++; continue;
 		}
@@ -972,7 +972,6 @@ void CON_HandleKey(int key, bool shift, bool ctrl)
 			break;
 
 
-		// Do we need more than letters, numbers, and the underscore for the console? Time will tell - Dasho		
 		if (shift)
 		{
 			if (key == 45)
@@ -1272,7 +1271,7 @@ void CON_PrintEndoom(int en_lump)
 	int row_counter = 0;
 	for (int i = 0; i < 4000; i+=2)
 	{
-		CON_Printf("%c", (u8_t)data[i]);
+		CON_Printf("%c", (int)data[i]);
 		row_counter++;
 		if (row_counter == 80) 
 		{

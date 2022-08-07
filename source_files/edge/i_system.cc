@@ -138,18 +138,6 @@ void I_Printf(const char *message,...)
 	// If debuging enabled, print to the debugfile
 	L_WriteDebug("%s", printbuf);
 
-	// Clean up \n\r combinations
-	while (*string)
-	{
-		if (*string == '\n')
-		{
-			memmove(string + 2, string + 1, strlen(string));
-			string[1] = '\r';
-			string++;
-		}
-		string++;
-	}
-
 	// Send the message to the console.
 	CON_Printf("%s", printbuf);
 

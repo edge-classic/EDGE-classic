@@ -976,18 +976,14 @@ void CON_HandleKey(int key, bool shift, bool ctrl)
 		if (shift)
 		{
 			if (key == 45)
-			{
 				InsertChar(95);
-			}
+			else if (key == 56)
+				InsertChar(42);
 			else
-			{
 				InsertChar(toupper(key));
-			}
 		}
 		else
-		{
 			InsertChar(key);
-		}
 		
 		TabbedLast = false;
 		con_cursor = 0;
@@ -1262,26 +1258,6 @@ void CON_ShowFPS(void)
 	}
 }
 
-const rgbcol_t endoom_colors[16] = 
-{
-0x000000,
-0x0000AA,
-0x00AA00,
-0x00AAAA,
-0xAA0000,
-0xAA00AA,
-0xAA5500,
-0xAAAAAA,
-0x555555,
-0x5555FF,
-0x55FF55,
-0x55FFFF,
-0xFF5555,
-0xFF55FF,
-0xFFFF55,
-0xFFFFFF
-};
-
 void CON_PrintEndoom(int en_lump)
 {
 	int length;
@@ -1296,8 +1272,7 @@ void CON_PrintEndoom(int en_lump)
 	int row_counter = 0;
 	for (int i = 0; i < 4000; i+=2)
 	{
-		//CON_MessageColor(endoom_colors[(data[i+1] & 15)]);
-		CON_Printf("%c", (char)data[i]);
+		CON_Printf("%c", (u8_t)data[i]);
 		row_counter++;
 		if (row_counter == 80) 
 		{

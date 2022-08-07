@@ -115,7 +115,13 @@ int CMD_Dir(char **argv, int argc)
 	const char *mask = "*.*";
 
 	if (argc >= 2)
-		path = argv[1];
+	{
+		// Assume a leading * is the beginning of a mask for the current dir
+		if (argv[1][0] == '*')
+			mask = argv[1];
+		else
+			path = argv[1];
+	}
 
 	if (argc >= 3)
 		mask = argv[2];

@@ -92,6 +92,11 @@ public:
 	{
 		line = line + std::string(text);
 	}
+
+	void Clear()
+	{
+		line.clear();
+	}
 };
 
 // entry [0] is the bottom-most one
@@ -1280,6 +1285,15 @@ void CON_PrintEndoom(int en_lump)
 		}
 	}
 	delete[] data;
+}
+
+void CON_ClearLines()
+{
+	for (int i = 0 ; i < con_used_lines; i++)
+	{
+		console_lines[i]->Clear();
+	}
+	con_used_lines = 0;
 }
 
 //--- editor settings ---

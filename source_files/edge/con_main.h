@@ -30,6 +30,8 @@ void CON_Printf(const char *message,...) GCCATTR((format(printf, 1, 2)));
 
 void CON_PrintEndoom(int en_lump);
 
+void CON_ClearLines();
+
 // Like CON_Printf, but appends an extra '\n'. Should be used for player
 // messages that need more than MessageLDF.
 

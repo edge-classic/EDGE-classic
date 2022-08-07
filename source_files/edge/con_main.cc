@@ -434,6 +434,12 @@ int CMD_Endoom(char **argv, int argc)
 	return 0;
 }
 
+int CMD_Clear(char **argv, int argc)
+{
+	CON_ClearLines();
+	return 0;
+}
+
 //----------------------------------------------------------------------------
 
 // oh lordy....
@@ -504,6 +510,8 @@ static void KillArgs(char **argv, int argc)
 const con_cmd_t builtin_commands[] =
 {
 	{ "args",           CMD_ArgList },
+	{ "cls",            CMD_Clear },
+	{ "clear",          CMD_Clear },
 	{ "crc",            CMD_Crc },
 	{ "dir",            CMD_Dir },
 	{ "ls",             CMD_Dir },

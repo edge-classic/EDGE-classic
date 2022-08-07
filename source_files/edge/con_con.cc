@@ -1271,7 +1271,7 @@ void CON_PrintEndoom(int en_lump)
 	int row_counter = 0;
 	for (int i = 0; i < 4000; i+=2)
 	{
-		CON_Printf("%c", (int)data[i]);
+		CON_Printf("%c", (int)data[i] != 0 ? (int)data[i] : 0x20); // Fix crumpled up ENDOOMs lol
 		row_counter++;
 		if (row_counter == 80) 
 		{

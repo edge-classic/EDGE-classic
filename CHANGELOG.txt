@@ -71,6 +71,7 @@ General Improvements
 + Axis Test added to Mouse/Joystick control options menu to assist in mapping thumbsticks/analog triggers
 + Widescreen status bars added for Freedoom 1/2, Heretic, and Blasphemer
 + Alternate liquid animations now apply when relevant graphics are used in HUD drawing functions (intermissions, etc)
++ Console dir/ls commands with just a mask for a parameter will search the current directory instead of requiring an explicit directory path
 
 
 New Features
@@ -186,6 +187,12 @@ New Features
   -- ZDoomTranslated  
   
 + Heretic support: vastly improved. Now 100% completeable from start to finish.
+
++ Console: clear/cls commands added to clear the current set of console lines (this does not clear the command history)
+
++ ENDOOM Support
+  - Use the new `endoom` command in the console
+  - Support foreground/background colors and blinking
 
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)

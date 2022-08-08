@@ -43,6 +43,8 @@
 #include "r_wipe.h"
 #include "w_wad.h"
 
+#include <vector>
+
 
 #define CON_WIPE_TICS  12
 
@@ -62,6 +64,26 @@ static style_c *console_style;
 
 static rgbcol_t current_color;
 
+const rgbcol_t endoom_colors[16] = 
+{
+0x000000,
+0x0000AA,
+0x00AA00,
+0x00AAAA,
+0xAA0000,
+0xAA00AA,
+0xAA5500,
+0xAAAAAA,
+0x555555,
+0x5555FF,
+0x55FF55,
+0x55FFFF,
+0xFF5555,
+0xFF55FF,
+0xFFFF55,
+0xFFFFFF
+};
+
 extern void E_ProgressMessage(const char *message);
 
 #define T_GREY176  RGB_MAKE(176,176,176)
@@ -76,9 +98,11 @@ public:
 
 	rgbcol_t color;
 
+	std::vector<byte> endoom_bytes;
+
 public:
 	console_line_c(const std::string& text, rgbcol_t _col = T_LGREY) :
-		line(text), color(_col)
+		line(text), color(_col) 
 	{ }
 
 	console_line_c(const char *text, rgbcol_t _col = T_LGREY) :
@@ -93,9 +117,15 @@ public:
 		line = line + std::string(text);
 	}
 
+	void AppendEndoom(byte endoom_byte)
+	{
+		endoom_bytes.push_back(endoom_byte);
+	}
+
 	void Clear()
 	{
 		line.clear();
+		endoom_bytes.clear();
 	}
 };
 
@@ -172,6 +202,42 @@ static void CON_AddLine(const char *s, bool partial)
 		col = T_ORANGE;
 
 	console_lines[0] = new console_line_c(s, col);
+
+	con_partial_last_line = partial;
+
+	if (con_used_lines < MAX_CON_LINES)
+		con_used_lines++;
+}
+
+static void CON_EndoomAddLine(byte endoom_byte, const char *s, bool partial)
+{
+	if (con_partial_last_line)
+	{
+		SYS_ASSERT(console_lines[0]);
+
+		console_lines[0]->Append(s);
+
+		console_lines[0]->AppendEndoom(endoom_byte);
+
+		con_partial_last_line = partial;
+		return;
+	}
+
+	// scroll everything up 
+
+	delete console_lines[MAX_CON_LINES-1];
+
+	for (int i = MAX_CON_LINES-1; i > 0; i--)
+		console_lines[i] = console_lines[i-1];
+
+	rgbcol_t col = current_color;
+
+	if (col == T_LGREY && (strncmp(s, "WARNING", 7) == 0))
+		col = T_ORANGE;
+
+	console_lines[0] = new console_line_c(s, col);
+
+	console_lines[0]->AppendEndoom(endoom_byte);
 
 	con_partial_last_line = partial;
 
@@ -290,6 +356,43 @@ static void SplitIntoLines(char *src)
 	current_color = T_LGREY;
 }
 
+static void EndoomSplitIntoLines(byte endoom_byte, char *src)
+{
+	char *dest = src;
+	char *line = dest;
+
+	while (*src)
+	{
+		if (*src == '\n')
+		{
+			*dest++ = 0;
+
+			CON_AddLine(line, false);
+
+			line = dest;
+
+			src++; continue;
+		}
+
+		// disregard if outside of extended ASCII range
+		if (*src > 128 || *src < -128)
+		{
+			src++; continue;
+		}
+
+		*dest++ = *src++;
+	}
+
+	*dest++ = 0;
+
+	if (line[0])
+	{
+		CON_EndoomAddLine(endoom_byte, line, true);
+	}
+
+	current_color = T_LGREY;
+}
+
 void CON_Printf(const char *message, ...)
 {
 	va_list argptr;
@@ -300,6 +403,18 @@ void CON_Printf(const char *message, ...)
 	va_end(argptr);
 
 	SplitIntoLines(buffer);
+}
+
+void CON_EndoomPrintf(byte endoom_byte, const char *message, ...)
+{
+	va_list argptr;
+	char buffer[1024];
+
+	va_start(argptr, message);
+	vsprintf(buffer, message, argptr);
+	va_end(argptr);
+
+	EndoomSplitIntoLines(endoom_byte, buffer);
 }
 
 void CON_Message(const char *message,...)
@@ -434,6 +549,69 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 
 }
 
+static void DrawEndoomChar(int x, int y, char ch, rgbcol_t col, rgbcol_t col2, bool blink, GLuint tex_id)
+{
+	if (x + FNSZ < 0)
+		return;
+
+	float alpha = 1.0f;
+
+	if (col2 > 0)
+	{
+		glDisable(GL_TEXTURE_2D);
+
+		glColor4f(RGB_RED(col2)/255.0f, RGB_GRN(col2)/255.0f, 
+							RGB_BLU(col2)/255.0f, alpha);
+
+		glBegin(GL_QUADS);
+
+		// Tweak x to prevent overlap of subsequent letters; may need to make this a bit more smart down the line
+		glVertex2i(x + 4, y);
+
+		glVertex2i(x + 4, y + FNSZ);
+
+		glVertex2i(x + FNSZ - 3, y + FNSZ);
+
+		glVertex2i(x + FNSZ - 3, y);
+
+		glEnd();
+
+		glEnable(GL_TEXTURE_2D);
+	}
+
+	glColor4f(RGB_RED(col)/255.0f, RGB_GRN(col)/255.0f, 
+				RGB_BLU(col)/255.0f, alpha);
+
+	if (blink && con_cursor >= 16)
+		ch = 0x20;
+
+	int px =      int((byte)ch) % 16;
+	int py = 15 - int((byte)ch) / 16;
+
+	float tx1 = (px  ) * con_font->font_image->ratio_w;
+	float tx2 = (px+1) * con_font->font_image->ratio_w;
+
+	float ty1 = (py  ) * con_font->font_image->ratio_h;
+	float ty2 = (py+1) * con_font->font_image->ratio_h;
+
+	glBegin(GL_POLYGON);
+
+	glTexCoord2f(tx1, ty1);
+	glVertex2i(x, y);
+
+	glTexCoord2f(tx1, ty2); 
+	glVertex2i(x, y + FNSZ);
+
+	glTexCoord2f(tx2, ty2);
+	glVertex2i(x + FNSZ, y + FNSZ);
+
+	glTexCoord2f(tx2, ty1);
+	glVertex2i(x + FNSZ, y);
+
+	glEnd();
+
+}
+
 // writes the text on coords (x,y) of the console
 static void DrawText(int x, int y, const char *s, rgbcol_t col)
 {
@@ -461,6 +639,34 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 	glDisable(GL_BLEND);
 }
 
+static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
+{
+	GLuint tex_id = W_ImageCache(con_font->font_image, true, (const colourmap_c *)0, true); // Always whiten the font when used with console output
+
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, tex_id);
+ 
+	glEnable(GL_BLEND);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0);
+
+	for (int i=0; i < 80; i++)
+	{
+		byte info = endoom_line->endoom_bytes.at(i);
+
+		DrawEndoomChar(x, y, endoom_line->line.at(i), endoom_colors[info & 15],
+			endoom_colors[(info >> 4) & 7], info & 128, tex_id);
+
+		x += XMUL;
+
+		if (x >= SCREENWIDTH)
+			break;
+	}
+
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_BLEND);
+}
 
 void CON_SetupFont(void)
 {
@@ -547,6 +753,8 @@ void CON_Drawer(void)
 
 		if (strncmp(CL->line.c_str(), "--------", 8) == 0)
 			HorizontalLine(y + YMUL/2, CL->color);
+		else if (CL->endoom_bytes.size() == 80 && CL->line.size() == 80) // 80 ENDOOM characters + newline
+			EndoomDrawText(0, y, CL);
 		else
 			DrawText(0, y, CL->line.c_str(), CL->color);
 
@@ -1276,7 +1484,7 @@ void CON_PrintEndoom(int en_lump)
 	int row_counter = 0;
 	for (int i = 0; i < 4000; i+=2)
 	{
-		CON_Printf("%c", (int)data[i] != 0 ? (int)data[i] : 0x20); // Fix crumpled up ENDOOMs lol
+		CON_EndoomPrintf(data[i+1], "%c", ((int)data[i] == 0 || (int)data[i] == 255) ? 0x20 : (int)data[i]); // Fix crumpled up ENDOOMs lol
 		row_counter++;
 		if (row_counter == 80) 
 		{

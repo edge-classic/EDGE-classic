@@ -557,28 +557,25 @@ static void DrawEndoomChar(int x, int y, char ch, rgbcol_t col, rgbcol_t col2, b
 
 	float alpha = 1.0f;
 
-	if (col2 > 0)
-	{
-		glDisable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_2D);
 
-		glColor4f(RGB_RED(col2)/255.0f, RGB_GRN(col2)/255.0f, 
-							RGB_BLU(col2)/255.0f, alpha);
+	glColor4f(RGB_RED(col2)/255.0f, RGB_GRN(col2)/255.0f, 
+						RGB_BLU(col2)/255.0f, alpha);
 
-		glBegin(GL_QUADS);
+	glBegin(GL_QUADS);
 
-		// Tweak x to prevent overlap of subsequent letters; may need to make this a bit more smart down the line
-		glVertex2i(x + 4, y);
+	// Tweak x to prevent overlap of subsequent letters; may need to make this a bit more smart down the line
+	glVertex2i(x + 4, y);
 
-		glVertex2i(x + 4, y + FNSZ);
+	glVertex2i(x + 4, y + FNSZ);
 
-		glVertex2i(x + FNSZ - 3, y + FNSZ);
+	glVertex2i(x + FNSZ - 3, y + FNSZ);
 
-		glVertex2i(x + FNSZ - 3, y);
+	glVertex2i(x + FNSZ - 3, y);
 
-		glEnd();
+	glEnd();
 
-		glEnable(GL_TEXTURE_2D);
-	}
+	glEnable(GL_TEXTURE_2D);
 
 	glColor4f(RGB_RED(col)/255.0f, RGB_GRN(col)/255.0f, 
 				RGB_BLU(col)/255.0f, alpha);

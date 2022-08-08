@@ -58,6 +58,7 @@ static visible_t con_visible;
 static int conwipeactive = 0;
 static int conwipepos = 0;
 font_c *con_font;
+font_c *endoom_font;
 
 // the console's background
 static style_c *console_style;
@@ -588,11 +589,11 @@ static void DrawEndoomChar(int x, int y, char ch, rgbcol_t col, rgbcol_t col2, b
 	int px =      int((byte)ch) % 16;
 	int py = 15 - int((byte)ch) / 16;
 
-	float tx1 = (px  ) * con_font->font_image->ratio_w;
-	float tx2 = (px+1) * con_font->font_image->ratio_w;
+	float tx1 = (px  ) * endoom_font->font_image->ratio_w;
+	float tx2 = (px+1) * endoom_font->font_image->ratio_w;
 
-	float ty1 = (py  ) * con_font->font_image->ratio_h;
-	float ty2 = (py+1) * con_font->font_image->ratio_h;
+	float ty1 = (py  ) * endoom_font->font_image->ratio_h;
+	float ty2 = (py+1) * endoom_font->font_image->ratio_h;
 
 	glBegin(GL_POLYGON);
 
@@ -641,7 +642,9 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 
 static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
 {
-	GLuint tex_id = W_ImageCache(con_font->font_image, true, (const colourmap_c *)0, true); // Always whiten the font when used with console output
+
+
+	GLuint tex_id = W_ImageCache(endoom_font->font_image, true, (const colourmap_c *)0, true); // Always whiten the font when used with console output
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -657,7 +660,7 @@ static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
 		DrawEndoomChar(x, y, endoom_line->line.at(i), endoom_colors[info & 15],
 			endoom_colors[(info >> 4) & 7], info & 128, tex_id);
 
-		x += XMUL;
+		x += XMUL - 1;
 
 		if (x >= SCREENWIDTH)
 			break;
@@ -678,6 +681,16 @@ void CON_SetupFont(void)
 		con_font = hu_fonts.Lookup(DEF);
 		SYS_ASSERT(con_font);
 		con_font->Load();
+	}
+
+	if (! endoom_font)
+	{
+		fontdef_c *DEF = fontdefs.Lookup("ENDFONT");
+		if (!DEF)
+			I_Error("ENDFONT definition missing from DDFFONT!\n");
+		endoom_font = hu_fonts.Lookup(DEF);
+		SYS_ASSERT(endoom_font);
+		endoom_font->Load();
 	}
 
 	if (! console_style)

@@ -471,17 +471,17 @@ static int YMUL;
 static void CalcSizes()
 {
 	// Would it be preferable to store the reduced sizes in the font_c class? Hmm
-	if (SCREENWIDTH < 400)
+	if (SCREENWIDTH <= 400)
 	{
-		FNSZ = 10; XMUL = 7 + I_ROUND((float)con_font->spacing * .5); YMUL = FNSZ;
+		FNSZ = 11; XMUL = 7; YMUL = 11;
 	}
-	else if (SCREENWIDTH < 700)
+	else if (SCREENWIDTH <= 640)
 	{
-		FNSZ = 13; XMUL = 9 + I_ROUND((float)con_font->spacing * .75); YMUL = FNSZ;
+		FNSZ = 13; XMUL = 9; YMUL = 13;
 	}
 	else
 	{
-		FNSZ = 16; XMUL = 11 + I_ROUND((float)con_font->spacing); YMUL = FNSZ;
+		FNSZ = 16; XMUL = 11; YMUL = 16;
 	}
 }
 
@@ -528,9 +528,12 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 
 	float tx1 = (px  ) * con_font->font_image->ratio_w;
 	float tx2 = (px+1) * con_font->font_image->ratio_w;
-
+	float char_texcoord_adjust = ((tx2 - tx1) - ((tx2 - tx1) * (con_font->CharWidth(ch) / con_font->im_char_width))) / 2;
+	tx1 += char_texcoord_adjust;
+	tx2 -= char_texcoord_adjust;
 	float ty1 = (py  ) * con_font->font_image->ratio_h;
 	float ty2 = (py+1) * con_font->font_image->ratio_h;
+	int x_adjust = I_ROUND(FNSZ * con_font->individual_char_ratios[(int)ch]);
 
 	glBegin(GL_POLYGON);
 
@@ -541,10 +544,10 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 	glVertex2i(x, y + FNSZ);
 
 	glTexCoord2f(tx2, ty2);
-	glVertex2i(x + FNSZ, y + FNSZ);
+	glVertex2i(x + x_adjust, y + FNSZ);
 
 	glTexCoord2f(tx2, ty1);
-	glVertex2i(x + FNSZ, y);
+	glVertex2i(x + x_adjust, y);
 
 	glEnd();
 
@@ -622,15 +625,24 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0);
 
+	bool draw_cursor = false;
+
+	if (s == input_line)
+	{
+		if (con_cursor < 16) draw_cursor = true;
+	}
+
 	for (; *s; s++)
 	{
 		DrawChar(x, y, *s, col);
 
-		x += XMUL;
+		x += (*s == ' ' ? I_ROUND(FNSZ * 0.4f) : I_ROUND(FNSZ * con_font->individual_char_ratios[(int)*s])) + I_ROUND(con_font->spacing);
 
 		if (x >= SCREENWIDTH)
 			break;
 	}
+
+	if (draw_cursor) DrawChar(x, y, 95, col);
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_ALPHA_TEST);
@@ -657,7 +669,7 @@ static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
 		DrawEndoomChar(x, y, endoom_line->line.at(i), endoom_colors[info & 15],
 			endoom_colors[(info >> 4) & 7], info & 128, tex_id);
 
-		x += XMUL - 1;
+		x += XMUL + I_ROUND(endoom_font->spacing);
 
 		if (x >= SCREENWIDTH)
 			break;
@@ -735,17 +747,17 @@ void CON_Drawer(void)
 
 		if (cmd_hist_pos >= 0)
 		{
-			const char *text = cmd_history[cmd_hist_pos]->c_str();
+			std::string text = cmd_history[cmd_hist_pos]->c_str();
 
-			DrawText(XMUL, y, text, T_PURPLE);
+			if (con_cursor < 16)
+				text.append("_");
+
+			DrawText(XMUL, y, text.c_str(), T_PURPLE);
 		}
 		else
 		{
 			DrawText(XMUL, y, input_line, T_PURPLE);
 		}
-
-		if (con_cursor < 16)
-			DrawText((input_pos+1) * XMUL, y - 2, "_", T_PURPLE);
 
 		y += YMUL;
 	}

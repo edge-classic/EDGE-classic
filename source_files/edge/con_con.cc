@@ -475,7 +475,7 @@ static void CalcSizes()
 	{
 		FNSZ = 11; XMUL = 7; YMUL = 11;
 	}
-	else if (SCREENWIDTH <= 640)
+	else if (SCREENWIDTH < 640)
 	{
 		FNSZ = 13; XMUL = 9; YMUL = 13;
 	}

@@ -621,6 +621,8 @@ void Wad_file::DetectLevels()
 		// check whether the next four lumps are level lumps
 		for (short i = 1 ; i <= 4 ; i++)
 		{
+			if (k+i >= directory.size()) break;
+
 			int part = WhatLevelPart(directory[k+i]->name);
 
 			if (part == 0)
@@ -637,6 +639,9 @@ void Wad_file::DetectLevels()
 		if (part_count == 4)
 		{
 			levels.push_back(k);
+			// Prevent erroneous level detection with binary format if all five LevelPart lumps are in sequential order
+			if (k+5 < directory.size() && WhatLevelPart(directory[k+5]->name) != 0)
+				k++;
 		}
 	}
 

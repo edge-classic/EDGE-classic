@@ -450,8 +450,13 @@ static void LoadSectors(int lump)
 	sector_t *ss;
 
 	if (! W_VerifyLumpName(lump, "SECTORS"))
-		I_Error("Bad WAD: level %s missing SECTORS.\n", 
-				currmap->lump.c_str());
+	{
+		// Check if SECTORS is immediately after THINGS/LINEDEFS/SIDEDEFS/VERTEXES
+		lump -= 3;
+		if (! W_VerifyLumpName(lump, "SECTORS"))
+			I_Error("Bad WAD: level %s missing SECTORS.\n", 
+					currmap->lump.c_str());
+	}
 
 	numsectors = W_LumpLength(lump) / sizeof(raw_sector_t);
 

@@ -426,6 +426,8 @@ int CMD_Endoom(char **argv, int argc)
 	if (en_lump == -1)
 		en_lump = W_CheckNumForName("ENDTEXT");
 	if (en_lump == -1)
+		en_lump = W_CheckNumForName("ENDBOOM");
+	if (en_lump == -1)
 	{
 		CON_Printf("No ENDOOM screen found for this WAD!\n");
 		return 0;

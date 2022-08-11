@@ -1497,9 +1497,13 @@ void CON_PrintEndoom(int en_lump)
 	int length;
 	byte *data = W_ReadLumpAlloc(en_lump, &length);
 	if (!data)
+	{
+		CON_Printf("CON_PrintEndoom: Failed to read data lump!\n");
 		return;
+	}
 	if (length != 4000)
 	{
+		CON_Printf("CON_PrintEndoom: Lump exists, but is malformed! (Length not equal to 4000 bytes)\n");
 		delete[] data;
 		return;
 	}

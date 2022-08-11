@@ -1028,7 +1028,9 @@ void M_OptDrawer()
 		// -ACB- 1998/07/15 Menu Cursor is colour indexed.
 		if (is_selected)
 		{
-			HL_WriteText(style,styledef_c::T_TITLE, (curr_menu->menu_center + 4), curry, "*");
+			int cursor = 16;
+
+			HL_WriteText(style,styledef_c::T_TITLE, (curr_menu->menu_center + 4), curry, (const char *)&cursor);
 
 			if (curr_menu->items[i].help)
 			{

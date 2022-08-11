@@ -24,6 +24,7 @@
 #include "utility.h"
 
 #include "level.h"
+#include "w_wad.h"
 
 #undef  DF
 #define DF  DDF_FIELD
@@ -511,13 +512,62 @@ mapdef_c* mapdef_container_c::Lookup(const char *refname)
 		mapdef_c *m = ITERATOR_TO_TYPE(it, mapdef_c*);
 
 		// ignore maps with unknown episode_name
-		if (! m->episode)
-			continue;
+		//if (! m->episode)
+		//	continue;
 
+		//Lobo 2022: Allow warping and IDCLEVing to arbitrarily
+		// named maps. We have to have a levels.ddf entry AND an episode
+		// so we need to create them on the fly if they are missing.
 		if (DDF_CompareName(m->name.c_str(), refname) == 0)
+		{
+			//Invent a temp episode if we don't have one
+			if (m->episode_name.empty())
+			{
+				gamedef_c *temp_gamedef;
+
+				temp_gamedef = new gamedef_c;
+				temp_gamedef->name = "TEMPEPI";
+				m->episode_name.Set(temp_gamedef->name);
+				m->episode = temp_gamedef;
+				//We must have a default sky
+				if(! m->sky[0])
+					m->sky.Set("SKY1");
+			}
 			return m;
+		}
+			
 	}
 
+	//If we're here then it is a map which has no corresponding 
+	// levels.ddf entry.
+
+	//1. check if the actual map lump exists
+	if(W_CheckNumForName(refname) >= 0)
+	{
+		//2. make a levels.ddf entry
+		mapdef_c *temp_level;
+		temp_level = new mapdef_c;
+		temp_level->name = refname;
+		temp_level->description = refname;
+		temp_level->lump.Set(refname);
+		
+		//3. we also need to assign an episode
+		gamedef_c *temp_gamedef;
+		temp_gamedef = new gamedef_c;
+		temp_gamedef->name = "TEMPEPI";
+		temp_level->episode_name.Set(temp_gamedef->name);
+		temp_level->episode = temp_gamedef;
+
+		//4. Finally We must have a default sky
+		if(! temp_level->sky[0])
+			temp_level->sky.Set("SKY1");
+
+		mapdefs.Insert(temp_level);
+
+		return temp_level;
+	}
+	
+		
 	return NULL;
 }
 

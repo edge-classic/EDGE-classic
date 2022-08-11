@@ -76,6 +76,7 @@
 #include "i_defs.h"
 
 #include "str_format.h"
+#include "font.h"
 
 #include "main.h"
 
@@ -1028,9 +1029,13 @@ void M_OptDrawer()
 		// -ACB- 1998/07/15 Menu Cursor is colour indexed.
 		if (is_selected)
 		{
-			int cursor = 16;
-
-			HL_WriteText(style,styledef_c::T_TITLE, (curr_menu->menu_center + 4), curry, (const char *)&cursor);
+			if (style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image)
+			{
+				int cursor = 16;
+				HL_WriteText(style,styledef_c::T_TITLE, (curr_menu->menu_center + 4), curry, (const char *)&cursor);
+			}
+			else
+				HL_WriteText(style,styledef_c::T_TITLE, (curr_menu->menu_center + 4), curry, "*");
 
 			if (curr_menu->items[i].help)
 			{

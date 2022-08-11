@@ -27,6 +27,7 @@
 #include "i_net.h"
 
 #include "main.h"
+#include "font.h"
 
 #include "con_main.h"
 #include "dm_defs.h"
@@ -241,9 +242,13 @@ static void DrawKeyword(int index, style_c *style, int y,
 
 	if (is_selected)
 	{
-		int cursor = 16;
-
-		HL_WriteText(style,2, x - style->fonts[2]->StringWidth((const char *)&cursor)/2, y, (const char *)&cursor);
+		if (style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image)
+		{
+			int cursor = 16;
+			HL_WriteText(style,2, x - style->fonts[2]->StringWidth((const char *)&cursor)/2, y, (const char *)&cursor);
+		}
+		else
+			HL_WriteText(style,2, x - style->fonts[2]->StringWidth("*")/2, y, "*");
 	}
 }
 

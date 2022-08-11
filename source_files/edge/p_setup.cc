@@ -2148,9 +2148,16 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd,
 		sd->middle.offset.y = 0;
 	}
 
-// Dasho: Re-enabled. Don't know if we need a fix for X-offsets as well. Looks like disabling was 
-// a decision to favor older/pre-Boom behavior and not due to a bug/glitch from what I can tell in the logs
-#if 1  // -AJA- 2005/01/13: DISABLED (see my log for explanation) 
+	if (sd->top.image && fabs(sd->top.offset.y) > IM_HEIGHT(sd->top.image))
+		sd->top.offset.y = fmodf(sd->top.offset.y, IM_HEIGHT(sd->top.image));
+
+	if (sd->middle.image && fabs(sd->middle.offset.y) > IM_HEIGHT(sd->middle.image))
+		sd->middle.offset.y = fmodf(sd->middle.offset.y, IM_HEIGHT(sd->middle.image));
+
+	if (sd->bottom.image && fabs(sd->bottom.offset.y) > IM_HEIGHT(sd->bottom.image))
+		sd->bottom.offset.y = fmodf(sd->bottom.offset.y, IM_HEIGHT(sd->bottom.image));
+
+#if 0  // -AJA- 2005/01/13: DISABLED (see my log for explanation) 
 	{
 		// -AJA- 2004/09/20: fix texture alignment for some rare cases
 		//       where the texture height is non-POW2 (e.g. 64x72) and
@@ -2158,18 +2165,12 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd,
 
 		if (sd->top.offset.y < 0 && sd->top.image)
 			sd->top.offset.y += IM_HEIGHT(sd->top.image);
-		else if (sd->top.image && sd->top.offset.y > IM_HEIGHT(sd->top.image))
-			sd->top.offset.y -= IM_HEIGHT(sd->top.image);
 
 		if (sd->middle.offset.y < 0 && sd->middle.image)
 			sd->middle.offset.y += IM_HEIGHT(sd->middle.image);
-		else if (sd->middle.image && sd->middle.offset.y > IM_HEIGHT(sd->middle.image))
-			sd->middle.offset.y -= IM_HEIGHT(sd->middle.image);
 
 		if (sd->bottom.offset.y < 0 && sd->bottom.image)
 			sd->bottom.offset.y += IM_HEIGHT(sd->bottom.image);
-		else if (sd->bottom.image && sd->bottom.offset.y > IM_HEIGHT(sd->bottom.image))
-			sd->bottom.offset.y -= IM_HEIGHT(sd->bottom.image);
 	}
 #endif
 }

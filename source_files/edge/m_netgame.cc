@@ -241,7 +241,9 @@ static void DrawKeyword(int index, style_c *style, int y,
 
 	if (is_selected)
 	{
-		HL_WriteText(style,2, x - style->fonts[2]->StringWidth("*")/2, y, "*");
+		int cursor = 16;
+
+		HL_WriteText(style,2, x - style->fonts[2]->StringWidth((const char *)&cursor)/2, y, (const char *)&cursor);
 	}
 }
 

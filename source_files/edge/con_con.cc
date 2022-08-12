@@ -1136,6 +1136,10 @@ void CON_HandleKey(int key, bool shift, bool ctrl)
 	
 		CON_ClearInputLine();
 
+		// Bring user back to current line after entering command
+        bottomrow -= MAX_CON_LINES;
+        if (bottomrow < -1) bottomrow = -1;
+
 		TabbedLast = false;
 		break;
 	

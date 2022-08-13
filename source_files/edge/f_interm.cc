@@ -140,6 +140,10 @@ static const image_c *bg_image;
 static const image_c *leaving_bg_image;
 static const image_c *entering_bg_image;
 
+bool tile_bg = false;
+bool tile_leaving_bg = false;
+bool tile_entering_bg = false;
+
 // You Are Here graphic
 static const image_c *yah[2] = {NULL, NULL};
 
@@ -413,7 +417,10 @@ static void DrawLevelFinished(void)
 	//Lobo 2022: if we have a per level image defined, use that instead
 	if (leaving_bg_image)
 	{
-		HUD_DrawImageTitleWS(leaving_bg_image); //Lobo: Widescreen support
+		if (tile_leaving_bg)
+			HUD_TileImage(-240, 0, 820, 200, leaving_bg_image);
+		else
+			HUD_DrawImageTitleWS(leaving_bg_image); //Lobo: Widescreen support
 	}
 
 	float y = WI_TITLEY;
@@ -490,7 +497,10 @@ static void DrawEnteringLevel(void)
 	//Lobo 2022: if we have a per level image defined, use that instead
 	if (entering_bg_image)
 	{
-		HUD_DrawImageTitleWS(entering_bg_image); //Lobo: Widescreen support
+		if (tile_entering_bg)
+			HUD_TileImage(-240, 0, 820, 200, entering_bg_image);
+		else
+			HUD_DrawImageTitleWS(entering_bg_image); //Lobo: Widescreen support
 	}
 
 	float y = WI_TITLEY;
@@ -685,7 +695,10 @@ static void DrawTime(float x, float y, int t)
 	else
 	{
 		// "sucks"
-		HUD_DrawImage(x - IM_WIDTH(sucks), y, sucks);
+		if (sucks)
+			HUD_DrawImage(x - IM_WIDTH(sucks), y, sucks);
+		else
+			HL_WriteText(wi_sp_style,styledef_c::T_TITLE, x - HUD_StringWidth("Sucks"), y, "Sucks");		
 	}
 }
 
@@ -1387,22 +1400,37 @@ static void DrawSinglePlayerStats(void)
 
 	DrawLevelFinished();
 
-	HUD_DrawImage(SP_STATSX, SP_STATSY, kills);
+	if (kills)
+		HUD_DrawImage(SP_STATSX, SP_STATSY, kills);
+	else
+		HL_WriteText(wi_sp_style,styledef_c::T_TITLE,SP_STATSX, SP_STATSY, "Kills", 0.9);
 	DrawPercent(320 - SP_STATSX, SP_STATSY, cnt_kills[0]);
 
-	HUD_DrawImage(SP_STATSX, SP_STATSY + lh, items);
+	if (items)
+		HUD_DrawImage(SP_STATSX, SP_STATSY + lh, items);
+	else
+		HL_WriteText(wi_sp_style,styledef_c::T_TITLE, SP_STATSX, SP_STATSY + lh, "Items", 0.9);
 	DrawPercent(320 - SP_STATSX, SP_STATSY + lh, cnt_items[0]);
 
-	HUD_DrawImage(SP_STATSX, SP_STATSY + 2 * lh, sp_secret);
+	if (sp_secret)
+		HUD_DrawImage(SP_STATSX, SP_STATSY + 2 * lh, sp_secret);
+	else
+		HL_WriteText(wi_sp_style,styledef_c::T_TITLE, SP_STATSX, SP_STATSY + 2 * lh, "Secrets", 0.9);
 	DrawPercent(320 - SP_STATSX, SP_STATSY + 2 * lh, cnt_secrets[0]);
 
-	HUD_DrawImage(SP_TIMEX, SP_TIMEY, time_image);
+	if (time_image)
+		HUD_DrawImage(SP_TIMEX, SP_TIMEY, time_image);
+	else
+		HL_WriteText(wi_sp_style,styledef_c::T_TITLE, SP_TIMEX, SP_TIMEY, "Time");
 	DrawTime(160 - SP_TIMEX, SP_TIMEY, cnt_time);
 
 	// -KM- 1998/11/25 Removed episode check. Replaced with partime check
 	if (wi_stats.partime)
 	{
-		HUD_DrawImage(160 + SP_TIMEX, SP_TIMEY, par);
+		if (par)
+			HUD_DrawImage(160 + SP_TIMEX, SP_TIMEY, par);
+		else
+			HL_WriteText(wi_sp_style,styledef_c::T_TITLE, 160 + SP_TIMEX, SP_TIMEY, "Par");
 		DrawTime(320 - SP_TIMEX, SP_TIMEY, cnt_par);
 	}
 }
@@ -1515,7 +1543,10 @@ void WI_Drawer(void)
 	else
 	{
 		//HUD_StretchImage(0, 0, 320, 200, bg_image);
-		HUD_DrawImageTitleWS(bg_image); //Lobo: Widescreen support
+		if (tile_bg)
+			HUD_TileImage(-240, 0, 820, 200, bg_image); //Lobo: Widescreen support
+		else
+			HUD_DrawImageTitleWS(bg_image); //Lobo: Widescreen support
 
 		for (int i = 0; i < worldint.numanims; i++)
 		{
@@ -1589,12 +1620,38 @@ static void LoadData(void)
 
 	//Lobo 2022: if we have a per level image defined, use that instead
 	if(wi_stats.cur->leavingbggraphic[0])
-		leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic);
+	{
+		leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic, INS_Flat, ILF_Null);
+		if (leaving_bg_image)
+			tile_leaving_bg = true;
+		else
+		{
+			leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic);
+			tile_leaving_bg = false;
+		}
+	}
 
-	if(wi_stats.cur->leavingbggraphic[0])
-		entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic);
-		
-	bg_image = W_ImageLookup(gd->background);
+	if(wi_stats.cur->enteringbggraphic[0])
+	{
+		entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic, INS_Flat, ILF_Null);
+		if (entering_bg_image)
+			tile_entering_bg = true;
+		else
+		{
+			entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic);
+			tile_entering_bg = false;
+		}
+	}
+
+	bg_image = W_ImageLookup(gd->background, INS_Flat, ILF_Null);
+
+	if (bg_image)
+		tile_bg = true;
+	else
+	{
+		bg_image = W_ImageLookup(gd->background);
+		tile_bg = false;
+	}
 
 	lnames[0] = W_ImageLookup(wi_stats.cur->namegraphic);
 
@@ -1614,16 +1671,16 @@ static void LoadData(void)
 
 	finished = W_ImageLookup("WIF");
 	entering = W_ImageLookup("WIENTER");
-	kills = W_ImageLookup("WIOSTK");
+	kills = W_ImageLookup("WIOSTK", INS_Graphic, ILF_Null);
 	secret = W_ImageLookup("WIOSTS");  // "scrt"
 
-	sp_secret = W_ImageLookup("WISCRT2");  // "secret"
+	sp_secret = W_ImageLookup("WISCRT2", INS_Graphic, ILF_Null);  // "secret"
 
-	items = W_ImageLookup("WIOSTI");
+	items = W_ImageLookup("WIOSTI", INS_Graphic, ILF_Null);
 	frags = W_ImageLookup("WIFRGS");
-	time_image = W_ImageLookup("WITIME");
-	sucks = W_ImageLookup("WISUCKS");
-	par = W_ImageLookup("WIPAR");
+	time_image = W_ImageLookup("WITIME", INS_Graphic, ILF_Null);
+	sucks = W_ImageLookup("WISUCKS", INS_Graphic, ILF_Null);
+	par = W_ImageLookup("WIPAR", INS_Graphic, ILF_Null);
 	killers = W_ImageLookup("WIKILRS");  // "killers" (vertical)
 
 	victims = W_ImageLookup("WIVCTMS");  // "victims" (horiz)

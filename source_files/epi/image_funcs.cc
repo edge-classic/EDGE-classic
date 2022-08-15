@@ -104,10 +104,8 @@ bool Image_GetInfo(file_c *f, int *width, int *height, bool *solid, int format)
 
 	if (format == 1)
 		*solid = true;
-	else if (channels == 2 || channels == 4)
-		*solid = false;
 	else
-		*solid = true;
+		*solid = false;
 
 	delete[] raw_image;
 

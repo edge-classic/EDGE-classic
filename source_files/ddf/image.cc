@@ -280,8 +280,12 @@ static void ImageParseLump(const char *spec)
 	{
 		dynamic_image->format = LIF_TGA;
 	}
+	else if (DDF_CompareName(keyword, "DOOM") == 0)
+	{
+		dynamic_image->format = LIF_DOOM;
+	}
 	else
-		DDF_Error("Unknown image format: %s (use PNG or JPEG)\n", keyword);
+		DDF_Error("Unknown image format: %s (use PNG,JPEG,TGA or DOOM)\n", keyword);
 }
 
 

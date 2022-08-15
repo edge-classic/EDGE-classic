@@ -527,6 +527,36 @@ static image_c *AddImageUser(imagedef_c *def)
 		{
 			const char *basename = def->info.c_str();
 
+			if (def->format == LIF_DOOM)
+			{
+				image_c *rim;
+				switch (def->belong)
+				{
+					case INS_Graphic: rim = AddImageGraphic(def->name, IMSRC_Graphic, W_GetNumForName2(basename), real_graphics); break;
+					case INS_Texture: rim = AddImageGraphic(def->name, IMSRC_Texture, W_GetNumForName2(basename), real_textures); break;
+					case INS_Flat:    rim = AddImageGraphic(def->name, IMSRC_Flat, W_GetNumForName2(basename), real_flats); break;
+					case INS_Sprite:  rim = AddImageGraphic(def->name, IMSRC_Sprite, W_GetNumForName2(basename), real_sprites); break;
+
+					default:
+						I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);
+				}
+
+				if (!rim)
+				{
+					I_Warning("Unable to add image %s: %s\n", 
+						(def->type == IMGDT_Lump) ? "lump" : "file", basename);
+					return NULL;
+				}
+
+				rim->offset_x = def->x_offset;
+				rim->offset_y = def->y_offset;
+
+				rim->scale_x = def->scale * def->aspect;
+				rim->scale_y = def->scale;
+
+				return rim;
+			}
+
 			epi::file_c *f = OpenUserFileOrLump(def);
 
 			if (! f)

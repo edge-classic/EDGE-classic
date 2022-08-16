@@ -95,6 +95,11 @@ void HUD_SetAlpha(float alpha)
 	cur_alpha = alpha;
 }
 
+float HUD_GetAlpha()
+{
+	return cur_alpha;
+}
+
 void HUD_SetAlignment(int xa, int ya)
 {
 	cur_x_align = xa;

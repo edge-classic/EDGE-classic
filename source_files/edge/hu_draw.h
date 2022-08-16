@@ -38,6 +38,7 @@ void HUD_SetFont(font_c *font = NULL);
 void HUD_SetScale(float scale = 1.0f);
 void HUD_SetTextColor(rgbcol_t color = RGB_NO_VALUE);
 void HUD_SetAlpha(float alpha = 1.0f);
+float HUD_GetAlpha(void);
 
 void HUD_SetAlignment(int xa = -1, int ya = -1);
 // xa is -1 for left, 0 for centred, +1 for right

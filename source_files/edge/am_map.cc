@@ -348,6 +348,16 @@ bool AM_Responder(event_t * ev)
 	if (ev->type != ev_keydown)
 		return false;
 
+	// Had to move the automap cheat check up here thanks to Heretic's 'ravmap' cheat - Dasho
+	// -ACB- 1999/09/28 Proper casting
+	if (!DEATHMATCH() && M_CheckCheat(&cheat_amap, (char)sym))
+	{
+		cheating = (cheating + 1) % 3;
+
+		show_things = (cheating == 2) ? true : false;
+		show_walls  = (cheating >= 1) ? true : false;
+	}
+
 	if (! followplayer)
 	{
 		if (E_MatchesKey(key_am_left, sym))
@@ -435,15 +445,6 @@ bool AM_Responder(event_t * ev)
 	{
 		ChangeWindowScale(WHEEL_ZOOMIN);
 		return true;
-	}
-
-	// -ACB- 1999/09/28 Proper casting
-	if (!DEATHMATCH() && M_CheckCheat(&cheat_amap, (char)sym))
-	{
-		cheating = (cheating + 1) % 3;
-
-		show_things = (cheating == 2) ? true : false;
-		show_walls  = (cheating >= 1) ? true : false;
 	}
 
 	return false;
@@ -1114,6 +1115,24 @@ void AM_Drawer(float x, float y, float w, float h, mobj_t *focus)
 	}
 
 	SYS_ASSERT(automap_style);
+
+	if (automap_style->bg_image)
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(automap_style->def->bg.translucency);
+		if (automap_style->def->special == 0)
+			HUD_StretchImage(-90, 0, 500, 200, automap_style->bg_image, 0.0, 0.0);
+		else
+			HUD_TileImage(-90, 0, 500, 200, automap_style->bg_image, 0.0, 0.0);
+		HUD_SetAlpha(old_alpha);
+	}
+	else if (automap_style->def->bg.colour != RGB_NO_VALUE)
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(automap_style->def->bg.translucency);
+		HUD_SolidBox(x, y, x+w, y+h, automap_style->def->bg.colour);
+		HUD_SetAlpha(old_alpha);
+	}
 
 	if (grid && !rotatemap)
 		DrawGrid();

@@ -2712,7 +2712,7 @@ bool W_IsLumpInPwad(const char *name)
 	{
 		filenum = W_GetFileForLump(lumpnum);
 
-		if (filenum == 0) return false; //it's the IWAD so we're done
+		if (filenum < 2) return false; //it's edge_defs or the IWAD so we're done
 
 		data_file_c *df = data_files[filenum];
 

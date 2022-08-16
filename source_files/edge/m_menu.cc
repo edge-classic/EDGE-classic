@@ -2557,14 +2557,17 @@ void M_Init(void)
 		//  page. I use CREDIT as second page now, but
 		//  kept this hack for educational purposes.
 
-		/*MainMenu[readthis] = MainMenu[quitdoom];
-		MainDef.numitems--;
-		MainDef.y += 8; // FIXME
-		SkillDef.prevMenu = &MainDef;
-		ReadDef1.draw_func = M_DrawReadThis1;
-		ReadDef1.x = 330;
-		ReadDef1.y = 165;
-		ReadMenu1[0].select_func = M_FinishReadThis;*/
+		if (W_IsLumpInPwad("M_NGAME") && !W_IsLumpInPwad("M_RDTHIS"))
+		{
+			MainMenu[readthis] = MainMenu[quitdoom];
+			MainDef.numitems--;
+			MainDef.y += 8; // FIXME
+			SkillDef.prevMenu = &MainDef;
+			ReadDef1.draw_func = M_DrawReadThis1;
+			ReadDef1.x = 330;
+			ReadDef1.y = 165;
+			ReadMenu1[0].select_func = M_FinishReadThis;
+		}
 	}
 
  	//Lobo 2022: Use new sfx definitions so we don't have to share names with

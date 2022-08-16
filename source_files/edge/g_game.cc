@@ -1203,6 +1203,10 @@ static void G_DoEndGame(void)
 
 	V_SetPalette(PALETTE_NORMAL, 0);
 
+	S_StopMusic();
+
+	E_PickLoadingScreen();
+
 	E_StartTitle();
 }
 

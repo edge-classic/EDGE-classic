@@ -432,7 +432,7 @@ static menu_t ReadDef1 =
 	ReadMenu1,
 	&menu_def_style,  // FIXME: maybe have READ_1 and READ_2 styles ??
 	M_DrawReadThis1,
-	280, 185,
+	1000, 1000,
 	0
 };
 
@@ -448,7 +448,7 @@ static menu_t ReadDef2 =
 	ReadMenu2,
 	&menu_def_style,  // FIXME: maybe have READ_1 and READ_2 styles ??
 	M_DrawReadThis2,
-	330, 175,
+	1000, 1000,
 	0
 };
 
@@ -1024,7 +1024,7 @@ void M_QuickLoad(void)
 //
 void M_DrawReadThis1(void)
 {
-	HUD_StretchImage(0, 0, 320, 200, menu_readthis[0], 0.0, 0.0);
+	HUD_DrawImageTitleWS(menu_readthis[0]);
 }
 
 //
@@ -1032,7 +1032,7 @@ void M_DrawReadThis1(void)
 //
 void M_DrawReadThis2(void)
 {
-	HUD_StretchImage(0, 0, 320, 200, menu_readthis[1], 0.0, 0.0);
+	HUD_DrawImageTitleWS(menu_readthis[1]);
 }
 
 
@@ -2557,14 +2557,14 @@ void M_Init(void)
 		//  page. I use CREDIT as second page now, but
 		//  kept this hack for educational purposes.
 
-		MainMenu[readthis] = MainMenu[quitdoom];
+		/*MainMenu[readthis] = MainMenu[quitdoom];
 		MainDef.numitems--;
 		MainDef.y += 8; // FIXME
 		SkillDef.prevMenu = &MainDef;
 		ReadDef1.draw_func = M_DrawReadThis1;
 		ReadDef1.x = 330;
 		ReadDef1.y = 165;
-		ReadMenu1[0].select_func = M_FinishReadThis;
+		ReadMenu1[0].select_func = M_FinishReadThis;*/
 	}
 
  	//Lobo 2022: Use new sfx definitions so we don't have to share names with

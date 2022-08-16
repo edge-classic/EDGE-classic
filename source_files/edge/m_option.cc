@@ -508,7 +508,7 @@ static optmenuitem_t playoptions[] =
 	{OPT_Boolean, "Mouse Look",         YesNo, 2, 
      &global_flags.mlook, M_ChangeMLook, NULL},
 
-	{OPT_Switch,  "AutoAiming",         AAim, 3, 
+	{OPT_Switch,  "Autoaim",         AAim, 3, 
      &global_flags.autoaim, M_ChangeAutoAim, NULL},
 
 	{OPT_Boolean, "Jumping",            YesNo, 2, 
@@ -530,7 +530,7 @@ static optmenuitem_t playoptions[] =
      &global_flags.more_blood, M_ChangeBlood, "Blood"},
 
 	{OPT_Boolean, "Extras",             YesNo, 2, 
-     &global_flags.have_extra, M_ChangeExtra, NULL},
+     &global_flags.have_extra, M_ChangeExtra, "Compatibility setting for older mods (recommend leaving on)"},
 
 	{OPT_Boolean, "True 3D Gameplay",   YesNo, 2, 
      &global_flags.true3dgameplay, M_ChangeTrue3d, "True3d"},

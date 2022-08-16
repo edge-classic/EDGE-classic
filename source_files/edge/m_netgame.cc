@@ -231,7 +231,7 @@ void ParsePlayerList(newgame_params_c *par, player_list_proto_t *li)
 static void DrawKeyword(int index, style_c *style, int y,
 		const char *keyword, const char *value)
 {
-	int x = 120;
+	int x = 160;
 
 	bool is_selected =
 	    (netgame_menuon == 1 && index == host_pos) ||
@@ -527,7 +527,7 @@ void M_DrawHostMenu(void)
 	HUD_SolidBox(0, 0, 320, 200, T_BLACK);
 	HUD_SetAlpha();
 
-	HL_WriteText(ng_host_style,2, 80, 25, "Bot Game Settings");
+	HL_WriteText(ng_host_style,2, 160 - (ng_host_style->fonts[2]->StringWidth("Bot Game Settings") / 2), 25, "Bot Game Settings");
 
 	char buffer[200];
 
@@ -568,7 +568,7 @@ void M_DrawHostMenu(void)
 	y += 22; idx++;
 
 
-	HL_WriteText(ng_host_style,(host_pos==idx) ? 2:0, 120,  y, "Start");
+	HL_WriteText(ng_host_style,(host_pos==idx) ? 2:0, 160 - (ng_host_style->fonts[host_pos == idx ? 2 : 0]->StringWidth("Start") / 2),  y, "Start");
 }
 
 bool M_NetHostResponder(event_t * ev, int ch)

@@ -58,8 +58,6 @@ General Improvements
   will remain clamped per the existing implementation
 + Freedoom Phase 1 and 2 have their own base WAD, which provides corrected text and menu graphics
 + Added capturing of console content (if active) in screenshots
-+ Heretic support improved (added missing attacks and ambient sfx, fixed secret level exit, added missing music
- Overlay HUD remodelled)
 + Number of available AMMO and INVENTORY types increased to 99
 + Widescreen ratio resolutions added to windowed resolution list
 + DOOMWADPATH environment variable now supported
@@ -80,7 +78,6 @@ General Improvements
 + Slider options in the Option menu will be drawn with font symbols if an IMAGE DDFFONT type is in use (patch fonts will use the existing slider graphics)
 + Console will automatically scroll back to the bottom/input line after inputting a command
 + Level stat screens will how fallback to HUD fonts if certain images are missing ("Kills", "Items", etc)
-+ Added missing big font patches to Freedoom 1/2 base WADs
 + DDFSTYLE: AUTOMAP background images/colors will now be used when drawing the automap if defined
 
 New Features

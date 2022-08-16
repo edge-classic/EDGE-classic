@@ -33,6 +33,9 @@ const int PNG_DEF_COMPRESS = 4;
 bool PNG_IsDataPNG(const byte *data, int length);
 // returns true if the data looks like a PNG file.
 
+bool TGA_IsDataTGA(const byte *data, int length);
+// returns true if the data looks like a TGA file.
+
 image_data_c *Image_Load(file_c *f, int read_flags, int format);
 // loads the given image.  Returns 0 if something went wrong.
 // The image will be RGB or RGBA (never paletted).  The size of

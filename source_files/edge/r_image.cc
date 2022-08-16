@@ -338,6 +338,7 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 	int offset_x=0, offset_y=0;
 
 	bool is_png = false;
+	bool is_tga = false;
 	bool solid  = false;
   
 	if (epi::PNG_IsDataPNG(buffer, lump_len))
@@ -345,6 +346,19 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 		is_png = true;
 
 		if (! Image_GetInfo(f, &width, &height, &solid, LIF_PNG) ||
+		    width <= 0 || height <= 0)
+		{
+			I_Error("Error scanning PNG image in '%s' lump\n", W_GetLumpName(lump));
+		}
+
+		// close it
+		delete f;
+	}
+	else if (epi::TGA_IsDataTGA(buffer, lump_len))
+	{
+		is_tga = true;
+
+		if (! Image_GetInfo(f, &width, &height, &solid, LIF_TGA) ||
 		    width <= 0 || height <= 0)
 		{
 			I_Error("Error scanning PNG image in '%s' lump\n", W_GetLumpName(lump));
@@ -412,6 +426,7 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 	rim->source_type = type;
 	rim->source.graphic.lump = lump;
 	rim->source.graphic.is_png = is_png;
+	rim->source.graphic.is_tga = is_tga;
 	rim->source_palette = W_GetPaletteForLump(lump);
 
 	if (replaces)
@@ -419,7 +434,7 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 		rim->scale_x = replaces->actual_w / (float)width;
 		rim->scale_y = replaces->actual_h / (float)height;
 
-		if (is_png && replaces->source_type == IMSRC_Sprite)
+		if ((is_png || is_tga) && replaces->source_type == IMSRC_Sprite)
 		{
 			rim->offset_x = replaces->offset_x;
 			rim->offset_y = replaces->offset_y;

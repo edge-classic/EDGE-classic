@@ -370,6 +370,20 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 				
 		return img;
 	}
+	else if (rim->source.graphic.is_tga)
+	{
+		epi::file_c * f = W_OpenLump(lump);
+
+		epi::image_data_c *img = epi::Image_Load(f, epi::IRF_Round_POW2, LIF_TGA);
+
+		// close it
+		delete f;
+
+		if (! img)
+			I_Error("Error loading PNG image in lump: %s\n", W_GetLumpName(lump));
+				
+		return img;
+	}
 
 	int tw = rim->total_w;
 	int th = rim->total_h;

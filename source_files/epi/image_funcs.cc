@@ -32,7 +32,67 @@
 namespace epi
 {
 
-// Header check backported from EDGE 2.x - Dasho
+typedef struct
+{
+    u8_t info_len;        /* length of info field */
+    u8_t has_cmap;        /* 1 if image has colormap, 0 otherwise */
+    u8_t type;
+
+    u8_t cmap_start[2];   /* index of first colormap entry */
+    u8_t cmap_len[2];     /* number of entries in colormap */
+    u8_t cmap_bits;       /* bits per colormap entry */
+
+    u8_t y_origin[2];     /* image origin */
+    u8_t x_origin[2];
+    u8_t width[2];        /* image size */
+    u8_t height[2];
+
+    u8_t pixel_bits;      /* bits/pixel */
+    u8_t flags;
+}
+tga_header_t;
+
+#define GET_U16_FIELD(hdvar, field)  (u16_t)  \
+		((hdvar).field[0] + ((hdvar).field[1] << 8))
+
+#define GET_S16_FIELD(hdvar, field)  (s16_t)  \
+		((hdvar).field[0] + ((hdvar).field[1] << 8))
+
+// Adapted from stb_image's stbi__tga_test function
+bool TGA_IsDataTGA(const byte *data, int length)
+{
+	if (length < sizeof(tga_header_t))
+		return false;
+
+	tga_header_t header;
+	int width, height;
+
+	memcpy(&header, data, sizeof(header));
+
+	if (header.has_cmap > 1) return false;
+
+	if (header.has_cmap == 1)
+	{
+		if (header.type != 1 && header.type != 9) return false;
+		if ((header.cmap_bits != 8) && (header.cmap_bits != 15) && (header.cmap_bits != 16)
+			&& (header.cmap_bits != 24) && (header.cmap_bits != 32)) return false;
+	}
+	else
+	{
+		if ((header.type != 2) && (header.type != 3) && (header.type != 10)
+			&& (header.type != 11)) return false;
+	}
+	height = GET_U16_FIELD(header, height);
+	width = GET_U16_FIELD(header, width);
+	if (height < 1 || width < 1) return false;
+	if ((header.has_cmap == 1) && (header.pixel_bits != 8) && (header.pixel_bits != 16)) return false;
+	if ((header.pixel_bits != 8) && (header.pixel_bits != 15) && (header.pixel_bits != 16)
+		&& (header.pixel_bits != 24) && (header.pixel_bits != 32)) return false;
+
+	return true;  
+}
+
+// PNG Header check backported from EDGE 2.x - Dasho
 bool PNG_IsDataPNG(const byte *data, int length)
 {
     static byte png_sig[4] = { 0x89, 0x50, 0x4E, 0x47 };

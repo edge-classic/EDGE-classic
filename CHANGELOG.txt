@@ -27,6 +27,10 @@ Bugs fixed
 + Fixed font recoloring appearing incorrect with non-Doom IWADs or certain PWADs that have their own COLORMAP/PLAYPAL lumps
 + Fixed occasional appearance of blank episode in episode selection menu with certain PWADs
 + Fixed SFX with SINGULAR+PRECIOUS flags being cutoff when another SINGULAR SFX in the same category is played
++ Fixed failure to detect binary-format maps with only the bare minimum number of required lumps
++ Fixed rare issue where some PNGs with transparency were detected as solid images
++ Fixed map position ("You Are Here") graphics being hidden by a custom Entering image
++ Fixed AddImageGraphic function trying to process TGA images as Doom format
 
 General Improvements
 --------------------
@@ -40,7 +44,7 @@ General Improvements
 + Original RNG LUT for M_Random/P_Random replaced with improved quality generators from the C++ stdlib
 + Crosshair color and size can now be changed via the Video Options menu
 + Pre-level story text/intermission will now be skipped when using the IDCLEV/level warp cheat
-+ Mouse wheel up/down will now page through option menus that have Prev/Next pages (like the keybindings)
++ Mouse wheel up/down will now page through option menus that have Prev/Next pages (like the keybindings/Load Game menus)
 + Improved changing resolutions while in fullscreen mode
 + DDF and RTS now use a consistent INVENTORY## naming scheme for inventory items and scripts
 + COALHUDS:
@@ -69,10 +73,15 @@ General Improvements
 + Improved height clipping for non-blocking map objects
 + New graphical startup sequence
 + Axis Test added to Mouse/Joystick control options menu to assist in mapping thumbsticks/analog triggers
-+ Widescreen status bars added for Freedoom 1/2, Heretic, and Blasphemer
++ Widescreen status bar extenders added for Freedoom 1/2, Heretic, and Blasphemer
 + Alternate liquid animations now apply when relevant graphics are used in HUD drawing functions (intermissions, etc)
 + Console dir/ls commands with just a mask for a parameter will search the current directory instead of requiring an explicit directory path
-
++ IDCLEV/warp will now work with non-standard map names
++ Slider options in the Option menu will be drawn with font symbols if an IMAGE DDFFONT type is in use (patch fonts will use the existing slider graphics)
++ Console will automatically scroll back to the bottom/input line after inputting a command
++ Level stat screens will how fallback to HUD fonts if certain images are missing ("Kills", "Items", etc)
++ Added missing big font patches to Freedoom 1/2 base WADs
++ DDFSTYLE: AUTOMAP background images/colors will now be used when drawing the automap if defined
 
 New Features
 ------------
@@ -112,6 +121,7 @@ New Features
 + IMAGES.DDF
   -New special: "IS_FONT = <bool>", needed when using an image in conjunction with the new IMAGE DDFFONT type. Will automatically set the background to transparent
    (if it isn't already), as well as apply the required mip/clamping flags to the texture
+  -IMAGE_DATA command: 'DOOM' format can now be specified in addition to the already existing PNG/JPG/TGA formats
 
 + WEAPONS.DDF
   -Command: RENDER_INVERT=TRUE which will cause this weapon to render the sprites in reverse order
@@ -124,6 +134,7 @@ New Features
    name.<state:frame> is optional
   -Command: ZOOM_FACTOR=<float> which will function as a tradition zoom magnification factor (1.5, 2.0, etc)
    and will be preferred over ZOOM_FOV if both are present
+  -Command: NO_CHEAT=<bool> will prevent the weapon from being given to the player when using idkfa/idfa style cheats
   
 + STYLES.DDF
   -PRE and END level texts now use style defined in entry [INTERLEVEL_TEXT] 
@@ -186,13 +197,14 @@ New Features
   -- Heretic
   -- ZDoomTranslated  
   
-+ Heretic support: vastly improved. Now 100% completeable from start to finish.
++ Heretic/Blasphemer support: vastly improved. Now 100% completeable from start to finish.
 
 + Console: clear/cls commands added to clear the current set of console lines (this does not clear the command history)
 
 + ENDOOM Support
   - Use the new `endoom` command in the console
-  - Support foreground/background colors and blinking
+  - Supports foreground/background colors and blinking
+  - Supports ENDOOM, ENDTEXT, and ENDBOOM lumps
 
 
 CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)

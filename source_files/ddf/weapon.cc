@@ -47,6 +47,7 @@ static const commandlist_t weapon_commands[] =
 	DF("AMMOPERSHOT", ammopershot[0], DDF_MainGetNumeric),
 	DF("CLIPSIZE", clip_size[0], DDF_MainGetNumeric),
 	DF("AUTOMATIC", autofire[0], DDF_MainGetBoolean),
+	DF("NO_CHEAT", no_cheat, DDF_MainGetBoolean),
 	DF("ATTACK", attack[0], DDF_MainRefAttack),
 	DF("SPECIAL", specials[0], DDF_WGetSpecialFlags),
 

@@ -243,13 +243,22 @@ bool S_StartupTSF(void)
 	I_Printf("Initializing TinySoundFont...\n");
 
 	if (var_pc_speaker_mode)
-		edge_tsf = tsf_load_filename(epi::PATH_Join(game_dir.c_str(), "soundfont/pcbeep.sf2").c_str());
+	{
+		edge_tsf = tsf_load_filename(epi::PATH_Join(game_dir.c_str(), "soundfont/bfb.sf2").c_str());
+		if (!edge_tsf) 
+		{
+			I_Warning("Could not load soundfont! Ensure that bfb.sf2 is present in the soundfont directory!\n");
+			return false;
+		}
+	}
 	else
+	{
 		edge_tsf = tsf_load_filename(epi::PATH_Join(game_dir.c_str(), "soundfont/default.sf2").c_str());
-
-	if (!edge_tsf) {
-		I_Printf("Could not load soundfont! Ensure that default.sf2 is present in the soundfont directory!\n");
-		return false;
+		if (!edge_tsf) 
+		{
+			I_Warning("Could not load soundfont! Ensure that default.sf2 is present in the soundfont directory!\n");
+			return false;
+		}
 	}
 
 	tsf_channel_set_bank_preset(edge_tsf, 9, 128, 0);

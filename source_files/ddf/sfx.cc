@@ -33,6 +33,7 @@ static sfxdef_c dummy_sfx;
 static const commandlist_t sfx_commands[] =
 {
 	DDF_FIELD("LUMP_NAME", lump_name, DDF_MainGetLumpName),
+	DDF_FIELD("PC_SPEAKER_LUMP", pc_speaker_lump, DDF_MainGetLumpName),
 	DDF_FIELD("FILE_NAME", file_name, DDF_MainGetString),
 	DDF_FIELD("SINGULAR",  singularity, DDF_MainGetNumeric),
 	DDF_FIELD("PRIORITY",  priority, DDF_MainGetNumeric),
@@ -209,6 +210,7 @@ sfxdef_c::~sfxdef_c()
 void sfxdef_c::CopyDetail(sfxdef_c &src)
 {
 	lump_name = src.lump_name;
+	pc_speaker_lump = src.pc_speaker_lump;
 	file_name = src.file_name;
 
 	// clear the internal sfx_t (ID would be wrong)
@@ -229,6 +231,7 @@ void sfxdef_c::CopyDetail(sfxdef_c &src)
 void sfxdef_c::Default()
 {
 	lump_name.clear();
+	pc_speaker_lump.clear();
 	file_name.clear();
 
 	normal.sounds[0] = 0;

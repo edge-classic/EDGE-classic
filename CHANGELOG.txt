@@ -84,8 +84,8 @@ New Features
 ------------
 + DP* sound lumps (PC speaker sounds) in the DOOM IWADs are now usable via DDFSFX
 
-+ "PC Speaker Mode" option added to Sound Options menu. Only PC speaker format sounds will be used, and
-  the MIDI player will switch to a PC speaker based soundfont
++ "PC Speaker Mode" option added to Sound Options menu. Only specific SFX will be used, and
+  the MIDI player will switch to an appropriate soundfont
 
 + "Pistol Starts" option added to Gameplay Options menu (default Off). Will force player to default state upon
   starting a new level. Works with all supported IWADs
@@ -132,7 +132,10 @@ New Features
   -Command: ZOOM_FACTOR=<float> which will function as a tradition zoom magnification factor (1.5, 2.0, etc)
    and will be preferred over ZOOM_FOV if both are present
   -Command: NO_CHEAT=<bool> will prevent the weapon from being given to the player when using idkfa/idfa style cheats
-  
+
++ SFX.DDF
+  -Command: PC_SPEAKER_LUMP = <lumpname>; optional, specifies an alternate lump to use when in PC Speaker Mode
+
 + STYLES.DDF
   -PRE and END level texts now use style defined in entry [INTERLEVEL_TEXT] 
   

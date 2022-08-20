@@ -184,14 +184,14 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 
 	bool OK = false;
 	
-	if (strcasecmp(std::string(def->lump_name.c_str()).substr(0, 2).c_str(), "DP") == 0) // Check for PC Speaker sounds
-		OK = Load_WAV(buf, data, length, true);
-	else if (memcmp(data, "RIFF", 4) == 0)
+	if (memcmp(data, "RIFF", 4) == 0)
 		OK = Load_WAV(buf, data, length, false);
 	else if (memcmp(data, "Ogg", 3) == 0)
 		OK = Load_OGG(buf, data, length);
 	else if (S_CheckMP3(data, length))
 		OK = Load_MP3(buf, data, length);
+	else if (strcasecmp(def->lump_name.c_str(), def->pc_speaker_lump.c_str()) == 0) // This check should hopefully only pass when it is a PC Speaker format sound
+		OK = Load_WAV(buf, data, length, true);
 	else
 		OK = Load_DOOM(buf, data, length);
 
@@ -208,14 +208,9 @@ epi::sound_data_c *S_CacheLoad(sfxdef_c *def)
 
 	if (var_pc_speaker_mode)
 	{
-		std::string temp_name = def->lump_name.c_str();
-		if (strcasecmp(temp_name.substr(0, 2).c_str(), "DS") == 0)
-		{
-			temp_name.replace(1, 1, "P");
-			I_Printf("TRYING: %s\n", temp_name.c_str());
-			def->lump_name.Set(temp_name.c_str());
-		}
-		else
+		if (!def->pc_speaker_lump.empty())
+			def->lump_name.Set(def->pc_speaker_lump.c_str());
+		else	
 			pc_speaker_skip = true;
 	}
 

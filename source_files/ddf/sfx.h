@@ -59,6 +59,8 @@ public:
 
     // full sound lump name (or file name)
 	lumpname_c lump_name;
+	// PC Speaker equivalent lump
+	lumpname_c pc_speaker_lump;
 	epi::strent_c file_name;
 
 	// sfxinfo ID number

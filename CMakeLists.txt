@@ -5,7 +5,7 @@ add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/deh_edge)
 add_subdirectory(source_files/epi)
-add_subdirectory(source_files/glew)
+add_subdirectory(source_files/glad)
 add_subdirectory(source_files/libgme)
 add_subdirectory(source_files/libmodplug)
 add_subdirectory(source_files/libwebsid)
@@ -159,7 +159,7 @@ target_include_directories(edge-classic PRIVATE source_files/ddf)
 target_include_directories(edge-classic PRIVATE source_files/deh_edge)
 target_include_directories(edge-classic PRIVATE source_files/dr_wav)
 target_include_directories(edge-classic PRIVATE source_files/epi)
-target_include_directories(edge-classic PRIVATE source_files/glew/include/GL)
+target_include_directories(edge-classic PRIVATE source_files/glad/include/glad)
 target_include_directories(edge-classic PRIVATE source_files/libgme/gme)
 target_include_directories(edge-classic PRIVATE source_files/libmodplug/src)
 target_include_directories(edge-classic PRIVATE source_files/libwebsid)
@@ -235,7 +235,7 @@ if(WIN32 OR MSYS)
 			edge_ddf
 			edge_deh
 			edge_epi
-			libglew_static
+			glad
 			${OPENGL_LIBRARIES}
 			${SDL2_LIBRARIES}
 			gme
@@ -253,7 +253,7 @@ else()
 			edge_deh
 			edge_epi
 			${OPENGL_LIBRARIES}
-			libglew_static
+			glad
 			${SDL2_LIBRARIES}
 			gme
 			miniz

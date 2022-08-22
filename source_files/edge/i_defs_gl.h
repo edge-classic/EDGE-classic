@@ -26,11 +26,7 @@
 #ifndef __SYSTEM_SPECIFIC_DEFS_OPENGL__
 #define __SYSTEM_SPECIFIC_DEFS_OPENGL__
 
-#ifdef WIN32
-#define GLEW_STATIC  1
-#endif
-
-#include "glew.h"
+#include "gl.h" // GLAD
 
 #define USING_GL_TYPES 1
 

@@ -2888,6 +2888,7 @@ void P_SetupLevel(void)
 	// -ACB- 1998/08/27 NULL the head pointers for the linked lists....
 	itemquehead = NULL;
 	mobjlisthead = NULL;
+	seen_monsters.clear();
 
 	lumpnum = W_GetNumForName(currmap->lump);
 

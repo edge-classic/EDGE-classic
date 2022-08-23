@@ -35,6 +35,8 @@
 #include "types.h"
 #include "m_math.h"
 
+#include <unordered_set>
+
 // forward decl.
 class atkdef_c;
 class mobjtype_c;
@@ -48,6 +50,8 @@ struct region_properties_s;
 struct state_s;
 struct subsector_s;
 struct touch_node_s;
+
+extern std::unordered_set<const mobjtype_c *> seen_monsters;
 
 #define STOPSPEED   		0.07f
 #define OOF_SPEED   		9.0f //Lobo: original value 20.0f too high, almost never played oof

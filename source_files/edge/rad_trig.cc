@@ -62,7 +62,6 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-
 #define MAXRTSLINE  2048
 
 
@@ -510,6 +509,8 @@ static bool RAD_CheckBossTrig(rad_trigger_t *trig, s_ondeath_t *cond)
 	// scan the remaining mobjs to see if all bosses are dead
 	for (mo=mobjlisthead; mo != NULL; mo=mo->next)
 	{
+		if (seen_monsters.count(cond->cached_info) == 0) return false; // Never on map?
+
 		if (mo->info == cond->cached_info && mo->health > 0)
 		{
 			count++;

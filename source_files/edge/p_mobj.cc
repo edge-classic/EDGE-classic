@@ -106,6 +106,8 @@ mobj_t *mobjlisthead;
 // Where objects go to die...
 static std::list<mobj_t *> remove_queue;
 
+std::unordered_set<const mobjtype_c *> seen_monsters;
+
 iteminque_t *itemquehead;
 
 
@@ -1529,6 +1531,9 @@ static void AddMobjToList(mobj_t *mo)
 	}
 
 	mobjlisthead = mo;
+
+	if (seen_monsters.count(mo->info) == 0)
+		seen_monsters.insert(mo->info);
 
 #if (DEBUG_MOBJ > 0)
 	L_WriteDebug("tics=%05d  ADD %p [%s]\n", leveltime, mo, 

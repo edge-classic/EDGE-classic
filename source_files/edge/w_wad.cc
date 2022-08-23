@@ -2000,13 +2000,14 @@ int W_CheckNumForName2(const char *name)
 	int i;
 	char buf[9];
 
+	if (strlen(name) > 8)
+	{
+		I_Warning("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
+		return -1;
+	}
+
 	for (i = 0; name[i]; i++)
 	{
-		if (i > 8)
-		{
-			I_Warning("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
-			return -1;
-		}
 		buf[i] = toupper(name[i]);
 	}
 	buf[i] = 0;

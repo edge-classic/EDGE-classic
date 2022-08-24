@@ -2407,7 +2407,8 @@ void mobjtype_c::Default()
 	noway_sound = sfx_None;
 	oof_sound = sfx_None;
 	gasp_sound = sfx_None;
-	secretsound = sfx_None;
+	//secretsound = sfx_None;
+	secretsound = sfxdefs.GetEffect("SECRET");
 	falling_sound = sfx_None;
 
     fuse = 0;

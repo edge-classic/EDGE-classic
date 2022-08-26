@@ -23,7 +23,7 @@ Bugs fixed
 + Fixed BERSERK_MULTIPLY not being applied to projectiles
 + Fixed ZOOM_FOV = 0 in DDFWEAP not disabling zoom for a weapon
 + Fixed erroneous missing sprite rotations when loading sprites from multiple sources
-+ Fixed possible CTD when a malformed lump name is passed to the W_CheckNumForName_GFX function
++ Fixed possible CTD when a malformed lump name is looked up
 + Fixed font recoloring appearing incorrect with non-Doom IWADs or certain PWADs that have their own COLORMAP/PLAYPAL lumps
 + Fixed occasional appearance of blank episode in episode selection menu with certain PWADs
 + Fixed SFX with SINGULAR+PRECIOUS flags being cutoff when another SINGULAR SFX in the same category is played
@@ -31,6 +31,7 @@ Bugs fixed
 + Fixed rare issue where some PNGs with transparency were detected as solid images
 + Fixed map position ("You Are Here") graphics being hidden by a custom Entering image
 + Fixed AddImageGraphic function trying to process TGA images as Doom format
++ Fixed ON_DEATH RTS scripts triggering when the condition uses a monster that was never in the map to begin with
 
 General Improvements
 --------------------
@@ -86,6 +87,7 @@ New Features
 
 + "PC Speaker Mode" option added to Sound Options menu. Only specific SFX will be used, and
   the MIDI player will switch to an appropriate soundfont
+  -Imitation PC Speaker sounds added for Blasphemer, Heretic, and HacX
 
 + "Pistol Starts" option added to Gameplay Options menu (default Off). Will force player to default state upon
   starting a new level. Works with all supported IWADs

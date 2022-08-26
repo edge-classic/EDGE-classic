@@ -231,7 +231,7 @@ bool S_LoadWAVSound(epi::sound_data_c *buf, byte *data, int length, bool pc_spea
 
 	if (wav.totalPCMFrameCount <= 0) // I think the initial loading would fail if this were the case, but just as a sanity check - Dasho
 	{
-		I_Error("WAV SFX Loader: no samples!\n");
+		I_Warning("WAV SFX Loader: no samples!\n");
 
 		drwav_uninit(&wav);
 
@@ -249,7 +249,7 @@ bool S_LoadWAVSound(epi::sound_data_c *buf, byte *data, int length, bool pc_spea
 	gather.CommitChunk(drwav_read_pcm_frames_s16(&wav, wav.totalPCMFrameCount, buffer));
 
 	if (! gather.Finalise(buf, is_stereo))
-		I_Error("WAV SFX Loader: no samples!\n");
+		I_Warning("WAV SFX Loader: no samples!\n");
 
 	drwav_uninit(&wav);
 

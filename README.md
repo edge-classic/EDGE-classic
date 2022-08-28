@@ -41,26 +41,34 @@ Download from ModDB [here.](https://www.moddb.com/mods/duke-it-out-in-doom)
 
 ## Aliens: Stranded
 
+![aem](https://user-images.githubusercontent.com/58537100/187060010-143ac59d-dcea-4e7b-a02a-f34a85b01000.png)
+
 A Total Conversion themed on the Aliens movies. New weapons, enemies, music, textures etc. Heavy use of 3D models.
 
 Download from MediaFire [here.](https://www.mediafire.com/file/uk82uwkkqlj2nmw/AEM.zip/file) The load order of the included WADs is D3tex.wad, AEM.wad, and AEM_Mapset.wad.
 
 # Notable Improvements over EDGE 1.35
 
-- A soundfont-capable MIDI player (.sf2 support).
-- Support for MP3 music and sound effects.
-- Migration from SDL1 to SDL2 (longevity and potential new features).
-- Improved support for gamepads.
-- Expanded DDF, RTS, and COAL features.
-- Full support for both HacX 1.2 and Harmony IWADs.
-- Widescreen statusbar, intermission, and title screens.
-- Replaced GLBSP with AJBSP as EDGE-Classic's internal nodebuilder.
-- A load of longstanding bugs fixed (see full changelog).
-- Inventory system.
-- Autoload folder.
+- UDMF map support
+- DEHEXTRA compatibility
+- A soundfont-capable MIDI player (.sf2 support)
+- Support for MP3 music and sound effects
+- Migration from SDL1 to SDL2 (longevity and potential new features)
+- Improved support for gamepads
+- Expanded DDF, RTS, and COAL features
+- Full support for both HacX 1.2 and Harmony IWADs
+- Greatly improved Heretic/Blasphemer IWAD compatibility
+- Enhanced support for the Freedoom 1/2 IWADs
+- Widescreen statusbar, intermission, and title screens
+- Replaced GLBSP with AJBSP as the internal nodebuilder
+- Inventory system
+- Autoload folder
 - New Liquid animation (SMMU and Parallax)
-- Many more music formats (MOD/S3M/XM as well as AY, GBS, GYM, HES, NSF, SAP, SPC, VGM and even C64 SID)
-- Sound Reverb options.
+- Many more music formats (module/tracker music as well as AY, GBS, GYM, HES, NSF, SAP, SPC, VGM and even C64 SID)
+- Optional Dynamic Sound Reverb
+- Optional Pistol Start feature
+- Support for image/spritesheet fonts
+- A load of longstanding bugs fixed (see full changelog)
 
 Bugfixes and detailed changes can be found in CHANGELOG.txt
 

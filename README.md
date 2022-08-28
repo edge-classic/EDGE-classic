@@ -47,6 +47,16 @@ A Total Conversion themed on the Aliens movies. New weapons, enemies, music, tex
 
 Download from MediaFire [here.](https://www.mediafire.com/file/uk82uwkkqlj2nmw/AEM.zip/file) The load order of the included WADs is D3tex.wad, AEM.wad, and AEM_Mapset.wad.
 
+## DarkForces Doom
+
+![darkforces](https://user-images.githubusercontent.com/58537100/187060442-3db18f29-f1c4-4b6b-a793-29f6b38270b0.png)
+
+A Star Wars/Dark Forces themed gameplay mod by CeeJay for EDGE-Classic. Weapons, items, enemies and new gameplay mechanics.
+
+Download from ModDB [here.](https://www.moddb.com/mods/edge-classic-add-ons/addons/darkforces-doom)
+
+An optional texture pack to enhance the experience can be found [here.](https://www.moddb.com/mods/edge-classic-add-ons/addons/darkforces-doom-texture-pack)
+
 # Notable Improvements over EDGE 1.35
 
 - UDMF map support

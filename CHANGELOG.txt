@@ -131,7 +131,7 @@ New Features
   (negative numbers move it down, positive numbers move it up). Mainly for Heretic compatibility
   -State Action: BECOME(<weapon name>,<state:frame>) Similar to the things.ddf action of the same 
    name.<state:frame> is optional
-  -Command: ZOOM_FACTOR=<float> which will function as a tradition zoom magnification factor (1.5, 2.0, etc)
+  -Command: ZOOM_FACTOR=<float> which will function as a traditional zoom magnification factor (1.5, 2.0, etc)
    and will be preferred over ZOOM_FOV if both are present
   -Command: NO_CHEAT=<bool> will prevent the weapon from being given to the player when using idkfa/idfa style cheats
 

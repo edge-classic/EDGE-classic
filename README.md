@@ -33,15 +33,13 @@ Download from ModDB [here.](https://www.moddb.com/mods/edge-classic-add-ons/addo
 
 ## Duke it out in DOOM
 
-![dukeitoutindoom](https://user-images.githubusercontent.com/58537100/146609673-f768fde6-9df2-42e1-87b4-01eb020e0131.jpg)
+![dukeitout](https://user-images.githubusercontent.com/58537100/187059563-2f6df105-4d54-4295-a664-df16e523227b.png)
 
 An action-packed gameplay mod that puts you in the boots of the political incorrect but lovable ass-kicking macho-man Duke Nukem. Crammed full of of 80's/90's action movie throwbacks and pop culture references. Featuring an impressive arsenal of super deadly, sneaky and devastating weapons and a colorful and humorous collection of power-ups and pickups. Full of witty one-liners from Duke himself and plenty of blood, guts and gore.
 
 Download from ModDB [here.](https://www.moddb.com/mods/duke-it-out-in-doom)
 
 ## Aliens: Stranded
-
-![aliens](https://user-images.githubusercontent.com/58537100/146612407-03b874b1-bec5-43ac-8214-cb9bde6fd9bf.jpg)
 
 A Total Conversion themed on the Aliens movies. New weapons, enemies, music, textures etc. Heavy use of 3D models.
 

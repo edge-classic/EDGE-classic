@@ -9,54 +9,76 @@ Here are some mods that showcase EDGE-Classic's flexibility and power:
 
 ## Operation: Arctic Wolf Revisited
 
-![arcticwolf](https://user-images.githubusercontent.com/58537100/146609601-93523448-45b7-438d-8598-5dcd508bf11f.jpg)
+Operation: Arctic Wolf Revisited is an update/extension of Laz Rojas' classic DOOM 2 mod with improved gameplay, all new weapons, enemies, new mechanics, more interactivity, more immersion, scripting, updated textures, level fixes, etc. making it essentially a whole new game.
 
-A 19-level Total Conversion for Doom 2 set in the Wolfenstein 3D universe.
+![arcticre](https://user-images.githubusercontent.com/58537100/187059072-dd93b206-d3cd-4c2f-bf3e-3200684d33f6.png)
 
-_For months now, Allied Intelligence has suspected that the German navy has been attempting to construct a nuclear-powered submarine somewhere in the Arctic Circle that would rule the Atlantic and threaten the east coast of the United States. The existence of this submarine, codenamed Seeteufel (Sea Devil), has been confirmed. Reconnaissance photos have pinpointed the site where this sub is being built as a u-boat base in a fjord in northern Norway, and although several spies have been dispatched to this location, none of them has been heard from again. Your mission is to infiltrate the base, rescue these missing operatives, and destroy the new submarine before its construction is completed._
+Download from ModDB [here.](https://www.moddb.com/mods/edge-classic-add-ons/downloads/arctic-wolf-revisited)
 
-Download from MediaFire [here.](https://www.mediafire.com/file/u1mgxtuszwnqd3k/Arcticwolf_Revisited_4.0.zip/file)
+## Astral Pathfinder
+
+![pathfinder](https://user-images.githubusercontent.com/58537100/187058724-a7601685-b22b-4128-ae4e-eaefc23bcd84.png)
+
+Astral Pathfinder by RunSaber/Chutzcraft is an EDGE exclusive partial conversion of Doom II, with an otherworldy setting and Quake-style weaponry. Three vast levels packed with exploring, secret-hunting and of course, hellish spawn from several dimensions, including three boss fights for the player to contend against.
+
+Download from ModDB [here.](https://www.moddb.com/mods/edge-classic-add-ons/downloads/astral-pathfinder1)
 
 ## Heathen
 
-![heathen](https://user-images.githubusercontent.com/58537100/146609610-5384636a-9ebd-4b0b-9b50-ed1422d09e90.jpg)
+![heathen (2)](https://user-images.githubusercontent.com/58537100/187059362-d27be9f8-ebb5-466a-9239-942516e2120e.png)
 
 A Hexen/Heretic-inspired gameplay mod for Doom. New enemies, weapons, items, and attacks.
 
-Download from MediaFire [here.](https://www.mediafire.com/file/l1migo50ldy4hro/Heathen_v10.wad/file)
+Download from ModDB [here.](https://www.moddb.com/mods/edge-classic-add-ons/addons/heathen-v1)
 
 ## Duke it out in DOOM
 
-![dukeitoutindoom](https://user-images.githubusercontent.com/58537100/146609673-f768fde6-9df2-42e1-87b4-01eb020e0131.jpg)
+![dukeitout](https://user-images.githubusercontent.com/58537100/187059563-2f6df105-4d54-4295-a664-df16e523227b.png)
 
 An action-packed gameplay mod that puts you in the boots of the political incorrect but lovable ass-kicking macho-man Duke Nukem. Crammed full of of 80's/90's action movie throwbacks and pop culture references. Featuring an impressive arsenal of super deadly, sneaky and devastating weapons and a colorful and humorous collection of power-ups and pickups. Full of witty one-liners from Duke himself and plenty of blood, guts and gore.
 
-Download from MediaFire [here.](http://www.mediafire.com/file/83sefztzxzaes57/DukeOut_v25.ZIP/file)
+Download from ModDB [here.](https://www.moddb.com/mods/duke-it-out-in-doom)
 
 ## Aliens: Stranded
 
-![aliens](https://user-images.githubusercontent.com/58537100/146612407-03b874b1-bec5-43ac-8214-cb9bde6fd9bf.jpg)
+![aem](https://user-images.githubusercontent.com/58537100/187060010-143ac59d-dcea-4e7b-a02a-f34a85b01000.png)
 
 A Total Conversion themed on the Aliens movies. New weapons, enemies, music, textures etc. Heavy use of 3D models.
 
 Download from MediaFire [here.](https://www.mediafire.com/file/uk82uwkkqlj2nmw/AEM.zip/file) The load order of the included WADs is D3tex.wad, AEM.wad, and AEM_Mapset.wad.
 
+## DarkForces Doom
+
+![darkforces](https://user-images.githubusercontent.com/58537100/187060442-3db18f29-f1c4-4b6b-a793-29f6b38270b0.png)
+
+A Star Wars/Dark Forces themed gameplay mod by CeeJay for EDGE-Classic. Weapons, items, enemies and new gameplay mechanics.
+
+Download from ModDB [here.](https://www.moddb.com/mods/edge-classic-add-ons/addons/darkforces-doom)
+
+An optional texture pack to enhance the experience can be found [here.](https://www.moddb.com/mods/edge-classic-add-ons/addons/darkforces-doom-texture-pack)
+
 # Notable Improvements over EDGE 1.35
 
-- A soundfont-capable MIDI player (.sf2 support).
-- Support for MP3 music and sound effects.
-- Migration from SDL1 to SDL2 (longevity and potential new features).
-- Improved support for gamepads.
-- Expanded DDF, RTS, and COAL features.
-- Full support for both HacX 1.2 and Harmony IWADs.
-- Widescreen statusbar, intermission, and title screens.
-- Replaced GLBSP with AJBSP as EDGE-Classic's internal nodebuilder.
-- A load of longstanding bugs fixed (see full changelog).
-- Inventory system.
-- Autoload folder.
+- UDMF map support
+- DEHEXTRA compatibility
+- A soundfont-capable MIDI player (.sf2 support)
+- Support for MP3 music and sound effects
+- Migration from SDL1 to SDL2 (longevity and potential new features)
+- Improved support for gamepads
+- Expanded DDF, RTS, and COAL features
+- Full support for both HacX 1.2 and Harmony IWADs
+- Greatly improved Heretic/Blasphemer IWAD compatibility
+- Enhanced support for the Freedoom 1/2 IWADs
+- Widescreen statusbar, intermission, and title screens
+- Replaced GLBSP with AJBSP as the internal nodebuilder
+- Inventory system
+- Autoload folder
 - New Liquid animation (SMMU and Parallax)
-- Many more music formats (MOD/S3M/XM as well as AY, GBS, GYM, HES, NSF, SAP, SPC, VGM and even C64 SID)
-- Sound Reverb options.
+- Many more music formats (module/tracker music as well as AY, GBS, GYM, HES, NSF, SAP, SPC, VGM and even C64 SID)
+- Optional Dynamic Sound Reverb
+- Optional Pistol Start feature
+- Support for image/spritesheet fonts
+- A load of longstanding bugs fixed (see full changelog)
 
 Bugfixes and detailed changes can be found in CHANGELOG.txt
 

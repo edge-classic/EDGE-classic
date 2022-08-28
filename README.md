@@ -84,10 +84,18 @@ Bugfixes and detailed changes can be found in CHANGELOG.txt
 
 # Currently Supported Platforms
 
-- Windows 32/64-bit (x86 architecture)
+- Windows 32/64-bit (x86 architecture), XP or later
 - Linux 32/64-bit (x86 and ARM architecture - ARM tested with Raspberry Pi OS on a Pi 4B)
-- BSD 32/64-bit (x86 and ARM64 architecture - tested with FreeBSD 13; ARM64 tested on a Pi 4B but not recommended unless proper video acceleration is available
+- BSD 32/64-bit (x86 and ARM64 architecture - tested with FreeBSD 13.1; ARM64 tested on a Pi 4B but not recommended unless proper video acceleration is available
                  as playable framerates are too difficult to achieve otherwise)
 - Mac 64-bit (x86 and M1 architecture)
+
+# Currently Supported IWADs
+
+- The Ultimate Doom/Doom 1/Freedoom Phase 1
+- Doom 2/Freedoom Phase 2
+- Heretic/Blasphemer
+- HacX 1.2
+- Harmony
 
 To learn more about EDGE-Classic, DDF, RTS, or COAL, please visit [our wiki](https://github.com/dashodanger/EDGE-classic/wiki).

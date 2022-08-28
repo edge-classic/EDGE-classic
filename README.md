@@ -9,11 +9,17 @@ Here are some mods that showcase EDGE-Classic's flexibility and power:
 
 ## Operation: Arctic Wolf Revisited
 
-![arcticwolf](https://user-images.githubusercontent.com/58537100/146609601-93523448-45b7-438d-8598-5dcd508bf11f.jpg)
-
 Operation: Arctic Wolf Revisited is an update/extension of Laz Rojas' classic DOOM 2 mod with improved gameplay, all new weapons, enemies, new mechanics, more interactivity, more immersion, scripting, updated textures, level fixes, etc. making it essentially a whole new game.
 
 Download from ModDB [here.](https://www.moddb.com/mods/edge-classic-add-ons/downloads/arctic-wolf-revisited)
+
+## Astral Pathfinder
+
+![pathfinder](https://user-images.githubusercontent.com/58537100/187058724-a7601685-b22b-4128-ae4e-eaefc23bcd84.png)
+
+Astral Pathfinder by RunSaber/Chutzcraft is an EDGE exclusive partial conversion of Doom II, with an otherworldy setting and Quake-style weaponry. Three vast levels packed with exploring, secret-hunting and of course, hellish spawn from several dimensions, including three boss fights for the player to contend against.
+
+Download from ModDB [here.](https://www.moddb.com/mods/edge-classic-add-ons/downloads/astral-pathfinder1)
 
 ## Heathen
 

@@ -11,11 +11,9 @@ Here are some mods that showcase EDGE-Classic's flexibility and power:
 
 ![arcticwolf](https://user-images.githubusercontent.com/58537100/146609601-93523448-45b7-438d-8598-5dcd508bf11f.jpg)
 
-A 19-level Total Conversion for Doom 2 set in the Wolfenstein 3D universe.
+Operation: Arctic Wolf Revisited is an update/extension of Laz Rojas' classic DOOM 2 mod with improved gameplay, all new weapons, enemies, new mechanics, more interactivity, more immersion, scripting, updated textures, level fixes, etc. making it essentially a whole new game.
 
-_For months now, Allied Intelligence has suspected that the German navy has been attempting to construct a nuclear-powered submarine somewhere in the Arctic Circle that would rule the Atlantic and threaten the east coast of the United States. The existence of this submarine, codenamed Seeteufel (Sea Devil), has been confirmed. Reconnaissance photos have pinpointed the site where this sub is being built as a u-boat base in a fjord in northern Norway, and although several spies have been dispatched to this location, none of them has been heard from again. Your mission is to infiltrate the base, rescue these missing operatives, and destroy the new submarine before its construction is completed._
-
-Download from MediaFire [here.](https://www.mediafire.com/file/u1mgxtuszwnqd3k/Arcticwolf_Revisited_4.0.zip/file)
+Download from ModDB [here.](https://www.moddb.com/mods/edge-classic-add-ons/downloads/arctic-wolf-revisited)
 
 ## Heathen
 
@@ -23,7 +21,7 @@ Download from MediaFire [here.](https://www.mediafire.com/file/u1mgxtuszwnqd3k/A
 
 A Hexen/Heretic-inspired gameplay mod for Doom. New enemies, weapons, items, and attacks.
 
-Download from MediaFire [here.](https://www.mediafire.com/file/l1migo50ldy4hro/Heathen_v10.wad/file)
+Download from ModDB [here.](https://www.moddb.com/mods/edge-classic-add-ons/addons/heathen-v1)
 
 ## Duke it out in DOOM
 
@@ -31,7 +29,7 @@ Download from MediaFire [here.](https://www.mediafire.com/file/l1migo50ldy4hro/H
 
 An action-packed gameplay mod that puts you in the boots of the political incorrect but lovable ass-kicking macho-man Duke Nukem. Crammed full of of 80's/90's action movie throwbacks and pop culture references. Featuring an impressive arsenal of super deadly, sneaky and devastating weapons and a colorful and humorous collection of power-ups and pickups. Full of witty one-liners from Duke himself and plenty of blood, guts and gore.
 
-Download from MediaFire [here.](http://www.mediafire.com/file/83sefztzxzaes57/DukeOut_v25.ZIP/file)
+Download from ModDB [here.](https://www.moddb.com/mods/duke-it-out-in-doom)
 
 ## Aliens: Stranded
 

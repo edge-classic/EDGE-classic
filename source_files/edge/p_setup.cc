@@ -58,6 +58,10 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
+#ifdef __arm__
+  #include "str_format.h"
+#endif
+
 // debugging aide:
 #define FORCE_LOCATION  0
 #define FORCE_LOC_X     12766
@@ -1271,6 +1275,26 @@ static void LoadXGL3Nodes(int lumpnum)
 
 	for (i=0; i<numnodes; i++, nd++)
 	{
+	// To imitate Andrew's feelings about stuff like this, this is a filthy HACK for ARM32 and is 
+	// in no way a decent solution, but it works - Dasho
+#ifdef __arm__
+		int td_int = EPI_LE_S32(*(int*)td);
+		std::string arm_nonsense = epi::STR_Format("%d", td_int);
+		nd->div.x  = (float)td_int / 65536.0f;
+		td += 4;
+		td_int = EPI_LE_S32(*(int*)td);
+		arm_nonsense = epi::STR_Format("%d", td_int);
+		nd->div.y  = (float)td_int / 65536.0f;
+		td += 4;
+		td_int = EPI_LE_S32(*(int*)td);
+		arm_nonsense = epi::STR_Format("%d", td_int);
+		nd->div.dx = (float)td_int / 65536.0f;
+		td += 4;
+		td_int = EPI_LE_S32(*(int*)td);
+		arm_nonsense = epi::STR_Format("%d", td_int);
+		nd->div.dy = (float)td_int / 65536.0f;
+		td += 4;
+#else
 		nd->div.x  = (float)EPI_LE_S32(*(int*)td) / 65536.0f;
 		td += 4;
 		nd->div.y  = (float)EPI_LE_S32(*(int*)td) / 65536.0f;
@@ -1279,6 +1303,7 @@ static void LoadXGL3Nodes(int lumpnum)
 		td += 4;
 		nd->div.dy = (float)EPI_LE_S32(*(int*)td) / 65536.0f;
 		td += 4;
+#endif
 
 		nd->div_len = R_PointToDist(0, 0, nd->div.dx, nd->div.dy);
 

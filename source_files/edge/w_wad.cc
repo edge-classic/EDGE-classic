@@ -1094,7 +1094,8 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 	// TODO: handle Read failure
     file->Read(&header, sizeof(raw_wad_header_t));
 
-	if (strncmp(header.identification, "IWAD", 4) != 0 && strcasecmp("0HAWK01", lumpname1) != 0) // Harmony has a PWAD signature
+ 	// Do not require IWAD header if loading Harmony or a custom standalone IWAD
+	if (strncmp(header.identification, "IWAD", 4) != 0 && strcasecmp("0HAWK01", lumpname1) != 0 && strcasecmp("EDGEIWAD", lumpname1) != 0)
 	{
 			file->Seek(0, epi::file_c::SEEKPOINT_START);
 			return false;
@@ -1117,7 +1118,17 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 	for (j=startlump, curinfo=fileinfo; j < numlumps; j++,curinfo++)
 	{
 		if (strncmp(lumpname1, curinfo->name, strlen(lumpname1) < 8 ? strlen(lumpname1) : 8) == 0)
-			lump1_found = true;
+		{
+			if (strcasecmp("EDGEIWAD", lumpname1) == 0) // EDGEIWAD is the only wad needed for custom standalones
+			{
+				numlumps = oldlumps;
+				delete[] fileinfo;
+				file->Seek(0, epi::file_c::SEEKPOINT_START);
+				return true;
+			}
+			else
+				lump1_found = true;
+		}
 		if (strncmp(lumpname2, curinfo->name, strlen(lumpname2) < 8 ? strlen(lumpname2) : 8) == 0)
 			lump2_found = true;
 	}

@@ -111,20 +111,21 @@ FILE *logfile = NULL;
 FILE *debugfile = NULL;
 
 // Combination of unique lumps needed to best identify an IWAD
-const std::array<std::array<const char*, 3>, 11> iwad_unique_lumps =
+const std::array<std::array<const char*, 3>, 12> iwad_unique_lumps =
 {
 	{
-		{ "BLASPHEMER", "BLASPHEM", "E1M1"  },
-		{ "FREEDOOM1",  "FREEDOOM", "E1M1"  },
-		{ "FREEDOOM2",  "FREEDOOM", "MAP01" },
-		{ "HACX",       "HACX-R",   "MAP01" },
-		{ "HARMONY",    "0HAWK01",  "MAP01" },
-		{ "HERETIC",    "MUS_E1M1", "E1M1"  },
-		{ "PLUTONIA",   "CAMO1",    "MAP01" },
-		{ "TNT",        "REDTNT2",  "MAP01" },
-		{ "DOOM",       "BFGGA0",   "E2M1"  },
-		{ "DOOM1",      "SHOTA0",   "E1M1"  },
-		{ "DOOM2",      "BFGGA0",   "MAP01" },
+		{ "CUSTOM",     "EDGEIWAD", "EDGEIWAD" }, // Not actually needed twice, just keeps things from crashing if NULL during the check
+		{ "BLASPHEMER", "BLASPHEM", "E1M1"     },
+		{ "FREEDOOM1",  "FREEDOOM", "E1M1"     },
+		{ "FREEDOOM2",  "FREEDOOM", "MAP01"    },
+		{ "HACX",       "HACX-R",   "MAP01"    },
+		{ "HARMONY",    "0HAWK01",  "MAP01"    },
+		{ "HERETIC",    "MUS_E1M1", "E1M1"     },
+		{ "PLUTONIA",   "CAMO1",    "MAP01"    },
+		{ "TNT",        "REDTNT2",  "MAP01"    },
+		{ "DOOM",       "BFGGA0",   "E2M1"     },
+		{ "DOOM1",      "SHOTA0",   "E1M1"     },
+		{ "DOOM2",      "BFGGA0",   "MAP01"    },
 		//{ "STRIFE",     "VELLOGO",  "RGELOGO"} // Dev/internal use - Definitely nowhwere near playable
 	}
 };
@@ -1097,6 +1098,8 @@ static void IdentifyVersion(void)
 // Add game-specific base EWADs (widepix, skyboxes, etc) - Dasho
 static void Add_Base(void) 
 {
+	if (strcasecmp("CUSTOM", iwad_base.c_str()) == 0)
+		return; // Custom standalone EDGE IWADs should already contain their necessary resources and definitions - Dasho
 	std::string base_path = epi::PATH_Join(game_dir.c_str(), "edge_base");
 	std::string base_wad = iwad_base;
 	std::transform(base_wad.begin(), base_wad.end(), base_wad.begin(), ::tolower);

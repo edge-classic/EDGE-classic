@@ -2,6 +2,19 @@ https://github.com/dashodanger/EDGE-classic
 
 Current as of: August 2022
 
+CHANGELOG for EDGE-Classic 1.3 (since EDGE-Classic 1.2)
+
+Bugs fixed
+----------
+
+General Improvements
+--------------------
+
+New Features
+------------
++ Custom standalone IWADs can be created by adding an EDGEIWAD lump to the WAD. This will allow it to pass the automatic IWAD
+  detection
+
 CHANGELOG for EDGE-Classic 1.2 (since EDGE-Classic 1.1)
 ====================================
 

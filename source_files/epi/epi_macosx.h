@@ -36,6 +36,7 @@
 
 #define stricmp   strcasecmp
 #define strnicmp  strncasecmp
+#define _strdup strdup
 
 #endif /* __MACOSX_EPI_HEADER__ */
 

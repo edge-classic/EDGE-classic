@@ -1083,7 +1083,8 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 
 	if (file == NULL)
 	{
-		I_Error("W_CheckForUniqueLumps: Received null file_c pointer!\n");
+		I_Warning("W_CheckForUniqueLumps: Received null file_c pointer!\n");
+		return false;
 	}
 
 	int oldlumps = numlumps;

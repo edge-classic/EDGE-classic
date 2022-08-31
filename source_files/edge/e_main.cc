@@ -982,11 +982,9 @@ static void IdentifyVersion(void)
 				break;
 			}
     	}
-		delete iwad_test;
+		if (iwad_test) delete iwad_test;
 		if (unique_lump_match)
-		{
 			W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad);
-		}
 		else
 			I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
     }
@@ -1040,9 +1038,11 @@ static void IdentifyVersion(void)
 						if (unique_lump_match)
 						{
 							W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad);
-							delete iwad_test;
+							if (iwad_test) delete iwad_test;
 							goto foundlooseiwad;
-						}					
+						}	
+						else
+							if (iwad_test) delete iwad_test;				
 					}
 				}
 			}
@@ -1081,9 +1081,11 @@ static void IdentifyVersion(void)
 							if (unique_lump_match)
 							{
 								W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad);
-								delete iwad_test;
+								if (iwad_test) delete iwad_test;
 								goto foundlooseiwad;
-							}					
+							}
+							else
+								if (iwad_test) delete iwad_test;			
 						}
 					}
 				}

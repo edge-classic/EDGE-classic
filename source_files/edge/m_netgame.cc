@@ -525,6 +525,8 @@ void M_DrawHostMenu(void)
 {
 	SYS_ASSERT(ng_host_style);
 
+	ng_host_style->DrawBackground();
+/*
 	if (ng_host_style->bg_image)
 	{
 		float old_alpha = HUD_GetAlpha();
@@ -543,7 +545,7 @@ void M_DrawHostMenu(void)
 			ng_host_style->def->bg.colour : T_BLACK);
 		HUD_SetAlpha(old_alpha);
 	}
-
+*/
 	HL_WriteText(ng_host_style,2, 160 - (ng_host_style->fonts[2]->StringWidth("Bot Game Settings") / 2), 25, "Bot Game Settings");
 
 	char buffer[200];

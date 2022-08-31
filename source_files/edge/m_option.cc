@@ -904,6 +904,9 @@ void M_OptDrawer()
 	style_c *style = curr_menu->style_var[0];
 	SYS_ASSERT(style);
 
+	style->DrawBackground();
+
+/*
 	if (style->bg_image)
 	{
 		float old_alpha = HUD_GetAlpha();
@@ -922,7 +925,7 @@ void M_OptDrawer()
 			style->def->bg.colour : T_BLACK);
 		HUD_SetAlpha(old_alpha);
 	}
-
+*/
 	if (! style->fonts[0])
 		return;
 

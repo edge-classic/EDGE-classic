@@ -94,6 +94,7 @@ typedef enum
 {
 	SYLSP_Tiled = 0x0001,  // bg image should tile (otherwise covers whole area)
 	SYLSP_TiledNoScale = 0x0002,  // bg image should tile (1:1 pixels)
+	SYLSP_StretchFullScreen = 0x0004,  // bg image will be stretched to fill the screen
 }
 style_special_e;
 

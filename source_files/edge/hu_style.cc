@@ -74,33 +74,57 @@ void style_c::DrawBackground()
 
 	HUD_SetAlpha(alpha);
 
+	float WS_x = -130; // Lobo: fixme, this shoud be calculated, not arbitrary hardcoded ;)
+	float WS_w = SCREENWIDTH; //580;
+
 	if (! bg_image)
 	{
+		if (!(def->special & SYLSP_StretchFullScreen))
+		{
+			WS_x = 1; //cannot be 0 or WS is invoked
+			WS_w = 319; //cannot be 320 or WS is invoked
+		}
+		
 		if (def->bg.colour != RGB_NO_VALUE)
-			HUD_SolidBox(0, 0, 320, 200, def->bg.colour);
+			HUD_SolidBox(WS_x, 0, WS_w, 200, def->bg.colour);
+		else
+			HUD_SolidBox(WS_x, 0, WS_w, 200, T_BLACK);
 
 		HUD_SetAlpha();
 		return;
 	}
 
-	//Lobo: calculate centering on screen
-	float CenterX = 0;
-
-	CenterX = 160;
-	CenterX -= (bg_image->actual_w * bg_image->scale_x)/ 2;
+	
 
 	if (def->special & (SYLSP_Tiled | SYLSP_TiledNoScale))
 	{
 		HUD_SetScale(def->bg.scale);
 
-		HUD_TileImage(0, 0, 320, 200, bg_image);
-
+		//HUD_TileImage(0, 0, 320, 200, bg_image);
+		HUD_TileImage(WS_x, 0, WS_w, 200, bg_image, 0.0, 0.0);
 		HUD_SetScale();
 	}
-	else //Lobo: this is almost always the case
+	//Lobo: handle our new special
+	if (def->special & SYLSP_StretchFullScreen)
 	{
 		HUD_SetScale(def->bg.scale);
 
+		HUD_StretchImage(WS_x, 0, WS_w, 200, bg_image, 0.0, 0.0);
+		//HUD_DrawImage(CenterX, 0, bg_image);
+
+		HUD_SetScale();
+	}
+
+	 //Lobo: positioning and size will be determined by images.ddf
+	if (def->special == 0)
+	{
+		//Lobo: calculate centering on screen
+		float CenterX = 0;
+
+		CenterX = 160;
+		CenterX -= (bg_image->actual_w * bg_image->scale_x)/ 2;
+
+		HUD_SetScale(def->bg.scale);
 		//HUD_StretchImage(0, 0, 320, 200, bg_image);
 		HUD_DrawImage(CenterX, 0, bg_image);
 

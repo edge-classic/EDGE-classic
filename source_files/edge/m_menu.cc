@@ -762,6 +762,8 @@ void M_DrawLoad(void)
 
 	SYS_ASSERT(style);
 
+	style->DrawBackground();
+/*
 	if (style->bg_image)
 	{
 		float old_alpha = HUD_GetAlpha();
@@ -780,7 +782,7 @@ void M_DrawLoad(void)
 			style->def->bg.colour : T_BLACK);
 		HUD_SetAlpha(old_alpha);
 	}
-
+*/
 	if (custom_MenuMain==false)
 	{
 		HL_WriteText(load_style,styledef_c::T_TEXT, 72, 8, language["MainLoadGame"]);
@@ -873,7 +875,9 @@ void M_DrawSave(void)
 	style_c *style = SaveDef.style_var[0];
 
 	SYS_ASSERT(style);
+	style->DrawBackground();
 
+/*	
 	if (style->bg_image)
 	{
 		float old_alpha = HUD_GetAlpha();
@@ -892,7 +896,7 @@ void M_DrawSave(void)
 			style->def->bg.colour : T_BLACK);
 		HUD_SetAlpha(old_alpha);
 	}
-
+*/
 	if (custom_MenuMain==false)
 	{
 		HL_WriteText(load_style,styledef_c::T_TEXT, 72, 8, language["MainSaveGame"]);
@@ -2193,6 +2197,8 @@ static void DrawMessage(void)
 
 	SYS_ASSERT(dialog_style);
 
+	dialog_style->DrawBackground();
+/*
 	if (dialog_style->bg_image)
 	{
 		float old_alpha = HUD_GetAlpha();
@@ -2211,7 +2217,7 @@ static void DrawMessage(void)
 			dialog_style->def->bg.colour : T_BLACK);
 		HUD_SetAlpha(old_alpha);
 	}
-
+*/
 	// FIXME: HU code should support center justification: this
 	// would remove the code duplication below...
 
@@ -2347,6 +2353,8 @@ void M_Drawer(void)
 	style_c *style = currentMenu->style_var[0];
 	SYS_ASSERT(style);
 
+	style->DrawBackground();
+/*
 	if (style->bg_image)
 	{
 		float old_alpha = HUD_GetAlpha();
@@ -2365,7 +2373,7 @@ void M_Drawer(void)
 			style->def->bg.colour : T_BLACK);
 		HUD_SetAlpha(old_alpha);
 	}
-
+*/
 	// call Draw routine
 	if (currentMenu->draw_func)
 		(* currentMenu->draw_func)();

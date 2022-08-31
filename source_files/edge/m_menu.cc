@@ -2335,7 +2335,7 @@ void M_Drawer(void)
 	//Lobo 2022: Check if we're going to use text-based menus
 	//or the users (custom)graphics
 	bool custom_menu = false;
-	if (custom_MenuMain == true) 
+	if ((currentMenu->draw_func == M_DrawMainMenu) && (custom_MenuMain == true)) 
 	{
 		custom_menu=true;
 	}
@@ -2579,7 +2579,7 @@ void M_Init(void)
 	menu_skull[1] = W_ImageLookup("M_SKULL2");
 	
 	//Check for custom menu graphics in pwads:
-	//If we have them then use them insetad of our 
+	//If we have them then use them instead of our 
 	// text-based ones.
 	if (W_IsLumpInPwad("M_NEWG"))
 		custom_MenuMain=true;

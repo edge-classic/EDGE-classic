@@ -817,7 +817,7 @@ void InitDirectories(void)
 	s = M_GetParm("-config");
 	if (s)
 	{
-		cfgfile = M_ComposeFileName(home_dir.c_str(), s);
+		cfgfile = std::string(s);
 	}
 	else
     {
@@ -828,11 +828,11 @@ void InitDirectories(void)
 	s = M_GetParm("-ewad");
 	if (s)
 	{
-		ewadfile = M_ComposeFileName(home_dir.c_str(), s);
+		ewadfile = std::string(s);
 	}
 	else
     {
-        ewadfile = epi::PATH_Join(home_dir.c_str(), "edge-defs.wad");
+        ewadfile = epi::PATH_Join(game_dir.c_str(), "edge-defs.wad");
 	}
 
 	// cache directory

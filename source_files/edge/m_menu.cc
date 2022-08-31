@@ -758,6 +758,29 @@ void M_DrawLoad(void)
 {
 	int i;
 
+	style_c *style = LoadDef.style_var[0];
+
+	SYS_ASSERT(style);
+
+	if (style->bg_image)
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(style->def->bg.translucency);
+		if (style->def->special == 0)
+			HUD_StretchImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
+		else
+			HUD_TileImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
+		HUD_SetAlpha(old_alpha); 
+	}
+	else
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(style->def->bg.translucency);
+		HUD_SolidBox(-90, 0, 500, 200, style->def->bg.colour != RGB_NO_VALUE ?
+			style->def->bg.colour : T_BLACK);
+		HUD_SetAlpha(old_alpha);
+	}
+
 	if (custom_MenuMain==false)
 	{
 		HL_WriteText(load_style,styledef_c::T_TEXT, 72, 8, language["MainLoadGame"]);
@@ -846,6 +869,29 @@ void M_LoadGame(int choice)
 void M_DrawSave(void)
 {
 	int i, len;
+
+	style_c *style = SaveDef.style_var[0];
+
+	SYS_ASSERT(style);
+
+	if (style->bg_image)
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(style->def->bg.translucency);
+		if (style->def->special == 0)
+			HUD_StretchImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
+		else
+			HUD_TileImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
+		HUD_SetAlpha(old_alpha); 
+	}
+	else
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(style->def->bg.translucency);
+		HUD_SolidBox(-90, 0, 500, 200, style->def->bg.colour != RGB_NO_VALUE ?
+			style->def->bg.colour : T_BLACK);
+		HUD_SetAlpha(old_alpha);
+	}
 
 	if (custom_MenuMain==false)
 	{
@@ -2145,9 +2191,26 @@ static void DrawMessage(void)
 	//short x; // Seems unused for now - Dasho
 	short y;
 
-	HUD_SetAlpha(0.64f);
-	HUD_SolidBox(0, 0, 320, 200, T_BLACK);
-	HUD_SetAlpha();
+	SYS_ASSERT(dialog_style);
+
+	if (dialog_style->bg_image)
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(dialog_style->def->bg.translucency);
+		if (dialog_style->def->special == 0)
+			HUD_StretchImage(-90, 0, 500, 200, dialog_style->bg_image, 0.0, 0.0);
+		else
+			HUD_TileImage(-90, 0, 500, 200, dialog_style->bg_image, 0.0, 0.0);
+		HUD_SetAlpha(old_alpha);
+	}
+	else
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(dialog_style->def->bg.translucency);
+		HUD_SolidBox(-90, 0, 500, 200, dialog_style->def->bg.colour != RGB_NO_VALUE ?
+			dialog_style->def->bg.colour : T_BLACK);
+		HUD_SetAlpha(old_alpha);
+	}
 
 	// FIXME: HU code should support center justification: this
 	// would remove the code duplication below...
@@ -2160,7 +2223,6 @@ static void DrawMessage(void)
 		input += "_";
 	
 	// Calc required height
-	SYS_ASSERT(dialog_style);
 
 	std::string s = msg + input;
 
@@ -2285,9 +2347,24 @@ void M_Drawer(void)
 	style_c *style = currentMenu->style_var[0];
 	SYS_ASSERT(style);
 
-	HUD_SetAlpha(0.85f);
-	HUD_SolidBox(0, 0, 320, 200, T_BLACK);
-	HUD_SetAlpha();
+	if (style->bg_image)
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(style->def->bg.translucency);
+		if (style->def->special == 0)
+			HUD_StretchImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
+		else
+			HUD_TileImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
+		HUD_SetAlpha(old_alpha);
+	}
+	else
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(style->def->bg.translucency);
+		HUD_SolidBox(-90, 0, 500, 200, style->def->bg.colour != RGB_NO_VALUE ?
+			style->def->bg.colour : T_BLACK);
+		HUD_SetAlpha(old_alpha);
+	}
 
 	// call Draw routine
 	if (currentMenu->draw_func)

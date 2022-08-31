@@ -523,9 +523,26 @@ static void HostAccept(void)
 
 void M_DrawHostMenu(void)
 {
-	HUD_SetAlpha(0.9f);
-	HUD_SolidBox(0, 0, 320, 200, T_BLACK);
-	HUD_SetAlpha();
+	SYS_ASSERT(ng_host_style);
+
+	if (ng_host_style->bg_image)
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(ng_host_style->def->bg.translucency);
+		if (ng_host_style->def->special == 0)
+			HUD_StretchImage(-90, 0, 500, 200, ng_host_style->bg_image, 0.0, 0.0);
+		else
+			HUD_TileImage(-90, 0, 500, 200, ng_host_style->bg_image, 0.0, 0.0);
+		HUD_SetAlpha(old_alpha);
+	}
+	else
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(ng_host_style->def->bg.translucency);
+		HUD_SolidBox(-90, 0, 500, 200, ng_host_style->def->bg.colour != RGB_NO_VALUE ?
+			ng_host_style->def->bg.colour : T_BLACK);
+		HUD_SetAlpha(old_alpha);
+	}
 
 	HL_WriteText(ng_host_style,2, 160 - (ng_host_style->fonts[2]->StringWidth("Bot Game Settings") / 2), 25, "Bot Game Settings");
 

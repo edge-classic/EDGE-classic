@@ -11,6 +11,7 @@ Bugs fixed
 
 General Improvements
 --------------------
++ Improved DDFSTYLE functionality across console and menus; backgrounds images/colors and translucency are no longer hardcoded for these
 
 New Features
 ------------

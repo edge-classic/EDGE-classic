@@ -735,7 +735,8 @@ void CON_Drawer(void)
 	else
 		y = y - CON_GFX_HT;
 
-	SolidBox(0, y, SCREENWIDTH, SCREENHEIGHT - y, RGB_MAKE(0,0,8), 0.75f);
+	SolidBox(0, y, SCREENWIDTH, SCREENHEIGHT - y, console_style->def->bg.colour != RGB_NO_VALUE ? 
+		console_style->def->bg.colour : RGB_MAKE(0,0,0), console_style->def->bg.translucency);
 
 	y += YMUL / 4;
 

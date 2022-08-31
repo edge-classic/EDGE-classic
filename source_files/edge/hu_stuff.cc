@@ -77,6 +77,7 @@ void HU_Init(void)
 {
 	// should use language["HeadsUpInit"], but LDF hasn't been loaded yet
 	E_ProgressMessage("Setting up HUD...\n");
+	hudtic = 0;
 }
 
 
@@ -110,6 +111,9 @@ void HU_Start(void)
 
 		w_map_title = std::string(string);
 	}
+
+	// Reset hudtic each map so it doesn't go super high? - Dasho
+	hudtic = 0;
 }
 
 

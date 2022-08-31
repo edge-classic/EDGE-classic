@@ -103,6 +103,8 @@ void HUD_TileImage(float x, float y, float w, float h, const image_c *image,
 				   float offset_x = 0.0f, float offset_y = 0.0f);
 
 
+extern int hudtic;
+
 float HUD_FontWidth(void);
 float HUD_FontHeight(void);
 

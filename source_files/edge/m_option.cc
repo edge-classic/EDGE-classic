@@ -901,12 +901,27 @@ void M_OptDrawer()
 	int i, j;
 	unsigned int k;
 
-	HUD_SetAlpha(0.9f);
-	HUD_SolidBox(0, 0, 320, 200, T_BLACK);
-	HUD_SetAlpha();
-
 	style_c *style = curr_menu->style_var[0];
 	SYS_ASSERT(style);
+
+	if (style->bg_image)
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(style->def->bg.translucency);
+		if (style->def->special == 0)
+			HUD_StretchImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
+		else
+			HUD_TileImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
+		HUD_SetAlpha(old_alpha);
+	}
+	else
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(style->def->bg.translucency);
+		HUD_SolidBox(-90, 0, 500, 200, style->def->bg.colour != RGB_NO_VALUE ?
+			style->def->bg.colour : T_BLACK);
+		HUD_SetAlpha(old_alpha);
+	}
 
 	if (! style->fonts[0])
 		return;

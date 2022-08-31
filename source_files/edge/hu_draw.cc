@@ -44,6 +44,7 @@ static font_c *default_font;
 float pixel_aspect = 1.0f;
 
 extern int gametic;
+int hudtic;
 
 int hud_swirl_pass = 0;
 bool hud_thick_liquid = false;
@@ -181,6 +182,8 @@ void HUD_FrameSetup(void)
 
 	margin_X = (SCREENWIDTH  - margin_W) / 2.0;
 	margin_Y = (SCREENHEIGHT + margin_H) / 2.0;
+
+	hudtic++;
 }
 
 
@@ -290,8 +293,9 @@ bool HUD_ScissorTest(float x1, float y1, float x2, float y2)
 // Adapted from Quake 3 GPL release
 void HUD_CalcScrollTexCoords( float x_scroll, float y_scroll, float *tx1, float *ty1, float *tx2, float *ty2 )
 {
-	float timeScale = gametic / 100.0f;
-	float adjustedScrollS, adjustedScrollT;
+	float timeScale, adjustedScrollS, adjustedScrollT;
+
+	timeScale = gametic / 100.0f;
 
 	adjustedScrollS = x_scroll * timeScale;
 	adjustedScrollT = y_scroll * timeScale;
@@ -314,7 +318,7 @@ void HUD_CalcTurbulentTexCoords( float *tx, float *ty, float x, float y )
 	float frequency = hud_thick_liquid ? 0.5 : 1.0;
 	float amplitude = 0.05;
 
-	now = ( phase + gametic / 100.0f * frequency );
+	now = ( phase + hudtic / 100.0f * frequency );
 
 	if (swirling_flats == SWIRL_PARALLAX)
 	{

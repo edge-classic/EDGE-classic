@@ -51,6 +51,7 @@
 #include "dm_state.h"
 #include "e_search.h"
 #include "e_main.h"
+#include "hu_draw.h" // hudtic
 #include "m_argv.h"
 #include "m_misc.h"
 #include "p_local.h"
@@ -1023,8 +1024,8 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 
 	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
 	{
-		tmp_img->Swirl(gametic, rim->liquid_type); // Using leveltime disabled swirl for intermission screens
-		rim->swirled_gametic = gametic;
+		tmp_img->Swirl(hudtic, rim->liquid_type); // Using leveltime disabled swirl for intermission screens
+		rim->swirled_gametic = hudtic;
 	}
 
 	if (rim->opacity == OPAC_Unknown)
@@ -1505,7 +1506,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 
 	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
 	{
-		if (rc->parent->liquid_type > LIQ_None && rc->parent->swirled_gametic != gametic)
+		if (rc->parent->liquid_type > LIQ_None && rc->parent->swirled_gametic != hudtic)
 		{
 			if (rc->tex_id != 0)
 			{

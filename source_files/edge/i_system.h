@@ -80,7 +80,7 @@ void I_MessageBox(const char *message, const char *title);
 // -AJA- 2007/04/13: display a system message box with the
 // given message (typically a serious error message).
 
-extern const char *win32_exe_path;
+extern const char *exe_path;
 
 
 //--------------------------------------------------------

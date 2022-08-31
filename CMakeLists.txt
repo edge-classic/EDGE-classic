@@ -10,6 +10,7 @@ add_subdirectory(source_files/libgme)
 add_subdirectory(source_files/libmodplug)
 add_subdirectory(source_files/libwebsid)
 add_subdirectory(source_files/miniz)
+add_subdirectory(source_files/whereami)
 
 project(
   edge-classic
@@ -245,6 +246,7 @@ if(WIN32 OR MSYS)
 			miniz
 			modplug
 			libwebsid
+			whereami
 			wsock32
 	)
 else()
@@ -262,5 +264,6 @@ else()
 			miniz
 			modplug
 			libwebsid
+			whereami
 	)
 endif()

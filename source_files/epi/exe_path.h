@@ -22,7 +22,7 @@
 namespace epi
 {
 
-const char *GetExecutablePath(const char *argv0);
+const char *GetExecutablePath();
 // returns the path containing the running executable.
 // You must pass in argv[0], which is used as a last resort
 // when better methods fail.  The returned path never has a

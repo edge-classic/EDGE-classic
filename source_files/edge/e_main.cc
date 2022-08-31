@@ -786,7 +786,11 @@ void InitDirectories(void)
     if (home_dir.empty()) home_dir = "."; // Default to current directory
 
 	// Get the Game Directory from parameter.
+#ifdef __APPLE__
 	s = epi::GetResourcePath();
+#else
+	s = epi::GetExecutablePath();
+#endif
 	game_dir = s;
 	free((void*)s);
 
@@ -1149,9 +1153,7 @@ static void ShowDateAndVersion(void)
 	I_Printf("EDGE-Classic homepage is at https://github.com/dashodanger/EDGE-classic/\n");
 	I_Printf("EDGE-Classic is based on DOOM by id Software http://www.idsoftware.com/\n");
 
-#ifdef WIN32
-	I_Printf("Executable path: '%s'\n", win32_exe_path);
-#endif
+	I_Printf("Executable path: '%s'\n", exe_path);
 
 	M_DebugDumpArgs();
 }

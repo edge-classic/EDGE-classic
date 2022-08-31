@@ -26,21 +26,21 @@
 #include "e_main.h"
 #include "version.h"
 
-const char *win32_exe_path = ".";
+const char *exe_path = ".";
 
 extern "C" {
 
 int main(int argc, char *argv[])
 {
+	exe_path = epi::GetExecutablePath();
+
 #ifdef WIN32
-	const char* title_string = "EDGE Engine";
+	const char* title_string = "EDGE-Classic Engine";
 	// -AJA- give us a proper name in the Task Manager
 	SDL_RegisterApp((char *)title_string, 0, 0);
 
     // -AJA- change current dir to match executable
-	win32_exe_path = epi::GetExecutablePath(argv[0]);
-
-    ::SetCurrentDirectory(win32_exe_path);
+    ::SetCurrentDirectory(exe_path);
 #endif
 
 	// Run EDGE. it never returns

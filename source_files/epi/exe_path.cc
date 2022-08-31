@@ -39,93 +39,20 @@
 #define PATH_MAX  2048
 #endif
 
+#include "whereami.h"
+
 namespace epi
 {
 
-const char *GetExecutablePath(const char *argv0)
+const char *GetExecutablePath()
 {
-	// NOTE: there are a few memory leaks here.  Because this
-	//       function is only called once, I don't care.
-
-	char *dir;
-
-#ifdef WIN32
-	dir = new char[PATH_MAX+2];
-
-	int length = GetModuleFileName(GetModuleHandle(NULL), dir, PATH_MAX);
-
-	if (length > 0 && length < PATH_MAX)
-	{
-		if (access(dir, 0) == 0)  // sanity check
-		{
-			std::string result = PATH_GetDir(dir);
-			delete[] dir;
-			return strdup(result.c_str());
-		}
-	}
-
-	delete[] dir;
-#endif
-
-
-#ifdef __linux__
-	dir = new char[PATH_MAX+2];
-
-	int length = readlink("/proc/self/exe", dir, PATH_MAX);
-
-	if (length > 0)
-	{
-		dir[length] = 0; // add the missing NUL
-
-		if (access(dir, 0) == 0)  // sanity check
-		{
-			std::string result = PATH_GetDir(dir);
-			delete[] dir;
-			return strdup(result.c_str());
-		}
-	}
-
-	delete[] dir;
-#endif
-
-
-#ifdef __APPLE__
-	/*
-	   from http://www.hmug.org/man/3/NSModule.html
-
-	   extern int _NSGetExecutablePath(char *buf, unsigned long *bufsize);
-
-	   _NSGetExecutablePath copies the path of the executable
-	   into the buffer and returns 0 if the path was successfully
-	   copied in the provided buffer. If the buffer is not large
-	   enough, -1 is returned and the expected buffer size is
-	   copied in *bufsize.
-	   */
-	uint32_t pathlen = PATH_MAX * 2;
-
-	dir = new char [pathlen+2];
-
-	if (0 == _NSGetExecutablePath(dir, &pathlen))
-	{
-		// FIXME: will this be _inside_ the .app folder???
-
-		std::string result = PATH_GetDir(dir);
-		delete[] dir;
-		return strdup(result.c_str());
-	}
-
-	delete[] dir;
-#endif
-
-
-	// --- fallback method: use argv[0] ---
-
-#ifdef __APPLE__
-	// FIXME: check if _inside_ the .app folder
-#endif
-
-	std::string result = PATH_GetDir(argv0);
-	return strdup(result.c_str());
+	int length;
+	std::string path;
+	length = wai_getExecutablePath(NULL, 0, NULL);
+	path.resize(length + 1, 0);
+	wai_getExecutablePath(path.data(), length, NULL);
+	path = PATH_GetDir(path.data());
+	return _strdup(path.c_str());
 }
 
 //

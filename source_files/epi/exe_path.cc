@@ -52,7 +52,7 @@ const char *GetExecutablePath()
 	path.resize(length + 1, 0);
 	wai_getExecutablePath(path.data(), length, NULL);
 	path = PATH_GetDir(path.data());
-	return _strdup(path.c_str());
+	return strdup(path.c_str());
 }
 
 //

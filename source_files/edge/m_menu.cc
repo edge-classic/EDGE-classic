@@ -149,7 +149,7 @@ static const image_c *menu_doom;
 static const image_c *menu_newgame;
 static const image_c *menu_skill;
 static const image_c *menu_episode;
-static const image_c *menu_skull[2];
+static image_c *menu_skull[2];
 static const image_c *menu_readthis[2];
 
 static style_c *menu_def_style;
@@ -2381,6 +2381,7 @@ void M_Drawer(void)
 	// DRAW MENU
 	x = currentMenu->x;
 	y = currentMenu->y;
+	
 	max = currentMenu->numitems;
 	
 	int t_type = styledef_c::T_TEXT;
@@ -2423,40 +2424,32 @@ void M_Drawer(void)
 			HUD_DrawImage(x, y, image);
 			LastLineHeight = IM_HEIGHT(image); //to scale the skull cursor later
 		}
-	}
 
-	// DRAW SKULL
-	{
-		int sx = x + SKULLXOFF;
-		
-		if (custom_menu==false)
+		if (itemOn == i)
 		{
+			short old_offset_x = menu_skull[0]->offset_x;
+			short old_offset_y = menu_skull[0]->offset_y;
+			menu_skull[0]->offset_x = 0;
+			menu_skull[0]->offset_y = 0;
 			if (currentMenu->draw_func == M_DrawLoad
 			|| currentMenu->draw_func == M_DrawSave) 
 			{
-					//need to use the box gfx
-					const image_c *C = W_ImageLookup("M_LSCNTR");
-
-					LastLineHeight = IM_HEIGHT(C);
-					LastLineHeight +=1;
+				//need to use the box gfx
+				const image_c *C = W_ImageLookup("M_LSCNTR");
+				LastLineHeight = IM_HEIGHT(C);
+				LastLineHeight +=1;
 			}
-		
-			//LastLineHeight += (1 * txtscale); //space between items?
 			
-			float sy = currentMenu->y - (LastLineHeight/4);	
-			sy = sy + (itemOn * LastLineHeight);
+			//LastLineHeight += (1 * txtscale); //space between items?
+				
 			//scale it to match lineheight
 			float TempScale = 0;
 			float TempWidth = 0;
 			TempScale = LastLineHeight / IM_HEIGHT(menu_skull[0]);
 			TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
-			HUD_StretchImage(sx,sy,TempWidth,LastLineHeight,menu_skull[0], 0.0, 0.0);
-		}
-		else
-		{
-			int sy = currentMenu->y - 5 + itemOn * LINEHEIGHT;
-			//Lobo: just use M_SKULL1, and any DDFANIM magic it has ;)
-			HUD_DrawImage(sx, sy, menu_skull[0]);
+			HUD_StretchImage(x - TempWidth - 5,y,TempWidth,LastLineHeight,menu_skull[0], 0.0, 0.0);
+			menu_skull[0]->offset_x = old_offset_x;
+			menu_skull[0]->offset_y = old_offset_y;
 		}
 	}
 }
@@ -2575,8 +2568,8 @@ void M_Init(void)
 	menu_newgame  = W_ImageLookup("M_NEWG");
 	menu_skill    = W_ImageLookup("M_SKILL");
 	menu_episode  = W_ImageLookup("M_EPISOD");
-	menu_skull[0] = W_ImageLookup("M_SKULL1");
-	menu_skull[1] = W_ImageLookup("M_SKULL2");
+	menu_skull[0] = (image_c *)W_ImageLookup("M_SKULL1");
+	menu_skull[1] = (image_c *)W_ImageLookup("M_SKULL2");
 	
 	//Check for custom menu graphics in pwads:
 	//If we have them then use them instead of our 

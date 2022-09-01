@@ -311,8 +311,8 @@ static void CheckUDMFNamespace(parser_t *psr)
 	if (!GetNextAssign(&udmf_psr, (u8_t*)ident, (u8_t*)value) || y_stricmp(ident, "namespace"))
 		FatalError(StringPrintf("AJBSP: Missing UDMF namespace in %s of %s!\n",	lev_current_name, FindBaseName(edit_wad->PathName())));
 
-	if (y_stricmp(value, "doom") != 0 && y_stricmp(value, "heretic") != 0 && y_strnicmp(value, "zdoomt", 6) != 0)
-		FatalError(StringPrintf("AJBSP: Incompatible UDMF namespace \"%s\" detected in %s of %s!\nNamespace must be \"Doom\", \"Heretic\", or \"ZDoomTranslated\"!\n",
+	if (y_stricmp(value, "doom") != 0 && y_stricmp(value, "heretic") != 0 && y_strnicmp(value, "zdoomt", 6) != 0 && y_stricmp(value, "edge") != 0)
+		FatalError(StringPrintf("AJBSP: Incompatible UDMF namespace \"%s\" detected in %s of %s!\nNamespace must be \"Edge\", \"Doom\", \"Heretic\", or \"ZDoomTranslated\"!\n",
 			value, lev_current_name, FindBaseName(edit_wad->PathName())));
 }
 

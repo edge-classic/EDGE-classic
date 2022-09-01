@@ -793,7 +793,27 @@ void M_DrawLoad(void)
 	}
       
 	for (i = 0; i < SAVE_SLOTS; i++)
+	{
 		M_DrawSaveLoadBorder(LoadDef.x + 8, LoadDef.y + LINEHEIGHT * (i), 24);
+		if (itemOn == i)
+		{
+			short old_offset_x = menu_skull[0]->offset_x;
+			short old_offset_y = menu_skull[0]->offset_y;
+			menu_skull[0]->offset_x = 0;
+			menu_skull[0]->offset_y = 0;
+			//need to use the box gfx
+			const image_c *C = W_ImageLookup("M_LSCNTR");
+								
+			//scale it to match lineheight
+			float TempScale = 0;
+			float TempWidth = 0;
+			TempScale = IM_HEIGHT(C) / IM_HEIGHT(menu_skull[0]);
+			TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
+			HUD_StretchImage(LoadDef.x - TempWidth - 8,LoadDef.y + (LINEHEIGHT * i) - (IM_HEIGHT(C)/4),TempWidth,IM_HEIGHT(C),menu_skull[0], 0.0, 0.0);
+			menu_skull[0]->offset_x = old_offset_x;
+			menu_skull[0]->offset_y = old_offset_y;
+		}
+	}
 
 	// draw screenshot ?
 
@@ -921,6 +941,25 @@ void M_DrawSave(void)
 		}
 		else
 			HL_WriteText(save_style,0, LoadDef.x + 8, y, ex_slots[i].desc);
+
+		if (itemOn == i)
+		{
+			short old_offset_x = menu_skull[0]->offset_x;
+			short old_offset_y = menu_skull[0]->offset_y;
+			menu_skull[0]->offset_x = 0;
+			menu_skull[0]->offset_y = 0;
+			//need to use the box gfx
+			const image_c *C = W_ImageLookup("M_LSCNTR");
+								
+			//scale it to match lineheight
+			float TempScale = 0;
+			float TempWidth = 0;
+			TempScale = IM_HEIGHT(C) / IM_HEIGHT(menu_skull[0]);
+			TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
+			HUD_StretchImage(LoadDef.x - TempWidth - 8,LoadDef.y + (LINEHEIGHT * i) - (IM_HEIGHT(C)/4),TempWidth,IM_HEIGHT(C),menu_skull[0], 0.0, 0.0);
+			menu_skull[0]->offset_x = old_offset_x;
+			menu_skull[0]->offset_y = old_offset_y;
+		}
 	}
 
 	M_DrawSaveLoadCommon(i, i+1, save_style);
@@ -2431,14 +2470,6 @@ void M_Drawer(void)
 			short old_offset_y = menu_skull[0]->offset_y;
 			menu_skull[0]->offset_x = 0;
 			menu_skull[0]->offset_y = 0;
-			if (currentMenu->draw_func == M_DrawLoad
-			|| currentMenu->draw_func == M_DrawSave) 
-			{
-				//need to use the box gfx
-				const image_c *C = W_ImageLookup("M_LSCNTR");
-				LastLineHeight = IM_HEIGHT(C);
-				LastLineHeight +=1;
-			}
 			
 			//LastLineHeight += (1 * txtscale); //space between items?
 				

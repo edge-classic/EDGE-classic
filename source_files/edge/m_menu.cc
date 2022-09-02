@@ -2487,7 +2487,7 @@ void M_Drawer(void)
 		{	
 			const image_c *image = currentMenu->menuitems[i].image;
 			currentMenu->menuitems[i].x = x - image->offset_x;
-			currentMenu->menuitems[i].y = y; // Y Offset seems trickier to deal with - Dasho
+			currentMenu->menuitems[i].y = y - image->offset_y + (IM_HEIGHT(image) / 4); // Could still be better, but will ballpark it - Dasho
 			HUD_DrawImage(x, y, image);
 			if (IM_HEIGHT(image) < ShortestLine) ShortestLine = IM_HEIGHT(image); //to scale the skull cursor later
 			if (IM_WIDTH(image) > WidestLine) WidestLine = IM_WIDTH(image);

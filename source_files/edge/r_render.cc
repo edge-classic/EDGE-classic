@@ -1280,6 +1280,65 @@ static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f,
 	}
 }
 
+// Mirror the texture on the back of the line
+static void DrawGlass(drawfloor_t *dfloor, float c, float f,
+						    float tex_top_h, surface_t *surf,
+						    bool opaque, float x_offset)
+{
+
+	line_t *ld = cur_seg->linedef;
+
+	// extent of current seg along the linedef
+	float s_seg, e_seg;
+
+	if (cur_seg->side == 0)
+	{
+		s_seg = cur_seg->offset;
+		e_seg = s_seg + cur_seg->length;
+	}
+	else
+	{
+		e_seg = ld->length - cur_seg->offset;
+		s_seg = e_seg - cur_seg->length;
+	}
+
+	// coordinates along the linedef (0.00 at V1, 1.00 at V2)
+	float s_along, s_tex;
+	float e_along, e_tex;
+
+	s_along = 0;
+	e_along = ld->length - 0;
+
+	s_tex   = -e_along;
+	e_tex   = 0;
+
+	// limit glass coordinates to current seg
+	if (s_along < s_seg)
+	{
+		s_tex  += (s_seg - s_along);
+		s_along = s_seg;
+	}
+	if (e_along > e_seg)
+	{
+		e_tex  += (e_seg - e_along);
+		e_along = e_seg;
+	}
+
+	if (s_along < e_along)
+	{
+		float x1 = ld->v1->x + ld->dx * s_along / ld->length;
+		float y1 = ld->v1->y + ld->dy * s_along / ld->length;
+
+		float x2 = ld->v1->x + ld->dx * e_along / ld->length;
+		float y2 = ld->v1->y + ld->dy * e_along / ld->length;
+
+		s_tex += x_offset;
+		e_tex += x_offset;
+
+		DrawWallPart(dfloor, x1,y1,f,c, x2,y2,f,c, tex_top_h,
+					surf, surf->image, true, opaque, s_tex, e_tex);
+	}
+}
 
 static void DrawTile(seg_t *seg, drawfloor_t *dfloor,
                     float lz1, float lz2, float rz1, float rz2,
@@ -1316,6 +1375,18 @@ static void DrawTile(seg_t *seg, drawfloor_t *dfloor,
 			DrawSlidingDoor(dfloor, lz2, lz1, tex_top_h, surf, opaque, x_offset);
 		return;
 	}
+
+	// check for breakable glass
+	if(seg->linedef->special)
+	{
+		if ((flags & WTILF_MidMask) && seg->linedef->special->glass)
+		{
+			if (surf->image)
+				DrawGlass(dfloor, lz2, lz1, tex_top_h, surf, opaque, x_offset);
+			return;
+		}
+	}
+	
 
 	float x1 = seg->v1->x;
 	float y1 = seg->v1->y;

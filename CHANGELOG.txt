@@ -9,12 +9,14 @@ Bugs fixed
 + Fixed home_dir variable being used instead of game_dir on startup, causing issues 
   when launching from a location other than the executable directory on non-Windows builds
 + Fixed rare ceiling crusher-related bug
++ Text based menus for <Episode select> and <Difficulty select> were not working if the Main menu was using custom graphics
 
 General Improvements
 --------------------
 + Improved STYLES.DDF functionality across console and menus; backgrounds images/colors and translucency are no longer hardcoded
 + Added "Edge" UDMF namespace detection in preparation for EDGE-Classic's UDMF spec
 + Improved menu cursor positioning and scaling
++ Back mid-texture on a Glass line type is automagically mirrored
 
 New Features
 ------------
@@ -24,6 +26,23 @@ New Features
 + STYLES.DDF
   - New SPECIAL flag: CURSOR_RIGHT, will align menu cursor to the right side of menu entries
   - New text style properties: X_OFFSET and Y_OFFSET. Will set all font-based entries in this style to the same x/y offset.
+  - New SPECIAL flag: NO_STRETCH_FULLSCREEN, which will disable default behaviour of stretching backgrounds to fill the screen
+  
++ Lines.ddf
+  -Added 3 new BREAKABLE glass line types: 
+  [830] Breakable Glass: monsters can see through it and can break it
+  [831] Breakable Glass: monsters: cannot see through it but can break it
+  [832] Breakable Glass: monsters: cannot see through it and cannot break it
+
++ Sectors.ddf
+  -Added 6 new coloured sector types:
+  [4471] EDGE Blue Hue
+  [4472] EDGE Green Hue
+  [4473] EDGE Red Hue
+  [4474] EDGE Yellow Hue
+  [4475] EDGE Purple Hue
+  [4476] EDGE Grey Hue
+
 
 CHANGELOG for EDGE-Classic 1.2 (since EDGE-Classic 1.1)
 ====================================

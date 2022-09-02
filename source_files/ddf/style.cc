@@ -62,6 +62,8 @@ static const commandlist_t text_commands[] =
     DF("FONT",   font,   DDF_MainLookupFont),
     DF("SCALE",  scale,  DDF_MainGetFloat),
     DF("ASPECT", aspect, DDF_MainGetFloat),
+	DF("X_OFFSET",   x_offset, DDF_MainGetNumeric),
+	DF("Y_OFFSET",   y_offset, DDF_MainGetNumeric),
 
 	DDF_CMD_END
 };
@@ -227,6 +229,7 @@ static specflags_t style_specials[] =
     {"TILED", SYLSP_Tiled, 0},
     {"TILED_NOSCALE", SYLSP_TiledNoScale, 0},
 	{"STRETCH_FULLSCREEN", SYLSP_StretchFullScreen, 0},
+	{"CURSOR_RIGHT", SYLSP_CursorRight, 0},
     {NULL, 0, 0}
 };
 
@@ -348,6 +351,8 @@ void textstyle_c::Default()
 	font   = NULL;
 	scale  = 1.0f;
 	aspect = 1.0f;
+	x_offset = 0;
+	y_offset = 0;
 }
 
 //
@@ -363,6 +368,8 @@ textstyle_c& textstyle_c::operator= (const textstyle_c &rhs)
 		font   = rhs.font;
 		scale  = rhs.scale;
 		aspect = rhs.aspect;
+		x_offset = rhs.x_offset;
+		y_offset = rhs.y_offset;
 	}
 		
 	return *this;

@@ -67,6 +67,8 @@ public:
 	float scale;
 	float aspect;
 
+	int x_offset;
+	int y_offset;
 	// FIXME: horizontal and vertical alignment
 };
 
@@ -95,6 +97,7 @@ typedef enum
 	SYLSP_Tiled = 0x0001,  // bg image should tile (otherwise covers whole area)
 	SYLSP_TiledNoScale = 0x0002,  // bg image should tile (1:1 pixels)
 	SYLSP_StretchFullScreen = 0x0004,  // bg image will be stretched to fill the screen
+	SYLSP_CursorRight = 0x0008, // Menu cursor will be on right side of entry instead
 }
 style_special_e;
 

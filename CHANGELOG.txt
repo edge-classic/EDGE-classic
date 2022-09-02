@@ -8,15 +8,22 @@ Bugs fixed
 ----------
 + Fixed home_dir variable being used instead of game_dir on startup, causing issues 
   when launching from a location other than the executable directory on non-Windows builds
++ Fixed rare ceiling crusher-related bug
 
 General Improvements
 --------------------
-+ Improved DDFSTYLE functionality across console and menus; backgrounds images/colors and translucency are no longer hardcoded for these
++ Improved STYLES.DDF functionality across console and menus; backgrounds images/colors and translucency are no longer hardcoded
++ Added "Edge" UDMF namespace detection in preparation for EDGE-Classic's UDMF spec
++ Improved menu cursor positioning and scaling
 
 New Features
 ------------
 + Custom standalone IWADs can be created by adding an EDGEIWAD lump to the WAD. This will allow it to pass the automatic IWAD
   detection
+
++ STYLES.DDF
+  - New SPECIAL flag: CURSOR_RIGHT, will align menu cursor to the right side of menu entries
+  - New text style properties: X_OFFSET and Y_OFFSET. Will set all font-based entries in this style to the same x/y offset.
 
 CHANGELOG for EDGE-Classic 1.2 (since EDGE-Classic 1.1)
 ====================================

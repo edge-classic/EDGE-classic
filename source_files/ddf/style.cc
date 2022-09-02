@@ -478,7 +478,7 @@ void styledef_c::Default()
 
 	sounds.Default();
 
-	special = (style_special_e) 0;
+	special = (style_special_e) SYLSP_StretchFullScreen; // I think this might be better for backwards compat, revert to 0 if needed - Dasho
 }
 
 

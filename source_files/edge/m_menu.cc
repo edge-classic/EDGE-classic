@@ -114,9 +114,6 @@ static std::string input_string;
 
 bool menuactive;
 
-//#define SKULLXOFF   -24
-#define LINEHEIGHT   15  //!!!!
-
 // timed message = no input from user
 static bool msg_needsinput;
 
@@ -200,6 +197,12 @@ typedef struct slot_extra_info_s
 	int skill;
 	int netgame;
 	bool has_view;
+
+	// Useful for drawing skull/cursor and possible other calculations
+	int x;
+	int y;
+	float height = -1;
+	float width = -1;
 }
 slot_extra_info_t;
 
@@ -719,8 +722,6 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
     
 	mbuffer[0] = 0;
 
-	// FIXME: use the patches (but shrink them)
-	// FIXME FIXME: or at least use Language entries for this
 	switch (info->skill)
 	{
 		case 0: strcat(mbuffer, language["MenuDifficulty1"]); break;
@@ -772,7 +773,6 @@ void M_DrawLoad(void)
 	// (this should only happen if the boxes aren't being drawn in theory)
 	float LineHeight = IM_HEIGHT(W_ImageLookup("M_LSCNTR"));
 	if (style->fonts[3]->NominalHeight() > LineHeight) LineHeight = style->fonts[3]->NominalHeight();
-	LineHeight = MAX(LineHeight, LINEHEIGHT);
 
 	if (custom_MenuMain==false)
 	{
@@ -783,15 +783,11 @@ void M_DrawLoad(void)
 		HUD_DrawImage(72, 8, menu_loadg);
 	}
 
-	for (i = 0; i < SAVE_SLOTS; i++)
-	{
-		M_DrawSaveLoadBorder(LoadDef.x + 8, LoadDef.y + LineHeight * (i), 24);
-	}
-
 	float WidestLine = 0.0;
 
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
+		M_DrawSaveLoadBorder(LoadDef.x + 8, LoadDef.y + LineHeight * (i), 24);
 		HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0,
 		             LoadDef.x + 8, LoadDef.y + LineHeight * (i),
 					 ex_slots[i].desc);
@@ -818,9 +814,9 @@ void M_DrawLoad(void)
 	TempScale = TempHeight / IM_HEIGHT(menu_skull[0]);
 	TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
 	if (style->def->special & SYLSP_CursorRight)
-		HUD_StretchImage(LoadDef.x + WidestLine,LoadDef.y + (LineHeight * itemOn) - (TempHeight/4),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x + WidestLine,LoadDef.y + (LineHeight * itemOn),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	else
-		HUD_StretchImage(LoadDef.x - TempWidth - 8,LoadDef.y + (LineHeight * itemOn) - (TempHeight/4),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x - TempWidth - 8,LoadDef.y + (LineHeight * itemOn),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	menu_skull[0]->offset_x = old_offset_x;
 	menu_skull[0]->offset_y = old_offset_y;
 
@@ -905,8 +901,6 @@ void M_DrawSave(void)
 	if (style->fonts[3]->NominalHeight() > LineHeight) 
 		LineHeight = style->fonts[3]->NominalHeight();
 
-	LineHeight = MAX(LineHeight, LINEHEIGHT);
-
 	if (custom_MenuMain==false)
 	{
 		HL_WriteText(load_style,styledef_c::T_TEXT, 72, 8, language["MainSaveGame"]);
@@ -957,9 +951,9 @@ void M_DrawSave(void)
 	TempScale = TempHeight / IM_HEIGHT(menu_skull[0]);
 	TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
 	if (style->def->special & SYLSP_CursorRight)
-		HUD_StretchImage(LoadDef.x + WidestLine,LoadDef.y + (LineHeight * itemOn) - (TempHeight/4),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x + WidestLine,LoadDef.y + (LineHeight * itemOn),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	else
-		HUD_StretchImage(LoadDef.x - TempWidth - 8,LoadDef.y + (LineHeight * itemOn) - (TempHeight/4),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x - TempWidth - 8,LoadDef.y + (LineHeight * itemOn),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	menu_skull[0]->offset_x = old_offset_x;
 	menu_skull[0]->offset_y = old_offset_y;
 
@@ -1130,8 +1124,8 @@ void M_DrawSound(void)
 {
 	HUD_DrawImage(60, 38, menu_svol);
 
-	M_DrawThermo(SoundDef.x, SoundDef.y + LINEHEIGHT * (sfx_vol   + 1), SND_SLIDER_NUM, sfx_volume, 1);
-	M_DrawThermo(SoundDef.x, SoundDef.y + LINEHEIGHT * (music_vol + 1), SND_SLIDER_NUM, mus_volume, 1);
+	M_DrawThermo(SoundDef.x, SoundDef.y + 15 * (sfx_vol   + 1), SND_SLIDER_NUM, sfx_volume, 1); // Possibly replace the 15; this was the old LINEHEIGHT constant
+	M_DrawThermo(SoundDef.x, SoundDef.y + 15 * (music_vol + 1), SND_SLIDER_NUM, mus_volume, 1); // Possibly replace the 15; this was the old LINEHEIGHT constant
 }
 
 #if 0
@@ -2457,18 +2451,18 @@ void M_Drawer(void)
 		
 			const image_c *image = currentMenu->menuitems[i].image;
 
-			currentMenu->menuitems[i].height = image->actual_h;
-			currentMenu->menuitems[i].width = image->actual_w;
+			currentMenu->menuitems[i].height = image->actual_h * image->scale_y;
+			currentMenu->menuitems[i].width = image->actual_w * image->scale_x;
 
-			if (image->actual_h < ShortestLine) 
-				ShortestLine = image->actual_h;
-			if (image->actual_w > WidestLine) 
-				WidestLine = image->actual_w;
+			if (currentMenu->menuitems[i].height < ShortestLine) 
+				ShortestLine = currentMenu->menuitems[i].height;
+			if (currentMenu->menuitems[i].width > WidestLine) 
+				WidestLine = currentMenu->menuitems[i].width;
 
 			currentMenu->menuitems[i].x = x + image->offset_x + style->def->x_offset;
 			currentMenu->menuitems[i].y = y - image->offset_y - style->def->y_offset;
 			HUD_DrawImage(currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, image);
-			y += currentMenu->menuitems[i].height + 1;
+			y += currentMenu->menuitems[i].height;
 		}
 		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
 		{

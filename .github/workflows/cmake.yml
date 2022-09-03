@@ -34,15 +34,18 @@ jobs:
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
+    - name: Copy Executable
+      run: cp ${{github.workspace}}/build/${{env.BUILD_TYPE}}/edge-classic ${{github.workspace}}
+
     - uses: actions/upload-artifact@v3
       with:
-        name: edge-classic
+        name: edge-classic-linux
         path: |
           ${{github.workspace}}/autoload
           ${{github.workspace}}/edge_base
           ${{github.workspace}}/edge_fixes
           ${{github.workspace}}/soundfont
-          ${{github.workspace}}/build/${{env.BUILD_TYPE}}/edge_classic
+          ${{github.workspace}}/edge_classic
           ${{github.workspace}}/edge_defs.wad
         retention-days: 2
   build-msys:
@@ -55,7 +58,7 @@ jobs:
       - name: Setup MSYS2
         uses: msys2/setup-msys2@v2
         with:
-          update: true
+          update: false
           msystem: mingw32
           install: >-
             git
@@ -68,15 +71,17 @@ jobs:
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "MSYS Makefiles"
       - name: Build
         run: cmake --build build --config ${{env.BUILD_TYPE}}
+      - name: Copy Executable
+        run: cp build/${{env.BUILD_TYPE}}/edge-classic.exe .
       - uses: actions/upload-artifact@v3
         with:
-          name: edge-classic
+          name: edge-classic-msys2
           path: |
             autoload
             edge_base
             edge_fixes
             soundfont
-            build/${{env.BUILD_TYPE}}/edge_classic.exe
+            edge_classic.exe
             edge_defs.wad
             *.dll
           retention-days: 2
@@ -88,15 +93,17 @@ jobs:
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DSDL2_PATH=${{github.workspace}}/source_files/sdl2
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      - name: Copy Executable
+        run: copy ${{github.workspace}}/build/${{env.BUILD_TYPE}}/edge-classic.exe ${{github.workspace}}
       - uses: actions/upload-artifact@v3
         with:
-          name: edge-classic
+          name: edge-classic-msvc
           path: |
             ${{github.workspace}}/autoload
             ${{github.workspace}}/edge_base
             ${{github.workspace}}/edge_fixes
             ${{github.workspace}}/soundfont
-            ${{github.workspace}}/build/${{env.BUILD_TYPE}}/edge_classic.exe
+            ${{github.workspace}}/edge_classic.exe
             ${{github.workspace}}/edge_defs.wad
             ${{github.workspace}}/SDL2.dll
           retention-days: 2

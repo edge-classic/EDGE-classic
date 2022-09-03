@@ -11,6 +11,7 @@ Bugs fixed
 + Fixed rare ceiling crusher-related bug
 + Text based menus for <Episode select> and <Difficulty select> were not working if the Main menu was using custom graphics
 + Fixed null string CTD in HUD_DrawText and font_c::StringWidth
++ Fixed issue with FS_ReadDir returning relative paths
 
 General Improvements
 --------------------
@@ -19,6 +20,8 @@ General Improvements
 + Improved menu cursor positioning and scaling
 + Back mid-texture on a Glass line type is automagically mirrored
 + Load/Save menu will use DDFLANG difficulty strings instead of hard-coded Doom strings when showing savegame details
++ Improved CMD_Dir result display
++ DOOMWADDIR and DOOMWADPATH will now be evaluated together instead of separately
 
 New Features
 ------------

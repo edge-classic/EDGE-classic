@@ -64,3 +64,15 @@ jobs:
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DSDL2_PATH=${{github.workspace}}/source_files/sdl2
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: edge-classic
+          path: |
+            ${{github.workspace}}/autoload
+            ${{github.workspace}}/edge_base
+            ${{github.workspace}}/edge_fixes
+            ${{github.workspace}}/soundfont
+            ${{github.workspace}}/edge_classic.exe
+            ${{github.workspace}}/edge_defs.wad
+            ${{github.workspace}}/SDL2.dll
+          retention-days: 2

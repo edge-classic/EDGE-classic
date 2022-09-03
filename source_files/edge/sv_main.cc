@@ -506,7 +506,7 @@ void SV_ClearSlot(const char *slot_name)
 		if (entry->is_dir)
 			continue;
 
-		std::string cur_file = epi::PATH_Join(full_dir.c_str(), entry->name.c_str());
+		std::string cur_file = epi::PATH_Join(full_dir.c_str(), epi::PATH_GetFilename(entry->name.c_str()).c_str());
 
 		I_Debugf("  Deleting %s\n", cur_file.c_str());
 
@@ -536,11 +536,11 @@ void SV_CopySlot(const char *src_name, const char *dest_name)
 		if (entry->is_dir)
 			continue;
 
-		std::string src_file  = epi::PATH_Join( src_dir.c_str(), entry->name.c_str());
-		std::string dest_file = epi::PATH_Join(dest_dir.c_str(), entry->name.c_str());
+		std::string src_file  = epi::PATH_Join( src_dir.c_str(), epi::PATH_GetFilename(entry->name.c_str()).c_str());
+		std::string dest_file = epi::PATH_Join(dest_dir.c_str(),epi::PATH_GetFilename(entry->name.c_str()).c_str());
 
 		I_Debugf("  Copying %s --> %s\n", src_file.c_str(), dest_file.c_str());
-
+ 
 		if (! epi::FS_Copy(src_file.c_str(), dest_file.c_str()))
 			I_Error("SV_CopySlot: failed to copy '%s' to '%s'\n",
 			        src_file.c_str(), dest_file.c_str());

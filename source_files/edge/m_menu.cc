@@ -2464,18 +2464,17 @@ void M_Drawer(void)
 			float TempWidth = 0;
 			TempScale = ShortestLine / IM_HEIGHT(menu_skull[0]);
 			TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
-			float SkullY = currentMenu->menuitems[itemOn].y + (currentMenu->menuitems[itemOn].height / 2) - (ShortestLine / 2);
 			if (style->def->special & SYLSP_CursorRight)
-				HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + 2,SkullY,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
+				HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + 2,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
 			else
-				HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - 2,SkullY,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
+				HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - 2,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
 			menu_skull[0]->offset_x = old_offset_x;
 			menu_skull[0]->offset_y = old_offset_y;
 		}
 	}
 	else
 	{	
-		ShortestLine = IM_HEIGHT(menu_skull[0]); // Only scale down from provided skull height if necessary
+		ShortestLine = 10000.0f;
 		for (i = 0; i < max; i++)
 		{
 			if (! currentMenu->menuitems[i].patch_name[0])

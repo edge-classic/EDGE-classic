@@ -31,7 +31,6 @@
 #include "i_defs.h"
 
 #include "str_format.h"
-#include "image_data.h"
 
 #include "main.h"
 
@@ -95,11 +94,6 @@ bool M_MatchesKey(int keyvar, int key)
 	return ((keyvar >> 16) == key) ||
 	       ((keyvar & 0xffff) == key);
 }
-
-extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
-
-extern epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src,
-									 const byte *palette, int opacity);
 
 //
 // defaulted values
@@ -1258,17 +1252,8 @@ static void CreateEpisodeMenu(void)
 			if (! EpisodeMenu[e].image)
 				EpisodeMenu[e].image = W_ImageLookup(EpisodeMenu[e].patch_name);
 			const image_c *image = EpisodeMenu[e].image;
-			epi::image_data_c *tmp_img_data = ReadAsEpiBlock((image_c *)image);
-			if (tmp_img_data->bpp == 1)
-			{
-				const byte *what_palette = (const byte *) &playpal_data[0];
-				if (image->source_palette >= 0)
-					what_palette = (const byte *) W_CacheLumpNum(image->source_palette);
-				tmp_img_data = R_PalettisedToRGB(tmp_img_data, what_palette, image->opacity);
-			}
-			EpisodeMenu[e].height = tmp_img_data->TrueHeight() * image->scale_y;
-			EpisodeMenu[e].width =  tmp_img_data->TrueWidth() * image->scale_x;
-			delete tmp_img_data;
+			EpisodeMenu[e].height = image->actual_h * image->scale_y;
+			EpisodeMenu[e].width =  image->actual_w * image->scale_x;
 		}
 		else
 		{

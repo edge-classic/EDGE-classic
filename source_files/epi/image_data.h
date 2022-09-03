@@ -132,14 +132,6 @@ public:
 	// by finding the row with the largest distance between the first
 	// and last non-background-colored pixel
 
-	int TrueWidth();
-	// Returns the widest row in terms of non-transparent pixels
-	// At the moment, used for menu item spacing
-
-	int TrueHeight();
-	// Returns the tallest column in terms of non-transparent pixels
-	// At the moment, used for menu item spacing
-
 	void AverageHue(u8_t *hue, u8_t *ity = NULL);
 	// compute the average Hue of the RGB(A) image, storing the
 	// result in the 'hue' array (r, g, b).  The average intensity

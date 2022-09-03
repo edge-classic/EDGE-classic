@@ -1,19 +1,18 @@
 https://github.com/dashodanger/EDGE-classic
 
-Current as of: August 2022
+Current as of: September 2022
 
-CHANGELOG for EDGE-Classic 1.3 (since EDGE-Classic 1.2)
+CHANGELOG for EDGE-Classic 1.21 (since EDGE-Classic 1.2)
 
 Bugs fixed
 ----------
-+ Fixed home_dir variable being used instead of game_dir on startup, causing issues 
-  when launching from a location other than the executable directory on non-Windows builds
++ Fixed issues when launching from a location other than the executable directory on non-Windows builds
 + Fixed rare ceiling crusher-related bug
 + Text based menus for <Episode select> and <Difficulty select> were not working if the Main menu was using custom graphics
 + Fixed null string CTD in HUD_DrawText and font_c::StringWidth
 + Fixed issue with FS_ReadDir returning relative paths
 + Restored "Hudless" option in COALHUDS HUD cycling
-s
+
 General Improvements
 --------------------
 + Improved STYLES.DDF functionality across console and menus; backgrounds images/colors and translucency are no longer hardcoded
@@ -48,11 +47,6 @@ New Features
   [4474] EDGE Yellow Hue
   [4475] EDGE Purple Hue
   [4476] EDGE Grey Hue
-
-
-+ EPI
-  - image_funcs.cc - New TrueHeight() and TrueWidth() functions added to return true height/width of an image, in terms of the 
-    tallest/widest non-transparent column/row of pixels. Currently used to help menu item spacing.
 
 CHANGELOG for EDGE-Classic 1.2 (since EDGE-Classic 1.1)
 ====================================

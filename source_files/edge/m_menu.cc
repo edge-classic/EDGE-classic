@@ -199,10 +199,7 @@ typedef struct slot_extra_info_s
 	bool has_view;
 
 	// Useful for drawing skull/cursor and possible other calculations
-	int x;
-	int y;
-	float height = -1;
-	float width = -1;
+	float y;
 }
 slot_extra_info_t;
 
@@ -761,18 +758,17 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 //
 void M_DrawLoad(void)
 {
+	const image_c *L = W_ImageLookup("M_LSLEFT");
+	const image_c *C = W_ImageLookup("M_LSCNTR");
+	const image_c *R = W_ImageLookup("M_LSRGHT");
 	int i;
+	int y = LoadDef.y;
 
 	style_c *style = LoadDef.style_var[0];
 
 	SYS_ASSERT(style);
 
 	style->DrawBackground();
-
-	// Use center box graphic for LineHeight unless the load game font text is actually taller
-	// (this should only happen if the boxes aren't being drawn in theory)
-	float LineHeight = IM_HEIGHT(W_ImageLookup("M_LSCNTR"));
-	if (style->fonts[3]->NominalHeight() > LineHeight) LineHeight = style->fonts[3]->NominalHeight();
 
 	if (custom_MenuMain==false)
 	{
@@ -783,72 +779,59 @@ void M_DrawLoad(void)
 		HUD_DrawImage(72, 8, menu_loadg);
 	}
 
-	float WidestLine = 0.0;
+	// Use center box graphic for LineHeight unless the load game font text is actually taller
+	// (this should only happen if the boxes aren't being drawn in theory)
+	float LineHeight = IM_HEIGHT(C);
+	if (style->fonts[3]->NominalHeight() > LineHeight) 
+		LineHeight = style->fonts[3]->NominalHeight();
+	float WidestLine = IM_WIDTH(C) * 24 + IM_WIDTH(L) + IM_WIDTH(R);
 
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
-		M_DrawSaveLoadBorder(LoadDef.x + 8, LoadDef.y + LineHeight * (i), 24);
-		HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0,
-		             LoadDef.x + 8, LoadDef.y + LineHeight * (i),
-					 ex_slots[i].desc);
+		if (custom_MenuMain==false)
+		{
+			float x = LoadDef.x;
+			HUD_StretchImage(x, y,IM_WIDTH(L),IM_HEIGHT(L),L, 0.0, 0.0);
+			x += IM_WIDTH(L);
+			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
+				HUD_StretchImage(x, y,IM_WIDTH(C),IM_HEIGHT(C),C, 0.0, 0.0);
+
+			HUD_StretchImage(x, y,IM_WIDTH(R),IM_HEIGHT(R),R, 0.0, 0.0);
+		}
+		else
+		{
+			float x = LoadDef.x;
+			HUD_DrawImage(x, y, L);
+			x += IM_WIDTH(L);
+			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
+				HUD_DrawImage(x, y, C);
+
+			HUD_DrawImage(x, y, R);
+		}
+		HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x + 8, y - (IM_HEIGHT(C) / 2), ex_slots[i].desc);
+		ex_slots[i].y = y;
 		if (style->fonts[3]->StringWidth(ex_slots[i].desc) > WidestLine) 
 			WidestLine = style->fonts[3]->StringWidth(ex_slots[i].desc);
+		y += LineHeight;
 	}
 
 	short old_offset_x = menu_skull[0]->offset_x;
 	short old_offset_y = menu_skull[0]->offset_y;
 	menu_skull[0]->offset_x = 0;
 	menu_skull[0]->offset_y = 0;
-	//need to use the box gfx
-	float TempHeight = IM_HEIGHT(W_ImageLookup("M_LSCNTR"));
-	if (style->fonts[3]->NominalHeight() > TempHeight) 
-		TempHeight = style->fonts[3]->NominalHeight();					
-	//scale it to match lineheight
-	TempHeight = MIN(TempHeight, IM_HEIGHT(menu_skull[0]));
-	if (IM_WIDTH(W_ImageLookup("M_LSCNTR")) * 24 + IM_WIDTH(W_ImageLookup("M_LSLEFT")) + IM_WIDTH(W_ImageLookup("M_LSRGHT")) > WidestLine)
-		WidestLine = IM_WIDTH(W_ImageLookup("M_LSCNTR")) * 24 + IM_WIDTH(W_ImageLookup("M_LSLEFT")) + IM_WIDTH(W_ImageLookup("M_LSRGHT"));
-	else
-		WidestLine += 8;
+	float TempHeight = MIN(LineHeight, IM_HEIGHT(menu_skull[0]));
 	float TempScale = 0;
 	float TempWidth = 0;
 	TempScale = TempHeight / IM_HEIGHT(menu_skull[0]);
 	TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
 	if (style->def->special & SYLSP_CursorRight)
-		HUD_StretchImage(LoadDef.x + WidestLine,LoadDef.y + (LineHeight * itemOn),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x + WidestLine,ex_slots[itemOn].y - C->offset_y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	else
-		HUD_StretchImage(LoadDef.x - TempWidth - 8,LoadDef.y + (LineHeight * itemOn),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x - TempWidth - 8,ex_slots[itemOn].y - C->offset_y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	menu_skull[0]->offset_x = old_offset_x;
 	menu_skull[0]->offset_y = old_offset_y;
 
 	M_DrawSaveLoadCommon(i, i+1, load_style, LineHeight);
-}
-
-
-//
-// Draw border for the savegame description
-//
-void M_DrawSaveLoadBorder(float x, float y, int len)
-{
-	const image_c *L = W_ImageLookup("M_LSLEFT");
-	const image_c *C = W_ImageLookup("M_LSCNTR");
-	const image_c *R = W_ImageLookup("M_LSRGHT");
-
-	if (custom_MenuMain==false)
-	{
-		HUD_StretchImage(x - IM_WIDTH(L), y + (IM_HEIGHT(L)/2),IM_WIDTH(L),IM_HEIGHT(L),L, 0.0, 0.0);
-		for (int i = 0; i < len; i++, x += IM_WIDTH(C))
-			HUD_StretchImage(x, y + (IM_HEIGHT(C)/2),IM_WIDTH(C),IM_HEIGHT(C),C, 0.0, 0.0);
-
-		HUD_StretchImage(x, y + (IM_HEIGHT(R)/2),IM_WIDTH(R),IM_HEIGHT(R),R, 0.0, 0.0);
-	}
-	else
-	{
-		HUD_DrawImage(x - IM_WIDTH(L), y + 7, L);
-		for (int i = 0; i < len; i++, x += IM_WIDTH(C))
-			HUD_DrawImage(x, y + 7, C);
-
-		HUD_DrawImage(x, y + 7, R);
-	}
 }
 
 //
@@ -888,18 +871,16 @@ void M_LoadGame(int choice)
 //
 void M_DrawSave(void)
 {
+	const image_c *L = W_ImageLookup("M_LSLEFT");
+	const image_c *C = W_ImageLookup("M_LSCNTR");
+	const image_c *R = W_ImageLookup("M_LSRGHT");
 	int i, len;
+	int y = LoadDef.y;
 
 	style_c *style = SaveDef.style_var[0];
 
 	SYS_ASSERT(style);
 	style->DrawBackground();
-
-	// Use center box graphic for LineHeight unless the load game font text is actually taller
-	// (this should only happen if the boxes aren't being drawn in theory)
-	float LineHeight = IM_HEIGHT(W_ImageLookup("M_LSCNTR"));
-	if (style->fonts[3]->NominalHeight() > LineHeight) 
-		LineHeight = style->fonts[3]->NominalHeight();
 
 	if (custom_MenuMain==false)
 	{
@@ -910,50 +891,66 @@ void M_DrawSave(void)
 		HUD_DrawImage(72, 8, menu_saveg);
 	}
 
-	float WidestLine = 0.0;
+	// Use center box graphic for LineHeight unless the load game font text is actually taller
+	// (this should only happen if the boxes aren't being drawn in theory)
+	float LineHeight = IM_HEIGHT(C);
+	if (style->fonts[3]->NominalHeight() > LineHeight) 
+		LineHeight = style->fonts[3]->NominalHeight();
+	float WidestLine = IM_WIDTH(C) * 24 + IM_WIDTH(L) + IM_WIDTH(R);
 
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
-		int y = LoadDef.y + LineHeight * i;
+		if (custom_MenuMain==false)
+		{
+			float x = LoadDef.x;
+			HUD_StretchImage(x, y,IM_WIDTH(L),IM_HEIGHT(L),L, 0.0, 0.0);
+			x += IM_WIDTH(L);
+			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
+				HUD_StretchImage(x, y,IM_WIDTH(C),IM_HEIGHT(C),C, 0.0, 0.0);
 
-		M_DrawSaveLoadBorder(LoadDef.x + 8, y, 24);
+			HUD_StretchImage(x, y,IM_WIDTH(R),IM_HEIGHT(R),R, 0.0, 0.0);
+		}
+		else
+		{
+			float x = LoadDef.x; 
+			HUD_DrawImage(x, y, L);
+			x += IM_WIDTH(L);
+			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
+				HUD_DrawImage(x, y, C);
+
+			HUD_DrawImage(x, y, R);
+		}
 
 		if (saveStringEnter && i == save_slot)
 		{
 			len = save_style->fonts[1]->StringWidth(ex_slots[save_slot].desc);
 
-			HL_WriteText(save_style,1, LoadDef.x + 8, y, ex_slots[i].desc);
-			HL_WriteText(save_style,1, LoadDef.x + len + 8, y, "_");
+			HL_WriteText(save_style,1, LoadDef.x + 8, y - (IM_HEIGHT(C) / 2), ex_slots[i].desc);
+			HL_WriteText(save_style,1, LoadDef.x + len + 8, y - (IM_HEIGHT(C) / 2), "_");
 		}
 		else
 		{
-			HL_WriteText(save_style,0, LoadDef.x + 8, y, ex_slots[i].desc);
+			HL_WriteText(save_style,0, LoadDef.x + 8, y - (IM_HEIGHT(C) / 2), ex_slots[i].desc);
 		}
-		if (style->fonts[3]->StringWidth(ex_slots[i].desc) > WidestLine) WidestLine = style->fonts[3]->StringWidth(ex_slots[i].desc);
+		ex_slots[i].y = y;
+		if (style->fonts[3]->StringWidth(ex_slots[i].desc) > WidestLine) 
+			WidestLine = style->fonts[3]->StringWidth(ex_slots[i].desc);
+		y += LineHeight;
 	}
 
 	short old_offset_x = menu_skull[0]->offset_x;
 	short old_offset_y = menu_skull[0]->offset_y;
 	menu_skull[0]->offset_x = 0;
 	menu_skull[0]->offset_y = 0;
-	//need to use the box gfx
-	float TempHeight = IM_HEIGHT(W_ImageLookup("M_LSCNTR"));
-	if (style->fonts[3]->NominalHeight() > TempHeight) 
-		TempHeight = style->fonts[3]->NominalHeight();					
-	//scale it to match lineheight
-	TempHeight = MIN(TempHeight, IM_HEIGHT(menu_skull[0]));
-	if (IM_WIDTH(W_ImageLookup("M_LSCNTR")) * 24 + IM_WIDTH(W_ImageLookup("M_LSLEFT")) + IM_WIDTH(W_ImageLookup("M_LSRGHT")) > WidestLine)
-		WidestLine = IM_WIDTH(W_ImageLookup("M_LSCNTR")) * 24 + IM_WIDTH(W_ImageLookup("M_LSLEFT")) + IM_WIDTH(W_ImageLookup("M_LSRGHT"));
-	else
-		WidestLine += 8;
+	float TempHeight = MIN(LineHeight, IM_HEIGHT(menu_skull[0]));
 	float TempScale = 0;
 	float TempWidth = 0;
 	TempScale = TempHeight / IM_HEIGHT(menu_skull[0]);
 	TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
 	if (style->def->special & SYLSP_CursorRight)
-		HUD_StretchImage(LoadDef.x + WidestLine,LoadDef.y + (LineHeight * itemOn),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x + WidestLine,ex_slots[itemOn].y - C->offset_y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	else
-		HUD_StretchImage(LoadDef.x - TempWidth - 8,LoadDef.y + (LineHeight * itemOn),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x - TempWidth - 8,ex_slots[itemOn].y - C->offset_y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	menu_skull[0]->offset_x = old_offset_x;
 	menu_skull[0]->offset_y = old_offset_y;
 

@@ -1248,6 +1248,29 @@ static void CreateEpisodeMenu(void)
 			EpisodeMenu[e].name =  g->name;
 		}
 
+		if (EpisodeMenu[e].patch_name[0])
+		{
+			if (! EpisodeMenu[e].image)
+				EpisodeMenu[e].image = W_ImageLookup(EpisodeMenu[e].patch_name);
+			const image_c *image = EpisodeMenu[e].image;
+			epi::image_data_c *tmp_img_data = ReadAsEpiBlock((image_c *)image);
+			if (tmp_img_data->bpp == 1)
+			{
+				const byte *what_palette = (const byte *) &playpal_data[0];
+				if (image->source_palette >= 0)
+					what_palette = (const byte *) W_CacheLumpNum(image->source_palette);
+				tmp_img_data = R_PalettisedToRGB(tmp_img_data, what_palette, image->opacity);
+			}
+			EpisodeMenu[e].height = tmp_img_data->TrueHeight() * image->scale_y;
+			EpisodeMenu[e].width =  tmp_img_data->TrueWidth() * image->scale_x;
+			delete tmp_img_data;
+		}
+		else
+		{
+			EpisodeMenu[e].height = episode_style->def->text[styledef_c::T_TEXT].scale * episode_style->fonts[0]->NominalHeight();
+			EpisodeMenu[e].width = episode_style->fonts[styledef_c::T_TEXT]->StringWidth(EpisodeMenu[e].name) * episode_style->def->text[styledef_c::T_TEXT].scale;
+		}
+
 		e++;
 	}
 

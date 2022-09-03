@@ -31,6 +31,7 @@
 #include "i_defs.h"
 
 #include "str_format.h"
+#include "image_data.h"
 
 #include "main.h"
 
@@ -95,6 +96,11 @@ bool M_MatchesKey(int keyvar, int key)
 	       ((keyvar & 0xffff) == key);
 }
 
+extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
+
+extern epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src,
+									 const byte *palette, int opacity);
+
 //
 // defaulted values
 //
@@ -114,6 +120,7 @@ static std::string input_string;
 
 bool menuactive;
 
+//#define SKULLXOFF   -24
 #define LINEHEIGHT   15  //!!!!
 
 // timed message = no input from user
@@ -230,11 +237,13 @@ typedef struct
 	char alpha_key;
 
 	// Printed name test
-	const char *name = "DEFAULT";
+	const char *name = NULL;
 
 	// Useful for drawing skull/cursor and possible other calculations
 	int x;
 	int y;
+	float height = -1;
+	float width = -1;
 }
 menuitem_t;
 
@@ -675,14 +684,13 @@ void M_ReadSaveStrings(void)
 	}
 }
 
-static void M_DrawSaveLoadCommon(int row, int row2, style_c *style)
+static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHeight)
 {
-	int y = LoadDef.y + LINEHEIGHT * row;
+	int y = LoadDef.y + LineHeight * row;
 
 	slot_extra_info_t *info;
 
 	char mbuffer[200];
-
 
 	sprintf(mbuffer, "PAGE %d", save_page + 1);
 
@@ -705,7 +713,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style)
 
 	// show some info about the savegame
 
-	y = LoadDef.y + LINEHEIGHT * (row2 + 1);
+	y = LoadDef.y + LineHeight * (row2 + 1);
 
 	mbuffer[0] = 0;
 
@@ -713,28 +721,28 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style)
 
 	HL_WriteText(style,3, 310 - style->fonts[3]->StringWidth(mbuffer), y, mbuffer);
 
-
-	y -= LINEHEIGHT;
+	y -= LineHeight;
     
 	mbuffer[0] = 0;
 
 	// FIXME: use the patches (but shrink them)
+	// FIXME FIXME: or at least use Language entries for this
 	switch (info->skill)
 	{
-		case 0: strcat(mbuffer, "Too Young To Die"); break;
-		case 1: strcat(mbuffer, "Not Too Rough"); break;
-		case 2: strcat(mbuffer, "Hurt Me Plenty"); break;
-		case 3: strcat(mbuffer, "Ultra Violence"); break;
-		default: strcat(mbuffer, "NIGHTMARE"); break;
+		case 0: strcat(mbuffer, language["MenuDifficulty1"]); break;
+		case 1: strcat(mbuffer, language["MenuDifficulty2"]); break;
+		case 2: strcat(mbuffer, language["MenuDifficulty3"]); break;
+		case 3: strcat(mbuffer, language["MenuDifficulty4"]); break;
+		default: strcat(mbuffer, language["MenuDifficulty5"]); break;
 	}
 
 	HL_WriteText(style,3, 310 - style->fonts[3]->StringWidth(mbuffer), y, mbuffer);
 
-
-	y -= LINEHEIGHT;
+	y -= LineHeight;
   
 	mbuffer[0] = 0;
 
+	// FIXME: use Language entries
 	switch (info->netgame)
 	{
 		case 0: strcat(mbuffer, "SP MODE"); break;
@@ -744,8 +752,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style)
   
 	HL_WriteText(style,3, 310 - style->fonts[3]->StringWidth(mbuffer), y, mbuffer);
 
-
-	y -= LINEHEIGHT;
+	y -= LineHeight;
   
 	mbuffer[0] = 0;
 
@@ -766,26 +773,12 @@ void M_DrawLoad(void)
 	SYS_ASSERT(style);
 
 	style->DrawBackground();
-/*
-	if (style->bg_image)
-	{
-		float old_alpha = HUD_GetAlpha();
-		HUD_SetAlpha(style->def->bg.translucency);
-		if (style->def->special == 0)
-			HUD_StretchImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
-		else
-			HUD_TileImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
-		HUD_SetAlpha(old_alpha); 
-	}
-	else
-	{
-		float old_alpha = HUD_GetAlpha();
-		HUD_SetAlpha(style->def->bg.translucency);
-		HUD_SolidBox(-90, 0, 500, 200, style->def->bg.colour != RGB_NO_VALUE ?
-			style->def->bg.colour : T_BLACK);
-		HUD_SetAlpha(old_alpha);
-	}
-*/
+
+	// Use center box graphic for LineHeight unless the load game font text is actually taller
+	// (this should only happen if the boxes aren't being drawn in theory)
+	float LineHeight = IM_HEIGHT(W_ImageLookup("M_LSCNTR"));
+	if (style->fonts[3]->NominalHeight() > LineHeight) LineHeight = style->fonts[3]->NominalHeight();
+
 	if (custom_MenuMain==false)
 	{
 		HL_WriteText(load_style,styledef_c::T_TEXT, 72, 8, language["MainLoadGame"]);
@@ -797,7 +790,7 @@ void M_DrawLoad(void)
 
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
-		M_DrawSaveLoadBorder(LoadDef.x + 8, LoadDef.y + LINEHEIGHT * (i), 24);
+		M_DrawSaveLoadBorder(LoadDef.x + 8, LoadDef.y + LineHeight * (i), 24);
 	}
 
 	float WidestLine = 0.0;
@@ -805,7 +798,7 @@ void M_DrawLoad(void)
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
 		HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0,
-		             LoadDef.x + 8, LoadDef.y + LINEHEIGHT * (i),
+		             LoadDef.x + 8, LoadDef.y + LineHeight * (i),
 					 ex_slots[i].desc);
 		if (style->fonts[3]->StringWidth(ex_slots[i].desc) > WidestLine) WidestLine = style->fonts[3]->StringWidth(ex_slots[i].desc);
 	}
@@ -819,8 +812,8 @@ void M_DrawLoad(void)
 	if (style->fonts[3]->NominalHeight() > TempHeight) TempHeight = style->fonts[3]->NominalHeight();					
 	//scale it to match lineheight
 	TempHeight = MIN(TempHeight, IM_HEIGHT(menu_skull[0]));
-	if (IM_WIDTH(W_ImageLookup("M_LSCNTR")) * 24 + IM_WIDTH(W_ImageLookup("M_LSLEFT")) + IM_WIDTH(W_ImageLookup("M_LSRIGHT")) > WidestLine)
-		WidestLine = IM_WIDTH(W_ImageLookup("M_LSCNTR")) * 24 + IM_WIDTH(W_ImageLookup("M_LSLEFT")) + IM_WIDTH(W_ImageLookup("M_LSRIGHT"));
+	if (IM_WIDTH(W_ImageLookup("M_LSCNTR")) * 24 + IM_WIDTH(W_ImageLookup("M_LSLEFT")) + IM_WIDTH(W_ImageLookup("M_LSRGHT")) > WidestLine)
+		WidestLine = IM_WIDTH(W_ImageLookup("M_LSCNTR")) * 24 + IM_WIDTH(W_ImageLookup("M_LSLEFT")) + IM_WIDTH(W_ImageLookup("M_LSRGHT"));
 	else
 		WidestLine += 8;
 	float TempScale = 0;
@@ -828,13 +821,13 @@ void M_DrawLoad(void)
 	TempScale = TempHeight / IM_HEIGHT(menu_skull[0]);
 	TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
 	if (style->def->special & SYLSP_CursorRight)
-		HUD_StretchImage(LoadDef.x + WidestLine,LoadDef.y + (LINEHEIGHT * itemOn) - (TempHeight/4),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x + WidestLine,LoadDef.y + (LineHeight * itemOn) - (TempHeight/4),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	else
-		HUD_StretchImage(LoadDef.x - TempWidth - 8,LoadDef.y + (LINEHEIGHT * itemOn) - (TempHeight/4),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x - TempWidth - 8,LoadDef.y + (LineHeight * itemOn) - (TempHeight/4),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	menu_skull[0]->offset_x = old_offset_x;
 	menu_skull[0]->offset_y = old_offset_y;
 
-	M_DrawSaveLoadCommon(i, i+1, load_style);
+	M_DrawSaveLoadCommon(i, i+1, load_style, LineHeight);
 }
 
 
@@ -909,26 +902,11 @@ void M_DrawSave(void)
 	SYS_ASSERT(style);
 	style->DrawBackground();
 
-/*	
-	if (style->bg_image)
-	{
-		float old_alpha = HUD_GetAlpha();
-		HUD_SetAlpha(style->def->bg.translucency);
-		if (style->def->special == 0)
-			HUD_StretchImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
-		else
-			HUD_TileImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
-		HUD_SetAlpha(old_alpha); 
-	}
-	else
-	{
-		float old_alpha = HUD_GetAlpha();
-		HUD_SetAlpha(style->def->bg.translucency);
-		HUD_SolidBox(-90, 0, 500, 200, style->def->bg.colour != RGB_NO_VALUE ?
-			style->def->bg.colour : T_BLACK);
-		HUD_SetAlpha(old_alpha);
-	}
-*/
+	// Use center box graphic for LineHeight unless the load game font text is actually taller
+	// (this should only happen if the boxes aren't being drawn in theory)
+	float LineHeight = IM_HEIGHT(W_ImageLookup("M_LSCNTR"));
+	if (style->fonts[3]->NominalHeight() > LineHeight) LineHeight = style->fonts[3]->NominalHeight();
+
 	if (custom_MenuMain==false)
 	{
 		HL_WriteText(load_style,styledef_c::T_TEXT, 72, 8, language["MainSaveGame"]);
@@ -942,7 +920,7 @@ void M_DrawSave(void)
 
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
-		int y = LoadDef.y + LINEHEIGHT * i;
+		int y = LoadDef.y + LineHeight * i;
 
 		M_DrawSaveLoadBorder(LoadDef.x + 8, y, 24);
 
@@ -969,8 +947,8 @@ void M_DrawSave(void)
 	if (style->fonts[3]->NominalHeight() > TempHeight) TempHeight = style->fonts[3]->NominalHeight();					
 	//scale it to match lineheight
 	TempHeight = MIN(TempHeight, IM_HEIGHT(menu_skull[0]));
-	if (IM_WIDTH(W_ImageLookup("M_LSCNTR")) * 24 + IM_WIDTH(W_ImageLookup("M_LSLEFT")) + IM_WIDTH(W_ImageLookup("M_LSRIGHT")) > WidestLine)
-		WidestLine = IM_WIDTH(W_ImageLookup("M_LSCNTR")) * 24 + IM_WIDTH(W_ImageLookup("M_LSLEFT")) + IM_WIDTH(W_ImageLookup("M_LSRIGHT"));
+	if (IM_WIDTH(W_ImageLookup("M_LSCNTR")) * 24 + IM_WIDTH(W_ImageLookup("M_LSLEFT")) + IM_WIDTH(W_ImageLookup("M_LSRGHT")) > WidestLine)
+		WidestLine = IM_WIDTH(W_ImageLookup("M_LSCNTR")) * 24 + IM_WIDTH(W_ImageLookup("M_LSLEFT")) + IM_WIDTH(W_ImageLookup("M_LSRGHT"));
 	else
 		WidestLine += 8;
 	float TempScale = 0;
@@ -978,13 +956,13 @@ void M_DrawSave(void)
 	TempScale = TempHeight / IM_HEIGHT(menu_skull[0]);
 	TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
 	if (style->def->special & SYLSP_CursorRight)
-		HUD_StretchImage(LoadDef.x + WidestLine,LoadDef.y + (LINEHEIGHT * itemOn) - (TempHeight/4),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x + WidestLine,LoadDef.y + (LineHeight * itemOn) - (TempHeight/4),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	else
-		HUD_StretchImage(LoadDef.x - TempWidth - 8,LoadDef.y + (LINEHEIGHT * itemOn) - (TempHeight/4),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x - TempWidth - 8,LoadDef.y + (LineHeight * itemOn) - (TempHeight/4),TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	menu_skull[0]->offset_x = old_offset_x;
 	menu_skull[0]->offset_y = old_offset_y;
 
-	M_DrawSaveLoadCommon(i, i+1, save_style);
+	M_DrawSaveLoadCommon(i, i+1, save_style, LineHeight);
 }
 
 //
@@ -2415,26 +2393,7 @@ void M_Drawer(void)
 	SYS_ASSERT(style);
 
 	style->DrawBackground();
-/*
-	if (style->bg_image)
-	{
-		float old_alpha = HUD_GetAlpha();
-		HUD_SetAlpha(style->def->bg.translucency);
-		if (style->def->special == 0)
-			HUD_StretchImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
-		else
-			HUD_TileImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
-		HUD_SetAlpha(old_alpha);
-	}
-	else
-	{
-		float old_alpha = HUD_GetAlpha();
-		HUD_SetAlpha(style->def->bg.translucency);
-		HUD_SolidBox(-90, 0, 500, 200, style->def->bg.colour != RGB_NO_VALUE ?
-			style->def->bg.colour : T_BLACK);
-		HUD_SetAlpha(old_alpha);
-	}
-*/
+
 	// call Draw routine
 	if (currentMenu->draw_func)
 		(* currentMenu->draw_func)();
@@ -2455,65 +2414,87 @@ void M_Drawer(void)
 		txtscale=style->def->text[styledef_c::T_TEXT].scale;
 	}
 	
-	float templineheight = (txtscale * style->fonts[0]->NominalHeight());
-
 	if (custom_menu==false)
-		ShortestLine = templineheight;
-	else
 	{
-		templineheight = LINEHEIGHT;
-		ShortestLine = IM_HEIGHT(menu_skull[0]); // Only scale down from provided skull height if necessary
-	}
-	
-	for (i = 0; i < max; i++, y += templineheight) //LINEHEIGHT)
-	{
-		// ignore blank lines
-		if (! currentMenu->menuitems[i].patch_name[0])
-			continue;
-
-		if (! currentMenu->menuitems[i].image)
-			currentMenu->menuitems[i].image = W_ImageLookup(
-				currentMenu->menuitems[i].patch_name);
-
-		if (custom_menu==false)
+		ShortestLine = txtscale * style->fonts[0]->NominalHeight();
+		for (i = 0; i < max; i++)
 		{
-			currentMenu->menuitems[i].x = x + style->def->text[styledef_c::T_TEXT].x_offset;
-			currentMenu->menuitems[i].y = y + style->def->text[styledef_c::T_TEXT].y_offset;
-			float cur_width = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[i].name);
-			if (style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[i].name) * txtscale > WidestLine) WidestLine = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[i].name) * txtscale;
+			currentMenu->menuitems[i].height = ShortestLine;
+			currentMenu->menuitems[i].x = x + style->def->x_offset;
+			currentMenu->menuitems[i].y = y + style->def->y_offset;
+			if (currentMenu->menuitems[i].width < 0)
+				currentMenu->menuitems[i].width = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[i].name) * txtscale;
+			if (currentMenu->menuitems[i].width > WidestLine) 
+				WidestLine = currentMenu->menuitems[i].width;
 			HL_WriteText(style,t_type, currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
-		} 
-		else
-		{	
-			const image_c *image = currentMenu->menuitems[i].image;
-			currentMenu->menuitems[i].x = x - image->offset_x;
-			currentMenu->menuitems[i].y = y - image->offset_y + (IM_HEIGHT(image) / 4); // Could still be better, but will ballpark it - Dasho
-			HUD_DrawImage(x, y, image);
-			if (IM_HEIGHT(image) < ShortestLine) ShortestLine = IM_HEIGHT(image); //to scale the skull cursor later
-			if (IM_WIDTH(image) > WidestLine) WidestLine = IM_WIDTH(image);
+			y += currentMenu->menuitems[i].height + 1;
+		}
+		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
+		{
+			short old_offset_x = menu_skull[0]->offset_x;
+			short old_offset_y = menu_skull[0]->offset_y;
+			menu_skull[0]->offset_x = 0;
+			menu_skull[0]->offset_y = 0;
+			float TempScale = 0;
+			float TempWidth = 0;
+			TempScale = ShortestLine / IM_HEIGHT(menu_skull[0]);
+			TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
+			float SkullY = currentMenu->menuitems[itemOn].y + (currentMenu->menuitems[itemOn].height / 2) - (ShortestLine / 2);
+			if (style->def->special & SYLSP_CursorRight)
+				HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + 2,SkullY,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
+			else
+				HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - 2,SkullY,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
+			menu_skull[0]->offset_x = old_offset_x;
+			menu_skull[0]->offset_y = old_offset_y;
 		}
 	}
-
-	if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
-	{
-		short old_offset_x = menu_skull[0]->offset_x;
-		short old_offset_y = menu_skull[0]->offset_y;
-		menu_skull[0]->offset_x = 0;
-		menu_skull[0]->offset_y = 0;
-				
-		//LastLineHeight += (1 * txtscale); //space between items?
-			
-		//scale it to match lineheight
-		float TempScale = 0;
-		float TempWidth = 0;
-		TempScale = ShortestLine / IM_HEIGHT(menu_skull[0]);
-		TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
-		if (style->def->special & SYLSP_CursorRight)
-			HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + 5,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
-		else
-			HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - 5,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
-		menu_skull[0]->offset_x = old_offset_x;
-		menu_skull[0]->offset_y = old_offset_y;
+	else
+	{	
+		ShortestLine = IM_HEIGHT(menu_skull[0]); // Only scale down from provided skull height if necessary
+		for (i = 0; i < max; i++)
+		{
+			if (! currentMenu->menuitems[i].patch_name[0])
+				continue;
+			if (! currentMenu->menuitems[i].image)
+				currentMenu->menuitems[i].image = W_ImageLookup(currentMenu->menuitems[i].patch_name);
+			const image_c *image = currentMenu->menuitems[i].image;
+			if (currentMenu->menuitems[i].height < 0)
+			{
+				const byte *what_palette = (const byte *) &playpal_data[0];
+				if (image->source_palette >= 0)
+					what_palette = (const byte *) W_CacheLumpNum(image->source_palette);
+				epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)image), what_palette, image->opacity);
+				currentMenu->menuitems[i].height = tmp_img_data->TrueHeight() * image->scale_y;
+				if (currentMenu->menuitems[i].width < 0)
+					currentMenu->menuitems[i].width =  tmp_img_data->TrueWidth() * image->scale_x;
+				delete tmp_img_data;
+			}
+			if (currentMenu->menuitems[i].height < ShortestLine) ShortestLine = currentMenu->menuitems[i].height;
+			if (currentMenu->menuitems[i].width > WidestLine) WidestLine = currentMenu->menuitems[i].width;
+			currentMenu->menuitems[i].x = x - image->offset_x - style->def->x_offset;
+			currentMenu->menuitems[i].y = y - image->offset_y - style->def->y_offset; // Could still be better, but will ballpark it - Dasho
+			HUD_DrawImage(currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, image);
+			y += currentMenu->menuitems[i].height + 1;
+		}
+		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
+		{
+			short old_offset_x = menu_skull[0]->offset_x;
+			short old_offset_y = menu_skull[0]->offset_y;
+			menu_skull[0]->offset_x = 0;
+			menu_skull[0]->offset_y = 0;
+			float TempScale = 0;
+			float TempWidth = 0;
+			TempScale = ShortestLine / IM_HEIGHT(menu_skull[0]);
+			TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
+			float SkullY = currentMenu->menuitems[itemOn].y + (currentMenu->menuitems[itemOn].height / 2) - (ShortestLine / 2);
+			if (style->def->special & SYLSP_CursorRight)
+				HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + 2,SkullY,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
+			else
+				HUD_StretchImage(currentMenu->menuitems[itemOn].x + MAX(0, ((IM_WIDTH(currentMenu->menuitems[itemOn].image) - WidestLine) / 2)) - TempWidth - 2,
+					SkullY,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
+			menu_skull[0]->offset_x = old_offset_x;
+			menu_skull[0]->offset_y = old_offset_y;
+		}
 	}
 }
 

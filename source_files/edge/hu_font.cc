@@ -342,6 +342,8 @@ float font_c::StringWidth(const char *str) const
 {
 	float w = 0;
 
+	if (!str) return 0;
+
 	while (*str)
 		w += CharWidth(*str++);
 

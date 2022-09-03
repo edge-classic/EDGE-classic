@@ -901,6 +901,9 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 	}
 
 	// handle each line
+
+	if (!str) return;
+
 	while (*str)
 	{
 		// get the length of the line

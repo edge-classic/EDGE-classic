@@ -66,10 +66,6 @@ public:
 
 	float scale;
 	float aspect;
-
-	int x_offset;
-	int y_offset;
-	// FIXME: horizontal and vertical alignment
 };
 
 class soundstyle_c
@@ -132,6 +128,9 @@ public:
 	soundstyle_c sounds;
 
 	style_special_e special;
+
+	int x_offset;
+	int y_offset;
 
 private:
 	// disable copy construct and assignment operator

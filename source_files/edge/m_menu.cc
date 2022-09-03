@@ -778,6 +778,7 @@ void M_DrawLoad(void)
 	// (this should only happen if the boxes aren't being drawn in theory)
 	float LineHeight = IM_HEIGHT(W_ImageLookup("M_LSCNTR"));
 	if (style->fonts[3]->NominalHeight() > LineHeight) LineHeight = style->fonts[3]->NominalHeight();
+	LineHeight = MAX(LineHeight, LINEHEIGHT);
 
 	if (custom_MenuMain==false)
 	{
@@ -906,6 +907,7 @@ void M_DrawSave(void)
 	// (this should only happen if the boxes aren't being drawn in theory)
 	float LineHeight = IM_HEIGHT(W_ImageLookup("M_LSCNTR"));
 	if (style->fonts[3]->NominalHeight() > LineHeight) LineHeight = style->fonts[3]->NominalHeight();
+	LineHeight = MAX(LineHeight, LINEHEIGHT);
 
 	if (custom_MenuMain==false)
 	{
@@ -2460,10 +2462,14 @@ void M_Drawer(void)
 			const image_c *image = currentMenu->menuitems[i].image;
 			if (currentMenu->menuitems[i].height < 0)
 			{
-				const byte *what_palette = (const byte *) &playpal_data[0];
-				if (image->source_palette >= 0)
-					what_palette = (const byte *) W_CacheLumpNum(image->source_palette);
-				epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)image), what_palette, image->opacity);
+				epi::image_data_c *tmp_img_data = ReadAsEpiBlock((image_c *)image);
+				if (tmp_img_data->bpp == 1)
+				{
+					const byte *what_palette = (const byte *) &playpal_data[0];
+					if (image->source_palette >= 0)
+						what_palette = (const byte *) W_CacheLumpNum(image->source_palette);
+					tmp_img_data = R_PalettisedToRGB(tmp_img_data, what_palette, image->opacity);
+				}
 				currentMenu->menuitems[i].height = tmp_img_data->TrueHeight() * image->scale_y;
 				if (currentMenu->menuitems[i].width < 0)
 					currentMenu->menuitems[i].width =  tmp_img_data->TrueWidth() * image->scale_x;
@@ -2471,8 +2477,8 @@ void M_Drawer(void)
 			}
 			if (currentMenu->menuitems[i].height < ShortestLine) ShortestLine = currentMenu->menuitems[i].height;
 			if (currentMenu->menuitems[i].width > WidestLine) WidestLine = currentMenu->menuitems[i].width;
-			currentMenu->menuitems[i].x = x - image->offset_x - style->def->x_offset;
-			currentMenu->menuitems[i].y = y - image->offset_y - style->def->y_offset; // Could still be better, but will ballpark it - Dasho
+			currentMenu->menuitems[i].x = x + image->offset_x + style->def->x_offset;
+			currentMenu->menuitems[i].y = y - image->offset_y - style->def->y_offset;
 			HUD_DrawImage(currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, image);
 			y += currentMenu->menuitems[i].height + 1;
 		}

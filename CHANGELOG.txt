@@ -12,7 +12,8 @@ Bugs fixed
 + Text based menus for <Episode select> and <Difficulty select> were not working if the Main menu was using custom graphics
 + Fixed null string CTD in HUD_DrawText and font_c::StringWidth
 + Fixed issue with FS_ReadDir returning relative paths
-
++ Restored "Hudless" option in COALHUDS HUD cycling
+s
 General Improvements
 --------------------
 + Improved STYLES.DDF functionality across console and menus; backgrounds images/colors and translucency are no longer hardcoded

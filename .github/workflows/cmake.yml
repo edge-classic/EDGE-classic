@@ -46,7 +46,7 @@ jobs:
           ${{github.workspace}}/edge_fixes
           ${{github.workspace}}/soundfont
           ${{github.workspace}}/edge-classic
-          ${{github.workspace}}/edge_defs.wad
+          ${{github.workspace}}/edge-defs.wad
         retention-days: 2
   build-msys:
     runs-on: windows-latest
@@ -82,7 +82,7 @@ jobs:
             edge_fixes
             soundfont
             edge-classic.exe
-            edge_defs.wad
+            edge-defs.wad
             *.dll
           retention-days: 2
   build-msvc:
@@ -104,6 +104,6 @@ jobs:
             ${{github.workspace}}/edge_fixes
             ${{github.workspace}}/soundfont
             ${{github.workspace}}/edge-classic.exe
-            ${{github.workspace}}/edge_defs.wad
+            ${{github.workspace}}/edge-defs.wad
             ${{github.workspace}}/SDL2.dll
           retention-days: 2

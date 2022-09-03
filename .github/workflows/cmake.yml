@@ -35,16 +35,16 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - uses: actions/upload-artifact@v3
-        with:
-          name: edge-classic
-          path: |
-            ${{github.workspace}}/autoload
-            ${{github.workspace}}/edge_base
-            ${{github.workspace}}/edge_fixes
-            ${{github.workspace}}/soundfont
-            ${{github.workspace}}/build/${{env.BUILD_TYPE}}/edge_classic
-            ${{github.workspace}}/edge_defs.wad
-          retention-days: 2
+      with:
+        name: edge-classic
+        path: |
+          ${{github.workspace}}/autoload
+          ${{github.workspace}}/edge_base
+          ${{github.workspace}}/edge_fixes
+          ${{github.workspace}}/soundfont
+          ${{github.workspace}}/build/${{env.BUILD_TYPE}}/edge_classic
+          ${{github.workspace}}/edge_defs.wad
+        retention-days: 2
   build-msys:
     runs-on: windows-latest
     defaults:

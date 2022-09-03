@@ -20,6 +20,7 @@
 
 #include "filesystem.h"
 #include "math_crc.h"
+#include "path.h"
 
 #include "language.h"
 #include "sfx.h"
@@ -126,8 +127,6 @@ int CMD_Dir(char **argv, int argc)
 	if (argc >= 3)
 		mask = argv[2];
 
-	I_Printf("Directory contents matching %s\n", mask);
-
 	epi::filesystem_dir_c fsd;
 
 	if (! FS_ReadDir(&fsd, path, mask))
@@ -136,6 +135,14 @@ int CMD_Dir(char **argv, int argc)
 		return 1;
 	}
 
+	if (fsd.GetSize() == 0)
+	{
+		I_Printf("No files found in provided path %s\n", path);
+		return 0;
+	}
+
+	I_Printf("Directory contents for %s matching %s\n", epi::PATH_GetDir(fsd[0]->name.c_str()).c_str(), mask);
+
 	for (int i = 0; i < fsd.GetSize(); i++)
 	{
 		epi::filesys_direntry_c *entry = fsd[i];
@@ -143,7 +150,7 @@ int CMD_Dir(char **argv, int argc)
 		I_Printf("  %2d: %10d     %s     '%s'\n",
 				 i+1, entry->size,
 				 entry->is_dir ? "DIR" : "   ",
-				 entry->name.c_str());
+				 epi::PATH_GetFilename(entry->name.c_str()).c_str());
 	}
 
 	return 0;

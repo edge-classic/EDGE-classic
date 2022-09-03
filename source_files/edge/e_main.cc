@@ -903,7 +903,7 @@ static void IdentifyVersion(void)
         s = getenv("DOOMWADDIR");
 
         if (s && epi::FS_IsDir(s))
-            iwad_dir = std::string(s);
+            iwad_dir_vector.push_back(std::string(s));
     }
 
     // Should the IWAD directory not be set by now, then we

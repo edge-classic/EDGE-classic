@@ -150,7 +150,7 @@ bool FS_ReadDir(filesystem_dir_c *fsd, const char *dir, const char *mask)
 
 		filesys_direntry_c *entry = new filesys_direntry_c();
 
-		entry->name = dir_entry.path().filename().string();
+		entry->name = dir_entry.path().generic_string();
 		entry->is_dir = dir_entry.is_directory();
 		entry->size = entry->is_dir ? 0 : dir_entry.file_size();
 

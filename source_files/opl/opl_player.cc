@@ -255,7 +255,6 @@ static const unsigned int volume_mapping_table[] = {
 
 static bool music_initialized = false;
 
-//static boolean musicpaused = false;
 static int start_music_volume;
 static int current_music_volume;
 
@@ -279,10 +278,11 @@ static opl_channel_data_t channels[MIDI_CHANNELS_PER_TRACK];
 
 // Track data for playing tracks:
 
+static midi_file_t *the_song;
+static uint64_t  absolute_time;
+
 static opl_track_data_t *tracks;
 static unsigned int num_tracks = 0;
-static unsigned int running_tracks = 0;
-static bool song_looping;
 
 // Tempo control variables
 
@@ -1339,7 +1339,6 @@ static void ProcessEvent(opl_track_data_t *track, midi_event_t *event)
 }
 
 static void ScheduleTrack(opl_track_data_t *track);
-static void InitChannel(opl_channel_data_t *channel);
 
 // Restart a song from the beginning.
 
@@ -1368,6 +1367,7 @@ static void RestartSong(void *unused)
 
 static void TrackTimerCallback(void *arg)
 {
+/*
     opl_track_data_t *track = arg;
     midi_event_t *event;
 
@@ -1405,6 +1405,7 @@ static void TrackTimerCallback(void *arg)
     // Reschedule the callback for the next event in the track.
 
     ScheduleTrack(track);
+*/
 }
 
 static void ScheduleTrack(opl_track_data_t *track)
@@ -1423,218 +1424,33 @@ static void ScheduleTrack(opl_track_data_t *track)
     OPL_SDL_SetCallback(us, TrackTimerCallback, track);
 }
 
+#endif
+
 // Initialize a channel.
 
-static void InitChannel(opl_channel_data_t *channel)
+static void InitChannels(void)
 {
-    // TODO: Work out sensible defaults?
-
-    channel->instrument = GM_GetInstrument(0);
-    channel->volume = current_music_volume;
-    channel->volume_base = 100;
-    if (channel->volume > channel->volume_base)
-    {
-        channel->volume = channel->volume_base;
-    }
-    channel->pan = 0x30;
-    channel->bend = 0;
-}
-
-// Start a MIDI track playing:
-
-static void StartTrack(midi_file_t *file, unsigned int track_num)
-{
-    opl_track_data_t *track;
-
-    track = &tracks[track_num];
-    track->iter = MIDI_IterateTrack(file, track_num);
-
-    // Schedule the first event.
-
-    ScheduleTrack(track);
-}
-
-// Start playing a mid
-
-static void I_OPL_PlaySong(void *handle, boolean looping)
-{
-    midi_file_t *file;
-    unsigned int i;
-
-    if (!music_initialized || handle == NULL)
-    {
-        return;
-    }
-
-    file = handle;
-
-    // Allocate track data.
-
-    tracks = malloc(MIDI_NumTracks(file) * sizeof(opl_track_data_t));
-
-    num_tracks = MIDI_NumTracks(file);
-    running_tracks = num_tracks;
-    song_looping = looping;
-
-    ticks_per_beat = MIDI_GetFileTimeDivision(file);
-
-    // Default is 120 bpm.
-    // TODO: this is wrong
-
-    us_per_beat = 500 * 1000;
-
-    start_music_volume = current_music_volume;
-
-    for (i = 0; i < num_tracks; ++i)
-    {
-        StartTrack(file, i);
-    }
-
-    for (i = 0; i < MIDI_CHANNELS_PER_TRACK; ++i)
-    {
-        InitChannel(&channels[i]);
-    }
-}
-
-static void I_OPL_PauseSong(void)
-{
-    unsigned int i;
-
-    if (!music_initialized)
-    {
-        return;
-    }
-
-    // Pause OPL callbacks.
-
-    OPL_SDL_SetPaused(1);
-
-    // Turn off all main instrument voices (not percussion).
-    // This is what Vanilla does.
-
-    for (i = 0; i < num_opl_voices; ++i)
-    {
-        if (voices[i].channel != NULL)
-         /* FIXME??  && voices[i].current_instr < percussion_instrs) */
-        {
-            VoiceKeyOff(&voices[i]);
-        }
-    }
-}
-
-static void I_OPL_ResumeSong(void)
-{
-    if (!music_initialized)
-    {
-        return;
-    }
-
-    OPL_SDL_SetPaused(0);
-}
-
-static void I_OPL_StopSong(void)
-{
-    unsigned int i;
-
-    if (!music_initialized)
-    {
-        return;
-    }
-
-    OPL_SDL_Lock();
-
-    // Stop all playback.
-
-    OPL_SDL_ClearCallbacks();
-
-    // Free all voices.
-
-    for (i = 0; i < MIDI_CHANNELS_PER_TRACK; ++i)
-    {
-        AllNotesOff(&channels[i], 0);
-    }
-
-    // Free all track data.
-
-    for (i = 0; i < num_tracks; ++i)
-    {
-        MIDI_FreeIterator(tracks[i].iter);
-    }
-
-    free(tracks);
-
-    tracks = NULL;
-    num_tracks = 0;
-
-    OPL_SDL_Unlock();
-}
-
-static void I_OPL_UnRegisterSong(void *handle)
-{
-    if (!music_initialized)
-    {
-        return;
-    }
-
-    if (handle != NULL)
-    {
-        MIDI_FreeFile(handle);
-    }
-}
-
-static void *I_OPL_RegisterSong(void *data, int len)
-{
-	midi_file_t *result;
-
-	if (!music_initialized)
+	int i;
+	for (i = 0; i < MIDI_CHANNELS_PER_TRACK; i++)
 	{
-		return NULL;
-	}
+		opl_channel_data_t *chan = &channels[i];
 
-	// MUS files begin with "MUS"
-	// Reject anything which doesnt have this signature
-	MEMFILE *midi_stream = NULL;
+		// TODO: Work out sensible defaults?
 
-	if (IsMid(data, len))
-	{
-		midi_stream = mem_fopen_read(data, len);
-	}
-	else
-	{
-		// Assume a MUS file and try to convert
-
-		MEMFILE *instream  = mem_fopen_read(data, len);
-		MEMFILE *outstream = mem_fopen_write();
-
-		int result = mus2mid(instream, outstream);
-
-		if (result != 0)
+		chan->instrument = GM_GetInstrument(0);
+		chan->volume = current_music_volume;
+		chan->volume_base = 100;
+		if (chan->volume > chan->volume_base)
 		{
-			mem_fclose(instream);
-			mem_fclose(outstream);
-
-			fprintf(stderr, "I_OPL_RegisterSong: Failed to load MUS.\n");
-			return NULL;
+			chan->volume = chan->volume_base;
 		}
-
-		mem_fclose(instream);
-
-		// do the ol' switcheroo trick
-		midi_stream = outstream;
-		mem_freopen_read(midi_stream);
+		chan->pan = 0x30;
+		chan->bend = 0;
 	}
-
-	result = MIDI_LoadFile(midi_stream);
-
-	if (result == NULL)
-	{
-		fprintf(stderr, "I_OPL_RegisterSong: Failed to load MIDI.\n");
-	}
-	return result;
 }
 
 // Is the song playing?
-
+/*
 static boolean I_OPL_MusicIsPlaying(void)
 {
     if (!music_initialized)
@@ -1644,60 +1460,13 @@ static boolean I_OPL_MusicIsPlaying(void)
 
     return num_tracks > 0;
 }
+*/
 
-// Shutdown music
-
-static void I_OPL_ShutdownMusic(void)
+static void ParseDMXOptions(void)
 {
-    if (music_initialized)
-    {
-        // Stop currently-playing track, if there is one:
+	// TODO
+	/// dmxoption = getenv("DMXOPTION");
 
-        I_OPL_StopSong();
-
-        OPL_SDL_Shutdown();
-
-        music_initialized = false;
-    }
-}
-
-// Initialize music subsystem
-
-static boolean I_OPL_InitMusic(void)
-{
-    char *dmxoption;
-    opl_init_result_t chip_type;
-
-    opl_sample_rate = snd_samplerate;
-
-    chip_type = OPL_Init(opl_io_port);
-    if (chip_type == OPL_INIT_NONE)
-    {
-        printf("Dude.  The Adlib isn't responding.\n");
-        return false;
-    }
-
-    // The DMXOPTION variable must be set to enable OPL3 support.
-    // As an extension, we also allow it to be set from the config file.
-    dmxoption = getenv("DMXOPTION");
-    if (dmxoption == NULL)
-    {
-        dmxoption = snd_dmxoption != NULL ? snd_dmxoption : "";
-    }
-
-
-    // Secret, undocumented DMXOPTION that reverses the stereo channels
-    // into their correct orientation.
-    opl_stereo_correct = strstr(dmxoption, "-reverse") != NULL;
-
-
-    return true;
-}
-
-#endif
-
-static void ParseDMXOptions(const char *s)
-{
 	if (false)  // TODO -opl3
 	{
 		opl3mode = true;
@@ -1715,17 +1484,49 @@ static void ParseDMXOptions(const char *s)
 	}
 }
 
-//----------------------------------------------------------------------
+static bool AllocateTracks(void)
+{
+	num_tracks = MIDI_NumTracks(the_song);
 
-// Public API....
+	tracks = (opl_track_data_t *) malloc(num_tracks * sizeof(opl_track_data_t));
+	if (tracks == NULL)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+static void FreeTracks(void)
+{
+	free(tracks);
+	tracks = NULL;
+	num_tracks = 0;
+}
+
+static void RewindSong(void)
+{
+	unsigned int i;
+	for (i = 0 ; i < num_tracks ; i++)
+	{
+		tracks[i].iter = MIDI_IterateTrack(the_song, i);
+		tracks[i].time = 0;
+	}
+	absolute_time = 0;
+}
+
+//----------------------------------------------------------------------
+//
+// The Public API
+//
+//----------------------------------------------------------------------
 
 bool OPLAY_Init(int freq, bool stereo)
 {
 	if (freq < 8000)
 		return false;
 
-	// TODO grab DMXOPTIONS env var
-	ParseDMXOptions("");
+	ParseDMXOptions();
 
 	OPL3_Reset(&opl_chip, freq);
 
@@ -1740,23 +1541,81 @@ bool OPLAY_Init(int freq, bool stereo)
 	return true;
 }
 
-void OPLAY_StartSong(midi_file_t *song)
+bool OPLAY_StartSong(midi_file_t *song)
 {
-	// TODO
+	if (! music_initialized)
+	{
+		return false;
+	}
+
+	// if we are already playing this song, just jump back to the start
+	if (song == the_song)
+	{
+		RewindSong();
+		InitChannels();
+		return true;
+	}
+
+	if (tracks != NULL)
+	{
+		FreeTracks();
+	}
+
+	the_song = song;
+
+	if (! AllocateTracks())
+	{
+		the_song = NULL;
+		return false;
+	}
+
+	ticks_per_beat = MIDI_GetFileTimeDivision(song);
+
+	// Default is 120 bpm.
+	// TODO: this is wrong
+	us_per_beat = 500 * 1000;
+
+	start_music_volume = current_music_volume;
+
+	RewindSong();
+	InitChannels();
+
+	return true;
 }
 
 void OPLAY_FinishSong(void)
 {
-	// TODO
+	if (! music_initialized || the_song == NULL)
+	{
+		return;
+	}
+
+	FreeTracks();
+
+	the_song = NULL;
 }
 
 void OPLAY_NotesOff(void)
 {
-	// TODO
+	if (! music_initialized)
+	{
+		return;
+	}
+
+	int i;
+	for (i = 0; i < MIDI_CHANNELS_PER_TRACK; i++)
+	{
+//FIXME		AllNotesOff(&channels[i], 0);
+	}
 }
 
-int  OPLAY_Stream(int16_t *buf, int samples, bool stereo)
+int OPLAY_Stream(int16_t *buf, int samples, bool stereo)
 {
+	if (! music_initialized)
+	{
+		return 0;
+	}
+
 	// TODO
 	return 0;
 }

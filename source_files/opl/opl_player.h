@@ -23,7 +23,7 @@
 
 bool OPLAY_Init(int freq, bool stereo);
 
-void OPLAY_StartSong(midi_file_t *song);
+bool OPLAY_StartSong(midi_file_t *song);
 void OPLAY_FinishSong(void);
 
 void OPLAY_NotesOff(void);

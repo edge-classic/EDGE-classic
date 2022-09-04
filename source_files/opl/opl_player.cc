@@ -21,6 +21,7 @@
 #include "genmidi.h"
 #include "midifile.h"
 #include "opl_player.h"
+#include "opl3.h"
 
 // #define OPL_MIDI_DEBUG
 
@@ -258,6 +259,11 @@ static bool music_initialized = false;
 static int start_music_volume;
 static int current_music_volume;
 
+// OPL emulator info:
+
+static opl3_chip opl_chip;
+static bool opl3mode;
+
 // Voices:
 
 static opl_voice_t voices[OPL_NUM_VOICES * 2];
@@ -265,7 +271,6 @@ static opl_voice_t *voice_free_list[OPL_NUM_VOICES * 2];
 static opl_voice_t *voice_alloced_list[OPL_NUM_VOICES * 2];
 static int voice_free_num;
 static int voice_alloced_num;
-static int opl_opl3mode;
 static int num_opl_voices;
 
 // Data for each channel.
@@ -286,17 +291,180 @@ static unsigned int us_per_beat;
 
 static int opl_io_port = 0x388;
 
-// If true, OPL sound channels are reversed to their correct arrangement
-// (as intended by the MIDI standard) rather than the backwards one
-// used by DMX due to a bug.
-
-static bool opl_stereo_correct = false;
+static bool swap_stereo = false;
 
 #define LE_SHORT(x)  (x)
 
-// Get the next available voice from the freelist.
+//----------------------------------------------------------------------
+
+typedef enum
+{
+    OPL_REGISTER_PORT = 0,
+    OPL_DATA_PORT = 1,
+    OPL_REGISTER_PORT_OPL3 = 2
+} opl_port_t;
+
+#define OPL_NUM_OPERATORS   21
+#define OPL_NUM_VOICES      9
+
+#define OPL_REG_WAVEFORM_ENABLE   0x01
+#define OPL_REG_TIMER1            0x02
+#define OPL_REG_TIMER2            0x03
+#define OPL_REG_TIMER_CTRL        0x04
+#define OPL_REG_FM_MODE           0x08
+#define OPL_REG_NEW               0x105
+
+// Operator registers (21 of each):
+
+#define OPL_REGS_TREMOLO          0x20
+#define OPL_REGS_LEVEL            0x40
+#define OPL_REGS_ATTACK           0x60
+#define OPL_REGS_SUSTAIN          0x80
+#define OPL_REGS_WAVEFORM         0xE0
+
+// Voice registers (9 of each):
+
+#define OPL_REGS_FREQ_1           0xA0
+#define OPL_REGS_FREQ_2           0xB0
+#define OPL_REGS_FEEDBACK         0xC0
+
+// Register number that was written last.
+
+static int register_num = 0;
+
+static void RawWriteRegister(unsigned int reg_num, unsigned int value)
+{
+    switch (reg_num)
+    {
+        case OPL_REG_TIMER1:
+        case OPL_REG_TIMER2:
+        case OPL_REG_TIMER_CTRL:
+			// andrewj: removed support for these
+            break;
+
+        case OPL_REG_NEW:
+            opl3mode = (value & 0x01) > 0;
+
+        default:
+            OPL3_WriteRegBuffered(&opl_chip, reg_num, value);
+            break;
+    }
+}
+
+static void WritePort(opl_port_t port, unsigned int value)
+{
+    if (port == OPL_REGISTER_PORT)
+    {
+        register_num = value;
+    }
+    else if (port == OPL_REGISTER_PORT_OPL3)
+    {
+        register_num = value | 0x100;
+    }
+    else if (port == OPL_DATA_PORT)
+    {
+        RawWriteRegister(register_num, value);
+    }
+}
+
+// Write an OPL register value
+
+static void OPL_WriteRegister(int reg, int value)
+{
+    if (reg & 0x100)
+    {
+        WritePort(OPL_REGISTER_PORT_OPL3, reg);
+    }
+    else
+    {
+        WritePort(OPL_REGISTER_PORT, reg);
+    }
+
+    WritePort(OPL_DATA_PORT, value);
+}
+
+// Initialize registers on startup
+
+static void OPL_InitRegisters(void)
+{
+    int r;
+
+    // Initialize level registers
+
+    for (r=OPL_REGS_LEVEL; r <= OPL_REGS_LEVEL + OPL_NUM_OPERATORS; ++r)
+    {
+        OPL_WriteRegister(r, 0x3f);
+    }
+
+    // Initialize other registers
+    // These two loops write to registers that actually don't exist,
+    // but this is what Doom does ...
+    // Similarly, the <= is also intenational.
+
+    for (r=OPL_REGS_ATTACK; r <= OPL_REGS_WAVEFORM + OPL_NUM_OPERATORS; ++r)
+    {
+        OPL_WriteRegister(r, 0x00);
+    }
+
+    // More registers ...
+
+    for (r=1; r < OPL_REGS_LEVEL; ++r)
+    {
+        OPL_WriteRegister(r, 0x00);
+    }
+
+    // Re-initialize the low registers:
+
+    // Reset both timers and enable interrupts:
+    OPL_WriteRegister(OPL_REG_TIMER_CTRL,      0x60);
+    OPL_WriteRegister(OPL_REG_TIMER_CTRL,      0x80);
+
+    // "Allow FM chips to control the waveform of each operator":
+    OPL_WriteRegister(OPL_REG_WAVEFORM_ENABLE, 0x20);
+
+    if (opl3mode)
+    {
+        OPL_WriteRegister(OPL_REG_NEW, 0x01);
+
+        // Initialize level registers
+
+        for (r=OPL_REGS_LEVEL; r <= OPL_REGS_LEVEL + OPL_NUM_OPERATORS; ++r)
+        {
+            OPL_WriteRegister(r | 0x100, 0x3f);
+        }
+
+        // Initialize other registers
+        // These two loops write to registers that actually don't exist,
+        // but this is what Doom does ...
+        // Similarly, the <= is also intenational.
+
+        for (r=OPL_REGS_ATTACK; r <= OPL_REGS_WAVEFORM + OPL_NUM_OPERATORS; ++r)
+        {
+            OPL_WriteRegister(r | 0x100, 0x00);
+        }
+
+        // More registers ...
+
+        for (r=1; r < OPL_REGS_LEVEL; ++r)
+        {
+            OPL_WriteRegister(r | 0x100, 0x00);
+        }
+    }
+
+    // Keyboard split point on (?)
+    OPL_WriteRegister(OPL_REG_FM_MODE,         0x40);
+
+    if (opl3mode)
+    {
+        OPL_WriteRegister(OPL_REG_NEW, 0x01);
+    }
+}
+
+//----------------------------------------------------------------------
 
 #if 0
+
+// Get the next available voice from the freelist.
 
 static opl_voice_t *GetFreeVoice(void)
 {
@@ -942,12 +1110,12 @@ static void SetChannelPan(opl_channel_data_t *channel, unsigned int pan)
     // perhaps it was just a bug in the OPL3 support that was never
     // finished. By default we preserve this bug, but we also provide a
     // secret DMXOPTION to fix it.
-    if (opl_stereo_correct)
+    if (swap_stereo)
     {
         pan = 144 - pan;
     }
 
-    if (opl_opl3mode)
+    if (opl3mode)
     {
         if (pan >= 96)
         {
@@ -1517,35 +1685,35 @@ static boolean I_OPL_InitMusic(void)
         dmxoption = snd_dmxoption != NULL ? snd_dmxoption : "";
     }
 
-    if (chip_type == OPL_INIT_OPL3 && strstr(dmxoption, "-opl3") != NULL)
-    {
-        opl_opl3mode = 1;
-        num_opl_voices = OPL_NUM_VOICES * 2;
-    }
-    else
-    {
-        opl_opl3mode = 0;
-        num_opl_voices = OPL_NUM_VOICES;
-    }
 
     // Secret, undocumented DMXOPTION that reverses the stereo channels
     // into their correct orientation.
     opl_stereo_correct = strstr(dmxoption, "-reverse") != NULL;
 
-    // Initialize all registers.
-
-    OPL_InitRegisters(opl_opl3mode);
-
-    InitVoices();
-
-    tracks = NULL;
-    num_tracks = 0;
-    music_initialized = true;
 
     return true;
 }
 
 #endif
+
+static void ParseDMXOptions(const char *s)
+{
+	if (false)  // TODO -opl3
+	{
+		opl3mode = true;
+		num_opl_voices = OPL_NUM_VOICES * 2;
+	}
+	else
+	{
+		opl3mode = false;
+		num_opl_voices = OPL_NUM_VOICES;
+	}
+
+	if (false)  // TODO -reverse
+	{
+		swap_stereo = true;
+	}
+}
 
 //----------------------------------------------------------------------
 
@@ -1553,7 +1721,22 @@ static boolean I_OPL_InitMusic(void)
 
 bool OPLAY_Init(int freq, bool stereo)
 {
-	// TODO
+	if (freq < 8000)
+		return false;
+
+	// TODO grab DMXOPTIONS env var
+	ParseDMXOptions("");
+
+	OPL3_Reset(&opl_chip, freq);
+
+	OPL_InitRegisters();
+
+// FIXME	InitVoices();
+
+	tracks = NULL;
+	num_tracks = 0;
+
+	music_initialized = true;
 	return true;
 }
 

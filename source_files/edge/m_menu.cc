@@ -516,7 +516,7 @@ static menu_t LoadDef =
 	LoadingMenu,
 	&load_style,
 	M_DrawLoad,
-	30, 34,
+	30, 42,
 	0
 };
 

@@ -285,7 +285,7 @@ abstract_music_c * S_PlayTSF(byte *data, int length, bool is_mus,
 		if (! Mus2Midi::Convert(data, length, &midi_data, &midi_len,
 					Mus2Midi::DOOM_DIVIS, true))
 		{
-			delete [] data;
+			delete[] data;
 
 			I_Warning("Unable to convert MUS to MIDI !\n");
 			return NULL;

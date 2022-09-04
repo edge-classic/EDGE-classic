@@ -34,8 +34,9 @@
 #include "s_ogg.h"
 #include "s_mp3.h"
 #include "s_tsf.h"
-#include "s_mod.h"
 #include "s_gme.h"
+#include "s_mod.h"
+#include "s_opl.h"
 #include "s_sid.h"
 #include "m_misc.h"
 #include "w_wad.h"
@@ -50,6 +51,10 @@ static abstract_music_c *music_player;
 
 static int  entry_playing = -1;
 static bool entry_looped;
+
+// FIXME (a) default should be false
+//       (b) should be a config variable and/or cvar
+bool force_opl_emulation = true;
 
 
 void S_ChangeMusic(int entrynum, bool loop)
@@ -155,16 +160,16 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 	byte *data = F->LoadIntoMemory();
 
+	// close file now
+	delete F;
+
 	if (! data)
 	{
-		delete F;
-
 		I_Warning("S_ChangeMusic: Error loading data.\n");
 		return;
 	}
 	if (length < 4)
 	{
-		delete F;
 		delete data;
 
 		I_Printf("S_ChangeMusic: ignored short data (%d bytes)\n", length);
@@ -173,7 +178,6 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 	if (memcmp(data, "Ogg", 3) == 0)
 	{
-		delete F;
 		delete data;
 
 		music_player = S_PlayOGGMusic(play, volume, loop);
@@ -182,7 +186,6 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 	if (S_CheckMP3(data, length))
 	{
-		delete F;
 		delete data;
 
 		music_player = S_PlayMP3Music(play, volume, loop);
@@ -191,7 +194,6 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 	if (S_CheckMOD(data, length))
 	{
-		delete F;
 		delete data;
 
 		music_player = S_PlayMODMusic(play, volume, loop);
@@ -200,7 +202,6 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 	if (S_CheckGME(data, length))
 	{
-		delete F;
 		delete data;
 
 		music_player = S_PlayGMEMusic(play, volume, loop);
@@ -209,99 +210,33 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 	if (S_CheckSID(data, length))
 	{
-		delete F;
 		delete data;
 
 		music_player = S_PlaySIDMusic(play, volume, loop);
 		return;
 	}
 	
-	bool is_mus = (data[0] == 'M' && data[1] == 'U' && data[2] == 'S');
+	bool is_mus  = (data[0] == 'M' && data[1] == 'U' && data[2] == 'S');
+	bool is_midi = (data[0] == 'M' && data[1] == 'T' && data[2] == 'r' && data[3] == 'k');
+
+	if (! (is_mus || is_midi))
+	{
+		delete data;
+
+		I_Printf("S_ChangeMusic: unknown format (not MUS or MIDI)\n");
+		return;
+	}
+
+	// TODO: these calls free the data, but we probably should free it here
+
+	if (force_opl_emulation)
+	{
+		music_player = S_PlayOPL(data, length, is_mus, volume, loop);
+		return;
+	}
 
 	music_player = S_PlayTSF(data, length, is_mus, volume, loop);
-
-#if 0
-	byte *data;
-	int datlength;
-	int datnum;
-	i_music_info_t musdat;
-
-	// -ACB- 2000/06/06 This is not system specific
-	if (play->infotype == MUSINF_FILE)
-	{
-		data = NULL;
-
-		// -AJA- 2005/01/15: filenames in DDF relative to GAMEDIR
-
-		//
-		// -ACB- 2004/08/18 Something of a hack until we revamp this to be
-		//                  a little less platform dependent and a little
-		//                  more object orientated
-		//
-		if (play->type != MUS_OGG)
-		{
-			data = M_GetFileData(fn.c_str(), &datlength);
-
-			if (!data)
-			{
-				I_Warning("S_ChangeMusic: Can't Load File '%s'\n", fn.c_str());
-				return;
-			}
-
-			musdat.format = IMUSSF_DATA;
-			musdat.info.data.ptr = data;
-			musdat.info.data.size = datlength;
-		}
-		else  /* OGG Vorbis */
-		{
-			if (! epi::FS_Access(fn.c_str(), epi::file_c::ACCESS_READ))
-			{
-				I_Warning("S_ChangeMusic: Can't Load OGG '%s'\n", fn.c_str());
-				return;
-			}
-
-			musdat.format = IMUSSF_FILE;
-			musdat.info.file.name = fn.c_str();
-		}
-
-		musichandle = I_MusicPlayback(&musdat, play->type, looping, volume);
-
-		if (data)
-			delete [] data;
-	}
-
-	if (play->infotype == MUSINF_LUMP)
-	{
-		datnum = W_CheckNumForName(play->info);
-		if (datnum != -1)
-		{
-			datlength = W_LumpLength(datnum);
-			data = (byte*)W_CacheLumpNum(datnum);
-
-			musdat.format = IMUSSF_DATA;
-			musdat.info.data.ptr = data;
-			musdat.info.data.size = datlength;
-
-			musichandle = I_MusicPlayback(&musdat, play->type, looping, volume);
-			W_DoneWithLump(data);
-		}
-		else
-		{
-		}
-	}
-
-	if (play->infotype == MUSINF_TRACK)
-	{
-		musdat.format = IMUSSF_CD;
-		musdat.info.cd.track = atoi(play->info);
-
-		musichandle = I_MusicPlayback(&musdat, play->type, looping, volume);
-	}
-
-	if (musichandle == -1)
-		I_Printf("%s\n", I_MusicReturnError());
-
-#endif
+	return;
 }
 
 

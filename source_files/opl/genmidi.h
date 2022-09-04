@@ -13,9 +13,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// DESCRIPTION:
-//     MIDI file parsing.
-//
 
 #ifndef GENMIDI_INFO_H
 #define GENMIDI_INFO_H

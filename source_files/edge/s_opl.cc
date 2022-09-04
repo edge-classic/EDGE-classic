@@ -28,6 +28,7 @@
 #include "s_blit.h"
 #include "s_music.h"
 #include "s_opl.h"
+#include "w_wad.h"
 
 #include "dm_state.h"
 
@@ -42,6 +43,32 @@ extern bool dev_stereo;
 extern int  dev_freq;
 
 static bool opl_inited;
+static bool opl_disabled;
+
+static bool S_StartupOPL(void)
+{
+	I_Debugf("Initializing OPL player...\n");
+
+	if (! OPLAY_Init(dev_freq, dev_stereo))
+	{
+		return false;
+	}
+
+	int p = W_CheckNumForName("GENMIDI");
+	if (p < 0)
+	{
+		I_Debugf("no GENMIDI lump !\n");
+		return false;
+	}
+
+	int length;
+	const byte *data = (const byte*)W_ReadLumpAlloc(p, &length);
+
+	GM_LoadInstruments(data, (size_t)length);
+
+	// OK
+	return true;
+}
 
 class opl_player_c : public abstract_music_c
 {
@@ -199,20 +226,18 @@ private:
 	}
 };
 
-bool S_StartupOPL(void)
-{
-	I_Printf("Initializing OPL player...\n");
-
-	// TODO find GENMIDI lump !!
-
-	opl_inited = true;
-
-	return true; // OK
-}
-
 abstract_music_c * S_PlayOPL(byte *data, int length, bool is_mus, float volume, bool loop)
 {
 	if (! opl_inited)
+	{
+		if (! S_StartupOPL())
+		{
+			opl_disabled = true;
+		}
+		opl_inited = true;
+	}
+
+	if (opl_disabled)
 		return NULL;
 
 	if (is_mus)

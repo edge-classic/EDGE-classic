@@ -13,9 +13,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// DESCRIPTION:
-//   System interface for music.
-//
 
 #include <stdio.h>
 #include <stdlib.h>

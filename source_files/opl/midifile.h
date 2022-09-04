@@ -80,37 +80,30 @@ typedef enum
 typedef struct
 {
     // Meta event type:
-
     unsigned int type;
 
     // Length:
-
     unsigned int length;
 
     // Meta event data:
-
     uint8_t *data;
 } midi_meta_event_data_t;
 
 typedef struct
 {
     // Length:
-
     unsigned int length;
 
     // Event data:
-
     uint8_t *data;
 } midi_sysex_event_data_t;
 
 typedef struct
 {
     // The channel number to which this applies:
-
     unsigned int channel;
 
     // Extra parameters:
-
     unsigned int param1;
     unsigned int param2;
 } midi_channel_event_data_t;
@@ -123,7 +116,7 @@ typedef struct midi_event_s
     // Type of event:
     midi_event_type_t event_type;
 
-    // Next event
+    // Next event in track:
     struct midi_event_s *next;
 
     union

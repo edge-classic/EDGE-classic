@@ -25,7 +25,6 @@
 
 #define HEADER_CHUNK_ID "MThd"
 #define TRACK_CHUNK_ID  "MTrk"
-#define MAX_BUFFER_SIZE 0x10000
 
 // haleyjd 09/09/10: packing required
 #ifdef _MSC_VER
@@ -83,7 +82,9 @@ struct midi_file_s
     unsigned int buffer_size;
 };
 
-uint16_t BE_SHORT(uint16_t n)
+// Note: the following functions assume the CPU is little endian.
+
+static uint16_t BE_SHORT(uint16_t n)
 {
     uint16_t a;
     a  = (n & 0xFF) << 8;
@@ -91,7 +92,7 @@ uint16_t BE_SHORT(uint16_t n)
     return a;
 }
 
-uint32_t BE_LONG(uint32_t n)
+static uint32_t BE_LONG(uint32_t n)
 {
     uint32_t a;
     a  = (n & 0xFFU)   << 24;
@@ -112,8 +113,7 @@ typedef struct
 
 // Check the header of a chunk:
 
-static bool CheckChunkHeader(chunk_header_t *chunk,
-                             const char *expected_id)
+static bool CheckChunkHeader(chunk_header_t *chunk, const char *expected_id)
 {
     bool result;
 
@@ -156,7 +156,7 @@ static bool ReadVariableLength(unsigned int *result, input_stream_t *stream)
 
     *result = 0;
 
-    for (i=0; i<4; ++i)
+    for (i=0; i < 4; i++)
     {
         if (! ReadByte(&b, stream))
         {
@@ -185,7 +185,7 @@ static bool ReadVariableLength(unsigned int *result, input_stream_t *stream)
 
 // Read a byte sequence into the data buffer.
 
-static void *ReadByteSequence(unsigned int num_bytes, input_stream_t *stream)
+static uint8_t *ReadByteSequence(unsigned int num_bytes, input_stream_t *stream)
 {
     unsigned int i;
     uint8_t *result;
@@ -260,10 +260,10 @@ static bool ReadChannelEvent(midi_event_t *event,
 
 // Read sysex event:
 
-static bool ReadSysExEvent(midi_event_t *event, midi_event_type_t event_type,
+static bool ReadSysExEvent(midi_event_t *event, uint8_t event_type,
                            input_stream_t *stream)
 {
-    event->event_type = event_type;
+    event->event_type = (midi_event_type_t) event_type;
 
     if (! ReadVariableLength(&event->data.sysex.length, stream))
     {
@@ -351,11 +351,13 @@ static bool ReadEvent(midi_event_t *event, unsigned int *last_event_type,
     {
         event_type = *last_event_type;
 
-        if (mem_fseek(stream, -1, SEEK_CUR) < 0)
+        if (stream->pos == stream->start)
         {
             fprintf(stderr, "ReadEvent: Unable to seek in stream\n");
             return false;
         }
+
+        stream->pos -= 1;
     }
     else
     {
@@ -434,15 +436,18 @@ static void FreeEvent(midi_event_t *event)
 
 static bool ReadTrackHeader(midi_track_t *track, input_stream_t *stream)
 {
-    size_t records_read;
     chunk_header_t chunk_header;
 
-    records_read = mem_fread(&chunk_header, sizeof(chunk_header_t), 1, stream);
+    ssize_t position  = (ssize_t)(stream->pos - stream->start);
+    ssize_t remaining = stream->len - position;
 
-    if (records_read < 1)
+    if (position + sizeof(chunk_header_t) > stream->len)
     {
         return false;
     }
+
+    memcpy(&chunk_header, stream->pos, sizeof(chunk_header_t));
+    stream->pos += sizeof(chunk_header_t);
 
     if (! CheckChunkHeader(&chunk_header, TRACK_CHUNK_ID))
     {
@@ -489,7 +494,8 @@ static bool ReadTrack(midi_track_t *track, input_stream_t *stream)
     unsigned int last_event_type;
 
     track->num_events = 0;
-    track->events = NULL;
+    track->head = NULL;
+    track->tail = NULL;
 
     // Read the header:
 
@@ -511,7 +517,6 @@ static bool ReadTrack(midi_track_t *track, input_stream_t *stream)
         }
 
         // Read the next event:
-        event = &track->events[track->num_events];
         if (! ReadEvent(event, &last_event_type, stream))
         {
             return false;
@@ -562,7 +567,7 @@ static bool ReadAllTracks(midi_file_t *file, input_stream_t *stream)
 
     // Read each track:
 
-    for (i=0; i<file->num_tracks; ++i)
+    for (i=0; i < file->num_tracks; i++)
     {
         if (! ReadTrack(&file->tracks[i], stream))
         {
@@ -577,15 +582,18 @@ static bool ReadAllTracks(midi_file_t *file, input_stream_t *stream)
 
 static bool ReadFileHeader(midi_file_t *file, input_stream_t *stream)
 {
-    size_t records_read;
     unsigned int format_type;
 
-    records_read = mem_fread(&file->header, sizeof(midi_header_t), 1, stream);
+    ssize_t position  = (ssize_t)(stream->pos - stream->start);
+    ssize_t remaining = stream->len - position;
 
-    if (records_read < 1)
+    if (position + sizeof(midi_header_t) > stream->len)
     {
         return false;
     }
+
+    memcpy(&file->header, stream->pos, sizeof(midi_header_t));
+    stream->pos += sizeof(midi_header_t);
 
     if (! CheckChunkHeader(&file->header.chunk_header, HEADER_CHUNK_ID) ||
         BE_LONG(file->header.chunk_header.chunk_size) != 6)
@@ -615,7 +623,7 @@ void MIDI_FreeFile(midi_file_t *file)
 
     if (file->tracks != NULL)
     {
-        for (i=0; i<file->num_tracks; ++i)
+        for (i=0; i < file->num_tracks; i++)
         {
             FreeTrack(&file->tracks[i]);
         }
@@ -694,8 +702,7 @@ unsigned int MIDI_GetFileTimeDivision(midi_file_t *file)
     // differently.
     if (result < 0)
     {
-        return (signed int)(-(result/256))
-             * (signed int)(result & 0xFF);
+        return (signed int)(-(result/256)) * (signed int)(result & 0xFF);
     }
     else
     {

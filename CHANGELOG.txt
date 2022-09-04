@@ -22,6 +22,12 @@ General Improvements
 + Load/Save menu will use DDFLANG difficulty strings instead of hard-coded Doom strings when showing savegame details
 + Improved CMD_Dir result display
 + DOOMWADDIR and DOOMWADPATH will now be evaluated together instead of separately
++ If no -iwad parameter is given, an IWAD will be selected from all IWADs discovered in default search paths based on a scoring/preference system
+  - Doom 2/Freedoom Phase 2/Final Doom are highest priority due to highest compatibilty with mods/PWADs
+  - Doom 1/Freedoom Phase 1 are second in line
+  - Remaining Doom-based IWADs (HacX/Harmony for now) are third
+  - Heretic/Blasphemer, being the newest games supported, are after those
+  - If a new custom standalone IWAD (with EDGEIWAD lump) is present in the search list, it will be considered last
 
 New Features
 ------------

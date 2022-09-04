@@ -130,6 +130,7 @@ add_executable(
 	source_files/edge/s_tsf.cc
 	source_files/edge/s_gme.cc
 	source_files/edge/s_mod.cc
+	source_files/edge/s_opl.cc
 	source_files/edge/s_sid.cc
 	source_files/edge/s_wav.cc  
 	source_files/edge/sv_chunk.cc   

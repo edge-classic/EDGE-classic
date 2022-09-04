@@ -32,6 +32,7 @@
 #include "dm_state.h"
 
 // these are in the opl/ directory
+#include "genmidi.h"
 #include "midifile.h"
 #include "opl_player.h"
 

@@ -5,6 +5,7 @@ project(
 )
 
 add_library(opl
+  genmidi.cc
   midifile.cc
   opl3.cc
 )

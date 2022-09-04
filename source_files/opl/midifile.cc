@@ -101,16 +101,25 @@ uint32_t BE_LONG(uint32_t n)
     return a;
 }
 
+// Current midi file
+
+typedef struct
+{
+    uint8_t *start;
+    uint8_t *pos;
+    ssize_t  len;
+} input_stream_t;
+
 // Check the header of a chunk:
 
 static bool CheckChunkHeader(chunk_header_t *chunk,
-                                char *expected_id)
+                             const char *expected_id)
 {
     bool result;
 
     result = (memcmp((char *) chunk->chunk_id, expected_id, 4) == 0);
 
-    if (!result)
+    if (! result)
     {
         fprintf(stderr, "CheckChunkHeader: Expected '%s' chunk header, "
                         "got '%c%c%c%c'\n",
@@ -124,22 +133,23 @@ static bool CheckChunkHeader(chunk_header_t *chunk,
 
 // Read a single byte.  Returns false on error.
 
-static bool ReadByte(uint8_t *result, MEMFILE *stream)
+static bool ReadByte(uint8_t *result, input_stream_t *stream)
 {
-    size_t count = mem_fread(result, 1, 1, stream);
-
-    if (count < 1)
+    if (stream->pos >= stream->start + stream->len)
     {
         fprintf(stderr, "ReadByte: Unexpected end of file\n");
         return false;
     }
+
+    *result = *stream->pos;
+    stream->pos += 1;
 
     return true;
 }
 
 // Read a variable-length value.
 
-static bool ReadVariableLength(unsigned int *result, MEMFILE *stream)
+static bool ReadVariableLength(unsigned int *result, input_stream_t *stream)
 {
     int i;
     uint8_t b = 0;
@@ -148,7 +158,7 @@ static bool ReadVariableLength(unsigned int *result, MEMFILE *stream)
 
     for (i=0; i<4; ++i)
     {
-        if (!ReadByte(&b, stream))
+        if (! ReadByte(&b, stream))
         {
             fprintf(stderr, "ReadVariableLength: Error while reading "
                             "variable-length value\n");
@@ -175,7 +185,7 @@ static bool ReadVariableLength(unsigned int *result, MEMFILE *stream)
 
 // Read a byte sequence into the data buffer.
 
-static void *ReadByteSequence(unsigned int num_bytes, MEMFILE *stream)
+static void *ReadByteSequence(unsigned int num_bytes, input_stream_t *stream)
 {
     unsigned int i;
     uint8_t *result;
@@ -183,8 +193,7 @@ static void *ReadByteSequence(unsigned int num_bytes, MEMFILE *stream)
     // Allocate a buffer. Allocate one extra byte, as malloc(0) is
     // non-portable.
 
-    result = malloc(num_bytes + 1);
-
+    result = (uint8_t *) malloc(num_bytes + 1);
     if (result == NULL)
     {
         fprintf(stderr, "ReadByteSequence: Failed to allocate buffer\n");
@@ -195,7 +204,7 @@ static void *ReadByteSequence(unsigned int num_bytes, MEMFILE *stream)
 
     for (i=0; i < num_bytes; i++)
     {
-        if (!ReadByte(&result[i], stream))
+        if (! ReadByte(&result[i], stream))
         {
             fprintf(stderr, "ReadByteSequence: Error while reading byte %u\n", i);
             free(result);
@@ -212,18 +221,18 @@ static void *ReadByteSequence(unsigned int num_bytes, MEMFILE *stream)
 
 static bool ReadChannelEvent(midi_event_t *event,
                              uint8_t event_type, bool two_param,
-                             MEMFILE *stream)
+                             input_stream_t *stream)
 {
     uint8_t b = 0;
 
     // Set basics:
 
-    event->event_type = event_type & 0xf0;
-    event->data.channel.channel = event_type & 0x0f;
+    event->event_type = (midi_event_type_t) (event_type & 0xf0);
+    event->data.channel.channel = (event_type & 0x0f);
 
     // Read parameters:
 
-    if (!ReadByte(&b, stream))
+    if (! ReadByte(&b, stream))
     {
         fprintf(stderr, "ReadChannelEvent: Error while reading channel "
                         "event parameters\n");
@@ -236,7 +245,7 @@ static bool ReadChannelEvent(midi_event_t *event,
 
     if (two_param)
     {
-        if (!ReadByte(&b, stream))
+        if (! ReadByte(&b, stream))
         {
             fprintf(stderr, "ReadChannelEvent: Error while reading channel "
                             "event parameters\n");
@@ -251,12 +260,12 @@ static bool ReadChannelEvent(midi_event_t *event,
 
 // Read sysex event:
 
-static bool ReadSysExEvent(midi_event_t *event, int event_type,
-                           MEMFILE *stream)
+static bool ReadSysExEvent(midi_event_t *event, midi_event_type_t event_type,
+                           input_stream_t *stream)
 {
     event->event_type = event_type;
 
-    if (!ReadVariableLength(&event->data.sysex.length, stream))
+    if (! ReadVariableLength(&event->data.sysex.length, stream))
     {
         fprintf(stderr, "ReadSysExEvent: Failed to read length of "
                                         "SysEx block\n");
@@ -278,7 +287,7 @@ static bool ReadSysExEvent(midi_event_t *event, int event_type,
 
 // Read meta event:
 
-static bool ReadMetaEvent(midi_event_t *event, MEMFILE *stream)
+static bool ReadMetaEvent(midi_event_t *event, input_stream_t *stream)
 {
     uint8_t b = 0;
 
@@ -286,7 +295,7 @@ static bool ReadMetaEvent(midi_event_t *event, MEMFILE *stream)
 
     // Read meta event type:
 
-    if (!ReadByte(&b, stream))
+    if (! ReadByte(&b, stream))
     {
         fprintf(stderr, "ReadMetaEvent: Failed to read meta event type\n");
         return false;
@@ -296,7 +305,7 @@ static bool ReadMetaEvent(midi_event_t *event, MEMFILE *stream)
 
     // Read length of meta event data:
 
-    if (!ReadVariableLength(&event->data.meta.length, stream))
+    if (! ReadVariableLength(&event->data.meta.length, stream))
     {
         fprintf(stderr, "ReadSysExEvent: Failed to read length of "
                                         "SysEx block\n");
@@ -317,17 +326,17 @@ static bool ReadMetaEvent(midi_event_t *event, MEMFILE *stream)
 }
 
 static bool ReadEvent(midi_event_t *event, unsigned int *last_event_type,
-                      MEMFILE *stream)
+                      input_stream_t *stream)
 {
     uint8_t event_type = 0;
 
-    if (!ReadVariableLength(&event->delta_time, stream))
+    if (! ReadVariableLength(&event->delta_time, stream))
     {
         fprintf(stderr, "ReadEvent: Failed to read event timestamp\n");
         return false;
     }
 
-    if (!ReadByte(&event_type, stream))
+    if (! ReadByte(&event_type, stream))
     {
         fprintf(stderr, "ReadEvent: Failed to read event type\n");
         return false;
@@ -417,11 +426,13 @@ static void FreeEvent(midi_event_t *event)
             // Nothing to do.
             break;
     }
+
+    free(event);
 }
 
 // Read and check the track chunk header
 
-static bool ReadTrackHeader(midi_track_t *track, MEMFILE *stream)
+static bool ReadTrackHeader(midi_track_t *track, input_stream_t *stream)
 {
     size_t records_read;
     chunk_header_t chunk_header;
@@ -433,7 +444,7 @@ static bool ReadTrackHeader(midi_track_t *track, MEMFILE *stream)
         return false;
     }
 
-    if (!CheckChunkHeader(&chunk_header, TRACK_CHUNK_ID))
+    if (! CheckChunkHeader(&chunk_header, TRACK_CHUNK_ID))
     {
         return false;
     }
@@ -471,7 +482,7 @@ static void AddEvent(midi_track_t *track, midi_event_t *event)
     track->num_events += 1;
 }
 
-static bool ReadTrack(midi_track_t *track, MEMFILE *stream)
+static bool ReadTrack(midi_track_t *track, input_stream_t *stream)
 {
     midi_event_t *new_events;
     midi_event_t *event;
@@ -482,7 +493,7 @@ static bool ReadTrack(midi_track_t *track, MEMFILE *stream)
 
     // Read the header:
 
-    if (!ReadTrackHeader(track, stream))
+    if (! ReadTrackHeader(track, stream))
     {
         return false;
     }
@@ -493,7 +504,7 @@ static bool ReadTrack(midi_track_t *track, MEMFILE *stream)
 
     for (;;)
     {
-        midi_event *event = AllocEvent();
+        midi_event_t *event = AllocEvent();
         if (event == NULL)
         {
             return false;
@@ -524,24 +535,24 @@ static bool ReadTrack(midi_track_t *track, MEMFILE *stream)
 
 static void FreeTrack(midi_track_t *track)
 {
-    unsigned int i;
+    track->tail = NULL;
 
-    for (i=0; i<track->num_events; ++i)
+    while (track->head != NULL)
     {
-        FreeEvent(&track->events[i]);
-    }
+        midi_event_t *event = track->head;
+        track->head = event->next;
 
-    free(track->events);
+        FreeEvent(event);
+    }
 }
 
-static bool ReadAllTracks(midi_file_t *file, MEMFILE *stream)
+static bool ReadAllTracks(midi_file_t *file, input_stream_t *stream)
 {
     unsigned int i;
 
     // Allocate list of tracks and read each track:
 
-    file->tracks = malloc(sizeof(midi_track_t) * file->num_tracks);
-
+    file->tracks = (midi_track_t *) malloc(sizeof(midi_track_t) * file->num_tracks);
     if (file->tracks == NULL)
     {
         return false;
@@ -553,7 +564,7 @@ static bool ReadAllTracks(midi_file_t *file, MEMFILE *stream)
 
     for (i=0; i<file->num_tracks; ++i)
     {
-        if (!ReadTrack(&file->tracks[i], stream))
+        if (! ReadTrack(&file->tracks[i], stream))
         {
             return false;
         }
@@ -564,7 +575,7 @@ static bool ReadAllTracks(midi_file_t *file, MEMFILE *stream)
 
 // Read and check the header chunk.
 
-static bool ReadFileHeader(midi_file_t *file, MEMFILE *stream)
+static bool ReadFileHeader(midi_file_t *file, input_stream_t *stream)
 {
     size_t records_read;
     unsigned int format_type;
@@ -576,8 +587,8 @@ static bool ReadFileHeader(midi_file_t *file, MEMFILE *stream)
         return false;
     }
 
-    if (!CheckChunkHeader(&file->header.chunk_header, HEADER_CHUNK_ID)
-     || BE_LONG(file->header.chunk_header.chunk_size) != 6)
+    if (! CheckChunkHeader(&file->header.chunk_header, HEADER_CHUNK_ID) ||
+        BE_LONG(file->header.chunk_header.chunk_size) != 6)
     {
         fprintf(stderr, "ReadFileHeader: Invalid MIDI chunk header! "
                         "chunk_size=%i\n",
@@ -615,12 +626,13 @@ void MIDI_FreeFile(midi_file_t *file)
     free(file);
 }
 
-midi_file_t *MIDI_LoadFile(MEMFILE *stream)
+midi_file_t *MIDI_LoadFile(uint8_t *input, ssize_t length)
 {
+    input_stream_t stream;
+
     midi_file_t *file;
 
-    file = malloc(sizeof(midi_file_t));
-
+    file = (midi_file_t *) malloc(sizeof(midi_file_t));
     if (file == NULL)
     {
         return NULL;
@@ -633,36 +645,25 @@ midi_file_t *MIDI_LoadFile(MEMFILE *stream)
 
     // Open file
 
-    /*
-    stream = fopen(filename, "rb");
-
-    if (stream == NULL)
-    {
-        fprintf(stderr, "MIDI_LoadFile: Failed to open '%s'\n", filename);
-        MIDI_FreeFile(file);
-        return NULL;
-    }
-    */
+    stream.start = input;
+    stream.pos   = stream.start;
+    stream.len   = length;
 
     // Read MIDI file header
 
-    if (!ReadFileHeader(file, stream))
+    if (! ReadFileHeader(file, &stream))
     {
-        mem_fclose(stream);
         MIDI_FreeFile(file);
         return NULL;
     }
 
     // Read all tracks:
 
-    if (!ReadAllTracks(file, stream))
+    if (! ReadAllTracks(file, &stream))
     {
-        mem_fclose(stream);
         MIDI_FreeFile(file);
         return NULL;
     }
-
-    mem_fclose(stream);
 
     return file;
 }
@@ -680,26 +681,10 @@ midi_event_t *MIDI_IterateTrack(midi_file_t *file, unsigned int track)
 {
     assert(track < file->num_tracks);
 
-    return file->tracks[track]->events;
+    return file->tracks[track].head;
 }
 
 // Get the time until the next MIDI event in a track.
-
-unsigned int MIDI_GetDeltaTime(midi_track_iter_t *iter)
-{
-    if (iter->position < iter->track->num_events)
-    {
-        midi_event_t *next_event;
-
-        next_event = &iter->track->events[iter->position];
-
-        return next_event->delta_time;
-    }
-    else
-    {
-        return 0;
-    }
-}
 
 unsigned int MIDI_GetFileTimeDivision(midi_file_t *file)
 {

@@ -66,6 +66,8 @@ static bool S_StartupOPL(void)
 
 	GM_LoadInstruments(data, (size_t)length);
 
+	delete[] data;
+
 	// OK
 	return true;
 }
@@ -80,7 +82,6 @@ private:
 
 	int status;
 	bool looping;
-	double current_time;
 
 	midi_file_t *song;
 
@@ -103,7 +104,7 @@ public:
 		if (status != STOPPED)
 		  Stop();
 
-		//??  OPLAY_Close()
+		OPLAY_FinishSong();
 
 		MIDI_FreeFile(song);
 
@@ -118,8 +119,7 @@ public:
 		status  = PLAYING;
 		looping = loop;
 
-		SYS_ASSERT(song);
-		current_time = 0;
+		OPLAY_StartSong(song);
 
 		// Load up initial buffer data
 		Ticker();
@@ -130,7 +130,7 @@ public:
 		if (! (status == PLAYING || status == PAUSED))
 			return;
 
-		// OPLAY_note_off_all();
+		OPLAY_NotesOff();
 
 		S_QueueStop();
 
@@ -142,7 +142,7 @@ public:
 		if (status != PLAYING)
 			return;
 
-		// OPLAY_note_off_all();
+		OPLAY_NotesOff();
 
 		status = PAUSED;
 	}
@@ -186,40 +186,44 @@ public:
 	}
 
 private:
-	bool PlaySome(s16_t *data_buf, int samples)
-	{
-		// OPLAY_Stream(data_buf, samples)
-
-		return false;
-	}
-
 	bool StreamIntoBuffer(epi::sound_data_c *buf)
 	{
 		int samples = 0;
-
-		bool song_done = false;
 
 		while (samples < NUM_SAMPLES)
 		{
 			s16_t *data_buf = buf->data_L + samples * (dev_stereo ? 2 : 1);
 
-			song_done = PlaySome(data_buf, NUM_SAMPLES - samples);
+			int got = OPLAY_Stream(data_buf, NUM_SAMPLES - samples, dev_stereo);
 
-			if (song_done)  /* EOF */
+			samples += got;
+
+			if (got > 0)
+				continue;
+
+			/* EOF */
+
+			if (looping)
 			{
-				if (looping)
-				{
-					// OPLAY_Restart()
-					current_time = 0;
-					continue;
-				}
-
-				// FIXME fill remaining buffer with zeroes
-
-				return (false);
+				OPLAY_StartSong(song);
+				continue;
 			}
 
-			samples += NUM_SAMPLES;
+			if (samples == 0)
+			{
+				// buffer not used at all, so free it
+				return false;
+			}
+
+			// buffer partially used, fill rest with zeroes
+			data_buf += got * (dev_stereo ? 2 : 1);
+			int total = (NUM_SAMPLES - samples) * (dev_stereo ? 2 : 1);
+
+			for (; total > 0 ; total--)
+			{
+				*data_buf++ = 0;
+			}
+			break;
 		}
 
 		return true;

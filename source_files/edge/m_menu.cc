@@ -817,17 +817,19 @@ void M_DrawLoad(void)
 
 	short old_offset_x = menu_skull[0]->offset_x;
 	short old_offset_y = menu_skull[0]->offset_y;
-	menu_skull[0]->offset_x = 0;
-	menu_skull[0]->offset_y = 0;
+	// I am using IM_HEIGHT for both here intentionally as a way to
+	// see if the C image is actually being used/drawn
+	menu_skull[0]->offset_x = LineHeight == IM_HEIGHT(C) ? C->offset_x : 0;
+	menu_skull[0]->offset_y = LineHeight == IM_HEIGHT(C) ? C->offset_y : 0;
 	float TempHeight = MIN(LineHeight, IM_HEIGHT(menu_skull[0]));
 	float TempScale = 0;
 	float TempWidth = 0;
 	TempScale = TempHeight / IM_HEIGHT(menu_skull[0]);
 	TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
 	if (style->def->special & SYLSP_CursorRight)
-		HUD_StretchImage(LoadDef.x + WidestLine,ex_slots[itemOn].y - C->offset_y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x + WidestLine,ex_slots[itemOn].y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	else
-		HUD_StretchImage(LoadDef.x - TempWidth - 8,ex_slots[itemOn].y - C->offset_y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x - TempWidth - 8,ex_slots[itemOn].y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	menu_skull[0]->offset_x = old_offset_x;
 	menu_skull[0]->offset_y = old_offset_y;
 
@@ -940,17 +942,19 @@ void M_DrawSave(void)
 
 	short old_offset_x = menu_skull[0]->offset_x;
 	short old_offset_y = menu_skull[0]->offset_y;
-	menu_skull[0]->offset_x = 0;
-	menu_skull[0]->offset_y = 0;
+	// I am using IM_HEIGHT for both here intentionally as a way to
+	// see if the C image is actually being used/drawn
+	menu_skull[0]->offset_x = LineHeight == IM_HEIGHT(C) ? C->offset_x : 0;
+	menu_skull[0]->offset_y = LineHeight == IM_HEIGHT(C) ? C->offset_y : 0;
 	float TempHeight = MIN(LineHeight, IM_HEIGHT(menu_skull[0]));
 	float TempScale = 0;
 	float TempWidth = 0;
 	TempScale = TempHeight / IM_HEIGHT(menu_skull[0]);
 	TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
 	if (style->def->special & SYLSP_CursorRight)
-		HUD_StretchImage(LoadDef.x + WidestLine,ex_slots[itemOn].y - C->offset_y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x + WidestLine,ex_slots[itemOn].y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	else
-		HUD_StretchImage(LoadDef.x - TempWidth - 8,ex_slots[itemOn].y - C->offset_y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x - TempWidth - 8,ex_slots[itemOn].y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
 	menu_skull[0]->offset_x = old_offset_x;
 	menu_skull[0]->offset_y = old_offset_y;
 
@@ -1243,8 +1247,8 @@ static void CreateEpisodeMenu(void)
 			if (! EpisodeMenu[e].image)
 				EpisodeMenu[e].image = W_ImageLookup(EpisodeMenu[e].patch_name);
 			const image_c *image = EpisodeMenu[e].image;
-			EpisodeMenu[e].height = image->actual_h * image->scale_y;
-			EpisodeMenu[e].width =  image->actual_w * image->scale_x;
+			EpisodeMenu[e].height = IM_HEIGHT(image);
+			EpisodeMenu[e].width =  IM_WIDTH(image);
 		}
 		else
 		{
@@ -2418,9 +2422,9 @@ void M_Drawer(void)
 		}
 		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
 		{
-			//short old_offset_x = menu_skull[0]->offset_x;
+			short old_offset_x = menu_skull[0]->offset_x;
 			short old_offset_y = menu_skull[0]->offset_y;
-			//menu_skull[0]->offset_x = 0;
+			menu_skull[0]->offset_x = 0;
 			menu_skull[0]->offset_y = 0;
 			float TempScale = 0;
 			float TempWidth = 0;
@@ -2432,7 +2436,7 @@ void M_Drawer(void)
 				HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
 			else
 				HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
-			//menu_skull[0]->offset_x = old_offset_x;
+			menu_skull[0]->offset_x = old_offset_x;
 			menu_skull[0]->offset_y = old_offset_y;
 		}
 	}
@@ -2448,8 +2452,8 @@ void M_Drawer(void)
 		
 			const image_c *image = currentMenu->menuitems[i].image;
 
-			currentMenu->menuitems[i].height = image->actual_h * image->scale_y;
-			currentMenu->menuitems[i].width = image->actual_w * image->scale_x;
+			currentMenu->menuitems[i].height = IM_HEIGHT(image);
+			currentMenu->menuitems[i].width = IM_WIDTH(image);
 
 			if (currentMenu->menuitems[i].height < ShortestLine) 
 				ShortestLine = currentMenu->menuitems[i].height;
@@ -2463,10 +2467,10 @@ void M_Drawer(void)
 		}
 		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
 		{
-			//short old_offset_x = menu_skull[0]->offset_x;
+			short old_offset_x = menu_skull[0]->offset_x;
 			short old_offset_y = menu_skull[0]->offset_y;
-			//menu_skull[0]->offset_x = 0;
-			menu_skull[0]->offset_y = 0;
+			menu_skull[0]->offset_x = currentMenu->menuitems[itemOn].image->offset_x;
+			menu_skull[0]->offset_y = currentMenu->menuitems[itemOn].image->offset_y;
 			float TempScale = 0;
 			float TempWidth = 0;
 			float TempSpacer = 0;
@@ -2474,20 +2478,14 @@ void M_Drawer(void)
 			TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
 			TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
 			
-/*	
-			float SkullY = currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].height + (currentMenu->menuitems[itemOn].height/2);
-			HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer,
-					SkullY,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
-
-*/
-			float SkullY = currentMenu->menuitems[itemOn].y + (currentMenu->menuitems[itemOn].height / 2) - (ShortestLine / 2);
 			if (style->def->special & SYLSP_CursorRight)
-				HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,SkullY,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
+				HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,
+					currentMenu->menuitems[itemOn].y ,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
 			else
-				HUD_StretchImage(currentMenu->menuitems[itemOn].x + MAX(0, ((IM_WIDTH(currentMenu->menuitems[itemOn].image) - WidestLine) / 2)) - TempWidth - TempSpacer,
-					SkullY,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
+				HUD_StretchImage(currentMenu->menuitems[itemOn].x + MAX(0, ((IM_WIDTH(currentMenu->menuitems[itemOn].image) - WidestLine) / 2)) - TempWidth - TempSpacer, 
+				currentMenu->menuitems[itemOn].y, TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
 
-			//menu_skull[0]->offset_x = old_offset_x;
+			menu_skull[0]->offset_x = old_offset_x;
 			menu_skull[0]->offset_y = old_offset_y;
 		}
 	}

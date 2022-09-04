@@ -5,5 +5,5 @@ project(
 )
 
 add_library(opl
-  midifile.cc
+  opl3.cc
 )

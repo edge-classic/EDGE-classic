@@ -89,7 +89,7 @@ typedef struct
 
     // Meta event data:
 
-    byte *data;
+    uint8_t *data;
 } midi_meta_event_data_t;
 
 typedef struct
@@ -100,7 +100,7 @@ typedef struct
 
     // Event data:
 
-    byte *data;
+    uint8_t *data;
 } midi_sysex_event_data_t;
 
 typedef struct

@@ -66,7 +66,6 @@ typedef struct
 
     midi_event_t *head;
     midi_event_t *tail;
-    int num_events;
 } midi_track_t;
 
 struct midi_file_s
@@ -472,7 +471,7 @@ static midi_event_t *AllocEvent(void)
 
 static void AddEvent(midi_track_t *track, midi_event_t *event)
 {
-    event->next = track->tail;
+    event->next = NULL;
 
     if (track->tail != NULL)
     {
@@ -484,7 +483,6 @@ static void AddEvent(midi_track_t *track, midi_event_t *event)
     }
 
     track->tail = event;
-    track->num_events += 1;
 }
 
 static bool ReadTrack(midi_track_t *track, input_stream_t *stream)
@@ -493,7 +491,6 @@ static bool ReadTrack(midi_track_t *track, input_stream_t *stream)
     midi_event_t *event;
     unsigned int last_event_type;
 
-    track->num_events = 0;
     track->head = NULL;
     track->tail = NULL;
 

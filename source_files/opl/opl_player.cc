@@ -255,9 +255,6 @@ static const unsigned int volume_mapping_table[] = {
 
 static bool music_initialized = false;
 
-static int start_music_volume;
-static int current_music_volume;
-
 // OPL emulator info:
 
 static opl3_chip opl_chip;
@@ -710,39 +707,6 @@ static void InitVoices(void)
     }
 }
 
-static void SetChannelVolume(opl_channel_data_t *channel, unsigned int volume,
-                             boolean clip_start);
-
-// Set music volume (0 - 127)
-
-static void I_OPL_SetMusicVolume(int volume)
-{
-    unsigned int i;
-
-    if (current_music_volume == volume)
-    {
-        return;
-    }
-
-    // Internal state variable.
-
-    current_music_volume = volume;
-
-    // Update the volume of all voices.
-
-    for (i = 0; i < MIDI_CHANNELS_PER_TRACK; ++i)
-    {
-        if (i == 15)
-        {
-            SetChannelVolume(&channels[i], volume, false);
-        }
-        else
-        {
-            SetChannelVolume(&channels[i], channels[i].volume_base, false);
-        }
-    }
-}
-
 static void VoiceKeyOff(opl_voice_t *voice)
 {
     OPL_WriteRegister((OPL_REGS_FREQ_2 + voice->index) | voice->array,
@@ -1077,14 +1041,9 @@ static void SetChannelVolume(opl_channel_data_t *channel, unsigned int volume,
 
     channel->volume_base = volume;
 
-    if (volume > current_music_volume)
+    if (volume > 127)
     {
-        volume = current_music_volume;
-    }
-
-    if (clip_start && volume > start_music_volume)
-    {
-        volume = start_music_volume;
+        volume = 127;
     }
 
     channel->volume = volume;
@@ -1340,28 +1299,6 @@ static void ProcessEvent(opl_track_data_t *track, midi_event_t *event)
 
 static void ScheduleTrack(opl_track_data_t *track);
 
-// Restart a song from the beginning.
-
-static void RestartSong(void *unused)
-{
-    unsigned int i;
-
-    running_tracks = num_tracks;
-
-    start_music_volume = current_music_volume;
-
-    for (i = 0; i < num_tracks; ++i)
-    {
-        MIDI_RestartIterator(tracks[i].iter);
-        ScheduleTrack(&tracks[i]);
-    }
-
-    for (i = 0; i < MIDI_CHANNELS_PER_TRACK; ++i)
-    {
-        InitChannel(&channels[i]);
-    }
-}
-
 // Callback function invoked when another event needs to be read from
 // a track.
 
@@ -1426,7 +1363,7 @@ static void ScheduleTrack(opl_track_data_t *track)
 
 #endif
 
-// Initialize a channel.
+// Initialize the channel info.
 
 static void InitChannels(void)
 {
@@ -1435,17 +1372,11 @@ static void InitChannels(void)
 	{
 		opl_channel_data_t *chan = &channels[i];
 
-		// TODO: Work out sensible defaults?
-
-		chan->instrument = GM_GetInstrument(0);
-		chan->volume = current_music_volume;
+		chan->instrument  = GM_GetInstrument(0);
+		chan->volume      = 100;
 		chan->volume_base = 100;
-		if (chan->volume > chan->volume_base)
-		{
-			chan->volume = chan->volume_base;
-		}
-		chan->pan = 0x30;
-		chan->bend = 0;
+		chan->pan         = 0x30;
+		chan->bend        = 0;
 	}
 }
 
@@ -1575,8 +1506,6 @@ bool OPLAY_StartSong(midi_file_t *song)
 	// TODO: this is wrong
 	us_per_beat = 500 * 1000;
 
-	start_music_volume = current_music_volume;
-
 	RewindSong();
 	InitChannels();
 
@@ -1597,7 +1526,7 @@ void OPLAY_FinishSong(void)
 
 void OPLAY_NotesOff(void)
 {
-	if (! music_initialized)
+	if (! music_initialized || the_song == NULL)
 	{
 		return;
 	}
@@ -1611,7 +1540,7 @@ void OPLAY_NotesOff(void)
 
 int OPLAY_Stream(int16_t *buf, int samples, bool stereo)
 {
-	if (! music_initialized)
+	if (! music_initialized || the_song == NULL)
 	{
 		return 0;
 	}

@@ -110,23 +110,37 @@ bool custom_MenuDifficulty = false;
 FILE *logfile = NULL;
 FILE *debugfile = NULL;
 
+typedef struct
+{
+	// used to determine IWAD priority if no -iwad parameter provided 
+	// and multiple IWADs are detected in various paths
+	u8_t score;
+
+	// iwad_base to set if this IWAD is used
+	const char *base;
+
+	// (usually) unique lumps to check for in a potential IWAD
+	std::array<const char*, 2> unique_lumps;
+}
+iwad_check_t;
+
 // Combination of unique lumps needed to best identify an IWAD
-const std::array<std::array<const char*, 3>, 12> iwad_unique_lumps =
+const std::array<iwad_check_t, 12> iwad_checker =
 {
 	{
-		{ "CUSTOM",     "EDGEIWAD", "EDGEIWAD" }, // Not actually needed twice, just keeps things from crashing if NULL during the check
-		{ "BLASPHEMER", "BLASPHEM", "E1M1"     },
-		{ "FREEDOOM1",  "FREEDOOM", "E1M1"     },
-		{ "FREEDOOM2",  "FREEDOOM", "MAP01"    },
-		{ "HACX",       "HACX-R",   "MAP01"    },
-		{ "HARMONY",    "0HAWK01",  "MAP01"    },
-		{ "HERETIC",    "MUS_E1M1", "E1M1"     },
-		{ "PLUTONIA",   "CAMO1",    "MAP01"    },
-		{ "TNT",        "REDTNT2",  "MAP01"    },
-		{ "DOOM",       "BFGGA0",   "E2M1"     },
-		{ "DOOM1",      "SHOTA0",   "E1M1"     },
-		{ "DOOM2",      "BFGGA0",   "MAP01"    },
-		//{ "STRIFE",     "VELLOGO",  "RGELOGO"} // Dev/internal use - Definitely nowhwere near playable
+		{ 1,  "CUSTOM",     {"EDGEIWAD", "EDGEIWAD"} }, // Maybe have "CUSTOM" be a DDFLANG-dependent value so that autoload and save folder names, etc can by dynamically created?
+		{ 2,  "BLASPHEMER", {"BLASPHEM", "E1M1"}     },
+		{ 7,  "FREEDOOM1",  {"FREEDOOM", "E1M1"}     },
+		{ 11, "FREEDOOM2",  {"FREEDOOM", "MAP01"}    },
+		{ 5,  "HACX",       {"HACX-R",   "MAP01"}    },
+		{ 4,  "HARMONY",    {"0HAWK01",  "MAP01"}    },
+		{ 3,  "HERETIC",    {"MUS_E1M1", "E1M1"}     },
+		{ 9,  "PLUTONIA",   {"CAMO1",    "MAP01"}    },
+		{ 10, "TNT",        {"REDTNT2",  "MAP01"}    },
+		{ 8,  "DOOM",       {"BFGGA0",   "E2M1"}     },
+		{ 6,  "DOOM1",      {"SHOTA0",   "E1M1"}     },
+		{ 12, "DOOM2",      {"BFGGA0",   "MAP01"}    },
+		//{ 0, "STRIFE",    {"VELLOGO",  "RGELOGO"}  }// Dev/internal use - Definitely nowhwere near playable
 	}
 };
 
@@ -974,11 +988,11 @@ static void IdentifyVersion(void)
 
 		epi::file_c *iwad_test = epi::FS_Open(iwad_file.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 		bool unique_lump_match = false;
-		for (int i=0; i < iwad_unique_lumps.size(); i++) {
-			if (W_CheckForUniqueLumps(iwad_test, iwad_unique_lumps[i][1], iwad_unique_lumps[i][2]))
+		for (int i=0; i < iwad_checker.size(); i++) {
+			if (W_CheckForUniqueLumps(iwad_test, iwad_checker[i].unique_lumps[0], iwad_checker[i].unique_lumps[1]))
 			{
 				unique_lump_match = true;
-				iwad_base = iwad_unique_lumps[i][0];
+				iwad_base = iwad_checker[i].base;
 				break;
 			}
     	}
@@ -992,6 +1006,10 @@ static void IdentifyVersion(void)
     {
         const char *location;
 		
+		// Track the "best" IWAD found throughout the various paths based on scores stored in iwad_checker
+		u8_t best_score = 0;
+		std::string best_match;
+
         int max = 1;
 
         if (stricmp(iwad_dir.c_str(), game_dir.c_str()) != 0) 
@@ -1026,23 +1044,20 @@ static void IdentifyVersion(void)
 					if(!fsd[i]->is_dir)
 					{
 						epi::file_c *iwad_test = epi::FS_Open(fsd[i]->name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-						bool unique_lump_match = false;
-						for (int i = 0; i < iwad_unique_lumps.size(); i++) {
-							if (W_CheckForUniqueLumps(iwad_test, iwad_unique_lumps[i][1], iwad_unique_lumps[i][2]))
+						for (int j = 0; j < iwad_checker.size(); j++) 
+						{
+							if (W_CheckForUniqueLumps(iwad_test, iwad_checker[j].unique_lumps[0], iwad_checker[j].unique_lumps[1]))
 							{
-								unique_lump_match = true;
-								iwad_base = iwad_unique_lumps[i][0];
+								if (iwad_checker[j].score > best_score)
+								{
+									best_score = iwad_checker[j].score;
+									best_match = fsd[i]->name;
+									iwad_base = iwad_checker[j].base;
+								}
 								break;
 							}
 						}
-						if (unique_lump_match)
-						{
-							W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad);
-							if (iwad_test) delete iwad_test;
-							goto foundlooseiwad;
-						}	
-						else
-							if (iwad_test) delete iwad_test;				
+						if (iwad_test) delete iwad_test;				
 					}
 				}
 			}
@@ -1069,34 +1084,31 @@ static void IdentifyVersion(void)
 						if(!fsd[i]->is_dir)
 						{
 							epi::file_c *iwad_test = epi::FS_Open(fsd[i]->name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-							bool unique_lump_match = false;
-							for (int i = 0; i < iwad_unique_lumps.size(); i++) {
-								if (W_CheckForUniqueLumps(iwad_test, iwad_unique_lumps[i][1], iwad_unique_lumps[i][2]))
+							for (int j = 0; j < iwad_checker.size(); j++) 
+							{
+								if (W_CheckForUniqueLumps(iwad_test, iwad_checker[j].unique_lumps[0], iwad_checker[j].unique_lumps[1]))
 								{
-									unique_lump_match = true;
-									iwad_base = iwad_unique_lumps[i][0];
+									if (iwad_checker[j].score > best_score)
+									{
+										best_score = iwad_checker[j].score;
+										best_match = fsd[i]->name;
+										iwad_base = iwad_checker[j].base;
+									}
 									break;
 								}
 							}
-							if (unique_lump_match)
-							{
-								W_AddRawFilename(fsd[i]->name.c_str(), FLKIND_IWad);
-								if (iwad_test) delete iwad_test;
-								goto foundlooseiwad;
-							}
-							else
-								if (iwad_test) delete iwad_test;			
+							if (iwad_test) delete iwad_test;			
 						}
 					}
 				}
 			}
 		}
 
-		// Should only get here if no loose IWADs were found - Dasho
-		I_Error("IdentifyVersion: No IWADs found!\n");
+		if (best_score == 0)
+			I_Error("IdentifyVersion: No IWADs found!\n");
+		else
+			W_AddRawFilename(best_match.c_str(), FLKIND_IWad);
     }
-
-	foundlooseiwad:
 
 	I_Debugf("IWAD BASE = [%s]\n", iwad_base.c_str());
 }

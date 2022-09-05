@@ -889,6 +889,112 @@ static void ReplaceExistingVoice(void)
 }
 
 //----------------------------------------------------------------------
+//
+// Channel management
+//
+//----------------------------------------------------------------------
+
+// Initialize the channel info.
+
+static void InitChannels(void)
+{
+	int i;
+	for (i = 0; i < MIDI_CHANNELS_PER_TRACK; i++)
+	{
+		opl_channel_data_t *chan = &channels[i];
+
+		chan->instrument  = GM_GetInstrument(0);
+		chan->volume      = 100;
+		chan->volume_base = 100;
+		chan->pan         = 0x30;
+		chan->bend        = 0;
+	}
+}
+
+static void Chan_SetVolume(opl_channel_data_t *channel, unsigned int volume, bool clip_start)
+{
+	unsigned int i;
+
+	channel->volume_base = volume;
+
+	if (volume > 127)
+	{
+		volume = 127;
+	}
+
+	channel->volume = volume;
+
+	// Update all voices that this channel is using.
+
+	for (i = 0; i < num_opl_voices; ++i)
+	{
+		if (voices[i].channel == channel)
+		{
+			V_SetVolume(&voices[i], voices[i].note_volume);
+		}
+	}
+}
+
+static void Chan_SetPan(opl_channel_data_t *channel, unsigned int pan)
+{
+	unsigned int reg_pan;
+	unsigned int i;
+
+	// The DMX library has the stereo channels backwards, maybe because
+	// Paul Radek had a Soundblaster card with the channels reversed, or
+	// perhaps it was just a bug in the OPL3 support that was never
+	// finished. By default we preserve this bug, but we also provide a
+	// secret DMXOPTION to fix it.
+	if (swap_stereo)
+	{
+		pan = 144 - pan;
+	}
+
+	if (opl3mode)
+	{
+		if (pan >= 96)
+		{
+			reg_pan = 0x10;
+		}
+		else if (pan <= 48)
+		{
+			reg_pan = 0x20;
+		}
+		else
+		{
+			reg_pan = 0x30;
+		}
+		if (channel->pan != reg_pan)
+		{
+			channel->pan = reg_pan;
+			for (i = 0; i < num_opl_voices; i++)
+			{
+				if (voices[i].channel == channel)
+				{
+					V_SetPan(&voices[i], reg_pan);
+				}
+			}
+		}
+	}
+}
+
+// Handler for the MIDI_CONTROLLER_ALL_NOTES_OFF channel event.
+static void Chan_AllNotesOff(opl_channel_data_t *channel, unsigned int param)
+{
+	int i;
+
+	for (i = 0; i < voice_alloced_num; i++)
+	{
+		if (voice_alloced_list[i]->channel == channel)
+		{
+			// Finished with this voice now.
+
+			ReleaseVoice(i);
+
+			i--;
+		}
+	}
+}
 
 static opl_channel_data_t *TrackChannelForEvent(opl_track_data_t *track,
                                                 midi_event_t *event)
@@ -910,14 +1016,20 @@ static opl_channel_data_t *TrackChannelForEvent(opl_track_data_t *track,
 	return &channels[channel_num];
 }
 
-#if 0
+//----------------------------------------------------------------------
+//
+// Event processing
+//
+//----------------------------------------------------------------------
+
+static void KeyOffEvent(opl_track_data_t *track, midi_event_t *event);
 
 static void KeyOnEvent(opl_track_data_t *track, midi_event_t *event)
 {
-    genmidi_instr_t *instrument;
-    opl_channel_data_t *channel;
-    unsigned int note, key, volume;
-    bool double_voice;
+	genmidi_instr_t *instrument;
+	opl_channel_data_t *channel;
+	unsigned int note, key, volume;
+	bool double_voice;
 
 /*
     printf("note on: channel %i, %i, %i\n",
@@ -926,63 +1038,62 @@ static void KeyOnEvent(opl_track_data_t *track, midi_event_t *event)
            event->data.channel.param2);
 */
 
-    note = event->data.channel.param1;
-    key = event->data.channel.param1;
-    volume = event->data.channel.param2;
+	note   = event->data.channel.param1;
+	key    = event->data.channel.param1;
+	volume = event->data.channel.param2;
 
-    // A volume of zero means key off. Some MIDI tracks, eg. the ones
-    // in AV.wad, use a second key on with a volume of zero to mean
-    // key off.
-    if (volume <= 0)
-    {
-        KeyOffEvent(track, event);
-        return;
-    }
+	// A volume of zero means key off. Some MIDI tracks, eg. the ones
+	// in AV.wad, use a second key on with a volume of zero to mean
+	// key off.
+	if (volume <= 0)
+	{
+		KeyOffEvent(track, event);
+		return;
+	}
 
-    // The channel.
-    channel = TrackChannelForEvent(track, event);
+	// The channel.
+	channel = TrackChannelForEvent(track, event);
 
-    // Percussion channel is treated differently.
-    if (event->data.channel.channel == 9)
-    {
-        instrument = GM_GetPercussion(key);
-        if (instrument == NULL)
-        {
-            return;
-        }
+	// Percussion channel is treated differently.
+	if (event->data.channel.channel == 9)
+	{
+		instrument = GM_GetPercussion(key);
+		if (instrument == NULL)
+		{
+			return;
+		}
 
-        note = 60;
-    }
-    else
-    {
-        instrument = channel->instrument;
-    }
+		note = 60;
+	}
+	else
+	{
+		instrument = channel->instrument;
+	}
 
-    double_voice = (LE_SHORT(instrument->flags) & GENMIDI_FLAG_2VOICE) != 0;
+	double_voice = (LE_SHORT(instrument->flags) & GENMIDI_FLAG_2VOICE) != 0;
 
-    {
-            if (voice_free_num == 0)
-            {
-                ReplaceExistingVoice();
-            }
+	if (voice_free_num == 0)
+	{
+		ReplaceExistingVoice();
+	}
 
-            // Find and program a voice for this instrument.  If this
-            // is a double voice instrument, we must do this twice.
+	// Find and program a voice for this instrument.  If this
+	// is a double voice instrument, we must do this twice, but it
+	// doesn't matter if the second one cannot get a free voice.
 
-            V_KeyOn(channel, instrument, 0, note, key, volume);
+	V_KeyOn(channel, instrument, 0, note, key, volume);
 
-            if (double_voice)
-            {
-                V_KeyOn(channel, instrument, 1, note, key, volume);
-            }
-    }
+	if (double_voice)
+	{
+		V_KeyOn(channel, instrument, 1, note, key, volume);
+	}
 }
 
 static void KeyOffEvent(opl_track_data_t *track, midi_event_t *event)
 {
-    opl_channel_data_t *channel;
-    int i;
-    unsigned int key;
+	opl_channel_data_t *channel;
+	int i;
+	unsigned int key;
 
 /*
     printf("note off: channel %i, %i, %i\n",
@@ -991,131 +1102,46 @@ static void KeyOffEvent(opl_track_data_t *track, midi_event_t *event)
            event->data.channel.param2);
 */
 
-    channel = TrackChannelForEvent(track, event);
-    key = event->data.channel.param1;
+	channel = TrackChannelForEvent(track, event);
+	key = event->data.channel.param1;
 
-    // Turn off voices being used to play this key.
-    // If it is a double voice instrument there will be two.
+	// Turn off voices being used to play this key.
+	// If it is a double voice instrument there will be two.
 
-    for (i = 0; i < voice_alloced_num; i++)
-    {
-        if (voice_alloced_list[i]->channel == channel
-         && voice_alloced_list[i]->key == key)
-        {
-            // Finished with this voice now.
+	for (i = 0; i < voice_alloced_num; i++)
+	{
+		if (voice_alloced_list[i]->channel == channel &&
+		    voice_alloced_list[i]->key == key)
+		{
+			// Finished with this voice now.
 
-            ReleaseVoice(i);
+			ReleaseVoice(i);
 
-            i--;
-        }
-    }
+			i--;
+		}
+	}
 }
 
 static void ProgramChangeEvent(opl_track_data_t *track, midi_event_t *event)
 {
-    opl_channel_data_t *channel;
-    int instrument;
+	opl_channel_data_t *channel;
+	int instrument;
 
-    // Set the instrument used on this channel.
+	// Set the instrument used on this channel.
 
-    channel = TrackChannelForEvent(track, event);
-    instrument = event->data.channel.param1;
-    channel->instrument = GM_GetInstrument(instrument);
+	channel = TrackChannelForEvent(track, event);
+	instrument = event->data.channel.param1;
+	channel->instrument = GM_GetInstrument(instrument);
 
-    // TODO: Look through existing voices that are turned on on this
-    // channel, and change the instrument.
-}
-
-static void Chan_SetVolume(opl_channel_data_t *channel, unsigned int volume, bool clip_start)
-{
-    unsigned int i;
-
-    channel->volume_base = volume;
-
-    if (volume > 127)
-    {
-        volume = 127;
-    }
-
-    channel->volume = volume;
-
-    // Update all voices that this channel is using.
-
-    for (i = 0; i < num_opl_voices; ++i)
-    {
-        if (voices[i].channel == channel)
-        {
-            V_SetVolume(&voices[i], voices[i].note_volume);
-        }
-    }
-}
-
-static void Chan_SetPan(opl_channel_data_t *channel, unsigned int pan)
-{
-    unsigned int reg_pan;
-    unsigned int i;
-
-    // The DMX library has the stereo channels backwards, maybe because
-    // Paul Radek had a Soundblaster card with the channels reversed, or
-    // perhaps it was just a bug in the OPL3 support that was never
-    // finished. By default we preserve this bug, but we also provide a
-    // secret DMXOPTION to fix it.
-    if (swap_stereo)
-    {
-        pan = 144 - pan;
-    }
-
-    if (opl3mode)
-    {
-        if (pan >= 96)
-        {
-            reg_pan = 0x10;
-        }
-        else if (pan <= 48)
-        {
-            reg_pan = 0x20;
-        }
-        else
-        {
-            reg_pan = 0x30;
-        }
-        if (channel->pan != reg_pan)
-        {
-            channel->pan = reg_pan;
-            for (i = 0; i < num_opl_voices; i++)
-            {
-                if (voices[i].channel == channel)
-                {
-                    V_SetPan(&voices[i], reg_pan);
-                }
-            }
-        }
-    }
-}
-
-// Handler for the MIDI_CONTROLLER_ALL_NOTES_OFF channel event.
-static void Chan_AllNotesOff(opl_channel_data_t *channel, unsigned int param)
-{
-    int i;
-
-    for (i = 0; i < voice_alloced_num; i++)
-    {
-        if (voice_alloced_list[i]->channel == channel)
-        {
-            // Finished with this voice now.
-
-            ReleaseVoice(i);
-
-            i--;
-        }
-    }
+	// TODO: Look through existing voices that are turned on on this
+	// channel, and change the instrument.
 }
 
 static void ControllerEvent(opl_track_data_t *track, midi_event_t *event)
 {
-    opl_channel_data_t *channel;
-    unsigned int controller;
-    unsigned int param;
+	opl_channel_data_t *channel;
+	unsigned int controller;
+	unsigned int param;
 
 /*
     printf("change controller: channel %i, %i, %i\n",
@@ -1124,169 +1150,173 @@ static void ControllerEvent(opl_track_data_t *track, midi_event_t *event)
            event->data.channel.param2);
 */
 
-    channel = TrackChannelForEvent(track, event);
-    controller = event->data.channel.param1;
-    param = event->data.channel.param2;
+	channel = TrackChannelForEvent(track, event);
+	controller = event->data.channel.param1;
+	param = event->data.channel.param2;
 
-    switch (controller)
-    {
-        case MIDI_CONTROLLER_MAIN_VOLUME:
-            Chan_SetVolume(channel, param, true);
-            break;
+	switch (controller)
+	{
+		case MIDI_CONTROLLER_MAIN_VOLUME:
+			Chan_SetVolume(channel, param, true);
+			break;
 
-        case MIDI_CONTROLLER_PAN:
-            Chan_SetPan(channel, param);
-            break;
+		case MIDI_CONTROLLER_PAN:
+			Chan_SetPan(channel, param);
+			break;
 
-        case MIDI_CONTROLLER_ALL_NOTES_OFF:
-            Chan_AllNotesOff(channel, param);
-            break;
+		case MIDI_CONTROLLER_ALL_NOTES_OFF:
+			Chan_AllNotesOff(channel, param);
+			break;
 
-        default:
+		default:
 #ifdef OPL_MIDI_DEBUG
-            fprintf(stderr, "Unknown MIDI controller type: %i\n", controller);
+			fprintf(stderr, "Unknown MIDI controller type: %i\n", controller);
 #endif
-            break;
-    }
+			break;
+	}
 }
 
 // Process a pitch bend event.
 
 static void PitchBendEvent(opl_track_data_t *track, midi_event_t *event)
 {
-    opl_channel_data_t *channel;
-    int i;
-    opl_voice_t *voice_updated_list[OPL_NUM_VOICES * 2];
-    unsigned int voice_updated_num = 0;
-    opl_voice_t *voice_not_updated_list[OPL_NUM_VOICES * 2];
-    unsigned int voice_not_updated_num = 0;
+	opl_channel_data_t *channel;
+	int i;
+	opl_voice_t *voice_updated_list[OPL_NUM_VOICES * 2];
+	unsigned int voice_updated_num = 0;
+	opl_voice_t *voice_not_updated_list[OPL_NUM_VOICES * 2];
+	unsigned int voice_not_updated_num = 0;
 
-    // Update the channel bend value.  Only the MSB of the pitch bend
-    // value is considered: this is what Doom does.
+	// Update the channel bend value.  Only the MSB of the pitch bend
+	// value is considered: this is what Doom does.
 
-    channel = TrackChannelForEvent(track, event);
-    channel->bend = event->data.channel.param2 - 64;
+	channel = TrackChannelForEvent(track, event);
+	channel->bend = event->data.channel.param2 - 64;
 
-    // Update all voices for this channel.
+	// Update all voices for this channel.
 
-    for (i = 0; i < voice_alloced_num; ++i)
-    {
-        if (voice_alloced_list[i]->channel == channel)
-        {
-            V_UpdateFrequency(voice_alloced_list[i]);
-            voice_updated_list[voice_updated_num++] = voice_alloced_list[i];
-        }
-        else
-        {
-            voice_not_updated_list[voice_not_updated_num++] =
-            voice_alloced_list[i];
-        }
-    }
+	for (i = 0; i < voice_alloced_num; ++i)
+	{
+		if (voice_alloced_list[i]->channel == channel)
+		{
+			V_UpdateFrequency(voice_alloced_list[i]);
+			voice_updated_list[voice_updated_num++] = voice_alloced_list[i];
+		}
+		else
+		{
+			voice_not_updated_list[voice_not_updated_num++] =
+				voice_alloced_list[i];
+		}
+	}
 
-    for (i = 0; i < voice_not_updated_num; i++)
-    {
-        voice_alloced_list[i] = voice_not_updated_list[i];
-    }
+	for (i = 0; i < voice_not_updated_num; i++)
+	{
+		voice_alloced_list[i] = voice_not_updated_list[i];
+	}
 
-    for (i = 0; i < voice_updated_num; i++)
-    {
-        voice_alloced_list[i + voice_not_updated_num] = voice_updated_list[i];
-    }
+	for (i = 0; i < voice_updated_num; i++)
+	{
+		voice_alloced_list[i + voice_not_updated_num] = voice_updated_list[i];
+	}
 }
 
 static void MetaSetTempo(unsigned int tempo)
 {
-    OPL_SDL_AdjustCallbacks((float) us_per_beat / tempo);
-    us_per_beat = tempo;
+	//???  OPL_SDL_AdjustCallbacks((float) us_per_beat / tempo);
+	us_per_beat = tempo;
 }
 
 // Process a meta event.
 
 static void MetaEvent(opl_track_data_t *track, midi_event_t *event)
 {
-    uint8_t *data = event->data.meta.data;
-    unsigned int data_len = event->data.meta.length;
+	uint8_t *data = event->data.meta.data;
+	unsigned int data_len = event->data.meta.length;
 
-    switch (event->data.meta.type)
-    {
-        // Things we can just ignore.
+	switch (event->data.meta.type)
+	{
+		// Things we can just ignore.
 
-        case MIDI_META_SEQUENCE_NUMBER:
-        case MIDI_META_TEXT:
-        case MIDI_META_COPYRIGHT:
-        case MIDI_META_TRACK_NAME:
-        case MIDI_META_INSTR_NAME:
-        case MIDI_META_LYRICS:
-        case MIDI_META_MARKER:
-        case MIDI_META_CUE_POINT:
-        case MIDI_META_SEQUENCER_SPECIFIC:
-            break;
+		case MIDI_META_SEQUENCE_NUMBER:
+		case MIDI_META_TEXT:
+		case MIDI_META_COPYRIGHT:
+		case MIDI_META_TRACK_NAME:
+		case MIDI_META_INSTR_NAME:
+		case MIDI_META_LYRICS:
+		case MIDI_META_MARKER:
+		case MIDI_META_CUE_POINT:
+		case MIDI_META_SEQUENCER_SPECIFIC:
+			break;
 
-        case MIDI_META_SET_TEMPO:
-            if (data_len == 3)
-            {
-                MetaSetTempo((data[0] << 16) | (data[1] << 8) | data[2]);
-            }
-            break;
+		case MIDI_META_SET_TEMPO:
+			if (data_len == 3)
+			{
+				MetaSetTempo((data[0] << 16) | (data[1] << 8) | data[2]);
+			}
+			break;
 
-        // End of track - actually handled when we run out of events
-        // in the track, see below.
+			// End of track - actually handled when we run out of events
+			// in the track, see below.
 
-        case MIDI_META_END_OF_TRACK:
-            break;
+		case MIDI_META_END_OF_TRACK:
+			break;
 
-        default:
+		default:
 #ifdef OPL_MIDI_DEBUG
-            fprintf(stderr, "Unknown MIDI meta event type: %i\n",
-                            event->data.meta.type);
+			fprintf(stderr, "Unknown MIDI meta event type: %i\n",
+					event->data.meta.type);
 #endif
-            break;
-    }
+			break;
+	}
 }
 
 // Process a MIDI event from a track.
 
 static void ProcessEvent(opl_track_data_t *track, midi_event_t *event)
 {
-    switch (event->event_type)
-    {
-        case MIDI_EVENT_NOTE_OFF:
-            KeyOffEvent(track, event);
-            break;
+	switch (event->event_type)
+	{
+		case MIDI_EVENT_NOTE_OFF:
+			KeyOffEvent(track, event);
+			break;
 
-        case MIDI_EVENT_NOTE_ON:
-            KeyOnEvent(track, event);
-            break;
+		case MIDI_EVENT_NOTE_ON:
+			KeyOnEvent(track, event);
+			break;
 
-        case MIDI_EVENT_CONTROLLER:
-            ControllerEvent(track, event);
-            break;
+		case MIDI_EVENT_CONTROLLER:
+			ControllerEvent(track, event);
+			break;
 
-        case MIDI_EVENT_PROGRAM_CHANGE:
-            ProgramChangeEvent(track, event);
-            break;
+		case MIDI_EVENT_PROGRAM_CHANGE:
+			ProgramChangeEvent(track, event);
+			break;
 
-        case MIDI_EVENT_PITCH_BEND:
-            PitchBendEvent(track, event);
-            break;
+		case MIDI_EVENT_PITCH_BEND:
+			PitchBendEvent(track, event);
+			break;
 
-        case MIDI_EVENT_META:
-            MetaEvent(track, event);
-            break;
+		case MIDI_EVENT_META:
+			MetaEvent(track, event);
+			break;
 
-        // SysEx events can be ignored.
+			// SysEx events can be ignored.
 
-        case MIDI_EVENT_SYSEX:
-        case MIDI_EVENT_SYSEX_SPLIT:
-            break;
+		case MIDI_EVENT_SYSEX:
+		case MIDI_EVENT_SYSEX_SPLIT:
+			break;
 
-        default:
+		default:
 #ifdef OPL_MIDI_DEBUG
-            fprintf(stderr, "Unknown MIDI event type %i\n", event->event_type);
+			fprintf(stderr, "Unknown MIDI event type %i\n", event->event_type);
 #endif
-            break;
-    }
+			break;
+	}
 }
+
+//----------------------------------------------------------------------
+
+#if 0
 
 static void ScheduleTrack(opl_track_data_t *track);
 
@@ -1353,23 +1383,6 @@ static void ScheduleTrack(opl_track_data_t *track)
 }
 
 #endif
-
-// Initialize the channel info.
-
-static void InitChannels(void)
-{
-	int i;
-	for (i = 0; i < MIDI_CHANNELS_PER_TRACK; i++)
-	{
-		opl_channel_data_t *chan = &channels[i];
-
-		chan->instrument  = GM_GetInstrument(0);
-		chan->volume      = 100;
-		chan->volume_base = 100;
-		chan->pan         = 0x30;
-		chan->bend        = 0;
-	}
-}
 
 // Is the song playing?
 /*

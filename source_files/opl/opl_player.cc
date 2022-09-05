@@ -259,6 +259,7 @@ static bool music_initialized = false;
 
 static opl3_chip opl_chip;
 static bool opl3mode;
+static int sample_rate;
 
 // Data for each channel.
 
@@ -1351,8 +1352,8 @@ static bool ProcessNextTrack(void)
 
 		if (time < best_time)
 		{
-			best = i;
-			best_time = time;
+			best       = i;
+			best_time  = time;
 			best_delta = delta;
 		}
 	}
@@ -1363,7 +1364,19 @@ static bool ProcessNextTrack(void)
 		return true;
 	}
 
-	// TODO: HANDLE DELAY
+	if (best_time > absolute_time)
+	{
+		// convert time to number of samples
+		uint64_t time = best_time - absolute_time;
+		absolute_time = best_time;
+
+		render_samples = time * (uint64_t)sample_rate / 1000000ULL;
+		if (render_samples < 1)
+			render_samples = 1;
+
+		// render these samples *before* doing the event
+		return false;
+	}
 
 	opl_track_data_t *track = &tracks[best];
 
@@ -1446,13 +1459,15 @@ bool OPLAY_Init(int freq, bool stereo)
 	if (freq < 8000)
 		return false;
 
+	sample_rate = freq;
+
 	ParseDMXOptions();
 
 	OPL3_Reset(&opl_chip, freq);
 
 	OPL_InitRegisters();
 
-// FIXME	InitVoices();
+	InitVoices();
 
 	tracks = NULL;
 	num_tracks = 0;
@@ -1519,7 +1534,7 @@ void OPLAY_NotesOff(void)
 	int i;
 	for (i = 0; i < MIDI_CHANNELS_PER_TRACK; i++)
 	{
-//FIXME		Chan_AllNotesOff(&channels[i], 0);
+		Chan_AllNotesOff(&channels[i], 0);
 	}
 }
 

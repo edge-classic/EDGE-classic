@@ -131,5 +131,6 @@ void OPL3_GenerateResampled(opl3_chip *chip, Bit16s *buf);
 void OPL3_Reset(opl3_chip *chip, Bit32u samplerate);
 void OPL3_WriteReg(opl3_chip *chip, Bit16u reg, Bit8u v);
 void OPL3_WriteRegBuffered(opl3_chip *chip, Bit16u reg, Bit8u v);
-void OPL3_GenerateStream(opl3_chip *chip, Bit16s *sndptr, Bit32u numsamples);
+void OPL3_StreamStereo(opl3_chip *chip, Bit16s *sndptr, Bit32u numsamples);
+void OPL3_StreamMono(opl3_chip *chip, Bit16s *sndptr, Bit32u numsamples);
 #endif

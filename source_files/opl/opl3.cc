@@ -1403,7 +1403,7 @@ void OPL3_WriteRegBuffered(opl3_chip *chip, Bit16u reg, Bit8u v)
     chip->writebuf_last = (chip->writebuf_last + 1) % OPL_WRITEBUF_SIZE;
 }
 
-void OPL3_GenerateStream(opl3_chip *chip, Bit16s *sndptr, Bit32u numsamples)
+void OPL3_StreamStereo(opl3_chip *chip, Bit16s *sndptr, Bit32u numsamples)
 {
     Bit32u i;
 
@@ -1411,5 +1411,22 @@ void OPL3_GenerateStream(opl3_chip *chip, Bit16s *sndptr, Bit32u numsamples)
     {
         OPL3_GenerateResampled(chip, sndptr);
         sndptr += 2;
+    }
+}
+
+// andrewj: added this function
+void OPL3_StreamMono(opl3_chip *chip, Bit16s *sndptr, Bit32u numsamples)
+{
+    Bit32u i;
+
+    Bit16s samples[2];
+
+    for(i = 0; i < numsamples; i++)
+    {
+        OPL3_GenerateResampled(chip, samples);
+
+        Bit32s sum = (Bit32s)samples[0] + (Bit32s)samples[1];
+
+        *sndptr++ = (Bit16s)(sum >> 1);
     }
 }

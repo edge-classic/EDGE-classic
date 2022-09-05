@@ -1403,8 +1403,11 @@ static bool AllocateTracks(void)
 
 static void FreeTracks(void)
 {
-	free(tracks);
-	tracks = NULL;
+	if (tracks != NULL)
+	{
+		free(tracks);
+		tracks = NULL;
+	}
 	num_tracks = 0;
 }
 
@@ -1424,6 +1427,8 @@ static void RewindSong(void)
 
 	// default tempo is 120 bpm (as per MIDI standard).
 	us_per_beat = 500 * 1000;
+
+	InitChannels();
 }
 
 static void ParseDMXOptions(void)
@@ -1487,14 +1492,10 @@ bool OPLAY_StartSong(midi_file_t *song)
 	if (song == the_song)
 	{
 		RewindSong();
-		InitChannels();
 		return true;
 	}
 
-	if (tracks != NULL)
-	{
-		FreeTracks();
-	}
+	FreeTracks();
 
 	the_song = song;
 
@@ -1507,7 +1508,6 @@ bool OPLAY_StartSong(midi_file_t *song)
 	ticks_per_beat = MIDI_GetFileTimeDivision(song);
 
 	RewindSong();
-	InitChannels();
 
 	return true;
 }

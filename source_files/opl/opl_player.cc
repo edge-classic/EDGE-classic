@@ -1373,7 +1373,8 @@ static void ScheduleTrack(opl_track_data_t *track)
 
     // Get the number of microseconds until the next event.
 
-    nticks = MIDI_GetDeltaTime(track->iter);
+    nticks = track->iter->delta_time;
+
     us = ((uint64_t) nticks * us_per_beat) / ticks_per_beat;
 
     // Set a timer to be invoked when the next event is
@@ -1384,39 +1385,50 @@ static void ScheduleTrack(opl_track_data_t *track)
 
 #endif
 
-// Is the song playing?
-/*
-static bool I_OPL_MusicIsPlaying(void)
+static bool ProcessNextTrack(void)
 {
-    if (!music_initialized)
-    {
-        return false;
-    }
+	int best = -1;
+	uint64_t best_time = (1ULL << 60);
 
-    return num_tracks > 0;
-}
-*/
+	// Find track with earliest next event.
 
-static void ParseDMXOptions(void)
-{
-	// TODO
-	/// dmxoption = getenv("DMXOPTION");
-
-	if (false)  // TODO -opl3
+	unsigned int i;
+	for (i = 0 ; i < num_tracks ; i++)
 	{
-		opl3mode = true;
-		num_opl_voices = OPL_NUM_VOICES * 2;
-	}
-	else
-	{
-		opl3mode = false;
-		num_opl_voices = OPL_NUM_VOICES;
+		opl_track_data_t *track = &tracks[i];
+
+		if (track->iter == NULL)
+		{
+			// ignore a finished track
+			continue;
+		}
+
+		if (track->time < best_time)
+		{
+			best = i;
+			best_time = track->time;
+		}
 	}
 
-	if (false)  // TODO -reverse
+	if (best < 0)
 	{
-		swap_stereo = true;
+		// that's all folks!
+		return true;
 	}
+
+	// TODO: HANDLE DELAY
+
+	opl_track_data_t *track = &tracks[best];
+
+	ProcessEvent(track, track->iter);
+
+	track->iter = track->iter->next;
+	if (track->iter != NULL)
+	{
+		track->time += (uint64_t) track->iter->delta_time;
+	}
+
+	return false;
 }
 
 static bool AllocateTracks(void)
@@ -1446,8 +1458,35 @@ static void RewindSong(void)
 	{
 		tracks[i].iter = MIDI_IterateTrack(the_song, i);
 		tracks[i].time = 0;
+
+		if (tracks[i].iter != NULL)
+		{
+			tracks[i].time = tracks[i].iter->delta_time;
+		}
 	}
 	absolute_time = 0;
+}
+
+static void ParseDMXOptions(void)
+{
+	// TODO
+	/// dmxoption = getenv("DMXOPTION");
+
+	if (false)  // TODO -opl3
+	{
+		opl3mode = true;
+		num_opl_voices = OPL_NUM_VOICES * 2;
+	}
+	else
+	{
+		opl3mode = false;
+		num_opl_voices = OPL_NUM_VOICES;
+	}
+
+	if (false)  // TODO -reverse
+	{
+		swap_stereo = true;
+	}
 }
 
 //----------------------------------------------------------------------

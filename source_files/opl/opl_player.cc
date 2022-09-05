@@ -51,8 +51,8 @@ typedef struct
     // the next event to process
     midi_event_t *iter;
 
-    // absolute time of next event
-    uint64_t  time;
+    // absolute time of previous event, in microseconds
+    uint64_t  prev_time;
 } opl_track_data_t;
 
 // Information for an active voice (on the OPL chip)
@@ -267,15 +267,15 @@ static opl_channel_data_t channels[MIDI_CHANNELS_PER_TRACK];
 // Track data for playing tracks:
 
 static midi_file_t *the_song;
-static uint64_t  absolute_time;
+static uint64_t  absolute_time;  // microseconds
 
 static opl_track_data_t *tracks;
 static unsigned int num_tracks = 0;
 
 // Tempo control variables
 
-static unsigned int ticks_per_beat;
-static unsigned int us_per_beat;
+static unsigned int ticks_per_beat;  // constant per song
+static unsigned int us_per_beat;     // can change via a Meta event
 
 static int opl_io_port = 0x388;
 
@@ -1222,7 +1222,9 @@ static void PitchBendEvent(opl_track_data_t *track, midi_event_t *event)
 
 static void MetaSetTempo(unsigned int tempo)
 {
-	//???  OPL_SDL_AdjustCallbacks((float) us_per_beat / tempo);
+	// tempo is defined as microseconds per "quarter note" (aka "beat").
+	// divide this by `ticks_per_beat` to get microseconds per tick.
+
 	us_per_beat = tempo;
 }
 
@@ -1389,6 +1391,7 @@ static bool ProcessNextTrack(void)
 {
 	int best = -1;
 	uint64_t best_time = (1ULL << 60);
+	uint64_t best_delta = 0;
 
 	// Find track with earliest next event.
 
@@ -1403,10 +1406,18 @@ static bool ProcessNextTrack(void)
 			continue;
 		}
 
-		if (track->time < best_time)
+		uint64_t delta = (uint64_t)track->iter->delta_time;
+
+		// convert "ticks" of delta time to microseconds
+		delta = delta * (uint64_t)us_per_beat / (uint64_t)ticks_per_beat;
+
+		uint64_t time = track->prev_time + delta;
+
+		if (time < best_time)
 		{
 			best = i;
-			best_time = track->time;
+			best_time = time;
+			best_delta = delta;
 		}
 	}
 
@@ -1423,10 +1434,7 @@ static bool ProcessNextTrack(void)
 	ProcessEvent(track, track->iter);
 
 	track->iter = track->iter->next;
-	if (track->iter != NULL)
-	{
-		track->time += (uint64_t) track->iter->delta_time;
-	}
+	track->prev_time = best_time;
 
 	return false;
 }
@@ -1457,14 +1465,13 @@ static void RewindSong(void)
 	for (i = 0 ; i < num_tracks ; i++)
 	{
 		tracks[i].iter = MIDI_IterateTrack(the_song, i);
-		tracks[i].time = 0;
-
-		if (tracks[i].iter != NULL)
-		{
-			tracks[i].time = tracks[i].iter->delta_time;
-		}
+		tracks[i].prev_time = 0;
 	}
+
 	absolute_time = 0;
+
+	// default tempo is 120 bpm (as per MIDI standard).
+	us_per_beat = 500 * 1000;
 }
 
 static void ParseDMXOptions(void)
@@ -1544,10 +1551,6 @@ bool OPLAY_StartSong(midi_file_t *song)
 	}
 
 	ticks_per_beat = MIDI_GetFileTimeDivision(song);
-
-	// Default is 120 bpm.
-	// TODO: this is wrong
-	us_per_beat = 500 * 1000;
 
 	RewindSong();
 	InitChannels();

@@ -52,10 +52,6 @@ static abstract_music_c *music_player;
 static int  entry_playing = -1;
 static bool entry_looped;
 
-// FIXME (a) default should be false
-//       (b) should be a config variable and/or cvar
-bool force_opl_emulation = true;
-
 
 void S_ChangeMusic(int entrynum, bool loop)
 {
@@ -229,7 +225,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 	// TODO: these calls free the data, but we probably should free it here
 
-	if (force_opl_emulation)
+	if (var_opl_music)
 	{
 		music_player = S_PlayOPL(data, length, is_mus, volume, loop);
 		return;

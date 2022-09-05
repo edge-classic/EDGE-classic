@@ -269,6 +269,9 @@ static opl_channel_data_t channels[MIDI_CHANNELS_PER_TRACK];
 static midi_file_t *the_song;
 static uint64_t  absolute_time;  // microseconds
 
+// number of sample pairs awaiting generation by the OPL3 emulator
+static int render_samples;
+
 static opl_track_data_t *tracks;
 static unsigned int num_tracks = 0;
 
@@ -1318,77 +1321,10 @@ static void ProcessEvent(opl_track_data_t *track, midi_event_t *event)
 
 //----------------------------------------------------------------------
 
-#if 0
-
-static void ScheduleTrack(opl_track_data_t *track);
-
-// Callback function invoked when another event needs to be read from
-// a track.
-
-static void TrackTimerCallback(void *arg)
-{
-/*
-    opl_track_data_t *track = arg;
-    midi_event_t *event;
-
-    // Get the next event and process it.
-
-    if (!MIDI_GetNextEvent(track->iter, &event))
-    {
-        return;
-    }
-
-    ProcessEvent(track, event);
-
-    // End of track?
-
-    if (event->event_type == MIDI_EVENT_META
-     && event->data.meta.type == MIDI_META_END_OF_TRACK)
-    {
-        --running_tracks;
-
-        // When all tracks have finished, restart the song.
-        // Don't restart the song immediately, but wait for 5ms
-        // before triggering a restart.  Otherwise it is possible
-        // to construct an empty MIDI file that causes the game
-        // to lock up in an infinite loop. (5ms should be short
-        // enough not to be noticeable by the listener).
-
-        if (running_tracks <= 0 && song_looping)
-        {
-            OPL_SDL_SetCallback(5000, RestartSong, NULL);
-        }
-
-        return;
-    }
-
-    // Reschedule the callback for the next event in the track.
-
-    ScheduleTrack(track);
-*/
-}
-
-static void ScheduleTrack(opl_track_data_t *track)
-{
-    unsigned int nticks;
-    uint64_t us;
-
-    // Get the number of microseconds until the next event.
-
-    nticks = track->iter->delta_time;
-
-    us = ((uint64_t) nticks * us_per_beat) / ticks_per_beat;
-
-    // Set a timer to be invoked when the next event is
-    // ready to play.
-
-    OPL_SDL_SetCallback(us, TrackTimerCallback, track);
-}
-
-#endif
-
 static bool ProcessNextTrack(void)
 {
+	// returns true when all tracks are finished.
+
 	int best = -1;
 	uint64_t best_time = (1ULL << 60);
 	uint64_t best_delta = 0;
@@ -1469,6 +1405,9 @@ static void RewindSong(void)
 	}
 
 	absolute_time = 0;
+
+	// guard against a zero-length MIDI, generate a very short pause at start
+	render_samples = 64;
 
 	// default tempo is 120 bpm (as per MIDI standard).
 	us_per_beat = 500 * 1000;
@@ -1586,11 +1525,46 @@ void OPLAY_NotesOff(void)
 
 int OPLAY_Stream(int16_t *buf, int samples, bool stereo)
 {
+	// number of sample pairs stored in the buffer
+	int stored = 0;
+
 	if (! music_initialized || the_song == NULL)
 	{
 		return 0;
 	}
 
-	// TODO
-	return 0;
+	for (;;)
+	{
+		if (render_samples > 0)
+		{
+			int want = samples - stored;
+			if (want > render_samples)
+				want = render_samples;
+
+			if (stereo)
+			{
+				OPL3_StreamStereo(&opl_chip, buf, want);
+				buf += want * 2;
+			}
+			else
+			{
+				OPL3_StreamMono(&opl_chip, buf, want);
+				buf += want;
+			}
+
+			stored += want;
+			render_samples -= want;
+		}
+
+		if (stored >= samples)
+			break;
+
+		if (ProcessNextTrack())
+		{
+			// all tracks are finished
+			break;
+		}
+	}
+
+	return stored;
 }

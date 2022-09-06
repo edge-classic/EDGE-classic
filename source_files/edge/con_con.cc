@@ -34,6 +34,7 @@
 #include "e_input.h"
 #include "e_player.h"
 #include "g_game.h"
+#include "hu_draw.h"
 #include "hu_stuff.h"
 #include "hu_style.h"
 #include "m_argv.h"
@@ -57,8 +58,8 @@ static visible_t con_visible;
 // stores the console toggle effect
 static int conwipeactive = 0;
 static int conwipepos = 0;
-font_c *con_font;
-font_c *endoom_font;
+static font_c *con_font;
+static font_c *endoom_font;
 
 // the console's background
 static style_c *console_style;
@@ -735,8 +736,20 @@ void CON_Drawer(void)
 	else
 		y = y - CON_GFX_HT;
 
-	SolidBox(0, y, SCREENWIDTH, SCREENHEIGHT - y, console_style->def->bg.colour != RGB_NO_VALUE ? 
-		console_style->def->bg.colour : RGB_MAKE(0,0,0), console_style->def->bg.translucency);
+	if (console_style->bg_image != NULL)
+	{
+		const image_c *img = console_style->bg_image;
+
+		HUD_RawImage(0, y, SCREENWIDTH, y + CON_GFX_HT, img,
+			0.0, 0.0, IM_RIGHT(img), IM_TOP(img),
+			console_style->def->bg.translucency,
+			RGB_NO_VALUE, NULL, 0, 0);
+	}
+	else
+	{
+		SolidBox(0, y, SCREENWIDTH, SCREENHEIGHT - y, console_style->def->bg.colour != RGB_NO_VALUE ?
+			console_style->def->bg.colour : RGB_MAKE(0,0,0), console_style->def->bg.translucency);
+	}
 
 	y += YMUL / 4;
 

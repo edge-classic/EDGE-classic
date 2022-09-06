@@ -10,6 +10,7 @@ add_subdirectory(source_files/libgme)
 add_subdirectory(source_files/libmodplug)
 add_subdirectory(source_files/libwebsid)
 add_subdirectory(source_files/miniz)
+add_subdirectory(source_files/opl)
 add_subdirectory(source_files/whereami)
 
 project(
@@ -129,6 +130,7 @@ add_executable(
 	source_files/edge/s_tsf.cc
 	source_files/edge/s_gme.cc
 	source_files/edge/s_mod.cc
+	source_files/edge/s_opl.cc
 	source_files/edge/s_sid.cc
 	source_files/edge/s_wav.cc  
 	source_files/edge/sv_chunk.cc   
@@ -170,6 +172,7 @@ target_include_directories(edge-classic PRIVATE source_files/libwebsid)
 target_include_directories(edge-classic PRIVATE source_files/minimp3)
 target_include_directories(edge-classic PRIVATE source_files/minivorbis)
 target_include_directories(edge-classic PRIVATE source_files/miniz)
+target_include_directories(edge-classic PRIVATE source_files/opl)
 if(WIN32 AND NOT MSYS)
   target_include_directories(edge-classic PRIVATE source_files/sdl2/include)
 endif()
@@ -246,6 +249,7 @@ if(WIN32 OR MSYS)
 			miniz
 			modplug
 			libwebsid
+			opl
 			whereami
 			wsock32
 	)
@@ -264,6 +268,7 @@ else()
 			miniz
 			modplug
 			libwebsid
+			opl
 			whereami
 	)
 endif()

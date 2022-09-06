@@ -34,7 +34,6 @@ typedef struct
 
     // Volume level:
     int volume;
-    int volume_base;
 
     // Panning:
     int pan;
@@ -909,7 +908,6 @@ static void InitChannels(void)
 
 		chan->instrument  = GM_GetInstrument(0);
 		chan->volume      = 100;
-		chan->volume_base = 100;
 		chan->pan         = 0x30;
 		chan->bend        = 0;
 	}
@@ -918,8 +916,6 @@ static void InitChannels(void)
 static void Chan_SetVolume(opl_channel_data_t *channel, unsigned int volume, bool clip_start)
 {
 	unsigned int i;
-
-	channel->volume_base = volume;
 
 	if (volume > 127)
 	{

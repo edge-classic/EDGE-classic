@@ -147,7 +147,7 @@ int CMD_Dir(char **argv, int argc)
 	{
 		epi::filesys_direntry_c *entry = fsd[i];
 
-		I_Printf("  %2d: %10d     %s     '%s'\n",
+		I_Printf("  %2d: %10d  %s  %s\n",
 				 i+1, entry->size,
 				 entry->is_dir ? "DIR" : "   ",
 				 epi::PATH_GetFilename(entry->name.c_str()).c_str());

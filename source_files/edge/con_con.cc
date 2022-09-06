@@ -529,12 +529,9 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 
 	float tx1 = (px  ) * con_font->font_image->ratio_w;
 	float tx2 = (px+1) * con_font->font_image->ratio_w;
-	float char_texcoord_adjust = ((tx2 - tx1) - ((tx2 - tx1) * (con_font->CharWidth(ch) / con_font->im_char_width))) / 2;
-	tx1 += char_texcoord_adjust;
-	tx2 -= char_texcoord_adjust;
 	float ty1 = (py  ) * con_font->font_image->ratio_h;
 	float ty2 = (py+1) * con_font->font_image->ratio_h;
-	int x_adjust = I_ROUND(FNSZ * con_font->individual_char_ratios[(int)ch]);
+	int x_adjust = FNSZ;
 
 	glBegin(GL_POLYGON);
 
@@ -637,7 +634,7 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 	{
 		DrawChar(x, y, *s, col);
 
-		x += (*s == ' ' ? I_ROUND(FNSZ * 0.4f) : I_ROUND(FNSZ * con_font->individual_char_ratios[(int)*s])) + I_ROUND(con_font->spacing);
+		x += I_ROUND(FNSZ * (con_font->im_mono_width / con_font->im_char_height)) + I_ROUND(con_font->spacing);
 
 		if (x >= SCREENWIDTH)
 			break;

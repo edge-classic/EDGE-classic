@@ -166,6 +166,7 @@ void font_c::LoadFontImage()
 		int char_height = font_image->actual_h / 16;
 		im_char_width = char_width * font_image->scale_x;
 		im_char_height = char_height * font_image->scale_y;
+		im_mono_width = 0;
 		spacing = def->spacing;
 		// Determine individual character widths and ratios
 		individual_char_widths = new float[256];
@@ -176,6 +177,8 @@ void font_c::LoadFontImage()
 			int px =      i % 16;
 			int py = 15 - i / 16;
 			individual_char_widths[i] = char_data->ImageCharacterWidth(px * char_width, py * char_height, px * char_width + char_width, py * char_height + char_height) * font_image->scale_x;
+			if (individual_char_widths[i] > im_mono_width)
+				im_mono_width = individual_char_widths[i];
 			individual_char_ratios[i] = individual_char_widths[i] / im_char_height;
 		}
 		delete char_data;

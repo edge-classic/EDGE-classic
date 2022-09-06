@@ -82,6 +82,7 @@ public:
 	float spacing;
 	float *individual_char_widths;
 	float *individual_char_ratios;
+	float im_mono_width;
 
 
 private:

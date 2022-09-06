@@ -1133,7 +1133,7 @@ static void ProgramChangeEvent(opl_track_data_t *track, midi_event_t *event)
 	instrument = event->data.channel.param1;
 	channel->instrument = GM_GetInstrument(instrument);
 
-	// TODO: Look through existing voices that are turned on on this
+	// WISH: Look through existing voices that are turned on on this
 	// channel, and change the instrument.
 }
 
@@ -1429,10 +1429,11 @@ static void RewindSong(void)
 
 static void ParseDMXOptions(void)
 {
-	// TODO
-	/// dmxoption = getenv("DMXOPTION");
+	const char *dmxoption = getenv("DMXOPTION");
+	if (dmxoption == NULL)
+		dmxoption = "";
 
-	if (false)  // TODO -opl3
+	if (strstr(dmxoption, "-opl3") != NULL)
 	{
 		opl3mode = true;
 		num_opl_voices = OPL_NUM_VOICES * 2;
@@ -1443,7 +1444,7 @@ static void ParseDMXOptions(void)
 		num_opl_voices = OPL_NUM_VOICES;
 	}
 
-	if (false)  // TODO -reverse
+	if (strstr(dmxoption, "-reverse") != NULL)
 	{
 		swap_stereo = true;
 	}

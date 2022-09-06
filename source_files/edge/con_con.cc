@@ -740,11 +740,7 @@ void CON_Drawer(void)
 	{
 		const image_c *img = console_style->bg_image;
 
-		float height = SCREENWIDTH / 2.0;
-		if (height < CON_GFX_HT)
-			height = CON_GFX_HT;
-
-		HUD_RawImage(0, y, SCREENWIDTH, y + height, img,
+		HUD_RawImage(0, y, SCREENWIDTH, y + CON_GFX_HT, img,
 			0.0, 0.0, IM_RIGHT(img), IM_TOP(img),
 			console_style->def->bg.translucency,
 			RGB_NO_VALUE, NULL, 0, 0);

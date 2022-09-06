@@ -262,7 +262,10 @@ bool S_StartupTSF(void)
 	}
 
 	tsf_channel_set_bank_preset(edge_tsf, 9, 128, 0);
-	tsf_set_output(edge_tsf, dev_stereo ? TSF_STEREO_INTERLEAVED : TSF_MONO, dev_freq, 0);
+
+	// reduce the overall gain by 6dB, to minimize the chance of clipping in
+	// songs with a lot of simultaneous notes.
+	tsf_set_output(edge_tsf, dev_stereo ? TSF_STEREO_INTERLEAVED : TSF_MONO, dev_freq, -6.0);
 
 	tsf_inited = true;
 
@@ -285,7 +288,7 @@ abstract_music_c * S_PlayTSF(byte *data, int length, bool is_mus,
 		if (! Mus2Midi::Convert(data, length, &midi_data, &midi_len,
 					Mus2Midi::DOOM_DIVIS, true))
 		{
-			delete [] data;
+			delete[] data;
 
 			I_Warning("Unable to convert MUS to MIDI !\n");
 			return NULL;

@@ -213,7 +213,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 	}
 	
 	bool is_mus  = (data[0] == 'M' && data[1] == 'U' && data[2] == 'S');
-	bool is_midi = (data[0] == 'M' && data[1] == 'T' && data[2] == 'r' && data[3] == 'k');
+	bool is_midi = (data[14] == 'M' && data[15] == 'T' && data[16] == 'r' && data[17] == 'k'); // First track chunk location (I think) - Dasho
 
 	if (! (is_mus || is_midi))
 	{

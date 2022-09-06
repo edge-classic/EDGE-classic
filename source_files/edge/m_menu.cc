@@ -1592,15 +1592,20 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
 	int i, basex = x;
 	int step = (8 / div);
 	int pos = 254;
+	int empty = 255;
 
 	style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
 
 	// If using an IMAGE type font for the menu, use symbols for the slider instead
 	if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image)
 	{
-		for (i=0; i < thermDot; i++, x += step)
+		for (i=1; i <= thermDot; i++, x += step)
 		{
 			HL_WriteText(opt_style, styledef_c::T_ALT, x, y, (const char *)&pos);
+		}
+		for (i=1; i < thermWidth - thermDot; i++, x += step)
+		{
+			HL_WriteText(opt_style, styledef_c::T_ALT, x, y, (const char *)&empty);
 		}
 	}
 	else

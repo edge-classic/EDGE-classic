@@ -2547,7 +2547,7 @@ void W_ShowFiles(void)
 	{
 		data_file_c *df = data_files[i];
 
-		I_Printf(" %2d %-4s \"%s\"\n", i+1, FileKind_Strings[df->kind], df->file_name);
+		I_Printf(" %2d: %-4s \"%s\"\n", i+1, FileKind_Strings[df->kind], df->file_name);
 	}
 }
 

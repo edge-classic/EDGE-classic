@@ -147,7 +147,7 @@ int CMD_Dir(char **argv, int argc)
 	{
 		epi::filesys_direntry_c *entry = fsd[i];
 
-		I_Printf("  %2d: %10d  %s  %s\n",
+		I_Printf(" %2d: %10d  %s  \"%s\"\n",
 				 i+1, entry->size,
 				 entry->is_dir ? "DIR" : "   ",
 				 epi::PATH_GetFilename(entry->name.c_str()).c_str());
@@ -311,9 +311,9 @@ int CMD_ShowVars(char **argv, int argc)
 		cvar_c *var = all_cvars[i].var;
 
 		if (show_defaults)
-			I_Printf("  %-15s \"%s\" (%s)\n", all_cvars[i].name, var->str, all_cvars[i].def_val);
+			I_Printf("  %-20s \"%s\" (%s)\n", all_cvars[i].name, var->str, all_cvars[i].def_val);
 		else
-			I_Printf("  %-15s \"%s\"\n", all_cvars[i].name, var->str);
+			I_Printf("  %-20s \"%s\"\n", all_cvars[i].name, var->str);
 
 		total++;
 	}

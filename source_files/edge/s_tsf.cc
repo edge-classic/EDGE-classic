@@ -262,7 +262,10 @@ bool S_StartupTSF(void)
 	}
 
 	tsf_channel_set_bank_preset(edge_tsf, 9, 128, 0);
-	tsf_set_output(edge_tsf, dev_stereo ? TSF_STEREO_INTERLEAVED : TSF_MONO, dev_freq, 0);
+
+	// reduce the overall gain by 6dB, to minimize the chance of clipping in
+	// songs with a lot of simultaneous notes.
+	tsf_set_output(edge_tsf, dev_stereo ? TSF_STEREO_INTERLEAVED : TSF_MONO, dev_freq, -6.0);
 
 	tsf_inited = true;
 

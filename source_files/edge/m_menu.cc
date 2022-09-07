@@ -1582,6 +1582,19 @@ void M_QuitEDGE(int choice)
 	M_StartMessage(msg.c_str(), QuitResponse, true);
 }
 
+// Accessible from console's 'quit now' command
+void M_ImmediateQuit()
+{
+	I_Printf("Saving system defaults...\n");
+	M_SaveDefaults();
+
+	I_Printf("Exiting...\n");
+
+	E_EngineShutdown();
+	I_SystemShutdown();
+
+	I_CloseProgram(EXIT_SUCCESS);
+}
 
 //----------------------------------------------------------------------------
 //   MENU FUNCTIONS

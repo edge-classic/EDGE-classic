@@ -175,14 +175,11 @@ int CMD_ScreenShot(char **argv, int argc)
 
 int CMD_QuitEDGE(char **argv, int argc)
 {
-#if 0
 	if (argc >= 2 && stricmp(argv[1], "now") == 0)
-	{
 		// this never returns
-		M_QuitFinally();
-	}
-#endif
-	M_QuitEDGE(0);
+		M_ImmediateQuit();
+	else
+		M_QuitEDGE(0);
 
 	return 0;
 }

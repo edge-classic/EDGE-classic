@@ -37,7 +37,7 @@
 #include "midifile.h"
 #include "opl_player.h"
 
-#define NUM_SAMPLES  4096
+#define NUM_SAMPLES  1024
 
 extern bool dev_stereo;
 extern int  dev_freq;

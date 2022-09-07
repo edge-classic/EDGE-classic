@@ -21,11 +21,6 @@
 
 #include <inttypes.h>
 
-// Not sure if signed int is the exact best MSVC equivalent for ssize_t, will do more research - Dasho
-#ifdef _MSC_VER
-#define ssize_t signed int
-#endif
-
 typedef struct midi_file_s midi_file_t;
 
 #define MIDI_CHANNELS_PER_TRACK 16
@@ -134,7 +129,7 @@ typedef struct midi_event_s
 
 // Load a MIDI file.
 
-midi_file_t *MIDI_LoadFile(uint8_t *input, ssize_t length);
+midi_file_t *MIDI_LoadFile(uint8_t *input, size_t length);
 
 // Free a MIDI file.
 

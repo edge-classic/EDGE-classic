@@ -107,7 +107,7 @@ typedef struct
 {
     uint8_t *start;
     uint8_t *pos;
-    ssize_t  len;
+    size_t   len;
 } input_stream_t;
 
 // Check the header of a chunk:
@@ -437,8 +437,8 @@ static bool ReadTrackHeader(midi_track_t *track, input_stream_t *stream)
 {
     chunk_header_t chunk_header;
 
-    ssize_t position  = (ssize_t)(stream->pos - stream->start);
-    ssize_t remaining = stream->len - position;
+    size_t position  = (size_t)(stream->pos - stream->start);
+    size_t remaining = stream->len - position;
 
     if (position + sizeof(chunk_header_t) > stream->len)
     {
@@ -581,8 +581,8 @@ static bool ReadFileHeader(midi_file_t *file, input_stream_t *stream)
 {
     unsigned int format_type;
 
-    ssize_t position  = (ssize_t)(stream->pos - stream->start);
-    ssize_t remaining = stream->len - position;
+    size_t position  = (size_t)(stream->pos - stream->start);
+    size_t remaining = stream->len - position;
 
     if (position + sizeof(midi_header_t) > stream->len)
     {
@@ -631,7 +631,7 @@ void MIDI_FreeFile(midi_file_t *file)
     free(file);
 }
 
-midi_file_t *MIDI_LoadFile(uint8_t *input, ssize_t length)
+midi_file_t *MIDI_LoadFile(uint8_t *input, size_t length)
 {
     input_stream_t stream;
 

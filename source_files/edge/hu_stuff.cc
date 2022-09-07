@@ -120,6 +120,7 @@ void HU_Start(void)
 void HU_Drawer(void)
 {
 	CON_ShowFPS();
+	CON_ShowPosition();
 
 	/*
 	if (message_on)

@@ -34,6 +34,7 @@ bool CON_Responder(event_t * ev);
 void CON_Drawer(void);
 
 void CON_ShowFPS(void);
+void CON_ShowPosition(void);
 
 // Initialises the console
 void CON_InitConsole(void);

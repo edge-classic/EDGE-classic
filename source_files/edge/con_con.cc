@@ -1420,91 +1420,103 @@ void CON_Start(void)
 
 void CON_ShowFPS(void)
 {
-	CON_SetupFont();
-
-	if (debug_fps.d <= 0 && debug_pos.d <= 0)
+	if (debug_fps.d <= 0)
 		return;
 
-	static int numframes = 0, lasttime = 0;
-	static float fps = 0, mspf = 0;
+	CON_SetupFont();
 
-	char textbuf[100];
-	int currtime, timediff;
+	// -AJA- 07-Sep-2022: reworked for better accuracy, and to show WORST time
 
-	numframes++;
-	currtime = I_GetTime();
-	timediff = currtime - lasttime;
+	static int last_time  = 0;
+	static int total_time = 0;
+	static int max_diff   = 0;
 
-	if (timediff > 70)
+	static float mspf = 0.0;  // last computed value
+
+	int time = I_GetMillies();
+	int diff = time - last_time;
+
+	if (diff > max_diff)
+		max_diff = diff;
+
+	last_time = time;
+	total_time += diff;
+
+	if (total_time > 250)
 	{
-		fps  = (float) (numframes * TICRATE) / (float) timediff;
-		mspf = (float) timediff * 1000.0f / (float) (numframes * TICRATE);
+		mspf = (float)max_diff;
 
-		lasttime = currtime;
-		numframes = 0;
+		// old way: compute average of the interval
+		// mspf = (float)total_time / (float)numframes;
+
+		max_diff   = 0;
+		total_time = 0;
 	}
 
-	int lcount = 2;
-
-	if (debug_fps.d >= 2)
-		lcount++;
-
-	if (debug_pos.d)
-		lcount += 7;
-
 	int x = SCREENWIDTH  - XMUL * 16;
-	int y = SCREENHEIGHT - YMUL * lcount;
+	int y = SCREENHEIGHT - YMUL * 2;
 
 	SolidBox(x, y, SCREENWIDTH, SCREENHEIGHT, RGB_MAKE(0,0,0), 0.5);
 
 	x += XMUL;
 	y = SCREENHEIGHT - YMUL - YMUL/2;
 
-	if (true)
+	char textbuf[128];
+
+	if (debug_fps.d == 2)
 	{
-		sprintf(textbuf, "  fps: %1.1f", fps);
-		DrawText(x, y, textbuf, T_GREY176);
-		y -= YMUL;
+		sprintf(textbuf, "  %1.1f ms", mspf);
+	}
+	else
+	{
+		sprintf(textbuf, "  %1.1f fps", 1000 / mspf);
 	}
 
-	if (debug_fps.d >= 2)
-	{
-		sprintf(textbuf, " ms/f: %1.1f", mspf);
-		DrawText(x, y, textbuf, T_GREY176);
-		y -= YMUL;
-	}
+	DrawText(x, y, textbuf, T_GREY176);
+}
+
+void CON_ShowPosition(void)
+{
+	if (debug_pos.d <= 0)
+		return;
+
+	CON_SetupFont();
+
+	player_t *p = players[displayplayer];
+	if (p == NULL)
+		return;
+
+	char textbuf[128];
+
+	int x = SCREENWIDTH  - XMUL * 16;
+	int y = SCREENHEIGHT - YMUL * 4;
+
+	SolidBox(x, y - YMUL * 7, XMUL * 16, YMUL * 7 + 2, RGB_MAKE(0,0,0), 0.5);
+
+	x += XMUL;
+	y -= YMUL;
+	sprintf(textbuf, "    x: %d", (int)p->mo->x);
+	DrawText(x, y, textbuf, T_GREY176);
 
 	y -= YMUL;
+	sprintf(textbuf, "    y: %d", (int)p->mo->y);
+	DrawText(x, y, textbuf, T_GREY176);
 
-	if (debug_pos.d)
-	{
-		player_t *p = players[displayplayer];
-		SYS_ASSERT(p);
+	y -= YMUL;
+	sprintf(textbuf, "    z: %d", (int)p->mo->z);
+	DrawText(x, y, textbuf, T_GREY176);
 
-		sprintf(textbuf, "    x: %d", (int)p->mo->x);
-		DrawText(x, y, textbuf, T_GREY176);
-		y -= YMUL;
+	y -= YMUL;
+	sprintf(textbuf, "angle: %d", (int)ANG_2_FLOAT(p->mo->angle));
+	DrawText(x, y, textbuf, T_GREY176);
 
-		sprintf(textbuf, "    y: %d", (int)p->mo->y);
-		DrawText(x, y, textbuf, T_GREY176);
-		y -= YMUL;
+	y -= YMUL;
+	sprintf(textbuf, "  sec: %d", (int)(p->mo->subsector->sector - sectors));
+	DrawText(x, y, textbuf, T_GREY176);
 
-		sprintf(textbuf, "    z: %d", (int)p->mo->z);
-		DrawText(x, y, textbuf, T_GREY176);
-		y -= YMUL;
-
-		sprintf(textbuf, "angle: %d", (int)ANG_2_FLOAT(p->mo->angle));
-		DrawText(x, y, textbuf, T_GREY176);
-		y -= YMUL;
-
-		sprintf(textbuf, "  sec: %d", (int)(p->mo->subsector->sector - sectors));
-		DrawText(x, y, textbuf, T_GREY176);
-		y -= YMUL;
-
-		sprintf(textbuf, "  sub: %d", (int)(p->mo->subsector - subsectors));
-		DrawText(x, y, textbuf, T_GREY176);
-		y -= YMUL*2;
-	}
+	y -= YMUL;
+	sprintf(textbuf, "  sub: %d", (int)(p->mo->subsector - subsectors));
+	DrawText(x, y, textbuf, T_GREY176);
 }
 
 void CON_PrintEndoom(int en_lump)

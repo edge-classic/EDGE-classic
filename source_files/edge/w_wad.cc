@@ -259,9 +259,6 @@ lumpinfo_t;
 // Location of each lump on disk.
 static std::vector<lumpinfo_t> lumpinfo;
 
-// TODO remove this
-static int numlumps;
-
 static std::vector<int> sortedlumps;
 
 #define LUMP_MAP_CMP(a) (strncmp(lumpinfo[sortedlumps[a]].name, buf, 8))
@@ -503,9 +500,9 @@ static void SortLumps(void)
 {
 	int i;
 
-	sortedlumps.resize(numlumps);
+	sortedlumps.resize(lumpinfo.size());
 
-	for (i = 0; i < numlumps; i++)
+	for (i = 0; i < (int)lumpinfo.size(); i++)
 		sortedlumps[i] = i;
     
 	// sort it, primarily by increasing name, secondly by decreasing
@@ -564,9 +561,11 @@ static void SortSpriteLumps(data_file_c *df)
 //
 // AddLump
 //
-static void AddLump(data_file_c *df, int lump, int pos, int size, int file, 
-					int sort_index, const char *name, bool allow_ddf)
+static void AddLump(data_file_c *df, const char *name, int pos, int size,
+					int file, int sort_index, bool allow_ddf)
 {
+	int lump = (int)lumpinfo.size();
+
 	lumpinfo_t info;
 
 	info.position = pos;
@@ -583,9 +582,8 @@ static void AddLump(data_file_c *df, int lump, int pos, int size, int file,
 	{
 		info.name[i] = toupper(info.name[i]);
 	}
- 
+
 	lumpinfo.push_back(info);
-	numlumps += 1;
 
 	lumpinfo_t *lump_p = &lumpinfo.back();
 
@@ -808,9 +806,7 @@ static void AddLump(data_file_c *df, int lump, int pos, int size, int file,
 // We need this to distinguish between old versus new .gwa cache files to trigger a rebuild
 bool W_CheckForXGLNodes(std::string filename)
 {
-	int j;
 	int length;
-	int startlump;
 	bool xgl_nodes_found = false;
 
 	epi::file_c *file = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
@@ -821,11 +817,6 @@ bool W_CheckForXGLNodes(std::string filename)
 	}
 
 	raw_wad_header_t header;
-	raw_wad_entry_t *curinfo;
-
-	int oldlumps = numlumps;
-
-	startlump = numlumps;
 
 	// WAD file
 	// TODO: handle Read failure
@@ -836,28 +827,25 @@ bool W_CheckForXGLNodes(std::string filename)
 
 	length = header.num_entries * sizeof(raw_wad_entry_t);
 
-    raw_wad_entry_t *fileinfo = new raw_wad_entry_t[header.num_entries];
+    raw_wad_entry_t *raw_info = new raw_wad_entry_t[header.num_entries];
 
     file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
 	// TODO: handle Read failure
-    file->Read(fileinfo, length);
+    file->Read(raw_info, length);
 
-	// Fill in lumpinfo
-	numlumps += header.num_entries;   // FIXME 
-
-	for (j=startlump, curinfo=fileinfo; j < numlumps; j++,curinfo++)
+	unsigned int i;
+	for (i=0 ; i < header.num_entries ; i++)
 	{
-		if (strncmp("XGLNODES", curinfo->name, 8) == 0)
+		if (strncmp("XGLNODES", raw_info[i].name, 8) == 0)
 		{
 			xgl_nodes_found = true;
 			break;
 		}
 	}
 
-	numlumps = oldlumps;
-
-	delete[] fileinfo;
+	delete[] raw_info;
 	delete file;
+
 	return xgl_nodes_found;
 }
 
@@ -1021,24 +1009,17 @@ static bool FindCacheFilename (std::string& out_name,
 
 bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char *lumpname2)
 {
-	int j;
 	int length;
-	int startlump;
 	bool lump1_found = false;
 	bool lump2_found = false;
 
 	raw_wad_header_t header;
-	raw_wad_entry_t *curinfo;
 
 	if (file == NULL)
 	{
 		I_Warning("W_CheckForUniqueLumps: Received null file_c pointer!\n");
 		return false;
 	}
-
-	int oldlumps = numlumps;
-
-	startlump = numlumps;
 
 	// WAD file
 	// TODO: handle Read failure
@@ -1047,44 +1028,42 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
  	// Do not require IWAD header if loading Harmony or a custom standalone IWAD
 	if (strncmp(header.identification, "IWAD", 4) != 0 && strcasecmp("0HAWK01", lumpname1) != 0 && strcasecmp("EDGEIWAD", lumpname1) != 0)
 	{
-			file->Seek(0, epi::file_c::SEEKPOINT_START);
-			return false;
+		file->Seek(0, epi::file_c::SEEKPOINT_START);
+		return false;
 	}
 
 	header.num_entries = EPI_LE_S32(header.num_entries);
-	header.dir_start = EPI_LE_S32(header.dir_start);
+	header.dir_start   = EPI_LE_S32(header.dir_start);
 
 	length = header.num_entries * sizeof(raw_wad_entry_t);
 
-    raw_wad_entry_t *fileinfo = new raw_wad_entry_t[header.num_entries];
+    raw_wad_entry_t *raw_info = new raw_wad_entry_t[header.num_entries];
 
     file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
 	// TODO: handle Read failure
-    file->Read(fileinfo, length);
+    file->Read(raw_info, length);
 
-	// Fill in lumpinfo
-	numlumps += header.num_entries;  // FIXME 
-
-	for (j=startlump, curinfo=fileinfo; j < numlumps; j++,curinfo++)
+	unsigned int i;
+	for (i=0 ; i < header.num_entries ; i++)
 	{
-		if (strncmp(lumpname1, curinfo->name, strlen(lumpname1) < 8 ? strlen(lumpname1) : 8) == 0)
+		raw_wad_entry_t& entry = raw_info[i];
+
+		if (strncmp(lumpname1, entry.name, strlen(lumpname1) < 8 ? strlen(lumpname1) : 8) == 0)
 		{
 			if (strcasecmp("EDGEIWAD", lumpname1) == 0) // EDGEIWAD is the only wad needed for custom standalones
 			{
-				numlumps = oldlumps;
-				delete[] fileinfo;
+				delete[] raw_info;
 				file->Seek(0, epi::file_c::SEEKPOINT_START);
 				return true;
 			}
 			else
 				lump1_found = true;
 		}
-		if (strncmp(lumpname2, curinfo->name, strlen(lumpname2) < 8 ? strlen(lumpname2) : 8) == 0)
+		if (strncmp(lumpname2, entry.name, strlen(lumpname2) < 8 ? strlen(lumpname2) : 8) == 0)
 			lump2_found = true;
 	}
 
-	numlumps = oldlumps;
-	delete[] fileinfo;
+	delete[] raw_info;
 	file->Seek(0, epi::file_c::SEEKPOINT_START);
 	return (lump1_found && lump2_found);
 }
@@ -1102,12 +1081,9 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 //
 static void AddFile(const char *filename, int kind, int dyn_index, std::string md5_check)
 {
-	int j;
 	int length;
-	int startlump;
 
 	raw_wad_header_t header;
-	raw_wad_entry_t *curinfo;
 
 	// reset the sprite/flat/patch list stuff
 	within_sprite_list = within_flat_list   = false;
@@ -1124,7 +1100,7 @@ static void AddFile(const char *filename, int kind, int dyn_index, std::string m
 
 	I_Printf("  Adding %s\n", filename);
 
-	startlump = numlumps;
+	int startlump = (int)lumpinfo.size();
 
 	int datafile = (int)data_files.size();
 
@@ -1154,32 +1130,37 @@ static void AddFile(const char *filename, int kind, int dyn_index, std::string m
 		}
 
 		header.num_entries = EPI_LE_S32(header.num_entries);
-		header.dir_start = EPI_LE_S32(header.dir_start);
+		header.dir_start   = EPI_LE_S32(header.dir_start);
 
 		length = header.num_entries * sizeof(raw_wad_entry_t);
 
-        raw_wad_entry_t *fileinfo = new raw_wad_entry_t[header.num_entries];
+        raw_wad_entry_t *raw_info = new raw_wad_entry_t[header.num_entries];
 
         file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
 		// TODO: handle Read failure
-        file->Read(fileinfo, length);
+        file->Read(raw_info, length);
 
 		// compute MD5 hash over wad directory
-		df->dir_md5.Compute((const byte *)fileinfo, length);
+		df->dir_md5.Compute((const byte *)raw_info, length);
 
-		for (j=startlump, curinfo=fileinfo; j < numlumps; j++,curinfo++)
+		unsigned int i;
+		for (i=0 ; i < header.num_entries ; i++)
 		{
-			AddLump(df, j, EPI_LE_S32(curinfo->pos), EPI_LE_S32(curinfo->size),
-					datafile, 
-                    (dyn_index >= 0) ? dyn_index : datafile, 
-					curinfo->name,
-					(kind == FLKIND_EWad) || (kind == FLKIND_PWad) || (kind == FLKIND_HWad) );
+			raw_wad_entry_t& entry = raw_info[i];
+
+			bool allow_ddf = (kind == FLKIND_EWad) || (kind == FLKIND_PWad) || (kind == FLKIND_HWad);
+
+			AddLump(df, entry.name, EPI_LE_S32(entry.pos), EPI_LE_S32(entry.size),
+					datafile, (dyn_index >= 0) ? dyn_index : datafile, allow_ddf);
+
+			// TODO ugh, do this another way
+			const char *upper_name = lumpinfo[startlump + i].name;
 
 			if (kind != FLKIND_HWad)
-				CheckForLevel(df, j, lumpinfo[j].name, curinfo, numlumps-1 - j);
+				CheckForLevel(df, startlump + i, upper_name, &entry, header.num_entries-1 - i);
 		}
 
-		delete[] fileinfo;
+		delete[] raw_info;
 	}
 	else  /* single lump file */
 	{
@@ -1207,17 +1188,15 @@ static void AddFile(const char *filename, int kind, int dyn_index, std::string m
 		ComputeFileMD5(df->dir_md5, file);
 
 		// Fill in lumpinfo
-		AddLump(df, startlump, 0, 
-                file->GetLength(), datafile, datafile, 
-				lump_name, true);
+		AddLump(df, lump_name, 0, file->GetLength(), datafile, datafile, true);
 	}
 
 	df->md5_string = epi::STR_Format("%02x%02x%02x%02x%02x%02x%02x%02x", 
-			df->dir_md5.hash[0], df->dir_md5.hash[1],
-			df->dir_md5.hash[2], df->dir_md5.hash[3],
-			df->dir_md5.hash[4], df->dir_md5.hash[5],
-			df->dir_md5.hash[6], df->dir_md5.hash[7],
-			df->dir_md5.hash[8], df->dir_md5.hash[9],
+			df->dir_md5.hash[0],  df->dir_md5.hash[1],
+			df->dir_md5.hash[2],  df->dir_md5.hash[3],
+			df->dir_md5.hash[4],  df->dir_md5.hash[5],
+			df->dir_md5.hash[6],  df->dir_md5.hash[7],
+			df->dir_md5.hash[8],  df->dir_md5.hash[9],
 			df->dir_md5.hash[10], df->dir_md5.hash[11],
 			df->dir_md5.hash[12], df->dir_md5.hash[13],
 			df->dir_md5.hash[14], df->dir_md5.hash[15]);
@@ -1370,8 +1349,7 @@ void W_AddRawFilename(const char *file, int kind)
 //
 void W_InitMultipleFiles(void)
 {
-	// open all the files, load headers, and count lumps
-	numlumps = 0;
+	// open all the files, add all the lumps
 
 	std::list<raw_filename_c *>::iterator it;
 
@@ -1381,7 +1359,7 @@ void W_InitMultipleFiles(void)
 		AddFile(rf->filename.c_str(), rf->kind, -1, "");
     }
 
-	if (numlumps == 0)
+	if (lumpinfo.empty())
 		I_Error("W_InitMultipleFiles: no files found!\n");
 }
 
@@ -1835,7 +1813,7 @@ void W_ReadCoalLumps(void)
 
 epi::file_c *W_OpenLump(int lump)
 {
-	SYS_ASSERT(0 <= lump && lump < numlumps);
+	SYS_ASSERT(W_VerifyLump(lump));
 
 	lumpinfo_t *l = &lumpinfo[lump];
 
@@ -1859,7 +1837,7 @@ epi::file_c *W_OpenLump(const char *name)
 //
 const char *W_GetFileName(int lump)
 {
-	SYS_ASSERT(0 <= lump && lump < numlumps);
+	SYS_ASSERT(W_VerifyLump(lump));
 
 	lumpinfo_t *l = &lumpinfo[lump];
 
@@ -1888,7 +1866,7 @@ const char *W_GetFileName(int lump)
 // 
 int W_GetPaletteForLump(int lump)
 {
-	SYS_ASSERT(0 <= lump && lump < numlumps);
+	SYS_ASSERT(W_VerifyLump(lump));
 
 	int f = lumpinfo[lump].file;
 
@@ -1910,11 +1888,11 @@ int W_GetPaletteForLump(int lump)
 
 static int QuickFindLumpMap(const char *buf)
 {
-	if (numlumps == 0)
-		return -1;
-
 	int low  = 0;
-	int high = numlumps - 1;
+	int high = (int)lumpinfo.size() - 1;
+
+	if (high < 0)
+		return -1;
 
 	while (low <= high)
 	{
@@ -2001,7 +1979,7 @@ int W_CheckNumForName_GFX(const char *name)
 	buf[i] = 0;
 
 	// search backwards
-	for (i = numlumps-1; i >= 0; i--)
+	for (i = (int)lumpinfo.size()-1; i >= 0; i--)
 	{
 		if (lumpinfo[i].kind == LMKIND_Normal ||
 		    lumpinfo[i].kind == LMKIND_Sprite ||
@@ -2059,7 +2037,7 @@ int W_CheckNumForTexPatch(const char *name)
 	if (i < 0)
 		return -1;  // not found
 
-	for (; i < numlumps && LUMP_MAP_CMP(i) == 0; i++)
+	for (; i < (int)lumpinfo.size() && LUMP_MAP_CMP(i) == 0; i++)
 	{
 		lumpinfo_t *L = &lumpinfo[sortedlumps[i]];
 
@@ -2086,12 +2064,12 @@ int W_CheckNumForTexPatch(const char *name)
 //
 bool W_VerifyLump(int lump)
 {
-	return lump < numlumps;
+	return (lump >= 0) && (lump < (int)lumpinfo.size());
 }
 
 bool W_VerifyLumpName(int lump, const char *name)
 {
-	if (lump >= numlumps)
+	if (! W_VerifyLump(lump))
 		return false;
   
 	return (strncmp(lumpinfo[lump].name, name, 8) == 0);
@@ -2104,7 +2082,7 @@ bool W_VerifyLumpName(int lump, const char *name)
 //
 int W_LumpLength(int lump)
 {
-	if (lump >= numlumps)
+	if (! W_VerifyLump(lump))
 		I_Error("W_LumpLength: %i >= numlumps", lump);
 
 	return lumpinfo[lump].size;
@@ -2183,7 +2161,7 @@ int W_GetNumFiles(void)
 
 int W_GetFileForLump(int lump)
 {
-	SYS_ASSERT(lump >= 0 && lump < numlumps);
+	SYS_ASSERT(W_VerifyLump(lump));
 
 	return lumpinfo[lump].file;
 }
@@ -2195,7 +2173,7 @@ int W_GetFileForLump(int lump)
 //
 static void W_RawReadLump(int lump, void *dest)
 {
-	if (lump >= numlumps)
+	if (! W_VerifyLump(lump))
 		I_Error("W_ReadLump: %i >= numlumps", lump);
 
 	lumpinfo_t *L = &lumpinfo[lump];
@@ -2319,7 +2297,7 @@ void W_ShowLumps(int for_file, const char *match)
 
 	int total = 0;
 
-	for (int i = 0; i < numlumps; i++)
+	for (int i = 0; i < (int)lumpinfo.size(); i++)
 	{
 		lumpinfo_t *L = &lumpinfo[i];
 
@@ -2356,7 +2334,7 @@ int W_LoboFindSkyImage(int for_file, const char *match)
 {
 	int total = 0;
 
-	for (int i = 0; i < numlumps; i++)
+	for (int i = 0; i < (int)lumpinfo.size(); i++)
 	{
 		lumpinfo_t *L = &lumpinfo[i];
 

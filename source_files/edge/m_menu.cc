@@ -156,7 +156,6 @@ static style_c *skill_style;
 static style_c *load_style;
 static style_c *save_style;
 static style_c *dialog_style;
-static style_c *sound_vol_style;
 
 //
 //  SAVE STUFF
@@ -289,15 +288,13 @@ static void M_SaveGame(int choice);
 
 // 25-6-98 KM
 extern void M_Options(int choice);
+extern void M_F4SoundOptions(int choice);
 static void M_LoadSavePage(int choice);
 static void M_ReadThis(int choice);
 static void M_ReadThis2(int choice);
 void M_EndGame(int choice);
 
 static void M_ChangeMessages(int choice);
-static void M_SfxVol(int choice);
-static void M_MusicVol(int choice);
-// static void M_Sound(int choice);
 
 static void M_FinishReadThis(int choice);
 static void M_LoadSelect(int choice);
@@ -311,7 +308,6 @@ static void M_DrawReadThis1(void);
 static void M_DrawReadThis2(void);
 static void M_DrawNewGame(void);
 static void M_DrawEpisode(void);
-static void M_DrawSound(void);
 static void M_DrawLoad(void);
 static void M_DrawSave(void);
 
@@ -455,38 +451,6 @@ static menu_t ReadDef2 =
 	&menu_def_style,  // FIXME: maybe have READ_1 and READ_2 styles ??
 	M_DrawReadThis2,
 	1000, 1000,
-	0
-};
-
-//
-// SOUND VOLUME MENU
-//
-typedef enum
-{
-	sfx_vol,
-	sfx_empty1,
-	music_vol,
-	sfx_empty2,
-	sound_end
-}
-sound_e;
-
-static menuitem_t SoundMenu[] =
-{
-	{2, "M_SFXVOL", NULL, M_SfxVol, 's'},
-	{-1, "", NULL, 0},
-	{2, "M_MUSVOL", NULL, M_MusicVol, 'm'},
-	{-1, "", NULL, 0}
-};
-
-static menu_t SoundDef =
-{
-	sound_end,
-	&MainDef,  ///  &OptionsDef,
-	SoundMenu,
-	&sound_vol_style,
-	M_DrawSound,
-	80, 64,
 	0
 };
 
@@ -1118,64 +1082,6 @@ void M_DrawReadThis1(void)
 void M_DrawReadThis2(void)
 {
 	HUD_DrawImageTitleWS(menu_readthis[1]);
-}
-
-
-void M_DrawSound(void)
-{
-	HUD_DrawImage(60, 38, menu_svol);
-
-	M_DrawThermo(SoundDef.x, SoundDef.y + 15 * (sfx_vol   + 1), SND_SLIDER_NUM, sfx_volume, 1); // Possibly replace the 15; this was the old LINEHEIGHT constant
-	M_DrawThermo(SoundDef.x, SoundDef.y + 15 * (music_vol + 1), SND_SLIDER_NUM, mus_volume, 1); // Possibly replace the 15; this was the old LINEHEIGHT constant
-}
-
-#if 0
-void M_Sound(int choice)
-{
-	M_SetupNextMenu(&SoundDef);
-}
-#endif
-
-// -ACB- 1999/10/10 Sound API Volume re-added
-void M_SfxVol(int choice)
-{
-	switch (choice)
-	{
-		case SLIDERLEFT:
-			if (sfx_volume > 0)
-				sfx_volume--;
-
-			break;
-
-		case SLIDERRIGHT:
-			if (sfx_volume < SND_SLIDER_NUM-1)
-				sfx_volume++;
-
-			break;
-	}
-
-	S_ChangeSoundVolume();
-}
-
-// -ACB- 1999/10/07 Removed sound references: New Sound API
-void M_MusicVol(int choice)
-{
-	switch (choice)
-	{
-		case SLIDERLEFT:
-			if (mus_volume > 0)
-				mus_volume--;
-
-			break;
-
-		case SLIDERRIGHT:
-			if (mus_volume < SND_SLIDER_NUM-1)
-				mus_volume++;
-
-			break;
-	}
-
-	S_ChangeMusicVolume();
 }
 
 void M_DrawMainMenu(void)
@@ -1974,10 +1880,9 @@ bool M_Responder(event_t * ev)
 
 			case KEYD_SOUNDCONTROLS:  // Sound Volume
 
-				M_StartControlPanel();
-				currentMenu = &SoundDef;
-				itemOn = sfx_vol;
 				S_StartFX(sfx_swtchn);
+				M_StartControlPanel();
+				M_F4SoundOptions(0);
 				return true;
 
 			case KEYD_OPTIONSMENU:  // Detail toggle, now loads options menu
@@ -2596,7 +2501,6 @@ void M_Init(void)
 
 	def = styledefs.Lookup("OPTIONS");
 	if (! def) def = default_style;
-	sound_vol_style = hu_styles.Lookup(def);
 
 	language.Select(m_language.str);
 	//Lobo 2022: load our ddflang stuff

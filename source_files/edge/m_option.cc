@@ -112,7 +112,7 @@
 
 
 int option_menuon = 0;
-int fkey_menu = 0;
+bool fkey_menu = false;
 
 extern cvar_c m_language;
 extern cvar_c r_crosshair;
@@ -497,6 +497,22 @@ static menuinfo_t sound_optmenu =
 };
 
 //
+//  F4 SOUND OPTIONS
+//
+//
+static optmenuitem_t f4soundoptions[] =
+{
+	{OPT_Slider,  "Sound Volume", NULL, SND_SLIDER_NUM, &sfx_volume, M_ChangeSfxVol, NULL},
+	{OPT_Slider,  "Music Volume", NULL, SND_SLIDER_NUM, &mus_volume, M_ChangeMusVol, NULL},
+};
+
+static menuinfo_t f4sound_optmenu = 
+{
+	f4soundoptions, sizeof(f4soundoptions) / sizeof(optmenuitem_t),
+	&opt_def_style, 150, 75, "M_SFXOPT", NULL, 0, "", language["MenuSound"]
+};
+
+//
 //  GAMEPLAY OPTIONS
 //
 // -ACB- 1998/07/15 Altered menu structure
@@ -858,6 +874,7 @@ void M_OptMenuInit()
 	res_optmenu.name=language["MenuResolution"];
 	analogue_optmenu.name=language["MenuMouse"];
 	sound_optmenu.name=language["MenuSound"];
+	f4sound_optmenu.name=language["MenuSound"];
 	gameplay_optmenu.name=language["MenuGameplay"];
 	movement_optmenu.name=language["MenuBinding"];
 	attack_optmenu.name=language["MenuBinding"];
@@ -1539,13 +1556,15 @@ bool M_OptResponder(event_t * ev, int ch)
 		case KEYD_MOUSE3:
 		case KEYD_MENU_CANCEL:
 		{
-			if (curr_menu == &main_optmenu)
+			if (curr_menu == &f4sound_optmenu)
+			{
+				curr_menu = &main_optmenu;
+				M_ClearMenus();
+			}
+			else if (curr_menu == &main_optmenu)
 			{
 				if (fkey_menu)
-				{
 					M_ClearMenus();
-					S_StartFX(sfx_swtchx);
-				}
 				else
 					option_menuon = 0;
 			}
@@ -1607,6 +1626,16 @@ static void M_AnalogueOptions(int keypressed)
 static void M_SoundOptions(int keypressed)
 {
 	curr_menu = &sound_optmenu;
+	curr_item = curr_menu->items + curr_menu->pos;
+}
+
+//
+// M_F4SoundOptions
+//
+void M_F4SoundOptions(int choice)
+{
+	option_menuon = 1;
+	curr_menu = &f4sound_optmenu;
 	curr_item = curr_menu->items + curr_menu->pos;
 }
 
@@ -1989,7 +2018,7 @@ void M_JoinNetGame(int keypressed)
 void M_Options(int choice)
 {
 	option_menuon = 1;
-	fkey_menu = choice;
+	fkey_menu = (choice == 1);
 	// hack
 	menu_crosshair = CLAMP(0, r_crosshair.d, 9);
 	menu_crosscolor = CLAMP(0, r_crosscolor.d, 7);

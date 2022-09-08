@@ -779,23 +779,42 @@ void M_DrawLoad(void)
 		y += LineHeight;
 	}
 
-	short old_offset_x = menu_skull[0]->offset_x;
-	short old_offset_y = menu_skull[0]->offset_y;
+	image_c *cursor;
+	if (style->def->cursor.alt_cursor)
+		cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor);
+	else
+		cursor = menu_skull[0];
+	short old_offset_x = cursor->offset_x;
+	short old_offset_y = cursor->offset_y;
 	// I am using IM_HEIGHT for both here intentionally as a way to
 	// see if the C image is actually being used/drawn
-	menu_skull[0]->offset_x = LineHeight == IM_HEIGHT(C) ? C->offset_x : 0;
-	menu_skull[0]->offset_y = LineHeight == IM_HEIGHT(C) ? C->offset_y : 0;
-	float TempHeight = MIN(LineHeight, IM_HEIGHT(menu_skull[0]));
+	cursor->offset_x = LineHeight == IM_HEIGHT(C) ? C->offset_x : 0;
+	cursor->offset_y = LineHeight == IM_HEIGHT(C) ? C->offset_y : 0;
+	float TempHeight = MIN(LineHeight, IM_HEIGHT(cursor));
 	float TempScale = 0;
 	float TempWidth = 0;
-	TempScale = TempHeight / IM_HEIGHT(menu_skull[0]);
-	TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
-	if (style->def->special & SYLSP_CursorRight)
-		HUD_StretchImage(LoadDef.x + WidestLine,ex_slots[itemOn].y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+	float TempSpacer = 0;
+	TempScale = TempHeight / IM_HEIGHT(cursor);
+	TempWidth = IM_WIDTH(cursor) * TempScale;
+	TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
+	float old_alpha = HUD_GetAlpha();
+	HUD_SetAlpha(style->def->cursor.translucency);
+	if (style->def->cursor.position == style->def->C_BOTH)
+	{
+		HUD_StretchImage(LoadDef.x + WidestLine + TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x - TempWidth - TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+	}
+	else if (style->def->cursor.position == style->def->C_CENTER)
+	{
+		HUD_StretchImage(LoadDef.x + (WidestLine / 2) - (TempWidth / 2),ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+	}
+	else if (style->def->cursor.position == style->def->C_RIGHT)
+		HUD_StretchImage(LoadDef.x + WidestLine + TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
 	else
-		HUD_StretchImage(LoadDef.x - TempWidth - 8,ex_slots[itemOn].y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
-	menu_skull[0]->offset_x = old_offset_x;
-	menu_skull[0]->offset_y = old_offset_y;
+		HUD_StretchImage(LoadDef.x - TempWidth - TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+	cursor->offset_x = old_offset_x;
+	cursor->offset_y = old_offset_y;
+	HUD_SetAlpha(old_alpha);
 
 	M_DrawSaveLoadCommon(i, i+1, load_style, LineHeight);
 }
@@ -904,23 +923,42 @@ void M_DrawSave(void)
 		y += LineHeight;
 	}
 
-	short old_offset_x = menu_skull[0]->offset_x;
-	short old_offset_y = menu_skull[0]->offset_y;
+	image_c *cursor;
+	if (style->def->cursor.alt_cursor)
+		cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor);
+	else
+		cursor = menu_skull[0];
+	short old_offset_x = cursor->offset_x;
+	short old_offset_y = cursor->offset_y;
 	// I am using IM_HEIGHT for both here intentionally as a way to
 	// see if the C image is actually being used/drawn
-	menu_skull[0]->offset_x = LineHeight == IM_HEIGHT(C) ? C->offset_x : 0;
-	menu_skull[0]->offset_y = LineHeight == IM_HEIGHT(C) ? C->offset_y : 0;
-	float TempHeight = MIN(LineHeight, IM_HEIGHT(menu_skull[0]));
+	cursor->offset_x = LineHeight == IM_HEIGHT(C) ? C->offset_x : 0;
+	cursor->offset_y = LineHeight == IM_HEIGHT(C) ? C->offset_y : 0;
+	float TempHeight = MIN(LineHeight, IM_HEIGHT(cursor));
 	float TempScale = 0;
 	float TempWidth = 0;
-	TempScale = TempHeight / IM_HEIGHT(menu_skull[0]);
-	TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
-	if (style->def->special & SYLSP_CursorRight)
-		HUD_StretchImage(LoadDef.x + WidestLine,ex_slots[itemOn].y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
+	float TempSpacer = 0;
+	TempScale = TempHeight / IM_HEIGHT(cursor);
+	TempWidth = IM_WIDTH(cursor) * TempScale;
+	TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
+	float old_alpha = HUD_GetAlpha();
+	HUD_SetAlpha(style->def->cursor.translucency);
+	if (style->def->cursor.position == style->def->C_BOTH)
+	{
+		HUD_StretchImage(LoadDef.x + WidestLine + TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+		HUD_StretchImage(LoadDef.x - TempWidth - TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+	}
+	else if (style->def->cursor.position == style->def->C_CENTER)
+	{
+		HUD_StretchImage(LoadDef.x + (WidestLine / 2) - (TempWidth / 2),ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+	}
+	else if (style->def->cursor.position == style->def->C_RIGHT)
+		HUD_StretchImage(LoadDef.x + WidestLine + TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
 	else
-		HUD_StretchImage(LoadDef.x - TempWidth - 8,ex_slots[itemOn].y,TempWidth,TempHeight,menu_skull[0], 0.0, 0.0);
-	menu_skull[0]->offset_x = old_offset_x;
-	menu_skull[0]->offset_y = old_offset_y;
+		HUD_StretchImage(LoadDef.x - TempWidth - TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+	cursor->offset_x = old_offset_x;
+	cursor->offset_y = old_offset_y;
+	HUD_SetAlpha(old_alpha);
 
 	M_DrawSaveLoadCommon(i, i+1, save_style, LineHeight);
 }
@@ -2320,6 +2358,7 @@ void M_Drawer(void)
 	max = currentMenu->numitems;
 	
 	float ShortestLine;
+	float TallestLine;
 	float WidestLine = 0.0f;
 	int t_type = styledef_c::T_TEXT;
 	float txtscale = 1.0;
@@ -2332,6 +2371,7 @@ void M_Drawer(void)
 	if (custom_menu==false)
 	{
 		ShortestLine = txtscale * style->fonts[0]->NominalHeight();
+		TallestLine = txtscale * style->fonts[0]->NominalHeight();
 		for (i = 0; i < max; i++)
 		{
 			currentMenu->menuitems[i].height = ShortestLine;
@@ -2341,32 +2381,92 @@ void M_Drawer(void)
 				currentMenu->menuitems[i].width = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[i].name) * txtscale;
 			if (currentMenu->menuitems[i].width > WidestLine) 
 				WidestLine = currentMenu->menuitems[i].width;
-			HL_WriteText(style,t_type, currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
 			y += currentMenu->menuitems[i].height + 1;
+		}
+		for (i=0; i < max; i++)
+		{
+			if (style->def->entry_alignment == style->def->C_RIGHT)
+				HL_WriteText(style,t_type, currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width, 
+					currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
+			else if (style->def->entry_alignment == style->def->C_CENTER)
+				HL_WriteText(style,t_type, currentMenu->menuitems[i].x + (WidestLine /2) - (currentMenu->menuitems[i].width / 2), 
+					currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
+			else
+				HL_WriteText(style,t_type, currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
 		}
 		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
 		{
-			short old_offset_x = menu_skull[0]->offset_x;
-			short old_offset_y = menu_skull[0]->offset_y;
-			menu_skull[0]->offset_x = 0;
-			menu_skull[0]->offset_y = 0;
-			float TempScale = 0;
-			float TempWidth = 0;
-			float TempSpacer = 0;
-			TempScale = ShortestLine / IM_HEIGHT(menu_skull[0]);
-			TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
-			TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
-			if (style->def->special & SYLSP_CursorRight)
-				HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
+			image_c *cursor;
+			if (style->def->cursor.cursor_string)
+				cursor = NULL;
+			else if (style->def->cursor.alt_cursor)
+				cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor);
 			else
-				HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
-			menu_skull[0]->offset_x = old_offset_x;
-			menu_skull[0]->offset_y = old_offset_y;
+				cursor = menu_skull[0];
+			if (cursor)
+			{
+				short old_offset_x = cursor->offset_x;
+				short old_offset_y = cursor->offset_y;
+				cursor->offset_x = 0;
+				cursor->offset_y = 0;
+				float TempScale = 0;
+				float TempWidth = 0;
+				float TempSpacer = 0;
+				TempScale = ShortestLine / IM_HEIGHT(cursor);
+				TempWidth = IM_WIDTH(cursor) * TempScale;
+				TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
+				float old_alpha = HUD_GetAlpha();
+				HUD_SetAlpha(style->def->cursor.translucency);
+				if (style->def->cursor.position == style->def->C_BOTH)
+				{
+					HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+					HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+				}
+				else if (style->def->cursor.position == style->def->C_CENTER)
+				{
+					if (style->def->cursor.border)
+						HUD_StretchImage(currentMenu->menuitems[itemOn].x,currentMenu->menuitems[itemOn].y,WidestLine,TallestLine,cursor, 0.0, 0.0);
+					else
+						HUD_StretchImage(currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2),currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+				}
+				else if (style->def->cursor.position == style->def->C_RIGHT)
+					HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+				else
+					HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+				cursor->offset_x = old_offset_x;
+				cursor->offset_y = old_offset_y;
+				HUD_SetAlpha(old_alpha);
+			}
+			else
+			{
+				float old_alpha = HUD_GetAlpha();
+				HUD_SetAlpha(style->def->cursor.translucency);
+				float TempWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(style->def->cursor.cursor_string) * txtscale;
+				float TempSpacer = TempWidth * 0.2;
+				if (style->def->cursor.position == style->def->C_BOTH)
+				{
+					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+				}
+				else if (style->def->cursor.position == style->def->C_CENTER)
+					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2), 
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+				else if (style->def->cursor.position == style->def->C_RIGHT)
+					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+				else
+					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+				HUD_SetAlpha(old_alpha);
+			}
 		}
 	}
 	else
 	{	
 		ShortestLine = 10000.0f;
+		TallestLine = 0.0f;
 		for (i = 0; i < max; i++)
 		{
 			if (! currentMenu->menuitems[i].patch_name[0])
@@ -2381,36 +2481,102 @@ void M_Drawer(void)
 
 			if (currentMenu->menuitems[i].height < ShortestLine) 
 				ShortestLine = currentMenu->menuitems[i].height;
+			if (currentMenu->menuitems[i].height > TallestLine) 
+				TallestLine = currentMenu->menuitems[i].height;
 			if (currentMenu->menuitems[i].width > WidestLine) 
 				WidestLine = currentMenu->menuitems[i].width;
 
 			currentMenu->menuitems[i].x = x + image->offset_x + style->def->x_offset;
 			currentMenu->menuitems[i].y = y - image->offset_y - style->def->y_offset;
-			HUD_DrawImage(currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, image);
 			y += currentMenu->menuitems[i].height;
+		}
+		for (i = 0; i < max; i++)
+		{
+			if (! currentMenu->menuitems[i].patch_name[0])
+				continue;
+			if (style->def->entry_alignment == style->def->C_RIGHT)
+				HUD_DrawImage(currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width, 
+					currentMenu->menuitems[i].y, currentMenu->menuitems[i].image);
+			else if (style->def->entry_alignment == style->def->C_CENTER)
+				HUD_DrawImage(currentMenu->menuitems[i].x + (WidestLine / 2) - (currentMenu->menuitems[i].width / 2), 
+					currentMenu->menuitems[i].y, currentMenu->menuitems[i].image);
+			else
+				HUD_DrawImage(currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, currentMenu->menuitems[i].image);
 		}
 		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
 		{
-			short old_offset_x = menu_skull[0]->offset_x;
-			short old_offset_y = menu_skull[0]->offset_y;
-			menu_skull[0]->offset_x = currentMenu->menuitems[itemOn].image->offset_x;
-			menu_skull[0]->offset_y = currentMenu->menuitems[itemOn].image->offset_y;
-			float TempScale = 0;
-			float TempWidth = 0;
-			float TempSpacer = 0;
-			TempScale = ShortestLine / IM_HEIGHT(menu_skull[0]);
-			TempWidth = IM_WIDTH(menu_skull[0]) * TempScale;
-			TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
-			
-			if (style->def->special & SYLSP_CursorRight)
-				HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,
-					currentMenu->menuitems[itemOn].y ,TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
+			image_c *cursor;
+			if (style->def->cursor.cursor_string)
+				cursor = NULL;
+			else if (style->def->cursor.alt_cursor)
+				cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor);
 			else
-				HUD_StretchImage(currentMenu->menuitems[itemOn].x + MAX(0, ((IM_WIDTH(currentMenu->menuitems[itemOn].image) - WidestLine) / 2)) - TempWidth - TempSpacer, 
-				currentMenu->menuitems[itemOn].y, TempWidth,ShortestLine,menu_skull[0], 0.0, 0.0);
+				cursor = menu_skull[0];
+			if (cursor)
+			{
+				short old_offset_x = cursor->offset_x;
+				short old_offset_y = cursor->offset_y;
+				cursor->offset_x = currentMenu->menuitems[itemOn].image->offset_x;
+				cursor->offset_y = currentMenu->menuitems[itemOn].image->offset_y;
+				float TempScale = 0;
+				float TempWidth = 0;
+				float TempSpacer = 0;
+				TempScale = ShortestLine / IM_HEIGHT(cursor);
+				TempWidth = IM_WIDTH(cursor) * TempScale;
+				TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
+				float old_alpha = HUD_GetAlpha();
+				HUD_SetAlpha(style->def->cursor.translucency);
+				if (style->def->cursor.position == style->def->C_BOTH)
+				{
+					HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,
+						currentMenu->menuitems[itemOn].y ,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+					HUD_StretchImage(currentMenu->menuitems[itemOn].x + MAX(0, ((IM_WIDTH(currentMenu->menuitems[itemOn].image) - WidestLine) / 2)) - TempWidth - TempSpacer, 
+						currentMenu->menuitems[itemOn].y, TempWidth,ShortestLine,cursor, 0.0, 0.0);
+				}
+				else if (style->def->cursor.position == style->def->C_CENTER)
+				{
+					if (style->def->cursor.border)
+						HUD_StretchImage(currentMenu->menuitems[itemOn].x, 
+							currentMenu->menuitems[itemOn].y, WidestLine,TallestLine,cursor, 0.0, 0.0);
+					else
+						HUD_StretchImage(currentMenu->menuitems[itemOn].x + + (WidestLine/2) - (TempWidth / 2), 
+							currentMenu->menuitems[itemOn].y, TempWidth,ShortestLine,cursor, 0.0, 0.0);
+				}
+				else if (style->def->cursor.position == style->def->C_RIGHT)
+					HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,
+						currentMenu->menuitems[itemOn].y ,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+				else
+					HUD_StretchImage(currentMenu->menuitems[itemOn].x + MAX(0, ((IM_WIDTH(currentMenu->menuitems[itemOn].image) - WidestLine) / 2)) - TempWidth - TempSpacer, 
+						currentMenu->menuitems[itemOn].y, TempWidth,ShortestLine,cursor, 0.0, 0.0);
 
-			menu_skull[0]->offset_x = old_offset_x;
-			menu_skull[0]->offset_y = old_offset_y;
+				cursor->offset_x = old_offset_x;
+				cursor->offset_y = old_offset_y;
+				HUD_SetAlpha(old_alpha);
+			}
+			else
+			{
+				float old_alpha = HUD_GetAlpha();
+				HUD_SetAlpha(style->def->cursor.translucency);
+				float TempWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(style->def->cursor.cursor_string) * txtscale;
+				float TempSpacer = TempWidth * 0.2;
+				if (style->def->cursor.position == style->def->C_BOTH)
+				{
+					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+				}
+				else if (style->def->cursor.position == style->def->C_CENTER)
+					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2), 
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+				else if (style->def->cursor.position == style->def->C_RIGHT)
+					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+				else
+					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+				HUD_SetAlpha(old_alpha);
+			}
 		}
 	}
 }

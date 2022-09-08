@@ -35,9 +35,17 @@ New Features
   detection
 
 + STYLES.DDF
-  - New SPECIAL flag: CURSOR_RIGHT, will align menu cursor to the right side of menu entries
   - New properties: X_OFFSET and Y_OFFSET. Will set all menu entries in this style to the same x/y offset.
   - New SPECIAL flag: NO_STRETCH_FULLSCREEN, which will disable default behaviour of stretching backgrounds to fill the screen
+  - New property: ENTRY_ALIGNMENT = <string>, accepts "LEFT", "CENTER", or "RIGHT" to set text/image alignment for menu item names
+  - New CURSOR customization options:
+    - CURSOR.POSITION = <string>, accepts "LEFT", "CENTER", "RIGHT", or "BOTH" to determine cursor position relative to menu item. 
+      "BOTH" will drawn the cursor in both LEFT/RIGHT positions. Defaults to "LEFT".
+    - CURSOR.BORDER = <bool>, only has an effect when the cursor position is set to CENTER. Will scale up to the dimensions of the tallest
+      menu item. Good for highlights/frames/border style cursors
+    - CURSOR.TRANSLUCENCY = <percentage>, controls cursor image translucency
+    - CURSOR.IMAGE = <string>, image to use instead of the default for this menu's cursor
+    - CURSOR.STRING = <string>, if present, will use these characters from the style's font as the cursor instead of an image
   
 + Lines.ddf
   -Added 3 new BREAKABLE glass line types: 

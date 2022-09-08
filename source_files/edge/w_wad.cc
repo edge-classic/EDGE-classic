@@ -2234,7 +2234,7 @@ int W_GetFileForLump(int lump)
 // Loads the lump into the given buffer,
 // which must be >= W_LumpLength().
 //
-static void W_ReadLump(int lump, void *dest)
+static void W_RawReadLump(int lump, void *dest)
 {
 	if (lump >= numlumps)
 		I_Error("W_ReadLump: %i >= numlumps", lump);
@@ -2257,7 +2257,7 @@ byte *W_ReadLumpAlloc(int lump, int *length)
 
 	byte *data = new byte[*length + 1];
 
-	W_ReadLump(lump, data);
+	W_RawReadLump(lump, data);
 
 	data[*length] = 0;
 
@@ -2269,6 +2269,8 @@ byte *W_ReadLumpAlloc(int lump, int *length)
 //
 void W_DoneWithLump(const void *ptr)
 {
+/* FIXME free the data
+
 	lumpheader_t *h = ((lumpheader_t *)ptr); // Intentional Const Override
 
 #ifdef DEVELOPERS
@@ -2292,6 +2294,7 @@ void W_DoneWithLump(const void *ptr)
 		h->next->prev = h;
 		MarkAsCached(h);
 	}
+*/
 }
 
 //
@@ -2330,7 +2333,7 @@ const void *W_CacheLumpNum(int lump)
 		h->prev->next = h;
 		lumphead.prev = h;
 
-		W_ReadLump(lump, (void *)(h + 1));
+		W_RawReadLump(lump, (void *)(h + 1));
 	}
 
 	return (void *)(h + 1);
@@ -2345,28 +2348,30 @@ const void *W_CacheLumpName(const char *name)
 }
 
 //
-// W_LoadLumpNum
+// W_LoadLump
 //
 // Returns a copy of the lump (it is your responsibility to free it)
 //
-void *W_LoadLumpNum(int lump)
+void *W_LoadLump(int lump, int *length)
 {
-	void *p;
-	const void *cached;
-	int length = W_LumpLength(lump);
-	p = (void *) Z_Malloc(length);
-	cached = W_CacheLumpNum(lump);
-	memcpy(p, cached, length);
-	W_DoneWithLump(cached);
-	return p;
+	int w_length = W_LumpLength(lump);
+
+	if (length != NULL)
+		*length = w_length;
+
+	byte *data = new byte[w_length + 1];
+
+	W_RawReadLump(lump, data);
+
+	// zero-terminate, handy for text parsers
+	data[w_length] = 0;
+
+	return data;
 }
 
-//
-// W_LoadLumpName
-//
-void *W_LoadLumpName(const char *name)
+void *W_LoadLump(const char *name, int *length)
 {
-	return W_LoadLumpNum(W_GetNumForName(name));
+	return W_LoadLump(W_GetNumForName(name), length);
 }
 
 //

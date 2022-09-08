@@ -187,9 +187,6 @@ int CMD_QuitEDGE(char **argv, int argc)
 
 int CMD_Crc(char **argv, int argc)
 {
-	int lump, length;
-	const byte *data;
-
 	if (argc < 2)
 	{
 		CON_Printf("Usage: crc <lump>\n");
@@ -198,7 +195,7 @@ int CMD_Crc(char **argv, int argc)
 
 	for (int i = 1; i < argc; i++)
 	{
-		lump = W_CheckNumForName(argv[i]);
+		int lump = W_CheckNumForName(argv[i]);
 
 		if (lump == -1)
 		{
@@ -206,15 +203,15 @@ int CMD_Crc(char **argv, int argc)
 		}
 		else
 		{
-			length = W_LumpLength(lump);
-			data = (const byte*)W_LoadLumpNum(lump);
+			int length;
+			byte *data = (byte*) W_LoadLump(lump, &length);
 
 			epi::crc32_c result;
 
 			result.Reset();
 			result.AddBlock(data, length);
 
-			Z_Free((void*)data);
+			W_DoneWithLump(data);
 
 			CON_Printf("  %s  %d bytes  crc = %08x\n", argv[i], length, result.crc);
 		}

@@ -1763,7 +1763,7 @@ void W_ReadWADFIXES(void)
 	(* wadfix_reader.func)(NULL, 0);
 
 	int length;
-	char *data = (char *) W_ReadLumpAlloc(W_GetNumForName2("WADFIXES"), &length);
+	char *data = (char *) W_ReadLumpAlloc(W_GetNumForName("WADFIXES"), &length);
 
 	// call read function
 	(* wadfix_reader.func)(data, length);
@@ -1951,7 +1951,7 @@ int W_GetPaletteForLump(int lump)
 	}
 
 	// Use last loaded PLAYPAL if no graphic-specific palette is found
-	return W_CheckNumForName2("PLAYPAL");
+	return W_CheckNumForName("PLAYPAL");
 }
 
 
@@ -2001,7 +2001,7 @@ static int QuickFindLumpMap(const char *buf)
 //
 // -ACB- 1999/09/18 Added name to error message 
 //
-int W_CheckNumForName2(const char *name)
+int W_CheckNumForName(const char *name)
 {
 	int i;
 	char buf[9];
@@ -2067,11 +2067,11 @@ int W_CheckNumForName_GFX(const char *name)
 //
 // Calls W_CheckNumForName, but bombs out if not found.
 //
-int W_GetNumForName2(const char *name)
+int W_GetNumForName(const char *name)
 {
 	int i;
 
-	if ((i = W_CheckNumForName2(name)) == -1)
+	if ((i = W_CheckNumForName(name)) == -1)
 		I_Error("W_GetNumForName: \'%.8s\' not found!", name);
 
 	return i;
@@ -2298,7 +2298,7 @@ void W_DoneWithLump(const void *ptr)
 //
 // W_CacheLumpNum
 //
-const void *W_CacheLumpNum2 (int lump)
+const void *W_CacheLumpNum(int lump)
 {
 	lumpheader_t *h;
 
@@ -2340,9 +2340,9 @@ const void *W_CacheLumpNum2 (int lump)
 //
 // W_CacheLumpName
 //
-const void *W_CacheLumpName2(const char *name)
+const void *W_CacheLumpName(const char *name)
 {
-	return W_CacheLumpNum2(W_GetNumForName2(name));
+	return W_CacheLumpNum(W_GetNumForName(name));
 }
 
 //
@@ -2374,7 +2374,7 @@ void *W_LoadLumpNum(int lump)
 	const void *cached;
 	int length = W_LumpLength(lump);
 	p = (void *) Z_Malloc(length);
-	cached = W_CacheLumpNum2(lump);
+	cached = W_CacheLumpNum(lump);
 	memcpy(p, cached, length);
 	W_DoneWithLump(cached);
 	return p;
@@ -2385,7 +2385,7 @@ void *W_LoadLumpNum(int lump)
 //
 void *W_LoadLumpName(const char *name)
 {
-	return W_LoadLumpNum(W_GetNumForName2(name));
+	return W_LoadLumpNum(W_GetNumForName(name));
 }
 
 //
@@ -2564,7 +2564,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 	{
 		if(tempImage->source_type ==IMSRC_User)//from images.ddf
 		{
-			lumpnum = W_CheckNumForName2(tempImage->name);
+			lumpnum = W_CheckNumForName(tempImage->name);
 
 			if (lumpnum != -1)
 			{
@@ -2602,7 +2602,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 		}
 		else //could be a png or jpg i.e. TX_ or HI_
 		{
-			lumpnum = W_CheckNumForName2(tempImage->name);
+			lumpnum = W_CheckNumForName(tempImage->name);
 			//lumpnum = tempImage->source.graphic.lump;
 			if (lumpnum != -1)
 			{
@@ -2658,7 +2658,7 @@ bool W_IsLumpInPwad(const char *name)
 	}
 
 	//if we're here then check pwad lumps
-	int lumpnum = W_CheckNumForName2(name);
+	int lumpnum = W_CheckNumForName(name);
 	int filenum = -1;
 
 	if (lumpnum != -1)

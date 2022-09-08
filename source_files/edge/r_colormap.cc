@@ -83,7 +83,7 @@ void V_InitPalette(void)
 	int t, i;
 	wadtex_resource_c WT;
 
-	const byte *pal = (const byte*)W_CacheLumpName2("PLAYPAL");
+	const byte *pal = (const byte*)W_CacheLumpName("PLAYPAL");
 
 	// read in palette colours
 	for (t = 0; t < 14; t++)

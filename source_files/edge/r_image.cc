@@ -548,10 +548,10 @@ static image_c *AddImageUser(imagedef_c *def)
 				image_c *rim = NULL;
 				switch (def->belong)
 				{
-					case INS_Graphic: rim = AddImageGraphic(def->name, IMSRC_Graphic, W_GetNumForName2(basename), real_graphics); break;
-					case INS_Texture: rim = AddImageGraphic(def->name, IMSRC_Texture, W_GetNumForName2(basename), real_textures); break;
-					case INS_Flat:    rim = AddImageGraphic(def->name, IMSRC_Flat, W_GetNumForName2(basename), real_flats); break;
-					case INS_Sprite:  rim = AddImageGraphic(def->name, IMSRC_Sprite, W_GetNumForName2(basename), real_sprites); break;
+					case INS_Graphic: rim = AddImageGraphic(def->name, IMSRC_Graphic, W_GetNumForName(basename), real_graphics); break;
+					case INS_Texture: rim = AddImageGraphic(def->name, IMSRC_Texture, W_GetNumForName(basename), real_textures); break;
+					case INS_Flat:    rim = AddImageGraphic(def->name, IMSRC_Flat,    W_GetNumForName(basename), real_flats);    break;
+					case INS_Sprite:  rim = AddImageGraphic(def->name, IMSRC_Sprite,  W_GetNumForName(basename), real_sprites);  break;
 
 					default:
 						I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);

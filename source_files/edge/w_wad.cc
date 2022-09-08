@@ -38,6 +38,8 @@
 #include <limits.h>
 
 #include <list>
+#include <vector>
+#include <algorithm>
 
 #include "endianess.h"
 #include "file.h"
@@ -256,10 +258,11 @@ lumpinfo_t;
 
 // Location of each lump on disk.
 lumpinfo_t *lumpinfo;
-static int *lumpmap = NULL;
 int numlumps;
 
-#define LUMP_MAP_CMP(a) (strncmp(lumpinfo[lumpmap[a]].name, buf, 8))
+static std::vector<int> sortedlumps;
+
+#define LUMP_MAP_CMP(a) (strncmp(lumpinfo[sortedlumps[a]].name, buf, 8))
 
 
 // the first datafile which contains a PLAYPAL lump
@@ -466,44 +469,47 @@ void W_GetTextureLumps(int file, wadtex_resource_c *res)
 //
 // SortLumps
 //
-// Create the lumpmap[] array, which is sorted by name for fast
-// searching.  It also makes sure that entries with the same name all
-// refer to the same lump (prefering lumps in later WADs over those in
-// earlier ones).
+// Create the sortedlumps array, which is sorted by name for fast
+// searching.  When two names are the same, we prefer lumps in later
+// WADs over those in earlier ones.
 //
 // -AJA- 2000/10/14: simplified.
 //
+struct Compare_lump_pred
+{
+	inline bool operator() (const int& A, const int& B) const
+	{
+		const lumpinfo_t& C = lumpinfo[A];
+		const lumpinfo_t& D = lumpinfo[B];
+
+		// increasing name
+		int cmp = strcmp(C.name, D.name);
+		if (cmp < 0) return true;
+		if (cmp > 0) return false;
+
+		// decreasing file number
+		cmp = C.sort_index - D.sort_index;
+		if (cmp > 0) return true;
+		if (cmp < 0) return false;
+
+		// lump type
+		return C.kind > D.kind;
+	}
+};
+
 static void SortLumps(void)
 {
 	int i;
 
-	Z_Resize(lumpmap, int, numlumps);
+	sortedlumps.resize(numlumps);
 
 	for (i = 0; i < numlumps; i++)
-		lumpmap[i] = i;
+		sortedlumps[i] = i;
     
 	// sort it, primarily by increasing name, secondly by decreasing
 	// file number, thirdly by the lump type.
 
-#define CMP(a, b)  \
-    (strncmp(lumpinfo[a].name, lumpinfo[b].name, 8) < 0 ||    \
-     (strncmp(lumpinfo[a].name, lumpinfo[b].name, 8) == 0 &&  \
-      (lumpinfo[a].sort_index > lumpinfo[b].sort_index ||     \
-	   (lumpinfo[a].sort_index == lumpinfo[b].sort_index &&   \
-        lumpinfo[a].kind > lumpinfo[b].kind))))
-	QSORT(int, lumpmap, numlumps, CUTOFF);
-#undef CMP
-
-#if 0
-	for (i=1; i < numlumps; i++)
-	{
-		int a = lumpmap[i - 1];
-		int b = lumpmap[i];
-
-		if (strncmp(lumpinfo[a].name, lumpinfo[b].name, 8) == 0)
-			lumpmap[i] = lumpmap[i - 1];
-	}
-#endif
+	std::sort(sortedlumps.begin(), sortedlumps.end(), Compare_lump_pred());
 }
 
 //
@@ -1968,7 +1974,7 @@ int W_CheckNumForName(const char *name)
 	if (i < 0)
 		return -1; // not found
 
-	return lumpmap[i];
+	return sortedlumps[i];
 }
 
 
@@ -2053,7 +2059,7 @@ int W_CheckNumForTexPatch(const char *name)
 
 	for (; i < numlumps && LUMP_MAP_CMP(i) == 0; i++)
 	{
-		lumpinfo_t *L = lumpinfo + lumpmap[i];
+		lumpinfo_t *L = lumpinfo + sortedlumps[i];
 
 		if (L->kind == LMKIND_Patch || L->kind == LMKIND_Sprite ||
 			L->kind == LMKIND_Normal)
@@ -2061,7 +2067,7 @@ int W_CheckNumForTexPatch(const char *name)
 			// allow LMKIND_Normal to support patches outside of the
 			// P_START/END markers.  We especially want to disallow
 			// flat and colourmap lumps.
-			return lumpmap[i];
+			return sortedlumps[i];
 		}
 	}
 

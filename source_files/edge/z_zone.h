@@ -45,14 +45,11 @@ typedef void cache_flusher_f(z_urgency_e urge);
 char *Z_StrDup(const char *s);
 
 // Memory handling functions.
-void Z_RegisterCacheFlusher(cache_flusher_f *f);
 void Z_Init(void);
 void *Z_Malloc2(int size);
-void *Z_ReMalloc2(void *ptr, int size);
 void Z_Free(void *ptr);
 
 #define Z_Malloc Z_Malloc2
-#define Z_ReMalloc Z_ReMalloc2
 
 //
 // Z_New
@@ -61,16 +58,6 @@ void Z_Free(void *ptr);
 // possible.
 //
 #define Z_New(type, num) ((type *) Z_Malloc((num) * sizeof(type)))
-
-//
-// Z_Resize
-//
-// Reallocates a block. Use instead of Z_ReMalloc wherever possible.
-// Unlike normal Z_ReMalloc, the pointer parameter is assigned the new
-// value, and there is no return value.
-//
-#define Z_Resize(ptr,type,n)  \
-	(void)((ptr) = (type *) Z_ReMalloc((void *)(ptr), (n) * sizeof(type)))
 
 
 #endif  /* __Z_ZONE__ */

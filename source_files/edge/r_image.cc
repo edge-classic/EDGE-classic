@@ -545,7 +545,7 @@ static image_c *AddImageUser(imagedef_c *def)
 
 			if (def->format == LIF_DOOM)
 			{
-				image_c *rim;
+				image_c *rim = NULL;
 				switch (def->belong)
 				{
 					case INS_Graphic: rim = AddImageGraphic(def->name, IMSRC_Graphic, W_GetNumForName2(basename), real_graphics); break;
@@ -654,18 +654,15 @@ static image_c *AddImageUser(imagedef_c *def)
 // NOTE: should only be called once, as it assumes none of the flats
 // in the list have names colliding with existing flat images.
 // 
-void W_ImageCreateFlats(int *lumps, int number)
+void W_ImageCreateFlats(std::vector<int>& lumps)
 {
-	int i;
-
-	SYS_ASSERT(lumps);
-
-	for (i=0; i < number; i++)
+	for (size_t i = 0; i < lumps.size(); i++)
 	{
-		if (lumps[i] < 0)
-			continue;
-    
-		AddImageFlat(W_GetLumpName(lumps[i]), lumps[i]);
+		if (lumps[i] >= 0)
+		{
+			const char *name = W_GetLumpName(lumps[i]);
+			AddImageFlat(name, lumps[i]);
+		}
 	}
 }
 

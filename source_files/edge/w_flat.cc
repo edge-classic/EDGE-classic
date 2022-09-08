@@ -29,6 +29,9 @@
 
 #include "i_defs.h"
 
+#include <vector>
+#include <algorithm>
+
 #include "e_search.h"
 #include "dm_state.h"
 #include "dm_defs.h"
@@ -242,6 +245,17 @@ void R_AddGraphicAnim(animdef_c *anim)
 	delete[] users;
 }
 
+struct Compare_flat_pred
+{
+	inline bool operator() (const int& A, const int& B) const
+	{
+		int cmp = strcmp(W_GetLumpName(A), W_GetLumpName(B));
+		if (cmp < 0) return true;
+		if (cmp > 0) return false;
+		return A < B;
+	}
+};
+
 //
 // W_InitFlats
 // 
@@ -250,8 +264,7 @@ void W_InitFlats(void)
 	int max_file = W_GetNumFiles();
 	int j, file;
 
-	int *F_lumps = NULL;
-	int numflats = 0;
+	std::vector<int> flats;
 
 	I_Printf("W_InitFlats...\n");
 
@@ -262,51 +275,45 @@ void W_InitFlats(void)
 		epi::u32array_c& lumps = W_GetListLumps(file, LMPLST_Flats);
 		int lumpnum = lumps.GetSize();
 
-		if (lumpnum == 0)
-			continue;
-
-		Z_Resize(F_lumps, int, numflats + lumpnum);
-
-		for (j=0; j < lumpnum; j++, numflats++)
-			F_lumps[numflats] = lumps[j];
+		for (j=0; j < lumpnum; j++)
+		{
+			flats.push_back((int)lumps[j]);
+		}
 	}
 
-	if (numflats == 0)
+	if (flats.size() == 0)
 		I_Error("No flats found !  Make sure the chosen IWAD is valid.\n");
 
 	// now sort the flats, primarily by increasing name, secondarily by
 	// increasing lump number (a measure of newness).
 
-#define CMP(a, b)  \
-	(strcmp(W_GetLumpName(a), W_GetLumpName(b)) < 0 || \
-	 (strcmp(W_GetLumpName(a), W_GetLumpName(b)) == 0 && a < b))
-		QSORT(int, F_lumps, numflats, CUTOFF);
-#undef CMP
+	std::sort(flats.begin(), flats.end(), Compare_flat_pred());
 
 	// remove duplicate names.  We rely on the fact that newer lumps
 	// have greater lump values than older ones.  Because the QSORT took
 	// newness into account, only the last entry in a run of identically
 	// named flats needs to be kept.
 
-	for (j=1; j < numflats; j++)
+	for (j=1; j < (int)flats.size(); j++)
 	{
-		int a = F_lumps[j - 1];
-		int b = F_lumps[j];
+		int a = flats[j - 1];
+		int b = flats[j];
 
 		if (strcmp(W_GetLumpName(a), W_GetLumpName(b)) == 0)
-			F_lumps[j - 1] = -1;
+		{
+			flats[j - 1] = -1;
+		}
 	}
 
 #if 0  // DEBUGGING
 	for (j=0; j < numflats; j++)
 	{
 		L_WriteDebug("FLAT #%d:  lump=%d  name=[%s]\n", j,
-				F_lumps[j], W_GetLumpName(F_lumps[j]));
+				flats[j], W_GetLumpName(flats[j]));
 	}
 #endif
 
-	W_ImageCreateFlats(F_lumps, numflats); 
-	Z_Free(F_lumps);
+	W_ImageCreateFlats(flats);
 }
 
 //

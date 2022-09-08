@@ -249,7 +249,6 @@ typedef struct
 }
 lumpinfo_t;
 
-// Create the start and end markers
 
 //
 //  GLOBALS
@@ -2343,24 +2342,6 @@ const void *W_CacheLumpNum(int lump)
 const void *W_CacheLumpName(const char *name)
 {
 	return W_CacheLumpNum(W_GetNumForName(name));
-}
-
-//
-// W_PreCacheLumpNum
-//
-// Attempts to load lump into the cache, if it isn't already there
-//
-void W_PreCacheLumpNum(int lump)
-{
-	W_DoneWithLump(W_CacheLumpNum(lump));
-}
-
-//
-// W_PreCacheLumpName
-//
-void W_PreCacheLumpName(const char *name)
-{
-	W_DoneWithLump(W_CacheLumpName(name));
 }
 
 //

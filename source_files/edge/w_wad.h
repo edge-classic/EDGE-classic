@@ -86,8 +86,6 @@ int W_LumpLength(int lump);
 void W_DoneWithLump(const void *ptr);
 const void *W_CacheLumpNum(int lump);
 const void *W_CacheLumpName(const char *name);
-void W_PreCacheLumpNum(int lump);
-void W_PreCacheLumpName(const char *name);
 void *W_LoadLumpNum(int lump);
 void *W_LoadLumpName(const char *name);
 bool W_VerifyLumpName(int lump, const char *name);

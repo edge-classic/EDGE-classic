@@ -68,9 +68,6 @@ typedef enum
 }
 lumplist_e;
 
-extern int numlumps;
-extern int addwadnum;
-
 void W_AddRawFilename(const char *file, int kind);
 void W_InitMultipleFiles(void);
 void W_ReadDDF(void);
@@ -91,6 +88,7 @@ byte *W_LoadLump(int lump, int *length = NULL);
 byte *W_LoadLump(const char *name, int *length = NULL);
 void W_DoneWithLump(const void *ptr);
 
+bool W_VerifyLump(int lump);
 bool W_VerifyLumpName(int lump, const char *name);
 const char *W_GetLumpName(int lump);
 

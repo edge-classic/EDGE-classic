@@ -257,8 +257,10 @@ lumpinfo_t;
 //
 
 // Location of each lump on disk.
-lumpinfo_t *lumpinfo;
-int numlumps;
+static std::vector<lumpinfo_t> lumpinfo;
+
+// TODO remove this
+static int numlumps;
 
 static std::vector<int> sortedlumps;
 
@@ -565,20 +567,30 @@ static void SortSpriteLumps(data_file_c *df)
 static void AddLump(data_file_c *df, int lump, int pos, int size, int file, 
 					int sort_index, const char *name, bool allow_ddf)
 {
-	int j;
-	lumpinfo_t *lump_p = lumpinfo + lump;
-  
-	lump_p->position = pos;
-	lump_p->size = size;
-	lump_p->file = file;
-	lump_p->sort_index = sort_index;
-	lump_p->kind = LMKIND_Normal;
+	lumpinfo_t info;
 
-	Z_StrNCpy(lump_p->name, name, 8);
-	for (size_t i=0;i<strlen(lump_p->name);i++) {
-		lump_p->name[i] = toupper(lump_p->name[i]);
+	info.position = pos;
+	info.size = size;
+	info.file = file;
+	info.sort_index = sort_index;
+	info.kind = LMKIND_Normal;
+
+	// copy name, make it uppercase
+	strncpy(info.name, name, 8);
+	info.name[8] = 0;
+
+	for (size_t i=0 ; i<strlen(info.name); i++)
+	{
+		info.name[i] = toupper(info.name[i]);
 	}
  
+	lumpinfo.push_back(info);
+	numlumps += 1;
+
+	lumpinfo_t *lump_p = &lumpinfo.back();
+
+	int j;
+
 	// -- handle special names --
 
 	if (strncmp(name, "PLAYPAL", 8) == 0)
@@ -820,7 +832,7 @@ bool W_CheckForXGLNodes(std::string filename)
     file->Read(&header, sizeof(raw_wad_header_t));
 
 	header.num_entries = EPI_LE_S32(header.num_entries);
-	header.dir_start = EPI_LE_S32(header.dir_start);
+	header.dir_start   = EPI_LE_S32(header.dir_start);
 
 	length = header.num_entries * sizeof(raw_wad_entry_t);
 
@@ -831,7 +843,7 @@ bool W_CheckForXGLNodes(std::string filename)
     file->Read(fileinfo, length);
 
 	// Fill in lumpinfo
-	numlumps += header.num_entries;
+	numlumps += header.num_entries;   // FIXME 
 
 	for (j=startlump, curinfo=fileinfo; j < numlumps; j++,curinfo++)
 	{
@@ -1051,7 +1063,7 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
     file->Read(fileinfo, length);
 
 	// Fill in lumpinfo
-	numlumps += header.num_entries;
+	numlumps += header.num_entries;  // FIXME 
 
 	for (j=startlump, curinfo=fileinfo; j < numlumps; j++,curinfo++)
 	{
@@ -1155,10 +1167,6 @@ static void AddFile(const char *filename, int kind, int dyn_index, std::string m
 		// compute MD5 hash over wad directory
 		df->dir_md5.Compute((const byte *)fileinfo, length);
 
-		// Fill in lumpinfo
-		numlumps += header.num_entries;
-		Z_Resize(lumpinfo, lumpinfo_t, numlumps);
-
 		for (j=startlump, curinfo=fileinfo; j < numlumps; j++,curinfo++)
 		{
 			AddLump(df, j, EPI_LE_S32(curinfo->pos), EPI_LE_S32(curinfo->size),
@@ -1199,9 +1207,6 @@ static void AddFile(const char *filename, int kind, int dyn_index, std::string m
 		ComputeFileMD5(df->dir_md5, file);
 
 		// Fill in lumpinfo
-		numlumps++;
-		Z_Resize(lumpinfo, lumpinfo_t, numlumps);
-
 		AddLump(df, startlump, 0, 
                 file->GetLength(), datafile, datafile, 
 				lump_name, true);
@@ -1367,9 +1372,6 @@ void W_InitMultipleFiles(void)
 {
 	// open all the files, load headers, and count lumps
 	numlumps = 0;
-
-	// will be realloced as lumps are added
-	lumpinfo = NULL;
 
 	std::list<raw_filename_c *>::iterator it;
 
@@ -1835,7 +1837,7 @@ epi::file_c *W_OpenLump(int lump)
 {
 	SYS_ASSERT(0 <= lump && lump < numlumps);
 
-	lumpinfo_t *l = lumpinfo + lump;
+	lumpinfo_t *l = &lumpinfo[lump];
 
 	data_file_c *df = data_files[l->file];
 
@@ -1859,7 +1861,7 @@ const char *W_GetFileName(int lump)
 {
 	SYS_ASSERT(0 <= lump && lump < numlumps);
 
-	lumpinfo_t *l = lumpinfo + lump;
+	lumpinfo_t *l = &lumpinfo[lump];
 
 	data_file_c *df = data_files[l->file];
 
@@ -2059,7 +2061,7 @@ int W_CheckNumForTexPatch(const char *name)
 
 	for (; i < numlumps && LUMP_MAP_CMP(i) == 0; i++)
 	{
-		lumpinfo_t *L = lumpinfo + sortedlumps[i];
+		lumpinfo_t *L = &lumpinfo[sortedlumps[i]];
 
 		if (L->kind == LMKIND_Patch || L->kind == LMKIND_Sprite ||
 			L->kind == LMKIND_Normal)
@@ -2075,13 +2077,18 @@ int W_CheckNumForTexPatch(const char *name)
 }
 
 //
-// W_VerifyLumpName
+// W_VerifyLump
 //
 // Verifies that the given lump number is valid and has the given
 // name.
 //
 // -AJA- 1999/11/26: written.
 //
+bool W_VerifyLump(int lump)
+{
+	return lump < numlumps;
+}
+
 bool W_VerifyLumpName(int lump, const char *name)
 {
 	if (lump >= numlumps)
@@ -2191,7 +2198,7 @@ static void W_RawReadLump(int lump, void *dest)
 	if (lump >= numlumps)
 		I_Error("W_ReadLump: %i >= numlumps", lump);
 
-	lumpinfo_t *L = lumpinfo + lump;
+	lumpinfo_t *L = &lumpinfo[lump];
 	data_file_c *df = data_files[L->file];
 
     df->file->Seek(L->position, epi::file_c::SEEKPOINT_START);

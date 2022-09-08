@@ -579,29 +579,6 @@ static void SortSpriteLumps(data_file_c *df)
 //  for the lump name.
 //
 
-#if 0  // UNUSED ??
-static void FreeLump(lumpheader_t *h)
-{
-	int lumpnum = h->lumpindex;
-
-	cache_size -= W_LumpLength(lumpnum);
-#ifdef DEVELOPERS
-	if (h->id != lumpheader_s::LUMPID)
-		I_Error("FreeLump: id != LUMPID");
-	h->id = 0;
-	if (h == NULL)
-		I_Error("FreeLump: NULL lump");
-	if (h->users)
-		I_Error("FreeLump: lump %d has %d users!", lumpnum, h->users);
-	if (lumplookup[lumpnum] != h)
-		I_Error("FreeLump: Internal error, lump %d", lumpnum);
-#endif
-	lumplookup[lumpnum] = NULL;
-	h->prev->next = h->next;
-	h->next->prev = h->prev;
-	Z_Free(h);
-}
-#endif
 
 //
 // MarkAsCached

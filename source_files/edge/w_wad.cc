@@ -2423,24 +2423,6 @@ void W_PreCacheLumpName(const char *name)
 }
 
 //
-// W_CacheInfo
-//
-int W_CacheInfo(int level)
-{
-	lumpheader_t *h;
-	int value = 0;
-
-	for (h = lumphead.next; h != &lumphead; h = h->next)
-	{
-		if ((level & 1) && h->users)
-			value += W_LumpLength(h->lumpindex);
-		if ((level & 2) && !h->users)
-			value += W_LumpLength(h->lumpindex);
-	}
-	return value;
-}
-
-//
 // W_LoadLumpNum
 //
 // Returns a copy of the lump (it is your responsibility to free it)

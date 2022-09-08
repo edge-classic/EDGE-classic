@@ -93,7 +93,6 @@ void *W_LoadLumpNum(int lump);
 void *W_LoadLumpName(const char *name);
 bool W_VerifyLumpName(int lump, const char *name);
 const char *W_GetLumpName(int lump);
-int W_CacheInfo(int level);
 byte *W_ReadLumpAlloc(int lump, int *length);
 
 epi::file_c *W_OpenLump(int lump);

@@ -2319,42 +2319,6 @@ void W_DoneWithLump(const void *ptr)
 }
 
 //
-// W_DoneWithLump_Flushable
-//
-// Call this if the lump probably won't be used for a while, to hint the
-// system to flush it early.
-//
-// Useful if you are creating a cache for e.g. some kind of lump
-// conversions (like the sound cache).
-//
-void W_DoneWithLump_Flushable(const void *ptr)
-{
-	lumpheader_t *h = ((lumpheader_t *)ptr); // Intentional Const Override
-
-#ifdef DEVELOPERS
-	if (h == NULL)
-		I_Error("W_DoneWithLump: NULL pointer");
-	h--;
-	if (h->id != lumpheader_s::LUMPID)
-		I_Error("W_DoneWithLump: id != LUMPID");
-	if (h->users == 0)
-		I_Error("W_DoneWithLump: lump %d has no users!", h->lumpindex);
-#endif
-	h->users--;
-	if (h->users == 0)
-	{
-		// Move the item to the head of the list.
-		h->prev->next = h->next;
-		h->next->prev = h->prev;
-		h->next = lumphead.next;
-		h->prev = &lumphead;
-		h->prev->next = h;
-		h->next->prev = h;
-		MarkAsCached(h);
-	}
-}
-
-//
 // W_CacheLumpNum
 //
 const void *W_CacheLumpNum2 (int lump)

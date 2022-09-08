@@ -112,6 +112,7 @@
 
 
 int option_menuon = 0;
+int fkey_menu = 0;
 
 extern cvar_c m_language;
 extern cvar_c r_crosshair;
@@ -1540,7 +1541,13 @@ bool M_OptResponder(event_t * ev, int ch)
 		{
 			if (curr_menu == &main_optmenu)
 			{
-				option_menuon = 0;
+				if (fkey_menu)
+				{
+					M_ClearMenus();
+					S_StartFX(sfx_swtchx);
+				}
+				else
+					option_menuon = 0;
 			}
 			else
 			{
@@ -1982,7 +1989,7 @@ void M_JoinNetGame(int keypressed)
 void M_Options(int choice)
 {
 	option_menuon = 1;
-
+	fkey_menu = choice;
 	// hack
 	menu_crosshair = CLAMP(0, r_crosshair.d, 9);
 	menu_crosscolor = CLAMP(0, r_crosscolor.d, 7);

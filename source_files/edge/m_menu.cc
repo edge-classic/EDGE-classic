@@ -1985,7 +1985,7 @@ bool M_Responder(event_t * ev)
 
 				S_StartFX(sfx_swtchn);
 				M_StartControlPanel();
-				M_Options(0);
+				M_Options(1);
 				return true;
 
 			case KEYD_QUICKSAVE:  // Quicksave
@@ -2520,6 +2520,7 @@ void M_ClearMenus(void)
 
 	menuactive = false;
 	save_screenshot_valid = false;
+	option_menuon = 0;
 }
 
 void M_SetupNextMenu(menu_t * menudef)

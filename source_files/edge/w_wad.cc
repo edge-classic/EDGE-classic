@@ -1978,25 +1978,42 @@ int W_GetPaletteForLump(int lump)
 }
 
 
-static inline int QuickFindLumpMap(char *buf)
+static int QuickFindLumpMap(const char *buf)
 {
-	int i;
-
-#define CMP(a)  (LUMP_MAP_CMP(a) < 0)
-	BSEARCH(numlumps, i);
-#undef CMP
-
-	if (i < 0 || i >= numlumps || LUMP_MAP_CMP(i) != 0)
-	{
-		// not found (nothing has that name)
+	if (numlumps == 0)
 		return -1;
+
+	int low  = 0;
+	int high = numlumps - 1;
+
+	while (low <= high)
+	{
+		int i   = (low + high) / 2;
+		int cmp = LUMP_MAP_CMP(i);
+
+		if (cmp == 0)
+		{
+			// jump to first matching name
+			while (i > 0 && LUMP_MAP_CMP(i-1) == 0)
+				i--;
+
+			return i;
+		}
+
+		if (cmp < 0)
+		{
+			// mid point < buf, so look in upper half
+			low = i + 1;
+		}
+		else
+		{
+			// mid point > buf, so look in lower half
+			high = i - 1;
+		}
 	}
 
-	// jump to first matching name
-	while (i > 0 && LUMP_MAP_CMP(i-1) == 0)
-		i--;
-
-	return i;
+	// not found (nothing has that name)
+	return -1;
 }
 
 

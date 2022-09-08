@@ -262,30 +262,6 @@ int numlumps;
 #define LUMP_MAP_CMP(a) (strncmp(lumpinfo[lumpmap[a]].name, buf, 8))
 
 
-typedef struct lumpheader_s
-{
-#ifdef DEVELOPERS
-	static const int LUMPID = (int)0xAC45197e;
-
-	int id;  // Should be LUMPID
-#endif
-
-	// number of users.
-	int users;
-
-	// index in lumplookup
-	int lumpindex;
-	struct lumpheader_s *next, *prev;
-}
-lumpheader_t;
-
-static lumpheader_t **lumplookup;
-static lumpheader_t lumphead;
-
-// number of freeable bytes in cache (excluding headers).
-// Used to decide how many bytes we should flush.
-static int cache_size = 0;
-
 // the first datafile which contains a PLAYPAL lump
 static int palette_datafile = -1;
 
@@ -576,25 +552,6 @@ static void SortSpriteLumps(data_file_c *df)
 //  for the lump name.
 //
 
-
-//
-// MarkAsCached
-//
-static void MarkAsCached(lumpheader_t *item)
-{
-#ifdef DEVELOPERS
-	if (item->id != lumpheader_s::LUMPID)
-		I_Error("MarkAsCached: id != LUMPID");
-	if (!item)
-		I_Error("MarkAsCached: lump %d is NULL", item->lumpindex);
-	if (item->users)
-		I_Error("MarkAsCached: lump %d has %d users!", item->lumpindex, item->users);
-	if (lumplookup[item->lumpindex] != item)
-		I_Error("MarkAsCached: Internal error, lump %d", item->lumpindex);
-#endif
-
-	cache_size += W_LumpLength(item->lumpindex);
-}
 
 //
 // AddLump
@@ -1259,12 +1216,6 @@ static void AddFile(const char *filename, int kind, int dyn_index, std::string m
 	SortLumps();
 	SortSpriteLumps(df);
 
-	// set up caching
-	Z_Resize(lumplookup, lumpheader_t *, numlumps);
-
-	for (j=startlump; j < numlumps; j++)
-		lumplookup[j] = NULL;
-
 	// check for unclosed sprite/flat/patch lists
 	if (within_sprite_list)
 		I_Warning("Missing S_END marker in %s.\n", filename);
@@ -1350,11 +1301,6 @@ static void AddFile(const char *filename, int kind, int dyn_index, std::string m
 	}
 }
 
-static void InitCaches(void)
-{
-	lumphead.next = lumphead.prev = &lumphead;
-}
-
 //
 // W_BuildNodes
 //
@@ -1413,8 +1359,6 @@ void W_AddRawFilename(const char *file, int kind)
 //
 void W_InitMultipleFiles(void)
 {
-	InitCaches();
-
 	// open all the files, load headers, and count lumps
 	numlumps = 0;
 

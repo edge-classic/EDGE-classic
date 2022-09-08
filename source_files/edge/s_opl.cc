@@ -62,11 +62,11 @@ static bool S_StartupOPL(void)
 	}
 
 	int length;
-	const byte *data = (const byte*)W_ReadLumpAlloc(p, &length);
+	const byte *data = (const byte*)W_LoadLump(p, &length);
 
 	GM_LoadInstruments(data, (size_t)length);
 
-	delete[] data;
+	W_DoneWithLump(data);
 
 	// OK
 	return true;

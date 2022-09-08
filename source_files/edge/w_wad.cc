@@ -297,8 +297,6 @@ static bool within_colmap_list;
 static bool within_tex_list;
 static bool within_hires_list;
 
-byte *W_ReadLumpAlloc(int lump, int *length);
-
 //
 // Is the name a sprite list start flag?
 // If lax syntax match, fix up to standard syntax.
@@ -1311,8 +1309,8 @@ static void AddFile(const char *filename, int kind, int dyn_index, std::string m
 
 				I_Printf("Converting [%s] lump in: %s\n", lump_name, filename);
 
-				const byte *data = (const byte *)W_CacheLumpNum(df->deh_lump);
-				int length = W_LumpLength(df->deh_lump);
+				int length;
+				const byte *data = (const byte *)W_LoadLump(df->deh_lump, &length);
 
 				if (! DH_ConvertLump(data, length, lump_name, hwa_filename.c_str()))
 					I_Error("Failed to convert DeHackEd LUMP in: %s\n", filename);
@@ -1447,7 +1445,7 @@ void W_ReadUMAPINFOLumps(void)
 	L_WriteDebug("parsing UMAPINFO lump\n");
 
 	int length;
-	const unsigned char * lump = (const unsigned char *)W_ReadLumpAlloc(p, &length);
+	const unsigned char * lump = (const unsigned char *)W_LoadLump(p, &length);
 	ParseUMapInfo(lump, W_LumpLength(p), I_Error);
 
 	unsigned int i;
@@ -1762,11 +1760,12 @@ void W_ReadWADFIXES(void)
 	(* wadfix_reader.func)(NULL, 0);
 
 	int length;
-	char *data = (char *) W_ReadLumpAlloc(W_GetNumForName("WADFIXES"), &length);
+	char *data = (char *) W_LoadLump("WADFIXES", &length);
 
 	// call read function
 	(* wadfix_reader.func)(data, length);
-	delete[] data;
+
+	W_DoneWithLump(data);
 }
 
 void W_ReadDDF(void)
@@ -1809,11 +1808,12 @@ void W_ReadDDF(void)
 				I_Printf("Loading %s from: %s\n", DDF_Readers[d].name, df->file_name);
 
 				int length;
-				char *data = (char *) W_ReadLumpAlloc(lump, &length);
+				char *data = (char *) W_LoadLump(lump, &length);
 
 				// call read function
 				(* DDF_Readers[d].func)(data, length);
-				delete[] data;
+
+				W_DoneWithLump(data);
 			}
 
 			// handle Boom's ANIMATED and SWITCHES lumps
@@ -1822,20 +1822,20 @@ void W_ReadDDF(void)
 				I_Printf("Loading ANIMATED from: %s\n", df->file_name);
 
 				int length;
-				byte *data = W_ReadLumpAlloc(df->animated, &length);
+				byte *data = W_LoadLump(df->animated, &length);
 
 				DDF_ParseANIMATED(data, length);
-				delete[] data;
+				W_DoneWithLump(data);
 			}
 			if (d == SWTH_READER && df->switches >= 0)
 			{
 				I_Printf("Loading SWITCHES from: %s\n", df->file_name);
 
 				int length;
-				byte *data = W_ReadLumpAlloc(df->switches, &length);
+				byte *data = W_LoadLump(df->switches, &length);
 
 				DDF_ParseSWITCHES(data, length);
-				delete[] data;
+				W_DoneWithLump(data);
 			}
 
 			// handle BOOM Colourmaps (between C_START and C_END)
@@ -1870,9 +1870,11 @@ void W_ReadCoalLumps(void)
 		if (df->kind > FLKIND_Lump)
 			continue;
 
-		if (df->coal_apis >= 0) VM_LoadLumpOfCoal(df->coal_apis);
+		if (df->coal_apis >= 0)
+			VM_LoadLumpOfCoal(df->coal_apis);
 
-		if (df->coal_huds >= 0)	VM_LoadLumpOfCoal(df->coal_huds);
+		if (df->coal_huds >= 0)
+			VM_LoadLumpOfCoal(df->coal_huds);
 	}
 }
 
@@ -2250,109 +2252,12 @@ static void W_RawReadLump(int lump, void *dest)
 		I_Error("W_ReadLump: only read %i of %i on lump %i", c, L->size, lump);
 }
 
-// FIXME !!! merge W_ReadLumpAlloc and W_LoadLumpNum into one good function
-byte *W_ReadLumpAlloc(int lump, int *length)
-{
-	*length = W_LumpLength(lump);
-
-	byte *data = new byte[*length + 1];
-
-	W_RawReadLump(lump, data);
-
-	data[*length] = 0;
-
-	return data;
-}
-
-//
-// W_DoneWithLump
-//
-void W_DoneWithLump(const void *ptr)
-{
-/* FIXME free the data
-
-	lumpheader_t *h = ((lumpheader_t *)ptr); // Intentional Const Override
-
-#ifdef DEVELOPERS
-	if (h == NULL)
-		I_Error("W_DoneWithLump: NULL pointer");
-	if (h[-1].id != lumpheader_s::LUMPID)
-		I_Error("W_DoneWithLump: id != LUMPID");
-	if (h[-1].users == 0)
-		I_Error("W_DoneWithLump: lump %d has no users!", h[-1].lumpindex);
-#endif
-	h--;
-	h->users--;
-	if (h->users == 0)
-	{
-		// Move the item to the tail.
-		h->prev->next = h->next;
-		h->next->prev = h->prev;
-		h->prev = lumphead.prev;
-		h->next = &lumphead;
-		h->prev->next = h;
-		h->next->prev = h;
-		MarkAsCached(h);
-	}
-*/
-}
-
-//
-// W_CacheLumpNum
-//
-const void *W_CacheLumpNum(int lump)
-{
-	lumpheader_t *h;
-
-#ifdef DEVELOPERS
-	if ((unsigned int)lump >= (unsigned int)numlumps)
-		I_Error("W_CacheLumpNum: %i >= numlumps", lump);
-#endif
-
-	h = lumplookup[lump];
-
-	if (h)
-	{
-		// cache hit
-		if (h->users == 0)
-			cache_size -= W_LumpLength(h->lumpindex);
-		h->users++;
-	}
-	else
-	{
-		// cache miss. load the new item.
-		h = (lumpheader_t *) Z_Malloc(sizeof(lumpheader_t) + W_LumpLength(lump));
-		lumplookup[lump] = h;
-#ifdef DEVELOPERS
-		h->id = lumpheader_s::LUMPID;
-#endif
-		h->lumpindex = lump;
-		h->users = 1;
-		h->prev = lumphead.prev;
-		h->next = &lumphead;
-		h->prev->next = h;
-		lumphead.prev = h;
-
-		W_RawReadLump(lump, (void *)(h + 1));
-	}
-
-	return (void *)(h + 1);
-}
-
-//
-// W_CacheLumpName
-//
-const void *W_CacheLumpName(const char *name)
-{
-	return W_CacheLumpNum(W_GetNumForName(name));
-}
-
 //
 // W_LoadLump
 //
 // Returns a copy of the lump (it is your responsibility to free it)
 //
-void *W_LoadLump(int lump, int *length)
+byte *W_LoadLump(int lump, int *length)
 {
 	int w_length = W_LumpLength(lump);
 
@@ -2369,9 +2274,22 @@ void *W_LoadLump(int lump, int *length)
 	return data;
 }
 
-void *W_LoadLump(const char *name, int *length)
+byte *W_LoadLump(const char *name, int *length)
 {
 	return W_LoadLump(W_GetNumForName(name), length);
+}
+
+//
+// W_DoneWithLump
+//
+void W_DoneWithLump(const void *ptr)
+{
+	if (ptr == NULL)
+		I_Error("W_DoneWithLump: NULL pointer");
+
+	byte *data = (byte *)ptr;
+
+	delete[] data;
 }
 
 //

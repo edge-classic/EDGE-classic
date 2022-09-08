@@ -83,14 +83,16 @@ int W_CheckNumForTexPatch(const char *name);
 
 int W_LumpLength(int lump);
 
+// TODO: one day tidy this up
+#define W_CacheLumpNum(x)   W_LoadLump((x), NULL)
+#define W_CacheLumpName(x)  W_LoadLump((x), NULL)
+
+byte *W_LoadLump(int lump, int *length = NULL);
+byte *W_LoadLump(const char *name, int *length = NULL);
 void W_DoneWithLump(const void *ptr);
-const void *W_CacheLumpNum(int lump);
-const void *W_CacheLumpName(const char *name);
-void *W_LoadLump(int lump, int *length = NULL);
-void *W_LoadLump(const char *name, int *length = NULL);
+
 bool W_VerifyLumpName(int lump, const char *name);
 const char *W_GetLumpName(int lump);
-byte *W_ReadLumpAlloc(int lump, int *length);
 
 epi::file_c *W_OpenLump(int lump);
 epi::file_c *W_OpenLump(const char *name);

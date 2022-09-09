@@ -21,7 +21,6 @@
 #include "states.h"
 
 #include "p_action.h"
-#include "z_zone.h"
 
 
 // FIXME: unwanted link to engine code (switch to epi::angle_c)

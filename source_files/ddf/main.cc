@@ -410,34 +410,6 @@ static void *DDF_MainCacheFile(readinfo_t * readinfo)
 	return (void *)memfile;
 }
 
-static void DDF_ParseVersion(const char *str, int len)
-{
-	if (len <= 0 || ! isspace(*str))
-		DDF_Error("Badly formed #VERSION directive.\n");
-	
-	for (; isspace(*str) && len > 0; str++, len--)
-	{ }
-
-	if (len < 4 || ! isdigit(str[0]) || str[1] != '.' ||
-		! isdigit(str[2]) || ! isdigit(str[3]))
-	{
-		DDF_Error("Badly formed #VERSION directive.\n");
-	}
-
-	int ddf_version = ((str[0] - '0') * 100) |
-	                  ((str[2] - '0') *  10) |
-				       (str[3] - '0');
-
-	if (ddf_version < 100)
-		DDF_Error("Illegal #VERSION number: %i\n", ddf_version);
-
-	/*
-	if (ddf_version > engine_version)
-		DDF_Error("This version of EDGE cannot handle this DDF.\n");
-	
-	*/
-}
-
 
 //
 // Description of the DDF Parser:
@@ -878,11 +850,7 @@ bool DDF_MainReadFile(readinfo_t * readinfo)
 
 			if (strnicmp(memfileptr, "#VERSION", 8) == 0)
 			{
-				if (! firstgo)
-					DDF_Error("#VERSION cannot be used inside an entry !\n");
-
-				DDF_ParseVersion(memfileptr + 8, l_len - 8);
-
+				// just ignore it
 				memfileptr += l_len;
 				continue;
 			}

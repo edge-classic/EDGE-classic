@@ -66,6 +66,20 @@ static const commandlist_t text_commands[] =
 	DDF_CMD_END
 };
 
+#undef  DDF_CMD_BASE
+#define DDF_CMD_BASE  dummy_cursorstyle
+static cursorstyle_c  dummy_cursorstyle;
+
+static const commandlist_t cursor_commands[] =
+{
+    DF("POSITION", pos_string, DDF_MainGetString),
+	DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
+	DF("IMAGE", alt_cursor, DDF_MainGetString),
+	DF("STRING", cursor_string, DDF_MainGetString),
+	DF("BORDER", border, DDF_MainGetBoolean),
+
+	DDF_CMD_END
+};
 
 #undef  DDF_CMD_BASE
 #define DDF_CMD_BASE  dummy_soundstyle
@@ -95,6 +109,7 @@ static const commandlist_t style_commands[] =
 {
 	// sub-commands
 	DDF_SUB_LIST("BACKGROUND", bg, background_commands),
+	DDF_SUB_LIST("CURSOR",  cursor, cursor_commands),
 	DDF_SUB_LIST("TEXT",  text[0], text_commands),
 	DDF_SUB_LIST("ALT",   text[1], text_commands),
 	DDF_SUB_LIST("TITLE", text[2], text_commands),
@@ -102,6 +117,7 @@ static const commandlist_t style_commands[] =
 	DDF_SUB_LIST("SOUND",  sounds, sound_commands),
 	DF("X_OFFSET",   x_offset, DDF_MainGetNumeric),
 	DF("Y_OFFSET",   y_offset, DDF_MainGetNumeric),
+	DF("ENTRY_ALIGNMENT", entry_align_string, DDF_MainGetString),
 
     DF("SPECIAL", special, DDF_StyleGetSpecials),
 
@@ -161,7 +177,30 @@ static void StyleParseField(const char *field, const char *contents,
 
 static void StyleFinishEntry(void)
 {
-	// TODO: check stuff
+	if (dynamic_style->cursor.pos_string)
+	{
+		if (strcasecmp(dynamic_style->cursor.pos_string, "LEFT") == 0)
+			dynamic_style->cursor.position = dynamic_style->C_LEFT;
+		else if (strcasecmp(dynamic_style->cursor.pos_string, "CENTER") == 0)
+			dynamic_style->cursor.position = dynamic_style->C_CENTER;
+		else if (strcasecmp(dynamic_style->cursor.pos_string, "RIGHT") == 0)
+			dynamic_style->cursor.position = dynamic_style->C_RIGHT;
+		else if (strcasecmp(dynamic_style->cursor.pos_string, "BOTH") == 0)
+			dynamic_style->cursor.position = dynamic_style->C_BOTH;
+		else // Fallback to left-aligned for typos/bad values
+			dynamic_style->cursor.position = dynamic_style->C_LEFT;
+	}
+	if (dynamic_style->entry_align_string)
+	{
+		if (strcasecmp(dynamic_style->entry_align_string, "LEFT") == 0)
+			dynamic_style->entry_alignment = dynamic_style->C_LEFT;
+		else if (strcasecmp(dynamic_style->entry_align_string, "CENTER") == 0)
+			dynamic_style->entry_alignment = dynamic_style->C_CENTER;
+		else if (strcasecmp(dynamic_style->entry_align_string, "RIGHT") == 0)
+			dynamic_style->entry_alignment = dynamic_style->C_RIGHT;
+		else // Fallback to left-aligned for typos/bad values
+			dynamic_style->entry_alignment = dynamic_style->C_LEFT;
+	}
 }
 
 
@@ -229,7 +268,6 @@ static specflags_t style_specials[] =
     {"TILED", SYLSP_Tiled, 0},
     {"TILED_NOSCALE", SYLSP_TiledNoScale, 0},
 	{"STRETCH_FULLSCREEN", SYLSP_StretchFullScreen, 0},
-	{"CURSOR_RIGHT", SYLSP_CursorRight, 0},
     {NULL, 0, 0}
 };
 
@@ -371,6 +409,62 @@ textstyle_c& textstyle_c::operator= (const textstyle_c &rhs)
 	return *this;
 }
 
+// --> cursorstyle_c definition class
+
+//
+// cursorstyle_c Constructor
+//
+cursorstyle_c::cursorstyle_c()
+{
+	Default();
+}
+
+//
+// cursorstyle_c Copy constructor
+//
+cursorstyle_c::cursorstyle_c(const cursorstyle_c &rhs)
+{
+	*this = rhs;
+}
+
+//
+// cursorstyle_c Destructor
+//
+cursorstyle_c::~cursorstyle_c()
+{
+}
+
+//
+// cursorstyle_c::Default()
+//
+void cursorstyle_c::Default()
+{
+	position = 0;
+	translucency = PERCENT_MAKE(100);
+	pos_string = NULL;
+	alt_cursor = NULL;
+	cursor_string = NULL;
+	border = false;
+}
+
+//
+// cursorstyle_c assignment operator
+//
+cursorstyle_c& cursorstyle_c::operator= (const cursorstyle_c &rhs)
+{
+	if (&rhs != this)
+	{
+		position = rhs.position;
+		translucency = rhs.translucency;
+		pos_string = rhs.pos_string;
+		alt_cursor = rhs.alt_cursor;
+		cursor_string = rhs.cursor_string;
+		border = rhs.border;
+	}
+		
+	return *this;
+}
+
 // --> soundstyle_c definition class
 
 //
@@ -463,6 +557,9 @@ void styledef_c::CopyDetail(const styledef_c &src)
 	y_offset = src.y_offset;
 
 	special = src.special;
+
+	entry_align_string = src.entry_align_string;
+	entry_alignment = src.entry_alignment;
 }
 
 //
@@ -481,6 +578,9 @@ void styledef_c::Default()
 	y_offset = 0;
 
 	special = (style_special_e) SYLSP_StretchFullScreen; // I think this might be better for backwards compat, revert to 0 if needed - Dasho
+
+	entry_align_string = NULL;
+	entry_alignment = 0;
 }
 
 

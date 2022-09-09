@@ -20,6 +20,7 @@
 #define __CON_VAR_H__
 
 #include <vector>
+#include <string>
 
 class cvar_c
 {
@@ -27,26 +28,16 @@ public:
 	// current value
 	int d;
 	float f;
-	const char *str;
+	std::string s;
 
+private:
 	// this is incremented each time a value is set.
 	// (Note: whether the value is different is not checked)
 	int modified;
 
-private:
-	enum bufsize_e { BUFSIZE = 24 };
-
-	// local buffer used for integers, floats and small strings.
-	// in use whenever (s == buffer).  Otherwise s is on the heap,
-	// using strdup() and free().
-	char buffer[BUFSIZE];
-
 public:
-	cvar_c() : d(0), f(0.0f), str(buffer), modified(0)
-	{
-		buffer[0] = '0';
-		buffer[1] =  0;
-	}
+	cvar_c() : d(0), f(0.0f), s("0"), modified(0)
+	{ }
 
 	cvar_c(int value);
 	cvar_c(float value);
@@ -61,24 +52,29 @@ public:
 	cvar_c& operator= (std::string value);
 	cvar_c& operator= (const cvar_c& other);
 
+	inline const char *c_str() const
+	{
+		return s.c_str();
+	}
+
 	// this checks and clears the 'modified' value
 	inline bool CheckModified()
 	{
 		if (modified)
 		{
-			modified = 0; return true;
+			modified = 0;
+			return true;
 		}
 		return false;
 	}
 
-private:
-	inline bool Allocd()
-	{
-		return (str != NULL) && (str != buffer);
-	}
+	void Reset(const char *value);
 
+private:
+	void FmtInt  (int value);
 	void FmtFloat(float value);
-	void DoStr(const char *value);
+
+	void ParseString();
 };
 
 
@@ -102,9 +98,8 @@ cvar_link_t;
 extern cvar_link_t all_cvars[];
 
 
-void CON_ResetAllVars(bool initial = false);
+void CON_ResetAllVars();
 // sets all cvars to their default value.
-// When 'initial' is true, the modified counts are set to 0.
 
 cvar_link_t * CON_FindVar(const char *name);
 // look for a CVAR with the given name.

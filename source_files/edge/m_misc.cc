@@ -298,7 +298,7 @@ void M_SaveDefaults(void)
 		cvar_c *var = all_cvars[k].var;
 
 		if (strchr(all_cvars[k].flags, 'c'))
-			fprintf(f, "/%s\t\"%s\"\n", all_cvars[k].name, var->str);
+			fprintf(f, "/%s\t\"%s\"\n", all_cvars[k].name, var->c_str());
 	}
 
 	// normal variables

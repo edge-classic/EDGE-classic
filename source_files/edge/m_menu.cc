@@ -2604,8 +2604,8 @@ void M_Ticker(void)
 {
 	// update language if it changed
 	if (m_language.CheckModified())
-		if (! language.Select(m_language.str))
-			I_Printf("Unknown language: %s\n", m_language.str);
+		if (! language.Select(m_language.c_str()))
+			I_Printf("Unknown language: %s\n", m_language.c_str());
 
 	if (option_menuon)
 	{
@@ -2668,7 +2668,8 @@ void M_Init(void)
 	def = styledefs.Lookup("OPTIONS");
 	if (! def) def = default_style;
 
-	language.Select(m_language.str);
+	language.Select(m_language.c_str());
+
 	//Lobo 2022: load our ddflang stuff
 	MainMenu[newgame].name = language["MainNewGame"];
 	MainMenu[options].name = language["MainOptions"];

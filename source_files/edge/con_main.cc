@@ -305,9 +305,9 @@ int CMD_ShowVars(char **argv, int argc)
 		cvar_c *var = all_cvars[i].var;
 
 		if (show_defaults)
-			I_Printf("  %-20s \"%s\" (%s)\n", all_cvars[i].name, var->str, all_cvars[i].def_val);
+			I_Printf("  %-20s \"%s\" (%s)\n", all_cvars[i].name, var->c_str(), all_cvars[i].def_val);
 		else
-			I_Printf("  %-20s \"%s\"\n", all_cvars[i].name, var->str);
+			I_Printf("  %-20s \"%s\"\n", all_cvars[i].name, var->c_str());
 
 		total++;
 	}
@@ -598,7 +598,7 @@ void CON_TryCommand(const char *cmd)
 	if (link)
 	{
 		if (argc <= 1)
-			I_Printf("%s \"%s\"\n", argv[0], link->var->str);
+			I_Printf("%s \"%s\"\n", argv[0], link->var->c_str());
 		else if (argc >= 3)
 			I_Printf("Can only assign one value (%d given).\n", argc-1);
 		else if (strchr(link->flags, 'r'))

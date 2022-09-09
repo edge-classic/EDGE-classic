@@ -45,7 +45,6 @@
 #include "r_texgl.h"
 #include "r_units.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 // -AJA- 1999/06/30: added this
 byte playpal_data[14][256][3];
@@ -70,22 +69,6 @@ int var_gamma;
 static bool old_gamma = -1;
 
 
-// text translation tables
-const colourmap_c *text_red_map    = NULL;
-const colourmap_c *text_white_map  = NULL;
-const colourmap_c *text_grey_map   = NULL;
-const colourmap_c *text_green_map  = NULL;
-const colourmap_c *text_brown_map  = NULL;
-const colourmap_c *text_blue_map   = NULL;
-const colourmap_c *text_purple_map = NULL;
-const colourmap_c *text_yellow_map = NULL;
-const colourmap_c *text_orange_map = NULL;
-
-// automap translation tables
-const byte *am_normal_colmap  = NULL;
-const byte *am_overlay_colmap = NULL;
-
-
 // colour indices from palette
 int pal_black, pal_white, pal_gray239;
 int pal_red, pal_green, pal_blue;
@@ -99,7 +82,7 @@ void V_InitPalette(void)
 	int t, i;
 	wadtex_resource_c WT;
 
-	const byte *pal = (const byte*)W_CacheLumpName2("PLAYPAL");
+	const byte *pal = (const byte*)W_CacheLumpName("PLAYPAL");
 
 	// read in palette colours
 	for (t = 0; t < 14; t++)
@@ -135,38 +118,6 @@ void V_InitPalette(void)
 }
 
 
-//
-// Reads the translation tables for various things, especially text
-// colours.  The text colourmaps to use are currently hardcoded, when
-// HUD.DDF (or MENU.DDF) comes along then the colours will be user
-// configurable.
-//
-// -ACB- 1998/09/10 Replaced the old procedure with this.
-// -AJA- 2000/03/04: Moved here from r_draw1/2.c.
-// -AJA- 2000/03/05: Uses colmap.ddf instead of PALREMAP lump.
-//
-static void InitTranslationTables(void)
-{
-	// look up the general colmaps & coltables
-
-	am_normal_colmap = V_GetTranslationTable(
-		colourmaps.Lookup("AUTOMAP_NORMAL"));
-
-	am_overlay_colmap = V_GetTranslationTable(
-		colourmaps.Lookup("AUTOMAP_OVERLAY"));
-
-	// look up the text maps
-	text_red_map    = colourmaps.Lookup("TEXT_RED");
-	text_white_map  = colourmaps.Lookup("TEXT_WHITE");
-	text_grey_map   = colourmaps.Lookup("TEXT_GREY");
-	text_green_map  = colourmaps.Lookup("TEXT_GREEN");
-	text_brown_map  = colourmaps.Lookup("TEXT_BROWN");
-	text_blue_map   = colourmaps.Lookup("TEXT_BLUE");
-	text_purple_map = colourmaps.Lookup("TEXT_PURPLE");
-	text_yellow_map = colourmaps.Lookup("TEXT_YELLOW");
-	text_orange_map = colourmaps.Lookup("TEXT_ORANGE");
-}
-
 static int cur_palette = -1;
 
 
@@ -177,8 +128,6 @@ void V_InitColour(void)
 	{
 		var_gamma = MAX(0, MIN(5, atoi(s)));
 	}
-
-	InitTranslationTables();
 }
 
 // 
@@ -302,15 +251,16 @@ static void LoadColourmap(const colourmap_c * colm)
 	data = (const byte*)W_CacheLumpNum(lump);
 
 	if ((colm->start + colm->length) * 256 > size)
-		I_Error("Colourmap [%s] is too small ! (LENGTH too big)\n", 
-		colm->name.c_str());
+	{
+		I_Error("Colourmap [%s] is too small ! (LENGTH too big)\n", colm->name.c_str());
+	}
 
 	data_in = data + (colm->start * 256);
 
-	Z_Resize(cache->data, byte, colm->length * 256);
+	cache->size = colm->length * 256;
+	cache->data = new byte[cache->size];
 
-	for (int j = 0; j < colm->length * 256; j++)
-		cache->data[j] = data_in[j];
+	memcpy(cache->data, data_in, cache->size);
 
 	W_DoneWithLump(data);
 }

@@ -63,7 +63,6 @@
 #include "r_colormap.h"
 #include "w_texture.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 
 swirl_type_e swirling_flats = SWIRL_Vanilla;
@@ -545,13 +544,13 @@ static image_c *AddImageUser(imagedef_c *def)
 
 			if (def->format == LIF_DOOM)
 			{
-				image_c *rim;
+				image_c *rim = NULL;
 				switch (def->belong)
 				{
-					case INS_Graphic: rim = AddImageGraphic(def->name, IMSRC_Graphic, W_GetNumForName2(basename), real_graphics); break;
-					case INS_Texture: rim = AddImageGraphic(def->name, IMSRC_Texture, W_GetNumForName2(basename), real_textures); break;
-					case INS_Flat:    rim = AddImageGraphic(def->name, IMSRC_Flat, W_GetNumForName2(basename), real_flats); break;
-					case INS_Sprite:  rim = AddImageGraphic(def->name, IMSRC_Sprite, W_GetNumForName2(basename), real_sprites); break;
+					case INS_Graphic: rim = AddImageGraphic(def->name, IMSRC_Graphic, W_GetNumForName(basename), real_graphics); break;
+					case INS_Texture: rim = AddImageGraphic(def->name, IMSRC_Texture, W_GetNumForName(basename), real_textures); break;
+					case INS_Flat:    rim = AddImageGraphic(def->name, IMSRC_Flat,    W_GetNumForName(basename), real_flats);    break;
+					case INS_Sprite:  rim = AddImageGraphic(def->name, IMSRC_Sprite,  W_GetNumForName(basename), real_sprites);  break;
 
 					default:
 						I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);
@@ -654,18 +653,15 @@ static image_c *AddImageUser(imagedef_c *def)
 // NOTE: should only be called once, as it assumes none of the flats
 // in the list have names colliding with existing flat images.
 // 
-void W_ImageCreateFlats(int *lumps, int number)
+void W_ImageCreateFlats(std::vector<int>& lumps)
 {
-	int i;
-
-	SYS_ASSERT(lumps);
-
-	for (i=0; i < number; i++)
+	for (size_t i = 0; i < lumps.size(); i++)
 	{
-		if (lumps[i] < 0)
-			continue;
-    
-		AddImageFlat(W_GetLumpName(lumps[i]), lumps[i]);
+		if (lumps[i] >= 0)
+		{
+			const char *name = W_GetLumpName(lumps[i]);
+			AddImageFlat(name, lumps[i]);
+		}
 	}
 }
 

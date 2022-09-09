@@ -21,7 +21,6 @@
 #include "states.h"
 
 #include "p_action.h"
-#include "z_zone.h"
 
 
 // FIXME: unwanted link to engine code (switch to epi::angle_c)
@@ -45,7 +44,6 @@ static const state_t template_state =
 	-1          // jump state ref
 };
 
-// -KM- 1998/11/25 All weapon related states are out
 state_t *states = NULL;
 int num_states;
 
@@ -123,18 +121,19 @@ static int AddModelName(const char *name)
 
 void DDF_StateInit(void)
 {
-	// setup the 'S_NULL' state
-	states = Z_New(state_t, 1);
+	// create states array with a single 'S_NULL' state
+	states = (state_t*) malloc(sizeof(state_t));
+	if (states == NULL)
+		I_Error("could not allocate states\n");
+
 	states[0] = template_state;
 	num_states = 1;
 
-	// setup the 'SPR_NULL' sprite
+	// create the 'SPR_NULL' sprite
 	// (Not strictly needed, but means we can access the arrays
 	//  without subtracting 1)
-#if 1
 	AddSpriteName("!NULL!");
 	AddModelName ("!NULL!");
-#endif
 }
 
 void DDF_StateCleanUp(void)
@@ -371,7 +370,11 @@ void DDF_StateReadState(const char *info, const char *label,
 	//---------------- ALLOCATE NEW STATE --------------
 	//--------------------------------------------------
 
-	Z_Resize(states, state_t, ++num_states);
+	num_states += 1;
+
+	states = (state_t*) realloc(states, num_states * sizeof(state_t));
+	if (states == NULL)
+		I_Error("could not allocate states\n");
 
 	cur = &states[num_states-1];
 

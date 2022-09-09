@@ -56,7 +56,6 @@
 #include "r_image.h"
 #include "w_texture.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 #ifdef __arm__
   #include "str_format.h"
@@ -2988,7 +2987,7 @@ void P_SetupLevel(void)
 	// check if the level is for Hexen
 	hexen_level = false;
 
-	if (lumpnum + ML_BEHAVIOR < numlumps &&
+	if (W_VerifyLump(lumpnum + ML_BEHAVIOR) &&
 		W_VerifyLumpName(lumpnum + ML_BEHAVIOR, "BEHAVIOR"))
 	{
 		L_WriteDebug("Detected Hexen level.\n");

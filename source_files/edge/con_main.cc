@@ -35,7 +35,6 @@
 #include "s_sound.h"
 #include "w_wad.h"
 #include "version.h"
-#include "z_zone.h"
 
 
 #define MAX_CON_ARGS  64
@@ -187,9 +186,6 @@ int CMD_QuitEDGE(char **argv, int argc)
 
 int CMD_Crc(char **argv, int argc)
 {
-	int lump, length;
-	const byte *data;
-
 	if (argc < 2)
 	{
 		CON_Printf("Usage: crc <lump>\n");
@@ -198,7 +194,7 @@ int CMD_Crc(char **argv, int argc)
 
 	for (int i = 1; i < argc; i++)
 	{
-		lump = W_CheckNumForName(argv[i]);
+		int lump = W_CheckNumForName(argv[i]);
 
 		if (lump == -1)
 		{
@@ -206,15 +202,15 @@ int CMD_Crc(char **argv, int argc)
 		}
 		else
 		{
-			length = W_LumpLength(lump);
-			data = (const byte*)W_LoadLumpNum(lump);
+			int length;
+			byte *data = (byte*) W_LoadLump(lump, &length);
 
 			epi::crc32_c result;
 
 			result.Reset();
 			result.AddBlock(data, length);
 
-			Z_Free((void*)data);
+			W_DoneWithLump(data);
 
 			CON_Printf("  %s  %d bytes  crc = %08x\n", argv[i], length, result.crc);
 		}
@@ -308,9 +304,9 @@ int CMD_ShowVars(char **argv, int argc)
 		cvar_c *var = all_cvars[i].var;
 
 		if (show_defaults)
-			I_Printf("  %-20s \"%s\" (%s)\n", all_cvars[i].name, var->str, all_cvars[i].def_val);
+			I_Printf("  %-20s \"%s\" (%s)\n", all_cvars[i].name, var->c_str(), all_cvars[i].def_val);
 		else
-			I_Printf("  %-20s \"%s\"\n", all_cvars[i].name, var->str);
+			I_Printf("  %-20s \"%s\"\n", all_cvars[i].name, var->c_str());
 
 		total++;
 	}
@@ -601,7 +597,7 @@ void CON_TryCommand(const char *cmd)
 	if (link)
 	{
 		if (argc <= 1)
-			I_Printf("%s \"%s\"\n", argv[0], link->var->str);
+			I_Printf("%s \"%s\"\n", argv[0], link->var->c_str());
 		else if (argc >= 3)
 			I_Printf("Can only assign one value (%d given).\n", argc-1);
 		else if (strchr(link->flags, 'r'))

@@ -23,50 +23,44 @@
 
 #include "m_argv.h"
 
-#include "z_zone.h"  // Noooooooooooooo!
 
-
-cvar_c::cvar_c(int value) : d(value), f(value), str(buffer), modified(0)
+cvar_c::cvar_c(int value) : d(value), f(value), s(), modified(0)
 {
-	sprintf(buffer, "%d", value);
+	FmtInt(value);
 }
 
-cvar_c::cvar_c(float value) : d(I_ROUND(value)), f(value), str(buffer), modified(0)
+cvar_c::cvar_c(float value) : d(I_ROUND(value)), f(value), s(), modified(0)
 {
 	FmtFloat(value);
 }
 
-cvar_c::cvar_c(const char *value) : str(buffer), modified(0)
+cvar_c::cvar_c(const char *value) : s(value), modified(0)
 {
-	DoStr(value);
+	ParseString();
 }
 
-cvar_c::cvar_c(const cvar_c& other) : str(buffer), modified(0)
+cvar_c::cvar_c(const cvar_c& other) : s(other.s), modified(0)
 {
-	DoStr(other.str);
+	ParseString();
 }
 
 cvar_c::~cvar_c()
 {
-	if (Allocd())
-	{
-		Z_Free((void *) str);
-	}
+	// nothing needed
 }
 
+void cvar_c::Reset(const char *value)
+{
+	s = value;
+	ParseString();
+	modified = 0;
+}
 
 cvar_c& cvar_c::operator= (int value)
 {
-	if (Allocd())
-	{
-		Z_Free((void *) str);
-	}
-
 	d = value;
 	f = value;
-
-	str = buffer;
-	sprintf(buffer, "%d", value);
+	FmtInt(value);
 
 	modified++;
 	return *this;
@@ -74,15 +68,8 @@ cvar_c& cvar_c::operator= (int value)
 
 cvar_c& cvar_c::operator= (float value)
 {
-	if (Allocd())
-	{
-		Z_Free((void *) str);
-	}
-
 	d = I_ROUND(value);
 	f = value;
-
-	str = buffer;
 	FmtFloat(value);
 
 	modified++;
@@ -91,7 +78,8 @@ cvar_c& cvar_c::operator= (float value)
 
 cvar_c& cvar_c::operator= (const char *value)
 {
-	DoStr(value);
+	s = value;
+	ParseString();
 
 	modified++;
 	return *this;
@@ -99,7 +87,8 @@ cvar_c& cvar_c::operator= (const char *value)
 
 cvar_c& cvar_c::operator= (std::string value)
 {
-	DoStr(value.c_str());
+	s = value;
+	ParseString();
 
 	modified++;
 	return *this;
@@ -109,7 +98,8 @@ cvar_c& cvar_c::operator= (const cvar_c& other)
 {
 	if (&other != this)
 	{
-		DoStr(other.str);
+		s = other.s;
+		ParseString();
 	}
 
 	modified++;
@@ -117,8 +107,18 @@ cvar_c& cvar_c::operator= (const cvar_c& other)
 }
 
 // private method
+void cvar_c::FmtInt(int value)
+{
+	char buffer[64];
+	sprintf(buffer, "%d", value);
+	s = buffer;
+}
+
+// private method
 void cvar_c::FmtFloat(float value)
 {
+	char buffer[64];
+
 	float ab = fabs(value);
 
 	if (ab >= 1e10)  // handle huge numbers
@@ -131,28 +131,15 @@ void cvar_c::FmtFloat(float value)
 		sprintf(buffer, "%1.5f", value);
 	else
 		sprintf(buffer, "%1.7f", value);
+
+	s = buffer;
 }
 
 // private method
-void cvar_c::DoStr(const char *value)
+void cvar_c::ParseString()
 {
-	if (Allocd())
-	{
-		Z_Free((void *) str);
-	}
-
-	if (strlen(value)+1 <= BUFSIZE)
-	{
-		str = buffer;
-		strcpy(buffer, value);
-	}
-	else
-	{
-		str = Z_StrDup(value);
-	}
-
-	d = atoi(str);
-	f = atof(str);
+	d = atoi(s.c_str());
+	f = atof(s.c_str());
 }
 
 
@@ -178,16 +165,11 @@ static bool CON_MatchFlags(const char *var_f, const char *want_f)
 }
 
 
-void CON_ResetAllVars(bool initial)
+void CON_ResetAllVars()
 {
 	for (int i = 0; all_cvars[i].var; i++)
 	{
 		*all_cvars[i].var = all_cvars[i].def_val;
-
-		// this function is equivalent to construction,
-		// hence ensure the modified count is zero.
-		if (initial)
-			all_cvars[i].var->modified = 0;
 	}
 }
 

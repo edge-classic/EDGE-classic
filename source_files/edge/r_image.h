@@ -230,7 +230,7 @@ bool W_InitImages(void);
 void W_UpdateImageAnims(void);
 void W_DeleteAllImages(void);
 
-void W_ImageCreateFlats(int *lumps, int number);
+void W_ImageCreateFlats(std::vector<int>& lumps);
 void W_ImageCreateTextures(struct texturedef_s ** defs, int number);
 const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon);
 void W_ImageCreateUser(void);

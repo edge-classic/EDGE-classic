@@ -34,7 +34,6 @@
 #include "sv_chunk.h"
 #include "sv_main.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 
 static savestruct_t *loaded_struct_list;

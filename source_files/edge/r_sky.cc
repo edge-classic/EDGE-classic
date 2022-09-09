@@ -36,7 +36,6 @@
 #include "r_image.h"
 #include "r_texgl.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 #define DEBUG  0
 

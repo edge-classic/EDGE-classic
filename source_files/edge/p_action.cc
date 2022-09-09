@@ -54,7 +54,6 @@
 #include "rad_trig.h"
 #include "s_sound.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 
 cvar_c g_aggression;

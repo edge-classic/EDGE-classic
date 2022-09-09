@@ -59,7 +59,6 @@
 #include "w_wad.h"
 #include "f_interm.h"
 #include "vm_coal.h"
-#include "z_zone.h"
 
 
 gamestate_e gamestate = GS_NOTHING;

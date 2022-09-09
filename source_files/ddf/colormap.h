@@ -41,6 +41,7 @@ colourspecial_e;
 typedef struct colmapcache_s
 {
 	byte *data;
+	int  size;
 }
 colmapcache_t;
 

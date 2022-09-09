@@ -131,46 +131,6 @@
    delete [] stk;                                                         \
 }
 
-#define MAPSORT(type, arr, map, n)                                      \
-{                                                                       \
-   type tmp;                                                            \
-   int i, j, k;                                                         \
-                                                                        \
-   for (i = 0; i < n; i++)                                              \
-   {                                                                    \
-      if (map[i] != i)                                                  \
-      {                                                                 \
-         tmp = arr[i];                                                  \
-         k = i;                                                         \
-         do                                                             \
-         {                                                              \
-            j = k;                                                      \
-            k = map[j];                                                 \
-            arr[j] = arr[k];                                            \
-            map[j] = j;                                                 \
-         } while (k != i);                                              \
-         arr[j] = tmp;                                                  \
-      }                                                                 \
-   }                                                                    \
-}
-
-#define BSEARCH(n, pos)                                                 \
-{                                                                       \
-     int hi, mid;                                                       \
-                                                                        \
-     pos = 0;                                                           \
-     hi = n-1;                                                          \
-                                                                        \
-     while (pos <= hi)                                                  \
-     {                                                                  \
-        mid = (pos + hi) >> 1;                                          \
-        if (CMP(mid))                                                   \
-          pos = mid + 1;                                                \
-        else                                                            \
-          hi = mid - 1;                                                 \
-     }                                                                  \
-}
-
 #endif
 
 //--- editor settings ---

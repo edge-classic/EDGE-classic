@@ -49,7 +49,6 @@
 #include "p_local.h"
 #include "p_spec.h"
 #include "r_state.h"
-#include "z_zone.h"
 
 //
 // P_ApproxDistance

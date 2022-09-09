@@ -39,7 +39,6 @@
 #include "p_local.h"
 #include "s_sound.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 #include <float.h>
 

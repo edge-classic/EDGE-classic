@@ -39,7 +39,6 @@
 #include "sv_chunk.h"
 #include "sv_main.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 
 savestruct_t *sv_known_structs;

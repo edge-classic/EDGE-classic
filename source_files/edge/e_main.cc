@@ -380,10 +380,10 @@ void SetLanguage(void)
 	if (want_lang)
 		m_language = want_lang;
 
-	if (language.Select(m_language.str))
+	if (language.Select(m_language.c_str()))
 		return;
 
-	I_Warning("Invalid language: '%s'\n", m_language.str);
+	I_Warning("Invalid language: '%s'\n", m_language.c_str());
 
 	if (! language.IsValid())
 		if (! language.Select(0))

@@ -29,7 +29,6 @@
 
 #include "sv_chunk.h"
 #include "sv_main.h"
-#include "z_zone.h"
 
 // forward decls:
 static void GV_GetInt(const char *info, void *storage);

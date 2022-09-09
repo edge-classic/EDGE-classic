@@ -47,7 +47,6 @@
 #include "m_random.h"
 #include "p_local.h"
 #include "s_sound.h"
-#include "z_zone.h"
 
 #define RAISE_RADIUS  32
 

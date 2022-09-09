@@ -30,7 +30,6 @@
 #include "m_argv.h"
 #include "r_gldefs.h"
 #include "r_units.h"
-#include "z_zone.h"
 
 #include "r_misc.h"
 #include "r_image.h"

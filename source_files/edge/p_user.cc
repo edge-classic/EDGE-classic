@@ -38,7 +38,6 @@
 #include "rad_trig.h"
 #include "s_blit.h"
 #include "s_sound.h"
-#include "z_zone.h"
 
 // Room size test - Dasho
 #include "p_blockmap.h"

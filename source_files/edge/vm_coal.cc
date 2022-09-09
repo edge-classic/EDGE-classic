@@ -37,7 +37,6 @@
 #include "hu_draw.h"
 #include "r_modes.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 #include "m_random.h"
 
@@ -418,14 +417,14 @@ void VM_LoadLumpOfCoal(int lump)
 	const char *name = W_GetLumpName(lump);
 
 	int length;
-	byte *data = W_ReadLumpAlloc(lump, &length);
+	byte *data = W_LoadLump(lump, &length);
 
 	I_Printf("Compiling %s lump\n", name);
 
 	if (! ui_vm->CompileFile((char *)data, name))
 		I_Error("Errors compiling %s lump.\nPlease see debug.txt for details.", name);
 
-	delete[] data;
+	W_DoneWithLump(data);
 }
 
 

@@ -29,7 +29,6 @@
 #include "g_game.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
-#include "z_zone.h"
 
 
 //----------------------------------------------------------------------------

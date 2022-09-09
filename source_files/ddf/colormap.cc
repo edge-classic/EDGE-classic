@@ -285,9 +285,8 @@ void colourmap_c::CopyDetail(colourmap_c &src)
 	gl_colour   = src.gl_colour;
 	font_colour = src.font_colour;
 
-	// FIXME!!! Cache struct to class
-	cache.data = src.cache.data;
-	analysis = NULL;
+	cache.data = NULL;
+	analysis   = NULL;
 }
 
 //
@@ -304,7 +303,6 @@ void colourmap_c::Default()
 	gl_colour   = RGB_NO_VALUE;
 	font_colour = RGB_NO_VALUE;
 
-	// FIXME!!! Cache struct to class
 	cache.data = NULL;
 	analysis = NULL;
 }

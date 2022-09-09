@@ -35,7 +35,6 @@
 #include "s_sound.h"
 #include "w_wad.h"
 #include "version.h"
-#include "z_zone.h"
 
 
 #define MAX_CON_ARGS  64

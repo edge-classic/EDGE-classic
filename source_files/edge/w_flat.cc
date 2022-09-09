@@ -45,7 +45,6 @@
 #include "w_sprite.h"
 #include "w_wad.h"
 #include "w_texture.h"
-#include "z_zone.h"
 
 
 cvar_c r_precache_tex;

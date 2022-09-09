@@ -57,7 +57,6 @@
 #include "r_colormap.h"
 #include "w_wad.h"
 #include "f_interm.h"
-#include "z_zone.h"
 
 
 extern gameflags_t default_gameflags;

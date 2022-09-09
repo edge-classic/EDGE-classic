@@ -30,7 +30,6 @@
 #include "r_state.h"
 #include "r_gldefs.h"
 #include "r_draw.h"
-#include "z_zone.h"
 
 /* #define TEST_CAMERA_CLASS 1 */
 

@@ -34,7 +34,6 @@
 #include "s_sound.h"
 #include "w_wad.h"
 #include "version.h"
-#include "z_zone.h"
 
 extern FILE* debugfile;
 extern FILE* logfile;

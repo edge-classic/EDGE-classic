@@ -45,7 +45,6 @@
 #include "r_texgl.h"
 #include "r_units.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 // -AJA- 1999/06/30: added this
 byte playpal_data[14][256][3];

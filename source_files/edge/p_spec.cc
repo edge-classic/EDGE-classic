@@ -45,7 +45,6 @@
 #include "s_blit.h"
 #include "s_sound.h"
 #include "s_music.h"
-#include "z_zone.h"
 
 #include "r_sky.h" //Lobo 2022: added for our Sky Transfer special
 

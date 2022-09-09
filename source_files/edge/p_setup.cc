@@ -56,7 +56,6 @@
 #include "r_image.h"
 #include "w_texture.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 #ifdef __arm__
   #include "str_format.h"

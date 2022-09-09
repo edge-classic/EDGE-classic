@@ -40,7 +40,6 @@
 #include "r_state.h"
 #include "s_sound.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 #define DEBUG  0
 

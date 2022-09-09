@@ -58,7 +58,6 @@
 #include "r_texgl.h"
 #include "w_texture.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 
 // posts are runs of non masked source pixels

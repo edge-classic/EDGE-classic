@@ -63,7 +63,6 @@
 #include "r_colormap.h"
 #include "w_texture.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 
 swirl_type_e swirling_flats = SWIRL_Vanilla;

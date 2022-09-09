@@ -74,7 +74,6 @@
 #include "rad_trig.h"
 #include "vm_coal.h"
 #include "w_wad.h"
-#include "z_zone.h"
 #include "w_texture.h"
 
 #include "umapinfo.h" //Lobo 2022

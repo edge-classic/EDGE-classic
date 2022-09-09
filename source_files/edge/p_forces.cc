@@ -43,7 +43,6 @@
 #include "m_random.h"
 #include "p_local.h"
 #include "r_state.h"
-#include "z_zone.h"
 
 #define PUSH_FACTOR  64.0f  // should be 128 ??
 

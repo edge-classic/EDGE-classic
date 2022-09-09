@@ -28,19 +28,6 @@
 
 #define ZONEID  0x1d4a11f1
 
-typedef enum
-{
-	Z_UrgencyNone    = 0,
-	Z_UrgencyLow     = 1,
-	Z_UrgencyMedium  = 2,
-	Z_UrgencyHigh    = 3,
-	Z_UrgencyExtreme = 4
-}
-z_urgency_e;
-
-// A cache flusher is a function that can find and free unused memory.
-typedef void cache_flusher_f(z_urgency_e urge);
-
 // Generic helper functions.
 char *Z_StrDup(const char *s);
 

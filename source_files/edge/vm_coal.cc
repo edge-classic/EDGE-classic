@@ -37,7 +37,6 @@
 #include "hu_draw.h"
 #include "r_modes.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 #include "m_random.h"
 

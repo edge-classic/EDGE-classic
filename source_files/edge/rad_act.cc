@@ -47,7 +47,6 @@
 #include "r_image.h"
 #include "w_wad.h"
 #include "w_texture.h"
-#include "z_zone.h"
 
 // current tip slots
 drawtip_t tip_slots[MAXTIPSLOT];

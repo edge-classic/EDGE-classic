@@ -746,8 +746,8 @@ void M_DrawLoad(void)
 	// Use center box graphic for LineHeight unless the load game font text is actually taller
 	// (this should only happen if the boxes aren't being drawn in theory)
 	float LineHeight = IM_HEIGHT(C);
-	if (style->fonts[3]->NominalHeight() > LineHeight) 
-		LineHeight = style->fonts[3]->NominalHeight();
+	if (style->fonts[0]->NominalHeight() > LineHeight) 
+		LineHeight = style->fonts[0]->NominalHeight();
 	float WidestLine = IM_WIDTH(C) * 24 + IM_WIDTH(L) + IM_WIDTH(R);
 
 	for (i = 0; i < SAVE_SLOTS; i++)
@@ -772,10 +772,13 @@ void M_DrawLoad(void)
 
 			HUD_DrawImage(x, y, R);
 		}
-		HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x + 8, y - (IM_HEIGHT(C) / 2), ex_slots[i].desc);
+		if (LineHeight == IM_HEIGHT(C))
+			HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x + 8, y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+		else
+			HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x, y, ex_slots[i].desc);
 		ex_slots[i].y = y;
-		if (style->fonts[3]->StringWidth(ex_slots[i].desc) > WidestLine) 
-			WidestLine = style->fonts[3]->StringWidth(ex_slots[i].desc);
+		if (style->fonts[ex_slots[i].corrupt ? 3 : 0]->StringWidth(ex_slots[i].desc) > WidestLine) 
+			WidestLine = style->fonts[ex_slots[i].corrupt ? 3 : 0]->StringWidth(ex_slots[i].desc);
 		y += LineHeight;
 	}
 
@@ -786,8 +789,6 @@ void M_DrawLoad(void)
 		cursor = menu_skull[0];
 	short old_offset_x = cursor->offset_x;
 	short old_offset_y = cursor->offset_y;
-	// I am using IM_HEIGHT for both here intentionally as a way to
-	// see if the C image is actually being used/drawn
 	cursor->offset_x = LineHeight == IM_HEIGHT(C) ? C->offset_x : 0;
 	cursor->offset_y = LineHeight == IM_HEIGHT(C) ? C->offset_y : 0;
 	float TempHeight = MIN(LineHeight, IM_HEIGHT(cursor));
@@ -879,8 +880,8 @@ void M_DrawSave(void)
 	// Use center box graphic for LineHeight unless the load game font text is actually taller
 	// (this should only happen if the boxes aren't being drawn in theory)
 	float LineHeight = IM_HEIGHT(C);
-	if (style->fonts[3]->NominalHeight() > LineHeight) 
-		LineHeight = style->fonts[3]->NominalHeight();
+	if (style->fonts[0]->NominalHeight() > LineHeight) 
+		LineHeight = style->fonts[0]->NominalHeight();
 	float WidestLine = IM_WIDTH(C) * 24 + IM_WIDTH(L) + IM_WIDTH(R);
 
 	for (i = 0; i < SAVE_SLOTS; i++)
@@ -910,16 +911,27 @@ void M_DrawSave(void)
 		{
 			len = save_style->fonts[1]->StringWidth(ex_slots[save_slot].desc);
 
-			HL_WriteText(save_style,1, LoadDef.x + 8, y - (IM_HEIGHT(C) / 2), ex_slots[i].desc);
-			HL_WriteText(save_style,1, LoadDef.x + len + 8, y - (IM_HEIGHT(C) / 2), "_");
+			if (LineHeight == IM_HEIGHT(C))
+			{
+				HL_WriteText(save_style,1, LoadDef.x + 8, y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+				HL_WriteText(save_style,1, LoadDef.x + len + 8, y - C->offset_y + (LineHeight / 4), "_");
+			}
+			else
+			{
+				HL_WriteText(save_style,1, LoadDef.x, y, ex_slots[i].desc);
+				HL_WriteText(save_style,1, LoadDef.x + len, y, "_");
+			}
 		}
 		else
 		{
-			HL_WriteText(save_style,0, LoadDef.x + 8, y - (IM_HEIGHT(C) / 2), ex_slots[i].desc);
+			if (LineHeight == IM_HEIGHT(C))
+				HL_WriteText(save_style,0, LoadDef.x + 8, y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+			else
+				HL_WriteText(save_style,0, LoadDef.x, y, ex_slots[i].desc);
 		}
 		ex_slots[i].y = y;
-		if (style->fonts[3]->StringWidth(ex_slots[i].desc) > WidestLine) 
-			WidestLine = style->fonts[3]->StringWidth(ex_slots[i].desc);
+		if (style->fonts[0]->StringWidth(ex_slots[i].desc) > WidestLine) 
+			WidestLine = style->fonts[0]->StringWidth(ex_slots[i].desc);
 		y += LineHeight;
 	}
 
@@ -930,8 +942,6 @@ void M_DrawSave(void)
 		cursor = menu_skull[0];
 	short old_offset_x = cursor->offset_x;
 	short old_offset_y = cursor->offset_y;
-	// I am using IM_HEIGHT for both here intentionally as a way to
-	// see if the C image is actually being used/drawn
 	cursor->offset_x = LineHeight == IM_HEIGHT(C) ? C->offset_x : 0;
 	cursor->offset_y = LineHeight == IM_HEIGHT(C) ? C->offset_y : 0;
 	float TempHeight = MIN(LineHeight, IM_HEIGHT(cursor));

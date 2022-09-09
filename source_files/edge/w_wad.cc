@@ -1152,11 +1152,11 @@ static void AddFile(const char *filename, int kind, int dyn_index, std::string m
 			AddLump(df, entry.name, EPI_LE_S32(entry.pos), EPI_LE_S32(entry.size),
 					datafile, (dyn_index >= 0) ? dyn_index : datafile, allow_ddf);
 
-			// TODO ugh, do this another way
-			const char *upper_name = lumpinfo[startlump + i].name;
+			// this will be uppercase
+			const char *level_name = lumpinfo[startlump + i].name;
 
 			if (kind != FLKIND_HWad)
-				CheckForLevel(df, startlump + i, upper_name, &entry, header.num_entries-1 - i);
+				CheckForLevel(df, startlump + i, level_name, &entry, header.num_entries-1 - i);
 		}
 
 		delete[] raw_info;

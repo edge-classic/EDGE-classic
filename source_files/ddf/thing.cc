@@ -52,6 +52,7 @@ static void DDF_MobjGetGlowType(const char *info, void *storage);
 static void DDF_MobjGetYAlign(const char *info, void *storage);
 static void DDF_MobjGetPercentRange(const char *info, void *storage);
 static void DDF_MobjGetAngleRange(const char *info, void *storage);
+static void DDF_MobjStateGetRADTrigger(const char *arg, state_t * cur_state);
 
 static void AddPickupEffect(pickup_effect_c **list, pickup_effect_c *cur);
 
@@ -280,8 +281,8 @@ const actioncode_t thing_actions[] =
 	{"BECOME",            P_ActBecome, DDF_StateGetBecome},
 	{"EXPLODE",           P_ActExplode, NULL},
 	{"ACTIVATE_LINETYPE", P_ActActivateLineType, DDF_StateGetIntPair},
-	{"RTS_ENABLE_TAGGED", P_ActEnableRadTrig,  DDF_StateGetInteger},
-	{"RTS_DISABLE_TAGGED",P_ActDisableRadTrig, DDF_StateGetInteger},
+	{"RTS_ENABLE_TAGGED", P_ActEnableRadTrig,  DDF_MobjStateGetRADTrigger},
+	{"RTS_DISABLE_TAGGED",P_ActDisableRadTrig, DDF_MobjStateGetRADTrigger},
 	{"TOUCHY_REARM",      P_ActTouchyRearm, NULL},
 	{"TOUCHY_DISARM",     P_ActTouchyDisarm, NULL},
 	{"BOUNCE_REARM",      P_ActBounceRearm, NULL},
@@ -1938,6 +1939,32 @@ static void DDF_MobjGetAngleRange(const char *info, void *storage)
 	dest[1] = FLOAT_2_ANG(val2);
 }
 
+//
+// DDF_MobjStateGetRADTrigger
+//
+static void DDF_MobjStateGetRADTrigger(const char *arg, state_t * cur_state)
+{
+	if (!arg || !arg[0])
+		return;
+
+	int *val_ptr = new int;
+
+	// Modified RAD_CheckForInt
+	const char *pos = arg;
+	int count = 0;
+	int length = strlen(arg);
+
+	while (isdigit(*pos++))
+		count++;
+
+	// Is the value an integer?
+	if (length != count)
+		*val_ptr = DDF_RADStringHash(arg);
+	else
+		*val_ptr = atoi(arg);
+
+	cur_state->action_par = val_ptr;
+}
 
 //
 //  CONDITION TESTERS

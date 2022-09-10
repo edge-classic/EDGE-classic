@@ -36,6 +36,7 @@ weapondef_container_c weapondefs;
 static void DDF_WGetAmmo(const char *info, void *storage);
 static void DDF_WGetUpgrade(const char *info, void *storage);
 static void DDF_WGetSpecialFlags(const char *info, void *storage);
+static void DDF_WStateGetRADTrigger(const char *arg, state_t * cur_state);
 
 #undef  DDF_CMD_BASE
 #define DDF_CMD_BASE  dummy_weapon
@@ -149,8 +150,8 @@ static const actioncode_t weapon_actions[] =
 	
 	{"DJNE",              A_WeaponDJNE, DDF_StateGetJump},
 
-	{"RTS_ENABLE_TAGGED", A_WeaponEnableRadTrig,  DDF_StateGetInteger},
-	{"RTS_DISABLE_TAGGED",A_WeaponDisableRadTrig, DDF_StateGetInteger},
+	{"RTS_ENABLE_TAGGED", A_WeaponEnableRadTrig,  DDF_WStateGetRADTrigger},
+	{"RTS_DISABLE_TAGGED",A_WeaponDisableRadTrig, DDF_WStateGetRADTrigger},
 	{"SEC_SHOOT",         A_WeaponShootSA, DDF_StateGetAttack},
 	{"SEC_REFIRE",        A_ReFireSA, NULL},
 	{"SEC_NOFIRE",        A_NoFireSA, NULL},
@@ -573,6 +574,33 @@ static specflags_t weapon_specials[] =
 	{"PARTIAL", WPSP_Partial, 0},
     {NULL, WPSP_None, 0}
 };
+
+//
+// DDF_WStateGetRADTrigger
+//
+static void DDF_WStateGetRADTrigger(const char *arg, state_t * cur_state)
+{
+	if (!arg || !arg[0])
+		return;
+
+	int *val_ptr = new int;
+
+	// Modified RAD_CheckForInt
+	const char *pos = arg;
+	int count = 0;
+	int length = strlen(arg);
+
+	while (isdigit(*pos++))
+		count++;
+
+	// Is the value an integer?
+	if (length != count)
+		*val_ptr = DDF_RADStringHash(arg);
+	else
+		*val_ptr = atoi(arg);
+
+	cur_state->action_par = val_ptr;
+}
 
 //
 // DDF_WGetSpecialFlags

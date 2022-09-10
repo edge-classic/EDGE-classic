@@ -783,39 +783,91 @@ void M_DrawLoad(void)
 	}
 
 	image_c *cursor;
-	if (style->def->cursor.alt_cursor)
+	if (style->def->cursor.cursor_string)
+		cursor = NULL;
+	else if (style->def->cursor.alt_cursor)
 		cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor);
 	else
 		cursor = menu_skull[0];
-	short old_offset_x = cursor->offset_x;
-	short old_offset_y = cursor->offset_y;
-	cursor->offset_x = LineHeight == IM_HEIGHT(C) ? C->offset_x : 0;
-	cursor->offset_y = LineHeight == IM_HEIGHT(C) ? C->offset_y : 0;
-	float TempHeight = MIN(LineHeight, IM_HEIGHT(cursor));
-	float TempScale = 0;
-	float TempWidth = 0;
-	float TempSpacer = 0;
-	TempScale = TempHeight / IM_HEIGHT(cursor);
-	TempWidth = IM_WIDTH(cursor) * TempScale;
-	TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
-	float old_alpha = HUD_GetAlpha();
-	HUD_SetAlpha(style->def->cursor.translucency);
-	if (style->def->cursor.position == style->def->C_BOTH)
+	if (cursor)
 	{
-		HUD_StretchImage(LoadDef.x + WidestLine + TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
-		HUD_StretchImage(LoadDef.x - TempWidth - TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+		short old_offset_x = cursor->offset_x;
+		short old_offset_y = cursor->offset_y;
+		cursor->offset_x = LineHeight == IM_HEIGHT(C) ? C->offset_x : 0;
+		cursor->offset_y = LineHeight == IM_HEIGHT(C) ? C->offset_y : 0;
+		float TempHeight = MIN(LineHeight, IM_HEIGHT(cursor));
+		float TempScale = 0;
+		float TempWidth = 0;
+		float TempSpacer = 0;
+		TempScale = TempHeight / IM_HEIGHT(cursor);
+		TempWidth = IM_WIDTH(cursor) * TempScale;
+		TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(style->def->cursor.translucency);
+		if (style->def->cursor.position == style->def->C_BOTH)
+		{
+			HUD_StretchImage(LoadDef.x + WidestLine + TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+			HUD_StretchImage(LoadDef.x - TempWidth - TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+		}
+		else if (style->def->cursor.position == style->def->C_CENTER)
+		{
+			HUD_StretchImage(LoadDef.x + (WidestLine / 2) - (TempWidth / 2),ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+		}
+		else if (style->def->cursor.position == style->def->C_RIGHT)
+			HUD_StretchImage(LoadDef.x + WidestLine + TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+		else
+			HUD_StretchImage(LoadDef.x - TempWidth - TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+		cursor->offset_x = old_offset_x;
+		cursor->offset_y = old_offset_y;
+		HUD_SetAlpha(old_alpha);
 	}
-	else if (style->def->cursor.position == style->def->C_CENTER)
-	{
-		HUD_StretchImage(LoadDef.x + (WidestLine / 2) - (TempWidth / 2),ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
-	}
-	else if (style->def->cursor.position == style->def->C_RIGHT)
-		HUD_StretchImage(LoadDef.x + WidestLine + TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
 	else
-		HUD_StretchImage(LoadDef.x - TempWidth - TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
-	cursor->offset_x = old_offset_x;
-	cursor->offset_y = old_offset_y;
-	HUD_SetAlpha(old_alpha);
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(style->def->cursor.translucency);
+		float TempWidth = style->fonts[0]->StringWidth(style->def->cursor.cursor_string) * style->def->text[styledef_c::T_TEXT].scale;
+		float TempSpacer = style->fonts[0]->CharWidth(style->def->cursor.cursor_string[0]) * style->def->text[styledef_c::T_TEXT].scale * 0.5;
+		if (LineHeight == IM_HEIGHT(C))
+		{
+			TempSpacer *= 2;
+			if (style->def->cursor.position == style->def->C_BOTH)
+			{
+				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+			}
+			else if (style->def->cursor.position == style->def->C_CENTER)
+				HL_WriteText(style, 0, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+			else if (style->def->cursor.position == style->def->C_RIGHT)
+				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+			else
+				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+		}
+		else
+		{
+			if (style->def->cursor.position == style->def->C_BOTH)
+			{
+				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+			}
+			else if (style->def->cursor.position == style->def->C_CENTER)
+				HL_WriteText(style, 0, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
+					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+			else if (style->def->cursor.position == style->def->C_RIGHT)
+				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+			else
+				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+		}
+		HUD_SetAlpha(old_alpha);
+	}
 
 	M_DrawSaveLoadCommon(i, i+1, load_style, LineHeight);
 }
@@ -936,39 +988,91 @@ void M_DrawSave(void)
 	}
 
 	image_c *cursor;
-	if (style->def->cursor.alt_cursor)
+	if (style->def->cursor.cursor_string)
+		cursor = NULL;
+	else if (style->def->cursor.alt_cursor)
 		cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor);
 	else
 		cursor = menu_skull[0];
-	short old_offset_x = cursor->offset_x;
-	short old_offset_y = cursor->offset_y;
-	cursor->offset_x = LineHeight == IM_HEIGHT(C) ? C->offset_x : 0;
-	cursor->offset_y = LineHeight == IM_HEIGHT(C) ? C->offset_y : 0;
-	float TempHeight = MIN(LineHeight, IM_HEIGHT(cursor));
-	float TempScale = 0;
-	float TempWidth = 0;
-	float TempSpacer = 0;
-	TempScale = TempHeight / IM_HEIGHT(cursor);
-	TempWidth = IM_WIDTH(cursor) * TempScale;
-	TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
-	float old_alpha = HUD_GetAlpha();
-	HUD_SetAlpha(style->def->cursor.translucency);
-	if (style->def->cursor.position == style->def->C_BOTH)
+	if (cursor)
 	{
-		HUD_StretchImage(LoadDef.x + WidestLine + TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
-		HUD_StretchImage(LoadDef.x - TempWidth - TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+		short old_offset_x = cursor->offset_x;
+		short old_offset_y = cursor->offset_y;
+		cursor->offset_x = LineHeight == IM_HEIGHT(C) ? C->offset_x : 0;
+		cursor->offset_y = LineHeight == IM_HEIGHT(C) ? C->offset_y : 0;
+		float TempHeight = MIN(LineHeight, IM_HEIGHT(cursor));
+		float TempScale = 0;
+		float TempWidth = 0;
+		float TempSpacer = 0;
+		TempScale = TempHeight / IM_HEIGHT(cursor);
+		TempWidth = IM_WIDTH(cursor) * TempScale;
+		TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(style->def->cursor.translucency);
+		if (style->def->cursor.position == style->def->C_BOTH)
+		{
+			HUD_StretchImage(LoadDef.x + WidestLine + TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+			HUD_StretchImage(LoadDef.x - TempWidth - TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+		}
+		else if (style->def->cursor.position == style->def->C_CENTER)
+		{
+			HUD_StretchImage(LoadDef.x + (WidestLine / 2) - (TempWidth / 2),ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+		}
+		else if (style->def->cursor.position == style->def->C_RIGHT)
+			HUD_StretchImage(LoadDef.x + WidestLine + TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+		else
+			HUD_StretchImage(LoadDef.x - TempWidth - TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+		cursor->offset_x = old_offset_x;
+		cursor->offset_y = old_offset_y;
+		HUD_SetAlpha(old_alpha);
 	}
-	else if (style->def->cursor.position == style->def->C_CENTER)
-	{
-		HUD_StretchImage(LoadDef.x + (WidestLine / 2) - (TempWidth / 2),ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
-	}
-	else if (style->def->cursor.position == style->def->C_RIGHT)
-		HUD_StretchImage(LoadDef.x + WidestLine + TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
 	else
-		HUD_StretchImage(LoadDef.x - TempWidth - TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
-	cursor->offset_x = old_offset_x;
-	cursor->offset_y = old_offset_y;
-	HUD_SetAlpha(old_alpha);
+	{
+		float old_alpha = HUD_GetAlpha();
+		HUD_SetAlpha(style->def->cursor.translucency);
+		float TempWidth = style->fonts[0]->StringWidth(style->def->cursor.cursor_string) * style->def->text[styledef_c::T_TEXT].scale;
+		float TempSpacer = style->fonts[0]->CharWidth(style->def->cursor.cursor_string[0]) * style->def->text[styledef_c::T_TEXT].scale * 0.5;
+		if (LineHeight == IM_HEIGHT(C))
+		{
+			TempSpacer *= 2;
+			if (style->def->cursor.position == style->def->C_BOTH)
+			{
+				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+			}
+			else if (style->def->cursor.position == style->def->C_CENTER)
+				HL_WriteText(style, 0, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+			else if (style->def->cursor.position == style->def->C_RIGHT)
+				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+			else
+				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+		}
+		else
+		{
+			if (style->def->cursor.position == style->def->C_BOTH)
+			{
+				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+			}
+			else if (style->def->cursor.position == style->def->C_CENTER)
+				HL_WriteText(style, 0, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
+					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+			else if (style->def->cursor.position == style->def->C_RIGHT)
+				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+			else
+				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+		}
+		HUD_SetAlpha(old_alpha);
+	}
 
 	M_DrawSaveLoadCommon(i, i+1, save_style, LineHeight);
 }
@@ -2452,7 +2556,7 @@ void M_Drawer(void)
 				float old_alpha = HUD_GetAlpha();
 				HUD_SetAlpha(style->def->cursor.translucency);
 				float TempWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(style->def->cursor.cursor_string) * txtscale;
-				float TempSpacer = TempWidth * 0.2;
+				float TempSpacer = style->fonts[styledef_c::T_TEXT]->CharWidth(style->def->cursor.cursor_string[0]) * txtscale * 0.2;
 				if (style->def->cursor.position == style->def->C_BOTH)
 				{
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
@@ -2568,23 +2672,23 @@ void M_Drawer(void)
 				float old_alpha = HUD_GetAlpha();
 				HUD_SetAlpha(style->def->cursor.translucency);
 				float TempWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(style->def->cursor.cursor_string) * txtscale;
-				float TempSpacer = TempWidth * 0.2;
+				float TempSpacer = style->fonts[styledef_c::T_TEXT]->CharWidth(style->def->cursor.cursor_string[0]) * txtscale * 0.2;
 				if (style->def->cursor.position == style->def->C_BOTH)
 				{
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
-						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string);
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
-						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string);
 				}
 				else if (style->def->cursor.position == style->def->C_CENTER)
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2), 
-						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string);
 				else if (style->def->cursor.position == style->def->C_RIGHT)
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
-						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string);
 				else
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
-						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string);
 				HUD_SetAlpha(old_alpha);
 			}
 		}

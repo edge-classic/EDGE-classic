@@ -811,7 +811,10 @@ void M_DrawLoad(void)
 		}
 		else if (style->def->cursor.position == style->def->C_CENTER)
 		{
-			HUD_StretchImage(LoadDef.x + (WidestLine / 2) - (TempWidth / 2),ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+			if (style->def->cursor.border)
+				HUD_StretchImage(LoadDef.x,ex_slots[itemOn].y,WidestLine,LineHeight,cursor, 0.0, 0.0);
+			else
+				HUD_StretchImage(LoadDef.x + (WidestLine / 2) - (TempWidth / 2),ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
 		}
 		else if (style->def->cursor.position == style->def->C_RIGHT)
 			HUD_StretchImage(LoadDef.x + WidestLine + TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
@@ -1016,7 +1019,10 @@ void M_DrawSave(void)
 		}
 		else if (style->def->cursor.position == style->def->C_CENTER)
 		{
-			HUD_StretchImage(LoadDef.x + (WidestLine / 2) - (TempWidth / 2),ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
+			if (style->def->cursor.border)
+				HUD_StretchImage(LoadDef.x,ex_slots[itemOn].y,WidestLine,LineHeight,cursor, 0.0, 0.0);
+			else
+				HUD_StretchImage(LoadDef.x + (WidestLine / 2) - (TempWidth / 2),ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);
 		}
 		else if (style->def->cursor.position == style->def->C_RIGHT)
 			HUD_StretchImage(LoadDef.x + WidestLine + TempSpacer,ex_slots[itemOn].y,TempWidth,TempHeight,cursor, 0.0, 0.0);

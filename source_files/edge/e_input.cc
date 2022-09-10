@@ -756,7 +756,7 @@ static specialkey_t special_keys[] =
     { KEYD_END, "End" },
     { '\'', "\'" },
     { KEYD_SPACE, "Space" },
-    { KEYD_TILDE, SDL_GetKeyName((SDL_GetKeyFromScancode(SDL_SCANCODE_GRAVE))) },
+    { KEYD_TILDE, "`" },
     { KEYD_PAUSE, "Pause" },
 
 	// function keys

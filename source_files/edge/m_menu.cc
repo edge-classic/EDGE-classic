@@ -199,6 +199,7 @@ typedef struct slot_extra_info_s
 
 	// Useful for drawing skull/cursor and possible other calculations
 	float y;
+	float width;
 }
 slot_extra_info_t;
 
@@ -772,16 +773,34 @@ void M_DrawLoad(void)
 
 			HUD_DrawImage(x, y, R);
 		}
-		if (LineHeight == IM_HEIGHT(C))
-			HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x + 8, y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
-		else
-			HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x, y, ex_slots[i].desc);
 		ex_slots[i].y = y;
-		if (style->fonts[ex_slots[i].corrupt ? 3 : 0]->StringWidth(ex_slots[i].desc) > WidestLine) 
-			WidestLine = style->fonts[ex_slots[i].corrupt ? 3 : 0]->StringWidth(ex_slots[i].desc);
+		ex_slots[i].width = style->fonts[ex_slots[i].corrupt ? 3 : 0]->StringWidth(ex_slots[i].desc);
+		if (ex_slots[i].width > WidestLine) 
+			WidestLine = ex_slots[i].width;
 		y += LineHeight;
 	}
-
+	for (i = 0; i < SAVE_SLOTS; i++)
+	{
+		if (LineHeight == IM_HEIGHT(C))
+		{
+			if (style->def->entry_alignment == style->def->C_RIGHT)
+				HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x - 8 + WidestLine - (ex_slots[i].width), ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+			else if (style->def->entry_alignment == style->def->C_CENTER)
+				HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), 
+					ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+			else
+				HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x + 8, ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+		}
+		else
+		{
+			if (style->def->entry_alignment == style->def->C_RIGHT)
+				HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x + WidestLine - ex_slots[i].width, ex_slots[i].y, ex_slots[i].desc);
+			else if (style->def->entry_alignment == style->def->C_CENTER)
+				HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), ex_slots[i].y, ex_slots[i].desc);
+			else
+				HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x, ex_slots[i].y, ex_slots[i].desc);
+		}
+	}
 	image_c *cursor;
 	if (style->def->cursor.cursor_string)
 		cursor = NULL;
@@ -963,33 +982,69 @@ void M_DrawSave(void)
 		}
 
 		if (saveStringEnter && i == save_slot)
+			ex_slots[i].width = style->fonts[1]->StringWidth("_");
+		else
+			ex_slots[i].width = 0;
+		ex_slots[i].y = y;
+		ex_slots[i].width = ex_slots[i].width + style->fonts[0]->StringWidth(ex_slots[i].desc);
+		if (ex_slots[i].width > WidestLine) 
+			WidestLine = ex_slots[i].width;
+		y += LineHeight;
+	}
+	for (i = 0; i < SAVE_SLOTS; i++)
+	{
+		int len;
+		int font = 0;
+		if (saveStringEnter && i == save_slot)
 		{
 			len = save_style->fonts[1]->StringWidth(ex_slots[save_slot].desc);
-
-			if (LineHeight == IM_HEIGHT(C))
+			font = 1;
+		}
+		if (LineHeight == IM_HEIGHT(C))
+		{
+			if (style->def->entry_alignment == style->def->C_RIGHT)
 			{
-				HL_WriteText(save_style,1, LoadDef.x + 8, y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
-				HL_WriteText(save_style,1, LoadDef.x + len + 8, y - C->offset_y + (LineHeight / 4), "_");
+				HL_WriteText(save_style, font, LoadDef.x - 8 + WidestLine - (ex_slots[i].width), ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+				if (font)
+					HL_WriteText(save_style, font, LoadDef.x - 8 + WidestLine - (ex_slots[i].width) + len, ex_slots[i].y - C->offset_y + (LineHeight / 4), "_");
+			}
+			else if (style->def->entry_alignment == style->def->C_CENTER)
+			{
+				HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), 
+					ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+				if (font)
+					HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2) + len, 
+						ex_slots[i].y - C->offset_y + (LineHeight / 4), "_");
 			}
 			else
 			{
-				HL_WriteText(save_style,1, LoadDef.x, y, ex_slots[i].desc);
-				HL_WriteText(save_style,1, LoadDef.x + len, y, "_");
+				HL_WriteText(save_style, font, LoadDef.x + 8, ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+				if (font)
+					HL_WriteText(save_style, font, LoadDef.x + 8 + len, ex_slots[i].y - C->offset_y + (LineHeight / 4), "_");
 			}
 		}
 		else
 		{
-			if (LineHeight == IM_HEIGHT(C))
-				HL_WriteText(save_style,0, LoadDef.x + 8, y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+			if (style->def->entry_alignment == style->def->C_RIGHT)
+			{
+				HL_WriteText(save_style, font, LoadDef.x + WidestLine - ex_slots[i].width, ex_slots[i].y, ex_slots[i].desc);
+				if (font)
+					HL_WriteText(save_style, font, LoadDef.x + WidestLine - ex_slots[i].width + len, ex_slots[i].y, "_");
+			}
+			else if (style->def->entry_alignment == style->def->C_CENTER)
+			{
+				HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), ex_slots[i].y, ex_slots[i].desc);
+				if (font)
+					HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2) + len, ex_slots[i].y, "_");
+			}
 			else
-				HL_WriteText(save_style,0, LoadDef.x, y, ex_slots[i].desc);
+			{
+				HL_WriteText(save_style, font, LoadDef.x, ex_slots[i].y, ex_slots[i].desc);
+				if (font)
+					HL_WriteText(save_style, font, LoadDef.x + len, ex_slots[i].y, "_");
+			}
 		}
-		ex_slots[i].y = y;
-		if (style->fonts[0]->StringWidth(ex_slots[i].desc) > WidestLine) 
-			WidestLine = style->fonts[0]->StringWidth(ex_slots[i].desc);
-		y += LineHeight;
 	}
-
 	image_c *cursor;
 	if (style->def->cursor.cursor_string)
 		cursor = NULL;

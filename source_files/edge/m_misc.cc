@@ -87,7 +87,7 @@ bool var_pc_speaker_mode = false;
 bool var_opl_music   = false;
 int var_sound_stereo = 0;
 int var_mix_channels = 0;
-int var_quiet_factor = 0;
+//int var_quiet_factor = 0;
 
 static int edge_version;
 static bool done_first_init = false;
@@ -107,6 +107,7 @@ static default_t defaults[] =
     {CFGT_Boolean,	"waveout",			 &force_waveout,  0},
     {CFGT_Int,      "usegamma",          &var_gamma,  CFGDEF_CURRENT_GAMMA},
  
+ 	{CFGT_Int,      "master_volume",     &master_volume,  CFGDEF_MASTER_VOLUME},
     {CFGT_Int,      "sfx_volume",        &sfx_volume,     CFGDEF_SOUND_VOLUME},
     {CFGT_Int,      "music_volume",      &mus_volume,     CFGDEF_MUSIC_VOLUME},
     {CFGT_Int,      "sound_stereo",      &var_sound_stereo, CFGDEF_SOUND_STEREO},
@@ -114,7 +115,7 @@ static default_t defaults[] =
     {CFGT_Boolean,	"opl_music",		 &var_opl_music,   0},
     {CFGT_Boolean,	"dynamic_reverb",	 &dynamic_reverb,  0},
     {CFGT_Int,      "mix_channels",      &var_mix_channels, CFGDEF_MIX_CHANNELS},
-    {CFGT_Int,      "quiet_factor",      &var_quiet_factor, CFGDEF_QUIET_FACTOR},
+    //{CFGT_Int,      "quiet_factor",      &var_quiet_factor, CFGDEF_QUIET_FACTOR},
 
     {CFGT_Int,      "show_messages",     &showMessages,   CFGDEF_SHOWMESSAGES},
 

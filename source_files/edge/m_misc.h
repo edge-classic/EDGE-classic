@@ -82,7 +82,7 @@ extern bool var_pc_speaker_mode;
 extern bool var_opl_music;
 extern int var_sound_stereo;
 extern int var_mix_channels;
-extern int var_quiet_factor;
+//extern int var_quiet_factor;
 
 extern bool var_cache_sfx;
 

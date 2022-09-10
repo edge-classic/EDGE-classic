@@ -81,6 +81,7 @@ public:
 
 extern mix_channel_c *mix_chan[];
 extern int num_chan;
+extern int master_volume;
 
 extern bool vacuum_sfx;
 extern bool submerged_sfx;

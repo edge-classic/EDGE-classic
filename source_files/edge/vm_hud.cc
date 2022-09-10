@@ -506,7 +506,7 @@ static void HD_draw_number(coal::vm_c *vm, int argc)
 //
 static void HD_game_paused(coal::vm_c *vm, int argc)
 {
-	if (paused || menuactive)
+	if (paused || menuactive || rts_menuactive)
 	{
 		vm->ReturnFloat(1);
 	}

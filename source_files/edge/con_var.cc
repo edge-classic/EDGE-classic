@@ -145,26 +145,6 @@ void cvar_c::ParseString()
 
 //----------------------------------------------------------------------------
 
-static bool CON_MatchFlags(const char *var_f, const char *want_f)
-{
-	for (; *want_f; want_f++)
-	{
-		if (isupper(*want_f))
-		{
-			if (strchr(var_f, tolower(*want_f)))
-				return false;
-		}
-		else
-		{
-			if (! strchr(var_f, *want_f))
-				return false;
-		}
-	}
-
-	return true;
-}
-
-
 void CON_ResetAllVars()
 {
 	for (int i = 0; all_cvars[i].var; i++)
@@ -201,8 +181,7 @@ bool CON_MatchPattern(const char *name, const char *pat)
 }
 
 
-int CON_MatchAllVars(std::vector<const char *>& list,
-                     const char *pattern, const char *flags)
+int CON_MatchAllVars(std::vector<const char *>& list, const char *pattern)
 {
 	list.clear();
 
@@ -211,43 +190,10 @@ int CON_MatchAllVars(std::vector<const char *>& list,
 		if (! CON_MatchPattern(all_cvars[i].name, pattern))
 			continue;
 
-		if (! CON_MatchFlags(all_cvars[i].flags, flags))
-			continue;
-
 		list.push_back(all_cvars[i].name);
 	}
 
 	return (int)list.size();
-}
-
-
-bool CON_SetVar(const char *name, const char *flags, const char *value)
-{
-	//bool no_alias = false; - Doesn't seem to actually affect anything - Dasho
-
-	if (*flags == 'A')
-	{
-		//no_alias = true;
-		flags++;
-	}
-
-	cvar_link_t *L = CON_FindVar(name);
-
-	if (! L)
-	{
-		CON_Printf("No such cvar: %s\n", name);
-		return false;
-	}
-
-	if (! CON_MatchFlags(L->flags, flags))
-	{
-		CON_Printf("Cannot set cvar: %s\n", name);
-		return false;
-	}
-
-	*L->var = value;
-
-	return true;
 }
 
 

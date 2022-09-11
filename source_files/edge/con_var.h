@@ -98,31 +98,24 @@ cvar_link_t;
 extern cvar_link_t all_cvars[];
 
 
-void CON_ResetAllVars();
 // sets all cvars to their default value.
+void CON_ResetAllVars();
 
-cvar_link_t * CON_FindVar(const char *name);
 // look for a CVAR with the given name.
+cvar_link_t * CON_FindVar(const char *name);
 
 bool CON_MatchPattern(const char *name, const char *pat);
 
-int CON_MatchAllVars(std::vector<const char *>& list,
-                     const char *pattern, const char *flags = "");
 // find all cvars which match the pattern, and copy pointers to
 // them into the given list.  The flags parameter, if present,
 // contains lowercase letters to match the CVAR with the flag,
 // and/or uppercase letters to require the flag to be absent.
 //
 // Returns number of matches found.
+int CON_MatchAllVars(std::vector<const char *>& list, const char *pattern);
 
-bool CON_SetVar(const char *name, const char *flags, const char *value);
-// sets the cvar with the given name (possibly an alias) with the
-// given value.  The flags parameter can limit the search, and
-// must begin with an 'A' to prevent matching aliases.
-// Returns true if the cvar was found.
-
-void CON_HandleProgramArgs(void);
 // scan the program arguments and set matching cvars
+void CON_HandleProgramArgs(void);
 
 #endif // __CON_VAR_H__
 

@@ -22,6 +22,7 @@
 #include <vector>
 #include <string>
 
+
 class cvar_c
 {
 public:
@@ -38,11 +39,6 @@ private:
 public:
 	cvar_c() : d(0), f(0.0f), s("0"), modified(0)
 	{ }
-
-	cvar_c(int value);
-	cvar_c(float value);
-	cvar_c(const char *value);
-	cvar_c(const cvar_c& other);
 
 	~cvar_c();
 

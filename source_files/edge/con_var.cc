@@ -24,25 +24,12 @@
 #include "m_argv.h"
 
 
-cvar_c::cvar_c(int value) : d(value), f(value), s(), modified(0)
-{
-	FmtInt(value);
-}
-
-cvar_c::cvar_c(float value) : d(I_ROUND(value)), f(value), s(), modified(0)
-{
-	FmtFloat(value);
-}
-
+/*
 cvar_c::cvar_c(const char *value) : s(value), modified(0)
 {
 	ParseString();
 }
-
-cvar_c::cvar_c(const cvar_c& other) : s(other.s), modified(0)
-{
-	ParseString();
-}
+*/
 
 cvar_c::~cvar_c()
 {

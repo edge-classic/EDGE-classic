@@ -117,6 +117,9 @@ int CON_MatchAllVars(std::vector<const char *>& list, const char *pattern);
 // scan the program arguments and set matching cvars
 void CON_HandleProgramArgs(void);
 
+// write all cvars to the config file
+void CON_WriteVars(FILE *f);
+
 #endif // __CON_VAR_H__
 
 //--- editor settings ---

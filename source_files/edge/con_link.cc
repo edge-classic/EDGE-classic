@@ -97,7 +97,7 @@ extern cvar_c debug_nomonsters, debug_subsector;
 //
 
 
-cvar_link_t  all_cvars[] =
+cvar_link_t  all_cvars_OLD[] =
 {
 	/* General Stuff */
 

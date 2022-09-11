@@ -37,7 +37,7 @@ int glmax_clip_planes;
 int glmax_tex_size;
 int glmax_tex_units;
 
-cvar_c r_aspect;
+DEF_CVAR(r_aspect, "1.777", CVAR_ARCHIVE)
 
 cvar_c r_nearclip;
 cvar_c r_farclip;

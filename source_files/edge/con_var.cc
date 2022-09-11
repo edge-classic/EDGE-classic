@@ -24,12 +24,32 @@
 #include "m_argv.h"
 
 
-/*
-cvar_c::cvar_c(const char *value) : s(value), modified(0)
+// Note: must use a plain array (and not std::vector) here
+//       because constructors run very early (before main) and
+//       no order is not guaranteed.
+
+#define MAX_CVARS  2000
+
+cvar_link_t all_cvars[MAX_CVARS];
+
+int total_cvars = 0;
+
+
+cvar_c::cvar_c(const char *name, const char *value, int flags) : s(value), modified(0)
 {
 	ParseString();
+
+	// add this cvar link into the global array
+	SYS_ASSERT(total_cvars < MAX_CVARS);
+
+	cvar_link_t *link = &all_cvars[total_cvars];
+	total_cvars += 1;
+
+	link->name    = name;
+	link->var     = this;
+	link->flags   = flags;
+	link->def_val = value;
 }
-*/
 
 cvar_c::~cvar_c()
 {
@@ -76,18 +96,6 @@ cvar_c& cvar_c::operator= (std::string value)
 {
 	s = value;
 	ParseString();
-
-	modified++;
-	return *this;
-}
-
-cvar_c& cvar_c::operator= (const cvar_c& other)
-{
-	if (&other != this)
-	{
-		s = other.s;
-		ParseString();
-	}
 
 	modified++;
 	return *this;

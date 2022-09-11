@@ -50,8 +50,8 @@
 #define CON_WIPE_TICS  12
 
 
-cvar_c debug_fps;
-cvar_c debug_pos;
+DEF_CVAR(debug_fps, "0", CVAR_ARCHIVE)
+DEF_CVAR(debug_pos, "0", CVAR_ARCHIVE)
 
 static visible_t con_visible;
 

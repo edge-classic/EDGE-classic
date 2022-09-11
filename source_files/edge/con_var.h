@@ -23,6 +23,9 @@
 #include <string>
 
 
+#define DEF_CVAR(name, ...)  cvar_c name(#name, __VA_ARGS__);
+
+
 class cvar_c
 {
 public:
@@ -37,8 +40,10 @@ private:
 	int modified;
 
 public:
-	cvar_c() : d(0), f(0.0f), s("0"), modified(0)
-	{ }
+	// FIXME remove this asap
+	cvar_c() : d(0), f(0.0f), s("0"), modified(0) {}
+
+	cvar_c(const char *name, const char *def_val, int flags = 0);
 
 	~cvar_c();
 
@@ -46,7 +51,6 @@ public:
 	cvar_c& operator= (float value);
 	cvar_c& operator= (const char *value);
 	cvar_c& operator= (std::string value);
-	cvar_c& operator= (const cvar_c& other);
 
 	inline const char *c_str() const
 	{
@@ -101,6 +105,8 @@ cvar_link_t;
 
 
 extern cvar_link_t all_cvars[];
+
+extern int total_cvars;
 
 
 // sets all cvars to their default value.

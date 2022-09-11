@@ -598,9 +598,9 @@ void CON_TryCommand(const char *cmd)
 	{
 		if (argc <= 1)
 			I_Printf("%s \"%s\"\n", argv[0], link->var->c_str());
-		else if (argc >= 3)
+		else if (argc-1 >= 2)
 			I_Printf("Can only assign one value (%d given).\n", argc-1);
-		else if (strchr(link->flags, 'r'))
+		else if ((link->flags & CVAR_ROM) != 0)
 			I_Printf("That cvar is read only.\n");
 		else
 			*link->var = argv[1];

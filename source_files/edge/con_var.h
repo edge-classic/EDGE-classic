@@ -78,6 +78,15 @@ private:
 };
 
 
+enum
+{
+	CVAR_ARCHIVE    = (1 << 0),  // saved in the config file
+	CVAR_CHEAT      = (1 << 1),  // disabled in multi-player games
+	CVAR_NO_RESET   = (1 << 2),  // do not reset to default
+	CVAR_ROM        = (1 << 3),  // read-only
+};
+
+
 typedef struct cvar_link_s
 {
 	// name of variable
@@ -86,8 +95,8 @@ typedef struct cvar_link_s
 	// the console variable itself
 	cvar_c *var;
 
-	// flags (a combination of letters, "" for none)
-	const char *flags;
+	// a combination of CVAR_XXX bits
+	int flags;
 
 	// default value
 	const char *def_val;

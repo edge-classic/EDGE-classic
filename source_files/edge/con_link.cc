@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  LIST OF ALL CVARS
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2007-2009  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2
@@ -101,140 +101,140 @@ cvar_link_t  all_cvars[] =
 {
 	/* General Stuff */
 
-    { "language",       &m_language,     "c",   "ENGLISH" },
+    { "language",       &m_language,     CVAR_ARCHIVE,   "ENGLISH" },
 
-    { "ddf_strict",     &ddf_strict,     "c",   "0"  },
-    { "ddf_lax",        &ddf_lax,        "c",   "0"  },
-    { "ddf_quiet",      &ddf_quiet,      "c",   "0"  },
+    { "ddf_strict",     &ddf_strict,     CVAR_ARCHIVE,   "0"  },
+    { "ddf_lax",        &ddf_lax,        CVAR_ARCHIVE,   "0"  },
+    { "ddf_quiet",      &ddf_quiet,      CVAR_ARCHIVE,   "0"  },
 
-    { "aggression",     &g_aggression,   "c",   "0"  },
+    { "aggression",     &g_aggression,   CVAR_ARCHIVE,   "0"  },
 
 	/* Input Stuff */
 
-    { "in_grab",        &in_grab,        "c",   "1"  },
-	{ "in_keypad",      &in_keypad,      "c",   "1"  },
-	{ "in_running",     &in_running,     "c",   "0"  },
-	{ "in_stageturn",   &in_stageturn,   "c",   "1"  },
+    { "in_grab",        &in_grab,        CVAR_ARCHIVE,   "1"  },
+	{ "in_keypad",      &in_keypad,      CVAR_ARCHIVE,   "1"  },
+	{ "in_running",     &in_running,     CVAR_ARCHIVE,   "0"  },
+	{ "in_stageturn",   &in_stageturn,   CVAR_ARCHIVE,   "1"  },
 
-	{ "joy_dead",       &joy_dead,       "c",   "0.15" },
-	{ "joy_peak",       &joy_peak,       "c",   "0.95" },
-	{ "joy_tuning",     &joy_peak,       "c",   "1.0"  },
+	{ "joy_dead",       &joy_dead,       CVAR_ARCHIVE,   "0.15" },
+	{ "joy_peak",       &joy_peak,       CVAR_ARCHIVE,   "0.95" },
+	{ "joy_tuning",     &joy_peak,       CVAR_ARCHIVE,   "1.0"  },
 
-	{ "goobers",        &m_goobers,      "",    "0" },
-	{ "m_busywait",     &m_busywait,     "c",   "1"  },
+	{ "goobers",        &m_goobers,      0,    "0" },
+	{ "m_busywait",     &m_busywait,     CVAR_ARCHIVE,   "1"  },
 
 	/* Rendering Stuff */
 
-	{ "r_aspect",       &r_aspect,       "c",   "1.777" },
-	{ "r_fov",          &r_fov,          "c",   "90" },
+	{ "r_aspect",       &r_aspect,       CVAR_ARCHIVE,   "1.777" },
+	{ "r_fov",          &r_fov,          CVAR_ARCHIVE,   "90" },
 
-	{ "r_crosshair",    &r_crosshair,    "c",   "0"  },
-	{ "r_crosscolor",   &r_crosscolor,   "c",   "0"  },
-	{ "r_crosssize",    &r_crosssize,    "c",   "16" },
-	{ "r_crossbright",  &r_crossbright,  "c",   "1.0" },
+	{ "r_crosshair",    &r_crosshair,    CVAR_ARCHIVE,   "0"  },
+	{ "r_crosscolor",   &r_crosscolor,   CVAR_ARCHIVE,   "0"  },
+	{ "r_crosssize",    &r_crosssize,    CVAR_ARCHIVE,   "16" },
+	{ "r_crossbright",  &r_crossbright,  CVAR_ARCHIVE,   "1.0" },
 
-	{ "r_nearclip",     &r_nearclip,     "c",   "4"  },
-	{ "r_farclip",      &r_farclip,      "c",   "64000" },
-	{ "r_fadepower",    &r_fadepower,    "c",   "1"  },
+	{ "r_nearclip",     &r_nearclip,     CVAR_ARCHIVE,   "4"  },
+	{ "r_farclip",      &r_farclip,      CVAR_ARCHIVE,   "64000" },
+	{ "r_fadepower",    &r_fadepower,    CVAR_ARCHIVE,   "1"  },
 
-	{ "r_precache_tex",    &r_precache_tex,    "c", "1" },
-	{ "r_precache_sprite", &r_precache_sprite, "c", "1" },
-	{ "r_precache_model",  &r_precache_model,  "c", "1" },
+	{ "r_precache_tex",    &r_precache_tex,    CVAR_ARCHIVE, "1" },
+	{ "r_precache_sprite", &r_precache_sprite, CVAR_ARCHIVE, "1" },
+	{ "r_precache_model",  &r_precache_model,  CVAR_ARCHIVE, "1" },
 
-	{ "r_colormaterial",&r_colormaterial, "",   "1"  },
-	{ "r_colorlighting",&r_colorlighting, "",   "1"  },
-	{ "r_dumbsky",      &r_dumbsky,       "",   "0"  },
-	{ "r_dumbmulti",    &r_dumbmulti,     "",   "0"  },
-	{ "r_dumbcombine",  &r_dumbcombine,   "",   "0"  },
+	{ "r_colormaterial",&r_colormaterial, 0,   "1"  },
+	{ "r_colorlighting",&r_colorlighting, 0,   "1"  },
+	{ "r_dumbsky",      &r_dumbsky,       0,   "0"  },
+	{ "r_dumbmulti",    &r_dumbmulti,     0,   "0"  },
+	{ "r_dumbcombine",  &r_dumbcombine,   0,   "0"  },
 	#ifdef APPLE_SILICON
-		{ "r_dumbclamp",    &r_dumbclamp,     "",   "1"  },
+		{ "r_dumbclamp",    &r_dumbclamp,     0,   "1"  },
 	#else
-		{ "r_dumbclamp",    &r_dumbclamp,     "",   "0"  },	
+		{ "r_dumbclamp",    &r_dumbclamp,     0,   "0"  },
 	#endif
-	{ "am_smoothing",   &am_smoothing,   "c",   "1"  },
-	{ "am_gridsize",    &am_gridsize,    "c",   "128" },
+	{ "am_smoothing",   &am_smoothing,   CVAR_ARCHIVE,   "1"  },
+	{ "am_gridsize",    &am_gridsize,    CVAR_ARCHIVE,   "128" },
 
 	/* Sound Stuff */
 
 	/* Debugging Stuff */
 
-	{ "debug_fullbright", &debug_fullbright, "h", "0" },
-	{ "debug_hom",        &debug_hom,        "h", "0" },
-	{ "debug_joyaxis",    &debug_joyaxis,    "",  "0" },
-	{ "debug_mouse",      &debug_mouse,      "",  "0" },
-	{ "debug_pos",        &debug_pos,        "h", "0" },
-	{ "debug_fps",        &debug_fps,        "c", "0" },
+	{ "debug_fullbright", &debug_fullbright, CVAR_CHEAT, "0" },
+	{ "debug_hom",        &debug_hom,        CVAR_CHEAT, "0" },
+	{ "debug_joyaxis",    &debug_joyaxis,    0,  "0" },
+	{ "debug_mouse",      &debug_mouse,      0,  "0" },
+	{ "debug_pos",        &debug_pos,        CVAR_CHEAT, "0" },
+	{ "debug_fps",        &debug_fps,        CVAR_ARCHIVE, "0" },
 
 #if 0 // FIXME
-    { "edge_compat",    &edge_compat,    "",    "0"  },
+    { "edge_compat",    &edge_compat,    0,    "0"  },
 
-    { "sys_directx",    &sys_directx,    "c",   "0"  },
-    { "sys_waveout",    &sys_waveout,    "c",   "0"  },
+    { "sys_directx",    &sys_directx,    CVAR_ARCHIVE,   "0"  },
+    { "sys_waveout",    &sys_waveout,    CVAR_ARCHIVE,   "0"  },
 
-    { "g_skill",        &g_skill,        "c",   "3"  },
-    { "g_gametype",     &g_gametype,     "",    "0"  },
-    { "g_mlook",        &g_mlook,        "c",   "1"  },
-    { "g_autoaim",      &g_autoaim,      "c",   "1"  },
-    { "g_jumping",      &g_jumping,      "c",   "0"  },
-    { "g_crouching",    &g_crouching,    "c",   "0"  },
-    { "g_true3d",       &g_true3d,       "c",   "1"  },
-    { "g_noextra",      &g_noextra,      "c",   "0"  },
-    { "g_moreblood",    &g_moreblood,    "c",   "0"  },
-    { "g_fastmon",      &g_fastmon,      "c",   "0"  },
-    { "g_passmissile",  &g_passmissile,  "c",   "1"  },
-    { "g_weaponkick",   &g_weaponkick,   "c",   "0"  },
-    { "g_weaponswitch", &g_weaponswitch, "c",   "1"  },
+    { "g_skill",        &g_skill,        CVAR_ARCHIVE,   "3"  },
+    { "g_gametype",     &g_gametype,     0,    "0"  },
+    { "g_mlook",        &g_mlook,        CVAR_ARCHIVE,   "1"  },
+    { "g_autoaim",      &g_autoaim,      CVAR_ARCHIVE,   "1"  },
+    { "g_jumping",      &g_jumping,      CVAR_ARCHIVE,   "0"  },
+    { "g_crouching",    &g_crouching,    CVAR_ARCHIVE,   "0"  },
+    { "g_true3d",       &g_true3d,       CVAR_ARCHIVE,   "1"  },
+    { "g_noextra",      &g_noextra,      CVAR_ARCHIVE,   "0"  },
+    { "g_moreblood",    &g_moreblood,    CVAR_ARCHIVE,   "0"  },
+    { "g_fastmon",      &g_fastmon,      CVAR_ARCHIVE,   "0"  },
+    { "g_passmissile",  &g_passmissile,  CVAR_ARCHIVE,   "1"  },
+    { "g_weaponkick",   &g_weaponkick,   CVAR_ARCHIVE,   "0"  },
+    { "g_weaponswitch", &g_weaponswitch, CVAR_ARCHIVE,   "1"  },
 
-	{ "am_rotate",      &am_rotate,      "c",   "0"  },
-                                        
-	{ "m_messages",     &m_messages,     "c",   "1"  },
-	{ "m_obituaries",   &m_obituaries,   "c",   "1"  },
-	{ "m_screenhud",    &m_screenhud,    "c",   "0"  },
+	{ "am_rotate",      &am_rotate,      CVAR_ARCHIVE,   "0"  },
 
-	{ "r_width",        &r_width,        "c",   "640"   },
-	{ "r_height",       &r_height,       "c",   "480"   },
-    { "r_depth",        &r_depth,        "c",   "32"    },
-    { "r_fullscreen",   &r_fullscreen,   "c",   "1"     },
-												
-	{ "r_gamma",        &r_gamma,        "c",   "1"  },
+	{ "m_messages",     &m_messages,     CVAR_ARCHIVE,   "1"  },
+	{ "m_obituaries",   &m_obituaries,   CVAR_ARCHIVE,   "1"  },
+	{ "m_screenhud",    &m_screenhud,    CVAR_ARCHIVE,   "0"  },
 
-	{ "r_mipmapping",   &r_mipmapping,   "c",   "0"  },
-	{ "r_smoothing",    &r_smoothing,    "c",   "0"  },
-	{ "r_dithering",    &r_dithering,    "c",   "0"  },
-	{ "r_hq2x",         &r_hq2x,         "c",   "0"  },
+	{ "r_width",        &r_width,        CVAR_ARCHIVE,   "640"   },
+	{ "r_height",       &r_height,       CVAR_ARCHIVE,   "480"   },
+    { "r_depth",        &r_depth,        CVAR_ARCHIVE,   "32"    },
+    { "r_fullscreen",   &r_fullscreen,   CVAR_ARCHIVE,   "1"     },
 
-	{ "r_dynlight",     &r_dynlight,     "c",   "1"  },
-	{ "r_detaillevel",  &r_detaillevel,  "c",   "1"  },
-	{ "r_invultex",     &r_invultex,     "c",   "1"  },
-	{ "r_wipemethod",   &r_wipemethod,   "c",   "1" /* Melt */ },
-	{ "r_wipereverse",  &r_wipereverse,  "c",   "0"  },
-	{ "r_teleportflash",&r_teleportflash,"c",   "1"  },
+	{ "r_gamma",        &r_gamma,        CVAR_ARCHIVE,   "1"  },
 
-	{ "s_volume",       &s_volume,       "c",   "0.5"  },
-	{ "s_mixchan",      &s_mixchan,      "c",   "32"   },
-	{ "s_rate",         &s_rate,         "c",   "22050" },
-	{ "s_bits",         &s_bits,         "c",   "16" },
-	{ "s_stereo",       &s_stereo,       "c",   "1"  },
-	{ "s_musicvol",     &s_musicvol,     "c",   "0.5"  },
-	{ "s_musicdevice",  &s_musicdevice,  "c",   S_MUSICDEV_CFG },
+	{ "r_mipmapping",   &r_mipmapping,   CVAR_ARCHIVE,   "0"  },
+	{ "r_smoothing",    &r_smoothing,    CVAR_ARCHIVE,   "0"  },
+	{ "r_dithering",    &r_dithering,    CVAR_ARCHIVE,   "0"  },
+	{ "r_hq2x",         &r_hq2x,         CVAR_ARCHIVE,   "0"  },
 
-	{ "s_quietfactor",  &s_quietfactor,  "c",   "1"  },
-	{ "tim_quietfactor",&tim_quietfactor,"c",   "1"  },
+	{ "r_dynlight",     &r_dynlight,     CVAR_ARCHIVE,   "1"  },
+	{ "r_detaillevel",  &r_detaillevel,  CVAR_ARCHIVE,   "1"  },
+	{ "r_invultex",     &r_invultex,     CVAR_ARCHIVE,   "1"  },
+	{ "r_wipemethod",   &r_wipemethod,   CVAR_ARCHIVE,   "1" /* Melt */ },
+	{ "r_wipereverse",  &r_wipereverse,  CVAR_ARCHIVE,   "0"  },
+	{ "r_teleportflash",&r_teleportflash,CVAR_ARCHIVE,   "1"  },
 
-	{ "in_shiftlook",   &in_shiftlook,   "c",   "1"  },
+	{ "s_volume",       &s_volume,       CVAR_ARCHIVE,   "0.5"  },
+	{ "s_mixchan",      &s_mixchan,      CVAR_ARCHIVE,   "32"   },
+	{ "s_rate",         &s_rate,         CVAR_ARCHIVE,   "22050" },
+	{ "s_bits",         &s_bits,         CVAR_ARCHIVE,   "16" },
+	{ "s_stereo",       &s_stereo,       CVAR_ARCHIVE,   "1"  },
+	{ "s_musicvol",     &s_musicvol,     CVAR_ARCHIVE,   "0.5"  },
+	{ "s_musicdevice",  &s_musicdevice,  CVAR_ARCHIVE,   S_MUSICDEV_CFG },
 
-	{ "mouse_x.axis",   &mouse_x_axis,   "c",   "1" /* AXIS_TURN */  },
-	{ "mouse_x.sens",   &mouse_x_sens,   "c",   "10"  },
-	{ "mouse_y.axis",   &mouse_y_axis,   "c",   "4" /* AXIS_MLOOK */ },
-	{ "mouse_y.sens",   &mouse_y_sens,   "c",   "10" },
+	{ "s_quietfactor",  &s_quietfactor,  CVAR_ARCHIVE,   "1"  },
+	{ "tim_quietfactor",&tim_quietfactor,CVAR_ARCHIVE,   "1"  },
 
-	{ "debug_nomonsters", &debug_nomonsters, "h", "0" },
-	{ "debug_subsector",  &debug_subsector,  "h", "0" },
+	{ "in_shiftlook",   &in_shiftlook,   CVAR_ARCHIVE,   "1"  },
+
+	{ "mouse_x.axis",   &mouse_x_axis,   CVAR_ARCHIVE,   "1" /* AXIS_TURN */  },
+	{ "mouse_x.sens",   &mouse_x_sens,   CVAR_ARCHIVE,   "10"  },
+	{ "mouse_y.axis",   &mouse_y_axis,   CVAR_ARCHIVE,   "4" /* AXIS_MLOOK */ },
+	{ "mouse_y.sens",   &mouse_y_sens,   CVAR_ARCHIVE,   "10" },
+
+	{ "debug_nomonsters", &debug_nomonsters, CVAR_CHEAT, "0" },
+	{ "debug_subsector",  &debug_subsector,  CVAR_CHEAT, "0" },
 #endif
 
 //---- END OF LIST -----------------------------------------------------------
 
-	{ NULL, NULL, NULL, NULL }
+	{ NULL, NULL, 0, NULL }
 };
 
 //--- editor settings ---

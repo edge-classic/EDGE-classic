@@ -228,10 +228,11 @@ void CON_WriteVars(FILE *f)
 {
 	for (int k = 0 ; all_cvars[k].name ; k++)
 	{
-		cvar_c *var = all_cvars[k].var;
-
-		if (strchr(all_cvars[k].flags, 'c'))
+		if ((all_cvars[k].flags & CVAR_ARCHIVE) != 0)
+		{
+			cvar_c *var = all_cvars[k].var;
 			fprintf(f, "/%s\t\"%s\"\n", all_cvars[k].name, var->c_str());
+		}
 	}
 }
 

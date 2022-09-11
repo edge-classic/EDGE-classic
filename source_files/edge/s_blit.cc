@@ -56,7 +56,7 @@
 // sounds start clipping.  More bits means less chance
 // of clipping, but every extra bit makes the sound half
 // as loud as before.
-#define QUIET_BITS  0 // Keep for now in case quiet factor needs to return?
+#define QUIET_BITS  0
 
 
 #define MIN_CHANNELS    32
@@ -64,7 +64,6 @@
 
 mix_channel_c *mix_chan[MAX_CHANNELS];
 int num_chan;
-int master_volume = 19; // Full volume
 
 bool vacuum_sfx = false;
 bool submerged_sfx = false;
@@ -166,7 +165,7 @@ void mix_channel_c::ComputeVolume()
 		}
 	}
 
-	float MAX_VOL = ((1 << (16 - SAFE_BITS)) - 3) * slider_to_gain[master_volume];
+	float MAX_VOL = (1 << (16 - SAFE_BITS - (var_quiet_factor-1))) - 3;
 
 	MAX_VOL = boss ? MAX_VOL : MAX_VOL / dist * slider_to_gain[sfx_volume];
 
@@ -195,10 +194,12 @@ void mix_channel_c::ComputeMusicVolume()
 	// We do not use 'quiet_factor' here because that mainly
 	// applies to the mixing of game/UI sounds.  The music volume
 	// slider allows for quieter output.
+	
+	// Dasho - Test var_quiet_factor affecting both
 
-	float MAX_VOL = (1 << (16 - SAFE_BITS)) - 3;
+	float MAX_VOL = (1 << (16 - SAFE_BITS) - (var_quiet_factor-1)) - 3;
 
- 	MAX_VOL = MAX_VOL * slider_to_gain[mus_volume] * slider_to_gain[master_volume];
+ 	MAX_VOL = MAX_VOL * slider_to_gain[mus_volume];
 
 	volume_L = (int) MAX_VOL;
 	volume_R = (int) MAX_VOL;

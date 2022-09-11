@@ -474,7 +474,6 @@ static menuinfo_t analogue_optmenu =
 //
 static optmenuitem_t soundoptions[] =
 {
-	{OPT_Slider,  "Master Volume", NULL, SND_SLIDER_NUM, &master_volume, M_ChangeSfxVol, NULL}, // Can also use M_ChangeSfxVol as it is a stub function (do we actually still need it?)
 	{OPT_Slider,  "Sound Volume", NULL, SND_SLIDER_NUM, &sfx_volume, M_ChangeSfxVol, NULL},
 	{OPT_Slider,  "Music Volume", NULL, SND_SLIDER_NUM, &mus_volume, M_ChangeMusVol, NULL},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
@@ -486,7 +485,7 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Boolean, "Dynamic Reverb",       YesNo, 2, &dynamic_reverb, NULL, NULL},
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Mix Channels",    MixChans,  8, &var_mix_channels, M_ChangeMixChan, NULL},
-	//{OPT_Switch,  "Quiet Factor",    QuietNess, 4, &var_quiet_factor, NULL, NULL},
+	{OPT_Switch,  "Quiet Factor",    QuietNess, 4, &var_quiet_factor, NULL, NULL},
 	{OPT_Boolean, "Precache SFX",       YesNo, 2, &var_cache_sfx, NULL, "NeedRestart"},
 	{OPT_Plain,   "",                NULL, 0,  NULL, NULL, NULL},
 };
@@ -503,7 +502,6 @@ static menuinfo_t sound_optmenu =
 //
 static optmenuitem_t f4soundoptions[] =
 {
-	{OPT_Slider,  "Master Volume", NULL, SND_SLIDER_NUM, &master_volume, M_ChangeSfxVol, NULL},
 	{OPT_Slider,  "Sound Volume", NULL, SND_SLIDER_NUM, &sfx_volume, M_ChangeSfxVol, NULL},
 	{OPT_Slider,  "Music Volume", NULL, SND_SLIDER_NUM, &mus_volume, M_ChangeMusVol, NULL},
 };

@@ -219,6 +219,30 @@ void CON_HandleProgramArgs(void)
 }
 
 
+int CON_PrintVars(const char *match, bool show_default)
+{
+	int total = 0;
+
+	for (int i = 0; all_cvars[i].name; i++)
+	{
+		if (match && *match)
+			if (! strstr(all_cvars[i].name, match))
+				continue;
+
+		cvar_c *var = all_cvars[i].var;
+
+		if (show_default)
+			I_Printf("  %-20s \"%s\" (%s)\n", all_cvars[i].name, var->c_str(), all_cvars[i].def_val);
+		else
+			I_Printf("  %-20s \"%s\"\n", all_cvars[i].name, var->c_str());
+
+		total++;
+	}
+
+	return total;
+}
+
+
 void CON_WriteVars(FILE *f)
 {
 	for (int k = 0 ; all_cvars[k].name ; k++)

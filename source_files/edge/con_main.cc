@@ -278,13 +278,13 @@ int CMD_ShowLumps(char **argv, int argc)
 
 int CMD_ShowVars(char **argv, int argc)
 {
-	bool show_defaults = false;
+	bool show_default = false;
 
 	char *match = NULL;
 
 	if (argc >= 2 && stricmp(argv[1], "-l") == 0)
 	{
-		show_defaults = true;
+		show_default = true;
 		argv++; argc--;
 	}
 
@@ -293,23 +293,7 @@ int CMD_ShowVars(char **argv, int argc)
 
 	I_Printf("Console Variables:\n");
 
-	int total = 0;
-
-	for (int i = 0; all_cvars[i].name; i++)
-	{
-		if (match && *match)
-			if (! strstr(all_cvars[i].name, match))
-				continue;
-
-		cvar_c *var = all_cvars[i].var;
-
-		if (show_defaults)
-			I_Printf("  %-20s \"%s\" (%s)\n", all_cvars[i].name, var->c_str(), all_cvars[i].def_val);
-		else
-			I_Printf("  %-20s \"%s\"\n", all_cvars[i].name, var->c_str());
-
-		total++;
-	}
+	int total = CON_PrintVars(match, show_default);
 
 	if (total == 0)
 		I_Printf("Nothing matched.\n");

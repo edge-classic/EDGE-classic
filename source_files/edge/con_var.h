@@ -104,11 +104,6 @@ typedef struct cvar_link_s
 cvar_link_t;
 
 
-extern cvar_link_t all_cvars[];
-
-extern int total_cvars;
-
-
 // sets all cvars to their default value.
 void CON_ResetAllVars();
 
@@ -127,6 +122,9 @@ int CON_MatchAllVars(std::vector<const char *>& list, const char *pattern);
 
 // scan the program arguments and set matching cvars
 void CON_HandleProgramArgs(void);
+
+// display value of matching cvars.  match can be NULL to match everything.
+int CON_PrintVars(const char *match, bool show_default);
 
 // write all cvars to the config file
 void CON_WriteVars(FILE *f);

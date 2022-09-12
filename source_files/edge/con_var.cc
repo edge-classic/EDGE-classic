@@ -24,15 +24,11 @@
 #include "m_argv.h"
 
 
-// Note: must use a plain array (and not std::vector) here
-//       because constructors run very early (before main) and
-//       no order is not guaranteed.
+// NOTE: we must use a plain linked list (and not std::vector) here,
+//       because constructors run very early (before main is called)
+//       and we cannot rely on a std::vector being initialized.
 
-#define MAX_CVARS  2000
-
-cvar_c * all_cvars[MAX_CVARS];
-
-int total_cvars = 0;
+static cvar_c * all_cvars = NULL;
 
 
 cvar_c::cvar_c(const char *_name, const char *_def, int _flags) :
@@ -42,22 +38,14 @@ cvar_c::cvar_c(const char *_name, const char *_def, int _flags) :
 {
 	ParseString();
 
-	// add this cvar link into the global array
-	SYS_ASSERT(total_cvars < MAX_CVARS);
-
-	all_cvars[total_cvars++] = this;
+	// add this cvar into the list.  it is sorted later.
+	next = all_cvars;
+	all_cvars = this;
 }
 
 cvar_c::~cvar_c()
 {
 	// nothing needed
-}
-
-void cvar_c::Reset(const char *value)
-{
-	s = value;
-	ParseString();
-	modified = 0;
 }
 
 cvar_c& cvar_c::operator= (int value)
@@ -137,21 +125,74 @@ void cvar_c::ParseString()
 
 //----------------------------------------------------------------------------
 
+static cvar_c * MergeSort(cvar_c *list)
+{
+	SYS_ASSERT(list != NULL);
+
+	// only a single item?  done!
+	if (list->next == NULL)
+		return list;
+
+	// split into left and right lists
+	cvar_c *L = NULL;
+	cvar_c *R = NULL;
+
+	while (list != NULL)
+	{
+		cvar_c *var = list;
+		list = list->next;
+
+		var->next = L;
+		L = var;
+
+		std::swap(L, R);
+	}
+
+	L = MergeSort(L);
+	R = MergeSort(R);
+
+	// now merge them
+	while (L != NULL && R != NULL)
+	{
+		// pick the largest name
+		if (L == NULL)
+			std::swap(L, R);
+		else if (R != NULL && stricmp(L->name, R->name) < 0)
+			std::swap(L, R);
+
+		// remove it, add to head of the new list
+		cvar_c *var = L;
+		L = L->next;
+
+		var->next = list;
+		list = var;
+	}
+
+	return list;
+}
+
+
+void CON_SortVars()
+{
+	all_cvars = MergeSort(all_cvars);
+}
+
+
 void CON_ResetAllVars()
 {
-	for (int i = 0; all_cvars[i] != NULL; i++)
+	for (cvar_c *var = all_cvars ; var != NULL ; var = var->next)
 	{
-		*all_cvars[i] = all_cvars[i]->def;
+		*var = var->def;
 	}
 }
 
 
 cvar_c * CON_FindVar(const char *name)
 {
-	for (int i = 0; all_cvars[i] != NULL; i++)
+	for (cvar_c *var = all_cvars ; var != NULL ; var = var->next)
 	{
-		if (stricmp(all_cvars[i]->name, name) == 0)
-			return all_cvars[i];
+		if (stricmp(var->name, name) == 0)
+			return var;
 	}
 
 	return NULL;
@@ -177,12 +218,12 @@ int CON_MatchAllVars(std::vector<const char *>& list, const char *pattern)
 {
 	list.clear();
 
-	for (int i = 0; all_cvars[i] != NULL; i++)
+	for (cvar_c *var = all_cvars ; var != NULL ; var = var->next)
 	{
-		if (! CON_MatchPattern(all_cvars[i]->name, pattern))
+		if (! CON_MatchPattern(var->name, pattern))
 			continue;
 
-		list.push_back(all_cvars[i]->name);
+		list.push_back(var->name);
 	}
 
 	return (int)list.size();
@@ -222,10 +263,8 @@ int CON_PrintVars(const char *match, bool show_default)
 {
 	int total = 0;
 
-	for (int i = 0; all_cvars[i] != NULL; i++)
+	for (cvar_c *var = all_cvars ; var != NULL ; var = var->next)
 	{
-		cvar_c *var = all_cvars[i];
-
 		if (match && *match)
 			if (! strstr(var->name, match))
 				continue;
@@ -244,10 +283,8 @@ int CON_PrintVars(const char *match, bool show_default)
 
 void CON_WriteVars(FILE *f)
 {
-	for (int i = 0 ; all_cvars[i] != NULL ; i++)
+	for (cvar_c *var = all_cvars ; var != NULL ; var = var->next)
 	{
-		cvar_c *var = all_cvars[i];
-
 		if ((var->flags & CVAR_ARCHIVE) != 0)
 		{
 			fprintf(f, "/%s\t\"%s\"\n", var->name, var->c_str());

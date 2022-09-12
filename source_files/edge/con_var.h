@@ -43,6 +43,9 @@ public:
 	// a combination of CVAR_XXX bits
 	int flags;
 
+	// link in list
+	cvar_c * next;
+
 private:
 	// this is incremented each time a value is set.
 	// (Note: whether the value is different is not checked)
@@ -77,8 +80,6 @@ public:
 		return false;
 	}
 
-	void Reset(const char *value);
-
 private:
 	void FmtInt  (int value);
 	void FmtFloat(float value);
@@ -96,6 +97,9 @@ enum
 };
 
 
+// called by CON_InitConsole.
+void CON_SortVars();
+
 // sets all cvars to their default value.
 void CON_ResetAllVars();
 
@@ -112,13 +116,13 @@ bool CON_MatchPattern(const char *name, const char *pat);
 // Returns number of matches found.
 int CON_MatchAllVars(std::vector<const char *>& list, const char *pattern);
 
-// scan the program arguments and set matching cvars
+// scan the program arguments and set matching cvars.
 void CON_HandleProgramArgs(void);
 
 // display value of matching cvars.  match can be NULL to match everything.
 int CON_PrintVars(const char *match, bool show_default);
 
-// write all cvars to the config file
+// write all cvars to the config file.
 void CON_WriteVars(FILE *f);
 
 #endif // __CON_VAR_H__

@@ -31,6 +31,7 @@
 #include "language.h"
 
 #include "con_main.h"
+#include "con_var.h"
 #include "e_input.h"
 #include "e_player.h"
 #include "g_game.h"
@@ -1397,6 +1398,8 @@ void CON_Ticker(void)
 //
 void CON_InitConsole(void)
 {
+	CON_SortVars();
+
 	con_used_lines = 0;
 	cmd_used_hist  = 0;
 

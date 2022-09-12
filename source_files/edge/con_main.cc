@@ -577,17 +577,17 @@ void CON_TryCommand(const char *cmd)
 		return;
 	}
 
-	cvar_link_t *link = CON_FindVar(argv[0]);
-	if (link)
+	cvar_c *var = CON_FindVar(argv[0]);
+	if (var != NULL)
 	{
 		if (argc <= 1)
-			I_Printf("%s \"%s\"\n", argv[0], link->var->c_str());
+			I_Printf("%s \"%s\"\n", argv[0], var->c_str());
 		else if (argc-1 >= 2)
-			I_Printf("Can only assign one value (%d given).\n", argc-1);
-		else if ((link->flags & CVAR_ROM) != 0)
-			I_Printf("That cvar is read only.\n");
+			I_Printf("Can only assign one value to cvar (%d given).\n", argc-1);
+		else if ((var->flags & CVAR_ROM) != 0)
+			I_Printf("The cvar '%s' is read only.\n", var->name);
 		else
-			*link->var = argv[1];
+			*var = argv[1];
 
 		KillArgs(argv, argc);
 		return;

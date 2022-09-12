@@ -34,6 +34,15 @@ public:
 	float f;
 	std::string s;
 
+	// name of variable
+	const char *name;
+
+	// default value
+	const char *def;
+
+	// a combination of CVAR_XXX bits
+	int flags;
+
 private:
 	// this is incremented each time a value is set.
 	// (Note: whether the value is different is not checked)
@@ -43,7 +52,7 @@ public:
 	// FIXME remove this asap
 	cvar_c() : d(0), f(0.0f), s("0"), modified(0) {}
 
-	cvar_c(const char *name, const char *def_val, int flags = 0);
+	cvar_c(const char *_name, const char *_def, int _flags = 0);
 
 	~cvar_c();
 
@@ -87,28 +96,11 @@ enum
 };
 
 
-typedef struct cvar_link_s
-{
-	// name of variable
-	const char *name;
-
-	// the console variable itself
-	cvar_c *var;
-
-	// a combination of CVAR_XXX bits
-	int flags;
-
-	// default value
-	const char *def_val;
-}
-cvar_link_t;
-
-
 // sets all cvars to their default value.
 void CON_ResetAllVars();
 
 // look for a CVAR with the given name.
-cvar_link_t * CON_FindVar(const char *name);
+cvar_c * CON_FindVar(const char *name);
 
 bool CON_MatchPattern(const char *name, const char *pat);
 

@@ -30,25 +30,22 @@
 
 #define MAX_CVARS  2000
 
-cvar_link_t all_cvars[MAX_CVARS];
+cvar_c * all_cvars[MAX_CVARS];
 
 int total_cvars = 0;
 
 
-cvar_c::cvar_c(const char *name, const char *value, int flags) : s(value), modified(0)
+cvar_c::cvar_c(const char *_name, const char *_def, int _flags) :
+	d(), f(), s(_def),
+	name(_name), def(_def), flags(_flags),
+	modified(0)
 {
 	ParseString();
 
 	// add this cvar link into the global array
 	SYS_ASSERT(total_cvars < MAX_CVARS);
 
-	cvar_link_t *link = &all_cvars[total_cvars];
-	total_cvars += 1;
-
-	link->name    = name;
-	link->var     = this;
-	link->flags   = flags;
-	link->def_val = value;
+	all_cvars[total_cvars++] = this;
 }
 
 cvar_c::~cvar_c()
@@ -142,19 +139,19 @@ void cvar_c::ParseString()
 
 void CON_ResetAllVars()
 {
-	for (int i = 0; all_cvars[i].var; i++)
+	for (int i = 0; all_cvars[i] != NULL; i++)
 	{
-		*all_cvars[i].var = all_cvars[i].def_val;
+		*all_cvars[i] = all_cvars[i]->def;
 	}
 }
 
 
-cvar_link_t * CON_FindVar(const char *name)
+cvar_c * CON_FindVar(const char *name)
 {
-	for (int i = 0; all_cvars[i].var; i++)
+	for (int i = 0; all_cvars[i] != NULL; i++)
 	{
-		if (stricmp(all_cvars[i].name, name) == 0)
-			return &all_cvars[i];
+		if (stricmp(all_cvars[i]->name, name) == 0)
+			return all_cvars[i];
 	}
 
 	return NULL;
@@ -180,12 +177,12 @@ int CON_MatchAllVars(std::vector<const char *>& list, const char *pattern)
 {
 	list.clear();
 
-	for (int i = 0; all_cvars[i].var; i++)
+	for (int i = 0; all_cvars[i] != NULL; i++)
 	{
-		if (! CON_MatchPattern(all_cvars[i].name, pattern))
+		if (! CON_MatchPattern(all_cvars[i]->name, pattern))
 			continue;
 
-		list.push_back(all_cvars[i].name);
+		list.push_back(all_cvars[i]->name);
 	}
 
 	return (int)list.size();
@@ -201,9 +198,9 @@ void CON_HandleProgramArgs(void)
 		if (s[0] != '-')
 			continue;
 
-		cvar_link_t *link = CON_FindVar(s+1);
+		cvar_c *var = CON_FindVar(s+1);
 
-		if (! link)
+		if (var == NULL)
 			continue;
 
 		p++;
@@ -214,7 +211,9 @@ void CON_HandleProgramArgs(void)
 			continue;
 		}
 
-		*link->var = M_GetArgument(p);
+		// FIXME allow CVAR_ROM here ?
+
+		*var = M_GetArgument(p);
 	}
 }
 
@@ -223,18 +222,18 @@ int CON_PrintVars(const char *match, bool show_default)
 {
 	int total = 0;
 
-	for (int i = 0; all_cvars[i].name; i++)
+	for (int i = 0; all_cvars[i] != NULL; i++)
 	{
+		cvar_c *var = all_cvars[i];
+
 		if (match && *match)
-			if (! strstr(all_cvars[i].name, match))
+			if (! strstr(var->name, match))
 				continue;
 
-		cvar_c *var = all_cvars[i].var;
-
 		if (show_default)
-			I_Printf("  %-20s \"%s\" (%s)\n", all_cvars[i].name, var->c_str(), all_cvars[i].def_val);
+			I_Printf("  %-20s \"%s\" (%s)\n", var->name, var->c_str(), var->def);
 		else
-			I_Printf("  %-20s \"%s\"\n", all_cvars[i].name, var->c_str());
+			I_Printf("  %-20s \"%s\"\n", var->name, var->c_str());
 
 		total++;
 	}
@@ -245,12 +244,13 @@ int CON_PrintVars(const char *match, bool show_default)
 
 void CON_WriteVars(FILE *f)
 {
-	for (int k = 0 ; all_cvars[k].name ; k++)
+	for (int i = 0 ; all_cvars[i] != NULL ; i++)
 	{
-		if ((all_cvars[k].flags & CVAR_ARCHIVE) != 0)
+		cvar_c *var = all_cvars[i];
+
+		if ((var->flags & CVAR_ARCHIVE) != 0)
 		{
-			cvar_c *var = all_cvars[k].var;
-			fprintf(f, "/%s\t\"%s\"\n", all_cvars[k].name, var->c_str());
+			fprintf(f, "/%s\t\"%s\"\n", var->name, var->c_str());
 		}
 	}
 }

@@ -37,13 +37,13 @@
 #include "r_shader.h"
 
 // TODO review if these should be archived
-DEF_CVAR(r_colorlighting, "1")
-DEF_CVAR(r_colormaterial, "1")
+DEF_CVAR(r_colorlighting, "1", 0)
+DEF_CVAR(r_colormaterial, "1", 0)
 
-DEF_CVAR(r_dumbsky,     "0")
-DEF_CVAR(r_dumbmulti,   "0")
-DEF_CVAR(r_dumbcombine, "0")
-DEF_CVAR(r_dumbclamp,   "0")
+DEF_CVAR(r_dumbsky,       "0", 0)
+DEF_CVAR(r_dumbmulti,     "0", 0)
+DEF_CVAR(r_dumbcombine,   "0", 0)
+DEF_CVAR(r_dumbclamp,     "0", 0)
 
 
 #define MAX_L_VERT  4096

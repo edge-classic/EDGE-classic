@@ -150,8 +150,8 @@ DEF_CVAR(joy_tuning, "1.00", CVAR_ARCHIVE)
 DEF_CVAR(in_running,   "0", CVAR_ARCHIVE)
 DEF_CVAR(in_stageturn, "1", CVAR_ARCHIVE)
 
-DEF_CVAR(debug_mouse,   "0")
-DEF_CVAR(debug_joyaxis, "0")
+DEF_CVAR(debug_mouse,   "0", 0)
+DEF_CVAR(debug_joyaxis, "0", 0)
 
 // Speed controls
 int var_turnspeed;

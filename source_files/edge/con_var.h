@@ -23,7 +23,7 @@
 #include <string>
 
 
-#define DEF_CVAR(name, ...)  cvar_c name(#name, __VA_ARGS__);
+#define DEF_CVAR(name, value, flags)  cvar_c name(#name, value, flags);
 
 
 class cvar_c

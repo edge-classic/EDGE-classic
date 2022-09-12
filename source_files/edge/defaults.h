@@ -78,7 +78,6 @@
 #define CFGDEF_MUSIC_VOLUME     (8)
 #define CFGDEF_SOUND_STEREO     (1)  // Stereo
 #define CFGDEF_MIX_CHANNELS     (2)  // 32 channels
-#define CFGDEF_QUIET_FACTOR     (1)
 
 // Video Options
 #define CFGDEF_CURRENT_GAMMA    (0)

@@ -52,13 +52,6 @@
 #define SAFE_BITS  4
 #define CLIP_THRESHHOLD  ((1L << (31-SAFE_BITS)) - 1)
 
-// This value is how much breathing room there is until
-// sounds start clipping.  More bits means less chance
-// of clipping, but every extra bit makes the sound half
-// as loud as before.
-#define QUIET_BITS  0
-
-
 #define MIN_CHANNELS    32
 #define MAX_CHANNELS  256
 
@@ -165,7 +158,7 @@ void mix_channel_c::ComputeVolume()
 		}
 	}
 
-	float MAX_VOL = (1 << (16 - SAFE_BITS - (var_quiet_factor-1))) - 3;
+	float MAX_VOL = (1 << (16 - SAFE_BITS)) - 3;
 
 	MAX_VOL = boss ? MAX_VOL : MAX_VOL / dist * slider_to_gain[sfx_volume];
 
@@ -186,18 +179,7 @@ void mix_channel_c::ComputeVolume()
 
 void mix_channel_c::ComputeMusicVolume()
 {
-	// the MAX_VOL value here is equivalent to the 'NORMAL' quiet
-	// factor.  If the music uses the full range, then the output
-	// will also use the full range without being clipped
-	// (assuming no other sounds are playing).
-	//
-	// We do not use 'quiet_factor' here because that mainly
-	// applies to the mixing of game/UI sounds.  The music volume
-	// slider allows for quieter output.
-	
-	// Dasho - Test var_quiet_factor affecting both
-
-	float MAX_VOL = (1 << (16 - SAFE_BITS) - (var_quiet_factor-1)) - 3;
+	float MAX_VOL = (1 << (16 - SAFE_BITS)) - 3;
 
  	MAX_VOL = MAX_VOL * slider_to_gain[mus_volume];
 

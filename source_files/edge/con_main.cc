@@ -278,13 +278,13 @@ int CMD_ShowLumps(char **argv, int argc)
 
 int CMD_ShowVars(char **argv, int argc)
 {
-	bool show_defaults = false;
+	bool show_default = false;
 
 	char *match = NULL;
 
 	if (argc >= 2 && stricmp(argv[1], "-l") == 0)
 	{
-		show_defaults = true;
+		show_default = true;
 		argv++; argc--;
 	}
 
@@ -293,23 +293,7 @@ int CMD_ShowVars(char **argv, int argc)
 
 	I_Printf("Console Variables:\n");
 
-	int total = 0;
-
-	for (int i = 0; all_cvars[i].name; i++)
-	{
-		if (match && *match)
-			if (! strstr(all_cvars[i].name, match))
-				continue;
-
-		cvar_c *var = all_cvars[i].var;
-
-		if (show_defaults)
-			I_Printf("  %-20s \"%s\" (%s)\n", all_cvars[i].name, var->c_str(), all_cvars[i].def_val);
-		else
-			I_Printf("  %-20s \"%s\"\n", all_cvars[i].name, var->c_str());
-
-		total++;
-	}
+	int total = CON_PrintVars(match, show_default);
 
 	if (total == 0)
 		I_Printf("Nothing matched.\n");
@@ -593,17 +577,17 @@ void CON_TryCommand(const char *cmd)
 		return;
 	}
 
-	cvar_link_t *link = CON_FindVar(argv[0]);
-	if (link)
+	cvar_c *var = CON_FindVar(argv[0]);
+	if (var != NULL)
 	{
 		if (argc <= 1)
-			I_Printf("%s \"%s\"\n", argv[0], link->var->c_str());
-		else if (argc >= 3)
-			I_Printf("Can only assign one value (%d given).\n", argc-1);
-		else if (strchr(link->flags, 'r'))
-			I_Printf("That cvar is read only.\n");
+			I_Printf("%s \"%s\"\n", argv[0], var->c_str());
+		else if (argc-1 >= 2)
+			I_Printf("Can only assign one value to cvar (%d given).\n", argc-1);
+		else if ((var->flags & CVAR_ROM) != 0)
+			I_Printf("The cvar '%s' is read only.\n", var->name);
 		else
-			*link->var = argv[1];
+			*var = argv[1];
 
 		KillArgs(argv, argc);
 		return;

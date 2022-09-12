@@ -132,7 +132,7 @@ static char *udmf_lump;
 // There is two values for every line: side0 and side1.
 static int *temp_line_sides;
 
-cvar_c m_goobers;
+DEF_CVAR(m_goobers, "0", 0)
 
 
 // UDMF parser and loading routines backported from EDGE 2.x codebase

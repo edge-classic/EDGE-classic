@@ -22,6 +22,10 @@
 #include <vector>
 #include <string>
 
+
+#define DEF_CVAR(name, value, flags)  cvar_c name(#name, value, flags);
+
+
 class cvar_c
 {
 public:
@@ -30,19 +34,25 @@ public:
 	float f;
 	std::string s;
 
+	// name of variable
+	const char *name;
+
+	// default value
+	const char *def;
+
+	// a combination of CVAR_XXX bits
+	int flags;
+
+	// link in list
+	cvar_c * next;
+
 private:
 	// this is incremented each time a value is set.
 	// (Note: whether the value is different is not checked)
 	int modified;
 
 public:
-	cvar_c() : d(0), f(0.0f), s("0"), modified(0)
-	{ }
-
-	cvar_c(int value);
-	cvar_c(float value);
-	cvar_c(const char *value);
-	cvar_c(const cvar_c& other);
+	cvar_c(const char *_name, const char *_def, int _flags = 0);
 
 	~cvar_c();
 
@@ -50,7 +60,6 @@ public:
 	cvar_c& operator= (float value);
 	cvar_c& operator= (const char *value);
 	cvar_c& operator= (std::string value);
-	cvar_c& operator= (const cvar_c& other);
 
 	inline const char *c_str() const
 	{
@@ -68,8 +77,6 @@ public:
 		return false;
 	}
 
-	void Reset(const char *value);
-
 private:
 	void FmtInt  (int value);
 	void FmtFloat(float value);
@@ -78,51 +85,42 @@ private:
 };
 
 
-typedef struct cvar_link_s
+enum
 {
-	// name of variable
-	const char *name;
-
-	// the console variable itself
-	cvar_c *var;
-
-	// flags (a combination of letters, "" for none)
-	const char *flags;
-
-	// default value
-	const char *def_val;
-}
-cvar_link_t;
+	CVAR_ARCHIVE    = (1 << 0),  // saved in the config file
+	CVAR_CHEAT      = (1 << 1),  // disabled in multi-player games
+	CVAR_NO_RESET   = (1 << 2),  // do not reset to default
+	CVAR_ROM        = (1 << 3),  // read-only
+};
 
 
-extern cvar_link_t all_cvars[];
+// called by CON_InitConsole.
+void CON_SortVars();
 
-
-void CON_ResetAllVars();
 // sets all cvars to their default value.
+void CON_ResetAllVars();
 
-cvar_link_t * CON_FindVar(const char *name);
 // look for a CVAR with the given name.
+cvar_c * CON_FindVar(const char *name);
 
 bool CON_MatchPattern(const char *name, const char *pat);
 
-int CON_MatchAllVars(std::vector<const char *>& list,
-                     const char *pattern, const char *flags = "");
 // find all cvars which match the pattern, and copy pointers to
 // them into the given list.  The flags parameter, if present,
 // contains lowercase letters to match the CVAR with the flag,
 // and/or uppercase letters to require the flag to be absent.
 //
 // Returns number of matches found.
+int CON_MatchAllVars(std::vector<const char *>& list, const char *pattern);
 
-bool CON_SetVar(const char *name, const char *flags, const char *value);
-// sets the cvar with the given name (possibly an alias) with the
-// given value.  The flags parameter can limit the search, and
-// must begin with an 'A' to prevent matching aliases.
-// Returns true if the cvar was found.
-
+// scan the program arguments and set matching cvars.
 void CON_HandleProgramArgs(void);
-// scan the program arguments and set matching cvars
+
+// display value of matching cvars.  match can be NULL to match everything.
+int CON_PrintVars(const char *match, bool show_default);
+
+// write all cvars to the config file.
+void CON_WriteVars(FILE *f);
 
 #endif // __CON_VAR_H__
 

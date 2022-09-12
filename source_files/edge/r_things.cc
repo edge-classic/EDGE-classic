@@ -62,10 +62,10 @@ extern double VM_GetFloat(coal::vm_c *vm, const char *mod_name, const char *var_
 #define DEBUG  0
 
 
-cvar_c r_crosshair;    // shape
-cvar_c r_crosscolor;   // 0 .. 7
-cvar_c r_crosssize;    // pixels on a 320x200 screen
-cvar_c r_crossbright;  // 1.0 is normal
+DEF_CVAR(r_crosshair,   "0",   CVAR_ARCHIVE)  // shape
+DEF_CVAR(r_crosscolor,  "0",   CVAR_ARCHIVE)  // 0 .. 7
+DEF_CVAR(r_crosssize,   "16",  CVAR_ARCHIVE)  // pixels on a 320x200 screen
+DEF_CVAR(r_crossbright, "1.0", CVAR_ARCHIVE)  // 1.0 is normal
 
 
 float sprite_skew;

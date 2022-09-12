@@ -55,7 +55,6 @@ add_executable(
 	source_files/edge/am_map.cc     
 	source_files/edge/con_con.cc    
 	source_files/edge/con_main.cc   
-	source_files/edge/con_link.cc   
 	source_files/edge/con_var.cc    
 	source_files/edge/e_input.cc    
 	source_files/edge/e_main.cc     

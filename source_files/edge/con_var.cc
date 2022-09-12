@@ -24,36 +24,28 @@
 #include "m_argv.h"
 
 
-cvar_c::cvar_c(int value) : d(value), f(value), s(), modified(0)
-{
-	FmtInt(value);
-}
+// NOTE: we must use a plain linked list (and not std::vector) here,
+//       because constructors run very early (before main is called)
+//       and we cannot rely on a std::vector being initialized.
 
-cvar_c::cvar_c(float value) : d(I_ROUND(value)), f(value), s(), modified(0)
-{
-	FmtFloat(value);
-}
+static cvar_c * all_cvars = NULL;
 
-cvar_c::cvar_c(const char *value) : s(value), modified(0)
+
+cvar_c::cvar_c(const char *_name, const char *_def, int _flags) :
+	d(), f(), s(_def),
+	name(_name), def(_def), flags(_flags),
+	modified(0)
 {
 	ParseString();
-}
 
-cvar_c::cvar_c(const cvar_c& other) : s(other.s), modified(0)
-{
-	ParseString();
+	// add this cvar into the list.  it is sorted later.
+	next = all_cvars;
+	all_cvars = this;
 }
 
 cvar_c::~cvar_c()
 {
 	// nothing needed
-}
-
-void cvar_c::Reset(const char *value)
-{
-	s = value;
-	ParseString();
-	modified = 0;
 }
 
 cvar_c& cvar_c::operator= (int value)
@@ -89,18 +81,6 @@ cvar_c& cvar_c::operator= (std::string value)
 {
 	s = value;
 	ParseString();
-
-	modified++;
-	return *this;
-}
-
-cvar_c& cvar_c::operator= (const cvar_c& other)
-{
-	if (&other != this)
-	{
-		s = other.s;
-		ParseString();
-	}
 
 	modified++;
 	return *this;
@@ -145,41 +125,81 @@ void cvar_c::ParseString()
 
 //----------------------------------------------------------------------------
 
-static bool CON_MatchFlags(const char *var_f, const char *want_f)
+static cvar_c * MergeSort(cvar_c *list)
 {
-	for (; *want_f; want_f++)
+	SYS_ASSERT(list != NULL);
+
+	// only a single item?  done!
+	if (list->next == NULL)
+		return list;
+
+	// split into left and right lists
+	cvar_c *L = NULL;
+	cvar_c *R = NULL;
+
+	while (list != NULL)
 	{
-		if (isupper(*want_f))
-		{
-			if (strchr(var_f, tolower(*want_f)))
-				return false;
-		}
-		else
-		{
-			if (! strchr(var_f, *want_f))
-				return false;
-		}
+		cvar_c *var = list;
+		list = list->next;
+
+		var->next = L;
+		L = var;
+
+		std::swap(L, R);
 	}
 
-	return true;
+	L = MergeSort(L);
+	R = MergeSort(R);
+
+	// now merge them
+	cvar_c *tail = NULL;
+
+	while (L != NULL || R != NULL)
+	{
+		// pick the smallest name
+		if (L == NULL)
+			std::swap(L, R);
+		else if (R != NULL && stricmp(L->name, R->name) > 0)
+			std::swap(L, R);
+
+		// remove it, add to tail of the new list
+		cvar_c *var = L;
+		L = L->next;
+
+		if (list == NULL)
+			list = var;
+		else
+			tail->next = var;
+
+		var->next = NULL;
+		tail = var;
+	}
+
+	return list;
+}
+
+
+void CON_SortVars()
+{
+	all_cvars = MergeSort(all_cvars);
 }
 
 
 void CON_ResetAllVars()
 {
-	for (int i = 0; all_cvars[i].var; i++)
+	for (cvar_c *var = all_cvars ; var != NULL ; var = var->next)
 	{
-		*all_cvars[i].var = all_cvars[i].def_val;
+		*var = var->def;
 	}
 }
 
 
-cvar_link_t * CON_FindVar(const char *name)
+cvar_c * CON_FindVar(const char *name)
 {
-	for (int i = 0; all_cvars[i].var; i++)
+	for (cvar_c *var = all_cvars ; var != NULL ; var = var->next)
 	{
-		if (stricmp(all_cvars[i].name, name) == 0)
-			return &all_cvars[i];
+		if (stricmp(var->name, name) == 0)
+			return var;
 	}
 
 	return NULL;
@@ -201,53 +221,19 @@ bool CON_MatchPattern(const char *name, const char *pat)
 }
 
 
-int CON_MatchAllVars(std::vector<const char *>& list,
-                     const char *pattern, const char *flags)
+int CON_MatchAllVars(std::vector<const char *>& list, const char *pattern)
 {
 	list.clear();
 
-	for (int i = 0; all_cvars[i].var; i++)
+	for (cvar_c *var = all_cvars ; var != NULL ; var = var->next)
 	{
-		if (! CON_MatchPattern(all_cvars[i].name, pattern))
+		if (! CON_MatchPattern(var->name, pattern))
 			continue;
 
-		if (! CON_MatchFlags(all_cvars[i].flags, flags))
-			continue;
-
-		list.push_back(all_cvars[i].name);
+		list.push_back(var->name);
 	}
 
 	return (int)list.size();
-}
-
-
-bool CON_SetVar(const char *name, const char *flags, const char *value)
-{
-	//bool no_alias = false; - Doesn't seem to actually affect anything - Dasho
-
-	if (*flags == 'A')
-	{
-		//no_alias = true;
-		flags++;
-	}
-
-	cvar_link_t *L = CON_FindVar(name);
-
-	if (! L)
-	{
-		CON_Printf("No such cvar: %s\n", name);
-		return false;
-	}
-
-	if (! CON_MatchFlags(L->flags, flags))
-	{
-		CON_Printf("Cannot set cvar: %s\n", name);
-		return false;
-	}
-
-	*L->var = value;
-
-	return true;
 }
 
 
@@ -260,9 +246,9 @@ void CON_HandleProgramArgs(void)
 		if (s[0] != '-')
 			continue;
 
-		cvar_link_t *link = CON_FindVar(s+1);
+		cvar_c *var = CON_FindVar(s+1);
 
-		if (! link)
+		if (var == NULL)
 			continue;
 
 		p++;
@@ -273,7 +259,43 @@ void CON_HandleProgramArgs(void)
 			continue;
 		}
 
-		*link->var = M_GetArgument(p);
+		// FIXME allow CVAR_ROM here ?
+
+		*var = M_GetArgument(p);
+	}
+}
+
+
+int CON_PrintVars(const char *match, bool show_default)
+{
+	int total = 0;
+
+	for (cvar_c *var = all_cvars ; var != NULL ; var = var->next)
+	{
+		if (match && *match)
+			if (! strstr(var->name, match))
+				continue;
+
+		if (show_default)
+			I_Printf("  %-20s \"%s\" (%s)\n", var->name, var->c_str(), var->def);
+		else
+			I_Printf("  %-20s \"%s\"\n", var->name, var->c_str());
+
+		total++;
+	}
+
+	return total;
+}
+
+
+void CON_WriteVars(FILE *f)
+{
+	for (cvar_c *var = all_cvars ; var != NULL ; var = var->next)
+	{
+		if ((var->flags & CVAR_ARCHIVE) != 0)
+		{
+			fprintf(f, "/%s\t\"%s\"\n", var->name, var->c_str());
+		}
 	}
 }
 

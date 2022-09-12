@@ -61,7 +61,7 @@
 // #define DEBUG_GREET_NEIGHBOUR
 
 
-cvar_c debug_hom;
+DEF_CVAR(debug_hom, "0", CVAR_CHEAT)
 
 
 side_t *sidedef;

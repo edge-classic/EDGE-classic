@@ -293,13 +293,7 @@ void M_SaveDefaults(void)
 	}
 
 	// console variables
-	for (int k = 0; all_cvars[k].name; k++)
-	{
-		cvar_c *var = all_cvars[k].var;
-
-		if (strchr(all_cvars[k].flags, 'c'))
-			fprintf(f, "/%s\t\"%s\"\n", all_cvars[k].name, var->c_str());
-	}
+	CON_WriteVars(f);
 
 	// normal variables
 	for (int i = 0; i < numdefaults; i++)

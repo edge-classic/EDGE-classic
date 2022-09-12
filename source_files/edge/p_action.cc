@@ -56,9 +56,6 @@
 #include "w_wad.h"
 
 
-cvar_c g_aggression;
-
-
 static int AttackSfxCat(const mobj_t *mo)
 {
 	int category = P_MobjGetSfxCategory(mo);

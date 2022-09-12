@@ -37,7 +37,7 @@
 bool alt_is_down;
 bool eat_mouse_motion = true;
 
-cvar_c in_keypad;
+DEF_CVAR(in_keypad, "1", CVAR_ARCHIVE)
 
 
 bool nojoy;  // what a wowser, joysticks completely disabled

@@ -102,7 +102,7 @@ bool M_MatchesKey(int keyvar, int key)
 // Show messages has default, 0 = off, 1 = on
 int showMessages;
 
-cvar_c m_language;
+extern cvar_c m_language;
 
 int screen_hud;  // has default
 

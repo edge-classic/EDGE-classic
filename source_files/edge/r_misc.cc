@@ -46,7 +46,7 @@
 #include "r_modes.h"
 #include "r_units.h"
 
-cvar_c r_fov;
+DEF_CVAR(r_fov, "90", CVAR_ARCHIVE)
 
 int viewwindow_x;
 int viewwindow_y;

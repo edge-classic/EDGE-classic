@@ -37,10 +37,9 @@ int glmax_clip_planes;
 int glmax_tex_size;
 int glmax_tex_units;
 
-DEF_CVAR(r_aspect, "1.777", CVAR_ARCHIVE)
-
-cvar_c r_nearclip;
-cvar_c r_farclip;
+DEF_CVAR(r_aspect,   "1.777",  CVAR_ARCHIVE)
+DEF_CVAR(r_nearclip, "4",      CVAR_ARCHIVE)
+DEF_CVAR(r_farclip,  "64000",  CVAR_ARCHIVE)
 
 
 typedef enum

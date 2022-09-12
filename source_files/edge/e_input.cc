@@ -143,15 +143,15 @@ static int joy_last_raw[6];
 static float ball_deltas[6] = {0, 0, 0, 0, 0, 0};
 static float  joy_forces[6] = {0, 0, 0, 0, 0, 0};
 
-cvar_c joy_dead;
-cvar_c joy_peak;
-cvar_c joy_tuning;
+DEF_CVAR(joy_dead,   "0.15", CVAR_ARCHIVE)
+DEF_CVAR(joy_peak,   "0.95", CVAR_ARCHIVE)
+DEF_CVAR(joy_tuning, "1.00", CVAR_ARCHIVE)
 
-cvar_c in_running;
-cvar_c in_stageturn;
+DEF_CVAR(in_running,   "0", CVAR_ARCHIVE)
+DEF_CVAR(in_stageturn, "1", CVAR_ARCHIVE)
 
-cvar_c debug_mouse;
-cvar_c debug_joyaxis;
+DEF_CVAR(debug_mouse,   "0")
+DEF_CVAR(debug_joyaxis, "0")
 
 // Speed controls
 int var_turnspeed;

@@ -113,8 +113,8 @@ int key_am_clear;
 
 bool automapactive = false;
 
-cvar_c am_smoothing;
-cvar_c am_gridsize;
+DEF_CVAR(am_smoothing, "1",   CVAR_ARCHIVE)
+DEF_CVAR(am_gridsize,  "128", CVAR_ARCHIVE)
 
 static int cheating = 0;
 static int grid = 0;

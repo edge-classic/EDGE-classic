@@ -52,9 +52,6 @@ private:
 	int modified;
 
 public:
-	// FIXME remove this asap
-	cvar_c() : d(0), f(0.0f), s("0"), modified(0) {}
-
 	cvar_c(const char *_name, const char *_def, int _flags = 0);
 
 	~cvar_c();

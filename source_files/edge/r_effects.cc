@@ -40,8 +40,8 @@ float ren_blu_mul;
 
 const colourmap_c *ren_fx_colmap;
 
-cvar_c r_fadepower;
-cvar_c debug_fullbright;
+DEF_CVAR(r_fadepower, "1.0", CVAR_ARCHIVE)
+DEF_CVAR(debug_fullbright, "0", CVAR_CHEAT)
 
 
 static inline float EffectStrength(player_t *player)

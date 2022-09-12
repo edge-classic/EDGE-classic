@@ -47,9 +47,9 @@
 #include "w_texture.h"
 
 
-cvar_c r_precache_tex;
-cvar_c r_precache_sprite;
-cvar_c r_precache_model;
+DEF_CVAR(r_precache_tex,    "1", CVAR_ARCHIVE)
+DEF_CVAR(r_precache_sprite, "1", CVAR_ARCHIVE)
+DEF_CVAR(r_precache_model,  "1", CVAR_ARCHIVE)
 
 
 //

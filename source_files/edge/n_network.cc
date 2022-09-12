@@ -50,7 +50,7 @@ bool netgame = false;
 
 int base_port;
 
-cvar_c m_busywait;
+DEF_CVAR(m_busywait, "1", CVAR_ARCHIVE)
 
 
 int gametic;

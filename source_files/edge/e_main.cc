@@ -198,12 +198,14 @@ std::string home_dir;
 std::string save_dir;
 std::string shot_dir;
 
-extern cvar_c m_language;
-extern cvar_c g_aggression;
+// not using DEF_CVAR here since var name != cvar name
+cvar_c m_language("language", "ENGLISH", CVAR_ARCHIVE);
 
-cvar_c ddf_strict;
-cvar_c ddf_lax;
-cvar_c ddf_quiet;
+DEF_CVAR(g_aggression, "0", CVAR_ARCHIVE)
+
+DEF_CVAR(ddf_strict, "0", CVAR_ARCHIVE)
+DEF_CVAR(ddf_lax,    "0", CVAR_ARCHIVE)
+DEF_CVAR(ddf_quiet,  "0", CVAR_ARCHIVE)
 
 static const image_c *loading_image = NULL;
 

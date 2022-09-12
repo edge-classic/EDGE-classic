@@ -34,6 +34,8 @@ New Features
 + Custom standalone IWADs can be created by adding an EDGEIWAD lump to the WAD. This will allow it to pass the automatic IWAD
   detection
 
++ Support OPL emulated playback of MUS and MIDI music lumps.
+
 + STYLES.DDF
   - New properties: X_OFFSET and Y_OFFSET. Will set all menu entries in this style to the same x/y offset.
   - New SPECIAL flag: NO_STRETCH_FULLSCREEN, which will disable default behaviour of stretching backgrounds to fill the screen

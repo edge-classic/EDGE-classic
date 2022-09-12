@@ -40,10 +40,16 @@
 DEF_CVAR(r_colorlighting, "1", 0)
 DEF_CVAR(r_colormaterial, "1", 0)
 
+#ifdef APPLE_SILICON
+#define DUMB_CLAMP  "1"
+#else
+#define DUMB_CLAMP  "0"
+#endif
+
 DEF_CVAR(r_dumbsky,       "0", 0)
 DEF_CVAR(r_dumbmulti,     "0", 0)
 DEF_CVAR(r_dumbcombine,   "0", 0)
-DEF_CVAR(r_dumbclamp,     "0", 0)
+DEF_CVAR(r_dumbclamp,     DUMB_CLAMP, 0)
 
 
 #define MAX_L_VERT  4096

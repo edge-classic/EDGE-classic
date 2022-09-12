@@ -152,20 +152,27 @@ static cvar_c * MergeSort(cvar_c *list)
 	R = MergeSort(R);
 
 	// now merge them
-	while (L != NULL && R != NULL)
+	cvar_c *tail = NULL;
+
+	while (L != NULL || R != NULL)
 	{
-		// pick the largest name
+		// pick the smallest name
 		if (L == NULL)
 			std::swap(L, R);
-		else if (R != NULL && stricmp(L->name, R->name) < 0)
+		else if (R != NULL && stricmp(L->name, R->name) > 0)
 			std::swap(L, R);
 
-		// remove it, add to head of the new list
+		// remove it, add to tail of the new list
 		cvar_c *var = L;
 		L = L->next;
 
-		var->next = list;
-		list = var;
+		if (list == NULL)
+			list = var;
+		else
+			tail->next = var;
+
+		var->next = NULL;
+		tail = var;
 	}
 
 	return list;

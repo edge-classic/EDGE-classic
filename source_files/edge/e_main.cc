@@ -82,6 +82,7 @@
 #include "r_draw.h"
 #include "r_modes.h"
 #include "r_image.h"
+#include "w_files.h"
 #include "w_model.h"
 #include "w_sprite.h"
 #include "w_texture.h"
@@ -1413,8 +1414,6 @@ static void E_Shutdown(void);
 
 static void E_Startup(void)
 {
-	int p;
-
 	// Version check ?
 	if (M_CheckParm("-version"))
 	{

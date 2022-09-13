@@ -73,6 +73,7 @@
 #include "r_image.h"
 #include "rad_trig.h"
 #include "vm_coal.h"
+#include "w_files.h"
 #include "w_wad.h"
 #include "w_texture.h"
 

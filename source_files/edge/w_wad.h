@@ -80,7 +80,6 @@ const char *W_GetLumpName(int lump);
 epi::file_c *W_OpenLump(int lump);
 epi::file_c *W_OpenLump(const char *name);
 
-const char *W_GetFileName(int lump);
 int W_GetPaletteForLump(int lump);
 int W_FindFlatSequence(const char *start, const char *end, 
     int *s_offset, int *e_offset);

@@ -1856,26 +1856,6 @@ epi::file_c *W_OpenLump(const char *name)
 }
 
 //
-// W_GetFileName
-//
-// Returns the filename of the WAD file containing the given lump, or
-// NULL if it wasn't a WAD file (e.g. a pure lump).
-//
-const char *W_GetFileName(int lump)
-{
-	SYS_ASSERT(W_VerifyLump(lump));
-
-	lumpinfo_t *l = &lumpinfo[lump];
-
-	data_file_c *df = data_files[l->file];
-
-	if (df->kind >= FLKIND_Lump)
-		return NULL;
-  
-	return df->name.c_str();
-}
-
-//
 // W_GetPaletteForLump
 //
 // Returns the palette lump that should be used for the given lump
@@ -1899,12 +1879,10 @@ int W_GetPaletteForLump(int lump)
 	for (; f > palette_datafile; f--)
 	{
 		data_file_c *df = data_files[f];
+		wad_file_c *wad = df->wad;
 
-		if (df->kind >= FLKIND_Lump || df->wad == NULL)
-			continue;
-
-		if (df->wad->wadtex.palette >= 0)
-			return df->wad->wadtex.palette;
+		if (wad != NULL && wad->wadtex.palette >= 0)
+			return wad->wadtex.palette;
 	}
 
 	// Use last loaded PLAYPAL if no graphic-specific palette is found

@@ -23,7 +23,7 @@
 #define CFGDEF_SCREENWIDTH      (640)
 #define CFGDEF_SCREENHEIGHT     (480)
 #define CFGDEF_SCREENBITS       (32)
-#define CFGDEF_FULLSCREEN       (1)
+#define CFGDEF_DISPLAYMODE       (2)
 
 // Controls (Key/Mouse Buttons)
 #define CFGDEF_KEY_FIRE         (KEYD_RCTRL + (KEYD_MOUSE1 << 16))

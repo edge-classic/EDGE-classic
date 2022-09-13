@@ -44,19 +44,26 @@ public:
 	int width;
 	int height;
 	int depth;
-	bool full;
+	int display_mode;
+
+	enum
+	{
+		SCR_WINDOW,
+		SCR_FULLSCREEN,
+		SCR_BORDERLESS
+	};
 
 public:
-	scrmode_c() : width(0), height(0), depth(0), full(true)
+	scrmode_c() : width(0), height(0), depth(0), display_mode(SCR_WINDOW)
 	{ }
 		
-	scrmode_c(int _w, int _h, int _depth, bool _full) :
-		width(_w), height(_h), depth(_depth), full(_full)
+	scrmode_c(int _w, int _h, int _depth, int _display_mode) :
+		width(_w), height(_h), depth(_depth), display_mode(_display_mode)
 	{ }
 	
 	scrmode_c(const scrmode_c& other) :
 		width(other.width), height(other.height),
-		depth(other.depth), full(other.full)
+		depth(other.depth), display_mode(other.display_mode)
 	{ }
 
 	~scrmode_c()
@@ -68,7 +75,7 @@ public:
 extern int SCREENWIDTH;
 extern int SCREENHEIGHT;
 extern int SCREENBITS;
-extern bool FULLSCREEN;
+extern int DISPLAYMODE;
 
 // Exported Func
 bool R_DepthIsEquivalent(int depth1, int depth2);
@@ -80,7 +87,7 @@ scrmode_c *R_FindResolution(int w, int h, int depth, bool full);
 typedef enum
 {
 	RESINC_Size = 0,
-	RESINC_Full,
+	RESINC_DisplayMode,
 }
 increment_res_e;
 

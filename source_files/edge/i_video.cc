@@ -142,19 +142,14 @@ void I_StartupGraphics(void)
 		SDL_DisplayMode possible_mode;
 		SDL_GetDisplayMode(0, i, &possible_mode);
 
-		if (true) // Placeholder
-			if (possible_mode.w != display_W || possible_mode.h != display_H)
-				continue;
-		else
-			if (possible_mode.w > display_W || possible_mode.h > display_H)
-				continue;
+		if (possible_mode.w > display_W || possible_mode.h > display_H)
+			continue;
 
 		scrmode_c test_mode;
 
 		test_mode.width  = possible_mode.w;
 		test_mode.height = possible_mode.h;
 		test_mode.depth  = SDL_BITSPERPIXEL(possible_mode.format);
-		test_mode.full   = true;
 
 		if ((test_mode.width & 15) != 0)
 			continue;
@@ -162,7 +157,18 @@ void I_StartupGraphics(void)
 		if (test_mode.depth == 15 || test_mode.depth == 16 ||
 		    test_mode.depth == 24 || test_mode.depth == 32)
 		{
-			R_AddResolution(&test_mode);
+			if (test_mode.width != display_W || test_mode.height != display_H)
+			{
+				test_mode.display_mode = test_mode.SCR_FULLSCREEN;
+				R_AddResolution(&test_mode);
+			}
+			else // For native res, add both a borderless and fullscreen mode
+			{
+				test_mode.display_mode = test_mode.SCR_BORDERLESS;
+				R_AddResolution(&test_mode);
+				test_mode.display_mode = test_mode.SCR_FULLSCREEN;
+				R_AddResolution(&test_mode);
+			}
 		}
 	}
 
@@ -181,7 +187,7 @@ void I_StartupGraphics(void)
 			mode.width = possible_modes[i].w;
 			mode.height = possible_modes[i].h;
 			mode.depth  = depth;
-			mode.full   = false;
+			mode.display_mode   = mode.SCR_WINDOW;
 
 			test_mode.w = possible_modes[i].w;
 			test_mode.h = possible_modes[i].h;
@@ -204,29 +210,38 @@ bool I_SetScreenSize(scrmode_c *mode)
 
 	I_Printf("I_SetScreenSize: trying %dx%d %dbpp (%s)\n",
 			 mode->width, mode->height, mode->depth,
-			 mode->full ? "fullscreen" : "windowed");
+			 mode->display_mode == mode->SCR_BORDERLESS ? "borderless" : 
+			 (mode->display_mode == mode->SCR_FULLSCREEN ? "fullscreen" : "windowed"));
 
 	if (my_vis)
 	{
-		if (mode->full) 
+		if (mode->display_mode == mode->SCR_BORDERLESS) 
 		{
-			SDL_SetWindowFullscreen(my_vis, true ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN);
-			if (!true)
-			{
-				SDL_DisplayMode *new_mode = new SDL_DisplayMode;
-				new_mode->h = mode->height;
-				new_mode->w = mode->width;
-				SDL_SetWindowDisplayMode(my_vis, new_mode);
-				SDL_SetWindowSize(my_vis, mode->width, mode->height);
-				delete new_mode;
-				new_mode = NULL;
-			}
+			SDL_SetWindowFullscreen(my_vis, 0);
+			SDL_SetWindowBordered(my_vis, SDL_FALSE);
+			SDL_SetWindowSize(my_vis, mode->width, mode->height);
+			SDL_SetWindowPosition(my_vis, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+			SDL_MaximizeWindow(my_vis);
+			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
+				mode->width, mode->height, mode->depth);
+		}
+		else if (mode->display_mode == mode->SCR_FULLSCREEN)
+		{
+			SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN);
+			SDL_DisplayMode *new_mode = new SDL_DisplayMode;
+			new_mode->h = mode->height;
+			new_mode->w = mode->width;
+			SDL_SetWindowDisplayMode(my_vis, new_mode);
+			SDL_SetWindowSize(my_vis, mode->width, mode->height);
+			delete new_mode;
+			new_mode = NULL;
 			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
 				mode->width, mode->height, mode->depth);
 		}
 		else
 		{
 			SDL_SetWindowFullscreen(my_vis, 0);
+			SDL_SetWindowBordered(my_vis, SDL_TRUE);
 			SDL_SetWindowSize(my_vis, mode->width, mode->height);
 			SDL_SetWindowPosition(my_vis, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
@@ -238,7 +253,8 @@ bool I_SetScreenSize(scrmode_c *mode)
 		std::string temp_title = TITLE;
 		temp_title.append(" ").append(EDGEVERSTR);
 		my_vis = SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
-			SDL_WINDOW_OPENGL | (mode->full ? (true ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN) : 0));
+			SDL_WINDOW_OPENGL | (mode->display_mode == mode->SCR_BORDERLESS ? (SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED) :
+			(mode->display_mode == mode->SCR_FULLSCREEN ? SDL_WINDOW_FULLSCREEN : 0)));
 		SDL_GL_CreateContext(my_vis);
 		gladLoaderLoadGL();
 	}

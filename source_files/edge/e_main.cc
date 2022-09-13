@@ -296,8 +296,12 @@ static void SetGlobalVars(void)
 	if (SCREENBITS < 15) SCREENBITS = 15;
 	else if (SCREENBITS > 32) SCREENBITS = 32;
 
-	M_CheckBooleanParm("windowed",   &FULLSCREEN, true);
-	M_CheckBooleanParm("fullscreen", &FULLSCREEN, false);
+	if (M_CheckParm("-borderless"))
+		DISPLAYMODE = 2;
+	else if (M_CheckParm("-fullscreen"))
+		DISPLAYMODE = 1;
+	else if (M_CheckParm("-windowed"))
+		DISPLAYMODE = 0;
 
 	// sprite kludge (TrueBSP)
 	p = M_CheckParm("-spritekludge");

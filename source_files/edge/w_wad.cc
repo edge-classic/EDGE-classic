@@ -1079,7 +1079,7 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 //       otherwise it is the sort_index for the lumps (typically the
 //       file number of the wad which the GWA is a companion for).
 //
-static void AddFile(data_file_c *df, int dyn_index, std::string md5_check)
+static void AddFile(data_file_c *df, size_t file_index, int dyn_index, std::string md5_check)
 {
 	int length;
 
@@ -1108,11 +1108,7 @@ static void AddFile(data_file_c *df, int dyn_index, std::string md5_check)
 
 	I_Printf("  Adding %s\n", filename);
 
-	int startlump = (int)lumpinfo.size();
-
-	int datafile = (int)data_files.size();
-
-	if (datafile == 1)
+	if (file_index == 1)  // FIXME explain this
 		W_ReadWADFIXES();
 
 	df->file = file;  // FIXME review lifetime of this open file
@@ -1152,15 +1148,17 @@ static void AddFile(data_file_c *df, int dyn_index, std::string md5_check)
 		// compute MD5 hash over wad directory
 		wad->dir_md5.Compute((const byte *)raw_info, length);
 
-		unsigned int i;
-		for (i=0 ; i < header.num_entries ; i++)
+		int startlump = (int)lumpinfo.size();
+
+		for (size_t i=0 ; i < header.num_entries ; i++)
 		{
 			raw_wad_entry_t& entry = raw_info[i];
 
 			bool allow_ddf = (df->kind == FLKIND_EWad) || (df->kind == FLKIND_PWad) || (df->kind == FLKIND_HWad);
 
 			AddLump(df, entry.name, EPI_LE_S32(entry.pos), EPI_LE_S32(entry.size),
-					datafile, (dyn_index >= 0) ? dyn_index : datafile, allow_ddf);
+					(int)file_index, (dyn_index >= 0) ? dyn_index : (int)file_index,
+					allow_ddf);
 
 			// this will be uppercase
 			const char *level_name = lumpinfo[startlump + i].name;
@@ -1192,13 +1190,13 @@ static void AddFile(data_file_c *df, int dyn_index, std::string md5_check)
 			}
         }
 
-		/* FIXME: NEEDED ??
+		/* FIXME
 
-		// calculate MD5 hash over whole file
+		// calculate MD5 hash over whole file   [ TODO need this for a single lump? ]
 		ComputeFileMD5(wad->dir_md5, file);
 
 		// Fill in lumpinfo
-		AddLump(df, lump_name, 0, file->GetLength(), datafile, datafile, true);
+		AddLump(df, lump_name, 0, file->GetLength(), (int)datafile, (int)datafile, true);
 		*/
 	}
 
@@ -1343,11 +1341,13 @@ void W_BuildNodes(void)
 					I_Error("Failed to build GL nodes for: %s\n", df->name.c_str());
 			}
 
-			// FIXME use AddRawFilename
+			size_t new_index = data_files.size();
+
+			// FIXME use AddRawFilename ?
 			data_file_c *new_df = new data_file_c(gwa_filename.c_str(), FLKIND_GWad);
 			data_files.push_back(new_df);
 
-			AddFile(new_df, total_files, "");
+			AddFile(new_df, new_index, total_files, "");
 
 			df->wad->companion_gwa = total_files + 1;
 			total_files++;
@@ -1372,7 +1372,7 @@ void W_InitMultipleFiles(void)
 	{
 		data_file_c *df = data_files[i];
 
-		AddFile(df, -1, "");
+		AddFile(df, i, -1, "");
 	}
 
 	if (lumpinfo.empty())

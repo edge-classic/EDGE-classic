@@ -47,7 +47,32 @@ typedef enum
 }
 filekind_e;
 
-// TODO
+
+class wad_file_c;
+
+class data_file_c
+{
+public:
+	const char *file_name;
+
+	// type of file (FLKIND_XXX)
+	int kind;
+
+	// file object   [ TODO review when active ]
+    epi::file_c *file;
+
+	// for FLKIND_IWad, PWad ... HWad
+	wad_file_c * wad;
+
+public:
+	data_file_c(const char *_fname, int _kind, epi::file_c *_file);
+	~data_file_c();
+};
+
+extern std::vector<data_file_c *> data_files;
+
+int W_GetNumFiles(void);
+void W_ShowFiles(void);
 
 #endif // __W_FILES__
 

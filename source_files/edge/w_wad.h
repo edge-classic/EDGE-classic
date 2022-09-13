@@ -84,13 +84,11 @@ const char *W_GetFileName(int lump);
 int W_GetPaletteForLump(int lump);
 int W_FindFlatSequence(const char *start, const char *end, 
     int *s_offset, int *e_offset);
-epi::u32array_c& W_GetListLumps(int file, lumplist_e which);
+epi::u32array_c * W_GetListLumps(int file, lumplist_e which);  // FIXME split up
 void W_GetTextureLumps(int file, wadtex_resource_c *res);
 void W_ProcessTX_HI(void);
-int W_GetNumFiles(void);
 int W_GetFileForLump(int lump);
 void W_ShowLumps(int for_file, const char *match);
-void W_ShowFiles(void);
 
 //auxiliary functions to help us deal with when to use skyboxes
 int W_LoboFindSkyImage(int for_file, const char *match);

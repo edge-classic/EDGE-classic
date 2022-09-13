@@ -43,6 +43,7 @@
 #include "w_flat.h"
 #include "w_model.h"
 #include "w_sprite.h"
+#include "w_files.h"
 #include "w_wad.h"
 #include "w_texture.h"
 
@@ -100,8 +101,11 @@ void R_AddFlatAnim(animdef_c *anim)
 			return;
 		}
 
-		epi::u32array_c& lumps = W_GetListLumps(file, LMPLST_Flats);
-		int total = lumps.GetSize();
+		epi::u32array_c *lumps = W_GetListLumps(file, LMPLST_Flats);
+		if (lumps == NULL)
+			return;
+
+		int total = lumps->GetSize();
 
 		SYS_ASSERT(s_offset <= e_offset);
 		SYS_ASSERT(e_offset < total);
@@ -114,7 +118,7 @@ void R_AddFlatAnim(animdef_c *anim)
 		// lookup each flat
 		for (i=0; i < total; i++)
 		{
-			const char *name = W_GetLumpName(lumps[s_offset + i]);
+			const char *name = W_GetLumpName((*lumps)[s_offset + i]);
 
 			// Note we use W_ImageFromFlat() here.  It might seem like a good
 			// optimisation to use the lump number directly, but we can't do
@@ -271,12 +275,15 @@ void W_InitFlats(void)
 
 	for (file=0; file < max_file; file++)
 	{
-		epi::u32array_c& lumps = W_GetListLumps(file, LMPLST_Flats);
-		int lumpnum = lumps.GetSize();
+		epi::u32array_c * lumps = W_GetListLumps(file, LMPLST_Flats);
+		if (lumps == NULL)
+			continue;
+
+		int lumpnum = lumps->GetSize();
 
 		for (j=0; j < lumpnum; j++)
 		{
-			flats.push_back((int)lumps[j]);
+			flats.push_back((int)(*lumps)[j]);
 		}
 	}
 

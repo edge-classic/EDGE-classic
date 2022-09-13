@@ -31,7 +31,27 @@
 
 #include "w_files.h"
 
-// TODO
+
+std::vector<data_file_c *> data_files;
+
+
+data_file_c::data_file_c(const char *_fname, int _kind, epi::file_c*_file) :
+		file_name(NULL), kind(_kind), file(_file), wad(NULL)
+{
+	file_name = strdup(_fname);
+}
+
+data_file_c::~data_file_c()
+{
+	free((void*)file_name);
+}
+
+
+int W_GetNumFiles(void)
+{
+	return (int)data_files.size();
+}
+
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -91,6 +91,7 @@ typedef struct ddf_reader_s
 }
 ddf_reader_t;
 
+// TODO move to w_files.cc
 static ddf_reader_t DDF_Readers[] =
 {
 	{ "DDFLANG", "Languages",  DDF_ReadLangs },
@@ -121,16 +122,10 @@ static ddf_reader_t DDF_Readers[] =
 #define ANIM_READER  13
 #define RTS_READER   17
 
-class data_file_c
+class wad_file_c
 {
 public:
-	const char *file_name;
-
-	// type of file (FLKIND_XXX)
-	int kind;
-
-	// file object
-    epi::file_c *file;
+	data_file_c *_parent;
 
 	// lists for sprites, flats, patches (stuff between markers)
 	epi::u32array_c sprite_lumps;
@@ -172,28 +167,23 @@ public:
 	std::string md5_string;
 
 public:
-	data_file_c(const char *_fname, int _kind, epi::file_c* _file) :
-		file_name(_fname), kind(_kind), file(_file),
+	wad_file_c() :
 		sprite_lumps(), flat_lumps(), patch_lumps(),
 		colmap_lumps(), tx_lumps(), hires_lumps(),
 		level_markers(), skin_markers(),
-		wadtex(), deh_lump(-1), coal_apis(-1), coal_huds(-1),
+		wadtex(),
+		deh_lump(-1), coal_apis(-1), coal_huds(-1),
 		animated(-1), switches(-1),
-		companion_gwa(-1), dir_md5()
+		companion_gwa(-1),
+		dir_md5(), md5_string()
 	{
-		file_name = strdup(_fname);
-
 		for (int d = 0; d < NUM_DDF_READERS; d++)
 			ddf_lumps[d] = -1;
 	}
 
-	~data_file_c()
-	{
-		free((void*)file_name);
-	}
+	~wad_file_c()
+	{ }
 };
-
-static std::vector<data_file_c *> data_files;
 
 
 // Raw filenames
@@ -444,11 +434,18 @@ void W_GetTextureLumps(int file, wadtex_resource_c *res)
 	SYS_ASSERT(res);
 
 	data_file_c *df = data_files[file];
+	wad_file_c *wad = df->wad;
 
-	res->palette  = df->wadtex.palette;
-	res->pnames   = df->wadtex.pnames;
-	res->texture1 = df->wadtex.texture1;
-	res->texture2 = df->wadtex.texture2;
+	if (wad == NULL)
+	{
+		// leave the wadtex_resource_c in initial state
+		return;
+	}
+
+	res->palette  = wad->wadtex.palette;
+	res->pnames   = wad->wadtex.pnames;
+	res->texture1 = wad->wadtex.texture1;
+	res->texture2 = wad->wadtex.texture2;
 
 	// find an earlier PNAMES lump when missing.
 	// Ditto for palette.
@@ -458,10 +455,16 @@ void W_GetTextureLumps(int file, wadtex_resource_c *res)
 		int cur;
 
 		for (cur=file; res->pnames == -1 && cur > 0; cur--)
-			res->pnames = data_files[cur]->wadtex.pnames;
+		{
+			if (data_files[cur]->wad != NULL)
+				res->pnames = data_files[cur]->wad->wadtex.pnames;
+		}
 
 		for (cur=file; res->palette == -1 && cur > 0; cur--)
-			res->palette = data_files[cur]->wadtex.palette;
+		{
+			if (data_files[cur]->wad != NULL)
+				res->palette = data_files[cur]->wad->wadtex.palette;
+		}
 	}
 }
 
@@ -517,25 +520,24 @@ static void SortLumps(void)
 // Put the sprite list in sorted order (of name), required by
 // R_InitSprites (speed optimisation).
 //
-static void SortSpriteLumps(data_file_c *df)
+static void SortSpriteLumps(wad_file_c *wad)
 {
-	if (df->sprite_lumps.GetSize() < 2)
+	if (wad->sprite_lumps.GetSize() < 2)
 		return;
 
 #define CMP(a, b) (strncmp(lumpinfo[a].name, lumpinfo[b].name, 8) < 0)
-	QSORT(int, df->sprite_lumps, df->sprite_lumps.GetSize(), CUTOFF);
+	QSORT(int, wad->sprite_lumps, wad->sprite_lumps.GetSize(), CUTOFF);
 #undef CMP
 
 #if 0  // DEBUGGING
 	{
 		int i, lump;
     
-		for (i=0; i < f->sprite_num; i++)
+		for (i=0; i < wad->sprite_num; i++)
 		{
-			lump = f->sprite_lumps[i];
+			lump = wad->sprite_lumps[i];
 
-			I_Debugf("Sorted sprite %d = lump %d [%s]\n", i, lump,
-						 lumpinfo[lump].name);
+			I_Debugf("Sorted sprite %d = lump %d [%s]\n", i, lump, lumpinfo[lump].name);
 		}
 	}
 #endif
@@ -1296,13 +1298,13 @@ static void AddFile(const char *filename, int kind, int dyn_index, std::string m
 //
 void W_BuildNodes(void)
 {
-	int datafile = (int)data_files.size();
+	int total_files = (int)data_files.size();
 
-	for (int i=0; i < datafile; i++)
+	for (int i=0; i < total_files; i++)
 	{
 		data_file_c *df = data_files[i];
 
-		if (df->kind <= FLKIND_EWad && df->level_markers.GetSize() > 0)
+		if (df->kind <= FLKIND_EWad && df->wad->level_markers.GetSize() > 0)
 		{
 			std::string gwa_filename;
 
@@ -1320,9 +1322,10 @@ void W_BuildNodes(void)
 
 			// Load it.  This recursion bit is rather sneaky,
 			// hopefully it doesn't break anything...
-			AddFile(gwa_filename.c_str(), FLKIND_GWad, datafile, "");
+			AddFile(gwa_filename.c_str(), FLKIND_GWad, total_files, "");
 
-			df->companion_gwa = datafile++ + 1;
+			df->wad->companion_gwa = total_files + 1;
+			total_files++;
 		}
 	}
 }
@@ -1698,6 +1701,7 @@ void W_ReadWADFIXES(void)
 	W_DoneWithLump(data);
 }
 
+// TODO move to w_files.cc
 void W_ReadDDF(void)
 {
 	// -AJA- the order here may look strange.  Since DDF files
@@ -1718,6 +1722,7 @@ void W_ReadDDF(void)
 		for (int f = 0; f < (int)data_files.size(); f++)
 		{
 			data_file_c *df = data_files[f];
+			wad_file_c *wad = df->wad;
 
 			// all script files get parsed here
 			if (d == RTS_READER && df->kind == FLKIND_RTS)
@@ -1731,7 +1736,11 @@ void W_ReadDDF(void)
 			if (df->kind >= FLKIND_RTS)
 				continue;
 
-			int lump = df->ddf_lumps[d];
+			// TODO : PK3
+			if (wad == NULL)
+				continue;
+
+			int lump = wad->ddf_lumps[d];
 
 			if (lump >= 0)
 			{
@@ -1747,33 +1756,35 @@ void W_ReadDDF(void)
 			}
 
 			// handle Boom's ANIMATED and SWITCHES lumps
-			if (d == ANIM_READER && df->animated >= 0)
+			// FIXME: FACTOR THIS OUTTA HERE!
+
+			if (d == ANIM_READER && wad->animated >= 0)
 			{
 				I_Printf("Loading ANIMATED from: %s\n", df->file_name);
 
 				int length;
-				byte *data = W_LoadLump(df->animated, &length);
+				byte *data = W_LoadLump(wad->animated, &length);
 
 				DDF_ParseANIMATED(data, length);
 				W_DoneWithLump(data);
 			}
-			if (d == SWTH_READER && df->switches >= 0)
+			if (d == SWTH_READER && wad->switches >= 0)
 			{
 				I_Printf("Loading SWITCHES from: %s\n", df->file_name);
 
 				int length;
-				byte *data = W_LoadLump(df->switches, &length);
+				byte *data = W_LoadLump(wad->switches, &length);
 
 				DDF_ParseSWITCHES(data, length);
 				W_DoneWithLump(data);
 			}
 
 			// handle BOOM Colourmaps (between C_START and C_END)
-			if (d == COLM_READER && df->colmap_lumps.GetSize() > 0)
+			if (d == COLM_READER && wad->colmap_lumps.GetSize() > 0)
 			{
-				for (int i=0; i < df->colmap_lumps.GetSize(); i++)
+				for (int i=0; i < wad->colmap_lumps.GetSize(); i++)
 				{
-					int lump = df->colmap_lumps[i];
+					int lump = wad->colmap_lumps[i];
 
 					DDF_ColourmapAddRaw(W_GetLumpName(lump), W_LumpLength(lump));
 				}
@@ -1790,25 +1801,27 @@ void W_ReadDDF(void)
 }
 
 
-
 void W_ReadCoalLumps(void)
 {
 	for (int f = 0; f < (int)data_files.size(); f++)
 	{
 		data_file_c *df = data_files[f];
+		wad_file_c *wad = df->wad;
+
+		// FIXME support single lumps and PK3
+		if (wad == NULL)
+			continue;
 
 		if (df->kind > FLKIND_Lump)
 			continue;
 
-		if (df->coal_apis >= 0)
-			VM_LoadLumpOfCoal(df->coal_apis);
+		if (wad->coal_apis >= 0)
+			VM_LoadLumpOfCoal(wad->coal_apis);
 
-		if (df->coal_huds >= 0)
-			VM_LoadLumpOfCoal(df->coal_huds);
+		if (wad->coal_huds >= 0)
+			VM_LoadLumpOfCoal(wad->coal_huds);
 	}
 }
-
-
 
 
 epi::file_c *W_OpenLump(int lump)
@@ -1874,11 +1887,11 @@ int W_GetPaletteForLump(int lump)
 	{
 		data_file_c *df = data_files[f];
 
-		if (df->kind >= FLKIND_Lump)
+		if (df->kind >= FLKIND_Lump || df->wad == NULL)
 			continue;
 
-		if (df->wadtex.palette >= 0)
-			return df->wadtex.palette;
+		if (df->wad->wadtex.palette >= 0)
+			return df->wad->wadtex.palette;
 	}
 
 	// Use last loaded PLAYPAL if no graphic-specific palette is found
@@ -2100,24 +2113,28 @@ int W_FindFlatSequence(const char *start, const char *end,
 	for (int file = (int)data_files.size()-1; file >= 0; file--)
 	{
 		data_file_c *df = data_files[file];
+		wad_file_c *wad = df->wad;
+
+		if (wad == NULL)
+			continue;
 
 		// look for start name
 		int i;
-		for (i=0; i < df->flat_lumps.GetSize(); i++)
+		for (i=0; i < wad->flat_lumps.GetSize(); i++)
 		{
-			if (strncmp(start, W_GetLumpName(df->flat_lumps[i]), 8) == 0)
+			if (strncmp(start, W_GetLumpName(wad->flat_lumps[i]), 8) == 0)
 				break;
 		}
 
-		if (i >= df->flat_lumps.GetSize())
+		if (i >= wad->flat_lumps.GetSize())
 			continue;
 
 		(*s_offset) = i;
 
 		// look for end name
-		for (i++; i < df->flat_lumps.GetSize(); i++)
+		for (i++; i < wad->flat_lumps.GetSize(); i++)
 		{
-			if (strncmp(end, W_GetLumpName(df->flat_lumps[i]), 8) == 0)
+			if (strncmp(end, W_GetLumpName(wad->flat_lumps[i]), 8) == 0)
 			{
 				(*e_offset) = i;
 				return file;
@@ -2133,29 +2150,27 @@ int W_FindFlatSequence(const char *start, const char *end,
 //
 // Returns NULL for an empty list.
 //
-epi::u32array_c& W_GetListLumps(int file, lumplist_e which)
+epi::u32array_c * W_GetListLumps(int file, lumplist_e which)
 {
 	SYS_ASSERT(0 <= file && file < (int)data_files.size());
 
 	data_file_c *df = data_files[file];
+	wad_file_c *wad = df->wad;
+
+	if (wad == NULL)
+		return NULL;
 
 	switch (which)
 	{
-		case LMPLST_Sprites: return df->sprite_lumps;
-		case LMPLST_Flats:   return df->flat_lumps;
-		case LMPLST_Patches: return df->patch_lumps;
+		case LMPLST_Sprites: return &wad->sprite_lumps;
+		case LMPLST_Flats:   return &wad->flat_lumps;
+		case LMPLST_Patches: return &wad->patch_lumps;
 
 		default: break;
 	}
 
 	I_Error("W_GetListLumps: bad `which' (%d)\n", which);
-	return df->sprite_lumps; /* NOT REACHED */
-}
-
-
-int W_GetNumFiles(void)
-{
-	return (int)data_files.size();
+	return NULL; /* NOT REACHED */
 }
 
 
@@ -2247,10 +2262,14 @@ void W_ProcessTX_HI(void)
 	for (int file = 0; file < (int)data_files.size(); file++)
 	{
 		data_file_c *df = data_files[file];
+		wad_file_c *wad = df->wad;
 
-		for (int i = 0; i < (int)df->tx_lumps.GetSize(); i++)
+		if (wad == NULL)
+			continue;
+
+		for (int i = 0; i < (int)wad->tx_lumps.GetSize(); i++)
 		{
-			int lump = df->tx_lumps[i];
+			int lump = wad->tx_lumps[i];
 			W_ImageAddTX(lump, W_GetLumpName(lump), false);
 		}
 	}
@@ -2262,10 +2281,14 @@ void W_ProcessTX_HI(void)
 	for (int file = 0; file < (int)data_files.size(); file++)
 	{
 		data_file_c *df = data_files[file];
+		wad_file_c *wad = df->wad;
 
-		for (int i = 0; i < (int)df->hires_lumps.GetSize(); i++)
+		if (wad == NULL)
+			continue;
+
+		for (int i = 0; i < (int)wad->hires_lumps.GetSize(); i++)
 		{
-			int lump = df->hires_lumps[i];
+			int lump = wad->hires_lumps[i];
 			W_ImageAddTX(lump, W_GetLumpName(lump), true);
 		}
 	}

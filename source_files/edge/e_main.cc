@@ -238,7 +238,7 @@ public:
 			HUD_SolidBox(25, 25, 295, 175, RGB_MAKE(0, 0, 0));
 		}
 		int y = 26;
-		for (int i=0; i < startup_messages.size(); i++)
+		for (int i=0; i < (int)startup_messages.size(); i++)
 		{
 			if (startup_messages[i].size() > 32)
 				HUD_DrawText(26, y, startup_messages[i].substr(0, 29).append("...").c_str());
@@ -1406,52 +1406,6 @@ void E_EngineShutdown(void)
     S_Shutdown();
 }
 
-void (*startcode[])() =
-{
-	InitDDF,
-	IdentifyVersion,
-	Add_Base,
-	Add_Autoload,
-	AddCommandLineFiles,
-	CheckTurbo,
-	RAD_Init,
-	W_InitMultipleFiles,
-	V_InitPalette,
-	W_ReadDDF,
-	DDF_CleanUp,
-	W_ReadUMAPINFOLumps,
-	W_InitFlats,
-	W_InitTextures,
-	W_ImageCreateUser,
-	E_PickLoadingScreen,
-	HU_Init,
-	CON_Start,
-	SpecialWadVerify,
-	W_BuildNodes,
-	M_InitMiscConVars,
-	SetLanguage,
-	ShowNotice,
-	SV_MainInit,
-	S_PrecacheSounds,
-	W_InitSprites,
-	W_ProcessTX_HI,
-	W_InitModels,
-	M_Init,
-	R_Init,
-	P_Init,
-	P_MapInit,
-	P_InitSwitchList,
-	W_InitPicAnims,
-	S_Init,
-	N_InitNetwork,
-	M_CheatInit,
-	VM_InitCoal,
-	VM_LoadScripts,
-	NULL
-};
-
-extern void WLF_InitMaps(void); //!!!
-
 // Local Prototypes
 static void E_Startup();
 static void E_Shutdown(void);
@@ -1486,11 +1440,50 @@ static void E_Startup(void)
 
 	DoSystemStartup();
 
-	// Cycle through all the startup functions
-	for (p=0; startcode[p] != NULL; p++)
-	{
-		startcode[p]();
-	}
+	InitDDF();
+	IdentifyVersion();
+	Add_Base();
+	Add_Autoload();
+	AddCommandLineFiles();
+	CheckTurbo();
+
+	RAD_Init();
+	W_InitMultipleFiles();
+	V_InitPalette();
+	W_ReadDDF();
+	DDF_CleanUp();
+	W_ReadUMAPINFOLumps();
+
+	W_InitFlats();
+	W_InitTextures();
+	W_ImageCreateUser();
+	E_PickLoadingScreen();
+
+	HU_Init();
+	CON_Start();
+	SpecialWadVerify();
+	W_BuildNodes();
+	M_InitMiscConVars();
+	SetLanguage();
+	ShowNotice();
+
+	SV_MainInit();
+	S_PrecacheSounds();
+	W_InitSprites();
+	W_ProcessTX_HI();
+	W_InitModels();
+
+	M_Init();
+	R_Init();
+	P_Init();
+	P_MapInit();
+	P_InitSwitchList();
+	W_InitPicAnims();
+	S_Init();
+	N_InitNetwork();
+	M_CheatInit();
+	VM_InitCoal();
+	VM_LoadScripts();
 }
 
 

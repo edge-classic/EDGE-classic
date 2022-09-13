@@ -39,10 +39,11 @@ typedef enum
 	FLKIND_GWad,      // ajbsp node wad
 	FLKIND_HWad,      // deHacked wad
 
-	FLKIND_Lump,      // raw lump (no extension)
+	FLKIND_PK3,       // pk3 (zip) package
 
+	FLKIND_Lump,      // raw lump file (no extension)
 	FLKIND_DDF,       // .ddf or .ldf file
-	FLKIND_RTS,       // .rts script
+	FLKIND_RTS,       // .rts script  file
 	FLKIND_Deh        // .deh or .bex file
 }
 filekind_e;

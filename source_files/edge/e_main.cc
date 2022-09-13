@@ -1226,6 +1226,8 @@ static void AddSingleCmdLineFile(const char *name)
 
 	if (stricmp(ext.c_str(), ".wad") == 0)
 		kind = FLKIND_PWad;
+	else if (stricmp(ext.c_str(), ".pk3") == 0)
+		kind = FLKIND_PK3;
 	else if (stricmp(ext.c_str(), ".hwa") == 0)
 		kind = FLKIND_HWad;
 	else if (stricmp(ext.c_str(), ".rts") == 0)
@@ -1288,8 +1290,7 @@ static void AddCommandLineFiles(void)
 
 			// sanity check...
 			if (stricmp(ext.c_str(), ".wad") == 0 || 
-                stricmp(ext.c_str(), ".gwa") == 0 ||
-			    stricmp(ext.c_str(), ".hwa") == 0 ||
+                stricmp(ext.c_str(), ".pk3") == 0 ||
                 stricmp(ext.c_str(), ".ddf") == 0 ||
 			    stricmp(ext.c_str(), ".deh") == 0 ||
 			    stricmp(ext.c_str(), ".bex") == 0)
@@ -1321,8 +1322,7 @@ static void AddCommandLineFiles(void)
 
 			// sanity check...
 			if (stricmp(ext.c_str(), ".wad") == 0 || 
-                stricmp(ext.c_str(), ".gwa") == 0 ||
-			    stricmp(ext.c_str(), ".hwa") == 0 ||
+                stricmp(ext.c_str(), ".pk3") == 0 ||
                 stricmp(ext.c_str(), ".ddf") == 0 ||
 			    stricmp(ext.c_str(), ".rts") == 0)
 			{

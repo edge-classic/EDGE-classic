@@ -141,12 +141,13 @@ add_executable(
 	source_files/edge/sv_mobj.cc    
 	source_files/edge/sv_play.cc    
 	source_files/edge/sv_save.cc    
-	source_files/edge/w_flat.cc     
-	source_files/edge/w_model.cc    
-	source_files/edge/w_pk3.cc      
-	source_files/edge/w_sprite.cc   
-	source_files/edge/w_texture.cc  
-	source_files/edge/w_wad.cc      
+	source_files/edge/w_files.cc
+	source_files/edge/w_flat.cc
+	source_files/edge/w_model.cc
+	source_files/edge/w_pk3.cc
+	source_files/edge/w_sprite.cc
+	source_files/edge/w_texture.cc
+	source_files/edge/w_wad.cc
 	source_files/edge/z_zone.cc     
 	source_files/edge/vm_coal.cc    
 	source_files/edge/vm_hud.cc     

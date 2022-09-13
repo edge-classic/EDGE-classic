@@ -53,7 +53,8 @@ class wad_file_c;
 class data_file_c
 {
 public:
-	const char *file_name;
+	// full name of file
+	std::string name;
 
 	// type of file (FLKIND_XXX)
 	int kind;
@@ -65,12 +66,13 @@ public:
 	wad_file_c * wad;
 
 public:
-	data_file_c(const char *_fname, int _kind, epi::file_c *_file);
+	data_file_c(const char *_name, int _kind);
 	~data_file_c();
 };
 
 extern std::vector<data_file_c *> data_files;
 
+void W_AddRawFilename(const char *file, int kind);
 int W_GetNumFiles(void);
 void W_ShowFiles(void);
 

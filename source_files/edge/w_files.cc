@@ -35,21 +35,31 @@
 std::vector<data_file_c *> data_files;
 
 
-data_file_c::data_file_c(const char *_fname, int _kind, epi::file_c*_file) :
-		file_name(NULL), kind(_kind), file(_file), wad(NULL)
-{
-	file_name = strdup(_fname);
-}
+data_file_c::data_file_c(const char *_name, int _kind) :
+		name(_name), kind(_kind), file(NULL), wad(NULL)
+{ }
 
 data_file_c::~data_file_c()
-{
-	free((void*)file_name);
-}
+{ }
 
 
 int W_GetNumFiles(void)
 {
 	return (int)data_files.size();
+}
+
+//----------------------------------------------------------------------------
+
+//
+// W_AddRawFilename
+//
+void W_AddRawFilename(const char *file, int kind)
+{
+	I_Debugf("Added filename: %s\n", file);
+
+	data_file_c *df = new data_file_c(file, kind);
+
+	data_files.push_back(df);
 }
 
 

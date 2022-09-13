@@ -143,6 +143,7 @@ add_executable(
 	source_files/edge/sv_save.cc    
 	source_files/edge/w_flat.cc     
 	source_files/edge/w_model.cc    
+	source_files/edge/w_pk3.cc      
 	source_files/edge/w_sprite.cc   
 	source_files/edge/w_texture.cc  
 	source_files/edge/w_wad.cc      

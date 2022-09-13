@@ -78,7 +78,6 @@ void I_GrabCursor(bool enable)
 	}
 }
 
-
 void I_StartupGraphics(void)
 {
 	if (M_CheckParm("-directx"))
@@ -143,8 +142,12 @@ void I_StartupGraphics(void)
 		SDL_DisplayMode possible_mode;
 		SDL_GetDisplayMode(0, i, &possible_mode);
 
-		if (possible_mode.w > display_W || possible_mode.h > display_H)
-			continue;
+		if (true) // Placeholder
+			if (possible_mode.w != display_W || possible_mode.h != display_H)
+				continue;
+		else
+			if (possible_mode.w > display_W || possible_mode.h > display_H)
+				continue;
 
 		scrmode_c test_mode;
 
@@ -164,35 +167,30 @@ void I_StartupGraphics(void)
 	}
 
 	// -ACB- 2000/03/16 Test for possible windowed resolutions
-	for (int full = 0; full <= 1; full++)
+	for (int depth = 16; depth <= 32; depth = depth+16)
 	{
-		for (int depth = 16; depth <= 32; depth = depth+16)
+		for (int i = 0; possible_modes[i].w != -1; i++)
 		{
-			for (int i = 0; possible_modes[i].w != -1; i++)
-			{
-				scrmode_c mode;
-				SDL_DisplayMode test_mode;
-				SDL_DisplayMode closest_mode;
+			scrmode_c mode;
+			SDL_DisplayMode test_mode;
+			SDL_DisplayMode closest_mode;
 
-				if (possible_modes[i].w > display_W || possible_modes[i].h > display_H)
-					continue;
+			if (possible_modes[i].w > display_W || possible_modes[i].h > display_H)
+				continue;
 
-				mode.width = possible_modes[i].w;
-				mode.height = possible_modes[i].h;
-				mode.depth  = depth;
-				mode.full   = false;
+			mode.width = possible_modes[i].w;
+			mode.height = possible_modes[i].h;
+			mode.depth  = depth;
+			mode.full   = false;
 
-				test_mode.w = possible_modes[i].w;
-				test_mode.h = possible_modes[i].h;
-				test_mode.format = (depth << 8);
+			test_mode.w = possible_modes[i].w;
+			test_mode.h = possible_modes[i].h;
+			test_mode.format = (depth << 8);
 
-				SDL_GetClosestDisplayMode(0, &test_mode, &closest_mode);
+			SDL_GetClosestDisplayMode(0, &test_mode, &closest_mode);
 
-				if (R_DepthIsEquivalent(SDL_BITSPERPIXEL(closest_mode.format), mode.depth))
-				{
-					R_AddResolution(&mode);
-				}
-			}
+			if (R_DepthIsEquivalent(SDL_BITSPERPIXEL(closest_mode.format), mode.depth))
+				R_AddResolution(&mode);
 		}
 	}
 
@@ -212,16 +210,19 @@ bool I_SetScreenSize(scrmode_c *mode)
 	{
 		if (mode->full) 
 		{
-			SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN);
-			SDL_DisplayMode *new_mode = new SDL_DisplayMode;
-			new_mode->h = mode->height;
-			new_mode->w = mode->width;
-			SDL_SetWindowDisplayMode(my_vis, new_mode);
-			SDL_SetWindowSize(my_vis, mode->width, mode->height);
+			SDL_SetWindowFullscreen(my_vis, true ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN);
+			if (!true)
+			{
+				SDL_DisplayMode *new_mode = new SDL_DisplayMode;
+				new_mode->h = mode->height;
+				new_mode->w = mode->width;
+				SDL_SetWindowDisplayMode(my_vis, new_mode);
+				SDL_SetWindowSize(my_vis, mode->width, mode->height);
+				delete new_mode;
+				new_mode = NULL;
+			}
 			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
 				mode->width, mode->height, mode->depth);
-			delete new_mode;
-			new_mode = NULL;
 		}
 		else
 		{
@@ -237,7 +238,7 @@ bool I_SetScreenSize(scrmode_c *mode)
 		std::string temp_title = TITLE;
 		temp_title.append(" ").append(EDGEVERSTR);
 		my_vis = SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
-			SDL_WINDOW_OPENGL | (mode->full ? SDL_WINDOW_FULLSCREEN : 0));
+			SDL_WINDOW_OPENGL | (mode->full ? (true ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN) : 0));
 		SDL_GL_CreateContext(my_vis);
 		gladLoaderLoadGL();
 	}

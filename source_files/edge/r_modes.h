@@ -80,7 +80,6 @@ scrmode_c *R_FindResolution(int w, int h, int depth, bool full);
 typedef enum
 {
 	RESINC_Size = 0,
-	RESINC_Depth,
 	RESINC_Full,
 }
 increment_res_e;

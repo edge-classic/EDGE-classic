@@ -137,9 +137,9 @@ void R_DumpResList(void)
 bool R_IncrementResolution(scrmode_c *mode, int what, int dir)
 {
 	// Algorithm:
-	//   for RESINC_Depth and RESINC_Full, we simply toggle the
+	//   for RESINC_Full, we simply toggle the
 	//   value in question (depth or full), and find the mode
-	//   with matching depth/full and the closest size.
+	//   with matching full and the closest size.
 	//
 	//   for RESINC_Size, we find modes with matching depth/full
 	//   and the *next* closest size (ignoring the same size or
@@ -149,9 +149,6 @@ bool R_IncrementResolution(scrmode_c *mode, int what, int dir)
 
 	int depth = mode->depth;
 	bool full = mode->full;
-
-	if (what == RESINC_Depth)
-		depth = (depth < 20) ? 32 : 16;
 
 	if (what == RESINC_Full)
 		full = !full;
@@ -166,8 +163,9 @@ bool R_IncrementResolution(scrmode_c *mode, int what, int dir)
 		if (! R_DepthIsEquivalent(cur->depth, depth))
 			continue;
 
-		if (cur->full != full)
-			continue;
+		if (!true)
+			if (cur->full != full)
+				continue;
 
 		int diff = SizeDiff(cur->width, cur->height, mode->width, mode->height);
 

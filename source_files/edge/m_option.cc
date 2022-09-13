@@ -168,7 +168,6 @@ static void M_OptionSetResolution(int keypressed);
 ///--  static void M_OptionTestResolution(int keypressed);
 ///--  static void M_RestoreResSettings(int keypressed);
 static void M_ChangeResSize(int keypressed);
-static void M_ChangeResDepth(int keypressed);
 static void M_ChangeResFull(int keypressed);
 
        void M_HostNetGame(int keypressed);
@@ -413,11 +412,10 @@ static optmenuitem_t resoptions[] =
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
-	{OPT_Function, "New Size",  NULL, 0, NULL, M_ChangeResSize, NULL},
-	{OPT_Function, "New Depth", NULL, 0, NULL, M_ChangeResDepth, NULL},
 	{OPT_Function, "New Mode",  NULL, 0, NULL, M_ChangeResFull, NULL},
+	{OPT_Function, "New Size",  NULL, 0, NULL, M_ChangeResSize, NULL},
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
-	{OPT_Function, "Set Resolution", NULL, 0, NULL, M_OptionSetResolution, NULL},
+	{OPT_Function, "Apply Changes", NULL, 0, NULL, M_OptionSetResolution, NULL},
 /*	{OPT_Function, "Test Resolution", NULL, 0, NULL, M_OptionTestResolution, NULL}, */
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
@@ -427,6 +425,22 @@ static optmenuitem_t resoptions[] =
 static menuinfo_t res_optmenu = 
 {
 	resoptions, sizeof(resoptions) / sizeof(optmenuitem_t),
+	&opt_def_style, 150, 77, "M_SETRES", NULL, 3, "", language["MenuResolution"]
+};
+
+//
+//  SIMPLE RESOLUTION MENU
+//
+static optmenuitem_t simple_resoptions[] =
+{
+	{OPT_Function, "New Window Size",  NULL, 0, NULL, M_ChangeResSize, NULL},
+	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
+	{OPT_Function, "Apply Changes", NULL, 0, NULL, M_OptionSetResolution, NULL},
+};
+
+static menuinfo_t simple_res_optmenu = 
+{
+	simple_resoptions, sizeof(simple_resoptions) / sizeof(optmenuitem_t),
 	&opt_def_style, 150, 77, "M_SETRES", NULL, 3, "", language["MenuResolution"]
 };
 
@@ -871,6 +885,7 @@ void M_OptMenuInit()
 	main_optmenu.name=language["MenuOptions"];
 	video_optmenu.name=language["MenuVideo"];
 	res_optmenu.name=language["MenuResolution"];
+	simple_res_optmenu.name=language["MenuResolution"];
 	analogue_optmenu.name=language["MenuMouse"];
 	sound_optmenu.name=language["MenuSound"];
 	f4sound_optmenu.name=language["MenuSound"];
@@ -1007,9 +1022,9 @@ void M_OptDrawer()
 			HL_WriteText(style,styledef_c::T_HELP, 160 - (style->fonts[3]->StringWidth(keystring1) / 2), 
 							  200-deltay*2, keystring1);
 	}
-	else if (curr_menu == &res_optmenu)
+	else if (curr_menu == &res_optmenu || curr_menu==&simple_res_optmenu)
 	{
-		M_ResOptDrawer(style, curry, curry + (deltay * (res_optmenu.item_num - 2)), 
+		M_ResOptDrawer(style, curry, curry + (deltay * (true ? simple_res_optmenu.item_num - 2 : res_optmenu.item_num - 2)), 
 					   deltay, curr_menu->menu_center);
 	}
 	else if (curr_menu == &main_optmenu)
@@ -1169,34 +1184,45 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
 	// Draw current resolution
 	int y = topy;
 
-	y += dy;
-
 	// Draw resolution selection option
-	y += (dy*2);
-	sprintf(tempstring, "%dx%d", new_scrmode.width, new_scrmode.height);
-	HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
+	if (!true)
+	{
+		y += dy;
+		y += (dy*2);
+		sprintf(tempstring, "%s", new_scrmode.full ? "Fullscreen" : "Windowed");
+		HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
+	}
 
-	// Draw depth selection option
-	y += dy;
-	sprintf(tempstring, "%d bit", (new_scrmode.depth < 20) ? 16:32);
-	HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
-
-	y += dy;
-	sprintf(tempstring, "%s", new_scrmode.full ? "Fullscreen" : "Windowed");
+	if (true)
+	{
+		if (new_scrmode.full)
+			sprintf(tempstring, "%s", "Fullscreen");
+		else
+			sprintf(tempstring, "%dx%d", new_scrmode.width, new_scrmode.height);
+	}
+	else
+	{
+		y += dy;
+		sprintf(tempstring, "%dx%d", new_scrmode.width, new_scrmode.height);
+	}
 	HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
 
 	// Draw selected resolution and mode:
 	y = bottomy;
-	y += (dy/2);
+	y += true ? (dy*3) : (dy/2);
 
-	sprintf(tempstring, "Current Resolution:");
+	if (true)
+		sprintf(tempstring, "Current Window Size:");
+	else
+		sprintf(tempstring, "Current Resolution:");
 	HL_WriteText(style,styledef_c::T_HELP, 160 - (style->fonts[0]->StringWidth(tempstring) / 2), y, tempstring);
 
 	y += dy;
-	y += 10;
-	sprintf(tempstring, "%d x %d at %d-bit %s",
-			SCREENWIDTH, SCREENHEIGHT, (SCREENBITS < 20) ? 16 : 32,
-			FULLSCREEN ? "Fullscreen" : "Windowed");
+	y += 5;
+	if (true)
+		sprintf(tempstring, "%d x %d", SCREENWIDTH, SCREENHEIGHT);
+	else
+		sprintf(tempstring, "%d x %d %s", SCREENWIDTH, SCREENHEIGHT, FULLSCREEN ? "Fullscreen" : "Windowed");
 
 	HL_WriteText(style,styledef_c::T_ALT, 160 - (style->fonts[1]->StringWidth(tempstring) / 2), y, tempstring);
 }
@@ -1606,7 +1632,10 @@ static void M_ResolutionOptions(int keypressed)
 	new_scrmode.depth  = SCREENBITS;
 	new_scrmode.full   = FULLSCREEN;
 
-	curr_menu = &res_optmenu;
+	if (true)
+		curr_menu = &simple_res_optmenu;
+	else
+		curr_menu = &res_optmenu;
 	curr_item = curr_menu->items + curr_menu->pos;
 }
 
@@ -1916,23 +1945,6 @@ static void M_ChangeResSize(int keypressed)
 	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Size, +1);
-	}
-}
-
-//
-// M_ChangeResDepth
-//
-// -ACB- 1998/08/29 Depth Changes...
-//
-static void M_ChangeResDepth(int keypressed)
-{
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
-	{
-		R_IncrementResolution(&new_scrmode, RESINC_Depth, -1);
-	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
-	{
-		R_IncrementResolution(&new_scrmode, RESINC_Depth, +1);
 	}
 }
 

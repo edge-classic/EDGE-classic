@@ -149,7 +149,7 @@ static void ImageParseField(const char *field, const char *contents, int index, 
 
 static void ImageFinishEntry(void)
 {
-	if (dynamic_image->type == IMGDT_File)
+	if (dynamic_image->type == IMGDT_File || dynamic_image->type == IMGDT_Package)
 	{
         const char *filename = dynamic_image->info.c_str();
 
@@ -320,6 +320,11 @@ static void DDF_ImageGetType(const char *info, void *storage)
 	{
 		dynamic_image->type = IMGDT_Lump;
 		ImageParseLump(colon + 1);
+	}
+	else if (DDF_CompareName(keyword, "PACK") == 0)
+	{
+		dynamic_image->type = IMGDT_Package;
+		ImageParseInfo(colon + 1);
 	}
 	else
 		DDF_Error("Unknown image type: %s\n", keyword);

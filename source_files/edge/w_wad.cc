@@ -155,11 +155,6 @@ public:
 	// BOOM stuff
 	int animated, switches;
 
-	// file containing the GL nodes for the levels in this WAD.
-	// -1 when none (usually when this WAD has no levels, but also
-	// temporarily before a new GWA files has been built and added).
-	int companion_gwa;
-
 	// MD5 hash of the contents of the WAD directory.
 	// This is used to disambiguate cached GWA/HWA filenames.
 	epi::md5hash_c dir_md5;
@@ -174,7 +169,6 @@ public:
 		wadtex(),
 		deh_lump(-1), coal_apis(-1), coal_huds(-1),
 		animated(-1), switches(-1),
-		companion_gwa(-1),
 		dir_md5(), md5_string()
 	{
 		for (int d = 0; d < NUM_DDF_READERS; d++)
@@ -1344,8 +1338,6 @@ void W_BuildNodes(void)
 			size_t new_index = W_AddFilename(gwa_filename.c_str(), FLKIND_GWad);
 
 			AddFile(data_files[new_index], new_index, total_files, "");
-
-			df->wad->companion_gwa = (int)new_index;
 		}
 	}
 }

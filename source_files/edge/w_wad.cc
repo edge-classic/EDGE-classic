@@ -1087,6 +1087,106 @@ static void DoFixers(wad_file_c *wad)
 }
 
 
+static void ProcessWad(data_file_c *df, size_t file_index)
+{
+	wad_file_c *wad = df->wad;
+
+	raw_wad_header_t header;
+
+	epi::file_c *file = df->file;
+
+	// TODO: handle Read failure
+	file->Read(&header, sizeof(raw_wad_header_t));
+
+	if (strncmp(header.identification, "IWAD", 4) != 0)
+	{
+		// Homebrew levels?
+		if (strncmp(header.identification, "PWAD", 4) != 0)
+		{
+			I_Error("Wad file %s doesn't have IWAD or PWAD id\n", df->name.c_str());
+		}
+	}
+
+	header.num_entries = EPI_LE_S32(header.num_entries);
+	header.dir_start   = EPI_LE_S32(header.dir_start);
+
+	size_t length = header.num_entries * sizeof(raw_wad_entry_t);
+
+	raw_wad_entry_t *raw_info = new raw_wad_entry_t[header.num_entries];
+
+	file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
+	// TODO: handle Read failure
+	file->Read(raw_info, length);
+
+	int startlump = (int)lumpinfo.size();
+
+	for (size_t i=0 ; i < header.num_entries ; i++)
+	{
+		raw_wad_entry_t& entry = raw_info[i];
+
+		bool allow_ddf = (df->kind == FLKIND_EWad) || (df->kind == FLKIND_PWad) || (df->kind == FLKIND_HWad);
+
+		AddLump(df, entry.name, EPI_LE_S32(entry.pos), EPI_LE_S32(entry.size),
+				(int)file_index, allow_ddf);
+
+		// this will be uppercase
+		const char *level_name = lumpinfo[startlump + i].name;
+
+		CheckForLevel(wad, startlump + i, level_name, &entry, header.num_entries-1 - i);
+	}
+
+	// compute MD5 hash over wad directory
+	wad->dir_md5.Compute((const byte *)raw_info, length);
+
+	wad->md5_string = epi::STR_Format("%02x%02x%02x%02x%02x%02x%02x%02x", 
+			wad->dir_md5.hash[0],  wad->dir_md5.hash[1],
+			wad->dir_md5.hash[2],  wad->dir_md5.hash[3],
+			wad->dir_md5.hash[4],  wad->dir_md5.hash[5],
+			wad->dir_md5.hash[6],  wad->dir_md5.hash[7],
+			wad->dir_md5.hash[8],  wad->dir_md5.hash[9],
+			wad->dir_md5.hash[10], wad->dir_md5.hash[11],
+			wad->dir_md5.hash[12], wad->dir_md5.hash[13],
+			wad->dir_md5.hash[14], wad->dir_md5.hash[15]);
+
+	I_Debugf("   md5hash = %s\n", wad->md5_string.c_str());
+
+	delete[] raw_info;
+}
+
+
+static void ProcessSingleLump(data_file_c *df)
+{
+/* TODO fix this, or disable single lumps altogether
+
+	char lump_name[32];
+
+	if (df->kind == FLKIND_DDF)
+	{
+		DDF_GetLumpNameForFile(filename, lump_name);
+	}
+	else
+	{
+		std::string base = epi::PATH_GetBasename(filename);
+		if (base.size() > 8)
+			I_Error("Filename base of %s >8 chars", filename);
+
+		strcpy(lump_name, base.c_str());
+		for (size_t i=0;i<strlen(lump_name);i++) {
+			lump_name[i] = toupper(lump_name[i]);
+		}
+	}
+
+
+	// calculate MD5 hash over whole file
+	// [ TODO do we need this for a single lump? ]
+	//?? ComputeFileMD5(wad->dir_md5, file);
+
+	// Fill in lumpinfo
+	AddLump(df, lump_name, 0, file->GetLength(), (int)datafile, (int)datafile, true);
+*/
+}
+
+
 //
 // ProcessFile
 //
@@ -1101,10 +1201,6 @@ static void ProcessFile(data_file_c *df)
 
 	wad_file_c *wad = df->wad;
 
-
-	int length;
-
-	raw_wad_header_t header;
 
 	// reset the sprite/flat/patch list stuff
 	within_sprite_list = within_flat_list   = false;
@@ -1132,99 +1228,17 @@ static void ProcessFile(data_file_c *df)
 	if (df->kind == FLKIND_RTS)
 		return;
 
-	if (df->wad != NULL)
+	if (wad != NULL)
 	{
-		// FIXME factor out this stuff...
-
-		// WAD file
-		// TODO: handle Read failure
-        file->Read(&header, sizeof(raw_wad_header_t));
-
-		if (strncmp(header.identification, "IWAD", 4) != 0)
-		{
-			// Homebrew levels?
-			if (strncmp(header.identification, "PWAD", 4) != 0)
-			{
-				I_Error("Wad file %s doesn't have IWAD or PWAD id\n", filename);
-			}
-		}
-
-		header.num_entries = EPI_LE_S32(header.num_entries);
-		header.dir_start   = EPI_LE_S32(header.dir_start);
-
-		length = header.num_entries * sizeof(raw_wad_entry_t);
-
-        raw_wad_entry_t *raw_info = new raw_wad_entry_t[header.num_entries];
-
-        file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
-		// TODO: handle Read failure
-        file->Read(raw_info, length);
-
-		// compute MD5 hash over wad directory
-		wad->dir_md5.Compute((const byte *)raw_info, length);
-
-		int startlump = (int)lumpinfo.size();
-
-		for (size_t i=0 ; i < header.num_entries ; i++)
-		{
-			raw_wad_entry_t& entry = raw_info[i];
-
-			bool allow_ddf = (df->kind == FLKIND_EWad) || (df->kind == FLKIND_PWad) || (df->kind == FLKIND_HWad);
-
-			AddLump(df, entry.name, EPI_LE_S32(entry.pos), EPI_LE_S32(entry.size),
-					(int)file_index, allow_ddf);
-
-			// this will be uppercase
-			const char *level_name = lumpinfo[startlump + i].name;
-
-			CheckForLevel(wad, startlump + i, level_name, &entry, header.num_entries-1 - i);
-		}
-
-		delete[] raw_info;
+		ProcessWad(df, file_index);
 	}
-	else  /* single lump file */
+	else
 	{
-		char lump_name[32];
-
-		if (df->kind == FLKIND_DDF)
-        {
-			DDF_GetLumpNameForFile(filename, lump_name);
-        }
-        else
-        {
-            std::string base = epi::PATH_GetBasename(filename);
-            if (base.size() > 8)
-                I_Error("Filename base of %s >8 chars", filename);
-
-            strcpy(lump_name, base.c_str());
-			for (size_t i=0;i<strlen(lump_name);i++) {
-				lump_name[i] = toupper(lump_name[i]);
-			}
-        }
-
-		/* FIXME
-
-		// calculate MD5 hash over whole file   [ TODO need this for a single lump? ]
-		ComputeFileMD5(wad->dir_md5, file);
-
-		// Fill in lumpinfo
-		AddLump(df, lump_name, 0, file->GetLength(), (int)datafile, (int)datafile, true);
-		*/
+		ProcessSingleLump(df);
 	}
 
 	if (wad != NULL)
 	{
-	wad->md5_string = epi::STR_Format("%02x%02x%02x%02x%02x%02x%02x%02x", 
-			wad->dir_md5.hash[0],  wad->dir_md5.hash[1],
-			wad->dir_md5.hash[2],  wad->dir_md5.hash[3],
-			wad->dir_md5.hash[4],  wad->dir_md5.hash[5],
-			wad->dir_md5.hash[6],  wad->dir_md5.hash[7],
-			wad->dir_md5.hash[8],  wad->dir_md5.hash[9],
-			wad->dir_md5.hash[10], wad->dir_md5.hash[11],
-			wad->dir_md5.hash[12], wad->dir_md5.hash[13],
-			wad->dir_md5.hash[14], wad->dir_md5.hash[15]);
-
-	I_Debugf("   md5hash = %s\n", wad->md5_string.c_str());
 	}
 
 	SortLumps();

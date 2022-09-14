@@ -204,12 +204,6 @@ typedef struct
 	// file number (an index into data_files[]).
 	short file;
 
-	// value used when sorting.  When lumps have the same name, the one
-	// with the highest sort_index is used (W_CheckNumForName).  This is
-	// closely related to the `file' field, with some tweaks for
-	// handling GWA files (especially dynamic ones).
-	short sort_index;
-
 	// one of the LMKIND values.  For sorting, this is the least
 	// significant aspect (but still necessary).
 	short kind;
@@ -465,7 +459,7 @@ struct Compare_lump_pred
 		if (cmp > 0) return false;
 
 		// decreasing file number
-		cmp = C.sort_index - D.sort_index;
+		cmp = C.file - D.file;
 		if (cmp > 0) return true;
 		if (cmp < 0) return false;
 
@@ -523,23 +517,11 @@ static void SortSpriteLumps(wad_file_c *wad)
 // LUMP BASED ROUTINES.
 //
 
-//
-// W_AddFile
-//
-// All files are optional, but at least one file must be
-//  found (PWAD, if all required lumps are present).
-// Files with a .wad extension are wadlink files
-//  with multiple lumps.
-// Other files are single lumps with the base filename
-//  for the lump name.
-//
-
 
 //
 // AddLump
 //
-static void AddLump(data_file_c *df, const char *name, int pos, int size,
-					int file, int sort_index, bool allow_ddf)
+static void AddLump(data_file_c *df, const char *name, int pos, int size, int file_index, bool allow_ddf)
 {
 	int lump = (int)lumpinfo.size();
 
@@ -547,8 +529,7 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size,
 
 	info.position = pos;
 	info.size = size;
-	info.file = file;
-	info.sort_index = sort_index;
+	info.file = file_index;
 	info.kind = LMKIND_Normal;
 
 	// copy name, make it uppercase
@@ -576,7 +557,7 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size,
 		if (wad != NULL)
 			wad->wadtex.palette = lump;
 		if (palette_datafile < 0)
-			palette_datafile = file;
+			palette_datafile = file_index;
 		return;
 	}
 	else if (strncmp(name, "PNAMES", 8) == 0)
@@ -1062,26 +1043,66 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 	return (lump1_found && lump2_found);
 }
 
-//
-// AddFile
-//
-// -AJA- New `dyn_index' parameter -- this is for adding GWA files
-//       which have been built by the AJBSP plugin.  Nothing else is
-//       supported, e.g. wads with textures/sprites/DDF/RTS.
-//
-//       The dyn_index value is -1 for normal (non-dynamic) files,
-//       otherwise it is the sort_index for the lumps (typically the
-//       file number of the wad which the GWA is a companion for).
-//
-static void AddFile(data_file_c *df, size_t file_index, int dyn_index, std::string md5_check)
+
+std::vector<data_file_c *> pending_files;
+
+size_t W_AddPending(const char *file, int kind)
 {
-	int length;
+	size_t index = pending_files.size();
+
+	data_file_c *df = new data_file_c(file, kind);
+	pending_files.push_back(df);
+
+	return index;
+}
+
+static void DoFixers(wad_file_c *wad)
+{
+	std::string fix_checker;
+
+	fix_checker = wad->md5_string;
+
+	if (fix_checker.empty())
+		return;
+
+	for (int i = 0; i < fixdefs.GetSize(); i++)
+	{
+		if (strcasecmp(fix_checker.c_str(), fixdefs[i]->md5_string.c_str()) == 0)
+		{
+			std::string fix_path = epi::PATH_Join(game_dir.c_str(), "edge_fixes");
+			fix_path = epi::PATH_Join(fix_path.c_str(), fix_checker.append(".wad").c_str());
+			if (epi::FS_Access(fix_path.c_str(), epi::file_c::ACCESS_READ))
+			{
+				W_AddPending(fix_path.c_str(), FLKIND_PWad);
+
+				I_Printf("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name.c_str());
+			}
+			else
+			{
+				I_Warning("WADFIXES: %s defined, but no fix WAD located in edge_fixes!\n", fixdefs[i]->name.c_str());
+				return;
+			}
+		}
+	}
+}
+
+
+//
+// ProcessFile
+//
+static void ProcessFile(data_file_c *df)
+{
+	size_t file_index = data_files.size();
+	data_files.push_back(df);
+
 
 	if (df->kind <= FLKIND_HWad)
 		df->wad = new wad_file_c();
 
 	wad_file_c *wad = df->wad;
 
+
+	int length;
 
 	raw_wad_header_t header;
 
@@ -1151,8 +1172,7 @@ static void AddFile(data_file_c *df, size_t file_index, int dyn_index, std::stri
 			bool allow_ddf = (df->kind == FLKIND_EWad) || (df->kind == FLKIND_PWad) || (df->kind == FLKIND_HWad);
 
 			AddLump(df, entry.name, EPI_LE_S32(entry.pos), EPI_LE_S32(entry.size),
-					(int)file_index, (dyn_index >= 0) ? dyn_index : (int)file_index,
-					allow_ddf);
+					(int)file_index, allow_ddf);
 
 			// this will be uppercase
 			const char *level_name = lumpinfo[startlump + i].name;
@@ -1165,8 +1185,6 @@ static void AddFile(data_file_c *df, size_t file_index, int dyn_index, std::stri
 	else  /* single lump file */
 	{
 		char lump_name[32];
-
-		SYS_ASSERT(dyn_index < 0);
 
 		if (df->kind == FLKIND_DDF)
         {
@@ -1271,40 +1289,13 @@ static void AddFile(data_file_c *df, size_t file_index, int dyn_index, std::stri
 			}
 
 			// Load it (using good ol' recursion again).
-	//FIXME !!		AddFile(hwa_filename.c_str(), FLKIND_HWad, -1, df->md5_string);
+	//FIXME !!		ProcessFile(hwa_filename.c_str(), FLKIND_HWad, -1, df->md5_string);
 	}
 */
 
 	if (wad != NULL)
 	{
-		// TODO refactor this outta here
-
-	std::string fix_checker;
-
-	if (!md5_check.empty())
-		fix_checker = md5_check;
-	else
-		fix_checker = wad->md5_string;
-
-	for (int i = 0; i < fixdefs.GetSize(); i++)
-	{
-		if (strcasecmp(fix_checker.c_str(), fixdefs[i]->md5_string.c_str()) == 0)
-		{
-			std::string fix_path = epi::PATH_Join(game_dir.c_str(), "edge_fixes");
-			fix_path = epi::PATH_Join(fix_path.c_str(), fix_checker.append(".wad").c_str());
-			if (epi::FS_Access(fix_path.c_str(), epi::file_c::ACCESS_READ))
-			{
-			// FIXME !!!	AddFile(fix_path.c_str(), FLKIND_PWad, -1, "");
-				I_Printf("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name.c_str());
-			}
-			else
-			{
-				I_Warning("WADFIXES: %s defined, but no fix WAD located in edge_fixes!\n", fixdefs[i]->name.c_str());
-				return;
-			}
-		}
-	}
-
+		DoFixers(wad);
 	}
 }
 
@@ -1313,9 +1304,7 @@ static void AddFile(data_file_c *df, size_t file_index, int dyn_index, std::stri
 //
 void W_BuildNodes(void)
 {
-	int total_files = (int)data_files.size();
-
-	for (int i=0; i < total_files; i++)
+	for (size_t i = 0 ; i < data_files.size() ; i++)
 	{
 		data_file_c *df = data_files[i];
 
@@ -1337,7 +1326,7 @@ void W_BuildNodes(void)
 
 			size_t new_index = W_AddFilename(gwa_filename.c_str(), FLKIND_GWad);
 
-			AddFile(data_files[new_index], new_index, total_files, "");
+			ProcessFile(data_files[new_index]);
 		}
 	}
 }
@@ -1345,21 +1334,25 @@ void W_BuildNodes(void)
 //
 // W_InitMultipleFiles
 //
-// Files with a .wad extension are idlink files with multiple lumps.
-// Other files are single lumps with the base filename for the lump name.
-// Lump names can appear multiple times.
-// The name searcher looks backwards, so a later file
-//   does override all earlier ones.
-//
 void W_InitMultipleFiles(void)
 {
-	// open all the files, add all the lumps
+	// open all the files, add all the lumps.
+	// NOTE: we rebuild the list, since new files can get added as we go along,
+	//       and they should appear *after* the one which produced it.
 
-	for (size_t i = 0 ; i < data_files.size() ; i++)
+	std::vector<data_file_c *> copied_files(data_files);
+	data_files.clear();
+
+	for (size_t i = 0 ; i < copied_files.size() ; i++)
 	{
-		data_file_c *df = data_files[i];
+		ProcessFile(copied_files[i]);
 
-		AddFile(df, i, -1, "");
+		for (size_t k = 0 ; k < pending_files.size() ; k++)
+		{
+			ProcessFile(pending_files[k]);
+		}
+
+		pending_files.clear();
 	}
 
 	if (lumpinfo.empty())

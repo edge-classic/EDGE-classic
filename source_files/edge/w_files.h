@@ -76,6 +76,8 @@ extern std::vector<data_file_c *> data_files;
 size_t W_AddFilename(const char *file, int kind);
 int W_GetNumFiles(void);
 void W_ShowFiles(void);
+size_t W_AddPending(const char *file, int kind);
+void W_InitMultipleFiles(void);
 
 #endif // __W_FILES__
 

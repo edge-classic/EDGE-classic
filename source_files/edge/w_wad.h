@@ -53,8 +53,6 @@ typedef enum
 }
 lumplist_e;
 
-void W_AddRawFilename(const char *file, int kind);
-void W_InitMultipleFiles(void);
 void W_ReadDDF(void);
 void W_ReadCoalLumps(void);
 

@@ -41,6 +41,7 @@
 #include <vector>
 #include <algorithm>
 
+// EPI
 #include "endianess.h"
 #include "file.h"
 #include "file_sub.h"
@@ -1044,19 +1045,7 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 }
 
 
-std::vector<data_file_c *> pending_files;
-
-size_t W_AddPending(const char *file, int kind)
-{
-	size_t index = pending_files.size();
-
-	data_file_c *df = new data_file_c(file, kind);
-	pending_files.push_back(df);
-
-	return index;
-}
-
-static void ProcessFixers(data_file_c *df)
+void ProcessFixers(data_file_c *df)
 {
 	wad_file_c *wad = df->wad;
 	if (wad == NULL)
@@ -1090,7 +1079,7 @@ static void ProcessFixers(data_file_c *df)
 	}
 }
 
-static void ProcessDehacked(data_file_c *df)
+void ProcessDehacked(data_file_c *df)
 {
 	if (df->kind == FLKIND_Deh)
 		{ /* ok */ }
@@ -1138,9 +1127,15 @@ static void ProcessDehacked(data_file_c *df)
 	W_AddPending(hwa_filename.c_str(), FLKIND_HWad);
 }
 
-static void ProcessWad(data_file_c *df, size_t file_index)
+void ProcessWad(data_file_c *df, size_t file_index)
 {
-	wad_file_c *wad = df->wad;
+	wad_file_c *wad = new wad_file_c();
+	df->wad = wad;
+
+	// reset the sprite/flat/patch list stuff
+	within_sprite_list = within_flat_list   = false;
+	within_patch_list  = within_colmap_list = false;
+	within_tex_list    = within_hires_list  = false;
 
 	raw_wad_header_t header;
 
@@ -1186,6 +1181,19 @@ static void ProcessWad(data_file_c *df, size_t file_index)
 		CheckForLevel(wad, startlump + i, level_name, &entry, header.num_entries-1 - i);
 	}
 
+	// check for unclosed sprite/flat/patch lists
+	const char *filename = df->name.c_str();
+	if (within_sprite_list) I_Warning("Missing S_END marker in %s.\n", filename);
+	if (within_flat_list)   I_Warning("Missing F_END marker in %s.\n", filename);
+	if (within_patch_list)  I_Warning("Missing P_END marker in %s.\n", filename);
+	if (within_colmap_list) I_Warning("Missing C_END marker in %s.\n", filename);
+	if (within_tex_list)    I_Warning("Missing TX_END marker in %s.\n", filename);
+	if (within_hires_list)  I_Warning("Missing HI_END marker in %s.\n", filename);
+
+	SortLumps();
+
+	SortSpriteLumps(wad);
+
 	// compute MD5 hash over wad directory
 	wad->dir_md5.Compute((const byte *)raw_info, length);
 
@@ -1205,7 +1213,7 @@ static void ProcessWad(data_file_c *df, size_t file_index)
 }
 
 
-static void ProcessSingleLump(data_file_c *df)
+void ProcessSingleLump(data_file_c *df)
 {
 /* TODO fix this, or disable single lumps altogether
 
@@ -1238,136 +1246,27 @@ static void ProcessSingleLump(data_file_c *df)
 }
 
 
-//
-// ProcessFile
-//
-static void ProcessFile(data_file_c *df)
+std::string W_BuildNodesForWad(data_file_c *df)
 {
-	size_t file_index = data_files.size();
-	data_files.push_back(df);
+	if (df->wad->level_markers.GetSize() == 0)
+		return std::string();
 
+	std::string gwa_filename;
 
-	if (df->kind <= FLKIND_HWad)
-		df->wad = new wad_file_c();
+	bool exists = FindCacheFilename(gwa_filename, df->name.c_str(), df->wad->dir_md5, EDGEGWAEXT);
 
-	wad_file_c *wad = df->wad;
+	I_Debugf("Actual_GWA_filename: %s\n", gwa_filename.c_str());
 
-
-	// reset the sprite/flat/patch list stuff
-	within_sprite_list = within_flat_list   = false;
-	within_patch_list  = within_colmap_list = false;
-	within_tex_list    = within_hires_list  = false;
-
-	// open the file and add to directory
-	const char *filename = df->name.c_str();
-
-    epi::file_c *file = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-	if (file == NULL)
+	if (! exists)
 	{
-		I_Error("Couldn't open file %s\n", filename);
-		return;
+		I_Printf("Building GL Nodes for: %s\n", df->name.c_str());
+
+		if (! AJ_BuildNodes(df->name.c_str(), gwa_filename.c_str()))
+			I_Error("Failed to build GL nodes for: %s\n", df->name.c_str());
 	}
 
-	I_Printf("  Adding %s\n", filename);
-
-	if (file_index == 1)  // 1 == edge-defs.wad
-		W_ReadWADFIXES();
-
-	df->file = file;  // FIXME review lifetime of this open file
-
-	// for RTS scripts, adding the data_file is enough
-	if (df->kind == FLKIND_RTS)
-		return;
-
-	if (wad != NULL)
-	{
-		ProcessWad(df, file_index);
-	}
-	else
-	{
-		ProcessSingleLump(df);
-	}
-
-	SortLumps();
-
-	if (wad != NULL)
-		SortSpriteLumps(wad);
-
-	// check for unclosed sprite/flat/patch lists
-	if (within_sprite_list) I_Warning("Missing S_END marker in %s.\n", filename);
-	if (within_flat_list)   I_Warning("Missing F_END marker in %s.\n", filename);
-	if (within_patch_list)  I_Warning("Missing P_END marker in %s.\n", filename);
-	if (within_colmap_list) I_Warning("Missing C_END marker in %s.\n", filename);
-	if (within_tex_list)    I_Warning("Missing TX_END marker in %s.\n", filename);
-	if (within_hires_list)  I_Warning("Missing HI_END marker in %s.\n", filename);
-   
-	// handle DeHackEd patch files
-	ProcessDehacked(df);
-
-	// handle fixer-uppers
-	ProcessFixers(df);
+	return gwa_filename;
 }
-
-//
-// W_BuildNodes
-//
-void W_BuildNodes(void)
-{
-	for (size_t i = 0 ; i < data_files.size() ; i++)
-	{
-		data_file_c *df = data_files[i];
-
-		if (df->kind <= FLKIND_EWad && df->wad->level_markers.GetSize() > 0)
-		{
-			std::string gwa_filename;
-
-			bool exists = FindCacheFilename(gwa_filename, df->name.c_str(), df->wad->dir_md5, EDGEGWAEXT);
-
-			I_Debugf("Actual_GWA_filename: %s\n", gwa_filename.c_str());
-
-			if (! exists)
-			{
-				I_Printf("Building GL Nodes for: %s\n", df->name.c_str());
-
-				if (! AJ_BuildNodes(df->name.c_str(), gwa_filename.c_str()))
-					I_Error("Failed to build GL nodes for: %s\n", df->name.c_str());
-			}
-
-			size_t new_index = W_AddFilename(gwa_filename.c_str(), FLKIND_GWad);
-
-			ProcessFile(data_files[new_index]);
-		}
-	}
-}
-
-//
-// W_InitMultipleFiles
-//
-void W_InitMultipleFiles(void)
-{
-	// open all the files, add all the lumps.
-	// NOTE: we rebuild the list, since new files can get added as we go along,
-	//       and they should appear *after* the one which produced it.
-
-	std::vector<data_file_c *> copied_files(data_files);
-	data_files.clear();
-
-	for (size_t i = 0 ; i < copied_files.size() ; i++)
-	{
-		ProcessFile(copied_files[i]);
-
-		for (size_t k = 0 ; k < pending_files.size() ; k++)
-		{
-			ProcessFile(pending_files[k]);
-		}
-
-		pending_files.clear();
-	}
-
-	if (lumpinfo.empty())
-		I_Error("W_InitMultipleFiles: no files found!\n");
-}
-
 
 
 void W_ReadUMAPINFOLumps(void)

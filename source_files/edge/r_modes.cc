@@ -45,10 +45,9 @@ int SCREENWIDTH;
 int SCREENHEIGHT;
 int SCREENBITS;
 int DISPLAYMODE;
-
+scrmode_c borderless_mode;
 
 static std::vector<scrmode_c *> screen_modes;
-
 
 bool R_DepthIsEquivalent(int depth1, int depth2)
 {
@@ -163,6 +162,16 @@ bool R_IncrementResolution(scrmode_c *mode, int what, int dir)
 		}
 	}
 
+	if (display_mode == 2)
+	{
+		mode->width  = borderless_mode.width;
+		mode->height = borderless_mode.height;
+		mode->depth  = borderless_mode.depth;
+		mode->display_mode   = borderless_mode.display_mode;
+
+		return true;
+	}
+
 	scrmode_c *best = NULL;
 	int best_diff = (1 << 30);
 
@@ -250,8 +259,8 @@ static bool DoExecuteChangeResolution(scrmode_c *mode)
 	DISPLAYMODE  = mode->display_mode;
 
 	// gfx card doesn't like to switch too rapidly
-	//I_Sleep(250);
-	//I_Sleep(250);
+	I_Sleep(250);
+	I_Sleep(250);
 
 	return true;
 }
@@ -263,7 +272,7 @@ struct Compare_Res_pred
 	{
 		if (A->display_mode != B->display_mode)
 		{
-			return DISPLAYMODE > 0 ? (A->display_mode > B->display_mode) : (A->display_mode < B->display_mode);
+			return DISPLAYMODE ? (A->display_mode > B->display_mode) : (A->display_mode < B->display_mode);
 		}
 
 		if (! R_DepthIsEquivalent(A->depth, B->depth))

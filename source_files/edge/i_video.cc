@@ -150,6 +150,7 @@ void I_StartupGraphics(void)
 		test_mode.width  = possible_mode.w;
 		test_mode.height = possible_mode.h;
 		test_mode.depth  = SDL_BITSPERPIXEL(possible_mode.format);
+		test_mode.display_mode = test_mode.SCR_FULLSCREEN;
 
 		if ((test_mode.width & 15) != 0)
 			continue;
@@ -157,20 +158,15 @@ void I_StartupGraphics(void)
 		if (test_mode.depth == 15 || test_mode.depth == 16 ||
 		    test_mode.depth == 24 || test_mode.depth == 32)
 		{
-			if (test_mode.width != display_W || test_mode.height != display_H)
-			{
-				test_mode.display_mode = test_mode.SCR_FULLSCREEN;
-				R_AddResolution(&test_mode);
-			}
-			else // For native res, add both a borderless and fullscreen mode
-			{
-				test_mode.display_mode = test_mode.SCR_BORDERLESS;
-				R_AddResolution(&test_mode);
-				test_mode.display_mode = test_mode.SCR_FULLSCREEN;
-				R_AddResolution(&test_mode);
-			}
+			R_AddResolution(&test_mode);
 		}
 	}
+
+	// Fill in borderless mode scrmode with the native display info
+    borderless_mode.display_mode = borderless_mode.SCR_BORDERLESS;
+    borderless_mode.width = info.w;
+    borderless_mode.height = info.h;
+    borderless_mode.depth = SDL_BITSPERPIXEL(info.format);
 
 	// -ACB- 2000/03/16 Test for possible windowed resolutions
 	for (int depth = 16; depth <= 32; depth = depth+16)
@@ -218,6 +214,7 @@ bool I_SetScreenSize(scrmode_c *mode)
 		if (mode->display_mode == mode->SCR_BORDERLESS) 
 		{
 			SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN_DESKTOP);
+			SDL_GetWindowSize(my_vis, &borderless_mode.width, &borderless_mode.height);
 			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
 				mode->width, mode->height, mode->depth);
 		}

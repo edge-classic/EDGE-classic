@@ -76,6 +76,7 @@ extern int SCREENWIDTH;
 extern int SCREENHEIGHT;
 extern int SCREENBITS;
 extern int DISPLAYMODE;
+extern scrmode_c borderless_mode;
 
 // Exported Func
 bool R_DepthIsEquivalent(int depth1, int depth2);

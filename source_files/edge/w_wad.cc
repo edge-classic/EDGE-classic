@@ -51,14 +51,8 @@
 #include "str_format.h"
 #include "utility.h"
 
-#include "main.h"
-#include "anim.h"
+// DDF
 #include "colormap.h"
-#include "font.h"
-#include "image.h"
-#include "style.h"
-#include "switch.h"
-#include "flat.h"
 #include "wadfixes.h"
 
 #include "dm_data.h"
@@ -72,7 +66,6 @@
 #include "l_ajbsp.h"
 #include "m_misc.h"
 #include "r_image.h"
-#include "rad_trig.h"
 #include "vm_coal.h"
 #include "w_files.h"
 #include "w_wad.h"
@@ -80,53 +73,12 @@
 
 #include "umapinfo.h" //Lobo 2022
 
-// forward declaration
-void W_ReadWADFIXES(void);
-
-// -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
-typedef struct ddf_reader_s
-{
-	const char *name;
-	const char *print_name;
-	bool (* func)(void *data, int size);
-}
-ddf_reader_t;
-
-// TODO move to w_files.cc
-static ddf_reader_t DDF_Readers[] =
-{
-	{ "DDFLANG", "Languages",  DDF_ReadLangs },
-	{ "DDFSFX",  "Sounds",     DDF_ReadSFX },
-	{ "DDFCOLM", "ColourMaps", DDF_ReadColourMaps },  // -AJA- 1999/07/09.
-	{ "DDFIMAGE","Images",     DDF_ReadImages },      // -AJA- 2004/11/18
-	{ "DDFFONT", "Fonts",      DDF_ReadFonts },       // -AJA- 2004/11/13
-	{ "DDFSTYLE","Styles",     DDF_ReadStyles },      // -AJA- 2004/11/14
-	{ "DDFATK",  "Attacks",    DDF_ReadAtks },
-	{ "DDFWEAP", "Weapons",    DDF_ReadWeapons },
-	{ "DDFTHING","Things",     DDF_ReadThings },
-	{ "DDFPLAY", "Playlists",  DDF_ReadMusicPlaylist },
-	{ "DDFLINE", "Lines",      DDF_ReadLines },
-	{ "DDFSECT", "Sectors",    DDF_ReadSectors },
-	{ "DDFSWTH", "Switches",   DDF_ReadSwitch },
-	{ "DDFANIM", "Anims",      DDF_ReadAnims },
-	{ "DDFGAME", "Games",      DDF_ReadGames },
-	{ "DDFLEVL", "Levels",     DDF_ReadLevels },
-	{ "DDFFLAT", "Flats",      DDF_ReadFlat },
-	{ "RSCRIPT", "RadTrig",    RAD_ReadScript }       // -AJA- 2000/04/21.
-};
-
-#define NUM_DDF_READERS  (int)(sizeof(DDF_Readers) / sizeof(ddf_reader_t))
-
-#define LANG_READER  0
-#define COLM_READER  2
-#define SWTH_READER  12
-#define ANIM_READER  13
-#define RTS_READER   17
+#define NUM_DDF_READERS  18
 
 class wad_file_c
 {
 public:
-	data_file_c *_parent;
+//??	data_file_c *_parent;
 
 	// lists for sprites, flats, patches (stuff between markers)
 	epi::u32array_c sprite_lumps;
@@ -546,8 +498,6 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 
 	lumpinfo_t *lump_p = &lumpinfo.back();
 
-	int j;
-
 	// -- handle special names --
 
 	wad_file_c *wad = df->wad;
@@ -621,14 +571,12 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 	// -KM- 1998/12/16 Load DDF/RSCRIPT file from wad.
 	if (allow_ddf && wad != NULL)
 	{
-		for (j=0; j < NUM_DDF_READERS; j++)
+		int d = W_CheckDDFLumpName(name);
+		if (d >= 0)
 		{
-			if (strncmp(name, DDF_Readers[j].name, 8) == 0)
-			{
-				lump_p->kind = LMKIND_DDFRTS;
-				wad->ddf_lumps[j] = lump;
-				return;
-			}
+			lump_p->kind = LMKIND_DDFRTS;
+			wad->ddf_lumps[d] = lump;
+			return;
 		}
 	}
 
@@ -1584,103 +1532,28 @@ void W_ReadUMAPINFOLumps(void)
 	}
 }
 
-// TODO move to w_files.cc
-void W_ReadDDF(void)
+
+// TODO review this, consider moving wad_file_c to header
+int W_GetDDFLump(wad_file_c *wad, int d)
 {
-	// -AJA- the order here may look strange.  Since DDF files
-	// have dependencies between them, it makes more sense to
-	// load all lumps of a certain type together (e.g. all
-	// DDFSFX lumps before all the DDFTHING lumps).
-
-	for (int d = 0; d < NUM_DDF_READERS; d++)
+	return wad->ddf_lumps[d];
+}
+int W_GetAnimated(wad_file_c *wad)
+{
+	return wad->animated;
+}
+int W_GetSwitches(wad_file_c *wad)
+{
+	return wad->switches;
+}
+void W_AddColourmaps(wad_file_c *wad)
+{
+	for (int i=0; i < wad->colmap_lumps.GetSize(); i++)
 	{
-		if (true)
-		{
-			I_Printf("Loading %s\n", DDF_Readers[d].print_name);
+		int lump = wad->colmap_lumps[i];
 
-			// call read function
-			(* DDF_Readers[d].func)(NULL, 0);
-		}
-
-		for (int f = 0; f < (int)data_files.size(); f++)
-		{
-			data_file_c *df = data_files[f];
-			wad_file_c *wad = df->wad;
-
-			// all script files get parsed here
-			if (d == RTS_READER && df->kind == FLKIND_RTS)
-			{
-				I_Printf("Loading RTS script: %s\n", df->name.c_str());
-
-				RAD_LoadFile(df->name.c_str());
-				continue;
-			}
-
-			if (df->kind >= FLKIND_RTS)
-				continue;
-
-			// TODO : PK3
-			if (wad == NULL)
-				continue;
-
-			int lump = wad->ddf_lumps[d];
-
-			if (lump >= 0)
-			{
-				I_Printf("Loading %s from: %s\n", DDF_Readers[d].name, df->name.c_str());
-
-				int length;
-				char *data = (char *) W_LoadLump(lump, &length);
-
-				// call read function
-				(* DDF_Readers[d].func)(data, length);
-
-				W_DoneWithLump(data);
-			}
-
-			// handle Boom's ANIMATED and SWITCHES lumps
-			// FIXME: FACTOR THIS OUTTA HERE!
-
-			if (d == ANIM_READER && wad->animated >= 0)
-			{
-				I_Printf("Loading ANIMATED from: %s\n", df->name.c_str());
-
-				int length;
-				byte *data = W_LoadLump(wad->animated, &length);
-
-				DDF_ParseANIMATED(data, length);
-				W_DoneWithLump(data);
-			}
-			if (d == SWTH_READER && wad->switches >= 0)
-			{
-				I_Printf("Loading SWITCHES from: %s\n", df->name.c_str());
-
-				int length;
-				byte *data = W_LoadLump(wad->switches, &length);
-
-				DDF_ParseSWITCHES(data, length);
-				W_DoneWithLump(data);
-			}
-
-			// handle BOOM Colourmaps (between C_START and C_END)
-			if (d == COLM_READER && wad->colmap_lumps.GetSize() > 0)
-			{
-				for (int i=0; i < wad->colmap_lumps.GetSize(); i++)
-				{
-					int lump = wad->colmap_lumps[i];
-
-					DDF_ColourmapAddRaw(W_GetLumpName(lump), W_LumpLength(lump));
-				}
-			}
-		}
-
-		std::string msg_buf(epi::STR_Format(
-			"Loaded %s %s\n", (d == NUM_DDF_READERS-1) ? "RTS" : "DDF",
-				DDF_Readers[d].print_name));
-
-		I_Printf(msg_buf.c_str());
+		DDF_ColourmapAddRaw(W_GetLumpName(lump), W_LumpLength(lump));
 	}
-
 }
 
 
@@ -1691,7 +1564,7 @@ void W_ReadCoalLumps(void)
 		data_file_c *df = data_files[f];
 		wad_file_c *wad = df->wad;
 
-		// FIXME support single lumps and PK3
+		// FIXME support PK3
 		if (wad == NULL)
 			continue;
 

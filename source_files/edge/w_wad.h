@@ -53,7 +53,6 @@ typedef enum
 }
 lumplist_e;
 
-void W_ReadDDF(void);
 void W_ReadCoalLumps(void);
 
 int W_CheckNumForName(const char *name);

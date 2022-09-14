@@ -306,6 +306,12 @@ void R_InitialResolution(void)
 {
 	L_WriteDebug("R_InitialResolution...\n");
 
+	if (DISPLAYMODE == 2)
+	{
+		if (DoExecuteChangeResolution(&borderless_mode))
+			return;
+	}
+
 	scrmode_c mode;
 
 	mode.width  = SCREENWIDTH;

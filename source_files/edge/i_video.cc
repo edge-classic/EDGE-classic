@@ -217,11 +217,7 @@ bool I_SetScreenSize(scrmode_c *mode)
 	{
 		if (mode->display_mode == mode->SCR_BORDERLESS) 
 		{
-			SDL_SetWindowFullscreen(my_vis, 0);
-			SDL_SetWindowBordered(my_vis, SDL_FALSE);
-			SDL_SetWindowSize(my_vis, mode->width, mode->height);
-			SDL_SetWindowPosition(my_vis, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-			SDL_MaximizeWindow(my_vis);
+			SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN_DESKTOP);
 			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
 				mode->width, mode->height, mode->depth);
 		}
@@ -241,7 +237,6 @@ bool I_SetScreenSize(scrmode_c *mode)
 		else
 		{
 			SDL_SetWindowFullscreen(my_vis, 0);
-			SDL_SetWindowBordered(my_vis, SDL_TRUE);
 			SDL_SetWindowSize(my_vis, mode->width, mode->height);
 			SDL_SetWindowPosition(my_vis, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
@@ -253,7 +248,7 @@ bool I_SetScreenSize(scrmode_c *mode)
 		std::string temp_title = TITLE;
 		temp_title.append(" ").append(EDGEVERSTR);
 		my_vis = SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
-			SDL_WINDOW_OPENGL | (mode->display_mode == mode->SCR_BORDERLESS ? (SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED) :
+			SDL_WINDOW_OPENGL | (mode->display_mode == mode->SCR_BORDERLESS ? (SDL_WINDOW_FULLSCREEN_DESKTOP) :
 			(mode->display_mode == mode->SCR_FULLSCREEN ? SDL_WINDOW_FULLSCREEN : 0)));
 		SDL_GL_CreateContext(my_vis);
 		gladLoaderLoadGL();

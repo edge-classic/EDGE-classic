@@ -34,8 +34,12 @@
 #include "file_sub.h"
 #include "filesystem.h"
 
-#include "w_files.h"
+// DDF
+#include "wadfixes.h"
+
 #include "dstrings.h"
+#include "w_files.h"
+#include "w_wad.h"
 
 
 std::vector<data_file_c *> data_files;
@@ -87,13 +91,23 @@ extern void ProcessFixers(data_file_c *df);
 extern void ProcessDehacked(data_file_c *df);
 extern void ProcessWad(data_file_c *df, size_t file_index);
 extern void ProcessSingleLump(data_file_c *df);
-extern void W_ReadWADFIXES(void);
+
 extern std::string W_BuildNodesForWad(data_file_c *df);
 
 
-//
-// ProcessFile
-//
+void W_ReadWADFIXES(void)
+{
+	I_Printf("Loading WADFIXES\n");
+
+	int length;
+	char *data = (char *) W_LoadLump("WADFIXES", &length);
+
+	DDF_ReadFixes(data, length);
+
+	W_DoneWithLump(data);
+}
+
+
 static void ProcessFile(data_file_c *df)
 {
 	size_t file_index = data_files.size();

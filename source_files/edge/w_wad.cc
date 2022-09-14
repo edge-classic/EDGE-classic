@@ -1215,7 +1215,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 
 void ProcessSingleLump(data_file_c *df)
 {
-/* TODO fix this, or disable single lumps altogether
+/* TODO probably remove support for this -- if not, fix the stuff below
 
 	char lump_name[32];
 
@@ -1582,24 +1582,6 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->partime = Maps.maps[i].partime;
 		
 	}
-}
-
-void W_ReadWADFIXES(void)
-{
-	ddf_reader_t wadfix_reader = {"WADFIXES","Fixes", DDF_ReadFixes };
-
-	I_Printf("Loading %s\n", wadfix_reader.print_name);
-
-	// call read function
-	(* wadfix_reader.func)(NULL, 0);
-
-	int length;
-	char *data = (char *) W_LoadLump("WADFIXES", &length);
-
-	// call read function
-	(* wadfix_reader.func)(data, length);
-
-	W_DoneWithLump(data);
 }
 
 // TODO move to w_files.cc

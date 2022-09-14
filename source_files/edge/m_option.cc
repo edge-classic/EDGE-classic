@@ -413,7 +413,6 @@ static optmenuitem_t resoptions[] =
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
 	{OPT_Function, "New Mode",  NULL, 0, NULL, M_ChangeResFull, NULL},
 	{OPT_Function, "New Size",  NULL, 0, NULL, M_ChangeResSize, NULL},
-	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
 	{OPT_Function, "Apply Changes", NULL, 0, NULL, M_OptionSetResolution, NULL},
 /*	{OPT_Function, "Test Resolution", NULL, 0, NULL, M_OptionTestResolution, NULL}, */
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
@@ -1018,13 +1017,22 @@ void M_OptDrawer()
 	{
 		bool is_selected = (i == curr_menu->pos);
 
+		if (curr_menu == &res_optmenu && curr_menu->items[i].routine == M_ChangeResSize)
+		{
+			if (new_scrmode.display_mode == 2)
+			{
+				curry += deltay;
+				continue;
+			}
+		}
+
 		HL_WriteText(style, is_selected ? styledef_c::T_TITLE : styledef_c::T_TEXT,
 		             (curr_menu->menu_center) - style->fonts[0]->StringWidth(curr_menu->items[i].name),
 					 curry, curr_menu->items[i].name);
 		
-		if (curr_menu == &analogue_optmenu && strcasecmp("Joystick Device", curr_menu->items[i].name) == 0)
+		if (curr_menu == &analogue_optmenu && curr_menu->items[i].switchvar == &joystick_device)
 		{
-			HL_WriteText(style, styledef_c::T_TEXT, 225, curry, "AXIS TEST");
+			HL_WriteText(style, styledef_c::T_TEXT, 225, curry, "Axis Test");
 			std::string axis = "None";
 			for (int j = 0; j < 6; j++)
 			{
@@ -1149,20 +1157,6 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
 {
 	char tempstring[80];
 	
-	// These seems ununsed for now -- Dasho
-	/*float ALTscale = 1.0;
-	float HELPscale = 1.0;
-
-	if(style->def->text[styledef_c::T_ALT].scale)
-	{
-		ALTscale=style->def->text[styledef_c::T_ALT].scale;
-	}
-
-	if(style->def->text[styledef_c::T_HELP].scale)
-	{
-		HELPscale=style->def->text[styledef_c::T_HELP].scale;
-	}*/
-
 	// Draw current resolution
 	int y = topy;
 
@@ -1170,24 +1164,29 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
 	y += (dy*2);
 
 	y += dy;
-	sprintf(tempstring, "%s", new_scrmode.display_mode == new_scrmode.SCR_BORDERLESS ? "Borderless Fullscreen" :
+	sprintf(tempstring, "%s", new_scrmode.display_mode == 2 ? "Borderless Fullscreen" :
 		(new_scrmode.display_mode == new_scrmode.SCR_FULLSCREEN ? "Fullscreen" : "Windowed"));
 	HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
 
-	y += dy;
-	sprintf(tempstring, "%dx%d", new_scrmode.width, new_scrmode.height);
-	HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
+	if (new_scrmode.display_mode < 2)
+	{
+		y += dy;
+		sprintf(tempstring, "%dx%d", new_scrmode.width, new_scrmode.height);
+		HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
+	}
 
 	// Draw selected resolution and mode:
 	y = bottomy;
-	y += true ? (dy*3) : (dy/2);
 
 	sprintf(tempstring, "Current Resolution:");
 	HL_WriteText(style,styledef_c::T_HELP, 160 - (style->fonts[0]->StringWidth(tempstring) / 2), y, tempstring);
 
 	y += dy;
 	y += 5;
-	sprintf(tempstring, "%d x %d %s", SCREENWIDTH, SCREENHEIGHT, DISPLAYMODE == 2 ? "Borderless Fullscreen" : (DISPLAYMODE == 1 ? "Fullscreen" : "Windowed"));
+	if (DISPLAYMODE == 2)
+		sprintf(tempstring, "%s", "Borderless Fullscreen");
+	else
+		sprintf(tempstring, "%d x %d %s", SCREENWIDTH, SCREENHEIGHT, DISPLAYMODE == 1 ? "Fullscreen" : "Windowed");
 
 	HL_WriteText(style,styledef_c::T_ALT, 160 - (style->fonts[1]->StringWidth(tempstring) / 2), y, tempstring);
 }
@@ -1301,6 +1300,14 @@ bool M_OptResponder(event_t * ev, int ch)
 			do
 			{
 				curr_menu->pos++;
+				if (curr_menu == &res_optmenu && new_scrmode.display_mode == 2)
+				{
+					if (curr_menu->pos >= 0 && curr_menu->pos < curr_menu->item_num)
+					{
+						if (curr_menu->items[curr_menu->pos].routine == M_ChangeResSize)
+							curr_menu->pos++;
+					}
+				}
 				if (curr_menu->pos >= curr_menu->item_num)
 					curr_menu->pos = 0;
 				curr_item = curr_menu->items + curr_menu->pos;
@@ -1316,6 +1323,14 @@ bool M_OptResponder(event_t * ev, int ch)
 			do
 			{
 				curr_menu->pos++;
+				if (curr_menu == &res_optmenu && new_scrmode.display_mode == 2)
+				{
+					if (curr_menu->pos >= 0 && curr_menu->pos < curr_menu->item_num)
+					{
+						if (curr_menu->items[curr_menu->pos].routine == M_ChangeResSize)
+							curr_menu->pos++;
+					}
+				}
 				if (curr_menu->pos >= curr_menu->item_num)
 				{
 					if (curr_menu->key_page[0])
@@ -1341,6 +1356,14 @@ bool M_OptResponder(event_t * ev, int ch)
 			do
 			{
 				curr_menu->pos--;
+				if (curr_menu == &res_optmenu && new_scrmode.display_mode == 2)
+				{
+					if (curr_menu->pos >= 0 && curr_menu->pos < curr_menu->item_num)
+					{
+						if (curr_menu->items[curr_menu->pos].routine == M_ChangeResSize)
+							curr_menu->pos--;
+					}
+				}
 				if (curr_menu->pos < 0)
 					curr_menu->pos = curr_menu->item_num - 1;
 				curr_item = curr_menu->items + curr_menu->pos;
@@ -1356,6 +1379,14 @@ bool M_OptResponder(event_t * ev, int ch)
 			do
 			{
 				curr_menu->pos--;
+				if (curr_menu == &res_optmenu && new_scrmode.display_mode == 2)
+				{
+					if (curr_menu->pos >= 0 && curr_menu->pos < curr_menu->item_num)
+					{
+						if (curr_menu->items[curr_menu->pos].routine == M_ChangeResSize)
+							curr_menu->pos--;
+					}
+				}
 				if (curr_menu->pos < 0)
 				{
 					if (curr_menu->key_page[0])

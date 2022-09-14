@@ -890,7 +890,7 @@ static void IdentifyVersion(void)
         I_Error("IdentifyVersion: Could not find required %s.%s!\n", 
             REQUIREDWAD, EDGEWADEXT);
 
-    W_AddRawFilename(reqwad.c_str(), FLKIND_EWad);
+    W_AddFilename(reqwad.c_str(), FLKIND_EWad);
 
 	I_Debugf("- Identify Version\n");
 
@@ -1001,7 +1001,7 @@ static void IdentifyVersion(void)
     	}
 		if (iwad_test) delete iwad_test;
 		if (unique_lump_match)
-			W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad);
+			W_AddFilename(iwad_file.c_str(), FLKIND_IWad);
 		else
 			I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
     }
@@ -1110,7 +1110,7 @@ static void IdentifyVersion(void)
 		if (best_score == 0)
 			I_Error("IdentifyVersion: No IWADs found!\n");
 		else
-			W_AddRawFilename(best_match.c_str(), FLKIND_IWad);
+			W_AddFilename(best_match.c_str(), FLKIND_IWad);
     }
 
 	I_Debugf("IWAD BASE = [%s]\n", iwad_base.c_str());
@@ -1126,7 +1126,7 @@ static void Add_Base(void)
 	std::transform(base_wad.begin(), base_wad.end(), base_wad.begin(), ::tolower);
 	base_path = epi::PATH_Join(base_path.c_str(), base_wad.append("_base.wad").c_str());
 	if (epi::FS_Access(base_path.c_str(), epi::file_c::ACCESS_READ)) 
-		W_AddRawFilename(base_path.c_str(), FLKIND_EWad);
+		W_AddFilename(base_path.c_str(), FLKIND_EWad);
 	else
 		I_Warning("Base WAD not found for the %s IWAD! Check the /edge_base folder of your EDGE-Classic install!\n", iwad_base.c_str());
 }
@@ -1242,7 +1242,7 @@ static void AddSingleCmdLineFile(const char *name)
 	if (kind != FLKIND_Lump)
 	{
 		std::string fn = M_ComposeFileName(game_dir.c_str(), name);
-		W_AddRawFilename(fn.c_str(), kind);
+		W_AddFilename(fn.c_str(), kind);
 	}
 }
 
@@ -1300,7 +1300,7 @@ static void AddCommandLineFiles(void)
 
 			std::string fn = M_ComposeFileName(game_dir.c_str(), ps);
 
-			W_AddRawFilename(fn.c_str(), FLKIND_RTS);
+			W_AddFilename(fn.c_str(), FLKIND_RTS);
 		}
 
 		p = M_CheckNextParm("-script", p-1);
@@ -1335,7 +1335,7 @@ static void AddCommandLineFiles(void)
 
 			if (fn_file)
 			{
-				W_AddRawFilename(fn.c_str(), FLKIND_Deh);
+				W_AddFilename(fn.c_str(), FLKIND_Deh);
 				delete fn_file;
 			}
 		}

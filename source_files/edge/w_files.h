@@ -73,7 +73,7 @@ public:
 
 extern std::vector<data_file_c *> data_files;
 
-void W_AddRawFilename(const char *file, int kind);
+size_t W_AddFilename(const char *file, int kind);
 int W_GetNumFiles(void);
 void W_ShowFiles(void);
 

@@ -1108,7 +1108,7 @@ static void AddFile(data_file_c *df, size_t file_index, int dyn_index, std::stri
 
 	I_Printf("  Adding %s\n", filename);
 
-	if (file_index == 1)  // FIXME explain this
+	if (file_index == 1)  // FIXME explain this number
 		W_ReadWADFIXES();
 
 	df->file = file;  // FIXME review lifetime of this open file
@@ -1341,16 +1341,11 @@ void W_BuildNodes(void)
 					I_Error("Failed to build GL nodes for: %s\n", df->name.c_str());
 			}
 
-			size_t new_index = data_files.size();
+			size_t new_index = W_AddFilename(gwa_filename.c_str(), FLKIND_GWad);
 
-			// FIXME use AddRawFilename ?
-			data_file_c *new_df = new data_file_c(gwa_filename.c_str(), FLKIND_GWad);
-			data_files.push_back(new_df);
+			AddFile(data_files[new_index], new_index, total_files, "");
 
-			AddFile(new_df, new_index, total_files, "");
-
-			df->wad->companion_gwa = total_files + 1;
-			total_files++;
+			df->wad->companion_gwa = (int)new_index;
 		}
 	}
 }

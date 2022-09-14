@@ -51,15 +51,18 @@ int W_GetNumFiles(void)
 //----------------------------------------------------------------------------
 
 //
-// W_AddRawFilename
+// W_AddFilename
 //
-void W_AddRawFilename(const char *file, int kind)
+size_t W_AddFilename(const char *file, int kind)
 {
 	I_Debugf("Added filename: %s\n", file);
 
-	data_file_c *df = new data_file_c(file, kind);
+	size_t index = data_files.size();
 
+	data_file_c *df = new data_file_c(file, kind);
 	data_files.push_back(df);
+
+	return index;
 }
 
 

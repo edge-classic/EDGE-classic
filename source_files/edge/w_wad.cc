@@ -130,6 +130,9 @@ public:
 
 	~wad_file_c()
 	{ }
+
+	bool HasLevel(const char *name) const;
+
 };
 
 
@@ -347,9 +350,18 @@ static bool IsSkin(const char *name)
 	return (strncmp(name, "S_SKIN", 6) == 0);
 }
 
-//
-// W_GetTextureLumps
-//
+
+bool wad_file_c::HasLevel(const char *name) const
+{
+	for (int L = 0 ; L < level_markers.GetSize() ; L++)
+	{
+		if (strcmp(lumpinfo[level_markers[L]].name, name) == 0)
+			return true;
+	}
+	return false;
+}
+
+
 void W_GetTextureLumps(int file, wadtex_resource_c *res)
 {
 	SYS_ASSERT(0 <= file && file < (int)data_files.size());
@@ -799,14 +811,10 @@ static void CheckForLevel(wad_file_c *wad, int lump, const char *name,
 		}
 
 		// check for duplicates (Slige sometimes does this)
-		// FIXME make this a method
-		for (int L = 0; L < wad->level_markers.GetSize(); L++)
+		if (wad->HasLevel(name))
 		{
-			if (strcmp(lumpinfo[wad->level_markers[L]].name, name) == 0)
-			{
-				I_Warning("Duplicate level '%s' ignored.\n", name);
-				return;
-			}
+			I_Warning("Duplicate level '%s' ignored.\n", name);
+			return;
 		}
 
 		wad->level_markers.Insert(lump);

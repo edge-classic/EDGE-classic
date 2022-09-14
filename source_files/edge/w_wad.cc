@@ -1056,8 +1056,12 @@ size_t W_AddPending(const char *file, int kind)
 	return index;
 }
 
-static void DoFixers(wad_file_c *wad)
+static void ProcessFixers(data_file_c *df)
 {
+	wad_file_c *wad = df->wad;
+	if (wad == NULL)
+		return;
+
 	std::string fix_checker;
 
 	fix_checker = wad->md5_string;
@@ -1086,6 +1090,53 @@ static void DoFixers(wad_file_c *wad)
 	}
 }
 
+static void ProcessDehacked(data_file_c *df)
+{
+	if (df->kind == FLKIND_Deh)
+		{ /* ok */ }
+	else if (df->wad != NULL && df->wad->deh_lump >= 0)
+		{ /* ok */ }
+	else
+		return;
+
+	// we just need a name that won't conflict with any other HWA file
+	// in the *current* session.  the following is crude, but works.
+	static int total = 0;
+
+	char base_name[64];
+	sprintf(base_name, "DEH_%04d.%s", total, EDGEHWAEXT);
+	total += 1;
+
+	std::string hwa_filename = epi::PATH_Join(cache_dir.c_str(), base_name);
+
+	I_Debugf("Actual_HWA_filename: %s\n", hwa_filename.c_str());
+
+	if (df->kind == FLKIND_Deh)
+	{
+		I_Printf("Converting DEH file: %s\n", df->name.c_str());
+
+		if (! DH_ConvertFile(df->name.c_str(), hwa_filename.c_str()))
+			I_Error("Failed to convert DeHackEd patch: %s\n", df->name.c_str());
+	}
+	else
+	{
+		int deh_lump = df->wad->deh_lump;
+
+		const char *lump_name = lumpinfo[deh_lump].name;
+
+		I_Printf("Converting [%s] lump in: %s\n", lump_name, df->name.c_str());
+
+		int length;
+		const byte *data = (const byte *)W_LoadLump(deh_lump, &length);
+
+		if (! DH_ConvertLump(data, length, lump_name, hwa_filename.c_str()))
+			I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());
+
+		W_DoneWithLump(data);
+	}
+
+	W_AddPending(hwa_filename.c_str(), FLKIND_HWad);
+}
 
 static void ProcessWad(data_file_c *df, size_t file_index)
 {
@@ -1219,7 +1270,7 @@ static void ProcessFile(data_file_c *df)
 
 	I_Printf("  Adding %s\n", filename);
 
-	if (file_index == 1)  // FIXME explain this number
+	if (file_index == 1)  // 1 == edge-defs.wad
 		W_ReadWADFIXES();
 
 	df->file = file;  // FIXME review lifetime of this open file
@@ -1237,80 +1288,24 @@ static void ProcessFile(data_file_c *df)
 		ProcessSingleLump(df);
 	}
 
-	if (wad != NULL)
-	{
-	}
-
 	SortLumps();
 
 	if (wad != NULL)
 		SortSpriteLumps(wad);
 
 	// check for unclosed sprite/flat/patch lists
-	if (within_sprite_list)
-		I_Warning("Missing S_END marker in %s.\n", filename);
-
-	if (within_flat_list)
-		I_Warning("Missing F_END marker in %s.\n", filename);
-   
-	if (within_patch_list)
-		I_Warning("Missing P_END marker in %s.\n", filename);
-   
-	if (within_colmap_list)
-		I_Warning("Missing C_END marker in %s.\n", filename);
-   
-	if (within_tex_list)
-		I_Warning("Missing TX_END marker in %s.\n", filename);
-   
-	if (within_hires_list)
-		I_Warning("Missing HI_END marker in %s.\n", filename);
+	if (within_sprite_list) I_Warning("Missing S_END marker in %s.\n", filename);
+	if (within_flat_list)   I_Warning("Missing F_END marker in %s.\n", filename);
+	if (within_patch_list)  I_Warning("Missing P_END marker in %s.\n", filename);
+	if (within_colmap_list) I_Warning("Missing C_END marker in %s.\n", filename);
+	if (within_tex_list)    I_Warning("Missing TX_END marker in %s.\n", filename);
+	if (within_hires_list)  I_Warning("Missing HI_END marker in %s.\n", filename);
    
 	// handle DeHackEd patch files
-	// TODO refactor this outta here
-/* FIXME !!!
+	ProcessDehacked(df);
 
-	if (df->kind == FLKIND_Deh || df->deh_lump >= 0)
-	{
-		std::string hwa_filename;
-
-		char base_name[64];
-		sprintf(base_name, "DEH_%04d.%s", datafile, EDGEHWAEXT);
- 
-		hwa_filename = epi::PATH_Join(cache_dir.c_str(), base_name);
-
-		I_Debugf("Actual_HWA_filename: %s\n", hwa_filename.c_str());
-
-			if (df->kind == FLKIND_Deh)
-			{
-                I_Printf("Converting DEH file: %s\n", filename);
-
-				if (! DH_ConvertFile(filename, hwa_filename.c_str()))
-					I_Error("Failed to convert DeHackEd patch: %s\n", filename);
-			}
-			else
-			{
-				const char *lump_name = lumpinfo[df->deh_lump].name;
-
-				I_Printf("Converting [%s] lump in: %s\n", lump_name, filename);
-
-				int length;
-				const byte *data = (const byte *)W_LoadLump(df->deh_lump, &length);
-
-				if (! DH_ConvertLump(data, length, lump_name, hwa_filename.c_str()))
-					I_Error("Failed to convert DeHackEd LUMP in: %s\n", filename);
-
-				W_DoneWithLump(data);
-			}
-
-			// Load it (using good ol' recursion again).
-	//FIXME !!		ProcessFile(hwa_filename.c_str(), FLKIND_HWad, -1, df->md5_string);
-	}
-*/
-
-	if (wad != NULL)
-	{
-		DoFixers(wad);
-	}
+	// handle fixer-uppers
+	ProcessFixers(df);
 }
 
 //

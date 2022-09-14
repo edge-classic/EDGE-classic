@@ -22,7 +22,11 @@
 
 #include "i_defs.h"
 
+extern std::vector<std::string> available_soundfonts;
+
 bool S_StartupTSF(void);
+
+void S_RestartTSF(void);
 
 abstract_music_c * S_PlayTSF(byte *data, int length, bool is_mus,
 			float volume, bool loop);

@@ -77,6 +77,7 @@
 
 #include "str_format.h"
 #include "font.h"
+#include "path.h"
 
 #include "main.h"
 
@@ -105,6 +106,7 @@
 #include "r_image.h"
 #include "w_wad.h"
 #include "r_wipe.h"
+#include "s_tsf.h"
 
 #include "i_ctrl.h"
 
@@ -118,6 +120,7 @@ extern cvar_c m_language;
 extern cvar_c r_crosshair;
 extern cvar_c r_crosscolor;
 extern cvar_c r_crosssize;
+extern cvar_c s_soundfont;
 
 static int menu_crosshair;
 static int menu_crosscolor;
@@ -176,6 +179,7 @@ static void M_ChangeResFull(int keypressed);
 
 static void M_LanguageDrawer(int x, int y, int deltay);
 static void M_ChangeLanguage(int keypressed);
+static void M_ChangeSoundfont(int keypressed);
 
 static char YesNo[]     = "Off/On";  // basic on/off
 static char CrossH[]    = "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double";
@@ -479,6 +483,7 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
+	{OPT_Function, "MIDI Soundfont", NULL,  0, NULL, M_ChangeSoundfont, NULL},
 	{OPT_Boolean, "OPL Music Mode",  YesNo, 2,  &var_opl_music, NULL, "NeedRestart"},
 	{OPT_Boolean, "PC Speaker Mode", YesNo, 2,  &var_pc_speaker_mode, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
@@ -924,26 +929,6 @@ void M_OptDrawer()
 
 	style->DrawBackground();
 
-/*
-	if (style->bg_image)
-	{
-		float old_alpha = HUD_GetAlpha();
-		HUD_SetAlpha(style->def->bg.translucency);
-		if (style->def->special == 0)
-			HUD_StretchImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
-		else
-			HUD_TileImage(-90, 0, 500, 200, style->bg_image, 0.0, 0.0);
-		HUD_SetAlpha(old_alpha);
-	}
-	else
-	{
-		float old_alpha = HUD_GetAlpha();
-		HUD_SetAlpha(style->def->bg.translucency);
-		HUD_SolidBox(-90, 0, 500, 200, style->def->bg.colour != RGB_NO_VALUE ?
-			style->def->bg.colour : T_BLACK);
-		HUD_SetAlpha(old_alpha);
-	}
-*/
 	if (! style->fonts[0])
 		return;
 
@@ -1025,9 +1010,9 @@ void M_OptDrawer()
 		             (curr_menu->menu_center) - style->fonts[0]->StringWidth(curr_menu->items[i].name),
 					 curry, curr_menu->items[i].name);
 		
-		if (curr_menu == &analogue_optmenu && strcasecmp("Joystick Device", curr_menu->items[i].name) == 0)
+		if (curr_menu == &analogue_optmenu && curr_menu->items[i].switchvar == &joystick_device)
 		{
-			HL_WriteText(style, styledef_c::T_TEXT, 225, curry, "AXIS TEST");
+			HL_WriteText(style, styledef_c::T_TEXT, 225, curry, "Axis Test");
 			std::string axis = "None";
 			for (int j = 0; j < 6; j++)
 			{
@@ -1060,6 +1045,12 @@ void M_OptDrawer()
 				}
 			}
 			HL_WriteText(style, styledef_c::T_ALT, 225 + (style->fonts[0]->StringWidth("AXIS TEST") / 2) - (style->fonts[0]->StringWidth(axis.c_str()) / 2), curry + deltay, axis.c_str());
+		}
+
+		// Draw current soundfont
+		if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeSoundfont)
+		{
+			HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, epi::PATH_GetBasename(s_soundfont.c_str()).c_str());
 		}
 
 		// -ACB- 1998/07/15 Menu Cursor is colour indexed.
@@ -1901,6 +1892,47 @@ static void M_ChangeLanguage(int keypressed)
 	m_language = language.GetName();
 }
 
+//
+// M_ChangeSoundfont
+//
+//
+static void M_ChangeSoundfont(int keypressed)
+{
+	int sf2_pos = -1;
+	for(int i=0; i < available_soundfonts.size(); i++)
+	{
+		if (strcasecmp(s_soundfont.c_str(), available_soundfonts.at(i).c_str()) == 0)
+		{
+			sf2_pos = i;
+			break;
+		}
+	}
+
+	if (sf2_pos < 0)
+	{
+		I_Warning("M_ChangeSoundfont: Could not read list of available soundfonts. Keeping current selection!\n");
+		return;
+	}
+
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	{
+		if (sf2_pos - 1 >= 0)
+			sf2_pos--;
+		else
+			sf2_pos = available_soundfonts.size() - 1;
+	}
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	{
+		if (sf2_pos + 1 >= available_soundfonts.size())
+			sf2_pos = 0;
+		else
+			sf2_pos++;
+	}
+
+	// update cvar
+	s_soundfont = available_soundfonts.at(sf2_pos);
+	S_RestartTSF();
+}
 
 //
 // M_ChangeResSize

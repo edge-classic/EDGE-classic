@@ -48,6 +48,7 @@ public:
 /* VARIABLES */
 
 extern int mus_volume;  // 0 .. SND_SLIDER_NUM-1
+extern int entry_playing;
 
 /* FUNCTIONS */
 

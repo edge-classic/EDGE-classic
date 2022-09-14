@@ -47,6 +47,10 @@ static bool tsf_inited;
 
 tsf *edge_tsf;
 
+cvar_c s_soundfont("s_soundfont", "default.sf2", CVAR_ARCHIVE);
+
+std::vector<std::string> available_soundfonts;
+
 class tsf_player_c : public abstract_music_c
 {
 private:
@@ -239,26 +243,39 @@ private:
 
 bool S_StartupTSF(void)
 {
-
 	I_Printf("Initializing TinySoundFont...\n");
 
-	if (var_pc_speaker_mode)
+	// Populate available soundfont vector here (might as well)
+	epi::filesystem_dir_c sfd;
+	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
+
+	if (!FS_ReadDir(&sfd, soundfont_dir.c_str(), "*.sf2"))
 	{
-		edge_tsf = tsf_load_filename(epi::PATH_Join(game_dir.c_str(), "soundfont/bfb.sf2").c_str());
-		if (!edge_tsf) 
-		{
-			I_Warning("Could not load soundfont! Ensure that bfb.sf2 is present in the soundfont directory!\n");
-			return false;
-		}
+		I_Warning("TinySoundFont: Failed to read '%s' directory!\n", soundfont_dir.c_str());
 	}
 	else
 	{
-		edge_tsf = tsf_load_filename(epi::PATH_Join(game_dir.c_str(), "soundfont/default.sf2").c_str());
-		if (!edge_tsf) 
+		for (int i = 0; i < sfd.GetSize(); i++) 
 		{
-			I_Warning("Could not load soundfont! Ensure that default.sf2 is present in the soundfont directory!\n");
-			return false;
+			if(!sfd[i]->is_dir)
+			{
+				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i]->name.c_str()));		
+			}
 		}
+	}
+
+	edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), s_soundfont.c_str()).c_str());
+
+	if (!edge_tsf)
+	{
+		I_Warning("TinySoundFont: Could not load requested soundfont %s! Falling back to default soundfont!\n", s_soundfont.c_str());
+		edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), "default.sf2").c_str());
+	}
+
+	if (!edge_tsf) 
+	{
+		I_Warning("Could not load any soundfonts! Ensure that default.sf2 is present in the soundfont directory!\n");
+		return false;
 	}
 
 	tsf_channel_set_bank_preset(edge_tsf, 9, 128, 0);
@@ -270,6 +287,48 @@ bool S_StartupTSF(void)
 	tsf_inited = true;
 
 	return true; // OK!
+}
+
+// Should only be invoked when switching soundfonts
+void S_RestartTSF(void)
+{
+	I_Printf("Restarting TinySoundFont...\n");
+
+	int old_entry = entry_playing;
+
+	S_StopMusic();
+
+	tsf_inited = false;
+
+	tsf_close(edge_tsf);
+
+	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
+
+	edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), s_soundfont.c_str()).c_str());
+
+	if (!edge_tsf)
+	{
+		I_Warning("TinySoundFont: Could not load requested soundfont %s! Falling back to default soundfont!\n", s_soundfont.c_str());
+		edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), "default.sf2").c_str());
+	}
+
+	if (!edge_tsf) 
+	{
+		I_Warning("Could not load any soundfonts! Ensure that default.sf2 is present in the soundfont directory!\n");
+		return;
+	}
+
+	tsf_channel_set_bank_preset(edge_tsf, 9, 128, 0);
+
+	// reduce the overall gain by 6dB, to minimize the chance of clipping in
+	// songs with a lot of simultaneous notes.
+	tsf_set_output(edge_tsf, dev_stereo ? TSF_STEREO_INTERLEAVED : TSF_MONO, dev_freq, -6.0);
+
+	tsf_inited = true;
+
+	S_ChangeMusic(old_entry, true); // Restart track that was playing when switched
+
+	return; // OK!
 }
 
 abstract_music_c * S_PlayTSF(byte *data, int length, bool is_mus,

@@ -25,6 +25,9 @@
 //
 //------------------------------------------------------------------------
 
+#include <stdio.h>
+#include <string.h>
+
 #include "i_defs.h"
 #include "attacks.h"
 
@@ -38,8 +41,16 @@
 #include "things.h"
 #include "wad.h"
 
-#include <stdio.h>
-#include <string.h>
+// EPI
+#include "macros.h"
+#include "types.h"
+
+// DDF
+#include "main.h"
+
+// FIXME from ddf/sfx.h
+#undef sfx_None
+
 
 namespace Deh_Edge
 {
@@ -69,7 +80,11 @@ namespace Attacks
 	void FinishLump(void)
 	{
 		WAD::Printf("\n");
-		WAD::FinishLump();
+
+		int length;
+		const byte *data = WAD::FinishLump(&length);
+
+		DDF_ReadAtks((void *)data, length);
 	}
 
 	typedef struct

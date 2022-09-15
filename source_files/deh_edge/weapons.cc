@@ -25,6 +25,10 @@
 //
 //------------------------------------------------------------------------
 
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "i_defs.h"
 #include "weapons.h"
 
@@ -42,9 +46,16 @@
 #include "things.h"
 #include "wad.h"
 
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
+// EPI
+#include "macros.h"
+#include "types.h"
+
+// DDF
+#include "main.h"
+
+// FIXME from ddf/sfx.h
+#undef sfx_None
+
 
 namespace Deh_Edge
 {
@@ -127,7 +138,11 @@ namespace Weapons
 	void FinishLump(void)
 	{
 		WAD::Printf("\n");
-		WAD::FinishLump();
+
+		int length;
+		const byte *data = WAD::FinishLump(&length);
+
+		DDF_ReadWeapons((void *)data, length);
 	}
 
 	void HandleFlags(const weaponinfo_t *info, int w_num)

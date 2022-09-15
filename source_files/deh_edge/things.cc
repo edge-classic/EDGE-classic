@@ -62,6 +62,7 @@
 // FIXME from ddf/sfx.h
 #undef sfx_None
 
+
 namespace Deh_Edge
 {
 

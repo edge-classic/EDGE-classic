@@ -50,6 +50,8 @@ filekind_e;
 
 
 class wad_file_c;
+class pack_file_c;
+
 
 class data_file_c
 {
@@ -65,6 +67,9 @@ public:
 
 	// for FLKIND_IWad, PWad ... HWad
 	wad_file_c * wad;
+
+	// for FLKIND_PK3
+	pack_file_c * pack;
 
 public:
 	data_file_c(const char *_name, int _kind);

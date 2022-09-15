@@ -24,6 +24,36 @@
 
 #include "miniz.h"
 
+
+class pack_entry_c
+{
+public:
+	std::string name;
+
+	// position, length
+
+public:
+	pack_entry_c(const char *_name) : name(_name)
+	{ }
+
+	~pack_entry_c()
+	{ }
+};
+
+
+class pack_file_c
+{
+public:
+	std::vector<pack_entry_c> entries;
+
+public:
+	pack_file_c()
+	{ }
+
+	~pack_file_c()
+	{ }
+};
+
 // TODO
 
 //--- editor settings ---

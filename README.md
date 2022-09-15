@@ -45,7 +45,7 @@ Download from ModDB [here.](https://www.moddb.com/mods/duke-it-out-in-doom)
 
 A Total Conversion themed on the Aliens movies. New weapons, enemies, music, textures etc. Heavy use of 3D models.
 
-Download from MediaFire [here.](https://www.mediafire.com/file/uk82uwkkqlj2nmw/AEM.zip/file) The load order of the included WADs is D3tex.wad, AEM.wad, and AEM_Mapset.wad.
+Download from MediaFire [here.](https://www.moddb.com/mods/edge-classic-add-ons/downloads/aliens-stranded) The load order of the included WADs is D3tex.wad, AEM.wad, and AEM_Mapset.wad.
 
 ## DarkForces Doom
 
@@ -63,6 +63,7 @@ An optional texture pack to enhance the experience can be found [here.](https://
 - DEHEXTRA compatibility
 - A soundfont-capable MIDI player (.sf2 support)
 - Support for MP3 music and sound effects
+- UMAPINFO compatibility (almost complete)
 - Migration from SDL1 to SDL2 (longevity and potential new features)
 - Improved support for gamepads
 - Expanded DDF, RTS, and COAL features

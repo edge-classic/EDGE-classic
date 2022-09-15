@@ -25,6 +25,10 @@
 //
 //------------------------------------------------------------------------
 
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "i_defs.h"
 #include "text.h"
 
@@ -41,9 +45,16 @@
 #include "util.h"
 #include "wad.h"
 
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
+// EPI
+#include "macros.h"
+#include "types.h"
+
+// DDF
+#include "main.h"
+
+// FIXME from ddf/sfx.h
+#undef sfx_None
+
 
 namespace Deh_Edge
 {
@@ -717,7 +728,11 @@ namespace TextStr
 	void FinishTextLump(void)
 	{
 		WAD::Printf("\n");
-		WAD::FinishLump();
+
+		int length;
+		const byte *data = WAD::FinishLump(&length);
+
+		DDF_ReadLangs((void *)data, length);
 	}
 
 	void WriteTextString(const langinfo_t *info)

@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------
 
+#include <assert.h>
+
 #include "i_defs.h"
 #include "rscript.h"
 
@@ -36,7 +38,9 @@
 #include "util.h"
 #include "wad.h"
 
-#include <assert.h>
+
+extern void RAD_ReadScript(void *data, int size);
+
 
 namespace Deh_Edge
 {
@@ -130,7 +134,11 @@ namespace Rscript
 	void FinishLump(void)
 	{
 		WAD::Printf("\n");
-		WAD::FinishLump();
+
+		int length;
+		const byte *data = WAD::FinishLump(&length);
+
+		RAD_ReadScript((void *)data, length);
 	}
 
 	// returns MT number of monster involved

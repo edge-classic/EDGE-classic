@@ -25,6 +25,10 @@
 //
 //------------------------------------------------------------------------
 
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "i_defs.h"
 #include "sounds.h"
 
@@ -36,9 +40,15 @@
 #include "util.h"
 #include "wad.h"
 
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
+// EPI
+#include "macros.h"
+#include "types.h"
+
+// DDF
+#include "main.h"
+
+// FIXME from ddf/sfx.h
+#undef sfx_None
 
 
 namespace Deh_Edge
@@ -971,7 +981,11 @@ namespace Sounds
 	void FinishSoundLump(void)
 	{
 		WAD::Printf("\n");
-		WAD::FinishLump();
+
+		int length;
+		const byte *data = WAD::FinishLump(&length);
+
+		DDF_ReadSFX((void *)data, length);
 	}
 
 	void BeginMusicLump(void)
@@ -985,7 +999,11 @@ namespace Sounds
 	void FinishMusicLump(void)
 	{
 		WAD::Printf("\n");
-		WAD::FinishLump();
+
+		int length;
+		const byte *data = WAD::FinishLump(&length);
+
+		DDF_ReadMusicPlaylist((void *)data, length);
 	}
 
 	void WriteSound(int s_num)

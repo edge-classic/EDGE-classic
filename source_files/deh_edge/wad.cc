@@ -209,6 +209,12 @@ byte * WAD::FinishLump(int *size)
 	if (! cur_lump)
 		InternalError("WAD_FinishLump: not started.\n");
 
+	// ensure a NUL terminated buffer
+	byte zeros[4] = { 0, 0, 0, 0 };
+
+	WAD::AddData(zeros, 4);
+
+
 	byte *result = cur_lump->data;
 
 	if (size != NULL)

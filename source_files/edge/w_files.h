@@ -63,7 +63,7 @@ public:
 	int kind;
 
 	// file object   [ TODO review when active ]
-    epi::file_c *file;
+	epi::file_c *file;
 
 	// for FLKIND_IWad, PWad ... HWad
 	wad_file_c * wad;

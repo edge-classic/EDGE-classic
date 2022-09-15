@@ -33,6 +33,7 @@
 #include "file.h"
 #include "file_sub.h"
 #include "filesystem.h"
+#include "path.h"
 
 // DDF
 #include "main.h"
@@ -123,30 +124,33 @@ static void ProcessFile(data_file_c *df)
 	size_t file_index = data_files.size();
 	data_files.push_back(df);
 
-	// open the file and add to directory
+	// open a WAD/PK3 file and add contents to directory
 	const char *filename = df->name.c_str();
-
-    epi::file_c *file = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-	if (file == NULL)
-	{
-		I_Error("Couldn't open file %s\n", filename);
-		return;
-	}
 
 	I_Printf("  Adding %s\n", filename);
 
-	if (file_index == 1)  // 1 means "edge-defs.wad"
-		W_ReadWADFIXES();
+	if (df->kind <= FLKIND_HWad || df->kind == FLKIND_PK3)
+	{
+		epi::file_c *file = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+		if (file == NULL)
+		{
+			I_Error("Couldn't open file %s\n", filename);
+			return;
+		}
 
-	df->file = file;  // FIXME review lifetime of this open file
+		df->file = file;
+	}
 
-	// for RTS scripts, adding the data_file is enough
-	if (df->kind == FLKIND_RTS)
+	// for DDF and RTS, adding the data_file is enough
+	if (df->kind == FLKIND_RTS || df->kind == FLKIND_DDF)
 		return;
 
 	if (df->kind <= FLKIND_HWad)
 	{
 		ProcessWad(df, file_index);
+
+		if (file_index == 0)  // "edge-defs.wad"
+			W_ReadWADFIXES();
 	}
 	else
 	{
@@ -270,25 +274,61 @@ int W_CheckDDFLumpName(const char *name)
 }
 
 
-static void W_ReadDDF_ForFile(data_file_c *df, int d)
+static void W_ReadDDF_FromFile(data_file_c *df, int d)
 {
-	wad_file_c *wad = df->wad;
+	wad_file_c  *wad  = df->wad;
+	pack_file_c *pack = df->pack;
 
-	const char * ddf_lump = DDF_Readers[d].lump_name;
+	const char * lump_name = DDF_Readers[d].lump_name;
 
-	// all script files get parsed here
-	if (strcmp(ddf_lump, "RSCRIPT") == 0 && df->kind == FLKIND_RTS)
+	// external script files get parsed here
+	if (strcmp(lump_name, "RSCRIPT") == 0 && df->kind == FLKIND_RTS)
 	{
 		I_Printf("Loading RTS script: %s\n", df->name.c_str());
+
+		// FIXME load file here, call RAD_ReadScript, free data
 
 		RAD_LoadFile(df->name.c_str());
 		return;
 	}
 
+	// handle standalone ddf/ldf files
+	if (df->kind == FLKIND_DDF)
+	{
+		std::string base_name = epi::PATH_GetFilename(df->name.c_str());
+
+		if (stricmp(base_name.c_str(), DDF_Readers[d].pack_name) == 0)
+		{
+			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, df->name.c_str());
+
+			epi::file_c *F = epi::FS_Open(df->name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+			if (F == NULL)
+				I_Error("Couldn't open file: %s\n", df->name.c_str());
+
+			char *data = (char *) F->LoadIntoMemory();
+			if (data == NULL)
+				I_Error("Couldn't read file: %s\n", df->name.c_str());
+
+			int length = (int)strlen(data);  // TODO make it not needed
+
+			// call read function
+			(* DDF_Readers[d].func)(data, length);
+
+			delete[] data;
+			delete F;
+
+			return;
+		}
+
+		/* FIXME this don't work, do it another way
+		if (d == NUM_DDF_READERS-1)
+			I_Error("Unknown DDF filename: %s\n", base_name.c_str());
+		*/
+		return;
+	}
+
 	if (df->kind >= FLKIND_RTS)
 		return;
-
-	// TODO : PK3
 
 	if (wad != NULL)
 	{
@@ -306,13 +346,21 @@ static void W_ReadDDF_ForFile(data_file_c *df, int d)
 
 			W_DoneWithLump(data);
 		}
+	}
 
+	if (pack != NULL)
+	{
+		// TODO : PK3
+	}
+
+	if (wad != NULL)
+	{
 		// handle Boom's ANIMATED and SWITCHES lumps
 
 		int animated = W_GetAnimated(wad);
 		int switches = W_GetSwitches(wad);
 
-		if (strcmp(ddf_lump, "DDFANIM") == 0 && animated >= 0)
+		if (strcmp(lump_name, "DDFANIM") == 0 && animated >= 0)
 		{
 			I_Printf("Loading ANIMATED from: %s\n", df->name.c_str());
 
@@ -323,7 +371,7 @@ static void W_ReadDDF_ForFile(data_file_c *df, int d)
 			W_DoneWithLump(data);
 		}
 
-		if (strcmp(ddf_lump, "DDFSWTH") == 0 && switches >= 0)
+		if (strcmp(lump_name, "DDFSWTH") == 0 && switches >= 0)
 		{
 			I_Printf("Loading SWITCHES from: %s\n", df->name.c_str());
 
@@ -335,7 +383,7 @@ static void W_ReadDDF_ForFile(data_file_c *df, int d)
 		}
 
 		// handle BOOM Colourmaps (between C_START and C_END)
-		if (strcmp(ddf_lump, "DDFCOLM") == 0)
+		if (strcmp(lump_name, "DDFCOLM") == 0)
 		{
 			W_AddColourmaps(wad);
 		}
@@ -365,7 +413,7 @@ void W_ReadDDF(void)
 		{
 			data_file_c *df = data_files[f];
 
-			W_ReadDDF_ForFile(df, d);
+			W_ReadDDF_FromFile(df, d);
 		}
 
 /* helpful ???

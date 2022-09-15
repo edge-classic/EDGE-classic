@@ -935,46 +935,6 @@ void RAD_ClearTriggers(void)
 	RAD_ResetTips();
 }
 
-//
-// Loads the script file into memory for parsing.
-//
-// -AJA- 2000/01/04: written, based on DDF_MainCacheFile
-// -AJA- FIXME: merge them both into a single utility routine.
-//       (BETTER: a single utility parsing module).
-//
-static void RAD_MainCacheFile(const char *filename)
-{
-	FILE *file;
-
-	// open the file
-	file = fopen(filename, "rb");
-
-	if (file == NULL)
-		I_Error("\nRAD_MainReadFile: Unable to open: '%s'", filename);
-
-	// get to the end of the file
-	fseek(file, 0, SEEK_END);
-
-	// get the size
-	rad_memfile_size = ftell(file);
-
-	// reset to beginning
-	fseek(file, 0, SEEK_SET);
-
-	// malloc the size
-	rad_memfile = Z_New(byte, rad_memfile_size + 1);
-	rad_memfile_end = &rad_memfile[rad_memfile_size];
-
-	// read the goodies
-	fread(rad_memfile, 1, rad_memfile_size, file);
-
-	// null Terminated string.
-	rad_memfile[rad_memfile_size] = 0;
-
-	// close the file
-	fclose(file);
-}
-
 static int ReadScriptLine(char *buf, int max)
 {
 	int real_num = 1;
@@ -1049,46 +1009,17 @@ static void RAD_ParseScript(void)
 }
 
 
-void RAD_LoadFile(const char *name)
-{
-	SYS_ASSERT(name);
-
-	L_WriteDebug("RTS: Loading File %s\n", name);
-
-	rad_cur_filename = name;
-
-	RAD_MainCacheFile(name);
-
-	// OK we have the file in memory.  Parse it to death :-)
-	RAD_ParseScript();
-
-	Z_Free(rad_memfile);
-}
-
-
 bool RAD_ReadScript(void *_data, int _kk)
 {
 	char *data = (char *)_data;
 
-	// FIXME !!! remove asap
-	if (data == NULL) return true;
-//--	if (data == NULL)
-//--	{
-//--		if (ddf_dir.empty()) return false;
-//--
-//--		std::string fn = M_ComposeFileName(ddf_dir.c_str(), "rscript.rts");
-//--
-//--		if (! epi::FS_Access(fn.c_str(), epi::file_c::ACCESS_READ))
-//--			return false;
-//--
-//--		RAD_LoadFile(fn.c_str());
-//--		return true;
-//--	}
+	SYS_ASSERT(data);
 
 	int size = (int)strlen(data);
 
 	L_WriteDebug("RTS: Loading LUMP (size=%d)\n", size);
 
+	// FIXME pass the filename to this func
 	rad_cur_filename = "RSCRIPT LUMP";
 
 	rad_memfile      = (byte *) data;

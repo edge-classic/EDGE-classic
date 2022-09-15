@@ -921,6 +921,8 @@ static void ThingClearAll(void)
 
 bool DDF_ReadThings(void *data, int size)
 {
+	SYS_ASSERT(data);
+
 	readinfo_t things;
 
 	things.memfile = (char*)data;

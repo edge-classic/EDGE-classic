@@ -274,6 +274,37 @@ int W_CheckDDFLumpName(const char *name)
 }
 
 
+static void W_ReadDDF_FromDir(int d)
+{
+	// no directory specified?
+	if (ddf_dir.empty())
+		return;
+
+	std::string filename = epi::PATH_Join(ddf_dir.c_str(), DDF_Readers[d].pack_name);
+
+	epi::file_c *F = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ);
+	if (F == NULL)
+	{
+		// ignore files which don't exist
+		return;
+	}
+
+	I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, filename.c_str());
+
+	char *data = (char *) F->LoadIntoMemory();
+	if (data == NULL)
+		I_Error("Couldn't read file: %s\n", filename.c_str());
+
+	int length = (int)strlen(data);  // TODO make it not needed
+
+	// call read function
+	(* DDF_Readers[d].func)(data, length);
+
+	delete[] data;
+	delete F;
+}
+
+
 static void W_ReadDDF_FromFile(data_file_c *df, int d)
 {
 	wad_file_c  *wad  = df->wad;
@@ -281,7 +312,7 @@ static void W_ReadDDF_FromFile(data_file_c *df, int d)
 
 	const char * lump_name = DDF_Readers[d].lump_name;
 
-	// external script files get parsed here
+	// handle external scripts (from `-script` or `-file` option)
 	if (strcmp(lump_name, "RSCRIPT") == 0 && df->kind == FLKIND_RTS)
 	{
 		I_Printf("Loading RTS script: %s\n", df->name.c_str());
@@ -302,7 +333,7 @@ static void W_ReadDDF_FromFile(data_file_c *df, int d)
 		return;
 	}
 
-	// handle standalone ddf/ldf files
+	// handle external ddf/ldf files (from `-file` option)
 	if (df->kind == FLKIND_DDF)
 	{
 		std::string base_name = epi::PATH_GetFilename(df->name.c_str());
@@ -412,19 +443,16 @@ void W_ReadDDF(void)
 	{
 		I_Printf("Loading %s\n", DDF_Readers[d].print_name);
 
-		if (true)
-		{
-			// call read function -- do external files
-			// FIXME only if `-ddf` option has been used
-			(* DDF_Readers[d].func)(NULL, 0);
-		}
-
 		for (int f = 0; f < (int)data_files.size(); f++)
 		{
 			data_file_c *df = data_files[f];
 
 			W_ReadDDF_FromFile(df, d);
 		}
+
+		// handle the `-ddf` option.
+		// files from that directory are done AFTER all other ones.
+		W_ReadDDF_FromDir(d);
 
 /* helpful ???
 		std::string msg_buf(epi::STR_Format(

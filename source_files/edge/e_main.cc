@@ -828,11 +828,7 @@ void InitDirectories(void)
 	if (s)
 	{
 		ddf_dir = std::string(s);
-		DDF_SetWhere(ddf_dir);
 	} 
-	{
-		ddf_dir = "";
-	}
 
 	// config file
 	s = M_GetParm("-config");

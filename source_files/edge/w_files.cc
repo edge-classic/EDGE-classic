@@ -286,9 +286,19 @@ static void W_ReadDDF_FromFile(data_file_c *df, int d)
 	{
 		I_Printf("Loading RTS script: %s\n", df->name.c_str());
 
-		// FIXME load file here, call RAD_ReadScript, free data
+		epi::file_c *F = epi::FS_Open(df->name.c_str(), epi::file_c::ACCESS_READ);
+		if (F == NULL)
+			I_Error("Couldn't open file: %s\n", df->name.c_str());
 
-		RAD_LoadFile(df->name.c_str());
+		char *data = (char *) F->LoadIntoMemory();
+		if (data == NULL)
+			I_Error("Couldn't read file: %s\n", df->name.c_str());
+
+		RAD_ReadScript(data, -1);
+
+		delete[] data;
+		delete F;
+
 		return;
 	}
 
@@ -301,7 +311,7 @@ static void W_ReadDDF_FromFile(data_file_c *df, int d)
 		{
 			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, df->name.c_str());
 
-			epi::file_c *F = epi::FS_Open(df->name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+			epi::file_c *F = epi::FS_Open(df->name.c_str(), epi::file_c::ACCESS_READ);
 			if (F == NULL)
 				I_Error("Couldn't open file: %s\n", df->name.c_str());
 

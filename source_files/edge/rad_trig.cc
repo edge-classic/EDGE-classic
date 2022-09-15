@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Radius Trigger / Tip Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2010  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2
@@ -1066,38 +1066,37 @@ void RAD_LoadFile(const char *name)
 }
 
 
-bool RAD_ReadScript(void *data, int size)
+bool RAD_ReadScript(void *_data, int _kk)
 {
-	if (data == NULL)
-	{
-		if (ddf_dir.empty()) return false;
-		
-		std::string fn = M_ComposeFileName(ddf_dir.c_str(), "rscript.rts");
+	char *data = (char *)_data;
 
-		if (! epi::FS_Access(fn.c_str(), epi::file_c::ACCESS_READ))
-			return false;
+	// FIXME !!! remove asap
+	if (data == NULL) return true;
+//--	if (data == NULL)
+//--	{
+//--		if (ddf_dir.empty()) return false;
+//--
+//--		std::string fn = M_ComposeFileName(ddf_dir.c_str(), "rscript.rts");
+//--
+//--		if (! epi::FS_Access(fn.c_str(), epi::file_c::ACCESS_READ))
+//--			return false;
+//--
+//--		RAD_LoadFile(fn.c_str());
+//--		return true;
+//--	}
 
-		RAD_LoadFile(fn.c_str());
-		return true;
-	}
+	int size = (int)strlen(data);
 
 	L_WriteDebug("RTS: Loading LUMP (size=%d)\n", size);
 
 	rad_cur_filename = "RSCRIPT LUMP";
 
+	rad_memfile      = (byte *) data;
 	rad_memfile_size = size;
-	rad_memfile = Z_New(byte, size + 1);
-	rad_memfile_end = &rad_memfile[size];
-
-	Z_MoveData(rad_memfile, (byte *)data, byte, size);
-
-	// Null Terminated string.
-	rad_memfile[size] = 0;
+	rad_memfile_end  = &rad_memfile[size];
 
 	// OK we have the file in memory.  Parse it to death :-)
 	RAD_ParseScript();
-
-	Z_Free(rad_memfile);
 
 	return true;
 }
@@ -1130,7 +1129,7 @@ void RAD_FinishMenu(int result)
 {
 	if (! rts_menuactive)
 		return;
-	
+
 	SYS_ASSERT(rts_curr_menu);
 
 	// zero is cancelled, otherwise result is 1..N
@@ -1157,7 +1156,7 @@ void RAD_Drawer(void)
 {
 	if (! automapactive)
 		RAD_DisplayTips();
-	
+
 	if (rts_menuactive)
 		RAD_MenuDrawer();
 }

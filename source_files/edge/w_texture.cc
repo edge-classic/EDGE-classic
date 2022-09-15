@@ -30,6 +30,7 @@
 #include "e_search.h"
 #include "e_main.h"
 #include "r_image.h"
+#include "w_files.h"
 #include "w_texture.h"
 #include "w_wad.h"
 #include "z_zone.h"
@@ -242,7 +243,6 @@ void W_InitTextures(void)
 
 	for (file=0; file < num_files; file++)
 	{
-		
 		wadtex_resource_c WT;
 
 		W_GetTextureLumps(file, &WT);

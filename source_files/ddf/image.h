@@ -41,16 +41,7 @@ typedef enum
 	IMGDT_Builtin,      // built-in pre-fab DYI kit
 	IMGDT_File,         // load from an image file
 	IMGDT_Lump,         // load from lump in a WAD
-
-	// future:
-	// IMGDT_WadFlat
-	// IMGDT_WadTex
-	// IMGDT_WadGfx
-	// IMGDT_WadSprite
-	// IMGDT_WadPlaySkin
-	// IMGDT_WadTexPatch
-	// IMGDT_Package
-	// IMGDT_Composed
+	IMGDT_Package,      // load from a PK3 package
 }
 imagedata_type_e;
 
@@ -111,8 +102,8 @@ public:
 	rgbcol_t colour;          // IMGDT_Colour
 	builtin_image_e builtin;  // IMGDT_Builtin
 
-	epi::strent_c info;   // IMGDT_WadXXX, IMGDT_Package, IMGDT_File, IMGDT_Lump
-	L_image_format_e format;  // IMGDT_Lump, IMGDT_File (etc)
+	epi::strent_c info;       // IMGDT_Package, IMGDT_File, IMGDT_Lump
+	L_image_format_e format;  // ditto
 
 	image_special_e special;
 

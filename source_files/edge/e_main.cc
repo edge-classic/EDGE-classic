@@ -82,6 +82,7 @@
 #include "r_draw.h"
 #include "r_modes.h"
 #include "r_image.h"
+#include "w_files.h"
 #include "w_model.h"
 #include "w_sprite.h"
 #include "w_texture.h"
@@ -238,7 +239,7 @@ public:
 			HUD_SolidBox(25, 25, 295, 175, RGB_MAKE(0, 0, 0));
 		}
 		int y = 26;
-		for (int i=0; i < startup_messages.size(); i++)
+		for (int i=0; i < (int)startup_messages.size(); i++)
 		{
 			if (startup_messages[i].size() > 32)
 				HUD_DrawText(26, y, startup_messages[i].substr(0, 29).append("...").c_str());
@@ -827,11 +828,7 @@ void InitDirectories(void)
 	if (s)
 	{
 		ddf_dir = std::string(s);
-		DDF_SetWhere(ddf_dir);
 	} 
-	{
-		ddf_dir = "";
-	}
 
 	// config file
 	s = M_GetParm("-config");
@@ -889,7 +886,7 @@ static void IdentifyVersion(void)
         I_Error("IdentifyVersion: Could not find required %s.%s!\n", 
             REQUIREDWAD, EDGEWADEXT);
 
-    W_AddRawFilename(reqwad.c_str(), FLKIND_EWad);
+    W_AddFilename(reqwad.c_str(), FLKIND_EWad);
 
 	I_Debugf("- Identify Version\n");
 
@@ -1000,7 +997,7 @@ static void IdentifyVersion(void)
     	}
 		if (iwad_test) delete iwad_test;
 		if (unique_lump_match)
-			W_AddRawFilename(iwad_file.c_str(), FLKIND_IWad);
+			W_AddFilename(iwad_file.c_str(), FLKIND_IWad);
 		else
 			I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
     }
@@ -1109,7 +1106,7 @@ static void IdentifyVersion(void)
 		if (best_score == 0)
 			I_Error("IdentifyVersion: No IWADs found!\n");
 		else
-			W_AddRawFilename(best_match.c_str(), FLKIND_IWad);
+			W_AddFilename(best_match.c_str(), FLKIND_IWad);
     }
 
 	I_Debugf("IWAD BASE = [%s]\n", iwad_base.c_str());
@@ -1125,7 +1122,7 @@ static void Add_Base(void)
 	std::transform(base_wad.begin(), base_wad.end(), base_wad.begin(), ::tolower);
 	base_path = epi::PATH_Join(base_path.c_str(), base_wad.append("_base.wad").c_str());
 	if (epi::FS_Access(base_path.c_str(), epi::file_c::ACCESS_READ)) 
-		W_AddRawFilename(base_path.c_str(), FLKIND_EWad);
+		W_AddFilename(base_path.c_str(), FLKIND_EWad);
 	else
 		I_Warning("Base WAD not found for the %s IWAD! Check the /edge_base folder of your EDGE-Classic install!\n", iwad_base.c_str());
 }
@@ -1213,10 +1210,10 @@ static void SetupLogAndDebugFiles(void)
 	}
 }
 
-static void AddSingleCmdLineFile(const char *name)
+static void AddSingleCmdLineFile(const char *name, bool ignore_unknown)
 {
     std::string ext = epi::PATH_GetExtension(name);
-	int kind = FLKIND_Lump;
+	int kind = -1;
 
 	if (stricmp(ext.c_str(), ".edm") == 0)
 		I_Error("Demos are no longer supported\n");
@@ -1225,6 +1222,8 @@ static void AddSingleCmdLineFile(const char *name)
 
 	if (stricmp(ext.c_str(), ".wad") == 0)
 		kind = FLKIND_PWad;
+	else if (stricmp(ext.c_str(), ".pk3") == 0)
+		kind = FLKIND_PK3;
 	else if (stricmp(ext.c_str(), ".hwa") == 0)
 		kind = FLKIND_HWad;
 	else if (stricmp(ext.c_str(), ".rts") == 0)
@@ -1235,12 +1234,15 @@ static void AddSingleCmdLineFile(const char *name)
 	else if (stricmp(ext.c_str(), ".deh") == 0 ||
 			 stricmp(ext.c_str(), ".bex") == 0)
 		kind = FLKIND_Deh;
-
-	if (kind != FLKIND_Lump)
+	else
 	{
-		std::string fn = M_ComposeFileName(game_dir.c_str(), name);
-		W_AddRawFilename(fn.c_str(), kind);
+		if (! ignore_unknown)
+			I_Error("unknown file type: %s\n", name);
+		return;
 	}
+
+	std::string filename = M_ComposeFileName(game_dir.c_str(), name);
+	W_AddFilename(filename.c_str(), kind);
 }
 
 static void AddCommandLineFiles(void)
@@ -1252,7 +1254,7 @@ static void AddCommandLineFiles(void)
 
 	for (p = 1; p < M_GetArgCount() && '-' != (ps = M_GetArgument(p))[0]; p++)
 	{
-		AddSingleCmdLineFile(ps);
+		AddSingleCmdLineFile(ps, false);
 	}
 
 	// next handle the -file option (we allow multiple uses)
@@ -1266,7 +1268,7 @@ static void AddCommandLineFiles(void)
 
 		for (p++; p < M_GetArgCount() && '-' != (ps = M_GetArgument(p))[0]; p++)
 		{
-			AddSingleCmdLineFile(ps);
+			AddSingleCmdLineFile(ps, false);
 		}
 
 		p = M_CheckNextParm("-file", p-1);
@@ -1287,8 +1289,7 @@ static void AddCommandLineFiles(void)
 
 			// sanity check...
 			if (stricmp(ext.c_str(), ".wad") == 0 || 
-                stricmp(ext.c_str(), ".gwa") == 0 ||
-			    stricmp(ext.c_str(), ".hwa") == 0 ||
+                stricmp(ext.c_str(), ".pk3") == 0 ||
                 stricmp(ext.c_str(), ".ddf") == 0 ||
 			    stricmp(ext.c_str(), ".deh") == 0 ||
 			    stricmp(ext.c_str(), ".bex") == 0)
@@ -1298,7 +1299,7 @@ static void AddCommandLineFiles(void)
 
 			std::string fn = M_ComposeFileName(game_dir.c_str(), ps);
 
-			W_AddRawFilename(fn.c_str(), FLKIND_RTS);
+			W_AddFilename(fn.c_str(), FLKIND_RTS);
 		}
 
 		p = M_CheckNextParm("-script", p-1);
@@ -1320,8 +1321,7 @@ static void AddCommandLineFiles(void)
 
 			// sanity check...
 			if (stricmp(ext.c_str(), ".wad") == 0 || 
-                stricmp(ext.c_str(), ".gwa") == 0 ||
-			    stricmp(ext.c_str(), ".hwa") == 0 ||
+                stricmp(ext.c_str(), ".pk3") == 0 ||
                 stricmp(ext.c_str(), ".ddf") == 0 ||
 			    stricmp(ext.c_str(), ".rts") == 0)
 			{
@@ -1334,7 +1334,7 @@ static void AddCommandLineFiles(void)
 
 			if (fn_file)
 			{
-				W_AddRawFilename(fn.c_str(), FLKIND_Deh);
+				W_AddFilename(fn.c_str(), FLKIND_Deh);
 				delete fn_file;
 			}
 		}
@@ -1358,7 +1358,7 @@ static void Add_Autoload(void) {
 		{
 			if(!fsd[i]->is_dir)
 			{
-				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i]->name.c_str()).c_str());
+				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i]->name.c_str()).c_str(), true);
 			}
 		}
 	}
@@ -1376,7 +1376,7 @@ static void Add_Autoload(void) {
 		{
 			if(!fsd[i]->is_dir)
 			{
-				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i]->name.c_str()).c_str());
+				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i]->name.c_str()).c_str(), true);
 			}
 		}		
 	}
@@ -1386,7 +1386,7 @@ static void InitDDF(void)
 {
 	I_Debugf("- Initialising DDF\n");
 
-	DDF_Init(EDGEVER);
+	DDF_Init();
 }
 
 
@@ -1406,52 +1406,6 @@ void E_EngineShutdown(void)
     S_Shutdown();
 }
 
-void (*startcode[])() =
-{
-	InitDDF,
-	IdentifyVersion,
-	Add_Base,
-	Add_Autoload,
-	AddCommandLineFiles,
-	CheckTurbo,
-	RAD_Init,
-	W_InitMultipleFiles,
-	V_InitPalette,
-	W_ReadDDF,
-	DDF_CleanUp,
-	W_ReadUMAPINFOLumps,
-	W_InitFlats,
-	W_InitTextures,
-	W_ImageCreateUser,
-	E_PickLoadingScreen,
-	HU_Init,
-	CON_Start,
-	SpecialWadVerify,
-	W_BuildNodes,
-	M_InitMiscConVars,
-	SetLanguage,
-	ShowNotice,
-	SV_MainInit,
-	S_PrecacheSounds,
-	W_InitSprites,
-	W_ProcessTX_HI,
-	W_InitModels,
-	M_Init,
-	R_Init,
-	P_Init,
-	P_MapInit,
-	P_InitSwitchList,
-	W_InitPicAnims,
-	S_Init,
-	N_InitNetwork,
-	M_CheatInit,
-	VM_InitCoal,
-	VM_LoadScripts,
-	NULL
-};
-
-extern void WLF_InitMaps(void); //!!!
-
 // Local Prototypes
 static void E_Startup();
 static void E_Shutdown(void);
@@ -1459,8 +1413,6 @@ static void E_Shutdown(void);
 
 static void E_Startup(void)
 {
-	int p;
-
 	// Version check ?
 	if (M_CheckParm("-version"))
 	{
@@ -1486,11 +1438,50 @@ static void E_Startup(void)
 
 	DoSystemStartup();
 
-	// Cycle through all the startup functions
-	for (p=0; startcode[p] != NULL; p++)
-	{
-		startcode[p]();
-	}
+	InitDDF();
+	IdentifyVersion();
+	Add_Base();
+	Add_Autoload();
+	AddCommandLineFiles();
+	CheckTurbo();
+
+	RAD_Init();
+	W_InitMultipleFiles();
+	V_InitPalette();
+	W_ReadDDF();
+	DDF_CleanUp();
+	W_ReadUMAPINFOLumps();
+
+	W_InitFlats();
+	W_InitTextures();
+	W_ImageCreateUser();
+	E_PickLoadingScreen();
+
+	HU_Init();
+	CON_Start();
+	SpecialWadVerify();
+	W_BuildNodes();
+	M_InitMiscConVars();
+	SetLanguage();
+	ShowNotice();
+
+	SV_MainInit();
+	S_PrecacheSounds();
+	W_InitSprites();
+	W_ProcessTX_HI();
+	W_InitModels();
+
+	M_Init();
+	R_Init();
+	P_Init();
+	P_MapInit();
+	P_InitSwitchList();
+	W_InitPicAnims();
+	S_Init();
+	N_InitNetwork();
+	M_CheatInit();
+	VM_InitCoal();
+	VM_LoadScripts();
 }
 
 

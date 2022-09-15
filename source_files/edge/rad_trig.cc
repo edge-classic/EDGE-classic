@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Radius Trigger / Tip Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2010  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2
@@ -935,46 +935,6 @@ void RAD_ClearTriggers(void)
 	RAD_ResetTips();
 }
 
-//
-// Loads the script file into memory for parsing.
-//
-// -AJA- 2000/01/04: written, based on DDF_MainCacheFile
-// -AJA- FIXME: merge them both into a single utility routine.
-//       (BETTER: a single utility parsing module).
-//
-static void RAD_MainCacheFile(const char *filename)
-{
-	FILE *file;
-
-	// open the file
-	file = fopen(filename, "rb");
-
-	if (file == NULL)
-		I_Error("\nRAD_MainReadFile: Unable to open: '%s'", filename);
-
-	// get to the end of the file
-	fseek(file, 0, SEEK_END);
-
-	// get the size
-	rad_memfile_size = ftell(file);
-
-	// reset to beginning
-	fseek(file, 0, SEEK_SET);
-
-	// malloc the size
-	rad_memfile = Z_New(byte, rad_memfile_size + 1);
-	rad_memfile_end = &rad_memfile[rad_memfile_size];
-
-	// read the goodies
-	fread(rad_memfile, 1, rad_memfile_size, file);
-
-	// null Terminated string.
-	rad_memfile[rad_memfile_size] = 0;
-
-	// close the file
-	fclose(file);
-}
-
 static int ReadScriptLine(char *buf, int max)
 {
 	int real_num = 1;
@@ -1049,55 +1009,25 @@ static void RAD_ParseScript(void)
 }
 
 
-void RAD_LoadFile(const char *name)
+bool RAD_ReadScript(void *_data, int _kk)
 {
-	SYS_ASSERT(name);
+	char *data = (char *)_data;
 
-	L_WriteDebug("RTS: Loading File %s\n", name);
+	SYS_ASSERT(data);
 
-	rad_cur_filename = name;
-
-	RAD_MainCacheFile(name);
-
-	// OK we have the file in memory.  Parse it to death :-)
-	RAD_ParseScript();
-
-	Z_Free(rad_memfile);
-}
-
-
-bool RAD_ReadScript(void *data, int size)
-{
-	if (data == NULL)
-	{
-		if (ddf_dir.empty()) return false;
-		
-		std::string fn = M_ComposeFileName(ddf_dir.c_str(), "rscript.rts");
-
-		if (! epi::FS_Access(fn.c_str(), epi::file_c::ACCESS_READ))
-			return false;
-
-		RAD_LoadFile(fn.c_str());
-		return true;
-	}
+	int size = (int)strlen(data);
 
 	L_WriteDebug("RTS: Loading LUMP (size=%d)\n", size);
 
+	// FIXME pass the filename to this func
 	rad_cur_filename = "RSCRIPT LUMP";
 
+	rad_memfile      = (byte *) data;
 	rad_memfile_size = size;
-	rad_memfile = Z_New(byte, size + 1);
-	rad_memfile_end = &rad_memfile[size];
-
-	Z_MoveData(rad_memfile, (byte *)data, byte, size);
-
-	// Null Terminated string.
-	rad_memfile[size] = 0;
+	rad_memfile_end  = &rad_memfile[size];
 
 	// OK we have the file in memory.  Parse it to death :-)
 	RAD_ParseScript();
-
-	Z_Free(rad_memfile);
 
 	return true;
 }
@@ -1130,7 +1060,7 @@ void RAD_FinishMenu(int result)
 {
 	if (! rts_menuactive)
 		return;
-	
+
 	SYS_ASSERT(rts_curr_menu);
 
 	// zero is cancelled, otherwise result is 1..N
@@ -1157,7 +1087,7 @@ void RAD_Drawer(void)
 {
 	if (! automapactive)
 		RAD_DisplayTips();
-	
+
 	if (rts_menuactive)
 		RAD_MenuDrawer();
 }

@@ -184,11 +184,11 @@ static void SectorClearAll(void)
 	sectortypes.Reset();
 }
 
-//
-// DDF_ReadSectors
-//
+
 bool DDF_ReadSectors(void *data, int size)
 {
+	SYS_ASSERT(data);
+
 	readinfo_t sects;
 
 	sects.memfile = (char*)data;
@@ -196,18 +196,8 @@ bool DDF_ReadSectors(void *data, int size)
 	sects.tag = "SECTORS";
 	sects.entries_per_dot = 1;
 
-	if (sects.memfile)
-	{
-		sects.message = NULL;
-		sects.filename = NULL;
-		sects.lumpname = "DDFSECT";
-	}
-	else
-	{
-		sects.message = "DDF_InitSectors";
-		sects.filename = "sectors.ddf";
-		sects.lumpname = NULL;
-	}
+	sects.filename = NULL;
+	sects.lumpname = "DDFSECT";
 
 	sects.start_entry  = SectorStartEntry;
 	sects.parse_field  = SectorParseField;

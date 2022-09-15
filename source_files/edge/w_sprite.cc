@@ -35,6 +35,7 @@
 #include "r_image.h"
 #include "r_things.h"
 #include "w_sprite.h"
+#include "w_files.h"
 #include "w_wad.h"
 
 #include "p_local.h"  // mobjlisthead
@@ -257,8 +258,10 @@ static void InstallSpriteImage(spritedef_c *def, const image_c *img,
 //
 static void FillSpriteFrames(int file, int prog_base, int prog_total)
 {
-	epi::u32array_c& lumps = W_GetListLumps(file, LMPLST_Sprites);
-	int lumpnum = lumps.GetSize();
+	epi::u32array_c * lumps = W_GetListLumps(file, LMPLST_Sprites);
+	if (lumps == NULL)
+		return;
+	int lumpnum = lumps->GetSize();
 
 	if (lumpnum == 0)
 		return;
@@ -272,7 +275,7 @@ static void FillSpriteFrames(int file, int prog_base, int prog_total)
 	while (S < sprite_map_len && L < lumpnum)
 	{
 		const char *sprname  = sprite_map[S]->name;
-		const char *lumpname = W_GetLumpName(lumps[L]);
+		const char *lumpname = W_GetLumpName((*lumps)[L]);
 
 		// ignore model skins
 		if (lumpname[4] == 'S' && lumpname[5] == 'K' && lumpname[6] == 'N')
@@ -298,10 +301,10 @@ static void FillSpriteFrames(int file, int prog_base, int prog_total)
 		}
 
 		// we have a match
-		InstallSpriteLump(sprite_map[S], lumps[L], lumpname, 4, 0);
+		InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, 4, 0);
 
 		if (lumpname[6])
-			InstallSpriteLump(sprite_map[S], lumps[L], lumpname, 6, 1);
+			InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, 6, 1);
 
 		L++;
 

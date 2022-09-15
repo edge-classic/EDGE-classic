@@ -41,6 +41,7 @@
 #include <vector>
 #include <algorithm>
 
+// EPI
 #include "endianess.h"
 #include "file.h"
 #include "file_sub.h"
@@ -50,14 +51,8 @@
 #include "str_format.h"
 #include "utility.h"
 
-#include "main.h"
-#include "anim.h"
+// DDF
 #include "colormap.h"
-#include "font.h"
-#include "image.h"
-#include "style.h"
-#include "switch.h"
-#include "flat.h"
 #include "wadfixes.h"
 
 #include "dm_data.h"
@@ -71,65 +66,19 @@
 #include "l_ajbsp.h"
 #include "m_misc.h"
 #include "r_image.h"
-#include "rad_trig.h"
 #include "vm_coal.h"
+#include "w_files.h"
 #include "w_wad.h"
 #include "w_texture.h"
 
 #include "umapinfo.h" //Lobo 2022
 
-// forward declaration
-void W_ReadWADFIXES(void);
+#define NUM_DDF_READERS  18
 
-// -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
-typedef struct ddf_reader_s
-{
-	const char *name;
-	const char *print_name;
-	bool (* func)(void *data, int size);
-}
-ddf_reader_t;
-
-static ddf_reader_t DDF_Readers[] =
-{
-	{ "DDFLANG", "Languages",  DDF_ReadLangs },
-	{ "DDFSFX",  "Sounds",     DDF_ReadSFX },
-	{ "DDFCOLM", "ColourMaps", DDF_ReadColourMaps },  // -AJA- 1999/07/09.
-	{ "DDFIMAGE","Images",     DDF_ReadImages },      // -AJA- 2004/11/18
-	{ "DDFFONT", "Fonts",      DDF_ReadFonts },       // -AJA- 2004/11/13
-	{ "DDFSTYLE","Styles",     DDF_ReadStyles },      // -AJA- 2004/11/14
-	{ "DDFATK",  "Attacks",    DDF_ReadAtks },
-	{ "DDFWEAP", "Weapons",    DDF_ReadWeapons },
-	{ "DDFTHING","Things",     DDF_ReadThings },
-	{ "DDFPLAY", "Playlists",  DDF_ReadMusicPlaylist },
-	{ "DDFLINE", "Lines",      DDF_ReadLines },
-	{ "DDFSECT", "Sectors",    DDF_ReadSectors },
-	{ "DDFSWTH", "Switches",   DDF_ReadSwitch },
-	{ "DDFANIM", "Anims",      DDF_ReadAnims },
-	{ "DDFGAME", "Games",      DDF_ReadGames },
-	{ "DDFLEVL", "Levels",     DDF_ReadLevels },
-	{ "DDFFLAT", "Flats",      DDF_ReadFlat },
-	{ "RSCRIPT", "RadTrig",    RAD_ReadScript }       // -AJA- 2000/04/21.
-};
-
-#define NUM_DDF_READERS  (int)(sizeof(DDF_Readers) / sizeof(ddf_reader_t))
-
-#define LANG_READER  0
-#define COLM_READER  2
-#define SWTH_READER  12
-#define ANIM_READER  13
-#define RTS_READER   17
-
-class data_file_c
+class wad_file_c
 {
 public:
-	const char *file_name;
-
-	// type of file (FLKIND_XXX)
-	int kind;
-
-	// file object
-    epi::file_c *file;
+//??	data_file_c *_parent;
 
 	// lists for sprites, flats, patches (stuff between markers)
 	epi::u32array_c sprite_lumps;
@@ -159,11 +108,6 @@ public:
 	// BOOM stuff
 	int animated, switches;
 
-	// file containing the GL nodes for the levels in this WAD.
-	// -1 when none (usually when this WAD has no levels, but also
-	// temporarily before a new GWA files has been built and added).
-	int companion_gwa;
-
 	// MD5 hash of the contents of the WAD directory.
 	// This is used to disambiguate cached GWA/HWA filenames.
 	epi::md5hash_c dir_md5;
@@ -171,47 +115,25 @@ public:
 	std::string md5_string;
 
 public:
-	data_file_c(const char *_fname, int _kind, epi::file_c* _file) :
-		file_name(_fname), kind(_kind), file(_file),
+	wad_file_c() :
 		sprite_lumps(), flat_lumps(), patch_lumps(),
 		colmap_lumps(), tx_lumps(), hires_lumps(),
 		level_markers(), skin_markers(),
-		wadtex(), deh_lump(-1), coal_apis(-1), coal_huds(-1),
+		wadtex(),
+		deh_lump(-1), coal_apis(-1), coal_huds(-1),
 		animated(-1), switches(-1),
-		companion_gwa(-1), dir_md5()
+		dir_md5(), md5_string()
 	{
-		file_name = strdup(_fname);
-
 		for (int d = 0; d < NUM_DDF_READERS; d++)
 			ddf_lumps[d] = -1;
 	}
 
-	~data_file_c()
-	{
-		free((void*)file_name);
-	}
-};
-
-static std::vector<data_file_c *> data_files;
-
-
-// Raw filenames
-class raw_filename_c
-{
-public:
-	std::string filename;
-	int kind;
-
-public:
-	raw_filename_c(const char *_name, int _kind) :
-			 filename(_name), kind(_kind)
+	~wad_file_c()
 	{ }
 
-	~raw_filename_c()
-	{ }
-};
+	bool HasLevel(const char *name) const;
 
-static std::list<raw_filename_c *> wadfiles;
+};
 
 
 typedef enum
@@ -237,12 +159,6 @@ typedef struct
 
 	// file number (an index into data_files[]).
 	short file;
-
-	// value used when sorting.  When lumps have the same name, the one
-	// with the highest sort_index is used (W_CheckNumForName).  This is
-	// closely related to the `file' field, with some tweaks for
-	// handling GWA files (especially dynamic ones).
-	short sort_index;
 
 	// one of the LMKIND values.  For sorting, this is the least
 	// significant aspect (but still necessary).
@@ -434,20 +350,36 @@ static bool IsSkin(const char *name)
 	return (strncmp(name, "S_SKIN", 6) == 0);
 }
 
-//
-// W_GetTextureLumps
-//
+
+bool wad_file_c::HasLevel(const char *name) const
+{
+	for (int L = 0 ; L < level_markers.GetSize() ; L++)
+	{
+		if (strcmp(lumpinfo[level_markers[L]].name, name) == 0)
+			return true;
+	}
+	return false;
+}
+
+
 void W_GetTextureLumps(int file, wadtex_resource_c *res)
 {
 	SYS_ASSERT(0 <= file && file < (int)data_files.size());
 	SYS_ASSERT(res);
 
 	data_file_c *df = data_files[file];
+	wad_file_c *wad = df->wad;
 
-	res->palette  = df->wadtex.palette;
-	res->pnames   = df->wadtex.pnames;
-	res->texture1 = df->wadtex.texture1;
-	res->texture2 = df->wadtex.texture2;
+	if (wad == NULL)
+	{
+		// leave the wadtex_resource_c in initial state
+		return;
+	}
+
+	res->palette  = wad->wadtex.palette;
+	res->pnames   = wad->wadtex.pnames;
+	res->texture1 = wad->wadtex.texture1;
+	res->texture2 = wad->wadtex.texture2;
 
 	// find an earlier PNAMES lump when missing.
 	// Ditto for palette.
@@ -457,10 +389,16 @@ void W_GetTextureLumps(int file, wadtex_resource_c *res)
 		int cur;
 
 		for (cur=file; res->pnames == -1 && cur > 0; cur--)
-			res->pnames = data_files[cur]->wadtex.pnames;
+		{
+			if (data_files[cur]->wad != NULL)
+				res->pnames = data_files[cur]->wad->wadtex.pnames;
+		}
 
 		for (cur=file; res->palette == -1 && cur > 0; cur--)
-			res->palette = data_files[cur]->wadtex.palette;
+		{
+			if (data_files[cur]->wad != NULL)
+				res->palette = data_files[cur]->wad->wadtex.palette;
+		}
 	}
 }
 
@@ -486,7 +424,7 @@ struct Compare_lump_pred
 		if (cmp > 0) return false;
 
 		// decreasing file number
-		cmp = C.sort_index - D.sort_index;
+		cmp = C.file - D.file;
 		if (cmp > 0) return true;
 		if (cmp < 0) return false;
 
@@ -516,25 +454,24 @@ static void SortLumps(void)
 // Put the sprite list in sorted order (of name), required by
 // R_InitSprites (speed optimisation).
 //
-static void SortSpriteLumps(data_file_c *df)
+static void SortSpriteLumps(wad_file_c *wad)
 {
-	if (df->sprite_lumps.GetSize() < 2)
+	if (wad->sprite_lumps.GetSize() < 2)
 		return;
 
 #define CMP(a, b) (strncmp(lumpinfo[a].name, lumpinfo[b].name, 8) < 0)
-	QSORT(int, df->sprite_lumps, df->sprite_lumps.GetSize(), CUTOFF);
+	QSORT(int, wad->sprite_lumps, wad->sprite_lumps.GetSize(), CUTOFF);
 #undef CMP
 
 #if 0  // DEBUGGING
 	{
 		int i, lump;
     
-		for (i=0; i < f->sprite_num; i++)
+		for (i=0; i < wad->sprite_num; i++)
 		{
-			lump = f->sprite_lumps[i];
+			lump = wad->sprite_lumps[i];
 
-			I_Debugf("Sorted sprite %d = lump %d [%s]\n", i, lump,
-						 lumpinfo[lump].name);
+			I_Debugf("Sorted sprite %d = lump %d [%s]\n", i, lump, lumpinfo[lump].name);
 		}
 	}
 #endif
@@ -545,23 +482,11 @@ static void SortSpriteLumps(data_file_c *df)
 // LUMP BASED ROUTINES.
 //
 
-//
-// W_AddFile
-//
-// All files are optional, but at least one file must be
-//  found (PWAD, if all required lumps are present).
-// Files with a .wad extension are wadlink files
-//  with multiple lumps.
-// Other files are single lumps with the base filename
-//  for the lump name.
-//
-
 
 //
 // AddLump
 //
-static void AddLump(data_file_c *df, const char *name, int pos, int size,
-					int file, int sort_index, bool allow_ddf)
+static void AddLump(data_file_c *df, const char *name, int pos, int size, int file_index, bool allow_ddf)
 {
 	int lump = (int)lumpinfo.size();
 
@@ -569,8 +494,7 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size,
 
 	info.position = pos;
 	info.size = size;
-	info.file = file;
-	info.sort_index = sort_index;
+	info.file = file_index;
 	info.kind = LMKIND_Normal;
 
 	// copy name, make it uppercase
@@ -586,85 +510,93 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size,
 
 	lumpinfo_t *lump_p = &lumpinfo.back();
 
-	int j;
-
 	// -- handle special names --
+
+	wad_file_c *wad = df->wad;
 
 	if (strncmp(name, "PLAYPAL", 8) == 0)
 	{
 		lump_p->kind = LMKIND_WadTex;
-		df->wadtex.palette = lump;
+		if (wad != NULL)
+			wad->wadtex.palette = lump;
 		if (palette_datafile < 0)
-			palette_datafile = file;
+			palette_datafile = file_index;
 		return;
 	}
 	else if (strncmp(name, "PNAMES", 8) == 0)
 	{
 		lump_p->kind = LMKIND_WadTex;
-		df->wadtex.pnames = lump;
+		if (wad != NULL)
+			wad->wadtex.pnames = lump;
 		return;
 	}
 	else if (strncmp(name, "TEXTURE1", 8) == 0)
 	{
 		lump_p->kind = LMKIND_WadTex;
-		df->wadtex.texture1 = lump;
+		if (wad != NULL)
+			wad->wadtex.texture1 = lump;
 		return;
 	}
 	else if (strncmp(name, "TEXTURE2", 8) == 0)
 	{
 		lump_p->kind = LMKIND_WadTex;
-		df->wadtex.texture2 = lump;
+		if (wad != NULL)
+			wad->wadtex.texture2 = lump;
 		return;
 	}
 	else if (strncmp(name, "DEHACKED", 8) == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
-		df->deh_lump = lump;
+		if (wad != NULL)
+			wad->deh_lump = lump;
 		return;
 	}
 	else if (strncmp(name, "COALAPI", 8) == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
-		df->coal_apis = lump;
+		if (wad != NULL)
+			wad->coal_apis = lump;
 		return;
 	}
 	else if (strncmp(name, "COALHUDS", 8) == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
-		df->coal_huds = lump;
+		if (wad != NULL)
+			wad->coal_huds = lump;
 		return;
 	}
 	else if (strncmp(name, "ANIMATED", 8) == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
-		df->animated = lump;
+		if (wad != NULL)
+			wad->animated = lump;
 		return;
 	}
 	else if (strncmp(name, "SWITCHES", 8) == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
-		df->switches = lump;
+		if (wad != NULL)
+			wad->switches = lump;
 		return;
 	}
 
 	// -KM- 1998/12/16 Load DDF/RSCRIPT file from wad.
-	if (allow_ddf)
+	if (allow_ddf && wad != NULL)
 	{
-		for (j=0; j < NUM_DDF_READERS; j++)
+		int d = W_CheckDDFLumpName(name);
+		if (d >= 0)
 		{
-			if (strncmp(name, DDF_Readers[j].name, 8) == 0)
-			{
-				lump_p->kind = LMKIND_DDFRTS;
-				df->ddf_lumps[j] = lump;
-				return;
-			}
+			lump_p->kind = LMKIND_DDFRTS;
+			wad->ddf_lumps[d] = lump;
+			return;
 		}
 	}
 
 	if (IsSkin(lump_p->name))
 	{
 		lump_p->kind = LMKIND_Marker;
-		df->skin_markers.Insert(lump);
+		if (wad != NULL)
+			wad->skin_markers.Insert(lump);
 		return;
 	}
 
@@ -762,43 +694,46 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size,
 	}
 
 	// ignore zero size lumps or dummy markers
-	if (lump_p->size > 0 && !IsDummySF(lump_p->name))
+	if (lump_p->size == 0 || IsDummySF(lump_p->name))
+		return;
+
+	if (wad == NULL)
+		return;
+
+	if (within_sprite_list)
 	{
-		if (within_sprite_list)
-		{
-			lump_p->kind = LMKIND_Sprite;
-			df->sprite_lumps.Insert(lump);
-		}
-    
-		if (within_flat_list)
-		{
-			lump_p->kind = LMKIND_Flat;
-			df->flat_lumps.Insert(lump);
-		}
-    
-		if (within_patch_list)
-		{
-			lump_p->kind = LMKIND_Patch;
-			df->patch_lumps.Insert(lump);
-		}
-    
-		if (within_colmap_list)
-		{
-			lump_p->kind = LMKIND_Colmap;
-			df->colmap_lumps.Insert(lump);
-		}
+		lump_p->kind = LMKIND_Sprite;
+		wad->sprite_lumps.Insert(lump);
+	}
 
-		if (within_tex_list)
-		{
-			lump_p->kind = LMKIND_TX;
-			df->tx_lumps.Insert(lump);
-		}
+	if (within_flat_list)
+	{
+		lump_p->kind = LMKIND_Flat;
+		wad->flat_lumps.Insert(lump);
+	}
 
-		if (within_hires_list)
-		{
-			lump_p->kind = LMKIND_HiRes;
-			df->hires_lumps.Insert(lump);
-		}
+	if (within_patch_list)
+	{
+		lump_p->kind = LMKIND_Patch;
+		wad->patch_lumps.Insert(lump);
+	}
+
+	if (within_colmap_list)
+	{
+		lump_p->kind = LMKIND_Colmap;
+		wad->colmap_lumps.Insert(lump);
+	}
+
+	if (within_tex_list)
+	{
+		lump_p->kind = LMKIND_TX;
+		wad->tx_lumps.Insert(lump);
+	}
+
+	if (within_hires_list)
+	{
+		lump_p->kind = LMKIND_HiRes;
+		wad->hires_lumps.Insert(lump);
 	}
 }
 
@@ -856,7 +791,7 @@ bool W_CheckForXGLNodes(std::string filename)
 // sequence of lumps _after_ this one, which works well since their
 // order is fixed (e.g. THINGS is always first).
 //
-static void CheckForLevel(data_file_c *df, int lump, const char *name,
+static void CheckForLevel(wad_file_c *wad, int lump, const char *name,
 	const raw_wad_entry_t *raw, int remaining)
 {
 	// we only test four lumps (it is enough), but fewer definitely
@@ -876,16 +811,13 @@ static void CheckForLevel(data_file_c *df, int lump, const char *name,
 		}
 
 		// check for duplicates (Slige sometimes does this)
-		for (int L = 0; L < df->level_markers.GetSize(); L++)
+		if (wad->HasLevel(name))
 		{
-			if (strcmp(lumpinfo[df->level_markers[L]].name, name) == 0)
-			{
-				I_Warning("Duplicate level '%s' ignored.\n", name);
-				return;
-			}
+			I_Warning("Duplicate level '%s' ignored.\n", name);
+			return;
 		}
 
-		df->level_markers.Insert(lump);
+		wad->level_markers.Insert(lump);
 		return;
 	}
 
@@ -896,7 +828,7 @@ static void CheckForLevel(data_file_c *df, int lump, const char *name,
 	    strncmp(raw[3].name, "GL_SSECT", 8) == 0 &&
 	    strncmp(raw[4].name, "GL_NODES", 8) == 0)
 	{
-		df->level_markers.Insert(lump);
+		wad->level_markers.Insert(lump);
 		return;
 	}
 
@@ -905,11 +837,12 @@ static void CheckForLevel(data_file_c *df, int lump, const char *name,
 
 	if (strncmp(raw[1].name, "TEXTMAP",  8) == 0)
 	{
-		df->level_markers.Insert(lump);
+		wad->level_markers.Insert(lump);
 		return;
 	}
 }
 
+// FIXME why is this unused ??
 static void ComputeFileMD5(epi::md5hash_c& md5, epi::file_c *file)
 {
 	int length = file->GetLength();
@@ -928,7 +861,7 @@ static void ComputeFileMD5(epi::md5hash_c& md5, epi::file_c *file)
 }
 
 static bool FindCacheFilename (std::string& out_name,
-		const char *filename, data_file_c *df,
+		const char *filename, epi::md5hash_c& dir_md5,
 		const char *extension)
 {
 	std::string wad_dir;
@@ -941,9 +874,9 @@ static bool FindCacheFilename (std::string& out_name,
 
 	// MD5 string used for files in the cache directory
 	md5_file_string = epi::STR_Format("-%02X%02X%02X-%02X%02X%02X",
-		df->dir_md5.hash[0], df->dir_md5.hash[1],
-		df->dir_md5.hash[2], df->dir_md5.hash[3],
-		df->dir_md5.hash[4], df->dir_md5.hash[5]);
+		dir_md5.hash[0], dir_md5.hash[1],
+		dir_md5.hash[2], dir_md5.hash[3],
+		dir_md5.hash[4], dir_md5.hash[5]);
 
 	// Determine the full path filename for "local" (same-directory) version
 	local_name = epi::PATH_GetBasename(filename);
@@ -1067,218 +1000,30 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 	return (lump1_found && lump2_found);
 }
 
-//
-// AddFile
-//
-// -AJA- New `dyn_index' parameter -- this is for adding GWA files
-//       which have been built by the AJBSP plugin.  Nothing else is
-//       supported, e.g. wads with textures/sprites/DDF/RTS.
-//
-//       The dyn_index value is -1 for normal (non-dynamic) files,
-//       otherwise it is the sort_index for the lumps (typically the
-//       file number of the wad which the GWA is a companion for).
-//
-static void AddFile(const char *filename, int kind, int dyn_index, std::string md5_check)
+
+void ProcessFixers(data_file_c *df)
 {
-	int length;
-
-	raw_wad_header_t header;
-
-	// reset the sprite/flat/patch list stuff
-	within_sprite_list = within_flat_list   = false;
-	within_patch_list  = within_colmap_list = false;
-	within_tex_list    = within_hires_list  = false;
-
-	// open the file and add to directory
-    epi::file_c *file = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-	if (file == NULL)
-	{
-		I_Error("Couldn't open file %s\n", filename);
+	wad_file_c *wad = df->wad;
+	if (wad == NULL)
 		return;
-	}
-
-	I_Printf("  Adding %s\n", filename);
-
-	int startlump = (int)lumpinfo.size();
-
-	int datafile = (int)data_files.size();
-
-	if (datafile == 1)
-		W_ReadWADFIXES();
-
-	data_file_c *df = new data_file_c(filename, kind, file);
-	data_files.push_back(df);
-
-	// for RTS scripts, adding the data_file is enough
-	if (kind == FLKIND_RTS)
-		return;
-
-	if (kind <= FLKIND_HWad)
-	{
-		// WAD file
-		// TODO: handle Read failure
-        file->Read(&header, sizeof(raw_wad_header_t));
-
-		if (strncmp(header.identification, "IWAD", 4) != 0)
-		{
-			// Homebrew levels?
-			if (strncmp(header.identification, "PWAD", 4) != 0)
-			{
-				I_Error("Wad file %s doesn't have IWAD or PWAD id\n", filename);
-			}
-		}
-
-		header.num_entries = EPI_LE_S32(header.num_entries);
-		header.dir_start   = EPI_LE_S32(header.dir_start);
-
-		length = header.num_entries * sizeof(raw_wad_entry_t);
-
-        raw_wad_entry_t *raw_info = new raw_wad_entry_t[header.num_entries];
-
-        file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
-		// TODO: handle Read failure
-        file->Read(raw_info, length);
-
-		// compute MD5 hash over wad directory
-		df->dir_md5.Compute((const byte *)raw_info, length);
-
-		unsigned int i;
-		for (i=0 ; i < header.num_entries ; i++)
-		{
-			raw_wad_entry_t& entry = raw_info[i];
-
-			bool allow_ddf = (kind == FLKIND_EWad) || (kind == FLKIND_PWad) || (kind == FLKIND_HWad);
-
-			AddLump(df, entry.name, EPI_LE_S32(entry.pos), EPI_LE_S32(entry.size),
-					datafile, (dyn_index >= 0) ? dyn_index : datafile, allow_ddf);
-
-			// this will be uppercase
-			const char *level_name = lumpinfo[startlump + i].name;
-
-			if (kind != FLKIND_HWad)
-				CheckForLevel(df, startlump + i, level_name, &entry, header.num_entries-1 - i);
-		}
-
-		delete[] raw_info;
-	}
-	else  /* single lump file */
-	{
-		char lump_name[32];
-
-		SYS_ASSERT(dyn_index < 0);
-
-		if (kind == FLKIND_DDF)
-        {
-			DDF_GetLumpNameForFile(filename, lump_name);
-        }
-        else
-        {
-            std::string base = epi::PATH_GetBasename(filename);
-            if (base.size() > 8)
-                I_Error("Filename base of %s >8 chars", filename);
-
-            strcpy(lump_name, base.c_str());
-			for (size_t i=0;i<strlen(lump_name);i++) {
-				lump_name[i] = toupper(lump_name[i]);
-			}
-        }
-
-		// calculate MD5 hash over whole file
-		ComputeFileMD5(df->dir_md5, file);
-
-		// Fill in lumpinfo
-		AddLump(df, lump_name, 0, file->GetLength(), datafile, datafile, true);
-	}
-
-	df->md5_string = epi::STR_Format("%02x%02x%02x%02x%02x%02x%02x%02x", 
-			df->dir_md5.hash[0],  df->dir_md5.hash[1],
-			df->dir_md5.hash[2],  df->dir_md5.hash[3],
-			df->dir_md5.hash[4],  df->dir_md5.hash[5],
-			df->dir_md5.hash[6],  df->dir_md5.hash[7],
-			df->dir_md5.hash[8],  df->dir_md5.hash[9],
-			df->dir_md5.hash[10], df->dir_md5.hash[11],
-			df->dir_md5.hash[12], df->dir_md5.hash[13],
-			df->dir_md5.hash[14], df->dir_md5.hash[15]);
-
-	I_Debugf("   md5hash = %s\n", df->md5_string.c_str());
-
-	SortLumps();
-	SortSpriteLumps(df);
-
-	// check for unclosed sprite/flat/patch lists
-	if (within_sprite_list)
-		I_Warning("Missing S_END marker in %s.\n", filename);
-
-	if (within_flat_list)
-		I_Warning("Missing F_END marker in %s.\n", filename);
-   
-	if (within_patch_list)
-		I_Warning("Missing P_END marker in %s.\n", filename);
-   
-	if (within_colmap_list)
-		I_Warning("Missing C_END marker in %s.\n", filename);
-   
-	if (within_tex_list)
-		I_Warning("Missing TX_END marker in %s.\n", filename);
-   
-	if (within_hires_list)
-		I_Warning("Missing HI_END marker in %s.\n", filename);
-   
-	// handle DeHackEd patch files
-	if (kind == FLKIND_Deh || df->deh_lump >= 0)
-	{
-		std::string hwa_filename;
-
-		char base_name[64];
-		sprintf(base_name, "DEH_%04d.%s", datafile, EDGEHWAEXT);
- 
-		hwa_filename = epi::PATH_Join(cache_dir.c_str(), base_name);
-
-		I_Debugf("Actual_HWA_filename: %s\n", hwa_filename.c_str());
-
-			if (kind == FLKIND_Deh)
-			{
-                I_Printf("Converting DEH file: %s\n", filename);
-
-				if (! DH_ConvertFile(filename, hwa_filename.c_str()))
-					I_Error("Failed to convert DeHackEd patch: %s\n", filename);
-			}
-			else
-			{
-				const char *lump_name = lumpinfo[df->deh_lump].name;
-
-				I_Printf("Converting [%s] lump in: %s\n", lump_name, filename);
-
-				int length;
-				const byte *data = (const byte *)W_LoadLump(df->deh_lump, &length);
-
-				if (! DH_ConvertLump(data, length, lump_name, hwa_filename.c_str()))
-					I_Error("Failed to convert DeHackEd LUMP in: %s\n", filename);
-
-				W_DoneWithLump(data);
-			}
-
-		// Load it (using good ol' recursion again).
-		AddFile(hwa_filename.c_str(), FLKIND_HWad, -1, df->md5_string);
-	}
 
 	std::string fix_checker;
 
-	if (!md5_check.empty())
-		fix_checker = md5_check;
-	else
-		fix_checker = df->md5_string;
+	fix_checker = wad->md5_string;
+
+	if (fix_checker.empty())
+		return;
 
 	for (int i = 0; i < fixdefs.GetSize(); i++)
 	{
 		if (strcasecmp(fix_checker.c_str(), fixdefs[i]->md5_string.c_str()) == 0)
 		{
-
 			std::string fix_path = epi::PATH_Join(game_dir.c_str(), "edge_fixes");
 			fix_path = epi::PATH_Join(fix_path.c_str(), fix_checker.append(".wad").c_str());
 			if (epi::FS_Access(fix_path.c_str(), epi::file_c::ACCESS_READ))
 			{
-				AddFile(fix_path.c_str(), FLKIND_PWad, -1, "");
+				W_AddPending(fix_path.c_str(), FLKIND_PWad);
+
 				I_Printf("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name.c_str());
 			}
 			else
@@ -1290,78 +1035,161 @@ static void AddFile(const char *filename, int kind, int dyn_index, std::string m
 	}
 }
 
-//
-// W_BuildNodes
-//
-void W_BuildNodes(void)
+void ProcessDehacked(data_file_c *df)
 {
-	int datafile = (int)data_files.size();
+	if (df->kind == FLKIND_Deh)
+		{ /* ok */ }
+	else if (df->wad != NULL && df->wad->deh_lump >= 0)
+		{ /* ok */ }
+	else
+		return;
 
-	for (int i=0; i < datafile; i++)
+	// we just need a name that won't conflict with any other HWA file
+	// in the *current* session.  the following is crude, but works.
+	static int total = 0;
+
+	char base_name[64];
+	sprintf(base_name, "DEH_%04d.%s", total, EDGEHWAEXT);
+	total += 1;
+
+	std::string hwa_filename = epi::PATH_Join(cache_dir.c_str(), base_name);
+
+	I_Debugf("Actual_HWA_filename: %s\n", hwa_filename.c_str());
+
+	if (df->kind == FLKIND_Deh)
 	{
-		data_file_c *df = data_files[i];
+		I_Printf("Converting DEH file: %s\n", df->name.c_str());
 
-		if (df->kind <= FLKIND_EWad && df->level_markers.GetSize() > 0)
+		if (! DH_ConvertFile(df->name.c_str(), hwa_filename.c_str()))
+			I_Error("Failed to convert DeHackEd patch: %s\n", df->name.c_str());
+	}
+	else
+	{
+		int deh_lump = df->wad->deh_lump;
+
+		const char *lump_name = lumpinfo[deh_lump].name;
+
+		I_Printf("Converting [%s] lump in: %s\n", lump_name, df->name.c_str());
+
+		int length;
+		const byte *data = (const byte *)W_LoadLump(deh_lump, &length);
+
+		if (! DH_ConvertLump(data, length, lump_name, hwa_filename.c_str()))
+			I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());
+
+		W_DoneWithLump(data);
+	}
+
+	W_AddPending(hwa_filename.c_str(), FLKIND_HWad);
+}
+
+void ProcessWad(data_file_c *df, size_t file_index)
+{
+	wad_file_c *wad = new wad_file_c();
+	df->wad = wad;
+
+	// reset the sprite/flat/patch list stuff
+	within_sprite_list = within_flat_list   = false;
+	within_patch_list  = within_colmap_list = false;
+	within_tex_list    = within_hires_list  = false;
+
+	raw_wad_header_t header;
+
+	epi::file_c *file = df->file;
+
+	// TODO: handle Read failure
+	file->Read(&header, sizeof(raw_wad_header_t));
+
+	if (strncmp(header.identification, "IWAD", 4) != 0)
+	{
+		// Homebrew levels?
+		if (strncmp(header.identification, "PWAD", 4) != 0)
 		{
-			std::string gwa_filename;
-
-			bool exists = FindCacheFilename(gwa_filename, df->file_name, df, EDGEGWAEXT);
-
-			I_Debugf("Actual_GWA_filename: %s\n", gwa_filename.c_str());
-
-			if (! exists)
-			{
-				I_Printf("Building GL Nodes for: %s\n", df->file_name);
-
-				if (! AJ_BuildNodes(df->file_name, gwa_filename.c_str()))
-					I_Error("Failed to build GL nodes for: %s\n", df->file_name);
-			}
-
-			// Load it.  This recursion bit is rather sneaky,
-			// hopefully it doesn't break anything...
-			AddFile(gwa_filename.c_str(), FLKIND_GWad, datafile, "");
-
-			df->companion_gwa = datafile++ + 1;
+			I_Error("Wad file %s doesn't have IWAD or PWAD id\n", df->name.c_str());
 		}
 	}
+
+	header.num_entries = EPI_LE_S32(header.num_entries);
+	header.dir_start   = EPI_LE_S32(header.dir_start);
+
+	size_t length = header.num_entries * sizeof(raw_wad_entry_t);
+
+	raw_wad_entry_t *raw_info = new raw_wad_entry_t[header.num_entries];
+
+	file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
+	// TODO: handle Read failure
+	file->Read(raw_info, length);
+
+	int startlump = (int)lumpinfo.size();
+
+	for (size_t i=0 ; i < header.num_entries ; i++)
+	{
+		raw_wad_entry_t& entry = raw_info[i];
+
+		bool allow_ddf = (df->kind == FLKIND_EWad) || (df->kind == FLKIND_PWad) || (df->kind == FLKIND_HWad);
+
+		AddLump(df, entry.name, EPI_LE_S32(entry.pos), EPI_LE_S32(entry.size),
+				(int)file_index, allow_ddf);
+
+		// this will be uppercase
+		const char *level_name = lumpinfo[startlump + i].name;
+
+		CheckForLevel(wad, startlump + i, level_name, &entry, header.num_entries-1 - i);
+	}
+
+	// check for unclosed sprite/flat/patch lists
+	const char *filename = df->name.c_str();
+	if (within_sprite_list) I_Warning("Missing S_END marker in %s.\n", filename);
+	if (within_flat_list)   I_Warning("Missing F_END marker in %s.\n", filename);
+	if (within_patch_list)  I_Warning("Missing P_END marker in %s.\n", filename);
+	if (within_colmap_list) I_Warning("Missing C_END marker in %s.\n", filename);
+	if (within_tex_list)    I_Warning("Missing TX_END marker in %s.\n", filename);
+	if (within_hires_list)  I_Warning("Missing HI_END marker in %s.\n", filename);
+
+	SortLumps();
+
+	SortSpriteLumps(wad);
+
+	// compute MD5 hash over wad directory
+	wad->dir_md5.Compute((const byte *)raw_info, length);
+
+	wad->md5_string = epi::STR_Format("%02x%02x%02x%02x%02x%02x%02x%02x", 
+			wad->dir_md5.hash[0],  wad->dir_md5.hash[1],
+			wad->dir_md5.hash[2],  wad->dir_md5.hash[3],
+			wad->dir_md5.hash[4],  wad->dir_md5.hash[5],
+			wad->dir_md5.hash[6],  wad->dir_md5.hash[7],
+			wad->dir_md5.hash[8],  wad->dir_md5.hash[9],
+			wad->dir_md5.hash[10], wad->dir_md5.hash[11],
+			wad->dir_md5.hash[12], wad->dir_md5.hash[13],
+			wad->dir_md5.hash[14], wad->dir_md5.hash[15]);
+
+	I_Debugf("   md5hash = %s\n", wad->md5_string.c_str());
+
+	delete[] raw_info;
 }
 
-//
-// W_AddRawFilename
-//
-void W_AddRawFilename(const char *file, int kind)
+
+std::string W_BuildNodesForWad(data_file_c *df)
 {
-	I_Debugf("Added filename: %s\n", file);
+	if (df->wad->level_markers.GetSize() == 0)
+		return std::string();
 
-    wadfiles.push_back(new raw_filename_c(file, kind));
+	std::string gwa_filename;
+
+	bool exists = FindCacheFilename(gwa_filename, df->name.c_str(), df->wad->dir_md5, EDGEGWAEXT);
+
+	I_Debugf("Actual_GWA_filename: %s\n", gwa_filename.c_str());
+
+	if (! exists)
+	{
+		I_Printf("Building GL Nodes for: %s\n", df->name.c_str());
+
+		if (! AJ_BuildNodes(df->name.c_str(), gwa_filename.c_str()))
+			I_Error("Failed to build GL nodes for: %s\n", df->name.c_str());
+	}
+
+	return gwa_filename;
 }
-
-//
-// W_InitMultipleFiles
-//
-// Pass a null terminated list of files to use.
-// Files with a .wad extension are idlink files with multiple lumps.
-// Other files are single lumps with the base filename for the lump name.
-// Lump names can appear multiple times.
-// The name searcher looks backwards, so a later file
-//   does override all earlier ones.
-//
-void W_InitMultipleFiles(void)
-{
-	// open all the files, add all the lumps
-
-	std::list<raw_filename_c *>::iterator it;
-
-	for (it = wadfiles.begin(); it != wadfiles.end(); it++)
-    {
-        raw_filename_c *rf = *it;
-		AddFile(rf->filename.c_str(), rf->kind, -1, "");
-    }
-
-	if (lumpinfo.empty())
-		I_Error("W_InitMultipleFiles: no files found!\n");
-}
-
 
 
 void W_ReadUMAPINFOLumps(void)
@@ -1679,115 +1507,29 @@ void W_ReadUMAPINFOLumps(void)
 	}
 }
 
-void W_ReadWADFIXES(void)
+
+// TODO review this, consider moving wad_file_c to header
+int W_GetDDFLump(wad_file_c *wad, int d)
 {
-	ddf_reader_t wadfix_reader = {"WADFIXES","Fixes", DDF_ReadFixes };
-
-	I_Printf("Loading %s\n", wadfix_reader.print_name);
-
-	// call read function
-	(* wadfix_reader.func)(NULL, 0);
-
-	int length;
-	char *data = (char *) W_LoadLump("WADFIXES", &length);
-
-	// call read function
-	(* wadfix_reader.func)(data, length);
-
-	W_DoneWithLump(data);
+	return wad->ddf_lumps[d];
 }
-
-void W_ReadDDF(void)
+int W_GetAnimated(wad_file_c *wad)
 {
-	// -AJA- the order here may look strange.  Since DDF files
-	// have dependencies between them, it makes more sense to
-	// load all lumps of a certain type together (e.g. all
-	// DDFSFX lumps before all the DDFTHING lumps).
-
-	for (int d = 0; d < NUM_DDF_READERS; d++)
+	return wad->animated;
+}
+int W_GetSwitches(wad_file_c *wad)
+{
+	return wad->switches;
+}
+void W_AddColourmaps(wad_file_c *wad)
+{
+	for (int i=0; i < wad->colmap_lumps.GetSize(); i++)
 	{
-		if (true)
-		{
-			I_Printf("Loading %s\n", DDF_Readers[d].print_name);
+		int lump = wad->colmap_lumps[i];
 
-			// call read function
-			(* DDF_Readers[d].func)(NULL, 0);
-		}
-
-		for (int f = 0; f < (int)data_files.size(); f++)
-		{
-			data_file_c *df = data_files[f];
-
-			// all script files get parsed here
-			if (d == RTS_READER && df->kind == FLKIND_RTS)
-			{
-				I_Printf("Loading RTS script: %s\n", df->file_name);
-
-				RAD_LoadFile(df->file_name);
-				continue;
-			}
-
-			if (df->kind >= FLKIND_RTS)
-				continue;
-
-			int lump = df->ddf_lumps[d];
-
-			if (lump >= 0)
-			{
-				I_Printf("Loading %s from: %s\n", DDF_Readers[d].name, df->file_name);
-
-				int length;
-				char *data = (char *) W_LoadLump(lump, &length);
-
-				// call read function
-				(* DDF_Readers[d].func)(data, length);
-
-				W_DoneWithLump(data);
-			}
-
-			// handle Boom's ANIMATED and SWITCHES lumps
-			if (d == ANIM_READER && df->animated >= 0)
-			{
-				I_Printf("Loading ANIMATED from: %s\n", df->file_name);
-
-				int length;
-				byte *data = W_LoadLump(df->animated, &length);
-
-				DDF_ParseANIMATED(data, length);
-				W_DoneWithLump(data);
-			}
-			if (d == SWTH_READER && df->switches >= 0)
-			{
-				I_Printf("Loading SWITCHES from: %s\n", df->file_name);
-
-				int length;
-				byte *data = W_LoadLump(df->switches, &length);
-
-				DDF_ParseSWITCHES(data, length);
-				W_DoneWithLump(data);
-			}
-
-			// handle BOOM Colourmaps (between C_START and C_END)
-			if (d == COLM_READER && df->colmap_lumps.GetSize() > 0)
-			{
-				for (int i=0; i < df->colmap_lumps.GetSize(); i++)
-				{
-					int lump = df->colmap_lumps[i];
-
-					DDF_ColourmapAddRaw(W_GetLumpName(lump), W_LumpLength(lump));
-				}
-			}
-		}
-
-		std::string msg_buf(epi::STR_Format(
-			"Loaded %s %s\n", (d == NUM_DDF_READERS-1) ? "RTS" : "DDF",
-				DDF_Readers[d].print_name));
-
-		I_Printf(msg_buf.c_str());
+		DDF_ColourmapAddRaw(W_GetLumpName(lump), W_LumpLength(lump));
 	}
-
 }
-
 
 
 void W_ReadCoalLumps(void)
@@ -1795,19 +1537,20 @@ void W_ReadCoalLumps(void)
 	for (int f = 0; f < (int)data_files.size(); f++)
 	{
 		data_file_c *df = data_files[f];
+		wad_file_c *wad = df->wad;
 
-		if (df->kind > FLKIND_Lump)
-			continue;
+		// FIXME support PK3
 
-		if (df->coal_apis >= 0)
-			VM_LoadLumpOfCoal(df->coal_apis);
+		if (wad != NULL)
+		{
+			if (wad->coal_apis >= 0)
+				VM_LoadLumpOfCoal(wad->coal_apis);
 
-		if (df->coal_huds >= 0)
-			VM_LoadLumpOfCoal(df->coal_huds);
+			if (wad->coal_huds >= 0)
+				VM_LoadLumpOfCoal(wad->coal_huds);
+		}
 	}
 }
-
-
 
 
 epi::file_c *W_OpenLump(int lump)
@@ -1826,26 +1569,6 @@ epi::file_c *W_OpenLump(int lump)
 epi::file_c *W_OpenLump(const char *name)
 {
 	return W_OpenLump(W_GetNumForName(name));
-}
-
-//
-// W_GetFileName
-//
-// Returns the filename of the WAD file containing the given lump, or
-// NULL if it wasn't a WAD file (e.g. a pure lump).
-//
-const char *W_GetFileName(int lump)
-{
-	SYS_ASSERT(W_VerifyLump(lump));
-
-	lumpinfo_t *l = &lumpinfo[lump];
-
-	data_file_c *df = data_files[l->file];
-
-	if (df->kind >= FLKIND_Lump)
-		return NULL;
-  
-	return df->file_name;
 }
 
 //
@@ -1872,12 +1595,10 @@ int W_GetPaletteForLump(int lump)
 	for (; f > palette_datafile; f--)
 	{
 		data_file_c *df = data_files[f];
+		wad_file_c *wad = df->wad;
 
-		if (df->kind >= FLKIND_Lump)
-			continue;
-
-		if (df->wadtex.palette >= 0)
-			return df->wadtex.palette;
+		if (wad != NULL && wad->wadtex.palette >= 0)
+			return wad->wadtex.palette;
 	}
 
 	// Use last loaded PLAYPAL if no graphic-specific palette is found
@@ -2099,24 +1820,28 @@ int W_FindFlatSequence(const char *start, const char *end,
 	for (int file = (int)data_files.size()-1; file >= 0; file--)
 	{
 		data_file_c *df = data_files[file];
+		wad_file_c *wad = df->wad;
+
+		if (wad == NULL)
+			continue;
 
 		// look for start name
 		int i;
-		for (i=0; i < df->flat_lumps.GetSize(); i++)
+		for (i=0; i < wad->flat_lumps.GetSize(); i++)
 		{
-			if (strncmp(start, W_GetLumpName(df->flat_lumps[i]), 8) == 0)
+			if (strncmp(start, W_GetLumpName(wad->flat_lumps[i]), 8) == 0)
 				break;
 		}
 
-		if (i >= df->flat_lumps.GetSize())
+		if (i >= wad->flat_lumps.GetSize())
 			continue;
 
 		(*s_offset) = i;
 
 		// look for end name
-		for (i++; i < df->flat_lumps.GetSize(); i++)
+		for (i++; i < wad->flat_lumps.GetSize(); i++)
 		{
-			if (strncmp(end, W_GetLumpName(df->flat_lumps[i]), 8) == 0)
+			if (strncmp(end, W_GetLumpName(wad->flat_lumps[i]), 8) == 0)
 			{
 				(*e_offset) = i;
 				return file;
@@ -2132,29 +1857,27 @@ int W_FindFlatSequence(const char *start, const char *end,
 //
 // Returns NULL for an empty list.
 //
-epi::u32array_c& W_GetListLumps(int file, lumplist_e which)
+epi::u32array_c * W_GetListLumps(int file, lumplist_e which)
 {
 	SYS_ASSERT(0 <= file && file < (int)data_files.size());
 
 	data_file_c *df = data_files[file];
+	wad_file_c *wad = df->wad;
+
+	if (wad == NULL)
+		return NULL;
 
 	switch (which)
 	{
-		case LMPLST_Sprites: return df->sprite_lumps;
-		case LMPLST_Flats:   return df->flat_lumps;
-		case LMPLST_Patches: return df->patch_lumps;
+		case LMPLST_Sprites: return &wad->sprite_lumps;
+		case LMPLST_Flats:   return &wad->flat_lumps;
+		case LMPLST_Patches: return &wad->patch_lumps;
 
 		default: break;
 	}
 
 	I_Error("W_GetListLumps: bad `which' (%d)\n", which);
-	return df->sprite_lumps; /* NOT REACHED */
-}
-
-
-int W_GetNumFiles(void)
-{
-	return (int)data_files.size();
+	return NULL; /* NOT REACHED */
 }
 
 
@@ -2246,10 +1969,14 @@ void W_ProcessTX_HI(void)
 	for (int file = 0; file < (int)data_files.size(); file++)
 	{
 		data_file_c *df = data_files[file];
+		wad_file_c *wad = df->wad;
 
-		for (int i = 0; i < (int)df->tx_lumps.GetSize(); i++)
+		if (wad == NULL)
+			continue;
+
+		for (int i = 0; i < (int)wad->tx_lumps.GetSize(); i++)
 		{
-			int lump = df->tx_lumps[i];
+			int lump = wad->tx_lumps[i];
 			W_ImageAddTX(lump, W_GetLumpName(lump), false);
 		}
 	}
@@ -2261,10 +1988,14 @@ void W_ProcessTX_HI(void)
 	for (int file = 0; file < (int)data_files.size(); file++)
 	{
 		data_file_c *df = data_files[file];
+		wad_file_c *wad = df->wad;
 
-		for (int i = 0; i < (int)df->hires_lumps.GetSize(); i++)
+		if (wad == NULL)
+			continue;
+
+		for (int i = 0; i < (int)wad->hires_lumps.GetSize(); i++)
 		{
-			int lump = df->hires_lumps[i];
+			int lump = wad->hires_lumps[i];
 			W_ImageAddTX(lump, W_GetLumpName(lump), true);
 		}
 	}
@@ -2325,7 +2056,7 @@ void W_ShowFiles(void)
 	{
 		data_file_c *df = data_files[i];
 
-		I_Printf(" %2d: %-4s \"%s\"\n", i+1, FileKind_Strings[df->kind], df->file_name);
+		I_Printf(" %2d: %-4s \"%s\"\n", i+1, FileKind_Strings[df->kind], df->name.c_str());
 	}
 }
 

@@ -135,6 +135,8 @@ static void ColmapClearAll(void)
 
 bool DDF_ReadColourMaps(void *data, int size)
 {
+	SYS_ASSERT(data);
+
 	readinfo_t colm_r;
 
 	colm_r.memfile = (char*)data;
@@ -142,18 +144,8 @@ bool DDF_ReadColourMaps(void *data, int size)
 	colm_r.tag = "COLOURMAPS";
 	colm_r.entries_per_dot = 2;
 
-	if (colm_r.memfile)
-	{
-		colm_r.message = NULL;
-		colm_r.filename = NULL;
-		colm_r.lumpname = "DDFCOLM";
-	}
-	else
-	{
-		colm_r.message = "DDF_InitColourMaps";
-		colm_r.filename = "colmap.ddf";
-		colm_r.lumpname = NULL;
-	}
+	colm_r.filename = NULL;
+	colm_r.lumpname = "DDFCOLM";
 
 	colm_r.start_entry  = ColmapStartEntry;
 	colm_r.parse_field  = ColmapParseField;

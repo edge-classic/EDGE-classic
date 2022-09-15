@@ -33,6 +33,7 @@
 #include "m_menu.h"
 #include "m_misc.h"
 #include "s_sound.h"
+#include "w_files.h"
 #include "w_wad.h"
 #include "version.h"
 

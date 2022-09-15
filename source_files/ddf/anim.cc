@@ -151,6 +151,8 @@ static void AnimClearAll(void)
 
 bool DDF_ReadAnims(void *data, int size)
 {
+	SYS_ASSERT(data);
+
 	readinfo_t anims;
 
 	anims.memfile = (char*)data;
@@ -158,18 +160,8 @@ bool DDF_ReadAnims(void *data, int size)
 	anims.tag = "ANIMATIONS";
 	anims.entries_per_dot = 2;
 
-	if (anims.memfile)
-	{
-		anims.message = NULL;
-		anims.filename = NULL;
-		anims.lumpname = "DDFANIM";
-	}
-	else
-	{
-		anims.message = "DDF_InitAnimations";
-		anims.filename = "anims.ddf";
-		anims.lumpname = NULL;
-	}
+	anims.filename  = NULL;
+	anims.lumpname = "DDFANIM";
 
 	anims.start_entry  = AnimStartEntry;
 	anims.parse_field  = AnimParseField;

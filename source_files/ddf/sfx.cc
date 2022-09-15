@@ -130,6 +130,8 @@ static void SoundClearAll(void)
 
 bool DDF_ReadSFX(void *data, int size)
 {
+	SYS_ASSERT(data);
+
 	readinfo_t sfx_r;
 
 	sfx_r.memfile = (char*)data;
@@ -137,18 +139,8 @@ bool DDF_ReadSFX(void *data, int size)
 	sfx_r.tag = "SOUNDS";
 	sfx_r.entries_per_dot = 8;
 
-	if (sfx_r.memfile)
-	{
-		sfx_r.message = NULL;
-		sfx_r.filename = NULL;
-		sfx_r.lumpname = "DDFSFX";
-	}
-	else
-	{
-		sfx_r.message = "DDF_InitSounds";
-		sfx_r.filename = "sounds.ddf";
-		sfx_r.lumpname = NULL;
-	}
+	sfx_r.filename = NULL;
+	sfx_r.lumpname = "DDFSFX";
 
 	sfx_r.start_entry  = SoundStartEntry;
 	sfx_r.parse_field  = SoundParseField;

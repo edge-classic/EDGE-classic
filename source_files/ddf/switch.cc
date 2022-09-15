@@ -130,18 +130,8 @@ bool DDF_ReadSwitch(void *data, int size)
 	switches.tag = "SWITCHES";
 	switches.entries_per_dot = 2;
 
-	if (switches.memfile)
-	{
-		switches.message = NULL;
-		switches.filename = NULL;
-		switches.lumpname = "DDFSWTH";
-	}
-	else
-	{
-		switches.message = "DDF_InitSwitches";
-		switches.filename = "switch.ddf";
-		switches.lumpname = NULL;
-	}
+	switches.filename = NULL;
+	switches.lumpname = "DDFSWTH";
 
 	switches.start_entry  = SwitchStartEntry;
 	switches.parse_field  = SwitchParseField;

@@ -110,6 +110,8 @@ static void FlatClearAll(void)
 
 bool DDF_ReadFlat(void *data, int size)
 {
+	SYS_ASSERT(data);
+
 #if (DEBUG_DDF)
 	epi::array_iterator_c it;
 	flatdef_c *sw;
@@ -122,18 +124,8 @@ bool DDF_ReadFlat(void *data, int size)
 	flats.tag = "FLATS";
 	flats.entries_per_dot = 2;
 
-	if (flats.memfile)
-	{
-		flats.message = NULL;
-		flats.filename = NULL;
-		flats.lumpname = "DDFFLAT";
-	}
-	else
-	{
-		flats.message = "DDF_InitFlats";
-		flats.filename = "flats.ddf";
-		flats.lumpname = NULL;
-	}
+	flats.filename = NULL;
+	flats.lumpname = "DDFFLAT";
 
 	flats.start_entry  = FlatStartEntry;
 	flats.parse_field  = FlatParseField;

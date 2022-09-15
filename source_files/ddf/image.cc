@@ -149,7 +149,7 @@ static void ImageParseField(const char *field, const char *contents, int index, 
 
 static void ImageFinishEntry(void)
 {
-	if (dynamic_image->type == IMGDT_File)
+	if (dynamic_image->type == IMGDT_File || dynamic_image->type == IMGDT_Package)
 	{
         const char *filename = dynamic_image->info.c_str();
 
@@ -186,6 +186,8 @@ static void ImageClearAll(void)
 
 bool DDF_ReadImages(void *data, int size)
 {
+	SYS_ASSERT(data);
+
 	readinfo_t images;
 
 	images.memfile = (char*)data;
@@ -193,18 +195,8 @@ bool DDF_ReadImages(void *data, int size)
 	images.tag = "IMAGES";
 	images.entries_per_dot = 2;
 
-	if (images.memfile)
-	{
-		images.message = NULL;
-		images.filename = NULL;
-		images.lumpname = "DDFIMAGE";
-	}
-	else
-	{
-		images.message = "DDF_InitImages";
-		images.filename = "images.ddf";
-		images.lumpname = NULL;
-	}
+	images.filename = NULL;
+	images.lumpname = "DDFIMAGE";
 
 	images.start_entry  = ImageStartEntry;
 	images.parse_field  = ImageParseField;
@@ -320,6 +312,11 @@ static void DDF_ImageGetType(const char *info, void *storage)
 	{
 		dynamic_image->type = IMGDT_Lump;
 		ImageParseLump(colon + 1);
+	}
+	else if (DDF_CompareName(keyword, "PACK") == 0)
+	{
+		dynamic_image->type = IMGDT_Package;
+		ImageParseInfo(colon + 1);
 	}
 	else
 		DDF_Error("Unknown image type: %s\n", keyword);

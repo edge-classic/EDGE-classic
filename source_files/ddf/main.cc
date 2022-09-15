@@ -33,10 +33,45 @@
 extern float M_Tan(angle_t ang)  GCCATTR((const));
 
 
-#define DEBUG_DDFREAD  0
+// enum thats gives the parser's current status
+typedef enum
+{
+	readstatus_invalid = 0,
+	waiting_tag,
+	reading_tag,
+	waiting_newdef,
+	reading_newdef,
+	reading_command,
+	reading_data,
+	reading_remark,
+	reading_string
+}
+readstatus_e;
 
-static int engine_version;
-static std::string ddf_where;
+// enum thats describes the return value from DDF_MainProcessChar
+typedef enum
+{
+	nothing,
+	command_read,
+	property_read,
+	def_start,
+	def_stop,
+	remark_start,
+	remark_stop,
+	separator,
+	string_start,
+	string_stop,
+	group_start,
+	group_stop,
+	tag_start,
+	tag_stop,
+	terminator,
+	ok_char
+}
+readchar_t;
+
+
+#define DEBUG_DDFREAD  0
 
 bool strict_errors = false;
 bool lax_errors = false;
@@ -153,10 +188,8 @@ void DDF_WarnError(const char *err, ...)
 }
 
 
-void DDF_Init(int _engine_ver)
+void DDF_Init()
 {
-	engine_version = _engine_ver;
-
 	DDF_StateInit();
 	DDF_LanguageInit();
 	DDF_SFXInit();
@@ -176,11 +209,6 @@ void DDF_Init(int _engine_ver)
 	DDF_MusicPlaylistInit();
 	DDF_FlatInit();
 	DDF_FixInit();
-}
-
-void DDF_SetWhere(const std::string& dir)
-{
-	ddf_where = dir;
 }
 
 
@@ -239,7 +267,7 @@ static const char *DDF_MainGetDefine(const char *name)
 // This goes through the information loaded via DDF and matchs any
 // info stored as references.
 //
-void DDF_CleanUp(void)
+void DDF_CleanUp()
 {
 	DDF_LanguageCleanUp();
 	DDF_ImageCleanUp();
@@ -362,52 +390,6 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
 
 	fclose(fp);
 	I_Error("Missing <..> marker in DDF file: %s\n", filename);
-}
-
-// -KM- 1998/12/16 This loads the ddf file into memory for parsing.
-// -AJA- Returns NULL if no such file exists (with a warning).
-
-static void *DDF_MainCacheFile(readinfo_t * readinfo)
-{
-	FILE *file;
-	char *memfile;
-	size_t size;
-
-	if (!readinfo->filename)
-		I_Error("DDF_MainReadFile: No file to read\n");
-
-	std::string filename(epi::PATH_Join(ddf_where.c_str(), readinfo->filename));
-
-	file = fopen(filename.c_str(), "rb");
-	if (file == NULL)
-	{
-		return NULL;
-	}
-
-#if (DEBUG_DDFREAD)
-	I_Debugf("\nDDF Parser Output:\n");
-#endif
-
-	// get to the end of the file
-	fseek(file, 0, SEEK_END);
-
-	// get the size
-	size = ftell(file);
-
-	// reset to beginning
-	fseek(file, 0, SEEK_SET);
-
-	// malloc the size
-	memfile = new char[size + 1];
-
-	fread(memfile, sizeof(char), size, file);
-	memfile[size] = 0;
-
-	// close the file
-	fclose(file);
-
-	readinfo->memsize = size;
-	return (void *)memfile;
 }
 
 
@@ -728,30 +710,17 @@ bool DDF_MainReadFile(readinfo_t * readinfo)
 #endif
 
 	status = waiting_tag;
-	formerstatus = readstatus_invalid;
+	formerstatus = nothing;
 	comment_level = 0;
 	bracket_level = 0;
 	firstgo = true;
 
 	cur_ddf_line_num = 1;
 
-	if (!readinfo->memfile && !readinfo->filename)
-		I_Error("DDF_MainReadFile: No file to read\n");
+	SYS_ASSERT(readinfo->memfile);
 
-	if (!readinfo->memfile)
-	{
-		readinfo->memfile = (char*)DDF_MainCacheFile(readinfo);
-
-		// no file ?  No worries, we'll get it from edge.wad...
-		if (!readinfo->memfile)
-			return false;
-      
-		cur_ddf_filename = std::string(readinfo->filename);
-	}
-	else
-	{
-		cur_ddf_filename = std::string(readinfo->lumpname);
-	}
+	// FIXME get proper filename from main engine code
+	cur_ddf_filename = std::string(readinfo->lumpname);
 
 	memfileptr = memfile = readinfo->memfile;
 	size = readinfo->memsize;

@@ -31,21 +31,6 @@
 #include "file.h"
 #include "utility.h"
 
-typedef enum
-{
-	FLKIND_IWad = 0,  // iwad file
-	FLKIND_PWad,      // normal .wad file
-	FLKIND_EWad,      // EDGE.wad
-	FLKIND_GWad,      // ajbsp node wad
-	FLKIND_HWad,      // deHacked wad
-
-	FLKIND_Lump,      // raw lump (no extension)
-
-	FLKIND_DDF,       // .ddf or .ldf file
-	FLKIND_RTS,       // .rts script
-	FLKIND_Deh        // .deh or .bex file
-}
-filekind_e;
 
 class wadtex_resource_c
 {
@@ -68,9 +53,6 @@ typedef enum
 }
 lumplist_e;
 
-void W_AddRawFilename(const char *file, int kind);
-void W_InitMultipleFiles(void);
-void W_ReadDDF(void);
 void W_ReadCoalLumps(void);
 
 int W_CheckNumForName(const char *name);
@@ -95,17 +77,14 @@ const char *W_GetLumpName(int lump);
 epi::file_c *W_OpenLump(int lump);
 epi::file_c *W_OpenLump(const char *name);
 
-const char *W_GetFileName(int lump);
 int W_GetPaletteForLump(int lump);
 int W_FindFlatSequence(const char *start, const char *end, 
     int *s_offset, int *e_offset);
-epi::u32array_c& W_GetListLumps(int file, lumplist_e which);
+epi::u32array_c * W_GetListLumps(int file, lumplist_e which);  // FIXME split up
 void W_GetTextureLumps(int file, wadtex_resource_c *res);
 void W_ProcessTX_HI(void);
-int W_GetNumFiles(void);
 int W_GetFileForLump(int lump);
 void W_ShowLumps(int for_file, const char *match);
-void W_ShowFiles(void);
 
 //auxiliary functions to help us deal with when to use skyboxes
 int W_LoboFindSkyImage(int for_file, const char *match);

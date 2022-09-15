@@ -312,6 +312,8 @@ static void AttackClearAll(void)
 
 bool DDF_ReadAtks(void *data, int size)
 {
+	SYS_ASSERT(data);
+
 	readinfo_t attacks;
 
 	attacks.memfile = (char*)data;
@@ -319,18 +321,8 @@ bool DDF_ReadAtks(void *data, int size)
 	attacks.tag = "ATTACKS";
 	attacks.entries_per_dot = 2;
 
-	if (attacks.memfile)
-	{
-		attacks.message = NULL;
-		attacks.filename = NULL;
-		attacks.lumpname = "DDFATK";
-	}
-	else
-	{
-		attacks.message = "DDF_InitAttacks";
-		attacks.filename = "attacks.ddf";
-		attacks.lumpname = NULL;
-	}
+	attacks.filename = NULL;
+	attacks.lumpname = "DDFATK";
 
 	attacks.start_entry  = AttackStartEntry;
 	attacks.parse_field  = AttackParseField;

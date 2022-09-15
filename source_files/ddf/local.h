@@ -27,45 +27,6 @@
 #include <cstddef>
 #include "states.h"
 
-// defines for parser stuff.
-#define BUFFERSIZE 1024
-
-// enum thats gives the parser's current status
-typedef enum
-{
-	readstatus_invalid = 0,
-	waiting_tag,
-	reading_tag,
-	waiting_newdef,
-	reading_newdef,
-	reading_command,
-	reading_data,
-	reading_remark,
-	reading_string
-}
-readstatus_e;
-
-// enum thats describes the return value from DDF_MainProcessChar
-typedef enum
-{
-	nothing,
-	command_read,
-	property_read,
-	def_start,
-	def_stop,
-	remark_start,
-	remark_stop,
-	separator,
-	string_start,
-	string_stop,
-	group_start,
-	group_stop,
-	tag_start,
-	tag_stop,
-	terminator,
-	ok_char
-}
-readchar_t;
 
 //
 // This structure forms the basis for the command checking, it hands back a code
@@ -108,9 +69,8 @@ commandlist_t;
 //
 typedef struct readinfo_s
 {
-	const char *message;	// message displayed
-	const char *filename;	// filename (when memfile == NULL)
-	const char *lumpname;	// lumpnume (when memfile != NULL)
+	const char *filename;	// filename (if from a file)
+	const char *lumpname;	// lumpnume (if from a wad)
 
 	const char *tag;	// the file has to start with <tag>
 

@@ -219,18 +219,8 @@ bool DDF_ReadStyles(void *data, int size)
 	styles.tag = "STYLES";
 	styles.entries_per_dot = 2;
 
-	if (styles.memfile)
-	{
-		styles.message = NULL;
-		styles.filename = NULL;
-		styles.lumpname = "DDFSTYLE";
-	}
-	else
-	{
-		styles.message = "DDF_InitStyles";
-		styles.filename = "styles.ddf";
-		styles.lumpname = NULL;
-	}
+	styles.filename = NULL;
+	styles.lumpname = "DDFSTYLE";
 
 	styles.start_entry  = StyleStartEntry;
 	styles.parse_field  = StyleParseField;

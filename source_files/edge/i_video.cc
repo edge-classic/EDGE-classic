@@ -215,6 +215,8 @@ bool I_SetScreenSize(scrmode_c *mode)
 		{
 			SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN_DESKTOP);
 			SDL_GetWindowSize(my_vis, &borderless_mode.width, &borderless_mode.height);
+			display_W = borderless_mode.width;
+			display_H = borderless_mode.height;
 			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
 				mode->width, mode->height, mode->depth);
 		}
@@ -247,6 +249,12 @@ bool I_SetScreenSize(scrmode_c *mode)
 		my_vis = SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
 			SDL_WINDOW_OPENGL | (mode->display_mode == mode->SCR_BORDERLESS ? (SDL_WINDOW_FULLSCREEN_DESKTOP) :
 			(mode->display_mode == mode->SCR_FULLSCREEN ? SDL_WINDOW_FULLSCREEN : 0)));
+		if (mode->display_mode == mode->SCR_BORDERLESS)
+		{
+			SDL_GetWindowSize(my_vis, &borderless_mode.width, &borderless_mode.height);
+			display_W = borderless_mode.width;
+			display_H = borderless_mode.height;
+		}
 		SDL_GL_CreateContext(my_vis);
 		gladLoaderLoadGL();
 	}

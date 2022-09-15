@@ -349,7 +349,7 @@ bool R_ChangeResolution(scrmode_c *mode)
 {
 	L_WriteDebug("R_ChangeResolution...\n");
 
-    if (DoExecuteChangeResolution(mode))
+    if (DoExecuteChangeResolution(mode->display_mode == 2 ? &borderless_mode : mode));
 		return true;
 
 	L_WriteDebug("- Failed : switching back...\n");

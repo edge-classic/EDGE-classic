@@ -264,6 +264,20 @@ bool S_StartupTSF(void)
 		}
 	}
 
+	// Check for presence of previous CVAR value's file
+	bool cvar_good = false;
+	for (int i=0; i < available_soundfonts.size(); i++)
+	{
+		if(strcasecmp(s_soundfont.c_str(), available_soundfonts.at(i).c_str()) == 0)
+			cvar_good = true;
+	}
+
+	if (!cvar_good)
+	{
+		I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
+		s_soundfont = "default.sf2";
+	}
+
 	edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), s_soundfont.c_str()).c_str());
 
 	if (!edge_tsf)

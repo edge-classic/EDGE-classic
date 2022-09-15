@@ -263,20 +263,15 @@ dehret_e Convert(void)
 	Frames::StateDependencies();
 	Ammo::AmmoDependencies();
 
-
-	Attacks::ConvertATK();
 	Things::FixHeights();
-	Things::ConvertTHING();
 
-
-	Weapons::ConvertWEAP();
 	Sounds::ConvertSFX();
 	Sounds::ConvertMUS();
-
-
+	Attacks::ConvertATK();
+	Things::ConvertTHING();
+	Weapons::ConvertWEAP();
 	TextStr::ConvertLDF();
 	Rscript::ConvertRAD();
-
 
 	Storage::RestoreAll();
 

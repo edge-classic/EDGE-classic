@@ -930,18 +930,8 @@ bool DDF_ReadThings(void *data, int size)
 	things.tag = "THINGS";
 	things.entries_per_dot = 6;
 
-	if (things.memfile)
-	{
-		things.message = NULL;
-		things.filename = NULL;
-		things.lumpname = "DDFTHING";
-	}
-	else
-	{
-		things.message = "DDF_InitThings";
-		things.filename = "things.ddf";
-		things.lumpname = NULL;
-	}
+	things.filename = NULL;
+	things.lumpname = "DDFTHING";
 
 	things.start_entry  = ThingStartEntry;
 	things.parse_field  = ThingParseField;

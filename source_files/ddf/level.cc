@@ -220,6 +220,8 @@ static void LevelClearAll(void)
 
 bool DDF_ReadLevels(void *data, int size)
 {
+	SYS_ASSERT(data);
+
 	readinfo_t levels;
 
 	levels.memfile = (char*)data;
@@ -227,18 +229,8 @@ bool DDF_ReadLevels(void *data, int size)
 	levels.tag = "LEVELS";
 	levels.entries_per_dot = 2;
 
-	if (levels.memfile)
-	{
-		levels.message = NULL;
-		levels.filename = NULL;
-		levels.lumpname = "DDFLEVL";
-	}
-	else
-	{
-		levels.message = "DDF_InitLevels";
-		levels.filename = "levels.ddf";
-		levels.lumpname = NULL;
-	}
+	levels.filename = NULL;
+	levels.lumpname = "DDFLEVL";
 
 	levels.start_entry  = LevelStartEntry;
 	levels.parse_field  = LevelParseField;

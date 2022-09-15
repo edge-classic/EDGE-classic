@@ -123,9 +123,8 @@ extern bool lax_errors;
 // if true, disable warning messages
 extern bool no_warnings;
 
-void DDF_Init(int _engine_ver);
-void DDF_CleanUp(void);
-void DDF_SetWhere(const std::string& dir);
+void DDF_Init();
+void DDF_CleanUp();
 
 void DDF_Load(epi::file_c *f);
 

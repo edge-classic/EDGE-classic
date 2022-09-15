@@ -415,6 +415,8 @@ static void LanguageClearAll(void)
 
 bool DDF_ReadLangs(void *data, int size)
 {
+	SYS_ASSERT(data);
+
 	readinfo_t languages;
 
 	languages.memfile = (char*)data;
@@ -422,18 +424,8 @@ bool DDF_ReadLangs(void *data, int size)
 	languages.tag = "LANGUAGES";
 	languages.entries_per_dot = 1;
 
-	if (languages.memfile)
-	{
-		languages.message = NULL;
-		languages.filename = NULL;
-		languages.lumpname = "DDFLANG";
-	}
-	else
-	{
-		languages.message = "DDF_InitLanguage";
-		languages.filename = "language.ldf";
-		languages.lumpname = NULL;
-	}
+	languages.filename = NULL;
+	languages.lumpname = "DDFLANG";
 
 	languages.start_entry  = LanguageStartEntry;
 	languages.parse_field  = LanguageParseField;

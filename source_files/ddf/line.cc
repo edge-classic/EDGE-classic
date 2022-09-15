@@ -461,6 +461,8 @@ static void LinedefClearAll(void)
 //
 bool DDF_ReadLines(void *data, int size)
 {
+	SYS_ASSERT(data);
+
 	readinfo_t lines;
 
 	lines.memfile = (char*)data;
@@ -468,18 +470,8 @@ bool DDF_ReadLines(void *data, int size)
 	lines.tag = "LINES";
 	lines.entries_per_dot = 6;
 
-	if (lines.memfile)
-	{
-		lines.message = NULL;
-		lines.filename = NULL;
-		lines.lumpname = "DDFLINE";
-	}
-	else
-	{
-		lines.message = "DDF_InitLinedefs";
-		lines.filename = "lines.ddf";
-		lines.lumpname = NULL;
-	}
+	lines.filename = NULL;
+	lines.lumpname = "DDFLINE";
 
 	lines.start_entry  = LinedefStartEntry;
 	lines.parse_field  = LinedefParseField;

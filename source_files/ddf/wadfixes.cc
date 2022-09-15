@@ -97,6 +97,8 @@ static void FixClearAll(void)
 
 bool DDF_ReadFixes(void *data, int size)
 {
+	SYS_ASSERT(data);
+
 #if (DEBUG_DDF)
 	epi::array_iterator_c it;
 	fixdef_c *sw;
@@ -109,18 +111,8 @@ bool DDF_ReadFixes(void *data, int size)
 	fixes.tag = "FIXES";
 	fixes.entries_per_dot = 2;
 
-	if (fixes.memfile)
-	{
-		fixes.message = NULL;
-		fixes.filename = NULL;
-		fixes.lumpname = "WADFIXES";
-	}
-	else
-	{
-		fixes.message = "DDF_InitFixes";
-		fixes.filename = "wadfixes.ddf";
-		fixes.lumpname = NULL;
-	}
+	fixes.filename = NULL;
+	fixes.lumpname = "WADFIXES";
 
 	fixes.start_entry  = FixStartEntry;
 	fixes.parse_field  = FixParseField;

@@ -114,6 +114,8 @@ static void FontClearAll(void)
 
 bool DDF_ReadFonts(void *data, int size)
 {
+	SYS_ASSERT(data);
+
 	readinfo_t fonts;
 
 	fonts.memfile = (char*)data;
@@ -121,18 +123,8 @@ bool DDF_ReadFonts(void *data, int size)
 	fonts.tag = "FONTS";
 	fonts.entries_per_dot = 2;
 
-	if (fonts.memfile)
-	{
-		fonts.message  = NULL;
-		fonts.filename = NULL;
-		fonts.lumpname = "DDFFONT";
-	}
-	else
-	{
-		fonts.message  = "DDF_InitFonts";
-		fonts.filename = "fonts.ddf";
-		fonts.lumpname = NULL;
-	}
+	fonts.filename = NULL;
+	fonts.lumpname = "DDFFONT";
 
 	fonts.start_entry  = FontStartEntry;
 	fonts.parse_field  = FontParseField;

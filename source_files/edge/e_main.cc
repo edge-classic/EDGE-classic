@@ -1383,7 +1383,7 @@ static void InitDDF(void)
 {
 	I_Debugf("- Initialising DDF\n");
 
-	DDF_Init(EDGEVER);
+	DDF_Init();
 }
 
 

@@ -170,6 +170,8 @@ static void GameClearAll (void)
 
 bool DDF_ReadGames (void *data, int size)
 {
+	SYS_ASSERT(data);
+
 	readinfo_t games;
 
 	games.memfile = (char *) data;
@@ -177,18 +179,8 @@ bool DDF_ReadGames (void *data, int size)
 	games.tag = "GAMES";
 	games.entries_per_dot = 1;
 
-	if (games.memfile)
-	{
-		games.message = NULL;
-		games.filename = NULL;
-		games.lumpname = "DDFGAME";
-	}
-	else
-	{
-		games.message = "DDF_InitGames";
-		games.filename = "games.ddf";
-		games.lumpname = NULL;
-	}
+	games.filename = NULL;
+	games.lumpname = "DDFGAME";
 
 	games.start_entry = GameStartEntry;
 	games.parse_field = GameParseField;

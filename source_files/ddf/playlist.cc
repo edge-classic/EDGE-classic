@@ -170,11 +170,10 @@ static void PlaylistClearAll(void)
 }
 
 
-//
-// DDF_ReadMusicPlaylist
-//
 bool DDF_ReadMusicPlaylist(void *data, int size)
 {
+	SYS_ASSERT(data);
+
 	readinfo_t playlistinfo;
 
 	playlistinfo.memfile = (char*)data;
@@ -182,18 +181,8 @@ bool DDF_ReadMusicPlaylist(void *data, int size)
 	playlistinfo.tag = "PLAYLISTS";
 	playlistinfo.entries_per_dot = 3;
 
-	if (playlistinfo.memfile)
-	{
-		playlistinfo.message  = NULL;
-		playlistinfo.filename = NULL;
-		playlistinfo.lumpname = "DDFPLAY";
-	}
-	else
-	{
-		playlistinfo.message  = "DDF_InitMusicPlaylist";
-		playlistinfo.filename = "playlist.ddf";
-		playlistinfo.lumpname = NULL;
-	}
+	playlistinfo.filename = NULL;
+	playlistinfo.lumpname = "DDFPLAY";
 
 	playlistinfo.start_entry  = PlaylistStartEntry;
 	playlistinfo.parse_field  = PlaylistParseField;

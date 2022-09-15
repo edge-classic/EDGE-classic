@@ -89,9 +89,8 @@ dehret_e DehEdgeSetQuiet(int quiet);
 dehret_e DehEdgeAddFile(const char *filename);
 dehret_e DehEdgeAddLump(const char *data, int length, const char *infoname);
 
-// convert all the DeHackEd patch files into DDF.  This is the only
-// place where the ticker and progress callbacks are called.
-dehret_e DehEdgeRunConversion(const char *out_name);
+// convert all the DeHackEd patch files into DDF.
+dehret_e DehEdgeRunConversion();
 
 // shut down: free all memory, close all files, etc..
 void DehEdgeShutdown(void);

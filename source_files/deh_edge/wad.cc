@@ -117,9 +117,7 @@ namespace WAD
 	}
 }
 
-//
-// WAD::NewLump
-//
+
 void WAD::NewLump(const char *name)
 {
 	if (cur_lump)
@@ -159,9 +157,7 @@ void WAD::NewLump(const char *name)
 	strncpy(cur_lump->name, name, 8);
 }
 
-//
-// WAD::AddData
-//
+
 void WAD::AddData(const byte *data, int size)
 {
 	if (! cur_lump)
@@ -183,9 +179,7 @@ void WAD::AddData(const byte *data, int size)
 	cur_lump->size += size;
 }
 
-//
-// WAD::Printf
-//
+
 void WAD::Printf(const char *str, ...)
 {
 	va_list args;
@@ -201,9 +195,7 @@ void WAD::Printf(const char *str, ...)
 #endif
 }
 
-//
-// WAD::FinishLump
-//
+
 byte * WAD::FinishLump(int *size)
 {
 	if (! cur_lump)
@@ -230,84 +222,7 @@ byte * WAD::FinishLump(int *size)
 	return result;
 }
 
-//
-// WAD::WriteFile
-//
-dehret_e WAD::WriteFile(const char *name)
-{
-	if (cur_lump)
-		InternalError("WAD_WriteFile: lump not finished.\n");
 
-	FILE *fp;
-	const char *pwadstr = PWAD_HEADER;
-
-	// Open File
-	fp = fopen(name, "wb");
-
-	if (!fp)
-	{
-		int err_num = errno;
-
-		SetErrorMsg("Cannot create output file: %s\n[%s]\n", name, strerror(err_num));
-		return DEH_E_NoFile;
-	}
-
-	// Write Header
-	int raw_num = Endian_U32(num_lumps);
-
-	fwrite((void*)pwadstr, 1, 4, fp);
-	fwrite((void*)&raw_num, sizeof(int), 1, fp);
-	fwrite((void*)&raw_num, sizeof(int), 1, fp); // dummy - write later
-
-	ProgressMinor(1, num_lumps+3);
-
-	// Write Lumps
-	int i;
-
-	for (i = 0; i < num_lumps; i++)
-	{
-		if (lumplist[i]->size == 0)
-			continue;
-
-		PadFile(fp);
-		lumplist[i]->filepos = ftell(fp);
-		fwrite((void*)lumplist[i]->data, 1, lumplist[i]->size, fp);
-
-		ProgressMinor(i+2, num_lumps+3);
-	}
-
-	PadFile(fp);
-	int raw_offset = Endian_U32(ftell(fp));
-
-	// Write Lumpinfos (directory table)
-	for (i = 0; i < num_lumps; i++)
-	{
-		if (lumplist[i]->size == 0)
-			continue;
-
-		int raw_pos  = Endian_U32(lumplist[i]->filepos);
-		int raw_size = Endian_U32(lumplist[i]->size);
-
-		fwrite((void*)&raw_pos, sizeof(int), 1, fp);
-		fwrite((void*)&raw_size, sizeof(int), 1, fp);
-		fwrite((void*)lumplist[i]->name, 1, 8, fp);
-	}
-
-	ProgressMinor(num_lumps+2, num_lumps+3);
-
-	// Write table offset
-	fseek(fp, 8, SEEK_SET);
-	fwrite((void*)&raw_offset, sizeof(int), 1, fp);
-
-	// Close File
-	fclose(fp);
-
-	return DEH_OK;
-}
-
-//
-// WAD::Startup
-//
 void WAD::Startup(void)
 {
 	lumplist = (lump_t **) calloc(sizeof(lump_t *), MAX_LUMPS);
@@ -318,9 +233,7 @@ void WAD::Startup(void)
 	num_lumps = 0;
 }
 
-//
-// WAD::Shutdown
-//
+
 void WAD::Shutdown(void)
 {
 	int i;

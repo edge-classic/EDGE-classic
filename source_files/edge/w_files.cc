@@ -129,7 +129,7 @@ static void ProcessFile(data_file_c *df)
 
 	I_Printf("  Adding %s\n", filename);
 
-	if (df->kind <= FLKIND_HWad || df->kind == FLKIND_PK3)
+	if (df->kind <= FLKIND_GWad || df->kind == FLKIND_PK3)
 	{
 		epi::file_c *file = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 		if (file == NULL)
@@ -145,7 +145,7 @@ static void ProcessFile(data_file_c *df)
 	if (df->kind == FLKIND_RTS || df->kind == FLKIND_DDF)
 		return;
 
-	if (df->kind <= FLKIND_HWad)
+	if (df->kind <= FLKIND_GWad)
 	{
 		ProcessWad(df, file_index);
 
@@ -437,28 +437,25 @@ void W_ReadDDF(void)
 	{
 		I_Printf("Loading %s\n", DDF_Readers[d].print_name);
 
-		for (int f = 0; f < (int)data_files.size(); f++)
+		for (int i = 0; i < (int)data_files.size(); i++)
 		{
-			data_file_c *df = data_files[f];
+			data_file_c *df = data_files[i];
 
 			W_ReadDDF_FromFile(df, d);
-
-			// TODO : temporary hack !!
-			if (d == NUM_DDF_READERS-1)
-				ProcessDehacked(df);
 		}
 
 		// handle the `-ddf` option.
-		// files from that directory are done AFTER all other ones.
+		// files from its directory are done AFTER any wads/packs.
 		W_ReadDDF_FromDir(d);
+	}
 
-/* helpful ???
-		std::string msg_buf(epi::STR_Format(
-			"Loaded %s %s\n", (d == NUM_DDF_READERS-1) ? "RTS" : "DDF",
-				DDF_Readers[d].print_name));
-
-		I_Printf(msg_buf.c_str());
-*/
+	// DeHackEd files are done last.
+	// The simplifies the DEH_EDGE code, but means that an EDGE mod
+	// may not work properly alongside a DeHackEd mod.
+	for (int i = 0; i < (int)data_files.size(); i++)
+	{
+		data_file_c *df = data_files[i];
+		ProcessDehacked(df);
 	}
 }
 

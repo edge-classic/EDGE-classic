@@ -37,7 +37,6 @@ typedef enum
 	FLKIND_PWad,      // normal .wad file
 	FLKIND_EWad,      // EDGE.wad
 	FLKIND_GWad,      // ajbsp node wad
-	FLKIND_HWad,      // deHacked wad
 
 	FLKIND_PK3,       // pk3 (zip) package
 
@@ -64,7 +63,7 @@ public:
 	// file object   [ TODO review when active ]
 	epi::file_c *file;
 
-	// for FLKIND_IWad, PWad ... HWad
+	// for FLKIND_IWad, PWad, EWad, GWad.
 	wad_file_c * wad;
 
 	// for FLKIND_PK3

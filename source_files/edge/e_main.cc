@@ -1224,8 +1224,6 @@ static void AddSingleCmdLineFile(const char *name, bool ignore_unknown)
 		kind = FLKIND_PWad;
 	else if (stricmp(ext.c_str(), ".pk3") == 0)
 		kind = FLKIND_PK3;
-	else if (stricmp(ext.c_str(), ".hwa") == 0)
-		kind = FLKIND_HWad;
 	else if (stricmp(ext.c_str(), ".rts") == 0)
 		kind = FLKIND_RTS;
 	else if (stricmp(ext.c_str(), ".ddf") == 0 ||

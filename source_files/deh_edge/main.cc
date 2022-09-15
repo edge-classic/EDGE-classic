@@ -80,8 +80,6 @@ public:
 input_buffer_c *input_bufs[MAX_INPUTS];
 int num_inputs = 0;
 
-const char *output_file = NULL;
-
 #define DEFAULT_TARGET  100
 
 int target_version;
@@ -142,7 +140,6 @@ void Startup(void)
 	/* reset parameters */
 
 	num_inputs = 0;
-	output_file = NULL;
 
 	target_version = DEFAULT_TARGET;
 	quiet_mode = false;
@@ -276,17 +273,8 @@ dehret_e Convert(void)
 	Storage::RestoreAll();
 
 	PrintMsg("\n");
-	PrintMsg("Writing WAD file: %s\n", output_file);
 
-	ProgressText("Writing HWA file");
-	ProgressMajor(80, 100);
-
-	result = WAD::WriteFile(output_file);
-
-	PrintMsg("\n");
-	ProgressMajor(100, 100);
-
-	return result;
+	return DEH_OK;
 }
 
 void Shutdown(void)
@@ -297,100 +285,6 @@ void Shutdown(void)
 
 
 /* ----- option handling ----------------------------- */
-
-#ifndef DEH_EDGE_PLUGIN
-
-void ParseArgs(int argc, char **argv)
-{
-	const char *first_input = NULL;
-
-	while (argc > 0)
-	{
-		const char *opt = *argv;
-
-		argv++, argc--;
-
-		// input filename ?
-		if (*opt != '-')
-		{
-			if (! first_input)
-				first_input = opt;
-
-			if (AddFile(opt) != DEH_OK)
-				FatalError("%s", GetErrorMsg());
-
-			continue;
-		}
-
-		if (opt[1] == '-') opt++;
-
-		if (! opt[1])
-			FatalError("Illegal option %s\n", opt);
-
-		// output filename ?
-		if (StrCaseCmp(opt, "-o") == 0 || StrCaseCmp(opt, "-output") == 0)
-		{
-			if (argc == 0 || argv[0][0] == '-')
-				FatalError("Missing output filename !\n");
-
-			if (output_file)
-				FatalError("Output file already given.\n");
-
-			output_file = StringDup(*argv);
-
-			argv++, argc--;
-			continue;
-		}
-
-		// version number
-		if (StrCaseCmp(opt, "-e") == 0 || StrCaseCmp(opt, "-edge") == 0)
-		{
-			const char *ver = argv[0];
-
-			if (argc == 0 || ver[0] == '-')
-				FatalError("Missing version number !\n");
-
-			if (isdigit(ver[0]) && ver[1] == '.' &&
-				isdigit(ver[2]) && isdigit(ver[3]))
-			{
-				target_version = (ver[0] - '0') * 100 +
-					(ver[2] - '0') * 10 + (ver[3] - '0');
-			}
-			else
-				FatalError("Badly formed version number.\n");
-
-			argv++, argc--;
-			continue;
-		}
-
-		if (StrCaseCmp(opt, "-q") == 0 || StrCaseCmp(opt, "-quiet") == 0)
-		{
-			quiet_mode = true;
-			continue;
-		}
-		if (StrCaseCmp(opt, "-full") == 0)
-		{
-			all_mode = true;
-			continue;
-		}
-
-		FatalError("Unknown option: %s\n", opt);
-	}
-
-	// choose output filename when not specified
-
-	if (! output_file && first_input)
-	{
-		const char *base_name = ReplaceExtension(first_input, NULL);
-
-		output_file = StringNew(strlen(base_name) + 16);
-
-		strcpy((char *)output_file, base_name);
-		strcat((char *)output_file, ".hwa");
-	}
-}
-
-#endif  // DEH_EDGE_PLUGIN
 
 dehret_e ValidateArgs(void)
 {
@@ -405,24 +299,6 @@ dehret_e ValidateArgs(void)
 		SetErrorMsg("Illegal version number: %d.%02d\n", target_version / 100,
 			target_version % 100);
 		return DEH_E_BadArgs;
-	}
-
-	if (! output_file)
-	{
-		SetErrorMsg("Missing output filename !\n");
-		return DEH_E_BadArgs;
-	}
-
-	if (CheckExtension(output_file, "deh") ||
-	    CheckExtension(output_file, "bex"))
-	{
-		SetErrorMsg("Output filename cannot be a DEH file.\n");
-		return DEH_E_BadArgs;
-	}
-
-	if (CheckExtension(output_file, NULL))
-	{
-		output_file = StringDup(ReplaceExtension(output_file, "hwa"));
 	}
 
 	return DEH_OK;
@@ -538,13 +414,8 @@ dehret_e DehEdgeAddLump(const char *data, int length, const char *infoname)
 	return DEH_OK;
 }
 
-dehret_e DehEdgeRunConversion(const char *out_name)
+dehret_e DehEdgeRunConversion()
 {
-	if (! out_name)
-		Deh_Edge::FatalError("RunConversion: missing output name.\n");
-
-	Deh_Edge::output_file = out_name;
-
 	dehret_e result = Deh_Edge::ValidateArgs();
 
 	if (result != DEH_OK)

@@ -92,7 +92,7 @@ static const dehconvfuncs_t edge_dehconv_funcs =
 //
 // DH_ConvertFile
 //
-bool DH_ConvertFile(const char *filename, const char *outname)
+bool DH_ConvertFile(const char *filename)
 {
 	DehEdgeStartup(&edge_dehconv_funcs);
 	DehEdgeSetVersion(EDGEVER);
@@ -106,7 +106,7 @@ bool DH_ConvertFile(const char *filename, const char *outname)
 	}
 	else
 	{
-		ret = DehEdgeRunConversion(outname);
+		ret = DehEdgeRunConversion();
 
 		if (ret != DEH_OK)
 		{
@@ -123,8 +123,7 @@ bool DH_ConvertFile(const char *filename, const char *outname)
 //
 // DH_ConvertLump
 //
-bool DH_ConvertLump(const byte *data, int length, const char *lumpname,
-	const char *outname)
+bool DH_ConvertLump(const byte *data, int length, const char *lumpname)
 {
 	char info_name[100];
 
@@ -142,7 +141,7 @@ bool DH_ConvertLump(const byte *data, int length, const char *lumpname,
 	}
 	else
 	{
-		ret = DehEdgeRunConversion(outname);
+		ret = DehEdgeRunConversion();
 
 		if (ret != DEH_OK)
 		{

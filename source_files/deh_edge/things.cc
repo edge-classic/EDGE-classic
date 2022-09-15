@@ -377,14 +377,12 @@ namespace Things
 
 		if (cur_f & MF_TRANSLATION)
 		{
-		/* TODO
 			if ((cur_f & MF_TRANSLATION) == 0x4000000)
 				WAD::Printf("PALETTE_REMAP = PLAYER_DK_GREY;\n");
 			else if ((cur_f & MF_TRANSLATION) == 0x8000000)
 				WAD::Printf("PALETTE_REMAP = PLAYER_BROWN;\n");
 			else
 				WAD::Printf("PALETTE_REMAP = PLAYER_DULL_RED;\n");
-		*/
 
 			cur_f &= ~MF_TRANSLATION;
 		}
@@ -653,7 +651,7 @@ namespace Things
 
 		WAD::Printf("PLAYER = %d;\n", player);
 		WAD::Printf("SIDE = %d;\n", 1 << (player - 1));
-		//TODO  WAD::Printf("PALETTE_REMAP = %s;\n", pi->remap);
+		WAD::Printf("PALETTE_REMAP = %s;\n", pi->remap);
 
 		WAD::Printf("INITIAL_BENEFIT = \n");
 		WAD::Printf("    BULLETS.LIMIT(%d), ", Ammo::plr_max[am_bullet]);

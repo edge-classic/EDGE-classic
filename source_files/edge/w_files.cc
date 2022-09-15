@@ -46,6 +46,7 @@
 #include "wadfixes.h"
 
 #include "dstrings.h"
+#include "dm_state.h"
 #include "rad_trig.h"
 #include "w_files.h"
 #include "w_wad.h"
@@ -224,33 +225,35 @@ extern void W_AddColourmaps(wad_file_c *wad);
 // -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
 typedef struct ddf_reader_s
 {
-	const char *name;
+	const char *lump_name;
+	const char *pack_name;
 	const char *print_name;
 	bool (* func)(void *data, int size);
 }
 ddf_reader_t;
 
-// TODO move to w_files.cc
 static ddf_reader_t DDF_Readers[] =
 {
-	{ "DDFLANG", "Languages",  DDF_ReadLangs },
-	{ "DDFSFX",  "Sounds",     DDF_ReadSFX },
-	{ "DDFCOLM", "ColourMaps", DDF_ReadColourMaps },  // -AJA- 1999/07/09.
-	{ "DDFIMAGE","Images",     DDF_ReadImages },      // -AJA- 2004/11/18
-	{ "DDFFONT", "Fonts",      DDF_ReadFonts },       // -AJA- 2004/11/13
-	{ "DDFSTYLE","Styles",     DDF_ReadStyles },      // -AJA- 2004/11/14
-	{ "DDFATK",  "Attacks",    DDF_ReadAtks },
-	{ "DDFWEAP", "Weapons",    DDF_ReadWeapons },
-	{ "DDFTHING","Things",     DDF_ReadThings },
-	{ "DDFPLAY", "Playlists",  DDF_ReadMusicPlaylist },
-	{ "DDFLINE", "Lines",      DDF_ReadLines },
-	{ "DDFSECT", "Sectors",    DDF_ReadSectors },
-	{ "DDFSWTH", "Switches",   DDF_ReadSwitch },
-	{ "DDFANIM", "Anims",      DDF_ReadAnims },
-	{ "DDFGAME", "Games",      DDF_ReadGames },
-	{ "DDFLEVL", "Levels",     DDF_ReadLevels },
-	{ "DDFFLAT", "Flats",      DDF_ReadFlat },
-	{ "RSCRIPT", "RadTrig",    RAD_ReadScript }       // -AJA- 2000/04/21.
+	{ "DDFLANG",  "language.ldf", "Languages",  DDF_ReadLangs },
+	{ "DDFSFX",   "sounds.ddf",   "Sounds",     DDF_ReadSFX },
+	{ "DDFCOLM",  "colmap.ddf",   "ColourMaps", DDF_ReadColourMaps },
+	{ "DDFIMAGE", "images.ddf",   "Images",     DDF_ReadImages },
+	{ "DDFFONT",  "fonts.ddf",    "Fonts",      DDF_ReadFonts },
+	{ "DDFSTYLE", "styles.ddf",   "Styles",     DDF_ReadStyles },
+	{ "DDFATK",   "attacks.ddf",  "Attacks",    DDF_ReadAtks },
+	{ "DDFWEAP",  "weapons.ddf",  "Weapons",    DDF_ReadWeapons },
+	{ "DDFTHING", "things.ddf",   "Things",     DDF_ReadThings },
+
+	{ "DDFPLAY",  "playlist.ddf", "Playlists",  DDF_ReadMusicPlaylist },
+	{ "DDFLINE",  "lines.ddf",    "Lines",      DDF_ReadLines },
+	{ "DDFSECT",  "sectors.ddf",  "Sectors",    DDF_ReadSectors },
+	{ "DDFSWTH",  "switch.ddf",   "Switches",   DDF_ReadSwitch },
+	{ "DDFANIM",  "anims.ddf",    "Anims",      DDF_ReadAnims },
+	{ "DDFGAME",  "games.ddf",    "Games",      DDF_ReadGames },
+	{ "DDFLEVL",  "levels.ddf",   "Levels",     DDF_ReadLevels },
+	{ "DDFFLAT",  "flats.ddf",    "Flats",      DDF_ReadFlat },
+
+	{ "RSCRIPT",  "rscript.rts",  "RadTrig",    RAD_ReadScript }
 };
 
 #define NUM_DDF_READERS  (int)(sizeof(DDF_Readers) / sizeof(ddf_reader_t))
@@ -260,7 +263,7 @@ int W_CheckDDFLumpName(const char *name)
 {
 	for (int d=0; d < NUM_DDF_READERS; d++)
 	{
-		if (strncmp(name, DDF_Readers[d].name, 8) == 0)
+		if (strncmp(name, DDF_Readers[d].lump_name, 8) == 0)
 			return d;
 	}
 	return -1;  // nope
@@ -271,7 +274,7 @@ static void W_ReadDDF_ForFile(data_file_c *df, int d)
 {
 	wad_file_c *wad = df->wad;
 
-	const char * ddf_lump = DDF_Readers[d].name;
+	const char * ddf_lump = DDF_Readers[d].lump_name;
 
 	// all script files get parsed here
 	if (strcmp(ddf_lump, "RSCRIPT") == 0 && df->kind == FLKIND_RTS)
@@ -293,7 +296,7 @@ static void W_ReadDDF_ForFile(data_file_c *df, int d)
 
 		if (lump >= 0)
 		{
-			I_Printf("Loading %s from: %s\n", DDF_Readers[d].name, df->name.c_str());
+			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, df->name.c_str());
 
 			int length;
 			char *data = (char *) W_LoadLump(lump, &length);

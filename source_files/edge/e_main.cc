@@ -129,7 +129,7 @@ iwad_check_t;
 const std::array<iwad_check_t, 12> iwad_checker =
 {
 	{
-		{ 1,  "CUSTOM",     {"EDGEIWAD", "EDGEIWAD"} }, // Maybe have "CUSTOM" be a DDFLANG-dependent value so that autoload and save folder names, etc can by dynamically created?
+		{ 1,  "CUSTOM",     {"EDGEIWAD", "EDGEIWAD"} },
 		{ 2,  "BLASPHEMER", {"BLASPHEM", "E1M1"}     },
 		{ 7,  "FREEDOOM1",  {"FREEDOOM", "E1M1"}     },
 		{ 11, "FREEDOOM2",  {"FREEDOOM", "MAP01"}    },

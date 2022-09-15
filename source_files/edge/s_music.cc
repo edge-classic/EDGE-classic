@@ -49,7 +49,7 @@ bool nomusic = false;
 // Current music handle
 static abstract_music_c *music_player;
 
-static int  entry_playing = -1;
+int  entry_playing = -1;
 static bool entry_looped;
 
 

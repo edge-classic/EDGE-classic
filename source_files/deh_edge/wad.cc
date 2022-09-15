@@ -204,13 +204,24 @@ void WAD::Printf(const char *str, ...)
 //
 // WAD::FinishLump
 //
-void WAD::FinishLump(void)
+byte * WAD::FinishLump(int *size)
 {
 	if (! cur_lump)
 		InternalError("WAD_FinishLump: not started.\n");
 
+	byte *result = cur_lump->data;
+
+	if (size != NULL)
+	{
+		*size = cur_lump->size;
+
+		cur_lump->size = 0;
+	}
+
 	cur_lump = NULL;
 	cur_max_size = 0;
+
+	return result;
 }
 
 //
@@ -249,6 +260,9 @@ dehret_e WAD::WriteFile(const char *name)
 
 	for (i = 0; i < num_lumps; i++)
 	{
+		if (lumplist[i]->size == 0)
+			continue;
+
 		PadFile(fp);
 		lumplist[i]->filepos = ftell(fp);
 		fwrite((void*)lumplist[i]->data, 1, lumplist[i]->size, fp);
@@ -262,6 +276,9 @@ dehret_e WAD::WriteFile(const char *name)
 	// Write Lumpinfos (directory table)
 	for (i = 0; i < num_lumps; i++)
 	{
+		if (lumplist[i]->size == 0)
+			continue;
+
 		int raw_pos  = Endian_U32(lumplist[i]->filepos);
 		int raw_size = Endian_U32(lumplist[i]->size);
 

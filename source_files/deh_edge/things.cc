@@ -25,6 +25,13 @@
 //
 //------------------------------------------------------------------------
 
+#include <assert.h>
+#include <ctype.h>
+#include <string.h>
+#include <stdarg.h>
+
+#include <string>
+
 #include "i_defs.h"
 #include "things.h"
 
@@ -45,9 +52,15 @@
 #include "wad.h"
 #include "weapons.h"
 
-#include <assert.h>
-#include <ctype.h>
-#include <string.h>
+// EPI
+#include "macros.h"
+#include "types.h"
+
+// DDF
+#include "main.h"
+
+// FIXME from ddf/sfx.h
+#undef sfx_None
 
 namespace Deh_Edge
 {
@@ -82,6 +95,21 @@ namespace Things
 
 	int cast_mobjs[CAST_MAX];
 
+	/*
+	void KK_Printf(const char *str, ...)
+	{
+		va_list args;
+
+		static char msg_buf[1024];
+
+		va_start(args, str);
+		vsnprintf(msg_buf, sizeof(msg_buf), str, args);
+		va_end(args);
+
+		out_lump += (char *)msg_buf;
+	}
+	*/
+
 	void BeginLump(void)
 	{
 		WAD::NewLump("DDFTHING");
@@ -94,7 +122,11 @@ namespace Things
 	void FinishLump(void)
 	{
 		WAD::Printf("\n");
-		WAD::FinishLump();
+
+		int length;
+		const byte *data = WAD::FinishLump(&length);
+
+		DDF_ReadThings((void *)data, length);
 	}
 
 	typedef struct 
@@ -344,12 +376,14 @@ namespace Things
 
 		if (cur_f & MF_TRANSLATION)
 		{
+		/* TODO
 			if ((cur_f & MF_TRANSLATION) == 0x4000000)
 				WAD::Printf("PALETTE_REMAP = PLAYER_DK_GREY;\n");
 			else if ((cur_f & MF_TRANSLATION) == 0x8000000)
 				WAD::Printf("PALETTE_REMAP = PLAYER_BROWN;\n");
 			else
 				WAD::Printf("PALETTE_REMAP = PLAYER_DULL_RED;\n");
+		*/
 
 			cur_f &= ~MF_TRANSLATION;
 		}
@@ -618,7 +652,7 @@ namespace Things
 
 		WAD::Printf("PLAYER = %d;\n", player);
 		WAD::Printf("SIDE = %d;\n", 1 << (player - 1));
-		WAD::Printf("PALETTE_REMAP = %s;\n", pi->remap);
+		//TODO  WAD::Printf("PALETTE_REMAP = %s;\n", pi->remap);
 
 		WAD::Printf("INITIAL_BENEFIT = \n");
 		WAD::Printf("    BULLETS.LIMIT(%d), ", Ammo::plr_max[am_bullet]);

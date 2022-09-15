@@ -33,3 +33,6 @@ add_library(
   wad.cc
   weapons.cc
 )
+
+target_include_directories(edge_deh PRIVATE ../epi)
+target_include_directories(edge_deh PRIVATE ../ddf)

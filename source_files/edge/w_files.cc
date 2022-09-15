@@ -157,9 +157,6 @@ static void ProcessFile(data_file_c *df)
 		ProcessPackage(df, file_index);
 	}
 
-	// handle DeHackEd patch files
-	ProcessDehacked(df);
-
 	// handle fixer-uppers
 	ProcessFixers(df);
 }
@@ -445,6 +442,10 @@ void W_ReadDDF(void)
 			data_file_c *df = data_files[f];
 
 			W_ReadDDF_FromFile(df, d);
+
+			// TODO : temporary hack !!
+			if (d == NUM_DDF_READERS-1)
+				ProcessDehacked(df);
 		}
 
 		// handle the `-ddf` option.

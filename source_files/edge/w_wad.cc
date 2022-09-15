@@ -1079,8 +1079,6 @@ void ProcessDehacked(data_file_c *df)
 
 		W_DoneWithLump(data);
 	}
-
-	W_AddPending(hwa_filename.c_str(), FLKIND_HWad);
 }
 
 void ProcessWad(data_file_c *df, size_t file_index)

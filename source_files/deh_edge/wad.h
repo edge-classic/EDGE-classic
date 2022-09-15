@@ -26,7 +26,7 @@ namespace WAD
 	void NewLump(const char *name);
 	void AddData(const byte *data, int len);
 	void Printf(const char *str, ...) GCCATTR((format (printf,1,2)));
-	void FinishLump(void);
+	byte * FinishLump(int * length = 0);
 
 	dehret_e WriteFile(const char *name);
 }

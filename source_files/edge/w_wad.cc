@@ -1169,39 +1169,6 @@ void ProcessWad(data_file_c *df, size_t file_index)
 }
 
 
-void ProcessSingleLump(data_file_c *df)
-{
-/* TODO probably remove support for this -- if not, fix the stuff below
-
-	char lump_name[32];
-
-	if (df->kind == FLKIND_DDF)
-	{
-		DDF_GetLumpNameForFile(filename, lump_name);
-	}
-	else
-	{
-		std::string base = epi::PATH_GetBasename(filename);
-		if (base.size() > 8)
-			I_Error("Filename base of %s >8 chars", filename);
-
-		strcpy(lump_name, base.c_str());
-		for (size_t i=0;i<strlen(lump_name);i++) {
-			lump_name[i] = toupper(lump_name[i]);
-		}
-	}
-
-
-	// calculate MD5 hash over whole file
-	// [ TODO do we need this for a single lump? ]
-	//?? ComputeFileMD5(wad->dir_md5, file);
-
-	// Fill in lumpinfo
-	AddLump(df, lump_name, 0, file->GetLength(), (int)datafile, (int)datafile, true);
-*/
-}
-
-
 std::string W_BuildNodesForWad(data_file_c *df)
 {
 	if (df->wad->level_markers.GetSize() == 0)
@@ -1573,17 +1540,15 @@ void W_ReadCoalLumps(void)
 		wad_file_c *wad = df->wad;
 
 		// FIXME support PK3
-		if (wad == NULL)
-			continue;
 
-		if (df->kind > FLKIND_Lump)
-			continue;
+		if (wad != NULL)
+		{
+			if (wad->coal_apis >= 0)
+				VM_LoadLumpOfCoal(wad->coal_apis);
 
-		if (wad->coal_apis >= 0)
-			VM_LoadLumpOfCoal(wad->coal_apis);
-
-		if (wad->coal_huds >= 0)
-			VM_LoadLumpOfCoal(wad->coal_huds);
+			if (wad->coal_huds >= 0)
+				VM_LoadLumpOfCoal(wad->coal_huds);
+		}
 	}
 }
 

@@ -41,7 +41,6 @@ typedef enum
 
 	FLKIND_PK3,       // pk3 (zip) package
 
-	FLKIND_Lump,      // raw lump file (no extension)
 	FLKIND_DDF,       // .ddf or .ldf file
 	FLKIND_RTS,       // .rts script  file
 	FLKIND_Deh        // .deh or .bex file

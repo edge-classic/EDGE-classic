@@ -24,6 +24,8 @@
 
 #include "miniz.h"
 
+#include "w_files.h"
+
 
 class pack_entry_c
 {
@@ -54,7 +56,12 @@ public:
 	{ }
 };
 
-// TODO
+//----------------------------------------------------------------------------
+
+void ProcessPackage(data_file_c *df, size_t file_index)
+{
+	// TODO
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

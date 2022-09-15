@@ -101,7 +101,7 @@ size_t W_AddPending(const char *file, int kind)
 extern void ProcessFixers(data_file_c *df);
 extern void ProcessDehacked(data_file_c *df);
 extern void ProcessWad(data_file_c *df, size_t file_index);
-extern void ProcessSingleLump(data_file_c *df);
+extern void ProcessPackage(data_file_c *df, size_t file_index);
 
 extern std::string W_BuildNodesForWad(data_file_c *df);
 
@@ -152,9 +152,9 @@ static void ProcessFile(data_file_c *df)
 		if (file_index == 0)  // "edge-defs.wad"
 			W_ReadWADFIXES();
 	}
-	else
+	else if (df->kind == FLKIND_PK3)
 	{
-		ProcessSingleLump(df);
+		ProcessPackage(df, file_index);
 	}
 
 	// handle DeHackEd patch files
@@ -194,9 +194,6 @@ void W_InitMultipleFiles(void)
 }
 
 
-//
-// W_BuildNodes
-//
 void W_BuildNodes(void)
 {
 	for (size_t i = 0 ; i < data_files.size() ; i++)

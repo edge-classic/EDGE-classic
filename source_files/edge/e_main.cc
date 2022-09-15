@@ -1210,10 +1210,10 @@ static void SetupLogAndDebugFiles(void)
 	}
 }
 
-static void AddSingleCmdLineFile(const char *name)
+static void AddSingleCmdLineFile(const char *name, bool ignore_unknown)
 {
     std::string ext = epi::PATH_GetExtension(name);
-	int kind = FLKIND_Lump;
+	int kind = -1;
 
 	if (stricmp(ext.c_str(), ".edm") == 0)
 		I_Error("Demos are no longer supported\n");
@@ -1234,12 +1234,15 @@ static void AddSingleCmdLineFile(const char *name)
 	else if (stricmp(ext.c_str(), ".deh") == 0 ||
 			 stricmp(ext.c_str(), ".bex") == 0)
 		kind = FLKIND_Deh;
-
-	if (kind != FLKIND_Lump)
+	else
 	{
-		std::string fn = M_ComposeFileName(game_dir.c_str(), name);
-		W_AddFilename(fn.c_str(), kind);
+		if (! ignore_unknown)
+			I_Error("unknown file type: %s\n", name);
+		return;
 	}
+
+	std::string filename = M_ComposeFileName(game_dir.c_str(), name);
+	W_AddFilename(filename.c_str(), kind);
 }
 
 static void AddCommandLineFiles(void)
@@ -1251,7 +1254,7 @@ static void AddCommandLineFiles(void)
 
 	for (p = 1; p < M_GetArgCount() && '-' != (ps = M_GetArgument(p))[0]; p++)
 	{
-		AddSingleCmdLineFile(ps);
+		AddSingleCmdLineFile(ps, false);
 	}
 
 	// next handle the -file option (we allow multiple uses)
@@ -1265,7 +1268,7 @@ static void AddCommandLineFiles(void)
 
 		for (p++; p < M_GetArgCount() && '-' != (ps = M_GetArgument(p))[0]; p++)
 		{
-			AddSingleCmdLineFile(ps);
+			AddSingleCmdLineFile(ps, false);
 		}
 
 		p = M_CheckNextParm("-file", p-1);
@@ -1355,7 +1358,7 @@ static void Add_Autoload(void) {
 		{
 			if(!fsd[i]->is_dir)
 			{
-				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i]->name.c_str()).c_str());
+				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i]->name.c_str()).c_str(), true);
 			}
 		}
 	}
@@ -1373,7 +1376,7 @@ static void Add_Autoload(void) {
 		{
 			if(!fsd[i]->is_dir)
 			{
-				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i]->name.c_str()).c_str());
+				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i]->name.c_str()).c_str(), true);
 			}
 		}		
 	}

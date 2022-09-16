@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __INFO_HDR__
-#define __INFO_HDR__
+#ifndef __DEH_INFO_HDR__
+#define __DEH_INFO_HDR__
 
 namespace Deh_Edge
 {
@@ -501,4 +501,4 @@ extern statedyn_t state_dyn[NUMSTATES_BEX];
 
 }  // Deh_Edge
 
-#endif  /* __INFO_HDR__ */
+#endif  /* __DEH_INFO_HDR__ */

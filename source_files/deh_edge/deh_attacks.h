@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __ATTACKS_HDR__
-#define __ATTACKS_HDR__
+#ifndef __DEH_ATTACKS_HDR__
+#define __DEH_ATTACKS_HDR__
 
 namespace Deh_Edge
 {
@@ -23,4 +23,4 @@ namespace Attacks
 
 }  // Deh_Edge
 
-#endif /* __ATTACKS_HDR__ */
+#endif /* __DEH_ATTACKS_HDR__ */

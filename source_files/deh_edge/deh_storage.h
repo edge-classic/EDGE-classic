@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __STORAGE_HDR__
-#define __STORAGE_HDR__
+#ifndef __DEH_STORAGE_HDR__
+#define __DEH_STORAGE_HDR__
 
 namespace Deh_Edge
 {
@@ -26,4 +26,4 @@ namespace Storage
 
 }  // Deh_Edge
 
-#endif /* __STORAGE_HDR__ */
+#endif /* __DEH_STORAGE_HDR__ */

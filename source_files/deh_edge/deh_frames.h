@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __FRAMES_HDR__
-#define __FRAMES_HDR__
+#ifndef __DEH_FRAMES_HDR__
+#define __DEH_FRAMES_HDR__
 
 namespace Deh_Edge
 {
@@ -72,4 +72,4 @@ namespace Frames
 
 }  // Deh_Edge
 
-#endif /* __FRAMES_HDR__ */
+#endif /* __DEH_FRAMES_HDR__ */

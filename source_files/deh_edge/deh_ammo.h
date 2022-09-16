@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __AMMO_HDR__
-#define __AMMO_HDR__
+#ifndef __DEH_AMMO_HDR__
+#define __DEH_AMMO_HDR__
 
 namespace Deh_Edge
 {
@@ -47,4 +47,4 @@ namespace Ammo
 
 }  // Deh_Edge
 
-#endif /* __AMMO_HDR__ */
+#endif /* __DEH_AMMO_HDR__ */

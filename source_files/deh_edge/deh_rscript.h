@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __RSCRIPT_HDR__
-#define __RSCRIPT_HDR__
+#ifndef __DEH_RSCRIPT_HDR__
+#define __DEH_RSCRIPT_HDR__
 
 namespace Deh_Edge
 {
@@ -26,4 +26,4 @@ namespace Rscript
 
 }  // Deh_Edge
 
-#endif /* __RSCRIPT_HDR__ */
+#endif /* __DEH_RSCRIPT_HDR__ */

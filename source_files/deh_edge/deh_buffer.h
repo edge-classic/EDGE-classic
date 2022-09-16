@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __BUFFER_HDR__
-#define __BUFFER_HDR__
+#ifndef __DEH_BUFFER_HDR__
+#define __DEH_BUFFER_HDR__
 
 namespace Deh_Edge
 {
@@ -43,4 +43,4 @@ namespace Buffer
 
 }  // Deh_Edge
 
-#endif /* __BUFFER_HDR__ */
+#endif /* __DEH_BUFFER_HDR__ */

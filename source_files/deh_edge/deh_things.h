@@ -10,10 +10,10 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __THINGS_HDR__
-#define __THINGS_HDR__
+#ifndef __DEH_THINGS_HDR__
+#define __DEH_THINGS_HDR__
 
-#include "mobj.h"
+#include "deh_mobj.h"
 
 namespace Deh_Edge
 {
@@ -72,4 +72,4 @@ namespace Things
 
 }  // Deh_Edge
 
-#endif /* __THINGS_HDR__ */
+#endif /* __DEH_THINGS_HDR__ */

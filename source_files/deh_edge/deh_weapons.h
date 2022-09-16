@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __WEAPONS_HDR__
-#define __WEAPONS_HDR__
+#ifndef __DEH_WEAPONS_HDR__
+#define __DEH_WEAPONS_HDR__
 
 namespace Deh_Edge
 {
@@ -66,4 +66,4 @@ namespace Weapons
 
 }  // Deh_Edge
 
-#endif /* __WEAPONS_HDR__ */
+#endif /* __DEH_WEAPONS_HDR__ */

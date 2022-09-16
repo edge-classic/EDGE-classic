@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __MISC_HDR__
-#define __MISC_HDR__
+#ifndef __DEH_MISC_HDR__
+#define __DEH_MISC_HDR__
 
 namespace Deh_Edge
 {
@@ -43,4 +43,4 @@ namespace Misc
 
 }  // Deh_Edge
 
-#endif /* __MISC_HDR__ */
+#endif /* __DEH_MISC_HDR__ */

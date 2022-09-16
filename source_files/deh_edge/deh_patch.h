@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __PATCH_HDR__
-#define __PATCH_HDR__
+#ifndef __DEH_PATCH_HDR__
+#define __DEH_PATCH_HDR__
 
 namespace Deh_Edge
 {
@@ -29,4 +29,4 @@ namespace Patch
 
 }  // Deh_Edge
 
-#endif /* __PATCH_HDR__ */
+#endif /* __DEH_PATCH_HDR__ */

@@ -10,10 +10,10 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __WAD_HDR__
-#define __WAD_HDR__
+#ifndef __DEH_WAD_HDR__
+#define __DEH_WAD_HDR__
 
-#include "system.h"
+#include "deh_system.h"
 
 namespace Deh_Edge
 {
@@ -31,4 +31,4 @@ namespace WAD
 
 }  // Deh_Edge
 
-#endif /* __WAD_HDR__ */
+#endif /* __DEH_WAD_HDR__ */

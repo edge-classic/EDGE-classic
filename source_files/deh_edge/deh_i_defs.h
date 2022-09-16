@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __SYSTEM_SPECIFIC_DEFS__
-#define __SYSTEM_SPECIFIC_DEFS__
+#ifndef __DEH_SYSTEM_SPECIFIC_DEFS__
+#define __DEH_SYSTEM_SPECIFIC_DEFS__
 
 // COMMON STUFF...
 #define FLOAT_IEEE_754
@@ -82,4 +82,4 @@ namespace Deh_Edge
 #error Unknown System (not DJGPP, WIN32, LINUX, UNIX or APPLE)
 #endif
 
-#endif /*__SYSTEM_SPECIFIC_DEFS__*/
+#endif /*__DEH_SYSTEM_SPECIFIC_DEFS__*/

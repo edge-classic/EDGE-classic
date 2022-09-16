@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __UTIL_HDR__
-#define __UTIL_HDR__
+#ifndef __DEH_UTIL_HDR__
+#define __DEH_UTIL_HDR__
 
 #include <stdio.h>
 
@@ -35,4 +35,4 @@ char *StringDup(const char *orig);
 
 }  // Deh_Edge
 
-#endif /* __UTIL_HDR__ */
+#endif /* __DEH_UTIL_HDR__ */

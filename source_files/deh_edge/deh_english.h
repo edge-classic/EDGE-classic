@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __ENGLISH_HDR__
-#define __ENGLISH_HDR__
+#ifndef __DEH_ENGLISH_HDR__
+#define __DEH_ENGLISH_HDR__
 
 namespace Deh_Edge
 {
@@ -734,4 +734,4 @@ namespace Deh_Edge
 
 }  // Deh_Edge
 
-#endif  /* __ENGLISH_HDR__ */
+#endif  /* __DEH_ENGLISH_HDR__ */

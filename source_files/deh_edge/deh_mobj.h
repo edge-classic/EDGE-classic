@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __MOBJ_HDR__
-#define __MOBJ_HDR__
+#ifndef __DEH_MOBJ_HDR__
+#define __DEH_MOBJ_HDR__
 
 namespace Deh_Edge
 {
@@ -348,4 +348,4 @@ extern bool mobj_modified[NUMMOBJTYPES_BEX];
 
 }  // Deh_Edge
 
-#endif /* __MOBJ_HDR__ */
+#endif /* __DEH_MOBJ_HDR__ */

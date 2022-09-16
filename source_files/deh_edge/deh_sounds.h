@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __SOUNDS_HDR__
-#define __SOUNDS_HDR__
+#ifndef __DEH_SOUNDS_HDR__
+#define __DEH_SOUNDS_HDR__
 
 #include <string>
 
@@ -208,4 +208,4 @@ namespace Sounds
 
 }  // Deh_Edge
 
-#endif  /* __SOUNDS_HDR__ */
+#endif  /* __DEH_SOUNDS_HDR__ */

@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __TEXT_HDR__
-#define __TEXT_HDR__
+#ifndef __DEH_TEXT_HDR__
+#define __DEH_TEXT_HDR__
 
 namespace Deh_Edge
 {
@@ -46,4 +46,4 @@ namespace TextStr
 
 }  // Deh_Edge
 
-#endif /* __TEXT_HDR__ */
+#endif /* __DEH_TEXT_HDR__ */

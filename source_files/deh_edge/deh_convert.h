@@ -10,8 +10,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __CONVERT_HDR__
-#define __CONVERT_HDR__
+#ifndef __DEH_CONVERT_HDR__
+#define __DEH_CONVERT_HDR__
 
 namespace Deh_Edge
 {
@@ -34,4 +34,4 @@ extern short pointerToFrame[POINTER_NUM_BEX];
 
 }  // Deh_Edge
 
-#endif /* __CONVERT_HDR__ */
+#endif /* __DEH_CONVERT_HDR__ */

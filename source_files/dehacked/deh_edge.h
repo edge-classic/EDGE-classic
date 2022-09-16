@@ -123,8 +123,7 @@ void DehEdgeStartup(const dehconvfuncs_t *funcs);
 // was none.  Also clears the current error.  Never returns NULL.
 const char *DehEdgeGetError(void);
 
-// set target EDGE version, and quiet mode (disables warnings).
-dehret_e DehEdgeSetVersion(int version);
+// set quiet mode (disables warnings).
 dehret_e DehEdgeSetQuiet(int quiet);
 
 // add a single patch file (possibly from a WAD lump).

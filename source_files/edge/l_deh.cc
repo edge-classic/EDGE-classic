@@ -95,7 +95,6 @@ static const dehconvfuncs_t edge_dehconv_funcs =
 bool DH_ConvertFile(const char *filename)
 {
 	DehEdgeStartup(&edge_dehconv_funcs);
-	DehEdgeSetVersion(EDGEVER);
 
 	dehret_e ret = DehEdgeAddFile(filename);
 
@@ -132,7 +131,6 @@ bool DH_ConvertLump(const byte *data, int length, const char *lumpname)
 	sprintf(info_name, "%s.LMP", lumpname);
 
 	DehEdgeStartup(&edge_dehconv_funcs);
-	DehEdgeSetVersion(EDGEVER);
 
 	dehret_e ret = DehEdgeAddLump((const char *)data, length, info_name);
 

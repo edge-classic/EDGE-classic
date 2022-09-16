@@ -24,8 +24,6 @@
 namespace Deh_Edge
 {
 
-extern int target_version;  // decimal, e.g. 128
-
 extern bool quiet_mode;
 extern bool all_mode;
 

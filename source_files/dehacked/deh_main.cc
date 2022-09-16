@@ -80,9 +80,6 @@ public:
 input_buffer_c *input_bufs[MAX_INPUTS];
 int num_inputs = 0;
 
-#define DEFAULT_TARGET  100
-
-int target_version;
 bool quiet_mode;
 bool all_mode;
 
@@ -108,7 +105,6 @@ void Startup(void)
 
 	num_inputs = 0;
 
-	target_version = DEFAULT_TARGET;
 	quiet_mode = false;
 	all_mode = false;
 }
@@ -220,8 +216,6 @@ dehret_e Convert(void)
 	Storage::ApplyAll();
 
 	// do conversions into DDF...
-	PrintMsg("Converting data into EDGE %d.%02d DDF...\n",
-		target_version / 100, target_version % 100);
 
 	TextStr::SpriteDependencies();
 	Frames::StateDependencies();
@@ -249,27 +243,6 @@ void Shutdown(void)
 	System_Shutdown();
 }
 
-
-/* ----- option handling ----------------------------- */
-
-dehret_e ValidateArgs(void)
-{
-	if (num_inputs == 0)
-	{
-		SetErrorMsg("Missing input filename !\n");
-		return DEH_E_BadArgs;
-	}
-
-	if (target_version < 100 || target_version >= 300)
-	{
-		SetErrorMsg("Illegal version number: %d.%02d\n", target_version / 100,
-			target_version % 100);
-		return DEH_E_BadArgs;
-	}
-
-	return DEH_OK;
-}
-
 }  // Deh_Edge
 
 //------------------------------------------------------------------------
@@ -285,13 +258,6 @@ void DehEdgeStartup(const dehconvfuncs_t *funcs)
 const char *DehEdgeGetError(void)
 {
 	return Deh_Edge::GetErrorMsg();
-}
-
-dehret_e DehEdgeSetVersion(int version)
-{
-	Deh_Edge::target_version = version;  // validated later
-
-	return DEH_OK;
 }
 
 dehret_e DehEdgeSetQuiet(int quiet)
@@ -323,11 +289,6 @@ dehret_e DehEdgeAddLump(const char *data, int length, const char *infoname)
 
 dehret_e DehEdgeRunConversion(deh_container_c *dest)
 {
-	dehret_e result = Deh_Edge::ValidateArgs();
-
-	if (result != DEH_OK)
-		return result;
-
 	Deh_Edge::WAD::dest_container = dest;
 
 	return Deh_Edge::Convert();

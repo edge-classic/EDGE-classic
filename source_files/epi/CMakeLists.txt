@@ -16,7 +16,6 @@ endif()
 add_library(
   edge_epi
   arrays.cc
-  bytearray.cc
   exe_path.cc
   file_sub.cc
   file.cc

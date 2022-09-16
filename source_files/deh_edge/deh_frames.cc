@@ -29,22 +29,22 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "i_defs.h"
+#include "deh_i_defs.h"
 #include "deh_edge.h"
 
-#include "buffer.h"
-#include "convert.h"
-#include "frames.h"
-#include "info.h"
-#include "patch.h"
-#include "sounds.h"
-#include "storage.h"
-#include "system.h"
-#include "text.h"
-#include "things.h"
-#include "util.h"
-#include "wad.h"
-#include "weapons.h"
+#include "deh_buffer.h"
+#include "deh_convert.h"
+#include "deh_frames.h"
+#include "deh_info.h"
+#include "deh_patch.h"
+#include "deh_sounds.h"
+#include "deh_storage.h"
+#include "deh_system.h"
+#include "deh_text.h"
+#include "deh_things.h"
+#include "deh_util.h"
+#include "deh_wad.h"
+#include "deh_weapons.h"
 
 namespace Deh_Edge
 {

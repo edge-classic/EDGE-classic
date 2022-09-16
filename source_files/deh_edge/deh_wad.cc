@@ -31,11 +31,11 @@
 #include <string.h>
 #include <errno.h>
 
-#include "i_defs.h"
+#include "deh_i_defs.h"
 #include "deh_edge.h"
 
-#include "system.h"
-#include "wad.h"
+#include "deh_system.h"
+#include "deh_wad.h"
 
 namespace Deh_Edge
 {

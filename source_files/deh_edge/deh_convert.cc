@@ -25,8 +25,8 @@
 //
 //------------------------------------------------------------------------
 
-#include "i_defs.h"
-#include "convert.h"
+#include "deh_i_defs.h"
+#include "deh_convert.h"
 
 
 namespace Deh_Edge

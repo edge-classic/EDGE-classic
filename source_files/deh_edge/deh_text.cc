@@ -29,21 +29,21 @@
 #include <string.h>
 #include <assert.h>
 
-#include "i_defs.h"
+#include "deh_i_defs.h"
 #include "deh_edge.h"
 
-#include "buffer.h"
-#include "info.h"
-#include "english.h"
-#include "frames.h"
-#include "mobj.h"
-#include "patch.h"
-#include "text.h"
-#include "storage.h"
-#include "sounds.h"
-#include "system.h"
-#include "util.h"
-#include "wad.h"
+#include "deh_buffer.h"
+#include "deh_info.h"
+#include "deh_english.h"
+#include "deh_frames.h"
+#include "deh_mobj.h"
+#include "deh_patch.h"
+#include "deh_text.h"
+#include "deh_storage.h"
+#include "deh_sounds.h"
+#include "deh_system.h"
+#include "deh_util.h"
+#include "deh_wad.h"
 
 // EPI
 #include "macros.h"

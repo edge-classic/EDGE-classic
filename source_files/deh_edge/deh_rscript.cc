@@ -27,16 +27,16 @@
 
 #include <assert.h>
 
-#include "i_defs.h"
+#include "deh_i_defs.h"
 #include "deh_edge.h"
 
-#include "info.h"
-#include "mobj.h"
-#include "rscript.h"
-#include "storage.h"
-#include "system.h"
-#include "util.h"
-#include "wad.h"
+#include "deh_info.h"
+#include "deh_mobj.h"
+#include "deh_rscript.h"
+#include "deh_storage.h"
+#include "deh_system.h"
+#include "deh_util.h"
+#include "deh_wad.h"
 
 
 extern void RAD_ReadScript(void *data, int size);

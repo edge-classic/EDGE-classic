@@ -28,11 +28,11 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "i_defs.h"
+#include "deh_i_defs.h"
 #include "deh_edge.h"
 
-#include "storage.h"
-#include "system.h"
+#include "deh_storage.h"
+#include "deh_system.h"
 
 // DESCRIPTION:
 //

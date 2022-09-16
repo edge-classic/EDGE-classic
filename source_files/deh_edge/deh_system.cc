@@ -30,10 +30,10 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include "i_defs.h"
+#include "deh_i_defs.h"
 #include "deh_edge.h"
 
-#include "system.h"
+#include "deh_system.h"
 
 namespace Deh_Edge
 {

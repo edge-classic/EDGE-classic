@@ -25,18 +25,18 @@
 //
 //------------------------------------------------------------------------
 
-#include "i_defs.h"
-#include "ammo.h"
+#include "deh_i_defs.h"
+#include "deh_ammo.h"
 
-#include "buffer.h"
+#include "deh_buffer.h"
 #include "deh_edge.h"
-#include "info.h"
-#include "mobj.h"
-#include "patch.h"
-#include "storage.h"
-#include "system.h"
-#include "things.h"
-#include "util.h"
+#include "deh_info.h"
+#include "deh_mobj.h"
+#include "deh_patch.h"
+#include "deh_storage.h"
+#include "deh_system.h"
+#include "deh_things.h"
+#include "deh_util.h"
 
 #include <assert.h>
 #include <string.h>

@@ -25,11 +25,11 @@
 //
 //------------------------------------------------------------------------
 
-#include "i_defs.h"
+#include "deh_i_defs.h"
 #include "deh_edge.h"
 
-#include "info.h"
-#include "mobj.h"
+#include "deh_info.h"
+#include "deh_mobj.h"
 
 
 namespace Deh_Edge

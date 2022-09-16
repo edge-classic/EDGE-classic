@@ -28,18 +28,18 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "i_defs.h"
+#include "deh_i_defs.h"
 #include "deh_edge.h"
 
-#include "attacks.h"
-#include "info.h"
-#include "frames.h"
-#include "misc.h"
-#include "mobj.h"
-#include "sounds.h"
-#include "system.h"
-#include "things.h"
-#include "wad.h"
+#include "deh_attacks.h"
+#include "deh_info.h"
+#include "deh_frames.h"
+#include "deh_misc.h"
+#include "deh_mobj.h"
+#include "deh_sounds.h"
+#include "deh_system.h"
+#include "deh_things.h"
+#include "deh_wad.h"
 
 // EPI
 #include "macros.h"

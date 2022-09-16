@@ -34,9 +34,9 @@ public:
 	void CopyDetail(fixdef_c &src);
 
 	// Member vars....
-	epi::strent_c name;
+	std::string name;
 	
-	epi::strent_c md5_string; // Fixes are likely to be for finalized WADs that won't be updated anymore,
+	std::string md5_string; // Fixes are likely to be for finalized WADs that won't be updated anymore,
 			   				  // but other qualifiers like unique lumps might be added if necessary
 
 private:

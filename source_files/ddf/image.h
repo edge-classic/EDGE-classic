@@ -94,7 +94,7 @@ public:
 	void CopyDetail(const imagedef_c &src);
 
 	// Member vars....
-	epi::strent_c name;
+	std::string name;
 	image_namespace_e belong;
 
 	imagedata_type_e type;
@@ -102,7 +102,7 @@ public:
 	rgbcol_t colour;          // IMGDT_Colour
 	builtin_image_e builtin;  // IMGDT_Builtin
 
-	epi::strent_c info;       // IMGDT_Package, IMGDT_File, IMGDT_Lump
+	std::string info;       // IMGDT_Package, IMGDT_File, IMGDT_Lump
 	L_image_format_e format;  // ditto
 
 	image_special_e special;

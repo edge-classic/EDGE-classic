@@ -28,6 +28,8 @@
 
 #include "utility.h"
 
+#include <string>
+
 class mobjtype_c;
 
 
@@ -148,7 +150,7 @@ public:
 	~mobj_strref_c() {};
 
 private:
-	epi::strent_c name;
+	std::string name;
 
 	const mobjtype_c *def;
 

@@ -857,7 +857,7 @@ void DDF_StateGetBecome(const char *arg, state_t * cur_state)
 
 	act_become_info_t *become = new act_become_info_t;
 
-	become->start.label.Set("IDLE");
+	become->start.label = "IDLE";
 
 	const char *s = strchr(arg, ',');
 
@@ -877,7 +877,7 @@ void DDF_StateGetBecome(const char *arg, state_t * cur_state)
 
 	buffer[len] = 0;
 
-	become->info_ref.Set(buffer);
+	become->info_ref = buffer;
 
 	
 	// get start label (if present)
@@ -898,7 +898,7 @@ void DDF_StateGetBecome(const char *arg, state_t * cur_state)
 
 		buffer[len] = 0;
 
-		become->start.label.Set(buffer);
+		become->start.label = buffer;
 
 		if (*s == ':')
 			become->start.offset = MAX(0, atoi(s+1) - 1);
@@ -926,7 +926,7 @@ void DDF_StateGetBecomeWeapon(const char *arg, state_t * cur_state)
 
 	wep_become_info_t *become = new wep_become_info_t;
 
-	become->start.label.Set("READY");
+	become->start.label = "READY";
 
 	const char *s = strchr(arg, ',');
 
@@ -946,7 +946,7 @@ void DDF_StateGetBecomeWeapon(const char *arg, state_t * cur_state)
 
 	buffer[len] = 0;
 
-	become->info_ref.Set(buffer);
+	become->info_ref = buffer;
 
 	
 	// get start label (if present)
@@ -967,7 +967,7 @@ void DDF_StateGetBecomeWeapon(const char *arg, state_t * cur_state)
 
 		buffer[len] = 0;
 
-		become->start.label.Set(buffer);
+		become->start.label = buffer;
 
 		if (*s == ':')
 			become->start.offset = MAX(0, atoi(s+1) - 1);

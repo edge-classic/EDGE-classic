@@ -257,7 +257,7 @@ static void ImageParseLump(const char *spec)
 	keyword[colon - spec] = 0;
 
 	// store the lump name
-	dynamic_image->info.Set(colon + 1);
+	dynamic_image->info = (colon + 1);
 
 	if (DDF_CompareName(keyword, "PNG") == 0)
 	{

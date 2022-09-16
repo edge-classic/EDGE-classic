@@ -56,7 +56,7 @@ public:
 	void Default();
 	
 	// Member vars...
-	epi::strent_c name;
+	std::string name;
 
 	lumpname_c lump_name;
 

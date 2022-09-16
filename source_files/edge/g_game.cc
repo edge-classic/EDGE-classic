@@ -890,11 +890,11 @@ static bool G_SaveGameToFile(const char *filename, const char *description)
 
 	// --- fill in global structure ---
 
-	globs->game  = SV_DupString(currmap->episode_name);
-	globs->level = SV_DupString(currmap->name);
+	globs->game  = SV_DupString(currmap->episode_name.c_str());
+	globs->level = SV_DupString(currmap->name.c_str());
 	globs->flags = level_flags;
 	globs->hub_tag = curr_hub_tag;
-	globs->hub_first = curr_hub_first ? SV_DupString(curr_hub_first->name) : NULL;
+	globs->hub_first = curr_hub_first ? SV_DupString(curr_hub_first->name.c_str()) : NULL;
 
 	globs->skill = gameskill;
 	globs->netgame = netgame ? (1+deathmatch) : 0;

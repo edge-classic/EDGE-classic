@@ -71,8 +71,8 @@ public:
 		
 		int lang;
 	
-		epi::strent_c ref;
-		epi::strent_c value;	
+		std::string ref;
+		std::string value;	
 		
 		// A linked list + binary tree is wasteful, but speed efficent and
 		// avoids stack overflow issues that may occur
@@ -114,7 +114,7 @@ public:
 			currnode = node;
 			
 			if (act != ADD)
-				cmp = stricmp(_ref, node->ref);
+				cmp = stricmp(_ref, node->ref.c_str());
 			else
 				cmp = 0;	// Has to be a match if the last act was ADD
 					
@@ -149,16 +149,16 @@ public:
 		// Handle replace seperately, since we not creating anything
 		if (act == REPLACE)
 		{
-			node->value.Set(value);
+			node->value = value;
 			return;
 		}
 	
 		newnode = new langentry_s;
 
-		if (act != ADD) { newnode->ref.Set(_ref); }
+		if (act != ADD) { newnode->ref = _ref; }
 
-		newnode->value.Set(value);
-		newnode->lang = currlang;
+		newnode->value = value;
+		newnode->lang  = currlang;
 		
 		switch (act)
 		{
@@ -311,7 +311,7 @@ public:
 		
 		// Add entries
 		for (currnode = head; currnode; currnode = currnode->next)
-			comp_langrefs.Insert(currnode->ref);
+			comp_langrefs.Insert(currnode->ref.c_str());
 		
 		return;		
 	}
@@ -353,7 +353,7 @@ public:
 				langnode = langnode->lang_next;
 				
 			if (langnode)
-				comp_langvalues.Insert(langnode->value);
+				comp_langvalues.Insert(langnode->value.c_str());
 			else	
 				comp_langvalues.Insert(NULL);
 		}

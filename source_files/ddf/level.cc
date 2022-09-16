@@ -204,7 +204,7 @@ static void LevelParseField(const char *field, const char *contents,
 static void LevelFinishEntry(void)
 {
 	// check stuff
-	if (dynamic_level->episode_name == NULL)
+	if (dynamic_level->episode_name.empty())
 		DDF_Error("Level entry must have an EPISODE name!\n");
 
 	// TODO: check more stuff here...
@@ -264,7 +264,7 @@ void DDF_LevelCleanUp(void)
 		
 		m->episode = gamedefs.Lookup(m->episode_name.c_str());
 
-		if (! m->episode_name)
+		if (m->episode_name.empty())
 			I_Printf("WARNING: Cannot find episode name for map entry [%s]\n",
 					 m->name.c_str());
 	}
@@ -519,7 +519,7 @@ mapdef_c* mapdef_container_c::Lookup(const char *refname)
 
 				temp_gamedef = new gamedef_c;
 				temp_gamedef->name = "TEMPEPI";
-				m->episode_name.Set(temp_gamedef->name);
+				m->episode_name = temp_gamedef->name;
 				m->episode = temp_gamedef;
 				//We must have a default sky
 				if(! m->sky[0])
@@ -547,7 +547,7 @@ mapdef_c* mapdef_container_c::Lookup(const char *refname)
 		gamedef_c *temp_gamedef;
 		temp_gamedef = new gamedef_c;
 		temp_gamedef->name = "TEMPEPI";
-		temp_level->episode_name.Set(temp_gamedef->name);
+		temp_level->episode_name = temp_gamedef->name;
 		temp_level->episode = temp_gamedef;
 
 		//4. Finally We must have a default sky

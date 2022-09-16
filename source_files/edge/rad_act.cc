@@ -1069,7 +1069,7 @@ void RAD_ActWaitUntilDead(rad_trigger_t *R, void *param)
 		if (mo->health <= 0)
 			continue;
 
-		if (! WUD_Match(wud, mo->info->name))
+		if (! WUD_Match(wud, mo->info->name.c_str()))
 			continue;
 
 		if (! RAD_WithinRadius(mo, R->info))

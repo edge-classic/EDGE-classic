@@ -118,8 +118,8 @@ void font_c::LoadPatches()
 		}
 	}
 
-	p_cache.missing = def->missing_patch ?
-		W_ImageLookup(def->missing_patch, INS_Graphic, ILF_Font|ILF_Null) : NULL;
+	p_cache.missing = def->missing_patch.size() > 0 ?
+		W_ImageLookup(def->missing_patch.c_str(), INS_Graphic, ILF_Font|ILF_Null) : NULL;
 
 	const image_c *Nom = NULL;
 

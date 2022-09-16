@@ -792,7 +792,7 @@ void SR_MobjPutState(void *storage, int index, void *extra)
 			return;
 		}
 
-		if (! actual->name)
+		if (actual->name.empty())
 		{
 			I_Warning("-- OOPS: state %d found in unnamed object !!\n", s_num);
 			SV_PutString("*:*:1");

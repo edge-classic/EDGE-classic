@@ -40,7 +40,7 @@ public:
 	void CopyDetail(animdef_c &src);
 
 	// Member vars....
-	epi::strent_c name;
+	std::string name;
 
 	enum  // types
 	{

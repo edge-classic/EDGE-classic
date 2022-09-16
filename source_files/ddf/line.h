@@ -459,11 +459,11 @@ public:
 
   	// effect object spawned when going in...
 	const mobjtype_c *inspawnobj;	// FIXME! Do mobjtypes.Lookup()?
-	epi::strent_c inspawnobj_ref;
+	std::string inspawnobj_ref;
 
   	// effect object spawned when going out...
 	const mobjtype_c *outspawnobj;	// FIXME! Do mobjtypes.Lookup()?
-	epi::strent_c outspawnobj_ref;
+	std::string outspawnobj_ref;
 
   	// Teleport delay
 	int delay;
@@ -730,7 +730,7 @@ public:
 	//Lobo: item to spawn (or NULL).  The mobjdef pointer is only valid after
 	// DDF_MobjCleanUp() has been called.
 	const mobjtype_c *effectobject;
-	epi::strent_c effectobject_ref;
+	std::string effectobject_ref;
 	
 	// Handle this line differently
 	bool glass;
@@ -752,7 +752,7 @@ public:
 	scroll_part_e scroll_parts;
 
 	// -ACB- 1998/09/11 Message handling
-	epi::strent_c failedmessage;
+	std::string failedmessage;
 
     // -AJA- 2011/01/14: sound for unusable locked door
 	struct sfx_s *failed_sfx;
@@ -937,7 +937,7 @@ public:
 	angle_t push_angle;
 
 	// Dasho 2022 - Params for user-defined reverb in sectors
-	epi::strent_c reverb_type;
+	std::string reverb_type;
 	float reverb_ratio;
 	float reverb_delay;
 

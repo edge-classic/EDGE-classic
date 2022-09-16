@@ -110,7 +110,7 @@ static bool HasFinale(const map_finaledef_c *F, finalestage_e cur)
 	switch (cur)
 	{
 		case f_text:
-			return F->text ? true:false;
+			return F->text.size() > 0;
 
 		case f_pic:
 			return (F->pics.GetSize() > 0);
@@ -581,7 +581,7 @@ static void CastInitNew(int num)
 	if (!castorder)
 		castorder = mobjtypes.Lookup(0);
 
-	casttitle = castorder->cast_title ?
+	casttitle = castorder->cast_title.size() > 0 ?
 		language[castorder->cast_title] : castorder->name.c_str();
 
 	castdeath = false;

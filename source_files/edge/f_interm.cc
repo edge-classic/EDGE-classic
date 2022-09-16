@@ -737,7 +737,7 @@ static void InitShowNextLoc(void)
 
 	for (i = 0; i < worldint.nummappos; i++)
 	{
-		if (!strcmp(worldint.mappos[i].info->name, wi_stats.cur->name))
+		if (strcmp(worldint.mappos[i].info->name, wi_stats.cur->name.c_str()) == 0)
 			worldint.mappos[i].done = true;
 	}
 
@@ -765,7 +765,7 @@ static void DrawShowNextLoc(void)
 			DrawOnLnode(&worldint.mappos[i], splat);
 
 		if (wi_stats.next)
-			if (snl_pointeron && !strcmp(wi_stats.next->name, worldint.mappos[i].info->name))
+			if (snl_pointeron && !strcmp(wi_stats.next->name.c_str(), worldint.mappos[i].info->name))
 				DrawOnLnode(&worldint.mappos[i], yah);
 	}
 }
@@ -1561,7 +1561,7 @@ void WI_Drawer(void)
 			{
 				if (!wi_stats.next)
 					f = NULL;
-				else if (!strcmp(wi_stats.next->name, a->info->level))
+				else if (!strcmp(wi_stats.next->name.c_str(), a->info->level))
 					f = &a->frames[a->frameon];
 			}
 			else
@@ -1761,7 +1761,7 @@ void WI_Start(void)
 	{
 		for (mobj_t *mo = mobjlisthead; mo != NULL; mo = mo->next)
 		{
-			if (DDF_CompareName(mo->info->name, gd->bg_camera.c_str()) != 0)
+			if (DDF_CompareName(mo->info->name.c_str(), gd->bg_camera.c_str()) != 0)
 				continue;
 
 			background_camera_mo = mo;

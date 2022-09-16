@@ -85,7 +85,7 @@ act_jump_info_t;
 typedef struct act_become_info_s
 {
 	const mobjtype_c *info;
-	epi::strent_c info_ref;
+	std::string info_ref;
 
 	label_offset_c start;
 
@@ -99,7 +99,7 @@ act_become_info_t;
 typedef struct wep_become_info_s
 {
 	const weapondef_c *info;
-	epi::strent_c info_ref;
+	std::string info_ref;
 
 	label_offset_c start;
 

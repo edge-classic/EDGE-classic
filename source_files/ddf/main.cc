@@ -1116,17 +1116,13 @@ void DDF_MainGetBoolean(const char *info, void *storage)
 //
 // Get String value directly from the file
 //
-// -KM- 1998/07/31 Needed a string argument.  Based on DDF_MainGetNumeric.
-// -AJA- 2000/02/09: Free any existing string (potential memory leak).
-// -ACB- 2004/07/26: Use epi::strent_c
-//
 void DDF_MainGetString(const char *info, void *storage)
 {
-	epi::strent_c *dest = (epi::strent_c *)storage;
+	std::string *dest = (std::string *)storage;
 
 	SYS_ASSERT(info && storage);
 
-	dest->Set(info);
+	*dest = info;
 }
 
 
@@ -2063,8 +2059,7 @@ void dlight_info_c::Default()
 	colour = RGB_MAKE(255, 255, 255);
 	height = PERCENT_MAKE(50);
 	leaky  = false;
-
-	shape.Set("DLIGHT_EXP");
+	shape  = "DLIGHT_EXP";
 
 	cache_data = NULL;
 }

@@ -178,7 +178,7 @@ public:
 	void CopyDetail(gamedef_c &src);
 
 	// Member vars....
-	epi::strent_c name;
+	std::string name;
 
 	wi_animdef_container_c anims;
 	wi_mapposdef_container_c mappos;
@@ -188,7 +188,7 @@ public:
 	lumpname_c yah[2];
 
 	// -AJA- 1999/10/22: background cameras.
-	epi::strent_c bg_camera;
+	std::string bg_camera;
 
 	int music;
 	struct sfx_s *percent;
@@ -210,7 +210,7 @@ public:
 	lighting_model_e lighting;
 	
 	// Episode description, a reference to languages.ldf
-	epi::strent_c description;
+	std::string description;
   
 
 private:

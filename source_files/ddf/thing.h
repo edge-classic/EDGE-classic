@@ -672,7 +672,7 @@ public:
 	void Default();
 	label_offset_c& operator=(label_offset_c &rhs);
 
-	epi::strent_c label;
+	std::string label;
 	int offset;
 };
 
@@ -718,7 +718,7 @@ public:
 	int delay;
 
 	// death message, names an entry in LANGUAGES.LDF
-	epi::strent_c obituary;
+	std::string obituary;
 
 	// override labels for various states, if the object being damaged
 	// has such a state then it is used instead of the normal ones
@@ -788,7 +788,7 @@ public:
 	dlight_info_c& operator=(dlight_info_c &rhs);
 
 	dlight_type_e type;
-	epi::strent_c shape;  // IMAGES.DDF reference
+	std::string shape;  // IMAGES.DDF reference
 	float radius;
 	rgbcol_t colour;
 	percent_t height;
@@ -824,7 +824,7 @@ class mobjtype_c
 {
 public:
 	// DDF Id
-	epi::strent_c name;
+	std::string name;
 
 	int number;
 
@@ -877,13 +877,13 @@ public:
 	pickup_effect_c *pickup_effects;
 
 	// pickup message, a reference to languages.ldf
-	char *pickup_message;
+	std::string pickup_message;
 
 	// linked list of initial benefits for players, or NULL if none
 	benefit_t *initial_benefits;
 
 	int castorder;
-	epi::strent_c cast_title;
+	std::string cast_title;
 	int respawntime;
 	percent_t translucency;
 	percent_t minatkchance;
@@ -971,22 +971,22 @@ public:
 	// item to drop (or NULL).  The mobjdef pointer is only valid after
 	// DDF_MobjCleanUp() has been called.
 	const mobjtype_c *dropitem;
-	epi::strent_c dropitem_ref;
+	std::string dropitem_ref;
 
 	// blood object (or NULL).  The mobjdef pointer is only valid after
 	// DDF_MobjCleanUp() has been called.
 	const mobjtype_c *blood;
-	epi::strent_c blood_ref;
+	std::string blood_ref;
   
 	// respawn effect object (or NULL).  The mobjdef pointer is only
 	// valid after DDF_MobjCleanUp() has been called.
 	const mobjtype_c *respawneffect;
-	epi::strent_c respawneffect_ref;
+	std::string respawneffect_ref;
   
 	// spot type for the `SHOOT_TO_SPOT' attack (or NULL).  The mobjdef
 	// pointer is only valid after DDF_MobjCleanUp() has been called.
 	const mobjtype_c *spitspot;
-	epi::strent_c spitspot_ref;
+	std::string spitspot_ref;
 
 public:
 	mobjtype_c();

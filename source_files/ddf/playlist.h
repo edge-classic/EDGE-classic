@@ -71,7 +71,7 @@ public:
 	musictype_t type;
 	musicinftype_e infotype;
 
-	epi::strent_c info;
+	std::string info;
 
 private:
 	// disable copy construct and assignment operator

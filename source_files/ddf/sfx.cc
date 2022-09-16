@@ -115,7 +115,7 @@ static void SoundParseField(const char *field, const char *contents,
 static void SoundFinishEntry(void)
 {
 	if (!dynamic_sfx->lump_name[0] &&
-		!(dynamic_sfx->file_name && dynamic_sfx->file_name[0]))
+		!(!dynamic_sfx->file_name.empty() && dynamic_sfx->file_name[0]))
 	{
 		DDF_Error("Missing LUMP_NAME or FILE_NAME for sound.\n");
 	}

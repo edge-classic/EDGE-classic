@@ -62,7 +62,7 @@ public:
 	void CopyDetail(weapondef_c &src);
 
 	// Weapon's name, etc...
-	epi::strent_c name;
+	std::string name;
 
 	atkdef_c *attack[2];	// Attack type used.
   

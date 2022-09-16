@@ -1212,7 +1212,7 @@ void W_ReadUMAPINFOLumps(void)
             std::string temp_ref = epi::STR_Format("%sDesc", Maps.maps[i].mapname);
             std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].levelname);
             language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
-			temp_level->description.Set(temp_ref.c_str());
+			temp_level->description = temp_ref;
         }
 
 		if(Maps.maps[i].music[0])
@@ -1228,7 +1228,7 @@ void W_ReadUMAPINFOLumps(void)
 					static pl_entry_c *dynamic_plentry;
 					dynamic_plentry = new pl_entry_c;
 					dynamic_plentry->number = playlist.FindFree();
-					dynamic_plentry->info.Set(Maps.maps[i].music);
+					dynamic_plentry->info = Maps.maps[i].music;
 					dynamic_plentry->type = MUS_UNKNOWN; //MUS_MUS
 					dynamic_plentry->infotype = MUSINF_LUMP;
 					temp_level->music = dynamic_plentry->number;
@@ -1297,8 +1297,7 @@ void W_ReadUMAPINFOLumps(void)
 			std::string temp_ref = epi::STR_Format("%sINTERTEXT", Maps.maps[i].mapname);
             std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].intertext);
             language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
-			temp_level->f_end.text.clear();
-			temp_level->f_end.text.Set(temp_ref.c_str());
+			temp_level->f_end.text = temp_ref;
 			temp_level->f_end.picwait = 350; //10 seconds
 
 
@@ -1337,7 +1336,7 @@ void W_ReadUMAPINFOLumps(void)
 					static pl_entry_c *dynamic_plentry;
 					dynamic_plentry = new pl_entry_c;
 					dynamic_plentry->number = playlist.FindFree();
-					dynamic_plentry->info.Set(Maps.maps[i].intermusic);
+					dynamic_plentry->info = Maps.maps[i].intermusic;
 					dynamic_plentry->type = MUS_UNKNOWN; //MUS_MUS
 					dynamic_plentry->infotype = MUSINF_LUMP;
 					temp_level->f_end.music = dynamic_plentry->number;
@@ -1395,8 +1394,7 @@ void W_ReadUMAPINFOLumps(void)
 				//hack for shitty dbp shennanigans :/
 				if (temp_level->nextmapname = temp_level->secretmapname)
 				{
-					temp_level->f_end.text.clear();
-					temp_level->f_end.text.Set(temp_ref.c_str());
+					temp_level->f_end.text = temp_ref;
 					temp_level->f_end.picwait = 700; //20 seconds
 
 					if(Maps.maps[i].interbackdrop[0])
@@ -1422,8 +1420,7 @@ void W_ReadUMAPINFOLumps(void)
 				}
 				else
 				{
-					secret_level->f_pre.text.clear();
-					secret_level->f_pre.text.Set(temp_ref.c_str());
+					secret_level->f_pre.text = temp_ref;
 					secret_level->f_pre.picwait = 700; //20 seconds
 					if (temp_level->f_end.music)
 						secret_level->f_pre.music=temp_level->f_end.music;

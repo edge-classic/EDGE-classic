@@ -42,7 +42,7 @@ public:
 	rgbcol_t colour;
 	percent_t translucency;
 
-	epi::strent_c image_name;
+	std::string image_name;
 
 	float scale;
 	float aspect;
@@ -126,7 +126,7 @@ public:
 	void CopyDetail(const styledef_c &src);
 
 	// Member vars....
-	epi::strent_c name;
+	std::string name;
 
 	backgroundstyle_c bg;
 

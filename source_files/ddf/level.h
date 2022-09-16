@@ -46,7 +46,7 @@ public:
 	map_finaledef_c& operator=(map_finaledef_c &rhs);
 
 	// Text
-	epi::strent_c text;
+	std::string text;
 	lumpname_c text_back;
 	lumpname_c text_flat;
 	float text_speed;
@@ -123,13 +123,13 @@ public:
 	void CopyDetail(mapdef_c &src);
 
 	// Member vars....
-	epi::strent_c name;
+	std::string name;
 
 ///---	// next in the list
 ///---	mapdef_c *next;				// FIXME!! Gamestate information
 
 	// level description, a reference to languages.ldf
-	epi::strent_c description;
+	std::string description;
   
   	lumpname_c namegraphic;
 	lumpname_c leavingbggraphic;
@@ -143,7 +143,7 @@ public:
 	int partime;
 
 	gamedef_c *episode;  // set during DDF_CleanUp
-	epi::strent_c episode_name;			
+	std::string episode_name;			
 
 	// flags come in two flavours: "force on" and "force off".  When not
 	// forced, then the user is allowed to control it (not applicable to

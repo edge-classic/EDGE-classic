@@ -552,7 +552,7 @@ void M_DrawHostMenu(void)
 	int y = 40;
 	int idx = 0;
 
-	if (ng_params->map->episode->description)
+	if (ng_params->map->episode->description.size() > 0)
 		DrawKeyword(idx, ng_host_style, y, "EPISODE", language[ng_params->map->episode->description.c_str()]);
 	else
 		DrawKeyword(idx, ng_host_style, y, "EPISODE", language[ng_params->map->episode_name.c_str()]);

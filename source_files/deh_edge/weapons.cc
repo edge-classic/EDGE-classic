@@ -25,16 +25,15 @@
 //
 //------------------------------------------------------------------------
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #include "i_defs.h"
-#include "weapons.h"
+#include "deh_edge.h"
 
 #include "ammo.h"
 #include "buffer.h"
-#include "dh_plugin.h"
 #include "info.h"
 #include "frames.h"
 #include "misc.h"
@@ -45,6 +44,7 @@
 #include "system.h"
 #include "things.h"
 #include "wad.h"
+#include "weapons.h"
 
 // EPI
 #include "macros.h"

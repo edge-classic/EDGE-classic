@@ -30,11 +30,11 @@
 #include <string.h>
 
 #include "i_defs.h"
-#include "sounds.h"
+#include "deh_edge.h"
 
 #include "buffer.h"
-#include "dh_plugin.h"
 #include "patch.h"
+#include "sounds.h"
 #include "storage.h"
 #include "system.h"
 #include "util.h"

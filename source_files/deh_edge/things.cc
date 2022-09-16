@@ -25,25 +25,25 @@
 //
 //------------------------------------------------------------------------
 
-#include <assert.h>
-#include <ctype.h>
-#include <string.h>
 #include <stdarg.h>
+#include <string.h>
+#include <ctype.h>
+#include <assert.h>
 
 #include <string>
 
 #include "i_defs.h"
-#include "things.h"
+#include "deh_edge.h"
 
 #include "ammo.h"
 #include "buffer.h"
-#include "dh_plugin.h"
 #include "info.h"
 #include "frames.h"
 #include "misc.h"
 #include "mobj.h"
 #include "patch.h"
 #include "rscript.h"
+#include "things.h"
 #include "storage.h"
 #include "sounds.h"
 #include "system.h"

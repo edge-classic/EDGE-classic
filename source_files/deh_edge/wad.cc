@@ -25,17 +25,17 @@
 //
 //------------------------------------------------------------------------
 
-#include "i_defs.h"
-#include "dh_plugin.h"
-#include "wad.h"
-
-#include "system.h"
-
-#include <errno.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
+#include <errno.h>
+
+#include "i_defs.h"
+#include "deh_edge.h"
+
+#include "system.h"
+#include "wad.h"
 
 namespace Deh_Edge
 {

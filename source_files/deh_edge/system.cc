@@ -25,18 +25,15 @@
 //
 //------------------------------------------------------------------------
 
-#include "i_defs.h"
-
-#include "dh_plugin.h"
-#include "system.h"
-
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
-#ifndef _MSC_VER // Haven't yet noticed consequences of just leaving this out with MSVC - Dasho
-#include <unistd.h>
-#endif
+
+#include "i_defs.h"
+#include "deh_edge.h"
+
+#include "system.h"
 
 namespace Deh_Edge
 {
@@ -116,17 +113,6 @@ void System_Startup(void)
 {
 	has_error_msg = false;
 
-	if (! cur_funcs)
-	{
-		setbuf(stdout, NULL);
-
-#if defined(__linux__) || defined(UNIX)
-		// no whirling baton if stderr is redirected
-		if (! isatty(2))
-			disable_progress = true;
-#endif
-	}
-	
 	progress.Reset();
 
 	Debug_Startup();

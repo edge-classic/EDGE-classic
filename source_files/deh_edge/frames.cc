@@ -25,12 +25,16 @@
 //
 //------------------------------------------------------------------------
 
+#include <assert.h>
+#include <ctype.h>
+#include <string.h>
+
 #include "i_defs.h"
-#include "frames.h"
+#include "deh_edge.h"
 
 #include "buffer.h"
 #include "convert.h"
-#include "dh_plugin.h"
+#include "frames.h"
 #include "info.h"
 #include "patch.h"
 #include "sounds.h"
@@ -41,10 +45,6 @@
 #include "util.h"
 #include "wad.h"
 #include "weapons.h"
-
-#include <assert.h>
-#include <ctype.h>
-#include <string.h>
 
 namespace Deh_Edge
 {

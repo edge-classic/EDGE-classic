@@ -29,9 +29,9 @@
 #include <string.h>
 
 #include "i_defs.h"
-#include "attacks.h"
+#include "deh_edge.h"
 
-#include "dh_plugin.h"
+#include "attacks.h"
 #include "info.h"
 #include "frames.h"
 #include "misc.h"

@@ -25,7 +25,7 @@
 
 #include "i_defs.h"
 
-#include "dh_plugin.h"
+#include "deh_edge.h"
 
 #include "l_deh.h"
 #include "version.h"

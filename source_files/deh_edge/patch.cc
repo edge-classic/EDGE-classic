@@ -25,18 +25,22 @@
 //
 //------------------------------------------------------------------------
 
-#include "i_defs.h"
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "buffer.h"
-#include "dh_plugin.h"
-#include "patch.h"
+#include "i_defs.h"
+#include "deh_edge.h"
 
 #include "ammo.h"
+#include "buffer.h"
 #include "convert.h"
 #include "frames.h"
 #include "info.h"
 #include "misc.h"
 #include "mobj.h"
+#include "patch.h"
 #include "sounds.h"
 #include "storage.h"
 #include "system.h"
@@ -44,11 +48,6 @@
 #include "things.h"
 #include "util.h"
 #include "weapons.h"
-
-#include <assert.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
 
 namespace Deh_Edge
 {

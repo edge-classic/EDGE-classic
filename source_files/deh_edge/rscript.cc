@@ -28,11 +28,11 @@
 #include <assert.h>
 
 #include "i_defs.h"
-#include "rscript.h"
+#include "deh_edge.h"
 
-#include "dh_plugin.h"
 #include "info.h"
 #include "mobj.h"
+#include "rscript.h"
 #include "storage.h"
 #include "system.h"
 #include "util.h"

@@ -29,7 +29,7 @@
 #include "ammo.h"
 
 #include "buffer.h"
-#include "dh_plugin.h"
+#include "deh_edge.h"
 #include "info.h"
 #include "mobj.h"
 #include "patch.h"

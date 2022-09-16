@@ -25,20 +25,20 @@
 //
 //------------------------------------------------------------------------
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "i_defs.h"
-#include "text.h"
+#include "deh_edge.h"
 
 #include "buffer.h"
-#include "dh_plugin.h"
 #include "info.h"
 #include "english.h"
 #include "frames.h"
 #include "mobj.h"
 #include "patch.h"
+#include "text.h"
 #include "storage.h"
 #include "sounds.h"
 #include "system.h"

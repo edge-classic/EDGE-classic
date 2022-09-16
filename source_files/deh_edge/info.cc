@@ -26,9 +26,9 @@
 //------------------------------------------------------------------------
 
 #include "i_defs.h"
-#include "info.h"
+#include "deh_edge.h"
 
-#include "dh_plugin.h"
+#include "info.h"
 #include "mobj.h"
 
 

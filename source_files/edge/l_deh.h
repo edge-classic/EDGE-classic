@@ -26,9 +26,10 @@
 #ifndef __L_DEH__
 #define __L_DEH__
 
-bool DH_ConvertFile(const char *filename, const char *outname);
-bool DH_ConvertLump(const byte *data, int length, const char *lumpname,
-	const char *outname);
+class deh_container_c;
+
+deh_container_c * DH_ConvertFile(const char *filename);
+deh_container_c * DH_ConvertLump(const byte *data, int length, const char *lumpname);
 
 #endif  // __L_DEH__
 

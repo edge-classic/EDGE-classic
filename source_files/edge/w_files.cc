@@ -46,8 +46,12 @@
 #include "flat.h"
 #include "wadfixes.h"
 
+// DEHACKED
+#include "deh_edge.h"
+
 #include "dstrings.h"
 #include "dm_state.h"
+#include "l_deh.h"
 #include "rad_trig.h"
 #include "w_files.h"
 #include "w_wad.h"
@@ -57,7 +61,7 @@ std::vector<data_file_c *> data_files;
 
 
 data_file_c::data_file_c(const char *_name, int _kind) :
-		name(_name), kind(_kind), file(NULL), wad(NULL)
+		name(_name), kind(_kind), file(NULL), wad(NULL), deh(NULL)
 { }
 
 data_file_c::~data_file_c()
@@ -129,7 +133,7 @@ static void ProcessFile(data_file_c *df)
 
 	I_Printf("  Adding %s\n", filename);
 
-	if (df->kind <= FLKIND_HWad || df->kind == FLKIND_PK3)
+	if (df->kind <= FLKIND_GWad || df->kind == FLKIND_PK3)
 	{
 		epi::file_c *file = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 		if (file == NULL)
@@ -145,7 +149,7 @@ static void ProcessFile(data_file_c *df)
 	if (df->kind == FLKIND_RTS || df->kind == FLKIND_DDF)
 		return;
 
-	if (df->kind <= FLKIND_HWad)
+	if (df->kind <= FLKIND_GWad)
 	{
 		ProcessWad(df, file_index);
 
@@ -429,6 +433,41 @@ static void W_ReadDDF_FromFile(data_file_c *df, int d)
 }
 
 
+static void W_ReadDehacked(data_file_c *df, int d)
+{
+	deh_container_c *deh = df->deh;
+	if (deh == NULL)
+		return;
+
+	// look for the appropriate lump (DDFTHING etc)
+	for (size_t i = 0 ; i < deh->lumps.size() ; i++)
+	{
+		deh_lump_c * lump = deh->lumps[i];
+
+		if (strcmp(lump->name.c_str(), DDF_Readers[d].lump_name) == 0)
+		{
+			std::string where = df->name;
+			if (df->wad != NULL)
+			{
+				where = "DEHACKED in ";
+				where += df->name;
+			}
+
+			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, where.c_str());
+
+			const char *data = lump->data.c_str();
+			int length = (int)strlen(data);  // TODO make it not needed
+
+			// call read function
+			(* DDF_Readers[d].func)((void *)data, length);
+
+			// free up some memory
+			lump->data.clear();
+		}
+	}
+}
+
+
 void W_ReadDDF(void)
 {
 	// -AJA- the order here may look strange.  Since DDF files
@@ -440,24 +479,18 @@ void W_ReadDDF(void)
 	{
 		I_Printf("Loading %s\n", DDF_Readers[d].print_name);
 
-		for (int f = 0; f < (int)data_files.size(); f++)
+		for (int i = 0; i < (int)data_files.size(); i++)
 		{
-			data_file_c *df = data_files[f];
+			data_file_c *df = data_files[i];
 
 			W_ReadDDF_FromFile(df, d);
+
+			W_ReadDehacked(df, d);
 		}
 
 		// handle the `-ddf` option.
-		// files from that directory are done AFTER all other ones.
+		// files from its directory are done AFTER any wads/packs.
 		W_ReadDDF_FromDir(d);
-
-/* helpful ???
-		std::string msg_buf(epi::STR_Format(
-			"Loaded %s %s\n", (d == NUM_DDF_READERS-1) ? "RTS" : "DDF",
-				DDF_Readers[d].print_name));
-
-		I_Printf(msg_buf.c_str());
-*/
 	}
 }
 

@@ -1044,23 +1044,12 @@ void ProcessDehacked(data_file_c *df)
 	else
 		return;
 
-	// we just need a name that won't conflict with any other HWA file
-	// in the *current* session.  the following is crude, but works.
-	static int total = 0;
-
-	char base_name[64];
-	sprintf(base_name, "DEH_%04d.%s", total, EDGEHWAEXT);
-	total += 1;
-
-	std::string hwa_filename = epi::PATH_Join(cache_dir.c_str(), base_name);
-
-	I_Debugf("Actual_HWA_filename: %s\n", hwa_filename.c_str());
-
 	if (df->kind == FLKIND_Deh)
 	{
 		I_Printf("Converting DEH file: %s\n", df->name.c_str());
 
-		if (! DH_ConvertFile(df->name.c_str(), hwa_filename.c_str()))
+		df->deh = DH_ConvertFile(df->name.c_str());
+		if (df->deh == NULL)
 			I_Error("Failed to convert DeHackEd patch: %s\n", df->name.c_str());
 	}
 	else
@@ -1074,13 +1063,12 @@ void ProcessDehacked(data_file_c *df)
 		int length;
 		const byte *data = (const byte *)W_LoadLump(deh_lump, &length);
 
-		if (! DH_ConvertLump(data, length, lump_name, hwa_filename.c_str()))
+		df->deh = DH_ConvertLump(data, length, lump_name);
+		if (df->deh == NULL)
 			I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());
 
 		W_DoneWithLump(data);
 	}
-
-	W_AddPending(hwa_filename.c_str(), FLKIND_HWad);
 }
 
 void ProcessWad(data_file_c *df, size_t file_index)
@@ -1126,7 +1114,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 	{
 		raw_wad_entry_t& entry = raw_info[i];
 
-		bool allow_ddf = (df->kind == FLKIND_EWad) || (df->kind == FLKIND_PWad) || (df->kind == FLKIND_HWad);
+		bool allow_ddf = (df->kind == FLKIND_EWad) || (df->kind == FLKIND_PWad);
 
 		AddLump(df, entry.name, EPI_LE_S32(entry.pos), EPI_LE_S32(entry.size),
 				(int)file_index, allow_ddf);

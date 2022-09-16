@@ -101,11 +101,11 @@ void R_AddFlatAnim(animdef_c *anim)
 			return;
 		}
 
-		epi::u32array_c *lumps = W_GetListLumps(file, LMPLST_Flats);
+		std::vector<int> *lumps = W_GetFlatList(file);
 		if (lumps == NULL)
 			return;
 
-		int total = lumps->GetSize();
+		int total = (int)lumps->size();
 
 		SYS_ASSERT(s_offset <= e_offset);
 		SYS_ASSERT(e_offset < total);
@@ -275,11 +275,11 @@ void W_InitFlats(void)
 
 	for (file=0; file < max_file; file++)
 	{
-		epi::u32array_c * lumps = W_GetListLumps(file, LMPLST_Flats);
+		std::vector<int> *lumps = W_GetFlatList(file);
 		if (lumps == NULL)
 			continue;
 
-		int lumpnum = lumps->GetSize();
+		int lumpnum = (int)lumps->size();
 
 		for (j=0; j < lumpnum; j++)
 		{

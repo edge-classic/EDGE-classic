@@ -974,7 +974,6 @@ namespace Sounds
 	{
 		WAD::NewLump("DDFSFX");
 
-		WAD::Printf(GEN_BY_COMMENT);
 		WAD::Printf("<SOUNDS>\n\n");
 	}
 
@@ -992,7 +991,6 @@ namespace Sounds
 	{
 		WAD::NewLump("DDFPLAY");
 
-		WAD::Printf(GEN_BY_COMMENT);
 		WAD::Printf("<PLAYLISTS>\n\n");
 	}
 

@@ -28,7 +28,6 @@
 #ifndef __DEH_EDGE_PLUGIN_H__
 #define __DEH_EDGE_PLUGIN_H__
 
-#define DEH_EDGE_VERS  "1.3"
 
 // Callback functions
 typedef struct dehconvfuncs_s
@@ -70,6 +69,7 @@ typedef enum
 	DEH_E_ParseError
 }
 dehret_e;
+
 
 /* ------------ interface functions ------------ */
 

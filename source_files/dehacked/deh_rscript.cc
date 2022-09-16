@@ -127,7 +127,6 @@ namespace Rscript
 	{
 		WAD::NewLump("RSCRIPT");
 
-		WAD::Printf(GEN_BY_COMMENT);
 		WAD::Printf("// <SCRIPTS>\n\n");
 	}
 

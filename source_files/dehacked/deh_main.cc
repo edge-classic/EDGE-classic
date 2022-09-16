@@ -89,38 +89,6 @@ bool all_mode;
 const dehconvfuncs_t *cur_funcs = NULL;
 
 
-/* ----- user information ----------------------------- */
-
-#ifndef DEH_EDGE_PLUGIN
-
-void ShowTitle(void)
-{
-  PrintMsg(
-    "\n"
-	"=================================================\n"
-    "|    DeHackEd -> EDGE Conversion Tool  V" DEH_EDGE_VERS "     |\n"
-	"|                                               |\n"
-	"|  The EDGE Team.  http://edge.sourceforge.net  |\n"
-	"=================================================\n"
-	"\n"
-  );
-}
-
-void ShowInfo(void)
-{
-  PrintMsg(
-    "USAGE:  deh_edge  (Options...)  input.deh (...)  (-o output.wad)\n"
-	"\n"
-	"Available options:\n"
-	"   -e --edge #.##   Specify EDGE version to target.\n"
-	"   -o --output      Override output filename.\n"
-	"   -q --quiet       Quiet mode, suppress warnings.\n"
-	"\n"
-  );
-}
-
-#endif
-
 void Startup(void)
 {
 	System_Startup();
@@ -308,71 +276,12 @@ dehret_e ValidateArgs(void)
 
 //------------------------------------------------------------------------
 
-#ifndef DEH_EDGE_PLUGIN
-
-namespace Deh_Edge
-{
-
-int main(int argc, char **argv)
-{
-	Startup();
-	ShowTitle();
-	
-	// skip program name itself
-	argv++, argc--;
-
-	if (argc <= 0)
-	{
-		ShowInfo();
-		System_Shutdown();
-
-		return 1;
-	}
-
-	if (StrCaseCmp(argv[0], "/?") == 0 ||
-		StrCaseCmp(argv[0], "-h") == 0 ||
-		StrCaseCmp(argv[0], "-help") == 0 ||
-		StrCaseCmp(argv[0], "--help") == 0)
-	{
-		ShowInfo();
-		System_Shutdown();
-
-		return 1;
-	}
-
-	ParseArgs(argc, argv);
-
-	if (ValidateArgs() != DEH_OK)
-		FatalError("%s", GetErrorMsg());
-
-	if (Convert() != DEH_OK)
-		FatalError("%s", GetErrorMsg());
-
-	Shutdown();
-
-	return 0;
-}
-
-}  // Deh_Edge
-
-int main(int argc, char **argv)
-{
-	return Deh_Edge::main(argc, argv);
-}
-
-#endif  // DEH_EDGE_PLUGIN
-
-//------------------------------------------------------------------------
-
-#ifdef DEH_EDGE_PLUGIN
-
 void DehEdgeStartup(const dehconvfuncs_t *funcs)
 {
 	Deh_Edge::Startup();
 	Deh_Edge::cur_funcs = funcs;
 
-	Deh_Edge::PrintMsg("*** DeHackEd -> EDGE Conversion Tool V%s ***\n",
-		DEH_EDGE_VERS);
+	Deh_Edge::PrintMsg("*** DeHackEd -> EDGE Conversion ***\n");
 }
 
 const char *DehEdgeGetError(void)
@@ -429,5 +338,3 @@ void DehEdgeShutdown(void)
 	Deh_Edge::Shutdown();
 	Deh_Edge::cur_funcs = NULL;
 }
-
-#endif  // DEH_EDGE_PLUGIN

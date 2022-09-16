@@ -73,7 +73,6 @@ namespace Attacks
 	{
 		WAD::NewLump("DDFATK");
 
-		WAD::Printf(GEN_BY_COMMENT);
 		WAD::Printf("<ATTACKS>\n\n");
 	}
 

@@ -131,7 +131,6 @@ namespace Weapons
 	{
 		WAD::NewLump("DDFWEAP");
 
-		WAD::Printf(GEN_BY_COMMENT);
 		WAD::Printf("<WEAPONS>\n\n");
 	}
 

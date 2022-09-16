@@ -720,7 +720,6 @@ namespace TextStr
 	{
 		WAD::NewLump("DDFLANG");
 
-		WAD::Printf(GEN_BY_COMMENT);
 		WAD::Printf("<LANGUAGES>\n\n");
 		WAD::Printf("[ENGLISH]\n");
 	}

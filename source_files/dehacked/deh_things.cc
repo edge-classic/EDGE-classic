@@ -115,8 +115,6 @@ namespace Things
 	{
 		WAD::NewLump("DDFTHING");
 
-		WAD::Printf(GEN_BY_COMMENT);
-
 		WAD::Printf("<THINGS>\n\n");
 	}
 

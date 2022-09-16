@@ -32,10 +32,11 @@
 //----------------------------------------------------------------------------
 
 #include "epi.h"
-#include "bytearray.h"
 #include "endianess.h"
 
 #include "mus_2_midi.h"
+
+#include <vector>
 
 
 namespace Mus2Midi
@@ -51,7 +52,7 @@ namespace Mus2Midi
 		TrackInfo_c() : data(), time(0), velocity(64), lastEvt(0) { }
 		~TrackInfo_c() { }
 
-		epi::bytearray_c data;  /* MIDI message stream */
+		std::vector<byte> data;  /* MIDI message stream */
 
 		int  time;
 		byte velocity;
@@ -59,8 +60,7 @@ namespace Mus2Midi
 
 		inline bool WriteByte(byte value)
 		{
-			data.Append(value);
-
+			data.push_back(value);
 			return true;
 		}
 
@@ -504,7 +504,7 @@ bool Mus2Midi::DecodeMUS(const byte *mus, MIDI_c& info, int division, int nocomp
 	{
 		TrackInfo_c *T = info.track[i];
 
-		if (T->data.Length() == 0)
+		if (T->data.size() == 0)
 			continue;
 
 		if (! T->WriteArray(trackend, sizeof(trackend)))
@@ -565,10 +565,10 @@ bool Mus2Midi::CompactMidi(MIDI_c& info, byte **mid, int *midlen)
 	{
 		TrackInfo_c *T = info.track[i];
 
-		if (T->data.Length() == 0)
+		if (T->data.size() == 0)
 			continue;
 
-		total += 8 + T->data.Length();  // track header + track length
+		total += 8 + T->data.size();  // track header + track length
 		num_track++;
 	}
 
@@ -607,17 +607,17 @@ bool Mus2Midi::CompactMidi(MIDI_c& info, byte **mid, int *midlen)
 	{
 		TrackInfo_c *T = info.track[i];
 
-		if (T->data.Length() == 0)
+		if (T->data.size() == 0)
 			continue;
 
 		memcpy(midiptr, trackhdr, sizeof(trackhdr));  // header
 		midiptr += sizeof(trackhdr);
 
-		TWriteLong(midiptr, T->data.Length());  // track length
+		TWriteLong(midiptr, T->data.size());  // track length
 		midiptr += 4;
 
-		T->data.Read(0, midiptr, T->data.Length());  // track data
-		midiptr += T->data.Length();
+		memcpy(midiptr, &T->data[0], T->data.size());  // track data
+		midiptr += T->data.size();
 	}
 
 	// return length information

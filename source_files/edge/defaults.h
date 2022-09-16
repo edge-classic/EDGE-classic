@@ -20,10 +20,10 @@
 #define __DEFAULT_SETTINGS__
 
 // Screen resolution
-#define CFGDEF_SCREENWIDTH      (640)
-#define CFGDEF_SCREENHEIGHT     (480)
+#define CFGDEF_SCREENWIDTH      (1000000)  // Super high number to force scaling to native res
+#define CFGDEF_SCREENHEIGHT     (1000000) // Super high number to force scaling to native res
 #define CFGDEF_SCREENBITS       (32)
-#define CFGDEF_FULLSCREEN       (1)
+#define CFGDEF_DISPLAYMODE       (2)
 
 // Controls (Key/Mouse Buttons)
 #define CFGDEF_KEY_FIRE         (KEYD_RCTRL + (KEYD_MOUSE1 << 16))

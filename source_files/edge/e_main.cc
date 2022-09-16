@@ -270,17 +270,33 @@ static void SetGlobalVars(void)
 	// Screen Resolution Check...
 	s = M_GetParm("-width");
 	if (s)
-		SCREENWIDTH = atoi(s);
+	{
+		if (DISPLAYMODE == 2)
+			I_Warning("Current display mode set to borderless fullscreen. Provided width of %d will be ignored!\n", atoi(s));
+		else
+			SCREENWIDTH = atoi(s);
+	}
 
 	s = M_GetParm("-height");
 	if (s)
-		SCREENHEIGHT = atoi(s);
+	{
+		if (DISPLAYMODE == 2)
+			I_Warning("Current display mode set to borderless fullscreen. Provided height of %d will be ignored!\n", atoi(s));
+		else
+			SCREENHEIGHT = atoi(s);
+	}
 
 	p = M_CheckParm("-res");
 	if (p && p + 2 < M_GetArgCount())
 	{
-		SCREENWIDTH  = atoi(M_GetArgument(p + 1));
-		SCREENHEIGHT = atoi(M_GetArgument(p + 2));
+		if (DISPLAYMODE == 2)
+			I_Warning("Current display mode set to borderless fullscreen. Provided resolution of %dx%d will be ignored!\n", 
+				atoi(M_GetArgument(p + 1)), atoi(M_GetArgument(p + 2)));
+		else
+		{
+			SCREENWIDTH  = atoi(M_GetArgument(p + 1));
+			SCREENHEIGHT = atoi(M_GetArgument(p + 2));
+		}
 	}
 
 	// Bits per pixel check....
@@ -297,8 +313,19 @@ static void SetGlobalVars(void)
 	if (SCREENBITS < 15) SCREENBITS = 15;
 	else if (SCREENBITS > 32) SCREENBITS = 32;
 
-	M_CheckBooleanParm("windowed",   &FULLSCREEN, true);
-	M_CheckBooleanParm("fullscreen", &FULLSCREEN, false);
+	if (M_CheckParm("-borderless"))
+		DISPLAYMODE = 2;
+	else if (M_CheckParm("-fullscreen"))
+		DISPLAYMODE = 1;
+	else if (M_CheckParm("-windowed"))
+		DISPLAYMODE = 0;
+
+	// If borderless fullscreen mode, override any provided dimensions so I_StartupGraphics will scale to native res
+	if (DISPLAYMODE == 2)
+	{
+		SCREENWIDTH = 100000;
+		SCREENHEIGHT = 100000;
+	}
 
 	// sprite kludge (TrueBSP)
 	p = M_CheckParm("-spritekludge");

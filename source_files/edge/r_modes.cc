@@ -44,11 +44,10 @@
 int SCREENWIDTH;
 int SCREENHEIGHT;
 int SCREENBITS;
-bool FULLSCREEN;
-
+int DISPLAYMODE;
+scrmode_c borderless_mode;
 
 static std::vector<scrmode_c *> screen_modes;
-
 
 bool R_DepthIsEquivalent(int depth1, int depth2)
 {
@@ -70,7 +69,7 @@ static int SizeDiff(int w1, int h1, int w2, int h2)
 }
 
 
-scrmode_c *R_FindResolution(int w, int h, int depth, bool full)
+scrmode_c *R_FindResolution(int w, int h, int depth, int display_mode)
 {
 	for (int i = 0; i < (int)screen_modes.size(); i++)
 	{
@@ -78,7 +77,7 @@ scrmode_c *R_FindResolution(int w, int h, int depth, bool full)
 
 		if (cur->width == w && cur->height == h &&
 			R_DepthIsEquivalent(cur->depth, depth) &&
-			cur->full == full)
+			cur->display_mode == display_mode)
 		{
 			return cur;
 		}
@@ -97,7 +96,7 @@ scrmode_c *R_FindResolution(int w, int h, int depth, bool full)
 void R_AddResolution(scrmode_c *mode)
 {
     scrmode_c *exist = R_FindResolution(mode->width, mode->height,
-							mode->depth, mode->full);
+							mode->depth, mode->display_mode);
 	if (exist)
 	{
 		if (mode->depth != exist->depth)
@@ -127,8 +126,8 @@ void R_DumpResList(void)
 			I_Printf("\n");
 
         I_Printf("  %4dx%4d @ %02d %s", 
-                 cur->width, cur->height, cur->depth,
-                 cur->full ? "FS " : "win");
+                 cur->width, cur->height, cur->depth, cur->display_mode == cur->SCR_BORDERLESS ?
+				 "BL" : (cur->display_mode == cur->SCR_FULLSCREEN ? "FS " : "win"));
 	}
 
 	I_Printf("\n");
@@ -137,24 +136,41 @@ void R_DumpResList(void)
 bool R_IncrementResolution(scrmode_c *mode, int what, int dir)
 {
 	// Algorithm:
-	//   for RESINC_Depth and RESINC_Full, we simply toggle the
-	//   value in question (depth or full), and find the mode
-	//   with matching depth/full and the closest size.
+	//   for RESINC_DisplayMode, we simply adjust the
+	//   value in question, and find the mode
+	//   with matching display_mode and the closest size.
 	//
-	//   for RESINC_Size, we find modes with matching depth/full
+	//   for RESINC_Size, we find modes with matching depth/display_mode
 	//   and the *next* closest size (ignoring the same size or
 	//   sizes that are in opposite direction to 'dir' param).
 
 	SYS_ASSERT(dir == 1 || dir == -1);
 
 	int depth = mode->depth;
-	bool full = mode->full;
+	int display_mode = mode->display_mode;
 
-	if (what == RESINC_Depth)
-		depth = (depth < 20) ? 32 : 16;
+	if (what == RESINC_DisplayMode)
+	{
+		if (dir == 1)
+			display_mode = (display_mode + 1) % 3;
+		else
+		{
+			if (display_mode > 0)
+				display_mode--;
+			else
+				display_mode = 2;
+		}
+	}
 
-	if (what == RESINC_Full)
-		full = !full;
+	if (display_mode == 2)
+	{
+		mode->width  = borderless_mode.width;
+		mode->height = borderless_mode.height;
+		mode->depth  = borderless_mode.depth;
+		mode->display_mode   = borderless_mode.display_mode;
+
+		return true;
+	}
 
 	scrmode_c *best = NULL;
 	int best_diff = (1 << 30);
@@ -166,7 +182,7 @@ bool R_IncrementResolution(scrmode_c *mode, int what, int dir)
 		if (! R_DepthIsEquivalent(cur->depth, depth))
 			continue;
 
-		if (cur->full != full)
+		if (cur->display_mode != display_mode)
 			continue;
 
 		int diff = SizeDiff(cur->width, cur->height, mode->width, mode->height);
@@ -194,7 +210,7 @@ bool R_IncrementResolution(scrmode_c *mode, int what, int dir)
 		mode->width  = best->width;
 		mode->height = best->height;
 		mode->depth  = best->depth;
-		mode->full   = best->full;
+		mode->display_mode   = best->display_mode;
 
 		return true;
 	}
@@ -240,7 +256,7 @@ static bool DoExecuteChangeResolution(scrmode_c *mode)
 	SCREENWIDTH  = mode->width;
 	SCREENHEIGHT = mode->height;
 	SCREENBITS   = mode->depth;
-	FULLSCREEN   = mode->full;
+	DISPLAYMODE  = mode->display_mode;
 
 	// gfx card doesn't like to switch too rapidly
 	I_Sleep(250);
@@ -254,9 +270,9 @@ struct Compare_Res_pred
 {
 	inline bool operator() (const scrmode_c * A, const scrmode_c * B) const
 	{
-		if (A->full != B->full)
+		if (A->display_mode != B->display_mode)
 		{
-			return FULLSCREEN ? (A->full > B->full) : (A->full < B->full);
+			return DISPLAYMODE ? (A->display_mode > B->display_mode) : (A->display_mode < B->display_mode);
 		}
 
 		if (! R_DepthIsEquivalent(A->depth, B->depth))
@@ -290,12 +306,18 @@ void R_InitialResolution(void)
 {
 	L_WriteDebug("R_InitialResolution...\n");
 
+	if (DISPLAYMODE == 2)
+	{
+		if (DoExecuteChangeResolution(&borderless_mode))
+			return;
+	}
+
 	scrmode_c mode;
 
 	mode.width  = SCREENWIDTH;
 	mode.height = SCREENHEIGHT;
 	mode.depth  = SCREENBITS;
-	mode.full   = FULLSCREEN;
+	mode.display_mode   = DISPLAYMODE;
 
     if (DoExecuteChangeResolution(&mode))
 	{
@@ -327,7 +349,7 @@ bool R_ChangeResolution(scrmode_c *mode)
 {
 	L_WriteDebug("R_ChangeResolution...\n");
 
-    if (DoExecuteChangeResolution(mode))
+    if (DoExecuteChangeResolution(mode->display_mode == 2 ? &borderless_mode : mode));
 		return true;
 
 	L_WriteDebug("- Failed : switching back...\n");
@@ -337,7 +359,7 @@ bool R_ChangeResolution(scrmode_c *mode)
 	old_mode.width  = SCREENWIDTH;
 	old_mode.height = SCREENHEIGHT;
 	old_mode.depth  = SCREENBITS;
-	old_mode.full   = FULLSCREEN;
+	old_mode.display_mode   = DISPLAYMODE;
 
     if (DoExecuteChangeResolution(&old_mode))
 		return false;

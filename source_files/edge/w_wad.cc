@@ -81,16 +81,16 @@ public:
 //??	data_file_c *_parent;
 
 	// lists for sprites, flats, patches (stuff between markers)
-	epi::u32array_c sprite_lumps;
-	epi::u32array_c flat_lumps;
-	epi::u32array_c patch_lumps;
-	epi::u32array_c colmap_lumps;
-	epi::u32array_c tx_lumps;
-	epi::u32array_c hires_lumps;
+	std::vector<int> sprite_lumps;
+	std::vector<int> flat_lumps;
+	std::vector<int> patch_lumps;
+	std::vector<int> colmap_lumps;
+	std::vector<int> tx_lumps;
+	std::vector<int> hires_lumps;
 
 	// level markers and skin markers
-	epi::u32array_c level_markers;
-	epi::u32array_c skin_markers;
+	std::vector<int> level_markers;
+	std::vector<int> skin_markers;
 
 	// ddf lump list
 	int ddf_lumps[NUM_DDF_READERS];
@@ -353,11 +353,10 @@ static bool IsSkin(const char *name)
 
 bool wad_file_c::HasLevel(const char *name) const
 {
-	for (int L = 0 ; L < level_markers.GetSize() ; L++)
-	{
-		if (strcmp(lumpinfo[level_markers[L]].name, name) == 0)
+	for (size_t i = 0 ; i < level_markers.size() ; i++)
+		if (strcmp(lumpinfo[level_markers[i]].name, name) == 0)
 			return true;
-	}
+
 	return false;
 }
 
@@ -420,13 +419,11 @@ struct Compare_lump_pred
 
 		// increasing name
 		int cmp = strcmp(C.name, D.name);
-		if (cmp < 0) return true;
-		if (cmp > 0) return false;
+		if (cmp != 0) return (cmp < 0);
 
 		// decreasing file number
 		cmp = C.file - D.file;
-		if (cmp > 0) return true;
-		if (cmp < 0) return false;
+		if (cmp != 0) return (cmp > 0);
 
 		// lump type
 		return C.kind > D.kind;
@@ -456,12 +453,10 @@ static void SortLumps(void)
 //
 static void SortSpriteLumps(wad_file_c *wad)
 {
-	if (wad->sprite_lumps.GetSize() < 2)
+	if (wad->sprite_lumps.size() < 2)
 		return;
 
-#define CMP(a, b) (strncmp(lumpinfo[a].name, lumpinfo[b].name, 8) < 0)
-	QSORT(int, wad->sprite_lumps, wad->sprite_lumps.GetSize(), CUTOFF);
-#undef CMP
+	std::sort(wad->sprite_lumps.begin(), wad->sprite_lumps.end(), Compare_lump_pred());
 
 #if 0  // DEBUGGING
 	{
@@ -596,7 +591,7 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 	{
 		lump_p->kind = LMKIND_Marker;
 		if (wad != NULL)
-			wad->skin_markers.Insert(lump);
+			wad->skin_markers.push_back(lump);
 		return;
 	}
 
@@ -703,37 +698,37 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 	if (within_sprite_list)
 	{
 		lump_p->kind = LMKIND_Sprite;
-		wad->sprite_lumps.Insert(lump);
+		wad->sprite_lumps.push_back(lump);
 	}
 
 	if (within_flat_list)
 	{
 		lump_p->kind = LMKIND_Flat;
-		wad->flat_lumps.Insert(lump);
+		wad->flat_lumps.push_back(lump);
 	}
 
 	if (within_patch_list)
 	{
 		lump_p->kind = LMKIND_Patch;
-		wad->patch_lumps.Insert(lump);
+		wad->patch_lumps.push_back(lump);
 	}
 
 	if (within_colmap_list)
 	{
 		lump_p->kind = LMKIND_Colmap;
-		wad->colmap_lumps.Insert(lump);
+		wad->colmap_lumps.push_back(lump);
 	}
 
 	if (within_tex_list)
 	{
 		lump_p->kind = LMKIND_TX;
-		wad->tx_lumps.Insert(lump);
+		wad->tx_lumps.push_back(lump);
 	}
 
 	if (within_hires_list)
 	{
 		lump_p->kind = LMKIND_HiRes;
-		wad->hires_lumps.Insert(lump);
+		wad->hires_lumps.push_back(lump);
 	}
 }
 
@@ -817,7 +812,7 @@ static void CheckForLevel(wad_file_c *wad, int lump, const char *name,
 			return;
 		}
 
-		wad->level_markers.Insert(lump);
+		wad->level_markers.push_back(lump);
 		return;
 	}
 
@@ -828,7 +823,7 @@ static void CheckForLevel(wad_file_c *wad, int lump, const char *name,
 	    strncmp(raw[3].name, "GL_SSECT", 8) == 0 &&
 	    strncmp(raw[4].name, "GL_NODES", 8) == 0)
 	{
-		wad->level_markers.Insert(lump);
+		wad->level_markers.push_back(lump);
 		return;
 	}
 
@@ -837,7 +832,7 @@ static void CheckForLevel(wad_file_c *wad, int lump, const char *name,
 
 	if (strncmp(raw[1].name, "TEXTMAP",  8) == 0)
 	{
-		wad->level_markers.Insert(lump);
+		wad->level_markers.push_back(lump);
 		return;
 	}
 }
@@ -1159,7 +1154,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 
 std::string W_BuildNodesForWad(data_file_c *df)
 {
-	if (df->wad->level_markers.GetSize() == 0)
+	if (df->wad->level_markers.empty())
 		return std::string();
 
 	std::string gwa_filename;
@@ -1511,10 +1506,9 @@ int W_GetSwitches(wad_file_c *wad)
 }
 void W_AddColourmaps(wad_file_c *wad)
 {
-	for (int i=0; i < wad->colmap_lumps.GetSize(); i++)
+	for (size_t i=0 ; i < wad->colmap_lumps.size() ; i++)
 	{
 		int lump = wad->colmap_lumps[i];
-
 		DDF_ColourmapAddRaw(W_GetLumpName(lump), W_LumpLength(lump));
 	}
 }
@@ -1815,19 +1809,19 @@ int W_FindFlatSequence(const char *start, const char *end,
 
 		// look for start name
 		int i;
-		for (i=0; i < wad->flat_lumps.GetSize(); i++)
+		for (i=0; i < (int)wad->flat_lumps.size(); i++)
 		{
 			if (strncmp(start, W_GetLumpName(wad->flat_lumps[i]), 8) == 0)
 				break;
 		}
 
-		if (i >= wad->flat_lumps.GetSize())
+		if (i >= (int)wad->flat_lumps.size())
 			continue;
 
 		(*s_offset) = i;
 
 		// look for end name
-		for (i++; i < wad->flat_lumps.GetSize(); i++)
+		for (i++; i < (int)wad->flat_lumps.size(); i++)
 		{
 			if (strncmp(end, W_GetLumpName(wad->flat_lumps[i]), 8) == 0)
 			{
@@ -1842,30 +1836,31 @@ int W_FindFlatSequence(const char *start, const char *end,
 }
 
 
-//
-// Returns NULL for an empty list.
-//
-epi::u32array_c * W_GetListLumps(int file, lumplist_e which)
+// returns NULL for an empty list.
+std::vector<int> * W_GetFlatList(int file)
 {
 	SYS_ASSERT(0 <= file && file < (int)data_files.size());
 
 	data_file_c *df = data_files[file];
 	wad_file_c *wad = df->wad;
 
-	if (wad == NULL)
-		return NULL;
+	if (wad != NULL)
+		return &wad->flat_lumps;
 
-	switch (which)
-	{
-		case LMPLST_Sprites: return &wad->sprite_lumps;
-		case LMPLST_Flats:   return &wad->flat_lumps;
-		case LMPLST_Patches: return &wad->patch_lumps;
+	return NULL;
+}
 
-		default: break;
-	}
+std::vector<int> * W_GetSpriteList(int file)
+{
+	SYS_ASSERT(0 <= file && file < (int)data_files.size());
 
-	I_Error("W_GetListLumps: bad `which' (%d)\n", which);
-	return NULL; /* NOT REACHED */
+	data_file_c *df = data_files[file];
+	wad_file_c *wad = df->wad;
+
+	if (wad != NULL)
+		return &wad->sprite_lumps;
+
+	return NULL;
 }
 
 
@@ -1962,7 +1957,7 @@ void W_ProcessTX_HI(void)
 		if (wad == NULL)
 			continue;
 
-		for (int i = 0; i < (int)wad->tx_lumps.GetSize(); i++)
+		for (int i = 0; i < (int)wad->tx_lumps.size(); i++)
 		{
 			int lump = wad->tx_lumps[i];
 			W_ImageAddTX(lump, W_GetLumpName(lump), false);
@@ -1981,7 +1976,7 @@ void W_ProcessTX_HI(void)
 		if (wad == NULL)
 			continue;
 
-		for (int i = 0; i < (int)wad->hires_lumps.GetSize(); i++)
+		for (int i = 0; i < (int)wad->hires_lumps.size(); i++)
 		{
 			int lump = wad->hires_lumps[i];
 			W_ImageAddTX(lump, W_GetLumpName(lump), true);

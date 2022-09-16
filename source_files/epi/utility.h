@@ -24,38 +24,7 @@ namespace epi
 {
 	// Forward declaration
 	class strlist_c;
-	
-    // Primitive array for base types
-    class s32array_c : public array_c
-    {
-    public:
-        s32array_c() : array_c(sizeof(s32_t)) {};
-        ~s32array_c() { Clear(); }
-        
-    private:
-    	void CleanupObject(void *obj) { /* Do Nothing */ } 
-    
-    public:
-    	int GetSize() const { return array_entries; }
-	    int Insert(s32_t num) { return InsertObject((void*)&num); }     	
-	    s32_t& operator[](int idx) const { return *(s32_t*)FetchObject(idx); } 
-    };
-    
-    class u32array_c : public array_c
-    {
-    public:
-        u32array_c() : array_c(sizeof(u32_t)) {};
-        ~u32array_c() { Clear(); }
-        
-    private:
-    	void CleanupObject(void *obj) { /* Do Nothing */ } 
-    
-    public:
-    	int GetSize() const { return array_entries; }
-	    int Insert(u32_t num) { return InsertObject((void*)&num); }     	
-	    u32_t& operator[](int idx) const { return *(u32_t*)FetchObject(idx); } 
-    };
-        
+
     // String Box
     class strbox_c
     {

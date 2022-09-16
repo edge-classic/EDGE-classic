@@ -133,11 +133,6 @@ namespace Rscript
 	void FinishLump(void)
 	{
 		WAD::Printf("\n");
-
-		int length;
-		const byte *data = WAD::FinishLump(&length);
-
-		RAD_ReadScript((void *)data, length);
 	}
 
 	// returns MT number of monster involved

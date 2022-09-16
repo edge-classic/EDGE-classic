@@ -20,13 +20,10 @@ namespace Deh_Edge
 
 namespace WAD
 {
-	void Startup(void);
-	void Shutdown(void);
+	extern deh_container_c * dest_container;
 
 	void NewLump(const char *name);
-	void AddData(const byte *data, int len);
 	void Printf(const char *str, ...) GCCATTR((format (printf,1,2)));
-	byte * FinishLump(int * length = 0);
 }
 
 }  // Deh_Edge

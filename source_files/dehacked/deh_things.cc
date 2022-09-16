@@ -52,16 +52,6 @@
 #include "deh_wad.h"
 #include "deh_weapons.h"
 
-// EPI
-#include "macros.h"
-#include "types.h"
-
-// DDF
-#include "main.h"
-
-// FIXME from ddf/sfx.h
-#undef sfx_None
-
 
 namespace Deh_Edge
 {
@@ -121,11 +111,6 @@ namespace Things
 	void FinishLump(void)
 	{
 		WAD::Printf("\n");
-
-		int length;
-		const byte *data = WAD::FinishLump(&length);
-
-		DDF_ReadThings((void *)data, length);
 	}
 
 	typedef struct 

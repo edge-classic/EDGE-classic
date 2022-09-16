@@ -133,7 +133,7 @@ dehret_e DehEdgeAddFile(const char *filename);
 dehret_e DehEdgeAddLump(const char *data, int length, const char *infoname);
 
 // convert all the DeHackEd patch files into DDF.
-dehret_e DehEdgeRunConversion();
+dehret_e DehEdgeRunConversion(deh_container_c *dest);
 
 // shut down: free all memory, close all files, etc..
 void DehEdgeShutdown(void);

@@ -103,7 +103,6 @@ void Startup(void)
 	Weapons::Startup();
 
 	Storage::Startup();
-	WAD::Startup();
 
 	/* reset parameters */
 
@@ -247,7 +246,6 @@ dehret_e Convert(void)
 
 void Shutdown(void)
 {
-	WAD::Shutdown();
 	System_Shutdown();
 }
 
@@ -323,18 +321,22 @@ dehret_e DehEdgeAddLump(const char *data, int length, const char *infoname)
 	return DEH_OK;
 }
 
-dehret_e DehEdgeRunConversion()
+dehret_e DehEdgeRunConversion(deh_container_c *dest)
 {
 	dehret_e result = Deh_Edge::ValidateArgs();
 
 	if (result != DEH_OK)
 		return result;
 
+	Deh_Edge::WAD::dest_container = dest;
+
 	return Deh_Edge::Convert();
 }
 
 void DehEdgeShutdown(void)
 {
+	Deh_Edge::WAD::dest_container = NULL;
+
 	Deh_Edge::Shutdown();
 	Deh_Edge::cur_funcs = NULL;
 }

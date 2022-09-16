@@ -106,7 +106,9 @@ bool DH_ConvertFile(const char *filename)
 	}
 	else
 	{
-		ret = DehEdgeRunConversion();
+		deh_container_c * container = new deh_container_c();
+
+		ret = DehEdgeRunConversion(container);
 
 		if (ret != DEH_OK)
 		{
@@ -141,7 +143,9 @@ bool DH_ConvertLump(const byte *data, int length, const char *lumpname)
 	}
 	else
 	{
-		ret = DehEdgeRunConversion();
+		deh_container_c * container = new deh_container_c();
+
+		ret = DehEdgeRunConversion(container);
 
 		if (ret != DEH_OK)
 		{

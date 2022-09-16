@@ -40,16 +40,6 @@
 #include "deh_util.h"
 #include "deh_wad.h"
 
-// EPI
-#include "macros.h"
-#include "types.h"
-
-// DDF
-#include "main.h"
-
-// FIXME from ddf/sfx.h
-#undef sfx_None
-
 
 namespace Deh_Edge
 {
@@ -977,16 +967,6 @@ namespace Sounds
 		WAD::Printf("<SOUNDS>\n\n");
 	}
 
-	void FinishSoundLump(void)
-	{
-		WAD::Printf("\n");
-
-		int length;
-		const byte *data = WAD::FinishLump(&length);
-
-		DDF_ReadSFX((void *)data, length);
-	}
-
 	void BeginMusicLump(void)
 	{
 		WAD::NewLump("DDFPLAY");
@@ -994,14 +974,14 @@ namespace Sounds
 		WAD::Printf("<PLAYLISTS>\n\n");
 	}
 
+	void FinishSoundLump(void)
+	{
+		WAD::Printf("\n");
+	}
+
 	void FinishMusicLump(void)
 	{
 		WAD::Printf("\n");
-
-		int length;
-		const byte *data = WAD::FinishLump(&length);
-
-		DDF_ReadMusicPlaylist((void *)data, length);
 	}
 
 	void WriteSound(int s_num)

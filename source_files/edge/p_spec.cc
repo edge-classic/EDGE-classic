@@ -751,9 +751,6 @@ static void P_SectorEffect(sector_t *target, line_t *source,
 	    target->floor.x_mat.y *= factor;
 		target->floor.y_mat.x *= factor;
 	    target->floor.y_mat.y *= factor;
-
-		target->floor.offset.x *= factor;
-		target->floor.offset.y *= factor;
 	}
 	if (special->sector_effect & SECTFX_ScaleCeiling)
 	{
@@ -761,9 +758,6 @@ static void P_SectorEffect(sector_t *target, line_t *source,
 		target->ceil.x_mat.y *= factor;
 		target->ceil.y_mat.x *= factor;
 		target->ceil.y_mat.y *= factor;
-
-		target->ceil.offset.x *= factor;
-		target->ceil.offset.y *= factor;
 	}
 }
 

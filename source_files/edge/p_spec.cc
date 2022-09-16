@@ -412,6 +412,14 @@ static void AdjustLightParts(side_t *side, bool left,
 		side->bottom.override_p = p;
 }
 
+static float ScaleFactorForPlane(surface_t& surf, float line_len, bool use_height)
+{
+	if (use_height)
+		return IM_HEIGHT(surf.image) / line_len;
+	else
+		return IM_WIDTH(surf.image) / line_len;
+}
+
 
 static void P_EFTransferTrans(sector_t *ctrl, sector_t *sec, line_t *line, 
 		const extrafloordef_c *ef, float trans)
@@ -651,8 +659,7 @@ static void P_SectorEffect(sector_t *target, line_t *source,
 
 	float length  = R_PointToDist( 0, 0,  source->dx,  source->dy);
 	angle_t angle = R_PointToAngle(0, 0, -source->dx, -source->dy);
-
-	float factor  = 64.0 / length;
+	bool is_vert  = fabs(source->dy) > fabs(source->dx);
 
 	if (special->sector_effect & SECTFX_LightFloor)
 		target->floor.override_p = &source->frontsector->props;
@@ -747,6 +754,9 @@ static void P_SectorEffect(sector_t *target, line_t *source,
 	// set texture scale
 	if (special->sector_effect & SECTFX_ScaleFloor)
 	{
+		bool aligned = (special->sector_effect & SECTFX_AlignFloor) != 0;
+		float factor = ScaleFactorForPlane(target->floor, length, is_vert && !aligned);
+
 		target->floor.x_mat.x *= factor;
 	    target->floor.x_mat.y *= factor;
 		target->floor.y_mat.x *= factor;
@@ -754,6 +764,9 @@ static void P_SectorEffect(sector_t *target, line_t *source,
 	}
 	if (special->sector_effect & SECTFX_ScaleCeiling)
 	{
+		bool aligned = (special->sector_effect & SECTFX_AlignCeiling) != 0;
+		float factor = ScaleFactorForPlane(target->ceil, length, is_vert && !aligned);
+
 		target->ceil.x_mat.x *= factor;
 		target->ceil.x_mat.y *= factor;
 		target->ceil.y_mat.x *= factor;

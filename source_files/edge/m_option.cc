@@ -171,7 +171,6 @@ static void M_OptionSetResolution(int keypressed);
 ///--  static void M_OptionTestResolution(int keypressed);
 ///--  static void M_RestoreResSettings(int keypressed);
 static void M_ChangeResSize(int keypressed);
-static void M_ChangeResDepth(int keypressed);
 static void M_ChangeResFull(int keypressed);
 
        void M_HostNetGame(int keypressed);
@@ -200,7 +199,6 @@ const char WIPE_EnumStr[] = "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right
 
 static char StereoNess[]  = "Off/On/Swapped";
 static char MixChans[]    = "32/64/96/128/160/192/224/256";
-static char QuietNess[]   = "Loud (distorted)/Normal/Soft/Very Soft";
 
 static char CrosshairColor[] = "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange";
 
@@ -417,11 +415,9 @@ static optmenuitem_t resoptions[] =
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
-	{OPT_Function, "New Size",  NULL, 0, NULL, M_ChangeResSize, NULL},
-	{OPT_Function, "New Depth", NULL, 0, NULL, M_ChangeResDepth, NULL},
 	{OPT_Function, "New Mode",  NULL, 0, NULL, M_ChangeResFull, NULL},
-	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
-	{OPT_Function, "Set Resolution", NULL, 0, NULL, M_OptionSetResolution, NULL},
+	{OPT_Function, "New Size",  NULL, 0, NULL, M_ChangeResSize, NULL},
+	{OPT_Function, "Apply Changes", NULL, 0, NULL, M_OptionSetResolution, NULL},
 /*	{OPT_Function, "Test Resolution", NULL, 0, NULL, M_OptionTestResolution, NULL}, */
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
@@ -994,7 +990,7 @@ void M_OptDrawer()
 	}
 	else if (curr_menu == &res_optmenu)
 	{
-		M_ResOptDrawer(style, curry, curry + (deltay * (res_optmenu.item_num - 2)), 
+		M_ResOptDrawer(style, curry, curry + (deltay * res_optmenu.item_num - 2), 
 					   deltay, curr_menu->menu_center);
 	}
 	else if (curr_menu == &main_optmenu)
@@ -1005,6 +1001,15 @@ void M_OptDrawer()
 	for (i = 0; i < curr_menu->item_num; i++)
 	{
 		bool is_selected = (i == curr_menu->pos);
+
+		if (curr_menu == &res_optmenu && curr_menu->items[i].routine == M_ChangeResSize)
+		{
+			if (new_scrmode.display_mode == 2)
+			{
+				curry += deltay;
+				continue;
+			}
+		}
 
 		HL_WriteText(style, is_selected ? styledef_c::T_TITLE : styledef_c::T_TEXT,
 		             (curr_menu->menu_center) - style->fonts[0]->StringWidth(curr_menu->items[i].name),
@@ -1143,51 +1148,36 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
 {
 	char tempstring[80];
 	
-	// These seems ununsed for now -- Dasho
-	/*float ALTscale = 1.0;
-	float HELPscale = 1.0;
-
-	if(style->def->text[styledef_c::T_ALT].scale)
-	{
-		ALTscale=style->def->text[styledef_c::T_ALT].scale;
-	}
-
-	if(style->def->text[styledef_c::T_HELP].scale)
-	{
-		HELPscale=style->def->text[styledef_c::T_HELP].scale;
-	}*/
-
 	// Draw current resolution
 	int y = topy;
 
-	y += dy;
-
 	// Draw resolution selection option
 	y += (dy*2);
-	sprintf(tempstring, "%dx%d", new_scrmode.width, new_scrmode.height);
-	HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
-
-	// Draw depth selection option
-	y += dy;
-	sprintf(tempstring, "%d bit", (new_scrmode.depth < 20) ? 16:32);
-	HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
 
 	y += dy;
-	sprintf(tempstring, "%s", new_scrmode.full ? "Fullscreen" : "Windowed");
+	sprintf(tempstring, "%s", new_scrmode.display_mode == 2 ? "Borderless Fullscreen" :
+		(new_scrmode.display_mode == new_scrmode.SCR_FULLSCREEN ? "Fullscreen" : "Windowed"));
 	HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
+
+	if (new_scrmode.display_mode < 2)
+	{
+		y += dy;
+		sprintf(tempstring, "%dx%d", new_scrmode.width, new_scrmode.height);
+		HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
+	}
 
 	// Draw selected resolution and mode:
 	y = bottomy;
-	y += (dy/2);
 
 	sprintf(tempstring, "Current Resolution:");
 	HL_WriteText(style,styledef_c::T_HELP, 160 - (style->fonts[0]->StringWidth(tempstring) / 2), y, tempstring);
 
 	y += dy;
-	y += 10;
-	sprintf(tempstring, "%d x %d at %d-bit %s",
-			SCREENWIDTH, SCREENHEIGHT, (SCREENBITS < 20) ? 16 : 32,
-			FULLSCREEN ? "Fullscreen" : "Windowed");
+	y += 5;
+	if (DISPLAYMODE == 2)
+		sprintf(tempstring, "%s", "Borderless Fullscreen");
+	else
+		sprintf(tempstring, "%d x %d %s", SCREENWIDTH, SCREENHEIGHT, DISPLAYMODE == 1 ? "Fullscreen" : "Windowed");
 
 	HL_WriteText(style,styledef_c::T_ALT, 160 - (style->fonts[1]->StringWidth(tempstring) / 2), y, tempstring);
 }
@@ -1301,6 +1291,14 @@ bool M_OptResponder(event_t * ev, int ch)
 			do
 			{
 				curr_menu->pos++;
+				if (curr_menu == &res_optmenu && new_scrmode.display_mode == 2)
+				{
+					if (curr_menu->pos >= 0 && curr_menu->pos < curr_menu->item_num)
+					{
+						if (curr_menu->items[curr_menu->pos].routine == M_ChangeResSize)
+							curr_menu->pos++;
+					}
+				}
 				if (curr_menu->pos >= curr_menu->item_num)
 					curr_menu->pos = 0;
 				curr_item = curr_menu->items + curr_menu->pos;
@@ -1316,6 +1314,14 @@ bool M_OptResponder(event_t * ev, int ch)
 			do
 			{
 				curr_menu->pos++;
+				if (curr_menu == &res_optmenu && new_scrmode.display_mode == 2)
+				{
+					if (curr_menu->pos >= 0 && curr_menu->pos < curr_menu->item_num)
+					{
+						if (curr_menu->items[curr_menu->pos].routine == M_ChangeResSize)
+							curr_menu->pos++;
+					}
+				}
 				if (curr_menu->pos >= curr_menu->item_num)
 				{
 					if (curr_menu->key_page[0])
@@ -1341,6 +1347,14 @@ bool M_OptResponder(event_t * ev, int ch)
 			do
 			{
 				curr_menu->pos--;
+				if (curr_menu == &res_optmenu && new_scrmode.display_mode == 2)
+				{
+					if (curr_menu->pos >= 0 && curr_menu->pos < curr_menu->item_num)
+					{
+						if (curr_menu->items[curr_menu->pos].routine == M_ChangeResSize)
+							curr_menu->pos--;
+					}
+				}
 				if (curr_menu->pos < 0)
 					curr_menu->pos = curr_menu->item_num - 1;
 				curr_item = curr_menu->items + curr_menu->pos;
@@ -1356,6 +1370,14 @@ bool M_OptResponder(event_t * ev, int ch)
 			do
 			{
 				curr_menu->pos--;
+				if (curr_menu == &res_optmenu && new_scrmode.display_mode == 2)
+				{
+					if (curr_menu->pos >= 0 && curr_menu->pos < curr_menu->item_num)
+					{
+						if (curr_menu->items[curr_menu->pos].routine == M_ChangeResSize)
+							curr_menu->pos--;
+					}
+				}
 				if (curr_menu->pos < 0)
 				{
 					if (curr_menu->key_page[0])
@@ -1595,7 +1617,7 @@ static void M_ResolutionOptions(int keypressed)
 	new_scrmode.width  = SCREENWIDTH;
 	new_scrmode.height = SCREENHEIGHT;
 	new_scrmode.depth  = SCREENBITS;
-	new_scrmode.full   = FULLSCREEN;
+	new_scrmode.display_mode = DISPLAYMODE;
 
 	curr_menu = &res_optmenu;
 	curr_item = curr_menu->items + curr_menu->pos;
@@ -1952,23 +1974,6 @@ static void M_ChangeResSize(int keypressed)
 }
 
 //
-// M_ChangeResDepth
-//
-// -ACB- 1998/08/29 Depth Changes...
-//
-static void M_ChangeResDepth(int keypressed)
-{
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
-	{
-		R_IncrementResolution(&new_scrmode, RESINC_Depth, -1);
-	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
-	{
-		R_IncrementResolution(&new_scrmode, RESINC_Depth, +1);
-	}
-}
-
-//
 // M_ChangeResFull
 //
 // -AJA- 2005/01/02: Windowed vs Fullscreen
@@ -1977,11 +1982,11 @@ static void M_ChangeResFull(int keypressed)
 {
 	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
 	{
-		R_IncrementResolution(&new_scrmode, RESINC_Full, +1);
+		R_IncrementResolution(&new_scrmode, RESINC_DisplayMode, +1);
 	}
 	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
 	{
-		R_IncrementResolution(&new_scrmode, RESINC_Full, +1);
+		R_IncrementResolution(&new_scrmode, RESINC_DisplayMode, +1);
 	}
 }
 

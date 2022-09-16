@@ -60,11 +60,11 @@ namespace WAD
 
 void WAD::NewLump(const char *name)
 {
-	if (cur_lump != NULL)
+	if (dest_container == NULL)
 		InternalError("WAD_NewLump: no container!\n");
 
-	if (cur_lump != NULL)
-		InternalError("WAD_NewLump: current lump not finished.\n");
+//??	if (cur_lump != NULL)
+//??		InternalError("WAD_NewLump: current lump not finished.\n");
 
 	cur_lump = new deh_lump_c(name);
 

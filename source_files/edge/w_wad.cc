@@ -1048,7 +1048,8 @@ void ProcessDehacked(data_file_c *df)
 	{
 		I_Printf("Converting DEH file: %s\n", df->name.c_str());
 
-		if (! DH_ConvertFile(df->name.c_str()))
+		df->deh = DH_ConvertFile(df->name.c_str());
+		if (df->deh == NULL)
 			I_Error("Failed to convert DeHackEd patch: %s\n", df->name.c_str());
 	}
 	else
@@ -1062,7 +1063,8 @@ void ProcessDehacked(data_file_c *df)
 		int length;
 		const byte *data = (const byte *)W_LoadLump(deh_lump, &length);
 
-		if (! DH_ConvertLump(data, length, lump_name))
+		df->deh = DH_ConvertLump(data, length, lump_name);
+		if (df->deh == NULL)
 			I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());
 
 		W_DoneWithLump(data);

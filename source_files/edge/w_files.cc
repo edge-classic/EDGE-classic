@@ -46,8 +46,12 @@
 #include "flat.h"
 #include "wadfixes.h"
 
+// DEHACKED
+#include "deh_edge.h"
+
 #include "dstrings.h"
 #include "dm_state.h"
+#include "l_deh.h"
 #include "rad_trig.h"
 #include "w_files.h"
 #include "w_wad.h"
@@ -57,7 +61,7 @@ std::vector<data_file_c *> data_files;
 
 
 data_file_c::data_file_c(const char *_name, int _kind) :
-		name(_name), kind(_kind), file(NULL), wad(NULL)
+		name(_name), kind(_kind), file(NULL), wad(NULL), deh(NULL)
 { }
 
 data_file_c::~data_file_c()
@@ -156,6 +160,9 @@ static void ProcessFile(data_file_c *df)
 	{
 		ProcessPackage(df, file_index);
 	}
+
+	// handle DeHackEd patch files
+	ProcessDehacked(df);
 
 	// handle fixer-uppers
 	ProcessFixers(df);
@@ -426,6 +433,34 @@ static void W_ReadDDF_FromFile(data_file_c *df, int d)
 }
 
 
+static void W_ReadDehacked(data_file_c *df, int d)
+{
+	deh_container_c *deh = df->deh;
+	if (deh == NULL)
+		return;
+
+	// look for the appropriate lump (DDFTHING etc)
+	for (size_t i = 0 ; i < deh->lumps.size() ; i++)
+	{
+		deh_lump_c * lump = deh->lumps[i];
+
+		if (strcmp(lump->name.c_str(), DDF_Readers[d].lump_name) == 0)
+		{
+			I_Printf("Loading %s from DEHACKED\n", DDF_Readers[d].lump_name);
+
+			const char *data = lump->data.c_str();
+			int length = (int)strlen(data);  // TODO make it not needed
+
+			// call read function
+			(* DDF_Readers[d].func)((void *)data, length);
+
+			// free up some memory
+			lump->data.clear();
+		}
+	}
+}
+
+
 void W_ReadDDF(void)
 {
 	// -AJA- the order here may look strange.  Since DDF files
@@ -442,20 +477,13 @@ void W_ReadDDF(void)
 			data_file_c *df = data_files[i];
 
 			W_ReadDDF_FromFile(df, d);
+
+			W_ReadDehacked(df, d);
 		}
 
 		// handle the `-ddf` option.
 		// files from its directory are done AFTER any wads/packs.
 		W_ReadDDF_FromDir(d);
-	}
-
-	// DeHackEd files are done last.
-	// The simplifies the DEH_EDGE code, but means that an EDGE mod
-	// may not work properly alongside a DeHackEd mod.
-	for (int i = 0; i < (int)data_files.size(); i++)
-	{
-		data_file_c *df = data_files[i];
-		ProcessDehacked(df);
 	}
 }
 

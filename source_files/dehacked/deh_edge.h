@@ -28,6 +28,9 @@
 #ifndef __DEH_EDGE_PLUGIN_H__
 #define __DEH_EDGE_PLUGIN_H__
 
+#include <vector>
+#include <string>
+
 
 // Callback functions
 typedef struct dehconvfuncs_s
@@ -69,6 +72,46 @@ typedef enum
 	DEH_E_ParseError
 }
 dehret_e;
+
+
+// storage of generated lumps
+
+class deh_lump_c
+{
+public:
+	std::string name;
+	std::string data;
+
+	deh_lump_c(const char *_name) : name(_name), data()
+	{ }
+
+	~deh_lump_c()
+	{ }
+};
+
+
+class deh_container_c
+{
+public:
+	std::vector<deh_lump_c *> lumps;
+
+	deh_container_c() : lumps()
+	{ }
+
+	~deh_container_c()
+	{
+		for (size_t i = 0 ; i < lumps.size() ; i++)
+		{
+			delete lumps[i];
+			lumps[i] = NULL;
+		}
+	}
+
+	void AddLump(deh_lump_c *L)
+	{
+		lumps.push_back(L);
+	}
+};
 
 
 /* ------------ interface functions ------------ */

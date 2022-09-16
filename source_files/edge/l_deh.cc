@@ -148,8 +148,6 @@ deh_container_c * DH_ConvertLump(const byte *data, int length, const char *lumpn
 
 	DehEdgeShutdown();
 
-	ret = DehEdgeRunConversion(container);
-
 	if (ret != DEH_OK)
 	{
 		DH_PrintMsg("CONVERSION FAILED:\n");

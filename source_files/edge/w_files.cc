@@ -446,7 +446,14 @@ static void W_ReadDehacked(data_file_c *df, int d)
 
 		if (strcmp(lump->name.c_str(), DDF_Readers[d].lump_name) == 0)
 		{
-			I_Printf("Loading %s from DEHACKED\n", DDF_Readers[d].lump_name);
+			std::string where = df->name;
+			if (df->wad != NULL)
+			{
+				where = "DEHACKED in ";
+				where += df->name;
+			}
+
+			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, where.c_str());
 
 			const char *data = lump->data.c_str();
 			int length = (int)strlen(data);  // TODO make it not needed

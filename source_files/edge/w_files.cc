@@ -49,12 +49,16 @@
 // DEHACKED
 #include "deh_edge.h"
 
+#include "con_main.h"
 #include "dstrings.h"
 #include "dm_state.h"
 #include "l_deh.h"
 #include "rad_trig.h"
 #include "w_files.h"
 #include "w_wad.h"
+
+
+DEF_CVAR(debug_dehacked, "0", CVAR_ARCHIVE)
 
 
 std::vector<data_file_c *> data_files;
@@ -457,6 +461,32 @@ static void W_ReadDehacked(data_file_c *df, int d)
 
 			const char *data = lump->data.c_str();
 			int length = (int)strlen(data);  // TODO make it not needed
+
+			if (debug_dehacked.d)
+			{
+				I_Debugf("\n");
+
+				// we need to break it into lines
+				const char *pos = data;
+				const char *end;
+
+				while (*pos != 0)
+				{
+					for (end = pos ; *end != 0 ; end++)
+					{
+						if (*end == '\n')
+						{
+							end++;
+							break;
+						}
+					}
+
+					std::string line(pos, end - pos);
+					I_Debugf("%s", line.c_str());
+
+					pos = end;
+				}
+			}
 
 			// call read function
 			(* DDF_Readers[d].func)((void *)data, length);

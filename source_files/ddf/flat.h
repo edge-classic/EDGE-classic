@@ -39,7 +39,7 @@ public:
 	std::string liquid; // Values are "THIN" and "THICK" - determines swirl and shader params - Dasho
 
 	struct sfx_s *footstep;
-	lumpname_c splash;
+	std::string splash;
 	//Lobo: item to spawn (or NULL).  The mobjdef pointer is only valid after
 	// DDF_flatCleanUp() has been called.
 	const mobjtype_c *impactobject;

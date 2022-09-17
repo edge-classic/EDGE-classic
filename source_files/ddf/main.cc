@@ -1186,14 +1186,12 @@ void DDF_MainGetLumpName(const char *info, void *storage)
 
 	SYS_ASSERT(info && storage);
 
-	lumpname_c *LN = (lumpname_c *)storage;
+	std::string *LN = (std::string *)storage;
 
-	if (strlen(info) == 9)
-		DDF_WarnError("Name %s too long (should be 8 characters or less)\n", info);
-	else if (strlen(info) > 9)
+	if (strlen(info) > 8)
 		DDF_Error("Name %s too long (must be 8 characters or less)\n", info);
 
-	LN->Set(info);
+	(*LN) = info;
 }
 
 

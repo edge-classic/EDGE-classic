@@ -336,7 +336,7 @@ static void ChangeGame(newgame_params_c *param, int dir)
 	{
 		gamedef_c *def = gamedefs[i];
 
-		mapdef_c *first_map = mapdefs.Lookup(def->firstmap);
+		mapdef_c *first_map = mapdefs.Lookup(def->firstmap.c_str());
 
 		if (! first_map || ! G_MapExists(first_map))
 			continue;
@@ -368,7 +368,7 @@ I_Debugf("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n",
 
 	if (closest)
 	{
-		param->map = mapdefs.Lookup(closest->firstmap);
+		param->map = mapdefs.Lookup(closest->firstmap.c_str());
 		SYS_ASSERT(param->map);
 		return;
 	}
@@ -376,7 +376,7 @@ I_Debugf("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n",
 	// could not find the next/previous map, hence wrap around
 	if (furthest)
 	{
-		param->map = mapdefs.Lookup(furthest->firstmap);
+		param->map = mapdefs.Lookup(furthest->firstmap.c_str());
 		SYS_ASSERT(param->map);
 		return;
 	}

@@ -119,7 +119,7 @@ public:
 	//   compose_overlay_t *overlays;
 
 	// WAD specifics:
-	//   lumpname_c palette;
+	//   std::string palette;
 	//   colourmap_c *colmap;
 
 	// CONVERSION

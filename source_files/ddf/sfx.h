@@ -58,9 +58,9 @@ public:
 	std::string name;
 
     // full sound lump name (or file name)
-	lumpname_c lump_name;
+	std::string lump_name;
 	// PC Speaker equivalent lump
-	lumpname_c pc_speaker_lump;
+	std::string pc_speaker_lump;
 	std::string file_name;
 
 	// sfxinfo ID number

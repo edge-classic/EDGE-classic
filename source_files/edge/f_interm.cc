@@ -737,7 +737,7 @@ static void InitShowNextLoc(void)
 
 	for (i = 0; i < worldint.nummappos; i++)
 	{
-		if (strcmp(worldint.mappos[i].info->name, wi_stats.cur->name.c_str()) == 0)
+		if (strcmp(worldint.mappos[i].info->name.c_str(), wi_stats.cur->name.c_str()) == 0)
 			worldint.mappos[i].done = true;
 	}
 
@@ -765,7 +765,7 @@ static void DrawShowNextLoc(void)
 			DrawOnLnode(&worldint.mappos[i], splat);
 
 		if (wi_stats.next)
-			if (snl_pointeron && !strcmp(wi_stats.next->name.c_str(), worldint.mappos[i].info->name))
+			if (snl_pointeron && !strcmp(wi_stats.next->name.c_str(), worldint.mappos[i].info->name.c_str()))
 				DrawOnLnode(&worldint.mappos[i], yah);
 	}
 }
@@ -1561,7 +1561,7 @@ void WI_Drawer(void)
 			{
 				if (!wi_stats.next)
 					f = NULL;
-				else if (!strcmp(wi_stats.next->name.c_str(), a->info->level))
+				else if (!strcmp(wi_stats.next->name.c_str(), a->info->level.c_str()))
 					f = &a->frames[a->frameon];
 			}
 			else
@@ -1621,49 +1621,49 @@ static void LoadData(void)
 	//Lobo 2022: if we have a per level image defined, use that instead
 	if(wi_stats.cur->leavingbggraphic[0])
 	{
-		leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic, INS_Flat, ILF_Null);
+		leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic.c_str(), INS_Flat, ILF_Null);
 		if (leaving_bg_image)
 			tile_leaving_bg = true;
 		else
 		{
-			leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic);
+			leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic.c_str());
 			tile_leaving_bg = false;
 		}
 	}
 
 	if(wi_stats.cur->enteringbggraphic[0])
 	{
-		entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic, INS_Flat, ILF_Null);
+		entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic.c_str(), INS_Flat, ILF_Null);
 		if (entering_bg_image)
 			tile_entering_bg = true;
 		else
 		{
-			entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic);
+			entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic.c_str());
 			tile_entering_bg = false;
 		}
 	}
 
-	bg_image = W_ImageLookup(gd->background, INS_Flat, ILF_Null);
+	bg_image = W_ImageLookup(gd->background.c_str(), INS_Flat, ILF_Null);
 
 	if (bg_image)
 		tile_bg = true;
 	else
 	{
-		bg_image = W_ImageLookup(gd->background);
+		bg_image = W_ImageLookup(gd->background.c_str());
 		tile_bg = false;
 	}
 
-	lnames[0] = W_ImageLookup(wi_stats.cur->namegraphic);
+	lnames[0] = W_ImageLookup(wi_stats.cur->namegraphic.c_str());
 
 	if (wi_stats.next)
-		lnames[1] = W_ImageLookup(wi_stats.next->namegraphic);
+		lnames[1] = W_ImageLookup(wi_stats.next->namegraphic.c_str());
 
 	if (gd->yah[0][0])
-		yah[0] = W_ImageLookup(gd->yah[0]);
+		yah[0] = W_ImageLookup(gd->yah[0].c_str());
 	if (gd->yah[1][0])
-		yah[1] = W_ImageLookup(gd->yah[1]);
+		yah[1] = W_ImageLookup(gd->yah[1].c_str());
 	if (gd->splatpic[0])
-		splat[0] = W_ImageLookup(gd->splatpic);
+		splat[0] = W_ImageLookup(gd->splatpic.c_str());
 	
 	wiminus = W_ImageLookup("WIMINUS"); //!!! FIXME: use the style!
 	percent = W_ImageLookup("WIPCNT");
@@ -1707,7 +1707,7 @@ static void LoadData(void)
 				worldint.anims[i].frames[j].info->pic.c_str());
 
 			worldint.anims[i].frames[j].image = 
-				W_ImageLookup(worldint.anims[i].frames[j].info->pic);
+				W_ImageLookup(worldint.anims[i].frames[j].info->pic.c_str());
 		}
 	}
 }

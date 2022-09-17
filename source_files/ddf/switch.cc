@@ -198,8 +198,8 @@ void DDF_ParseSWITCHES(const byte *data, int size)
 
 		def->Default();
 		
-		def->on_name.Set( on_name);
-		def->off_name.Set(off_name);
+		def->on_name  = on_name;
+		def->off_name = off_name;
 
 		switchdefs.Insert(def);
 	}

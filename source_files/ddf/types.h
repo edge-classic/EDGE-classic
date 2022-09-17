@@ -98,49 +98,6 @@ typedef u32_t angle_t;
 #define FLOAT_2_ANG(n)  ((angle_t) (F2AX(n) / 360.0f * 4294967296.0f))
 
 
-// Our lumpname class
-#define LUMPNAME_SIZE 10
-
-class lumpname_c
-{
-public:
-	lumpname_c() { clear(); }
-	lumpname_c(lumpname_c &rhs) { Set(rhs.data); }
-	~lumpname_c() {};
-
-private:
-	char data[LUMPNAME_SIZE];
-
-public:
-	void clear() { data[0] = '\0'; }
-
-	const char *c_str() const { return data; }
-
-	inline bool empty() const { return data[0] == '\0'; }
-
-	void Set(const char *s) 
-	{
-		int i;
-
-		for (i=0; i<(LUMPNAME_SIZE-1) && *s; i++, s++)
-			data[i] = *s;
-
-		data[i] = '\0';
-	}
-
-	lumpname_c& operator=(lumpname_c &rhs) 
-	{
-		if (&rhs != this) 
-			Set(rhs.data);
-			 
-		return *this; 
-	}
-	
-	char operator[](int idx) const { return data[idx]; }
-	operator const char* () const { return data; }
-};
-
-
 class mobj_strref_c
 {
 public:

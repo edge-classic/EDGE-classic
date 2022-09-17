@@ -150,7 +150,7 @@ void LoadLevel_Bits(void)
 	//
 	// -ACB- 1998/08/09 Reference current map for sky name.
 
-	sky_image = W_ImageLookup(currmap->sky, INS_Texture);
+	sky_image = W_ImageLookup(currmap->sky.c_str(), INS_Texture);
 
 	gamestate = GS_NOTHING; //FIXME: needed ???
 
@@ -560,7 +560,7 @@ void G_DeferredScreenShot(void)
 //  actually exiting level.
 void G_ExitLevel(int time)
 {
-	nextmap = G_LookupMap(currmap->nextmapname);
+	nextmap = G_LookupMap(currmap->nextmapname.c_str());
 	exittime = leveltime + time;
 	exit_skipall = false;
 	exit_hub_tag = 0;
@@ -570,7 +570,7 @@ void G_ExitLevel(int time)
 //                  removed the check for map31.
 void G_SecretExitLevel(int time)
 {
-	nextmap = G_LookupMap(currmap->secretmapname);
+	nextmap = G_LookupMap(currmap->secretmapname.c_str());
 	exittime = leveltime + time;
 	exit_skipall = false;
 	exit_hub_tag = 0;
@@ -1055,7 +1055,7 @@ void G_DeferredNewGame(newgame_params_c& params)
 
 bool G_MapExists(const mapdef_c *map)
 {
-	return (W_CheckNumForName(map->lump) >= 0);
+	return (W_CheckNumForName(map->lump.c_str()) >= 0);
 }
 
 

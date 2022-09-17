@@ -30,7 +30,7 @@
 class wi_mapposdef_c
 {
 public:
-	lumpname_c name;
+	std::string name;
 
 	int x, y;
 
@@ -69,7 +69,7 @@ public:
 class wi_framedef_c
 {
 public:
-	lumpname_c pic;		// Name of pic to display.
+	std::string pic;	// Name of pic to display.
 	int tics;			// Tics on this frame
 	int x, y;			// Position on screen where this goes
 
@@ -112,7 +112,7 @@ public:
 
 	animtype_e type;
 
-	lumpname_c level;
+	std::string level;
 
 	wi_framedef_container_c frames;
 
@@ -183,9 +183,9 @@ public:
 	wi_animdef_container_c anims;
 	wi_mapposdef_container_c mappos;
 
-	lumpname_c background;
-	lumpname_c splatpic;
-	lumpname_c yah[2];
+	std::string background;
+	std::string splatpic;
+	std::string yah[2];
 
 	// -AJA- 1999/10/22: background cameras.
 	std::string bg_camera;
@@ -198,9 +198,9 @@ public:
 	struct sfx_s *accel_snd;
 	struct sfx_s *frag_snd;
 
-	lumpname_c firstmap;
-	lumpname_c namegraphic;
-	
+	std::string firstmap;
+	std::string namegraphic;
+
 	epi::strlist_c titlepics;
 	
 	int titlemusic;

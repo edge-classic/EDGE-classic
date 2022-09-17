@@ -294,7 +294,7 @@ public:
 	float other;
 
     // Floor texture to change to.
-	lumpname_c tex;
+	std::string tex;
 
 	// How much crush damage to do (0 for none).
 	int crush_damage;
@@ -736,7 +736,7 @@ public:
 	bool glass;
 	
 	// line texture to change to.
-	lumpname_c brokentex;
+	std::string brokentex;
 
 	// LIGHT SPECIFIC
 	// Things may be added here; start strobing/flashing glowing lights.

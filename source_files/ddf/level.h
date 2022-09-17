@@ -47,8 +47,8 @@ public:
 
 	// Text
 	std::string text;
-	lumpname_c text_back;
-	lumpname_c text_flat;
+	std::string text_back;
+	std::string text_flat;
 	float text_speed;
 	unsigned int text_wait;
 	const colourmap_c *text_colmap;
@@ -131,12 +131,12 @@ public:
 	// level description, a reference to languages.ldf
 	std::string description;
   
-  	lumpname_c namegraphic;
-	lumpname_c leavingbggraphic;
-	lumpname_c enteringbggraphic;
-  	lumpname_c lump;
-   	lumpname_c sky;
-   	lumpname_c surround;
+  	std::string namegraphic;
+	std::string leavingbggraphic;
+	std::string enteringbggraphic;
+  	std::string lump;
+   	std::string sky;
+   	std::string surround;
    	
    	int music;
  
@@ -152,10 +152,10 @@ public:
 	int force_off;
 
 	// name of the next normal level
-	lumpname_c nextmapname;
+	std::string nextmapname;
 
 	// name of the secret level
-	lumpname_c secretmapname;
+	std::string secretmapname;
 
 	// -KM- 1998/11/25 All lines with this trigger will be activated at
 	// the level start. (MAP07)

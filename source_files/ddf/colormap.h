@@ -58,7 +58,7 @@ public:
 	// Member vars...
 	std::string name;
 
-	lumpname_c lump_name;
+	std::string lump_name;
 
 	int start;
 	int length;

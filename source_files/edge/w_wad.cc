@@ -1196,16 +1196,16 @@ void W_ReadUMAPINFOLumps(void)
 		{
 			temp_level = new mapdef_c;
 			temp_level->name = M_Strupr(Maps.maps[i].mapname);
-			temp_level->lump.Set(M_Strupr(Maps.maps[i].mapname));
+			temp_level->lump = M_Strupr(Maps.maps[i].mapname);
 
 			mapdefs.Insert(temp_level);
 		}
 
 		if(Maps.maps[i].levelpic[0])
-			temp_level->namegraphic.Set(M_Strupr(Maps.maps[i].levelpic));
+			temp_level->namegraphic = M_Strupr(Maps.maps[i].levelpic);
 
 		if(Maps.maps[i].skytexture[0])	
-			temp_level->sky.Set(M_Strupr(Maps.maps[i].skytexture));
+			temp_level->sky = M_Strupr(Maps.maps[i].skytexture);
 
 		if(Maps.maps[i].levelname)
         {
@@ -1237,7 +1237,7 @@ void W_ReadUMAPINFOLumps(void)
 		}	
 		
 		if(Maps.maps[i].nextmap[0])	
-			temp_level->nextmapname.Set(M_Strupr(Maps.maps[i].nextmap));
+			temp_level->nextmapname = M_Strupr(Maps.maps[i].nextmap);
 
 /*
 		if(Maps.maps[i].interbackdrop[0])
@@ -1312,13 +1312,13 @@ void W_ReadUMAPINFOLumps(void)
 					rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Graphic, ILF_Null);
 					
 					if (! rim) // no graphic
-						temp_level->f_end.text_flat.Set("FLOOR4_8"); //should not happen
+						temp_level->f_end.text_flat = "FLOOR4_8"; //should not happen
 					else //background is a graphic
-						temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].interbackdrop));
+						temp_level->f_end.text_back = M_Strupr(Maps.maps[i].interbackdrop);
 				}
 				else //background is a flat
 				{
-					temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+					temp_level->f_end.text_flat = M_Strupr(Maps.maps[i].interbackdrop);
 				}
 			}
 		}	
@@ -1346,7 +1346,7 @@ void W_ReadUMAPINFOLumps(void)
 
 		if(Maps.maps[i].nextsecret[0])
 		{
-			temp_level->secretmapname.Set(M_Strupr(Maps.maps[i].nextsecret));
+			temp_level->secretmapname = M_Strupr(Maps.maps[i].nextsecret);
 			if (Maps.maps[i].intertextsecret)
 			{
 				
@@ -1384,7 +1384,7 @@ void W_ReadUMAPINFOLumps(void)
 				{
 					secret_level = new mapdef_c;
 					secret_level->name = M_Strupr(Maps.maps[i].nextsecret);
-					secret_level->lump.Set(M_Strupr(Maps.maps[i].nextsecret));
+					secret_level->lump = M_Strupr(Maps.maps[i].nextsecret);
 					mapdefs.Insert(secret_level);
 				}
 				std::string temp_ref = epi::STR_Format("%sPRETEXT", secret_level->name.c_str());
@@ -1392,7 +1392,7 @@ void W_ReadUMAPINFOLumps(void)
             	language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
 
 				//hack for shitty dbp shennanigans :/
-				if (temp_level->nextmapname = temp_level->secretmapname)
+				if (temp_level->nextmapname == temp_level->secretmapname)
 				{
 					temp_level->f_end.text = temp_ref;
 					temp_level->f_end.picwait = 700; //20 seconds
@@ -1408,13 +1408,13 @@ void W_ReadUMAPINFOLumps(void)
 							rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Graphic, ILF_Null);
 							
 							if (! rim) // no graphic
-								temp_level->f_end.text_flat.Set("FLOOR4_8"); //should not happen
+								temp_level->f_end.text_flat = "FLOOR4_8"; //should not happen
 							else //background is a graphic
-								temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].interbackdrop));
+								temp_level->f_end.text_back = M_Strupr(Maps.maps[i].interbackdrop);
 						}
 						else //background is a flat
 						{
-							temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+							temp_level->f_end.text_flat = M_Strupr(Maps.maps[i].interbackdrop);
 						}
 					}
 				}
@@ -1436,13 +1436,13 @@ void W_ReadUMAPINFOLumps(void)
 							rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Graphic, ILF_Null);
 							
 							if (! rim) // no graphic
-								secret_level->f_pre.text_flat.Set("FLOOR4_8"); //should not happen
+								secret_level->f_pre.text_flat = "FLOOR4_8"; //should not happen
 							else //background is a graphic
-								secret_level->f_pre.text_back.Set(M_Strupr(Maps.maps[i].interbackdrop));
+								secret_level->f_pre.text_back = M_Strupr(Maps.maps[i].interbackdrop);
 						}
 						else //background is a flat
 						{
-							secret_level->f_pre.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+							secret_level->f_pre.text_flat = M_Strupr(Maps.maps[i].interbackdrop);
 						}
 					}
 				}
@@ -1452,10 +1452,10 @@ void W_ReadUMAPINFOLumps(void)
 			
 		
 		if(Maps.maps[i].exitpic[0])
-			temp_level->leavingbggraphic.Set(M_Strupr(Maps.maps[i].exitpic));
+			temp_level->leavingbggraphic = M_Strupr(Maps.maps[i].exitpic);
 
 		if(Maps.maps[i].enterpic[0])
-			temp_level->enteringbggraphic.Set(M_Strupr(Maps.maps[i].enterpic));
+			temp_level->enteringbggraphic = M_Strupr(Maps.maps[i].enterpic);
 
 		if(Maps.maps[i].endpic[0])
 		{

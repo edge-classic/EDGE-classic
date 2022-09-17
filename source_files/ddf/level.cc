@@ -521,9 +521,10 @@ mapdef_c* mapdef_container_c::Lookup(const char *refname)
 				temp_gamedef->name = "TEMPEPI";
 				m->episode_name = temp_gamedef->name;
 				m->episode = temp_gamedef;
+
 				//We must have a default sky
-				if(! m->sky[0])
-					m->sky.Set("SKY1");
+				if(m->sky.empty())
+					m->sky = "SKY1";
 			}
 			return m;
 		}
@@ -541,7 +542,7 @@ mapdef_c* mapdef_container_c::Lookup(const char *refname)
 		temp_level = new mapdef_c;
 		temp_level->name = refname;
 		temp_level->description = refname;
-		temp_level->lump.Set(refname);
+		temp_level->lump = refname;
 		
 		//3. we also need to assign an episode
 		gamedef_c *temp_gamedef;
@@ -551,8 +552,8 @@ mapdef_c* mapdef_container_c::Lookup(const char *refname)
 		temp_level->episode = temp_gamedef;
 
 		//4. Finally We must have a default sky
-		if(! temp_level->sky[0])
-			temp_level->sky.Set("SKY1");
+		if(temp_level->sky.empty())
+			temp_level->sky = "SKY1";
 
 		mapdefs.Insert(temp_level);
 

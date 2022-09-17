@@ -235,8 +235,7 @@ void DDF_ColourmapAddRaw(const char *lump_name, int size)
 	def->Default();
 
 	def->name = lump_name;
-
-	def->lump_name.Set(lump_name);
+	def->lump_name = lump_name;
 
 	def->start  = 0;
 	def->length = MIN(32, size / 256);

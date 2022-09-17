@@ -275,7 +275,7 @@ static void MakeBoomFloor(linetype_c *line, int number)
 	// handle change + model (pretty dodgy this bit)
 	if (change > 0)
 	{
-		line->f.tex.Set(model ? "+" : "-");
+		line->f.tex = model ? "+" : "-";
 	}
 }
 
@@ -354,7 +354,7 @@ static void MakeBoomCeiling(linetype_c *line, int number)
 	// handle change + model (this logic is pretty dodgy)
 	if (change > 0)
 	{
-		line->c.tex.Set(model ? "+" : "-");
+		line->c.tex = model ? "+" : "-";
 	}
 }
 

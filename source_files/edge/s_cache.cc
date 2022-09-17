@@ -209,7 +209,7 @@ epi::sound_data_c *S_CacheLoad(sfxdef_c *def)
 	if (var_pc_speaker_mode)
 	{
 		if (!def->pc_speaker_lump.empty())
-			def->lump_name.Set(def->pc_speaker_lump.c_str());
+			def->lump_name = def->pc_speaker_lump;
 		else	
 			pc_speaker_skip = true;
 	}

@@ -195,7 +195,7 @@ void DDF_ParseFLATS(const byte *data, int size)
 
 		def->Default();
 		
-		def->splash.Set(splash);
+		def->splash = splash;
 
 		flatdefs.Insert(def);
 	}

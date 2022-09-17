@@ -275,7 +275,7 @@ static void MakeBoomFloor(linetype_c *line, int number)
 	// handle change + model (pretty dodgy this bit)
 	if (change > 0)
 	{
-		line->f.tex.Set(model ? "+" : "-");
+		line->f.tex = model ? "+" : "-";
 	}
 }
 
@@ -354,7 +354,7 @@ static void MakeBoomCeiling(linetype_c *line, int number)
 	// handle change + model (this logic is pretty dodgy)
 	if (change > 0)
 	{
-		line->c.tex.Set(model ? "+" : "-");
+		line->c.tex = model ? "+" : "-";
 	}
 }
 
@@ -421,37 +421,37 @@ static void MakeBoomLockedDoor(linetype_c *line, int number)
 	{
 		case 0:  // ANY
 			line->keys = (keys_e)(KF_RedCard | KF_BlueCard | KF_YellowCard | KF_RedSkull | KF_BlueSkull | KF_YellowSkull);
-			line->failedmessage.Set("NeedAnyForDoor");
+			line->failedmessage = "NeedAnyForDoor";
 			break;
 
 		case 1:  // Red Card
 			line->keys = (keys_e)(KF_RedCard | (sk_ck ? KF_RedSkull : 0));
-			line->failedmessage.Set("NeedRedForDoor");
+			line->failedmessage = "NeedRedForDoor";
 			break;
 
 		case 2:  // Blue Card
 			line->keys = (keys_e)(KF_BlueCard | (sk_ck ? KF_BlueSkull : 0));
-			line->failedmessage.Set("NeedBlueForDoor");
+			line->failedmessage = "NeedBlueForDoor";
 			break;
 
 		case 3:  // Yellow Card
 			line->keys = (keys_e)(KF_YellowCard | (sk_ck ? KF_YellowSkull : 0));
-			line->failedmessage.Set("NeedYellowForDoor");
+			line->failedmessage = "NeedYellowForDoor";
 			break;
 
 		case 4:  // Red Skull
 			line->keys = (keys_e)(KF_RedSkull | (sk_ck ? KF_RedCard : 0));
-			line->failedmessage.Set("NeedRedForDoor");
+			line->failedmessage = "NeedRedForDoor";
 			break;
 
 		case 5:  // Blue Skull
 			line->keys = (keys_e)(KF_BlueSkull | (sk_ck ? KF_BlueCard : 0));
-			line->failedmessage.Set("NeedBlueForDoor");
+			line->failedmessage = "NeedBlueForDoor";
 			break;
 
 		case 6:  // Yellow Skull
 			line->keys = (keys_e)(KF_YellowSkull | (sk_ck ? KF_YellowCard : 0));
-			line->failedmessage.Set("NeedYellowForDoor");
+			line->failedmessage = "NeedYellowForDoor";
 			break;
 
 		case 7:  // ALL  
@@ -459,7 +459,7 @@ static void MakeBoomLockedDoor(linetype_c *line, int number)
 				(KF_RedCard | KF_BlueCard | KF_YellowCard |
 				KF_RedSkull | KF_BlueSkull | KF_YellowSkull));
 
-			line->failedmessage.Set("NeedAllForDoor");
+			line->failedmessage = "NeedAllForDoor";
 			break;
 	}
 }

@@ -55,13 +55,13 @@ public:
 	void CopyDetail(sfxdef_c &src);
 
 	// Member vars....
-	epi::strent_c name;
+	std::string name;
 
     // full sound lump name (or file name)
-	lumpname_c lump_name;
+	std::string lump_name;
 	// PC Speaker equivalent lump
-	lumpname_c pc_speaker_lump;
-	epi::strent_c file_name;
+	std::string pc_speaker_lump;
+	std::string file_name;
 
 	// sfxinfo ID number
 	// -AJA- Changed to a sfx_t.  It serves two purposes: (a) hold the

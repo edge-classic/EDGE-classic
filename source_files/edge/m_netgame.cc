@@ -336,7 +336,7 @@ static void ChangeGame(newgame_params_c *param, int dir)
 	{
 		gamedef_c *def = gamedefs[i];
 
-		mapdef_c *first_map = mapdefs.Lookup(def->firstmap);
+		mapdef_c *first_map = mapdefs.Lookup(def->firstmap.c_str());
 
 		if (! first_map || ! G_MapExists(first_map))
 			continue;
@@ -368,7 +368,7 @@ I_Debugf("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n",
 
 	if (closest)
 	{
-		param->map = mapdefs.Lookup(closest->firstmap);
+		param->map = mapdefs.Lookup(closest->firstmap.c_str());
 		SYS_ASSERT(param->map);
 		return;
 	}
@@ -376,7 +376,7 @@ I_Debugf("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n",
 	// could not find the next/previous map, hence wrap around
 	if (furthest)
 	{
-		param->map = mapdefs.Lookup(furthest->firstmap);
+		param->map = mapdefs.Lookup(furthest->firstmap.c_str());
 		SYS_ASSERT(param->map);
 		return;
 	}
@@ -552,7 +552,7 @@ void M_DrawHostMenu(void)
 	int y = 40;
 	int idx = 0;
 
-	if (ng_params->map->episode->description)
+	if (ng_params->map->episode->description != "")
 		DrawKeyword(idx, ng_host_style, y, "EPISODE", language[ng_params->map->episode->description.c_str()]);
 	else
 		DrawKeyword(idx, ng_host_style, y, "EPISODE", language[ng_params->map->episode_name.c_str()]);

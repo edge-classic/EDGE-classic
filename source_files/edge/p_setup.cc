@@ -2914,7 +2914,7 @@ void P_SetupLevel(void)
 	mobjlisthead = NULL;
 	seen_monsters.clear();
 
-	lumpnum = W_GetNumForName(currmap->lump);
+	lumpnum = W_GetNumForName(currmap->lump.c_str());
 
 	// -AJA- 1999/12/20: Support for "GL-Friendly Nodes".
 	// Dasho - Changed to XG for our specific XGL3 nodes

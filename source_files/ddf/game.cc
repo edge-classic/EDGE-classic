@@ -233,9 +233,7 @@ static void ParseFrame(const char *info, wi_framedef_c *f)
 	if (! p || p == info)
 		DDF_Error("Bad frame def: '%s' (missing pic name)\n", info);
 
-	std::string temp(info, p - info);
-	
-	f->pic.Set(temp.c_str());
+	f->pic = std::string(info, p - info);
 
 	p++;
 
@@ -264,9 +262,7 @@ static void DDF_GameGetAnim(const char *info, void *storage)
 		if (! p || p <= info+1)
 			DDF_Error("Invalid # command: '%s'\n", info);
 
-		std::string temp(info+1, p - (info+1));
-
-		buffer_animdef.level.Set(temp.c_str());
+		buffer_animdef.level = std::string(info+1, p - (info+1));
 
 		p++;
 	}
@@ -284,9 +280,7 @@ static void ParseMap(const char *info, wi_mapposdef_c *mp)
 	if (! p || p == info)
 		DDF_Error("Bad map def: '%s' (missing level name)\n", info);
 
-	std::string temp(info, p - info);
-
-	mp->name.Set(temp.c_str());
+	mp->name = std::string(info, p - info);
 
 	p++;
 

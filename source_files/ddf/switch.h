@@ -47,10 +47,10 @@ public:
 	void CopyDetail(switchdef_c &src);
 
 	// Member vars....
-	epi::strent_c name;
+	std::string name;
 
-	lumpname_c on_name;
-	lumpname_c off_name;
+	std::string on_name;
+	std::string off_name;
 
 	struct sfx_s *on_sfx;
 	struct sfx_s *off_sfx;

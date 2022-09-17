@@ -65,6 +65,11 @@ public:
 	
 	const char* operator[](const char *refname);
 
+	const char* operator[](const std::string& refname)
+	{
+		return (*this)[refname.c_str()];
+	}
+
 	ddf_bi_lang_c* buildinfo;
 	
 	void AddOrReplace(const char *ref, const char *value);

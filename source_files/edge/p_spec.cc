@@ -1161,8 +1161,8 @@ static bool P_ActivateSpecialLine(line_t * line,
 
 			if (failedsecurity)
 			{
-				if (special->failedmessage)
-					CON_PlayerMessageLDF(thing->player->pnum, special->failedmessage);
+				if (special->failedmessage != "")
+					CON_PlayerMessageLDF(thing->player->pnum, special->failedmessage.c_str());
 
 				if (special->failed_sfx)
 					S_StartFX(special->failed_sfx, SNCAT_Level, thing);
@@ -1579,9 +1579,9 @@ static inline void PlayerInProperties(player_t *player,
 	if (special->special_flags & SECSP_ReverbSFX)
 	{
 		ddf_reverb = true;
-		if (strcasecmp(special->reverb_type, "REVERB") == 0)
+		if (strcasecmp(special->reverb_type.c_str(), "REVERB") == 0)
 			ddf_reverb_type = 1;
-		else if (strcasecmp(special->reverb_type, "ECHO") == 0)
+		else if (strcasecmp(special->reverb_type.c_str(), "ECHO") == 0)
 			ddf_reverb_type = 2;
 		ddf_reverb_delay = MAX(0, special->reverb_delay);
 		ddf_reverb_ratio = CLAMP(0, special->reverb_ratio, 100);

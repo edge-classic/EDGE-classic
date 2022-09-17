@@ -141,7 +141,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	// open the file or lump, and read it into memory
 	epi::file_c *F;
 
-	if (def->file_name && def->file_name[0])
+	if (def->file_name != "")
 	{
 		std::string fn = M_ComposeFileName(game_dir.c_str(), def->file_name.c_str());
 
@@ -209,7 +209,7 @@ epi::sound_data_c *S_CacheLoad(sfxdef_c *def)
 	if (var_pc_speaker_mode)
 	{
 		if (!def->pc_speaker_lump.empty())
-			def->lump_name.Set(def->pc_speaker_lump.c_str());
+			def->lump_name = def->pc_speaker_lump;
 		else	
 			pc_speaker_skip = true;
 	}

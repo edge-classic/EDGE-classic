@@ -34,19 +34,19 @@ public:
 	void CopyDetail(flatdef_c &src);
 
 	// Member vars....
-	epi::strent_c name;
+	std::string name;
 	
-	epi::strent_c liquid; // Values are "THIN" and "THICK" - determines swirl and shader params - Dasho
+	std::string liquid; // Values are "THIN" and "THICK" - determines swirl and shader params - Dasho
 
 	struct sfx_s *footstep;
-	lumpname_c splash;
+	std::string splash;
 	//Lobo: item to spawn (or NULL).  The mobjdef pointer is only valid after
 	// DDF_flatCleanUp() has been called.
 	const mobjtype_c *impactobject;
-	epi::strent_c impactobject_ref;
+	std::string impactobject_ref;
 
 	const mobjtype_c *glowobject;
-	epi::strent_c glowobject_ref;
+	std::string glowobject_ref;
 
 private:
 	// disable copy construct and assignment operator

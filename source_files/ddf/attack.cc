@@ -351,17 +351,17 @@ void DDF_AttackCleanUp(void)
 		// lookup thing references
 
 		a->puff = a->puff_ref.empty() ? 
-				NULL : mobjtypes.Lookup(a->puff_ref);
+				NULL : mobjtypes.Lookup(a->puff_ref.c_str());
 
 		a->spawnedobj = a->spawnedobj_ref.empty() ? 
-						NULL : mobjtypes.Lookup(a->spawnedobj_ref);
+						NULL : mobjtypes.Lookup(a->spawnedobj_ref.c_str());
       
 		if (a->spawnedobj)
 		{
 			if (a->objinitstate_ref.empty())
 				a->objinitstate = a->spawnedobj->spawn_state;
 			else
-				a->objinitstate = DDF_MainLookupDirector(a->spawnedobj, a->objinitstate_ref);
+				a->objinitstate = DDF_MainLookupDirector(a->spawnedobj, a->objinitstate_ref.c_str());
 		}
 
 		cur_ddf_entryname.clear();
@@ -472,7 +472,7 @@ static void DDF_AtkGetLabel(const char *info, void *storage)
 	if (i <= 0)
 		DDF_Error("Bad State `%s'.\n", info);
 
-	lab->label.Set(info, i);
+	lab->label = std::string(info, i);
 	lab->offset = div ? MAX(0, atoi(div+1) - 1) : 0;
 }
 

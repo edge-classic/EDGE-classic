@@ -165,47 +165,7 @@ namespace epi
    			
    		return *this;
    	}
-	
-	// ---> strent_c
-	
-	//
-	// strent_c::Set()
-	//
-	void strent_c::Set(const char *s)
-	{
-		clear();
-		if (s)
-		{
-			data = new char[strlen(s)+1];
-			strcpy(data, s);
-		}
-	}
-	
-	//
-	// strent_c::Set()
-	//
-	void strent_c::Set(const char *s, int max)
-	{
-		clear();
-		if (s)
-		{
-			const char *s2;
-			int len;
-			
-			len = 0;
-			s2 = s;
-			while(*s2 && len<max)
-			{
-				len++;
-				s2++;
-			}
-			
-			data = new char[len+1];
-			strncpy(data, s, len);
-			data[len] ='\0';
-		}
-	}
-	
+
     // ---> strlist_c 
 
     //

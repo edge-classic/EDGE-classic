@@ -51,48 +51,6 @@ namespace epi
     	char* operator[](int idx) const { return strs[idx]; }
     };
     
-    // String entry
-    class strent_c
-    {
-	public:
-		strent_c() : data(NULL) { }
-		strent_c(const char *s) : data(NULL) { Set(s); }
-		strent_c(const strent_c &rhs) : data(NULL) { Set(rhs.data); }
-		~strent_c() { clear(); };
-
-	private:
-		char *data;
-
-	public:
-		void clear() 
-		{ 
-			if (data) 
-				delete [] data;
-				
-			data = NULL; 
-		}
-	
-		const char *c_str(void) const { return data; }
-	
-		bool empty() const { return (data && data[0]) ? false : true; }
-	
-		void Set(const char *s);
-		void Set(const char *s, int max);
-
-		strent_c& operator= (const strent_c &rhs) 
-		{ 
-			if(&rhs != this)
-				Set(rhs.data);
-				 
-			return *this; 
-		}
-		
-		char operator[](int idx) const { return data[idx]; }
-
-		// FIXME: -AJA- not sure about this auto-conversion
-		operator const char* () const { return data; }
-    };
-
     // String list
     class strlist_c : public array_c
     {

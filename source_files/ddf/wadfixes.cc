@@ -73,7 +73,7 @@ static void FixStartEntry(const char *name, bool extend)
 
 static void FixFinishEntry(void)
 {
-	if (!dynamic_fixdef->md5_string)
+	if (dynamic_fixdef->md5_string.empty())
 		DDF_Warning("WADFIXES: No MD5 hash defined for %s.\n", dynamic_fixdef->name.c_str());
 }
 

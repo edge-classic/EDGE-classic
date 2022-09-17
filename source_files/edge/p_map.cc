@@ -1331,7 +1331,7 @@ void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
 
 			//2. Remove existing texture from line
 			const image_c *image;
-			if (special->brokentex)
+			if (special->brokentex.c_str())
 			{
 				image = W_ImageLookup(special->brokentex.c_str(), INS_Texture);
 			}

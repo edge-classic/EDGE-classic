@@ -693,7 +693,7 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
     }
 
     // change to surrounding
-    if (def->tex[0] == '-')
+    if (def->tex != "" && def->tex[0] == '-')
     {
         model = P_GetSectorSurrounding(sector, 
                                        plane->destheight, 
@@ -715,7 +715,7 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
             }
         }
     }
-    else if (def->tex[0] == '+')
+    else if (def->tex != "" && def->tex[0] == '+')
     {
         if (model)
         {
@@ -744,9 +744,9 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
             }
         }
     }
-    else if (def->tex[0])
+    else if (def->tex != "")
     {
-        plane->new_image = W_ImageLookup(def->tex, INS_Flat);
+        plane->new_image = W_ImageLookup(def->tex.c_str(), INS_Flat);
     }
 
     P_AddActivePlane(plane);
@@ -1012,7 +1012,7 @@ bool EV_DoDonut(sector_t * s1, sfx_t *sfx[4])
         donut[0].Default();
         donut[0].count = 1;
         donut[0].f.Default(movplanedef_c::DEFAULT_DonutFloor);
-        donut[0].f.tex.Set("-");
+        donut[0].f.tex = "-";
 
         donut[1].Default();
         donut[1].count = 1;

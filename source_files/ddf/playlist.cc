@@ -98,7 +98,7 @@ static void DDF_MusicParseInfo(const char *info)
 
 	// Remained is the string reference: filename/lumpname/track-number
 	pos++;
-	dynamic_plentry->info.Set(&info[pos]);
+	dynamic_plentry->info = &info[pos];
 
 	return;
 }

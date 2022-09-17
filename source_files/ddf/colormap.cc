@@ -78,7 +78,7 @@ static void ColmapStartEntry(const char *name, bool extend)
 	// not found, create a new one
 	dynamic_colmap = new colourmap_c;
 
-	dynamic_colmap->name.Set(name);
+	dynamic_colmap->name = name;
 
 	// make sure fonts get whitened properly (as the default)
 	if (strnicmp(name, "TEXT", 4) == 0)
@@ -235,8 +235,7 @@ void DDF_ColourmapAddRaw(const char *lump_name, int size)
 	def->Default();
 
 	def->name = lump_name;
-
-	def->lump_name.Set(lump_name);
+	def->lump_name = lump_name;
 
 	def->start  = 0;
 	def->length = MIN(32, size / 256);

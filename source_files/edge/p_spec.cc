@@ -580,20 +580,38 @@ static void P_LineEffect(line_t *target, line_t *source,
 
 		if ((sdx == tdy) && (sdy == tdx))
 		{
-			AdjustScrollParts(target->side[0], 0, special->line_parts, 0, yspeed);
-			AdjustScrollParts(target->side[1], 1, special->line_parts, 0, yspeed);
+			if (((source->dy / source->length)+(source->dx / source->length)) == ((target->dx/target->length)+(target->dy/target->length)))
+			{
+				AdjustScrollParts(target->side[0], 0, special->line_parts, 0, yspeed);
+				AdjustScrollParts(target->side[1], 1, special->line_parts, 0, -yspeed);
+			}
+			else
+			{
+				AdjustScrollParts(target->side[0], 0, special->line_parts, 0, -yspeed);
+				AdjustScrollParts(target->side[1], 1, special->line_parts, 0, yspeed);
+			}
 		}
 		else if ((sdx == tdx) && (sdy == tdy))
 		{
-			AdjustScrollParts(target->side[0], 0, special->line_parts, xspeed, 0);
-			AdjustScrollParts(target->side[1], 1, special->line_parts, xspeed, 0);
+			if (((source->dy / source->length)+(source->dx / source->length)) == ((target->dx/target->length)+(target->dy/target->length)))
+			{
+				AdjustScrollParts(target->side[0], 0, special->line_parts, -xspeed, 0);
+				AdjustScrollParts(target->side[1], 1, special->line_parts, xspeed, 0);
+			}
+			else
+			{
+				AdjustScrollParts(target->side[0], 0, special->line_parts, xspeed, 0);
+				AdjustScrollParts(target->side[1], 1, special->line_parts, -xspeed, 0);	
+			}
 		}
 		else
 		{
+			bool samex = ((source->dx >= 0 && target->dx >= 0) || (source->dx < 0 && target->dx < 0));
+			bool samey = ((source->dy >= 0 && target->dy >= 0) || (source->dy < 0 && target->dy < 0));
 			AdjustScrollParts(target->side[0], 0, special->line_parts,
-					xspeed, yspeed);
+					samex ? xspeed : -xspeed, samey ? -yspeed : yspeed);
 			AdjustScrollParts(target->side[1], 1, special->line_parts,
-					xspeed, yspeed);
+					samex ? -xspeed : xspeed, samey ? yspeed : -yspeed);
 		}
 
 		P_AddSpecialLine(target);

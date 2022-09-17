@@ -916,14 +916,12 @@ static void ThingClearAll(void)
 }
 
 
-bool DDF_ReadThings(void *data, int size)
+void DDF_ReadThings(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t things;
 
-	things.memfile = (char*)data;
-	things.memsize = size;
+	things.memfile = (char*)data.c_str();
+	things.memsize = (int)  data.size();
 	things.tag = "THINGS";
 	things.entries_per_dot = 6;
 
@@ -935,7 +933,7 @@ bool DDF_ReadThings(void *data, int size)
 	things.finish_entry = ThingFinishEntry;
 	things.clear_all    = ThingClearAll;
 
-	return DDF_MainReadFile(&things);
+	DDF_MainReadFile(&things);
 }
 
 void DDF_MobjInit(void)

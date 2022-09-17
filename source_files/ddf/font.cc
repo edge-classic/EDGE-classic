@@ -112,14 +112,12 @@ static void FontClearAll(void)
 }
 
 
-bool DDF_ReadFonts(void *data, int size)
+void DDF_ReadFonts(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t fonts;
 
-	fonts.memfile = (char*)data;
-	fonts.memsize = size;
+	fonts.memfile = (char*)data.c_str();
+	fonts.memsize = (int)  data.size();
 	fonts.tag = "FONTS";
 	fonts.entries_per_dot = 2;
 
@@ -131,20 +129,16 @@ bool DDF_ReadFonts(void *data, int size)
 	fonts.finish_entry = FontFinishEntry;
 	fonts.clear_all    = FontClearAll;
 
-	return DDF_MainReadFile(&fonts);
+	DDF_MainReadFile(&fonts);
 }
 
-//
-// DDF_FontInit
-//
+
 void DDF_FontInit(void)
 {
 	fontdefs.Clear();		// <-- Consistent with existing behaviour (-ACB- 2004/05/04)
 }
 
-//
-// DDF_FontCleanUp
-//
+
 void DDF_FontCleanUp(void)
 {
 	if (fontdefs.GetSize() == 0)

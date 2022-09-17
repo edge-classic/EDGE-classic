@@ -488,17 +488,12 @@ static void WeaponClearAll(void)
 }
 
 
-//
-// DDF_ReadWeapons
-//
-bool DDF_ReadWeapons(void *data, int size)
+void DDF_ReadWeapons(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t weapons;
 
-	weapons.memfile = (char*)data;
-	weapons.memsize = size;
+	weapons.memfile = (char*)data.c_str();
+	weapons.memsize = (int)  data.size();
 	weapons.tag = "WEAPONS";
 	weapons.entries_per_dot = 1;
 
@@ -510,19 +505,22 @@ bool DDF_ReadWeapons(void *data, int size)
 	weapons.finish_entry = WeaponFinishEntry;
 	weapons.clear_all    = WeaponClearAll;
 
-	return DDF_MainReadFile(&weapons);
+	DDF_MainReadFile(&weapons);
 }
+
 
 void DDF_WeaponInit(void)
 {
 	weapondefs.Clear();
 }
 
+
 void DDF_WeaponCleanUp(void)
 {
 	// Trim down the required to size
 	weapondefs.Trim();
 }
+
 
 static void DDF_WGetAmmo(const char *info, void *storage)
 {

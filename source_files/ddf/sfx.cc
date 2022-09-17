@@ -127,14 +127,12 @@ static void SoundClearAll(void)
 }
 
 
-bool DDF_ReadSFX(void *data, int size)
+void DDF_ReadSFX(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t sfx_r;
 
-	sfx_r.memfile = (char*)data;
-	sfx_r.memsize = size;
+	sfx_r.memfile = (char*)data.c_str();
+	sfx_r.memsize = (int)  data.size();
 	sfx_r.tag = "SOUNDS";
 	sfx_r.entries_per_dot = 8;
 
@@ -146,7 +144,7 @@ bool DDF_ReadSFX(void *data, int size)
 	sfx_r.finish_entry = SoundFinishEntry;
 	sfx_r.clear_all    = SoundClearAll;
 
-	return DDF_MainReadFile(&sfx_r);
+	DDF_MainReadFile(&sfx_r);
 }
 
 void DDF_SFXInit(void)

@@ -210,12 +210,12 @@ static void StyleClearAll(void)
 }
 
 
-bool DDF_ReadStyles(void *data, int size)
+void DDF_ReadStyles(const std::string& data)
 {
 	readinfo_t styles;
 
-	styles.memfile = (char*)data;
-	styles.memsize = size;
+	styles.memfile = (char*)data.c_str();
+	styles.memsize = (int)  data.size();
 	styles.tag = "STYLES";
 	styles.entries_per_dot = 2;
 
@@ -227,7 +227,7 @@ bool DDF_ReadStyles(void *data, int size)
 	styles.finish_entry = StyleFinishEntry;
 	styles.clear_all    = StyleClearAll;
 
-	return DDF_MainReadFile(&styles);
+	DDF_MainReadFile(&styles);
 }
 
 

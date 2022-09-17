@@ -148,14 +148,12 @@ static void AnimClearAll(void)
 }
 
 
-bool DDF_ReadAnims(void *data, int size)
+void DDF_ReadAnims(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t anims;
 
-	anims.memfile = (char*)data;
-	anims.memsize = size;
+	anims.memfile = (char*)data.c_str();
+	anims.memsize = (int)  data.size();
 	anims.tag = "ANIMATIONS";
 	anims.entries_per_dot = 2;
 
@@ -167,7 +165,7 @@ bool DDF_ReadAnims(void *data, int size)
 	anims.finish_entry = AnimFinishEntry;
 	anims.clear_all    = AnimClearAll;
 
-	return DDF_MainReadFile(&anims);
+	DDF_MainReadFile(&anims);
 }
 
 //

@@ -100,7 +100,7 @@ void DDF_ReadFixes(const std::string& data)
 	readinfo_t fixes;
 
 	fixes.memfile = (char*)data.c_str();
-	fixes.memsize = (int)data.size();
+	fixes.memsize = (int)  data.size();
 	fixes.tag = "FIXES";
 	fixes.entries_per_dot = 2;
 

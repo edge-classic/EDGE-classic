@@ -85,9 +85,10 @@ public:
 
 extern switchdef_container_c switchdefs; 	// -ACB- 2004/06/04 Implemented
 
-bool DDF_ReadSwitch(void *data, int size);
+void DDF_ReadSwitch(const std::string& data);
 
-void DDF_ParseSWITCHES(const byte *data, int size);
+// handle the BOOM lump
+void DDF_ParseSWITCHES(const byte * data, int size);
 
 #endif  /*__DDF_SWTH_H__*/
 

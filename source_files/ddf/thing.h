@@ -1044,7 +1044,7 @@ extern mobjtype_container_c mobjtypes;
 
 void DDF_MobjGetBenefit(const char *info, void *storage);
 
-bool DDF_ReadThings(void *data, int size);
+void DDF_ReadThings(const std::string& data);
 
 #endif /*__DDF_MOBJ_H__*/
 

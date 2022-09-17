@@ -217,7 +217,7 @@ public:
 
 extern weapondef_container_c weapondefs;	// -ACB- 2004/07/14 Implemented
 
-bool DDF_ReadWeapons(void *data, int size);
+void DDF_ReadWeapons(const std::string& data);
 
 #endif // __DDF_WEAPON_H__
 

@@ -693,7 +693,10 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
 	if (ctex->what == CHTEX_Sky)
 	{
 		if (image)
+		{
 			sky_image = image;
+			RGL_UpdateSkyBoxTextures();
+		}
 		return;
 	}
 

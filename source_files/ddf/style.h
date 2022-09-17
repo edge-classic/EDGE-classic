@@ -80,9 +80,10 @@ public:
 
 	u8_t position;
 	percent_t translucency;
-	const char *alt_cursor;
-	const char *pos_string; // Here for user convenience, is translated to a value for position
-	const char *cursor_string;
+
+	std::string alt_cursor;
+	std::string pos_string; // Here for user convenience, is translated to a value for position
+	std::string cursor_string;
 
 	bool border;
 };
@@ -161,7 +162,7 @@ public:
 	int y_offset;
 
 	u8_t entry_alignment;
-	const char *entry_align_string; // User convenience
+	std::string entry_align_string; // User convenience
 
 private:
 	// disable copy construct and assignment operator

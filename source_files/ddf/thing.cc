@@ -959,15 +959,15 @@ void DDF_MobjCleanUp(void)
 
 		cur_ddf_entryname = epi::STR_Format("[%s]  (things.ddf)", m->name.c_str());
 
-		m->dropitem = m->dropitem_ref.size() > 0 ? mobjtypes.Lookup(m->dropitem_ref.c_str()) : NULL;
-		m->blood = m->blood_ref.size() > 0 ? mobjtypes.Lookup(m->blood_ref.c_str()) : mobjtypes.Lookup("BLOOD");
+		m->dropitem = m->dropitem_ref != "" ? mobjtypes.Lookup(m->dropitem_ref.c_str()) : NULL;
+		m->blood = m->blood_ref != "" ? mobjtypes.Lookup(m->blood_ref.c_str()) : mobjtypes.Lookup("BLOOD");
 
-		m->respawneffect = m->respawneffect_ref.size() > 0 ? 
+		m->respawneffect = m->respawneffect_ref != "" ? 
 			mobjtypes.Lookup(m->respawneffect_ref.c_str()) :
 			(m->flags & MF_SPECIAL) ? mobjtypes.Lookup("ITEM_RESPAWN") 
 				                    : mobjtypes.Lookup("RESPAWN_FLASH");
 
-		m->spitspot = m->spitspot_ref.size() > 0 ? mobjtypes.Lookup(m->spitspot_ref.c_str()) : NULL;
+		m->spitspot = m->spitspot_ref != "" ? mobjtypes.Lookup(m->spitspot_ref.c_str()) : NULL;
 
 		cur_ddf_entryname.clear();
 	}
@@ -2230,7 +2230,7 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	//pickup_message = src.pickup_message;
 	//lose_benefits = src.lose_benefits; 
 	//pickup_benefits = src.pickup_benefits;
-	if (src.pickup_message.size() > 0)
+	if (src.pickup_message != "")
 	{
 		pickup_message = src.pickup_message; 
 	}

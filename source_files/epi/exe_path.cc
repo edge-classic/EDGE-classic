@@ -80,7 +80,7 @@ const char* GetResourcePath()
 	std::string exe_path = ep;
     free((void*)ep);
 
-	if (exe_path.size() > 0)
+	if (exe_path != "")
 	{
 		std::string::size_type pos = exe_path.rfind(dir_match);
 		if (pos != std::string::npos) // Found it 

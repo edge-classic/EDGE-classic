@@ -686,7 +686,7 @@ void E_PickLoadingScreen(void)
 
 		// ignore non-existing episodes.  Doesn't include title-only ones
 		// like [EDGE].
-		if (title_pic == 0 && g->firstmap.size() > 0 &&
+		if (title_pic == 0 && g->firstmap != "" &&
 			W_CheckNumForName(g->firstmap.c_str()) == -1)
 		{
 			title_game = (title_game + 1) % gamedefs.GetSize();
@@ -738,7 +738,7 @@ void E_AdvanceTitle(void)
 
 		// ignore non-existing episodes.  Doesn't include title-only ones
 		// like [EDGE].
-		if (title_pic == 0 && g->firstmap.size() > 0 &&
+		if (title_pic == 0 && g->firstmap != "" &&
 			W_CheckNumForName(g->firstmap.c_str()) == -1)
 		{
 			title_game = (title_game + 1) % gamedefs.GetSize();

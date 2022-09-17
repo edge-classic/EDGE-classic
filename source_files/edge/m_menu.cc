@@ -1352,7 +1352,7 @@ static void CreateEpisodeMenu(void)
 		Z_StrNCpy(EpisodeMenu[e].patch_name, g->namegraphic.c_str(), 8);
 		EpisodeMenu[e].patch_name[8] = 0;
 		
-		if (g->description.size() > 0)
+		if (g->description != "")
 		{
 			EpisodeMenu[e].name = language[g->description];
 		}
@@ -1462,7 +1462,7 @@ static void DoStartLevel(skill_t skill)
 		g = ITERATOR_TO_TYPE(it, gamedef_c*);
 
 		//Lobo 2022: lets use text instead of M_EPIxx graphic
-		if (g->description.size() > 0) 
+		if (g->description != "") 
 		{
 			std::string gamedef_episode = epi::STR_Format("%s",language[g->description.c_str()]);
 			if (DDF_CompareName(gamedef_episode.c_str(), chosen_episode.c_str()) == 0)
@@ -1918,7 +1918,7 @@ bool M_Responder(event_t * ev)
 		{
 			std::string s = input_string.c_str();
 
-			if (input_string.size() > 0)
+			if (input_string != "")
 			{
 				input_string.resize(input_string.size() - 1);
 			}

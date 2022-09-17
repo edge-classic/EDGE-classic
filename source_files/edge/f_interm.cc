@@ -1615,11 +1615,8 @@ static void LoadData(void)
 
 	const gamedef_c *gd = wi_stats.cur->episode;
 
-	
-	
-
 	//Lobo 2022: if we have a per level image defined, use that instead
-	if(wi_stats.cur->leavingbggraphic[0])
+	if(wi_stats.cur->leavingbggraphic != "")
 	{
 		leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic.c_str(), INS_Flat, ILF_Null);
 		if (leaving_bg_image)
@@ -1631,7 +1628,7 @@ static void LoadData(void)
 		}
 	}
 
-	if(wi_stats.cur->enteringbggraphic[0])
+	if(wi_stats.cur->enteringbggraphic != "")
 	{
 		entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic.c_str(), INS_Flat, ILF_Null);
 		if (entering_bg_image)
@@ -1658,11 +1655,11 @@ static void LoadData(void)
 	if (wi_stats.next)
 		lnames[1] = W_ImageLookup(wi_stats.next->namegraphic.c_str());
 
-	if (gd->yah[0][0])
+	if (gd->yah[0] != "")
 		yah[0] = W_ImageLookup(gd->yah[0].c_str());
-	if (gd->yah[1][0])
+	if (gd->yah[1] != "")
 		yah[1] = W_ImageLookup(gd->yah[1].c_str());
-	if (gd->splatpic[0])
+	if (gd->splatpic != "")
 		splat[0] = W_ImageLookup(gd->splatpic.c_str());
 	
 	wiminus = W_ImageLookup("WIMINUS"); //!!! FIXME: use the style!
@@ -1757,7 +1754,7 @@ void WI_Start(void)
 	// -AJA- 1999/10/22: background cameras.
 	background_camera_mo = NULL;
 
-	if (gd->bg_camera.c_str() && gd->bg_camera.c_str()[0])
+	if (gd->bg_camera != "")
 	{
 		for (mobj_t *mo = mobjlisthead; mo != NULL; mo = mo->next)
 		{

@@ -794,7 +794,7 @@ void P_TouchSpecialThing(mobj_t * special, mobj_t * toucher)
 		if (info.player->bonuscount > BONUS_LIMIT)
 			info.player->bonuscount = BONUS_LIMIT;
 
-		if (special->info->pickup_message.size() > 0 &&
+		if (special->info->pickup_message != "" &&
 			language.IsValidRef(special->info->pickup_message.c_str()))
 		{
 			CON_PlayerMessage(info.player->pnum, "%s",
@@ -1037,7 +1037,7 @@ void P_KillMobj(mobj_t * source, mobj_t * target, const damage_c *damtype,
 			overkill = true;
 	}
 
-	if (state == S_NULL && overkill && damtype && damtype->overkill.label.size() > 0)
+	if (state == S_NULL && overkill && damtype && damtype->overkill.label != "")
 	{
 		state = P_MobjFindLabel(target, damtype->overkill.label.c_str());
 		if (state != S_NULL)
@@ -1047,7 +1047,7 @@ void P_KillMobj(mobj_t * source, mobj_t * target, const damage_c *damtype,
 	if (state == S_NULL && overkill && target->info->overkill_state)
 		state = target->info->overkill_state;
 
-	if (state == S_NULL && damtype && damtype->death.label.size() > 0)
+	if (state == S_NULL && damtype && damtype->death.label != "")
 	{
 		state = P_MobjFindLabel(target, damtype->death.label.c_str());
 		if (state != S_NULL)
@@ -1428,7 +1428,7 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 		if (weak_spot)
 			state = P_MobjFindLabel(target, "WEAKPAIN");
 
-		if (state == S_NULL && damtype && damtype->pain.label.size() > 0)
+		if (state == S_NULL && damtype && damtype->pain.label != "")
 		{
 			state = P_MobjFindLabel(target, damtype->pain.label.c_str());
 			if (state != S_NULL)

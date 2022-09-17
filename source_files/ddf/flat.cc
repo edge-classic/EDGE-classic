@@ -159,10 +159,10 @@ void DDF_FlatCleanUp(void)
 		f = ITERATOR_TO_TYPE(it, flatdef_c*);
 		cur_ddf_entryname = epi::STR_Format("[%s]  (flats.ddf)", f->name.c_str());
 
-		f->impactobject = f->impactobject_ref.size() > 0 ?
+		f->impactobject = f->impactobject_ref != "" ?
 			mobjtypes.Lookup(f->impactobject_ref.c_str()) : NULL;
 		
-		f->glowobject = f->glowobject_ref.size() > 0 ?
+		f->glowobject = f->glowobject_ref != "" ?
 			mobjtypes.Lookup(f->glowobject_ref.c_str()) : NULL;
 
 		//f->effectobject = f->effectobject_ref.empty() ? 

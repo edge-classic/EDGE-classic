@@ -506,14 +506,14 @@ void DDF_LinedefCleanUp(void)
 
 		cur_ddf_entryname = epi::STR_Format("[%d]  (lines.ddf)", l->number);
 
-		l->t.inspawnobj = l->t.inspawnobj_ref.size() > 0 ?
+		l->t.inspawnobj = l->t.inspawnobj_ref != "" ?
 			mobjtypes.Lookup(l->t.inspawnobj_ref.c_str()) : NULL;
 
-		l->t.outspawnobj = l->t.outspawnobj_ref.size() > 0 ?
+		l->t.outspawnobj = l->t.outspawnobj_ref != "" ?
 			mobjtypes.Lookup(l->t.outspawnobj_ref.c_str()) : NULL;
 		
 		//Lobo: 2021
-		l->effectobject = l->effectobject_ref.size() > 0 ?
+		l->effectobject = l->effectobject_ref != "" ?
 			mobjtypes.Lookup(l->effectobject_ref.c_str()) : NULL;
 
 		cur_ddf_entryname.clear();

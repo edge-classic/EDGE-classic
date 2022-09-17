@@ -110,7 +110,7 @@ static bool HasFinale(const map_finaledef_c *F, finalestage_e cur)
 	switch (cur)
 	{
 		case f_text:
-			return F->text.size() > 0;
+			return F->text != "";
 
 		case f_pic:
 			return (F->pics.GetSize() > 0);
@@ -211,9 +211,9 @@ static void LookupFinaleStuff(void)
 {
 	// here is where we lookup the required images
 
-	if (finale->text_flat[0])
+	if (finale->text_flat != "")
 		finale_textback = W_ImageLookup(finale->text_flat.c_str(), INS_Flat);
-	else if (finale->text_back[0])
+	else if (finale->text_back != "")
 		finale_textback = W_ImageLookup(finale->text_back.c_str(), INS_Graphic);
 	else
 		finale_textback = NULL;
@@ -581,7 +581,7 @@ static void CastInitNew(int num)
 	if (!castorder)
 		castorder = mobjtypes.Lookup(0);
 
-	casttitle = castorder->cast_title.size() > 0 ?
+	casttitle = castorder->cast_title != "" ?
 		language[castorder->cast_title] : castorder->name.c_str();
 
 	castdeath = false;

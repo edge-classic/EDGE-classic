@@ -141,7 +141,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	// open the file or lump, and read it into memory
 	epi::file_c *F;
 
-	if (def->file_name.size() > 0)
+	if (def->file_name != "")
 	{
 		std::string fn = M_ComposeFileName(game_dir.c_str(), def->file_name.c_str());
 

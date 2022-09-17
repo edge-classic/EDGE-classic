@@ -693,7 +693,7 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
     }
 
     // change to surrounding
-    if (def->tex[0] == '-')
+    if (def->tex != "" && def->tex[0] == '-')
     {
         model = P_GetSectorSurrounding(sector, 
                                        plane->destheight, 
@@ -715,7 +715,7 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
             }
         }
     }
-    else if (def->tex[0] == '+')
+    else if (def->tex != "" && def->tex[0] == '+')
     {
         if (model)
         {
@@ -744,7 +744,7 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
             }
         }
     }
-    else if (def->tex[0])
+    else if (def->tex != "")
     {
         plane->new_image = W_ImageLookup(def->tex.c_str(), INS_Flat);
     }

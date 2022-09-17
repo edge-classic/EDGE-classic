@@ -45,10 +45,6 @@ void N_QuitNetGame(void);
 // is_fresh means that game ticks can be run.
 int N_TryRunTics(bool *is_fresh);
 
-// process input and create player (and robot) ticcmds.
-// returns false if couldn't hold any more.
-bool N_BuildTiccmds(void);
-
 // restart tic counters (maketic, gametic) at zero.
 void N_ResetTics(void);
 

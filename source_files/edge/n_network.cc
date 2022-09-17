@@ -224,7 +224,9 @@ static void DoSendTiccmds(int tic)
 #endif  // USE_HAWKNL_XX
 }
 
-bool N_BuildTiccmds(void)
+// process input and create player (and robot) ticcmds.
+// returns false if couldn't hold any more.
+static bool N_BuildTiccmds(void)
 {
 	I_ControlGetEvents();
 	E_ProcessEvents();
@@ -259,8 +261,6 @@ bool N_BuildTiccmds(void)
 				cmd = &p->in_cmds[maketic % (MP_SAVETICS*2)];
 
 			p->builder(p, p->build_data, cmd);
-			
-			cmd->consistency = p->consistency[maketic % (MP_SAVETICS*2)];
 		}
 	}
 
@@ -418,27 +418,6 @@ void N_TiccmdTicker(void)
 		if (! p) continue;
 
 		memcpy(&p->cmd, p->in_cmds + buf, sizeof(ticcmd_t));
-
-		// check for turbo cheats
-		if (p->cmd.forwardmove > TURBOTHRESHOLD
-			&& !(gametic & 31) && (((gametic >> 5) + p->pnum) & 0x1f) == 0)
-		{
-			// FIXME: something better for turbo cheat
-			I_Printf(language["IsTurbo"], p->playername);
-		}
-
-		if (netgame)
-		{
-			if (gametic > BACKUPTICS && p->consistency[buf] != p->cmd.consistency)
-			{
-// !!!! DEBUG //	I_Warning("Consistency failure on player %d (%i should be %i)",
-//					p->pnum + 1, p->cmd.consistency, p->consistency[buf]);
-			}
-			if (p->mo)
-				p->consistency[buf] = (int)p->mo->x;
-			else
-				p->consistency[buf] = P_ReadRandomState() & 0xff;
-		}
 	}
 
 	VM_SetFloat(ui_vm, "sys", "gametic", gametic);

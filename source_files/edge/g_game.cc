@@ -482,8 +482,7 @@ void G_Ticker(void)
 			break;
 
 		case GS_LEVEL:
-			// get commands, check consistency,
-			// and build new consistency check.
+			// get commands
 			N_TiccmdTicker();
 
 			P_Ticker();

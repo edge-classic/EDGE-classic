@@ -30,7 +30,6 @@
 // The data sampled per tick (single player)
 // and transmitted to other peers (multiplayer).
 // Mainly movements/button commands per game tick,
-// plus a checksum for internal state consistency.
 
 typedef struct
 {
@@ -40,8 +39,7 @@ typedef struct
 	// vertical angle for mlook, *65536 for angle delta
 	s16_t mlookturn;
 
-	// checks for net game
-	u16_t consistency;
+	u16_t __unused;
 
 	// active player number, -1 for "dropped out" player
 	s16_t player_idx;

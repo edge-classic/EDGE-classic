@@ -565,14 +565,36 @@ static void P_LineEffect(line_t *target, line_t *source,
 		//       suggests that the horizontal speed is proportional to the
 		//       tagging line's length.
 
-		float xspeed = source->dx / 32.0f;
-		float yspeed = source->dy / 32.0f;
+		// Dasho - Adjust them to match boomref.txt to be able to work on
+		// different scroll handling if the target is parallel/perpendiciular/neither
+		// to the source
 
-		AdjustScrollParts(target->side[0], 0, special->line_parts,
-				xspeed, yspeed);
+		float xspeed = source->length / 32.0f;
+		float yspeed = source->length / 32.0f;
 
-		AdjustScrollParts(target->side[1], 1, special->line_parts,
-				xspeed, yspeed);
+
+		float sdx = fabs(source->dx / source->length);
+		float sdy = fabs(source->dy / source->length);
+		float tdx = fabs(target->dx / target->length);
+		float tdy = fabs(target->dy / target->length);
+
+		if ((sdx == tdy) && (sdy == tdx))
+		{
+			AdjustScrollParts(target->side[0], 0, special->line_parts, 0, yspeed);
+			AdjustScrollParts(target->side[1], 1, special->line_parts, 0, yspeed);
+		}
+		else if ((sdx == tdx) && (sdy == tdy))
+		{
+			AdjustScrollParts(target->side[0], 0, special->line_parts, xspeed, 0);
+			AdjustScrollParts(target->side[1], 1, special->line_parts, xspeed, 0);
+		}
+		else
+		{
+			AdjustScrollParts(target->side[0], 0, special->line_parts,
+					xspeed, yspeed);
+			AdjustScrollParts(target->side[1], 1, special->line_parts,
+					xspeed, yspeed);
+		}
 
 		P_AddSpecialLine(target);
 	}

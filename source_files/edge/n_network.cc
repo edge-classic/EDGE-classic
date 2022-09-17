@@ -302,31 +302,6 @@ int N_NetUpdate(bool do_delay)
 	return nowtime;
 }
 
-int DetermineLowTic(void)
-{
-	if (! netgame)
-		return maketic;
-
-	int lowtic = INT_MAX;
-
-	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-	{
-		player_t *p = players[pnum];
-		if (! p) continue;
-
-		// ignore bots
-		if (p->playerflags & PFL_Bot)
-			continue;
-
-		if (p->playerflags & PFL_Console)
-			lowtic = MIN(lowtic, maketic); // correct?????
-		else
-			lowtic = MIN(lowtic, p->in_tic);
-	}
-
-	return lowtic;
-}
-
 int N_TryRunTics(bool *is_fresh)
 {
 	*is_fresh = true;
@@ -363,7 +338,7 @@ nowtime, nowtime - realtics, realtics);
 		return realtics;
 	}
 
-	int lowtic = DetermineLowTic();
+	int lowtic = maketic;
 	int availabletics = lowtic - gametic;
 
 	// this shouldn't happen, since we can only run a gametic when
@@ -391,7 +366,7 @@ nowtime, nowtime - realtics, realtics);
 	{
 		int wait_tics = N_NetUpdate(true) - last_tryrun_tic;
 
-		lowtic = DetermineLowTic();
+		lowtic = maketic;
 
 		SYS_ASSERT(lowtic >= gametic);
 

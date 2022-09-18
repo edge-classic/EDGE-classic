@@ -840,29 +840,27 @@ static void PL_map_items(coal::vm_c *vm, int argc)
 // Lobo: November 2021
 static void PL_floor_flat(coal::vm_c *vm, int argc)
 {
-    // If no 3D floors, just return the flat
-    if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
-    {
-        vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
-    }
-    // Start from the lowest exfloor and check if the player is standing on it, then return the control sector's flat
-    else
-    {
-        float player_floor_height = ui_player_who->mo->floorz;
+	// If no 3D floors, just return the flat
+	if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
+	{
+		vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
+	}
+	else
+	{
+		// Start from the lowest exfloor and check if the player is standing on it, then return the control sector's flat
+		float player_floor_height = ui_player_who->mo->floorz;
 		extrafloor_t *floor_checker = ui_player_who->mo->subsector->sector->bottom_ef;
-		extrafloor_t *liquid_checker = ui_player_who->mo->subsector->sector->bottom_liq;
 		for (extrafloor_t *ef = floor_checker; ef; ef=ef->higher)
 		{
-			if (player_floor_height == ef->top_h)
-				vm->ReturnString(ef->ef_line->frontsector->floor.image->name);
+			if (player_floor_height + 1 > ef->top_h)
+			{
+				vm->ReturnString(ef->top->image->name);
+				return;
+			}
 		}
-		for (extrafloor_t *ef = liquid_checker; ef; ef=ef->higher)
-		{
-			if (player_floor_height == ef->top_h)
-				vm->ReturnString(ef->ef_line->frontsector->floor.image->name);
-		}
-		vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name); // Fallback if nothing else satisfies these conditions
-    }
+		// Fallback if nothing else satisfies these conditions
+		vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
+	}
 }
 
 // player.sector_tag()

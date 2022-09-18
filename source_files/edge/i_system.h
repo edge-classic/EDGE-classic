@@ -26,6 +26,12 @@
 #ifndef __I_SYSTEM_H__
 #define __I_SYSTEM_H__
 
+// Allow use of std::min and std::max across the board
+#ifdef _WIN32
+#undef min
+#undef max
+#endif
+
 //--------------------------------------------------------
 //  SYSTEM functions.
 //--------------------------------------------------------

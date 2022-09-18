@@ -56,15 +56,13 @@ DEF_CVAR(m_busywait, "1", CVAR_ARCHIVE)
 // gametic is the tic about to (or currently being) run.
 // maketic is the tic that hasn't had control made for it yet.
 // it is an invariant that gametic <= maketic (since we cannot run
-// a step of the physics without a ticcmd for all player).
+// a step of the physics without a ticcmd for all local players).
 
 int gametic;
 int maketic;
 
-static int last_update_tic;
-static int last_tryrun_tic;
-
-extern gameflags_t default_gameflags;
+static int last_update_tic;  // last time N_NetUpdate  was called
+static int last_tryrun_tic;  // last time N_TryRunTics was called
 
 
 //----------------------------------------------------------------------------
@@ -88,18 +86,9 @@ void N_InitNetwork(void)
 
 	I_Printf("Network: base port is %d\n", base_port);
 
-///!!!	N_StartupReliableLink (base_port+0);
-///!!!	N_StartupBroadcastLink(base_port+1);
+//??	N_StartupReliableLink (base_port+0);
+//??	N_StartupBroadcastLink(base_port+1);
 }
-
-
-// TEMP CRAP
-bool N_OpenBroadcastSocket(bool is_host)
-{ return true; }
-void N_CloseBroadcastSocket(void)
-{ }
-void N_SendBroadcastDiscovery(void)
-{ }
 
 
 static void DoDelay()
@@ -124,10 +113,12 @@ static void TransmitStuff(int tic)
 }
 
 
-// process input and create player (and robot) ticcmds.
-// returns false if couldn't hold any more.
 static bool N_BuildTiccmds(void)
 {
+	// process input and create player (and robot) ticcmds.
+	// returns false if couldn't hold any more.
+	// this is the only allowed to increase `maketics`.
+
 	I_ControlGetEvents();
 	E_ProcessEvents();
 
@@ -139,7 +130,7 @@ static bool N_BuildTiccmds(void)
 
 	if (maketic >= gametic + BACKUPTICS)
 	{
-		// players cannot hold any more ticcmds
+		// players cannot hold any more ticcmds!
 
 		E_UpdateKeyState();
 		return false;
@@ -152,7 +143,7 @@ static bool N_BuildTiccmds(void)
 		if (! p) continue;
 		if (! p->builder) continue;
 
-///     L_WriteDebug("N_BuildTiccmds: pnum %d netgame %c\n", pnum, netgame ? 'Y' : 'n');
+///     I_Debugf("N_BuildTiccmds: pnum %d netgame %c\n", pnum, netgame ? 'Y' : 'n');
 
 		ticcmd_t *cmd = &p->in_cmds[maketic % BACKUPTICS];
 
@@ -167,11 +158,16 @@ static bool N_BuildTiccmds(void)
 	return true;
 }
 
+
 int N_NetUpdate()
 {
+	// if enough time has elapsed, process input events and build one
+	// or more ticcmds for the local players.
+
 	int nowtime = I_GetTime();
 
-	if (singletics)  // singletic update is syncronous
+	// singletic update is syncronous
+	if (singletics)
 		return nowtime;
 
 	int newtics = nowtime - last_update_tic;
@@ -188,13 +184,14 @@ int N_NetUpdate()
 		}
 
 		if (t != newtics && numplayers > 0)
-			L_WriteDebug("N_NetUpdate: lost tics: %d\n", newtics - t);
+			I_Debugf("N_NetUpdate: lost tics: %d\n", newtics - t);
 	}
 
 	ReceivePackets();
 
 	return nowtime;
 }
+
 
 int N_TryRunTics()
 {
@@ -209,8 +206,8 @@ int N_TryRunTics()
 	last_tryrun_tic = nowtime;
 
 #ifdef DEBUG_TICS
-L_WriteDebug("N_TryRunTics: now %d last_tryrun %d --> real %d\n",
-nowtime, nowtime - realtics, realtics);
+	I_Debugf("N_TryRunTics: now %d last_tryrun %d --> real %d\n",
+		nowtime, nowtime - realtics, realtics);
 #endif
 
 	// simpler handling when no game in progress
@@ -231,11 +228,10 @@ nowtime, nowtime - realtics, realtics);
 		return realtics;
 	}
 
-	int lowtic = maketic;
-	int availabletics = lowtic - gametic;
+	int availabletics = maketic - gametic;
 
 	// this shouldn't happen, since we can only run a gametic when
-	// the ticcmds for _all_ players have arrived (hence lowtic >= gametic);
+	// the ticcmds for _all_ players have arrived (hence maketic >= gametic);
 	SYS_ASSERT(availabletics >= 0);
 
 	// decide how many tics to run
@@ -247,22 +243,20 @@ nowtime, nowtime - realtics, realtics);
 		counts = MIN(realtics, availabletics);
 
 #ifdef DEBUG_TICS
-	L_WriteDebug("=== lowtic %d gametic %d | real %d avail %d raw-counts %d\n",
-		lowtic, gametic, realtics, availabletics, counts);
+	I_Debugf("=== maketic %d gametic %d | real %d avail %d raw-counts %d\n",
+		maketic, gametic, realtics, availabletics, counts);
 #endif
 
 	if (counts < 1)
 		counts = 1;
 
 	// wait for new tics if needed
-	while (lowtic < gametic + counts)
+	while (maketic < gametic + counts)
 	{
 		DoDelay();
 		N_NetUpdate();
 
-		lowtic = maketic;
-
-		SYS_ASSERT(lowtic >= gametic);
+		SYS_ASSERT(maketic >= gametic);
 	}
 
 	return counts;

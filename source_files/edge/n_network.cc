@@ -55,8 +55,9 @@ DEF_CVAR(m_busywait, "1", CVAR_ARCHIVE)
 
 // gametic is the tic about to (or currently being) run.
 // maketic is the tic that hasn't had control made for it yet.
-// it is an invariant that gametic <= maketic (since we cannot run
-// a step of the physics without a ticcmd for all local players).
+//
+// NOTE: it is a system-wide INVARIANT that gametic <= maketic, since we
+// cannot run a step of the physics without a ticcmd for all players).
 
 int gametic;
 int maketic;
@@ -228,11 +229,9 @@ int N_TryRunTics()
 		return realtics;
 	}
 
-	int availabletics = maketic - gametic;
+	SYS_ASSERT(gametic <= maketic);
 
-	// this shouldn't happen, since we can only run a gametic when
-	// the ticcmds for _all_ players have arrived (hence maketic >= gametic);
-	SYS_ASSERT(availabletics >= 0);
+	int availabletics = maketic - gametic;
 
 	// decide how many tics to run
 	int counts;
@@ -256,7 +255,7 @@ int N_TryRunTics()
 		DoDelay();
 		N_NetUpdate();
 
-		SYS_ASSERT(maketic >= gametic);
+		SYS_ASSERT(gametic <= maketic);
 	}
 
 	return counts;
@@ -289,17 +288,13 @@ void N_TiccmdTicker(void)
 	// all we do here is grab the ticcmd for the active players
 	// (from ones built earler in N_BuildTiccmds).
 
-	// gametic <= maketic is a system-wide invariant.  However,
-	// new levels are loaded during G_Ticker(), resetting them
-	// both to zero, hence if we increment gametic here, we
-	// break the invariant.  The following is a workaround.
-	// TODO: this smells like a hack -- fix it properly!
-	if (gametic >= maketic)
-	{ 
-		if (! (gametic == 0 && maketic == 0) && !netgame)
-			I_Printf("WARNING: G_TiccmdTicker: gametic >= maketic (%d >= %d)\n", gametic, maketic);
+	// gametic <= maketic is a system-wide invariant.  However, new levels
+	// levels are loaded during G_Ticker(), which resets them both to zero,
+	// hence we need to handle that particular case here.
+	SYS_ASSERT(gametic <= maketic);
+
+	if (gametic == maketic)
 		return;
-	}
 
 	int buf = gametic % BACKUPTICS;
 

@@ -1927,6 +1927,44 @@ void P_UpdateSpecials(void)
 					}
 				}
 			}
+			if (sec->scroll_special_ref->scroll_type & ScrollType_Accel)
+			{
+				float ratio = sec->scroll_line_ref->length / 32.0f;
+				if (sec->scroll_sec_ref->floor_move)
+				{
+					if (sec->scroll_sec_ref->floor_move->direction == 1)
+					{
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
+							sec->floor.scroll.y += ratio;
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
+							sec->ceil.scroll.y += ratio;
+					}
+					else if (sec->scroll_sec_ref->floor_move->direction == -1)
+					{
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
+							sec->floor.scroll.y -= ratio;
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
+							sec->ceil.scroll.y -= ratio;
+					}
+				}
+				if (sec->scroll_sec_ref->ceil_move)
+				{
+					if (sec->scroll_sec_ref->ceil_move->direction == 1)
+					{
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
+							sec->floor.scroll.y += ratio;
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
+							sec->ceil.scroll.y += ratio;
+					}
+					else if (sec->scroll_sec_ref->ceil_move->direction == -1)
+					{
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
+							sec->floor.scroll.y -= ratio;
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
+							sec->ceil.scroll.y -= ratio;
+					}
+				}
+			}
 		}
 
 		ApplyScroll(sec->floor.offset, sec->floor.scroll, sec->floor.image->actual_w, sec->floor.image->actual_h);

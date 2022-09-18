@@ -295,13 +295,9 @@ static void W_ReadExternalDDF(int d, epi::file_c * F, const std::string& filenam
 }
 
 
-static void W_ReadDDF_FromDir(int d)
+static void W_ReadDDF_FromDir(data_file_c *df, int d)
 {
-	// no directory specified?
-	if (ddf_dir.empty())
-		return;
-
-	std::string filename = epi::PATH_Join(ddf_dir.c_str(), DDF_Readers[d].pack_name);
+	std::string filename = epi::PATH_Join(df->name.c_str(), DDF_Readers[d].pack_name);
 
 	epi::file_c *F = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ);
 	if (F == NULL)
@@ -318,6 +314,12 @@ static void W_ReadDDF_FromDir(int d)
 
 static void W_ReadDDF_DataFile(data_file_c *df, int d)
 {
+	if (df->kind == FLKIND_Folder)
+	{
+		W_ReadDDF_FromDir(df, d);
+		return;
+	}
+
 	wad_file_c  *wad  = df->wad;
 	pack_file_c *pack = df->pack;
 
@@ -497,13 +499,8 @@ void W_ReadDDF(void)
 			data_file_c *df = data_files[i];
 
 			W_ReadDDF_DataFile(df, d);
-
 			W_ReadDehacked(df, d);
 		}
-
-		// handle the `-ddf` option.
-		// files from its directory are done AFTER any wads/packs.
-		W_ReadDDF_FromDir(d);
 	}
 }
 

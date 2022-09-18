@@ -163,6 +163,40 @@ static bool N_BuildTiccmds(void)
 }
 
 
+void N_GrabTiccmds(void)
+{
+	// this is called from G_Ticker, and is the only place allowed to
+	// bump `gametic` (allowing the game simulation to advance).
+	//
+	// all we actually do here is grab the ticcmd for each local player
+	// (i.e. ones created earler in N_BuildTiccmds).
+
+	// gametic <= maketic is a system-wide invariant.  However, new levels
+	// levels are loaded during G_Ticker(), which resets them both to zero,
+	// hence we need to handle that particular case here.
+	SYS_ASSERT(gametic <= maketic);
+
+	if (gametic == maketic)
+		return;
+
+	int buf = gametic % BACKUPTICS;
+
+	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+	{
+		player_t *p = players[pnum];
+		if (! p) continue;
+
+		memcpy(&p->cmd, p->in_cmds + buf, sizeof(ticcmd_t));
+	}
+
+	VM_SetFloat(ui_vm, "sys", "gametic", gametic);
+
+	gametic++;
+}
+
+
+//----------------------------------------------------------------------------
+
 int N_NetUpdate()
 {
 	// if enough time has elapsed, process input events and build one
@@ -271,12 +305,14 @@ int N_TryRunTics()
 	return counts;
 }
 
+
 void N_ResetTics(void)
 {
 	maketic = gametic = 0;
 
 	last_update_tic = last_tryrun_tic = I_GetTime();
 }
+
 
 void N_QuitNetGame(void)
 {
@@ -287,38 +323,6 @@ void N_QuitNetGame(void)
 		I_Sleep(250);
 
 	// TODO close open sockets
-}
-
-
-void N_TiccmdTicker(void)
-{
-	// this is called from G_Ticker, and is the only place allowed to
-	// advance `gametic` (allowing the game simulation to advance).
-
-	// all we do here is grab the ticcmd for the active players
-	// (from ones built earler in N_BuildTiccmds).
-
-	// gametic <= maketic is a system-wide invariant.  However, new levels
-	// levels are loaded during G_Ticker(), which resets them both to zero,
-	// hence we need to handle that particular case here.
-	SYS_ASSERT(gametic <= maketic);
-
-	if (gametic == maketic)
-		return;
-
-	int buf = gametic % BACKUPTICS;
-
-	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-	{
-		player_t *p = players[pnum];
-		if (! p) continue;
-
-		memcpy(&p->cmd, p->in_cmds + buf, sizeof(ticcmd_t));
-	}
-
-	VM_SetFloat(ui_vm, "sys", "gametic", gametic);
-
-	gametic++;
 }
 
 

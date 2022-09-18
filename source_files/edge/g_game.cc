@@ -483,7 +483,7 @@ void G_Ticker(void)
 
 		case GS_LEVEL:
 			// get commands
-			N_TiccmdTicker();
+			N_GrabTiccmds();
 
 			P_Ticker();
 			AM_Ticker();
@@ -495,12 +495,12 @@ void G_Ticker(void)
 			break;
 
 		case GS_INTERMISSION:
-			N_TiccmdTicker();
+			N_GrabTiccmds();
 			WI_Ticker();
 			break;
 
 		case GS_FINALE:
-			N_TiccmdTicker();
+			N_GrabTiccmds();
 			F_Ticker();
 			break;
 

@@ -45,11 +45,7 @@ int N_TryRunTics();
 // restart tic counters (maketic, gametic) at zero.
 void N_ResetTics(void);
 
-void N_TiccmdTicker(void);
-
-bool N_OpenBroadcastSocket(bool is_host);
-void N_CloseBroadcastSocket(void);
-void N_SendBroadcastDiscovery(void);
+void N_GrabTiccmds(void);
 
 #endif /* __N_NETWORK_H__ */
 

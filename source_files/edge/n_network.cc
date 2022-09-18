@@ -53,6 +53,11 @@ int base_port;
 DEF_CVAR(m_busywait, "1", CVAR_ARCHIVE)
 
 
+// gametic is the tic about to (or currently being) run.
+// maketic is the tic that hasn't had control made for it yet.
+// it is an invariant that gametic <= maketic (since we cannot run
+// a step of the physics without a ticcmd for all player).
+
 int gametic;
 int maketic;
 

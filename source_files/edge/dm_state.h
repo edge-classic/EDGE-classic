@@ -87,12 +87,8 @@ extern bool autoquickload;
 //?
 extern gamestate_e gamestate;
 
-//-----------------------------
-// Internal parameters, fixed.
-// These are set by the engine, and not changed
-//  according to user inputs. Partly load from
-//  WAD, partly set at startup time.
 
+extern int maketic;
 extern int gametic;
 
 #define DEATHMATCH()  (deathmatch > 0)
@@ -144,11 +140,6 @@ extern const image_c *skyflatimage;
 
 #define IS_SKY(plane)  ((plane).image == skyflatimage)
 
-
-//---------------------------------------------------
-// Netgame stuff (buffers and pointers, i.e. indices).
-
-extern int maketic;
 
 //misc stuff
 extern bool swapstereo;

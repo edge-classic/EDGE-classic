@@ -39,6 +39,7 @@ typedef enum
 	FLKIND_GWad,      // ajbsp node wad
 	FLKIND_HWad,      // deHacked wad
 
+	FLKIND_Folder,    // a folder somewhere
 	FLKIND_PK3,       // pk3 (zip) package
 
 	FLKIND_DDF,       // .ddf or .ldf file

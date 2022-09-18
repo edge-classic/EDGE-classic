@@ -193,7 +193,6 @@ std::string ewadfile;
 std::string iwad_base;
 
 std::string cache_dir;
-std::string ddf_dir;
 std::string game_dir;
 std::string home_dir;
 std::string save_dir;
@@ -824,12 +823,6 @@ void InitDirectories(void)
 		M_ApplyResponseFile(parms.c_str(), M_CheckParm("-game") + 2);
 	}
 
-	s = M_GetParm("-ddf");
-	if (s)
-	{
-		ddf_dir = std::string(s);
-	} 
-
 	// config file
 	s = M_GetParm("-config");
 	if (s)
@@ -1260,7 +1253,7 @@ static void AddCommandLineFiles(void)
 	// next handle the -file option (we allow multiple uses)
 
 	p = M_CheckNextParm("-file", 0);
-	
+
 	while (p)
 	{
 		// the parms after p are wadfile/lump names,
@@ -1277,7 +1270,7 @@ static void AddCommandLineFiles(void)
 	// scripts....
 
 	p = M_CheckNextParm("-script", 0);
-	
+
 	while (p)
 	{
 		// the parms after p are script filenames,
@@ -1297,19 +1290,17 @@ static void AddCommandLineFiles(void)
 				I_Error("Illegal filename for -script: %s\n", ps);
 			}
 
-			std::string fn = M_ComposeFileName(game_dir.c_str(), ps);
-
-			W_AddFilename(fn.c_str(), FLKIND_RTS);
+			std::string filename = M_ComposeFileName(game_dir.c_str(), ps);
+			W_AddFilename(filename.c_str(), FLKIND_RTS);
 		}
 
 		p = M_CheckNextParm("-script", p-1);
 	}
 
-
-	// finally handle the -deh option(s)
+	// dehacked/bex....
 
 	p = M_CheckNextParm("-deh", 0);
-	
+
 	while (p)
 	{
 		// the parms after p are Dehacked/BEX filenames,
@@ -1328,18 +1319,39 @@ static void AddCommandLineFiles(void)
 				I_Error("Illegal filename for -deh: %s\n", ps);
 			}
 
-			std::string fn = M_ComposeFileName(game_dir.c_str(), ps);
-
-			epi::file_c *fn_file = epi::FS_Open(fn.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-
-			if (fn_file)
-			{
-				W_AddFilename(fn.c_str(), FLKIND_Deh);
-				delete fn_file;
-			}
+			std::string filename = M_ComposeFileName(game_dir.c_str(), ps);
+			W_AddFilename(filename.c_str(), FLKIND_Deh);
 		}
 
 		p = M_CheckNextParm("-deh", p-1);
+	}
+
+	// directories....
+
+	p = M_CheckNextParm("-dir", 0);
+
+	while (p)
+	{
+		// the parms after p are directory names,
+		// go until end of parms or another '-' preceded parm
+
+		for (p++; p < M_GetArgCount() && '-' != (ps = M_GetArgument(p))[0]; p++)
+		{
+			std::string dirname = M_ComposeFileName(game_dir.c_str(), ps);
+			W_AddFilename(dirname.c_str(), FLKIND_Folder);
+		}
+
+		p = M_CheckNextParm("-dir", p-1);
+	}
+
+	// handle -ddf option (backwards compatibility)
+
+	ps = M_GetParm("-ddf");
+
+	if (ps != NULL)
+	{
+		std::string filename = M_ComposeFileName(game_dir.c_str(), ps);
+		W_AddFilename(filename.c_str(), FLKIND_Folder);
 	}
 }
 

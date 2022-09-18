@@ -246,7 +246,7 @@ int N_TryRunTics()
 		return 1;
 	}
 
-	int nowtime = N_NetUpdate();
+	int nowtime  = N_NetUpdate();
 	int realtics = nowtime - last_tryrun_tic;
 	last_tryrun_tic = nowtime;
 
@@ -261,14 +261,14 @@ int N_TryRunTics()
 		while (realtics <= 0)
 		{
 			DoDelay();
-			nowtime = N_NetUpdate();
+			nowtime  = N_NetUpdate();
 			realtics = nowtime - last_tryrun_tic;
 			last_tryrun_tic = nowtime;
 		}
 
 		// this limit is rather arbitrary
-		if (realtics > TICRATE/3)
-			realtics = TICRATE/3;
+		if (realtics > BACKUPTICS)
+			realtics = BACKUPTICS;
 
 		return realtics;
 	}
@@ -278,28 +278,13 @@ int N_TryRunTics()
 	int availabletics = maketic - gametic;
 
 	// decide how many tics to run
-	int counts;
-
-	if (realtics + 1 < availabletics)
-		counts = realtics + 1;
-	else
-		counts = MIN(realtics, availabletics);
-
-#ifdef DEBUG_TICS
-	I_Debugf("=== maketic %d gametic %d | real %d avail %d raw-counts %d\n",
-		maketic, gametic, realtics, availabletics, counts);
-#endif
-
-	if (counts < 1)
-		counts = 1;
+	int counts = std::min(availabletics, 1);
 
 	// wait for new tics if needed
 	while (maketic < gametic + counts)
 	{
 		DoDelay();
 		N_NetUpdate();
-
-		SYS_ASSERT(gametic <= maketic);
 	}
 
 	return counts;

@@ -319,6 +319,11 @@ typedef struct sector_s
 
 	// -AJA- 2000/03/30: Keep a list of child subsectors.
 	struct subsector_s *subsectors;
+
+	// Dasho - For Displace/Accel scrollers
+	struct sector_s *scroll_sec_ref;
+	const linetype_c *scroll_special_ref;
+	line_s *scroll_line_ref;
 }
 sector_t;
 

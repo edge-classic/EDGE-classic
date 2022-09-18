@@ -67,6 +67,7 @@ static void DDF_LineGetRadTrig(const char *info, void *storage);
 static void DDF_LineGetSpecialFlags(const char *info, void *storage);
 static void DDF_LineGetSlideType(const char *info, void *storage);
 static void DDF_LineGetLineEffect(const char *info, void *storage);
+static void DDF_LineGetScrollType(const char *info, void *storage);
 static void DDF_LineGetSectorEffect(const char *info, void *storage);
 static void DDF_LineGetPortalEffect(const char *info, void *storage);
 static void DDF_LineGetSlopeType(const char *info, void *storage);
@@ -200,6 +201,7 @@ static const commandlist_t linedef_commands[] =
 	DF("SPECIAL", special_flags, DDF_LineGetSpecialFlags),
 	DF("RADIUS_TRIGGER", trigger_effect, DDF_LineGetRadTrig),
 	DF("LINE_EFFECT", line_effect, DDF_LineGetLineEffect),
+	DF("SCROLL_TYPE", scroll_type, DDF_LineGetScrollType),
 	DF("LINE_PARTS",  line_parts,  DDF_LineGetScrollPart),
 	DF("SECTOR_EFFECT", sector_effect, DDF_LineGetSectorEffect),
 	DF("PORTAL_TYPE",   portal_effect, DDF_LineGetPortalEffect),
@@ -955,6 +957,46 @@ static void DDF_LineGetLineEffect(const char *info, void *storage)
 	}
 }
 
+static specflags_t scroll_type_names[] =
+{
+	{"DISPLACE",    ScrollType_Displace, 0},
+	{"ACCEL",  		ScrollType_Accel, 0},
+	{NULL, 0, 0}
+};
+
+//
+// Gets the scroll type flags.
+//
+static void DDF_LineGetScrollType(const char *info, void *storage)
+{
+	scroll_type_e *var = (scroll_type_e *)storage;
+
+	int flag_value;
+
+	if (DDF_CompareName(info, "NONE") == 0)
+	{
+		*var = ScrollType_None;
+		return;
+	}
+
+	switch (DDF_MainCheckSpecialFlag(info, scroll_type_names,
+	                                 &flag_value, true, false))
+	{
+		case CHKF_Positive:
+			*var = (scroll_type_e)(*var | flag_value);
+			break;
+
+		case CHKF_Negative:
+			*var = (scroll_type_e)(*var & ~flag_value);
+			break;
+
+		case CHKF_User:
+		case CHKF_Unknown:
+			DDF_WarnError("Unknown scroll type: %s", info);
+			break;
+	}
+}
+
 static specflags_t sector_effect_names[] =
 {
 	{"LIGHT_FLOOR",     SECTFX_LightFloor,     0},
@@ -1673,6 +1715,7 @@ void linetype_c::CopyDetail(linetype_c &src)
 	trigger_effect = src.trigger_effect;
 	line_effect = src.line_effect;
 	line_parts = src.line_parts;
+	scroll_type = src.scroll_type;
 	sector_effect = src.sector_effect;
 	portal_effect = src.portal_effect;
 	slope_type = src.slope_type;
@@ -1733,6 +1776,7 @@ void linetype_c::Default(void)
 	trigger_effect = 0;
 	line_effect = LINEFX_NONE;
 	line_parts = SCPT_None;
+	scroll_type = ScrollType_None;
 	sector_effect = SECTFX_None;
 	portal_effect = PORTFX_None;
 	slope_type = SLP_NONE;

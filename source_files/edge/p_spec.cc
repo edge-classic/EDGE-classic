@@ -569,49 +569,52 @@ static void P_LineEffect(line_t *target, line_t *source,
 		// different scroll handling if the target is parallel/perpendiciular/neither
 		// to the source
 
-		float xspeed = source->length / 32.0f;
-		float yspeed = source->length / 32.0f;
-
-
-		float sdx = fabs(source->dx / source->length);
-		float sdy = fabs(source->dy / source->length);
-		float tdx = fabs(target->dx / target->length);
-		float tdy = fabs(target->dy / target->length);
-
-		if ((sdx == tdy) && (sdy == tdx))
+		if (special->scroll_type == ScrollType_None)
 		{
-			if (((source->dy / source->length)+(source->dx / source->length)) == ((target->dx/target->length)+(target->dy/target->length)))
+			float xspeed = source->length / 32.0f;
+			float yspeed = source->length / 32.0f;
+
+
+			float sdx = fabs(source->dx / source->length);
+			float sdy = fabs(source->dy / source->length);
+			float tdx = fabs(target->dx / target->length);
+			float tdy = fabs(target->dy / target->length);
+
+			if ((sdx == tdy) && (sdy == tdx))
 			{
-				AdjustScrollParts(target->side[0], 0, special->line_parts, 0, yspeed);
-				AdjustScrollParts(target->side[1], 1, special->line_parts, 0, -yspeed);
+				if (((source->dy / source->length)+(source->dx / source->length)) == ((target->dx/target->length)+(target->dy/target->length)))
+				{
+					AdjustScrollParts(target->side[0], 0, special->line_parts, 0, yspeed);
+					AdjustScrollParts(target->side[1], 1, special->line_parts, 0, -yspeed);
+				}
+				else
+				{
+					AdjustScrollParts(target->side[0], 0, special->line_parts, 0, -yspeed);
+					AdjustScrollParts(target->side[1], 1, special->line_parts, 0, yspeed);
+				}
+			}
+			else if ((sdx == tdx) && (sdy == tdy))
+			{
+				if (((source->dy / source->length)+(source->dx / source->length)) == ((target->dx/target->length)+(target->dy/target->length)))
+				{
+					AdjustScrollParts(target->side[0], 0, special->line_parts, -xspeed, 0);
+					AdjustScrollParts(target->side[1], 1, special->line_parts, xspeed, 0);
+				}
+				else
+				{
+					AdjustScrollParts(target->side[0], 0, special->line_parts, xspeed, 0);
+					AdjustScrollParts(target->side[1], 1, special->line_parts, -xspeed, 0);	
+				}
 			}
 			else
 			{
-				AdjustScrollParts(target->side[0], 0, special->line_parts, 0, -yspeed);
-				AdjustScrollParts(target->side[1], 1, special->line_parts, 0, yspeed);
+				bool samex = ((source->dx >= 0 && target->dx >= 0) || (source->dx < 0 && target->dx < 0));
+				bool samey = ((source->dy >= 0 && target->dy >= 0) || (source->dy < 0 && target->dy < 0));
+				AdjustScrollParts(target->side[0], 0, special->line_parts,
+						samex ? xspeed : -xspeed, samey ? -yspeed : yspeed);
+				AdjustScrollParts(target->side[1], 1, special->line_parts,
+						samex ? -xspeed : xspeed, samey ? yspeed : -yspeed);
 			}
-		}
-		else if ((sdx == tdx) && (sdy == tdy))
-		{
-			if (((source->dy / source->length)+(source->dx / source->length)) == ((target->dx/target->length)+(target->dy/target->length)))
-			{
-				AdjustScrollParts(target->side[0], 0, special->line_parts, -xspeed, 0);
-				AdjustScrollParts(target->side[1], 1, special->line_parts, xspeed, 0);
-			}
-			else
-			{
-				AdjustScrollParts(target->side[0], 0, special->line_parts, xspeed, 0);
-				AdjustScrollParts(target->side[1], 1, special->line_parts, -xspeed, 0);	
-			}
-		}
-		else
-		{
-			bool samex = ((source->dx >= 0 && target->dx >= 0) || (source->dx < 0 && target->dx < 0));
-			bool samey = ((source->dy >= 0 && target->dy >= 0) || (source->dy < 0 && target->dy < 0));
-			AdjustScrollParts(target->side[0], 0, special->line_parts,
-					samex ? xspeed : -xspeed, samey ? -yspeed : yspeed);
-			AdjustScrollParts(target->side[1], 1, special->line_parts,
-					samex ? -xspeed : xspeed, samey ? yspeed : -yspeed);
 		}
 
 		P_AddSpecialLine(target);
@@ -709,23 +712,54 @@ static void P_SectorEffect(sector_t *target, line_t *source,
 
 	if (special->sector_effect & SECTFX_ScrollFloor)
 	{
-		target->floor.scroll.x -= source->dx / 32.0f;
-		target->floor.scroll.y -= source->dy / 32.0f;
+		if (special->scroll_type == ScrollType_None)
+		{
+			target->floor.scroll.x -= source->dx / 32.0f;
+			target->floor.scroll.y -= source->dy / 32.0f;
+		}
+		else
+		{
+			// BOOM spec states that the front sector is the height reference
+			// for displace/accel scrollers
+			if (source->frontsector)
+			{
+				target->scroll_sec_ref = source->frontsector;
+				target->scroll_special_ref = special;
+				target->scroll_line_ref = source;
+			}
+		}
 
 		P_AddSpecialSector(target);
 	}
 	if (special->sector_effect & SECTFX_ScrollCeiling)
 	{
-		target->ceil.scroll.x -= source->dx / 32.0f;
-		target->ceil.scroll.y -= source->dy / 32.0f;
+		if (special->scroll_type == ScrollType_None)
+		{
+			target->ceil.scroll.x -= source->dx / 32.0f;
+			target->ceil.scroll.y -= source->dy / 32.0f;
+		}
+		else
+		{
+			// BOOM spec states that the front sector is the height reference
+			// for displace/accel scrollers
+			if (source->frontsector)
+			{
+				target->scroll_sec_ref = source->frontsector;
+				target->scroll_special_ref = special;
+				target->scroll_line_ref = source;
+			}
+		}
 
 		P_AddSpecialSector(target);
 	}
 
 	if (special->sector_effect & SECTFX_PushThings)
 	{
-		target->props.push.x += source->dx / 320.0f;
-		target->props.push.y += source->dy / 320.0f;
+		if (special->scroll_type == ScrollType_None)
+		{
+			target->props.push.x += source->dx / 320.0f;
+			target->props.push.y += source->dy / 320.0f;
+		}
 	}
 
 	if (special->sector_effect & SECTFX_SetFriction)
@@ -1851,6 +1885,49 @@ void P_UpdateSpecials(void)
 		 SI++)
 	{
 		sector_t *sec = *SI;
+
+		// Update Accel/Displace scrollers
+		if (sec->scroll_sec_ref && sec->scroll_line_ref && sec->scroll_special_ref)
+		{
+			if (sec->scroll_special_ref->scroll_type & ScrollType_Displace)
+			{
+				float ratio = sec->scroll_line_ref->length / 32.0f;
+				if (sec->scroll_sec_ref->floor_move)
+				{
+					if (sec->scroll_sec_ref->floor_move->direction == 1)
+					{
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
+							sec->floor.offset.y += ratio;
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
+							sec->ceil.offset.y += ratio;
+					}
+					else if (sec->scroll_sec_ref->floor_move->direction == -1)
+					{
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
+							sec->floor.offset.y -= ratio;
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
+							sec->ceil.offset.y -= ratio;
+					}
+				}
+				if (sec->scroll_sec_ref->ceil_move)
+				{
+					if (sec->scroll_sec_ref->ceil_move->direction == 1)
+					{
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
+							sec->floor.offset.y += ratio;
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
+							sec->ceil.offset.y += ratio;
+					}
+					else if (sec->scroll_sec_ref->ceil_move->direction == -1)
+					{
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
+							sec->floor.offset.y -= ratio;
+						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
+							sec->ceil.offset.y -= ratio;
+					}
+				}
+			}
+		}
 
 		ApplyScroll(sec->floor.offset, sec->floor.scroll, sec->floor.image->actual_w, sec->floor.image->actual_h);
 		ApplyScroll(sec->ceil.offset,  sec->ceil.scroll, sec->ceil.image->actual_w, sec->ceil.image->actual_h);

@@ -679,6 +679,15 @@ typedef enum
 }
 line_special_e;
 
+// BOOM scroll types (didn't want to eat up flags elsewhere)
+typedef enum
+{
+	ScrollType_None  = 0,
+	ScrollType_Displace = (1 << 0),
+	ScrollType_Accel = (1 << 1),
+}
+scroll_type_e;
+
 // --> Line definition type class
 
 class linetype_c
@@ -800,6 +809,7 @@ public:
     // -AJA- 2000/09/28: BOOM compatibility fields (and more !).
 	line_effect_type_e line_effect;
 	scroll_part_e line_parts;
+	scroll_type_e scroll_type;
 
 	sector_effect_type_e sector_effect;
 	portal_effect_type_e portal_effect;

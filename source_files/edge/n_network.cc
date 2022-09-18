@@ -102,17 +102,18 @@ void N_SendBroadcastDiscovery(void)
 { }
 
 
-static void GetPackets(bool do_delay)
+static void DoDelay()
 {
-	if (! netgame)
-	{
-		// -AJA- This can make everything a bit "jerky" :-(
-		if (do_delay && ! m_busywait.d)
-			I_Sleep(10 /* millis */);
-
+	if (m_busywait.d)
 		return;
-	}
 
+	// -AJA- This can make everything a bit "jerky" :-(
+	I_Sleep(5 /* millis */);
+}
+
+
+static void GetPackets()
+{
 #ifdef USE_HAWKNL
 
 	NLsocket socks[4];  // only one in the group
@@ -278,7 +279,7 @@ static bool N_BuildTiccmds(void)
 	return true;
 }
 
-int N_NetUpdate(bool do_delay)
+int N_NetUpdate()
 {
 	int nowtime = I_GetTime();
 
@@ -302,7 +303,7 @@ int N_NetUpdate(bool do_delay)
 			L_WriteDebug("N_NetUpdate: lost tics: %d\n", newtics - t);
 	}
 
-	GetPackets(do_delay);
+	GetPackets();
 
 	return nowtime;
 }
@@ -332,7 +333,8 @@ nowtime, nowtime - realtics, realtics);
 	{
 		while (realtics <= 0)
 		{
-			nowtime = N_NetUpdate(true);
+			DoDelay();
+			nowtime = N_NetUpdate();
 			realtics = nowtime - last_tryrun_tic;
 			last_tryrun_tic = nowtime;
 		}
@@ -369,7 +371,10 @@ nowtime, nowtime - realtics, realtics);
 	// wait for new tics if needed
 	while (lowtic < gametic + counts)
 	{
-		int wait_tics = N_NetUpdate(true) - last_tryrun_tic;
+		DoDelay();
+
+		// see how long we have been waiting
+		int wait_tics = N_NetUpdate() - last_tryrun_tic;
 
 		lowtic = maketic;
 

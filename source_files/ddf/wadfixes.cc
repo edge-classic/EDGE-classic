@@ -95,19 +95,12 @@ static void FixClearAll(void)
 	fixdefs.Clear();
 }
 
-bool DDF_ReadFixes(void *data, int size)
+void DDF_ReadFixes(const std::string& data)
 {
-	SYS_ASSERT(data);
-
-#if (DEBUG_DDF)
-	epi::array_iterator_c it;
-	fixdef_c *sw;
-#endif
-
 	readinfo_t fixes;
 
-	fixes.memfile = (char*)data;
-	fixes.memsize = size;
+	fixes.memfile = (char*)data.c_str();
+	fixes.memsize = (int)  data.size();
 	fixes.tag = "FIXES";
 	fixes.entries_per_dot = 2;
 
@@ -119,10 +112,7 @@ bool DDF_ReadFixes(void *data, int size)
 	fixes.finish_entry = FixFinishEntry;
 	fixes.clear_all    = FixClearAll;
 
-	if (! DDF_MainReadFile(&fixes))
-		return false;
-
-	return true;
+	DDF_MainReadFile(&fixes);
 }
 
 //
@@ -150,23 +140,6 @@ void DDF_FixCleanUp(void)
 	}
 	
 	fixdefs.Trim();
-}
-
-void DDF_ParseFIXES(const byte *data, int size)
-{
-	for (; size >= 20; data += 20, size -= 20)
-	{
-		if (data[18] == 0)  // end marker
-			break;
-
-		fixdef_c *def = new fixdef_c;
-
-		def->name = "FIX";
-
-		def->Default();
-		
-		fixdefs.Insert(def);
-	}
 }
 
 

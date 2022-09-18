@@ -103,27 +103,21 @@ void DDF_Error(const char *err, ...)
  
 	pos = buffer + strlen(buffer);
 
-	if (!cur_ddf_filename.empty())
+	if (cur_ddf_filename != "")
 	{
-		sprintf(pos, "Error occurred near line %d of %s\n", 
-				cur_ddf_line_num, cur_ddf_filename.c_str());
-				
+		sprintf(pos, "Error occurred near line %d of %s\n", cur_ddf_line_num, cur_ddf_filename.c_str());
 		pos += strlen(pos);
 	}
 
-	if (!cur_ddf_entryname.empty())
+	if (cur_ddf_entryname != "")
 	{
-		sprintf(pos, "Error occurred in entry: %s\n", 
-				cur_ddf_entryname.c_str());
-				
+		sprintf(pos, "Error occurred in entry: %s\n", cur_ddf_entryname.c_str());
 		pos += strlen(pos);
 	}
 
-	if (!cur_ddf_linedata.empty())
+	if (cur_ddf_linedata != "")
 	{
-		sprintf(pos, "Line contents: %s\n", 
-				cur_ddf_linedata.c_str());
-				
+		sprintf(pos, "Line contents: %s\n", cur_ddf_linedata.c_str());
 		pos += strlen(pos);
 	}
 

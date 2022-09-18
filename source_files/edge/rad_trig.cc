@@ -1009,27 +1009,21 @@ static void RAD_ParseScript(void)
 }
 
 
-bool RAD_ReadScript(void *_data, int _kk)
+void RAD_ReadScript(const std::string& data)
 {
-	char *data = (char *)_data;
+	int size = (int)data.size();
 
-	SYS_ASSERT(data);
+	I_Debugf("RTS: Loading LUMP (size=%d)\n", size);
 
-	int size = (int)strlen(data);
-
-	L_WriteDebug("RTS: Loading LUMP (size=%d)\n", size);
-
-	// FIXME pass the filename to this func
+	// TODO pass the filename to this func
 	rad_cur_filename = "RSCRIPT LUMP";
 
-	rad_memfile      = (byte *) data;
+	rad_memfile      = (byte *) data.c_str();
 	rad_memfile_size = size;
 	rad_memfile_end  = &rad_memfile[size];
 
 	// OK we have the file in memory.  Parse it to death :-)
 	RAD_ParseScript();
-
-	return true;
 }
 
 

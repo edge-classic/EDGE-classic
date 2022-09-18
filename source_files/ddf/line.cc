@@ -456,17 +456,13 @@ static void LinedefClearAll(void)
 	linetypes.Reset();
 }
 
-//
-// DDF_ReadLines
-//
-bool DDF_ReadLines(void *data, int size)
-{
-	SYS_ASSERT(data);
 
+void DDF_ReadLines(const std::string& data)
+{
 	readinfo_t lines;
 
-	lines.memfile = (char*)data;
-	lines.memsize = size;
+	lines.memfile = (char*)data.c_str();
+	lines.memsize = (int)  data.size();
 	lines.tag = "LINES";
 	lines.entries_per_dot = 6;
 
@@ -478,12 +474,10 @@ bool DDF_ReadLines(void *data, int size)
 	lines.finish_entry = LinedefFinishEntry;
 	lines.clear_all    = LinedefClearAll;
 
-	return DDF_MainReadFile(&lines);
+	DDF_MainReadFile(&lines);
 }
 
-//
-// DDF_LinedefInit
-//
+
 void DDF_LinedefInit(void)
 {
 	linetypes.Reset();
@@ -492,9 +486,7 @@ void DDF_LinedefInit(void)
 	default_linetype->number = 0;
 }
 
-//
-// DDF_LinedefCleanUp
-//
+
 void DDF_LinedefCleanUp(void)
 {
 	epi::array_iterator_c it;

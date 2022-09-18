@@ -976,8 +976,8 @@ public:
 extern linetype_container_c linetypes;		// -ACB- 2004/07/05 Implemented
 extern sectortype_container_c sectortypes;	// -ACB- 2004/07/05 Implemented
 
-bool DDF_ReadLines(void *data, int size);
-bool DDF_ReadSectors(void *data, int size);
+void DDF_ReadLines(const std::string& data);
+void DDF_ReadSectors(const std::string& data);
 
 #endif // __DDF_LINE_H__
 

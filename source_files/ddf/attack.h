@@ -162,7 +162,7 @@ public:
 
 extern atkdef_container_c atkdefs;			// -ACB- 2004/06/09 Implemented
 
-bool DDF_ReadAtks(void *data, int size);
+void DDF_ReadAtks(const std::string& data);
 
 #endif // __DDF_ATK_H__
 

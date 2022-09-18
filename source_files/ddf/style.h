@@ -193,7 +193,7 @@ public:
 extern styledef_container_c styledefs;
 extern styledef_c *default_style;
 
-bool DDF_ReadStyles(void *data, int size);
+void DDF_ReadStyles(const std::string& data);
 
 #endif  /*__DDF_STYLE_H__*/
 

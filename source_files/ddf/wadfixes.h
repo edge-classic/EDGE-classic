@@ -65,9 +65,7 @@ public:
 
 extern fixdef_container_c fixdefs; 	// -DASHO- 2022 Implemented
 
-bool DDF_ReadFixes(void *data, int size);
-
-void DDF_ParseFIXES(const byte *data, int size);
+void DDF_ReadFixes(const std::string& data);
 
 #endif  /*__DDF_WADFIXES_H__*/
 

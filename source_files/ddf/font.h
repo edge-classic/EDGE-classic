@@ -99,7 +99,8 @@ public:
 extern fontdef_container_c fontdefs;
 
 void DDF_MainLookupFont(const char *info, void *storage);
-bool DDF_ReadFonts(void *data, int size);
+
+void DDF_ReadFonts(const std::string& data);
 
 #endif  /* __DDF_FONT__ */
 

@@ -310,14 +310,12 @@ static void AttackClearAll(void)
 }
 
 
-bool DDF_ReadAtks(void *data, int size)
+void DDF_ReadAtks(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t attacks;
 
-	attacks.memfile = (char*)data;
-	attacks.memsize = size;
+	attacks.memfile = (char*)data.c_str();
+	attacks.memsize = (int)  data.size();
 	attacks.tag = "ATTACKS";
 	attacks.entries_per_dot = 2;
 
@@ -329,7 +327,7 @@ bool DDF_ReadAtks(void *data, int size)
 	attacks.finish_entry = AttackFinishEntry;
 	attacks.clear_all    = AttackClearAll;
 
-	return DDF_MainReadFile(&attacks);
+	DDF_MainReadFile(&attacks);
 }
 
 void DDF_AttackInit(void)

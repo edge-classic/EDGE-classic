@@ -168,14 +168,12 @@ static void GameClearAll (void)
 }
 
 
-bool DDF_ReadGames (void *data, int size)
+void DDF_ReadGames(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t games;
 
-	games.memfile = (char *) data;
-	games.memsize = size;
+	games.memfile = (char *) data.c_str();
+	games.memsize = (int)  data.size();
 	games.tag = "GAMES";
 	games.entries_per_dot = 1;
 
@@ -187,7 +185,7 @@ bool DDF_ReadGames (void *data, int size)
 	games.finish_entry = GameFinishEntry;
 	games.clear_all = GameClearAll;
 
-	return DDF_MainReadFile (&games);
+	DDF_MainReadFile (&games);
 }
 
 

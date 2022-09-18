@@ -108,19 +108,13 @@ static void FlatClearAll(void)
 	flatdefs.Clear();
 }
 
-bool DDF_ReadFlat(void *data, int size)
+
+void DDF_ReadFlat(const std::string& data)
 {
-	SYS_ASSERT(data);
-
-#if (DEBUG_DDF)
-	epi::array_iterator_c it;
-	flatdef_c *sw;
-#endif
-
 	readinfo_t flats;
 
-	flats.memfile = (char*)data;
-	flats.memsize = size;
+	flats.memfile = (char*)data.c_str();
+	flats.memsize = (int)  data.size();
 	flats.tag = "FLATS";
 	flats.entries_per_dot = 2;
 
@@ -132,15 +126,10 @@ bool DDF_ReadFlat(void *data, int size)
 	flats.finish_entry = FlatFinishEntry;
 	flats.clear_all    = FlatClearAll;
 
-	if (! DDF_MainReadFile(&flats))
-		return false;
-
-	return true;
+	DDF_MainReadFile(&flats);
 }
 
-//
-// DDF_FlatInit
-//
+
 void DDF_FlatInit(void)
 {
 	flatdefs.Clear();

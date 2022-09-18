@@ -218,14 +218,12 @@ static void LevelClearAll(void)
 }
 
 
-bool DDF_ReadLevels(void *data, int size)
+void DDF_ReadLevels(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t levels;
 
-	levels.memfile = (char*)data;
-	levels.memsize = size;
+	levels.memfile = (char*)data.c_str();
+	levels.memsize = (int)  data.size();
 	levels.tag = "LEVELS";
 	levels.entries_per_dot = 2;
 
@@ -237,7 +235,7 @@ bool DDF_ReadLevels(void *data, int size)
 	levels.finish_entry = LevelFinishEntry;
 	levels.clear_all    = LevelClearAll;
 
-	return DDF_MainReadFile(&levels);
+	DDF_MainReadFile(&levels);
 }
 
 

@@ -1916,6 +1916,24 @@ byte *W_LoadLump(const char *name, int *length)
 	return W_LoadLump(W_GetNumForName(name), length);
 }
 
+std::string W_LoadString(int lump)
+{
+	// WISH: optimise this to remove temporary buffer
+	int length;
+	byte *data = W_LoadLump(lump, &length);
+
+	std::string result((char *)data, length);
+
+	W_DoneWithLump(data);
+
+	return result;
+}
+
+std::string W_LoadString(const char *name)
+{
+	return W_LoadString(W_GetNumForName(name));
+}
+
 //
 // W_DoneWithLump
 //

@@ -74,9 +74,7 @@ public:
 
 extern flatdef_container_c flatdefs; 	// -DASHO- 2022 Implemented
 
-bool DDF_ReadFlat(void *data, int size);
-
-void DDF_ParseFLATS(const byte *data, int size);
+void DDF_ReadFlat(const std::string& data);
 
 #endif  /*__DDF_FLAT_H__*/
 

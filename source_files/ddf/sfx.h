@@ -123,7 +123,7 @@ public:
 
 extern sfxdef_container_c sfxdefs;			// -ACB- 2004/07/25 Implemented
 
-bool DDF_ReadSFX(void *data, int size);
+void DDF_ReadSFX(const std::string& data);
 
 #endif // __DDF_SFX_H__
 

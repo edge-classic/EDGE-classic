@@ -161,7 +161,7 @@ public:
 
 extern imagedef_container_c imagedefs;
 
-bool DDF_ReadImages(void *data, int size);
+void DDF_ReadImages(const std::string& data);
 
 #endif  /*__DDF_IMAGE_H__*/
 

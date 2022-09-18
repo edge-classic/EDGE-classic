@@ -133,14 +133,12 @@ static void ColmapClearAll(void)
 }
 
 
-bool DDF_ReadColourMaps(void *data, int size)
+void DDF_ReadColourMaps(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t colm_r;
 
-	colm_r.memfile = (char*)data;
-	colm_r.memsize = size;
+	colm_r.memfile = (char*)data.c_str();
+	colm_r.memsize = (int)  data.size();
 	colm_r.tag = "COLOURMAPS";
 	colm_r.entries_per_dot = 2;
 
@@ -152,7 +150,7 @@ bool DDF_ReadColourMaps(void *data, int size)
 	colm_r.finish_entry = ColmapFinishEntry;
 	colm_r.clear_all    = ColmapClearAll;
 
-	return DDF_MainReadFile(&colm_r);
+	DDF_MainReadFile(&colm_r);
 }
 
 

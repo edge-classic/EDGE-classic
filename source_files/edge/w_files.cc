@@ -118,12 +118,9 @@ void W_ReadWADFIXES(void)
 {
 	I_Printf("Loading WADFIXES\n");
 
-	int length;
-	char *data = (char *) W_LoadLump("WADFIXES", &length);
+	auto data = W_LoadString("WADFIXES");
 
-	DDF_ReadFixes(data, length);
-
-	W_DoneWithLump(data);
+	DDF_ReadFixes(data);
 }
 
 
@@ -237,7 +234,7 @@ typedef struct ddf_reader_s
 	const char *lump_name;
 	const char *pack_name;
 	const char *print_name;
-	bool (* func)(void *data, int size);
+	void (* func)(const std::string& data);
 }
 ddf_reader_t;
 
@@ -279,6 +276,25 @@ int W_CheckDDFLumpName(const char *name)
 }
 
 
+static void W_ReadExternalDDF(int d, epi::file_c * F, const std::string& filename)
+{
+	// WISH: load directly into a std::string
+
+	char *raw_data = (char *) F->LoadIntoMemory();
+	if (raw_data == NULL)
+		I_Error("Couldn't read file: %s\n", filename.c_str());
+
+	std::string data(raw_data);
+	delete[] raw_data;
+
+	// call read function
+	(* DDF_Readers[d].func)(data);
+
+	// close file
+	delete F;
+}
+
+
 static void W_ReadDDF_FromDir(int d)
 {
 	// no directory specified?
@@ -296,21 +312,11 @@ static void W_ReadDDF_FromDir(int d)
 
 	I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, filename.c_str());
 
-	char *data = (char *) F->LoadIntoMemory();
-	if (data == NULL)
-		I_Error("Couldn't read file: %s\n", filename.c_str());
-
-	int length = (int)strlen(data);  // TODO make it not needed
-
-	// call read function
-	(* DDF_Readers[d].func)(data, length);
-
-	delete[] data;
-	delete F;
+	W_ReadExternalDDF(d, F, filename);
 }
 
 
-static void W_ReadDDF_FromFile(data_file_c *df, int d)
+static void W_ReadDDF_DataFile(data_file_c *df, int d)
 {
 	wad_file_c  *wad  = df->wad;
 	pack_file_c *pack = df->pack;
@@ -326,15 +332,7 @@ static void W_ReadDDF_FromFile(data_file_c *df, int d)
 		if (F == NULL)
 			I_Error("Couldn't open file: %s\n", df->name.c_str());
 
-		char *data = (char *) F->LoadIntoMemory();
-		if (data == NULL)
-			I_Error("Couldn't read file: %s\n", df->name.c_str());
-
-		RAD_ReadScript(data, -1);
-
-		delete[] data;
-		delete F;
-
+		W_ReadExternalDDF(NUM_DDF_READERS-1, F, df->name);
 		return;
 	}
 
@@ -351,18 +349,7 @@ static void W_ReadDDF_FromFile(data_file_c *df, int d)
 			if (F == NULL)
 				I_Error("Couldn't open file: %s\n", df->name.c_str());
 
-			char *data = (char *) F->LoadIntoMemory();
-			if (data == NULL)
-				I_Error("Couldn't read file: %s\n", df->name.c_str());
-
-			int length = (int)strlen(data);  // TODO make it not needed
-
-			// call read function
-			(* DDF_Readers[d].func)(data, length);
-
-			delete[] data;
-			delete F;
-
+			W_ReadExternalDDF(d, F, df->name);
 			return;
 		}
 
@@ -384,13 +371,10 @@ static void W_ReadDDF_FromFile(data_file_c *df, int d)
 		{
 			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, df->name.c_str());
 
-			int length;
-			char *data = (char *) W_LoadLump(lump, &length);
+			std::string data = W_LoadString(lump);
 
 			// call read function
-			(* DDF_Readers[d].func)(data, length);
-
-			W_DoneWithLump(data);
+			(* DDF_Readers[d].func)(data);
 		}
 	}
 
@@ -460,7 +444,6 @@ static void W_ReadDehacked(data_file_c *df, int d)
 			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, where.c_str());
 
 			const char *data = lump->data.c_str();
-			int length = (int)strlen(data);  // TODO make it not needed
 
 			if (debug_dehacked.d)
 			{
@@ -489,7 +472,7 @@ static void W_ReadDehacked(data_file_c *df, int d)
 			}
 
 			// call read function
-			(* DDF_Readers[d].func)((void *)data, length);
+			(* DDF_Readers[d].func)(lump->data);
 
 			// free up some memory
 			lump->data.clear();
@@ -513,7 +496,7 @@ void W_ReadDDF(void)
 		{
 			data_file_c *df = data_files[i];
 
-			W_ReadDDF_FromFile(df, d);
+			W_ReadDDF_DataFile(df, d);
 
 			W_ReadDehacked(df, d);
 		}

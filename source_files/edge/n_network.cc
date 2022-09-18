@@ -144,11 +144,9 @@ static bool N_BuildTiccmds(void)
 		if (! p) continue;
 		if (! p->builder) continue;
 
-///     I_Debugf("N_BuildTiccmds: pnum %d netgame %c\n", pnum, netgame ? 'Y' : 'n');
+		int buf = maketic % BACKUPTICS;
 
-		ticcmd_t *cmd = &p->in_cmds[maketic % BACKUPTICS];
-
-		p->builder(p, p->build_data, cmd);
+		p->builder(p, p->build_data, &p->in_cmds[buf]);
 	}
 
 	E_UpdateKeyState();
@@ -176,7 +174,8 @@ int N_NetUpdate()
 
 	if (newtics > 0)
 	{
-		// build and send new ticcmds for local players
+		// build and send new ticcmds for local players.
+		// this will advance `maketic`, unless buffers are full.
 		int t;
 		for (t = 0; t < newtics; t++)
 		{
@@ -211,55 +210,37 @@ int N_TryRunTics()
 		nowtime, nowtime - realtics, realtics);
 #endif
 
+	// we require at least ONE real tic
+	while (realtics <= 0)
+	{
+		DoDelay();
+		nowtime = N_NetUpdate();
+		realtics = nowtime - last_tryrun_tic;
+		last_tryrun_tic = nowtime;
+	}
+
+	// we can never generate more ticcmds that this
+	if (realtics > BACKUPTICS-1)
+		realtics = BACKUPTICS-1;
+
 	// simpler handling when no game in progress
 	if (numplayers == 0)
 	{
-		while (realtics <= 0)
-		{
-			DoDelay();
-			nowtime = N_NetUpdate();
-			realtics = nowtime - last_tryrun_tic;
-			last_tryrun_tic = nowtime;
-		}
-
-		// this limit is rather arbitrary
-		if (realtics > TICRATE/3)
-			realtics = TICRATE/3;
-
 		return realtics;
 	}
 
 	SYS_ASSERT(gametic <= maketic);
 
-	int availabletics = maketic - gametic;
-
-	// decide how many tics to run
-	int counts;
-
-	if (realtics + 1 < availabletics)
-		counts = realtics + 1;
-	else
-		counts = MIN(realtics, availabletics);
-
-#ifdef DEBUG_TICS
-	I_Debugf("=== maketic %d gametic %d | real %d avail %d raw-counts %d\n",
-		maketic, gametic, realtics, availabletics, counts);
-#endif
-
-	if (counts < 1)
-		counts = 1;
-
-	// wait for new tics if needed
-	while (maketic < gametic + counts)
+	// if there is not enough ticcmds to run, build them now.
+	// we don't need to process events here -- this is very quick.
+	while (maketic < gametic + realtics)
 	{
-		DoDelay();
-		N_NetUpdate();
-
-		SYS_ASSERT(gametic <= maketic);
+		N_BuildTiccmds();
 	}
 
-	return counts;
+	return realtics;
 }
+
 
 void N_ResetTics(void)
 {
@@ -267,6 +248,7 @@ void N_ResetTics(void)
 
 	last_update_tic = last_tryrun_tic = I_GetTime();
 }
+
 
 void N_QuitNetGame(void)
 {

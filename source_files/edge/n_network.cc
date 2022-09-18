@@ -275,34 +275,30 @@ int N_TryRunTics()
 
 	SYS_ASSERT(gametic <= maketic);
 
-	int availabletics = maketic - gametic;
+	// decide how many tics to run...
+	int tics = maketic - gametic;
 
-	// decide how many tics to run
-	int counts;
-
-	if (realtics + 1 < availabletics)
-		counts = realtics + 1;
+	// -AJA- been staring at this all day, still can't explain it.
+	//       my best guess is that we *usually* need an extra tic so that
+	//       the ticcmd queue cannot "run away" and we never catch up.
+	if (tics > realtics + 1)
+		tics = realtics + 1;
 	else
-		counts = MIN(realtics, availabletics);
+		tics = std::max(1, std::min(tics, realtics));
 
 #ifdef DEBUG_TICS
-	I_Debugf("=== maketic %d gametic %d | real %d avail %d raw-counts %d\n",
-		maketic, gametic, realtics, availabletics, counts);
+	I_Debugf("=== maketic %d gametic %d | real %d using %d\n",
+		maketic, gametic, realtics, tics);
 #endif
 
-	if (counts < 1)
-		counts = 1;
-
 	// wait for new tics if needed
-	while (maketic < gametic + counts)
+	while (maketic < gametic + tics)
 	{
 		DoDelay();
 		N_NetUpdate();
-
-		SYS_ASSERT(gametic <= maketic);
 	}
 
-	return counts;
+	return tics;
 }
 
 

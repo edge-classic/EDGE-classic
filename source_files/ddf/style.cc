@@ -118,6 +118,7 @@ static const commandlist_t style_commands[] =
 	DF("X_OFFSET",   x_offset, DDF_MainGetNumeric),
 	DF("Y_OFFSET",   y_offset, DDF_MainGetNumeric),
 	DF("ENTRY_ALIGNMENT", entry_align_string, DDF_MainGetString),
+	DF("ENTRY_SPACING",   entry_spacing, DDF_MainGetNumeric),
 
     DF("SPECIAL", special, DDF_StyleGetSpecials),
 
@@ -555,6 +556,7 @@ void styledef_c::CopyDetail(const styledef_c &src)
 
 	entry_align_string = src.entry_align_string;
 	entry_alignment = src.entry_alignment;
+	entry_spacing = src.entry_spacing;
 }
 
 //
@@ -576,6 +578,7 @@ void styledef_c::Default()
 
 	entry_align_string = "";
 	entry_alignment = 0;
+	entry_spacing = 0;
 }
 
 

@@ -777,7 +777,7 @@ void M_DrawLoad(void)
 		ex_slots[i].width = style->fonts[ex_slots[i].corrupt ? 3 : 0]->StringWidth(ex_slots[i].desc);
 		if (ex_slots[i].width > WidestLine) 
 			WidestLine = ex_slots[i].width;
-		y += LineHeight;
+		y += LineHeight + style->def->entry_spacing;
 	}
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
@@ -989,7 +989,7 @@ void M_DrawSave(void)
 		ex_slots[i].width = ex_slots[i].width + style->fonts[0]->StringWidth(ex_slots[i].desc);
 		if (ex_slots[i].width > WidestLine) 
 			WidestLine = ex_slots[i].width;
-		y += LineHeight;
+		y += LineHeight + style->def->entry_spacing;
 	}
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
@@ -2556,7 +2556,7 @@ void M_Drawer(void)
 				currentMenu->menuitems[i].width = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[i].name) * txtscale;
 			if (currentMenu->menuitems[i].width > WidestLine) 
 				WidestLine = currentMenu->menuitems[i].width;
-			y += currentMenu->menuitems[i].height + 1;
+			y += currentMenu->menuitems[i].height + 1 + style->def->entry_spacing;
 		}
 		for (i=0; i < max; i++)
 		{
@@ -2663,7 +2663,7 @@ void M_Drawer(void)
 
 			currentMenu->menuitems[i].x = x + image->offset_x + style->def->x_offset;
 			currentMenu->menuitems[i].y = y - image->offset_y - style->def->y_offset;
-			y += currentMenu->menuitems[i].height;
+			y += currentMenu->menuitems[i].height + style->def->entry_spacing;
 		}
 		for (i = 0; i < max; i++)
 		{

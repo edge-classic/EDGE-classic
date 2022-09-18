@@ -162,6 +162,7 @@ public:
 	int y_offset;
 
 	u8_t entry_alignment;
+	u8_t entry_spacing;
 	std::string entry_align_string; // User convenience
 
 private:

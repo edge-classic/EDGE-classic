@@ -952,8 +952,9 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 	// TODO: handle Read failure
     file->Read(&header, sizeof(raw_wad_header_t));
 
- 	// Do not require IWAD header if loading Harmony or a custom standalone IWAD
-	if (strncmp(header.identification, "IWAD", 4) != 0 && strcasecmp("0HAWK01", lumpname1) != 0 && strcasecmp("EDGEIWAD", lumpname1) != 0)
+ 	// Do not require IWAD header if loading Harmony, REKKR, or a custom standalone IWAD
+	if (strncmp(header.identification, "IWAD", 4) != 0 && strcasecmp("REKCREDS", lumpname1) != 0 && 
+		strcasecmp("0HAWK01", lumpname1) != 0 && strcasecmp("EDGEIWAD", lumpname1) != 0)
 	{
 		file->Seek(0, epi::file_c::SEEKPOINT_START);
 		return false;

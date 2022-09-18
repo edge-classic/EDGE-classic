@@ -126,21 +126,22 @@ typedef struct
 iwad_check_t;
 
 // Combination of unique lumps needed to best identify an IWAD
-const std::array<iwad_check_t, 12> iwad_checker =
+const std::array<iwad_check_t, 13> iwad_checker =
 {
 	{
 		{ 1,  "CUSTOM",     {"EDGEIWAD", "EDGEIWAD"} },
 		{ 2,  "BLASPHEMER", {"BLASPHEM", "E1M1"}     },
-		{ 7,  "FREEDOOM1",  {"FREEDOOM", "E1M1"}     },
-		{ 11, "FREEDOOM2",  {"FREEDOOM", "MAP01"}    },
+		{ 8,  "FREEDOOM1",  {"FREEDOOM", "E1M1"}     },
+		{ 12, "FREEDOOM2",  {"FREEDOOM", "MAP01"}    },
+		{ 6,  "REKKR",      {"REKCREDS", "E1M1"}     },
 		{ 5,  "HACX",       {"HACX-R",   "MAP01"}    },
 		{ 4,  "HARMONY",    {"0HAWK01",  "MAP01"}    },
 		{ 3,  "HERETIC",    {"MUS_E1M1", "E1M1"}     },
-		{ 9,  "PLUTONIA",   {"CAMO1",    "MAP01"}    },
-		{ 10, "TNT",        {"REDTNT2",  "MAP01"}    },
-		{ 8,  "DOOM",       {"BFGGA0",   "E2M1"}     },
-		{ 6,  "DOOM1",      {"SHOTA0",   "E1M1"}     },
-		{ 12, "DOOM2",      {"BFGGA0",   "MAP01"}    },
+		{ 10, "PLUTONIA",   {"CAMO1",    "MAP01"}    },
+		{ 11, "TNT",        {"REDTNT2",  "MAP01"}    },
+		{ 9,  "DOOM",       {"BFGGA0",   "E2M1"}     },
+		{ 7,  "DOOM1",      {"SHOTA0",   "E1M1"}     },
+		{ 13, "DOOM2",      {"BFGGA0",   "MAP01"}    },
 		//{ 0, "STRIFE",    {"VELLOGO",  "RGELOGO"}  }// Dev/internal use - Definitely nowhwere near playable
 	}
 };

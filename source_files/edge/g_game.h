@@ -35,7 +35,6 @@
 extern bool pistol_starts;
 
 extern int random_seed;
-extern int starttime;    //
 
 extern int exittime;  // for savegame code
 

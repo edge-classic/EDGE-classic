@@ -618,7 +618,8 @@ void E_Display(void)
 	// menus go directly to the screen
 	M_Drawer();  // menu is drawn even on top of everything (except console)
 
-	N_NetUpdate();  // send out any new accumulation
+	// process mouse and keyboard events
+	N_NetUpdate();
 
 	CON_Drawer();
 
@@ -1711,25 +1712,25 @@ void E_Tick(void)
 	// Update display, next frame, with current state.
 	E_Display();
 
-	bool fresh_game_tic;
-
 	// this also runs the responder chain via E_ProcessEvents
-	int counts = N_TryRunTics(&fresh_game_tic);
+	int counts = N_TryRunTics();
 
 	SYS_ASSERT(counts > 0);
 
-	for (; counts > 0; counts--)  // run the tics
+	// run the tics
+	for (; counts > 0 ; counts--)
 	{
+		// run a step in the physics (etc)
+		G_Ticker();
+
+		// user interface stuff (skull anim, etc)
 		CON_Ticker();
 		M_Ticker();
-
-		if (fresh_game_tic)
-			G_Ticker();
-
 		S_SoundTicker(); 
-		S_MusicTicker(); // -ACB- 1999/11/13 Improved music update routines
+		S_MusicTicker();
 
-		N_NetUpdate();  // check for new console commands
+		// process mouse and keyboard events
+		N_NetUpdate();
 	}
 }
 

@@ -23,8 +23,6 @@
 
 #define MP_PROTOCOL_VER  1
 
-#define MP_SAVETICS  6  // past and future
-
 extern bool netgame;
 
 extern int base_port;
@@ -35,28 +33,19 @@ void N_InitiateNetGame(void);
 
 // Create any new ticcmds and broadcast to other players.
 // returns value of I_GetTime().
-int N_NetUpdate(bool do_delay = false);
+int N_NetUpdate();
 
 // Broadcasts special packets to other players
 //  to notify of game exit
 void N_QuitNetGame(void);
 
 // returns number of ticks to run (always > 0).
-// is_fresh means that game ticks can be run.
-int N_TryRunTics(bool *is_fresh);
-
-// process input and create player (and robot) ticcmds.
-// returns false if couldn't hold any more.
-bool N_BuildTiccmds(void);
+int N_TryRunTics();
 
 // restart tic counters (maketic, gametic) at zero.
 void N_ResetTics(void);
 
-void N_TiccmdTicker(void);
-
-bool N_OpenBroadcastSocket(bool is_host);
-void N_CloseBroadcastSocket(void);
-void N_SendBroadcastDiscovery(void);
+void N_GrabTiccmds(void);
 
 #endif /* __N_NETWORK_H__ */
 

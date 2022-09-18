@@ -622,9 +622,10 @@ bool M_NetHostResponder(event_t * ev, int ch)
 	return false;
 }
 
+
 void M_NetHostTicker(void)
 {
-	// Note: broadcast queries are handled by the general net stuff  [???]
+	// nothing needed
 }
 
 
@@ -886,9 +887,10 @@ bool M_NetListResponder(event_t * ev, int ch)
 	return false;
 }
 
+
 void M_NetListTicker(void)
 {
-	// FIXME: handle player update commands, BEGIN command, etc
+	// nothing needed
 }
 
 
@@ -932,6 +934,7 @@ void M_NetGameInit(void)
 	}
 }
 
+
 void M_NetGameDrawer(void)
 {
 	switch (netgame_menuon)
@@ -943,6 +946,7 @@ void M_NetGameDrawer(void)
 
 	I_Error("INTERNAL ERROR: netgame_menuon=%d\n", netgame_menuon);
 }
+
 
 bool M_NetGameResponder(event_t * ev, int ch)
 {
@@ -970,6 +974,7 @@ bool M_NetGameResponder(event_t * ev, int ch)
 
 	return false;
 }
+
 
 void M_NetGameTicker(void)
 {

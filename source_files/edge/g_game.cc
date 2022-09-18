@@ -77,8 +77,6 @@ bool noblit;
 // if true, load all graphics at start 
 bool precache = true;
 
-int starttime;
-
 // -KM- 1998/11/25 Exit time is the time when the level will actually finish
 // after hitting the exit switch/killing the boss.  So that you see the
 // switch change or the boss die.
@@ -246,7 +244,6 @@ void LoadLevel_Bits(void)
 
 	RAD_SpawnTriggers(currmap->name.c_str());
 
-	starttime = I_GetTime();
 	exittime = INT_MAX;
 	exit_skipall = false;
 	exit_hub_tag = 0;
@@ -482,9 +479,8 @@ void G_Ticker(void)
 			break;
 
 		case GS_LEVEL:
-			// get commands, check consistency,
-			// and build new consistency check.
-			N_TiccmdTicker();
+			// get commands
+			N_GrabTiccmds();
 
 			P_Ticker();
 			AM_Ticker();
@@ -496,12 +492,12 @@ void G_Ticker(void)
 			break;
 
 		case GS_INTERMISSION:
-			N_TiccmdTicker();
+			N_GrabTiccmds();
 			WI_Ticker();
 			break;
 
 		case GS_FINALE:
-			N_TiccmdTicker();
+			N_GrabTiccmds();
 			F_Ticker();
 			break;
 

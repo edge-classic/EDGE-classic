@@ -349,7 +349,6 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
 	mobj_t *mo;
 	const mobjtype_c *minfo;
 
-	// These *MUST* happen to everyone to keep netgames consistent.
 	// Spawn a new map object.
 
 	if (t->thing_name)

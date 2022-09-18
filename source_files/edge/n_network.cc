@@ -53,13 +53,20 @@ int base_port;
 DEF_CVAR(m_busywait, "1", CVAR_ARCHIVE)
 
 
+// gametic is the tic about to (or currently being) run.
+// maketic is the tic that hasn't had control made for it yet.
+//
+// NOTE 1: it is a system-wide INVARIANT that gametic <= maketic, since
+//         we cannot run a physics step without a ticcmd for each player.
+//
+// NOTE 2: maketic - gametic is number of buffered (un-run) ticcmds,
+//         and it must be <= BACKUPTICS (the maximum buffered ticcmds).
+
 int gametic;
 int maketic;
 
-static int last_update_tic;
-static int last_tryrun_tic;
-
-extern gameflags_t default_gameflags;
+static int last_update_tic;  // last time N_NetUpdate  was called
+static int last_tryrun_tic;  // last time N_TryRunTics was called
 
 
 //----------------------------------------------------------------------------
@@ -83,357 +90,94 @@ void N_InitNetwork(void)
 
 	I_Printf("Network: base port is %d\n", base_port);
 
-///!!!	N_StartupReliableLink (base_port+0);
-///!!!	N_StartupBroadcastLink(base_port+1);
+//??	N_StartupReliableLink (base_port+0);
+//??	N_StartupBroadcastLink(base_port+1);
 }
 
 
-// TEMP CRAP
-bool N_OpenBroadcastSocket(bool is_host)
-{ return true; }
-void N_CloseBroadcastSocket(void)
-{ }
-void N_SendBroadcastDiscovery(void)
-{ }
-
-
-static void GetPackets(bool do_delay)
+static void DoDelay()
 {
-	if (! netgame)
-	{
-		// -AJA- This can make everything a bit "jerky" :-(
-		if (do_delay && ! m_busywait.d)
-			I_Sleep(10 /* millis */);
-
-		return;
-	}
-
-#ifdef USE_HAWKNL
-
-	NLsocket socks[4];  // only one in the group
-
-	int delay = (do_delay && ! m_busywait.d) ? 10 /* millis */ : 0;
-	int num = nlPollGroup(sk_group, NL_READ_STATUS, socks, 4, delay);
-
-	if (num < 1)
+	if (m_busywait.d)
 		return;
 
-	if (! pk.Read(socks[0]))
-		return;
-
-	L_WriteDebug("- GOT PACKET [%c%c] len = %d\n", pk.hd().type[0], pk.hd().type[1],
-		pk.hd().data_len);
-
-#if 0
-	if (! pk.CheckType("Tg"))
-		return;
-
-	// FIXME: validate packet, check size
-
-	tic_group_proto_t& tg = pk.tg_p();
-
-	int count = tg.last_player - tg.first_player + 1;
-
-	tg.ByteSwap();
-	tg.ByteSwapCmds((1 + bots_each) * count);
-
-	// !!! FIXME: handle tg.count
-
-	player_t *p = players[consoleplayer]; //!!!!
-
-	int got_tic = tg.gametic + tg.offset;
-
-	L_WriteDebug("-- Got TG: counter = %d  in_tic = %d\n", got_tic, p->in_tic);
-
-	if (got_tic != p->in_tic)
-	{
-		L_WriteDebug("GOT TIC %d != EXPECTED %d\n", got_tic, p->in_tic);
-
-		// !!! FIXME: handle "future" tics (save them, set bit in mask)
-		//            (send retransmission request for gametic NOW).
-		return;
-	}
-
-	ticcmd_t *raw_cmd = tg.tic_cmds;
-
-	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-	{
-		player_t *p = players[pnum];
-
-		if (! p) continue;
-
-		memcpy(p->in_cmds + (got_tic % (MP_SAVETICS*2)), raw_cmd, sizeof(ticcmd_t));
-
-		raw_cmd++;
-
-		p->in_tic++;
-	}
-
-//	SYS_ASSERT((raw_cmd - tg.tic_cmds) == (1 + bots_each));
-
-#endif
-
-#endif  // USE_HAWKNL
+	// -AJA- This can make everything a bit "jerky" :-(
+	I_Sleep(5 /* millis */);
 }
 
-static void DoSendTiccmds(int tic)
+
+static void ReceivePackets()
 {
-#ifdef USE_HAWKNL_XX
-	pk.Clear();  // FIXME: TESTING ONLY
-
-	pk.SetType("tc");
-	pk.hd().flags = 0;
-	pk.hd().data_len = sizeof(ticcmd_proto_t) - sizeof(ticcmd_t);
-	pk.hd().client = client_id;
-
-    ticcmd_proto_t& tc = pk.tc_p();
-
-	SYS_ASSERT(tic >= gametic);
-
-	tc.gametic = gametic;
-	tc.offset  = tic - gametic;
-	tc.count   = 1;
-
-	ticcmd_t *raw_cmd = tc.tic_cmds;
-
-	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-	{
-		player_t *p = players[pnum];
-
-		if (! p || ! p->builder) continue;
-
-		memcpy(raw_cmd, p->out_cmds + (tic % (MP_SAVETICS*2)), sizeof(ticcmd_t));
-
-		raw_cmd++;
-
-		pk.hd().data_len += sizeof(ticcmd_t);
-	}
-
-	SYS_ASSERT((raw_cmd - tc.tic_cmds) == (1 + bots_each));
-
-    tc.ByteSwap();
-    tc.ByteSwapCmds((1 + bots_each) * tc.count);
-
-	L_WriteDebug("Writing ticcmd for tic %d\n", tic);
-
-	if (! pk.Write(socket))
-		L_WriteDebug("Failed to write packet (tic %d)\n", tic);
-	
-	// FIXME: need an 'out_tic' for resends....
-
-#endif  // USE_HAWKNL_XX
+	// TODO receive stuff from other computers
 }
 
-bool N_BuildTiccmds(void)
+
+static void TransmitStuff(int tic)
 {
+	// TODO send stuff to other computers
+}
+
+
+static void PreInput()
+{
+	// process input
 	I_ControlGetEvents();
 	E_ProcessEvents();
+}
+
+
+static void PostInput()
+{
+	E_UpdateKeyState();
+}
+
+
+static bool N_BuildTiccmds(void)
+{
+	// create player (and robot) ticcmds.
+	// returns false if players cannot hold any more ticcmds.
+	// NOTE: this is the only place allowed to bump `maketics`.
 
 	if (numplayers == 0)
-	{
-		E_UpdateKeyState();
 		return false;
-	}
 
-	if (maketic >= gametic + MP_SAVETICS)
-	{
-		E_UpdateKeyState();
-		return false;  // can't hold any more
-	}
+	if (maketic >= gametic + BACKUPTICS)
+		return false;
 
-	// build ticcmds
-	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+	for (int pnum = 0 ; pnum < MAXPLAYERS ; pnum++)
 	{
 		player_t *p = players[pnum];
 		if (! p) continue;
+		if (! p->builder) continue;
+#if 0
+		I_Debugf("N_BuildTiccmds: pnum %d netgame %c\n", pnum, netgame ? 'Y' : 'n');
+#endif
+		int buf = maketic % BACKUPTICS;
 
-		if (p->builder)
-		{
-			ticcmd_t *cmd;
-
-///     L_WriteDebug("N_BuildTiccmds: pnum %d netgame %c\n", pnum, netgame ? 'Y' : 'n');
-
-			if (false) // FIXME: temp hack!!!  if (netgame)
-				cmd = &p->out_cmds[maketic % (MP_SAVETICS*2)];
-			else
-				cmd = &p->in_cmds[maketic % (MP_SAVETICS*2)];
-
-			p->builder(p, p->build_data, cmd);
-			
-			cmd->consistency = p->consistency[maketic % (MP_SAVETICS*2)];
-		}
+		p->builder(p, p->build_data, &p->in_cmds[buf]);
 	}
 
-	E_UpdateKeyState();
-
-	if (netgame)
-		DoSendTiccmds(maketic);
+	TransmitStuff(maketic);
 
 	maketic++;
 	return true;
 }
 
-int N_NetUpdate(bool do_delay)
+
+void N_GrabTiccmds(void)
 {
-	int nowtime = I_GetTime();
+	// this is called from G_Ticker, and is the only place allowed to
+	// bump `gametic` (allowing the game simulation to advance).
+	//
+	// all we actually do here is grab the ticcmd for each local player
+	// (i.e. ones created earler in N_BuildTiccmds).
 
-	if (singletics)  // singletic update is syncronous
-		return nowtime;
+	// gametic <= maketic is a system-wide invariant.  However, new levels
+	// levels are loaded during G_Ticker(), which resets them both to zero,
+	// hence we need to handle that particular case here.
+	SYS_ASSERT(gametic <= maketic);
 
-	int newtics = nowtime - last_update_tic;
-	last_update_tic = nowtime;
-
-	if (newtics > 0)
-	{
-		// build and send new ticcmds for local players
-		int t;
-		for (t = 0; t < newtics; t++)
-		{
-			if (! N_BuildTiccmds())
-				break;
-		}
-
-		if (t != newtics && numplayers > 0)
-			L_WriteDebug("N_NetUpdate: lost tics: %d\n", newtics - t);
-	}
-
-	GetPackets(do_delay);
-
-	return nowtime;
-}
-
-int DetermineLowTic(void)
-{
-	if (! netgame)
-		return maketic;
-
-	int lowtic = INT_MAX;
-
-	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-	{
-		player_t *p = players[pnum];
-		if (! p) continue;
-
-		// ignore bots
-		if (p->playerflags & PFL_Bot)
-			continue;
-
-		if (p->playerflags & PFL_Console)
-			lowtic = MIN(lowtic, maketic); // correct?????
-		else
-			lowtic = MIN(lowtic, p->in_tic);
-	}
-
-	return lowtic;
-}
-
-int N_TryRunTics(bool *is_fresh)
-{
-	*is_fresh = true;
-
-	if (singletics)
-	{
-		N_BuildTiccmds();
-
-		return 1;
-	}
-
-	int nowtime = N_NetUpdate();
-	int realtics = nowtime - last_tryrun_tic;
-	last_tryrun_tic = nowtime;
-
-#ifdef DEBUG_TICS
-L_WriteDebug("N_TryRunTics: now %d last_tryrun %d --> real %d\n",
-nowtime, nowtime - realtics, realtics);
-#endif
-
-	// simpler handling when no game in progress
-	if (numplayers == 0)
-	{
-		while (realtics <= 0)
-		{
-			nowtime = N_NetUpdate(true);
-			realtics = nowtime - last_tryrun_tic;
-			last_tryrun_tic = nowtime;
-		}
-
-		if (realtics > MP_SAVETICS)
-			realtics = MP_SAVETICS;
-
-		return realtics;
-	}
-
-	int lowtic = DetermineLowTic();
-	int availabletics = lowtic - gametic;
-
-	// this shouldn't happen, since we can only run a gametic when
-	// the ticcmds for _all_ players have arrived (hence lowtic >= gametic);
-	SYS_ASSERT(availabletics >= 0);
-
-	// decide how many tics to run
-	int counts;
-
-	if (realtics + 1 < availabletics)
-		counts = realtics + 1;
-	else
-		counts = MIN(realtics, availabletics);
-
-#ifdef DEBUG_TICS
-	L_WriteDebug("=== lowtic %d gametic %d | real %d avail %d raw-counts %d\n",
-		lowtic, gametic, realtics, availabletics, counts);
-#endif
-
-	if (counts < 1)
-		counts = 1;
-
-	// wait for new tics if needed
-	while (lowtic < gametic + counts)
-	{
-		int wait_tics = N_NetUpdate(true) - last_tryrun_tic;
-
-		lowtic = DetermineLowTic();
-
-		SYS_ASSERT(lowtic >= gametic);
-
-		// don't stay in here forever -- give the menu a chance to work
-		if (wait_tics > TICRATE/2)
-		{
-			L_WriteDebug("Waited %d tics IN VAIN !\n", wait_tics);
-			*is_fresh = false;
-			return 3;
-		}
-	}
-
-	return counts;
-}
-
-void N_ResetTics(void)
-{
-	maketic = gametic = 0;
-
-	last_update_tic = last_tryrun_tic = I_GetTime();
-}
-
-void N_QuitNetGame(void)
-{
-	// !!!! FIXME: N_QuitNetGame
-}
-
-#define TURBOTHRESHOLD  0x32
-
-void N_TiccmdTicker(void)
-{
-	// gametic <= maketic is a system-wide invariant.  However,
-	// new levels are loaded during G_Ticker(), resetting them
-	// both to zero, hence if we increment gametic here, we
-	// break the invariant.  The following is a workaround.
-	// TODO: this smells like a hack -- fix it properly!
-	if (gametic >= maketic)
-	{ 
-		if (! (gametic == 0 && maketic == 0) && !netgame)
-			I_Printf("WARNING: G_TiccmdTicker: gametic >= maketic (%d >= %d)\n", gametic, maketic);
+	if (gametic == maketic)
 		return;
-	}
 
 	int buf = gametic % BACKUPTICS;
 
@@ -443,32 +187,138 @@ void N_TiccmdTicker(void)
 		if (! p) continue;
 
 		memcpy(&p->cmd, p->in_cmds + buf, sizeof(ticcmd_t));
-
-		// check for turbo cheats
-		if (p->cmd.forwardmove > TURBOTHRESHOLD
-			&& !(gametic & 31) && (((gametic >> 5) + p->pnum) & 0x1f) == 0)
-		{
-			// FIXME: something better for turbo cheat
-			I_Printf(language["IsTurbo"], p->playername);
-		}
-
-		if (netgame)
-		{
-			if (gametic > BACKUPTICS && p->consistency[buf] != p->cmd.consistency)
-			{
-// !!!! DEBUG //	I_Warning("Consistency failure on player %d (%i should be %i)",
-//					p->pnum + 1, p->cmd.consistency, p->consistency[buf]);
-			}
-			if (p->mo)
-				p->consistency[buf] = (int)p->mo->x;
-			else
-				p->consistency[buf] = P_ReadRandomState() & 0xff;
-		}
 	}
 
 	VM_SetFloat(ui_vm, "sys", "gametic", gametic);
 
 	gametic++;
+}
+
+
+//----------------------------------------------------------------------------
+
+int N_NetUpdate()
+{
+	// if enough time has elapsed, process input events and build one
+	// or more ticcmds for the local players.
+
+	int nowtime = I_GetTime();
+
+	// singletic update is syncronous
+	if (singletics)
+		return nowtime;
+
+	int newtics = nowtime - last_update_tic;
+	last_update_tic = nowtime;
+
+	if (newtics > 0)
+	{
+		PreInput();
+
+		// build and send new ticcmds for local players.
+		// N_BuildTiccmds returns false when buffers are full.
+
+		for (; newtics > 0 ; newtics--)
+			if (! N_BuildTiccmds())
+				break;
+
+		PostInput();
+
+#if 0
+		if (newtics > 0 && numplayers > 0)
+			I_Debugf("N_NetUpdate: lost tics: %d\n", newtics);
+#endif
+	}
+
+	ReceivePackets();
+
+	return nowtime;
+}
+
+
+int N_TryRunTics()
+{
+	if (singletics)
+	{
+		PreInput();
+		N_BuildTiccmds();
+		PostInput();
+		return 1;
+	}
+
+	int nowtime = N_NetUpdate();
+	int realtics = nowtime - last_tryrun_tic;
+	last_tryrun_tic = nowtime;
+
+#ifdef DEBUG_TICS
+	I_Debugf("N_TryRunTics: now %d last_tryrun %d --> real %d\n",
+		nowtime, nowtime - realtics, realtics);
+#endif
+
+	// simpler handling when no game in progress
+	if (numplayers == 0)
+	{
+		while (realtics <= 0)
+		{
+			DoDelay();
+			nowtime = N_NetUpdate();
+			realtics = nowtime - last_tryrun_tic;
+			last_tryrun_tic = nowtime;
+		}
+
+		// this limit is rather arbitrary
+		if (realtics > TICRATE/3)
+			realtics = TICRATE/3;
+
+		return realtics;
+	}
+
+	SYS_ASSERT(gametic <= maketic);
+
+	// decide how many tics to run...
+	int tics = maketic - gametic;
+
+	// -AJA- been staring at this all day, still can't explain it.
+	//       my best guess is that we *usually* need an extra tic so that
+	//       the ticcmd queue cannot "run away" and we never catch up.
+	if (tics > realtics + 1)
+		tics = realtics + 1;
+	else
+		tics = std::max(std::min(tics, realtics), 1);
+
+#ifdef DEBUG_TICS
+	I_Debugf("=== maketic %d gametic %d | real %d using %d\n",
+		maketic, gametic, realtics, tics);
+#endif
+
+	// wait for new tics if needed
+	while (maketic < gametic + tics)
+	{
+		DoDelay();
+		N_NetUpdate();
+	}
+
+	return tics;
+}
+
+
+void N_ResetTics(void)
+{
+	maketic = gametic = 0;
+
+	last_update_tic = last_tryrun_tic = I_GetTime();
+}
+
+
+void N_QuitNetGame(void)
+{
+	// TODO send a quit message to all peers
+
+	// wait a bit
+	if (false)  // have_peers
+		I_Sleep(250);
+
+	// TODO close open sockets
 }
 
 

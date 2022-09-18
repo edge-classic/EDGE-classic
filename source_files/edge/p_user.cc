@@ -628,18 +628,6 @@ void P_ConsolePlayerBuilder(const player_t *pl, void *data, ticcmd_t *dest)
 	dest->player_idx = pl->pnum;
 }
 
-static u16_t MakeConsistency(const player_t *pl)
-{
-	u16_t result = 0;
-
-	if (pl->mo)
-	{
-		result = (int)(pl->mo->x - pl->mo->y + pl->mo->z);
-	}
-
-	return (result ^= (u16_t)P_ReadRandomState());
-}
-
 
 bool P_PlayerSwitchWeapon(player_t *player, weapondef_c *choice)
 {
@@ -701,8 +689,6 @@ void P_PlayerThink(player_t * player)
 
 	if (player->damagecount <= 0)
 		player->damage_pain = 0;
-
-	player->consistency[gametic % (MP_SAVETICS*2)] = MakeConsistency(player);
 
 	// fixme: do this in the cheat code
 	if (player->cheats & CF_NOCLIP)
@@ -892,8 +878,6 @@ void P_CreatePlayer(int pnum, bool is_bot)
 
 	if (is_bot)
 		P_BotCreate(p, false);
-
-	memset(p->consistency, -1, sizeof(p->consistency));
 
 	if (! sfx_jpidle)
 	{

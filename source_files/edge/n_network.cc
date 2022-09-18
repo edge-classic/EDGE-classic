@@ -219,9 +219,10 @@ int N_TryRunTics()
 		last_tryrun_tic = nowtime;
 	}
 
-	// we can never generate more ticcmds that this
-	if (realtics > BACKUPTICS-1)
-		realtics = BACKUPTICS-1;
+	// we can never generate more than BACKUPTICS ticcmds.
+	// [ this is very conservative, but it only kicks at unusably low FPS ]
+	if (realtics > BACKUPTICS/2)
+		realtics = BACKUPTICS/2;
 
 	// simpler handling when no game in progress
 	if (numplayers == 0)

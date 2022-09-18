@@ -988,6 +988,9 @@ public:
 	const mobjtype_c *spitspot;
 	std::string spitspot_ref;
 
+	float sight_distance; // lobo 2022: How far this thing can see
+
+
 public:
 	mobjtype_c();
 	~mobjtype_c();

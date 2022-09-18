@@ -469,6 +469,12 @@ bool P_CheckSight(mobj_t * src, mobj_t * dest)
 	// destination out of object's DDF slope range ?
 	dist_a = P_ApproxDistance(sight_I.src.dx, sight_I.src.dy);
 
+	if(src->info->sight_distance > -1) //if we have sight_distance set
+	{
+		if(src->info->sight_distance < dist_a)
+			return false; //too far away for this thing to see
+	}
+
 #if (DEBUG_SIGHT >= 1)
 	L_WriteDebug("\n");
 	L_WriteDebug("P_CheckSight:\n");

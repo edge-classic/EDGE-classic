@@ -40,8 +40,7 @@ int N_NetUpdate();
 void N_QuitNetGame(void);
 
 // returns number of ticks to run (always > 0).
-// is_fresh means that game ticks can be run.
-int N_TryRunTics(bool *is_fresh);
+int N_TryRunTics();
 
 // restart tic counters (maketic, gametic) at zero.
 void N_ResetTics(void);

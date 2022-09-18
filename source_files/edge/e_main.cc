@@ -1699,10 +1699,8 @@ void E_Tick(void)
 	// Update display, next frame, with current state.
 	E_Display();
 
-	bool fresh_game_tic;
-
 	// this also runs the responder chain via E_ProcessEvents
-	int counts = N_TryRunTics(&fresh_game_tic);
+	int counts = N_TryRunTics();
 
 	SYS_ASSERT(counts > 0);
 
@@ -1711,14 +1709,12 @@ void E_Tick(void)
 	{
 		CON_Ticker();
 		M_Ticker();
-
-		if (fresh_game_tic)
-			G_Ticker();
-
+		G_Ticker();
 		S_SoundTicker(); 
 		S_MusicTicker(); // -ACB- 1999/11/13 Improved music update routines
 
-		N_NetUpdate();  // check for new console commands
+		// check for new console commands
+		N_NetUpdate();
 	}
 }
 

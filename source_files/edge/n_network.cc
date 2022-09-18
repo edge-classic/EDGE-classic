@@ -196,14 +196,11 @@ int N_NetUpdate()
 	return nowtime;
 }
 
-int N_TryRunTics(bool *is_fresh)
+int N_TryRunTics()
 {
-	*is_fresh = true;
-
 	if (singletics)
 	{
 		N_BuildTiccmds();
-
 		return 1;
 	}
 
@@ -227,6 +224,7 @@ nowtime, nowtime - realtics, realtics);
 			last_tryrun_tic = nowtime;
 		}
 
+		// this limit is rather arbitrary
 		if (realtics > TICRATE/3)
 			realtics = TICRATE/3;
 
@@ -260,21 +258,11 @@ nowtime, nowtime - realtics, realtics);
 	while (lowtic < gametic + counts)
 	{
 		DoDelay();
-
-		// see how long we have been waiting
-		int wait_tics = N_NetUpdate() - last_tryrun_tic;
+		N_NetUpdate();
 
 		lowtic = maketic;
 
 		SYS_ASSERT(lowtic >= gametic);
-
-		// don't stay in here forever -- give the menu a chance to work
-		if (wait_tics > TICRATE/2)
-		{
-			L_WriteDebug("Waited %d tics IN VAIN !\n", wait_tics);
-			*is_fresh = false;
-			return 3;
-		}
 	}
 
 	return counts;

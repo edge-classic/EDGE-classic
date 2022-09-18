@@ -44,7 +44,7 @@
 #include "colormap.h"  // colmap.ddf stuff
 
 // Networking and tick handling related.
-#define BACKUPTICS 12
+#define BACKUPTICS  32
 
 #define MAX_PLAYNAME  32
 
@@ -326,8 +326,7 @@ typedef struct player_s
 	// last frame for weapon models
 	int weapon_last_frame;
 
-	ticcmd_t in_cmds [BACKUPTICS];
-	ticcmd_t out_cmds[BACKUPTICS];  //???
+	ticcmd_t in_cmds[BACKUPTICS];
 
 	int in_tic;  /* tic number of next input command expected */
 

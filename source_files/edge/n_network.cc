@@ -137,10 +137,12 @@ static bool N_BuildTiccmds(void)
 		return false;
 	}
 
-	if (maketic >= gametic + MP_SAVETICS)
+	if (maketic >= gametic + BACKUPTICS)
 	{
+		// players cannot hold any more ticcmds
+
 		E_UpdateKeyState();
-		return false;  // can't hold any more
+		return false;
 	}
 
 	// build ticcmds
@@ -148,20 +150,13 @@ static bool N_BuildTiccmds(void)
 	{
 		player_t *p = players[pnum];
 		if (! p) continue;
-
-		if (p->builder)
-		{
-			ticcmd_t *cmd;
+		if (! p->builder) continue;
 
 ///     L_WriteDebug("N_BuildTiccmds: pnum %d netgame %c\n", pnum, netgame ? 'Y' : 'n');
 
-			if (false) // FIXME: temp hack!!!  if (netgame)
-				cmd = &p->out_cmds[maketic % (MP_SAVETICS*2)];
-			else
-				cmd = &p->in_cmds[maketic % (MP_SAVETICS*2)];
+		ticcmd_t *cmd = &p->in_cmds[maketic % BACKUPTICS];
 
-			p->builder(p, p->build_data, cmd);
-		}
+		p->builder(p, p->build_data, cmd);
 	}
 
 	E_UpdateKeyState();
@@ -232,8 +227,8 @@ nowtime, nowtime - realtics, realtics);
 			last_tryrun_tic = nowtime;
 		}
 
-		if (realtics > MP_SAVETICS)
-			realtics = MP_SAVETICS;
+		if (realtics > TICRATE/3)
+			realtics = TICRATE/3;
 
 		return realtics;
 	}
@@ -297,7 +292,6 @@ void N_QuitNetGame(void)
 	// !!!! FIXME: N_QuitNetGame
 }
 
-#define TURBOTHRESHOLD  0x32
 
 void N_TiccmdTicker(void)
 {

@@ -1706,7 +1706,8 @@ void E_Tick(void)
 
 	SYS_ASSERT(counts > 0);
 
-	for (; counts > 0; counts--)  // run the tics
+	// run the tics
+	for (; counts > 0; counts--)
 	{
 		CON_Ticker();
 		M_Ticker();

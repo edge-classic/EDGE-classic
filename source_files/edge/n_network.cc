@@ -56,8 +56,11 @@ DEF_CVAR(m_busywait, "1", CVAR_ARCHIVE)
 // gametic is the tic about to (or currently being) run.
 // maketic is the tic that hasn't had control made for it yet.
 //
-// NOTE: it is a system-wide INVARIANT that gametic <= maketic, since we
-// cannot run a step of the physics without a ticcmd for all players).
+// NOTE 1: it is a system-wide INVARIANT that gametic <= maketic, since
+//         we cannot run a physics step without a ticcmd for each player.
+//
+// NOTE 2: maketic - gametic is number of buffered (un-run) ticcmds,
+//         and it must be <= BACKUPTICS (the maximum buffered ticcmds).
 
 int gametic;
 int maketic;
@@ -114,44 +117,44 @@ static void TransmitStuff(int tic)
 }
 
 
-static bool N_BuildTiccmds(void)
+static void PreInput()
 {
-	// process input and create player (and robot) ticcmds.
-	// returns false if couldn't hold any more.
-	// this is the only allowed to increase `maketics`.
-
+	// process input
 	I_ControlGetEvents();
 	E_ProcessEvents();
+}
+
+
+static void PostInput()
+{
+	E_UpdateKeyState();
+}
+
+
+static bool N_BuildTiccmds(void)
+{
+	// create player (and robot) ticcmds.
+	// returns false if players cannot hold any more ticcmds.
+	// NOTE: this is the only place allowed to bump `maketics`.
 
 	if (numplayers == 0)
-	{
-		E_UpdateKeyState();
 		return false;
-	}
 
 	if (maketic >= gametic + BACKUPTICS)
-	{
-		// players cannot hold any more ticcmds!
-
-		E_UpdateKeyState();
 		return false;
-	}
 
-	// build ticcmds
-	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+	for (int pnum = 0 ; pnum < MAXPLAYERS ; pnum++)
 	{
 		player_t *p = players[pnum];
 		if (! p) continue;
 		if (! p->builder) continue;
+#if 0
+		I_Debugf("N_BuildTiccmds: pnum %d netgame %c\n", pnum, netgame ? 'Y' : 'n');
+#endif
+		int buf = maketic % BACKUPTICS;
 
-///     I_Debugf("N_BuildTiccmds: pnum %d netgame %c\n", pnum, netgame ? 'Y' : 'n');
-
-		ticcmd_t *cmd = &p->in_cmds[maketic % BACKUPTICS];
-
-		p->builder(p, p->build_data, cmd);
+		p->builder(p, p->build_data, &p->in_cmds[buf]);
 	}
-
-	E_UpdateKeyState();
 
 	TransmitStuff(maketic);
 
@@ -176,16 +179,21 @@ int N_NetUpdate()
 
 	if (newtics > 0)
 	{
-		// build and send new ticcmds for local players
-		int t;
-		for (t = 0; t < newtics; t++)
-		{
+		PreInput();
+
+		// build and send new ticcmds for local players.
+		// N_BuildTiccmds returns false when buffers are full.
+
+		for (; newtics > 0 ; newtics--)
 			if (! N_BuildTiccmds())
 				break;
-		}
 
-		if (t != newtics && numplayers > 0)
-			I_Debugf("N_NetUpdate: lost tics: %d\n", newtics - t);
+		PostInput();
+
+#if 0
+		if (newtics > 0 && numplayers > 0)
+			I_Debugf("N_NetUpdate: lost tics: %d\n", newtics);
+#endif
 	}
 
 	ReceivePackets();
@@ -198,7 +206,9 @@ int N_TryRunTics()
 {
 	if (singletics)
 	{
+		PreInput();
 		N_BuildTiccmds();
+		PostInput();
 		return 1;
 	}
 

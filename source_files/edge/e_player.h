@@ -41,10 +41,10 @@
 // as commands per game tick.
 #include "e_ticcmd.h"
 
-#include "colormap.h"  // colmap.ddf stuff
+#include "colormap.h"
 
 // Networking and tick handling related.
-#define BACKUPTICS  32
+#define BACKUPTICS  12
 
 #define MAX_PLAYNAME  32
 

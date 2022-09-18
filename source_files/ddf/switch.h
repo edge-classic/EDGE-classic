@@ -47,10 +47,10 @@ public:
 	void CopyDetail(switchdef_c &src);
 
 	// Member vars....
-	epi::strent_c name;
+	std::string name;
 
-	lumpname_c on_name;
-	lumpname_c off_name;
+	std::string on_name;
+	std::string off_name;
 
 	struct sfx_s *on_sfx;
 	struct sfx_s *off_sfx;
@@ -85,9 +85,10 @@ public:
 
 extern switchdef_container_c switchdefs; 	// -ACB- 2004/06/04 Implemented
 
-bool DDF_ReadSwitch(void *data, int size);
+void DDF_ReadSwitch(const std::string& data);
 
-void DDF_ParseSWITCHES(const byte *data, int size);
+// handle the BOOM lump
+void DDF_ParseSWITCHES(const byte * data, int size);
 
 #endif  /*__DDF_SWTH_H__*/
 

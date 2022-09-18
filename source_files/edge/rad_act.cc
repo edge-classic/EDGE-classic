@@ -693,7 +693,10 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
 	if (ctex->what == CHTEX_Sky)
 	{
 		if (image)
+		{
 			sky_image = image;
+			RGL_UpdateSkyBoxTextures();
+		}
 		return;
 	}
 
@@ -1069,7 +1072,7 @@ void RAD_ActWaitUntilDead(rad_trigger_t *R, void *param)
 		if (mo->health <= 0)
 			continue;
 
-		if (! WUD_Match(wud, mo->info->name))
+		if (! WUD_Match(wud, mo->info->name.c_str()))
 			continue;
 
 		if (! RAD_WithinRadius(mo, R->info))

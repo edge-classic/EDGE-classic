@@ -103,27 +103,21 @@ void DDF_Error(const char *err, ...)
  
 	pos = buffer + strlen(buffer);
 
-	if (!cur_ddf_filename.empty())
+	if (cur_ddf_filename != "")
 	{
-		sprintf(pos, "Error occurred near line %d of %s\n", 
-				cur_ddf_line_num, cur_ddf_filename.c_str());
-				
+		sprintf(pos, "Error occurred near line %d of %s\n", cur_ddf_line_num, cur_ddf_filename.c_str());
 		pos += strlen(pos);
 	}
 
-	if (!cur_ddf_entryname.empty())
+	if (cur_ddf_entryname != "")
 	{
-		sprintf(pos, "Error occurred in entry: %s\n", 
-				cur_ddf_entryname.c_str());
-				
+		sprintf(pos, "Error occurred in entry: %s\n", cur_ddf_entryname.c_str());
 		pos += strlen(pos);
 	}
 
-	if (!cur_ddf_linedata.empty())
+	if (cur_ddf_linedata != "")
 	{
-		sprintf(pos, "Line contents: %s\n", 
-				cur_ddf_linedata.c_str());
-				
+		sprintf(pos, "Line contents: %s\n", cur_ddf_linedata.c_str());
 		pos += strlen(pos);
 	}
 
@@ -1116,17 +1110,13 @@ void DDF_MainGetBoolean(const char *info, void *storage)
 //
 // Get String value directly from the file
 //
-// -KM- 1998/07/31 Needed a string argument.  Based on DDF_MainGetNumeric.
-// -AJA- 2000/02/09: Free any existing string (potential memory leak).
-// -ACB- 2004/07/26: Use epi::strent_c
-//
 void DDF_MainGetString(const char *info, void *storage)
 {
-	epi::strent_c *dest = (epi::strent_c *)storage;
+	std::string *dest = (std::string *)storage;
 
 	SYS_ASSERT(info && storage);
 
-	dest->Set(info);
+	*dest = info;
 }
 
 
@@ -1190,14 +1180,12 @@ void DDF_MainGetLumpName(const char *info, void *storage)
 
 	SYS_ASSERT(info && storage);
 
-	lumpname_c *LN = (lumpname_c *)storage;
+	std::string *LN = (std::string *)storage;
 
-	if (strlen(info) == 9)
-		DDF_WarnError("Name %s too long (should be 8 characters or less)\n", info);
-	else if (strlen(info) > 9)
+	if (strlen(info) > 8)
 		DDF_Error("Name %s too long (must be 8 characters or less)\n", info);
 
-	LN->Set(info);
+	(*LN) = info;
 }
 
 
@@ -2063,8 +2051,7 @@ void dlight_info_c::Default()
 	colour = RGB_MAKE(255, 255, 255);
 	height = PERCENT_MAKE(50);
 	leaky  = false;
-
-	shape.Set("DLIGHT_EXP");
+	shape  = "DLIGHT_EXP";
 
 	cache_data = NULL;
 }

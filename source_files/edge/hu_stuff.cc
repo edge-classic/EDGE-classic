@@ -98,7 +98,7 @@ void HU_Start(void)
 
 	// -ACB- 1998/08/09 Use currmap settings
 	//if (currmap->description && language.IsValidRef(currmap->description))
-	if (currmap->description) //Lobo 2022: if it's wrong, show it anyway
+	if (currmap->description != "") //Lobo 2022: if it's wrong, show it anyway
 	{
 		I_Printf("\n");
 		I_Printf("--------------------------------------------------\n");

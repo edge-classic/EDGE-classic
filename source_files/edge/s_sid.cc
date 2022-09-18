@@ -33,18 +33,17 @@
 
 #include "sidplayer.h"
 
-#define SID_BUFFER 96000 / 50 * 4
-
+#define SID_BUFFER 96000 / 50
 extern bool dev_stereo;  // FIXME: encapsulation
 extern int  dev_freq;
 
 // Function for s_music.cc to check if a lump is supported by TinySID
 bool S_CheckSID (byte *data, int length)
 {
-	if ((length < 0x7c) || !((data[0x00] == 0x50) || (data[0x00] == 0x52))) {
-		return false;	// we need at least a header that starts with "P" or "R"
+	if (length < 0x7c) {
+		return false;
 	}
-	return true;
+	return (memcmp(data, "RSID", 4) == 0 || memcmp(data, "PSID", 4) == 0);
 }
 
 class sidplayer_c : public abstract_music_c
@@ -66,8 +65,6 @@ private:
 
 	byte *sid_data;
 	int sid_length;
-
-	int empty_frame_counter;
 
 public:
 	bool OpenLump(const char *lumpname);
@@ -139,7 +136,17 @@ bool sidplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	else
 		data_buf = buf->data_L;
 
-	computeAudioSamples();
+	if (computeAudioSamples() == -1)
+	{
+		if (! looping)
+			return false;
+		else
+		{
+			loadSidFile(0, sid_data, sid_length, dev_freq, NULL, NULL, NULL, NULL);
+			sid_playTune(0, 0);
+			computeAudioSamples();
+		}
+	}
 
 	buf->length = getSoundBufferLen();
 
@@ -147,34 +154,6 @@ bool sidplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 
 	if (!dev_stereo)
 		ConvertToMono(buf->data_L, mono_buffer, buf->length);
-
-	// End-of-track detection seems hit or miss, so if 5 empty frames are rendered in a row,
-	// restart the SID
-	for (int i = 0; i < buf->length; i++)
-	{
-		if (data_buf[i] != 0)
-		{
-			if (empty_frame_counter > 0)
-				empty_frame_counter--;
-			break;
-		}
-		if (i == buf->length - 1)
-		{
-			if (! looping)
-				return false;
-			else
-			{
-				empty_frame_counter++;
-				if (empty_frame_counter == 5)
-				{
-					empty_frame_counter = 0;
-					loadSidFile(0, sid_data, sid_length, dev_freq, NULL, NULL, NULL, NULL);
-					sid_playTune(0, 0);
-					break;
-				}
-			}
-		}
-	}
 
     return true;
 }
@@ -324,7 +303,6 @@ void sidplayer_c::Play(bool loop)
 	status = PLAYING;
 	looping = loop;
 
-	empty_frame_counter = 0;
 	sid_playTune(0, 0);
 
 	// Load up initial buffer data

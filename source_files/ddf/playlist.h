@@ -71,7 +71,7 @@ public:
 	musictype_t type;
 	musicinftype_e infotype;
 
-	epi::strent_c info;
+	std::string info;
 
 private:
 	// disable copy construct and assignment operator
@@ -104,7 +104,7 @@ public:
 
 extern pl_entry_container_c playlist;		// -ACB- 2004/06/04 Implemented
 
-bool DDF_ReadMusicPlaylist(void *data, int size);
+void DDF_ReadMusicPlaylist(const std::string& data);
 
 #endif // __DDF_MUS_H__
 

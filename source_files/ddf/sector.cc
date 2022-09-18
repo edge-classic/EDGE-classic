@@ -185,14 +185,12 @@ static void SectorClearAll(void)
 }
 
 
-bool DDF_ReadSectors(void *data, int size)
+void DDF_ReadSectors(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t sects;
 
-	sects.memfile = (char*)data;
-	sects.memsize = size;
+	sects.memfile = (char*)data.c_str();
+	sects.memsize = (int)  data.size();
 	sects.tag = "SECTORS";
 	sects.entries_per_dot = 1;
 
@@ -204,7 +202,7 @@ bool DDF_ReadSectors(void *data, int size)
 	sects.finish_entry = SectorFinishEntry;
 	sects.clear_all    = SectorClearAll;
 
-	return DDF_MainReadFile(&sects);
+	DDF_MainReadFile(&sects);
 }
 
 //

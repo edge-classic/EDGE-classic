@@ -46,18 +46,26 @@
 #include "flat.h"
 #include "wadfixes.h"
 
+// DEHACKED
+#include "deh_edge.h"
+
+#include "con_main.h"
 #include "dstrings.h"
 #include "dm_state.h"
+#include "l_deh.h"
 #include "rad_trig.h"
 #include "w_files.h"
 #include "w_wad.h"
+
+
+DEF_CVAR(debug_dehacked, "0", CVAR_ARCHIVE)
 
 
 std::vector<data_file_c *> data_files;
 
 
 data_file_c::data_file_c(const char *_name, int _kind) :
-		name(_name), kind(_kind), file(NULL), wad(NULL)
+		name(_name), kind(_kind), file(NULL), wad(NULL), deh(NULL)
 { }
 
 data_file_c::~data_file_c()
@@ -110,12 +118,9 @@ void W_ReadWADFIXES(void)
 {
 	I_Printf("Loading WADFIXES\n");
 
-	int length;
-	char *data = (char *) W_LoadLump("WADFIXES", &length);
+	auto data = W_LoadString("WADFIXES");
 
-	DDF_ReadFixes(data, length);
-
-	W_DoneWithLump(data);
+	DDF_ReadFixes(data);
 }
 
 
@@ -129,7 +134,7 @@ static void ProcessFile(data_file_c *df)
 
 	I_Printf("  Adding %s\n", filename);
 
-	if (df->kind <= FLKIND_HWad || df->kind == FLKIND_PK3)
+	if (df->kind <= FLKIND_GWad || df->kind == FLKIND_PK3)
 	{
 		epi::file_c *file = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 		if (file == NULL)
@@ -145,7 +150,7 @@ static void ProcessFile(data_file_c *df)
 	if (df->kind == FLKIND_RTS || df->kind == FLKIND_DDF)
 		return;
 
-	if (df->kind <= FLKIND_HWad)
+	if (df->kind <= FLKIND_GWad)
 	{
 		ProcessWad(df, file_index);
 
@@ -229,7 +234,7 @@ typedef struct ddf_reader_s
 	const char *lump_name;
 	const char *pack_name;
 	const char *print_name;
-	bool (* func)(void *data, int size);
+	void (* func)(const std::string& data);
 }
 ddf_reader_t;
 
@@ -271,6 +276,25 @@ int W_CheckDDFLumpName(const char *name)
 }
 
 
+static void W_ReadExternalDDF(int d, epi::file_c * F, const std::string& filename)
+{
+	// WISH: load directly into a std::string
+
+	char *raw_data = (char *) F->LoadIntoMemory();
+	if (raw_data == NULL)
+		I_Error("Couldn't read file: %s\n", filename.c_str());
+
+	std::string data(raw_data);
+	delete[] raw_data;
+
+	// call read function
+	(* DDF_Readers[d].func)(data);
+
+	// close file
+	delete F;
+}
+
+
 static void W_ReadDDF_FromDir(int d)
 {
 	// no directory specified?
@@ -288,21 +312,11 @@ static void W_ReadDDF_FromDir(int d)
 
 	I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, filename.c_str());
 
-	char *data = (char *) F->LoadIntoMemory();
-	if (data == NULL)
-		I_Error("Couldn't read file: %s\n", filename.c_str());
-
-	int length = (int)strlen(data);  // TODO make it not needed
-
-	// call read function
-	(* DDF_Readers[d].func)(data, length);
-
-	delete[] data;
-	delete F;
+	W_ReadExternalDDF(d, F, filename);
 }
 
 
-static void W_ReadDDF_FromFile(data_file_c *df, int d)
+static void W_ReadDDF_DataFile(data_file_c *df, int d)
 {
 	wad_file_c  *wad  = df->wad;
 	pack_file_c *pack = df->pack;
@@ -318,15 +332,7 @@ static void W_ReadDDF_FromFile(data_file_c *df, int d)
 		if (F == NULL)
 			I_Error("Couldn't open file: %s\n", df->name.c_str());
 
-		char *data = (char *) F->LoadIntoMemory();
-		if (data == NULL)
-			I_Error("Couldn't read file: %s\n", df->name.c_str());
-
-		RAD_ReadScript(data, -1);
-
-		delete[] data;
-		delete F;
-
+		W_ReadExternalDDF(NUM_DDF_READERS-1, F, df->name);
 		return;
 	}
 
@@ -343,18 +349,7 @@ static void W_ReadDDF_FromFile(data_file_c *df, int d)
 			if (F == NULL)
 				I_Error("Couldn't open file: %s\n", df->name.c_str());
 
-			char *data = (char *) F->LoadIntoMemory();
-			if (data == NULL)
-				I_Error("Couldn't read file: %s\n", df->name.c_str());
-
-			int length = (int)strlen(data);  // TODO make it not needed
-
-			// call read function
-			(* DDF_Readers[d].func)(data, length);
-
-			delete[] data;
-			delete F;
-
+			W_ReadExternalDDF(d, F, df->name);
 			return;
 		}
 
@@ -376,13 +371,10 @@ static void W_ReadDDF_FromFile(data_file_c *df, int d)
 		{
 			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, df->name.c_str());
 
-			int length;
-			char *data = (char *) W_LoadLump(lump, &length);
+			std::string data = W_LoadString(lump);
 
 			// call read function
-			(* DDF_Readers[d].func)(data, length);
-
-			W_DoneWithLump(data);
+			(* DDF_Readers[d].func)(data);
 		}
 	}
 
@@ -429,6 +421,66 @@ static void W_ReadDDF_FromFile(data_file_c *df, int d)
 }
 
 
+static void W_ReadDehacked(data_file_c *df, int d)
+{
+	deh_container_c *deh = df->deh;
+	if (deh == NULL)
+		return;
+
+	// look for the appropriate lump (DDFTHING etc)
+	for (size_t i = 0 ; i < deh->lumps.size() ; i++)
+	{
+		deh_lump_c * lump = deh->lumps[i];
+
+		if (strcmp(lump->name.c_str(), DDF_Readers[d].lump_name) == 0)
+		{
+			std::string where = df->name;
+			if (df->wad != NULL)
+			{
+				where = "DEHACKED in ";
+				where += df->name;
+			}
+
+			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, where.c_str());
+
+			const char *data = lump->data.c_str();
+
+			if (debug_dehacked.d)
+			{
+				I_Debugf("\n");
+
+				// we need to break it into lines
+				const char *pos = data;
+				const char *end;
+
+				while (*pos != 0)
+				{
+					for (end = pos ; *end != 0 ; end++)
+					{
+						if (*end == '\n')
+						{
+							end++;
+							break;
+						}
+					}
+
+					std::string line(pos, end - pos);
+					I_Debugf("%s", line.c_str());
+
+					pos = end;
+				}
+			}
+
+			// call read function
+			(* DDF_Readers[d].func)(lump->data);
+
+			// free up some memory
+			lump->data.clear();
+		}
+	}
+}
+
+
 void W_ReadDDF(void)
 {
 	// -AJA- the order here may look strange.  Since DDF files
@@ -440,24 +492,18 @@ void W_ReadDDF(void)
 	{
 		I_Printf("Loading %s\n", DDF_Readers[d].print_name);
 
-		for (int f = 0; f < (int)data_files.size(); f++)
+		for (int i = 0; i < (int)data_files.size(); i++)
 		{
-			data_file_c *df = data_files[f];
+			data_file_c *df = data_files[i];
 
-			W_ReadDDF_FromFile(df, d);
+			W_ReadDDF_DataFile(df, d);
+
+			W_ReadDehacked(df, d);
 		}
 
 		// handle the `-ddf` option.
-		// files from that directory are done AFTER all other ones.
+		// files from its directory are done AFTER any wads/packs.
 		W_ReadDDF_FromDir(d);
-
-/* helpful ???
-		std::string msg_buf(epi::STR_Format(
-			"Loaded %s %s\n", (d == NUM_DDF_READERS-1) ? "RTS" : "DDF",
-				DDF_Readers[d].print_name));
-
-		I_Printf(msg_buf.c_str());
-*/
 	}
 }
 

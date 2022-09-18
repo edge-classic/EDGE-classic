@@ -130,8 +130,7 @@ static void AnimFinishEntry(void)
 
 	if (dynamic_anim->pics.GetSize() == 0)
 	{
-		if (!dynamic_anim->startname || !dynamic_anim->startname[0] ||
-		    !dynamic_anim->endname   || !dynamic_anim->endname[0])
+		if (dynamic_anim->startname.empty() || dynamic_anim->endname.empty())
 		{
 			DDF_Error("Missing animation sequence.\n");
 		}
@@ -149,14 +148,12 @@ static void AnimClearAll(void)
 }
 
 
-bool DDF_ReadAnims(void *data, int size)
+void DDF_ReadAnims(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t anims;
 
-	anims.memfile = (char*)data;
-	anims.memsize = size;
+	anims.memfile = (char*)data.c_str();
+	anims.memsize = (int)  data.size();
 	anims.tag = "ANIMATIONS";
 	anims.entries_per_dot = 2;
 
@@ -168,7 +165,7 @@ bool DDF_ReadAnims(void *data, int size)
 	anims.finish_entry = AnimFinishEntry;
 	anims.clear_all    = AnimClearAll;
 
-	return DDF_MainReadFile(&anims);
+	DDF_MainReadFile(&anims);
 }
 
 //
@@ -248,8 +245,8 @@ void DDF_ParseANIMATED(const byte *data, int size)
 		def->type = (data[0] & 1) ? animdef_c::A_Texture : animdef_c::A_Flat;
 		def->speed = MAX(1, speed);
 
-		def->startname.Set(first);
-		def->endname  .Set(last);
+		def->startname = first;
+		def->endname   = last;
 
 		animdefs.Insert(def);
 	}

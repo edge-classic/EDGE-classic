@@ -184,14 +184,12 @@ static void ImageClearAll(void)
 }
 
 
-bool DDF_ReadImages(void *data, int size)
+void DDF_ReadImages(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t images;
 
-	images.memfile = (char*)data;
-	images.memsize = size;
+	images.memfile = (char*)data.c_str();
+	images.memsize = (int)  data.size();
 	images.tag = "IMAGES";
 	images.entries_per_dot = 2;
 
@@ -203,7 +201,7 @@ bool DDF_ReadImages(void *data, int size)
 	images.finish_entry = ImageFinishEntry;
 	images.clear_all    = ImageClearAll;
 
-	return DDF_MainReadFile(&images);
+	DDF_MainReadFile(&images);
 }
 
 
@@ -257,7 +255,7 @@ static void ImageParseLump(const char *spec)
 	keyword[colon - spec] = 0;
 
 	// store the lump name
-	dynamic_image->info.Set(colon + 1);
+	dynamic_image->info = (colon + 1);
 
 	if (DDF_CompareName(keyword, "PNG") == 0)
 	{

@@ -12,6 +12,7 @@ Bugs fixed
 + Fixed null string CTD in HUD_DrawText and font_c::StringWidth
 + Fixed issue with FS_ReadDir returning relative paths
 + Restored "Hudless" option in COALHUDS HUD cycling
++ Fixed CHANGE_TEX SKY not working with skyboxes
 
 General Improvements
 --------------------

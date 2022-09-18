@@ -258,11 +258,11 @@ static void InstallSpriteImage(spritedef_c *def, const image_c *img,
 //
 static void FillSpriteFrames(int file, int prog_base, int prog_total)
 {
-	epi::u32array_c * lumps = W_GetListLumps(file, LMPLST_Sprites);
+	std::vector<int> * lumps = W_GetSpriteList(file);
 	if (lumps == NULL)
 		return;
-	int lumpnum = lumps->GetSize();
 
+	int lumpnum = (int)lumps->size();
 	if (lumpnum == 0)
 		return;
 

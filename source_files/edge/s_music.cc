@@ -136,7 +136,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 		case MUSINF_LUMP:
 		{
-			int lump = W_CheckNumForName(play->info);
+			int lump = W_CheckNumForName(play->info.c_str());
 			if (lump < 0)
 			{
 				I_Warning("S_ChangeMusic: LUMP '%s' not found.\n", play->info.c_str()); 

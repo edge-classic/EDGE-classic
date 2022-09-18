@@ -168,14 +168,12 @@ static void GameClearAll (void)
 }
 
 
-bool DDF_ReadGames (void *data, int size)
+void DDF_ReadGames(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t games;
 
-	games.memfile = (char *) data;
-	games.memsize = size;
+	games.memfile = (char *) data.c_str();
+	games.memsize = (int)  data.size();
 	games.tag = "GAMES";
 	games.entries_per_dot = 1;
 
@@ -187,7 +185,7 @@ bool DDF_ReadGames (void *data, int size)
 	games.finish_entry = GameFinishEntry;
 	games.clear_all = GameClearAll;
 
-	return DDF_MainReadFile (&games);
+	DDF_MainReadFile (&games);
 }
 
 
@@ -233,9 +231,7 @@ static void ParseFrame(const char *info, wi_framedef_c *f)
 	if (! p || p == info)
 		DDF_Error("Bad frame def: '%s' (missing pic name)\n", info);
 
-	std::string temp(info, p - info);
-	
-	f->pic.Set(temp.c_str());
+	f->pic = std::string(info, p - info);
 
 	p++;
 
@@ -264,9 +260,7 @@ static void DDF_GameGetAnim(const char *info, void *storage)
 		if (! p || p <= info+1)
 			DDF_Error("Invalid # command: '%s'\n", info);
 
-		std::string temp(info+1, p - (info+1));
-
-		buffer_animdef.level.Set(temp.c_str());
+		buffer_animdef.level = std::string(info+1, p - (info+1));
 
 		p++;
 	}
@@ -284,9 +278,7 @@ static void ParseMap(const char *info, wi_mapposdef_c *mp)
 	if (! p || p == info)
 		DDF_Error("Bad map def: '%s' (missing level name)\n", info);
 
-	std::string temp(info, p - info);
-
-	mp->name.Set(temp.c_str());
+	mp->name = std::string(info, p - info);
 
 	p++;
 

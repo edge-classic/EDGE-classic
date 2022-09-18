@@ -108,19 +108,13 @@ static void FlatClearAll(void)
 	flatdefs.Clear();
 }
 
-bool DDF_ReadFlat(void *data, int size)
+
+void DDF_ReadFlat(const std::string& data)
 {
-	SYS_ASSERT(data);
-
-#if (DEBUG_DDF)
-	epi::array_iterator_c it;
-	flatdef_c *sw;
-#endif
-
 	readinfo_t flats;
 
-	flats.memfile = (char*)data;
-	flats.memsize = size;
+	flats.memfile = (char*)data.c_str();
+	flats.memsize = (int)  data.size();
 	flats.tag = "FLATS";
 	flats.entries_per_dot = 2;
 
@@ -132,15 +126,10 @@ bool DDF_ReadFlat(void *data, int size)
 	flats.finish_entry = FlatFinishEntry;
 	flats.clear_all    = FlatClearAll;
 
-	if (! DDF_MainReadFile(&flats))
-		return false;
-
-	return true;
+	DDF_MainReadFile(&flats);
 }
 
-//
-// DDF_FlatInit
-//
+
 void DDF_FlatInit(void)
 {
 	flatdefs.Clear();
@@ -159,11 +148,11 @@ void DDF_FlatCleanUp(void)
 		f = ITERATOR_TO_TYPE(it, flatdef_c*);
 		cur_ddf_entryname = epi::STR_Format("[%s]  (flats.ddf)", f->name.c_str());
 
-		f->impactobject = f->impactobject_ref ?
-			mobjtypes.Lookup(f->impactobject_ref) : NULL;
+		f->impactobject = f->impactobject_ref != "" ?
+			mobjtypes.Lookup(f->impactobject_ref.c_str()) : NULL;
 		
-		f->glowobject = f->glowobject_ref ?
-			mobjtypes.Lookup(f->glowobject_ref) : NULL;
+		f->glowobject = f->glowobject_ref != "" ?
+			mobjtypes.Lookup(f->glowobject_ref.c_str()) : NULL;
 
 		//f->effectobject = f->effectobject_ref.empty() ? 
 		//		NULL : mobjtypes.Lookup(f->effectobject_ref);
@@ -195,7 +184,7 @@ void DDF_ParseFLATS(const byte *data, int size)
 
 		def->Default();
 		
-		def->splash.Set(splash);
+		def->splash = splash;
 
 		flatdefs.Insert(def);
 	}

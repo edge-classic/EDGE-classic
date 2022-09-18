@@ -56,9 +56,9 @@ public:
 	void Default();
 	
 	// Member vars...
-	epi::strent_c name;
+	std::string name;
 
-	lumpname_c lump_name;
+	std::string lump_name;
 
 	int start;
 	int length;
@@ -104,7 +104,7 @@ public:
 
 extern colourmap_container_c colourmaps;	// -ACB- 2004/06/10 Implemented
 
-bool DDF_ReadColourMaps(void *data, int size);
+void DDF_ReadColourMaps(const std::string& data);
 
 void DDF_ColourmapAddRaw(const char *lump_name, int size);
 

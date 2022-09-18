@@ -177,26 +177,31 @@ static void StyleParseField(const char *field, const char *contents,
 
 static void StyleFinishEntry(void)
 {
-	if (dynamic_style->cursor.pos_string)
+	if (dynamic_style->cursor.pos_string != "")
 	{
-		if (strcasecmp(dynamic_style->cursor.pos_string, "LEFT") == 0)
+		const char *pos_str = dynamic_style->cursor.pos_string.c_str();
+
+		if (strcasecmp(pos_str, "LEFT") == 0)
 			dynamic_style->cursor.position = dynamic_style->C_LEFT;
-		else if (strcasecmp(dynamic_style->cursor.pos_string, "CENTER") == 0)
+		else if (strcasecmp(pos_str, "CENTER") == 0)
 			dynamic_style->cursor.position = dynamic_style->C_CENTER;
-		else if (strcasecmp(dynamic_style->cursor.pos_string, "RIGHT") == 0)
+		else if (strcasecmp(pos_str, "RIGHT") == 0)
 			dynamic_style->cursor.position = dynamic_style->C_RIGHT;
-		else if (strcasecmp(dynamic_style->cursor.pos_string, "BOTH") == 0)
+		else if (strcasecmp(pos_str, "BOTH") == 0)
 			dynamic_style->cursor.position = dynamic_style->C_BOTH;
 		else // Fallback to left-aligned for typos/bad values
 			dynamic_style->cursor.position = dynamic_style->C_LEFT;
 	}
-	if (dynamic_style->entry_align_string)
+
+	if (dynamic_style->entry_align_string != "")
 	{
-		if (strcasecmp(dynamic_style->entry_align_string, "LEFT") == 0)
+		const char *align_str = dynamic_style->entry_align_string.c_str();
+
+		if (strcasecmp(align_str, "LEFT") == 0)
 			dynamic_style->entry_alignment = dynamic_style->C_LEFT;
-		else if (strcasecmp(dynamic_style->entry_align_string, "CENTER") == 0)
+		else if (strcasecmp(align_str, "CENTER") == 0)
 			dynamic_style->entry_alignment = dynamic_style->C_CENTER;
-		else if (strcasecmp(dynamic_style->entry_align_string, "RIGHT") == 0)
+		else if (strcasecmp(align_str, "RIGHT") == 0)
 			dynamic_style->entry_alignment = dynamic_style->C_RIGHT;
 		else // Fallback to left-aligned for typos/bad values
 			dynamic_style->entry_alignment = dynamic_style->C_LEFT;
@@ -210,12 +215,12 @@ static void StyleClearAll(void)
 }
 
 
-bool DDF_ReadStyles(void *data, int size)
+void DDF_ReadStyles(const std::string& data)
 {
 	readinfo_t styles;
 
-	styles.memfile = (char*)data;
-	styles.memsize = size;
+	styles.memfile = (char*)data.c_str();
+	styles.memsize = (int)  data.size();
 	styles.tag = "STYLES";
 	styles.entries_per_dot = 2;
 
@@ -227,7 +232,7 @@ bool DDF_ReadStyles(void *data, int size)
 	styles.finish_entry = StyleFinishEntry;
 	styles.clear_all    = StyleClearAll;
 
-	return DDF_MainReadFile(&styles);
+	DDF_MainReadFile(&styles);
 }
 
 
@@ -431,9 +436,9 @@ void cursorstyle_c::Default()
 {
 	position = 0;
 	translucency = PERCENT_MAKE(100);
-	pos_string = NULL;
-	alt_cursor = NULL;
-	cursor_string = NULL;
+	pos_string = "";
+	alt_cursor = "";
+	cursor_string = "";
 	border = false;
 }
 
@@ -569,7 +574,7 @@ void styledef_c::Default()
 
 	special = (style_special_e) SYLSP_StretchFullScreen; // I think this might be better for backwards compat, revert to 0 if needed - Dasho
 
-	entry_align_string = NULL;
+	entry_align_string = "";
 	entry_alignment = 0;
 }
 

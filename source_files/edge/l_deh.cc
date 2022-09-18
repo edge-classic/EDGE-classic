@@ -25,7 +25,7 @@
 
 #include "i_defs.h"
 
-#include "dh_plugin.h"
+#include "deh_edge.h"
 
 #include "l_deh.h"
 #include "version.h"
@@ -89,13 +89,9 @@ static const dehconvfuncs_t edge_dehconv_funcs =
 };
 
 
-//
-// DH_ConvertFile
-//
-bool DH_ConvertFile(const char *filename, const char *outname)
+deh_container_c * DH_ConvertFile(const char *filename)
 {
 	DehEdgeStartup(&edge_dehconv_funcs);
-	DehEdgeSetVersion(EDGEVER);
 
 	dehret_e ret = DehEdgeAddFile(filename);
 
@@ -103,35 +99,37 @@ bool DH_ConvertFile(const char *filename, const char *outname)
 	{
 		DH_PrintMsg("FAILED to add file:\n");
 		DH_PrintMsg("- %s\n", DehEdgeGetError());
-	}
-	else
-	{
-		ret = DehEdgeRunConversion(outname);
 
-		if (ret != DEH_OK)
-		{
-			DH_PrintMsg("CONVERSION FAILED:\n");
-			DH_PrintMsg("- %s\n", DehEdgeGetError());
-		}
+		DehEdgeShutdown();
+		return NULL;
 	}
+
+	deh_container_c * container = new deh_container_c();
+
+	ret = DehEdgeRunConversion(container);
 
 	DehEdgeShutdown();
 
-	return (ret == DEH_OK);
+	if (ret != DEH_OK)
+	{
+		DH_PrintMsg("CONVERSION FAILED:\n");
+		DH_PrintMsg("- %s\n", DehEdgeGetError());
+
+		delete container;
+		return NULL;
+	}
+
+	return container;
 }
 
-//
-// DH_ConvertLump
-//
-bool DH_ConvertLump(const byte *data, int length, const char *lumpname,
-	const char *outname)
+
+deh_container_c * DH_ConvertLump(const byte *data, int length, const char *lumpname)
 {
 	char info_name[100];
 
 	sprintf(info_name, "%s.LMP", lumpname);
 
 	DehEdgeStartup(&edge_dehconv_funcs);
-	DehEdgeSetVersion(EDGEVER);
 
 	dehret_e ret = DehEdgeAddLump((const char *)data, length, info_name);
 
@@ -139,21 +137,27 @@ bool DH_ConvertLump(const byte *data, int length, const char *lumpname,
 	{
 		DH_PrintMsg("FAILED to add lump:\n");
 		DH_PrintMsg("- %s\n", DehEdgeGetError());
-	}
-	else
-	{
-		ret = DehEdgeRunConversion(outname);
 
-		if (ret != DEH_OK)
-		{
-			DH_PrintMsg("CONVERSION FAILED:\n");
-			DH_PrintMsg("- %s\n", DehEdgeGetError());
-		}
+		DehEdgeShutdown();
+		return NULL;
 	}
+
+	deh_container_c * container = new deh_container_c();
+
+	ret = DehEdgeRunConversion(container);
 
 	DehEdgeShutdown();
 
-	return (ret == DEH_OK);
+	if (ret != DEH_OK)
+	{
+		DH_PrintMsg("CONVERSION FAILED:\n");
+		DH_PrintMsg("- %s\n", DehEdgeGetError());
+
+		delete container;
+		return NULL;
+	}
+
+	return container;
 }
 
 

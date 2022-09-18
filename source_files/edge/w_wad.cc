@@ -81,16 +81,16 @@ public:
 //??	data_file_c *_parent;
 
 	// lists for sprites, flats, patches (stuff between markers)
-	epi::u32array_c sprite_lumps;
-	epi::u32array_c flat_lumps;
-	epi::u32array_c patch_lumps;
-	epi::u32array_c colmap_lumps;
-	epi::u32array_c tx_lumps;
-	epi::u32array_c hires_lumps;
+	std::vector<int> sprite_lumps;
+	std::vector<int> flat_lumps;
+	std::vector<int> patch_lumps;
+	std::vector<int> colmap_lumps;
+	std::vector<int> tx_lumps;
+	std::vector<int> hires_lumps;
 
 	// level markers and skin markers
-	epi::u32array_c level_markers;
-	epi::u32array_c skin_markers;
+	std::vector<int> level_markers;
+	std::vector<int> skin_markers;
 
 	// ddf lump list
 	int ddf_lumps[NUM_DDF_READERS];
@@ -353,11 +353,10 @@ static bool IsSkin(const char *name)
 
 bool wad_file_c::HasLevel(const char *name) const
 {
-	for (int L = 0 ; L < level_markers.GetSize() ; L++)
-	{
-		if (strcmp(lumpinfo[level_markers[L]].name, name) == 0)
+	for (size_t i = 0 ; i < level_markers.size() ; i++)
+		if (strcmp(lumpinfo[level_markers[i]].name, name) == 0)
 			return true;
-	}
+
 	return false;
 }
 
@@ -420,13 +419,11 @@ struct Compare_lump_pred
 
 		// increasing name
 		int cmp = strcmp(C.name, D.name);
-		if (cmp < 0) return true;
-		if (cmp > 0) return false;
+		if (cmp != 0) return (cmp < 0);
 
 		// decreasing file number
 		cmp = C.file - D.file;
-		if (cmp > 0) return true;
-		if (cmp < 0) return false;
+		if (cmp != 0) return (cmp > 0);
 
 		// lump type
 		return C.kind > D.kind;
@@ -456,12 +453,10 @@ static void SortLumps(void)
 //
 static void SortSpriteLumps(wad_file_c *wad)
 {
-	if (wad->sprite_lumps.GetSize() < 2)
+	if (wad->sprite_lumps.size() < 2)
 		return;
 
-#define CMP(a, b) (strncmp(lumpinfo[a].name, lumpinfo[b].name, 8) < 0)
-	QSORT(int, wad->sprite_lumps, wad->sprite_lumps.GetSize(), CUTOFF);
-#undef CMP
+	std::sort(wad->sprite_lumps.begin(), wad->sprite_lumps.end(), Compare_lump_pred());
 
 #if 0  // DEBUGGING
 	{
@@ -596,7 +591,7 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 	{
 		lump_p->kind = LMKIND_Marker;
 		if (wad != NULL)
-			wad->skin_markers.Insert(lump);
+			wad->skin_markers.push_back(lump);
 		return;
 	}
 
@@ -703,37 +698,37 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 	if (within_sprite_list)
 	{
 		lump_p->kind = LMKIND_Sprite;
-		wad->sprite_lumps.Insert(lump);
+		wad->sprite_lumps.push_back(lump);
 	}
 
 	if (within_flat_list)
 	{
 		lump_p->kind = LMKIND_Flat;
-		wad->flat_lumps.Insert(lump);
+		wad->flat_lumps.push_back(lump);
 	}
 
 	if (within_patch_list)
 	{
 		lump_p->kind = LMKIND_Patch;
-		wad->patch_lumps.Insert(lump);
+		wad->patch_lumps.push_back(lump);
 	}
 
 	if (within_colmap_list)
 	{
 		lump_p->kind = LMKIND_Colmap;
-		wad->colmap_lumps.Insert(lump);
+		wad->colmap_lumps.push_back(lump);
 	}
 
 	if (within_tex_list)
 	{
 		lump_p->kind = LMKIND_TX;
-		wad->tx_lumps.Insert(lump);
+		wad->tx_lumps.push_back(lump);
 	}
 
 	if (within_hires_list)
 	{
 		lump_p->kind = LMKIND_HiRes;
-		wad->hires_lumps.Insert(lump);
+		wad->hires_lumps.push_back(lump);
 	}
 }
 
@@ -817,7 +812,7 @@ static void CheckForLevel(wad_file_c *wad, int lump, const char *name,
 			return;
 		}
 
-		wad->level_markers.Insert(lump);
+		wad->level_markers.push_back(lump);
 		return;
 	}
 
@@ -828,7 +823,7 @@ static void CheckForLevel(wad_file_c *wad, int lump, const char *name,
 	    strncmp(raw[3].name, "GL_SSECT", 8) == 0 &&
 	    strncmp(raw[4].name, "GL_NODES", 8) == 0)
 	{
-		wad->level_markers.Insert(lump);
+		wad->level_markers.push_back(lump);
 		return;
 	}
 
@@ -837,7 +832,7 @@ static void CheckForLevel(wad_file_c *wad, int lump, const char *name,
 
 	if (strncmp(raw[1].name, "TEXTMAP",  8) == 0)
 	{
-		wad->level_markers.Insert(lump);
+		wad->level_markers.push_back(lump);
 		return;
 	}
 }
@@ -1044,23 +1039,12 @@ void ProcessDehacked(data_file_c *df)
 	else
 		return;
 
-	// we just need a name that won't conflict with any other HWA file
-	// in the *current* session.  the following is crude, but works.
-	static int total = 0;
-
-	char base_name[64];
-	sprintf(base_name, "DEH_%04d.%s", total, EDGEHWAEXT);
-	total += 1;
-
-	std::string hwa_filename = epi::PATH_Join(cache_dir.c_str(), base_name);
-
-	I_Debugf("Actual_HWA_filename: %s\n", hwa_filename.c_str());
-
 	if (df->kind == FLKIND_Deh)
 	{
 		I_Printf("Converting DEH file: %s\n", df->name.c_str());
 
-		if (! DH_ConvertFile(df->name.c_str(), hwa_filename.c_str()))
+		df->deh = DH_ConvertFile(df->name.c_str());
+		if (df->deh == NULL)
 			I_Error("Failed to convert DeHackEd patch: %s\n", df->name.c_str());
 	}
 	else
@@ -1074,13 +1058,12 @@ void ProcessDehacked(data_file_c *df)
 		int length;
 		const byte *data = (const byte *)W_LoadLump(deh_lump, &length);
 
-		if (! DH_ConvertLump(data, length, lump_name, hwa_filename.c_str()))
+		df->deh = DH_ConvertLump(data, length, lump_name);
+		if (df->deh == NULL)
 			I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());
 
 		W_DoneWithLump(data);
 	}
-
-	W_AddPending(hwa_filename.c_str(), FLKIND_HWad);
 }
 
 void ProcessWad(data_file_c *df, size_t file_index)
@@ -1126,7 +1109,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 	{
 		raw_wad_entry_t& entry = raw_info[i];
 
-		bool allow_ddf = (df->kind == FLKIND_EWad) || (df->kind == FLKIND_PWad) || (df->kind == FLKIND_HWad);
+		bool allow_ddf = (df->kind == FLKIND_EWad) || (df->kind == FLKIND_PWad);
 
 		AddLump(df, entry.name, EPI_LE_S32(entry.pos), EPI_LE_S32(entry.size),
 				(int)file_index, allow_ddf);
@@ -1171,7 +1154,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 
 std::string W_BuildNodesForWad(data_file_c *df)
 {
-	if (df->wad->level_markers.GetSize() == 0)
+	if (df->wad->level_markers.empty())
 		return std::string();
 
 	std::string gwa_filename;
@@ -1213,23 +1196,23 @@ void W_ReadUMAPINFOLumps(void)
 		{
 			temp_level = new mapdef_c;
 			temp_level->name = M_Strupr(Maps.maps[i].mapname);
-			temp_level->lump.Set(M_Strupr(Maps.maps[i].mapname));
+			temp_level->lump = M_Strupr(Maps.maps[i].mapname);
 
 			mapdefs.Insert(temp_level);
 		}
 
 		if(Maps.maps[i].levelpic[0])
-			temp_level->namegraphic.Set(M_Strupr(Maps.maps[i].levelpic));
+			temp_level->namegraphic = M_Strupr(Maps.maps[i].levelpic);
 
 		if(Maps.maps[i].skytexture[0])	
-			temp_level->sky.Set(M_Strupr(Maps.maps[i].skytexture));
+			temp_level->sky = M_Strupr(Maps.maps[i].skytexture);
 
 		if(Maps.maps[i].levelname)
         {
             std::string temp_ref = epi::STR_Format("%sDesc", Maps.maps[i].mapname);
             std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].levelname);
             language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
-			temp_level->description.Set(temp_ref.c_str());
+			temp_level->description = temp_ref;
         }
 
 		if(Maps.maps[i].music[0])
@@ -1245,7 +1228,7 @@ void W_ReadUMAPINFOLumps(void)
 					static pl_entry_c *dynamic_plentry;
 					dynamic_plentry = new pl_entry_c;
 					dynamic_plentry->number = playlist.FindFree();
-					dynamic_plentry->info.Set(Maps.maps[i].music);
+					dynamic_plentry->info = Maps.maps[i].music;
 					dynamic_plentry->type = MUS_UNKNOWN; //MUS_MUS
 					dynamic_plentry->infotype = MUSINF_LUMP;
 					temp_level->music = dynamic_plentry->number;
@@ -1254,7 +1237,7 @@ void W_ReadUMAPINFOLumps(void)
 		}	
 		
 		if(Maps.maps[i].nextmap[0])	
-			temp_level->nextmapname.Set(M_Strupr(Maps.maps[i].nextmap));
+			temp_level->nextmapname = M_Strupr(Maps.maps[i].nextmap);
 
 /*
 		if(Maps.maps[i].interbackdrop[0])
@@ -1314,8 +1297,7 @@ void W_ReadUMAPINFOLumps(void)
 			std::string temp_ref = epi::STR_Format("%sINTERTEXT", Maps.maps[i].mapname);
             std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].intertext);
             language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
-			temp_level->f_end.text.clear();
-			temp_level->f_end.text.Set(temp_ref.c_str());
+			temp_level->f_end.text = temp_ref;
 			temp_level->f_end.picwait = 350; //10 seconds
 
 
@@ -1330,13 +1312,13 @@ void W_ReadUMAPINFOLumps(void)
 					rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Graphic, ILF_Null);
 					
 					if (! rim) // no graphic
-						temp_level->f_end.text_flat.Set("FLOOR4_8"); //should not happen
+						temp_level->f_end.text_flat = "FLOOR4_8"; //should not happen
 					else //background is a graphic
-						temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].interbackdrop));
+						temp_level->f_end.text_back = M_Strupr(Maps.maps[i].interbackdrop);
 				}
 				else //background is a flat
 				{
-					temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+					temp_level->f_end.text_flat = M_Strupr(Maps.maps[i].interbackdrop);
 				}
 			}
 		}	
@@ -1354,7 +1336,7 @@ void W_ReadUMAPINFOLumps(void)
 					static pl_entry_c *dynamic_plentry;
 					dynamic_plentry = new pl_entry_c;
 					dynamic_plentry->number = playlist.FindFree();
-					dynamic_plentry->info.Set(Maps.maps[i].intermusic);
+					dynamic_plentry->info = Maps.maps[i].intermusic;
 					dynamic_plentry->type = MUS_UNKNOWN; //MUS_MUS
 					dynamic_plentry->infotype = MUSINF_LUMP;
 					temp_level->f_end.music = dynamic_plentry->number;
@@ -1364,7 +1346,7 @@ void W_ReadUMAPINFOLumps(void)
 
 		if(Maps.maps[i].nextsecret[0])
 		{
-			temp_level->secretmapname.Set(M_Strupr(Maps.maps[i].nextsecret));
+			temp_level->secretmapname = M_Strupr(Maps.maps[i].nextsecret);
 			if (Maps.maps[i].intertextsecret)
 			{
 				
@@ -1402,7 +1384,7 @@ void W_ReadUMAPINFOLumps(void)
 				{
 					secret_level = new mapdef_c;
 					secret_level->name = M_Strupr(Maps.maps[i].nextsecret);
-					secret_level->lump.Set(M_Strupr(Maps.maps[i].nextsecret));
+					secret_level->lump = M_Strupr(Maps.maps[i].nextsecret);
 					mapdefs.Insert(secret_level);
 				}
 				std::string temp_ref = epi::STR_Format("%sPRETEXT", secret_level->name.c_str());
@@ -1410,10 +1392,9 @@ void W_ReadUMAPINFOLumps(void)
             	language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
 
 				//hack for shitty dbp shennanigans :/
-				if (temp_level->nextmapname = temp_level->secretmapname)
+				if (temp_level->nextmapname == temp_level->secretmapname)
 				{
-					temp_level->f_end.text.clear();
-					temp_level->f_end.text.Set(temp_ref.c_str());
+					temp_level->f_end.text = temp_ref;
 					temp_level->f_end.picwait = 700; //20 seconds
 
 					if(Maps.maps[i].interbackdrop[0])
@@ -1427,20 +1408,19 @@ void W_ReadUMAPINFOLumps(void)
 							rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Graphic, ILF_Null);
 							
 							if (! rim) // no graphic
-								temp_level->f_end.text_flat.Set("FLOOR4_8"); //should not happen
+								temp_level->f_end.text_flat = "FLOOR4_8"; //should not happen
 							else //background is a graphic
-								temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].interbackdrop));
+								temp_level->f_end.text_back = M_Strupr(Maps.maps[i].interbackdrop);
 						}
 						else //background is a flat
 						{
-							temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+							temp_level->f_end.text_flat = M_Strupr(Maps.maps[i].interbackdrop);
 						}
 					}
 				}
 				else
 				{
-					secret_level->f_pre.text.clear();
-					secret_level->f_pre.text.Set(temp_ref.c_str());
+					secret_level->f_pre.text = temp_ref;
 					secret_level->f_pre.picwait = 700; //20 seconds
 					if (temp_level->f_end.music)
 						secret_level->f_pre.music=temp_level->f_end.music;
@@ -1456,13 +1436,13 @@ void W_ReadUMAPINFOLumps(void)
 							rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Graphic, ILF_Null);
 							
 							if (! rim) // no graphic
-								secret_level->f_pre.text_flat.Set("FLOOR4_8"); //should not happen
+								secret_level->f_pre.text_flat = "FLOOR4_8"; //should not happen
 							else //background is a graphic
-								secret_level->f_pre.text_back.Set(M_Strupr(Maps.maps[i].interbackdrop));
+								secret_level->f_pre.text_back = M_Strupr(Maps.maps[i].interbackdrop);
 						}
 						else //background is a flat
 						{
-							secret_level->f_pre.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
+							secret_level->f_pre.text_flat = M_Strupr(Maps.maps[i].interbackdrop);
 						}
 					}
 				}
@@ -1472,10 +1452,10 @@ void W_ReadUMAPINFOLumps(void)
 			
 		
 		if(Maps.maps[i].exitpic[0])
-			temp_level->leavingbggraphic.Set(M_Strupr(Maps.maps[i].exitpic));
+			temp_level->leavingbggraphic = M_Strupr(Maps.maps[i].exitpic);
 
 		if(Maps.maps[i].enterpic[0])
-			temp_level->enteringbggraphic.Set(M_Strupr(Maps.maps[i].enterpic));
+			temp_level->enteringbggraphic = M_Strupr(Maps.maps[i].enterpic);
 
 		if(Maps.maps[i].endpic[0])
 		{
@@ -1523,10 +1503,9 @@ int W_GetSwitches(wad_file_c *wad)
 }
 void W_AddColourmaps(wad_file_c *wad)
 {
-	for (int i=0; i < wad->colmap_lumps.GetSize(); i++)
+	for (size_t i=0 ; i < wad->colmap_lumps.size() ; i++)
 	{
 		int lump = wad->colmap_lumps[i];
-
 		DDF_ColourmapAddRaw(W_GetLumpName(lump), W_LumpLength(lump));
 	}
 }
@@ -1827,19 +1806,19 @@ int W_FindFlatSequence(const char *start, const char *end,
 
 		// look for start name
 		int i;
-		for (i=0; i < wad->flat_lumps.GetSize(); i++)
+		for (i=0; i < (int)wad->flat_lumps.size(); i++)
 		{
 			if (strncmp(start, W_GetLumpName(wad->flat_lumps[i]), 8) == 0)
 				break;
 		}
 
-		if (i >= wad->flat_lumps.GetSize())
+		if (i >= (int)wad->flat_lumps.size())
 			continue;
 
 		(*s_offset) = i;
 
 		// look for end name
-		for (i++; i < wad->flat_lumps.GetSize(); i++)
+		for (i++; i < (int)wad->flat_lumps.size(); i++)
 		{
 			if (strncmp(end, W_GetLumpName(wad->flat_lumps[i]), 8) == 0)
 			{
@@ -1854,30 +1833,31 @@ int W_FindFlatSequence(const char *start, const char *end,
 }
 
 
-//
-// Returns NULL for an empty list.
-//
-epi::u32array_c * W_GetListLumps(int file, lumplist_e which)
+// returns NULL for an empty list.
+std::vector<int> * W_GetFlatList(int file)
 {
 	SYS_ASSERT(0 <= file && file < (int)data_files.size());
 
 	data_file_c *df = data_files[file];
 	wad_file_c *wad = df->wad;
 
-	if (wad == NULL)
-		return NULL;
+	if (wad != NULL)
+		return &wad->flat_lumps;
 
-	switch (which)
-	{
-		case LMPLST_Sprites: return &wad->sprite_lumps;
-		case LMPLST_Flats:   return &wad->flat_lumps;
-		case LMPLST_Patches: return &wad->patch_lumps;
+	return NULL;
+}
 
-		default: break;
-	}
+std::vector<int> * W_GetSpriteList(int file)
+{
+	SYS_ASSERT(0 <= file && file < (int)data_files.size());
 
-	I_Error("W_GetListLumps: bad `which' (%d)\n", which);
-	return NULL; /* NOT REACHED */
+	data_file_c *df = data_files[file];
+	wad_file_c *wad = df->wad;
+
+	if (wad != NULL)
+		return &wad->sprite_lumps;
+
+	return NULL;
 }
 
 
@@ -1936,6 +1916,24 @@ byte *W_LoadLump(const char *name, int *length)
 	return W_LoadLump(W_GetNumForName(name), length);
 }
 
+std::string W_LoadString(int lump)
+{
+	// WISH: optimise this to remove temporary buffer
+	int length;
+	byte *data = W_LoadLump(lump, &length);
+
+	std::string result((char *)data, length);
+
+	W_DoneWithLump(data);
+
+	return result;
+}
+
+std::string W_LoadString(const char *name)
+{
+	return W_LoadString(W_GetNumForName(name));
+}
+
 //
 // W_DoneWithLump
 //
@@ -1974,7 +1972,7 @@ void W_ProcessTX_HI(void)
 		if (wad == NULL)
 			continue;
 
-		for (int i = 0; i < (int)wad->tx_lumps.GetSize(); i++)
+		for (int i = 0; i < (int)wad->tx_lumps.size(); i++)
 		{
 			int lump = wad->tx_lumps[i];
 			W_ImageAddTX(lump, W_GetLumpName(lump), false);
@@ -1993,7 +1991,7 @@ void W_ProcessTX_HI(void)
 		if (wad == NULL)
 			continue;
 
-		for (int i = 0; i < (int)wad->hires_lumps.GetSize(); i++)
+		for (int i = 0; i < (int)wad->hires_lumps.size(); i++)
 		{
 			int lump = wad->hires_lumps[i];
 			W_ImageAddTX(lump, W_GetLumpName(lump), true);

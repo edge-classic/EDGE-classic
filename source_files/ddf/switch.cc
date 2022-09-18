@@ -116,17 +116,12 @@ static void SwitchClearAll(void)
 }
 
 
-bool DDF_ReadSwitch(void *data, int size)
+void DDF_ReadSwitch(const std::string& data)
 {
-#if (DEBUG_DDF)
-	epi::array_iterator_c it;
-	switchdef_c *sw;
-#endif
-
 	readinfo_t switches;
 
-	switches.memfile = (char*)data;
-	switches.memsize = size;
+	switches.memfile = (char*)data.c_str();
+	switches.memsize = (int)  data.size();
 	switches.tag = "SWITCHES";
 	switches.entries_per_dot = 2;
 
@@ -138,10 +133,12 @@ bool DDF_ReadSwitch(void *data, int size)
 	switches.finish_entry = SwitchFinishEntry;
 	switches.clear_all    = SwitchClearAll;
 
-	if (! DDF_MainReadFile(&switches))
-		return false;
+	DDF_MainReadFile(&switches);
 
 #if (DEBUG_DDF)
+	epi::array_iterator_c it;
+	switchdef_c *sw;
+
 	I_Debugf("DDF_ReadSW: Switch List:\n");
 
 	for (it = switchdefs.GetBaseIterator(); it.IsValid(); it++)
@@ -152,8 +149,6 @@ bool DDF_ReadSwitch(void *data, int size)
 						i, sw->on_name, sw->off_name);
 	}
 #endif
-
-	return true;
 }
 
 //
@@ -198,8 +193,8 @@ void DDF_ParseSWITCHES(const byte *data, int size)
 
 		def->Default();
 		
-		def->on_name.Set( on_name);
-		def->off_name.Set(off_name);
+		def->on_name  = on_name;
+		def->off_name = off_name;
 
 		switchdefs.Insert(def);
 	}

@@ -98,7 +98,7 @@ static void DDF_MusicParseInfo(const char *info)
 
 	// Remained is the string reference: filename/lumpname/track-number
 	pos++;
-	dynamic_plentry->info.Set(&info[pos]);
+	dynamic_plentry->info = &info[pos];
 
 	return;
 }
@@ -170,14 +170,12 @@ static void PlaylistClearAll(void)
 }
 
 
-bool DDF_ReadMusicPlaylist(void *data, int size)
+void DDF_ReadMusicPlaylist(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t playlistinfo;
 
-	playlistinfo.memfile = (char*)data;
-	playlistinfo.memsize = size;
+	playlistinfo.memfile = (char*)data.c_str();
+	playlistinfo.memsize = (int)  data.size();
 	playlistinfo.tag = "PLAYLISTS";
 	playlistinfo.entries_per_dot = 3;
 
@@ -189,21 +187,17 @@ bool DDF_ReadMusicPlaylist(void *data, int size)
 	playlistinfo.finish_entry = PlaylistFinishEntry;
 	playlistinfo.clear_all    = PlaylistClearAll;
 
-	return DDF_MainReadFile(&playlistinfo);
+	DDF_MainReadFile(&playlistinfo);
 }
 
-//
-// DDF_MusicPlaylistInit
-//
+
 void DDF_MusicPlaylistInit(void)
 {
 	// -ACB- 2004/05/04 Use container 
 	playlist.Clear();
 }
 
-//
-// DDF_MusicPlaylistCleanUp
-//
+
 void DDF_MusicPlaylistCleanUp(void)
 {
 	// -ACB- 2004/05/04 Cut our playlist down to size

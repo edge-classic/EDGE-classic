@@ -45,7 +45,7 @@ public:
 
 	int char1, char2;  // range
 
-	epi::strent_c patch1;
+	std::string patch1;
 };
 
 class fontdef_c
@@ -59,14 +59,14 @@ public:
 	void CopyDetail(const fontdef_c &src);
 
 	// Member vars....
-	epi::strent_c name;
+	std::string name;
 
 	fonttype_e type;
 
 	fontpatch_c *patches;
-	epi::strent_c missing_patch;
+	std::string missing_patch;
 
-	epi::strent_c image_name;
+	std::string image_name;
 
 	int spacing;
 
@@ -99,7 +99,8 @@ public:
 extern fontdef_container_c fontdefs;
 
 void DDF_MainLookupFont(const char *info, void *storage);
-bool DDF_ReadFonts(void *data, int size);
+
+void DDF_ReadFonts(const std::string& data);
 
 #endif  /* __DDF_FONT__ */
 

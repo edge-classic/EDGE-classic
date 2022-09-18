@@ -77,8 +77,8 @@ void R_AddFlatAnim(animdef_c *anim)
 {
 	if (anim->pics.GetSize() == 0)  // old way
 	{
-		int start = W_CheckNumForName(anim->startname);
-		int end   = W_CheckNumForName(anim->endname);
+		int start = W_CheckNumForName(anim->startname.c_str());
+		int end   = W_CheckNumForName(anim->endname.c_str());
 
 		int file;
 		int s_offset, e_offset;
@@ -91,21 +91,21 @@ void R_AddFlatAnim(animdef_c *anim)
 			return;
 		}
 
-		file = W_FindFlatSequence(anim->startname, anim->endname, 
+		file = W_FindFlatSequence(anim->startname.c_str(), anim->endname.c_str(), 
 				&s_offset, &e_offset);
 
 		if (file < 0)
 		{
 			I_Warning("Missing flat animation: %s-%s not in any wad.\n",
-					(const char*)anim->startname, (const char*)anim->endname);
+					anim->startname.c_str(), anim->endname.c_str());
 			return;
 		}
 
-		epi::u32array_c *lumps = W_GetListLumps(file, LMPLST_Flats);
+		std::vector<int> *lumps = W_GetFlatList(file);
 		if (lumps == NULL)
 			return;
 
-		int total = lumps->GetSize();
+		int total = (int)lumps->size();
 
 		SYS_ASSERT(s_offset <= e_offset);
 		SYS_ASSERT(e_offset < total);
@@ -180,7 +180,7 @@ void R_AddTextureAnim(animdef_c *anim)
 	{
 		int set, s_offset, e_offset;
 
-		set = W_FindTextureSequence(anim->startname, anim->endname,
+		set = W_FindTextureSequence(anim->startname.c_str(), anim->endname.c_str(),
 				&s_offset, &e_offset);
 
 		if (set < 0)
@@ -275,11 +275,11 @@ void W_InitFlats(void)
 
 	for (file=0; file < max_file; file++)
 	{
-		epi::u32array_c * lumps = W_GetListLumps(file, LMPLST_Flats);
+		std::vector<int> *lumps = W_GetFlatList(file);
 		if (lumps == NULL)
 			continue;
 
-		int lumpnum = lumps->GetSize();
+		int lumpnum = (int)lumps->size();
 
 		for (j=0; j < lumpnum; j++)
 		{

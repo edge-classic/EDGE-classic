@@ -294,7 +294,7 @@ public:
 	float other;
 
     // Floor texture to change to.
-	lumpname_c tex;
+	std::string tex;
 
 	// How much crush damage to do (0 for none).
 	int crush_damage;
@@ -459,11 +459,11 @@ public:
 
   	// effect object spawned when going in...
 	const mobjtype_c *inspawnobj;	// FIXME! Do mobjtypes.Lookup()?
-	epi::strent_c inspawnobj_ref;
+	std::string inspawnobj_ref;
 
   	// effect object spawned when going out...
 	const mobjtype_c *outspawnobj;	// FIXME! Do mobjtypes.Lookup()?
-	epi::strent_c outspawnobj_ref;
+	std::string outspawnobj_ref;
 
   	// Teleport delay
 	int delay;
@@ -730,13 +730,13 @@ public:
 	//Lobo: item to spawn (or NULL).  The mobjdef pointer is only valid after
 	// DDF_MobjCleanUp() has been called.
 	const mobjtype_c *effectobject;
-	epi::strent_c effectobject_ref;
+	std::string effectobject_ref;
 	
 	// Handle this line differently
 	bool glass;
 	
 	// line texture to change to.
-	lumpname_c brokentex;
+	std::string brokentex;
 
 	// LIGHT SPECIFIC
 	// Things may be added here; start strobing/flashing glowing lights.
@@ -752,7 +752,7 @@ public:
 	scroll_part_e scroll_parts;
 
 	// -ACB- 1998/09/11 Message handling
-	epi::strent_c failedmessage;
+	std::string failedmessage;
 
     // -AJA- 2011/01/14: sound for unusable locked door
 	struct sfx_s *failed_sfx;
@@ -937,7 +937,7 @@ public:
 	angle_t push_angle;
 
 	// Dasho 2022 - Params for user-defined reverb in sectors
-	epi::strent_c reverb_type;
+	std::string reverb_type;
 	float reverb_ratio;
 	float reverb_delay;
 
@@ -976,8 +976,8 @@ public:
 extern linetype_container_c linetypes;		// -ACB- 2004/07/05 Implemented
 extern sectortype_container_c sectortypes;	// -ACB- 2004/07/05 Implemented
 
-bool DDF_ReadLines(void *data, int size);
-bool DDF_ReadSectors(void *data, int size);
+void DDF_ReadLines(const std::string& data);
+void DDF_ReadSectors(const std::string& data);
 
 #endif // __DDF_LINE_H__
 

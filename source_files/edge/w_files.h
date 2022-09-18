@@ -37,7 +37,6 @@ typedef enum
 	FLKIND_PWad,      // normal .wad file
 	FLKIND_EWad,      // EDGE.wad
 	FLKIND_GWad,      // ajbsp node wad
-	FLKIND_HWad,      // deHacked wad
 
 	FLKIND_Folder,    // a folder somewhere
 	FLKIND_PK3,       // pk3 (zip) package
@@ -51,6 +50,7 @@ filekind_e;
 
 class wad_file_c;
 class pack_file_c;
+class deh_container_c;
 
 
 class data_file_c
@@ -65,11 +65,14 @@ public:
 	// file object   [ TODO review when active ]
 	epi::file_c *file;
 
-	// for FLKIND_IWad, PWad ... HWad
+	// for FLKIND_IWad, PWad, EWad, GWad.
 	wad_file_c * wad;
 
 	// for FLKIND_PK3
 	pack_file_c * pack;
+
+	// for FLKIND_Deh, or a wad with a DEHACKED lump
+	deh_container_c * deh;
 
 public:
 	data_file_c(const char *_name, int _kind);

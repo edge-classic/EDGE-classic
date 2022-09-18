@@ -62,7 +62,7 @@ public:
 	void CopyDetail(weapondef_c &src);
 
 	// Weapon's name, etc...
-	epi::strent_c name;
+	std::string name;
 
 	atkdef_c *attack[2];	// Attack type used.
   
@@ -217,7 +217,7 @@ public:
 
 extern weapondef_container_c weapondefs;	// -ACB- 2004/07/14 Implemented
 
-bool DDF_ReadWeapons(void *data, int size);
+void DDF_ReadWeapons(const std::string& data);
 
 #endif // __DDF_WEAPON_H__
 

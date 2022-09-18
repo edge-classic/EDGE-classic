@@ -42,7 +42,7 @@ public:
 	rgbcol_t colour;
 	percent_t translucency;
 
-	epi::strent_c image_name;
+	std::string image_name;
 
 	float scale;
 	float aspect;
@@ -80,9 +80,10 @@ public:
 
 	u8_t position;
 	percent_t translucency;
-	const char *alt_cursor;
-	const char *pos_string; // Here for user convenience, is translated to a value for position
-	const char *cursor_string;
+
+	std::string alt_cursor;
+	std::string pos_string; // Here for user convenience, is translated to a value for position
+	std::string cursor_string;
 
 	bool border;
 };
@@ -126,7 +127,7 @@ public:
 	void CopyDetail(const styledef_c &src);
 
 	// Member vars....
-	epi::strent_c name;
+	std::string name;
 
 	backgroundstyle_c bg;
 
@@ -161,7 +162,7 @@ public:
 	int y_offset;
 
 	u8_t entry_alignment;
-	const char *entry_align_string; // User convenience
+	std::string entry_align_string; // User convenience
 
 private:
 	// disable copy construct and assignment operator
@@ -192,7 +193,7 @@ public:
 extern styledef_container_c styledefs;
 extern styledef_c *default_style;
 
-bool DDF_ReadStyles(void *data, int size);
+void DDF_ReadStyles(const std::string& data);
 
 #endif  /*__DDF_STYLE_H__*/
 

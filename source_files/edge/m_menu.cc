@@ -802,10 +802,10 @@ void M_DrawLoad(void)
 		}
 	}
 	image_c *cursor;
-	if (style->def->cursor.cursor_string)
+	if (style->def->cursor.cursor_string != "")
 		cursor = NULL;
-	else if (style->def->cursor.alt_cursor)
-		cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor);
+	else if (style->def->cursor.alt_cursor != "")
+		cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor.c_str());
 	else
 		cursor = menu_skull[0];
 	if (cursor)
@@ -847,7 +847,7 @@ void M_DrawLoad(void)
 	{
 		float old_alpha = HUD_GetAlpha();
 		HUD_SetAlpha(style->def->cursor.translucency);
-		float TempWidth = style->fonts[0]->StringWidth(style->def->cursor.cursor_string) * style->def->text[styledef_c::T_TEXT].scale;
+		float TempWidth = style->fonts[0]->StringWidth(style->def->cursor.cursor_string.c_str()) * style->def->text[styledef_c::T_TEXT].scale;
 		float TempSpacer = style->fonts[0]->CharWidth(style->def->cursor.cursor_string[0]) * style->def->text[styledef_c::T_TEXT].scale * 0.5;
 		if (LineHeight == IM_HEIGHT(C))
 		{
@@ -855,38 +855,38 @@ void M_DrawLoad(void)
 			if (style->def->cursor.position == style->def->C_BOTH)
 			{
 				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 			}
 			else if (style->def->cursor.position == style->def->C_CENTER)
 				HL_WriteText(style, 0, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 			else if (style->def->cursor.position == style->def->C_RIGHT)
 				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 			else
 				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 		}
 		else
 		{
 			if (style->def->cursor.position == style->def->C_BOTH)
 			{
 				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 			}
 			else if (style->def->cursor.position == style->def->C_CENTER)
 				HL_WriteText(style, 0, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 			else if (style->def->cursor.position == style->def->C_RIGHT)
 				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 			else
 				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 		}
 		HUD_SetAlpha(old_alpha);
 	}
@@ -1046,10 +1046,10 @@ void M_DrawSave(void)
 		}
 	}
 	image_c *cursor;
-	if (style->def->cursor.cursor_string)
+	if (style->def->cursor.cursor_string != "")
 		cursor = NULL;
-	else if (style->def->cursor.alt_cursor)
-		cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor);
+	else if (style->def->cursor.alt_cursor != "")
+		cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor.c_str());
 	else
 		cursor = menu_skull[0];
 	if (cursor)
@@ -1091,7 +1091,7 @@ void M_DrawSave(void)
 	{
 		float old_alpha = HUD_GetAlpha();
 		HUD_SetAlpha(style->def->cursor.translucency);
-		float TempWidth = style->fonts[0]->StringWidth(style->def->cursor.cursor_string) * style->def->text[styledef_c::T_TEXT].scale;
+		float TempWidth = style->fonts[0]->StringWidth(style->def->cursor.cursor_string.c_str()) * style->def->text[styledef_c::T_TEXT].scale;
 		float TempSpacer = style->fonts[0]->CharWidth(style->def->cursor.cursor_string[0]) * style->def->text[styledef_c::T_TEXT].scale * 0.5;
 		if (LineHeight == IM_HEIGHT(C))
 		{
@@ -1099,38 +1099,38 @@ void M_DrawSave(void)
 			if (style->def->cursor.position == style->def->C_BOTH)
 			{
 				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 			}
 			else if (style->def->cursor.position == style->def->C_CENTER)
 				HL_WriteText(style, 0, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 			else if (style->def->cursor.position == style->def->C_RIGHT)
 				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 			else
 				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string);
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 		}
 		else
 		{
 			if (style->def->cursor.position == style->def->C_BOTH)
 			{
 				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 			}
 			else if (style->def->cursor.position == style->def->C_CENTER)
 				HL_WriteText(style, 0, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 			else if (style->def->cursor.position == style->def->C_RIGHT)
 				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 			else
 				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string);
+					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 		}
 		HUD_SetAlpha(old_alpha);
 	}
@@ -1352,13 +1352,13 @@ static void CreateEpisodeMenu(void)
 		Z_StrNCpy(EpisodeMenu[e].patch_name, g->namegraphic.c_str(), 8);
 		EpisodeMenu[e].patch_name[8] = 0;
 		
-		if(g->description) 
+		if (g->description != "")
 		{
-			EpisodeMenu[e].name =  language[g->description];
+			EpisodeMenu[e].name = language[g->description];
 		}
 		else
 		{
-			EpisodeMenu[e].name =  g->name;
+			EpisodeMenu[e].name = g->name.c_str();
 		}
 
 		if (EpisodeMenu[e].patch_name[0])
@@ -1462,7 +1462,7 @@ static void DoStartLevel(skill_t skill)
 		g = ITERATOR_TO_TYPE(it, gamedef_c*);
 
 		//Lobo 2022: lets use text instead of M_EPIxx graphic
-		if(g->description) 
+		if (g->description != "") 
 		{
 			std::string gamedef_episode = epi::STR_Format("%s",language[g->description.c_str()]);
 			if (DDF_CompareName(gamedef_episode.c_str(), chosen_episode.c_str()) == 0)
@@ -1918,7 +1918,7 @@ bool M_Responder(event_t * ev)
 		{
 			std::string s = input_string.c_str();
 
-			if (input_string.size() > 0)
+			if (input_string != "")
 			{
 				input_string.resize(input_string.size() - 1);
 			}
@@ -2572,10 +2572,10 @@ void M_Drawer(void)
 		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
 		{
 			image_c *cursor;
-			if (style->def->cursor.cursor_string)
+			if (style->def->cursor.cursor_string != "")
 				cursor = NULL;
-			else if (style->def->cursor.alt_cursor)
-				cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor);
+			else if (style->def->cursor.alt_cursor != "")
+				cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor.c_str());
 			else
 				cursor = menu_skull[0];
 			if (cursor)
@@ -2616,24 +2616,24 @@ void M_Drawer(void)
 			{
 				float old_alpha = HUD_GetAlpha();
 				HUD_SetAlpha(style->def->cursor.translucency);
-				float TempWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(style->def->cursor.cursor_string) * txtscale;
+				float TempWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(style->def->cursor.cursor_string.c_str()) * txtscale;
 				float TempSpacer = style->fonts[styledef_c::T_TEXT]->CharWidth(style->def->cursor.cursor_string[0]) * txtscale * 0.2;
 				if (style->def->cursor.position == style->def->C_BOTH)
 				{
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
-						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string.c_str());
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
-						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string.c_str());
 				}
 				else if (style->def->cursor.position == style->def->C_CENTER)
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2), 
-						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string.c_str());
 				else if (style->def->cursor.position == style->def->C_RIGHT)
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
-						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string.c_str());
 				else
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
-						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string.c_str());
 				HUD_SetAlpha(old_alpha);
 			}
 		}
@@ -2681,10 +2681,10 @@ void M_Drawer(void)
 		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
 		{
 			image_c *cursor;
-			if (style->def->cursor.cursor_string)
+			if (style->def->cursor.cursor_string != "")
 				cursor = NULL;
-			else if (style->def->cursor.alt_cursor)
-				cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor);
+			else if (style->def->cursor.alt_cursor != "")
+				cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor.c_str());
 			else
 				cursor = menu_skull[0];
 			if (cursor)
@@ -2732,24 +2732,24 @@ void M_Drawer(void)
 			{
 				float old_alpha = HUD_GetAlpha();
 				HUD_SetAlpha(style->def->cursor.translucency);
-				float TempWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(style->def->cursor.cursor_string) * txtscale;
+				float TempWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(style->def->cursor.cursor_string.c_str()) * txtscale;
 				float TempSpacer = style->fonts[styledef_c::T_TEXT]->CharWidth(style->def->cursor.cursor_string[0]) * txtscale * 0.2;
 				if (style->def->cursor.position == style->def->C_BOTH)
 				{
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
-						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string.c_str());
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
-						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string.c_str());
 				}
 				else if (style->def->cursor.position == style->def->C_CENTER)
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2), 
-						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string.c_str());
 				else if (style->def->cursor.position == style->def->C_RIGHT)
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
-						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string.c_str());
 				else
 					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
-						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string);
+						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string.c_str());
 				HUD_SetAlpha(old_alpha);
 			}
 		}

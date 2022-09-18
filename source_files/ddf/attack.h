@@ -85,7 +85,7 @@ public:
 	void CopyDetail(atkdef_c &src);
 
 	// Member vars
-	epi::strent_c name;
+	std::string name;
 
 	attackstyle_e attackstyle;
 	attackflags_e flags;
@@ -112,7 +112,7 @@ public:
 	// object init state.  The integer value only becomes valid after
 	// DDF_AttackCleanUp() has been called.
 	int objinitstate;
-	epi::strent_c objinitstate_ref;
+	std::string objinitstate_ref;
   
 	percent_t notracechance;
 	percent_t keepfirechance;
@@ -123,13 +123,13 @@ public:
 	// spawned object (for spawners).  The mobjdef pointer only becomes
 	// valid after DDF_AttackCleanUp().  Can be NULL.
 	const mobjtype_c *spawnedobj;
-	epi::strent_c spawnedobj_ref;
+	std::string spawnedobj_ref;
 	int spawn_limit;
   
 	// puff object.  The mobjdef pointer only becomes valid after
 	// DDF_AttackCleanUp() has been called.  Can be NULL.
 	const mobjtype_c *puff;
-	epi::strent_c puff_ref;
+	std::string puff_ref;
 
 private:
 	// disable copy construct and assignment operator
@@ -162,7 +162,7 @@ public:
 
 extern atkdef_container_c atkdefs;			// -ACB- 2004/06/09 Implemented
 
-bool DDF_ReadAtks(void *data, int size);
+void DDF_ReadAtks(const std::string& data);
 
 #endif // __DDF_ATK_H__
 

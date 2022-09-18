@@ -45,14 +45,6 @@ public:
 	int texture2;
 };
 
-typedef enum
-{
-	LMPLST_Sprites,
-	LMPLST_Flats,
-	LMPLST_Patches
-}
-lumplist_e;
-
 void W_ReadCoalLumps(void);
 
 int W_CheckNumForName(const char *name);
@@ -70,6 +62,9 @@ byte *W_LoadLump(int lump, int *length = NULL);
 byte *W_LoadLump(const char *name, int *length = NULL);
 void W_DoneWithLump(const void *ptr);
 
+std::string W_LoadString(int lump);
+std::string W_LoadString(const char *name);
+
 bool W_VerifyLump(int lump);
 bool W_VerifyLumpName(int lump, const char *name);
 const char *W_GetLumpName(int lump);
@@ -78,9 +73,9 @@ epi::file_c *W_OpenLump(int lump);
 epi::file_c *W_OpenLump(const char *name);
 
 int W_GetPaletteForLump(int lump);
-int W_FindFlatSequence(const char *start, const char *end, 
-    int *s_offset, int *e_offset);
-epi::u32array_c * W_GetListLumps(int file, lumplist_e which);  // FIXME split up
+int W_FindFlatSequence(const char *start, const char *end, int *s_offset, int *e_offset);
+std::vector<int> * W_GetFlatList  (int file);
+std::vector<int> * W_GetSpriteList(int file);
 void W_GetTextureLumps(int file, wadtex_resource_c *res);
 void W_ProcessTX_HI(void);
 int W_GetFileForLump(int lump);

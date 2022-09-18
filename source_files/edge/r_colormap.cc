@@ -245,7 +245,7 @@ static void LoadColourmap(const colourmap_c * colm)
 	// the cache struct is touched.
 	colmapcache_t *cache = (colmapcache_t *)&colm->cache; // Intentional Const Override
 
-	lump = W_GetNumForName(colm->lump_name);
+	lump = W_GetNumForName(colm->lump_name.c_str());
 	size = W_LumpLength(lump);
 	data = (const byte*)W_CacheLumpNum(lump);
 

@@ -78,7 +78,7 @@ static void ColmapStartEntry(const char *name, bool extend)
 	// not found, create a new one
 	dynamic_colmap = new colourmap_c;
 
-	dynamic_colmap->name.Set(name);
+	dynamic_colmap->name = name;
 
 	// make sure fonts get whitened properly (as the default)
 	if (strnicmp(name, "TEXT", 4) == 0)
@@ -133,14 +133,12 @@ static void ColmapClearAll(void)
 }
 
 
-bool DDF_ReadColourMaps(void *data, int size)
+void DDF_ReadColourMaps(const std::string& data)
 {
-	SYS_ASSERT(data);
-
 	readinfo_t colm_r;
 
-	colm_r.memfile = (char*)data;
-	colm_r.memsize = size;
+	colm_r.memfile = (char*)data.c_str();
+	colm_r.memsize = (int)  data.size();
 	colm_r.tag = "COLOURMAPS";
 	colm_r.entries_per_dot = 2;
 
@@ -152,7 +150,7 @@ bool DDF_ReadColourMaps(void *data, int size)
 	colm_r.finish_entry = ColmapFinishEntry;
 	colm_r.clear_all    = ColmapClearAll;
 
-	return DDF_MainReadFile(&colm_r);
+	DDF_MainReadFile(&colm_r);
 }
 
 
@@ -235,8 +233,7 @@ void DDF_ColourmapAddRaw(const char *lump_name, int size)
 	def->Default();
 
 	def->name = lump_name;
-
-	def->lump_name.Set(lump_name);
+	def->lump_name = lump_name;
 
 	def->start  = 0;
 	def->length = MIN(32, size / 256);

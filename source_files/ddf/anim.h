@@ -40,7 +40,7 @@ public:
 	void CopyDetail(animdef_c &src);
 
 	// Member vars....
-	epi::strent_c name;
+	std::string name;
 
 	enum  // types
 	{
@@ -55,8 +55,8 @@ public:
 	epi::strlist_c pics;
 
 	// first and last names in TEXTURE1/2 lump
-	lumpname_c startname;
-	lumpname_c endname;
+	std::string startname;
+	std::string endname;
 
 	// how many 1/35s ticks each frame lasts
 	int speed;
@@ -86,8 +86,9 @@ public:
 
 extern animdef_container_c animdefs;		// -ACB- 2004/06/03 Implemented 
 
-bool DDF_ReadAnims(void *data, int size);
+void DDF_ReadAnims(const std::string& data);
 
+// handle the BOOM lump
 void DDF_ParseANIMATED(const byte *data, int size);
 
 #endif  /* __DDF_ANIM__ */

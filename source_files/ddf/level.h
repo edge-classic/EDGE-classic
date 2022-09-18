@@ -46,9 +46,9 @@ public:
 	map_finaledef_c& operator=(map_finaledef_c &rhs);
 
 	// Text
-	epi::strent_c text;
-	lumpname_c text_back;
-	lumpname_c text_flat;
+	std::string text;
+	std::string text_back;
+	std::string text_flat;
 	float text_speed;
 	unsigned int text_wait;
 	const colourmap_c *text_colmap;
@@ -123,27 +123,27 @@ public:
 	void CopyDetail(mapdef_c &src);
 
 	// Member vars....
-	epi::strent_c name;
+	std::string name;
 
 ///---	// next in the list
 ///---	mapdef_c *next;				// FIXME!! Gamestate information
 
 	// level description, a reference to languages.ldf
-	epi::strent_c description;
+	std::string description;
   
-  	lumpname_c namegraphic;
-	lumpname_c leavingbggraphic;
-	lumpname_c enteringbggraphic;
-  	lumpname_c lump;
-   	lumpname_c sky;
-   	lumpname_c surround;
+  	std::string namegraphic;
+	std::string leavingbggraphic;
+	std::string enteringbggraphic;
+  	std::string lump;
+   	std::string sky;
+   	std::string surround;
    	
    	int music;
  
 	int partime;
 
 	gamedef_c *episode;  // set during DDF_CleanUp
-	epi::strent_c episode_name;			
+	std::string episode_name;			
 
 	// flags come in two flavours: "force on" and "force off".  When not
 	// forced, then the user is allowed to control it (not applicable to
@@ -152,10 +152,10 @@ public:
 	int force_off;
 
 	// name of the next normal level
-	lumpname_c nextmapname;
+	std::string nextmapname;
 
 	// name of the secret level
-	lumpname_c secretmapname;
+	std::string secretmapname;
 
 	// -KM- 1998/11/25 All lines with this trigger will be activated at
 	// the level start. (MAP07)
@@ -196,7 +196,7 @@ public:
 
 extern mapdef_container_c mapdefs;			// -ACB- 2004/06/29 Implemented
 
-bool DDF_ReadLevels(void *data, int size);
+void DDF_ReadLevels(const std::string& data);
 
 #endif // __DDF_LEVEL_H__
 

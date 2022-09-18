@@ -65,6 +65,11 @@ public:
 	
 	const char* operator[](const char *refname);
 
+	const char* operator[](const std::string& refname)
+	{
+		return (*this)[refname.c_str()];
+	}
+
 	ddf_bi_lang_c* buildinfo;
 	
 	void AddOrReplace(const char *ref, const char *value);
@@ -74,7 +79,7 @@ public:
 
 extern language_c language;   // -ACB- 2004/06/27 Implemented
 
-bool DDF_ReadLangs(void *data, int size);
+void DDF_ReadLangs(const std::string& data);
 
 #endif /* __DDF_LANG_H__ */
 

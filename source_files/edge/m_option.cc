@@ -850,9 +850,7 @@ void M_OptCheckNetgame(void)
 	}
 }
 
-//
-// Menu Initialisation
-//
+
 void M_OptMenuInit()
 {
 	option_menuon = 0;
@@ -890,29 +888,13 @@ void M_OptMenuInit()
 	M_ChangeBlood(-1);
 }
 
-//
-// M_OptTicker
-//
-// Text menu ticker
-//
+
 void M_OptTicker(void)
 {
-///--  	if (testticker > 0)
-///--  	{
-///--  		testticker--;
-///--  	}
-///--  	else if (!testticker)
-///--  	{
-///--  		testticker--;
-///--  		M_RestoreResSettings(-1);
-///--  	}
+	// nothing needed
 }
 
-//
-// M_OptDrawer
-//
-// Text menu drawer
-//
+
 void M_OptDrawer()
 {
 	char tempstring[80];

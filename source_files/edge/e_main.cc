@@ -619,7 +619,8 @@ void E_Display(void)
 	// menus go directly to the screen
 	M_Drawer();  // menu is drawn even on top of everything (except console)
 
-	N_NetUpdate();  // send out any new accumulation
+	// process mouse and keyboard events
+	N_NetUpdate();
 
 	CON_Drawer();
 
@@ -1705,16 +1706,18 @@ void E_Tick(void)
 	SYS_ASSERT(counts > 0);
 
 	// run the tics
-	for (; counts > 0; counts--)
+	for (; counts > 0 ; counts--)
 	{
-		CON_Ticker();
-		M_Ticker();
+		// run a step in the physics (etc)
 		G_Ticker();
 
+		// user interface stuff (skull anim, etc)
+		CON_Ticker();
+		M_Ticker();
 		S_SoundTicker(); 
-		S_MusicTicker(); // -ACB- 1999/11/13 Improved music update routines
+		S_MusicTicker();
 
-		// check for new console commands
+		// process mouse and keyboard events
 		N_NetUpdate();
 	}
 }

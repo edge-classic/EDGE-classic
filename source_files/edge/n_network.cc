@@ -284,7 +284,7 @@ int N_TryRunTics()
 	if (tics > realtics + 1)
 		tics = realtics + 1;
 	else
-		tics = std::max(1, std::min(tics, realtics));
+		tics = std::max(std::min(tics, realtics), 1);
 
 #ifdef DEBUG_TICS
 	I_Debugf("=== maketic %d gametic %d | real %d using %d\n",

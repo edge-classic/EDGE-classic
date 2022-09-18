@@ -277,12 +277,24 @@ void N_ResetTics(void)
 
 void N_QuitNetGame(void)
 {
-	// !!!! FIXME: N_QuitNetGame
+	// TODO send a quit message to all peers
+
+	// wait a bit
+	if (false)  // have_peers
+		I_Sleep(250);
+
+	// TODO close open sockets
 }
 
 
 void N_TiccmdTicker(void)
 {
+	// this is called from G_Ticker, and is the only place allowed to
+	// advance `gametic` (allowing the game simulation to advance).
+
+	// all we do here is grab the ticcmd for the active players
+	// (from ones built earler in N_BuildTiccmds).
+
 	// gametic <= maketic is a system-wide invariant.  However,
 	// new levels are loaded during G_Ticker(), resetting them
 	// both to zero, hence if we increment gametic here, we

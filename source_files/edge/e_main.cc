@@ -1710,6 +1710,7 @@ void E_Tick(void)
 		CON_Ticker();
 		M_Ticker();
 		G_Ticker();
+
 		S_SoundTicker(); 
 		S_MusicTicker(); // -ACB- 1999/11/13 Improved music update routines
 

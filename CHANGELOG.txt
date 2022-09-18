@@ -64,6 +64,10 @@ New Features
   [4474] EDGE Yellow Hue
   [4475] EDGE Purple Hue
   [4476] EDGE Grey Hue
+  
++ THINGS.DDF
+  - New property: SIGHT_DISTANCE=<number> which is how far a thing can see in map units.
+  
 
 CHANGELOG for EDGE-Classic 1.2 (since EDGE-Classic 1.1)
 ====================================

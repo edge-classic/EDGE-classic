@@ -198,6 +198,8 @@ const commandlist_t thing_commands[] =
 	DF("ARMOUR_DEPLETION",  armour_deplete, DDF_MainGetPercentAny),  // -AJA- 2007/08/22
 	DF("ARMOUR_CLASS",  armour_class, DDF_MainGetBitSet),  // -AJA- 2007/08/22
 
+	DF("SIGHT_DISTANCE", sight_distance, DDF_MainGetFloat), //Lobo 2022
+
 	// -AJA- backwards compatibility cruft...
 	DF("EXPLOD_DAMAGE", explode_damage.nominal, DDF_MainGetFloat),
 	DF("EXPLOSION_DAMAGE", explode_damage.nominal, DDF_MainGetFloat),
@@ -2332,6 +2334,8 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	respawneffect_ref = src.respawneffect_ref; 
 	spitspot = src.spitspot; 
 	spitspot_ref = src.spitspot_ref; 
+
+	sight_distance = src.sight_distance;
 }
 
 
@@ -2463,6 +2467,8 @@ void mobjtype_c::Default()
 	respawneffect_ref.clear();
 	spitspot = NULL;
 	spitspot_ref.clear();
+
+	sight_distance = -1;
 }
 
 void mobjtype_c::DLightCompatibility(void)

@@ -209,51 +209,42 @@ void DDF_Init()
 class define_c
 {
 public:
-	// Note: these pointers only point inside the currently
-	//       loaded memfile.  Hence there is no need to
-	//       explicitly free them.
-	char *name;
-	char *value;
+	// Note: these pointers only point inside the currently loaded
+	//       memfile.  Hence no need to explicitly free them.
+	const char *name;
+	const char *value;
 
 public:
 	define_c() : name(NULL), value(NULL)
 	{ }
 
-	define_c(char *_N, char *_V) : name(_N), value(_V)
+	define_c(const char *_N, const char *_V) : name(_N), value(_V)
 	{ }
 
 	~define_c()
 	{ }
 };
 
-// -AJA- 1999/09/12: Made these static.  The variable `defines' was
-//       clashing with the one in rad_trig.c.  Ugh.
+// defines are very rare, hence no need for fast lookup.
+// a std::vector is nice and simple.
+static std::vector<define_c> ddf_defines;
 
-static std::vector<define_c> defines;
-
-static void DDF_MainAddDefine(char *name, char *value)
+static void DDF_MainAddDefine(const char *name, const char *value)
 {
-	for (int i = 0; i < (int)defines.size(); i++)
-	{
-		if (stricmp(defines[i].name, name) == 0)
-		{
-			DDF_Error("Redefinition of '%s'\n", name);
-			return;
-		}
-	}
-
-	defines.push_back(define_c(name, value));
+	ddf_defines.push_back(define_c(name, value));
 }
 
 static const char *DDF_MainGetDefine(const char *name)
 {
-	for (int i = 0; i < (int)defines.size(); i++)
-	{
-		if (stricmp(defines[i].name, name) == 0)
-			return defines[i].value;
-	}
-	return name; // un-defined.
+	// search backwards, to allow redefinitions to work
+	for (int i = (int)ddf_defines.size()-1 ; i >= 0 ; i--)
+		if (stricmp(ddf_defines[i].name, name) == 0)
+			return ddf_defines[i].value;
+
+	// undefined, so use the token as-is
+	return name;
 }
+
 
 //
 // DDF_MainCleanup
@@ -1017,10 +1008,7 @@ bool DDF_MainReadFile(readinfo_t * readinfo)
 	cur_ddf_entryname.clear();
 	cur_ddf_filename.clear();
 
-	defines.clear();
-
-	if (readinfo->filename)
-		delete[] memfile;
+	ddf_defines.clear();
 
 	return true;
 }

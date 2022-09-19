@@ -611,9 +611,9 @@ static void P_LineEffect(line_t *target, line_t *source,
 				bool samex = ((source->dx >= 0 && target->dx >= 0) || (source->dx < 0 && target->dx < 0));
 				bool samey = ((source->dy >= 0 && target->dy >= 0) || (source->dy < 0 && target->dy < 0));
 				AdjustScrollParts(target->side[0], 0, special->line_parts,
-						samex ? xspeed : -xspeed, samey ? -yspeed : yspeed);
+						tdx * (samex ? xspeed : -xspeed), tdy * (samey ? -yspeed : yspeed));
 				AdjustScrollParts(target->side[1], 1, special->line_parts,
-						samex ? -xspeed : xspeed, samey ? yspeed : -yspeed);
+						tdx * (samex ? -xspeed : xspeed), tdy * (samey ? yspeed : -yspeed));
 			}
 		}
 

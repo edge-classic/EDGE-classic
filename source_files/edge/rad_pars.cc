@@ -83,9 +83,6 @@ static define_t *defines;
 // Determine whether the code blocks are started and terminated.
 static int rad_cur_level = 0;
 
-// For checking when #VERSION is used
-static bool rad_has_start_map;
-
 static const char *rad_level_names[3] =
 	{ "outer area", "map area", "trigger area" };
 
@@ -778,24 +775,7 @@ static void RAD_FreeParameters(int pnum, char **pars)
 
 static void RAD_ParseVersion(int pnum, const char **pars)
 {
-	// #VERSION <vers>
-
-	if (rad_has_start_map)
-		RAD_Error("The #VERSION directive must appear before all scripts.\n");
-
-	float vers;
-
-	RAD_CheckForFloat(pars[1], &vers);
-
-	if (vers < 0.99f || vers > 9.99f)
-		RAD_Error("Illegal #VERSION number.\n");
-
-	//int rts_version = I_ROUND(vers * 100); -- Keep commented in case we feel like reviving this again for some reason, but unlikely - Dasho
-
-	/*
-	if (rts_version > EDGEVER)
-		RAD_Error("This version of EDGE cannot handle this RTS script\n");
-	*/
+	// ignored for compatibility
 }
 
 static void RAD_ParseClearAll(int pnum, const char **pars)
@@ -839,7 +819,6 @@ static void RAD_ParseStartMap(int pnum, const char **pars)
 	}
 
 	rad_cur_level++;
-	rad_has_start_map = true;
 }
 
 static void RAD_ParseRadiusTrigger(int pnum, const char **pars)
@@ -2469,7 +2448,6 @@ void RAD_ParseLine(char *s)
 void RAD_ParserBegin(void)
 {
 	rad_cur_level = 0;
-	rad_has_start_map = false;
 }
 
 void RAD_ParserDone(void)

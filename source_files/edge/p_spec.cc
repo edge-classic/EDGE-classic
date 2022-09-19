@@ -1904,92 +1904,252 @@ void P_UpdateSpecials(void)
 			if (sec->scroll_special_ref->scroll_type & ScrollType_Displace)
 			{
 				float ratio = sec->scroll_line_ref->length / 32.0f;
+				float sdx = -(sec->scroll_line_ref->dx / sec->scroll_line_ref->length);
+				float sdy = -(sec->scroll_line_ref->dy / sec->scroll_line_ref->length);
 				if (sec->scroll_sec_ref->floor_move)
 				{
+					bool lowering = sec->scroll_sec_ref->floor_move->startheight > sec->scroll_sec_ref->floor_move->destheight;
 					if (sec->scroll_sec_ref->floor_move->direction == 1)
 					{
 						if (sec->scroll_special_ref->sector_effect & SECTFX_PushThings)
-							sec->props.push.y = sec->scroll_line_ref->dy / 320.0f * ratio;
+						{
+							if (sec->scroll_sec_ref->f_h + sec->scroll_sec_ref->floor_move->speed > 
+								(lowering ? sec->scroll_sec_ref->floor_move->startheight : sec->scroll_sec_ref->floor_move->destheight))
+							{
+								sec->props.push.y = sec->props.push.y - sec->scroll_line_ref->dy / 320.0f * ratio;
+								sec->props.push.x = sec->props.push.x - sec->scroll_line_ref->dx / 320.0f * ratio;
+							}
+							else
+							{
+								sec->props.push.y = sec->scroll_line_ref->dy / 320.0f * ratio;
+								sec->props.push.x = sec->scroll_line_ref->dx / 320.0f * ratio;
+							}
+						}
 						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
-							sec->floor.offset.y += sec->scroll_sec_ref->floor_move->speed * ratio;
+						{
+							sec->floor.offset.y += sec->scroll_sec_ref->floor_move->speed * ratio * sdy;
+							sec->floor.offset.x += sec->scroll_sec_ref->floor_move->speed * ratio * sdx;
+						}
 						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
-							sec->ceil.offset.y += sec->scroll_sec_ref->floor_move->speed * ratio;
+						{
+							sec->ceil.offset.y += sec->scroll_sec_ref->floor_move->speed * ratio * sdy;
+							sec->ceil.offset.x += sec->scroll_sec_ref->floor_move->speed * ratio * sdx;
+						}
 					}
 					else if (sec->scroll_sec_ref->floor_move->direction == -1)
 					{
 						if (sec->scroll_special_ref->sector_effect & SECTFX_PushThings)
-							sec->props.push.y = -(sec->scroll_line_ref->dy / 320.0f * ratio);
+						{
+							if (sec->scroll_sec_ref->f_h - sec->scroll_sec_ref->floor_move->speed < 
+								(lowering ? sec->scroll_sec_ref->floor_move->destheight : sec->scroll_sec_ref->floor_move->startheight))
+							{
+								sec->props.push.y = sec->props.push.y + sec->scroll_line_ref->dy / 320.0f * ratio;
+								sec->props.push.x = sec->props.push.x + sec->scroll_line_ref->dx / 320.0f * ratio;
+							}
+							else
+							{
+								sec->props.push.y = -(sec->scroll_line_ref->dy / 320.0f * ratio);
+								sec->props.push.x = -(sec->scroll_line_ref->dx / 320.0f * ratio);
+							}
+						}
 						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
-							sec->floor.offset.y -= sec->scroll_sec_ref->floor_move->speed * ratio;
+						{
+							sec->floor.offset.y -= sec->scroll_sec_ref->floor_move->speed * ratio * sdy;
+							sec->floor.offset.x -= sec->scroll_sec_ref->floor_move->speed * ratio * sdx;
+						}
 						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
-							sec->ceil.offset.y -= sec->scroll_sec_ref->floor_move->speed * ratio;
+						{
+							sec->ceil.offset.y -= sec->scroll_sec_ref->floor_move->speed * ratio * sdy;
+							sec->ceil.offset.x -= sec->scroll_sec_ref->floor_move->speed * ratio * sdx;
+						}
 					}
 				}
 				if (sec->scroll_sec_ref->ceil_move)
 				{
+					bool lowering = sec->scroll_sec_ref->ceil_move->startheight > sec->scroll_sec_ref->ceil_move->destheight;
 					if (sec->scroll_sec_ref->ceil_move->direction == 1)
 					{
 						if (sec->scroll_special_ref->sector_effect & SECTFX_PushThings)
-							sec->props.push.y = sec->scroll_line_ref->dy / 320.0f * ratio;
+						{
+							if (sec->scroll_sec_ref->f_h + sec->scroll_sec_ref->ceil_move->speed > 
+									(lowering ? sec->scroll_sec_ref->ceil_move->startheight : sec->scroll_sec_ref->ceil_move->destheight))
+							{
+								sec->props.push.y = sec->props.push.y - sec->scroll_line_ref->dy / 320.0f * ratio;
+								sec->props.push.x = sec->props.push.x - sec->scroll_line_ref->dx / 320.0f * ratio;
+							}
+							else
+							{
+								sec->props.push.y = sec->scroll_line_ref->dy / 320.0f * ratio;
+								sec->props.push.x = sec->scroll_line_ref->dx / 320.0f * ratio;
+							}
+						}
 						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
-							sec->floor.offset.y += sec->scroll_sec_ref->ceil_move->speed * ratio;
+						{
+							sec->floor.offset.y += sec->scroll_sec_ref->ceil_move->speed * ratio * sdy;
+							sec->floor.offset.x += sec->scroll_sec_ref->ceil_move->speed * ratio * sdx;
+						}
 						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
-							sec->ceil.offset.y += sec->scroll_sec_ref->ceil_move->speed * ratio;
+						{
+							sec->ceil.offset.y += sec->scroll_sec_ref->ceil_move->speed * ratio * sdy;
+							sec->ceil.offset.x += sec->scroll_sec_ref->ceil_move->speed * ratio * sdx;
+						}
 					}
 					else if (sec->scroll_sec_ref->ceil_move->direction == -1)
 					{
 						if (sec->scroll_special_ref->sector_effect & SECTFX_PushThings)
-							sec->props.push.y = -(sec->scroll_line_ref->dy / 320.0f * ratio);
+						{
+							if (sec->scroll_sec_ref->f_h + sec->scroll_sec_ref->ceil_move->speed > 
+									(lowering ? sec->scroll_sec_ref->ceil_move->startheight : sec->scroll_sec_ref->ceil_move->destheight))
+							{
+								sec->props.push.y = sec->props.push.y + sec->scroll_line_ref->dy / 320.0f * ratio;
+								sec->props.push.x = sec->props.push.x + sec->scroll_line_ref->dx / 320.0f * ratio;
+							}
+							else
+							{
+								sec->props.push.y = -(sec->scroll_line_ref->dy / 320.0f * ratio);
+								sec->props.push.x = -(sec->scroll_line_ref->dx / 320.0f * ratio);
+							}
+						}
 						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
-							sec->floor.offset.y -= sec->scroll_sec_ref->ceil_move->speed * ratio;
+						{
+							sec->floor.offset.y -= sec->scroll_sec_ref->ceil_move->speed * ratio * sdy;
+							sec->floor.offset.x -= sec->scroll_sec_ref->ceil_move->speed * ratio * sdx;
+						}
 						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
-							sec->ceil.offset.y -= sec->scroll_sec_ref->ceil_move->speed * ratio;
+						{
+							sec->ceil.offset.y -= sec->scroll_sec_ref->ceil_move->speed * ratio * sdy;
+							sec->ceil.offset.x -= sec->scroll_sec_ref->ceil_move->speed * ratio * sdx;
+						}
 					}
 				}
 			}
 			if (sec->scroll_special_ref->scroll_type & ScrollType_Accel)
 			{
 				float ratio = sec->scroll_line_ref->length / 32.0f;
+				float sdx = -(sec->scroll_line_ref->dx / sec->scroll_line_ref->length);
+				float sdy = -(sec->scroll_line_ref->dy / sec->scroll_line_ref->length);
 				if (sec->scroll_sec_ref->floor_move)
 				{
+					bool lowering = sec->scroll_sec_ref->floor_move->startheight > sec->scroll_sec_ref->floor_move->destheight;
 					if (sec->scroll_sec_ref->floor_move->direction == 1)
 					{
-						if (sec->scroll_special_ref->sector_effect & SECTFX_PushThings)
-							sec->props.push.y -= sec->scroll_sec_ref->floor_move->speed * ratio / 10.0f;
-						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
-							sec->floor.scroll.y += sec->scroll_sec_ref->floor_move->speed * ratio;
-						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
-							sec->ceil.scroll.y += sec->scroll_sec_ref->floor_move->speed * ratio;
+						if (sec->scroll_sec_ref->f_h + sec->scroll_sec_ref->floor_move->speed > 
+								(lowering ? sec->scroll_sec_ref->floor_move->startheight : sec->scroll_sec_ref->floor_move->destheight))
+						{
+							if (sec->scroll_special_ref->sector_effect & SECTFX_PushThings)
+							{
+								sec->props.push.y += sec->scroll_sec_ref->floor_move->speed * ratio / 10.0f * sdy;
+								sec->props.push.x += sec->scroll_sec_ref->floor_move->speed * ratio / 10.0f * sdx;
+							}
+							if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
+							{
+								sec->floor.scroll.y -= sec->scroll_sec_ref->floor_move->speed * ratio * sdy;
+								sec->floor.scroll.x -= sec->scroll_sec_ref->floor_move->speed * ratio * sdx;
+							}
+							if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
+							{
+								sec->ceil.scroll.y -= sec->scroll_sec_ref->floor_move->speed * ratio * sdy;
+								sec->ceil.scroll.x -= sec->scroll_sec_ref->floor_move->speed * ratio * sdx;
+							}
+						}
+						else
+						{
+							if (sec->scroll_special_ref->sector_effect & SECTFX_PushThings)
+							{
+								sec->props.push.y -= sec->scroll_sec_ref->floor_move->speed * ratio / 10.0f * sdy;
+								sec->props.push.x -= sec->scroll_sec_ref->floor_move->speed * ratio / 10.0f * sdx;
+							}
+							if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
+							{
+								sec->floor.scroll.y += sec->scroll_sec_ref->floor_move->speed * ratio * sdy;
+								sec->floor.scroll.x += sec->scroll_sec_ref->floor_move->speed * ratio * sdx;
+							}
+							if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
+							{
+								sec->ceil.scroll.y += sec->scroll_sec_ref->floor_move->speed * ratio * sdy;
+								sec->ceil.scroll.x += sec->scroll_sec_ref->floor_move->speed * ratio * sdx;
+							}
+						}
 					}
 					else if (sec->scroll_sec_ref->floor_move->direction == -1)
 					{
-						if (sec->scroll_special_ref->sector_effect & SECTFX_PushThings)
-							sec->props.push.y += sec->scroll_sec_ref->floor_move->speed * ratio / 10.0f;
-						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
-							sec->floor.scroll.y -= sec->scroll_sec_ref->floor_move->speed * ratio;
-						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
-							sec->ceil.scroll.y -= sec->scroll_sec_ref->floor_move->speed * ratio;
+						if (sec->scroll_sec_ref->f_h - sec->scroll_sec_ref->floor_move->speed < 
+								(lowering ? sec->scroll_sec_ref->floor_move->destheight : sec->scroll_sec_ref->floor_move->startheight))
+						{
+							if (sec->scroll_special_ref->sector_effect & SECTFX_PushThings)
+							{
+								sec->props.push.y -= sec->scroll_sec_ref->floor_move->speed * ratio / 10.0f * sdy;
+								sec->props.push.x -= sec->scroll_sec_ref->floor_move->speed * ratio / 10.0f * sdx;
+							}
+							if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
+							{
+								sec->floor.scroll.y += sec->scroll_sec_ref->floor_move->speed * ratio * sdy;
+								sec->floor.scroll.x += sec->scroll_sec_ref->floor_move->speed * ratio * sdx;
+							}
+							if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
+							{
+								sec->ceil.scroll.y += sec->scroll_sec_ref->floor_move->speed * ratio * sdy;
+								sec->ceil.scroll.x += sec->scroll_sec_ref->floor_move->speed * ratio * sdx;
+							}
+						}
+						else
+						{
+							if (sec->scroll_special_ref->sector_effect & SECTFX_PushThings)
+							{
+								sec->props.push.y += sec->scroll_sec_ref->floor_move->speed * ratio / 10.0f * sdy;
+								sec->props.push.x += sec->scroll_sec_ref->floor_move->speed * ratio / 10.0f * sdx;
+							}
+							if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
+							{
+								sec->floor.scroll.y -= sec->scroll_sec_ref->floor_move->speed * ratio * sdy;
+								sec->floor.scroll.x -= sec->scroll_sec_ref->floor_move->speed * ratio * sdx;
+							}
+							if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
+							{
+								sec->ceil.scroll.y -= sec->scroll_sec_ref->floor_move->speed * ratio * sdy;
+								sec->ceil.scroll.x -= sec->scroll_sec_ref->floor_move->speed * ratio * sdx;
+							}
+						}
 					}
 				}
 				if (sec->scroll_sec_ref->ceil_move)
 				{
+					bool lowering = sec->scroll_sec_ref->ceil_move->startheight > sec->scroll_sec_ref->ceil_move->destheight;
 					if (sec->scroll_sec_ref->ceil_move->direction == 1)
 					{
 						if (sec->scroll_special_ref->sector_effect & SECTFX_PushThings)
-							sec->props.push.y -= sec->scroll_sec_ref->ceil_move->speed * ratio / 10.0f;
+						{
+							sec->props.push.y -= sec->scroll_sec_ref->ceil_move->speed * ratio / 10.0f * sdy;
+							sec->props.push.x -= sec->scroll_sec_ref->ceil_move->speed * ratio / 10.0f * sdx;
+						}
 						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
-							sec->floor.scroll.y += sec->scroll_sec_ref->ceil_move->speed * ratio;
+						{
+							sec->floor.scroll.y += sec->scroll_sec_ref->ceil_move->speed * ratio * sdy;
+							sec->floor.scroll.x += sec->scroll_sec_ref->ceil_move->speed * ratio * sdx;
+						}
 						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
-							sec->ceil.scroll.y += sec->scroll_sec_ref->ceil_move->speed * ratio;
+						{
+							sec->ceil.scroll.y += sec->scroll_sec_ref->ceil_move->speed * ratio * sdy;
+							sec->ceil.scroll.x += sec->scroll_sec_ref->ceil_move->speed * ratio * sdx;
+						}
 					}
 					else if (sec->scroll_sec_ref->ceil_move->direction == -1)
 					{
 						if (sec->scroll_special_ref->sector_effect & SECTFX_PushThings)
-							sec->props.push.y += sec->scroll_sec_ref->ceil_move->speed * ratio / 10.0f;
+						{
+							sec->props.push.y += sec->scroll_sec_ref->ceil_move->speed * ratio / 10.0f * sdy;
+							sec->props.push.x += sec->scroll_sec_ref->ceil_move->speed * ratio / 10.0f * sdx;
+						}
 						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollFloor)
-							sec->floor.scroll.y -= sec->scroll_sec_ref->ceil_move->speed * ratio;
+						{
+							sec->floor.scroll.y -= sec->scroll_sec_ref->ceil_move->speed * ratio * sdy;
+							sec->floor.scroll.x -= sec->scroll_sec_ref->ceil_move->speed * ratio * sdx;
+						}
 						if (sec->scroll_special_ref->sector_effect & SECTFX_ScrollCeiling)
-							sec->ceil.scroll.y -= sec->scroll_sec_ref->ceil_move->speed * ratio;
+						{
+							sec->ceil.scroll.y -= sec->scroll_sec_ref->ceil_move->speed * ratio * sdy;
+							sec->ceil.scroll.x -= sec->scroll_sec_ref->ceil_move->speed * ratio * sdx;
+						}
 					}
 				}
 			}

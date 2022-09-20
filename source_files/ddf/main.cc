@@ -215,28 +215,41 @@ public:
 	define_c(const char *N, const char *V) : name(N), value(V)
 	{ }
 
+	define_c(const std::string& N, const std::string& V) : name(N), value(V)
+	{ }
+
 	~define_c()
 	{ }
 };
 
 // defines are very rare, hence no need for fast lookup.
 // a std::vector is nice and simple.
-static std::vector<define_c> ddf_defines;
+static std::vector<define_c> all_defines;
 
-static void DDF_MainAddDefine(const char *name, const char *value)
+void DDF_MainAddDefine(const char *name, const char *value)
 {
-	ddf_defines.push_back(define_c(name, value));
+	all_defines.push_back(define_c(name, value));
 }
 
-static const char *DDF_MainGetDefine(const char *name)
+void DDF_MainAddDefine(const std::string& name, const std::string& value)
+{
+	all_defines.push_back(define_c(name, value));
+}
+
+const char *DDF_MainGetDefine(const char *name)
 {
 	// search backwards, to allow redefinitions to work
-	for (int i = (int)ddf_defines.size()-1 ; i >= 0 ; i--)
-		if (stricmp(ddf_defines[i].name.c_str(), name) == 0)
-			return ddf_defines[i].value.c_str();
+	for (int i = (int)all_defines.size()-1 ; i >= 0 ; i--)
+		if (stricmp(all_defines[i].name.c_str(), name) == 0)
+			return all_defines[i].value.c_str();
 
 	// undefined, so use the token as-is
 	return name;
+}
+
+void DDF_MainFreeDefines()
+{
+	all_defines.clear();
 }
 
 
@@ -1000,7 +1013,7 @@ void DDF_MainReadFile(readinfo_t * readinfo, const std::string& data)
 	cur_ddf_entryname.clear();
 	cur_ddf_filename.clear();
 
-	ddf_defines.clear();
+	DDF_MainFreeDefines();
 }
 
 #if 0

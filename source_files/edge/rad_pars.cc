@@ -37,16 +37,6 @@
 #include "z_zone.h"
 
 
-typedef struct define_s
-{
-	// next in list
-	struct define_s *next;
-
-	char *name;
-	char *value;
-}
-define_t;
-
 typedef struct rts_parser_s
 {
 	// needed level:
@@ -73,12 +63,6 @@ static const char *rad_cur_filename;
 static std::string rad_cur_line;
 
 static char tokenbuf[4096];
-
-// -AJA- 1999/09/12: Made all these static.  The variable 'defines'
-//       was clashing with the one in ddf_main.c.  ARGH !
-
-// Define List
-static define_t *defines;
 
 // Determine whether the code blocks are started and terminated.
 static int rad_cur_level = 0;
@@ -190,23 +174,6 @@ void RAD_WarnError(const char *err, ...)
 		RAD_Warning("%s", buffer);
 }
 
-
-// Searches through the #defines namespace for a match and returns
-// its value if it exists.
-static bool CheckForDefine(const char *s, char ** val)
-{
-	define_t *tempnode = defines;
-
-	for (; tempnode; tempnode = tempnode->next)
-	{
-		if (stricmp(s, tempnode->name) == 0)
-		{
-			*val = Z_StrDup(tempnode->value);
-			return true;
-		}
-	}
-	return false;
-}
 
 static void RAD_CheckForInt(const char *value, int *retvalue)
 {
@@ -740,9 +707,8 @@ static void RAD_TokenizeLine(int *pnum, char ** pars, int max)
 		if (*pnum >= max)
 			RAD_Error("Too many tokens on line\n");
 
-		// check for defines 
-		if (! CheckForDefine(tokenbuf, &pars[*pnum]))
-			pars[*pnum] = Z_StrDup(tokenbuf);
+		// check for defines
+		pars[*pnum] = Z_StrDup(DDF_MainGetDefine(tokenbuf));
 
 		*pnum += 1;
 
@@ -783,18 +749,7 @@ static void RAD_ParseDefine(int pnum, const char **pars)
 {
 	// #Define <identifier> <num>
 
-	define_t *newdef;
-
-	newdef = Z_New(define_t, 1);
-
-	Z_Clear(newdef, define_t, 1);
-
-	newdef->name  = Z_StrDup(pars[1]);
-	newdef->value = Z_StrDup(pars[2]);
-
-	// link it in
-	newdef->next = defines;
-	defines = newdef;
+	DDF_MainAddDefine(pars[1], pars[2]);
 }
 
 static void RAD_ParseStartMap(int pnum, const char **pars)
@@ -2486,6 +2441,8 @@ static void RAD_ParserDone()
 
 	if (rad_cur_level == 1)
 		RAD_Error("START_MAP: block not terminated !\n");
+
+	DDF_MainFreeDefines();
 }
 
 

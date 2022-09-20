@@ -143,8 +143,7 @@ void RAD_Error(const char *err, ...)
 
 	pos = buffer + strlen(buffer);
 
-	sprintf(pos, "Error occurred near line %d of %s\n", rad_cur_linenum, 
-		rad_cur_filename);
+	sprintf(pos, "Error occurred near line %d of %s\n", rad_cur_linenum, rad_cur_filename);
 	pos += strlen(pos);
 
 	if (!rad_cur_linedata.empty())
@@ -176,8 +175,7 @@ void RAD_Warning(const char *err, ...)
 	va_end(argptr);
 
 	I_Warning("\n");
-	I_Warning("Found problem near line %d of %s\n", rad_cur_linenum, 
-		rad_cur_filename);
+	I_Warning("Found problem near line %d of %s\n", rad_cur_linenum, rad_cur_filename);
 
 	if (!rad_cur_linedata.empty())
 		I_Warning("with line contents: %s\n", rad_cur_linedata.c_str());
@@ -2501,13 +2499,13 @@ static int ReadScriptLine(char *buf, int max)
 }
 
 
-static void RAD_ParserBegin(void)
+static void RAD_ParserBegin()
 {
 	rad_cur_level = 0;
 }
 
 
-static void RAD_ParserDone(void)
+static void RAD_ParserDone()
 {
 	if (rad_cur_level >= 2)
 		RAD_Error("RADIUS_TRIGGER: block not terminated !\n");
@@ -2517,12 +2515,21 @@ static void RAD_ParserDone(void)
 }
 
 
-//
-// -ACB- 1998/07/10 Renamed function and used I_Print for functions,
-//                  Version displayed at all times.
-//
-static void RAD_ParseScript(void)
+void RAD_ReadScript(const std::string& data)
 {
+	int size = (int)data.size();
+
+	I_Debugf("RTS: Loading LUMP (size=%d)\n", size);
+
+	// TODO get the filename to this func
+	rad_cur_filename = "RSCRIPT";
+
+	rad_memfile      = (byte *) data.c_str();
+	rad_memfile_size = size;
+	rad_memfile_end  = &rad_memfile[size];
+
+	// OK we have the file in memory.  Parse it to death :-)
+
 	RAD_ParserBegin();
 
 	rad_cur_linenum = 1;
@@ -2544,24 +2551,6 @@ static void RAD_ParseScript(void)
 	}
 
 	RAD_ParserDone();
-}
-
-
-void RAD_ReadScript(const std::string& data)
-{
-	int size = (int)data.size();
-
-	I_Debugf("RTS: Loading LUMP (size=%d)\n", size);
-
-	// TODO pass the filename to this func
-	rad_cur_filename = "RSCRIPT LUMP";
-
-	rad_memfile      = (byte *) data.c_str();
-	rad_memfile_size = size;
-	rad_memfile_end  = &rad_memfile[size];
-
-	// OK we have the file in memory.  Parse it to death :-)
-	RAD_ParseScript();
 }
 
 //--- editor settings ---

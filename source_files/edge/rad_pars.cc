@@ -62,8 +62,6 @@ static int rad_cur_linenum;
 static const char *rad_cur_filename;
 static std::string rad_cur_line;
 
-static char tokenbuf[4096];
-
 // Determine whether the code blocks are started and terminated.
 static int rad_cur_level = 0;
 
@@ -619,9 +617,11 @@ static void RAD_TokenizeLine(int *pnum, char ** pars, int max)
 {
 	const char *line = rad_cur_line.c_str();
 
-	int tokenlen = -1;
-	bool in_string = false;
-	int in_expr = 0;  // add one for each open bracket.
+	std::string tokenbuf;
+
+	bool want_token = true;
+	bool in_string  = false;
+	int  in_expr    = 0;  // add one for each open bracket.
 
 	*pnum = 0;
 
@@ -640,7 +640,7 @@ static void RAD_TokenizeLine(int *pnum, char ** pars, int max)
 		if ((ch == 0 || comment) && in_expr)
 			RAD_Error("Nonterminated expression found.\n");
 
-		if (tokenlen < 0)  // looking for a new token
+		if (want_token)  // looking for a new token
 		{
 			SYS_ASSERT(!in_expr && !in_string);
 
@@ -660,9 +660,10 @@ static void RAD_TokenizeLine(int *pnum, char ** pars, int max)
 				RAD_Error("Unmatched ')' bracket found\n");
 
 			// begin a new token
-			tokenbuf[0] = ch;
-			tokenlen = 1;
+			tokenbuf.clear();
+			tokenbuf += ch;
 
+			want_token = false;
 			continue;
 		}
 
@@ -674,7 +675,7 @@ static void RAD_TokenizeLine(int *pnum, char ** pars, int max)
 
 			if (! in_expr)
 			{
-				tokenbuf[tokenlen++] = ch;
+				tokenbuf += ch;
 				end_token = true;
 			}
 		}
@@ -688,7 +689,7 @@ static void RAD_TokenizeLine(int *pnum, char ** pars, int max)
 
 			if (in_expr == 0)
 			{
-				tokenbuf[tokenlen++] = ch;
+				tokenbuf += ch;
 				end_token = true;
 			}
 		}
@@ -700,18 +701,17 @@ static void RAD_TokenizeLine(int *pnum, char ** pars, int max)
 		// end of token ?
 		if (! end_token)
 		{
-			tokenbuf[tokenlen++] = ch;
+			tokenbuf += ch;
 			continue;
 		}
 
-		tokenbuf[tokenlen] = 0;
-		tokenlen = -1;
+		want_token = true;
 
 		if (*pnum >= max)
 			RAD_Error("Too many tokens on line\n");
 
 		// check for defines
-		pars[*pnum] = Z_StrDup(DDF_MainGetDefine(tokenbuf));
+		pars[*pnum] = Z_StrDup(DDF_MainGetDefine(tokenbuf.c_str()));
 
 		*pnum += 1;
 

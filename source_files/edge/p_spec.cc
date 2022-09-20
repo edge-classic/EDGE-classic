@@ -711,62 +711,27 @@ static void P_SectorEffect(sector_t *target, line_t *source,
 	if (special->sector_effect & SECTFX_LightCeiling)
 		target->ceil.override_p = &source->frontsector->props;
 
-	if (special->sector_effect & SECTFX_ScrollFloor)
+	if (special->sector_effect & SECTFX_ScrollFloor || special->sector_effect & SECTFX_ScrollCeiling || special->sector_effect & SECTFX_PushThings)
 	{
 		secanim_t anim;
 		anim.target = target;
 		if (special->scroll_type == ScrollType_None)
 		{
-			anim.floor_scroll.x -= source->dx / 32.0f;
-			anim.floor_scroll.y -= source->dy / 32.0f;
-		}
-		else
-		{
-			// BOOM spec states that the front sector is the height reference
-			// for displace/accel scrollers
-			if (source->frontsector)
+			if (special->sector_effect & SECTFX_ScrollFloor)
 			{
-				anim.scroll_sec_ref = source->frontsector;
-				anim.scroll_special_ref = special;
-				anim.scroll_line_ref = source;
+				anim.floor_scroll.x -= source->dx / 32.0f;
+				anim.floor_scroll.y -= source->dy / 32.0f;
 			}
-		}
-
-		secanims.push_back(anim);
-		P_AddSpecialSector(target);
-	}
-	if (special->sector_effect & SECTFX_ScrollCeiling)
-	{
-		secanim_t anim;
-		anim.target = target;
-		if (special->scroll_type == ScrollType_None)
-		{
-			anim.ceil_scroll.x -= source->dx / 32.0f;
-			anim.ceil_scroll.y -= source->dy / 32.0f;
-		}
-		else
-		{
-			// BOOM spec states that the front sector is the height reference
-			// for displace/accel scrollers
-			if (source->frontsector)
+			if (special->sector_effect & SECTFX_ScrollCeiling)
 			{
-				anim.scroll_sec_ref = source->frontsector;
-				anim.scroll_special_ref = special;
-				anim.scroll_line_ref = source;
+				anim.ceil_scroll.x -= source->dx / 32.0f;
+				anim.ceil_scroll.y -= source->dy / 32.0f;
 			}
-		}
-		secanims.push_back(anim);
-		P_AddSpecialSector(target);
-	}
-
-	if (special->sector_effect & SECTFX_PushThings)
-	{
-		secanim_t anim;
-		anim.target = target;
-		if (special->scroll_type == ScrollType_None)
-		{
-			anim.push.x += source->dx / 320.0f;
-			anim.push.y += source->dy / 320.0f;
+			if (special->sector_effect & SECTFX_PushThings)
+			{
+				anim.push.x += source->dx / 320.0f;
+				anim.push.y += source->dy / 320.0f;
+			}
 		}
 		else
 		{
@@ -1908,10 +1873,10 @@ void P_UpdateSpecials(void)
 		// Add static values
 		sec->props.net_push.x += secanims[i].push.x;
 		sec->props.net_push.y += secanims[i].push.y;
-		sec->floor.net_scroll.x = secanims[i].floor_scroll.x;
-		sec->floor.net_scroll.y = secanims[i].floor_scroll.y;
-		sec->ceil.net_scroll.x = secanims[i].ceil_scroll.x;
-		sec->ceil.net_scroll.y = secanims[i].ceil_scroll.y;
+		sec->floor.net_scroll.x += secanims[i].floor_scroll.x;
+		sec->floor.net_scroll.y += secanims[i].floor_scroll.y;
+		sec->ceil.net_scroll.x += secanims[i].ceil_scroll.x;
+		sec->ceil.net_scroll.y += secanims[i].ceil_scroll.y;
 
 		// Update dynamic values
 		struct sector_s *sec_ref = secanims[i].scroll_sec_ref;

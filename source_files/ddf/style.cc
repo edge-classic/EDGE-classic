@@ -220,12 +220,7 @@ void DDF_ReadStyles(const std::string& data)
 {
 	readinfo_t styles;
 
-	styles.memfile = (char*)data.c_str();
-	styles.memsize = (int)  data.size();
 	styles.tag = "STYLES";
-	styles.entries_per_dot = 2;
-
-	styles.filename = NULL;
 	styles.lumpname = "DDFSTYLE";
 
 	styles.start_entry  = StyleStartEntry;
@@ -233,7 +228,7 @@ void DDF_ReadStyles(const std::string& data)
 	styles.finish_entry = StyleFinishEntry;
 	styles.clear_all    = StyleClearAll;
 
-	DDF_MainReadFile(&styles);
+	DDF_MainReadFile(&styles, data);
 }
 
 

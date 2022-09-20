@@ -152,12 +152,7 @@ void DDF_ReadAnims(const std::string& data)
 {
 	readinfo_t anims;
 
-	anims.memfile = (char*)data.c_str();
-	anims.memsize = (int)  data.size();
 	anims.tag = "ANIMATIONS";
-	anims.entries_per_dot = 2;
-
-	anims.filename  = NULL;
 	anims.lumpname = "DDFANIM";
 
 	anims.start_entry  = AnimStartEntry;
@@ -165,7 +160,7 @@ void DDF_ReadAnims(const std::string& data)
 	anims.finish_entry = AnimFinishEntry;
 	anims.clear_all    = AnimClearAll;
 
-	DDF_MainReadFile(&anims);
+	DDF_MainReadFile(&anims, data);
 }
 
 //

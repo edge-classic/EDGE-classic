@@ -120,12 +120,7 @@ void DDF_ReadSwitch(const std::string& data)
 {
 	readinfo_t switches;
 
-	switches.memfile = (char*)data.c_str();
-	switches.memsize = (int)  data.size();
 	switches.tag = "SWITCHES";
-	switches.entries_per_dot = 2;
-
-	switches.filename = NULL;
 	switches.lumpname = "DDFSWTH";
 
 	switches.start_entry  = SwitchStartEntry;
@@ -133,7 +128,7 @@ void DDF_ReadSwitch(const std::string& data)
 	switches.finish_entry = SwitchFinishEntry;
 	switches.clear_all    = SwitchClearAll;
 
-	DDF_MainReadFile(&switches);
+	DDF_MainReadFile(&switches, data);
 
 #if (DEBUG_DDF)
 	epi::array_iterator_c it;
@@ -145,8 +140,7 @@ void DDF_ReadSwitch(const std::string& data)
 	{
 		sw = ITERATOR_TO_TYPE(it, switchdef_c*);
 		
-		I_Debugf("  Num: %d  ON: '%s'  OFF: '%s'\n", 
-						i, sw->on_name, sw->off_name);
+		I_Debugf("  Num: %d  ON: '%s'  OFF: '%s'\n", i, sw->on_name, sw->off_name);
 	}
 #endif
 }

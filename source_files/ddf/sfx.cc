@@ -131,12 +131,7 @@ void DDF_ReadSFX(const std::string& data)
 {
 	readinfo_t sfx_r;
 
-	sfx_r.memfile = (char*)data.c_str();
-	sfx_r.memsize = (int)  data.size();
 	sfx_r.tag = "SOUNDS";
-	sfx_r.entries_per_dot = 8;
-
-	sfx_r.filename = NULL;
 	sfx_r.lumpname = "DDFSFX";
 
 	sfx_r.start_entry  = SoundStartEntry;
@@ -144,7 +139,7 @@ void DDF_ReadSFX(const std::string& data)
 	sfx_r.finish_entry = SoundFinishEntry;
 	sfx_r.clear_all    = SoundClearAll;
 
-	DDF_MainReadFile(&sfx_r);
+	DDF_MainReadFile(&sfx_r, data);
 }
 
 void DDF_SFXInit(void)

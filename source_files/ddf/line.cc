@@ -461,12 +461,7 @@ void DDF_ReadLines(const std::string& data)
 {
 	readinfo_t lines;
 
-	lines.memfile = (char*)data.c_str();
-	lines.memsize = (int)  data.size();
 	lines.tag = "LINES";
-	lines.entries_per_dot = 6;
-
-	lines.filename = NULL;
 	lines.lumpname = "DDFLINE";
 
 	lines.start_entry  = LinedefStartEntry;
@@ -474,7 +469,7 @@ void DDF_ReadLines(const std::string& data)
 	lines.finish_entry = LinedefFinishEntry;
 	lines.clear_all    = LinedefClearAll;
 
-	DDF_MainReadFile(&lines);
+	DDF_MainReadFile(&lines, data);
 }
 
 

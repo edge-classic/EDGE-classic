@@ -116,12 +116,7 @@ void DDF_ReadFonts(const std::string& data)
 {
 	readinfo_t fonts;
 
-	fonts.memfile = (char*)data.c_str();
-	fonts.memsize = (int)  data.size();
 	fonts.tag = "FONTS";
-	fonts.entries_per_dot = 2;
-
-	fonts.filename = NULL;
 	fonts.lumpname = "DDFFONT";
 
 	fonts.start_entry  = FontStartEntry;
@@ -129,7 +124,7 @@ void DDF_ReadFonts(const std::string& data)
 	fonts.finish_entry = FontFinishEntry;
 	fonts.clear_all    = FontClearAll;
 
-	DDF_MainReadFile(&fonts);
+	DDF_MainReadFile(&fonts, data);
 }
 
 

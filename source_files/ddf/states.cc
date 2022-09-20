@@ -23,10 +23,6 @@
 #include "p_action.h"
 
 
-// FIXME: unwanted link to engine code (switch to epi::angle_c)
-extern float M_Tan(angle_t ang)  GCCATTR((const));
-
-
 static const state_t template_state =
 {
 	0,          // sprite ref
@@ -1014,7 +1010,7 @@ void DDF_StateGetSlope(const char *arg, state_t * cur_state)
 	if (tmp < -89.5f)
 		tmp = -89.5f;
 
-	*value = M_Tan(FLOAT_2_ANG(tmp));
+	*value = tan(tmp * M_PI / 180.0);
 
 	cur_state->action_par = value;
 }

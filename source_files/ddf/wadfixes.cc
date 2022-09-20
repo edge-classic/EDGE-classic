@@ -99,12 +99,7 @@ void DDF_ReadFixes(const std::string& data)
 {
 	readinfo_t fixes;
 
-	fixes.memfile = (char*)data.c_str();
-	fixes.memsize = (int)  data.size();
 	fixes.tag = "FIXES";
-	fixes.entries_per_dot = 2;
-
-	fixes.filename = NULL;
 	fixes.lumpname = "WADFIXES";
 
 	fixes.start_entry  = FixStartEntry;
@@ -112,7 +107,7 @@ void DDF_ReadFixes(const std::string& data)
 	fixes.finish_entry = FixFinishEntry;
 	fixes.clear_all    = FixClearAll;
 
-	DDF_MainReadFile(&fixes);
+	DDF_MainReadFile(&fixes, data);
 }
 
 //

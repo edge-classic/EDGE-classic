@@ -172,12 +172,7 @@ void DDF_ReadGames(const std::string& data)
 {
 	readinfo_t games;
 
-	games.memfile = (char *) data.c_str();
-	games.memsize = (int)  data.size();
 	games.tag = "GAMES";
-	games.entries_per_dot = 1;
-
-	games.filename = NULL;
 	games.lumpname = "DDFGAME";
 
 	games.start_entry = GameStartEntry;
@@ -185,7 +180,7 @@ void DDF_ReadGames(const std::string& data)
 	games.finish_entry = GameFinishEntry;
 	games.clear_all = GameClearAll;
 
-	DDF_MainReadFile (&games);
+	DDF_MainReadFile (&games, data);
 }
 
 

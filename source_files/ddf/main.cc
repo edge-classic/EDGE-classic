@@ -29,10 +29,6 @@
 #include "p_action.h"
 
 
-// FIXME: unwanted link to engine code (switch to epi::angle_c)
-extern float M_Tan(angle_t ang)  GCCATTR((const));
-
-
 // enum thats gives the parser's current status
 typedef enum
 {
@@ -209,51 +205,42 @@ void DDF_Init()
 class define_c
 {
 public:
-	// Note: these pointers only point inside the currently
-	//       loaded memfile.  Hence there is no need to
-	//       explicitly free them.
-	char *name;
-	char *value;
+	// Note: these pointers only point inside the currently loaded
+	//       memfile.  Hence no need to explicitly free them.
+	const char *name;
+	const char *value;
 
 public:
 	define_c() : name(NULL), value(NULL)
 	{ }
 
-	define_c(char *_N, char *_V) : name(_N), value(_V)
+	define_c(const char *_N, const char *_V) : name(_N), value(_V)
 	{ }
 
 	~define_c()
 	{ }
 };
 
-// -AJA- 1999/09/12: Made these static.  The variable `defines' was
-//       clashing with the one in rad_trig.c.  Ugh.
+// defines are very rare, hence no need for fast lookup.
+// a std::vector is nice and simple.
+static std::vector<define_c> ddf_defines;
 
-static std::vector<define_c> defines;
-
-static void DDF_MainAddDefine(char *name, char *value)
+static void DDF_MainAddDefine(const char *name, const char *value)
 {
-	for (int i = 0; i < (int)defines.size(); i++)
-	{
-		if (stricmp(defines[i].name, name) == 0)
-		{
-			DDF_Error("Redefinition of '%s'\n", name);
-			return;
-		}
-	}
-
-	defines.push_back(define_c(name, value));
+	ddf_defines.push_back(define_c(name, value));
 }
 
 static const char *DDF_MainGetDefine(const char *name)
 {
-	for (int i = 0; i < (int)defines.size(); i++)
-	{
-		if (stricmp(defines[i].name, name) == 0)
-			return defines[i].value;
-	}
-	return name; // un-defined.
+	// search backwards, to allow redefinitions to work
+	for (int i = (int)ddf_defines.size()-1 ; i >= 0 ; i--)
+		if (stricmp(ddf_defines[i].name, name) == 0)
+			return ddf_defines[i].value;
+
+	// undefined, so use the token as-is
+	return name;
 }
+
 
 //
 // DDF_MainCleanup
@@ -679,23 +666,14 @@ static readchar_t DDF_MainProcessChar(char character, std::string& token, int st
 // -AJA- 1999/10/02 Recursive { } comments.
 // -ES- 2000/02/29 Added
 //
-bool DDF_MainReadFile(readinfo_t * readinfo)
+void DDF_MainReadFile(readinfo_t * readinfo, const std::string& data)
 {
 	std::string token;
 	std::string current_cmd;
 
-	char *name;
+	char *name  = NULL;
 	char *value = NULL;
-	char character;
-	char *memfile;
-	char *memfileptr;
-	int status, formerstatus;
-	int response;
-	int size;
-	int comment_level;
-	int bracket_level;
-	bool firstgo;
-	
+
 	int current_index = 0;
 	int entry_count = 0;
   
@@ -703,24 +681,27 @@ bool DDF_MainReadFile(readinfo_t * readinfo)
 	char charcount = 0;
 #endif
 
-	status = waiting_tag;
-	formerstatus = nothing;
-	comment_level = 0;
-	bracket_level = 0;
-	firstgo = true;
+	int status = waiting_tag;
+	int formerstatus = nothing;
+
+	int comment_level = 0;
+	int bracket_level = 0;
+	bool firstgo = true;
 
 	cur_ddf_line_num = 1;
-
-	SYS_ASSERT(readinfo->memfile);
-
-	// FIXME get proper filename from main engine code
 	cur_ddf_filename = std::string(readinfo->lumpname);
+	cur_ddf_entryname.clear();
 
-	memfileptr = memfile = readinfo->memfile;
-	size = readinfo->memsize;
+	// WISH: don't make this copy, parse directly from the string
+	char *memfile = new char[data.size() + 1];
+	data.copy(memfile, std::string::npos);
+	memfile[data.size()] = 0;
+
+	char *memfileptr = memfile;
+	int   memsize    = (int)data.size();
 
 	// -ACB- 1998/09/12 Copy file to memory: Read until end. Speed optimisation.
-	while (memfileptr < &memfile[size])
+	while (memfileptr < &memfile[memsize])
 	{
 		// -KM- 1998/12/16 Added #define command to ddf files.
 		if (!strnicmp(memfileptr, "#DEFINE", 7))
@@ -730,10 +711,10 @@ bool DDF_MainReadFile(readinfo_t * readinfo)
 			memfileptr += 8;
 			name = memfileptr;
 
-			while (*memfileptr != ' ' && memfileptr < &memfile[size])
+			while (*memfileptr != ' ' && memfileptr < &memfile[memsize])
 				memfileptr++;
 
-			if (memfileptr < &memfile[size])
+			if (memfileptr < &memfile[memsize])
 			{
 				*memfileptr++ = 0;
 				value = memfileptr;
@@ -743,7 +724,7 @@ bool DDF_MainReadFile(readinfo_t * readinfo)
 				DDF_Error("#DEFINE '%s' as what?!\n", name);
 			}
 
-			while (memfileptr < &memfile[size])
+			while (memfileptr < &memfile[memsize])
 			{
 				if (*memfileptr == '\r')
 					*memfileptr = ' ';
@@ -770,17 +751,17 @@ bool DDF_MainReadFile(readinfo_t * readinfo)
 		//       identifier names...  Ow the pain of &memfile[size] :-)
     
 		if (comment_level == 0 && status != reading_string &&
-			memfileptr+1 < &memfile[size] &&
+			memfileptr+1 < &memfile[memsize] &&
 			memfileptr[0] == '/' && memfileptr[1] == '/')
 		{
-			while (memfileptr < &memfile[size] && *memfileptr != '\n')
+			while (memfileptr < &memfile[memsize] && *memfileptr != '\n')
 				memfileptr++;
 
-			if (memfileptr >= &memfile[size])
+			if (memfileptr >= &memfile[memsize])
 				break;
 		}
     
-		character = *memfileptr++;
+		char character = *memfileptr++;
 
 		if (character == '\n')
 		{
@@ -789,7 +770,7 @@ bool DDF_MainReadFile(readinfo_t * readinfo)
 			cur_ddf_line_num++;
 
 			// -AJA- 2000/03/21: determine linedata.  Ouch.
-			for (l_len=0; &memfileptr[l_len] < &memfile[size] &&
+			for (l_len=0; &memfileptr[l_len] < &memfile[memsize] &&
 					 memfileptr[l_len] != '\n' && memfileptr[l_len] != '\r'; l_len++)
 			{ }
 
@@ -819,7 +800,7 @@ bool DDF_MainReadFile(readinfo_t * readinfo)
 			}
 		}
 
-		response = DDF_MainProcessChar(character, token, status);
+		int response = DDF_MainProcessChar(character, token, status);
 
 		switch (response)
 		{
@@ -1014,15 +995,12 @@ bool DDF_MainReadFile(readinfo_t * readinfo)
 	if (!firstgo)
 		(* readinfo->finish_entry)();
 
+	delete[] memfile;
+
 	cur_ddf_entryname.clear();
 	cur_ddf_filename.clear();
 
-	defines.clear();
-
-	if (readinfo->filename)
-		delete[] memfile;
-
-	return true;
+	ddf_defines.clear();
 }
 
 #if 0
@@ -1272,7 +1250,7 @@ void DDF_MainGetSlope(const char *info, void *storage)
 	if (val < -89.5f)
 		val = -89.5f;
 
-	*dest = M_Tan(FLOAT_2_ANG(val));
+	*dest = tan(val * M_PI / 180.0);
 }
 
 

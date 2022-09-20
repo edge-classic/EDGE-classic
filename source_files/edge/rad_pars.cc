@@ -2428,7 +2428,7 @@ void RAD_ParseLine()
 
 //----------------------------------------------------------------------------
 
-static int ReadScriptLine(const std::string& data, size_t pos, std::string& out_line)
+static int ReadScriptLine(const std::string& data, size_t& pos, std::string& out_line)
 {
 	out_line.clear();
 
@@ -2500,7 +2500,6 @@ void RAD_ReadScript(const std::string& data)
 	for (;;)
 	{
 		int real_num = ReadScriptLine(data, pos, rad_cur_line);
-
 		if (real_num == 0)
 			break;
 

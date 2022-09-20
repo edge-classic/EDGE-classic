@@ -339,41 +339,44 @@ static armour_type_e RAD_CheckForArmourType(const char *info)
 {
 	if (DDF_CompareName(info, "GREEN") == 0)
 		return ARMOUR_Green;
-	else if (DDF_CompareName(info, "BLUE") == 0)
+	if (DDF_CompareName(info, "BLUE") == 0)
 		return ARMOUR_Blue;
-	else if (DDF_CompareName(info, "PURPLE") == 0)
+	if (DDF_CompareName(info, "PURPLE") == 0)
 		return ARMOUR_Purple;
-	else if (DDF_CompareName(info, "YELLOW") == 0)
+	if (DDF_CompareName(info, "YELLOW") == 0)
 		return ARMOUR_Yellow;
-	else if (DDF_CompareName(info, "RED") == 0)
+	if (DDF_CompareName(info, "RED") == 0)
 		return ARMOUR_Red;
 
+	// this never returns
 	RAD_Error("Unknown armour type: %s\n", info);
-	return ARMOUR_Green; // (0 - No such thing as ARMOUR_None)
+	return ARMOUR_Green;
 }
 
 static changetex_type_e RAD_CheckForChangetexType(const char *info)
 {
 	if (DDF_CompareName(info, "LEFT_UPPER") == 0 || DDF_CompareName(info, "BACK_UPPER") == 0)
 		return CHTEX_LeftUpper;
-	else if (DDF_CompareName(info, "LEFT_MIDDLE") == 0 || DDF_CompareName(info, "BACK_MIDDLE") == 0)
+	if (DDF_CompareName(info, "LEFT_MIDDLE") == 0 || DDF_CompareName(info, "BACK_MIDDLE") == 0)
 		return CHTEX_LeftMiddle;
-	else if (DDF_CompareName(info, "LEFT_LOWER") == 0 || DDF_CompareName(info, "BACK_LOWER") == 0)
+	if (DDF_CompareName(info, "LEFT_LOWER") == 0 || DDF_CompareName(info, "BACK_LOWER") == 0)
 		return CHTEX_LeftLower;
 	if (DDF_CompareName(info, "RIGHT_UPPER" ) == 0 || DDF_CompareName(info, "FRONT_UPPER") == 0)
 		return CHTEX_RightUpper;
-	else if (DDF_CompareName(info, "RIGHT_MIDDLE") == 0 || DDF_CompareName(info, "FRONT_MIDDLE") == 0)
+	if (DDF_CompareName(info, "RIGHT_MIDDLE") == 0 || DDF_CompareName(info, "FRONT_MIDDLE") == 0)
 		return CHTEX_RightMiddle;
-	else if (DDF_CompareName(info, "RIGHT_LOWER") == 0  || DDF_CompareName(info, "FRONT_LOWER") == 0)
+	if (DDF_CompareName(info, "RIGHT_LOWER") == 0  || DDF_CompareName(info, "FRONT_LOWER") == 0)
 		return CHTEX_RightLower;
-	else if (DDF_CompareName(info, "FLOOR") == 0)
+	if (DDF_CompareName(info, "FLOOR") == 0)
 		return CHTEX_Floor;
-	else if (DDF_CompareName(info, "CEILING") == 0)
+	if (DDF_CompareName(info, "CEILING") == 0)
 		return CHTEX_Ceiling;
-	else if (DDF_CompareName(info, "SKY") == 0)
+	if (DDF_CompareName(info, "SKY") == 0)
 		return CHTEX_Sky;
+
+	// this never returns
 	RAD_Error("Unknown ChangeTex type '%s'\n", info);
-	return CHTEX_RightUpper; // (0 - No such thing as CHTEX_None)
+	return CHTEX_RightUpper;
 }
 
 //

@@ -118,6 +118,8 @@ typedef struct region_properties_s
 
     // pushing sector information (normally all zero)
 	vec3_t push;
+
+	vec3_t net_push = {0,0,0};
 }
 region_properties_t;
 
@@ -148,6 +150,9 @@ typedef struct surface_s
 	// current offset and scrolling deltas (world coords)
 	vec2_t offset;
 	vec2_t scroll;
+
+	vec2_t net_offset = {0,0};
+	vec2_t net_scroll = {0,0};
 
 	// lighting override (as in BOOM).  Usually NULL.
 	struct region_properties_s *override_p;
@@ -319,11 +324,6 @@ typedef struct sector_s
 
 	// -AJA- 2000/03/30: Keep a list of child subsectors.
 	struct subsector_s *subsectors;
-
-	// Dasho - For Displace/Accel scrollers
-	struct sector_s *scroll_sec_ref;
-	const linetype_c *scroll_special_ref;
-	line_s *scroll_line_ref;
 }
 sector_t;
 
@@ -540,6 +540,17 @@ typedef struct node_s
 }
 node_t;
 
+typedef struct secanim_s
+{
+	sector_t *target = NULL;
+	struct sector_s *scroll_sec_ref = NULL;
+	const linetype_c *scroll_special_ref = NULL;
+	line_s *scroll_line_ref = NULL;
+	vec2_t floor_scroll = {0,0};
+	vec2_t ceil_scroll = {0,0};
+	vec3_t push = {0,0,0};
+}
+secanim_t;
 
 #endif /*__R_DEFS__*/
 

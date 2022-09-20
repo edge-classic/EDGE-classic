@@ -205,16 +205,14 @@ void DDF_Init()
 class define_c
 {
 public:
-	// Note: these pointers only point inside the currently loaded
-	//       memfile.  Hence no need to explicitly free them.
-	const char *name;
-	const char *value;
+	std::string name;
+	std::string value;
 
 public:
-	define_c() : name(NULL), value(NULL)
+	define_c() : name(), value()
 	{ }
 
-	define_c(const char *_N, const char *_V) : name(_N), value(_V)
+	define_c(const char *N, const char *V) : name(N), value(V)
 	{ }
 
 	~define_c()
@@ -234,8 +232,8 @@ static const char *DDF_MainGetDefine(const char *name)
 {
 	// search backwards, to allow redefinitions to work
 	for (int i = (int)ddf_defines.size()-1 ; i >= 0 ; i--)
-		if (stricmp(ddf_defines[i].name, name) == 0)
-			return ddf_defines[i].value;
+		if (stricmp(ddf_defines[i].name.c_str(), name) == 0)
+			return ddf_defines[i].value.c_str();
 
 	// undefined, so use the token as-is
 	return name;
@@ -723,6 +721,8 @@ void DDF_MainReadFile(readinfo_t * readinfo, const std::string& data)
 			{
 				DDF_Error("#DEFINE '%s' as what?!\n", name);
 			}
+
+			// FIXME handle comments, stop at "//"
 
 			while (memfileptr < &memfile[memsize])
 			{

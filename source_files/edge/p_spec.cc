@@ -2185,6 +2185,36 @@ void P_UpdateSpecials(void)
 	{
 		sector_t *sec = *SI;
 
+		if (!sec->old_stored)
+		{
+			sec->floor.old_offset.x = sec->floor.offset.x;
+			sec->floor.old_offset.y = sec->floor.offset.y;
+			sec->floor.old_scroll.x = sec->floor.offset.x;
+			sec->floor.old_scroll.y = sec->floor.offset.y;
+			sec->ceil.old_offset.x = sec->ceil.offset.x;
+			sec->ceil.old_offset.y = sec->ceil.offset.y;
+			sec->ceil.old_scroll.x = sec->ceil.offset.x;
+			sec->ceil.old_scroll.y = sec->ceil.offset.y;
+			sec->props.old_push.x = sec->props.push.x;
+			sec->props.old_push.y = sec->props.push.y;
+			sec->props.old_push.z = sec->props.push.z;
+			sec->old_stored = true;
+		}
+		else
+		{
+			sec->floor.offset.x = sec->floor.old_offset.x;
+			sec->floor.offset.y = sec->floor.old_offset.y;
+			sec->floor.scroll.x = sec->floor.old_offset.x;
+			sec->floor.scroll.y = sec->floor.old_offset.y;
+			sec->ceil.offset.x = sec->ceil.old_offset.x;
+			sec->ceil.offset.y = sec->ceil.old_offset.y;
+			sec->ceil.scroll.x = sec->ceil.old_offset.x;
+			sec->ceil.scroll.y = sec->ceil.old_offset.y;
+			sec->props.push.x = sec->props.old_push.x;
+			sec->props.push.y = sec->props.old_push.y;
+			sec->props.push.z = sec->props.old_push.z;
+		}
+
 		sec->floor.offset.x = fmod(sec->floor.offset.x + sec->floor.net_offset.x + sec->floor.scroll.x + sec->floor.net_scroll.x, sec->floor.image->actual_w);
 		sec->floor.offset.y = fmod(sec->floor.offset.y + sec->floor.net_offset.y + sec->floor.scroll.y + sec->floor.net_scroll.y, sec->floor.image->actual_h);
 		sec->ceil.offset.x = fmod(sec->ceil.offset.x + sec->ceil.net_offset.x + sec->ceil.scroll.x + sec->ceil.net_scroll.x, sec->ceil.image->actual_w);

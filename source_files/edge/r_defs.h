@@ -120,6 +120,8 @@ typedef struct region_properties_s
 	vec3_t push;
 
 	vec3_t net_push = {0,0,0};
+
+	vec3_t old_push = {0,0,0};
 }
 region_properties_t;
 
@@ -153,6 +155,8 @@ typedef struct surface_s
 
 	vec2_t net_offset = {0,0};
 	vec2_t net_scroll = {0,0};
+	vec2_t old_offset = {0,0};
+	vec2_t old_scroll = {0,0};
 
 	// lighting override (as in BOOM).  Usually NULL.
 	struct region_properties_s *override_p;
@@ -324,6 +328,9 @@ typedef struct sector_s
 
 	// -AJA- 2000/03/30: Keep a list of child subsectors.
 	struct subsector_s *subsectors;
+
+	// Test for dynamic scroll/push/offset
+	bool old_stored;
 }
 sector_t;
 

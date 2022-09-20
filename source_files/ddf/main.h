@@ -137,6 +137,11 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname);
 
 int DDF_CompareName(const char *A, const char *B);
 
+void DDF_MainAddDefine(const char *name, const char *value);
+void DDF_MainAddDefine(const std::string& name, const std::string& value);
+const char *DDF_MainGetDefine(const char *name);
+void DDF_MainFreeDefines();
+
 bool DDF_WeaponIsUpgrade(weapondef_c *weap, weapondef_c *old);
 
 bool DDF_IsBoomLineType(int num);

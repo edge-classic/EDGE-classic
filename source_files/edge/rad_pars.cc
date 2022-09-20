@@ -37,16 +37,6 @@
 #include "z_zone.h"
 
 
-typedef struct define_s
-{
-	// next in list
-	struct define_s *next;
-
-	char *name;
-	char *value;
-}
-define_t;
-
 typedef struct rts_parser_s
 {
 	// needed level:
@@ -68,17 +58,9 @@ typedef struct rts_parser_s
 rts_parser_t;
 
 
-int rad_cur_linenum;
-const char *rad_cur_filename;
-std::string rad_cur_linedata;
-
-static char tokenbuf[4096];
-
-// -AJA- 1999/09/12: Made all these static.  The variable 'defines'
-//       was clashing with the one in ddf_main.c.  ARGH !
-
-// Define List
-static define_t *defines;
+static int rad_cur_linenum;
+static const char *rad_cur_filename;
+static std::string rad_cur_line;
 
 // Determine whether the code blocks are started and terminated.
 static int rad_cur_level = 0;
@@ -125,9 +107,7 @@ int RAD_StringHashFunc(const char *s)
 	return r;
 }
 
-//
-// RAD_Error
-//
+
 void RAD_Error(const char *err, ...)
 {
 	va_list argptr;
@@ -143,21 +123,17 @@ void RAD_Error(const char *err, ...)
 
 	pos = buffer + strlen(buffer);
 
-	sprintf(pos, "Error occurred near line %d of %s\n", rad_cur_linenum, 
-		rad_cur_filename);
+	sprintf(pos, "Error occurred near line %d of %s\n", rad_cur_linenum, rad_cur_filename);
 	pos += strlen(pos);
 
-	if (!rad_cur_linedata.empty())
-	{
-		sprintf(pos, "Line contents: %s\n", rad_cur_linedata.c_str());
-		pos += strlen(pos);
-	}
+	sprintf(pos, "Line contents: %s\n", rad_cur_line.c_str());
+	pos += strlen(pos);
 
 	// check for buffer overflow
 	if (buffer[2047] != 0)
 		I_Error("Buffer overflow in RAD_Error.\n");
 
-	// add a blank line for readability under DOS/Linux.
+	// add a blank line for readability in the log file
 	I_Printf("\n");
 
 	I_Error("%s", buffer);
@@ -165,23 +141,19 @@ void RAD_Error(const char *err, ...)
 
 void RAD_Warning(const char *err, ...)
 {
-	va_list argptr;
-	char buffer[1024];
-
 	if (no_warnings)
 		return;
+
+	va_list argptr;
+	char buffer[1024];
 
 	va_start(argptr, err);
 	vsprintf(buffer, err, argptr);
 	va_end(argptr);
 
 	I_Warning("\n");
-	I_Warning("Found problem near line %d of %s\n", rad_cur_linenum, 
-		rad_cur_filename);
-
-	if (!rad_cur_linedata.empty())
-		I_Warning("with line contents: %s\n", rad_cur_linedata.c_str());
-
+	I_Warning("Found problem near line %d of %s\n", rad_cur_linenum, rad_cur_filename);
+	I_Warning("Line contents: %s\n", rad_cur_line.c_str());
 	I_Warning("%s", buffer);
 }
 
@@ -200,23 +172,6 @@ void RAD_WarnError(const char *err, ...)
 		RAD_Warning("%s", buffer);
 }
 
-
-// Searches through the #defines namespace for a match and returns
-// its value if it exists.
-static bool CheckForDefine(const char *s, char ** val)
-{
-	define_t *tempnode = defines;
-
-	for (; tempnode; tempnode = tempnode->next)
-	{
-		if (stricmp(s, tempnode->name) == 0)
-		{
-			*val = Z_StrDup(tempnode->value);
-			return true;
-		}
-	}
-	return false;
-}
 
 static void RAD_CheckForInt(const char *value, int *retvalue)
 {
@@ -349,41 +304,44 @@ static armour_type_e RAD_CheckForArmourType(const char *info)
 {
 	if (DDF_CompareName(info, "GREEN") == 0)
 		return ARMOUR_Green;
-	else if (DDF_CompareName(info, "BLUE") == 0)
+	if (DDF_CompareName(info, "BLUE") == 0)
 		return ARMOUR_Blue;
-	else if (DDF_CompareName(info, "PURPLE") == 0)
+	if (DDF_CompareName(info, "PURPLE") == 0)
 		return ARMOUR_Purple;
-	else if (DDF_CompareName(info, "YELLOW") == 0)
+	if (DDF_CompareName(info, "YELLOW") == 0)
 		return ARMOUR_Yellow;
-	else if (DDF_CompareName(info, "RED") == 0)
+	if (DDF_CompareName(info, "RED") == 0)
 		return ARMOUR_Red;
 
+	// this never returns
 	RAD_Error("Unknown armour type: %s\n", info);
-	return ARMOUR_Green; // (0 - No such thing as ARMOUR_None)
+	return ARMOUR_Green;
 }
 
 static changetex_type_e RAD_CheckForChangetexType(const char *info)
 {
 	if (DDF_CompareName(info, "LEFT_UPPER") == 0 || DDF_CompareName(info, "BACK_UPPER") == 0)
 		return CHTEX_LeftUpper;
-	else if (DDF_CompareName(info, "LEFT_MIDDLE") == 0 || DDF_CompareName(info, "BACK_MIDDLE") == 0)
+	if (DDF_CompareName(info, "LEFT_MIDDLE") == 0 || DDF_CompareName(info, "BACK_MIDDLE") == 0)
 		return CHTEX_LeftMiddle;
-	else if (DDF_CompareName(info, "LEFT_LOWER") == 0 || DDF_CompareName(info, "BACK_LOWER") == 0)
+	if (DDF_CompareName(info, "LEFT_LOWER") == 0 || DDF_CompareName(info, "BACK_LOWER") == 0)
 		return CHTEX_LeftLower;
 	if (DDF_CompareName(info, "RIGHT_UPPER" ) == 0 || DDF_CompareName(info, "FRONT_UPPER") == 0)
 		return CHTEX_RightUpper;
-	else if (DDF_CompareName(info, "RIGHT_MIDDLE") == 0 || DDF_CompareName(info, "FRONT_MIDDLE") == 0)
+	if (DDF_CompareName(info, "RIGHT_MIDDLE") == 0 || DDF_CompareName(info, "FRONT_MIDDLE") == 0)
 		return CHTEX_RightMiddle;
-	else if (DDF_CompareName(info, "RIGHT_LOWER") == 0  || DDF_CompareName(info, "FRONT_LOWER") == 0)
+	if (DDF_CompareName(info, "RIGHT_LOWER") == 0  || DDF_CompareName(info, "FRONT_LOWER") == 0)
 		return CHTEX_RightLower;
-	else if (DDF_CompareName(info, "FLOOR") == 0)
+	if (DDF_CompareName(info, "FLOOR") == 0)
 		return CHTEX_Floor;
-	else if (DDF_CompareName(info, "CEILING") == 0)
+	if (DDF_CompareName(info, "CEILING") == 0)
 		return CHTEX_Ceiling;
-	else if (DDF_CompareName(info, "SKY") == 0)
+	if (DDF_CompareName(info, "SKY") == 0)
 		return CHTEX_Sky;
+
+	// this never returns
 	RAD_Error("Unknown ChangeTex type '%s'\n", info);
-	return CHTEX_RightUpper; // (0 - No such thing as CHTEX_None)
+	return CHTEX_RightUpper;
 }
 
 //
@@ -394,31 +352,34 @@ static changetex_type_e RAD_CheckForChangetexType(const char *info)
 //
 static char *RAD_UnquoteString(const char *s)
 {
-	int tokenlen = 0;
+	if (s[0] != '"')
+		return Z_StrDup(s);
 
 	// skip initial quote
 	s++;
 
-	while (*s != '"')
+	std::string new_str;
+
+	while (s[0] != '"')
 	{
 #ifdef DEVELOPERS
-		if (*s == 0)
+		if (s[0] == 0)
 			I_Error("INTERNAL ERROR: bad string.\n");
 #endif
 
-		// -AJA- 1999/09/07: check for \n. Only temporary, awaiting bison...
-		if (s[0] == '\\' && toupper(s[1]) == 'N')
+		// -AJA- 1999/09/07: check for \n
+		if (s[0] == '\\' && tolower(s[1]) == 'n')
 		{
-			tokenbuf[tokenlen++] = '\n';
+			new_str += '\n';
 			s += 2;
 			continue;
 		}
 
-		tokenbuf[tokenlen++] = *s++;
+		new_str += s[0];
+		s += 1;
 	}
 
-	tokenbuf[tokenlen] = 0;
-	return Z_StrDup(tokenbuf);
+	return Z_StrDup(new_str.c_str());
 }
 
 static bool CheckForBoolean(const char *s)
@@ -645,19 +606,22 @@ static void RAD_ComputeScriptCRC(rad_script_t *scr)
 
 #undef M_FLAG
 
-// RAD_CollectParameters
+// RAD_TokenizeLine
 //
 // Collect the parameters from the line into an array of strings
 // 'pars', which can hold at most 'max' string pointers.
 // 
 // -AJA- 2000/01/02: Moved #define handling to here.
 //
-static void RAD_CollectParameters(const char *line, int *pnum, 
-								  char ** pars, int max)
+static void RAD_TokenizeLine(int *pnum, char ** pars, int max)
 {
-	int tokenlen = -1;
-	bool in_string = false;
-	int in_expr = 0;  // add one for each open bracket.
+	const char *line = rad_cur_line.c_str();
+
+	std::string tokenbuf;
+
+	bool want_token = true;
+	bool in_string  = false;
+	int  in_expr    = 0;  // add one for each open bracket.
 
 	*pnum = 0;
 
@@ -676,7 +640,7 @@ static void RAD_CollectParameters(const char *line, int *pnum,
 		if ((ch == 0 || comment) && in_expr)
 			RAD_Error("Nonterminated expression found.\n");
 
-		if (tokenlen < 0)  // looking for a new token
+		if (want_token)  // looking for a new token
 		{
 			SYS_ASSERT(!in_expr && !in_string);
 
@@ -696,9 +660,10 @@ static void RAD_CollectParameters(const char *line, int *pnum,
 				RAD_Error("Unmatched ')' bracket found\n");
 
 			// begin a new token
-			tokenbuf[0] = ch;
-			tokenlen = 1;
+			tokenbuf.clear();
+			tokenbuf += ch;
 
+			want_token = false;
 			continue;
 		}
 
@@ -710,7 +675,7 @@ static void RAD_CollectParameters(const char *line, int *pnum,
 
 			if (! in_expr)
 			{
-				tokenbuf[tokenlen++] = ch;
+				tokenbuf += ch;
 				end_token = true;
 			}
 		}
@@ -724,7 +689,7 @@ static void RAD_CollectParameters(const char *line, int *pnum,
 
 			if (in_expr == 0)
 			{
-				tokenbuf[tokenlen++] = ch;
+				tokenbuf += ch;
 				end_token = true;
 			}
 		}
@@ -736,19 +701,17 @@ static void RAD_CollectParameters(const char *line, int *pnum,
 		// end of token ?
 		if (! end_token)
 		{
-			tokenbuf[tokenlen++] = ch;
+			tokenbuf += ch;
 			continue;
 		}
 
-		tokenbuf[tokenlen] = 0;
-		tokenlen = -1;
+		want_token = true;
 
 		if (*pnum >= max)
 			RAD_Error("Too many tokens on line\n");
 
-		// check for defines 
-		if (! CheckForDefine(tokenbuf, &pars[*pnum]))
-			pars[*pnum] = Z_StrDup(tokenbuf);
+		// check for defines
+		pars[*pnum] = Z_StrDup(DDF_MainGetDefine(tokenbuf.c_str()));
 
 		*pnum += 1;
 
@@ -789,18 +752,7 @@ static void RAD_ParseDefine(int pnum, const char **pars)
 {
 	// #Define <identifier> <num>
 
-	define_t *newdef;
-
-	newdef = Z_New(define_t, 1);
-
-	Z_Clear(newdef, define_t, 1);
-
-	newdef->name  = Z_StrDup(pars[1]);
-	newdef->value = Z_StrDup(pars[2]);
-
-	// link it in
-	newdef->next = defines;
-	defines = newdef;
+	DDF_MainAddDefine(pars[1], pars[2]);
 }
 
 static void RAD_ParseStartMap(int pnum, const char **pars)
@@ -2113,17 +2065,11 @@ static void RAD_ParseShowMenu(int pnum, const char **pars)
 
 	SYS_ASSERT(2 <= pnum && pnum <= 11);
 
-	if (pars[1][0] == '"')
-		menu->title = RAD_UnquoteString(pars[1]);
-	else
-		menu->title = Z_StrDup(pars[1]);
+	menu->title = RAD_UnquoteString(pars[1]);
 
 	for (int p = 2; p < pnum; p++)
 	{
-		if (pars[p][0] == '"')
-			menu->options[p-2] = RAD_UnquoteString(pars[p]);
-		else
-			menu->options[p-2] = Z_StrDup(pars[p]);
+		menu->options[p-2] = RAD_UnquoteString(pars[p]);
 	}
 
 	AddStateToScript(this_rad, 0, RAD_ActShowMenu, menu);
@@ -2137,10 +2083,7 @@ static void RAD_ParseMenuStyle(int pnum, const char **pars)
 
 	Z_Clear(mm, s_menu_style_t, 1);
 
-	if (pars[1][0] == '"')
-		mm->style = RAD_UnquoteString(pars[1]);
-	else
-		mm->style = Z_StrDup(pars[1]);
+	mm->style = RAD_UnquoteString(pars[1]);
 
 	AddStateToScript(this_rad, 0, RAD_ActMenuStyle, mm);
 }
@@ -2198,12 +2141,7 @@ static void RAD_ParseSwitchWeapon(int pnum, const char **pars)
 {
 	// SwitchWeapon <WeaponName>
 
-	char * WeaponName;
-
-	if (pars[1][0] == '"')
-		WeaponName = RAD_UnquoteString(pars[1]);
-	else
-		WeaponName = Z_StrDup(pars[1]);
+	char * WeaponName = RAD_UnquoteString(pars[1]);
 
 	s_weapon_t *weaparg = Z_New(s_weapon_t, 1);
 	Z_Clear(weaparg, s_weapon_t, 1);
@@ -2226,18 +2164,8 @@ static void RAD_ParseReplaceWeapon(int pnum, const char **pars)
 {
 	// ReplaceWeapon <OldWeaponName> <NewWeaponName>
 
-	char * OldWeaponName;
-	char * NewWeaponName;
-
-	if (pars[1][0] == '"')
-		OldWeaponName = RAD_UnquoteString(pars[1]);
-	else
-		OldWeaponName = Z_StrDup(pars[1]);
-
-	if (pars[2][0] == '"')
-		NewWeaponName = RAD_UnquoteString(pars[2]);
-	else
-		NewWeaponName = Z_StrDup(pars[2]);
+	char * OldWeaponName = RAD_UnquoteString(pars[1]);
+	char * NewWeaponName = RAD_UnquoteString(pars[2]);
 
 	s_weapon_replace_t *weaparg = Z_New(s_weapon_replace_t, 1);
 	Z_Clear(weaparg, s_weapon_replace_t, 1);
@@ -2379,23 +2307,17 @@ static const rts_parser_t radtrig_parsers[] =
 	{0, NULL, 0,0, NULL}
 };
 
-//
-// Primitive Parser
-//
-void RAD_ParseLine(char *s)
-{
-	rad_cur_linedata = s;
 
+void RAD_ParseLine()
+{
 	int pnum;
 	char *pars[16];
 
-	RAD_CollectParameters(s, &pnum, pars, 16);
+	RAD_TokenizeLine(&pnum, pars, 16);
 
+	// simply ignore blank lines
 	if (pnum == 0)
-	{
-		rad_cur_linedata.clear();
 		return;
-	}
 
 	for (const rts_parser_t *cur = radtrig_parsers; cur->name != NULL; cur++)
 	{
@@ -2415,8 +2337,6 @@ void RAD_ParseLine(char *s)
 					rad_level_names[cur->level]);
 
 				RAD_FreeParameters(pnum, pars);
-				rad_cur_linedata.clear();
-
 				return;
 			}
 		}
@@ -2434,31 +2354,105 @@ void RAD_ParseLine(char *s)
 		(* cur->parser)(pnum, (const char **) pars);
 
 		RAD_FreeParameters(pnum, pars);
-		rad_cur_linedata.clear();
-
 		return;
 	}
 
 	RAD_WarnError("Unknown primitive: %s\n", pars[0]);
 
 	RAD_FreeParameters(pnum, pars);
-	rad_cur_linedata.clear();
 }
 
-void RAD_ParserBegin(void)
+
+//----------------------------------------------------------------------------
+
+static int ReadScriptLine(const std::string& data, size_t& pos, std::string& out_line)
 {
-	rad_cur_level = 0;
+	out_line.clear();
+
+	// reached the end of file?
+	size_t limit = data.size();
+	if (pos >= limit)
+		return 0;
+
+	int real_num = 1;
+
+	while (pos < data.size())
+	{
+		// ignore carriage returns
+		if (data[pos] == '\r')
+		{
+			pos++;
+			continue;
+		}
+
+		// reached the end of the line?
+		if (data[pos] == '\n')
+		{
+			pos++;
+			break;
+		}
+
+		// line concatenation
+		if (data[pos] == '\\' && pos+3 < limit)
+		{
+			if (data[pos+1] == '\n' ||
+				(data[pos+1] == '\r' && data[pos+2] == '\n'))
+			{
+				pos += (data[pos+1] == '\n') ? 2 : 3;
+				real_num++;
+				continue;
+			}
+		}
+
+		// append current character
+		out_line += data[pos];
+		pos++;
+	}
+
+	return real_num;
 }
 
-void RAD_ParserDone(void)
+
+static void RAD_ParserDone()
 {
 	if (rad_cur_level >= 2)
 		RAD_Error("RADIUS_TRIGGER: block not terminated !\n");
 
 	if (rad_cur_level == 1)
 		RAD_Error("START_MAP: block not terminated !\n");
+
+	DDF_MainFreeDefines();
 }
 
+
+void RAD_ReadScript(const std::string& data)
+{
+	I_Debugf("RTS: Loading LUMP (size=%d)\n", (int)data.size());
+
+	// WISH: a more helpful filename
+	rad_cur_filename = "RSCRIPT";
+	rad_cur_linenum = 1;
+	rad_cur_level = 0;
+
+	size_t pos = 0;
+
+	for (;;)
+	{
+		int real_num = ReadScriptLine(data, pos, rad_cur_line);
+		if (real_num == 0)
+			break;
+
+#if (DEBUG_RTS)
+		I_Debugf("RTS LINE: '%s'\n", rad_cur_line.c_str());
+#endif
+
+		RAD_ParseLine();
+
+		rad_cur_linenum += real_num;
+	}
+
+	RAD_ParserDone();
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

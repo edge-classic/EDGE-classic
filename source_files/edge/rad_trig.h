@@ -58,20 +58,7 @@ void RAD_FinishMenu(int result);
 // Path support
 bool RAD_CheckReachedTrigger(mobj_t * thing);
 
-//
-//  PARSING
-//
-void RAD_ParserBegin(void);
-void RAD_ParserDone(void);
-void RAD_ParseLine(char *s);
 int RAD_StringHashFunc(const char *s);
-
-void RAD_Error    (const char *err, ...) GCCATTR((format (printf,1,2)));
-void RAD_Warning  (const char *err, ...) GCCATTR((format (printf,1,2)));
-void RAD_WarnError(const char *err, ...) GCCATTR((format (printf,1,2)));
-
-extern int rad_cur_linenum;
-extern const char *rad_cur_filename;
 
 #endif  /* __RAD_TRIG__ */
 

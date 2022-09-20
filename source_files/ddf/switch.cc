@@ -123,7 +123,6 @@ void DDF_ReadSwitch(const std::string& data)
 	switches.memfile = (char*)data.c_str();
 	switches.memsize = (int)  data.size();
 	switches.tag = "SWITCHES";
-	switches.entries_per_dot = 2;
 
 	switches.filename = NULL;
 	switches.lumpname = "DDFSWTH";

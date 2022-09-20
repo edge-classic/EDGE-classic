@@ -495,7 +495,6 @@ void DDF_ReadWeapons(const std::string& data)
 	weapons.memfile = (char*)data.c_str();
 	weapons.memsize = (int)  data.size();
 	weapons.tag = "WEAPONS";
-	weapons.entries_per_dot = 1;
 
 	weapons.filename = NULL;
 	weapons.lumpname = "DDFWEAP";

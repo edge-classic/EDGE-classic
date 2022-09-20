@@ -119,7 +119,6 @@ void DDF_ReadFonts(const std::string& data)
 	fonts.memfile = (char*)data.c_str();
 	fonts.memsize = (int)  data.size();
 	fonts.tag = "FONTS";
-	fonts.entries_per_dot = 2;
 
 	fonts.filename = NULL;
 	fonts.lumpname = "DDFFONT";

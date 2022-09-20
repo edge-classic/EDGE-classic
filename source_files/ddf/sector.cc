@@ -192,7 +192,6 @@ void DDF_ReadSectors(const std::string& data)
 	sects.memfile = (char*)data.c_str();
 	sects.memsize = (int)  data.size();
 	sects.tag = "SECTORS";
-	sects.entries_per_dot = 1;
 
 	sects.filename = NULL;
 	sects.lumpname = "DDFSECT";

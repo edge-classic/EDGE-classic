@@ -225,7 +225,6 @@ void DDF_ReadLevels(const std::string& data)
 	levels.memfile = (char*)data.c_str();
 	levels.memsize = (int)  data.size();
 	levels.tag = "LEVELS";
-	levels.entries_per_dot = 2;
 
 	levels.filename = NULL;
 	levels.lumpname = "DDFLEVL";

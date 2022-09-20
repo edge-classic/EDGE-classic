@@ -317,7 +317,6 @@ void DDF_ReadAtks(const std::string& data)
 	attacks.memfile = (char*)data.c_str();
 	attacks.memsize = (int)  data.size();
 	attacks.tag = "ATTACKS";
-	attacks.entries_per_dot = 2;
 
 	attacks.filename = NULL;
 	attacks.lumpname = "DDFATK";

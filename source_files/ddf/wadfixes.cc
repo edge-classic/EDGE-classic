@@ -102,7 +102,6 @@ void DDF_ReadFixes(const std::string& data)
 	fixes.memfile = (char*)data.c_str();
 	fixes.memsize = (int)  data.size();
 	fixes.tag = "FIXES";
-	fixes.entries_per_dot = 2;
 
 	fixes.filename = NULL;
 	fixes.lumpname = "WADFIXES";

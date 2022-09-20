@@ -420,7 +420,6 @@ void DDF_ReadLangs(const std::string& data)
 	languages.memfile = (char*)data.c_str();
 	languages.memsize = (int)  data.size();
 	languages.tag = "LANGUAGES";
-	languages.entries_per_dot = 1;
 
 	languages.filename = NULL;
 	languages.lumpname = "DDFLANG";

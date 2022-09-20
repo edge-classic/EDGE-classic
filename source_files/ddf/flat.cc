@@ -116,7 +116,6 @@ void DDF_ReadFlat(const std::string& data)
 	flats.memfile = (char*)data.c_str();
 	flats.memsize = (int)  data.size();
 	flats.tag = "FLATS";
-	flats.entries_per_dot = 2;
 
 	flats.filename = NULL;
 	flats.lumpname = "DDFFLAT";

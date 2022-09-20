@@ -77,9 +77,6 @@ typedef struct readinfo_s
 	char *memfile;
 	unsigned int memsize;
 
-	// number of entries per displayed `.'
-	int entries_per_dot;
-
 	//
 	//  FUNCTIONS
 	//

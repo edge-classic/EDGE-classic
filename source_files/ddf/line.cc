@@ -464,7 +464,6 @@ void DDF_ReadLines(const std::string& data)
 	lines.memfile = (char*)data.c_str();
 	lines.memsize = (int)  data.size();
 	lines.tag = "LINES";
-	lines.entries_per_dot = 6;
 
 	lines.filename = NULL;
 	lines.lumpname = "DDFLINE";

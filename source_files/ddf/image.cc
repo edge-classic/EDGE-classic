@@ -191,7 +191,6 @@ void DDF_ReadImages(const std::string& data)
 	images.memfile = (char*)data.c_str();
 	images.memsize = (int)  data.size();
 	images.tag = "IMAGES";
-	images.entries_per_dot = 2;
 
 	images.filename = NULL;
 	images.lumpname = "DDFIMAGE";

@@ -140,7 +140,6 @@ void DDF_ReadColourMaps(const std::string& data)
 	colm_r.memfile = (char*)data.c_str();
 	colm_r.memsize = (int)  data.size();
 	colm_r.tag = "COLOURMAPS";
-	colm_r.entries_per_dot = 2;
 
 	colm_r.filename = NULL;
 	colm_r.lumpname = "DDFCOLM";

@@ -925,7 +925,6 @@ void DDF_ReadThings(const std::string& data)
 	things.memfile = (char*)data.c_str();
 	things.memsize = (int)  data.size();
 	things.tag = "THINGS";
-	things.entries_per_dot = 6;
 
 	things.filename = NULL;
 	things.lumpname = "DDFTHING";

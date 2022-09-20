@@ -175,7 +175,6 @@ void DDF_ReadGames(const std::string& data)
 	games.memfile = (char *) data.c_str();
 	games.memsize = (int)  data.size();
 	games.tag = "GAMES";
-	games.entries_per_dot = 1;
 
 	games.filename = NULL;
 	games.lumpname = "DDFGAME";

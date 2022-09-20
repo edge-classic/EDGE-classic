@@ -155,7 +155,6 @@ void DDF_ReadAnims(const std::string& data)
 	anims.memfile = (char*)data.c_str();
 	anims.memsize = (int)  data.size();
 	anims.tag = "ANIMATIONS";
-	anims.entries_per_dot = 2;
 
 	anims.filename  = NULL;
 	anims.lumpname = "DDFANIM";

@@ -134,7 +134,6 @@ void DDF_ReadSFX(const std::string& data)
 	sfx_r.memfile = (char*)data.c_str();
 	sfx_r.memsize = (int)  data.size();
 	sfx_r.tag = "SOUNDS";
-	sfx_r.entries_per_dot = 8;
 
 	sfx_r.filename = NULL;
 	sfx_r.lumpname = "DDFSFX";

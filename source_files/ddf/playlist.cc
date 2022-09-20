@@ -177,7 +177,6 @@ void DDF_ReadMusicPlaylist(const std::string& data)
 	playlistinfo.memfile = (char*)data.c_str();
 	playlistinfo.memsize = (int)  data.size();
 	playlistinfo.tag = "PLAYLISTS";
-	playlistinfo.entries_per_dot = 3;
 
 	playlistinfo.filename = NULL;
 	playlistinfo.lumpname = "DDFPLAY";

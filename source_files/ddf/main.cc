@@ -29,10 +29,6 @@
 #include "p_action.h"
 
 
-// FIXME: unwanted link to engine code (switch to epi::angle_c)
-extern float M_Tan(angle_t ang)  GCCATTR((const));
-
-
 // enum thats gives the parser's current status
 typedef enum
 {
@@ -1260,7 +1256,7 @@ void DDF_MainGetSlope(const char *info, void *storage)
 	if (val < -89.5f)
 		val = -89.5f;
 
-	*dest = M_Tan(FLOAT_2_ANG(val));
+	*dest = tan(val * M_PI / 180.0);
 }
 
 

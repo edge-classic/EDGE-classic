@@ -68,9 +68,9 @@ typedef struct rts_parser_s
 rts_parser_t;
 
 
-int rad_cur_linenum;
-const char *rad_cur_filename;
-std::string rad_cur_linedata;
+static int rad_cur_linenum;
+static const char *rad_cur_filename;
+static std::string rad_cur_line;
 
 static char tokenbuf[4096];
 
@@ -125,9 +125,7 @@ int RAD_StringHashFunc(const char *s)
 	return r;
 }
 
-//
-// RAD_Error
-//
+
 void RAD_Error(const char *err, ...)
 {
 	va_list argptr;
@@ -146,17 +144,14 @@ void RAD_Error(const char *err, ...)
 	sprintf(pos, "Error occurred near line %d of %s\n", rad_cur_linenum, rad_cur_filename);
 	pos += strlen(pos);
 
-	if (!rad_cur_linedata.empty())
-	{
-		sprintf(pos, "Line contents: %s\n", rad_cur_linedata.c_str());
-		pos += strlen(pos);
-	}
+	sprintf(pos, "Line contents: %s\n", rad_cur_line.c_str());
+	pos += strlen(pos);
 
 	// check for buffer overflow
 	if (buffer[2047] != 0)
 		I_Error("Buffer overflow in RAD_Error.\n");
 
-	// add a blank line for readability under DOS/Linux.
+	// add a blank line for readability in the log file
 	I_Printf("\n");
 
 	I_Error("%s", buffer);
@@ -164,11 +159,11 @@ void RAD_Error(const char *err, ...)
 
 void RAD_Warning(const char *err, ...)
 {
-	va_list argptr;
-	char buffer[1024];
-
 	if (no_warnings)
 		return;
+
+	va_list argptr;
+	char buffer[1024];
 
 	va_start(argptr, err);
 	vsprintf(buffer, err, argptr);
@@ -176,10 +171,7 @@ void RAD_Warning(const char *err, ...)
 
 	I_Warning("\n");
 	I_Warning("Found problem near line %d of %s\n", rad_cur_linenum, rad_cur_filename);
-
-	if (!rad_cur_linedata.empty())
-		I_Warning("with line contents: %s\n", rad_cur_linedata.c_str());
-
+	I_Warning("Line contents: %s\n", rad_cur_line.c_str());
 	I_Warning("%s", buffer);
 }
 
@@ -643,16 +635,17 @@ static void RAD_ComputeScriptCRC(rad_script_t *scr)
 
 #undef M_FLAG
 
-// RAD_CollectParameters
+// RAD_TokenizeLine
 //
 // Collect the parameters from the line into an array of strings
 // 'pars', which can hold at most 'max' string pointers.
 // 
 // -AJA- 2000/01/02: Moved #define handling to here.
 //
-static void RAD_CollectParameters(const char *line, int *pnum, 
-								  char ** pars, int max)
+static void RAD_TokenizeLine(int *pnum, char ** pars, int max)
 {
+	const char *line = rad_cur_line.c_str();
+
 	int tokenlen = -1;
 	bool in_string = false;
 	int in_expr = 0;  // add one for each open bracket.
@@ -2377,23 +2370,17 @@ static const rts_parser_t radtrig_parsers[] =
 	{0, NULL, 0,0, NULL}
 };
 
-//
-// Primitive Parser
-//
-void RAD_ParseLine(char *s)
-{
-	rad_cur_linedata = s;
 
+void RAD_ParseLine()
+{
 	int pnum;
 	char *pars[16];
 
-	RAD_CollectParameters(s, &pnum, pars, 16);
+	RAD_TokenizeLine(&pnum, pars, 16);
 
+	// simply ignore blank lines
 	if (pnum == 0)
-	{
-		rad_cur_linedata.clear();
 		return;
-	}
 
 	for (const rts_parser_t *cur = radtrig_parsers; cur->name != NULL; cur++)
 	{
@@ -2413,8 +2400,6 @@ void RAD_ParseLine(char *s)
 					rad_level_names[cur->level]);
 
 				RAD_FreeParameters(pnum, pars);
-				rad_cur_linedata.clear();
-
 				return;
 			}
 		}
@@ -2432,76 +2417,62 @@ void RAD_ParseLine(char *s)
 		(* cur->parser)(pnum, (const char **) pars);
 
 		RAD_FreeParameters(pnum, pars);
-		rad_cur_linedata.clear();
-
 		return;
 	}
 
 	RAD_WarnError("Unknown primitive: %s\n", pars[0]);
 
 	RAD_FreeParameters(pnum, pars);
-	rad_cur_linedata.clear();
 }
 
 
 //----------------------------------------------------------------------------
 
-#define MAXRTSLINE  2048
-
-// Current RTS file or lump being parsed.
-static byte *rad_memfile;
-static byte *rad_memfile_end;
-static byte *rad_memptr;
-static int rad_memfile_size;
-
-
-static int ReadScriptLine(char *buf, int max)
+static int ReadScriptLine(const std::string& data, size_t pos, std::string& out_line)
 {
+	out_line.clear();
+
+	// reached the end of file?
+	size_t limit = data.size();
+	if (pos >= limit)
+		return 0;
+
 	int real_num = 1;
 
-	while (rad_memptr < rad_memfile_end)
+	while (pos < data.size())
 	{
-		if (rad_memptr[0] == '\n')
+		// ignore carriage returns
+		if (data[pos] == '\r')
 		{
-			// skip trailing EOLN
-			rad_memptr++;
+			pos++;
+			continue;
+		}
+
+		// reached the end of the line?
+		if (data[pos] == '\n')
+		{
+			pos++;
 			break;
 		}
 
 		// line concatenation
-		if (rad_memptr+2 < rad_memfile_end && rad_memptr[0] == '\\')
+		if (data[pos] == '\\' && pos+3 < limit)
 		{
-			if (rad_memptr[1] == '\n' ||
-			    (rad_memptr[1] == '\r' && rad_memptr[2] == '\n'))
+			if (data[pos+1] == '\n' ||
+				(data[pos+1] == '\r' && data[pos+2] == '\n'))
 			{
+				pos += (data[pos+1] == '\n') ? 2 : 3;
 				real_num++;
-				rad_memptr += (rad_memptr[1] == '\n') ? 2 : 3;
 				continue;
 			}
 		}
 
-		// ignore carriage returns
-		if (rad_memptr[0] == '\r')
-		{
-			rad_memptr++;
-			continue;
-		}
-
-		if (max <= 2)
-			I_Error("RTS script: line %d too long !!\n", rad_cur_linenum);
-
-		*buf++ = *rad_memptr++;  max--;
+		// append current character
+		out_line += data[pos];
+		pos++;
 	}
 
-	*buf = 0;
-
 	return real_num;
-}
-
-
-static void RAD_ParserBegin()
-{
-	rad_cur_level = 0;
 }
 
 
@@ -2517,35 +2488,27 @@ static void RAD_ParserDone()
 
 void RAD_ReadScript(const std::string& data)
 {
-	int size = (int)data.size();
+	I_Debugf("RTS: Loading LUMP (size=%d)\n", (int)data.size());
 
-	I_Debugf("RTS: Loading LUMP (size=%d)\n", size);
-
-	// TODO get the filename to this func
+	// WISH: a more helpful filename
 	rad_cur_filename = "RSCRIPT";
-
-	rad_memfile      = (byte *) data.c_str();
-	rad_memfile_size = size;
-	rad_memfile_end  = &rad_memfile[size];
-
-	// OK we have the file in memory.  Parse it to death :-)
-
-	RAD_ParserBegin();
-
 	rad_cur_linenum = 1;
-	rad_memptr = rad_memfile;
+	rad_cur_level = 0;
 
-	char linebuf[MAXRTSLINE];
+	size_t pos = 0;
 
-	while (rad_memptr < rad_memfile_end)
+	for (;;)
 	{
-		int real_num = ReadScriptLine(linebuf, MAXRTSLINE);
+		int real_num = ReadScriptLine(data, pos, rad_cur_line);
+
+		if (real_num == 0)
+			break;
 
 #if (DEBUG_RTS)
-		L_WriteDebug("RTS LINE: '%s'\n", linebuf);
+		I_Debugf("RTS LINE: '%s'\n", rad_cur_line.c_str());
 #endif
 
-		RAD_ParseLine(linebuf);
+		RAD_ParseLine();
 
 		rad_cur_linenum += real_num;
 	}

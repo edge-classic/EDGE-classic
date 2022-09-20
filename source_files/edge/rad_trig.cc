@@ -62,8 +62,6 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-#define MAXRTSLINE  2048
-
 
 // Static Scripts.  Never change once all scripts have been read in.
 rad_script_t *r_scripts = NULL;
@@ -265,12 +263,6 @@ public:
 // RTS menu active ?
 bool rts_menuactive = false;
 static rts_menu_c *rts_curr_menu = NULL;
-
-// Current RTS file or lump being parsed.
-static byte *rad_memfile;
-static byte *rad_memfile_end;
-static byte *rad_memptr;
-static int rad_memfile_size;
 
 
 rad_script_t * RAD_FindScriptByName(const char *map_name, const char *name)
@@ -933,97 +925,6 @@ void RAD_ClearTriggers(void)
 
 	RAD_ClearCachedInfo();
 	RAD_ResetTips();
-}
-
-static int ReadScriptLine(char *buf, int max)
-{
-	int real_num = 1;
-
-	while (rad_memptr < rad_memfile_end)
-	{
-		if (rad_memptr[0] == '\n')
-		{
-			// skip trailing EOLN
-			rad_memptr++;
-			break;
-		}
-
-		// line concatenation
-		if (rad_memptr+2 < rad_memfile_end && rad_memptr[0] == '\\')
-		{
-			if (rad_memptr[1] == '\n' ||
-			    (rad_memptr[1] == '\r' && rad_memptr[2] == '\n'))
-			{
-				real_num++;
-				rad_memptr += (rad_memptr[1] == '\n') ? 2 : 3;
-				continue;
-			}
-		}
-
-		// ignore carriage returns
-		if (rad_memptr[0] == '\r')
-		{
-			rad_memptr++;
-			continue;
-		}
-
-		if (max <= 2)
-			I_Error("RTS script: line %d too long !!\n", rad_cur_linenum);
-
-		*buf++ = *rad_memptr++;  max--;
-	}
-
-	*buf = 0;
-
-	return real_num;
-}
-
-
-//
-// -ACB- 1998/07/10 Renamed function and used I_Print for functions,
-//                  Version displayed at all times.
-//
-static void RAD_ParseScript(void)
-{
-	RAD_ParserBegin();
-
-	rad_cur_linenum = 1;
-	rad_memptr = rad_memfile;
-
-	char linebuf[MAXRTSLINE];
-
-	while (rad_memptr < rad_memfile_end)
-	{
-		int real_num = ReadScriptLine(linebuf, MAXRTSLINE);
-
-#if (DEBUG_RTS)
-		L_WriteDebug("RTS LINE: '%s'\n", linebuf);
-#endif
-
-		RAD_ParseLine(linebuf);
-
-		rad_cur_linenum += real_num;
-	}
-
-	RAD_ParserDone();
-}
-
-
-void RAD_ReadScript(const std::string& data)
-{
-	int size = (int)data.size();
-
-	I_Debugf("RTS: Loading LUMP (size=%d)\n", size);
-
-	// TODO pass the filename to this func
-	rad_cur_filename = "RSCRIPT LUMP";
-
-	rad_memfile      = (byte *) data.c_str();
-	rad_memfile_size = size;
-	rad_memfile_end  = &rad_memfile[size];
-
-	// OK we have the file in memory.  Parse it to death :-)
-	RAD_ParseScript();
 }
 
 

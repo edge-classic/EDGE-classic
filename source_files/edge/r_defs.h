@@ -153,9 +153,7 @@ typedef struct surface_s
 	vec2_t offset;
 	vec2_t scroll;
 
-	vec2_t net_offset = {0,0};
 	vec2_t net_scroll = {0,0};
-	vec2_t old_offset = {0,0};
 	vec2_t old_scroll = {0,0};
 
 	// lighting override (as in BOOM).  Usually NULL.

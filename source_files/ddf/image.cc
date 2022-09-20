@@ -188,11 +188,7 @@ void DDF_ReadImages(const std::string& data)
 {
 	readinfo_t images;
 
-	images.memfile = (char*)data.c_str();
-	images.memsize = (int)  data.size();
 	images.tag = "IMAGES";
-
-	images.filename = NULL;
 	images.lumpname = "DDFIMAGE";
 
 	images.start_entry  = ImageStartEntry;
@@ -200,7 +196,7 @@ void DDF_ReadImages(const std::string& data)
 	images.finish_entry = ImageFinishEntry;
 	images.clear_all    = ImageClearAll;
 
-	DDF_MainReadFile(&images);
+	DDF_MainReadFile(&images, data);
 }
 
 

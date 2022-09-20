@@ -189,11 +189,7 @@ void DDF_ReadSectors(const std::string& data)
 {
 	readinfo_t sects;
 
-	sects.memfile = (char*)data.c_str();
-	sects.memsize = (int)  data.size();
 	sects.tag = "SECTORS";
-
-	sects.filename = NULL;
 	sects.lumpname = "DDFSECT";
 
 	sects.start_entry  = SectorStartEntry;
@@ -201,7 +197,7 @@ void DDF_ReadSectors(const std::string& data)
 	sects.finish_entry = SectorFinishEntry;
 	sects.clear_all    = SectorClearAll;
 
-	DDF_MainReadFile(&sects);
+	DDF_MainReadFile(&sects, data);
 }
 
 //

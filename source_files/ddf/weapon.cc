@@ -492,11 +492,7 @@ void DDF_ReadWeapons(const std::string& data)
 {
 	readinfo_t weapons;
 
-	weapons.memfile = (char*)data.c_str();
-	weapons.memsize = (int)  data.size();
 	weapons.tag = "WEAPONS";
-
-	weapons.filename = NULL;
 	weapons.lumpname = "DDFWEAP";
 
 	weapons.start_entry  = WeaponStartEntry;
@@ -504,7 +500,7 @@ void DDF_ReadWeapons(const std::string& data)
 	weapons.finish_entry = WeaponFinishEntry;
 	weapons.clear_all    = WeaponClearAll;
 
-	DDF_MainReadFile(&weapons);
+	DDF_MainReadFile(&weapons, data);
 }
 
 

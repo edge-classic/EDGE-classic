@@ -113,11 +113,7 @@ void DDF_ReadFlat(const std::string& data)
 {
 	readinfo_t flats;
 
-	flats.memfile = (char*)data.c_str();
-	flats.memsize = (int)  data.size();
 	flats.tag = "FLATS";
-
-	flats.filename = NULL;
 	flats.lumpname = "DDFFLAT";
 
 	flats.start_entry  = FlatStartEntry;
@@ -125,7 +121,7 @@ void DDF_ReadFlat(const std::string& data)
 	flats.finish_entry = FlatFinishEntry;
 	flats.clear_all    = FlatClearAll;
 
-	DDF_MainReadFile(&flats);
+	DDF_MainReadFile(&flats, data);
 }
 
 

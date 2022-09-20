@@ -417,11 +417,7 @@ void DDF_ReadLangs(const std::string& data)
 {
 	readinfo_t languages;
 
-	languages.memfile = (char*)data.c_str();
-	languages.memsize = (int)  data.size();
 	languages.tag = "LANGUAGES";
-
-	languages.filename = NULL;
 	languages.lumpname = "DDFLANG";
 
 	languages.start_entry  = LanguageStartEntry;
@@ -429,7 +425,7 @@ void DDF_ReadLangs(const std::string& data)
 	languages.finish_entry = LanguageFinishEntry;
 	languages.clear_all    = LanguageClearAll;
 
-	DDF_MainReadFile(&languages);
+	DDF_MainReadFile(&languages, data);
 }
 
 

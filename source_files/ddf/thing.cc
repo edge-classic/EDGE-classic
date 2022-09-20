@@ -922,11 +922,7 @@ void DDF_ReadThings(const std::string& data)
 {
 	readinfo_t things;
 
-	things.memfile = (char*)data.c_str();
-	things.memsize = (int)  data.size();
 	things.tag = "THINGS";
-
-	things.filename = NULL;
 	things.lumpname = "DDFTHING";
 
 	things.start_entry  = ThingStartEntry;
@@ -934,7 +930,7 @@ void DDF_ReadThings(const std::string& data)
 	things.finish_entry = ThingFinishEntry;
 	things.clear_all    = ThingClearAll;
 
-	DDF_MainReadFile(&things);
+	DDF_MainReadFile(&things, data);
 }
 
 void DDF_MobjInit(void)

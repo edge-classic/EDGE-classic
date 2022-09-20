@@ -69,13 +69,11 @@ commandlist_t;
 //
 typedef struct readinfo_s
 {
-	const char *filename;	// filename (if from a file)
-	const char *lumpname;	// lumpnume (if from a wad)
+	// name of the lump, for error messages
+	const char *lumpname;
 
-	const char *tag;	// the file has to start with <tag>
-
-	char *memfile;
-	unsigned int memsize;
+	// the file has to start with <tag>
+	const char *tag;
 
 	//
 	//  FUNCTIONS
@@ -106,8 +104,7 @@ typedef struct readinfo_s
 	// be called multiple times, once for each element, and `index' is
 	// used to indicate which element (starting at 0).
 	//
-	void (*parse_field) (const char *field, const char *contents,
-			     int index, bool is_last);
+	void (*parse_field) (const char *field, const char *contents, int index, bool is_last);
 
 	// when the entry has finished, this routine can perform any
 	// necessary operations here (such as updating a number -> entry
@@ -189,7 +186,7 @@ typedef struct
 state_starter_t;
 
 // DDF_MAIN Code (Reading all files, main init & generic functions).
-bool DDF_MainReadFile (readinfo_t * readinfo);
+void DDF_MainReadFile (readinfo_t * readinfo, const std::string& data);
 
 extern int cur_ddf_line_num;
 extern std::string cur_ddf_filename;

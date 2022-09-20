@@ -354,31 +354,34 @@ static changetex_type_e RAD_CheckForChangetexType(const char *info)
 //
 static char *RAD_UnquoteString(const char *s)
 {
-	int tokenlen = 0;
+	if (s[0] != '"')
+		return Z_StrDup(s);
 
 	// skip initial quote
 	s++;
 
-	while (*s != '"')
+	std::string new_str;
+
+	while (s[0] != '"')
 	{
 #ifdef DEVELOPERS
-		if (*s == 0)
+		if (s[0] == 0)
 			I_Error("INTERNAL ERROR: bad string.\n");
 #endif
 
-		// -AJA- 1999/09/07: check for \n. Only temporary, awaiting bison...
-		if (s[0] == '\\' && toupper(s[1]) == 'N')
+		// -AJA- 1999/09/07: check for \n
+		if (s[0] == '\\' && tolower(s[1]) == 'n')
 		{
-			tokenbuf[tokenlen++] = '\n';
+			new_str += '\n';
 			s += 2;
 			continue;
 		}
 
-		tokenbuf[tokenlen++] = *s++;
+		new_str += s[0];
+		s += 1;
 	}
 
-	tokenbuf[tokenlen] = 0;
-	return Z_StrDup(tokenbuf);
+	return Z_StrDup(new_str.c_str());
 }
 
 static bool CheckForBoolean(const char *s)
@@ -2062,17 +2065,11 @@ static void RAD_ParseShowMenu(int pnum, const char **pars)
 
 	SYS_ASSERT(2 <= pnum && pnum <= 11);
 
-	if (pars[1][0] == '"')
-		menu->title = RAD_UnquoteString(pars[1]);
-	else
-		menu->title = Z_StrDup(pars[1]);
+	menu->title = RAD_UnquoteString(pars[1]);
 
 	for (int p = 2; p < pnum; p++)
 	{
-		if (pars[p][0] == '"')
-			menu->options[p-2] = RAD_UnquoteString(pars[p]);
-		else
-			menu->options[p-2] = Z_StrDup(pars[p]);
+		menu->options[p-2] = RAD_UnquoteString(pars[p]);
 	}
 
 	AddStateToScript(this_rad, 0, RAD_ActShowMenu, menu);
@@ -2086,10 +2083,7 @@ static void RAD_ParseMenuStyle(int pnum, const char **pars)
 
 	Z_Clear(mm, s_menu_style_t, 1);
 
-	if (pars[1][0] == '"')
-		mm->style = RAD_UnquoteString(pars[1]);
-	else
-		mm->style = Z_StrDup(pars[1]);
+	mm->style = RAD_UnquoteString(pars[1]);
 
 	AddStateToScript(this_rad, 0, RAD_ActMenuStyle, mm);
 }
@@ -2147,12 +2141,7 @@ static void RAD_ParseSwitchWeapon(int pnum, const char **pars)
 {
 	// SwitchWeapon <WeaponName>
 
-	char * WeaponName;
-
-	if (pars[1][0] == '"')
-		WeaponName = RAD_UnquoteString(pars[1]);
-	else
-		WeaponName = Z_StrDup(pars[1]);
+	char * WeaponName = RAD_UnquoteString(pars[1]);
 
 	s_weapon_t *weaparg = Z_New(s_weapon_t, 1);
 	Z_Clear(weaparg, s_weapon_t, 1);
@@ -2175,18 +2164,8 @@ static void RAD_ParseReplaceWeapon(int pnum, const char **pars)
 {
 	// ReplaceWeapon <OldWeaponName> <NewWeaponName>
 
-	char * OldWeaponName;
-	char * NewWeaponName;
-
-	if (pars[1][0] == '"')
-		OldWeaponName = RAD_UnquoteString(pars[1]);
-	else
-		OldWeaponName = Z_StrDup(pars[1]);
-
-	if (pars[2][0] == '"')
-		NewWeaponName = RAD_UnquoteString(pars[2]);
-	else
-		NewWeaponName = Z_StrDup(pars[2]);
+	char * OldWeaponName = RAD_UnquoteString(pars[1]);
+	char * NewWeaponName = RAD_UnquoteString(pars[2]);
 
 	s_weapon_replace_t *weaparg = Z_New(s_weapon_replace_t, 1);
 	Z_Clear(weaparg, s_weapon_replace_t, 1);

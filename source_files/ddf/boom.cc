@@ -426,32 +426,32 @@ static void MakeBoomLockedDoor(linetype_c *line, int number)
 
 		case 1:  // Red Card
 			line->keys = (keys_e)(KF_RedCard | (sk_ck ? KF_RedSkull : 0));
-			line->failedmessage = "NeedRedForDoor";
+			line->failedmessage = "NeedRedCardForDoor";
 			break;
 
 		case 2:  // Blue Card
 			line->keys = (keys_e)(KF_BlueCard | (sk_ck ? KF_BlueSkull : 0));
-			line->failedmessage = "NeedBlueForDoor";
+			line->failedmessage = "NeedBlueCardForDoor";
 			break;
 
 		case 3:  // Yellow Card
 			line->keys = (keys_e)(KF_YellowCard | (sk_ck ? KF_YellowSkull : 0));
-			line->failedmessage = "NeedYellowForDoor";
+			line->failedmessage = "NeedYellowCardForDoor";
 			break;
 
 		case 4:  // Red Skull
 			line->keys = (keys_e)(KF_RedSkull | (sk_ck ? KF_RedCard : 0));
-			line->failedmessage = "NeedRedForDoor";
+			line->failedmessage = "NeedRedSkullForDoor";
 			break;
 
 		case 5:  // Blue Skull
 			line->keys = (keys_e)(KF_BlueSkull | (sk_ck ? KF_BlueCard : 0));
-			line->failedmessage = "NeedBlueForDoor";
+			line->failedmessage = "NeedBlueSkullForDoor";
 			break;
 
 		case 6:  // Yellow Skull
 			line->keys = (keys_e)(KF_YellowSkull | (sk_ck ? KF_YellowCard : 0));
-			line->failedmessage = "NeedYellowForDoor";
+			line->failedmessage = "NeedYellowSkullForDoor";
 			break;
 
 		case 7:  // ALL  

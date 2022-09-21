@@ -559,8 +559,18 @@ static void P_LineEffect(line_t *target, line_t *source,
 		target->side[1]->middle.translucency = 0.5f;
 	}
 
+	if ((special->line_effect & LINEFX_OffsetScroll) && target->side[0])
+	{
+		float xspeed = -target->side[0]->middle.offset.x;
+		float yspeed =  target->side[0]->middle.offset.y;
 
-	if (special->line_effect & LINEFX_VectorScroll || ((special->line_effect & LINEFX_OffsetScroll) && target->side[0]))
+		AdjustScrollParts(target->side[0], 0, special->line_parts,
+				xspeed, yspeed);
+
+		P_AddSpecialLine(target);
+	}
+
+	if (special->line_effect & LINEFX_VectorScroll)
 	{
 		// -AJA- Note: these values are the same as in BOOM, which doesn't
 		//       exactly match the description given in boomref.txt, which
@@ -572,12 +582,6 @@ static void P_LineEffect(line_t *target, line_t *source,
 		// to the source
 		lineanim_t anim;
 		anim.target = target;
-
-		if ((special->line_effect & LINEFX_OffsetScroll) && target->side[0])
-		{
-			anim.side0_xspeed -= target->side[0]->middle.offset.x;
-			anim.side0_yspeed +=  target->side[0]->middle.offset.y;
-		}
 
 		if (special->scroll_type == ScrollType_None)
 		{

@@ -28,15 +28,10 @@
 
 #define ZONEID  0x1d4a11f1
 
-// Generic helper functions.
-char *Z_StrDup(const char *s);
-
 // Memory handling functions.
 void Z_Init(void);
-void *Z_Malloc2(int size);
+void *Z_Malloc(int size);
 void Z_Free(void *ptr);
-
-#define Z_Malloc Z_Malloc2
 
 //
 // Z_New

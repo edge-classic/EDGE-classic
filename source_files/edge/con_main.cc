@@ -654,11 +654,11 @@ void CON_PlayerMessage(int plyr, const char *message, ...)
 	if (consoleplayer != plyr)
 		return;
 
-	Z_Clear(buffer, char, 256);
-
 	va_start(argptr, message);
-	vsprintf(buffer, message, argptr);
+	vsnprintf(buffer, sizeof(buffer), message, argptr);
 	va_end(argptr);
+
+	buffer[sizeof(buffer)-1] = 0;
 
 	CON_Message("%s", buffer);
 }
@@ -670,7 +670,7 @@ void CON_PlayerMessage(int plyr, const char *message, ...)
 //                  #define to procedure because of compiler
 //                  differences.
 //
-void CON_PlayerMessageLDF(int plyr, const char *lookup, ...)
+void CON_PlayerMessageLDF(int plyr, const char *message, ...)
 {
 	va_list argptr;
 	char buffer[256];
@@ -678,13 +678,13 @@ void CON_PlayerMessageLDF(int plyr, const char *lookup, ...)
 	if (consoleplayer != plyr)
 		return;
 
-	lookup = language[lookup];
+	message = language[message];
 
-	Z_Clear(buffer, char, 256);
-
-	va_start(argptr, lookup);
-	vsprintf(buffer, lookup, argptr);
+	va_start(argptr, message);
+	vsnprintf(buffer, sizeof(buffer), message, argptr);
 	va_end(argptr);
+
+	buffer[sizeof(buffer)-1] = 0;
 
 	CON_Message("%s", buffer);
 }

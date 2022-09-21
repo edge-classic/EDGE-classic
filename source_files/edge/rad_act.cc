@@ -82,11 +82,11 @@ void RAD_InitTips(void)
 	for (int i=0; i < MAXTIPSLOT; i++)
 	{
 		drawtip_t *current = tip_slots + i;
-		s_tip_prop_t *src = fixed_props + (i % FIXEDSLOTS);
 
 		// initial properties
 		Z_Clear(current, drawtip_t, 1);
-		Z_MoveData(&current->p, src, s_tip_prop_t, 1);
+
+		current->p = fixed_props[i % FIXEDSLOTS];
 
 		current->delay = -1;
 		current->color = RGB_NO_VALUE;

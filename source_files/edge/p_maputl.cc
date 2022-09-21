@@ -367,7 +367,7 @@ static int GAP_RemoveSolid(vgap_t * dest, int d_num, float z1, float z2)
 		}
 	}
 
-	Z_MoveData(dest, new_gaps, vgap_t, new_num);
+	memmove(dest, new_gaps, new_num * sizeof(vgap_t));
 
 	return new_num;
 }
@@ -440,7 +440,7 @@ static int GAP_Restrict(vgap_t * dest, int d_num, vgap_t * src, int s_num)
 	float f, c;
 
 	int new_num = 0;
-	vgap_t new_gaps[32];
+	vgap_t new_gaps[100];
 
 	for (s = 0; s < s_num; s++)
 	{
@@ -466,7 +466,7 @@ static int GAP_Restrict(vgap_t * dest, int d_num, vgap_t * src, int s_num)
 		}
 	}
 
-	Z_MoveData(dest, new_gaps, vgap_t, new_num);
+	memmove(dest, new_gaps, new_num * sizeof(vgap_t));
 
 	return new_num;
 }

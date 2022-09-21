@@ -58,6 +58,7 @@ int levelTimeCount;
 std::list<line_t *>   active_line_anims;
 std::list<sector_t *> active_sector_anims;
 std::vector<secanim_t> secanims;
+std::vector<lineanim_t> lineanims;
 
 
 static bool P_DoSectorsFromTag(int tag, const void *p1, void *p2,
@@ -559,7 +560,7 @@ static void P_LineEffect(line_t *target, line_t *source,
 	}
 
 
-	if (special->line_effect & LINEFX_VectorScroll)
+	if (special->line_effect & LINEFX_VectorScroll || ((special->line_effect & LINEFX_OffsetScroll) && target->side[0]))
 	{
 		// -AJA- Note: these values are the same as in BOOM, which doesn't
 		//       exactly match the description given in boomref.txt, which
@@ -569,6 +570,14 @@ static void P_LineEffect(line_t *target, line_t *source,
 		// Dasho - Adjust them to match boomref.txt to be able to work on
 		// different scroll handling if the target is parallel/perpendiciular/neither
 		// to the source
+		lineanim_t anim;
+		anim.target = target;
+
+		if ((special->line_effect & LINEFX_OffsetScroll) && target->side[0])
+		{
+			anim.side0_xspeed -= target->side[0]->middle.offset.x;
+			anim.side0_yspeed +=  target->side[0]->middle.offset.y;
+		}
 
 		if (special->scroll_type == ScrollType_None)
 		{
@@ -585,50 +594,66 @@ static void P_LineEffect(line_t *target, line_t *source,
 			{
 				if (((source->dy / source->length)+(source->dx / source->length)) == ((target->dx/target->length)+(target->dy/target->length)))
 				{
-					AdjustScrollParts(target->side[0], 0, special->line_parts, 0, yspeed);
-					AdjustScrollParts(target->side[1], 1, special->line_parts, 0, -yspeed);
+					anim.side0_yspeed += yspeed;
+					anim.side1_yspeed -= yspeed;
 				}
 				else
 				{
-					AdjustScrollParts(target->side[0], 0, special->line_parts, 0, -yspeed);
-					AdjustScrollParts(target->side[1], 1, special->line_parts, 0, yspeed);
+					anim.side0_yspeed -= yspeed;
+					anim.side1_yspeed += yspeed;
 				}
 			}
 			else if ((sdx == tdx) && (sdy == tdy))
 			{
 				if (((source->dy / source->length)+(source->dx / source->length)) == ((target->dx/target->length)+(target->dy/target->length)))
 				{
-					AdjustScrollParts(target->side[0], 0, special->line_parts, -xspeed, 0);
-					AdjustScrollParts(target->side[1], 1, special->line_parts, xspeed, 0);
+					anim.side0_xspeed -= xspeed;
+					anim.side1_xspeed += xspeed;
 				}
 				else
 				{
-					AdjustScrollParts(target->side[0], 0, special->line_parts, xspeed, 0);
-					AdjustScrollParts(target->side[1], 1, special->line_parts, -xspeed, 0);	
+					anim.side0_xspeed += xspeed;
+					anim.side1_xspeed -= xspeed;
 				}
 			}
 			else
 			{
 				bool samex = ((source->dx >= 0 && target->dx >= 0) || (source->dx < 0 && target->dx < 0));
 				bool samey = ((source->dy >= 0 && target->dy >= 0) || (source->dy < 0 && target->dy < 0));
-				AdjustScrollParts(target->side[0], 0, special->line_parts,
-						tdx * (samex ? xspeed : -xspeed), tdy * (samey ? -yspeed : yspeed));
-				AdjustScrollParts(target->side[1], 1, special->line_parts,
-						tdx * (samex ? -xspeed : xspeed), tdy * (samey ? yspeed : -yspeed));
+				if (samex)
+				{
+					anim.side0_xspeed += tdx * xspeed;
+					anim.side1_xspeed -= tdx * xspeed;
+				}
+				else
+				{
+					anim.side0_xspeed -= tdx * xspeed;
+					anim.side1_xspeed += tdx * xspeed;
+				}
+				if (samey)
+				{
+					anim.side0_yspeed -= tdy * yspeed;
+					anim.side1_yspeed += tdy * yspeed;
+				}
+				else
+				{
+					anim.side0_yspeed += tdy * yspeed;
+					anim.side1_yspeed -= tdy * yspeed;
+				}
 			}
 		}
-
-		P_AddSpecialLine(target);
-	}
-
-	if ((special->line_effect & LINEFX_OffsetScroll) && target->side[0])
-	{
-		float xspeed = -target->side[0]->middle.offset.x;
-		float yspeed =  target->side[0]->middle.offset.y;
-
-		AdjustScrollParts(target->side[0], 0, special->line_parts,
-				xspeed, yspeed);
-
+		else
+		{
+			// BOOM spec states that the front sector is the height reference
+			// for displace/accel scrollers
+			if (source->frontsector)
+			{
+				anim.scroll_sec_ref = source->frontsector;
+				anim.scroll_special_ref = special;
+				anim.scroll_line_ref = source;
+			}
+		}
+		lineanims.push_back(anim);
 		P_AddSpecialLine(target);
 	}
 
@@ -1830,6 +1855,317 @@ void P_UpdateSpecials(void)
 			G_ExitLevel(1);
 	}
 
+	// Calculate net offset/scroll/push for walls
+	for (int i=0;i < lineanims.size(); i++)
+	{
+		line_t *ld = lineanims[i].target;
+		if (!ld)
+			continue;
+		
+		// Add static values
+		if (ld->side[0])
+		{
+			if (ld->side[0]->top.image)
+			{
+				ld->side[0]->top.net_scroll.x += lineanims[i].side0_xspeed;
+				ld->side[0]->top.net_scroll.y += lineanims[i].side0_yspeed;
+			}
+			if (ld->side[0]->middle.image)
+			{
+				ld->side[0]->middle.net_scroll.x += lineanims[i].side0_xspeed;
+				ld->side[0]->middle.net_scroll.y += lineanims[i].side0_yspeed;
+			}
+			if (ld->side[0]->bottom.image)
+			{
+				ld->side[0]->bottom.net_scroll.x += lineanims[i].side0_xspeed;
+				ld->side[0]->bottom.net_scroll.y += lineanims[i].side0_yspeed;
+			}
+		}
+		if (ld->side[1])
+		{
+			if (ld->side[1]->top.image)
+			{
+				ld->side[1]->top.net_scroll.x += lineanims[i].side1_xspeed;
+				ld->side[1]->top.net_scroll.y += lineanims[i].side1_yspeed;
+			}
+			if (ld->side[1]->middle.image)
+			{
+				ld->side[1]->middle.net_scroll.x += lineanims[i].side1_xspeed;
+				ld->side[1]->middle.net_scroll.y += lineanims[i].side1_yspeed;
+			}
+			if (ld->side[1]->bottom.image)
+			{
+				ld->side[1]->bottom.net_scroll.x += lineanims[i].side1_xspeed;
+				ld->side[1]->bottom.net_scroll.y += lineanims[i].side1_yspeed;
+			}
+		}
+
+		// Update dynamic values
+		struct sector_s *sec_ref = lineanims[i].scroll_sec_ref;
+		const linetype_c *special_ref = lineanims[i].scroll_special_ref;
+		line_s *line_ref = lineanims[i].scroll_line_ref;
+
+		if (!sec_ref || !special_ref || !line_ref)
+			continue;
+
+			if (special_ref->scroll_type & ScrollType_Displace)
+			{
+				float ratio = line_ref->length / 32.0f;
+				float sdx = -(line_ref->dx / line_ref->length);
+				float sdy = -(line_ref->dy / line_ref->length);
+				if (sec_ref->floor_move)
+				{
+					if (sec_ref->floor_move->direction == 1)
+					{
+						if (ld->side[0])
+						{
+							if (ld->side[0]->top.image)
+							{
+								ld->side[0]->top.net_scroll.x += sec_ref->floor_move->speed * ratio * sdx;
+								ld->side[0]->top.net_scroll.y += sec_ref->floor_move->speed * ratio * sdy;
+							}
+							if (ld->side[0]->middle.image)
+							{
+								ld->side[0]->middle.net_scroll.x += sec_ref->floor_move->speed * ratio * sdx;
+								ld->side[0]->middle.net_scroll.y += sec_ref->floor_move->speed * ratio * sdy;
+							}
+							if (ld->side[0]->bottom.image)
+							{
+								ld->side[0]->bottom.net_scroll.x += sec_ref->floor_move->speed * ratio * sdx;
+								ld->side[0]->bottom.net_scroll.y += sec_ref->floor_move->speed * ratio * sdy;
+							}
+						}
+						if (ld->side[1])
+						{
+							if (ld->side[1]->top.image)
+							{
+								ld->side[1]->top.net_scroll.x += sec_ref->floor_move->speed * ratio * sdx;
+								ld->side[1]->top.net_scroll.y += sec_ref->floor_move->speed * ratio * sdy;
+							}
+							if (ld->side[1]->middle.image)
+							{
+								ld->side[1]->middle.net_scroll.x += sec_ref->floor_move->speed * ratio * sdx;
+								ld->side[1]->middle.net_scroll.y += sec_ref->floor_move->speed * ratio * sdy;
+							}
+							if (ld->side[1]->bottom.image)
+							{
+								ld->side[1]->bottom.net_scroll.x += sec_ref->floor_move->speed * ratio * sdx;
+								ld->side[1]->bottom.net_scroll.y += sec_ref->floor_move->speed * ratio * sdy;
+							}
+						}
+					}
+					else if (sec_ref->floor_move->direction == -1)
+					{
+						if (ld->side[0])
+						{
+							if (ld->side[0]->top.image)
+							{
+								ld->side[0]->top.net_scroll.x -= sec_ref->floor_move->speed * ratio * sdx;
+								ld->side[0]->top.net_scroll.y -= sec_ref->floor_move->speed * ratio * sdy;
+							}
+							if (ld->side[0]->middle.image)
+							{
+								ld->side[0]->middle.net_scroll.x -= sec_ref->floor_move->speed * ratio * sdx;
+								ld->side[0]->middle.net_scroll.y -= sec_ref->floor_move->speed * ratio * sdy;
+							}
+							if (ld->side[0]->bottom.image)
+							{
+								ld->side[0]->bottom.net_scroll.x -= sec_ref->floor_move->speed * ratio * sdx;
+								ld->side[0]->bottom.net_scroll.y -= sec_ref->floor_move->speed * ratio * sdy;
+							}
+						}
+						if (ld->side[1])
+						{
+							if (ld->side[1]->top.image)
+							{
+								ld->side[1]->top.net_scroll.x -= sec_ref->floor_move->speed * ratio * sdx;
+								ld->side[1]->top.net_scroll.y -= sec_ref->floor_move->speed * ratio * sdy;
+							}
+							if (ld->side[1]->middle.image)
+							{
+								ld->side[1]->middle.net_scroll.x -= sec_ref->floor_move->speed * ratio * sdx;
+								ld->side[1]->middle.net_scroll.y -= sec_ref->floor_move->speed * ratio * sdy;
+							}
+							if (ld->side[1]->bottom.image)
+							{
+								ld->side[1]->bottom.net_scroll.x -= sec_ref->floor_move->speed * ratio * sdx;
+								ld->side[1]->bottom.net_scroll.y -= sec_ref->floor_move->speed * ratio * sdy;
+							}
+						}
+					}
+				}
+				if (sec_ref->ceil_move)
+				{
+					if (sec_ref->ceil_move->direction == 1)
+					{
+						if (ld->side[0])
+						{
+							if (ld->side[0]->top.image)
+							{
+								ld->side[0]->top.net_scroll.x += sec_ref->ceil_move->speed * ratio * sdx;
+								ld->side[0]->top.net_scroll.y += sec_ref->ceil_move->speed * ratio * sdy;
+							}
+							if (ld->side[0]->middle.image)
+							{
+								ld->side[0]->middle.net_scroll.x += sec_ref->ceil_move->speed * ratio * sdx;
+								ld->side[0]->middle.net_scroll.y += sec_ref->ceil_move->speed * ratio * sdy;
+							}
+							if (ld->side[0]->bottom.image)
+							{
+								ld->side[0]->bottom.net_scroll.x += sec_ref->ceil_move->speed * ratio * sdx;
+								ld->side[0]->bottom.net_scroll.y += sec_ref->ceil_move->speed * ratio * sdy;
+							}
+						}
+						if (ld->side[1])
+						{
+							if (ld->side[1]->top.image)
+							{
+								ld->side[1]->top.net_scroll.x += sec_ref->ceil_move->speed * ratio * sdx;
+								ld->side[1]->top.net_scroll.y += sec_ref->ceil_move->speed * ratio * sdy;
+							}
+							if (ld->side[1]->middle.image)
+							{
+								ld->side[1]->middle.net_scroll.x += sec_ref->ceil_move->speed * ratio * sdx;
+								ld->side[1]->middle.net_scroll.y += sec_ref->ceil_move->speed * ratio * sdy;
+							}
+							if (ld->side[1]->bottom.image)
+							{
+								ld->side[1]->bottom.net_scroll.x += sec_ref->ceil_move->speed * ratio * sdx;
+								ld->side[1]->bottom.net_scroll.y += sec_ref->ceil_move->speed * ratio * sdy;
+							}
+						}
+					}
+					else if (sec_ref->ceil_move->direction == -1)
+					{
+						if (ld->side[0])
+						{
+							if (ld->side[0]->top.image)
+							{
+								ld->side[0]->top.net_scroll.x -= sec_ref->ceil_move->speed * ratio * sdx;
+								ld->side[0]->top.net_scroll.y -= sec_ref->ceil_move->speed * ratio * sdy;
+							}
+							if (ld->side[0]->middle.image)
+							{
+								ld->side[0]->middle.net_scroll.x -= sec_ref->ceil_move->speed * ratio * sdx;
+								ld->side[0]->middle.net_scroll.y -= sec_ref->ceil_move->speed * ratio * sdy;
+							}
+							if (ld->side[0]->bottom.image)
+							{
+								ld->side[0]->bottom.net_scroll.x -= sec_ref->ceil_move->speed * ratio * sdx;
+								ld->side[0]->bottom.net_scroll.y -= sec_ref->ceil_move->speed * ratio * sdy;
+							}
+						}
+						if (ld->side[1])
+						{
+							if (ld->side[1]->top.image)
+							{
+								ld->side[1]->top.net_scroll.x -= sec_ref->ceil_move->speed * ratio * sdx;
+								ld->side[1]->top.net_scroll.y -= sec_ref->ceil_move->speed * ratio * sdy;
+							}
+							if (ld->side[1]->middle.image)
+							{
+								ld->side[1]->middle.net_scroll.x -= sec_ref->ceil_move->speed * ratio * sdx;
+								ld->side[1]->middle.net_scroll.y -= sec_ref->ceil_move->speed * ratio * sdy;
+							}
+							if (ld->side[1]->bottom.image)
+							{
+								ld->side[1]->bottom.net_scroll.x -= sec_ref->ceil_move->speed * ratio * sdx;
+								ld->side[1]->bottom.net_scroll.y -= sec_ref->ceil_move->speed * ratio * sdy;
+							}
+						}
+					}
+				}
+			}
+			if (special_ref->scroll_type & ScrollType_Accel)
+			{
+				float ratio = line_ref->length / 32.0f;
+				float sdx = line_ref->dx / line_ref->length;
+				float sdy = line_ref->dy / line_ref->length;
+				if (sec_ref->floor_move)
+				{
+					bool lowering = sec_ref->floor_move->startheight > sec_ref->floor_move->destheight;
+					float dist = (lowering ? sec_ref->floor_move->startheight : sec_ref->floor_move->destheight) - sec_ref->f_h;
+					if (ld->side[0])
+					{
+						if (ld->side[0]->top.image)
+						{
+							ld->side[0]->top.net_scroll.x += sec_ref->floor_move->speed * ratio * sdx * dist;
+							ld->side[0]->top.net_scroll.y += sec_ref->floor_move->speed * ratio * sdy * dist;
+						}
+						if (ld->side[0]->middle.image)
+						{
+							ld->side[0]->middle.net_scroll.x += sec_ref->floor_move->speed * ratio * sdx * dist;
+							ld->side[0]->middle.net_scroll.y += sec_ref->floor_move->speed * ratio * sdy * dist;
+						}
+						if (ld->side[0]->bottom.image)
+						{
+							ld->side[0]->bottom.net_scroll.x += sec_ref->floor_move->speed * ratio * sdx * dist;
+							ld->side[0]->bottom.net_scroll.y += sec_ref->floor_move->speed * ratio * sdy * dist;
+						}
+					}
+					if (ld->side[1])
+					{
+						if (ld->side[1]->top.image)
+						{
+							ld->side[1]->top.net_scroll.x += sec_ref->floor_move->speed * ratio * sdx * dist;
+							ld->side[1]->top.net_scroll.y += sec_ref->floor_move->speed * ratio * sdy * dist;
+						}
+						if (ld->side[1]->middle.image)
+						{
+							ld->side[1]->middle.net_scroll.x += sec_ref->floor_move->speed * ratio * sdx * dist;
+							ld->side[1]->middle.net_scroll.y += sec_ref->floor_move->speed * ratio * sdy * dist;
+						}
+						if (ld->side[1]->bottom.image)
+						{
+							ld->side[1]->bottom.net_scroll.x += sec_ref->floor_move->speed * ratio * sdx * dist;
+							ld->side[1]->bottom.net_scroll.y += sec_ref->floor_move->speed * ratio * sdy * dist;
+						}
+					}	
+				}
+				if (sec_ref->ceil_move)
+				{
+					bool lowering = sec_ref->ceil_move->startheight > sec_ref->ceil_move->destheight;
+					float dist = (lowering ? sec_ref->ceil_move->startheight : sec_ref->ceil_move->destheight) - sec_ref->c_h;
+					if (ld->side[0])
+					{
+						if (ld->side[0]->top.image)
+						{
+							ld->side[0]->top.net_scroll.x += sec_ref->ceil_move->speed * ratio * sdx * dist;
+							ld->side[0]->top.net_scroll.y += sec_ref->ceil_move->speed * ratio * sdy * dist;
+						}
+						if (ld->side[0]->middle.image)
+						{
+							ld->side[0]->middle.net_scroll.x += sec_ref->ceil_move->speed * ratio * sdx * dist;
+							ld->side[0]->middle.net_scroll.y += sec_ref->ceil_move->speed * ratio * sdy * dist;
+						}
+						if (ld->side[0]->bottom.image)
+						{
+							ld->side[0]->bottom.net_scroll.x += sec_ref->ceil_move->speed * ratio * sdx * dist;
+							ld->side[0]->bottom.net_scroll.y += sec_ref->ceil_move->speed * ratio * sdy * dist;
+						}
+					}
+					if (ld->side[1])
+					{
+						if (ld->side[1]->top.image)
+						{
+							ld->side[1]->top.net_scroll.x += sec_ref->ceil_move->speed * ratio * sdx * dist;
+							ld->side[1]->top.net_scroll.y += sec_ref->ceil_move->speed * ratio * sdy * dist;
+						}
+						if (ld->side[1]->middle.image)
+						{
+							ld->side[1]->middle.net_scroll.x += sec_ref->ceil_move->speed * ratio * sdx * dist;
+							ld->side[1]->middle.net_scroll.y += sec_ref->ceil_move->speed * ratio * sdy * dist;
+						}
+						if (ld->side[1]->bottom.image)
+						{
+							ld->side[1]->bottom.net_scroll.x += sec_ref->ceil_move->speed * ratio * sdx * dist;
+							ld->side[1]->bottom.net_scroll.y += sec_ref->ceil_move->speed * ratio * sdy * dist;
+						}
+					}		
+				}
+			}
+	}
+
 	// ANIMATE LINE SPECIALS
 	// -KM- 1998/09/01 Lines.ddf
 	std::list<line_t *>::iterator LI;
@@ -1840,30 +2176,135 @@ void P_UpdateSpecials(void)
 	{
 		line_t *ld = *LI;
 
+		if (!ld->old_stored)
+		{
+			if (ld->side[0])
+			{
+				if (ld->side[0]->top.image)
+				{
+					ld->side[0]->top.old_scroll.x = ld->side[0]->top.scroll.x;
+					ld->side[0]->top.old_scroll.y = ld->side[0]->top.scroll.y;
+				}
+				if (ld->side[0]->middle.image)
+				{
+					ld->side[0]->middle.old_scroll.x = ld->side[0]->middle.scroll.x;
+					ld->side[0]->middle.old_scroll.y = ld->side[0]->middle.scroll.y;
+				}
+				if (ld->side[0]->bottom.image)
+				{
+					ld->side[0]->bottom.old_scroll.x = ld->side[0]->bottom.scroll.x;
+					ld->side[0]->bottom.old_scroll.y = ld->side[0]->bottom.scroll.y;
+				}
+			}
+			if (ld->side[1])
+			{
+				if (ld->side[1]->top.image)
+				{
+					ld->side[1]->top.old_scroll.x = ld->side[1]->top.scroll.x;
+					ld->side[1]->top.old_scroll.y = ld->side[1]->top.scroll.y;
+				}
+				if (ld->side[1]->middle.image)
+				{
+					ld->side[1]->middle.old_scroll.x = ld->side[1]->middle.scroll.x;
+					ld->side[1]->middle.old_scroll.y = ld->side[1]->middle.scroll.y;
+				}
+				if (ld->side[1]->bottom.image)
+				{
+					ld->side[1]->bottom.old_scroll.x = ld->side[1]->bottom.scroll.x;
+					ld->side[1]->bottom.old_scroll.y = ld->side[1]->bottom.scroll.y;
+				}
+			}
+			ld->old_stored = true;
+		}
+		else
+		{
+			if (ld->side[0])
+			{
+				if (ld->side[0]->top.image)
+				{
+					ld->side[0]->top.scroll.x = ld->side[0]->top.old_scroll.x;
+					ld->side[0]->top.scroll.y = ld->side[0]->top.old_scroll.y;
+				}
+				if (ld->side[0]->middle.image)
+				{
+					ld->side[0]->middle.scroll.x = ld->side[0]->middle.old_scroll.x;
+					ld->side[0]->middle.scroll.y = ld->side[0]->middle.old_scroll.y;
+				}
+				if (ld->side[0]->bottom.image)
+				{
+					ld->side[0]->bottom.scroll.x = ld->side[0]->bottom.old_scroll.x;
+					ld->side[0]->bottom.scroll.y = ld->side[0]->bottom.old_scroll.y;
+				}
+			}
+			if (ld->side[1])
+			{
+				if (ld->side[1]->top.image)
+				{
+					ld->side[1]->top.scroll.x = ld->side[1]->top.old_scroll.x;
+					ld->side[1]->top.scroll.y = ld->side[1]->top.old_scroll.y;
+				}
+				if (ld->side[1]->middle.image)
+				{
+					ld->side[1]->middle.scroll.x = ld->side[1]->middle.old_scroll.x;
+					ld->side[1]->middle.scroll.y = ld->side[1]->middle.old_scroll.y;
+				}
+				if (ld->side[1]->bottom.image)
+				{
+					ld->side[1]->bottom.scroll.x = ld->side[1]->bottom.old_scroll.x;
+					ld->side[1]->bottom.scroll.y = ld->side[1]->bottom.old_scroll.y;
+				}
+			}
+		}
+
+
 		// -KM- 1999/01/31 Use new method.
 		// -AJA- 1999/07/01: Handle both sidedefs.
 		if (ld->side[0])
 		{
 			if (ld->side[0]->top.image)
-				ApplyScroll(ld->side[0]->top.offset,    ld->side[0]->top.scroll, ld->side[0]->top.image->actual_w, ld->side[0]->top.image->actual_h);
+			{
+				ld->side[0]->top.offset.x = fmod(ld->side[0]->top.offset.x + ld->side[0]->top.scroll.x + ld->side[0]->top.net_scroll.x, ld->side[0]->top.image->actual_w);
+				ld->side[0]->top.offset.y = fmod(ld->side[0]->top.offset.y + ld->side[0]->top.scroll.y + ld->side[0]->top.net_scroll.y, ld->side[0]->top.image->actual_h);
+				ld->side[0]->top.net_scroll = {0,0};
+			}
 			if (ld->side[0]->middle.image)
-				ApplyScroll(ld->side[0]->middle.offset, ld->side[0]->middle.scroll, ld->side[0]->middle.image->actual_w, ld->side[0]->middle.image->actual_h);
+			{
+				ld->side[0]->middle.offset.x = fmod(ld->side[0]->middle.offset.x + ld->side[0]->middle.scroll.x + ld->side[0]->middle.net_scroll.x, ld->side[0]->middle.image->actual_w);
+				ld->side[0]->middle.offset.y = fmod(ld->side[0]->middle.offset.y + ld->side[0]->middle.scroll.y + ld->side[0]->middle.net_scroll.y, ld->side[0]->middle.image->actual_h);
+				ld->side[0]->middle.net_scroll = {0,0};
+			}
 			if (ld->side[0]->bottom.image)
-				ApplyScroll(ld->side[0]->bottom.offset, ld->side[0]->bottom.scroll, ld->side[0]->bottom.image->actual_w, ld->side[0]->bottom.image->actual_h);
+			{
+				ld->side[0]->bottom.offset.x = fmod(ld->side[0]->bottom.offset.x + ld->side[0]->bottom.scroll.x + ld->side[0]->bottom.net_scroll.x, ld->side[0]->bottom.image->actual_w);
+				ld->side[0]->bottom.offset.y = fmod(ld->side[0]->bottom.offset.y + ld->side[0]->bottom.scroll.y + ld->side[0]->bottom.net_scroll.y, ld->side[0]->bottom.image->actual_h);
+				ld->side[0]->bottom.net_scroll = {0,0};
+			}
 		}
 
 		if (ld->side[1])
 		{
 			if (ld->side[1]->top.image)
-				ApplyScroll(ld->side[1]->top.offset,    ld->side[1]->top.scroll, ld->side[1]->top.image->actual_w, ld->side[1]->top.image->actual_h);
+			{
+				ld->side[1]->top.offset.x = fmod(ld->side[1]->top.offset.x + ld->side[1]->top.scroll.x + ld->side[1]->top.net_scroll.x, ld->side[1]->top.image->actual_w);
+				ld->side[1]->top.offset.y = fmod(ld->side[1]->top.offset.y + ld->side[1]->top.scroll.y + ld->side[1]->top.net_scroll.y, ld->side[1]->top.image->actual_h);
+				ld->side[1]->top.net_scroll = {0,0};
+			}
 			if (ld->side[1]->middle.image)
-				ApplyScroll(ld->side[1]->middle.offset, ld->side[1]->middle.scroll, ld->side[1]->middle.image->actual_w, ld->side[1]->middle.image->actual_h);
+			{
+				ld->side[1]->middle.offset.x = fmod(ld->side[1]->middle.offset.x + ld->side[1]->middle.scroll.x + ld->side[1]->middle.net_scroll.x, ld->side[1]->middle.image->actual_w);
+				ld->side[1]->middle.offset.y = fmod(ld->side[1]->middle.offset.y + ld->side[1]->middle.scroll.y + ld->side[1]->middle.net_scroll.y, ld->side[1]->middle.image->actual_h);
+				ld->side[1]->middle.net_scroll = {0,0};
+			}
 			if (ld->side[1]->bottom.image)
-				ApplyScroll(ld->side[1]->bottom.offset, ld->side[1]->bottom.scroll, ld->side[1]->bottom.image->actual_w, ld->side[1]->bottom.image->actual_h);
+			{
+				ld->side[1]->bottom.offset.x = fmod(ld->side[1]->bottom.offset.x + ld->side[1]->bottom.scroll.x + ld->side[1]->bottom.net_scroll.x, ld->side[1]->bottom.image->actual_w);
+				ld->side[1]->bottom.offset.y = fmod(ld->side[1]->bottom.offset.y + ld->side[1]->bottom.scroll.y + ld->side[1]->bottom.net_scroll.y, ld->side[1]->bottom.image->actual_h);
+				ld->side[1]->bottom.net_scroll = {0,0};
+			}
 		}
 	}
 
-	// Calculate net offset/scroll/push
+	// Calculate net offset/scroll/push for floor/ceilings
 	for (int i=0;i < secanims.size(); i++)
 	{
 		sector_t *sec = secanims[i].target;
@@ -1893,7 +2334,6 @@ void P_UpdateSpecials(void)
 				float sdy = -(line_ref->dy / line_ref->length);
 				if (sec_ref->floor_move)
 				{
-					bool lowering = sec_ref->floor_move->startheight > sec_ref->floor_move->destheight;
 					if (sec_ref->floor_move->direction == 1)
 					{
 						if (special_ref->sector_effect & SECTFX_PushThings)
@@ -1933,7 +2373,6 @@ void P_UpdateSpecials(void)
 				}
 				if (sec_ref->ceil_move)
 				{
-					bool lowering = sec_ref->ceil_move->startheight > sec_ref->ceil_move->destheight;
 					if (sec_ref->ceil_move->direction == 1)
 					{
 						if (special_ref->sector_effect & SECTFX_PushThings)
@@ -2019,7 +2458,6 @@ void P_UpdateSpecials(void)
 				}
 			}
 	}
-
 
 	// ANIMATE SECTOR SPECIALS
 	std::list<sector_t *>::iterator SI;

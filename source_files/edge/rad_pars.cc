@@ -37,6 +37,9 @@
 #include "z_zone.h"
 
 
+typedef std::vector<const char *> param_set_t;
+
+
 typedef struct rts_parser_s
 {
 	// needed level:
@@ -53,7 +56,7 @@ typedef struct rts_parser_s
 	int min_pars, max_pars;
 
 	// parser function
-	void (* parser)(int pnum, const char ** pars);
+	void (* parser)(param_set_t& pars);
 }
 rts_parser_t;
 
@@ -613,7 +616,7 @@ static void RAD_ComputeScriptCRC(rad_script_t *scr)
 // 
 // -AJA- 2000/01/02: Moved #define handling to here.
 //
-static void RAD_TokenizeLine(int *pnum, char ** pars, int max)
+static void RAD_TokenizeLine(param_set_t& pars)
 {
 	const char *line = rad_cur_line.c_str();
 
@@ -622,8 +625,6 @@ static void RAD_TokenizeLine(int *pnum, char ** pars, int max)
 	bool want_token = true;
 	bool in_string  = false;
 	int  in_expr    = 0;  // add one for each open bracket.
-
-	*pnum = 0;
 
 	for (;;)
 	{
@@ -707,13 +708,10 @@ static void RAD_TokenizeLine(int *pnum, char ** pars, int max)
 
 		want_token = true;
 
-		if (*pnum >= max)
-			RAD_Error("Too many tokens on line\n");
-
 		// check for defines
-		pars[*pnum] = Z_StrDup(DDF_MainGetDefine(tokenbuf.c_str()));
+		const char *par_str = Z_StrDup(DDF_MainGetDefine(tokenbuf.c_str()));
 
-		*pnum += 1;
+		pars.push_back(par_str);
 
 		// end of line ?
 		if (ch == 0 || comment)
@@ -725,37 +723,37 @@ static void RAD_TokenizeLine(int *pnum, char ** pars, int max)
 //
 // Free previously collected parameters.
 // 
-static void RAD_FreeParameters(int pnum, char **pars)
+static void RAD_FreeParameters(param_set_t& pars)
 {
-	while (pnum > 0)
+	for (size_t i = 0 ; i < pars.size() ; i++)
 	{
-		Z_Free(pars[--pnum]);
+		Z_Free((void *) pars[i]);
 	}
 }
 
 
 // ---- Primitive Parsers ----------------------------------------------
 
-static void RAD_ParseVersion(int pnum, const char **pars)
+static void RAD_ParseVersion(param_set_t& pars)
 {
 	// ignored for compatibility
 }
 
-static void RAD_ParseClearAll(int pnum, const char **pars)
+static void RAD_ParseClearAll(param_set_t& pars)
 {
 	// #ClearAll
 
 	ClearAllScripts();
 }
 
-static void RAD_ParseDefine(int pnum, const char **pars)
+static void RAD_ParseDefine(param_set_t& pars)
 {
 	// #Define <identifier> <num>
 
 	DDF_MainAddDefine(pars[1], pars[2]);
 }
 
-static void RAD_ParseStartMap(int pnum, const char **pars)
+static void RAD_ParseStartMap(param_set_t& pars)
 {
 	// Start_Map <map>
 
@@ -773,7 +771,7 @@ static void RAD_ParseStartMap(int pnum, const char **pars)
 	rad_cur_level++;
 }
 
-static void RAD_ParseRadiusTrigger(int pnum, const char **pars)
+static void RAD_ParseRadiusTrigger(param_set_t& pars)
 {
 	// RadiusTrigger <x> <y> <radius>
 	// RadiusTrigger <x> <y> <radius> <low z> <high z>
@@ -817,7 +815,7 @@ static void RAD_ParseRadiusTrigger(int pnum, const char **pars)
 	{
 		float x1, y1, x2, y2, z1, z2;
 
-		if (pnum == 6)
+		if (pars.size() == 6)
 			RAD_Error("%s: Wrong number of parameters.\n", pars[0]);
 
 		RAD_CheckForFloat(pars[1], &x1);
@@ -835,7 +833,7 @@ static void RAD_ParseRadiusTrigger(int pnum, const char **pars)
 		this_rad->rad_x = (float)fabs(x1 - x2) / 2.0f;
 		this_rad->rad_y = (float)fabs(y1 - y2) / 2.0f;
 
-		if (pnum >= 7)
+		if (pars.size() >= 7)
 		{
 			RAD_CheckForFloat(pars[5], &z1);
 			RAD_CheckForFloat(pars[6], &z2);
@@ -850,7 +848,7 @@ static void RAD_ParseRadiusTrigger(int pnum, const char **pars)
 	}
 	else
 	{
-		if (pnum == 5)
+		if (pars.size() == 5)
 			RAD_Error("%s: Wrong number of parameters.\n", pars[0]);
 
 		RAD_CheckForFloat(pars[1], &this_rad->x);
@@ -859,7 +857,7 @@ static void RAD_ParseRadiusTrigger(int pnum, const char **pars)
 
 		this_rad->rad_y = this_rad->rad_x;
 
-		if (pnum >= 6)
+		if (pars.size() >= 6)
 		{
 			float z1, z2;
 
@@ -886,7 +884,7 @@ static void RAD_ParseRadiusTrigger(int pnum, const char **pars)
 	rad_cur_level++;
 }
 
-static void RAD_ParseEndRadiusTrigger(int pnum, const char **pars)
+static void RAD_ParseEndRadiusTrigger(param_set_t& pars)
 {
 	// End_RadiusTrigger
 
@@ -908,7 +906,7 @@ static void RAD_ParseEndRadiusTrigger(int pnum, const char **pars)
 	rad_cur_level--;
 }
 
-static void RAD_ParseEndMap(int pnum, const char **pars)
+static void RAD_ParseEndMap(param_set_t& pars)
 {
 	// End_Map
 
@@ -924,7 +922,7 @@ static void RAD_ParseEndMap(int pnum, const char **pars)
 	rad_cur_level--;
 }
 
-static void RAD_ParseName(int pnum, const char **pars)
+static void RAD_ParseName(param_set_t& pars)
 {
 	// Name <name>
 
@@ -934,7 +932,7 @@ static void RAD_ParseName(int pnum, const char **pars)
 	this_rad->script_name = Z_StrDup(pars[1]);
 }
 
-static void RAD_ParseTag(int pnum, const char **pars)
+static void RAD_ParseTag(param_set_t& pars)
 {
 	// Tag <number>
 
@@ -956,14 +954,14 @@ static void RAD_ParseTag(int pnum, const char **pars)
 		this_rad->tag = atoi(pars[1]);
 }
 
-static void RAD_ParseWhenAppear(int pnum, const char **pars)
+static void RAD_ParseWhenAppear(param_set_t& pars)
 {
 	// When_Appear 1:2:3:4:5:SP:COOP:DM
 
 	DDF_MainGetWhenAppear(pars[1], &this_rad->appear);
 }
 
-static void RAD_ParseWhenPlayerNum(int pnum, const char **pars)
+static void RAD_ParseWhenPlayerNum(param_set_t& pars)
 {
 	// When_Player_Num <min> [max]
 
@@ -971,7 +969,7 @@ static void RAD_ParseWhenPlayerNum(int pnum, const char **pars)
 
 	this_rad->max_players = MAXPLAYERS;
 
-	if (pnum >= 3)
+	if (pars.size() >= 3)
 		RAD_CheckForInt(pars[2], &this_rad->max_players);
 
 	if (this_rad->min_players < 0 || this_rad->min_players > this_rad->max_players)
@@ -981,7 +979,7 @@ static void RAD_ParseWhenPlayerNum(int pnum, const char **pars)
 	}
 }
 
-static void RAD_ParseNetMode(int pnum, const char **pars)
+static void RAD_ParseNetMode(param_set_t& pars)
 {
 	// Net_Mode SEPARATE
 	// Net_Mode ABSOLUTE
@@ -989,7 +987,7 @@ static void RAD_ParseNetMode(int pnum, const char **pars)
 	// NOTE: IGNORED FOR BACKWARDS COMPATIBILITY
 }
 
-static void RAD_ParseTaggedRepeatable(int pnum, const char **pars)
+static void RAD_ParseTaggedRepeatable(param_set_t& pars)
 {
 	// Tagged_Repeatable
 	// Tagged_Repeatable <num repetitions>
@@ -998,54 +996,54 @@ static void RAD_ParseTaggedRepeatable(int pnum, const char **pars)
 	if (this_rad->repeat_count >= 0)
 		RAD_Error("%s: can only be used once.\n", pars[0]);
 
-	if (pnum >= 2)
+	if (pars.size() >= 2)
 		RAD_CheckForInt(pars[1], &this_rad->repeat_count);
 	else
 		this_rad->repeat_count = REPEAT_FOREVER;
 
 	// -ES- 2000/03/03 Changed to RAD_CheckForTime.
-	if (pnum >= 3)
+	if (pars.size() >= 3)
 		RAD_CheckForTime(pars[2], &this_rad->repeat_delay);
 	else
 		this_rad->repeat_delay = 1;
 }
 
-static void RAD_ParseTaggedUse(int pnum, const char **pars)
+static void RAD_ParseTaggedUse(param_set_t& pars)
 {
 	// Tagged_Use
 
 	this_rad->tagged_use = true;
 }
 
-static void RAD_ParseTaggedIndependent(int pnum, const char **pars)
+static void RAD_ParseTaggedIndependent(param_set_t& pars)
 {
 	// Tagged_Independent
 
 	this_rad->tagged_independent = true;
 }
 
-static void RAD_ParseTaggedImmediate(int pnum, const char **pars)
+static void RAD_ParseTaggedImmediate(param_set_t& pars)
 {
 	// Tagged_Immediate
 
 	this_rad->tagged_immediate = true;
 }
 
-static void RAD_ParseTaggedPlayerSpecific(int pnum, const char **pars)
+static void RAD_ParseTaggedPlayerSpecific(param_set_t& pars)
 {
 	// Tagged_Player_Specific
 
 	// NOTE: IGNORED FOR BACKWARDS COMPATIBILITY
 }
 
-static void RAD_ParseTaggedDisabled(int pnum, const char **pars)
+static void RAD_ParseTaggedDisabled(param_set_t& pars)
 {
 	// Tagged_Disabled
 
 	this_rad->tagged_disabled = true;
 }
 
-static void RAD_ParseTaggedPath(int pnum, const char **pars)
+static void RAD_ParseTaggedPath(param_set_t& pars)
 {
 	// Tagged_Path  <next node>
 
@@ -1060,7 +1058,7 @@ static void RAD_ParseTaggedPath(int pnum, const char **pars)
 	this_rad->next_path_total += 1;
 }
 
-static void RAD_ParsePathEvent(int pnum, const char **pars)
+static void RAD_ParsePathEvent(param_set_t& pars)
 {
 	// Path_Event  <label>
 
@@ -1084,7 +1082,7 @@ static void RAD_ParsePathEvent(int pnum, const char **pars)
 	this_rad->path_event_offset = div ? MAX(0, atoi(div+1) - 1) : 0;
 }
 
-static void RAD_ParseOnDeath(int pnum, const char **pars)
+static void RAD_ParseOnDeath(param_set_t& pars)
 {
 	// OnDeath <thing type>
 	// OnDeath <thing type> <threshhold>
@@ -1101,7 +1099,7 @@ static void RAD_ParseOnDeath(int pnum, const char **pars)
 	else
 		cond->thing_name = Z_StrDup(pars[1]);
 
-	if (pnum >= 3)
+	if (pars.size() >= 3)
 	{
 		RAD_CheckForInt(pars[2], &cond->threshhold);
 	}
@@ -1111,7 +1109,7 @@ static void RAD_ParseOnDeath(int pnum, const char **pars)
 	this_rad->boss_trig = cond;
 }
 
-static void RAD_ParseOnHeight(int pnum, const char **pars)
+static void RAD_ParseOnHeight(param_set_t& pars)
 {
 	// OnHeight <low Z> <high Z>
 	// OnHeight <low Z> <high Z> <sector num>
@@ -1133,7 +1131,7 @@ static void RAD_ParseOnHeight(int pnum, const char **pars)
 		cond->z1, cond->z2);
 
 	// get sector reference
-	if (pnum >= 4)
+	if (pars.size() >= 4)
 	{
 		RAD_CheckForInt(pars[3], &cond->sec_num);
 	}
@@ -1145,7 +1143,7 @@ static void RAD_ParseOnHeight(int pnum, const char **pars)
 	this_rad->height_trig = cond;
 }
 
-static void RAD_ParseOnCondition(int pnum, const char **pars)
+static void RAD_ParseOnCondition(param_set_t& pars)
 {
 	// OnCondition  <condition>
 
@@ -1164,7 +1162,7 @@ static void RAD_ParseOnCondition(int pnum, const char **pars)
 	this_rad->cond_trig = cond;
 }
 
-static void RAD_ParseLabel(int pnum, const char **pars)
+static void RAD_ParseLabel(param_set_t& pars)
 {
 	// Label <label>
 
@@ -1178,7 +1176,7 @@ static void RAD_ParseLabel(int pnum, const char **pars)
 	pending_label = Z_StrDup(pars[1]);
 }
 
-static void RAD_ParseEnableScript(int pnum, const char **pars)
+static void RAD_ParseEnableScript(param_set_t& pars)
 {
 	// Enable_Script  <script name>
 	// Disable_Script <script name>
@@ -1193,7 +1191,7 @@ static void RAD_ParseEnableScript(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActEnableScript, t);
 }
 
-static void RAD_ParseEnableTagged(int pnum, const char **pars)
+static void RAD_ParseEnableTagged(param_set_t& pars)
 {
 	// Enable_Tagged  <tag num>
 	// Disable_Tagged <tag num>
@@ -1224,7 +1222,7 @@ static void RAD_ParseEnableTagged(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActEnableScript, t);
 }
 
-static void RAD_ParseExitLevel(int pnum, const char **pars)
+static void RAD_ParseExitLevel(param_set_t& pars)
 {
 	// ExitLevel
 	// ExitLevel <wait time>
@@ -1239,7 +1237,7 @@ static void RAD_ParseExitLevel(int pnum, const char **pars)
 	exit->exittime = 10;
 	exit->is_secret = DDF_CompareName("SECRETEXIT", pars[0]) == 0;
 
-	if (pnum >= 2)
+	if (pars.size() >= 2)
 	{
 		RAD_CheckForTime(pars[1], &exit->exittime);
 	}
@@ -1248,14 +1246,14 @@ static void RAD_ParseExitLevel(int pnum, const char **pars)
 }
 
 //Lobo November 2021
-static void RAD_ParseExitGame(int pnum, const char **pars)
+static void RAD_ParseExitGame(param_set_t& pars)
 {
 	// ExitGame to TitleScreen
 
 	AddStateToScript(this_rad, 0, RAD_ActExitGame, NULL);
 }
 
-static void RAD_ParseTip(int pnum, const char **pars)
+static void RAD_ParseTip(param_set_t& pars)
 {
 	// Tip "<text>"
 	// Tip "<text>" <time>
@@ -1288,13 +1286,13 @@ static void RAD_ParseTip(int pnum, const char **pars)
 	else
 		RAD_Error("Needed string for TIP command.\n");
 
-	if (pnum >= 3)
+	if (pars.size() >= 3)
 		RAD_CheckForTime(pars[2], &tip->display_time);
 
-	if (pnum >= 4)
+	if (pars.size() >= 4)
 		tip->playsound = CheckForBoolean(pars[3]);
 
-	if (pnum >= 5)
+	if (pars.size() >= 5)
 	{
 		/*if (! tip->tip_graphic)
 			RAD_Error("%s: scale value only works with TIP_GRAPHIC.\n", pars[0]);
@@ -1305,7 +1303,7 @@ static void RAD_ParseTip(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActTip, tip);
 }
 
-static void RAD_ParseTipSlot(int pnum, const char ** pars)
+static void RAD_ParseTipSlot(param_set_t& pars)
 {
 	// Tip_Slot <slotnum>
 
@@ -1325,7 +1323,7 @@ static void RAD_ParseTipSlot(int pnum, const char ** pars)
 	AddStateToScript(this_rad, 0, RAD_ActTipProps, tp);
 }
 
-static void RAD_ParseTipPos(int pnum, const char ** pars)
+static void RAD_ParseTipPos(param_set_t& pars)
 {
 	// Tip_Set_Pos <x> <y>
 	// Tip_Set_Pos <x> <y> <time>
@@ -1338,13 +1336,13 @@ static void RAD_ParseTipPos(int pnum, const char ** pars)
 	RAD_CheckForPercentAny(pars[1], &tp->x_pos);
 	RAD_CheckForPercentAny(pars[2], &tp->y_pos);
 
-	if (pnum >= 4)
+	if (pars.size() >= 4)
 		RAD_CheckForTime(pars[3], &tp->time);
 
 	AddStateToScript(this_rad, 0, RAD_ActTipProps, tp);
 }
 
-static void RAD_ParseTipColour(int pnum, const char ** pars)
+static void RAD_ParseTipColour(param_set_t& pars)
 {
 	// Tip_Set_Colour <color>
 	// Tip_Set_Colour <color> <time>
@@ -1356,13 +1354,13 @@ static void RAD_ParseTipColour(int pnum, const char ** pars)
 
 	tp->color_name = Z_StrDup(pars[1]);
 
-	if (pnum >= 3)
+	if (pars.size() >= 3)
 		RAD_CheckForTime(pars[2], &tp->time);
 
 	AddStateToScript(this_rad, 0, RAD_ActTipProps, tp);
 }
 
-static void RAD_ParseTipTrans(int pnum, const char ** pars)
+static void RAD_ParseTipTrans(param_set_t& pars)
 {
 	// Tip_Set_Trans <translucency>
 	// Tip_Set_Trans <translucency> <time>
@@ -1374,13 +1372,13 @@ static void RAD_ParseTipTrans(int pnum, const char ** pars)
 
 	RAD_CheckForPercent(pars[1], &tp->translucency);
 
-	if (pnum >= 3)
+	if (pars.size() >= 3)
 		RAD_CheckForTime(pars[2], &tp->time);
 
 	AddStateToScript(this_rad, 0, RAD_ActTipProps, tp);
 }
 
-static void RAD_ParseTipAlign(int pnum, const char ** pars)
+static void RAD_ParseTipAlign(param_set_t& pars)
 {
 	// Tip_Set_Align  CENTER/LEFT
 
@@ -1441,7 +1439,7 @@ static void HandleSpawnKeyword(const char *par, s_thing_t *t)
 	}
 }
 
-static void RAD_ParseSpawnThing(int pnum, const char **pars)
+static void RAD_ParseSpawnThing(param_set_t& pars)
 {
 	// SpawnThing <thingid>
 	// SpawnThing <thingid> <angle>
@@ -1494,14 +1492,14 @@ static void RAD_ParseSpawnThing(int pnum, const char **pars)
 		t->thing_name = Z_StrDup(pars[1]);
 
 	// handle keyword parameters
-	while (pnum >= 3 && strchr(pars[pnum-1],'=') != NULL)
+	while (pars.size() >= 3 && strchr(pars.back(),'=') != NULL)
 	{
-		HandleSpawnKeyword(pars[pnum-1], t);
-		pnum--;
+		HandleSpawnKeyword(pars.back(), t);
+		pars.pop_back();
 	}
 
 	// get angle
-	const char *angle_str = (pnum == 3) ? pars[2] : (pnum >= 5) ? pars[4] : NULL;
+	const char *angle_str = (pars.size() == 3) ? pars[2] : (pars.size() >= 5) ? pars[4] : NULL;
 
 	if (angle_str) 
 	{
@@ -1517,16 +1515,16 @@ static void RAD_ParseSpawnThing(int pnum, const char **pars)
 
 	// check for x, y, z, slope
 
-	if (pnum >= 4)
+	if (pars.size() >= 4)
 	{
 		RAD_CheckForFloat(pars[2], &t->x);
 		RAD_CheckForFloat(pars[3], &t->y);
 	}
-	if (pnum >= 6)
+	if (pars.size() >= 6)
 	{
 		RAD_CheckForFloat(pars[5], &t->z);
 	}
-	if (pnum >= 7)
+	if (pars.size() >= 7)
 	{
 		RAD_CheckForFloat(pars[6], &t->slope);
 
@@ -1537,7 +1535,7 @@ static void RAD_ParseSpawnThing(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActSpawnThing, t);
 }
 
-static void RAD_ParsePlaySound(int pnum, const char **pars)
+static void RAD_ParsePlaySound(param_set_t& pars)
 {
 	// PlaySound <soundid>
 	// PlaySound <soundid> <x> <y>
@@ -1547,7 +1545,7 @@ static void RAD_ParsePlaySound(int pnum, const char **pars)
 	//
 	// -AJA- 1999/09/12: Reworked for playing sound at specific Z.
 
-	if (pnum == 3)
+	if (pars.size() == 3)
 		RAD_Error("%s: Wrong number of parameters.\n", pars[0]);
 
 	s_sound_t *t = Z_New(s_sound_t, 1);
@@ -1565,13 +1563,13 @@ static void RAD_ParsePlaySound(int pnum, const char **pars)
 	t->y = this_rad->y;
 	t->z = (this_rad->rad_z < 0) ? ONFLOORZ : this_rad->z;
 
-	if (pnum >= 4)
+	if (pars.size() >= 4)
 	{
 		RAD_CheckForFloat(pars[2], &t->x);
 		RAD_CheckForFloat(pars[3], &t->y);
 	}
 
-	if (pnum >= 5)
+	if (pars.size() >= 5)
 	{
 		RAD_CheckForFloat(pars[4], &t->z);
 	}
@@ -1579,14 +1577,14 @@ static void RAD_ParsePlaySound(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActPlaySound, t);
 }
 
-static void RAD_ParseKillSound(int pnum, const char **pars)
+static void RAD_ParseKillSound(param_set_t& pars)
 {
 	// KillSound
 
 	AddStateToScript(this_rad, 0, RAD_ActKillSound, NULL);
 }
 
-static void RAD_ParseChangeMusic(int pnum, const char **pars)
+static void RAD_ParseChangeMusic(param_set_t& pars)
 {
 	// ChangeMusic <playlist num>
 
@@ -1601,7 +1599,7 @@ static void RAD_ParseChangeMusic(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActChangeMusic, music);
 }
 
-static void RAD_ParseDamagePlayer(int pnum, const char **pars)
+static void RAD_ParseDamagePlayer(param_set_t& pars)
 {
 	// DamagePlayer <amount>
 
@@ -1615,7 +1613,7 @@ static void RAD_ParseDamagePlayer(int pnum, const char **pars)
 }
 
 // FIXME: use the benefit system
-static void RAD_ParseHealPlayer(int pnum, const char **pars)
+static void RAD_ParseHealPlayer(param_set_t& pars)
 {
 	// HealPlayer <amount>
 	// HealPlayer <amount> <limit>
@@ -1626,7 +1624,7 @@ static void RAD_ParseHealPlayer(int pnum, const char **pars)
 
 	RAD_CheckForFloat(pars[1], &heal->heal_amount);
 
-	if (pnum < 3)
+	if (pars.size() < 3)
 		heal->limit = MAXHEALTH;
 	else
 		RAD_CheckForFloat(pars[2], &heal->limit);
@@ -1641,7 +1639,7 @@ static void RAD_ParseHealPlayer(int pnum, const char **pars)
 }
 
 // FIXME: use the benefit system
-static void RAD_ParseGiveArmour(int pnum, const char **pars)
+static void RAD_ParseGiveArmour(param_set_t& pars)
 {
 	// GiveArmour <type> <amount>
 	// GiveArmour <type> <amount> <limit>
@@ -1654,7 +1652,7 @@ static void RAD_ParseGiveArmour(int pnum, const char **pars)
 
 	RAD_CheckForFloat(pars[2], &armour->armour_amount);
 
-	if (pnum < 4)
+	if (pars.size() < 4)
 		armour->limit = MAXARMOUR;
 	else
 		RAD_CheckForFloat(pars[3], &armour->limit);
@@ -1668,7 +1666,7 @@ static void RAD_ParseGiveArmour(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActArmourPlayers, armour);
 }
 
-static void RAD_ParseGiveLoseBenefit(int pnum, const char **pars)
+static void RAD_ParseGiveLoseBenefit(param_set_t& pars)
 {
 	// Give_Benefit  <benefit>
 	//   or
@@ -1686,7 +1684,7 @@ static void RAD_ParseGiveLoseBenefit(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActBenefitPlayers, sb);
 }
 
-static void RAD_ParseDamageMonsters(int pnum, const char **pars)
+static void RAD_ParseDamageMonsters(param_set_t& pars)
 {
 	// Damage_Monsters <monster> <amount>
 	//
@@ -1712,7 +1710,7 @@ static void RAD_ParseDamageMonsters(int pnum, const char **pars)
 	RAD_CheckForFloat(pars[2], &mon->damage_amount);
 
 	// parse the tag value
-	if (pnum >= 4)
+	if (pars.size() >= 4)
 	{
 		if (strnicmp(pars[3], "TAG=", 4) != 0)
 			RAD_Error("%s: Bad keyword parameter: %s\n", pars[0], pars[3]);
@@ -1723,7 +1721,7 @@ static void RAD_ParseDamageMonsters(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActDamageMonsters, mon);
 }
 
-static void RAD_ParseThingEvent(int pnum, const char **pars)
+static void RAD_ParseThingEvent(param_set_t& pars)
 {
 	// Thing_Event <thing> <label>
 	//
@@ -1761,7 +1759,7 @@ static void RAD_ParseThingEvent(int pnum, const char **pars)
 	tev->offset = div ? MAX(0, atoi(div+1) - 1) : 0;
 
 	// parse the tag value
-	if (pnum >= 4)
+	if (pars.size() >= 4)
 	{
 		if (strnicmp(pars[3], "TAG=", 4) != 0)
 			RAD_Error("%s: Bad keyword parameter: %s\n", pars[0], pars[3]);
@@ -1772,7 +1770,7 @@ static void RAD_ParseThingEvent(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActThingEvent, tev);
 }
 
-static void RAD_ParseSkill(int pnum, const char **pars)
+static void RAD_ParseSkill(param_set_t& pars)
 {
 	// Skill <skill> <respawn> <fastmonsters>
 
@@ -1792,7 +1790,7 @@ static void RAD_ParseSkill(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActSkill, skill);
 }
 
-static void RAD_ParseGotoMap(int pnum, const char **pars)
+static void RAD_ParseGotoMap(param_set_t& pars)
 {
 	// GotoMap <map>
 	// GotoMap <map> SKIP_ALL
@@ -1804,7 +1802,7 @@ static void RAD_ParseGotoMap(int pnum, const char **pars)
 
 	go->map_name = Z_StrDup(pars[1]);
 
-	if (pnum >= 3)
+	if (pars.size() >= 3)
 	{
 		if (DDF_CompareName(pars[2], "SKIP_ALL") == 0)
 		{
@@ -1818,7 +1816,7 @@ static void RAD_ParseGotoMap(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActGotoMap, go);
 }
 
-static void RAD_ParseHubExit(int pnum, const char **pars)
+static void RAD_ParseHubExit(param_set_t& pars)
 {
 	// HubExit <map> <tag>
 
@@ -1834,7 +1832,7 @@ static void RAD_ParseHubExit(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActGotoMap, go);
 }
 
-static void RAD_ParseMoveSector(int pnum, const char **pars)
+static void RAD_ParseMoveSector(param_set_t& pars)
 {
 	// MoveSector <tag> <amount> <ceil or floor>
 	// MoveSector <tag> <amount> <ceil or floor> ABSOLUTE
@@ -1870,7 +1868,7 @@ static void RAD_ParseMoveSector(int pnum, const char **pars)
 		if (secv->tag == 0)
 			RAD_Error("%s: Invalid tag number: %d\n", pars[0], secv->tag);
 
-		if (pnum >= 5)
+		if (pars.size() >= 5)
 		{
 			if (DDF_CompareName(pars[4], "ABSOLUTE") == 0)
 				secv->relative = false;
@@ -1883,7 +1881,7 @@ static void RAD_ParseMoveSector(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActMoveSector, secv);
 }
 
-static void RAD_ParseLightSector(int pnum, const char **pars)
+static void RAD_ParseLightSector(param_set_t& pars)
 {
 	// LightSector <tag> <amount>
 	// LightSector <tag> <amount> ABSOLUTE
@@ -1912,7 +1910,7 @@ static void RAD_ParseLightSector(int pnum, const char **pars)
 		if (secl->tag == 0)
 			RAD_Error("%s: Invalid tag number: %d\n", pars[0], secl->tag);
 
-		if (pnum >= 4)
+		if (pars.size() >= 4)
 		{
 			if (DDF_CompareName(pars[3], "ABSOLUTE") == 0)
 				secl->relative = false;
@@ -1925,7 +1923,7 @@ static void RAD_ParseLightSector(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActLightSector, secl);
 }
 
-static void RAD_ParseActivateLinetype(int pnum, const char **pars)
+static void RAD_ParseActivateLinetype(param_set_t& pars)
 {
 	// Activate_LineType <linetype> <tag>
 
@@ -1941,7 +1939,7 @@ static void RAD_ParseActivateLinetype(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActActivateLinetype, lineact);
 }
 
-static void RAD_ParseUnblockLines(int pnum, const char **pars)
+static void RAD_ParseUnblockLines(param_set_t& pars)
 {
 	// Unblock_Lines <tag>
 
@@ -1956,7 +1954,7 @@ static void RAD_ParseUnblockLines(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActUnblockLines, lineact);
 }
 
-static void RAD_ParseBlockLines(int pnum, const char **pars)
+static void RAD_ParseBlockLines(param_set_t& pars)
 {
 	// Block_Lines <tag>
 
@@ -1971,7 +1969,7 @@ static void RAD_ParseBlockLines(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActBlockLines, lineact);
 }
 
-static void RAD_ParseWait(int pnum, const char **pars)
+static void RAD_ParseWait(param_set_t& pars)
 {
 	// Wait <time>
 
@@ -1985,7 +1983,7 @@ static void RAD_ParseWait(int pnum, const char **pars)
 	pending_wait_tics += tics;
 }
 
-static void RAD_ParseJump(int pnum, const char **pars)
+static void RAD_ParseJump(param_set_t& pars)
 {
 	// Jump <label>
 	// Jump <label> <random chance>
@@ -1997,20 +1995,20 @@ static void RAD_ParseJump(int pnum, const char **pars)
 	jump->label = Z_StrDup(pars[1]);
 	jump->random_chance = PERCENT_MAKE(100);
 
-	if (pnum >= 3)
+	if (pars.size() >= 3)
 		RAD_CheckForPercent(pars[2], &jump->random_chance);
 
 	AddStateToScript(this_rad, 0, RAD_ActJump, jump);
 }
 
-static void RAD_ParseSleep(int pnum, const char **pars)
+static void RAD_ParseSleep(param_set_t& pars)
 {
 	// Sleep
 
 	AddStateToScript(this_rad, 0, RAD_ActSleep, NULL);
 }
 
-static void RAD_ParseRetrigger(int pnum, const char **pars)
+static void RAD_ParseRetrigger(param_set_t& pars)
 {
 	// Retrigger
 
@@ -2020,7 +2018,7 @@ static void RAD_ParseRetrigger(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActRetrigger, NULL);
 }
 
-static void RAD_ParseChangeTex(int pnum, const char **pars)
+static void RAD_ParseChangeTex(param_set_t& pars)
 {
 	// Change_Tex <where> <texname>
 	// Change_Tex <where> <texname> <tag>
@@ -2039,16 +2037,16 @@ static void RAD_ParseChangeTex(int pnum, const char **pars)
 
 	strcpy(ctex->texname, pars[2]);
 
-	if (pnum >= 4)
+	if (pars.size() >= 4)
 		RAD_CheckForInt(pars[3], &ctex->tag);
 
-	if (pnum >= 5)
+	if (pars.size() >= 5)
 		RAD_CheckForInt(pars[4], &ctex->subtag);
 
 	AddStateToScript(this_rad, 0, RAD_ActChangeTex, ctex);
 }
 
-static void RAD_ParseShowMenu(int pnum, const char **pars)
+static void RAD_ParseShowMenu(param_set_t& pars)
 {
 	// Show_Menu     <title> <option1> ...
 	// Show_Menu_LDF <title> <option1> ...
@@ -2057,17 +2055,17 @@ static void RAD_ParseShowMenu(int pnum, const char **pars)
 
 	Z_Clear(menu, s_show_menu_t, 1);
 
-	if (pnum > 11)
+	if (pars.size() > 11)
 		RAD_Error("%s: too many option strings (limit is 9)\n", pars[0]);
 
 	if (DDF_CompareName(pars[0], "SHOW_MENU_LDF") == 0)
 		menu->use_ldf = true;
 
-	SYS_ASSERT(2 <= pnum && pnum <= 11);
+	SYS_ASSERT(2 <= pars.size() && pars.size() <= 11);
 
 	menu->title = RAD_UnquoteString(pars[1]);
 
-	for (int p = 2; p < pnum; p++)
+	for (size_t p = 2; p < pars.size(); p++)
 	{
 		menu->options[p-2] = RAD_UnquoteString(pars[p]);
 	}
@@ -2075,7 +2073,7 @@ static void RAD_ParseShowMenu(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActShowMenu, menu);
 }
 
-static void RAD_ParseMenuStyle(int pnum, const char **pars)
+static void RAD_ParseMenuStyle(param_set_t& pars)
 {
 	// Menu_Style  <style>
 
@@ -2088,7 +2086,7 @@ static void RAD_ParseMenuStyle(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActMenuStyle, mm);
 }
 
-static void RAD_ParseJumpOn(int pnum, const char **pars)
+static void RAD_ParseJumpOn(param_set_t& pars)
 {
 	// Jump_On <VAR> <label1> <label2> ...
 	//
@@ -2098,7 +2096,7 @@ static void RAD_ParseJumpOn(int pnum, const char **pars)
 
 	Z_Clear(jump, s_jump_on_t, 1);
 
-	if (pnum > 11)
+	if (pars.size() > 11)
 		RAD_Error("%s: too many labels (limit is 9)\n", pars[0]);
 
 	if (DDF_CompareName(pars[1], "MENU") != 0)
@@ -2107,19 +2105,19 @@ static void RAD_ParseJumpOn(int pnum, const char **pars)
 			pars[0], pars[1]);
 	}
 
-	SYS_ASSERT(2 <= pnum && pnum <= 11);
+	SYS_ASSERT(2 <= pars.size() && pars.size() <= 11);
 
-	for (int p = 2; p < pnum; p++)
+	for (size_t p = 2; p < pars.size(); p++)
 		jump->labels[p-2] = Z_StrDup(pars[p]);
 
 	AddStateToScript(this_rad, 0, RAD_ActJumpOn, jump);
 }
 
-static void RAD_ParseWaitUntilDead(int pnum, const char **pars)
+static void RAD_ParseWaitUntilDead(param_set_t& pars)
 {
 	// WaitUntilDead <monster> ...
 
-	if (pnum-1 > 10)
+	if (pars.size()-1 > 10)
 		RAD_Error("%s: too many monsters (limit is 10)\n", pars[0]);
 
 	static int current_tag = 70000;
@@ -2130,14 +2128,14 @@ static void RAD_ParseWaitUntilDead(int pnum, const char **pars)
 
 	wud->tag = current_tag;  current_tag++;
 
-	for (int p = 1; p < pnum; p++)
+	for (size_t p = 1; p < pars.size(); p++)
 		wud->mon_names[p-1] = Z_StrDup(pars[p]);
 
 	AddStateToScript(this_rad, 0, RAD_ActWaitUntilDead, wud);
 }
 
 
-static void RAD_ParseSwitchWeapon(int pnum, const char **pars)
+static void RAD_ParseSwitchWeapon(param_set_t& pars)
 {
 	// SwitchWeapon <WeaponName>
 
@@ -2151,7 +2149,7 @@ static void RAD_ParseSwitchWeapon(int pnum, const char **pars)
 	AddStateToScript(this_rad, 0, RAD_ActSwitchWeapon, weaparg);
 }
 
-static void RAD_ParseTeleportToStart(int pnum, const char **pars)
+static void RAD_ParseTeleportToStart(param_set_t& pars)
 {
 	// TELEPORT_TO_START
 
@@ -2160,7 +2158,7 @@ static void RAD_ParseTeleportToStart(int pnum, const char **pars)
 
 // Replace one weapon with another instantly (no up/down states run)
 // It doesnt matter if we have the old one currently selected or not.
-static void RAD_ParseReplaceWeapon(int pnum, const char **pars)
+static void RAD_ParseReplaceWeapon(param_set_t& pars)
 {
 	// ReplaceWeapon <OldWeaponName> <NewWeaponName>
 
@@ -2178,7 +2176,7 @@ static void RAD_ParseReplaceWeapon(int pnum, const char **pars)
 
 // If we have the weapon we insta-switch to it and 
 // go to the STATE we indicated.
-static void RAD_ParseWeaponEvent(int pnum, const char **pars)
+static void RAD_ParseWeaponEvent(param_set_t& pars)
 {
 	// Weapon_Event <weapon> <label>
 	//
@@ -2310,13 +2308,12 @@ static const rts_parser_t radtrig_parsers[] =
 
 void RAD_ParseLine()
 {
-	int pnum;
-	char *pars[16];
+	param_set_t pars;
 
-	RAD_TokenizeLine(&pnum, pars, 16);
+	RAD_TokenizeLine(pars);
 
 	// simply ignore blank lines
-	if (pnum == 0)
+	if (pars.empty())
 		return;
 
 	for (const rts_parser_t *cur = radtrig_parsers; cur->name != NULL; cur++)
@@ -2336,7 +2333,7 @@ void RAD_ParseLine()
 					rad_level_names[rad_cur_level],
 					rad_level_names[cur->level]);
 
-				RAD_FreeParameters(pnum, pars);
+				// NOT REACHED
 				return;
 			}
 		}
@@ -2344,22 +2341,22 @@ void RAD_ParseLine()
 		// check number of parameters.  Too many is live-with-able, but
 		// not enough is fatal.
 
-		if (pnum < cur->min_pars)
+		if ((int)pars.size() < cur->min_pars)
 			RAD_Error("%s: Not enough parameters.\n", cur->name);
 
-		if (pnum > cur->max_pars)
+		if ((int)pars.size() > cur->max_pars)
 			RAD_WarnError("%s: Too many parameters.\n", cur->name);
 
 		// found it, invoke the parser function
-		(* cur->parser)(pnum, (const char **) pars);
+		(* cur->parser)(pars);
 
-		RAD_FreeParameters(pnum, pars);
+		RAD_FreeParameters(pars);
 		return;
 	}
 
 	RAD_WarnError("Unknown primitive: %s\n", pars[0]);
 
-	RAD_FreeParameters(pnum, pars);
+	RAD_FreeParameters(pars);
 }
 
 

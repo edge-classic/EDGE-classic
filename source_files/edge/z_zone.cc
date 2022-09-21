@@ -30,26 +30,6 @@
 #include "z_zone.h"
 
 
-//
-// Z_StrDup
-//
-// Duplicates the string.
-char *Z_StrDup(const char *s)
-{
-	int size;
-	char *ret;
-
-	if (s == NULL)
-		return NULL;
-
-	size = strlen(s) + 1;
-
-	ret = Z_New(char, size);
-
-	Z_MoveData(ret, s, char, size);
-
-	return ret;
-}
 #ifdef DEVELOPERS
 typedef struct mallocheader_s
 {

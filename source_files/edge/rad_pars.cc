@@ -40,6 +40,20 @@
 typedef std::vector<const char *> param_set_t;
 
 
+// TODO remove these eventually, use std::string
+static char * Z_StrDup(const char *s)
+{
+	char *dup = strdup(s);
+	if (dup == NULL)
+		I_Error("out of memory\n");
+	return dup;
+}
+static void Z_StrFree(const char *s)
+{
+	free((void *)s);
+}
+
+
 typedef struct rts_parser_s
 {
 	// needed level:
@@ -727,7 +741,7 @@ static void RAD_FreeParameters(param_set_t& pars)
 {
 	for (size_t i = 0 ; i < pars.size() ; i++)
 	{
-		Z_Free((void *) pars[i]);
+		Z_StrFree(pars[i]);
 	}
 }
 

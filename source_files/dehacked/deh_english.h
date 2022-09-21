@@ -689,6 +689,38 @@ namespace Deh_Edge
 #define CC_CYBER	"THE CYBERDEMON"
 #define CC_HERO		"OUR HERO"
 
+// Obituaries (not strictly BEX, but Freedoom 1/2 use them)
+#define OB_BABY "%o was melted by an Arachnotron."
+#define OB_VILE  "%o was charred by an Archvile."
+#define OB_BARON "%o was killed by a Baron of Hell."
+#define OB_BARONHIT "%o was clawed by a Baron of Hell."
+#define OB_CACOHIT "A Cacodemon chewed up %o!"
+#define OB_CACO "%o was killed by a Cacodemon."
+#define OB_CHAINGUY "%o was mowed down by a Chaingunner."
+#define OB_CYBORG "%o was blown to bits by a Cyberdemon."
+#define OB_SPIDER "A Spider Mastermind ripped %o apart!"
+#define OB_WOLFSS "%o was executed by a Nazi."
+#define OB_DEMONHIT "%o was mauled by a Demon."
+#define OB_IMP "%o was killed by an Imp."
+#define OB_IMPHIT "An Imp tore %o a new one!"
+#define OB_FATSO "%o was killed by a Mancubus."
+#define OB_UNDEAD "%o was killed by a Revenant."
+#define OB_UNDEADHIT "A revenant knocked %o's head off."
+#define OB_SHOTGUY "%o was shot by a Shotgun Sergeant."
+#define OB_SKULL "%o was eaten by a Lost Soul!"
+#define OB_ZOMBIE "%o was gunned down by a Zombie."
+#define OB_MPCHAINGUN "%o was torn apart by %k."
+#define OB_MPPISTOL "%o was gunned down by %k."
+#define OB_MPROCKET "%o was blown up by %k."
+#define OB_MPR_SPLASH "%o was blown up by %k."
+#define OB_MPPLASMARIFLE "%o was melted by %k."
+#define OB_MPFIST "%k punched %o's lights out."
+#define OB_MPCHAINSAW "%k sawed %o's head off."
+#define OB_MPSHOTGUN "%o was shot by %k."
+#define OB_MPBFG_BOOM "%k annihilated %o."
+#define OB_MPBFG_SPLASH "%k annihilated %o."
+#define OB_MPBFG_MBF "%k annihilated %o."
+
 //------------------------------------------------------------------------
 //
 // -AJA- Other common strings

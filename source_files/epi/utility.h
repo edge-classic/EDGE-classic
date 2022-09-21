@@ -87,13 +87,6 @@ namespace epi
 #define Z_Clear(ptr, type, num)  \
 	memset((void *)(ptr), ((ptr) - ((type *)(ptr))), (num) * sizeof(type))
 
-//
-// Z_MoveData
-//
-// moves data from src to dest.
-//
-#define Z_MoveData(dest, src, type, num)  \
-	memmove((void *)(dest), (void *)(src), (num) * sizeof(type) + ((src) - (type *)(src)) + ((dest) - (type *)(dest)))
 
 //
 // Z_StrNCpy

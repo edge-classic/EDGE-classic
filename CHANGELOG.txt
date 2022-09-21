@@ -2,7 +2,50 @@ https://github.com/dashodanger/EDGE-classic
 
 Current as of: September 2022
 
+
+CHANGELOG for EDGE-Classic 1.3 (since EDGE-Classic 1.21)
+====================================
+
+Bugs fixed
+----------
++ Fixed CHANGE_TEX SKY not working with skyboxes
++ Fixed alignment of flats when both ALIGN and SCALE are used
++ Doom episode 1 intermission screen animation speed was wrong
+
+
+General Improvements
+--------------------
++ Soundfont selector
++ DEH_EDGE cleanup and improvements
++ Improved fullscreen resolution mode
+
+
+New Features
+------------
++ Support OPL emulated playback of MUS and MIDI music lumps.
+
++ STYLES.DDF
+  - New property: ENTRY_ALIGNMENT = <string>, accepts "LEFT", "CENTER", or "RIGHT" to set text/image alignment for menu item names
+  - New CURSOR customization options:
+    - CURSOR.POSITION = <string>, accepts "LEFT", "CENTER", "RIGHT", or "BOTH" to determine cursor position relative to menu item. 
+      "BOTH" will drawn the cursor in both LEFT/RIGHT positions. Defaults to "LEFT".
+    - CURSOR.BORDER = <bool>, only has an effect when the cursor position is set to CENTER. Will scale up to the dimensions of the tallest
+      menu item. Good for highlights/frames/border style cursors
+    - CURSOR.TRANSLUCENCY = <percentage>, controls cursor image translucency
+    - CURSOR.IMAGE = <string>, image to use instead of the default for this menu's cursor
+    - CURSOR.STRING = <string>, if present, will use these characters from the style's font as the cursor instead of an image
+  
++ THINGS.DDF
+  - New property: SIGHT_DISTANCE=<number> which is how far a thing can see in map units.
+
++ REKKR added as a recognized IWAD
+
+
+
+
+
 CHANGELOG for EDGE-Classic 1.21 (since EDGE-Classic 1.2)
+====================================
 
 Bugs fixed
 ----------
@@ -12,7 +55,6 @@ Bugs fixed
 + Fixed null string CTD in HUD_DrawText and font_c::StringWidth
 + Fixed issue with FS_ReadDir returning relative paths
 + Restored "Hudless" option in COALHUDS HUD cycling
-+ Fixed CHANGE_TEX SKY not working with skyboxes
 
 General Improvements
 --------------------
@@ -35,20 +77,9 @@ New Features
 + Custom standalone IWADs can be created by adding an EDGEIWAD lump to the WAD. This will allow it to pass the automatic IWAD
   detection
 
-+ Support OPL emulated playback of MUS and MIDI music lumps.
-
 + STYLES.DDF
   - New properties: X_OFFSET and Y_OFFSET. Will set all menu entries in this style to the same x/y offset.
   - New SPECIAL flag: NO_STRETCH_FULLSCREEN, which will disable default behaviour of stretching backgrounds to fill the screen
-  - New property: ENTRY_ALIGNMENT = <string>, accepts "LEFT", "CENTER", or "RIGHT" to set text/image alignment for menu item names
-  - New CURSOR customization options:
-    - CURSOR.POSITION = <string>, accepts "LEFT", "CENTER", "RIGHT", or "BOTH" to determine cursor position relative to menu item. 
-      "BOTH" will drawn the cursor in both LEFT/RIGHT positions. Defaults to "LEFT".
-    - CURSOR.BORDER = <bool>, only has an effect when the cursor position is set to CENTER. Will scale up to the dimensions of the tallest
-      menu item. Good for highlights/frames/border style cursors
-    - CURSOR.TRANSLUCENCY = <percentage>, controls cursor image translucency
-    - CURSOR.IMAGE = <string>, image to use instead of the default for this menu's cursor
-    - CURSOR.STRING = <string>, if present, will use these characters from the style's font as the cursor instead of an image
   
 + Lines.ddf
   -Added 3 new BREAKABLE glass line types: 
@@ -65,8 +96,7 @@ New Features
   [4475] EDGE Purple Hue
   [4476] EDGE Grey Hue
   
-+ THINGS.DDF
-  - New property: SIGHT_DISTANCE=<number> which is how far a thing can see in map units.
+  
   
 
 CHANGELOG for EDGE-Classic 1.2 (since EDGE-Classic 1.1)

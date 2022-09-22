@@ -267,15 +267,17 @@ typedef struct sector_s
     // 
 	region_properties_t *p;
  
- 	// slope information, normally NULL
+	// slope information, normally NULL
 	slope_plane_t *f_slope;
 	slope_plane_t *c_slope;
 
 	// linked list of extrafloors that this sector controls.  NULL means
 	// that this sector is not a controller.
-	//
 	extrafloor_t *control_floors;
  
+	// killough 3/7/98: support flat heights drawn at another sector's heights
+	struct sector_s *heightsec;
+
 	// movement thinkers, for quick look-up
 	struct plane_move_s *floor_move;
 	struct plane_move_s *ceil_move;

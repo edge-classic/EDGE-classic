@@ -691,8 +691,7 @@ static void P_LineEffect(line_t *target, line_t *source,
 //
 // Handles BOOM's line -> tagged sector transfers.
 //
-static void P_SectorEffect(sector_t *target, line_t *source,
-		const linetype_c *special)
+static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *special)
 {
 	if (! target)
 		return;
@@ -811,6 +810,13 @@ static void P_SectorEffect(sector_t *target, line_t *source,
 		target->ceil.x_mat.y *= factor;
 		target->ceil.y_mat.x *= factor;
 		target->ceil.y_mat.y *= factor;
+	}
+
+	// killough 3/7/98:
+	// support for drawn heights coming from different sector
+	if (special->sector_effect & SECTFX_BoomHeights)
+	{
+		target->heightsec = source->frontsector;
 	}
 }
 

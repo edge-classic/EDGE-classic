@@ -468,7 +468,6 @@ static void LoadSectors(int lump)
 				currmap->lump.c_str());
 
 	sectors = new sector_t[numsectors];
-		
 	Z_Clear(sectors, sector_t, numsectors);
 
 	data = W_CacheLumpNum(lump);

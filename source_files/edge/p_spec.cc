@@ -1945,13 +1945,12 @@ void P_SpawnSpecials1(void)
 
 			for (sector_t * tsec = P_FindSectorFromTag(lines[i].tag); tsec; tsec = tsec->tag_next)
 			{
+				// the OLD method of Boom deep water (the BOOMTEX flag)
 				if (special->ef.type & EXFL_BoomTex)
 				{
 					if (ctrl->f_h <= tsec->f_h)
 					{
 						tsec->props.colourmap = ctrl->props.colourmap;
-
-						// FIXME: BOOM's invisible floor feature
 						continue;
 					}
 				}

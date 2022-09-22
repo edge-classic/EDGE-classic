@@ -1949,7 +1949,9 @@ static void RGL_DrawSeg(drawfloor_t *dfloor, seg_t *seg)
 	if (! debug_hom.d && solid_mode && dfloor->is_lowest &&
 		sd->bottom.image == NULL && cur_seg->back_sub &&
 		cur_seg->back_sub->sector->f_h > cur_seg->front_sub->sector->f_h &&
-		cur_seg->back_sub->sector->f_h < viewz)
+		cur_seg->back_sub->sector->f_h < viewz &&
+		cur_seg->back_sub->sector->heightsec == NULL &&
+		cur_seg->front_sub->sector->heightsec == NULL)
 	{
 		EmulateFloodPlane(dfloor, cur_seg->back_sub->sector, +1,
 			cur_seg->front_sub->sector->f_h,
@@ -1959,7 +1961,9 @@ static void RGL_DrawSeg(drawfloor_t *dfloor, seg_t *seg)
 	if (! debug_hom.d && solid_mode && dfloor->is_highest &&
 		sd->top.image == NULL && cur_seg->back_sub &&
 		cur_seg->back_sub->sector->c_h < cur_seg->front_sub->sector->c_h &&
-		cur_seg->back_sub->sector->c_h > viewz)
+		cur_seg->back_sub->sector->c_h > viewz &&
+		cur_seg->back_sub->sector->heightsec == NULL &&
+		cur_seg->front_sub->sector->heightsec == NULL)
 	{
 		EmulateFloodPlane(dfloor, cur_seg->back_sub->sector, -1,
 			cur_seg->back_sub->sector->c_h,
@@ -2570,52 +2574,66 @@ static inline void AddNewDrawFloor(drawsub_c *dsub, extrafloor_t *ef,
 static void RGL_WalkSubsector(int num)
 {
 	subsector_t *sub = &subsectors[num];
-	seg_t *seg;
-	mobj_t *mo;
-	sector_t *sector;
-	surface_t *floor_s;
-	float floor_h;
+	sector_t *sector = sub->sector;
 
-	extrafloor_t *S, *L, *C;
+	// store subsector in a global var for other functions to use
+	cur_sub = sub;
 
 #if (DEBUG >= 1)
-	L_WriteDebug( "\nVISITING SUBSEC %d (sector %d)\n\n", num, sub->sector - sectors);
+	I_Debugf( "\nVISITING SUBSEC %d (sector %d)\n\n", num, sub->sector - sectors);
 #endif
-
-	cur_sub = sub;
-	sector = cur_sub->sector;
 
 	drawsub_c *K = R_GetDrawSub();
 	K->Clear(sub);
 
 	// --- handle sky (using the depth buffer) ---
 
-	if (IS_SKY(cur_sub->sector->floor) && viewz > cur_sub->sector->f_h)
+	if (IS_SKY(sub->sector->floor) && viewz > sub->sector->f_h)
 	{
-		RGL_DrawSkyPlane(cur_sub, cur_sub->sector->f_h);
+		RGL_DrawSkyPlane(sub, sub->sector->f_h);
 	}
 
-	if (IS_SKY(cur_sub->sector->ceil) && viewz < cur_sub->sector->sky_h)
+	if (IS_SKY(sub->sector->ceil) && viewz < sub->sector->sky_h)
 	{
-		RGL_DrawSkyPlane(cur_sub, cur_sub->sector->sky_h);
+		RGL_DrawSkyPlane(sub, sub->sector->sky_h);
 	}
 
-	// add in each extrafloor, traversing strictly upwards
+	float floor_h = sector->f_h;
+	float ceil_h  = sector->c_h;
 
-	floor_s = &sector->floor;
-	floor_h = sector->f_h;
+	surface_t *floor_s = &sector->floor;
+	surface_t *ceil_s  = &sector->ceil;
 
-	S = sector->bottom_ef;
-	L = sector->bottom_liq;
+	// Boom compatibility -- deep water FX
+	if (sector->heightsec != NULL && viewz > sector->heightsec->f_h && viewz < sector->heightsec->c_h)
+	{
+		floor_h = sector->heightsec->f_h;
+		ceil_h  = sector->heightsec->c_h;
+	}
+	// -AJA- 2004/04/22: emulate the Deep-Water TRICK
+	else if (sub->deep_ref != NULL)
+	{
+		floor_h = sub->deep_ref->f_h;
+		floor_s = &sub->deep_ref->floor;
 
-	// Handle the BOOMTEX flag (Boom compatibility)
+		ceil_h = sub->deep_ref->c_h;
+		ceil_s = &sub->deep_ref->ceil;
+	}
+
+	// the OLD method of Boom deep water (the BOOMTEX flag)
 	extrafloor_t *boom_ef = sector->bottom_liq ? sector->bottom_liq : sector->bottom_ef;
-
 	if (boom_ef && (boom_ef->ef_info->type & EXFL_BoomTex))
 		floor_s = &boom_ef->ef_line->frontsector->floor;
 
+	// add in each extrafloor, traversing strictly upwards
+
+	extrafloor_t *S = sector->bottom_ef;
+	extrafloor_t *L = sector->bottom_liq;
+
 	while (S || L)
 	{
+		extrafloor_t *C = NULL;
+
 		if (!L || (S && S->bottom_h < L->bottom_h))
 		{
 			C = S;  S = S->higher;
@@ -2633,28 +2651,13 @@ static void RGL_WalkSubsector(int num)
 		if (C->bottom_h < floor_h || C->bottom_h > sector->c_h)
 			continue;
 
-		bool de_f = (cur_sub->deep_ref && K->floors.size() == 0);
-
-		AddNewDrawFloor(K, C,
-			de_f ? cur_sub->deep_ref->f_h : floor_h,
-			C->bottom_h, C->top_h,
-			de_f ? &cur_sub->deep_ref->floor : floor_s,
-			C->bottom, C->p);
+		AddNewDrawFloor(K, C, floor_h, C->bottom_h, C->top_h, floor_s, C->bottom, C->p);
 
 		floor_s = C->top;
 		floor_h = C->top_h;
 	}
 
-	// -AJA- 2004/04/22: emulate the Deep-Water TRICK (above too)
-	bool de_f = (cur_sub->deep_ref && K->floors.size() == 0);
-	bool de_c = (cur_sub->deep_ref != NULL);
-
-	AddNewDrawFloor(K, NULL,
-		de_f ? cur_sub->deep_ref->f_h : floor_h,
-		de_c ? cur_sub->deep_ref->c_h : sector->c_h,
-		de_c ? cur_sub->deep_ref->c_h : sector->c_h,
-		de_f ? &cur_sub->deep_ref->floor : floor_s,
-		de_c ? &cur_sub->deep_ref->ceil : &sector->ceil, sector->p);
+	AddNewDrawFloor(K, NULL, floor_h, ceil_h, ceil_h, floor_s, ceil_s, sector->p);
 
 	K->floors[0]->is_lowest = true;
 	K->floors[K->floors.size() - 1]->is_highest = true;
@@ -2662,13 +2665,13 @@ static void RGL_WalkSubsector(int num)
 	// handle each sprite in the subsector.  Must be done before walls,
 	// since the wall code will update the 1D occlusion buffer.
 
-	for (mo=cur_sub->thinglist; mo; mo=mo->snext)
+	for (mobj_t *mo = sub->thinglist ; mo ; mo=mo->snext)
 	{
 		RGL_WalkThing(K, mo);
 	}
 
 	// clip 1D occlusion buffer.
-	for (seg=sub->segs; seg; seg=seg->sub_next)
+	for (seg_t *seg = sub->segs ; seg ; seg=seg->sub_next)
 	{
 		RGL_WalkSeg(K, seg);
 	}

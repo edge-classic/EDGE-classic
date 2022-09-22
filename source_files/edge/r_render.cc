@@ -2605,10 +2605,31 @@ static void RGL_WalkSubsector(int num)
 	surface_t *ceil_s  = &sector->ceil;
 
 	// Boom compatibility -- deep water FX
-	if (sector->heightsec != NULL && viewz > sector->heightsec->f_h && viewz < sector->heightsec->c_h)
+	if (sector->heightsec != NULL)
 	{
-		floor_h = sector->heightsec->f_h;
-		ceil_h  = sector->heightsec->c_h;
+		// TODO lighting
+		// TODO colormaps
+
+		// check which region the camera is in...
+		if (viewz > sector->heightsec->c_h)  // A : above
+		{
+			floor_h = sector->heightsec->c_h;
+			floor_s = &sector->heightsec->floor;
+			ceil_s  = &sector->heightsec->ceil;
+			// lighting from sector->heightsec
+		}
+		else if (viewz < sector->heightsec->f_h)  // C : below
+		{
+			ceil_h  = sector->heightsec->f_h;
+			floor_s = &sector->heightsec->floor;
+			ceil_s  = &sector->heightsec->ceil;
+			// lighting from sector->heightsec
+		}
+		else  // B : middle for diddle
+		{
+			floor_h = sector->heightsec->f_h;
+			ceil_h  = sector->heightsec->c_h;
+		}
 	}
 	// -AJA- 2004/04/22: emulate the Deep-Water TRICK
 	else if (sub->deep_ref != NULL)

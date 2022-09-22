@@ -477,7 +477,7 @@ static void MakeBoomLift(linetype_c *line, int number)
 	line->f.dest = 0;
 	line->f.other = 0;
 
-	line->f.speed_up = 1 << speed;
+	line->f.speed_up = 2 << speed;
 	line->f.speed_down = line->f.speed_up;
 	line->f.sfxstart = sfxdefs.GetEffect("PSTART");
 	line->f.sfxstop  = sfxdefs.GetEffect("PSTOP");

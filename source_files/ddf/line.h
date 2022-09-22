@@ -118,7 +118,6 @@ typedef enum
 	// this is a special flag value that indicates that _all_ of the
 	// keys in the bitfield must be held.  Normally we require _any_ of
 	// the keys in the bitfield to be held.
-	//
 	KF_STRICTLY_ALL = (1 << 16),
 
 	// Boom compatibility: don't care if card or skull
@@ -591,34 +590,36 @@ typedef enum
 	SECTFX_None = 0,
 
 	// transfer sector lighting to tagged floors/ceilings
-	SECTFX_LightFloor   = 0x0001,
-	SECTFX_LightCeiling = 0x0002,
+	SECTFX_LightFloor   = (1 << 0),
+	SECTFX_LightCeiling = (1 << 1),
 
 	// make tagged floors/ceilings scroll
-	SECTFX_ScrollFloor   = 0x0004,
-	SECTFX_ScrollCeiling = 0x0008,
+	SECTFX_ScrollFloor   = (1 << 2),
+	SECTFX_ScrollCeiling = (1 << 3),
 
 	// push things on tagged floor
-	SECTFX_PushThings = 0x0010,
+	SECTFX_PushThings = (1 << 4),
 
 	// restore light/scroll/push in tagged floors/ceilings
-	SECTFX_ResetFloor   = 0x0040,
-	SECTFX_ResetCeiling = 0x0080,
+	SECTFX_ResetFloor   = (1 << 6),
+	SECTFX_ResetCeiling = (1 << 7),
 
-	// experimental: set floor/ceiling texture scale
-	SECTFX_ScaleFloor   = 0x0100,
-	SECTFX_ScaleCeiling = 0x0200,
+	// set floor/ceiling texture scale
+	SECTFX_ScaleFloor   = (1 << 8),
+	SECTFX_ScaleCeiling = (1 << 9),
 
-	// experimental: align floor/ceiling texture to line
-	SECTFX_AlignFloor   = 0x0400,
-	SECTFX_AlignCeiling = 0x0800,
+	// align floor/ceiling texture to line
+	SECTFX_AlignFloor   = (1 << 10),
+	SECTFX_AlignCeiling = (1 << 11),
 
 	// set various force parameters
-	SECTFX_SetFriction  = 0x1000,
-	SECTFX_WindForce    = 0x2000,
-	SECTFX_CurrentForce = 0x4000,
-	SECTFX_PointForce   = 0x8000
+	SECTFX_SetFriction  = (1 << 12),
+	SECTFX_WindForce    = (1 << 13),
+	SECTFX_CurrentForce = (1 << 14),
+	SECTFX_PointForce   = (1 << 15),
 
+	// BOOM's linetype 242 -- deep water effect (etc)
+	SECTFX_BoomHeights  = (1 << 16)
 }
 sector_effect_type_e;
 

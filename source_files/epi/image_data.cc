@@ -49,8 +49,6 @@ void image_data_c::Whiten()
 {
 	SYS_ASSERT(bpp >= 3);
 
-	// TODO: OPTIMISE this
-
 	for (int y = 0; y < height; y++)
 	for (int x = 0; x < width;  x++)
 	{
@@ -58,7 +56,8 @@ void image_data_c::Whiten()
 
 		int ity = MAX(src[0], MAX(src[1], src[2]));
 
-		ity = (ity * 128 + src[0] * 38 + src[1] * 64 + src[2] * 26) >> 8;
+		// soften the above equation, take average into account
+		ity = (ity * 196 + src[0] * 20 + src[1] * 20 + src[2] * 20) >> 8;
 
 		src[0] = src[1] = src[2] = ity; 
 	}

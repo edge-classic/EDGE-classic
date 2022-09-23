@@ -118,6 +118,10 @@ typedef struct region_properties_s
 
     // pushing sector information (normally all zero)
 	vec3_t push;
+
+	vec3_t net_push = {0,0,0};
+
+	vec3_t old_push = {0,0,0};
 }
 region_properties_t;
 
@@ -148,6 +152,9 @@ typedef struct surface_s
 	// current offset and scrolling deltas (world coords)
 	vec2_t offset;
 	vec2_t scroll;
+
+	vec2_t net_scroll = {0,0};
+	vec2_t old_scroll = {0,0};
 
 	// lighting override (as in BOOM).  Usually NULL.
 	struct region_properties_s *override_p;
@@ -319,6 +326,9 @@ typedef struct sector_s
 
 	// -AJA- 2000/03/30: Keep a list of child subsectors.
 	struct subsector_s *subsectors;
+
+	// Test for dynamic scroll/push/offset
+	bool old_stored = false;
 }
 sector_t;
 
@@ -426,6 +436,8 @@ typedef struct line_s
 	struct slider_move_s *slider_move;
 
 	struct line_s *portal_pair;
+
+	bool old_stored = false;
 }
 line_t;
 
@@ -535,6 +547,32 @@ typedef struct node_s
 }
 node_t;
 
+typedef struct secanim_s
+{
+	sector_t *target = NULL;
+	struct sector_s *scroll_sec_ref = NULL;
+	const linetype_c *scroll_special_ref = NULL;
+	line_s *scroll_line_ref = NULL;
+	vec2_t floor_scroll = {0,0};
+	vec2_t ceil_scroll = {0,0};
+	vec3_t push = {0,0,0};
+}
+secanim_t;
+
+typedef struct lineanim_s
+{
+	line_t *target = NULL;
+	struct sector_s *scroll_sec_ref = NULL;
+	const linetype_c *scroll_special_ref = NULL;
+	line_s *scroll_line_ref = NULL;
+	float side0_xspeed = 0.0;
+	float side1_xspeed = 0.0;
+	float side0_yspeed = 0.0;
+	float side1_yspeed = 0.0;
+	bool parallel = false;
+	bool perpendicular = false;
+}
+lineanim_t;
 
 #endif /*__R_DEFS__*/
 

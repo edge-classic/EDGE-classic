@@ -91,6 +91,9 @@ void SR_SectorPutProps(void *storage, int index, void *extra);
 void SR_SectorPutPropRef(void *storage, int index, void *extra);
 void SR_SectorPutGenMove(void *storage, int index, void *extra);
 
+bool SR_SideGetSide(void *storage, int index, void *extra);
+void SR_SidePutSide(void *storage, int index, void *extra);
+
 
 //----------------------------------------------------------------------------
 //
@@ -109,6 +112,9 @@ static savefield_t sv_fields_surface[] =
 	SF(scroll, "scroll", 1, SVT_VEC2, SR_GetVec2, SR_PutVec2),
 	SF(x_mat, "x_mat", 1, SVT_VEC2, SR_GetVec2, SR_PutVec2),
 	SF(y_mat, "y_mat", 1, SVT_VEC2, SR_GetVec2, SR_PutVec2),
+
+	SF(net_scroll, "net_scroll", 1, SVT_VEC2, SR_GetVec2, SR_PutVec2),
+	SF(old_scroll, "old_scroll", 1, SVT_VEC2, SR_GetVec2, SR_PutVec2),
 
 	SF(override_p, "override_p", 1, SVT_STRING, SR_SectorGetPropRef, SR_SectorPutPropRef),
 
@@ -193,8 +199,10 @@ static savefield_t sv_fields_line[] =
 	SF(flags, "flags", 1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(tag,   "tag",   1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(count, "count", 1, SVT_INT, SR_GetInt, SR_PutInt),
+	SF(side, "side", 1, SVT_INDEX("sides"), SR_SideGetSide, SR_SidePutSide),
 	SF(special, "special", 1, SVT_STRING, SR_LineGetSpecial, SR_LinePutSpecial),
 	SF(slide_door, "slide_door", 1, SVT_STRING, SR_LineGetSpecial, SR_LinePutSpecial),
+	SF(old_stored, "old_stored", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
 
 	// NOT HERE:
 	//   (many): values are kept from level load.
@@ -257,6 +265,8 @@ static savefield_t sv_fields_regprops[] =
 	SF(viscosity, "viscosity", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
 	SF(drag, "drag", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
 	SF(push, "push", 1, SVT_VEC3, SR_GetVec3, SR_PutVec3),
+	SF(net_push, "net_push", 1, SVT_VEC3, SR_GetVec3, SR_PutVec3),
+	SF(old_push, "old_push", 1, SVT_VEC3, SR_GetVec3, SR_PutVec3),
 
 	SVFIELD_END
 };
@@ -363,6 +373,7 @@ static savefield_t sv_fields_sector[] =
 	SF(top_ef, "top_ef", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
 	SF(bottom_liq, "bottom_liq", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
 	SF(top_liq, "top_liq", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+	SF(old_stored, "old_stored", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
 
 	// NOT HERE:
 	//   - floor_move, ceil_move: can be regenerated
@@ -447,7 +458,6 @@ void SV_SideFinaliseElems(void)
 
 //----------------------------------------------------------------------------
 
-extern std::list<line_t *> active_line_anims;
 extern std::vector<slider_move_t *> active_sliders;
 
 int SV_LineCountElems(void)
@@ -481,9 +491,6 @@ void SV_LineCreateElems(int num_elems)
 	if (num_elems != numlines)
 		I_Error("LOADGAME: LINE MISMATCH !  (%d != %d)\n",
 			num_elems, numlines);
-
-	// clear animate list
-	active_line_anims.clear();
 }
 
 //
@@ -502,14 +509,26 @@ void SV_LineFinaliseElems(void)
 		// check for animation
 		if (s1 && (s1->top.scroll.x || s1->top.scroll.y ||
 			s1->middle.scroll.x || s1->middle.scroll.y ||
-			s1->bottom.scroll.x || s1->bottom.scroll.y))
+			s1->bottom.scroll.x || s1->bottom.scroll.y ||
+			s1->top.net_scroll.x || s1->top.net_scroll.y ||
+			s1->middle.net_scroll.x || s1->middle.net_scroll.y ||
+			s1->bottom.net_scroll.x || s1->bottom.net_scroll.y ||
+			s1->top.old_scroll.x || s1->top.old_scroll.y ||
+			s1->middle.old_scroll.x || s1->middle.old_scroll.y ||
+			s1->bottom.old_scroll.x || s1->bottom.old_scroll.y))
 		{
 			P_AddSpecialLine(ld);
 		}
 
 		if (s2 && (s2->top.scroll.x || s2->top.scroll.y ||
 			s2->middle.scroll.x || s2->middle.scroll.y ||
-			s2->bottom.scroll.x || s2->bottom.scroll.y))
+			s2->bottom.scroll.x || s2->bottom.scroll.y ||
+			s2->top.net_scroll.x || s2->top.net_scroll.y ||
+			s2->middle.net_scroll.x || s2->middle.net_scroll.y ||
+			s2->bottom.net_scroll.x || s2->bottom.net_scroll.y ||
+			s2->top.old_scroll.x || s2->top.old_scroll.y ||
+			s2->middle.old_scroll.x || s2->middle.old_scroll.y ||
+			s2->bottom.old_scroll.x || s2->bottom.old_scroll.y))
 		{
 			P_AddSpecialLine(ld);
 		}
@@ -593,7 +612,6 @@ void SV_ExfloorFinaliseElems(void)
 
 //----------------------------------------------------------------------------
 
-extern std::list<sector_t *> active_sector_anims;
 extern std::vector<plane_move_t *>  active_planes;
 
 int SV_SectorCountElems(void)
@@ -629,7 +647,6 @@ void SV_SectorCreateElems(int num_elems)
 			num_elems, numsectors);
 
 	// clear animate list
-	active_sector_anims.clear();
 }
 
 void SV_SectorFinaliseElems(void)
@@ -644,9 +661,24 @@ void SV_SectorFinaliseElems(void)
 
 		// check for animation
 		if (sec->floor.scroll.x || sec->floor.scroll.y ||
-			sec->ceil.scroll.x  || sec->ceil.scroll.y)
+			sec->ceil.scroll.x  || sec->ceil.scroll.y ||
+			sec->floor.net_scroll.x || sec->floor.net_scroll.y ||
+			sec->ceil.net_scroll.x  || sec->ceil.net_scroll.y ||
+			sec->floor.old_scroll.x || sec->floor.old_scroll.y ||
+			sec->ceil.old_scroll.x  || sec->ceil.old_scroll.y)
 		{
 			P_AddSpecialSector(sec);
+		}
+	}
+
+	extern std::vector<lineanim_t> lineanims;
+
+	for (int i=0; i < lineanims.size(); i++)
+	{
+		if (lineanims[i].scroll_sec_ref)
+		{
+			lineanims[i].scroll_sec_ref->ceil_move = NULL;
+			lineanims[i].scroll_sec_ref->floor_move = NULL;
 		}
 	}
 
@@ -1040,6 +1072,25 @@ void SR_LinePutLine(void *storage, int index, void *extra)
 	line_t *elem = ((line_t **)storage)[index];
 
 	int swizzle = (elem == NULL) ? 0 : SV_LineFindElem(elem) + 1;
+
+	SV_PutInt(swizzle);
+}
+
+bool SR_SideGetSide(void *storage, int index, void *extra)
+{
+	side_t ** dest = (side_t **)storage + index;
+
+	int swizzle = SV_GetInt();
+
+	*dest = (side_t*)((swizzle == 0) ? NULL : SV_SideGetElem(swizzle - 1));
+	return true;
+}
+
+void SR_SidePutSide(void *storage, int index, void *extra)
+{
+	side_t *elem = ((side_t **)storage)[index];
+
+	int swizzle = (elem == NULL) ? 0 : SV_SideFindElem(elem) + 1;
 
 	SV_PutInt(swizzle);
 }

@@ -544,9 +544,34 @@ void G_SpawnVoodooDolls(player_t *p)
 }
 
 
-//
-// G_CheckConditions
-//
+// number of wanted dogs (1-3)
+DEF_CVAR(dogs, "0", CVAR_ARCHIVE)
+
+void G_SpawnHelper(int pnum)
+{
+	if (pnum == 0)
+		return;
+
+	if (pnum > dogs.d)
+		return;
+
+	spawnpoint_t *point = G_FindCoopPlayer(pnum+1);
+	if (point == NULL)
+		return;
+
+	const mobjtype_c *info = mobjtypes.Lookup(888);
+	if (info == NULL)
+		return;
+
+	mobj_t *mo = P_MobjCreateObject(point->x, point->y, point->z, info);
+
+	mo->angle = point->angle;
+	mo->spawnpoint = *point;
+
+	mo->side = ~0;
+}
+
+
 bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 {
 	player_t *p = mo->player;

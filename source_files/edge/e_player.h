@@ -357,6 +357,7 @@ void G_DeathMatchSpawnPlayer(player_t *p);
 void G_CoopSpawnPlayer(player_t *p);
 void G_HubSpawnPlayer(player_t *p, int tag);
 void G_SpawnVoodooDolls(player_t *p);
+void G_SpawnHelper(int pnum);
 
 void G_SetConsolePlayer(int pnum);
 void G_SetDisplayPlayer(int pnum);

@@ -532,7 +532,12 @@ static void SpawnInitialPlayers(void)
 	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
 	{
 		player_t *p = players[pnum];
-		if (! p) continue;
+		if (p == NULL)
+		{
+			// no real player, maybe spawn a helper dog?
+			G_SpawnHelper(pnum);
+			continue;
+		}
 
 		RespawnPlayer(p);
 

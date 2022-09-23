@@ -1463,6 +1463,10 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 	if (sec->c_slope)
 		slope_ch += MAX(sec->c_slope->dz1, sec->c_slope->dz2);
 
+	// Boom compatibility -- invisible walkways
+	if (sec->heightsec != NULL)
+		slope_fh = std::min(slope_fh, sec->heightsec->f_h);
+
 	if (! other)
 	{
 		if (! sd->middle.image && ! debug_hom.d)

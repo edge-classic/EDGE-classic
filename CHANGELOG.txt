@@ -40,6 +40,9 @@ New Features
 
 + REKKR added as a recognized IWAD
 
++ MBF Dog is back! Rocking new sprites and sounds, credits to gzdoom(original sprites: Nash Muhandes, original sfx: Kinsie)
+
++ New CVAR: dogs <number> which will spawn 1-3 friendly helper dogs at coop spawn points.
 
 
 

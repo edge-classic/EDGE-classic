@@ -91,6 +91,9 @@ void SR_SectorPutProps(void *storage, int index, void *extra);
 void SR_SectorPutPropRef(void *storage, int index, void *extra);
 void SR_SectorPutGenMove(void *storage, int index, void *extra);
 
+bool SR_SideGetSide(void *storage, int index, void *extra);
+void SR_SidePutSide(void *storage, int index, void *extra);
+
 
 //----------------------------------------------------------------------------
 //
@@ -196,6 +199,7 @@ static savefield_t sv_fields_line[] =
 	SF(flags, "flags", 1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(tag,   "tag",   1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(count, "count", 1, SVT_INT, SR_GetInt, SR_PutInt),
+	SF(side, "side", 1, SVT_INDEX("sides"), SR_SideGetSide, SR_SidePutSide),
 	SF(special, "special", 1, SVT_STRING, SR_LineGetSpecial, SR_LinePutSpecial),
 	SF(slide_door, "slide_door", 1, SVT_STRING, SR_LineGetSpecial, SR_LinePutSpecial),
 	SF(old_stored, "old_stored", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
@@ -667,6 +671,17 @@ void SV_SectorFinaliseElems(void)
 		}
 	}
 
+	extern std::vector<lineanim_t> lineanims;
+
+	for (int i=0; i < lineanims.size(); i++)
+	{
+		if (lineanims[i].scroll_sec_ref)
+		{
+			lineanims[i].scroll_sec_ref->ceil_move = NULL;
+			lineanims[i].scroll_sec_ref->floor_move = NULL;
+		}
+	}
+
 	// scan active parts, regenerate floor_move and ceil_move
 	std::vector<plane_move_t *>::iterator PMI;
 
@@ -1057,6 +1072,25 @@ void SR_LinePutLine(void *storage, int index, void *extra)
 	line_t *elem = ((line_t **)storage)[index];
 
 	int swizzle = (elem == NULL) ? 0 : SV_LineFindElem(elem) + 1;
+
+	SV_PutInt(swizzle);
+}
+
+bool SR_SideGetSide(void *storage, int index, void *extra)
+{
+	side_t ** dest = (side_t **)storage + index;
+
+	int swizzle = SV_GetInt();
+
+	*dest = (side_t*)((swizzle == 0) ? NULL : SV_SideGetElem(swizzle - 1));
+	return true;
+}
+
+void SR_SidePutSide(void *storage, int index, void *extra)
+{
+	side_t *elem = ((side_t **)storage)[index];
+
+	int swizzle = (elem == NULL) ? 0 : SV_SideFindElem(elem) + 1;
 
 	SV_PutInt(swizzle);
 }

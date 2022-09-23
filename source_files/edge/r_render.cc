@@ -2608,26 +2608,25 @@ static void RGL_WalkSubsector(int num)
 	surface_t *floor_s = &sector->floor;
 	surface_t *ceil_s  = &sector->ceil;
 
+	region_properties_t *props = sector->p;
+
 	// Boom compatibility -- deep water FX
 	if (sector->heightsec != NULL)
 	{
-		// TODO lighting
-		// TODO colormaps
-
 		// check which region the camera is in...
 		if (viewz > sector->heightsec->c_h)  // A : above
 		{
 			floor_h = sector->heightsec->c_h;
 			floor_s = &sector->heightsec->floor;
 			ceil_s  = &sector->heightsec->ceil;
-			// lighting from sector->heightsec
+			props   =  sector->heightsec->p;
 		}
 		else if (viewz < sector->heightsec->f_h)  // C : below
 		{
 			ceil_h  = sector->heightsec->f_h;
 			floor_s = &sector->heightsec->floor;
 			ceil_s  = &sector->heightsec->ceil;
-			// lighting from sector->heightsec
+			props   =  sector->heightsec->p;
 		}
 		else  // B : middle for diddle
 		{
@@ -2682,7 +2681,7 @@ static void RGL_WalkSubsector(int num)
 		floor_h = C->top_h;
 	}
 
-	AddNewDrawFloor(K, NULL, floor_h, ceil_h, ceil_h, floor_s, ceil_s, sector->p);
+	AddNewDrawFloor(K, NULL, floor_h, ceil_h, ceil_h, floor_s, ceil_s, props);
 
 	K->floors[0]->is_lowest = true;
 	K->floors[K->floors.size() - 1]->is_highest = true;

@@ -371,8 +371,18 @@ static void MakeBoomDoor(linetype_c *line, int number)
 
 	line->c.speed_up = 2 << speed;
 	line->c.speed_down = line->c.speed_up;
-	line->c.sfxup = sfxdefs.GetEffect("DOROPN");
-	line->c.sfxdown = sfxdefs.GetEffect("DORCLS");
+
+	if(line->c.speed_up > 7)
+	{
+		line->c.sfxup = sfxdefs.GetEffect("BDOPN");
+		line->c.sfxdown = sfxdefs.GetEffect("BDCLS");
+	}
+	else
+	{
+		line->c.sfxup = sfxdefs.GetEffect("DOROPN");
+		line->c.sfxdown = sfxdefs.GetEffect("DORCLS");
+	}
+	
 
 	switch (kind & 2)
 	{
@@ -411,8 +421,18 @@ static void MakeBoomLockedDoor(linetype_c *line, int number)
 
 	line->c.speed_up = 2 << speed;
 	line->c.speed_down = line->c.speed_up;
-	line->c.sfxup = sfxdefs.GetEffect("DOROPN");
-	line->c.sfxdown = sfxdefs.GetEffect("DORCLS");
+
+	if(line->c.speed_up > 7)
+	{
+		line->c.sfxup = sfxdefs.GetEffect("BDOPN");
+		line->c.sfxdown = sfxdefs.GetEffect("BDCLS");
+	}
+	else
+	{
+		line->c.sfxup = sfxdefs.GetEffect("DOROPN");
+		line->c.sfxdown = sfxdefs.GetEffect("DORCLS");
+	}
+
 	line->c.wait = 150;
 
 	// handle keys

@@ -2426,8 +2426,8 @@ void P_UpdateSpecials(void)
 						{
 							if (special_ref->sector_effect & SECTFX_PushThings)
 							{
-								sec->props.net_push.y += line_ref->dy / 320.0f * ratio * sec_ref->floor_move->speed;
-								sec->props.net_push.x += line_ref->dx / 320.0f * ratio * sec_ref->floor_move->speed;
+								sec->props.net_push.y += line_ref->dy / 320.0f * ratio * sec_ref->ceil_move->speed;
+								sec->props.net_push.x += line_ref->dx / 320.0f * ratio * sec_ref->ceil_move->speed;
 							}
 							if (special_ref->sector_effect & SECTFX_ScrollFloor)
 							{
@@ -2444,8 +2444,8 @@ void P_UpdateSpecials(void)
 						{
 							if (special_ref->sector_effect & SECTFX_PushThings)
 							{
-								sec->props.net_push.y -= line_ref->dy / 320.0f * ratio * sec_ref->floor_move->speed;
-								sec->props.net_push.x -= line_ref->dx / 320.0f * ratio * sec_ref->floor_move->speed;
+								sec->props.net_push.y -= line_ref->dy / 320.0f * ratio * sec_ref->ceil_move->speed;
+								sec->props.net_push.x -= line_ref->dx / 320.0f * ratio * sec_ref->ceil_move->speed;
 							}
 							if (special_ref->sector_effect & SECTFX_ScrollFloor)
 							{

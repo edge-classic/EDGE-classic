@@ -998,8 +998,8 @@ static specflags_t sector_effect_names[] =
 	{"LIGHT_CEILING",   SECTFX_LightCeiling,   0},
 	{"SCROLL_FLOOR",    SECTFX_ScrollFloor,    0},
 	{"SCROLL_CEILING",  SECTFX_ScrollCeiling,  0},
-	{"PUSH_THINGS",     SECTFX_PushThings,     0},
 
+	{"PUSH_THINGS",     SECTFX_PushThings,     0},
 	{"SET_FRICTION",    SECTFX_SetFriction,    0},
 	{"WIND_FORCE",      SECTFX_WindForce,      0},
 	{"CURRENT_FORCE",   SECTFX_CurrentForce,   0},
@@ -1011,6 +1011,8 @@ static specflags_t sector_effect_names[] =
 	{"ALIGN_CEILING",   SECTFX_AlignCeiling,   0},
 	{"SCALE_FLOOR",     SECTFX_ScaleFloor,     0},
 	{"SCALE_CEILING",   SECTFX_ScaleCeiling,   0},
+
+	{"BOOM_HEIGHTS",    SECTFX_BoomHeights,    0},
 	{NULL, 0, 0}
 };
 

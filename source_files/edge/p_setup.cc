@@ -468,7 +468,6 @@ static void LoadSectors(int lump)
 				currmap->lump.c_str());
 
 	sectors = new sector_t[numsectors];
-		
 	Z_Clear(sectors, sector_t, numsectors);
 
 	data = W_CacheLumpNum(lump);
@@ -1698,30 +1697,21 @@ static void LoadUDMFSideDefs(parser_t *psr)
 
 			sd->top.image = W_ImageLookup(top_tex, INS_Texture, ILF_Null);
 
-			if (m_goobers.d && ! sd->top.image)
+			if (sd->top.image == NULL)
 			{
-				sd->top.image = W_ImageLookup(bottom_tex, INS_Texture);
-			}
-
-			// handle air colourmaps with BOOM's [242] linetype
-			if (! sd->top.image)
-			{
-				sd->top.image = W_ImageLookup(top_tex, INS_Texture);
-				colourmap_c *cmap = colourmaps.Lookup(top_tex);
-				if (cmap) sd->sector->props.colourmap = cmap;
-			}
-
-			sd->bottom.image = W_ImageLookup(bottom_tex, INS_Texture, ILF_Null);
-
-			// handle water colourmaps with BOOM's [242] linetype
-			if (! sd->bottom.image)
-			{
-				sd->bottom.image = W_ImageLookup(bottom_tex, INS_Texture);
-				colourmap_c *cmap = colourmaps.Lookup(bottom_tex);
-				if (cmap) sd->sector->props.colourmap = cmap;
+				if (m_goobers.d)
+					sd->top.image = W_ImageLookup(bottom_tex, INS_Texture);
+				else
+					sd->top.image = W_ImageLookup(top_tex, INS_Texture);
 			}
 
 			sd->middle.image = W_ImageLookup(middle_tex, INS_Texture);
+			sd->bottom.image = W_ImageLookup(bottom_tex, INS_Texture);
+
+			// handle BOOM colourmaps with [242] linetype
+			sd->top   .boom_colmap = colourmaps.Lookup(top_tex);
+			sd->middle.boom_colmap = colourmaps.Lookup(middle_tex);
+			sd->bottom.boom_colmap = colourmaps.Lookup(bottom_tex);
 		}
 	}
 
@@ -2119,7 +2109,9 @@ static void LoadUDMFThings(parser_t *psr)
 static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd,
 							   bool two_sided)
 {
-	char buffer[10];
+	char upper_tex [10];
+	char middle_tex[10];
+	char lower_tex [10];
 
 	int sec_num = EPI_LE_S16(msd->sector);
 
@@ -2140,36 +2132,27 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd,
 	}
 	sd->sector = &sectors[sec_num];
 
-	Z_StrNCpy(buffer, msd->upper_tex, 8);
-	sd->top.image = W_ImageLookup(buffer, INS_Texture, ILF_Null);
+	Z_StrNCpy(upper_tex,  msd->upper_tex, 8);
+	Z_StrNCpy(middle_tex, msd->mid_tex,   8);
+	Z_StrNCpy(lower_tex,  msd->lower_tex, 8);
 
-	if (m_goobers.d && ! sd->top.image)
+	sd->top.image = W_ImageLookup(upper_tex, INS_Texture, ILF_Null);
+
+	if (sd->top.image == NULL)
 	{
-		Z_StrNCpy(buffer, msd->lower_tex, 8);
-		sd->top.image = W_ImageLookup(buffer, INS_Texture);
+		if (m_goobers.d)
+			sd->top.image = W_ImageLookup(upper_tex, INS_Texture);
+		else
+			sd->top.image = W_ImageLookup(upper_tex, INS_Texture);
 	}
 
-	// handle air colourmaps with BOOM's [242] linetype
-	if (! sd->top.image)
-	{
-		sd->top.image = W_ImageLookup(buffer, INS_Texture);
-		colourmap_c *cmap = colourmaps.Lookup(buffer);
-		if (cmap) sd->sector->props.colourmap = cmap;
-	}
+	sd->middle.image = W_ImageLookup(middle_tex, INS_Texture);
+	sd->bottom.image = W_ImageLookup(lower_tex,  INS_Texture);
 
-	Z_StrNCpy(buffer, msd->lower_tex, 8);
-	sd->bottom.image = W_ImageLookup(buffer, INS_Texture, ILF_Null);
-
-	// handle water colourmaps with BOOM's [242] linetype
-	if (! sd->bottom.image)
-	{
-		sd->bottom.image = W_ImageLookup(buffer, INS_Texture);
-		colourmap_c *cmap = colourmaps.Lookup(buffer);
-		if (cmap) sd->sector->props.colourmap = cmap;
-	}
-
-	Z_StrNCpy(buffer, msd->mid_tex, 8);
-	sd->middle.image = W_ImageLookup(buffer, INS_Texture);
+	// handle BOOM colourmaps with [242] linetype
+	sd->top   .boom_colmap = colourmaps.Lookup(upper_tex);
+	sd->middle.boom_colmap = colourmaps.Lookup(middle_tex);
+	sd->bottom.boom_colmap = colourmaps.Lookup(lower_tex);
 
 	if (sd->middle.image && two_sided)
 	{

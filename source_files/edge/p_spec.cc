@@ -728,8 +728,7 @@ static void P_LineEffect(line_t *target, line_t *source,
 //
 // Handles BOOM's line -> tagged sector transfers.
 //
-static void P_SectorEffect(sector_t *target, line_t *source,
-		const linetype_c *special)
+static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *special)
 {
 	if (! target)
 		return;
@@ -864,6 +863,14 @@ static void P_SectorEffect(sector_t *target, line_t *source,
 		target->ceil.x_mat.y *= factor;
 		target->ceil.y_mat.x *= factor;
 		target->ceil.y_mat.y *= factor;
+	}
+
+	// killough 3/7/98 and AJA 2022:
+	// support for drawn heights coming from different sector
+	if (special->sector_effect & SECTFX_BoomHeights)
+	{
+		target->heightsec = source->frontsector;
+		target->heightsec_side = source->side[0];
 	}
 }
 
@@ -2630,13 +2637,12 @@ void P_SpawnSpecials1(void)
 
 			for (sector_t * tsec = P_FindSectorFromTag(lines[i].tag); tsec; tsec = tsec->tag_next)
 			{
+				// the OLD method of Boom deep water (the BOOMTEX flag)
 				if (special->ef.type & EXFL_BoomTex)
 				{
 					if (ctrl->f_h <= tsec->f_h)
 					{
 						tsec->props.colourmap = ctrl->props.colourmap;
-
-						// FIXME: BOOM's invisible floor feature
 						continue;
 					}
 				}

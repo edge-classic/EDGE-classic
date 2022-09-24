@@ -57,6 +57,7 @@ typedef vec2_t vertex_t;
 // Forward of LineDefs, for Sectors.
 struct line_s;
 struct side_s;
+struct subsector_s;
 struct region_properties_s;
 
 
@@ -157,7 +158,10 @@ typedef struct surface_s
 	vec2_t old_scroll = {0,0};
 
 	// lighting override (as in BOOM).  Usually NULL.
-	struct region_properties_s *override_p;
+	region_properties_t *override_p;
+
+	// this only used for BOOM deep water (linetype 242)
+	const colourmap_c *boom_colmap;
 }
 surface_t;
 
@@ -174,34 +178,30 @@ typedef struct extrafloor_s
 	// bottom_h as the reference.  This is important, especially when a
 	// liquid extrafloor overlaps a solid one: using this rule, the
 	// liquid region will be higher than the solid one.
-	// 
 	struct extrafloor_s *higher;
 	struct extrafloor_s *lower;
 
 	struct sector_s *sector;
 
-    // top and bottom heights of the extrafloor.  For non-THICK
-    // extrafloors, these are the same.  These are generally the same as
-    // in the dummy sector, EXCEPT during the process of moving the
-    // extrafloor.
-    //
+	// top and bottom heights of the extrafloor.  For non-THICK
+	// extrafloors, these are the same.  These are generally the same as
+	// in the dummy sector, EXCEPT during the process of moving the
+	// extrafloor.
 	float top_h, bottom_h;
 
 	// top/bottom surfaces of the extrafloor
 	surface_t *top;
 	surface_t *bottom;
 
-    // properties used for stuff below us
+	// properties used for stuff below us
 	region_properties_t *p;
 
 	// type of extrafloor this is.  Only NULL for unused extrafloors.
 	// This value is cached pointer to ef_line->special->ef.
-	//
 	const extrafloordef_c *ef_info;
 
 	// extrafloor linedef (frontsector == control sector).  Only NULL
 	// for unused extrafloors.
-	//
 	struct line_s *ef_line;
 
 	// link in dummy sector's controlling list
@@ -231,8 +231,6 @@ slope_plane_t;
 //
 // The SECTORS record, at runtime.
 //
-struct subsector_s;
-
 typedef struct sector_s
 {
 	// floor and ceiling heights
@@ -257,37 +255,37 @@ typedef struct sector_s
 	// Now the FLOORS ARE IMPLIED.  Unlike before, the floor below an
 	// extrafloor is NOT stored in each extrafloor_t -- you must scan
 	// down to find them, and use the sector's floor if you hit NULL.
-	//
 	extrafloor_t *bottom_ef;
 	extrafloor_t *top_ef;
 
 	// Liquid extrafloors are now kept in a separate list.  For many
 	// purposes (especially moving sectors) they otherwise just get in
 	// the way.
-	//
 	extrafloor_t *bottom_liq;
 	extrafloor_t *top_liq;
 
-    // properties that are active for this sector (top-most extrafloor).
-    // This may be different than the sector's actual properties (the
-    // "props" field) due to flooders.
-    // 
+	// properties that are active for this sector (top-most extrafloor).
+	// This may be different than the sector's actual properties (the
+	// "props" field) due to flooders.
 	region_properties_t *p;
  
- 	// slope information, normally NULL
+	// slope information, normally NULL
 	slope_plane_t *f_slope;
 	slope_plane_t *c_slope;
 
 	// linked list of extrafloors that this sector controls.  NULL means
 	// that this sector is not a controller.
-	//
 	extrafloor_t *control_floors;
  
+	// killough 3/7/98: support flat heights drawn at another sector's heights
+	struct sector_s *heightsec;
+	struct side_s   *heightsec_side;
+
 	// movement thinkers, for quick look-up
 	struct plane_move_s *floor_move;
 	struct plane_move_s *ceil_move;
 
-    // 0 = untraversed, 1,2 = sndlines-1
+	// 0 = untraversed, 1,2 = sndlines-1
 	int soundtraversed;
 
 	// player# that made a sound (starting at 0), or -1

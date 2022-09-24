@@ -175,14 +175,14 @@ drawthing_t;
 // Stores all the information needed to draw a single on-screen
 // floor of a subsector.
 //
-typedef struct drawfloor_s
+class drawfloor_t
 {
 public:
 	short is_lowest;
 	short is_highest;
 
 	// link for list, rendering order
-	struct drawfloor_s *next_R, *prev_R;
+	drawfloor_t *next_R, *prev_R;
 
 	// heights for this floor
 	float f_h, c_h, top_h;
@@ -208,8 +208,7 @@ public:
 		props = NULL;
 		things = NULL;
 	}
-}
-drawfloor_t;
+};
 
 
 class drawmirror_c

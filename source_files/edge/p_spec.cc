@@ -812,7 +812,7 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 		target->ceil.y_mat.y *= factor;
 	}
 
-	// killough 3/7/98:
+	// killough 3/7/98 and AJA 2022:
 	// support for drawn heights coming from different sector
 	if (special->sector_effect & SECTFX_BoomHeights)
 	{

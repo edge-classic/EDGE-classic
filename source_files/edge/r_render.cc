@@ -2176,18 +2176,12 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
 	// --- handle sky (using the depth buffer) ---
 
-	//bool upper_sky = false; - Doesn't seem to affect anything - Dasho
-	bool lower_sky = false;
-
 	if (backsector && IS_SKY(frontsector->floor) && IS_SKY(backsector->floor))
-		lower_sky = true;
-
-	//if (backsector && IS_SKY(frontsector->ceil) && IS_SKY(backsector->ceil))
-		//upper_sky = true;
-
-	if (lower_sky && frontsector->f_h < backsector->f_h)
 	{
-		RGL_DrawSkyWall(seg, frontsector->f_h, backsector->f_h);
+		if (frontsector->f_h < backsector->f_h)
+		{
+			RGL_DrawSkyWall(seg, frontsector->f_h, backsector->f_h);
+		}
 	}
 
 	if (IS_SKY(frontsector->ceil))
@@ -2198,7 +2192,8 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 		{
 			RGL_DrawSkyWall(seg, frontsector->c_h, frontsector->sky_h);
 		}
-		else if (backsector && IS_SKY(backsector->ceil))
+		else if (backsector && IS_SKY(backsector->ceil) &&
+			frontsector->heightsec == NULL && backsector->heightsec == NULL)
 		{
 			float max_f = MAX(frontsector->f_h, backsector->f_h);
 
@@ -2217,6 +2212,7 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 	}
 }
 
+
 //
 // RGL_CheckBBox
 //
@@ -2226,7 +2222,6 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 // Placed here to be close to RGL_WalkSeg(), which has similiar angle
 // clipping stuff in it.
 //
-
 bool RGL_CheckBBox(float *bspcoord)
 {
 	if (num_active_mirrors > 0)

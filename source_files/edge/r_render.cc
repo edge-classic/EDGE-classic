@@ -3026,7 +3026,7 @@ static void RGL_RenderTrueBSP(void)
 
 	player_t *v_player = view_cam_mo->player;
 	
-	// handle powerup effects
+	// handle powerup effects and BOOM colourmaps
 	RGL_RainbowEffect(v_player);
 
 

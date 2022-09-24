@@ -2582,6 +2582,7 @@ void P_SpawnSpecials1(void)
 	active_sector_anims.clear();
 	active_line_anims.clear();
 	secanims.clear();
+	lineanims.clear();
 
 	P_ClearButtons();
 

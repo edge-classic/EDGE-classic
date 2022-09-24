@@ -817,6 +817,7 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 	if (special->sector_effect & SECTFX_BoomHeights)
 	{
 		target->heightsec = source->frontsector;
+		target->heightsec_side = source->side[0];
 	}
 }
 

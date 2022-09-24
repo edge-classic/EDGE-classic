@@ -128,9 +128,26 @@ void RGL_RainbowEffect(player_t *player)
 		ren_grn_mul = 1.0f - (1.0f - g) * s;
 		ren_blu_mul = 1.0f - (1.0f - b) * s;
 
-		return;
+		// fallthrough...
 	}
-	
+
+	// AJA 2022: handle BOOM colourmaps (linetype 242)
+	sector_t *sector = player->mo->subsector->sector;
+
+	if (sector->heightsec != NULL)
+	{
+		const colourmap_c *colmap = NULL;
+
+		// see which region the camera is in
+		if (viewz > sector->heightsec->c_h)
+			colmap = sector->heightsec_side->top.boom_colmap;
+		else if (viewz < sector->heightsec->f_h)
+			colmap = sector->heightsec_side->bottom.boom_colmap;
+		else
+			colmap = sector->heightsec_side->middle.boom_colmap;
+
+		ren_fx_colmap = colmap;
+	}
 }
 
 

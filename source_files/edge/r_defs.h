@@ -57,6 +57,7 @@ typedef vec2_t vertex_t;
 // Forward of LineDefs, for Sectors.
 struct line_s;
 struct side_s;
+struct subsector_s;
 struct region_properties_s;
 
 
@@ -223,8 +224,6 @@ slope_plane_t;
 //
 // The SECTORS record, at runtime.
 //
-struct subsector_s;
-
 typedef struct sector_s
 {
 	// floor and ceiling heights
@@ -273,6 +272,7 @@ typedef struct sector_s
  
 	// killough 3/7/98: support flat heights drawn at another sector's heights
 	struct sector_s *heightsec;
+	struct side_s   *heightsec_side;
 
 	// movement thinkers, for quick look-up
 	struct plane_move_s *floor_move;

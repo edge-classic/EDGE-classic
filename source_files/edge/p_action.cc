@@ -1059,8 +1059,8 @@ static void CheckMissileSpawn(mobj_t * projectile)
 // LaunchProjectile
 //
 // This procedure launches a project the direction of the target mobj.
-// * source - the source of the projectile
-// * target - the target of the projectile
+// * source - the source of the projectile, required
+// * target - the target of the projectile, can be NULL
 // * type   - the mobj type of the projectile
 //
 // For all sense and purposes it is possible for the target to be a dummy
@@ -3685,11 +3685,49 @@ void P_PlayerAttack(mobj_t * p_obj, const atkdef_c * attack)
 //----------------------   MBF / MBF21  -----------------------------
 //-------------------------------------------------------------------
 
+//
+// killough 9/98: a mushroom explosion effect, sorta :)
+// Original idea: Linguica
+//
 void P_ActMushroom(struct mobj_s *mo)
 {
-	// TODO
-}
+	float height = 8.0;
+	float speed  = 0.5;
+	int spread   = 64;
 
+	// First make normal explosion damage
+	P_ActDamageExplosion(mo);
+
+	// Now launch mushroom cloud
+	const atkdef_c *atk = mo->info->spareattack;
+	if (atk == NULL) atk = atkdefs.Lookup("MANCUBUS_FIREBALL_L");
+	if (atk == NULL) return;
+
+	for (int i = -spread ; i <= spread ; i += 16)
+	{
+		for (int j = -spread ; j <= spread ; j += 16)
+		{
+			// Aim in many directions from source
+			float tx = mo->x + i;
+			float ty = mo->y + j;
+			float tz = mo->z + P_ApproxDistance(i + 2, j + 2) * height;
+
+			mo->currentattack = atk;
+
+			mobj_t *proj = DoLaunchProjectile(mo, tx, ty, tz, NULL, atk->atk_mobj);
+			if (proj == NULL)
+				continue;
+
+			// Slow down a bit
+			proj->mom.x = proj->mom.x * speed;
+			proj->mom.y = proj->mom.y * speed;
+			proj->mom.z = proj->mom.z * speed;
+
+			// Make debris fall under gravity
+			proj->flags &= ~MF_NOGRAVITY;
+		}
+	}
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

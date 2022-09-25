@@ -78,7 +78,7 @@ public:
 	void Default();
 	cursorstyle_c& operator= (const cursorstyle_c& rhs);
 
-	u8_t position;
+	int position;
 	percent_t translucency;
 
 	std::string alt_cursor;
@@ -161,8 +161,8 @@ public:
 	int x_offset;
 	int y_offset;
 
-	u8_t entry_alignment;
-	u8_t entry_spacing;
+	int entry_alignment;
+	int entry_spacing;
 	std::string entry_align_string; // User convenience
 
 private:

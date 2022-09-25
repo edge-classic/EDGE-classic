@@ -1049,6 +1049,82 @@ static void LoadHexenLineDefs(int lump)
 	W_DoneWithLump(data);
 }
 
+static sector_t *DetermineSubsectorSector(subsector_t *ss, bool fallback)
+{
+	const seg_t *seg;
+
+	for (seg = ss->segs ; seg != NULL ; seg = seg->sub_next)
+	{
+		if (seg->miniseg)
+			continue;
+
+		// ignore self-referencing linedefs
+		if (seg->frontsector == seg->backsector)
+			continue;
+
+		return seg->frontsector;
+	}
+
+	for (seg = ss->segs ; seg != NULL ; seg = seg->sub_next)
+	{
+		if (seg->partner == NULL)
+			continue;
+
+		if (seg->partner->front_sub->sector != NULL)
+			return seg->partner->front_sub->sector;
+	}
+
+	if (fallback)
+	{
+		for (seg = ss->segs ; seg != NULL ; seg = seg->sub_next)
+		{
+			if (! seg->miniseg)
+				return seg->frontsector;
+		}
+	}
+
+	return NULL;
+}
+
+static void AssignSubsectorsPass(int pass, bool fallback)
+{
+	int null_count = 0;
+
+	for (int i = 0 ; i < numsubsectors ; i++)
+	{
+		subsector_t *ss = &subsectors[i];
+
+		if (ss->sector == NULL)
+		{
+			null_count += 1;
+
+			ss->sector = DetermineSubsectorSector(ss, fallback);
+
+			if (ss->sector != NULL)
+			{
+				// link subsector into parent sector's list.
+				// order is not important, so add it to the head of the list.
+				ss->sec_next = ss->sector->subsectors;
+				ss->sector->subsectors = ss;
+			}
+		}
+	}
+
+	if (fallback && null_count > 0)
+		I_Error("Bad WAD: level %s has crazy SSECTORS.\n", currmap->lump.c_str());
+}
+
+static void AssignSubsectorsToSectors()
+{
+	// AJA 2022: this attempts to improve handling of self-referencing lines
+	//           (i.e. ones with the same sector on both sides).  Subsectors
+	//           touching such lines should NOT be assigned to that line's
+	//           sector, but rather to the "outer" sector.
+
+	for (int pass = 0 ; pass < 10 ; pass++)
+		AssignSubsectorsPass(pass, pass == 9);
+}
+
 // Adapted from EDGE 2.x's ZNode loading routine; only handles XGL3 as that is all
 // our built-in AJBSP produces now
 static void LoadXGL3Nodes(int lumpnum)
@@ -1235,24 +1311,11 @@ static void LoadXGL3Nodes(int lumpnum)
 			cur->front_sub = ss;
 			cur->back_sub = NULL;
 
-			if (!ss->sector && !cur->miniseg)
-				ss->sector = cur->sidedef->sector;
-
 			//I_Debugf("  ssec = %d, seg = %d\n", i, firstseg + j);
 		}
 		//I_Debugf("LoadZNodes: ssec = %d, fseg = %d, cseg = %d\n", i, firstseg, countsegs);
 
-		if (ss->sector == NULL)
-			I_Error("Bad WAD: level %s has crazy SSECTORS.\n",
-				currmap->lump.c_str());
-
 		*prevptr = NULL;
-
-		// link subsector into parent sector's list.
-		// order is not important, so add it to the head of the list.
-
-		ss->sec_next = ss->sector->subsectors;
-		ss->sector->subsectors = ss;
 	}
 	delete [] ss_temp; //CA 9.30.18: allocated with new but released using delete, added [] between delete and ss_temp
 
@@ -1325,6 +1388,8 @@ static void LoadXGL3Nodes(int lumpnum)
 			}
 		}
 	}
+
+	AssignSubsectorsToSectors();
 
 	I_Debugf("LoadXGL3Nodes: Setup root node\n");
 	SetupRootNode();

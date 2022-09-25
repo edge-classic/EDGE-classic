@@ -184,7 +184,7 @@ const actioninfo_t action_info[NUMACTIONS_BEX] =
 	{ "EXPLODE", AF_SPECIAL, NULL, NULL,    "A_Die" },
 	{ "STOP",    0,          NULL, NULL,    "A_Stop" },
 	{ "EXPLOSIONDAMAGE", AF_DETONATE, NULL, NULL, "A_Detonate" },
-	{ "NOTHING", AF_UNIMPL, NULL, NULL,    "A_Mushroom" },
+	{ "MUSHROOM", 0, NULL, NULL,            "A_Mushroom" },
 
 	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_Spawn" },
 	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_Turn" },
@@ -193,8 +193,8 @@ const actioninfo_t action_info[NUMACTIONS_BEX] =
 	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_PlaySound" },
 	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_RandomJump" },  // special
 	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_LineEffect" },
-	{ "NOTHING", AF_UNIMPL, NULL, NULL,    "A_FireOldBFG" },
-	{ "NOTHING", AF_UNIMPL, NULL, NULL,    "A_BetaSkullAttack" },
+	{ "NOTHING", AF_UNIMPL,  NULL, NULL,    "A_FireOldBFG" },
+	{ "NOTHING", AF_UNIMPL,  NULL, NULL,    "A_BetaSkullAttack" },
 
 };
 

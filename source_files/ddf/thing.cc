@@ -320,6 +320,7 @@ const actioncode_t thing_actions[] =
 	// Boom/MBF compatibility
 	{"DIE",               P_ActDie, NULL},
 	{"KEEN_DIE",          P_ActKeenDie, NULL},
+	{"MUSHROOM",          P_ActMushroom, NULL},
 
 	// bossbrain actions
 	{"BRAINSPIT", P_ActBrainSpit, NULL},

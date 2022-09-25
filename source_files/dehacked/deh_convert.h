@@ -30,7 +30,6 @@ extern short thing12to166[THINGS_1_2];
 extern short frame12to166[FRAMES_1_2];
 extern short sprite12to166[SPRITES_1_2];
 extern short sound12to166[SOUNDS_1_2];
-extern short pointerToFrame[POINTER_NUM_BEX];
 
 }  // Deh_Edge
 

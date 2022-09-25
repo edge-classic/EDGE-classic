@@ -1248,10 +1248,7 @@ void Frames::AlterFrame(int new_val)
 
 void Frames::AlterPointer(int new_val)
 {
-	int ptr_num = Patch::active_obj;
-	assert(0 <= ptr_num && ptr_num < POINTER_NUM_BEX);
-
-	int st_num = pointerToFrame[ptr_num];
+	int st_num = Patch::active_obj;
 	const char *deh_field = Patch::line_buf;
 
 	assert(0 <= st_num && st_num < NUMSTATES_BEX);

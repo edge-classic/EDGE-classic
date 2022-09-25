@@ -581,13 +581,6 @@ void DDF_LineGetTrigType(const char *info, void *storage)
 	{
 		if (DDF_CompareName(info, s_trigger[i].s) == 0)
 		{
-#if 0  // DISABLED FOR NOW
-			if (global_flags.edge_compat && (trigger_e)s_trigger[i].n == line_manual)
-			{
-				*var = line_pushable;
-				return;
-			}
-#endif
 			*var = (trigger_e)s_trigger[i].n;
 			return;
 		}

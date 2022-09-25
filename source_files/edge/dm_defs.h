@@ -119,7 +119,6 @@ typedef struct gameflags_s
 	bool have_extra;
 	bool limit_zoom;
 
-	bool edge_compat;
 	bool kicking;
 	bool weapon_switch;
 	bool pass_missile;

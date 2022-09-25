@@ -179,8 +179,6 @@ static void GV_GetLevelFlags(const char *info, void *storage)
 
 #undef HANDLE_FLAG
 
-	dest->edge_compat = (flags & MPF_BoomCompat) ? false : true;
-
 	dest->autoaim = (flags & MPF_AutoAim) ? 
 		((flags & MPF_AutoAimMlook) ? AA_MLOOK : AA_ON) : AA_OFF;
 }
@@ -277,9 +275,6 @@ static const char *GV_PutLevelFlags(void *storage)
 	HANDLE_FLAG(src->team_damage, MPF_TeamDamage);
 
 #undef HANDLE_FLAG
-
-	if (!src->edge_compat)
-		flags |= MPF_BoomCompat;
 
 	if (src->autoaim != AA_OFF)
 		flags |= MPF_AutoAim;

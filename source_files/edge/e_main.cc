@@ -168,7 +168,6 @@ gameflags_t default_gameflags =
 	true,   // have_extra
 	false,  // limit_zoom
 
-	false,    // edge_compat
 	true,     // kicking
 	true,     // weapon_switch
 	true,     // pass_missile
@@ -371,9 +370,6 @@ static void SetGlobalVars(void)
 		use_dlights = 1;
 	else if (M_CheckParm("-nodlights"))
 		use_dlights = 0;
-
-	if (M_CheckParm("-ecompat"))
-		global_flags.edge_compat = true;
 
 	if (!global_flags.respawn)
 	{

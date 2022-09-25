@@ -75,27 +75,26 @@ typedef enum
 	MPF_Mlook         = (1 << 1),
 	MPF_Cheats        = (1 << 3),
 	MPF_ItemRespawn   = (1 << 4),
-	MPF_FastParm      = (1 << 5),     // Fast Monsters
-	MPF_ResRespawn    = (1 << 6),     // Resurrect Monsters (else Teleport)
+	MPF_FastParm      = (1 << 5),   // Fast Monsters
+	MPF_ResRespawn    = (1 << 6),   // Resurrect Monsters (else Teleport)
 	MPF_StretchSky    = (1 << 7),
 
-	MPF_True3D        = (1 << 8),    // True 3D Gameplay
-	MPF_Stomp         = (1 << 9),    // Monsters can stomp players
-	MPF_MoreBlood     = (1 << 10),    // Make a bloody mess
+	MPF_True3D        = (1 << 8),   // True 3D Gameplay
+	MPF_Stomp         = (1 << 9),   // Monsters can stomp players
+	MPF_MoreBlood     = (1 << 10),  // Make a bloody mess
 	MPF_Respawn       = (1 << 11),
 	MPF_AutoAim       = (1 << 12),
 	MPF_AutoAimMlook  = (1 << 13),
-	MPF_ResetPlayer   = (1 << 14),   // Force player back to square #1
+	MPF_ResetPlayer   = (1 << 14),  // Force player back to square #1
 	MPF_Extras        = (1 << 15),
 
 	MPF_LimitZoom     = (1 << 16),  // Limit zoom to certain weapons
 	MPF_Shadows       = (1 << 17),
 	MPF_Halos         = (1 << 18),
 	MPF_Crouching     = (1 << 19),
-	MPF_Kicking       = (1 << 20), // Weapon recoil
-	MPF_BoomCompat    = (1 << 21),
+	MPF_Kicking       = (1 << 20),  // Weapon recoil
+	MPF_BoomCompat    = (1 << 21),  // old flag, does nothing anymore
 	MPF_WeaponSwitch  = (1 << 22),
-	MPF_NoMonsters    = (1 << 23), // (Only for demos!)
 
 	MPF_PassMissile   = (1 << 24),
 	MPF_TeamDamage    = (1 << 25),

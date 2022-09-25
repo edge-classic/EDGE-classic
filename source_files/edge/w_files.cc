@@ -205,15 +205,14 @@ void W_BuildNodes(void)
 	{
 		data_file_c *df = data_files[i];
 
-		if (df->wad != NULL)
+		if (df->kind == FLKIND_IWad || df->kind == FLKIND_PWad)
 		{
 			std::string gwa_filename = W_BuildNodesForWad(df);
 
 			if (! gwa_filename.empty())
 			{
-				size_t new_index = W_AddFilename(gwa_filename.c_str(), FLKIND_GWad);
-
-				ProcessFile(data_files[new_index]);
+				data_file_c *new_df = new data_file_c(gwa_filename.c_str(), FLKIND_GWad);
+				ProcessFile(new_df);
 			}
 		}
 	}

@@ -60,7 +60,7 @@ public:
 	std::string name;
 
 	// type of file (FLKIND_XXX)
-	int kind;
+	filekind_e kind;
 
 	// file object   [ TODO review when active ]
 	epi::file_c *file;
@@ -75,20 +75,20 @@ public:
 	deh_container_c * deh;
 
 public:
-	data_file_c(const char *_name, int _kind);
+	data_file_c(const char *_name, filekind_e _kind);
 	~data_file_c();
 };
 
 extern std::vector<data_file_c *> data_files;
 
-size_t W_AddFilename(const char *file, int kind);
-int W_GetNumFiles(void);
-void W_ShowFiles(void);
+size_t W_AddFilename(const char *file, filekind_e kind);
+int W_GetNumFiles();
+void W_ShowFiles();
 
-size_t W_AddPending(const char *file, int kind);
+size_t W_AddPending(const char *file, filekind_e kind);
 void W_InitMultipleFiles(void);
 int W_CheckDDFLumpName(const char *name);
-void W_ReadDDF(void);
+void W_ReadDDF();
 
 #endif // __W_FILES__
 

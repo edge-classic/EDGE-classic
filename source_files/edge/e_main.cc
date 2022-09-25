@@ -1235,12 +1235,13 @@ static void SetupLogAndDebugFiles(void)
 static void AddSingleCmdLineFile(const char *name, bool ignore_unknown)
 {
     std::string ext = epi::PATH_GetExtension(name);
-	int kind = -1;
 
 	if (stricmp(ext.c_str(), ".edm") == 0)
 		I_Error("Demos are no longer supported\n");
 
 	// no need to check for GWA (shouldn't be added manually)
+
+	filekind_e kind;
 
 	if (stricmp(ext.c_str(), ".wad") == 0)
 		kind = FLKIND_PWad;

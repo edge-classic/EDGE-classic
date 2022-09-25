@@ -64,14 +64,14 @@ DEF_CVAR(debug_dehacked, "0", CVAR_ARCHIVE)
 std::vector<data_file_c *> data_files;
 
 
-data_file_c::data_file_c(const char *_name, int _kind) :
+data_file_c::data_file_c(const char *_name, filekind_e _kind) :
 		name(_name), kind(_kind), file(NULL), wad(NULL), deh(NULL)
 { }
 
 data_file_c::~data_file_c()
 { }
 
-int W_GetNumFiles(void)
+int W_GetNumFiles()
 {
 	return (int)data_files.size();
 }
@@ -79,7 +79,7 @@ int W_GetNumFiles(void)
 //
 // W_AddFilename
 //
-size_t W_AddFilename(const char *file, int kind)
+size_t W_AddFilename(const char *file, filekind_e kind)
 {
 	I_Debugf("Added filename: %s\n", file);
 
@@ -95,7 +95,7 @@ size_t W_AddFilename(const char *file, int kind)
 
 std::vector<data_file_c *> pending_files;
 
-size_t W_AddPending(const char *file, int kind)
+size_t W_AddPending(const char *file, filekind_e kind)
 {
 	size_t index = pending_files.size();
 
@@ -501,6 +501,41 @@ void W_ReadDDF(void)
 			W_ReadDDF_DataFile(df, d);
 			W_ReadDehacked(df, d);
 		}
+	}
+}
+
+//----------------------------------------------------------------------------
+
+static const char *FileKindString(filekind_e kind)
+{
+	switch (kind)
+	{
+		case FLKIND_IWad:   return "iwad";
+		case FLKIND_PWad:   return "pwad";
+		case FLKIND_EWad:   return "edge";
+		case FLKIND_GWad:   return "gwa";
+
+		case FLKIND_Folder: return "DIR";
+		case FLKIND_PK3:    return "pk3";
+
+		case FLKIND_DDF:    return "ddf";
+		case FLKIND_RTS:    return "rts";
+		case FLKIND_Deh:    return "deh";
+
+		default: return "???";
+	}
+}
+
+
+void W_ShowFiles()
+{
+	I_Printf("File list:\n");
+
+	for (int i = 0; i < (int)data_files.size(); i++)
+	{
+		data_file_c *df = data_files[i];
+
+		I_Printf(" %2d: %-4s \"%s\"\n", i+1, FileKindString(df->kind), df->name.c_str());
 	}
 }
 

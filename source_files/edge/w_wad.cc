@@ -154,15 +154,16 @@ lump_kind_e;
 typedef struct
 {
 	char name[10];
+
 	int position;
 	int size;
 
 	// file number (an index into data_files[]).
-	short file;
+	int file;
 
 	// one of the LMKIND values.  For sorting, this is the least
 	// significant aspect (but still necessary).
-	short kind;
+	lump_kind_e kind;
 }
 lumpinfo_t;
 
@@ -2001,23 +2002,25 @@ void W_ProcessTX_HI(void)
 }
 
 
-static const char *FileKind_Strings[] =
+static const char *LumpKindString(lump_kind_e kind)
 {
-	"iwad", "pwad", "edge", "gwa", "hwa",
-	"lump", "ddf", "rts", "deh",
-	"???",  "???",  "???",  "???"
-};
+	switch (kind)
+	{
+		case LMKIND_Normal: return "normal";
+		case LMKIND_Marker: return "marker";
+		case LMKIND_WadTex: return "wadtex";
+		case LMKIND_DDFRTS: return "ddf";
 
-static const char *LumpKind_Strings[] =
-{
-	"normal", "???", "???",
-	"marker", "???", "???",
-	"wadtex", "???", "???", "???",
-	"ddf",    "???", "???", "???",
+		case LMKIND_TX    : return "tx";
+		case LMKIND_Colmap: return "cmap";
+		case LMKIND_Flat  : return "flat";
+		case LMKIND_Sprite: return "sprite";
+		case LMKIND_Patch : return "patch";
+		case LMKIND_HiRes : return "hires";
 
-	"tx", "colmap", "flat", "sprite", "patch",
-	"???", "???", "???", "???"
-};
+		default: return "???";
+	}
+}
 
 
 void W_ShowLumps(int for_file, const char *match)
@@ -2039,7 +2042,7 @@ void W_ShowLumps(int for_file, const char *match)
 
 		I_Printf(" %4d %-9s %2d %-6s %7d @ 0x%08x\n", 
 		         i+1, L->name,
-				 L->file+1, LumpKind_Strings[L->kind],
+				 L->file+1, LumpKindString(L->kind),
 				 L->size, L->position);
 		total++;
 	}
@@ -2047,17 +2050,6 @@ void W_ShowLumps(int for_file, const char *match)
 	I_Printf("Total: %d\n", total);
 }
 
-void W_ShowFiles(void)
-{
-	I_Printf("File list:\n");
-
-	for (int i = 0; i < (int)data_files.size(); i++)
-	{
-		data_file_c *df = data_files[i];
-
-		I_Printf(" %2d: %-4s \"%s\"\n", i+1, FileKind_Strings[df->kind], df->name.c_str());
-	}
-}
 
 int W_LoboFindSkyImage(int for_file, const char *match)
 {
@@ -2142,7 +2134,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 			if (filenum != -1) //make sure we actually have a file
 			{
 				//we only want pwads
-				if (FileKind_Strings[data_files[filenum]->kind] == FileKind_Strings[FLKIND_PWad])
+				if (data_files[filenum]->kind == FLKIND_PWad)
 				{
 					I_Debugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name, tempImage->source_type, lumpnum, filenum);
 					TurnOffSkyBox = false;
@@ -2191,7 +2183,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 		if (filenum != -1) //make sure we actually have a file
 		{
 			//we only want pwads
-			if (FileKind_Strings[data_files[filenum]->kind] == FileKind_Strings[FLKIND_PWad])
+			if (data_files[filenum]->kind == FLKIND_PWad)
 			{
 				TurnOffSkyBox = true;
 			}
@@ -2209,7 +2201,6 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 //Returns true if found
 bool W_IsLumpInPwad(const char *name)
 {
-
 	if(!name)
 		return false;
 
@@ -2238,12 +2229,8 @@ bool W_IsLumpInPwad(const char *name)
 		data_file_c *df = data_files[filenum];
 
 		//we only want pwads
-		if (FileKind_Strings[df->kind] == FileKind_Strings[FLKIND_PWad])
-		{
-			return true;
-		}
 		//or ewads ;)
-		if (FileKind_Strings[df->kind] == FileKind_Strings[FLKIND_EWad])
+		if (df->kind == FLKIND_PWad || df->kind == FLKIND_EWad)
 		{
 			return true;
 		}

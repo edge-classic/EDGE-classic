@@ -3125,13 +3125,6 @@ sectortype_c *P_LookupSectorType(int num)
 	if (def)
 		return def;
 
-	if (level_flags.edge_compat && (num > 0) && (num < 100))
-	{
-		sectortype_c* def = sectortypes.Lookup(4400 + num);
-		if (def)
-			return def;
-	}
-
 	if (DDF_IsBoomSectorType(num))
 		return DDF_BoomGetGenSector(num);
 

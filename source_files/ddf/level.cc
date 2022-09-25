@@ -115,7 +115,7 @@ static specflags_t map_specials[] =
     {"HALOS", MPF_Halos, 0},
     {"CROUCHING", MPF_Crouching, 0},
     {"WEAPON_KICK", MPF_Kicking, 0},
-    {"BOOM_COMPAT", MPF_BoomCompat, 0},
+    {"BOOM_COMPAT", MPF_BoomCompat, 0},  // old flag, does nothing anymore
 
     {NULL, 0, 0}
 };
@@ -297,7 +297,7 @@ void DDF_LevelGetSpecials(const char *info)
 
 		case CHKF_Negative:
 			dynamic_level->force_on  &= ~flag_value;
-			dynamic_level->force_off |= flag_value;
+			dynamic_level->force_off |=  flag_value;
 			break;
 
 		case CHKF_User:

@@ -135,6 +135,8 @@ dehret_e Convert(void)
 
 void Shutdown(void)
 {
+	FreeInputBuffers();
+
 	System_Shutdown();
 }
 
@@ -185,8 +187,6 @@ dehret_e DehEdgeRunConversion(deh_container_c *dest)
 
 void DehEdgeShutdown(void)
 {
-	FreeInputBuffers();
-
 	Deh_Edge::WAD::dest_container = NULL;
 
 	Deh_Edge::Shutdown();

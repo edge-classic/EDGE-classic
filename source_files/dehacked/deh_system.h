@@ -42,10 +42,6 @@ void InternalError(const char *str, ...) GCCATTR((format (printf,1,2)));
 void SetErrorMsg(const char *str, ...) GCCATTR((format (printf,1,2)));
 const char *GetErrorMsg(void);
 
-// endian handling
-unsigned short Endian_U16(unsigned short);
-unsigned int   Endian_U32(unsigned int);
-
 // these are only used for debugging
 void Debug_PrintMsg(const char *str, ...) GCCATTR((format (printf,1,2)));
 

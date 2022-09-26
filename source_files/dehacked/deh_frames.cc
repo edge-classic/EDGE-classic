@@ -32,6 +32,7 @@
 #include "deh_i_defs.h"
 #include "deh_edge.h"
 
+#include "deh_attacks.h"
 #include "deh_buffer.h"
 #include "deh_convert.h"
 #include "deh_frames.h"
@@ -52,7 +53,7 @@ namespace Deh_Edge
 #define DEBUG_RANGES  0  // must enable one in info.cpp too
 #define DEBUG_FRAMES  0
 
-#define MAX_ACT_NAME  256
+#define MAX_ACT_NAME  1024
 
 
 bool state_modified[NUMSTATES_BEX];
@@ -190,10 +191,11 @@ const actioninfo_t action_info[NUMACTIONS_BEX] =
 	{ "A_Spawn",        AF_SPECIAL, "", NULL, NULL },
 	{ "A_Turn",         AF_SPECIAL, "", NULL, NULL },
 	{ "A_Face",         AF_SPECIAL, "", NULL, NULL },
-	{ "A_Scratch",      AF_UNIMPL,  "NOTHING", NULL, NULL },
+	{ "A_Scratch",      AF_SPECIAL, "", NULL, NULL },
 	{ "A_PlaySound",    AF_SPECIAL, "", NULL, NULL },
 	{ "A_RandomJump",   AF_SPECIAL, "", NULL, NULL },
 	{ "A_LineEffect",   AF_SPECIAL, "", NULL, NULL },
+
 	{ "A_FireOldBFG",   AF_UNIMPL,  "NOTHING", NULL, NULL },
 	{ "A_BetaSkullAttack", AF_UNIMPL, "NOTHING", NULL, NULL },
 };
@@ -978,10 +980,20 @@ void Frames::SpecialAction(char *act_name, state_t *st, bool use_spawn)
 				strcpy(act_name, "NOTHING");
 			else
 			{
-				sprintf(act_name, "PLAYSOUND(%s)",
-					Sounds::GetSound(st->misc1));
+				sprintf(act_name, "PLAYSOUND(%s)", Sounds::GetSound(st->misc1));
 			}
 			break;
+
+		case A_Scratch:
+			{
+				const char *sfx = NULL;
+				if (st->misc2 > 0 && st->misc2 < NUMSFX_BEX)
+					sfx = Sounds::GetSound(st->misc2);
+
+				int damage = st->misc1;
+				const char *atk_name = Attacks::AddScratch(damage, sfx);
+				sprintf(act_name, "CLOSE_ATTACK(%s)", atk_name);
+			}
 
 		case A_LineEffect:
 		  	if (st->misc1 <= 0)

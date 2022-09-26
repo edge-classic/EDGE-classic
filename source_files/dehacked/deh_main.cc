@@ -107,8 +107,6 @@ dehret_e Convert(void)
 			return result;
 	}
 
-	FreeInputBuffers();
-
 	Storage::ApplyAll();
 
 	// do conversions into DDF...
@@ -187,6 +185,8 @@ dehret_e DehEdgeRunConversion(deh_container_c *dest)
 
 void DehEdgeShutdown(void)
 {
+	FreeInputBuffers();
+
 	Deh_Edge::WAD::dest_container = NULL;
 
 	Deh_Edge::Shutdown();

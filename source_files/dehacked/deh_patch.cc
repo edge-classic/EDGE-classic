@@ -798,11 +798,11 @@ namespace Patch
 			{
 				case DEH_THING:  min_obj = 1; max_obj = NUMMOBJTYPES; break;
 
-				case DEH_SOUND:  max_obj = NUMSFX - 1; break;
-				case DEH_FRAME:  max_obj = NUMSTATES - 1; break;
-				case DEH_AMMO:   max_obj = NUMAMMO - 1; break;
+				case DEH_SOUND:  max_obj = NUMSFX     - 1; break;
+				case DEH_FRAME:  max_obj = NUMSTATES  - 1; break;
+				case DEH_AMMO:   max_obj = NUMAMMO    - 1; break;
 				case DEH_WEAPON: max_obj = NUMWEAPONS - 1; break;
-				case DEH_PTR:    max_obj = POINTER_NUM - 1; break;
+				case DEH_PTR:    max_obj = NUMSTATES  - 1; break;
 
 				default:
 					InternalError("Bad active_section value %d\n", active_section);
@@ -814,11 +814,11 @@ namespace Patch
 			{
 				case DEH_THING:  min_obj = 1; max_obj = NUMMOBJTYPES_BEX; break;
 
-				case DEH_SOUND:  max_obj = NUMSFX_BEX - 1; break;
+				case DEH_SOUND:  max_obj = NUMSFX_BEX    - 1; break;
 				case DEH_FRAME:  max_obj = NUMSTATES_BEX - 1; break;
-				case DEH_AMMO:   max_obj = NUMAMMO - 1; break;
-				case DEH_WEAPON: max_obj = NUMWEAPONS - 1; break;
-				case DEH_PTR:    max_obj = POINTER_NUM_BEX - 1; break;
+				case DEH_AMMO:   max_obj = NUMAMMO       - 1; break;
+				case DEH_WEAPON: max_obj = NUMWEAPONS    - 1; break;
+				case DEH_PTR:    max_obj = NUMSTATES_BEX - 1; break;
 
 				default:
 					InternalError("Bad active_section value %d\n", active_section);
@@ -871,8 +871,17 @@ namespace Patch
 			if (! isspace(line_buf[sec_len]))
 				continue;
 
-			if (sscanf(line_buf + sec_len, " %i ", &obj_num) != 1)
-				continue;
+			// for the "Pointer" section, MBF and other source ports don't use
+			// the immediately following number, but the state number in `()`
+			// parentheses.  support that idiom here.
+			if (i == DEH_PTR)
+			{
+				if (sscanf(line_buf + sec_len, " %*i ( %*s %i )", &obj_num) != 1)
+					continue;
+			} else {
+				if (sscanf(line_buf + sec_len, " %i ", &obj_num) != 1)
+					continue;
+			}
 
 			active_section = i;
 			active_obj = obj_num;
@@ -1130,7 +1139,7 @@ namespace Patch
 	{
 		// set these to defaults
 		doom_ver  = no_header ? 19 : 16;
-		patch_fmt = no_header ? 6 : 5;
+		patch_fmt = no_header ? 6  : 5;
 
 		line_num = 0;
 
@@ -1248,6 +1257,7 @@ namespace Patch
 
 		pat_buf->read(idstr, 24);
 
+		// Note: the 'P' is checked elsewhere
 		if (StrCaseCmp(idstr, "atch File for DeHackEd v") != 0)
 		{
 			SetErrorMsg("Not a DeHackEd patch file !\n");
@@ -1276,11 +1286,9 @@ namespace Patch
 
 		if (dhe_ver < 23)
 			return LoadBinary();
-		else
-		{
-			DetectMsg("text-based");
-			return LoadDiff(false);
-		}
+
+		DetectMsg("text-based");
+		return LoadDiff(false);
 	}
 }
 

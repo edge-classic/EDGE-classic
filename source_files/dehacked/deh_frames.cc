@@ -184,7 +184,7 @@ const actioninfo_t action_info[NUMACTIONS_BEX] =
 	{ "EXPLODE", AF_SPECIAL, NULL, NULL,    "A_Die" },
 	{ "STOP",    0,          NULL, NULL,    "A_Stop" },
 	{ "EXPLOSIONDAMAGE", AF_DETONATE, NULL, NULL, "A_Detonate" },
-	{ "NOTHING", AF_UNIMPL, NULL, NULL,    "A_Mushroom" },
+	{ "MUSHROOM", 0, NULL, NULL,            "A_Mushroom" },
 
 	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_Spawn" },
 	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_Turn" },
@@ -193,8 +193,8 @@ const actioninfo_t action_info[NUMACTIONS_BEX] =
 	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_PlaySound" },
 	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_RandomJump" },  // special
 	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_LineEffect" },
-	{ "NOTHING", AF_UNIMPL, NULL, NULL,    "A_FireOldBFG" },
-	{ "NOTHING", AF_UNIMPL, NULL, NULL,    "A_BetaSkullAttack" },
+	{ "NOTHING", AF_UNIMPL,  NULL, NULL,    "A_FireOldBFG" },
+	{ "NOTHING", AF_UNIMPL,  NULL, NULL,    "A_BetaSkullAttack" },
 
 };
 
@@ -1248,10 +1248,7 @@ void Frames::AlterFrame(int new_val)
 
 void Frames::AlterPointer(int new_val)
 {
-	int ptr_num = Patch::active_obj;
-	assert(0 <= ptr_num && ptr_num < POINTER_NUM_BEX);
-
-	int st_num = pointerToFrame[ptr_num];
+	int st_num = Patch::active_obj;
 	const char *deh_field = Patch::line_buf;
 
 	assert(0 <= st_num && st_num < NUMSTATES_BEX);

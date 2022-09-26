@@ -1059,8 +1059,8 @@ static void CheckMissileSpawn(mobj_t * projectile)
 // LaunchProjectile
 //
 // This procedure launches a project the direction of the target mobj.
-// * source - the source of the projectile
-// * target - the target of the projectile
+// * source - the source of the projectile, required
+// * target - the target of the projectile, can be NULL
 // * type   - the mobj type of the projectile
 //
 // For all sense and purposes it is possible for the target to be a dummy
@@ -3680,6 +3680,45 @@ void P_PlayerAttack(mobj_t * p_obj, const atkdef_c * attack)
 	P_DoAttack(p_obj);
 }
 
+
+//-------------------------------------------------------------------
+//----------------------   MBF / MBF21  -----------------------------
+//-------------------------------------------------------------------
+
+//
+// killough 9/98: a mushroom explosion effect, sorta :)
+// Original idea: Linguica
+//
+void P_ActMushroom(struct mobj_s *mo)
+{
+	float height = 4.0;
+	int spread   = 32;
+
+	// First make normal explosion damage
+	P_ActDamageExplosion(mo);
+
+	// Now launch mushroom cloud
+	const atkdef_c *atk = mo->info->spareattack;
+	if (atk == NULL) atk = atkdefs.Lookup("MUSHROOM_FIREBALL");
+	if (atk == NULL) return;
+
+	for (int i = -spread ; i <= spread ; i += 16)
+	{
+		for (int j = -spread ; j <= spread ; j += 16)
+		{
+			// Aim in many directions from source
+			float tx = mo->x + i;
+			float ty = mo->y + j;
+			float tz = mo->z + P_ApproxDistance(i, j) * height;
+
+			mo->currentattack = atk;
+
+			mobj_t *proj = DoLaunchProjectile(mo, tx, ty, tz, NULL, atk->atk_mobj);
+			if (proj == NULL)
+				continue;
+		}
+	}
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

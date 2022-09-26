@@ -18,13 +18,6 @@
 namespace Deh_Edge
 {
 
-// file utilities
-bool FileExists(const char *filename);
-bool CheckExtension(const char *filename, const char *ext);
-const char *ReplaceExtension(const char *filename, const char *ext);
-const char *FileBaseName(const char *filename);
-bool FileIsBinary(FILE *fp);
-
 // string utilities
 int StrCaseCmp(const char *A, const char *B);
 int StrCaseCmpPartial(const char *A, const char *B);

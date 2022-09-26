@@ -57,21 +57,14 @@ class input_buffer_c
 {
 public:
 	parse_buffer_api *buf;
-	const char *infoname;
-	bool is_lump;
 
-	input_buffer_c(parse_buffer_api *_buf, const char *_info, bool _lump) :
-		buf(_buf), is_lump(_lump)
-	{
-		infoname = StringDup(_info);
-	}
+	input_buffer_c(parse_buffer_api *_buf) : buf(_buf)
+	{ }
 
 	~input_buffer_c()
 	{
 		delete buf;
 		buf = NULL;
-
-		free((void*)infoname); 
 	}
 };
 
@@ -109,72 +102,6 @@ void Startup(void)
 	all_mode = false;
 }
 
-dehret_e AddFile(const char *filename)
-{
-	if (num_inputs >= MAX_INPUTS)
-	{
-		SetErrorMsg("Too many input files !!\n");
-		return DEH_E_BadArgs;
-	}
-
-	if (strlen(ReplaceExtension(filename, NULL)) == 0)
-	{
-		SetErrorMsg("Illegal input filename: %s\n", filename);
-		return DEH_E_BadArgs;
-	}
-
-	if (CheckExtension(filename, "wad") || CheckExtension(filename, "hwa"))
-	{
-		SetErrorMsg("Input filename cannot be a WAD file.\n");
-		return DEH_E_BadArgs;
-	}
-
-	if (CheckExtension(filename, NULL))
-	{
-		// memory management here is "optimised" (i.e. a bit dodgy),
-		// since the result of ReplaceExtension() is an internal static
-		// buffer.
-
-		const char *bex_name = ReplaceExtension(filename, "bex");
-
-		if (FileExists(bex_name))
-		{
-			parse_buffer_api *buf = Buffer::OpenFile(bex_name);
-
-			if (! buf) return DEH_E_NoFile;  // normally won't happen
-
-			input_bufs[num_inputs++] = new input_buffer_c(buf,
-				FileBaseName(bex_name), false);
-
-			return DEH_OK;
-		}
-
-		const char *deh_name = ReplaceExtension(filename, "deh");
-
-		if (FileExists(deh_name))
-		{
-			parse_buffer_api *buf = Buffer::OpenFile(deh_name);
-
-			if (! buf) return DEH_E_NoFile;  // normally won't happen
-
-			input_bufs[num_inputs++] = new input_buffer_c(buf,
-				FileBaseName(deh_name), false);
-
-			return DEH_OK;
-		}
-	}
-
-	parse_buffer_api *buf = Buffer::OpenFile(filename);
-
-	if (! buf)
-		return DEH_E_NoFile;
-
-	input_bufs[num_inputs++] = new input_buffer_c(buf,
-		FileBaseName(filename), false);
-
-	return DEH_OK;
-}
-
 void FreeInputBuffers(void)
 {
 	for (int j = 0; j < num_inputs; j++)
@@ -195,12 +122,9 @@ dehret_e Convert(void)
 	for (int j = 0; j < num_inputs; j++)
 	{
 		char temp_text[256];
-		sprintf(temp_text, "Parsing %s", input_bufs[j]->infoname);
 
 		ProgressText(temp_text);
 		ProgressMajor(j * 70 / num_inputs, (j+1) * 70 / num_inputs);
-
-		PrintMsg("Loading patch file: %s\n", input_bufs[j]->infoname);
 
 		result = Patch::Load(input_bufs[j]->buf);
 
@@ -267,22 +191,18 @@ dehret_e DehEdgeSetQuiet(int quiet)
 	return DEH_OK;
 }
 
-dehret_e DehEdgeAddFile(const char *filename)
-{
-	return Deh_Edge::AddFile(filename);
-}
-
-dehret_e DehEdgeAddLump(const char *data, int length, const char *infoname)
+dehret_e DehEdgeAddLump(const char *data, int length)
 {
 	if (Deh_Edge::num_inputs >= MAX_INPUTS)
 	{
-		Deh_Edge::SetErrorMsg("Too many input lumps !!\n");
-		return DEH_E_BadArgs;
+		Deh_Edge::SetErrorMsg("Too many dehacked lumps !\n");
+		return DEH_E_Unknown;
 	}
 
+	auto buf = Deh_Edge::Buffer::OpenLump((const char *)data, length);
+
 	Deh_Edge::input_bufs[Deh_Edge::num_inputs++] =
-		new Deh_Edge::input_buffer_c(
-			Deh_Edge::Buffer::OpenLump(data, length), infoname, true);
+		new Deh_Edge::input_buffer_c(buf);
 
 	return DEH_OK;
 }

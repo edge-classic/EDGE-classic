@@ -128,50 +128,6 @@ public:
 namespace Buffer
 {
 
-parse_buffer_api *OpenFile(const char *filename)
-{
-	// Note: always binary - we'll handle CR/LF ourselves
-	FILE *fp = fopen(filename, "rb");
-
-	if (fp == NULL)
-	{
-		int err_num = errno;
-		SetErrorMsg("Could not open file: %s\n[%s]\n", filename, strerror(err_num));
-		return NULL;
-	}
-
-	int length;
-
-	// determine file size (by seeking to the end)
-	fseek(fp, 0, SEEK_END);
-	length = (int) ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-
-	if (length < 0)
-	{
-		fclose(fp);
-
-		int err_num = errno;
-		SetErrorMsg("Couldn't get file size: %s\n[%s]\n", filename, strerror(err_num));
-		return NULL;
-	}
-
-	char *f_data = new char[length + 1];
-
-	fread(f_data, sizeof(char), length, fp);
-	f_data[length] = 0;
-
-	// close the file
-	fclose(fp);
-
-#if (DEBUG_BUFFER)
-	Debug_PrintMsg("Loaded file: data %p length %d begin: %02x,%02x,%02x,%02x\n",
-		f_data, length, f_data[0], f_data[1], f_data[2], f_data[3]);
-#endif
-
-	return new memory_buffer_c(f_data, length);
-}
-
 parse_buffer_api *OpenLump(const char *data, int length)
 {
 	if (length < 0)

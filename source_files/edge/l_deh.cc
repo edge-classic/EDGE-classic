@@ -25,10 +25,15 @@
 
 #include "i_defs.h"
 
+#include "l_deh.h"
+
+// EPI
+#include "file.h"
+#include "filesystem.h"
+
+// DEH_EDGE
 #include "deh_edge.h"
 
-#include "l_deh.h"
-#include "version.h"
 
 static char dh_message[1024];
 
@@ -91,47 +96,38 @@ static const dehconvfuncs_t edge_dehconv_funcs =
 
 deh_container_c * DH_ConvertFile(const char *filename)
 {
-	DehEdgeStartup(&edge_dehconv_funcs);
-
-	dehret_e ret = DehEdgeAddFile(filename);
-
-	if (ret != DEH_OK)
+	epi::file_c *F = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+	if (F == NULL)
 	{
-		DH_PrintMsg("FAILED to add file:\n");
-		DH_PrintMsg("- %s\n", DehEdgeGetError());
-
-		DehEdgeShutdown();
+		DH_PrintMsg("FAILED to open file: %s\n", filename);
 		return NULL;
 	}
 
-	deh_container_c * container = new deh_container_c();
+	int length = F->GetLength();
+	byte *data = F->LoadIntoMemory();
 
-	ret = DehEdgeRunConversion(container);
-
-	DehEdgeShutdown();
-
-	if (ret != DEH_OK)
+	if (data == NULL)
 	{
-		DH_PrintMsg("CONVERSION FAILED:\n");
-		DH_PrintMsg("- %s\n", DehEdgeGetError());
-
-		delete container;
+		DH_PrintMsg("FAILED to read file: %s\n", filename);
+		delete F;
 		return NULL;
 	}
+
+	deh_container_c * container = DH_ConvertLump(data, length);
+
+	// close file, free that data
+	delete F;
+	delete[] data;
 
 	return container;
 }
 
 
-deh_container_c * DH_ConvertLump(const byte *data, int length, const char *lumpname)
+deh_container_c * DH_ConvertLump(const byte *data, int length)
 {
-	char info_name[100];
-
-	sprintf(info_name, "%s.LMP", lumpname);
-
 	DehEdgeStartup(&edge_dehconv_funcs);
 
-	dehret_e ret = DehEdgeAddLump((const char *)data, length, info_name);
+	dehret_e ret = DehEdgeAddLump((const char *)data, length);
 
 	if (ret != DEH_OK)
 	{

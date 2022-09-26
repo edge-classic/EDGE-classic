@@ -816,7 +816,7 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 			if (length > 100)
 				target->props.friction  = MIN(1.0f, 0.8125f + length / 1066.7f);
 			else
-				target->props.viscosity = MAX(0.2f, length / 100.0f);
+				target->props.friction = MAX(0.2f, length / 100.0f);
 		}
 	}
 

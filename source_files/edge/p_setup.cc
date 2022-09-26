@@ -698,7 +698,17 @@ static void SpawnMapThing(const mobjtype_c *info,
 
 	// -AJA- 2000/09/22: MBF compatibility flag
 	if (options & MTF_FRIEND)
-		mo->side = ~0;
+	{
+		mo->side = 1; //~0;
+		mo->hyperflags |=HF_ULTRALOYAL;
+		/*
+		player_t *player;
+		player = players[0];
+		mo->SetSupportObj(player->mo);
+		P_LookForPlayers(mo, mo->info->sight_angle);
+		*/
+	}
+		
 }
 
 static void LoadThings(int lump)

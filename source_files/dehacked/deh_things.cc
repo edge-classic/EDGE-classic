@@ -86,21 +86,6 @@ namespace Things
 
 	int cast_mobjs[CAST_MAX];
 
-	/*
-	void KK_Printf(const char *str, ...)
-	{
-		va_list args;
-
-		static char msg_buf[1024];
-
-		va_start(args, str);
-		vsnprintf(msg_buf, sizeof(msg_buf), str, args);
-		va_end(args);
-
-		out_lump += (char *)msg_buf;
-	}
-	*/
-
 	void BeginLump(void)
 	{
 		WAD::NewLump("DDFTHING");

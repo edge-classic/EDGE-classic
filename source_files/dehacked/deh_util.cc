@@ -108,6 +108,29 @@ const char *StrUpper(const char *name)
 }
 
 //
+// StrSanitize
+//
+const char *StrSanitize(const char *name)
+{
+	static char clean_buf[512];
+
+	assert(strlen(name) < sizeof(clean_buf) - 1);
+
+	char *dest = clean_buf;
+
+	while (*name)
+	{
+		char ch = *name++;
+		if (isalnum(ch) || ch == '_')
+			*dest++ = ch;
+	}
+
+	*dest = 0;
+
+	return clean_buf;
+}
+
+//
 // StringNew
 //
 char *StringNew(int length)

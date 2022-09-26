@@ -39,6 +39,7 @@
 #include "deh_sounds.h"
 #include "deh_system.h"
 #include "deh_things.h"
+#include "deh_util.h"
 #include "deh_wad.h"
 
 
@@ -278,8 +279,13 @@ namespace Attacks
 
 const char * Attacks::AddScratch(int damage, const char *sfx)
 {
+	// remove quotes from sound name
+	const char *safe_sfx = "QUIET";
+	if (sfx != NULL)
+		safe_sfx = StrSanitize(sfx);
+
 	static char namebuf[256];
-	snprintf(namebuf, sizeof(namebuf), "SCRATCH_%s_%d", sfx ? sfx : "QUIET", damage);
+	snprintf(namebuf, sizeof(namebuf), "SCRATCH_%s_%d", safe_sfx, damage);
 
 	// already have it?
 	for (size_t i = 0 ; i < scratchers.size() ; i++)
@@ -312,7 +318,7 @@ void Attacks::ConvertScratch(const scratch_atk_c *atk)
 
 	if (atk->sfx != "")
 	{
-		WAD::Printf("ATTEMPT_SOUND=%s;\n", atk->sfx.c_str());
+		WAD::Printf("ENGAGED_SOUND=%s;\n", atk->sfx.c_str());
 	}
 
 	WAD::Printf("\n");

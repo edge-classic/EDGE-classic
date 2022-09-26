@@ -23,6 +23,7 @@ int StrCaseCmp(const char *A, const char *B);
 int StrCaseCmpPartial(const char *A, const char *B);
 void StrMaxCopy(char *dest, const char *src, int max);
 const char *StrUpper(const char *name);
+const char *StrSanitize(const char *name);
 char *StringNew(int length);
 char *StringDup(const char *orig);
 

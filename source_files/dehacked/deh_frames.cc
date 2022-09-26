@@ -994,6 +994,7 @@ void Frames::SpecialAction(char *act_name, state_t *st, bool use_spawn)
 				const char *atk_name = Attacks::AddScratch(damage, sfx);
 				sprintf(act_name, "CLOSE_ATTACK(%s)", atk_name);
 			}
+			break;
 
 		case A_LineEffect:
 		  	if (st->misc1 <= 0)

@@ -682,6 +682,16 @@ void SV_SectorFinaliseElems(void)
 		}
 	}
 
+	extern std::vector<lightanim_t> lightanims;
+
+	for (int i=0; i < lightanims.size(); i++)
+	{
+		if (lightanims[i].light_sec_ref)
+		{
+			lightanims[i].light_sec_ref->ceil_move = NULL;
+		}
+	}
+
 	// scan active parts, regenerate floor_move and ceil_move
 	std::vector<plane_move_t *>::iterator PMI;
 

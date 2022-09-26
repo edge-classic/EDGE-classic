@@ -59,6 +59,7 @@ std::list<line_t *>   active_line_anims;
 std::list<sector_t *> active_sector_anims;
 std::vector<secanim_t> secanims;
 std::vector<lineanim_t> lineanims;
+std::vector<lightanim_t> lightanims;
 
 
 static bool P_DoSectorsFromTag(int tag, const void *p1, void *p2,
@@ -283,6 +284,31 @@ int P_FindMinSurroundingLight(sector_t * sector, int max)
 			min = check->props.lightlevel;
 	}
 	return min;
+}
+
+//
+// Find maximum light from an adjacent sector
+//
+int P_FindMaxSurroundingLight(sector_t * sector, int min)
+{
+	int i;
+	int max;
+	line_t *line;
+	sector_t *check;
+
+	max = min;
+	for (i = 0; i < sector->linecount; i++)
+	{
+		line = sector->lines[i];
+		check = P_GetNextSector(line, sector);
+
+		if (!check)
+			continue;
+
+		if (check->props.lightlevel > max)
+			max = check->props.lightlevel;
+	}
+	return max;
 }
 
 
@@ -1870,11 +1896,29 @@ void P_UpdateSpecials(void)
 			G_ExitLevel(1);
 	}
 
+	for (int i=0; i < lightanims.size(); i++)
+	{
+		struct sector_s *sec_ref = lightanims[i].light_sec_ref;
+		line_s *line_ref = lightanims[i].light_line_ref;
+
+		if (!sec_ref || !line_ref)
+			continue;
+
+		// Only do "normal" (raising) doors for now
+		if (sec_ref->ceil_move && sec_ref->ceil_move->destheight > sec_ref->ceil_move->startheight)
+		{
+			float ratio = (sec_ref->c_h - sec_ref->ceil_move->startheight) / (sec_ref->ceil_move->destheight - sec_ref->ceil_move->startheight);
+			for (sector_t *tsec = P_FindSectorFromTag(lightanims[i].light_line_ref->tag); tsec; tsec = tsec->tag_next)
+			{
+				tsec->props.lightlevel = (tsec->max_neighbor_light - tsec->min_neighbor_light) * ratio + tsec->min_neighbor_light;
+			}						
+		}
+	}
 
 	if (active_line_anims.size() > 0)
 	{
 		// Calculate net offset/scroll/push for walls
-		for (int i=0;i < lineanims.size(); i++)
+		for (int i=0; i < lineanims.size(); i++)
 		{
 			line_t *ld = lineanims[i].target;
 			if (!ld)
@@ -2583,6 +2627,7 @@ void P_SpawnSpecials1(void)
 	active_line_anims.clear();
 	secanims.clear();
 	lineanims.clear();
+	lightanims.clear();
 
 	P_ClearButtons();
 
@@ -2812,6 +2857,20 @@ void P_SpawnSpecials2(int autotag)
 		{
 			P_ActivateSpecialLine(&lines[i], lines[i].special,
 					lines[i].tag, 0, NULL, line_pushable, 1, 1);
+		}
+
+		// add lightanim for manual doors with tags
+		if (special->type == line_manual && special->c.type != mov_undefined && lines[i].tag)
+		{
+			lightanim_t anim;
+			anim.light_line_ref = &lines[i];
+			anim.light_sec_ref = lines[i].backsector;
+			for (sector_t *tsec = P_FindSectorFromTag(anim.light_line_ref->tag); tsec; tsec = tsec->tag_next)
+			{
+				tsec->min_neighbor_light = P_FindMinSurroundingLight(tsec, tsec->props.lightlevel);
+				tsec->max_neighbor_light = P_FindMaxSurroundingLight(tsec, tsec->props.lightlevel);
+			}
+			lightanims.push_back(anim);
 		}
 	}
 }

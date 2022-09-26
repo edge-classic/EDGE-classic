@@ -327,6 +327,10 @@ typedef struct sector_s
 
 	// Test for dynamic scroll/push/offset
 	bool old_stored = false;
+
+	// Boom door lighting stuff
+	int min_neighbor_light;
+	int max_neighbor_light;
 }
 sector_t;
 
@@ -571,6 +575,13 @@ typedef struct lineanim_s
 	bool perpendicular = false;
 }
 lineanim_t;
+
+typedef struct lightanim_s
+{
+	struct sector_s *light_sec_ref = NULL;
+	line_s *light_line_ref = NULL;
+}
+lightanim_t;
 
 #endif /*__R_DEFS__*/
 

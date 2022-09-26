@@ -39,6 +39,7 @@
 #include "deh_sounds.h"
 #include "deh_system.h"
 #include "deh_things.h"
+#include "deh_util.h"
 #include "deh_wad.h"
 
 
@@ -58,6 +59,23 @@ namespace Attacks
 {
 	bool got_one;
 	bool flag_got_one;
+
+	class scratch_atk_c
+	{
+	public:
+		int damage;
+		std::string sfx;
+		std::string fullname;
+
+		scratch_atk_c(int _damage, const char *_sfx, const char *_name) :
+			damage(_damage), sfx(_sfx), fullname(_name)
+		{ }
+
+		~scratch_atk_c()
+		{ }
+	};
+
+	std::vector<scratch_atk_c *> scratchers;
 
 	void BeginLump(void)
 	{
@@ -255,6 +273,55 @@ namespace Attacks
 	}
 
 	void ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket);
+	void ConvertScratch(const scratch_atk_c *atk);
+}
+
+
+const char * Attacks::AddScratch(int damage, const char *sfx)
+{
+	// remove quotes from sound name
+	const char *safe_sfx = "QUIET";
+	if (sfx != NULL)
+		safe_sfx = StrSanitize(sfx);
+
+	static char namebuf[256];
+	snprintf(namebuf, sizeof(namebuf), "SCRATCH_%s_%d", safe_sfx, damage);
+
+	// already have it?
+	for (size_t i = 0 ; i < scratchers.size() ; i++)
+	{
+		if (strcmp(scratchers[i]->fullname.c_str(), namebuf) == 0)
+			return namebuf;
+	}
+
+	scratch_atk_c * atk = new scratch_atk_c(damage, sfx ? sfx : "", namebuf);
+	scratchers.push_back(atk);
+
+	return namebuf;
+}
+
+void Attacks::ConvertScratch(const scratch_atk_c *atk)
+{
+	if (! got_one)
+	{
+		got_one = true;
+		BeginLump();
+	}
+
+	WAD::Printf("[%s]\n", atk->fullname.c_str());
+
+	WAD::Printf("ATTACKTYPE=CLOSECOMBAT;\n");
+	WAD::Printf("DAMAGE.VAL=%d;\n", atk->damage);
+	WAD::Printf("DAMAGE.MAX=%d;\n", atk->damage);
+	WAD::Printf("ATTACKRANGE=80;\n");
+	WAD::Printf("ATTACK_SPECIAL=FACE_TARGET;\n");
+
+	if (atk->sfx != "")
+	{
+		WAD::Printf("ENGAGED_SOUND=%s;\n", atk->sfx.c_str());
+	}
+
+	WAD::Printf("\n");
 }
 
 void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
@@ -282,7 +349,7 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 			ext = attack_extra + j;
 			break;
 		}
-	
+
 	if (! ext)
 		InternalError("Missing attack %s in extra table.\n", info->name + 1);
 
@@ -334,7 +401,7 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 
 	if (strchr(ext->flags, KF_PUFF_SMK))
 		WAD::Printf("PUFF = SMOKE;\n");
-	
+
 	if (strchr(ext->flags, KF_TOO_CLOSE))
 		WAD::Printf("TOO_CLOSE_RANGE = 196;\n");
 
@@ -373,6 +440,12 @@ void Attacks::ConvertATK(void)
 {
 	got_one = false;
 
+	for (size_t k = 0 ; k < scratchers.size() ; k++)
+	{
+		ConvertScratch(scratchers[k]);
+		delete scratchers[k];
+	}
+
 	for (int i = 0; i < NUMMOBJTYPES_BEX; i++)
 	{
 	    if (! all_mode && ! mobj_modified[i])
@@ -388,6 +461,8 @@ void Attacks::ConvertATK(void)
 
 	if (got_one)
 		FinishLump();
+
+	scratchers.clear();
 }
 
 // NOTES

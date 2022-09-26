@@ -952,11 +952,10 @@ namespace Sounds
 			default: break;
 		}
 
-		static char name_buf[40];
+		static char name_buf[256];
 
 		sprintf(name_buf, "\"%s\"", StrUpper(GetEdgeSfxName(sound_id)));
 
-		
 		return name_buf;
 	}
 

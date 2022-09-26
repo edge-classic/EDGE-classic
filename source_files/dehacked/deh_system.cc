@@ -103,7 +103,6 @@ progress_info_t progress;
 // forward decls
 void Debug_Startup(void);
 void Debug_Shutdown(void);
-void Endian_Startup(void);
 
 
 //
@@ -116,7 +115,6 @@ void System_Startup(void)
 	progress.Reset();
 
 	Debug_Startup();
-	Endian_Startup();
 }
 
 //
@@ -124,8 +122,6 @@ void System_Startup(void)
 //
 void System_Shutdown(void)
 {
-//	if (! cur_funcs) ClearProgress();
-
 	Debug_Shutdown();
 }
 
@@ -267,90 +263,6 @@ const char *GetErrorMsg(void)
 }
 
 
-/* --------- progress handling -------------------------------- */
-
-//
-// ProgressMajor
-//
-// Called for major elements, i.e. each patch file to process and
-// also the final save.
-//
-void ProgressMajor(int low_perc, int high_perc)
-{
-	progress.Major(low_perc, high_perc);
-
-	if (cur_funcs)
-		cur_funcs->progress_bar(progress.cur_perc);
-#if (DEBUG_PROGRESS)
-	else
-		fprintf(stderr, "PROGRESS %d%% (to %d%%)\n", progress.low_perc,
-			progress.high_perc);
-#endif
-}
-
-//
-// ProgressMinor
-//
-// Called for the progress of a single element (patch file loading,
-// hwa file saving).  The count value should range from 0 to limit-1.
-// 
-void ProgressMinor(int count, int limit)
-{
-	if (progress.Minor(count, limit))
-	{
-		if (cur_funcs)
-			cur_funcs->progress_bar(progress.cur_perc);
-#if (DEBUG_PROGRESS)
-		else
-			fprintf(stderr, " Progress Minor %d%%\n", progress.cur_perc);
-#endif
-	}
-}
-
-//
-// ProgressText
-//
-void ProgressText(const char *str)
-{
-	if (cur_funcs)
-		cur_funcs->progress_text(str);
-#if (DEBUG_PROGRESS)
-	else
-		fprintf(stderr, "------ %s ------\n", str);
-#endif
-}
-
-#if 0
-//
-// ClearProgress
-//
-void ClearProgress(void)
-{
-	fprintf(stderr, "                \b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
-
-	progress_shown = -1;
-}
-
-//
-// ShowProgress
-//
-void ShowProgress(int count, int limit)
-{
-	if (disable_progress)
-		return;
-
-	int perc = count * 100 / limit;
-
-	if (perc == progress_shown)
-		return;
-
-	fprintf(stderr, "--%3d%%--\b\b\b\b\b\b\b\b", perc);
-
-	progress_shown = perc;
-}
-#endif
-
-
 /* -------- debugging code ----------------------------- */
 
 void Debug_Startup(void)
@@ -397,90 +309,6 @@ void Debug_PrintMsg(const char *str, ...)
 #else
   (void) str;
 #endif
-}
-
-
-/* -------- endian code ----------------------------- */
-
-//
-// Endian_Startup
-//
-// Parts inspired by the Yadex endian.cc code.
-//
-void Endian_Startup(void)
-{
-	volatile union
-	{
-		unsigned char mem[32];
-		unsigned int val;
-	}
-	u_test;
-
-	/* sanity-check type sizes */
-
-	int size_8  = sizeof(unsigned char);
-	int size_16 = sizeof(unsigned short);
-	int size_32 = sizeof(unsigned int);
-
-	if (size_8 != 1)
-		FatalError("Sanity check failed: sizeof(uint8) = %d\n", size_8);
-
-	if (size_16 != 2)
-		FatalError("Sanity check failed: sizeof(uint16) = %d\n", size_16);
-
-	if (size_32 != 4)
-		FatalError("Sanity check failed: sizeof(uint32) = %d\n", size_32);
-
-	/* check endianness */
-
-	memset((unsigned int *) u_test.mem, 0, sizeof(u_test.mem));
-
-	u_test.mem[0] = 0x70;  u_test.mem[1] = 0x71;
-	u_test.mem[2] = 0x72;  u_test.mem[3] = 0x73;
-
-#if (DEBUG_ENDIAN)
-	Debug_PrintMsg("Endianness magic value: 0x%08x\n", u_test.val);
-#endif
-
-	if (u_test.val == 0x70717273)
-		cpu_big_endian = 1;
-	else if (u_test.val == 0x73727170)
-		cpu_big_endian = 0;
-	else
-		FatalError("Sanity check failed: weird endianness (0x%08x)\n", u_test.val);
-
-#if (DEBUG_ENDIAN)
-	Debug_PrintMsg("Endianness = %s\n", cpu_big_endian ? "BIG" : "LITTLE");
-
-	Debug_PrintMsg("Endianness check: 0x1234 --> 0x%04x\n", 
-			(int) Endian_U16(0x1234));
-
-	Debug_PrintMsg("Endianness check: 0x11223344 --> 0x%08x\n", 
-			Endian_U32(0x11223344));
-#endif
-}
-
-//
-// Endian_U16
-//
-unsigned short Endian_U16(unsigned short x)
-{
-	if (cpu_big_endian)
-		return (x >> 8) | (x << 8);
-	else
-		return x;
-}
-
-//
-// Endian_U32
-//
-unsigned int Endian_U32(unsigned int x)
-{
-	if (cpu_big_endian)
-		return (x >> 24) | ((x >> 8) & 0xff00) |
-			((x << 8) & 0xff0000) | (x << 24);
-	else
-		return x;
 }
 
 }  // Deh_Edge

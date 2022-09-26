@@ -53,32 +53,7 @@
 namespace Deh_Edge
 {
 
-class input_buffer_c
-{
-public:
-	parse_buffer_api *buf;
-	const char *infoname;
-	bool is_lump;
-
-	input_buffer_c(parse_buffer_api *_buf, const char *_info, bool _lump) :
-		buf(_buf), is_lump(_lump)
-	{
-		infoname = StringDup(_info);
-	}
-
-	~input_buffer_c()
-	{
-		delete buf;
-		buf = NULL;
-
-		free((void*)infoname); 
-	}
-};
-
-#define MAX_INPUTS  32
-
-input_buffer_c *input_bufs[MAX_INPUTS];
-int num_inputs = 0;
+std::vector<input_buffer_c *> input_bufs;
 
 bool quiet_mode;
 bool all_mode;
@@ -103,115 +78,34 @@ void Startup(void)
 
 	/* reset parameters */
 
-	num_inputs = 0;
-
 	quiet_mode = false;
 	all_mode = false;
 }
 
-dehret_e AddFile(const char *filename)
-{
-	if (num_inputs >= MAX_INPUTS)
-	{
-		SetErrorMsg("Too many input files !!\n");
-		return DEH_E_BadArgs;
-	}
-
-	if (strlen(ReplaceExtension(filename, NULL)) == 0)
-	{
-		SetErrorMsg("Illegal input filename: %s\n", filename);
-		return DEH_E_BadArgs;
-	}
-
-	if (CheckExtension(filename, "wad") || CheckExtension(filename, "hwa"))
-	{
-		SetErrorMsg("Input filename cannot be a WAD file.\n");
-		return DEH_E_BadArgs;
-	}
-
-	if (CheckExtension(filename, NULL))
-	{
-		// memory management here is "optimised" (i.e. a bit dodgy),
-		// since the result of ReplaceExtension() is an internal static
-		// buffer.
-
-		const char *bex_name = ReplaceExtension(filename, "bex");
-
-		if (FileExists(bex_name))
-		{
-			parse_buffer_api *buf = Buffer::OpenFile(bex_name);
-
-			if (! buf) return DEH_E_NoFile;  // normally won't happen
-
-			input_bufs[num_inputs++] = new input_buffer_c(buf,
-				FileBaseName(bex_name), false);
-
-			return DEH_OK;
-		}
-
-		const char *deh_name = ReplaceExtension(filename, "deh");
-
-		if (FileExists(deh_name))
-		{
-			parse_buffer_api *buf = Buffer::OpenFile(deh_name);
-
-			if (! buf) return DEH_E_NoFile;  // normally won't happen
-
-			input_bufs[num_inputs++] = new input_buffer_c(buf,
-				FileBaseName(deh_name), false);
-
-			return DEH_OK;
-		}
-	}
-
-	parse_buffer_api *buf = Buffer::OpenFile(filename);
-
-	if (! buf)
-		return DEH_E_NoFile;
-
-	input_bufs[num_inputs++] = new input_buffer_c(buf,
-		FileBaseName(filename), false);
-
-	return DEH_OK;
-}
 
 void FreeInputBuffers(void)
 {
-	for (int j = 0; j < num_inputs; j++)
+	for (size_t i = 0; i < input_bufs.size() ; i++)
 	{
-		if (input_bufs[j])
-		{
-			delete input_bufs[j];
-			input_bufs[j] = NULL;
-		}
+		delete input_bufs[i];
 	}
+
+	input_bufs.clear();
 }
+
 
 dehret_e Convert(void)
 {
 	dehret_e result;
 
 	// load DEH patch file(s)
-	for (int j = 0; j < num_inputs; j++)
+	for (size_t i = 0; i < input_bufs.size() ; i++)
 	{
-		char temp_text[256];
-		sprintf(temp_text, "Parsing %s", input_bufs[j]->infoname);
-
-		ProgressText(temp_text);
-		ProgressMajor(j * 70 / num_inputs, (j+1) * 70 / num_inputs);
-
-		PrintMsg("Loading patch file: %s\n", input_bufs[j]->infoname);
-
-		result = Patch::Load(input_bufs[j]->buf);
+		result = Patch::Load(input_bufs[i]);
 
 		if (result != DEH_OK)
 			return result;
 	}
-
-	FreeInputBuffers();
-
-	ProgressText("Converting DEH");
-	ProgressMajor(70, 80);
 
 	Storage::ApplyAll();
 
@@ -221,12 +115,13 @@ dehret_e Convert(void)
 	Frames::StateDependencies();
 	Ammo::AmmoDependencies();
 
-	Things::FixHeights();
-
 	Sounds::ConvertSFX();
 	Sounds::ConvertMUS();
-	Attacks::ConvertATK();
+
+	Things::FixHeights();
 	Things::ConvertTHING();
+	Attacks::ConvertATK();
+
 	Weapons::ConvertWEAP();
 	TextStr::ConvertLDF();
 	Rscript::ConvertRAD();
@@ -238,8 +133,11 @@ dehret_e Convert(void)
 	return DEH_OK;
 }
 
+
 void Shutdown(void)
 {
+	FreeInputBuffers();
+
 	System_Shutdown();
 }
 
@@ -255,10 +153,12 @@ void DehEdgeStartup(const dehconvfuncs_t *funcs)
 	Deh_Edge::PrintMsg("*** DeHackEd -> EDGE Conversion ***\n");
 }
 
+
 const char *DehEdgeGetError(void)
 {
 	return Deh_Edge::GetErrorMsg();
 }
+
 
 dehret_e DehEdgeSetQuiet(int quiet)
 {
@@ -267,25 +167,16 @@ dehret_e DehEdgeSetQuiet(int quiet)
 	return DEH_OK;
 }
 
-dehret_e DehEdgeAddFile(const char *filename)
-{
-	return Deh_Edge::AddFile(filename);
-}
 
-dehret_e DehEdgeAddLump(const char *data, int length, const char *infoname)
+dehret_e DehEdgeAddLump(const char *data, int length)
 {
-	if (Deh_Edge::num_inputs >= MAX_INPUTS)
-	{
-		Deh_Edge::SetErrorMsg("Too many input lumps !!\n");
-		return DEH_E_BadArgs;
-	}
+	auto buf = new Deh_Edge::input_buffer_c(data, length);
 
-	Deh_Edge::input_bufs[Deh_Edge::num_inputs++] =
-		new Deh_Edge::input_buffer_c(
-			Deh_Edge::Buffer::OpenLump(data, length), infoname, true);
+	Deh_Edge::input_bufs.push_back(buf);
 
 	return DEH_OK;
 }
+
 
 dehret_e DehEdgeRunConversion(deh_container_c *dest)
 {
@@ -293,6 +184,7 @@ dehret_e DehEdgeRunConversion(deh_container_c *dest)
 
 	return Deh_Edge::Convert();
 }
+
 
 void DehEdgeShutdown(void)
 {

@@ -62,12 +62,6 @@ typedef enum
 	// an unknown error occurred (this is the catch-all value).
 	DEH_E_Unknown,
 
-	// the arguments were bad/inconsistent.
-	DEH_E_BadArgs,
-
-	// non-existing input file, or couldn't create output file.
-	DEH_E_NoFile,
-
 	// problem parsing input file (maybe it wasn't a DeHackEd patch).
 	DEH_E_ParseError
 }
@@ -127,9 +121,7 @@ const char *DehEdgeGetError(void);
 dehret_e DehEdgeSetQuiet(int quiet);
 
 // add a single patch file (possibly from a WAD lump).
-// ('infoname' is some printable name for the lump).
-dehret_e DehEdgeAddFile(const char *filename);
-dehret_e DehEdgeAddLump(const char *data, int length, const char *infoname);
+dehret_e DehEdgeAddLump(const char *data, int length);
 
 // convert all the DeHackEd patch files into DDF.
 dehret_e DehEdgeRunConversion(deh_container_c *dest);

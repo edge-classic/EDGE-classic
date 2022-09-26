@@ -29,7 +29,7 @@
 class deh_container_c;
 
 deh_container_c * DH_ConvertFile(const char *filename);
-deh_container_c * DH_ConvertLump(const byte *data, int length, const char *lumpname);
+deh_container_c * DH_ConvertLump(const byte *data, int length);
 
 #endif  // __L_DEH__
 

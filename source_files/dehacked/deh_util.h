@@ -18,18 +18,12 @@
 namespace Deh_Edge
 {
 
-// file utilities
-bool FileExists(const char *filename);
-bool CheckExtension(const char *filename, const char *ext);
-const char *ReplaceExtension(const char *filename, const char *ext);
-const char *FileBaseName(const char *filename);
-bool FileIsBinary(FILE *fp);
-
 // string utilities
 int StrCaseCmp(const char *A, const char *B);
 int StrCaseCmpPartial(const char *A, const char *B);
 void StrMaxCopy(char *dest, const char *src, int max);
 const char *StrUpper(const char *name);
+const char *StrSanitize(const char *name);
 char *StringNew(int length);
 char *StringDup(const char *orig);
 

@@ -1035,13 +1035,6 @@ void ProcessFixers(data_file_c *df)
 void ProcessDehacked(data_file_c *df)
 {
 	if (df->kind == FLKIND_Deh)
-		{ /* ok */ }
-	else if (df->wad != NULL && df->wad->deh_lump >= 0)
-		{ /* ok */ }
-	else
-		return;
-
-	if (df->kind == FLKIND_Deh)
 	{
 		I_Printf("Converting DEH file: %s\n", df->name.c_str());
 
@@ -1049,9 +1042,12 @@ void ProcessDehacked(data_file_c *df)
 		if (df->deh == NULL)
 			I_Error("Failed to convert DeHackEd patch: %s\n", df->name.c_str());
 	}
-	else
+	else if (df->wad != NULL)
 	{
 		int deh_lump = df->wad->deh_lump;
+
+		if (deh_lump < 0)
+			return;
 
 		const char *lump_name = lumpinfo[deh_lump].name;
 
@@ -1060,7 +1056,7 @@ void ProcessDehacked(data_file_c *df)
 		int length;
 		const byte *data = (const byte *)W_LoadLump(deh_lump, &length);
 
-		df->deh = DH_ConvertLump(data, length, lump_name);
+		df->deh = DH_ConvertLump(data, length);
 		if (df->deh == NULL)
 			I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());
 

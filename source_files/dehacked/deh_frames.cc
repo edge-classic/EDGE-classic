@@ -32,6 +32,7 @@
 #include "deh_i_defs.h"
 #include "deh_edge.h"
 
+#include "deh_attacks.h"
 #include "deh_buffer.h"
 #include "deh_convert.h"
 #include "deh_frames.h"
@@ -52,7 +53,7 @@ namespace Deh_Edge
 #define DEBUG_RANGES  0  // must enable one in info.cpp too
 #define DEBUG_FRAMES  0
 
-#define MAX_ACT_NAME  256
+#define MAX_ACT_NAME  1024
 
 
 bool state_modified[NUMSTATES_BEX];
@@ -83,119 +84,120 @@ namespace Frames
 
 typedef struct
 {
-	const char *ddf_name;
+	const char *bex_name;
 
 	int act_flags;
+
+	// this is not used when AF_SPECIAL is set
+	const char *ddf_name;
 
 	// attacks implied by the action, often NULL.  The format is
 	// "X:ATTACK_NAME" where X is 'R' for range attacks, 'C' for
 	// close-combat attacks, and 'S' for spare attacks.
 	const char *atk_1;
 	const char *atk_2;
-
-	const char *bex_name;
 }
 actioninfo_t;
 
 const actioninfo_t action_info[NUMACTIONS_BEX] =
 {
-    { "NOTHING", 0, NULL, NULL,    "A_NULL" },
+	{ "A_NULL",         0,          "NOTHING", NULL, NULL },
 
-    { "W:LIGHT0", 0, NULL, NULL,   "A_Light0" },
-    { "W:READY", 0, NULL, NULL,    "A_WeaponReady" },
-    { "W:LOWER", 0, NULL, NULL,    "A_Lower" },
-    { "W:RAISE", 0, NULL, NULL,    "A_Raise" },
-    { "W:SHOOT", 0, "C:PLAYER_PUNCH", NULL, "A_Punch" },
-    { "W:REFIRE", 0, NULL, NULL,            "A_ReFire" },
-    { "W:SHOOT", AF_FLASH, "R:PLAYER_PISTOL", NULL,   "A_FirePistol" },
-    { "W:LIGHT1", 0, NULL, NULL,            "A_Light1" },
-    { "W:SHOOT", AF_FLASH, "R:PLAYER_SHOTGUN", NULL,  "A_FireShotgun" },
-    { "W:LIGHT2", 0, NULL, NULL,            "A_Light2" },
-    { "W:SHOOT", AF_FLASH, "R:PLAYER_SHOTGUN2", NULL, "A_FireShotgun2" },
-    { "W:CHECKRELOAD", 0, NULL, NULL,       "A_CheckReload" },
-    { "W:PLAYSOUND(DBOPN)", 0, NULL, NULL,  "A_OpenShotgun2" },
-    { "W:PLAYSOUND(DBLOAD)", 0, NULL, NULL, "A_LoadShotgun2" },
-    { "W:PLAYSOUND(DBCLS)", 0, NULL, NULL,  "A_CloseShotgun2" },
-    { "W:SHOOT", AF_FLASH, "R:PLAYER_CHAINGUN", NULL, "A_FireCGun" },
-    { "W:FLASH", AF_FLASH, NULL, NULL,        "A_GunFlash" },
-    { "W:SHOOT", 0, "R:PLAYER_MISSILE", NULL, "A_FireMissile" },
-    { "W:SHOOT", 0, "C:PLAYER_SAW", NULL,     "A_Saw" },
-    { "W:SHOOT", AF_FLASH, "R:PLAYER_PLASMA", NULL,            "A_FirePlasma" },
-    { "W:PLAYSOUND(BFG)", 0, NULL, NULL,      "A_BFGsound" },
-    { "W:SHOOT", 0, "R:PLAYER_BFG9000", NULL, "A_FireBFG" },
+	// weapon actions...
+	{ "A_Light0",       0,          "W:LIGHT0", NULL, NULL },
+	{ "A_WeaponReady",  0,          "W:READY", NULL, NULL },
+	{ "A_Lower",        0,          "W:LOWER", NULL, NULL },
+	{ "A_Raise",        0,          "W:RAISE", NULL, NULL },
+	{ "A_Punch",        0,          "W:SHOOT", "C:PLAYER_PUNCH", NULL },
+	{ "A_ReFire",       0,          "W:REFIRE", NULL, NULL },
+	{ "A_FirePistol",   AF_FLASH,   "W:SHOOT", "R:PLAYER_PISTOL", NULL },
+	{ "A_Light1",       0,          "W:LIGHT1", NULL, NULL },
+	{ "A_FireShotgun",  AF_FLASH,   "W:SHOOT", "R:PLAYER_SHOTGUN", NULL },
+	{ "A_Light2",       0,          "W:LIGHT2", NULL, NULL },
+	{ "A_FireShotgun2", AF_FLASH,   "W:SHOOT", "R:PLAYER_SHOTGUN2", NULL },
+	{ "A_CheckReload",  0,          "W:CHECKRELOAD", NULL, NULL },
+	{ "A_OpenShotgun2", 0,          "W:PLAYSOUND(DBOPN)", NULL, NULL },
+	{ "A_LoadShotgun2", 0,          "W:PLAYSOUND(DBLOAD)", NULL, NULL },
+	{ "A_CloseShotgun2",0,          "W:PLAYSOUND(DBCLS)", NULL, NULL },
+	{ "A_FireCGun",     AF_FLASH,   "W:SHOOT", "R:PLAYER_CHAINGUN", NULL },
+	{ "A_GunFlash",     AF_FLASH,   "W:FLASH", NULL, NULL },
+	{ "A_FireMissile",  0,          "W:SHOOT", "R:PLAYER_MISSILE", NULL },
+	{ "A_Saw",          0,          "W:SHOOT", "C:PLAYER_SAW", NULL },
+	{ "A_FirePlasma",   AF_FLASH,   "W:SHOOT", "R:PLAYER_PLASMA", NULL },
+	{ "A_BFGsound",     0,          "W:PLAYSOUND(BFG)", NULL, NULL },
+	{ "A_FireBFG",      0,          "W:SHOOT", "R:PLAYER_BFG9000", NULL },
 
-    { "SPARE_ATTACK", 0, NULL, NULL,          "A_BFGSpray" },
-    { "EXPLOSIONDAMAGE", AF_EXPLODE, NULL, NULL, "A_Explode" },
-    { "MAKEPAINSOUND", 0, NULL, NULL,         "A_Pain" },
-    { "PLAYER_SCREAM", 0, NULL, NULL,         "A_PlayerScream" },
-    { "MAKEDEAD", AF_FALLER, NULL, NULL,      "A_Fall" },
-    { "MAKEOVERKILLSOUND", 0, NULL, NULL,     "A_XScream" },
-    { "LOOKOUT", AF_LOOK, NULL, NULL,         "A_Look" },
-    { "CHASE", AF_CHASER, NULL, NULL,         "A_Chase" },
-    { "FACETARGET", 0, NULL, NULL,            "A_FaceTarget" },
-    { "RANGE_ATTACK", 0, "R:FORMER_HUMAN_PISTOL", NULL,   "A_PosAttack" },
-    { "MAKEDEATHSOUND", 0, NULL, NULL,        "A_Scream" },
-    { "RANGE_ATTACK", 0, "R:FORMER_HUMAN_SHOTGUN", NULL,  "A_SPosAttack" },
-    { "RESCHASE", AF_CHASER | AF_RAISER, NULL, NULL,      "A_VileChase" },
-    { "PLAYSOUND(VILATK)", 0, NULL, NULL,     "A_VileStart" },
-    { "RANGE_ATTACK", 0, "R:ARCHVILE_FIRE", NULL,         "A_VileTarget" },
-    { "EFFECTTRACKER", 0, NULL, NULL,         "A_VileAttack" },
-    { "TRACKERSTART", 0, NULL, NULL,          "A_StartFire" },
-    { "TRACKERFOLLOW", 0, NULL, NULL,         "A_Fire" },
-    { "TRACKERACTIVE", 0, NULL, NULL,         "A_FireCrackle" },
-    { "RANDOM_TRACER", 0, NULL, NULL,         "A_Tracer" },
-    { "PLAYSOUND(SKESWG)", AF_FACE, NULL, NULL,                "A_SkelWhoosh" },
-    { "CLOSE_ATTACK", AF_FACE, "C:REVENANT_CLOSECOMBAT", NULL, "A_SkelFist" },
-    { "RANGE_ATTACK", 0, "R:REVENANT_MISSILE", NULL,           "A_SkelMissile" },
-    { "PLAYSOUND(MANATK)", AF_FACE, NULL, NULL,                "A_FatRaise" },
-    { "RANGE_ATTACK", AF_SPREAD, "R:MANCUBUS_FIREBALL", NULL,  "A_FatAttack1" },
-    { "RANGE_ATTACK", AF_SPREAD, "R:MANCUBUS_FIREBALL", NULL,  "A_FatAttack2" },
-    { "RANGE_ATTACK", AF_SPREAD, "R:MANCUBUS_FIREBALL", NULL,  "A_FatAttack3" },
-    { "NOTHING", 0, NULL, NULL,  "A_BossDeath" },
-    { "RANGE_ATTACK", 0, "R:FORMER_HUMAN_CHAINGUN", NULL,      "A_CPosAttack" },
-    { "REFIRE_CHECK", 0, NULL, NULL,  "A_CPosRefire" },
-    { "COMBOATTACK", 0, "R:IMP_FIREBALL", "C:IMP_CLOSECOMBAT", "A_TroopAttack" },
-    { "CLOSE_ATTACK", 0, "C:DEMON_CLOSECOMBAT", NULL,          "A_SargAttack" },
-    { "COMBOATTACK", 0, "R:CACO_FIREBALL", "C:CACO_CLOSECOMBAT","A_HeadAttack" },
-    { "COMBOATTACK", 0, "R:BARON_FIREBALL", "C:BARON_CLOSECOMBAT","A_BruisAttack" },
-    { "RANGE_ATTACK", 0, "R:SKULL_ASSAULT", NULL,  "A_SkullAttack" },
-    { "WALKSOUND_CHASE", 0, NULL, NULL,            "A_Metal" },
-    { "REFIRE_CHECK", 0, NULL, NULL,               "A_SpidRefire" },
-    { "WALKSOUND_CHASE", 0, NULL, NULL,            "A_BabyMetal" },
-    { "RANGE_ATTACK", 0, "R:ARACHNOTRON_PLASMA", NULL, "A_BspiAttack" },
-    { "PLAYSOUND(HOOF)", 0, NULL, NULL,            "A_Hoof" },
-    { "RANGE_ATTACK", 0, "R:CYBERDEMON_MISSILE", NULL, "A_CyberAttack" },
-    { "RANGE_ATTACK", 0, "R:ELEMENTAL_SPAWNER", NULL,  "A_PainAttack" },
-    { "SPARE_ATTACK", AF_MAKEDEAD, "S:ELEMENTAL_DEATHSPAWN", NULL, "A_PainDie" },
-    { "KEEN_DIE", AF_SPECIAL | AF_KEENDIE | AF_MAKEDEAD, NULL, NULL, "A_KeenDie" },
-    { "MAKEPAINSOUND", 0, NULL, NULL,       "A_BrainPain" },
-    { "BRAINSCREAM", 0, NULL, NULL,         "A_BrainScream" },
-    { "BRAINDIE", 0, NULL, NULL,            "A_BrainDie" },
-    { "NOTHING", 0, NULL, NULL,             "A_BrainAwake" },
-    { "BRAINSPIT", 0, "R:BRAIN_CUBE", NULL, "A_BrainSpit" },
-    { "MAKEACTIVESOUND", 0, NULL, NULL,     "A_SpawnSound" },
-    { "CUBETRACER", 0, NULL, NULL,          "A_SpawnFly" },
-    { "BRAINMISSILEEXPLODE", 0, NULL, NULL, "A_BrainExplode" },
-    { "CUBESPAWN", 0, NULL, NULL,           "A_CubeSpawn" },  // NEW
+	// thing actions...
+	{ "A_BFGSpray",     0,          "SPARE_ATTACK", NULL, NULL },
+	{ "A_Explode",      AF_EXPLODE, "EXPLOSIONDAMAGE", NULL, NULL },
+	{ "A_Pain",         0,          "MAKEPAINSOUND", NULL, NULL },
+	{ "A_PlayerScream", 0,          "PLAYER_SCREAM", NULL, NULL },
+	{ "A_Fall",         AF_FALLER,  "MAKEDEAD", NULL, NULL },
+	{ "A_XScream",      0,          "MAKEOVERKILLSOUND", NULL, NULL },
+	{ "A_Look",         AF_LOOK,    "LOOKOUT", NULL, NULL },
+	{ "A_Chase",        AF_CHASER,  "CHASE", NULL, NULL },
+	{ "A_FaceTarget",   0,          "FACETARGET", NULL, NULL },
+	{ "A_PosAttack",    0,          "RANGE_ATTACK", "R:FORMER_HUMAN_PISTOL", NULL },
+	{ "A_Scream",       0,          "MAKEDEATHSOUND", NULL, NULL },
+	{ "A_SPosAttack",   0,          "RANGE_ATTACK", "R:FORMER_HUMAN_SHOTGUN", NULL },
+	{ "A_VileChase",    AF_CHASER | AF_RAISER,    "RESCHASE", NULL, NULL },
+	{ "A_VileStart",    0,          "PLAYSOUND(VILATK)", NULL, NULL },
+	{ "A_VileTarget",   0,          "RANGE_ATTACK", "R:ARCHVILE_FIRE", NULL },
+	{ "A_VileAttack",   0,          "EFFECTTRACKER", NULL, NULL },
+	{ "A_StartFire",    0,          "TRACKERSTART", NULL, NULL },
+	{ "A_Fire",         0,          "TRACKERFOLLOW", NULL, NULL },
+	{ "A_FireCrackle",  0,          "TRACKERACTIVE", NULL, NULL },
+	{ "A_Tracer",       0,          "RANDOM_TRACER", NULL, NULL },
+	{ "A_SkelWhoosh",   AF_FACE,    "PLAYSOUND(SKESWG)", NULL, NULL },
+	{ "A_SkelFist",     AF_FACE,    "CLOSE_ATTACK", "C:REVENANT_CLOSECOMBAT", NULL },
+	{ "A_SkelMissile",  0,          "RANGE_ATTACK", "R:REVENANT_MISSILE", NULL },
+	{ "A_FatRaise",     AF_FACE,    "PLAYSOUND(MANATK)", NULL, NULL },
+	{ "A_FatAttack1",   AF_SPREAD,  "RANGE_ATTACK", "R:MANCUBUS_FIREBALL", NULL },
+	{ "A_FatAttack2",   AF_SPREAD,  "RANGE_ATTACK", "R:MANCUBUS_FIREBALL", NULL },
+	{ "A_FatAttack3",   AF_SPREAD,  "RANGE_ATTACK", "R:MANCUBUS_FIREBALL", NULL },
+	{ "A_BossDeath",    0,          "NOTHING", NULL, NULL },
+	{ "A_CPosAttack",   0,          "RANGE_ATTACK", "R:FORMER_HUMAN_CHAINGUN", NULL },
+	{ "A_CPosRefire",   0,          "REFIRE_CHECK", NULL, NULL },
+	{ "A_TroopAttack",  0,          "COMBOATTACK", "R:IMP_FIREBALL", "C:IMP_CLOSECOMBAT" },
+	{ "A_SargAttack",   0,          "CLOSE_ATTACK", "C:DEMON_CLOSECOMBAT", NULL },
+	{ "A_HeadAttack",   0,          "COMBOATTACK", "R:CACO_FIREBALL", "C:CACO_CLOSECOMBAT" },
+	{ "A_BruisAttack",  0,          "COMBOATTACK", "R:BARON_FIREBALL", "C:BARON_CLOSECOMBAT" },
+	{ "A_SkullAttack",  0,          "RANGE_ATTACK", "R:SKULL_ASSAULT", NULL },
+	{ "A_Metal",        0,          "WALKSOUND_CHASE", NULL, NULL },
+	{ "A_SpidRefire",   0,          "REFIRE_CHECK", NULL, NULL },
+	{ "A_BabyMetal",    0,          "WALKSOUND_CHASE", NULL, NULL },
+	{ "A_BspiAttack",   0,          "RANGE_ATTACK", "R:ARACHNOTRON_PLASMA", NULL },
+	{ "A_Hoof",         0,          "PLAYSOUND(HOOF)", NULL, NULL },
+	{ "A_CyberAttack",  0,          "RANGE_ATTACK", "R:CYBERDEMON_MISSILE", NULL },
+	{ "A_PainAttack",   0,          "RANGE_ATTACK", "R:ELEMENTAL_SPAWNER", NULL },
+	{ "A_PainDie",      AF_MAKEDEAD, "SPARE_ATTACK", "S:ELEMENTAL_DEATHSPAWN", NULL },
+	{ "A_KeenDie",      AF_SPECIAL | AF_KEENDIE | AF_MAKEDEAD, "", NULL, NULL },
+	{ "A_BrainPain",    0,          "MAKEPAINSOUND", NULL, NULL },
+	{ "A_BrainScream",  0,          "BRAINSCREAM", NULL, NULL },
+	{ "A_BrainDie",     0,          "BRAINDIE", NULL, NULL },
+	{ "A_BrainAwake",   0,          "NOTHING", NULL, NULL },
+	{ "A_BrainSpit",    0,          "BRAINSPIT", "R:BRAIN_CUBE", NULL },
+	{ "A_SpawnSound",   0,          "MAKEACTIVESOUND", NULL, NULL },
+	{ "A_SpawnFly",     0,          "CUBETRACER", NULL, NULL },
+	{ "A_BrainExplode", 0,          "BRAINMISSILEEXPLODE", NULL, NULL },
+	{ "A_CubeSpawn",    0,          "CUBESPAWN", NULL, NULL },
 
-	// BOOM and MBF:
-	// FIXME !!! Require special treatment for EDGE
+	// BOOM and MBF actions...
+	{ "A_Die",          AF_SPECIAL, "", NULL, NULL },
+	{ "A_Stop",         0,          "STOP", NULL, NULL },
+	{ "A_Detonate",     AF_DETONATE,"EXPLOSIONDAMAGE", NULL, NULL },
+	{ "A_Mushroom",     0,          "MUSHROOM", NULL, NULL },
 
-	{ "EXPLODE", AF_SPECIAL, NULL, NULL,    "A_Die" },
-	{ "STOP",    0,          NULL, NULL,    "A_Stop" },
-	{ "EXPLOSIONDAMAGE", AF_DETONATE, NULL, NULL, "A_Detonate" },
-	{ "MUSHROOM", 0, NULL, NULL,            "A_Mushroom" },
+	{ "A_Spawn",        AF_SPECIAL, "", NULL, NULL },
+	{ "A_Turn",         AF_SPECIAL, "", NULL, NULL },
+	{ "A_Face",         AF_SPECIAL, "", NULL, NULL },
+	{ "A_Scratch",      AF_SPECIAL, "", NULL, NULL },
+	{ "A_PlaySound",    AF_SPECIAL, "", NULL, NULL },
+	{ "A_RandomJump",   AF_SPECIAL, "", NULL, NULL },
+	{ "A_LineEffect",   AF_SPECIAL, "", NULL, NULL },
 
-	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_Spawn" },
-	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_Turn" },
-	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_Face" },
-	{ "NOTHING", AF_UNIMPL,  NULL, NULL,    "A_Scratch" },
-	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_PlaySound" },
-	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_RandomJump" },  // special
-	{ "NOTHING", AF_SPECIAL, NULL, NULL,    "A_LineEffect" },
-	{ "NOTHING", AF_UNIMPL,  NULL, NULL,    "A_FireOldBFG" },
-	{ "NOTHING", AF_UNIMPL,  NULL, NULL,    "A_BetaSkullAttack" },
-
+	{ "A_FireOldBFG",   AF_UNIMPL,  "NOTHING", NULL, NULL },
+	{ "A_BetaSkullAttack", AF_UNIMPL, "NOTHING", NULL, NULL },
 };
 
 
@@ -978,8 +980,19 @@ void Frames::SpecialAction(char *act_name, state_t *st, bool use_spawn)
 				strcpy(act_name, "NOTHING");
 			else
 			{
-				sprintf(act_name, "PLAYSOUND(%s)",
-					Sounds::GetSound(st->misc1));
+				sprintf(act_name, "PLAYSOUND(%s)", Sounds::GetSound(st->misc1));
+			}
+			break;
+
+		case A_Scratch:
+			{
+				const char *sfx = NULL;
+				if (st->misc2 > 0 && st->misc2 < NUMSFX_BEX)
+					sfx = Sounds::GetSound(st->misc2);
+
+				int damage = st->misc1;
+				const char *atk_name = Attacks::AddScratch(damage, sfx);
+				sprintf(act_name, "CLOSE_ATTACK(%s)", atk_name);
 			}
 			break;
 

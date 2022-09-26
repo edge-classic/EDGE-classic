@@ -41,30 +41,20 @@
 namespace Deh_Edge
 {
 
-#define PWAD_HEADER  "PWAD"
-
-#define MAX_LUMPS  2000
-
-#define DEBUG_DDF  0
-
-
 namespace WAD
 {
-	deh_container_c * dest_container = NULL;
 
-	deh_lump_c * cur_lump = NULL;
+deh_container_c * dest_container = NULL;
 
-	char wad_msg_buf[1024];
-}
+deh_lump_c * cur_lump = NULL;
+
+char wad_msg_buf[1024];
 
 
-void WAD::NewLump(const char *name)
+void NewLump(const char *name)
 {
 	if (dest_container == NULL)
 		InternalError("WAD_NewLump: no container!\n");
-
-//??	if (cur_lump != NULL)
-//??		InternalError("WAD_NewLump: current lump not finished.\n");
 
 	cur_lump = new deh_lump_c(name);
 
@@ -72,7 +62,7 @@ void WAD::NewLump(const char *name)
 }
 
 
-void WAD::Printf(const char *str, ...)
+void Printf(const char *str, ...)
 {
 	if (cur_lump == NULL)
 		InternalError("WAD_Printf: not started.\n");
@@ -83,12 +73,9 @@ void WAD::Printf(const char *str, ...)
 	vsprintf(wad_msg_buf, str, args);
 	va_end(args);
 
-#if DEBUG_DDF
-	fprintf(stderr, "%s", wad_msg_buf);
-#else
 	cur_lump->data += (char *) wad_msg_buf;
-#endif
 }
 
+}  // WAD
 
 }  // Deh_Edge

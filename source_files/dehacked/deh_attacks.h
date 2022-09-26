@@ -19,6 +19,8 @@ namespace Deh_Edge
 namespace Attacks
 {
 	void ConvertATK(void);
+
+	const char *AddScratch(int damage, const char *sfx);
 }
 
 }  // Deh_Edge

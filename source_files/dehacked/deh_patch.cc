@@ -541,21 +541,15 @@ namespace Patch
 		DetectMsg("really old");
 		VersionMsg();
 	
-		pat_buf->showProgress();
-
 		int j;
 
 		for (j = 0; j < THINGS_1_2; j++)
 			ReadBinaryThing(thing12to166[j]);
 
-		pat_buf->showProgress();
-
 		ReadBinaryAmmo();
 
 		for (j = 0; j < 8; j++)
 			ReadBinaryWeapon(j);  // no need to convert
-
-		pat_buf->showProgress();
 
 		if (patch_fmt == 2)
 		{
@@ -600,8 +594,6 @@ namespace Patch
 		DetectMsg("binary");
 		VersionMsg();
 
-		pat_buf->showProgress();
-
 		int j;
 
 		if (doom_ver == 12)
@@ -615,16 +607,12 @@ namespace Patch
 				ReadBinaryThing(j);
 		}
 
-		pat_buf->showProgress();
-
 		ReadBinaryAmmo();
 
 		int num_weap = (doom_ver == 12) ? 8 : 9;
 
 		for (j = 0; j < num_weap; j++)
 			ReadBinaryWeapon(j);
-
-		pat_buf->showProgress();
 
 		if (doom_ver == 12)
 		{
@@ -640,8 +628,6 @@ namespace Patch
 			for (j = 0; j < NUMSTATES - 1; j++)
 				ReadBinaryFrame(j);
 		}
-
-		pat_buf->showProgress();
 
 		if (doom_ver == 12)
 		{
@@ -667,8 +653,6 @@ namespace Patch
 			for (j = 0; j < NUMSPRITES; j++)
 				ReadBinarySprite(j);
 		}
-
-		pat_buf->showProgress();
 
 		if (doom_ver == 16 || doom_ver == 17)
 		{
@@ -1149,8 +1133,6 @@ namespace Patch
 
 		while (! pat_buf->eof())
 		{
-			pat_buf->showProgress();
-
 			GetNextLine();
 
 			if (line_buf[0] == 0 || line_buf[0] == '#')

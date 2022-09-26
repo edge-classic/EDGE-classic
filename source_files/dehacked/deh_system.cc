@@ -124,8 +124,6 @@ void System_Startup(void)
 //
 void System_Shutdown(void)
 {
-//	if (! cur_funcs) ClearProgress();
-
 	Debug_Shutdown();
 }
 
@@ -265,90 +263,6 @@ const char *GetErrorMsg(void)
 
 	return global_error_buf;
 }
-
-
-/* --------- progress handling -------------------------------- */
-
-//
-// ProgressMajor
-//
-// Called for major elements, i.e. each patch file to process and
-// also the final save.
-//
-void ProgressMajor(int low_perc, int high_perc)
-{
-	progress.Major(low_perc, high_perc);
-
-	if (cur_funcs)
-		cur_funcs->progress_bar(progress.cur_perc);
-#if (DEBUG_PROGRESS)
-	else
-		fprintf(stderr, "PROGRESS %d%% (to %d%%)\n", progress.low_perc,
-			progress.high_perc);
-#endif
-}
-
-//
-// ProgressMinor
-//
-// Called for the progress of a single element (patch file loading,
-// hwa file saving).  The count value should range from 0 to limit-1.
-// 
-void ProgressMinor(int count, int limit)
-{
-	if (progress.Minor(count, limit))
-	{
-		if (cur_funcs)
-			cur_funcs->progress_bar(progress.cur_perc);
-#if (DEBUG_PROGRESS)
-		else
-			fprintf(stderr, " Progress Minor %d%%\n", progress.cur_perc);
-#endif
-	}
-}
-
-//
-// ProgressText
-//
-void ProgressText(const char *str)
-{
-	if (cur_funcs)
-		cur_funcs->progress_text(str);
-#if (DEBUG_PROGRESS)
-	else
-		fprintf(stderr, "------ %s ------\n", str);
-#endif
-}
-
-#if 0
-//
-// ClearProgress
-//
-void ClearProgress(void)
-{
-	fprintf(stderr, "                \b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
-
-	progress_shown = -1;
-}
-
-//
-// ShowProgress
-//
-void ShowProgress(int count, int limit)
-{
-	if (disable_progress)
-		return;
-
-	int perc = count * 100 / limit;
-
-	if (perc == progress_shown)
-		return;
-
-	fprintf(stderr, "--%3d%%--\b\b\b\b\b\b\b\b", perc);
-
-	progress_shown = perc;
-}
-#endif
 
 
 /* -------- debugging code ----------------------------- */

@@ -42,11 +42,6 @@ void InternalError(const char *str, ...) GCCATTR((format (printf,1,2)));
 void SetErrorMsg(const char *str, ...) GCCATTR((format (printf,1,2)));
 const char *GetErrorMsg(void);
 
-// progress functions
-void ProgressMajor(int low_perc, int high_perc);
-void ProgressMinor(int count, int limit);
-void ProgressText(const char *str);
-
 // endian handling
 unsigned short Endian_U16(unsigned short);
 unsigned int   Endian_U32(unsigned int);

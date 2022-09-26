@@ -116,11 +116,6 @@ public:
 
 		return false;
 	}
-
-	void showProgress()
-	{
-		ProgressMinor(ptr - data, length + 1);
-	}
 };
 
 //------------------------------------------------------------------------

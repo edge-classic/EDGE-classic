@@ -121,11 +121,6 @@ dehret_e Convert(void)
 	// load DEH patch file(s)
 	for (int j = 0; j < num_inputs; j++)
 	{
-		char temp_text[256];
-
-		ProgressText(temp_text);
-		ProgressMajor(j * 70 / num_inputs, (j+1) * 70 / num_inputs);
-
 		result = Patch::Load(input_bufs[j]->buf);
 
 		if (result != DEH_OK)
@@ -133,9 +128,6 @@ dehret_e Convert(void)
 	}
 
 	FreeInputBuffers();
-
-	ProgressText("Converting DEH");
-	ProgressMajor(70, 80);
 
 	Storage::ApplyAll();
 

@@ -53,25 +53,7 @@
 namespace Deh_Edge
 {
 
-class input_buffer_c
-{
-public:
-	parse_buffer_api *buf;
-
-	input_buffer_c(parse_buffer_api *_buf) : buf(_buf)
-	{ }
-
-	~input_buffer_c()
-	{
-		delete buf;
-		buf = NULL;
-	}
-};
-
-#define MAX_INPUTS  32
-
-input_buffer_c *input_bufs[MAX_INPUTS];
-int num_inputs = 0;
+std::vector<input_buffer_c *> input_bufs;
 
 bool quiet_mode;
 bool all_mode;
@@ -96,32 +78,30 @@ void Startup(void)
 
 	/* reset parameters */
 
-	num_inputs = 0;
-
 	quiet_mode = false;
 	all_mode = false;
 }
 
+
 void FreeInputBuffers(void)
 {
-	for (int j = 0; j < num_inputs; j++)
+	for (size_t i = 0; i < input_bufs.size() ; i++)
 	{
-		if (input_bufs[j])
-		{
-			delete input_bufs[j];
-			input_bufs[j] = NULL;
-		}
+		delete input_bufs[i];
 	}
+
+	input_bufs.clear();
 }
+
 
 dehret_e Convert(void)
 {
 	dehret_e result;
 
 	// load DEH patch file(s)
-	for (int j = 0; j < num_inputs; j++)
+	for (size_t i = 0; i < input_bufs.size() ; i++)
 	{
-		result = Patch::Load(input_bufs[j]->buf);
+		result = Patch::Load(input_bufs[i]);
 
 		if (result != DEH_OK)
 			return result;
@@ -154,6 +134,7 @@ dehret_e Convert(void)
 	return DEH_OK;
 }
 
+
 void Shutdown(void)
 {
 	System_Shutdown();
@@ -171,10 +152,12 @@ void DehEdgeStartup(const dehconvfuncs_t *funcs)
 	Deh_Edge::PrintMsg("*** DeHackEd -> EDGE Conversion ***\n");
 }
 
+
 const char *DehEdgeGetError(void)
 {
 	return Deh_Edge::GetErrorMsg();
 }
+
 
 dehret_e DehEdgeSetQuiet(int quiet)
 {
@@ -183,21 +166,16 @@ dehret_e DehEdgeSetQuiet(int quiet)
 	return DEH_OK;
 }
 
+
 dehret_e DehEdgeAddLump(const char *data, int length)
 {
-	if (Deh_Edge::num_inputs >= MAX_INPUTS)
-	{
-		Deh_Edge::SetErrorMsg("Too many dehacked lumps !\n");
-		return DEH_E_Unknown;
-	}
+	auto buf = new Deh_Edge::input_buffer_c(data, length);
 
-	auto buf = Deh_Edge::Buffer::OpenLump((const char *)data, length);
-
-	Deh_Edge::input_bufs[Deh_Edge::num_inputs++] =
-		new Deh_Edge::input_buffer_c(buf);
+	Deh_Edge::input_bufs.push_back(buf);
 
 	return DEH_OK;
 }
+
 
 dehret_e DehEdgeRunConversion(deh_container_c *dest)
 {
@@ -205,6 +183,7 @@ dehret_e DehEdgeRunConversion(deh_container_c *dest)
 
 	return Deh_Edge::Convert();
 }
+
 
 void DehEdgeShutdown(void)
 {

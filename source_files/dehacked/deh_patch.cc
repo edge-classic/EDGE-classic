@@ -60,7 +60,7 @@ namespace Deh_Edge
 
 namespace Patch
 {
-	parse_buffer_api *pat_buf;
+	input_buffer_c *pat_buf;
 
 	bool file_error;
 
@@ -1274,7 +1274,7 @@ namespace Patch
 	}
 }
 
-dehret_e Patch::Load(parse_buffer_api *buf)
+dehret_e Patch::Load(input_buffer_c *buf)
 {
 	pat_buf = buf;
 	assert(pat_buf);

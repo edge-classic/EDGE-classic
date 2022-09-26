@@ -39,103 +39,71 @@
 namespace Deh_Edge
 {
 
-#define DEBUG_BUFFER  0
-
-class memory_buffer_c : public parse_buffer_api
-{
-private:
-	const char *data;
-	int length;
-
-	const char *ptr; // current pointer into data
-
-public:
-	memory_buffer_c(const char *_data, int _length) :
-		data(_data), length(_length), ptr(_data)
-	{
-		/* NOTE: data is not copied, but it _is_ freed */
-	}
-
-	~memory_buffer_c()
-	{
-		delete[] data;
-		data = NULL;
-	}
-
-	bool eof()
-	{
-		return (ptr >= data + length);
-	}
-
-	bool error()
-	{
-		return false;
-	}
-	
-	int read(void *buf, int count)
-	{
-		int avail = data + length - ptr;
-
-		if (avail < count)
-			count = avail;
-
-		if (count <= 0)
-			return 0;
-
-		memcpy(buf, ptr, count);
-
-		ptr += count;
-
-		return count;
-	}
-
-	int getch()
-	{
-		if (eof())
-			return EOF;
-
-		return *ptr++;
-	}
-
-	void ungetch(int c)  /* NOTE: assumes c == last character read */
-	{
-		if (ptr > data)
-			ptr--;
-	}
-
-	bool isBinary() const
-	{
-		if (length == 0)
-			return false;
-
-		int test_len = (length > 260) ? 256 : ((length * 3 + 1) / 4);
-
-		for (; test_len > 0; test_len--)
-			if (data[test_len - 1] == 0)
-				return true;
-
-		return false;
-	}
-};
-
-//------------------------------------------------------------------------
-
-namespace Buffer
-{
-
-parse_buffer_api *OpenLump(const char *data, int length)
+input_buffer_c::input_buffer_c(const char *_data, int _length) :
+		data(_data), ptr(_data), length(_length)
 {
 	if (length < 0)
 		FatalError("Illegal length of lump (%d bytes)\n", length);
-	
-	char *d_copy = new char[length + 1];
-
-	memcpy(d_copy, data, length);
-	d_copy[length] = 0;
-
-	return new memory_buffer_c(d_copy, length);
 }
 
-}  // Buffer
+input_buffer_c::~input_buffer_c()
+{ }
+
+bool input_buffer_c::eof()
+{
+	return (ptr >= data + length);
+}
+
+bool input_buffer_c::error()
+{
+	return false;
+}
+
+int input_buffer_c::read(void *buf, int count)
+{
+	int avail = data + length - ptr;
+
+	if (avail < count)
+		count = avail;
+
+	if (count <= 0)
+		return 0;
+
+	memcpy(buf, ptr, count);
+
+	ptr += count;
+
+	return count;
+}
+
+int input_buffer_c::getch()
+{
+	if (eof())
+		return EOF;
+
+	return *ptr++;
+}
+
+void input_buffer_c::ungetch(int c)
+{
+	// NOTE: assumes c == last character read
+
+	if (ptr > data)
+		ptr--;
+}
+
+bool input_buffer_c::isBinary() const
+{
+	if (length == 0)
+		return false;
+
+	int test_len = (length > 260) ? 256 : ((length * 3 + 1) / 4);
+
+	for (; test_len > 0; test_len--)
+		if (data[test_len - 1] == 0)
+			return true;
+
+	return false;
+}
 
 }  // Deh_Edge

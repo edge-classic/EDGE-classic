@@ -1,9 +1,9 @@
 //------------------------------------------------------------------------
 //  BUFFER for Parsing
 //------------------------------------------------------------------------
-// 
+//
 //  DEH_EDGE  Copyright (C) 2004-2005  The EDGE Team
-// 
+//
 //  This program is under the GNU General Public License.
 //  It comes WITHOUT ANY WARRANTY of any kind.
 //  See COPYING.txt for the full details.
@@ -16,24 +16,25 @@
 namespace Deh_Edge
 {
 
-class parse_buffer_api
+class input_buffer_c
 {
 public:
-	parse_buffer_api()  { }
-	virtual ~parse_buffer_api() { }
+	input_buffer_c(const char *_data, int _length);
+	~input_buffer_c();
 
-	virtual bool eof() = 0;
-	virtual bool error() = 0;
-	virtual int  read(void *buf, int count) = 0; 
-	virtual int  getch() = 0;
-	virtual void ungetch(int c) = 0;
-	virtual bool isBinary() const = 0;
+	bool eof();
+	bool error();
+	int  read(void *buf, int count);
+	int  getch();
+	void ungetch(int c);
+	bool isBinary() const;
+
+private:
+	const char *data;  // base pointer
+	const char *ptr;   // current read pointer
+
+	int length;
 };
-
-namespace Buffer
-{
-	parse_buffer_api *OpenLump(const char *data, int length);
-}
 
 }  // Deh_Edge
 

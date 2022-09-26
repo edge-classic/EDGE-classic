@@ -3691,16 +3691,15 @@ void P_PlayerAttack(mobj_t * p_obj, const atkdef_c * attack)
 //
 void P_ActMushroom(struct mobj_s *mo)
 {
-	float height = 8.0;
-	float speed  = 0.5;
-	int spread   = 64;
+	float height = 4.0;
+	int spread   = 32;
 
 	// First make normal explosion damage
 	P_ActDamageExplosion(mo);
 
 	// Now launch mushroom cloud
 	const atkdef_c *atk = mo->info->spareattack;
-	if (atk == NULL) atk = atkdefs.Lookup("MANCUBUS_FIREBALL_L");
+	if (atk == NULL) atk = atkdefs.Lookup("MUSHROOM_FIREBALL");
 	if (atk == NULL) return;
 
 	for (int i = -spread ; i <= spread ; i += 16)
@@ -3710,21 +3709,13 @@ void P_ActMushroom(struct mobj_s *mo)
 			// Aim in many directions from source
 			float tx = mo->x + i;
 			float ty = mo->y + j;
-			float tz = mo->z + P_ApproxDistance(i + 2, j + 2) * height;
+			float tz = mo->z + P_ApproxDistance(i, j) * height;
 
 			mo->currentattack = atk;
 
 			mobj_t *proj = DoLaunchProjectile(mo, tx, ty, tz, NULL, atk->atk_mobj);
 			if (proj == NULL)
 				continue;
-
-			// Slow down a bit
-			proj->mom.x = proj->mom.x * speed;
-			proj->mom.y = proj->mom.y * speed;
-			proj->mom.z = proj->mom.z * speed;
-
-			// Make debris fall under gravity
-			proj->flags &= ~MF_NOGRAVITY;
 		}
 	}
 }

@@ -3103,8 +3103,15 @@ void P_ActStandardLook(mobj_t * object)
 
 	// -AJA- 2004/09/02: ignore the sound of a friend
 	// FIXME: maybe wake up and support that player ??
-	if (targ && (targ->side & object->side) != 0)
-		targ = NULL;
+	//if (targ && (targ->side & object->side) != 0)
+	if (object->side != 0)
+	{
+		//targ = NULL;
+		//P_ActPlayerSupportLook(object);
+		P_ActPlayerSupportMeander(object);
+		return;
+	}
+		
 
 	if (object->flags & MF_STEALTH)
 		object->vis_target = VISIBLE;
@@ -3173,6 +3180,7 @@ void P_ActPlayerSupportLook(mobj_t * object)
 
 	if (object->info->meander_state)
 		P_SetMobjStateDeferred(object, object->info->meander_state, 0);
+
 }
 
 //

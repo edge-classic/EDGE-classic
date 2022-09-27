@@ -862,8 +862,8 @@ static void ThingFinishEntry(void)
 
 	// FIXME: check more stuff
 
-	// backwards compatibility:
-	if (!dynamic_mobj->idle_state && dynamic_mobj->spawn_state)
+	// backwards compatibility: if no idle state, re-use spawn state
+	if (dynamic_mobj->idle_state == NULL)
 		dynamic_mobj->idle_state = dynamic_mobj->spawn_state;
 
 	dynamic_mobj->DLightCompatibility();

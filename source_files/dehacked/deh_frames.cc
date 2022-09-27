@@ -65,6 +65,7 @@ const char *Frames::attack_slot[3];
 
 int Frames::act_flags;
 
+
 namespace Frames
 {
 	int lowest_touched;
@@ -72,14 +73,22 @@ namespace Frames
 
 	// forward decls
 	void InstallRandomJump(int src, int first);
-	const char *GroupToName(char group, bool use_spawn);
-	const char *RedirectorName(int next_st, bool use_spawn);
-	void SpecialAction(char *buf, state_t *st, bool use_spawn);
-	void OutputState(char group, int cur, bool use_spawn);
+	const char *GroupToName(char group);
+	const char *RedirectorName(int next_st);
+	void SpecialAction(char *buf, state_t *st);
+	void OutputState(char group, int cur);
+	bool OutputSpawnState(int first);
+
+	inline bool IS_WEAPON(char group)
+	{
+		return islower(group);
+	}
+
+	inline int MISC_TO_ANGLE(int m)
+	{
+		return m / 11930465;
+	}
 }
-
-
-#define IS_WEAPON(group)  (islower(group))
 
 
 typedef struct
@@ -733,34 +742,6 @@ void Frames::SpreadGroups(void)
 	}
 }
 
-bool Frames::CheckSpawnRemove(int first)
-{
-	assert(first != S_NULL);
-
-	for (;;)
-	{
-		if (state_dyn[first].group != 'S')
-			break;
-
-		if (states[first].tics < 0)  // hibernation
-			break;
-
-		if (states[first].nextstate == S_NULL)
-			return true;
-
-		// don't look in the random-jump states
-		if (states[first].nextstate != state_dyn[first].gr_next)
-			break;
-
-		first = state_dyn[first].gr_next;
-
-		if (first == S_NULL)
-			break;
-	}
-
-	return false;
-}
-
 bool Frames::CheckWeaponFlash(int first)
 {
 	// fairly simple test, we don't need to detect looping or such here,
@@ -892,13 +873,13 @@ namespace Frames
 	}
 }
 
-const char *Frames::GroupToName(char group, bool use_spawn)
+const char *Frames::GroupToName(char group)
 {
 	assert(group != 0);
 
 	switch (group)
 	{
-		case 'S': return use_spawn ? "SPAWN" : "IDLE";
+		case 'S': return "IDLE";
 		case 'E': return "CHASE";
 		case 'L': return "MELEE";
 		case 'M': return "MISSILE";
@@ -922,27 +903,25 @@ const char *Frames::GroupToName(char group, bool use_spawn)
 	return NULL;
 }
 
-const char *Frames::RedirectorName(int next_st, bool use_spawn)
+const char *Frames::RedirectorName(int next_st)
 {
 	static char name_buf[MAX_ACT_NAME];
 
-	char next_gr = state_dyn[next_st].group;
-	int next_idx = state_dyn[next_st].gr_idx;
+	char next_group = state_dyn[next_st].group;
+	int  next_idx   = state_dyn[next_st].gr_idx;
 
-	assert(next_gr != 0);
+	assert(next_group != 0);
 	assert(next_idx > 0);
 
 	if (next_idx == 1)
-		sprintf(name_buf, "%s", GroupToName(next_gr, use_spawn));
+		sprintf(name_buf, "%s", GroupToName(next_group));
 	else
-		sprintf(name_buf, "%s:%d", GroupToName(next_gr, use_spawn), next_idx);
+		sprintf(name_buf, "%s:%d", GroupToName(next_group), next_idx);
 
 	return name_buf;
 }
 
-#define MISC_TO_ANGLE(m)  ((int)(m) / 11930465)
-
-void Frames::SpecialAction(char *act_name, state_t *st, bool use_spawn)
+void Frames::SpecialAction(char *act_name, state_t *st)
 {
 	switch (st->action)
 	{
@@ -962,8 +941,7 @@ void Frames::SpecialAction(char *act_name, state_t *st, bool use_spawn)
 				int perc = (st->misc2 <= 0) ? 0 : (st->misc2 >= 256) ? 100 :
 						   (st->misc2 * 100 / 256);
 
-				sprintf(act_name, "JUMP(%s,%d%%)",
-					RedirectorName(st->misc1, use_spawn), perc);
+				sprintf(act_name, "JUMP(%s,%d%%)", RedirectorName(st->misc1), perc);
 			}
 			break;
 
@@ -1033,7 +1011,7 @@ void Frames::SpecialAction(char *act_name, state_t *st, bool use_spawn)
 	}
 }
 
-void Frames::OutputState(char group, int cur, bool use_spawn)
+void Frames::OutputState(char group, int cur)
 {
 	assert(cur > 0);
 
@@ -1055,8 +1033,7 @@ void Frames::OutputState(char group, int cur, bool use_spawn)
 	}
 
 	if (action_info[st->action].act_flags & AF_UNIMPL)
-		PrintWarn("Frame %d: action %s is not yet supported.\n", cur,
-			bex_name);
+		PrintWarn("Frame %d: action %s is not yet supported.\n", cur, bex_name);
 
 	char act_name[MAX_ACT_NAME];
 
@@ -1064,7 +1041,7 @@ void Frames::OutputState(char group, int cur, bool use_spawn)
 
 	if (action_info[st->action].act_flags & AF_SPECIAL)
 	{
-		SpecialAction(act_name, st, use_spawn);
+		SpecialAction(act_name, st);
 	}
 	else
 	{
@@ -1076,7 +1053,7 @@ void Frames::OutputState(char group, int cur, bool use_spawn)
 			strcpy(act_name, action_info[st->action].ddf_name + 2);
 	}
 
-	if (st->action != S_NULL && weap_act == ! IS_WEAPON(group) &&
+	if (st->action != A_NULL && (weap_act == ! IS_WEAPON(group)) &&
 		StrCaseCmp(act_name, "NOTHING") != 0)
 	{
 		if (weap_act)
@@ -1087,7 +1064,7 @@ void Frames::OutputState(char group, int cur, bool use_spawn)
 		strcpy(act_name, "NOTHING");
 	}
 
-	if (st->action == S_NULL || weap_act == (IS_WEAPON(group) ? true : false))
+	if (st->action == A_NULL || weap_act == (IS_WEAPON(group) ? true : false))
 	{
 		UpdateAttacks(group, act_name, st->action);
 	}
@@ -1147,10 +1124,45 @@ void Frames::OutputState(char group, int cur, bool use_spawn)
 		'A' + ((int) st->frame & 31), tics,
 		(st->frame >= 32768) ? "BRIGHT" : "NORMAL", act_name);
 
-	if (st->action != S_NULL && weap_act == ! IS_WEAPON(group))
+	if (st->action != A_NULL && weap_act == ! IS_WEAPON(group))
 		return;
 
 	act_flags |= action_info[st->action].act_flags;
+}
+
+bool Frames::OutputSpawnState(int first)
+{
+	// returns true if no IDLE states will be needed
+
+	WAD::Printf("\n");
+	WAD::Printf("STATES(SPAWN) =\n");
+
+	// clear the action, restore it after
+	int saved_action = states[first].action;
+	states[first].action = A_NULL;
+	{
+		OutputState('S', first);
+	}
+	states[first].action = saved_action;
+
+	int next = states[first].nextstate;
+
+	if (states[first].tics < 0)
+	{
+		// goes into hibernation
+		WAD::Printf(";\n");
+		return true;
+	}
+	else if (next == S_NULL)
+	{
+		WAD::Printf(",#REMOVE;\n");
+		return true;
+	}
+	else
+	{
+		WAD::Printf(",#%s;\n", RedirectorName(next));
+		return false;
+	}
 }
 
 void Frames::OutputGroup(int first, char group)
@@ -1160,20 +1172,26 @@ void Frames::OutputGroup(int first, char group)
 
 	assert(state_dyn[first].group != 0);
 
-	bool use_spawn = (group == 'S') && CheckSpawnRemove(first);
+	// create the STATES(SPAWN) here, before the IDLE ones.
+	// this is to emulate BOOM/MBF, which don't execute the very first
+	// action when an object is spawned, but EDGE *does* execute it.
+	if (group == 'S')
+	{
+		if (OutputSpawnState(first))
+			return;
+	}
 
 	WAD::Printf("\n");
-	WAD::Printf("STATES(%s) =\n", GroupToName(group, use_spawn));
+	WAD::Printf("STATES(%s) =\n", GroupToName(group));
 
 	int cur = first;
 
 	for (;;)
 	{
-		OutputState(group, cur, use_spawn);
-
-		bool is_last = (state_dyn[cur].gr_next == S_NULL);
+		OutputState(group, cur);
 
 		int next = states[cur].nextstate;
+		bool is_last = (state_dyn[cur].gr_next == S_NULL);
 
 		if (states[cur].tics < 0)
 		{
@@ -1190,7 +1208,7 @@ void Frames::OutputGroup(int first, char group)
 				   (group == 'S' || group == 'E' ||
 				    group == 'u' || group == 'd' || group == 'r')))
 			{
-				WAD::Printf(",#%s", RedirectorName(next, use_spawn));
+				WAD::Printf(",#%s", RedirectorName(next));
 			}
 		}
 

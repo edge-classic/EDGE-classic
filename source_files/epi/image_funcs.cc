@@ -20,12 +20,15 @@
 #include "epi.h"
 
 #include "image_funcs.h"
+#include "path.h"
 
-#define STBI_ONLY_JPEG
 #define STBI_ONLY_PNG
 #define STBI_ONLY_TGA
+#define STBI_ONLY_JPEG
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
@@ -101,6 +104,24 @@ bool PNG_IsDataPNG(const byte *data, int length)
 
 	return memcmp(data, png_sig, 4) == 0;
 }
+
+
+image_format_e Image_FilenameToFormat(const std::string& filename)
+{
+	std::string ext = epi::PATH_GetExtension(filename.c_str());
+
+	if (ext == ".png" || ext == ".PNG")
+		return FMT_PNG;
+
+	if (ext == ".tga" || ext == ".TGA")
+		return FMT_TGA;
+
+	if (ext == ".jpg" || ext == ".JPG" || ext == ".jpeg" || ext == ".JPEG")
+		return FMT_JPEG;
+
+	return FMT_Unknown;
+}
+
 
 image_data_c *Image_Load(file_c *f, int format)
 {

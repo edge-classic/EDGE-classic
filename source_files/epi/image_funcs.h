@@ -26,6 +26,18 @@
 namespace epi
 {
 
+typedef enum
+{
+	FMT_Unknown = 0,
+	FMT_PNG,
+	FMT_TGA,
+	FMT_JPEG,
+}
+image_format_e;
+
+// determine image format from the filename (by its extension).
+image_format_e Image_FilenameToFormat(const std::string& filename);
+
 // returns true if the data looks like a PNG file.
 bool PNG_IsDataPNG(const byte *data, int length);
 

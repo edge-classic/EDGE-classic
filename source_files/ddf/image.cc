@@ -217,19 +217,6 @@ static void ImageParseColour(const char *value)
 }
 
 
-static void ImageParseBuiltin(const char *value)
-{
-	if (DDF_CompareName(value, "LINEAR") == 0)
-		dynamic_image->builtin = BLTIM_Linear;
-	else if (DDF_CompareName(value, "QUADRATIC") == 0)
-		dynamic_image->builtin = BLTIM_Quadratic;
-	else if (DDF_CompareName(value, "SHADOW") == 0)
-		dynamic_image->builtin = BLTIM_Shadow;
-	else
-		DDF_Error("Unknown image BUILTIN kind: %s\n", value);
-}
-
-
 static void ImageParseInfo(const char *value)
 {
 	// ouch, hard work here...
@@ -293,8 +280,9 @@ static void DDF_ImageGetType(const char *info, void *storage)
 	}
 	else if (DDF_CompareName(keyword, "BUILTIN") == 0)
 	{
-		dynamic_image->type = IMGDT_Builtin;
-		ImageParseBuiltin(colon + 1);
+		// accepted for backwards compat. only
+		dynamic_image->type = IMGDT_Colour;
+		dynamic_image->colour = 0;
 	}
 	else if (DDF_CompareName(keyword, "FILE") == 0)
 	{
@@ -384,7 +372,6 @@ void imagedef_c::CopyDetail(const imagedef_c &src)
 {
 	type    = src.type;
 	colour  = src.colour;
-	builtin = src.builtin;
 	info    = src.info;
 	format  = src.format;
 
@@ -401,7 +388,6 @@ void imagedef_c::Default()
 {
 	type    = IMGDT_Colour;
 	colour  = 0x000000;  // black
-	builtin = BLTIM_Quadratic;
 	format  = LIF_PNG;
 
 	info.clear();

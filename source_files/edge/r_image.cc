@@ -526,12 +526,6 @@ static image_c *AddImageUser(imagedef_c *def)
 			solid = true;
 			break;
 
-		case IMGDT_Builtin:
-			w = 256;
-			h = 256;
-			solid = false;
-			break;
-
 		case IMGDT_File:
 		case IMGDT_Lump:
 		{

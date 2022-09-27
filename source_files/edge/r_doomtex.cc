@@ -539,8 +539,6 @@ static epi::image_data_c *ReadUserAsEpiBlock(image_c *rim)
 
 	switch (def->type)
 	{
-		case IMGDT_Builtin:  // DEAD!
-
 		case IMGDT_Colour:
 			return CreateUserColourImage(rim, def);
 

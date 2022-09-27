@@ -38,20 +38,11 @@ image_namespace_e;
 typedef enum
 {
 	IMGDT_Colour = 0,   // solid colour
-	IMGDT_Builtin,      // built-in pre-fab DYI kit
 	IMGDT_File,         // load from an image file
 	IMGDT_Lump,         // load from lump in a WAD
 	IMGDT_Package,      // load from a PK3 package
 }
 imagedata_type_e;
-
-typedef enum
-{
-	BLTIM_Quadratic = 0,
-	BLTIM_Linear,
-	BLTIM_Shadow
-}
-builtin_image_e;
 
 typedef enum
 {
@@ -100,9 +91,8 @@ public:
 	imagedata_type_e type;
 
 	rgbcol_t colour;          // IMGDT_Colour
-	builtin_image_e builtin;  // IMGDT_Builtin
 
-	std::string info;       // IMGDT_Package, IMGDT_File, IMGDT_Lump
+	std::string info;         // IMGDT_Package, IMGDT_File, IMGDT_Lump
 	L_image_format_e format;  // ditto
 
 	image_special_e special;

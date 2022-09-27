@@ -51,12 +51,14 @@ image_format_e Image_FilenameToFormat(const std::string& filename);
 // power-of-two.
 image_data_c *Image_Load(file_c *f, int format);
 
-// reads the principle information from the TGA header.
+// reads the principle information from the image header.
 // (should be much faster than loading the whole image).
+// Cannot be used with DOOM patches.
 // Returns false if something went wrong.
+//
 // Note: size returned here is the real size, and may be different
 // from the image returned by Load() which rounds to power-of-two.
-bool Image_GetInfo(file_c *f, int *width, int *height, bool *solid, int format);
+bool Image_GetInfo(file_c *f, int *width, int *height);
 
 // saves the image (in JPEG format) to the given file.  Returns false if
 // something went wrong.  The image _MUST_ be RGB (bpp == 3).

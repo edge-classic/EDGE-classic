@@ -389,8 +389,12 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 	}
 	else  // PNG, TGA or JPEG
 	{
-		if (! Image_GetInfo(f, &width, &height, &solid, 1 /* FIXME */) ||
-		    width <= 0 || height <= 0)
+		if (fmt == epi::FMT_JPEG)
+			solid = true;
+
+		f->Seek(0, epi::file_c::SEEKPOINT_START);
+
+		if (! Image_GetInfo(f, &width, &height) || width <= 0 || height <= 0)
 		{
 			I_Warning("Error scanning image in '%s' lump\n", W_GetLumpName(lump));
 			return NULL;
@@ -572,7 +576,9 @@ static image_c *AddImageUser(imagedef_c *def)
 
 			bool got_info;
 
-			got_info = epi::Image_GetInfo(f, &w, &h, &solid, def->format);
+			solid = false;  // TODO
+
+			got_info = epi::Image_GetInfo(f, &w, &h);
 
 			if (! got_info)
 				I_Error("Error occurred scanning image: %s\n", basename);

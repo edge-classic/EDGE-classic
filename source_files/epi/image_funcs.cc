@@ -186,21 +186,17 @@ image_data_c *Image_Load(file_c *f, int format)
 	return img;
 }
 
-bool Image_GetInfo(file_c *f, int *width, int *height, bool *solid, int format)
+bool Image_GetInfo(file_c *f, int *width, int *height)
 {
-	int channels = 0;
+	int length      = f->GetLength();
 	byte *raw_image = f->LoadIntoMemory();
 
-	int result = stbi_info_from_memory(raw_image, f->GetLength(), width, height, &channels);
-
-	if (format == 1)
-		*solid = true;
-	else
-		*solid = false;
+	int channels = 0;
+	int result = stbi_info_from_memory(raw_image, length, width, height, &channels);
 
 	delete[] raw_image;
 
-	return result;
+	return result != 0;
 }
 
 //------------------------------------------------------------------------

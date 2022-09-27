@@ -89,8 +89,6 @@ void image_data_c::Shrink(int new_w, int new_h)
 	int step_y = height / new_h;
 	int total  = step_x * step_y;
 
-	// TODO: OPTIMISE this
-
 	if (bpp == 1)
 	{
 		for (int dy=0; dy < new_h; dy++)
@@ -185,8 +183,6 @@ void image_data_c::ShrinkMasked(int new_w, int new_h)
 	int step_x = width  / new_w;
 	int step_y = height / new_h;
 	int total  = step_x * step_y;
-
-	// TODO: OPTIMISE this
 
 	for (int dy=0; dy < new_h; dy++)
 	for (int dx=0; dx < new_w; dx++)
@@ -407,9 +403,9 @@ int image_data_c::ImageCharacterWidth(int x1, int y1, int x2, int y2)
 	for (int i = y1; i < y2; i++)
 	{
 		bool found_first = false;
-		bool found_last = false;
-		int first;
-		int last;
+		bool found_last  = false;
+		int first = 0;
+		int last  = 0;
 		for (int j = x1; j < x2; j++)
 		{
 			u8_t *checker = PixelAt(j, i);
@@ -704,6 +700,33 @@ void image_data_c::Swirl(int leveltime, int thickness)
 	}
 	delete[] pixels;
 	pixels = new_pixels;
+}
+
+void image_data_c::FillMarginX(int actual_w)
+{
+	if (actual_w >= width)
+		return;
+
+	for (int x = 0 ; x < (width - actual_w) ; x++)
+	{
+		for (int y = 0 ; y < height ; y++)
+		{
+			memcpy(pixels + (y * width + x + actual_w) * bpp,
+			       pixels + (y * width + x) * bpp,  bpp);
+		}
+	}
+}
+
+void image_data_c::FillMarginY(int actual_h)
+{
+	if (actual_h >= height)
+		return;
+
+	for (int y = 0 ; y < (height - actual_h) ; y++)
+	{
+		memcpy(pixels + (y + actual_h) * width * bpp,
+		       pixels +  y             * width * bpp,  width * bpp);
+	}
 }
 
 } // namespace epi

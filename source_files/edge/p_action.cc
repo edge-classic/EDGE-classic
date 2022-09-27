@@ -3428,7 +3428,8 @@ void P_ActDie(mobj_t * mo)
 {
 	// Boom/MBF compatibility.
 
-	P_DamageMobj(mo, NULL, NULL, mo->health + 1, NULL);
+	mo->health = 0;
+	P_KillMobj(NULL, mo);
 }
 
 void P_ActKeenDie(mobj_t * mo)

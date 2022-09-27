@@ -332,9 +332,6 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 
 	f->Read(header, sizeof(header));
 
-	// close it
-	delete f;
-
 	// determine format and size information
 	int width=0, height=0;
 	int offset_x=0, offset_y=0;
@@ -346,11 +343,17 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 
 	if (fmt == epi::FMT_OTHER)
 	{
+		// close it
+		delete f;
+
 		I_Warning("Unsupported image format in '%s' lump\n", W_GetLumpName(lump));
 		return NULL;
 	}
 	else if (fmt == epi::FMT_Unknown)
 	{
+		// close it
+		delete f;
+
 		// check for Heretic/Hexen images, which are raw 320x200
 		if (lump_len == 320*200 && type == IMSRC_Graphic)
 		{
@@ -372,7 +375,10 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 	}
 	else if (fmt == epi::FMT_DOOM)
 	{
-		patch_t *pat = (patch_t *) header;
+		// close it
+		delete f;
+
+		const patch_t *pat = (patch_t *) header;
 
 		width    = EPI_LE_S16(pat->width);
 		height   = EPI_LE_S16(pat->height);
@@ -389,6 +395,9 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 			I_Warning("Error scanning image in '%s' lump\n", W_GetLumpName(lump));
 			return NULL;
 		}
+
+		// close it
+		delete f;
 	}
 
 	// create new image

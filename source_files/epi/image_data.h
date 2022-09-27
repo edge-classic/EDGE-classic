@@ -22,15 +22,6 @@
 namespace epi
 {
 
-typedef enum
-{
-	IDF_NONE = 0,
-
-	IDF_ExtPalette = (1 << 0),  // palette is external (do not free)
-}
-image_data_flags_e;
-
-
 class image_data_c
 {
 public:
@@ -43,15 +34,11 @@ public:
 	// 4 = format is RGBA
 	short bpp;
 
-	short flags;
-
 	// for image loading, these will be the actual image size
 	short used_w;
 	short used_h;
 
 	u8_t *pixels;
-
-	// TODO: color_c *palette;
 
 public:
 	image_data_c(int _w, int _h, int _bpp = 3);
@@ -166,19 +153,6 @@ public:
 	void FillMarginX(int actual_w);
 	void FillMarginY(int actual_h);
 };
-
-
-// IMAGE LOADING FLAGS
-
-typedef enum
-{
-	IRF_NONE = 0,
-
-	IRF_Round_POW2 = (1 << 0),  // convert width / height to powers of two
-// IRF_Invert_Y   = (1 << 1),  // invert the image vertically
-}
-image_read_flags_e;
-
 
 } // namespace epi
 

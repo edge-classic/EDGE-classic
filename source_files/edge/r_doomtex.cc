@@ -332,7 +332,7 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 	{
 		epi::file_c * f = W_OpenLump(lump);
 
-		epi::image_data_c *img = epi::Image_Load(f, epi::IRF_Round_POW2, LIF_PNG);
+		epi::image_data_c *img = epi::Image_Load(f, LIF_PNG);
 
 		// close it
 		delete f;
@@ -485,7 +485,7 @@ static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 	if (! f)
 		I_Error("Missing image file: %s\n", def->info.c_str());
 
-	epi::image_data_c *img = epi::Image_Load(f, epi::IRF_Round_POW2, def->format);
+	epi::image_data_c *img = epi::Image_Load(f, def->format);
 
 	CloseUserFileOrLump(def, f);
 

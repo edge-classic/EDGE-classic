@@ -35,8 +35,8 @@ bool TGA_IsDataTGA(const byte *data, int length);
 // loads the given image.  Returns 0 if something went wrong.
 // The image will be RGB or RGBA (never paletted).  The size of
 // image (width and height) will be rounded to the next highest
-// power-of-two when 'read_flags' contains IRF_Round_POW2.
-image_data_c *Image_Load(file_c *f, int read_flags, int format);
+// power-of-two.
+image_data_c *Image_Load(file_c *f, int format);
 
 // reads the principle information from the TGA header.
 // (should be much faster than loading the whole image).

@@ -102,7 +102,7 @@ bool PNG_IsDataPNG(const byte *data, int length)
 	return memcmp(data, png_sig, 4) == 0;
 }
 
-image_data_c *Image_Load(file_c *f, int read_flags, int format)
+image_data_c *Image_Load(file_c *f, int format)
 {
 	int width;
 	int height;
@@ -123,7 +123,8 @@ image_data_c *Image_Load(file_c *f, int read_flags, int format)
 	int tot_W = width;
 	int tot_H = height;
 
-	if (read_flags & IRF_Round_POW2)
+	// round size up to the nearest power-of-two
+	if (true)
 	{
 		tot_W = 1; while (tot_W < (int)width)  tot_W <<= 1;
 		tot_H = 1; while (tot_H < (int)height) tot_H <<= 1;

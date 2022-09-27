@@ -174,26 +174,22 @@ bool Image_GetInfo(file_c *f, int *width, int *height, bool *solid, int format)
 
 //------------------------------------------------------------------------
 
-bool JPEG_Save(const char *fn, image_data_c *img, int quality)
+bool JPEG_Save(const char *fn, image_data_c *img)
 {
 	SYS_ASSERT(img->bpp == 3);
 
-	img->Invert();
+	// zero means failure here
+	int result = stbi_write_jpg(fn, img->used_w, img->used_h, img->bpp, img->pixels, 95);
 
-	int result = stbi_write_jpg(fn, img->used_w, img->used_h, img->bpp, img->pixels, quality);
-
-	return result;
+	return result != 0;
 }
 
-bool PNG_Save(const char *fn, image_data_c *img, int compress)
+bool PNG_Save(const char *fn, image_data_c *img)
 {
-	img->Invert();
-
-	stbi_write_png_compression_level = compress;
-
+	// zero means failure here
 	int result = stbi_write_png(fn, img->used_w, img->used_h, img->bpp, img->pixels, 0);
 
-	return result;	
+	return result != 0;
 }
 
 } // namespace epi

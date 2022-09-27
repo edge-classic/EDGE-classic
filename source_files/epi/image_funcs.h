@@ -26,39 +26,32 @@
 namespace epi
 {
 
-const int JPEG_DEF_QUALITY = 90;
-
-const int PNG_DEF_COMPRESS = 4;
-
-bool PNG_IsDataPNG(const byte *data, int length);
 // returns true if the data looks like a PNG file.
+bool PNG_IsDataPNG(const byte *data, int length);
 
-bool TGA_IsDataTGA(const byte *data, int length);
 // returns true if the data looks like a TGA file.
+bool TGA_IsDataTGA(const byte *data, int length);
 
-image_data_c *Image_Load(file_c *f, int read_flags, int format);
 // loads the given image.  Returns 0 if something went wrong.
 // The image will be RGB or RGBA (never paletted).  The size of
 // image (width and height) will be rounded to the next highest
 // power-of-two when 'read_flags' contains IRF_Round_POW2.
+image_data_c *Image_Load(file_c *f, int read_flags, int format);
 
-bool Image_GetInfo(file_c *f, int *width, int *height, bool *solid, int format);
 // reads the principle information from the TGA header.
 // (should be much faster than loading the whole image).
 // Returns false if something went wrong.
 // Note: size returned here is the real size, and may be different
 // from the image returned by Load() which rounds to power-of-two.
+bool Image_GetInfo(file_c *f, int *width, int *height, bool *solid, int format);
 
-bool JPEG_Save(const char *fn, image_data_c *img, int quality = JPEG_DEF_QUALITY);
 // saves the image (in JPEG format) to the given file.  Returns false if
-// something went wrong.  The 'quality' parameter is a percentage, the
-// range is roughly 70 to 95 (values outside of this are possible).
-// The image _MUST_ be RGB (bpp == 3).
+// something went wrong.  The image _MUST_ be RGB (bpp == 3).
+bool JPEG_Save(const char *fn, image_data_c *img);
 
-bool PNG_Save(const char *fn, image_data_c *img, int compress = PNG_DEF_COMPRESS);
-// saves the image (in PNG format) to the given file.  The compression
-// level should be between 1 (Z_BEST_SPEED) and 9 (Z_BEST_COMPRESSION).
+// saves the image (in PNG format) to the given file.
 // Returns false if failed to save (e.g. file already exists).
+bool PNG_Save(const char *fn, image_data_c *img);
 
 }  // namespace epi
 

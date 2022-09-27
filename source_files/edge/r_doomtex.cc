@@ -353,9 +353,8 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 
 	int lump = rim->source.graphic.lump;
 
-	// handle PNG images
-
-	if (rim->source.graphic.is_png)
+	// handle PNG/JPEG/TGA images
+	if (! rim->source.graphic.is_patch)
 	{
 		epi::file_c * f = W_OpenLump(lump);
 
@@ -365,21 +364,7 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 		delete f;
 
 		if (! img)
-			I_Error("Error loading PNG image in lump: %s\n", W_GetLumpName(lump));
-				
-		return img;
-	}
-	else if (rim->source.graphic.is_tga)
-	{
-		epi::file_c * f = W_OpenLump(lump);
-
-		epi::image_data_c *img = epi::Image_Load(f, epi::IRF_Round_POW2, LIF_TGA);
-
-		// close it
-		delete f;
-
-		if (! img)
-			I_Error("Error loading PNG image in lump: %s\n", W_GetLumpName(lump));
+			I_Error("Error loading image in lump: %s\n", W_GetLumpName(lump));
 				
 		return img;
 	}

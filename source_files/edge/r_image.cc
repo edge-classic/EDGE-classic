@@ -337,14 +337,11 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 	int width=0, height=0;
 	int offset_x=0, offset_y=0;
 
-	bool is_png = false;
-	bool is_tga = false;
-	bool solid  = false;
+	bool is_patch = false;
+	bool solid    = false;
   
 	if (epi::PNG_IsDataPNG(buffer, lump_len))
 	{
-		is_png = true;
-
 		if (! Image_GetInfo(f, &width, &height, &solid, LIF_PNG) ||
 		    width <= 0 || height <= 0)
 		{
@@ -356,8 +353,6 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 	}
 	else if (epi::TGA_IsDataTGA(buffer, lump_len))
 	{
-		is_tga = true;
-
 		if (! Image_GetInfo(f, &width, &height, &solid, LIF_TGA) ||
 		    width <= 0 || height <= 0)
 		{
@@ -403,6 +398,8 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 
 			return NULL;
 		}
+
+		is_patch = true;
 	}
  
 	// create new image
@@ -425,8 +422,7 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 
 	rim->source_type = type;
 	rim->source.graphic.lump = lump;
-	rim->source.graphic.is_png = is_png;
-	rim->source.graphic.is_tga = is_tga;
+	rim->source.graphic.is_patch = is_patch;
 	rim->source_palette = W_GetPaletteForLump(lump);
 
 	if (replaces)
@@ -434,7 +430,7 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 		rim->scale_x = replaces->actual_w / (float)width;
 		rim->scale_y = replaces->actual_h / (float)height;
 
-		if ((is_png || is_tga) && replaces->source_type == IMSRC_Sprite)
+		if (! is_patch && replaces->source_type == IMSRC_Sprite)
 		{
 			rim->offset_x = replaces->offset_x;
 			rim->offset_y = replaces->offset_y;
@@ -531,7 +527,6 @@ static image_c *AddImageUser(imagedef_c *def)
 			break;
 
 		case IMGDT_Builtin:
-			//!!!!! (detail_level == 2) ? 512 : 256;
 			w = 256;
 			h = 256;
 			solid = false;

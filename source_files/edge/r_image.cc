@@ -327,84 +327,73 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 	epi::file_c *f = W_OpenLump(lump);
 	SYS_ASSERT(f);
 
-	byte buffer[32];
+	byte header[32];
+	memset(header, 255, sizeof(header));
 
-	f->Read(buffer, sizeof(buffer));
+	f->Read(header, sizeof(header));
 
-	f->Seek(0, epi::file_c::SEEKPOINT_START);
+	// close it
+	delete f;
 
-	// determine info, and whether it is PNG or DOOM_PATCH
+	// determine format and size information
 	int width=0, height=0;
 	int offset_x=0, offset_y=0;
 
 	bool is_patch = false;
 	bool solid    = false;
-  
-	if (epi::PNG_IsDataPNG(buffer, lump_len))
+
+	auto fmt = epi::Image_DetectFormat(header, (int)sizeof(header), lump_len);
+
+	if (fmt == epi::FMT_OTHER)
 	{
-		if (! Image_GetInfo(f, &width, &height, &solid, LIF_PNG) ||
-		    width <= 0 || height <= 0)
+		I_Warning("Unsupported image format in '%s' lump\n", W_GetLumpName(lump));
+		return NULL;
+	}
+	else if (fmt == epi::FMT_Unknown)
+	{
+		// check for Heretic/Hexen images, which are raw 320x200
+		if (lump_len == 320*200 && type == IMSRC_Graphic)
 		{
-			I_Error("Error scanning PNG image in '%s' lump\n", W_GetLumpName(lump));
+			image_c *rim = NewImage(320, 200, OPAC_Solid);
+			strcpy(rim->name, name);
+
+			rim->source_type = IMSRC_Raw320x200;
+			rim->source.flat.lump = lump;
+			rim->source_palette = W_GetPaletteForLump(lump);
+			return rim;
 		}
 
-		// close it
-		delete f;
-	}
-	else if (epi::TGA_IsDataTGA(buffer, lump_len))
-	{
-		if (! Image_GetInfo(f, &width, &height, &solid, LIF_TGA) ||
-		    width <= 0 || height <= 0)
-		{
-			I_Error("Error scanning PNG image in '%s' lump\n", W_GetLumpName(lump));
-		}
+		if (lump_len == 64*64 || lump_len == 64*65 || lump_len == 64*128)
+			I_Warning("Graphic '%s' seems to be a flat.\n", name);
+		else
+			I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
 
-		// close it
-		delete f;
+		return NULL;
 	}
-	else  // DOOM PATCH format
+	else if (fmt == epi::FMT_DOOM)
 	{
-		patch_t *pat = (patch_t *) buffer;
+		patch_t *pat = (patch_t *) header;
 
 		width    = EPI_LE_S16(pat->width);
 		height   = EPI_LE_S16(pat->height);
 		offset_x = EPI_LE_S16(pat->leftoffset);
 		offset_y = EPI_LE_S16(pat->topoffset);
 
-		delete f;
-
-		// do some basic checks
-		// !!! FIXME: identify lump types in wad code.
-		if (width  <= 0 || width > 2048 ||
-		    height <= 0 || height > 512 ||
-			ABS(offset_x) > 2048 || ABS(offset_y) > 1024)
-		{
-			// check for Heretic/Hexen images, which are raw 320x200 
-			if (lump_len == 320*200 && type == IMSRC_Graphic)
-			{
-				image_c *rim = NewImage(320, 200, OPAC_Solid);
-				strcpy(rim->name, name);
-
-				rim->source_type = IMSRC_Raw320x200;
-				rim->source.flat.lump = lump;
-				rim->source_palette = W_GetPaletteForLump(lump);
-				return rim;
-			}
-
-			if (lump_len == 64*64 || lump_len == 64*65 || lump_len == 64*128)
-				I_Warning("Graphic '%s' seems to be a flat.\n", name);
-			else
-				I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
-
-			return NULL;
-		}
-
 		is_patch = true;
 	}
- 
+	else  // PNG, TGA or JPEG
+	{
+		if (! Image_GetInfo(f, &width, &height, &solid, 1 /* FIXME */) ||
+		    width <= 0 || height <= 0)
+		{
+			I_Warning("Error scanning image in '%s' lump\n", W_GetLumpName(lump));
+			return NULL;
+		}
+	}
+
 	// create new image
 	image_c *rim = NewImage(width, height, solid ? OPAC_Solid : OPAC_Unknown);
- 
+
 	rim->offset_x = offset_x;
 	rim->offset_y = offset_y;
 
@@ -446,9 +435,9 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 static image_c *AddImageTexture(const char *name, texturedef_t *tdef)
 {
 	image_c *rim;
- 
+
 	rim = NewImage(tdef->width, tdef->height);
- 
+
 	strcpy(rim->name, name);
 
 	if (tdef->scale_x) rim->scale_x = 8.0 / tdef->scale_x;

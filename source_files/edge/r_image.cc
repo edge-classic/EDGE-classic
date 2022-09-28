@@ -334,7 +334,8 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump,
 	bool is_patch = false;
 	bool solid    = false;
 
-	auto fmt = epi::Image_DetectFormat(header, (int)sizeof(header), lump_len);
+	int header_len = std::min((int)sizeof(header), lump_len);
+	auto fmt = epi::Image_DetectFormat(header, header_len, lump_len);
 
 	if (fmt == epi::FMT_OTHER)
 	{
@@ -590,7 +591,8 @@ static image_c *AddImageUser(imagedef_c *def)
 			f->Read(header, sizeof(header));
 			f->Seek(0, epi::file_c::SEEKPOINT_START);
 
-			auto fmt = epi::Image_DetectFormat(header, (int)sizeof(header), file_size);
+			int header_len = std::min((int)sizeof(header), file_size);
+			auto fmt = epi::Image_DetectFormat(header, header_len, file_size);
 
 			// when a lump uses DOOM patch format, use the other method
 			if (fmt == epi::FMT_DOOM || fmt == epi::FMT_Unknown)

@@ -39,7 +39,7 @@ image_format_e Image_DetectFormat(byte *header, int header_len, int file_size)
 {
 	// AJA 2022: based on code I wrote for Eureka...
 
-	if (header_len < 20 || file_size < 20)
+	if (header_len < 12)
 		return FMT_Unknown;
 
 	// PNG is clearly marked in the header, so check it first.
@@ -80,35 +80,40 @@ image_format_e Image_DetectFormat(byte *header, int header_len, int file_size)
 	// TGA (Targa) is not clearly marked, but better than Doom patches,
 	// so check it next.
 
-	int  width = (int)header[12] + ((int)header[13] << 8);
-	int height = (int)header[14] + ((int)header[15] << 8);
-
-	byte cmap_type = header[1];
-	byte img_type  = header[2];
-	byte depth     = header[16];
-
-	if (width  > 0 && width  <= 2048 &&
-		height > 0 && height <= 2048 &&
-		(cmap_type == 0 || cmap_type == 1) &&
-		((img_type | 8) >= 8 && (img_type | 8) <= 11) &&
-		(depth == 8 || depth == 15 || depth == 16 || depth == 24 || depth == 32))
+	if (header_len >= 18)
 	{
-		return FMT_TGA;
+		int  width = (int)header[12] + ((int)header[13] << 8);
+		int height = (int)header[14] + ((int)header[15] << 8);
+
+		byte cmap_type = header[1];
+		byte img_type  = header[2];
+		byte depth     = header[16];
+
+		if (width  > 0 && width  <= 2048 &&
+			height > 0 && height <= 2048 &&
+			(cmap_type == 0 || cmap_type == 1) &&
+			((img_type | 8) >= 8 && (img_type | 8) <= 11) &&
+			(depth == 8 || depth == 15 || depth == 16 || depth == 24 || depth == 32))
+		{
+			return FMT_TGA;
+		}
 	}
 
 	// check for DOOM patches last
 
-	 width = (int)header[0] + (int)(header[1] << 8);
-	height = (int)header[2] + (int)(header[3] << 8);
-
-	int ofs_x = (int)header[4] + (int)((signed char)header[5] * 256);
-	int ofs_y = (int)header[6] + (int)((signed char)header[7] * 256);
-
-	if (width  > 0 && width  <= 2048 && abs(ofs_x) <= 2048 &&
-		height > 0 && height <=  512 && abs(ofs_y) <=  512 &&
-		file_size > width * 4 /* columnofs */)
 	{
-		return FMT_DOOM;
+		int  width = (int)header[0] + (int)(header[1] << 8);
+		int height = (int)header[2] + (int)(header[3] << 8);
+
+		int ofs_x = (int)header[4] + (int)((signed char)header[5] * 256);
+		int ofs_y = (int)header[6] + (int)((signed char)header[7] * 256);
+
+		if (width  > 0 && width  <= 4096 && abs(ofs_x) <= 4096 &&
+			height > 0 && height <=  512 && abs(ofs_y) <=  512 &&
+			file_size > width * 4 /* columnofs */)
+		{
+			return FMT_DOOM;
+		}
 	}
 
 	return FMT_Unknown;  // uh oh!

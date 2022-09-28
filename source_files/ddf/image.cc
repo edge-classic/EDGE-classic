@@ -216,34 +216,48 @@ static void ImageParseLump(const char *spec)
 {
 	const char *colon = DDF_MainDecodeList(spec, ':', true);
 
-	if (! colon || colon == spec || (colon - spec) >= 16 || colon[1] == 0)
-		DDF_Error("Malformed image lump spec: 'LUMP:%s'\n", spec);
-
-	char keyword[20];
-
-	strncpy(keyword, spec, colon - spec);
-	keyword[colon - spec] = 0;
-
-	// store the lump name
-	dynamic_image->info = (colon + 1);
-
-	// the specific names ("PNG" etc) are only for backwards compat.
-	if (DDF_CompareName(keyword, "STD") == 0  ||
-	    DDF_CompareName(keyword, "PNG") == 0  ||
-	    DDF_CompareName(keyword, "TGA") == 0  ||
-	    DDF_CompareName(keyword, "JPG") == 0  ||
-	    DDF_CompareName(keyword, "JPEG") == 0)
+	if (colon == NULL)
 	{
+		dynamic_image->info = spec;
 		dynamic_image->format = LIF_STANDARD;
-	}
-	else if (DDF_CompareName(keyword, "DOOM") == 0)
-	{
-		dynamic_image->format = LIF_DOOM;
 	}
 	else
 	{
-		DDF_Error("Unknown image format: %s (use PNG,JPEG,TGA or DOOM)\n", keyword);
+		// all this is mainly for backwards compatibility, but the
+		// format "DOOM" does affect how the lump is handled.
+
+		if (colon == spec || colon[1] == 0 || (colon - spec) >= 16)
+			DDF_Error("Malformed image lump spec: 'LUMP:%s'\n", spec);
+
+		char keyword[20];
+
+		strncpy(keyword, spec, colon - spec);
+		keyword[colon - spec] = 0;
+
+		// store the lump name
+		dynamic_image->info = (colon + 1);
+
+		if (DDF_CompareName(keyword, "PNG") == 0  ||
+		    DDF_CompareName(keyword, "TGA") == 0  ||
+		    DDF_CompareName(keyword, "JPG") == 0  ||
+		    DDF_CompareName(keyword, "JPEG") == 0)
+		{
+			dynamic_image->format = LIF_STANDARD;
+		}
+		else if (DDF_CompareName(keyword, "DOOM") == 0)
+		{
+			dynamic_image->format = LIF_DOOM;
+		}
+		else
+		{
+			DDF_Error("Unknown image format: %s (use PNG,JPEG,TGA or DOOM)\n", keyword);
+		}
 	}
+
+	/* FIX NAME : replace space with '_' */
+	for (size_t i = 0 ; i < dynamic_image->info.size() ; i++)
+		if (dynamic_image->info[i] == ' ')
+			dynamic_image->info[i] = '_';
 }
 
 

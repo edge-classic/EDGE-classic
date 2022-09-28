@@ -606,11 +606,6 @@ static image_c *AddImageUser(imagedef_c *def)
 
 	strcpy(rim->name, def->name.c_str());
 
-	/* FIX NAME : replace space with '_' */
-	for (int i = 0; rim->name[i]; i++)
-		if (rim->name[i] == ' ')
-			rim->name[i] = '_';
-
 	rim->source_type = IMSRC_User;
 	rim->source.user.def = def;
 

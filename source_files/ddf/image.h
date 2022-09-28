@@ -67,10 +67,8 @@ image_fix_trans_e;
 
 typedef enum
 {
-	LIF_PNG = 0,
-	LIF_JPEG,
-	LIF_TGA,
-	LIF_DOOM
+	LIF_STANDARD = 0,  // something standard, e.g. PNG, TGA or JPEG
+	LIF_DOOM     = 1,  // the DOOM "patch" format (in a wad lump)
 }
 L_image_format_e;
 

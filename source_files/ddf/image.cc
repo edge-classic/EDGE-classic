@@ -149,22 +149,10 @@ static void ImageParseField(const char *field, const char *contents, int index, 
 
 static void ImageFinishEntry(void)
 {
+	// files and PK3 only support standard image formats
 	if (dynamic_image->type == IMGDT_File || dynamic_image->type == IMGDT_Package)
 	{
-        const char *filename = dynamic_image->info.c_str();
-
-		// determine format
-        std::string ext(epi::PATH_GetExtension(filename));
-
-		if (DDF_CompareName(ext.c_str(), ".png") == 0)
-			dynamic_image->format = LIF_PNG;
-		else if (DDF_CompareName(ext.c_str(), ".jpg")  == 0 ||
-				 DDF_CompareName(ext.c_str(), ".jpeg") == 0)
-			dynamic_image->format = LIF_JPEG;
-		else if (DDF_CompareName(ext.c_str(), ".tga") == 0)
-			dynamic_image->format = LIF_TGA;
-		else
-			DDF_Error("Unknown image extension for '%s'\n", filename);
+		dynamic_image->format = LIF_STANDARD;
 	}
 
 	// Add these automatically so modders don't have to remember them
@@ -239,25 +227,23 @@ static void ImageParseLump(const char *spec)
 	// store the lump name
 	dynamic_image->info = (colon + 1);
 
-	if (DDF_CompareName(keyword, "PNG") == 0)
+	// the specific names ("PNG" etc) are only for backwards compat.
+	if (DDF_CompareName(keyword, "STD") == 0  ||
+	    DDF_CompareName(keyword, "PNG") == 0  ||
+	    DDF_CompareName(keyword, "TGA") == 0  ||
+	    DDF_CompareName(keyword, "JPG") == 0  ||
+	    DDF_CompareName(keyword, "JPEG") == 0)
 	{
-		dynamic_image->format = LIF_PNG;
-	}
-	else if (DDF_CompareName(keyword, "JPG") == 0 ||
-	         DDF_CompareName(keyword, "JPEG") == 0)
-	{
-		dynamic_image->format = LIF_JPEG;
-	}
-	else if (DDF_CompareName(keyword, "TGA") == 0)
-	{
-		dynamic_image->format = LIF_TGA;
+		dynamic_image->format = LIF_STANDARD;
 	}
 	else if (DDF_CompareName(keyword, "DOOM") == 0)
 	{
 		dynamic_image->format = LIF_DOOM;
 	}
 	else
+	{
 		DDF_Error("Unknown image format: %s (use PNG,JPEG,TGA or DOOM)\n", keyword);
+	}
 }
 
 
@@ -388,7 +374,7 @@ void imagedef_c::Default()
 {
 	type    = IMGDT_Colour;
 	colour  = 0x000000;  // black
-	format  = LIF_PNG;
+	format  = LIF_STANDARD;
 
 	info.clear();
 

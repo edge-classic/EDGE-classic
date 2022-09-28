@@ -80,8 +80,6 @@ typedef post_t column_t;
 
 // Dummy image, for when texture/flat/graphic is unknown.  Row major
 // order.  Could be packed, but why bother ?
-#define DUMMY_X  16
-#define DUMMY_Y  16
 static byte dummy_graphic[DUMMY_X * DUMMY_Y] =
 {
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

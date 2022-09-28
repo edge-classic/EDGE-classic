@@ -74,10 +74,6 @@ extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
 
 extern epi::file_c *OpenUserFileOrLump(imagedef_c *def);
 
-// FIXME: duplicated in r_doomtex
-#define DUMMY_X  16
-#define DUMMY_Y  16
-
 
 extern void DeleteSkyTextures(void);
 extern void DeleteColourmapTextures(void);

@@ -47,6 +47,10 @@ struct texturedef_s;
 #define DL_OUTER       64.0f
 #define DL_OUTER_SQRT   8.0f
 
+// size of dummy replacements
+#define DUMMY_X  16
+#define DUMMY_Y  16
+
 
 typedef enum
 {

@@ -132,67 +132,64 @@ image_format_e Image_FilenameToFormat(const std::string& filename)
 }
 
 
-image_data_c *Image_Load(file_c *f, int format)
+image_data_c *Image_Load(file_c *f)
 {
 	int width;
 	int height;
-	int channels;
-	int desired_channels;
+	int bpp;
+
+	int   length    = f->GetLength();
 	byte *raw_image = f->LoadIntoMemory();
 
-	if (format == 1)
-		desired_channels = 3;
-	else
-		desired_channels = 4;
+	unsigned char *decoded_img = stbi_load_from_memory(raw_image, length, &width, &height, &bpp, 0);
 
-	unsigned char *decoded_img = stbi_load_from_memory(raw_image, f->GetLength(), &width, &height, &channels, desired_channels);
+	delete[] raw_image;
 
-	if (!decoded_img)
+	if (decoded_img == NULL)
 		return NULL;
 
-	int tot_W = width;
-	int tot_H = height;
+	if (bpp < 3 || bpp > 4)
+	{
+		stbi_image_free(decoded_img);
+		return NULL;
+	}
+
+	int total_w = width;
+	int total_h = height;
 
 	// round size up to the nearest power-of-two
 	if (true)
 	{
-		tot_W = 1; while (tot_W < (int)width)  tot_W <<= 1;
-		tot_H = 1; while (tot_H < (int)height) tot_H <<= 1;
+		total_w = 1; while (total_w < (int)width)  total_w <<= 1;
+		total_h = 1; while (total_h < (int)height) total_h <<= 1;
 	}
 
-	image_data_c *img = new image_data_c(tot_W, tot_H, desired_channels);
+	image_data_c *img = new image_data_c(total_w, total_h, bpp);
 
 	img->used_w = width;
 	img->used_h = height;
 
-	if (img->used_w != tot_W || img->used_h != tot_H)
+	if (img->used_w != total_w || img->used_h != total_h)
 		img->Clear();
 
-	int total_pixels = 0;
-
-	for (int y = height - 1; y > -1; y--)
+	// copy the image data, inverting it at the same time
+	for (int y = 0 ; y < height ; y++)
 	{
-		for (int x = 0; x < width; x++)
-		{
-			memcpy(img->PixelAt(x, y), decoded_img + (total_pixels * desired_channels), desired_channels);
-			total_pixels++;
-		}
+		const byte *source = &decoded_img[(height - 1 - y) * width * bpp];
+		memcpy(img->PixelAt(0, y), source, width * bpp);
 	}
-
-	delete[] raw_image;
 
 	stbi_image_free(decoded_img);
 
 	return img;
 }
 
-bool Image_GetInfo(file_c *f, int *width, int *height)
+bool Image_GetInfo(file_c *f, int *width, int *height, int *bpp)
 {
 	int length      = f->GetLength();
 	byte *raw_image = f->LoadIntoMemory();
 
-	int channels = 0;
-	int result = stbi_info_from_memory(raw_image, length, width, height, &channels);
+	int result = stbi_info_from_memory(raw_image, length, width, height, bpp);
 
 	delete[] raw_image;
 
@@ -213,6 +210,8 @@ bool JPEG_Save(const char *fn, image_data_c *img)
 
 bool PNG_Save(const char *fn, image_data_c *img)
 {
+	SYS_ASSERT(img->bpp >= 3);
+
 	// zero means failure here
 	int result = stbi_write_png(fn, img->used_w, img->used_h, img->bpp, img->pixels, 0);
 

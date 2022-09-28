@@ -333,7 +333,7 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 	f->Read(header, sizeof(header));
 
 	// determine format and size information
-	int width=0, height=0;
+	int width=0, height=0, bpp=0;
 	int offset_x=0, offset_y=0;
 
 	bool is_patch = false;
@@ -389,16 +389,15 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 	}
 	else  // PNG, TGA or JPEG
 	{
-		if (fmt == epi::FMT_JPEG)
-			solid = true;
-
 		f->Seek(0, epi::file_c::SEEKPOINT_START);
 
-		if (! Image_GetInfo(f, &width, &height) || width <= 0 || height <= 0)
+		if (! Image_GetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
 		{
 			I_Warning("Error scanning image in '%s' lump\n", W_GetLumpName(lump));
 			return NULL;
 		}
+
+		solid = (bpp == 3);
 
 		// close it
 		delete f;
@@ -518,13 +517,14 @@ static image_c *AddImageFlat(const char *name, int lump)
 
 static image_c *AddImageUser(imagedef_c *def)
 {
-	int w, h;
+	int w, h, bpp;
 	bool solid;
 
 	switch (def->type)
 	{
 		case IMGDT_Colour:
 			w = h = 8;
+			bpp   = 3;
 			solid = true;
 			break;
 
@@ -574,14 +574,12 @@ static image_c *AddImageUser(imagedef_c *def)
 				return NULL;
 			}
 
-			bool got_info;
+			// FIXME check for FMT_DOOM (or FMT_Unknown/OTHER), we cannot handle them here
 
-			solid = false;  // TODO
-
-			got_info = epi::Image_GetInfo(f, &w, &h);
-
-			if (! got_info)
+			if (! epi::Image_GetInfo(f, &w, &h, &bpp))
 				I_Error("Error occurred scanning image: %s\n", basename);
+
+			solid = (bpp == 3);
 
 			CloseUserFileOrLump(def, f);
 

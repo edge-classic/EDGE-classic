@@ -45,20 +45,20 @@ image_format_e Image_DetectFormat(byte *header, int header_len, int file_size);
 // determine image format from the filename (by its extension).
 image_format_e Image_FilenameToFormat(const std::string& filename);
 
-// loads the given image.  Returns 0 if something went wrong.
-// The image will be RGB or RGBA (never paletted).  The size of
-// image (width and height) will be rounded to the next highest
-// power-of-two.
-image_data_c *Image_Load(file_c *f, int format);
+// loads the given image, which must be PNG, TGA or JPEG format.
+// Returns NULL if something went wrong.  The result image will be RGB
+// or RGBA (never paletted).  The image size (width and height) will be
+// rounded to the next power-of-two.
+image_data_c *Image_Load(file_c *f);
 
 // reads the principle information from the image header.
 // (should be much faster than loading the whole image).
-// Cannot be used with DOOM patches.
-// Returns false if something went wrong.
+// The image must be PNG, TGA or JPEG format, it cannot be used
+// with DOOM patches.  Returns false if something went wrong.
 //
-// Note: size returned here is the real size, and may be different
+// NOTE: size returned here is the real size, and may be different
 // from the image returned by Load() which rounds to power-of-two.
-bool Image_GetInfo(file_c *f, int *width, int *height);
+bool Image_GetInfo(file_c *f, int *width, int *height, int *bpp);
 
 // saves the image (in JPEG format) to the given file.  Returns false if
 // something went wrong.  The image _MUST_ be RGB (bpp == 3).
@@ -66,6 +66,7 @@ bool JPEG_Save(const char *fn, image_data_c *img);
 
 // saves the image (in PNG format) to the given file.
 // Returns false if failed to save (e.g. file already exists).
+// The image _MUST_ be RGB or RGBA.
 bool PNG_Save(const char *fn, image_data_c *img);
 
 }  // namespace epi

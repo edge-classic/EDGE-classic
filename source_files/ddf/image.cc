@@ -253,11 +253,6 @@ static void ImageParseLump(const char *spec)
 			DDF_Error("Unknown image format: %s (use PNG,JPEG,TGA or DOOM)\n", keyword);
 		}
 	}
-
-	/* FIX NAME : replace space with '_' */
-	for (size_t i = 0 ; i < dynamic_image->info.size() ; i++)
-		if (dynamic_image->info[i] == ' ')
-			dynamic_image->info[i] = '_';
 }
 
 

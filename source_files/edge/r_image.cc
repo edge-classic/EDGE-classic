@@ -515,10 +515,55 @@ static image_c *AddImageFlat(const char *name, int lump)
 }
 
 
+static image_c *AddImage_DOOM(imagedef_c *def)
+{
+	const char *name = def->name.c_str();
+	const char *lump_name = def->info.c_str();
+
+	image_c *rim = NULL;
+
+	switch (def->belong)
+	{
+		case INS_Graphic: rim = AddImage_Smart(name, IMSRC_Graphic, W_GetNumForName(lump_name), real_graphics); break;
+		case INS_Texture: rim = AddImage_Smart(name, IMSRC_Texture, W_GetNumForName(lump_name), real_textures); break;
+		case INS_Flat:    rim = AddImage_Smart(name, IMSRC_Flat,    W_GetNumForName(lump_name), real_flats);    break;
+		case INS_Sprite:  rim = AddImage_Smart(name, IMSRC_Sprite,  W_GetNumForName(lump_name), real_sprites);  break;
+
+		default:
+			I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);
+	}
+
+	if (rim == NULL)
+	{
+		I_Warning("Unable to add image lump: %s\n", lump_name);
+		return NULL;
+	}
+
+	rim->offset_x = def->x_offset;
+	rim->offset_y = def->y_offset;
+
+	rim->scale_x = def->scale * def->aspect;
+	rim->scale_y = def->scale;
+
+	rim->is_font = def->is_font;
+
+	if (def->special & IMGSP_Crosshair)
+	{
+		float dy = (200.0f - rim->actual_h * rim->scale_y) / 2.0f - WEAPONTOP;
+		rim->offset_y += int(dy / rim->scale_y);
+	}
+
+	return rim;
+}
+
+
 static image_c *AddImageUser(imagedef_c *def)
 {
 	int w, h, bpp;
 	bool solid;
+
+	if (def->type == IMGDT_Lump && def->format == LIF_DOOM)
+		return AddImage_DOOM(def);
 
 	switch (def->type)
 	{
@@ -532,38 +577,6 @@ static image_c *AddImageUser(imagedef_c *def)
 		case IMGDT_Lump:
 		{
 			const char *basename = def->info.c_str();
-
-			if (def->format == LIF_DOOM)
-			{
-				image_c *rim = NULL;
-				const char *name = def->name.c_str();
-
-				switch (def->belong)
-				{
-					case INS_Graphic: rim = AddImage_Smart(name, IMSRC_Graphic, W_GetNumForName(basename), real_graphics); break;
-					case INS_Texture: rim = AddImage_Smart(name, IMSRC_Texture, W_GetNumForName(basename), real_textures); break;
-					case INS_Flat:    rim = AddImage_Smart(name, IMSRC_Flat,    W_GetNumForName(basename), real_flats);    break;
-					case INS_Sprite:  rim = AddImage_Smart(name, IMSRC_Sprite,  W_GetNumForName(basename), real_sprites);  break;
-
-					default:
-						I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);
-				}
-
-				if (!rim)
-				{
-					I_Warning("Unable to add image %s: %s\n", 
-						(def->type == IMGDT_Lump) ? "lump" : "file", basename);
-					return NULL;
-				}
-
-				rim->offset_x = def->x_offset;
-				rim->offset_y = def->y_offset;
-
-				rim->scale_x = def->scale * def->aspect;
-				rim->scale_y = def->scale;
-
-				return rim;
-			}
 
 			epi::file_c *f = OpenUserFileOrLump(def);
 
@@ -598,13 +611,13 @@ static image_c *AddImageUser(imagedef_c *def)
  
 	image_c *rim = NewImage(w, h, solid ? OPAC_Solid : OPAC_Unknown);
  
+	strcpy(rim->name, def->name.c_str());
+
 	rim->offset_x = def->x_offset;
 	rim->offset_y = def->y_offset;
 
 	rim->scale_x = def->scale * def->aspect;
 	rim->scale_y = def->scale;
-
-	strcpy(rim->name, def->name.c_str());
 
 	rim->source_type = IMSRC_User;
 	rim->source.user.def = def;
@@ -614,7 +627,6 @@ static image_c *AddImageUser(imagedef_c *def)
 	if (def->special & IMGSP_Crosshair)
 	{
 		float dy = (200.0f - rim->actual_h * rim->scale_y) / 2.0f - WEAPONTOP;
-
 		rim->offset_y += int(dy / rim->scale_y);
 	}
 

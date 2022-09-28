@@ -45,162 +45,220 @@ namespace Deh_Edge
 {
 
 //
+// MusicInfo struct.
+//
+typedef struct
+{
+	// up to 6-character name
+	char name[12];
+
+	int ddf_num;
+}
+musicinfo_t;
+
+
+//
 // Information about all the music
 //
-
-musicinfo_t S_music[NUMMUSIC] =
+const musicinfo_t S_music_orig[NUMMUSIC] =
 {
-    { NULL, -1, "" },  // dummy entry
+	// mus_None  (a dummy entry)
+	{ "",       -1 },
 
-    { "e1m1", 33, "" },
-    { "e1m2", 34, "" },
-    { "e1m3", 35, "" },
-    { "e1m4", 36, "" },
-    { "e1m5", 37, "" },
-    { "e1m6", 38, "" },
-    { "e1m7", 39, "" },
-    { "e1m8", 40, "" },
-    { "e1m9", 41, "" },
-    { "e2m1", 42, "" },
-    { "e2m2", 43, "" },
-    { "e2m3", 44, "" },
-    { "e2m4", 45, "" },
-    { "e2m5", 46, "" },
-    { "e2m6", 47, "" },
-    { "e2m7", 48, "" },
-    { "e2m8", 49, "" },
-    { "e2m9", 50, "" },
-    { "e3m1", 51, "" },
-    { "e3m2", 52, "" },
-    { "e3m3", 53, "" },
-    { "e3m4", 54, "" },
-    { "e3m5", 55, "" },
-    { "e3m6", 56, "" },
-    { "e3m7", 57, "" },
-    { "e3m8", 58, "" },
-    { "e3m9", 59, "" },
+	// Doom I
+	{ "e1m1",   33 },
+	{ "e1m2",   34 },
+	{ "e1m3",   35 },
+	{ "e1m4",   36 },
+	{ "e1m5",   37 },
+	{ "e1m6",   38 },
+	{ "e1m7",   39 },
+	{ "e1m8",   40 },
+	{ "e1m9",   41 },
+	{ "e2m1",   42 },
+	{ "e2m2",   43 },
+	{ "e2m3",   44 },
+	{ "e2m4",   45 },
+	{ "e2m5",   46 },
+	{ "e2m6",   47 },
+	{ "e2m7",   48 },
+	{ "e2m8",   49 },
+	{ "e2m9",   50 },
+	{ "e3m1",   51 },
+	{ "e3m2",   52 },
+	{ "e3m3",   53 },
+	{ "e3m4",   54 },
+	{ "e3m5",   55 },
+	{ "e3m6",   56 },
+	{ "e3m7",   57 },
+	{ "e3m8",   58 },
+	{ "e3m9",   59 },
 
-    { "inter",  63, "" },
-    { "intro",  62, "" },
-    { "bunny",  67, "" },
-    { "victor", 61, "" },
-    { "introa", 68, "" },
-    { "runnin",  1, "" },
-    { "stalks",  2, "" },
-    { "countd",  3, "" },
-    { "betwee",  4, "" },
-    { "doom",    5, "" },
-    { "the_da",  6, "" },
-    { "shawn",   7, "" },
-    { "ddtblu",  8, "" },
-    { "in_cit",  9, "" },
-    { "dead",   10, "" },
-    { "stlks2", 11, "" },
-    { "theda2", 12, "" },
-    { "doom2",  13, "" },
-    { "ddtbl2", 14, "" },
-    { "runni2", 15, "" },
-    { "dead2",  16, "" },
-    { "stlks3", 17, "" },
-    { "romero", 18, "" },
-    { "shawn2", 19, "" },
-    { "messag", 20, "" },
-    { "count2", 21, "" },
-    { "ddtbl3", 22, "" },
-    { "ampie",  23, "" },
-    { "theda3", 24, "" },
-    { "adrian", 25, "" },
-    { "messg2", 26, "" },
-    { "romer2", 27, "" },
-    { "tense",  28, "" },
-    { "shawn3", 29, "" },
-    { "openin", 30, "" },
-    { "evil",   31, "" },
-    { "ultima", 32, "" },
-    { "read_m", 60, "" },
-    { "dm2ttl", 65, "" },
-    { "dm2int", 64, "" } 
+	// Doom II
+	{ "inter",  63 },
+	{ "intro",  62 },
+	{ "bunny",  67 },
+	{ "victor", 61 },
+	{ "introa", 68 },
+	{ "runnin",  1 },
+	{ "stalks",  2 },
+	{ "countd",  3 },
+	{ "betwee",  4 },
+	{ "doom",    5 },
+	{ "the_da",  6 },
+	{ "shawn",   7 },
+	{ "ddtblu",  8 },
+	{ "in_cit",  9 },
+	{ "dead",   10 },
+	{ "stlks2", 11 },
+	{ "theda2", 12 },
+	{ "doom2",  13 },
+	{ "ddtbl2", 14 },
+	{ "runni2", 15 },
+	{ "dead2",  16 },
+	{ "stlks3", 17 },
+	{ "romero", 18 },
+	{ "shawn2", 19 },
+	{ "messag", 20 },
+	{ "count2", 21 },
+	{ "ddtbl3", 22 },
+	{ "ampie",  23 },
+	{ "theda3", 24 },
+	{ "adrian", 25 },
+	{ "messg2", 26 },
+	{ "romer2", 27 },
+	{ "tense",  28 },
+	{ "shawn3", 29 },
+	{ "openin", 30 },
+	{ "evil",   31 },
+	{ "ultima", 32 },
+	{ "read_m", 60 },
+	{ "dm2ttl", 65 },
+	{ "dm2int", 64 } 
 };
+
+
+//
+// all the modified entries.
+// NOTE: some pointers may be NULL!
+//
+std::vector<musicinfo_t *> S_music;
 
 
 //------------------------------------------------------------------------
 
 namespace Music
 {
-	bool got_one;
+	void MarkEntry(int num);
+	void BeginLump();
+	void FinishLump();
+	void WriteEntry(int num);
 }
 
 
 void Music::Init()
-{ }
+{
+	S_music.clear();
+}
 
 
 void Music::Shutdown()
-{ }
-
-
-namespace Music
 {
-	void BeginMusicLump(void)
-	{
-		WAD::NewLump("DDFPLAY");
+	for (size_t i = 0 ; i < S_music.size() ; i++)
+		if (S_music[i] != NULL)
+			delete S_music[i];
 
-		WAD::Printf("<PLAYLISTS>\n\n");
+	S_music.clear();
+}
+
+
+void Music::MarkEntry(int num)
+{
+	if (num == mus_None)
+		return;
+
+	// fill any missing slots with NULLs
+	while ((int)S_music.size() < num)
+	{
+		S_music.push_back(NULL);
 	}
 
-	void FinishMusicLump(void)
-	{
-		WAD::Printf("\n");
-	}
+	// already have a modified entry?
+	if (S_music[num] != NULL)
+		return;
 
-	void WriteMusic(int m_num)
-	{
-		musicinfo_t *mus = S_music + m_num;
+	musicinfo_t *entry = new musicinfo_t;
+	S_music[num] = entry;
 
-		if (! got_one)
-		{
-			got_one = true;
-			BeginMusicLump();
-		}
+	// copy the original info
+	strcpy(entry->name, S_music_orig[num].name);
+	entry->ddf_num    = S_music_orig[num].ddf_num;
+}
 
-		WAD::Printf("[%02d] ", mus->ddf_num);
 
-		const char *lump = !mus->new_name.empty() ? mus->new_name.c_str() : mus->orig_name;
+void Music::BeginLump()
+{
+	WAD::NewLump("DDFPLAY");
+	WAD::Printf("<PLAYLISTS>\n");
+}
 
-		WAD::Printf("MUSICINFO = MUS:LUMP:\"D_%s\";\n", StrUpper(lump));
-	}
+
+void Music::FinishLump()
+{
+	WAD::Printf("\n");
+}
+
+
+void Music::WriteEntry(int num)
+{
+	const musicinfo_t * mod = S_music[num];
+
+	WAD::Printf("\n");
+	WAD::Printf("[%02d] ", mod->ddf_num);
+	WAD::Printf("MUSICINFO = MUS:LUMP:\"D_%s\";\n", StrUpper(mod->name));
 }
 
 
 void Music::ConvertMUS()
 {
-	got_one = false;
+	bool got_one = false;
 
 	for (int i = 1; i < NUMMUSIC; i++)
 	{
-	    if (! all_mode && S_music[i].new_name.empty())
+		if (all_mode)
+			MarkEntry(i);
+
+		if (i >= (int)S_music.size())
+			break;
+
+		if (S_music[i] == NULL)
 			continue;
 
-		WriteMusic(i);
+		if (! got_one)
+		{
+			BeginLump();
+			got_one = true;
+		}
+
+		WriteEntry(i);
 	}
 
 	if (got_one)
-		FinishMusicLump();
+		FinishLump();
 }
 
 
 bool Music::ReplaceMusic(const char *before, const char *after)
 {
-	for (int j = 1; j < NUMMUSIC; j++)
+	for (int i = 1; i < NUMMUSIC; i++)
 	{
-		if (StrCaseCmp(S_music[j].orig_name, before) != 0)
+		if (StrCaseCmp(S_music_orig[i].name, before) != 0)
 			continue;
 
-		if (!S_music[j].new_name.empty())
-			S_music[j].new_name.clear();
+		// create modified entry if it does not exist yet
+		MarkEntry(i);
 
-		S_music[j].new_name = StringDup(after);
-
+		strcpy(S_music[i]->name, after);
 		return true;
 	}
 

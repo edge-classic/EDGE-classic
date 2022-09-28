@@ -19,21 +19,6 @@ namespace Deh_Edge
 {
 
 //
-// MusicInfo struct.
-//
-typedef struct
-{
-    // up to 6-character name
-    const char *orig_name;
-
-	int ddf_num;
-
-	// changed name (empty if not modified).  Space for 6 non-NUL characters.
-	std::string new_name;
-}
-musicinfo_t;
-
-//
 // Identifiers for all music in game.
 //
 

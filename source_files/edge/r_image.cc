@@ -74,8 +74,6 @@ extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
 
 extern epi::file_c *OpenUserFileOrLump(imagedef_c *def);
 
-extern void CloseUserFileOrLump(imagedef_c *def, epi::file_c *f);
-
 // FIXME: duplicated in r_doomtex
 #define DUMMY_X  16
 #define DUMMY_Y  16
@@ -327,12 +325,13 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump,
 	epi::file_c *f = W_OpenLump(lump);
 	SYS_ASSERT(f);
 
+	// determine format and size information
 	byte header[32];
 	memset(header, 255, sizeof(header));
 
 	f->Read(header, sizeof(header));
+	f->Seek(0, epi::file_c::SEEKPOINT_START);
 
-	// determine format and size information
 	int width=0, height=0, bpp=0;
 	int offset_x=0, offset_y=0;
 
@@ -389,8 +388,6 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump,
 	}
 	else  // PNG, TGA or JPEG
 	{
-		f->Seek(0, epi::file_c::SEEKPOINT_START);
-
 		if (! Image_GetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
 		{
 			I_Warning("Error scanning image in '%s' lump\n", W_GetLumpName(lump));
@@ -559,8 +556,8 @@ static image_c *AddImage_DOOM(imagedef_c *def)
 
 static image_c *AddImageUser(imagedef_c *def)
 {
-	int w, h, bpp;
-	bool solid;
+	int width=0, height=0, bpp=0;
+	bool solid=false;
 
 	if (def->type == IMGDT_Lump && def->format == LIF_DOOM)
 		return AddImage_DOOM(def);
@@ -568,33 +565,67 @@ static image_c *AddImageUser(imagedef_c *def)
 	switch (def->type)
 	{
 		case IMGDT_Colour:
-			w = h = 8;
-			bpp   = 3;
-			solid = true;
+			width  = 8;
+			height = 8;
+			bpp    = 3;
+			solid  = true;
 			break;
 
-		case IMGDT_File:
 		case IMGDT_Lump:
+		case IMGDT_File:
+		case IMGDT_Package:
 		{
-			const char *basename = def->info.c_str();
+			const char *filename = def->info.c_str();
 
 			epi::file_c *f = OpenUserFileOrLump(def);
-
-			if (! f)
+			if (f == NULL)
 			{
-				I_Warning("Unable to add image %s: %s\n", 
-					(def->type == IMGDT_Lump) ? "lump" : "file", basename);
+				I_Warning("Unable to open image %s: %s\n", 
+					(def->type == IMGDT_Lump) ? "lump" : "file", filename);
 				return NULL;
 			}
 
-			// FIXME check for FMT_DOOM (or FMT_Unknown/OTHER), we cannot handle them here
+			int file_size = f->GetLength();
 
-			if (! epi::Image_GetInfo(f, &w, &h, &bpp))
-				I_Error("Error occurred scanning image: %s\n", basename);
+			// determine format and size information
+			byte header[32];
+			memset(header, 255, sizeof(header));
+
+			f->Read(header, sizeof(header));
+			f->Seek(0, epi::file_c::SEEKPOINT_START);
+
+			auto fmt = epi::Image_DetectFormat(header, (int)sizeof(header), file_size);
+
+			// when a lump uses DOOM patch format, use the other method
+			if (fmt == epi::FMT_DOOM || fmt == epi::FMT_Unknown)
+			{
+				delete f;  // close file
+
+				if (def->type == IMGDT_Lump)
+					return AddImage_DOOM(def);
+
+				I_Warning("Unknown image format in: %s\n", filename);
+				return NULL;
+			}
+
+			if (fmt == epi::FMT_OTHER)
+			{
+				delete f;
+				I_Warning("Unsupported image format in: %s\n", filename);
+				return NULL;
+			}
+
+			if (! epi::Image_GetInfo(f, &width, &height, &bpp))
+			{
+				delete f;
+				I_Warning("Error occurred scanning image: %s\n", filename);
+				return NULL;
+			}
+
+			// close it
+			delete f;
 
 			solid = (bpp == 3);
-
-			CloseUserFileOrLump(def, f);
 
 /* Lobo 2022: info overload. Shut up.
 #if 1
@@ -609,7 +640,7 @@ static image_c *AddImageUser(imagedef_c *def)
 			return NULL; /* NOT REACHED */
 	}
  
-	image_c *rim = NewImage(w, h, solid ? OPAC_Solid : OPAC_Unknown);
+	image_c *rim = NewImage(width, height, solid ? OPAC_Solid : OPAC_Unknown);
  
 	strcpy(rim->name, def->name.c_str());
 
@@ -728,16 +759,14 @@ const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon)
 //
 void W_ImageCreateUser(void)
 {
-
 	I_Printf("Adding DDFIMAGE definitions...\n");
 
 	for (int i = 0; i < imagedefs.GetSize(); i++)
 	{
 		imagedef_c* def = imagedefs[i];
 
-		if (def)
+		if (def != NULL)
 			AddImageUser(def);
-
 	}
 
 #if 0

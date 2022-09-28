@@ -472,12 +472,6 @@ epi::file_c *OpenUserFileOrLump(imagedef_c *def)
 	}
 }
 
-void CloseUserFileOrLump(imagedef_c *def, epi::file_c *f)
-{
-	delete f;
-
-}
-
 static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 {
 	epi::file_c *f = OpenUserFileOrLump(def);
@@ -487,7 +481,8 @@ static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 
 	epi::image_data_c *img = epi::Image_Load(f);
 
-	CloseUserFileOrLump(def, f);
+	// close it
+	delete f;
 
 	if (! img)
 		I_Error("Error occurred loading image file: %s\n",

@@ -39,6 +39,7 @@
 #include "deh_frames.h"
 #include "deh_info.h"
 #include "deh_misc.h"
+#include "deh_music.h"
 #include "deh_patch.h"
 #include "deh_rscript.h"
 #include "deh_sounds.h"
@@ -61,7 +62,7 @@ bool all_mode;
 const dehconvfuncs_t *cur_funcs = NULL;
 
 
-void Startup(void)
+void Init()
 {
 	System_Startup();
 
@@ -69,7 +70,8 @@ void Startup(void)
 	Frames::Startup();
 	Misc::Startup();
 	Rscript::Startup();
-	Sounds::Startup();
+	Sounds::Init();
+	Music::Init();
 	TextStr::Startup();
 	Things::Startup();
 	Weapons::Startup();
@@ -112,14 +114,14 @@ dehret_e Convert(void)
 	// do conversions into DDF...
 
 	TextStr::SpriteDependencies();
-	Frames::StateDependencies();
-	Ammo::AmmoDependencies();
+	Frames ::StateDependencies();
+	Ammo   ::AmmoDependencies();
 
 	Sounds::ConvertSFX();
-	Sounds::ConvertMUS();
+	Music ::ConvertMUS();
 
-	Things::FixHeights();
-	Things::ConvertTHING();
+	Things ::FixHeights();
+	Things ::ConvertTHING();
 	Attacks::ConvertATK();
 
 	Weapons::ConvertWEAP();
@@ -134,8 +136,11 @@ dehret_e Convert(void)
 }
 
 
-void Shutdown(void)
+void Shutdown()
 {
+	Sounds::Shutdown();
+	Music ::Shutdown();
+
 	FreeInputBuffers();
 
 	System_Shutdown();
@@ -147,7 +152,7 @@ void Shutdown(void)
 
 void DehEdgeStartup(const dehconvfuncs_t *funcs)
 {
-	Deh_Edge::Startup();
+	Deh_Edge::Init();
 	Deh_Edge::cur_funcs = funcs;
 
 	Deh_Edge::PrintMsg("*** DeHackEd -> EDGE Conversion ***\n");

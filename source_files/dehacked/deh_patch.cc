@@ -40,6 +40,7 @@
 #include "deh_info.h"
 #include "deh_misc.h"
 #include "deh_mobj.h"
+#include "deh_music.h"
 #include "deh_patch.h"
 #include "deh_sounds.h"
 #include "deh_storage.h"
@@ -932,12 +933,12 @@ namespace Patch
 			if (TextStr::ReplaceSprite(text_1, text_2))
 				return;
 
-		if (len1 < 7 && len2 < 7)
+		if (len1 <= 6 && len2 <= 6)
 		{
 			if (Sounds::ReplaceSound(text_1, text_2))
 				return;
 
-			if (Sounds::ReplaceMusic(text_1, text_2))
+			if (Music::ReplaceMusic(text_1, text_2))
 				return;
 		}
 
@@ -1111,7 +1112,7 @@ namespace Patch
 			case BEX_STRINGS: ProcessBexString(); break;
 
 			case BEX_SOUNDS:  Sounds:: AlterBexSound(equal_pos);  break;
-			case BEX_MUSIC:   Sounds:: AlterBexMusic(equal_pos);  break;
+			case BEX_MUSIC:   Music::  AlterBexMusic(equal_pos);  break;
 			case BEX_SPRITES: TextStr::AlterBexSprite(equal_pos); break;
 
 			default:

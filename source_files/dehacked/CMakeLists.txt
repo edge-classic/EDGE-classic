@@ -22,6 +22,7 @@ add_library(
   deh_main.cc
   deh_misc.cc
   deh_mobj.cc
+  deh_music.cc
   deh_patch.cc
   deh_rscript.cc
   deh_sounds.cc

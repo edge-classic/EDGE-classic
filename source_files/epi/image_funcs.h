@@ -26,39 +26,48 @@
 namespace epi
 {
 
-const int JPEG_DEF_QUALITY = 90;
+typedef enum
+{
+	FMT_Unknown = 0,
+	FMT_PNG,
+	FMT_TGA,
+	FMT_JPEG,
+	FMT_DOOM,
+	FMT_OTHER  // e.g. gif, dds, bmp
+}
+image_format_e;
 
-const int PNG_DEF_COMPRESS = 4;
+// determine image format from the first 32 bytes (or so) of the file.
+// the file_size is the total size of the file or lump, and helps to
+// distinguish DOOM patch format from other things.
+image_format_e Image_DetectFormat(byte *header, int header_len, int file_size);
 
-bool PNG_IsDataPNG(const byte *data, int length);
-// returns true if the data looks like a PNG file.
+// determine image format from the filename (by its extension).
+image_format_e Image_FilenameToFormat(const std::string& filename);
 
-bool TGA_IsDataTGA(const byte *data, int length);
-// returns true if the data looks like a TGA file.
+// loads the given image, which must be PNG, TGA or JPEG format.
+// Returns NULL if something went wrong.  The result image will be RGB
+// or RGBA (never paletted).  The image size (width and height) will be
+// rounded to the next power-of-two.
+image_data_c *Image_Load(file_c *f);
 
-image_data_c *Image_Load(file_c *f, int read_flags, int format);
-// loads the given image.  Returns 0 if something went wrong.
-// The image will be RGB or RGBA (never paletted).  The size of
-// image (width and height) will be rounded to the next highest
-// power-of-two when 'read_flags' contains IRF_Round_POW2.
-
-bool Image_GetInfo(file_c *f, int *width, int *height, bool *solid, int format);
-// reads the principle information from the TGA header.
+// reads the principle information from the image header.
 // (should be much faster than loading the whole image).
-// Returns false if something went wrong.
-// Note: size returned here is the real size, and may be different
+// The image must be PNG, TGA or JPEG format, it cannot be used
+// with DOOM patches.  Returns false if something went wrong.
+//
+// NOTE: size returned here is the real size, and may be different
 // from the image returned by Load() which rounds to power-of-two.
+bool Image_GetInfo(file_c *f, int *width, int *height, int *bpp);
 
-bool JPEG_Save(const char *fn, image_data_c *img, int quality = JPEG_DEF_QUALITY);
 // saves the image (in JPEG format) to the given file.  Returns false if
-// something went wrong.  The 'quality' parameter is a percentage, the
-// range is roughly 70 to 95 (values outside of this are possible).
-// The image _MUST_ be RGB (bpp == 3).
+// something went wrong.  The image _MUST_ be RGB (bpp == 3).
+bool JPEG_Save(const char *fn, image_data_c *img);
 
-bool PNG_Save(const char *fn, image_data_c *img, int compress = PNG_DEF_COMPRESS);
-// saves the image (in PNG format) to the given file.  The compression
-// level should be between 1 (Z_BEST_SPEED) and 9 (Z_BEST_COMPRESSION).
+// saves the image (in PNG format) to the given file.
 // Returns false if failed to save (e.g. file already exists).
+// The image _MUST_ be RGB or RGBA.
+bool PNG_Save(const char *fn, image_data_c *img);
 
 }  // namespace epi
 

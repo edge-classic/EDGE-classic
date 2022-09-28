@@ -80,8 +80,6 @@ typedef post_t column_t;
 
 // Dummy image, for when texture/flat/graphic is unknown.  Row major
 // order.  Could be packed, but why bother ?
-#define DUMMY_X  16
-#define DUMMY_Y  16
 static byte dummy_graphic[DUMMY_X * DUMMY_Y] =
 {
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -222,22 +220,9 @@ static epi::image_data_c *ReadFlatAsEpiBlock(image_c *rim)
 	W_DoneWithLump(src);
 
 	// CW: Textures MUST tile! If actual size not total size, manually tile
-	if (rim->actual_w != rim->total_w)
-	{
-		// tile horizontally
-		byte *buf = img->pixels;
-		for (int x = 0; x < (rim->total_w - rim->actual_w); x++)
-			for (int y = 0; y < rim->total_h; y++)
-				buf[y*rim->total_w + rim->actual_w + x] = buf[y*rim->total_w + x];
-	}
-	if (rim->actual_h != rim->total_h)
-	{
-		// tile vertically
-		byte *buf = img->pixels;
-		for (int y = 0; y < (rim->total_h - rim->actual_h); y++)
-			for (int x = 0; x < rim->total_w; x++)
-				buf[(rim->actual_h + y)*rim->total_w + x] = buf[y*rim->total_w + x];
-	}
+	// [ AJA: this does not make them tile, just fills in the black gaps ]
+	img->FillMarginX(rim->actual_w);
+	img->FillMarginY(rim->actual_h);
 
 	return img;
 }
@@ -315,22 +300,9 @@ static epi::image_data_c *ReadTextureAsEpiBlock(image_c *rim)
 	}
 
 	// CW: Textures MUST tile! If actual size not total size, manually tile
-	if (rim->actual_w != rim->total_w)
-	{
-		// tile horizontally
-		byte *buf = img->pixels;
-		for (int x = 0; x < (rim->total_w - rim->actual_w); x++)
-			for (int y = 0; y < rim->total_h; y++)
-				buf[y*rim->total_w + rim->actual_w + x] = buf[y*rim->total_w + x];
-	}
-	if (rim->actual_h != rim->total_h)
-	{
-		// tile vertically
-		byte *buf = img->pixels;
-		for (int y = 0; y < (rim->total_h - rim->actual_h); y++)
-			for (int x = 0; x < rim->total_w; x++)
-				buf[(rim->actual_h + y)*rim->total_w + x] = buf[y*rim->total_w + x];
-	}
+	// [ AJA: this does not make them tile, just fills in the black gaps ]
+	img->FillMarginX(rim->actual_w);
+	img->FillMarginY(rim->actual_h);
 
 	return img;
 }
@@ -353,33 +325,18 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 
 	int lump = rim->source.graphic.lump;
 
-	// handle PNG images
-
-	if (rim->source.graphic.is_png)
+	// handle PNG/JPEG/TGA images
+	if (! rim->source.graphic.is_patch)
 	{
 		epi::file_c * f = W_OpenLump(lump);
 
-		epi::image_data_c *img = epi::Image_Load(f, epi::IRF_Round_POW2, LIF_PNG);
+		epi::image_data_c *img = epi::Image_Load(f);
 
 		// close it
 		delete f;
 
 		if (! img)
-			I_Error("Error loading PNG image in lump: %s\n", W_GetLumpName(lump));
-				
-		return img;
-	}
-	else if (rim->source.graphic.is_tga)
-	{
-		epi::file_c * f = W_OpenLump(lump);
-
-		epi::image_data_c *img = epi::Image_Load(f, epi::IRF_Round_POW2, LIF_TGA);
-
-		// close it
-		delete f;
-
-		if (! img)
-			I_Error("Error loading PNG image in lump: %s\n", W_GetLumpName(lump));
+			I_Error("Error loading image in lump: %s\n", W_GetLumpName(lump));
 				
 		return img;
 	}
@@ -513,12 +470,6 @@ epi::file_c *OpenUserFileOrLump(imagedef_c *def)
 	}
 }
 
-void CloseUserFileOrLump(imagedef_c *def, epi::file_c *f)
-{
-	delete f;
-
-}
-
 static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 {
 	epi::file_c *f = OpenUserFileOrLump(def);
@@ -526,9 +477,10 @@ static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 	if (! f)
 		I_Error("Missing image file: %s\n", def->info.c_str());
 
-	epi::image_data_c *img = epi::Image_Load(f, epi::IRF_Round_POW2, def->format);
+	epi::image_data_c *img = epi::Image_Load(f);
 
-	CloseUserFileOrLump(def, f);
+	// close it
+	delete f;
 
 	if (! img)
 		I_Error("Error occurred loading image file: %s\n",
@@ -554,38 +506,11 @@ static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 	SYS_ASSERT(rim->total_w == img->width);
 	SYS_ASSERT(rim->total_h == img->height);
 
-	
-
 	// CW: Textures MUST tile! If actual size not total size, manually tile
-	if (img->bpp == 3)
-	{
-		if (rim->actual_w != rim->total_w)
-		{
-			// tile horizontally
-			byte *buf = img->pixels;
-			for (int x = 0; x < (rim->total_w - rim->actual_w); x++)
-				for (int y = 0; y < rim->total_h; y++)
-				{
-					buf[(y*rim->total_w + rim->actual_w + x) * 3] = buf[(y*rim->total_w + x) * 3];
-					buf[(y*rim->total_w + rim->actual_w + x) * 3 + 2] = buf[(y*rim->total_w + x) * 3 + 1];
-					buf[(y*rim->total_w + rim->actual_w + x) * 3 + 2] = buf[(y*rim->total_w + x) * 3 + 2];
-				}
-		}
-		if (rim->actual_h != rim->total_h)
-		{
-			// tile vertically
-			byte *buf = img->pixels;
-			for (int y = 0; y < (rim->total_h - rim->actual_h); y++)
-				for (int x = 0; x < rim->total_w; x++)
-				{
-					buf[((rim->actual_h + y)*rim->total_w + x) * 3] = buf[(y*rim->total_w + x) * 3];
-					buf[((rim->actual_h + y)*rim->total_w + x) * 3 + 1] = buf[(y*rim->total_w + x) * 3 + 1];
-					buf[((rim->actual_h + y)*rim->total_w + x) * 3 + 2] = buf[(y*rim->total_w + x) * 3 + 2];
-				}
-		}
-	}
-	
-	
+	// [ AJA: this does not make them tile, just fills in the black gaps ]
+	img->FillMarginX(rim->actual_w);
+	img->FillMarginY(rim->actual_h);
+
 	return img;
 }
 
@@ -607,8 +532,6 @@ static epi::image_data_c *ReadUserAsEpiBlock(image_c *rim)
 
 	switch (def->type)
 	{
-		case IMGDT_Builtin:  // DEAD!
-
 		case IMGDT_Colour:
 			return CreateUserColourImage(rim, def);
 

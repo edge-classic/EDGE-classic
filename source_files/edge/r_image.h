@@ -47,6 +47,10 @@ struct texturedef_s;
 #define DL_OUTER       64.0f
 #define DL_OUTER_SQRT   8.0f
 
+// size of dummy replacements
+#define DUMMY_X  16
+#define DUMMY_Y  16
+
 
 typedef enum
 {
@@ -113,7 +117,7 @@ public:
 		// case IMSRC_Graphic:
 		// case IMSRC_Sprite:
 		// case IMSRC_TX_HI:
-		struct { int lump; bool is_png; bool is_tga; } graphic;
+		struct { int lump; bool is_patch; } graphic;
 
 		// case IMSRC_Flat:
 		// case IMSRC_Raw320x200:

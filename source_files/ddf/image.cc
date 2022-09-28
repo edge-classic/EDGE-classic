@@ -149,22 +149,10 @@ static void ImageParseField(const char *field, const char *contents, int index, 
 
 static void ImageFinishEntry(void)
 {
+	// files and PK3 only support standard image formats
 	if (dynamic_image->type == IMGDT_File || dynamic_image->type == IMGDT_Package)
 	{
-        const char *filename = dynamic_image->info.c_str();
-
-		// determine format
-        std::string ext(epi::PATH_GetExtension(filename));
-
-		if (DDF_CompareName(ext.c_str(), ".png") == 0)
-			dynamic_image->format = LIF_PNG;
-		else if (DDF_CompareName(ext.c_str(), ".jpg")  == 0 ||
-				 DDF_CompareName(ext.c_str(), ".jpeg") == 0)
-			dynamic_image->format = LIF_JPEG;
-		else if (DDF_CompareName(ext.c_str(), ".tga") == 0)
-			dynamic_image->format = LIF_TGA;
-		else
-			DDF_Error("Unknown image extension for '%s'\n", filename);
+		dynamic_image->format = LIF_STANDARD;
 	}
 
 	// Add these automatically so modders don't have to remember them
@@ -217,19 +205,6 @@ static void ImageParseColour(const char *value)
 }
 
 
-static void ImageParseBuiltin(const char *value)
-{
-	if (DDF_CompareName(value, "LINEAR") == 0)
-		dynamic_image->builtin = BLTIM_Linear;
-	else if (DDF_CompareName(value, "QUADRATIC") == 0)
-		dynamic_image->builtin = BLTIM_Quadratic;
-	else if (DDF_CompareName(value, "SHADOW") == 0)
-		dynamic_image->builtin = BLTIM_Shadow;
-	else
-		DDF_Error("Unknown image BUILTIN kind: %s\n", value);
-}
-
-
 static void ImageParseInfo(const char *value)
 {
 	// ouch, hard work here...
@@ -241,36 +216,43 @@ static void ImageParseLump(const char *spec)
 {
 	const char *colon = DDF_MainDecodeList(spec, ':', true);
 
-	if (! colon || colon == spec || (colon - spec) >= 16 || colon[1] == 0)
-		DDF_Error("Malformed image lump spec: 'LUMP:%s'\n", spec);
-
-	char keyword[20];
-
-	strncpy(keyword, spec, colon - spec);
-	keyword[colon - spec] = 0;
-
-	// store the lump name
-	dynamic_image->info = (colon + 1);
-
-	if (DDF_CompareName(keyword, "PNG") == 0)
+	if (colon == NULL)
 	{
-		dynamic_image->format = LIF_PNG;
-	}
-	else if (DDF_CompareName(keyword, "JPG") == 0 ||
-	         DDF_CompareName(keyword, "JPEG") == 0)
-	{
-		dynamic_image->format = LIF_JPEG;
-	}
-	else if (DDF_CompareName(keyword, "TGA") == 0)
-	{
-		dynamic_image->format = LIF_TGA;
-	}
-	else if (DDF_CompareName(keyword, "DOOM") == 0)
-	{
-		dynamic_image->format = LIF_DOOM;
+		dynamic_image->info = spec;
+		dynamic_image->format = LIF_STANDARD;
 	}
 	else
-		DDF_Error("Unknown image format: %s (use PNG,JPEG,TGA or DOOM)\n", keyword);
+	{
+		// all this is mainly for backwards compatibility, but the
+		// format "DOOM" does affect how the lump is handled.
+
+		if (colon == spec || colon[1] == 0 || (colon - spec) >= 16)
+			DDF_Error("Malformed image lump spec: 'LUMP:%s'\n", spec);
+
+		char keyword[20];
+
+		strncpy(keyword, spec, colon - spec);
+		keyword[colon - spec] = 0;
+
+		// store the lump name
+		dynamic_image->info = (colon + 1);
+
+		if (DDF_CompareName(keyword, "PNG") == 0  ||
+		    DDF_CompareName(keyword, "TGA") == 0  ||
+		    DDF_CompareName(keyword, "JPG") == 0  ||
+		    DDF_CompareName(keyword, "JPEG") == 0)
+		{
+			dynamic_image->format = LIF_STANDARD;
+		}
+		else if (DDF_CompareName(keyword, "DOOM") == 0)
+		{
+			dynamic_image->format = LIF_DOOM;
+		}
+		else
+		{
+			DDF_Error("Unknown image format: %s (use PNG,JPEG,TGA or DOOM)\n", keyword);
+		}
+	}
 }
 
 
@@ -293,8 +275,9 @@ static void DDF_ImageGetType(const char *info, void *storage)
 	}
 	else if (DDF_CompareName(keyword, "BUILTIN") == 0)
 	{
-		dynamic_image->type = IMGDT_Builtin;
-		ImageParseBuiltin(colon + 1);
+		// accepted for backwards compat. only
+		dynamic_image->type = IMGDT_Colour;
+		dynamic_image->colour = 0;
 	}
 	else if (DDF_CompareName(keyword, "FILE") == 0)
 	{
@@ -384,7 +367,6 @@ void imagedef_c::CopyDetail(const imagedef_c &src)
 {
 	type    = src.type;
 	colour  = src.colour;
-	builtin = src.builtin;
 	info    = src.info;
 	format  = src.format;
 
@@ -401,8 +383,7 @@ void imagedef_c::Default()
 {
 	type    = IMGDT_Colour;
 	colour  = 0x000000;  // black
-	builtin = BLTIM_Quadratic;
-	format  = LIF_PNG;
+	format  = LIF_STANDARD;
 
 	info.clear();
 

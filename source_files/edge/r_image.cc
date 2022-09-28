@@ -74,12 +74,6 @@ extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
 
 extern epi::file_c *OpenUserFileOrLump(imagedef_c *def);
 
-extern void CloseUserFileOrLump(imagedef_c *def, epi::file_c *f);
-
-// FIXME: duplicated in r_doomtex
-#define DUMMY_X  16
-#define DUMMY_Y  16
-
 
 extern void DeleteSkyTextures(void);
 extern void DeleteColourmapTextures(void);
@@ -316,98 +310,96 @@ static image_c *CreateDummyImage(const char *name, rgbcol_t fg, rgbcol_t bg)
 }
 
 
-static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
+static image_c *AddImage_Smart(const char *name, image_source_e type, int lump,
 								real_image_container_c& container,
 								const image_c *replaces = NULL)
 {
-	/* also used for Sprites and TX/HI stuff */
+	/* used for Graphics, Sprites and TX/HI stuff */
 
 	int lump_len = W_LumpLength(lump);
 
 	epi::file_c *f = W_OpenLump(lump);
 	SYS_ASSERT(f);
 
-	byte buffer[32];
+	// determine format and size information
+	byte header[32];
+	memset(header, 255, sizeof(header));
 
-	f->Read(buffer, sizeof(buffer));
-
+	f->Read(header, sizeof(header));
 	f->Seek(0, epi::file_c::SEEKPOINT_START);
 
-	// determine info, and whether it is PNG or DOOM_PATCH
-	int width=0, height=0;
+	int width=0, height=0, bpp=0;
 	int offset_x=0, offset_y=0;
 
-	bool is_png = false;
-	bool is_tga = false;
-	bool solid  = false;
-  
-	if (epi::PNG_IsDataPNG(buffer, lump_len))
+	bool is_patch = false;
+	bool solid    = false;
+
+	int header_len = std::min((int)sizeof(header), lump_len);
+	auto fmt = epi::Image_DetectFormat(header, header_len, lump_len);
+
+	if (fmt == epi::FMT_OTHER)
 	{
-		is_png = true;
-
-		if (! Image_GetInfo(f, &width, &height, &solid, LIF_PNG) ||
-		    width <= 0 || height <= 0)
-		{
-			I_Error("Error scanning PNG image in '%s' lump\n", W_GetLumpName(lump));
-		}
-
 		// close it
 		delete f;
+
+		I_Warning("Unsupported image format in '%s' lump\n", W_GetLumpName(lump));
+		return NULL;
 	}
-	else if (epi::TGA_IsDataTGA(buffer, lump_len))
+	else if (fmt == epi::FMT_Unknown)
 	{
-		is_tga = true;
-
-		if (! Image_GetInfo(f, &width, &height, &solid, LIF_TGA) ||
-		    width <= 0 || height <= 0)
-		{
-			I_Error("Error scanning PNG image in '%s' lump\n", W_GetLumpName(lump));
-		}
-
 		// close it
 		delete f;
+
+		// check for Heretic/Hexen images, which are raw 320x200
+		if (lump_len == 320*200 && type == IMSRC_Graphic)
+		{
+			image_c *rim = NewImage(320, 200, OPAC_Solid);
+			strcpy(rim->name, name);
+
+			rim->source_type = IMSRC_Raw320x200;
+			rim->source.flat.lump = lump;
+			rim->source_palette = W_GetPaletteForLump(lump);
+			return rim;
+		}
+
+		if (lump_len == 64*64 || lump_len == 64*65 || lump_len == 64*128)
+			I_Warning("Graphic '%s' seems to be a flat.\n", name);
+		else
+			I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
+
+		return NULL;
 	}
-	else  // DOOM PATCH format
+	else if (fmt == epi::FMT_DOOM)
 	{
-		patch_t *pat = (patch_t *) buffer;
+		// close it
+		delete f;
+
+		const patch_t *pat = (patch_t *) header;
 
 		width    = EPI_LE_S16(pat->width);
 		height   = EPI_LE_S16(pat->height);
 		offset_x = EPI_LE_S16(pat->leftoffset);
 		offset_y = EPI_LE_S16(pat->topoffset);
 
-		delete f;
-
-		// do some basic checks
-		// !!! FIXME: identify lump types in wad code.
-		if (width  <= 0 || width > 2048 ||
-		    height <= 0 || height > 512 ||
-			ABS(offset_x) > 2048 || ABS(offset_y) > 1024)
+		is_patch = true;
+	}
+	else  // PNG, TGA or JPEG
+	{
+		if (! Image_GetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
 		{
-			// check for Heretic/Hexen images, which are raw 320x200 
-			if (lump_len == 320*200 && type == IMSRC_Graphic)
-			{
-				image_c *rim = NewImage(320, 200, OPAC_Solid);
-				strcpy(rim->name, name);
-
-				rim->source_type = IMSRC_Raw320x200;
-				rim->source.flat.lump = lump;
-				rim->source_palette = W_GetPaletteForLump(lump);
-				return rim;
-			}
-
-			if (lump_len == 64*64 || lump_len == 64*65 || lump_len == 64*128)
-				I_Warning("Graphic '%s' seems to be a flat.\n", name);
-			else
-				I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
-
+			I_Warning("Error scanning image in '%s' lump\n", W_GetLumpName(lump));
 			return NULL;
 		}
+
+		solid = (bpp == 3);
+
+		// close it
+		delete f;
 	}
- 
+
 	// create new image
 	image_c *rim = NewImage(width, height, solid ? OPAC_Solid : OPAC_Unknown);
- 
+
 	rim->offset_x = offset_x;
 	rim->offset_y = offset_y;
 
@@ -425,8 +417,7 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 
 	rim->source_type = type;
 	rim->source.graphic.lump = lump;
-	rim->source.graphic.is_png = is_png;
-	rim->source.graphic.is_tga = is_tga;
+	rim->source.graphic.is_patch = is_patch;
 	rim->source_palette = W_GetPaletteForLump(lump);
 
 	if (replaces)
@@ -434,7 +425,7 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 		rim->scale_x = replaces->actual_w / (float)width;
 		rim->scale_y = replaces->actual_h / (float)height;
 
-		if ((is_png || is_tga) && replaces->source_type == IMSRC_Sprite)
+		if (! is_patch && replaces->source_type == IMSRC_Sprite)
 		{
 			rim->offset_x = replaces->offset_x;
 			rim->offset_y = replaces->offset_y;
@@ -450,9 +441,9 @@ static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
 static image_c *AddImageTexture(const char *name, texturedef_t *tdef)
 {
 	image_c *rim;
- 
+
 	rim = NewImage(tdef->width, tdef->height);
- 
+
 	strcpy(rim->name, name);
 
 	if (tdef->scale_x) rim->scale_x = 8.0 / tdef->scale_x;
@@ -518,79 +509,121 @@ static image_c *AddImageFlat(const char *name, int lump)
 }
 
 
+static image_c *AddImage_DOOM(imagedef_c *def)
+{
+	const char *name = def->name.c_str();
+	const char *lump_name = def->info.c_str();
+
+	image_c *rim = NULL;
+
+	switch (def->belong)
+	{
+		case INS_Graphic: rim = AddImage_Smart(name, IMSRC_Graphic, W_GetNumForName(lump_name), real_graphics); break;
+		case INS_Texture: rim = AddImage_Smart(name, IMSRC_Texture, W_GetNumForName(lump_name), real_textures); break;
+		case INS_Flat:    rim = AddImage_Smart(name, IMSRC_Flat,    W_GetNumForName(lump_name), real_flats);    break;
+		case INS_Sprite:  rim = AddImage_Smart(name, IMSRC_Sprite,  W_GetNumForName(lump_name), real_sprites);  break;
+
+		default:
+			I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);
+	}
+
+	if (rim == NULL)
+	{
+		I_Warning("Unable to add image lump: %s\n", lump_name);
+		return NULL;
+	}
+
+	rim->offset_x = def->x_offset;
+	rim->offset_y = def->y_offset;
+
+	rim->scale_x = def->scale * def->aspect;
+	rim->scale_y = def->scale;
+
+	rim->is_font = def->is_font;
+
+	if (def->special & IMGSP_Crosshair)
+	{
+		float dy = (200.0f - rim->actual_h * rim->scale_y) / 2.0f - WEAPONTOP;
+		rim->offset_y += int(dy / rim->scale_y);
+	}
+
+	return rim;
+}
+
+
 static image_c *AddImageUser(imagedef_c *def)
 {
-	int w, h;
-	bool solid;
+	int width=0, height=0, bpp=0;
+	bool solid=false;
+
+	if (def->type == IMGDT_Lump && def->format == LIF_DOOM)
+		return AddImage_DOOM(def);
 
 	switch (def->type)
 	{
 		case IMGDT_Colour:
-			w = h = 8;
-			solid = true;
+			width  = 8;
+			height = 8;
+			bpp    = 3;
+			solid  = true;
 			break;
 
-		case IMGDT_Builtin:
-			//!!!!! (detail_level == 2) ? 512 : 256;
-			w = 256;
-			h = 256;
-			solid = false;
-			break;
-
-		case IMGDT_File:
 		case IMGDT_Lump:
+		case IMGDT_File:
+		case IMGDT_Package:
 		{
-			const char *basename = def->info.c_str();
-
-			if (def->format == LIF_DOOM)
-			{
-				image_c *rim = NULL;
-				const char *name = def->name.c_str();
-
-				switch (def->belong)
-				{
-					case INS_Graphic: rim = AddImageGraphic(name, IMSRC_Graphic, W_GetNumForName(basename), real_graphics); break;
-					case INS_Texture: rim = AddImageGraphic(name, IMSRC_Texture, W_GetNumForName(basename), real_textures); break;
-					case INS_Flat:    rim = AddImageGraphic(name, IMSRC_Flat,    W_GetNumForName(basename), real_flats);    break;
-					case INS_Sprite:  rim = AddImageGraphic(name, IMSRC_Sprite,  W_GetNumForName(basename), real_sprites);  break;
-
-					default:
-						I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);
-				}
-
-				if (!rim)
-				{
-					I_Warning("Unable to add image %s: %s\n", 
-						(def->type == IMGDT_Lump) ? "lump" : "file", basename);
-					return NULL;
-				}
-
-				rim->offset_x = def->x_offset;
-				rim->offset_y = def->y_offset;
-
-				rim->scale_x = def->scale * def->aspect;
-				rim->scale_y = def->scale;
-
-				return rim;
-			}
+			const char *filename = def->info.c_str();
 
 			epi::file_c *f = OpenUserFileOrLump(def);
-
-			if (! f)
+			if (f == NULL)
 			{
-				I_Warning("Unable to add image %s: %s\n", 
-					(def->type == IMGDT_Lump) ? "lump" : "file", basename);
+				I_Warning("Unable to open image %s: %s\n", 
+					(def->type == IMGDT_Lump) ? "lump" : "file", filename);
 				return NULL;
 			}
 
-			bool got_info;
+			int file_size = f->GetLength();
 
-			got_info = epi::Image_GetInfo(f, &w, &h, &solid, def->format);
+			// determine format and size information
+			byte header[32];
+			memset(header, 255, sizeof(header));
 
-			if (! got_info)
-				I_Error("Error occurred scanning image: %s\n", basename);
+			f->Read(header, sizeof(header));
+			f->Seek(0, epi::file_c::SEEKPOINT_START);
 
-			CloseUserFileOrLump(def, f);
+			int header_len = std::min((int)sizeof(header), file_size);
+			auto fmt = epi::Image_DetectFormat(header, header_len, file_size);
+
+			// when a lump uses DOOM patch format, use the other method
+			if (fmt == epi::FMT_DOOM || fmt == epi::FMT_Unknown)
+			{
+				delete f;  // close file
+
+				if (def->type == IMGDT_Lump)
+					return AddImage_DOOM(def);
+
+				I_Warning("Unknown image format in: %s\n", filename);
+				return NULL;
+			}
+
+			if (fmt == epi::FMT_OTHER)
+			{
+				delete f;
+				I_Warning("Unsupported image format in: %s\n", filename);
+				return NULL;
+			}
+
+			if (! epi::Image_GetInfo(f, &width, &height, &bpp))
+			{
+				delete f;
+				I_Warning("Error occurred scanning image: %s\n", filename);
+				return NULL;
+			}
+
+			// close it
+			delete f;
+
+			solid = (bpp == 3);
 
 /* Lobo 2022: info overload. Shut up.
 #if 1
@@ -605,20 +638,15 @@ static image_c *AddImageUser(imagedef_c *def)
 			return NULL; /* NOT REACHED */
 	}
  
-	image_c *rim = NewImage(w, h, solid ? OPAC_Solid : OPAC_Unknown);
+	image_c *rim = NewImage(width, height, solid ? OPAC_Solid : OPAC_Unknown);
  
+	strcpy(rim->name, def->name.c_str());
+
 	rim->offset_x = def->x_offset;
 	rim->offset_y = def->y_offset;
 
 	rim->scale_x = def->scale * def->aspect;
 	rim->scale_y = def->scale;
-
-	strcpy(rim->name, def->name.c_str());
-
-	/* FIX NAME : replace space with '_' */
-	for (int i = 0; rim->name[i]; i++)
-		if (rim->name[i] == ' ')
-			rim->name[i] = '_';
 
 	rim->source_type = IMSRC_User;
 	rim->source.user.def = def;
@@ -628,7 +656,6 @@ static image_c *AddImageUser(imagedef_c *def)
 	if (def->special & IMGSP_Crosshair)
 	{
 		float dy = (200.0f - rim->actual_h * rim->scale_y) / 2.0f - WEAPONTOP;
-
 		rim->offset_y += int(dy / rim->scale_y);
 	}
 
@@ -705,7 +732,7 @@ const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon)
 {
 	SYS_ASSERT(lump >= 0);
 
-	image_c *rim = AddImageGraphic(name, IMSRC_Sprite, lump, real_sprites);
+	image_c *rim = AddImage_Smart(name, IMSRC_Sprite, lump, real_sprites);
 	if (! rim)
 		return NULL;
 
@@ -730,16 +757,14 @@ const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon)
 //
 void W_ImageCreateUser(void)
 {
-
 	I_Printf("Adding DDFIMAGE definitions...\n");
 
 	for (int i = 0; i < imagedefs.GetSize(); i++)
 	{
 		imagedef_c* def = imagedefs[i];
 
-		if (def)
+		if (def != NULL)
 			AddImageUser(def);
-
 	}
 
 #if 0
@@ -765,21 +790,21 @@ void W_ImageAddTX(int lump, const char *name, bool hires)
 		const image_c *rim = do_Lookup(real_textures, name, -2);
 		if (rim && rim->source_type != IMSRC_User)
 		{
-			AddImageGraphic(name, IMSRC_TX_HI, lump, real_textures, rim);
+			AddImage_Smart(name, IMSRC_TX_HI, lump, real_textures, rim);
 			return;
 		}
 
 		rim = do_Lookup(real_flats, name, -2);
 		if (rim && rim->source_type != IMSRC_User)
 		{
-			AddImageGraphic(name, IMSRC_TX_HI, lump, real_flats, rim);
+			AddImage_Smart(name, IMSRC_TX_HI, lump, real_flats, rim);
 			return;
 		}
 
 		rim = do_Lookup(real_sprites, name, -2);
 		if (rim && rim->source_type != IMSRC_User)
 		{
-			AddImageGraphic(name, IMSRC_TX_HI, lump, real_sprites, rim);
+			AddImage_Smart(name, IMSRC_TX_HI, lump, real_sprites, rim);
 			return;
 		}
 
@@ -788,14 +813,14 @@ void W_ImageAddTX(int lump, const char *name, bool hires)
 
 		if (rim && rim->source_type != IMSRC_User)
 		{
-			AddImageGraphic(name, IMSRC_TX_HI, lump, real_graphics, rim);
+			AddImage_Smart(name, IMSRC_TX_HI, lump, real_graphics, rim);
 			return;
 		}
 
 		I_Warning("HIRES replacement '%s' has no counterpart.\n", name);
 	}
 
-	AddImageGraphic(name, IMSRC_TX_HI, lump, real_textures);
+	AddImage_Smart(name, IMSRC_TX_HI, lump, real_textures);
 }
 
 
@@ -1240,7 +1265,7 @@ static const image_c *BackupGraphic(const char *gfx_name, int flags)
 
 		if (i >= 0)
 		{
-			rim = AddImageGraphic(gfx_name, IMSRC_Graphic, i, real_graphics);
+			rim = AddImage_Smart(gfx_name, IMSRC_Graphic, i, real_graphics);
 			if (rim)
 				return rim;
 		}

@@ -461,7 +461,7 @@ void M_ScreenShot(bool show_msg)
 {
 	const char *extension;
 
-    if (png_scrshots) 
+	if (png_scrshots) 
 		extension = "png";
 	else
 		extension = "jpg";
@@ -474,22 +474,26 @@ void M_ScreenShot(bool show_msg)
 		std::string base(epi::STR_Format("shot%02d.%s", i, extension));
 
 		fn = epi::PATH_Join(shot_dir.c_str(), base.c_str());
-  
+
 		if (! epi::FS_Access(fn.c_str(), epi::file_c::ACCESS_READ))
-        {
+		{
 			break; // file doesn't exist
-        }
+		}
 	}
 
 	epi::image_data_c *img = new epi::image_data_c(SCREENWIDTH, SCREENHEIGHT, 3);
 
 	RGL_ReadScreen(0, 0, SCREENWIDTH, SCREENHEIGHT, img->PixelAt(0,0));
 
+	// ReadScreen produces a bottom-up image, need to invert it
+	img->Invert();
+
 	bool result;
-    if (png_scrshots) {
-        result = epi::PNG_Save(fn.c_str(), img);
+
+	if (png_scrshots) {
+		result = epi::PNG_Save(fn.c_str(), img);
 	} else {
-        result = epi::JPEG_Save(fn.c_str(), img);
+		result = epi::JPEG_Save(fn.c_str(), img);
 	}
 
 	if (show_msg)

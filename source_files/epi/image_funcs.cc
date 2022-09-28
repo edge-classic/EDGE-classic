@@ -20,180 +20,207 @@
 #include "epi.h"
 
 #include "image_funcs.h"
+#include "path.h"
 
-#define STBI_ONLY_JPEG
 #define STBI_ONLY_PNG
 #define STBI_ONLY_TGA
+#define STBI_ONLY_JPEG
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
 namespace epi
 {
 
-typedef struct
+image_format_e Image_DetectFormat(byte *header, int header_len, int file_size)
 {
-    u8_t info_len;        /* length of info field */
-    u8_t has_cmap;        /* 1 if image has colormap, 0 otherwise */
-    u8_t type;
+	// AJA 2022: based on code I wrote for Eureka...
 
-    u8_t cmap_start[2];   /* index of first colormap entry */
-    u8_t cmap_len[2];     /* number of entries in colormap */
-    u8_t cmap_bits;       /* bits per colormap entry */
+	if (header_len < 12)
+		return FMT_Unknown;
 
-    u8_t y_origin[2];     /* image origin */
-    u8_t x_origin[2];
-    u8_t width[2];        /* image size */
-    u8_t height[2];
+	// PNG is clearly marked in the header, so check it first.
 
-    u8_t pixel_bits;      /* bits/pixel */
-    u8_t flags;
-}
-tga_header_t;
-
-#define GET_U16_FIELD(hdvar, field)  (u16_t)  \
-		((hdvar).field[0] + ((hdvar).field[1] << 8))
-
-#define GET_S16_FIELD(hdvar, field)  (s16_t)  \
-		((hdvar).field[0] + ((hdvar).field[1] << 8))
-
-// Adapted from stb_image's stbi__tga_test function
-bool TGA_IsDataTGA(const byte *data, int length)
-{
-	if (length < sizeof(tga_header_t))
-		return false;
-
-	tga_header_t header;
-	int width, height;
-
-	memcpy(&header, data, sizeof(header));
-
-	if (header.has_cmap > 1) return false;
-
-	if (header.has_cmap == 1)
+	if (header[0] == 0x89 && header[1] == 'P' &&
+		header[2] == 'N'  && header[3] == 'G' &&
+		header[4] == 0x0D && header[5] == 0x0A)
 	{
-		if (header.type != 1 && header.type != 9) return false;
-		if ((header.cmap_bits != 8) && (header.cmap_bits != 15) && (header.cmap_bits != 16)
-			&& (header.cmap_bits != 24) && (header.cmap_bits != 32)) return false;
+		return FMT_PNG;
 	}
-	else
+
+	// check some other common image formats....
+
+	if (header[0] == 0xFF && header[1] == 0xD8 &&
+		header[2] == 0xFF && header[3] >= 0xE0 &&
+		((header[6] == 'J' && header[7] == 'F') ||
+		 (header[6] == 'E' && header[7] == 'x')))
 	{
-		if ((header.type != 2) && (header.type != 3) && (header.type != 10)
-			&& (header.type != 11)) return false;
+		return FMT_JPEG;
 	}
-	height = GET_U16_FIELD(header, height);
-	width = GET_U16_FIELD(header, width);
-	if (height < 1 || width < 1) return false;
-	if ((header.has_cmap == 1) && (header.pixel_bits != 8) && (header.pixel_bits != 16)) return false;
-	if ((header.pixel_bits != 8) && (header.pixel_bits != 15) && (header.pixel_bits != 16)
-		&& (header.pixel_bits != 24) && (header.pixel_bits != 32)) return false;
 
-	return true;  
+	if (header[0] == 'G' && header[1] == 'I' &&
+		header[2] == 'F' && header[3] == '8' &&
+		header[4] >= '7' && header[4] <= '9' &&
+		header[5] == 'a')
+	{
+		return FMT_OTHER; /* GIF */
+	}
+
+	if (header[0] == 'D' && header[1] == 'D'  &&
+		header[2] == 'S' && header[3] == 0x20 &&
+		header[4] == 124 && header[5] == 0    &&
+		header[6] == 0)
+	{
+		return FMT_OTHER; /* DDS (DirectDraw Surface) */
+	}
+
+	// TGA (Targa) is not clearly marked, but better than Doom patches,
+	// so check it next.
+
+	if (header_len >= 18)
+	{
+		int  width = (int)header[12] + ((int)header[13] << 8);
+		int height = (int)header[14] + ((int)header[15] << 8);
+
+		byte cmap_type = header[1];
+		byte img_type  = header[2];
+		byte depth     = header[16];
+
+		if (width  > 0 && width  <= 2048 &&
+			height > 0 && height <= 2048 &&
+			(cmap_type == 0 || cmap_type == 1) &&
+			((img_type | 8) >= 8 && (img_type | 8) <= 11) &&
+			(depth == 8 || depth == 15 || depth == 16 || depth == 24 || depth == 32))
+		{
+			return FMT_TGA;
+		}
+	}
+
+	// check for DOOM patches last
+
+	{
+		int  width = (int)header[0] + (int)(header[1] << 8);
+		int height = (int)header[2] + (int)(header[3] << 8);
+
+		int ofs_x = (int)header[4] + (int)((signed char)header[5] * 256);
+		int ofs_y = (int)header[6] + (int)((signed char)header[7] * 256);
+
+		if (width  > 0 && width  <= 4096 && abs(ofs_x) <= 4096 &&
+			height > 0 && height <=  512 && abs(ofs_y) <=  512 &&
+			file_size > width * 4 /* columnofs */)
+		{
+			return FMT_DOOM;
+		}
+	}
+
+	return FMT_Unknown;  // uh oh!
 }
 
-// PNG Header check backported from EDGE 2.x - Dasho
-bool PNG_IsDataPNG(const byte *data, int length)
+
+image_format_e Image_FilenameToFormat(const std::string& filename)
 {
-    static byte png_sig[4] = { 0x89, 0x50, 0x4E, 0x47 };
-	if (length < 4)
-		return false;
+	std::string ext = epi::PATH_GetExtension(filename.c_str());
 
-	return memcmp(data, png_sig, 4) == 0;
+	if (ext == ".png" || ext == ".PNG")
+		return FMT_PNG;
+
+	if (ext == ".tga" || ext == ".TGA")
+		return FMT_TGA;
+
+	if (ext == ".jpg" || ext == ".JPG" || ext == ".jpeg" || ext == ".JPEG")
+		return FMT_JPEG;
+
+	return FMT_Unknown;
 }
 
-image_data_c *Image_Load(file_c *f, int read_flags, int format)
+
+image_data_c *Image_Load(file_c *f)
 {
 	int width;
 	int height;
-	int channels;
-	int desired_channels;
+	int bpp;
+
+	int   length    = f->GetLength();
 	byte *raw_image = f->LoadIntoMemory();
 
-	if (format == 1)
-		desired_channels = 3;
-	else
-		desired_channels = 4;
+	unsigned char *decoded_img = stbi_load_from_memory(raw_image, length, &width, &height, &bpp, 0);
 
-	unsigned char *decoded_img = stbi_load_from_memory(raw_image, f->GetLength(), &width, &height, &channels, desired_channels);
+	delete[] raw_image;
 
-	if (!decoded_img)
+	if (decoded_img == NULL)
 		return NULL;
 
-	int tot_W = width;
-	int tot_H = height;
-
-	if (read_flags & IRF_Round_POW2)
+	if (bpp < 3 || bpp > 4)
 	{
-		tot_W = 1; while (tot_W < (int)width)  tot_W <<= 1;
-		tot_H = 1; while (tot_H < (int)height) tot_H <<= 1;
+		stbi_image_free(decoded_img);
+		return NULL;
 	}
 
-	image_data_c *img = new image_data_c(tot_W, tot_H, desired_channels);
+	int total_w = width;
+	int total_h = height;
+
+	// round size up to the nearest power-of-two
+	if (true)
+	{
+		total_w = 1; while (total_w < (int)width)  total_w <<= 1;
+		total_h = 1; while (total_h < (int)height) total_h <<= 1;
+	}
+
+	image_data_c *img = new image_data_c(total_w, total_h, bpp);
 
 	img->used_w = width;
 	img->used_h = height;
 
-	if (img->used_w != tot_W || img->used_h != tot_H)
+	if (img->used_w != total_w || img->used_h != total_h)
 		img->Clear();
 
-	int total_pixels = 0;
-
-	for (int y = height - 1; y > -1; y--)
+	// copy the image data, inverting it at the same time
+	for (int y = 0 ; y < height ; y++)
 	{
-		for (int x = 0; x < width; x++)
-		{
-			memcpy(img->PixelAt(x, y), decoded_img + (total_pixels * desired_channels), desired_channels);
-			total_pixels++;
-		}
+		const byte *source = &decoded_img[(height - 1 - y) * width * bpp];
+		memcpy(img->PixelAt(0, y), source, width * bpp);
 	}
-
-	delete[] raw_image;
 
 	stbi_image_free(decoded_img);
 
 	return img;
 }
 
-bool Image_GetInfo(file_c *f, int *width, int *height, bool *solid, int format)
+bool Image_GetInfo(file_c *f, int *width, int *height, int *bpp)
 {
-	int channels = 0;
+	int length      = f->GetLength();
 	byte *raw_image = f->LoadIntoMemory();
 
-	int result = stbi_info_from_memory(raw_image, f->GetLength(), width, height, &channels);
-
-	if (format == 1)
-		*solid = true;
-	else
-		*solid = false;
+	int result = stbi_info_from_memory(raw_image, length, width, height, bpp);
 
 	delete[] raw_image;
 
-	return result;
+	return result != 0;
 }
 
 //------------------------------------------------------------------------
 
-bool JPEG_Save(const char *fn, image_data_c *img, int quality)
+bool JPEG_Save(const char *fn, image_data_c *img)
 {
 	SYS_ASSERT(img->bpp == 3);
 
-	img->Invert();
+	// zero means failure here
+	int result = stbi_write_jpg(fn, img->used_w, img->used_h, img->bpp, img->pixels, 95);
 
-	int result = stbi_write_jpg(fn, img->used_w, img->used_h, img->bpp, img->pixels, quality);
-
-	return result;
+	return result != 0;
 }
 
-bool PNG_Save(const char *fn, image_data_c *img, int compress)
+bool PNG_Save(const char *fn, image_data_c *img)
 {
-	img->Invert();
+	SYS_ASSERT(img->bpp >= 3);
 
-	stbi_write_png_compression_level = compress;
-
+	// zero means failure here
 	int result = stbi_write_png(fn, img->used_w, img->used_h, img->bpp, img->pixels, 0);
 
-	return result;	
+	return result != 0;
 }
 
 } // namespace epi

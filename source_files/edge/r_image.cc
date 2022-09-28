@@ -316,11 +316,11 @@ static image_c *CreateDummyImage(const char *name, rgbcol_t fg, rgbcol_t bg)
 }
 
 
-static image_c *AddImageGraphic(const char *name, image_source_e type, int lump,
+static image_c *AddImage_Smart(const char *name, image_source_e type, int lump,
 								real_image_container_c& container,
 								const image_c *replaces = NULL)
 {
-	/* also used for Sprites and TX/HI stuff */
+	/* used for Graphics, Sprites and TX/HI stuff */
 
 	int lump_len = W_LumpLength(lump);
 
@@ -540,10 +540,10 @@ static image_c *AddImageUser(imagedef_c *def)
 
 				switch (def->belong)
 				{
-					case INS_Graphic: rim = AddImageGraphic(name, IMSRC_Graphic, W_GetNumForName(basename), real_graphics); break;
-					case INS_Texture: rim = AddImageGraphic(name, IMSRC_Texture, W_GetNumForName(basename), real_textures); break;
-					case INS_Flat:    rim = AddImageGraphic(name, IMSRC_Flat,    W_GetNumForName(basename), real_flats);    break;
-					case INS_Sprite:  rim = AddImageGraphic(name, IMSRC_Sprite,  W_GetNumForName(basename), real_sprites);  break;
+					case INS_Graphic: rim = AddImage_Smart(name, IMSRC_Graphic, W_GetNumForName(basename), real_graphics); break;
+					case INS_Texture: rim = AddImage_Smart(name, IMSRC_Texture, W_GetNumForName(basename), real_textures); break;
+					case INS_Flat:    rim = AddImage_Smart(name, IMSRC_Flat,    W_GetNumForName(basename), real_flats);    break;
+					case INS_Sprite:  rim = AddImage_Smart(name, IMSRC_Sprite,  W_GetNumForName(basename), real_sprites);  break;
 
 					default:
 						I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);
@@ -691,7 +691,7 @@ const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon)
 {
 	SYS_ASSERT(lump >= 0);
 
-	image_c *rim = AddImageGraphic(name, IMSRC_Sprite, lump, real_sprites);
+	image_c *rim = AddImage_Smart(name, IMSRC_Sprite, lump, real_sprites);
 	if (! rim)
 		return NULL;
 
@@ -751,21 +751,21 @@ void W_ImageAddTX(int lump, const char *name, bool hires)
 		const image_c *rim = do_Lookup(real_textures, name, -2);
 		if (rim && rim->source_type != IMSRC_User)
 		{
-			AddImageGraphic(name, IMSRC_TX_HI, lump, real_textures, rim);
+			AddImage_Smart(name, IMSRC_TX_HI, lump, real_textures, rim);
 			return;
 		}
 
 		rim = do_Lookup(real_flats, name, -2);
 		if (rim && rim->source_type != IMSRC_User)
 		{
-			AddImageGraphic(name, IMSRC_TX_HI, lump, real_flats, rim);
+			AddImage_Smart(name, IMSRC_TX_HI, lump, real_flats, rim);
 			return;
 		}
 
 		rim = do_Lookup(real_sprites, name, -2);
 		if (rim && rim->source_type != IMSRC_User)
 		{
-			AddImageGraphic(name, IMSRC_TX_HI, lump, real_sprites, rim);
+			AddImage_Smart(name, IMSRC_TX_HI, lump, real_sprites, rim);
 			return;
 		}
 
@@ -774,14 +774,14 @@ void W_ImageAddTX(int lump, const char *name, bool hires)
 
 		if (rim && rim->source_type != IMSRC_User)
 		{
-			AddImageGraphic(name, IMSRC_TX_HI, lump, real_graphics, rim);
+			AddImage_Smart(name, IMSRC_TX_HI, lump, real_graphics, rim);
 			return;
 		}
 
 		I_Warning("HIRES replacement '%s' has no counterpart.\n", name);
 	}
 
-	AddImageGraphic(name, IMSRC_TX_HI, lump, real_textures);
+	AddImage_Smart(name, IMSRC_TX_HI, lump, real_textures);
 }
 
 
@@ -1226,7 +1226,7 @@ static const image_c *BackupGraphic(const char *gfx_name, int flags)
 
 		if (i >= 0)
 		{
-			rim = AddImageGraphic(gfx_name, IMSRC_Graphic, i, real_graphics);
+			rim = AddImage_Smart(gfx_name, IMSRC_Graphic, i, real_graphics);
 			if (rim)
 				return rim;
 		}

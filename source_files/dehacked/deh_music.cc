@@ -177,8 +177,8 @@ void Music::MarkEntry(int num)
 	if (num == mus_None)
 		return;
 
-	// fill any missing slots with NULLs
-	while ((int)S_music.size() < num)
+	// fill any missing slots with NULLs, including the one we want
+	while ((int)S_music.size() < num+1)
 	{
 		S_music.push_back(NULL);
 	}
@@ -191,8 +191,16 @@ void Music::MarkEntry(int num)
 	S_music[num] = entry;
 
 	// copy the original info
-	strcpy(entry->name, S_music_orig[num].name);
-	entry->ddf_num    = S_music_orig[num].ddf_num;
+	if (num < NUMMUSIC)
+	{
+		strcpy(entry->name, S_music_orig[num].name);
+		entry->ddf_num    = S_music_orig[num].ddf_num;
+	}
+	else
+	{
+		entry->name[0] = 0;
+		entry->ddf_num = 100 + num;
+	}
 }
 
 
@@ -221,16 +229,14 @@ void Music::WriteEntry(int num)
 
 void Music::ConvertMUS()
 {
-	bool got_one = false;
-
-	for (int i = 1; i < NUMMUSIC; i++)
-	{
-		if (all_mode)
+	if (all_mode)
+		for (int i = 1; i < NUMMUSIC; i++)
 			MarkEntry(i);
 
-		if (i >= (int)S_music.size())
-			break;
+	bool got_one = false;
 
+	for (int i = 1 ; i < (int)S_music.size() ; i++)
+	{
 		if (S_music[i] == NULL)
 			continue;
 

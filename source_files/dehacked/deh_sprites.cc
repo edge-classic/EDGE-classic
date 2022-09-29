@@ -33,10 +33,7 @@
 #include "deh_edge.h"
 
 #include "deh_buffer.h"
-#include "deh_info.h"
-#include "deh_english.h"
 #include "deh_frames.h"
-#include "deh_mobj.h"
 #include "deh_patch.h"
 #include "deh_text.h"
 #include "deh_storage.h"
@@ -137,7 +134,7 @@ void Sprites::Shutdown()
 }
 
 
-void Sprites::SpriteDependencies()
+void Sprites::MarkDependencies()
 {
 	for (int i = 0; i < NUMSPRITES_BEX; i++)
 	{
@@ -145,9 +142,7 @@ void Sprites::SpriteDependencies()
 			continue;
 
 		// find this sprite amongst the states...
-		for (int st = 1; st < NUMSTATES_BEX; st++)
-			if (states[st].sprite == i)
-				Frames::MarkState(st);
+		Frames::MarkStatesWithSprite(i);
 	}
 }
 

@@ -53,6 +53,7 @@ namespace Frames
 	void Startup(void);
 
 	void MarkState(int st_num);
+	void MarkStatesWithSprite(int spr_num);
 	void StateDependencies(void);
 
 	void AlterFrame(int new_val);

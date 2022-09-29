@@ -587,6 +587,13 @@ namespace Frames
 	}
 }
 
+void Frames::MarkStatesWithSprite(int spr_num)
+{
+	for (int st = 1; st < NUMSTATES_BEX; st++)
+		if (states[st].sprite == spr_num)
+			MarkState(st);
+}
+
 
 //------------------------------------------------------------------------
 

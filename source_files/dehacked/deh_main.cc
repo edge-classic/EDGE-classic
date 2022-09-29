@@ -115,7 +115,7 @@ dehret_e Convert(void)
 
 	// do conversions into DDF...
 
-	Sprites::SpriteDependencies();
+	Sprites::MarkDependencies();
 	Frames ::StateDependencies();
 	Ammo   ::AmmoDependencies();
 

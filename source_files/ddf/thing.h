@@ -728,6 +728,17 @@ public:
 	// this flag says that the damage is unaffected by the player's
 	// armour -- and vice versa.
 	bool no_armour;
+
+	// Apply damange unconditionally
+	bool bypass_all;
+	// Instantly kill the player (MBF21)
+	bool instakill;
+	// Only apply damage if player has no rad suit or invulnerability status (MBF21)
+	bool if_naked;
+	// Apply to all players (MBF21)
+	bool all_players;
+	// Apply to (grounded) monsters instead (MBF21)
+	bool grounded_monsters;
 };
 
 typedef enum

@@ -35,7 +35,7 @@ bool DDF_IsBoomLineType(int num)
 //
 bool DDF_IsBoomSectorType(int num)
 {
-	return (num >= 0x20 && num <= 0xFFF);
+	return (num >= 0x20 && num <= 0xFFFF); // Might as well extend to 16 bits to allow for more MBF21-type expansions
 }
 
 //
@@ -146,6 +146,54 @@ void DDF_BoomMakeGenSector(sectortype_c *sec, int number)
 	// ignoring bit 8: Ice/Mud effect
 
 	// ignoring bit 9: Wind effect
+
+	// ignoring bit 10: Suppress all sounds in sector - This is alluded to in boomref, not sure if ever implemented - Dasho
+
+	// ignoring bit 11: Suppress all floor/ceiling movement sounds in sector - Same as above
+
+	// handle bit 12: Alternate damage mode (MBF21)
+	if ((number >> 12) & 1)
+	{
+		switch ((number >> 5) & 0x3)
+		{
+			case 0: // Kill player if no radsuit or invul status
+				sec->damage.nominal = 5;
+				sec->damage.delay = 0;
+				sec->damage.instakill = true;
+				sec->damage.if_naked = true;
+				break;
+
+			case 1: // Kill player
+				sec->damage.delay = 0;
+				sec->damage.bypass_all = true;
+				sec->damage.instakill = true;
+				break;
+
+			case 2: // Kill all players and exit map (normal)
+				sec->damage.delay = 0;
+				sec->damage.all_players = true;
+				sec->damage.instakill = true;
+				sec->damage.bypass_all = true;
+				sec->e_exit = EXIT_Normal;
+				break;
+
+			case 3: // Kill all players and exit map (secret)
+				sec->damage.delay = 0;
+				sec->damage.all_players = true;
+				sec->damage.instakill = true;
+				sec->damage.bypass_all = true;
+				sec->e_exit = EXIT_Secret;
+				break;
+		}
+	}
+
+	// handle bit 13: Kill grounded monsters (MBF21)
+	if ((number >> 13) & 1)
+	{
+		sec->damage.delay = 0;
+		sec->damage.instakill = true;
+		sec->damage.grounded_monsters = true;
+	}
 }
 
 //

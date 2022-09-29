@@ -1741,7 +1741,7 @@ static inline void PlayerInProperties(player_t *player,
 			return;
 	}
 
-	if (player->powers[PW_AcidSuit])
+	if (player->powers[PW_AcidSuit] && !special->damage.bypass_all)
 		factor = 0;
 
 	if (factor > 0 &&

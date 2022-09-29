@@ -27,6 +27,10 @@
 #include <cstddef>
 #include "states.h"
 
+#ifdef _WIN32
+#undef min
+#undef max
+#endif
 
 //
 // This structure forms the basis for the command checking, it hands back a code

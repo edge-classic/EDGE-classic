@@ -1353,6 +1353,12 @@ static void P_MobjThinker(mobj_t * mobj)
 				mobj->mom.z += push_mul * props->push.z;
 			}
 		}
+
+		// Probably needs to be retooled to be a little more generalized - Dasho
+		if (props->special && props->special->damage.grounded_monsters && mobj->z <= mobj->floorz + 1.0f)
+		{
+			P_DamageMobj(mobj, NULL, NULL, 5.0, &props->special->damage, false);
+		}
 	}
 
 	// momentum movement

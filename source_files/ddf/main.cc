@@ -1895,6 +1895,13 @@ void damage_c::Copy(damage_c &src)
 	overkill = src.overkill;
 	
 	no_armour = src.no_armour;
+
+	bypass_all = src.bypass_all;
+	instakill = src.instakill;
+	if_naked = src.if_naked;
+	grounded_monsters = src.grounded_monsters;
+	all_players = src.all_players;
+
 }
 
 //
@@ -1914,6 +1921,11 @@ void damage_c::Default(damage_c::default_e def)
 			delay = 2 * TICRATE;
 			obituary = "OB_DROWN";
 			no_armour = true;
+			bypass_all = false;
+			instakill = false;
+			if_naked = false;
+			grounded_monsters = false;
+			all_players = false;
 			break;
 		}
 
@@ -1924,6 +1936,11 @@ void damage_c::Default(damage_c::default_e def)
 			error = -1.0f;
 			delay = 31;
 			no_armour = false;
+			bypass_all = false;
+			instakill = false;
+			if_naked = false;
+			grounded_monsters = false;
+			all_players = false;
 			break;
 		}
 		
@@ -1936,6 +1953,11 @@ void damage_c::Default(damage_c::default_e def)
 			error = -1.0f;     
 			delay = 0;      
 			no_armour = false;
+			bypass_all = false;
+			instakill = false;
+			if_naked = false;
+			grounded_monsters = false;
+			all_players = false;
 			break;
 		}
 	}

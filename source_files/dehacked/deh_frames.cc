@@ -954,27 +954,31 @@ void Frames::SpecialAction(char *act_name, state_t *st)
 			break;
 
 		case A_Turn:
-		  	sprintf(act_name, "TURN(%d)", MISC_TO_ANGLE(st->misc1));
+			sprintf(act_name, "TURN(%d)", MISC_TO_ANGLE(st->misc1));
 			break;
 
-		  case A_Face:
-		  	sprintf(act_name, "FACE(%d)", MISC_TO_ANGLE(st->misc1));
+		case A_Face:
+			sprintf(act_name, "FACE(%d)", MISC_TO_ANGLE(st->misc1));
 			break;
 
-		  case A_PlaySound:
-		  	if (st->misc1 <= 0 || st->misc1 >= NUMSFX_MBF)  // FIXME
-				strcpy(act_name, "NOTHING");
-			else
+		case A_PlaySound:
 			{
-				sprintf(act_name, "PLAYSOUND(\"%s\")", Sounds::GetSound(st->misc1));
+				const char * sfx = Sounds::GetSound(st->misc1);
+
+				if (StrCaseCmp(sfx, "NULL") == 0)
+					strcpy(act_name, "NOTHING");
+				else
+					sprintf(act_name, "PLAYSOUND(\"%s\")", sfx);
 			}
 			break;
 
 		case A_Scratch:
 			{
 				const char *sfx = NULL;
-				if (st->misc2 > 0 && st->misc2 < NUMSFX_MBF)  // FIXME
+				if (st->misc2 > 0)
 					sfx = Sounds::GetSound(st->misc2);
+				if (StrCaseCmp(sfx, "NULL") == 0)
+					sfx = NULL;
 
 				int damage = st->misc1;
 				const char *atk_name = Attacks::AddScratch(damage, sfx);
@@ -983,26 +987,26 @@ void Frames::SpecialAction(char *act_name, state_t *st)
 			break;
 
 		case A_LineEffect:
-		  	if (st->misc1 <= 0)
+			if (st->misc1 <= 0)
 				strcpy(act_name, "NOTHING");
 			else
-			{
-				sprintf(act_name, "ACTIVATE_LINETYPE(%d,%d)",
-					st->misc1, st->misc2);
-			}
+				sprintf(act_name, "ACTIVATE_LINETYPE(%d,%d)", st->misc1, st->misc2);
 			break;
 
 		case A_Spawn:
 			if (st->misc1 < 1 || st->misc1 > NUMMOBJTYPES_BEX)
+			{
 				PrintWarn("Action A_SPAWN: illegal type (%d)\n", st->misc1);
-
+			}
 			else
 			{
 				const mobjinfo_t *type = &mobjinfo[st->misc1 - 1];
 
 				if (! type->name || type->doomednum <= 0)
+				{
 					PrintWarn("Action A_SPAWN unusable type (%d = %s)\n",
 							  st->misc1, type->name ? type->name : "\"\"");
+				}
 				else
 				{
 					sprintf(act_name, "SPAWN(%s)", type->name);

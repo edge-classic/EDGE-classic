@@ -797,11 +797,13 @@ namespace Patch
 			{
 				case DEH_THING:  min_obj = 1; max_obj = NUMMOBJTYPES_BEX; break;
 
-				case DEH_SOUND:  max_obj = NUMSFX_MBF    - 1; break;  // FIXME
 				case DEH_FRAME:  max_obj = NUMSTATES_BEX - 1; break;
 				case DEH_AMMO:   max_obj = NUMAMMO       - 1; break;
 				case DEH_WEAPON: max_obj = NUMWEAPONS    - 1; break;
 				case DEH_PTR:    max_obj = NUMSTATES_BEX - 1; break;
+
+				// for DSDehacked, allow very high values
+				case DEH_SOUND:  max_obj = 32767; break;
 
 				default:
 					InternalError("Bad active_section value %d\n", active_section);

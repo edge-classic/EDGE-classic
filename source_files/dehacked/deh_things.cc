@@ -1184,9 +1184,9 @@ namespace Things
 		{
 			switch (ref->field_type)
 			{
-				case FT_AMMO:   max_obj = NUMAMMO - 1; break;
-				case FT_FRAME:  max_obj = NUMSTATES - 1; break;
-				case FT_SOUND:  max_obj = NUMSFX - 1; break;
+				case FT_AMMO:   max_obj = NUMAMMO    - 1; break;
+				case FT_FRAME:  max_obj = NUMSTATES  - 1; break;
+				case FT_SOUND:  max_obj = NUMSFX     - 1; break;
 				case FT_SPRITE: max_obj = NUMSPRITES - 1; break;
 				case FT_SUBSPR: max_obj = 31; break;
 
@@ -1202,10 +1202,10 @@ namespace Things
 				case FT_SUBSPR: max_obj = 31; break;
 
 				case FT_FRAME:  max_obj = NUMSTATES_BEX - 1; break;
-				case FT_SOUND:  max_obj = NUMSFX_MBF - 1; break;  // FIXME
 
 				// for DSDehacked, allow very high values
 				case FT_SPRITE: max_obj = 32767; break;
+				case FT_SOUND:  max_obj = 32767; break;
 
 				default:
 					InternalError("Bad field type %d\n", ref->field_type);

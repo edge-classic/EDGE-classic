@@ -35,7 +35,6 @@
 #include "deh_buffer.h"
 #include "deh_patch.h"
 #include "deh_sounds.h"
-#include "deh_storage.h"
 #include "deh_system.h"
 #include "deh_util.h"
 #include "deh_wad.h"
@@ -272,6 +271,10 @@ const sfxinfo_t S_sfx_dehextra[200] =
 };
 
 
+//
+// all the modified entries.
+// NOTE: some pointers may be NULL!
+//
 std::vector<sfxinfo_t *> S_sfx;
 
 
@@ -282,6 +285,9 @@ namespace Sounds
 	bool some_sound_modified = false;
 	bool got_one;
 	bool sound_modified[NUMSFX_DEHEXTRA];
+
+	void BeginLump();
+	void FinishLump();
 
 	const sfxinfo_t * GetOriginalSFX(int num);
 
@@ -303,28 +309,59 @@ void Sounds::Shutdown()
 }
 
 
+void Sounds::BeginLump()
+{
+	WAD::NewLump("DDFSFX");
+
+	WAD::Printf("<SOUNDS>\n\n");
+}
+
+
+void Sounds::FinishLump()
+{
+	WAD::Printf("\n");
+}
+
+
 const sfxinfo_t * Sounds::GetOriginalSFX(int num)
 {
-	if (sfx_fre000 <= num && num <= sfx_fre199)
-		return &S_sfx_dehextra[num - sfx_fre000];
-
 	if (0 <= num && num < NUMSFX_COMPAT)
 		return &S_sfx_orig[num];
+
+	if (sfx_fre000 <= num && num <= sfx_fre199)
+		return &S_sfx_dehextra[num - sfx_fre000];
 
 	// no actual original, return the dummy template
 	return &S_sfx_orig[0];
 }
 
 
-void Sounds::MarkSound(int s_num)
+void Sounds::MarkSound(int num)
 {
 	// can happen since the binary patches contain the dummy sound
-	if (s_num == sfx_None)
+	if (num == sfx_None)
 		return;
 
-	assert(1 <= s_num && s_num < NUMSFX_DEHEXTRA);
+	// fill any missing slots with NULLs, including the one we want
+	while ((int)S_sfx.size() < num+1)
+	{
+		S_sfx.push_back(NULL);
+	}
 
-	some_sound_modified = true;
+	// already have a modified entry?
+	if (S_sfx[num] != NULL)
+		return;
+
+	sfxinfo_t *entry = new sfxinfo_t;
+	S_sfx[num] = entry;
+
+	// copy the original info
+	const sfxinfo_t *orig = GetOriginalSFX(num);
+
+	strcpy(entry->name, orig->name);
+
+	entry->singularity = orig->singularity;
+	entry->priority    = orig->priority;
 }
 
 
@@ -333,10 +370,13 @@ void Sounds::AlterSound(int new_val)
 	int s_num = Patch::active_obj;
 	const char *deh_field = Patch::line_buf;
 
-	assert(0 <= s_num && s_num < NUMSFX_DEHEXTRA);
+	assert(s_num >= 0);
 
 	if (StrCaseCmpPartial(deh_field, "Zero") == 0 ||
 		StrCaseCmpPartial(deh_field, "Neg. One") == 0)
+		return;
+
+	if (StrCaseCmp(deh_field, "Zero/One") == 0)  // singularity, ignored
 		return;
 
 	if (StrCaseCmp(deh_field, "Offset") == 0)
@@ -354,14 +394,11 @@ void Sounds::AlterSound(int new_val)
 			new_val = 0;
 		}
 
-		Storage::RememberMod(&S_sfx[s_num].priority, new_val);
-
 		MarkSound(s_num);
+
+		S_sfx[s_num]->priority = new_val;
 		return;
 	}
-
-	if (StrCaseCmp(deh_field, "Zero/One") == 0)  // singularity, ignored
-		return;
 
 	PrintWarn("UNKNOWN SOUND FIELD: %s\n", deh_field);
 }
@@ -421,20 +458,6 @@ const char * Sounds::GetSound(int sound_id)
 	sprintf(name_buf, "%s", StrUpper(GetEdgeSfxName(sound_id)));
 
 	return name_buf;
-}
-
-
-void Sounds::BeginLump()
-{
-	WAD::NewLump("DDFSFX");
-
-	WAD::Printf("<SOUNDS>\n\n");
-}
-
-
-void Sounds::FinishLump()
-{
-	WAD::Printf("\n");
 }
 
 
@@ -504,14 +527,19 @@ bool Sounds::ReplaceSound(const char *before, const char *after)
 	assert(strlen(before) <= 6);
 	assert(strlen(after)  <= 6);
 
-	for (int i = 1; i < NUMSFX_DEHEXTRA; i++)
+	for (int i = 1 ; i < NUMSFX_DEHEXTRA ; i++)
 	{
-		if (StrCaseCmp(S_sfx[i].orig_name, before) != 0)
+		const sfxinfo_t *orig = GetOriginalSFX(i);
+
+		if (orig->name[0] == 0)
+			continue;
+
+		if (StrCaseCmp(orig->name, before) != 0)
 			continue;
 
 		MarkSound(i);
 
-		strcpy(S_sfx[i].new_name, after);
+		strcpy(S_sfx[i].name, after);
 		return true;
 	}
 

@@ -476,31 +476,28 @@ namespace Things
 		if (info->activesound != sfx_None)
 		{
 			if (info->flags & MF_PICKUP)
-				WAD::Printf("PICKUP_SOUND = %s;\n",
-					Sounds::GetSound(info->activesound));
+				WAD::Printf("PICKUP_SOUND = \"%s\";\n", Sounds::GetSound(info->activesound));
 			else
-				WAD::Printf("ACTIVE_SOUND = %s;\n",
-					Sounds::GetSound(info->activesound));
+				WAD::Printf("ACTIVE_SOUND = \"%s\";\n", Sounds::GetSound(info->activesound));
 		}
 		else if (mt_num == MT_TELEPORTMAN)
-			WAD::Printf("ACTIVE_SOUND = %s;\n", Sounds::GetSound(sfx_telept));
+			WAD::Printf("ACTIVE_SOUND = \"%s\";\n", Sounds::GetSound(sfx_telept));
 
 		if (info->seesound != sfx_None)
-			WAD::Printf("SIGHTING_SOUND = %s;\n", Sounds::GetSound(info->seesound));
+			WAD::Printf("SIGHTING_SOUND = \"%s\";\n", Sounds::GetSound(info->seesound));
 		else if (mt_num == MT_BOSSSPIT)
-			WAD::Printf("SIGHTING_SOUND = %s;\n", Sounds::GetSound(sfx_bossit));
+			WAD::Printf("SIGHTING_SOUND = \"%s\";\n", Sounds::GetSound(sfx_bossit));
 
 		if (info->attacksound != sfx_None && info->meleestate != S_NULL)
 		{
-			WAD::Printf("STARTCOMBAT_SOUND = %s;\n",
-				Sounds::GetSound(info->attacksound));
+			WAD::Printf("STARTCOMBAT_SOUND = \"%s\";\n", Sounds::GetSound(info->attacksound));
 		}
 
 		if (info->painsound != sfx_None)
-			WAD::Printf("PAIN_SOUND = %s;\n", Sounds::GetSound(info->painsound));
+			WAD::Printf("PAIN_SOUND = \"%s\";\n", Sounds::GetSound(info->painsound));
 
 		if (info->deathsound != sfx_None)
-			WAD::Printf("DEATH_SOUND = %s;\n", Sounds::GetSound(info->deathsound));
+			WAD::Printf("DEATH_SOUND = \"%s\";\n", Sounds::GetSound(info->deathsound));
 	}
 
 	void HandleFrames(const mobjinfo_t *info, int mt_num)

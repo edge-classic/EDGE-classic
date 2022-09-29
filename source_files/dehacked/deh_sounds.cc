@@ -893,23 +893,23 @@ namespace Sounds
 		switch (sound_id)
 		{
 			case sfx_podth1: case sfx_podth2: case sfx_podth3:
-				return "\"PODTH?\"";
+				return "PODTH?";
 
 			case sfx_posit1: case sfx_posit2: case sfx_posit3:
-				return "\"POSIT?\"";
+				return "POSIT?";
 
 			case sfx_bgdth1: case sfx_bgdth2:
-				return "\"BGDTH?\"";
+				return "BGDTH?";
 
 			case sfx_bgsit1: case sfx_bgsit2:
-				return "\"BGSIT?\"";
+				return "BGSIT?";
 
 			default: break;
 		}
 
 		static char name_buf[256];
 
-		sprintf(name_buf, "\"%s\"", StrUpper(GetEdgeSfxName(sound_id)));
+		sprintf(name_buf, "%s", StrUpper(GetEdgeSfxName(sound_id)));
 
 		return name_buf;
 	}

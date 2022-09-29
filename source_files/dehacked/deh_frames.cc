@@ -966,7 +966,7 @@ void Frames::SpecialAction(char *act_name, state_t *st)
 				strcpy(act_name, "NOTHING");
 			else
 			{
-				sprintf(act_name, "PLAYSOUND(%s)", Sounds::GetSound(st->misc1));
+				sprintf(act_name, "PLAYSOUND(\"%s\")", Sounds::GetSound(st->misc1));
 			}
 			break;
 

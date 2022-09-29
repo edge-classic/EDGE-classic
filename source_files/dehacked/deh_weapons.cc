@@ -154,9 +154,9 @@ namespace Weapons
 	{
 		if (w_num == wp_chainsaw)
 		{
-			WAD::Printf("START_SOUND = %s;\n",   Sounds::GetSound(sfx_sawup));
-			WAD::Printf("IDLE_SOUND = %s;\n",    Sounds::GetSound(sfx_sawidl));
-			WAD::Printf("ENGAGED_SOUND = %s;\n", Sounds::GetSound(sfx_sawful));
+			WAD::Printf("START_SOUND = \"%s\";\n",   Sounds::GetSound(sfx_sawup));
+			WAD::Printf("IDLE_SOUND = \"%s\";\n",    Sounds::GetSound(sfx_sawidl));
+			WAD::Printf("ENGAGED_SOUND = \"%s\";\n", Sounds::GetSound(sfx_sawful));
 			return;
 		}
 

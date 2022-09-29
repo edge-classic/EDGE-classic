@@ -288,6 +288,23 @@ void Music::AlterBexMusic(const char *new_val)
 		return;
 	}
 
+	// for DSDHACKED, support a numeric target
+	if (isdigit(old_val[0]))
+	{
+		int num = atoi(old_val);
+		if (num < 1 || num > 32767)
+		{
+			PrintWarn("Line %d: illegal music entry '%s'.\n",
+				Patch::line_num, old_val);
+		}
+		else
+		{
+			MarkEntry(num);
+			strcpy(S_music[num]->name, new_val);
+		}
+		return;
+	}
+
 	if (! ReplaceMusic(old_val, new_val))
 		PrintWarn("Line %d: unknown music name '%s'.\n",
 			Patch::line_num, old_val);

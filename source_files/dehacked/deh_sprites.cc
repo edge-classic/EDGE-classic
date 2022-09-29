@@ -36,7 +36,6 @@
 #include "deh_frames.h"
 #include "deh_patch.h"
 #include "deh_text.h"
-#include "deh_storage.h"
 #include "deh_sounds.h"
 #include "deh_sprites.h"
 #include "deh_system.h"
@@ -47,102 +46,88 @@
 namespace Deh_Edge
 {
 
-spritename_t sprnames[NUMSPRITES_BEX] =
+const char * sprnames_orig[NUMSPRITES_DEHEXTRA] =
 {
-    {"TROO",NULL}, {"SHTG",NULL}, {"PUNG",NULL}, {"PISG",NULL},
-	{"PISF",NULL}, {"SHTF",NULL}, {"SHT2",NULL}, {"CHGG",NULL},
-	{"CHGF",NULL}, {"MISG",NULL}, {"MISF",NULL}, {"SAWG",NULL},
-	{"PLSG",NULL}, {"PLSF",NULL}, {"BFGG",NULL}, {"BFGF",NULL},
-	{"BLUD",NULL}, {"PUFF",NULL}, {"BAL1",NULL}, {"BAL2",NULL},
-	{"PLSS",NULL}, {"PLSE",NULL}, {"MISL",NULL}, {"BFS1",NULL},
-	{"BFE1",NULL}, {"BFE2",NULL}, {"TFOG",NULL}, {"IFOG",NULL},
-	{"PLAY",NULL}, {"POSS",NULL}, {"SPOS",NULL}, {"VILE",NULL},
-	{"FIRE",NULL}, {"FATB",NULL}, {"FBXP",NULL}, {"SKEL",NULL},
-	{"MANF",NULL}, {"FATT",NULL}, {"CPOS",NULL}, {"SARG",NULL},
-	{"HEAD",NULL}, {"BAL7",NULL}, {"BOSS",NULL}, {"BOS2",NULL},
-	{"SKUL",NULL}, {"SPID",NULL}, {"BSPI",NULL}, {"APLS",NULL},
-	{"APBX",NULL}, {"CYBR",NULL}, {"PAIN",NULL}, {"SSWV",NULL},
-	{"KEEN",NULL}, {"BBRN",NULL}, {"BOSF",NULL}, {"ARM1",NULL},
-	{"ARM2",NULL}, {"BAR1",NULL}, {"BEXP",NULL}, {"FCAN",NULL},
-	{"BON1",NULL}, {"BON2",NULL}, {"BKEY",NULL}, {"RKEY",NULL},
-	{"YKEY",NULL}, {"BSKU",NULL}, {"RSKU",NULL}, {"YSKU",NULL},
-	{"STIM",NULL}, {"MEDI",NULL}, {"SOUL",NULL}, {"PINV",NULL},
-	{"PSTR",NULL}, {"PINS",NULL}, {"MEGA",NULL}, {"SUIT",NULL},
-	{"PMAP",NULL}, {"PVIS",NULL}, {"CLIP",NULL}, {"AMMO",NULL},
-	{"ROCK",NULL}, {"BROK",NULL}, {"CELL",NULL}, {"CELP",NULL},
-	{"SHEL",NULL}, {"SBOX",NULL}, {"BPAK",NULL}, {"BFUG",NULL},
-	{"MGUN",NULL}, {"CSAW",NULL}, {"LAUN",NULL}, {"PLAS",NULL},
-	{"SHOT",NULL}, {"SGN2",NULL}, {"COLU",NULL}, {"SMT2",NULL},
-	{"GOR1",NULL}, {"POL2",NULL}, {"POL5",NULL}, {"POL4",NULL},
-	{"POL3",NULL}, {"POL1",NULL}, {"POL6",NULL}, {"GOR2",NULL},
-	{"GOR3",NULL}, {"GOR4",NULL}, {"GOR5",NULL}, {"SMIT",NULL},
-	{"COL1",NULL}, {"COL2",NULL}, {"COL3",NULL}, {"COL4",NULL},
-	{"CAND",NULL}, {"CBRA",NULL}, {"COL6",NULL}, {"TRE1",NULL},
-	{"TRE2",NULL}, {"ELEC",NULL}, {"CEYE",NULL}, {"FSKU",NULL},
-	{"COL5",NULL}, {"TBLU",NULL}, {"TGRN",NULL}, {"TRED",NULL},
-	{"SMBT",NULL}, {"SMGT",NULL}, {"SMRT",NULL}, {"HDB1",NULL},
-	{"HDB2",NULL}, {"HDB3",NULL}, {"HDB4",NULL}, {"HDB5",NULL},
-	{"HDB6",NULL}, {"POB1",NULL}, {"POB2",NULL}, {"BRS1",NULL},
-	{"TLMP",NULL}, {"TLP2",NULL},
+	"TROO", "SHTG", "PUNG", "PISG", "PISF", "SHTF", "SHT2", "CHGG",
+	"CHGF", "MISG", "MISF", "SAWG", "PLSG", "PLSF", "BFGG", "BFGF",
+	"BLUD", "PUFF", "BAL1", "BAL2", "PLSS", "PLSE", "MISL", "BFS1",
+	"BFE1", "BFE2", "TFOG", "IFOG", "PLAY", "POSS", "SPOS", "VILE",
+	"FIRE", "FATB", "FBXP", "SKEL", "MANF", "FATT", "CPOS", "SARG",
+	"HEAD", "BAL7", "BOSS", "BOS2", "SKUL", "SPID", "BSPI", "APLS",
+	"APBX", "CYBR", "PAIN", "SSWV", "KEEN", "BBRN", "BOSF", "ARM1",
+	"ARM2", "BAR1", "BEXP", "FCAN", "BON1", "BON2", "BKEY", "RKEY",
+	"YKEY", "BSKU", "RSKU", "YSKU", "STIM", "MEDI", "SOUL", "PINV",
+	"PSTR", "PINS", "MEGA", "SUIT", "PMAP", "PVIS", "CLIP", "AMMO",
+	"ROCK", "BROK", "CELL", "CELP", "SHEL", "SBOX", "BPAK", "BFUG",
+	"MGUN", "CSAW", "LAUN", "PLAS", "SHOT", "SGN2", "COLU", "SMT2",
+	"GOR1", "POL2", "POL5", "POL4", "POL3", "POL1", "POL6", "GOR2",
+	"GOR3", "GOR4", "GOR5", "SMIT", "COL1", "COL2", "COL3", "COL4",
+	"CAND", "CBRA", "COL6", "TRE1", "TRE2", "ELEC", "CEYE", "FSKU",
+	"COL5", "TBLU", "TGRN", "TRED", "SMBT", "SMGT", "SMRT", "HDB1",
+	"HDB2", "HDB3", "HDB4", "HDB5", "HDB6", "POB1", "POB2", "BRS1",
+	"TLMP", "TLP2",
 
 	// BOOM/MBF/Doom Retro:
-	{"TNT1",NULL}, {"DOGS",NULL}, {"PLS1",NULL}, {"PLS2",NULL},
-    {"BON3",NULL}, {"BON4",NULL}, {"BLD2",NULL},
+	"TNT1", "DOGS", "PLS1", "PLS2", "BON3", "BON4", "BLD2",
 
-    // DEHEXTRA
-    {"SP00",NULL},{"SP01",NULL}, {"SP02",NULL}, {"SP03",NULL},
-    {"SP04",NULL},{"SP05",NULL}, {"SP06",NULL}, {"SP07",NULL},
-    {"SP08",NULL},{"SP09",NULL}, {"SP10",NULL}, {"SP11",NULL},
-    {"SP12",NULL},{"SP13",NULL}, {"SP14",NULL}, {"SP15",NULL},
-    {"SP16",NULL},{"SP17",NULL}, {"SP18",NULL}, {"SP19",NULL},
-    {"SP20",NULL},{"SP21",NULL}, {"SP22",NULL}, {"SP23",NULL},
-    {"SP24",NULL},{"SP25",NULL}, {"SP26",NULL}, {"SP27",NULL},
-    {"SP28",NULL},{"SP29",NULL}, {"SP30",NULL}, {"SP31",NULL},
-    {"SP32",NULL},{"SP33",NULL}, {"SP34",NULL}, {"SP35",NULL},
-    {"SP36",NULL},{"SP37",NULL}, {"SP38",NULL}, {"SP39",NULL},
-    {"SP40",NULL},{"SP41",NULL}, {"SP42",NULL}, {"SP43",NULL},
-    {"SP44",NULL},{"SP45",NULL}, {"SP46",NULL}, {"SP47",NULL},
-    {"SP48",NULL},{"SP49",NULL}, {"SP50",NULL}, {"SP51",NULL},
-    {"SP52",NULL},{"SP53",NULL}, {"SP54",NULL}, {"SP55",NULL},
-    {"SP56",NULL},{"SP57",NULL}, {"SP58",NULL}, {"SP59",NULL},
-    {"SP60",NULL},{"SP61",NULL}, {"SP62",NULL}, {"SP63",NULL},
-    {"SP64",NULL},{"SP65",NULL}, {"SP66",NULL}, {"SP67",NULL},
-    {"SP68",NULL},{"SP69",NULL}, {"SP70",NULL}, {"SP71",NULL},
-    {"SP72",NULL},{"SP73",NULL}, {"SP74",NULL}, {"SP75",NULL},
-    {"SP76",NULL},{"SP77",NULL}, {"SP78",NULL}, {"SP79",NULL},
-    {"SP80",NULL},{"SP81",NULL}, {"SP82",NULL}, {"SP83",NULL},
-    {"SP84",NULL},{"SP85",NULL}, {"SP86",NULL}, {"SP87",NULL},
-    {"SP88",NULL},{"SP89",NULL}, {"SP90",NULL}, {"SP91",NULL},
-    {"SP92",NULL},{"SP93",NULL}, {"SP94",NULL}, {"SP95",NULL},
-    {"SP96",NULL},{"SP97",NULL}, {"SP98",NULL}, {"SP99",NULL},
+	// DEHEXTRA sprites:
+	"SP00", "SP01", "SP02", "SP03", "SP04", "SP05", "SP06", "SP07", "SP08", "SP09",
+	"SP10", "SP11", "SP12", "SP13", "SP14", "SP15", "SP16", "SP17", "SP18", "SP19",
+	"SP20", "SP21", "SP22", "SP23", "SP24", "SP25", "SP26", "SP27", "SP28", "SP29",
+	"SP30", "SP31", "SP32", "SP33", "SP34", "SP35", "SP36", "SP37", "SP38", "SP39",
+	"SP40", "SP41", "SP42", "SP43", "SP44", "SP45", "SP46", "SP47", "SP48", "SP49",
+	"SP50", "SP51", "SP52", "SP53", "SP54", "SP55", "SP56", "SP57", "SP58", "SP59",
+	"SP60", "SP61", "SP62", "SP63", "SP64", "SP65", "SP66", "SP67", "SP68", "SP69",
+	"SP70", "SP71", "SP72", "SP73", "SP74", "SP75", "SP76", "SP77", "SP78", "SP79",
+	"SP80", "SP81", "SP82", "SP83", "SP84", "SP85", "SP86", "SP87", "SP88", "SP89",
+	"SP90", "SP91", "SP92", "SP93", "SP94", "SP95", "SP96", "SP97", "SP98", "SP99"
 };
+
+
+// elements here can be "" for unmodified names
+std::vector<std::string> sprnames;
+
 
 //------------------------------------------------------------------------
 
+namespace Sprites
+{
+	void MarkEntry(int num);
+}
+
+
 void Sprites::Init()
 {
-	for (int s = 0; s < NUMSPRITES_BEX; s++)
-	{
-		free(sprnames[s].new_name);
-		sprnames[s].new_name = NULL;
-	}
+	sprnames.clear();
 }
 
 
 void Sprites::Shutdown()
 {
+	sprnames.clear();
+}
+
+
+void Sprites::MarkEntry(int num)
+{
+	// fill any missing slots with "", including the one we want.
+	while ((int)sprnames.size() < num)
+		sprnames.push_back("");
+
+	// for the modified sprite, copy the original name
+	if (sprnames[num].empty())
+		sprnames[num] = GetOriginalName(num);
 }
 
 
 void Sprites::MarkDependencies()
 {
-	for (int i = 0; i < NUMSPRITES_BEX; i++)
+	for (size_t i = 0 ; i < sprnames.size() ; i++)
 	{
-		if (! sprnames[i].new_name)
-			continue;
-
-		// find this sprite amongst the states...
-		Frames::MarkStatesWithSprite(i);
+		if (sprnames[i] != "" && sprnames[i] != GetOriginalName(i))
+		{
+			Frames::MarkStatesWithSprite((int) i);
+		}
 	}
 }
 
@@ -152,19 +137,15 @@ bool Sprites::ReplaceSprite(const char *before, const char *after)
 	assert(strlen(before) == 4);
 	assert(strlen(after)  == 4);
 
-	for (int i = 0; i < NUMSPRITES_BEX; i++)
+	for (int i = 0 ; i < NUMSPRITES_DEHEXTRA ; i++)
 	{
-		spritename_t *spr = sprnames + i;
+		if (StrCaseCmp(before, sprnames_orig[i]) == 0)
+		{
+			MarkEntry(i);
 
-		if (StrCaseCmp(before, spr->orig_name) != 0)
-			continue;
-
-		if (! spr->new_name)
-			spr->new_name = StringNew(5);
-
-		strcpy(spr->new_name, after);
-
-		return true;
+			sprnames[i] = after;
+			return true;
+		}
 	}
 
 	return false;
@@ -195,26 +176,31 @@ void Sprites::AlterBexSprite(const char *new_val)
 
 const char * Sprites::GetSprite(int spr_num)
 {
-	assert(0 <= spr_num && spr_num < NUMSPRITES_BEX);
+	if (spr_num < 0 || spr_num > 32767)
+		return "XXXX";
 
-	const spritename_t *spr = sprnames + spr_num;
+	const char *name = "";
 
-	const char *name = spr->new_name ? spr->new_name : spr->orig_name;
+	if (spr_num < (int)sprnames.size())
+		name = sprnames[spr_num].c_str();
+
+	if (strlen(name) == 0)
+		name = GetOriginalName(spr_num);
 
 	// Boom support: TNT1 is an invisible sprite
 	if (StrCaseCmp(name, "TNT1") == 0)
 		return "NULL";
-	
+
 	return name;
 }
 
 
 const char * Sprites::GetOriginalName(int spr_num)
 {
-	if (spr_num < NUMSPRITES)
-		return sprnames[spr_num].orig_name;
+	if (spr_num < NUMSPRITES_DEHEXTRA)
+		return sprnames_orig[spr_num];
 
-	return "NONE";
+	return "NULL";
 }
 
 }  // Deh_Edge

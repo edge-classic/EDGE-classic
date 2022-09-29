@@ -1204,7 +1204,7 @@ namespace Things
 				case FT_AMMO:   max_obj = NUMAMMO - 1; break;
 				case FT_FRAME:  max_obj = NUMSTATES_BEX - 1; break;
 				case FT_SOUND:  max_obj = NUMSFX_BEX - 1; break;
-				case FT_SPRITE: max_obj = NUMSPRITES_BEX - 1; break;
+				case FT_SPRITE: max_obj = NUMSPRITES_DEHEXTRA - 1; break; // FIXME !!!
 				case FT_SUBSPR: max_obj = 31; break;
 
 				default:

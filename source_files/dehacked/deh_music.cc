@@ -35,7 +35,6 @@
 #include "deh_buffer.h"
 #include "deh_patch.h"
 #include "deh_music.h"
-#include "deh_storage.h"
 #include "deh_system.h"
 #include "deh_util.h"
 #include "deh_wad.h"

@@ -43,6 +43,7 @@
 #include "deh_music.h"
 #include "deh_patch.h"
 #include "deh_sounds.h"
+#include "deh_sprites.h"
 #include "deh_storage.h"
 #include "deh_system.h"
 #include "deh_text.h"
@@ -930,7 +931,7 @@ namespace Patch
 		Debug_PrintMsg("- After  <%s>\n", text_2);
 
 		if (len1 == 4 && len2 == 4)
-			if (TextStr::ReplaceSprite(text_1, text_2))
+			if (Sprites::ReplaceSprite(text_1, text_2))
 				return;
 
 		if (len1 <= 6 && len2 <= 6)
@@ -1113,7 +1114,7 @@ namespace Patch
 
 			case BEX_SOUNDS:  Sounds:: AlterBexSound(equal_pos);  break;
 			case BEX_MUSIC:   Music::  AlterBexMusic(equal_pos);  break;
-			case BEX_SPRITES: TextStr::AlterBexSprite(equal_pos); break;
+			case BEX_SPRITES: Sprites::AlterBexSprite(equal_pos); break;
 
 			default:
 				InternalError("Bad active_section value %d\n", active_section);

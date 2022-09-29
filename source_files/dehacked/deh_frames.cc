@@ -39,6 +39,7 @@
 #include "deh_info.h"
 #include "deh_patch.h"
 #include "deh_sounds.h"
+#include "deh_sprites.h"
 #include "deh_storage.h"
 #include "deh_system.h"
 #include "deh_text.h"
@@ -1074,7 +1075,7 @@ void Frames::OutputState(char group, int cur)
 	if (action_info[st->action].act_flags & AF_MAKEDEAD)
 	{
 		WAD::Printf("    %s:%c:0:%s:MAKEDEAD,  // %s\n",
-			TextStr::GetSprite(st->sprite),
+			Sprites::GetSprite(st->sprite),
 			'A' + ((int) st->frame & 31),
 			(st->frame >= 32768) ? "BRIGHT" : "NORMAL",
 			(st->action == A_PainDie) ? "A_PainDie" : "A_KeenDie");
@@ -1083,7 +1084,7 @@ void Frames::OutputState(char group, int cur)
 	if (action_info[st->action].act_flags & AF_FACE)
 	{
 		WAD::Printf("    %s:%c:0:%s:FACE_TARGET,\n",
-			TextStr::GetSprite(st->sprite),
+			Sprites::GetSprite(st->sprite),
 			'A' + ((int) st->frame & 31),
 			(st->frame >= 32768) ? "BRIGHT" : "NORMAL");
 	}
@@ -1094,13 +1095,13 @@ void Frames::OutputState(char group, int cur)
 		if ((act_flags & AF_SPREAD) == 0)
 		{
 			WAD::Printf("    %s:%c:0:%s:RESET_SPREADER,\n",
-				TextStr::GetSprite(st->sprite),
+				Sprites::GetSprite(st->sprite),
 				'A' + ((int) st->frame & 31),
 				(st->frame >= 32768) ? "BRIGHT" : "NORMAL");
 		}
 
 		WAD::Printf("    %s:%c:0:%s:%s,  // A_FatAttack\n",
-			TextStr::GetSprite(st->sprite),
+			Sprites::GetSprite(st->sprite),
 			'A' + ((int) st->frame & 31),
 			(st->frame >= 32768) ? "BRIGHT" : "NORMAL", act_name);
 	}
@@ -1120,7 +1121,7 @@ void Frames::OutputState(char group, int cur)
 		tics = 44;
 
 	WAD::Printf("    %s:%c:%d:%s:%s",
-		TextStr::GetSprite(st->sprite),
+		Sprites::GetSprite(st->sprite),
 		'A' + ((int) st->frame & 31), tics,
 		(st->frame >= 32768) ? "BRIGHT" : "NORMAL", act_name);
 

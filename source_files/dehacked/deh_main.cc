@@ -43,6 +43,7 @@
 #include "deh_patch.h"
 #include "deh_rscript.h"
 #include "deh_sounds.h"
+#include "deh_sprites.h"
 #include "deh_storage.h"
 #include "deh_system.h"
 #include "deh_things.h"
@@ -72,6 +73,7 @@ void Init()
 	Rscript::Startup();
 	Sounds::Init();
 	Music::Init();
+	Sprites::Init();
 	TextStr::Startup();
 	Things::Startup();
 	Weapons::Startup();
@@ -113,7 +115,7 @@ dehret_e Convert(void)
 
 	// do conversions into DDF...
 
-	TextStr::SpriteDependencies();
+	Sprites::SpriteDependencies();
 	Frames ::StateDependencies();
 	Ammo   ::AmmoDependencies();
 
@@ -138,8 +140,9 @@ dehret_e Convert(void)
 
 void Shutdown()
 {
-	Sounds::Shutdown();
-	Music ::Shutdown();
+	Sounds ::Shutdown();
+	Music  ::Shutdown();
+	Sprites::Shutdown();
 
 	FreeInputBuffers();
 

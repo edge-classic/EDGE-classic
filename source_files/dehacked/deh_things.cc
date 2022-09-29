@@ -46,6 +46,7 @@
 #include "deh_things.h"
 #include "deh_storage.h"
 #include "deh_sounds.h"
+#include "deh_sprites.h"
 #include "deh_system.h"
 #include "deh_text.h"
 #include "deh_util.h"
@@ -516,7 +517,7 @@ namespace Things
 			WAD::Printf("TRANSLUCENCY = 50%%;\n");
 			WAD::Printf("\n");
 			WAD::Printf("STATES(IDLE) = %s:A:-1:NORMAL:TRANS_SET(0%%);\n",
-				TextStr::GetSprite(SPR_TFOG));
+				Sprites::GetSprite(SPR_TFOG));
 
 			// EDGE doesn't use the TELEPORT_FOG object, instead it uses
 			// the CHASE states of the TELEPORT_FLASH object (i.e. the one
@@ -559,7 +560,7 @@ namespace Things
 
 			WAD::Printf("\n");
 			WAD::Printf("STATES(IDLE) = %s:A:-1:NORMAL:NOTHING;\n",
-				TextStr::GetSprite(SPR_CAND));
+				Sprites::GetSprite(SPR_CAND));
 
 			return;
 		}

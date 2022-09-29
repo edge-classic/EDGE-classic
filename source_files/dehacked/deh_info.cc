@@ -30,6 +30,7 @@
 
 #include "deh_info.h"
 #include "deh_mobj.h"
+#include "deh_sprites.h"
 
 
 namespace Deh_Edge

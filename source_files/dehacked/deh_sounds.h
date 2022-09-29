@@ -18,33 +18,7 @@
 namespace Deh_Edge
 {
 
-//
-// SoundFX struct.
-//
-typedef struct
-{
-    // up to 6-character name
-    const char *orig_name;
 
-    // Sfx singularity (only one at a time)
-    int singularity;
-
-    // Sfx priority
-    int priority;
-
-    // referenced sound if a link
-    int link;
-
-    // pitch if a link
-    int pitch;
-
-    // volume if a link
-    int volume;
-
-	// changed name (empty if not modified).  Space for 6 non-NUL characters.
-	std::string new_name;
-}
-sfxinfo_t;
 
 //
 // Identifiers for all sfx in game.
@@ -131,9 +105,6 @@ typedef enum
 	NUMSFX_BEX
 }
 sfxtype_e;
-
-// the complete set of sound effects
-extern sfxinfo_t S_sfx[NUMSFX_BEX];
 
 
 namespace Sounds

@@ -479,14 +479,11 @@ namespace Patch
 		Debug_PrintMsg("\n--- ReadBinarySound %d ---\n", s_num);
 
 		if (file_error)
-			FatalError("File error reading binary sprite table.\n");
-
-		sfxinfo_t *sfx = S_sfx + s_num;
+			FatalError("File error reading binary sound table.\n");
 
 		GetRawInt();  // ignore sound name pointer
 		GetRawInt();  // ignore singularity
-
-		GetInt(O_SOUND, s_num, &sfx->priority);
+		GetRawInt();  // ignore priority
 
 		GetRawInt();  // ignore link pointer
 		GetRawInt();  // ignore link pitch

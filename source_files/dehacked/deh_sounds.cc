@@ -283,15 +283,15 @@ std::vector<sfxinfo_t *> S_sfx;
 namespace Sounds
 {
 	bool some_sound_modified = false;
-	bool got_one;
 	bool sound_modified[NUMSFX_DEHEXTRA];
 
 	void BeginLump();
 	void FinishLump();
 
-	const sfxinfo_t * GetOriginalSFX(int num);
-
 	void MarkSound(int s_num);
+	const sfxinfo_t * GetOriginalSFX(int num);
+	const char * GetEdgeSfxName(int sound_id);
+	void WriteSound(int s_num);
 }
 
 
@@ -406,7 +406,8 @@ void Sounds::AlterSound(int new_val)
 
 const char * Sounds::GetEdgeSfxName(int sound_id)
 {
-	assert(sound_id != sfx_None);
+	if (sound_id == sfx_None)
+		return NULL;
 
 	switch (sound_id)
 	{
@@ -420,20 +421,32 @@ const char * Sounds::GetEdgeSfxName(int sound_id)
 		default: break;
 	}
 
-	return S_sfx[sound_id].orig_name;
+	const sfxinfo_t * orig = GetOriginalSFX(sound_id);
+
+	if (orig->name[0] != 0)
+		return StrUpper(orig->name);
+
+	// we get here for sounds with no original name (only possible
+	// for DSDehacked / MBF21).  check if modified name is empty too.
+
+	if (sound_id >= (int)S_sfx.size())
+		return NULL;
+
+	const sfxinfo_t * mod = S_sfx[sound_id];
+	if (mod == NULL || mod->name[0] == 0)
+		return NULL;
+
+	// create a suitable name
+	static char name_buf[64];
+	snprintf(name_buf, sizeof(name_buf), "BEX_%d", sound_id);
+	return name_buf;
 }
 
 
 const char * Sounds::GetSound(int sound_id)
 {
-	assert(sound_id != sfx_None);
-	assert(strlen(S_sfx[sound_id].orig_name) < 16);
-
-	if (sound_id >= 500)
-	{
-		sound_modified[sound_id] = true;
-		MarkSound(sound_id);
-	}
+	if (sound_id == sfx_None)
+		return "NULL";
 
 	// handle random sounds
 	switch (sound_id)
@@ -453,39 +466,42 @@ const char * Sounds::GetSound(int sound_id)
 		default: break;
 	}
 
-	static char name_buf[256];
+	const char * name = GetEdgeSfxName(sound_id);
+	if (name == NULL)
+		return "NULL";
 
-	sprintf(name_buf, "%s", StrUpper(GetEdgeSfxName(sound_id)));
-
-	return name_buf;
+	return name;
 }
 
 
-void Sounds::WriteSound(int s_num)
+void Sounds::WriteSound(int sound_id)
 {
-	sfxinfo_t *sound = S_sfx + s_num;
+	const sfxinfo_t *sound = S_sfx[sound_id];
 
-	if (! got_one)
-	{
-		got_one = true;
-		BeginLump();
-	}
+	// in the unlikely event the sound did not get a name (which is
+	// only possible with DSDehacked / MBF21), just skip it.
+	const char *lump = sound->name;
 
-	WAD::Printf("[%s]\n", StrUpper(GetEdgeSfxName(s_num)));
+	if (lump[0] == 0)
+		return;
 
-	const char *lump = sound->orig_name;
-	if (sound->new_name[0] != 0)
-		lump = sound->new_name;
+	const char * ddf_name = GetEdgeSfxName(sound_id);
+	if (ddf_name == NULL)
+		InternalError("No DDF name for sound %d ??\n", sound_id);
 
-	// only one sound had a `link` field in standard DOOM.
+	WAD::Printf("[%s]\n", ddf_name);
+
+	// only one sound has a `link` field in standard DOOM.
 	// we emulate that here.
-	if (s_num == sfx_chgun)
+	if (sound_id == sfx_chgun)
 	{
-		sfxinfo_t *link = &S_sfx[sfx_pistol];
+		const sfxinfo_t *link = &S_sfx_orig[sfx_pistol];
 
-		lump = link->orig_name;
-		if (link->new_name[0] != 0)
-			lump = link->new_name;
+		if (sfx_pistol < (int)S_sfx.size() && S_sfx[sfx_pistol] != NULL)
+			link = S_sfx[sfx_pistol];
+
+		if (link->name[0] != 0)
+			lump = link->name;
 	}
 
 	WAD::Printf("LUMP_NAME = \"DS%s\";\n", StrUpper(lump));
@@ -494,7 +510,7 @@ void Sounds::WriteSound(int s_num)
 	if (sound->singularity != 0)
 		WAD::Printf("SINGULAR = %d;\n", sound->singularity);
 
-	if (s_num == sfx_stnmov)
+	if (sound_id == sfx_stnmov)
 		WAD::Printf("LOOP = TRUE;\n");
 
 	WAD::Printf("\n");
@@ -503,18 +519,31 @@ void Sounds::WriteSound(int s_num)
 
 void Sounds::ConvertSFX(void)
 {
-	if (! all_mode && ! some_sound_modified)
-		return;
-
-	got_one = false;
-
-	for (int i = 1; i < NUMSFX_DEHEXTRA; i++)
+	if (all_mode)
 	{
-	    if (! all_mode && S_sfx[i].new_name[0] == 0)
+		for (int i = 1 ; i < NUMSFX_COMPAT ; i++)
+			MarkSound(i);
+
+		/* this is debatable....
+		for (int i = sfx_fre000 ; i <= sfx_fre199 ; i++)
+			MarkSound(i);
+		*/
+	}
+
+	bool got_one = false;
+
+	for (int i = 1 ; i < (int)S_sfx.size() ; i++)
+	{
+		if (S_sfx[i] == NULL)
 			continue;
 
-		if(sound_modified[i] == true)
-			WriteSound(i);
+		if (! got_one)
+		{
+			BeginLump();
+			got_one = true;
+		}
+
+		WriteSound(i);
 	}
 
 	if (got_one)
@@ -539,7 +568,7 @@ bool Sounds::ReplaceSound(const char *before, const char *after)
 
 		MarkSound(i);
 
-		strcpy(S_sfx[i].name, after);
+		strcpy(S_sfx[i]->name, after);
 		return true;
 	}
 

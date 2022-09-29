@@ -156,15 +156,32 @@ void Sprites::AlterBexSprite(const char *new_val)
 {
 	const char *old_val = Patch::line_buf;
 
-	if (strlen(old_val) != 4)
-	{
-		PrintWarn("Bad length for sprite name '%s'.\n", old_val);
-		return;
-	}
-
 	if (strlen(new_val) != 4)
 	{
 		PrintWarn("Bad length for sprite name '%s'.\n", new_val);
+		return;
+	}
+
+	// for DSDHACKED, support a numeric target
+	if (isdigit(old_val[0]))
+	{
+		int num = atoi(old_val);
+		if (num < 0 || num > 32767)
+		{
+			PrintWarn("Line %d: illegal sprite entry '%s'.\n",
+				Patch::line_num, old_val);
+		}
+		else
+		{
+			MarkEntry(num);
+			sprnames[num] = new_val;
+		}
+		return;
+	}
+
+	if (strlen(old_val) != 4)
+	{
+		PrintWarn("Bad length for sprite name '%s'.\n", old_val);
 		return;
 	}
 

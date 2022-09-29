@@ -275,12 +275,6 @@ void Music::AlterBexMusic(const char *new_val)
 {
 	const char *old_val = Patch::line_buf;
 
-	if (strlen(old_val) < 1 || strlen(old_val) > 6)
-	{
-		PrintWarn("Bad length for music name '%s'.\n", old_val);
-		return;
-	}
-
 	if (strlen(new_val) < 1 || strlen(new_val) > 6)
 	{
 		PrintWarn("Bad length for music name '%s'.\n", new_val);
@@ -301,6 +295,12 @@ void Music::AlterBexMusic(const char *new_val)
 			MarkEntry(num);
 			strcpy(S_music[num]->name, new_val);
 		}
+		return;
+	}
+
+	if (strlen(old_val) < 1 || strlen(old_val) > 6)
+	{
+		PrintWarn("Bad length for music name '%s'.\n", old_val);
 		return;
 	}
 

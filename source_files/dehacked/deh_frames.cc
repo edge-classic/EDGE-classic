@@ -962,7 +962,7 @@ void Frames::SpecialAction(char *act_name, state_t *st)
 			break;
 
 		  case A_PlaySound:
-		  	if (st->misc1 <= 0 || st->misc1 >= NUMSFX_BEX)
+		  	if (st->misc1 <= 0 || st->misc1 >= NUMSFX_MBF)  // FIXME
 				strcpy(act_name, "NOTHING");
 			else
 			{
@@ -973,7 +973,7 @@ void Frames::SpecialAction(char *act_name, state_t *st)
 		case A_Scratch:
 			{
 				const char *sfx = NULL;
-				if (st->misc2 > 0 && st->misc2 < NUMSFX_BEX)
+				if (st->misc2 > 0 && st->misc2 < NUMSFX_MBF)  // FIXME
 					sfx = Sounds::GetSound(st->misc2);
 
 				int damage = st->misc1;

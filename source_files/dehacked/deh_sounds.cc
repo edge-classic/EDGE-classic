@@ -68,10 +68,10 @@ struct sfxinfo_t
 // Information about all the sfx
 //
 
-sfxinfo_t S_sfx[NUMSFX_BEX] =
+sfxinfo_t S_sfx[NUMSFX_DEHEXTRA] =
 {
 	// S_sfx[0] needs to be a dummy for odd reasons.
-	{ "none", 0,  0, "" },
+	{ "none",   0,  0,  "" },
 
 	{ "pistol", 0,  64, "" },
 	{ "shotgn", 0,  64, "" },
@@ -182,15 +182,17 @@ sfxinfo_t S_sfx[NUMSFX_BEX] =
 	{ "skeatk", 0,  70, "" },
 	{ "radio",  0,  60, "" },
 
-	// BOOM and MBF sounds...
+	// MBF sounds...
 	{ "dgsit",  0,  98, "" },
 	{ "dgatk",  0,  70, "" },
 	{ "dgact",  0, 120, "" },
 	{ "dgdth",  0,  70, "" },
 	{ "dgpain", 0,  96, "" },
+
+	// other source ports...
 	{ "secret", 0,  60, "" },
-	{ "gibdth", 0,  60, "gibdth" },
-	{ "scrsht", 0,   0, "scrsht" },
+	{ "gibdth", 0,  60, "" },
+	{ "scrsht", 0,   0, "" },
 
 	// A LOT of dummies
 	{ "none", 0,  0, "" },
@@ -787,7 +789,7 @@ namespace Sounds
 {
 	bool some_sound_modified = false;
 	bool got_one;
-	bool sound_modified[NUMSFX_BEX];
+	bool sound_modified[NUMSFX_DEHEXTRA];
 }
 
 
@@ -807,7 +809,7 @@ namespace Sounds
 		if (s_num == sfx_None)
 			return;
 
-		assert(1 <= s_num && s_num < NUMSFX_BEX);
+		assert(1 <= s_num && s_num < NUMSFX_DEHEXTRA);
 
 		some_sound_modified = true;
 	}
@@ -817,7 +819,7 @@ namespace Sounds
 		int s_num = Patch::active_obj;
 		const char *deh_field = Patch::line_buf;
 
-		assert(0 <= s_num && s_num < NUMSFX_BEX);
+		assert(0 <= s_num && s_num < NUMSFX_DEHEXTRA);
 
 		if (StrCaseCmpPartial(deh_field, "Zero") == 0 ||
 		    StrCaseCmpPartial(deh_field, "Neg. One") == 0)
@@ -927,7 +929,6 @@ namespace Sounds
 			BeginSoundLump();
 		}
 
-
 		WAD::Printf("[%s]\n", StrUpper(GetEdgeSfxName(s_num)));
 
 		const char *lump = !sound->new_name.empty() ? sound->new_name.c_str() : sound->orig_name;
@@ -961,7 +962,7 @@ void Sounds::ConvertSFX(void)
 
 	got_one = false;
 
-	for (int i = 1; i < NUMSFX_BEX; i++)
+	for (int i = 1; i < NUMSFX_DEHEXTRA; i++)
 	{
 	    if (! all_mode && S_sfx[i].new_name.empty())
 			continue;
@@ -977,7 +978,7 @@ void Sounds::ConvertSFX(void)
 
 bool Sounds::ReplaceSound(const char *before, const char *after)
 {
-	for (int i = 1; i < NUMSFX_BEX; i++)
+	for (int i = 1; i < NUMSFX_DEHEXTRA; i++)
 	{
 		if (StrCaseCmp(S_sfx[i].orig_name, before) != 0)
 			continue;

@@ -1202,7 +1202,7 @@ namespace Things
 				case FT_SUBSPR: max_obj = 31; break;
 
 				case FT_FRAME:  max_obj = NUMSTATES_BEX - 1; break;
-				case FT_SOUND:  max_obj = NUMSFX_BEX - 1; break;
+				case FT_SOUND:  max_obj = NUMSFX_MBF - 1; break;  // FIXME
 
 				// for DSDehacked, allow very high values
 				case FT_SPRITE: max_obj = 32767; break;

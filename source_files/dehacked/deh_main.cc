@@ -67,14 +67,14 @@ void Init()
 {
 	System_Startup();
 
-	Ammo::Startup();
+	Ammo   ::Init();
 	Frames::Startup();
 	Misc::Startup();
-	Rscript::Startup();
-	Sounds::Init();
-	Music::Init();
+	Rscript::Init();
+	Sounds ::Init();
+	Music  ::Init();
 	Sprites::Init();
-	TextStr::Startup();
+	TextStr::Init();
 	Things::Startup();
 	Weapons::Startup();
 
@@ -142,9 +142,12 @@ dehret_e Convert(void)
 
 void Shutdown()
 {
+	Ammo   ::Shutdown();
+	Rscript::Shutdown();
 	Sounds ::Shutdown();
 	Music  ::Shutdown();
 	Sprites::Shutdown();
+	TextStr::Shutdown();
 
 	FreeInputBuffers();
 

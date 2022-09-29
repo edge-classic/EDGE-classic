@@ -18,7 +18,8 @@ namespace Deh_Edge
 
 namespace TextStr
 {
-	void Startup(void);
+	void Init();
+	void Shutdown();
 
 	// these return true if the string was found.
 	bool ReplaceString(const char *before, const char *after);

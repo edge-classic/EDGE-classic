@@ -37,7 +37,6 @@
 #include "deh_info.h"
 #include "deh_frames.h"
 #include "deh_misc.h"
-#include "deh_mobj.h"
 #include "deh_patch.h"
 #include "deh_storage.h"
 #include "deh_sounds.h"

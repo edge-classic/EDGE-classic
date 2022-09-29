@@ -18,10 +18,12 @@ namespace Deh_Edge
 
 namespace Rscript
 {
-	void Startup(void);
+	void Init();
+	void Shutdown();
+
 	void MarkKeenDie(int mt_num);
 
-	void ConvertRAD(void);
+	void ConvertRAD();
 }
 
 }  // Deh_Edge

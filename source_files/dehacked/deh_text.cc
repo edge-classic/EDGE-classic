@@ -36,7 +36,6 @@
 #include "deh_info.h"
 #include "deh_english.h"
 #include "deh_frames.h"
-#include "deh_mobj.h"
 #include "deh_patch.h"
 #include "deh_text.h"
 #include "deh_storage.h"
@@ -447,7 +446,7 @@ const char *lang_bex_unsupported[] =
 
 //------------------------------------------------------------------------
 
-void TextStr::Startup(void)
+void TextStr::Init()
 {
 	for (int i = 0; lang_list[i].orig_text; i++)
 	{
@@ -460,6 +459,11 @@ void TextStr::Startup(void)
 		free(cheat_list[c].new_text);
 		cheat_list[c].new_text = NULL;
 	}
+}
+
+
+void TextStr::Shutdown()
+{
 }
 
 
@@ -593,52 +597,60 @@ namespace TextStr
 {
 	bool got_one;
 
-	void BeginTextLump(void)
-	{
-		WAD::NewLump("DDFLANG");
-
-		WAD::Printf("<LANGUAGES>\n\n");
-		WAD::Printf("[ENGLISH]\n");
-	}
-
-	void FinishTextLump(void)
-	{
-		WAD::Printf("\n");
-	}
-
-	void WriteTextString(const langinfo_t *info)
-	{
-		if (! got_one)
-		{
-			got_one = true;
-			BeginTextLump();
-		}
-
-		WAD::Printf("%s = \"", info->ldf_name);
-
-		const char *str = info->new_text ? info->new_text : info->orig_text;
-
-		for (; *str; str++)
-		{
-			if (*str == '\n')
-			{
-				WAD::Printf("\\n\"\n  \"");
-				continue;
-			}
-
-			if (*str == '"')
-			{
-				WAD::Printf("\\\"");
-				continue;
-			}
-
-			// XXX may need special handling for non-english chars
-			WAD::Printf("%c", *str);
-		}
-
-		WAD::Printf("\";\n");
-	}
+	void BeginTextLump();
+	void FinishTextLump();
+	void WriteTextString(const langinfo_t *info);
 }
+
+
+void TextStr::BeginTextLump()
+{
+	WAD::NewLump("DDFLANG");
+
+	WAD::Printf("<LANGUAGES>\n\n");
+	WAD::Printf("[ENGLISH]\n");
+}
+
+
+void TextStr::FinishTextLump()
+{
+	WAD::Printf("\n");
+}
+
+
+void TextStr::WriteTextString(const langinfo_t *info)
+{
+	if (! got_one)
+	{
+		got_one = true;
+		BeginTextLump();
+	}
+
+	WAD::Printf("%s = \"", info->ldf_name);
+
+	const char *str = info->new_text ? info->new_text : info->orig_text;
+
+	for (; *str; str++)
+	{
+		if (*str == '\n')
+		{
+			WAD::Printf("\\n\"\n  \"");
+			continue;
+		}
+
+		if (*str == '"')
+		{
+			WAD::Printf("\\\"");
+			continue;
+		}
+
+		// XXX may need special handling for non-english chars
+		WAD::Printf("%c", *str);
+	}
+
+	WAD::Printf("\";\n");
+}
+
 
 void TextStr::ConvertLDF(void)
 {

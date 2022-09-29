@@ -280,7 +280,7 @@ void Music::AlterBexMusic(const char *new_val)
 		return;
 	}
 
-	// for DSDHACKED, support a numeric target
+	// for DSDehacked, support a numeric target
 	if (isdigit(old_val[0]))
 	{
 		int num = atoi(old_val);

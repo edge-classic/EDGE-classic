@@ -260,6 +260,20 @@ static bool PIT_CheckAbsLine(line_t * ld, void *data)
 		if (ld->flags & MLF_Blocking)
 			return false;
 
+		// block players only ?
+		if ((tm_I.mover->player) &&
+			(ld->flags & MLF_BlockPlayers))
+		{
+			return false;
+		}
+
+		// block grounded monsters only ?
+		if ((tm_I.extflags & EF_MONSTER) &&
+			(ld->flags & MLF_BlockGrounded) && (tm_I.mover->z <= tm_I.mover->floorz + 1.0f))
+		{
+			return false;
+		}
+
 		// block monsters only ?
 		if ((tm_I.extflags & EF_MONSTER) &&
 			(ld->flags & MLF_BlockMonsters))
@@ -451,7 +465,9 @@ static bool PIT_CheckRelLine(line_t * ld, void *data)
 
 		if ((ld->flags & MLF_Blocking) ||
 			((ld->flags & MLF_BlockMonsters) &&
-			(tm_I.extflags & EF_MONSTER)))
+			(tm_I.extflags & EF_MONSTER)) ||
+			((ld->flags & MLF_BlockGrounded) && (tm_I.extflags & EF_MONSTER) && (tm_I.mover->z <= tm_I.mover->floorz + 1.0f)) ||
+			((ld->flags & MLF_BlockPlayers) && (tm_I.mover->player)))
 		{
 			blockline = ld;
 			return false;
@@ -1324,7 +1340,7 @@ void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
 		if (TheLine->side[0] && TheLine->side[1])
 		{
 			// clear standard flags
-			TheLine->flags &= ~(MLF_Blocking | MLF_BlockMonsters);
+			TheLine->flags &= ~(MLF_Blocking | MLF_BlockMonsters | MLF_BlockGrounded | MLF_BlockPlayers);
 
 			// clear EDGE's extended lineflags too
 			TheLine->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
@@ -2465,7 +2481,7 @@ static bool PIT_CheckBlockingLine(line_t * line, void *data)
 
 	// -KM- 1999/01/31 Save ceilingline for bounce.
 	if ((crosser && (line->flags & MLF_ShootBlock)) || 
-		(!crosser && (line->flags & (MLF_Blocking | MLF_BlockMonsters))))
+		(!crosser && (line->flags & (MLF_Blocking | MLF_BlockMonsters)))) // How to handle MLF_BlockGrounded and MLF_BlockPlayer?
 	{
 		blockline = line;
 		return false;

@@ -695,7 +695,7 @@ static void P_LineEffect(line_t *target, line_t *source,
 	if (special->line_effect & LINEFX_UnblockThings)
 	{
 		if (target->side[0] && target->side[1] && (target != source))
-			target->flags &= ~(MLF_Blocking | MLF_BlockMonsters);
+			target->flags &= ~(MLF_Blocking | MLF_BlockMonsters | MLF_BlockGrounded | MLF_BlockPlayers);
 	}
 
 	// experimental: block bullets/missiles

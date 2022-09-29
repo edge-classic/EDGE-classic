@@ -116,12 +116,18 @@ typedef enum
 	//       be pushed simultaneously.
 	MLF_PassThru = 0x0200,
 
-	// -AJA- These two from XDoom.
-	MLF_ShootBlock  = 0x0800,
-	MLF_SightBlock  = 0x1000,
+
+	// MBF21
+	MLF_BlockGrounded = 0x1000,
+	MLF_BlockPlayers = 0x2000,
+
 
 	// ----- internal flags -----
 	MLF_Mirror = (1 << 16),
+	// -AJA- These two from XDoom.
+	// Dasho - Moved to internal flag range to make room for MBF21 stuff
+	MLF_ShootBlock  = (1 << 17),
+	MLF_SightBlock  = (1 << 18),
 }
 lineflag_e;
 

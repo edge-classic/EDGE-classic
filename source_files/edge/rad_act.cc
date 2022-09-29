@@ -909,7 +909,7 @@ void RAD_ActUnblockLines(rad_trigger_t *R, void *param)
 			continue;
 
 		// clear standard flags
-		ld->flags &= ~(MLF_Blocking | MLF_BlockMonsters);
+		ld->flags &= ~(MLF_Blocking | MLF_BlockMonsters | MLF_BlockGrounded | MLF_BlockPlayers);
 
 		// clear EDGE's extended lineflags too
 		ld->flags &= ~(MLF_SightBlock | MLF_ShootBlock);

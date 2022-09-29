@@ -69,9 +69,6 @@ namespace Deh_Edge
 #define EF_NO_ITEM_BK  'I'
 
 
-// XXX needed to get original name (warning message)
-extern spritename_t sprnames[NUMSPRITES_BEX];
-
 #define CAST_MAX  20
 
 
@@ -758,7 +755,7 @@ namespace Things
 		if (pu->benefit == NULL)  // not found
 		{
 			PrintWarn("Unknown pickup sprite \"%s\" for item [%s]\n",
-				sprnames[spr_num].orig_name, info->name);
+				Sprites::GetOriginalName(spr_num), info->name);
 			return;
 		}
 

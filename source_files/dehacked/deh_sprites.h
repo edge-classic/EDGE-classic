@@ -94,6 +94,7 @@ namespace Sprites
 	void AlterBexSprite(const char * new_val);
 
 	const char *GetSprite(int spr_num);
+	const char *GetOriginalName(int spr_num);
 
 	void MarkDependencies();
 }

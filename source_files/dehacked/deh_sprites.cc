@@ -208,4 +208,13 @@ const char * Sprites::GetSprite(int spr_num)
 	return name;
 }
 
+
+const char * Sprites::GetOriginalName(int spr_num)
+{
+	if (spr_num < NUMSPRITES)
+		return sprnames[spr_num].orig_name;
+
+	return "NONE";
+}
+
 }  // Deh_Edge

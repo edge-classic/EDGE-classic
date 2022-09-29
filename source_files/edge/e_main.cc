@@ -40,6 +40,7 @@
 #include <algorithm>
 #include <array>
 #include <vector>
+#include <chrono> // PurgeCache
 
 #include "exe_path.h"
 #include "file.h"
@@ -890,6 +891,32 @@ void InitDirectories(void)
         epi::FS_MakeDir(shot_dir.c_str());
 }
 
+// Remove cache files that are older than roughly ~6 months to keep cache dir from going nuts
+
+static void PurgeCache(void)
+{
+	const std::filesystem::file_time_type expiry = std::filesystem::file_time_type::clock::now() - std::chrono::hours(4320);
+	epi::filesystem_dir_c fsd;
+
+	// GWA should be the only filetypes we need to worry about now that HWA files are internal
+	if (!FS_ReadDir(&fsd, cache_dir.c_str(), "*.gwa"))
+	{
+		I_Error("PurgeCache: Failed to read '%s' directory!\n", cache_dir.c_str());
+	}
+	else
+	{
+		for (int i = 0; i < fsd.GetSize(); i++) 
+		{
+			if(!fsd[i]->is_dir)
+			{
+				if(std::filesystem::last_write_time(fsd[i]->name.c_str()) < expiry)
+				{
+					epi::FS_Delete(fsd[i]->name.c_str());
+				}			
+			}
+		}
+	}	
+}
 
 //
 // Adds an IWAD and EDGE.WAD
@@ -1462,6 +1489,8 @@ static void E_Startup(void)
 	InitDirectories();
 
 	SetupLogAndDebugFiles();
+
+	PurgeCache();
 
 	CON_InitConsole();
 

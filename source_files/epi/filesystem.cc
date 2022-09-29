@@ -20,7 +20,6 @@
 
 #include "file.h"
 #include "filesystem.h"
-#include <chrono>
 
 #define MAX_MODE_CHARS  32
 

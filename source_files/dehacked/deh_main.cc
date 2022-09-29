@@ -119,16 +119,18 @@ dehret_e Convert(void)
 	Frames ::StateDependencies();
 	Ammo   ::AmmoDependencies();
 
-	Sounds::ConvertSFX();
-	Music ::ConvertMUS();
-
+	// things and weapons must be before attacks
 	Things ::FixHeights();
 	Things ::ConvertTHING();
+	Weapons::ConvertWEAP();
 	Attacks::ConvertATK();
 
-	Weapons::ConvertWEAP();
 	TextStr::ConvertLDF();
 	Rscript::ConvertRAD();
+
+	// sounds must be after things/weapons/attacks
+	Sounds::ConvertSFX();
+	Music ::ConvertMUS();
 
 	Storage::RestoreAll();
 

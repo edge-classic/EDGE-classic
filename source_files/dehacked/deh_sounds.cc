@@ -465,6 +465,14 @@ const char * Sounds::GetSound(int sound_id)
 		default: break;
 	}
 
+	// if something uses DEHEXTRA sounds (+ a few others), ensure we
+	// generate DDFSFX entries for them.
+	if ((sfx_fre000 <= sound_id && sound_id <= sfx_fre199) ||
+		(sound_id == sfx_gibdth) || (sound_id == sfx_scrsht))
+	{
+		MarkSound(sound_id);
+	}
+
 	const char * name = GetEdgeSfxName(sound_id);
 	if (name == NULL)
 		return "NULL";

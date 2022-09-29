@@ -65,6 +65,10 @@ typedef enum
 	sfx_gibdth,
 	sfx_scrsht,
 
+	NUMSFX_COMPAT,
+
+	// Note: there is a big gap here until the DEHEXTRA sounds...
+
 	// DEHEXTRA: 200 additional sounds
 	sfx_fre000 = 500,
 	sfx_fre199 = 699,

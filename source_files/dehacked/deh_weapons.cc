@@ -100,10 +100,15 @@ bool weapon_modified[NUMWEAPONS];
 
 //----------------------------------------------------------------------------
 
-void Weapons::Startup(void)
+void Weapons::Init()
 {
 	memset(weapon_modified, 0, sizeof(weapon_modified));
 }
+
+
+void Weapons::Shutdown()
+{ }
+
 
 namespace Weapons
 {

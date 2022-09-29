@@ -72,11 +72,6 @@ namespace Deh_Edge
 #define CAST_MAX  20
 
 
-void Things::Startup(void)
-{
-	memset(mobj_modified, 0, sizeof(mobj_modified));
-}
-
 namespace Things
 {
 	bool got_one;
@@ -84,18 +79,38 @@ namespace Things
 
 	int cast_mobjs[CAST_MAX];
 
-	void BeginLump(void)
-	{
-		WAD::NewLump("DDFTHING");
+	void BeginLump();
+	void FinishLump();
 
-		WAD::Printf("<THINGS>\n\n");
-	}
+	bool ValidateValue(const fieldreference_t *ref, int new_val);
+}
 
-	void FinishLump(void)
-	{
-		WAD::Printf("\n");
-	}
 
+void Things::Init()
+{
+	memset(mobj_modified, 0, sizeof(mobj_modified));
+}
+
+
+void Things::Shutdown()
+{ }
+
+
+void Things::BeginLump()
+{
+	WAD::NewLump("DDFTHING");
+
+	WAD::Printf("<THINGS>\n\n");
+}
+
+void Things::FinishLump(void)
+{
+	WAD::Printf("\n");
+}
+
+
+namespace Things
+{
 	typedef struct 
 	{
 		int flag;
@@ -1157,72 +1172,71 @@ void Things::AlterBexBits(char *bit_str)
 	MarkThing(mt_num);
 }
 
-namespace Things
+
+bool Things::ValidateValue(const fieldreference_t *ref, int new_val)
 {
-	bool ValidateValue(const fieldreference_t *ref, int new_val)
-	{
-		if (ref->field_type == FT_ANY || ref->field_type == FT_BITS)
-			return true;
-
-		if (new_val < 0 || (new_val == 0 && ref->field_type == FT_GTEQ1))
-		{
-			PrintWarn("Line %d: bad value '%d' for %s\n",
-				Patch::line_num, new_val, ref->deh_name);
-			return false;
-		}
-
-		if (ref->field_type == FT_NONEG || ref->field_type == FT_GTEQ1)
-			return true;
-
-		if (ref->field_type == FT_SUBSPR)  // ignore the bright bit
-			new_val &= ~32768;
-
-		int min_obj = 0;
-		int max_obj = 0;
-
-		if (Patch::patch_fmt <= 5)
-		{
-			switch (ref->field_type)
-			{
-				case FT_AMMO:   max_obj = NUMAMMO    - 1; break;
-				case FT_FRAME:  max_obj = NUMSTATES  - 1; break;
-				case FT_SOUND:  max_obj = NUMSFX     - 1; break;
-				case FT_SPRITE: max_obj = NUMSPRITES - 1; break;
-				case FT_SUBSPR: max_obj = 31; break;
-
-				default:
-					InternalError("Bad field type %d\n", ref->field_type);
-			}
-		}
-		else  /* patch_fmt == 6, allow BOOM/MBF stuff */
-		{
-			switch (ref->field_type)
-			{
-				case FT_AMMO:   max_obj = NUMAMMO - 1; break;
-				case FT_SUBSPR: max_obj = 31; break;
-
-				case FT_FRAME:  max_obj = NUMSTATES_BEX - 1; break;
-
-				// for DSDehacked, allow very high values
-				case FT_SPRITE: max_obj = 32767; break;
-				case FT_SOUND:  max_obj = 32767; break;
-
-				default:
-					InternalError("Bad field type %d\n", ref->field_type);
-			}
-		}
-
-		if (new_val < min_obj || new_val > max_obj)
-		{
-			PrintWarn("Line %d: bad value '%d' for %s\n",
-				Patch::line_num, new_val, ref->deh_name);
-
-			return false;
-		}
-
+	if (ref->field_type == FT_ANY || ref->field_type == FT_BITS)
 		return true;
+
+	if (new_val < 0 || (new_val == 0 && ref->field_type == FT_GTEQ1))
+	{
+		PrintWarn("Line %d: bad value '%d' for %s\n",
+			Patch::line_num, new_val, ref->deh_name);
+		return false;
 	}
+
+	if (ref->field_type == FT_NONEG || ref->field_type == FT_GTEQ1)
+		return true;
+
+	if (ref->field_type == FT_SUBSPR)  // ignore the bright bit
+		new_val &= ~32768;
+
+	int min_obj = 0;
+	int max_obj = 0;
+
+	if (Patch::patch_fmt <= 5)
+	{
+		switch (ref->field_type)
+		{
+			case FT_AMMO:   max_obj = NUMAMMO    - 1; break;
+			case FT_FRAME:  max_obj = NUMSTATES  - 1; break;
+			case FT_SOUND:  max_obj = NUMSFX     - 1; break;
+			case FT_SPRITE: max_obj = NUMSPRITES - 1; break;
+			case FT_SUBSPR: max_obj = 31; break;
+
+			default:
+				InternalError("Bad field type %d\n", ref->field_type);
+		}
+	}
+	else  /* patch_fmt == 6, allow BOOM/MBF stuff */
+	{
+		switch (ref->field_type)
+		{
+			case FT_AMMO:   max_obj = NUMAMMO - 1; break;
+			case FT_SUBSPR: max_obj = 31; break;
+
+			case FT_FRAME:  max_obj = NUMSTATES_BEX - 1; break;
+
+			// for DSDehacked, allow very high values
+			case FT_SPRITE: max_obj = 32767; break;
+			case FT_SOUND:  max_obj = 32767; break;
+
+			default:
+				InternalError("Bad field type %d\n", ref->field_type);
+		}
+	}
+
+	if (new_val < min_obj || new_val > max_obj)
+	{
+		PrintWarn("Line %d: bad value '%d' for %s\n",
+			Patch::line_num, new_val, ref->deh_name);
+
+		return false;
+	}
+
+	return true;
 }
+
 
 bool Things::AlterOneField(const fieldreference_t *refs, const char *deh_field,
 		int entry_offset, int new_val)

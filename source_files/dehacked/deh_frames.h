@@ -50,7 +50,8 @@ namespace Frames
 	extern const char *attack_slot[3];
 	extern int act_flags;
 
-	void Startup(void);
+	void Init();
+	void Shutdown();
 
 	void MarkState(int st_num);
 	void MarkStatesWithSprite(int spr_num);

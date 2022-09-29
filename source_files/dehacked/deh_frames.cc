@@ -597,7 +597,13 @@ void Frames::MarkStatesWithSprite(int spr_num)
 
 //------------------------------------------------------------------------
 
-void Frames::Startup(void)
+namespace Frames
+{
+	void UpdateAttacks(char group, char *act_name, int action);
+}
+
+
+void Frames::Init()
 {
 	memset(state_modified, 0, sizeof(state_modified));
 	memset(state_dyn, 0, sizeof(state_dyn));
@@ -614,6 +620,11 @@ void Frames::Startup(void)
 		states[i].misc2 = 0;
 	}
 }
+
+
+void Frames::Shutdown()
+{ }
+
 
 void Frames::ResetAll(void)
 {
@@ -632,6 +643,7 @@ void Frames::ResetAll(void)
 	highest_touched = S_NULL;
 }
 
+
 int Frames::BeginGroup(int first, char group)
 {
 	if (first == S_NULL)
@@ -642,6 +654,7 @@ int Frames::BeginGroup(int first, char group)
 
 	return 1;
 }
+
 
 void Frames::InstallRandomJump(int src, int first)
 {
@@ -685,6 +698,7 @@ void Frames::InstallRandomJump(int src, int first)
 			break;
 	}
 }
+
 
 void Frames::SpreadGroups(void)
 {
@@ -750,6 +764,7 @@ void Frames::SpreadGroups(void)
 	}
 }
 
+
 bool Frames::CheckWeaponFlash(int first)
 {
 	// fairly simple test, we don't need to detect looping or such here,
@@ -776,110 +791,109 @@ bool Frames::CheckWeaponFlash(int first)
 	return false;
 }
 
-namespace Frames
+
+void Frames::UpdateAttacks(char group, char *act_name, int action)
 {
-	void UpdateAttacks(char group, char *act_name, int action)
+	const char *atk1 = action_info[action].atk_1;
+	const char *atk2 = action_info[action].atk_2;
+
+	bool free1 = true;
+	bool free2 = true;
+
+	int kind1 = -1;
+	int kind2 = -1;
+
+	if (! atk1)
 	{
-		const char *atk1 = action_info[action].atk_1;
-		const char *atk2 = action_info[action].atk_2;
+		return;
+	}
+	else if (IS_WEAPON(group))
+	{
+		assert(strlen(atk1) >= 3);
+		assert(atk1[1] == ':');
+		assert(! atk2);
 
-		bool free1 = true;
-		bool free2 = true;
+		kind1 = RANGE;
+	}
+	else
+	{
+		assert(strlen(atk1) >= 3);
+		assert(atk1[1] == ':');
 
-		int kind1 = -1;
-		int kind2 = -1;
+		kind1 = (atk1[0] == 'R') ? RANGE : (atk1[0] == 'C') ? COMBAT : SPARE;
+	}
 
-		if (! atk1)
-		{
-			return;
-		}
-		else if (IS_WEAPON(group))
-		{
-			assert(strlen(atk1) >= 3);
-			assert(atk1[1] == ':');
-			assert(! atk2);
+	atk1 += 2;
 
-			kind1 = RANGE;
-		}
-		else
-		{
-			assert(strlen(atk1) >= 3);
-			assert(atk1[1] == ':');
+	free1 = (! attack_slot[kind1] || 
+			 StrCaseCmp(attack_slot[kind1], atk1) == 0);
 
-			kind1 = (atk1[0] == 'R') ? RANGE : (atk1[0] == 'C') ? COMBAT : SPARE;
-		}
+	if (atk2)
+	{
+		assert(strlen(atk2) >= 3);
+		assert(atk2[1] == ':');
 
-		atk1 += 2;
+		kind2 = (atk2[0] == 'R') ? RANGE : (atk2[0] == 'C') ? COMBAT : SPARE;
 
-		free1 = (! attack_slot[kind1] || 
-				 StrCaseCmp(attack_slot[kind1], atk1) == 0);
+		atk2 += 2;
+
+		free2 = (! attack_slot[kind2] || 
+				 StrCaseCmp(attack_slot[kind2], atk2) == 0);
+	}
+
+	if (free1 && free2)
+	{
+		attack_slot[kind1] = atk1;
 
 		if (atk2)
-		{
-			assert(strlen(atk2) >= 3);
-			assert(atk2[1] == ':');
+			attack_slot[kind2] = atk2;
 
-			kind2 = (atk2[0] == 'R') ? RANGE : (atk2[0] == 'C') ? COMBAT : SPARE;
-
-			atk2 += 2;
-
-            free2 = (! attack_slot[kind2] || 
-			         StrCaseCmp(attack_slot[kind2], atk2) == 0);
-		}
-
-		if (free1 && free2)
-		{
-			attack_slot[kind1] = atk1;
-
-			if (atk2)
-				attack_slot[kind2] = atk2;
-
-			return;
-		}
-
-		WAD::Printf("    // Specialising %s\n", act_name);
-
-		// do some magic to put the attack name into parenthesis,
-		// for example RANGE_ATTACK(IMP_FIREBALL).
-
-		if (StrCaseCmp(act_name, "BRAINSPIT") == 0)
-		{
-			PrintWarn("Multiple range attacks used with A_BrainSpit.\n");
-			return;
-		}
-
-		// in this case, we have two attacks (must be a COMBOATTACK), but
-		// we don't have the required slots (need both).  Therefore select
-		// one of them based on the group.
-		if (atk1 && atk2)
-		{
-			if (group != 'L' && group != 'M')
-			{
-				PrintWarn("Not enough attack slots for COMBOATTACK.\n");
-			}
-
-			if ((group == 'L' && kind2 == COMBAT) ||
-			    (group == 'M' && kind2 == RANGE))
-			{
-				atk1  = atk2;
-				kind1 = kind2;
-			}
-
-			switch (kind1)
-			{
-				case RANGE:  strcpy(act_name, "RANGE_ATTACK"); break;
-				case COMBAT: strcpy(act_name, "CLOSE_ATTACK"); break;
-				case SPARE:  strcpy(act_name, "SPARE_ATTACK"); break;
-
-				default: InternalError("Bad attack kind %d\n", kind1);
-			}
-		}
-
-		strcat(act_name, "(");
-		strcat(act_name, atk1);
-		strcat(act_name, ")");
+		return;
 	}
+
+	WAD::Printf("    // Specialising %s\n", act_name);
+
+	// do some magic to put the attack name into parenthesis,
+	// for example RANGE_ATTACK(IMP_FIREBALL).
+
+	if (StrCaseCmp(act_name, "BRAINSPIT") == 0)
+	{
+		PrintWarn("Multiple range attacks used with A_BrainSpit.\n");
+		return;
+	}
+
+	// in this case, we have two attacks (must be a COMBOATTACK), but
+	// we don't have the required slots (need both).  Therefore select
+	// one of them based on the group.
+	if (atk1 && atk2)
+	{
+		if (group != 'L' && group != 'M')
+		{
+			PrintWarn("Not enough attack slots for COMBOATTACK.\n");
+		}
+
+		if ((group == 'L' && kind2 == COMBAT) ||
+			(group == 'M' && kind2 == RANGE))
+		{
+			atk1  = atk2;
+			kind1 = kind2;
+		}
+
+		switch (kind1)
+		{
+			case RANGE:  strcpy(act_name, "RANGE_ATTACK"); break;
+			case COMBAT: strcpy(act_name, "CLOSE_ATTACK"); break;
+			case SPARE:  strcpy(act_name, "SPARE_ATTACK"); break;
+
+			default: InternalError("Bad attack kind %d\n", kind1);
+		}
+	}
+
+	strcat(act_name, "(");
+	strcat(act_name, atk1);
+	strcat(act_name, ")");
 }
+
 
 const char *Frames::GroupToName(char group)
 {
@@ -911,6 +925,7 @@ const char *Frames::GroupToName(char group)
 	return NULL;
 }
 
+
 const char *Frames::RedirectorName(int next_st)
 {
 	static char name_buf[MAX_ACT_NAME];
@@ -928,6 +943,7 @@ const char *Frames::RedirectorName(int next_st)
 
 	return name_buf;
 }
+
 
 void Frames::SpecialAction(char *act_name, state_t *st)
 {
@@ -1022,6 +1038,7 @@ void Frames::SpecialAction(char *act_name, state_t *st)
 			InternalError("Bad special action %d\n", st->action);
 	}
 }
+
 
 void Frames::OutputState(char group, int cur)
 {
@@ -1142,6 +1159,7 @@ void Frames::OutputState(char group, int cur)
 	act_flags |= action_info[st->action].act_flags;
 }
 
+
 bool Frames::OutputSpawnState(int first)
 {
 	// returns true if no IDLE states will be needed
@@ -1176,6 +1194,7 @@ bool Frames::OutputSpawnState(int first)
 		return false;
 	}
 }
+
 
 void Frames::OutputGroup(int first, char group)
 {
@@ -1264,6 +1283,7 @@ namespace Frames
 	};
 }
 
+
 void Frames::AlterFrame(int new_val)
 {
 	int st_num = Patch::active_obj;
@@ -1289,6 +1309,7 @@ void Frames::AlterFrame(int new_val)
 	MarkState(st_num);
 }
 
+
 void Frames::AlterPointer(int new_val)
 {
 	int st_num = Patch::active_obj;
@@ -1313,6 +1334,7 @@ void Frames::AlterPointer(int new_val)
 
 	MarkState(st_num);
 }
+
 
 void Frames::AlterBexCodePtr(const char * new_action)
 {

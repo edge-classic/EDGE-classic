@@ -48,12 +48,13 @@ fieldreference_t;
 
 namespace Things
 {
-	void Startup(void);
+	void Init();
+	void Shutdown();
 
 	void MarkThing(int mt_num);  // attacks too
 
-	void FixHeights(void);
-	void ConvertTHING(void);
+	void FixHeights();
+	void ConvertTHING();
 
 	void HandleFlags(const mobjinfo_t *info, int mt_num, int player);
 	void HandleAttacks(const mobjinfo_t *info, int mt_num);

@@ -124,7 +124,7 @@ namespace Misc
 	}
 }
 
-void Misc::Startup(void)
+void Misc::Init()
 {
     init_ammo   = 50;
 
@@ -141,6 +141,11 @@ void Misc::Startup(void)
 
     monster_infight = 202;
 }
+
+
+void Misc::Shutdown()
+{ }
+
 
 void Misc::AlterMisc(int new_val)
 {

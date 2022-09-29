@@ -111,7 +111,7 @@ void Sprites::Shutdown()
 void Sprites::MarkEntry(int num)
 {
 	// fill any missing slots with "", including the one we want.
-	while ((int)sprnames.size() < num)
+	while ((int)sprnames.size() < num+1)
 		sprnames.push_back("");
 
 	// for the modified sprite, copy the original name

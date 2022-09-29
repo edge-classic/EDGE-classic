@@ -46,14 +46,13 @@ namespace Deh_Edge
 //
 // MusicInfo struct.
 //
-typedef struct
+struct musicinfo_t
 {
 	// up to 6-character name
 	char name[12];
 
 	int ddf_num;
-}
-musicinfo_t;
+};
 
 
 //

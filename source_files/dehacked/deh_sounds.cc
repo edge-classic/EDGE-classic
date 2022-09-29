@@ -50,16 +50,16 @@ namespace Deh_Edge
 struct sfxinfo_t
 {
 	// up to 6-character name
-	const char *orig_name;
+	char orig_name[8];
 
-	// Sfx singularity (only one at a time)
+	// Sfx singularity (only one at a time), 0 = normal
 	int singularity;
 
 	// Sfx priority (lower is MORE important)
 	int priority;
 
-	// changed name (empty if not modified).  Space for 6 non-NUL characters.
-	std::string new_name;
+	// changed name (empty if not modified).  Space for 6 non-NUL chars.
+	char new_name[8];
 };
 
 
@@ -931,14 +931,19 @@ namespace Sounds
 
 		WAD::Printf("[%s]\n", StrUpper(GetEdgeSfxName(s_num)));
 
-		const char *lump = !sound->new_name.empty() ? sound->new_name.c_str() : sound->orig_name;
+		const char *lump = sound->orig_name;
+		if (sound->new_name[0] != 0)
+			lump = sound->new_name;
 
 		// only one sound had a `link` field in standard DOOM.
 		// we emulate that here.
 		if (s_num == sfx_chgun)
 		{
 			sfxinfo_t *link = &S_sfx[sfx_pistol];
-			lump = !link->new_name.empty() ? link->new_name.c_str() : link->orig_name;
+
+			lump = link->orig_name;
+			if (link->new_name[0] != 0)
+				lump = link->new_name;
 		}
 
 		WAD::Printf("LUMP_NAME = \"DS%s\";\n", StrUpper(lump));
@@ -964,7 +969,7 @@ void Sounds::ConvertSFX(void)
 
 	for (int i = 1; i < NUMSFX_DEHEXTRA; i++)
 	{
-	    if (! all_mode && S_sfx[i].new_name.empty())
+	    if (! all_mode && S_sfx[i].new_name[0] == 0)
 			continue;
 
 		if(sound_modified[i] == true)
@@ -978,18 +983,17 @@ void Sounds::ConvertSFX(void)
 
 bool Sounds::ReplaceSound(const char *before, const char *after)
 {
+	assert(strlen(before) <= 6);
+	assert(strlen(after)  <= 6);
+
 	for (int i = 1; i < NUMSFX_DEHEXTRA; i++)
 	{
 		if (StrCaseCmp(S_sfx[i].orig_name, before) != 0)
 			continue;
 
-		if (!S_sfx[i].new_name.empty())
-			S_sfx[i].new_name.clear();
-
-		S_sfx[i].new_name = StringDup(after);
-
 		MarkSound(i);
 
+		strcpy(S_sfx[i].new_name, after);
 		return true;
 	}
 

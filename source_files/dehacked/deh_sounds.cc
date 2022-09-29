@@ -282,9 +282,6 @@ std::vector<sfxinfo_t *> S_sfx;
 
 namespace Sounds
 {
-	bool some_sound_modified = false;
-	bool sound_modified[NUMSFX_DEHEXTRA];
-
 	void BeginLump();
 	void FinishLump();
 

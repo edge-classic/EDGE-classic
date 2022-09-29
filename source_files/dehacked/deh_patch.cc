@@ -1153,7 +1153,8 @@ namespace Patch
 				doom_ver = (int)strtol(equal_pos+1, NULL, 10);
 
 				if (! (doom_ver == 12 ||
-					  (doom_ver >= 16 && doom_ver <= 21)))
+						(doom_ver >= 16 && doom_ver <= 21) ||
+						doom_ver == 2021 /* DSDehacked */))
 				{
 					SetErrorMsg("Unknown doom version found: V%d.%d\n",
 						doom_ver / 10, (doom_ver+1000) % 10);

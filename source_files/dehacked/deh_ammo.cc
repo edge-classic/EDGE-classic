@@ -31,7 +31,6 @@
 #include "deh_buffer.h"
 #include "deh_edge.h"
 #include "deh_patch.h"
-#include "deh_storage.h"
 #include "deh_system.h"
 #include "deh_things.h"
 #include "deh_util.h"
@@ -42,13 +41,14 @@
 namespace Deh_Edge
 {
 
-int Ammo::plr_max[4];
-int Ammo::pickups[4];
-bool ammo_modified[4];
-
 
 namespace Ammo
 {
+	int plr_max[4];
+	int pickups[4];
+
+	bool ammo_modified[4];
+
 	void MarkAmmo(int a_num);
 }
 
@@ -74,7 +74,7 @@ void Ammo::Shutdown()
 
 void Ammo::MarkAmmo(int a_num)
 {
-	assert (0 <= a_num && a_num < NUMAMMO);
+	assert(0 <= a_num && a_num < NUMAMMO);
 
 	ammo_modified[a_num] = true;
 }
@@ -158,10 +158,8 @@ void Ammo::AlterAmmo(int new_val)
 		return;
 	}
 
-	if (max_m)
-		Storage::RememberMod(plr_max + a_num, new_val);
-	else /* per_m */
-		Storage::RememberMod(pickups + a_num, new_val);
+	if (max_m) plr_max[a_num] = new_val;
+	if (per_m) pickups[a_num] = new_val;
 
 	MarkAmmo(a_num);
 }

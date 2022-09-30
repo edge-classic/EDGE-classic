@@ -36,7 +36,6 @@
 #include "deh_mobj.h"
 #include "deh_patch.h"
 #include "deh_sounds.h"
-#include "deh_storage.h"
 #include "deh_system.h"
 #include "deh_things.h"
 #include "deh_util.h"
@@ -45,42 +44,41 @@
 namespace Deh_Edge
 {
 
-int Misc::init_ammo;
+namespace Misc
+{
+	int init_ammo;
+	int max_armour;
+	int max_health;
 
-int Misc::max_armour;
-int Misc::max_health;
+	int green_armour_class;
+	int blue_armour_class;
+	int bfg_cells_per_shot;
 
-int Misc::green_armour_class;
-int Misc::blue_armour_class;
-int Misc::bfg_cells_per_shot;
+	int soul_health;
+	int soul_limit;
+	int mega_health;
 
-int Misc::soul_health;
-int Misc::soul_limit;
-int Misc::mega_health;
-
-int Misc::monster_infight;
+	int monster_infight;
+}
 
 
-typedef struct
+struct miscinfo_t
 {
 	const char *deh_name;
 	int minimum;
 	int *var;
 	const int *affected_mobjs;
-}
-miscinfo_t;
+};
 
 
 namespace Misc
 {
-	const int init_ammo_mobj[] = { MT_PLAYER, -1 };
-
-	const int max_heal_mobj[] = { MT_MISC2, -1 };
-	const int max_arm_mobj [] = { MT_MISC0, MT_MISC1, MT_MISC3, MT_MEGA, -1 };
-
-	const int green_class_mobj[] = { MT_MISC0, -1 };
-	const int blue_class_mobj [] = { MT_MISC1, -1 };
-
+	// mobjtypes which are affected by a setting
+	const int init_ammo_mobj  [] = { MT_PLAYER, -1 };
+	const int max_heal_mobj   [] = { MT_MISC2,  -1 };
+	const int max_arm_mobj    [] = { MT_MISC0, MT_MISC1, MT_MISC3, MT_MEGA, -1 };
+	const int green_class_mobj[] = { MT_MISC0,  -1 };
+	const int blue_class_mobj [] = { MT_MISC1,  -1 };
 	const int soulsphere_mobj [] = { MT_MISC12, -1 };
 	const int megasphere_mobj [] = { MT_MEGA,   -1 };
 
@@ -109,7 +107,6 @@ namespace Misc
 void Misc::Init()
 {
     init_ammo   = 50;
-
     max_armour  = 200;
     max_health  = 200;
 
@@ -155,7 +152,7 @@ void Misc::AlterMisc(int new_val)
 			return;
 		}
 
-		Storage::RememberMod(&bfg_cells_per_shot, new_val);
+		bfg_cells_per_shot = new_val;
 
 		Weapons::MarkWeapon(wp_bfg);
 		return;
@@ -168,8 +165,8 @@ void Misc::AlterMisc(int new_val)
 			PrintWarn("Bad value '%d' for MISC field: %s\n", new_val, misc_name);
 			return;
 		}
-		
-		Storage::RememberMod(&monster_infight, new_val);
+
+		monster_infight = new_val;
 
 		if (monster_infight == 221)
 			Things::MarkAllMonsters();
@@ -207,7 +204,7 @@ void Misc::AlterMisc(int new_val)
 		new_val = info->minimum;
 	}
 
-	Storage::RememberMod(info->var, new_val);
+	*(info->var) = new_val;
 
 	// mark mobjs that have been modified
 

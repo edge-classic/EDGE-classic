@@ -905,6 +905,7 @@ void Frames::SpecialAction(char *act_name, state_t *st)
 			}
 			else
 			{
+				Things::UseThing(st->misc1);
 				sprintf(act_name, "SPAWN(%s)", Things::GetMobjName(st->misc1));
 				return; // success !
 			}

@@ -537,6 +537,12 @@ void Things::MarkThing(int mt_num)
 }
 
 
+void Things::UseThing(int mt_num)
+{
+	// FIXME
+}
+
+
 void Things::MarkAllMonsters()
 {
 	for (int i = 0; i < NUMMOBJTYPES_COMPAT; i++)
@@ -562,7 +568,19 @@ mobjinfo_t * Things::GetModifiedMobj(int mt_num)
 
 const char * Things::GetMobjName(int mt_num)
 {
-	return mobjinfo[mt_num].name;
+	assert(mt_num >= 0);
+
+	if (mt_num < NUMMOBJTYPES_COMPAT)
+		return mobjinfo[mt_num].name;
+
+	static char buffer[64];
+
+	if (MT_EXTRA00 <= mt_num && mt_num <= MT_EXTRA99)
+		snprintf(buffer, sizeof(buffer), "MT_EXTRA%02d", mt_num - MT_EXTRA00);
+	else
+		snprintf(buffer, sizeof(buffer), "DEHACKED_%d", mt_num);
+
+	return buffer;
 }
 
 

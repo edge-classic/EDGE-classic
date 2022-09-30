@@ -142,7 +142,7 @@ void Rscript::MarkKeenDie(int mt_num)
 
 	if (keen_count >= MAX_KEENS)
 	{
-		PrintWarn("Too many keen deaths ! (monster %s)\n", Things::GetMobjName(mt_num));
+		PrintWarn("Too many keen deaths !n");
 		return;
 	}
 
@@ -196,6 +196,7 @@ void Rscript::OutputMonsterDeath(int mt_num, int idx)
 
 	idx *= 10;
 
+	Things::UseThing(mt_num);
 	const char *ddf_name = Things::GetMobjName(mt_num);
 
 	WAD::Printf("  radiustrigger 0 0 -1\n");

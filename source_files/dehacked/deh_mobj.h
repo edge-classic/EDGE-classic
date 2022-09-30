@@ -134,6 +134,8 @@ typedef enum
 	MF_TRANSLUCENT = 0x40000000,
 
 	MF_TOUCHY  = 0x20000000     // Should be: (0x1 << 32)
+
+// FIXME place these in `flags2` or similar
 #define MF_BOUNCES  MF_JUSTHIT  // Should be: (0x2 << 32)
 #define MF_FRIEND   MF_INFLOAT  // Should be: (0x4 << 32)
 }

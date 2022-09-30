@@ -51,6 +51,7 @@ namespace Things
 	void Init();
 	void Shutdown();
 
+	void UseThing(int mt_num);
 	void MarkThing(int mt_num);  // attacks too
 	void MarkAllMonsters();
 

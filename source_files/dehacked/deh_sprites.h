@@ -75,7 +75,7 @@ namespace Sprites
 	const char *GetSprite(int spr_num);
 	const char *GetOriginalName(int spr_num);
 
-	void MarkDependencies();
+	void SpriteDependencies();
 }
 
 }  // Deh_Edge

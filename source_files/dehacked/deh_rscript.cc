@@ -35,6 +35,7 @@
 #include "deh_rscript.h"
 #include "deh_storage.h"
 #include "deh_system.h"
+#include "deh_things.h"
 #include "deh_util.h"
 #include "deh_wad.h"
 
@@ -141,7 +142,7 @@ void Rscript::MarkKeenDie(int mt_num)
 
 	if (keen_count >= MAX_KEENS)
 	{
-		PrintWarn("Too many keen deaths ! (monster %s)\n", mobjinfo[mt_num].name);
+		PrintWarn("Too many keen deaths ! (monster %s)\n", Things::GetMobjName(mt_num));
 		return;
 	}
 
@@ -195,10 +196,12 @@ void Rscript::OutputMonsterDeath(int mt_num, int idx)
 
 	idx *= 10;
 
+	const char *ddf_name = Things::GetMobjName(mt_num);
+
 	WAD::Printf("  radiustrigger 0 0 -1\n");
 	WAD::Printf("    tag %d\n", idx);
 	WAD::Printf("    tagged_disabled\n");
-	WAD::Printf("    ondeath %s\n", mobjinfo[mt_num].name);
+	WAD::Printf("    ondeath %s\n", ddf_name);
 	WAD::Printf("    activate_linetype 2 666\n");
 	WAD::Printf("  end_radiustrigger\n");
 	WAD::Printf("  //\n");
@@ -209,7 +212,7 @@ void Rscript::OutputMonsterDeath(int mt_num, int idx)
 	WAD::Printf("  end_radiustrigger\n");
 	WAD::Printf("  //\n");
 	WAD::Printf("  radiustrigger 0 0 -1\n");
-	WAD::Printf("    ondeath %s\n", mobjinfo[mt_num].name);
+	WAD::Printf("    ondeath %s\n", ddf_name);
 	WAD::Printf("    disable_tagged %d\n", idx+1);
 	WAD::Printf("  end_radiustrigger\n");
 }

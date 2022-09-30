@@ -83,6 +83,7 @@ namespace Things
 	void FinishLump();
 
 	bool ValidateValue(const fieldreference_t *ref, int new_val);
+	bool CheckIsMonster(const mobjinfo_t *info, int mt_num, int player, bool use_act_flags);
 }
 
 
@@ -109,9 +110,70 @@ void Things::FinishLump(void)
 }
 
 
+void Things::MarkThing(int mt_num)
+{
+	assert(0 <= mt_num && mt_num < NUMMOBJTYPES_BEX);
+
+	mobj_modified[mt_num] = true;
+
+	// handle merged things/attacks
+
+	if (mt_num == MT_TFOG)
+		mobj_modified[MT_TELEPORTMAN] = true;
+
+	if (mt_num == MT_SPAWNFIRE)
+		mobj_modified[MT_SPAWNSHOT] = true;
+}
+
+
+void Things::MarkAllMonsters()
+{
+	for (int i = 0; i < NUMMOBJTYPES_BEX; i++)
+	{
+		if (i == MT_PLAYER)
+			continue;
+
+		const mobjinfo_t *mobj = mobjinfo + i;
+
+		if (CheckIsMonster(mobj, i, 0, false))
+			MarkThing(i);
+	}
+}
+
+
+mobjinfo_t * Things::GetModifiedMobj(int mt_num)
+{
+	MarkThing(mt_num);
+
+	return &mobjinfo[mt_num];
+}
+
+
+const char * Things::GetMobjName(int mt_num)
+{
+	return mobjinfo[mt_num].name;
+}
+
+
+void Things::SetPlayerHealth(int new_value)
+{
+	MarkThing(MT_PLAYER);
+
+	Storage::RememberMod(&mobjinfo[MT_PLAYER].spawnhealth, new_value);
+}
+
+
+bool Things::IsSpawnable(int mt_num)
+{
+	const mobjinfo_t *info = &mobjinfo[mt_num];
+
+	return info->doomednum > 0;
+}
+
+
 namespace Things
 {
-	typedef struct 
+	typedef struct
 	{
 		int flag;
 		const char *name;  // for EDGE
@@ -1040,21 +1102,6 @@ void Things::ConvertTHING(void)
 		FinishLump();
 }
 
-void Things::MarkThing(int mt_num)
-{
-	assert(0 <= mt_num && mt_num < NUMMOBJTYPES_BEX);
-
-	mobj_modified[mt_num] = true;
-
-	// handle merged things/attacks
-
-	if (mt_num == MT_TFOG)
-		mobj_modified[MT_TELEPORTMAN] = true;
-	
-	if (mt_num == MT_SPAWNFIRE)
-		mobj_modified[MT_SPAWNSHOT] = true;
-}
-
 
 //------------------------------------------------------------------------
 
@@ -1090,6 +1137,7 @@ namespace Things
 	};
 }
 
+
 void Things::AlterThing(int new_val)
 {
 	int mt_num = Patch::active_obj - 1;  // NOTE WELL
@@ -1108,6 +1156,7 @@ void Things::AlterThing(int new_val)
 
 	MarkThing(mt_num);
 }
+
 
 void Things::AlterBexBits(char *bit_str)
 {

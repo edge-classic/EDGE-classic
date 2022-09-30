@@ -1016,16 +1016,13 @@ void Frames::SpecialAction(char *act_name, state_t *st)
 			}
 			else
 			{
-				const mobjinfo_t *type = &mobjinfo[st->misc1 - 1];
-
-				if (! type->name || type->doomednum <= 0)
+				if (! Things::IsSpawnable(st->misc1))
 				{
-					PrintWarn("Action A_SPAWN unusable type (%d = %s)\n",
-							  st->misc1, type->name ? type->name : "\"\"");
+					PrintWarn("Action A_SPAWN unusable type (%d)\n", st->misc1);
 				}
 				else
 				{
-					sprintf(act_name, "SPAWN(%s)", type->name);
+					sprintf(act_name, "SPAWN(%s)", Things::GetMobjName(st->misc1));
 					return; // success !
 				}
 			}

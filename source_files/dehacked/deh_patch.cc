@@ -383,7 +383,7 @@ namespace Patch
 		if (file_error)
 			FatalError("File error reading binary thing table.\n");
 
-		mobjinfo_t *mobj = mobjinfo + mt_num;
+		mobjinfo_t *mobj = Things::GetModifiedMobj(mt_num);
 
 		GetInt  (O_MOBJ, mt_num, &mobj->doomednum);
 		GetFrame(O_MOBJ, mt_num, &mobj->spawnstate);

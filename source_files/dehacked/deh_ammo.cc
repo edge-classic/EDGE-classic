@@ -30,7 +30,6 @@
 
 #include "deh_buffer.h"
 #include "deh_edge.h"
-#include "deh_info.h"
 #include "deh_patch.h"
 #include "deh_storage.h"
 #include "deh_system.h"

@@ -120,7 +120,7 @@ void Sprites::MarkEntry(int num)
 }
 
 
-void Sprites::MarkDependencies()
+void Sprites::SpriteDependencies()
 {
 	for (size_t i = 0 ; i < sprnames.size() ; i++)
 	{

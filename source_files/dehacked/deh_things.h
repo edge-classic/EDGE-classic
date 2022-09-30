@@ -52,6 +52,12 @@ namespace Things
 	void Shutdown();
 
 	void MarkThing(int mt_num);  // attacks too
+	void MarkAllMonsters();
+
+	mobjinfo_t *GetModifiedMobj(int mt_num);
+	const char *GetMobjName(int mt_num);
+	bool IsSpawnable(int mt_num);
+	void SetPlayerHealth(int new_value);
 
 	void ConvertTHING();
 
@@ -59,12 +65,9 @@ namespace Things
 	void HandleAttacks(const mobjinfo_t *info, int mt_num);
 
 	const char *GetSpeed(int speed);
-	bool CheckIsMonster(const mobjinfo_t *info, int mt_num, int player,
-		bool use_act_flags);
 
 	// returns false if name not found
-	bool AlterOneField(const fieldreference_t *refs, const char *deh_field,
-		int entry_offset, int new_val);
+	bool AlterOneField(const fieldreference_t *refs, const char *deh_field, int entry_offset, int new_val);
 
 	void AlterThing(int new_val);
 	void AlterBexBits(char *bit_str);

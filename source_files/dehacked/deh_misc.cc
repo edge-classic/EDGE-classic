@@ -70,6 +70,7 @@ typedef struct
 }
 miscinfo_t;
 
+
 namespace Misc
 {
 	const int init_ammo_mobj[] = { MT_PLAYER, -1 };
@@ -104,25 +105,6 @@ namespace Misc
 	};
 }
 
-
-//------------------------------------------------------------------------
-
-namespace Misc
-{
-	void MarkAllMonsters(void)
-	{
-		for (int i = 0; i < NUMMOBJTYPES_BEX; i++)
-		{
-			mobjinfo_t *mobj = mobjinfo + i;
-
-			if (i == MT_PLAYER)
-				continue;
-
-			if (Things::CheckIsMonster(mobj, i, 0, false))
-				Things::MarkThing(i);
-		}
-	}
-}
 
 void Misc::Init()
 {
@@ -161,9 +143,7 @@ void Misc::AlterMisc(int new_val)
 			return;
 		}
 
-		Storage::RememberMod(&mobjinfo[MT_PLAYER].spawnhealth, new_val);
-
-		Things::MarkThing(MT_PLAYER);
+		Things::SetPlayerHealth(new_val);
 		return;
 	}
 
@@ -192,7 +172,7 @@ void Misc::AlterMisc(int new_val)
 		Storage::RememberMod(&monster_infight, new_val);
 
 		if (monster_infight == 221)
-			MarkAllMonsters();
+			Things::MarkAllMonsters();
 
 		return;
 	}

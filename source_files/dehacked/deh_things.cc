@@ -79,9 +79,6 @@ extern mobjinfo_t brain_explode_mobj;
 std::vector<mobjinfo_t *> new_mobjinfo;
 
 
-bool mobj_modified[NUMMOBJTYPES_COMPAT];
-
-
 //----------------------------------------------------------------------------
 //
 //  ATTACKS
@@ -501,9 +498,7 @@ namespace Things
 void Things::Init()
 {
 	new_mobjinfo.clear();
-
-	// FIXME
-	memset(mobj_modified, 0, sizeof(mobj_modified));
+	Attacks::scratchers.clear();
 }
 
 
@@ -514,6 +509,7 @@ void Things::Shutdown()
 			delete new_mobjinfo[i];
 
 	new_mobjinfo.clear();
+	Attacks::scratchers.clear();
 }
 
 
@@ -1560,8 +1556,6 @@ void Things::ConvertTHING(void)
 
 	CollectTheCast();
 
-	bool got_one = false;
-
 	if (all_mode)
 	{
 		for (int i = 0 ; i < NUMMOBJTYPES_COMPAT ; i++)
@@ -1573,23 +1567,28 @@ void Things::ConvertTHING(void)
 		*/
 	}
 
-	for (int i = 0; i < NUMMOBJTYPES_COMPAT; i++)
+	bool got_one = false;
+
+	for (int i = 0; i < (int)new_mobjinfo.size() ; i++)
 	{
-	    if (! mobj_modified[i])
+	    const mobjinfo_t * info = new_mobjinfo[i];
+
+	    if (info == NULL)
 			continue;
 
 		if (i == MT_PLAYER)
 		{
-			for (int p = 1; p <= NUMPLAYERS; p++)
-				ConvertMobj(mobjinfo + i, i, p, got_one);
+			for (int p = 1 ; p <= NUMPLAYERS ; p++)
+				ConvertMobj(info, i, p, got_one);
 
 			continue;
 		}
 
-		ConvertMobj(mobjinfo + i, i, 0, got_one);
+		ConvertMobj(info, i, 0, got_one);
 	}
 
-	if (true)  // FIXME don't always need this, figure out WHEN WE DO
+	// FIXME we don't always need this, figure out WHEN WE DO
+	if (true)
 		ConvertMobj(&brain_explode_mobj, MT_ROCKET /* dummy */, 0, got_one);
 
 	if (got_one)
@@ -1607,23 +1606,25 @@ void Things::ConvertATK()
 		delete Attacks::scratchers[k];  // FIXME do in Shutdown
 	}
 
-	for (int i = 0; i < NUMMOBJTYPES_COMPAT; i++)
+	// Note: all_mode was handled by ConvertTHING
+
+	for (int i = 0 ; i < (int)new_mobjinfo.size() ; i++)
 	{
-	    if (! all_mode && ! mobj_modified[i])
+	    const mobjinfo_t * info = new_mobjinfo[i];
+
+		if (info == NULL)
 			continue;
 
-		Attacks::ConvertAttack(mobjinfo + i, i, false);
+		Attacks::ConvertAttack(info, i, false);
 
 		if (i == MT_ROCKET)
-			Attacks::ConvertAttack(mobjinfo + i, i, true);
+			Attacks::ConvertAttack(info, i, true);
 	}
 
 	Attacks::CheckPainElemental();
 
 	if (Attacks::got_one)
 		Attacks::FinishLump();
-
-	Attacks::scratchers.clear();  // FIXME do in Shutdown
 }
 
 

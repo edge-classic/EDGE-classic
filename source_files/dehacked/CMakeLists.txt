@@ -14,7 +14,6 @@ endif()
 add_library(
   edge_deh
   deh_ammo.cc
-  deh_attacks.cc
   deh_buffer.cc
   deh_convert.cc
   deh_frames.cc

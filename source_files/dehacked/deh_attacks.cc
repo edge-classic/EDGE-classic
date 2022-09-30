@@ -31,7 +31,6 @@
 #include "deh_i_defs.h"
 #include "deh_edge.h"
 
-#include "deh_attacks.h"
 #include "deh_info.h"
 #include "deh_frames.h"
 #include "deh_misc.h"
@@ -81,6 +80,8 @@ namespace Attacks
 	};
 
 	std::vector<scratch_atk_c *> scratchers;
+
+	const char * AddScratchAttack(int damage, const char *sfx);
 
 	void BeginLump(void)
 	{
@@ -282,7 +283,7 @@ namespace Attacks
 }
 
 
-const char * Attacks::AddScratch(int damage, const char *sfx)
+const char * Attacks::AddScratchAttack(int damage, const char *sfx)
 {
 	const char *safe_sfx = "QUIET";
 	if (sfx != NULL)
@@ -440,14 +441,20 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 	WAD::Printf("\n");
 }
 
-void Attacks::ConvertATK(void)
-{
-	got_one = false;
 
-	for (size_t k = 0 ; k < scratchers.size() ; k++)
+const char * Things::AddScratchAttack(int damage, const char *sfx)
+{
+	return Attacks::AddScratchAttack(damage, sfx);
+}
+
+void Things::ConvertATK()
+{
+	Attacks::got_one = false;
+
+	for (size_t k = 0 ; k < Attacks::scratchers.size() ; k++)
 	{
-		ConvertScratch(scratchers[k]);
-		delete scratchers[k];
+		Attacks::ConvertScratch(Attacks::scratchers[k]);
+		delete Attacks::scratchers[k];  // FIXME do in Shutdown
 	}
 
 	for (int i = 0; i < NUMMOBJTYPES_BEX; i++)
@@ -455,23 +462,18 @@ void Attacks::ConvertATK(void)
 	    if (! all_mode && ! mobj_modified[i])
 			continue;
 
-		ConvertAttack(mobjinfo + i, i, false);
+		Attacks::ConvertAttack(mobjinfo + i, i, false);
 
 		if (i == MT_ROCKET)
-			ConvertAttack(mobjinfo + i, i, true);
+			Attacks::ConvertAttack(mobjinfo + i, i, true);
 	}
 
-	CheckPainElemental();
+	Attacks::CheckPainElemental();
 
-	if (got_one)
-		FinishLump();
+	if (Attacks::got_one)
+		Attacks::FinishLump();
 
-	scratchers.clear();
+	Attacks::scratchers.clear();  // FIXME do in Shutdown
 }
-
-// NOTES
-//
-//   Handle PLAYER_MISSILE == CYBERDEMON_MISSILE
-//   BRAIN_CUBE is a merger between MT_SPAWNSHOT and MT_SPAWNFIRE
 
 }  // Deh_Edge

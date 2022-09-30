@@ -57,9 +57,12 @@ namespace Things
 	mobjinfo_t *GetModifiedMobj(int mt_num);
 	const char *GetMobjName(int mt_num);
 	bool IsSpawnable(int mt_num);
+
 	void SetPlayerHealth(int new_value);
+	const char *AddScratchAttack(int damage, const char *sfx);
 
 	void ConvertTHING();
+	void ConvertATK();
 
 	void HandleFlags(const mobjinfo_t *info, int mt_num, int player);
 	void HandleAttacks(const mobjinfo_t *info, int mt_num);

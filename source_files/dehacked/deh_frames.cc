@@ -32,7 +32,6 @@
 #include "deh_i_defs.h"
 #include "deh_edge.h"
 
-#include "deh_attacks.h"
 #include "deh_buffer.h"
 #include "deh_convert.h"
 #include "deh_frames.h"
@@ -997,7 +996,7 @@ void Frames::SpecialAction(char *act_name, state_t *st)
 					sfx = NULL;
 
 				int damage = st->misc1;
-				const char *atk_name = Attacks::AddScratch(damage, sfx);
+				const char *atk_name = Things::AddScratchAttack(damage, sfx);
 				sprintf(act_name, "CLOSE_ATTACK(%s)", atk_name);
 			}
 			break;

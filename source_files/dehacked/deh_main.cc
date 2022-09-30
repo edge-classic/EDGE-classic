@@ -34,7 +34,6 @@
 #include "deh_edge.h"
 
 #include "deh_ammo.h"
-#include "deh_attacks.h"
 #include "deh_buffer.h"
 #include "deh_frames.h"
 #include "deh_info.h"
@@ -122,7 +121,7 @@ dehret_e Convert(void)
 	// things and weapons must be before attacks
 	Weapons::ConvertWEAP();
 	Things ::ConvertTHING();
-	Attacks::ConvertATK();
+	Things ::ConvertATK();
 
 	// rscript must be after things (for A_KeenDie)
 	TextStr::ConvertLDF();

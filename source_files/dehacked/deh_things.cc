@@ -76,6 +76,9 @@ extern mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT];
 
 extern mobjinfo_t brain_explode_mobj;
 
+std::vector<mobjinfo_t *> new_mobjinfo;
+
+
 bool mobj_modified[NUMMOBJTYPES_COMPAT];
 
 
@@ -497,12 +500,21 @@ namespace Things
 
 void Things::Init()
 {
+	new_mobjinfo.clear();
+
+	// FIXME
 	memset(mobj_modified, 0, sizeof(mobj_modified));
 }
 
 
 void Things::Shutdown()
-{ }
+{
+	for (size_t i = 0 ; i < new_mobjinfo.size() ; i++)
+		if (new_mobjinfo[i] != NULL)
+			delete new_mobjinfo[i];
+
+	new_mobjinfo.clear();
+}
 
 
 void Things::BeginLump()
@@ -520,23 +532,51 @@ void Things::FinishLump(void)
 
 void Things::MarkThing(int mt_num)
 {
-	assert(0 <= mt_num && mt_num < NUMMOBJTYPES_COMPAT);
-
-	mobj_modified[mt_num] = true;
+	assert(mt_num >= 0);
 
 	// handle merged things/attacks
-
 	if (mt_num == MT_TFOG)
-		mobj_modified[MT_TELEPORTMAN] = true;
+		MarkThing(MT_TELEPORTMAN);
 
 	if (mt_num == MT_SPAWNFIRE)
-		mobj_modified[MT_SPAWNSHOT] = true;
+		MarkThing(MT_SPAWNSHOT);
+
+	// fill any missing slots with NULLs, including the one we want
+	while ((int)new_mobjinfo.size() < mt_num+1)
+	{
+		new_mobjinfo.push_back(NULL);
+	}
+
+	// already have a modified entry?
+	if (new_mobjinfo[mt_num] != NULL)
+		return;
+
+	// create new entry, copy original info if we have it
+	mobjinfo_t * entry = new mobjinfo_t;
+
+	if (mt_num < NUMMOBJTYPES_COMPAT)
+	{
+		memcpy(entry, &mobjinfo[mt_num], sizeof(mobjinfo_t));
+		entry->name = NULL;
+	}
+	else
+	{
+		memset(entry, 0, sizeof(mobjinfo_t));
+		entry->doomednum = -1;
+
+		if (MT_EXTRA00 <= mt_num && mt_num <= MT_EXTRA99)
+		{
+			entry->doomednum = mt_num;
+		}
+	}
 }
 
 
 void Things::UseThing(int mt_num)
 {
-	// FIXME
+	// only create something when our standard DDF lacks it
+	if (mt_num >= MT_DOGS)
+		MarkThing(mt_num);
 }
 
 
@@ -585,16 +625,25 @@ void Things::SetPlayerHealth(int new_value)
 {
 	MarkThing(MT_PLAYER);
 
-	Storage::RememberMod(&mobjinfo[MT_PLAYER].spawnhealth, new_value);
+	new_mobjinfo[MT_PLAYER]->spawnhealth = new_value;
 }
 
 
 bool Things::IsSpawnable(int mt_num)
 {
-	const mobjinfo_t *info = &mobjinfo[mt_num];
-
 	// attacks are not spawnable via A_Spawn
-	if (info->name[0] == '*')
+	if (mt_num < NUMMOBJTYPES_COMPAT && mobjinfo[mt_num].name[0] == '*')
+		return false;
+
+	const mobjinfo_t *info = NULL;
+
+	if (mt_num < (int)new_mobjinfo.size())
+		info = new_mobjinfo[mt_num];
+
+	if (info == NULL && mt_num < NUMMOBJTYPES_COMPAT)
+		info = &mobjinfo[mt_num];
+
+	if (info == NULL)
 		return false;
 
 	return info->doomednum > 0;
@@ -694,10 +743,8 @@ namespace Things
 		if (info->name[0] == '*')
 			return false;
 
-#if (! DEBUG_MONST)
 		if (info->flags & MF_COUNTKILL)
 			return true;
-#endif
 
 		if (info->flags & (MF_SPECIAL | MF_COUNTITEM))
 			return false;
@@ -1542,7 +1589,7 @@ void Things::ConvertTHING(void)
 		ConvertMobj(mobjinfo + i, i, 0, got_one);
 	}
 
-	if (true)  // XXX Modified
+	if (true)  // FIXME don't always need this, figure out WHEN WE DO
 		ConvertMobj(&brain_explode_mobj, MT_ROCKET /* dummy */, 0, got_one);
 
 	if (got_one)

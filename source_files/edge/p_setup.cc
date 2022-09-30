@@ -708,6 +708,9 @@ static void SpawnMapThing(const mobjtype_c *info,
 		P_LookForPlayers(mo, mo->info->sight_angle);
 		*/
 	}
+	//Lobo 2022: added tagged mobj support ;)
+	if (tag > 0)
+		mo->tag = tag;
 		
 }
 

@@ -120,7 +120,7 @@ bool Field_ValidateValue(const fieldreference_t *ref, int new_val)
 }
 
 
-bool Field_Alter(const fieldreference_t *refs, const char *deh_field, int *object, int new_val)
+bool Field_Alter(const fieldreference_t *refs, const char *deh_field, int *object, int new_value)
 {
 	for (; refs->deh_name ; refs++)
 	{
@@ -129,15 +129,16 @@ bool Field_Alter(const fieldreference_t *refs, const char *deh_field, int *objec
 
 		// found it...
 
-		if (Field_ValidateValue(refs, new_val))
+		if (Field_ValidateValue(refs, new_value))
 		{
 			// prevent BOOM/MBF specific flags from being set using
 			// numeric notation.  Only settable via AA+BB+CC notation.
 			if (refs->field_type == FT_BITS)
-				new_val &= ~ ALL_BEX_FLAGS;
+				new_value &= ~ ALL_BEX_FLAGS;
 
 			// Yup, we play a bit dirty here
-			object[refs->offset] = new_val;
+			int *field = (int *)((char *)object + refs->offset);
+			*field = new_value;
 		}
 
 		return true;

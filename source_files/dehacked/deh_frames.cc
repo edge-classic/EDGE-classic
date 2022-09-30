@@ -34,6 +34,7 @@
 
 #include "deh_buffer.h"
 #include "deh_convert.h"
+#include "deh_field.h"
 #include "deh_frames.h"
 #include "deh_info.h"
 #include "deh_patch.h"
@@ -1150,16 +1151,18 @@ void Frames::OutputGroup(int first, char group)
 
 namespace Frames
 {
+#define FIELD_OFS(xxx)  offsetof(state_t, xxx)
+
 	const fieldreference_t frame_field[] =
 	{
-		{ "Sprite number",    &states[0].sprite, FT_SPRITE },
-		{ "Sprite subnumber", &states[0].frame,  FT_SUBSPR },
-		{ "Duration",         &states[0].tics, FT_ANY },
-		{ "Next frame",       &states[0].nextstate, FT_FRAME },
-		{ "Unknown 1",        &states[0].misc1, FT_ANY },
-		{ "Unknown 2",        &states[0].misc2, FT_ANY },
+		{ "Sprite number",    FIELD_OFS(sprite),    FT_SPRITE },
+		{ "Sprite subnumber", FIELD_OFS(frame),     FT_SUBSPR },
+		{ "Duration",         FIELD_OFS(tics),      FT_ANY },
+		{ "Next frame",       FIELD_OFS(nextstate), FT_FRAME },
+		{ "Unknown 1",        FIELD_OFS(misc1),     FT_ANY },
+		{ "Unknown 2",        FIELD_OFS(misc2),     FT_ANY },
 
-		{ NULL, NULL, 0 }   // End sentinel
+		{ NULL, 0, FT_ANY }   // End sentinel
 	};
 }
 
@@ -1178,9 +1181,9 @@ void Frames::AlterFrame(int new_val)
 		return;
 	}
 
-	int stride = ((char*) (states+1)) - ((char*) states);
+	int * raw_obj = (int *) &states[st_num];
 
-	if (! Things::AlterOneField(frame_field, field_name, st_num * stride, new_val))
+	if (! Field_Alter(frame_field, field_name, raw_obj, new_val))
 	{
 		PrintWarn("UNKNOWN FRAME FIELD: %s\n", field_name);
 		return;

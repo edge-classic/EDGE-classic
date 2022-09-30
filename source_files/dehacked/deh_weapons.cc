@@ -35,6 +35,7 @@
 #include "deh_ammo.h"
 #include "deh_buffer.h"
 #include "deh_info.h"
+#include "deh_field.h"
 #include "deh_frames.h"
 #include "deh_misc.h"
 #include "deh_patch.h"
@@ -285,18 +286,20 @@ void Weapons::ConvertWEAP(void)
 
 namespace Weapons
 {
+#define FIELD_OFS(xxx)  offsetof(weaponinfo_t, xxx)
+
 	const fieldreference_t weapon_field[] =
 	{
-		{ "Ammo type", &weapon_info[0].ammo, FT_AMMO },
+		{ "Ammo type",      FIELD_OFS(ammo),       FT_AMMO },
 
 		// -AJA- these first two fields have misleading dehacked names
-		{ "Deselect frame", &weapon_info[0].upstate,    FT_FRAME },
-		{ "Select frame",   &weapon_info[0].downstate,  FT_FRAME },
-		{ "Bobbing frame",  &weapon_info[0].readystate, FT_FRAME },
-		{ "Shooting frame", &weapon_info[0].atkstate,   FT_FRAME },
-		{ "Firing frame",   &weapon_info[0].flashstate, FT_FRAME },
+		{ "Deselect frame", FIELD_OFS(upstate),    FT_FRAME },
+		{ "Select frame",   FIELD_OFS(downstate),  FT_FRAME },
+		{ "Bobbing frame",  FIELD_OFS(readystate), FT_FRAME },
+		{ "Shooting frame", FIELD_OFS(atkstate),   FT_FRAME },
+		{ "Firing frame",   FIELD_OFS(flashstate), FT_FRAME },
 
-		{ NULL, NULL, 0 }   // End sentinel
+		{ NULL, 0, FT_ANY }   // End sentinel
 	};
 }
 
@@ -308,9 +311,9 @@ void Weapons::AlterWeapon(int new_val)
 
 	assert(0 <= wp_num && wp_num < NUMWEAPONS);
 
-	int stride = ((char*) (weapon_info+1)) - ((char*) weapon_info);
+	int * raw_obj = (int *) &weapon_info[wp_num];
 
-	if (! Things::AlterOneField(weapon_field, field_name, wp_num * stride, new_val))
+	if (! Field_Alter(weapon_field, field_name, raw_obj, new_val))
 	{
 		PrintWarn("UNKNOWN WEAPON FIELD: %s\n", field_name);
 		return;

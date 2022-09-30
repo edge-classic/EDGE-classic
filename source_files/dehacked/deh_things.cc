@@ -1647,33 +1647,35 @@ void Things::ConvertATK()
 
 namespace Things
 {
+#define FIELD_OFS(xxx)  offsetof(mobjinfo_t, xxx)
+
 	const fieldreference_t mobj_field[] =
 	{
-		{ "ID #",               &mobjinfo[0].doomednum,    FT_ANY },
-		{ "Initial frame",      &mobjinfo[0].spawnstate,   FT_FRAME },
-		{ "Hit points",         &mobjinfo[0].spawnhealth,  FT_GTEQ1 },
-		{ "First moving frame", &mobjinfo[0].seestate,     FT_FRAME },
-		{ "Alert sound",        &mobjinfo[0].seesound,     FT_SOUND },
-		{ "Reaction time",      &mobjinfo[0].reactiontime, FT_NONEG },
-		{ "Attack sound",       &mobjinfo[0].attacksound,  FT_SOUND },
-		{ "Injury frame",       &mobjinfo[0].painstate,    FT_FRAME },
-		{ "Pain chance",        &mobjinfo[0].painchance,   FT_NONEG },
-		{ "Pain sound",         &mobjinfo[0].painsound,    FT_SOUND },
-		{ "Close attack frame", &mobjinfo[0].meleestate,   FT_FRAME },
-		{ "Far attack frame",   &mobjinfo[0].missilestate, FT_FRAME },
-		{ "Death frame",        &mobjinfo[0].deathstate,   FT_FRAME },
-		{ "Exploding frame",    &mobjinfo[0].xdeathstate,  FT_FRAME },
-		{ "Death sound",        &mobjinfo[0].deathsound,   FT_SOUND },
-		{ "Speed",              &mobjinfo[0].speed,        FT_NONEG },
-		{ "Width",              &mobjinfo[0].radius,       FT_NONEG },
-		{ "Height",             &mobjinfo[0].height,       FT_NONEG },
-		{ "Mass",               &mobjinfo[0].mass,         FT_NONEG },
-		{ "Missile damage",     &mobjinfo[0].damage,       FT_NONEG },
-		{ "Action sound",       &mobjinfo[0].activesound,  FT_SOUND },
-		{ "Bits",               &mobjinfo[0].flags,        FT_BITS },
-		{ "Respawn frame",      &mobjinfo[0].raisestate,   FT_FRAME },
+		{ "ID #",               FIELD_OFS(doomednum),    FT_ANY },
+		{ "Initial frame",      FIELD_OFS(spawnstate),   FT_FRAME },
+		{ "Hit points",         FIELD_OFS(spawnhealth),  FT_GTEQ1 },
+		{ "First moving frame", FIELD_OFS(seestate),     FT_FRAME },
+		{ "Alert sound",        FIELD_OFS(seesound),     FT_SOUND },
+		{ "Reaction time",      FIELD_OFS(reactiontime), FT_NONEG },
+		{ "Attack sound",       FIELD_OFS(attacksound),  FT_SOUND },
+		{ "Injury frame",       FIELD_OFS(painstate),    FT_FRAME },
+		{ "Pain chance",        FIELD_OFS(painchance),   FT_NONEG },
+		{ "Pain sound",         FIELD_OFS(painsound),    FT_SOUND },
+		{ "Close attack frame", FIELD_OFS(meleestate),   FT_FRAME },
+		{ "Far attack frame",   FIELD_OFS(missilestate), FT_FRAME },
+		{ "Death frame",        FIELD_OFS(deathstate),   FT_FRAME },
+		{ "Exploding frame",    FIELD_OFS(xdeathstate),  FT_FRAME },
+		{ "Death sound",        FIELD_OFS(deathsound),   FT_SOUND },
+		{ "Speed",              FIELD_OFS(speed),        FT_NONEG },
+		{ "Width",              FIELD_OFS(radius),       FT_NONEG },
+		{ "Height",             FIELD_OFS(height),       FT_NONEG },
+		{ "Mass",               FIELD_OFS(mass),         FT_NONEG },
+		{ "Missile damage",     FIELD_OFS(damage),       FT_NONEG },
+		{ "Action sound",       FIELD_OFS(activesound),  FT_SOUND },
+		{ "Bits",               FIELD_OFS(flags),        FT_BITS },
+		{ "Respawn frame",      FIELD_OFS(raisestate),   FT_FRAME },
 
-		{ NULL, NULL, 0 }   // End sentinel
+		{ NULL, 0, FT_ANY }   // End sentinel
 	};
 }
 

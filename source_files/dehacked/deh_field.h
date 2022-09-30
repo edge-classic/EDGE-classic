@@ -39,7 +39,7 @@ typedef struct
 	const char *deh_name;
 
 	// offset into the structure (like an mobjtype_t).
-	int offset;
+	size_t offset;
 
 	fieldtype_e field_type;
 }

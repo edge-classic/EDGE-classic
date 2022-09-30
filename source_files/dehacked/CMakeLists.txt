@@ -16,6 +16,7 @@ add_library(
   deh_ammo.cc
   deh_buffer.cc
   deh_convert.cc
+  deh_field.cc
   deh_frames.cc
   deh_info.cc
   deh_main.cc

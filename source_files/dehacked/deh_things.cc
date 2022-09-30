@@ -38,6 +38,7 @@
 #include "deh_ammo.h"
 #include "deh_buffer.h"
 #include "deh_info.h"
+#include "deh_field.h"
 #include "deh_frames.h"
 #include "deh_misc.h"
 #include "deh_mobj.h"
@@ -508,7 +509,6 @@ namespace Things
 	void BeginLump();
 	void FinishLump();
 
-	bool ValidateValue(const fieldreference_t *ref, int new_val);
 	bool CheckIsMonster(const mobjinfo_t *info, int mt_num, int player, bool use_act_flags);
 }
 
@@ -1649,29 +1649,29 @@ namespace Things
 {
 	const fieldreference_t mobj_field[] =
 	{
-		{ "ID #",             &mobjinfo[0].doomednum, FT_ANY },
-		{ "Initial frame",    &mobjinfo[0].spawnstate, FT_FRAME },
-		{ "Hit points",       &mobjinfo[0].spawnhealth, FT_GTEQ1 },
-		{ "First moving frame", &mobjinfo[0].seestate, FT_FRAME },
-		{ "Alert sound",      &mobjinfo[0].seesound, FT_SOUND },
-		{ "Reaction time",    &mobjinfo[0].reactiontime, FT_NONEG },
-		{ "Attack sound",     &mobjinfo[0].attacksound, FT_SOUND },
-		{ "Injury frame",     &mobjinfo[0].painstate, FT_FRAME },
-		{ "Pain chance",      &mobjinfo[0].painchance, FT_NONEG },
-		{ "Pain sound",       &mobjinfo[0].painsound, FT_SOUND },
-		{ "Close attack frame", &mobjinfo[0].meleestate, FT_FRAME },
-		{ "Far attack frame", &mobjinfo[0].missilestate, FT_FRAME },
-		{ "Death frame",      &mobjinfo[0].deathstate, FT_FRAME },
-		{ "Exploding frame",  &mobjinfo[0].xdeathstate, FT_FRAME },
-		{ "Death sound",      &mobjinfo[0].deathsound, FT_SOUND },
-		{ "Speed",            &mobjinfo[0].speed, FT_NONEG },
-		{ "Width",            &mobjinfo[0].radius, FT_NONEG },
-		{ "Height",           &mobjinfo[0].height, FT_NONEG },
-		{ "Mass",             &mobjinfo[0].mass, FT_NONEG },
-		{ "Missile damage",   &mobjinfo[0].damage, FT_NONEG },
-		{ "Action sound",     &mobjinfo[0].activesound, FT_SOUND },
-		{ "Bits",             &mobjinfo[0].flags, FT_BITS },
-		{ "Respawn frame",    &mobjinfo[0].raisestate, FT_FRAME },
+		{ "ID #",               &mobjinfo[0].doomednum,    FT_ANY },
+		{ "Initial frame",      &mobjinfo[0].spawnstate,   FT_FRAME },
+		{ "Hit points",         &mobjinfo[0].spawnhealth,  FT_GTEQ1 },
+		{ "First moving frame", &mobjinfo[0].seestate,     FT_FRAME },
+		{ "Alert sound",        &mobjinfo[0].seesound,     FT_SOUND },
+		{ "Reaction time",      &mobjinfo[0].reactiontime, FT_NONEG },
+		{ "Attack sound",       &mobjinfo[0].attacksound,  FT_SOUND },
+		{ "Injury frame",       &mobjinfo[0].painstate,    FT_FRAME },
+		{ "Pain chance",        &mobjinfo[0].painchance,   FT_NONEG },
+		{ "Pain sound",         &mobjinfo[0].painsound,    FT_SOUND },
+		{ "Close attack frame", &mobjinfo[0].meleestate,   FT_FRAME },
+		{ "Far attack frame",   &mobjinfo[0].missilestate, FT_FRAME },
+		{ "Death frame",        &mobjinfo[0].deathstate,   FT_FRAME },
+		{ "Exploding frame",    &mobjinfo[0].xdeathstate,  FT_FRAME },
+		{ "Death sound",        &mobjinfo[0].deathsound,   FT_SOUND },
+		{ "Speed",              &mobjinfo[0].speed,        FT_NONEG },
+		{ "Width",              &mobjinfo[0].radius,       FT_NONEG },
+		{ "Height",             &mobjinfo[0].height,       FT_NONEG },
+		{ "Mass",               &mobjinfo[0].mass,         FT_NONEG },
+		{ "Missile damage",     &mobjinfo[0].damage,       FT_NONEG },
+		{ "Action sound",       &mobjinfo[0].activesound,  FT_SOUND },
+		{ "Bits",               &mobjinfo[0].flags,        FT_BITS },
+		{ "Respawn frame",      &mobjinfo[0].raisestate,   FT_FRAME },
 
 		{ NULL, NULL, 0 }   // End sentinel
 	};
@@ -1681,20 +1681,19 @@ namespace Things
 void Things::AlterThing(int new_val)
 {
 	int mt_num = Patch::active_obj - 1;  // NOTE WELL
-
-	assert(0 <= mt_num && mt_num < NUMMOBJTYPES_COMPAT);
+	assert(mt_num >= 0);
 
 	const char *field_name = Patch::line_buf;
 
-	int stride = ((char*) (mobjinfo+1)) - ((char*) mobjinfo);
+	MarkThing(mt_num);
 
-	if (! Things::AlterOneField(mobj_field, field_name, mt_num * stride, new_val))
+	int * raw_obj = (int *) new_mobjinfo[mt_num];
+	assert(raw_obj != NULL);
+
+	if (! Field_Alter(mobj_field, field_name, raw_obj, new_val))
 	{
 		PrintWarn("UNKNOWN THING FIELD: %s\n", field_name);
-		return;
 	}
-
-	MarkThing(mt_num);
 }
 
 
@@ -1702,7 +1701,7 @@ void Things::AlterBexBits(char *bit_str)
 {
 	int mt_num = Patch::active_obj - 1;  // NOTE WELL
 
-	assert(0 <= mt_num && mt_num < NUMMOBJTYPES_COMPAT);
+	assert(mt_num >= 0);
 
 	static const char *delims = "+|, \t\f\r";
 
@@ -1729,7 +1728,7 @@ void Things::AlterBexBits(char *bit_str)
 		}
 
 		// see whether name is in known list
-		for (i = 0; flagnamelist[i].flag != 0; i++)
+		for (i = 0 ; flagnamelist[i].flag != 0 ; i++)
 		{
 			const char *name = flagnamelist[i].bex ?
 				flagnamelist[i].bex : flagnamelist[i].name;
@@ -1747,7 +1746,7 @@ void Things::AlterBexBits(char *bit_str)
 		}
 
 		// see whether we should ignore this flag
-		for (i = 0; flag_bex_ignored[i]; i++)
+		for (i = 0 ; flag_bex_ignored[i] ; i++)
 			if (StrCaseCmp(token, flag_bex_ignored[i]) == 0)
 				break;
 
@@ -1758,106 +1757,10 @@ void Things::AlterBexBits(char *bit_str)
 			Patch::line_num, token);
 	}
 
-	Storage::RememberMod(&mobjinfo[mt_num].flags, new_flags);
-
 	MarkThing(mt_num);
+
+	new_mobjinfo[mt_num]->flags = new_flags;
 }
 
-
-bool Things::ValidateValue(const fieldreference_t *ref, int new_val)
-{
-	if (ref->field_type == FT_ANY || ref->field_type == FT_BITS)
-		return true;
-
-	if (new_val < 0 || (new_val == 0 && ref->field_type == FT_GTEQ1))
-	{
-		PrintWarn("Line %d: bad value '%d' for %s\n",
-			Patch::line_num, new_val, ref->deh_name);
-		return false;
-	}
-
-	if (ref->field_type == FT_NONEG || ref->field_type == FT_GTEQ1)
-		return true;
-
-	if (ref->field_type == FT_SUBSPR)  // ignore the bright bit
-		new_val &= ~32768;
-
-	int min_obj = 0;
-	int max_obj = 0;
-
-	if (Patch::patch_fmt <= 5)
-	{
-		switch (ref->field_type)
-		{
-			case FT_AMMO:   max_obj = NUMAMMO    - 1; break;
-			case FT_FRAME:  max_obj = NUMSTATES  - 1; break;
-			case FT_SOUND:  max_obj = NUMSFX     - 1; break;
-			case FT_SPRITE: max_obj = NUMSPRITES - 1; break;
-			case FT_SUBSPR: max_obj = 31; break;
-
-			default:
-				InternalError("Bad field type %d\n", ref->field_type);
-		}
-	}
-	else  /* patch_fmt == 6, allow BOOM/MBF stuff */
-	{
-		switch (ref->field_type)
-		{
-			case FT_AMMO:   max_obj = NUMAMMO - 1; break;
-			case FT_SUBSPR: max_obj = 31; break;
-
-			case FT_FRAME:  max_obj = NUMSTATES_BEX - 1; break;
-
-			// for DSDehacked, allow very high values
-			case FT_SPRITE: max_obj = 32767; break;
-			case FT_SOUND:  max_obj = 32767; break;
-
-			default:
-				InternalError("Bad field type %d\n", ref->field_type);
-		}
-	}
-
-	if (new_val < min_obj || new_val > max_obj)
-	{
-		PrintWarn("Line %d: bad value '%d' for %s\n",
-			Patch::line_num, new_val, ref->deh_name);
-
-		return false;
-	}
-
-	return true;
-}
-
-
-bool Things::AlterOneField(const fieldreference_t *refs, const char *deh_field,
-		int entry_offset, int new_val)
-{
-	assert(entry_offset >= 0);
-
-	for (; refs->deh_name; refs++)
-	{
-		if (StrCaseCmp(refs->deh_name, deh_field) != 0)
-			continue;
-
-		// found it...
-
-		if (ValidateValue(refs, new_val))
-		{
-			// prevent BOOM/MBF specific flags from being set using
-			// numeric notation.  Only settable via AA+BB+CC notation.
-			if (refs->field_type == FT_BITS)
-				new_val &= ~ ALL_BEX_FLAGS;
-
-			// Yup, we play a bit dirty here
-			char *dest = ((char *) (refs->var)) + entry_offset;
-
-			Storage::RememberMod((int *)dest, new_val);
-		}
-
-		return true;
-	}
-
-	return false;
-}
 
 }  // Deh_Edge

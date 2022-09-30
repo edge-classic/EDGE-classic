@@ -300,6 +300,7 @@ namespace Weapons
 	};
 }
 
+
 void Weapons::AlterWeapon(int new_val)
 {
 	int wp_num = Patch::active_obj;

@@ -220,7 +220,7 @@ typedef struct
 }
 staterange_t;
 
-const staterange_t thing_range[] =
+const staterange_t thing_range[NUMMOBJTYPES_COMPAT] =
 {
 	// Things...
     { MT_PLAYER, S_PLAY, S_PLAY_XDIE9, -1,-1 },
@@ -375,117 +375,9 @@ const staterange_t thing_range[] =
     { MT_BIBLE, S_BON4, S_BON4, -1,-1 },
     { MT_MUSICSOURCE, S_TNT1, S_TNT1, -1,-1 },
     { MT_GIBDTH, S_TNT1, S_TNT1, -1,-1 },
-
-    { MT_STEALTHBABY, S_BSPI_STND, S_BSPI_RAISE7, -1,-1 },
-    { MT_STEALTHVILE, S_VILE_STND, S_VILE_DIE10, -1,-1 },
-    { MT_STEALTHBRUISER, S_BOSS_STND, S_BOSS_RAISE7, -1,-1 },
-    { MT_STEALTHHEAD, S_HEAD_STND, S_HEAD_RAISE6, -1,-1 },
-    { MT_STEALTHCHAINGUY, S_CPOS_STND, S_CPOS_RAISE7, -1,-1 },
-    { MT_STEALTHSERGEANT, S_SARG_STND, S_SARG_RAISE6, -1,-1 },
-    { MT_STEALTHKNIGHT, S_BOS2_STND, S_BOS2_RAISE7, -1,-1 },
-    { MT_STEALTHIMP, S_TROO_STND, S_TROO_RAISE5, -1,-1 },
-    { MT_STEALTHFATSO, S_FATT_STND, S_FATT_RAISE8, -1,-1 },
-    { MT_STEALTHUNDEAD, S_SKEL_STND, S_SKEL_RAISE6, -1,-1 },
-    { MT_STEALTHSHOTGUY, S_SPOS_STND, S_SPOS_RAISE5, -1,-1 },
-    { MT_STEALTHZOMBIE, S_POSS_STND, S_POSS_RAISE4, -1,-1 },
-
-	{ MT_EXTRA08, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA09, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA10, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA11, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA12, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA13, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA14, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA15, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA16, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA17, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA18, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA19, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA20, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA21, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA22, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA23, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA24, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA25, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA26, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA27, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA28, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA29, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA30, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA31, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA32, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA33, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA34, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA35, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA36, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA37, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA38, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA39, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA40, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA41, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA42, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA43, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA44, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA45, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA46, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA47, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA48, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA49, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA50, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA51, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA52, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA53, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA54, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA55, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA56, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA57, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA58, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA59, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA60, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA61, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA62, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA63, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA64, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA65, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA66, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA67, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA68, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA69, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA70, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA71, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA72, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA73, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA74, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA75, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA76, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA77, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA78, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA79, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA80, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA81, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA82, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA83, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA84, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA85, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA86, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA87, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA88, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA89, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA90, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA91, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA92, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA93, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA94, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA95, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA96, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA97, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA98, S_NULL, S_NULL, -1,-1 },
-	{ MT_EXTRA99, S_NULL, S_NULL, -1,-1 },
-
-    { -1, -1,-1, -1, -1 }  // End sentinel
 };
 
-const staterange_t weapon_range[] =
+const staterange_t weapon_range[9] =
 {
 	// Weapons...
     { wp_fist, S_PUNCH, S_PUNCH5, -1,-1 },
@@ -497,8 +389,6 @@ const staterange_t weapon_range[] =
     { wp_plasma, S_PLASMA, S_PLASMAFLASH2, S_LIGHTDONE, S_LIGHTDONE },
     { wp_bfg, S_BFG, S_BFGFLASH2, S_LIGHTDONE, S_LIGHTDONE },
     { wp_supershotgun, S_DSGUN, S_DSGUNFLASH2, S_LIGHTDONE, S_LIGHTDONE },
-
-    { -1, -1,-1, -1, -1 }  // End sentinel
 };
 
 namespace Frames
@@ -538,7 +428,7 @@ namespace Frames
 
 		if (st_hi <= S_LAST_WEAPON_STATE)
 		{
-			for (int w = 0; weapon_range[w].obj_num >= 0; w++)
+			for (int w = 0 ; w < 9 ; w++)
 			{
 				const staterange_t *R = weapon_range + w;
 
@@ -553,7 +443,7 @@ namespace Frames
 
 		// check things.
 
-		for (int t = 0; thing_range[t].obj_num >= 0; t++)
+		for (int t = 0 ; t < NUMMOBJTYPES_COMPAT ; t++)
 		{
 			const staterange_t *R = thing_range + t;
 
@@ -1009,21 +899,14 @@ void Frames::SpecialAction(char *act_name, state_t *st)
 			break;
 
 		case A_Spawn:
-			if (st->misc1 < 1 || st->misc1 > NUMMOBJTYPES_BEX)
+			if (! Things::IsSpawnable(st->misc1))
 			{
-				PrintWarn("Action A_SPAWN: illegal type (%d)\n", st->misc1);
+				PrintWarn("Action A_SPAWN unusable type (%d)\n", st->misc1);
 			}
 			else
 			{
-				if (! Things::IsSpawnable(st->misc1))
-				{
-					PrintWarn("Action A_SPAWN unusable type (%d)\n", st->misc1);
-				}
-				else
-				{
-					sprintf(act_name, "SPAWN(%s)", Things::GetMobjName(st->misc1));
-					return; // success !
-				}
+				sprintf(act_name, "SPAWN(%s)", Things::GetMobjName(st->misc1));
+				return; // success !
 			}
 
 			// fall-back

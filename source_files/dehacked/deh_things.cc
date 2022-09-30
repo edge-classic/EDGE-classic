@@ -72,11 +72,11 @@ namespace Deh_Edge
 #define CAST_MAX  20
 
 
-extern mobjinfo_t mobjinfo[NUMMOBJTYPES_BEX];
+extern mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT];
 
 extern mobjinfo_t brain_explode_mobj;
 
-bool mobj_modified[NUMMOBJTYPES_BEX];
+bool mobj_modified[NUMMOBJTYPES_COMPAT];
 
 
 //----------------------------------------------------------------------------
@@ -92,11 +92,6 @@ bool mobj_modified[NUMMOBJTYPES_BEX];
 #define KF_TOO_CLOSE  'c'
 #define KF_KEEP_FIRE  'e'
 #define KF_PUFF_SMK   'p'
-
-
-extern mobjinfo_t mobjinfo[NUMMOBJTYPES_BEX];
-
-extern bool mobj_modified[NUMMOBJTYPES_BEX];
 
 
 namespace Attacks
@@ -528,7 +523,7 @@ void Things::FinishLump(void)
 
 void Things::MarkThing(int mt_num)
 {
-	assert(0 <= mt_num && mt_num < NUMMOBJTYPES_BEX);
+	assert(0 <= mt_num && mt_num < NUMMOBJTYPES_COMPAT);
 
 	mobj_modified[mt_num] = true;
 
@@ -544,7 +539,7 @@ void Things::MarkThing(int mt_num)
 
 void Things::MarkAllMonsters()
 {
-	for (int i = 0; i < NUMMOBJTYPES_BEX; i++)
+	for (int i = 0; i < NUMMOBJTYPES_COMPAT; i++)
 	{
 		if (i == MT_PLAYER)
 			continue;
@@ -895,7 +890,7 @@ namespace Things
 		{
 			int mt_num = height_fixes[i];
 
-			assert(mt_num < NUMMOBJTYPES_BEX);
+			assert(mt_num < NUMMOBJTYPES_COMPAT);
 
 			mobjinfo_t *mobj = mobjinfo + mt_num;
 
@@ -922,7 +917,7 @@ namespace Things
 		for (int i = 0; i < CAST_MAX; i++)
 			cast_mobjs[i] = -1;
 
-		for (int mt_num = 0; mt_num < NUMMOBJTYPES_BEX; mt_num++)
+		for (int mt_num = 0; mt_num < NUMMOBJTYPES_COMPAT; mt_num++)
 		{
 			int order = 0;
 
@@ -1506,7 +1501,7 @@ void Things::ConvertTHING(void)
 
 	got_one = false;
 
-	for (int i = 0; i < NUMMOBJTYPES_BEX; i++)
+	for (int i = 0; i < NUMMOBJTYPES_COMPAT; i++)
 	{
 	    if (! all_mode && ! mobj_modified[i])
 			continue;
@@ -1540,7 +1535,7 @@ void Things::ConvertATK()
 		delete Attacks::scratchers[k];  // FIXME do in Shutdown
 	}
 
-	for (int i = 0; i < NUMMOBJTYPES_BEX; i++)
+	for (int i = 0; i < NUMMOBJTYPES_COMPAT; i++)
 	{
 	    if (! all_mode && ! mobj_modified[i])
 			continue;
@@ -1599,7 +1594,7 @@ void Things::AlterThing(int new_val)
 {
 	int mt_num = Patch::active_obj - 1;  // NOTE WELL
 
-	assert(0 <= mt_num && mt_num < NUMMOBJTYPES_BEX);
+	assert(0 <= mt_num && mt_num < NUMMOBJTYPES_COMPAT);
 
 	const char *field_name = Patch::line_buf;
 
@@ -1619,7 +1614,7 @@ void Things::AlterBexBits(char *bit_str)
 {
 	int mt_num = Patch::active_obj - 1;  // NOTE WELL
 
-	assert(0 <= mt_num && mt_num < NUMMOBJTYPES_BEX);
+	assert(0 <= mt_num && mt_num < NUMMOBJTYPES_COMPAT);
 
 	static const char *delims = "+|, \t\f\r";
 

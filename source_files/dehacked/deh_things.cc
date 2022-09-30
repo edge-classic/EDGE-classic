@@ -72,6 +72,13 @@ namespace Deh_Edge
 #define CAST_MAX  20
 
 
+extern mobjinfo_t mobjinfo[NUMMOBJTYPES_BEX];
+
+extern mobjinfo_t brain_explode_mobj;
+
+bool mobj_modified[NUMMOBJTYPES_BEX];
+
+
 namespace Things
 {
 	bool got_one;
@@ -166,6 +173,10 @@ void Things::SetPlayerHealth(int new_value)
 bool Things::IsSpawnable(int mt_num)
 {
 	const mobjinfo_t *info = &mobjinfo[mt_num];
+
+	// attacks are not spawnable via A_Spawn
+	if (info->name[0] == '*')
+		return false;
 
 	return info->doomednum > 0;
 }
@@ -1011,7 +1022,7 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player)
 		got_one = true;
 		BeginLump();
 	}
-	
+
 	if (info->name[0] == '*')  // attack
 		return;
 
@@ -1070,6 +1081,7 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player)
 
 	WAD::Printf("\n");
 }
+
 
 void Things::ConvertTHING(void)
 {

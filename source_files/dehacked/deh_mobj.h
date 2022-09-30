@@ -340,11 +340,6 @@ typedef struct
 }
 mobjinfo_t;
 
-extern mobjinfo_t mobjinfo[NUMMOBJTYPES_BEX];
-
-extern const mobjinfo_t brain_explode_mobj;
-
-extern bool mobj_modified[NUMMOBJTYPES_BEX];
 
 }  // Deh_Edge
 

@@ -7013,7 +7013,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_BEX] =
 };
 
 
-const mobjinfo_t brain_explode_mobj =
+mobjinfo_t brain_explode_mobj =
 {
     "BRAIN_DEATH_MISSILE",       // name
 	-1,		// doomednum
@@ -7040,8 +7040,5 @@ const mobjinfo_t brain_explode_mobj =
 	MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY,		// flags
 	S_NULL		// raisestate
 };
-
-
-bool mobj_modified[NUMMOBJTYPES_BEX];
 
 }  // Deh_Edge

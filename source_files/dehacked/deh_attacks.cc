@@ -55,6 +55,11 @@ namespace Deh_Edge
 #define KF_PUFF_SMK   'p'
 
 
+extern mobjinfo_t mobjinfo[NUMMOBJTYPES_BEX];
+
+extern bool mobj_modified[NUMMOBJTYPES_BEX];
+
+
 namespace Attacks
 {
 	bool got_one;

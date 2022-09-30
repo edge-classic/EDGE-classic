@@ -43,9 +43,6 @@
 namespace Deh_Edge
 {
 
-#define MAX_KEENS  16
-
-
 #define MAP07  \
 	"  radiustrigger 0 0 -1\n"  \
 	"    ondeath MANCUBUS\n"  \
@@ -98,8 +95,7 @@ namespace Deh_Edge
 
 namespace Rscript
 {
-	int keen_mobjs[MAX_KEENS];
-	int keen_count;
+	std::vector<int> keen_mobjs;
 
 	void BeginLump();
 	void FinishLump();
@@ -112,12 +108,13 @@ namespace Rscript
 
 void Rscript::Init()
 {
-	keen_count = 0;
+	keen_mobjs.clear();
 }
 
 
 void Rscript::Shutdown()
 {
+	keen_mobjs.clear();
 }
 
 
@@ -136,17 +133,11 @@ void Rscript::FinishLump()
 
 void Rscript::MarkKeenDie(int mt_num)
 {
-	for (int i = 0; i < keen_count; i++)
+	for (size_t i = 0 ; i < keen_mobjs.size() ; i++)
 		if (keen_mobjs[i] == mt_num)
 			return;
 
-	if (keen_count >= MAX_KEENS)
-	{
-		PrintWarn("Too many keen deaths !n");
-		return;
-	}
-
-	keen_mobjs[keen_count++] = mt_num;
+	keen_mobjs.push_back(mt_num);
 }
 
 
@@ -228,7 +219,7 @@ void Rscript::OutputLevel(int episode, int map)
 
 	int spec_mt = SpecialLevel(episode, map);
 
-	for (int i = 0; i < keen_count; i++)
+	for (int i = 0 ; i < (int)keen_mobjs.size() ; i++)
 	{
 		// don't let keen deaths interfere with boss-death scripts
 		if (spec_mt == keen_mobjs[i])
@@ -246,21 +237,21 @@ void Rscript::OutputLevel(int episode, int map)
 
 void Rscript::ConvertRAD()
 {
-	if (! all_mode && keen_count == 0)
+	if (! all_mode && keen_mobjs.empty())
 		return;
 
 	BeginLump();
 
 	WAD::Printf("// --- DOOM I Scripts ---\n\n");
 
-	for (int e = 1; e <= 4; e++)
-		for (int m = 1; m <= 9; m++)
+	for (int e = 1 ; e <= 4 ; e++)
+		for (int m = 1 ; m <= 9 ; m++)
 			OutputLevel(e, m);
 
 	WAD::Printf("// --- DOOM II Scripts ---\n\n");
 
-	for (int j = 1; j <= 32; j++)
-		OutputLevel(0, j);
+	for (int m = 1 ; m <= 32 ; m++)
+		OutputLevel(0, m);
 
 	FinishLump();
 }

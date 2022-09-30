@@ -485,9 +485,6 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 
 namespace Things
 {
-	bool got_one;
-	bool flags_got_one;
-
 	int cast_mobjs[CAST_MAX];
 
 	void BeginLump();
@@ -777,11 +774,11 @@ namespace Things
 		return "";
 	}
 
-	void AddOneFlag(const mobjinfo_t *info, const char *name)
+	void AddOneFlag(const mobjinfo_t *info, const char *name, bool& got_a_flag)
 	{
-		if (! flags_got_one)
+		if (! got_a_flag)
 		{
-			flags_got_one = true;
+			got_a_flag = true;
 
 			if (info->name[0] == '*')
 				WAD::Printf("PROJECTILE_SPECIAL = ");
@@ -798,6 +795,7 @@ namespace Things
 	{
 		int i;
 		int cur_f = info->flags;
+		bool got_a_flag = false;
 
 		// strangely absent from MT_PLAYER
 		if (player)
@@ -818,8 +816,6 @@ namespace Things
 		bool is_monster = CheckIsMonster(info, mt_num, player, true);
 		bool force_disloyal = (is_monster && Misc::monster_infight == 221);
 
-		flags_got_one = false;
-
 		for (i = 0; flagnamelist[i].name != NULL; i++)
 		{
 			if (0 == (cur_f & flagnamelist[i].flag))
@@ -827,7 +823,7 @@ namespace Things
 
 			cur_f &= ~flagnamelist[i].flag;
 
-			AddOneFlag(info, flagnamelist[i].name);
+			AddOneFlag(info, flagnamelist[i].name, got_a_flag);
 		}
 
 		const char *eflags = GetExtFlags(mt_num, player);
@@ -845,16 +841,16 @@ namespace Things
 				continue;
 			}
 
-			AddOneFlag(info, extflaglist[i].name);
+			AddOneFlag(info, extflaglist[i].name, got_a_flag);
 		}
 
 		if (force_disloyal)
-			AddOneFlag(info, extflaglist[0].name);
+			AddOneFlag(info, extflaglist[0].name, got_a_flag);
 
 		if (is_monster)
-			AddOneFlag(info, "MONSTER");
+			AddOneFlag(info, "MONSTER", got_a_flag);
 
-		if (flags_got_one)
+		if (got_a_flag)
 			WAD::Printf(";\n");
 
 		if (cur_f & MF_TRANSLATION)
@@ -884,8 +880,7 @@ namespace Things
 		}
 
 		if (cur_f != 0)
-			PrintWarn("Unconverted flags 0x%08x in entry [%s]\n",
-				cur_f, info->name);
+			PrintWarn("Unconverted flags 0x%08x in entry [%s]\n", cur_f, info->name);
 	}
 
 	const int height_fixes[] =
@@ -1440,19 +1435,20 @@ namespace Things
 				Frames::attack_slot[Frames::SPARE]);
 	}
 
-	void ConvertMobj(const mobjinfo_t *info, int mt_num, int player);
+	void ConvertMobj(const mobjinfo_t *info, int mt_num, int player, bool &got_one);
 }
 
-void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player)
+
+void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player, bool& got_one)
 {
+	if (info->name[0] == '*')  // attack
+		return;
+
 	if (! got_one)
 	{
 		got_one = true;
 		BeginLump();
 	}
-
-	if (info->name[0] == '*')  // attack
-		return;
 
 	if (player > 0)
 		WAD::Printf("[%s:%d]\n", player_info[player-1].name, player_info[player-1].num);
@@ -1517,26 +1513,37 @@ void Things::ConvertTHING(void)
 
 	CollectTheCast();
 
-	got_one = false;
+	bool got_one = false;
+
+	if (all_mode)
+	{
+		for (int i = 0 ; i < NUMMOBJTYPES_COMPAT ; i++)
+			MarkThing(i);
+
+		/* this is debatable...
+		for (int i = MT_EXTRA00 ; i <= MT_EXTRA99 ; i++)
+			MarkThing(i);
+		*/
+	}
 
 	for (int i = 0; i < NUMMOBJTYPES_COMPAT; i++)
 	{
-	    if (! all_mode && ! mobj_modified[i])
+	    if (! mobj_modified[i])
 			continue;
 
 		if (i == MT_PLAYER)
 		{
 			for (int p = 1; p <= NUMPLAYERS; p++)
-				ConvertMobj(mobjinfo + i, i, p);
+				ConvertMobj(mobjinfo + i, i, p, got_one);
 
 			continue;
 		}
 
-		ConvertMobj(mobjinfo + i, i, 0);
+		ConvertMobj(mobjinfo + i, i, 0, got_one);
 	}
 
 	if (true)  // XXX Modified
-		ConvertMobj(&brain_explode_mobj, MT_ROCKET /* dummy */, 0);
+		ConvertMobj(&brain_explode_mobj, MT_ROCKET /* dummy */, 0, got_one);
 
 	if (got_one)
 		FinishLump();

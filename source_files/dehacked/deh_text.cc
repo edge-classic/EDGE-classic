@@ -447,6 +447,10 @@ const char *lang_bex_unsupported[] =
 //------------------------------------------------------------------------
 
 void TextStr::Init()
+{ }
+
+
+void TextStr::Shutdown()
 {
 	for (int i = 0; lang_list[i].orig_text; i++)
 	{
@@ -459,11 +463,6 @@ void TextStr::Init()
 		free(cheat_list[c].new_text);
 		cheat_list[c].new_text = NULL;
 	}
-}
-
-
-void TextStr::Shutdown()
-{
 }
 
 

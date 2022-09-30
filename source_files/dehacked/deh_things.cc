@@ -976,17 +976,17 @@ namespace Things
 	}
 
 
-	void CollectTheCast(void)
+	void CollectTheCast()
 	{
-		for (int i = 0; i < CAST_MAX; i++)
+		for (int i = 0 ; i < CAST_MAX ; i++)
 			cast_mobjs[i] = -1;
 
-		for (int mt_num = 0; mt_num < NUMMOBJTYPES_COMPAT; mt_num++)
+		for (int mt_num = 0 ; mt_num < NUMMOBJTYPES_COMPAT ; mt_num++)
 		{
 			int order = 0;
 
 			// cast objects are required to have CHASE and DEATH states
-			if (mobjinfo[mt_num].seestate == S_NULL ||
+			if (mobjinfo[mt_num].seestate   == S_NULL ||
 				mobjinfo[mt_num].deathstate == S_NULL)
 				continue;
 
@@ -1010,13 +1010,13 @@ namespace Things
 				case MT_SPIDER:    order = 16; break;
 				case MT_CYBORG:    order = 17; break;
 
-				default:
-					continue;
+				default: continue;
 			}
 
 			cast_mobjs[order] = mt_num;
 		}
 	}
+
 
 	const char *GetSpeed(int speed)
 	{
@@ -1032,6 +1032,7 @@ namespace Things
 
 		return num_buf;
 	}
+
 
 	void HandleSounds(const mobjinfo_t *info, int mt_num)
 	{
@@ -1061,6 +1062,7 @@ namespace Things
 		if (info->deathsound != sfx_None)
 			WAD::Printf("DEATH_SOUND = \"%s\";\n", Sounds::GetSound(info->deathsound));
 	}
+
 
 	void HandleFrames(const mobjinfo_t *info, int mt_num)
 	{
@@ -1143,6 +1145,7 @@ namespace Things
 		}
 	}
 
+
 	const int NUMPLAYERS = 8;
 
 	typedef struct
@@ -1199,6 +1202,7 @@ namespace Things
 
 		WAD::Printf("    BULLETS(%d);\n",      Misc::init_ammo);
 	}
+
 
 	typedef struct
 	{
@@ -1398,6 +1402,7 @@ namespace Things
 			WAD::Printf("PICKUP_SOUND = %s;\n", Sounds::GetSound(pu->sound));
 	}
 
+
 	const char *cast_titles[17] =
 	{
 	    "OurHeroName",     "ZombiemanName",
@@ -1411,6 +1416,7 @@ namespace Things
         "CyberdemonName"
 	};
 
+
 	void HandleCastOrder(const mobjinfo_t *info, int mt_num, int player)
 	{
 		if (player >= 2)
@@ -1419,7 +1425,7 @@ namespace Things
 		int pos   = 1;
 		int order = 1;
 
-		for (; pos < CAST_MAX; pos++)
+		for (; pos < CAST_MAX ; pos++)
 		{
 			// ignore missing members (ensure real order is contiguous)
 			if (cast_mobjs[pos] < 0)
@@ -1435,58 +1441,59 @@ namespace Things
 			return;
 
 		WAD::Printf("CASTORDER = %d;\n", order);
-
 		WAD::Printf("CAST_TITLE = %s;\n", cast_titles[pos - 1]);
 	}
 
-	void HandleDropItem(const mobjinfo_t *info, int mt_num)
-	{
-		const char *item = NULL;
 
-		switch (mt_num)
-		{
-			case MT_WOLFSS:
-			case MT_POSSESSED: item = "CLIP"; break;
 
-			case MT_SHOTGUY:   item = "SHOTGUN"; break;
-			case MT_CHAINGUY:  item = "CHAINGUN"; break;
-
-			default:
-				return;
-		}
-
-		assert(item);
-
-		WAD::Printf("DROPITEM = \"%s\";\n", item);
-	}
-
-	void HandleAttacks(const mobjinfo_t *info, int mt_num)
-	{
-		if (Frames::attack_slot[Frames::RANGE])
-		{
-			WAD::Printf("RANGE_ATTACK = %s;\n",
-				Frames::attack_slot[Frames::RANGE]);
-			WAD::Printf("MINATTACK_CHANCE = 25%%;\n");
-		}
-
-		if (Frames::attack_slot[Frames::COMBAT])
-		{
-			WAD::Printf("CLOSE_ATTACK = %s;\n",
-				Frames::attack_slot[Frames::COMBAT]);
-		}
-		else if (info->meleestate && info->name[0] != '*')
-		{
-			PrintWarn("No close attack in melee states of [%s].\n",
-				info->name);
-			WAD::Printf("CLOSE_ATTACK = DEMON_CLOSECOMBAT; // dummy attack\n");
-		}
-
-		if (Frames::attack_slot[Frames::SPARE])
-			WAD::Printf("SPARE_ATTACK = %s;\n",
-				Frames::attack_slot[Frames::SPARE]);
-	}
-
+	void HandleDropItem(const mobjinfo_t *info, int mt_num);
+	void HandleAttacks(const mobjinfo_t *info, int mt_num);
 	void ConvertMobj(const mobjinfo_t *info, int mt_num, int player, bool &got_one);
+}
+
+
+void Things::HandleDropItem(const mobjinfo_t *info, int mt_num)
+{
+	const char *item = NULL;
+
+	switch (mt_num)
+	{
+		case MT_WOLFSS:
+		case MT_POSSESSED: item = "CLIP"; break;
+
+		case MT_SHOTGUY:   item = "SHOTGUN"; break;
+		case MT_CHAINGUY:  item = "CHAINGUN"; break;
+
+		default:
+			return;
+	}
+
+	assert(item);
+
+	WAD::Printf("DROPITEM = \"%s\";\n", item);
+}
+
+
+void Things::HandleAttacks(const mobjinfo_t *info, int mt_num)
+{
+	if (Frames::attack_slot[Frames::RANGE])
+	{
+		WAD::Printf("RANGE_ATTACK = %s;\n", Frames::attack_slot[Frames::RANGE]);
+		WAD::Printf("MINATTACK_CHANCE = 25%%;\n");
+	}
+
+	if (Frames::attack_slot[Frames::COMBAT])
+	{
+		WAD::Printf("CLOSE_ATTACK = %s;\n", Frames::attack_slot[Frames::COMBAT]);
+	}
+	else if (info->meleestate && info->name[0] != '*')
+	{
+		PrintWarn("No close attack in melee states of [%s].\n", info->name);
+		WAD::Printf("CLOSE_ATTACK = DEMON_CLOSECOMBAT; // dummy attack\n");
+	}
+
+	if (Frames::attack_slot[Frames::SPARE])
+		WAD::Printf("SPARE_ATTACK = %s;\n", Frames::attack_slot[Frames::SPARE]);
 }
 
 

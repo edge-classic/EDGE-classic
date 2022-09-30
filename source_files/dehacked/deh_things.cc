@@ -189,6 +189,7 @@ namespace Attacks
 
 			int count = 0;
 
+			// FIXME
 			count += Frames::BeginGroup(mobjinfo[MT_SPAWNFIRE].spawnstate, 'D');
 			count += Frames::BeginGroup(info->spawnstate, 'S');
 
@@ -201,6 +202,7 @@ namespace Attacks
 			Frames::SpreadGroups();
 
 			Frames::OutputGroup(info->spawnstate, 'S');
+			// FIXME
 			Frames::OutputGroup(mobjinfo[MT_SPAWNFIRE].spawnstate, 'D');
 
 			return;
@@ -266,6 +268,7 @@ namespace Attacks
 		// these two attacks refer to the LOST_SOUL's missile states.
 		// Hence we need to check that they didn't go away.
 
+		// FIXME
 		mobjinfo_t *skull = mobjinfo + MT_SKULL;
 
 		if (skull->missilestate != S_NULL)
@@ -483,6 +486,21 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 //
 //----------------------------------------------------------------------------
 
+const int height_fixes[] =
+{
+	MT_MISC14, 60, MT_MISC29, 78, MT_MISC30, 58, MT_MISC31, 46,
+	MT_MISC33, 38, MT_MISC34, 50, MT_MISC38, 56, MT_MISC39, 48,
+	MT_MISC41, 96, MT_MISC42, 96, MT_MISC43, 96, MT_MISC44, 72,
+	MT_MISC45, 72, MT_MISC46, 72, MT_MISC70, 64, MT_MISC72, 52,
+	MT_MISC73, 40, MT_MISC74, 64, MT_MISC75, 64, MT_MISC76, 120,
+
+	MT_MISC36, 56, MT_MISC37, 56, MT_MISC47, 56, MT_MISC48, 128,
+	MT_MISC35, 56, MT_MISC40, 56, MT_MISC50, 56, MT_MISC77, 42,
+
+	-1, -1  /* the end */
+};
+
+
 namespace Things
 {
 	int cast_mobjs[CAST_MAX];
@@ -583,7 +601,7 @@ void Things::MarkAllMonsters()
 		if (i == MT_PLAYER)
 			continue;
 
-		const mobjinfo_t *mobj = mobjinfo + i;
+		const mobjinfo_t *mobj = &mobjinfo[i];
 
 		if (CheckIsMonster(mobj, i, 0, false))
 			MarkThing(i);
@@ -926,47 +944,37 @@ namespace Things
 			PrintWarn("Unconverted flags 0x%08x in entry [%s]\n", cur_f, info->name);
 	}
 
-	const int height_fixes[] =
+
+	void FixHeights()
 	{
-	   MT_MISC14, 60, MT_MISC29, 78, MT_MISC30, 58, MT_MISC31, 46,
-	   MT_MISC33, 38, MT_MISC34, 50, MT_MISC38, 56, MT_MISC39, 48,
-	   MT_MISC41, 96, MT_MISC42, 96, MT_MISC43, 96, MT_MISC44, 72,
-	   MT_MISC45, 72, MT_MISC46, 72, MT_MISC70, 64, MT_MISC72, 52,
-	   MT_MISC73, 40, MT_MISC74, 64, MT_MISC75, 64, MT_MISC76, 120,
-
-	   MT_MISC36, 56, MT_MISC37, 56, MT_MISC47, 56, MT_MISC48, 128,
-	   MT_MISC35, 56, MT_MISC40, 56, MT_MISC50, 56, MT_MISC77, 42,
-
-     -1 /* the end */
-	};
-
-	void FixHeights(void)
-	{
-		for (int i = 0; height_fixes[i] >= 0; i += 2)
+		for (int i = 0 ; height_fixes[i] >= 0 ; i += 2)
 		{
 			int mt_num = height_fixes[i];
+			int new_h  = height_fixes[i + 1];
 
 			assert(mt_num < NUMMOBJTYPES_COMPAT);
 
-			mobjinfo_t *mobj = mobjinfo + mt_num;
+			// if the thing was not modified, nothing to do here
+			if (mt_num >= (int)new_mobjinfo.size())
+				continue;
 
-			/* Kludge for Aliens TC (and others) that put these thibgs on
+			mobjinfo_t *info = new_mobjinfo[mt_num];
+			if (info == NULL)
+				continue;
+
+			/* Kludge for Aliens TC (and others) that put these things on
 			 * the ceiling -- they need the 16 height for correct display,
 			 */
-			if (mobj->flags & MF_SPAWNCEILING)
+			if (info->flags & MF_SPAWNCEILING)
 				continue;
 
-			if (mobj->height != 16*FRACUNIT)
+			if (info->height != 16*FRACUNIT)
 				continue;
 
-			mobj->height = height_fixes[i+1] * FRACUNIT;
-
-			// Note: Storage::ApplyAll() has already been called, hence
-			//       we are being a bit sneaky here and using RememberMod
-			//       just to restore the changed heights.
-			Storage::RememberMod(&mobj->height, 16*FRACUNIT);
+			info->height = new_h * FRACUNIT;
 		}
 	}
+
 
 	void CollectTheCast(void)
 	{

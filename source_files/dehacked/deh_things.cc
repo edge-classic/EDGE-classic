@@ -45,7 +45,6 @@
 #include "deh_patch.h"
 #include "deh_rscript.h"
 #include "deh_things.h"
-#include "deh_storage.h"
 #include "deh_sounds.h"
 #include "deh_sprites.h"
 #include "deh_system.h"
@@ -78,6 +77,14 @@ extern mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT];
 extern mobjinfo_t brain_explode_mobj;
 
 std::vector<mobjinfo_t *> new_mobjinfo;
+
+
+namespace Things
+{
+	mobjinfo_t * NewMobj(int mt_num);
+	const mobjinfo_t * OldMobj(int mt_num);
+	const mobjinfo_t * NewMobjElseOld(int mt_num);
+}
 
 
 //----------------------------------------------------------------------------
@@ -190,8 +197,10 @@ namespace Attacks
 
 			int count = 0;
 
-			// FIXME
-			count += Frames::BeginGroup(mobjinfo[MT_SPAWNFIRE].spawnstate, 'D');
+			const mobjinfo_t * spawnfire = Things::NewMobjElseOld(MT_SPAWNFIRE);
+			assert(spawnfire);
+
+			count += Frames::BeginGroup(spawnfire->spawnstate, 'D');
 			count += Frames::BeginGroup(info->spawnstate, 'S');
 
 			if (count != 2)
@@ -203,8 +212,7 @@ namespace Attacks
 			Frames::SpreadGroups();
 
 			Frames::OutputGroup(info->spawnstate, 'S');
-			// FIXME
-			Frames::OutputGroup(mobjinfo[MT_SPAWNFIRE].spawnstate, 'D');
+			Frames::OutputGroup(spawnfire->spawnstate, 'D');
 
 			return;
 		}
@@ -230,6 +238,7 @@ namespace Attacks
 		Frames::OutputGroup(info->deathstate,   'D');
 	}
 
+
 	void AddAtkSpecial(const char *name)
 	{
 		if (! flag_got_one)
@@ -242,6 +251,7 @@ namespace Attacks
 
 		WAD::Printf("%s", name);
 	}
+
 
 	void HandleAtkSpecials(const mobjinfo_t *info, int mt_num,
 		const attackextra_t *ext, bool plr_rocket)
@@ -264,17 +274,19 @@ namespace Attacks
 			WAD::Printf(";\n");
 	}
 
+
 	void CheckPainElemental(void)
 	{
-		// these two attacks refer to the LOST_SOUL's missile states.
-		// Hence we need to check that they didn't go away.
+		// two attacks which refer to the LOST_SOUL's missile states
+		// (ELEMENTAL_SPAWNER and ELEMENTAL_DEATHSPAWN).  check if
+		// those states are still valid, recreate attacks if not.
 
-		// FIXME
-		mobjinfo_t *skull = mobjinfo + MT_SKULL;
+		const mobjinfo_t *skull = Things::NewMobjElseOld(MT_SKULL);
+		assert(skull);
 
 		if (skull->missilestate != S_NULL)
 		{
-			state_t *mis_st = states + skull->missilestate;
+			state_t *mis_st = &states[skull->missilestate];
 
 			if (mis_st->tics >= 0 && mis_st->nextstate != S_NULL)
 				return;
@@ -344,6 +356,7 @@ const char * Attacks::AddScratchAttack(int damage, const char *sfx)
 	return namebuf;
 }
 
+
 void Attacks::ConvertScratch(const scratch_atk_c *atk)
 {
 	if (! got_one)
@@ -368,16 +381,17 @@ void Attacks::ConvertScratch(const scratch_atk_c *atk)
 	WAD::Printf("\n");
 }
 
+
 void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 {
+	if (info->name[0] != '*')  // thing?
+		return;
+
 	if (! got_one)
 	{
 		got_one = true;
 		BeginLump();
 	}
-
-	if (info->name[0] != '*' || info->name[1] == 0)  // thing
-		return;
 
 	if (plr_rocket)
 		WAD::Printf("[%s]\n", "PLAYER_MISSILE");
@@ -527,6 +541,10 @@ void Things::Shutdown()
 			delete new_mobjinfo[i];
 
 	new_mobjinfo.clear();
+
+	for (size_t k = 0 ; k < Attacks::scratchers.size() ; k++)
+		delete Attacks::scratchers[k];
+
 	Attacks::scratchers.clear();
 }
 
@@ -571,11 +589,12 @@ void Things::MarkThing(int mt_num)
 	if (mt_num < NUMMOBJTYPES_COMPAT)
 	{
 		memcpy(entry, &mobjinfo[mt_num], sizeof(mobjinfo_t));
-		entry->name = NULL;
 	}
 	else
 	{
 		memset(entry, 0, sizeof(mobjinfo_t));
+
+		entry->name = "X";  // only needed to differentiate from an attack
 		entry->doomednum = -1;
 
 		if (MT_EXTRA00 <= mt_num && mt_num <= MT_EXTRA99)
@@ -643,20 +662,41 @@ void Things::SetPlayerHealth(int new_value)
 }
 
 
+const mobjinfo_t * Things::OldMobj(int mt_num)
+{
+	if (mt_num < NUMMOBJTYPES_COMPAT)
+		return &mobjinfo[mt_num];
+
+	return NULL;
+}
+
+
+mobjinfo_t * Things::NewMobj(int mt_num)
+{
+	if (mt_num < (int)new_mobjinfo.size())
+		return new_mobjinfo[mt_num];
+
+	return NULL;
+}
+
+
+const mobjinfo_t * Things::NewMobjElseOld(int mt_num)
+{
+	const mobjinfo_t * info = NewMobj(mt_num);
+	if (info != NULL)
+		return info;
+
+	return OldMobj(mt_num);
+}
+
+
 bool Things::IsSpawnable(int mt_num)
 {
 	// attacks are not spawnable via A_Spawn
 	if (mt_num < NUMMOBJTYPES_COMPAT && mobjinfo[mt_num].name[0] == '*')
 		return false;
 
-	const mobjinfo_t *info = NULL;
-
-	if (mt_num < (int)new_mobjinfo.size())
-		info = new_mobjinfo[mt_num];
-
-	if (info == NULL && mt_num < NUMMOBJTYPES_COMPAT)
-		info = &mobjinfo[mt_num];
-
+	const mobjinfo_t *info = NewMobjElseOld(mt_num);
 	if (info == NULL)
 		return false;
 
@@ -739,7 +779,7 @@ namespace Things
 
 	const char *flag_bex_ignored[] =
 	{
-		"INFLOAT", "JUSTATTACKED", "JUSTHIT", 
+		"INFLOAT", "JUSTATTACKED", "JUSTHIT",
 		"UNUSED1", "UNUSED2", "UNUSED3", "UNUSED4",
 
 		NULL
@@ -861,7 +901,7 @@ namespace Things
 		// strangely absent from MT_PLAYER
 		if (player)
 			cur_f |= MF_SLIDE;
-		
+
 		// this can cause EDGE 1.27 to crash
 		if (! player)
 			cur_f &= ~MF_PICKUP;
@@ -986,8 +1026,9 @@ namespace Things
 			int order = 0;
 
 			// cast objects are required to have CHASE and DEATH states
-			if (mobjinfo[mt_num].seestate   == S_NULL ||
-				mobjinfo[mt_num].deathstate == S_NULL)
+			const mobjinfo_t *info = NewMobjElseOld(mt_num);
+
+			if (info->seestate == S_NULL || info->deathstate == S_NULL)
 				continue;
 
 			switch (mt_num)
@@ -1081,14 +1122,17 @@ namespace Things
 			// the CHASE states of the TELEPORT_FLASH object (i.e. the one
 			// used to find the destination in the target sector).
 
-			if (0 == Frames::BeginGroup(mobjinfo[MT_TFOG].spawnstate, 'E'))
+			const mobjinfo_t *tfog = NewMobjElseOld(MT_TFOG);
+			assert(tfog);
+
+			if (0 == Frames::BeginGroup(tfog->spawnstate, 'E'))
 			{
 				PrintWarn("Teleport fog has no spawn states.\n");
 				return;
 			}
 
 			Frames::SpreadGroups();
-			Frames::OutputGroup(mobjinfo[MT_TFOG].spawnstate, 'E');
+			Frames::OutputGroup(tfog->spawnstate, 'E');
 
 			return;
 		}
@@ -1218,7 +1262,7 @@ namespace Things
 	const pickupitem_t pickup_item[] =
 	{
 		// Health & Armor....
-		{ SPR_BON1, "HEALTH", 2, 1,200, "GotHealthPotion", sfx_itemup },  
+		{ SPR_BON1, "HEALTH", 2, 1,200, "GotHealthPotion", sfx_itemup }, 
 		{ SPR_STIM, "HEALTH", 2, 10,100, "GotStim", sfx_itemup },  
 		{ SPR_MEDI, "HEALTH", 2, 25,100, "GotMedi", sfx_itemup },  
 		{ SPR_BON2, "GREEN_ARMOUR", 2, 1,200, "GotArmourHelmet", sfx_itemup },  
@@ -1618,7 +1662,6 @@ void Things::ConvertATK()
 	for (size_t k = 0 ; k < Attacks::scratchers.size() ; k++)
 	{
 		Attacks::ConvertScratch(Attacks::scratchers[k]);
-		delete Attacks::scratchers[k];  // FIXME do in Shutdown
 	}
 
 	// Note: all_mode was handled by ConvertTHING

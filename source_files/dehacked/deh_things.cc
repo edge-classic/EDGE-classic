@@ -166,6 +166,7 @@ namespace Attacks
 		{ -1, NULL, 0, 0, "" }
 	};
 
+
 	void HandleSounds(const mobjinfo_t *info, int mt_num)
 	{
 		if (info->seesound != sfx_None)
@@ -183,6 +184,7 @@ namespace Attacks
 		if (mt_num == MT_FATSHOT)
 			WAD::Printf("ATTEMPT_SOUND = \"%s\";\n", Sounds::GetSound(sfx_manatk));
 	}
+
 
 	void HandleFrames(const mobjinfo_t *info, int mt_num)
 	{
@@ -227,7 +229,7 @@ namespace Attacks
 
 		if (count == 0)
 		{
-			PrintWarn("Attack [%s] has no states.\n", info->name + 1);
+			PrintWarn("Attack [%s] has no states.\n", Things::GetMobjName(mt_num) + 1);
 			return;
 		}
 
@@ -396,7 +398,7 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 	if (plr_rocket)
 		WAD::Printf("[%s]\n", "PLAYER_MISSILE");
 	else
-		WAD::Printf("[%s]\n", info->name + 1);
+		WAD::Printf("[%s]\n", Things::GetMobjName(mt_num) + 1);
 
 	// find attack in the extra table...
 	const attackextra_t *ext = NULL;
@@ -409,7 +411,7 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 		}
 
 	if (! ext)
-		InternalError("Missing attack %s in extra table.\n", info->name + 1);
+		InternalError("Missing attack %s in extra table.\n", Things::GetMobjName(mt_num) + 1);
 
 	WAD::Printf("ATTACKTYPE = %s;\n", ext->atk_type);
 
@@ -484,7 +486,7 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 	if (Frames::attack_slot[0] || Frames::attack_slot[1] ||
 	    Frames::attack_slot[2])
 	{
-		PrintWarn("Attack [%s] contained an attacking action.\n", info->name + 1);
+		PrintWarn("Attack [%s] contained an attacking action.\n", Things::GetMobjName(mt_num) + 1);
 		Things::HandleAttacks(info, mt_num);
 	}
 
@@ -585,6 +587,7 @@ void Things::MarkThing(int mt_num)
 
 	// create new entry, copy original info if we have it
 	mobjinfo_t * entry = new mobjinfo_t;
+	new_mobjinfo[mt_num] = entry;
 
 	if (mt_num < NUMMOBJTYPES_COMPAT)
 	{
@@ -648,7 +651,7 @@ const char * Things::GetMobjName(int mt_num)
 	if (MT_EXTRA00 <= mt_num && mt_num <= MT_EXTRA99)
 		snprintf(buffer, sizeof(buffer), "MT_EXTRA%02d", mt_num - MT_EXTRA00);
 	else
-		snprintf(buffer, sizeof(buffer), "DEHACKED_%d", mt_num);
+		snprintf(buffer, sizeof(buffer), "DEHACKED_%d", mt_num + 1);
 
 	return buffer;
 }
@@ -826,7 +829,7 @@ namespace Things
 
 #if (DEBUG_MONST)
 		Debug_PrintMsg("[%20.20s:%-4d] %c%c%c%c%c %c%c%c%c %c%c %d = %d\n",
-			info->name, info->doomednum,
+			GetMobjName(mt_num), info->doomednum,
 			(info->flags & MF_SOLID) ? 'S' : '-',
 			(info->flags & MF_SHOOTABLE) ? 'H' : '-',
 			(info->flags & MF_FLOAT) ? 'F' : '-',
@@ -981,7 +984,7 @@ namespace Things
 		}
 
 		if (cur_f != 0)
-			PrintWarn("Unconverted flags 0x%08x in entry [%s]\n", cur_f, info->name);
+			PrintWarn("Unconverted flags 0x%08x in mobjtype %d\n", cur_f, mt_num);
 	}
 
 
@@ -1156,7 +1159,7 @@ namespace Things
 			// with teleport target (handled above) and brain spit targets.
 
 			if (mt_num != MT_BOSSTARGET)
-				PrintWarn("Mobj [%s:%d] has no states.\n", info->name, info->doomednum);
+				PrintWarn("Mobj [%s:%d] has no states.\n", GetMobjName(mt_num), info->doomednum);
 
 			WAD::Printf("TRANSLUCENCY = 0%%;\n");
 
@@ -1307,6 +1310,7 @@ namespace Things
 		{ -1, NULL, 0,0,0, NULL }
 	};
 
+
 	void HandleItem(const mobjinfo_t *info, int mt_num)
 	{
 		if (! (info->flags & MF_SPECIAL))
@@ -1362,7 +1366,7 @@ namespace Things
 		if (pu->benefit == NULL)  // not found
 		{
 			PrintWarn("Unknown pickup sprite \"%s\" for item [%s]\n",
-				Sprites::GetOriginalName(spr_num), info->name);
+				Sprites::GetOriginalName(spr_num), GetMobjName(mt_num));
 			return;
 		}
 
@@ -1532,7 +1536,7 @@ void Things::HandleAttacks(const mobjinfo_t *info, int mt_num)
 	}
 	else if (info->meleestate && info->name[0] != '*')
 	{
-		PrintWarn("No close attack in melee states of [%s].\n", info->name);
+		PrintWarn("No close attack in melee states of [%s].\n", GetMobjName(mt_num));
 		WAD::Printf("CLOSE_ATTACK = DEMON_CLOSECOMBAT; // dummy attack\n");
 	}
 
@@ -1552,12 +1556,14 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player, bool& g
 		BeginLump();
 	}
 
+	const char * ddf_name = GetMobjName(mt_num);
+
 	if (player > 0)
 		WAD::Printf("[%s:%d]\n", player_info[player-1].name, player_info[player-1].num);
 	else if (info->doomednum < 0)
-		WAD::Printf("[%s]\n", info->name);
+		WAD::Printf("[%s]\n", ddf_name);
 	else
-		WAD::Printf("[%s:%d]\n", info->name, info->doomednum);
+		WAD::Printf("[%s:%d]\n", ddf_name, info->doomednum);
 
 	WAD::Printf("RADIUS = %1.1f;\n", F_FIXED(info->radius));
 	WAD::Printf("HEIGHT = %1.1f;\n", F_FIXED(info->height));

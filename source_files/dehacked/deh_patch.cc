@@ -778,7 +778,7 @@ namespace Patch
 		{
 			switch (active_section)
 			{
-				case DEH_THING:  min_obj = 1; max_obj = NUMMOBJTYPES; break;
+				case DEH_THING:  max_obj = NUMMOBJTYPES; min_obj = 1; break;
 
 				case DEH_SOUND:  max_obj = NUMSFX     - 1; break;
 				case DEH_FRAME:  max_obj = NUMSTATES  - 1; break;

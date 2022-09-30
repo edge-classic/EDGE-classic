@@ -53,7 +53,6 @@ namespace Things
 
 	void MarkThing(int mt_num);  // attacks too
 
-	void FixHeights();
 	void ConvertTHING();
 
 	void HandleFlags(const mobjinfo_t *info, int mt_num, int player);

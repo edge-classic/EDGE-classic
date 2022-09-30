@@ -1011,6 +1011,8 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player)
 
 void Things::ConvertTHING(void)
 {
+	FixHeights();
+
 	CollectTheCast();
 
 	got_one = false;

@@ -120,11 +120,11 @@ dehret_e Convert(void)
 	Ammo   ::AmmoDependencies();
 
 	// things and weapons must be before attacks
-	Things ::FixHeights();
-	Things ::ConvertTHING();
 	Weapons::ConvertWEAP();
+	Things ::ConvertTHING();
 	Attacks::ConvertATK();
 
+	// rscript must be after things (for A_KeenDie)
 	TextStr::ConvertLDF();
 	Rscript::ConvertRAD();
 

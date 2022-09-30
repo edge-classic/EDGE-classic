@@ -582,6 +582,9 @@ typedef enum
 	
 	// experimental: transfer upper texture to SKY
 	LINEFX_SkyTransfer = (1 << 9),
+
+	// make all tagged lines scroll using this sidedef's offsets (MBF21)
+	LINEFX_TaggedOffsetScroll = (1 << 10),
 }
 line_effect_type_e;
 

@@ -909,6 +909,7 @@ static specflags_t line_effect_names[] =
 	{"BLOCK_SHOTS",    LINEFX_BlockShots,    0},
 	{"BLOCK_SIGHT",    LINEFX_BlockSight,    0},
 	{"SKY_TRANSFER",    LINEFX_SkyTransfer,    0}, //Lobo 2022
+	{"TAGGED_OFFSET_SCROLL", LINEFX_TaggedOffsetScroll,    0}, //Lobo 2022
 	{NULL, 0, 0}
 };
 

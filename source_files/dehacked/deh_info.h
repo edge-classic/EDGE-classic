@@ -420,19 +420,9 @@ struct state_t
 	int  tics;
 	int  action;
 	int  nextstate;
-	int  misc1, misc2;
+	int  argptr;
 };
 
-
-struct new_state_t
-{
-	// the old state info
-	state_t  o;
-
-	// for MBF21, eight 32-bit arguments.
-	// misc1 is mapped to args[0], misc2 to args[1].
-	int args[8];
-};
 
 }  // Deh_Edge
 

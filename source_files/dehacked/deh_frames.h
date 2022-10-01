@@ -16,7 +16,7 @@
 namespace Deh_Edge
 {
 
-struct new_state_t;
+struct state_t;
 
 typedef enum
 {
@@ -60,7 +60,7 @@ namespace Frames
 	void MarkStatesWithSprite(int spr_num);
 	void StateDependencies();
 
-	new_state_t *GetModifiedState(int st_num);
+	state_t *GetModifiedState(int st_num);
 	int GetStateSprite(int st_num);
 
 	void AlterFrame(int new_val);

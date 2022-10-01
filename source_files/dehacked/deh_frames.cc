@@ -58,9 +58,14 @@ namespace Deh_Edge
 #define MAX_ACT_NAME  1024
 
 
-extern state_t states[NUMSTATES_DEHEXTRA];
+extern state_t states[NUMSTATES_MBF];
 
 bool state_modified[NUMSTATES_DEHEXTRA];
+
+
+// FIXME !!!! AWFUL TEMP HACK
+#define misc1  tics
+#define misc2  tics
 
 
 struct group_info_t
@@ -413,6 +418,7 @@ void Frames::Init()
 	memset(state_modified, 0, sizeof(state_modified));
 
 	// Initialize DEHEXTRA states - Dasho
+	/* FIXME
 	for (int i = NUMSTATES_MBF ; i < NUMSTATES_DEHEXTRA ; i++)
 	{
 		states[i].sprite = SPR_TNT1;
@@ -420,9 +426,8 @@ void Frames::Init()
 		states[i].tics = -1;
 		states[i].action = A_NULL;
 		states[i].nextstate = i;
-		states[i].misc1 = 0;
-		states[i].misc2 = 0;
 	}
+	*/
 }
 
 
@@ -456,12 +461,12 @@ void Frames::MarkState(int st_num)
 }
 
 
-new_state_t * Frames::GetModifiedState(int st_num)
+state_t * Frames::GetModifiedState(int st_num)
 {
 	MarkState(st_num);
 
 	// FIXME temp crud
-	static new_state_t  crud;
+	static state_t  crud;
 	return &crud;
 }
 
@@ -563,7 +568,7 @@ void Frames::StateDependencies()
 
 void Frames::MarkStatesWithSprite(int spr_num)
 {
-	for (int st = 1; st < NUMSTATES_DEHEXTRA; st++)
+	for (int st = 1; st < NUMSTATES_MBF; st++)  // FIXME
 		if (states[st].sprite == spr_num)
 			MarkState(st);
 }
@@ -1135,8 +1140,6 @@ namespace Frames
 		{ "Sprite subnumber", FIELD_OFS(frame),     FT_SUBSPR },
 		{ "Duration",         FIELD_OFS(tics),      FT_ANY },
 		{ "Next frame",       FIELD_OFS(nextstate), FT_FRAME },
-		{ "Unknown 1",        FIELD_OFS(misc1),     FT_ANY },
-		{ "Unknown 2",        FIELD_OFS(misc2),     FT_ANY },
 
 		{ NULL, 0, FT_ANY }   // End sentinel
 	};
@@ -1154,6 +1157,18 @@ void Frames::AlterFrame(int new_val)
 	{
 		PrintWarn("Line %d: raw Action pointer not supported.\n",
 			Patch::line_num);
+		return;
+	}
+
+	if (StrCaseCmp(field_name, "Unknown 1") == 0)
+	{
+		// FIXME
+		return;
+	}
+
+	if (StrCaseCmp(field_name, "Unknown 2") == 0)
+	{
+		// FIXME
 		return;
 	}
 

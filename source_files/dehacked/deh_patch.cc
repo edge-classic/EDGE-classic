@@ -457,15 +457,15 @@ namespace Patch
 		if (file_error)
 			FatalError("File error reading binary frame table.\n");
 
-		new_state_t *state = Frames::GetModifiedState(st_num);
+		state_t *state = Frames::GetModifiedState(st_num);
 
-		GetSprite(O_FRAME, st_num, &state->o.sprite);
-		GetInt   (O_FRAME, st_num, &state->o.frame);
-		GetInt   (O_FRAME, st_num, &state->o.tics);
+		GetSprite(O_FRAME, st_num, &state->sprite);
+		GetInt   (O_FRAME, st_num, &state->frame);
+		GetInt   (O_FRAME, st_num, &state->tics);
 
 		GetRawInt();  // ignore code-pointer
 
-		GetFrame(O_FRAME, st_num, &state->o.nextstate);
+		GetFrame(O_FRAME, st_num, &state->nextstate);
 
 		GetRawInt();  // ignore misc1/misc2 fields
 		GetRawInt();

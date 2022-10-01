@@ -68,12 +68,12 @@ namespace Frames
 	void AlterBexCodePtr(const char * new_action);
 
 	void ResetGroups(); // also resets the slots and flags
-	int  BeginGroup(int first, char group);
+	int  BeginGroup(char group, int first);
 	void SpreadGroups();
 
 	bool CheckWeaponFlash(int first);
 	bool CheckMissileState(int first);
-	void OutputGroup(int first, char group);
+	void OutputGroup(char group);
 
 	// debugging stuff
 	void DebugRange(const char *kind, const char *entry);

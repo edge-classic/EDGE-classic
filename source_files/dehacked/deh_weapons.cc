@@ -179,12 +179,12 @@ namespace Weapons
 		int count = 0;
 
 		if (has_flash)
-			count += Frames::BeginGroup(info->flashstate,  'f');
+			count += Frames::BeginGroup('f', info->flashstate);
 
-		count += Frames::BeginGroup(info->atkstate,    'a');
-		count += Frames::BeginGroup(info->readystate,  'r');
-		count += Frames::BeginGroup(info->downstate,   'd');
-		count += Frames::BeginGroup(info->upstate,     'u');
+		count += Frames::BeginGroup('a', info->atkstate);
+		count += Frames::BeginGroup('r', info->readystate);
+		count += Frames::BeginGroup('d', info->downstate);
+		count += Frames::BeginGroup('u', info->upstate);
 
 		if (count == 0)
 		{
@@ -194,13 +194,13 @@ namespace Weapons
 
 		Frames::SpreadGroups();
 
-		Frames::OutputGroup(info->upstate,     'u');
-		Frames::OutputGroup(info->downstate,   'd');
-		Frames::OutputGroup(info->readystate,  'r');
-		Frames::OutputGroup(info->atkstate,    'a');
+		Frames::OutputGroup('u');
+		Frames::OutputGroup('d');
+		Frames::OutputGroup('r');
+		Frames::OutputGroup('a');
 
 		if (has_flash)
-			Frames::OutputGroup(info->flashstate, 'f');
+			Frames::OutputGroup('f');
 	}
 
 	void HandleAttacks(const weaponinfo_t *info, int w_num)

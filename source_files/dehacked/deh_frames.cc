@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <string.h>
+#include <unordered_map>
 
 #include "deh_i_defs.h"
 #include "deh_edge.h"
@@ -64,10 +65,21 @@ bool state_modified[NUMSTATES_DEHEXTRA];
 statedyn_t state_dyn[NUMSTATES_DEHEXTRA];
 
 
+struct group_info_t
+{
+	char group;
+	std::vector<int> states;
+};
+
+
 namespace Frames
 {
-	const char * attack_slot[3];
+	// stuff for determining and outputting groups of states:
+	std::unordered_map<char, group_info_t> groups;
+	std::unordered_map<int, char> group_for_state;
+	std::unordered_map<int, int>  index_for_state;
 
+	const char * attack_slot[3];
 	int act_flags;
 
 	// forward decls
@@ -422,6 +434,10 @@ void Frames::Shutdown()
 
 void Frames::ResetGroups()
 {
+	groups.clear();
+	group_for_state.clear();
+	index_for_state.clear();
+
 	for (int i = 0; i < NUMSTATES_DEHEXTRA; i++)
 	{
 		state_dyn[i].group = 0;
@@ -562,7 +578,7 @@ void Frames::MarkStatesWithSprite(int spr_num)
 
 //------------------------------------------------------------------------
 
-int Frames::BeginGroup(int first, char group)
+int Frames::BeginGroup(char group, int first)
 {
 	if (first == S_NULL)
 		return 0;
@@ -1099,33 +1115,35 @@ bool Frames::OutputSpawnState(int first)
 }
 
 
-void Frames::OutputGroup(int first, char group)
+void Frames::OutputGroup(char group)
 {
-	if (first == S_NULL)
+	auto GIT = groups.find(group);
+
+	if (GIT == groups.end())
 		return;
 
-	assert(state_dyn[first].group != 0);
+	group_info_t& G = GIT->second;
 
-	// create the STATES(SPAWN) here, before the IDLE ones.
+	// generate STATES(SPAWN) here, before doing the IDLE ones.
 	// this is to emulate BOOM/MBF, which don't execute the very first
 	// action when an object is spawned, but EDGE *does* execute it.
 	if (group == 'S')
 	{
-		if (OutputSpawnState(first))
+		if (OutputSpawnState(G.states[0]))
 			return;
 	}
 
 	WAD::Printf("\n");
 	WAD::Printf("STATES(%s) =\n", GroupToName(group));
 
-	int cur = first;
-
-	for (;;)
+	for (size_t i = 0 ; i < G.states.size() ; i++)
 	{
+		int cur = G.states[i];
+		bool is_last = (i == G.states.size() - 1);
+
 		OutputState(group, cur);
 
 		int next = states[cur].nextstate;
-		bool is_last = (state_dyn[cur].gr_next == S_NULL);
 
 		if (states[cur].tics < 0)
 		{
@@ -1135,15 +1153,9 @@ void Frames::OutputGroup(int first, char group)
 		{
 			WAD::Printf(",#REMOVE");
 		}
-		else if (next != state_dyn[cur].gr_next)
+		else if (is_last || next != G.states[i+1])
 		{
-			// check if finished and DON'T need a redirector
-			if (! (is_last && next == first && 
-				   (group == 'S' || group == 'E' ||
-				    group == 'u' || group == 'd' || group == 'r')))
-			{
-				WAD::Printf(",#%s", RedirectorName(next));
-			}
+			WAD::Printf(",#%s", RedirectorName(next));
 		}
 
 		if (is_last)
@@ -1161,10 +1173,6 @@ void Frames::OutputGroup(int first, char group)
 #else
 		WAD::Printf(",\n");
 #endif
-
-		cur = state_dyn[cur].gr_next;
-
-		assert(cur != S_NULL);
 	}
 }
 

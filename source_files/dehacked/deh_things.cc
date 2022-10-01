@@ -202,8 +202,8 @@ namespace Attacks
 			const mobjinfo_t * spawnfire = Things::NewMobjElseOld(MT_SPAWNFIRE);
 			assert(spawnfire);
 
-			count += Frames::BeginGroup(spawnfire->spawnstate, 'D');
-			count += Frames::BeginGroup(info->spawnstate, 'S');
+			count += Frames::BeginGroup('D', spawnfire->spawnstate);
+			count += Frames::BeginGroup('S', info->spawnstate);
 
 			if (count != 2)
 				PrintWarn("Brain cube is missing spawn/fire states.\n");
@@ -213,8 +213,8 @@ namespace Attacks
 
 			Frames::SpreadGroups();
 
-			Frames::OutputGroup(info->spawnstate, 'S');
-			Frames::OutputGroup(spawnfire->spawnstate, 'D');
+			Frames::OutputGroup('S');
+			Frames::OutputGroup('D');
 
 			return;
 		}
@@ -223,9 +223,9 @@ namespace Attacks
 
 		int count = 0;
 
-		count += Frames::BeginGroup(info->deathstate,   'D');
-		count += Frames::BeginGroup(info->seestate,     'E');
-		count += Frames::BeginGroup(info->spawnstate,   'S');
+		count += Frames::BeginGroup('D', info->deathstate);
+		count += Frames::BeginGroup('E', info->seestate);
+		count += Frames::BeginGroup('S', info->spawnstate);
 
 		if (count == 0)
 		{
@@ -235,9 +235,9 @@ namespace Attacks
 
 		Frames::SpreadGroups();
 
-		Frames::OutputGroup(info->spawnstate,   'S');
-		Frames::OutputGroup(info->seestate,     'E');
-		Frames::OutputGroup(info->deathstate,   'D');
+		Frames::OutputGroup('S');
+		Frames::OutputGroup('E');
+		Frames::OutputGroup('D');
 	}
 
 
@@ -1123,14 +1123,14 @@ namespace Things
 			const mobjinfo_t *tfog = NewMobjElseOld(MT_TFOG);
 			assert(tfog);
 
-			if (0 == Frames::BeginGroup(tfog->spawnstate, 'E'))
+			if (0 == Frames::BeginGroup('E', tfog->spawnstate))
 			{
 				PrintWarn("Teleport fog has no spawn states.\n");
 				return;
 			}
 
 			Frames::SpreadGroups();
-			Frames::OutputGroup(tfog->spawnstate, 'E');
+			Frames::OutputGroup('E');
 
 			return;
 		}
@@ -1140,14 +1140,14 @@ namespace Things
 		int count = 0;
 
 		// do more important states AFTER less important ones
-		count += Frames::BeginGroup(info->raisestate,   'R');
-		count += Frames::BeginGroup(info->xdeathstate,  'X');
-		count += Frames::BeginGroup(info->deathstate,   'D');
-		count += Frames::BeginGroup(info->painstate,    'P');
-		count += Frames::BeginGroup(info->missilestate, 'M');
-		count += Frames::BeginGroup(info->meleestate,   'L');
-		count += Frames::BeginGroup(info->seestate,     'E');
-		count += Frames::BeginGroup(info->spawnstate,   'S');
+		count += Frames::BeginGroup('R', info->raisestate);
+		count += Frames::BeginGroup('X', info->xdeathstate);
+		count += Frames::BeginGroup('D', info->deathstate);
+		count += Frames::BeginGroup('P', info->painstate);
+		count += Frames::BeginGroup('M', info->missilestate);
+		count += Frames::BeginGroup('L', info->meleestate);
+		count += Frames::BeginGroup('E', info->seestate);
+		count += Frames::BeginGroup('S', info->spawnstate);
 
 		if (count == 0)
 		{
@@ -1168,22 +1168,22 @@ namespace Things
 
 		Frames::SpreadGroups();
 
-		Frames::OutputGroup(info->spawnstate,   'S');
-		Frames::OutputGroup(info->seestate,     'E');
-		Frames::OutputGroup(info->meleestate,   'L');
-		Frames::OutputGroup(info->missilestate, 'M');
-		Frames::OutputGroup(info->painstate,    'P');
-		Frames::OutputGroup(info->deathstate,   'D');
-		Frames::OutputGroup(info->xdeathstate,  'X');
-		Frames::OutputGroup(info->raisestate,   'R');
+		Frames::OutputGroup('S');
+		Frames::OutputGroup('E');
+		Frames::OutputGroup('L');
+		Frames::OutputGroup('M');
+		Frames::OutputGroup('P');
+		Frames::OutputGroup('D');
+		Frames::OutputGroup('X');
+		Frames::OutputGroup('R');
 
 		// the A_VileChase action is another special case
 		if (Frames::act_flags & AF_RAISER)
 		{
-			if (Frames::BeginGroup(S_VILE_HEAL1, 'H') > 0)
+			if (Frames::BeginGroup('H', S_VILE_HEAL1) > 0)
 			{
 				Frames::SpreadGroups();
-				Frames::OutputGroup(S_VILE_HEAL1, 'H');
+				Frames::OutputGroup('H');
 			}
 		}
 	}

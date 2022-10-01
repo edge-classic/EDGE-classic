@@ -58,7 +58,7 @@ namespace Frames
 
 	void MarkState(int st_num);
 	void MarkStatesWithSprite(int spr_num);
-	void StateDependencies(void);
+	void StateDependencies();
 
 	new_state_t *GetModifiedState(int st_num);
 	int GetStateSprite(int st_num);
@@ -67,9 +67,9 @@ namespace Frames
 	void AlterPointer(int new_val);
 	void AlterBexCodePtr(const char * new_action);
 
-	void ResetAll(void); // also resets the slots and flags
+	void ResetAll(); // also resets the slots and flags
 	int  BeginGroup(int first, char group);
-	void SpreadGroups(void);
+	void SpreadGroups();
 
 	bool CheckWeaponFlash(int first);
 	bool CheckMissileState(int first);

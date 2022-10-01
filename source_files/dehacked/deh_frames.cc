@@ -64,15 +64,14 @@ bool state_modified[NUMSTATES_DEHEXTRA];
 statedyn_t state_dyn[NUMSTATES_DEHEXTRA];
 
 
-const char *Frames::attack_slot[3];
-
-int Frames::act_flags;
-
-
 namespace Frames
 {
 	int lowest_touched;
 	int highest_touched;
+
+	const char * attack_slot[3];
+
+	int act_flags;
 
 	// forward decls
 	void InstallRandomJump(int src, int first);
@@ -81,6 +80,8 @@ namespace Frames
 	void SpecialAction(char *buf, state_t *st);
 	void OutputState(char group, int cur);
 	bool OutputSpawnState(int first);
+	void UpdateAttacks(char group, char *act_name, int action);
+	void StateDependRange(int st_lo, int st_hi);
 
 	inline bool IS_WEAPON(char group)
 	{
@@ -94,7 +95,7 @@ namespace Frames
 }
 
 
-typedef struct
+struct actioninfo_t
 {
 	const char *bex_name;
 
@@ -108,8 +109,8 @@ typedef struct
 	// close-combat attacks, and 'S' for spare attacks.
 	const char *atk_1;
 	const char *atk_2;
-}
-actioninfo_t;
+};
+
 
 const actioninfo_t action_info[NUMACTIONS_MBF] =
 {
@@ -397,6 +398,49 @@ const staterange_t weapon_range[9] =
 };
 
 
+//------------------------------------------------------------------------
+
+void Frames::Init()
+{
+	memset(state_modified, 0, sizeof(state_modified));
+	memset(state_dyn, 0, sizeof(state_dyn));
+
+	// Initialize DEHEXTRA states - Dasho
+	for (int i = NUMSTATES_MBF ; i < NUMSTATES_DEHEXTRA ; i++)
+	{
+		states[i].sprite = SPR_TNT1;
+		states[i].frame = 0;
+		states[i].tics = -1;
+		states[i].action = A_NULL;
+		states[i].nextstate = i;
+		states[i].misc1 = 0;
+		states[i].misc2 = 0;
+	}
+}
+
+
+void Frames::Shutdown()
+{ }
+
+
+void Frames::ResetAll(void)
+{
+	for (int i = 0; i < NUMSTATES_DEHEXTRA; i++)
+	{
+		state_dyn[i].group = 0;
+		state_dyn[i].gr_idx = 0;
+		state_dyn[i].gr_next = S_NULL;
+	}
+
+	attack_slot[0] = attack_slot[1] = attack_slot[2] = NULL;
+
+	act_flags = 0;
+
+	lowest_touched  = 99999;
+	highest_touched = S_NULL;
+}
+
+
 void Frames::MarkState(int st_num)
 {
 	// this is possible since binary patches store the dummy state
@@ -441,77 +485,75 @@ bool Frames::CheckMissileState(int st_num)
 }
 
 
-namespace Frames
+void Frames::StateDependRange(int st_lo, int st_hi)
 {
-	void StateDependRange(int st_lo, int st_hi)
+	// Notes:
+	//   While it's possible for weapons to use thing states, and vice
+	//   versa, it can only happen when those weapons/things are
+	//   modified, so they don't need to be marked here.
+
+	assert(st_lo <= st_hi);
+	assert(st_lo >= 0);
+	assert(st_hi < NUMSTATES_DEHEXTRA);
+
+	if (st_lo == S_NULL)
+		return;
+
+	// does range crosses the weapon/thing boundary ?
+	if (st_lo <= S_LAST_WEAPON_STATE && st_hi > S_LAST_WEAPON_STATE)
 	{
-		// Notes:
-		//   While it's possible for weapons to use thing states, and vice
-		//   versa, it can only happen when those weapons/things are
-		//   modified, so they don't need to be marked here.
+		StateDependRange(st_lo, S_LAST_WEAPON_STATE);
+		StateDependRange(S_LAST_WEAPON_STATE + 1, st_hi);
+		return;
+	}
 
-		assert(st_lo <= st_hi);
-		assert(st_lo >= 0);
-		assert(st_hi < NUMSTATES_DEHEXTRA);
-
-		if (st_lo == S_NULL)
-			return;
-
-		// does range crosses the weapon/thing boundary ?
-		if (st_lo <= S_LAST_WEAPON_STATE && st_hi > S_LAST_WEAPON_STATE)
+	if (st_hi <= S_LAST_WEAPON_STATE)
+	{
+		for (int w = 0 ; w < 9 ; w++)
 		{
-			StateDependRange(st_lo, S_LAST_WEAPON_STATE);
-			StateDependRange(S_LAST_WEAPON_STATE + 1, st_hi);
-			return;
-		}
-
-		if (st_hi <= S_LAST_WEAPON_STATE)
-		{
-			for (int w = 0 ; w < 9 ; w++)
-			{
-				const staterange_t *R = weapon_range + w;
-
-				if ((st_hi >= R->start1 && st_lo <= R->end1) ||
-				    (st_hi >= R->start2 && st_lo <= R->end2))
-				{
-					Weapons::MarkWeapon(R->obj_num);
-				}
-			}
-			return;
-		}
-
-		// check things.
-
-		for (int t = 0 ; t < NUMMOBJTYPES_COMPAT ; t++)
-		{
-			const staterange_t *R = thing_range + t;
+			const staterange_t *R = weapon_range + w;
 
 			if ((st_hi >= R->start1 && st_lo <= R->end1) ||
 				(st_hi >= R->start2 && st_lo <= R->end2))
 			{
-				Things::MarkThing(R->obj_num);
+				Weapons::MarkWeapon(R->obj_num);
 			}
 		}
+		return;
 	}
 
-	void StateDependencies(void)
+	// check things.
+
+	for (int t = 0 ; t < NUMMOBJTYPES_COMPAT ; t++)
 	{
-		for (int lo = 1; lo < NUMSTATES_DEHEXTRA; )
+		const staterange_t *R = thing_range + t;
+
+		if ((st_hi >= R->start1 && st_lo <= R->end1) ||
+			(st_hi >= R->start2 && st_lo <= R->end2))
 		{
-			if (! state_modified[lo])
-			{
-				lo++; continue;
-			}
-
-			int hi = lo;
-
-			while (hi + 1 < NUMSTATES_DEHEXTRA && state_modified[hi])
-				hi++;
-
-			StateDependRange(lo, hi);
-
-			lo = hi + 1;
+			Things::MarkThing(R->obj_num);
 		}
+	}
+}
+
+
+void Frames::StateDependencies()
+{
+	for (int lo = 1; lo < NUMSTATES_DEHEXTRA; )
+	{
+		if (! state_modified[lo])
+		{
+			lo++; continue;
+		}
+
+		int hi = lo;
+
+		while (hi + 1 < NUMSTATES_DEHEXTRA && state_modified[hi])
+			hi++;
+
+		StateDependRange(lo, hi);
+
+		lo = hi + 1;
 	}
 }
 
@@ -525,53 +567,6 @@ void Frames::MarkStatesWithSprite(int spr_num)
 
 
 //------------------------------------------------------------------------
-
-namespace Frames
-{
-	void UpdateAttacks(char group, char *act_name, int action);
-}
-
-
-void Frames::Init()
-{
-	memset(state_modified, 0, sizeof(state_modified));
-	memset(state_dyn, 0, sizeof(state_dyn));
-
-	// Initialize DEHEXTRA states - Dasho
-	for (int i = NUMSTATES_MBF ; i < NUMSTATES_DEHEXTRA ; i++)
-	{
-		states[i].sprite = SPR_TNT1;
-		states[i].frame = 0;
-		states[i].tics = -1;
-		states[i].action = A_NULL;
-		states[i].nextstate = i;
-		states[i].misc1 = 0;
-		states[i].misc2 = 0;
-	}
-}
-
-
-void Frames::Shutdown()
-{ }
-
-
-void Frames::ResetAll(void)
-{
-	for (int i = 0; i < NUMSTATES_DEHEXTRA; i++)
-	{
-		state_dyn[i].group = 0;
-		state_dyn[i].gr_idx = 0;
-		state_dyn[i].gr_next = S_NULL;
-	}
-
-	attack_slot[0] = attack_slot[1] = attack_slot[2] = NULL;
-
-	act_flags = 0;
-
-	lowest_touched  = 99999;
-	highest_touched = S_NULL;
-}
-
 
 int Frames::BeginGroup(int first, char group)
 {

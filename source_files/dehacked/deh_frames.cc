@@ -66,9 +66,6 @@ statedyn_t state_dyn[NUMSTATES_DEHEXTRA];
 
 namespace Frames
 {
-	int lowest_touched;
-	int highest_touched;
-
 	const char * attack_slot[3];
 
 	int act_flags;
@@ -435,9 +432,6 @@ void Frames::ResetAll(void)
 	attack_slot[0] = attack_slot[1] = attack_slot[2] = NULL;
 
 	act_flags = 0;
-
-	lowest_touched  = 99999;
-	highest_touched = S_NULL;
 }
 
 
@@ -970,12 +964,6 @@ void Frames::OutputState(char group, int cur)
 	else
 		act_flags |= AF_THING_ST;
 
-	if (cur != S_LIGHTDONE)
-	{
-		if (cur < lowest_touched)  lowest_touched  = cur;
-		if (cur > highest_touched) highest_touched = cur;
-	}
-
 	if (action_info[st->action].act_flags & AF_UNIMPL)
 		PrintWarn("Frame %d: action %s is not yet supported.\n", cur, bex_name);
 
@@ -1303,34 +1291,6 @@ void Frames::AlterBexCodePtr(const char * new_action)
 	Storage::RememberMod(&states[st_num].action, action);
 
 	MarkState(st_num);
-}
-
-
-//------- DEBUGGING ------------------------------------------------------
-
-#if (DEBUG_RANGES)
-extern const char *state_names[NUMSTATES_DEHEXTRA];
-#endif
-
-void Frames::DebugRange(const char *kind, const char *entry)
-{
-#if (DEBUG_RANGES)
-	fprintf(stderr, "%s [%s] : ", kind, entry);
-	
-	if (highest_touched == S_NULL)
-	{
-		fprintf(stderr, "empty\n");
-	}
-	else
-	{
-		assert(0 < lowest_touched);
-		assert(lowest_touched <= highest_touched);
-		assert(highest_touched < NUMSTATES_DEHEXTRA);
-
-		fprintf(stderr, "%s -> %s\n", state_names[lowest_touched],
-			state_names[highest_touched]);
-	}
-#endif
 }
 
 }  // Deh_Edge

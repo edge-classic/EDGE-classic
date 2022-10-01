@@ -413,7 +413,7 @@ statenum_t;
 #define S_LAST_WEAPON_STATE  S_BFGFLASH2
 
 
-typedef struct
+struct state_t
 {
 	int  sprite;
 	int  frame;
@@ -421,17 +421,33 @@ typedef struct
 	int  action;
 	int  nextstate;
 	int  misc1, misc2;
-}
-state_t;
+};
 
 
-typedef struct  // dynamic information
+typedef struct  // dynamic information   FIXME remove, new_state_t
 {
 	char group;
 	int gr_idx;
 	int gr_next;  // next state in same group (incl. random-jumps)
 }
 statedyn_t;
+
+
+struct new_state_t
+{
+	// the old state info
+	state_t  o;
+
+	// for MBF21, eight 32-bit args.
+	// misc1 is mapped to args[0], misc2 to args[1].
+	int args[8];
+
+	// housekeeping stuff
+	char  group;
+	int gr_idx;
+	int gr_next;  // next state in same group (incl. random-jumps)
+};
+
 
 extern state_t states[NUMSTATES_DEHEXTRA];
 

@@ -457,20 +457,18 @@ namespace Patch
 		if (file_error)
 			FatalError("File error reading binary frame table.\n");
 
-		state_t *state = states + st_num;
+		new_state_t *state = Frames::GetModifiedState(st_num);
 
-		GetSprite(O_FRAME, st_num, &state->sprite);
-		GetInt   (O_FRAME, st_num, &state->frame);
-		GetInt   (O_FRAME, st_num, &state->tics);
+		GetSprite(O_FRAME, st_num, &state->o.sprite);
+		GetInt   (O_FRAME, st_num, &state->o.frame);
+		GetInt   (O_FRAME, st_num, &state->o.tics);
 
 		GetRawInt();  // ignore code-pointer
-		
-		GetFrame(O_FRAME, st_num, &state->nextstate);
-		GetInt  (O_FRAME, st_num, &state->misc1);
-		GetInt  (O_FRAME, st_num, &state->misc2);
 
-		if (state->misc1 || state->misc2)
-			PrintWarn("frame %d has non-zero misc fields.\n", st_num);
+		GetFrame(O_FRAME, st_num, &state->o.nextstate);
+
+		GetRawInt();  // ignore misc1/misc2 fields
+		GetRawInt();
 	}
 
 	void ReadBinarySound(int s_num)

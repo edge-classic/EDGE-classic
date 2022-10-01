@@ -286,13 +286,8 @@ namespace Attacks
 		const mobjinfo_t *skull = Things::NewMobjElseOld(MT_SKULL);
 		assert(skull);
 
-		if (skull->missilestate != S_NULL)
-		{
-			state_t *mis_st = &states[skull->missilestate];
-
-			if (mis_st->tics >= 0 && mis_st->nextstate != S_NULL)
-				return;
-		}
+		if (Frames::CheckMissileState(skull->missilestate))
+			return;
 
 		// need to write out new versions
 

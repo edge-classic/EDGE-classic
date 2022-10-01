@@ -221,6 +221,7 @@ typedef struct
 }
 staterange_t;
 
+
 const staterange_t thing_range[NUMMOBJTYPES_COMPAT] =
 {
 	// Things...
@@ -378,6 +379,7 @@ const staterange_t thing_range[NUMMOBJTYPES_COMPAT] =
     { MT_GIBDTH, S_TNT1, S_TNT1, -1,-1 },
 };
 
+
 const staterange_t weapon_range[9] =
 {
 	// Weapons...
@@ -392,19 +394,42 @@ const staterange_t weapon_range[9] =
     { wp_supershotgun, S_DSGUN, S_DSGUNFLASH2, S_LIGHTDONE, S_LIGHTDONE },
 };
 
+
+void Frames::MarkState(int st_num)
+{
+	// this is possible since binary patches store the dummy state
+	if (st_num == S_NULL)
+		return;
+
+	assert(1 <= st_num && st_num < NUMSTATES_DEHEXTRA);
+
+	state_modified[st_num] = true;
+}
+
+
+new_state_t * Frames::GetModifiedState(int st_num)
+{
+	MarkState(st_num);
+
+	// FIXME temp crud
+	static new_state_t  crud;
+	return &crud;
+}
+
+
+bool Frames::CheckMissileState(int st_num)
+{
+	if (st_num == S_NULL)
+		return false;
+
+	state_t *mis_st = &states[st_num];
+
+	return (mis_st->tics >= 0 && mis_st->nextstate != S_NULL);
+}
+
+
 namespace Frames
 {
-	void MarkState(int st_num)
-	{
-		// this is possible since binary patches store the dummy state
-		if (st_num == S_NULL)
-			return;
-
-		assert(1 <= st_num && st_num < NUMSTATES_DEHEXTRA);
-
-		state_modified[st_num] = true;
-	}
-
 	void StateDependRange(int st_lo, int st_hi)
 	{
 		// Notes:
@@ -476,6 +501,7 @@ namespace Frames
 		}
 	}
 }
+
 
 void Frames::MarkStatesWithSprite(int spr_num)
 {

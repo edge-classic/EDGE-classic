@@ -90,7 +90,7 @@ namespace Frames
 	const char *GroupToName(char group);
 	const char *RedirectorName(int next_st);
 	void SpecialAction(char *buf, const state_t *st);
-	void OutputState(char group, int cur);
+	void OutputState(char group, int cur, bool do_action);
 	bool OutputSpawnState(int first);
 	bool SpreadGroupPass(bool alt_jumps);
 	void UpdateAttacks(char group, char *act_name, int action);
@@ -509,7 +509,10 @@ bool Frames::CheckMissileState(int st_num)
 	if (st_num == S_NULL)
 		return false;
 
-	state_t *mis_st = &states[st_num];
+	const state_t *mis_st = NewStateElseOld(st_num);
+
+	if (mis_st == NULL)
+		return false;
 
 	return (mis_st->tics >= 0 && mis_st->nextstate != S_NULL);
 }
@@ -639,22 +642,26 @@ bool Frames::SpreadGroupPass(bool alt_jumps)
 
 	for (int i = 1 ; i < total ; i++)
 	{
+		const state_t *st = NewStateElseOld(i);
+		if (st == NULL)
+			continue;
+
 		if (group_for_state.find(i) == group_for_state.end())
 			continue;
 
 		char group = group_for_state[i];
 		group_info_t& G = groups[group];
 
-		if (states[i].tics < 0)  // hibernation
+		if (st->tics < 0)  // hibernation
 			continue;
 
-		int next = states[i].nextstate;
+		int next = st->nextstate;
 
 		if (alt_jumps)
 		{
 			next = S_NULL;
-			if (states[i].action == A_RandomJump)
-				next = states[i].misc1;
+			if (st->action == A_RandomJump)
+				next = st->misc1;
 		}
 
 		if (next == S_NULL)
@@ -694,22 +701,26 @@ bool Frames::CheckWeaponFlash(int first)
 	// fairly simple test, we don't need to detect looping or such here,
 	// just following the states upto a small maximum is enough.
 
-	for (int len = 0; len < 30; len++)
+	for (int len = 0 ; len < 30 ; len++)
 	{
 		if (first == S_NULL)
 			break;
 
-		if (states[first].tics < 0)  // hibernation
+		const state_t *st = NewStateElseOld(first);
+		if (st == NULL)
 			break;
 
-		int act = states[first].action;
+		if (st->tics < 0)  // hibernation
+			break;
+
+		int act = st->action;
 
 		assert(0 <= act && act < NUMACTIONS_MBF);
 
 		if (action_info[act].act_flags & AF_FLASH)
 			return true;
 
-		first = states[first].nextstate;
+		first = st->nextstate;
 	}
 
 	return false;
@@ -962,47 +973,47 @@ void Frames::SpecialAction(char *act_name, const state_t *st)
 }
 
 
-void Frames::OutputState(char group, int cur)
+void Frames::OutputState(char group, int cur, bool do_action)
 {
 	assert(cur > 0);
 
 	const state_t *st = NewStateElseOld(cur);
 	if (st == NULL)
-	{
-		st = &states[S_TNT1];
-	}
+		st = &states_orig[S_TNT1];
 
-	assert(st->action >= 0 && st->action < NUMACTIONS_MBF);
+	int action = do_action ? st->action : A_NULL;
 
-	const char *bex_name = action_info[st->action].bex_name;
+	assert(action >= 0 && action < NUMACTIONS_MBF);
+
+	const char *bex_name = action_info[action].bex_name;
 
 	if (cur <= S_LAST_WEAPON_STATE)
 		act_flags |= AF_WEAPON_ST;
 	else
 		act_flags |= AF_THING_ST;
 
-	if (action_info[st->action].act_flags & AF_UNIMPL)
+	if (action_info[action].act_flags & AF_UNIMPL)
 		PrintWarn("Frame %d: action %s is not yet supported.\n", cur, bex_name);
 
 	char act_name[MAX_ACT_NAME];
 
 	bool weap_act = false;
 
-	if (action_info[st->action].act_flags & AF_SPECIAL)
+	if (action_info[action].act_flags & AF_SPECIAL)
 	{
 		SpecialAction(act_name, st);
 	}
 	else
 	{
-		strcpy(act_name, action_info[st->action].ddf_name);
+		strcpy(act_name, action_info[action].ddf_name);
 
 		weap_act = (act_name[0] == 'W' && act_name[1] == ':');
 
 		if (weap_act)
-			strcpy(act_name, action_info[st->action].ddf_name + 2);
+			strcpy(act_name, action_info[action].ddf_name + 2);
 	}
 
-	if (st->action != A_NULL && (weap_act == ! IS_WEAPON(group)) &&
+	if (action != A_NULL && (weap_act == ! IS_WEAPON(group)) &&
 		StrCaseCmp(act_name, "NOTHING") != 0)
 	{
 		if (weap_act)
@@ -1013,23 +1024,23 @@ void Frames::OutputState(char group, int cur)
 		strcpy(act_name, "NOTHING");
 	}
 
-	if (st->action == A_NULL || weap_act == (IS_WEAPON(group) ? true : false))
+	if (action == A_NULL || weap_act == (IS_WEAPON(group) ? true : false))
 	{
-		UpdateAttacks(group, act_name, st->action);
+		UpdateAttacks(group, act_name, action);
 	}
 
 	// If the death states contain A_PainDie or A_KeenDie, then we
 	// need to add an A_Fall action for proper operation in EDGE.
-	if (action_info[st->action].act_flags & AF_MAKEDEAD)
+	if (action_info[action].act_flags & AF_MAKEDEAD)
 	{
 		WAD::Printf("    %s:%c:0:%s:MAKEDEAD,  // %s\n",
 			Sprites::GetSprite(st->sprite),
 			'A' + ((int) st->frame & 31),
 			(st->frame >= 32768) ? "BRIGHT" : "NORMAL",
-			(st->action == A_PainDie) ? "A_PainDie" : "A_KeenDie");
+			(action == A_PainDie) ? "A_PainDie" : "A_KeenDie");
 	}
 
-	if (action_info[st->action].act_flags & AF_FACE)
+	if (action_info[action].act_flags & AF_FACE)
 	{
 		WAD::Printf("    %s:%c:0:%s:FACE_TARGET,\n",
 			Sprites::GetSprite(st->sprite),
@@ -1038,7 +1049,7 @@ void Frames::OutputState(char group, int cur)
 	}
 
 	// special handling for Mancubus attacks...
-	if (action_info[st->action].act_flags & AF_SPREAD)
+	if (action_info[action].act_flags & AF_SPREAD)
 	{
 		if ((act_flags & AF_SPREAD) == 0)
 		{
@@ -1056,10 +1067,10 @@ void Frames::OutputState(char group, int cur)
 
 	int tics = (int) st->tics;
 
-	// Check for JUMP with tics < 0 (can happen with DEHEXTRA states)
-	if (action_info[st->action].act_flags & AF_SPECIAL)
+	// Check for JUMP with tics < 0 (can happen with DEHEXTRA states)  // FIXME REVIEW
+	if (action_info[action].act_flags & AF_SPECIAL)
 	{
-		if (StrCaseCmp(action_info[st->action].bex_name, "A_RandomJump") == 0 && tics < 0) tics = 0;
+		if (StrCaseCmp(action_info[action].bex_name, "A_RandomJump") == 0 && tics < 0) tics = 0;
 	}
 
 	// kludge for EDGE and Batman TC.  EDGE waits 35 tics before exiting the
@@ -1073,10 +1084,10 @@ void Frames::OutputState(char group, int cur)
 		'A' + ((int) st->frame & 31), tics,
 		(st->frame >= 32768) ? "BRIGHT" : "NORMAL", act_name);
 
-	if (st->action != A_NULL && weap_act == ! IS_WEAPON(group))
+	if (action != A_NULL && weap_act == ! IS_WEAPON(group))
 		return;
 
-	act_flags |= action_info[st->action].act_flags;
+	act_flags |= action_info[action].act_flags;
 }
 
 
@@ -1087,17 +1098,15 @@ bool Frames::OutputSpawnState(int first)
 	WAD::Printf("\n");
 	WAD::Printf("STATES(SPAWN) =\n");
 
-	// clear the action, restore it after
-	int saved_action = states[first].action;
-	states[first].action = A_NULL;
-	{
-		OutputState('S', first);
-	}
-	states[first].action = saved_action;
+	const state_t *st = NewStateElseOld(first);
+	if (st == NULL)
+		st = &states_orig[S_TNT1];
 
-	int next = states[first].nextstate;
+	OutputState('S', first, false);
 
-	if (states[first].tics < 0)
+	int next = st->nextstate;
+
+	if (st->tics < 0)
 	{
 		// goes into hibernation
 		WAD::Printf(";\n");
@@ -1142,11 +1151,14 @@ void Frames::OutputGroup(char group)
 		int cur = G.states[i];
 		bool is_last = (i == G.states.size() - 1);
 
-		OutputState(group, cur);
+		OutputState(group, cur, true);
 
-		int next = states[cur].nextstate;
+		const state_t *st = NewStateElseOld(cur);
+		assert(st);
 
-		if (states[cur].tics < 0)
+		int next = st->nextstate;
+
+		if (st->tics < 0)
 		{
 			// go into hibernation (nothing needed)
 		}
@@ -1254,7 +1266,7 @@ void Frames::AlterPointer(int new_val)
 		return;
 	}
 
-	st->action = states[new_val].action;
+	st->action = states_orig[new_val].action;
 }
 
 

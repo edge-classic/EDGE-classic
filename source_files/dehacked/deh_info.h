@@ -424,28 +424,14 @@ struct state_t
 };
 
 
-typedef struct  // dynamic information   FIXME remove, new_state_t
-{
-	char group;
-	int gr_idx;
-	int gr_next;  // next state in same group (incl. random-jumps)
-}
-statedyn_t;
-
-
 struct new_state_t
 {
 	// the old state info
 	state_t  o;
 
-	// for MBF21, eight 32-bit args.
+	// for MBF21, eight 32-bit arguments.
 	// misc1 is mapped to args[0], misc2 to args[1].
 	int args[8];
-
-	// housekeeping stuff
-	char  group;
-	int   gr_idx;
-	int   gr_next;  // next state in same group (incl. random-jumps)
 };
 
 }  // Deh_Edge

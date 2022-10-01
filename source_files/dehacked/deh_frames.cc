@@ -62,8 +62,6 @@ extern state_t states[NUMSTATES_DEHEXTRA];
 
 bool state_modified[NUMSTATES_DEHEXTRA];
 
-statedyn_t state_dyn[NUMSTATES_DEHEXTRA];
-
 
 struct group_info_t
 {
@@ -77,7 +75,7 @@ namespace Frames
 	// stuff for determining and outputting groups of states:
 	std::unordered_map<char, group_info_t> groups;
 	std::unordered_map<int, char> group_for_state;
-	std::unordered_map<int, int>  index_for_state;
+	std::unordered_map<int, int> offset_for_state;
 
 	const char * attack_slot[3];
 	int act_flags;
@@ -89,6 +87,7 @@ namespace Frames
 	void SpecialAction(char *buf, state_t *st);
 	void OutputState(char group, int cur);
 	bool OutputSpawnState(int first);
+	bool SpreadGroupPass(bool alt_jumps);
 	void UpdateAttacks(char group, char *act_name, int action);
 	void StateDependRange(int st_lo, int st_hi);
 
@@ -412,7 +411,6 @@ const staterange_t weapon_range[9] =
 void Frames::Init()
 {
 	memset(state_modified, 0, sizeof(state_modified));
-	memset(state_dyn, 0, sizeof(state_dyn));
 
 	// Initialize DEHEXTRA states - Dasho
 	for (int i = NUMSTATES_MBF ; i < NUMSTATES_DEHEXTRA ; i++)
@@ -436,16 +434,11 @@ void Frames::ResetGroups()
 {
 	groups.clear();
 	group_for_state.clear();
-	index_for_state.clear();
+	offset_for_state.clear();
 
-	for (int i = 0; i < NUMSTATES_DEHEXTRA; i++)
-	{
-		state_dyn[i].group = 0;
-		state_dyn[i].gr_idx = 0;
-		state_dyn[i].gr_next = S_NULL;
-	}
-
-	attack_slot[0] = attack_slot[1] = attack_slot[2] = NULL;
+	attack_slot[0] = NULL;
+	attack_slot[1] = NULL;
+	attack_slot[2] = NULL;
 
 	act_flags = 0;
 }
@@ -583,115 +576,65 @@ int Frames::BeginGroup(char group, int first)
 	if (first == S_NULL)
 		return 0;
 
-	state_dyn[first].group = group;
-	state_dyn[first].gr_idx = 1;
+	// create the group info
+	groups[group] = group_info_t { group, { first } };
+
+	 group_for_state[first] = group;
+	offset_for_state[first] = 1;
 
 	return 1;
 }
 
 
-void Frames::InstallRandomJump(int src, int first)
+bool Frames::SpreadGroupPass(bool alt_jumps)
 {
-	assert(state_dyn[src].gr_idx > 0);
-	assert(state_dyn[first].group == 0);
+	bool changes = false;
 
-	char group = state_dyn[src].group;
-
-	// step 1: find the last state in the current group
-	for (int i = 1; i < NUMSTATES_DEHEXTRA; i++)
+	for (int i = 1 ; i < NUMSTATES_DEHEXTRA ; i++)
 	{
-		if (state_dyn[i].group != group)
+		if (group_for_state.find(i) == group_for_state.end())
 			continue;
 
-		if (state_dyn[i].gr_idx > state_dyn[src].gr_idx)
-			src = i;
+		char group = group_for_state[i];
+		group_info_t& G = groups[group];
+
+		if (states[i].tics < 0)  // hibernation
+			continue;
+
+		int next = states[i].nextstate;
+
+		if (alt_jumps)
+		{
+			next = S_NULL;
+			if (states[i].action == A_RandomJump)
+				next = states[i].misc1;
+		}
+
+		if (next == S_NULL)
+			continue;
+
+		// require next state to have no group yet
+		if (group_for_state.find(next) != group_for_state.end())
+			continue;
+
+		G.states.push_back(next);
+
+		 group_for_state[next] = group;
+		offset_for_state[next] = (int)G.states.size();
+
+		changes = true;
 	}
 
-	assert(group != 0);
-	assert(state_dyn[src].gr_next == S_NULL);
-
-	// step 2: follow state chain as far as possible
-
-	for (;;)
-	{
-		state_dyn[src].gr_next = first;
-
-		state_dyn[first].group = group;
-		state_dyn[first].gr_idx = state_dyn[src].gr_idx + 1;
-
-		if (states[first].tics < 0)  // hibernation
-			break;
-
-		src   = first;
-		first = states[first].nextstate;
-
-		if (first == S_NULL)
-			break;
-
-		if (state_dyn[first].group != 0)
-			break;
-	}
+	return changes;
 }
 
 
-void Frames::SpreadGroups(void)
+void Frames::SpreadGroups()
 {
 	for (;;)
 	{
-		bool changes = false;
-
-		for (int i = 1; i < NUMSTATES_DEHEXTRA; i++)
-		{
-			if (state_dyn[i].group == 0)
-				continue;
-
-			if (states[i].tics < 0)  // hibernation
-				continue;
-
-			int next = states[i].nextstate;
-
-			if (next == S_NULL)
-				continue;
-
-			if (state_dyn[next].group != 0)
-				continue;
-
-			state_dyn[i].gr_next = next;
-
-			state_dyn[next].group  = state_dyn[i].group;
-			state_dyn[next].gr_idx = state_dyn[i].gr_idx + 1;
-
-			changes = true;
-		}
-
-		if (! changes)
-			break;
-	}
-
-	// now sort out the A_RandomJump targets
-
-	for (;;)
-	{
-		bool changes = false;
-
-		for (int i = 1; i < NUMSTATES_DEHEXTRA; i++)
-		{
-			if (state_dyn[i].group == 0)
-				continue;
-
-			if (! (states[i].action == A_RandomJump &&
-				   states[i].misc1 > 0 && states[i].misc1 < NUMSTATES_DEHEXTRA))
-				continue;
-
-			int first = states[i].misc1;
-
-			if (state_dyn[first].group != 0)
-				continue;
-
-			InstallRandomJump(i, first);
-
-			changes = true;
-		}
+		bool changes = SpreadGroupPass(false);
+		changes     |= SpreadGroupPass(true);
 
 		if (! changes)
 			break;
@@ -864,16 +807,19 @@ const char *Frames::RedirectorName(int next_st)
 {
 	static char name_buf[MAX_ACT_NAME];
 
-	char next_group = state_dyn[next_st].group;
-	int  next_idx   = state_dyn[next_st].gr_idx;
+	if (group_for_state.find(next_st) == group_for_state.end())
+		InternalError("RedirectorName failure.\n");
+
+	char next_group =  group_for_state[next_st];
+	int  next_ofs   = offset_for_state[next_st];
 
 	assert(next_group != 0);
-	assert(next_idx > 0);
+	assert(next_ofs > 0);
 
-	if (next_idx == 1)
+	if (next_ofs == 1)
 		sprintf(name_buf, "%s", GroupToName(next_group));
 	else
-		sprintf(name_buf, "%s:%d", GroupToName(next_group), next_idx);
+		sprintf(name_buf, "%s:%d", GroupToName(next_group), next_ofs);
 
 	return name_buf;
 }

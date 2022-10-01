@@ -57,9 +57,9 @@ namespace Deh_Edge
 #define MAX_ACT_NAME  1024
 
 
-bool state_modified[NUMSTATES_BEX];
+bool state_modified[NUMSTATES_DEHEXTRA];
 
-statedyn_t state_dyn[NUMSTATES_BEX];
+statedyn_t state_dyn[NUMSTATES_DEHEXTRA];
 
 
 const char *Frames::attack_slot[3];
@@ -109,7 +109,7 @@ typedef struct
 }
 actioninfo_t;
 
-const actioninfo_t action_info[NUMACTIONS_BEX] =
+const actioninfo_t action_info[NUMACTIONS_MBF] =
 {
 	{ "A_NULL",         0,          "NOTHING", NULL, NULL },
 
@@ -400,7 +400,7 @@ namespace Frames
 		if (st_num == S_NULL)
 			return;
 
-		assert(1 <= st_num && st_num < NUMSTATES_BEX);
+		assert(1 <= st_num && st_num < NUMSTATES_DEHEXTRA);
 
 		state_modified[st_num] = true;
 	}
@@ -414,7 +414,7 @@ namespace Frames
 
 		assert(st_lo <= st_hi);
 		assert(st_lo >= 0);
-		assert(st_hi < NUMSTATES_BEX);
+		assert(st_hi < NUMSTATES_DEHEXTRA);
 
 		if (st_lo == S_NULL)
 			return;
@@ -458,7 +458,7 @@ namespace Frames
 
 	void StateDependencies(void)
 	{
-		for (int lo = 1; lo < NUMSTATES_BEX; )
+		for (int lo = 1; lo < NUMSTATES_DEHEXTRA; )
 		{
 			if (! state_modified[lo])
 			{
@@ -467,7 +467,7 @@ namespace Frames
 
 			int hi = lo;
 
-			while (hi + 1 < NUMSTATES_BEX && state_modified[hi])
+			while (hi + 1 < NUMSTATES_DEHEXTRA && state_modified[hi])
 				hi++;
 
 			StateDependRange(lo, hi);
@@ -479,7 +479,7 @@ namespace Frames
 
 void Frames::MarkStatesWithSprite(int spr_num)
 {
-	for (int st = 1; st < NUMSTATES_BEX; st++)
+	for (int st = 1; st < NUMSTATES_DEHEXTRA; st++)
 		if (states[st].sprite == spr_num)
 			MarkState(st);
 }
@@ -499,7 +499,7 @@ void Frames::Init()
 	memset(state_dyn, 0, sizeof(state_dyn));
 
 	// Initialize DEHEXTRA states - Dasho
-	for (int i = EXTRASTATES; i < NUMSTATES_BEX; i++)
+	for (int i = NUMSTATES_MBF ; i < NUMSTATES_DEHEXTRA ; i++)
 	{
 		states[i].sprite = SPR_TNT1;
 		states[i].frame = 0;
@@ -518,7 +518,7 @@ void Frames::Shutdown()
 
 void Frames::ResetAll(void)
 {
-	for (int i = 0; i < NUMSTATES_BEX; i++)
+	for (int i = 0; i < NUMSTATES_DEHEXTRA; i++)
 	{
 		state_dyn[i].group = 0;
 		state_dyn[i].gr_idx = 0;
@@ -554,7 +554,7 @@ void Frames::InstallRandomJump(int src, int first)
 	char group = state_dyn[src].group;
 
 	// step 1: find the last state in the current group
-	for (int i = 1; i < NUMSTATES_BEX; i++)
+	for (int i = 1; i < NUMSTATES_DEHEXTRA; i++)
 	{
 		if (state_dyn[i].group != group)
 			continue;
@@ -596,7 +596,7 @@ void Frames::SpreadGroups(void)
 	{
 		bool changes = false;
 
-		for (int i = 1; i < NUMSTATES_BEX; i++)
+		for (int i = 1; i < NUMSTATES_DEHEXTRA; i++)
 		{
 			if (state_dyn[i].group == 0)
 				continue;
@@ -630,13 +630,13 @@ void Frames::SpreadGroups(void)
 	{
 		bool changes = false;
 
-		for (int i = 1; i < NUMSTATES_BEX; i++)
+		for (int i = 1; i < NUMSTATES_DEHEXTRA; i++)
 		{
 			if (state_dyn[i].group == 0)
 				continue;
 
 			if (! (states[i].action == A_RandomJump &&
-				   states[i].misc1 > 0 && states[i].misc1 < NUMSTATES_BEX))
+				   states[i].misc1 > 0 && states[i].misc1 < NUMSTATES_DEHEXTRA))
 				continue;
 
 			int first = states[i].misc1;
@@ -670,7 +670,7 @@ bool Frames::CheckWeaponFlash(int first)
 
 		int act = states[first].action;
 
-		assert(0 <= act && act < NUMACTIONS_BEX);
+		assert(0 <= act && act < NUMACTIONS_MBF);
 
 		if (action_info[act].act_flags & AF_FLASH)
 			return true;
@@ -848,7 +848,7 @@ void Frames::SpecialAction(char *act_name, state_t *st)
 			break;
 
 		case A_RandomJump:
-			if (st->misc1 <= 0 || st->misc1 >= NUMSTATES_BEX)
+			if (st->misc1 <= 0 || st->misc1 >= NUMSTATES_DEHEXTRA)
 				strcpy(act_name, "NOTHING");
 			else
 			{
@@ -927,7 +927,7 @@ void Frames::OutputState(char group, int cur)
 
 	state_t *st = states + cur;
 
-	assert(st->action >= 0 && st->action < NUMACTIONS_BEX);
+	assert(st->action >= 0 && st->action < NUMACTIONS_MBF);
 
 	const char *bex_name = action_info[st->action].bex_name;
 
@@ -1172,7 +1172,7 @@ void Frames::AlterFrame(int new_val)
 	int st_num = Patch::active_obj;
 	const char *field_name = Patch::line_buf;
 
-	assert(0 <= st_num && st_num < NUMSTATES_BEX);
+	assert(0 <= st_num && st_num < NUMSTATES_DEHEXTRA);
 
 	if (StrCaseCmp(field_name, "Action pointer") == 0)
 	{
@@ -1198,7 +1198,7 @@ void Frames::AlterPointer(int new_val)
 	int st_num = Patch::active_obj;
 	const char *deh_field = Patch::line_buf;
 
-	assert(0 <= st_num && st_num < NUMSTATES_BEX);
+	assert(0 <= st_num && st_num < NUMSTATES_DEHEXTRA);
 
 	if (StrCaseCmp(deh_field, "Codep Frame") != 0)
 	{
@@ -1206,7 +1206,7 @@ void Frames::AlterPointer(int new_val)
 		return;
 	}
 
-	if (new_val < 0 || new_val >= NUMSTATES_BEX)
+	if (new_val < 0 || new_val >= NUMSTATES_DEHEXTRA)
 	{
 		PrintWarn("Line %d: Illegal Codep frame number: %d\n",
 			Patch::line_num, new_val);
@@ -1239,7 +1239,7 @@ void Frames::AlterBexCodePtr(const char * new_action)
 		return;
 	}
 
-	if (st_num < 0 || st_num >= NUMSTATES_BEX)
+	if (st_num < 0 || st_num >= NUMSTATES_DEHEXTRA)
 	{
 		PrintWarn("Line %d: illegal FRAME number: %d\n",
 			Patch::line_num, st_num);
@@ -1252,14 +1252,14 @@ void Frames::AlterBexCodePtr(const char * new_action)
 
 	int action;
 
-	for (action = 0; action < NUMACTIONS_BEX; action++)
+	for (action = 0; action < NUMACTIONS_MBF; action++)
 	{
 		// use +2 here to ignore the "A_" prefix
 		if (StrCaseCmp(action_info[action].bex_name + 2, new_action) == 0)
 			break;
 	}
 
-	if (action >= NUMACTIONS_BEX)
+	if (action >= NUMACTIONS_MBF)
 	{
 		PrintWarn("Line %d: unknown action %s for CODEPTR.\n",
 			Patch::line_num, new_action);
@@ -1275,7 +1275,7 @@ void Frames::AlterBexCodePtr(const char * new_action)
 //------- DEBUGGING ------------------------------------------------------
 
 #if (DEBUG_RANGES)
-extern const char *state_names[NUMSTATES_BEX];
+extern const char *state_names[NUMSTATES_DEHEXTRA];
 #endif
 
 void Frames::DebugRange(const char *kind, const char *entry)
@@ -1291,7 +1291,7 @@ void Frames::DebugRange(const char *kind, const char *entry)
 	{
 		assert(0 < lowest_touched);
 		assert(lowest_touched <= highest_touched);
-		assert(highest_touched < NUMSTATES_BEX);
+		assert(highest_touched < NUMSTATES_DEHEXTRA);
 
 		fprintf(stderr, "%s -> %s\n", state_names[lowest_touched],
 			state_names[highest_touched]);

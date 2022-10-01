@@ -36,7 +36,7 @@
 namespace Deh_Edge
 {
 
-state_t	states[NUMSTATES_BEX] =
+state_t	states[NUMSTATES_DEHEXTRA] =
 {
 	// Weapons...
     {SPR_TROO,0,-1,A_NULL,S_NULL,0,0},	// S_NULL

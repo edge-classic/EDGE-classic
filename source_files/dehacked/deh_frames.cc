@@ -52,15 +52,15 @@
 namespace Deh_Edge
 {
 
-#define DEBUG_RANGES  0  // must enable one in info.cpp too
-#define DEBUG_FRAMES  0
-
 #define MAX_ACT_NAME  1024
 
 
 extern state_t states[NUMSTATES_MBF];
 
-bool state_modified[NUMSTATES_DEHEXTRA];
+std::vector<state_t *> new_states;
+
+// memory for states using misc1/misc2 or Args1..Args8
+std::vector<int> argument_mem;
 
 
 // FIXME !!!! AWFUL TEMP HACK
@@ -86,7 +86,7 @@ namespace Frames
 	int act_flags;
 
 	// forward decls
-	void InstallRandomJump(int src, int first);
+	const state_t * NewStateElseOld(int st_num);
 	const char *GroupToName(char group);
 	const char *RedirectorName(int next_st);
 	void SpecialAction(char *buf, state_t *st);
@@ -415,37 +415,19 @@ const staterange_t weapon_range[9] =
 
 void Frames::Init()
 {
-	memset(state_modified, 0, sizeof(state_modified));
-
-	// Initialize DEHEXTRA states - Dasho
-	/* FIXME
-	for (int i = NUMSTATES_MBF ; i < NUMSTATES_DEHEXTRA ; i++)
-	{
-		states[i].sprite = SPR_TNT1;
-		states[i].frame = 0;
-		states[i].tics = -1;
-		states[i].action = A_NULL;
-		states[i].nextstate = i;
-	}
-	*/
+	new_states.clear();
+	argument_mem.clear();
 }
 
 
 void Frames::Shutdown()
-{ }
-
-
-void Frames::ResetGroups()
 {
-	groups.clear();
-	group_for_state.clear();
-	offset_for_state.clear();
+	for (size_t i = 0 ; i < new_states.size() ; i++)
+		if (new_states[i] != NULL)
+			delete new_states[i];
 
-	attack_slot[0] = NULL;
-	attack_slot[1] = NULL;
-	attack_slot[2] = NULL;
-
-	act_flags = 0;
+	new_states.clear();
+	argument_mem.clear();
 }
 
 
@@ -455,9 +437,49 @@ void Frames::MarkState(int st_num)
 	if (st_num == S_NULL)
 		return;
 
-	assert(1 <= st_num && st_num < NUMSTATES_DEHEXTRA);
+	// fill any missing slots with NULLs, including the one we want
+	while ((int)new_states.size() < st_num+1)
+	{
+		new_states.push_back(NULL);
+	}
 
-	state_modified[st_num] = true;
+	// already have a modified entry?
+	if (new_states[st_num] != NULL)
+		return;
+
+	state_t * entry = new state_t;
+
+	// copy the original info, if we have one
+	if (st_num < NUMSTATES_MBF)
+	{
+		memcpy(entry, &states[st_num], sizeof(state_t));
+	}
+	else
+	{
+		// these defaults follow the DSDehacked specs
+		entry->sprite = SPR_TNT1;
+		entry->frame  = 0;
+		entry->tics   = -1;
+		entry->action = A_NULL;
+		entry->nextstate = st_num;
+		entry->argptr = 0;
+	}
+}
+
+
+const state_t * Frames::NewStateElseOld(int st_num)
+{
+	if (st_num < 0)
+		return NULL;
+
+	if (st_num < (int)new_states.size())
+		if (new_states[st_num] != NULL)
+			return new_states[st_num];
+
+	if (st_num < NUMSTATES_MBF)
+		return &states[st_num];
+
+	return NULL;
 }
 
 
@@ -547,6 +569,8 @@ void Frames::StateDependRange(int st_lo, int st_hi)
 
 void Frames::StateDependencies()
 {
+/* FIXME !!
+
 	for (int lo = 1; lo < NUMSTATES_DEHEXTRA; )
 	{
 		if (! state_modified[lo])
@@ -563,6 +587,7 @@ void Frames::StateDependencies()
 
 		lo = hi + 1;
 	}
+*/
 }
 
 
@@ -575,6 +600,20 @@ void Frames::MarkStatesWithSprite(int spr_num)
 
 
 //------------------------------------------------------------------------
+
+void Frames::ResetGroups()
+{
+	groups.clear();
+	group_for_state.clear();
+	offset_for_state.clear();
+
+	attack_slot[0] = NULL;
+	attack_slot[1] = NULL;
+	attack_slot[2] = NULL;
+
+	act_flags = 0;
+}
+
 
 int Frames::BeginGroup(char group, int first)
 {
@@ -707,7 +746,7 @@ void Frames::UpdateAttacks(char group, char *act_name, int action)
 
 	atk1 += 2;
 
-	free1 = (! attack_slot[kind1] || 
+	free1 = (! attack_slot[kind1] ||
 			 StrCaseCmp(attack_slot[kind1], atk1) == 0);
 
 	if (atk2)
@@ -719,7 +758,7 @@ void Frames::UpdateAttacks(char group, char *act_name, int action)
 
 		atk2 += 2;
 
-		free2 = (! attack_slot[kind2] || 
+		free2 = (! attack_slot[kind2] ||
 				 StrCaseCmp(attack_slot[kind2], atk2) == 0);
 	}
 
@@ -802,7 +841,7 @@ const char *Frames::GroupToName(char group)
 
 		default:
 			InternalError("GroupToName: BAD GROUP '%c'\n", group);
-	}		
+	}
 
 	return NULL;
 }
@@ -822,9 +861,9 @@ const char *Frames::RedirectorName(int next_st)
 	assert(next_ofs > 0);
 
 	if (next_ofs == 1)
-		sprintf(name_buf, "%s", GroupToName(next_group));
+		snprintf(name_buf, sizeof(name_buf), "%s", GroupToName(next_group));
 	else
-		sprintf(name_buf, "%s:%d", GroupToName(next_group), next_ofs);
+		snprintf(name_buf, sizeof(name_buf), "%s:%d", GroupToName(next_group), next_ofs);
 
 	return name_buf;
 }
@@ -978,7 +1017,7 @@ void Frames::OutputState(char group, int cur)
 			(st->frame >= 32768) ? "BRIGHT" : "NORMAL",
 			(st->action == A_PainDie) ? "A_PainDie" : "A_KeenDie");
 	}
-	
+
 	if (action_info[st->action].act_flags & AF_FACE)
 	{
 		WAD::Printf("    %s:%c:0:%s:FACE_TARGET,\n",
@@ -1111,19 +1150,11 @@ void Frames::OutputGroup(char group)
 
 		if (is_last)
 		{
-#if (DEBUG_FRAMES)
-			WAD::Printf("; // %d\n", cur);
-#else
 			WAD::Printf(";\n");
-#endif
 			return;
 		}
 
-#if (DEBUG_FRAMES)
-		WAD::Printf(", // %d\n", cur);
-#else
 		WAD::Printf(",\n");
-#endif
 	}
 }
 

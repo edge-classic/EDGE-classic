@@ -1079,10 +1079,10 @@ void Frames::OutputState(char group, int cur, bool do_action)
 
 	int tics = (int) st->tics;
 
-	// Check for JUMP with tics < 0 (can happen with DEHEXTRA states)  // FIXME REVIEW
-	if (action_info[action].act_flags & AF_SPECIAL)
+	// check for JUMP with tics < 0 (can happen with DEHEXTRA states)
+	if (action == A_RandomJump && tics < 0)
 	{
-		if (StrCaseCmp(action_info[action].bex_name, "A_RandomJump") == 0 && tics < 0) tics = 0;
+		tics = 0;
 	}
 
 	// kludge for EDGE and Batman TC.  EDGE waits 35 tics before exiting the

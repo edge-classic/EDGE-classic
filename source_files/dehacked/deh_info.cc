@@ -36,7 +36,7 @@
 namespace Deh_Edge
 {
 
-state_t states[NUMSTATES_MBF] =
+state_t states_orig[NUMSTATES_MBF] =
 {
 	// the dummy state
 	{SPR_TROO,0,-1,A_NULL,S_NULL,0}, // S_NULL

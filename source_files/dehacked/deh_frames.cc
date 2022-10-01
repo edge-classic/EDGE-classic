@@ -55,7 +55,7 @@ namespace Deh_Edge
 #define MAX_ACT_NAME  1024
 
 
-extern state_t states[NUMSTATES_MBF];
+extern state_t states_orig[NUMSTATES_MBF];
 
 std::vector<state_t *> new_states;
 
@@ -89,7 +89,7 @@ namespace Frames
 	const state_t * NewStateElseOld(int st_num);
 	const char *GroupToName(char group);
 	const char *RedirectorName(int next_st);
-	void SpecialAction(char *buf, state_t *st);
+	void SpecialAction(char *buf, const state_t *st);
 	void OutputState(char group, int cur);
 	bool OutputSpawnState(int first);
 	bool SpreadGroupPass(bool alt_jumps);
@@ -452,7 +452,7 @@ void Frames::MarkState(int st_num)
 	// copy the original info, if we have one
 	if (st_num < NUMSTATES_MBF)
 	{
-		memcpy(entry, &states[st_num], sizeof(state_t));
+		memcpy(entry, &states_orig[st_num], sizeof(state_t));
 	}
 	else
 	{
@@ -477,7 +477,7 @@ const state_t * Frames::NewStateElseOld(int st_num)
 			return new_states[st_num];
 
 	if (st_num < NUMSTATES_MBF)
-		return &states[st_num];
+		return &states_orig[st_num];
 
 	return NULL;
 }
@@ -495,12 +495,12 @@ state_t * Frames::GetModifiedState(int st_num)
 
 int Frames::GetStateSprite(int st_num)
 {
-	assert(st_num >= 0);
+	const state_t * st = NewStateElseOld(st_num);
 
-	if (st_num >= NUMSTATES_DEHEXTRA)
+	if (st == NULL)
 		return -1;
 
-	return states[st_num].sprite;
+	return st->sprite;
 }
 
 
@@ -593,8 +593,9 @@ void Frames::StateDependencies()
 
 void Frames::MarkStatesWithSprite(int spr_num)
 {
-	for (int st = 1; st < NUMSTATES_MBF; st++)  // FIXME
-		if (states[st].sprite == spr_num)
+	// only need to handle old states here
+	for (int st = 1 ; st < NUMSTATES_MBF ; st++)
+		if (states_orig[st].sprite == spr_num)
 			MarkState(st);
 }
 
@@ -634,7 +635,9 @@ bool Frames::SpreadGroupPass(bool alt_jumps)
 {
 	bool changes = false;
 
-	for (int i = 1 ; i < NUMSTATES_DEHEXTRA ; i++)
+	int total = std::max((int)NUMSTATES_MBF, (int)new_states.size());
+
+	for (int i = 1 ; i < total ; i++)
 	{
 		if (group_for_state.find(i) == group_for_state.end())
 			continue;
@@ -851,6 +854,8 @@ const char *Frames::RedirectorName(int next_st)
 {
 	static char name_buf[MAX_ACT_NAME];
 
+	// this shouldn't happen since OutputGroup() only visits states
+	// which we collected/processed as a group.
 	if (group_for_state.find(next_st) == group_for_state.end())
 		InternalError("RedirectorName failure.\n");
 
@@ -869,7 +874,7 @@ const char *Frames::RedirectorName(int next_st)
 }
 
 
-void Frames::SpecialAction(char *act_name, state_t *st)
+void Frames::SpecialAction(char *act_name, const state_t *st)
 {
 	switch (st->action)
 	{
@@ -882,8 +887,10 @@ void Frames::SpecialAction(char *act_name, state_t *st)
 			break;
 
 		case A_RandomJump:
-			if (st->misc1 <= 0 || st->misc1 >= NUMSTATES_DEHEXTRA)
+			if (st->misc1 <= 0 || NewStateElseOld(st->misc1) == NULL)
+			{
 				strcpy(act_name, "NOTHING");
+			}
 			else
 			{
 				int perc = (st->misc2 <= 0) ? 0 : (st->misc2 >= 256) ? 100 :
@@ -959,7 +966,11 @@ void Frames::OutputState(char group, int cur)
 {
 	assert(cur > 0);
 
-	state_t *st = states + cur;
+	const state_t *st = NewStateElseOld(cur);
+	if (st == NULL)
+	{
+		st = &states[S_TNT1];
+	}
 
 	assert(st->action >= 0 && st->action < NUMACTIONS_MBF);
 
@@ -1182,7 +1193,12 @@ void Frames::AlterFrame(int new_val)
 	int st_num = Patch::active_obj;
 	const char *field_name = Patch::line_buf;
 
-	assert(0 <= st_num && st_num < NUMSTATES_DEHEXTRA);
+	assert(st_num >= 0);
+
+	MarkState(st_num);
+
+	state_t * st = new_states[st_num];
+	assert(st);
 
 	if (StrCaseCmp(field_name, "Action pointer") == 0)
 	{
@@ -1203,9 +1219,7 @@ void Frames::AlterFrame(int new_val)
 		return;
 	}
 
-	int * raw_obj = (int *) &states[st_num];
-
-	if (! Field_Alter(frame_field, field_name, raw_obj, new_val))
+	if (! Field_Alter(frame_field, field_name, (int *)st, new_val))
 	{
 		PrintWarn("UNKNOWN FRAME FIELD: %s\n", field_name);
 		return;
@@ -1220,7 +1234,12 @@ void Frames::AlterPointer(int new_val)
 	int st_num = Patch::active_obj;
 	const char *deh_field = Patch::line_buf;
 
-	assert(0 <= st_num && st_num < NUMSTATES_DEHEXTRA);
+	assert(st_num >= 0);
+
+	MarkState(st_num);
+
+	state_t * st = new_states[st_num];
+	assert(st);
 
 	if (StrCaseCmp(deh_field, "Codep Frame") != 0)
 	{
@@ -1228,16 +1247,14 @@ void Frames::AlterPointer(int new_val)
 		return;
 	}
 
-	if (new_val < 0 || new_val >= NUMSTATES_DEHEXTRA)
+	if (new_val < 0 || new_val >= NUMSTATES_MBF)
 	{
 		PrintWarn("Line %d: Illegal Codep frame number: %d\n",
 			Patch::line_num, new_val);
 		return;
 	}
 
-	Storage::RememberMod(&states[st_num].action, states[new_val].action);
-
-	MarkState(st_num);
+	st->action = states[new_val].action;
 }
 
 
@@ -1261,7 +1278,7 @@ void Frames::AlterBexCodePtr(const char * new_action)
 		return;
 	}
 
-	if (st_num < 0 || st_num >= NUMSTATES_DEHEXTRA)
+	if (st_num < 0 || st_num >= 32767)
 	{
 		PrintWarn("Line %d: illegal FRAME number: %d\n",
 			Patch::line_num, st_num);
@@ -1272,25 +1289,26 @@ void Frames::AlterBexCodePtr(const char * new_action)
 	if (st_num == S_NULL)
 		return;
 
+	MarkState(st_num);
+
+	state_t * st = new_states[st_num];
+	assert(st);
+
 	int action;
 
-	for (action = 0; action < NUMACTIONS_MBF; action++)
+	for (action = 0 ; action < NUMACTIONS_MBF ; action++)
 	{
 		// use +2 here to ignore the "A_" prefix
 		if (StrCaseCmp(action_info[action].bex_name + 2, new_action) == 0)
-			break;
+		{
+			// found it!
+			st->action = action;
+			return;
+		}
 	}
 
-	if (action >= NUMACTIONS_MBF)
-	{
-		PrintWarn("Line %d: unknown action %s for CODEPTR.\n",
-			Patch::line_num, new_action);
-		return;
-	}
-
-	Storage::RememberMod(&states[st_num].action, action);
-
-	MarkState(st_num);
+	PrintWarn("Line %d: unknown action %s for CODEPTR.\n",
+		Patch::line_num, new_action);
 }
 
 }  // Deh_Edge

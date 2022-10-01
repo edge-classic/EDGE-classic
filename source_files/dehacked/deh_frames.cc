@@ -87,8 +87,10 @@ namespace Frames
 
 	// forward decls
 	const state_t * NewStateElseOld(int st_num);
+	int * GetArgs(state_t *st);
 	const char *GroupToName(char group);
 	const char *RedirectorName(int next_st);
+
 	void SpecialAction(char *buf, const state_t *st);
 	void OutputState(char group, int cur, bool do_action);
 	bool OutputSpawnState(int first);
@@ -570,6 +572,26 @@ void Frames::MarkStatesWithSprite(int spr_num)
 	for (int st = 1 ; st < NUMSTATES_MBF ; st++)
 		if (states_orig[st].sprite == spr_num)
 			MarkState(st);
+}
+
+
+int * Frames::GetArgs(state_t *st)
+{
+	// the given state MUST be a new one (in new_states).
+	// allocate a group of eight ints, unless already done it.
+	// the returned pointer should NOT be saved anywhere.
+
+	if (st->argptr == 0)
+	{
+		for (int k = 0 ; k < 8 ; k++)
+			argument_mem.push_back(0);
+
+		st->argptr = (int)(argument_mem.size() / 8UL);
+	}
+
+	size_t ofs = (size_t)(st->argptr - 1) * 8UL;
+
+	return &argument_mem[ofs];
 }
 
 
@@ -1191,13 +1213,13 @@ void Frames::AlterFrame(int new_val)
 
 	if (StrCaseCmp(field_name, "Unknown 1") == 0)
 	{
-		// FIXME
+		GetArgs(st)[0] = new_val;
 		return;
 	}
 
 	if (StrCaseCmp(field_name, "Unknown 2") == 0)
 	{
-		// FIXME
+		GetArgs(st)[1] = new_val;
 		return;
 	}
 

@@ -94,7 +94,7 @@ namespace Frames
 	bool OutputSpawnState(int first);
 	bool SpreadGroupPass(bool alt_jumps);
 	void UpdateAttacks(char group, char *act_name, int action);
-	void StateDependRange(int st_lo, int st_hi);
+	bool DependRangeWasModified(int low, int high);
 
 	inline bool IS_WEAPON(char group)
 	{
@@ -229,185 +229,181 @@ const actioninfo_t action_info[NUMACTIONS_MBF] =
 
 //------------------------------------------------------------------------
 
-typedef struct
+struct staterange_t
 {
 	int obj_num;  // thing or weapon
 	int start1, end1;
 	int start2, end2;
-}
-staterange_t;
-
+};
 
 const staterange_t thing_range[NUMMOBJTYPES_COMPAT] =
 {
 	// Things...
-    { MT_PLAYER, S_PLAY, S_PLAY_XDIE9, -1,-1 },
-    { MT_POSSESSED, S_POSS_STND, S_POSS_RAISE4, -1,-1 },
-    { MT_SHOTGUY, S_SPOS_STND, S_SPOS_RAISE5, -1,-1 },
-    { MT_VILE, S_VILE_STND, S_VILE_DIE10, -1,-1 },
-    { MT_UNDEAD, S_SKEL_STND, S_SKEL_RAISE6, -1,-1 },
-    { MT_SMOKE, S_SMOKE1, S_SMOKE5, -1,-1 },
-    { MT_FATSO, S_FATT_STND, S_FATT_RAISE8, -1,-1 },
-    { MT_CHAINGUY, S_CPOS_STND, S_CPOS_RAISE7, -1,-1 },
-    { MT_TROOP, S_TROO_STND, S_TROO_RAISE5, -1,-1 },
-    { MT_SERGEANT, S_SARG_STND, S_SARG_RAISE6, -1,-1 },
-    { MT_SHADOWS, S_SARG_STND, S_SARG_RAISE6, -1,-1 },
-    { MT_HEAD, S_HEAD_STND, S_HEAD_RAISE6, -1,-1 },
-    { MT_BRUISER, S_BOSS_STND, S_BOSS_RAISE7, -1,-1 },
-    { MT_KNIGHT, S_BOS2_STND, S_BOS2_RAISE7, -1,-1 },
-    { MT_SKULL, S_SKULL_STND, S_SKULL_DIE6, -1,-1 },
-    { MT_SPIDER, S_SPID_STND, S_SPID_DIE11, -1,-1 },
-    { MT_BABY, S_BSPI_STND, S_BSPI_RAISE7, -1,-1 },
-    { MT_CYBORG, S_CYBER_STND, S_CYBER_DIE10, -1,-1 },
-    { MT_PAIN, S_PAIN_STND, S_PAIN_RAISE6, -1,-1 },
-    { MT_WOLFSS, S_SSWV_STND, S_SSWV_RAISE5, -1,-1 },
-    { MT_KEEN, S_KEENSTND, S_KEENPAIN2, -1,-1 },
-    { MT_BOSSBRAIN, S_BRAIN, S_BRAIN_DIE4, -1,-1 },
-    { MT_BOSSSPIT, S_BRAINEYE, S_BRAINEYE1, -1,-1 },
-    { MT_BARREL, S_BAR1, S_BEXP5, -1,-1 },
-    { MT_PUFF, S_PUFF1, S_PUFF4, -1,-1 },
-    { MT_BLOOD, S_BLOOD1, S_BLOOD3, -1,-1 },
-    { MT_TFOG, S_TFOG, S_TFOG10, -1,-1 },
-    { MT_IFOG, S_IFOG, S_IFOG5, -1,-1 },
-    { MT_TELEPORTMAN, S_TFOG, S_TFOG10, -1,-1 },
+	{ MT_PLAYER, S_PLAY, S_PLAY_XDIE9, -1,-1 },
+	{ MT_POSSESSED, S_POSS_STND, S_POSS_RAISE4, -1,-1 },
+	{ MT_SHOTGUY, S_SPOS_STND, S_SPOS_RAISE5, -1,-1 },
+	{ MT_VILE, S_VILE_STND, S_VILE_DIE10, -1,-1 },
+	{ MT_UNDEAD, S_SKEL_STND, S_SKEL_RAISE6, -1,-1 },
+	{ MT_SMOKE, S_SMOKE1, S_SMOKE5, -1,-1 },
+	{ MT_FATSO, S_FATT_STND, S_FATT_RAISE8, -1,-1 },
+	{ MT_CHAINGUY, S_CPOS_STND, S_CPOS_RAISE7, -1,-1 },
+	{ MT_TROOP, S_TROO_STND, S_TROO_RAISE5, -1,-1 },
+	{ MT_SERGEANT, S_SARG_STND, S_SARG_RAISE6, -1,-1 },
+	{ MT_SHADOWS, S_SARG_STND, S_SARG_RAISE6, -1,-1 },
+	{ MT_HEAD, S_HEAD_STND, S_HEAD_RAISE6, -1,-1 },
+	{ MT_BRUISER, S_BOSS_STND, S_BOSS_RAISE7, -1,-1 },
+	{ MT_KNIGHT, S_BOS2_STND, S_BOS2_RAISE7, -1,-1 },
+	{ MT_SKULL, S_SKULL_STND, S_SKULL_DIE6, -1,-1 },
+	{ MT_SPIDER, S_SPID_STND, S_SPID_DIE11, -1,-1 },
+	{ MT_BABY, S_BSPI_STND, S_BSPI_RAISE7, -1,-1 },
+	{ MT_CYBORG, S_CYBER_STND, S_CYBER_DIE10, -1,-1 },
+	{ MT_PAIN, S_PAIN_STND, S_PAIN_RAISE6, -1,-1 },
+	{ MT_WOLFSS, S_SSWV_STND, S_SSWV_RAISE5, -1,-1 },
+	{ MT_KEEN, S_KEENSTND, S_KEENPAIN2, -1,-1 },
+	{ MT_BOSSBRAIN, S_BRAIN, S_BRAIN_DIE4, -1,-1 },
+	{ MT_BOSSSPIT, S_BRAINEYE, S_BRAINEYE1, -1,-1 },
+	{ MT_BARREL, S_BAR1, S_BEXP5, -1,-1 },
+	{ MT_PUFF, S_PUFF1, S_PUFF4, -1,-1 },
+	{ MT_BLOOD, S_BLOOD1, S_BLOOD3, -1,-1 },
+	{ MT_TFOG, S_TFOG, S_TFOG10, -1,-1 },
+	{ MT_IFOG, S_IFOG, S_IFOG5, -1,-1 },
+	{ MT_TELEPORTMAN, S_TFOG, S_TFOG10, -1,-1 },
 
-    { MT_MISC0, S_ARM1, S_ARM1A, -1,-1 },
-    { MT_MISC1, S_ARM2, S_ARM2A, -1,-1 },
-    { MT_MISC2, S_BON1, S_BON1E, -1,-1 },
-    { MT_MISC3, S_BON2, S_BON2E, -1,-1 },
-    { MT_MISC4, S_BKEY, S_BKEY2, -1,-1 },
-    { MT_MISC5, S_RKEY, S_RKEY2, -1,-1 },
-    { MT_MISC6, S_YKEY, S_YKEY2, -1,-1 },
-    { MT_MISC7, S_YSKULL, S_YSKULL2, -1,-1 },
-    { MT_MISC8, S_RSKULL, S_RSKULL2, -1,-1 },
-    { MT_MISC9, S_BSKULL, S_BSKULL2, -1,-1 },
-    { MT_MISC10, S_STIM, S_STIM, -1,-1 },
-    { MT_MISC11, S_MEDI, S_MEDI, -1,-1 },
-    { MT_MISC12, S_SOUL, S_SOUL6, -1,-1 },
-    { MT_INV, S_PINV, S_PINV4, -1,-1 },
-    { MT_MISC13, S_PSTR, S_PSTR, -1,-1 },
-    { MT_INS, S_PINS, S_PINS4, -1,-1 },
-    { MT_MISC14, S_SUIT, S_SUIT, -1,-1 },
-    { MT_MISC15, S_PMAP, S_PMAP6, -1,-1 },
-    { MT_MISC16, S_PVIS, S_PVIS2, -1,-1 },
-    { MT_MEGA, S_MEGA, S_MEGA4, -1,-1 },
-    { MT_CLIP, S_CLIP, S_CLIP, -1,-1 },
-    { MT_MISC17, S_AMMO, S_AMMO, -1,-1 },
-    { MT_MISC18, S_ROCK, S_ROCK, -1,-1 },
-    { MT_MISC19, S_BROK, S_BROK, -1,-1 },
-    { MT_MISC20, S_CELL, S_CELL, -1,-1 },
-    { MT_MISC21, S_CELP, S_CELP, -1,-1 },
-    { MT_MISC22, S_SHEL, S_SHEL, -1,-1 },
-    { MT_MISC23, S_SBOX, S_SBOX, -1,-1 },
-    { MT_MISC24, S_BPAK, S_BPAK, -1,-1 },
-    { MT_MISC25, S_BFUG, S_BFUG, -1,-1 },
-    { MT_CHAINGUN, S_MGUN, S_MGUN, -1,-1 },
-    { MT_MISC26, S_CSAW, S_CSAW, -1,-1 },
-    { MT_MISC27, S_LAUN, S_LAUN, -1,-1 },
-    { MT_MISC28, S_PLAS, S_PLAS, -1,-1 },
-    { MT_SHOTGUN, S_SHOT, S_SHOT, -1,-1 },
-    { MT_SUPERSHOTGUN, S_SHOT2, S_SHOT2, -1,-1 },
-    { MT_MISC29, S_TECHLAMP, S_TECHLAMP4, -1,-1 },
-    { MT_MISC30, S_TECH2LAMP, S_TECH2LAMP4, -1,-1 },
-    { MT_MISC31, S_COLU, S_COLU, -1,-1 },
-    { MT_MISC32, S_TALLGRNCOL, S_TALLGRNCOL, -1,-1 },
-    { MT_MISC33, S_SHRTGRNCOL, S_SHRTGRNCOL, -1,-1 },
-    { MT_MISC34, S_TALLREDCOL, S_TALLREDCOL, -1,-1 },
-    { MT_MISC35, S_SHRTREDCOL, S_SHRTREDCOL, -1,-1 },
-    { MT_MISC36, S_SKULLCOL, S_SKULLCOL, -1,-1 },
-    { MT_MISC37, S_HEARTCOL, S_HEARTCOL2, -1,-1 },
-    { MT_MISC38, S_EVILEYE, S_EVILEYE4, -1,-1 },
-    { MT_MISC39, S_FLOATSKULL, S_FLOATSKULL3, -1,-1 },
-    { MT_MISC40, S_TORCHTREE, S_TORCHTREE, -1,-1 },
-    { MT_MISC41, S_BLUETORCH, S_BLUETORCH4, -1,-1 },
-    { MT_MISC42, S_GREENTORCH, S_GREENTORCH4, -1,-1 },
-    { MT_MISC43, S_REDTORCH, S_REDTORCH4, -1,-1 },
-    { MT_MISC44, S_BTORCHSHRT, S_BTORCHSHRT4, -1,-1 },
-    { MT_MISC45, S_GTORCHSHRT, S_GTORCHSHRT4, -1,-1 },
-    { MT_MISC46, S_RTORCHSHRT, S_RTORCHSHRT4, -1,-1 },
-    { MT_MISC47, S_STALAGTITE, S_STALAGTITE, -1,-1 },
-    { MT_MISC48, S_TECHPILLAR, S_TECHPILLAR, -1,-1 },
-    { MT_MISC49, S_CANDLESTIK, S_CANDLESTIK, -1,-1 },
-    { MT_MISC50, S_CANDELABRA, S_CANDELABRA, -1,-1 },
-    { MT_MISC51, S_BLOODYTWITCH, S_BLOODYTWITCH4, -1,-1 },
-    { MT_MISC60, S_BLOODYTWITCH, S_BLOODYTWITCH4, -1,-1 },
-    { MT_MISC52, S_MEAT2, S_MEAT2, -1,-1 },
-    { MT_MISC53, S_MEAT3, S_MEAT3, -1,-1 },
-    { MT_MISC54, S_MEAT4, S_MEAT4, -1,-1 },
-    { MT_MISC55, S_MEAT5, S_MEAT5, -1,-1 },
-    { MT_MISC56, S_MEAT2, S_MEAT2, -1,-1 },
-    { MT_MISC57, S_MEAT4, S_MEAT4, -1,-1 },
-    { MT_MISC58, S_MEAT3, S_MEAT3, -1,-1 },
-    { MT_MISC59, S_MEAT5, S_MEAT5, -1,-1 },
-    { MT_MISC61, S_HEAD_DIE6, S_HEAD_DIE6, -1,-1 },
-    { MT_MISC62, S_PLAY_DIE7, S_PLAY_DIE7, -1,-1 },
-    { MT_MISC63, S_POSS_DIE5, S_POSS_DIE5, -1,-1 },
-    { MT_MISC64, S_SARG_DIE6, S_SARG_DIE6, -1,-1 },
-    { MT_MISC65, S_SKULL_DIE6, S_SKULL_DIE6, -1,-1 },
-    { MT_MISC66, S_TROO_DIE5, S_TROO_DIE5, -1,-1 },
-    { MT_MISC67, S_SPOS_DIE5, S_SPOS_DIE5, -1,-1 },
-    { MT_MISC68, S_PLAY_XDIE9, S_PLAY_XDIE9, -1,-1 },
-    { MT_MISC69, S_PLAY_XDIE9, S_PLAY_XDIE9, -1,-1 },
-    { MT_MISC70, S_HEADSONSTICK, S_HEADSONSTICK, -1,-1 },
-    { MT_MISC71, S_GIBS, S_GIBS, -1,-1 },
-    { MT_MISC72, S_HEADONASTICK, S_HEADONASTICK, -1,-1 },
-    { MT_MISC73, S_HEADCANDLES, S_HEADCANDLES2, -1,-1 },
-    { MT_MISC74, S_DEADSTICK, S_DEADSTICK, -1,-1 },
-    { MT_MISC75, S_LIVESTICK, S_LIVESTICK2, -1,-1 },
-    { MT_MISC76, S_BIGTREE, S_BIGTREE, -1,-1 },
-    { MT_MISC77, S_BBAR1, S_BBAR3, -1,-1 },
-    { MT_MISC78, S_HANGNOGUTS, S_HANGNOGUTS, -1,-1 },
-    { MT_MISC79, S_HANGBNOBRAIN, S_HANGBNOBRAIN, -1,-1 },
-    { MT_MISC80, S_HANGTLOOKDN, S_HANGTLOOKDN, -1,-1 },
-    { MT_MISC81, S_HANGTSKULL, S_HANGTSKULL, -1,-1 },
-    { MT_MISC82, S_HANGTLOOKUP, S_HANGTLOOKUP, -1,-1 },
-    { MT_MISC83, S_HANGTNOBRAIN, S_HANGTNOBRAIN, -1,-1 },
-    { MT_MISC84, S_COLONGIBS, S_COLONGIBS, -1,-1 },
-    { MT_MISC85, S_SMALLPOOL, S_SMALLPOOL, -1,-1 },
-    { MT_MISC86, S_BRAINSTEM, S_BRAINSTEM, -1,-1 },
+	{ MT_MISC0, S_ARM1, S_ARM1A, -1,-1 },
+	{ MT_MISC1, S_ARM2, S_ARM2A, -1,-1 },
+	{ MT_MISC2, S_BON1, S_BON1E, -1,-1 },
+	{ MT_MISC3, S_BON2, S_BON2E, -1,-1 },
+	{ MT_MISC4, S_BKEY, S_BKEY2, -1,-1 },
+	{ MT_MISC5, S_RKEY, S_RKEY2, -1,-1 },
+	{ MT_MISC6, S_YKEY, S_YKEY2, -1,-1 },
+	{ MT_MISC7, S_YSKULL, S_YSKULL2, -1,-1 },
+	{ MT_MISC8, S_RSKULL, S_RSKULL2, -1,-1 },
+	{ MT_MISC9, S_BSKULL, S_BSKULL2, -1,-1 },
+	{ MT_MISC10, S_STIM, S_STIM, -1,-1 },
+	{ MT_MISC11, S_MEDI, S_MEDI, -1,-1 },
+	{ MT_MISC12, S_SOUL, S_SOUL6, -1,-1 },
+	{ MT_INV, S_PINV, S_PINV4, -1,-1 },
+	{ MT_MISC13, S_PSTR, S_PSTR, -1,-1 },
+	{ MT_INS, S_PINS, S_PINS4, -1,-1 },
+	{ MT_MISC14, S_SUIT, S_SUIT, -1,-1 },
+	{ MT_MISC15, S_PMAP, S_PMAP6, -1,-1 },
+	{ MT_MISC16, S_PVIS, S_PVIS2, -1,-1 },
+	{ MT_MEGA, S_MEGA, S_MEGA4, -1,-1 },
+	{ MT_CLIP, S_CLIP, S_CLIP, -1,-1 },
+	{ MT_MISC17, S_AMMO, S_AMMO, -1,-1 },
+	{ MT_MISC18, S_ROCK, S_ROCK, -1,-1 },
+	{ MT_MISC19, S_BROK, S_BROK, -1,-1 },
+	{ MT_MISC20, S_CELL, S_CELL, -1,-1 },
+	{ MT_MISC21, S_CELP, S_CELP, -1,-1 },
+	{ MT_MISC22, S_SHEL, S_SHEL, -1,-1 },
+	{ MT_MISC23, S_SBOX, S_SBOX, -1,-1 },
+	{ MT_MISC24, S_BPAK, S_BPAK, -1,-1 },
+	{ MT_MISC25, S_BFUG, S_BFUG, -1,-1 },
+	{ MT_CHAINGUN, S_MGUN, S_MGUN, -1,-1 },
+	{ MT_MISC26, S_CSAW, S_CSAW, -1,-1 },
+	{ MT_MISC27, S_LAUN, S_LAUN, -1,-1 },
+	{ MT_MISC28, S_PLAS, S_PLAS, -1,-1 },
+	{ MT_SHOTGUN, S_SHOT, S_SHOT, -1,-1 },
+	{ MT_SUPERSHOTGUN, S_SHOT2, S_SHOT2, -1,-1 },
+	{ MT_MISC29, S_TECHLAMP, S_TECHLAMP4, -1,-1 },
+	{ MT_MISC30, S_TECH2LAMP, S_TECH2LAMP4, -1,-1 },
+	{ MT_MISC31, S_COLU, S_COLU, -1,-1 },
+	{ MT_MISC32, S_TALLGRNCOL, S_TALLGRNCOL, -1,-1 },
+	{ MT_MISC33, S_SHRTGRNCOL, S_SHRTGRNCOL, -1,-1 },
+	{ MT_MISC34, S_TALLREDCOL, S_TALLREDCOL, -1,-1 },
+	{ MT_MISC35, S_SHRTREDCOL, S_SHRTREDCOL, -1,-1 },
+	{ MT_MISC36, S_SKULLCOL, S_SKULLCOL, -1,-1 },
+	{ MT_MISC37, S_HEARTCOL, S_HEARTCOL2, -1,-1 },
+	{ MT_MISC38, S_EVILEYE, S_EVILEYE4, -1,-1 },
+	{ MT_MISC39, S_FLOATSKULL, S_FLOATSKULL3, -1,-1 },
+	{ MT_MISC40, S_TORCHTREE, S_TORCHTREE, -1,-1 },
+	{ MT_MISC41, S_BLUETORCH, S_BLUETORCH4, -1,-1 },
+	{ MT_MISC42, S_GREENTORCH, S_GREENTORCH4, -1,-1 },
+	{ MT_MISC43, S_REDTORCH, S_REDTORCH4, -1,-1 },
+	{ MT_MISC44, S_BTORCHSHRT, S_BTORCHSHRT4, -1,-1 },
+	{ MT_MISC45, S_GTORCHSHRT, S_GTORCHSHRT4, -1,-1 },
+	{ MT_MISC46, S_RTORCHSHRT, S_RTORCHSHRT4, -1,-1 },
+	{ MT_MISC47, S_STALAGTITE, S_STALAGTITE, -1,-1 },
+	{ MT_MISC48, S_TECHPILLAR, S_TECHPILLAR, -1,-1 },
+	{ MT_MISC49, S_CANDLESTIK, S_CANDLESTIK, -1,-1 },
+	{ MT_MISC50, S_CANDELABRA, S_CANDELABRA, -1,-1 },
+	{ MT_MISC51, S_BLOODYTWITCH, S_BLOODYTWITCH4, -1,-1 },
+	{ MT_MISC60, S_BLOODYTWITCH, S_BLOODYTWITCH4, -1,-1 },
+	{ MT_MISC52, S_MEAT2, S_MEAT2, -1,-1 },
+	{ MT_MISC53, S_MEAT3, S_MEAT3, -1,-1 },
+	{ MT_MISC54, S_MEAT4, S_MEAT4, -1,-1 },
+	{ MT_MISC55, S_MEAT5, S_MEAT5, -1,-1 },
+	{ MT_MISC56, S_MEAT2, S_MEAT2, -1,-1 },
+	{ MT_MISC57, S_MEAT4, S_MEAT4, -1,-1 },
+	{ MT_MISC58, S_MEAT3, S_MEAT3, -1,-1 },
+	{ MT_MISC59, S_MEAT5, S_MEAT5, -1,-1 },
+	{ MT_MISC61, S_HEAD_DIE6, S_HEAD_DIE6, -1,-1 },
+	{ MT_MISC62, S_PLAY_DIE7, S_PLAY_DIE7, -1,-1 },
+	{ MT_MISC63, S_POSS_DIE5, S_POSS_DIE5, -1,-1 },
+	{ MT_MISC64, S_SARG_DIE6, S_SARG_DIE6, -1,-1 },
+	{ MT_MISC65, S_SKULL_DIE6, S_SKULL_DIE6, -1,-1 },
+	{ MT_MISC66, S_TROO_DIE5, S_TROO_DIE5, -1,-1 },
+	{ MT_MISC67, S_SPOS_DIE5, S_SPOS_DIE5, -1,-1 },
+	{ MT_MISC68, S_PLAY_XDIE9, S_PLAY_XDIE9, -1,-1 },
+	{ MT_MISC69, S_PLAY_XDIE9, S_PLAY_XDIE9, -1,-1 },
+	{ MT_MISC70, S_HEADSONSTICK, S_HEADSONSTICK, -1,-1 },
+	{ MT_MISC71, S_GIBS, S_GIBS, -1,-1 },
+	{ MT_MISC72, S_HEADONASTICK, S_HEADONASTICK, -1,-1 },
+	{ MT_MISC73, S_HEADCANDLES, S_HEADCANDLES2, -1,-1 },
+	{ MT_MISC74, S_DEADSTICK, S_DEADSTICK, -1,-1 },
+	{ MT_MISC75, S_LIVESTICK, S_LIVESTICK2, -1,-1 },
+	{ MT_MISC76, S_BIGTREE, S_BIGTREE, -1,-1 },
+	{ MT_MISC77, S_BBAR1, S_BBAR3, -1,-1 },
+	{ MT_MISC78, S_HANGNOGUTS, S_HANGNOGUTS, -1,-1 },
+	{ MT_MISC79, S_HANGBNOBRAIN, S_HANGBNOBRAIN, -1,-1 },
+	{ MT_MISC80, S_HANGTLOOKDN, S_HANGTLOOKDN, -1,-1 },
+	{ MT_MISC81, S_HANGTSKULL, S_HANGTSKULL, -1,-1 },
+	{ MT_MISC82, S_HANGTLOOKUP, S_HANGTLOOKUP, -1,-1 },
+	{ MT_MISC83, S_HANGTNOBRAIN, S_HANGTNOBRAIN, -1,-1 },
+	{ MT_MISC84, S_COLONGIBS, S_COLONGIBS, -1,-1 },
+	{ MT_MISC85, S_SMALLPOOL, S_SMALLPOOL, -1,-1 },
+	{ MT_MISC86, S_BRAINSTEM, S_BRAINSTEM, -1,-1 },
 
 	/* BRAIN_DEATH_MISSILE : S_BRAINEXPLODE1, S_BRAINEXPLODE3 */
 
 	// Attacks...
-    { MT_FIRE, S_FIRE1, S_FIRE30, -1,-1 },
-    { MT_TRACER, S_TRACER, S_TRACEEXP3, -1,-1 },
-    { MT_FATSHOT, S_FATSHOT1, S_FATSHOTX3, -1,-1 },
-    { MT_BRUISERSHOT, S_BRBALL1, S_BRBALLX3, -1,-1 },
-    { MT_SPAWNSHOT, S_SPAWN1, S_SPAWNFIRE8, -1,-1 },
-    { MT_TROOPSHOT, S_TBALL1, S_TBALLX3, -1,-1 },
-    { MT_HEADSHOT, S_RBALL1, S_RBALLX3, -1,-1 },
-    { MT_ARACHPLAZ, S_ARACH_PLAZ, S_ARACH_PLEX5, -1,-1 },
-    { MT_ROCKET, S_ROCKET, S_ROCKET, S_EXPLODE1, S_EXPLODE3 },
-    { MT_PLASMA, S_PLASBALL, S_PLASEXP5, -1,-1 },
-    { MT_BFG, S_BFGSHOT, S_BFGLAND6, -1,-1 },
-    { MT_EXTRABFG, S_BFGEXP, S_BFGEXP4, -1,-1 },
+	{ MT_FIRE, S_FIRE1, S_FIRE30, -1,-1 },
+	{ MT_TRACER, S_TRACER, S_TRACEEXP3, -1,-1 },
+	{ MT_FATSHOT, S_FATSHOT1, S_FATSHOTX3, -1,-1 },
+	{ MT_BRUISERSHOT, S_BRBALL1, S_BRBALLX3, -1,-1 },
+	{ MT_SPAWNSHOT, S_SPAWN1, S_SPAWNFIRE8, -1,-1 },
+	{ MT_TROOPSHOT, S_TBALL1, S_TBALLX3, -1,-1 },
+	{ MT_HEADSHOT, S_RBALL1, S_RBALLX3, -1,-1 },
+	{ MT_ARACHPLAZ, S_ARACH_PLAZ, S_ARACH_PLEX5, -1,-1 },
+	{ MT_ROCKET, S_ROCKET, S_ROCKET, S_EXPLODE1, S_EXPLODE3 },
+	{ MT_PLASMA, S_PLASBALL, S_PLASEXP5, -1,-1 },
+	{ MT_BFG, S_BFGSHOT, S_BFGLAND6, -1,-1 },
+	{ MT_EXTRABFG, S_BFGEXP, S_BFGEXP4, -1,-1 },
 
 	// Boom/MBF stuff...
-	{ MT_PUSH, S_TNT1, S_TNT1, -1,-1 },
-	{ MT_PULL, S_TNT1, S_TNT1, -1,-1 },
+	{ MT_PUSH, -1,-1, -1,-1 },
+	{ MT_PULL, -1,-1, -1,-1 },
 	{ MT_DOGS, S_DOGS_STND, S_DOGS_RAISE6, -1,-1 },
 
-    { MT_PLASMA1, S_PLS1BALL, S_PLS1EXP5, -1,-1 },
-    { MT_PLASMA2, S_PLS2BALL, S_PLS2BALLX3, -1,-1 },
-    { MT_SCEPTRE, S_BON3, S_BON3, -1,-1 },
-    { MT_BIBLE, S_BON4, S_BON4, -1,-1 },
-    { MT_MUSICSOURCE, S_TNT1, S_TNT1, -1,-1 },
-    { MT_GIBDTH, S_TNT1, S_TNT1, -1,-1 },
+	{ MT_PLASMA1, S_PLS1BALL, S_PLS1EXP5, -1,-1 },
+	{ MT_PLASMA2, S_PLS2BALL, S_PLS2BALLX3, -1,-1 },
+	{ MT_SCEPTRE, S_BON3, S_BON3, -1,-1 },
+	{ MT_BIBLE,   S_BON4, S_BON4, -1,-1 },
+	{ MT_MUSICSOURCE, -1,-1, -1,-1 },
+	{ MT_GIBDTH,      -1,-1, -1,-1 },
 };
 
-
-const staterange_t weapon_range[9] =
+const staterange_t weapon_range[NUMWEAPONS] =
 {
-	// Weapons...
-    { wp_fist, S_PUNCH, S_PUNCH5, -1,-1 },
-    { wp_chainsaw, S_SAW, S_SAW3, -1,-1 },
-    { wp_pistol, S_PISTOL, S_PISTOLFLASH, S_LIGHTDONE, S_LIGHTDONE },
-    { wp_shotgun, S_SGUN, S_SGUNFLASH2, S_LIGHTDONE, S_LIGHTDONE },
-    { wp_chaingun, S_CHAIN, S_CHAINFLASH2, S_LIGHTDONE, S_LIGHTDONE },
-    { wp_missile, S_MISSILE, S_MISSILEFLASH4, S_LIGHTDONE, S_LIGHTDONE },
-    { wp_plasma, S_PLASMA, S_PLASMAFLASH2, S_LIGHTDONE, S_LIGHTDONE },
-    { wp_bfg, S_BFG, S_BFGFLASH2, S_LIGHTDONE, S_LIGHTDONE },
-    { wp_supershotgun, S_DSGUN, S_DSGUNFLASH2, S_LIGHTDONE, S_LIGHTDONE },
+	{ wp_fist,         S_PUNCH,   S_PUNCH5, -1,-1 },
+	{ wp_chainsaw,     S_SAW,     S_SAW3,   -1,-1 },
+	{ wp_pistol,       S_PISTOL,  S_PISTOLFLASH,   S_LIGHTDONE, S_LIGHTDONE },
+	{ wp_shotgun,      S_SGUN,    S_SGUNFLASH2,    S_LIGHTDONE, S_LIGHTDONE },
+	{ wp_chaingun,     S_CHAIN,   S_CHAINFLASH2,   S_LIGHTDONE, S_LIGHTDONE },
+	{ wp_missile,      S_MISSILE, S_MISSILEFLASH4, S_LIGHTDONE, S_LIGHTDONE },
+	{ wp_plasma,       S_PLASMA,  S_PLASMAFLASH2,  S_LIGHTDONE, S_LIGHTDONE },
+	{ wp_bfg,          S_BFG,     S_BFGFLASH2,     S_LIGHTDONE, S_LIGHTDONE },
+	{ wp_supershotgun, S_DSGUN,   S_DSGUNFLASH2,   S_LIGHTDONE, S_LIGHTDONE },
 };
 
 
@@ -516,79 +512,55 @@ bool Frames::CheckMissileState(int st_num)
 }
 
 
-void Frames::StateDependRange(int st_lo, int st_hi)
+bool Frames::DependRangeWasModified(int low, int high)
 {
-	// Notes:
-	//   While it's possible for weapons to use thing states, and vice
-	//   versa, it can only happen when those weapons/things are
-	//   modified, so they don't need to be marked here.
+	if (high < 0)
+		return false;
 
-	assert(st_lo <= st_hi);
-	assert(st_lo >= 0);
-	assert(st_hi < NUMSTATES_DEHEXTRA);
+	assert(low <= high);
+	assert(low >  S_NULL);
 
-	if (st_lo == S_NULL)
-		return;
+	if (high >= (int)new_states.size())
+		high  = (int)new_states.size() - 1;
 
-	// does range crosses the weapon/thing boundary ?
-	if (st_lo <= S_LAST_WEAPON_STATE && st_hi > S_LAST_WEAPON_STATE)
-	{
-		StateDependRange(st_lo, S_LAST_WEAPON_STATE);
-		StateDependRange(S_LAST_WEAPON_STATE + 1, st_hi);
-		return;
-	}
+	for (int i = low ; i <= high ; i++)
+		if (new_states[i] != NULL)
+			return true;
 
-	if (st_hi <= S_LAST_WEAPON_STATE)
-	{
-		for (int w = 0 ; w < 9 ; w++)
-		{
-			const staterange_t *R = weapon_range + w;
-
-			if ((st_hi >= R->start1 && st_lo <= R->end1) ||
-				(st_hi >= R->start2 && st_lo <= R->end2))
-			{
-				Weapons::MarkWeapon(R->obj_num);
-			}
-		}
-		return;
-	}
-
-	// check things.
-
-	for (int t = 0 ; t < NUMMOBJTYPES_COMPAT ; t++)
-	{
-		const staterange_t *R = thing_range + t;
-
-		if ((st_hi >= R->start1 && st_lo <= R->end1) ||
-			(st_hi >= R->start2 && st_lo <= R->end2))
-		{
-			Things::MarkThing(R->obj_num);
-		}
-	}
+	return false;
 }
 
 
 void Frames::StateDependencies()
 {
-/* FIXME !!
+	// the goal here is to mark *existing* things and weapons whose
+	// states have been modified, so that we generate the DDF for
+	// the thing/weapon which has the new states.  modified or new
+	// things/weapons don't need this (already been marked). 
 
-	for (int lo = 1; lo < NUMSTATES_DEHEXTRA; )
+	for (int w = 0 ; w < NUMWEAPONS ; w++)
 	{
-		if (! state_modified[lo])
+		const staterange_t& R = weapon_range[w];
+
+		if (DependRangeWasModified(R.start1, R.end1) ||
+		    DependRangeWasModified(R.start2, R.end2))
 		{
-			lo++; continue;
+			Weapons::MarkWeapon(R.obj_num);
 		}
-
-		int hi = lo;
-
-		while (hi + 1 < NUMSTATES_DEHEXTRA && state_modified[hi])
-			hi++;
-
-		StateDependRange(lo, hi);
-
-		lo = hi + 1;
 	}
-*/
+
+	// check things....
+
+	for (int t = 0 ; t < NUMMOBJTYPES_COMPAT ; t++)
+	{
+		const staterange_t& R = thing_range[t];
+
+		if (DependRangeWasModified(R.start1, R.end1) ||
+		    DependRangeWasModified(R.start2, R.end2))
+		{
+			Things::MarkThing(R.obj_num);
+		}
+	}
 }
 
 

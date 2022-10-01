@@ -234,7 +234,7 @@ struct staterange_t
 	int start2, end2;
 };
 
-const staterange_t thing_range[NUMMOBJTYPES_COMPAT] =
+const staterange_t thing_range[] =
 {
 	// Things...
 	{ MT_PLAYER, S_PLAY, S_PLAY_XDIE9, -1,-1 },
@@ -303,6 +303,7 @@ const staterange_t thing_range[NUMMOBJTYPES_COMPAT] =
 	{ MT_MISC28, S_PLAS, S_PLAS, -1,-1 },
 	{ MT_SHOTGUN, S_SHOT, S_SHOT, -1,-1 },
 	{ MT_SUPERSHOTGUN, S_SHOT2, S_SHOT2, -1,-1 },
+
 	{ MT_MISC29, S_TECHLAMP, S_TECHLAMP4, -1,-1 },
 	{ MT_MISC30, S_TECH2LAMP, S_TECH2LAMP4, -1,-1 },
 	{ MT_MISC31, S_COLU, S_COLU, -1,-1 },
@@ -379,19 +380,17 @@ const staterange_t thing_range[NUMMOBJTYPES_COMPAT] =
 	{ MT_EXTRABFG, S_BFGEXP, S_BFGEXP4, -1,-1 },
 
 	// Boom/MBF stuff...
-	{ MT_PUSH, -1,-1, -1,-1 },
-	{ MT_PULL, -1,-1, -1,-1 },
 	{ MT_DOGS, S_DOGS_STND, S_DOGS_RAISE6, -1,-1 },
 
 	{ MT_PLASMA1, S_PLS1BALL, S_PLS1EXP5, -1,-1 },
 	{ MT_PLASMA2, S_PLS2BALL, S_PLS2BALLX3, -1,-1 },
 	{ MT_SCEPTRE, S_BON3, S_BON3, -1,-1 },
 	{ MT_BIBLE,   S_BON4, S_BON4, -1,-1 },
-	{ MT_MUSICSOURCE, -1,-1, -1,-1 },
-	{ MT_GIBDTH,      -1,-1, -1,-1 },
+
+	{ -1, 0, 0, 0, 0 }  // End sentinel
 };
 
-const staterange_t weapon_range[NUMWEAPONS] =
+const staterange_t weapon_range[] =
 {
 	{ wp_fist,         S_PUNCH,   S_PUNCH5, -1,-1 },
 	{ wp_chainsaw,     S_SAW,     S_SAW3,   -1,-1 },
@@ -402,6 +401,8 @@ const staterange_t weapon_range[NUMWEAPONS] =
 	{ wp_plasma,       S_PLASMA,  S_PLASMAFLASH2,  S_LIGHTDONE, S_LIGHTDONE },
 	{ wp_bfg,          S_BFG,     S_BFGFLASH2,     S_LIGHTDONE, S_LIGHTDONE },
 	{ wp_supershotgun, S_DSGUN,   S_DSGUNFLASH2,   S_LIGHTDONE, S_LIGHTDONE },
+
+	{ -1, 0, 0, 0, 0 }  // End sentinel
 };
 
 
@@ -442,6 +443,7 @@ void Frames::MarkState(int st_num)
 		return;
 
 	state_t * entry = new state_t;
+	new_states[st_num] = entry;
 
 	// copy the original info, if we have one
 	if (st_num < NUMSTATES_MBF)
@@ -536,7 +538,7 @@ void Frames::StateDependencies()
 	// the thing/weapon which has the new states.  modified or new
 	// things/weapons don't need this (already been marked). 
 
-	for (int w = 0 ; w < NUMWEAPONS ; w++)
+	for (int w = 0 ; weapon_range[w].obj_num >= 0 ; w++)
 	{
 		const staterange_t& R = weapon_range[w];
 
@@ -549,7 +551,7 @@ void Frames::StateDependencies()
 
 	// check things....
 
-	for (int t = 0 ; t < NUMMOBJTYPES_COMPAT ; t++)
+	for (int t = 0 ; thing_range[t].obj_num >= 0 ; t++)
 	{
 		const staterange_t& R = thing_range[t];
 
@@ -1219,6 +1221,10 @@ void Frames::AlterFrame(int new_val)
 
 	assert(st_num >= 0);
 
+	// the S_NULL state is never output, no need to change it
+	if (st_num == S_NULL)
+		return;
+
 	MarkState(st_num);
 
 	state_t * st = new_states[st_num];
@@ -1259,6 +1265,10 @@ void Frames::AlterPointer(int new_val)
 	const char *deh_field = Patch::line_buf;
 
 	assert(st_num >= 0);
+
+	// the S_NULL state is never output, no need to change it
+	if (st_num == S_NULL)
+		return;
 
 	MarkState(st_num);
 

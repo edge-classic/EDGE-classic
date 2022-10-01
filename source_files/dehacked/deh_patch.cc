@@ -792,14 +792,14 @@ namespace Patch
 		{
 			switch (active_section)
 			{
-				case DEH_FRAME:  max_obj = NUMSTATES_DEHEXTRA - 1; break;
 				case DEH_AMMO:   max_obj = NUMAMMO       - 1; break;
 				case DEH_WEAPON: max_obj = NUMWEAPONS    - 1; break;
-				case DEH_PTR:    max_obj = NUMSTATES_DEHEXTRA - 1; break;
 
 				// for DSDehacked, allow very high values
-				case DEH_THING:  max_obj = 32767; min_obj = 1; break;
+				case DEH_FRAME:  max_obj = 32767; break;
+				case DEH_PTR:    max_obj = 32767; break;
 				case DEH_SOUND:  max_obj = 32767; break;
+				case DEH_THING:  max_obj = 32767; min_obj = 1; break;
 
 				default:
 					InternalError("Bad active_section value %d\n", active_section);

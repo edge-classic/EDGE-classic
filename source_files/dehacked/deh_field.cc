@@ -97,9 +97,8 @@ bool Field_ValidateValue(const fieldreference_t *ref, int new_val)
 			case FT_AMMO:   max_obj = NUMAMMO - 1; break;
 			case FT_SUBSPR: max_obj = 31; break;
 
-			case FT_FRAME:  max_obj = NUMSTATES_DEHEXTRA - 1; break;
-
 			// for DSDehacked, allow very high values
+			case FT_FRAME:  max_obj = 32767; break;
 			case FT_SPRITE: max_obj = 32767; break;
 			case FT_SOUND:  max_obj = 32767; break;
 

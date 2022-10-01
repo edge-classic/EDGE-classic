@@ -67,7 +67,7 @@ namespace Frames
 	void AlterPointer(int new_val);
 	void AlterBexCodePtr(const char * new_action);
 
-	void ResetAll(); // also resets the slots and flags
+	void ResetGroups(); // also resets the slots and flags
 	int  BeginGroup(int first, char group);
 	void SpreadGroups();
 

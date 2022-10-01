@@ -420,7 +420,7 @@ void Frames::Shutdown()
 { }
 
 
-void Frames::ResetAll(void)
+void Frames::ResetGroups()
 {
 	for (int i = 0; i < NUMSTATES_DEHEXTRA; i++)
 	{

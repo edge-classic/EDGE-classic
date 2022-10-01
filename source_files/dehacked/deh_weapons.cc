@@ -170,7 +170,7 @@ namespace Weapons
 
 	void HandleFrames(const weaponinfo_t *info, int w_num)
 	{
-		Frames::ResetAll();
+		Frames::ResetGroups();
 
 		// --- collect states into groups ---
 

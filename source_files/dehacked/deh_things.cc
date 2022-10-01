@@ -188,7 +188,7 @@ namespace Attacks
 
 	void HandleFrames(const mobjinfo_t *info, int mt_num)
 	{
-		Frames::ResetAll();
+		Frames::ResetGroups();
 
 		// special cases...
 
@@ -1105,7 +1105,7 @@ namespace Things
 
 	void HandleFrames(const mobjinfo_t *info, int mt_num)
 	{
-		Frames::ResetAll();
+		Frames::ResetGroups();
 
 		// special cases...
 
@@ -1139,6 +1139,7 @@ namespace Things
 
 		int count = 0;
 
+		// do more important states AFTER less important ones
 		count += Frames::BeginGroup(info->raisestate,   'R');
 		count += Frames::BeginGroup(info->xdeathstate,  'X');
 		count += Frames::BeginGroup(info->deathstate,   'D');

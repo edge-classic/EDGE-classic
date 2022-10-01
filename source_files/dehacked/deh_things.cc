@@ -1314,7 +1314,7 @@ namespace Things
 		if (info->spawnstate == S_NULL)
 			return;
 
-		int spr_num = states[info->spawnstate].sprite;
+		int spr_num = Frames::GetStateSprite(info->spawnstate);
 
 		// special cases:
 

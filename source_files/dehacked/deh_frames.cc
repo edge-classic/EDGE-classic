@@ -57,6 +57,8 @@ namespace Deh_Edge
 #define MAX_ACT_NAME  1024
 
 
+extern state_t states[NUMSTATES_DEHEXTRA];
+
 bool state_modified[NUMSTATES_DEHEXTRA];
 
 statedyn_t state_dyn[NUMSTATES_DEHEXTRA];
@@ -414,6 +416,17 @@ new_state_t * Frames::GetModifiedState(int st_num)
 	// FIXME temp crud
 	static new_state_t  crud;
 	return &crud;
+}
+
+
+int Frames::GetStateSprite(int st_num)
+{
+	assert(st_num >= 0);
+
+	if (st_num >= NUMSTATES_DEHEXTRA)
+		return -1;
+
+	return states[st_num].sprite;
 }
 
 

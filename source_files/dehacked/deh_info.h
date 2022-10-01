@@ -444,15 +444,9 @@ struct new_state_t
 
 	// housekeeping stuff
 	char  group;
-	int gr_idx;
-	int gr_next;  // next state in same group (incl. random-jumps)
+	int   gr_idx;
+	int   gr_next;  // next state in same group (incl. random-jumps)
 };
-
-
-extern state_t states[NUMSTATES_DEHEXTRA];
-
-extern bool state_modified[NUMSTATES_DEHEXTRA];
-extern statedyn_t state_dyn[NUMSTATES_DEHEXTRA];
 
 }  // Deh_Edge
 

@@ -487,9 +487,7 @@ state_t * Frames::GetModifiedState(int st_num)
 {
 	MarkState(st_num);
 
-	// FIXME temp crud
-	static state_t  crud;
-	return &crud;
+	return new_states[st_num];
 }
 
 

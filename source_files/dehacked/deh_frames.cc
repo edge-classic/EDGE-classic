@@ -63,11 +63,6 @@ std::vector<state_t *> new_states;
 std::vector<int> argument_mem;
 
 
-// FIXME !!!! AWFUL TEMP HACK
-#define misc1  tics
-#define misc2  tics
-
-
 struct group_info_t
 {
 	char group;
@@ -87,7 +82,8 @@ namespace Frames
 
 	// forward decls
 	const state_t * NewStateElseOld(int st_num);
-	int * GetArgs(state_t *st);
+	int  ReadArg(const state_t *st, int i);
+	void WriteArg(state_t *st, int i, int value);
 	const char *GroupToName(char group);
 	const char *RedirectorName(int next_st);
 
@@ -575,23 +571,33 @@ void Frames::MarkStatesWithSprite(int spr_num)
 }
 
 
-int * Frames::GetArgs(state_t *st)
+int Frames::ReadArg(const state_t *st, int i)
+{
+	// the given state can be old or new here.
+
+	if (st->argptr == 0)
+		return 0;
+
+	int ofs = (st->argptr - 1) * 8;
+	return argument_mem[ofs + i];
+}
+
+
+void Frames::WriteArg(state_t *st, int i, int value)
 {
 	// the given state MUST be a new one (in new_states).
-	// allocate a group of eight ints, unless already done it.
-	// the returned pointer should NOT be saved anywhere.
+	// allocates a group of eight ints, unless done before.
 
 	if (st->argptr == 0)
 	{
 		for (int k = 0 ; k < 8 ; k++)
 			argument_mem.push_back(0);
 
-		st->argptr = (int)(argument_mem.size() / 8UL);
+		st->argptr = (int)argument_mem.size() / 8;
 	}
 
-	size_t ofs = (size_t)(st->argptr - 1) * 8UL;
-
-	return &argument_mem[ofs];
+	int ofs = (st->argptr - 1) * 8;
+	argument_mem[ofs + i] = value;
 }
 
 
@@ -653,7 +659,7 @@ bool Frames::SpreadGroupPass(bool alt_jumps)
 		{
 			next = S_NULL;
 			if (st->action == A_RandomJump)
-				next = st->misc1;
+				next = ReadArg(st, 0);  // misc1
 		}
 
 		if (next == S_NULL)
@@ -890,30 +896,36 @@ void Frames::SpecialAction(char *act_name, const state_t *st)
 			break;
 
 		case A_RandomJump:
-			if (st->misc1 <= 0 || NewStateElseOld(st->misc1) == NULL)
 			{
-				strcpy(act_name, "NOTHING");
-			}
-			else
-			{
-				int perc = (st->misc2 <= 0) ? 0 : (st->misc2 >= 256) ? 100 :
-						   (st->misc2 * 100 / 256);
+				int next = ReadArg(st, 0);  // misc1
+				int perc = ReadArg(st, 1);  // misc2
 
-				sprintf(act_name, "JUMP(%s,%d%%)", RedirectorName(st->misc1), perc);
+				if (next <= 0 || NewStateElseOld(next) == NULL)
+				{
+					strcpy(act_name, "NOTHING");
+				}
+				else
+				{
+					perc = perc * 100 / 256;
+					if (perc < 0)   perc = 0;
+					if (perc > 100) perc = 100;
+
+					sprintf(act_name, "JUMP(%s,%d%%)", RedirectorName(next), perc);
+				}
 			}
 			break;
 
 		case A_Turn:
-			sprintf(act_name, "TURN(%d)", MISC_TO_ANGLE(st->misc1));
+			sprintf(act_name, "TURN(%d)", MISC_TO_ANGLE(ReadArg(st, 0)));
 			break;
 
 		case A_Face:
-			sprintf(act_name, "FACE(%d)", MISC_TO_ANGLE(st->misc1));
+			sprintf(act_name, "FACE(%d)", MISC_TO_ANGLE(ReadArg(st, 0)));
 			break;
 
 		case A_PlaySound:
 			{
-				const char * sfx = Sounds::GetSound(st->misc1);
+				const char * sfx = Sounds::GetSound(ReadArg(st, 0));
 
 				if (StrCaseCmp(sfx, "NULL") == 0)
 					strcpy(act_name, "NOTHING");
@@ -924,39 +936,47 @@ void Frames::SpecialAction(char *act_name, const state_t *st)
 
 		case A_Scratch:
 			{
+				int damage = ReadArg(st, 0);  // misc1;
+				int sfx_id = ReadArg(st, 1); // misc2
+
 				const char *sfx = NULL;
-				if (st->misc2 > 0)
-					sfx = Sounds::GetSound(st->misc2);
-				if (StrCaseCmp(sfx, "NULL") == 0)
+				if (sfx_id > 0)
+					sfx = Sounds::GetSound(sfx_id);
+				if (sfx != NULL && StrCaseCmp(sfx, "NULL") == 0)
 					sfx = NULL;
 
-				int damage = st->misc1;
 				const char *atk_name = Things::AddScratchAttack(damage, sfx);
 				sprintf(act_name, "CLOSE_ATTACK(%s)", atk_name);
 			}
 			break;
 
 		case A_LineEffect:
-			if (st->misc1 <= 0)
-				strcpy(act_name, "NOTHING");
-			else
-				sprintf(act_name, "ACTIVATE_LINETYPE(%d,%d)", st->misc1, st->misc2);
+			{
+				int misc1 = ReadArg(st, 0);
+				int misc2 = ReadArg(st, 1);
+
+				if (misc1 <= 0)
+					strcpy(act_name, "NOTHING");
+				else
+					sprintf(act_name, "ACTIVATE_LINETYPE(%d,%d)", misc1, misc2);
+			}
 			break;
 
 		case A_Spawn:
-			if (! Things::IsSpawnable(st->misc1))
 			{
-				PrintWarn("Action A_SPAWN unusable type (%d)\n", st->misc1);
-			}
-			else
-			{
-				Things::UseThing(st->misc1);
-				sprintf(act_name, "SPAWN(%s)", Things::GetMobjName(st->misc1));
-				return; // success !
-			}
+				int mt_num = ReadArg(st, 0);
 
-			// fall-back
-			strcpy(act_name, "NOTHING");
+				if (! Things::IsSpawnable(mt_num))
+				{
+					PrintWarn("Action A_SPAWN unusable type (%d)\n", mt_num);
+					strcpy(act_name, "NOTHING");
+				}
+				else
+				{
+					Things::UseThing(mt_num);
+					sprintf(act_name, "SPAWN(%s)", Things::GetMobjName(mt_num));
+				}
+			}
 			break;
 
 		default:
@@ -1213,13 +1233,13 @@ void Frames::AlterFrame(int new_val)
 
 	if (StrCaseCmp(field_name, "Unknown 1") == 0)
 	{
-		GetArgs(st)[0] = new_val;
+		WriteArg(st, 0, new_val);
 		return;
 	}
 
 	if (StrCaseCmp(field_name, "Unknown 2") == 0)
 	{
-		GetArgs(st)[1] = new_val;
+		WriteArg(st, 1, new_val);
 		return;
 	}
 

@@ -33,6 +33,7 @@ SDL_Window *my_vis;
 int graphics_shutdown = 0;
 
 DEF_CVAR(in_grab, "1", CVAR_ARCHIVE)
+DEF_CVAR(v_sync,  "1", CVAR_ARCHIVE);
 
 static bool grab_state;
 
@@ -226,6 +227,8 @@ static bool I_CreateWindow(scrmode_c *mode)
 	if (SDL_GL_CreateContext(my_vis) == NULL)
 		I_Error("Failed to create OpenGL context.\n");
 
+	SDL_GL_SetSwapInterval(v_sync.d ? 1 : 0);
+
 	gladLoaderLoadGL();
 
 	return true;
@@ -315,6 +318,9 @@ void I_FinishFrame(void)
 
 	if (in_grab.CheckModified())
 		I_GrabCursor(grab_state);
+
+	if (v_sync.CheckModified())
+		SDL_GL_SetSwapInterval(v_sync.d ? 1 : 0);
 }
 
 

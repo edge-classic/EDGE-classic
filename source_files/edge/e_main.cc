@@ -268,6 +268,13 @@ static void SetGlobalVars(void)
 	const char *s;
 
 	// Screen Resolution Check...
+	if (M_CheckParm("-borderless"))
+		DISPLAYMODE = 2;
+	else if (M_CheckParm("-fullscreen"))
+		DISPLAYMODE = 1;
+	else if (M_CheckParm("-windowed"))
+		DISPLAYMODE = 0;
+
 	s = M_GetParm("-width");
 	if (s)
 	{
@@ -311,14 +318,7 @@ static void SetGlobalVars(void)
 
 	// restrict depth to allowable values
 	if (SCREENBITS < 15) SCREENBITS = 15;
-	else if (SCREENBITS > 32) SCREENBITS = 32;
-
-	if (M_CheckParm("-borderless"))
-		DISPLAYMODE = 2;
-	else if (M_CheckParm("-fullscreen"))
-		DISPLAYMODE = 1;
-	else if (M_CheckParm("-windowed"))
-		DISPLAYMODE = 0;
+	if (SCREENBITS > 32) SCREENBITS = 32;
 
 	// If borderless fullscreen mode, override any provided dimensions so I_StartupGraphics will scale to native res
 	if (DISPLAYMODE == 2)

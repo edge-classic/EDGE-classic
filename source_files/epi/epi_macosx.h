@@ -26,8 +26,6 @@
 #define __EPI_HEADER_SYSTEM_SPECIFIC__
 #endif
 
-#define DIRSEPARATOR '/'
-
 #ifdef GNUC
 #define GCCATTR(xyz) attribute (xyz)
 #else

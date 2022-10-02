@@ -71,9 +71,9 @@ const char* GetResourcePath()
 	const std::string res_subdir = "Resources";
 
 	std::string dir_match = appdir_suffix;
-	dir_match += DIRSEPARATOR;
+	dir_match += '/';
 	dir_match += contents_subdir;
-	dir_match += DIRSEPARATOR;
+	dir_match += '/';
 	dir_match += exe_subdir; 
 
     const char *ep = GetExecutablePath(NULL);

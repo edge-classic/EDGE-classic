@@ -35,8 +35,6 @@
 #define MAXPATH  _MAX_PATH
 #endif
 
-#define DIRSEPARATOR  '\\'
-
 #ifdef __GNUC__
 #define GCCATTR(xyz) __attribute__ (xyz)
 #else

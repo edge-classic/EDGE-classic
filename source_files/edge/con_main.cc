@@ -145,7 +145,7 @@ int CMD_Dir(char **argv, int argc)
 
 	for (int i = 0; i < fsd.GetSize(); i++)
 	{
-		epi::filesys_direntry_c *entry = fsd[i];
+		epi::direntry_c *entry = fsd[i];
 
 		I_Printf(" %2d: %10d  %s  \"%s\"\n",
 				 i+1, entry->size,

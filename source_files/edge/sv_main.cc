@@ -500,7 +500,7 @@ void SV_ClearSlot(const char *slot_name)
 
 	for (int i = 0; i < fsd.GetSize(); i++)
 	{
-		epi::filesys_direntry_c *entry = fsd[i];
+		epi::direntry_c *entry = fsd[i];
 
 		if (entry->is_dir)
 			continue;
@@ -530,7 +530,7 @@ void SV_CopySlot(const char *src_name, const char *dest_name)
 
 	for (int i = 0; i < fsd.GetSize(); i++)
 	{
-		epi::filesys_direntry_c *entry = fsd[i];
+		epi::direntry_c *entry = fsd[i];
 
 		if (entry->is_dir)
 			continue;

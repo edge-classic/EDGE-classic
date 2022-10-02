@@ -28,8 +28,9 @@ namespace epi
 // Forward declarations
 class file_c;
 
+
 // A Filesystem directory entry
-class filesys_direntry_c
+class direntry_c
 {
 public:
 	std::string name;
@@ -37,10 +38,10 @@ public:
 	bool is_dir;
 
 public:
-	filesys_direntry_c() : name(), size(0), is_dir(false)
+	direntry_c() : name(), size(0), is_dir(false)
 	{ }
 
-	~filesys_direntry_c()
+	~direntry_c()
 	{ }
 };
 
@@ -54,19 +55,19 @@ public:
 
 private:
 	void CleanupObject(void *obj);
-		
+
 public:
-	bool AddEntry(filesys_direntry_c* fs_entry);
+	bool AddEntry(direntry_c* fs_entry);
 
 	int GetSize(void) { return array_entries; }
 
-	filesys_direntry_c *operator[](int idx); 	
+	direntry_c *operator[](int idx);
 };
 
 // ---- The Filesystem ----
 
 // Directory Functions
-std::filesystem::path FS_GetCurrDir(); 
+std::filesystem::path FS_GetCurrDir();
 bool FS_SetCurrDir(std::filesystem::path dir);
 
 bool FS_IsDir(const char *dir);

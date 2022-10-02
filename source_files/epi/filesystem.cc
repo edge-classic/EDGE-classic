@@ -28,13 +28,13 @@ namespace epi
 
 // A Filesystem Directory
 
-filesystem_dir_c::filesystem_dir_c() : array_c(sizeof(filesys_direntry_c)) 
+filesystem_dir_c::filesystem_dir_c() : array_c(sizeof(direntry_c)) 
 { }
 
 filesystem_dir_c::~filesystem_dir_c()
 { }
 
-bool filesystem_dir_c::AddEntry(filesys_direntry_c *fs_entry)
+bool filesystem_dir_c::AddEntry(direntry_c *fs_entry)
 {
 	if (InsertObject(fs_entry) < 0)
         return false;
@@ -45,9 +45,9 @@ bool filesystem_dir_c::AddEntry(filesys_direntry_c *fs_entry)
 void filesystem_dir_c::CleanupObject(void *obj)
 { }
 
-filesys_direntry_c *filesystem_dir_c::operator[](int idx)
+direntry_c *filesystem_dir_c::operator[](int idx)
 {
-	return (filesys_direntry_c*)FetchObject(idx);
+	return (direntry_c*)FetchObject(idx);
 }
 
 
@@ -147,7 +147,7 @@ bool FS_ReadDir(filesystem_dir_c *fsd, const char *dir, const char *mask)
 		if (strcasecmp(mask_ext.string().c_str(), ".*") != 0 && strcasecmp(mask_ext.string().c_str(), dir_entry.path().extension().string().c_str()) != 0)
 			continue;
 
-		filesys_direntry_c *entry = new filesys_direntry_c();
+		direntry_c *entry = new direntry_c();
 
 		entry->name = dir_entry.path().generic_string();
 		entry->is_dir = dir_entry.is_directory();

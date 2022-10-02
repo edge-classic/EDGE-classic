@@ -2,7 +2,7 @@
 //  EDGE Local Header for play sim functions 
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2009  The EDGE Team.
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -279,6 +279,7 @@ void P_MapInit(void);
 bool P_MapCheckBlockingLine(mobj_t * thing, mobj_t * spawnthing);
 mobj_t *P_MapFindCorpse(mobj_t * thing);
 mobj_t *P_MapTargetAutoAim(mobj_t * source, angle_t angle, float distance, bool force_aim);
+mobj_t *DoMapTargetAutoAim(mobj_t * source, angle_t angle, float distance, bool force_aim, bool everythingbutscenery = false);
 void P_TargetTheory(mobj_t * source, mobj_t * target, float *x, float *y, float *z);
 
 mobj_t *P_AimLineAttack(mobj_t * t1, angle_t angle, float distance, float *slope);

@@ -2,7 +2,7 @@
 //  COAL HUD module
 //------------------------------------------------------------------------
 //
-//  Copyright (c) 2006-2009  The EDGE Team.
+//  Copyright (c) 2006-2022  The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -812,16 +812,13 @@ void VM_RegisterHUD()
     ui_vm->AddNativeFunction("hud.gradient_box",    HD_gradient_box);
 
     ui_vm->AddNativeFunction("hud.draw_image",      HD_draw_image);
-	//ui_vm->AddNativeFunction("hud.draw_image_nooffsets",      HD_draw_image_NoOffsets);
     ui_vm->AddNativeFunction("hud.stretch_image",   HD_stretch_image);
-    //ui_vm->AddNativeFunction("hud.stretch_image_nooffsets",   HD_stretch_imageNoOffsets);
 	ui_vm->AddNativeFunction("hud.scroll_image",   HD_scroll_image);
-    //ui_vm->AddNativeFunction("hud.scroll_image_nooffsets",   HD_scroll_image_NoOffsets);
+    
     ui_vm->AddNativeFunction("hud.tile_image",      HD_tile_image);
     ui_vm->AddNativeFunction("hud.draw_text",       HD_draw_text);
     ui_vm->AddNativeFunction("hud.draw_num2",       HD_draw_num2);
 
-	//Lobo: new functions
 	ui_vm->AddNativeFunction("hud.draw_number",     HD_draw_number);
 	ui_vm->AddNativeFunction("hud.game_paused",     HD_game_paused);
 	ui_vm->AddNativeFunction("hud.screen_aspect",  HD_screen_aspect);

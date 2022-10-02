@@ -26,8 +26,6 @@
 #define __EPI_HEADER_SYSTEM_SPECIFIC__
 #endif
 
-#define DIRSEPARATOR '/'
-
 #define GCCATTR(xyz) __attribute__ (xyz)
 
 #define stricmp   strcasecmp

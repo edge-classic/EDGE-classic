@@ -19,12 +19,12 @@ namespace Deh_Edge
 // Ammunition types defined.
 typedef enum
 {
-    am_bullet,    // Pistol / chaingun ammo.
-    am_shell,     // Shotgun / double barreled shotgun.
-    am_cell,      // Plasma rifle, BFG.
-    am_rocket,    // Missile launcher.
+	am_bullet,    // Pistol / chaingun ammo.
+	am_shell,     // Shotgun / double barreled shotgun.
+	am_cell,      // Plasma rifle, BFG.
+	am_rocket,    // Missile launcher.
 
-    NUMAMMO,
+	NUMAMMO,
 
 	am_noammo     // Fist / chainsaw
 }

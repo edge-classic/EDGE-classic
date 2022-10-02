@@ -43,7 +43,6 @@
 #include "deh_patch.h"
 #include "deh_sounds.h"
 #include "deh_sprites.h"
-#include "deh_storage.h"
 #include "deh_system.h"
 #include "deh_text.h"
 #include "deh_things.h"
@@ -191,9 +190,9 @@ namespace Patch
 		if (*dest == temp)
 			return;
 
-		Storage::RememberMod(dest, temp);
-
 		MarkObject(o_kind, o_num);
+
+		*dest = temp;
 	}
 
 	void GetFlags(int o_kind, int o_num, int *dest)
@@ -209,9 +208,9 @@ namespace Patch
 		if (*dest == temp)
 			return;
 
-		Storage::RememberMod(dest, temp);
-
 		MarkObject(o_kind, o_num);
+
+		*dest = temp;
 	}
 
 	void GetFrame(int o_kind, int o_num, int *dest)
@@ -237,12 +236,9 @@ namespace Patch
 			return;
 		}
 
-		if (*dest == temp)
-			return;
+		// no need to MarkObject, already done (e.g. in ReadBinaryThing)
 
-		Storage::RememberMod(dest, temp);
-
-		MarkObject(o_kind, o_num);
+		*dest = temp;
 	}
 
 	void GetSprite(int o_kind, int o_num, int *dest)
@@ -268,12 +264,7 @@ namespace Patch
 			return;
 		}
 
-		if (*dest == temp)
-			return;
-
-		Storage::RememberMod(dest, temp);
-
-		MarkObject(o_kind, o_num);
+		*dest = temp;
 	}
 
 	void GetSound(int o_kind, int o_num, int *dest)
@@ -299,12 +290,9 @@ namespace Patch
 			return;
 	    }
 
-		if (*dest == temp)
-			return;
+		// no need to MarkObject, already done (e.g. in ReadBinaryThing)
 
-		Storage::RememberMod(dest, temp);
-
-		MarkObject(o_kind, o_num);
+		*dest = temp;
 	}
 
 	void GetAmmoType(int o_kind, int o_num, int *dest)
@@ -320,14 +308,11 @@ namespace Patch
 	    }
 
 		if (temp == 4)
-			temp = 5;
+			temp = am_noammo;
 
-		if (*dest == temp)
-			return;
+		// no need to MarkObject, already done (in ReadBinaryWeapon)
 
-		Storage::RememberMod(dest, temp);
-
-		MarkObject(o_kind, o_num);
+		*dest = temp;
 	}
 
 	const char *PrettyTextString(const char *t)

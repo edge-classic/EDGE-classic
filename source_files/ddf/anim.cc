@@ -128,7 +128,7 @@ static void AnimFinishEntry(void)
 		dynamic_anim->speed = 8;
 	}
 
-	if (dynamic_anim->pics.GetSize() == 0)
+	if (dynamic_anim->pics.empty())
 	{
 		if (dynamic_anim->startname.empty() || dynamic_anim->endname.empty())
 		{
@@ -201,16 +201,17 @@ static void DDF_AnimGetType(const char *info, void *storage)
 	}
 }
 
-//
-// DDF_AnimGetPic
-//
+
 static void DDF_AnimGetPic (const char *info, void *storage)
 {
-	dynamic_anim->pics.Insert(info);
+	dynamic_anim->pics.push_back(info);
 }
+
 
 void DDF_ParseANIMATED(const byte *data, int size)
 {
+	// handles the Boom ANIMATED lump (in a wad).
+
 	for (; size >= 23; data += 23, size -= 23)
 	{
 		if (data[0] & 0x80)  // end marker
@@ -253,7 +254,7 @@ void DDF_ParseANIMATED(const byte *data, int size)
 //
 // animdef_c constructor
 //
-animdef_c::animdef_c() : name()
+animdef_c::animdef_c() : name(), pics()
 {
 	Default();
 }
@@ -280,7 +281,7 @@ void animdef_c::Default()
 {
 	type = A_Texture;
 
-	pics.Clear();
+	pics.clear();
 
 	startname.clear();
 	endname.clear();

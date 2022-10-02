@@ -2,7 +2,7 @@
 //  COAL Play Simulation Interface
 //------------------------------------------------------------------------
 //
-//  Copyright (c) 2006-2009  The EDGE Team.
+//  Copyright (c) 2006-2022  The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -934,6 +934,395 @@ static void PL_rts_enable_tagged(coal::vm_c *vm, int argc)
 		RAD_EnableByTag(NULL, name.c_str(), false);
 }
 
+
+// AuxStringReplaceAll("Our_String", std::string("_"), std::string(" "));
+//
+std::string AuxStringReplaceAll(std::string str, const std::string& from, const std::string& to) 
+{
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) 
+	{
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+    return str;
+}
+
+
+
+// GetMobjBenefits(mobj);
+//
+std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits=false) 
+{
+	std::string temp_string;
+	temp_string.clear();
+	benefit_t *list;
+	int temp_num=0;
+
+	if(KillBenefits)
+		list = obj->info->kill_benefits;
+	else
+		list = obj->info->pickup_benefits;
+
+    for (; list != NULL; list=list->next)
+	{
+		switch (list->type)
+		{
+			case BENEFIT_Weapon:  
+				//If it's a weapon all bets are off: we'll want to parse
+				//it differently, not here.
+				temp_string = "WEAPON=1";
+				break;
+
+			case BENEFIT_Ammo:
+				temp_string += "AMMO" + std::to_string((int)list->sub.type + 1);
+				temp_string += "=" + std::to_string((int)list->amount);
+				break;
+
+			case BENEFIT_Health: //only benefit without a sub.type so just give it 01
+				temp_string += "HEALTH01=" + std::to_string((int)list->amount);
+				break;
+
+			case BENEFIT_Armour:
+				temp_string += "ARMOUR" + std::to_string((int)list->sub.type + 1);
+				temp_string += "=" + std::to_string((int)list->amount);
+				break;
+			
+			case BENEFIT_Inventory:
+				temp_string += "INVENTORY";
+				if((list->sub.type + 1) < 10)
+					temp_string += "0";
+				temp_string += std::to_string((int)list->sub.type + 1);
+				temp_string += "=" + std::to_string((int)list->amount);
+				break;
+			
+			case BENEFIT_Counter:
+				temp_string += "COUNTER";
+				if((list->sub.type + 1) < 10)
+					temp_string += "0";
+				temp_string += std::to_string((int)list->sub.type + 1);
+				temp_string += "=" + std::to_string((int)list->amount);
+				break;
+
+			case BENEFIT_Key:
+				temp_string += "KEY";
+				temp_num = log2((int)list->sub.type);
+				temp_num ++;
+				temp_string += std::to_string(temp_num);
+				break;
+
+			case BENEFIT_Powerup:
+				temp_string += "POWERUP" + std::to_string((int)list->sub.type + 1);
+				break;
+			
+			default: break;
+		}
+	}
+	return temp_string;
+}
+
+// GetQueryInfoFromMobj(mobj, whatinfo)
+//
+std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
+{
+	int temp_num = 0;
+	std::string temp_string;
+	temp_string.clear();
+
+	switch (whatinfo)
+	{
+		case 1:  //name
+			if (obj)
+			{
+				//try CAST_TITLE first
+				temp_string = language[obj->info->cast_title];
+
+				if (temp_string.empty()) //fallback to DDFTHING entry name
+				{
+					temp_string = obj->info->name;
+					temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
+				}
+			}
+			break;
+
+		case 2: //current health
+			if (obj)
+			{
+				temp_num = obj->health;
+				temp_string = std::to_string(temp_num);
+			}
+			break;
+
+		case 3: //spawn health
+			if (obj)
+			{
+				temp_num = obj->info->spawnhealth;
+				temp_string = std::to_string(temp_num);
+			}
+			break;
+
+		case 4:  //pickup_benefits
+			if (obj)
+			{
+				temp_string = GetMobjBenefits(obj, false);
+			}
+			break;
+
+		case 5: //kill_benefits
+			if (obj)
+			{
+				temp_string = GetMobjBenefits(obj,true);
+			}
+			break;
+
+	}
+
+	if (temp_string.empty())
+		return("");
+
+	return(temp_string.c_str());
+	
+}
+
+// GetQueryInfoFromWeapon(mobj, whatinfo)
+//
+std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo)
+{
+	int temp_num = 0;
+	std::string temp_string;
+	temp_string.clear();
+
+	if (!obj->info->pickup_benefits)
+		return "";
+	if (!obj->info->pickup_benefits->sub.weap)
+		return "";	
+
+	weapondef_c *objWep = obj->info->pickup_benefits->sub.weap;
+	switch (whatinfo)
+	{
+		case 1:  //name
+			if (objWep)
+			{
+				temp_string = objWep->name;
+				temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
+			}
+			break;
+		
+		case 2:  //ZOOM_FACTOR
+			if (objWep)
+			{
+				temp_num = objWep->zoom_factor;
+				temp_string = std::to_string(temp_num);
+			}
+			break;
+
+		case 3: //AMMOTYPE
+			if (objWep)
+			{
+				temp_num = (objWep->ammo[0]) + 1;
+				temp_string = std::to_string(temp_num);
+			}
+			break;
+
+		case 4: //AMMOPERSHOT
+			if (objWep)
+			{
+				temp_num = objWep->ammopershot[0];
+				temp_string = std::to_string(temp_num);
+			}
+			break;
+
+		case 5:  //CLIPSIZE
+			if (objWep)
+			{
+				temp_num = objWep->clip_size[0];
+				temp_string = std::to_string(temp_num);
+			}
+			break;
+
+		case 6: //DAMAGE Nominal
+			if (objWep)
+			{
+				atkdef_c *objAtck = objWep->attack[0];
+				const damage_c *damtype;
+				damtype = &objAtck->damage;
+				temp_num = damtype->nominal;
+				temp_string = std::to_string(temp_num);
+			}
+			break;
+		
+		case 7: //DAMAGE Max
+			if (objWep)
+			{
+				atkdef_c *objAtck = objWep->attack[0];
+				const damage_c *damtype;
+				damtype = &objAtck->damage;
+				temp_num = damtype->linear_max;
+				temp_string = std::to_string(temp_num);
+			}
+			break;
+
+		case 8: //Range
+			if (objWep)
+			{
+				atkdef_c *objAtck = objWep->attack[0];
+				temp_num = objAtck->range;
+				temp_string = std::to_string(temp_num);
+			}
+			break;
+
+		case 9:  //AUTOMATIC
+			if (objWep)
+			{
+				if (objWep->autofire[0])
+					temp_string = "1";
+				else
+					temp_string = "0";
+			}
+			break;
+
+	}
+
+	if (temp_string.empty())
+		return("");
+
+	return(temp_string.c_str());
+	
+}
+
+// player.query_object(whatinfo)
+//
+static void PL_query_object(coal::vm_c *vm, int argc)
+{
+	double *num = vm->AccessParam(0);
+	int whatinfo = 1;
+
+	if (!num)
+		I_Error("player.query_object: can't parse WhatInfo!\n");
+	else
+		whatinfo = (int)*num;
+
+	if (whatinfo < 1 || whatinfo > 5)
+		I_Error("player.query_object: bad whatInfo number: %d\n", whatinfo);
+
+	mobj_t *obj = DoMapTargetAutoAim(ui_player_who->mo, ui_player_who->mo->angle, 512, true, true);
+	if (!obj)
+	{
+		vm->ReturnString("");
+		return;
+	}
+
+	std::string temp_string;
+	temp_string.clear();
+
+	temp_string = GetQueryInfoFromMobj(obj,whatinfo);
+
+	if (temp_string.empty())
+		vm->ReturnString("");
+	else
+		vm->ReturnString(temp_string.c_str());
+	
+}
+
+// mapobject.query_tagged(thing tag, whatinfo)
+//
+static void MO_query_tagged(coal::vm_c *vm, int argc)
+{
+	
+	if (argc != 2)
+		I_Error("mapobject.query_tagged: wrong number of arguments given\n");
+
+	double *argTag = vm->AccessParam(0);
+	double *argInfo = vm->AccessParam(1);
+	int whattag = 1;
+	int whatinfo = 1;
+
+	whattag = (int)*argTag;
+	whatinfo = (int)*argInfo;
+
+	mobj_t *mo;
+
+	int index = 0;
+	std::string temp_value;
+	temp_value.clear();
+
+	for (mo=mobjlisthead; mo; mo=mo->next, index++)
+	{
+		if (mo->tag == whattag)
+		{
+			temp_value = GetQueryInfoFromMobj(mo,whatinfo);
+			break;
+		}	
+	}
+
+	if (temp_value.empty())
+		vm->ReturnString("");
+	else
+		vm->ReturnString(temp_value.c_str());
+	
+}
+
+// mapobject.count(thing type/id)
+//
+static void MO_count(coal::vm_c *vm, int argc)
+{
+	double *num = vm->AccessParam(0);
+	int thingid = 0;
+
+	if (!num)
+		I_Error("mapobjects.count: can't parse thing id/type!\n");
+	else
+		thingid = (int)*num;
+
+
+	mobj_t *mo;
+
+	int index = 0;
+	double thingcount = 0;
+
+	for (mo=mobjlisthead; mo; mo=mo->next, index++)
+	{
+		if (mo->info->number == thingid && mo->health > 0)
+			thingcount ++;
+	}
+	
+	vm->ReturnFloat(thingcount);
+}
+
+// player.query_weapon(whatinfo)
+//
+static void PL_query_weapon(coal::vm_c *vm, int argc)
+{
+	double *num = vm->AccessParam(0);
+	int whatinfo = 1;
+
+	if (!num)
+		I_Error("player.query_weapon: can't parse WhatInfo!\n");
+	else
+		whatinfo = (int)*num;
+
+	if (whatinfo < 1 || whatinfo > 9)
+		I_Error("player.query_weapon: bad whatInfo number: %d\n", whatinfo);
+
+	mobj_t *obj = DoMapTargetAutoAim(ui_player_who->mo, ui_player_who->mo->angle, 512, true, true);
+	if (!obj)
+	{
+		vm->ReturnString("");
+		return;
+	}
+
+	std::string temp_string;
+	temp_string.clear();
+
+	temp_string = GetQueryInfoFromWeapon(obj,whatinfo);
+
+	if (temp_string.empty())
+		vm->ReturnString("");
+	else
+		vm->ReturnString(temp_string.c_str());
+	
+}
+
 //------------------------------------------------------------------------
 
 
@@ -1012,6 +1401,14 @@ void VM_RegisterPlaysim()
     ui_vm->AddNativeFunction("player.counter",        PL_counter);
     ui_vm->AddNativeFunction("player.counter_max",     PL_counter_max);
 	ui_vm->AddNativeFunction("player.set_counter",     PL_set_counter);
+
+	//Lobo: October 2022
+	ui_vm->AddNativeFunction("player.query_object",     PL_query_object);
+	ui_vm->AddNativeFunction("player.query_weapon",     PL_query_weapon);
+
+	ui_vm->AddNativeFunction("mapobject.query_tagged",     MO_query_tagged);
+    ui_vm->AddNativeFunction("mapobject.count",     MO_count);
+	
 }
 
 

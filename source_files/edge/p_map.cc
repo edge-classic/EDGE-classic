@@ -2,7 +2,7 @@
 //  EDGE Moving, Aiming, Shooting & Collision code
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2009  The EDGE Team.
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -1265,6 +1265,106 @@ static bool PTR_AimTraverse(intercept_t * in, void *dataptr)
 	return false;  // don't go any farther
 }
 
+//
+// PTR_AimTraverse2
+//
+// Sets aim_I.target and slope when a target is aimed at.
+// Same as above except targets everything except scenery
+//
+static bool PTR_AimTraverse2(intercept_t * in, void *dataptr)
+{
+	float dist = aim_I.range * in->frac;
+
+	if (dist < 0.01f)
+		return true;
+
+	if (in->line)
+	{
+		line_t *ld = in->line;
+
+		if (!(ld->flags & MLF_TwoSided) || ld->gap_num == 0)
+			return false;  // stop
+
+		// Crosses a two sided line.
+		// A two sided line will restrict
+		// the possible target ranges.
+		//
+		// -AJA- 1999/07/19: Gaps are now kept in line_t.
+
+		if (ld->frontsector->f_h != ld->backsector->f_h)
+		{
+			float maxfloor = MAX(ld->frontsector->f_h, ld->backsector->f_h);
+			float slope = (maxfloor - aim_I.start_z) / dist;
+
+			if (slope > aim_I.bottomslope)
+				aim_I.bottomslope = slope;
+		}
+
+		if (ld->frontsector->c_h != ld->backsector->c_h)
+		{
+			float minceil = MIN(ld->frontsector->c_h, ld->backsector->c_h);
+			float slope = (minceil - aim_I.start_z) / dist;
+
+			if (slope < aim_I.topslope)
+				aim_I.topslope = slope;
+		}
+
+		if (aim_I.topslope <= aim_I.bottomslope)
+			return false;  // stop
+
+		// shot continues
+		return true;
+	}
+
+	// shoot a thing
+	mobj_t *mo = in->thing;
+
+	SYS_ASSERT(mo);
+
+	if (mo == aim_I.source)
+		return true;  // can't shoot self
+
+	if (aim_I.source && (aim_I.source->side & mo->side) == 0) //not a friend
+	{
+		if ( !(mo->extendedflags & EF_MONSTER) && !(mo->flags & MF_SPECIAL) )
+			return true;  // scenery
+	}
+	if (mo->extendedflags & EF_MONSTER && mo->health <= 0)
+		return true;  // don't aim at dead monsters
+	
+	if (mo->flags & MF_CORPSE)
+		return true;  // don't aim at corpses
+
+	if (mo->flags & MF_NOBLOCKMAP)
+		return true;  // don't aim at inert things
+	
+	if (mo->flags & MF_NOSECTOR)
+		return true;  // don't aim at invisible things
+
+
+	// check angles to see if the thing can be aimed at
+	float thingtopslope = (mo->z + mo->height - aim_I.start_z) / dist;
+
+	if (thingtopslope < aim_I.bottomslope)
+		return true;  // shot over the thing
+
+	float thingbottomslope = (mo->z - aim_I.start_z) / dist;
+
+	if (thingbottomslope > aim_I.topslope)
+		return true;  // shot under the thing
+
+	// this thing can be hit!
+	if (thingtopslope > aim_I.topslope)
+		thingtopslope = aim_I.topslope;
+
+	if (thingbottomslope < aim_I.bottomslope)
+		thingbottomslope = aim_I.bottomslope;
+
+	aim_I.slope = (thingtopslope + thingbottomslope) / 2;
+	aim_I.target = mo;
+
+	return false;  // don't go any farther
+}
 
 static inline bool ShootCheckGap(float z,
 	float f_h, surface_t *floor, float c_h, surface_t *ceil)
@@ -1664,7 +1764,7 @@ void P_TargetTheory(mobj_t * source, mobj_t * target, float *x, float *y, float 
 // -ACB- 1998/09/01
 // -AJA- 1999/08/08: Added `force_aim' to fix chainsaw.
 //
-mobj_t *DoMapTargetAutoAim(mobj_t * source, angle_t angle, float distance, bool force_aim)
+mobj_t *DoMapTargetAutoAim(mobj_t * source, angle_t angle, float distance, bool force_aim, bool everythingbutscenery)
 {
 	float x2, y2;
 
@@ -1703,8 +1803,16 @@ mobj_t *DoMapTargetAutoAim(mobj_t * source, angle_t angle, float distance, bool 
 	aim_I.range = distance;
 	aim_I.target = NULL;
 
-	P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, 
+	if(!everythingbutscenery)
+	{
+		P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, 
 		PTR_AimTraverse);
+	}
+	else
+	{
+		P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, 
+		PTR_AimTraverse2);	
+	}
 
 	if (! aim_I.target)
 		return NULL;

@@ -937,17 +937,24 @@ void Frames::SpecialAction(char *act_name, const state_t *st)
 
 		case A_Scratch:
 			{
-				int damage = ReadArg(st, 0);  // misc1;
+				int damage = ReadArg(st, 0); // misc1
 				int sfx_id = ReadArg(st, 1); // misc2
 
-				const char *sfx = NULL;
-				if (sfx_id > 0)
-					sfx = Sounds::GetSound(sfx_id);
-				if (sfx != NULL && StrCaseCmp(sfx, "NULL") == 0)
-					sfx = NULL;
+				if (damage == 0 && sfx_id == 0)
+				{
+					sprintf(act_name, "NOTHING");
+				}
+				else
+				{
+					const char *sfx = NULL;
+					if (sfx_id > 0)
+						sfx = Sounds::GetSound(sfx_id);
+					if (sfx != NULL && StrCaseCmp(sfx, "NULL") == 0)
+						sfx = NULL;
 
-				const char *atk_name = Things::AddScratchAttack(damage, sfx);
-				sprintf(act_name, "CLOSE_ATTACK(%s)", atk_name);
+					const char *atk_name = Things::AddScratchAttack(damage, sfx);
+					sprintf(act_name, "CLOSE_ATTACK(%s)", atk_name);
+				}
 			}
 			break;
 
@@ -1321,7 +1328,7 @@ void Frames::AlterBexCodePtr(const char * new_action)
 		return;
 	}
 
-	if (st_num < 0 || st_num >= 32767)
+	if (st_num < 0 || st_num > 32767)
 	{
 		PrintWarn("Line %d: illegal FRAME number: %d\n",
 			Patch::line_num, st_num);

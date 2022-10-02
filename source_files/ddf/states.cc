@@ -57,7 +57,8 @@ std::vector<std::string> ddf_model_names;
 // top 16 bits (minus 1) will be an index into this list of redirector
 // names.  These labels will be looked for in the states when the
 // fixup routine is called.
-epi::strlist_c redirs;
+static std::vector<std::string> redirs;
+
 
 #define NUM_SPLIT 10  // Max Number of sections a state is split info
 
@@ -255,18 +256,15 @@ static void DDF_MainSplitActionArg(const char *info, char *actname, char *actarg
 //
 static int StateGetRedirector(const char *redir)
 {
-	epi::array_iterator_c it;
-	const char *s;
-	
-	for (it=redirs.GetBaseIterator(); it.IsValid(); it++)
+	for (size_t i = 0 ; i < redirs.size() ; i++)
 	{
-		s = ITERATOR_TO_TYPE(it, const char*);
-		if (DDF_CompareName(s, redir) == 0)
-			return it.GetPos();
+		if (DDF_CompareName(redirs[i].c_str(), redir) == 0)
+			return (int) i;
 	}
-	
-	redirs.Insert(redir);
-	return redirs.GetSize()-1;
+
+	redirs.push_back(redir);
+
+	return (int)redirs.size() - 1;
 }
 
 //
@@ -594,7 +592,7 @@ void DDF_StateFinishRange(state_group_t& group)
 	{
 		group.pop_back();
 
-		redirs.Clear();
+		redirs.clear();
 		return;
 	}
 
@@ -611,8 +609,10 @@ void DDF_StateFinishRange(state_group_t& group)
 		}
 		else
 		{
-			states[i].nextstate = DDF_StateFindLabel(group,
-												redirs[(states[i].nextstate >> 16) - 1]) +
+			int RI = (states[i].nextstate >> 16) - 1;
+
+			// FIXME: is this validated anywhere?
+			states[i].nextstate = DDF_StateFindLabel(group, redirs[RI].c_str()) +
 				(states[i].nextstate & 0xFFFF);
 		}
 
@@ -627,13 +627,14 @@ void DDF_StateFinishRange(state_group_t& group)
 		}
 		else
 		{
-			states[i].jumpstate = DDF_StateFindLabel(group,
-												 redirs[(states[i].jumpstate >> 16) - 1]) +
+			int RI = (states[i].jumpstate >> 16) - 1;
+
+			states[i].jumpstate = DDF_StateFindLabel(group, redirs[RI].c_str()) +
 				(states[i].jumpstate & 0xFFFF);
 		}
 	}
   
-	redirs.Clear();
+	redirs.clear();
 }
 
 

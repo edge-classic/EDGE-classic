@@ -675,9 +675,9 @@ void E_PickLoadingScreen(void)
 		gamedef_c *g = gamedefs[title_game];
 		SYS_ASSERT(g);
 
-		if (title_pic >= g->titlepics.GetSize())
+		if (title_pic >= (int)g->titlepics.size())
 		{
-			title_game = (title_game + 1) % gamedefs.GetSize();
+			title_game = (title_game + 1) % (int)gamedefs.GetSize();
 			title_pic  = 0;
 			continue;
 		}
@@ -693,7 +693,7 @@ void E_PickLoadingScreen(void)
 		}
 
 		// ignore non-existing images
-		loading_image = W_ImageLookup(g->titlepics[title_pic], INS_Graphic, ILF_Null);
+		loading_image = W_ImageLookup(g->titlepics[title_pic].c_str(), INS_Graphic, ILF_Null);
 
 		if (! loading_image)
 		{
@@ -727,9 +727,9 @@ void E_AdvanceTitle(void)
 		gamedef_c *g = gamedefs[title_game];
 		SYS_ASSERT(g);
 
-		if (title_pic >= g->titlepics.GetSize())
+		if (title_pic >= (int)g->titlepics.size())
 		{
-			title_game = (title_game + 1) % gamedefs.GetSize();
+			title_game = (title_game + 1) % (int)gamedefs.GetSize();
 			title_pic  = 0;
 			continue;
 		}
@@ -745,7 +745,7 @@ void E_AdvanceTitle(void)
 		}
 
 		// ignore non-existing images
-		title_image = W_ImageLookup(g->titlepics[title_pic], INS_Graphic, ILF_Null);
+		title_image = W_ImageLookup(g->titlepics[title_pic].c_str(), INS_Graphic, ILF_Null);
 
 		if (! title_image)
 		{

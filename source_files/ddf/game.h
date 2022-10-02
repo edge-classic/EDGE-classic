@@ -201,8 +201,8 @@ public:
 	std::string firstmap;
 	std::string namegraphic;
 
-	epi::strlist_c titlepics;
-	
+	std::vector<std::string> titlepics;
+
 	int titlemusic;
 	int titletics;
 	int special_music;

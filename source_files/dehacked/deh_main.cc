@@ -43,7 +43,6 @@
 #include "deh_rscript.h"
 #include "deh_sounds.h"
 #include "deh_sprites.h"
-#include "deh_storage.h"
 #include "deh_system.h"
 #include "deh_things.h"
 #include "deh_text.h"
@@ -77,8 +76,6 @@ void Init()
 	Things ::Init();
 	Weapons::Init();
 
-	Storage::Startup();
-
 	/* reset parameters */
 
 	quiet_mode = false;
@@ -110,8 +107,6 @@ dehret_e Convert(void)
 			return result;
 	}
 
-	Storage::ApplyAll();
-
 	// do conversions into DDF...
 
 	Sprites::SpriteDependencies();
@@ -130,8 +125,6 @@ dehret_e Convert(void)
 	// sounds must be after things/weapons/attacks
 	Sounds::ConvertSFX();
 	Music ::ConvertMUS();
-
-	Storage::RestoreAll();
 
 	PrintMsg("\n");
 

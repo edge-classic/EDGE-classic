@@ -41,7 +41,6 @@
 #include "deh_patch.h"
 #include "deh_sounds.h"
 #include "deh_sprites.h"
-#include "deh_storage.h"
 #include "deh_system.h"
 #include "deh_text.h"
 #include "deh_things.h"

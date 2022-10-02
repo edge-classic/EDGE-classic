@@ -27,7 +27,6 @@ add_library(
   deh_rscript.cc
   deh_sounds.cc
   deh_sprites.cc
-  deh_storage.cc
   deh_system.cc
   deh_text.cc
   deh_things.cc

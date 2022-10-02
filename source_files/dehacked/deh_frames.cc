@@ -651,7 +651,9 @@ bool Frames::SpreadGroupPass(bool alt_jumps)
 		char group = group_for_state[i];
 		group_info_t& G = groups[group];
 
-		if (st->tics < 0)  // hibernation
+		// hibernation?
+		// if action is A_RandomJump or similar, still need to follow it!
+		if (st->tics < 0 && !alt_jumps)
 			continue;
 
 		int next = st->nextstate;
@@ -686,10 +688,10 @@ void Frames::SpreadGroups()
 {
 	for (;;)
 	{
-		bool changes = SpreadGroupPass(false);
-		changes     |= SpreadGroupPass(true);
+		bool changes1 = SpreadGroupPass(false);
+		bool changes2 = SpreadGroupPass(true);
 
-		if (! changes)
+		if (! (changes1 || changes2))
 			break;
 	}
 }
@@ -867,7 +869,10 @@ const char *Frames::RedirectorName(int next_st)
 	// this shouldn't happen since OutputGroup() only visits states
 	// which we collected/processed as a group.
 	if (group_for_state.find(next_st) == group_for_state.end())
-		InternalError("RedirectorName failure.\n");
+	{
+		PrintWarn("Redirection to state %d FAILED\n", next_st);
+		return "IDLE";
+	}
 
 	char next_group =  group_for_state[next_st];
 	int  next_ofs   = offset_for_state[next_st];
@@ -1086,12 +1091,6 @@ void Frames::OutputState(char group, int cur, bool do_action)
 	}
 
 	int tics = (int) st->tics;
-
-	// check for JUMP with tics < 0 (can happen with DEHEXTRA states)
-	if (action == A_RandomJump && tics < 0)
-	{
-		tics = 0;
-	}
 
 	// kludge for EDGE and Batman TC.  EDGE waits 35 tics before exiting the
 	// level from A_BrainDie, but standard Doom does it immediately.  Oddly,

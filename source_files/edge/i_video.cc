@@ -33,7 +33,7 @@ SDL_Window *my_vis;
 int graphics_shutdown = 0;
 
 DEF_CVAR(in_grab, "1", CVAR_ARCHIVE)
-DEF_CVAR(v_sync,  "1", CVAR_ARCHIVE);
+DEF_CVAR(v_sync,  "1", CVAR_ARCHIVE)
 
 static bool grab_state;
 

@@ -33,6 +33,7 @@ SDL_Window *my_vis;
 int graphics_shutdown = 0;
 
 DEF_CVAR(in_grab, "1", CVAR_ARCHIVE)
+DEF_CVAR(v_sync,  "1", CVAR_ARCHIVE)
 
 static bool grab_state;
 
@@ -77,6 +78,7 @@ void I_GrabCursor(bool enable)
 		SDL_SetRelativeMouseMode(SDL_FALSE);
 	}
 }
+
 
 void I_StartupGraphics(void)
 {
@@ -200,6 +202,39 @@ void I_StartupGraphics(void)
 }
 
 
+static bool I_CreateWindow(scrmode_c *mode)
+{
+	std::string temp_title = TITLE;
+	temp_title.append(" ").append(EDGEVERSTR);
+
+	my_vis = SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
+		SDL_WINDOW_OPENGL | (mode->display_mode == mode->SCR_BORDERLESS ? (SDL_WINDOW_FULLSCREEN_DESKTOP) :
+		(mode->display_mode == mode->SCR_FULLSCREEN ? SDL_WINDOW_FULLSCREEN : 0)));
+
+	if (my_vis == NULL)
+	{
+		I_Printf("Failed to create window: %s\n", SDL_GetError());
+		return false;
+	}
+
+	if (mode->display_mode == mode->SCR_BORDERLESS)
+	{
+		SDL_GetWindowSize(my_vis, &borderless_mode.width, &borderless_mode.height);
+		display_W = borderless_mode.width;
+		display_H = borderless_mode.height;
+	}
+
+	if (SDL_GL_CreateContext(my_vis) == NULL)
+		I_Error("Failed to create OpenGL context.\n");
+
+	SDL_GL_SetSwapInterval(v_sync.d ? 1 : 0);
+
+	gladLoaderLoadGL();
+
+	return true;
+}
+
+
 bool I_SetScreenSize(scrmode_c *mode)
 {
 	I_GrabCursor(false);
@@ -209,54 +244,45 @@ bool I_SetScreenSize(scrmode_c *mode)
 			 mode->display_mode == mode->SCR_BORDERLESS ? "borderless" : 
 			 (mode->display_mode == mode->SCR_FULLSCREEN ? "fullscreen" : "windowed"));
 
-	if (my_vis)
+	if (my_vis == NULL)
 	{
-		if (mode->display_mode == mode->SCR_BORDERLESS) 
+		if (! I_CreateWindow(mode))
 		{
-			SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN_DESKTOP);
-			SDL_GetWindowSize(my_vis, &borderless_mode.width, &borderless_mode.height);
-			display_W = borderless_mode.width;
-			display_H = borderless_mode.height;
-			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
-				mode->width, mode->height, mode->depth);
-		}
-		else if (mode->display_mode == mode->SCR_FULLSCREEN)
-		{
-			SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN);
-			SDL_DisplayMode *new_mode = new SDL_DisplayMode;
-			new_mode->h = mode->height;
-			new_mode->w = mode->width;
-			SDL_SetWindowDisplayMode(my_vis, new_mode);
-			SDL_SetWindowSize(my_vis, mode->width, mode->height);
-			delete new_mode;
-			new_mode = NULL;
-			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
-				mode->width, mode->height, mode->depth);
-		}
-		else
-		{
-			SDL_SetWindowFullscreen(my_vis, 0);
-			SDL_SetWindowSize(my_vis, mode->width, mode->height);
-			SDL_SetWindowPosition(my_vis, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-			I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
-				mode->width, mode->height, mode->depth);
+			return false;
 		}
 	}
-	else
+	else if (mode->display_mode == mode->SCR_BORDERLESS) 
 	{
-		std::string temp_title = TITLE;
-		temp_title.append(" ").append(EDGEVERSTR);
-		my_vis = SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
-			SDL_WINDOW_OPENGL | (mode->display_mode == mode->SCR_BORDERLESS ? (SDL_WINDOW_FULLSCREEN_DESKTOP) :
-			(mode->display_mode == mode->SCR_FULLSCREEN ? SDL_WINDOW_FULLSCREEN : 0)));
-		if (mode->display_mode == mode->SCR_BORDERLESS)
-		{
-			SDL_GetWindowSize(my_vis, &borderless_mode.width, &borderless_mode.height);
-			display_W = borderless_mode.width;
-			display_H = borderless_mode.height;
-		}
-		SDL_GL_CreateContext(my_vis);
-		gladLoaderLoadGL();
+		SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		SDL_GetWindowSize(my_vis, &borderless_mode.width, &borderless_mode.height);
+		display_W = borderless_mode.width;
+		display_H = borderless_mode.height;
+
+		I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
+			mode->width, mode->height, mode->depth);
+	}
+	else if (mode->display_mode == mode->SCR_FULLSCREEN)
+	{
+		SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN);
+		SDL_DisplayMode *new_mode = new SDL_DisplayMode;
+		new_mode->h = mode->height;
+		new_mode->w = mode->width;
+		SDL_SetWindowDisplayMode(my_vis, new_mode);
+		SDL_SetWindowSize(my_vis, mode->width, mode->height);
+		delete new_mode;
+		new_mode = NULL;
+
+		I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
+			mode->width, mode->height, mode->depth);
+	}
+	else  /* SCR_WINDOW */
+	{
+		SDL_SetWindowFullscreen(my_vis, 0);
+		SDL_SetWindowSize(my_vis, mode->width, mode->height);
+		SDL_SetWindowPosition(my_vis, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+
+		I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
+			mode->width, mode->height, mode->depth);
 	}
 
 	// -AJA- turn off cursor -- BIG performance increase.
@@ -271,7 +297,7 @@ bool I_SetScreenSize(scrmode_c *mode)
 #endif
 
 	glClearColor(0, 0, 0, 0);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	SDL_GL_SwapWindow(my_vis);
 
@@ -282,7 +308,7 @@ bool I_SetScreenSize(scrmode_c *mode)
 void I_StartFrame(void)
 {
 	glClearColor(0, 0, 0, 0);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 
@@ -292,7 +318,11 @@ void I_FinishFrame(void)
 
 	if (in_grab.CheckModified())
 		I_GrabCursor(grab_state);
+
+	if (v_sync.CheckModified())
+		SDL_GL_SetSwapInterval(v_sync.d ? 1 : 0);
 }
+
 
 void I_SetGamma(float gamma)
 {

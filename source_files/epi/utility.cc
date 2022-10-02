@@ -150,11 +150,49 @@ namespace epi
         	
        		pos++;					// Next string pointer entry  
         }
-        
-        return;
-
    	}
-   	
+
+	void strbox_c::Set(const std::vector<std::string> &src)
+	{
+		int pos;
+		int datapos = 0;
+		size_t i;
+
+		Clear();
+
+		// Calculate space required
+		for (i = 0 ; i < src.size() ; i++)
+		{
+			datapos = datapos + (int)src[i].size() + 1;  
+			STRBOX_ALIGN(datapos);
+		}
+
+		// Allocate space
+		datasize = datapos;
+		data = new char[datapos];
+		memset(data, 0, datasize*sizeof(char));
+
+		// Allocate pointer list
+		numstrs = (int)src.size();
+		strs = new char*[numstrs];
+
+		// Load data and pointer list
+		datapos = 0;
+
+		for (pos = 0, i = 0 ; i < src.size() ; i++)
+		{
+			const char *s = src[i].c_str();
+
+			strs[pos] = &data[datapos];
+			strcpy(strs[pos], s);
+
+			datapos = datapos + (int)src[i].size() + 1;
+			STRBOX_ALIGN(datapos);	// Increment data pointer
+
+			pos++;  // Next string pointer entry
+		}
+	}
+
    	//
    	// strbox assignment operator
    	//
@@ -162,7 +200,7 @@ namespace epi
    	{
    		if (&rhs != this)
    			Copy(rhs);
-   			
+
    		return *this;
    	}
 

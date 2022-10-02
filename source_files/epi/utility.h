@@ -20,6 +20,8 @@
 
 #include "arrays.h"
 
+#include <vector>
+
 namespace epi
 {
 	// Forward declaration
@@ -46,6 +48,7 @@ namespace epi
     	void Clear();
     	int GetSize() const { return numstrs; }
     	void Set(strlist_c &src);
+    	void Set(const std::vector<std::string>& src);
 
     	strbox_c& operator=(strbox_c &rhs);
     	char* operator[](int idx) const { return strs[idx]; }

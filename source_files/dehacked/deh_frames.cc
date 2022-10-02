@@ -1249,6 +1249,16 @@ void Frames::AlterFrame(int new_val)
 		return;
 	}
 
+	if (StrCaseCmpPartial(field_name, "Args") == 0)
+	{
+		int arg = atoi(field_name + 4);
+		if (arg >= 1 && arg <= 8)
+		{
+			WriteArg(st, arg - 1, new_val);
+			return;
+		}
+	}
+
 	if (! Field_Alter(frame_field, field_name, (int *)st, new_val))
 	{
 		PrintWarn("UNKNOWN FRAME FIELD: %s\n", field_name);

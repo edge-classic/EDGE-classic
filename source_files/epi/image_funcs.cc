@@ -139,25 +139,33 @@ image_format_e Image_FilenameToFormat(const std::string& filename)
 
 image_data_c *Image_Load(file_c *f)
 {
-	int width;
-	int height;
-	int bpp;
+	int width  = 0;
+	int height = 0;
+	int bpp    = 0;
 
 	int   length    = f->GetLength();
 	byte *raw_image = f->LoadIntoMemory();
 
 	unsigned char *decoded_img = stbi_load_from_memory(raw_image, length, &width, &height, &bpp, 0);
 
+	// we don't want no grayscale here, force STB to convert
+	if (decoded_img != NULL && (bpp == 1 || bpp == 2))
+	{
+		stbi_image_free(decoded_img);
+
+		// bpp 1 = grayscale, so force RGB
+		// bpp 2 = grayscale + alpha, so force RGBA
+		int new_bpp = bpp + 2;
+
+		decoded_img = stbi_load_from_memory(raw_image, length, &width, &height, &bpp, new_bpp);
+
+		bpp = new_bpp;  // sigh...
+	}
+
 	delete[] raw_image;
 
 	if (decoded_img == NULL)
 		return NULL;
-
-	if (bpp < 3 || bpp > 4)
-	{
-		stbi_image_free(decoded_img);
-		return NULL;
-	}
 
 	int total_w = width;
 	int total_h = height;
@@ -188,6 +196,7 @@ image_data_c *Image_Load(file_c *f)
 
 	return img;
 }
+
 
 bool Image_GetInfo(file_c *f, int *width, int *height, int *bpp)
 {

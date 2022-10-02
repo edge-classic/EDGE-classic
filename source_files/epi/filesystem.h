@@ -20,6 +20,7 @@
 #define __EPI_FILESYSTEM_H__
 
 #include "arrays.h"
+#include <vector>
 #include <filesystem>
 
 namespace epi
@@ -30,41 +31,14 @@ class file_c;
 
 
 // A Filesystem directory entry
-class direntry_c
+class dir_entry_c
 {
 public:
-	std::string name;
-	unsigned int size;
-	bool is_dir;
-
-public:
-	direntry_c() : name(), size(0), is_dir(false)
-	{ }
-
-	~direntry_c()
-	{ }
+	std::string name = "";
+	size_t size      = 0;
+	bool is_dir      = false;
 };
 
-
-// A Filesystem directory
-class filesystem_dir_c : public array_c
-{
-public:
-	filesystem_dir_c();
-	~filesystem_dir_c();
-
-private:
-	void CleanupObject(void *obj);
-
-public:
-	bool AddEntry(direntry_c* fs_entry);
-
-	int GetSize(void) { return array_entries; }
-
-	direntry_c *operator[](int idx);
-};
-
-// ---- The Filesystem ----
 
 // Directory Functions
 std::filesystem::path FS_GetCurrDir();
@@ -74,7 +48,7 @@ bool FS_IsDir(const char *dir);
 bool FS_MakeDir(const char *dir);
 bool FS_RemoveDir(const char *dir);
 
-bool FS_ReadDir(filesystem_dir_c *fsd, const char *dir, const char *mask);
+bool FS_ReadDir(std::vector<dir_entry_c>& fsd, const char *dir, const char *mask);
 
 // File Functions
 bool FS_Access(const char *name, unsigned int flags);

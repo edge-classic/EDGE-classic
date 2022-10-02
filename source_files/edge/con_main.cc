@@ -127,30 +127,28 @@ int CMD_Dir(char **argv, int argc)
 	if (argc >= 3)
 		mask = argv[2];
 
-	epi::filesystem_dir_c fsd;
+	std::vector<epi::dir_entry_c> fsd;
 
-	if (! FS_ReadDir(&fsd, path, mask))
+	if (! FS_ReadDir(fsd, path, mask))
 	{
 		I_Printf("Failed to read dir: %s\n", path);
 		return 1;
 	}
 
-	if (fsd.GetSize() == 0)
+	if (fsd.empty())
 	{
 		I_Printf("No files found in provided path %s\n", path);
 		return 0;
 	}
 
-	I_Printf("Directory contents for %s matching %s\n", epi::PATH_GetDir(fsd[0]->name.c_str()).c_str(), mask);
+	I_Printf("Directory contents for %s matching %s\n", epi::PATH_GetDir(fsd[0].name.c_str()).c_str(), mask);
 
-	for (int i = 0; i < fsd.GetSize(); i++)
+	for (size_t i = 0 ; i < fsd.size() ; i++)
 	{
-		epi::direntry_c *entry = fsd[i];
-
-		I_Printf(" %2d: %10d  %s  \"%s\"\n",
-				 i+1, entry->size,
-				 entry->is_dir ? "DIR" : "   ",
-				 epi::PATH_GetFilename(entry->name.c_str()).c_str());
+		I_Printf("%4d: %10d  %s  \"%s\"\n", (int)i + 1,
+			(int)fsd[i].size,
+			fsd[i].is_dir ? "DIR" : "   ",
+			epi::PATH_GetFilename(fsd[i].name.c_str()).c_str());
 	}
 
 	return 0;

@@ -35,11 +35,10 @@
 #include "deh_ammo.h"
 #include "deh_buffer.h"
 #include "deh_info.h"
+#include "deh_field.h"
 #include "deh_frames.h"
 #include "deh_misc.h"
-#include "deh_mobj.h"
 #include "deh_patch.h"
-#include "deh_storage.h"
 #include "deh_sounds.h"
 #include "deh_system.h"
 #include "deh_things.h"
@@ -101,10 +100,15 @@ bool weapon_modified[NUMWEAPONS];
 
 //----------------------------------------------------------------------------
 
-void Weapons::Startup(void)
+void Weapons::Init()
 {
 	memset(weapon_modified, 0, sizeof(weapon_modified));
 }
+
+
+void Weapons::Shutdown()
+{ }
+
 
 namespace Weapons
 {
@@ -154,9 +158,9 @@ namespace Weapons
 	{
 		if (w_num == wp_chainsaw)
 		{
-			WAD::Printf("START_SOUND = %s;\n",   Sounds::GetSound(sfx_sawup));
-			WAD::Printf("IDLE_SOUND = %s;\n",    Sounds::GetSound(sfx_sawidl));
-			WAD::Printf("ENGAGED_SOUND = %s;\n", Sounds::GetSound(sfx_sawful));
+			WAD::Printf("START_SOUND = \"%s\";\n",   Sounds::GetSound(sfx_sawup));
+			WAD::Printf("IDLE_SOUND = \"%s\";\n",    Sounds::GetSound(sfx_sawidl));
+			WAD::Printf("ENGAGED_SOUND = \"%s\";\n", Sounds::GetSound(sfx_sawful));
 			return;
 		}
 
@@ -165,7 +169,7 @@ namespace Weapons
 
 	void HandleFrames(const weaponinfo_t *info, int w_num)
 	{
-		Frames::ResetAll();
+		Frames::ResetGroups();
 
 		// --- collect states into groups ---
 
@@ -174,12 +178,12 @@ namespace Weapons
 		int count = 0;
 
 		if (has_flash)
-			count += Frames::BeginGroup(info->flashstate,  'f');
+			count += Frames::BeginGroup('f', info->flashstate);
 
-		count += Frames::BeginGroup(info->atkstate,    'a');
-		count += Frames::BeginGroup(info->readystate,  'r');
-		count += Frames::BeginGroup(info->downstate,   'd');
-		count += Frames::BeginGroup(info->upstate,     'u');
+		count += Frames::BeginGroup('a', info->atkstate);
+		count += Frames::BeginGroup('r', info->readystate);
+		count += Frames::BeginGroup('d', info->downstate);
+		count += Frames::BeginGroup('u', info->upstate);
 
 		if (count == 0)
 		{
@@ -189,13 +193,13 @@ namespace Weapons
 
 		Frames::SpreadGroups();
 
-		Frames::OutputGroup(info->upstate,     'u');
-		Frames::OutputGroup(info->downstate,   'd');
-		Frames::OutputGroup(info->readystate,  'r');
-		Frames::OutputGroup(info->atkstate,    'a');
+		Frames::OutputGroup('u');
+		Frames::OutputGroup('d');
+		Frames::OutputGroup('r');
+		Frames::OutputGroup('a');
 
 		if (has_flash)
-			Frames::OutputGroup(info->flashstate, 'f');
+			Frames::OutputGroup('f');
 	}
 
 	void HandleAttacks(const weaponinfo_t *info, int w_num)
@@ -281,20 +285,23 @@ void Weapons::ConvertWEAP(void)
 
 namespace Weapons
 {
+#define FIELD_OFS(xxx)  offsetof(weaponinfo_t, xxx)
+
 	const fieldreference_t weapon_field[] =
 	{
-		{ "Ammo type", &weapon_info[0].ammo, FT_AMMO },
+		{ "Ammo type",      FIELD_OFS(ammo),       FT_AMMO },
 
 		// -AJA- these first two fields have misleading dehacked names
-		{ "Deselect frame", &weapon_info[0].upstate,    FT_FRAME },
-		{ "Select frame",   &weapon_info[0].downstate,  FT_FRAME },
-		{ "Bobbing frame",  &weapon_info[0].readystate, FT_FRAME },
-		{ "Shooting frame", &weapon_info[0].atkstate,   FT_FRAME },
-		{ "Firing frame",   &weapon_info[0].flashstate, FT_FRAME },
+		{ "Deselect frame", FIELD_OFS(upstate),    FT_FRAME },
+		{ "Select frame",   FIELD_OFS(downstate),  FT_FRAME },
+		{ "Bobbing frame",  FIELD_OFS(readystate), FT_FRAME },
+		{ "Shooting frame", FIELD_OFS(atkstate),   FT_FRAME },
+		{ "Firing frame",   FIELD_OFS(flashstate), FT_FRAME },
 
-		{ NULL, NULL, 0 }   // End sentinel
+		{ NULL, 0, FT_ANY }   // End sentinel
 	};
 }
+
 
 void Weapons::AlterWeapon(int new_val)
 {
@@ -303,9 +310,9 @@ void Weapons::AlterWeapon(int new_val)
 
 	assert(0 <= wp_num && wp_num < NUMWEAPONS);
 
-	int stride = ((char*) (weapon_info+1)) - ((char*) weapon_info);
+	int * raw_obj = (int *) &weapon_info[wp_num];
 
-	if (! Things::AlterOneField(weapon_field, field_name, wp_num * stride, new_val))
+	if (! Field_Alter(weapon_field, field_name, raw_obj, new_val))
 	{
 		PrintWarn("UNKNOWN WEAPON FIELD: %s\n", field_name);
 		return;

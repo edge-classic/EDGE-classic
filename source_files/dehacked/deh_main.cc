@@ -34,15 +34,15 @@
 #include "deh_edge.h"
 
 #include "deh_ammo.h"
-#include "deh_attacks.h"
 #include "deh_buffer.h"
 #include "deh_frames.h"
 #include "deh_info.h"
 #include "deh_misc.h"
+#include "deh_music.h"
 #include "deh_patch.h"
 #include "deh_rscript.h"
 #include "deh_sounds.h"
-#include "deh_storage.h"
+#include "deh_sprites.h"
 #include "deh_system.h"
 #include "deh_things.h"
 #include "deh_text.h"
@@ -61,20 +61,20 @@ bool all_mode;
 const dehconvfuncs_t *cur_funcs = NULL;
 
 
-void Startup(void)
+void Init()
 {
 	System_Startup();
 
-	Ammo::Startup();
-	Frames::Startup();
-	Misc::Startup();
-	Rscript::Startup();
-	Sounds::Startup();
-	TextStr::Startup();
-	Things::Startup();
-	Weapons::Startup();
-
-	Storage::Startup();
+	Ammo   ::Init();
+	Frames ::Init();
+	Misc   ::Init();
+	Rscript::Init();
+	Sounds ::Init();
+	Music  ::Init();
+	Sprites::Init();
+	TextStr::Init();
+	Things ::Init();
+	Weapons::Init();
 
 	/* reset parameters */
 
@@ -107,26 +107,24 @@ dehret_e Convert(void)
 			return result;
 	}
 
-	Storage::ApplyAll();
-
 	// do conversions into DDF...
 
-	TextStr::SpriteDependencies();
-	Frames::StateDependencies();
-	Ammo::AmmoDependencies();
+	Sprites::SpriteDependencies();
+	Frames ::StateDependencies();
+	Ammo   ::AmmoDependencies();
 
-	Sounds::ConvertSFX();
-	Sounds::ConvertMUS();
-
-	Things::FixHeights();
-	Things::ConvertTHING();
-	Attacks::ConvertATK();
-
+	// things and weapons must be before attacks
 	Weapons::ConvertWEAP();
+	Things ::ConvertTHING();
+	Things ::ConvertATK();
+
+	// rscript must be after things (for A_KeenDie)
 	TextStr::ConvertLDF();
 	Rscript::ConvertRAD();
 
-	Storage::RestoreAll();
+	// sounds must be after things/weapons/attacks
+	Sounds::ConvertSFX();
+	Music ::ConvertMUS();
 
 	PrintMsg("\n");
 
@@ -134,8 +132,19 @@ dehret_e Convert(void)
 }
 
 
-void Shutdown(void)
+void Shutdown()
 {
+	Ammo   ::Shutdown();
+	Frames ::Shutdown();
+	Misc   ::Shutdown();
+	Rscript::Shutdown();
+	Sounds ::Shutdown();
+	Music  ::Shutdown();
+	Sprites::Shutdown();
+	TextStr::Shutdown();
+	Things ::Shutdown();
+	Weapons::Shutdown();
+
 	FreeInputBuffers();
 
 	System_Shutdown();
@@ -147,7 +156,7 @@ void Shutdown(void)
 
 void DehEdgeStartup(const dehconvfuncs_t *funcs)
 {
-	Deh_Edge::Startup();
+	Deh_Edge::Init();
 	Deh_Edge::cur_funcs = funcs;
 
 	Deh_Edge::PrintMsg("*** DeHackEd -> EDGE Conversion ***\n");

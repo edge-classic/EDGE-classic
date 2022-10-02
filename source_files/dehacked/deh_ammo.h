@@ -19,12 +19,12 @@ namespace Deh_Edge
 // Ammunition types defined.
 typedef enum
 {
-    am_bullet,    // Pistol / chaingun ammo.
-    am_shell,     // Shotgun / double barreled shotgun.
-    am_cell,      // Plasma rifle, BFG.
-    am_rocket,    // Missile launcher.
+	am_bullet,    // Pistol / chaingun ammo.
+	am_shell,     // Shotgun / double barreled shotgun.
+	am_cell,      // Plasma rifle, BFG.
+	am_rocket,    // Missile launcher.
 
-    NUMAMMO,
+	NUMAMMO,
 
 	am_noammo     // Fist / chainsaw
 }
@@ -35,10 +35,11 @@ namespace Ammo
 	extern int plr_max[4];
 	extern int pickups[4];
 
-	void Startup(void);
+	void Init();
+	void Shutdown();
 
 	void MarkAmmo(int a_num);
-	void AmmoDependencies(void);
+	void AmmoDependencies();
 
 	const char *GetAmmo(int type);
 

@@ -30,10 +30,7 @@
 
 #include "deh_buffer.h"
 #include "deh_edge.h"
-#include "deh_info.h"
-#include "deh_mobj.h"
 #include "deh_patch.h"
-#include "deh_storage.h"
 #include "deh_system.h"
 #include "deh_things.h"
 #include "deh_util.h"
@@ -44,14 +41,19 @@
 namespace Deh_Edge
 {
 
-int Ammo::plr_max[4];
-int Ammo::pickups[4];
-bool ammo_modified[4];
+
+namespace Ammo
+{
+	int plr_max[4];
+	int pickups[4];
+
+	bool ammo_modified[4];
+
+	void MarkAmmo(int a_num);
+}
 
 
-//----------------------------------------------------------------------------
-
-void Ammo::Startup(void)
+void Ammo::Init()
 {
 	// doubled for backpack
 	plr_max[0] = 200; plr_max[1] = 50;
@@ -64,98 +66,102 @@ void Ammo::Startup(void)
 	memset(ammo_modified, 0, sizeof(ammo_modified));
 }
 
-namespace Ammo
+
+void Ammo::Shutdown()
 {
-	void MarkAmmo(int a_num)
-	{
-		assert (0 <= a_num && a_num < NUMAMMO);
+}
 
-		ammo_modified[a_num] = true;
+
+void Ammo::MarkAmmo(int a_num)
+{
+	assert(0 <= a_num && a_num < NUMAMMO);
+
+	ammo_modified[a_num] = true;
+}
+
+
+void Ammo::AmmoDependencies()
+{
+	bool any = ammo_modified[0] || ammo_modified[1] ||
+			   ammo_modified[2] || ammo_modified[3];
+
+	if (any)
+	{
+		Things::MarkThing(MT_PLAYER);
+		Things::MarkThing(MT_MISC24);  // backpack
 	}
 
-	void AmmoDependencies(void)
+	if (ammo_modified[am_bullet])
 	{
-		bool any = ammo_modified[0] || ammo_modified[1] ||
-		           ammo_modified[2] || ammo_modified[3];
-
-		if (any)
-		{
-			Things::MarkThing(MT_PLAYER);
-			Things::MarkThing(MT_MISC24);  // backpack
-		}
-
-		if (ammo_modified[am_bullet])
-		{
-			Things::MarkThing(MT_CLIP);    // "CLIP"
-			Things::MarkThing(MT_MISC17);  // "BOX_OF_BULLETS"  
-		}
-
-		if (ammo_modified[am_shell])
-		{
-			Things::MarkThing(MT_MISC22);  // "SHELLS"  
-			Things::MarkThing(MT_MISC23);  // "BOX_OF_SHELLS"  
-		}
-
-		if (ammo_modified[am_rocket])
-		{
-			Things::MarkThing(MT_MISC18);  // "ROCKET"  
-			Things::MarkThing(MT_MISC19);  // "BOX_OF_ROCKETS"  
-		}
-
-		if (ammo_modified[am_cell])
-		{
-			Things::MarkThing(MT_MISC20);  // "CELLS"  
-			Things::MarkThing(MT_MISC21);  // "CELL_PACK"  
-		}
+		Things::MarkThing(MT_CLIP);    // "CLIP"
+		Things::MarkThing(MT_MISC17);  // "BOX_OF_BULLETS"
 	}
 
-	const char *GetAmmo(int type)
+	if (ammo_modified[am_shell])
 	{
-		switch (type)
-		{
-			case am_bullet: return "BULLETS";
-			case am_shell:  return "SHELLS";
-			case am_rocket: return "ROCKETS";
-			case am_cell:   return "CELLS";
-			case am_noammo: return "NOAMMO";
-		}
-
-		InternalError("Bad ammo type %d\n", type);
-		return NULL;
+		Things::MarkThing(MT_MISC22);  // "SHELLS"
+		Things::MarkThing(MT_MISC23);  // "BOX_OF_SHELLS"
 	}
 
-	void AlterAmmo(int new_val)
+	if (ammo_modified[am_rocket])
 	{
-		int a_num = Patch::active_obj;
-		const char *deh_field = Patch::line_buf;
-
-		assert(0 <= a_num && a_num < NUMAMMO);
-
-		bool max_m = (0 == StrCaseCmp(deh_field, "Max ammo"));
-		bool per_m = (0 == StrCaseCmp(deh_field, "Per ammo"));
-
-		if (! max_m && ! per_m)
-		{
-			PrintWarn("UNKNOWN AMMO FIELD: %s\n", deh_field);
-			return;
-		}
-
-		if (new_val > 10000)
-			new_val = 10000;
-
-		if (new_val < 0)
-		{
-			PrintWarn("Bad value '%d' for AMMO field: %s\n", new_val, deh_field);
-			return;
-		}
-
-		if (max_m)
-			Storage::RememberMod(plr_max + a_num, new_val);
-		else /* per_m */
-			Storage::RememberMod(pickups + a_num, new_val);
-
-		MarkAmmo(a_num);
+		Things::MarkThing(MT_MISC18);  // "ROCKET"
+		Things::MarkThing(MT_MISC19);  // "BOX_OF_ROCKETS"
 	}
+
+	if (ammo_modified[am_cell])
+	{
+		Things::MarkThing(MT_MISC20);  // "CELLS"
+		Things::MarkThing(MT_MISC21);  // "CELL_PACK"
+	}
+}
+
+
+const char * Ammo::GetAmmo(int type)
+{
+	switch (type)
+	{
+		case am_bullet: return "BULLETS";
+		case am_shell:  return "SHELLS";
+		case am_rocket: return "ROCKETS";
+		case am_cell:   return "CELLS";
+		case am_noammo: return "NOAMMO";
+	}
+
+	InternalError("Bad ammo type %d\n", type);
+	return NULL;
+}
+
+
+void Ammo::AlterAmmo(int new_val)
+{
+	int a_num = Patch::active_obj;
+	const char *deh_field = Patch::line_buf;
+
+	assert(0 <= a_num && a_num < NUMAMMO);
+
+	bool max_m = (0 == StrCaseCmp(deh_field, "Max ammo"));
+	bool per_m = (0 == StrCaseCmp(deh_field, "Per ammo"));
+
+	if (! max_m && ! per_m)
+	{
+		PrintWarn("UNKNOWN AMMO FIELD: %s\n", deh_field);
+		return;
+	}
+
+	if (new_val > 10000)
+		new_val = 10000;
+
+	if (new_val < 0)
+	{
+		PrintWarn("Bad value '%d' for AMMO field: %s\n", new_val, deh_field);
+		return;
+	}
+
+	if (max_m) plr_max[a_num] = new_val;
+	if (per_m) pickups[a_num] = new_val;
+
+	MarkAmmo(a_num);
 }
 
 }  // Deh_Edge

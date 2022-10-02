@@ -39,10 +39,10 @@
 #include "deh_frames.h"
 #include "deh_info.h"
 #include "deh_misc.h"
-#include "deh_mobj.h"
+#include "deh_music.h"
 #include "deh_patch.h"
 #include "deh_sounds.h"
-#include "deh_storage.h"
+#include "deh_sprites.h"
 #include "deh_system.h"
 #include "deh_text.h"
 #include "deh_things.h"
@@ -190,9 +190,9 @@ namespace Patch
 		if (*dest == temp)
 			return;
 
-		Storage::RememberMod(dest, temp);
-
 		MarkObject(o_kind, o_num);
+
+		*dest = temp;
 	}
 
 	void GetFlags(int o_kind, int o_num, int *dest)
@@ -208,9 +208,9 @@ namespace Patch
 		if (*dest == temp)
 			return;
 
-		Storage::RememberMod(dest, temp);
-
 		MarkObject(o_kind, o_num);
+
+		*dest = temp;
 	}
 
 	void GetFrame(int o_kind, int o_num, int *dest)
@@ -236,12 +236,9 @@ namespace Patch
 			return;
 		}
 
-		if (*dest == temp)
-			return;
+		// no need to MarkObject, already done (e.g. in ReadBinaryThing)
 
-		Storage::RememberMod(dest, temp);
-
-		MarkObject(o_kind, o_num);
+		*dest = temp;
 	}
 
 	void GetSprite(int o_kind, int o_num, int *dest)
@@ -267,12 +264,7 @@ namespace Patch
 			return;
 		}
 
-		if (*dest == temp)
-			return;
-
-		Storage::RememberMod(dest, temp);
-
-		MarkObject(o_kind, o_num);
+		*dest = temp;
 	}
 
 	void GetSound(int o_kind, int o_num, int *dest)
@@ -298,12 +290,9 @@ namespace Patch
 			return;
 	    }
 
-		if (*dest == temp)
-			return;
+		// no need to MarkObject, already done (e.g. in ReadBinaryThing)
 
-		Storage::RememberMod(dest, temp);
-
-		MarkObject(o_kind, o_num);
+		*dest = temp;
 	}
 
 	void GetAmmoType(int o_kind, int o_num, int *dest)
@@ -319,14 +308,11 @@ namespace Patch
 	    }
 
 		if (temp == 4)
-			temp = 5;
+			temp = am_noammo;
 
-		if (*dest == temp)
-			return;
+		// no need to MarkObject, already done (in ReadBinaryWeapon)
 
-		Storage::RememberMod(dest, temp);
-
-		MarkObject(o_kind, o_num);
+		*dest = temp;
 	}
 
 	const char *PrettyTextString(const char *t)
@@ -382,7 +368,7 @@ namespace Patch
 		if (file_error)
 			FatalError("File error reading binary thing table.\n");
 
-		mobjinfo_t *mobj = mobjinfo + mt_num;
+		mobjinfo_t *mobj = Things::GetModifiedMobj(mt_num);
 
 		GetInt  (O_MOBJ, mt_num, &mobj->doomednum);
 		GetFrame(O_MOBJ, mt_num, &mobj->spawnstate);
@@ -456,20 +442,18 @@ namespace Patch
 		if (file_error)
 			FatalError("File error reading binary frame table.\n");
 
-		state_t *state = states + st_num;
+		state_t *state = Frames::GetModifiedState(st_num);
 
 		GetSprite(O_FRAME, st_num, &state->sprite);
 		GetInt   (O_FRAME, st_num, &state->frame);
 		GetInt   (O_FRAME, st_num, &state->tics);
 
 		GetRawInt();  // ignore code-pointer
-		
-		GetFrame(O_FRAME, st_num, &state->nextstate);
-		GetInt  (O_FRAME, st_num, &state->misc1);
-		GetInt  (O_FRAME, st_num, &state->misc2);
 
-		if (state->misc1 || state->misc2)
-			PrintWarn("frame %d has non-zero misc fields.\n", st_num);
+		GetFrame(O_FRAME, st_num, &state->nextstate);
+
+		GetRawInt();  // ignore misc1/misc2 fields
+		GetRawInt();
 	}
 
 	void ReadBinarySound(int s_num)
@@ -477,14 +461,11 @@ namespace Patch
 		Debug_PrintMsg("\n--- ReadBinarySound %d ---\n", s_num);
 
 		if (file_error)
-			FatalError("File error reading binary sprite table.\n");
-
-		sfxinfo_t *sfx = S_sfx + s_num;
+			FatalError("File error reading binary sound table.\n");
 
 		GetRawInt();  // ignore sound name pointer
 		GetRawInt();  // ignore singularity
-
-		GetInt(O_SOUND, s_num, &sfx->priority);
+		GetRawInt();  // ignore priority
 
 		GetRawInt();  // ignore link pointer
 		GetRawInt();  // ignore link pitch
@@ -780,7 +761,7 @@ namespace Patch
 		{
 			switch (active_section)
 			{
-				case DEH_THING:  min_obj = 1; max_obj = NUMMOBJTYPES; break;
+				case DEH_THING:  max_obj = NUMMOBJTYPES; min_obj = 1; break;
 
 				case DEH_SOUND:  max_obj = NUMSFX     - 1; break;
 				case DEH_FRAME:  max_obj = NUMSTATES  - 1; break;
@@ -796,13 +777,14 @@ namespace Patch
 		{
 			switch (active_section)
 			{
-				case DEH_THING:  min_obj = 1; max_obj = NUMMOBJTYPES_BEX; break;
-
-				case DEH_SOUND:  max_obj = NUMSFX_BEX    - 1; break;
-				case DEH_FRAME:  max_obj = NUMSTATES_BEX - 1; break;
 				case DEH_AMMO:   max_obj = NUMAMMO       - 1; break;
 				case DEH_WEAPON: max_obj = NUMWEAPONS    - 1; break;
-				case DEH_PTR:    max_obj = NUMSTATES_BEX - 1; break;
+
+				// for DSDehacked, allow very high values
+				case DEH_FRAME:  max_obj = 32767; break;
+				case DEH_PTR:    max_obj = 32767; break;
+				case DEH_SOUND:  max_obj = 32767; break;
+				case DEH_THING:  max_obj = 32767; min_obj = 1; break;
 
 				default:
 					InternalError("Bad active_section value %d\n", active_section);
@@ -929,15 +911,15 @@ namespace Patch
 		Debug_PrintMsg("- After  <%s>\n", text_2);
 
 		if (len1 == 4 && len2 == 4)
-			if (TextStr::ReplaceSprite(text_1, text_2))
+			if (Sprites::ReplaceSprite(text_1, text_2))
 				return;
 
-		if (len1 < 7 && len2 < 7)
+		if (len1 <= 6 && len2 <= 6)
 		{
 			if (Sounds::ReplaceSound(text_1, text_2))
 				return;
 
-			if (Sounds::ReplaceMusic(text_1, text_2))
+			if (Music::ReplaceMusic(text_1, text_2))
 				return;
 		}
 
@@ -1111,8 +1093,8 @@ namespace Patch
 			case BEX_STRINGS: ProcessBexString(); break;
 
 			case BEX_SOUNDS:  Sounds:: AlterBexSound(equal_pos);  break;
-			case BEX_MUSIC:   Sounds:: AlterBexMusic(equal_pos);  break;
-			case BEX_SPRITES: TextStr::AlterBexSprite(equal_pos); break;
+			case BEX_MUSIC:   Music::  AlterBexMusic(equal_pos);  break;
+			case BEX_SPRITES: Sprites::AlterBexSprite(equal_pos); break;
 
 			default:
 				InternalError("Bad active_section value %d\n", active_section);
@@ -1152,7 +1134,8 @@ namespace Patch
 				doom_ver = (int)strtol(equal_pos+1, NULL, 10);
 
 				if (! (doom_ver == 12 ||
-					  (doom_ver >= 16 && doom_ver <= 21)))
+						(doom_ver >= 16 && doom_ver <= 21) ||
+						doom_ver == 2021 /* DSDehacked */))
 				{
 					SetErrorMsg("Unknown doom version found: V%d.%d\n",
 						doom_ver / 10, (doom_ver+1000) % 10);

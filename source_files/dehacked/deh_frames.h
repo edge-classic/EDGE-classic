@@ -16,6 +16,8 @@
 namespace Deh_Edge
 {
 
+struct state_t;
+
 typedef enum
 {
 	AF_EXPLODE    = (1 << 0),   // uses A_Explode
@@ -39,6 +41,7 @@ typedef enum
 }
 actflags_e;
 
+
 namespace Frames
 {
 	typedef enum
@@ -50,21 +53,27 @@ namespace Frames
 	extern const char *attack_slot[3];
 	extern int act_flags;
 
-	void Startup(void);
+	void Init();
+	void Shutdown();
 
 	void MarkState(int st_num);
-	void StateDependencies(void);
+	void MarkStatesWithSprite(int spr_num);
+	void StateDependencies();
+
+	state_t *GetModifiedState(int st_num);
+	int GetStateSprite(int st_num);
 
 	void AlterFrame(int new_val);
 	void AlterPointer(int new_val);
 	void AlterBexCodePtr(const char * new_action);
 
-	void ResetAll(void); // also resets the slots and flags
-	int  BeginGroup(int first, char group);
-	void SpreadGroups(void);
-	bool CheckSpawnRemove(int first);
+	void ResetGroups(); // also resets the slots and flags
+	int  BeginGroup(char group, int first);
+	void SpreadGroups();
+
 	bool CheckWeaponFlash(int first);
-	void OutputGroup(int first, char group);
+	bool CheckMissileState(int first);
+	void OutputGroup(char group);
 
 	// debugging stuff
 	void DebugRange(const char *kind, const char *entry);

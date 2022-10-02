@@ -53,9 +53,11 @@ weapontype_e;
 
 extern weaponinfo_t weapon_info[NUMWEAPONS];
 
+
 namespace Weapons
 {
-	void Startup(void);
+	void Init();
+	void Shutdown();
 
 	void MarkWeapon(int wp_num);
 

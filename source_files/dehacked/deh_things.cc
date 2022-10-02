@@ -595,6 +595,7 @@ void Things::MarkThing(int mt_num)
 		entry->name = "X";  // only needed to differentiate from an attack
 		entry->doomednum = -1;
 
+		// DEHEXTRA things have a default doomednum
 		if (MT_EXTRA00 <= mt_num && mt_num <= MT_EXTRA99)
 		{
 			entry->doomednum = mt_num;
@@ -1492,7 +1493,8 @@ namespace Things
 
 	void HandleDropItem(const mobjinfo_t *info, int mt_num);
 	void HandleAttacks(const mobjinfo_t *info, int mt_num);
-	void ConvertMobj(const mobjinfo_t *info, int mt_num, int player, bool &got_one);
+	void ConvertMobj(const mobjinfo_t *info, int mt_num, int player,
+		bool brain_missile, bool& got_one);
 }
 
 
@@ -1541,7 +1543,8 @@ void Things::HandleAttacks(const mobjinfo_t *info, int mt_num)
 }
 
 
-void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player, bool& got_one)
+void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player,
+	bool brain_missile, bool& got_one)
 {
 	if (info->name[0] == '*')  // attack
 		return;
@@ -1553,6 +1556,9 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player, bool& g
 	}
 
 	const char * ddf_name = GetMobjName(mt_num);
+
+	if (brain_missile)
+		ddf_name = info->name;
 
 	if (player > 0)
 		WAD::Printf("[%s:%d]\n", player_info[player-1].name, player_info[player-1].num);
@@ -1640,17 +1646,17 @@ void Things::ConvertTHING(void)
 		if (i == MT_PLAYER)
 		{
 			for (int p = 1 ; p <= NUMPLAYERS ; p++)
-				ConvertMobj(info, i, p, got_one);
+				ConvertMobj(info, i, p, false, got_one);
 
 			continue;
 		}
 
-		ConvertMobj(info, i, 0, got_one);
+		ConvertMobj(info, i, 0, false, got_one);
 	}
 
-	// FIXME we don't always need this, figure out WHEN WE DO
+	// TODO we don't always need this, figure out WHEN WE DO
 	if (true)
-		ConvertMobj(&brain_explode_mobj, MT_ROCKET /* dummy */, 0, got_one);
+		ConvertMobj(&brain_explode_mobj, MT_ROCKET, 0, true, got_one);
 
 	if (got_one)
 		FinishLump();

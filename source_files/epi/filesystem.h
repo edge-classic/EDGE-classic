@@ -19,7 +19,6 @@
 #ifndef __EPI_FILESYSTEM_H__
 #define __EPI_FILESYSTEM_H__
 
-#include "arrays.h"
 #include <vector>
 #include <filesystem>
 

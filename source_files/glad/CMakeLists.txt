@@ -6,7 +6,7 @@ project(
   VERSION 0.1.0
 )
 
-set(CMAKE_CC_FLAGS "-O2 -DINLINE_G=inline -Wall")
+set(CMAKE_CC_FLAGS "-O2 -Wall")
 if(WIN32 AND NOT MSYS)
   set(CMAKE_CC_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs")
 else()

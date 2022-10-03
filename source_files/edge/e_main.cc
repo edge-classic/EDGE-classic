@@ -412,9 +412,8 @@ void SetLanguage(void)
 
 	I_Warning("Invalid language: '%s'\n", m_language.c_str());
 
-	if (! language.IsValid())
-		if (! language.Select(0))
-			I_Error("Unable to select any language!");
+	if (! language.Select(0))
+		I_Error("Unable to select any language!");
 
 	m_language = language.GetName();
 }

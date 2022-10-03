@@ -51,7 +51,7 @@ namespace epi
     	void Set(const std::vector<std::string>& src);
 
     	strbox_c& operator=(strbox_c &rhs);
-    	char* operator[](int idx) const { return strs[idx]; }
+    	const char * operator[](int idx) const { return strs[idx]; }
     };
     
     // String list

@@ -342,9 +342,9 @@ public:
 			currnode = currnode->next;
 			count++;
 		}
-		
+
 		comp_langvalues.Size(count);
-		
+
 		// Add entries
 		for (currnode = head; currnode; currnode = currnode->next)
 		{
@@ -471,21 +471,18 @@ void DDF_LanguageCleanUp(void)
 	//delete lang_buildinfo;
 }
 
-//
-// language_c Constructor
-//
+
 language_c::language_c()
 {
 	current = -1;
 }
 
-//
-// language_c Destructor
-//
+
 language_c::~language_c()
 {
 	Clear();
 }
+
 
 void language_c::Recompile(void)
 {
@@ -516,11 +513,7 @@ void language_c::AddOrReplace(const char *ref, const char *value)
 	Recompile();
 }
 
-//
-// language_c::Clear()
-//
-// Clear the contents
-//
+
 void language_c::Clear()
 {
 	choices.Clear();
@@ -531,13 +524,11 @@ void language_c::Clear()
 		delete [] values;
 		values = NULL;
 	}
-	
+
 	current = -1;
 }
 
-//
-// int language_c::Find(const char* ref)
-//
+
 int language_c::Find(const char *name)
 {
 	if (!values || !name)
@@ -569,87 +560,66 @@ const char* language_c::GetName(int idx)
 	return choices[idx];
 }
 
-//
-// bool language_c::IsValidRef()
-//
+
 bool language_c::IsValidRef(const char *refname)
 {
 	return (Find(refname)>=0);
 }
 
-//
-// language_c::LoadLanguageChoices()
-//	
+
 void language_c::LoadLanguageChoices(epi::strlist_c& _langnames)
 {
 	choices.Set(_langnames);
 }
 
-//
-// language_c::LoadLanguageReferences()
-//
+
 void language_c::LoadLanguageReferences(epi::strlist_c& _refs)
 {
 	if (values)
 		delete [] values;
-	
+
 	refs.Set(_refs);
 	values = new epi::strbox_c[refs.GetSize()];
-	
-	return;
 }
 
-//
-// language_c::LoadLanguageValues()
-//
+
 void language_c::LoadLanguageValues(int lang, epi::strlist_c& _values)
 {
 	if (_values.GetSize() != refs.GetSize())
-		return;	// FIXME!! Throw error
+		return;
 		
 	if (lang < 0 || lang >= choices.GetSize())
-		return;	// FIXME!! Throw error
-		
+		return;
+
 	values[lang].Set(_values);
-	
-	return;
 }
 
-//
-// language_c::Select() Named Select
-//
+
 bool language_c::Select(const char *name)
 {
-	int i, max;
-	
-	for(i=0, max=choices.GetSize(); i<max; i++)
+	for (int i=0 ; i < choices.GetSize() ; i++)
 	{
-		if (! DDF_CompareName(name, choices[i]))
+		if (DDF_CompareName(name, choices[i]) == 0)
 		{
 			current = i;
 			return true;
 		}
 	}
-	
-	// FIXME!! Throw error
+
 	return false;
 }
 
-//
-// language_c::Select() Index Select
-//
+
 bool language_c::Select(int idx)
 {
 	if (idx < 0 || idx >= choices.GetSize())
-		return false;	// FIXME!! Throw error
-		
+		return false;
+
 	current = idx;
 	return true;
 }
 
-//
-// const char* language_c::operator[]()
-//	
+
 const char* language_c::operator[](const char *refname)
 {
 	int idx;
@@ -660,7 +630,7 @@ const char* language_c::operator[](const char *refname)
 		if (current < 0 || current >= choices.GetSize())
 			return refname;  // -AJA- preserve old behaviour
 		
-		char *s = values[current][idx];
+		const char *s = values[current][idx];
 		if (s != NULL)
 			return s;
 			
@@ -670,13 +640,13 @@ const char* language_c::operator[](const char *refname)
 		{
 			if (i != current)
 			{
-				char *s = values[i][idx];
+				const char *s = values[i][idx];
 				if (s != NULL)
 					return values[i][idx];
 			}
 		}
 	}
-	
+
 	return refname;  // -AJA- preserve old behaviour
 }
 

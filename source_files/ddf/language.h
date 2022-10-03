@@ -53,7 +53,6 @@ public:
 	int GetChoice() { return current; }
 	
 	const char* GetName(int idx = -1);
-	bool IsValid() { return (current>=0 && current < choices.GetSize()); }
 	bool IsValidRef(const char *refname);
 	
 	void LoadLanguageChoices(epi::strlist_c& langnames);
@@ -62,9 +61,8 @@ public:
 				
 	bool Select(const char *name);
 	bool Select(int idx);
-	
-	const char* operator[](const char *refname);
 
+	const char* operator[](const char *refname);
 	const char* operator[](const std::string& refname)
 	{
 		return (*this)[refname.c_str()];

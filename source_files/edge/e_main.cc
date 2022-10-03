@@ -896,22 +896,23 @@ void InitDirectories(void)
 static void PurgeCache(void)
 {
 	const std::filesystem::file_time_type expiry = std::filesystem::file_time_type::clock::now() - std::chrono::hours(4320);
-	epi::filesystem_dir_c fsd;
+
+	std::vector<epi::dir_entry_c> fsd;
 
 	// GWA should be the only filetypes we need to worry about now that HWA files are internal
-	if (!FS_ReadDir(&fsd, cache_dir.c_str(), "*.gwa"))
+	if (!FS_ReadDir(fsd, cache_dir.c_str(), "*.gwa"))
 	{
 		I_Error("PurgeCache: Failed to read '%s' directory!\n", cache_dir.c_str());
 	}
 	else
 	{
-		for (int i = 0; i < fsd.GetSize(); i++) 
+		for (size_t i = 0 ; i < fsd.size() ; i++) 
 		{
-			if(!fsd[i]->is_dir)
+			if(!fsd[i].is_dir)
 			{
-				if(std::filesystem::last_write_time(fsd[i]->name.c_str()) < expiry)
+				if(std::filesystem::last_write_time(fsd[i].name.c_str()) < expiry)
 				{
-					epi::FS_Delete(fsd[i]->name.c_str());
+					epi::FS_Delete(fsd[i].name.c_str());
 				}			
 			}
 		}
@@ -1075,19 +1076,19 @@ static void IdentifyVersion(void)
 			// -ACB- 2000/06/08 Quit after we found a file - don't load
 			//                  more than one IWAD
 			//
-			epi::filesystem_dir_c fsd;
+			std::vector<epi::dir_entry_c> fsd;
 
-			if (!FS_ReadDir(&fsd, location, "*.wad"))
+			if (!FS_ReadDir(fsd, location, "*.wad"))
 			{
 				I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location);
 			}
 			else
 			{
-				for (int i = 0; i < fsd.GetSize(); i++) 
+				for (size_t i = 0 ; i < fsd.size() ; i++) 
 				{
-					if(!fsd[i]->is_dir)
+					if(!fsd[i].is_dir)
 					{
-						epi::file_c *iwad_test = epi::FS_Open(fsd[i]->name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+						epi::file_c *iwad_test = epi::FS_Open(fsd[i].name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 						for (int j = 0; j < iwad_checker.size(); j++) 
 						{
 							if (W_CheckForUniqueLumps(iwad_test, iwad_checker[j].unique_lumps[0], iwad_checker[j].unique_lumps[1]))
@@ -1095,7 +1096,7 @@ static void IdentifyVersion(void)
 								if (iwad_checker[j].score > best_score)
 								{
 									best_score = iwad_checker[j].score;
-									best_match = fsd[i]->name;
+									best_match = fsd[i].name;
 									iwad_base = iwad_checker[j].base;
 								}
 								break;
@@ -1115,19 +1116,19 @@ static void IdentifyVersion(void)
 			{
 				location = iwad_dir_vector[i].c_str();
 
-				epi::filesystem_dir_c fsd;
+				std::vector<epi::dir_entry_c> fsd;
 
-				if (!FS_ReadDir(&fsd, location, "*.wad"))
+				if (!FS_ReadDir(fsd, location, "*.wad"))
 				{
 					I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location);
 				}
 				else
 				{
-					for (int i = 0; i < fsd.GetSize(); i++) 
+					for (size_t i = 0 ; i < fsd.size() ; i++) 
 					{
-						if(!fsd[i]->is_dir)
+						if(!fsd[i].is_dir)
 						{
-							epi::file_c *iwad_test = epi::FS_Open(fsd[i]->name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+							epi::file_c *iwad_test = epi::FS_Open(fsd[i].name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 							for (int j = 0; j < iwad_checker.size(); j++) 
 							{
 								if (W_CheckForUniqueLumps(iwad_test, iwad_checker[j].unique_lumps[0], iwad_checker[j].unique_lumps[1]))
@@ -1135,7 +1136,7 @@ static void IdentifyVersion(void)
 									if (iwad_checker[j].score > best_score)
 									{
 										best_score = iwad_checker[j].score;
-										best_match = fsd[i]->name;
+										best_match = fsd[i].name;
 										iwad_base = iwad_checker[j].base;
 									}
 									break;
@@ -1408,38 +1409,39 @@ static void AddCommandLineFiles(void)
 
 static void Add_Autoload(void) {
 	
-	epi::filesystem_dir_c fsd;
+	std::vector<epi::dir_entry_c> fsd;
 	std::string folder = "autoload";
 
-	if (!FS_ReadDir(&fsd, folder.c_str(), "*.*"))
+	if (!FS_ReadDir(fsd, folder.c_str(), "*.*"))
 	{
 		I_Warning("Failed to read autoload directory!\n");
 	}
 	else
 	{
-		for (int i = 0; i < fsd.GetSize(); i++) 
+		for (size_t i = 0 ; i < fsd.size() ; i++) 
 		{
-			if(!fsd[i]->is_dir)
+			if(!fsd[i].is_dir)
 			{
-				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i]->name.c_str()).c_str(), true);
+				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i].name.c_str()).c_str(), true);
 			}
 		}
 	}
-	fsd.Clear();
+
 	std::string lowercase_base = iwad_base;
 	std::transform(lowercase_base.begin(), lowercase_base.end(), lowercase_base.begin(), ::tolower);
 	folder = epi::PATH_Join(folder.c_str(), lowercase_base.c_str());
-	if (!FS_ReadDir(&fsd, folder.c_str(), "*.*"))
+
+	if (!FS_ReadDir(fsd, folder.c_str(), "*.*"))
 	{
 		I_Warning("Failed to read game-specific autoload directory!\n");
 	}
 	else
 	{
-		for (int i = 0; i < fsd.GetSize(); i++) 
+		for (size_t i = 0 ; i < fsd.size() ; i++) 
 		{
-			if(!fsd[i]->is_dir)
+			if(!fsd[i].is_dir)
 			{
-				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i]->name.c_str()).c_str(), true);
+				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i].name.c_str()).c_str(), true);
 			}
 		}		
 	}

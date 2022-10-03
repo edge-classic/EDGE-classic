@@ -26,35 +26,6 @@
 namespace epi
 {
 
-// A Filesystem Directory
-
-filesystem_dir_c::filesystem_dir_c() : array_c(sizeof(filesys_direntry_c)) 
-{ }
-
-filesystem_dir_c::~filesystem_dir_c()
-{ }
-
-bool filesystem_dir_c::AddEntry(filesys_direntry_c *fs_entry)
-{
-	if (InsertObject(fs_entry) < 0)
-        return false;
-
-	return true;
-}
-
-void filesystem_dir_c::CleanupObject(void *obj)
-{ }
-
-filesys_direntry_c *filesystem_dir_c::operator[](int idx)
-{
-	return (filesys_direntry_c*)FetchObject(idx);
-}
-
-
-//----------------------------------------------------------------------------
-
-// common functions
-
 bool FS_Access(const char *name, unsigned int flags)
 {
 	SYS_ASSERT(name);
@@ -72,6 +43,7 @@ bool FS_Access(const char *name, unsigned int flags)
     return true;
 }
 
+
 file_c* FS_Open(const char *name, unsigned int flags)
 {
 	SYS_ASSERT(name);
@@ -87,10 +59,12 @@ file_c* FS_Open(const char *name, unsigned int flags)
 	return new ansi_file_c(fp);
 }
 
+
 std::filesystem::path FS_GetCurrDir()
 {
 	return std::filesystem::current_path();
 }
+
 
 bool FS_SetCurrDir(std::filesystem::path dir)
 {
@@ -107,11 +81,13 @@ bool FS_SetCurrDir(std::filesystem::path dir)
 	return true;
 }
 
+
 bool FS_IsDir(const char *dir)
 {
 	SYS_ASSERT(dir);
 	return std::filesystem::is_directory(dir);
 }
+
 
 bool FS_MakeDir(const char *dir)
 {
@@ -119,15 +95,17 @@ bool FS_MakeDir(const char *dir)
 	return std::filesystem::create_directory(dir);
 }
 
+
 bool FS_RemoveDir(const char *dir)
 {
 	SYS_ASSERT(dir);
 	return std::filesystem::remove(dir);
 }
 
-bool FS_ReadDir(filesystem_dir_c *fsd, const char *dir, const char *mask)
+
+bool FS_ReadDir(std::vector<dir_entry_c>& fsd, const char *dir, const char *mask)
 {
-	if (!dir || !fsd || !mask)
+	if (!dir || !mask)
 		return false;
 
 	std::filesystem::path prev_dir = FS_GetCurrDir();
@@ -140,30 +118,24 @@ bool FS_ReadDir(filesystem_dir_c *fsd, const char *dir, const char *mask)
 		return false;
 
 	// Ensure the container is empty
-	fsd->Clear();
+	fsd.clear();
 
-	for (auto const& dir_entry: std::filesystem::directory_iterator{std::filesystem::current_path()})
+	for (auto const& entry : std::filesystem::directory_iterator{std::filesystem::current_path()})
 	{
-		if (strcasecmp(mask_ext.string().c_str(), ".*") != 0 && strcasecmp(mask_ext.string().c_str(), dir_entry.path().extension().string().c_str()) != 0)
+		if (strcasecmp(mask_ext.string().c_str(), ".*") != 0 &&
+			strcasecmp(mask_ext.string().c_str(), entry.path().extension().string().c_str()) != 0)
 			continue;
 
-		filesys_direntry_c *entry = new filesys_direntry_c();
+		bool is_dir = entry.is_directory();
+		size_t size = is_dir ? 0 : entry.file_size();
 
-		entry->name = dir_entry.path().generic_string();
-		entry->is_dir = dir_entry.is_directory();
-		entry->size = entry->is_dir ? 0 : dir_entry.file_size();
-
-		if (! fsd->AddEntry(entry))
-		{
-			delete entry;
-			FS_SetCurrDir(prev_dir);
-			return false;
-		}
+		fsd.push_back(dir_entry_c { entry.path().generic_string(), size, is_dir });
 	}
 
 	FS_SetCurrDir(prev_dir);
 	return true;
 }
+
 
 bool FS_Copy(const char *src, const char *dest)
 {
@@ -173,12 +145,14 @@ bool FS_Copy(const char *src, const char *dest)
 	return std::filesystem::copy_file(src, dest, std::filesystem::copy_options::overwrite_existing);
 }
 
+
 bool FS_Delete(const char *name)
 {
 	SYS_ASSERT(name);
 
 	return std::filesystem::remove(name);
 }
+
 
 bool FS_Rename(const char *oldname, const char *newname)
 {

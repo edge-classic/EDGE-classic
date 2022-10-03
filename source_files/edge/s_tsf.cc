@@ -246,20 +246,20 @@ bool S_StartupTSF(void)
 	I_Printf("Initializing TinySoundFont...\n");
 
 	// Populate available soundfont vector here (might as well)
-	epi::filesystem_dir_c sfd;
+	std::vector<epi::dir_entry_c> sfd;
 	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
 
-	if (!FS_ReadDir(&sfd, soundfont_dir.c_str(), "*.sf2"))
+	if (!FS_ReadDir(sfd, soundfont_dir.c_str(), "*.sf2"))
 	{
 		I_Warning("TinySoundFont: Failed to read '%s' directory!\n", soundfont_dir.c_str());
 	}
 	else
 	{
-		for (int i = 0; i < sfd.GetSize(); i++) 
+		for (size_t i = 0 ; i < sfd.size() ; i++) 
 		{
-			if(!sfd[i]->is_dir)
+			if(!sfd[i].is_dir)
 			{
-				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i]->name.c_str()));		
+				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name.c_str()));
 			}
 		}
 	}

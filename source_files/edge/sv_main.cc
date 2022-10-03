@@ -488,24 +488,22 @@ void SV_ClearSlot(const char *slot_name)
 	// make sure the directory exists
 	epi::FS_MakeDir(full_dir.c_str());
 
-	epi::filesystem_dir_c fsd;
+	std::vector<epi::dir_entry_c> fsd;
 
-	if (! FS_ReadDir(&fsd, full_dir.c_str(), "*.esg"))
+	if (! FS_ReadDir(fsd, full_dir.c_str(), "*.esg"))
 	{
 		I_Debugf("Failed to read directory: %s\n", full_dir.c_str());
 		return;
 	}
 
-	I_Debugf("SV_ClearSlot: removing %d files\n", fsd.GetSize());
+	I_Debugf("SV_ClearSlot: removing %d files\n", (int)fsd.size());
 
-	for (int i = 0; i < fsd.GetSize(); i++)
+	for (size_t i = 0 ; i < fsd.size() ; i++)
 	{
-		epi::filesys_direntry_c *entry = fsd[i];
-
-		if (entry->is_dir)
+		if (fsd[i].is_dir)
 			continue;
 
-		std::string cur_file = epi::PATH_Join(full_dir.c_str(), epi::PATH_GetFilename(entry->name.c_str()).c_str());
+		std::string cur_file = epi::PATH_Join(full_dir.c_str(), epi::PATH_GetFilename(fsd[i].name.c_str()).c_str());
 
 		I_Debugf("  Deleting %s\n", cur_file.c_str());
 
@@ -518,25 +516,23 @@ void SV_CopySlot(const char *src_name, const char *dest_name)
 	std::string src_dir  = SV_DirName(src_name);
 	std::string dest_dir = SV_DirName(dest_name);
 
-	epi::filesystem_dir_c fsd;
+	std::vector<epi::dir_entry_c> fsd;
 
-	if (! FS_ReadDir(&fsd, src_dir.c_str(), "*.esg"))
+	if (! FS_ReadDir(fsd, src_dir.c_str(), "*.esg"))
 	{
 		I_Error("SV_CopySlot: failed to read dir: %s\n", src_dir.c_str());
 		return;
 	}
 
-	I_Debugf("SV_CopySlot: copying %d files\n", fsd.GetSize());
+	I_Debugf("SV_CopySlot: copying %d files\n", (int)fsd.size());
 
-	for (int i = 0; i < fsd.GetSize(); i++)
+	for (size_t i = 0 ; i < fsd.size() ; i++)
 	{
-		epi::filesys_direntry_c *entry = fsd[i];
-
-		if (entry->is_dir)
+		if (fsd[i].is_dir)
 			continue;
 
-		std::string src_file  = epi::PATH_Join( src_dir.c_str(), epi::PATH_GetFilename(entry->name.c_str()).c_str());
-		std::string dest_file = epi::PATH_Join(dest_dir.c_str(),epi::PATH_GetFilename(entry->name.c_str()).c_str());
+		std::string src_file  = epi::PATH_Join( src_dir.c_str(), epi::PATH_GetFilename(fsd[i].name.c_str()).c_str());
+		std::string dest_file = epi::PATH_Join(dest_dir.c_str(),epi::PATH_GetFilename(fsd[i].name.c_str()).c_str());
 
 		I_Debugf("  Copying %s --> %s\n", src_file.c_str(), dest_file.c_str());
  

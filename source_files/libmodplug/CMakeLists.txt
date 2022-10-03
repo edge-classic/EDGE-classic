@@ -15,7 +15,7 @@ if(WORDS_BIGENDIAN)
   add_compile_definitions(WORDS_BIGENDIAN 1)
 endif()
 
-set(CMAKE_CXX_FLAGS "-O2 -DINLINE_G=inline -Wall")
+set(CMAKE_CXX_FLAGS "-O2 -Wall")
 if(WIN32 AND NOT MSYS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs")
   set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS")

@@ -54,7 +54,7 @@ public:
 	const colourmap_c *text_colmap;
 
 	// Pic
-	epi::strlist_c pics;
+	std::vector<std::string> pics;
 	unsigned int picwait;
 
 	// Cast

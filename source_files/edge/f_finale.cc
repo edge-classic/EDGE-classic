@@ -113,7 +113,7 @@ static bool HasFinale(const map_finaledef_c *F, finalestage_e cur)
 			return F->text != "";
 
 		case f_pic:
-			return (F->pics.GetSize() > 0);
+			return (F->pics.size() > 0);
 
 		case f_bunny:
 			return F->dobunny;
@@ -311,7 +311,7 @@ void F_Ticker(void)
 				finalecount = 0;
 				skip_finale = false;
 			}
-			if (picnum >= finale->pics.GetSize())
+			if (picnum >= (int)finale->pics.size())
 			{
 				DoBumpFinale();
 			}
@@ -852,7 +852,7 @@ void F_Drawer(void)
 
 		case f_pic:
 			{
-				const image_c *image = W_ImageLookup(finale->pics[picnum]);
+				const image_c *image = W_ImageLookup(finale->pics[picnum].c_str());
 
 				HUD_DrawImageTitleWS(image); //Lobo: Widescreen support
 				//HUD_StretchImage(0, 0, 320, 200, image);

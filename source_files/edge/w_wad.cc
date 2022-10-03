@@ -1458,7 +1458,7 @@ void W_ReadUMAPINFOLumps(void)
 		if(Maps.maps[i].endpic[0])
 		{
 			temp_level->nextmapname.clear();
-			temp_level->f_end.pics.Insert(M_Strupr(Maps.maps[i].endpic));
+			temp_level->f_end.pics.push_back(M_Strupr(Maps.maps[i].endpic));
 			temp_level->f_end.picwait = 350000; //1000 seconds
 		}
 

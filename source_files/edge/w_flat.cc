@@ -75,7 +75,7 @@ DEF_CVAR(r_precache_model,  "1", CVAR_ARCHIVE)
 // 
 void R_AddFlatAnim(animdef_c *anim)
 {
-	if (anim->pics.GetSize() == 0)  // old way
+	if (anim->pics.empty())  // old way
 	{
 		int start = W_CheckNumForName(anim->startname.c_str());
 		int end   = W_CheckNumForName(anim->endname.c_str());
@@ -134,16 +134,16 @@ void R_AddFlatAnim(animdef_c *anim)
 
 	// -AJA- 2004/10/27: new SEQUENCE command for anims
 
-	int total = anim->pics.GetSize();
+	int total = (int)anim->pics.size();
 
 	if (total == 1)
 		return;
 
 	const image_c **flats = new const image_c* [total];
 
-	for (int i = 0; i < total; i++)
+	for (int i = 0 ; i < total ; i++)
 	{
-		flats[i] = W_ImageLookup(anim->pics[i], INS_Flat, ILF_Null|ILF_Exact);
+		flats[i] = W_ImageLookup(anim->pics[i].c_str(), INS_Flat, ILF_Null|ILF_Exact);
 	}
 
 	W_AnimateImageSet(flats, total, anim->speed);
@@ -176,7 +176,7 @@ void R_AddFlatAnim(animdef_c *anim)
 // 
 void R_AddTextureAnim(animdef_c *anim)
 {
-	if (anim->pics.GetSize() == 0)  // old way
+	if (anim->pics.empty())  // old way
 	{
 		int set, s_offset, e_offset;
 
@@ -209,7 +209,7 @@ void R_AddTextureAnim(animdef_c *anim)
 
 	// -AJA- 2004/10/27: new SEQUENCE command for anims
 
-	int total = anim->pics.GetSize();
+	int total = (int)anim->pics.size();
 
 	if (total == 1)
 		return;
@@ -218,7 +218,7 @@ void R_AddTextureAnim(animdef_c *anim)
 
 	for (int i = 0; i < total; i++)
 	{
-		texs[i] = W_ImageLookup(anim->pics[i], INS_Texture, ILF_Null|ILF_Exact);
+		texs[i] = W_ImageLookup(anim->pics[i].c_str(), INS_Texture, ILF_Null|ILF_Exact);
 	}
 
 	W_AnimateImageSet(texs, total, anim->speed);
@@ -230,7 +230,7 @@ void R_AddTextureAnim(animdef_c *anim)
 // 
 void R_AddGraphicAnim(animdef_c *anim)
 {
-	int total = anim->pics.GetSize();
+	int total = (int)anim->pics.size();
 
 	SYS_ASSERT(total != 0);
 
@@ -241,12 +241,13 @@ void R_AddGraphicAnim(animdef_c *anim)
 
 	for (int i = 0; i < total; i++)
 	{
-		users[i] = W_ImageLookup(anim->pics[i], INS_Graphic, ILF_Null|ILF_Exact);
+		users[i] = W_ImageLookup(anim->pics[i].c_str(), INS_Graphic, ILF_Null|ILF_Exact);
 	}
 
 	W_AnimateImageSet(users, total, anim->speed);
 	delete[] users;
 }
+
 
 struct Compare_flat_pred
 {

@@ -290,17 +290,17 @@ static void DDF_GameGetMap(const char *info, void *storage)
 	dynamic_gamedef->mappos.Insert(mp);
 }
 
-static void DDF_GameGetPic (const char *info, void *storage)
+static void DDF_GameGetPic(const char *info, void *storage)
 {
 	if (splash_screen)
 	{
-		dynamic_gamedef->titlepics.Insert(info);
+		dynamic_gamedef->titlepics.push_back(info);
 	}
 	else
 	{
 		if (strcmp(info, "EDGECRED") != 0)
 		{
-			dynamic_gamedef->titlepics.Insert(info);
+			dynamic_gamedef->titlepics.push_back(info);
 		}
 	}
 }
@@ -731,7 +731,7 @@ wi_animdef_container_c& wi_animdef_container_c::operator=(wi_animdef_container_c
 //
 // gamedef_c Constructor
 //
-gamedef_c::gamedef_c() : name()
+gamedef_c::gamedef_c() : name(), titlepics()
 {
 	Default();
 }
@@ -807,7 +807,7 @@ void gamedef_c::Default()
 	firstmap.clear();
 	namegraphic.clear();
 
-	titlepics.Clear();
+	titlepics.clear();
 
 	titlemusic = 0;
 	titletics = TICRATE * 4;

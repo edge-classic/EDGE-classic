@@ -52,7 +52,7 @@ public:
 	int type;
 
 	// -AJA- 2004/10/27: new SEQUENCE command for anims
-	epi::strlist_c pics;
+	std::vector<std::string> pics;
 
 	// first and last names in TEXTURE1/2 lump
 	std::string startname;

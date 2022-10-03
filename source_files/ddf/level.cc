@@ -47,7 +47,7 @@ static const commandlist_t finale_commands[] =
     DF("TEXT_SPEED", text_speed, DDF_MainGetFloat),
     DF("TEXT_WAIT", text_wait, DDF_MainGetNumeric),
     DF("COLOURMAP", text_colmap, DDF_MainGetColourmap),
-    DF("GRAPHIC", text, DDF_LevelGetPic),
+    DF("GRAPHIC", pics, DDF_LevelGetPic),
     DF("GRAPHIC_WAIT", picwait, DDF_MainGetTime),
     DF("CAST", docast, DDF_MainGetBoolean),
     DF("BUNNY", dobunny, DDF_MainGetBoolean),
@@ -263,14 +263,15 @@ void DDF_LevelCleanUp(void)
 	}
 }
 
+
 //
 // Adds finale pictures to the level's list.
 //
 void DDF_LevelGetPic(const char *info, void *storage)
 {
-	map_finaledef_c *f = (map_finaledef_c *)storage;
+	std::vector<std::string> * list = (std::vector<std::string> *)storage;
 
-	f->pics.Insert(info);
+	list->push_back(info);
 }
 
 
@@ -337,12 +338,12 @@ void DDF_LevelGetWistyle(const char *info, void *storage)
 
 // --> map finale definition class
 
-map_finaledef_c::map_finaledef_c()
+map_finaledef_c::map_finaledef_c() : pics()
 {
 	Default();
 }
 
-map_finaledef_c::map_finaledef_c(map_finaledef_c &rhs)
+map_finaledef_c::map_finaledef_c(map_finaledef_c &rhs) : pics()
 {
 	Copy(rhs);
 }
@@ -378,7 +379,7 @@ void map_finaledef_c::Default()
 	text_wait = 150;
 	text_colmap = NULL;
 
-	pics.Clear();
+	pics.clear();
 	picwait = 0;
 
 	docast = false;

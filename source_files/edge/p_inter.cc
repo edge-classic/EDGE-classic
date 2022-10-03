@@ -1266,18 +1266,18 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 	{
 		int i;
 
-		if (damtype->grounded_monsters)
+		if (damtype && damtype->grounded_monsters)
 			return;
 
 		// ignore damage in GOD mode, or with INVUL powerup
 		if ((player->cheats & CF_GODMODE) || player->powers[PW_Invulnerable] > 0)
 		{
-			if (!damtype->bypass_all)
+			if (! (damtype && damtype->bypass_all))
 				return;
 		}
 
 		// MBF21 - Only damage if not wearing a radsuit (also if not invul, but the above check should theoretically cover that already)
-		if (damtype->if_naked && player->powers[PW_AcidSuit] > 0)
+		if (damtype && damtype->if_naked && player->powers[PW_AcidSuit] > 0)
 			return;
 
 		// take half damage in trainer mode
@@ -1372,7 +1372,7 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 
 		player->attacker = source;
 
-		if (damtype->instakill)
+		if (damtype && damtype->instakill)
 			damage = target->player->health + 1;
 
 		// add damage after armour / invuln detection
@@ -1388,7 +1388,7 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 	}
 	else
 	{
-		if (damtype->instakill)
+		if (damtype && damtype->instakill)
 			damage = target->health + 1;
 	}
 

@@ -1084,9 +1084,9 @@ std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
 	
 }
 
-// GetQueryInfoFromWeapon(mobj, whatinfo)
+// GetQueryInfoFromWeapon(mobj, whatinfo, [secattackinfo])
 //
-std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo)
+std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secattackinfo = false)
 {
 	int temp_num = 0;
 	std::string temp_string;
@@ -1098,87 +1098,68 @@ std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo)
 		return "";	
 
 	weapondef_c *objWep = obj->info->pickup_benefits->sub.weap;
+	if (!objWep)
+		return "";
+
+	int attacknum = 0; //default to primary attack
+	if(secattackinfo)
+		attacknum = 1;
+
+	atkdef_c *objAtck = objWep->attack[attacknum];	
+	if(!objAtck && whatinfo > 2)
+		return ""; //no attack to get info about (only should happen with secondary attacks)
+
+	const damage_c *damtype;
+
 	switch (whatinfo)
 	{
 		case 1:  //name
-			if (objWep)
-			{
-				temp_string = objWep->name;
-				temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
-			}
+			temp_string = objWep->name;
+			temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
 			break;
 		
 		case 2:  //ZOOM_FACTOR
-			if (objWep)
-			{
-				temp_num = objWep->zoom_factor;
-				temp_string = std::to_string(temp_num);
-			}
+			temp_num = objWep->zoom_factor;
+			temp_string = std::to_string(temp_num);
 			break;
 
 		case 3: //AMMOTYPE
-			if (objWep)
-			{
-				temp_num = (objWep->ammo[0]) + 1;
-				temp_string = std::to_string(temp_num);
-			}
+			temp_num = (objWep->ammo[attacknum]) + 1;
+			temp_string = std::to_string(temp_num);
 			break;
 
 		case 4: //AMMOPERSHOT
-			if (objWep)
-			{
-				temp_num = objWep->ammopershot[0];
-				temp_string = std::to_string(temp_num);
-			}
+			temp_num = objWep->ammopershot[attacknum];
+			temp_string = std::to_string(temp_num);
 			break;
 
 		case 5:  //CLIPSIZE
-			if (objWep)
-			{
-				temp_num = objWep->clip_size[0];
-				temp_string = std::to_string(temp_num);
-			}
+			temp_num = objWep->clip_size[attacknum];
+			temp_string = std::to_string(temp_num);
 			break;
 
 		case 6: //DAMAGE Nominal
-			if (objWep)
-			{
-				atkdef_c *objAtck = objWep->attack[0];
-				const damage_c *damtype;
-				damtype = &objAtck->damage;
-				temp_num = damtype->nominal;
-				temp_string = std::to_string(temp_num);
-			}
+			damtype = &objAtck->damage;
+			temp_num = damtype->nominal;
+			temp_string = std::to_string(temp_num);
 			break;
 		
 		case 7: //DAMAGE Max
-			if (objWep)
-			{
-				atkdef_c *objAtck = objWep->attack[0];
-				const damage_c *damtype;
-				damtype = &objAtck->damage;
-				temp_num = damtype->linear_max;
-				temp_string = std::to_string(temp_num);
-			}
+			damtype = &objAtck->damage;
+			temp_num = damtype->linear_max;
+			temp_string = std::to_string(temp_num);
 			break;
 
 		case 8: //Range
-			if (objWep)
-			{
-				atkdef_c *objAtck = objWep->attack[0];
-				temp_num = objAtck->range;
-				temp_string = std::to_string(temp_num);
-			}
+			temp_num = objAtck->range;
+			temp_string = std::to_string(temp_num);
 			break;
 
 		case 9:  //AUTOMATIC
-			if (objWep)
-			{
-				if (objWep->autofire[0])
-					temp_string = "1";
-				else
-					temp_string = "0";
-			}
+			if (objWep->autofire[attacknum])
+				temp_string = "1";
+			else
+				temp_string = "0";
 			break;
 
 	}
@@ -1289,20 +1270,29 @@ static void MO_count(coal::vm_c *vm, int argc)
 	vm->ReturnFloat(thingcount);
 }
 
-// player.query_weapon(whatinfo)
+// player.query_weapon(whatinfo,[SecAttack])
 //
 static void PL_query_weapon(coal::vm_c *vm, int argc)
 {
 	double *num = vm->AccessParam(0);
+	double *secattack = vm->AccessParam(1);
+
 	int whatinfo = 1;
+	int secattackinfo = 0;
 
 	if (!num)
 		I_Error("player.query_weapon: can't parse WhatInfo!\n");
 	else
 		whatinfo = (int)*num;
 
+	if (secattack)
+		secattackinfo = (int)*secattack;
+
 	if (whatinfo < 1 || whatinfo > 9)
 		I_Error("player.query_weapon: bad whatInfo number: %d\n", whatinfo);
+
+	if (secattackinfo < 0 || secattackinfo > 1)
+		I_Error("player.query_weapon: bad secAttackInfo number: %d\n", whatinfo);
 
 	mobj_t *obj = DoMapTargetAutoAim(ui_player_who->mo, ui_player_who->mo->angle, 512, true, true);
 	if (!obj)
@@ -1314,7 +1304,10 @@ static void PL_query_weapon(coal::vm_c *vm, int argc)
 	std::string temp_string;
 	temp_string.clear();
 
-	temp_string = GetQueryInfoFromWeapon(obj,whatinfo);
+	if (secattackinfo == 1)
+		temp_string = GetQueryInfoFromWeapon(obj,whatinfo,true);
+	else
+		temp_string = GetQueryInfoFromWeapon(obj,whatinfo);
 
 	if (temp_string.empty())
 		vm->ReturnString("");

@@ -36,337 +36,56 @@
 //
 
 #include "local.h"
-
 #include "language.h"
 
-// ---> ddf buildinfo for language class
-class ddf_bi_lang_c
+#include <unordered_map>
+
+// Globals
+language_c language;   // -ACB- 2004/07/28 Languages instance
+
+
+static void SanitizeRefName(std::string& s)
+{
+	for (size_t i = 0 ; i < s.size() ; i++)
+	{
+		if (s[i] == ' ')
+			s[i] = '_';
+
+		s[i] = (char)toupper(s[i]);
+	}
+}
+
+
+class lang_choice_c
 {
 public:
-	ddf_bi_lang_c() 
+	std::string name;
+	std::unordered_map<std::string, std::string> refs;
+
+	lang_choice_c() : name(), refs()
+	{ }
+
+	~lang_choice_c()
+	{ }
+
+	bool HasEntry(const std::string& refname) const
 	{
-		treehead = NULL; 
+		return refs.find(refname) != refs.end();
 	}
-	
-	~ddf_bi_lang_c() 
-	{ 
-		DeleteLangNodes(); 
-	}
-	
-	struct langentry_s
+
+	void AddEntry(const char *refname, const char *value)
 	{
-		langentry_s()
-		{
-			// Binary tree for sorting
-			left = NULL;
-			right = NULL;
-			
-			// Next entry with matching ref
-			lang_next = NULL;
-			
-			// Linked list
-			prev = NULL;
-			next = NULL;
-		}
-		
-		int lang;
-	
-		std::string ref;
-		std::string value;	
-		
-		// A linked list + binary tree is wasteful, but speed efficent and
-		// avoids stack overflow issues that may occur
-		struct langentry_s* left;
-		struct langentry_s* right;
-		
-		struct langentry_s* prev;
-		struct langentry_s* next;
+		// ensure ref name is uppercase, with no spaces
+		std::string ref(refname);
+		SanitizeRefName(ref);
 
-		// Next entry 
-		struct langentry_s* lang_next;		
-	};
-	
-private:
-	langentry_s *treehead;
-	 
-public:
-	epi::strlist_c langnames;
-	int currlang;
-	
-	epi::strlist_c comp_langrefs;   // Compiled language references
-	epi::strlist_c comp_langvalues; // Compiled language values (1 per lang)
-	
-	// LANGUAGE ENTRY NODE HANDLING
-	
-	void AddLangNode(const char *_ref, const char *value)
-	{
-		langentry_s *currnode, *node, *newnode;
-
-		int cmp;
-		enum { CREATE_HEAD, TO_LEFT, TO_RIGHT, ADD, REPLACE } act;
-
-		act = CREATE_HEAD;
-		currnode = NULL;
-		node = treehead;
-
-		while (node && act != REPLACE)
-		{
-			currnode = node;
-			
-			if (act != ADD)
-				cmp = stricmp(_ref, node->ref.c_str());
-			else
-				cmp = 0;	// Has to be a match if the last act was ADD
-					
-			if (cmp == 0)
-			{
-				//
-				// Check to see if the language id matches, if it does then
-				// replace the entry, else add the node.
-				//
-				if (node->lang == currlang)
-				{
-					act = REPLACE;
-				}
-				else
-				{
-					act = ADD;
-					node = node->lang_next;
-				}
-			} 
-			else if (cmp < 0)
-			{
-				act = TO_LEFT;
-				node = node->left;
-			}
-			else if (cmp > 0)
-			{
-				act = TO_RIGHT;
-				node = node->right;
-			}
-		}
-	
-		// Handle replace seperately, since we not creating anything
-		if (act == REPLACE)
-		{
-			node->value = value;
-			return;
-		}
-	
-		newnode = new langentry_s;
-
-		if (act != ADD) { newnode->ref = _ref; }
-
-		newnode->value = value;
-		newnode->lang  = currlang;
-		
-		switch (act)
-		{
-			case CREATE_HEAD:	
-			{ 
-				treehead = newnode; 
-				break;
-			}
-			
-			case TO_LEFT:		
-			{ 
-				// Update the binary tree
-				currnode->left = newnode;
-				
-				// Update the linked list (Insert behind current node)
-				if (currnode->prev) 
-				{ 
-					currnode->prev->next = newnode; 
-					newnode->prev = currnode->prev;
-				}
-				
-				currnode->prev = newnode;
-				newnode->next = currnode; 
-				break;
-			}
-			
-			case TO_RIGHT:  	
-			{ 
-				// Update the binary tree
-				currnode->right = newnode; 
-
-				// Update the linked list (Insert infront of current node)
-				if (currnode->next) 
-				{ 
-					currnode->next->prev = newnode; 
-					newnode->next = currnode->next;
-				}
-				
-				currnode->next = newnode;
-				newnode->prev = currnode; 
-				break;
-			}
-			
-			case ADD:  		
-			{ 
-				currnode->lang_next = newnode; 
-				break;
-			}
-			
-			default: 			
-			{ 
-				break; /* FIXME!! Throw error */ 
-			}
-		}
-	}
-	
-	void DeleteLangNodes()
-	{
-		if (!treehead)
-			return;
-		
-		// The node head is the head for the binary tree, so
-		// we have to find the head by going backwards from
-		// the treehead
-		
-		langentry_s *currnode, *savenode;
-
-		currnode = treehead;
-		while (currnode->prev)
-			currnode = currnode->prev;
-			
-		while (currnode)
-		{
-			savenode = currnode->next;
-			delete currnode;
-			currnode = savenode;
-		}
-	}
-	
-	// LANGUAGES
-	
-	//
-	// AddLanguage()
-	//
-	// Returns if the language already exists
-	//
-	bool AddLanguage(const char *name)
-	{
-		int langsel = -1;
-		
-		// Look for an existing language entry if one exists
-		{
-			epi::array_iterator_c it;
-
-			for (it = langnames.GetBaseIterator(); it.IsValid(); it++)
-			{
-				char *it2 = ITERATOR_TO_TYPE(it, char*);
-
-				if (stricmp(it2, name) == 0)
-				{
-					langsel = it.GetPos();
-					break;
-				}
-			}
-		}
-		
-		// Setup the current language index, adding the new entry if needs be
-		if (langsel < 0)
-		{
-			langnames.Insert(name);
-
-			currlang = langnames.GetSize() - 1;
-		}
-		else
-		{
-			currlang = langsel;
-		}
-		
-		
-		return (langsel < 0);
-	}
-	
-	// LIST COMPILING
-			
-	void CompileLanguageReferences()
-	{
-		comp_langrefs.Clear();
-		
-		if (!treehead)
-			return;					// Nothing to do
-
-		langentry_s *currnode, *head;
-		int count;
-		
-		currnode = treehead;
-		while (currnode->prev)
-			currnode = currnode->prev;
-			
-		head = currnode;
-			
-		// Count the entries so strlist_c does not over-fragment memory
-		count = 0;
-		while (currnode)
-		{
-			currnode = currnode->next;
-			count++;
-		}
-		
-		comp_langrefs.Size(count);
-		
-		// Add entries
-		for (currnode = head; currnode; currnode = currnode->next)
-			comp_langrefs.Insert(currnode->ref.c_str());
-		
-		return;		
-	}
-	
-	void CompileLanguageValues(int lang)
-	{
-		SYS_ASSERT(lang >=0 && lang <= langnames.GetSize());
-			
-		comp_langvalues.Clear();
-		
-		if (!treehead)
-			return;					// Nothing to do
-
-		langentry_s *currnode, *head, *langnode;
-		int count;
-		
-		// Find me head, son!
-		currnode = treehead;
-		while (currnode->prev)
-			currnode = currnode->prev;
-			
-		head = currnode;
-			
-		// Count the entries so strlist_c does not over-fragment memory
-		count = 0;
-		while (currnode)
-		{
-			currnode = currnode->next;
-			count++;
-		}
-
-		comp_langvalues.Size(count);
-
-		// Add entries
-		for (currnode = head; currnode; currnode = currnode->next)
-		{
-			langnode = currnode;
-			while (langnode && langnode->lang != lang)
-				langnode = langnode->lang_next;
-				
-			if (langnode)
-				comp_langvalues.Insert(langnode->value.c_str());
-			else	
-				comp_langvalues.Insert(NULL);
-		}
-		
-		return;
+		refs[ref] = value;
 	}
 };
 
-// Globals
-language_c language;	// -ACB- 2004/07/28 Languages instance
 
-// Locals
-ddf_bi_lang_c* lang_buildinfo;
+static lang_choice_c * dynamic_choice;
+
 
 //
 //  DDF PARSING ROUTINES
@@ -381,7 +100,7 @@ static void LanguageStartEntry(const char *name, bool extend)
 
 	// Note: extension is the norm for LANGUAGES.LDF
 
-	lang_buildinfo->AddLanguage(name);
+	dynamic_choice = language.AddChoice(name);
 }
 
 
@@ -398,13 +117,15 @@ static void LanguageParseField(const char *field, const char *contents,
 		return;
 	}
 
-	lang_buildinfo->AddLangNode(field, contents);
+	dynamic_choice->AddEntry(field, contents);
 }
+
 
 static void LanguageFinishEntry(void)
 {
-	/* ... */
+	dynamic_choice = NULL;
 }
+
 
 static void LanguageClearAll(void)
 {
@@ -431,44 +152,14 @@ void DDF_ReadLangs(const std::string& data)
 
 void DDF_LanguageInit(void)
 {
-	// FIXME! Copy any existing entries into the new buildinfo
-
-	// Clear any existing
-	language.Clear();
-
-	// Create a build info object
-	lang_buildinfo = new ddf_bi_lang_c;
+	// nothing needed
 }
+
 
 void DDF_LanguageCleanUp(void)
 {
-	// Convert build info into the language structure
-	int langcount = lang_buildinfo->langnames.GetSize();
-	if (langcount == 0)
+	if (language.GetChoiceCount() == 0)
 		I_Error("Missing languages !\n");
-	
-	// Load the choice of languages
-	language.LoadLanguageChoices(lang_buildinfo->langnames);
-	
-	// Load the reference table
-	lang_buildinfo->CompileLanguageReferences();
-	language.LoadLanguageReferences(lang_buildinfo->comp_langrefs);
-	
-	// Load the value table for each one of the languages
-	int i;
-	for (i=0; i<langcount; i++)
-	{
-		lang_buildinfo->CompileLanguageValues(i);
-		language.LoadLanguageValues(i, lang_buildinfo->comp_langvalues);
-	}
-	
-	//language.Dump();
-	//exit(1);
-	
-	language.buildinfo = lang_buildinfo;
-
-	// Dispose of the data
-	//delete lang_buildinfo;
 }
 
 
@@ -484,122 +175,73 @@ language_c::~language_c()
 }
 
 
-void language_c::Recompile(void)
+lang_choice_c * language_c::AddChoice(const char *name)
 {
-	// Convert build info into the language structure
-	int langcount = buildinfo->langnames.GetSize();
-	if (langcount == 0)
-		I_Error("Missing languages !\n");
-	
-	// Load the choice of languages
-	LoadLanguageChoices(buildinfo->langnames);
-	
-	// Load the reference table
-	buildinfo->CompileLanguageReferences();
-	LoadLanguageReferences(buildinfo->comp_langrefs);
-	
-	// Load the value table for each one of the languages
-	int i;
-	for (i=0; i<langcount; i++)
+	for (size_t i = 0 ; i < choices.size() ; i++)
 	{
-		buildinfo->CompileLanguageValues(i);
-		LoadLanguageValues(i, buildinfo->comp_langvalues);
+		if (DDF_CompareName(name, choices[i]->name.c_str()) == 0)
+			return choices[i];
 	}
+
+	lang_choice_c * choice = new lang_choice_c;
+	choice->name = name;
+
+	choices.push_back(choice);
+	return choice;
 }
+
 
 void language_c::AddOrReplace(const char *ref, const char *value)
 {
-	buildinfo->AddLangNode(ref, value);
-	Recompile();
+	if (umap == NULL)
+	{
+		umap = new lang_choice_c;
+
+		umap->AddEntry(ref, value);
+	}
 }
 
 
 void language_c::Clear()
 {
-	choices.Clear();
-	refs.Clear();
-	
-	if (values)
+	for (size_t i = 0 ; i < choices.size() ; i++)
+		delete choices[i];
+
+	choices.clear();
+
+	if (umap != NULL)
 	{
-		delete [] values;
-		values = NULL;
+		delete umap;
+		umap = NULL;
 	}
 
 	current = -1;
 }
 
 
-int language_c::Find(const char *name)
-{
-	if (!values || !name)
-		return -1;
-
-	// TODO Optimise search - this list is sorted in order
-
-	for (int i = refs.GetSize()-1; i >= 0; i--)
-		if (stricmp(refs[i], name) == 0)
-			return i;
-
-	return -1; // not found
-}
-
-//
-// const char* language_c::GetName()
-//	
-// Returns the current name if idx is isvalid, can be
-// NULL if the choices table has not been setup
-//
+// returns the current name if idx is negative.
 const char* language_c::GetName(int idx)
 {
+	// fallback in case no languages are loaded
+	if (choices.empty())
+		return "ENGLISH";
+
 	if (idx < 0)
 		idx = current;
-		
-	if (idx < 0 || idx >= choices.GetSize())
-		return NULL; 
-	
-	return choices[idx];
-}
 
+	// caller must ensure index is valid
+	if (idx < 0 || idx >= (int)choices.size())
+		I_Error("Bug in code calling language_c::GetName\n");
 
-bool language_c::IsValidRef(const char *refname)
-{
-	return (Find(refname)>=0);
-}
-
-
-void language_c::LoadLanguageChoices(epi::strlist_c& _langnames)
-{
-	choices.Set(_langnames);
-}
-
-
-void language_c::LoadLanguageReferences(epi::strlist_c& _refs)
-{
-	if (values)
-		delete [] values;
-
-	refs.Set(_refs);
-	values = new epi::strbox_c[refs.GetSize()];
-}
-
-
-void language_c::LoadLanguageValues(int lang, epi::strlist_c& _values)
-{
-	if (_values.GetSize() != refs.GetSize())
-		return;
-		
-	if (lang < 0 || lang >= choices.GetSize())
-		return;
-
-	values[lang].Set(_values);
+	return choices[idx]->name.c_str();
 }
 
 
 bool language_c::Select(const char *name)
 {
-	for (int i=0 ; i < choices.GetSize() ; i++)
+	for (size_t i = 0 ; i < choices.size() ; i++)
 	{
-		if (DDF_CompareName(name, choices[i]) == 0)
+		if (DDF_CompareName(name, choices[i]->name.c_str()) == 0)
 		{
 			current = i;
 			return true;
@@ -612,7 +254,7 @@ bool language_c::Select(const char *name)
 
 bool language_c::Select(int idx)
 {
-	if (idx < 0 || idx >= choices.GetSize())
+	if (idx < 0 || idx >= (int)choices.size())
 		return false;
 
 	current = idx;
@@ -620,61 +262,61 @@ bool language_c::Select(int idx)
 }
 
 
-const char* language_c::operator[](const char *refname)
+bool language_c::IsValidRef(const char *refname)
 {
-	int idx;
-	
-	idx = Find(refname);
-	if (idx>=0)
+	if (current < 0 || current >= (int)choices.size())
+		return false;
+
+	if (umap != NULL)
+		if (umap->HasEntry(refname))
+			return true;
+
+	return choices[current]->HasEntry(refname);
+}
+
+
+// this returns the given refname if the lookup fails.
+const char * language_c::operator[](const char *refname)
+{
+	if (refname == NULL)
+		return "";
+
+	if (current < 0 || current >= (int)choices.size())
+		return refname;
+
+	// ensure ref name is uppercase, with no spaces
+	std::string ref(refname);
+	SanitizeRefName(ref);
+
+	if (umap != NULL)
 	{
-		if (current < 0 || current >= choices.GetSize())
-			return refname;  // -AJA- preserve old behaviour
-		
-		const char *s = values[current][idx];
-		if (s != NULL)
-			return s;
-			
-		// Look through other language definitions is one does not exist
-		int i, max;
-		for (i=0, max=choices.GetSize(); i<max; i++)
+		if (umap->HasEntry(ref))
 		{
-			if (i != current)
-			{
-				const char *s = values[i][idx];
-				if (s != NULL)
-					return values[i][idx];
-			}
+			const std::string& value = umap->refs[ref];
+			return value.c_str();
 		}
 	}
 
-	return refname;  // -AJA- preserve old behaviour
-}
-
-/*
-void language_c::Dump(void)
-{
-	int i,j;
-	for (i=0; i<choices.GetSize(); i++)
+	if (choices[current]->HasEntry(ref))
 	{
-		I_Printf("Language %d is %s\n", i, choices[i]);
-	}	
-	I_Printf("\n");
-
-	for (i=0; i<refs.GetSize(); i++)
-	{
-		I_Printf("Ref %d is %s\n", i, refs[i]);
+		const std::string& value = choices[current]->refs[ref];
+		return value.c_str();
 	}
 
-	I_Printf("\n");
-	for (i=0; i<choices.GetSize(); i++)
+	// fallback, look through other language definitions...
+
+	for (size_t i = 0 ; i < choices.size() ; i++)
 	{
-		for (j=0; j<values[i].GetSize(); j++)
-			I_Printf("Value %d/%d (%s) is %s\n", i, j, refs[j], values[i][j]);
-			
-		I_Printf("\n");
-	}	
+		if (choices[i]->HasEntry(ref))
+		{
+			const std::string& value = choices[i]->refs[ref];
+			return value.c_str();
+		}
+	}
+
+	// not found!
+	return refname;
 }
-*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -20,66 +20,10 @@
 
 #include "arrays.h"
 
-#include <vector>
-
 namespace epi
 {
-	// Forward declaration
-	class strlist_c;
-
-    // String Box
-    class strbox_c
-    {
-    public:
-    	strbox_c();
-    	strbox_c(strbox_c &rhs);
-    	~strbox_c();
-    	
-    private:
-    	char **strs;
-    	int numstrs;
-    	
-    	char *data;
-    	int datasize;
-    	
-    	void Copy(strbox_c &src);
-    	
-    public:
-    	void Clear();
-    	int GetSize() const { return numstrs; }
-    	void Set(strlist_c &src);
-    	void Set(const std::vector<std::string>& src);
-
-    	strbox_c& operator=(strbox_c &rhs);
-    	const char * operator[](int idx) const { return strs[idx]; }
-    };
-    
-    // String list
-    class strlist_c : public array_c
-    {
-    public:
-        strlist_c();
-        strlist_c(strlist_c &rhs);
-        ~strlist_c();
-        
-    private:
-        void CleanupObject(void *obj);
-		void Copy(strlist_c &src);
-        
-    public:
-        void Delete(int idx) { RemoveObject(idx); }
-	    int Find(const char* refname);
-	    int GetSize() const { return array_entries; }
-	    int Insert(const char *s);
-    	void Set(strbox_c &src);
-    	
-		strlist_c& operator=(strlist_c &rhs);
-	    char* operator[](int idx) const { return *(char**)FetchObject(idx); } 
-    };
     
 };
-
-
 
 
 //

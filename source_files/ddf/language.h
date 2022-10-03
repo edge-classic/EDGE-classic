@@ -23,11 +23,11 @@
 
 #include "types.h"
 
-class ddf_bi_lang_c;
-
 // ------------------------------------------------------------------
 // ---------------------------LANGUAGES------------------------------
 // ------------------------------------------------------------------
+
+class lang_choice_c;
 
 class language_c
 {
@@ -36,29 +36,23 @@ public:
 	~language_c();
 
 private:
-	epi::strbox_c choices;
-	epi::strbox_c refs;
-	epi::strbox_c *values;
+	std::vector<lang_choice_c *> choices;
 
+	// UMAPINFO strings
+	lang_choice_c *umap;
+
+	// the current language choice
 	int current;
-
-	int Find(const char *ref);
-
-	void Recompile(void);
 
 public:
 	void Clear();
 	
-	int GetChoiceCount() { return choices.GetSize(); }
+	int GetChoiceCount() { return (int)choices.size(); }
 	int GetChoice() { return current; }
 	
-	const char* GetName(int idx = -1);
+	const char *GetName(int idx = -1);
 	bool IsValidRef(const char *refname);
-	
-	void LoadLanguageChoices(epi::strlist_c& langnames);
-	void LoadLanguageReferences(epi::strlist_c& _refs);
-	void LoadLanguageValues(int lang, epi::strlist_c& _values);
-				
+
 	bool Select(const char *name);
 	bool Select(int idx);
 
@@ -68,11 +62,8 @@ public:
 		return (*this)[refname.c_str()];
 	}
 
-	ddf_bi_lang_c* buildinfo;
-	
+	// this is for UMAPINFO strings
 	void AddOrReplace(const char *ref, const char *value);
-
-	//void Dump(void);
 };
 
 extern language_c language;   // -ACB- 2004/06/27 Implemented

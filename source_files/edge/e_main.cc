@@ -401,9 +401,6 @@ static void SetGlobalVars(void)
 void SetLanguage(void)
 {
 	const char *want_lang = M_GetParm("-lang");
-	if (! want_lang)
-		want_lang = M_GetParm("-language");
-
 	if (want_lang)
 		m_language = want_lang;
 

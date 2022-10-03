@@ -44,6 +44,18 @@
 language_c language;   // -ACB- 2004/07/28 Languages instance
 
 
+static void SanitizeRefName(std::string& s)
+{
+	for (size_t i = 0 ; i < s.size() ; i++)
+	{
+		if (s[i] == ' ')
+			s[i] = '_';
+
+		s[i] = (char)toupper(s[i]);
+	}
+}
+
+
 class lang_choice_c
 {
 public:
@@ -60,19 +72,19 @@ public:
 	{
 		return refs.find(refname) != refs.end();
 	}
+
+	void AddEntry(const char *refname, const char *value)
+	{
+		// ensure ref name is uppercase, with no spaces
+		std::string ref(refname);
+		SanitizeRefName(ref);
+
+		refs[ref] = value;
+	}
 };
 
 
-static void SanitizeEntryName(std::string& s)
-{
-	for (size_t i = 0 ; i < s.size() ; i++)
-	{
-		if (s[i] == ' ')
-			s[i] = '_';
-
-		s[i] = (char)toupper(s[i]);
-	}
-}
+static lang_choice_c * dynamic_choice;
 
 
 //
@@ -88,7 +100,7 @@ static void LanguageStartEntry(const char *name, bool extend)
 
 	// Note: extension is the norm for LANGUAGES.LDF
 
-//FIXME	lang_buildinfo->AddLanguage(name);
+	dynamic_choice = language.AddChoice(name);
 }
 
 
@@ -105,13 +117,13 @@ static void LanguageParseField(const char *field, const char *contents,
 		return;
 	}
 
-//FIXME	lang_buildinfo->AddLangNode(field, contents);
+	dynamic_choice->AddEntry(field, contents);
 }
 
 
 static void LanguageFinishEntry(void)
 {
-	// nothing needed
+	dynamic_choice = NULL;
 }
 
 
@@ -163,11 +175,29 @@ language_c::~language_c()
 }
 
 
+lang_choice_c * language_c::AddChoice(const char *name)
+{
+	for (size_t i = 0 ; i < choices.size() ; i++)
+	{
+		if (DDF_CompareName(name, choices[i]->name.c_str()) == 0)
+			return choices[i];
+	}
+
+	lang_choice_c * choice = new lang_choice_c;
+	choice->name = name;
+
+	choices.push_back(choice);
+	return choice;
+}
+
+
 void language_c::AddOrReplace(const char *ref, const char *value)
 {
 	if (umap == NULL)
 	{
-		// FIXME
+		umap = new lang_choice_c;
+
+		umap->AddEntry(ref, value);
 	}
 }
 
@@ -254,22 +284,22 @@ const char * language_c::operator[](const char *refname)
 	if (current < 0 || current >= (int)choices.size())
 		return refname;
 
-	// ensure input name is uppercase, with no spaces
-	std::string ref2(refname);
-	SanitizeEntryName(ref2);
+	// ensure ref name is uppercase, with no spaces
+	std::string ref(refname);
+	SanitizeRefName(ref);
 
 	if (umap != NULL)
 	{
-		if (umap->HasEntry(ref2))
+		if (umap->HasEntry(ref))
 		{
-			const std::string& value = umap->refs[ref2];
+			const std::string& value = umap->refs[ref];
 			return value.c_str();
 		}
 	}
 
-	if (choices[current]->HasEntry(ref2))
+	if (choices[current]->HasEntry(ref))
 	{
-		const std::string& value = choices[current]->refs[ref2];
+		const std::string& value = choices[current]->refs[ref];
 		return value.c_str();
 	}
 
@@ -277,9 +307,9 @@ const char * language_c::operator[](const char *refname)
 
 	for (size_t i = 0 ; i < choices.size() ; i++)
 	{
-		if (choices[i]->HasEntry(ref2))
+		if (choices[i]->HasEntry(ref))
 		{
-			const std::string& value = choices[i]->refs[ref2];
+			const std::string& value = choices[i]->refs[ref];
 			return value.c_str();
 		}
 	}

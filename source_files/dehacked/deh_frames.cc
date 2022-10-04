@@ -651,9 +651,19 @@ bool Frames::SpreadGroupPass(bool alt_jumps)
 		char group = group_for_state[i];
 		group_info_t& G = groups[group];
 
+		// check if this is the very first state of death or overkill sequence.
+		// in vanilla Doom (and Boom/MBF/etc), a tics of -1 will be IGNORED when
+		// *entering* such a state due to this code in P_KillMobj:
+		//    ``` if (target->tics < 1)
+		//            target->tics = 1;
+		//    ```
+		// and that means it *will* enter the next state.
+
+		bool first_death = ((group == 'D' || group == 'X') && G.states.size() == 1);
+
 		// hibernation?
 		// if action is A_RandomJump or similar, still need to follow it!
-		if (st->tics < 0 && !alt_jumps)
+		if (st->tics < 0 && !first_death && !alt_jumps)
 			continue;
 
 		int next = st->nextstate;

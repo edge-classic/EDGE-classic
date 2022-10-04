@@ -309,7 +309,7 @@ typedef enum
 	// -Lobo- 2022/07/07: this thing doesn't cause splashes
 	HF_NOSPLASH = (1 << 20),
 
-	// -AJA- 2022/08/04: used by DEH_EDGE to workaround issues
+	// -AJA- 2022/10/04: used by DEH_EDGE to workaround issues
 	HF_DEHACKED_COMPAT = (1 << 21),
 }
 mobjhyperflag_t;

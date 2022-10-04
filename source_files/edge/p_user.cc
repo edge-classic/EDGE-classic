@@ -311,7 +311,7 @@ static void MovePlayer(player_t * player)
 	eh = 1;
 	ev = 0;
 
-	if (swimming || flying)
+	if (swimming || flying || onladder)
 	{
 		float slope = M_Tan(player->mo->vertangle);
 

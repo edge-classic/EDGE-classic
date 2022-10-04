@@ -480,6 +480,13 @@ const state_t * Frames::NewStateElseOld(int st_num)
 
 state_t * Frames::GetModifiedState(int st_num)
 {
+	// this is possible since binary patches store the dummy state
+	if (st_num == S_NULL)
+	{
+		static state_t dummy;
+		return &dummy;
+	}
+
 	MarkState(st_num);
 
 	return new_states[st_num];

@@ -845,6 +845,49 @@ static void InsertChar(char ch)
 }
 
 
+static char KeyToCharacter(int key, bool shift, bool ctrl)
+{
+	if (ctrl)
+		return 0;
+
+	if (key < 32 || key > 126)
+		return 0;
+
+	if (! shift)
+		return (char)key;
+
+	// the following assumes a US keyboard layout
+	switch (key)
+	{
+		case '1':  return '!';
+		case '2':  return '@';
+		case '3':  return '#';
+		case '4':  return '$';
+		case '5':  return '%';
+		case '6':  return '^';
+		case '7':  return '&';
+		case '8':  return '*';
+		case '9':  return '(';
+		case '0':  return ')';
+
+		case '`':  return '~';
+		case '-':  return '_';
+		case '=':  return '+';
+		case '\\': return '|';
+		case '[':  return '{';
+		case ']':  return '}';
+		case ';':  return ':';
+		case '\'': return '"';
+		case ',':  return '<';
+		case '.':  return '>';
+		case '/':  return '?';
+		case '@':  return '\'';
+	}
+
+	return toupper(key);
+}
+
+
 static void ListCompletions(std::vector<const char *> & list,
                             int word_len, int max_row, rgbcol_t color)
 {
@@ -1226,32 +1269,23 @@ void CON_HandleKey(int key, bool shift, bool ctrl)
 		break;
 
 	default:
-		if (key < 32 || key > 126)
 		{
+			char ch = KeyToCharacter(key, shift, ctrl);
+
 			// ignore non-printable characters
-			break;
+			if (ch == 0)
+				break;
+
+			// no room?
+			if (input_pos >= MAX_CON_INPUT-1)
+				break;
+
+			EditHistory();
+			InsertChar(ch);
+
+			TabbedLast = false;
+			con_cursor = 0;
 		}
-
-		EditHistory();
-
-		if (input_pos >= MAX_CON_INPUT-1)
-			break;
-
-
-		if (shift)
-		{
-			if (key == 45)
-				InsertChar(95);
-			else if (key == 56)
-				InsertChar(42);
-			else
-				InsertChar(toupper(key));
-		}
-		else
-			InsertChar(key);
-		
-		TabbedLast = false;
-		con_cursor = 0;
 		break;
 	}
 }

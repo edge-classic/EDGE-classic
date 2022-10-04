@@ -685,9 +685,8 @@ void E_PostEvent(event_t * ev)
 #ifdef DEBUG_KEY_EV  //!!!!
 if (ev->type == ev_keydown || ev->type == ev_keyup)
 {
-	L_WriteDebug("EVENT @ %08x %d %s\n",
-		I_ReadMicroSeconds()/1000,
-		ev->value.key,
+	I_Debugf("EVENT @ %08x %d %s\n",
+		I_GetMillies(), ev->value.key,
 		(ev->type == ev_keyup) ? "DOWN" : "up");
 }
 #endif

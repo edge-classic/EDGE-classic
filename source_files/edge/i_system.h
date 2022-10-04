@@ -38,53 +38,60 @@
 
 // -ACB- 1999/09/20 Removed system specific attribs.
 
-void I_SystemStartup(void);
 // This routine is responsible for getting things off the ground, in
 // particular calling all the other platform initialisers (i.e.
 // I_StartupControl, I_StartupGraphics, I_StartupMusic and
 // I_StartupSound).  Does whatever else the platform code needs.
+void I_SystemStartup(void);
 
-//--- void I_Loop(void);
 // This is called by EDGE to begin the main engine loop, and is not
 // expected to return.  It must call engine::Tick() to perform a
 // single loop in the system, which processes events, updates the play
 // simulation, keeps sound and music playing, and most importantly
 // renders a single frame of graphics.
+//--- void I_Loop(void);
 
-void I_Printf(const char *message,...) GCCATTR((format(printf, 1, 2)));
 // The generic print function.  If in text mode, the message should be
 // displayed on the text mode screen.  This function should also call
 // I_Debugf() and CON_Printf().
+void I_Printf(const char *message,...) GCCATTR((format(printf, 1, 2)));
 
-void I_Debugf(const char *message,...) GCCATTR((format(printf, 1, 2)));
+void I_Logf(const char *message,...) GCCATTR((format(printf, 1, 2)));
+
+// Writes a warning to the console and the debug file (if any).  This
+// function should call CON_Printf().
+void I_Warning(const char *warning,...) GCCATTR((format(printf, 1, 2)));
+
 // The generic debugging function.
+void I_Debugf(const char *message,...) GCCATTR((format(printf, 1, 2)));
 
+// The error function.  All fatal errors call I_Error().  This calls
+// I_CloseProgram.
 void I_Error(const char *error,...) GCCATTR((format(printf, 1, 2)));
-// The error function.  All fatal errors call I_Error().  This
-// I_CloseProgram).
 
-void I_SystemShutdown(void);
+// FIXME : remove eventually
+#define L_WriteDebug  I_Debugf
+#define L_WriteLog    I_Logf
+
 // The opposite of the I_SystemStartup routine.  This will shutdown
 // everything running in the platform code, by calling the other
 // termination functions (I_ShutdownSound, I_ShutdownMusic,
 // I_ShutdownGraphics and I_ShutdownControl), and doing anything else
 // the platform code needs to (e.g. freeing all other resources).
+void I_SystemShutdown(void);
 
-void I_CloseProgram(int exitnum) GCCATTR((noreturn));
 // Exit the program immediately, using the given `exitnum' as the
 // program's exit status.  This is the very last thing done, and
 // I_SystemShutdown() is guaranteed to have already been called.
+void I_CloseProgram(int exitnum) GCCATTR((noreturn));
 
-void I_Warning(const char *warning,...) GCCATTR((format(printf, 1, 2)));
-// Writes a warning to the console and the debug file (if any).  This
-// function should call CON_Printf().
-
-void I_Sleep(int millisecs);
 // -AJA- 2005/01/21: sleep for the given number of milliseconds.
+void I_Sleep(int millisecs);
 
-void I_MessageBox(const char *message, const char *title);
 // -AJA- 2007/04/13: display a system message box with the
 // given message (typically a serious error message).
+void I_MessageBox(const char *message, const char *title);
+
 
 extern const char *exe_path;
 
@@ -95,43 +102,45 @@ extern const char *exe_path;
 //
 // -ACB- 1999/09/19 moved from I_Input.H
 
-void I_StartupControl(void);
 // Initialises all control devices (i.e. input devices), such as the
 // keyboard, mouse and joysticks.  Should be called from
 // I_SystemStartup() -- the main code never calls this function.
+void I_StartupControl(void);
 
-void I_ControlGetEvents(void);
 // Causes all control devices to send their events to the engine via
 // the E_PostEvent() function.
+void I_ControlGetEvents(void);
 
-void I_CalibrateJoystick(int ch);
 // Something for calibrating a joystick -- not currently used.
+void I_CalibrateJoystick(int ch);
 
-void I_ShutdownControl(void);
 // Shuts down all control devices.  This is the opposite of
 // I_StartupControl().  Should be called from I_SystemShutdown(), the
 // main code never calls this function.
+void I_ShutdownControl(void);
 
-int I_PureRandom(void);
 // Returns a fairly random value, used as seed for EDGE's internal
 // random engine.  If this function would return a constant value,
 // everything would still work great, except that random events before
 // the first tic of a level (like random RTS spawn) would be
 // predictable.
+int I_PureRandom(void);
 
-int I_GetTime(void);
 // Returns a value that increases monotonically over time.  The value
 // should increase by TICRATE every second (TICRATE is currently 35).
 // The starting value should be close to zero.
+int I_GetTime(void);
 
+// Returns a value that increases by 1000 every second (i.e. each unit is
+// a single millisecond).  This timer begins at zero when the application
+// is first begun, hence it won't normally overflow (unless the engine
+// runs continuously for 24 days).
 int I_GetMillies(void);
 
-u32_t I_ReadMicroSeconds(void);
-// Like I_GetTime(), this function returns a value that increases
-// monotonically over time, but in this case the value increases by
-// 1000000 every second (i.e. each unit is 1 microsecond).  Since this
-// value will overflow regularly (assuming `long' is 32 bits), the
-// caller should check for this situation.
+// Returns a value that increases by 1000000 every second (i.e. each unit
+// is a single microsecond).  Since this value will wrap-around regularly
+// (roughly every 71 minutes), caller *MUST* check for this situation.
+u32_t I_GetMicros(void);
 
 
 //--------------------------------------------------------
@@ -142,21 +151,21 @@ u32_t I_ReadMicroSeconds(void);
 
 class abstract_music_c;
 
-extern bool nomusic;
 // This variable enables/disables music.  Initially false, it is set
 // to true by the "-nomusic" option.  Can also be set to true by the
 // platform code when no working music device is found.
+extern bool nomusic;
 
-void I_StartupMusic(void);
 // Initialises the music system.  Returns true if successful,
 // otherwise false.  (You should set "nomusic" to true if it fails).
 // The main code never calls this function, it should be called by
 // I_SystemStartup().
+void I_StartupMusic(void);
 
-void I_ShutdownMusic(void);
 // Shuts down the music system.  This is the opposite to
 // I_StartupMusic().  Must be called by I_SystemShutdown(), the main
 // code never calls this function.
+void I_ShutdownMusic(void);
 
 abstract_music_c * I_PlayNativeMusic(const byte *data, int length,
 									 float volume, bool loop);
@@ -168,24 +177,22 @@ abstract_music_c * I_PlayNativeMusic(const byte *data, int length,
 //
 // -ACB- 1999/09/20 Moved from I_Sound.H
 
-extern bool nosound;
 // This variable enables/disables sound.  Initially false, it is set
 // to true by the "-nosound" option.  Can also be set to true by the
 // platform code when no working sound device is found.
+extern bool nosound;
 
-void I_StartupSound(void);
 // Initialises the sound system.  Returns true if successful,
 // otherwise false if something went wrong (NOTE: you must set nosound
 // to false when it fails).   The main code never calls this function,
 // it should be called by I_SystemStartup().
+void I_StartupSound(void);
 
-void I_ShutdownSound(void);
 // Shuts down the sound system.  This is the companion function to
 // I_StartupSound().  This must be called by I_SystemShutdown(), the
 // main code never calls this function.
+void I_ShutdownSound(void);
 
-bool I_LoadSfx(const unsigned char *data, unsigned int length, 
-					unsigned int freq, unsigned int handle);
 // Loads the given `handle' with the specified sound data.  Handle is
 // a small integer value from 0 onwards.  If no such handle exists
 // then it is created.  The handle must not already contain any sound
@@ -196,14 +203,14 @@ bool I_LoadSfx(const unsigned char *data, unsigned int length,
 // upto 0xFF for the peaks, and down to 0x00 for the valleys.  The
 // sound data is also mono.  There is no support for 16-bit or stereo
 // sounds yet.
+bool I_LoadSfx(const unsigned char *data, unsigned int length, 
+					unsigned int freq, unsigned int handle);
 
-bool I_UnloadSfx(unsigned int handle);
 // Unloads the sound data for the given handle, previously loaded via
 // I_LoadSfx().  This frees the sound data.  Returns true on success,
 // otherwise false.
+bool I_UnloadSfx(unsigned int handle);
 
-int I_SoundPlayback(unsigned int handle, float gain, bool looping,
-	bool relative, float *pos, float *veloc);
 // Starts the sound with the given handle playing, using the
 // paramaters for panning, volume and looping.  Gain ranges from
 // from 0.0 (silent) to 1.0 (loudest).
@@ -212,40 +219,42 @@ int I_SoundPlayback(unsigned int handle, float gain, bool looping,
 // refer to the sound in the other functions below.  If something goes
 // wrong, especially when there are no free channels, then -1 is
 // returned.
+int I_SoundPlayback(unsigned int handle, float gain, bool looping,
+	bool relative, float *pos, float *veloc);
 
-bool I_SoundCheck(unsigned int chanid);
 // Checks that the given sound is still playing (i.e. has not reached
 // the end yet), and returns true if it is, otherwise false.
+bool I_SoundCheck(unsigned int chanid);
 
-bool I_SoundPause(unsigned int chanid);
 // Pauses the sound on the specified channel.  Returns true on
 // success, otherwise false.
+bool I_SoundPause(unsigned int chanid);
 
-bool I_SoundResume(unsigned int chanid);
 // Resumes the previously paused sound on the specified channel.
 // Returns true on success, otherwise false.
+bool I_SoundResume(unsigned int chanid);
 
-bool I_SoundKill(unsigned int chanid);
 // Kills a sound on the specified channel that was started with
 // I_SoundPlayback(), and frees the channel to be used for future
 // sound playbacks.  Note that this function must be called even if
 // the sound finished played (i.e. I_SoundCheck() == false).  Returns
 // true on success, otherwise false.
+bool I_SoundKill(unsigned int chanid);
 
-void I_SoundTicker(void);
 // Called every tic to keep the sounds playing.
+void I_SoundTicker(void);
 
-const char *I_SoundReturnError(void);
 // Returns an error message string that describes the error from the
 // last sound function that failed.  It will return an empty string if
 // no errors have yet occurred, but never NULL.  This function may
 // clear the error message.
+const char *I_SoundReturnError(void);
 
-void I_LockAudio(void);
-void I_UnlockAudio(void);
 // wrappers around the SDL functions of the same name,
 // however I_UnlockAudio() may be called at any time,
 // even when I_LockAudio() hasn't been called.
+void I_LockAudio(void);
+void I_UnlockAudio(void);
 
 
 //--------------------------------------------------------
@@ -256,29 +265,28 @@ void I_UnlockAudio(void);
 
 class scrmode_c;
 
-void I_StartupGraphics(void);
 // Initialises the graphics system.  This should be called by
 // I_SystemStartup(), the main code never calls this function
 // directly.  This function should determine what video modes are
 // available, and call V_AddAvailableResolution() for them.
+void I_StartupGraphics(void);
 
-void I_ShutdownGraphics(void);
 // Shuts down the graphics system.  This is the companion function to
 // I_StartupGraphics.  Note that this should be called by
 // I_SystemStartup(), the main code never calls this function.
+void I_ShutdownGraphics(void);
 
-void I_StartFrame(void);
 // Called to prepare the screen for rendering (if necessary).
+void I_StartFrame(void);
 
-void I_FinishFrame(void);
 // Called when the current frame has finished being rendered.  This
 // routine typically copies the screen buffer to the video memory.  It
 // may also handle double/triple buffering here.
+void I_FinishFrame(void);
 
-void I_GetDesktopSize(int *width, int *height);
 // returns the desktop resolution.
+void I_GetDesktopSize(int *width, int *height);
 
-bool I_SetScreenSize(scrmode_c *mode);
 // Tries to set the video card to the given mode (or open a window).
 // If there already was a valid mode (or open window), this call
 // should replace it.  The previous contents (including the palette)
@@ -288,16 +296,11 @@ bool I_SetScreenSize(scrmode_c *mode);
 // to select a working mode if the given mode was not possible, in
 // which case the values of the global variables SCREENWIDTH,
 // SCREENHEIGHT and SCREENBITS must be updated.
+bool I_SetScreenSize(scrmode_c *mode);
 
 void I_GrabCursor(bool enable);
 
 void I_SetGamma(float gamma);
-
-
-void I_Logf(const char *message,...) GCCATTR((format(printf, 1, 2)));
-
-#define L_WriteDebug  I_Debugf
-#define L_WriteLog    I_Logf
 
 
 #endif /*__I_SYSTEM_H__*/

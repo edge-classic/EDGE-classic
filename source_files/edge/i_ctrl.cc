@@ -710,6 +710,7 @@ void I_ControlGetEvents(void)
 	}
 }
 
+
 void I_ShutdownControl(void)
 {
 }
@@ -724,9 +725,6 @@ int I_GetTime(void)
 }
 
 
-//
-// Same as I_GetTime, but returns time in milliseconds
-//
 int I_GetMillies(void)
 {
     return SDL_GetTicks();

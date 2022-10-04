@@ -852,7 +852,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 
 	// MT_SPAWNFIRE
 	{
-		"*",       // name
+		"*SPAWNFIRE",       // name
 		-1,		// doomednum
 		S_SPAWNFIRE1,		// spawnstate
 		1000,		// spawnhealth

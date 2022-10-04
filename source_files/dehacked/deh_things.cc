@@ -384,6 +384,10 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 	if (info->name[0] != '*')  // thing?
 		return;
 
+	// MT_SPAWNFIRE is handled specially (in other code)
+	if (mt_num == MT_SPAWNFIRE)
+		return;
+
 	if (! got_one)
 	{
 		got_one = true;

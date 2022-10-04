@@ -42,11 +42,7 @@ extern FILE* logfile;
 #define MSGBUFSIZE 4096
 static char msgbuf[MSGBUFSIZE];
 
-//
-// I_SystemStartup
-//
-// -ACB- 1998/07/11 Reformatted the code.
-//
+
 void I_SystemStartup(void)
 {
 	if (SDL_Init(0) < 0)
@@ -59,19 +55,13 @@ void I_SystemStartup(void)
 	I_StartupNetwork();
 }
 
-//
-// I_CloseProgram
-//
+
 void I_CloseProgram(int exitnum)
 {
 	std::exit(exitnum);
 }
 
-//
-// I_Warning
-//
-// -AJA- 1999/09/10: added this.
-//
+
 void I_Warning(const char *warning,...)
 {
 	va_list argptr;
@@ -79,13 +69,11 @@ void I_Warning(const char *warning,...)
 	va_start(argptr, warning);
 	vsprintf(msgbuf, warning, argptr);
 	va_end(argptr);
-	I_Printf("WARNING: %s", msgbuf);
 
+	I_Printf("WARNING: %s", msgbuf);
 }
 
-//
-// I_Error
-//
+
 void I_Error(const char *error,...)
 {
 	va_list argptr;
@@ -113,70 +101,54 @@ void I_Error(const char *error,...)
 	I_CloseProgram(EXIT_FAILURE);
 }
 
-//
-// I_Printf
-//
-void I_Printf(const char *message,...)
+
+void I_Printf(const char *message, ...)
 {
 	va_list argptr;
-	char *string;
+
 	char printbuf[MSGBUFSIZE];
 
-	// clear the buffer
-	memset (printbuf, 0, MSGBUFSIZE);
-
-	string = printbuf;
-
 	va_start(argptr, message);
+	vsnprintf(printbuf, sizeof(printbuf), message, argptr);
+	va_end(argptr);
 
-	// Print the message into a text string
-	vsprintf(printbuf, message, argptr);
-
-	L_WriteLog("%s", printbuf);
+	I_Logf("%s", printbuf);
 
 	// If debuging enabled, print to the debugfile
-	L_WriteDebug("%s", printbuf);
+	I_Debugf("%s", printbuf);
 
 	// Send the message to the console.
 	CON_Printf("%s", printbuf);
-
-	va_end(argptr);
 }
+
 
 void I_MessageBox(const char *message, const char *title)
 {
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, NULL);
 }
 
-//
-// I_PureRandom
-//
+
 int I_PureRandom(void)
 {
-	return ((int)time(NULL) ^ (int)I_ReadMicroSeconds()) & 0x7FFFFFFF;
+	int P1 = (int)time(NULL);
+	int P2 = (int)I_GetMicros();
+
+	return (P1 ^ P2) & 0x7FFFFFFF;
 }
 
-//
-// I_ReadMicroSeconds
-//
-u32_t I_ReadMicroSeconds(void)
+
+u32_t I_GetMicros(void)
 {
 	return (u32_t) std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
-//
-// I_Sleep
-//
+
 void I_Sleep(int millisecs)
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(millisecs));
 }
 
-//
-// I_SystemShutdown
-//
-// -ACB- 1998/07/11 Tidying the code
-//
+
 void I_SystemShutdown(void)
 {
 	// make sure audio is unlocked (e.g. I_Error occurred)

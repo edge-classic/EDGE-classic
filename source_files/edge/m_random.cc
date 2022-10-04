@@ -38,7 +38,7 @@ static int p_step = 1;
 
 void M_Random_Init(void)
 {
-    m_rand.seed(I_ReadMicroSeconds());
+    m_rand.seed(I_GetMicros());
 }
 
 // 

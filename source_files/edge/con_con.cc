@@ -1414,6 +1414,7 @@ void CON_InitConsole(void)
 	CON_AddLine("", false);
 }
 
+
 void CON_Start(void)
 {
 	con_visible = vs_notvisible;
@@ -1421,62 +1422,86 @@ void CON_Start(void)
 	E_ProgressMessage("Starting console...");
 }
 
+
 void CON_ShowFPS(void)
 {
-	if (debug_fps.d <= 0)
+	if (debug_fps.d == 0)
 		return;
 
 	CON_SetupFont();
 
-	// -AJA- 07-Sep-2022: reworked for better accuracy, and to show WORST time
+	// -AJA- 2022: reworked for better accuracy, ability to show WORST time
 
-	static int last_time  = 0;
-	static int total_time = 0;
-	static int max_diff   = 0;
+	// get difference since last call
+	static u32_t last_time = 0;
+	u32_t time = I_GetMicros();
+	u32_t diff = time - last_time;
+	last_time  = time;
 
-	static float mspf = 0.0;  // last computed value
+	// last computed value, state to compute average
+	static float avg_shown   = 100.00;
+	static float worst_shown = 100.00;
 
-	int time = I_GetMillies();
-	int diff = time - last_time;
+	static u32_t frames = 0;
+	static u32_t total  = 0;
+	static u32_t worst  = 0;
 
-	if (diff > max_diff)
-		max_diff = diff;
-
-	last_time = time;
-	total_time += diff;
-
-	if (total_time > 250)
+	// ignore a large diff or timer wrap-around
+	if (diff < 1000000)
 	{
-		mspf = (float)max_diff;
+		frames += 1;
+		total  += diff;
+		worst  = std::max(worst, diff);
 
-		// old way: compute average of the interval
-		// mspf = (float)total_time / (float)numframes;
+		// update every second
+		if (total > 999999)
+		{
+			avg_shown   = (double)total / (double)(frames * 1000);
+			worst_shown = (double)worst / 1000.0;
 
-		max_diff   = 0;
-		total_time = 0;
+			frames = 0;
+			total  = 0;
+			worst  = 0;
+		}
 	}
 
 	int x = SCREENWIDTH  - XMUL * 16;
 	int y = SCREENHEIGHT - YMUL * 2;
+
+	if (abs(debug_fps.d) >= 2)
+		y -= YMUL;
 
 	SolidBox(x, y, SCREENWIDTH, SCREENHEIGHT, RGB_MAKE(0,0,0), 0.5);
 
 	x += XMUL;
 	y = SCREENHEIGHT - YMUL - YMUL/2;
 
+	// show average...
+
 	char textbuf[128];
 
-	if (debug_fps.d == 2)
-	{
-		sprintf(textbuf, "  %1.1f ms", mspf);
-	}
+	if (debug_fps.d < 0)
+		sprintf(textbuf, " %6.2f ms", avg_shown);
 	else
-	{
-		sprintf(textbuf, "  %1.1f fps", 1000 / mspf);
-	}
+		sprintf(textbuf, " %6.2f fps", 1000 / avg_shown);
 
 	DrawText(x, y, textbuf, T_GREY176);
+
+	// show worst...
+
+	if (abs(debug_fps.d) >= 2)
+	{
+		y -= YMUL;
+
+		if (debug_fps.d < 0)
+			sprintf(textbuf, " %6.2f max", worst_shown);
+		else if (worst_shown > 0)
+			sprintf(textbuf, " %6.2f min", 1000 / worst_shown);
+
+		DrawText(x, y, textbuf, T_GREY176);
+	}
 }
+
 
 void CON_ShowPosition(void)
 {
@@ -1492,7 +1517,7 @@ void CON_ShowPosition(void)
 	char textbuf[128];
 
 	int x = SCREENWIDTH  - XMUL * 16;
-	int y = SCREENHEIGHT - YMUL * 4;
+	int y = SCREENHEIGHT - YMUL * 5;
 
 	SolidBox(x, y - YMUL * 7, XMUL * 16, YMUL * 7 + 2, RGB_MAKE(0,0,0), 0.5);
 
@@ -1522,6 +1547,7 @@ void CON_ShowPosition(void)
 	DrawText(x, y, textbuf, T_GREY176);
 }
 
+
 void CON_PrintEndoom(int en_lump)
 {
 	int length;
@@ -1550,6 +1576,7 @@ void CON_PrintEndoom(int en_lump)
 	}
 	W_DoneWithLump(data);
 }
+
 
 void CON_ClearLines()
 {

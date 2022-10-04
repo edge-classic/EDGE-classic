@@ -954,6 +954,8 @@ namespace Things
 		if (is_monster)
 			AddOneFlag(info, "MONSTER", got_a_flag);
 
+		AddOneFlag(info, "DEHACKED_COMPAT", got_a_flag);
+
 		if (got_a_flag)
 			WAD::Printf(";\n");
 

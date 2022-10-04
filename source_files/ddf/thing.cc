@@ -1699,6 +1699,7 @@ static specflags_t hyper_specials[] =
 	{"TRIGGER_LINES", HF_NOTRIGGERLINES, 1}, //Lobo: Cannot activate doors etc.
 	{"SHOVEABLE", HF_SHOVEABLE, 0}, //Lobo: can be pushed
 	{"SPLASH", HF_NOSPLASH, 1}, //Lobo: causes no splash on liquids
+	{"DEHACKED_COMPAT", HF_DEHACKED_COMPAT, 0},
 	{NULL, 0, 0}
 };
 

@@ -1057,7 +1057,17 @@ void P_KillMobj(mobj_t * source, mobj_t * target, const damage_c *damtype,
 	if (state == S_NULL)
 		state = target->info->death_state;
 
-	P_SetMobjStateDeferred(target, state, P_Random() & 3);
+	if (target->hyperflags & HF_DEHACKED_COMPAT)
+	{
+		P_SetMobjState(target, state);
+		target->tics -= P_Random() & 3;
+		if (target->tics < 1)
+			target->tics = 1;
+	}
+	else
+	{
+		P_SetMobjStateDeferred(target, state, P_Random() & 3);
+	}
 
 	// Drop stuff. This determines the kind of object spawned
 	// during the death frame of a thing.

@@ -1630,24 +1630,30 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 	// Spawn bullet puffs or blood spots,
 	// depending on target type.
 
-	bool use_puff = !(mo->flags & MF_SHOOTABLE) || (mo->flags & MF_NOBLOOD);
+	bool use_blood = (mo->flags & MF_SHOOTABLE) && !(mo->flags & MF_NOBLOOD);
 
 	if (mo->flags & MF_SHOOTABLE)
 	{
-		int what = P_BulletContact(shoot_I.source, mo, shoot_I.damage,
-						shoot_I.damtype, x, y, z);
+		int what = P_BulletContact(shoot_I.source, mo, shoot_I.damage, shoot_I.damtype, x, y, z);
 
-		if (what < 0) // bullets pass through
+		// bullets pass through?
+		if (what < 0)
 			return true;
 
 		if (what == 0)
-			use_puff = true;
+			use_blood = false;
 	}
 
-	if (!use_puff)
-		P_SpawnBlood(x, y, z, shoot_I.damage, shoot_I.angle, mo->info->blood);
-	else if (shoot_I.puff)
-		P_SpawnPuff(x, y, z, shoot_I.puff, shoot_I.angle + ANG180);
+	if (use_blood)
+	{
+		if (mo->info->blood != NULL)
+			P_SpawnBlood(x, y, z, shoot_I.damage, shoot_I.angle, mo->info->blood);
+	}
+	else
+	{
+		if (shoot_I.puff)
+			P_SpawnPuff(x, y, z, shoot_I.puff, shoot_I.angle + ANG180);
+	}
 
 	// don't go any farther
 	return false;

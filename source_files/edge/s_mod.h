@@ -29,8 +29,6 @@ class pl_entry_c;
 
 abstract_music_c * S_PlayMODMusic(const pl_entry_c *musdat, float volume, bool looping);
 
-bool S_CheckMOD(byte *data, int length);
-
 #endif  /* __MODPLAYER_H__ */
 
 //--- editor settings ---

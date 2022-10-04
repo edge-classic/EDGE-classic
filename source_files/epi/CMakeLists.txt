@@ -33,10 +33,13 @@ add_library(
   path.cc
   sound_data.cc
   sound_gather.cc
+  sound_types.cc
   str_format.cc
   utility.cc
 )
 target_include_directories(edge_epi PRIVATE ../whereami)
 target_include_directories(edge_epi PRIVATE ../stb)
+target_include_directories(edge_epi PRIVATE ../libgme/gme)
+target_include_directories(edge_epi PRIVATE ../libmodplug/src)
 
 target_link_libraries(edge_epi PUBLIC whereami)

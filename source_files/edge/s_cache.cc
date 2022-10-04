@@ -30,6 +30,7 @@
 #include "file.h"
 #include "filesystem.h"
 #include "sound_data.h"
+#include "sound_types.h"
 
 #include "main.h"
 #include "sfx.h"
@@ -171,6 +172,9 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 
 	byte *data = F->LoadIntoMemory();
 
+	// determine format information
+	auto fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
+
 	// no longer need the epi::file_c
 	delete F; F = NULL;
 
@@ -184,16 +188,32 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 
 	bool OK = false;
 	
-	if (memcmp(data, "RIFF", 4) == 0)
-		OK = Load_WAV(buf, data, length, false);
-	else if (memcmp(data, "Ogg", 3) == 0)
-		OK = Load_OGG(buf, data, length);
-	else if (S_CheckMP3(data, length))
-		OK = Load_MP3(buf, data, length);
-	else if (strcasecmp(def->lump_name.c_str(), def->pc_speaker_lump.c_str()) == 0) // This check should hopefully only pass when it is a PC Speaker format sound
-		OK = Load_WAV(buf, data, length, true);
-	else
-		OK = Load_DOOM(buf, data, length);
+	switch (fmt)
+	{
+		case epi::FMT_WAV:
+			OK = Load_WAV(buf, data, length, false);
+			break;
+
+		case epi::FMT_OGG:
+			OK = Load_OGG(buf, data, length);
+			break;
+
+		case epi::FMT_MP3:
+			OK = Load_MP3(buf, data, length);
+			break;
+
+		case epi::FMT_SPK:
+			OK = Load_WAV(buf, data, length, true);
+			break;
+
+		case epi::FMT_DOOM:
+			OK = Load_DOOM(buf, data, length);
+			break;
+
+		default:
+			OK = false;
+			break;
+	}
 
 	// Tag sound as SFX for environmental effects - Dasho
 	if (OK)

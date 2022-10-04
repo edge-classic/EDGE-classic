@@ -38,18 +38,6 @@
 extern bool dev_stereo;  // FIXME: encapsulation
 extern int  dev_freq;
 
-// Function for s_music.cc to check if a lump is in mod tracker format
-bool S_CheckMOD (byte *data, int length)
-{
-    ModPlugFile *mod_checker = ModPlug_Load(data, length);
-	if (mod_checker)
-	{
-		ModPlug_Unload(mod_checker);
-		return true;
-	}
-	return false;
-}
-
 class modplayer_c : public abstract_music_c
 {
 public:

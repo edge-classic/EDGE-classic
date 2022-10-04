@@ -44,23 +44,6 @@
 
 extern bool dev_stereo;  // FIXME: encapsulation
 
-// Function for s_music.cc to check if a lump is in .mp3 format
-bool S_CheckMP3 (byte *data, int length) 
-{
-	mp3dec_t mp3_sound;
-	mp3dec_file_info_t sound_info;
-    if (mp3dec_load_buf(&mp3_sound, data, length, &sound_info, NULL, NULL) != 0) {
-		return false;
-	}
-	if (sound_info.samples > 0) {
-		free(sound_info.buffer);
-		return true;
-	} else {
-		free(sound_info.buffer);
-		return false;
-	}
-}
-
 class mp3player_c : public abstract_music_c
 {
 public:

@@ -25,6 +25,7 @@
 
 #include "file.h"
 #include "filesystem.h"
+#include "sound_types.h"
 
 #include "main.h"
 
@@ -156,6 +157,8 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 	byte *data = F->LoadIntoMemory();
 
+	auto fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
+
 	// close file now
 	delete F;
 
@@ -172,7 +175,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	if (memcmp(data, "Ogg", 3) == 0)
+	if (fmt == epi::FMT_OGG)
 	{
 		delete data;
 
@@ -180,7 +183,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	if (S_CheckMP3(data, length))
+	if (fmt == epi::FMT_MP3)
 	{
 		delete data;
 
@@ -188,7 +191,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	if (S_CheckMOD(data, length))
+	if (fmt == epi::FMT_MOD)
 	{
 		delete data;
 
@@ -196,7 +199,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	if (S_CheckGME(data, length))
+	if (fmt == epi::FMT_GME)
 	{
 		delete data;
 
@@ -204,7 +207,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	if (S_CheckSID(data, length))
+	if (fmt == epi::FMT_SID)
 	{
 		delete data;
 
@@ -212,26 +215,25 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	bool is_mus  = (data[0] == 'M' && data[1] == 'U' && data[2] == 'S');
-	bool is_midi = (data[0] == 'M' && data[1] == 'T' && data[2] == 'h' && data[3] == 'd');
-
-	if (! (is_mus || is_midi))
-	{
-		delete data;
-
-		I_Printf("S_ChangeMusic: unknown format (not MUS or MIDI)\n");
-		return;
-	}
-
 	// TODO: these calls free the data, but we probably should free it here
 
-	if (var_opl_music)
+	if (fmt == epi::FMT_MIDI || fmt == epi::FMT_MUS)
 	{
-		music_player = S_PlayOPL(data, length, is_mus, volume, loop);
-		return;
+		if (var_opl_music)
+		{
+			music_player = S_PlayOPL(data, length, fmt == epi::FMT_MUS, volume, loop);
+			return;
+		}
+		else
+		{
+			music_player = S_PlayTSF(data, length, fmt == epi::FMT_MUS, volume, loop);
+			return;
+		}
 	}
 
-	music_player = S_PlayTSF(data, length, is_mus, volume, loop);
+	delete data;
+
+	I_Printf("S_ChangeMusic: unknown format (not MUS or MIDI)\n");
 	return;
 }
 

@@ -29,8 +29,6 @@ class pl_entry_c;
 
 abstract_music_c * S_PlaySIDMusic(const pl_entry_c *musdat, float volume, bool looping);
 
-bool S_CheckSID(byte *data, int length);
-
 #endif  /* __SIDPLAYER_H__ */
 
 //--- editor settings ---

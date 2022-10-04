@@ -38,21 +38,6 @@
 extern bool dev_stereo;  // FIXME: encapsulation
 extern int  dev_freq;
 
-// Function for s_music.cc to check if a lump is supported by Game Music Emu
-bool S_CheckGME (byte *data, int length)
-{
-	if (length > 4)
-	{
-		std::string gme_check = gme_identify_header(data);
-		if (gme_check.empty())
-			return false;
-		else
-			return true;
-	}
-	else
-		return false;
-}
-
 class gmeplayer_c : public abstract_music_c
 {
 public:

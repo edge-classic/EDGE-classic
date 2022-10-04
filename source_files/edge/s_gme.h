@@ -29,8 +29,6 @@ class pl_entry_c;
 
 abstract_music_c * S_PlayGMEMusic(const pl_entry_c *musdat, float volume, bool looping);
 
-bool S_CheckGME(byte *data, int length);
-
 #endif  /* __GMEPLAYER_H__ */
 
 //--- editor settings ---

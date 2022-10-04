@@ -37,15 +37,6 @@
 extern bool dev_stereo;  // FIXME: encapsulation
 extern int  dev_freq;
 
-// Function for s_music.cc to check if a lump is supported by TinySID
-bool S_CheckSID (byte *data, int length)
-{
-	if (length < 0x7c) {
-		return false;
-	}
-	return (memcmp(data, "RSID", 4) == 0 || memcmp(data, "PSID", 4) == 0);
-}
-
 class sidplayer_c : public abstract_music_c
 {
 public:

@@ -496,7 +496,8 @@ static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 	img, img->width, img->height, img->bpp);
 #endif
 */
-	
+	rim->opacity = R_DetermineOpacity(img);
+
 	if (def->is_font)
 		return img;
 
@@ -508,8 +509,11 @@ static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 
 	// CW: Textures MUST tile! If actual size not total size, manually tile
 	// [ AJA: this does not make them tile, just fills in the black gaps ]
-	img->FillMarginX(rim->actual_w);
-	img->FillMarginY(rim->actual_h);
+	if (rim->opacity == OPAC_Solid)
+	{
+		img->FillMarginX(rim->actual_w);
+		img->FillMarginY(rim->actual_h);
+	}
 
 	return img;
 }

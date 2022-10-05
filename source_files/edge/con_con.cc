@@ -615,7 +615,8 @@ static void DrawEndoomChar(int x, int y, char ch, rgbcol_t col, rgbcol_t col2, b
 // writes the text on coords (x,y) of the console
 static void DrawText(int x, int y, const char *s, rgbcol_t col)
 {
-	GLuint tex_id = W_ImageCache(con_font->font_image, true, (const colourmap_c *)0, true); // Always whiten the font when used with console output
+	// Always whiten the font when used with console output
+	GLuint tex_id = W_ImageCache(con_font->font_image, true, (const colourmap_c *)0, true);
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -628,12 +629,20 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 
 	if (s == input_line)
 	{
-		if (con_cursor < 16) draw_cursor = true;
+		if (con_cursor < 16)
+			draw_cursor = true;
 	}
 
-	for (; *s; s++)
+	int pos = 0;
+	for (; *s; s++, pos++)
 	{
 		DrawChar(x, y, *s, col);
+
+		if (pos == input_pos && draw_cursor)
+		{
+			DrawChar(x, y, 95, col);
+			draw_cursor = false;
+		}
 
 		x += I_ROUND(FNSZ * (con_font->im_mono_width / con_font->im_char_height)) + I_ROUND(con_font->spacing);
 
@@ -641,18 +650,19 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 			break;
 	}
 
-	if (draw_cursor) DrawChar(x, y, 95, col);
+	if (draw_cursor)
+		DrawChar(x, y, 95, col);
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);
 }
 
+
 static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
 {
-
-
-	GLuint tex_id = W_ImageCache(endoom_font->font_image, true, (const colourmap_c *)0, true); // Always whiten the font when used with console output
+	// Always whiten the font when used with console output
+	GLuint tex_id = W_ImageCache(endoom_font->font_image, true, (const colourmap_c *)0, true);
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -810,6 +820,7 @@ static void GotoEndOfLine(void)
 	con_cursor = 0;
 }
 
+
 static void EditHistory(void)
 {
 	if (cmd_hist_pos >= 0)
@@ -819,6 +830,7 @@ static void EditHistory(void)
 		cmd_hist_pos = -1;
 	}
 }
+
 
 static void InsertChar(char ch)
 {
@@ -831,6 +843,50 @@ static void InsertChar(char ch)
 
 	input_line[input_pos++] = ch;
 }
+
+
+static char KeyToCharacter(int key, bool shift, bool ctrl)
+{
+	if (ctrl)
+		return 0;
+
+	if (key < 32 || key > 126)
+		return 0;
+
+	if (! shift)
+		return (char)key;
+
+	// the following assumes a US keyboard layout
+	switch (key)
+	{
+		case '1':  return '!';
+		case '2':  return '@';
+		case '3':  return '#';
+		case '4':  return '$';
+		case '5':  return '%';
+		case '6':  return '^';
+		case '7':  return '&';
+		case '8':  return '*';
+		case '9':  return '(';
+		case '0':  return ')';
+
+		case '`':  return '~';
+		case '-':  return '_';
+		case '=':  return '+';
+		case '\\': return '|';
+		case '[':  return '{';
+		case ']':  return '}';
+		case ';':  return ':';
+		case '\'': return '"';
+		case ',':  return '<';
+		case '.':  return '>';
+		case '/':  return '?';
+		case '@':  return '\'';
+	}
+
+	return toupper(key);
+}
+
 
 static void ListCompletions(std::vector<const char *> & list,
                             int word_len, int max_row, rgbcol_t color)
@@ -909,6 +965,7 @@ static void ListCompletions(std::vector<const char *> & list,
 		CON_Printf("  %s\n", buffer);
 	}
 }
+
 
 static void TabComplete(void)
 {
@@ -1024,6 +1081,7 @@ static void TabComplete(void)
 		pos++;
 	}
 }
+
 
 void CON_HandleKey(int key, bool shift, bool ctrl)
 {
@@ -1211,35 +1269,27 @@ void CON_HandleKey(int key, bool shift, bool ctrl)
 		break;
 
 	default:
-		if (key < 32 || key > 126)
 		{
+			char ch = KeyToCharacter(key, shift, ctrl);
+
 			// ignore non-printable characters
-			break;
+			if (ch == 0)
+				break;
+
+			// no room?
+			if (input_pos >= MAX_CON_INPUT-1)
+				break;
+
+			EditHistory();
+			InsertChar(ch);
+
+			TabbedLast = false;
+			con_cursor = 0;
 		}
-
-		EditHistory();
-
-		if (input_pos >= MAX_CON_INPUT-1)
-			break;
-
-
-		if (shift)
-		{
-			if (key == 45)
-				InsertChar(95);
-			else if (key == 56)
-				InsertChar(42);
-			else
-				InsertChar(toupper(key));
-		}
-		else
-			InsertChar(key);
-		
-		TabbedLast = false;
-		con_cursor = 0;
 		break;
 	}
 }
+
 
 static int GetKeycode(event_t *ev)
 {
@@ -1276,6 +1326,7 @@ static int GetKeycode(event_t *ev)
 
     return -1;
 }
+
 
 bool CON_Responder(event_t * ev)
 {
@@ -1340,6 +1391,7 @@ bool CON_Responder(event_t * ev)
 
 	return true;  // eat all keyboard events
 }
+
 
 void CON_Ticker(void)
 {

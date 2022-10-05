@@ -107,10 +107,11 @@ sound_format_e Sound_FilenameToFormat(const std::string& filename)
 	if (ext == ".mp3")
 		return FMT_MP3;
 
-	// Might have to do a MUS header check to distinguish between this
-	// and the MUS MIDI format - Dasho
-	if (ext == ".sid" || ext == ".psid" || ext == ".mus")
+	if (ext == ".sid" || ext == ".psid")
 		return FMT_SID;
+
+	if (ext == ".mus")
+		return FMT_MUS;
 
 	if (ext == ".mid" || ext == ".midi")
 		return FMT_MIDI;

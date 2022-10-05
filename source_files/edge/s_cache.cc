@@ -172,9 +172,6 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 
 	byte *data = F->LoadIntoMemory();
 
-	// determine format information
-	auto fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
-
 	// no longer need the epi::file_c
 	delete F; F = NULL;
 
@@ -183,6 +180,9 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 		M_WarnError("SFX Loader: Error loading data.\n");
 		return false;
 	}
+
+	// determine format information
+	auto fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
 
 	// Load the data into the buffer
 

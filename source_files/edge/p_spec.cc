@@ -2967,21 +2967,31 @@ void P_SpawnSpecials2(int autotag)
 		// Scrollers
 		if (secSpecial->f.scroll_speed > 0)
 		{
+			secanim_t anim;
+			anim.target = sector;
+
 			float dx = M_Cos(secSpecial->f.scroll_angle);
 			float dy = M_Sin(secSpecial->f.scroll_angle);
 
-			sector->floor.scroll.x -= dx * secSpecial->f.scroll_speed / 32.0f;
-			sector->floor.scroll.y -= dy * secSpecial->f.scroll_speed / 32.0f;
+			anim.floor_scroll.x -= dx * secSpecial->f.scroll_speed / 32.0f;
+			anim.floor_scroll.y -= dy * secSpecial->f.scroll_speed / 32.0f;
+
+			secanims.push_back(anim);
 
 			P_AddSpecialSector(sector);
 		}
 		if (secSpecial->c.scroll_speed > 0)
 		{
+			secanim_t anim;
+			anim.target = sector;
+
 			float dx = M_Cos(secSpecial->c.scroll_angle);
 			float dy = M_Sin(secSpecial->c.scroll_angle);
 
-			sector->ceil.scroll.x -= dx * secSpecial->c.scroll_speed / 32.0f;
-			sector->ceil.scroll.y -= dy * secSpecial->c.scroll_speed / 32.0f;
+			anim.ceil_scroll.x -= dx * secSpecial->c.scroll_speed / 32.0f;
+			anim.ceil_scroll.y -= dy * secSpecial->c.scroll_speed / 32.0f;
+
+			secanims.push_back(anim);
 
 			P_AddSpecialSector(sector);
 		}

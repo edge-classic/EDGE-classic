@@ -85,36 +85,6 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 	float volume = slider_to_gain[mus_volume];
 
-	if (play->type == MUS_MP3)
-	{
-		music_player = S_PlayMP3Music(play, volume, loop);
-		return;
-	}
-
-	if (play->type == MUS_OGG)
-	{
-		music_player = S_PlayOGGMusic(play, volume, loop);
-		return;
-	}
-
-	if (play->type == MUS_MOD)
-	{
-		music_player = S_PlayMODMusic(play, volume, loop);
-		return;
-	}
-
-	if (play->type == MUS_GME)
-	{
-		music_player = S_PlayGMEMusic(play, volume, loop);
-		return;
-	}
-
-	if (play->type == MUS_SID)
-	{
-		music_player = S_PlaySIDMusic(play, volume, loop);
-		return;
-	}
-
 	// open the file or lump, and read it into memory
 	epi::file_c *F;
 
@@ -157,8 +127,6 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 	byte *data = F->LoadIntoMemory();
 
-	auto fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
-
 	// close file now
 	delete F;
 
@@ -174,6 +142,8 @@ void S_ChangeMusic(int entrynum, bool loop)
 		I_Printf("S_ChangeMusic: ignored short data (%d bytes)\n", length);
 		return;
 	}
+
+	auto fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
 
 	if (fmt == epi::FMT_OGG)
 	{

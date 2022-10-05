@@ -63,7 +63,21 @@ static void DDF_MusicParseInfo(const char *info)
 		i++;
 
 	if (i==ENDOFMUSTYPES)
-		DDF_Error("DDF_MusicParseInfo: Unknown music type: '%s'\n", charbuff);
+	{
+		i=MUSINF_UNKNOWN;
+		while (musinftype[i] != NULL && stricmp(charbuff, musinftype[i]) != 0)
+			i++;
+		if (i==ENDOFMUSINFTYPES)
+			DDF_Error("DDF_MusicParseInfo: Unknown music type: '%s'\n", charbuff);
+		else
+		{
+			dynamic_plentry->infotype = (musicinftype_e)i;
+			// Remained is the string reference: filename/lumpname/track-number
+			pos++;
+			dynamic_plentry->info = &info[pos];
+			return;
+		}
+	}
 	else
 		dynamic_plentry->type = (musictype_t)i;
 

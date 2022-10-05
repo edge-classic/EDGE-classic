@@ -254,6 +254,8 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 		df->pack = ProcessZip(df);
 
 	df->pack->SortEntries();
+
+	//TODO ProcessDehackedInPack(df->pack);
 }
 
 //--- editor settings ---

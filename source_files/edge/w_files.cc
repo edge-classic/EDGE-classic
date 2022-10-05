@@ -106,12 +106,12 @@ size_t W_AddPending(const char *file, filekind_e kind)
 }
 
 // TODO tidy this
-extern void ProcessFixers(data_file_c *df);
-extern void ProcessDehacked(data_file_c *df);
+extern void ProcessFixersForWad(wad_file_c *wad);
 extern void ProcessWad(data_file_c *df, size_t file_index);
 extern void ProcessPackage(data_file_c *df, size_t file_index);
 
 extern std::string W_BuildNodesForWad(data_file_c *df);
+
 
 
 void W_ReadWADFIXES(void)
@@ -162,11 +162,19 @@ static void ProcessFile(data_file_c *df)
 		ProcessPackage(df, file_index);
 	}
 
-	// handle DeHackEd patch files
-	ProcessDehacked(df);
+	// handle stand-alone DeHackEd patches
+	if (df->kind == FLKIND_Deh)
+	{
+		I_Printf("Converting DEH file: %s\n", df->name.c_str());
+
+		df->deh = DH_ConvertFile(df->name.c_str());
+		if (df->deh == NULL)
+			I_Error("Failed to convert DeHackEd patch: %s\n", df->name.c_str());
+	}
 
 	// handle fixer-uppers
-	ProcessFixers(df);
+	if (df->wad != NULL)
+		ProcessFixersForWad(df->wad);
 }
 
 

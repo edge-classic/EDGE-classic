@@ -121,9 +121,51 @@ public:
 
 //----------------------------------------------------------------------------
 
+// -AJA- this compares the name in "natural order", which means that
+//       "x15" comes after "x1" and "x2" (not between them).
+//       more precisely: we treat strings of digits as a single char.
+struct Compare_packentry_pred
+{
+	inline bool operator() (const pack_entry_c& AE, const pack_entry_c& BE) const
+	{
+		const std::string& A = AE.name;
+		const std::string& B = BE.name;
+
+		size_t x = 0;
+		size_t y = 0;
+
+		for (;;)
+		{
+			// reached the end of one/both strings?
+			if (x >= A.size() || y >= B.size())
+				return x >= A.size() && y < B.size();
+
+			int xc = (int)(unsigned char)A[x++];
+			int yc = (int)(unsigned char)B[y++];
+
+			// handle a sequence of digits
+			if (isdigit(xc))
+			{
+				xc = 200 + (xc - '0');
+				while (x < A.size() && isdigit(A[x]) && xc < 214'000'000)
+					xc = (xc * 10) + (int)(A[x++] - '0');
+			}
+			if (isdigit(yc))
+			{
+				yc = 200 + (yc - '0');
+				while (y < B.size() && isdigit(B[y]) && yc < 214'000'000)
+					yc = (yc * 10) + (int)(B[y++] - '0');
+			}
+
+			if (xc != yc)
+				return xc < yc;
+		}
+	}
+};
+
 void pack_dir_c::SortEntries()
 {
-	// FIXME
+	std::sort(entries.begin(), entries.end(), Compare_packentry_pred());
 }
 
 void pack_file_c::SortEntries()

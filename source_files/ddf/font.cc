@@ -36,6 +36,8 @@ static const commandlist_t font_commands[] =
 	DDF_FIELD("TYPE",     type,       DDF_FontGetType),
 	DDF_FIELD("PATCHES",  patches,    DDF_FontGetPatch),
 	DDF_FIELD("IMAGE",    image_name, DDF_MainGetString),
+	DDF_FIELD("TTF",    ttf_name, DDF_MainGetString),
+	DDF_FIELD("TTF_DEFAULT_SIZE", ttf_default_size, DDF_MainGetNumeric),
 	DDF_FIELD("MISSING_PATCH", missing_patch, DDF_MainGetString),
 	DDF_FIELD("SPACING", spacing, DDF_MainGetNumeric),
 
@@ -155,6 +157,8 @@ static void DDF_FontGetType(const char *info, void *storage)
 		(*type) = FNTYP_Patch;
 	else if (DDF_CompareName(info, "IMAGE") == 0)
 		(*type) = FNTYP_Image;
+	else if (DDF_CompareName(info, "TRUETYPE") == 0)
+		(*type) = FNTYP_TrueType;
 	else
 		DDF_Error("Unknown font type: %s\n", info);
 }
@@ -264,6 +268,8 @@ void fontdef_c::CopyDetail(const fontdef_c &src)
 	image_name = src.image_name;
 	missing_patch = src.missing_patch;
 	spacing = src.spacing;
+	ttf_name = src.ttf_name;
+	ttf_default_size = src.ttf_default_size;
 }
 
 //
@@ -275,6 +281,8 @@ void fontdef_c::Default()
 	patches = NULL;
 	image_name.clear();
 	missing_patch.clear();
+	ttf_name.clear();
+	ttf_default_size = 16;
 	spacing = 0;
 }
 

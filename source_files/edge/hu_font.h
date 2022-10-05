@@ -20,9 +20,18 @@
 #define __HU_FONT__
 
 #include "r_image.h"
+#include "stb_truetype.h"
+#include <map>
 
 class fontdef_c;
 
+typedef struct
+{
+	// index within font
+	int glyph;
+	int width, height;
+}
+ttf_char_t;
 
 typedef struct
 {
@@ -58,11 +67,11 @@ public:
 	int NominalWidth() const;
 	int NominalHeight() const;
 
-	float CharRatio(char ch) const;
-	float CharWidth(char ch) const;
-	float StringWidth(const char *str) const;
+	float CharRatio(char ch);
+	float CharWidth(char ch);
+	float StringWidth(const char *str);
 	int StringLines(const char *str) const;
-	int MaxFit(int pixel_w, const char *str) const;
+	int MaxFit(int pixel_w, const char *str);
 
 	void DrawChar320(float x, float y, char ch, float scale, float aspect,
 				     const colourmap_c *colmap, float alpha) const;
@@ -84,11 +93,20 @@ public:
 	float *individual_char_ratios;
 	float im_mono_width;
 
+	// For TRUETYPE type
+	stbtt_fontinfo ttf_info;
+	unsigned int ttf_tex_id;
+	byte *ttf_buffer;
+	stbtt_bakedchar *ttf_cdata;
+	int ttf_char_width;
+	int ttf_char_height;
+	std::map<int, ttf_char_t> ttf_glyph_map;
 
 private:
 	void BumpPatchName(char *name);
 	void LoadPatches();
 	void LoadFontImage();
+	void LoadFontTTF();
 };
 
 class font_container_c : public epi::array_c 

@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
+#include "i_defs_gl.h"
 
 #include "main.h"
 #include "font.h"
@@ -30,6 +31,10 @@
 #include "r_draw.h"
 #include "r_modes.h"
 #include "r_image.h"
+#include "w_wad.h"
+
+#define STB_TRUETYPE_IMPLEMENTATION
+#include "stb_truetype.h"
 
 #define DUMMY_WIDTH  8
 
@@ -48,6 +53,8 @@ font_c::font_c(fontdef_c *_def) : def(_def)
 	p_cache.missing = NULL;
 
 	font_image = NULL;
+	ttf_buffer = NULL;
+	ttf_cdata = NULL;
 }
 
 font_c::~font_c()
@@ -185,6 +192,65 @@ void font_c::LoadFontImage()
 	}
 }
 
+void font_c::LoadFontTTF()
+{
+	if (!ttf_buffer)
+	{
+		if (def->ttf_name.empty())
+		{
+			I_Error("LoadFontTTF: No TTF file/lump name provided for font %s!", def->name.c_str());
+		}
+
+		int lump = W_CheckNumForName(def->ttf_name.c_str());
+		if (lump < 0)
+		{
+			I_Error("LoadFontTTF: LUMP '%s' not found for font %s.\n", def->ttf_name.c_str(), def->name.c_str()); 
+		}
+
+		epi::file_c *F;
+
+		F = W_OpenLump(lump);
+
+		byte *ttf_buffer = F->LoadIntoMemory();
+
+		delete F;
+
+		if (!stbtt_InitFont(&ttf_info, ttf_buffer, 0))
+    	{
+			if (ttf_buffer) delete ttf_buffer;
+			I_Error("LoadFontTTF: STB_TrueType failed to load font %s!\n", def->ttf_name.c_str());
+    	}
+
+		unsigned char *temp_bitmap = new unsigned char[512 * 512];
+		ttf_cdata = new stbtt_bakedchar[256];
+
+		stbtt_BakeFontBitmap(ttf_buffer,0, def->ttf_default_size, temp_bitmap, 512,512, 0, 256, ttf_cdata);
+
+		glGenTextures(1, &ttf_tex_id);
+		glBindTexture(GL_TEXTURE_2D, ttf_tex_id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 512,512, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		if (temp_bitmap) delete temp_bitmap;
+
+		ttf_char_t M;
+
+		M.glyph = stbtt_FindGlyphIndex(&ttf_info, (int)'M');
+
+		if (M.glyph == 0)
+		{
+			I_Error("LoadFontTTF: MISSING THE LETTER M COME ON!\n");
+		}
+		float scale = stbtt_ScaleForPixelHeight(&ttf_info, def->ttf_default_size);
+		stbtt_GetGlyphHMetrics(&ttf_info, M.glyph, &ttf_char_width, NULL);
+		stbtt_GetFontVMetrics(&ttf_info, &ttf_char_height, NULL, NULL);
+		ttf_char_width *= scale;
+		ttf_char_height *= scale;
+		M.width = ttf_char_width;
+		M.height = ttf_char_height;
+		ttf_glyph_map.try_emplace((int)'M', M);
+	}
+}
 
 void font_c::Load()
 {
@@ -196,6 +262,10 @@ void font_c::Load()
 
 		case FNTYP_Image:
 			LoadFontImage();
+			break;
+
+		case FNTYP_TrueType:
+			LoadFontTTF();
 			break;
 
 		default:
@@ -213,6 +283,9 @@ int font_c::NominalWidth() const
 	if (def->type == FNTYP_Patch)
 		return p_cache.width;
 
+	if (def->type == FNTYP_TrueType)
+		return ttf_char_width;
+
 	I_Error("font_c::NominalWidth : unknown FONT type %d\n", def->type);
 	return 1; /* NOT REACHED */
 }
@@ -224,6 +297,9 @@ int font_c::NominalHeight() const
 
 	if (def->type == FNTYP_Patch)
 		return p_cache.height;
+
+	if (def->type == FNTYP_TrueType)
+		return ttf_char_height;
 
 	I_Error("font_c::NominalHeight : unknown FONT type %d\n", def->type);
 	return 1; /* NOT REACHED */
@@ -248,6 +324,15 @@ const image_c *font_c::CharImage(char ch) const
 	if (def->type == FNTYP_Image)
 		return font_image;
 
+	if (def->type == FNTYP_TrueType)
+	{
+		if (ttf_glyph_map.find((int)ch) != ttf_glyph_map.end())
+			// Create or return faux backup image
+			return W_ImageLookup("TTFDUMMY", INS_Graphic, ILF_Font);
+		else
+			return NULL;
+	}
+
 	SYS_ASSERT(def->type == FNTYP_Patch);
 
 	if (! HasChar(ch))
@@ -267,9 +352,9 @@ const image_c *font_c::CharImage(char ch) const
 	return p_cache.images[idx - p_cache.first];
 }
 
-float font_c::CharRatio(char ch) const
+float font_c::CharRatio(char ch)
 {
-	SYS_ASSERT(def->type = FNTYP_Image);
+	SYS_ASSERT(def->type == FNTYP_Image);
 
 	if (ch == ' ')
 		return 0.4f;
@@ -280,7 +365,7 @@ float font_c::CharRatio(char ch) const
 //
 // Returns the width of the IBM cp437 char in the font.
 //
-float font_c::CharWidth(char ch) const
+float font_c::CharWidth(char ch)
 {
 	if (def->type == FNTYP_Image)
 	{
@@ -289,7 +374,27 @@ float font_c::CharWidth(char ch) const
 		else
 			return individual_char_widths[int((byte)ch)] + def->spacing;
 	}
-			
+
+	if (def->type == FNTYP_TrueType)
+	{
+		auto find_glyph = ttf_glyph_map.find((int)ch);
+		if (find_glyph != ttf_glyph_map.end())
+		{
+			return find_glyph->second.width;
+		}
+		else
+		{
+			ttf_char_t character;
+			character.glyph = stbtt_FindGlyphIndex(&ttf_info, (int)ch);
+			float scale = stbtt_ScaleForPixelHeight(&ttf_info, def->ttf_default_size);
+			stbtt_GetGlyphHMetrics(&ttf_info, character.glyph, &character.width, NULL);
+			character.width *= scale;
+			character.height = ttf_char_height * scale;
+			ttf_glyph_map.try_emplace((int)ch, character);
+			return character.width;
+		}
+	}
+
 	SYS_ASSERT(def->type == FNTYP_Patch);
 
 	if (ch == ' ')
@@ -308,7 +413,7 @@ float font_c::CharWidth(char ch) const
 // Returns the maximum number of characters which can fit within pixel_w
 // pixels.  The string may not contain any newline characters.
 //
-int font_c::MaxFit(int pixel_w, const char *str) const
+int font_c::MaxFit(int pixel_w, const char *str)
 {
 	int w = 0;
 	const char *s;
@@ -341,7 +446,7 @@ int font_c::MaxFit(int pixel_w, const char *str) const
 // Find string width from hu_font chars.  The string may not contain
 // any newline characters.
 //
-float font_c::StringWidth(const char *str) const
+float font_c::StringWidth(const char *str)
 {
 	float w = 0;
 
@@ -372,7 +477,7 @@ int font_c::StringLines(const char *str) const
 void font_c::DrawChar320(float x, float y, char ch, float scale, float aspect,
     const colourmap_c *colmap, float alpha) const
 {
-	SYS_ASSERT(def->type != FNTYP_Image);
+	SYS_ASSERT(def->type == FNTYP_Patch);
 
 	const image_c *image = CharImage(ch);
 

@@ -68,7 +68,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
                   const image_c *image, 
 				  float tx1, float ty1, float tx2, float ty2,
 				  float alpha = 1.0f, rgbcol_t text_col = RGB_NO_VALUE,
-				  const colourmap_c *palremap = NULL, float sx = 0.0, float sy = 0.0);
+				  const colourmap_c *palremap = NULL, float sx = 0.0, float sy = 0.0, int ch = -1);
  
 void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col);
 // Draw a solid colour box (possibly translucent) in the given

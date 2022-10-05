@@ -157,7 +157,7 @@ static void ProcessFile(data_file_c *df)
 		if (file_index == 0)  // "edge-defs.wad"
 			W_ReadWADFIXES();
 	}
-	else if (df->kind == FLKIND_PK3)
+	else if (df->kind == FLKIND_Folder || df->kind == FLKIND_PK3)
 	{
 		ProcessPackage(df, file_index);
 	}

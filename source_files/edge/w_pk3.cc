@@ -384,11 +384,79 @@ static pack_file_c * ProcessZip(data_file_c *df)
 }
 
 
+class pk3_file_c : public epi::file_c
+{
+private:
+	pack_file_c * pack;
+
+	mz_uint file_idx;
+
+	mz_uint length = 0;
+	mz_uint pos    = 0;
+
+	mz_zip_reader_extract_iter_state *iter = NULL;
+
+public:
+	pk3_file_c(pack_file_c *_pack, mz_uint _idx) : pack(_pack), file_idx(_idx)
+	{
+		// determine length
+		mz_zip_archive_file_stat stat;
+		if (mz_zip_reader_file_stat(pack->arch, file_idx, &stat))
+			length = (mz_uint) stat.m_uncomp_size;
+
+		iter = mz_zip_reader_extract_iter_new(pack->arch, file_idx, 0);
+		SYS_ASSERT(iter);
+	}
+
+	~pk3_file_c()
+	{
+		if (iter != NULL)
+			mz_zip_reader_extract_iter_free(iter);
+	}
+
+	int GetLength()
+	{
+		return (int)length;
+	}
+
+	int GetPosition()
+	{
+		return (int)pos;
+	}
+
+	unsigned int Read(void *dest, unsigned int size)
+	{
+		// FIXME
+		return size;
+	}
+
+	unsigned int Write(const void *src, unsigned int size)
+	{
+		// not implemented
+		return size;
+	}
+
+	bool Seek(int offset, int seekpoint)
+	{
+		// FIXME
+		return true;
+	}
+
+private:
+	void Rewind()
+	{
+		mz_zip_reader_extract_iter_free(iter);
+		iter = mz_zip_reader_extract_iter_new(pack->arch, file_idx, 0);
+		SYS_ASSERT(iter);
+	}
+};
+
+
 epi::file_c * pack_file_c::OpenEntry_Zip(size_t dir, size_t index)
 {
-	// TODO !!!
-	I_Error("OpenEntry_Zip called.\n");
-	return NULL;
+	pk3_file_c *f = new pk3_file_c(this, dirs[dir].entries[index].file_idx);
+
+	return f;
 }
 
 

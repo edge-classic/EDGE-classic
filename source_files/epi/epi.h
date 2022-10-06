@@ -45,9 +45,24 @@
 #include <string>
 #include <vector>
 
-#include "types.h"
 #include "macros.h"
 #include "asserts.h"
+
+
+// basic types
+#include <cstdint>
+
+typedef std::int8_t   s8_t;
+typedef std::int16_t  s16_t;
+typedef std::int32_t  s32_t;
+typedef std::int64_t  s64_t;
+
+typedef std::uint8_t   u8_t;
+typedef std::uint16_t  u16_t;
+typedef std::uint32_t  u32_t;
+typedef std::uint64_t  u64_t;
+
+typedef u8_t byte;
 
 
 #ifdef GNUC

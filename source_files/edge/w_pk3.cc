@@ -356,5 +356,22 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 	ProcessDehackedInPack(df->pack);
 }
 
+
+epi::file_c * Pack_OpenFile(pack_file_c *pack, const char *base_name)
+{
+	std::string name = base_name;
+
+	for (size_t i = 0 ; i < pack->dirs[0].entries.size() ; i++)
+	{
+		if (pack->dirs[0].entries[i] == name)
+		{
+			return pack->OpenEntry(0, i);
+		}
+	}
+
+	// not found
+	return NULL;
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

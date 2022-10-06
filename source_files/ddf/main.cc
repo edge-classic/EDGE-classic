@@ -29,6 +29,10 @@
 #include "p_action.h"
 
 
+#define CHECK_SELF_ASSIGN(param)  \
+    if (this == &param) return *this;
+
+
 // enum thats gives the parser's current status
 typedef enum
 {

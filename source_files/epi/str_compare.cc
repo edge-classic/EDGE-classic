@@ -19,38 +19,162 @@
 #include "epi.h"
 #include "str_compare.h"
 
-int epi::str_compare(const char *A, const char *B) { return -1; }
-int epi::str_compare(const char *A, const std::string& B) { return -1; }
-int epi::str_compare(const std::string& A, const char *B) { return -1; }
-int epi::str_compare(const std::string& A, const std::string& B) { return -1; }
+#include <cstring>
+#include <cctype>
+
+#undef strcmp
+#undef strncmp
+
+namespace epi
+{
+
+int str_compare(const char *A, const char *B)
+{
+	SYS_ASSERT(A && B);
+	return std::strcmp(A, B);
+}
+
+int str_compare(const char *A, const std::string& B)
+{
+	return str_compare(A, B.c_str());
+}
+
+int str_compare(const std::string& A, const char *B)
+{
+	return str_compare(A.c_str(), B);
+}
+
+int str_compare(const std::string& A, const std::string& B)
+{
+	return str_compare(A.c_str(), B.c_str());
+}
 
 //----------------------------------------------------------------------------
 
-int epi::str_compare_max(const char *A, const char *B, size_t n) { return -1; }
-int epi::str_compare_max(const char *A, const std::string& B, size_t n) { return -1; }
-int epi::str_compare_max(const std::string& A, const char *B, size_t n) { return -1; }
-int epi::str_compare_max(const std::string& A, const std::string& B, size_t n) { return -1; }
+int str_compare_max(const char *A, const char *B, size_t n)
+{
+	SYS_ASSERT(A && B);
+	return std::strncmp(A, B, n);
+}
+
+int str_compare_max(const char *A, const std::string& B, size_t n)
+{
+	return str_compare_max(A, B.c_str(), n);
+}
+
+int str_compare_max(const std::string& A, const char *B, size_t n)
+{
+	return str_compare_max(A.c_str(), B, n);
+}
+
+int str_compare_max(const std::string& A, const std::string& B, size_t n)
+{
+	return str_compare_max(A.c_str(), B.c_str(), n);
+}
 
 //----------------------------------------------------------------------------
 
-int epi::str_compare_nocase(const char *A, const char *B) { return -1; }
-int epi::str_compare_nocase(const char *A, const std::string& B) { return -1; }
-int epi::str_compare_nocase(const std::string& A, const char *B) { return -1; }
-int epi::str_compare_nocase(const std::string& A, const std::string& B) { return -1; }
+int str_compare_nocase(const char *A, const char *B)
+{
+	SYS_ASSERT(A && B);
+
+	for (;;)
+	{
+		int AC = std::tolower(*A++);
+		int BC = std::tolower(*B++);
+
+		if (AC != BC)
+			return AC - BC;
+
+		if (AC == 0)
+			return 0;
+	}
+}
+
+int str_compare_nocase(const char *A, const std::string& B)
+{
+	return str_compare_nocase(A, B.c_str());
+}
+
+int str_compare_nocase(const std::string& A, const char *B)
+{
+	return str_compare_nocase(A.c_str(), B);
+}
+
+int str_compare_nocase(const std::string& A, const std::string& B)
+{
+	return str_compare_nocase(A.c_str(), B.c_str());
+}
 
 //----------------------------------------------------------------------------
 
-int epi::prefix_compare(const char *A, const char *B) { return -1; }
-int epi::prefix_compare(const char *A, const std::string& B) { return -1; }
-int epi::prefix_compare(const std::string& A, const char *B) { return -1; }
-int epi::prefix_compare(const std::string& A, const std::string& B) { return -1; }
+int prefix_compare(const char *A, const char *B)
+{
+	SYS_ASSERT(A && B);
+
+	for (;;)
+	{
+		int AC = (int)(unsigned char) *A++;
+		int BC = (int)(unsigned char) *B++;
+
+		if (BC == 0)
+			return 0;
+
+		if (AC != BC)
+			return AC - BC;
+	}
+}
+
+int prefix_compare(const char *A, const std::string& B)
+{
+	return prefix_compare(A, B.c_str());
+}
+
+int prefix_compare(const std::string& A, const char *B)
+{
+	return prefix_compare(A.c_str(), B);
+}
+
+int prefix_compare(const std::string& A, const std::string& B)
+{
+	return prefix_compare(A.c_str(), B.c_str());
+}
 
 //----------------------------------------------------------------------------
 
-int epi::prefix_compare_nocase(const char *A, const char *B) { return -1; }
-int epi::prefix_compare_nocase(const char *A, const std::string& B) { return -1; }
-int epi::prefix_compare_nocase(const std::string& A, const char *B) { return -1; }
-int epi::prefix_compare_nocase(const std::string& A, const std::string& B) { return -1; }
+int prefix_compare_nocase(const char *A, const char *B)
+{
+	SYS_ASSERT(A && B);
+
+	for (;;)
+	{
+		int AC = std::tolower(*A++);
+		int BC = std::tolower(*B++);
+
+		if (BC == 0)
+			return 0;
+
+		if (AC != BC)
+			return AC - BC;
+	}
+}
+
+int prefix_compare_nocase(const char *A, const std::string& B)
+{
+	return prefix_compare_nocase(A, B.c_str());
+}
+
+int prefix_compare_nocase(const std::string& A, const char *B)
+{
+	return prefix_compare_nocase(A.c_str(), B);
+}
+
+int prefix_compare_nocase(const std::string& A, const std::string& B)
+{
+	return prefix_compare_nocase(A.c_str(), B.c_str());
+}
+
+} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

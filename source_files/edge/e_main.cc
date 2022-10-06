@@ -1254,7 +1254,7 @@ static void SetupLogAndDebugFiles(void)
 
 static void AddSingleCmdLineFile(const char *name, bool ignore_unknown)
 {
-    std::string ext = epi::PATH_GetExtension(name);
+	std::string ext = epi::PATH_GetExtension(name);
 
 	if (stricmp(ext.c_str(), ".edm") == 0)
 		I_Error("Demos are no longer supported\n");

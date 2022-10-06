@@ -1039,7 +1039,7 @@ void ProcessDehackedInWad(data_file_c *df)
 
 	I_Printf("Converting [%s] lump in: %s\n", lump_name, df->name.c_str());
 
-	int length;
+	int length = -1;
 	const byte *data = (const byte *)W_LoadLump(deh_lump, &length);
 
 	df->deh = DH_ConvertLump(data, length);

@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
+#include "l_deh.h"
 #include "w_files.h"
 
 // EPI
@@ -35,11 +36,12 @@ class pack_entry_c
 {
 public:
 	std::string name;
+	std::string fullpath;
 
 	u32_t pos, length;
 
-	pack_entry_c(const std::string& _name, u32_t _pos, u32_t _len) :
-		name(_name), pos(_pos), length(_len)
+	pack_entry_c(const std::string& _name, const std::string& _path, u32_t _pos, u32_t _len) :
+		name(_name), fullpath(_path), pos(_pos), length(_len)
 	{ }
 
 	~pack_entry_c()
@@ -47,8 +49,13 @@ public:
 
 	bool operator== (const std::string& other) const
 	{
-		// FIXME !!!
-		return false;
+		return stricmp(name.c_str(), other.c_str()) == 0;
+	}
+
+	bool HasExtension(const char *match) const
+	{
+		std::string ext = epi::PATH_GetExtension(name.c_str());
+		return stricmp(ext.c_str(), match) == 0;
 	}
 };
 
@@ -67,21 +74,20 @@ public:
 
 	void SortEntries();
 
-	size_t AddEntry(const std::string& _name, u32_t _pos, u32_t _length)
+	size_t AddEntry(const std::string& _name, const std::string& _path, u32_t _pos, u32_t _length)
 	{
 		// check if already there
 		for (size_t i = 0 ; i < entries.size() ; i++)
 			if (entries[i] == _name)
 				return i;
 
-		entries.push_back(pack_entry_c(_name, _pos, _length));
+		entries.push_back(pack_entry_c(_name, _path, _pos, _length));
 		return entries.size() - 1;
 	}
 
 	bool operator== (const std::string& other) const
 	{
-		// FIXME !!!
-		return false;
+		return stricmp(name.c_str(), other.c_str()) == 0;
 	}
 };
 
@@ -89,7 +95,9 @@ public:
 class pack_file_c
 {
 public:
-	data_file_c *parent = NULL;
+	data_file_c *parent;
+
+	bool is_folder;
 
 	// first entry here is always the top-level (with no name).
 	// everything else is from a second-level directory.
@@ -97,7 +105,7 @@ public:
 	std::vector<pack_dir_c> dirs;
 
 public:
-	pack_file_c(data_file_c *_par) : parent(_par), dirs()
+	pack_file_c(data_file_c *_par, bool _folder) : parent(_par), is_folder(_folder), dirs()
 	{ }
 
 	~pack_file_c()
@@ -116,6 +124,17 @@ public:
 
 	void ProcessSubDir(const std::string& dirname);
 	void SortEntries();
+
+	byte * LoadEntry_Folder(size_t dir, size_t index);
+	byte * LoadEntry_Zip   (size_t dir, size_t index);
+
+	byte * LoadEntry(size_t dir, size_t index)
+	{
+		if (is_folder)
+			return LoadEntry_Folder(dir, index);
+		else
+			return LoadEntry_Zip(dir, index);
+	}
 };
 
 
@@ -198,7 +217,7 @@ void ProcessSubDir(pack_file_c *pack, const std::string& fullpath)
 		if (! fsd[i].is_dir)
 		{
 			std::string filename = epi::PATH_GetFilename(fsd[i].name.c_str());
-			pack->dirs[d].AddEntry(filename, 0, 0);
+			pack->dirs[d].AddEntry(filename, fsd[i].name, 0, 0);
 		}
 	}
 }
@@ -213,7 +232,7 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 		I_Error("Failed to read dir: %s\n", df->name.c_str());
 	}
 
-	pack_file_c *pack = new pack_file_c(df);
+	pack_file_c *pack = new pack_file_c(df, true);
 
 	// top-level files go in here
 	pack->AddDir("");
@@ -227,11 +246,17 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 		else
 		{
 			std::string filename = epi::PATH_GetFilename(fsd[i].name.c_str());
-			pack->dirs[0].AddEntry(filename, 0, 0);
+			pack->dirs[0].AddEntry(filename, "", 0, 0);
 		}
 	}
 
 	return pack;
+}
+
+
+byte * pack_file_c::LoadEntry_Folder(size_t dir, size_t index)
+{
+	return NULL;
 }
 
 
@@ -242,7 +267,46 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 static pack_file_c * ProcessZip(data_file_c *df)
 {
 	I_Warning("Skipping PK3 package: %s\n", df->name.c_str());
-	return new pack_file_c(df);
+	return new pack_file_c(df, false);
+}
+
+
+byte * pack_file_c::LoadEntry_Zip(size_t dir, size_t index)
+{
+	// TODO !!!
+	I_Error("LoadEntry_Zip called.\n");
+	return NULL;
+}
+
+
+//----------------------------------------------------------------------------
+//  GENERAL STUFF
+//----------------------------------------------------------------------------
+
+static void ProcessDehackedInPack(pack_file_c *pack)
+{
+	data_file_c *df = pack->parent;
+
+	for (size_t i = 0 ; i < pack->dirs[0].entries.size() ; i++)
+	{
+		pack_entry_c& entry = pack->dirs[0].entries[i];
+
+		if (entry.HasExtension(".deh") || entry.HasExtension(".bex"))
+		{
+			I_Printf("Converting DEH file%s: %s\n",
+				pack->is_folder ? "" : " in PK3", entry.name.c_str());
+
+			int length = -1;
+			const byte *data = pack->LoadEntry(0, i);
+
+			// FIXME only a single DEH/BEX file can be stored here!!
+			df->deh = DH_ConvertLump(data, length);
+			if (df->deh == NULL)
+				I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());
+
+			delete[] data;
+		}
+	}
 }
 
 
@@ -255,7 +319,7 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 
 	df->pack->SortEntries();
 
-	//TODO ProcessDehackedInPack(df->pack);
+	ProcessDehackedInPack(df->pack);
 }
 
 //--- editor settings ---

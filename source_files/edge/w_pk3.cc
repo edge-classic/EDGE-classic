@@ -334,13 +334,50 @@ static pack_file_c * ProcessZip(data_file_c *df)
 
 	mz_uint total = mz_zip_reader_get_num_files(pack->arch);
 
-	for (mz_uint i = 0 ; i < total ; i++)
+	for (mz_uint idx = 0 ; idx < total ; idx++)
 	{
+		// skip directories
+		if (mz_zip_reader_is_file_a_directory(pack->arch, idx))
+			continue;
+
+		// get filename, decode into DIR + FILE
 		char filename[1024];
 
-		mz_zip_reader_get_filename(pack->arch, i, filename, sizeof(filename));
+		mz_zip_reader_get_filename(pack->arch, idx, filename, sizeof(filename));
 
-		fprintf(stderr, "FILE %d : '%s'\n", (int)i, filename);
+		char *p = filename;
+		while (*p != 0 && *p != '/' && *p != '\\')
+			p++;
+
+		if (p == filename)
+			continue;
+
+		// decode into DIR + FILE
+		size_t dir_idx  = 0;
+		char * basename = filename;
+
+		if (*p != 0)
+		{
+			*p++ = 0;
+
+			basename = p;
+			if (basename[0] == 0)
+				continue;
+
+			// skip file if it has more sub-directories
+			while (*p != 0 && *p != '/' && *p != '\\')
+				p++;
+
+			if (*p != 0)
+				continue;
+
+			dir_idx = pack->AddDir(filename);
+		}
+
+		pack->dirs[dir_idx].AddEntry(basename, "", idx);
+
+		// DEBUG
+		//   fprintf(stderr, "FILE %d : dir %d '%s'\n", (int)idx, (int)dir_idx, basename);
 	}
 
 	return pack;

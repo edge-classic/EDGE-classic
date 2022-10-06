@@ -426,8 +426,18 @@ public:
 
 	unsigned int Read(void *dest, unsigned int count)
 	{
-		// FIXME
-		return count;
+		if (pos >= length)
+			return 0;
+
+		// never read more than what GetLength() reports
+		if (count > length - pos)
+			count = length - pos;
+
+		size_t got = mz_zip_reader_extract_iter_read(iter, dest, count);
+
+		pos += got;
+
+		return got;
 	}
 
 	unsigned int Write(const void *src, unsigned int count)
@@ -492,7 +502,20 @@ private:
 
 	void SkipForward(unsigned int count)
 	{
-		// FIXME
+		byte buffer[1024];
+
+		while (count > 0)
+		{
+			size_t want = std::min((size_t)count, sizeof(buffer));
+			size_t got  = mz_zip_reader_extract_iter_read(iter, buffer, want);
+
+			// reached end of file?
+			if (got == 0)
+				break;
+
+			pos   += got;
+			count -= got;
+		}
 	}
 };
 

@@ -427,7 +427,7 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 			 header.ident[0], header.ident[1],
 			 header.ident[2], header.ident[3], version);
 
-	if (strncmp(header.ident, MD2_IDENTIFIER, 4) != 0)
+	if (prefix_cmp(header.ident, MD2_IDENTIFIER) != 0)
 	{
 		I_Error("MD2_LoadModel: lump is not an MD2 model!");
 		return NULL; /* NOT REACHED */

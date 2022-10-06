@@ -473,7 +473,7 @@ void DDF_StateReadState(const char *info, const char *label,
 		cur->bright = 0;
 	else if (strcmp(stateinfo[3].c_str(), "BRIGHT") == 0)
 		cur->bright = 255;
-	else if (strncmp(stateinfo[3].c_str(), "LIT", 3) == 0)
+	else if (prefix_cmp(stateinfo[3].c_str(), "LIT") == 0)
 	{
 		cur->bright = strtol(stateinfo[3].c_str()+3, NULL, 10);
 		cur->bright = CLAMP(0, cur->bright * 255 / 99, 255);
@@ -527,7 +527,7 @@ bool DDF_MainParseState(byte *object, state_group_t& group,
 						const state_starter_t *starters,
 						const actioncode_t *actions)
 {
-	if (strnicmp(field, "STATES(", 7) != 0)
+	if (prefix_icmp(field, "STATES(") != 0)
 		return false;
 
 	// extract label name

@@ -1420,15 +1420,15 @@ static void RAD_ParseTipAlign(param_set_t& pars)
 
 static void HandleSpawnKeyword(const char *par, s_thing_t *t)
 {
-	if (strnicmp(par, "X=", 2) == 0)
+	if (prefix_icmp(par, "X=") == 0)
 		RAD_CheckForFloat(par+2, &t->x);
-	else if (strnicmp(par, "Y=", 2) == 0)
+	else if (prefix_icmp(par, "Y=") == 0)
 		RAD_CheckForFloat(par+2, &t->y);
-	else if (strnicmp(par, "Z=", 2) == 0)
+	else if (prefix_icmp(par, "Z=") == 0)
 		RAD_CheckForFloat(par+2, &t->z);
-	else if (strnicmp(par, "TAG=", 4) == 0)
+	else if (prefix_icmp(par, "TAG=") == 0)
 		RAD_CheckForInt(par+4, &t->tag);
-	else if (strnicmp(par, "ANGLE=", 6) == 0)
+	else if (prefix_icmp(par, "ANGLE=") == 0)
 	{
 		int val;
 		RAD_CheckForInt(par+6, &val);
@@ -1438,12 +1438,12 @@ static void HandleSpawnKeyword(const char *par, s_thing_t *t)
 		else
 			t->angle = val << 16;
 	}
-	else if (strnicmp(par, "SLOPE=", 6) == 0)
+	else if (prefix_icmp(par, "SLOPE=") == 0)
 	{
 		RAD_CheckForFloat(par+6, &t->slope);
 		t->slope /= 45.0f;
 	}
-	else if (strnicmp(par, "WHEN=", 5) == 0)
+	else if (prefix_icmp(par, "WHEN=") == 0)
 	{
 		DDF_MainGetWhenAppear(par+5, &t->appear);
 	}
@@ -1726,7 +1726,7 @@ static void RAD_ParseDamageMonsters(param_set_t& pars)
 	// parse the tag value
 	if (pars.size() >= 4)
 	{
-		if (strnicmp(pars[3], "TAG=", 4) != 0)
+		if (prefix_icmp(pars[3], "TAG=") != 0)
 			RAD_Error("%s: Bad keyword parameter: %s\n", pars[0], pars[3]);
 
 		RAD_CheckForInt(pars[3]+4, &mon->thing_tag);
@@ -1775,7 +1775,7 @@ static void RAD_ParseThingEvent(param_set_t& pars)
 	// parse the tag value
 	if (pars.size() >= 4)
 	{
-		if (strnicmp(pars[3], "TAG=", 4) != 0)
+		if (prefix_icmp(pars[3], "TAG=") != 0)
 			RAD_Error("%s: Bad keyword parameter: %s\n", pars[0], pars[3]);
 
 		RAD_CheckForInt(pars[3]+4, &tev->thing_tag);

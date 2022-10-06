@@ -23,21 +23,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <ctype.h>
+#include "epi.h"
 
 #include "scanner.h"
 
-
-#ifdef _WIN32
-# define strcmpnocase  stricmp
-#else
-# include <strings.h>
-# define strcmpnocase  strcasecmp
-#endif
+#define strcmpnocase  epi::str_compare_nocase
 
 
 const char* const Scanner::TokenNames[TK_NumSpecialTokens] =

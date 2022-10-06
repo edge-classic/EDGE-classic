@@ -182,7 +182,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 		const raw_patchdef_t *mpatch = &mtexture->patches[0];
 		texpatch_t *patch = &texture->patches[0];
 
-		bool is_sky = (strncmp("SKY", texture->name, 3) == 0);
+		bool is_sky = (prefix_cmp("SKY", texture->name) == 0);
 
 		for (int k = 0; k < texture->patchcount; k++, mpatch++, patch++)
 		{

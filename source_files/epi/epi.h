@@ -69,14 +69,8 @@ typedef u8_t byte;
 #endif
 
 
-// FIXME tidy up this crap
-#ifdef _MSC_VER
-#define strncasecmp _strnicmp
-#define strcasecmp _stricmp
-#else
-#define stricmp   strcasecmp
-#define strnicmp  strncasecmp
-#endif
+// string comparisons
+#include "str_compare.h"
 
 
 /* Important functions provided by Engine code */

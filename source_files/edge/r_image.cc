@@ -915,7 +915,7 @@ static bool IM_ShouldClamp(const image_c *rim)
 static bool IM_ShouldMipmap(image_c *rim)
 {
    	// the "SKY" check here is a hack...
-   	if (strnicmp(rim->name, "SKY", 3) == 0)
+   	if (prefix_icmp(rim->name, "SKY") == 0)
 		return false;
 
 	switch (rim->source_type)
@@ -944,7 +944,7 @@ static bool IM_ShouldMipmap(image_c *rim)
 static bool IM_ShouldSmooth(image_c *rim)
 {
    	// the "SKY" check here is a hack...
-   	if (strnicmp(rim->name, "SKY", 3) == 0)
+   	if (prefix_icmp(rim->name, "SKY") == 0)
 		return true;
 
 	// TODO: more smooth options
@@ -973,7 +973,7 @@ static bool IM_ShouldHQ2X(image_c *rim)
 #if 0
 		case IMSRC_Texture:
 			// the "SKY" check here is a hack...
-			if (strnicmp(rim->name, "SKY", 3) == 0)
+			if (prefix_icmp(rim->name, "SKY") == 0)
 				return true;
 			break;
 #endif
@@ -1189,7 +1189,7 @@ static const image_c *BackupTexture(const char *tex_name, int flags)
 
 	image_c *dummy;
 
-   	if (strnicmp(tex_name, "SKY", 3) == 0)
+   	if (prefix_icmp(tex_name, "SKY") == 0)
 		dummy = CreateDummyImage(tex_name, 0x0000AA, 0x55AADD);
 	else
 		dummy = CreateDummyImage(tex_name, 0xAA5511, 0x663300);
@@ -1598,8 +1598,8 @@ void W_ImagePreCache(const image_c *image)
 
 	// pre-cache alternative images for switches too
 	if (strlen(rim->name) >= 4 &&
-		(strnicmp(rim->name, "SW1", 3) == 0 ||
-		 strnicmp(rim->name, "SW2", 3) == 0 ))
+		(prefix_icmp(rim->name, "SW1") == 0 ||
+		 prefix_icmp(rim->name, "SW2") == 0 ))
 	{
 		char alt_name[16];
 

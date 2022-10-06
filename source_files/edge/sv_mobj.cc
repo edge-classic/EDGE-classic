@@ -541,7 +541,7 @@ bool SR_MobjGetType(void *storage, int index, void *extra)
 	}
 
 	// special handling for projectiles (attacks)
-	if (strncmp(name, "atk:", 4) == 0)
+	if (prefix_cmp(name, "atk:") == 0)
 	{
 		const atkdef_c *atk = atkdefs.Lookup(name+4);
 

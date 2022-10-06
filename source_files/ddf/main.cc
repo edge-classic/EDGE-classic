@@ -719,7 +719,7 @@ void DDF_MainReadFile(readinfo_t * readinfo, const std::string& data)
 	while (memfileptr < &memfile[memsize])
 	{
 		// -KM- 1998/12/16 Added #define command to ddf files.
-		if (!strnicmp(memfileptr, "#DEFINE", 7))
+		if (prefix_icmp(memfileptr, "#DEFINE") == 0)
 		{
 			bool line = false;
 
@@ -798,7 +798,7 @@ void DDF_MainReadFile(readinfo_t * readinfo, const std::string& data)
 			// This code is more hackitude -- to be fixed when the whole
 			// parsing code gets the overhaul it needs.
       
-			if (strnicmp(memfileptr, "#CLEARALL", 9) == 0)
+			if (prefix_icmp(memfileptr, "#CLEARALL") == 0)
 			{
 				if (! firstgo)
 					DDF_Error("#CLEARALL cannot be used inside an entry !\n");
@@ -809,7 +809,7 @@ void DDF_MainReadFile(readinfo_t * readinfo, const std::string& data)
 				continue;
 			}
 
-			if (strnicmp(memfileptr, "#VERSION", 8) == 0)
+			if (prefix_icmp(memfileptr, "#VERSION") == 0)
 			{
 				// just ignore it
 				memfileptr += l_len;

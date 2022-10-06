@@ -69,7 +69,7 @@ static void ColmapStartEntry(const char *name, bool extend)
 	{
 		dynamic_colmap->Default();
 
-		if (strnicmp(name, "TEXT", 4) == 0)
+		if (prefix_icmp(name, "TEXT") == 0)
 			dynamic_colmap->special = COLSP_Whiten;
 
 		return;
@@ -81,7 +81,7 @@ static void ColmapStartEntry(const char *name, bool extend)
 	dynamic_colmap->name = name;
 
 	// make sure fonts get whitened properly (as the default)
-	if (strnicmp(name, "TEXT", 4) == 0)
+	if (prefix_icmp(name, "TEXT") == 0)
 		dynamic_colmap->special = COLSP_Whiten;
 
 	colourmaps.Insert(dynamic_colmap);

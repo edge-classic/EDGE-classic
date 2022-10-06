@@ -144,9 +144,16 @@ public:
 		}
 
 		byte * data = f->LoadIntoMemory();
+		length      = f->GetLength();
 
 		// close file
 		delete f;
+
+		if (data == NULL)
+		{
+			length = 0;
+			return new byte[1];
+		}
 
 		return data;
 	}
@@ -265,7 +272,7 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 		else
 		{
 			std::string filename = epi::PATH_GetFilename(fsd[i].name.c_str());
-			pack->dirs[0].AddEntry(filename, "", 0, 0);
+			pack->dirs[0].AddEntry(filename, fsd[i].name, 0, 0);
 		}
 	}
 
@@ -275,7 +282,7 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 
 epi::file_c * pack_file_c::OpenEntry_Folder(size_t dir, size_t index)
 {
-	const std::string& filename = dirs[dir].entries[index].name;
+	const std::string& filename = dirs[dir].entries[index].fullpath;
 
 	epi::file_c * f = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 

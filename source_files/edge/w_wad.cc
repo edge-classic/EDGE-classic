@@ -953,8 +953,10 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
     file->Read(&header, sizeof(raw_wad_header_t));
 
  	// Do not require IWAD header if loading Harmony, REKKR, or a custom standalone IWAD
-	if (strncmp(header.identification, "IWAD", 4) != 0 && strcasecmp("REKCREDS", lumpname1) != 0 && 
-		strcasecmp("0HAWK01", lumpname1) != 0 && strcasecmp("EDGEIWAD", lumpname1) != 0)
+	if (prefix_cmp(header.identification, "IWAD") != 0 &&
+		stricmp(lumpname1, "REKCREDS") != 0 && 
+		stricmp(lumpname1, "0HAWK01" ) != 0 &&
+		stricmp(lumpname1, "EDGEIWAD") != 0)
 	{
 		file->Seek(0, epi::file_c::SEEKPOINT_START);
 		return false;
@@ -978,7 +980,8 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 
 		if (strncmp(lumpname1, entry.name, strlen(lumpname1) < 8 ? strlen(lumpname1) : 8) == 0)
 		{
-			if (strcasecmp("EDGEIWAD", lumpname1) == 0) // EDGEIWAD is the only wad needed for custom standalones
+			// EDGEIWAD is the only wad needed for custom standalones
+			if (stricmp(lumpname1, "EDGEIWAD") == 0)
 			{
 				delete[] raw_info;
 				file->Seek(0, epi::file_c::SEEKPOINT_START);
@@ -1008,7 +1011,7 @@ void ProcessFixersForWad(wad_file_c *wad)
 
 	for (int i = 0; i < fixdefs.GetSize(); i++)
 	{
-		if (strcasecmp(fix_checker.c_str(), fixdefs[i]->md5_string.c_str()) == 0)
+		if (stricmp(fix_checker, fixdefs[i]->md5_string) == 0)
 		{
 			std::string fix_path = epi::PATH_Join(game_dir.c_str(), "edge_fixes");
 			fix_path = epi::PATH_Join(fix_path.c_str(), fix_checker.append(".wad").c_str());

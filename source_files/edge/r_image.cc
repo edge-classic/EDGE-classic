@@ -409,9 +409,9 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump,
 
 	if (current_flatdef && !current_flatdef->liquid.empty())
 	{
-		if (strcasecmp(current_flatdef->liquid.c_str(), "THIN") == 0)
+		if (stricmp(current_flatdef->liquid, "THIN") == 0)
 			rim->liquid_type = LIQ_Thin;
-		else if (strcasecmp(current_flatdef->liquid.c_str(), "THICK") == 0)
+		else if (stricmp(current_flatdef->liquid, "THICK") == 0)
 			rim->liquid_type = LIQ_Thick;
 	}
 
@@ -497,9 +497,9 @@ static image_c *AddImageFlat(const char *name, int lump)
 
 	if (current_flatdef && !current_flatdef->liquid.empty())
 	{
-		if (strcasecmp(current_flatdef->liquid.c_str(), "THIN") == 0)
+		if (stricmp(current_flatdef->liquid, "THIN") == 0)
 			rim->liquid_type = LIQ_Thin;
-		else if (strcasecmp(current_flatdef->liquid.c_str(), "THICK") == 0)
+		else if (stricmp(current_flatdef->liquid, "THICK") == 0)
 			rim->liquid_type = LIQ_Thick;
 	}
 

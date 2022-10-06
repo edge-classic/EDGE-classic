@@ -1156,7 +1156,7 @@ static void IdentifyVersion(void)
 // Add game-specific base EWADs (widepix, skyboxes, etc) - Dasho
 static void Add_Base(void) 
 {
-	if (strcasecmp("CUSTOM", iwad_base.c_str()) == 0)
+	if (stricmp("CUSTOM", iwad_base) == 0)
 		return; // Custom standalone EDGE IWADs should already contain their necessary resources and definitions - Dasho
 	std::string base_path = epi::PATH_Join(game_dir.c_str(), "edge_base");
 	std::string base_wad = iwad_base;

@@ -283,7 +283,7 @@ blk_loop:
 
 static bool str2bool(char *val)
 {
-	if (strcasecmp(val, "true") == 0)
+	if (stricmp(val, "true") == 0)
 		return true;
 
 	// default is always false
@@ -1426,7 +1426,7 @@ static void LoadUDMFVertexes(parser_t *psr)
 		if (!GetNextBlock(psr, (uint8_t*)ident))
 			break;
 
-		if (strcasecmp(ident, "vertex") == 0)
+		if (stricmp(ident, "vertex") == 0)
 		{
 			// count vertex blocks
 			while (1)
@@ -1461,7 +1461,7 @@ static void LoadUDMFVertexes(parser_t *psr)
 		if (!GetNextBlock(psr, (uint8_t*)ident))
 			break;
 
-		if (strcasecmp(ident, "vertex") == 0)
+		if (stricmp(ident, "vertex") == 0)
 		{
 			float x = 0.0f, y = 0.0f;
 
@@ -1485,11 +1485,11 @@ static void LoadUDMFVertexes(parser_t *psr)
 					continue; // skip line
 				}
 				// process assignment
-				if (strcasecmp(ident, "x") == 0)
+				if (stricmp(ident, "x") == 0)
 				{
 					x = str2float(val, 0.0f);
 				}
-				else if (strcasecmp(ident, "y") == 0)
+				else if (stricmp(ident, "y") == 0)
 				{
 					y = str2float(val, 0.0f);
 				}
@@ -1521,7 +1521,7 @@ static void LoadUDMFSectors(parser_t *psr)
 		if (!GetNextBlock(psr, (uint8_t*)ident))
 			break;
 
-		if (strcasecmp(ident, "sector") == 0)
+		if (stricmp(ident, "sector") == 0)
 		{
 			// count sector blocks
 			while (1)
@@ -1557,7 +1557,7 @@ static void LoadUDMFSectors(parser_t *psr)
 		if (!GetNextBlock(psr, (uint8_t*)ident))
 			break;
 
-		if (strcasecmp(ident, "sector") == 0)
+		if (stricmp(ident, "sector") == 0)
 		{
 			float cz = 0.0f, fz = 0.0f;
 			int light = 160, type = 0, tag = 0;
@@ -1586,31 +1586,31 @@ static void LoadUDMFSectors(parser_t *psr)
 					continue; // skip line
 				}
 				// process assignment
-				if (strcasecmp(ident, "heightfloor") == 0)
+				if (stricmp(ident, "heightfloor") == 0)
 				{
 					fz = str2float(val, 0.0f);
 				}
-				else if (strcasecmp(ident, "heightceiling") == 0)
+				else if (stricmp(ident, "heightceiling") == 0)
 				{
 					cz = str2float(val, 0.0f);
 				}
-				else if (strcasecmp(ident, "texturefloor") == 0)
+				else if (stricmp(ident, "texturefloor") == 0)
 				{
 					Z_StrNCpy(floor_tex, val, 8);
 				}
-				else if (strcasecmp(ident, "textureceiling") == 0)
+				else if (stricmp(ident, "textureceiling") == 0)
 				{
 					Z_StrNCpy(ceil_tex, val, 8);
 				}
-				else if (strcasecmp(ident, "lightlevel") == 0)
+				else if (stricmp(ident, "lightlevel") == 0)
 				{
 					light = str2int(val, 160);
 				}
-				else if (strcasecmp(ident, "special") == 0)
+				else if (stricmp(ident, "special") == 0)
 				{
 					type = str2int(val, 0);
 				}
-				else if (strcasecmp(ident, "id") == 0)
+				else if (stricmp(ident, "id") == 0)
 				{
 					tag = str2int(val, 0);
 				}
@@ -1699,7 +1699,7 @@ static void LoadUDMFSideDefs(parser_t *psr)
 		if (!GetNextBlock(psr, (uint8_t*)ident))
 			break;
 
-		if (strcasecmp(ident, "sidedef") == 0)
+		if (stricmp(ident, "sidedef") == 0)
 		{
 			float x = 0, y = 0;
 			int sec_num = 0;
@@ -1732,27 +1732,27 @@ static void LoadUDMFSideDefs(parser_t *psr)
 					continue; // skip line
 				}
 				// process assignment
-				if (strcasecmp(ident, "offsetx") == 0)
+				if (stricmp(ident, "offsetx") == 0)
 				{
 					x = str2float(val, 0);
 				}
-				else if (strcasecmp(ident, "offsety") == 0)
+				else if (stricmp(ident, "offsety") == 0)
 				{
 					y = str2float(val, 0);
 				}
-				else if (strcasecmp(ident, "texturetop") == 0)
+				else if (stricmp(ident, "texturetop") == 0)
 				{
 					Z_StrNCpy(top_tex, val, 8);
 				}
-				else if (strcasecmp(ident, "texturebottom") == 0)
+				else if (stricmp(ident, "texturebottom") == 0)
 				{
 					Z_StrNCpy(bottom_tex, val, 8);
 				}
-				else if (strcasecmp(ident, "texturemiddle") == 0)
+				else if (stricmp(ident, "texturemiddle") == 0)
 				{
 					Z_StrNCpy(middle_tex, val, 8);
 				}
-				else if (strcasecmp(ident, "sector") == 0)
+				else if (stricmp(ident, "sector") == 0)
 				{
 					sec_num = str2int(val, 0);
 				}
@@ -1868,7 +1868,7 @@ static void LoadUDMFLineDefs(parser_t *psr)
 		if (!GetNextBlock(psr, (uint8_t*)ident))
 			break;
 
-		if (strcasecmp(ident, "linedef") == 0)
+		if (stricmp(ident, "linedef") == 0)
 		{
 			// count linedef blocks
 			while (1)
@@ -1905,7 +1905,7 @@ static void LoadUDMFLineDefs(parser_t *psr)
 		if (!GetNextBlock(psr, (uint8_t*)ident))
 			break;
 
-		if (strcasecmp(ident, "linedef") == 0)
+		if (stricmp(ident, "linedef") == 0)
 		{
 			int flags = 0, v1 = 0, v2 = 0;
 			int side0 = -1, side1 = -1, tag = -1;
@@ -1931,76 +1931,76 @@ static void LoadUDMFLineDefs(parser_t *psr)
 					continue; // skip line
 				}
 				// process assignment
-				if (strcasecmp(ident, "id") == 0)
+				if (stricmp(ident, "id") == 0)
 				{
 					tag = str2int(val, -1);
 				}
-				else if (strcasecmp(ident, "v1") == 0)
+				else if (stricmp(ident, "v1") == 0)
 				{
 					v1 = str2int(val, 0);
 				}
-				else if (strcasecmp(ident, "v2") == 0)
+				else if (stricmp(ident, "v2") == 0)
 				{
 					v2 = str2int(val, 0);
 				}
-				else if (strcasecmp(ident, "special") == 0)
+				else if (stricmp(ident, "special") == 0)
 				{
 					special = str2int(val, 0);
 				}
-				else if (strcasecmp(ident, "sidefront") == 0)
+				else if (stricmp(ident, "sidefront") == 0)
 				{
 					side0 = str2int(val, -1);
 				}
-				else if (strcasecmp(ident, "sideback") == 0)
+				else if (stricmp(ident, "sideback") == 0)
 				{
 					side1 = str2int(val, -1);
 				}
-				else if (strcasecmp(ident, "blocking") == 0)
+				else if (stricmp(ident, "blocking") == 0)
 				{
 					if (str2bool(val))
 						flags |= 0x0001;
 				}
-				else if (strcasecmp(ident, "blockmonsters") == 0)
+				else if (stricmp(ident, "blockmonsters") == 0)
 				{
 					if (str2bool(val))
 						flags |= 0x0002;
 				}
-				else if (strcasecmp(ident, "twosided") == 0)
+				else if (stricmp(ident, "twosided") == 0)
 				{
 					if (str2bool(val))
 						flags |= 0x0004;
 				}
-				else if (strcasecmp(ident, "dontpegtop") == 0)
+				else if (stricmp(ident, "dontpegtop") == 0)
 				{
 					if (str2bool(val))
 						flags |= 0x0008;
 				}
-				else if (strcasecmp(ident, "dontpegbottom") == 0)
+				else if (stricmp(ident, "dontpegbottom") == 0)
 				{
 					if (str2bool(val))
 						flags |= 0x0010;
 				}
-				else if (strcasecmp(ident, "secret") == 0)
+				else if (stricmp(ident, "secret") == 0)
 				{
 					if (str2bool(val))
 						flags |= 0x0020;
 				}
-				else if (strcasecmp(ident, "blocksound") == 0)
+				else if (stricmp(ident, "blocksound") == 0)
 				{
 					if (str2bool(val))
 						flags |= 0x0040;
 				}
-				else if (strcasecmp(ident, "dontdraw") == 0)
+				else if (stricmp(ident, "dontdraw") == 0)
 				{
 					if (str2bool(val))
 						flags |= 0x0080;
 				}
-				else if (strcasecmp(ident, "mapped") == 0)
+				else if (stricmp(ident, "mapped") == 0)
 				{
 					if (str2bool(val))
 						flags |= 0x0100;
 				}
-				else if (strcasecmp(ident, "passuse") == 0)
+				else if (stricmp(ident, "passuse") == 0)
 				{
 					if (str2bool(val))
 						flags |= 0x0200; // BOOM flag
@@ -2054,7 +2054,7 @@ static void LoadUDMFThings(parser_t *psr)
 		if (!GetNextBlock(psr, (uint8_t*)ident))
 			break;
 
-		if (strcasecmp(ident, "thing") == 0)
+		if (stricmp(ident, "thing") == 0)
 		{
 			float x = 0.0f, y = 0.0f, z = 0.0f;
 			angle_t angle = ANG0;
@@ -2079,77 +2079,77 @@ static void LoadUDMFThings(parser_t *psr)
 					continue; // skip line
 				}
 				// process assignment
-				if (strcasecmp(ident, "id") == 0)
+				if (stricmp(ident, "id") == 0)
 				{
 					tag = str2int(val, 0);
 				}
-				else if (strcasecmp(ident, "x") == 0)
+				else if (stricmp(ident, "x") == 0)
 				{
 					x = str2float(val, 0.0f);
 				}
-				else if (strcasecmp(ident, "y") == 0)
+				else if (stricmp(ident, "y") == 0)
 				{
 					y = str2float(val, 0.0f);
 				}
-				else if (strcasecmp(ident, "height") == 0)
+				else if (stricmp(ident, "height") == 0)
 				{
 					z = str2float(val, 0.0f);
 				}
-				else if (strcasecmp(ident, "angle") == 0)
+				else if (stricmp(ident, "angle") == 0)
 				{
 					int ta = str2int(val, 0);
 					angle = FLOAT_2_ANG((float)ta);
 				}
-				else if (strcasecmp(ident, "type") == 0)
+				else if (stricmp(ident, "type") == 0)
 				{
 					typenum = str2int(val, 0);
 				}
-				else if (strcasecmp(ident, "skill1") == 0)
+				else if (stricmp(ident, "skill1") == 0)
 				{
 					options |= MTF_EASY;
 				}
-				else if (strcasecmp(ident, "skill2") == 0)
+				else if (stricmp(ident, "skill2") == 0)
 				{
 					if (str2bool(val))
 						options |= MTF_EASY;
 				}
-				else if (strcasecmp(ident, "skill3") == 0)
+				else if (stricmp(ident, "skill3") == 0)
 				{
 					if (str2bool(val))
 						options |= MTF_NORMAL;
 				}
-				else if (strcasecmp(ident, "skill4") == 0)
+				else if (stricmp(ident, "skill4") == 0)
 				{
 					if (str2bool(val))
 						options |= MTF_HARD;
 				}
-				else if (strcasecmp(ident, "skill5") == 0)
+				else if (stricmp(ident, "skill5") == 0)
 				{
 					if (str2bool(val))
 						options |= MTF_HARD;
 				}
-				else if (strcasecmp(ident, "ambush") == 0)
+				else if (stricmp(ident, "ambush") == 0)
 				{
 					if (str2bool(val))
 						options |= MTF_AMBUSH;
 				}
-				else if (strcasecmp(ident, "single") == 0)
+				else if (stricmp(ident, "single") == 0)
 				{
 					if (str2bool(val))
 						options &= ~MTF_NOT_SINGLE;
 				}
-				else if (strcasecmp(ident, "dm") == 0)
+				else if (stricmp(ident, "dm") == 0)
 				{
 					if (str2bool(val))
 						options &= ~MTF_NOT_DM;
 				}
-				else if (strcasecmp(ident, "coop") == 0)
+				else if (stricmp(ident, "coop") == 0)
 				{
 					if (str2bool(val))
 						options &= ~MTF_NOT_COOP;
 				}
 				// MBF flag
-				else if (strcasecmp(ident, "friend") == 0)
+				else if (stricmp(ident, "friend") == 0)
 				{
 					if (str2bool(val))
 						options |= MTF_FRIEND;

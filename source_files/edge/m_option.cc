@@ -1905,7 +1905,7 @@ static void M_ChangeSoundfont(int keypressed)
 	int sf2_pos = -1;
 	for(int i=0; i < available_soundfonts.size(); i++)
 	{
-		if (strcasecmp(s_soundfont.c_str(), available_soundfonts.at(i).c_str()) == 0)
+		if (stricmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
 		{
 			sf2_pos = i;
 			break;

@@ -47,7 +47,7 @@ static bool tsf_inited;
 
 tsf *edge_tsf;
 
-cvar_c s_soundfont("s_soundfont", "default.sf2", CVAR_ARCHIVE);
+DEF_CVAR(s_soundfont, "default.sf2", CVAR_ARCHIVE)
 
 std::vector<std::string> available_soundfonts;
 
@@ -268,7 +268,7 @@ bool S_StartupTSF(void)
 	bool cvar_good = false;
 	for (int i=0; i < available_soundfonts.size(); i++)
 	{
-		if(strcasecmp(s_soundfont.c_str(), available_soundfonts.at(i).c_str()) == 0)
+		if(stricmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
 			cvar_good = true;
 	}
 

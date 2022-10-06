@@ -19,8 +19,6 @@
 #include "epi.h"
 #include "arrays.h"
 
-#include <string.h>
-
 //void I_Printf(const char *message,...) GCCATTR(format(printf, 1, 2));
 
 #define INITIAL_ARRAY_SIZE 2

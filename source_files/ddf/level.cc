@@ -20,10 +20,9 @@
 //
 
 #include "local.h"
-
-#include "utility.h"
-
 #include "level.h"
+
+// engine code (FIXME don't do wad shit here)
 #include "w_wad.h"
 
 #undef  DF

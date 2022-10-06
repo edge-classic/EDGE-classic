@@ -73,16 +73,16 @@ static int last_model  = -1;
 
 static int AddSpriteName(const char *name)
 {
-	if (stricmp(name, "NULL") == 0)
+	if (epi::case_cmp(name, "NULL") == 0)
 		return SPR_NULL;
 	
 	if (last_sprite >= 0 &&
-		stricmp(ddf_sprite_names[last_sprite].c_str(), name) == 0)
+		epi::case_cmp(ddf_sprite_names[last_sprite], name) == 0)
 		return last_sprite;
 
 	// look backwards, assuming a recent sprite is more likely
 	for (int i = (int)ddf_sprite_names.size() - 1; i > SPR_NULL; i--)
-		if (stricmp(ddf_sprite_names[i].c_str(), name) == 0)
+		if (epi::case_cmp(ddf_sprite_names[i], name) == 0)
 			return ((last_sprite = i));
 
 	last_sprite = (int)ddf_sprite_names.size();
@@ -95,16 +95,16 @@ static int AddSpriteName(const char *name)
 
 static int AddModelName(const char *name)
 {
-	if (stricmp(name, "NULL") == 0)
+	if (epi::case_cmp(name, "NULL") == 0)
 		return SPR_NULL;
 
 	if (last_model >= 0 &&
-		stricmp(ddf_model_names[last_model].c_str(), name) == 0)
+		epi::case_cmp(ddf_model_names[last_model], name) == 0)
 		return last_model;
 
 	// look backwards, assuming a recent model is more likely
 	for (int i = (int)ddf_model_names.size() - 1; i > SPR_NULL; i--)
-		if (stricmp(ddf_model_names[i].c_str(), name) == 0)
+		if (epi::case_cmp(ddf_model_names[i], name) == 0)
 			return ((last_model = i));
 
 	last_model = (int)ddf_model_names.size();
@@ -469,11 +469,11 @@ void DDF_StateReadState(const char *info, const char *label,
 	//------------STATE BRIGHTNESS LEVEL----------------
 	//--------------------------------------------------
 
-	if (strcmp(stateinfo[3].c_str(), "NORMAL") == 0)
+	if (epi::strcmp(stateinfo[3].c_str(), "NORMAL") == 0)
 		cur->bright = 0;
-	else if (strcmp(stateinfo[3].c_str(), "BRIGHT") == 0)
+	else if (epi::strcmp(stateinfo[3].c_str(), "BRIGHT") == 0)
 		cur->bright = 255;
-	else if (strncmp(stateinfo[3].c_str(), "LIT", 3) == 0)
+	else if (epi::prefix_cmp(stateinfo[3].c_str(), "LIT") == 0)
 	{
 		cur->bright = strtol(stateinfo[3].c_str()+3, NULL, 10);
 		cur->bright = CLAMP(0, cur->bright * 255 / 99, 255);
@@ -527,7 +527,7 @@ bool DDF_MainParseState(byte *object, state_group_t& group,
 						const state_starter_t *starters,
 						const actioncode_t *actions)
 {
-	if (strnicmp(field, "STATES(", 7) != 0)
+	if (epi::prefix_case_cmp(field, "STATES(") != 0)
 		return false;
 
 	// extract label name

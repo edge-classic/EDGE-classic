@@ -2148,7 +2148,7 @@ bool DDF_MainParseCondition(const char *info, condition_check_t *cond)
 
 	// check for negation
 	t_off = 0;
-	if (strnicmp(typebuf, "NOT_", 4) == 0)
+	if (epi::prefix_case_cmp(typebuf, "NOT_") == 0)
 	{
 		cond->negate = true;
 		t_off = 4;

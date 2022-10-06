@@ -22,7 +22,6 @@
 #include "dm_defs.h"
 
 #include "file.h"
-#include "utility.h"
 
 // TODO
 

@@ -330,7 +330,7 @@ static void W_ReadDDF_DataFile(data_file_c *df, int d)
 	{
 		std::string base_name = epi::PATH_GetFilename(df->name.c_str());
 
-		if (stricmp(base_name.c_str(), DDF_Readers[d].pack_name) == 0)
+		if (epi::case_cmp(base_name.c_str(), DDF_Readers[d].pack_name) == 0)
 		{
 			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, df->name.c_str());
 

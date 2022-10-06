@@ -19,7 +19,8 @@
 #ifndef __DDF_ANIM_H_
 #define __DDF_ANIM_H_
 
-#include "utility.h"
+#include "epi.h"
+#include "arrays.h"
 
 #include "types.h"
 

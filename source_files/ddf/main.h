@@ -19,8 +19,9 @@
 #ifndef __DDF_MAIN_H__
 #define __DDF_MAIN_H__
 
+#include "epi.h"
 #include "file.h"
-#include "utility.h"
+#include "arrays.h"
 
 #include "types.h"
 

@@ -26,9 +26,7 @@
 #ifndef __DDF_TYPE_H__
 #define __DDF_TYPE_H__
 
-#include "utility.h"
-
-#include <string>
+#include "epi.h"
 
 class mobjtype_c;
 

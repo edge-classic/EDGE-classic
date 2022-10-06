@@ -130,7 +130,7 @@ static image_c *do_Lookup(real_image_container_c& bucket, const char *name,
 		if (source_type >= 0 && source_type != (int)rim->source_type)
 			continue;
 
-		if (stricmp(name, rim->name) == 0)
+		if (epi::case_cmp(name, rim->name) == 0)
 			return rim;
 	}
 
@@ -409,9 +409,9 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump,
 
 	if (current_flatdef && !current_flatdef->liquid.empty())
 	{
-		if (strcasecmp(current_flatdef->liquid.c_str(), "THIN") == 0)
+		if (epi::case_cmp(current_flatdef->liquid, "THIN") == 0)
 			rim->liquid_type = LIQ_Thin;
-		else if (strcasecmp(current_flatdef->liquid.c_str(), "THICK") == 0)
+		else if (epi::case_cmp(current_flatdef->liquid, "THICK") == 0)
 			rim->liquid_type = LIQ_Thick;
 	}
 
@@ -497,9 +497,9 @@ static image_c *AddImageFlat(const char *name, int lump)
 
 	if (current_flatdef && !current_flatdef->liquid.empty())
 	{
-		if (strcasecmp(current_flatdef->liquid.c_str(), "THIN") == 0)
+		if (epi::case_cmp(current_flatdef->liquid, "THIN") == 0)
 			rim->liquid_type = LIQ_Thin;
-		else if (strcasecmp(current_flatdef->liquid.c_str(), "THICK") == 0)
+		else if (epi::case_cmp(current_flatdef->liquid, "THICK") == 0)
 			rim->liquid_type = LIQ_Thick;
 	}
 
@@ -915,7 +915,7 @@ static bool IM_ShouldClamp(const image_c *rim)
 static bool IM_ShouldMipmap(image_c *rim)
 {
    	// the "SKY" check here is a hack...
-   	if (strnicmp(rim->name, "SKY", 3) == 0)
+   	if (epi::prefix_case_cmp(rim->name, "SKY") == 0)
 		return false;
 
 	switch (rim->source_type)
@@ -944,7 +944,7 @@ static bool IM_ShouldMipmap(image_c *rim)
 static bool IM_ShouldSmooth(image_c *rim)
 {
    	// the "SKY" check here is a hack...
-   	if (strnicmp(rim->name, "SKY", 3) == 0)
+   	if (epi::prefix_case_cmp(rim->name, "SKY") == 0)
 		return true;
 
 	// TODO: more smooth options
@@ -973,7 +973,7 @@ static bool IM_ShouldHQ2X(image_c *rim)
 #if 0
 		case IMSRC_Texture:
 			// the "SKY" check here is a hack...
-			if (strnicmp(rim->name, "SKY", 3) == 0)
+			if (epi::prefix_case_cmp(rim->name, "SKY") == 0)
 				return true;
 			break;
 #endif
@@ -1189,7 +1189,7 @@ static const image_c *BackupTexture(const char *tex_name, int flags)
 
 	image_c *dummy;
 
-   	if (strnicmp(tex_name, "SKY", 3) == 0)
+   	if (epi::prefix_case_cmp(tex_name, "SKY") == 0)
 		dummy = CreateDummyImage(tex_name, 0x0000AA, 0x55AADD);
 	else
 		dummy = CreateDummyImage(tex_name, 0xAA5511, 0x663300);
@@ -1310,18 +1310,18 @@ const image_c *W_ImageLookup(const char *name, image_namespace_e type, int flags
 
 	// "Sky" marker.
 	if (type == INS_Flat &&
-		(stricmp(name, "F_SKY1") == 0 ||
-		 stricmp(name, "F_SKY")  == 0))
+		(epi::case_cmp(name, "F_SKY1") == 0 ||
+		 epi::case_cmp(name, "F_SKY")  == 0))
 	{
 		return skyflatimage;
 	}
 
 	// compatibility hack (first texture in IWAD is a dummy)
 	if (type == INS_Texture &&
-		( (stricmp(name, "AASTINKY") == 0) ||
-		  (stricmp(name, "AASHITTY") == 0) ||
-		  (stricmp(name, "BADPATCH") == 0) ||
-		  (stricmp(name, "ABADONE")  == 0)))
+		( (epi::case_cmp(name, "AASTINKY") == 0) ||
+		  (epi::case_cmp(name, "AASHITTY") == 0) ||
+		  (epi::case_cmp(name, "BADPATCH") == 0) ||
+		  (epi::case_cmp(name, "ABADONE")  == 0)))
 	{
 	    return NULL;
 	}
@@ -1372,7 +1372,7 @@ const image_c *W_ImageParseSaveString(char type, const char *name)
 	// Used by the savegame code.
 
 	// this name represents the sky (historical reasons)
-	if (type == 'd' && stricmp(name, "DUMMY__2") == 0)
+	if (type == 'd' && epi::case_cmp(name, "DUMMY__2") == 0)
 	{
 		return skyflatimage;
 	}
@@ -1598,8 +1598,8 @@ void W_ImagePreCache(const image_c *image)
 
 	// pre-cache alternative images for switches too
 	if (strlen(rim->name) >= 4 &&
-		(strnicmp(rim->name, "SW1", 3) == 0 ||
-		 strnicmp(rim->name, "SW2", 3) == 0 ))
+		(epi::prefix_case_cmp(rim->name, "SW1") == 0 ||
+		 epi::prefix_case_cmp(rim->name, "SW2") == 0 ))
 	{
 		char alt_name[16];
 

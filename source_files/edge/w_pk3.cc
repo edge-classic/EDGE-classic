@@ -50,13 +50,13 @@ public:
 
 	bool operator== (const std::string& other) const
 	{
-		return stricmp(name.c_str(), other.c_str()) == 0;
+		return epi::case_cmp(name, other.c_str()) == 0;
 	}
 
 	bool HasExtension(const char *match) const
 	{
 		std::string ext = epi::PATH_GetExtension(name.c_str());
-		return stricmp(ext.c_str(), match) == 0;
+		return epi::case_cmp(ext, match) == 0;
 	}
 };
 
@@ -88,7 +88,7 @@ public:
 
 	bool operator== (const std::string& other) const
 	{
-		return stricmp(name.c_str(), other.c_str()) == 0;
+		return epi::case_cmp(name, other) == 0;
 	}
 };
 

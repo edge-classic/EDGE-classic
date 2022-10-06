@@ -19,7 +19,8 @@
 #ifndef __DDF_FONT__
 #define __DDF_FONT__
 
-#include "utility.h"
+#include "epi.h"
+#include "arrays.h"
 
 #include "types.h"
 

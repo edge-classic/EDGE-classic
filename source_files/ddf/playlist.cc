@@ -59,13 +59,13 @@ static void DDF_MusicParseInfo(const char *info)
 	charbuff[i] = 0;
 
 	i=MUS_UNKNOWN;
-	while (i!=ENDOFMUSTYPES && stricmp(charbuff, musstrtype[i]) != 0)
+	while (i!=ENDOFMUSTYPES && epi::case_cmp(charbuff, musstrtype[i]) != 0)
 		i++;
 
 	if (i==ENDOFMUSTYPES)
 	{
 		i=MUSINF_UNKNOWN;
-		while (musinftype[i] != NULL && stricmp(charbuff, musinftype[i]) != 0)
+		while (musinftype[i] != NULL && epi::case_cmp(charbuff, musinftype[i]) != 0)
 			i++;
 		if (i==ENDOFMUSINFTYPES)
 			DDF_Error("DDF_MusicParseInfo: Unknown music type: '%s'\n", charbuff);
@@ -102,7 +102,7 @@ static void DDF_MusicParseInfo(const char *info)
 	charbuff[i] = 0;
 
 	i=MUSINF_UNKNOWN;
-	while (musinftype[i] != NULL && stricmp(charbuff, musinftype[i]) != 0)
+	while (musinftype[i] != NULL && epi::case_cmp(charbuff, musinftype[i]) != 0)
 		i++;
 
 	if (i==ENDOFMUSINFTYPES)

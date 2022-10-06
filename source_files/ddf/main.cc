@@ -29,6 +29,10 @@
 #include "p_action.h"
 
 
+#define CHECK_SELF_ASSIGN(param)  \
+    if (this == &param) return *this;
+
+
 // enum thats gives the parser's current status
 typedef enum
 {
@@ -240,7 +244,7 @@ const char *DDF_MainGetDefine(const char *name)
 {
 	// search backwards, to allow redefinitions to work
 	for (int i = (int)all_defines.size()-1 ; i >= 0 ; i--)
-		if (stricmp(all_defines[i].name.c_str(), name) == 0)
+		if (epi::case_cmp(all_defines[i].name.c_str(), name) == 0)
 			return all_defines[i].value.c_str();
 
 	// undefined, so use the token as-is
@@ -715,7 +719,7 @@ void DDF_MainReadFile(readinfo_t * readinfo, const std::string& data)
 	while (memfileptr < &memfile[memsize])
 	{
 		// -KM- 1998/12/16 Added #define command to ddf files.
-		if (!strnicmp(memfileptr, "#DEFINE", 7))
+		if (epi::prefix_case_cmp(memfileptr, "#DEFINE") == 0)
 		{
 			bool line = false;
 
@@ -794,7 +798,7 @@ void DDF_MainReadFile(readinfo_t * readinfo, const std::string& data)
 			// This code is more hackitude -- to be fixed when the whole
 			// parsing code gets the overhaul it needs.
       
-			if (strnicmp(memfileptr, "#CLEARALL", 9) == 0)
+			if (epi::prefix_case_cmp(memfileptr, "#CLEARALL") == 0)
 			{
 				if (! firstgo)
 					DDF_Error("#CLEARALL cannot be used inside an entry !\n");
@@ -805,7 +809,7 @@ void DDF_MainReadFile(readinfo_t * readinfo, const std::string& data)
 				continue;
 			}
 
-			if (strnicmp(memfileptr, "#VERSION", 8) == 0)
+			if (epi::prefix_case_cmp(memfileptr, "#VERSION") == 0)
 			{
 				// just ignore it
 				memfileptr += l_len;
@@ -851,7 +855,7 @@ void DDF_MainReadFile(readinfo_t * readinfo, const std::string& data)
 				break;
 
 			case tag_stop:
-				if (stricmp(token.c_str(), readinfo->tag) != 0)
+				if (epi::case_cmp(token.c_str(), readinfo->tag) != 0)
 					DDF_Error("Start tag <%s> expected, found <%s>!\n", 
 							  readinfo->tag, token.c_str());
 
@@ -1081,13 +1085,13 @@ void DDF_MainGetBoolean(const char *info, void *storage)
 
 	SYS_ASSERT(info && storage);
 
-	if ((stricmp(info, "TRUE") == 0) || (strcmp(info, "1") == 0))
+	if ((epi::case_cmp(info, "TRUE") == 0) || (epi::case_cmp(info, "1") == 0))
 	{
 		*dest = true;
 		return;
 	}
 
-	if ((stricmp(info, "FALSE") == 0) || (strcmp(info, "0") == 0))
+	if ((epi::case_cmp(info, "FALSE") == 0) || (epi::case_cmp(info, "0") == 0))
 	{
 		*dest = false;
 		return;
@@ -1359,7 +1363,7 @@ void DDF_MainGetTime(const char *info, void *storage)
 	SYS_ASSERT(info && storage);
 
 	// -ES- 1999/09/14 MAXT means that time should be maximal.
-	if (!stricmp(info, "maxt"))
+	if (epi::case_cmp(info, "maxt") == 0)
 	{
 		*dest = INT_MAX; // -ACB- 1999/09/22 Standards, Please.
 		return;

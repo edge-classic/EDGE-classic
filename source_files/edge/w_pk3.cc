@@ -37,12 +37,15 @@ class pack_entry_c
 {
 public:
 	std::string name;
+
+	// only for Folder: the full pathname to file (for FS_Open).
 	std::string fullpath;
 
-	u32_t pos, length;
+	// only for PK3: the index into the archive.
+	mz_uint file_idx;
 
-	pack_entry_c(const std::string& _name, const std::string& _path, u32_t _pos, u32_t _len) :
-		name(_name), fullpath(_path), pos(_pos), length(_len)
+	pack_entry_c(const std::string& _name, const std::string& _path, mz_uint _idx) :
+		name(_name), fullpath(_path), file_idx(_idx)
 	{ }
 
 	~pack_entry_c()
@@ -75,14 +78,14 @@ public:
 
 	void SortEntries();
 
-	size_t AddEntry(const std::string& _name, const std::string& _path, u32_t _pos, u32_t _length)
+	size_t AddEntry(const std::string& _name, const std::string& _path, mz_uint _idx)
 	{
 		// check if already there
 		for (size_t i = 0 ; i < entries.size() ; i++)
 			if (entries[i] == _name)
 				return i;
 
-		entries.push_back(pack_entry_c(_name, _path, _pos, _length));
+		entries.push_back(pack_entry_c(_name, _path, _idx));
 		return entries.size() - 1;
 	}
 
@@ -105,12 +108,17 @@ public:
 	// things in deeper directories are not stored.
 	std::vector<pack_dir_c> dirs;
 
+	mz_zip_archive *arch;
+
 public:
-	pack_file_c(data_file_c *_par, bool _folder) : parent(_par), is_folder(_folder), dirs()
+	pack_file_c(data_file_c *_par, bool _folder) : parent(_par), is_folder(_folder), dirs(), arch(NULL)
 	{ }
 
 	~pack_file_c()
-	{ }
+	{
+		if (arch != NULL)
+			delete arch;
+	}
 
 	size_t AddDir(const std::string& name)
 	{
@@ -243,7 +251,7 @@ void ProcessSubDir(pack_file_c *pack, const std::string& fullpath)
 		if (! fsd[i].is_dir)
 		{
 			std::string filename = epi::PATH_GetFilename(fsd[i].name.c_str());
-			pack->dirs[d].AddEntry(filename, fsd[i].name, 0, 0);
+			pack->dirs[d].AddEntry(filename, fsd[i].name, 0);
 		}
 	}
 }
@@ -272,7 +280,7 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 		else
 		{
 			std::string filename = epi::PATH_GetFilename(fsd[i].name.c_str());
-			pack->dirs[0].AddEntry(filename, fsd[i].name, 0, 0);
+			pack->dirs[0].AddEntry(filename, fsd[i].name, 0);
 		}
 	}
 
@@ -300,8 +308,42 @@ epi::file_c * pack_file_c::OpenEntry_Folder(size_t dir, size_t index)
 
 static pack_file_c * ProcessZip(data_file_c *df)
 {
-	I_Warning("Skipping PK3 package: %s\n", df->name.c_str());
-	return new pack_file_c(df, false);
+	pack_file_c *pack = new pack_file_c(df, false);
+
+	pack->arch = new mz_zip_archive;
+
+	// this is necessary (but stupid)
+	memset(pack->arch, 0, sizeof(mz_zip_archive));
+
+	if (! mz_zip_reader_init_file(pack->arch, df->name.c_str(), 0))
+	{
+		switch (mz_zip_get_last_error(pack->arch))
+		{
+			case MZ_ZIP_FILE_OPEN_FAILED:
+			case MZ_ZIP_FILE_READ_FAILED:
+			case MZ_ZIP_FILE_SEEK_FAILED:
+				I_Error("Failed to open PK3 file: %s\n", df->name.c_str());
+
+			default:
+				I_Error("Not a PK3 file (or is corrupted): %s\n", df->name.c_str());
+		}
+	}
+
+	// create the top-level directory
+	pack->AddDir("");
+
+	mz_uint total = mz_zip_reader_get_num_files(pack->arch);
+
+	for (mz_uint i = 0 ; i < total ; i++)
+	{
+		char filename[1024];
+
+		mz_zip_reader_get_filename(pack->arch, i, filename, sizeof(filename));
+
+		fprintf(stderr, "FILE %d : '%s'\n", (int)i, filename);
+	}
+
+	return pack;
 }
 
 

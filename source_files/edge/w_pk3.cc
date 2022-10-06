@@ -424,21 +424,59 @@ public:
 		return (int)pos;
 	}
 
-	unsigned int Read(void *dest, unsigned int size)
+	unsigned int Read(void *dest, unsigned int count)
 	{
 		// FIXME
-		return size;
+		return count;
 	}
 
-	unsigned int Write(const void *src, unsigned int size)
+	unsigned int Write(const void *src, unsigned int count)
 	{
 		// not implemented
-		return size;
+		return count;
 	}
 
 	bool Seek(int offset, int seekpoint)
 	{
-		// FIXME
+		mz_uint want_pos = pos;
+
+		if (seekpoint == epi::file_c::SEEKPOINT_START) want_pos = 0;
+		if (seekpoint == epi::file_c::SEEKPOINT_END)   want_pos = length;
+
+		if (offset < 0)
+		{
+			offset = -offset;
+			if ((mz_uint)offset >= want_pos)
+				want_pos = 0;
+			else
+				want_pos -= (mz_uint)offset;
+		}
+		else
+		{
+			want_pos += (mz_uint)offset;
+		}
+
+		// cannot go beyond the end (except TO very end)
+		if (want_pos > length)
+			return false;
+
+		if (want_pos == length)
+		{
+			pos = length;
+			return true;
+		}
+
+		// to go backwards, we are forced to rewind to beginning
+		if (want_pos < pos)
+		{
+			Rewind();
+		}
+
+		// trivial success when already there
+		if (want_pos == pos)
+			return true;
+
+		SkipForward(want_pos - pos);
 		return true;
 	}
 
@@ -448,6 +486,13 @@ private:
 		mz_zip_reader_extract_iter_free(iter);
 		iter = mz_zip_reader_extract_iter_new(pack->arch, file_idx, 0);
 		SYS_ASSERT(iter);
+
+		pos = 0;
+	}
+
+	void SkipForward(unsigned int count)
+	{
+		// FIXME
 	}
 };
 

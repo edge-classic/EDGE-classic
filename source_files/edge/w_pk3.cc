@@ -22,6 +22,7 @@
 
 // EPI
 #include "epi.h"
+#include "file.h"
 #include "filesystem.h"
 #include "path.h"
 
@@ -125,16 +126,24 @@ public:
 	void ProcessSubDir(const std::string& dirname);
 	void SortEntries();
 
-	byte * LoadEntry_Folder(size_t dir, size_t index);
-	byte * LoadEntry_Zip   (size_t dir, size_t index);
-
-	byte * LoadEntry(size_t dir, size_t index)
+	epi::file_c * OpenEntry(size_t dir, size_t index)
 	{
 		if (is_folder)
-			return LoadEntry_Folder(dir, index);
+			return OpenEntry_Folder(dir, index);
 		else
-			return LoadEntry_Zip(dir, index);
+			return OpenEntry_Zip(dir, index);
 	}
+
+	byte * LoadEntry(size_t dir, size_t index, int& length)
+	{
+		// FIXME
+		length = 0;
+		return NULL;
+	}
+
+private:
+	epi::file_c * OpenEntry_Folder(size_t dir, size_t index);
+	epi::file_c * OpenEntry_Zip   (size_t dir, size_t index);
 };
 
 
@@ -254,9 +263,17 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 }
 
 
-byte * pack_file_c::LoadEntry_Folder(size_t dir, size_t index)
+epi::file_c * pack_file_c::OpenEntry_Folder(size_t dir, size_t index)
 {
-	return NULL;
+	const std::string& filename = dirs[dir].entries[index].name;
+
+	epi::file_c * f = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+
+	// this generally won't happen, file was found during a dir scan
+	if (f == NULL)
+		I_Error("Failed to open file: %s\n", filename.c_str());
+
+	return f;
 }
 
 
@@ -271,7 +288,7 @@ static pack_file_c * ProcessZip(data_file_c *df)
 }
 
 
-byte * pack_file_c::LoadEntry_Zip(size_t dir, size_t index)
+epi::file_c * pack_file_c::OpenEntry_Zip(size_t dir, size_t index)
 {
 	// TODO !!!
 	I_Error("LoadEntry_Zip called.\n");
@@ -297,9 +314,9 @@ static void ProcessDehackedInPack(pack_file_c *pack)
 				pack->is_folder ? "" : " in PK3", entry.name.c_str());
 
 			int length = -1;
-			const byte *data = pack->LoadEntry(0, i);
+			const byte *data = pack->LoadEntry(0, i, length);
 
-			// FIXME only a single DEH/BEX file can be stored here!!
+			// FIXME does not handle multiple files!!
 			df->deh = DH_ConvertLump(data, length);
 			if (df->deh == NULL)
 				I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());

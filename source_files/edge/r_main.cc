@@ -182,9 +182,9 @@ void RGL_CheckExtensions(void)
 	I_Printf("OpenGL: Vendor: %s\n", glstr_vendor.c_str());
 
 	// Check for a windows software renderer
-	if (stricmp(glstr_vendor.c_str(), "Microsoft Corporation") == 0)
+	if (epi::case_cmp(glstr_vendor.c_str(), "Microsoft Corporation") == 0)
 	{
-		if (stricmp(glstr_renderer.c_str(), "GDI Generic") == 0)
+		if (epi::case_cmp(glstr_renderer.c_str(), "GDI Generic") == 0)
 		{
 			I_Error("OpenGL: SOFTWARE Renderer!\n");
 		}		

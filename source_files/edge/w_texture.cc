@@ -182,7 +182,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 		const raw_patchdef_t *mpatch = &mtexture->patches[0];
 		texpatch_t *patch = &texture->patches[0];
 
-		bool is_sky = (prefix_cmp("SKY", texture->name) == 0);
+		bool is_sky = (epi::prefix_case_cmp(texture->name, "SKY") == 0);
 
 		for (int k = 0; k < texture->patchcount; k++, mpatch++, patch++)
 		{
@@ -345,7 +345,7 @@ int W_FindTextureSequence(const char *start, const char *end,
 	{
 		// look for start name
 		for (j=0; j < tex_sets[i]->num_tex; j++)
-			if (stricmp(start, tex_sets[i]->textures[j]->name) == 0)
+			if (epi::case_cmp(start, tex_sets[i]->textures[j]->name) == 0)
 				break;
 
 		if (j >= tex_sets[i]->num_tex)
@@ -356,7 +356,7 @@ int W_FindTextureSequence(const char *start, const char *end,
 		// look for end name
 		for (j++; j < tex_sets[i]->num_tex; j++)
 		{
-			if (stricmp(end, tex_sets[i]->textures[j]->name) == 0)
+			if (epi::case_cmp(end, tex_sets[i]->textures[j]->name) == 0)
 			{
 				(*e_offset) = j;
 				return i;

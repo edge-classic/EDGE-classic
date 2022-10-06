@@ -28,53 +28,53 @@
 namespace epi
 {
 
-int str_compare(const char *A, const char *B)
+int strcmp(const char *A, const char *B)
 {
 	SYS_ASSERT(A && B);
 	return std::strcmp(A, B);
 }
 
-int str_compare(const char *A, const std::string& B)
+int strcmp(const char *A, const std::string& B)
 {
-	return str_compare(A, B.c_str());
+	return epi::strcmp(A, B.c_str());
 }
 
-int str_compare(const std::string& A, const char *B)
+int strcmp(const std::string& A, const char *B)
 {
-	return str_compare(A.c_str(), B);
+	return epi::strcmp(A.c_str(), B);
 }
 
-int str_compare(const std::string& A, const std::string& B)
+int strcmp(const std::string& A, const std::string& B)
 {
-	return str_compare(A.c_str(), B.c_str());
+	return epi::strcmp(A.c_str(), B.c_str());
 }
 
 //----------------------------------------------------------------------------
 
-int str_compare_max(const char *A, const char *B, size_t n)
+int strncmp(const char *A, const char *B, size_t n)
 {
 	SYS_ASSERT(A && B);
 	return std::strncmp(A, B, n);
 }
 
-int str_compare_max(const char *A, const std::string& B, size_t n)
+int strncmp(const char *A, const std::string& B, size_t n)
 {
-	return str_compare_max(A, B.c_str(), n);
+	return epi::strncmp(A, B.c_str(), n);
 }
 
-int str_compare_max(const std::string& A, const char *B, size_t n)
+int strncmp(const std::string& A, const char *B, size_t n)
 {
-	return str_compare_max(A.c_str(), B, n);
+	return epi::strncmp(A.c_str(), B, n);
 }
 
-int str_compare_max(const std::string& A, const std::string& B, size_t n)
+int strncmp(const std::string& A, const std::string& B, size_t n)
 {
-	return str_compare_max(A.c_str(), B.c_str(), n);
+	return epi::strncmp(A.c_str(), B.c_str(), n);
 }
 
 //----------------------------------------------------------------------------
 
-int str_compare_nocase(const char *A, const char *B)
+int case_cmp(const char *A, const char *B)
 {
 	SYS_ASSERT(A && B);
 
@@ -91,24 +91,24 @@ int str_compare_nocase(const char *A, const char *B)
 	}
 }
 
-int str_compare_nocase(const char *A, const std::string& B)
+int case_cmp(const char *A, const std::string& B)
 {
-	return str_compare_nocase(A, B.c_str());
+	return epi::case_cmp(A, B.c_str());
 }
 
-int str_compare_nocase(const std::string& A, const char *B)
+int case_cmp(const std::string& A, const char *B)
 {
-	return str_compare_nocase(A.c_str(), B);
+	return epi::case_cmp(A.c_str(), B);
 }
 
-int str_compare_nocase(const std::string& A, const std::string& B)
+int case_cmp(const std::string& A, const std::string& B)
 {
-	return str_compare_nocase(A.c_str(), B.c_str());
+	return epi::case_cmp(A.c_str(), B.c_str());
 }
 
 //----------------------------------------------------------------------------
 
-int prefix_compare(const char *A, const char *B)
+int prefix_cmp(const char *A, const char *B)
 {
 	SYS_ASSERT(A && B);
 
@@ -125,24 +125,24 @@ int prefix_compare(const char *A, const char *B)
 	}
 }
 
-int prefix_compare(const char *A, const std::string& B)
+int prefix_cmp(const char *A, const std::string& B)
 {
-	return prefix_compare(A, B.c_str());
+	return epi::prefix_cmp(A, B.c_str());
 }
 
-int prefix_compare(const std::string& A, const char *B)
+int prefix_cmp(const std::string& A, const char *B)
 {
-	return prefix_compare(A.c_str(), B);
+	return epi::prefix_cmp(A.c_str(), B);
 }
 
-int prefix_compare(const std::string& A, const std::string& B)
+int prefix_cmp(const std::string& A, const std::string& B)
 {
-	return prefix_compare(A.c_str(), B.c_str());
+	return epi::prefix_cmp(A.c_str(), B.c_str());
 }
 
 //----------------------------------------------------------------------------
 
-int prefix_compare_nocase(const char *A, const char *B)
+int prefix_case_cmp(const char *A, const char *B)
 {
 	SYS_ASSERT(A && B);
 
@@ -159,19 +159,19 @@ int prefix_compare_nocase(const char *A, const char *B)
 	}
 }
 
-int prefix_compare_nocase(const char *A, const std::string& B)
+int prefix_case_cmp(const char *A, const std::string& B)
 {
-	return prefix_compare_nocase(A, B.c_str());
+	return epi::prefix_case_cmp(A, B.c_str());
 }
 
-int prefix_compare_nocase(const std::string& A, const char *B)
+int prefix_case_cmp(const std::string& A, const char *B)
 {
-	return prefix_compare_nocase(A.c_str(), B);
+	return epi::prefix_case_cmp(A.c_str(), B);
 }
 
-int prefix_compare_nocase(const std::string& A, const std::string& B)
+int prefix_case_cmp(const std::string& A, const std::string& B)
 {
-	return prefix_compare_nocase(A.c_str(), B.c_str());
+	return epi::prefix_case_cmp(A.c_str(), B.c_str());
 }
 
 } // namespace epi

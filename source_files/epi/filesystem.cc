@@ -122,8 +122,8 @@ bool FS_ReadDir(std::vector<dir_entry_c>& fsd, const char *dir, const char *mask
 
 	for (auto const& entry : std::filesystem::directory_iterator{std::filesystem::current_path()})
 	{
-		if (stricmp(mask_ext.string(), ".*") != 0 &&
-			stricmp(mask_ext.string(), entry.path().extension().string()) != 0)
+		if (epi::case_cmp(mask_ext.string(), ".*") != 0 &&
+			epi::case_cmp(mask_ext.string(), entry.path().extension().string()) != 0)
 			continue;
 
 		bool is_dir = entry.is_directory();

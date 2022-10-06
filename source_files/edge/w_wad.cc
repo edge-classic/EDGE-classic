@@ -953,10 +953,10 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
     file->Read(&header, sizeof(raw_wad_header_t));
 
  	// Do not require IWAD header if loading Harmony, REKKR, or a custom standalone IWAD
-	if (prefix_cmp(header.identification, "IWAD") != 0 &&
-		stricmp(lumpname1, "REKCREDS") != 0 && 
-		stricmp(lumpname1, "0HAWK01" ) != 0 &&
-		stricmp(lumpname1, "EDGEIWAD") != 0)
+	if (epi::prefix_cmp(header.identification, "IWAD") != 0 &&
+		epi::case_cmp(lumpname1, "REKCREDS") != 0 && 
+		epi::case_cmp(lumpname1, "0HAWK01" ) != 0 &&
+		epi::case_cmp(lumpname1, "EDGEIWAD") != 0)
 	{
 		file->Seek(0, epi::file_c::SEEKPOINT_START);
 		return false;
@@ -981,7 +981,7 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 		if (strncmp(lumpname1, entry.name, strlen(lumpname1) < 8 ? strlen(lumpname1) : 8) == 0)
 		{
 			// EDGEIWAD is the only wad needed for custom standalones
-			if (stricmp(lumpname1, "EDGEIWAD") == 0)
+			if (epi::case_cmp(lumpname1, "EDGEIWAD") == 0)
 			{
 				delete[] raw_info;
 				file->Seek(0, epi::file_c::SEEKPOINT_START);
@@ -1011,7 +1011,7 @@ void ProcessFixersForWad(wad_file_c *wad)
 
 	for (int i = 0; i < fixdefs.GetSize(); i++)
 	{
-		if (stricmp(fix_checker, fixdefs[i]->md5_string) == 0)
+		if (epi::case_cmp(fix_checker, fixdefs[i]->md5_string) == 0)
 		{
 			std::string fix_path = epi::PATH_Join(game_dir.c_str(), "edge_fixes");
 			fix_path = epi::PATH_Join(fix_path.c_str(), fix_checker.append(".wad").c_str());
@@ -1252,28 +1252,28 @@ void W_ReadUMAPINFOLumps(void)
 
 		if(Maps.maps[i].intertext)
 		{
-			if (!stricmp(temp_level->nextmapname.c_str(), "MAP07")) 
+			if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP07")) 
 			{
 				//Clear out some of our defaults on certain maps
 				mapdef_c *conflict_level = mapdefs.Lookup("MAP07");
 				conflict_level->f_pre.text.clear();
 				conflict_level->f_pre.text_flat.clear();
 			}
-			if (!stricmp(temp_level->nextmapname.c_str(), "MAP21")) 
+			if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP21")) 
 			{
 				//Clear out some of our defaults on certain maps
 				mapdef_c *conflict_level = mapdefs.Lookup("MAP21");
 				conflict_level->f_pre.text.clear();
 				conflict_level->f_pre.text_flat.clear();
 			}
-			if (!stricmp(temp_level->nextmapname.c_str(), "MAP31")) 
+			if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP31")) 
 			{
 				//Clear out some of our defaults on certain maps
 				mapdef_c *conflict_level = mapdefs.Lookup("MAP31");
 				conflict_level->f_pre.text.clear();
 				conflict_level->f_pre.text_flat.clear();
 			}
-			if (!stricmp(temp_level->nextmapname.c_str(), "MAP32")) 
+			if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP32")) 
 			{
 				//Clear out some of our defaults on certain maps
 				mapdef_c *conflict_level = mapdefs.Lookup("MAP32");
@@ -1338,28 +1338,28 @@ void W_ReadUMAPINFOLumps(void)
 			if (Maps.maps[i].intertextsecret)
 			{
 				
-				if (!stricmp(temp_level->secretmapname.c_str(), "MAP07")) 
+				if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP07")) 
 				{
 					//Clear out some of our defaults on certain maps
 					mapdef_c *conflict_level = mapdefs.Lookup("MAP07");
 					conflict_level->f_pre.text.clear();
 					conflict_level->f_pre.text_flat.clear();
 				}
-				if (!stricmp(temp_level->secretmapname.c_str(), "MAP21")) 
+				if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP21")) 
 				{
 					//Clear out some of our defaults on certain maps
 					mapdef_c *conflict_level = mapdefs.Lookup("MAP21");
 					conflict_level->f_pre.text.clear();
 					conflict_level->f_pre.text_flat.clear();
 				}
-				if (!stricmp(temp_level->secretmapname.c_str(), "MAP31")) 
+				if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP31")) 
 				{
 					//Clear out some of our defaults on certain maps
 					mapdef_c *conflict_level = mapdefs.Lookup("MAP31");
 					conflict_level->f_pre.text.clear();
 					conflict_level->f_pre.text_flat.clear();
 				}
-				if (!stricmp(temp_level->secretmapname.c_str(), "MAP32")) 
+				if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP32")) 
 				{
 					//Clear out some of our defaults on certain maps
 					mapdef_c *conflict_level = mapdefs.Lookup("MAP32");

@@ -27,7 +27,7 @@
 
 #include "scanner.h"
 
-#define strcmpnocase  epi::str_compare_nocase
+#define strcmpnocase  epi::case_cmp
 
 
 const char* const Scanner::TokenNames[TK_NumSpecialTokens] =

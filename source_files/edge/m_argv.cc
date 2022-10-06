@@ -96,7 +96,7 @@ int M_CheckNextParm(const char *check, int prev)
 
 	for (i = prev + 1; i < myargc; i++)
 	{
-		if (!stricmp(check, myargv[i]))
+		if (!epi::case_cmp(check, myargv[i]))
 			return i;
 	}
 

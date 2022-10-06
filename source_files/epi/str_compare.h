@@ -26,42 +26,33 @@
 #undef strcasecmp
 #undef strncasecmp
 
-#define strcmp        epi::str_compare
-#define strncmp       epi::str_compare_max
-
-#define strcasecmp    epi::str_compare_nocase
-#define stricmp       epi::str_compare_nocase
-
-#define prefix_cmp    epi::prefix_compare
-#define prefix_icmp   epi::prefix_compare_nocase
-
 namespace epi
 {
 
-int str_compare(const char *A, const char *B);
-int str_compare(const char *A, const std::string& B);
-int str_compare(const std::string& A, const char *B);
-int str_compare(const std::string& A, const std::string& B);
+int strcmp(const char *A, const char *B);
+int strcmp(const char *A, const std::string& B);
+int strcmp(const std::string& A, const char *B);
+int strcmp(const std::string& A, const std::string& B);
 
-int str_compare_max(const char *A, const char *B, size_t n);
-int str_compare_max(const char *A, const std::string& B, size_t n);
-int str_compare_max(const std::string& A, const char *B, size_t n);
-int str_compare_max(const std::string& A, const std::string& B, size_t n);
+int strncmp(const char *A, const char *B, size_t n);
+int strncmp(const char *A, const std::string& B, size_t n);
+int strncmp(const std::string& A, const char *B, size_t n);
+int strncmp(const std::string& A, const std::string& B, size_t n);
 
-int str_compare_nocase(const char *A, const char *B);
-int str_compare_nocase(const char *A, const std::string& B);
-int str_compare_nocase(const std::string& A, const char *B);
-int str_compare_nocase(const std::string& A, const std::string& B);
+int case_cmp(const char *A, const char *B);
+int case_cmp(const char *A, const std::string& B);
+int case_cmp(const std::string& A, const char *B);
+int case_cmp(const std::string& A, const std::string& B);
 
-int prefix_compare(const char *A, const char *B);
-int prefix_compare(const char *A, const std::string& B);
-int prefix_compare(const std::string& A, const char *B);
-int prefix_compare(const std::string& A, const std::string& B);
+int prefix_cmp(const char *A, const char *B);
+int prefix_cmp(const char *A, const std::string& B);
+int prefix_cmp(const std::string& A, const char *B);
+int prefix_cmp(const std::string& A, const std::string& B);
 
-int prefix_compare_nocase(const char *A, const char *B);
-int prefix_compare_nocase(const char *A, const std::string& B);
-int prefix_compare_nocase(const std::string& A, const char *B);
-int prefix_compare_nocase(const std::string& A, const std::string& B);
+int prefix_case_cmp(const char *A, const char *B);
+int prefix_case_cmp(const char *A, const std::string& B);
+int prefix_case_cmp(const std::string& A, const char *B);
+int prefix_case_cmp(const std::string& A, const std::string& B);
 
 } // namespace epi
 

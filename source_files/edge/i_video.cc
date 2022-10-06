@@ -103,7 +103,7 @@ void I_StartupGraphics(void)
 #endif
 	}
 
-	if (stricmp(driver, "default") != 0)
+	if (epi::case_cmp(driver, "default") != 0)
 	{
 		SDL_setenv("SDL_VIDEODRIVER", driver, 1);
 	}

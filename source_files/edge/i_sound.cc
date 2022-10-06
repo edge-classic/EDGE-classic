@@ -123,7 +123,7 @@ void I_StartupSound(void)
 #endif
 	}
 
-	if (stricmp(driver, "default") != 0)
+	if (epi::case_cmp(driver, "default") != 0)
 	{
 		SDL_setenv("SDL_AUDIODRIVER", driver, 1);
 	}

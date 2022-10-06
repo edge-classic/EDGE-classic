@@ -268,7 +268,7 @@ bool S_StartupTSF(void)
 	bool cvar_good = false;
 	for (int i=0; i < available_soundfonts.size(); i++)
 	{
-		if(stricmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
+		if(epi::case_cmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
 			cvar_good = true;
 	}
 

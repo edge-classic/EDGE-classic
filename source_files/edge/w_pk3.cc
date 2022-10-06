@@ -136,9 +136,19 @@ public:
 
 	byte * LoadEntry(size_t dir, size_t index, int& length)
 	{
-		// FIXME
-		length = 0;
-		return NULL;
+		epi::file_c *f = OpenEntry(dir, index);
+		if (f == NULL)
+		{
+			length = 0;
+			return new byte[1];
+		}
+
+		byte * data = f->LoadIntoMemory();
+
+		// close file
+		delete f;
+
+		return data;
 	}
 
 private:
@@ -291,7 +301,7 @@ static pack_file_c * ProcessZip(data_file_c *df)
 epi::file_c * pack_file_c::OpenEntry_Zip(size_t dir, size_t index)
 {
 	// TODO !!!
-	I_Error("LoadEntry_Zip called.\n");
+	I_Error("OpenEntry_Zip called.\n");
 	return NULL;
 }
 

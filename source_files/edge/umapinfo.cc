@@ -19,10 +19,6 @@
 
 #include "epi.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <assert.h>
 #include "umapinfo.h"
 #include "scanner.h"
 

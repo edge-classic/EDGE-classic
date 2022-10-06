@@ -25,8 +25,6 @@
 
 #include "i_defs.h"
 
-#include "utility.h"
-
 #include "z_zone.h"
 
 

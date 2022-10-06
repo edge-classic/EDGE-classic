@@ -49,7 +49,6 @@
 #include "math_md5.h"
 #include "path.h"
 #include "str_format.h"
-#include "utility.h"
 
 // DDF
 #include "colormap.h"

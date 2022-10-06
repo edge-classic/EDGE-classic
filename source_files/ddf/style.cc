@@ -20,9 +20,6 @@
 //
 
 #include "local.h"
-
-#include "utility.h"
-
 #include "font.h"
 #include "style.h"
 

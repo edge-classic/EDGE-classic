@@ -35,7 +35,6 @@ add_library(
   sound_gather.cc
   sound_types.cc
   str_format.cc
-  utility.cc
 )
 target_include_directories(edge_epi PRIVATE ../whereami)
 target_include_directories(edge_epi PRIVATE ../stb)

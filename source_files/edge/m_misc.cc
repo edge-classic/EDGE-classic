@@ -30,7 +30,6 @@
 
 #include "i_defs.h"
 
-#include "utility.h"
 #include "endianess.h"
 #include "file.h"
 #include "filesystem.h"

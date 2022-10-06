@@ -19,7 +19,8 @@
 #ifndef __DDF_STYLE_H__
 #define __DDF_STYLE_H__
 
-#include "utility.h"
+#include "epi.h"
+#include "arrays.h"
 
 #include "types.h"
 

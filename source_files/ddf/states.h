@@ -19,7 +19,7 @@
 #ifndef __DDF_STAT_H__
 #define __DDF_STAT_H__
 
-#include <vector>
+#include "epi.h"
 
 
 //-------------------------------------------------------------------------

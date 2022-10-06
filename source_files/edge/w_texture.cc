@@ -24,7 +24,6 @@
 #include "i_defs.h"
 
 #include "endianess.h"
-#include "utility.h"
 
 #include "dm_structs.h"
 #include "e_search.h"

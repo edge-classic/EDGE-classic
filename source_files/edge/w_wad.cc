@@ -998,12 +998,8 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 }
 
 
-void ProcessFixers(data_file_c *df)
+void ProcessFixersForWad(wad_file_c *wad)
 {
-	wad_file_c *wad = df->wad;
-	if (wad == NULL)
-		return;
-
 	std::string fix_checker;
 
 	fix_checker = wad->md5_string;
@@ -1032,37 +1028,27 @@ void ProcessFixers(data_file_c *df)
 	}
 }
 
-void ProcessDehacked(data_file_c *df)
+
+void ProcessDehackedInWad(data_file_c *df)
 {
-	if (df->kind == FLKIND_Deh)
-	{
-		I_Printf("Converting DEH file: %s\n", df->name.c_str());
+	int deh_lump = df->wad->deh_lump;
+	if (deh_lump < 0)
+		return;
 
-		df->deh = DH_ConvertFile(df->name.c_str());
-		if (df->deh == NULL)
-			I_Error("Failed to convert DeHackEd patch: %s\n", df->name.c_str());
-	}
-	else if (df->wad != NULL)
-	{
-		int deh_lump = df->wad->deh_lump;
+	const char *lump_name = lumpinfo[deh_lump].name;
 
-		if (deh_lump < 0)
-			return;
+	I_Printf("Converting [%s] lump in: %s\n", lump_name, df->name.c_str());
 
-		const char *lump_name = lumpinfo[deh_lump].name;
+	int length = -1;
+	const byte *data = (const byte *)W_LoadLump(deh_lump, &length);
 
-		I_Printf("Converting [%s] lump in: %s\n", lump_name, df->name.c_str());
+	df->deh = DH_ConvertLump(data, length);
+	if (df->deh == NULL)
+		I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());
 
-		int length;
-		const byte *data = (const byte *)W_LoadLump(deh_lump, &length);
-
-		df->deh = DH_ConvertLump(data, length);
-		if (df->deh == NULL)
-			I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());
-
-		W_DoneWithLump(data);
-	}
+	W_DoneWithLump(data);
 }
+
 
 void ProcessWad(data_file_c *df, size_t file_index)
 {
@@ -1147,6 +1133,8 @@ void ProcessWad(data_file_c *df, size_t file_index)
 	I_Debugf("   md5hash = %s\n", wad->md5_string.c_str());
 
 	delete[] raw_info;
+
+	ProcessDehackedInWad(df);
 }
 
 

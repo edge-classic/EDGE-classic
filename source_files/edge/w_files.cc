@@ -65,7 +65,7 @@ std::vector<data_file_c *> data_files;
 
 
 data_file_c::data_file_c(const char *_name, filekind_e _kind) :
-		name(_name), kind(_kind), file(NULL), wad(NULL), deh(NULL)
+		name(_name), kind(_kind), file(NULL), wad(NULL), pack(NULL), deh(NULL)
 { }
 
 data_file_c::~data_file_c()
@@ -106,12 +106,12 @@ size_t W_AddPending(const char *file, filekind_e kind)
 }
 
 // TODO tidy this
-extern void ProcessFixers(data_file_c *df);
-extern void ProcessDehacked(data_file_c *df);
+extern void ProcessFixersForWad(wad_file_c *wad);
 extern void ProcessWad(data_file_c *df, size_t file_index);
 extern void ProcessPackage(data_file_c *df, size_t file_index);
 
 extern std::string W_BuildNodesForWad(data_file_c *df);
+
 
 
 void W_ReadWADFIXES(void)
@@ -157,16 +157,24 @@ static void ProcessFile(data_file_c *df)
 		if (file_index == 0)  // "edge-defs.wad"
 			W_ReadWADFIXES();
 	}
-	else if (df->kind == FLKIND_PK3)
+	else if (df->kind == FLKIND_Folder || df->kind == FLKIND_PK3)
 	{
 		ProcessPackage(df, file_index);
 	}
 
-	// handle DeHackEd patch files
-	ProcessDehacked(df);
+	// handle stand-alone DeHackEd patches
+	if (df->kind == FLKIND_Deh)
+	{
+		I_Printf("Converting DEH file: %s\n", df->name.c_str());
+
+		df->deh = DH_ConvertFile(df->name.c_str());
+		if (df->deh == NULL)
+			I_Error("Failed to convert DeHackEd patch: %s\n", df->name.c_str());
+	}
 
 	// handle fixer-uppers
-	ProcessFixers(df);
+	if (df->wad != NULL)
+		ProcessFixersForWad(df->wad);
 }
 
 
@@ -294,31 +302,11 @@ static void W_ReadExternalDDF(int d, epi::file_c * F, const std::string& filenam
 }
 
 
-static void W_ReadDDF_FromDir(data_file_c *df, int d)
-{
-	std::string filename = epi::PATH_Join(df->name.c_str(), DDF_Readers[d].pack_name);
-
-	epi::file_c *F = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ);
-	if (F == NULL)
-	{
-		// ignore files which don't exist
-		return;
-	}
-
-	I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, filename.c_str());
-
-	W_ReadExternalDDF(d, F, filename);
-}
+extern epi::file_c * Pack_OpenFile(pack_file_c *pack, const char *base_name);
 
 
 static void W_ReadDDF_DataFile(data_file_c *df, int d)
 {
-	if (df->kind == FLKIND_Folder)
-	{
-		W_ReadDDF_FromDir(df, d);
-		return;
-	}
-
 	wad_file_c  *wad  = df->wad;
 	pack_file_c *pack = df->pack;
 
@@ -354,7 +342,7 @@ static void W_ReadDDF_DataFile(data_file_c *df, int d)
 			return;
 		}
 
-		/* FIXME this don't work, do it another way
+		/* FIXME this don't work, need explicit check for known name (in e_main)
 		if (d == NUM_DDF_READERS-1)
 			I_Error("Unknown DDF filename: %s\n", base_name.c_str());
 		*/
@@ -363,6 +351,17 @@ static void W_ReadDDF_DataFile(data_file_c *df, int d)
 
 	if (df->kind >= FLKIND_RTS)
 		return;
+
+	if (pack != NULL)
+	{
+		epi::file_c *F = Pack_OpenFile(df->pack, DDF_Readers[d].pack_name);
+
+		if (F != NULL)
+		{
+			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, df->name.c_str());
+			W_ReadExternalDDF(d, F, DDF_Readers[d].pack_name);
+		}
+	}
 
 	if (wad != NULL)
 	{
@@ -377,11 +376,6 @@ static void W_ReadDDF_DataFile(data_file_c *df, int d)
 			// call read function
 			(* DDF_Readers[d].func)(data);
 		}
-	}
-
-	if (pack != NULL)
-	{
-		// TODO : PK3
 	}
 
 	if (wad != NULL)

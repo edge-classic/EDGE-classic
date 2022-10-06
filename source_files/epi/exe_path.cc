@@ -20,23 +20,6 @@
 #include "exe_path.h"
 #include "path.h"
 
-#ifdef WIN32
-#include <io.h>      // access()
-#else
-#include <unistd.h>  // access(), readlink()
-#endif
-
-#ifdef __APPLE__
-#include <sys/param.h>
-#include <mach-o/dyld.h> // _NSGetExecutablePath
-#endif
-
-#include <limits.h>  // PATH_MAX
-
-#ifndef PATH_MAX
-#define PATH_MAX  2048
-#endif
-
 #include "whereami.h"
 
 namespace epi

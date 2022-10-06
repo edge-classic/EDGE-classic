@@ -62,8 +62,8 @@ typedef std::uint64_t  u64_t;
 typedef u8_t byte;
 
 
-#ifdef GNUC
-#define GCCATTR(xyz) attribute (xyz)
+#ifdef __GNUC__
+#define GCCATTR(xyz) __attribute__(xyz)
 #else
 #define GCCATTR(xyz) /* nothing */
 #endif

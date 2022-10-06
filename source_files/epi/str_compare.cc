@@ -80,8 +80,8 @@ int str_compare_nocase(const char *A, const char *B)
 
 	for (;;)
 	{
-		int AC = std::tolower(*A++);
-		int BC = std::tolower(*B++);
+		int AC = std::tolower((unsigned char) *A++);
+		int BC = std::tolower((unsigned char) *B++);
 
 		if (AC != BC)
 			return AC - BC;
@@ -148,8 +148,8 @@ int prefix_compare_nocase(const char *A, const char *B)
 
 	for (;;)
 	{
-		int AC = std::tolower(*A++);
-		int BC = std::tolower(*B++);
+		int AC = std::tolower((unsigned char) *A++);
+		int BC = std::tolower((unsigned char) *B++);
 
 		if (BC == 0)
 			return 0;

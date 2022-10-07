@@ -139,7 +139,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 /* Lobo 2022: info overload. Shut up.
 	I_Debugf("S_CacheLoad: [%s]\n", def->name.c_str());
 */
-	
+
 	// open the file or lump, and read it into memory
 	epi::file_c *F;
 
@@ -182,7 +182,8 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 		F = W_OpenLump(lump);
 		SYS_ASSERT(F);
 	}
-	
+
+	// Load the data into the buffer
 	int length = F->GetLength();
 	byte *data = F->LoadIntoMemory();
 
@@ -196,9 +197,21 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	}
 
 	// determine format information
-	auto fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
+	epi::sound_format_e fmt = epi::FMT_Unknown;
 
-	// Load the data into the buffer
+	if (def->pack_name != "")
+	{
+		fmt = epi::Sound_FilenameToFormat(def->pack_name);
+	}
+	else if (def->file_name != "")
+	{
+		fmt = epi::Sound_FilenameToFormat(def->file_name);
+	}
+	else
+	{
+		// for lumps, we must detect the format from the lump contents
+		fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
+	}
 
 	bool OK = false;
 	

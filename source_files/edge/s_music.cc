@@ -175,9 +175,10 @@ void S_ChangeMusic(int entrynum, bool loop)
 			break;
 
 		case epi::FMT_MP3:
-			delete F;
+			// rewind the file
+			F->Seek(0, epi::file_c::SEEKPOINT_START);
 			delete data;
-			music_player = S_PlayMP3Music(play, volume, loop);
+			music_player = S_PlayMP3Music(F, volume, loop);
 			break;
 
 		case epi::FMT_MOD:

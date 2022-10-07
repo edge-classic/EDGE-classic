@@ -26,11 +26,9 @@
 
 #include "sound_data.h"
 
-class pl_entry_c;
-
 /* FUNCTIONS */
 
-abstract_music_c * S_PlayMP3Music(const pl_entry_c *musdat, float volume, bool looping);
+abstract_music_c * S_PlayMP3Music(epi::file_c *file, float volume, bool looping);
 
 bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length);
 

@@ -96,28 +96,22 @@ void S_ChangeMusic(int entrynum, bool loop)
 			std::string fn = M_ComposeFileName(game_dir.c_str(), play->info.c_str());
 
 			F = epi::FS_Open(fn.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-
 			if (! F)
 			{
 				I_Warning("S_ChangeMusic: Can't Find File '%s'\n", fn.c_str());
 				return;
 			}
-
-			// FIXME: get the format from filename (Sound_FilenameToFormat)
 			break;
 		}
 
 		case MUSINF_PACKAGE:
 		{
 			F = W_OpenPackFile(play->info);
-
 			if (! F)
 			{
 				I_Warning("S_ChangeMusic: PK3 entry '%s' not found.\n", play->info.c_str());
 				return;
 			}
-
-			// FIXME: get the format from filename (Sound_FilenameToFormat)
 			break;
 		}
 
@@ -158,7 +152,20 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	auto fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
+	epi::sound_format_e fmt = epi::FMT_Unknown;
+
+	if (play->infotype == MUSINF_LUMP)
+	{
+		// lumps must use auto-detection based on their contents
+		fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
+	}
+	else
+	{
+		// for FILE and PACK, use the file extension
+		fmt = epi::Sound_FilenameToFormat(play->info);
+	}
+
+	// NOTE: the players that take `data` are responsible to free it
 
 	if (fmt == epi::FMT_OGG)
 	{
@@ -200,8 +207,6 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	// TODO: these calls free the data, but we probably should free it here
-
 	if (fmt == epi::FMT_MIDI || fmt == epi::FMT_MUS)
 	{
 		if (var_opl_music)
@@ -219,7 +224,6 @@ void S_ChangeMusic(int entrynum, bool loop)
 	delete data;
 
 	I_Printf("S_ChangeMusic: unknown format (not MUS or MIDI)\n");
-	return;
 }
 
 

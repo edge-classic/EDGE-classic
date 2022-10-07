@@ -190,9 +190,15 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	// no longer need the epi::file_c
 	delete F; F = NULL;
 
-	if (! data || length < 4)
+	if (! data)
 	{
 		M_WarnError("SFX Loader: Error loading data.\n");
+		return false;
+	}
+	if (length < 4)
+	{
+		delete[] data;
+		M_WarnError("SFX Loader: Ignored short data (%d bytes).\n", length);
 		return false;
 	}
 

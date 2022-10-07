@@ -40,6 +40,7 @@
 #include "s_opl.h"
 #include "s_sid.h"
 #include "m_misc.h"
+#include "w_files.h"
 #include "w_wad.h"
 
 // music slider value
@@ -101,7 +102,18 @@ void S_ChangeMusic(int entrynum, bool loop)
 				I_Warning("S_ChangeMusic: Can't Find File '%s'\n", fn.c_str());
 				return;
 			}
+			break;
+		}
 
+		case MUSINF_PACKAGE:
+		{
+			F = W_OpenPackFile(play->info);
+
+			if (! F)
+			{
+				I_Warning("S_ChangeMusic: PK3 entry '%s' not found.\n", play->info.c_str());
+				return;
+			}
 			break;
 		}
 
@@ -124,7 +136,6 @@ void S_ChangeMusic(int entrynum, bool loop)
 	}
 
 	int length = F->GetLength();
-
 	byte *data = F->LoadIntoMemory();
 
 	// close file now

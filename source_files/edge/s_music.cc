@@ -167,63 +167,47 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 	// NOTE: the players that take `data` are responsible to free it
 
-	if (fmt == epi::FMT_OGG)
+	switch (fmt)
 	{
-		delete data;
+		case epi::FMT_OGG:
+			delete data;
+			music_player = S_PlayOGGMusic(play, volume, loop);
+			break;
 
-		music_player = S_PlayOGGMusic(play, volume, loop);
-		return;
+		case epi::FMT_MP3:
+			delete data;
+			music_player = S_PlayMP3Music(play, volume, loop);
+			break;
+
+		case epi::FMT_MOD:
+			music_player = S_PlayMODMusic(data, length, volume, loop);
+			break;
+
+		case epi::FMT_GME:
+			music_player = S_PlayGMEMusic(data, length, volume, loop);
+			break;
+
+		case epi::FMT_SID:
+			music_player = S_PlaySIDMusic(data, length, volume, loop);
+			break;
+
+		case epi::FMT_MIDI:
+		case epi::FMT_MUS:
+			if (var_opl_music)
+			{
+				music_player = S_PlayOPL(data, length, fmt == epi::FMT_MUS, volume, loop);
+			}
+			else
+			{
+				music_player = S_PlayTSF(data, length, fmt == epi::FMT_MUS, volume, loop);
+			}
+			break;
+
+		default:
+			delete data;
+			I_Printf("S_ChangeMusic: unknown format (not MUS or MIDI)\n");
+			break;
 	}
-
-	if (fmt == epi::FMT_MP3)
-	{
-		delete data;
-
-		music_player = S_PlayMP3Music(play, volume, loop);
-		return;
-	}
-
-	if (fmt == epi::FMT_MOD)
-	{
-		delete data;
-
-		music_player = S_PlayMODMusic(play, volume, loop);
-		return;
-	}
-
-	if (fmt == epi::FMT_GME)
-	{
-		delete data;
-
-		music_player = S_PlayGMEMusic(play, volume, loop);
-		return;
-	}
-
-	if (fmt == epi::FMT_SID)
-	{
-		delete data;
-
-		music_player = S_PlaySIDMusic(play, volume, loop);
-		return;
-	}
-
-	if (fmt == epi::FMT_MIDI || fmt == epi::FMT_MUS)
-	{
-		if (var_opl_music)
-		{
-			music_player = S_PlayOPL(data, length, fmt == epi::FMT_MUS, volume, loop);
-			return;
-		}
-		else
-		{
-			music_player = S_PlayTSF(data, length, fmt == epi::FMT_MUS, volume, loop);
-			return;
-		}
-	}
-
-	delete data;
-
-	I_Printf("S_ChangeMusic: unknown format (not MUS or MIDI)\n");
 }
 
 

@@ -58,8 +58,7 @@ private:
 	s16_t *mono_buffer;
 
 public:
-	bool OpenLump(const char *lumpname);
-	bool OpenFile(const char *filename);
+	bool OpenMemory(byte *data, int length);
 
 	virtual void Close(void);
 
@@ -161,38 +160,9 @@ void gmeplayer_c::Volume(float gain)
 }
 
 
-bool gmeplayer_c::OpenLump(const char *lumpname)
+bool gmeplayer_c::OpenMemory(byte *data, int length)
 {
-	SYS_ASSERT(lumpname);
-
-	if (status != NOT_LOADED)
-		Close();
-
-	int lump = W_CheckNumForName(lumpname);
-	if (lump < 0)
-	{
-		I_Warning("gmeplayer_c: LUMP '%s' not found.\n", lumpname);
-		return false;
-	}
-
-	epi::file_c *F = W_OpenLump(lump);
-
-	int length = F->GetLength();
-
-	byte *data = F->LoadIntoMemory();
-
-	if (! data)
-	{
-		delete F;
-		I_Warning("gmeplayer_c: Error loading data.\n");
-		return false;
-	}
-	if (length < 4)
-	{
-		delete F;
-		I_Debugf("gmeplayer_c: ignored short data (%d bytes)\n", length);
-		return false;
-	}
+	SYS_ASSERT(data);
 
 	gme_track = gme_new_emu(NULL, dev_freq);
 
@@ -201,27 +171,6 @@ bool gmeplayer_c::OpenLump(const char *lumpname)
     if (open_error)
     {
 		I_Warning("[gmeplayer_c::Open](DataLump) Failed: %s\n", open_error);
-		return false;
-    }
-
-	PostOpenInit();
-	return true;
-}
-
-bool gmeplayer_c::OpenFile(const char *filename)
-{
-	SYS_ASSERT(filename);
-
-	if (status != NOT_LOADED)
-		Close();
-
-	gme_track = gme_new_emu(NULL, dev_freq);
-
-	gme_err_t open_error = gme_open_file(filename, &gme_track, dev_freq);
-
-    if (open_error)
-    {
-		I_Warning("gmeplayer_c: Could not open file: '%s': %s\n", filename, open_error);
 		return false;
     }
 
@@ -321,28 +270,19 @@ void gmeplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayGMEMusic(const pl_entry_c *musdat, float volume, bool looping)
+abstract_music_c * S_PlayGMEMusic(byte *data, int length, float volume, bool looping)
 {
 	gmeplayer_c *player = new gmeplayer_c();
 
-	if (musdat->infotype == MUSINF_LUMP)
+	if (! player->OpenMemory(data, length))
 	{
-		if (! player->OpenLump(musdat->info.c_str()))
-		{
-			delete player;
-			return NULL;
-		}
+		delete[] data;
+		delete player;
+		return NULL;
 	}
-	else if (musdat->infotype == MUSINF_FILE)
-	{
-		if (! player->OpenFile(musdat->info.c_str()))
-		{
-			delete player;
-			return NULL;
-		}
-	}
-	else
-		I_Error("S_PlayGMEMusic: bad format value %d\n", musdat->infotype);
+
+	// gme_open_data makes a copy of the data, so can free it here
+	delete[] data;
 
 	player->Volume(volume);
 	player->Play(looping);

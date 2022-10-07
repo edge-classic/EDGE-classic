@@ -321,13 +321,13 @@ epi::file_c * pack_file_c::OpenEntry_Folder(size_t dir, size_t index)
 {
 	const std::string& filename = dirs[dir].entries[index].fullpath;
 
-	epi::file_c * f = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+	epi::file_c * F = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 
 	// this generally won't happen, file was found during a dir scan
-	if (f == NULL)
+	if (F == NULL)
 		I_Error("Failed to open file: %s\n", filename.c_str());
 
-	return f;
+	return F;
 }
 
 
@@ -378,11 +378,12 @@ static pack_file_c * ProcessZip(data_file_c *df)
 		if (mz_zip_reader_is_file_a_directory(pack->arch, idx))
 			continue;
 
-		// get filename, decode into DIR + FILE
+		// get the filename
 		char filename[1024];
 
 		mz_zip_reader_get_filename(pack->arch, idx, filename, sizeof(filename));
 
+		// decode into DIR + FILE
 		char *p = filename;
 		while (*p != 0 && *p != '/' && *p != '\\')
 			p++;
@@ -390,7 +391,6 @@ static pack_file_c * ProcessZip(data_file_c *df)
 		if (p == filename)
 			continue;
 
-		// decode into DIR + FILE
 		size_t dir_idx  = 0;
 		char * basename = filename;
 
@@ -560,16 +560,20 @@ private:
 
 epi::file_c * pack_file_c::OpenEntry_Zip(size_t dir, size_t index)
 {
-	pk3_file_c *f = new pk3_file_c(this, dirs[dir].entries[index].file_idx);
-
-	return f;
+	pk3_file_c *F = new pk3_file_c(this, dirs[dir].entries[index].file_idx);
+	return F;
 }
 
 
 epi::file_c * pack_file_c::OpenFile_Zip(const std::string& name)
 {
-	// FIXME
-	return NULL;
+	// this ignores case by default
+	int idx = mz_zip_reader_locate_file(arch, name.c_str(), NULL, 0);
+	if (idx < 0)
+		return NULL;
+
+	pk3_file_c *F = new pk3_file_c(this, (mz_uint)idx);
+	return F;
 }
 
 

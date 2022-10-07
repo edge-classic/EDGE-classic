@@ -21,11 +21,14 @@
 
 #include "dm_defs.h"
 
+// EPI
 #include "file.h"
 
-// TODO
+class pack_file_c;
 
-#endif // __W_PK3__
+epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name);
+
+#endif /* __W_PK3__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

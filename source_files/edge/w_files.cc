@@ -55,6 +55,7 @@
 #include "l_deh.h"
 #include "rad_trig.h"
 #include "w_files.h"
+#include "w_pk3.h"
 #include "w_wad.h"
 
 
@@ -299,9 +300,6 @@ static void W_ReadExternalDDF(int d, epi::file_c * F, const std::string& filenam
 }
 
 
-extern epi::file_c * Pack_OpenFile(pack_file_c *pack, const char *base_name);
-
-
 static void W_ReadDDF_DataFile(data_file_c *df, int d)
 {
 	wad_file_c  *wad  = df->wad;
@@ -492,6 +490,25 @@ void W_ReadDDF(void)
 			W_ReadDehacked(df, d);
 		}
 	}
+}
+
+
+epi::file_c * W_OpenPackFile(const std::string& name)
+{
+	// search from newest file to oldest
+	for (int i = (int)data_files.size() - 1 ; i >= 0 ; i--)
+	{
+		data_file_c *df = data_files[i];
+		if (df->kind == FLKIND_Folder || df->kind == FLKIND_PK3)
+		{
+			epi::file_c *F = Pack_OpenFile(df->pack, name);
+			if (F != NULL)
+				return F;
+		}
+	}
+
+	// not found
+	return NULL;
 }
 
 //----------------------------------------------------------------------------

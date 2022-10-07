@@ -56,6 +56,7 @@
 #include "r_sky.h"
 #include "r_colormap.h"
 #include "r_texgl.h"
+#include "w_files.h"
 #include "w_texture.h"
 #include "w_wad.h"
 
@@ -454,19 +455,26 @@ static epi::image_data_c * CreateUserColourImage(image_c *rim, imagedef_c *def)
 
 epi::file_c *OpenUserFileOrLump(imagedef_c *def)
 {
-	if (def->type == IMGDT_File)
+	switch (def->type)
 	{
-		// -AJA- 2005/01/15: filenames in DDF relative to GAMEDIR
-		return M_OpenComposedEPIFile(game_dir.c_str(), def->info.c_str());
-	}
-	else  /* LUMP */
-	{
-		int lump = W_CheckNumForName(def->info.c_str());
+		case IMGDT_File:
+			// -AJA- 2005/01/15: filenames in DDF relative to GAMEDIR
+			return M_OpenComposedEPIFile(game_dir.c_str(), def->info.c_str());
 
-		if (lump < 0)
+		case IMGDT_Package:
+			return W_OpenPackFile(def->info);
+
+		case IMGDT_Lump:
+		{
+			int lump = W_CheckNumForName(def->info.c_str());
+			if (lump < 0)
+				return NULL;
+
+			return W_OpenLump(lump);
+		}
+
+		default:
 			return NULL;
-
-		return W_OpenLump(lump);
 	}
 }
 
@@ -541,6 +549,7 @@ static epi::image_data_c *ReadUserAsEpiBlock(image_c *rim)
 
 		case IMGDT_File:
 		case IMGDT_Lump:
+		case IMGDT_Package:
 		    return CreateUserFileImage(rim, def);
 
 		default:

@@ -47,6 +47,7 @@
 #include "m_random.h"
 #include "p_mobj.h"
 #include "r_defs.h"
+#include "w_files.h"
 #include "w_wad.h"
 
 
@@ -142,7 +143,17 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	// open the file or lump, and read it into memory
 	epi::file_c *F;
 
-	if (def->file_name != "")
+	if (def->pack_name != "")
+	{
+		F = W_OpenPackFile(def->pack_name);
+
+		if (! F)
+		{
+			M_WarnError("SFX Loader: Missing sound in PK3: '%s'\n", def->pack_name.c_str());
+			return false;
+		}
+	}
+	else if (def->file_name != "")
 	{
 		std::string fn = M_ComposeFileName(game_dir.c_str(), def->file_name.c_str());
 
@@ -169,7 +180,6 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	}
 	
 	int length = F->GetLength();
-
 	byte *data = F->LoadIntoMemory();
 
 	// no longer need the epi::file_c

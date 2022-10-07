@@ -32,7 +32,7 @@ pl_entry_container_c playlist;
 static void DDF_MusicParseInfo(const char *info)
 {
 	static const char *const musstrtype[] = { "UNKNOWN", "CD", "MIDI", "MUS", "OGG", "MP3", "MOD", "GME", "SID", NULL };
-	static const char *const musinftype[] = { "UNKNOWN", "TRACK", "LUMP", "FILE", NULL };
+	static const char *const musinftype[] = { "UNKNOWN", "TRACK", "LUMP", "FILE", "PACK", NULL };
 
 	char charbuff[256];
 	int pos,i;

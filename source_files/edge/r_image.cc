@@ -584,17 +584,30 @@ static image_c *AddImageUser(imagedef_c *def)
 
 			int file_size = f->GetLength();
 
-			// determine format and size information
-			byte header[32];
-			memset(header, 255, sizeof(header));
+			// determine format and size information.
+			// for FILE and PACK get format from filename, but note that when
+			// it is wrong (like a PNG called "foo.jpeg"), it can still work.
+			epi::image_format_e fmt = epi::FMT_Unknown;
 
-			f->Read(header, sizeof(header));
-			f->Seek(0, epi::file_c::SEEKPOINT_START);
+			if (def->type == IMGDT_Lump)
+			{
+				byte header[32];
+				memset(header, 255, sizeof(header));
 
-			int header_len = std::min((int)sizeof(header), file_size);
-			auto fmt = epi::Image_DetectFormat(header, header_len, file_size);
+				f->Read(header, sizeof(header));
+				f->Seek(0, epi::file_c::SEEKPOINT_START);
 
-			// when a lump uses DOOM patch format, use the other method
+				int header_len = std::min((int)sizeof(header), file_size);
+				fmt = epi::Image_DetectFormat(header, header_len, file_size);
+			}
+			else
+			{
+				fmt = epi::Image_FilenameToFormat(def->info);
+			}
+
+			// when a lump uses DOOM patch format, use the other method.
+			// for lumps, assume FMT_Unknown is a mis-detection of DOOM patch
+			// and hope for the best.
 			if (fmt == epi::FMT_DOOM || fmt == epi::FMT_Unknown)
 			{
 				delete f;  // close file

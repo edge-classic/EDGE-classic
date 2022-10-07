@@ -102,6 +102,8 @@ void S_ChangeMusic(int entrynum, bool loop)
 				I_Warning("S_ChangeMusic: Can't Find File '%s'\n", fn.c_str());
 				return;
 			}
+
+			// FIXME: get the format from filename (Sound_FilenameToFormat)
 			break;
 		}
 
@@ -114,6 +116,8 @@ void S_ChangeMusic(int entrynum, bool loop)
 				I_Warning("S_ChangeMusic: PK3 entry '%s' not found.\n", play->info.c_str());
 				return;
 			}
+
+			// FIXME: get the format from filename (Sound_FilenameToFormat)
 			break;
 		}
 

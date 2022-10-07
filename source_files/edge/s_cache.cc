@@ -152,6 +152,8 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 			M_WarnError("SFX Loader: Missing sound in PK3: '%s'\n", def->pack_name.c_str());
 			return false;
 		}
+
+		// FIXME: get the format from filename (Sound_FilenameToFormat)
 	}
 	else if (def->file_name != "")
 	{
@@ -164,6 +166,8 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 			M_WarnError("SFX Loader: Can't Find File '%s'\n", fn.c_str());
 			return false;
 		}
+
+		// FIXME: get the format from filename (Sound_FilenameToFormat)
 	}
 	else 
 	{

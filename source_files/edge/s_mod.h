@@ -23,11 +23,9 @@
 
 #include "sound_data.h"
 
-class pl_entry_c;
-
 /* FUNCTIONS */
 
-abstract_music_c * S_PlayMODMusic(const pl_entry_c *musdat, float volume, bool looping);
+abstract_music_c * S_PlayMODMusic(byte *data, int length, float volume, bool looping);
 
 #endif  /* __MODPLAYER_H__ */
 

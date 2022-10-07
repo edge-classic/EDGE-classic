@@ -89,6 +89,15 @@ public:
 		return entries.size() - 1;
 	}
 
+	int Find(const std::string& name) const
+	{
+		for (int i = 0 ; i < (int)entries.size() ; i++)
+			if (entries[i] == name)
+				return i;
+
+		return -1; // not found
+	}
+
 	bool operator== (const std::string& other) const
 	{
 		return epi::case_cmp(name, other) == 0;
@@ -131,6 +140,15 @@ public:
 		return dirs.size() - 1;
 	}
 
+	int FindDir(const std::string& name) const
+	{
+		for (int i = 0 ; i < (int)dirs.size() ; i++)
+			if (dirs[i] == name)
+				return i;
+
+		return -1; // not found
+	}
+
 	void ProcessSubDir(const std::string& dirname);
 	void SortEntries();
 
@@ -140,6 +158,14 @@ public:
 			return OpenEntry_Folder(dir, index);
 		else
 			return OpenEntry_Zip(dir, index);
+	}
+
+	epi::file_c * OpenFileByName(const std::string& name)
+	{
+		if (is_folder)
+			return OpenFile_Folder(name);
+		else
+			return OpenFile_Zip(name);
 	}
 
 	byte * LoadEntry(size_t dir, size_t index, int& length)
@@ -169,6 +195,9 @@ public:
 private:
 	epi::file_c * OpenEntry_Folder(size_t dir, size_t index);
 	epi::file_c * OpenEntry_Zip   (size_t dir, size_t index);
+
+	epi::file_c * OpenFile_Folder(const std::string& name);
+	epi::file_c * OpenFile_Zip   (const std::string& name);
 };
 
 
@@ -292,13 +321,22 @@ epi::file_c * pack_file_c::OpenEntry_Folder(size_t dir, size_t index)
 {
 	const std::string& filename = dirs[dir].entries[index].fullpath;
 
-	epi::file_c * f = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+	epi::file_c * F = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 
 	// this generally won't happen, file was found during a dir scan
-	if (f == NULL)
+	if (F == NULL)
 		I_Error("Failed to open file: %s\n", filename.c_str());
 
-	return f;
+	return F;
+}
+
+
+epi::file_c * pack_file_c::OpenFile_Folder(const std::string& name)
+{
+	std::string fullpath = epi::PATH_Join(parent->name.c_str(), name.c_str());
+
+	// NOTE: it is okay here when file does not exist
+	return epi::FS_Open(fullpath.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 }
 
 
@@ -340,11 +378,12 @@ static pack_file_c * ProcessZip(data_file_c *df)
 		if (mz_zip_reader_is_file_a_directory(pack->arch, idx))
 			continue;
 
-		// get filename, decode into DIR + FILE
+		// get the filename
 		char filename[1024];
 
 		mz_zip_reader_get_filename(pack->arch, idx, filename, sizeof(filename));
 
+		// decode into DIR + FILE
 		char *p = filename;
 		while (*p != 0 && *p != '/' && *p != '\\')
 			p++;
@@ -352,7 +391,6 @@ static pack_file_c * ProcessZip(data_file_c *df)
 		if (p == filename)
 			continue;
 
-		// decode into DIR + FILE
 		size_t dir_idx  = 0;
 		char * basename = filename;
 
@@ -522,9 +560,20 @@ private:
 
 epi::file_c * pack_file_c::OpenEntry_Zip(size_t dir, size_t index)
 {
-	pk3_file_c *f = new pk3_file_c(this, dirs[dir].entries[index].file_idx);
+	pk3_file_c *F = new pk3_file_c(this, dirs[dir].entries[index].file_idx);
+	return F;
+}
 
-	return f;
+
+epi::file_c * pack_file_c::OpenFile_Zip(const std::string& name)
+{
+	// this ignores case by default
+	int idx = mz_zip_reader_locate_file(arch, name.c_str(), NULL, 0);
+	if (idx < 0)
+		return NULL;
+
+	pk3_file_c *F = new pk3_file_c(this, (mz_uint)idx);
+	return F;
 }
 
 
@@ -572,20 +621,26 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 }
 
 
-epi::file_c * Pack_OpenFile(pack_file_c *pack, const char *base_name)
+epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name)
 {
-	std::string name = base_name;
+	// when file does not exist, this returns NULL.
 
-	for (size_t i = 0 ; i < pack->dirs[0].entries.size() ; i++)
+	// disallow absolute names
+	if (name.size() >= 1 && (name[0] == '/' || name[0] == '\\'))
+		return NULL;
+
+	if (name.size() >= 2 && name[1] == ':')
+		return NULL;
+
+	// try the top-level directory
+	int ent = pack->dirs[0].Find(name);
+	if (ent >= 0)
 	{
-		if (pack->dirs[0].entries[i] == name)
-		{
-			return pack->OpenEntry(0, i);
-		}
+		return pack->OpenEntry(0, (size_t)ent);
 	}
 
-	// not found
-	return NULL;
+	// try an arbitrary place
+	return pack->OpenFileByName(name);
 }
 
 //--- editor settings ---

@@ -58,8 +58,7 @@ private:
 	int sid_length;
 
 public:
-	bool OpenLump(const char *lumpname);
-	bool OpenFile(const char *filename);
+	bool OpenMemory(byte *data, int length);
 
 	virtual void Close(void);
 
@@ -157,38 +156,12 @@ void sidplayer_c::Volume(float gain)
 }
 
 
-bool sidplayer_c::OpenLump(const char *lumpname)
+bool sidplayer_c::OpenMemory(byte *data, int length)
 {
-	SYS_ASSERT(lumpname);
+	SYS_ASSERT(data);
 
 	if (status != NOT_LOADED)
 		Close();
-
-	int lump = W_CheckNumForName(lumpname);
-	if (lump < 0)
-	{
-		I_Warning("sidplayer_c: LUMP '%s' not found.\n", lumpname);
-		return false;
-	}
-
-	epi::file_c *F = W_OpenLump(lump);
-
-	int length = F->GetLength();
-
-	byte *data = F->LoadIntoMemory();
-
-	if (! data)
-	{
-		delete F;
-		I_Warning("sidplayer_c: Error loading data.\n");
-		return false;
-	}
-	if (length < 4)
-	{
-		delete F;
-		I_Debugf("sidplayer_c: ignored short data (%d bytes)\n", length);
-		return false;
-	}
 
     if (loadSidFile(0, data, length, dev_freq, NULL, NULL, NULL, NULL) != 0)
     {
@@ -197,60 +170,9 @@ bool sidplayer_c::OpenLump(const char *lumpname)
     }
 
 	// Need to keep the song in memory for SID restarts
+	sid_data   = data;
 	sid_length = length;
-	sid_data = new byte[sid_length];
-	memcpy(sid_data, data, sid_length);
 
-	PostOpenInit();
-	return true;
-}
-
-bool sidplayer_c::OpenFile(const char *filename)
-{
-	SYS_ASSERT(filename);
-
-	if (status != NOT_LOADED)
-		Close();
-
-	FILE *sid_loader = fopen(filename, "rb");
-
-	if (!sid_loader)
-	{
-		I_Warning("sidplayer_c: Could not open file: '%s'\n", filename);
-		return false;		
-	}
-
-	// Basically the same as EPI::File's GetLength() method
-	long cur_pos = ftell(sid_loader);      // Get existing position
-
-    fseek(sid_loader, 0, SEEK_END);        // Seek to the end of file
-    long len = ftell(sid_loader);          // Get the position - it our length
-
-    fseek(sid_loader, cur_pos, SEEK_SET);  // Reset existing position
-   
-   	sid_length = len;
-
-	sid_data = new byte[sid_length];
-
-	if (fread(sid_data, 1, sid_length, sid_loader) != sid_length)
-	{
-		I_Warning("sidplayer_c: Could not open file: '%s'\n", filename);
-		fclose(sid_loader);
-		if (sid_data)
-			delete []sid_data;
-		return false;		
-	}
-
-	fclose(sid_loader);
-
-	if (loadSidFile(0, sid_data, sid_length, dev_freq, NULL, NULL, NULL, NULL) != 0)
-    {
-		I_Warning("sidplayer_c: Could not open file: '%s'\n", filename);
-		if (sid_data)
-			delete []sid_data;
-		return false;
-    }
-	
 	PostOpenInit();
 	return true;
 }
@@ -345,28 +267,16 @@ void sidplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlaySIDMusic(const pl_entry_c *musdat, float volume, bool looping)
+abstract_music_c * S_PlaySIDMusic(byte *data, int length, float volume, bool looping)
 {
 	sidplayer_c *player = new sidplayer_c();
 
-	if (musdat->infotype == MUSINF_LUMP)
+	if (! player->OpenMemory(data, length))
 	{
-		if (! player->OpenLump(musdat->info.c_str()))
-		{
-			delete player;
-			return NULL;
-		}
+		delete[] data;
+		delete player;
+		return NULL;
 	}
-	else if (musdat->infotype == MUSINF_FILE)
-	{
-		if (! player->OpenFile(musdat->info.c_str()))
-		{
-			delete player;
-			return NULL;
-		}
-	}
-	else
-		I_Error("S_PlaySIDMusic: bad format value %d\n", musdat->infotype);
 
 	player->Volume(volume);
 	player->Play(looping);

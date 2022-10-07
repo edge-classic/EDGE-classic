@@ -28,6 +28,7 @@
 
 #include "dm_defs.h"
 
+// EPI
 #include "file.h"
 
 typedef enum
@@ -88,6 +89,8 @@ size_t W_AddPending(const char *file, filekind_e kind);
 void W_InitMultipleFiles(void);
 int W_CheckDDFLumpName(const char *name);
 void W_ReadDDF();
+
+epi::file_c * W_OpenPackFile(const std::string& name);
 
 #endif // __W_FILES__
 

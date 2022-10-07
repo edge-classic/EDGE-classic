@@ -84,7 +84,7 @@ void I_Debugf(const char *message,...) GCCATTR((format(printf, 1, 2)));
 // basic macros
 
 #ifndef NULL
-#define NULL  ((void*) 0)
+#define NULL  nullptr
 #endif
 
 #ifndef M_PI

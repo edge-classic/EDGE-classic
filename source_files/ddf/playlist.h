@@ -52,7 +52,8 @@ typedef enum
 	MUSINF_TRACK     = 1,
 	MUSINF_LUMP      = 2,
 	MUSINF_FILE      = 3,
-	ENDOFMUSINFTYPES = 4
+	MUSINF_PACKAGE   = 4,
+	ENDOFMUSINFTYPES = 5
 }
 musicinftype_e;
 

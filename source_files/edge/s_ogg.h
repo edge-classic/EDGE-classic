@@ -25,11 +25,9 @@
 
 #include "sound_data.h"
 
-class pl_entry_c;
-
 /* FUNCTIONS */
 
-abstract_music_c * S_PlayOGGMusic(const pl_entry_c *musdat, float volume, bool looping);
+abstract_music_c * S_PlayOGGMusic(epi::file_c *file, float volume, bool looping);
 
 bool S_LoadOGGSound(epi::sound_data_c *buf, const byte *data, int length);
 

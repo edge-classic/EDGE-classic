@@ -136,18 +136,16 @@ void S_ChangeMusic(int entrynum, bool loop)
 	int length = F->GetLength();
 	byte *data = F->LoadIntoMemory();
 
-	// close file now
-	delete F;
-
 	if (! data)
 	{
+		delete F;
 		I_Warning("S_ChangeMusic: Error loading data.\n");
 		return;
 	}
 	if (length < 4)
 	{
+		delete F;
 		delete data;
-
 		I_Printf("S_ChangeMusic: ignored short data (%d bytes)\n", length);
 		return;
 	}
@@ -170,29 +168,38 @@ void S_ChangeMusic(int entrynum, bool loop)
 	switch (fmt)
 	{
 		case epi::FMT_OGG:
+			// rewind the file
+			F->Seek(0, epi::file_c::SEEKPOINT_START);
 			delete data;
-			music_player = S_PlayOGGMusic(play, volume, loop);
+			music_player = S_PlayOGGMusic(F, volume, loop);
 			break;
 
 		case epi::FMT_MP3:
+			// rewind the file
+			F->Seek(0, epi::file_c::SEEKPOINT_START);
 			delete data;
-			music_player = S_PlayMP3Music(play, volume, loop);
+			music_player = S_PlayMP3Music(F, volume, loop);
 			break;
 
 		case epi::FMT_MOD:
+			delete F;
 			music_player = S_PlayMODMusic(data, length, volume, loop);
 			break;
 
 		case epi::FMT_GME:
+			delete F;
 			music_player = S_PlayGMEMusic(data, length, volume, loop);
 			break;
 
 		case epi::FMT_SID:
+			delete F;
 			music_player = S_PlaySIDMusic(data, length, volume, loop);
 			break;
 
 		case epi::FMT_MIDI:
 		case epi::FMT_MUS:
+			delete F;
+
 			if (var_opl_music)
 			{
 				music_player = S_PlayOPL(data, length, fmt == epi::FMT_MUS, volume, loop);
@@ -204,6 +211,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 			break;
 
 		default:
+			delete F;
 			delete data;
 			I_Printf("S_ChangeMusic: unknown format (not MUS or MIDI)\n");
 			break;

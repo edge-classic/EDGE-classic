@@ -134,7 +134,11 @@ static void ProcessFile(data_file_c *df)
 
 	I_Printf("  Adding %s\n", filename);
 
-	if (df->kind <= FLKIND_GWad || df->kind == FLKIND_PK3)
+	// for DDF and RTS, adding the data_file is enough
+	if (df->kind == FLKIND_RTS || df->kind == FLKIND_DDF)
+		return;
+
+	if (df->kind <= FLKIND_GWad)
 	{
 		epi::file_c *file = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 		if (file == NULL)
@@ -144,14 +148,7 @@ static void ProcessFile(data_file_c *df)
 		}
 
 		df->file = file;
-	}
 
-	// for DDF and RTS, adding the data_file is enough
-	if (df->kind == FLKIND_RTS || df->kind == FLKIND_DDF)
-		return;
-
-	if (df->kind <= FLKIND_GWad)
-	{
 		ProcessWad(df, file_index);
 
 		if (file_index == 0)  // "edge-defs.wad"

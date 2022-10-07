@@ -37,12 +37,15 @@ class pack_entry_c
 {
 public:
 	std::string name;
+
+	// only for Folder: the full pathname to file (for FS_Open).
 	std::string fullpath;
 
-	u32_t pos, length;
+	// only for PK3: the index into the archive.
+	mz_uint file_idx;
 
-	pack_entry_c(const std::string& _name, const std::string& _path, u32_t _pos, u32_t _len) :
-		name(_name), fullpath(_path), pos(_pos), length(_len)
+	pack_entry_c(const std::string& _name, const std::string& _path, mz_uint _idx) :
+		name(_name), fullpath(_path), file_idx(_idx)
 	{ }
 
 	~pack_entry_c()
@@ -75,14 +78,14 @@ public:
 
 	void SortEntries();
 
-	size_t AddEntry(const std::string& _name, const std::string& _path, u32_t _pos, u32_t _length)
+	size_t AddEntry(const std::string& _name, const std::string& _path, mz_uint _idx)
 	{
 		// check if already there
 		for (size_t i = 0 ; i < entries.size() ; i++)
 			if (entries[i] == _name)
 				return i;
 
-		entries.push_back(pack_entry_c(_name, _path, _pos, _length));
+		entries.push_back(pack_entry_c(_name, _path, _idx));
 		return entries.size() - 1;
 	}
 
@@ -105,12 +108,17 @@ public:
 	// things in deeper directories are not stored.
 	std::vector<pack_dir_c> dirs;
 
+	mz_zip_archive *arch;
+
 public:
-	pack_file_c(data_file_c *_par, bool _folder) : parent(_par), is_folder(_folder), dirs()
+	pack_file_c(data_file_c *_par, bool _folder) : parent(_par), is_folder(_folder), dirs(), arch(NULL)
 	{ }
 
 	~pack_file_c()
-	{ }
+	{
+		if (arch != NULL)
+			delete arch;
+	}
 
 	size_t AddDir(const std::string& name)
 	{
@@ -243,7 +251,7 @@ void ProcessSubDir(pack_file_c *pack, const std::string& fullpath)
 		if (! fsd[i].is_dir)
 		{
 			std::string filename = epi::PATH_GetFilename(fsd[i].name.c_str());
-			pack->dirs[d].AddEntry(filename, fsd[i].name, 0, 0);
+			pack->dirs[d].AddEntry(filename, fsd[i].name, 0);
 		}
 	}
 }
@@ -272,7 +280,7 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 		else
 		{
 			std::string filename = epi::PATH_GetFilename(fsd[i].name.c_str());
-			pack->dirs[0].AddEntry(filename, fsd[i].name, 0, 0);
+			pack->dirs[0].AddEntry(filename, fsd[i].name, 0);
 		}
 	}
 
@@ -300,16 +308,223 @@ epi::file_c * pack_file_c::OpenEntry_Folder(size_t dir, size_t index)
 
 static pack_file_c * ProcessZip(data_file_c *df)
 {
-	I_Warning("Skipping PK3 package: %s\n", df->name.c_str());
-	return new pack_file_c(df, false);
+	pack_file_c *pack = new pack_file_c(df, false);
+
+	pack->arch = new mz_zip_archive;
+
+	// this is necessary (but stupid)
+	memset(pack->arch, 0, sizeof(mz_zip_archive));
+
+	if (! mz_zip_reader_init_file(pack->arch, df->name.c_str(), 0))
+	{
+		switch (mz_zip_get_last_error(pack->arch))
+		{
+			case MZ_ZIP_FILE_OPEN_FAILED:
+			case MZ_ZIP_FILE_READ_FAILED:
+			case MZ_ZIP_FILE_SEEK_FAILED:
+				I_Error("Failed to open PK3 file: %s\n", df->name.c_str());
+
+			default:
+				I_Error("Not a PK3 file (or is corrupted): %s\n", df->name.c_str());
+		}
+	}
+
+	// create the top-level directory
+	pack->AddDir("");
+
+	mz_uint total = mz_zip_reader_get_num_files(pack->arch);
+
+	for (mz_uint idx = 0 ; idx < total ; idx++)
+	{
+		// skip directories
+		if (mz_zip_reader_is_file_a_directory(pack->arch, idx))
+			continue;
+
+		// get filename, decode into DIR + FILE
+		char filename[1024];
+
+		mz_zip_reader_get_filename(pack->arch, idx, filename, sizeof(filename));
+
+		char *p = filename;
+		while (*p != 0 && *p != '/' && *p != '\\')
+			p++;
+
+		if (p == filename)
+			continue;
+
+		// decode into DIR + FILE
+		size_t dir_idx  = 0;
+		char * basename = filename;
+
+		if (*p != 0)
+		{
+			*p++ = 0;
+
+			basename = p;
+			if (basename[0] == 0)
+				continue;
+
+			// skip file if it has more sub-directories
+			while (*p != 0 && *p != '/' && *p != '\\')
+				p++;
+
+			if (*p != 0)
+				continue;
+
+			dir_idx = pack->AddDir(filename);
+		}
+
+		pack->dirs[dir_idx].AddEntry(basename, "", idx);
+
+		// DEBUG
+		//   fprintf(stderr, "FILE %d : dir %d '%s'\n", (int)idx, (int)dir_idx, basename);
+	}
+
+	return pack;
 }
+
+
+class pk3_file_c : public epi::file_c
+{
+private:
+	pack_file_c * pack;
+
+	mz_uint file_idx;
+
+	mz_uint length = 0;
+	mz_uint pos    = 0;
+
+	mz_zip_reader_extract_iter_state *iter = NULL;
+
+public:
+	pk3_file_c(pack_file_c *_pack, mz_uint _idx) : pack(_pack), file_idx(_idx)
+	{
+		// determine length
+		mz_zip_archive_file_stat stat;
+		if (mz_zip_reader_file_stat(pack->arch, file_idx, &stat))
+			length = (mz_uint) stat.m_uncomp_size;
+
+		iter = mz_zip_reader_extract_iter_new(pack->arch, file_idx, 0);
+		SYS_ASSERT(iter);
+	}
+
+	~pk3_file_c()
+	{
+		if (iter != NULL)
+			mz_zip_reader_extract_iter_free(iter);
+	}
+
+	int GetLength()
+	{
+		return (int)length;
+	}
+
+	int GetPosition()
+	{
+		return (int)pos;
+	}
+
+	unsigned int Read(void *dest, unsigned int count)
+	{
+		if (pos >= length)
+			return 0;
+
+		// never read more than what GetLength() reports
+		if (count > length - pos)
+			count = length - pos;
+
+		size_t got = mz_zip_reader_extract_iter_read(iter, dest, count);
+
+		pos += got;
+
+		return got;
+	}
+
+	unsigned int Write(const void *src, unsigned int count)
+	{
+		// not implemented
+		return count;
+	}
+
+	bool Seek(int offset, int seekpoint)
+	{
+		mz_uint want_pos = pos;
+
+		if (seekpoint == epi::file_c::SEEKPOINT_START) want_pos = 0;
+		if (seekpoint == epi::file_c::SEEKPOINT_END)   want_pos = length;
+
+		if (offset < 0)
+		{
+			offset = -offset;
+			if ((mz_uint)offset >= want_pos)
+				want_pos = 0;
+			else
+				want_pos -= (mz_uint)offset;
+		}
+		else
+		{
+			want_pos += (mz_uint)offset;
+		}
+
+		// cannot go beyond the end (except TO very end)
+		if (want_pos > length)
+			return false;
+
+		if (want_pos == length)
+		{
+			pos = length;
+			return true;
+		}
+
+		// to go backwards, we are forced to rewind to beginning
+		if (want_pos < pos)
+		{
+			Rewind();
+		}
+
+		// trivial success when already there
+		if (want_pos == pos)
+			return true;
+
+		SkipForward(want_pos - pos);
+		return true;
+	}
+
+private:
+	void Rewind()
+	{
+		mz_zip_reader_extract_iter_free(iter);
+		iter = mz_zip_reader_extract_iter_new(pack->arch, file_idx, 0);
+		SYS_ASSERT(iter);
+
+		pos = 0;
+	}
+
+	void SkipForward(unsigned int count)
+	{
+		byte buffer[1024];
+
+		while (count > 0)
+		{
+			size_t want = std::min((size_t)count, sizeof(buffer));
+			size_t got  = mz_zip_reader_extract_iter_read(iter, buffer, want);
+
+			// reached end of file?
+			if (got == 0)
+				break;
+
+			pos   += got;
+			count -= got;
+		}
+	}
+};
 
 
 epi::file_c * pack_file_c::OpenEntry_Zip(size_t dir, size_t index)
 {
-	// TODO !!!
-	I_Error("OpenEntry_Zip called.\n");
-	return NULL;
+	pk3_file_c *f = new pk3_file_c(this, dirs[dir].entries[index].file_idx);
+
+	return f;
 }
 
 

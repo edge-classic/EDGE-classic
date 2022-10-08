@@ -26,10 +26,11 @@
 //
 
 #include "local.h"
-
 #include "thing.h"
 
 #include "p_action.h"
+
+#include "str_util.h"
 
 
 #undef  DF

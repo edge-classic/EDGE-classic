@@ -22,7 +22,7 @@
 #include "filesystem.h"
 #include "mus_2_midi.h"
 #include "path.h"
-#include "str_format.h"
+#include "str_util.h"
 
 #include "m_misc.h"
 #include "s_blit.h"

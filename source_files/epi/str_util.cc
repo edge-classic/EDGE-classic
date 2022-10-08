@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EPI String Formatting
+//  EPI String Utilities
 //----------------------------------------------------------------------------
 //
 //  Copyright (c) 2007-2008  The EDGE Team.
@@ -17,49 +17,33 @@
 //----------------------------------------------------------------------------
 
 #include "epi.h"
+#include "str_util.h"
 
-#include "str_format.h"
-
-#define STARTING_LENGTH  80
+#include <locale>
 
 namespace epi
 {
 
-char * STR_FormatCStr(const char *fmt, ...)
+void str_lower(std::string& s)
+{
+	for (size_t i = 0 ; i < s.size() ; i++)
+		s[i] = std::tolower(s[i]);
+}
+
+
+void str_upper(std::string& s)
+{
+	for (size_t i = 0 ; i < s.size() ; i++)
+		s[i] = std::toupper(s[i]);
+}
+
+
+std::string STR_Format(const char *fmt, ...)
 {
 	/* Algorithm: keep doubling the allocated buffer size
 	 * until the output fits. Based on code by Darren Salt.
 	 */
-	int buf_size = STARTING_LENGTH;
-
-	for (;;)
-	{
-		char *buf = new char[buf_size];
-
-		va_list args;
-
-		va_start(args, fmt);
-		int out_len = vsnprintf(buf, buf_size, fmt, args);
-		va_end(args);
-
-		// old versions of vsnprintf() simply return -1 when
-		// the output doesn't fit.
-		if (out_len >= 0 && out_len < buf_size)
-			return buf;
-
-		delete[] buf;
-
-		buf_size *= 2;
-	}
-}
-
-std::string STR_Format(const char *fmt, ...)
-{
-	/* Same as above, but with conversion to std::string
-	 * at the end.
-	 */
-
-	int buf_size = STARTING_LENGTH;
+	int buf_size = 128;
 
 	for (;;)
 	{

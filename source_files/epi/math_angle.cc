@@ -19,7 +19,7 @@
 #include "epi.h"
 
 #include "math_angle.h"
-#include "str_format.h"
+#include "str_util.h"
 
 namespace epi
 {

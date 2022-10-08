@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EPI String Formatting
+//  EPI String Utilities
 //----------------------------------------------------------------------------
 //
 //  Copyright (c) 2007-2008  The EDGE Team.
@@ -16,21 +16,22 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_STR_FORMAT_H__
-#define __EPI_STR_FORMAT_H__
+#ifndef __EPI_STR_UTIL_H__
+#define __EPI_STR_UTIL_H__
 
 #include <string>
 
 namespace epi
 {
 
-std::string STR_Format(const char *fmt, ...);
+void str_lower(std::string& s);
+void str_upper(std::string& s);
 
-char * STR_FormatCStr(const char *fmt, ...);
+std::string STR_Format(const char *fmt, ...) GCCATTR((format(printf, 1, 2)));
 
 } // namespace epi
 
-#endif /* __EPI_STR_FORMAT_H__ */
+#endif /* __EPI_STR_UTIL_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

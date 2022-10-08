@@ -20,6 +20,7 @@
 
 #include "path.h"
 #include "sound_types.h"
+#include "str_util.h"
 
 #include "gme.h"
 #include "modplug.h"
@@ -97,6 +98,8 @@ sound_format_e Sound_DetectFormat(byte *data, int header_len)
 sound_format_e Sound_FilenameToFormat(const std::string& filename)
 {
 	std::string ext = epi::PATH_GetExtension(filename.c_str());
+
+	str_lower(ext);
 
 	if (ext == ".wav" || ext == ".wave")
 		return FMT_WAV;

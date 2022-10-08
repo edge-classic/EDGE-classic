@@ -23,7 +23,7 @@
 #include "i_defs.h"
 
 #include "path.h"
-#include "str_format.h"
+#include "str_util.h"
 #include "filesystem.h"
 
 #include "dm_state.h"

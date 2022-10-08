@@ -23,6 +23,8 @@
 
 #include "local.h"
 
+#include "str_util.h"
+
 #undef  DF
 #define DF  DDF_FIELD
 

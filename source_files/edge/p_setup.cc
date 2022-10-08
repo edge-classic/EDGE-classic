@@ -58,7 +58,7 @@
 #include "w_wad.h"
 
 #ifdef __arm__
-  #include "str_format.h"
+  #include "str_util.h"
 #endif
 
 // debugging aide:

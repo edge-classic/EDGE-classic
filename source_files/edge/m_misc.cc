@@ -34,7 +34,7 @@
 #include "file.h"
 #include "filesystem.h"
 #include "path.h"
-#include "str_format.h"
+#include "str_util.h"
 
 #include "image_data.h"
 #include "image_funcs.h"

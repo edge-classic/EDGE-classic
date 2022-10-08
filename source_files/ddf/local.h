@@ -22,8 +22,6 @@
 #include "epi.h"
 #include "arrays.h"
 
-#include "str_format.h"
-
 #include "types.h"
 #include "main.h"
 #include "states.h"

@@ -18,7 +18,7 @@
 
 #include "epi.h"
 
-#include "str_format.h"
+#include "str_util.h"
 
 #define STARTING_LENGTH  80
 

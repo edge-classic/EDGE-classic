@@ -17,8 +17,9 @@
 //----------------------------------------------------------------------------
 
 #include "local.h"
-
 #include "wadfixes.h"
+
+#include "str_util.h"
 
 static fixdef_c *dynamic_fixdef;
 

@@ -75,9 +75,9 @@
 
 #include "i_defs.h"
 
-#include "str_format.h"
 #include "font.h"
 #include "path.h"
+#include "str_util.h"
 
 #include "main.h"
 

@@ -17,8 +17,9 @@
 //----------------------------------------------------------------------------
 
 #include "local.h"
-
 #include "flat.h"
+
+#include "str_util.h"
 
 static flatdef_c *dynamic_flatdef;
 

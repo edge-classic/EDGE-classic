@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "path.h"
-#include "str_format.h"
+#include "str_util.h"
 
 #include "colormap.h"
 

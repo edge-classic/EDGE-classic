@@ -20,6 +20,7 @@
 
 #include "path.h"
 #include "sound_types.h"
+#include "str_util.h"
 
 #include "gme.h"
 #include "modplug.h"

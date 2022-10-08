@@ -46,6 +46,7 @@
 #include "file.h"
 #include "filesystem.h"
 #include "path.h"
+#include "str_util.h"
 
 #include "am_map.h"
 #include "con_gui.h"
@@ -1255,24 +1256,24 @@ static void AddSingleCmdLineFile(const char *name, bool ignore_unknown)
 {
 	std::string ext = epi::PATH_GetExtension(name);
 
-	if (epi::case_cmp(ext.c_str(), ".edm") == 0)
-		I_Error("Demos are no longer supported\n");
+	epi::str_lower(ext);
+
+	if (ext == ".edm")
+		I_Error("Demos are not supported\n");
 
 	// no need to check for GWA (shouldn't be added manually)
 
 	filekind_e kind;
 
-	if (epi::case_cmp(ext.c_str(), ".wad") == 0)
+	if (ext == ".wad")
 		kind = FLKIND_PWad;
-	else if (epi::case_cmp(ext.c_str(), ".pk3") == 0)
+	else if (ext == ".pk3")
 		kind = FLKIND_PK3;
-	else if (epi::case_cmp(ext.c_str(), ".rts") == 0)
+	else if (ext == ".rts")
 		kind = FLKIND_RTS;
-	else if (epi::case_cmp(ext.c_str(), ".ddf") == 0 ||
-			 epi::case_cmp(ext.c_str(), ".ldf") == 0)
+	else if (ext == ".ddf" || ext == ".ldf")
 		kind = FLKIND_DDF;
-	else if (epi::case_cmp(ext.c_str(), ".deh") == 0 ||
-			 epi::case_cmp(ext.c_str(), ".bex") == 0)
+	else if (ext == ".deh" || ext == ".bex")
 		kind = FLKIND_Deh;
 	else
 	{

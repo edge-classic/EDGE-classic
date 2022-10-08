@@ -98,6 +98,8 @@ sound_format_e Sound_FilenameToFormat(const std::string& filename)
 {
 	std::string ext = epi::PATH_GetExtension(filename.c_str());
 
+	str_lower(ext);
+
 	if (ext == ".wav" || ext == ".wave")
 		return FMT_WAV;
 

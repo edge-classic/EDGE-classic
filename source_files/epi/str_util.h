@@ -24,7 +24,10 @@
 namespace epi
 {
 
-std::string STR_Format(const char *fmt, ...);
+void str_lower(std::string& s);
+void str_upper(std::string& s);
+
+std::string STR_Format(const char *fmt, ...) GCCATTR((format(printf, 1, 2)));
 
 } // namespace epi
 

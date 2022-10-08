@@ -17,20 +17,33 @@
 //----------------------------------------------------------------------------
 
 #include "epi.h"
-
 #include "str_util.h"
 
-#define STARTING_LENGTH  80
+#include <locale>
 
 namespace epi
 {
+
+void str_lower(std::string& s)
+{
+	for (size_t i = 0 ; i < s.size() ; i++)
+		s[i] = std::tolower(s[i]);
+}
+
+
+void str_upper(std::string& s)
+{
+	for (size_t i = 0 ; i < s.size() ; i++)
+		s[i] = std::toupper(s[i]);
+}
+
 
 std::string STR_Format(const char *fmt, ...)
 {
 	/* Algorithm: keep doubling the allocated buffer size
 	 * until the output fits. Based on code by Darren Salt.
 	 */
-	int buf_size = STARTING_LENGTH;
+	int buf_size = 128;
 
 	for (;;)
 	{

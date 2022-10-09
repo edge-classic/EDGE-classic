@@ -57,7 +57,7 @@ namespace Deh_Edge
 
 bool Field_ValidateValue(const fieldreference_t *ref, int new_val)
 {
-	if (ref->field_type == FT_ANY || ref->field_type == FT_BITS)
+	if (ref->field_type == FT_ANY || ref->field_type == FT_BITS || ref->field_type == FT_MBF21BITS)
 		return true;
 
 	if (new_val < 0 || (new_val == 0 && ref->field_type == FT_GTEQ1))

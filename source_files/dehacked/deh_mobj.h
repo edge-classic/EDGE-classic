@@ -141,6 +141,70 @@ typedef enum
 }
 mobjflag_t;
 
+//
+// MBF21 mobj flags
+//
+typedef enum
+{
+	// Lower gravity (1/8)
+	MBF21_LOGRAV = 1,
+
+	// Short missile range (archvile)
+	MBF21_SHORTMRANGE = 2,
+
+	// Other things ignore its attacks (archvile?)
+	MBF21_DMGIGNORED = 4,
+
+	// Doesn't take splash damage (cyberdemon, mastermind)
+	MBF21_NORADIUSDMG = 8,
+
+	// Thing causes splash damage even if the target shouldn't (WTF?)
+	MBF21_FORCERADIUSDMG = 16,
+
+	// Higher missile attack prob (cyberdemon)
+	MBF21_HIGHERMPROB = 32,
+
+	// Use half distance for missile attack prob (cyberdemon, mastermind, revvie, lost soul)
+	MBF21_RANGEHALF = 64,
+
+	// Has no targeting threshold (archvile)
+	MBF21_NOTHRESHOLD = 128,
+
+	// Has long melee range (revvie)
+	MBF21_LONGMELEE = 256,
+
+	// Full volume see/death sound and splash immunity
+	MBF21_BOSS = 512,
+
+	// Triggers tag 666 when all are dead (mancubus)
+	MBF21_MAP07BOSS1 = 0x400,
+
+	// Triggers tag 667 when all are dead (arachnotron)
+	MBF21_MAP07BOSS2 = 0x800,
+
+	// E1M8 boss (baron)
+	MBF21_E1M8BOSS = 0x1000,
+
+	// E2M8 boss (cyberdemon)
+	MBF21_E2M8BOSS = 0x2000,
+
+	// E3M8 boss (mastermind)
+	MBF21_E3M8BOSS = 0x4000,
+
+	// E4M6 boss (cyberdemon)
+	MBF21_E4M6BOSS = 0x8000,
+
+	// E4M8 boss (mastermind)
+	MBF21_E4M8BOSS = 0x10000,
+
+	// Ripper projectile (does not disappear on impact)
+	MBF21_RIP = 0x20000,
+
+	// Full volume see/death sounds
+	MBF21_FULLVOLSOUNDS = 0x40000,
+}
+mobjmbf21flag_t;
+
 #define MF_TRANSLATION  (MF_TRANSLATION1 | MF_TRANSLATION2)
 #define ALL_BEX_FLAGS  \
 	(MF_STEALTH | MF_TRANSLUCENT | MF_TOUCHY | MF_BOUNCES | MF_FRIEND)
@@ -231,6 +295,7 @@ typedef struct
     int	damage;
     int	activesound;
     int	flags;
+	int mbf21_flags;
     int	raisestate;
 }
 mobjinfo_t;

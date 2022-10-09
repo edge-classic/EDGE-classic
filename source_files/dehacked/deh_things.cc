@@ -484,6 +484,7 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 	WAD::Printf("\n");
 
 	Things::HandleFlags(info, mt_num, 0);
+	Things::HandleMBF21Flags(info, mt_num, 0);
 
 	if (Frames::attack_slot[0] || Frames::attack_slot[1] ||
 	    Frames::attack_slot[2])
@@ -791,6 +792,31 @@ namespace Things
 		NULL
 	};
 
+	const flagname_t mbf21flagnamelist[] =
+	{
+		{ MBF21_LOGRAV,         "LOGRAV",         NULL },
+		{ MBF21_SHORTMRANGE,    "SHORTMRANGE",    NULL },
+		{ MBF21_DMGIGNORED,     "DMGIGNORED",     NULL },
+		{ MBF21_NORADIUSDMG,    "NORADIUSDMG",    NULL },
+		{ MBF21_FORCERADIUSDMG, "FORCERADIUSDMG", NULL },
+		{ MBF21_HIGHERMPROB,    "HIGHERMPROB",    NULL },
+		{ MBF21_RANGEHALF,      "RANGEHALF",      NULL },
+		{ MBF21_NOTHRESHOLD,    "NOTHRESHOLD",    NULL },
+		{ MBF21_LONGMELEE,      "LONGMELEE",      NULL },
+		{ MBF21_BOSS,           "BOSS",           NULL },
+		{ MBF21_MAP07BOSS1,     "MAP07BOSS1",     NULL },
+		{ MBF21_MAP07BOSS2,     "MAP07BOSS2",     NULL },
+		{ MBF21_E1M8BOSS,       "E1M8BOSS",       NULL },
+		{ MBF21_E2M8BOSS,       "E2M8BOSS",       NULL },
+		{ MBF21_E3M8BOSS,       "E3M8BOSS",       NULL },
+		{ MBF21_E4M6BOSS,       "E4M6BOSS",       NULL },
+		{ MBF21_E4M8BOSS,       "E4M8BOSS",       NULL },
+		{ MBF21_RIP,            "RIP",            NULL },
+		{ MBF21_FULLVOLSOUNDS,  "FULLVOLSOUNDS",  NULL },
+
+		{ 0, NULL, NULL }  // End sentinel
+	};
+
 	bool CheckIsMonster(const mobjinfo_t *info, int mt_num, int player,
 		bool use_act_flags)
 	{
@@ -992,6 +1018,30 @@ namespace Things
 			PrintWarn("Unconverted flags 0x%08x in mobjtype %d\n", cur_f, mt_num);
 	}
 
+	void HandleMBF21Flags(const mobjinfo_t *info, int mt_num, int player)
+	{
+		int i;
+		int cur_f = info->mbf21_flags;
+		bool got_a_flag = false;
+
+		for (i = 0; mbf21flagnamelist[i].name != NULL; i++)
+		{
+			if (0 == (cur_f & mbf21flagnamelist[i].flag))
+				continue;
+
+			cur_f &= ~mbf21flagnamelist[i].flag;
+
+			AddOneFlag(info, mbf21flagnamelist[i].name, got_a_flag);
+		}
+
+		AddOneFlag(info, "MBF21_COMPAT", got_a_flag);
+
+		if (got_a_flag)
+			WAD::Printf(";\n");
+
+		if (cur_f != 0)
+			PrintWarn("Unconverted flags 0x%08x in mobjtype %d\n", cur_f, mt_num);
+	}
 
 	void FixHeights()
 	{
@@ -1612,6 +1662,7 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player,
 	WAD::Printf("\n");
 
 	HandleFlags(info, mt_num, player);
+	HandleMBF21Flags(info, mt_num, player);
 	HandleAttacks(info, mt_num);
 
 	if (Frames::act_flags & AF_EXPLODE)
@@ -1733,6 +1784,7 @@ namespace Things
 		{ "Missile damage",     FIELD_OFS(damage),       FT_NONEG },
 		{ "Action sound",       FIELD_OFS(activesound),  FT_SOUND },
 		{ "Bits",               FIELD_OFS(flags),        FT_BITS },
+		{ "MBF21 Bits",         FIELD_OFS(mbf21_flags),  FT_MBF21BITS },
 		{ "Respawn frame",      FIELD_OFS(raisestate),   FT_FRAME },
 
 		{ NULL, 0, FT_ANY }   // End sentinel

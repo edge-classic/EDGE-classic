@@ -296,6 +296,12 @@ typedef struct
     int	activesound;
     int	flags;
 	int mbf21_flags;
+	int infight_group;
+	int proj_group;
+	int splash_group;
+	int rip_sound;
+	int fast_speed;
+	int melee_range;
     int	raisestate;
 }
 mobjinfo_t;

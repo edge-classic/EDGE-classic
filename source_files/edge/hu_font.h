@@ -30,6 +30,7 @@ typedef struct
 	// index within font
 	int glyph;
 	int width, height;
+	unsigned int tex_id;
 }
 ttf_char_t;
 
@@ -95,11 +96,10 @@ public:
 
 	// For TRUETYPE type
 	stbtt_fontinfo ttf_info;
-	unsigned int ttf_tex_id;
 	byte *ttf_buffer;
-	stbtt_bakedchar *ttf_cdata;
 	int ttf_char_width;
 	int ttf_char_height;
+	float ttf_scale;
 	std::map<int, ttf_char_t> ttf_glyph_map;
 
 private:

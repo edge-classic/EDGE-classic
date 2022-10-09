@@ -54,7 +54,6 @@ font_c::font_c(fontdef_c *_def) : def(_def)
 
 	font_image = NULL;
 	ttf_buffer = NULL;
-	ttf_cdata = NULL;
 }
 
 font_c::~font_c()
@@ -221,18 +220,6 @@ void font_c::LoadFontTTF()
 			I_Error("LoadFontTTF: STB_TrueType failed to load font %s!\n", def->ttf_name.c_str());
     	}
 
-		unsigned char *temp_bitmap = new unsigned char[512 * 512];
-		ttf_cdata = new stbtt_bakedchar[256];
-
-		stbtt_BakeFontBitmap(ttf_buffer,0, def->ttf_default_size, temp_bitmap, 512,512, 0, 256, ttf_cdata);
-
-		glGenTextures(1, &ttf_tex_id);
-		glBindTexture(GL_TEXTURE_2D, ttf_tex_id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 512,512, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-		if (temp_bitmap) delete temp_bitmap;
-
 		ttf_char_t M;
 
 		M.glyph = stbtt_FindGlyphIndex(&ttf_info, (int)'M');
@@ -241,13 +228,19 @@ void font_c::LoadFontTTF()
 		{
 			I_Error("LoadFontTTF: MISSING THE LETTER M COME ON!\n");
 		}
-		float scale = stbtt_ScaleForPixelHeight(&ttf_info, def->ttf_default_size);
-		stbtt_GetGlyphHMetrics(&ttf_info, M.glyph, &ttf_char_width, NULL);
-		stbtt_GetFontVMetrics(&ttf_info, &ttf_char_height, NULL, NULL);
-		ttf_char_width *= scale;
-		ttf_char_height *= scale;
+		int x0,y0,x1,y1;
+		ttf_scale = stbtt_ScaleForPixelHeight(&ttf_info, def->ttf_default_size);
+		stbtt_GetGlyphBitmapBox(&ttf_info, M.glyph, ttf_scale,ttf_scale, &x0,&y0,&x1,&y1);
+		ttf_char_width = (x1-x0) * ttf_scale;
+		ttf_char_height = (y1-y0) * ttf_scale;
+		unsigned char *bitmap = stbtt_GetGlyphBitmap(&ttf_info, ttf_scale, ttf_scale, M.glyph, &ttf_char_width, &ttf_char_height, &x0, &y0);
 		M.width = ttf_char_width;
 		M.height = ttf_char_height;
+		glGenTextures(1, &M.tex_id);
+		glBindTexture(GL_TEXTURE_2D, M.tex_id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, ttf_char_width,ttf_char_height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, bitmap);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		delete bitmap;
 		ttf_glyph_map.try_emplace((int)'M', M);
 	}
 }
@@ -386,10 +379,16 @@ float font_c::CharWidth(char ch)
 		{
 			ttf_char_t character;
 			character.glyph = stbtt_FindGlyphIndex(&ttf_info, (int)ch);
-			float scale = stbtt_ScaleForPixelHeight(&ttf_info, def->ttf_default_size);
-			stbtt_GetGlyphHMetrics(&ttf_info, character.glyph, &character.width, NULL);
-			character.width *= scale;
-			character.height = ttf_char_height * scale;
+			int x0,y0,x1,y1;
+			stbtt_GetGlyphBitmapBox(&ttf_info, character.glyph, ttf_scale,ttf_scale, &x0,&y0,&x1,&y1);
+			character.width = (x1-x0) * ttf_scale;
+			character.height = (y1-y0) * ttf_scale;
+			unsigned char *bitmap = stbtt_GetGlyphBitmap(&ttf_info, ttf_scale, ttf_scale, character.glyph, &character.width, &character.height, &x0, &y0);
+			glGenTextures(1, &character.tex_id);
+			glBindTexture(GL_TEXTURE_2D, character.tex_id);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, character.width,character.height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, bitmap);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			delete bitmap;
 			ttf_glyph_map.try_emplace((int)ch, character);
 			return character.width;
 		}

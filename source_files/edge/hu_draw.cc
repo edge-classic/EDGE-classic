@@ -397,19 +397,13 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, cur_font->ttf_tex_id);
+		glBindTexture(GL_TEXTURE_2D, cur_font->ttf_glyph_map[(int)ch].tex_id);
 		glColor4f(r, g, b, alpha);
 		glBegin(GL_QUADS);
-		stbtt_aligned_quad q;
-        stbtt_GetBakedQuad(cur_font->ttf_cdata, 512,512, ch, &hx1,&hy1,&q,1);
-        //glTexCoord2f(q.s0,q.t0); glVertex2i(x1,y1);
-        //glTexCoord2f(q.s1,q.t0); glVertex2i(x2,y1);
-        //glTexCoord2f(q.s1,q.t1); glVertex2i(x2,y2);
-        //glTexCoord2f(q.s0,q.t1); glVertex2i(x1,y2);
-		glTexCoord2f(q.s0,q.t1); glVertex2i(x1,y1);
-        glTexCoord2f(q.s1,q.t1); glVertex2i(x2,y1);
-        glTexCoord2f(q.s1,q.t0); glVertex2i(x2,y2);
-        glTexCoord2f(q.s0,q.t0); glVertex2i(x1,y2);
+		glTexCoord2f(0.0,1.0); glVertex2f(hx1,hy1);
+        glTexCoord2f(1.0,1.0); glVertex2f(hx2,hy1);
+        glTexCoord2f(1.0,0.0); glVertex2f(hx2,hy2);
+        glTexCoord2f(0.0,0.0); glVertex2f(hx1,hy2);
 		glEnd();
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_BLEND);
@@ -873,7 +867,7 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 	if (strcasecmp(img->name, "TTFDUMMY") == 0)
 	{
 		w = (size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->ttf_default_size)) : cur_font->CharWidth(ch)) * sc_x;
-		h = (size > 0 ? size : cur_font->ttf_char_height) * sc_y;
+		h = (size > 0 ? size : cur_font->ttf_glyph_map[(int)ch].height) * sc_y;
 		// tx* values don't really matter here, they will be determined in HUD_RawImage for truetype fonts
 		tx1 = 0;
 		ty1 = 0;

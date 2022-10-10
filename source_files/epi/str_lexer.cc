@@ -2,7 +2,7 @@
 //  EPI Lexer (tokenizer)
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 2022  The EDGE Team.
+//  Copyright (c) 2022  Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -21,6 +21,25 @@
 
 namespace epi
 {
+
+token_kind_e lexer_c::Next(std::string& s)
+{
+	// TODO : Next
+	return TOK_EOF;
+}
+
+
+bool lexer_c::Match(const char *s)
+{
+	// TODO : Match
+	return false;
+}
+
+
+int lexer_c::LastLine()
+{
+	return line;
+}
 
 
 } // namespace epi

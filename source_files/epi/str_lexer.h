@@ -70,6 +70,10 @@ private:
 	int    line;
 
 	void SkipToNext();
+
+	token_kind_e ParseIdentifier(std::string& s);
+	token_kind_e ParseNumber(std::string& s);
+	token_kind_e ParseString(std::string& s);
 };
 
 } // namespace epi

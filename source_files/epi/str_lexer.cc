@@ -34,9 +34,20 @@ token_kind_e lexer_c::Next(std::string& s)
 	if (pos >= data.size())
 		return TOK_EOF;
 
-	// TODO : Next
+	unsigned char ch = (unsigned char) data[pos++];
 
-	return TOK_EOF;
+	if (ch == '"')
+		return ParseString(s);
+
+	if (ch == '-' || ch == '+' || std::isdigit(ch))
+		return ParseNumber(s);
+
+	if (std::isalpha(ch) || ch == '_' || ch >= 128)
+		return ParseIdentifier(s);
+
+	// anything else is a symbol
+	s.push_back((char)ch);
+	return TOK_Symbol;
 }
 
 
@@ -101,6 +112,7 @@ double lexer_c::ToDouble(const std::string& s)
 	return std::strtod(s.c_str(), NULL);
 }
 
+//----------------------------------------------------------------------------
 
 void lexer_c::SkipToNext()
 {
@@ -152,6 +164,27 @@ void lexer_c::SkipToNext()
 		// reached a token!
 		return;
 	}
+}
+
+
+token_kind_e lexer_c::ParseIdentifier(std::string& s)
+{
+	// TODO ParseIdentifier
+	return TOK_ERROR;
+}
+
+
+token_kind_e lexer_c::ParseNumber(std::string& s)
+{
+	// TODO ParseNumber
+	return TOK_ERROR;
+}
+
+
+token_kind_e lexer_c::ParseString(std::string& s)
+{
+	// TODO ParseString
+	return TOK_ERROR;
 }
 
 } // namespace epi

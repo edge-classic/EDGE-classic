@@ -110,7 +110,7 @@ image_format_e Image_DetectFormat(byte *header, int header_len, int file_size)
 		int ofs_y = (int)header[6] + (int)((signed char)header[7] * 256);
 
 		if (width  > 0 && width  <= 4096 && abs(ofs_x) <= 4096 &&
-			height > 0 && height <=  512 && abs(ofs_y) <=  512 &&
+			height > 0 && height <= 1024 && abs(ofs_y) <= 4096 &&
 			file_size > width * 4 /* columnofs */)
 		{
 			return FMT_DOOM;

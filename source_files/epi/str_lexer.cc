@@ -34,7 +34,7 @@ token_kind_e lexer_c::Next(std::string& s)
 	if (pos >= data.size())
 		return TOK_EOF;
 
-	unsigned char ch = (unsigned char) data[pos++];
+	unsigned char ch = (unsigned char) data[pos];
 
 	if (ch == '"')
 		return ParseString(s);
@@ -45,8 +45,9 @@ token_kind_e lexer_c::Next(std::string& s)
 	if (std::isalpha(ch) || ch == '_' || ch >= 128)
 		return ParseIdentifier(s);
 
-	// anything else is a symbol
-	s.push_back((char)ch);
+	// anything else is a single-character symbol
+	s.push_back(data[pos++]);
+
 	return TOK_Symbol;
 }
 
@@ -176,8 +177,33 @@ token_kind_e lexer_c::ParseIdentifier(std::string& s)
 
 token_kind_e lexer_c::ParseNumber(std::string& s)
 {
-	// TODO ParseNumber
-	return TOK_ERROR;
+	if (data[pos] == '-' || data[pos] == '+')
+	{
+		// no digits after the sign?
+		if (pos+1 >= data.size() || ! std::isdigit(data[pos+1]))
+		{
+			s.push_back(data[pos++]);
+			return TOK_Symbol;
+		}
+	}
+
+	for (;;)
+	{
+		s.push_back(data[pos++]);
+
+		if (pos >= data.size())
+			break;
+
+		unsigned char ch = (unsigned char) data[pos];
+
+		// this is fairly lax, but adequate for our purposes
+		if (std::isalnum(ch) || ch == '+' || ch == '-' || ch == '.')
+			continue;
+
+		break;
+	}
+
+	return TOK_Number;
 }
 
 

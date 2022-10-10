@@ -20,12 +20,20 @@
 #include "str_lexer.h"
 
 #include <cstdlib>
+#include <cctype>
 
 namespace epi
 {
 
 token_kind_e lexer_c::Next(std::string& s)
 {
+	s.clear();
+
+	SkipToNext();
+
+	if (pos >= data.size())
+		return TOK_EOF;
+
 	// TODO : Next
 	return TOK_EOF;
 }
@@ -33,6 +41,11 @@ token_kind_e lexer_c::Next(std::string& s)
 
 bool lexer_c::Match(const char *s)
 {
+	SkipToNext();
+
+	if (pos >= data.size())
+		return false;
+
 	// TODO : Match
 	return false;
 }
@@ -55,6 +68,59 @@ double lexer_c::ToDouble(const std::string& s)
 {
 	// strtod handles all the floating-point sequences of the UDMF spec
 	return std::strtod(s.c_str(), NULL);
+}
+
+
+void lexer_c::SkipToNext()
+{
+	while (pos < data.size())
+	{
+		unsigned char ch = (unsigned char) data[pos++];
+
+		// bump line number at end of a line
+		if (ch == '\n')
+			line += 1;
+
+		// whitespace?
+		if (ch <= ' ')
+			continue;
+
+		if (ch == '/' && pos < data.size())
+		{
+			// single line comment?
+			if (data[pos] == '/')
+			{
+				pos++;
+
+				while (pos < data.size() && data[pos] != '\n')
+					pos++;
+
+				continue;
+			}
+
+			// multi-line comment?
+			if (data[pos] == '*')
+			{
+				pos++;
+
+				while (pos < data.size())
+				{
+					if (pos+1 < data.size() && data[pos] == '*' && data[pos+1] == '/')
+						break;
+
+					if (data[pos] == '\n')
+						line += 1;
+
+					pos++;
+				}
+
+				continue;
+			}
+		}
+
+		// reached a token!
+		return;
+	}
 }
 
 } // namespace epi

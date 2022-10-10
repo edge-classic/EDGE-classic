@@ -69,7 +69,7 @@ private:
 	size_t pos;
 	int    line;
 
-	//...
+	void SkipToNext();
 };
 
 } // namespace epi

@@ -225,9 +225,44 @@ token_kind_e lexer_c::ParseNumber(std::string& s)
 
 token_kind_e lexer_c::ParseString(std::string& s)
 {
-	// TODO ParseString
-	return TOK_ERROR;
+	// NOTE: we allow newlines ('\n') in the string, rather than produce an
+	//       an unterminated-string error.  it is unlikely to matter.
+
+	while (pos < data.size())
+	{
+		char ch = data[pos++];
+
+		if (ch == '"')
+			break;
+
+		if (ch == '\\')
+		{
+			ParseEscape(s);
+			continue;
+		}
+
+		if (ch == '\n')
+			line += 1;
+
+		// skip all control characters except TAB and NEWLINE
+		if ((unsigned char)ch < 32 && ! (ch == '\t' || ch == '\n'))
+			continue;
+
+		if (ch == 127)  // DEL
+			continue;
+
+		s.push_back(ch);
+	}
+
+	return TOK_String;
 }
+
+
+void lexer_c::ParseEscape(std::string& s)
+{
+	// FIXME ParseEscape
+}
+
 
 } // namespace epi
 

@@ -59,6 +59,10 @@ public:
 	// where in the file an error occurred.
 	int LastLine();
 
+	// helpers for converting numeric tokens.
+	int    ToInt   (const std::string& s);
+	double ToDouble(const std::string& s);
+
 private:
 	const std::string& data;
 
@@ -67,7 +71,6 @@ private:
 
 	//...
 };
-
 
 } // namespace epi
 

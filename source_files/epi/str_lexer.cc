@@ -19,6 +19,8 @@
 #include "epi.h"
 #include "str_lexer.h"
 
+#include <cstdlib>
+
 namespace epi
 {
 
@@ -41,6 +43,19 @@ int lexer_c::LastLine()
 	return line;
 }
 
+
+int lexer_c::ToInt(const std::string& s)
+{
+	// strtol handles all the integer sequences of the UDMF spec
+	return (int)std::strtol(s.c_str(), NULL, 0);
+}
+
+
+double lexer_c::ToDouble(const std::string& s)
+{
+	// strtod handles all the floating-point sequences of the UDMF spec
+	return std::strtod(s.c_str(), NULL);
+}
 
 } // namespace epi
 

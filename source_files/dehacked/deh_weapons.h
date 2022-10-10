@@ -16,6 +16,31 @@
 namespace Deh_Edge
 {
 
+//
+// MBF21 weapon flags
+//
+typedef enum
+{
+	// Doesn't thrust things
+	MBF21_NOTHRUST = 1,
+
+	// Weapon is silent
+	MBF21_SILENT = 2,
+
+	// Weapon won't autofile when swapped to
+	MBF21_NOAUTOFIRE = 4,
+
+	// Monsters consider it a melee weapon
+	MBF21_FLEEMELEE = 8,
+
+	// Can be switched away from when ammo is picked up
+	MBF21_AUTOSWITCHFROM = 16,
+
+	// Cannot be switched to when ammo is picked up
+	MBF21_NOAUTOSWITCHTO = 32,
+}
+weapmbf21flag_t;
+
 // Weapon info: sprite frames, ammunition use.
 typedef struct
 {
@@ -31,6 +56,7 @@ typedef struct
     int readystate;
     int atkstate;
     int flashstate;
+    int mbf21_flags;
 }
 weaponinfo_t;
 

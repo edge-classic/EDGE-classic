@@ -1784,7 +1784,7 @@ namespace Things
 		{ "Missile damage",     FIELD_OFS(damage),        FT_NONEG },
 		{ "Action sound",       FIELD_OFS(activesound),   FT_SOUND },
 		{ "Bits",               FIELD_OFS(flags),         FT_BITS },
-		{ "MBF21 Bits",         FIELD_OFS(mbf21_flags),   FT_MBF21BITS },
+		{ "MBF21 Bits",         FIELD_OFS(mbf21_flags),   FT_BITS },
 		{ "Infighting group",   FIELD_OFS(infight_group), FT_NONEG },
 		{ "Projectile group",   FIELD_OFS(proj_group),    FT_ANY },
 		{ "Splash group",       FIELD_OFS(splash_group),  FT_NONEG },

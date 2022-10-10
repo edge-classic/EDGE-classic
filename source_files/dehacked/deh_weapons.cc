@@ -62,39 +62,39 @@ weaponinfo_t weapon_info[NUMWEAPONS] =
 {
     {
 		"FIST", am_noammo, 0,  1,0, "f",
-		S_PUNCHUP, S_PUNCHDOWN, S_PUNCH, S_PUNCH1, S_NULL
+		S_PUNCHUP, S_PUNCHDOWN, S_PUNCH, S_PUNCH1, S_NULL, 0
     },	
     {
 		"PISTOL", am_bullet, 1,  2,2, "fr",
-		S_PISTOLUP, S_PISTOLDOWN, S_PISTOL, S_PISTOL1, S_PISTOLFLASH
+		S_PISTOLUP, S_PISTOLDOWN, S_PISTOL, S_PISTOL1, S_PISTOLFLASH, 0
     },	
     {
 		"SHOTGUN", am_shell, 1,  3,3, NULL,
-		S_SGUNUP, S_SGUNDOWN, S_SGUN, S_SGUN1, S_SGUNFLASH1
+		S_SGUNUP, S_SGUNDOWN, S_SGUN, S_SGUN1, S_SGUNFLASH1, 0
     },
     {
 		"CHAINGUN", am_bullet, 1,  4,5, "r",
-		S_CHAINUP, S_CHAINDOWN, S_CHAIN, S_CHAIN1, S_CHAINFLASH1
+		S_CHAINUP, S_CHAINDOWN, S_CHAIN, S_CHAIN1, S_CHAINFLASH1, 0
     },
     {
 		"ROCKET_LAUNCHER", am_rocket, 1,  5,6, "d",
-		S_MISSILEUP, S_MISSILEDOWN, S_MISSILE, S_MISSILE1, S_MISSILEFLASH1
+		S_MISSILEUP, S_MISSILEDOWN, S_MISSILE, S_MISSILE1, S_MISSILEFLASH1, 0
     },
     {
 		"PLASMA_RIFLE", am_cell, 1,  6,7, NULL,
-		S_PLASMAUP, S_PLASMADOWN, S_PLASMA, S_PLASMA1, S_PLASMAFLASH1
+		S_PLASMAUP, S_PLASMADOWN, S_PLASMA, S_PLASMA1, S_PLASMAFLASH1, 0
     },
     {
 		"BFG_9000", am_cell, 40,  7,8, "d",
-		S_BFGUP, S_BFGDOWN, S_BFG, S_BFG1, S_BFGFLASH1
+		S_BFGUP, S_BFGDOWN, S_BFG, S_BFG1, S_BFGFLASH1, 0
     },
     {
 		"CHAINSAW", am_noammo, 0,  1,1, "bt",
-		S_SAWUP, S_SAWDOWN, S_SAW, S_SAW1, S_NULL
+		S_SAWUP, S_SAWDOWN, S_SAW, S_SAW1, S_NULL, 0
     },
     {
 		"SUPER_SHOTGUN", am_shell, 2,  3,4, NULL,
-		S_DSGUNUP, S_DSGUNDOWN, S_DSGUN, S_DSGUN1, S_DSGUNFLASH1
+		S_DSGUNUP, S_DSGUNDOWN, S_DSGUN, S_DSGUN1, S_DSGUNFLASH1, 0
     },	
 };
 
@@ -112,6 +112,46 @@ void Weapons::Init()
 void Weapons::Shutdown()
 { }
 
+namespace Weapons
+{
+#define FIELD_OFS(xxx)  offsetof(weaponinfo_t, xxx)
+
+	typedef struct
+	{
+		int flag;
+		const char *name;  // for EDGE
+		const char *bex;  // NULL if same as EDGE name
+	}
+	flagname_t;
+
+	const fieldreference_t weapon_field[] =
+	{
+		{ "Ammo type",      FIELD_OFS(ammo),          FT_AMMO  },
+		{ "Ammo per shot",  FIELD_OFS(ammo_per_shot), FT_NONEG },
+
+		// -AJA- these first two fields have misleading dehacked names
+		{ "Deselect frame", FIELD_OFS(upstate),       FT_FRAME },
+		{ "Select frame",   FIELD_OFS(downstate),     FT_FRAME },
+		{ "Bobbing frame",  FIELD_OFS(readystate),    FT_FRAME },
+		{ "Shooting frame", FIELD_OFS(atkstate),      FT_FRAME },
+		{ "Firing frame",   FIELD_OFS(flashstate),    FT_FRAME },
+		{ "MBF21 Bits",     FIELD_OFS(mbf21_flags),    FT_BITS  },
+
+		{ NULL, 0, FT_ANY }   // End sentinel
+	};
+
+	const flagname_t mbf21flagnamelist[] =
+	{
+		{ MBF21_NOTHRUST,       "LOGRAV",         NULL },
+		{ MBF21_SILENT,         "SHORTMRANGE",    NULL },
+		{ MBF21_NOAUTOFIRE,     "DMGIGNORED",     NULL },
+		{ MBF21_FLEEMELEE,      "NORADIUSDMG",    NULL },
+		{ MBF21_AUTOSWITCHFROM, "FORCERADIUSDMG", NULL },
+		{ MBF21_NOAUTOSWITCHTO, "HIGHERMPROB",    NULL },
+
+		{ 0, NULL, NULL }  // End sentinel
+	};
+}
 
 namespace Weapons
 {
@@ -155,6 +195,45 @@ namespace Weapons
 
 		if (strchr(info->flags, WF_FEEDBACK))
 			WAD::Printf("FEEDBACK = TRUE;\n");
+	}
+
+	void AddOneFlag(const weaponinfo_t *info, const char *name, bool& got_a_flag)
+	{
+		if (! got_a_flag)
+		{
+			got_a_flag = true;
+
+			WAD::Printf("SPECIAL = ");
+		}
+		else
+			WAD::Printf(",");
+
+		WAD::Printf("%s", name);
+	}
+
+	void HandleMBF21Flags(const weaponinfo_t *info, int w_num)
+	{
+		int i;
+		int cur_f = info->mbf21_flags;
+		bool got_a_flag = false;
+
+		for (i = 0; mbf21flagnamelist[i].name != NULL; i++)
+		{
+			if (0 == (cur_f & mbf21flagnamelist[i].flag))
+				continue;
+
+			cur_f &= ~mbf21flagnamelist[i].flag;
+
+			AddOneFlag(info, mbf21flagnamelist[i].name, got_a_flag);
+		}
+
+		AddOneFlag(info, "MBF21_COMPAT", got_a_flag);
+
+		if (got_a_flag)
+			WAD::Printf(";\n");
+
+		if (cur_f != 0)
+			PrintWarn("Unconverted flags 0x%08x in weapontype %d\n", cur_f, w_num);
 	}
 
 	void HandleSounds(const weaponinfo_t *info, int w_num)
@@ -259,6 +338,7 @@ namespace Weapons
 		WAD::Printf("PRIORITY = %d;\n", info->priority);
 
 		HandleFlags(info, w_num);
+		HandleMBF21Flags(info, w_num);
 		HandleSounds(info, w_num);
 		HandleFrames(info, w_num);
 		HandleAttacks(info, w_num);
@@ -285,26 +365,6 @@ void Weapons::ConvertWEAP(void)
 
 
 //------------------------------------------------------------------------
-
-namespace Weapons
-{
-#define FIELD_OFS(xxx)  offsetof(weaponinfo_t, xxx)
-
-	const fieldreference_t weapon_field[] =
-	{
-		{ "Ammo type",      FIELD_OFS(ammo),       FT_AMMO },
-
-		// -AJA- these first two fields have misleading dehacked names
-		{ "Deselect frame", FIELD_OFS(upstate),    FT_FRAME },
-		{ "Select frame",   FIELD_OFS(downstate),  FT_FRAME },
-		{ "Bobbing frame",  FIELD_OFS(readystate), FT_FRAME },
-		{ "Shooting frame", FIELD_OFS(atkstate),   FT_FRAME },
-		{ "Firing frame",   FIELD_OFS(flashstate), FT_FRAME },
-
-		{ NULL, 0, FT_ANY }   // End sentinel
-	};
-}
-
 
 void Weapons::AlterWeapon(int new_val)
 {

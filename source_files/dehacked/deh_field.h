@@ -30,7 +30,6 @@ typedef enum
 	FT_SUBSPR,  // subsprite number
 	FT_AMMO,    // ammo number
 	FT_BITS,     // mobj bitflags
-	FT_MBF21BITS
 }
 fieldtype_e;
 

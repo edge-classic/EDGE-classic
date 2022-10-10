@@ -35,19 +35,50 @@ token_kind_e lexer_c::Next(std::string& s)
 		return TOK_EOF;
 
 	// TODO : Next
+
 	return TOK_EOF;
 }
 
 
 bool lexer_c::Match(const char *s)
 {
+	SYS_ASSERT(s);
+	SYS_ASSERT(s[0]);
+
+	bool is_keyword = std::isalnum(s[0]);
+
 	SkipToNext();
 
-	if (pos >= data.size())
-		return false;
+	size_t ofs = 0;
 
-	// TODO : Match
-	return false;
+	for (; *s != 0 ; s++, ofs++)
+	{
+		if (pos + ofs >= data.size())
+			return false;
+
+		unsigned char A = (unsigned char) data[pos + ofs];
+		unsigned char B = (unsigned char) s[0];
+
+		// don't change a char when high-bit is set (for UTF-8)
+		if (A < 128) A = std::tolower(A);
+		if (B < 128) B = std::tolower(B);
+
+		if (A != B)
+			return false;
+	}
+
+	pos += ofs;
+
+	// for a keyword, require a non-alphanumeric char after it.
+	if (is_keyword && pos < data.size())
+	{
+		unsigned char ch = (unsigned char) data[pos];
+
+		if (std::isalnum(ch) || ch >= 128)
+			return false;
+	}
+
+	return true;
 }
 
 

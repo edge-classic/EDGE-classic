@@ -155,7 +155,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 	if (play->infotype == MUSINF_LUMP)
 	{
 		// lumps must use auto-detection based on their contents
-		fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
+		fmt = epi::Sound_DetectFormat(data, std::min(length, 2048));
 	}
 	else
 	{

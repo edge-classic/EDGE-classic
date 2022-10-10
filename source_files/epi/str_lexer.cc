@@ -126,7 +126,7 @@ void lexer_c::SkipToNext()
 			line += 1;
 
 		// whitespace?
-		if (ch <= ' ')
+		if (ch <= 32)
 			continue;
 
 		if (ch == '/' && pos < data.size())
@@ -241,6 +241,7 @@ token_kind_e lexer_c::ParseString(std::string& s)
 			continue;
 		}
 
+		// bump line number at end of a line
 		if (ch == '\n')
 			line += 1;
 
@@ -260,7 +261,48 @@ token_kind_e lexer_c::ParseString(std::string& s)
 
 void lexer_c::ParseEscape(std::string& s)
 {
-	// FIXME ParseEscape
+	if (pos >= data.size())
+	{
+		s.push_back('\\');
+		return;
+	}
+
+	char ch = data[pos];
+
+	// avoid control chars, especially newline
+	if ((unsigned char)ch <= 32)
+	{
+		s.push_back('\\');
+		return;
+	}
+
+	pos++;
+
+	// octal sequence?
+	if ('0' <= ch && ch <= '7')
+	{
+		// FIXME
+	}
+
+	// hexadecimal sequence?
+	if (ch == 'x' || ch == 'X')
+	{
+		// FIXME
+	}
+
+	switch(ch)
+	{
+		case 'a': s.push_back('\a'); break;  // bell
+		case 'b': s.push_back('\b'); break;  // backspace
+		case 'f': s.push_back('\f'); break;  // form feed
+		case 'n': s.push_back('\n'); break;  // newline
+		case 't': s.push_back('\t'); break;  // tab
+		case 'r': s.push_back('\r'); break;  // carriage return
+		case 'v': s.push_back('\v'); break;  // vertical tab
+
+		// the default is to reproduce the same character
+		default: s.push_back(ch); break;
+	}
 }
 
 

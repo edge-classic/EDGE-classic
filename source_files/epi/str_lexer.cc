@@ -170,8 +170,26 @@ void lexer_c::SkipToNext()
 
 token_kind_e lexer_c::ParseIdentifier(std::string& s)
 {
-	// TODO ParseIdentifier
-	return TOK_ERROR;
+	// NOTE: we lowercase the identifier put into 's'.
+
+	for (;;)
+	{
+		unsigned char ch = (unsigned char) data[pos];
+
+		// don't change a char when high-bit is set (for UTF-8)
+		if (ch < 128)
+			ch = std::tolower(ch);
+
+		if (! (std::isalnum(ch) || ch == '_' || ch >= 128))
+			break;
+
+		s.push_back((char) ch);
+		pos++;
+	}
+
+	SYS_ASSERT(s.size() > 0);
+
+	return TOK_Ident;
 }
 
 
@@ -197,10 +215,8 @@ token_kind_e lexer_c::ParseNumber(std::string& s)
 		unsigned char ch = (unsigned char) data[pos];
 
 		// this is fairly lax, but adequate for our purposes
-		if (std::isalnum(ch) || ch == '+' || ch == '-' || ch == '.')
-			continue;
-
-		break;
+		if (! (std::isalnum(ch) || ch == '+' || ch == '-' || ch == '.'))
+			break;
 	}
 
 	return TOK_Number;

@@ -1334,13 +1334,9 @@ static void LoadXGL3Nodes(int lumpnum)
 
 	I_Debugf("LoadXGL3Nodes: Read GL nodes\n");
 	// finally, read the nodes
+	// NOTE: no nodes is okay (a basic single sector map). -AJA-
 	numnodes = EPI_LE_U32(*(uint32_t*)td);
 	td += 4;
-	if (numnodes == 0)
-	{
-		W_DoneWithLump(xgldata);
-		I_Error("LoadXGL3Nodes: No nodes\n");
-	}
 	I_Debugf("LoadXGL3Nodes: Num nodes = %d\n", numnodes);
 
 	nodes = new node_t[numnodes+1];

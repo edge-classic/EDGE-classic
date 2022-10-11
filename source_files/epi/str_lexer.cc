@@ -230,7 +230,7 @@ token_kind_e lexer_c::ParseString(std::string& s)
 
 	while (pos < data.size())
 	{
-		char ch = data[pos++];
+		unsigned char ch = (unsigned char) data[pos++];
 
 		if (ch == '"')
 			break;
@@ -246,13 +246,13 @@ token_kind_e lexer_c::ParseString(std::string& s)
 			line += 1;
 
 		// skip all control characters except TAB and NEWLINE
-		if ((unsigned char)ch < 32 && ! (ch == '\t' || ch == '\n'))
+		if (ch < 32 && ! (ch == '\t' || ch == '\n'))
 			continue;
 
 		if (ch == 127)  // DEL
 			continue;
 
-		s.push_back(ch);
+		s.push_back((char) ch);
 	}
 
 	return TOK_String;
@@ -267,10 +267,10 @@ void lexer_c::ParseEscape(std::string& s)
 		return;
 	}
 
-	char ch = data[pos];
+	unsigned char ch = (unsigned char) data[pos];
 
 	// avoid control chars, especially newline
-	if ((unsigned char)ch < 32 || ch == 127)
+	if (ch < 32 || ch == 127)
 	{
 		s.push_back('\\');
 		return;
@@ -283,28 +283,45 @@ void lexer_c::ParseEscape(std::string& s)
 	{
 		int val = (int)(ch - '0');
 
-		ch = data[pos];
+		ch = (unsigned char) data[pos];
 		if ('0' <= ch && ch <= '7')
 		{
 			val = val * 8 + (int)(ch - '0');
 			pos++;
 		}
 
-		ch = data[pos];
+		ch = (unsigned char) data[pos];
 		if ('0' <= ch && ch <= '7')
 		{
 			val = val * 8 + (int)(ch - '0');
 			pos++;
 		}
 
-		s.push_back((char)val);
+		s.push_back((char) val);
 		return;
 	}
 
 	// hexadecimal sequence?  followed by 1 to 2 hex digits.
 	if (ch == 'x' || ch == 'X')
 	{
-		// FIXME
+		char buffer[16];
+		char *p = buffer;
+
+		*p++ = '0';
+		*p++ = 'x';
+		*p++ = '0';
+
+		ch = (unsigned char) data[pos];
+		if (std::isxdigit(ch)) { *p++ = ch; pos++; }
+
+		ch = (unsigned char) data[pos];
+		if (std::isxdigit(ch)) { *p++ = ch; pos++; }
+
+		*p = 0;
+
+		int val = (int)std::strtol(buffer, NULL, 0);
+		s.push_back((char) val);
+		return;
 	}
 
 	switch(ch)

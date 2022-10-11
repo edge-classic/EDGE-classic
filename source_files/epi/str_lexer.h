@@ -59,9 +59,12 @@ public:
 	// where in the file an error occurred.
 	int LastLine();
 
+	// rewind to the very beginning.
+	void Rewind();
+
 	// helpers for converting numeric tokens.
-	int    ToInt   (const std::string& s);
-	double ToDouble(const std::string& s);
+	int    ToInt   (const std::string& s) const;
+	double ToDouble(const std::string& s) const;
 
 private:
 	const std::string& data;

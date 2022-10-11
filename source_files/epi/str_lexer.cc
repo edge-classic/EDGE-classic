@@ -100,14 +100,21 @@ int lexer_c::LastLine()
 }
 
 
-int lexer_c::ToInt(const std::string& s)
+void lexer_c::Rewind()
+{
+	pos  = 0;
+	line = 1;
+}
+
+
+int lexer_c::ToInt(const std::string& s) const
 {
 	// strtol handles all the integer sequences of the UDMF spec
 	return (int)std::strtol(s.c_str(), NULL, 0);
 }
 
 
-double lexer_c::ToDouble(const std::string& s)
+double lexer_c::ToDouble(const std::string& s) const
 {
 	// strtod handles all the floating-point sequences of the UDMF spec
 	return std::strtod(s.c_str(), NULL);

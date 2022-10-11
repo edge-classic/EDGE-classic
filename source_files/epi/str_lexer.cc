@@ -125,8 +125,8 @@ void lexer_c::SkipToNext()
 		if (ch == '\n')
 			line += 1;
 
-		// whitespace?
-		if (ch <= 32)
+		// skip whitespace and control chars
+		if (ch <= 32 || ch == 127)
 			continue;
 
 		if (ch == '/' && pos < data.size())
@@ -226,7 +226,7 @@ token_kind_e lexer_c::ParseNumber(std::string& s)
 token_kind_e lexer_c::ParseString(std::string& s)
 {
 	// NOTE: we allow newlines ('\n') in the string, rather than produce an
-	//       an unterminated-string error.  it is unlikely to matter.
+	//       an unterminated-string error.
 
 	while (pos < data.size())
 	{
@@ -270,7 +270,7 @@ void lexer_c::ParseEscape(std::string& s)
 	char ch = data[pos];
 
 	// avoid control chars, especially newline
-	if ((unsigned char)ch <= 32)
+	if ((unsigned char)ch < 32 || ch == 127)
 	{
 		s.push_back('\\');
 		return;
@@ -278,13 +278,30 @@ void lexer_c::ParseEscape(std::string& s)
 
 	pos++;
 
-	// octal sequence?
+	// octal sequence?  1 to 3 digits.
 	if ('0' <= ch && ch <= '7')
 	{
-		// FIXME
+		int val = (int)(ch - '0');
+
+		ch = data[pos];
+		if ('0' <= ch && ch <= '7')
+		{
+			val = val * 8 + (int)(ch - '0');
+			pos++;
+		}
+
+		ch = data[pos];
+		if ('0' <= ch && ch <= '7')
+		{
+			val = val * 8 + (int)(ch - '0');
+			pos++;
+		}
+
+		s.push_back((char)val);
+		return;
 	}
 
-	// hexadecimal sequence?
+	// hexadecimal sequence?  followed by 1 to 2 hex digits.
 	if (ch == 'x' || ch == 'X')
 	{
 		// FIXME

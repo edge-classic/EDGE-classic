@@ -119,7 +119,7 @@ void lexer_c::SkipToNext()
 {
 	while (pos < data.size())
 	{
-		unsigned char ch = (unsigned char) data[pos++];
+		unsigned char ch = (unsigned char) data[pos];
 
 		// bump line number at end of a line
 		if (ch == '\n')
@@ -127,14 +127,17 @@ void lexer_c::SkipToNext()
 
 		// skip whitespace and control chars
 		if (ch <= 32 || ch == 127)
+		{
+			pos++;
 			continue;
+		}
 
-		if (ch == '/' && pos < data.size())
+		if (ch == '/' && pos+1 < data.size())
 		{
 			// single line comment?
-			if (data[pos] == '/')
+			if (data[pos+1] == '/')
 			{
-				pos++;
+				pos += 2;
 
 				while (pos < data.size() && data[pos] != '\n')
 					pos++;
@@ -143,14 +146,17 @@ void lexer_c::SkipToNext()
 			}
 
 			// multi-line comment?
-			if (data[pos] == '*')
+			if (data[pos+1] == '*')
 			{
-				pos++;
+				pos += 2;
 
 				while (pos < data.size())
 				{
 					if (pos+1 < data.size() && data[pos] == '*' && data[pos+1] == '/')
+					{
+						pos += 2;
 						break;
+					}
 
 					if (data[pos] == '\n')
 						line += 1;
@@ -228,12 +234,17 @@ token_kind_e lexer_c::ParseString(std::string& s)
 	// NOTE: we allow newlines ('\n') in the string, rather than produce an
 	//       an unterminated-string error.
 
+	pos++;
+
 	while (pos < data.size())
 	{
 		unsigned char ch = (unsigned char) data[pos++];
 
 		if (ch == '"')
+		{
+			pos++;
 			break;
+		}
 
 		if (ch == '\\')
 		{

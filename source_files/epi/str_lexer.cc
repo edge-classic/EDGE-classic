@@ -248,10 +248,7 @@ token_kind_e lexer_c::ParseString(std::string& s)
 		unsigned char ch = (unsigned char) data[pos++];
 
 		if (ch == '"')
-		{
-			pos++;
 			break;
-		}
 
 		if (ch == '\\')
 		{

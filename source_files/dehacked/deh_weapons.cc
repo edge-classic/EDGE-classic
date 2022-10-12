@@ -142,12 +142,12 @@ namespace Weapons
 
 	const flagname_t mbf21flagnamelist[] =
 	{
-		{ MBF21_NOTHRUST,       "LOGRAV",         NULL },
-		{ MBF21_SILENT,         "SHORTMRANGE",    NULL },
-		{ MBF21_NOAUTOFIRE,     "DMGIGNORED",     NULL },
-		{ MBF21_FLEEMELEE,      "NORADIUSDMG",    NULL },
-		{ MBF21_AUTOSWITCHFROM, "FORCERADIUSDMG", NULL },
-		{ MBF21_NOAUTOSWITCHTO, "HIGHERMPROB",    NULL },
+		{ MBF21_NOTHRUST,       "NOTHRUST",         	  NULL },
+		{ MBF21_SILENT,         "SILENT_TO_MONSTERS", "SILENT" },
+		{ MBF21_NOAUTOFIRE,     "NOAUTOFIRE",      		  NULL },
+		{ MBF21_FLEEMELEE,      "FLEEMELEE",    		  NULL },
+		{ MBF21_AUTOSWITCHFROM, "AUTOSWITCHFROM", 		  NULL },
+		{ MBF21_NOAUTOSWITCHTO, "NOAUTOSWITCHTO",    	  NULL }, // Same as PRIORITY = -1
 
 		{ 0, NULL, NULL }  // End sentinel
 	};

@@ -78,8 +78,9 @@ private:
 };
 
 // helpers for converting numeric tokens.
-int    LEX_Int   (const std::string& s);
-double LEX_Double(const std::string& s);
+int    LEX_Int    (const std::string& s);
+double LEX_Double (const std::string& s);
+bool   LEX_Boolean(const std::string& s);
 
 } // namespace epi
 

@@ -120,6 +120,16 @@ double LEX_Double(const std::string& s)
 	return std::strtod(s.c_str(), NULL);
 }
 
+
+bool LEX_Boolean(const std::string& s)
+{
+	if (s.empty())
+		return false;
+
+	return (s[0] == 't' || s[0] == 'T');
+}
+
+
 //----------------------------------------------------------------------------
 
 void lexer_c::SkipToNext()

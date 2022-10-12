@@ -211,7 +211,7 @@ namespace Weapons
 		WAD::Printf("%s", name);
 	}
 
-	void HandleMBF21Flags(const weaponinfo_t *info, int w_num)
+	void HandleMBF21Flags(const weaponinfo_t *info, int w_num, int priority)
 	{
 		int i;
 		int cur_f = info->mbf21_flags;
@@ -224,7 +224,10 @@ namespace Weapons
 
 			cur_f &= ~mbf21flagnamelist[i].flag;
 
-			AddOneFlag(info, mbf21flagnamelist[i].name, got_a_flag);
+			if (mbf21flagnamelist[i].flag == MBF21_NOAUTOSWITCHTO)
+				priority = -1;
+			else
+				AddOneFlag(info, mbf21flagnamelist[i].name, got_a_flag);
 		}
 
 		AddOneFlag(info, "MBF21_COMPAT", got_a_flag);
@@ -335,10 +338,14 @@ namespace Weapons
 		WAD::Printf("AUTOMATIC = TRUE;\n");
 
 		WAD::Printf("BINDKEY = %d;\n", info->bind_key);
-		WAD::Printf("PRIORITY = %d;\n", info->priority);
+
+		int priority = info->priority;
 
 		HandleFlags(info, w_num);
-		HandleMBF21Flags(info, w_num);
+		HandleMBF21Flags(info, w_num, priority);
+
+		WAD::Printf("PRIORITY = %d;\n", priority);
+
 		HandleSounds(info, w_num);
 		HandleFrames(info, w_num);
 		HandleAttacks(info, w_num);

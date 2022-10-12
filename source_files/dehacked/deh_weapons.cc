@@ -147,7 +147,7 @@ namespace Weapons
 		{ MBF21_NOAUTOFIRE,     "NOAUTOFIRE",      		  NULL },
 		{ MBF21_FLEEMELEE,      "FLEEMELEE",    		  NULL },
 		{ MBF21_AUTOSWITCHFROM, "AUTOSWITCHFROM", 		  NULL },
-		{ MBF21_NOAUTOSWITCHTO, "NOAUTOSWITCHTO",    	  NULL }, // Same as PRIORITY = -1
+		{ MBF21_NOAUTOSWITCHTO, "DANGEROUS",  "NOAUTOSWITCHTO" },
 
 		{ 0, NULL, NULL }  // End sentinel
 	};
@@ -211,7 +211,7 @@ namespace Weapons
 		WAD::Printf("%s", name);
 	}
 
-	void HandleMBF21Flags(const weaponinfo_t *info, int w_num, int priority)
+	void HandleMBF21Flags(const weaponinfo_t *info, int w_num)
 	{
 		int i;
 		int cur_f = info->mbf21_flags;
@@ -224,13 +224,8 @@ namespace Weapons
 
 			cur_f &= ~mbf21flagnamelist[i].flag;
 
-			if (mbf21flagnamelist[i].flag == MBF21_NOAUTOSWITCHTO)
-				priority = -1;
-			else
-				AddOneFlag(info, mbf21flagnamelist[i].name, got_a_flag);
+			AddOneFlag(info, mbf21flagnamelist[i].name, got_a_flag);
 		}
-
-		AddOneFlag(info, "MBF21_COMPAT", got_a_flag);
 
 		if (got_a_flag)
 			WAD::Printf(";\n");
@@ -339,13 +334,10 @@ namespace Weapons
 
 		WAD::Printf("BINDKEY = %d;\n", info->bind_key);
 
-		int priority = info->priority;
+		WAD::Printf("PRIORITY = %d;\n", info->priority);
 
 		HandleFlags(info, w_num);
-		HandleMBF21Flags(info, w_num, priority);
-
-		WAD::Printf("PRIORITY = %d;\n", priority);
-
+		HandleMBF21Flags(info, w_num);
 		HandleSounds(info, w_num);
 		HandleFrames(info, w_num);
 		HandleAttacks(info, w_num);

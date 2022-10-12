@@ -107,14 +107,14 @@ void lexer_c::Rewind()
 }
 
 
-int lexer_c::ToInt(const std::string& s) const
+int LEX_Int(const std::string& s)
 {
 	// strtol handles all the integer sequences of the UDMF spec
 	return (int)std::strtol(s.c_str(), NULL, 0);
 }
 
 
-double lexer_c::ToDouble(const std::string& s) const
+double LEX_Double(const std::string& s)
 {
 	// strtod handles all the floating-point sequences of the UDMF spec
 	return std::strtod(s.c_str(), NULL);

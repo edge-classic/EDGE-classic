@@ -62,10 +62,6 @@ public:
 	// rewind to the very beginning.
 	void Rewind();
 
-	// helpers for converting numeric tokens.
-	int    ToInt   (const std::string& s) const;
-	double ToDouble(const std::string& s) const;
-
 private:
 	const std::string& data;
 
@@ -80,6 +76,10 @@ private:
 
 	void ParseEscape(std::string& s);
 };
+
+// helpers for converting numeric tokens.
+int    LEX_Int   (const std::string& s);
+double LEX_Double(const std::string& s);
 
 } // namespace epi
 

@@ -424,7 +424,7 @@ void P_ActMakeIntoCorpse(mobj_t * mo)
 
 	mo->tag = 0;
 
-	P_HitFloor(mo);
+	P_HitLiquidFloor(mo);
 }
 
 
@@ -3581,6 +3581,96 @@ void P_ActJump(mobj_t * mo)
 	}
 }
 
+void P_ActJumpLiquid(mobj_t * mo)
+{
+	// Jumps to the given label, possibly randomly.
+	//
+	// Note: nothing to do with monsters physically jumping.
+
+    if (P_HitLiquidFloor(mo) == false) //Are we touching a liquid floor?
+	{
+		return;
+	}
+
+	if (!mo->state || !mo->state->action_par)
+	{
+		M_WarnError("JUMP_LIQUID action used in [%s] without a label !\n",
+					mo->info->name.c_str());
+		return;
+	}
+
+	act_jump_info_t *jump = (act_jump_info_t *) mo->state->action_par;
+
+	SYS_ASSERT(jump->chance >= 0);
+	SYS_ASSERT(jump->chance <= 1);
+
+	if (P_RandomTest(jump->chance))
+	{
+		mo->next_state = (mo->state->jumpstate == S_NULL) ?
+			NULL : (states + mo->state->jumpstate);
+	}
+}
+
+void P_ActJumpSky(mobj_t * mo)
+{
+	// Jumps to the given label, possibly randomly.
+	//
+	// Note: nothing to do with monsters physically jumping.
+
+	if (mo->subsector->sector->ceil.image != skyflatimage) //is it outdoors?
+	{
+		return;
+	}
+	if (!mo->state || !mo->state->action_par)
+	{
+		M_WarnError("JUMP_SKY action used in [%s] without a label !\n",
+					mo->info->name.c_str());
+		return;
+	}
+
+	act_jump_info_t *jump = (act_jump_info_t *) mo->state->action_par;
+
+	SYS_ASSERT(jump->chance >= 0);
+	SYS_ASSERT(jump->chance <= 1);
+
+	if (P_RandomTest(jump->chance))
+	{
+		mo->next_state = (mo->state->jumpstate == S_NULL) ?
+			NULL : (states + mo->state->jumpstate);
+	}
+}
+
+/*
+void P_ActJumpStuck(mobj_t * mo)
+{
+	// Jumps to the given label, possibly randomly.
+	//
+	// Note: nothing to do with monsters physically jumping.
+
+	if (mo->mom.x > 0.1f && mo->mom.y > 0.1f)
+	{
+		return;
+	}
+
+	if (!mo->state || !mo->state->action_par)
+	{
+		M_WarnError("JUMP_STUCK action used in [%s] without a label !\n",
+					mo->info->name.c_str());
+		return;
+	}
+
+	act_jump_info_t *jump = (act_jump_info_t *) mo->state->action_par;
+
+	SYS_ASSERT(jump->chance >= 0);
+	SYS_ASSERT(jump->chance <= 1);
+
+	if (P_RandomTest(jump->chance))
+	{
+		mo->next_state = (mo->state->jumpstate == S_NULL) ?
+			NULL : (states + mo->state->jumpstate);
+	}
+}
+*/
 
 void P_ActSetInvuln(struct mobj_s *mo)
 {

@@ -1085,7 +1085,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 				// ground (hard), and utter appropriate sound.
 				mo->player->deltaviewheight = zmove / 8.0f;
 				S_StartFX(mo->info->oof_sound, P_MobjGetSfxCategory(mo), mo);
-				P_HitFloor(mo);
+				P_HitLiquidFloor(mo);
 			}
 			// -KM- 1998/12/16 If bigger than max fall, take damage.
 			if (mo->info->maxfall > 0 && gravity > 0 && -mo->mom.z > hurt_momz &&
@@ -1112,7 +1112,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 
 		if (mo->z - mo->mom.z > mo->floorz)
         {                       // Spawn splashes, etc.
-            P_HitFloor(mo);
+            P_HitLiquidFloor(mo);
         }
 		
 		mo->z = mo->floorz;
@@ -1810,11 +1810,11 @@ flatdef_c* P_IsThingOnLiquidFloor(mobj_t * thing)
 	
 	
 	
-	if (! current_flatdef)
-		return NULL;
-	
-	if (current_flatdef->impactobject) //now check if it is has a splash object
+	if (current_flatdef)
 		return current_flatdef;
+	
+	//if (current_flatdef->impactobject) //now check if it is has a splash object
+	//	return current_flatdef;
 	
 	return NULL;
 	
@@ -1822,35 +1822,43 @@ flatdef_c* P_IsThingOnLiquidFloor(mobj_t * thing)
 
 //---------------------------------------------------------------------------
 //
-// FUNC P_HitFloor
+// FUNC P_HitLiquidFloor
 //
 //---------------------------------------------------------------------------
 
-void P_HitFloor(mobj_t * thing)
+bool P_HitLiquidFloor(mobj_t * thing)
 {
 	if (thing->flags & MF_FLOAT)
-		return;
+		return false;
 
 	// marked as not making splashes (e.g. a leaf)
 	if (thing->hyperflags & HF_NOSPLASH)
-		return;
+		return false;
 
 	// don't splash if landing on the edge above water/lava/etc....
     if (thing->floorz != thing->subsector->sector->f_h)
-    	return;
+    	return false;
 
 	flatdef_c *current_flatdef = P_IsThingOnLiquidFloor(thing);
 
     if (current_flatdef)
     {
-		int tempRandom = M_RandomNegPos() % 8;
-		P_SpawnSplash(thing->x + tempRandom, thing->y + tempRandom, thing->z + tempRandom, current_flatdef->impactobject, thing->angle);
+		if(current_flatdef->impactobject)
+		{
+			int tempRandom = M_RandomNegPos() % 8;
+			P_SpawnSplash(thing->x + tempRandom, thing->y + tempRandom, thing->z + tempRandom, current_flatdef->impactobject, thing->angle);
 		
-		//tempRandom = M_RandomNegPos() % 8;
-		//P_SpawnSplash(thing->x + tempRandom, thing->y + tempRandom, thing->z + tempRandom, current_flatdef->impactobject, thing->angle);
+			S_StartFX(current_flatdef->footstep, P_MobjGetSfxCategory(thing), thing);
+		}
+		if (current_flatdef->liquid.empty())
+		{
+			return false;
+		}
+		else
+			return true;
 		
-		S_StartFX(current_flatdef->footstep, P_MobjGetSfxCategory(thing), thing);
     }
+	return false;
 }
 
 //

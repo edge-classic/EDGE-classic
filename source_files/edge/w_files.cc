@@ -66,20 +66,19 @@ std::vector<data_file_c *> data_files;
 
 
 data_file_c::data_file_c(const char *_name, filekind_e _kind) :
-		name(_name), kind(_kind), file(NULL), wad(NULL), pack(NULL), deh(NULL)
+		name(_name), kind(_kind), file(NULL), wad(NULL), pack(NULL), deh()
 { }
 
 data_file_c::~data_file_c()
 { }
+
 
 int W_GetNumFiles()
 {
 	return (int)data_files.size();
 }
 
-//
-// W_AddFilename
-//
+
 size_t W_AddFilename(const char *file, filekind_e kind)
 {
 	I_Debugf("Added filename: %s\n", file);
@@ -165,9 +164,11 @@ static void ProcessFile(data_file_c *df)
 	{
 		I_Printf("Converting DEH file: %s\n", df->name.c_str());
 
-		df->deh = DH_ConvertFile(df->name.c_str());
-		if (df->deh == NULL)
+		deh_container_c * deh = DH_ConvertFile(df->name.c_str());
+		if (deh == NULL)
 			I_Error("Failed to convert DeHackEd patch: %s\n", df->name.c_str());
+
+		df->deh.push_back(deh);
 	}
 
 	// handle fixer-uppers
@@ -411,12 +412,8 @@ static void W_ReadDDF_DataFile(data_file_c *df, int d)
 }
 
 
-static void W_ReadDehacked(data_file_c *df, int d)
+static void W_ReadDehacked(data_file_c *df, deh_container_c *deh, int d)
 {
-	deh_container_c *deh = df->deh;
-	if (deh == NULL)
-		return;
-
 	// look for the appropriate lump (DDFTHING etc)
 	for (size_t i = 0 ; i < deh->lumps.size() ; i++)
 	{
@@ -487,7 +484,9 @@ void W_ReadDDF(void)
 			data_file_c *df = data_files[i];
 
 			W_ReadDDF_DataFile(df, d);
-			W_ReadDehacked(df, d);
+
+			for (size_t k = 0 ; k < df->deh.size() ; k++)
+				W_ReadDehacked(df, df->deh[k], d);
 		}
 	}
 }

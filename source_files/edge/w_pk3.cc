@@ -597,10 +597,11 @@ static void ProcessDehackedInPack(pack_file_c *pack)
 			int length = -1;
 			const byte *data = pack->LoadEntry(0, i, length);
 
-			// FIXME does not handle multiple files!!
-			df->deh = DH_ConvertLump(data, length);
-			if (df->deh == NULL)
+			deh_container_c *deh = DH_ConvertLump(data, length);
+			if (deh == NULL)
 				I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());
+
+			df->deh.push_back(deh);
 
 			delete[] data;
 		}

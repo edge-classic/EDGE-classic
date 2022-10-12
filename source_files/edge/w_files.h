@@ -72,7 +72,7 @@ public:
 	pack_file_c * pack;
 
 	// for FLKIND_Deh, or a wad with a DEHACKED lump
-	deh_container_c * deh;
+	std::vector<deh_container_c *> deh;
 
 public:
 	data_file_c(const char *_name, filekind_e _kind);

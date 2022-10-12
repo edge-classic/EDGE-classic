@@ -149,7 +149,7 @@ void P_SpawnPuff(float x, float y, float z, const mobjtype_c * puff, angle_t ang
 void P_SpawnBlood(float x, float y, float z, float damage, angle_t angle, const mobjtype_c * blood);
 void P_RemoveQueuedMobjs(bool force_all);
 void P_CalcFullProperties(const mobj_t *mo, region_properties_t *newregp);
-void P_HitFloor(mobj_t * thing);
+bool P_HitLiquidFloor(mobj_t * thing);
 
 // -ACB- 1998/08/02 New procedures for DDF etc...
 void P_MobjItemRespawn(void);

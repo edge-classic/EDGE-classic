@@ -1722,7 +1722,7 @@ static inline void PlayerInProperties(player_t *player,
 		player->mo->z >= f_h && player->mo->z <= c_h)
 	{
 		player->wet_feet = true;
-		P_HitFloor(player->mo);
+		P_HitLiquidFloor(player->mo);
 	}
 
 	if (special->special_flags & SECSP_VacuumSFX)

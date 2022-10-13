@@ -2009,6 +2009,13 @@ static bool PIT_RadiusAttack(mobj_t * thing, void *data)
 		return true;
 	}
 
+	// MBF21: If in same splash group, don't damage it
+	if (thing->info->splash_group >=0 && bomb_I.source->info->splash_group >=0 &&
+		(thing->info->splash_group == bomb_I.source->info->splash_group))
+	{
+		return true;
+	}
+
 	//
 	// Boss types take no damage from concussion.
 	// -ACB- 1998/06/14 Changed enum reference to extended flag check.

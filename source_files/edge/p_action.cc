@@ -1375,7 +1375,17 @@ int P_MissileContact(mobj_t * object, mobj_t * target)
 
 		if (source->info == target->info)
 		{
-			if (!(target->extendedflags & EF_DISLOYALTYPE))
+			if (!(target->extendedflags & EF_DISLOYALTYPE) && (source->info->proj_group != -1))
+				return 0;
+		}
+
+		// MBF21: If in same projectile group, attack does no damage
+		if (source->info->proj_group >= 0 && target->info->proj_group >= 0 &&
+			(source->info->proj_group == target->info->proj_group))
+		{
+			if (object->extendedflags & EF_TUNNEL)
+				return -1;
+			else
 				return 0;
 		}
 

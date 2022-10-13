@@ -168,6 +168,7 @@ const commandlist_t thing_commands[] =
 	DF("GASP_SOUND", gasp_sound, DDF_MainLookupSound),
 	DF("SECRET_SOUND", secretsound, DDF_MainLookupSound),
 	DF("FALLING_SOUND", falling_sound, DDF_MainLookupSound),
+	DF("RIP_SOUND", rip_sound, DDF_MainLookupSound),
 
 	DF("FLOAT_SPEED", float_speed, DDF_MainGetFloat),
 	DF("STEP_SIZE", step_size, DDF_MainGetFloat),
@@ -2293,6 +2294,7 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	gasp_sound = src.gasp_sound; 
 	secretsound = src.secretsound;
 	falling_sound = src.falling_sound;
+	rip_sound = src.rip_sound;
 
     fuse = src.fuse; 
 	reload_shots = src.reload_shots;
@@ -2427,6 +2429,7 @@ void mobjtype_c::Default()
 	//secretsound = sfx_None;
 	secretsound = sfxdefs.GetEffect("SECRET");
 	falling_sound = sfx_None;
+	rip_sound = sfx_None;
 
     fuse = 0;
 	reload_shots = 5;

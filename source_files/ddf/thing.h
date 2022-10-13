@@ -932,6 +932,7 @@ public:
 	struct sfx_s *gasp_sound;
 	struct sfx_s *secretsound;
 	struct sfx_s *falling_sound;
+	struct sfx_s *rip_sound;
 
 	int fuse;
 	int reload_shots;

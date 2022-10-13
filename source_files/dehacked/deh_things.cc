@@ -178,6 +178,9 @@ namespace Attacks
 		if (info->deathsound != sfx_None)
 			WAD::Printf("DEATH_SOUND = \"%s\";\n", Sounds::GetSound(info->deathsound));
 
+		if (info->rip_sound != sfx_None)
+			WAD::Printf("RIP_SOUND = \"%s\";\n", Sounds::GetSound(info->rip_sound));
+
 		if (mt_num == MT_FIRE)
 		{
 			WAD::Printf("ATTEMPT_SOUND = \"%s\";\n", Sounds::GetSound(sfx_vilatk));
@@ -811,7 +814,7 @@ namespace Things
 		{ MBF21_E3M8BOSS,       "E3M8BOSS",       		   NULL },
 		{ MBF21_E4M6BOSS,       "E4M6BOSS",       		   NULL },
 		{ MBF21_E4M8BOSS,       "E4M8BOSS",       		   NULL },
-		{ MBF21_RIP,            "RIP",            		   NULL },
+		{ MBF21_RIP,            "TUNNEL",            	   "RIP"},
 		{ MBF21_FULLVOLSOUNDS,  "ALWAYS_LOUD",  "FULLVOLSOUNDS" },
 
 		{ 0, NULL, NULL }  // End sentinel
@@ -1160,6 +1163,9 @@ namespace Things
 
 		if (info->deathsound != sfx_None)
 			WAD::Printf("DEATH_SOUND = \"%s\";\n", Sounds::GetSound(info->deathsound));
+
+		if (info->rip_sound != sfx_None)
+			WAD::Printf("RIP_SOUND = \"%s\";\n", Sounds::GetSound(info->rip_sound));
 	}
 
 

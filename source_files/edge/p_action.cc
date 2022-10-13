@@ -1432,6 +1432,8 @@ int P_MissileContact(mobj_t * object, mobj_t * target)
 
 		object->tunnel_hash[0] = object->tunnel_hash[1];
 		object->tunnel_hash[1] = hash;
+		if (object->info->rip_sound)
+			S_StartFX(object->info->rip_sound, SNCAT_Object, object, 0);
 	}
 
 	if (source)

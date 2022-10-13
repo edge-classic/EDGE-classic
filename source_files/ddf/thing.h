@@ -1005,6 +1005,12 @@ public:
 
 	float sight_distance; // lobo 2022: How far this thing can see
 
+	// MBF 21
+	int infight_group;
+	int proj_group;
+	int splash_group;
+	int fast_speed;
+	int melee_range;
 
 public:
 	mobjtype_c();

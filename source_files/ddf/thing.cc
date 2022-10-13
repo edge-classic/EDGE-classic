@@ -202,6 +202,12 @@ const commandlist_t thing_commands[] =
 
 	DF("SIGHT_DISTANCE", sight_distance, DDF_MainGetFloat), //Lobo 2022
 
+	DF("INFIGHTING_GROUP", infight_group, DDF_MainGetNumeric),
+	DF("PROJECTILE_GROUP", proj_group, DDF_MainGetNumeric),
+	DF("SPLASH_GROUP", splash_group, DDF_MainGetNumeric),
+	DF("FAST_SPEED", fast_speed, DDF_MainGetNumeric),
+	DF("MELEE_RANGE", melee_range, DDF_MainGetNumeric),
+
 	// -AJA- backwards compatibility cruft...
 	DF("EXPLOD_DAMAGE", explode_damage.nominal, DDF_MainGetFloat),
 	DF("EXPLOSION_DAMAGE", explode_damage.nominal, DDF_MainGetFloat),
@@ -2337,6 +2343,12 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	spitspot_ref = src.spitspot_ref; 
 
 	sight_distance = src.sight_distance;
+
+	infight_group = src.infight_group;
+	proj_group = src.proj_group;
+	splash_group = src.splash_group;
+	fast_speed = src.fast_speed;
+	melee_range = src.melee_range;
 }
 
 
@@ -2471,6 +2483,11 @@ void mobjtype_c::Default()
 	spitspot_ref.clear();
 
 	sight_distance = -1;
+	infight_group = -2;
+	proj_group = -2;
+	splash_group = -2;
+	fast_speed = -1;
+	melee_range = -1;
 }
 
 void mobjtype_c::DLightCompatibility(void)

@@ -1425,7 +1425,7 @@ int P_MissileContact(mobj_t * object, mobj_t * target)
 	if (object->extendedflags & EF_TUNNEL)
 	{
 		// this hash is very basic, but should work OK
-		u32_t hash = (u32_t)(long long)target; // This might need to have an ifdef for 32-bit to be long instead of long long - Dasho
+		u32_t hash = (u32_t)(long long)target;
 
 		if (object->tunnel_hash[0] == hash || object->tunnel_hash[1] == hash)
 			return -1;
@@ -3045,6 +3045,14 @@ static bool CreateAggression(mobj_t * mo)
 		// -AJA- I'm assuming that even friends will 'infight'.
 		if ((mo->info->side & other->info->side) != 0 && 
 			(other->info->hyperflags & (HF_SIDEIMMUNE | HF_ULTRALOYAL)))
+		{
+			continue;
+		}
+
+		// MBF21: If in same infighting group, never target each other even if
+		// hit with 'friendly fire'
+		if (mo->info->infight_group >= 0 && other->info->infight_group >= 0 &&
+			(mo->info->infight_group == other->info->infight_group))
 		{
 			continue;
 		}

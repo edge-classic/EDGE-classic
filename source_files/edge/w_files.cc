@@ -138,28 +138,11 @@ static void DEH_ConvertFile(const std::string& filename)
 }
 
 
-static void W_ReadExternalDDF(int d, epi::file_c * F, const std::string& filename)
-{
-	// WISH: load directly into a std::string
-
-	char *raw_data = (char *) F->LoadIntoMemory();
-	if (raw_data == NULL)
-		I_Error("Couldn't read file: %s\n", filename.c_str());
-
-	std::string data(raw_data);
-	delete[] raw_data;
-
-	// call read function
-	(* DDF_Readers[d].func)(data);
-
-	// close file
-	delete F;
-}
-
-
-static void W_ExternalDDF_2(data_file_c *df)
+static void W_ExternalDDF(data_file_c *df)
 {
 	ddf_type_e type = DDF_FilenameToType(df->name);
+
+	std::string base_name = epi::PATH_GetFilename(df->name.c_str());
 
 	if (type == DDF_UNKNOWN)
 		I_Error("Unknown DDF filename: %s\n", base_name.c_str());
@@ -170,11 +153,20 @@ static void W_ExternalDDF_2(data_file_c *df)
 	if (F == NULL)
 		I_Error("Couldn't open file: %s\n", df->name.c_str());
 
-//FIXME !!!		W_ReadExternalDDF(d, F, df->name);
+	// WISH: load directly into a std::string
+
+	char *raw_data = (char *) F->LoadIntoMemory();
+	if (raw_data == NULL)
+		I_Error("Couldn't read file: %s\n", df->name.c_str());
+
+	std::string data(raw_data);
+	delete[] raw_data;
+
+	DDF_AddFile(type, data, df->name);
 }
 
 
-static void W_ExternalRTS_2(data_file_c *df)
+static void W_ExternalRTS(data_file_c *df)
 {
 	I_Printf("Loading RTS script: %s\n", df->name.c_str());
 
@@ -182,7 +174,16 @@ static void W_ExternalRTS_2(data_file_c *df)
 	if (F == NULL)
 		I_Error("Couldn't open file: %s\n", df->name.c_str());
 
-//FIXME !!!	W_ReadExternalDDF(NUM_DDF_READERS-1, F, df->name);
+	// WISH: load directly into a std::string
+
+	char *raw_data = (char *) F->LoadIntoMemory();
+	if (raw_data == NULL)
+		I_Error("Couldn't read file: %s\n", df->name.c_str());
+
+	std::string data(raw_data);
+	delete[] raw_data;
+
+	DDF_AddFile(DDF_RadScript, data, df->name);
 }
 
 
@@ -216,14 +217,12 @@ static void ProcessFile(data_file_c *df)
 	else if (df->kind == FLKIND_DDF)
 	{
 		// handle external ddf files (from `-file` option)
-		W_ExternalDDF_2(df);
-		return
+		W_ExternalDDF(df);
 	}
 	else if (df->kind == FLKIND_RTS)
 	{
 		// handle external rts scripts (from `-file` or `-script` option)
-		W_ExternalRTS_2(df);
-		return
+		W_ExternalRTS(df);
 	}
 	else if (df->kind == FLKIND_Deh)
 	{

@@ -566,7 +566,7 @@ void styledef_c::Default()
 	x_offset = 0;
 	y_offset = 0;
 
-	special = (style_special_e) SYLSP_StretchFullScreen; // I think this might be better for backwards compat, revert to 0 if needed - Dasho
+	special =  SYLSP_None; //(style_special_e) SYLSP_StretchFullScreen; // I think this might be better for backwards compat, revert to 0 if needed - Dasho
 
 	entry_align_string = "";
 	entry_alignment = 0;

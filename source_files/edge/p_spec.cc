@@ -1784,7 +1784,7 @@ static inline void PlayerInProperties(player_t *player,
 	{
 		player->secretcount++;
 
-		CON_MessageLDF("FoundSecret"); //Lobo: get text from language.ddf
+		CON_ImportantMessageLDF("FoundSecret"); //Lobo: get text from language.ddf
 		S_StartFX(player->mo->info->secretsound,
 				P_MobjGetSfxCategory(player->mo),
 				player->mo);

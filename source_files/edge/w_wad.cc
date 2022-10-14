@@ -1111,14 +1111,13 @@ static void ProcessBoomStuffInWad(data_file_c *df)
 		W_DoneWithLump(data);
 	}
 
-	/* FIXME !!! colourmaps
+	// handle BOOM Colourmaps (between C_START and C_END)
+	for (int lump : df->wad->colmap_lumps)
+	{
+		// int lump = df->wad->colmap_lumps[i];
 
-		// handle BOOM Colourmaps (between C_START and C_END)
-		if (strcmp(lump_name, "DDFCOLM") == 0)
-		{
-			W_AddColourmaps(wad);
-		}
-	*/
+		DDF_AddRawColourmap(W_GetLumpName(lump), W_LumpLength(lump));
+	}
 }
 
 
@@ -1552,16 +1551,6 @@ void W_ReadUMAPINFOLumps(void)
 		if(Maps.maps[i].partime > 0)
 			temp_level->partime = Maps.maps[i].partime;
 		
-	}
-}
-
-
-void W_AddColourmaps(wad_file_c *wad)
-{
-	for (size_t i=0 ; i < wad->colmap_lumps.size() ; i++)
-	{
-		int lump = wad->colmap_lumps[i];
-		DDF_ColourmapAddRaw(W_GetLumpName(lump), W_LumpLength(lump));
 	}
 }
 

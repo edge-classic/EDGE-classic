@@ -2191,7 +2191,19 @@ ddf_type_e DDF_LumpToType(const std::string& name)
 
 ddf_type_e DDF_FilenameToType(const std::string& path)
 {
-	// FIXME
+	std::string low_name = epi::PATH_GetExtension(path.c_str());
+	epi::str_lower(low_name);
+
+	if (low_name == ".rts")
+		return DDF_RadScript;
+
+	low_name = epi::PATH_GetFilename(path.c_str());
+	epi::str_lower(low_name);
+
+	for (size_t i = 0 ; i < DDF_NUM_TYPES ; i++)
+		if (low_name == ddf_readers[i].pack_name)
+			return ddf_readers[i].type;
+
 	return DDF_UNKNOWN;
 }
 

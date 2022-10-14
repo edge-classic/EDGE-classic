@@ -94,40 +94,11 @@ static const dehconvfuncs_t edge_dehconv_funcs =
 };
 
 
-deh_container_c * DH_ConvertFile(const char *filename)
-{
-	epi::file_c *F = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-	if (F == NULL)
-	{
-		DH_PrintMsg("FAILED to open file: %s\n", filename);
-		return NULL;
-	}
-
-	int length = F->GetLength();
-	byte *data = F->LoadIntoMemory();
-
-	if (data == NULL)
-	{
-		DH_PrintMsg("FAILED to read file: %s\n", filename);
-		delete F;
-		return NULL;
-	}
-
-	deh_container_c * container = DH_ConvertLump(data, length);
-
-	// close file, free that data
-	delete F;
-	delete[] data;
-
-	return container;
-}
-
-
-deh_container_c * DH_ConvertLump(const byte *data, int length)
+deh_container_c * DEH_Convert(const byte *data, int length, const std::string& source)
 {
 	DehEdgeStartup(&edge_dehconv_funcs);
 
-	dehret_e ret = DehEdgeAddLump((const char *)data, length);
+	dehret_e ret = DehEdgeAddLump((const char *)data, length, source);
 
 	if (ret != DEH_OK)
 	{

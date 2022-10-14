@@ -121,7 +121,7 @@ const char *DehEdgeGetError(void);
 dehret_e DehEdgeSetQuiet(int quiet);
 
 // add a single patch file (possibly from a WAD lump).
-dehret_e DehEdgeAddLump(const char *data, int length);
+dehret_e DehEdgeAddLump(const char *data, int length, const std::string& source);
 
 // convert all the DeHackEd patch files into DDF.
 dehret_e DehEdgeRunConversion(deh_container_c *dest);

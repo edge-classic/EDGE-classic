@@ -85,8 +85,8 @@ size_t W_AddFilename(const char *file, filekind_e kind);
 int W_GetNumFiles();
 void W_ShowFiles();
 
+void W_ProcessMultipleFiles();
 size_t W_AddPending(const char *file, filekind_e kind);
-void W_InitMultipleFiles(void);
 int W_CheckDDFLumpName(const char *name);
 void W_ReadDDF();
 

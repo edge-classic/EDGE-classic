@@ -594,10 +594,14 @@ static void ProcessDehackedInPack(pack_file_c *pack)
 			I_Printf("Converting DEH file%s: %s\n",
 				pack->is_folder ? "" : " in PK3", entry.name.c_str());
 
+			std::string source = entry.name;
+			source += " in ";
+			source += df->name;  // FIXME remove directory
+
 			int length = -1;
 			const byte *data = pack->LoadEntry(0, i, length);
 
-			deh_container_c *deh = DH_ConvertLump(data, length);
+			deh_container_c *deh = DEH_Convert(data, length, source);
 			if (deh == NULL)
 				I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());
 

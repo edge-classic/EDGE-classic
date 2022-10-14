@@ -124,6 +124,35 @@ void W_ReadWADFIXES(void)
 }
 
 
+static deh_container_c * DEH_ConvertFile(const std::string& filename)
+{
+	epi::file_c *F = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+	if (F == NULL)
+	{
+		I_Printf("FAILED to open file: %s\n", filename);
+		return NULL;
+	}
+
+	int length = F->GetLength();
+	byte *data = F->LoadIntoMemory();
+
+	if (data == NULL)
+	{
+		I_Printf("FAILED to read file: %s\n", filename.c_str());
+		delete F;
+		return NULL;
+	}
+
+	deh_container_c * container = DEH_Convert(data, length, filename);
+
+	// close file, free that data
+	delete F;
+	delete[] data;
+
+	return container;
+}
+
+
 static void ProcessFile(data_file_c *df)
 {
 	size_t file_index = data_files.size();
@@ -164,7 +193,7 @@ static void ProcessFile(data_file_c *df)
 	{
 		I_Printf("Converting DEH file: %s\n", df->name.c_str());
 
-		deh_container_c * deh = DH_ConvertFile(df->name.c_str());
+		deh_container_c * deh = DEH_ConvertFile(df->name);
 		if (deh == NULL)
 			I_Error("Failed to convert DeHackEd patch: %s\n", df->name.c_str());
 
@@ -177,10 +206,7 @@ static void ProcessFile(data_file_c *df)
 }
 
 
-//
-// W_InitMultipleFiles
-//
-void W_InitMultipleFiles(void)
+void W_ProcessMultipleFiles()
 {
 	// open all the files, add all the lumps.
 	// NOTE: we rebuild the list, since new files can get added as we go along,

@@ -177,8 +177,10 @@ dehret_e DehEdgeSetQuiet(int quiet)
 }
 
 
-dehret_e DehEdgeAddLump(const char *data, int length)
+dehret_e DehEdgeAddLump(const char *data, int length, const std::string& source)
 {
+	// FIXME store source somewhere
+
 	auto buf = new Deh_Edge::input_buffer_c(data, length);
 
 	Deh_Edge::input_bufs.push_back(buf);

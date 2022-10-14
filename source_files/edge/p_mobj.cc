@@ -1998,7 +1998,13 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
 	mobj->model_last_frame = -1;
 
 	if (level_flags.fastparm)
-		mobj->speed *= info->fast;
+	{
+		// MBF21: Use explicit Fast speed value if provided
+		if (info->fast_speed > -1)
+			mobj->speed = info->fast_speed;
+		else
+			mobj->speed *= info->fast;
+	}
 
 	// -ACB- 1998/06/25 new mobj Stuff (1998/07/11 - invisibility added)
 	mobj->extendedflags = info->extendedflags;

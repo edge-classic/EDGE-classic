@@ -1237,7 +1237,13 @@ static void LaunchSmartProjectile(mobj_t * source, mobj_t * target,
 
 		float s = type->speed;
 		if (level_flags.fastparm)
-			s *= type->fast;
+		{
+			// MBF21: Use explicit Fast speed if provided
+			if (type->fast_speed > -1)
+				s = type->fast_speed;
+			else
+				s *= type->fast;
+		}
 
 		float a = mx * mx + my * my - s * s;
 		float b = 2 * (dx * mx + dy * my);
@@ -2357,7 +2363,13 @@ static void SkullFlyAssault(mobj_t * object)
 
 	// -KM- 1999/01/31 Fix skulls in nightmare mode
 	if (level_flags.fastparm)
-		speed *= object->info->fast;
+	{
+		// MBF21: Use explicit Fast speed if provided
+		if (object->info->fast_speed > -1)
+			speed = object->info->fast_speed;
+		else
+			speed *= object->info->fast;
+	}
 
 	sfx_t *sound = object->currentattack->initsound;
 
@@ -3728,7 +3740,11 @@ void P_ActBecome(struct mobj_s *mo)
 
 		mo->radius = mo->info->radius;
 		mo->height = mo->info->height;
-		mo->speed  = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
+		// MBF21: Use explicit Fast speed if provided
+		if (mo->info->fast_speed > -1)
+			mo->speed  = level_flags.fastparm ? mo->info->fast_speed : mo->info->speed;
+		else
+			mo->speed  = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
 
 		// Note: health is not changed
 

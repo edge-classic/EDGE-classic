@@ -315,6 +315,13 @@ typedef enum
 }
 mobjhyperflag_t;
 
+// MBF21 flags not already covered by extended/hyper flags
+typedef enum
+{
+	// Gravity affects this thing as if it were 1/8 of the normal value
+	MBF21_LOGRAV = (1 << 0),
+}
+mobjmbf21flag_t;
 
 #define NUM_FX_SLOT  30
 
@@ -874,6 +881,7 @@ public:
 	int flags;
 	int extendedflags;
 	int hyperflags;
+	int mbf21flags;
 
 	damage_c explode_damage;
 	float explode_radius;  // normally zero (radius == damage)

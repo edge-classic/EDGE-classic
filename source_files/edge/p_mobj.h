@@ -229,6 +229,7 @@ struct mobj_s : public position_c
 	int flags;
 	int extendedflags;
 	int hyperflags;
+	int mbf21flags;
 
 	int model_skin;
 	int model_last_frame;

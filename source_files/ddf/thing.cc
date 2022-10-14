@@ -1715,6 +1715,12 @@ static specflags_t hyper_specials[] =
 	{NULL, 0, 0}
 };
 
+static specflags_t mbf21_specials[] =
+{
+	{"LOGRAV", MBF21_LOGRAV, 0},
+	{NULL, 0, 0}
+};
+
 //
 // DDF_MobjGetSpecial
 //
@@ -1769,6 +1775,15 @@ void DDF_MobjGetSpecial(const char *info)
 		flag_ptr = &dynamic_mobj->hyperflags;
 
 		res = DDF_MainCheckSpecialFlag(info, hyper_specials,
+				&flag_value, true, false);
+	}
+
+	if (res == CHKF_User || res == CHKF_Unknown)
+	{
+		// -AJA- 2004/08/25: Try the hyper specials...
+		flag_ptr = &dynamic_mobj->mbf21flags;
+
+		res = DDF_MainCheckSpecialFlag(info, mbf21_specials,
 				&flag_value, true, false);
 	}
 
@@ -2231,7 +2246,8 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 
     flags = src.flags; 
     extendedflags = src.extendedflags; 
-    hyperflags = src.hyperflags; 
+    hyperflags = src.hyperflags;
+	mbf21flags = src.mbf21flags;
 
 	explode_damage = src.explode_damage;	
 	explode_radius = src.explode_radius;
@@ -2388,6 +2404,7 @@ void mobjtype_c::Default()
     flags = 0;
     extendedflags = 0;
 	hyperflags = 0;
+	mbf21flags = 0;
 
 	explode_damage.Default(damage_c::DEFAULT_Mobj);
 	explode_radius = 0;

@@ -234,6 +234,13 @@ extern int W_GetSwitches(wad_file_c *wad);
 extern void W_AddColourmaps(wad_file_c *wad);
 
 
+// FIXME TEMP CRUD
+void RAD_ReadScript2(const std::string& _data)
+{
+	RAD_ReadScript(_data, "RSCRIPT");
+}
+
+
 // -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
 typedef struct ddf_reader_s
 {
@@ -265,7 +272,7 @@ static ddf_reader_t DDF_Readers[] =
 	{ "DDFLEVL",  "levels.ddf",   "Levels",     DDF_ReadLevels },
 	{ "DDFFLAT",  "flats.ddf",    "Flats",      DDF_ReadFlat },
 
-	{ "RSCRIPT",  "rscript.rts",  "RadTrig",    RAD_ReadScript }
+	{ "RSCRIPT",  "rscript.rts",  "RadTrig",    RAD_ReadScript2 }
 };
 
 #define NUM_DDF_READERS  (int)(sizeof(DDF_Readers) / sizeof(ddf_reader_t))

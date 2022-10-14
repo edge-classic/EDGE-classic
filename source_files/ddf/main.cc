@@ -2133,19 +2133,34 @@ weakness_info_c& weakness_info_c::operator=(weakness_info_c &rhs)
 static ddf_collection_c unread_ddf;
 
 
-void DDF_AddFile(ddf_type_e type, std::string& data)
+// -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
+static ddf_type_e ddf_ordering[DDF_NUM_TYPES] =
 {
-	unread_ddf.files.push_back(ddf_file_c(type));
+	DDF_Language, DDF_SFX, DDF_Colourmap, DDF_Image, DDF_Font, DDF_Style,
+	DDF_Attack, DDF_Weapon, DDF_Thing, DDF_Playlist, DDF_Line, DDF_Sector,
+	DDF_Switch, DDF_Anim, DDF_Game, DDF_Level, DDF_Flat,
+	DDF_RadScript
+};
+
+
+void DDF_AddFile(ddf_type_e type, std::string& source, std::string& data)
+{
+	unread_ddf.files.push_back(ddf_file_c(type, source));
 
 	// transfer the caller's data
 	unread_ddf.files.back().data.swap(data);
 }
 
 
-void DDF_AddCollection(ddf_collection_c *col)
+void DDF_AddCollection(ddf_collection_c *col, std::string& source)
 {
 	for (auto& it : col->files)
-		DDF_AddFile(it.type, it.data);
+		DDF_AddFile(it.type, source, it.data);
+}
+
+
+void DDF_ParseEverything()
+{
 }
 
 

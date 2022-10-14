@@ -17,16 +17,24 @@
 //----------------------------------------------------------------------------
 
 #include "local.h"
+#include "colormap.h"
+#include "anim.h"
+#include "image.h"
+#include "font.h"
+#include "style.h"
+#include "switch.h"
 
 #include <limits.h>
-#include <vector>
 
+// EPI
+#include "epi.h"
 #include "path.h"
 #include "str_util.h"
 
-#include "colormap.h"
-
+// EDGE
 #include "p_action.h"
+
+void RAD_ReadScript(const std::string& _data);
 
 
 #define CHECK_SELF_ASSIGN(param)  \
@@ -2133,14 +2141,59 @@ weakness_info_c& weakness_info_c::operator=(weakness_info_c &rhs)
 static ddf_collection_c unread_ddf;
 
 
-// -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
-static ddf_type_e ddf_ordering[DDF_NUM_TYPES] =
+struct ddf_reader_t
 {
-	DDF_Language, DDF_SFX, DDF_Colourmap, DDF_Image, DDF_Font, DDF_Style,
-	DDF_Attack, DDF_Weapon, DDF_Thing, DDF_Playlist, DDF_Line, DDF_Sector,
-	DDF_Switch, DDF_Anim, DDF_Game, DDF_Level, DDF_Flat,
-	DDF_RadScript
+	ddf_type_e  type;
+	const char *lump_name;
+	const char *pack_name;
+	const char *print_name;
+	void (* func)(const std::string& data);
 };
+
+// -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
+static ddf_reader_t ddf_readers[DDF_NUM_TYPES] =
+{
+	{ DDF_Language,  "DDFLANG",  "language.ldf", "Languages",  DDF_ReadLangs },
+	{ DDF_SFX,       "DDFSFX",   "sounds.ddf",   "Sounds",     DDF_ReadSFX },
+	{ DDF_ColourMap, "DDFCOLM",  "colmap.ddf",   "ColourMaps", DDF_ReadColourMaps },
+	{ DDF_Image,     "DDFIMAGE", "images.ddf",   "Images",     DDF_ReadImages },
+	{ DDF_Font,      "DDFFONT",  "fonts.ddf",    "Fonts",      DDF_ReadFonts },
+	{ DDF_Style,     "DDFSTYLE", "styles.ddf",   "Styles",     DDF_ReadStyles },
+	{ DDF_Attack,    "DDFATK",   "attacks.ddf",  "Attacks",    DDF_ReadAtks },
+	{ DDF_Weapon,    "DDFWEAP",  "weapons.ddf",  "Weapons",    DDF_ReadWeapons },
+	{ DDF_Thing,     "DDFTHING", "things.ddf",   "Things",     DDF_ReadThings },
+
+	{ DDF_Playlist,  "DDFPLAY",  "playlist.ddf", "Playlists",  DDF_ReadMusicPlaylist },
+	{ DDF_Line,      "DDFLINE",  "lines.ddf",    "Lines",      DDF_ReadLines },
+	{ DDF_Sector,    "DDFSECT",  "sectors.ddf",  "Sectors",    DDF_ReadSectors },
+	{ DDF_Switch,    "DDFSWTH",  "switch.ddf",   "Switches",   DDF_ReadSwitch },
+	{ DDF_Anim,      "DDFANIM",  "anims.ddf",    "Anims",      DDF_ReadAnims },
+	{ DDF_Game,      "DDFGAME",  "games.ddf",    "Games",      DDF_ReadGames },
+	{ DDF_Level,     "DDFLEVL",  "levels.ddf",   "Levels",     DDF_ReadLevels },
+	{ DDF_Flat,      "DDFFLAT",  "flats.ddf",    "Flats",      DDF_ReadFlat },
+
+	{ DDF_RadScript, "RSCRIPT",  "rscript.rts",  "RadTrig",    RAD_ReadScript }
+};
+
+
+ddf_type_e DDF_LumpToType(const std::string& name)
+{
+	std::string up_name(name);
+	epi::str_upper(up_name);
+
+	for (size_t i = 0 ; i < DDF_NUM_TYPES ; i++)
+		if (up_name == ddf_readers[i].lump_name)
+			return ddf_readers[i].type;
+
+	return DDF_UNKNOWN;
+}
+
+
+ddf_type_e DDF_FilenameToType(const std::string& path)
+{
+	// FIXME
+	return DDF_UNKNOWN;
+}
 
 
 void DDF_AddFile(ddf_type_e type, std::string& source, std::string& data)

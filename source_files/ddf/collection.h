@@ -25,11 +25,11 @@
 // types of DDF lumps / files
 enum ddf_type_e
 {
-	DDF_UNKNOWN = 0,
+	DDF_UNKNOWN = -1,
 
-	DDF_Anim,
+	DDF_Anim = 0,
 	DDF_Attack,
-	DDF_Colourmap,
+	DDF_ColourMap,
 	DDF_Flat,
 	DDF_Font,
 	DDF_Game,

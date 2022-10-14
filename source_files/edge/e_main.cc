@@ -1512,7 +1512,6 @@ static void E_Startup(void)
 	W_ProcessMultipleFiles();
 	V_InitPalette();
 
-	W_ReadDDF();
 	DDF_ParseEverything();
 	DDF_CleanUp();
 	W_ReadUMAPINFOLumps();

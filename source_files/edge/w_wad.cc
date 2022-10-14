@@ -1051,6 +1051,58 @@ void ProcessDehackedInWad(data_file_c *df)
 }
 
 
+static void ProcessStuffInWad()
+{
+		int lump = W_GetDDFLump(wad, d);
+
+		if (lump >= 0)
+		{
+			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, df->name.c_str());
+
+			std::string data = W_LoadString(lump);
+
+			// call read function
+			(* DDF_Readers[d].func)(data);
+		}
+	}
+
+	if (wad != NULL)
+	{
+		// handle Boom's ANIMATED and SWITCHES lumps
+
+		int animated = W_GetAnimated(wad);
+		int switches = W_GetSwitches(wad);
+
+		if (strcmp(lump_name, "DDFANIM") == 0 && animated >= 0)
+		{
+			I_Printf("Loading ANIMATED from: %s\n", df->name.c_str());
+
+			int length;
+			byte *data = W_LoadLump(animated, &length);
+
+			DDF_ParseANIMATED(data, length);
+			W_DoneWithLump(data);
+		}
+
+		if (strcmp(lump_name, "DDFSWTH") == 0 && switches >= 0)
+		{
+			I_Printf("Loading SWITCHES from: %s\n", df->name.c_str());
+
+			int length;
+			byte *data = W_LoadLump(switches, &length);
+
+			DDF_ParseSWITCHES(data, length);
+			W_DoneWithLump(data);
+		}
+
+		// handle BOOM Colourmaps (between C_START and C_END)
+		if (strcmp(lump_name, "DDFCOLM") == 0)
+		{
+			W_AddColourmaps(wad);
+		}
+}
+
+
 void ProcessWad(data_file_c *df, size_t file_index)
 {
 	wad_file_c *wad = new wad_file_c();
@@ -1135,6 +1187,14 @@ void ProcessWad(data_file_c *df, size_t file_index)
 
 	delete[] raw_info;
 
+	// parse the WADFIXES lump from `edge-defs.wad` immediately
+	if (file_index == 0)
+		I_Printf("Loading WADFIXES\n");
+		std::string data = W_LoadString("WADFIXES");
+		DDF_ReadFixes(data);
+	}
+
+	ProcessStuffInWad(df);
 	ProcessDehackedInWad(df);
 }
 

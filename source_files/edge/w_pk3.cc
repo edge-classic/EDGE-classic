@@ -609,6 +609,18 @@ static void ProcessDehackedInPack(pack_file_c *pack)
 }
 
 
+static void ProcessStuffInPackage()
+{
+		epi::file_c *F = Pack_OpenFile(df->pack, DDF_Readers[d].pack_name);
+
+		if (F != NULL)
+		{
+			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, df->name.c_str());
+			W_ReadExternalDDF(d, F, DDF_Readers[d].pack_name);
+		}
+}
+
+
 void ProcessPackage(data_file_c *df, size_t file_index)
 {
 	if (df->kind == FLKIND_Folder)
@@ -618,6 +630,7 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 
 	df->pack->SortEntries();
 
+	ProcessStuffInPack(df->pack);
 	ProcessDehackedInPack(df->pack);
 }
 

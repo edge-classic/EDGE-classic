@@ -111,16 +111,6 @@ extern std::string W_BuildNodesForWad(data_file_c *df);
 
 
 
-void W_ReadWADFIXES(void)
-{
-	I_Printf("Loading WADFIXES\n");
-
-	auto data = W_LoadString("WADFIXES");
-
-	DDF_ReadFixes(data);
-}
-
-
 static void DEH_ConvertFile(const std::string& filename)
 {
 	epi::file_c *F = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
@@ -148,6 +138,54 @@ static void DEH_ConvertFile(const std::string& filename)
 }
 
 
+static void W_ReadExternalDDF(int d, epi::file_c * F, const std::string& filename)
+{
+	// WISH: load directly into a std::string
+
+	char *raw_data = (char *) F->LoadIntoMemory();
+	if (raw_data == NULL)
+		I_Error("Couldn't read file: %s\n", filename.c_str());
+
+	std::string data(raw_data);
+	delete[] raw_data;
+
+	// call read function
+	(* DDF_Readers[d].func)(data);
+
+	// close file
+	delete F;
+}
+
+
+static void W_ExternalDDF_2(data_file_c *df)
+{
+	ddf_type_e type = DDF_FilenameToType(df->name);
+
+	if (type == DDF_UNKNOWN)
+		I_Error("Unknown DDF filename: %s\n", base_name.c_str());
+
+	I_Printf("Loading DDF from: %s\n", df->name.c_str());
+
+	epi::file_c *F = epi::FS_Open(df->name.c_str(), epi::file_c::ACCESS_READ);
+	if (F == NULL)
+		I_Error("Couldn't open file: %s\n", df->name.c_str());
+
+//FIXME !!!		W_ReadExternalDDF(d, F, df->name);
+}
+
+
+static void W_ExternalRTS_2(data_file_c *df)
+{
+	I_Printf("Loading RTS script: %s\n", df->name.c_str());
+
+	epi::file_c *F = epi::FS_Open(df->name.c_str(), epi::file_c::ACCESS_READ);
+	if (F == NULL)
+		I_Error("Couldn't open file: %s\n", df->name.c_str());
+
+//FIXME !!!	W_ReadExternalDDF(NUM_DDF_READERS-1, F, df->name);
+}
+
+
 static void ProcessFile(data_file_c *df)
 {
 	size_t file_index = data_files.size();
@@ -156,42 +194,46 @@ static void ProcessFile(data_file_c *df)
 	// open a WAD/PK3 file and add contents to directory
 	const char *filename = df->name.c_str();
 
-	I_Printf("  Adding %s\n", filename);
-
-	// for DDF and RTS, adding the data_file is enough
-	if (df->kind == FLKIND_RTS || df->kind == FLKIND_DDF)
-		return;
+	I_Printf("  Processing: %s\n", filename);
 
 	if (df->kind <= FLKIND_GWad)
 	{
 		epi::file_c *file = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 		if (file == NULL)
 		{
-			I_Error("Couldn't open file %s\n", filename);
+			I_Error("Couldn't open file: %s\n", filename);
 			return;
 		}
 
 		df->file = file;
 
 		ProcessWad(df, file_index);
-
-		if (file_index == 0)  // "edge-defs.wad"
-			W_ReadWADFIXES();
 	}
 	else if (df->kind == FLKIND_Folder || df->kind == FLKIND_PK3)
 	{
 		ProcessPackage(df, file_index);
 	}
-
-	// handle stand-alone DeHackEd patches
-	if (df->kind == FLKIND_Deh)
+	else if (df->kind == FLKIND_DDF)
 	{
+		// handle external ddf files (from `-file` option)
+		W_ExternalDDF_2(df);
+		return
+	}
+	else if (df->kind == FLKIND_RTS)
+	{
+		// handle external rts scripts (from `-file` or `-script` option)
+		W_ExternalRTS_2(df);
+		return
+	}
+	else if (df->kind == FLKIND_Deh)
+	{
+		// handle stand-alone DeHackEd patches
 		I_Printf("Converting DEH file: %s\n", df->name.c_str());
 
 		DEH_ConvertFile(df->name);
 	}
 
-	// handle fixer-uppers
+	// handle fixer-uppers   [ TODO support it for PK3 files too ]
 	if (df->wad != NULL)
 		ProcessFixersForWad(df->wad);
 }
@@ -217,9 +259,6 @@ void W_ProcessMultipleFiles()
 
 		pending_files.clear();
 	}
-
-//??	if (lumpinfo.empty())
-//??		I_Error("W_InitMultipleFiles: no files found!\n");
 }
 
 
@@ -243,219 +282,6 @@ void W_BuildNodes(void)
 }
 
 //----------------------------------------------------------------------------
-
-// TODO move to header
-extern int W_GetDDFLump(wad_file_c *wad, int d);
-extern int W_GetAnimated(wad_file_c *wad);
-extern int W_GetSwitches(wad_file_c *wad);
-extern void W_AddColourmaps(wad_file_c *wad);
-
-
-// FIXME TEMP CRUD
-void RAD_ReadScript2(const std::string& _data)
-{
-	RAD_ReadScript(_data, "RSCRIPT");
-}
-
-
-// -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
-typedef struct ddf_reader_s
-{
-	const char *lump_name;
-	const char *pack_name;
-	const char *print_name;
-	void (* func)(const std::string& data);
-}
-ddf_reader_t;
-
-static ddf_reader_t DDF_Readers[] =
-{
-	{ "DDFLANG",  "language.ldf", "Languages",  DDF_ReadLangs },
-	{ "DDFSFX",   "sounds.ddf",   "Sounds",     DDF_ReadSFX },
-	{ "DDFCOLM",  "colmap.ddf",   "ColourMaps", DDF_ReadColourMaps },
-	{ "DDFIMAGE", "images.ddf",   "Images",     DDF_ReadImages },
-	{ "DDFFONT",  "fonts.ddf",    "Fonts",      DDF_ReadFonts },
-	{ "DDFSTYLE", "styles.ddf",   "Styles",     DDF_ReadStyles },
-	{ "DDFATK",   "attacks.ddf",  "Attacks",    DDF_ReadAtks },
-	{ "DDFWEAP",  "weapons.ddf",  "Weapons",    DDF_ReadWeapons },
-	{ "DDFTHING", "things.ddf",   "Things",     DDF_ReadThings },
-
-	{ "DDFPLAY",  "playlist.ddf", "Playlists",  DDF_ReadMusicPlaylist },
-	{ "DDFLINE",  "lines.ddf",    "Lines",      DDF_ReadLines },
-	{ "DDFSECT",  "sectors.ddf",  "Sectors",    DDF_ReadSectors },
-	{ "DDFSWTH",  "switch.ddf",   "Switches",   DDF_ReadSwitch },
-	{ "DDFANIM",  "anims.ddf",    "Anims",      DDF_ReadAnims },
-	{ "DDFGAME",  "games.ddf",    "Games",      DDF_ReadGames },
-	{ "DDFLEVL",  "levels.ddf",   "Levels",     DDF_ReadLevels },
-	{ "DDFFLAT",  "flats.ddf",    "Flats",      DDF_ReadFlat },
-
-	{ "RSCRIPT",  "rscript.rts",  "RadTrig",    RAD_ReadScript2 }
-};
-
-#define NUM_DDF_READERS  (int)(sizeof(DDF_Readers) / sizeof(ddf_reader_t))
-
-
-int W_CheckDDFLumpName(const char *name)
-{
-	for (int d=0; d < NUM_DDF_READERS; d++)
-	{
-		if (strncmp(name, DDF_Readers[d].lump_name, 8) == 0)
-			return d;
-	}
-	return -1;  // nope
-}
-
-
-static void W_ReadExternalDDF(int d, epi::file_c * F, const std::string& filename)
-{
-	// WISH: load directly into a std::string
-
-	char *raw_data = (char *) F->LoadIntoMemory();
-	if (raw_data == NULL)
-		I_Error("Couldn't read file: %s\n", filename.c_str());
-
-	std::string data(raw_data);
-	delete[] raw_data;
-
-	// call read function
-	(* DDF_Readers[d].func)(data);
-
-	// close file
-	delete F;
-}
-
-
-static void W_ReadDDF_DataFile(data_file_c *df, int d)
-{
-	wad_file_c  *wad  = df->wad;
-	pack_file_c *pack = df->pack;
-
-	const char * lump_name = DDF_Readers[d].lump_name;
-
-	// handle external scripts (from `-script` or `-file` option)
-	if (strcmp(lump_name, "RSCRIPT") == 0 && df->kind == FLKIND_RTS)
-	{
-		I_Printf("Loading RTS script: %s\n", df->name.c_str());
-
-		epi::file_c *F = epi::FS_Open(df->name.c_str(), epi::file_c::ACCESS_READ);
-		if (F == NULL)
-			I_Error("Couldn't open file: %s\n", df->name.c_str());
-
-		W_ReadExternalDDF(NUM_DDF_READERS-1, F, df->name);
-		return;
-	}
-
-	// handle external ddf/ldf files (from `-file` option)
-	if (df->kind == FLKIND_DDF)
-	{
-		std::string base_name = epi::PATH_GetFilename(df->name.c_str());
-
-		if (epi::case_cmp(base_name.c_str(), DDF_Readers[d].pack_name) == 0)
-		{
-			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, df->name.c_str());
-
-			epi::file_c *F = epi::FS_Open(df->name.c_str(), epi::file_c::ACCESS_READ);
-			if (F == NULL)
-				I_Error("Couldn't open file: %s\n", df->name.c_str());
-
-			W_ReadExternalDDF(d, F, df->name);
-			return;
-		}
-
-		/* FIXME this don't work, need explicit check for known name (in e_main)
-		if (d == NUM_DDF_READERS-1)
-			I_Error("Unknown DDF filename: %s\n", base_name.c_str());
-		*/
-		return;
-	}
-
-	if (df->kind >= FLKIND_RTS)
-		return;
-
-	if (pack != NULL)
-	{
-		epi::file_c *F = Pack_OpenFile(df->pack, DDF_Readers[d].pack_name);
-
-		if (F != NULL)
-		{
-			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, df->name.c_str());
-			W_ReadExternalDDF(d, F, DDF_Readers[d].pack_name);
-		}
-	}
-
-	if (wad != NULL)
-	{
-		int lump = W_GetDDFLump(wad, d);
-
-		if (lump >= 0)
-		{
-			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, df->name.c_str());
-
-			std::string data = W_LoadString(lump);
-
-			// call read function
-			(* DDF_Readers[d].func)(data);
-		}
-	}
-
-	if (wad != NULL)
-	{
-		// handle Boom's ANIMATED and SWITCHES lumps
-
-		int animated = W_GetAnimated(wad);
-		int switches = W_GetSwitches(wad);
-
-		if (strcmp(lump_name, "DDFANIM") == 0 && animated >= 0)
-		{
-			I_Printf("Loading ANIMATED from: %s\n", df->name.c_str());
-
-			int length;
-			byte *data = W_LoadLump(animated, &length);
-
-			DDF_ParseANIMATED(data, length);
-			W_DoneWithLump(data);
-		}
-
-		if (strcmp(lump_name, "DDFSWTH") == 0 && switches >= 0)
-		{
-			I_Printf("Loading SWITCHES from: %s\n", df->name.c_str());
-
-			int length;
-			byte *data = W_LoadLump(switches, &length);
-
-			DDF_ParseSWITCHES(data, length);
-			W_DoneWithLump(data);
-		}
-
-		// handle BOOM Colourmaps (between C_START and C_END)
-		if (strcmp(lump_name, "DDFCOLM") == 0)
-		{
-			W_AddColourmaps(wad);
-		}
-	}
-}
-
-
-void W_ReadDDF(void)
-{
-	// -AJA- the order here may look strange.  Since DDF files
-	// have dependencies between them, it makes more sense to
-	// load all lumps of a certain type together (e.g. all
-	// DDFSFX lumps before all the DDFTHING lumps).
-
-	for (int d = 0; d < NUM_DDF_READERS; d++)
-	{
-		I_Printf("Loading %s\n", DDF_Readers[d].print_name);
-
-		for (int i = 0; i < (int)data_files.size(); i++)
-		{
-			data_file_c *df = data_files[i];
-
-			W_ReadDDF_DataFile(df, d);
-		}
-	}
-}
-
 
 epi::file_c * W_OpenPackFile(const std::string& name)
 {

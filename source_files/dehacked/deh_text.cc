@@ -603,7 +603,7 @@ namespace TextStr
 
 void TextStr::BeginTextLump()
 {
-	WAD::NewLump("DDFLANG");
+	WAD::NewLump(DDF_Language);
 
 	WAD::Printf("<LANGUAGES>\n\n");
 	WAD::Printf("[ENGLISH]\n");

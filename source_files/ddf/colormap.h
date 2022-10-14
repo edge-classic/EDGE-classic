@@ -107,7 +107,7 @@ extern colourmap_container_c colourmaps;	// -ACB- 2004/06/10 Implemented
 
 void DDF_ReadColourMaps(const std::string& data);
 
-void DDF_ColourmapAddRaw(const char *lump_name, int size);
+void DDF_AddRawColourmap(const char *lump_name, int size);
 
 #endif /* __DDF_COLORMAP_H__ */
 

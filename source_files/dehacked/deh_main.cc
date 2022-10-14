@@ -187,7 +187,7 @@ dehret_e DehEdgeAddLump(const char *data, int length)
 }
 
 
-dehret_e DehEdgeRunConversion(deh_container_c *dest)
+dehret_e DehEdgeRunConversion(ddf_collection_c *dest)
 {
 	Deh_Edge::WAD::dest_container = dest;
 
@@ -197,8 +197,7 @@ dehret_e DehEdgeRunConversion(deh_container_c *dest)
 
 void DehEdgeShutdown(void)
 {
-	Deh_Edge::WAD::dest_container = NULL;
-
 	Deh_Edge::Shutdown();
+	Deh_Edge::WAD::dest_container = NULL;
 	Deh_Edge::cur_funcs = NULL;
 }

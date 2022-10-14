@@ -166,7 +166,7 @@ namespace Weapons
 
 	void BeginLump(void)
 	{
-		WAD::NewLump("DDFWEAP");
+		WAD::NewLump(DDF_Weapon);
 
 		WAD::Printf("<WEAPONS>\n\n");
 	}

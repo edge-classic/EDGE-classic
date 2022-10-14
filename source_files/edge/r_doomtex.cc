@@ -123,46 +123,45 @@ static void DrawColumnIntoEpiBlock(image_c *rim, epi::image_data_c *img,
 	int w1 = rim->actual_w;
 	int h1 = rim->actual_h;
 	int w2 = rim->total_w;
-	//int h2 = rim->total_h;
 
 	// clip horizontally
 	if (x < 0 || x >= w1)
 		return;
 
+	int top = -1;
+
 	while (patchcol->topdelta != 0xFF)
 	{
-		int top = ((int)patchcol->topdelta <= y) ? y + (int)patchcol->topdelta : (int)patchcol->topdelta;
+		int delta = patchcol->topdelta;
 		int count = patchcol->length;
-		y = top;
 
-		byte *src = (byte *)patchcol + 3;
+		const byte *src = (const byte *)patchcol + 3;
 		byte *dest = img->pixels + x;
 
-		if (top < 0)
-		{
-			count += top;
-			top = 0;
+		// logic for DeePsea's tall patches
+		if (delta <= top) {
+			top += delta;
+		} else {
+			top = delta;
 		}
 
-		if (top + count > h1)
-			count = h1 - top;
-
-		// copy the pixels, remapping any TRANS_PIXEL values
-		for (; count > 0; count--, src++, top++)
+		for (int i = 0 ; i < count ; i++, src++)
 		{
+			int y2 = y + top + i;
+
+			if (y2 < 0 || y2 >= h1)
+				continue;
+
 			if (*src == TRANS_PIXEL)
-				dest[(h1-1-top) * w2] = TRANS_REPLACE;
+				dest[(h1-1-y2) * w2] = TRANS_REPLACE;
 			else
-				dest[(h1-1-top) * w2] = *src;
-
-
+				dest[(h1-1-y2) * w2] = *src;
 		}
 
-		patchcol = (const column_t *)((const byte *)patchcol +
-			patchcol->length + 4);
+		// jump to next column
+		patchcol = (const column_t *)((const byte *)patchcol + patchcol->length + 4);
 	}
 }
-
 
 
 //------------------------------------------------------------------------

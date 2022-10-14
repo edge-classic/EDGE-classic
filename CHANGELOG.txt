@@ -1,6 +1,6 @@
 https://github.com/dashodanger/EDGE-classic
 
-Current as of: September 2022
+Current as of: October 2022
 
 
 CHANGELOG for EDGE-Classic 1.3 (since EDGE-Classic 1.21)
@@ -11,6 +11,11 @@ Bugs fixed
 + Fixed CHANGE_TEX SKY not working with skyboxes
 + Fixed alignment of flats when both ALIGN and SCALE are used
 + Doom episode 1 intermission screen animation speed was wrong
++ Single sector maps no longer give an error
++ Fixed a bug displaying tall patches with a non-zero Y Offset
++ Several old DEHACKED issues fixed (original AliensTC for example)
++ Conflicts between Doom graphics and PNGs causing errors are now fixed (the infamous "Error occurred scanning image: xxx")
+
 
 
 General Improvements
@@ -18,11 +23,18 @@ General Improvements
 + Soundfont selector
 + DEH_EDGE cleanup and improvements
 + Improved fullscreen resolution mode
++ New ENDOOM screen for Harmony
++ Auto-detect music type for DDFPLAY
++ No longer need to press Up/JUMP key to go up ladders: Just mlook + forward is enough.
++ Tags assigned to map things are now supported 
+
 
 
 New Features
 ------------
 + Support OPL emulated playback of MUS and MIDI music lumps.
+
++ DSDHACKED support.
 
 + STYLES.DDF
   - New property: ENTRY_ALIGNMENT = <string>, accepts "LEFT", "CENTER", or "RIGHT" to set text/image alignment for menu item names
@@ -37,6 +49,11 @@ New Features
   
 + THINGS.DDF
   - New property: SIGHT_DISTANCE=<number> which is how far a thing can see in map units.
+  - 2 new actions: 
+    - JUMP_LIQUID(state:frame,xx%) similar to the normal jump action except that it will only trigger if
+      the thing is in contact with a floor flat indicated as LIQUID in DDFFLATS.
+	- JUMP_SKY(state:frame,xx%) similar to the normal jump action except that it will only trigger if
+      the thing is in an outdoor sector i.e. ceiling is sky.
 
 + REKKR added as a recognized IWAD
 
@@ -44,7 +61,31 @@ New Features
 
 + New CVAR: dogs <number> which will spawn 1-3 friendly helper dogs at coop spawn points.
 
++ COALHUDS: new commands
+  -mapobject.count(thingID): returns number of objects of this type on the map
+  -player.query_object(whatinfo): returns information about the currently targetted thing. whatInfo is 
+   a number from 1 to 5 and can be: 
+   1 (NAME)
+   2 (CURRENT_HEALTH)
+   3 (SPAWN_HEALTH)
+   4 (PICKUP_BENEFIT)
+   5 (KILL_BENEFIT)
+  -mapobject.query_tagged(ThingMapTag, whatInfo): returns information about the thing with the tag we specified. whatInfo is the same as player.query_object()
+  -player.query_weapon(whatinfo, [secAttackInfo]): returns information about the currently targetted weapon. Using the optional [secAttackInfo] we can get information about the weapons secondary attack. whatInfo and SecAttackInfo are 
+   a number from 1 to 9 and can be: 
+   1 (NAME)
+   2 (ZOOM FACTOR)
+   3 (AMMOTYPE)
+   4 (AMMOPERSHOT)
+   5 (CLIPSIZE)
+   6 (DAMAGE Nominal)
+   7 (DAMAGE Max)
+   8 (RANGE)
+   9 (AUTOMATIC)
 
++ Improved Boom, MBF and MBF21 support.
+
++ No longer necessary to specify an image type in DDFIMAGE i.e. "IMAGE_DATA=LUMP:FOOBAR;" is now permitted.
 
 
 CHANGELOG for EDGE-Classic 1.21 (since EDGE-Classic 1.2)

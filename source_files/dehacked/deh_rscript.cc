@@ -119,7 +119,7 @@ void Rscript::Shutdown()
 
 void Rscript::BeginLump()
 {
-	WAD::NewLump("RSCRIPT");
+	WAD::NewLump(DDF_RadScript);
 
 	WAD::Printf("// <SCRIPTS>\n\n");
 }

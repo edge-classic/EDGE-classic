@@ -104,7 +104,7 @@ void DEH_Convert(const byte *data, int length, const std::string& source)
 {
 	DehEdgeStartup(&edge_dehconv_funcs);
 
-	dehret_e ret = DehEdgeAddLump((const char *)data, length, source);
+	dehret_e ret = DehEdgeAddLump((const char *)data, length);
 
 	if (ret != DEH_OK)
 	{
@@ -112,7 +112,8 @@ void DEH_Convert(const byte *data, int length, const std::string& source)
 		DH_PrintMsg("- %s\n", DehEdgeGetError());
 
 		DehEdgeShutdown();
-		return NULL;
+
+		I_Error("Failed to convert DeHackEd file: %s\n", source.c_str());
 	}
 
 	ddf_collection_c col;
@@ -123,14 +124,13 @@ void DEH_Convert(const byte *data, int length, const std::string& source)
 
 	if (ret != DEH_OK)
 	{
-		delete col;
 		I_Error("Failed to convert DeHackEd file: %s\n", source.c_str());
 	}
 
 	if (debug_dehacked.d > 0)
 		DDF_DumpCollection(&col);
 
-	DDF_AddCollection(&col);
+	DDF_AddCollection(&col, source);
 }
 
 

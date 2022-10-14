@@ -59,10 +59,10 @@ public:
 	std::string source;
 	std::string data;
 
-	ddf_file_c(ddf_type_e _t, std::string& _s) : type(_t), source(_s), data()
+	ddf_file_c(ddf_type_e _t, const std::string& _s) : type(_t), source(_s), data()
 	{ }
 
-	ddf_file_c(ddf_type_e _t, std::string& _s, std::string& _d) : type(_t), source(_s), data(_d)
+	ddf_file_c(ddf_type_e _t, const std::string& _s, std::string& _d) : type(_t), source(_s), data(_d)
 	{ }
 
 	~ddf_file_c()

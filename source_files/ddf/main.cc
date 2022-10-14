@@ -2209,7 +2209,7 @@ ddf_type_e DDF_FilenameToType(const std::string& path)
 }
 
 
-void DDF_AddFile(ddf_type_e type, std::string& source, std::string& data)
+void DDF_AddFile(ddf_type_e type, const std::string& source, std::string& data)
 {
 	unread_ddf.files.push_back(ddf_file_c(type, source));
 
@@ -2218,7 +2218,7 @@ void DDF_AddFile(ddf_type_e type, std::string& source, std::string& data)
 }
 
 
-void DDF_AddCollection(ddf_collection_c *col, std::string& source)
+void DDF_AddCollection(ddf_collection_c *col, const std::string& source)
 {
 	for (auto& it : col->files)
 		DDF_AddFile(it.type, source, it.data);
@@ -2258,13 +2258,13 @@ void DDF_DumpCollection(ddf_collection_c *col)
 }
 
 
-static void DDF_ParseFileType(ddf_type_e t)
+static void DDF_ParseUnreadFile(size_t d)
 {
 	for (auto& it : unread_ddf.files)
 	{
-		if (it.type == t)
+		if (it.type == ddf_readers[d].type)
 		{
-			I_Printf("Loading %s from: %s\n", ddf_readers[t].lump_name, it.source.c_str());
+			I_Printf("Loading %s from: %s\n", ddf_readers[d].lump_name, it.source.c_str());
 
 			if (it.type == DDF_RadScript)
 			{
@@ -2274,7 +2274,7 @@ static void DDF_ParseFileType(ddf_type_e t)
 			{
 				// FIXME store `source` in cur_ddf_filename (or so)
 
-				(* ddf_readers[t].func)(it.data);
+				(* ddf_readers[d].func)(it.data);
 			}
 
 			// can free the memory now
@@ -2290,8 +2290,8 @@ void DDF_ParseEverything()
 	//       sense to load all lumps of a certain type together, for example
 	//       all DDFSFX lumps before all the DDFTHING lumps.
 
-	for (size_t i = 0 ; i < DDF_NUM_TYPES ; i++)
-		DDF_ParseFileType((ddf_type_e) i);
+	for (size_t d = 0 ; d < DDF_NUM_TYPES ; d++)
+		DDF_ParseUnreadFile(d);
 }
 
 

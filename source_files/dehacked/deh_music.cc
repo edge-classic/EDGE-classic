@@ -204,7 +204,8 @@ void Music::MarkEntry(int num)
 
 void Music::BeginLump()
 {
-	WAD::NewLump("DDFPLAY");
+	WAD::NewLump(DDF_Playlist);
+
 	WAD::Printf("<PLAYLISTS>\n");
 }
 

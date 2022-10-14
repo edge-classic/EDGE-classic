@@ -63,7 +63,7 @@ std::vector<data_file_c *> data_files;
 
 
 data_file_c::data_file_c(const char *_name, filekind_e _kind) :
-		name(_name), kind(_kind), file(NULL), wad(NULL), pack(NULL), deh()
+		name(_name), kind(_kind), file(NULL), wad(NULL), pack(NULL)
 { }
 
 data_file_c::~data_file_c()
@@ -126,8 +126,8 @@ static void DEH_ConvertFile(const std::string& filename)
 	epi::file_c *F = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 	if (F == NULL)
 	{
-		I_Printf("FAILED to open file: %s\n", filename);
-		return NULL;
+		I_Printf("FAILED to open file: %s\n", filename.c_str());
+		return;
 	}
 
 	int length = F->GetLength();
@@ -137,7 +137,7 @@ static void DEH_ConvertFile(const std::string& filename)
 	{
 		I_Printf("FAILED to read file: %s\n", filename.c_str());
 		delete F;
-		return NULL;
+		return;
 	}
 
 	DEH_Convert(data, length, filename);

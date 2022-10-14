@@ -24,18 +24,24 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
-
 #include "l_deh.h"
 
 // EPI
 #include "file.h"
 #include "filesystem.h"
 
+// DDF
+#include "main.h"
+
 // DEH_EDGE
 #include "deh_edge.h"
 
 
+DEF_CVAR(debug_dehacked, "0", CVAR_ARCHIVE)
+
+
 static char dh_message[1024];
+
 
 //
 // DH_PrintMsg
@@ -94,7 +100,7 @@ static const dehconvfuncs_t edge_dehconv_funcs =
 };
 
 
-deh_container_c * DEH_Convert(const byte *data, int length, const std::string& source)
+void DEH_Convert(const byte *data, int length, const std::string& source)
 {
 	DehEdgeStartup(&edge_dehconv_funcs);
 
@@ -109,22 +115,22 @@ deh_container_c * DEH_Convert(const byte *data, int length, const std::string& s
 		return NULL;
 	}
 
-	deh_container_c * container = new deh_container_c();
+	ddf_collection_c col;
 
-	ret = DehEdgeRunConversion(container);
+	ret = DehEdgeRunConversion(&col);
 
 	DehEdgeShutdown();
 
 	if (ret != DEH_OK)
 	{
-		DH_PrintMsg("CONVERSION FAILED:\n");
-		DH_PrintMsg("- %s\n", DehEdgeGetError());
-
-		delete container;
-		return NULL;
+		delete col;
+		I_Error("Failed to convert DeHackEd file: %s\n", source.c_str());
 	}
 
-	return container;
+	if (debug_dehacked.d > 0)
+		DDF_DumpCollection(&col);
+
+	DDF_AddCollection(&col);
 }
 
 

@@ -26,9 +26,7 @@
 #ifndef __L_DEH__
 #define __L_DEH__
 
-class deh_container_c;
-
-deh_container_c * DEH_Convert(const byte *data, int length, const std::string& source);
+void DEH_Convert(const byte *data, int length, const std::string& source);
 
 #endif  // __L_DEH__
 

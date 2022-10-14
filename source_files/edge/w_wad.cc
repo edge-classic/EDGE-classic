@@ -1045,11 +1045,7 @@ void ProcessDehackedInWad(data_file_c *df)
 	const byte *data = (const byte *)W_LoadLump(deh_lump, &length);
 
 	// TODO better `source` here
-	deh_container_c *deh = DEH_Convert(data, length, df->name);
-	if (deh == NULL)
-		I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());
-
-	df->deh.push_back(deh);
+	DEH_Convert(data, length, df->name);
 
 	W_DoneWithLump(data);
 }

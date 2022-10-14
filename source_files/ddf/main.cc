@@ -2225,6 +2225,39 @@ void DDF_AddCollection(ddf_collection_c *col, std::string& source)
 }
 
 
+void DDF_DumpFile(const std::string& data)
+{
+	I_Debugf("\n");
+
+	// we need to break it into lines
+	std::string line;
+
+	size_t pos = 0;
+
+	while (pos < data.size())
+	{
+		line += data[pos];
+		pos  += 1;
+
+		if (data[pos] == '\n')
+		{
+			I_Debugf("%s", line.c_str());
+			line.clear();
+		}
+	}
+
+	if (line.size() > 0)
+		I_Debugf("%s", line.c_str());
+}
+
+
+void DDF_DumpCollection(ddf_collection_c *col)
+{
+	for (auto& it : col->files)
+		DDF_DumpFile(it.data);
+}
+
+
 static void DDF_ParseFileType(ddf_type_e t)
 {
 	for (auto& it : unread_ddf.files)

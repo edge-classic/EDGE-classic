@@ -50,7 +50,6 @@ filekind_e;
 
 class wad_file_c;
 class pack_file_c;
-class deh_container_c;
 
 
 class data_file_c
@@ -70,9 +69,6 @@ public:
 
 	// for FLKIND_PK3
 	pack_file_c * pack;
-
-	// for FLKIND_Deh, or a wad with a DEHACKED lump
-	std::vector<deh_container_c *> deh;
 
 public:
 	data_file_c(const char *_name, filekind_e _kind);

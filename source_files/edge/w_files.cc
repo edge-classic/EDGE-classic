@@ -59,9 +59,6 @@
 #include "w_wad.h"
 
 
-DEF_CVAR(debug_dehacked, "0", CVAR_ARCHIVE)
-
-
 std::vector<data_file_c *> data_files;
 
 
@@ -124,7 +121,7 @@ void W_ReadWADFIXES(void)
 }
 
 
-static deh_container_c * DEH_ConvertFile(const std::string& filename)
+static void DEH_ConvertFile(const std::string& filename)
 {
 	epi::file_c *F = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 	if (F == NULL)
@@ -143,13 +140,11 @@ static deh_container_c * DEH_ConvertFile(const std::string& filename)
 		return NULL;
 	}
 
-	deh_container_c * container = DEH_Convert(data, length, filename);
+	DEH_Convert(data, length, filename);
 
 	// close file, free that data
 	delete F;
 	delete[] data;
-
-	return container;
 }
 
 
@@ -193,11 +188,7 @@ static void ProcessFile(data_file_c *df)
 	{
 		I_Printf("Converting DEH file: %s\n", df->name.c_str());
 
-		deh_container_c * deh = DEH_ConvertFile(df->name);
-		if (deh == NULL)
-			I_Error("Failed to convert DeHackEd patch: %s\n", df->name.c_str());
-
-		df->deh.push_back(deh);
+		DEH_ConvertFile(df->name);
 	}
 
 	// handle fixer-uppers
@@ -445,62 +436,6 @@ static void W_ReadDDF_DataFile(data_file_c *df, int d)
 }
 
 
-static void W_ReadDehacked(data_file_c *df, deh_container_c *deh, int d)
-{
-	// look for the appropriate lump (DDFTHING etc)
-	for (size_t i = 0 ; i < deh->lumps.size() ; i++)
-	{
-		deh_lump_c * lump = deh->lumps[i];
-
-		if (strcmp(lump->name.c_str(), DDF_Readers[d].lump_name) == 0)
-		{
-			std::string where = df->name;
-			if (df->wad != NULL)
-			{
-				where = "DEHACKED in ";
-				where += df->name;
-			}
-
-			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, where.c_str());
-
-			const char *data = lump->data.c_str();
-
-			if (debug_dehacked.d)
-			{
-				I_Debugf("\n");
-
-				// we need to break it into lines
-				const char *pos = data;
-				const char *end;
-
-				while (*pos != 0)
-				{
-					for (end = pos ; *end != 0 ; end++)
-					{
-						if (*end == '\n')
-						{
-							end++;
-							break;
-						}
-					}
-
-					std::string line(pos, end - pos);
-					I_Debugf("%s", line.c_str());
-
-					pos = end;
-				}
-			}
-
-			// call read function
-			(* DDF_Readers[d].func)(lump->data);
-
-			// free up some memory
-			lump->data.clear();
-		}
-	}
-}
-
-
 void W_ReadDDF(void)
 {
 	// -AJA- the order here may look strange.  Since DDF files
@@ -517,9 +452,6 @@ void W_ReadDDF(void)
 			data_file_c *df = data_files[i];
 
 			W_ReadDDF_DataFile(df, d);
-
-			for (size_t k = 0 ; k < df->deh.size() ; k++)
-				W_ReadDehacked(df, df->deh[k], d);
 		}
 	}
 }

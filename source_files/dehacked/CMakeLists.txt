@@ -36,3 +36,4 @@ add_library(
 )
 
 target_include_directories(edge_deh PRIVATE ../epi)
+target_include_directories(edge_deh PRIVATE ../ddf)

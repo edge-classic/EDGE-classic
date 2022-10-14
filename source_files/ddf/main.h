@@ -160,6 +160,9 @@ void DDF_AddFile(ddf_type_e type, std::string& source, std::string& data);
 void DDF_AddCollection(ddf_collection_c *col, std::string& source);
 void DDF_ParseEverything();
 
+void DDF_DumpFile(const std::string& data);
+void DDF_DumpCollection(ddf_collection_c *col);
+
 #endif /* __DDF_MAIN_H__ */
 
 //--- editor settings ---

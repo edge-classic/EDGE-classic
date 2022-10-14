@@ -28,6 +28,9 @@
 #ifndef __DEH_EDGE_PLUGIN_H__
 #define __DEH_EDGE_PLUGIN_H__
 
+// DDF
+#include "collection.h"
+
 #include <vector>
 #include <string>
 
@@ -68,46 +71,6 @@ typedef enum
 dehret_e;
 
 
-// storage of generated lumps
-
-class deh_lump_c
-{
-public:
-	std::string name;
-	std::string data;
-
-	deh_lump_c(const char *_name) : name(_name), data()
-	{ }
-
-	~deh_lump_c()
-	{ }
-};
-
-
-class deh_container_c
-{
-public:
-	std::vector<deh_lump_c *> lumps;
-
-	deh_container_c() : lumps()
-	{ }
-
-	~deh_container_c()
-	{
-		for (size_t i = 0 ; i < lumps.size() ; i++)
-		{
-			delete lumps[i];
-			lumps[i] = NULL;
-		}
-	}
-
-	void AddLump(deh_lump_c *L)
-	{
-		lumps.push_back(L);
-	}
-};
-
-
 /* ------------ interface functions ------------ */
 
 // startup: set the interface functions, reset static vars, etc..
@@ -124,7 +87,7 @@ dehret_e DehEdgeSetQuiet(int quiet);
 dehret_e DehEdgeAddLump(const char *data, int length, const std::string& source);
 
 // convert all the DeHackEd patch files into DDF.
-dehret_e DehEdgeRunConversion(deh_container_c *dest);
+dehret_e DehEdgeRunConversion(ddf_collection_c *dest);
 
 // shut down: free all memory, close all files, etc..
 void DehEdgeShutdown(void);

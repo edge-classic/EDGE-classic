@@ -2128,5 +2128,26 @@ weakness_info_c& weakness_info_c::operator=(weakness_info_c &rhs)
 	return *this;
 }
 
+//----------------------------------------------------------------------------
+
+static ddf_collection_c unread_ddf;
+
+
+void DDF_AddFile(ddf_type_e type, std::string& data)
+{
+	unread_ddf.files.push_back(ddf_file_c(type));
+
+	// transfer the caller's data
+	unread_ddf.files.back().data.swap(data);
+}
+
+
+void DDF_AddCollection(ddf_collection_c *col)
+{
+	for (auto& it : col->files)
+		DDF_AddFile(it.type, it.data);
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

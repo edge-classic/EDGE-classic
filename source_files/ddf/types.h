@@ -27,36 +27,9 @@
 #define __DDF_TYPE_H__
 
 #include "epi.h"
+#include "collection.h"
 
 class mobjtype_c;
-
-
-// types of DDF lumps / files
-enum ddf_type_e
-{
-	DDF_UNKNOWN = 0,
-
-	DDF_Anim,
-	DDF_Attack,
-	DDF_Colourmap,
-	DDF_Flat,
-	DDF_Font,
-	DDF_Game,
-	DDF_Image,
-	DDF_Language,
-	DDF_Level,
-	DDF_Line,
-	DDF_Playlist,
-	DDF_SFX,
-	DDF_Sector,
-	DDF_Style,
-	DDF_Switch,
-	DDF_Thing,
-	DDF_Weapon,
-
-	// not strictly DDF, but useful sometimes
-	DDF_RadScript,
-};
 
 
 // RGB 8:8:8

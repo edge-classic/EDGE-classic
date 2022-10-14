@@ -1509,9 +1509,10 @@ static void E_Startup(void)
 	CheckTurbo();
 
 	RAD_Init();
-	W_InitMultipleFiles();
+	W_ProcessMultipleFiles();
 	V_InitPalette();
-	W_ReadDDF();
+
+	DDF_ParseEverything();
 	DDF_CleanUp();
 	W_ReadUMAPINFOLumps();
 

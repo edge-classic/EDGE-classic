@@ -26,6 +26,9 @@
 #include "filesystem.h"
 #include "path.h"
 
+// DDF
+#include "main.h"
+
 #include <list>
 #include <vector>
 #include <algorithm>
@@ -581,13 +584,34 @@ epi::file_c * pack_file_c::OpenFile_Zip(const std::string& name)
 //  GENERAL STUFF
 //----------------------------------------------------------------------------
 
-static void ProcessDehackedInPack(pack_file_c *pack)
+static void ProcessStuffInPack(pack_file_c *pack)
 {
 	data_file_c *df = pack->parent;
+
+	std::string bare_filename = epi::PATH_GetFilename(df->name.c_str());
 
 	for (size_t i = 0 ; i < pack->dirs[0].entries.size() ; i++)
 	{
 		pack_entry_c& entry = pack->dirs[0].entries[i];
+
+		std::string source = entry.name;
+		source += " in ";
+		source += bare_filename;
+
+		// this handles RTS scripts too!
+		ddf_type_e type = DDF_FilenameToType(entry.name);
+
+		if (type != DDF_UNKNOWN)
+		{
+			int length = -1;
+			const byte *raw_data = pack->LoadEntry(0, i, length);
+
+			std::string data((const char *)raw_data);
+			delete[] raw_data;
+
+			DDF_AddFile(type, data, source);
+			continue;
+		}
 
 		if (entry.HasExtension(".deh") || entry.HasExtension(".bex"))
 		{
@@ -597,13 +621,10 @@ static void ProcessDehackedInPack(pack_file_c *pack)
 			int length = -1;
 			const byte *data = pack->LoadEntry(0, i, length);
 
-			deh_container_c *deh = DH_ConvertLump(data, length);
-			if (deh == NULL)
-				I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());
-
-			df->deh.push_back(deh);
-
+			DEH_Convert(data, length, source);
 			delete[] data;
+
+			continue;
 		}
 	}
 }
@@ -618,7 +639,7 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 
 	df->pack->SortEntries();
 
-	ProcessDehackedInPack(df->pack);
+	ProcessStuffInPack(df->pack);
 }
 
 

@@ -310,7 +310,7 @@ void Sounds::Shutdown()
 
 void Sounds::BeginLump()
 {
-	WAD::NewLump("DDFSFX");
+	WAD::NewLump(DDF_SFX);
 
 	WAD::Printf("<SOUNDS>\n\n");
 }

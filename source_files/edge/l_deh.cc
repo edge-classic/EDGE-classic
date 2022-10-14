@@ -24,18 +24,24 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
-
 #include "l_deh.h"
 
 // EPI
 #include "file.h"
 #include "filesystem.h"
 
+// DDF
+#include "main.h"
+
 // DEH_EDGE
 #include "deh_edge.h"
 
 
+DEF_CVAR(debug_dehacked, "0", CVAR_ARCHIVE)
+
+
 static char dh_message[1024];
+
 
 //
 // DH_PrintMsg
@@ -94,36 +100,7 @@ static const dehconvfuncs_t edge_dehconv_funcs =
 };
 
 
-deh_container_c * DH_ConvertFile(const char *filename)
-{
-	epi::file_c *F = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-	if (F == NULL)
-	{
-		DH_PrintMsg("FAILED to open file: %s\n", filename);
-		return NULL;
-	}
-
-	int length = F->GetLength();
-	byte *data = F->LoadIntoMemory();
-
-	if (data == NULL)
-	{
-		DH_PrintMsg("FAILED to read file: %s\n", filename);
-		delete F;
-		return NULL;
-	}
-
-	deh_container_c * container = DH_ConvertLump(data, length);
-
-	// close file, free that data
-	delete F;
-	delete[] data;
-
-	return container;
-}
-
-
-deh_container_c * DH_ConvertLump(const byte *data, int length)
+void DEH_Convert(const byte *data, int length, const std::string& source)
 {
 	DehEdgeStartup(&edge_dehconv_funcs);
 
@@ -135,25 +112,25 @@ deh_container_c * DH_ConvertLump(const byte *data, int length)
 		DH_PrintMsg("- %s\n", DehEdgeGetError());
 
 		DehEdgeShutdown();
-		return NULL;
+
+		I_Error("Failed to convert DeHackEd file: %s\n", source.c_str());
 	}
 
-	deh_container_c * container = new deh_container_c();
+	ddf_collection_c col;
 
-	ret = DehEdgeRunConversion(container);
+	ret = DehEdgeRunConversion(&col);
 
 	DehEdgeShutdown();
 
 	if (ret != DEH_OK)
 	{
-		DH_PrintMsg("CONVERSION FAILED:\n");
-		DH_PrintMsg("- %s\n", DehEdgeGetError());
-
-		delete container;
-		return NULL;
+		I_Error("Failed to convert DeHackEd file: %s\n", source.c_str());
 	}
 
-	return container;
+	if (debug_dehacked.d > 0)
+		DDF_DumpCollection(&col);
+
+	DDF_AddCollection(&col, source);
 }
 
 

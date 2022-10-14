@@ -50,7 +50,6 @@ filekind_e;
 
 class wad_file_c;
 class pack_file_c;
-class deh_container_c;
 
 
 class data_file_c
@@ -71,9 +70,6 @@ public:
 	// for FLKIND_PK3
 	pack_file_c * pack;
 
-	// for FLKIND_Deh, or a wad with a DEHACKED lump
-	std::vector<deh_container_c *> deh;
-
 public:
 	data_file_c(const char *_name, filekind_e _kind);
 	~data_file_c();
@@ -85,10 +81,9 @@ size_t W_AddFilename(const char *file, filekind_e kind);
 int W_GetNumFiles();
 void W_ShowFiles();
 
+void W_ProcessMultipleFiles();
 size_t W_AddPending(const char *file, filekind_e kind);
-void W_InitMultipleFiles(void);
 int W_CheckDDFLumpName(const char *name);
-void W_ReadDDF();
 
 epi::file_c * W_OpenPackFile(const std::string& name);
 

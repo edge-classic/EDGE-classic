@@ -2436,8 +2436,10 @@ static void RAD_ParserDone()
 }
 
 
-void RAD_ReadScript(const std::string& data)
+void RAD_ReadScript(const std::string& data, const std::string& source)
 {
+	// FIXME store source somewhere, like rad_cur_filename
+
 	I_Debugf("RTS: Loading LUMP (size=%d)\n", (int)data.size());
 
 	// WISH: a more helpful filename

@@ -44,21 +44,21 @@ namespace Deh_Edge
 namespace WAD
 {
 
-deh_container_c * dest_container = NULL;
+ddf_collection_c * dest_container = NULL;
 
-deh_lump_c * cur_lump = NULL;
+ddf_file_c * cur_lump = NULL;
 
 char wad_msg_buf[1024];
 
 
-void NewLump(const char *name)
+void NewLump(ddf_type_e type)
 {
 	if (dest_container == NULL)
 		InternalError("WAD_NewLump: no container!\n");
 
-	cur_lump = new deh_lump_c(name);
+	dest_container->files.push_back(ddf_file_c(type, ""));
 
-	dest_container->AddLump(cur_lump);
+	cur_lump = &dest_container->files.back();
 }
 
 
@@ -73,7 +73,7 @@ void Printf(const char *str, ...)
 	vsprintf(wad_msg_buf, str, args);
 	va_end(args);
 
-	cur_lump->data += (char *) wad_msg_buf;
+	cur_lump->data += (const char *) wad_msg_buf;
 }
 
 }  // WAD

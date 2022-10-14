@@ -51,6 +51,8 @@
 #include "str_util.h"
 
 // DDF
+#include "main.h"
+#include "switch.h"
 #include "colormap.h"
 #include "wadfixes.h"
 
@@ -72,8 +74,6 @@
 
 #include "umapinfo.h" //Lobo 2022
 
-#define NUM_DDF_READERS  18
-
 class wad_file_c
 {
 public:
@@ -91,8 +91,8 @@ public:
 	std::vector<int> level_markers;
 	std::vector<int> skin_markers;
 
-	// ddf lump list
-	int ddf_lumps[NUM_DDF_READERS];
+	// ddf and rts lump list
+	int ddf_lumps[DDF_NUM_TYPES];
 
 	// texture information
 	wadtex_resource_c wadtex;
@@ -105,7 +105,8 @@ public:
 	int coal_huds;
 
 	// BOOM stuff
-	int animated, switches;
+	int animated;
+	int switches;
 
 	// MD5 hash of the contents of the WAD directory.
 	// This is used to disambiguate cached GWA/HWA filenames.
@@ -123,7 +124,7 @@ public:
 		animated(-1), switches(-1),
 		dir_md5(), md5_string()
 	{
-		for (int d = 0; d < NUM_DDF_READERS; d++)
+		for (int d = 0 ; d < DDF_NUM_TYPES ; d++)
 			ddf_lumps[d] = -1;
 	}
 
@@ -481,7 +482,7 @@ static void SortSpriteLumps(wad_file_c *wad)
 //
 // AddLump
 //
-static void AddLump(data_file_c *df, const char *name, int pos, int size, int file_index, bool allow_ddf)
+static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, int file_index, bool allow_ddf)
 {
 	int lump = (int)lumpinfo.size();
 
@@ -493,7 +494,7 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 	info.kind = LMKIND_Normal;
 
 	// copy name, make it uppercase
-	strncpy(info.name, name, 8);
+	strncpy(info.name, raw_name, 8);
 	info.name[8] = 0;
 
 	for (size_t i=0 ; i<strlen(info.name); i++)
@@ -509,7 +510,7 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 
 	wad_file_c *wad = df->wad;
 
-	if (strncmp(name, "PLAYPAL", 8) == 0)
+	if (strcmp(info.name, "PLAYPAL") == 0)
 	{
 		lump_p->kind = LMKIND_WadTex;
 		if (wad != NULL)
@@ -518,56 +519,56 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 			palette_datafile = file_index;
 		return;
 	}
-	else if (strncmp(name, "PNAMES", 8) == 0)
+	else if (strcmp(info.name, "PNAMES") == 0)
 	{
 		lump_p->kind = LMKIND_WadTex;
 		if (wad != NULL)
 			wad->wadtex.pnames = lump;
 		return;
 	}
-	else if (strncmp(name, "TEXTURE1", 8) == 0)
+	else if (strcmp(info.name, "TEXTURE1") == 0)
 	{
 		lump_p->kind = LMKIND_WadTex;
 		if (wad != NULL)
 			wad->wadtex.texture1 = lump;
 		return;
 	}
-	else if (strncmp(name, "TEXTURE2", 8) == 0)
+	else if (strcmp(info.name, "TEXTURE2") == 0)
 	{
 		lump_p->kind = LMKIND_WadTex;
 		if (wad != NULL)
 			wad->wadtex.texture2 = lump;
 		return;
 	}
-	else if (strncmp(name, "DEHACKED", 8) == 0)
+	else if (strcmp(info.name, "DEHACKED") == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
 		if (wad != NULL)
 			wad->deh_lump = lump;
 		return;
 	}
-	else if (strncmp(name, "COALAPI", 8) == 0)
+	else if (strcmp(info.name, "COALAPI") == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
 		if (wad != NULL)
 			wad->coal_apis = lump;
 		return;
 	}
-	else if (strncmp(name, "COALHUDS", 8) == 0)
+	else if (strcmp(info.name, "COALHUDS") == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
 		if (wad != NULL)
 			wad->coal_huds = lump;
 		return;
 	}
-	else if (strncmp(name, "ANIMATED", 8) == 0)
+	else if (strcmp(info.name, "ANIMATED") == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
 		if (wad != NULL)
 			wad->animated = lump;
 		return;
 	}
-	else if (strncmp(name, "SWITCHES", 8) == 0)
+	else if (strcmp(info.name, "SWITCHES") == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
 		if (wad != NULL)
@@ -578,16 +579,17 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 	// -KM- 1998/12/16 Load DDF/RSCRIPT file from wad.
 	if (allow_ddf && wad != NULL)
 	{
-		int d = W_CheckDDFLumpName(name);
-		if (d >= 0)
+		ddf_type_e type = DDF_LumpToType(info.name);
+
+		if (type != DDF_UNKNOWN)
 		{
 			lump_p->kind = LMKIND_DDFRTS;
-			wad->ddf_lumps[d] = lump;
+			wad->ddf_lumps[type] = lump;
 			return;
 		}
 	}
 
-	if (IsSkin(lump_p->name))
+	if (IsSkin(info.name))
 	{
 		lump_p->kind = LMKIND_Marker;
 		if (wad != NULL)
@@ -1044,13 +1046,78 @@ void ProcessDehackedInWad(data_file_c *df)
 	int length = -1;
 	const byte *data = (const byte *)W_LoadLump(deh_lump, &length);
 
-	deh_container_c *deh = DH_ConvertLump(data, length);
-	if (deh == NULL)
-		I_Error("Failed to convert DeHackEd LUMP in: %s\n", df->name.c_str());
+	std::string bare_name = epi::PATH_GetFilename(df->name.c_str());
 
-	df->deh.push_back(deh);
+	std::string source = lump_name;
+	source += " in ";
+	source += bare_name;
+
+	DEH_Convert(data, length, source);
 
 	W_DoneWithLump(data);
+}
+
+
+static void ProcessDDFInWad(data_file_c *df)
+{
+	std::string bare_filename = epi::PATH_GetFilename(df->name.c_str());
+
+	for (size_t d = 0 ; d < DDF_NUM_TYPES ; d++)
+	{
+		int lump = df->wad->ddf_lumps[d];
+
+		if (lump >= 0)
+		{
+			I_Printf("Loading %s lump in %s\n", W_GetLumpName(lump), bare_filename.c_str());
+
+			std::string data   = W_LoadString(lump);
+			std::string source = W_GetLumpName(lump);
+
+			source += " in ";
+			source += bare_filename;
+
+			DDF_AddFile((ddf_type_e) d, data, source);
+		}
+	}
+}
+
+
+static void ProcessBoomStuffInWad(data_file_c *df)
+{
+	// handle Boom's ANIMATED and SWITCHES lumps
+
+	int animated = df->wad->animated;
+	int switches = df->wad->switches;
+
+	if (animated >= 0)
+	{
+		I_Printf("Loading ANIMATED from: %s\n", df->name.c_str());
+
+		int length = -1;
+		byte *data = W_LoadLump(animated, &length);
+
+		DDF_ParseANIMATED(data, length);
+		W_DoneWithLump(data);
+	}
+
+	if (switches >= 0)
+	{
+		I_Printf("Loading SWITCHES from: %s\n", df->name.c_str());
+
+		int length = -1;
+		byte *data = W_LoadLump(switches, &length);
+
+		DDF_ParseSWITCHES(data, length);
+		W_DoneWithLump(data);
+	}
+
+	// handle BOOM Colourmaps (between C_START and C_END)
+	for (int lump : df->wad->colmap_lumps)
+	{
+		// int lump = df->wad->colmap_lumps[i];
+
+		DDF_AddRawColourmap(W_GetLumpName(lump), W_LumpLength(lump));
+	}
 }
 
 
@@ -1138,7 +1205,17 @@ void ProcessWad(data_file_c *df, size_t file_index)
 
 	delete[] raw_info;
 
+	// parse the WADFIXES lump from `edge-defs.wad` immediately
+	if (file_index == 0)
+	{
+		I_Printf("Loading WADFIXES\n");
+		std::string data = W_LoadString("WADFIXES");
+		DDF_ReadFixes(data);
+	}
+
 	ProcessDehackedInWad(df);
+	ProcessBoomStuffInWad(df);
+	ProcessDDFInWad(df);
 }
 
 
@@ -1474,29 +1551,6 @@ void W_ReadUMAPINFOLumps(void)
 		if(Maps.maps[i].partime > 0)
 			temp_level->partime = Maps.maps[i].partime;
 		
-	}
-}
-
-
-// TODO review this, consider moving wad_file_c to header
-int W_GetDDFLump(wad_file_c *wad, int d)
-{
-	return wad->ddf_lumps[d];
-}
-int W_GetAnimated(wad_file_c *wad)
-{
-	return wad->animated;
-}
-int W_GetSwitches(wad_file_c *wad)
-{
-	return wad->switches;
-}
-void W_AddColourmaps(wad_file_c *wad)
-{
-	for (size_t i=0 ; i < wad->colmap_lumps.size() ; i++)
-	{
-		int lump = wad->colmap_lumps[i];
-		DDF_ColourmapAddRaw(W_GetLumpName(lump), W_LumpLength(lump));
 	}
 }
 

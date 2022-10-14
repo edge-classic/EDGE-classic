@@ -459,6 +459,24 @@ void CON_MessageLDF(const char *lookup, ...)
 	SplitIntoLines(buffer);
 }
 
+void CON_ImportantMessageLDF(const char *lookup, ...)
+{
+	va_list argptr;
+	char buffer[1024];
+
+	lookup = language[lookup];
+
+	va_start(argptr, lookup);
+	vsprintf(buffer, lookup, argptr);
+	va_end(argptr);
+
+	HU_StartImportantMessage(buffer);
+
+	strcat(buffer, "\n");
+
+	SplitIntoLines(buffer);
+}
+
 void CON_MessageColor(rgbcol_t col)
 {
 	current_color = col;

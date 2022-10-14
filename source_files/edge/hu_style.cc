@@ -74,7 +74,7 @@ void style_c::DrawBackground()
 
 	HUD_SetAlpha(alpha);
 
-	float WS_x = -130; // Lobo: fixme, this shoud be calculated, not arbitrary hardcoded ;)
+	float WS_x = -130; // Lobo: fixme, this should be calculated, not arbitrary hardcoded ;)
 	float WS_w = SCREENWIDTH; //580;
 
 	if (! bg_image)
@@ -87,9 +87,9 @@ void style_c::DrawBackground()
 		
 		if (def->bg.colour != RGB_NO_VALUE)
 			HUD_SolidBox(WS_x, 0, WS_w, 200, def->bg.colour);
-		else
+		/*else
 			HUD_SolidBox(WS_x, 0, WS_w, 200, T_BLACK);
-
+*/
 		HUD_SetAlpha();
 		return;
 	}

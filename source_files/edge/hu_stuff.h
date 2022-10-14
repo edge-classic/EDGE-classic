@@ -58,6 +58,7 @@ void HU_Start(void);
 bool HU_Responder(event_t * ev);
 
 void HU_StartMessage(const char *msg);
+void HU_StartImportantMessage(const char *msg);
 
 void HU_Ticker(void);
 void HU_Drawer(void);

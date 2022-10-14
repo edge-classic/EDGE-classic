@@ -41,6 +41,8 @@ void CON_Message(const char *message, ...) GCCATTR((format(printf, 1, 2)));
 // the console. Should be used for most player messages.
 void CON_MessageLDF(const char *lookup, ...);
 
+void CON_ImportantMessageLDF(const char *lookup, ...);
+
 // -ACB- 1999/09/22
 // Introduced because MSVC and DJGPP handle #defines differently
 void CON_PlayerMessage(int plyr, const char *message, ...) GCCATTR((format(printf, 2, 3)));

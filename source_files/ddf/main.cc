@@ -34,7 +34,7 @@
 // EDGE
 #include "p_action.h"
 
-void RAD_ReadScript(const std::string& _data);
+void RAD_ReadScript(const std::string& _data, const std::string& source);
 
 
 #define CHECK_SELF_ASSIGN(param)  \
@@ -2172,7 +2172,8 @@ static ddf_reader_t ddf_readers[DDF_NUM_TYPES] =
 	{ DDF_Level,     "DDFLEVL",  "levels.ddf",   "Levels",     DDF_ReadLevels },
 	{ DDF_Flat,      "DDFFLAT",  "flats.ddf",    "Flats",      DDF_ReadFlat },
 
-	{ DDF_RadScript, "RSCRIPT",  "rscript.rts",  "RadTrig",    RAD_ReadScript }
+	// RTS scripts are handled differently
+	{ DDF_RadScript, "RSCRIPT",  "rscript.rts",  "RadTrig",    NULL }
 };
 
 
@@ -2224,8 +2225,40 @@ void DDF_AddCollection(ddf_collection_c *col, std::string& source)
 }
 
 
+static void DDF_ParseFileType(ddf_type_e t)
+{
+	for (auto& it : unread_ddf.files)
+	{
+		if (it.type == t)
+		{
+			I_Printf("Loading %s from: %s\n", ddf_readers[t].lump_name, it.source.c_str());
+
+			if (it.type == DDF_RadScript)
+			{
+				RAD_ReadScript(it.data, it.source);
+			}
+			else
+			{
+				// FIXME store `source` in cur_ddf_filename (or so)
+
+				(* ddf_readers[t].func)(it.data);
+			}
+
+			// can free the memory now
+			it.data.clear();
+		}
+	}
+}
+
+
 void DDF_ParseEverything()
 {
+	// -AJA- Since DDF files have dependencies between them, it makes most
+	//       sense to load all lumps of a certain type together, for example
+	//       all DDFSFX lumps before all the DDFTHING lumps.
+
+	for (size_t i = 0 ; i < DDF_NUM_TYPES ; i++)
+		DDF_ParseFileType((ddf_type_e) i);
 }
 
 

@@ -147,7 +147,7 @@ static void W_ExternalDDF(data_file_c *df)
 	if (type == DDF_UNKNOWN)
 		I_Error("Unknown DDF filename: %s\n", bare_name.c_str());
 
-	I_Printf("Loading DDF from: %s\n", df->name.c_str());
+	I_Printf("Reading DDF file: %s\n", df->name.c_str());
 
 	epi::file_c *F = epi::FS_Open(df->name.c_str(), epi::file_c::ACCESS_READ);
 	if (F == NULL)
@@ -168,7 +168,7 @@ static void W_ExternalDDF(data_file_c *df)
 
 static void W_ExternalRTS(data_file_c *df)
 {
-	I_Printf("Loading RTS script: %s\n", df->name.c_str());
+	I_Printf("Reading RTS script: %s\n", df->name.c_str());
 
 	epi::file_c *F = epi::FS_Open(df->name.c_str(), epi::file_c::ACCESS_READ);
 	if (F == NULL)

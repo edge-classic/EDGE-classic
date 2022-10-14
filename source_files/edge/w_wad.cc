@@ -482,7 +482,7 @@ static void SortSpriteLumps(wad_file_c *wad)
 //
 // AddLump
 //
-static void AddLump(data_file_c *df, const char *name, int pos, int size, int file_index, bool allow_ddf)
+static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, int file_index, bool allow_ddf)
 {
 	int lump = (int)lumpinfo.size();
 
@@ -494,7 +494,7 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 	info.kind = LMKIND_Normal;
 
 	// copy name, make it uppercase
-	strncpy(info.name, name, 8);
+	strncpy(info.name, raw_name, 8);
 	info.name[8] = 0;
 
 	for (size_t i=0 ; i<strlen(info.name); i++)
@@ -510,7 +510,7 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 
 	wad_file_c *wad = df->wad;
 
-	if (strncmp(name, "PLAYPAL", 8) == 0)
+	if (strcmp(info.name, "PLAYPAL") == 0)
 	{
 		lump_p->kind = LMKIND_WadTex;
 		if (wad != NULL)
@@ -519,56 +519,56 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 			palette_datafile = file_index;
 		return;
 	}
-	else if (strncmp(name, "PNAMES", 8) == 0)
+	else if (strcmp(info.name, "PNAMES") == 0)
 	{
 		lump_p->kind = LMKIND_WadTex;
 		if (wad != NULL)
 			wad->wadtex.pnames = lump;
 		return;
 	}
-	else if (strncmp(name, "TEXTURE1", 8) == 0)
+	else if (strcmp(info.name, "TEXTURE1") == 0)
 	{
 		lump_p->kind = LMKIND_WadTex;
 		if (wad != NULL)
 			wad->wadtex.texture1 = lump;
 		return;
 	}
-	else if (strncmp(name, "TEXTURE2", 8) == 0)
+	else if (strcmp(info.name, "TEXTURE2") == 0)
 	{
 		lump_p->kind = LMKIND_WadTex;
 		if (wad != NULL)
 			wad->wadtex.texture2 = lump;
 		return;
 	}
-	else if (strncmp(name, "DEHACKED", 8) == 0)
+	else if (strcmp(info.name, "DEHACKED") == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
 		if (wad != NULL)
 			wad->deh_lump = lump;
 		return;
 	}
-	else if (strncmp(name, "COALAPI", 8) == 0)
+	else if (strcmp(info.name, "COALAPI") == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
 		if (wad != NULL)
 			wad->coal_apis = lump;
 		return;
 	}
-	else if (strncmp(name, "COALHUDS", 8) == 0)
+	else if (strcmp(info.name, "COALHUDS") == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
 		if (wad != NULL)
 			wad->coal_huds = lump;
 		return;
 	}
-	else if (strncmp(name, "ANIMATED", 8) == 0)
+	else if (strcmp(info.name, "ANIMATED") == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
 		if (wad != NULL)
 			wad->animated = lump;
 		return;
 	}
-	else if (strncmp(name, "SWITCHES", 8) == 0)
+	else if (strcmp(info.name, "SWITCHES") == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
 		if (wad != NULL)
@@ -579,7 +579,7 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 	// -KM- 1998/12/16 Load DDF/RSCRIPT file from wad.
 	if (allow_ddf && wad != NULL)
 	{
-		ddf_type_e type = DDF_LumpToType(name);
+		ddf_type_e type = DDF_LumpToType(info.name);
 
 		if (type != DDF_UNKNOWN)
 		{
@@ -589,7 +589,7 @@ static void AddLump(data_file_c *df, const char *name, int pos, int size, int fi
 		}
 	}
 
-	if (IsSkin(lump_p->name))
+	if (IsSkin(info.name))
 	{
 		lump_p->kind = LMKIND_Marker;
 		if (wad != NULL)
@@ -1068,7 +1068,7 @@ static void ProcessDDFInWad(data_file_c *df)
 
 		if (lump >= 0)
 		{
-			I_Printf("Loading DDF/RTS from: %s lump\n", W_GetLumpName(lump));
+			I_Printf("Loading %s lump in %s\n", W_GetLumpName(lump), bare_filename.c_str());
 
 			std::string data   = W_LoadString(lump);
 			std::string source = W_GetLumpName(lump);

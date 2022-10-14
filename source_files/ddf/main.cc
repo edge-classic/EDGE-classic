@@ -2264,7 +2264,7 @@ static void DDF_ParseUnreadFile(size_t d)
 	{
 		if (it.type == ddf_readers[d].type)
 		{
-			I_Printf("Loading %s from: %s\n", ddf_readers[d].lump_name, it.source.c_str());
+			I_Printf("Parsing %s from: %s\n", ddf_readers[d].lump_name, it.source.c_str());
 
 			if (it.type == DDF_RadScript)
 			{

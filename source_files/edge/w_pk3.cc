@@ -26,6 +26,9 @@
 #include "filesystem.h"
 #include "path.h"
 
+// DDF
+#include "main.h"
+
 #include <list>
 #include <vector>
 #include <algorithm>
@@ -581,43 +584,49 @@ epi::file_c * pack_file_c::OpenFile_Zip(const std::string& name)
 //  GENERAL STUFF
 //----------------------------------------------------------------------------
 
-static void ProcessDehackedInPack(pack_file_c *pack)
+static void ProcessStuffInPack(pack_file_c *pack)
 {
 	data_file_c *df = pack->parent;
+
+	std::string bare_filename = epi::PATH_GetFilename(df->name.c_str());
 
 	for (size_t i = 0 ; i < pack->dirs[0].entries.size() ; i++)
 	{
 		pack_entry_c& entry = pack->dirs[0].entries[i];
+
+		std::string source = entry.name;
+		source += " in ";
+		source += bare_filename;
+
+		// this handles RTS scripts too!
+		ddf_type_e type = DDF_FilenameToType(entry.name);
+
+		if (type != DDF_UNKNOWN)
+		{
+			int length = -1;
+			const byte *raw_data = pack->LoadEntry(0, i, length);
+
+			std::string data((const char *)raw_data);
+			delete[] raw_data;
+
+			DDF_AddFile(type, data, source);
+			continue;
+		}
 
 		if (entry.HasExtension(".deh") || entry.HasExtension(".bex"))
 		{
 			I_Printf("Converting DEH file%s: %s\n",
 				pack->is_folder ? "" : " in PK3", entry.name.c_str());
 
-			std::string source = entry.name;
-			source += " in ";
-			source += df->name;  // FIXME remove directory
-
 			int length = -1;
 			const byte *data = pack->LoadEntry(0, i, length);
 
 			DEH_Convert(data, length, source);
-
 			delete[] data;
+
+			continue;
 		}
 	}
-}
-
-
-static void ProcessStuffInPackage()
-{
-		epi::file_c *F = Pack_OpenFile(df->pack, DDF_Readers[d].pack_name);
-
-		if (F != NULL)
-		{
-			I_Printf("Loading %s from: %s\n", DDF_Readers[d].lump_name, df->name.c_str());
-			W_ReadExternalDDF(d, F, DDF_Readers[d].pack_name);
-		}
 }
 
 
@@ -631,7 +640,6 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 	df->pack->SortEntries();
 
 	ProcessStuffInPack(df->pack);
-	ProcessDehackedInPack(df->pack);
 }
 
 

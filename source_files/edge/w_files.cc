@@ -142,10 +142,10 @@ static void W_ExternalDDF(data_file_c *df)
 {
 	ddf_type_e type = DDF_FilenameToType(df->name);
 
-	std::string base_name = epi::PATH_GetFilename(df->name.c_str());
+	std::string bare_name = epi::PATH_GetFilename(df->name.c_str());
 
 	if (type == DDF_UNKNOWN)
-		I_Error("Unknown DDF filename: %s\n", base_name.c_str());
+		I_Error("Unknown DDF filename: %s\n", bare_name.c_str());
 
 	I_Printf("Loading DDF from: %s\n", df->name.c_str());
 

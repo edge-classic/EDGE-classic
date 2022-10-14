@@ -2209,7 +2209,7 @@ ddf_type_e DDF_FilenameToType(const std::string& path)
 }
 
 
-void DDF_AddFile(ddf_type_e type, const std::string& source, std::string& data)
+void DDF_AddFile(ddf_type_e type, std::string& data, const std::string& source)
 {
 	unread_ddf.files.push_back(ddf_file_c(type, source));
 
@@ -2221,7 +2221,7 @@ void DDF_AddFile(ddf_type_e type, const std::string& source, std::string& data)
 void DDF_AddCollection(ddf_collection_c *col, const std::string& source)
 {
 	for (auto& it : col->files)
-		DDF_AddFile(it.type, source, it.data);
+		DDF_AddFile(it.type, it.data, source);
 }
 
 

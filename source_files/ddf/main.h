@@ -156,7 +156,7 @@ int DDF_RADStringHash(const char *s); // Identical to RAD_StringHashFunc
 ddf_type_e DDF_LumpToType(const std::string& name);
 ddf_type_e DDF_FilenameToType(const std::string& path);
 
-void DDF_AddFile(ddf_type_e type, const std::string& source, std::string& data);
+void DDF_AddFile(ddf_type_e type, std::string& data, const std::string& source);
 void DDF_AddCollection(ddf_collection_c *col, const std::string& source);
 void DDF_ParseEverything();
 

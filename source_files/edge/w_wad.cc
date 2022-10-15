@@ -1114,9 +1114,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
 	// handle BOOM Colourmaps (between C_START and C_END)
 	for (int lump : df->wad->colmap_lumps)
 	{
-		// int lump = df->wad->colmap_lumps[i];
-
-		DDF_AddRawColourmap(W_GetLumpName(lump), W_LumpLength(lump));
+		DDF_AddRawColourmap(W_GetLumpName(lump), W_LumpLength(lump), NULL);
 	}
 }
 

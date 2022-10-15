@@ -25,6 +25,7 @@
 #include "file.h"
 #include "filesystem.h"
 #include "path.h"
+#include "str_util.h"
 
 // DDF
 #include "main.h"
@@ -39,6 +40,7 @@
 class pack_entry_c
 {
 public:
+	// this name is relative to parent (if any), i.e. no slashes
 	std::string name;
 
 	// only for Folder: the full pathname to file (for FS_Open).
@@ -584,7 +586,7 @@ epi::file_c * pack_file_c::OpenFile_Zip(const std::string& name)
 //  GENERAL STUFF
 //----------------------------------------------------------------------------
 
-static void ProcessStuffInPack(pack_file_c *pack)
+static void ProcessDDFInPack(pack_file_c *pack)
 {
 	data_file_c *df = pack->parent;
 
@@ -630,6 +632,98 @@ static void ProcessStuffInPack(pack_file_c *pack)
 }
 
 
+static bool TextureNameFromFilename(std::string& buf, const std::string& stem, bool is_sprite)
+{
+	// returns false if the name is invalid (e.g. longer than 8 chars).
+
+	size_t pos = 0;
+
+	buf.clear();
+
+	while (pos < stem.size())
+	{
+		if (buf.size() >= 8)
+			return false;
+
+		int ch = (unsigned char) stem[pos++];
+
+		// sprites allow a few special characters, but remap caret --> backslash
+		if (is_sprite && ch == '^')
+			ch = '\\';
+		else if (is_sprite && (ch == '[' || ch == ']'))
+			{ /* ok */ }
+		else if (isalnum(ch) || ch == '_')
+			{ /* ok */ }
+		else
+			return false;
+
+		buf.push_back((char) ch);
+	}
+
+	epi::str_upper(buf);
+
+	return (buf.size() > 0);
+}
+
+
+static void ProcessImagesInPack(pack_file_c *pack, const std::string& dir_name, const std::string& prefix)
+{
+	data_file_c *df = pack->parent;
+
+	int d = pack->FindDir(dir_name);
+	if (d < 0)
+		return;
+
+	std::string text = "<IMAGES>\n\n";
+
+	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+	{
+		pack_entry_c& entry = pack->dirs[d].entries[i];
+
+		// split filename in stem + extension
+		std::string stem = epi::PATH_GetBasename(entry.name.c_str());
+		std::string ext  = epi::PATH_GetExtension(entry.name.c_str());
+
+		epi::str_lower(ext);
+
+		if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg")
+		{
+			std::string texname;
+
+			if (! TextureNameFromFilename(texname, stem, prefix == "spr"))
+			{
+				I_Warning("Illegal image name in PK3: %s\n", entry.name.c_str());
+				continue;
+			}
+
+			I_Debugf("- Adding image file in PK3: %s\n", entry.name.c_str());
+
+			// generate DDF for it...
+			text += "[";
+			text += prefix;
+			text += ":";
+			text += texname;
+			text += "]\n";
+
+			text += "IMAGE_DATA=PACK:\"";
+			text += dir_name;
+			text += "/";
+			text += entry.name;
+			text += "\";\n\n";
+		}
+		else
+		{
+			I_Warning("Unknown image type in PK3: %s\n", entry.name.c_str());
+		}
+	}
+
+	// DEBUG:
+	// DDF_DumpFile(text);
+
+	DDF_AddFile(DDF_Image, text, df->name);
+}
+
+
 void ProcessPackage(data_file_c *df, size_t file_index)
 {
 	if (df->kind == FLKIND_Folder)
@@ -639,7 +733,12 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 
 	df->pack->SortEntries();
 
-	ProcessStuffInPack(df->pack);
+	ProcessImagesInPack(df->pack, "textures", "tex");
+	ProcessImagesInPack(df->pack, "flats",    "flat");
+	ProcessImagesInPack(df->pack, "graphics", "gfx");
+	ProcessImagesInPack(df->pack, "sprites",  "spr");
+
+	ProcessDDFInPack(df->pack);
 }
 
 

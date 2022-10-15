@@ -1562,11 +1562,13 @@ void W_ReadCoalLumps(void)
 		data_file_c *df = data_files[f];
 		wad_file_c *wad = df->wad;
 
-		// FIXME support PK3
+		// FIXME support PK3 for coal_huds
 
 		if (wad != NULL)
 		{
-			if (wad->coal_apis >= 0)
+			// only load COALAPI from edge-defs, because (like WADFIXES)
+			// it is not something that user mods should mess with.
+			if (wad->coal_apis >= 0 && f == 0)
 				VM_LoadLumpOfCoal(wad->coal_apis);
 
 			if (wad->coal_huds >= 0)

@@ -161,38 +161,6 @@ void DDF_SwitchCleanUp(void)
 	switchdefs.Trim();
 }
 
-void DDF_ParseSWITCHES(const byte *data, int size)
-{
-	for (; size >= 20; data += 20, size -= 20)
-	{
-		if (data[18] == 0)  // end marker
-			break;
-
-		char  on_name[10];
-		char off_name[10];
-
-		// make sure names are NUL-terminated
-		memcpy( on_name, data+9, 9);  on_name[8] = 0;
-		memcpy(off_name, data+0, 9); off_name[8] = 0;
-
-		I_Debugf("- SWITCHES LUMP: off '%s' : on '%s'\n", off_name, on_name);
-				
-		// ignore zero-length names
-		if (!off_name[0] || !on_name[0])
-			continue;
-
-		switchdef_c *def = new switchdef_c;
-
-		def->name = "BOOM_SWITCH";
-
-		def->Default();
-		
-		def->on_name  = on_name;
-		def->off_name = off_name;
-
-		switchdefs.Insert(def);
-	}
-}
 
 
 // ---> switchdef_c class
@@ -268,6 +236,59 @@ switchdef_c* switchdef_container_c::Find(const char *name)
 	}
 
 	return NULL;
+}
+
+//----------------------------------------------------------------------------
+
+void DDF_ConvertSWITCHES(const byte *data, int size)
+{
+	// handles the Boom SWITCHES lump (in a wad).
+
+	if (size < 20)
+		return;
+
+	std::string text = "<SWITCHES>\n\n";
+
+	for (; size >= 20 ; data += 20, size -= 20)
+	{
+		if (data[18] == 0)  // end marker
+			break;
+
+		char off_name[10];
+		char  on_name[10];
+
+		// make sure names are NUL-terminated
+		memcpy(off_name, data+0, 9); off_name[8] = 0;
+		memcpy( on_name, data+9, 9);  on_name[8] = 0;
+
+		I_Debugf("- SWITCHES LUMP: off '%s' : on '%s'\n", off_name, on_name);
+
+		// ignore zero-length names
+		if (off_name[0] == 0 || on_name[0] == 0)
+			continue;
+
+		// create the DDF equivalent...
+		text += "[";
+		text += on_name;
+		text += "]\n";
+
+		text += "on_texture  = \"";
+		text += on_name;
+		text += "\";\n";
+
+		text += "off_texture = \"";
+		text += off_name;
+		text += "\";\n";
+
+		text += "on_sound  = \"SWTCHN\";\n";
+		text += "off_sound = \"SWTCHN\";\n";
+		text += "\n";
+	}
+
+	// DEBUG:
+	// DDF_DumpFile(text);
+
+	DDF_AddFile(DDF_Switch, text, "Boom SWITCHES lump");
 }
 
 //--- editor settings ---

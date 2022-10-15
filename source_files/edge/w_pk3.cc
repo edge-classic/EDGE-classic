@@ -710,7 +710,7 @@ static void ProcessImagesInPack(pack_file_c *pack, const std::string& dir_name, 
 				continue;
 			}
 
-			I_Debugf("- Adding image file in PK3: %s\n", entry.name.c_str());
+			I_Debugf("- Adding image file in PK3: %s/%s\n", dir_name.c_str(), entry.name.c_str());
 
 			// generate DDF for it...
 			text += "[";
@@ -740,7 +740,56 @@ static void ProcessImagesInPack(pack_file_c *pack, const std::string& dir_name, 
 
 static void ProcessSoundsInPack(pack_file_c *pack)
 {
-	// TODO ProcessSoundsInPack
+	data_file_c *df = pack->parent;
+
+	int d = pack->FindDir("sounds");
+	if (d < 0)
+		return;
+
+	std::string text = "<SOUNDS>\n\n";
+
+	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+	{
+		pack_entry_c& entry = pack->dirs[d].entries[i];
+
+		epi::sound_format_e fmt = epi::Sound_FilenameToFormat(entry.name);
+
+		if (fmt == epi::FMT_Unknown)
+		{
+			I_Warning("Unknown sound type in PK3: %s\n", entry.name.c_str());
+			continue;
+		}
+
+		// stem must consist of only digits
+		std::string stem = epi::PATH_GetBasename(entry.name.c_str());
+		std::string sfxname;
+
+		if (! TextureNameFromFilename(sfxname, stem, false))
+		{
+			I_Warning("Illegal sound name in PK3: %s\n", entry.name.c_str());
+			continue;
+		}
+
+		I_Debugf("- Adding sound file in PK3: %s\n", entry.name.c_str());
+
+		// generate DDF for it...
+		text += "[";
+		text += sfxname;
+		text += "]\n";
+
+		text += "pack_name = \"";
+		text += "sounds/";
+		text += entry.name;
+		text += "\";\n";
+
+		text += "priority  = 64;\n";
+		text += "\n";
+	}
+
+	// DEBUG:
+	// DDF_DumpFile(text);
+
+	DDF_AddFile(DDF_SFX, text, df->name);
 }
 
 
@@ -794,7 +843,7 @@ static void ProcessMusicsInPack(pack_file_c *pack)
 	}
 
 	// DEBUG:
-	DDF_DumpFile(text);
+	// DDF_DumpFile(text);
 
 	DDF_AddFile(DDF_Playlist, text, df->name);
 }

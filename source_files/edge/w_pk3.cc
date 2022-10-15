@@ -29,6 +29,7 @@
 
 // DDF
 #include "main.h"
+#include "colormap.h"
 
 #include <list>
 #include <vector>
@@ -171,6 +172,18 @@ public:
 			return OpenFile_Folder(name);
 		else
 			return OpenFile_Zip(name);
+	}
+
+	int EntryLength(size_t dir, size_t index)
+	{
+		epi::file_c *f = OpenEntry(dir, index);
+		if (f == NULL)
+			return 0;
+
+		int length = f->GetLength();
+		delete f;  // close it
+
+		return length;
 	}
 
 	byte * LoadEntry(size_t dir, size_t index, int& length)
@@ -724,6 +737,53 @@ static void ProcessImagesInPack(pack_file_c *pack, const std::string& dir_name, 
 }
 
 
+static void ProcessSoundsInPack(pack_file_c *pack)
+{
+	// TODO ProcessSoundsInPack
+}
+
+
+static void ProcessMusicsInPack(pack_file_c *pack)
+{
+	// TODO ProcessMusicsInPack
+}
+
+
+static void ProcessColourmapsInPack(pack_file_c *pack)
+{
+	int d = pack->FindDir("colormaps");
+	if (d < 0)
+		return;
+
+	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+	{
+		pack_entry_c& entry = pack->dirs[d].entries[i];
+
+		// split filename in stem + extension
+		std::string stem = epi::PATH_GetBasename(entry.name.c_str());
+		std::string ext  = epi::PATH_GetExtension(entry.name.c_str());
+
+		// extension is currently ignored
+		(void)ext;
+
+		std::string colname;
+
+		if (! TextureNameFromFilename(colname, stem, false))
+		{
+			I_Warning("Illegal colourmap name in PK3: %s\n", entry.name.c_str());
+			continue;
+		}
+
+		std::string fullname = "colormaps/";
+		fullname += entry.name;
+
+		int size = pack->EntryLength(d, i);
+
+		DDF_AddRawColourmap(colname.c_str(), size, fullname.c_str());
+	}
+}
+
+
 void ProcessPackage(data_file_c *df, size_t file_index)
 {
 	if (df->kind == FLKIND_Folder)
@@ -733,10 +793,15 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 
 	df->pack->SortEntries();
 
+	ProcessColourmapsInPack(df->pack);
+
 	ProcessImagesInPack(df->pack, "textures", "tex");
 	ProcessImagesInPack(df->pack, "flats",    "flat");
 	ProcessImagesInPack(df->pack, "graphics", "gfx");
 	ProcessImagesInPack(df->pack, "sprites",  "spr");
+
+	ProcessSoundsInPack(df->pack);
+	ProcessMusicsInPack(df->pack);
 
 	ProcessDDFInPack(df->pack);
 }

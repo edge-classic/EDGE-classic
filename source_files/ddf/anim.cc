@@ -325,7 +325,7 @@ void DDF_ConvertANIMATED(const byte *data, int size)
 	}
 
 	// DEBUG:
-	DDF_DumpFile(text);
+	// DDF_DumpFile(text);
 
 	DDF_AddFile(DDF_Anim, text, "Boom ANIMATED lump");
 }

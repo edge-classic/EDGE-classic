@@ -110,7 +110,7 @@ static void AnimStartEntry(const char *name, bool extend)
 
 static void AnimParseField(const char *field, const char *contents, int index, bool is_last)
 {
-#if (DEBUG_DDF)  
+#if (DEBUG_DDF)
 	I_Debugf("ANIM_PARSE: %s = %s;\n", field, contents);
 #endif
 
@@ -208,46 +208,6 @@ static void DDF_AnimGetPic (const char *info, void *storage)
 }
 
 
-void DDF_ParseANIMATED(const byte *data, int size)
-{
-	// handles the Boom ANIMATED lump (in a wad).
-
-	for (; size >= 23; data += 23, size -= 23)
-	{
-		if (data[0] & 0x80)  // end marker
-			break;
-
-		int speed = data[19] + (data[20] << 8);
-
-		char first[10];
-		char  last[10];
-
-		// make sure names are NUL-terminated
-		memcpy(first, data+10, 9);  last[8] = 0;
-		memcpy( last, data+ 1, 9); first[8] = 0;
-
-		I_Debugf("- ANIMATED LUMP: start '%s' : end '%s'\n", first, last);
-
-		// ignore zero-length names
-		if (!first[0] || !last[0])
-			continue;
-
-		animdef_c *def = new animdef_c;
-
-		def->name = "BOOM_ANIM";
-
-		def->Default();
-		
-		def->type = (data[0] & 1) ? animdef_c::A_Texture : animdef_c::A_Flat;
-		def->speed = MAX(1, speed);
-
-		def->startname = first;
-		def->endname   = last;
-
-		animdefs.Insert(def);
-	}
-}
-
 
 // ---> animdef_c class
 
@@ -303,6 +263,48 @@ void animdef_container_c::CleanupObject(void *obj)
 		delete a;
 
 	return;
+}
+
+//----------------------------------------------------------------------------
+
+void DDF_ConvertANIMATED(const byte *data, int size)
+{
+	// handles the Boom ANIMATED lump (in a wad).
+
+	for (; size >= 23; data += 23, size -= 23)
+	{
+		if (data[0] & 0x80)  // end marker
+			break;
+
+		int speed = data[19] + (data[20] << 8);
+
+		char first[10];
+		char  last[10];
+
+		// make sure names are NUL-terminated
+		memcpy(first, data+10, 9);  last[8] = 0;
+		memcpy( last, data+ 1, 9); first[8] = 0;
+
+		I_Debugf("- ANIMATED LUMP: start '%s' : end '%s'\n", first, last);
+
+		// ignore zero-length names
+		if (!first[0] || !last[0])
+			continue;
+
+		animdef_c *def = new animdef_c;
+
+		def->name = "BOOM_ANIM";
+
+		def->Default();
+
+		def->type = (data[0] & 1) ? animdef_c::A_Texture : animdef_c::A_Flat;
+		def->speed = MAX(1, speed);
+
+		def->startname = first;
+		def->endname   = last;
+
+		animdefs.Insert(def);
+	}
 }
 
 

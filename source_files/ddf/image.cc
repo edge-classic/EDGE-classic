@@ -30,6 +30,7 @@ static imagedef_c *dynamic_image;
 static void DDF_ImageGetType(const char *info, void *storage);
 static void DDF_ImageGetSpecial(const char *info, void *storage);
 static void DDF_ImageGetFixTrans(const char *info, void *storage);
+static void DDF_ImageGetPatches(const char *info, void *storage);
 
 // -ACB- 1998/08/10 Use DDF_MainGetLumpName for getting the..lump name.
 // -KM- 1998/09/27 Use DDF_MainGetTime for getting tics
@@ -40,6 +41,7 @@ static imagedef_c dummy_image;
 static const commandlist_t image_commands[] =
 {
 	DDF_FIELD("IMAGE_DATA", type,     DDF_ImageGetType),
+	DDF_FIELD("PATCHES",    patches,  DDF_ImageGetPatches),
 	DDF_FIELD("SPECIAL",    special,  DDF_ImageGetSpecial),
 	DDF_FIELD("X_OFFSET",   x_offset, DDF_MainGetNumeric),
 	DDF_FIELD("Y_OFFSET",   y_offset, DDF_MainGetNumeric),
@@ -139,6 +141,10 @@ static void ImageParseField(const char *field, const char *contents, int index, 
 #if (DEBUG_DDF)  
 	I_Debugf("IMAGE_PARSE: %s = %s;\n", field, contents);
 #endif
+
+	// ensure previous patches are cleared when beginning a new set
+	if (DDF_CompareName(field, "PATCHES") == 0 && index == 0)
+		dynamic_image->patches.clear();
 
 	if (DDF_MainParseField(image_commands, field, contents, (byte *)dynamic_image))
 		return;  // OK
@@ -371,6 +377,29 @@ static void DDF_ImageGetFixTrans(const char *info, void *storage)
 	}
 	else
 		DDF_Error("Unknown FIX_TRANS type: %s\n", info);
+}
+
+
+static void DDF_ImageGetPatches(const char *info, void *storage)
+{
+	// the syntax is: `NAME : XOFFSET : YOFFSET`.
+	// in the future we may accept more stuff at the end.
+
+	const char *colon1 = DDF_MainDecodeList(info, ':', true);
+	if (colon1 == NULL || colon1 == info || colon1[1] == 0)
+		DDF_Error("Malformed patch spec: %s\n", info);
+
+	const char *colon2 = DDF_MainDecodeList(colon1+1, ':', true);
+	if (colon2 == NULL || colon2 == colon1+1 || colon2[1] == 0)
+		DDF_Error("Malformed patch spec: %s\n", info);
+
+	compose_patch_c patch;
+
+	patch.name = std::string(info, (int)(colon1 - info));
+	patch.x    = atoi(colon1 + 1);
+	patch.y    = atoi(colon2 + 1);
+
+	dynamic_image->patches.push_back(patch);
 }
 
 

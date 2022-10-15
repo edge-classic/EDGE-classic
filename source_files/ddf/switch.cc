@@ -242,12 +242,14 @@ switchdef_c* switchdef_container_c::Find(const char *name)
 
 void DDF_ConvertSWITCHES(const byte *data, int size)
 {
+	// handles the Boom SWITCHES lump (in a wad).
+
 	if (size < 20)
 		return;
 
 	std::string text = "<SWITCHES>\n\n";
 
-	for (; size >= 20; data += 20, size -= 20)
+	for (; size >= 20 ; data += 20, size -= 20)
 	{
 		if (data[18] == 0)  // end marker
 			break;
@@ -262,7 +264,7 @@ void DDF_ConvertSWITCHES(const byte *data, int size)
 		I_Debugf("- SWITCHES LUMP: off '%s' : on '%s'\n", off_name, on_name);
 
 		// ignore zero-length names
-		if (!off_name[0] || !on_name[0])
+		if (off_name[0] == 0 || on_name[0] == 0)
 			continue;
 
 		// create the DDF equivalent...

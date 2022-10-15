@@ -271,40 +271,63 @@ void DDF_ConvertANIMATED(const byte *data, int size)
 {
 	// handles the Boom ANIMATED lump (in a wad).
 
-	for (; size >= 23; data += 23, size -= 23)
+	if (size < 23)
+		return;
+
+	std::string text = "<ANIMATIONS>\n\n";
+
+	for (; size >= 23 ; data += 23, size -= 23)
 	{
 		if (data[0] & 0x80)  // end marker
 			break;
 
 		int speed = data[19] + (data[20] << 8);
+		if (speed < 1)
+			speed = 1;
 
-		char first[10];
 		char  last[10];
+		char first[10];
 
 		// make sure names are NUL-terminated
-		memcpy(first, data+10, 9);  last[8] = 0;
 		memcpy( last, data+ 1, 9); first[8] = 0;
+		memcpy(first, data+10, 9);  last[8] = 0;
 
 		I_Debugf("- ANIMATED LUMP: start '%s' : end '%s'\n", first, last);
 
 		// ignore zero-length names
-		if (!first[0] || !last[0])
+		if (first[0] == 0 || last[0] == 0)
 			continue;
 
-		animdef_c *def = new animdef_c;
+		// create the DDF equivalent...
+		text += "[";
+		text += first;
+		text += "]\n";
 
-		def->name = "BOOM_ANIM";
+		if (data[0] & 1)
+			text += "type = TEXTURE;\n";
+		else
+			text += "type  = FLAT;\n";
 
-		def->Default();
+		text += "first = \"";
+		text += first;
+		text += "\";\n";
 
-		def->type = (data[0] & 1) ? animdef_c::A_Texture : animdef_c::A_Flat;
-		def->speed = MAX(1, speed);
+		text += "last  = \"";
+		text += last;
+		text += "\";\n";
 
-		def->startname = first;
-		def->endname   = last;
+		char speed_buf[64];
+		snprintf(speed_buf, sizeof(speed_buf), "%dT", speed);
 
-		animdefs.Insert(def);
+		text += "speed = ";
+		text += speed_buf;
+		text += ";\n\n";
 	}
+
+	// DEBUG:
+	DDF_DumpFile(text);
+
+	DDF_AddFile(DDF_Anim, text, "Boom ANIMATED lump");
 }
 
 

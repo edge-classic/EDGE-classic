@@ -256,11 +256,27 @@ static void ImageParseLump(const char *spec)
 }
 
 
+static void ImageParseCompose(const char *info)
+{
+	const char *colon = DDF_MainDecodeList(info, ':', true);
+
+	if (colon == NULL || colon == info || colon[1] == 0)
+		DDF_Error("Malformed image compose spec: %s\n", info);
+
+	dynamic_image->compose_w = atoi(info);
+	dynamic_image->compose_h = atoi(colon + 1);
+
+	if (dynamic_image->compose_w <= 0 || dynamic_image->compose_h <= 0)
+		DDF_Error("Illegal image compose size: %d x %d\n",
+			dynamic_image->compose_w, dynamic_image->compose_h);
+}
+
+
 static void DDF_ImageGetType(const char *info, void *storage)
 {
 	const char *colon = DDF_MainDecodeList(info, ':', true);
 
-	if (! colon || colon == info || (colon - info) >= 16 || colon[1] == 0)
+	if (colon == NULL || colon == info || (colon - info) >= 16 || colon[1] == 0)
 		DDF_Error("Malformed image type spec: %s\n", info);
 
 	char keyword[20];
@@ -293,6 +309,11 @@ static void DDF_ImageGetType(const char *info, void *storage)
 	{
 		dynamic_image->type = IMGDT_Package;
 		ImageParseInfo(colon + 1);
+	}
+	else if (DDF_CompareName(keyword, "COMPOSE") == 0)
+	{
+		dynamic_image->type = IMGDT_Compose;
+		ImageParseCompose(colon + 1);
 	}
 	else
 		DDF_Error("Unknown image type: %s\n", keyword);

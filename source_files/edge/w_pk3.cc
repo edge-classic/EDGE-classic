@@ -25,6 +25,7 @@
 #include "file.h"
 #include "filesystem.h"
 #include "path.h"
+#include "sound_types.h"
 #include "str_util.h"
 
 // DDF
@@ -745,7 +746,57 @@ static void ProcessSoundsInPack(pack_file_c *pack)
 
 static void ProcessMusicsInPack(pack_file_c *pack)
 {
-	// TODO ProcessMusicsInPack
+	data_file_c *df = pack->parent;
+
+	int d = pack->FindDir("music");
+	if (d < 0)
+		return;
+
+	std::string text = "<PLAYLISTS>\n\n";
+
+	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+	{
+		pack_entry_c& entry = pack->dirs[d].entries[i];
+
+		epi::sound_format_e fmt = epi::Sound_FilenameToFormat(entry.name);
+
+		if (fmt == epi::FMT_Unknown)
+		{
+			I_Warning("Unknown music type in PK3: %s\n", entry.name.c_str());
+			continue;
+		}
+
+		// stem must consist of only digits
+		std::string stem = epi::PATH_GetBasename(entry.name.c_str());
+
+		bool valid = stem.size() > 0;
+		for (char ch : stem)
+			if (ch < '0' || ch > '9')
+				valid = false;
+
+		if (! valid)
+		{
+			I_Warning("Non-numeric music name in PK3: %s\n", entry.name.c_str());
+			continue;
+		}
+
+		I_Debugf("- Adding music file in PK3: %s\n", entry.name.c_str());
+
+		// generate DDF for it...
+		text += "[";
+		text += stem;
+		text += "]\n";
+
+		text += "MUSICINFO=MUS:PACK:\"";
+		text += "music/";
+		text += entry.name;
+		text += "\";\n\n";
+	}
+
+	// DEBUG:
+	DDF_DumpFile(text);
+
+	DDF_AddFile(DDF_Playlist, text, df->name);
 }
 
 

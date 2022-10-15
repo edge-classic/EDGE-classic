@@ -343,6 +343,9 @@ void DDF_AddRawColourmap(const char *lump_name, int size)
 	text += length_buf;
 	text += ";\n";
 
+	// DEBUG:
+	// DDF_DumpFile(text);
+
 	DDF_AddFile(DDF_ColourMap, text, lump_name);
 
 	I_Debugf("- Added RAW colourmap '%s' start=0 length=%s\n", lump_name, length_buf);

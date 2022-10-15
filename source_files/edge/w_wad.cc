@@ -1096,7 +1096,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
 		int length = -1;
 		byte *data = W_LoadLump(animated, &length);
 
-		DDF_ParseANIMATED(data, length);
+		DDF_ConvertANIMATED(data, length);
 		W_DoneWithLump(data);
 	}
 
@@ -1107,7 +1107,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
 		int length = -1;
 		byte *data = W_LoadLump(switches, &length);
 
-		DDF_ParseSWITCHES(data, length);
+		DDF_ConvertSWITCHES(data, length);
 		W_DoneWithLump(data);
 	}
 

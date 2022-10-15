@@ -370,6 +370,10 @@ void imagedef_c::CopyDetail(const imagedef_c &src)
 	info    = src.info;
 	format  = src.format;
 
+	compose_w = src.compose_w;
+	compose_h = src.compose_h;
+	patches   = src.patches;
+
 	special  = src.special;
 	x_offset = src.x_offset;
 	y_offset = src.y_offset;
@@ -381,11 +385,14 @@ void imagedef_c::CopyDetail(const imagedef_c &src)
 
 void imagedef_c::Default()
 {
+	info.clear();
+
 	type    = IMGDT_Colour;
-	colour  = 0x000000;  // black
+	colour  = T_BLACK;
 	format  = LIF_STANDARD;
 
-	info.clear();
+	compose_w = compose_h = 0;
+	patches.clear();
 
 	special  = IMGSP_None;
 	x_offset = y_offset = 0;

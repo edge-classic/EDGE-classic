@@ -68,7 +68,10 @@ static image_namespace_e GetImageNamespace(const char *prefix)
 
 	if (DDF_CompareName(prefix, "spr") == 0)
 		return INS_Sprite;
-	
+
+	if (DDF_CompareName(prefix, "patch") == 0)
+		return INS_Patch;
+
 	DDF_Error("Invalid image prefix '%s' (use: gfx,tex,flat,spr)\n", prefix);
 	return INS_Flat; /* NOT REACHED */ 
 }

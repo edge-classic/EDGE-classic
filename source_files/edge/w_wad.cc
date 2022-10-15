@@ -1204,7 +1204,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 	delete[] raw_info;
 
 	// parse the WADFIXES lump from `edge-defs.wad` immediately
-	if (file_index == 0)
+	if (df->kind == FLKIND_EWad)
 	{
 		I_Printf("Loading WADFIXES\n");
 		std::string data = W_LoadString("WADFIXES");
@@ -1560,11 +1560,13 @@ void W_ReadCoalLumps(void)
 		data_file_c *df = data_files[f];
 		wad_file_c *wad = df->wad;
 
-		// FIXME support PK3
+		// FIXME support PK3 for coal_huds
 
 		if (wad != NULL)
 		{
-			if (wad->coal_apis >= 0)
+			// only load COALAPI from edge-defs, because (like WADFIXES)
+			// it is not something that user mods should mess with.
+			if (wad->coal_apis >= 0 && df->kind == FLKIND_EWad)
 				VM_LoadLumpOfCoal(wad->coal_apis);
 
 			if (wad->coal_huds >= 0)

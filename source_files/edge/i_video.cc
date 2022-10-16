@@ -37,7 +37,7 @@ DEF_CVAR(v_sync,  "1", CVAR_ARCHIVE)
 
 // this is the Monitor Size setting, really an aspect ratio.
 // it defaults to 16:9, as that is the most common monitor size nowadays.
-DEF_CVAR(v_monitorsize, "1.7777", CVAR_ARCHIVE)
+DEF_CVAR(v_monitorsize, "1.77777", CVAR_ARCHIVE)
 
 // these are zero until I_StartupGraphics is called.
 // after that they never change (we assume the desktop won't become other
@@ -170,7 +170,7 @@ void I_StartupGraphics(void)
 	if (M_CheckParm("-nograb"))
 		in_grab = 0;
 
-	// -AJA- 2002: FIXME these are wrong (probably ignored though)
+	// -AJA- FIXME these are wrong (probably ignored though)
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE,     5);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,   5);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,    5);
@@ -408,14 +408,6 @@ void I_ShutdownGraphics(void)
 	}
 
 	gladLoaderUnloadGL();
-}
-
-
-// FIXME this should go away!
-void I_GetDesktopSize(int *width, int *height)
-{
-	*width  = v_desktop_width.d;
-	*height = v_desktop_height.d;
 }
 
 //--- editor settings ---

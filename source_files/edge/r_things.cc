@@ -174,6 +174,14 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 		trans = 1.0f;
 	}
 
+	//Lobo: no sense having the zoom crosshair fuzzy
+	if (which == ps_weapon && viewiszoomed)
+	{
+		is_fuzzy = false;
+		trans = 1.0f;
+	}
+	
+
 	trans *= psp->visibility;
 
 	if (trans <= 0)

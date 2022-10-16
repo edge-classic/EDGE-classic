@@ -1062,7 +1062,7 @@ static void LoadHexenLineDefs(int lump)
 	W_DoneWithLump(data);
 }
 
-static sector_t *DetermineSubsectorSector(subsector_t *ss, bool fallback)
+static sector_t *DetermineSubsectorSector(subsector_t *ss, int pass)
 {
 	const seg_t *seg;
 
@@ -1087,7 +1087,7 @@ static sector_t *DetermineSubsectorSector(subsector_t *ss, bool fallback)
 			return seg->partner->front_sub->sector;
 	}
 
-	if (fallback)
+	if (pass == 1)
 	{
 		for (seg = ss->segs ; seg != NULL ; seg = seg->sub_next)
 		{
@@ -1096,12 +1096,22 @@ static sector_t *DetermineSubsectorSector(subsector_t *ss, bool fallback)
 		}
 	}
 
+	if (pass == 2)
+		return &sectors[0];
+
 	return NULL;
 }
 
-static void AssignSubsectorsPass(int pass, bool fallback)
+static bool AssignSubsectorsPass(int pass)
 {
+	// pass 0 : ignore self-ref lines.
+	// pass 1 : use them.
+	// pass 2 : handle extreme brokenness.
+	//
+	// returns true if progress was made.
+
 	int null_count = 0;
+	bool progress  = false;
 
 	for (int i = 0 ; i < numsubsectors ; i++)
 	{
@@ -1111,10 +1121,12 @@ static void AssignSubsectorsPass(int pass, bool fallback)
 		{
 			null_count += 1;
 
-			ss->sector = DetermineSubsectorSector(ss, fallback);
+			ss->sector = DetermineSubsectorSector(ss, pass);
 
 			if (ss->sector != NULL)
 			{
+				progress = true;
+
 				// link subsector into parent sector's list.
 				// order is not important, so add it to the head of the list.
 				ss->sec_next = ss->sector->subsectors;
@@ -1123,8 +1135,11 @@ static void AssignSubsectorsPass(int pass, bool fallback)
 		}
 	}
 
-	if (fallback && null_count > 0)
-		I_Error("Bad WAD: level %s has crazy SSECTORS.\n", currmap->lump.c_str());
+	/* DEBUG
+	fprintf(stderr, "** pass %d : %d : %d\n", pass, null_count, progress ? 1 : 0);
+	*/
+
+	return progress;
 }
 
 static void AssignSubsectorsToSectors()
@@ -1134,8 +1149,15 @@ static void AssignSubsectorsToSectors()
 	//           touching such lines should NOT be assigned to that line's
 	//           sector, but rather to the "outer" sector.
 
-	for (int pass = 0 ; pass < 10 ; pass++)
-		AssignSubsectorsPass(pass, pass == 9);
+	while (AssignSubsectorsPass(0))
+	{ }
+
+	while (AssignSubsectorsPass(1))
+	{ }
+
+	// the above *should* handle everything, so this pass is only needed
+	// for extremely broken nodes or maps.
+	AssignSubsectorsPass(2);
 }
 
 // Adapted from EDGE 2.x's ZNode loading routine; only handles XGL3 as that is all

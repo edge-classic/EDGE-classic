@@ -35,11 +35,22 @@ int graphics_shutdown = 0;
 DEF_CVAR(in_grab, "1", CVAR_ARCHIVE)
 DEF_CVAR(v_sync,  "1", CVAR_ARCHIVE)
 
+// this is the Monitor Size setting, really an aspect ratio.
+// it defaults to 16:9, as that is the most common monitor size nowadays.
+DEF_CVAR(v_monitorsize, "1.7777", CVAR_ARCHIVE)
+
 // these are zero until I_StartupGraphics is called.
 // after that they never change (we assume the desktop won't become other
 // resolutions while EC is running).
-DEF_CVAR(v_desktop_width,  "0", CVAR_ROM);
-DEF_CVAR(v_desktop_height, "0", CVAR_ROM);
+DEF_CVAR(v_desktop_width,  "0", CVAR_ROM)
+DEF_CVAR(v_desktop_height, "0", CVAR_ROM)
+
+double pixel_aspect = 1.0;
+
+// when > 0, this will force the pixel_aspect to a particular value, for
+// cases where a normal logic fails.  however, it will apply to *all* modes,
+// including windowed mode.
+DEF_CVAR(v_force_pixelaspect, "0", CVAR_ARCHIVE)
 
 static bool grab_state;
 
@@ -81,6 +92,44 @@ void I_GrabCursor(bool enable)
 	{
 		SDL_SetRelativeMouseMode(SDL_FALSE);
 	}
+}
+
+
+static void I_DeterminePixelAspect()
+{
+	// the pixel aspect is the shape of pixels on the monitor for the current
+	// video mode.  on modern LCDs (etc) it is usuall 1.0 (1:1).  knowing this
+	// is critical to get things drawn correctly.  for example, Doom assets
+	// assumed a 320x200 resolution on a 4:3 monitor, a pixel aspect of 5:6 or
+	// 0.833333, and we must adjust image drawing to get "correct" results.
+
+	// allow user to override
+	if (v_force_pixelaspect.f > 0.1)
+	{
+		pixel_aspect = v_force_pixelaspect.f;
+		return;
+	}
+
+	// if not a fullscreen mode, check for a modern LCD (etc) monitor -- they
+	// will have square pixels (1:1 aspect).
+	bool is_crt = (v_desktop_width.d < v_desktop_height.d) * 7 / 5;
+
+	bool is_fullscreen = (DISPLAYMODE == 1);
+	if (is_fullscreen && SCREENWIDTH == v_desktop_width.d && SCREENHEIGHT = v_desktop_height.d)
+		is_fullscreen = false;
+
+	if (! is_fullscreen && ! is_crt)
+	{
+		pixel_aspect = 1.0;
+		return;
+	}
+
+	// in fullscreen modes, or a CRT monitor, compute the pixel aspect from
+	// the current resolution and Monitor Size setting.  this assumes that the
+	// video mode is filling the whole monitor (i.e. the monitor is not doing
+	// any letter-boxing or pillar-boxing).  DPI setting does not matter here.
+
+	pixel_aspect = v_monitorsize.f * (double)SCREENHEIGHT / (double)SCREENWIDTH;
 }
 
 

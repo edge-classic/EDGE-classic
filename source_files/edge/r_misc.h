@@ -60,21 +60,23 @@ extern angle_t normalfov, zoomedfov;
 extern bool viewiszoomed;
 
 extern cvar_c r_fov;
-extern cvar_c v_monitorsize;
 
 extern int framecount;
 
 extern struct mobj_s *background_camera_mo;
 
 
-#define DOOM_ASPECT  (320.0f / 200.0f)
-#define DOOM_PIXEL_ASPECT  0.8333
-extern float pixel_aspect;
+#define DOOM_SCREEN_ASPECT  (320.0f / 200.0f)
+#define DOOM_PIXEL_ASPECT   (5.0f / 6.0f)
+
+extern cvar_c v_pixelaspect;
+extern cvar_c v_monitorsize;
 
 // Values/tables adapted from Quake 3 GPL release
 #define FUNCTABLE_SIZE 1024
 #define FUNCTABLE_MASK FUNCTABLE_SIZE - 1
 #define DEG2RAD( a ) (( a * M_PI ) / 180.0f)
+
 extern float *r_sintable;
 extern float *r_squaretable;
 extern float *r_sawtoothtable;

@@ -179,6 +179,7 @@ static void M_ChangeResFull(int keypressed);
 static void M_LanguageDrawer(int x, int y, int deltay);
 static void M_ChangeLanguage(int keypressed);
 static void M_ChangeSoundfont(int keypressed);
+static void InitMonitorSize();
 
 static char YesNo[]     = "Off/On";  // basic on/off
 static char CrossH[]    = "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double";
@@ -1709,10 +1710,10 @@ static void InitMonitorSize()
 
 static void M_ChangeMonitorSize(int key)
 {
-	static const float ratios[5] =
+	static const float ratios[6] =
 	{
-		1.2500, 1.3333, 1.5000,
-		1.6000, 1.7777, 2.3333
+		1.25000, 1.33333, 1.50000,   // 5:4    4:3    3:2
+		1.60000, 1.77777, 2.33333    // 16:9  16:10  21:9
 	};
 
 	monitor_size = CLAMP(0, monitor_size, 5);
@@ -1917,7 +1918,7 @@ static void M_ChangeLanguage(int keypressed)
 static void M_ChangeSoundfont(int keypressed)
 {
 	int sf2_pos = -1;
-	for(int i=0; i < available_soundfonts.size(); i++)
+	for(int i=0; i < (int)available_soundfonts.size(); i++)
 	{
 		if (epi::case_cmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
 		{
@@ -1941,7 +1942,7 @@ static void M_ChangeSoundfont(int keypressed)
 	}
 	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
 	{
-		if (sf2_pos + 1 >= available_soundfonts.size())
+		if (sf2_pos + 1 >= (int)available_soundfonts.size())
 			sf2_pos = 0;
 		else
 			sf2_pos++;

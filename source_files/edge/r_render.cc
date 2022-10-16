@@ -92,8 +92,6 @@ mobj_t *view_cam_mo;
 
 float view_expand_w;
 
-extern float pixel_aspect;
-
 
 static int checkcoord[12][4] =
 {

@@ -108,8 +108,6 @@ extern int hudtic;
 float HUD_FontWidth(void);
 float HUD_FontHeight(void);
 
-float HUD_Aspect(void);
-
 float HUD_StringWidth(const char *str);
 float HUD_StringHeight(const char *str);
 

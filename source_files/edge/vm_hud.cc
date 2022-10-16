@@ -34,13 +34,13 @@
 #include "e_player.h"
 #include "hu_font.h"
 #include "hu_draw.h"
+#include "r_misc.h"
 #include "r_modes.h"
 #include "am_map.h"     // AM_Drawer
 #include "r_colormap.h"
 #include "s_sound.h"
-#if defined _MSC_VER || defined __APPLE__ || defined __unix__
+
 #include <cmath>
-#endif
 
 
 extern coal::vm_c *ui_vm;
@@ -655,9 +655,7 @@ static void HD_play_sound(coal::vm_c *vm, int argc)
 //
 static void HD_screen_aspect(coal::vm_c *vm, int argc)
 {
-	//1.333, 1.777, 1.6, 1.5, 2.4
-	float TempAspect= HUD_Aspect();
-	TempAspect= std::ceil(TempAspect * 100.0) / 100.0;
+	float TempAspect= std::ceil(v_pixelaspect.f * 100.0) / 100.0;
 	
 	vm->ReturnFloat(TempAspect);
 }

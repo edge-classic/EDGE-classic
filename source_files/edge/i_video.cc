@@ -45,7 +45,7 @@ DEF_CVAR(v_monitorsize, "1.7777", CVAR_ARCHIVE)
 DEF_CVAR(v_desktop_width,  "0", CVAR_ROM)
 DEF_CVAR(v_desktop_height, "0", CVAR_ROM)
 
-double pixel_aspect = 1.0;
+DEF_CVAR(v_pixelaspect, "1.0", CVAR_ROM);
 
 // when > 0, this will force the pixel_aspect to a particular value, for
 // cases where a normal logic fails.  however, it will apply to *all* modes,
@@ -106,7 +106,7 @@ static void I_DeterminePixelAspect()
 	// allow user to override
 	if (v_force_pixelaspect.f > 0.1)
 	{
-		pixel_aspect = v_force_pixelaspect.f;
+		v_pixelaspect = v_force_pixelaspect.f;
 		return;
 	}
 
@@ -115,12 +115,12 @@ static void I_DeterminePixelAspect()
 	bool is_crt = (v_desktop_width.d < v_desktop_height.d) * 7 / 5;
 
 	bool is_fullscreen = (DISPLAYMODE == 1);
-	if (is_fullscreen && SCREENWIDTH == v_desktop_width.d && SCREENHEIGHT = v_desktop_height.d)
+	if (is_fullscreen && SCREENWIDTH == v_desktop_width.d && SCREENHEIGHT == v_desktop_height.d)
 		is_fullscreen = false;
 
 	if (! is_fullscreen && ! is_crt)
 	{
-		pixel_aspect = 1.0;
+		v_pixelaspect = 1.0f;
 		return;
 	}
 
@@ -129,7 +129,7 @@ static void I_DeterminePixelAspect()
 	// video mode is filling the whole monitor (i.e. the monitor is not doing
 	// any letter-boxing or pillar-boxing).  DPI setting does not matter here.
 
-	pixel_aspect = v_monitorsize.f * (double)SCREENHEIGHT / (double)SCREENWIDTH;
+	v_pixelaspect = v_monitorsize.f * (float)SCREENHEIGHT / (float)SCREENWIDTH;
 }
 
 
@@ -338,6 +338,10 @@ bool I_SetScreenSize(scrmode_c *mode)
 		I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
 			mode->width, mode->height, mode->depth);
 	}
+
+	I_DeterminePixelAspect();
+
+	I_Printf("Pixel aspect: %1.3f\n", v_pixelaspect.f);
 
 	// -AJA- turn off cursor -- BIG performance increase.
 	//       Plus, the combination of no-cursor + grab gives 

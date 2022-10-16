@@ -379,6 +379,9 @@ void I_FinishFrame(void)
 
 	if (v_sync.CheckModified())
 		SDL_GL_SetSwapInterval(v_sync.d ? 1 : 0);
+
+	if (v_monitorsize.CheckModified() || v_force_pixelaspect.CheckModified())
+		I_DeterminePixelAspect();
 }
 
 

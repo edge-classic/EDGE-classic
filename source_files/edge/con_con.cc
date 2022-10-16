@@ -2,7 +2,7 @@
 //  EDGE Console Interface code.
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2009  The EDGE Team.
+//  Copyright (c) 1999-2022  The EDGE Team.
 //  Copyright (c) 1998       Randy Heit
 // 
 //  This program is free software; you can redistribute it and/or

@@ -1712,8 +1712,8 @@ static void M_ChangeMonitorSize(int key)
 {
 	static const float ratios[6] =
 	{
-		1.25000, 1.33333, 1.50000,   // 5:4    4:3    3:2
-		1.60000, 1.77777, 2.33333    // 16:9  16:10  21:9
+		1.25000, 1.33333, 1.50000,   // 5:4     4:3   3:2
+		1.60000, 1.77777, 2.33333    // 16:10  16:9  21:9
 	};
 
 	monitor_size = CLAMP(0, monitor_size, 5);

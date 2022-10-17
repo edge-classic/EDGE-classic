@@ -320,6 +320,12 @@ typedef enum
 {
 	// Gravity affects this thing as if it were 1/8 of the normal value
 	MBF21_LOGRAV = (1 << 0),
+
+	MBF21_SHORTMRANGE = (1 << 1),
+
+	MBF21_FORCERADIUSDMG = (1 << 4),
+
+	MBF21_LONGMELEE = (1 << 8),
 }
 mobjmbf21flag_t;
 

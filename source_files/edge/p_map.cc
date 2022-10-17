@@ -2026,7 +2026,11 @@ static bool PIT_RadiusAttack(mobj_t * thing, void *data)
 	// -ACB- 1998/06/14 Changed enum reference to extended flag check.
 	//
 	if (thing->info->extendedflags & EF_EXPLODEIMMUNE)
-		return true;
+	{
+		// MBF21 FORCERADIUSDMG flag
+		if (!(bomb_I.source->mbf21flags & MBF21_FORCERADIUSDMG))
+			return true;
+	}
 
 	// -KM- 1999/01/31 Use thing->height/2
 	dx = (float)fabs(thing->x - bomb_I.spot->x);

@@ -27,10 +27,10 @@ typedef enum
 	// Weapon is silent
 	MBF21_SILENT = 2,
 
-	// Weapon won't autofile when swapped to
+	// Weapon won't autofire when swapped to
 	MBF21_NOAUTOFIRE = 4,
 
-	// Monsters consider it a melee weapon
+	// Monsters consider it a melee weapon (currently unused)
 	MBF21_FLEEMELEE = 8,
 
 	// Can be switched away from when ammo is picked up

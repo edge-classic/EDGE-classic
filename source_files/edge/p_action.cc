@@ -235,7 +235,7 @@ static bool DecideMeleeAttack(mobj_t * object, const atkdef_c * attack)
 	if (level_flags.true3dgameplay)
 		distance = P_ApproxDistance(target->z - object->z, distance);
 
-	meleedist = attack ? attack->range : MELEERANGE;
+	meleedist = attack ? attack->range : (object->mbf21flags & MBF21_LONGMELEE ? LONGMELEERANGE : MELEERANGE);
 	meleedist += target->radius - 20.0f;	// Check the thing's actual radius		
 
 	if (distance >= meleedist)
@@ -303,8 +303,17 @@ static bool DecideRangeAttack(mobj_t * object)
 	if (attack->range && distance >= attack->range)
 		return false;
 
+	// MBF21 SHORTMRANGE flag
+	if ((object->mbf21flags & MBF21_SHORTMRANGE) &&
+		distance >= SHORTMISSILERANGE)
+		return false;
+
 	// Object is too close to target
 	if (attack->tooclose && attack->tooclose >= distance)
+		return false;
+
+	if ((object->mbf21flags & MBF21_LONGMELEE) &&
+		LONGMELEERANGE >= distance)
 		return false;
 
 	// Object likes to fire? if so, double the chance of it happening

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Data Definition File Code (Language handling settings)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2008  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2
@@ -44,15 +44,22 @@
 language_c language;   // -ACB- 2004/07/28 Languages instance
 
 
-static void SanitizeRefName(std::string& s)
+std::string DDF_SanitizeName(const std::string& s)
 {
+	std::string out;
+
 	for (size_t i = 0 ; i < s.size() ; i++)
 	{
-		if (s[i] == ' ')
-			s[i] = '_';
+		if (s[i] == ' ' || s[i] == '_')
+			continue;
 
-		s[i] = (char)toupper(s[i]);
+		out.push_back((char) toupper(s[i]));
 	}
+
+	if (out.empty())
+		out.push_back('_');
+
+	return out;
 }
 
 
@@ -76,8 +83,7 @@ public:
 	void AddEntry(const char *refname, const char *value)
 	{
 		// ensure ref name is uppercase, with no spaces
-		std::string ref(refname);
-		SanitizeRefName(ref);
+		std::string ref = DDF_SanitizeName(refname);
 
 		refs[ref] = value;
 	}
@@ -264,14 +270,20 @@ bool language_c::Select(int idx)
 
 bool language_c::IsValidRef(const char *refname)
 {
+	if (refname == NULL)
+		return false;
+
 	if (current < 0 || current >= (int)choices.size())
 		return false;
 
+	// ensure ref name is uppercase, with no spaces
+	std::string ref = DDF_SanitizeName(refname);
+
 	if (umap != NULL)
-		if (umap->HasEntry(refname))
+		if (umap->HasEntry(ref))
 			return true;
 
-	return choices[current]->HasEntry(refname);
+	return choices[current]->HasEntry(ref);
 }
 
 
@@ -285,8 +297,7 @@ const char * language_c::operator[](const char *refname)
 		return refname;
 
 	// ensure ref name is uppercase, with no spaces
-	std::string ref(refname);
-	SanitizeRefName(ref);
+	std::string ref = DDF_SanitizeName(refname);
 
 	if (umap != NULL)
 	{

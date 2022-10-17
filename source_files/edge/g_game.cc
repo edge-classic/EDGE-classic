@@ -30,7 +30,7 @@
 
 #include "endianess.h"
 #include "path.h"
-#include "str_format.h"
+#include "str_util.h"
 #include "filesystem.h"
 
 #include "con_main.h"

@@ -26,15 +26,13 @@
 #ifndef __DDF_TYPE_H__
 #define __DDF_TYPE_H__
 
-#include "utility.h"
-
-#include <string>
+#include "epi.h"
+#include "collection.h"
 
 class mobjtype_c;
 
 
 // RGB 8:8:8
-// (FIXME: use epi::colour_c)
 typedef unsigned int rgbcol_t;
 
 #define RGB_NO_VALUE  0x01FEFE  /* bright CYAN */

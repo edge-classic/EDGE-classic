@@ -34,7 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "str_format.h"
+#include "str_util.h"
 
 #include "colormap.h"
 
@@ -874,7 +874,7 @@ bool SR_LevelGetColmap(void *storage, int index, void *extra)
 		(*dest) = NULL;
 
 	// -AJA- 2008/03/15: backwards compatibility
-	if (*dest && stricmp((*dest)->name.c_str(), "NORMAL") == 0)
+	if (*dest && epi::case_cmp((*dest)->name.c_str(), "NORMAL") == 0)
 		*dest = NULL;
 
 	SV_FreeString(str);

@@ -32,7 +32,7 @@ pl_entry_container_c playlist;
 static void DDF_MusicParseInfo(const char *info)
 {
 	static const char *const musstrtype[] = { "UNKNOWN", "CD", "MIDI", "MUS", "OGG", "MP3", "MOD", "GME", "SID", NULL };
-	static const char *const musinftype[] = { "UNKNOWN", "TRACK", "LUMP", "FILE", NULL };
+	static const char *const musinftype[] = { "UNKNOWN", "TRACK", "LUMP", "FILE", "PACK", NULL };
 
 	char charbuff[256];
 	int pos,i;
@@ -59,13 +59,13 @@ static void DDF_MusicParseInfo(const char *info)
 	charbuff[i] = 0;
 
 	i=MUS_UNKNOWN;
-	while (i!=ENDOFMUSTYPES && stricmp(charbuff, musstrtype[i]) != 0)
+	while (i!=ENDOFMUSTYPES && epi::case_cmp(charbuff, musstrtype[i]) != 0)
 		i++;
 
 	if (i==ENDOFMUSTYPES)
 	{
 		i=MUSINF_UNKNOWN;
-		while (musinftype[i] != NULL && stricmp(charbuff, musinftype[i]) != 0)
+		while (musinftype[i] != NULL && epi::case_cmp(charbuff, musinftype[i]) != 0)
 			i++;
 		if (i==ENDOFMUSINFTYPES)
 			DDF_Error("DDF_MusicParseInfo: Unknown music type: '%s'\n", charbuff);
@@ -102,7 +102,7 @@ static void DDF_MusicParseInfo(const char *info)
 	charbuff[i] = 0;
 
 	i=MUSINF_UNKNOWN;
-	while (musinftype[i] != NULL && stricmp(charbuff, musinftype[i]) != 0)
+	while (musinftype[i] != NULL && epi::case_cmp(charbuff, musinftype[i]) != 0)
 		i++;
 
 	if (i==ENDOFMUSINFTYPES)

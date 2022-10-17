@@ -35,6 +35,7 @@ static colourmap_c dummy_colmap;
 static const commandlist_t colmap_commands[] =
 {
 	DDF_FIELD("LUMP",    lump_name, DDF_MainGetLumpName),
+	DDF_FIELD("PACK",    pack_name, DDF_MainGetString),
 	DDF_FIELD("START",   start,     DDF_MainGetNumeric),
 	DDF_FIELD("LENGTH",  length,    DDF_MainGetNumeric),
 	DDF_FIELD("SPECIAL", special,   DDF_ColmapGetSpecial),
@@ -69,7 +70,7 @@ static void ColmapStartEntry(const char *name, bool extend)
 	{
 		dynamic_colmap->Default();
 
-		if (strnicmp(name, "TEXT", 4) == 0)
+		if (epi::prefix_case_cmp(name, "TEXT") == 0)
 			dynamic_colmap->special = COLSP_Whiten;
 
 		return;
@@ -81,7 +82,7 @@ static void ColmapStartEntry(const char *name, bool extend)
 	dynamic_colmap->name = name;
 
 	// make sure fonts get whitened properly (as the default)
-	if (strnicmp(name, "TEXT", 4) == 0)
+	if (epi::prefix_case_cmp(name, "TEXT") == 0)
 		dynamic_colmap->special = COLSP_Whiten;
 
 	colourmaps.Insert(dynamic_colmap);
@@ -115,15 +116,20 @@ static void ColmapFinishEntry(void)
 	}
 
 	// don't need a length when using GL_COLOUR
-	if (! dynamic_colmap->lump_name.empty() && dynamic_colmap->length <= 0)
+	if (! dynamic_colmap->lump_name.empty() &&
+		! dynamic_colmap->pack_name.empty() &&
+		dynamic_colmap->length <= 0)
 	{
 		DDF_WarnError("Bad LENGTH value for colmap: %d\n", dynamic_colmap->length);
 		dynamic_colmap->length = 1;
 	}
 
-	if (dynamic_colmap->lump_name.empty() && dynamic_colmap->gl_colour == RGB_NO_VALUE)
-		DDF_Error("Colourmap entry missing LUMP or GL_COLOUR.\n");
-
+	if (dynamic_colmap->lump_name.empty() &&
+		dynamic_colmap->pack_name.empty() &&
+		dynamic_colmap->gl_colour == RGB_NO_VALUE)
+	{
+		DDF_Error("Colourmap entry missing LUMP, PACK or GL_COLOUR.\n");
+	}
 }
 
 
@@ -200,41 +206,6 @@ void DDF_ColmapGetSpecial(const char *info, void *storage)
 			DDF_WarnError("DDF_ColmapGetSpecial: Unknown Special: %s", info);
 			break;
 	}
-}
-
-
-// 
-// This is used to make entries for lumps between C_START and C_END
-// markers in a (BOOM) WAD file.
-//
-void DDF_ColourmapAddRaw(const char *lump_name, int size)
-{
-	if (size < 256)
-	{
-		I_Warning("WAD Colourmap '%s' too small (%d < %d)\n", lump_name, size, 256);
-		return;
-	}
-
-	colourmap_c *def = colourmaps.Lookup(lump_name);
-
-	// not found, create a new one
-	if (! def)
-	{
-		def = new colourmap_c;
-
-		colourmaps.Insert(def);
-	}
-
-	def->Default();
-
-	def->name = lump_name;
-	def->lump_name = lump_name;
-
-	def->start  = 0;
-	def->length = MIN(32, size / 256);
-
-	I_Debugf("- Added RAW colourmap '%s' start=%d length=%d\n",
-		lump_name, def->start, def->length);
 }
 
 
@@ -341,6 +312,58 @@ colourmap_c* colourmap_container_c::Lookup(const char *refname)
 	}
 
 	return NULL;
+}
+
+//----------------------------------------------------------------------------
+
+//
+// This is used to make entries for lumps between C_START and C_END
+// markers in a (BOOM) WAD file.
+//
+void DDF_AddRawColourmap(const char *name, int size, const char *pack_name)
+{
+	if (size < 256)
+	{
+		I_Warning("WAD Colourmap '%s' too small (%d < %d)\n", name, size, 256);
+		return;
+	}
+
+	// limit length to 32
+	size = std::min(32, size / 256);
+
+	std::string text = "<COLOURMAPS>\n\n";
+
+	text += "[";
+	text += name;
+	text += "]\n";
+
+	if (pack_name != NULL)
+	{
+		text += "pack   = \"";
+		text += pack_name;
+		text += "\";\n";
+	}
+	else
+	{
+		text += "lump   = \"";
+		text += name;
+		text += "\";\n";
+	}
+
+	char length_buf[64];
+	snprintf(length_buf, sizeof(length_buf), "%d", size);
+
+	text += "start  = 0;\n";
+	text += "length = ";
+	text += length_buf;
+	text += ";\n";
+
+	// DEBUG:
+	DDF_DumpFile(text);
+
+	DDF_AddFile(DDF_ColourMap, text, pack_name ? pack_name : name);
+
+	I_Debugf("- Added RAW colourmap '%s' start=0 length=%s\n", name, length_buf);
 }
 
 //--- editor settings ---

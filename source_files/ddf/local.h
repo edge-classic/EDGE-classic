@@ -20,17 +20,14 @@
 #define __DDF_LOCAL_H__
 
 #include "epi.h"
-#include "str_format.h"
+#include "arrays.h"
 
 #include "types.h"
 #include "main.h"
-#include <cstddef>
 #include "states.h"
 
-#ifdef _WIN32
-#undef min
-#undef max
-#endif
+#include <cstddef>
+
 
 //
 // This structure forms the basis for the command checking, it hands back a code

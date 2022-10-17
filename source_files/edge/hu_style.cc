@@ -2,7 +2,7 @@
 //  EDGE Heads-up-display Style code
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 2004-2009  The EDGE Team.
+//  Copyright (c) 2004-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -74,7 +74,7 @@ void style_c::DrawBackground()
 
 	HUD_SetAlpha(alpha);
 
-	float WS_x = -130; // Lobo: fixme, this shoud be calculated, not arbitrary hardcoded ;)
+	float WS_x = -130; // Lobo: fixme, this should be calculated, not arbitrary hardcoded ;)
 	float WS_w = SCREENWIDTH; //580;
 
 	if (! bg_image)
@@ -87,9 +87,9 @@ void style_c::DrawBackground()
 		
 		if (def->bg.colour != RGB_NO_VALUE)
 			HUD_SolidBox(WS_x, 0, WS_w, 200, def->bg.colour);
-		else
+		/*else
 			HUD_SolidBox(WS_x, 0, WS_w, 200, T_BLACK);
-
+*/
 		HUD_SetAlpha();
 		return;
 	}

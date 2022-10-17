@@ -2,7 +2,7 @@
 //  EDGE Specials Lines & Floor Code
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2009  The EDGE Team.
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -1722,7 +1722,7 @@ static inline void PlayerInProperties(player_t *player,
 		player->mo->z >= f_h && player->mo->z <= c_h)
 	{
 		player->wet_feet = true;
-		P_HitFloor(player->mo);
+		P_HitLiquidFloor(player->mo);
 	}
 
 	if (special->special_flags & SECSP_VacuumSFX)
@@ -1731,9 +1731,9 @@ static inline void PlayerInProperties(player_t *player,
 	if (special->special_flags & SECSP_ReverbSFX)
 	{
 		ddf_reverb = true;
-		if (strcasecmp(special->reverb_type.c_str(), "REVERB") == 0)
+		if (epi::case_cmp(special->reverb_type, "REVERB") == 0)
 			ddf_reverb_type = 1;
-		else if (strcasecmp(special->reverb_type.c_str(), "ECHO") == 0)
+		else if (epi::case_cmp(special->reverb_type, "ECHO") == 0)
 			ddf_reverb_type = 2;
 		ddf_reverb_delay = MAX(0, special->reverb_delay);
 		ddf_reverb_ratio = CLAMP(0, special->reverb_ratio, 100);
@@ -1784,7 +1784,7 @@ static inline void PlayerInProperties(player_t *player,
 	{
 		player->secretcount++;
 
-		CON_MessageLDF("FoundSecret"); //Lobo: get text from language.ddf
+		CON_ImportantMessageLDF("FoundSecret"); //Lobo: get text from language.ddf
 		S_StartFX(player->mo->info->secretsound,
 				P_MobjGetSfxCategory(player->mo),
 				player->mo);

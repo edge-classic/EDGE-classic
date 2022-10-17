@@ -44,6 +44,7 @@
 #include "r_shader.h"
 #include "r_texgl.h"
 #include "r_units.h"
+#include "w_files.h"
 #include "w_wad.h"
 
 // -AJA- 1999/06/30: added this
@@ -236,32 +237,41 @@ void V_SetPalette(int type, float amount)
 //
 static void LoadColourmap(const colourmap_c * colm)
 {
-	int lump;
-	int size;
-	const byte *data;
-	const byte *data_in;
+	int   size;
+	byte *data;
 
 	// we are writing to const marked memory here. Here is the only place
 	// the cache struct is touched.
-	colmapcache_t *cache = (colmapcache_t *)&colm->cache; // Intentional Const Override
+	colmapcache_t *cache = (colmapcache_t *)&colm->cache;
 
-	lump = W_GetNumForName(colm->lump_name.c_str());
-	size = W_LumpLength(lump);
-	data = (const byte*)W_CacheLumpNum(lump);
+	if (colm->pack_name != "")
+	{
+		epi::file_c *f = W_OpenPackFile(colm->pack_name);
+		if (f == NULL)
+			I_Error("No such colormap file: %s\n", colm->pack_name.c_str());
+		size = f->GetLength();
+		data = f->LoadIntoMemory();
+		delete f;  // close file
+	}
+	else
+	{
+		data = W_LoadLump(colm->lump_name.c_str(), &size);
+	}
 
 	if ((colm->start + colm->length) * 256 > size)
 	{
 		I_Error("Colourmap [%s] is too small ! (LENGTH too big)\n", colm->name.c_str());
 	}
 
-	data_in = data + (colm->start * 256);
-
 	cache->size = colm->length * 256;
 	cache->data = new byte[cache->size];
 
-	memcpy(cache->data, data_in, cache->size);
+	memcpy(cache->data, data + (colm->start * 256), cache->size);
 
-	W_DoneWithLump(data);
+	if (colm->pack_name != "")
+		delete[] data;
+	else
+		W_DoneWithLump(data);
 }
 
 
@@ -408,7 +418,7 @@ void TransformColourmap(colourmap_c *colmap)
 {
 	const byte *table = colmap->cache.data;
 
-	if (table == NULL && ! colmap->lump_name.empty())
+	if (table == NULL && (! colmap->lump_name.empty() || ! colmap->pack_name.empty()))
 	{
 		LoadColourmap(colmap);
 

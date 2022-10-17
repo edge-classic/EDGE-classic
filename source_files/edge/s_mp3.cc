@@ -1,10 +1,10 @@
 //----------------------------------------------------------------------------
 //  EDGE MP3 Music Player
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2004-2009  The EDGE Team.
 //  Adapted from the EDGE Ogg Player in 2021 - Dashodanger
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2
@@ -16,12 +16,6 @@
 //  GNU General Public License for more details.
 //
 //----------------------------------------------------------------------------
-//
-// -ACB- 2004/08/18 Written: 
-//
-// Based on a tutorial at DevMaster.net:
-// http://www.devmaster.net/articles/openal-tutorials/lesson8.php
-//
 
 #include "i_defs.h"
 
@@ -49,25 +43,25 @@ class mp3player_c : public abstract_music_c
 public:
 	 mp3player_c();
 	~mp3player_c();
-private:
 
+private:
 	enum status_e
 	{
 		NOT_LOADED, PLAYING, PAUSED, STOPPED
 	};
-	
+
 	int status;
+
 	bool looping;
+	bool is_stereo;
 
 	mp3dec_ex_t mp3_track;
-
-	bool is_stereo;
+	mp3dec_io_t io;
 
 	s16_t *mono_buffer;
 
 public:
-	bool OpenLump(const char *lumpname);
-	bool OpenFile(const char *filename);
+	bool OpenFile(epi::file_c *file);
 
 	virtual void Close(void);
 
@@ -81,11 +75,9 @@ public:
 	virtual void Volume(float gain);
 
 private:
-
 	void PostOpenInit(void);
 
 	bool StreamIntoBuffer(epi::sound_data_c *buf);
-	
 };
 
 //----------------------------------------------------------------------------
@@ -130,7 +122,6 @@ static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
 
 bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
 {
-
 	s16_t *data_buf;
 
 	if (is_stereo && !dev_stereo)
@@ -173,59 +164,37 @@ void mp3player_c::Volume(float gain)
 }
 
 
-bool mp3player_c::OpenLump(const char *lumpname)
+static size_t mp3player_epi_read(void *buf, size_t size, void *user_data)
 {
-	SYS_ASSERT(lumpname);
+	epi::file_c *file = (epi::file_c *)user_data;
 
-	if (status != NOT_LOADED)
-		Close();
-
-	int lump = W_CheckNumForName(lumpname);
-	if (lump < 0)
-	{
-		I_Warning("mp3player_c: LUMP '%s' not found.\n", lumpname);
-		return false;
-	}
-
-	epi::file_c *F = W_OpenLump(lump);
-
-	int length = F->GetLength();
-
-	byte *data = F->LoadIntoMemory();
-
-	if (! data)
-	{
-		delete F;
-		I_Warning("mp3player_c: Error loading data.\n");
-		return false;
-	}
-	if (length < 4)
-	{
-		delete F;
-		I_Debugf("mp3player_c: ignored short data (%d bytes)\n", length);
-		return false;
-	}
-
-    if (mp3dec_ex_open_buf(&mp3_track, data, length, MP3D_SEEK_TO_SAMPLE) != 0)
-    {
-		I_Warning("[mp3player_c::Open](DataLump) Failed!\n");
-		return false;
-    }
-
-	PostOpenInit();
-	return true;
+	return file->Read(buf, (unsigned int)size);
 }
 
-bool mp3player_c::OpenFile(const char *filename)
+
+static int mp3player_epi_seek(uint64_t position, void *user_data)
 {
-	SYS_ASSERT(filename);
+	epi::file_c *file = (epi::file_c *)user_data;
+
+	return file->Seek((int)position, epi::file_c::SEEKPOINT_START) ? 0 : -1;
+}
+
+
+bool mp3player_c::OpenFile(epi::file_c *file)
+{
+	SYS_ASSERT(file);
 
 	if (status != NOT_LOADED)
 		Close();
 
-    if (mp3dec_ex_open(&mp3_track, filename, MP3D_SEEK_TO_SAMPLE) != 0)
+	io.read = &mp3player_epi_read;
+	io.seek = &mp3player_epi_seek;
+	io.read_data = (void *) file;
+	io.seek_data = (void *) file;
+
+    if (mp3dec_ex_open_cb(&mp3_track, &io, MP3D_SEEK_TO_SAMPLE) != 0)
     {
-		I_Warning("mp3player_c: Could not open file: '%s'\n", filename);
+		I_Warning("mp3player_c: Could not open MP3 file.\n");
 		return false;
     }
 
@@ -319,34 +288,22 @@ void mp3player_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayMP3Music(const pl_entry_c *musdat, float volume, bool looping)
+abstract_music_c * S_PlayMP3Music(epi::file_c *file, float volume, bool looping)
 {
 	mp3player_c *player = new mp3player_c();
 
-	if (musdat->infotype == MUSINF_LUMP)
+	if (! player->OpenFile(file))
 	{
-		if (! player->OpenLump(musdat->info.c_str()))
-		{
-			delete player;
-			return NULL;
-		}
+		delete player;
+		return NULL;
 	}
-	else if (musdat->infotype == MUSINF_FILE)
-	{
-		if (! player->OpenFile(musdat->info.c_str()))
-		{
-			delete player;
-			return NULL;
-		}
-	}
-	else
-		I_Error("S_PlayMP3Music: bad format value %d\n", musdat->infotype);
 
 	player->Volume(volume);
 	player->Play(looping);
 
 	return player;
 }
+
 
 bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length)
 {
@@ -356,7 +313,7 @@ bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length)
     if (mp3dec_load_buf(&mp3_sound, data, length, &sound_info, NULL, NULL) != 0)
     {
 		I_Warning("Failed to load MP3 sound (corrupt mp3?)\n");
- 
+
 		return false;
     }
 

@@ -845,8 +845,7 @@ void P_PlayerThink(player_t * player)
 void P_CreatePlayer(int pnum, bool is_bot)
 {
 	SYS_ASSERT(0 <= pnum && pnum < MAXPLAYERS);
-
-	SYS_ASSERT_MSG(! players[pnum], ("P_CreatePlayer: %d already there", pnum));
+	SYS_ASSERT(players[pnum] == NULL);
 
 	player_t *p = new player_t;
 

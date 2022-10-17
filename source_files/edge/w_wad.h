@@ -29,7 +29,6 @@
 #include "dm_defs.h"
 
 #include "file.h"
-#include "utility.h"
 
 
 class wadtex_resource_c
@@ -44,8 +43,6 @@ public:
 	int texture1;
 	int texture2;
 };
-
-void W_ReadCoalLumps(void);
 
 int W_CheckNumForName(const char *name);
 int W_CheckNumForName_GFX(const char *name);

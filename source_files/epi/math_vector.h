@@ -19,7 +19,7 @@
 #ifndef __EPI_MATH_VECTOR__
 #define __EPI_MATH_VECTOR__
 
-#include "macros.h"
+#include "epi.h"
 #include "math_angle.h"
 
 namespace epi

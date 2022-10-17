@@ -19,7 +19,8 @@
 #ifndef __DDF_FLAT_H__
 #define __DDF_FLAT_H__
 
-#include "utility.h"
+#include "epi.h"
+#include "arrays.h"
 
 #include "types.h"
 

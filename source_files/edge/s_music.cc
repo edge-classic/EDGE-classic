@@ -40,6 +40,7 @@
 #include "s_opl.h"
 #include "s_sid.h"
 #include "m_misc.h"
+#include "w_files.h"
 #include "w_wad.h"
 
 // music slider value
@@ -95,13 +96,22 @@ void S_ChangeMusic(int entrynum, bool loop)
 			std::string fn = M_ComposeFileName(game_dir.c_str(), play->info.c_str());
 
 			F = epi::FS_Open(fn.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-
 			if (! F)
 			{
 				I_Warning("S_ChangeMusic: Can't Find File '%s'\n", fn.c_str());
 				return;
 			}
+			break;
+		}
 
+		case MUSINF_PACKAGE:
+		{
+			F = W_OpenPackFile(play->info);
+			if (! F)
+			{
+				I_Warning("S_ChangeMusic: PK3 entry '%s' not found.\n", play->info.c_str());
+				return;
+			}
 			break;
 		}
 
@@ -124,87 +134,88 @@ void S_ChangeMusic(int entrynum, bool loop)
 	}
 
 	int length = F->GetLength();
-
 	byte *data = F->LoadIntoMemory();
-
-	// close file now
-	delete F;
 
 	if (! data)
 	{
+		delete F;
 		I_Warning("S_ChangeMusic: Error loading data.\n");
 		return;
 	}
 	if (length < 4)
 	{
+		delete F;
 		delete data;
-
 		I_Printf("S_ChangeMusic: ignored short data (%d bytes)\n", length);
 		return;
 	}
 
-	auto fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
+	epi::sound_format_e fmt = epi::FMT_Unknown;
 
-	if (fmt == epi::FMT_OGG)
+	if (play->infotype == MUSINF_LUMP)
 	{
-		delete data;
-
-		music_player = S_PlayOGGMusic(play, volume, loop);
-		return;
+		// lumps must use auto-detection based on their contents
+		fmt = epi::Sound_DetectFormat(data, std::min(length, 2048));
+	}
+	else
+	{
+		// for FILE and PACK, use the file extension
+		fmt = epi::Sound_FilenameToFormat(play->info);
 	}
 
-	if (fmt == epi::FMT_MP3)
+	// NOTE: the players that take `data` are responsible to free it
+
+	switch (fmt)
 	{
-		delete data;
+		case epi::FMT_OGG:
+			// rewind the file
+			F->Seek(0, epi::file_c::SEEKPOINT_START);
+			delete data;
+			music_player = S_PlayOGGMusic(F, volume, loop);
+			break;
 
-		music_player = S_PlayMP3Music(play, volume, loop);
-		return;
+		case epi::FMT_MP3:
+			// rewind the file
+			F->Seek(0, epi::file_c::SEEKPOINT_START);
+			delete data;
+			music_player = S_PlayMP3Music(F, volume, loop);
+			break;
+
+		case epi::FMT_MOD:
+			delete F;
+			music_player = S_PlayMODMusic(data, length, volume, loop);
+			break;
+
+		case epi::FMT_GME:
+			delete F;
+			music_player = S_PlayGMEMusic(data, length, volume, loop);
+			break;
+
+		case epi::FMT_SID:
+			delete F;
+			music_player = S_PlaySIDMusic(data, length, volume, loop);
+			break;
+
+		case epi::FMT_MIDI:
+		case epi::FMT_MUS:
+			delete F;
+
+			if (var_opl_music)
+			{
+				music_player = S_PlayOPL(data, length, fmt == epi::FMT_MUS, volume, loop);
+			}
+			else
+			{
+				music_player = S_PlayTSF(data, length, fmt == epi::FMT_MUS, volume, loop);
+			}
+			break;
+
+		default:
+			delete F;
+			delete data;
+			I_Printf("S_ChangeMusic: unknown format (not MUS or MIDI)\n");
+			break;
 	}
-
-	if (fmt == epi::FMT_MOD)
-	{
-		delete data;
-
-		music_player = S_PlayMODMusic(play, volume, loop);
-		return;
-	}
-
-	if (fmt == epi::FMT_GME)
-	{
-		delete data;
-
-		music_player = S_PlayGMEMusic(play, volume, loop);
-		return;
-	}
-
-	if (fmt == epi::FMT_SID)
-	{
-		delete data;
-
-		music_player = S_PlaySIDMusic(play, volume, loop);
-		return;
-	}
-
-	// TODO: these calls free the data, but we probably should free it here
-
-	if (fmt == epi::FMT_MIDI || fmt == epi::FMT_MUS)
-	{
-		if (var_opl_music)
-		{
-			music_player = S_PlayOPL(data, length, fmt == epi::FMT_MUS, volume, loop);
-			return;
-		}
-		else
-		{
-			music_player = S_PlayTSF(data, length, fmt == epi::FMT_MUS, volume, loop);
-			return;
-		}
-	}
-
-	delete data;
-
-	I_Printf("S_ChangeMusic: unknown format (not MUS or MIDI)\n");
-	return;
 }
 
 

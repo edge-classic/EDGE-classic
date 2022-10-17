@@ -261,6 +261,13 @@ static void PL_is_using(coal::vm_c *vm, int argc)
 	vm->ReturnFloat(ui_player_who->usedown ? 1 : 0);
 }
 
+// player.is_zoomed()
+//
+static void PL_is_zoomed(coal::vm_c *vm, int argc)
+{
+	vm->ReturnFloat(viewiszoomed ? 1 : 0);
+}
+
 
 // player.is_action1()
 //
@@ -1401,6 +1408,8 @@ void VM_RegisterPlaysim()
 
 	ui_vm->AddNativeFunction("mapobject.query_tagged",     MO_query_tagged);
     ui_vm->AddNativeFunction("mapobject.count",     MO_count);
+
+	ui_vm->AddNativeFunction("player.is_zoomed",        PL_is_zoomed);
 	
 }
 

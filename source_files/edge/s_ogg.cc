@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE OGG Music Player
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2004-2009  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2
@@ -16,7 +16,7 @@
 //
 //----------------------------------------------------------------------------
 //
-// -ACB- 2004/08/18 Written: 
+// -ACB- 2004/08/18 Written:
 //
 // Based on a tutorial at DevMaster.net:
 // http://www.devmaster.net/articles/openal-tutorials/lesson8.php
@@ -47,15 +47,6 @@
 extern bool dev_stereo;  // FIXME: encapsulation
 
 
-struct datalump_s
-{
-	const byte *data;
-
-	size_t pos;
-	size_t size;
-};
-
-
 class oggplayer_c : public abstract_music_c
 {
 public:
@@ -63,27 +54,25 @@ public:
 	~oggplayer_c();
 
 private:
-
 	enum status_e
 	{
 		NOT_LOADED, PLAYING, PAUSED, STOPPED
 	};
-	
-	int status;
-	bool looping;
 
-	FILE *ogg_file;
-	datalump_s ogg_lump;
+	int status;
+
+	bool looping;
+	bool is_stereo;
+
+	epi::file_c *ogg_file;
 
 	OggVorbis_File ogg_stream;
 	vorbis_info *vorbis_inf;
-	bool is_stereo;
 
 	s16_t *mono_buffer;
 
 public:
-	bool OpenLump(const char *lumpname);
-	bool OpenFile(const char *filename);
+	bool OpenFile(epi::file_c *file);
 
 	virtual void Close(void);
 
@@ -102,19 +91,25 @@ private:
 	void PostOpenInit(void);
 
 	bool StreamIntoBuffer(epi::sound_data_c *buf);
-
 };
 
 
 //----------------------------------------------------------------------------
-
-
 //
-// oggplayer datalump operation functions
+// oggplayer memory operations
 //
+
+struct datalump_t
+{
+	const byte *data;
+
+	size_t pos;
+	size_t size;
+};
+
 size_t oggplayer_memread(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
-	datalump_s *d = (datalump_s *)datasource;
+	datalump_t *d = (datalump_t *)datasource;
 	size_t rb = size*nmemb;
 
 	if (d->pos >= d->size)
@@ -124,24 +119,24 @@ size_t oggplayer_memread(void *ptr, size_t size, size_t nmemb, void *datasource)
 		rb = d->size - d->pos;
 
 	memcpy(ptr, d->data + d->pos, rb);
-	d->pos += rb;		
-	
+	d->pos += rb;
+
 	return rb / size;
 }
 
 int oggplayer_memseek(void *datasource, ogg_int64_t offset, int whence)
 {
-	datalump_s *d = (datalump_s *)datasource;
+	datalump_t *d = (datalump_t *)datasource;
 	size_t newpos;
 
 	switch(whence)
 	{
-		case 0: { newpos = (int) offset; break; }				// Offset
-		case 1: { newpos = d->pos + (int)offset; break; }		// Pos + Offset
-        case 2: { newpos = d->size + (int)offset; break; }	    // End + Offset
+		case SEEK_SET: { newpos = (int) offset; break; }
+		case SEEK_CUR: { newpos = d->pos  + (int)offset; break; }
+        case SEEK_END: { newpos = d->size + (int)offset; break; }
 		default: { return -1; }	// WTF?
 	}
-	
+
 	if (newpos > d->size)
 		return -1;
 
@@ -151,23 +146,14 @@ int oggplayer_memseek(void *datasource, ogg_int64_t offset, int whence)
 
 int oggplayer_memclose(void *datasource)
 {
-	datalump_s *d = (datalump_s *)datasource;
-
-	if (d->size > 0)
-	{
-		delete[] d->data;
-		d->data = NULL;
-
-        d->pos  = 0;
-		d->size = 0;
-	}
+	// we don't free the data here
 
 	return 0;
 }
 
 long oggplayer_memtell(void *datasource)
 {
-	datalump_s *d = (datalump_s *)datasource;
+	datalump_t *d = (datalump_t *)datasource;
 
 	if (d->pos > d->size)
 		return -1;
@@ -175,38 +161,53 @@ long oggplayer_memtell(void *datasource)
 	return d->pos;
 }
 
+
+//----------------------------------------------------------------------------
 //
-// oggplayer file operation functions
+// oggplayer epi::file operations
 //
-size_t oggplayer_fread(void *ptr, size_t size, size_t nmemb, void *datasource)
+
+size_t oggplayer_epi_read(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
-	return fread(ptr, size, nmemb, (FILE*)datasource);
+	epi::file_c *file = (epi::file_c *)datasource;
+
+	return file->Read(ptr, (unsigned int) (size * nmemb));
 }
 
-int oggplayer_fseek(void *datasource, ogg_int64_t offset, int whence)
+int oggplayer_epi_seek(void *datasource, ogg_int64_t offset, int whence)
 {
-	return fseek((FILE*)datasource, (int)offset, whence);
+	epi::file_c *file = (epi::file_c *)datasource;
+
+	switch (whence)
+	{
+		case SEEK_SET: whence = epi::file_c::SEEKPOINT_START;   break;
+		case SEEK_CUR: whence = epi::file_c::SEEKPOINT_CURRENT; break;
+		case SEEK_END: whence = epi::file_c::SEEKPOINT_END;     break;
+	}
+
+	return file->Seek((int)offset, whence) ? 0 : -1;
 }
 
-int oggplayer_fclose(void *datasource)
+int oggplayer_epi_close(void *datasource)
 {
-	return fclose((FILE*)datasource);
+	// we don't close the epi::file_c here
+
+	return 0;  // ok
 }
 
-long oggplayer_ftell(void *datasource)
+long oggplayer_epi_tell(void *datasource)
 {
-	return ftell((FILE*)datasource);
+	epi::file_c *file = (epi::file_c *)datasource;
+
+	return (long) file->GetPosition();
 }
 
 
 //----------------------------------------------------------------------------
 
-
 oggplayer_c::oggplayer_c() : status(NOT_LOADED), vorbis_inf(NULL)
 {
 	ogg_file = NULL;
-
-	ogg_lump.data = NULL;
 
 	mono_buffer = new s16_t[OGGV_NUM_SAMPLES * 2];
 }
@@ -256,7 +257,7 @@ void oggplayer_c::PostOpenInit()
 	} else {
         is_stereo = true;
 	}
-    
+
 	// Loaded, but not playing
 	status = STOPPED;
 }
@@ -338,102 +339,33 @@ void oggplayer_c::Volume(float gain)
 }
 
 
-bool oggplayer_c::OpenLump(const char *lumpname)
+bool oggplayer_c::OpenFile(epi::file_c * file)
 {
-	SYS_ASSERT(lumpname);
+	SYS_ASSERT(file);
 
 	if (status != NOT_LOADED)
 		Close();
 
-	int lump = W_CheckNumForName(lumpname);
-	if (lump < 0)
-	{
-		I_Warning("oggplayer_c: LUMP '%s' not found.\n", lumpname);
-		return false;
-	}
+	ogg_file = file;
 
-	epi::file_c *F = W_OpenLump(lump);
-
-	int length = F->GetLength();
-
-	byte *data = F->LoadIntoMemory();
-
-	if (! data)
-	{
-		delete F;
-		I_Warning("oggplayer_c: Error loading data.\n");
-		return false;
-	}
-	if (length < 4)
-	{
-		delete F;
-		I_Debugf("oggplayer_c: ignored short data (%d bytes)\n", length);
-		return false;
-	}
-
-	ogg_lump.data = data;
-	ogg_lump.size = length;
-	ogg_lump.pos  = 0;
-
+	// set up callbacks for reading from the EPI file
 	ov_callbacks CB;
 
-	CB.read_func  = oggplayer_memread;
-	CB.seek_func  = oggplayer_memseek;
-	CB.close_func = oggplayer_memclose;
-	CB.tell_func  = oggplayer_memtell; 
-
-    int result = ov_open_callbacks((void*)&ogg_lump, &ogg_stream, NULL, 0, CB);
-
-    if (result < 0)
-    {
-		// Only time we have to kill this since OGG will deal with
-		// the handle when ov_open_callbacks() succeeds
-        oggplayer_memclose((void*)&ogg_lump);
-  
-		// Construct an error message
-		std::string err_msg("[oggplayer_c::Open](DataLump) Failed: ");
-
-		err_msg += GetError(result);
-
-		I_Error("%s\n", err_msg.c_str());
-		return false; /* NOT REACHED */
-    }
-
-	PostOpenInit();
-	return true;
-}
-
-bool oggplayer_c::OpenFile(const char *filename)
-{
-	SYS_ASSERT(filename);
-
-	if (status != NOT_LOADED)
-		Close();
-
-	ogg_file = fopen(filename, "rb");
-    if (!ogg_file)
-    {
-		I_Warning("oggplayer_c: Could not open file: '%s'\n", filename);
-		return false;
-    }
-
-	ov_callbacks CB;
-
-	CB.read_func  = oggplayer_fread;
-	CB.seek_func  = oggplayer_fseek;
-	CB.close_func = oggplayer_fclose;
-	CB.tell_func  = oggplayer_ftell; 
+	CB.read_func  = oggplayer_epi_read;
+	CB.seek_func  = oggplayer_epi_seek;
+	CB.close_func = oggplayer_epi_close;
+	CB.tell_func  = oggplayer_epi_tell;
 
     int result = ov_open_callbacks((void*)ogg_file, &ogg_stream, NULL, 0, CB);
 
     if (result < 0)
     {
-        oggplayer_fclose(ogg_file);	
-  
+        oggplayer_epi_close((void *) ogg_file);
+
 		std::string err_msg("[oggplayer_c::OpenFile] Failed: ");
 
 		err_msg += GetError(result);
-		
+
 		I_Error("%s\n", err_msg.c_str());
 		return false; /* NOT REACHED */
     }
@@ -452,15 +384,9 @@ void oggplayer_c::Close()
 	Stop();
 
 	ov_clear(&ogg_stream);
-	
-	// NOTE: the ov_clear has called our fclose() callback
-	ogg_file = NULL;
 
-	if (ogg_lump.data)
-	{
-		delete[] ogg_lump.data;
-		ogg_lump.data = NULL;
-	}
+	delete ogg_file;
+	ogg_file = NULL;
 
 	status = NOT_LOADED;
 }
@@ -511,7 +437,7 @@ void oggplayer_c::Ticker()
 {
 	while (status == PLAYING)
 	{
-		epi::sound_data_c *buf = S_QueueGetFreeBuffer(OGGV_NUM_SAMPLES, 
+		epi::sound_data_c *buf = S_QueueGetFreeBuffer(OGGV_NUM_SAMPLES,
 				(is_stereo && dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 
 		if (! buf)
@@ -533,28 +459,15 @@ void oggplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayOGGMusic(const pl_entry_c *musdat, float volume, bool looping)
+abstract_music_c * S_PlayOGGMusic(epi::file_c *file, float volume, bool looping)
 {
 	oggplayer_c *player = new oggplayer_c();
 
-	if (musdat->infotype == MUSINF_LUMP)
+	if (! player->OpenFile(file))
 	{
-		if (! player->OpenLump(musdat->info.c_str()))
-		{
-			delete player;
-			return NULL;
-		}
+		delete player;
+		return NULL;
 	}
-	else if (musdat->infotype == MUSINF_FILE)
-	{
-		if (! player->OpenFile(musdat->info.c_str()))
-		{
-			delete player;
-			return NULL;
-		}
-	}
-	else
-		I_Error("S_PlayOGGMusic: bad format value %d\n", musdat->infotype);
 
 	player->Volume(volume);
 	player->Play(looping);
@@ -565,7 +478,7 @@ abstract_music_c * S_PlayOGGMusic(const pl_entry_c *musdat, float volume, bool l
 
 bool S_LoadOGGSound(epi::sound_data_c *buf, const byte *data, int length)
 {
-	datalump_s ogg_lump;
+	datalump_t ogg_lump;
 
 	ogg_lump.data = data;
 	ogg_lump.size = length;
@@ -576,7 +489,7 @@ bool S_LoadOGGSound(epi::sound_data_c *buf, const byte *data, int length)
 	CB.read_func  = oggplayer_memread;
 	CB.seek_func  = oggplayer_memseek;
 	CB.close_func = oggplayer_memclose;
-	CB.tell_func  = oggplayer_memtell; 
+	CB.tell_func  = oggplayer_memtell;
 
 	OggVorbis_File ogg_stream;
 
@@ -588,8 +501,8 @@ bool S_LoadOGGSound(epi::sound_data_c *buf, const byte *data, int length)
 
 		// Only time we have to kill this since OGG will deal with
 		// the handle when ov_open_callbacks() succeeds
-        oggplayer_memclose((void*)&ogg_lump);
-  
+        oggplayer_memclose((void*) &ogg_lump);
+
 		return false;
     }
 
@@ -616,7 +529,7 @@ bool S_LoadOGGSound(epi::sound_data_c *buf, const byte *data, int length)
 
 	epi::sound_gather_c gather;
 
-	while (true)
+	for (;;)
 	{
 		int want = 2048;
 
@@ -655,10 +568,10 @@ bool S_LoadOGGSound(epi::sound_data_c *buf, const byte *data, int length)
 	if (! gather.Finalise(buf, is_stereo))
 		I_Error("OGG SFX Loader: no samples!\n");
 
-	// HACK: we must not free the data (in oggplayer_memclose)
-	ogg_lump.size = 0;
-
 	ov_clear(&ogg_stream);
+
+	// free the data
+	delete[] data;
 
 	return true;
 }

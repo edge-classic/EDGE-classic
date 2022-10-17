@@ -29,10 +29,11 @@
 //
 
 #include "local.h"
+#include "line.h"
+
+#include "str_util.h"
 
 #include <limits.h>
-
-#include "line.h"
 
 #undef  DF
 #define DF  DDF_FIELD

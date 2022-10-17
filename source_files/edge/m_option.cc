@@ -75,9 +75,9 @@
 
 #include "i_defs.h"
 
-#include "str_format.h"
 #include "font.h"
 #include "path.h"
+#include "str_util.h"
 
 #include "main.h"
 
@@ -125,7 +125,7 @@ extern cvar_c s_soundfont;
 static int menu_crosshair;
 static int menu_crosscolor;
 static int menu_crosssize;
-extern int monitor_size;
+static int monitor_size;
 
 extern int joystick_device;
 
@@ -179,6 +179,7 @@ static void M_ChangeResFull(int keypressed);
 static void M_LanguageDrawer(int x, int y, int deltay);
 static void M_ChangeLanguage(int keypressed);
 static void M_ChangeSoundfont(int keypressed);
+static void InitMonitorSize();
 
 static char YesNo[]     = "Off/On";  // basic on/off
 static char CrossH[]    = "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double";
@@ -192,7 +193,7 @@ static char MipMaps[]   = "None/Good/Best";
 static char Details[]   = "Low/Medium/High";
 static char Hq2xMode[]  = "Off/UI Only/UI & Sprites/All";
 static char Invuls[]    = "Simple/Textured";
-static char MonitSiz[]  = "4:3/16:9/16:10/3:2/24:10";
+static char MonitSiz[]  = "5:4/4:3/3:2/16:10/16:9/21:9";
 
 // for CVar enums
 const char WIPE_EnumStr[] = "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors";
@@ -371,7 +372,7 @@ static optmenuitem_t vidoptions[] =
 
 	{OPT_Plain,   "",  NULL,  0,  NULL, NULL, NULL},
 
-	{OPT_Switch,  "Monitor Size",  MonitSiz,  5, &monitor_size, M_ChangeMonitorSize, NULL},
+	{OPT_Switch,  "Monitor Size",  MonitSiz,  6, &monitor_size, M_ChangeMonitorSize, NULL},
 	{OPT_Switch,  "Smoothing",         YesNo, 2, &var_smoothing, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "H.Q.2x Scaling", Hq2xMode, 4, &hq2x_scaling, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Dynamic Lighting", DLMode, 2, &use_dlights, M_ChangeDLights, NULL},
@@ -858,6 +859,8 @@ void M_OptMenuInit()
 	curr_item = curr_menu->items + curr_menu->pos;
 	curr_key_menu = 0;
 	keyscan = 0;
+
+	InitMonitorSize();
 
 	// load styles
 	styledef_c *def;
@@ -1694,16 +1697,28 @@ static void M_ChangeGamma(int keypressed)
 }
 
 
+static void InitMonitorSize()
+{
+	     if (v_monitorsize.f > 2.00) monitor_size = 5;
+	else if (v_monitorsize.f > 1.70) monitor_size = 4;
+	else if (v_monitorsize.f > 1.55) monitor_size = 3;
+	else if (v_monitorsize.f > 1.40) monitor_size = 2;
+	else if (v_monitorsize.f > 1.30) monitor_size = 1;
+	else                             monitor_size = 0;
+}
+
+
 static void M_ChangeMonitorSize(int key)
 {
-	static const float aspect_ratios[5] =
+	static const float ratios[6] =
 	{
-		1.333, 1.777, 1.6, 1.5, 2.4
+		1.25000, 1.33333, 1.50000,   // 5:4     4:3   3:2
+		1.60000, 1.77777, 2.33333    // 16:10  16:9  21:9
 	};
 
-	monitor_size = CLAMP(0, monitor_size, 4);
+	monitor_size = CLAMP(0, monitor_size, 5);
 
-	r_aspect = aspect_ratios[monitor_size];
+	v_monitorsize = ratios[monitor_size];
 }
 
 
@@ -1903,9 +1918,9 @@ static void M_ChangeLanguage(int keypressed)
 static void M_ChangeSoundfont(int keypressed)
 {
 	int sf2_pos = -1;
-	for(int i=0; i < available_soundfonts.size(); i++)
+	for(int i=0; i < (int)available_soundfonts.size(); i++)
 	{
-		if (strcasecmp(s_soundfont.c_str(), available_soundfonts.at(i).c_str()) == 0)
+		if (epi::case_cmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
 		{
 			sf2_pos = i;
 			break;
@@ -1927,7 +1942,7 @@ static void M_ChangeSoundfont(int keypressed)
 	}
 	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
 	{
-		if (sf2_pos + 1 >= available_soundfonts.size())
+		if (sf2_pos + 1 >= (int)available_soundfonts.size())
 			sf2_pos = 0;
 		else
 			sf2_pos++;

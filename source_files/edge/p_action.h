@@ -2,7 +2,7 @@
 //  EDGE Play Simulation Action routines
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2009  The EDGE Team.
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -152,6 +152,9 @@ void P_ActDie(struct mobj_s *mo);
 void P_ActKeenDie(struct mobj_s *mo);
 void P_ActCheckBlood(struct mobj_s *mo);
 void P_ActJump(struct mobj_s *mo);
+void P_ActJumpLiquid(struct mobj_s *mo);
+void P_ActJumpSky(struct mobj_s *mo);
+//void P_ActJumpStuck(struct mobj_s *mo);
 void P_ActBecome(struct mobj_s *mo);
 void P_ActSetInvuln(struct mobj_s *mo);
 void P_ActClearInvuln(struct mobj_s *mo);

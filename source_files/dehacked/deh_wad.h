@@ -20,9 +20,10 @@ namespace Deh_Edge
 
 namespace WAD
 {
-	extern deh_container_c * dest_container;
+	extern ddf_collection_c * dest_container;
 
-	void NewLump(const char *name);
+	void NewLump(ddf_type_e type);
+
 	void Printf(const char *str, ...) GCCATTR((format (printf,1,2)));
 }
 

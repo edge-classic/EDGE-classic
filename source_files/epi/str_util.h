@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------------
-//  EDGE Platform Interface Utility
+//  EPI String Utilities
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 2004-2008  The EDGE Team.
+//  Copyright (c) 2007-2008  The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -16,13 +16,22 @@
 //
 //----------------------------------------------------------------------------
 
-#include "epi.h"
-#include "utility.h"
+#ifndef __EPI_STR_UTIL_H__
+#define __EPI_STR_UTIL_H__
+
+#include <string>
 
 namespace epi
 {
-	
-};
+
+void str_lower(std::string& s);
+void str_upper(std::string& s);
+
+std::string STR_Format(const char *fmt, ...) GCCATTR((format(printf, 1, 2)));
+
+} // namespace epi
+
+#endif /* __EPI_STR_UTIL_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -26,10 +26,7 @@
 #ifndef __L_DEH__
 #define __L_DEH__
 
-class deh_container_c;
-
-deh_container_c * DH_ConvertFile(const char *filename);
-deh_container_c * DH_ConvertLump(const byte *data, int length);
+void DEH_Convert(const byte *data, int length, const std::string& source);
 
 #endif  // __L_DEH__
 

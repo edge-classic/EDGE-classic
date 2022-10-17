@@ -56,6 +56,7 @@
 #include "r_sky.h"
 #include "r_colormap.h"
 #include "r_texgl.h"
+#include "w_files.h"
 #include "w_texture.h"
 #include "w_wad.h"
 
@@ -122,46 +123,45 @@ static void DrawColumnIntoEpiBlock(image_c *rim, epi::image_data_c *img,
 	int w1 = rim->actual_w;
 	int h1 = rim->actual_h;
 	int w2 = rim->total_w;
-	//int h2 = rim->total_h;
 
 	// clip horizontally
 	if (x < 0 || x >= w1)
 		return;
 
+	int top = -1;
+
 	while (patchcol->topdelta != 0xFF)
 	{
-		int top = ((int)patchcol->topdelta <= y) ? y + (int)patchcol->topdelta : (int)patchcol->topdelta;
+		int delta = patchcol->topdelta;
 		int count = patchcol->length;
-		y = top;
 
-		byte *src = (byte *)patchcol + 3;
+		const byte *src = (const byte *)patchcol + 3;
 		byte *dest = img->pixels + x;
 
-		if (top < 0)
-		{
-			count += top;
-			top = 0;
+		// logic for DeePsea's tall patches
+		if (delta <= top) {
+			top += delta;
+		} else {
+			top = delta;
 		}
 
-		if (top + count > h1)
-			count = h1 - top;
-
-		// copy the pixels, remapping any TRANS_PIXEL values
-		for (; count > 0; count--, src++, top++)
+		for (int i = 0 ; i < count ; i++, src++)
 		{
+			int y2 = y + top + i;
+
+			if (y2 < 0 || y2 >= h1)
+				continue;
+
 			if (*src == TRANS_PIXEL)
-				dest[(h1-1-top) * w2] = TRANS_REPLACE;
+				dest[(h1-1-y2) * w2] = TRANS_REPLACE;
 			else
-				dest[(h1-1-top) * w2] = *src;
-
-
+				dest[(h1-1-y2) * w2] = *src;
 		}
 
-		patchcol = (const column_t *)((const byte *)patchcol +
-			patchcol->length + 4);
+		// jump to next column
+		patchcol = (const column_t *)((const byte *)patchcol + patchcol->length + 4);
 	}
 }
-
 
 
 //------------------------------------------------------------------------
@@ -454,19 +454,26 @@ static epi::image_data_c * CreateUserColourImage(image_c *rim, imagedef_c *def)
 
 epi::file_c *OpenUserFileOrLump(imagedef_c *def)
 {
-	if (def->type == IMGDT_File)
+	switch (def->type)
 	{
-		// -AJA- 2005/01/15: filenames in DDF relative to GAMEDIR
-		return M_OpenComposedEPIFile(game_dir.c_str(), def->info.c_str());
-	}
-	else  /* LUMP */
-	{
-		int lump = W_CheckNumForName(def->info.c_str());
+		case IMGDT_File:
+			// -AJA- 2005/01/15: filenames in DDF relative to GAMEDIR
+			return M_OpenComposedEPIFile(game_dir.c_str(), def->info.c_str());
 
-		if (lump < 0)
+		case IMGDT_Package:
+			return W_OpenPackFile(def->info);
+
+		case IMGDT_Lump:
+		{
+			int lump = W_CheckNumForName(def->info.c_str());
+			if (lump < 0)
+				return NULL;
+
+			return W_OpenLump(lump);
+		}
+
+		default:
 			return NULL;
-
-		return W_OpenLump(lump);
 	}
 }
 
@@ -541,6 +548,7 @@ static epi::image_data_c *ReadUserAsEpiBlock(image_c *rim)
 
 		case IMGDT_File:
 		case IMGDT_Lump:
+		case IMGDT_Package:
 		    return CreateUserFileImage(rim, def);
 
 		default:

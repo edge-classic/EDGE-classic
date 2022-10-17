@@ -159,7 +159,7 @@ static cvar_c * MergeSort(cvar_c *list)
 		// pick the smallest name
 		if (L == NULL)
 			std::swap(L, R);
-		else if (R != NULL && stricmp(L->name, R->name) > 0)
+		else if (R != NULL && epi::case_cmp(L->name, R->name) > 0)
 			std::swap(L, R);
 
 		// remove it, add to tail of the new list
@@ -198,7 +198,7 @@ cvar_c * CON_FindVar(const char *name)
 {
 	for (cvar_c *var = all_cvars ; var != NULL ; var = var->next)
 	{
-		if (stricmp(var->name, name) == 0)
+		if (epi::case_cmp(var->name, name) == 0)
 			return var;
 	}
 

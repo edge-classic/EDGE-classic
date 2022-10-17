@@ -119,7 +119,7 @@ void Rscript::Shutdown()
 
 void Rscript::BeginLump()
 {
-	WAD::NewLump("RSCRIPT");
+	WAD::NewLump(DDF_RadScript);
 
 	WAD::Printf("// <SCRIPTS>\n\n");
 }
@@ -184,7 +184,7 @@ void Rscript::OutputMonsterDeath(int mt_num, int idx)
 	// ONDEATH script after a short delay -- this script is then
 	// disabled by another script
 
-	idx *= 10;
+	idx *= 10000;
 
 	Things::UseThing(mt_num);
 	const char *ddf_name = Things::GetMobjName(mt_num);

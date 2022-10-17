@@ -23,59 +23,40 @@
 namespace epi
 {
 
-//
-// Constructor
-//
-sub_file_c::sub_file_c(file_c *_par, int _start, int _len) :
-	parent(_par), start(_start), length(_len), remain(_len)
+sub_file_c::sub_file_c(file_c *_parent, int _start, int _len) :
+	parent(_parent), start(_start), length(_len), pos(0)
 {
-	SYS_ASSERT(parent);
-	SYS_ASSERT(start >= 0);
+	SYS_ASSERT(parent != NULL);
+	SYS_ASSERT(start  >= 0);
 	SYS_ASSERT(length >= 0);
-
-	parent->Seek(start, SEEKPOINT_START);
 }
 
-//
-// Destructor
-//
+
 sub_file_c::~sub_file_c()
 {
-	start = length = -1;
+	parent = NULL;
 }
 
-int sub_file_c::GetPosition()
-{
-	return length - remain;
-#if 0
-	int par_pos = parent->GetPosition();
-
-	int result = par_pos - start;
-
-	if (result < 0) // oopsie
-		return 0;
-
-	if (result > length)
-		return length;
-	
-	return result;
-#endif
-}
 
 unsigned int sub_file_c::Read(void *dest, unsigned int size)
 {
-	if ((int)size > remain)
-		size = remain;
+	// EOF ?
+	if (pos >= length)
+		return 0;
 
-	if (size <= 0)
-		return 0;  // EOF
+	size = std::min(size, (unsigned int) (length - pos));
 
-	int read_len = parent->Read(dest, size);
+	// we must always seek before a read, because other things may also be
+	// reading the parent file.
+	parent->Seek(start + pos, SEEKPOINT_START);
 
-	remain -= read_len;
+	unsigned int got = parent->Read(dest, size);
 
-	return read_len;
+	pos += (int)got;
+
+	return got;
 }
+
 
 bool sub_file_c::Seek(int offset, int seekpoint)
 {
@@ -83,24 +64,24 @@ bool sub_file_c::Seek(int offset, int seekpoint)
 
     switch (seekpoint)
     {
-        case SEEKPOINT_START:   { new_pos = 0; break; }
-        case SEEKPOINT_CURRENT: { new_pos = GetPosition(); break; }
+        case SEEKPOINT_START:   { new_pos = 0;      break; }
+        case SEEKPOINT_CURRENT: { new_pos = pos;    break; }
         case SEEKPOINT_END:     { new_pos = length; break; }
 
-        default:
-			return false;
+        default: return false;
     }
 
 	new_pos += offset;
 
-	// Note: allow position at the very end (last byte + 1).
+	// NOTE: we allow position at the very end (last byte + 1).
 	if (new_pos < 0 || new_pos > length)
 		return false;
 
-	remain = length - new_pos;
-		
-	return parent->Seek(start + new_pos, SEEKPOINT_START);
+	pos = new_pos;
+
+	return true;
 }
+
 
 unsigned int sub_file_c::Write(const void *src, unsigned int size)
 {

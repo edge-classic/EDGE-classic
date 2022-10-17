@@ -17,16 +17,28 @@
 //----------------------------------------------------------------------------
 
 #include "local.h"
+#include "colormap.h"
+#include "anim.h"
+#include "image.h"
+#include "font.h"
+#include "style.h"
+#include "switch.h"
 
 #include <limits.h>
-#include <vector>
 
+// EPI
+#include "epi.h"
 #include "path.h"
-#include "str_format.h"
+#include "str_util.h"
 
-#include "colormap.h"
-
+// EDGE
 #include "p_action.h"
+
+void RAD_ReadScript(const std::string& _data, const std::string& source);
+
+
+#define CHECK_SELF_ASSIGN(param)  \
+    if (this == &param) return *this;
 
 
 // enum thats gives the parser's current status
@@ -240,7 +252,7 @@ const char *DDF_MainGetDefine(const char *name)
 {
 	// search backwards, to allow redefinitions to work
 	for (int i = (int)all_defines.size()-1 ; i >= 0 ; i--)
-		if (stricmp(all_defines[i].name.c_str(), name) == 0)
+		if (epi::case_cmp(all_defines[i].name.c_str(), name) == 0)
 			return all_defines[i].value.c_str();
 
 	// undefined, so use the token as-is
@@ -715,7 +727,7 @@ void DDF_MainReadFile(readinfo_t * readinfo, const std::string& data)
 	while (memfileptr < &memfile[memsize])
 	{
 		// -KM- 1998/12/16 Added #define command to ddf files.
-		if (!strnicmp(memfileptr, "#DEFINE", 7))
+		if (epi::prefix_case_cmp(memfileptr, "#DEFINE") == 0)
 		{
 			bool line = false;
 
@@ -794,7 +806,7 @@ void DDF_MainReadFile(readinfo_t * readinfo, const std::string& data)
 			// This code is more hackitude -- to be fixed when the whole
 			// parsing code gets the overhaul it needs.
       
-			if (strnicmp(memfileptr, "#CLEARALL", 9) == 0)
+			if (epi::prefix_case_cmp(memfileptr, "#CLEARALL") == 0)
 			{
 				if (! firstgo)
 					DDF_Error("#CLEARALL cannot be used inside an entry !\n");
@@ -805,7 +817,7 @@ void DDF_MainReadFile(readinfo_t * readinfo, const std::string& data)
 				continue;
 			}
 
-			if (strnicmp(memfileptr, "#VERSION", 8) == 0)
+			if (epi::prefix_case_cmp(memfileptr, "#VERSION") == 0)
 			{
 				// just ignore it
 				memfileptr += l_len;
@@ -851,7 +863,7 @@ void DDF_MainReadFile(readinfo_t * readinfo, const std::string& data)
 				break;
 
 			case tag_stop:
-				if (stricmp(token.c_str(), readinfo->tag) != 0)
+				if (epi::case_cmp(token.c_str(), readinfo->tag) != 0)
 					DDF_Error("Start tag <%s> expected, found <%s>!\n", 
 							  readinfo->tag, token.c_str());
 
@@ -1081,13 +1093,13 @@ void DDF_MainGetBoolean(const char *info, void *storage)
 
 	SYS_ASSERT(info && storage);
 
-	if ((stricmp(info, "TRUE") == 0) || (strcmp(info, "1") == 0))
+	if ((epi::case_cmp(info, "TRUE") == 0) || (epi::case_cmp(info, "1") == 0))
 	{
 		*dest = true;
 		return;
 	}
 
-	if ((stricmp(info, "FALSE") == 0) || (strcmp(info, "0") == 0))
+	if ((epi::case_cmp(info, "FALSE") == 0) || (epi::case_cmp(info, "0") == 0))
 	{
 		*dest = false;
 		return;
@@ -1359,7 +1371,7 @@ void DDF_MainGetTime(const char *info, void *storage)
 	SYS_ASSERT(info && storage);
 
 	// -ES- 1999/09/14 MAXT means that time should be maximal.
-	if (!stricmp(info, "maxt"))
+	if (epi::case_cmp(info, "maxt") == 0)
 	{
 		*dest = INT_MAX; // -ACB- 1999/09/22 Standards, Please.
 		return;
@@ -2123,6 +2135,165 @@ weakness_info_c& weakness_info_c::operator=(weakness_info_c &rhs)
 
 	return *this;
 }
+
+//----------------------------------------------------------------------------
+
+static ddf_collection_c unread_ddf;
+
+
+struct ddf_reader_t
+{
+	ddf_type_e  type;
+	const char *lump_name;
+	const char *pack_name;
+	const char *print_name;
+	void (* func)(const std::string& data);
+};
+
+// -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
+static ddf_reader_t ddf_readers[DDF_NUM_TYPES] =
+{
+	{ DDF_Language,  "DDFLANG",  "language.ldf", "Languages",  DDF_ReadLangs },
+	{ DDF_SFX,       "DDFSFX",   "sounds.ddf",   "Sounds",     DDF_ReadSFX },
+	{ DDF_ColourMap, "DDFCOLM",  "colmap.ddf",   "ColourMaps", DDF_ReadColourMaps },
+	{ DDF_Image,     "DDFIMAGE", "images.ddf",   "Images",     DDF_ReadImages },
+	{ DDF_Font,      "DDFFONT",  "fonts.ddf",    "Fonts",      DDF_ReadFonts },
+	{ DDF_Style,     "DDFSTYLE", "styles.ddf",   "Styles",     DDF_ReadStyles },
+	{ DDF_Attack,    "DDFATK",   "attacks.ddf",  "Attacks",    DDF_ReadAtks },
+	{ DDF_Weapon,    "DDFWEAP",  "weapons.ddf",  "Weapons",    DDF_ReadWeapons },
+	{ DDF_Thing,     "DDFTHING", "things.ddf",   "Things",     DDF_ReadThings },
+
+	{ DDF_Playlist,  "DDFPLAY",  "playlist.ddf", "Playlists",  DDF_ReadMusicPlaylist },
+	{ DDF_Line,      "DDFLINE",  "lines.ddf",    "Lines",      DDF_ReadLines },
+	{ DDF_Sector,    "DDFSECT",  "sectors.ddf",  "Sectors",    DDF_ReadSectors },
+	{ DDF_Switch,    "DDFSWTH",  "switch.ddf",   "Switches",   DDF_ReadSwitch },
+	{ DDF_Anim,      "DDFANIM",  "anims.ddf",    "Anims",      DDF_ReadAnims },
+	{ DDF_Game,      "DDFGAME",  "games.ddf",    "Games",      DDF_ReadGames },
+	{ DDF_Level,     "DDFLEVL",  "levels.ddf",   "Levels",     DDF_ReadLevels },
+	{ DDF_Flat,      "DDFFLAT",  "flats.ddf",    "Flats",      DDF_ReadFlat },
+
+	// RTS scripts are handled differently
+	{ DDF_RadScript, "RSCRIPT",  "rscript.rts",  "RadTrig",    NULL }
+};
+
+
+ddf_type_e DDF_LumpToType(const std::string& name)
+{
+	std::string up_name(name);
+	epi::str_upper(up_name);
+
+	for (size_t i = 0 ; i < DDF_NUM_TYPES ; i++)
+		if (up_name == ddf_readers[i].lump_name)
+			return ddf_readers[i].type;
+
+	return DDF_UNKNOWN;
+}
+
+
+ddf_type_e DDF_FilenameToType(const std::string& path)
+{
+	std::string low_name = epi::PATH_GetExtension(path.c_str());
+	epi::str_lower(low_name);
+
+	if (low_name == ".rts")
+		return DDF_RadScript;
+
+	low_name = epi::PATH_GetFilename(path.c_str());
+	epi::str_lower(low_name);
+
+	for (size_t i = 0 ; i < DDF_NUM_TYPES ; i++)
+		if (low_name == ddf_readers[i].pack_name)
+			return ddf_readers[i].type;
+
+	return DDF_UNKNOWN;
+}
+
+
+void DDF_AddFile(ddf_type_e type, std::string& data, const std::string& source)
+{
+	unread_ddf.files.push_back(ddf_file_c(type, source));
+
+	// transfer the caller's data
+	unread_ddf.files.back().data.swap(data);
+}
+
+
+void DDF_AddCollection(ddf_collection_c *col, const std::string& source)
+{
+	for (auto& it : col->files)
+		DDF_AddFile(it.type, it.data, source);
+}
+
+
+void DDF_DumpFile(const std::string& data)
+{
+	I_Debugf("\n");
+
+	// we need to break it into lines
+	std::string line;
+
+	size_t pos = 0;
+
+	while (pos < data.size())
+	{
+		line += data[pos];
+		pos  += 1;
+
+		if (data[pos] == '\n')
+		{
+			I_Debugf("%s", line.c_str());
+			line.clear();
+		}
+	}
+
+	if (line.size() > 0)
+		I_Debugf("%s", line.c_str());
+}
+
+
+void DDF_DumpCollection(ddf_collection_c *col)
+{
+	for (auto& it : col->files)
+		DDF_DumpFile(it.data);
+}
+
+
+static void DDF_ParseUnreadFile(size_t d)
+{
+	for (auto& it : unread_ddf.files)
+	{
+		if (it.type == ddf_readers[d].type)
+		{
+			I_Printf("Parsing %s from: %s\n", ddf_readers[d].lump_name, it.source.c_str());
+
+			if (it.type == DDF_RadScript)
+			{
+				RAD_ReadScript(it.data, it.source);
+			}
+			else
+			{
+				// FIXME store `source` in cur_ddf_filename (or so)
+
+				(* ddf_readers[d].func)(it.data);
+			}
+
+			// can free the memory now
+			it.data.clear();
+		}
+	}
+}
+
+
+void DDF_ParseEverything()
+{
+	// -AJA- Since DDF files have dependencies between them, it makes most
+	//       sense to load all lumps of a certain type together, for example
+	//       all DDFSFX lumps before all the DDFTHING lumps.
+
+	for (size_t d = 0 ; d < DDF_NUM_TYPES ; d++)
+		DDF_ParseUnreadFile(d);
+}
+
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

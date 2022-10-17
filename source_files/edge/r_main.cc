@@ -37,7 +37,6 @@ int glmax_clip_planes;
 int glmax_tex_size;
 int glmax_tex_units;
 
-DEF_CVAR(r_aspect,   "1.777",  CVAR_ARCHIVE)
 DEF_CVAR(r_nearclip, "4",      CVAR_ARCHIVE)
 DEF_CVAR(r_farclip,  "64000",  CVAR_ARCHIVE)
 
@@ -182,9 +181,9 @@ void RGL_CheckExtensions(void)
 	I_Printf("OpenGL: Vendor: %s\n", glstr_vendor.c_str());
 
 	// Check for a windows software renderer
-	if (stricmp(glstr_vendor.c_str(), "Microsoft Corporation") == 0)
+	if (epi::case_cmp(glstr_vendor.c_str(), "Microsoft Corporation") == 0)
 	{
-		if (stricmp(glstr_renderer.c_str(), "GDI Generic") == 0)
+		if (epi::case_cmp(glstr_renderer.c_str(), "GDI Generic") == 0)
 		{
 			I_Error("OpenGL: SOFTWARE Renderer!\n");
 		}		

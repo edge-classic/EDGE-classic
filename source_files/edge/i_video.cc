@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE SDL Video Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2009  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2
@@ -35,9 +35,24 @@ int graphics_shutdown = 0;
 DEF_CVAR(in_grab, "1", CVAR_ARCHIVE)
 DEF_CVAR(v_sync,  "1", CVAR_ARCHIVE)
 
-static bool grab_state;
+// this is the Monitor Size setting, really an aspect ratio.
+// it defaults to 16:9, as that is the most common monitor size nowadays.
+DEF_CVAR(v_monitorsize, "1.77777", CVAR_ARCHIVE)
 
-static int display_W, display_H;
+// these are zero until I_StartupGraphics is called.
+// after that they never change (we assume the desktop won't become other
+// resolutions while EC is running).
+DEF_CVAR(v_desktop_width,  "0", CVAR_ROM)
+DEF_CVAR(v_desktop_height, "0", CVAR_ROM)
+
+DEF_CVAR(v_pixelaspect, "1.0", CVAR_ROM);
+
+// when > 0, this will force the pixel_aspect to a particular value, for
+// cases where a normal logic fails.  however, it will apply to *all* modes,
+// including windowed mode.
+DEF_CVAR(v_force_pixelaspect, "0", CVAR_ARCHIVE)
+
+static bool grab_state;
 
 
 // Possible Screen Modes
@@ -80,6 +95,44 @@ void I_GrabCursor(bool enable)
 }
 
 
+static void I_DeterminePixelAspect()
+{
+	// the pixel aspect is the shape of pixels on the monitor for the current
+	// video mode.  on modern LCDs (etc) it is usuall 1.0 (1:1).  knowing this
+	// is critical to get things drawn correctly.  for example, Doom assets
+	// assumed a 320x200 resolution on a 4:3 monitor, a pixel aspect of 5:6 or
+	// 0.833333, and we must adjust image drawing to get "correct" results.
+
+	// allow user to override
+	if (v_force_pixelaspect.f > 0.1)
+	{
+		v_pixelaspect = v_force_pixelaspect.f;
+		return;
+	}
+
+	// if not a fullscreen mode, check for a modern LCD (etc) monitor -- they
+	// will have square pixels (1:1 aspect).
+	bool is_crt = (v_desktop_width.d < v_desktop_height.d) * 7 / 5;
+
+	bool is_fullscreen = (DISPLAYMODE == 1);
+	if (is_fullscreen && SCREENWIDTH == v_desktop_width.d && SCREENHEIGHT == v_desktop_height.d)
+		is_fullscreen = false;
+
+	if (! is_fullscreen && ! is_crt)
+	{
+		v_pixelaspect = 1.0f;
+		return;
+	}
+
+	// in fullscreen modes, or a CRT monitor, compute the pixel aspect from
+	// the current resolution and Monitor Size setting.  this assumes that the
+	// video mode is filling the whole monitor (i.e. the monitor is not doing
+	// any letter-boxing or pillar-boxing).  DPI setting does not matter here.
+
+	v_pixelaspect = v_monitorsize.f * (float)SCREENHEIGHT / (float)SCREENWIDTH;
+}
+
+
 void I_StartupGraphics(void)
 {
 	if (M_CheckParm("-directx"))
@@ -103,7 +156,7 @@ void I_StartupGraphics(void)
 #endif
 	}
 
-	if (stricmp(driver, "default") != 0)
+	if (epi::case_cmp(driver, "default") != 0)
 	{
 		SDL_setenv("SDL_VIDEODRIVER", driver, 1);
 	}
@@ -117,6 +170,7 @@ void I_StartupGraphics(void)
 	if (M_CheckParm("-nograb"))
 		in_grab = 0;
 
+	// -AJA- FIXME these are wrong (probably ignored though)
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE,     5);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,   5);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,    5);
@@ -124,18 +178,17 @@ void I_StartupGraphics(void)
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,   16);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
 
-	
     // -DS- 2005/06/27 Detect SDL Resolutions
 	SDL_DisplayMode info;
 	SDL_GetDesktopDisplayMode(0, &info);
 
-	display_W = info.w;
-	display_H = info.h;
+	v_desktop_width  = info.w;
+	v_desktop_height = info.h;
 
-	if (SCREENWIDTH > display_W) SCREENWIDTH = display_W;
-	if (SCREENHEIGHT > display_H) SCREENHEIGHT = display_H;
+	if (SCREENWIDTH > v_desktop_width.d) SCREENWIDTH = v_desktop_width.d;
+	if (SCREENHEIGHT > v_desktop_height.d) SCREENHEIGHT = v_desktop_height.d;
 
-	I_Printf("Desktop resolution: %dx%d\n", display_W, display_H);
+	I_Printf("Desktop resolution: %dx%d\n", v_desktop_width.d, v_desktop_height.d);
 
 	int num_modes = SDL_GetNumDisplayModes(0);
 
@@ -144,7 +197,7 @@ void I_StartupGraphics(void)
 		SDL_DisplayMode possible_mode;
 		SDL_GetDisplayMode(0, i, &possible_mode);
 
-		if (possible_mode.w > display_W || possible_mode.h > display_H)
+		if (possible_mode.w > v_desktop_width.d || possible_mode.h > v_desktop_height.d)
 			continue;
 
 		scrmode_c test_mode;
@@ -171,6 +224,7 @@ void I_StartupGraphics(void)
     borderless_mode.depth = SDL_BITSPERPIXEL(info.format);
 
 	// -ACB- 2000/03/16 Test for possible windowed resolutions
+	// -AJA- TODO see if SDL2 can give us a definitive list, rather than this silliness
 	for (int depth = 16; depth <= 32; depth = depth+16)
 	{
 		for (int i = 0; possible_modes[i].w != -1; i++)
@@ -179,7 +233,7 @@ void I_StartupGraphics(void)
 			SDL_DisplayMode test_mode;
 			SDL_DisplayMode closest_mode;
 
-			if (possible_modes[i].w > display_W || possible_modes[i].h > display_H)
+			if (possible_modes[i].w > v_desktop_width.d || possible_modes[i].h > v_desktop_height.d)
 				continue;
 
 			mode.width = possible_modes[i].w;
@@ -220,8 +274,8 @@ static bool I_CreateWindow(scrmode_c *mode)
 	if (mode->display_mode == mode->SCR_BORDERLESS)
 	{
 		SDL_GetWindowSize(my_vis, &borderless_mode.width, &borderless_mode.height);
-		display_W = borderless_mode.width;
-		display_H = borderless_mode.height;
+		//-- display_W = borderless_mode.width;
+		//-- display_H = borderless_mode.height;
 	}
 
 	if (SDL_GL_CreateContext(my_vis) == NULL)
@@ -255,8 +309,8 @@ bool I_SetScreenSize(scrmode_c *mode)
 	{
 		SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN_DESKTOP);
 		SDL_GetWindowSize(my_vis, &borderless_mode.width, &borderless_mode.height);
-		display_W = borderless_mode.width;
-		display_H = borderless_mode.height;
+		//-- display_W = borderless_mode.width;
+		//-- display_H = borderless_mode.height;
 
 		I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
 			mode->width, mode->height, mode->depth);
@@ -284,6 +338,10 @@ bool I_SetScreenSize(scrmode_c *mode)
 		I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
 			mode->width, mode->height, mode->depth);
 	}
+
+	I_DeterminePixelAspect();
+
+	I_Printf("Pixel aspect: %1.3f\n", v_pixelaspect.f);
 
 	// -AJA- turn off cursor -- BIG performance increase.
 	//       Plus, the combination of no-cursor + grab gives 
@@ -321,6 +379,9 @@ void I_FinishFrame(void)
 
 	if (v_sync.CheckModified())
 		SDL_GL_SetSwapInterval(v_sync.d ? 1 : 0);
+
+	if (v_monitorsize.CheckModified() || v_force_pixelaspect.CheckModified())
+		I_DeterminePixelAspect();
 }
 
 
@@ -347,13 +408,6 @@ void I_ShutdownGraphics(void)
 	}
 
 	gladLoaderUnloadGL();
-}
-
-
-void I_GetDesktopSize(int *width, int *height)
-{
-	*width  = display_W;
-	*height = display_H;
 }
 
 //--- editor settings ---

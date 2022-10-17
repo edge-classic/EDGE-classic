@@ -2,7 +2,7 @@
 //  EDGE Head Up Display
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2009  The EDGE Team.
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -58,6 +58,7 @@ void HU_Start(void);
 bool HU_Responder(event_t * ev);
 
 void HU_StartMessage(const char *msg);
+void HU_StartImportantMessage(const char *msg);
 
 void HU_Ticker(void);
 void HU_Drawer(void);

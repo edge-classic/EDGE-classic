@@ -30,6 +30,7 @@ static imagedef_c *dynamic_image;
 static void DDF_ImageGetType(const char *info, void *storage);
 static void DDF_ImageGetSpecial(const char *info, void *storage);
 static void DDF_ImageGetFixTrans(const char *info, void *storage);
+static void DDF_ImageGetPatches(const char *info, void *storage);
 
 // -ACB- 1998/08/10 Use DDF_MainGetLumpName for getting the..lump name.
 // -KM- 1998/09/27 Use DDF_MainGetTime for getting tics
@@ -40,6 +41,7 @@ static imagedef_c dummy_image;
 static const commandlist_t image_commands[] =
 {
 	DDF_FIELD("IMAGE_DATA", type,     DDF_ImageGetType),
+	DDF_FIELD("PATCHES",    patches,  DDF_ImageGetPatches),
 	DDF_FIELD("SPECIAL",    special,  DDF_ImageGetSpecial),
 	DDF_FIELD("X_OFFSET",   x_offset, DDF_MainGetNumeric),
 	DDF_FIELD("Y_OFFSET",   y_offset, DDF_MainGetNumeric),
@@ -66,7 +68,10 @@ static image_namespace_e GetImageNamespace(const char *prefix)
 
 	if (DDF_CompareName(prefix, "spr") == 0)
 		return INS_Sprite;
-	
+
+	if (DDF_CompareName(prefix, "patch") == 0)
+		return INS_Patch;
+
 	DDF_Error("Invalid image prefix '%s' (use: gfx,tex,flat,spr)\n", prefix);
 	return INS_Flat; /* NOT REACHED */ 
 }
@@ -139,6 +144,10 @@ static void ImageParseField(const char *field, const char *contents, int index, 
 #if (DEBUG_DDF)  
 	I_Debugf("IMAGE_PARSE: %s = %s;\n", field, contents);
 #endif
+
+	// ensure previous patches are cleared when beginning a new set
+	if (DDF_CompareName(field, "PATCHES") == 0 && index == 0)
+		dynamic_image->patches.clear();
 
 	if (DDF_MainParseField(image_commands, field, contents, (byte *)dynamic_image))
 		return;  // OK
@@ -256,11 +265,27 @@ static void ImageParseLump(const char *spec)
 }
 
 
+static void ImageParseCompose(const char *info)
+{
+	const char *colon = DDF_MainDecodeList(info, ':', true);
+
+	if (colon == NULL || colon == info || colon[1] == 0)
+		DDF_Error("Malformed image compose spec: %s\n", info);
+
+	dynamic_image->compose_w = atoi(info);
+	dynamic_image->compose_h = atoi(colon + 1);
+
+	if (dynamic_image->compose_w <= 0 || dynamic_image->compose_h <= 0)
+		DDF_Error("Illegal image compose size: %d x %d\n",
+			dynamic_image->compose_w, dynamic_image->compose_h);
+}
+
+
 static void DDF_ImageGetType(const char *info, void *storage)
 {
 	const char *colon = DDF_MainDecodeList(info, ':', true);
 
-	if (! colon || colon == info || (colon - info) >= 16 || colon[1] == 0)
+	if (colon == NULL || colon == info || (colon - info) >= 16 || colon[1] == 0)
 		DDF_Error("Malformed image type spec: %s\n", info);
 
 	char keyword[20];
@@ -293,6 +318,11 @@ static void DDF_ImageGetType(const char *info, void *storage)
 	{
 		dynamic_image->type = IMGDT_Package;
 		ImageParseInfo(colon + 1);
+	}
+	else if (DDF_CompareName(keyword, "COMPOSE") == 0)
+	{
+		dynamic_image->type = IMGDT_Compose;
+		ImageParseCompose(colon + 1);
 	}
 	else
 		DDF_Error("Unknown image type: %s\n", keyword);
@@ -353,6 +383,29 @@ static void DDF_ImageGetFixTrans(const char *info, void *storage)
 }
 
 
+static void DDF_ImageGetPatches(const char *info, void *storage)
+{
+	// the syntax is: `NAME : XOFFSET : YOFFSET`.
+	// in the future we may accept more stuff at the end.
+
+	const char *colon1 = DDF_MainDecodeList(info, ':', true);
+	if (colon1 == NULL || colon1 == info || colon1[1] == 0)
+		DDF_Error("Malformed patch spec: %s\n", info);
+
+	const char *colon2 = DDF_MainDecodeList(colon1+1, ':', true);
+	if (colon2 == NULL || colon2 == colon1+1 || colon2[1] == 0)
+		DDF_Error("Malformed patch spec: %s\n", info);
+
+	compose_patch_c patch;
+
+	patch.name = std::string(info, (int)(colon1 - info));
+	patch.x    = atoi(colon1 + 1);
+	patch.y    = atoi(colon2 + 1);
+
+	dynamic_image->patches.push_back(patch);
+}
+
+
 // ---> imagedef_c class
 
 imagedef_c::imagedef_c() : name(), belong(INS_Graphic), info()
@@ -370,6 +423,10 @@ void imagedef_c::CopyDetail(const imagedef_c &src)
 	info    = src.info;
 	format  = src.format;
 
+	compose_w = src.compose_w;
+	compose_h = src.compose_h;
+	patches   = src.patches;
+
 	special  = src.special;
 	x_offset = src.x_offset;
 	y_offset = src.y_offset;
@@ -381,11 +438,14 @@ void imagedef_c::CopyDetail(const imagedef_c &src)
 
 void imagedef_c::Default()
 {
+	info.clear();
+
 	type    = IMGDT_Colour;
-	colour  = 0x000000;  // black
+	colour  = T_BLACK;
 	format  = LIF_STANDARD;
 
-	info.clear();
+	compose_w = compose_h = 0;
+	patches.clear();
 
 	special  = IMGSP_None;
 	x_offset = y_offset = 0;

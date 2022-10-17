@@ -2,7 +2,7 @@
 //  EDGE Heads-Up-Display Code
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2009  The EDGE Team.
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -61,12 +61,17 @@ bool chat_on;
 std::string w_map_title;
 
 static bool message_on;
+static bool important_message_on;
 static bool message_no_overwrite;
 
 static std::string w_message;
+static std::string w_important_message;
 static int message_counter;
+static int important_message_counter;
 
 style_c *automap_style;
+style_c *message_style;
+style_c *important_message_style;
 
 
 //
@@ -88,12 +93,24 @@ void HU_Start(void)
 
 	SYS_ASSERT(currmap);
 
+	
 	styledef_c *map_styledef = styledefs.Lookup("AUTOMAP");
 	if (! map_styledef)
 		map_styledef = default_style;
 	automap_style = hu_styles.Lookup(map_styledef);
 
+	styledef_c *messages_styledef = styledefs.Lookup("MESSAGES");
+	if (! messages_styledef)
+		messages_styledef = default_style;
+	message_style = hu_styles.Lookup(messages_styledef);
+
+	styledef_c *important_messages_styledef = styledefs.Lookup("IMPORTANT_MESSAGES");
+	if (! important_messages_styledef)
+		important_messages_styledef = default_style;
+	important_message_style = hu_styles.Lookup(important_messages_styledef);
+
 	message_on = false;
+	important_message_on = false;
 	message_no_overwrite = false;
 
 	// -ACB- 1998/08/09 Use currmap settings
@@ -121,23 +138,41 @@ void HU_Drawer(void)
 	CON_ShowFPS();
 	CON_ShowPosition();
 
-	/*
+
+	short tempY;
+	short y;
 	if (message_on)
 	{
-		HUD_SetScale(0.8f);
-		HUD_DrawText(HU_MSGX, HU_MSGY, w_message.c_str());
-		HUD_SetScale();
+
+		tempY = 0;
+		tempY += message_style->fonts[0]->StringLines(w_message.c_str()) *
+		(message_style->fonts[0]->NominalHeight() * message_style->def->text[0].scale);
+		tempY /= 2;
+		if (message_style->fonts[0]->StringLines(w_message.c_str())>1)
+			tempY += message_style->fonts[0]->NominalHeight() * message_style->def->text[0].scale;
+		
+		y = tempY;
+
+		message_style->DrawBackground();
+		HUD_SetAlignment(0, 0);//center it
+		HUD_SetAlpha(message_style->def->text->translucency);
+		HL_WriteText(message_style,0, 160, y, w_message.c_str());
+		HUD_SetAlignment();
+		HUD_SetAlpha();
 	}
-	*/
+
 	
-	if (message_on)
+	if (important_message_on)
 	{
-		HUD_SetAlpha(1.0f); //r_textalpha, defaults to "1.0f";
-		HUD_SetScale(0.9f);	 //TODO: Should make this user-definable in the Options Menu.
-		HUD_SetAlignment(0, 0); //use this to set alignment?
-		//OLD. NON CENTERED. HUD_DrawText(HU_MSGX, HU_MSGY, w_message.c_str());
-		HUD_DrawText(160, 3, w_message.c_str()); //r_text_x = 160 - 3/ 2 (keep this 160 int), r_text_y = 3;
-		HUD_SetScale();
+		tempY = 0;
+		tempY -= important_message_style->fonts[0]->StringLines(w_important_message.c_str()) *
+		(important_message_style->fonts[0]->NominalHeight() * important_message_style->def->text[0].scale);
+		tempY /= 2;
+		y = 90 - tempY;
+		important_message_style->DrawBackground();
+		HUD_SetAlignment(0, 0);//center it
+		HUD_SetAlpha(important_message_style->def->text->translucency);
+		HL_WriteText(important_message_style,0, 160, y, w_important_message.c_str());
 		HUD_SetAlignment();
 		HUD_SetAlpha();
 	}
@@ -164,6 +199,22 @@ void HU_StartMessage(const char *msg)
 	}
 }
 
+// Starts displaying the message.
+void HU_StartImportantMessage(const char *msg)
+{
+	
+	// only display message if necessary
+	if (! message_no_overwrite)
+	{
+		w_important_message = std::string(msg);
+
+		important_message_on = true;
+		important_message_counter = HU_MSGTIMEOUT;
+		message_no_overwrite = false;
+	}
+	
+}
+
 
 void HU_Ticker(void)
 {
@@ -171,6 +222,12 @@ void HU_Ticker(void)
 	if (message_counter && !--message_counter)
 	{
 		message_on = false;
+		message_no_overwrite = false;
+	}
+
+	if (important_message_counter && !--important_message_counter)
+	{
+		important_message_on = false;
 		message_no_overwrite = false;
 	}
 

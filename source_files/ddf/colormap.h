@@ -19,7 +19,8 @@
 #ifndef __DDF_COLORMAP_H__
 #define __DDF_COLORMAP_H__
 
-#include "utility.h"
+#include "epi.h"
+#include "arrays.h"
 
 #include "types.h"
 
@@ -59,6 +60,7 @@ public:
 	std::string name;
 
 	std::string lump_name;
+	std::string pack_name;
 
 	int start;
 	int length;
@@ -106,7 +108,7 @@ extern colourmap_container_c colourmaps;	// -ACB- 2004/06/10 Implemented
 
 void DDF_ReadColourMaps(const std::string& data);
 
-void DDF_ColourmapAddRaw(const char *lump_name, int size);
+void DDF_AddRawColourmap(const char *name, int size, const char *pack_name);
 
 #endif /* __DDF_COLORMAP_H__ */
 

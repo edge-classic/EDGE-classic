@@ -34,7 +34,6 @@
 
 #include "types.h"
 
-#include "utility.h"
 
 // We need globally shared data structures,
 //  for defining the global state variables.

@@ -58,8 +58,7 @@ private:
 	s16_t *mono_buffer;
 
 public:
-	bool OpenLump(const char *lumpname);
-	bool OpenFile(const char *filename);
+	bool OpenMemory(byte *data, int length);
 
 	virtual void Close(void);
 
@@ -153,38 +152,9 @@ void modplayer_c::Volume(float gain)
 }
 
 
-bool modplayer_c::OpenLump(const char *lumpname)
+bool modplayer_c::OpenMemory(byte *data, int length)
 {
-	SYS_ASSERT(lumpname);
-
-	if (status != NOT_LOADED)
-		Close();
-
-	int lump = W_CheckNumForName(lumpname);
-	if (lump < 0)
-	{
-		I_Warning("modplayer_c: LUMP '%s' not found.\n", lumpname);
-		return false;
-	}
-
-	epi::file_c *F = W_OpenLump(lump);
-
-	int length = F->GetLength();
-
-	byte *data = F->LoadIntoMemory();
-
-	if (! data)
-	{
-		delete F;
-		I_Warning("modplayer_c: Error loading data.\n");
-		return false;
-	}
-	if (length < 4)
-	{
-		delete F;
-		I_Debugf("modplayer_c: ignored short data (%d bytes)\n", length);
-		return false;
-	}
+	SYS_ASSERT(data);
 
 	mod_track = ModPlug_Load(data, length);
 
@@ -193,36 +163,6 @@ bool modplayer_c::OpenLump(const char *lumpname)
 		I_Warning("[modplayer_c::Open](DataLump) Failed!\n");
 		return false;
     }
-
-	PostOpenInit();
-	return true;
-}
-
-bool modplayer_c::OpenFile(const char *filename)
-{
-	SYS_ASSERT(filename);
-
-	if (status != NOT_LOADED)
-		Close();
-
-	epi::file_c *mod_loader = epi::FS_Open(filename, epi::file_c::ACCESS_READ|epi::file_c::ACCESS_BINARY);
-
-	if (!mod_loader)
-	{
-		I_Warning("modplayer_c: failed to open module file\n");
-		return false;
-	}		
-
-	mod_track = ModPlug_Load(mod_loader->LoadIntoMemory(), mod_loader->GetLength());
-
-	if (!mod_track)
-	{
-		I_Warning("modplayer_c: failure to create xmp context\n");
-		delete[] mod_loader;
-		return false;
-	}	
-
-	delete[] mod_loader;
 
 	PostOpenInit();
 	return true;
@@ -318,12 +258,13 @@ void modplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayMODMusic(const pl_entry_c *musdat, float volume, bool looping)
+abstract_music_c * S_PlayMODMusic(byte *data, int length, float volume, bool looping)
 {
 	modplayer_c *player = new modplayer_c();
 
 	// Need to set settings before loading module :/
 	ModPlug_Settings *mod_settings = new ModPlug_Settings;
+
 	mod_settings->mFlags = MODPLUG_ENABLE_OVERSAMPLING | MODPLUG_ENABLE_NOISE_REDUCTION;
 	mod_settings->mChannels = 2;
 	mod_settings->mBits = 16;
@@ -334,28 +275,17 @@ abstract_music_c * S_PlayMODMusic(const pl_entry_c *musdat, float volume, bool l
 
 	ModPlug_SetSettings(mod_settings);
 
-	if (musdat->infotype == MUSINF_LUMP)
-	{
-		if (! player->OpenLump(musdat->info.c_str()))
-		{
-			delete player;
-			delete mod_settings;
-			return NULL;
-		}
-	}
-	else if (musdat->infotype == MUSINF_FILE)
-	{
-		if (! player->OpenFile(musdat->info.c_str()))
-		{
-			delete player;
-			delete mod_settings;
-			return NULL;
-		}
-	}
-	else
-		I_Error("S_PlayMODMusic: bad format value %d\n", musdat->infotype);
-
 	delete mod_settings;
+
+	if (! player->OpenMemory(data, length))
+	{
+		delete[] data;
+		delete player;
+		return NULL;
+	}
+
+	// TODO check if ModPlug_Load holds onto the data pointer
+	//?? delete[] data;
 
 	player->Volume(volume);
 	player->Play(looping);

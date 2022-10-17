@@ -85,8 +85,6 @@ extern const colourmap_c *ren_fx_colmap;
 
 extern int doom_fading;
 
-extern cvar_c r_aspect;
-
 extern cvar_c r_nearclip;
 extern cvar_c r_farclip;
 

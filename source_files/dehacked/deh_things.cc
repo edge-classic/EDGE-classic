@@ -29,6 +29,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#if defined __arm__ || defined __aarch64__
+#include <cstddef> // offsetof
+#endif
 
 #include <string>
 
@@ -128,7 +131,7 @@ namespace Attacks
 
 	void BeginLump(void)
 	{
-		WAD::NewLump("DDFATK");
+		WAD::NewLump(DDF_Attack);
 
 		WAD::Printf("<ATTACKS>\n\n");
 	}
@@ -552,7 +555,7 @@ void Things::Shutdown()
 
 void Things::BeginLump()
 {
-	WAD::NewLump("DDFTHING");
+	WAD::NewLump(DDF_Thing);
 
 	WAD::Printf("<THINGS>\n\n");
 }

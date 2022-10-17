@@ -21,6 +21,7 @@
 
 #include "image_funcs.h"
 #include "path.h"
+#include "str_util.h"
 
 #define STBI_ONLY_PNG
 #define STBI_ONLY_TGA
@@ -109,7 +110,7 @@ image_format_e Image_DetectFormat(byte *header, int header_len, int file_size)
 		int ofs_y = (int)header[6] + (int)((signed char)header[7] * 256);
 
 		if (width  > 0 && width  <= 4096 && abs(ofs_x) <= 4096 &&
-			height > 0 && height <=  512 && abs(ofs_y) <=  512 &&
+			height > 0 && height <= 1024 && abs(ofs_y) <= 4096 &&
 			file_size > width * 4 /* columnofs */)
 		{
 			return FMT_DOOM;
@@ -124,14 +125,19 @@ image_format_e Image_FilenameToFormat(const std::string& filename)
 {
 	std::string ext = epi::PATH_GetExtension(filename.c_str());
 
-	if (ext == ".png" || ext == ".PNG")
+	str_lower(ext);
+
+	if (ext == ".png")
 		return FMT_PNG;
 
-	if (ext == ".tga" || ext == ".TGA")
+	if (ext == ".tga")
 		return FMT_TGA;
 
-	if (ext == ".jpg" || ext == ".JPG" || ext == ".jpeg" || ext == ".JPEG")
+	if (ext == ".jpg" || ext == ".jpeg")
 		return FMT_JPEG;
+
+	if (ext == ".gif" || ext == ".bmp" || ext == ".dds")
+		return FMT_OTHER;
 
 	return FMT_Unknown;
 }

@@ -19,7 +19,8 @@
 #ifndef __DDF_MUS_H__
 #define __DDF_MUS_H__
 
-#include "utility.h"
+#include "epi.h"
+#include "arrays.h"
 
 #include "types.h"
 
@@ -51,7 +52,8 @@ typedef enum
 	MUSINF_TRACK     = 1,
 	MUSINF_LUMP      = 2,
 	MUSINF_FILE      = 3,
-	ENDOFMUSINFTYPES = 4
+	MUSINF_PACKAGE   = 4,
+	ENDOFMUSINFTYPES = 5
 }
 musicinftype_e;
 

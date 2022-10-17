@@ -2,7 +2,7 @@
 //  EDGE Data Definition File Code (Things - MOBJs)
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2008  The EDGE Team.
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -26,10 +26,11 @@
 //
 
 #include "local.h"
-
 #include "thing.h"
 
 #include "p_action.h"
+
+#include "str_util.h"
 
 
 #undef  DF
@@ -280,6 +281,9 @@ const actioncode_t thing_actions[] =
 	{"CHECKMOVING",       P_ActCheckMoving, NULL},
 	{"CHECK_ACTIVITY",    P_ActCheckActivity, NULL},
 	{"JUMP",              P_ActJump, DDF_StateGetJump},
+	{"JUMP_LIQUID",       P_ActJumpLiquid, DDF_StateGetJump},
+	{"JUMP_SKY",          P_ActJumpSky, DDF_StateGetJump},
+	//{"JUMP_STUCK",        P_ActJumpStuck, DDF_StateGetJump},
 	{"BECOME",            P_ActBecome, DDF_StateGetBecome},
 	{"EXPLODE",           P_ActExplode, NULL},
 	{"ACTIVATE_LINETYPE", P_ActActivateLineType, DDF_StateGetIntPair},
@@ -863,7 +867,7 @@ static void ThingFinishEntry(void)
 	// FIXME: check more stuff
 
 	// backwards compatibility: if no idle state, re-use spawn state
-	if (dynamic_mobj->idle_state == NULL)
+	if (dynamic_mobj->idle_state == 0)
 		dynamic_mobj->idle_state = dynamic_mobj->spawn_state;
 
 	dynamic_mobj->DLightCompatibility();
@@ -2148,7 +2152,7 @@ bool DDF_MainParseCondition(const char *info, condition_check_t *cond)
 
 	// check for negation
 	t_off = 0;
-	if (strnicmp(typebuf, "NOT_", 4) == 0)
+	if (epi::prefix_case_cmp(typebuf, "NOT_") == 0)
 	{
 		cond->negate = true;
 		t_off = 4;

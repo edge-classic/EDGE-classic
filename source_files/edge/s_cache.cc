@@ -47,6 +47,7 @@
 #include "m_random.h"
 #include "p_mobj.h"
 #include "r_defs.h"
+#include "w_files.h"
 #include "w_wad.h"
 
 
@@ -138,11 +139,23 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 /* Lobo 2022: info overload. Shut up.
 	I_Debugf("S_CacheLoad: [%s]\n", def->name.c_str());
 */
-	
+
 	// open the file or lump, and read it into memory
 	epi::file_c *F;
 
-	if (def->file_name != "")
+	if (def->pack_name != "")
+	{
+		F = W_OpenPackFile(def->pack_name);
+
+		if (! F)
+		{
+			M_WarnError("SFX Loader: Missing sound in PK3: '%s'\n", def->pack_name.c_str());
+			return false;
+		}
+
+		// FIXME: get the format from filename (Sound_FilenameToFormat)
+	}
+	else if (def->file_name != "")
 	{
 		std::string fn = M_ComposeFileName(game_dir.c_str(), def->file_name.c_str());
 
@@ -153,6 +166,8 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 			M_WarnError("SFX Loader: Can't Find File '%s'\n", fn.c_str());
 			return false;
 		}
+
+		// FIXME: get the format from filename (Sound_FilenameToFormat)
 	}
 	else 
 	{
@@ -167,24 +182,42 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 		F = W_OpenLump(lump);
 		SYS_ASSERT(F);
 	}
-	
-	int length = F->GetLength();
 
+	// Load the data into the buffer
+	int length = F->GetLength();
 	byte *data = F->LoadIntoMemory();
 
 	// no longer need the epi::file_c
 	delete F; F = NULL;
 
-	if (! data || length < 4)
+	if (! data)
 	{
 		M_WarnError("SFX Loader: Error loading data.\n");
 		return false;
 	}
+	if (length < 4)
+	{
+		delete[] data;
+		M_WarnError("SFX Loader: Ignored short data (%d bytes).\n", length);
+		return false;
+	}
 
 	// determine format information
-	auto fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
+	epi::sound_format_e fmt = epi::FMT_Unknown;
 
-	// Load the data into the buffer
+	if (def->pack_name != "")
+	{
+		fmt = epi::Sound_FilenameToFormat(def->pack_name);
+	}
+	else if (def->file_name != "")
+	{
+		fmt = epi::Sound_FilenameToFormat(def->file_name);
+	}
+	else
+	{
+		// for lumps, we must detect the format from the lump contents
+		fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
+	}
 
 	bool OK = false;
 	

@@ -2,7 +2,7 @@
 //  EDGE Creature Action Code
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2009  The EDGE Team.
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -227,7 +227,7 @@ bool P_Move(mobj_t * actor, bool path)
 		{
 			if (actor->z > actor->floorz)
 			{
-				P_HitFloor(actor);
+				P_HitLiquidFloor(actor);
 			}
 			actor->z = actor->floorz;
 		}
@@ -256,7 +256,7 @@ bool P_Move(mobj_t * actor, bool path)
 //
 static bool TryWalk(mobj_t * actor)
 {
-	P_HitFloor(actor);
+	P_HitLiquidFloor(actor);
 	
 	if (!P_Move(actor, false))
 		return false;

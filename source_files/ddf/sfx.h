@@ -19,7 +19,8 @@
 #ifndef __DDF_SFX_H__
 #define __DDF_SFX_H__
 
-#include "utility.h"
+#include "epi.h"
+#include "arrays.h"
 
 #include "types.h"
 
@@ -59,9 +60,11 @@ public:
 
     // full sound lump name (or file name)
 	std::string lump_name;
+	std::string file_name;
+	std::string pack_name;
+
 	// PC Speaker equivalent lump
 	std::string pc_speaker_lump;
-	std::string file_name;
 
 	// sfxinfo ID number
 	// -AJA- Changed to a sfx_t.  It serves two purposes: (a) hold the

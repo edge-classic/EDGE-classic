@@ -19,7 +19,8 @@
 #ifndef __DDF_IMAGE_H__
 #define __DDF_IMAGE_H__
 
-#include "utility.h"
+#include "epi.h"
+#include "arrays.h"
 
 #include "types.h"
 
@@ -29,6 +30,7 @@ typedef enum
 	INS_Texture,
 	INS_Flat,
 	INS_Sprite,
+	INS_Patch,
 }
 image_namespace_e;
 
@@ -41,6 +43,7 @@ typedef enum
 	IMGDT_File,         // load from an image file
 	IMGDT_Lump,         // load from lump in a WAD
 	IMGDT_Package,      // load from a PK3 package
+	IMGDT_Compose       // compose from patches
 }
 imagedata_type_e;
 
@@ -72,6 +75,16 @@ typedef enum
 }
 L_image_format_e;
 
+
+class compose_patch_c
+{
+public:
+	std::string name;
+	int x = 0;
+	int y = 0;
+};
+
+
 class imagedef_c
 {
 public:
@@ -91,35 +104,22 @@ public:
 	rgbcol_t colour;          // IMGDT_Colour
 
 	std::string info;         // IMGDT_Package, IMGDT_File, IMGDT_Lump
-	L_image_format_e format;  // ditto
+	L_image_format_e format;  //
+
+	int compose_w, compose_h;              // IMGDT_Compose
+	std::vector<compose_patch_c> patches;  //
 
 	image_special_e special;
 
+	// offsets for sprites (mainly)
 	int x_offset, y_offset;
 
 	int fix_trans;   // FIXTRN_XXX value
 
 	bool is_font;
 
-	// COMPOSE specifics:
-	//   rgbcol_t base_col;
-	//   percent_t base_trans;
-	//   compose_overlay_t *overlays;
-
-	// WAD specifics:
-	//   std::string palette;
-	//   colourmap_c *colmap;
-
-	// CONVERSION
-	//   float gamma;
-	//   h_formula_t   conv_h;
-	//   rgb_formula_t conv_s, conv_v;
-	//   rgb_formula_t conv_r, conv_g, conv_b, conv_a;
-
 	// RENDERING specifics:
 	float scale, aspect;
-	//   percent_t translucency;
-	//   angle_t rotation;
 
 private:
 	// disable copy construct and assignment operator

@@ -70,10 +70,6 @@ void HUD_FrameSetup(void);
 void HUD_PushScissor(float x1, float y1, float x2, float y2, bool expand=false);
 void HUD_PopScissor();
 
-// returns true unless the given line/box is completely outside the
-// scissor rectangles.
-bool HUD_ScissorTest(float x1, float y1, float x2, float y2);
-
 
 void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
                   const image_c *image, 

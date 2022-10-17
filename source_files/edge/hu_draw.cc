@@ -298,22 +298,6 @@ void HUD_PopScissor()
 }
 
 
-bool HUD_ScissorTest(float x1, float y1, float x2, float y2)
-{
-	if (sci_stack_top == 0)
-		return true;
-
-	if (x1 > x2) std::swap(x1, x2);
-	if (y1 < y2) std::swap(y1, y2);
-
-	x1 = COORD_X(x1); y1 = COORD_Y(y1);
-	x2 = COORD_X(x2); y2 = COORD_Y(y2);
-
-	int *xy = scissor_stack[sci_stack_top-1];
-
-	return ! (x2 < xy[0] || x1 > xy[2] || y2 < xy[1] || y1 > xy[3]);
-}
-
 // Adapted from Quake 3 GPL release
 void HUD_CalcScrollTexCoords( float x_scroll, float y_scroll, float *tx1, float *ty1, float *tx2, float *ty2 )
 {

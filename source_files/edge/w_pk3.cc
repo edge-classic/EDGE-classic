@@ -19,6 +19,7 @@
 #include "i_defs.h"
 #include "l_deh.h"
 #include "w_files.h"
+#include "vm_coal.h"
 
 // EPI
 #include "epi.h"
@@ -605,6 +606,8 @@ static void ProcessDDFInPack(pack_file_c *pack)
 	data_file_c *df = pack->parent;
 
 	std::string bare_filename = epi::PATH_GetFilename(df->name.c_str());
+	if (bare_filename == "")
+		bare_filename = df->name;
 
 	for (size_t i = 0 ; i < pack->dirs[0].entries.size() ; i++)
 	{
@@ -643,6 +646,34 @@ static void ProcessDDFInPack(pack_file_c *pack)
 			continue;
 		}
 	}
+}
+
+
+static void ProcessCoalInPack(pack_file_c *pack)
+{
+	const char *name = "coal_hud.ec";
+
+	int idx = pack->dirs[0].Find(name);
+	if (idx < 0)
+		return;
+
+	data_file_c *df = pack->parent;
+
+	std::string bare_filename = epi::PATH_GetFilename(df->name.c_str());
+	if (bare_filename == "")
+		bare_filename = df->name;
+
+	std::string source = name;
+	source += " in ";
+	source += bare_filename;
+
+	int length = -1;
+	const byte *raw_data = pack->LoadEntry(0, idx, length);
+
+	std::string data((const char *)raw_data);
+	delete[] raw_data;
+
+	VM_AddScript(0, data, source);
 }
 
 
@@ -904,6 +935,7 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 	ProcessMusicsInPack(df->pack);
 
 	ProcessDDFInPack(df->pack);
+	ProcessCoalInPack(df->pack);
 }
 
 

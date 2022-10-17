@@ -181,10 +181,6 @@ void HU_Drawer(void)
 }
 
 
-void HU_Erase(void)
-{ }
-
-
 // Starts displaying the message.
 void HU_StartMessage(const char *msg)
 {

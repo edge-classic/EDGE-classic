@@ -557,6 +557,7 @@ static specflags_t weapon_specials[] =
 	{"FRESH",   WPSP_Fresh, 0},
 	{"MANUAL",  WPSP_Manual, 0},
 	{"PARTIAL", WPSP_Partial, 0},
+	{"NOAUTOFIRE", WPSP_NoAutoFire, 0},
     {NULL, WPSP_None, 0}
 };
 

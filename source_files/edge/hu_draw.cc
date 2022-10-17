@@ -47,6 +47,11 @@ int hudtic;
 int hud_swirl_pass = 0;
 bool hud_thick_liquid = false;
 
+float hud_x_left;
+float hud_x_right;
+float hud_y_top;
+float hud_y_bottom;
+
 // current state
 static float cur_coord_W;
 static float cur_coord_H;
@@ -62,9 +67,17 @@ static float margin_Y;
 static float margin_W;
 static float margin_H;
 
-#define COORD_X(x)  (margin_X + (x) * margin_W / cur_coord_W)
-#define COORD_Y(y)  (margin_Y - (y) * margin_H / cur_coord_H)
+static inline float COORD_X(float x)
+{
+	return margin_X + (x) * margin_W / cur_coord_W;
+}
 
+static inline float COORD_Y(float y)
+{
+	return margin_Y - (y) * margin_H / cur_coord_H;
+}
+
+// FIXME: this seems totally arbitrary, improve or remove it
 #define VERT_SPACING  2.0f
 
 
@@ -72,6 +85,20 @@ void HUD_SetCoordSys(int width, int height)
 {
 	cur_coord_W = width;
 	cur_coord_H = height;
+
+	// setup letterboxing for wide screens (etc)
+	margin_H = SCREENHEIGHT;
+
+	margin_W = margin_H * DOOM_SCREEN_ASPECT * (DOOM_PIXEL_ASPECT / v_pixelaspect.f);
+
+	if (margin_W > SCREENWIDTH)
+	{
+		margin_H *= (float)SCREENWIDTH / margin_W;
+		margin_W = SCREENWIDTH;
+	}
+
+	margin_X = (SCREENWIDTH  - margin_W) / 2.0;
+	margin_Y = (SCREENHEIGHT + margin_H) / 2.0;
 }
 
 void HUD_SetFont(font_c *font)
@@ -114,12 +141,13 @@ void HUD_Reset()
 	cur_color = RGB_NO_VALUE;
 	cur_scale = 1.0f;
 	cur_alpha = 1.0f;
-	cur_x_align = cur_y_align = -1;
+	cur_x_align = -1;
+	cur_y_align = -1;
 }
 
 void HUD_FrameSetup(void)
 {
-	if (! default_font)
+	if (default_font == NULL)
 	{
 		// FIXME: get default font from DDF gamedef
 		fontdef_c *DEF = fontdefs.Lookup("DOOM");
@@ -130,20 +158,6 @@ void HUD_FrameSetup(void)
 	}
 
 	HUD_Reset();
-
-	// setup letterboxing for wide screens (etc)
-	margin_H = SCREENHEIGHT;
-
-	margin_W = margin_H * DOOM_SCREEN_ASPECT * (DOOM_PIXEL_ASPECT / v_pixelaspect.f);
-
-	if (margin_W > SCREENWIDTH)
-	{
-		margin_H *= (float)SCREENWIDTH / margin_W;
-		margin_W = SCREENWIDTH;
-	}
-
-	margin_X = (SCREENWIDTH  - margin_W) / 2.0;
-	margin_Y = (SCREENHEIGHT + margin_H) / 2.0;
 
 	hudtic++;
 }

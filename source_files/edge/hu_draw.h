@@ -32,6 +32,16 @@
 #include "hu_font.h"
 
 
+// X coordinates of left and right edges of screen.
+// updated by calls to HUD_SetCoordSys() or HUD_Reset().
+extern float hud_x_left;
+extern float hud_x_right;
+
+// Y coordinates of top and bottom of screen.
+extern float hud_y_top;
+extern float hud_y_bottom;
+
+
 void HUD_SetCoordSys(int width, int height);
 
 void HUD_SetFont(font_c *font = NULL);
@@ -40,12 +50,12 @@ void HUD_SetTextColor(rgbcol_t color = RGB_NO_VALUE);
 void HUD_SetAlpha(float alpha = 1.0f);
 float HUD_GetAlpha(void);
 
-void HUD_SetAlignment(int xa = -1, int ya = -1);
 // xa is -1 for left, 0 for centred, +1 for right
 // ya is -1 for top,  0 for centred, +! for bottom
+void HUD_SetAlignment(int xa = -1, int ya = -1);
 
-void HUD_Reset();
 // resets the coord sys to 320x200, and resets all properties
+void HUD_Reset();
 
 
 void HL_Init(void);
@@ -53,15 +63,15 @@ void HL_Init(void);
 void HUD_FrameSetup(void);
 
 
-void HUD_PushScissor(float x1, float y1, float x2, float y2, bool expand=false);
-void HUD_PopScissor();
 // manage the current clip rectangle.  The first push enables the
 // scissor test, subsequent pushes merely shrink the area, and the
 // last pop disables the scissor test.
+void HUD_PushScissor(float x1, float y1, float x2, float y2, bool expand=false);
+void HUD_PopScissor();
 
-bool HUD_ScissorTest(float x1, float y1, float x2, float y2);
 // returns true unless the given line/box is completely outside the
 // scissor rectangles.
+bool HUD_ScissorTest(float x1, float y1, float x2, float y2);
 
 
 void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
@@ -70,9 +80,9 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 				  float alpha = 1.0f, rgbcol_t text_col = RGB_NO_VALUE,
 				  const colourmap_c *palremap = NULL, float sx = 0.0, float sy = 0.0);
  
-void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col);
 // Draw a solid colour box (possibly translucent) in the given
 // rectangle.
+void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col);
 
 void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col,
                    bool thick=false, bool smooth=true, float dx=0, float dy=0);
@@ -85,12 +95,12 @@ void HUD_SolidFatLine(float x1, float y1, float x2, float y2, rgbcol_t col,
                    bool thick=false, bool smooth=true, float dx=0, float dy=0);
 
 
-void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col);
 // Draw a thin outline of a box.
+void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col);
 
-void HUD_GradientBox(float x1, float y1, float x2, float y2, rgbcol_t *cols);
 // Like HUD_SolidBox but the colors of each corner (TL, BL, TR, BR) can
 // be specified individually.
+void HUD_GradientBox(float x1, float y1, float x2, float y2, rgbcol_t *cols);
 
 void HUD_DrawImage(float x, float y, const image_c *image);
 void HUD_DrawImageNoOffset(float x, float y, const image_c *image);
@@ -113,12 +123,11 @@ float HUD_StringHeight(const char *str);
 
 void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float size = 0);
 
-void HUD_DrawText(float x, float y, const char *str, float size = 0);
 // draw a text string with the current font, current color (etc).
+void HUD_DrawText(float x, float y, const char *str, float size = 0);
 
-
-void HUD_RenderWorld(float x1, float y1, float x2, float y2, mobj_t *camera);
 // render a view of the world using the given camera object.
+void HUD_RenderWorld(float x1, float y1, float x2, float y2, mobj_t *camera);
 
 void HUD_GetCastPosition(float *x, float *y, float *scale_x, float *scale_y);
 

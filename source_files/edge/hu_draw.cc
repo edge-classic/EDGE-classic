@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE 2D DRAWING STUFF
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2009  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2
@@ -38,6 +38,10 @@
 #define HU_CHAR(ch)  (islower(ch) ? toupper(ch) : (ch))
 #define HU_INDEX(c)  ((unsigned char) HU_CHAR(c))
 
+// FIXME: this seems totally arbitrary, review it.
+#define VERT_SPACING  2.0f
+
+
 static font_c *default_font;
 
 
@@ -49,56 +53,101 @@ bool hud_thick_liquid = false;
 
 float hud_x_left;
 float hud_x_right;
+float hud_x_mid;
+
 float hud_y_top;
 float hud_y_bottom;
 
 // current state
-static float cur_coord_W;
-static float cur_coord_H;
-
-static font_c *cur_font;
+static font_c  *cur_font;
 static rgbcol_t cur_color;
 
 static float cur_scale, cur_alpha;
 static int cur_x_align, cur_y_align;
 
+// mapping from hud X and Y coords to real (OpenGL) coords.
+// note that Y coordinates get inverted.
 static float margin_X;
 static float margin_Y;
-static float margin_W;
-static float margin_H;
+static float margin_XMUL;
+static float margin_YMUL;
 
 static inline float COORD_X(float x)
 {
-	return margin_X + (x) * margin_W / cur_coord_W;
+	return margin_X + x * margin_XMUL;
 }
 
 static inline float COORD_Y(float y)
 {
-	return margin_Y - (y) * margin_H / cur_coord_H;
+	return margin_Y - y * margin_YMUL;
 }
 
-// FIXME: this seems totally arbitrary, improve or remove it
-#define VERT_SPACING  2.0f
+
+DEF_CVAR(v_letterbox, "0", CVAR_ARCHIVE)
+DEF_CVAR(v_pillarbox, "0", CVAR_ARCHIVE)
 
 
 void HUD_SetCoordSys(int width, int height)
 {
-	cur_coord_W = width;
-	cur_coord_H = height;
+	if (width < 1 || height < 1)
+		return;
 
-	// setup letterboxing for wide screens (etc)
-	margin_H = SCREENHEIGHT;
+	float sw = (float)SCREENWIDTH;
+	float sh = (float)SCREENHEIGHT;
 
-	margin_W = margin_H * DOOM_SCREEN_ASPECT * (DOOM_PIXEL_ASPECT / v_pixelaspect.f);
+	/* compute Y stuff */
 
-	if (margin_W > SCREENWIDTH)
+	hud_y_top    = 0.0f;
+	hud_y_bottom = height;
+
+	margin_Y    = sh;
+	margin_YMUL = sh / (float)height;
+
+	/* compute X stuff */
+
+	hud_x_mid = width * 0.5f;
+
+	if (false)
 	{
-		margin_H *= (float)SCREENWIDTH / margin_W;
-		margin_W = SCREENWIDTH;
+		// simply stretch to fit [ bad!! ]
+
+		margin_X    = 0.0;
+		margin_XMUL = sw / (float)width;
+
+		hud_x_left  = 0.0;
+		hud_x_right = width * 1.0f;
+	}
+	else
+	{
+		float side_dist = (float)width / 2.0;
+
+		// compensate for size of window or screen.
+		// Note: this implicitly handles DOOM_PIXEL_ASPECT !
+		side_dist = side_dist * (sw / 320.0f) / (sh / 200.0f);
+
+		// compensate for monitor's pixel aspect
+		side_dist = side_dist * v_pixelaspect.f;
+
+		// enabling this will stop the horizontal stretching which is done
+		// because of Doom's 5:6 pixel aspect ratio.
+		if (false)
+		{
+			side_dist = side_dist * DOOM_PIXEL_ASPECT;
+		}
+
+		hud_x_left  = hud_x_mid - side_dist;
+		hud_x_right = hud_x_mid + side_dist;
+
+		margin_XMUL = sw / side_dist / 2.0;
+		margin_X    = 0.0f - hud_x_left * margin_XMUL;
+
+		/* DEBUG
+		fprintf(stderr, "side: %1.0f  L %1.0f R %1.0f  X %1.0f XMUL %1.6f\n",
+			side_dist, hud_x_left, hud_x_right, margin_X, margin_XMUL);
+		*/
 	}
 
-	margin_X = (SCREENWIDTH  - margin_W) / 2.0;
-	margin_Y = (SCREENHEIGHT + margin_H) / 2.0;
+	// TODO letterboxing and pillarboxing
 }
 
 void HUD_SetFont(font_c *font)
@@ -174,7 +223,7 @@ void HUD_PushScissor(float x1, float y1, float x2, float y2, bool expand)
 	SYS_ASSERT(sci_stack_top < MAX_SCISSOR_STACK);
 
 	// expand rendered view to cover whole screen
-	if (expand && x1 < 1 && x2 > cur_coord_W-1)
+	if (expand && x1 < hud_x_left && x2 > hud_x_right-1)
 	{
 		x1 = 0;
 		x2 = SCREENWIDTH;
@@ -620,7 +669,7 @@ void HUD_TileImage(float x, float y, float w, float h, const image_c *img,
 void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col)
 {
 	// expand to cover wide screens
-	if (x1 < 1 && x2 > cur_coord_W-1 && y1 < 1 && y2 > cur_coord_H-1)
+	if (x1 < hud_x_left && x2 > hud_x_right-1 && y1 < hud_y_top+1 && y2 > hud_y_bottom-1)
 	{
 		x1 = 0; x2 = SCREENWIDTH;
 		y1 = 0; y2 = SCREENHEIGHT;
@@ -936,7 +985,7 @@ void HUD_RenderWorld(float x1, float y1, float x2, float y2, mobj_t *camera)
 
 	int *xy = scissor_stack[sci_stack_top-1];
 
-	bool full_height = (y2 - y1) > cur_coord_H * 0.95;
+	bool full_height = (y2 - y1) > (hud_y_bottom - hud_y_top) * 0.95;
 
 	float width = COORD_X(x2) - COORD_X(x1);
 	float expand_w = (xy[2] - xy[0]) / width;
@@ -953,7 +1002,8 @@ void HUD_GetCastPosition(float *x, float *y, float *scale_x, float *scale_y)
 	*x = COORD_X(160);
 	*y = COORD_Y(170);
 
-	*scale_y = margin_H / cur_coord_H;
+	// FIXME REVIEW THIS
+	*scale_y = 1.0;
 	*scale_x = *scale_y / v_pixelaspect.f;
 }
 

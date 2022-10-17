@@ -36,10 +36,11 @@
 // updated by calls to HUD_SetCoordSys() or HUD_Reset().
 extern float hud_x_left;
 extern float hud_x_right;
+extern float hud_x_mid;
 
-// Y coordinates of top and bottom of screen.
-extern float hud_y_top;
-extern float hud_y_bottom;
+//-- // Y coordinates of top and bottom of screen.
+//-- extern float hud_y_top;
+//-- extern float hud_y_bottom;
 
 
 void HUD_SetCoordSys(int width, int height);

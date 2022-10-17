@@ -85,12 +85,12 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 // rectangle.
 void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col);
 
-void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col,
-                   bool thick=false, bool smooth=true, float dx=0, float dy=0);
 // Draw a solid colour line (possibly translucent) between the two
 // end points.  Coordinates are inclusive.  Drawing will be clipped
 // to the current scissor rectangle.  The dx/dy fields are used by
 // the automap code to reduce the wobblies.
+void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col,
+                   bool thick=false, bool smooth=true, float dx=0, float dy=0);
 
 void HUD_SolidFatLine(float x1, float y1, float x2, float y2, rgbcol_t col,
                    bool thick=false, bool smooth=true, float dx=0, float dy=0);

@@ -145,15 +145,6 @@ static float m_cx, m_cy;
 static float m_scale;
 
 
-// translates between frame-buffer and map distances
-#define MTOF(xx) (  (int)((xx) * m_scale * f_scale))
-#define FTOM(xx) ((float)((xx) / m_scale / f_scale))
-
-// translates between frame-buffer and map coordinates
-#define CXMTOF(xx)  (f_x + f_w*0.5 + MTOF((xx) - m_cx))
-#define CYMTOF(yy)  (f_y + f_h*0.5 - MTOF((yy) - m_cy))
-
-
 // largest size of map along X or Y axis
 static float map_size;
 
@@ -190,6 +181,31 @@ static bool stopped = true;
 bool rotatemap = false;
 
 extern style_c *automap_style;  // FIXME: put in header
+
+
+// translates between frame-buffer and map distances
+static float XMTOF(float x)
+{
+	return x * m_scale * f_scale * 1.2f;
+}
+static float YMTOF(float y)
+{
+	return y * m_scale * f_scale;
+}
+static float FTOM(float x)
+{
+	return x / m_scale / f_scale;
+}
+
+// translates from map coordinates to frame-buffer
+static float CXMTOF(float x, float dx)
+{
+	return f_x + f_w * 0.5 + XMTOF(x - dx);
+}
+static float CYMTOF(float y, float dy)
+{
+	return f_y + f_h * 0.5 - YMTOF(y - dy);
+}
 
 
 //
@@ -526,15 +542,16 @@ static void DrawMLine(mline_t * ml, rgbcol_t rgb, bool thick = true)
 	if (! am_smoothing.d)
 		thick = false;
 
-	float x1 = f_x + f_w*0.5 + MTOF(ml->a.x);
-	float y1 = f_y + f_h*0.5 - MTOF(ml->a.y);
+	float x1 = CXMTOF(ml->a.x, 0);
+	float y1 = CYMTOF(ml->a.y, 0);
 
-	float x2 = f_x + f_w*0.5 + MTOF(ml->b.x);
-	float y2 = f_y + f_h*0.5 - MTOF(ml->b.y);
+	float x2 = CXMTOF(ml->b.x, 0);
+	float y2 = CYMTOF(ml->b.y, 0);
 
-	float dx = MTOF(- m_cx);
-	float dy = MTOF(- m_cy);
-	
+	// these are separate to reduce the wobblies
+	float dx = XMTOF(- m_cx);
+	float dy = YMTOF(- m_cy);
+
 	if (!hide_lines)
 		HUD_SolidLine(x1, y1, x2, y2, rgb, thick, thick, dx, dy);
 }
@@ -542,15 +559,15 @@ static void DrawMLine(mline_t * ml, rgbcol_t rgb, bool thick = true)
 //Lobo 2022: keyed doors automap colouring
 static void DrawMLineDoor(mline_t * ml, rgbcol_t rgb)
 {
-	float x1 = f_x + f_w*0.5 + MTOF(ml->a.x);
-	float y1 = f_y + f_h*0.5 - MTOF(ml->a.y);
+	float x1 = CXMTOF(ml->a.x, 0);
+	float y1 = CYMTOF(ml->a.y, 0);
 
-	float x2 = f_x + f_w*0.5 + MTOF(ml->b.x);
-	float y2 = f_y + f_h*0.5 - MTOF(ml->b.y);
+	float x2 = CXMTOF(ml->b.x, 0);
+	float y2 = CYMTOF(ml->b.y, 0);
 
-	float dx = MTOF(- m_cx);
-	float dy = MTOF(- m_cy);
-	
+	float dx = XMTOF(- m_cx);
+	float dy = YMTOF(- m_cy);
+
 	if (!hide_lines)
 		HUD_SolidFatLine(x1, y1, x2, y2, rgb, true, true, dx, dy);
 }
@@ -575,8 +592,8 @@ static void DrawGrid()
 		int jx = ((j & ~1) >> 1);
 
 		// stop when both lines are off the screen
-		float x1 = CXMTOF(mx0 - jx * grid_size);
-		float x2 = CXMTOF(mx0 + jx * grid_size);
+		float x1 = CXMTOF(mx0 - jx * grid_size, m_cx);
+		float x2 = CXMTOF(mx0 + jx * grid_size, m_cx);
 
 		if (x1 < f_x && x2 >= f_x + f_w)
 			break;
@@ -584,8 +601,8 @@ static void DrawGrid()
 		ml.a.x = mx0 + jx * ((j & 1) ? -grid_size : grid_size);
 		ml.b.x = ml.a.x;
 
-		ml.a.y = -40000;
-		ml.b.y = +40000;
+		ml.a.y = -9e6;
+		ml.b.y = +9e6;
 
 		DrawMLine(&ml, am_colors[AMCOL_Grid], false);
 	}
@@ -595,14 +612,14 @@ static void DrawGrid()
 		int ky = ((k & ~1) >> 1);
 
 		// stop when both lines are off the screen
-		float y1 = CYMTOF(my0 + ky * grid_size);
-		float y2 = CYMTOF(my0 - ky * grid_size);
+		float y1 = CYMTOF(my0 + ky * grid_size, m_cy);
+		float y2 = CYMTOF(my0 - ky * grid_size, m_cy);
 
 		if (y1 < f_y && y2 >= f_y + f_h)
 			break;
 
-		ml.a.x = -40000;
-		ml.b.x = +40000;
+		ml.a.x = -9e6;
+		ml.b.x = +9e6;
 
 		ml.a.y = my0 + ky * ((k & 1) ? -grid_size : grid_size);
 		ml.b.y = ml.a.y;
@@ -782,29 +799,32 @@ static void DrawLineCharacter(mline_t *lineguy, int lineguylines,
 
 	GetRotatedCoords(x, y, &cx, &cy);
 
-	cx = CXMTOF(cx);
-	cy = CYMTOF(cy);
+	cx = CXMTOF(cx, m_cx);
+	cy = CYMTOF(cy, m_cy);
 
-	radius = MTOF(radius);
-
-	if (radius < 2)
-		radius = 2;
+	if (radius < FTOM(2))
+		radius = FTOM(2);
 
 	angle = GetRotatedAngle(angle);
 
-	for (int i = 0; i < lineguylines; i++)
+	for (int i = 0 ; i < lineguylines ; i++)
 	{
-		float ax = lineguy[i].a.x * radius;
-		float ay = lineguy[i].a.y * radius;
+		float ax = lineguy[i].a.x;
+		float ay = lineguy[i].a.y;
 
 		if (angle)
 			Rotate(&ax, &ay, angle);
 
-		float bx = lineguy[i].b.x * radius;
-		float by = lineguy[i].b.y * radius;
+		float bx = lineguy[i].b.x;
+		float by = lineguy[i].b.y;
 
 		if (angle)
 			Rotate(&bx, &by, angle);
+
+		ax = ax * XMTOF(radius);
+		ay = ay * YMTOF(radius);
+		bx = bx * XMTOF(radius);
+		by = by * YMTOF(radius);
 
 		HUD_SolidLine(cx+ax, cy-ay, cx+bx, cy-by, rgb);
 	}
@@ -1018,11 +1038,11 @@ static bool AM_CheckBBox(float *bspcoord)
 	if (rotatemap)
 		return true;
 
-	float x1 = CXMTOF(xl);
-	float x2 = CXMTOF(xr);
+	float x1 = CXMTOF(xl, m_cx);
+	float x2 = CXMTOF(xr, m_cx);
 
-	float y1 = CYMTOF(yt);
-	float y2 = CYMTOF(yb);
+	float y1 = CYMTOF(yt, m_cy);
+	float y2 = CYMTOF(yb, m_cy);
 
 	// some part of bbox is visible?
 	return HUD_ScissorTest(x1, y1, x2, y2);
@@ -1079,7 +1099,7 @@ static void DrawMarks(void)
 		buffer[0] = ('1' + i);
 		buffer[1] = 0;
 
-		HUD_DrawText(CXMTOF(mx), CYMTOF(my), buffer);
+		HUD_DrawText(CXMTOF(mx, m_cx), CYMTOF(my, m_cy), buffer);
 	}
 
 	HUD_SetFont();

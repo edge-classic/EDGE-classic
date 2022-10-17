@@ -2,7 +2,7 @@
 //  EDGE Console Main
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2009  The EDGE Team.
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -40,6 +40,8 @@ void CON_Message(const char *message, ...) GCCATTR((format(printf, 1, 2)));
 // Looks up the string in LDF, appends an extra '\n', and then writes it to
 // the console. Should be used for most player messages.
 void CON_MessageLDF(const char *lookup, ...);
+
+void CON_ImportantMessageLDF(const char *lookup, ...);
 
 // -ACB- 1999/09/22
 // Introduced because MSVC and DJGPP handle #defines differently

@@ -1816,6 +1816,11 @@ mobj_t *DoMapTargetAutoAim(mobj_t * source, angle_t angle, float distance, bool 
 	}
 	else
 	{
+		//Lobo: try and limit the vertical range somewhat
+		float vertslope = M_Tan(source->vertangle);
+		aim_I.topslope = (100 + vertslope * 320) / 160.0f;
+		aim_I.bottomslope = (-100 + vertslope * 576) / 160.0f;
+
 		P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, 
 		PTR_AimTraverse2);	
 	}

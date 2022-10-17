@@ -99,8 +99,6 @@ static const image_c *finale_textback;
 static float finale_textbackscale = 1.0f;
 static rgbcol_t finale_textcol;
 
-extern float pixel_aspect;
-
 static style_c *wi_leveltext_style;
 
 static bool HasFinale(const map_finaledef_c *F, finalestage_e cur)

@@ -19,15 +19,19 @@
 #include "i_defs.h"
 #include "l_deh.h"
 #include "w_files.h"
+#include "vm_coal.h"
 
 // EPI
 #include "epi.h"
 #include "file.h"
 #include "filesystem.h"
 #include "path.h"
+#include "sound_types.h"
+#include "str_util.h"
 
 // DDF
 #include "main.h"
+#include "colormap.h"
 
 #include <list>
 #include <vector>
@@ -39,6 +43,7 @@
 class pack_entry_c
 {
 public:
+	// this name is relative to parent (if any), i.e. no slashes
 	std::string name;
 
 	// only for Folder: the full pathname to file (for FS_Open).
@@ -169,6 +174,18 @@ public:
 			return OpenFile_Folder(name);
 		else
 			return OpenFile_Zip(name);
+	}
+
+	int EntryLength(size_t dir, size_t index)
+	{
+		epi::file_c *f = OpenEntry(dir, index);
+		if (f == NULL)
+			return 0;
+
+		int length = f->GetLength();
+		delete f;  // close it
+
+		return length;
 	}
 
 	byte * LoadEntry(size_t dir, size_t index, int& length)
@@ -584,11 +601,13 @@ epi::file_c * pack_file_c::OpenFile_Zip(const std::string& name)
 //  GENERAL STUFF
 //----------------------------------------------------------------------------
 
-static void ProcessStuffInPack(pack_file_c *pack)
+static void ProcessDDFInPack(pack_file_c *pack)
 {
 	data_file_c *df = pack->parent;
 
 	std::string bare_filename = epi::PATH_GetFilename(df->name.c_str());
+	if (bare_filename == "")
+		bare_filename = df->name;
 
 	for (size_t i = 0 ; i < pack->dirs[0].entries.size() ; i++)
 	{
@@ -630,6 +649,272 @@ static void ProcessStuffInPack(pack_file_c *pack)
 }
 
 
+static void ProcessCoalInPack(pack_file_c *pack)
+{
+	const char *name = "coal_hud.ec";
+
+	int idx = pack->dirs[0].Find(name);
+	if (idx < 0)
+		return;
+
+	data_file_c *df = pack->parent;
+
+	std::string bare_filename = epi::PATH_GetFilename(df->name.c_str());
+	if (bare_filename == "")
+		bare_filename = df->name;
+
+	std::string source = name;
+	source += " in ";
+	source += bare_filename;
+
+	int length = -1;
+	const byte *raw_data = pack->LoadEntry(0, idx, length);
+
+	std::string data((const char *)raw_data);
+	delete[] raw_data;
+
+	VM_AddScript(0, data, source);
+}
+
+
+static bool TextureNameFromFilename(std::string& buf, const std::string& stem, bool is_sprite)
+{
+	// returns false if the name is invalid (e.g. longer than 8 chars).
+
+	size_t pos = 0;
+
+	buf.clear();
+
+	while (pos < stem.size())
+	{
+		if (buf.size() >= 8)
+			return false;
+
+		int ch = (unsigned char) stem[pos++];
+
+		// sprites allow a few special characters, but remap caret --> backslash
+		if (is_sprite && ch == '^')
+			ch = '\\';
+		else if (is_sprite && (ch == '[' || ch == ']'))
+			{ /* ok */ }
+		else if (isalnum(ch) || ch == '_')
+			{ /* ok */ }
+		else
+			return false;
+
+		buf.push_back((char) ch);
+	}
+
+	epi::str_upper(buf);
+
+	return (buf.size() > 0);
+}
+
+
+static void ProcessImagesInPack(pack_file_c *pack, const std::string& dir_name, const std::string& prefix)
+{
+	data_file_c *df = pack->parent;
+
+	int d = pack->FindDir(dir_name);
+	if (d < 0)
+		return;
+
+	std::string text = "<IMAGES>\n\n";
+
+	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+	{
+		pack_entry_c& entry = pack->dirs[d].entries[i];
+
+		// split filename in stem + extension
+		std::string stem = epi::PATH_GetBasename(entry.name.c_str());
+		std::string ext  = epi::PATH_GetExtension(entry.name.c_str());
+
+		epi::str_lower(ext);
+
+		if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg")
+		{
+			std::string texname;
+
+			if (! TextureNameFromFilename(texname, stem, prefix == "spr"))
+			{
+				I_Warning("Illegal image name in PK3: %s\n", entry.name.c_str());
+				continue;
+			}
+
+			I_Debugf("- Adding image file in PK3: %s/%s\n", dir_name.c_str(), entry.name.c_str());
+
+			// generate DDF for it...
+			text += "[";
+			text += prefix;
+			text += ":";
+			text += texname;
+			text += "]\n";
+
+			text += "IMAGE_DATA=PACK:\"";
+			text += dir_name;
+			text += "/";
+			text += entry.name;
+			text += "\";\n\n";
+		}
+		else
+		{
+			I_Warning("Unknown image type in PK3: %s\n", entry.name.c_str());
+		}
+	}
+
+	// DEBUG:
+	// DDF_DumpFile(text);
+
+	DDF_AddFile(DDF_Image, text, df->name);
+}
+
+
+static void ProcessSoundsInPack(pack_file_c *pack)
+{
+	data_file_c *df = pack->parent;
+
+	int d = pack->FindDir("sounds");
+	if (d < 0)
+		return;
+
+	std::string text = "<SOUNDS>\n\n";
+
+	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+	{
+		pack_entry_c& entry = pack->dirs[d].entries[i];
+
+		epi::sound_format_e fmt = epi::Sound_FilenameToFormat(entry.name);
+
+		if (fmt == epi::FMT_Unknown)
+		{
+			I_Warning("Unknown sound type in PK3: %s\n", entry.name.c_str());
+			continue;
+		}
+
+		// stem must consist of only digits
+		std::string stem = epi::PATH_GetBasename(entry.name.c_str());
+		std::string sfxname;
+
+		if (! TextureNameFromFilename(sfxname, stem, false))
+		{
+			I_Warning("Illegal sound name in PK3: %s\n", entry.name.c_str());
+			continue;
+		}
+
+		I_Debugf("- Adding sound file in PK3: %s\n", entry.name.c_str());
+
+		// generate DDF for it...
+		text += "[";
+		text += sfxname;
+		text += "]\n";
+
+		text += "pack_name = \"";
+		text += "sounds/";
+		text += entry.name;
+		text += "\";\n";
+
+		text += "priority  = 64;\n";
+		text += "\n";
+	}
+
+	// DEBUG:
+	// DDF_DumpFile(text);
+
+	DDF_AddFile(DDF_SFX, text, df->name);
+}
+
+
+static void ProcessMusicsInPack(pack_file_c *pack)
+{
+	data_file_c *df = pack->parent;
+
+	int d = pack->FindDir("music");
+	if (d < 0)
+		return;
+
+	std::string text = "<PLAYLISTS>\n\n";
+
+	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+	{
+		pack_entry_c& entry = pack->dirs[d].entries[i];
+
+		epi::sound_format_e fmt = epi::Sound_FilenameToFormat(entry.name);
+
+		if (fmt == epi::FMT_Unknown)
+		{
+			I_Warning("Unknown music type in PK3: %s\n", entry.name.c_str());
+			continue;
+		}
+
+		// stem must consist of only digits
+		std::string stem = epi::PATH_GetBasename(entry.name.c_str());
+
+		bool valid = stem.size() > 0;
+		for (char ch : stem)
+			if (ch < '0' || ch > '9')
+				valid = false;
+
+		if (! valid)
+		{
+			I_Warning("Non-numeric music name in PK3: %s\n", entry.name.c_str());
+			continue;
+		}
+
+		I_Debugf("- Adding music file in PK3: %s\n", entry.name.c_str());
+
+		// generate DDF for it...
+		text += "[";
+		text += stem;
+		text += "]\n";
+
+		text += "MUSICINFO=MUS:PACK:\"";
+		text += "music/";
+		text += entry.name;
+		text += "\";\n\n";
+	}
+
+	// DEBUG:
+	// DDF_DumpFile(text);
+
+	DDF_AddFile(DDF_Playlist, text, df->name);
+}
+
+
+static void ProcessColourmapsInPack(pack_file_c *pack)
+{
+	int d = pack->FindDir("colormaps");
+	if (d < 0)
+		return;
+
+	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+	{
+		pack_entry_c& entry = pack->dirs[d].entries[i];
+
+		// split filename in stem + extension
+		std::string stem = epi::PATH_GetBasename(entry.name.c_str());
+		std::string ext  = epi::PATH_GetExtension(entry.name.c_str());
+
+		// extension is currently ignored
+		(void)ext;
+
+		std::string colname;
+
+		if (! TextureNameFromFilename(colname, stem, false))
+		{
+			I_Warning("Illegal colourmap name in PK3: %s\n", entry.name.c_str());
+			continue;
+		}
+
+		std::string fullname = "colormaps/";
+		fullname += entry.name;
+
+		int size = pack->EntryLength(d, i);
+
+		DDF_AddRawColourmap(colname.c_str(), size, fullname.c_str());
+	}
+}
+
+
 void ProcessPackage(data_file_c *df, size_t file_index)
 {
 	if (df->kind == FLKIND_Folder)
@@ -639,7 +924,18 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 
 	df->pack->SortEntries();
 
-	ProcessStuffInPack(df->pack);
+	ProcessColourmapsInPack(df->pack);
+
+	ProcessImagesInPack(df->pack, "textures", "tex");
+	ProcessImagesInPack(df->pack, "flats",    "flat");
+	ProcessImagesInPack(df->pack, "graphics", "gfx");
+	ProcessImagesInPack(df->pack, "sprites",  "spr");
+
+	ProcessSoundsInPack(df->pack);
+	ProcessMusicsInPack(df->pack);
+
+	ProcessDDFInPack(df->pack);
+	ProcessCoalInPack(df->pack);
 }
 
 

@@ -2,7 +2,7 @@
 //  EDGE Data Definition File Code (Styles)
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2008  The EDGE Team.
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -111,6 +111,7 @@ public:
 
 typedef enum
 {
+	SYLSP_None = 0,
 	SYLSP_Tiled = 0x0001,  // bg image should tile (otherwise covers whole area)
 	SYLSP_TiledNoScale = 0x0002,  // bg image should tile (1:1 pixels)
 	SYLSP_StretchFullScreen = 0x0004,  // bg image will be stretched to fill the screen

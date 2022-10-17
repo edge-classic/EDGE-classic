@@ -284,9 +284,6 @@ void I_StartFrame(void);
 // may also handle double/triple buffering here.
 void I_FinishFrame(void);
 
-// returns the desktop resolution.
-void I_GetDesktopSize(int *width, int *height);
-
 // Tries to set the video card to the given mode (or open a window).
 // If there already was a valid mode (or open window), this call
 // should replace it.  The previous contents (including the palette)

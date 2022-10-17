@@ -776,7 +776,10 @@ void W_ImageCreateUser(void)
 	{
 		imagedef_c* def = imagedefs[i];
 
-		if (def != NULL)
+		if (def == NULL)
+			continue;
+
+		if (def->belong != INS_Patch)
 			AddImageUser(def);
 	}
 

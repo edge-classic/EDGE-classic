@@ -35,6 +35,7 @@ static colourmap_c dummy_colmap;
 static const commandlist_t colmap_commands[] =
 {
 	DDF_FIELD("LUMP",    lump_name, DDF_MainGetLumpName),
+	DDF_FIELD("PACK",    pack_name, DDF_MainGetString),
 	DDF_FIELD("START",   start,     DDF_MainGetNumeric),
 	DDF_FIELD("LENGTH",  length,    DDF_MainGetNumeric),
 	DDF_FIELD("SPECIAL", special,   DDF_ColmapGetSpecial),
@@ -115,15 +116,20 @@ static void ColmapFinishEntry(void)
 	}
 
 	// don't need a length when using GL_COLOUR
-	if (! dynamic_colmap->lump_name.empty() && dynamic_colmap->length <= 0)
+	if (! dynamic_colmap->lump_name.empty() &&
+		! dynamic_colmap->pack_name.empty() &&
+		dynamic_colmap->length <= 0)
 	{
 		DDF_WarnError("Bad LENGTH value for colmap: %d\n", dynamic_colmap->length);
 		dynamic_colmap->length = 1;
 	}
 
-	if (dynamic_colmap->lump_name.empty() && dynamic_colmap->gl_colour == RGB_NO_VALUE)
-		DDF_Error("Colourmap entry missing LUMP or GL_COLOUR.\n");
-
+	if (dynamic_colmap->lump_name.empty() &&
+		dynamic_colmap->pack_name.empty() &&
+		dynamic_colmap->gl_colour == RGB_NO_VALUE)
+	{
+		DDF_Error("Colourmap entry missing LUMP, PACK or GL_COLOUR.\n");
+	}
 }
 
 
@@ -314,11 +320,11 @@ colourmap_c* colourmap_container_c::Lookup(const char *refname)
 // This is used to make entries for lumps between C_START and C_END
 // markers in a (BOOM) WAD file.
 //
-void DDF_AddRawColourmap(const char *lump_name, int size)
+void DDF_AddRawColourmap(const char *name, int size, const char *pack_name)
 {
 	if (size < 256)
 	{
-		I_Warning("WAD Colourmap '%s' too small (%d < %d)\n", lump_name, size, 256);
+		I_Warning("WAD Colourmap '%s' too small (%d < %d)\n", name, size, 256);
 		return;
 	}
 
@@ -328,12 +334,21 @@ void DDF_AddRawColourmap(const char *lump_name, int size)
 	std::string text = "<COLOURMAPS>\n\n";
 
 	text += "[";
-	text += lump_name;
+	text += name;
 	text += "]\n";
 
-	text += "lump = \"";
-	text += lump_name;
-	text += "\";\n";
+	if (pack_name != NULL)
+	{
+		text += "pack   = \"";
+		text += pack_name;
+		text += "\";\n";
+	}
+	else
+	{
+		text += "lump   = \"";
+		text += name;
+		text += "\";\n";
+	}
 
 	char length_buf[64];
 	snprintf(length_buf, sizeof(length_buf), "%d", size);
@@ -343,9 +358,12 @@ void DDF_AddRawColourmap(const char *lump_name, int size)
 	text += length_buf;
 	text += ";\n";
 
-	DDF_AddFile(DDF_ColourMap, text, lump_name);
+	// DEBUG:
+	DDF_DumpFile(text);
 
-	I_Debugf("- Added RAW colourmap '%s' start=0 length=%s\n", lump_name, length_buf);
+	DDF_AddFile(DDF_ColourMap, text, pack_name ? pack_name : name);
+
+	I_Debugf("- Added RAW colourmap '%s' start=0 length=%s\n", name, length_buf);
 }
 
 //--- editor settings ---

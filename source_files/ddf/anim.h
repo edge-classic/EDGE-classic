@@ -90,7 +90,7 @@ extern animdef_container_c animdefs;		// -ACB- 2004/06/03 Implemented
 void DDF_ReadAnims(const std::string& data);
 
 // handle the BOOM lump
-void DDF_ParseANIMATED(const byte *data, int size);
+void DDF_ConvertANIMATED(const byte *data, int size);
 
 #endif  /* __DDF_ANIM__ */
 

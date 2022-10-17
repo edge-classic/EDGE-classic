@@ -334,8 +334,6 @@ static void STRINGS_tonumber(coal::vm_c *vm, int argc)
 }
 
 
-//------------------------------------------------------------------------
-
 void VM_RegisterBASE(coal::vm_c *vm)
 {
 	// SYSTEM
@@ -371,6 +369,19 @@ void VM_RegisterBASE(coal::vm_c *vm)
 }
 
 
+//------------------------------------------------------------------------
+
+class pending_coal_script_c
+{
+public:
+	int type = 0;
+	std::string data = "";
+	std::string source = "";
+};
+
+static std::vector<pending_coal_script_c> unread_scripts;
+
+
 void VM_InitCoal()
 {
 	E_ProgressMessage("Starting COAL VM...");
@@ -384,8 +395,11 @@ void VM_InitCoal()
 	VM_RegisterPlaysim();
 }
 
+
 void VM_QuitCoal()
 {
+	unread_scripts.clear();
+
 	if (ui_vm)
 	{
 		delete ui_vm;
@@ -394,44 +408,32 @@ void VM_QuitCoal()
 }
 
 
-void VM_LoadCoalFire(const char *filename)
+void VM_AddScript(int type, std::string& data, const std::string& source)
 {
-	epi::file_c *F = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+	unread_scripts.push_back(pending_coal_script_c { type, "", source });
 
-	if (! F)
-		I_Error("Could not open coal script: %s\n", filename);
-
-	I_Printf("Compiling COAL script: %s\n", filename);
-
-	byte *data = F->LoadIntoMemory();
-
-	if (! ui_vm->CompileFile((char *)data, filename))
-		I_Error("Errors compiling coal script: %s\nPlease see debug.txt for details.", filename);
-
-	delete[] data;
-	delete F;
-}
-
-void VM_LoadLumpOfCoal(int lump)
-{
-	const char *name = W_GetLumpName(lump);
-
-	int length;
-	byte *data = W_LoadLump(lump, &length);
-
-	I_Printf("Compiling %s lump\n", name);
-
-	if (! ui_vm->CompileFile((char *)data, name))
-		I_Error("Errors compiling %s lump.\nPlease see debug.txt for details.", name);
-
-	W_DoneWithLump(data);
+	// transfer the caller's data
+	unread_scripts.back().data.swap(data);
 }
 
 
 void VM_LoadScripts()
 {
-	W_ReadCoalLumps();
+	for (auto& info : unread_scripts)
+	{
+		const char *name = info.source.c_str();
+		char *data = (char *) info.data.c_str(); // FIXME make param to CompileFile be a std::string&
+
+		I_Printf("Compiling: %s\n", name);
+
+		if (! ui_vm->CompileFile(data, name))
+			I_Error("Errors compiling %s\nPlease see debug.txt for details.", name);
+	}
+
+	unread_scripts.clear();
+
 	VM_SetFloat(ui_vm, "sys", "gametic", gametic);
+
 	if (W_IsLumpInPwad("STBAR"))
 	{
 		VM_SetFloat(ui_vm, "hud", "custom_stbar", 1);

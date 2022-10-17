@@ -58,9 +58,8 @@ bool AM_Responder(event_t * ev);
 // Called by main loop.
 void AM_Ticker(void);
 
-// Called by main loop,
-// called instead of view drawer if automap active.
-void AM_Drawer(float x, float y, float w, float h, mobj_t *focus);
+// Called to draw the automap on the screen.
+void AM_Render(float x, float y, float w, float h, mobj_t *focus, int flags);
 
 // Called to force the automap to quit
 // if the level is completed while it is up.

@@ -552,8 +552,8 @@ static void HD_render_automap(coal::vm_c *vm, int argc)
 		new_zoom = ui_hud_automap_zoom;
 
 	AM_SetState(new_state, new_zoom);
-	            
- 	AM_Drawer(x, y, w, h, ui_hud_who->mo);
+
+	HUD_RenderAutomap(x, y, x+w, y+h, ui_hud_who->mo, 0);
 
 	AM_SetState(old_state, old_zoom);
 }

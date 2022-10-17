@@ -21,6 +21,7 @@
 
 #include "font.h"
 
+#include "am_map.h"
 #include "g_game.h"
 #include "r_misc.h"
 #include "r_gldefs.h"
@@ -122,17 +123,15 @@ void HUD_SetCoordSys(int width, int height)
 		float side_dist = (float)width / 2.0;
 
 		// compensate for size of window or screen.
-		// Note: this implicitly handles DOOM_PIXEL_ASPECT !
 		side_dist = side_dist * (sw / 320.0f) / (sh / 200.0f);
 
 		// compensate for monitor's pixel aspect
 		side_dist = side_dist * v_pixelaspect.f;
 
-		// enabling this will stop the horizontal stretching which is done
-		// because of Doom's 5:6 pixel aspect ratio.
-		if (false)
+		// compensate for Doom's 5:6 pixel aspect ratio.
+		if (true)
 		{
-			side_dist = side_dist * DOOM_PIXEL_ASPECT;
+			side_dist = side_dist / DOOM_PIXEL_ASPECT;
 		}
 
 		hud_x_left  = hud_x_mid - side_dist;
@@ -979,19 +978,35 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 }
 
 
-void HUD_RenderWorld(float x1, float y1, float x2, float y2, mobj_t *camera)
+void HUD_RenderWorld(float x, float y, float w, float h, mobj_t *camera)
 {
-	HUD_PushScissor(x1, y1, x2, y2, true);
+	HUD_PushScissor(x, y, x+w, y+h, true);
 
 	int *xy = scissor_stack[sci_stack_top-1];
 
-	bool full_height = (y2 - y1) > (hud_y_bottom - hud_y_top) * 0.95;
+	bool full_height = h > (hud_y_bottom - hud_y_top) * 0.95;
 
-	float width = COORD_X(x2) - COORD_X(x1);
+	// FIXME explain this weirdness
+	float width = COORD_X(x+w) - COORD_X(x);
 	float expand_w = (xy[2] - xy[0]) / width;
 
-	R_Render(xy[0], xy[1], xy[2]-xy[0], xy[3]-xy[1],
-	         camera, full_height, expand_w);
+	// renderer needs true (OpenGL) coordinates
+	float x1 = COORD_X(x);
+	float y1 = COORD_Y(y);
+	float x2 = COORD_X(x+w);
+	float y2 = COORD_Y(y+h);
+
+	R_Render(x1, y2, x2-x1, y1-y2, camera, full_height, expand_w);
+
+	HUD_PopScissor();
+}
+
+
+void HUD_RenderAutomap(float x, float y, float w, float h, mobj_t *player, int flags)
+{
+	HUD_PushScissor(x, y, x+w, y+h, true);
+
+	AM_Render(x, y, w, h, player, flags);
 
 	HUD_PopScissor();
 }

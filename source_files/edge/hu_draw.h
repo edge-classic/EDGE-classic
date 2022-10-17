@@ -128,7 +128,10 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 void HUD_DrawText(float x, float y, const char *str, float size = 0);
 
 // render a view of the world using the given camera object.
-void HUD_RenderWorld(float x1, float y1, float x2, float y2, mobj_t *camera);
+void HUD_RenderWorld(float x, float y, float w, float h, mobj_t *camera);
+
+// render the automap
+void HUD_RenderAutomap(float x, float y, float w, float h, mobj_t *focus, int flags);
 
 void HUD_GetCastPosition(float *x, float *y, float *scale_x, float *scale_y);
 

@@ -1087,18 +1087,7 @@ static void DrawMarks(void)
 }
 
 
-static void AM_RenderScene(void)
-{
-	HUD_PushScissor(f_x, f_y, f_x+f_w, f_y+f_h, true);
-
-	// walk the bsp tree
-	AM_WalkBSPNode(root_node);
-
-	HUD_PopScissor();
-}
-
-
-void AM_Drawer(float x, float y, float w, float h, mobj_t *focus)
+void AM_Render(float x, float y, float w, float h, mobj_t *focus, int flags)
 {
 	f_x = x;
 	f_y = y;
@@ -1137,7 +1126,8 @@ void AM_Drawer(float x, float y, float w, float h, mobj_t *focus)
 	if (grid && !rotatemap)
 		DrawGrid();
 
-	AM_RenderScene();
+	// walk the bsp tree
+	AM_WalkBSPNode(root_node);
 
 	DrawMarks();
 }

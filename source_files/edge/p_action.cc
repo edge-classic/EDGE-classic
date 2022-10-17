@@ -235,7 +235,18 @@ static bool DecideMeleeAttack(mobj_t * object, const atkdef_c * attack)
 	if (level_flags.true3dgameplay)
 		distance = P_ApproxDistance(target->z - object->z, distance);
 
-	meleedist = attack ? attack->range : (object->mbf21flags & MBF21_LONGMELEE ? LONGMELEERANGE : MELEERANGE);
+
+	if (attack)
+		meleedist = attack->range;
+	else
+	{
+		meleedist = MELEERANGE;
+		if (object->mbf21flags & MBF21_LONGMELEE)
+			meleedist = LONGMELEERANGE;
+		// I guess a specific MBF21 Thing Melee range should override the above choices?
+		if (object->info->melee_range > -1)
+			meleedist = object->info->melee_range;
+	}
 	meleedist += target->radius - 20.0f;	// Check the thing's actual radius		
 
 	if (distance >= meleedist)
@@ -310,10 +321,6 @@ static bool DecideRangeAttack(mobj_t * object)
 
 	// Object is too close to target
 	if (attack->tooclose && attack->tooclose >= distance)
-		return false;
-
-	if ((object->mbf21flags & MBF21_LONGMELEE) &&
-		LONGMELEERANGE >= distance)
 		return false;
 
 	// Object likes to fire? if so, double the chance of it happening

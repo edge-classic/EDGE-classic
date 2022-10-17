@@ -22,8 +22,7 @@
 void VM_InitCoal();
 void VM_QuitCoal();
 
-void VM_LoadCoalFire(const char *filename);
-void VM_LoadLumpOfCoal(int lump);
+void VM_AddScript(int type, std::string& data, const std::string& source);
 void VM_LoadScripts();
 
 void VM_RegisterHUD();

@@ -1082,6 +1082,42 @@ static void ProcessDDFInWad(data_file_c *df)
 }
 
 
+static void ProcessCoalInWad(data_file_c *df)
+{
+	std::string bare_filename = epi::PATH_GetFilename(df->name.c_str());
+
+	wad_file_c *wad = df->wad;
+
+	// only load COALAPI from edge-defs, because (like WADFIXES)
+	// it is not something that user mods should mess with.
+	if (wad->coal_apis >= 0 && df->kind == FLKIND_EWad)
+	{
+		int lump = wad->coal_apis;
+
+		std::string data   = W_LoadString(lump);
+		std::string source = W_GetLumpName(lump);
+
+		source += " in ";
+		source += bare_filename;
+
+		VM_AddScript(0, data, source);
+	}
+
+	if (wad->coal_huds >= 0)
+	{
+		int lump = wad->coal_huds;
+
+		std::string data   = W_LoadString(lump);
+		std::string source = W_GetLumpName(lump);
+
+		source += " in ";
+		source += bare_filename;
+
+		VM_AddScript(0, data, source);
+	}
+}
+
+
 static void ProcessBoomStuffInWad(data_file_c *df)
 {
 	// handle Boom's ANIMATED and SWITCHES lumps
@@ -1214,6 +1250,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 	ProcessDehackedInWad(df);
 	ProcessBoomStuffInWad(df);
 	ProcessDDFInWad(df);
+	ProcessCoalInWad(df);
 }
 
 
@@ -1549,29 +1586,6 @@ void W_ReadUMAPINFOLumps(void)
 		if(Maps.maps[i].partime > 0)
 			temp_level->partime = Maps.maps[i].partime;
 		
-	}
-}
-
-
-void W_ReadCoalLumps(void)
-{
-	for (int f = 0; f < (int)data_files.size(); f++)
-	{
-		data_file_c *df = data_files[f];
-		wad_file_c *wad = df->wad;
-
-		// FIXME support PK3 for coal_huds
-
-		if (wad != NULL)
-		{
-			// only load COALAPI from edge-defs, because (like WADFIXES)
-			// it is not something that user mods should mess with.
-			if (wad->coal_apis >= 0 && df->kind == FLKIND_EWad)
-				VM_LoadLumpOfCoal(wad->coal_apis);
-
-			if (wad->coal_huds >= 0)
-				VM_LoadLumpOfCoal(wad->coal_huds);
-		}
 	}
 }
 

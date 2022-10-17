@@ -95,7 +95,7 @@ void I_GrabCursor(bool enable)
 }
 
 
-static void I_DeterminePixelAspect()
+void I_DeterminePixelAspect()
 {
 	// the pixel aspect is the shape of pixels on the monitor for the current
 	// video mode.  on modern LCDs (etc) it is usuall 1.0 (1:1).  knowing this
@@ -338,10 +338,6 @@ bool I_SetScreenSize(scrmode_c *mode)
 		I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
 			mode->width, mode->height, mode->depth);
 	}
-
-	I_DeterminePixelAspect();
-
-	I_Printf("Pixel aspect: %1.3f\n", v_pixelaspect.f);
 
 	// -AJA- turn off cursor -- BIG performance increase.
 	//       Plus, the combination of no-cursor + grab gives 

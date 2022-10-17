@@ -112,7 +112,7 @@ static void I_DeterminePixelAspect()
 
 	// if not a fullscreen mode, check for a modern LCD (etc) monitor -- they
 	// will have square pixels (1:1 aspect).
-	bool is_crt = (v_desktop_width.d < v_desktop_height.d) * 7 / 5;
+	bool is_crt = (v_desktop_width.d < v_desktop_height.d * 7 / 5);
 
 	bool is_fullscreen = (DISPLAYMODE == 1);
 	if (is_fullscreen && SCREENWIDTH == v_desktop_width.d && SCREENHEIGHT == v_desktop_height.d)

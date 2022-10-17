@@ -96,7 +96,7 @@ int key_am_clear;
 
 // scale on entry
 #define INIT_MSCALE (4.0f)
-#define  MAX_MSCALE (200.0f)
+#define  MAX_MSCALE (100.0f)
 
 // how much the automap moves window per tic in frame-buffer coordinates
 // moves a whole screen-width in 1.5 seconds
@@ -498,30 +498,30 @@ void AM_Ticker(void)
 // Rotation in 2D.
 // Used to rotate player arrow line character.
 //
-static inline void Rotate(float * x, float * y, angle_t a)
+static inline void Rotate(float& x, float& y, angle_t a)
 {
-	float new_x = *x * M_Cos(a) - *y * M_Sin(a);
-	float new_y = *x * M_Sin(a) + *y * M_Cos(a);
+	float new_x = x * M_Cos(a) - y * M_Sin(a);
+	float new_y = x * M_Sin(a) + y * M_Cos(a);
 
-	*x = new_x;
-	*y = new_y;
+	x = new_x;
+	y = new_y;
 }
 
-static inline void GetRotatedCoords(float sx, float sy, float *dx, float *dy)
+static void GetRotatedCoords(float sx, float sy, float& dx, float& dy)
 {
-	*dx = sx;
-	*dy = sy;
+	dx = sx;
+	dy = sy;
 
 	if (rotatemap)
 	{
 		// rotate coordinates so they are on the map correctly
-		*dx -= f_focus->x;
-		*dy -= f_focus->y;
+		dx -= f_focus->x;
+		dy -= f_focus->y;
 
 		Rotate(dx, dy, ANG90 - f_focus->angle);
 
-		*dx += f_focus->x;
-		*dy += f_focus->y;
+		dx += f_focus->x;
+		dy += f_focus->y;
 	}
 }
 
@@ -697,8 +697,8 @@ static void AM_WalkSeg(seg_t *seg)
 	if (line->side[1] == seg->sidedef)
 		return;
 
-	GetRotatedCoords(seg->v1->x, seg->v1->y, &l.a.x, &l.a.y);
-	GetRotatedCoords(seg->v2->x, seg->v2->y, &l.b.x, &l.b.y);
+	GetRotatedCoords(seg->v1->x, seg->v1->y, l.a.x, l.a.y);
+	GetRotatedCoords(seg->v2->x, seg->v2->y, l.b.x, l.b.y);
 
 	if ((line->flags & MLF_Mapped) || show_walls)
 	{
@@ -797,7 +797,7 @@ static void DrawLineCharacter(mline_t *lineguy, int lineguylines,
 {
 	float cx, cy;
 
-	GetRotatedCoords(x, y, &cx, &cy);
+	GetRotatedCoords(x, y, cx, cy);
 
 	cx = CXMTOF(cx, m_cx);
 	cy = CYMTOF(cy, m_cy);
@@ -813,13 +813,13 @@ static void DrawLineCharacter(mline_t *lineguy, int lineguylines,
 		float ay = lineguy[i].a.y;
 
 		if (angle)
-			Rotate(&ax, &ay, angle);
+			Rotate(ax, ay, angle);
 
 		float bx = lineguy[i].b.x;
 		float by = lineguy[i].b.y;
 
 		if (angle)
-			Rotate(&bx, &by, angle);
+			Rotate(bx, by, angle);
 
 		ax = ax * XMTOF(radius);
 		ay = ay * YMTOF(radius);
@@ -846,20 +846,20 @@ static void DrawObjectBounds(mobj_t *mo, rgbcol_t rgb)
 
 	mline_t ml;
 
-	GetRotatedCoords(lx, ly, &ml.a.x, &ml.a.y);
-	GetRotatedCoords(lx, hy, &ml.b.x, &ml.b.y);
+	GetRotatedCoords(lx, ly, ml.a.x, ml.a.y);
+	GetRotatedCoords(lx, hy, ml.b.x, ml.b.y);
 	DrawMLine(&ml, rgb);
 
-	GetRotatedCoords(lx, hy, &ml.a.x, &ml.a.y);
-	GetRotatedCoords(hx, hy, &ml.b.x, &ml.b.y);
+	GetRotatedCoords(lx, hy, ml.a.x, ml.a.y);
+	GetRotatedCoords(hx, hy, ml.b.x, ml.b.y);
 	DrawMLine(&ml, rgb);
 
-	GetRotatedCoords(hx, hy, &ml.a.x, &ml.a.y);
-	GetRotatedCoords(hx, ly, &ml.b.x, &ml.b.y);
+	GetRotatedCoords(hx, hy, ml.a.x, ml.a.y);
+	GetRotatedCoords(hx, ly, ml.b.x, ml.b.y);
 	DrawMLine(&ml, rgb);
 
-	GetRotatedCoords(hx, ly, &ml.a.x, &ml.a.y);
-	GetRotatedCoords(lx, ly, &ml.b.x, &ml.b.y);
+	GetRotatedCoords(hx, ly, ml.a.x, ml.a.y);
+	GetRotatedCoords(lx, ly, ml.b.x, ml.b.y);
 	DrawMLine(&ml, rgb);
 }
 #endif
@@ -1029,23 +1029,37 @@ static void AM_WalkSubsector(unsigned int num)
 //
 static bool AM_CheckBBox(float *bspcoord)
 {
-	float xl = bspcoord[BOXLEFT];
-	float yt = bspcoord[BOXTOP];
-	float xr = bspcoord[BOXRIGHT];
-	float yb = bspcoord[BOXBOTTOM];
+	float L = bspcoord[BOXLEFT];
+	float R = bspcoord[BOXRIGHT];
+	float T = bspcoord[BOXTOP];
+	float B = bspcoord[BOXBOTTOM];
 
-	// TODO: improve this quick'n'dirty hack
 	if (rotatemap)
-		return true;
+	{
+		float x1, x2, x3, x4;
+		float y1, y2, y3, y4;
 
-	float x1 = CXMTOF(xl, m_cx);
-	float x2 = CXMTOF(xr, m_cx);
+		GetRotatedCoords(L, T, x1, y1);
+		GetRotatedCoords(R, T, x2, y2);
+		GetRotatedCoords(L, B, x3, y3);
+		GetRotatedCoords(R, B, x4, y4);
 
-	float y1 = CYMTOF(yt, m_cy);
-	float y2 = CYMTOF(yb, m_cy);
+		L = std::min(std::min(x1, x2), std::min(x3, x4));
+		B = std::min(std::min(y1, y2), std::min(y3, y4));
 
-	// some part of bbox is visible?
-	return HUD_ScissorTest(x1, y1, x2, y2);
+		R = std::max(std::max(x1, x2), std::max(x3, x4));
+		T = std::max(std::max(y1, y2), std::max(y3, y4));
+	}
+
+	// convert from map to hud coordinates
+	float x1 = CXMTOF(L, m_cx);
+	float x2 = CXMTOF(R, m_cx);
+
+	float y1 = CYMTOF(T, m_cy);
+	float y2 = CYMTOF(B, m_cy);
+
+	return ! (x2 < f_x-1 || x1 > f_x+f_w+1 ||
+	          y2 < f_y-1 || y1 > f_y+f_h+1);
 }
 
 
@@ -1094,7 +1108,7 @@ static void DrawMarks(void)
 
 		float mx, my;
 
-		GetRotatedCoords(markpoints[i].x, markpoints[i].y, &mx, &my);
+		GetRotatedCoords(markpoints[i].x, markpoints[i].y, mx, my);
 
 		buffer[0] = ('1' + i);
 		buffer[1] = 0;

@@ -38,10 +38,6 @@ extern float hud_x_left;
 extern float hud_x_right;
 extern float hud_x_mid;
 
-//-- // Y coordinates of top and bottom of screen.
-//-- extern float hud_y_top;
-//-- extern float hud_y_bottom;
-
 
 void HUD_SetCoordSys(int width, int height);
 
@@ -86,10 +82,7 @@ void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col);
 // to the current scissor rectangle.  The dx/dy fields are used by
 // the automap code to reduce the wobblies.
 void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col,
-                   bool thick=false, bool smooth=true, float dx=0, float dy=0);
-
-void HUD_SolidFatLine(float x1, float y1, float x2, float y2, rgbcol_t col,
-                   bool thick=false, bool smooth=true, float dx=0, float dy=0);
+                   float thickness=1, bool smooth=true, float dx=0, float dy=0);
 
 
 // Draw a thin outline of a box.

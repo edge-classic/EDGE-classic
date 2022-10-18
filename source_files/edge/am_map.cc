@@ -539,6 +539,9 @@ static inline angle_t GetRotatedAngle(angle_t src)
 //
 static void DrawMLine(mline_t * ml, rgbcol_t rgb, bool thick = true)
 {
+	if (hide_lines)
+		return;
+
 	if (! am_smoothing.d)
 		thick = false;
 
@@ -552,13 +555,15 @@ static void DrawMLine(mline_t * ml, rgbcol_t rgb, bool thick = true)
 	float dx = XMTOF(- m_cx);
 	float dy = YMTOF(- m_cy);
 
-	if (!hide_lines)
-		HUD_SolidLine(x1, y1, x2, y2, rgb, thick, thick, dx, dy);
+	HUD_SolidLine(x1, y1, x2, y2, rgb, thick ? 1.5f : 1.0f, thick, dx, dy);
 }
 
 //Lobo 2022: keyed doors automap colouring
 static void DrawMLineDoor(mline_t * ml, rgbcol_t rgb)
 {
+	if (hide_lines)
+		return;
+
 	float x1 = CXMTOF(ml->a.x, 0);
 	float y1 = CYMTOF(ml->a.y, 0);
 
@@ -568,8 +573,7 @@ static void DrawMLineDoor(mline_t * ml, rgbcol_t rgb)
 	float dx = XMTOF(- m_cx);
 	float dy = YMTOF(- m_cy);
 
-	if (!hide_lines)
-		HUD_SolidFatLine(x1, y1, x2, y2, rgb, true, true, dx, dy);
+	HUD_SolidLine(x1, y1, x2, y2, rgb, 3.5, true, dx, dy);
 }
 
 //

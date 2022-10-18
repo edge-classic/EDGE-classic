@@ -379,6 +379,7 @@ static void ResurrectRespawn(mobj_t * mobj)
 	mobj->flags = info->flags;
 	mobj->extendedflags = info->extendedflags;
 	mobj->hyperflags = info->hyperflags;
+	mobj->mbf21flags = info->mbf21flags;
 	mobj->health = info->spawnhealth;
 
 	mobj->visibility = PERCENT_2_FLOAT(info->translucency);
@@ -1101,7 +1102,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 
 				// don't bounce forever on the floor
 				if (! (mo->flags & MF_NOGRAVITY) &&
-					fabs(mo->mom.z) < STOPSPEED + fabs(gravity))
+					fabs(mo->mom.z) < STOPSPEED + fabs(gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1)))
 				{
 					mo->mom.x = mo->mom.y = mo->mom.z = 0;
 				}
@@ -1158,7 +1159,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 			!(mo->player && mo->player->powers[PW_Jetpack] > 0) &&
 			!(mo->on_ladder >= 0))
 		{
-			mo->mom.z -= gravity;
+			mo->mom.z -= gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
 		}
 	}
 
@@ -1196,7 +1197,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 
 				// don't bounce forever on the ceiling
 				if (! (mo->flags & MF_NOGRAVITY) &&
-					fabs(mo->mom.z) < STOPSPEED + fabs(gravity))
+					fabs(mo->mom.z) < STOPSPEED + fabs(gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1)))
 				{
 					mo->mom.x = mo->mom.y = mo->mom.z = 0;
 				}
@@ -1243,7 +1244,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 			!(mo->player && mo->player->powers[PW_Jetpack] > 0) &&
 			!(mo->on_ladder >= 0))
 		{
-			mo->mom.z += -gravity;
+			mo->mom.z += -gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
 		}
 	}
 
@@ -1997,11 +1998,18 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
 	mobj->model_last_frame = -1;
 
 	if (level_flags.fastparm)
-		mobj->speed *= info->fast;
+	{
+		// MBF21: Use explicit Fast speed value if provided
+		if (info->fast_speed > -1)
+			mobj->speed = info->fast_speed;
+		else
+			mobj->speed *= info->fast;
+	}
 
 	// -ACB- 1998/06/25 new mobj Stuff (1998/07/11 - invisibility added)
 	mobj->extendedflags = info->extendedflags;
 	mobj->hyperflags = info->hyperflags;
+	mobj->mbf21flags = info->mbf21flags;
 	mobj->vis_target = mobj->visibility = PERCENT_2_FLOAT(info->translucency);
 
 	mobj->currentattack = NULL;

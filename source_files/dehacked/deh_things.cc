@@ -178,6 +178,9 @@ namespace Attacks
 		if (info->deathsound != sfx_None)
 			WAD::Printf("DEATH_SOUND = \"%s\";\n", Sounds::GetSound(info->deathsound));
 
+		if (info->rip_sound != sfx_None)
+			WAD::Printf("RIP_SOUND = \"%s\";\n", Sounds::GetSound(info->rip_sound));
+
 		if (mt_num == MT_FIRE)
 		{
 			WAD::Printf("ATTEMPT_SOUND = \"%s\";\n", Sounds::GetSound(sfx_vilatk));
@@ -484,6 +487,7 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 	WAD::Printf("\n");
 
 	Things::HandleFlags(info, mt_num, 0);
+	Things::HandleMBF21Flags(info, mt_num, 0);
 
 	if (Frames::attack_slot[0] || Frames::attack_slot[1] ||
 	    Frames::attack_slot[2])
@@ -791,6 +795,31 @@ namespace Things
 		NULL
 	};
 
+	const flagname_t mbf21flagnamelist[] =
+	{
+		{ MBF21_LOGRAV,         "LOGRAV",          		     NULL },
+		{ MBF21_SHORTMRANGE,    "SHORTMRANGE",    	 	     NULL },
+		{ MBF21_DMGIGNORED,     "NEVERTARGETED",     "DMGIGNORED" },
+		{ MBF21_NORADIUSDMG,    "EXPLODE_IMMUNE",   "NORADIUSDMG" },
+		{ MBF21_FORCERADIUSDMG, "FORCERADIUSDMG",            NULL },
+		{ MBF21_HIGHERMPROB,    "TRIGGER_HAPPY",    "HIGHERMPROB" },
+		{ MBF21_RANGEHALF,      "TRIGGER_HAPPY",      "RANGEHALF" },
+		{ MBF21_NOTHRESHOLD,    "NOGRUDGE",    		"NOTHRESHOLD" },
+		{ MBF21_LONGMELEE,      "LONGMELEE",      		     NULL },
+		{ MBF21_BOSS,           "BOSSMAN",        		   "BOSS" },
+		{ MBF21_MAP07BOSS1,     "MAP07BOSS1",     		     NULL },
+		{ MBF21_MAP07BOSS2,     "MAP07BOSS2",     		     NULL },
+		{ MBF21_E1M8BOSS,       "E1M8BOSS",       		     NULL },
+		{ MBF21_E2M8BOSS,       "E2M8BOSS",       		     NULL },
+		{ MBF21_E3M8BOSS,       "E3M8BOSS",       		     NULL },
+		{ MBF21_E4M6BOSS,       "E4M6BOSS",       		     NULL },
+		{ MBF21_E4M8BOSS,       "E4M8BOSS",       		     NULL },
+		{ MBF21_RIP,            "TUNNEL",            	    "RIP" },
+		{ MBF21_FULLVOLSOUNDS,  "ALWAYS_LOUD",    "FULLVOLSOUNDS" },
+
+		{ 0, NULL, NULL }  // End sentinel
+	};
+
 	bool CheckIsMonster(const mobjinfo_t *info, int mt_num, int player,
 		bool use_act_flags)
 	{
@@ -992,6 +1021,30 @@ namespace Things
 			PrintWarn("Unconverted flags 0x%08x in mobjtype %d\n", cur_f, mt_num);
 	}
 
+	void HandleMBF21Flags(const mobjinfo_t *info, int mt_num, int player)
+	{
+		int i;
+		int cur_f = info->mbf21_flags;
+		bool got_a_flag = false;
+
+		for (i = 0; mbf21flagnamelist[i].name != NULL; i++)
+		{
+			if (0 == (cur_f & mbf21flagnamelist[i].flag))
+				continue;
+
+			cur_f &= ~mbf21flagnamelist[i].flag;
+
+			AddOneFlag(info, mbf21flagnamelist[i].name, got_a_flag);
+		}
+
+		AddOneFlag(info, "MBF21_COMPAT", got_a_flag);
+
+		if (got_a_flag)
+			WAD::Printf(";\n");
+
+		if (cur_f != 0)
+			PrintWarn("Unconverted flags 0x%08x in mobjtype %d\n", cur_f, mt_num);
+	}
 
 	void FixHeights()
 	{
@@ -1110,6 +1163,9 @@ namespace Things
 
 		if (info->deathsound != sfx_None)
 			WAD::Printf("DEATH_SOUND = \"%s\";\n", Sounds::GetSound(info->deathsound));
+
+		if (info->rip_sound != sfx_None)
+			WAD::Printf("RIP_SOUND = \"%s\";\n", Sounds::GetSound(info->rip_sound));
 	}
 
 
@@ -1612,6 +1668,7 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player,
 	WAD::Printf("\n");
 
 	HandleFlags(info, mt_num, player);
+	HandleMBF21Flags(info, mt_num, player);
 	HandleAttacks(info, mt_num);
 
 	if (Frames::act_flags & AF_EXPLODE)
@@ -1711,29 +1768,36 @@ namespace Things
 
 	const fieldreference_t mobj_field[] =
 	{
-		{ "ID #",               FIELD_OFS(doomednum),    FT_ANY },
-		{ "Initial frame",      FIELD_OFS(spawnstate),   FT_FRAME },
-		{ "Hit points",         FIELD_OFS(spawnhealth),  FT_GTEQ1 },
-		{ "First moving frame", FIELD_OFS(seestate),     FT_FRAME },
-		{ "Alert sound",        FIELD_OFS(seesound),     FT_SOUND },
-		{ "Reaction time",      FIELD_OFS(reactiontime), FT_NONEG },
-		{ "Attack sound",       FIELD_OFS(attacksound),  FT_SOUND },
-		{ "Injury frame",       FIELD_OFS(painstate),    FT_FRAME },
-		{ "Pain chance",        FIELD_OFS(painchance),   FT_NONEG },
-		{ "Pain sound",         FIELD_OFS(painsound),    FT_SOUND },
-		{ "Close attack frame", FIELD_OFS(meleestate),   FT_FRAME },
-		{ "Far attack frame",   FIELD_OFS(missilestate), FT_FRAME },
-		{ "Death frame",        FIELD_OFS(deathstate),   FT_FRAME },
-		{ "Exploding frame",    FIELD_OFS(xdeathstate),  FT_FRAME },
-		{ "Death sound",        FIELD_OFS(deathsound),   FT_SOUND },
-		{ "Speed",              FIELD_OFS(speed),        FT_NONEG },
-		{ "Width",              FIELD_OFS(radius),       FT_NONEG },
-		{ "Height",             FIELD_OFS(height),       FT_NONEG },
-		{ "Mass",               FIELD_OFS(mass),         FT_NONEG },
-		{ "Missile damage",     FIELD_OFS(damage),       FT_NONEG },
-		{ "Action sound",       FIELD_OFS(activesound),  FT_SOUND },
-		{ "Bits",               FIELD_OFS(flags),        FT_BITS },
-		{ "Respawn frame",      FIELD_OFS(raisestate),   FT_FRAME },
+		{ "ID #",               FIELD_OFS(doomednum),     FT_ANY },
+		{ "Initial frame",      FIELD_OFS(spawnstate),    FT_FRAME },
+		{ "Hit points",         FIELD_OFS(spawnhealth),   FT_GTEQ1 },
+		{ "First moving frame", FIELD_OFS(seestate),      FT_FRAME },
+		{ "Alert sound",        FIELD_OFS(seesound),      FT_SOUND },
+		{ "Reaction time",      FIELD_OFS(reactiontime),  FT_NONEG },
+		{ "Attack sound",       FIELD_OFS(attacksound),   FT_SOUND },
+		{ "Injury frame",       FIELD_OFS(painstate),     FT_FRAME },
+		{ "Pain chance",        FIELD_OFS(painchance),    FT_NONEG },
+		{ "Pain sound",         FIELD_OFS(painsound),     FT_SOUND },
+		{ "Close attack frame", FIELD_OFS(meleestate),    FT_FRAME },
+		{ "Far attack frame",   FIELD_OFS(missilestate),  FT_FRAME },
+		{ "Death frame",        FIELD_OFS(deathstate),    FT_FRAME },
+		{ "Exploding frame",    FIELD_OFS(xdeathstate),   FT_FRAME },
+		{ "Death sound",        FIELD_OFS(deathsound),    FT_SOUND },
+		{ "Speed",              FIELD_OFS(speed),         FT_NONEG },
+		{ "Width",              FIELD_OFS(radius),        FT_NONEG },
+		{ "Height",             FIELD_OFS(height),        FT_NONEG },
+		{ "Mass",               FIELD_OFS(mass),          FT_NONEG },
+		{ "Missile damage",     FIELD_OFS(damage),        FT_NONEG },
+		{ "Action sound",       FIELD_OFS(activesound),   FT_SOUND },
+		{ "Bits",               FIELD_OFS(flags),         FT_BITS },
+		{ "MBF21 Bits",         FIELD_OFS(mbf21_flags),   FT_BITS },
+		{ "Infighting group",   FIELD_OFS(infight_group), FT_NONEG },
+		{ "Projectile group",   FIELD_OFS(proj_group),    FT_ANY },
+		{ "Splash group",       FIELD_OFS(splash_group),  FT_NONEG },
+		{ "Rip sound",          FIELD_OFS(rip_sound),     FT_SOUND },
+		{ "Fast speed",         FIELD_OFS(fast_speed),    FT_NONEG },
+		{ "Melee range",        FIELD_OFS(melee_range),   FT_NONEG },
+		{ "Respawn frame",      FIELD_OFS(raisestate),    FT_FRAME },
 
 		{ NULL, 0, FT_ANY }   // End sentinel
 	};

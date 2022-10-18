@@ -315,6 +315,19 @@ typedef enum
 }
 mobjhyperflag_t;
 
+// MBF21 flags not already covered by extended/hyper flags
+typedef enum
+{
+	// Gravity affects this thing as if it were 1/8 of the normal value
+	MBF21_LOGRAV = (1 << 0),
+
+	MBF21_SHORTMRANGE = (1 << 1),
+
+	MBF21_FORCERADIUSDMG = (1 << 4),
+
+	MBF21_LONGMELEE = (1 << 8),
+}
+mobjmbf21flag_t;
 
 #define NUM_FX_SLOT  30
 
@@ -874,6 +887,7 @@ public:
 	int flags;
 	int extendedflags;
 	int hyperflags;
+	int mbf21flags;
 
 	damage_c explode_damage;
 	float explode_radius;  // normally zero (radius == damage)
@@ -932,6 +946,7 @@ public:
 	struct sfx_s *gasp_sound;
 	struct sfx_s *secretsound;
 	struct sfx_s *falling_sound;
+	struct sfx_s *rip_sound;
 
 	int fuse;
 	int reload_shots;
@@ -1004,6 +1019,12 @@ public:
 
 	float sight_distance; // lobo 2022: How far this thing can see
 
+	// MBF 21
+	int infight_group;
+	int proj_group;
+	int splash_group;
+	int fast_speed;
+	int melee_range;
 
 public:
 	mobjtype_c();

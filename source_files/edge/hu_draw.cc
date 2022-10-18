@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE 2D DRAWING STUFF
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2009  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2
@@ -21,6 +21,7 @@
 
 #include "font.h"
 
+#include "am_map.h"
 #include "g_game.h"
 #include "r_misc.h"
 #include "r_gldefs.h"
@@ -38,6 +39,10 @@
 #define HU_CHAR(ch)  (islower(ch) ? toupper(ch) : (ch))
 #define HU_INDEX(c)  ((unsigned char) HU_CHAR(c))
 
+// FIXME: this seems totally arbitrary, review it.
+#define VERT_SPACING  2.0f
+
+
 static font_c *default_font;
 
 
@@ -47,31 +52,101 @@ int hudtic;
 int hud_swirl_pass = 0;
 bool hud_thick_liquid = false;
 
-// current state
-static float cur_coord_W;
-static float cur_coord_H;
+float hud_x_left;
+float hud_x_right;
+float hud_x_mid;
 
-static font_c *cur_font;
+float hud_y_top;
+float hud_y_bottom;
+
+// current state
+static font_c  *cur_font;
 static rgbcol_t cur_color;
 
 static float cur_scale, cur_alpha;
 static int cur_x_align, cur_y_align;
 
+// mapping from hud X and Y coords to real (OpenGL) coords.
+// note that Y coordinates get inverted.
 static float margin_X;
 static float margin_Y;
-static float margin_W;
-static float margin_H;
+static float margin_XMUL;
+static float margin_YMUL;
 
-#define COORD_X(x)  (margin_X + (x) * margin_W / cur_coord_W)
-#define COORD_Y(y)  (margin_Y - (y) * margin_H / cur_coord_H)
+static inline float COORD_X(float x)
+{
+	return margin_X + x * margin_XMUL;
+}
 
-#define VERT_SPACING  2.0f
+static inline float COORD_Y(float y)
+{
+	return margin_Y - y * margin_YMUL;
+}
+
+
+DEF_CVAR(v_letterbox, "0", CVAR_ARCHIVE)
+DEF_CVAR(v_pillarbox, "0", CVAR_ARCHIVE)
 
 
 void HUD_SetCoordSys(int width, int height)
 {
-	cur_coord_W = width;
-	cur_coord_H = height;
+	if (width < 1 || height < 1)
+		return;
+
+	float sw = (float)SCREENWIDTH;
+	float sh = (float)SCREENHEIGHT;
+
+	/* compute Y stuff */
+
+	hud_y_top    = 0.0f;
+	hud_y_bottom = height;
+
+	margin_Y    = sh;
+	margin_YMUL = sh / (float)height;
+
+	/* compute X stuff */
+
+	hud_x_mid = width * 0.5f;
+
+	if (false)
+	{
+		// simply stretch to fit [ bad!! ]
+
+		margin_X    = 0.0;
+		margin_XMUL = sw / (float)width;
+
+		hud_x_left  = 0.0;
+		hud_x_right = width * 1.0f;
+	}
+	else
+	{
+		float side_dist = (float)width / 2.0;
+
+		// compensate for size of window or screen.
+		side_dist = side_dist * (sw / 320.0f) / (sh / 200.0f);
+
+		// compensate for monitor's pixel aspect
+		side_dist = side_dist * v_pixelaspect.f;
+
+		// compensate for Doom's 5:6 pixel aspect ratio.
+		if (true)
+		{
+			side_dist = side_dist / DOOM_PIXEL_ASPECT;
+		}
+
+		hud_x_left  = hud_x_mid - side_dist;
+		hud_x_right = hud_x_mid + side_dist;
+
+		margin_XMUL = sw / side_dist / 2.0;
+		margin_X    = 0.0f - hud_x_left * margin_XMUL;
+
+		/* DEBUG
+		fprintf(stderr, "side: %1.0f  L %1.0f R %1.0f  X %1.0f XMUL %1.6f\n",
+			side_dist, hud_x_left, hud_x_right, margin_X, margin_XMUL);
+		*/
+	}
+
+	// TODO letterboxing and pillarboxing
 }
 
 void HUD_SetFont(font_c *font)
@@ -114,12 +189,13 @@ void HUD_Reset()
 	cur_color = RGB_NO_VALUE;
 	cur_scale = 1.0f;
 	cur_alpha = 1.0f;
-	cur_x_align = cur_y_align = -1;
+	cur_x_align = -1;
+	cur_y_align = -1;
 }
 
 void HUD_FrameSetup(void)
 {
-	if (! default_font)
+	if (default_font == NULL)
 	{
 		// FIXME: get default font from DDF gamedef
 		fontdef_c *DEF = fontdefs.Lookup("DOOM");
@@ -130,20 +206,6 @@ void HUD_FrameSetup(void)
 	}
 
 	HUD_Reset();
-
-	// setup letterboxing for wide screens (etc)
-	margin_H = SCREENHEIGHT;
-
-	margin_W = margin_H * DOOM_SCREEN_ASPECT * (DOOM_PIXEL_ASPECT / v_pixelaspect.f);
-
-	if (margin_W > SCREENWIDTH)
-	{
-		margin_H *= (float)SCREENWIDTH / margin_W;
-		margin_W = SCREENWIDTH;
-	}
-
-	margin_X = (SCREENWIDTH  - margin_W) / 2.0;
-	margin_Y = (SCREENHEIGHT + margin_H) / 2.0;
 
 	hudtic++;
 }
@@ -160,7 +222,7 @@ void HUD_PushScissor(float x1, float y1, float x2, float y2, bool expand)
 	SYS_ASSERT(sci_stack_top < MAX_SCISSOR_STACK);
 
 	// expand rendered view to cover whole screen
-	if (expand && x1 < 1 && x2 > cur_coord_W-1)
+	if (expand && x1 < hud_x_left && x2 > hud_x_right-1)
 	{
 		x1 = 0;
 		x2 = SCREENWIDTH;
@@ -235,22 +297,6 @@ void HUD_PopScissor()
 	}
 }
 
-
-bool HUD_ScissorTest(float x1, float y1, float x2, float y2)
-{
-	if (sci_stack_top == 0)
-		return true;
-
-	if (x1 > x2) std::swap(x1, x2);
-	if (y1 < y2) std::swap(y1, y2);
-
-	x1 = COORD_X(x1); y1 = COORD_Y(y1);
-	x2 = COORD_X(x2); y2 = COORD_Y(y2);
-
-	int *xy = scissor_stack[sci_stack_top-1];
-
-	return ! (x2 < xy[0] || x1 > xy[2] || y2 < xy[1] || y1 > xy[3]);
-}
 
 // Adapted from Quake 3 GPL release
 void HUD_CalcScrollTexCoords( float x_scroll, float y_scroll, float *tx1, float *ty1, float *tx2, float *ty2 )
@@ -624,7 +670,7 @@ void HUD_TileImage(float x, float y, float w, float h, const image_c *img,
 void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col)
 {
 	// expand to cover wide screens
-	if (x1 < 1 && x2 > cur_coord_W-1 && y1 < 1 && y2 > cur_coord_H-1)
+	if (x1 < hud_x_left && x2 > hud_x_right-1 && y1 < hud_y_top+1 && y2 > hud_y_bottom-1)
 	{
 		x1 = 0; x2 = SCREENWIDTH;
 		y1 = 0; y2 = SCREENHEIGHT;
@@ -656,7 +702,7 @@ void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col)
 
 
 void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col,
-                   bool thick, bool smooth, float dx, float dy)
+                   float thickness, bool smooth, float dx, float dy)
 {
 	x1 = COORD_X(x1); y1 = COORD_Y(y1);
 	x2 = COORD_X(x2); y2 = COORD_Y(y2);
@@ -664,8 +710,7 @@ void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col,
 	dx = COORD_X(dx) - COORD_X(0);
 	dy = COORD_Y( 0) - COORD_Y(dy);
 
-	if (thick)
-		glLineWidth(1.5f);
+	glLineWidth(thickness);
 
 	if (smooth)
 		glEnable(GL_LINE_SMOOTH);
@@ -687,39 +732,6 @@ void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col,
 	glLineWidth(1.0f);
 }
 
-void HUD_SolidFatLine(float x1, float y1, float x2, float y2, rgbcol_t col,
-                   bool thick, bool smooth, float dx, float dy)
-{
-	x1 = COORD_X(x1); y1 = COORD_Y(y1);
-	x2 = COORD_X(x2); y2 = COORD_Y(y2);
-
-	dx = COORD_X(dx) - COORD_X(0);
-	dy = COORD_Y( 0) - COORD_Y(dy);
-
-	glLineWidth(3.5f);
-	
-	if (thick)
-		glLineWidth(3.5f);
-
-	if (smooth)
-		glEnable(GL_LINE_SMOOTH);
-
-	if (smooth || cur_alpha < 0.99f)
-		glEnable(GL_BLEND);
-
-	glColor4f(RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, cur_alpha);
-
-	glBegin(GL_LINES);
-
-	glVertex2i((int)x1 + (int)dx, (int)y1 + (int)dy);
-	glVertex2i((int)x2 + (int)dx, (int)y2 + (int)dy);
-
-	glEnd();
-
-	glDisable(GL_BLEND);
-	glDisable(GL_LINE_SMOOTH);
-	glLineWidth(1.0f);
-}
 
 void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col)
 {
@@ -948,19 +960,35 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 }
 
 
-void HUD_RenderWorld(float x1, float y1, float x2, float y2, mobj_t *camera)
+void HUD_RenderWorld(float x, float y, float w, float h, mobj_t *camera)
 {
-	HUD_PushScissor(x1, y1, x2, y2, true);
+	HUD_PushScissor(x, y, x+w, y+h, true);
 
 	int *xy = scissor_stack[sci_stack_top-1];
 
-	bool full_height = (y2 - y1) > cur_coord_H * 0.95;
+	bool full_height = h > (hud_y_bottom - hud_y_top) * 0.95;
 
-	float width = COORD_X(x2) - COORD_X(x1);
+	// FIXME explain this weirdness
+	float width = COORD_X(x+w) - COORD_X(x);
 	float expand_w = (xy[2] - xy[0]) / width;
 
-	R_Render(xy[0], xy[1], xy[2]-xy[0], xy[3]-xy[1],
-	         camera, full_height, expand_w);
+	// renderer needs true (OpenGL) coordinates
+	float x1 = COORD_X(x);
+	float y1 = COORD_Y(y);
+	float x2 = COORD_X(x+w);
+	float y2 = COORD_Y(y+h);
+
+	R_Render(x1, y2, x2-x1, y1-y2, camera, full_height, expand_w);
+
+	HUD_PopScissor();
+}
+
+
+void HUD_RenderAutomap(float x, float y, float w, float h, mobj_t *player, int flags)
+{
+	HUD_PushScissor(x, y, x+w, y+h, true);
+
+	AM_Render(x, y, w, h, player, flags);
 
 	HUD_PopScissor();
 }
@@ -971,7 +999,8 @@ void HUD_GetCastPosition(float *x, float *y, float *scale_x, float *scale_y)
 	*x = COORD_X(160);
 	*y = COORD_Y(170);
 
-	*scale_y = margin_H / cur_coord_H;
+	// FIXME REVIEW THIS
+	*scale_y = 1.0;
 	*scale_x = *scale_y / v_pixelaspect.f;
 }
 

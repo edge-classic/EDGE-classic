@@ -96,7 +96,7 @@ int key_am_clear;
 
 // scale on entry
 #define INIT_MSCALE (4.0f)
-#define  MAX_MSCALE (200.0f)
+#define  MAX_MSCALE (100.0f)
 
 // how much the automap moves window per tic in frame-buffer coordinates
 // moves a whole screen-width in 1.5 seconds
@@ -145,15 +145,6 @@ static float m_cx, m_cy;
 static float m_scale;
 
 
-// translates between frame-buffer and map distances
-#define MTOF(xx) (  (int)((xx) * m_scale * f_scale))
-#define FTOM(xx) ((float)((xx) / m_scale / f_scale))
-
-// translates between frame-buffer and map coordinates
-#define CXMTOF(xx)  (f_x + f_w*0.5 + MTOF((xx) - m_cx))
-#define CYMTOF(yy)  (f_y + f_h*0.5 - MTOF((yy) - m_cy))
-
-
 // largest size of map along X or Y axis
 static float map_size;
 
@@ -190,6 +181,31 @@ static bool stopped = true;
 bool rotatemap = false;
 
 extern style_c *automap_style;  // FIXME: put in header
+
+
+// translates between frame-buffer and map distances
+static float XMTOF(float x)
+{
+	return x * m_scale * f_scale * 1.2f;
+}
+static float YMTOF(float y)
+{
+	return y * m_scale * f_scale;
+}
+static float FTOM(float x)
+{
+	return x / m_scale / f_scale;
+}
+
+// translates from map coordinates to frame-buffer
+static float CXMTOF(float x, float dx)
+{
+	return f_x + f_w * 0.5 + XMTOF(x - dx);
+}
+static float CYMTOF(float y, float dy)
+{
+	return f_y + f_h * 0.5 - YMTOF(y - dy);
+}
 
 
 //
@@ -482,30 +498,30 @@ void AM_Ticker(void)
 // Rotation in 2D.
 // Used to rotate player arrow line character.
 //
-static inline void Rotate(float * x, float * y, angle_t a)
+static inline void Rotate(float& x, float& y, angle_t a)
 {
-	float new_x = *x * M_Cos(a) - *y * M_Sin(a);
-	float new_y = *x * M_Sin(a) + *y * M_Cos(a);
+	float new_x = x * M_Cos(a) - y * M_Sin(a);
+	float new_y = x * M_Sin(a) + y * M_Cos(a);
 
-	*x = new_x;
-	*y = new_y;
+	x = new_x;
+	y = new_y;
 }
 
-static inline void GetRotatedCoords(float sx, float sy, float *dx, float *dy)
+static void GetRotatedCoords(float sx, float sy, float& dx, float& dy)
 {
-	*dx = sx;
-	*dy = sy;
+	dx = sx;
+	dy = sy;
 
 	if (rotatemap)
 	{
 		// rotate coordinates so they are on the map correctly
-		*dx -= f_focus->x;
-		*dy -= f_focus->y;
+		dx -= f_focus->x;
+		dy -= f_focus->y;
 
 		Rotate(dx, dy, ANG90 - f_focus->angle);
 
-		*dx += f_focus->x;
-		*dy += f_focus->y;
+		dx += f_focus->x;
+		dy += f_focus->y;
 	}
 }
 
@@ -523,36 +539,41 @@ static inline angle_t GetRotatedAngle(angle_t src)
 //
 static void DrawMLine(mline_t * ml, rgbcol_t rgb, bool thick = true)
 {
+	if (hide_lines)
+		return;
+
 	if (! am_smoothing.d)
 		thick = false;
 
-	float x1 = f_x + f_w*0.5 + MTOF(ml->a.x);
-	float y1 = f_y + f_h*0.5 - MTOF(ml->a.y);
+	float x1 = CXMTOF(ml->a.x, 0);
+	float y1 = CYMTOF(ml->a.y, 0);
 
-	float x2 = f_x + f_w*0.5 + MTOF(ml->b.x);
-	float y2 = f_y + f_h*0.5 - MTOF(ml->b.y);
+	float x2 = CXMTOF(ml->b.x, 0);
+	float y2 = CYMTOF(ml->b.y, 0);
 
-	float dx = MTOF(- m_cx);
-	float dy = MTOF(- m_cy);
-	
-	if (!hide_lines)
-		HUD_SolidLine(x1, y1, x2, y2, rgb, thick, thick, dx, dy);
+	// these are separate to reduce the wobblies
+	float dx = XMTOF(- m_cx);
+	float dy = YMTOF(- m_cy);
+
+	HUD_SolidLine(x1, y1, x2, y2, rgb, thick ? 1.5f : 1.0f, thick, dx, dy);
 }
 
 //Lobo 2022: keyed doors automap colouring
 static void DrawMLineDoor(mline_t * ml, rgbcol_t rgb)
 {
-	float x1 = f_x + f_w*0.5 + MTOF(ml->a.x);
-	float y1 = f_y + f_h*0.5 - MTOF(ml->a.y);
+	if (hide_lines)
+		return;
 
-	float x2 = f_x + f_w*0.5 + MTOF(ml->b.x);
-	float y2 = f_y + f_h*0.5 - MTOF(ml->b.y);
+	float x1 = CXMTOF(ml->a.x, 0);
+	float y1 = CYMTOF(ml->a.y, 0);
 
-	float dx = MTOF(- m_cx);
-	float dy = MTOF(- m_cy);
-	
-	if (!hide_lines)
-		HUD_SolidFatLine(x1, y1, x2, y2, rgb, true, true, dx, dy);
+	float x2 = CXMTOF(ml->b.x, 0);
+	float y2 = CYMTOF(ml->b.y, 0);
+
+	float dx = XMTOF(- m_cx);
+	float dy = YMTOF(- m_cy);
+
+	HUD_SolidLine(x1, y1, x2, y2, rgb, 3.5, true, dx, dy);
 }
 
 //
@@ -575,8 +596,8 @@ static void DrawGrid()
 		int jx = ((j & ~1) >> 1);
 
 		// stop when both lines are off the screen
-		float x1 = CXMTOF(mx0 - jx * grid_size);
-		float x2 = CXMTOF(mx0 + jx * grid_size);
+		float x1 = CXMTOF(mx0 - jx * grid_size, m_cx);
+		float x2 = CXMTOF(mx0 + jx * grid_size, m_cx);
 
 		if (x1 < f_x && x2 >= f_x + f_w)
 			break;
@@ -584,8 +605,8 @@ static void DrawGrid()
 		ml.a.x = mx0 + jx * ((j & 1) ? -grid_size : grid_size);
 		ml.b.x = ml.a.x;
 
-		ml.a.y = -40000;
-		ml.b.y = +40000;
+		ml.a.y = -9e6;
+		ml.b.y = +9e6;
 
 		DrawMLine(&ml, am_colors[AMCOL_Grid], false);
 	}
@@ -595,14 +616,14 @@ static void DrawGrid()
 		int ky = ((k & ~1) >> 1);
 
 		// stop when both lines are off the screen
-		float y1 = CYMTOF(my0 + ky * grid_size);
-		float y2 = CYMTOF(my0 - ky * grid_size);
+		float y1 = CYMTOF(my0 + ky * grid_size, m_cy);
+		float y2 = CYMTOF(my0 - ky * grid_size, m_cy);
 
 		if (y1 < f_y && y2 >= f_y + f_h)
 			break;
 
-		ml.a.x = -40000;
-		ml.b.x = +40000;
+		ml.a.x = -9e6;
+		ml.b.x = +9e6;
 
 		ml.a.y = my0 + ky * ((k & 1) ? -grid_size : grid_size);
 		ml.b.y = ml.a.y;
@@ -680,8 +701,8 @@ static void AM_WalkSeg(seg_t *seg)
 	if (line->side[1] == seg->sidedef)
 		return;
 
-	GetRotatedCoords(seg->v1->x, seg->v1->y, &l.a.x, &l.a.y);
-	GetRotatedCoords(seg->v2->x, seg->v2->y, &l.b.x, &l.b.y);
+	GetRotatedCoords(seg->v1->x, seg->v1->y, l.a.x, l.a.y);
+	GetRotatedCoords(seg->v2->x, seg->v2->y, l.b.x, l.b.y);
 
 	if ((line->flags & MLF_Mapped) || show_walls)
 	{
@@ -780,31 +801,34 @@ static void DrawLineCharacter(mline_t *lineguy, int lineguylines,
 {
 	float cx, cy;
 
-	GetRotatedCoords(x, y, &cx, &cy);
+	GetRotatedCoords(x, y, cx, cy);
 
-	cx = CXMTOF(cx);
-	cy = CYMTOF(cy);
+	cx = CXMTOF(cx, m_cx);
+	cy = CYMTOF(cy, m_cy);
 
-	radius = MTOF(radius);
-
-	if (radius < 2)
-		radius = 2;
+	if (radius < FTOM(2))
+		radius = FTOM(2);
 
 	angle = GetRotatedAngle(angle);
 
-	for (int i = 0; i < lineguylines; i++)
+	for (int i = 0 ; i < lineguylines ; i++)
 	{
-		float ax = lineguy[i].a.x * radius;
-		float ay = lineguy[i].a.y * radius;
+		float ax = lineguy[i].a.x;
+		float ay = lineguy[i].a.y;
 
 		if (angle)
-			Rotate(&ax, &ay, angle);
+			Rotate(ax, ay, angle);
 
-		float bx = lineguy[i].b.x * radius;
-		float by = lineguy[i].b.y * radius;
+		float bx = lineguy[i].b.x;
+		float by = lineguy[i].b.y;
 
 		if (angle)
-			Rotate(&bx, &by, angle);
+			Rotate(bx, by, angle);
+
+		ax = ax * XMTOF(radius);
+		ay = ay * YMTOF(radius);
+		bx = bx * XMTOF(radius);
+		by = by * YMTOF(radius);
 
 		HUD_SolidLine(cx+ax, cy-ay, cx+bx, cy-by, rgb);
 	}
@@ -826,20 +850,20 @@ static void DrawObjectBounds(mobj_t *mo, rgbcol_t rgb)
 
 	mline_t ml;
 
-	GetRotatedCoords(lx, ly, &ml.a.x, &ml.a.y);
-	GetRotatedCoords(lx, hy, &ml.b.x, &ml.b.y);
+	GetRotatedCoords(lx, ly, ml.a.x, ml.a.y);
+	GetRotatedCoords(lx, hy, ml.b.x, ml.b.y);
 	DrawMLine(&ml, rgb);
 
-	GetRotatedCoords(lx, hy, &ml.a.x, &ml.a.y);
-	GetRotatedCoords(hx, hy, &ml.b.x, &ml.b.y);
+	GetRotatedCoords(lx, hy, ml.a.x, ml.a.y);
+	GetRotatedCoords(hx, hy, ml.b.x, ml.b.y);
 	DrawMLine(&ml, rgb);
 
-	GetRotatedCoords(hx, hy, &ml.a.x, &ml.a.y);
-	GetRotatedCoords(hx, ly, &ml.b.x, &ml.b.y);
+	GetRotatedCoords(hx, hy, ml.a.x, ml.a.y);
+	GetRotatedCoords(hx, ly, ml.b.x, ml.b.y);
 	DrawMLine(&ml, rgb);
 
-	GetRotatedCoords(hx, ly, &ml.a.x, &ml.a.y);
-	GetRotatedCoords(lx, ly, &ml.b.x, &ml.b.y);
+	GetRotatedCoords(hx, ly, ml.a.x, ml.a.y);
+	GetRotatedCoords(lx, ly, ml.b.x, ml.b.y);
 	DrawMLine(&ml, rgb);
 }
 #endif
@@ -1009,23 +1033,37 @@ static void AM_WalkSubsector(unsigned int num)
 //
 static bool AM_CheckBBox(float *bspcoord)
 {
-	float xl = bspcoord[BOXLEFT];
-	float yt = bspcoord[BOXTOP];
-	float xr = bspcoord[BOXRIGHT];
-	float yb = bspcoord[BOXBOTTOM];
+	float L = bspcoord[BOXLEFT];
+	float R = bspcoord[BOXRIGHT];
+	float T = bspcoord[BOXTOP];
+	float B = bspcoord[BOXBOTTOM];
 
-	// TODO: improve this quick'n'dirty hack
 	if (rotatemap)
-		return true;
+	{
+		float x1, x2, x3, x4;
+		float y1, y2, y3, y4;
 
-	float x1 = CXMTOF(xl);
-	float x2 = CXMTOF(xr);
+		GetRotatedCoords(L, T, x1, y1);
+		GetRotatedCoords(R, T, x2, y2);
+		GetRotatedCoords(L, B, x3, y3);
+		GetRotatedCoords(R, B, x4, y4);
 
-	float y1 = CYMTOF(yt);
-	float y2 = CYMTOF(yb);
+		L = std::min(std::min(x1, x2), std::min(x3, x4));
+		B = std::min(std::min(y1, y2), std::min(y3, y4));
 
-	// some part of bbox is visible?
-	return HUD_ScissorTest(x1, y1, x2, y2);
+		R = std::max(std::max(x1, x2), std::max(x3, x4));
+		T = std::max(std::max(y1, y2), std::max(y3, y4));
+	}
+
+	// convert from map to hud coordinates
+	float x1 = CXMTOF(L, m_cx);
+	float x2 = CXMTOF(R, m_cx);
+
+	float y1 = CYMTOF(T, m_cy);
+	float y2 = CYMTOF(B, m_cy);
+
+	return ! (x2 < f_x-1 || x1 > f_x+f_w+1 ||
+	          y2 < f_y-1 || y1 > f_y+f_h+1);
 }
 
 
@@ -1074,12 +1112,12 @@ static void DrawMarks(void)
 
 		float mx, my;
 
-		GetRotatedCoords(markpoints[i].x, markpoints[i].y, &mx, &my);
+		GetRotatedCoords(markpoints[i].x, markpoints[i].y, mx, my);
 
 		buffer[0] = ('1' + i);
 		buffer[1] = 0;
 
-		HUD_DrawText(CXMTOF(mx), CYMTOF(my), buffer);
+		HUD_DrawText(CXMTOF(mx, m_cx), CYMTOF(my, m_cy), buffer);
 	}
 
 	HUD_SetFont();
@@ -1087,18 +1125,7 @@ static void DrawMarks(void)
 }
 
 
-static void AM_RenderScene(void)
-{
-	HUD_PushScissor(f_x, f_y, f_x+f_w, f_y+f_h, true);
-
-	// walk the bsp tree
-	AM_WalkBSPNode(root_node);
-
-	HUD_PopScissor();
-}
-
-
-void AM_Drawer(float x, float y, float w, float h, mobj_t *focus)
+void AM_Render(float x, float y, float w, float h, mobj_t *focus, int flags)
 {
 	f_x = x;
 	f_y = y;
@@ -1137,7 +1164,8 @@ void AM_Drawer(float x, float y, float w, float h, mobj_t *focus)
 	if (grid && !rotatemap)
 		DrawGrid();
 
-	AM_RenderScene();
+	// walk the bsp tree
+	AM_WalkBSPNode(root_node);
 
 	DrawMarks();
 }

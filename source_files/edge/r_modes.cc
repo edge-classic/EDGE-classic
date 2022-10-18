@@ -36,6 +36,7 @@
 #include "r_colormap.h"
 #include "am_map.h"
 #include "r_image.h"
+#include "r_misc.h"
 #include "r_units.h"
 #include "r_draw.h"
 #include "r_wipe.h"
@@ -45,6 +46,7 @@ int SCREENWIDTH;
 int SCREENHEIGHT;
 int SCREENBITS;
 int DISPLAYMODE;
+
 scrmode_c borderless_mode;
 
 static std::vector<scrmode_c *> screen_modes;
@@ -258,6 +260,10 @@ static bool DoExecuteChangeResolution(scrmode_c *mode)
 	SCREENBITS   = mode->depth;
 	DISPLAYMODE  = mode->display_mode;
 
+	I_DeterminePixelAspect();
+
+	I_Printf("Pixel aspect: %1.3f\n", v_pixelaspect.f);
+
 	// gfx card doesn't like to switch too rapidly
 	I_Sleep(250);
 	I_Sleep(250);
@@ -349,7 +355,7 @@ bool R_ChangeResolution(scrmode_c *mode)
 {
 	L_WriteDebug("R_ChangeResolution...\n");
 
-    if (DoExecuteChangeResolution(mode->display_mode == 2 ? &borderless_mode : mode));
+	if (DoExecuteChangeResolution(mode->display_mode == 2 ? &borderless_mode : mode))
 		return true;
 
 	L_WriteDebug("- Failed : switching back...\n");
@@ -361,7 +367,7 @@ bool R_ChangeResolution(scrmode_c *mode)
 	old_mode.depth  = SCREENBITS;
 	old_mode.display_mode   = DISPLAYMODE;
 
-    if (DoExecuteChangeResolution(&old_mode))
+	if (DoExecuteChangeResolution(&old_mode))
 		return false;
 
 	// This ain't good - current and previous resolutions do not work.

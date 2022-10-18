@@ -29,7 +29,7 @@ typedef enum
 	FT_SPRITE,  // sprite number
 	FT_SUBSPR,  // subsprite number
 	FT_AMMO,    // ammo number
-	FT_BITS     // mobj bitflags
+	FT_BITS,     // mobj bitflags
 }
 fieldtype_e;
 

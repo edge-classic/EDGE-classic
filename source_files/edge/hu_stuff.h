@@ -64,7 +64,6 @@ void HU_Ticker(void);
 void HU_Drawer(void);
 void HU_QueueChatChar(char c);
 char HU_DequeueChatChar(void);
-void HU_Erase(void);
 
 #endif // __HU_STUFF_H__
 

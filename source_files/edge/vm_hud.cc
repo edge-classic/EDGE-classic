@@ -45,7 +45,7 @@
 
 extern coal::vm_c *ui_vm;
 
-extern void VM_SetFloat(coal::vm_c *vm, const char *name, double value);
+extern void VM_SetFloat(coal::vm_c *vm, const char *mod, const char *name, double value);
 extern void VM_CallFunction(coal::vm_c *vm, const char *name);
 
 // Needed for color functions
@@ -102,6 +102,9 @@ static void HD_coord_sys(coal::vm_c *vm, int argc)
 		I_Error("Bad hud.coord_sys size: %dx%d\n", w, h);
 
 	HUD_SetCoordSys(w, h);
+
+	VM_SetFloat(ui_vm, "hud", "x_left",  hud_x_left);
+	VM_SetFloat(ui_vm, "hud", "x_right", hud_x_right);
 }
 
 

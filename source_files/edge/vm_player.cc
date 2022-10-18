@@ -1178,22 +1178,32 @@ std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secattackinfo
 	
 }
 
-// player.query_object(whatinfo)
+// player.query_object(maxdistance,whatinfo)
 //
 static void PL_query_object(coal::vm_c *vm, int argc)
 {
-	double *num = vm->AccessParam(0);
+	double *maxd = vm->AccessParam(0);
+	double *whati = vm->AccessParam(1);
 	int whatinfo = 1;
+	int maxdistance = 512;
 
-	if (!num)
+	if (argc != 2)
+		I_Error("player.query_object: wrong number of arguments given\n");
+
+	if (!whati)
 		I_Error("player.query_object: can't parse WhatInfo!\n");
 	else
-		whatinfo = (int)*num;
+		whatinfo = (int)*whati;
+	
+	if (!maxd)
+		I_Error("player.query_object: can't parse MaxDistance!\n");
+	else
+		maxdistance = (int)*maxd;
 
 	if (whatinfo < 1 || whatinfo > 5)
 		I_Error("player.query_object: bad whatInfo number: %d\n", whatinfo);
 
-	mobj_t *obj = DoMapTargetAutoAim(ui_player_who->mo, ui_player_who->mo->angle, 512, true, true);
+	mobj_t *obj = DoMapTargetAutoAim(ui_player_who->mo, ui_player_who->mo->angle, maxdistance, true, true);
 	if (!obj)
 	{
 		vm->ReturnString("");
@@ -1277,20 +1287,27 @@ static void MO_count(coal::vm_c *vm, int argc)
 	vm->ReturnFloat(thingcount);
 }
 
-// player.query_weapon(whatinfo,[SecAttack])
+// player.query_weapon(maxdistance,whatinfo,[SecAttack])
 //
 static void PL_query_weapon(coal::vm_c *vm, int argc)
 {
-	double *num = vm->AccessParam(0);
-	double *secattack = vm->AccessParam(1);
+	double *maxd = vm->AccessParam(0);
+	double *whati = vm->AccessParam(1);
+	double *secattack = vm->AccessParam(2);
 
 	int whatinfo = 1;
+	int maxdistance = 512;
 	int secattackinfo = 0;
 
-	if (!num)
+	if (!maxd)
+		I_Error("player.query_weapon: can't parse MaxDistance!\n");
+	else
+		maxdistance = (int)*maxd;
+
+	if (!whati)
 		I_Error("player.query_weapon: can't parse WhatInfo!\n");
 	else
-		whatinfo = (int)*num;
+		whatinfo = (int)*whati;
 
 	if (secattack)
 		secattackinfo = (int)*secattack;
@@ -1301,7 +1318,7 @@ static void PL_query_weapon(coal::vm_c *vm, int argc)
 	if (secattackinfo < 0 || secattackinfo > 1)
 		I_Error("player.query_weapon: bad secAttackInfo number: %d\n", whatinfo);
 
-	mobj_t *obj = DoMapTargetAutoAim(ui_player_who->mo, ui_player_who->mo->angle, 512, true, true);
+	mobj_t *obj = DoMapTargetAutoAim(ui_player_who->mo, ui_player_who->mo->angle, maxdistance, true, true);
 	if (!obj)
 	{
 		vm->ReturnString("");

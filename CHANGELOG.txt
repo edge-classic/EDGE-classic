@@ -64,25 +64,28 @@ New Features
 
 + COALHUDS: new commands
   -mapobject.count(thingID): returns number of objects of this type on the map
-  -player.query_object(whatinfo): returns information about the currently targetted thing. whatInfo is 
-   a number from 1 to 5 and can be: 
-   1 (NAME)
-   2 (CURRENT_HEALTH)
-   3 (SPAWN_HEALTH)
-   4 (PICKUP_BENEFIT)
-   5 (KILL_BENEFIT)
-  -mapobject.query_tagged(ThingMapTag, whatInfo): returns information about the thing with the tag we specified. whatInfo is the same as player.query_object()
-  -player.query_weapon(whatinfo, [secAttackInfo]): returns information about the currently targetted weapon. Using the optional [secAttackInfo] we can get information about the weapons secondary attack. whatInfo and SecAttackInfo are 
-   a number from 1 to 9 and can be: 
-   1 (NAME)
-   2 (ZOOM FACTOR)
-   3 (AMMOTYPE)
-   4 (AMMOPERSHOT)
-   5 (CLIPSIZE)
-   6 (DAMAGE Nominal)
-   7 (DAMAGE Max)
-   8 (RANGE)
-   9 (AUTOMATIC)
+  -player.query_object(MaxDistance, WhatInfo): returns information about the currently targetted thing.
+   MaxDistance is the limit to how far we can query an object. 
+   WhatInfo is a number from 1 to 5 and can be: 
+	1 (NAME)
+	2 (CURRENT_HEALTH)
+	3 (SPAWN_HEALTH)
+	4 (PICKUP_BENEFIT)
+	5 (KILL_BENEFIT)
+  -mapobject.query_tagged(ThingMapTag, WhatInfo): returns information about the thing with the tag we specified. WhatInfo is the same as player.query_object()
+  -player.query_weapon(MaxDistance, Whatinfo, [secAttackInfo]): returns information about the currently targetted weapon.
+   MaxDistance is the limit to how far we can query an object.  
+   Using the optional [secAttackInfo] we can get information about the weapons secondary attack. 
+   WhatInfo and SecAttackInfo are a number from 1 to 9 and can be: 
+    1 (NAME)
+    2 (ZOOM FACTOR)
+    3 (AMMOTYPE)
+    4 (AMMOPERSHOT)
+    5 (CLIPSIZE)
+    6 (DAMAGE Nominal)
+    7 (DAMAGE Max)
+    8 (RANGE)
+    9 (AUTOMATIC)
 
 + Improved Boom, MBF and MBF21 support.
 

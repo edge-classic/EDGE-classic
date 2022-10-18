@@ -1538,7 +1538,7 @@ void WI_Drawer(void)
 
 	if (background_camera_mo)
 	{
-		HUD_RenderWorld(0, 0, 320, 200, background_camera_mo);
+		HUD_RenderWorld(0, 0, 320, 200, background_camera_mo, 0);
 	} 
 	else
 	{

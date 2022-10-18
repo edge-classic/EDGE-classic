@@ -519,7 +519,7 @@ static void HD_game_paused(coal::vm_c *vm, int argc)
 	}
 }
 
-// hud.render_world(x, y, w, h)
+// hud.render_world(x, y, w, h, [flags])
 //
 static void HD_render_world(coal::vm_c *vm, int argc)
 {
@@ -528,11 +528,13 @@ static void HD_render_world(coal::vm_c *vm, int argc)
 	float w = *vm->AccessParam(2);
 	float h = *vm->AccessParam(3);
 
-	HUD_RenderWorld(x, y, w, h, ui_hud_who->mo);
+	int flags = (int) *vm->AccessParam(4);
+
+	HUD_RenderWorld(x, y, w, h, ui_hud_who->mo, flags);
 }
 
 
-// hud.render_automap(x, y, w, h)
+// hud.render_automap(x, y, w, h, [flags])
 //
 static void HD_render_automap(coal::vm_c *vm, int argc)
 {
@@ -540,6 +542,8 @@ static void HD_render_automap(coal::vm_c *vm, int argc)
 	float y = *vm->AccessParam(1);
 	float w = *vm->AccessParam(2);
 	float h = *vm->AccessParam(3);
+
+	int flags = (int) *vm->AccessParam(4);
 
 	int   old_state;
 	float old_zoom;
@@ -556,7 +560,7 @@ static void HD_render_automap(coal::vm_c *vm, int argc)
 
 	AM_SetState(new_state, new_zoom);
 
-	HUD_RenderAutomap(x, y, w, h, ui_hud_who->mo, 0);
+	HUD_RenderAutomap(x, y, w, h, ui_hud_who->mo, flags);
 
 	AM_SetState(old_state, old_zoom);
 }

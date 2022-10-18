@@ -553,8 +553,6 @@ void E_Display(void)
 	switch (gamestate)
 	{
 		case GS_LEVEL:
-			HU_Erase();
-
 			R_PaletteStuff();
 
 			VM_RunHud();

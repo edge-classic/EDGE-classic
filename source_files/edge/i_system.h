@@ -295,6 +295,8 @@ void I_FinishFrame(void);
 // SCREENHEIGHT and SCREENBITS must be updated.
 bool I_SetScreenSize(scrmode_c *mode);
 
+void I_DeterminePixelAspect();
+
 void I_GrabCursor(bool enable);
 
 void I_SetGamma(float gamma);

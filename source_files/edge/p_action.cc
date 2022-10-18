@@ -235,7 +235,18 @@ static bool DecideMeleeAttack(mobj_t * object, const atkdef_c * attack)
 	if (level_flags.true3dgameplay)
 		distance = P_ApproxDistance(target->z - object->z, distance);
 
-	meleedist = attack ? attack->range : MELEERANGE;
+
+	if (attack)
+		meleedist = attack->range;
+	else
+	{
+		meleedist = MELEERANGE;
+		if (object->mbf21flags & MBF21_LONGMELEE)
+			meleedist = LONGMELEERANGE;
+		// I guess a specific MBF21 Thing Melee range should override the above choices?
+		if (object->info->melee_range > -1)
+			meleedist = object->info->melee_range;
+	}
 	meleedist += target->radius - 20.0f;	// Check the thing's actual radius		
 
 	if (distance >= meleedist)
@@ -301,6 +312,11 @@ static bool DecideRangeAttack(mobj_t * object)
 
 	// Object is too far away to attack?
 	if (attack->range && distance >= attack->range)
+		return false;
+
+	// MBF21 SHORTMRANGE flag
+	if ((object->mbf21flags & MBF21_SHORTMRANGE) &&
+		distance >= SHORTMISSILERANGE)
 		return false;
 
 	// Object is too close to target
@@ -1237,7 +1253,13 @@ static void LaunchSmartProjectile(mobj_t * source, mobj_t * target,
 
 		float s = type->speed;
 		if (level_flags.fastparm)
-			s *= type->fast;
+		{
+			// MBF21: Use explicit Fast speed if provided
+			if (type->fast_speed > -1)
+				s = type->fast_speed;
+			else
+				s *= type->fast;
+		}
 
 		float a = mx * mx + my * my - s * s;
 		float b = 2 * (dx * mx + dy * my);
@@ -1375,7 +1397,17 @@ int P_MissileContact(mobj_t * object, mobj_t * target)
 
 		if (source->info == target->info)
 		{
-			if (!(target->extendedflags & EF_DISLOYALTYPE))
+			if (!(target->extendedflags & EF_DISLOYALTYPE) && (source->info->proj_group != -1))
+				return 0;
+		}
+
+		// MBF21: If in same projectile group, attack does no damage
+		if (source->info->proj_group >= 0 && target->info->proj_group >= 0 &&
+			(source->info->proj_group == target->info->proj_group))
+		{
+			if (object->extendedflags & EF_TUNNEL)
+				return -1;
+			else
 				return 0;
 		}
 
@@ -1425,13 +1457,15 @@ int P_MissileContact(mobj_t * object, mobj_t * target)
 	if (object->extendedflags & EF_TUNNEL)
 	{
 		// this hash is very basic, but should work OK
-		u32_t hash = (u32_t)(long long)target; // This might need to have an ifdef for 32-bit to be long instead of long long - Dasho
+		u32_t hash = (u32_t)(long long)target;
 
 		if (object->tunnel_hash[0] == hash || object->tunnel_hash[1] == hash)
 			return -1;
 
 		object->tunnel_hash[0] = object->tunnel_hash[1];
 		object->tunnel_hash[1] = hash;
+		if (object->info->rip_sound)
+			S_StartFX(object->info->rip_sound, SNCAT_Object, object, 0);
 	}
 
 	if (source)
@@ -2345,7 +2379,13 @@ static void SkullFlyAssault(mobj_t * object)
 
 	// -KM- 1999/01/31 Fix skulls in nightmare mode
 	if (level_flags.fastparm)
-		speed *= object->info->fast;
+	{
+		// MBF21: Use explicit Fast speed if provided
+		if (object->info->fast_speed > -1)
+			speed = object->info->fast_speed;
+		else
+			speed *= object->info->fast;
+	}
 
 	sfx_t *sound = object->currentattack->initsound;
 
@@ -3047,6 +3087,14 @@ static bool CreateAggression(mobj_t * mo)
 			continue;
 		}
 
+		// MBF21: If in same infighting group, never target each other even if
+		// hit with 'friendly fire'
+		if (mo->info->infight_group >= 0 && other->info->infight_group >= 0 &&
+			(mo->info->infight_group == other->info->infight_group))
+		{
+			continue;
+		}
+
 		// POTENTIAL TARGET
 
 		// fairly low chance of trying it, in case this block
@@ -3708,7 +3756,11 @@ void P_ActBecome(struct mobj_s *mo)
 
 		mo->radius = mo->info->radius;
 		mo->height = mo->info->height;
-		mo->speed  = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
+		// MBF21: Use explicit Fast speed if provided
+		if (mo->info->fast_speed > -1)
+			mo->speed  = level_flags.fastparm ? mo->info->fast_speed : mo->info->speed;
+		else
+			mo->speed  = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
 
 		// Note: health is not changed
 

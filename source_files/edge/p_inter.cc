@@ -947,7 +947,7 @@ void P_KillMobj(mobj_t * source, mobj_t * target, const damage_c *damtype,
 		target->flags &= ~MF_NOGRAVITY;
 
 	target->flags |= MF_CORPSE | MF_DROPOFF;
-	target->height /= 4;
+	target->height /= (4 / (target->mbf21flags & MBF21_LOGRAV ? 8 : 1));
 
 	RAD_MonsterIsDead(target);
 

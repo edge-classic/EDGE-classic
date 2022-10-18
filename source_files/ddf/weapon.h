@@ -35,18 +35,21 @@
 // -AJA- 2000/01/12: Weapon special flags
 typedef enum
 {
-	WPSP_None = 0x0000,
+	WPSP_None = 0,
 
-	WPSP_SilentToMon = 0x0001, // monsters cannot hear this weapon
-	WPSP_Animated    = 0x0002, // raise/lower states are animated
+	WPSP_SilentToMon = (1 << 0), // monsters cannot hear this weapon
+	WPSP_Animated    = (1 << 1), // raise/lower states are animated
 
-	WPSP_SwitchAway  = 0x0010, // select new weapon when we run out of ammo
+	WPSP_SwitchAway  = (1 << 4), // select new weapon when we run out of ammo
 
 	// reload flags:
-	WPSP_Trigger = 0x0100, // allow reload while holding trigger
-	WPSP_Fresh   = 0x0200, // automatically reload when new ammo is avail
-	WPSP_Manual  = 0x0400, // enables the manual reload key
-	WPSP_Partial = 0x0800, // manual reload: allow partial refill
+	WPSP_Trigger = (1 << 8), // allow reload while holding trigger
+	WPSP_Fresh   = (1 << 9), // automatically reload when new ammo is avail
+	WPSP_Manual  = (1 << 10), // enables the manual reload key
+	WPSP_Partial = (1 << 11), // manual reload: allow partial refill
+
+	// MBF21 flags:
+	WPSP_NoAutoFire = (1 << 12), // Do not fire if switched to while trigger is held
 }
 weapon_flag_e;
 

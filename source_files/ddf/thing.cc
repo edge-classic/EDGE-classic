@@ -168,6 +168,7 @@ const commandlist_t thing_commands[] =
 	DF("GASP_SOUND", gasp_sound, DDF_MainLookupSound),
 	DF("SECRET_SOUND", secretsound, DDF_MainLookupSound),
 	DF("FALLING_SOUND", falling_sound, DDF_MainLookupSound),
+	DF("RIP_SOUND", rip_sound, DDF_MainLookupSound),
 
 	DF("FLOAT_SPEED", float_speed, DDF_MainGetFloat),
 	DF("STEP_SIZE", step_size, DDF_MainGetFloat),
@@ -200,6 +201,12 @@ const commandlist_t thing_commands[] =
 	DF("ARMOUR_CLASS",  armour_class, DDF_MainGetBitSet),  // -AJA- 2007/08/22
 
 	DF("SIGHT_DISTANCE", sight_distance, DDF_MainGetFloat), //Lobo 2022
+
+	DF("INFIGHTING_GROUP", infight_group, DDF_MainGetNumeric),
+	DF("PROJECTILE_GROUP", proj_group, DDF_MainGetNumeric),
+	DF("SPLASH_GROUP", splash_group, DDF_MainGetNumeric),
+	DF("FAST_SPEED", fast_speed, DDF_MainGetNumeric),
+	DF("MELEE_RANGE", melee_range, DDF_MainGetNumeric),
 
 	// -AJA- backwards compatibility cruft...
 	DF("EXPLOD_DAMAGE", explode_damage.nominal, DDF_MainGetFloat),
@@ -1704,6 +1711,13 @@ static specflags_t hyper_specials[] =
 	{"SHOVEABLE", HF_SHOVEABLE, 0}, //Lobo: can be pushed
 	{"SPLASH", HF_NOSPLASH, 1}, //Lobo: causes no splash on liquids
 	{"DEHACKED_COMPAT", HF_DEHACKED_COMPAT, 0},
+	{"MBF21_COMPAT", HF_DEHACKED_COMPAT, 0},
+	{NULL, 0, 0}
+};
+
+static specflags_t mbf21_specials[] =
+{
+	{"LOGRAV", MBF21_LOGRAV, 0},
 	{NULL, 0, 0}
 };
 
@@ -1761,6 +1775,15 @@ void DDF_MobjGetSpecial(const char *info)
 		flag_ptr = &dynamic_mobj->hyperflags;
 
 		res = DDF_MainCheckSpecialFlag(info, hyper_specials,
+				&flag_value, true, false);
+	}
+
+	if (res == CHKF_User || res == CHKF_Unknown)
+	{
+		// -AJA- 2004/08/25: Try the hyper specials...
+		flag_ptr = &dynamic_mobj->mbf21flags;
+
+		res = DDF_MainCheckSpecialFlag(info, mbf21_specials,
 				&flag_value, true, false);
 	}
 
@@ -2223,7 +2246,8 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 
     flags = src.flags; 
     extendedflags = src.extendedflags; 
-    hyperflags = src.hyperflags; 
+    hyperflags = src.hyperflags;
+	mbf21flags = src.mbf21flags;
 
 	explode_damage = src.explode_damage;	
 	explode_radius = src.explode_radius;
@@ -2295,6 +2319,7 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	gasp_sound = src.gasp_sound; 
 	secretsound = src.secretsound;
 	falling_sound = src.falling_sound;
+	rip_sound = src.rip_sound;
 
     fuse = src.fuse; 
 	reload_shots = src.reload_shots;
@@ -2337,6 +2362,12 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	spitspot_ref = src.spitspot_ref; 
 
 	sight_distance = src.sight_distance;
+
+	infight_group = src.infight_group;
+	proj_group = src.proj_group;
+	splash_group = src.splash_group;
+	fast_speed = src.fast_speed;
+	melee_range = src.melee_range;
 }
 
 
@@ -2373,6 +2404,7 @@ void mobjtype_c::Default()
     flags = 0;
     extendedflags = 0;
 	hyperflags = 0;
+	mbf21flags = 0;
 
 	explode_damage.Default(damage_c::DEFAULT_Mobj);
 	explode_radius = 0;
@@ -2429,6 +2461,7 @@ void mobjtype_c::Default()
 	//secretsound = sfx_None;
 	secretsound = sfxdefs.GetEffect("SECRET");
 	falling_sound = sfx_None;
+	rip_sound = sfx_None;
 
     fuse = 0;
 	reload_shots = 5;
@@ -2470,6 +2503,11 @@ void mobjtype_c::Default()
 	spitspot_ref.clear();
 
 	sight_distance = -1;
+	infight_group = -2;
+	proj_group = -2;
+	splash_group = -2;
+	fast_speed = -1;
+	melee_range = -1;
 }
 
 void mobjtype_c::DLightCompatibility(void)

@@ -21,7 +21,7 @@ struct state_t;
 typedef enum
 {
 	AF_EXPLODE    = (1 << 0),   // uses A_Explode
-	AF_KEENDIE    = (1 << 1),   // uses A_KeenDie
+	AF_BOSSDEATH  = (1 << 1),   // uses A_BossDeath
 	AF_LOOK       = (1 << 2),   // uses A_Look
 	AF_DETONATE   = (1 << 3),   // uses A_Detonate
 

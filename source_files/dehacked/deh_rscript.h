@@ -21,7 +21,7 @@ namespace Rscript
 	void Init();
 	void Shutdown();
 
-	void MarkKeenDie(int mt_num);
+	void MarkBossDeath(int mt_num);
 
 	void ConvertRAD();
 }

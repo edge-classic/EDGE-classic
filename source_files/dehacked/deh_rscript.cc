@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------
 
-#include <assert.h>
-
 #include "deh_i_defs.h"
 #include "deh_edge.h"
 
@@ -37,6 +35,8 @@
 #include "deh_things.h"
 #include "deh_util.h"
 #include "deh_wad.h"
+
+#include <assert.h>
 
 
 namespace Deh_Edge
@@ -94,26 +94,30 @@ namespace Deh_Edge
 
 namespace Rscript
 {
-	std::vector<int> keen_mobjs;
+	std::vector<int> boss_mobjs;
 
 	void BeginLump();
 	void FinishLump();
 
+	bool IsBoss(int mt_num);
+
 	int SpecialLevel(int episode, int map);
 	void OutputMonsterDeath(int mt_num, int idx);
-	void OutputLevel(int episode, int map);
+	void HandleLevel(int episode, int map);
+
+	void CollectMonsters(std::vector<int>& list, int flag);
 }
 
 
 void Rscript::Init()
 {
-	keen_mobjs.clear();
+	boss_mobjs.clear();
 }
 
 
 void Rscript::Shutdown()
 {
-	keen_mobjs.clear();
+	boss_mobjs.clear();
 }
 
 
@@ -130,13 +134,28 @@ void Rscript::FinishLump()
 }
 
 
-void Rscript::MarkKeenDie(int mt_num)
+bool Rscript::IsBoss(int mt_num)
 {
-	for (size_t i = 0 ; i < keen_mobjs.size() ; i++)
-		if (keen_mobjs[i] == mt_num)
-			return;
+	for (int num : boss_mobjs)
+		if (num == mt_num)
+			return true;
 
-	keen_mobjs.push_back(mt_num);
+	return false;
+}
+
+
+void Rscript::MarkBossDeath(int mt_num)
+{
+	// only monsters which use A_BossDeath can trigger the special code
+	// in DOOM for the maps ExM8, E4M6 and MAP07.
+
+	if (! IsBoss(mt_num))
+		boss_mobjs.push_back(mt_num);
+}
+
+
+void Rscript::CollectMonsters(std::vector<int>& list, int flag)
+{
 }
 
 
@@ -209,7 +228,7 @@ void Rscript::OutputMonsterDeath(int mt_num, int idx)
 }
 
 
-void Rscript::OutputLevel(int episode, int map)
+void Rscript::HandleLevel(int episode, int map)
 {
 	if (episode == 0)  /* DOOM II */
 		WAD::Printf("start_map MAP%02d\n", map);
@@ -218,6 +237,7 @@ void Rscript::OutputLevel(int episode, int map)
 
 	int spec_mt = SpecialLevel(episode, map);
 
+/* TODO REVIEW
 	for (int i = 0 ; i < (int)keen_mobjs.size() ; i++)
 	{
 		// don't let keen deaths interfere with boss-death scripts
@@ -229,6 +249,7 @@ void Rscript::OutputLevel(int episode, int map)
 
 		OutputMonsterDeath(keen_mobjs[i], i + 1);
 	}
+*/
 
 	WAD::Printf("end_map\n\n\n");
 }
@@ -236,21 +257,18 @@ void Rscript::OutputLevel(int episode, int map)
 
 void Rscript::ConvertRAD()
 {
-	if (! all_mode && keen_mobjs.empty())
-		return;
-
 	BeginLump();
 
 	WAD::Printf("// --- DOOM I Scripts ---\n\n");
 
 	for (int e = 1 ; e <= 4 ; e++)
 		for (int m = 1 ; m <= 9 ; m++)
-			OutputLevel(e, m);
+			HandleLevel(e, m);
 
 	WAD::Printf("// --- DOOM II Scripts ---\n\n");
 
 	for (int m = 1 ; m <= 32 ; m++)
-		OutputLevel(0, m);
+		HandleLevel(0, m);
 
 	FinishLump();
 }

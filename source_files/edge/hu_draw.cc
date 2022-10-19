@@ -222,7 +222,7 @@ void HUD_PushScissor(float x1, float y1, float x2, float y2, bool expand)
 	SYS_ASSERT(sci_stack_top < MAX_SCISSOR_STACK);
 
 	// expand rendered view to cover whole screen
-	if (expand && x1 < hud_x_left && x2 > hud_x_right-1)
+	if (expand && x1 < 1 && x2 > hud_x_mid*2-1)
 	{
 		x1 = 0;
 		x2 = SCREENWIDTH;
@@ -928,9 +928,9 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 }
 
 
-void HUD_RenderWorld(float x, float y, float w, float h, mobj_t *camera)
+void HUD_RenderWorld(float x, float y, float w, float h, mobj_t *camera, int flags)
 {
-	HUD_PushScissor(x, y, x+w, y+h, true);
+	HUD_PushScissor(x, y, x+w, y+h, (flags & 1) == 0);
 
 	int *xy = scissor_stack[sci_stack_top-1];
 
@@ -940,13 +940,14 @@ void HUD_RenderWorld(float x, float y, float w, float h, mobj_t *camera)
 	float width = COORD_X(x+w) - COORD_X(x);
 	float expand_w = (xy[2] - xy[0]) / width;
 
-	// renderer needs true (OpenGL) coordinates
-	float x1 = COORD_X(x);
-	float y1 = COORD_Y(y);
-	float x2 = COORD_X(x+w);
-	float y2 = COORD_Y(y+h);
+	// renderer needs true (OpenGL) coordinates.
+	// get from scissor due to the expansion thing [ FIXME: HACKY ]
+	float x1 = xy[0]; // COORD_X(x);
+	float y1 = xy[1]; // COORD_Y(y);
+	float x2 = xy[2]; // COORD_X(x+w);
+	float y2 = xy[3]; // COORD_Y(y+h);
 
-	R_Render(x1, y2, x2-x1, y1-y2, camera, full_height, expand_w);
+	R_Render(x1, y1, x2-x1, y2-y1, camera, full_height, expand_w);
 
 	HUD_PopScissor();
 }
@@ -954,7 +955,17 @@ void HUD_RenderWorld(float x, float y, float w, float h, mobj_t *camera)
 
 void HUD_RenderAutomap(float x, float y, float w, float h, mobj_t *player, int flags)
 {
-	HUD_PushScissor(x, y, x+w, y+h, true);
+	HUD_PushScissor(x, y, x+w, y+h, (flags & 1) == 0);
+
+	// [ FIXME HACKY ]
+	if ((flags & 1) == 0)
+	{
+		if (x < 1 && x+w > hud_x_mid*2-1)
+		{
+			x = hud_x_left;
+			w = hud_x_right - x;
+		}
+	}
 
 	AM_Render(x, y, w, h, player, flags);
 

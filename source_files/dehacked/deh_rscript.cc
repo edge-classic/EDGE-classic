@@ -2,7 +2,7 @@
 //  RSCRIPT output
 //------------------------------------------------------------------------
 //
-//  DEH_EDGE  Copyright (C) 2004-2005  The EDGE Team
+//  DEH_EDGE  Copyright (C) 2004-2022  The EDGE Team
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -42,56 +42,6 @@
 namespace Deh_Edge
 {
 
-#define MAP07  \
-	"  radiustrigger 0 0 -1\n"  \
-	"    ondeath MANCUBUS\n"  \
-	"    activate_linetype 38 666\n"  \
-	"  end_radiustrigger\n"  \
-	"\n"  \
-	"  radiustrigger 0 0 -1\n"  \
-	"    ondeath ARACHNOTRON\n"  \
-	"    activate_linetype 30 667\n"  \
-	"  end_radiustrigger\n"
-
-#define MAP32  \
-	"  radiustrigger 0 0 -1\n"  \
-	"    ondeath COMMANDER_KEEN\n"  \
-	"    activate_linetype 2 666\n"  \
-	"  end_radiustrigger\n"
-
-#define E1M8  \
-	"  radiustrigger 0 0 -1\n"  \
-	"    ondeath BARON_OF_HELL\n"  \
-	"    activate_linetype 38 666\n"  \
-	"  end_radiustrigger\n"
-
-#define E2M8  \
-	"  radiustrigger 0 0 -1\n"  \
-	"    ondeath THE_CYBERDEMON\n"  \
-	"    exitlevel 5\n"  \
-	"  end_radiustrigger\n"
-
-#define E3M8  \
-	"  radiustrigger 0 0 -1\n"  \
-	"    ondeath THE_SPIDER_MASTERMIND\n"  \
-	"    exitlevel 5\n"  \
-	"  end_radiustrigger\n"
-
-#define E4M6  \
-	"  radiustrigger 0 0 -1\n"  \
-	"    ondeath THE_CYBERDEMON\n"  \
-	"    activate_linetype 2 666\n"  \
-	"  end_radiustrigger\n"
-
-#define E4M8  \
-	"  radiustrigger 0 0 -1\n"  \
-	"    ondeath THE_SPIDER_MASTERMIND\n"  \
-	"    activate_linetype 38 666\n"  \
-	"  end_radiustrigger\n"
-
-
-//------------------------------------------------------------------------
-
 namespace Rscript
 {
 	std::vector<int> boss_mobjs;
@@ -102,7 +52,7 @@ namespace Rscript
 	bool IsBoss(int mt_num);
 
 	void CollectMatchingBosses(std::vector<int>& list, int flag);
-	void OutputTrigger(const std::string& map, const std::vector<int>& list);
+	void OutputTrigger(const std::string& map, const std::vector<int>& list, bool boss2);
 	void HandleLevel(const std::string& map, int flag1, int mt1, int flag2, int mt2);
 }
 
@@ -162,11 +112,39 @@ void Rscript::CollectMatchingBosses(std::vector<int>& list, int flag)
 }
 
 
-void Rscript::OutputTrigger(const std::string& map, const std::vector<int>& list)
+void Rscript::OutputTrigger(const std::string& map, const std::vector<int>& list, bool boss2)
 {
-	WAD::Printf("  radiustrigger 0 0 -1\n");
+	// when there is no monsters, that is okay, we just don't output any
+	// radius trigger (there is nothing it could do).
+	if (list.empty())
+		return;
 
-	// TODO
+	WAD::Printf("  radiustrigger 0 0 -1\n");
+	WAD::Printf("    wait_until_dead");
+
+	for (int mt_num : list)
+	{
+		WAD::Printf(" %s", Things::GetMobjName(mt_num));
+	}
+
+	WAD::Printf("\n");
+
+	// the command to execute depends on the map...
+
+	if (map == "E1M8")
+		WAD::Printf("    activate_linetype 38 666\n");
+	else if (map == "E2M8")
+		WAD::Printf("    exit_level 5\n");
+	else if (map == "E3M8")
+		WAD::Printf("    exit_level 5\n");
+	else if (map == "E4M6")
+		WAD::Printf("    activate_linetype 2 666\n");
+	else if (map == "E4M8")
+		WAD::Printf("    activate_linetype 38 666\n");
+	else if (! boss2)
+		WAD::Printf("    activate_linetype 38 666\n");  // MAP07 Mancubus
+	else
+		WAD::Printf("    activate_linetype 30 667\n");  // MAP07 Arachnotron
 
 	WAD::Printf("  end_radiustrigger\n");
 }
@@ -187,15 +165,15 @@ void Rscript::HandleLevel(const std::string& map, int flag1, int mt1, int flag2,
 	if (flag1 != 0 && (list1.size() != 1 || list1[0] != mt1)) different = true;
 	if (flag2 != 0 && (list2.size() != 1 || list2[0] != mt2)) different = true;
 
-	if (! different)
+	if (! different && ! all_mode)
 		return;
 
-	WAD::Printf("start_map %s\n", map.c_str());
+	WAD::Printf("START_MAP %s\n", map.c_str());
 
-	if (flag1 != 0) OutputTrigger(map, list1);
-	if (flag2 != 0) OutputTrigger(map, list2);
+	if (flag1 != 0) OutputTrigger(map, list1, false);
+	if (flag2 != 0) OutputTrigger(map, list2, true);
 
-	WAD::Printf("end_map\n\n\n");
+	WAD::Printf("END_MAP\n\n\n");
 }
 
 

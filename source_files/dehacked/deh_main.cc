@@ -118,7 +118,7 @@ dehret_e Convert(void)
 	Things ::ConvertTHING();
 	Things ::ConvertATK();
 
-	// rscript must be after things (for A_KeenDie)
+	// rscript must be after things (for A_BossDeath)
 	TextStr::ConvertLDF();
 	Rscript::ConvertRAD();
 

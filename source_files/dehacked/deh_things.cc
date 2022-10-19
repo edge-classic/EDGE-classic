@@ -700,6 +700,15 @@ const mobjinfo_t * Things::NewMobjElseOld(int mt_num)
 }
 
 
+int Things::GetMobjMBF21Flags(int mt_num)
+{
+	const mobjinfo_t *info = NewMobjElseOld(mt_num);
+	if (info == NULL)
+		return 0;
+	return info->mbf21_flags;
+}
+
+
 bool Things::IsSpawnable(int mt_num)
 {
 	// attacks are not spawnable via A_Spawn
@@ -724,101 +733,151 @@ namespace Things
 {
 	typedef struct
 	{
-		int flag;
-		const char *name;  // for EDGE
-		const char *bex;  // NULL if same as EDGE name
+		int flag;          // flag in mobjinfo_t (MF_XXX), 0 if ignored
+		const char *bex;   // name in a DEHACKED or BEX file
+		const char *conv;  // edge name, NULL if none, can be multiple
 	}
 	flagname_t;
 
-	const flagname_t flagnamelist[] =
+	const flagname_t flag_list[] =
 	{
-		{ MF_NOBLOCKMAP,   "NOBLOCKMAP",     NULL },
-		{ MF_NOBLOOD,      "DAMAGESMOKE",   "NOBLOOD" },
-		{ MF_NOCLIP,       "NOCLIP",         NULL },
-		{ MF_NOGRAVITY,    "NOGRAVITY",      NULL },
-		{ MF_NOSECTOR,     "NOSECTOR",       NULL },
-		{ MF_NOTDMATCH,    "NODEATHMATCH",  "NOTDMATCH" },
+		{ MF_NOBLOCKMAP,   "NOBLOCKMAP",    "NOBLOCKMAP" },
+		{ MF_NOBLOOD,      "NOBLOOD",       "DAMAGESMOKE" },
+		{ MF_NOCLIP,       "NOCLIP",        "NOCLIP" },
+		{ MF_NOGRAVITY,    "NOGRAVITY",     "NOGRAVITY" },
+		{ MF_NOSECTOR,     "NOSECTOR",      "NOSECTOR" },
+		{ MF_NOTDMATCH,    "NOTDMATCH",     "NODEATHMATCH" },
 
-		{ MF_AMBUSH,       "AMBUSH",         NULL },
-		{ MF_CORPSE,       "CORPSE",         NULL },
-		{ MF_COUNTITEM,    "COUNT_AS_ITEM", "COUNTITEM" },
-		{ MF_COUNTKILL,    "COUNT_AS_KILL", "COUNTKILL" },
-		{ MF_DROPOFF,      "DROPOFF",        NULL },
-		{ MF_DROPPED,      "DROPPED",        NULL },
-		{ MF_FLOAT,        "FLOAT",          NULL },
-		{ MF_MISSILE,      "MISSILE",        NULL },
-		{ MF_PICKUP,       "PICKUP",         NULL },
-		{ MF_SHADOW,       "FUZZY",         "SHADOW" },
-		{ MF_SHOOTABLE,    "SHOOTABLE",      NULL },
-		{ MF_SKULLFLY,     "SKULLFLY",       NULL },
-		{ MF_SLIDE,        "SLIDER",        "SLIDE" },
-		{ MF_SOLID,        "SOLID",          NULL },
-		{ MF_SPAWNCEILING, "SPAWNCEILING",   NULL },
-		{ MF_SPECIAL,      "SPECIAL",        NULL },
-		{ MF_TELEPORT,     "TELEPORT",       NULL },
+		{ MF_AMBUSH,       "AMBUSH",        "AMBUSH" },
+		{ MF_CORPSE,       "CORPSE",        "CORPSE" },
+		{ MF_COUNTITEM,    "COUNTITEM",     "COUNT_AS_ITEM" },
+		{ MF_COUNTKILL,    "COUNTKILL",     "COUNT_AS_KILL" },
+		{ MF_DROPOFF,      "DROPOFF",       "DROPOFF" },
+		{ MF_DROPPED,      "DROPPED",       "DROPPED" },
+		{ MF_FLOAT,        "FLOAT",         "FLOAT" },
+		{ MF_MISSILE,      "MISSILE",       "MISSILE" },
+		{ MF_PICKUP,       "PICKUP",        "PICKUP" },
+		{ MF_SHADOW,       "SHADOW",        "FUZZY"  },
+		{ MF_SHOOTABLE,    "SHOOTABLE",     "SHOOTABLE" },
+		{ MF_SKULLFLY,     "SKULLFLY",      "SKULLFLY" },
+		{ MF_SLIDE,        "SLIDE",         "SLIDER" },
+		{ MF_SOLID,        "SOLID",         "SOLID" },
+		{ MF_SPAWNCEILING, "SPAWNCEILING",  "SPAWNCEILING" },
+		{ MF_SPECIAL,      "SPECIAL",       "SPECIAL" },
+		{ MF_TELEPORT,     "TELEPORT",      "TELEPORT" },
 
 		// BOOM and MBF flags...
-		{ MF_BOUNCES,      "BOUNCE",   "BOUNCES" },
-		{ MF_STEALTH,      "STEALTH",   NULL },
-		{ MF_TOUCHY,       "TOUCHY",    NULL },
+		{ MF_BOUNCES,      "BOUNCES",       "BOUNCE" },
+		{ MF_STEALTH,      "STEALTH",       "STEALTH" },
+		{ MF_TOUCHY,       "TOUCHY",        "TOUCHY" },
 
-		// Boom/MBF flags which don't produce an Edge SPECIAL
-        { MF_TRANSLATION1, NULL, "TRANSLATION1" },
-        { MF_TRANSLATION2, NULL, "TRANSLATION2" },
-        { MF_TRANSLATION1, NULL, "TRANSLATION"  },  // bug compat
-        { MF_TRANSLUCENT,  NULL, "TRANSLUCENT" },
-        { MF_TRANSLUCENT,  NULL, "TRANSLUC50"  },
-        { MF_TRANSLUCENT,  NULL, "TRANSLUC25"  },  // XXX: 25,75 unsupported
-        { MF_TRANSLUCENT,  NULL, "TRANSLUC75"  },  //
+		// flags which don't produce an Edge SPECIAL
+		{ MF_TRANSLATION1, "TRANSLATION1",  NULL },
+		{ MF_TRANSLATION2, "TRANSLATION2",  NULL },
+		{ MF_TRANSLATION1, "TRANSLATION",   NULL },  // bug compat
+		{ MF_TRANSLUCENT,  "TRANSLUCENT",   NULL },
+		{ MF_TRANSLUCENT,  "TRANSLUC50",    NULL },
+		{ MF_TRANSLUCENT,  "TRANSLUC25",    NULL },  // WISH
+		{ MF_TRANSLUCENT,  "TRANSLUC75",    NULL },  // WISH
+
+		{ 0,               "INFLOAT",       NULL },
+		{ 0,               "JUSTATTACKED",  NULL },
+		{ 0,               "JUSTHIT",       NULL },
+		{ 0,               "UNUSED1",       NULL },
+		{ 0,               "UNUSED2",       NULL },
+		{ 0,               "UNUSED3",       NULL },
+		{ 0,               "UNUSED4",       NULL },
 
 		{ 0, NULL, NULL }  // End sentinel
 	};
 
+	const flagname_t mbf21flag_list[] =
+	{
+		{ MBF21_LOGRAV,          "LOGRAV",         "LOGRAV" },
+		{ MBF21_DMGIGNORED,      "DMGIGNORED",     "NEVERTARGETED"  },
+		{ MBF21_NORADIUSDMG,     "NORADIUSDMG",    "EXPLODE_IMMUNE" },
+		{ MBF21_HIGHERMPROB,     "HIGHERMPROB",    "TRIGGER_HAPPY"  },  // FIXME: not quite the same
+		{ MBF21_RANGEHALF,       "RANGEHALF",      "TRIGGER_HAPPY"  },
+		{ MBF21_NOTHRESHOLD,     "NOTHRESHOLD",    "NOGRUDGE"       },
+		{ MBF21_BOSS,            "BOSS",           "BOSSMAN"        },
+		{ MBF21_RIP,             "RIP",            "TUNNEL"         },
+		{ MBF21_FULLVOLSOUNDS,   "FULLVOLSOUNDS",  "ALWAYS_LOUD"    },
+
+		// flags which don't produce an Edge special
+		{ MBF21_SHORTMRANGE,     "SHORTMRANGE",    NULL },
+		{ MBF21_LONGMELEE,       "LONGMELEE",      NULL },
+		{ MBF21_FORCERADIUSDMG,  "FORCERADIUSDMG", NULL },
+
+		{ MBF21_MAP07BOSS1,      "MAP07BOSS1",     NULL },
+		{ MBF21_MAP07BOSS2,      "MAP07BOSS2",     NULL },
+		{ MBF21_E1M8BOSS,        "E1M8BOSS",       NULL },
+		{ MBF21_E2M8BOSS,        "E2M8BOSS",       NULL },
+		{ MBF21_E3M8BOSS,        "E3M8BOSS",       NULL },
+		{ MBF21_E4M6BOSS,        "E4M6BOSS",       NULL },
+		{ MBF21_E4M8BOSS,        "E4M8BOSS",       NULL },
+
+		{ 0, NULL, NULL }  // End sentinel
+	};
+
+	// these are extra flags we add for certain monsters.
+	// they do not correspond to anything in DEHACKED / BEX / MBF21.
 	const flagname_t extflaglist[] =
 	{
-		{ EF_DISLOYAL,    "DISLOYAL,ATTACK_HURTS", NULL },  // Must be first
-		{ EF_TRIG_HAPPY,  "TRIGGER_HAPPY", NULL },
-		{ EF_BOSSMAN,     "BOSSMAN", NULL },
-		{ EF_LOUD,        "ALWAYS_LOUD", NULL },
-		{ EF_NO_RAISE,    "NO_RESURRECT", NULL },
-		{ EF_NO_GRUDGE,   "NO_GRUDGE,NEVERTARGETED", NULL },
-		{ EF_NO_ITEM_BK,  "NO_RESPAWN", NULL },
+		{ EF_DISLOYAL,    NULL,  "DISLOYAL,ATTACK_HURTS" },  // must be first
+		{ EF_TRIG_HAPPY,  NULL,  "TRIGGER_HAPPY" },
+		{ EF_BOSSMAN,     NULL,  "BOSSMAN" },
+		{ EF_LOUD,        NULL,  "ALWAYS_LOUD" },
+		{ EF_NO_RAISE,    NULL,  "NO_RESURRECT" },
+		{ EF_NO_GRUDGE,   NULL,  "NO_GRUDGE,NEVERTARGETED" },
+		{ EF_NO_ITEM_BK,  NULL,  "NO_RESPAWN" },
 
 		{ 0, NULL, NULL }  // End sentinel
 	};
 
-	const char *flag_bex_ignored[] =
+
+	int ParseBits(const flagname_t *list, char *bit_str)
 	{
-		"INFLOAT", "JUSTATTACKED", "JUSTHIT",
-		"UNUSED1", "UNUSED2", "UNUSED3", "UNUSED4",
+		int new_flags = 0;
 
-		NULL
-	};
+		// these delimiters are the same as what Boom/MBF uses
+		static const char *delims = "+|, \t\f\r";
 
-	const flagname_t mbf21flagnamelist[] =
-	{
-		{ MBF21_LOGRAV,         "LOGRAV",          		     NULL },
-		{ MBF21_SHORTMRANGE,    "SHORTMRANGE",    	 	     NULL },
-		{ MBF21_DMGIGNORED,     "NEVERTARGETED",     "DMGIGNORED" },
-		{ MBF21_NORADIUSDMG,    "EXPLODE_IMMUNE",   "NORADIUSDMG" },
-		{ MBF21_FORCERADIUSDMG, "FORCERADIUSDMG",            NULL },
-		{ MBF21_HIGHERMPROB,    "TRIGGER_HAPPY",    "HIGHERMPROB" },
-		{ MBF21_RANGEHALF,      "TRIGGER_HAPPY",      "RANGEHALF" },
-		{ MBF21_NOTHRESHOLD,    "NOGRUDGE",    		"NOTHRESHOLD" },
-		{ MBF21_LONGMELEE,      "LONGMELEE",      		     NULL },
-		{ MBF21_BOSS,           "BOSSMAN",        		   "BOSS" },
-		{ MBF21_MAP07BOSS1,     "MAP07BOSS1",     		     NULL },
-		{ MBF21_MAP07BOSS2,     "MAP07BOSS2",     		     NULL },
-		{ MBF21_E1M8BOSS,       "E1M8BOSS",       		     NULL },
-		{ MBF21_E2M8BOSS,       "E2M8BOSS",       		     NULL },
-		{ MBF21_E3M8BOSS,       "E3M8BOSS",       		     NULL },
-		{ MBF21_E4M6BOSS,       "E4M6BOSS",       		     NULL },
-		{ MBF21_E4M8BOSS,       "E4M8BOSS",       		     NULL },
-		{ MBF21_RIP,            "TUNNEL",            	    "RIP" },
-		{ MBF21_FULLVOLSOUNDS,  "ALWAYS_LOUD",    "FULLVOLSOUNDS" },
+		for (char *token = strtok(bit_str, delims);
+			 token != NULL;
+			 token = strtok(NULL, delims))
+		{
+			// tokens should be non-empty
+			assert(token[0] != 0);
 
-		{ 0, NULL, NULL }  // End sentinel
-	};
+			if (isdigit(token[0]))
+			{
+				int flags;
+
+				if (sscanf(token, " %i ", &flags) == 1)
+					new_flags |= flags;
+				else
+					PrintWarn("Line %d: unreadable BITS value: %s\n", Patch::line_num, token);
+
+				continue;
+			}
+
+			// find the name in the given list
+			int i;
+			for (i = 0 ; list[i].bex != NULL ; i++)
+				if (StrCaseCmp(token, list[i].bex) == 0)
+					break;
+
+			if (list[i].bex == NULL)
+			{
+				PrintWarn("Line %d: unknown BITS mnemonic: %s\n", Patch::line_num, token);
+				continue;
+			}
+
+			new_flags |= list[i].flag;
+		}
+
+		return new_flags;
+	}
 
 	bool CheckIsMonster(const mobjinfo_t *info, int mt_num, int player,
 		bool use_act_flags)
@@ -841,7 +900,7 @@ namespace Things
 		int score = 0;
 
 		// values determined by statistical analysis of major DEH patches
-		// (Standard DOOM, Batman, Mordeth, Wheel-of-Time, Osiris). 
+		// (Standard DOOM, Batman, Mordeth, Wheel-of-Time, Osiris).
 
 		if (info->flags & MF_SOLID) score += 25;
 		if (info->flags & MF_SHOOTABLE) score += 72;
@@ -952,19 +1011,18 @@ namespace Things
 		bool is_monster = CheckIsMonster(info, mt_num, player, true);
 		bool force_disloyal = (is_monster && Misc::monster_infight == 221);
 
-		for (i = 0; flagnamelist[i].name != NULL; i++)
+		for (i = 0 ; flag_list[i].bex != NULL ; i++)
 		{
-			if (0 == (cur_f & flagnamelist[i].flag))
+			if (0 == (cur_f & flag_list[i].flag))
 				continue;
 
-			cur_f &= ~flagnamelist[i].flag;
-
-			AddOneFlag(info, flagnamelist[i].name, got_a_flag);
+			if (flag_list[i].conv != NULL)
+				AddOneFlag(info, flag_list[i].conv, got_a_flag);
 		}
 
 		const char *eflags = GetExtFlags(mt_num, player);
 
-		for (i = 0; extflaglist[i].name != NULL; i++)
+		for (i = 0 ; extflaglist[i].bex != NULL; i++)
 		{
 			char ch = (char) extflaglist[i].flag;
 
@@ -977,11 +1035,11 @@ namespace Things
 				continue;
 			}
 
-			AddOneFlag(info, extflaglist[i].name, got_a_flag);
+			AddOneFlag(info, extflaglist[i].conv, got_a_flag);
 		}
 
 		if (force_disloyal)
-			AddOneFlag(info, extflaglist[0].name, got_a_flag);
+			AddOneFlag(info, extflaglist[0].conv, got_a_flag);
 
 		if (is_monster)
 			AddOneFlag(info, "MONSTER", got_a_flag);
@@ -999,26 +1057,17 @@ namespace Things
 				WAD::Printf("PALETTE_REMAP = PLAYER_BROWN;\n");
 			else
 				WAD::Printf("PALETTE_REMAP = PLAYER_DULL_RED;\n");
-
-			cur_f &= ~MF_TRANSLATION;
 		}
 
 		if (cur_f & MF_TRANSLUCENT)
 		{
 			WAD::Printf("TRANSLUCENCY = 50%%;\n");
-			cur_f &= ~MF_TRANSLUCENT;
 		}
 
-		if (cur_f & MF_FRIEND)
+		if ((cur_f & MF_FRIEND) && ! player)
 		{
-			if (! player)
-				WAD::Printf("SIDE = 16777215;\n");
-
-			cur_f &= ~MF_FRIEND;
+			WAD::Printf("SIDE = 16777215;\n");
 		}
-
-		if (cur_f != 0)
-			PrintWarn("Unconverted flags 0x%08x in mobjtype %d\n", cur_f, mt_num);
 	}
 
 	void HandleMBF21Flags(const mobjinfo_t *info, int mt_num, int player)
@@ -1027,23 +1076,19 @@ namespace Things
 		int cur_f = info->mbf21_flags;
 		bool got_a_flag = false;
 
-		for (i = 0; mbf21flagnamelist[i].name != NULL; i++)
+		for (i = 0; mbf21flag_list[i].bex != NULL; i++)
 		{
-			if (0 == (cur_f & mbf21flagnamelist[i].flag))
+			if (0 == (cur_f & mbf21flag_list[i].flag))
 				continue;
 
-			cur_f &= ~mbf21flagnamelist[i].flag;
-
-			AddOneFlag(info, mbf21flagnamelist[i].name, got_a_flag);
+			if (mbf21flag_list[i].conv != NULL)
+				AddOneFlag(info, mbf21flag_list[i].conv, got_a_flag);
 		}
 
 		AddOneFlag(info, "MBF21_COMPAT", got_a_flag);
 
 		if (got_a_flag)
 			WAD::Printf(";\n");
-
-		if (cur_f != 0)
-			PrintWarn("Unconverted flags 0x%08x in mobjtype %d\n", cur_f, mt_num);
 	}
 
 	void FixHeights()
@@ -1327,7 +1372,7 @@ namespace Things
 	const pickupitem_t pickup_item[] =
 	{
 		// Health & Armor....
-		{ SPR_BON1, "HEALTH", 2, 1,200, "GotHealthPotion", sfx_itemup }, 
+		{ SPR_BON1, "HEALTH", 2, 1,200, "GotHealthPotion", sfx_itemup },
 		{ SPR_STIM, "HEALTH", 2, 10,100, "GotStim", sfx_itemup },  
 		{ SPR_MEDI, "HEALTH", 2, 25,100, "GotMedi", sfx_itemup },  
 		{ SPR_BON2, "GREEN_ARMOUR", 2, 1,200, "GotArmourHelmet", sfx_itemup },  
@@ -1825,67 +1870,23 @@ void Things::AlterThing(int new_val)
 
 void Things::AlterBexBits(char *bit_str)
 {
-	int mt_num = Patch::active_obj - 1;  // NOTE WELL
-
+	int mt_num = Patch::active_obj - 1;  /* NOTE WELL */
 	assert(mt_num >= 0);
-
-	static const char *delims = "+|, \t\f\r";
-
-	int new_flags = 0;
-	int i;
-
-	for (char *token = strtok(bit_str, delims);
-	     token != NULL;
-		 token = strtok(NULL, delims))
-	{
-		assert(token[0] != 0);  // tokens should be non-empty
-
-		if (isdigit(token[0]))
-		{
-			int flags;
-
-			if (sscanf(token, " %i ", &flags) == 1)
-				new_flags |= flags;
-			else
-                PrintWarn("Line %d: unreadable BITS value: %s\n",
-					Patch::line_num, token);
-
-			continue;
-		}
-
-		// see whether name is in known list
-		for (i = 0 ; flagnamelist[i].flag != 0 ; i++)
-		{
-			const char *name = flagnamelist[i].bex ?
-				flagnamelist[i].bex : flagnamelist[i].name;
-
-			assert(name);
-
-			if (StrCaseCmp(token, name) == 0)
-				break;
-		}
-
-		if (flagnamelist[i].flag != 0)
-		{
-			new_flags |= flagnamelist[i].flag;
-			continue;
-		}
-
-		// see whether we should ignore this flag
-		for (i = 0 ; flag_bex_ignored[i] ; i++)
-			if (StrCaseCmp(token, flag_bex_ignored[i]) == 0)
-				break;
-
-		if (flag_bex_ignored[i])
-			continue;
-
-		PrintWarn("Line %d: unknown BITS mnemonic: %s\n",
-			Patch::line_num, token);
-	}
 
 	MarkThing(mt_num);
 
-	new_mobjinfo[mt_num]->flags = new_flags;
+	new_mobjinfo[mt_num]->flags = ParseBits(flag_list, bit_str);
+}
+
+
+void Things::AlterMBF21Bits(char *bit_str)
+{
+	int mt_num = Patch::active_obj - 1;  /* NOTE WELL */
+	assert(mt_num >= 0);
+
+	MarkThing(mt_num);
+
+	new_mobjinfo[mt_num]->mbf21_flags = ParseBits(mbf21flag_list, bit_str);
 }
 
 

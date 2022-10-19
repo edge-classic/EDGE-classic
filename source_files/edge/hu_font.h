@@ -27,10 +27,10 @@ class fontdef_c;
 
 typedef struct
 {
-	// index within font
-	int glyph;
-	int width, height;
+	float width, height;
 	unsigned int tex_id;
+	stbtt_bakedchar *baked_char;
+	stbtt_aligned_quad *char_quad;
 }
 ttf_char_t;
 
@@ -99,7 +99,6 @@ public:
 	byte *ttf_buffer;
 	int ttf_char_width;
 	int ttf_char_height;
-	float ttf_scale;
 	std::map<int, ttf_char_t> ttf_glyph_map;
 
 private:

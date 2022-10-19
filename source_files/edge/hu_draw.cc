@@ -32,6 +32,7 @@
 #include "r_image.h"
 #include "r_misc.h"     //  R_Render
 
+#include "str_compare.h"
 
 #define DUMMY_WIDTH(font)  (4)
 #define DUMMY_CLAMP 789
@@ -400,7 +401,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 		do_whiten = true;
 	}
 
-	if (strcasecmp(image->name, "TTFDUMMY") == 0)
+	if (stricmp(image->name, "TTFDUMMY") == 0)
 	{
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -408,10 +409,10 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 		glBindTexture(GL_TEXTURE_2D, cur_font->ttf_glyph_map[(int)ch].tex_id);
 		glColor4f(r, g, b, alpha);
 		glBegin(GL_QUADS);
-		glTexCoord2f(0.0,1.0); glVertex2f(hx1,hy1);
-        glTexCoord2f(1.0,1.0); glVertex2f(hx2,hy1);
-        glTexCoord2f(1.0,0.0); glVertex2f(hx2,hy2);
-        glTexCoord2f(0.0,0.0); glVertex2f(hx1,hy2);
+		glTexCoord2f(tx1,ty2); glVertex2f(hx1,hy1);
+        glTexCoord2f(tx2,ty2); glVertex2f(hx2,hy1);
+        glTexCoord2f(tx2,ty1); glVertex2f(hx2,hy2);
+        glTexCoord2f(tx1,ty1); glVertex2f(hx1,hy2);
 		glEnd();
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_BLEND);
@@ -838,15 +839,17 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 	float w, h;
 	float tx1, tx2, ty1, ty2;
 
-	if (strcasecmp(img->name, "TTFDUMMY") == 0)
+	if (stricmp(img->name, "TTFDUMMY") == 0)
 	{
+		x = left_x;
+		y = top_y;
 		w = (size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->ttf_default_size)) : cur_font->CharWidth(ch)) * sc_x;
 		h = (size > 0 ? size : cur_font->ttf_glyph_map[(int)ch].height) * sc_y;
-		// tx* values don't really matter here, they will be determined in HUD_RawImage for truetype fonts
-		tx1 = 0;
-		ty1 = 0;
-		tx2 = 0;
-		ty2 = 0;
+		stbtt_aligned_quad *q = cur_font->ttf_glyph_map[(int)ch].char_quad;
+		tx1 = q->s0;
+		ty1 = q->t0;
+		tx2 = q->s1;
+		ty2 = q->t1;
 	}
 	else if (img->is_font)
 	{

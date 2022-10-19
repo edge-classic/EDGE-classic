@@ -210,7 +210,7 @@ void font_c::LoadFontTTF()
 
 		F = W_OpenLump(lump);
 
-		byte *ttf_buffer = F->LoadIntoMemory();
+		ttf_buffer = F->LoadIntoMemory();
 
 		delete F;
 
@@ -222,25 +222,22 @@ void font_c::LoadFontTTF()
 
 		ttf_char_t M;
 
-		M.glyph = stbtt_FindGlyphIndex(&ttf_info, (int)'M');
+		M.baked_char = new stbtt_bakedchar;
+		M.char_quad = new stbtt_aligned_quad;
 
-		if (M.glyph == 0)
-		{
-			I_Error("LoadFontTTF: MISSING THE LETTER M COME ON!\n");
-		}
-		int x0,y0,x1,y1;
-		ttf_scale = stbtt_ScaleForPixelHeight(&ttf_info, def->ttf_default_size);
-		stbtt_GetGlyphBitmapBox(&ttf_info, M.glyph, ttf_scale,ttf_scale, &x0,&y0,&x1,&y1);
-		ttf_char_width = (x1-x0) * ttf_scale;
-		ttf_char_height = (y1-y0) * ttf_scale;
-		unsigned char *bitmap = stbtt_GetGlyphBitmap(&ttf_info, ttf_scale, ttf_scale, M.glyph, &ttf_char_width, &ttf_char_height, &x0, &y0);
-		M.width = ttf_char_width;
-		M.height = ttf_char_height;
+		unsigned char *temp_bitmap = new unsigned char [64*64];
+		stbtt_BakeFontBitmap(ttf_buffer, 0, 64, temp_bitmap, 64, 64, (int)'M', 1, M.baked_char);
 		glGenTextures(1, &M.tex_id);
 		glBindTexture(GL_TEXTURE_2D, M.tex_id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, ttf_char_width,ttf_char_height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, bitmap);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		delete bitmap;
+		delete temp_bitmap;
+		float x,y = 0.0f;
+		stbtt_GetBakedQuad(M.baked_char, 64, 64, 0, &x, &y, M.char_quad, 1);
+		M.width = (M.char_quad->x1 - M.char_quad->x0) * (def->ttf_default_size / 64.0);
+		M.height = (M.char_quad->y1 - M.char_quad->y0) * (def->ttf_default_size / 64.0);
+		ttf_char_width = M.width;
+		ttf_char_height = M.height;
 		ttf_glyph_map.try_emplace((int)'M', M);
 	}
 }
@@ -370,6 +367,9 @@ float font_c::CharWidth(char ch)
 
 	if (def->type == FNTYP_TrueType)
 	{
+		if (ch == ' ')
+			return ttf_char_width * 4 / 5 + def->spacing;
+			
 		auto find_glyph = ttf_glyph_map.find((int)ch);
 		if (find_glyph != ttf_glyph_map.end())
 		{
@@ -378,17 +378,19 @@ float font_c::CharWidth(char ch)
 		else
 		{
 			ttf_char_t character;
-			character.glyph = stbtt_FindGlyphIndex(&ttf_info, (int)ch);
-			int x0,y0,x1,y1;
-			stbtt_GetGlyphBitmapBox(&ttf_info, character.glyph, ttf_scale,ttf_scale, &x0,&y0,&x1,&y1);
-			character.width = (x1-x0) * ttf_scale;
-			character.height = (y1-y0) * ttf_scale;
-			unsigned char *bitmap = stbtt_GetGlyphBitmap(&ttf_info, ttf_scale, ttf_scale, character.glyph, &character.width, &character.height, &x0, &y0);
+			character.baked_char = new stbtt_bakedchar;
+			character.char_quad = new stbtt_aligned_quad;
+			unsigned char *temp_bitmap = new unsigned char [64 * 64];
+			stbtt_BakeFontBitmap(ttf_buffer, 0, 64, temp_bitmap, 64, 64, (int)ch, 1, character.baked_char);
 			glGenTextures(1, &character.tex_id);
 			glBindTexture(GL_TEXTURE_2D, character.tex_id);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, character.width,character.height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, bitmap);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64,64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			delete bitmap;
+			delete temp_bitmap;
+			float x,y = 0.0f;
+			stbtt_GetBakedQuad(character.baked_char, 64, 64, 0, &x, &y, character.char_quad, 1);
+			character.width = (character.char_quad->x1 - character.char_quad->x0) * (def->ttf_default_size / 64.0);
+			character.height = (character.char_quad->y1 - character.char_quad->y0) * (def->ttf_default_size / 64.0);
 			ttf_glyph_map.try_emplace((int)ch, character);
 			return character.width;
 		}

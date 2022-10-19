@@ -29,6 +29,8 @@ namespace Things
 
 	mobjinfo_t *GetModifiedMobj(int mt_num);
 	const char *GetMobjName(int mt_num);
+	int         GetMobjMBF21Flags(int mt_num);
+
 	bool IsSpawnable(int mt_num);
 
 	void SetPlayerHealth(int new_value);
@@ -45,6 +47,7 @@ namespace Things
 
 	void AlterThing(int new_val);
 	void AlterBexBits(char *bit_str);
+	void AlterMBF21Bits(char *bit_str);
 }
 
 }  // Deh_Edge

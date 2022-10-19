@@ -343,7 +343,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0,		// damage
 		sfx_posact,		// activesound
 		MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL,		// flags
-		0, // MBF21 flags
+		MBF21_MAP07BOSS1, // MBF21 flags
 		-2, // Infighting group
 		-2, // Projectile group
 		-2, // Splash group
@@ -588,7 +588,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0,		// damage
 		sfx_dmact,		// activesound
 		MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL,		// flags
-		0, // MBF21 flags
+		MBF21_E1M8BOSS, // MBF21 flags
 		-2, // Infighting group
 		-2, // Projectile group
 		-2, // Splash group
@@ -728,7 +728,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0,		// damage
 		sfx_dmact,		// activesound
 		MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL,		// flags
-		0, // MBF21 flags
+		MBF21_E3M8BOSS | MBF21_E4M8BOSS,  // MBF21 flags
 		-2, // Infighting group
 		-2, // Projectile group
 		-2, // Splash group
@@ -763,7 +763,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0,		// damage
 		sfx_bspact,		// activesound
 		MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL,		// flags
-		0, // MBF21 flags
+		MBF21_MAP07BOSS2, // MBF21 flags
 		-2, // Infighting group
 		-2, // Projectile group
 		-2, // Splash group
@@ -798,7 +798,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0,		// damage
 		sfx_dmact,		// activesound
 		MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL,		// flags
-		0, // MBF21 flags
+		MBF21_E2M8BOSS | MBF21_E4M6BOSS,  // MBF21 flags
 		-2, // Infighting group
 		-2, // Projectile group
 		-2, // Splash group

@@ -365,17 +365,20 @@ static void TextWrite(void)
 		
 		if (finale->text_flat[0])
 		{
+			// AJA 2022: make the flats be square, not squished
+			HUD_SetCoordSys(266, 200);
+
 			//Lobo: if it's a flat, tile it
-  			HUD_TileImage(-240, 0, 820, 200, finale_textback); //Lobo: Widescreen support
-			//HUD_TileImage(0, 0, 320, 200, finale_textback);
+			HUD_TileImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, finale_textback); //Lobo: Widescreen support
 		}
 		else
 		{
 			//Lobo: if it's a normal graphic, no tile and center it
 			HUD_DrawImageTitleWS(finale_textback); //Lobo: Widescreen support
-			//HUD_TileImage(-240, 0, 820, 200, finale_textback); //Lobo: Widescreen support
 		}
-		HUD_SetScale();
+
+		// reset coordinate system
+		HUD_Reset();
 	}
 	
 	style_c *style;

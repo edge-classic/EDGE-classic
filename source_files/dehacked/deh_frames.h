@@ -22,8 +22,9 @@ typedef enum
 {
 	AF_EXPLODE    = (1 << 0),   // uses A_Explode
 	AF_BOSSDEATH  = (1 << 1),   // uses A_BossDeath
-	AF_LOOK       = (1 << 2),   // uses A_Look
-	AF_DETONATE   = (1 << 3),   // uses A_Detonate
+	AF_KEENDIE    = (1 << 2),   // uses A_KeenDie
+	AF_LOOK       = (1 << 3),   // uses A_Look
+	AF_DETONATE   = (1 << 4),   // uses A_Detonate
 
 	AF_SPREAD     = (1 << 6),   // uses A_FatAttack1/2/3
 	AF_CHASER     = (1 << 7),   // uses A_Chase

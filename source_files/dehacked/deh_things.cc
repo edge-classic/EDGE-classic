@@ -1674,8 +1674,8 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player,
 	else if (Frames::act_flags & AF_DETONATE)
 		WAD::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
 
-	if ((Frames::act_flags & AF_BOSSDEATH))
-		Rscript::MarkBossDeath(mt_num);
+	if ((Frames::act_flags & AF_KEENDIE))
+		Rscript::MarkKeenDie(mt_num);
 
 	WAD::Printf("\n");
 }

@@ -44,12 +44,12 @@ namespace Deh_Edge
 
 namespace Rscript
 {
-	std::vector<int> boss_mobjs;
+	std::vector<int> keen_mobjs;
 
 	void BeginLump();
 	void FinishLump();
 
-	bool IsBoss(int mt_num);
+	bool IsKeen(int mt_num);
 
 	void CollectMatchingBosses(std::vector<int>& list, int flag);
 	void OutputTrigger(const std::string& map, const std::vector<int>& list, bool boss2);
@@ -59,13 +59,13 @@ namespace Rscript
 
 void Rscript::Init()
 {
-	boss_mobjs.clear();
+	keen_mobjs.clear();
 }
 
 
 void Rscript::Shutdown()
 {
-	boss_mobjs.clear();
+	keen_mobjs.clear();
 }
 
 
@@ -82,32 +82,36 @@ void Rscript::FinishLump()
 }
 
 
-bool Rscript::IsBoss(int mt_num)
+bool Rscript::IsKeen(int mt_num)
 {
-	for (int num : boss_mobjs)
+	for (int num : keen_mobjs)
 		if (num == mt_num)
-			return true;
+			return true;  // peachy keen!
 
-	return false;
+	return false;  // not so keen
 }
 
 
-void Rscript::MarkBossDeath(int mt_num)
+void Rscript::MarkKeenDie(int mt_num)
 {
-	// only monsters which use A_BossDeath can trigger the special code
-	// in DOOM for the maps ExM8, E4M6 and MAP07.
-
-	if (! IsBoss(mt_num))
-		boss_mobjs.push_back(mt_num);
+	if (! IsKeen(mt_num))
+		keen_mobjs.push_back(mt_num);
 }
 
 
 void Rscript::CollectMatchingBosses(std::vector<int>& list, int flag)
 {
-	for (int mt_num : boss_mobjs)
+	for (int i = 1 ; i <= 32767 ; i++)
 	{
-		if ((Things::GetMobjMBF21Flags(mt_num) & flag) != 0)
-			list.push_back(mt_num);
+		// Note: we skip MT_PLAYER (index == 0)
+
+		// skip monsters using A_KeenDie, since the KEEN_DIE action already
+		// handles their death and we don't want to intefere with that.
+		if (IsKeen(i))
+			continue;
+
+		if (0 != (Things::GetMobjMBF21Flags(i) & flag))
+			list.push_back(i);
 	}
 }
 

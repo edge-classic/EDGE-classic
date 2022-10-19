@@ -101,11 +101,9 @@ namespace Rscript
 
 	bool IsBoss(int mt_num);
 
-	int SpecialLevel(int episode, int map);
-	void OutputMonsterDeath(int mt_num, int idx);
-	void HandleLevel(int episode, int map);
-
-	void CollectMonsters(std::vector<int>& list, int flag);
+	void CollectMatchingBosses(std::vector<int>& list, int flag);
+	void OutputTrigger(const std::string& map, const std::vector<int>& list);
+	void HandleLevel(const std::string& map, int flag1, int mt1, int flag2, int mt2);
 }
 
 
@@ -154,102 +152,48 @@ void Rscript::MarkBossDeath(int mt_num)
 }
 
 
-void Rscript::CollectMonsters(std::vector<int>& list, int flag)
+void Rscript::CollectMatchingBosses(std::vector<int>& list, int flag)
 {
-}
-
-
-// returns MT number of monster involved, or -1
-int Rscript::SpecialLevel(int episode, int map)
-{
-	if (episode == 0)  /* DOOM II */
+	for (int mt_num : boss_mobjs)
 	{
-		if (map == 7)
-		{
-			WAD::Printf("%s\n", MAP07);
-			return MT_FATSO;
-		}
-
-		if (map == 32)
-		{
-			WAD::Printf("%s\n", MAP32);
-			return MT_KEEN;
-		}
-
-		return -1;
-	}
-
-	switch (episode*10 + map)
-	{
-		case 18: WAD::Printf("%s\n", E1M8); return MT_BRUISER;
-		case 28: WAD::Printf("%s\n", E2M8); return MT_CYBORG;
-		case 38: WAD::Printf("%s\n", E3M8); return MT_SPIDER;
-		case 46: WAD::Printf("%s\n", E4M6); return MT_CYBORG;
-		case 48: WAD::Printf("%s\n", E4M8); return MT_SPIDER;
-
-		default: return -1;
+		if ((Things::GetMobjFlags(mt_num) & flag) != 0)
+			list.push_back(mt_num);
 	}
 }
 
 
-void Rscript::OutputMonsterDeath(int mt_num, int idx)
+void Rscript::OutputTrigger(const std::string& map, const std::vector<int>& list)
 {
-	assert(mt_num >= 0);
-
-	// This is complicated because the ONDEATH normally succeeds when
-	// there are NO such monsters on the map.  What we want is that
-	// only maps containing such monsters to be affected.  We achieve
-	// this with two extra scripts.  One script will enable the main
-	// ONDEATH script after a short delay -- this script is then
-	// disabled by another script
-
-	idx *= 10000;
-
-	Things::UseThing(mt_num);
-	const char *ddf_name = Things::GetMobjName(mt_num);
-
 	WAD::Printf("  radiustrigger 0 0 -1\n");
-	WAD::Printf("    tag %d\n", idx);
-	WAD::Printf("    tagged_disabled\n");
-	WAD::Printf("    ondeath %s\n", ddf_name);
-	WAD::Printf("    activate_linetype 2 666\n");
-	WAD::Printf("  end_radiustrigger\n");
-	WAD::Printf("  //\n");
-	WAD::Printf("  radiustrigger 0 0 -1\n");
-	WAD::Printf("    tag %d\n", idx+1);
-	WAD::Printf("    wait 2\n");
-	WAD::Printf("    enable_tagged %d\n", idx);
-	WAD::Printf("  end_radiustrigger\n");
-	WAD::Printf("  //\n");
-	WAD::Printf("  radiustrigger 0 0 -1\n");
-	WAD::Printf("    ondeath %s\n", ddf_name);
-	WAD::Printf("    disable_tagged %d\n", idx+1);
+
+	// TODO
+
 	WAD::Printf("  end_radiustrigger\n");
 }
 
 
-void Rscript::HandleLevel(int episode, int map)
+void Rscript::HandleLevel(const std::string& map, int flag1, int mt1, int flag2, int mt2)
 {
-	if (episode == 0)  /* DOOM II */
-		WAD::Printf("start_map MAP%02d\n", map);
-	else
-		WAD::Printf("start_map E%dM%d\n", episode, map);
+	std::vector<int> list1;
+	std::vector<int> list2;
 
-	int spec_mt = SpecialLevel(episode, map);
+	if (flag1 != 0) CollectMatchingBosses(list1, flag1);
+	if (flag2 != 0) CollectMatchingBosses(list2, flag2);
 
-/* TODO REVIEW
-	for (int i = 0 ; i < (int)keen_mobjs.size() ; i++)
-	{
-		// don't let keen deaths interfere with boss-death scripts
-		if (spec_mt == keen_mobjs[i])
-			continue;
+	// check if the results are any different from normal.
+	// if there was no change, then we output no script.
+	bool different = false;
 
-		if (i > 0)
-			WAD::Printf("\n");
+	if (flag1 != 0 && (list1.size() != 1 || list1[0] != mt1)) different = true;
+	if (flag2 != 0 && (list2.size() != 1 || list2[0] != mt2)) different = true;
 
-		OutputMonsterDeath(keen_mobjs[i], i + 1);
-	}
-*/
+	if (! different)
+		return;
+
+	WAD::Printf("start_map %s\n", map.c_str());
+
+	if (flag1 != 0) OutputTrigger(map, list1);
+	if (flag2 != 0) OutputTrigger(map, list2);
 
 	WAD::Printf("end_map\n\n\n");
 }
@@ -261,14 +205,15 @@ void Rscript::ConvertRAD()
 
 	WAD::Printf("// --- DOOM I Scripts ---\n\n");
 
-	for (int e = 1 ; e <= 4 ; e++)
-		for (int m = 1 ; m <= 9 ; m++)
-			HandleLevel(e, m);
+	HandleLevel("E1M8", MBF21_E1M8BOSS, MT_BRUISER, 0, 0);
+	HandleLevel("E2M8", MBF21_E2M8BOSS, MT_CYBORG,  0, 0);
+	HandleLevel("E3M8", MBF21_E3M8BOSS, MT_SPIDER,  0, 0);
+	HandleLevel("E4M6", MBF21_E4M6BOSS, MT_CYBORG,  0, 0);
+	HandleLevel("E4M8", MBF21_E4M8BOSS, MT_SPIDER,  0, 0);
 
 	WAD::Printf("// --- DOOM II Scripts ---\n\n");
 
-	for (int m = 1 ; m <= 32 ; m++)
-		HandleLevel(0, m);
+	HandleLevel("MAP07", MBF21_MAP07BOSS1, MT_FATSO,  MBF21_MAP07BOSS2, MT_BABY);
 
 	FinishLump();
 }

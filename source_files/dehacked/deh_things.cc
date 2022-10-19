@@ -700,6 +700,15 @@ const mobjinfo_t * Things::NewMobjElseOld(int mt_num)
 }
 
 
+int Things::GetMobjMBF21Flags(int mt_num)
+{
+	const mobjinfo_t *info = NewMobjElseOld(mt_num);
+	if (info == NULL)
+		return 0;
+	return info->mbf21_flags;
+}
+
+
 bool Things::IsSpawnable(int mt_num)
 {
 	// attacks are not spawnable via A_Spawn

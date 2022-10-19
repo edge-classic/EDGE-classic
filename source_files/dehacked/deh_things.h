@@ -29,7 +29,7 @@ namespace Things
 
 	mobjinfo_t *GetModifiedMobj(int mt_num);
 	const char *GetMobjName(int mt_num);
-	int         GetMobjFlags(int mt_num);
+	int         GetMobjMBF21Flags(int mt_num);
 
 	bool IsSpawnable(int mt_num);
 

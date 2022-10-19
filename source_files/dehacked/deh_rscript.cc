@@ -156,7 +156,7 @@ void Rscript::CollectMatchingBosses(std::vector<int>& list, int flag)
 {
 	for (int mt_num : boss_mobjs)
 	{
-		if ((Things::GetMobjFlags(mt_num) & flag) != 0)
+		if ((Things::GetMobjMBF21Flags(mt_num) & flag) != 0)
 			list.push_back(mt_num);
 	}
 }

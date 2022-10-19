@@ -47,6 +47,7 @@ namespace Things
 
 	void AlterThing(int new_val);
 	void AlterBexBits(char *bit_str);
+	void AlterMBF21Bits(char *bit_str);
 }
 
 }  // Deh_Edge

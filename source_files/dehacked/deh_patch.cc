@@ -1064,6 +1064,13 @@ namespace Patch
 			return;
 		}
 
+		if (patch_fmt >= 6 && active_section == DEH_THING &&
+			StrCaseCmp(line_buf, "MBF21 Bits") == 0)
+		{
+			Things::AlterMBF21Bits(equal_pos);
+			return;
+		}
+
 		int num_value = 0;
 
         if (active_section != DEH_CHEAT && active_section <= BEX_HELPER)

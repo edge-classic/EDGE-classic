@@ -835,6 +835,50 @@ namespace Things
 	};
 
 
+	int ParseBits(const flagname_t *list, char *bit_str)
+	{
+		int new_flags = 0;
+
+		// these delimiters are the same as what Boom/MBF uses
+		static const char *delims = "+|, \t\f\r";
+
+		for (char *token = strtok(bit_str, delims);
+			 token != NULL;
+			 token = strtok(NULL, delims))
+		{
+			// tokens should be non-empty
+			assert(token[0] != 0);
+
+			if (isdigit(token[0]))
+			{
+				int flags;
+
+				if (sscanf(token, " %i ", &flags) == 1)
+					new_flags |= flags;
+				else
+					PrintWarn("Line %d: unreadable BITS value: %s\n", Patch::line_num, token);
+
+				continue;
+			}
+
+			// find the name in the given list
+			int i;
+			for (i = 0 ; list[i].bex != NULL ; i++)
+				if (StrCaseCmp(token, list[i].bex) == 0)
+					break;
+
+			if (list[i].bex == NULL)
+			{
+				PrintWarn("Line %d: unknown BITS mnemonic: %s\n", Patch::line_num, token);
+				continue;
+			}
+
+			new_flags |= list[i].flag;
+		}
+
+		return new_flags;
+	}
+
 	bool CheckIsMonster(const mobjinfo_t *info, int mt_num, int player,
 		bool use_act_flags)
 	{
@@ -856,7 +900,7 @@ namespace Things
 		int score = 0;
 
 		// values determined by statistical analysis of major DEH patches
-		// (Standard DOOM, Batman, Mordeth, Wheel-of-Time, Osiris). 
+		// (Standard DOOM, Batman, Mordeth, Wheel-of-Time, Osiris).
 
 		if (info->flags & MF_SOLID) score += 25;
 		if (info->flags & MF_SHOOTABLE) score += 72;
@@ -1328,7 +1372,7 @@ namespace Things
 	const pickupitem_t pickup_item[] =
 	{
 		// Health & Armor....
-		{ SPR_BON1, "HEALTH", 2, 1,200, "GotHealthPotion", sfx_itemup }, 
+		{ SPR_BON1, "HEALTH", 2, 1,200, "GotHealthPotion", sfx_itemup },
 		{ SPR_STIM, "HEALTH", 2, 10,100, "GotStim", sfx_itemup },  
 		{ SPR_MEDI, "HEALTH", 2, 25,100, "GotMedi", sfx_itemup },  
 		{ SPR_BON2, "GREEN_ARMOUR", 2, 1,200, "GotArmourHelmet", sfx_itemup },  
@@ -1824,62 +1868,25 @@ void Things::AlterThing(int new_val)
 }
 
 
-/*
-int Things::ParseBitFlags(char *bit_str)
-{
-	// returns 
-}
-*/
-
-
 void Things::AlterBexBits(char *bit_str)
 {
-	int mt_num = Patch::active_obj - 1;  // NOTE WELL
-
+	int mt_num = Patch::active_obj - 1;  /* NOTE WELL */
 	assert(mt_num >= 0);
-
-	static const char *delims = "+|, \t\f\r";
-
-	int new_flags = 0;
-
-	for (char *token = strtok(bit_str, delims);
-	     token != NULL;
-		 token = strtok(NULL, delims))
-	{
-		assert(token[0] != 0);  // tokens should be non-empty
-
-		if (isdigit(token[0]))
-		{
-			int flags;
-
-			if (sscanf(token, " %i ", &flags) == 1)
-				new_flags |= flags;
-			else
-                PrintWarn("Line %d: unreadable BITS value: %s\n", Patch::line_num, token);
-
-			continue;
-		}
-
-		// see whether name is in known list
-		int i;
-		for (i = 0 ; flag_list[i].bex != NULL ; i++)
-		{
-			if (StrCaseCmp(token, flag_list[i].bex) == 0)
-				break;
-		}
-
-		if (flag_list[i].bex == NULL)
-		{
-			PrintWarn("Line %d: unknown BITS mnemonic: %s\n", Patch::line_num, token);
-			continue;
-		}
-
-		new_flags |= flag_list[i].flag;
-	}
 
 	MarkThing(mt_num);
 
-	new_mobjinfo[mt_num]->flags = new_flags;
+	new_mobjinfo[mt_num]->flags = ParseBits(flag_list, bit_str);
+}
+
+
+void Things::AlterMBF21Bits(char *bit_str)
+{
+	int mt_num = Patch::active_obj - 1;  /* NOTE WELL */
+	assert(mt_num >= 0);
+
+	MarkThing(mt_num);
+
+	new_mobjinfo[mt_num]->mbf21_flags = ParseBits(mbf21flag_list, bit_str);
 }
 
 

@@ -1780,7 +1780,7 @@ void DDF_MobjGetSpecial(const char *info)
 
 	if (res == CHKF_User || res == CHKF_Unknown)
 	{
-		// -AJA- 2004/08/25: Try the hyper specials...
+		// Try the MBF21 specials...
 		flag_ptr = &dynamic_mobj->mbf21flags;
 
 		res = DDF_MainCheckSpecialFlag(info, mbf21_specials,

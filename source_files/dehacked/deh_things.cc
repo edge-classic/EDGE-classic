@@ -816,15 +816,10 @@ namespace Things
 		{ MBF21_NOTHRESHOLD,    "NOGRUDGE",    		"NOTHRESHOLD" },
 		{ MBF21_LONGMELEE,      "LONGMELEE",      		     NULL },
 		{ MBF21_BOSS,           "BOSSMAN",        		   "BOSS" },
-		{ MBF21_MAP07BOSS1,     "MAP07BOSS1",     		     NULL },
-		{ MBF21_MAP07BOSS2,     "MAP07BOSS2",     		     NULL },
-		{ MBF21_E1M8BOSS,       "E1M8BOSS",       		     NULL },
-		{ MBF21_E2M8BOSS,       "E2M8BOSS",       		     NULL },
-		{ MBF21_E3M8BOSS,       "E3M8BOSS",       		     NULL },
-		{ MBF21_E4M6BOSS,       "E4M6BOSS",       		     NULL },
-		{ MBF21_E4M8BOSS,       "E4M8BOSS",       		     NULL },
 		{ MBF21_RIP,            "TUNNEL",            	    "RIP" },
 		{ MBF21_FULLVOLSOUNDS,  "ALWAYS_LOUD",    "FULLVOLSOUNDS" },
+
+		// NOT HERE: the MBF21_xxxBOSS flags, they are handled elsewhere
 
 		{ 0, NULL, NULL }  // End sentinel
 	};
@@ -1025,9 +1020,6 @@ namespace Things
 
 			cur_f &= ~MF_FRIEND;
 		}
-
-		if (cur_f != 0)
-			PrintWarn("Unconverted flags 0x%08x in mobjtype %d\n", cur_f, mt_num);
 	}
 
 	void HandleMBF21Flags(const mobjinfo_t *info, int mt_num, int player)
@@ -1050,9 +1042,6 @@ namespace Things
 
 		if (got_a_flag)
 			WAD::Printf(";\n");
-
-		if (cur_f != 0)
-			PrintWarn("Unconverted flags 0x%08x in mobjtype %d\n", cur_f, mt_num);
 	}
 
 	void FixHeights()

@@ -1213,6 +1213,9 @@ void P_PushMobj(mobj_t * target, mobj_t * inflictor, float thrust)
 void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 				  float damage, const damage_c * damtype, bool weak_spot)
 {
+	if (target->isRemoved())
+		return;
+
 	if (!(target->flags & MF_SHOOTABLE))
 		return;
 
@@ -1228,6 +1231,10 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 	{
 		return;
 	}
+
+	// sanity check : don't produce references to removed objects
+	if (inflictor && inflictor->isRemoved()) inflictor = NULL;
+	if (source    &&    source->isRemoved())    source = NULL;
 
 	// check for immortality
 	if (target->hyperflags & HF_IMMORTAL)

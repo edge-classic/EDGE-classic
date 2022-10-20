@@ -841,12 +841,11 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 
 	if (stricmp(img->name, "TTFDUMMY") == 0)
 	{
-		float height_diff = cur_font->ttf_char_height - cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].height;
+		stbtt_aligned_quad *q = cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].char_quad;
 		x = left_x;
-		y = top_y + height_diff;
+		y = top_y + (cur_font->ttf_char_height - cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].height) + (cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].char_quad->y1 * (cur_font->def->ttf_default_size / 64.0));
 		w = (size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->ttf_default_size)) : cur_font->CharWidth(ch)) * sc_x;
 		h = (size > 0 ? size : cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].height) * sc_y;
-		stbtt_aligned_quad *q = cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].char_quad;
 		tx1 = q->s0;
 		ty1 = q->t0;
 		tx2 = q->s1;

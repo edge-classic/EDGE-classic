@@ -282,7 +282,7 @@ void fontdef_c::Default()
 	image_name.clear();
 	missing_patch.clear();
 	ttf_name.clear();
-	ttf_default_size = 16;
+	ttf_default_size = 7;
 	spacing = 0;
 }
 

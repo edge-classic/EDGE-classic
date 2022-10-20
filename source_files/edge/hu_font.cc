@@ -394,6 +394,7 @@ float font_c::CharWidth(char ch)
 			stbtt_GetPackedQuad(character.packed_char, 64, 64, 0, &x, &y, character.char_quad, 0);
 			character.width = (character.char_quad->x1 - character.char_quad->x0) * (def->ttf_default_size / 64.0);
 			character.height = (character.char_quad->y1 - character.char_quad->y0) * (def->ttf_default_size / 64.0);
+			character.y_shift = (ttf_char_height - character.height) + (character.char_quad->y1 * (def->ttf_default_size / 64.0));
 			ttf_glyph_map.try_emplace(cp437_unicode_values[(int)ch], character);
 			return character.width;
 		}

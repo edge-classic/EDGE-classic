@@ -66,6 +66,7 @@ typedef struct
 {
 	float width, height;
 	unsigned int tex_id;
+	float y_shift;
 	stbtt_packedchar *packed_char;
 	stbtt_aligned_quad *char_quad;
 }

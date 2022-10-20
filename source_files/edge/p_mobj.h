@@ -275,11 +275,11 @@ struct mobj_s : public position_c
 	// If == validcount, already checked.
 	int validcount;
 
-	// -ES- 1999/10/25 Reference Count. DO NOT TOUCH.
-	// All the following mobj references should be set only
-	// through P_MobjSetX, where X is the field name. This is useful because
-	// it sets the pointer to NULL if the mobj is removed, this protects us
-	// from a crash.
+	// -ES- 1999/10/25 Reference Count.
+	// All the following mobj references should be set *only* via the
+	// SetXX() methods, where XX is the field name. This is useful because
+	// it sets the pointer to NULL if the mobj is removed, which protects
+	// us from a crash.
 	int refcount;
 
 	// source of the mobj, used for projectiles (i.e. the shooter)
@@ -344,11 +344,8 @@ struct mobj_s : public position_c
 	mobj_t *dlnext, *dlprev;
 
 public:
-	inline bool isRemoved() const
-	{
-		return (state == NULL);
-	}
-	
+	bool isRemoved() const;
+
 	void SetTracer(mobj_t *ref);
 	void SetSource(mobj_t *ref);
 	void SetTarget(mobj_t *ref);

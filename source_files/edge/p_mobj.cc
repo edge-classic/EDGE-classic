@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Moving Object Handling Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2022  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2
@@ -74,6 +74,57 @@
 
 #define DEBUG_MOBJ  0
 
+
+// List of all objects in map.
+mobj_t *mobjlisthead;
+
+// List of item respawn objects
+iteminque_t *itemquehead;
+
+std::unordered_set<const mobjtype_c *> seen_monsters;
+
+
+static void P_AddItemToQueue(const mobj_t *mo)
+{
+	// only respawn items in deathmatch or forced by level flags
+	if (! (deathmatch >= 2 || level_flags.itemrespawn))
+		return;
+
+	iteminque_t *newbie = Z_New(iteminque_t, 1);
+
+	newbie->spawnpoint = mo->spawnpoint;
+	newbie->time = mo->info->respawntime;
+
+	// add to end of list
+
+	if (itemquehead == NULL)
+	{
+		newbie->next = NULL;
+		newbie->prev = NULL;
+
+		itemquehead = newbie;
+	}
+	else
+	{
+		iteminque_t *tail = itemquehead;
+
+		while (tail->next != NULL)
+			tail = tail->next;
+
+		newbie->next = NULL;
+		newbie->prev = tail;
+
+		tail->next = newbie;
+	}
+}
+
+
+bool mobj_t::isRemoved() const
+{
+	return state == NULL;
+}
+
+
 #if 1  // DEBUGGING
 void P_DumpMobjs(void)
 {
@@ -100,17 +151,6 @@ void P_DumpMobjs(void)
 #endif
 
 
-// List of all objects in map.
-mobj_t *mobjlisthead;
-
-// Where objects go to die...
-static std::list<mobj_t *> remove_queue;
-
-std::unordered_set<const mobjtype_c *> seen_monsters;
-
-iteminque_t *itemquehead;
-
-
 // convenience function
 // -AJA- FIXME: duplicate code from p_map.c
 static inline int PointOnLineSide(float x, float y, line_t *ld)
@@ -124,6 +164,7 @@ static inline int PointOnLineSide(float x, float y, line_t *ld)
 
 	return P_PointOnDivlineSide(x, y, &div);
 }
+
 
 //
 // EnterBounceStates
@@ -150,6 +191,7 @@ static void EnterBounceStates(mobj_t * mo)
 
 	P_SetMobjState(mo, mo->info->bounce_state);
 }
+
 
 //
 // BounceOffWall
@@ -207,6 +249,7 @@ static void BounceOffWall(mobj_t * mo, line_t * wall)
 
 	EnterBounceStates(mo);
 }
+
 
 //
 // BounceOffPlane
@@ -397,78 +440,6 @@ static void ResurrectRespawn(mobj_t * mobj)
 	return;
 }
 
-void mobj_t::ClearStaleRefs()
-{
-	if (target && target->isRemoved()) SetTarget(NULL);
-	if (source && source->isRemoved()) SetSource(NULL);
-	if (tracer && tracer->isRemoved()) SetTracer(NULL);
-
-	if (supportobj && supportobj->isRemoved()) SetSupportObj(NULL);
-	if (above_mo   && above_mo->isRemoved())   SetAboveMo(NULL);
-	if (below_mo   && below_mo->isRemoved())   SetBelowMo(NULL);
-}
-
-//
-// Finally destroy the map object.
-//
-static void DeleteMobj(mobj_t * mo)
-{
-#if (DEBUG_MOBJ > 0)
-	L_WriteDebug("tics=%05d  DELETE %p [%s]\n", leveltime, mo, 
-		mo->info ? mo->info->name.c_str() : "???");
-#endif
-
-	// Sound might still be playing, so use remove the
-    // link between object and effect
-
-    S_StopFX(mo);
-
-	if (mo->refcount != 0)
-	{
-		I_Error("INTERNAL ERROR: Reference count %d", mo->refcount);
-		return;
-	}
-
-	delete mo->dlight.shader;
-
-	Z_Free(mo);
-}
-
-
-// Use these methods to set mobj entries.
-// NEVER EVER modify the entries directly.
-
-#define FUNCTION_BODY(field) \
-{ \
-	if (field) field->refcount--; \
-	field = ref; \
-	if (field) field->refcount++; \
-}
-
-void mobj_t::SetTarget(mobj_t *ref)  FUNCTION_BODY(target)
-void mobj_t::SetSource(mobj_t *ref)  FUNCTION_BODY(source)
-void mobj_t::SetTracer(mobj_t *ref)  FUNCTION_BODY(tracer)
-
-void mobj_t::SetSupportObj(mobj_t *ref)  FUNCTION_BODY(supportobj)
-void mobj_t::SetAboveMo(mobj_t *ref)     FUNCTION_BODY(above_mo)
-void mobj_t::SetBelowMo(mobj_t *ref)     FUNCTION_BODY(below_mo)
-
-#undef FUNCTION_BODY
-
-//
-// P_MobjSetRealSource
-//
-// -AJA- This is for missiles that spawn other missiles -- what we
-//       really want to know is who spawned the original missile
-//       (the "instigator" of all the mayhem :-).
-//
-void mobj_t::SetRealSource(mobj_t *ref)
-{
-	while (ref && ref->source && (ref->flags & MF_MISSILE))
-		ref = ref->source;
-
-	SetSource(ref);
-}
 
 //
 // P_SetMobjState
@@ -477,8 +448,6 @@ void mobj_t::SetRealSource(mobj_t *ref)
 //
 bool P_SetMobjState(mobj_t * mobj, statenum_t state)
 {
-	state_t *st;
-
 	// ignore removed objects
 	if (mobj->isRemoved())
 		return false;
@@ -489,7 +458,7 @@ bool P_SetMobjState(mobj_t * mobj, statenum_t state)
 		return false;
 	}
 
-	st = &states[state];
+	state_t *st = &states[state];
 
 	// model interpolation stuff
 	if ((st->flags & SFF_Model) && (mobj->state->flags & SFF_Model) &&
@@ -510,6 +479,7 @@ bool P_SetMobjState(mobj_t * mobj, statenum_t state)
 
 	return true;
 }
+
 
 bool P_SetMobjState2(mobj_t * mobj, statenum_t state)
 {
@@ -1280,16 +1250,19 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 
 static void P_MobjThinker(mobj_t * mobj)
 {
-	const region_properties_t *props;
-	region_properties_t player_props;
-
 	if (mobj->next == (mobj_t *)-1)
 		I_Error("P_MobjThinker INTERNAL ERROR: mobj has been Z_Freed");
 
-	SYS_ASSERT(mobj->state);
-	SYS_ASSERT(mobj->refcount >= 0);
+	if (mobj->isRemoved())
+		return;
 
 	mobj->ClearStaleRefs();
+
+	const region_properties_t *props;
+	region_properties_t player_props;
+
+	SYS_ASSERT(mobj->state);
+	SYS_ASSERT(mobj->refcount >= 0);
 
 	mobj->visibility = (15 * mobj->visibility + mobj->vis_target)  / 16;
 	mobj->dlight.r   = (15 * mobj->dlight.r + mobj->dlight.target) / 16;
@@ -1450,81 +1423,125 @@ static void P_MobjThinker(mobj_t * mobj)
 	}
 }
 
-//
-// P_RunMobjThinkers
-//
-// Cycle through all mobjs and let them think.
-//
-void P_RunMobjThinkers(void)
+//---------------------------------------------------------------------------
+
+void mobj_t::ClearStaleRefs()
 {
-	mobj_t *mo;
-	mobj_t *next;
+	if (target && target->isRemoved()) SetTarget(NULL);
+	if (source && source->isRemoved()) SetSource(NULL);
+	if (tracer && tracer->isRemoved()) SetTracer(NULL);
 
-	for (mo = mobjlisthead; mo; mo = next)
+	if (supportobj && supportobj->isRemoved()) SetSupportObj(NULL);
+	if (above_mo   && above_mo->isRemoved())   SetAboveMo(NULL);
+	if (below_mo   && below_mo->isRemoved())   SetBelowMo(NULL);
+}
+
+
+//
+// Finally destroy the map object.
+//
+static void DeleteMobj(mobj_t * mo)
+{
+	if (mo->refcount != 0)
 	{
-		next = mo->next;
-
-		P_MobjThinker(mo);
+		I_Error("INTERNAL ERROR: DeleteMobh with refcount %d", mo->refcount);
+		return;
 	}
 
-	P_RemoveQueuedMobjs(false);
+#if (DEBUG_MOBJ > 0)
+	I_Debugf("tics=%05d  DELETE %p [%s]\n", leveltime, mo, 
+		mo->info ? mo->info->name.c_str() : "???");
+#endif
+
+	// Sound might still be playing, so use remove the
+    // link between object and effect.
+
+    S_StopFX(mo);
+
+	delete mo->dlight.shader;
+
+	mo->next = (mobj_t *) -1;
+	mo->prev = (mobj_t *) -1;
+
+	Z_Free(mo);
+}
+
+
+static inline void UpdateMobjRef(mobj_t *self, mobj_t*& field, mobj_t *other)
+{
+	// prevent a reference to oneself
+	if (other == self)
+		other = NULL;
+
+	// never refer to a removed object
+	if (other != NULL && other->isRemoved())
+		other = NULL;
+
+	if (field != NULL)
+		field->refcount--;
+
+	if (other != NULL)
+		other->refcount++;
+
+	field = other;
+}
+
+void mobj_t::SetTarget(mobj_t *other)
+{
+	UpdateMobjRef(this, target, other);
+}
+
+void mobj_t::SetSource(mobj_t *other)
+{
+	UpdateMobjRef(this, source, other);
+}
+
+void mobj_t::SetTracer(mobj_t *other)
+{
+	UpdateMobjRef(this, tracer, other);
+}
+
+void mobj_t::SetSupportObj(mobj_t *other)
+{
+	UpdateMobjRef(this, supportobj, other);
+}
+
+void mobj_t::SetAboveMo(mobj_t *other)
+{
+	UpdateMobjRef(this, above_mo, other);
+}
+
+void mobj_t::SetBelowMo(mobj_t *other)
+{
+	UpdateMobjRef(this, below_mo, other);
+}
+
+
+//
+// P_MobjSetRealSource
+//
+// -AJA- This is for missiles that spawn other missiles -- what we
+//       really want to know is who spawned the original missile
+//       (the "instigator" of all the mayhem :-).
+//
+void mobj_t::SetRealSource(mobj_t *ref)
+{
+	if (ref && ref->source && (ref->flags & MF_MISSILE)) ref = ref->source;
+	if (ref && ref->source && (ref->flags & MF_MISSILE)) ref = ref->source;
+	if (ref && ref->source && (ref->flags & MF_MISSILE)) ref = ref->source;
+
+	SetSource(ref);
 }
 
 
 void P_ClearAllStaleRefs(void)
 {
-	for (mobj_t * mo = mobjlisthead; mo; mo = mo->next)
+	for (mobj_t * mo = mobjlisthead ; mo != NULL ; mo = mo->next)
 	{
 		mo->ClearStaleRefs();
 	}
-
-	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-	{
-		player_t *p = players[pnum];
-
-		if (p && p->attacker && p->attacker->isRemoved())
-			p->attacker = NULL;
-	}
 }
 
-
-//
-// P_RemoveQueuedMobjs
-//
-// Removes all the mobjs in the remove_queue list.
-//
-// -ES- 1999/10/24 Written.
-//
-void P_RemoveQueuedMobjs(bool force_all)
-{
-	std::list<mobj_t *>::iterator M;
-
-	bool did_remove = false;
-
-	for (M = remove_queue.begin(); M != remove_queue.end(); M++)
-	{
-		mobj_t *mo = *M;
-
-		mo->fuse--;
-
-		if (!force_all && mo->fuse == 1 && mo->refcount != 0)
-			I_Warning("Bad ref count for %s = %d.\n", 
-						mo->info->name.c_str(), mo->refcount);
-
-		if (force_all || (mo->fuse <= 0 && mo->refcount == 0))
-		{
-			DeleteMobj(mo);
-
-			// cannot mess with the list while traversing it,
-			// hence set the current entry to NULL and remove
-			// those nodes afterwards.
-			*M = NULL; did_remove = true;
-		}
-	}
-
-	if (did_remove)
-		remove_queue.remove(NULL);
-}
 
 static void AddMobjToList(mobj_t *mo)
 {
@@ -1543,13 +1560,19 @@ static void AddMobjToList(mobj_t *mo)
 		seen_monsters.insert(mo->info);
 
 #if (DEBUG_MOBJ > 0)
-	L_WriteDebug("tics=%05d  ADD %p [%s]\n", leveltime, mo, 
+	I_Debugf("tics=%05d  ADD %p [%s]\n", leveltime, mo, 
 		mo->info ? mo->info->name.c_str() : "???");
 #endif
 }
 
+
 static void RemoveMobjFromList(mobj_t *mo)
 {
+#if (DEBUG_MOBJ > 0)
+	I_Debugf("tics=%05d  REMOVE %p [%s]\n", leveltime, mo, 
+		mo->info ? mo->info->name.c_str() : "???");
+#endif
+
 	if (mo->prev != NULL)
 	{
 		SYS_ASSERT(mo->prev->next == mo);
@@ -1566,10 +1589,8 @@ static void RemoveMobjFromList(mobj_t *mo)
 		SYS_ASSERT(mo->next->prev == mo);
 		mo->next->prev = mo->prev;
 	}
-
-	mo->next = (mobj_t *) -1;
-	mo->prev = (mobj_t *) -1;
 }
+
 
 //
 // P_RemoveMobj
@@ -1577,51 +1598,28 @@ static void RemoveMobjFromList(mobj_t *mo)
 // Removes the object from the play simulation: no longer thinks, if
 // the mobj is MF_SPECIAL: i.e. item can be picked up, it is added to
 // the item-respawn-que, so it gets respawned if needed; The respawning
-// only happens if itemrespawn is set or the deathmatch mode is
-// version 2.0: altdeath.
+// only happens if itemrespawn is set or the deathmatch mode is altdeath.
 //
 void P_RemoveMobj(mobj_t *mo)
 {
-#if (DEBUG_MOBJ > 0)
-	L_WriteDebug("tics=%05d  REMOVE %p [%s]\n", leveltime, mo, 
-		mo->info ? mo->info->name.c_str() : "???");
-#endif
+	for (int pnum = 0 ; pnum < MAXPLAYERS ; pnum++)
+	{
+		player_t *p = players[pnum];
+		if (p && p->attacker == mo)
+			p->attacker = NULL;
+	}
 
 	if (mo->isRemoved())
 	{
-		L_WriteDebug("Warning: Object %p (%s) REMOVED TWICE\n",
-		     mo, mo->info ? mo->info->name.c_str() : "???");
+		I_Debugf("Warning: object %p already removed.\n", mo);
 		return;
 	}
 
 	if ((mo->info->flags & MF_SPECIAL) && 
-	    ! (mo->flags & MF_MISSILE) &&
-		(deathmatch >= 2 || level_flags.itemrespawn) &&
-		!(mo->extendedflags & EF_NORESPAWN) &&
-		!(mo->flags & MF_DROPPED))
+		0 == (mo->extendedflags & EF_NORESPAWN) &&
+	    0 == (mo->flags & (MF_MISSILE | MF_DROPPED)))
 	{
-		iteminque_t *newbie = Z_New(iteminque_t, 1);
-
-		newbie->spawnpoint = mo->spawnpoint;
-		newbie->time = mo->info->respawntime;
-
-		if (itemquehead == NULL)
-		{
-			newbie->next = newbie->prev = NULL;
-			itemquehead = newbie;
-		}
-		else
-		{
-			iteminque_t *tail;
-
-			for (tail = itemquehead; tail->next; tail = tail->next)
-			{ /* nothing */ }
-
-			newbie->next = NULL;
-			newbie->prev = tail;
-
-			tail->next = newbie;
-		}
+		P_AddItemToQueue(mo);
 	}
 
 	// mark as REMOVED
@@ -1640,43 +1638,69 @@ void P_RemoveMobj(mobj_t *mo)
 	// unlink from sector and block lists
 	P_UnsetThingFinally(mo);
 
-	// remove from global list
-	RemoveMobjFromList(mo);
-
-	// set timer to keep in the remove queue ("IN LIMBO")
-	mo->fuse = TICRATE * 3;
-
-	remove_queue.push_back(mo);
+	// NOTE: object is kept in mobjlist until no there are no more
+	//       references to it.  such objects may legally be stored and
+	//       restored from savegames.
 }
+
 
 void P_RemoveAllMobjs(void)
 {
-	while (mobjlisthead)
+	while (mobjlisthead != NULL)
 	{
 		mobj_t *mo = mobjlisthead;
+		mobjlisthead = mo->next;
 
 		P_UnsetThingFinally(mo);
-
-		RemoveMobjFromList(mo);
 
 		mo->refcount = 0;
 		DeleteMobj(mo);
 	}
 }
 
-//
-// P_RemoveItemsInQue
-//
+
 void P_RemoveItemsInQue(void)
 {
-	while (itemquehead)
+	while (itemquehead != NULL)
 	{
 		iteminque_t *tmp = itemquehead;
 		itemquehead = itemquehead->next;
+
 		Z_Free(tmp);
 	}
 }
 
+
+//
+// P_RunMobjThinkers
+//
+// Cycle through all mobjs and let them think.
+// Also handles removed objects which have no more references.
+//
+void P_RunMobjThinkers(void)
+{
+	mobj_t *mo;
+	mobj_t *next;
+
+	for (mo = mobjlisthead ; mo != NULL ; mo = next)
+	{
+		next = mo->next;
+
+		if (mo->isRemoved())
+		{
+			if (mo->refcount == 0)
+			{
+				RemoveMobjFromList(mo);
+				DeleteMobj(mo);
+			}
+			continue;
+		}
+
+		P_MobjThinker(mo);
+	}
+}
+
+//---------------------------------------------------------------------------
 //
 // GAME SPAWN FUNCTIONS
 //
@@ -1837,13 +1861,13 @@ bool P_HitLiquidFloor(mobj_t * thing)
 		return false;
 
 	// don't splash if landing on the edge above water/lava/etc....
-    if (thing->floorz != thing->subsector->sector->f_h)
-    	return false;
+	if (thing->floorz != thing->subsector->sector->f_h)
+		return false;
 
 	flatdef_c *current_flatdef = P_IsThingOnLiquidFloor(thing);
 
-    if (current_flatdef)
-    {
+	if (current_flatdef)
+	{
 		if(current_flatdef->impactobject)
 		{
 			int tempRandom = M_RandomNegPos() % 8;
@@ -1862,6 +1886,7 @@ bool P_HitLiquidFloor(mobj_t * thing)
 	return false;
 }
 
+
 //
 // P_MobjItemRespawn
 //
@@ -1874,22 +1899,18 @@ bool P_HitLiquidFloor(mobj_t * thing)
 //
 void P_MobjItemRespawn(void)
 {
+	// only respawn items in deathmatch or forced by level flags
+	if (! (deathmatch >= 2 || level_flags.itemrespawn))
+		return;
+
 	float x, y, z;
 	mobj_t *mo;
 	const mobjtype_c *objtype;
 
 	iteminque_t *cur, *next;
 
-	// only respawn items in deathmatch or if itemrespawn
-	if (! (deathmatch >= 2 || level_flags.itemrespawn))
-		return;
-
-	// No item-respawn-que exists, so nothing to process.
-	if (itemquehead == NULL)
-		return;
-
-	// lets start from the beginning....
-	for (cur = itemquehead; cur; cur = next)
+	// let's start from the beginning....
+	for (cur = itemquehead ; cur ; cur = next)
 	{
 		next = cur->next;
 

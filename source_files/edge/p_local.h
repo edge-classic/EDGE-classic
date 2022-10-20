@@ -149,7 +149,6 @@ void P_RunMobjThinkers(void);
 void P_SpawnSplash(float x, float y, float z, const mobjtype_c * splash, angle_t angle);
 void P_SpawnPuff(float x, float y, float z, const mobjtype_c * puff, angle_t angle);
 void P_SpawnBlood(float x, float y, float z, float damage, angle_t angle, const mobjtype_c * blood);
-void P_RemoveQueuedMobjs(bool force_all);
 void P_CalcFullProperties(const mobj_t *mo, region_properties_t *newregp);
 bool P_HitLiquidFloor(mobj_t * thing);
 

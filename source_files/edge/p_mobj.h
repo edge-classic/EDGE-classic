@@ -344,11 +344,8 @@ struct mobj_s : public position_c
 	mobj_t *dlnext, *dlprev;
 
 public:
-	inline bool isRemoved() const
-	{
-		return (state == NULL);
-	}
-	
+	bool isRemoved() const;
+
 	void SetTracer(mobj_t *ref);
 	void SetSource(mobj_t *ref);
 	void SetTarget(mobj_t *ref);

@@ -74,6 +74,60 @@
 
 #define DEBUG_MOBJ  0
 
+
+// List of all objects in map.
+mobj_t *mobjlisthead;
+
+// List of item respawn objects
+iteminque_t *itemquehead;
+
+std::unordered_set<const mobjtype_c *> seen_monsters;
+
+// TODO: REMOVE THIS
+static std::list<mobj_t *> remove_queue;
+
+
+static void P_AddItemToQueue(const mobj_t *mo)
+{
+	// only respawn items in deathmatch or forced by level flags
+	if (! (deathmatch >= 2 || level_flags.itemrespawn))
+		return;
+
+	iteminque_t *newbie = Z_New(iteminque_t, 1);
+
+	newbie->spawnpoint = mo->spawnpoint;
+	newbie->time = mo->info->respawntime;
+
+	// add to end of list
+
+	if (itemquehead == NULL)
+	{
+		newbie->next = NULL;
+		newbie->prev = NULL;
+
+		itemquehead = newbie;
+	}
+	else
+	{
+		iteminque_t *tail = itemquehead;
+
+		while (tail->next != NULL)
+			tail = tail->next;
+
+		newbie->next = NULL;
+		newbie->prev = tail;
+
+		tail->next = newbie;
+	}
+}
+
+
+bool mobj_t::isRemoved() const
+{
+	return state == NULL;
+}
+
+
 #if 1  // DEBUGGING
 void P_DumpMobjs(void)
 {
@@ -98,17 +152,6 @@ void P_DumpMobjs(void)
 	L_WriteDebug("END OF MOBJs\n");
 }
 #endif
-
-
-// List of all objects in map.
-mobj_t *mobjlisthead;
-
-// Where objects go to die...
-static std::list<mobj_t *> remove_queue;
-
-std::unordered_set<const mobjtype_c *> seen_monsters;
-
-iteminque_t *itemquehead;
 
 
 // convenience function
@@ -1582,46 +1625,22 @@ static void RemoveMobjFromList(mobj_t *mo)
 //
 void P_RemoveMobj(mobj_t *mo)
 {
+	if (mo->isRemoved())
+	{
+		I_Debugf("Warning: object %p already removed.\n", mo);
+		return;
+	}
+
 #if (DEBUG_MOBJ > 0)
 	L_WriteDebug("tics=%05d  REMOVE %p [%s]\n", leveltime, mo, 
 		mo->info ? mo->info->name.c_str() : "???");
 #endif
 
-	if (mo->isRemoved())
-	{
-		L_WriteDebug("Warning: Object %p (%s) REMOVED TWICE\n",
-		     mo, mo->info ? mo->info->name.c_str() : "???");
-		return;
-	}
-
 	if ((mo->info->flags & MF_SPECIAL) && 
-	    ! (mo->flags & MF_MISSILE) &&
-		(deathmatch >= 2 || level_flags.itemrespawn) &&
-		!(mo->extendedflags & EF_NORESPAWN) &&
-		!(mo->flags & MF_DROPPED))
+		0 == (mo->extendedflags & EF_NORESPAWN) &&
+	    0 == (mo->flags & (MF_MISSILE | MF_DROPPED)))
 	{
-		iteminque_t *newbie = Z_New(iteminque_t, 1);
-
-		newbie->spawnpoint = mo->spawnpoint;
-		newbie->time = mo->info->respawntime;
-
-		if (itemquehead == NULL)
-		{
-			newbie->next = newbie->prev = NULL;
-			itemquehead = newbie;
-		}
-		else
-		{
-			iteminque_t *tail;
-
-			for (tail = itemquehead; tail->next; tail = tail->next)
-			{ /* nothing */ }
-
-			newbie->next = NULL;
-			newbie->prev = tail;
-
-			tail->next = newbie;
-		}
+		P_AddItemToQueue(mo);
 	}
 
 	// mark as REMOVED
@@ -1664,12 +1683,10 @@ void P_RemoveAllMobjs(void)
 	}
 }
 
-//
-// P_RemoveItemsInQue
-//
+
 void P_RemoveItemsInQue(void)
 {
-	while (itemquehead)
+	while (itemquehead != NULL)
 	{
 		iteminque_t *tmp = itemquehead;
 		itemquehead = itemquehead->next;
@@ -1837,13 +1854,13 @@ bool P_HitLiquidFloor(mobj_t * thing)
 		return false;
 
 	// don't splash if landing on the edge above water/lava/etc....
-    if (thing->floorz != thing->subsector->sector->f_h)
-    	return false;
+	if (thing->floorz != thing->subsector->sector->f_h)
+		return false;
 
 	flatdef_c *current_flatdef = P_IsThingOnLiquidFloor(thing);
 
-    if (current_flatdef)
-    {
+	if (current_flatdef)
+	{
 		if(current_flatdef->impactobject)
 		{
 			int tempRandom = M_RandomNegPos() % 8;
@@ -1862,6 +1879,7 @@ bool P_HitLiquidFloor(mobj_t * thing)
 	return false;
 }
 
+
 //
 // P_MobjItemRespawn
 //
@@ -1874,22 +1892,18 @@ bool P_HitLiquidFloor(mobj_t * thing)
 //
 void P_MobjItemRespawn(void)
 {
+	// only respawn items in deathmatch or forced by level flags
+	if (! (deathmatch >= 2 || level_flags.itemrespawn))
+		return;
+
 	float x, y, z;
 	mobj_t *mo;
 	const mobjtype_c *objtype;
 
 	iteminque_t *cur, *next;
 
-	// only respawn items in deathmatch or if itemrespawn
-	if (! (deathmatch >= 2 || level_flags.itemrespawn))
-		return;
-
-	// No item-respawn-que exists, so nothing to process.
-	if (itemquehead == NULL)
-		return;
-
-	// lets start from the beginning....
-	for (cur = itemquehead; cur; cur = next)
+	// let's start from the beginning....
+	for (cur = itemquehead ; cur ; cur = next)
 	{
 		next = cur->next;
 

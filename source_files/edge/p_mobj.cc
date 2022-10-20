@@ -478,25 +478,50 @@ static void DeleteMobj(mobj_t * mo)
 }
 
 
-// Use these methods to set mobj entries.
-// NEVER EVER modify the entries directly.
+static inline void UpdateMobjReference(mobj_t*& field, mobj_t *other)
+{
+	if (other != NULL && other->isRemoved())
+		other = NULL;
 
-#define FUNCTION_BODY(field) \
-{ \
-	if (field) field->refcount--; \
-	field = ref; \
-	if (field) field->refcount++; \
+	if (field != NULL)
+		field->refcount--;
+
+	if (other != NULL)
+		other->refcount++;
+
+	field = other;
 }
 
-void mobj_t::SetTarget(mobj_t *ref)  FUNCTION_BODY(target)
-void mobj_t::SetSource(mobj_t *ref)  FUNCTION_BODY(source)
-void mobj_t::SetTracer(mobj_t *ref)  FUNCTION_BODY(tracer)
+void mobj_t::SetTarget(mobj_t *other)
+{
+	UpdateMobjReference(target, other);
+}
 
-void mobj_t::SetSupportObj(mobj_t *ref)  FUNCTION_BODY(supportobj)
-void mobj_t::SetAboveMo(mobj_t *ref)     FUNCTION_BODY(above_mo)
-void mobj_t::SetBelowMo(mobj_t *ref)     FUNCTION_BODY(below_mo)
+void mobj_t::SetSource(mobj_t *other)
+{
+	UpdateMobjReference(source, other);
+}
 
-#undef FUNCTION_BODY
+void mobj_t::SetTracer(mobj_t *other)
+{
+	UpdateMobjReference(tracer, other);
+}
+
+void mobj_t::SetSupportObj(mobj_t *other)
+{
+	UpdateMobjReference(supportobj, other);
+}
+
+void mobj_t::SetAboveMo(mobj_t *other)
+{
+	UpdateMobjReference(above_mo, other);
+}
+
+void mobj_t::SetBelowMo(mobj_t *other)
+{
+	UpdateMobjReference(below_mo, other);
+}
+
 
 //
 // P_MobjSetRealSource
@@ -507,11 +532,13 @@ void mobj_t::SetBelowMo(mobj_t *ref)     FUNCTION_BODY(below_mo)
 //
 void mobj_t::SetRealSource(mobj_t *ref)
 {
-	while (ref && ref->source && (ref->flags & MF_MISSILE))
-		ref = ref->source;
+	if (ref && ref->source && (ref->flags & MF_MISSILE)) ref = ref->source;
+	if (ref && ref->source && (ref->flags & MF_MISSILE)) ref = ref->source;
+	if (ref && ref->source && (ref->flags & MF_MISSILE)) ref = ref->source;
 
 	SetSource(ref);
 }
+
 
 //
 // P_SetMobjState
@@ -520,8 +547,6 @@ void mobj_t::SetRealSource(mobj_t *ref)
 //
 bool P_SetMobjState(mobj_t * mobj, statenum_t state)
 {
-	state_t *st;
-
 	// ignore removed objects
 	if (mobj->isRemoved())
 		return false;
@@ -532,7 +557,7 @@ bool P_SetMobjState(mobj_t * mobj, statenum_t state)
 		return false;
 	}
 
-	st = &states[state];
+	state_t *st = &states[state];
 
 	// model interpolation stuff
 	if ((st->flags & SFF_Model) && (mobj->state->flags & SFF_Model) &&
@@ -1323,6 +1348,11 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 
 static void P_MobjThinker(mobj_t * mobj)
 {
+	if (mobj->isRemoved())
+		return;
+
+	mobj->ClearStaleRefs();
+
 	const region_properties_t *props;
 	region_properties_t player_props;
 
@@ -1331,8 +1361,6 @@ static void P_MobjThinker(mobj_t * mobj)
 
 	SYS_ASSERT(mobj->state);
 	SYS_ASSERT(mobj->refcount >= 0);
-
-	mobj->ClearStaleRefs();
 
 	mobj->visibility = (15 * mobj->visibility + mobj->vis_target)  / 16;
 	mobj->dlight.r   = (15 * mobj->dlight.r + mobj->dlight.target) / 16;
@@ -1503,7 +1531,7 @@ void P_RunMobjThinkers(void)
 	mobj_t *mo;
 	mobj_t *next;
 
-	for (mo = mobjlisthead; mo; mo = next)
+	for (mo = mobjlisthead ; mo != NULL ; mo = next)
 	{
 		next = mo->next;
 
@@ -1516,17 +1544,9 @@ void P_RunMobjThinkers(void)
 
 void P_ClearAllStaleRefs(void)
 {
-	for (mobj_t * mo = mobjlisthead; mo; mo = mo->next)
+	for (mobj_t * mo = mobjlisthead ; mo != NULL ; mo = mo->next)
 	{
 		mo->ClearStaleRefs();
-	}
-
-	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-	{
-		player_t *p = players[pnum];
-
-		if (p && p->attacker && p->attacker->isRemoved())
-			p->attacker = NULL;
 	}
 }
 
@@ -1625,6 +1645,13 @@ static void RemoveMobjFromList(mobj_t *mo)
 //
 void P_RemoveMobj(mobj_t *mo)
 {
+	for (int pnum = 0 ; pnum < MAXPLAYERS ; pnum++)
+	{
+		player_t *p = players[pnum];
+		if (p && p->attacker == mo)
+			p->attacker = NULL;
+	}
+
 	if (mo->isRemoved())
 	{
 		I_Debugf("Warning: object %p already removed.\n", mo);

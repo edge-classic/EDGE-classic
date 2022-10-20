@@ -86,12 +86,14 @@ void G_ClearPlayerStarts(void)
 	hub_starts.clear();
 }
 
+
 void G_ClearBodyQueue(void)
 {
 	memset(bodyqueue, 0, sizeof(bodyqueue));
 
 	bodyqueue_size = 0;
 }
+
 
 void G_AddBodyToQueue(mobj_t *mo)
 {
@@ -104,7 +106,8 @@ void G_AddBodyToQueue(mobj_t *mo)
 		P_RemoveMobj(rotten);
 	}
 
-	mo->refcount++;  // prevent accidental re-use
+	// prevent accidental re-use
+	mo->refcount++;
 
 	bodyqueue[bodyqueue_size % MAX_BODIES] = mo;
 	bodyqueue_size++;

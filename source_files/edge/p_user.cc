@@ -685,7 +685,7 @@ void P_PlayerThink(player_t * player)
 #endif
 
 	if (player->attacker && player->attacker->isRemoved())
-		player->attacker = NULL;
+		I_Error("INTERNAL ERROR: player has a removed attacker.\n");
 
 	if (player->damagecount <= 0)
 		player->damage_pain = 0;

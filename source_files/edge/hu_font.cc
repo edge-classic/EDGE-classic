@@ -366,9 +366,6 @@ float font_c::CharWidth(char ch)
 
 	if (def->type == FNTYP_TrueType)
 	{
-		if (ch == ' ')
-			return ttf_char_width * 4 / 5 + def->spacing;
-			
 		auto find_glyph = ttf_glyph_map.find(cp437_unicode_values[(int)ch]);
 		if (find_glyph != ttf_glyph_map.end())
 		{
@@ -392,7 +389,10 @@ float font_c::CharWidth(char ch)
 			delete temp_bitmap;
 			float x,y = 0.0f;
 			stbtt_GetPackedQuad(character.packed_char, 64, 64, 0, &x, &y, character.char_quad, 0);
-			character.width = (character.char_quad->x1 - character.char_quad->x0) * (def->ttf_default_size / 64.0);
+			if (ch == ' ')
+				character.width = ttf_char_width * 4 / 5 + def->spacing;
+			else
+				character.width = (character.char_quad->x1 - character.char_quad->x0) * (def->ttf_default_size / 64.0);
 			character.height = (character.char_quad->y1 - character.char_quad->y0) * (def->ttf_default_size / 64.0);
 			character.y_shift = (ttf_char_height - character.height) + (character.char_quad->y1 * (def->ttf_default_size / 64.0));
 			ttf_glyph_map.try_emplace(cp437_unicode_values[(int)ch], character);

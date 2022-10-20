@@ -562,19 +562,20 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 
 	if (con_font->def->type == FNTYP_TrueType)
 	{
-		float x_adjust = con_font->CharWidth((int)ch) * (FNSZ / con_font->def->ttf_default_size);
+		float x_adjust = (con_font->ttf_char_width - con_font->CharWidth((int)ch)) * (FNSZ / con_font->def->ttf_default_size) / 2;
 		float y_adjust = con_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].y_shift * (FNSZ / con_font->def->ttf_default_size);
 		float height = con_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].height * (FNSZ / con_font->def->ttf_default_size);
+		float width = con_font->CharWidth((int)ch) * (FNSZ / con_font->def->ttf_default_size);
 		stbtt_aligned_quad *q = con_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].char_quad;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, con_font->ttf_glyph_map[cp437_unicode_values[ch]].tex_id);
 		glBegin(GL_POLYGON);
-		glTexCoord2f(q->s0,q->t0); glVertex2f(x,y - y_adjust);
-        glTexCoord2f(q->s1,q->t0); glVertex2f(x + x_adjust,y - y_adjust);
-        glTexCoord2f(q->s1,q->t1); glVertex2f(x + x_adjust,y - y_adjust - height);
-        glTexCoord2f(q->s0,q->t1); glVertex2f(x,y - y_adjust - height);
+		glTexCoord2f(q->s0,q->t0); glVertex2f(x + x_adjust,y - y_adjust);
+        glTexCoord2f(q->s1,q->t0); glVertex2f(x + x_adjust + width,y - y_adjust);
+        glTexCoord2f(q->s1,q->t1); glVertex2f(x + x_adjust + width,y - y_adjust - height);
+        glTexCoord2f(q->s0,q->t1); glVertex2f(x + x_adjust,y - y_adjust - height);
 		glEnd();
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_BLEND);

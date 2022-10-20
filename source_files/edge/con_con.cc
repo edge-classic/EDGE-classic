@@ -30,6 +30,8 @@
 #include "font.h"
 #include "language.h"
 
+#include "str_compare.h"
+
 #include "con_main.h"
 #include "con_var.h"
 #include "e_input.h"
@@ -493,15 +495,30 @@ static void CalcSizes()
 	// Would it be preferable to store the reduced sizes in the font_c class? Hmm
 	if (SCREENWIDTH <= 400)
 	{
-		FNSZ = 11; XMUL = 7; YMUL = 11;
+		FNSZ = 11; 
+		XMUL = 7;
+		if (con_font->def->type == FNTYP_TrueType)
+			YMUL = con_font->ttf_char_height * (11 / con_font->def->ttf_default_size);
+		else;
+			YMUL = 11;
 	}
 	else if (SCREENWIDTH < 640)
 	{
-		FNSZ = 13; XMUL = 9; YMUL = 13;
+		FNSZ = 13; 
+		XMUL = 9; 
+		if (con_font->def->type == FNTYP_TrueType)
+			YMUL = con_font->ttf_char_height * (13 / con_font->def->ttf_default_size);
+		else;
+			YMUL = 13;
 	}
 	else
 	{
-		FNSZ = 16; XMUL = 11; YMUL = 16;
+		FNSZ = 16; 
+		XMUL = 11; 
+		if (con_font->def->type == FNTYP_TrueType)
+			YMUL = con_font->ttf_char_height * (16 / con_font->def->ttf_default_size);
+		else;
+			YMUL = 16;
 	}
 }
 
@@ -543,6 +560,28 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 	glColor4f(RGB_RED(col)/255.0f, RGB_GRN(col)/255.0f, 
 				RGB_BLU(col)/255.0f, alpha);
 
+	if (con_font->def->type == FNTYP_TrueType)
+	{
+		float x_adjust = (con_font->ttf_char_width - con_font->CharWidth((int)ch)) * (FNSZ / con_font->def->ttf_default_size) / 2;
+		float y_adjust = con_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].y_shift * (FNSZ / con_font->def->ttf_default_size);
+		float height = con_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].height * (FNSZ / con_font->def->ttf_default_size);
+		float width = con_font->CharWidth((int)ch) * (FNSZ / con_font->def->ttf_default_size);
+		stbtt_aligned_quad *q = con_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].char_quad;
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, con_font->ttf_glyph_map[cp437_unicode_values[ch]].tex_id);
+		glBegin(GL_POLYGON);
+		glTexCoord2f(q->s0,q->t0); glVertex2f(x + x_adjust,y - y_adjust);
+        glTexCoord2f(q->s1,q->t0); glVertex2f(x + x_adjust + width,y - y_adjust);
+        glTexCoord2f(q->s1,q->t1); glVertex2f(x + x_adjust + width,y - y_adjust - height);
+        glTexCoord2f(q->s0,q->t1); glVertex2f(x + x_adjust,y - y_adjust - height);
+		glEnd();
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_BLEND);
+		return;
+	}
+
 	int px =      int((byte)ch) % 16;
 	int py = 15 - int((byte)ch) / 16;
 
@@ -550,7 +589,6 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 	float tx2 = (px+1) * con_font->font_image->ratio_w;
 	float ty1 = (py  ) * con_font->font_image->ratio_h;
 	float ty2 = (py+1) * con_font->font_image->ratio_h;
-	int x_adjust = FNSZ;
 
 	glBegin(GL_POLYGON);
 
@@ -561,10 +599,10 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 	glVertex2i(x, y + FNSZ);
 
 	glTexCoord2f(tx2, ty2);
-	glVertex2i(x + x_adjust, y + FNSZ);
+	glVertex2i(x + FNSZ, y + FNSZ);
 
 	glTexCoord2f(tx2, ty1);
-	glVertex2i(x + x_adjust, y);
+	glVertex2i(x + FNSZ, y);
 
 	glEnd();
 
@@ -633,15 +671,18 @@ static void DrawEndoomChar(int x, int y, char ch, rgbcol_t col, rgbcol_t col2, b
 // writes the text on coords (x,y) of the console
 static void DrawText(int x, int y, const char *s, rgbcol_t col)
 {
-	// Always whiten the font when used with console output
-	GLuint tex_id = W_ImageCache(con_font->font_image, true, (const colourmap_c *)0, true);
+	if (con_font->def->type == FNTYP_Image)
+	{
+		// Always whiten the font when used with console output
+		GLuint tex_id = W_ImageCache(con_font->font_image, true, (const colourmap_c *)0, true);
 
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, tex_id);
- 
-	glEnable(GL_BLEND);
-	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0);
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, tex_id);
+	
+		glEnable(GL_BLEND);
+		glEnable(GL_ALPHA_TEST);
+		glAlphaFunc(GL_GREATER, 0);
+	}
 
 	bool draw_cursor = false;
 
@@ -662,7 +703,10 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 			draw_cursor = false;
 		}
 
-		x += I_ROUND(FNSZ * (con_font->im_mono_width / con_font->im_char_height)) + I_ROUND(con_font->spacing);
+		if (con_font->def->type != FNTYP_TrueType)
+			x += I_ROUND(FNSZ * (con_font->im_mono_width / con_font->im_char_height)) + I_ROUND(con_font->spacing);
+		else
+			x += (FNSZ * (FNSZ / con_font->def->ttf_default_size)) + I_ROUND(con_font->def->spacing);
 
 		if (x >= SCREENWIDTH)
 			break;

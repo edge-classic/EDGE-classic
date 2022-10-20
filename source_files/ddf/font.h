@@ -33,6 +33,7 @@ typedef enum
 
 	FNTYP_Patch = 1,  // font is made up of individual patches
 	FNTYP_Image = 2,  // font consists of one big image (16x16 chars)
+	FNTYP_TrueType = 3 // font is a ttf/otf file or lump
 }
 fonttype_e;
 
@@ -68,6 +69,9 @@ public:
 	std::string missing_patch;
 
 	std::string image_name;
+
+	std::string ttf_name;
+	int ttf_default_size;
 
 	int spacing;
 

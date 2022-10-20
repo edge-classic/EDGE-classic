@@ -32,6 +32,7 @@
 #include "r_image.h"
 #include "r_misc.h"     //  R_Render
 
+#include "str_compare.h"
 
 #define DUMMY_WIDTH(font)  (4)
 #define DUMMY_CLAMP 789
@@ -374,7 +375,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
                   const image_c *image, 
 				  float tx1, float ty1, float tx2, float ty2,
 				  float alpha, rgbcol_t text_col,
-				  const colourmap_c *palremap, float sx, float sy)
+				  const colourmap_c *palremap, float sx, float sy, int ch)
 {
 	int x1 = I_ROUND(hx1);
 	int y1 = I_ROUND(hy1);
@@ -398,6 +399,24 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 		g = RGB_GRN(text_col) / 255.0;
 		b = RGB_BLU(text_col) / 255.0;
 		do_whiten = true;
+	}
+
+	if (epi::strcmp(image->name, "TTFDUMMY") == 0)
+	{
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, cur_font->ttf_glyph_map[cp437_unicode_values[ch]].tex_id);
+		glColor4f(r, g, b, alpha);
+		glBegin(GL_QUADS);
+		glTexCoord2f(tx1,ty2); glVertex2f(hx1,hy1);
+        glTexCoord2f(tx2,ty2); glVertex2f(hx2,hy1);
+        glTexCoord2f(tx2,ty1); glVertex2f(hx2,hy2);
+        glTexCoord2f(tx1,ty1); glVertex2f(hx1,hy2);
+		glEnd();
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_BLEND);
+		return;
 	}
 
 	GLuint tex_id = W_ImageCache(image, true, palremap, do_whiten);
@@ -820,7 +839,19 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 	float w, h;
 	float tx1, tx2, ty1, ty2;
 
-	if (img->is_font)
+	if (epi::strcmp(img->name, "TTFDUMMY") == 0)
+	{
+		stbtt_aligned_quad *q = cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].char_quad;
+		x = left_x;
+		y = top_y + (cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].y_shift * sc_y);
+		w = (size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->ttf_default_size)) : cur_font->CharWidth(ch)) * sc_x;
+		h = (size > 0 ? size : cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].height) * sc_y;
+		tx1 = q->s0;
+		ty1 = q->t0;
+		tx2 = q->s1;
+		ty2 = q->t1;
+	}
+	else if (img->is_font)
 	{
 		w = (size > 0 ? (size * cur_font->CharRatio(ch)) : cur_font->CharWidth(ch)) * sc_x;
 		h = (size > 0 ? size : cur_font->im_char_height) * sc_y;
@@ -851,7 +882,7 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 	float y2 = COORD_Y(y);
 
     HUD_RawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2,
-				  cur_alpha, cur_color);
+				  cur_alpha, cur_color, NULL, 0.0, 0.0, (int)ch);
 }
 
 
@@ -890,7 +921,9 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 
 		for (int i = 0; i < len; i++)
 		{
-			if (cur_font->def->type == FNTYP_Image)
+			if (cur_font->def->type == FNTYP_TrueType)
+				total_w += (size > 0 ? cur_font->CharWidth(str[i]) * (size / cur_font->def->ttf_default_size) + cur_font->spacing : cur_font->CharWidth(str[i])) * cur_scale;
+			else if (cur_font->def->type == FNTYP_Image)
 				total_w += (size > 0 ? size * cur_font->CharRatio(str[i]) + cur_font->spacing : cur_font->CharWidth(str[i])) * cur_scale;
 			else
 				total_w += (size > 0 ? size * cur_font->p_cache.ratio : cur_font->CharWidth(str[i])) * cur_scale;
@@ -913,7 +946,9 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 			if (img)
 				HUD_DrawChar(cx, cy, img, ch, size);
 
-			if (cur_font->def->type == FNTYP_Image)
+			if (cur_font->def->type == FNTYP_TrueType)
+				cx += (size > 0 ? cur_font->CharWidth(ch) * (size / cur_font->def->ttf_default_size) + cur_font->spacing : cur_font->CharWidth(ch)) * cur_scale;
+			else if (cur_font->def->type == FNTYP_Image)
 				cx += (size > 0 ? size * cur_font->CharRatio(ch) + cur_font->spacing : cur_font->CharWidth(ch)) * cur_scale;
 			else
 				cx += (size > 0 ? size * cur_font->p_cache.ratio : cur_font->CharWidth(ch)) * cur_scale;

@@ -1725,7 +1725,7 @@ void P_ActHomeToSpot(mobj_t * projectile)
 {
 	mobj_t *target = projectile->target;
   
-	if (!target)
+	if (target == NULL)
 	{
 		P_MobjExplodeMissile(projectile);
 		return;
@@ -2173,36 +2173,27 @@ void P_ActEffectTracker(mobj_t * object)
 
 static void ShootToSpot(mobj_t * object)
 {
-	// Note: using a static int here for better randomness.
-	// -AJA- FIXME: should be global to allow synchronisation in Netgames
-	static int current_spot = 0;
-
 	if (! object->currentattack)
 		return;
 
-	if (brain_spots.number < 0)
-	{
-		if (! object->info->spitspot)
-		{
-			M_WarnError("Thing [%s] used SHOOT_TO_SPOT attack, but has no "
-						"SPIT_SPOT\n", object->info->name.c_str());
-			return;
-		}
+	const mobjtype_c *spot_type = object->info->spitspot;
 
-		P_LookForShootSpots(object->info->spitspot);
+	if (spot_type == NULL)
+	{
+		M_WarnError("Thing [%s] used SHOOT_TO_SPOT attack, but has no SPIT_SPOT\n",
+			object->info->name.c_str());
+		return;
 	}
 
-	if (brain_spots.number == 0)
+	mobj_t *spot = P_LookForShootSpot(object->info->spitspot);
+
+	if (spot == NULL)
+	{
+		I_Warning("No [%s] objects found for BossBrain shooter.\n", spot_type->name.c_str());
 		return;
+	}
 
-	SYS_ASSERT(brain_spots.targets);
-	SYS_ASSERT(brain_spots.number > 0);
-
-	current_spot += P_Random();
-	current_spot %= brain_spots.number;
-  
-	LaunchProjectile(object, brain_spots.targets[current_spot],
-					 object->currentattack->atk_mobj);
+	LaunchProjectile(object, spot, object->currentattack->atk_mobj);
 }
 
 //-------------------------------------------------------------------

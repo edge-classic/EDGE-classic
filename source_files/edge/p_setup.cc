@@ -2950,7 +2950,6 @@ void ShutdownLevel(void)
 	P_DestroyAllLights();
 	P_DestroyAllPlanes();
 	P_DestroyAllSliders();
-	P_FreeShootSpots();
 	P_DestroyAllAmbientSFX();
 
 	DDF_BoomClearGenTypes();

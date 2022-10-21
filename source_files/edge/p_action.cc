@@ -3132,8 +3132,14 @@ void P_ActStandardLook(mobj_t * object)
 
 	object->threshold = 0;  // any shot will wake up
 
-	//targ_pnum = object->subsector->sector->sound_player;
-	targ_pnum = object->lastheard;
+	//FIXME: replace with cvar/Menu toggle
+	bool CVAR_DOOM_TARGETTING = false;
+
+	if (CVAR_DOOM_TARGETTING == true)
+		targ_pnum = object->subsector->sector->sound_player; //old way
+	else
+		targ_pnum = object->lastheard; //new way
+
 
 	if (targ_pnum >= 0 && targ_pnum < MAXPLAYERS && 
 		players[targ_pnum])

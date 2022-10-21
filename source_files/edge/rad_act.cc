@@ -1079,7 +1079,7 @@ void RAD_ActWaitUntilDead(rad_trigger_t *R, void *param)
 
 		// mark the monster
 		mo->hyperflags |= HF_WAIT_UNTIL_DEAD;
-		mo->tag = wud->tag;
+		mo->wud_tags.push_back(wud->tag);
 
 		R->wud_count++;
 	}

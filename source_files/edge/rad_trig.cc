@@ -785,9 +785,10 @@ void RAD_MonsterIsDead(mobj_t *mo)
 
 		for (trig = active_triggers ; trig ; trig = trig->next)
 		{
-			if (trig->wud_tag == mo->tag)
+			for (int i=0;i < mo->wud_tags.size();i++)
 			{
-				trig->wud_count--;
+				if (trig->wud_tag == mo->wud_tags.at(i))
+					trig->wud_count--;
 			}
 		}
 	}

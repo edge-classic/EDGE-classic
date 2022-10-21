@@ -485,68 +485,31 @@ bool P_LookForPlayers(mobj_t * actor, angle_t range)
 	return false;
 }
 
+
 //
 //   BOSS-BRAIN HANDLING
 //
 
-//
-// -AJA- Savegames: we assume that the spit-spot objects never
-//       disappear, or new ones appear.  After all, they have to be
-//       there to be the target of the cubes.  This means we don't
-//       need to save anything: the set of shoot-spots will be
-//       regenerated after the loadgame when the BrainShooter next
-//       tries to shoot a cube.
-
-shoot_spot_info_t brain_spots = { -1, NULL };
-
-void P_LookForShootSpots(const mobjtype_c *spot_type)
+mobj_t * P_LookForShootSpot(const mobjtype_c *spot_type)
 {
-	int i;
-	mobj_t *cur;
+	// -AJA- 2022: changed this to find all spots matching the wanted type,
+	//             and return a random one.  Since brain spits occur seldomly
+	//             (every few seconds), there is little need to pre-find them.
 
-	brain_spots.number = 0;
+	std::vector<mobj_t *> spots;
 
-	// count them
-	for (cur=mobjlisthead; cur != NULL; cur=cur->next)
-	{
-		if (cur->info == spot_type)
-			brain_spots.number++;
-	}
+	for (mobj_t *cur = mobjlisthead ; cur != NULL ; cur=cur->next)
+		if (cur->info == spot_type && ! cur->isRemoved())
+			spots.push_back(cur);
 
-	if (brain_spots.number == 0)
-	{
-		I_Warning("No [%s] objects found for BossBrain shooter.\n",
-			spot_type->name.c_str());
-		return;
-	}
+	if (spots.empty())
+		return NULL;
 
-	// create the spots
-	brain_spots.targets = new mobj_t* [brain_spots.number];
+	int idx = C_Random() % (int)spots.size();
 
-	for (cur=mobjlisthead, i=0; cur != NULL; cur=cur->next)
-	{
-		if (cur->info == spot_type)
-			brain_spots.targets[i++] = cur;
-	}
-
-	SYS_ASSERT(i == brain_spots.number);
+	return spots[idx];
 }
 
-void P_FreeShootSpots(void)
-{
-	if (brain_spots.number < 0)
-		return;
-
-	if (brain_spots.number > 0) // Changed from brain_spots.targets, hopefully I don't blow it up - Dasho
-	{
-		SYS_ASSERT(brain_spots.targets);
-
-		delete[] brain_spots.targets;
-	}
-
-	brain_spots.number = -1;
-	brain_spots.targets = NULL;
-}
 
 static void SpawnDeathMissile(mobj_t *source, float x, float y, float z)
 {

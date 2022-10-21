@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
+#include "i_defs_gl.h"
 
 #include "main.h"
 #include "font.h"
@@ -30,6 +31,11 @@
 #include "r_draw.h"
 #include "r_modes.h"
 #include "r_image.h"
+#include "w_wad.h"
+#define STB_RECT_PACK_IMPLEMENTATION
+#include "stb_rect_pack.h"
+#define STB_TRUETYPE_IMPLEMENTATION
+#include "stb_truetype.h"
 
 #define DUMMY_WIDTH  8
 
@@ -48,6 +54,7 @@ font_c::font_c(fontdef_c *_def) : def(_def)
 	p_cache.missing = NULL;
 
 	font_image = NULL;
+	ttf_buffer = NULL;
 }
 
 font_c::~font_c()
@@ -185,6 +192,54 @@ void font_c::LoadFontImage()
 	}
 }
 
+void font_c::LoadFontTTF()
+{
+	if (!ttf_buffer)
+	{
+		if (def->ttf_name.empty())
+		{
+			I_Error("LoadFontTTF: No TTF file/lump name provided for font %s!", def->name.c_str());
+		}
+
+		int lump = W_CheckNumForName(def->ttf_name.c_str());
+		if (lump < 0)
+		{
+			I_Error("LoadFontTTF: LUMP '%s' not found for font %s.\n", def->ttf_name.c_str(), def->name.c_str()); 
+		}
+
+		epi::file_c *F;
+
+		F = W_OpenLump(lump);
+
+		ttf_buffer = F->LoadIntoMemory();
+
+		delete F;
+
+		ttf_char_t *M = new ttf_char_t;
+
+		M->packed_char = new stbtt_packedchar;
+		M->char_quad = new stbtt_aligned_quad;
+
+		unsigned char *temp_bitmap = new unsigned char [64*64];
+
+		stbtt_pack_context *spc = new stbtt_pack_context;
+		stbtt_PackBegin(spc, temp_bitmap, 64, 64, 0, 1, NULL);
+		stbtt_PackSetOversampling(spc, 1, 1);
+		stbtt_PackFontRange(spc, ttf_buffer, 0, 64, cp437_unicode_values[(int)'M'], 1, M->packed_char);
+		stbtt_PackEnd(spc);
+		delete temp_bitmap;
+		float x,y,ascent,descent,linegap = 0.0f;
+		stbtt_GetPackedQuad(M->packed_char, 64, 64, 0, &x, &y, M->char_quad, 0);
+		stbtt_GetScaledFontVMetrics(ttf_buffer, 0, 64, &ascent, &descent, &linegap);
+		M->width = (M->char_quad->x1 - M->char_quad->x0) * (def->ttf_default_size / 64.0);
+		M->height = (M->char_quad->y1 - M->char_quad->y0) * (def->ttf_default_size / 64.0);
+		ttf_char_width = M->width;
+		ttf_char_height = (ascent - descent) * (def->ttf_default_size / 64.0);
+		delete M->packed_char;
+		delete M->char_quad;
+		delete M;
+	}
+}
 
 void font_c::Load()
 {
@@ -196,6 +251,10 @@ void font_c::Load()
 
 		case FNTYP_Image:
 			LoadFontImage();
+			break;
+
+		case FNTYP_TrueType:
+			LoadFontTTF();
 			break;
 
 		default:
@@ -213,6 +272,9 @@ int font_c::NominalWidth() const
 	if (def->type == FNTYP_Patch)
 		return p_cache.width;
 
+	if (def->type == FNTYP_TrueType)
+		return ttf_char_width;
+
 	I_Error("font_c::NominalWidth : unknown FONT type %d\n", def->type);
 	return 1; /* NOT REACHED */
 }
@@ -224,6 +286,9 @@ int font_c::NominalHeight() const
 
 	if (def->type == FNTYP_Patch)
 		return p_cache.height;
+
+	if (def->type == FNTYP_TrueType)
+		return ttf_char_height;
 
 	I_Error("font_c::NominalHeight : unknown FONT type %d\n", def->type);
 	return 1; /* NOT REACHED */
@@ -248,6 +313,15 @@ const image_c *font_c::CharImage(char ch) const
 	if (def->type == FNTYP_Image)
 		return font_image;
 
+	if (def->type == FNTYP_TrueType)
+	{
+		if (ttf_glyph_map.find((int)ch) != ttf_glyph_map.end())
+			// Create or return faux backup image
+			return W_ImageLookup("TTFDUMMY", INS_Graphic, ILF_Font);
+		else
+			return NULL;
+	}
+
 	SYS_ASSERT(def->type == FNTYP_Patch);
 
 	if (! HasChar(ch))
@@ -267,9 +341,9 @@ const image_c *font_c::CharImage(char ch) const
 	return p_cache.images[idx - p_cache.first];
 }
 
-float font_c::CharRatio(char ch) const
+float font_c::CharRatio(char ch)
 {
-	SYS_ASSERT(def->type = FNTYP_Image);
+	SYS_ASSERT(def->type == FNTYP_Image);
 
 	if (ch == ' ')
 		return 0.4f;
@@ -280,7 +354,7 @@ float font_c::CharRatio(char ch) const
 //
 // Returns the width of the IBM cp437 char in the font.
 //
-float font_c::CharWidth(char ch) const
+float font_c::CharWidth(char ch)
 {
 	if (def->type == FNTYP_Image)
 	{
@@ -289,7 +363,43 @@ float font_c::CharWidth(char ch) const
 		else
 			return individual_char_widths[int((byte)ch)] + def->spacing;
 	}
-			
+
+	if (def->type == FNTYP_TrueType)
+	{
+		auto find_glyph = ttf_glyph_map.find(cp437_unicode_values[(int)ch]);
+		if (find_glyph != ttf_glyph_map.end())
+		{
+			return find_glyph->second.width;
+		}
+		else
+		{
+			ttf_char_t character;
+			character.packed_char = new stbtt_packedchar;
+			character.char_quad = new stbtt_aligned_quad;
+			unsigned char *temp_bitmap = new unsigned char [64 * 64];
+			stbtt_pack_context *spc = new stbtt_pack_context;
+			stbtt_PackBegin(spc, temp_bitmap, 64, 64, 0, 1, NULL);
+			stbtt_PackSetOversampling(spc, 1, 1);
+			stbtt_PackFontRange(spc, ttf_buffer, 0, 64, cp437_unicode_values[(int)ch], 1, character.packed_char);
+			stbtt_PackEnd(spc);
+			glGenTextures(1, &character.tex_id);
+			glBindTexture(GL_TEXTURE_2D, character.tex_id);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64,64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			delete temp_bitmap;
+			float x,y = 0.0f;
+			stbtt_GetPackedQuad(character.packed_char, 64, 64, 0, &x, &y, character.char_quad, 0);
+			if (ch == ' ')
+				character.width = ttf_char_width * 4 / 5 + def->spacing;
+			else
+				character.width = (character.char_quad->x1 - character.char_quad->x0) * (def->ttf_default_size / 64.0);
+			character.height = (character.char_quad->y1 - character.char_quad->y0) * (def->ttf_default_size / 64.0);
+			character.y_shift = (ttf_char_height - character.height) + (character.char_quad->y1 * (def->ttf_default_size / 64.0));
+			ttf_glyph_map.try_emplace(cp437_unicode_values[(int)ch], character);
+			return character.width;
+		}
+	}
+
 	SYS_ASSERT(def->type == FNTYP_Patch);
 
 	if (ch == ' ')
@@ -308,7 +418,7 @@ float font_c::CharWidth(char ch) const
 // Returns the maximum number of characters which can fit within pixel_w
 // pixels.  The string may not contain any newline characters.
 //
-int font_c::MaxFit(int pixel_w, const char *str) const
+int font_c::MaxFit(int pixel_w, const char *str)
 {
 	int w = 0;
 	const char *s;
@@ -341,7 +451,7 @@ int font_c::MaxFit(int pixel_w, const char *str) const
 // Find string width from hu_font chars.  The string may not contain
 // any newline characters.
 //
-float font_c::StringWidth(const char *str) const
+float font_c::StringWidth(const char *str)
 {
 	float w = 0;
 
@@ -372,7 +482,7 @@ int font_c::StringLines(const char *str) const
 void font_c::DrawChar320(float x, float y, char ch, float scale, float aspect,
     const colourmap_c *colmap, float alpha) const
 {
-	SYS_ASSERT(def->type != FNTYP_Image);
+	SYS_ASSERT(def->type == FNTYP_Patch);
 
 	const image_c *image = CharImage(ch);
 

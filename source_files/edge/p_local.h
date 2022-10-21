@@ -171,20 +171,10 @@ void P_ClearAllStaleRefs(void);
 // P_ENEMY
 //
 
-typedef struct 
-{
-	int number;
-
-	// FIXME: big troubles if one of these objects disappears.
-	struct mobj_s ** targets;
-}
-shoot_spot_info_t;
-
 extern dirtype_e opposite[];
 extern dirtype_e diags[];
 extern float xspeed[8];
 extern float yspeed[8];
-extern shoot_spot_info_t brain_spots;
 
 void P_NoiseAlert(player_t *p);
 void P_NoiseAlert(mobj_t * actor);
@@ -194,8 +184,7 @@ bool P_CheckMeleeRange(mobj_t * actor);
 bool P_CheckMissileRange(mobj_t * actor);
 bool P_Move(mobj_t * actor, bool path);
 bool P_LookForPlayers(mobj_t * actor, angle_t range);
-void P_LookForShootSpots(const mobjtype_c *spot_type);
-void P_FreeShootSpots(void);
+mobj_t * P_LookForShootSpot(const mobjtype_c *spot_type);
 
 //
 // P_MAPUTL

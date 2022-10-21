@@ -482,7 +482,7 @@ static void BOT_Chase(bot_t *bot, bool seetarget, bool move_ok)
 		if (!move_ok || bot->move_count < 0)
 		{
 			if (seetarget && move_ok)
-				bot->cmd.face_mobj = mo->target;
+				bot->cmd.face_target = true;
 
 			bot->angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
 			bot->strafedir = 0;
@@ -523,7 +523,8 @@ static void BOT_Chase(bot_t *bot, bool seetarget, bool move_ok)
 			bot->angle = R_PointToAngle(mo->x, mo->y,
 				mo->target->x, mo->target->y);
 
-			bot->cmd.face_mobj = mo->target;
+			bot->cmd.face_target = true;
+
 			// Shoot it,
 			bot->cmd.attack = M_Random() < attack_chances[bot_skill];
 
@@ -668,11 +669,11 @@ static void BOT_ConvertToTiccmd(bot_t *bot, ticcmd_t *dest, botcmd_t *src)
 	angle_t new_angle = bot->angle;
 	float   new_slope = 0;		
 
-	if (src->face_mobj)
+	if (src->face_target && bot->pl->mo->target != NULL)
 	{
-		float dx = src->face_mobj->x - mo->x;
-		float dy = src->face_mobj->y - mo->y;
-		float dz = src->face_mobj->z - mo->z;
+		float dx = bot->pl->mo->target->x - mo->x;
+		float dy = bot->pl->mo->target->y - mo->y;
+		float dz = bot->pl->mo->target->z - mo->z;
 
 		new_angle = R_PointToAngle(0,0, dx,dy);
 		new_slope = P_ApproxSlope(dx, dy, dz);

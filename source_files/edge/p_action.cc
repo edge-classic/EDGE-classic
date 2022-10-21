@@ -3863,6 +3863,7 @@ void P_ActMushroom(struct mobj_s *mo)
 	}
 }
 
+// Called by new NOISE_ALERT ddf action 
 void P_ActNoiseAlert(struct mobj_s *mo)
 {
 	P_NoiseAlert(mo);

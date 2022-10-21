@@ -182,11 +182,19 @@ void P_NoiseAlert(player_t *p)
 	RecursiveSound(p->mo->subsector->sector, 0, p->pnum);
 }
 
-
+//Called by P_ActNoiseAlert
 void P_NoiseAlert(mobj_t * actor)
 {
 	validcount++;
-	RecursiveSound(actor->subsector->sector, 0, 0);
+
+	int WhatPlayer;
+
+	if (actor->lastheard !=-1)
+		WhatPlayer = actor->lastheard;
+	else if (actor->lastlook >=0 )
+		WhatPlayer = actor->lastlook;
+
+	RecursiveSound(actor->subsector->sector, 0, WhatPlayer);
 }
 
 

@@ -40,8 +40,7 @@ typedef struct botcmd_s
 	int move_speed;
 	angle_t move_angle;
 
-	// Object which we want to face, NULL if none
-	struct mobj_s *face_mobj;
+	bool face_target;
 
 	// The weapon we want to use. -1 if the current one is fine.
 	int new_weapon;

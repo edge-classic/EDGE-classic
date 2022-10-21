@@ -187,12 +187,12 @@ void P_NoiseAlert(mobj_t * actor)
 {
 	validcount++;
 
-	int WhatPlayer;
+	int WhatPlayer = 0;
 
 	if (actor->lastheard !=-1)
 		WhatPlayer = actor->lastheard;
-	else if (actor->lastlook >=0 )
-		WhatPlayer = actor->lastlook;
+	//else if (actor->lastlook >=0 )
+	//	WhatPlayer = actor->lastlook;
 
 	RecursiveSound(actor->subsector->sector, 0, WhatPlayer);
 }

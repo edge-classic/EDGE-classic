@@ -2107,6 +2107,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
 	if (mobj->flags & MF_COUNTITEM)
 		wi_stats.items++;
 
+	mobj->lastheard=-1; //For now, the last player we heard
 	//
 	// -ACB- 1998/08/27 Mobj Linked-List Addition
 	//

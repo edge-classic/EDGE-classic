@@ -3141,7 +3141,8 @@ void P_ActStandardLook(mobj_t * object)
 
 	object->threshold = 0;  // any shot will wake up
 
-	targ_pnum = object->subsector->sector->sound_player;
+	//targ_pnum = object->subsector->sector->sound_player;
+	targ_pnum = object->lastheard;
 
 	if (targ_pnum >= 0 && targ_pnum < MAXPLAYERS && 
 		players[targ_pnum])
@@ -3869,6 +3870,11 @@ void P_ActMushroom(struct mobj_s *mo)
 				continue;
 		}
 	}
+}
+
+void P_ActNoiseAlert(struct mobj_s *mo)
+{
+	P_NoiseAlert(mo);
 }
 
 //--- editor settings ---

@@ -187,6 +187,7 @@ extern float yspeed[8];
 extern shoot_spot_info_t brain_spots;
 
 void P_NoiseAlert(player_t *p);
+void P_NoiseAlert(mobj_t * actor);
 void P_NewChaseDir(mobj_t * actor);
 bool P_CreateAggression(mobj_t * actor);
 bool P_CheckMeleeRange(mobj_t * actor);

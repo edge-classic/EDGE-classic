@@ -92,13 +92,53 @@ static void RecursiveSound(sector_t * sec, int soundblocks, int player)
 	sector_t *other;
 
 	// has the sound flooded this sector
-	if (sec->validcount == validcount && sec->soundtraversed <= soundblocks + 1)
+	if (sec->validcount == validcount && sec->soundtraversed <= (soundblocks + 1))
 		return;
 
 	// wake up all monsters in this sector
 	sec->validcount = validcount;
 	sec->soundtraversed = soundblocks + 1;
 	sec->sound_player = player;
+
+/*
+	for (mobj_t *mo = sec->subsectors->thinglist; mo != NULL; mo = mo->snext)
+	{
+		mo->lastheard=player;
+	}
+
+
+	mobj_t *mo;
+	int index = 0;
+	for (mo=sec->subsectors->thinglist; mo; mo=mo->snext, index++)
+	{
+		if(mo != NULL && !mo->player)
+			mo->lastheard=player;
+	}
+*/
+
+	// Set any nearby monsters to have heard the player
+	touch_node_t *nd;
+	for (nd = sec->touch_things; nd; nd = nd->sec_next)
+	{
+		if(nd->mo != NULL)
+		{
+			if(nd->mo->info->hear_distance != -1) //if we have hear_distance set
+			{
+				float distance;
+				distance = P_ApproxDistance(players[player]->mo->x - nd->mo->x, players[player]->mo->y - nd->mo->y);
+				distance = P_ApproxDistance(players[player]->mo->z - nd->mo->z, distance);
+				if (distance < nd->mo->info->hear_distance)
+				{
+					nd->mo->lastheard=player;
+				}
+			}
+			else ///by default he heard
+			{
+				nd->mo->lastheard=player;
+			}
+		}	
+	}
+
 
 	for (i = 0; i < sec->linecount; i++)
 	{
@@ -141,6 +181,14 @@ void P_NoiseAlert(player_t *p)
 
 	RecursiveSound(p->mo->subsector->sector, 0, p->pnum);
 }
+
+
+void P_NoiseAlert(mobj_t * actor)
+{
+	validcount++;
+	RecursiveSound(actor->subsector->sector, 0, 0);
+}
+
 
 //
 // Move in the current direction,

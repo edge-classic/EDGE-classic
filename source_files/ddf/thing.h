@@ -1018,6 +1018,7 @@ public:
 	std::string spitspot_ref;
 
 	float sight_distance; // lobo 2022: How far this thing can see
+	float hear_distance; // lobo 2022: How far this thing can hear
 
 	// MBF 21
 	int infight_group;

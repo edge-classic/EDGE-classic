@@ -201,6 +201,7 @@ const commandlist_t thing_commands[] =
 	DF("ARMOUR_CLASS",  armour_class, DDF_MainGetBitSet),  // -AJA- 2007/08/22
 
 	DF("SIGHT_DISTANCE", sight_distance, DDF_MainGetFloat), //Lobo 2022
+	DF("HEAR_DISTANCE", hear_distance, DDF_MainGetFloat), //Lobo 2022
 
 	DF("INFIGHTING_GROUP", infight_group, DDF_MainGetNumeric),
 	DF("PROJECTILE_GROUP", proj_group, DDF_MainGetNumeric),
@@ -332,6 +333,7 @@ const actioncode_t thing_actions[] =
 	{"DIE",               P_ActDie, NULL},
 	{"KEEN_DIE",          P_ActKeenDie, NULL},
 	{"MUSHROOM",          P_ActMushroom, NULL},
+	{"NOISE_ALERT",       P_ActNoiseAlert, NULL},
 
 	// bossbrain actions
 	{"BRAINSPIT", P_ActBrainSpit, NULL},
@@ -2362,6 +2364,7 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	spitspot_ref = src.spitspot_ref; 
 
 	sight_distance = src.sight_distance;
+	hear_distance = src.hear_distance;
 
 	infight_group = src.infight_group;
 	proj_group = src.proj_group;
@@ -2503,6 +2506,7 @@ void mobjtype_c::Default()
 	spitspot_ref.clear();
 
 	sight_distance = -1;
+	hear_distance = -1;
 	infight_group = -2;
 	proj_group = -2;
 	splash_group = -2;

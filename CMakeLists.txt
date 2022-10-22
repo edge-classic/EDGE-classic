@@ -26,7 +26,7 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_FLAGS "-O2 -DINLINE_G=inline -Wall")
+set(CMAKE_CXX_FLAGS "-O2 -Wall")
 if(WIN32 AND NOT MSYS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs")
   set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS")
@@ -90,6 +90,7 @@ add_executable(
 	source_files/edge/p_map.cc      
 	source_files/edge/p_maputl.cc   
 	source_files/edge/p_mobj.cc     
+	source_files/edge/p_navigate.cc     
 	source_files/edge/p_plane.cc    
 	source_files/edge/p_setup.cc    
 	source_files/edge/p_sight.cc    

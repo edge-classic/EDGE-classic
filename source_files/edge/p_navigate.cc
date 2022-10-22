@@ -358,6 +358,9 @@ static bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, s
 		{
 			const nav_link_c& link = nav_links[area.first_link + k];
 
+			// FIXME
+			// if (! NAV_CanTraverseLink(cur, link)) continue;
+
 			// TODO
 		}
 	}

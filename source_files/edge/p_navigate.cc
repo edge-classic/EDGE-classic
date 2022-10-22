@@ -32,9 +32,20 @@
 #include "thing.h"
 
 
-static int NAV_EvaluateBigItem(const mobj_t *mo)
+class big_item_c
 {
-	int score = 0;
+public:
+	float x = 0;
+	float y = 0;
+	float z = 0;
+	float score = 0;
+};
+
+static std::vector<big_item_c> big_items;
+
+
+static float NAV_EvaluateBigItem(const mobj_t *mo)
+{
 	ammotype_e ammotype;
 
 	for (const benefit_t *B = mo->info->pickup_benefits ; B != NULL ; B = B->next)
@@ -71,18 +82,15 @@ static int NAV_EvaluateBigItem(const mobj_t *mo)
 				break;
 
 			case BENEFIT_Health:
-				// ignore small amounts (e.g. potions)
+				// ignore small amounts (e.g. potions, stimpacks)
 				if (B->amount >= 100)
-					score = std::max(score, 40);
-				else if (B->amount >= 25)
-					score = std::max(score, 10);
+					return 40;
 				break;
 
 			case BENEFIT_Armour:
-				// ignore green armor and tiny amounts.
-				// also handle the items which give both health and armor
-				if (B->sub.type >= ARMOUR_Blue && B->amount >= 50)
-					score = std::max(score, 30);
+				// ignore small amounts (e.g. helmets)
+				if (B->amount >= 50)
+					return 20;
 				break;
 
 			default:
@@ -90,19 +98,42 @@ static int NAV_EvaluateBigItem(const mobj_t *mo)
 		}
 	}
 
-	return score;
+	return 0;
+}
+
+
+static void NAV_CollectBigItems()
+{
+	// collect the location of all the significant pickups on the map.
+	// the main purpose of this is allowing the bots to roam, since big
+	// items (e.g. weapons) tend to be well distributed around a map.
+	// it will also be useful for finding a weapon after spawning.
+
+	for (const mobj_t *mo = mobjlisthead ; mo != NULL ; mo = mo->next)
+	{
+		if ((mo->flags & MF_SPECIAL) == 0)
+			continue;
+
+		float score = NAV_EvaluateBigItem(mo);
+		if (score <= 0)
+			continue;
+
+		big_items.push_back(big_item_c { mo->x, mo->y, mo->z + 8.0f, score });
+	}
 }
 
 
 void NAV_AnalyseLevel()
 {
-	// TODO
+	NAV_FreeLevel();
+
+	NAV_CollectBigItems();
 }
 
 
 void NAV_FreeLevel()
 {
-	// TODO
+	big_items.clear();
 }
 
 

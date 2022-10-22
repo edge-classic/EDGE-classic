@@ -188,6 +188,7 @@ void P_ActTrackerStart(struct mobj_s *mo);
 
 // MBF / MBF21
 void P_ActMushroom(struct mobj_s *mo);
+void P_ActNoiseAlert(struct mobj_s *mo);
 
 #endif /* __P_ACTION_H__ */
 

@@ -344,6 +344,9 @@ struct mobj_s : public position_c
 	// One more: link in dynamic light blockmap
 	mobj_t *dlnext, *dlprev;
 
+	// Player number last heard.
+	int lastheard;
+
 public:
 	bool isRemoved() const;
 

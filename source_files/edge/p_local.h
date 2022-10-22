@@ -177,6 +177,7 @@ extern float xspeed[8];
 extern float yspeed[8];
 
 void P_NoiseAlert(player_t *p);
+void P_NoiseAlert(mobj_t * actor);
 void P_NewChaseDir(mobj_t * actor);
 bool P_CreateAggression(mobj_t * actor);
 bool P_CheckMeleeRange(mobj_t * actor);

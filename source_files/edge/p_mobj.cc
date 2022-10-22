@@ -1622,9 +1622,19 @@ void P_RemoveMobj(mobj_t *mo)
 		P_AddItemToQueue(mo);
 	}
 
+	// unlink from sector and block lists
+	P_UnsetThingFinally(mo);
+
 	// mark as REMOVED
 	mo->state = NULL;
 	mo->next_state = NULL;
+
+	mo->flags = 0;
+	mo->extendedflags = 0;
+	mo->hyperflags = 0;
+	mo->health = 0;
+	mo->tag = 0;
+	mo->tics = -1;
 
 	// Clear all references to other mobjs
 	mo->SetTarget(NULL);
@@ -1635,12 +1645,12 @@ void P_RemoveMobj(mobj_t *mo)
 	mo->SetAboveMo(NULL);
 	mo->SetBelowMo(NULL);
 
-	// unlink from sector and block lists
-	P_UnsetThingFinally(mo);
-
 	// NOTE: object is kept in mobjlist until no there are no more
-	//       references to it.  such objects may legally be stored and
-	//       restored from savegames.
+	//       references to it, and until 5 seconds has elapsed (giving time
+	//       for deaths sounds to play out).  such "zombie" objects may be
+	//       legally stored and restored from savegames.
+
+	mo->fuse = TICRATE * 5;
 }
 
 
@@ -1688,7 +1698,11 @@ void P_RunMobjThinkers(void)
 
 		if (mo->isRemoved())
 		{
-			if (mo->refcount == 0)
+			if (mo->fuse > 0)
+			{
+				mo->fuse--;
+			}
+			else if (mo->refcount == 0)
 			{
 				RemoveMobjFromList(mo);
 				DeleteMobj(mo);

@@ -309,9 +309,7 @@ int SV_MobjFindElem(mobj_t *elem)
 	return index;
 }
 
-//
-// SV_MobjCreateElems
-//
+
 void SV_MobjCreateElems(int num_elems)
 {
 	// free existing mobjs
@@ -343,34 +341,27 @@ void SV_MobjCreateElems(int num_elems)
 	}
 }
 
-//
-// SV_MobjFinaliseElems
-//
+
 void SV_MobjFinaliseElems(void)
 {
-	mobj_t *mo;
-
-	for (mo=mobjlisthead; mo; mo=mo->next)
+	for (mobj_t *mo = mobjlisthead ; mo != NULL ; mo = mo->next)
 	{
-		if (! mo->info)
+		if (mo->info == NULL)
 			mo->info = mobjtypes.Lookup(0);  // template
 
-		P_SetThingPosition(mo);
+		// do not link zombie objects into the blockmap
+		if (! mo->isRemoved())
+			P_SetThingPosition(mo);
 
 		// handle reference counts
 
-#define REF_COUNT_FIELD(field)  \
-	if (mo->field) mo->field->refcount++;
+		if (mo->tracer)     mo->tracer->refcount++;
+		if (mo->source)     mo->source->refcount++;
+		if (mo->target)     mo->target->refcount++;
+		if (mo->supportobj) mo->supportobj->refcount++;
+		if (mo->above_mo)   mo->above_mo->refcount++;
+		if (mo->below_mo)   mo->below_mo->refcount++;
 
-		REF_COUNT_FIELD(tracer);
-		REF_COUNT_FIELD(source);
-		REF_COUNT_FIELD(target);
-		REF_COUNT_FIELD(supportobj);
-		REF_COUNT_FIELD(above_mo);
-		REF_COUNT_FIELD(below_mo);
-
-#undef REF_COUNT_FIELD
-		
 		// sanity checks
 	}
 }

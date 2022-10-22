@@ -35,7 +35,7 @@ extern int bot_skill;  // 0 to 2
 // This describes what action the bot wants to do.
 // It will be translated to a ticcmd_t by P_BotPlayerBuilder.
 
-typedef struct botcmd_s
+struct botcmd_t
 {
 	int move_speed;
 	angle_t move_angle;
@@ -49,11 +49,10 @@ typedef struct botcmd_s
 	bool second_attack;
 	bool use;
 	bool jump;
-} 
-botcmd_t;
+};
 
 
-typedef struct bot_s
+struct bot_t
 {
 	struct player_s *pl;
 
@@ -72,8 +71,7 @@ typedef struct bot_s
 	angle_t strafedir;
 
 	botcmd_t cmd;
-}
-bot_t;
+};
 
 void P_BotCreate(struct player_s *pl, bool recreate);
 

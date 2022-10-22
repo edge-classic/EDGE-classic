@@ -22,9 +22,11 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "m_random.h"
+#include "p_bot.h"
 #include "p_local.h"
 #include "p_mobj.h"
 #include "p_navigate.h"
+#include "r_defs.h"
 #include "r_misc.h"
 
 // DDF
@@ -120,8 +122,29 @@ static void NAV_CollectBigItems()
 
 		big_items.push_back(big_item_c { mo->x, mo->y, mo->z + 8.0f, score });
 	}
+
+	// FIXME : if < 4 or so, try small items and/or player spawn points
 }
 
+
+position_c NAV_NextRoamPoint(bot_t *bot)
+{
+	// TODO ensure it is not different to the last few chosen points
+
+	if (big_items.empty())
+	{
+		return position_c { 0, 0, 0 };
+	}
+
+	int idx = C_Random() % (int)big_items.size();
+
+	const big_item_c& item = big_items[idx];
+
+	return position_c { item.x, item.y, item.z };
+}
+
+
+//----------------------------------------------------------------------------
 
 void NAV_AnalyseLevel()
 {

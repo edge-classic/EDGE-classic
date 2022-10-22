@@ -20,10 +20,14 @@
 #define __P_NAVIGATE_H__
 
 #include "types.h"
-#include "m_math.h"
+#include "p_mobj.h"
+
+struct bot_t;
 
 void NAV_AnalyseLevel();
 void NAV_FreeLevel();
+
+position_c NAV_NextRoamPoint(bot_t *bot);
 
 #endif  /*__P_NAVIGATE_H__*/
 

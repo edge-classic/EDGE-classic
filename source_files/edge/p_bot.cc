@@ -34,6 +34,7 @@
 #include "m_random.h"
 #include "p_bot.h"
 #include "p_local.h"
+#include "p_navigate.h"
 #include "p_weapon.h"
 #include "p_action.h"
 #include "rad_trig.h"
@@ -748,6 +749,8 @@ void P_BotCreate(player_t *p, bool recreate)
 
 void BOT_BeginLevel(void)
 {
+	if (numbots > 0)
+		NAV_AnalyseLevel();
 }
 
 
@@ -757,7 +760,7 @@ void BOT_BeginLevel(void)
 //
 void BOT_EndLevel(void)
 {
-	// FIXME bot data never freed
+	NAV_FreeLevel();
 }
 
 

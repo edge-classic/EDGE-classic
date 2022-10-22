@@ -28,7 +28,16 @@
 #include "r_misc.h"
 
 
-// TODO
+void NAV_AnalyseLevel()
+{
+	// TODO
+}
+
+
+void NAV_FreeLevel()
+{
+	// TODO
+}
 
 
 //--- editor settings ---

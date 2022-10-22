@@ -22,7 +22,8 @@
 #include "types.h"
 #include "m_math.h"
 
-// TODO
+void NAV_AnalyseLevel();
+void NAV_FreeLevel();
 
 #endif  /*__P_NAVIGATE_H__*/
 

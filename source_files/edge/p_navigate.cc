@@ -193,7 +193,7 @@ class nav_link_c
 {
 public:
 	int   dest_id = -1;
-	float length  = 0;
+	float length  =  0;
 };
 
 
@@ -278,23 +278,25 @@ static void NAV_CreateLinks()
 }
 
 
-static bool NAV_CanTraverseLink(int cur, const nav_link_c& link)
+static float NAV_TraverseLinkCost(int cur, const nav_link_c& link)
 {
 	const sector_t *s1 = subsectors[cur].sector;
 	const sector_t *s2 = subsectors[link.dest_id].sector;
 
 	// too big a step up?   FIXME check for a manual lift
 	if (s2->f_h > s1->f_h + 24.0f)
-		return false;
+		return -1;
 
 	// not enough vertical space?   FIXME check for a manual door
 	float high_f = std::max(s1->f_h, s2->f_h);
 	float  low_c = std::min(s1->c_h, s2->c_h);
 
 	if (high_f - low_c < 56.0f)
-		return false;
+		return -1;
 
-	return true;
+	// TODO if a drop-off, compute time to fall
+
+	return link.length / RUNNING_SPEED;
 }
 
 
@@ -307,7 +309,7 @@ static float NAV_EstimateH(const subsector_t * cur_sub)
 	float time = dist / RUNNING_SPEED;
 
 	// over-estimate, to account for height changes, obstacles etc
-	return time * 1.5f;
+	return time * 1.25f;
 }
 
 
@@ -398,12 +400,14 @@ static bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, s
 		if (cur < 0)
 			return false;
 
+		// reached the destination?
 		if (&subsectors[cur] == finish)
 		{
 			NAV_StorePath(path, start, finish);
 			return true;
 		}
 
+		// move current node to CLOSED set
 		nav_area_c& area = nav_areas[cur];
 		area.state = AST_Closed;
 
@@ -412,10 +416,33 @@ static bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, s
 		{
 			const nav_link_c& link = nav_links[area.first_link + k];
 
-			if (! NAV_CanTraverseLink(cur, link))
+			float cost = NAV_TraverseLinkCost(cur, link);
+			if (cost < 0)
 				continue;
 
-			// TODO
+			// we need the total traversal time
+			cost += area.G;
+
+			nav_area_c& neighbor = nav_areas[link.dest_id];
+
+			switch (neighbor.state)
+			{
+				case AST_Unseen:
+					NAV_OpenNode(&neighbor, cur, cost, NAV_EstimateH(&subsectors[link.dest_id]));
+					break;
+
+				case AST_Open:
+					// path through neighbor is worse?
+					// if (neighbor.G > cost)
+					//   neighbor.state = AST_Closed;
+					break;
+
+				case AST_Closed:
+					// re-open a closed node if its cost shrank
+					if (cost < neighbor.G)
+						NAV_OpenNode(&neighbor, cur, cost, neighbor.H);
+					break;
+			}
 		}
 	}
 

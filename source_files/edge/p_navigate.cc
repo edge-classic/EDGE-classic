@@ -146,6 +146,23 @@ position_c NAV_NextRoamPoint(bot_t *bot)
 }
 
 //----------------------------------------------------------------------------
+//  A* PATHING ALGORITHM
+//----------------------------------------------------------------------------
+
+// NOTE: for the A* algorithm, we use *time* in seconds for measuring
+//       the cost of travelling between two nodes.
+
+// player travel speed when running, in map units per second.
+#define RUNNING_SPEED  500.0
+
+
+enum astar_state_e
+{
+	AST_Unseen = 0,   // not visited yet
+	AST_Open,         // in the open set
+	AST_Closed,       // in the closed set
+};
+
 
 class nav_area_c
 {
@@ -153,6 +170,13 @@ public:
 	int id         = 0;
 	int first_link = 0;
 	int num_links  = 0;
+
+	// info for A* path finding...
+
+	astar_state_e  state = AST_Unseen;
+	nav_area_c  * parent = NULL;
+	double G = 0;  // cost of this node (from start node)
+	double H = 0;  // estimated cost to reach end node
 
 	nav_area_c(int _id) : id(_id)
 	{ }
@@ -166,8 +190,7 @@ class nav_link_c
 {
 public:
 	nav_area_c * dest = NULL;
-
-	bool blocked = false;
+	float length = 0;
 };
 
 
@@ -220,15 +243,112 @@ static void NAV_CreateLinks()
 			// NOTE: a big height difference is allowed here, it is checked
 			//       during play (and we need to allow lowering floors etc).
 
-			// WISH: check if link is not blocked by obstacles
+			// FIXME compute length !!
+			float length = 64.0;
 
-			nav_links.push_back(nav_link_c { dest, false });
+			// WISH: check if link is blocked by obstacles
+
+			nav_links.push_back(nav_link_c { dest, length });
 			area.num_links += 1;
 
 			//DEBUG
 			// fprintf(stderr, "link area %d --> %d\n", area.id, dest->id);
 		}
 	}
+}
+
+
+static int NAV_LowestOpenF()
+{
+	// return index of the nav_area_c which is in the OPEN set and has the
+	// lowest F value, where F = G + H.  returns -1 if OPEN set is empty.
+
+	// this is a brute force search -- consider OPTIMISING it...
+
+	int result = -1;
+	double best_F = 9e99;
+
+	for (int i = 0 ; i < (int)nav_areas.size() ; i++)
+	{
+		const nav_area_c& area = nav_areas[i];
+
+		if (area.state == AST_Open)
+		{
+			double F = area.G + area.H;
+			if (F < best_F)
+			{
+				best_F = F;
+				result = i;
+			}
+		}
+	}
+
+	return result;
+}
+
+
+static void NAV_OpenNode(nav_area_c *area, nav_area_c *parent, double G, double H)
+{
+	area->state  = AST_Open;
+	area->parent = parent;
+	area->G      = G;
+	area->H      = H;
+}
+
+
+static void NAV_StorePath()
+{
+	// TODO
+}
+
+
+
+static bool NAV_FindPath(std::vector<subsector_t *> path, subsector_t *start, subsector_t *finish, int flags)
+{
+	// tries to find a path from start to finish (subsectors).
+	// if successful, returns true and 'path' vector will contain all the
+	// subsectors along the path (including finish but excluding start).
+	// the path may include manual lifts and doors, but more complicated
+	// things (a door activated by a nearby switch) will fail.
+
+	SYS_ASSERT(start);
+	SYS_ASSERT(finish);
+
+	// prepare all nodes
+	for (nav_area_c& area : nav_areas)
+	{
+		area.state = AST_Unseen;
+	}
+
+	NAV_OpenNode(NavArea(start), NULL, 0, 999 /* FIXME: H */);
+
+	for (;;)
+	{
+		int cur = NAV_LowestOpenF();
+
+		// no path at all?
+		if (cur < 0)
+			return false;
+
+		if (&subsectors[cur] == finish)
+		{
+			NAV_StorePath();
+			return true;
+		}
+
+		nav_area_c& area = nav_areas[cur];
+		area.state = AST_Closed;
+
+		// visit each neighbor node
+		for (int k = 0 ; k < area.num_links ; k++)
+		{
+			const nav_link_c& link = nav_links[area.first_link + k];
+
+			// TODO
+		}
+	}
+
+	return false;
 }
 
 //----------------------------------------------------------------------------

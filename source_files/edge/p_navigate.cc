@@ -145,6 +145,7 @@ position_c NAV_NextRoamPoint(bot_t *bot)
 	return position_c { item.x, item.y, item.z };
 }
 
+
 //----------------------------------------------------------------------------
 //  A* PATHING ALGORITHM
 //----------------------------------------------------------------------------
@@ -174,9 +175,10 @@ public:
 	// info for A* path finding...
 
 	astar_state_e  state = AST_Unseen;
-	nav_area_c  * parent = NULL;
-	double G = 0;  // cost of this node (from start node)
-	double H = 0;  // estimated cost to reach end node
+
+	int parent = -1;  // parent nav_area_c / subsector_t
+	double G   =  0;  // cost of this node (from start node)
+	double H   =  0;  // estimated cost to reach end node
 
 	nav_area_c(int _id) : id(_id)
 	{ }
@@ -287,7 +289,7 @@ static int NAV_LowestOpenF()
 }
 
 
-static void NAV_OpenNode(nav_area_c *area, nav_area_c *parent, double G, double H)
+static void NAV_OpenNode(nav_area_c *area, int parent, double G, double H)
 {
 	area->state  = AST_Open;
 	area->parent = parent;
@@ -296,20 +298,31 @@ static void NAV_OpenNode(nav_area_c *area, nav_area_c *parent, double G, double 
 }
 
 
-static void NAV_StorePath()
+static void NAV_StorePath(std::vector<subsector_t *>& path, subsector_t *start, subsector_t *finish)
 {
-	// TODO
+	path.clear();
+
+	while (finish != start)
+	{
+		path.push_back(finish);
+
+		int parent = NavArea(finish)->parent;
+		SYS_ASSERT(parent >= 0);
+
+		finish = &subsectors[parent];
+	}
 }
 
 
-
-static bool NAV_FindPath(std::vector<subsector_t *> path, subsector_t *start, subsector_t *finish, int flags)
+static bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, subsector_t *finish, int flags)
 {
 	// tries to find a path from start to finish (subsectors).
 	// if successful, returns true and 'path' vector will contain all the
-	// subsectors along the path (including finish but excluding start).
+	// subsectors along the path in REVERSE ORDER (including the finish but
+	// EXCLUDING the start subsector).
+	//
 	// the path may include manual lifts and doors, but more complicated
-	// things (a door activated by a nearby switch) will fail.
+	// things (e.g. a door activated by a nearby switch) will fail.
 
 	SYS_ASSERT(start);
 	SYS_ASSERT(finish);
@@ -317,10 +330,11 @@ static bool NAV_FindPath(std::vector<subsector_t *> path, subsector_t *start, su
 	// prepare all nodes
 	for (nav_area_c& area : nav_areas)
 	{
-		area.state = AST_Unseen;
+		area.state  = AST_Unseen;
+		area.parent = -1;
 	}
 
-	NAV_OpenNode(NavArea(start), NULL, 0, 999 /* FIXME: H */);
+	NAV_OpenNode(NavArea(start), -1, 0, 999 /* FIXME: H */);
 
 	for (;;)
 	{
@@ -332,7 +346,7 @@ static bool NAV_FindPath(std::vector<subsector_t *> path, subsector_t *start, su
 
 		if (&subsectors[cur] == finish)
 		{
-			NAV_StorePath();
+			NAV_StorePath(path, start, finish);
 			return true;
 		}
 
@@ -350,6 +364,7 @@ static bool NAV_FindPath(std::vector<subsector_t *> path, subsector_t *start, su
 
 	return false;
 }
+
 
 //----------------------------------------------------------------------------
 

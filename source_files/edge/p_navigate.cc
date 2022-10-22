@@ -22,6 +22,7 @@
 #include "dm_data.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "m_bbox.h"
 #include "m_random.h"
 #include "p_bot.h"
 #include "p_local.h"
@@ -177,8 +178,8 @@ public:
 	astar_state_e  state = AST_Unseen;
 
 	int parent = -1;  // parent nav_area_c / subsector_t
-	double G   =  0;  // cost of this node (from start node)
-	double H   =  0;  // estimated cost to reach end node
+	float G    =  0;  // cost of this node (from start node)
+	float H    =  0;  // estimated cost to reach end node
 
 	nav_area_c(int _id) : id(_id)
 	{ }
@@ -191,8 +192,8 @@ public:
 class nav_link_c
 {
 public:
-	nav_area_c * dest = NULL;
-	float length = 0;
+	int   dest_id = -1;
+	float length  = 0;
 };
 
 
@@ -200,6 +201,8 @@ public:
 // nav_area_c in this vector.
 static std::vector<nav_area_c> nav_areas;
 static std::vector<nav_link_c> nav_links;
+
+static position_c nav_finish_mid;
 
 
 static nav_area_c * NavArea(const subsector_t *sub)
@@ -212,6 +215,18 @@ static nav_area_c * NavArea(const subsector_t *sub)
 	SYS_ASSERT(id >= 0 && id < numsubsectors);
 
 	return &nav_areas[id];
+}
+
+
+static position_c NAV_CalcMiddle(const subsector_t *sub)
+{
+	position_c result;
+
+	result.x = (sub->bbox[BOXLEFT] + sub->bbox[BOXRIGHT])  * 0.5;
+	result.y = (sub->bbox[BOXTOP]  + sub->bbox[BOXBOTTOM]) * 0.5;
+	result.z = sub->sector->f_h;
+
+	return result;
 }
 
 
@@ -231,11 +246,11 @@ static void NAV_CreateLinks()
 
 		for (const seg_t *seg = sub.segs ; seg != NULL ; seg=seg->sub_next)
 		{
-			nav_area_c *dest = NavArea(seg->back_sub);
-
 			// no link for a one-sided wall
-			if (dest == NULL)
+			if (seg->back_sub == NULL)
 				continue;
+
+			int dest_id = (int)(seg->back_sub - subsectors);
 
 			// ignore player-blocking lines
 			if (! seg->miniseg)
@@ -243,20 +258,56 @@ static void NAV_CreateLinks()
 					continue;
 
 			// NOTE: a big height difference is allowed here, it is checked
-			//       during play (and we need to allow lowering floors etc).
+			//       during play (since we need to allow lowering floors etc).
 
-			// FIXME compute length !!
-			float length = 64.0;
+			// WISH: check if link is blocked by obstacle things
 
-			// WISH: check if link is blocked by obstacles
+			// compute length of link
+			auto p1 = NAV_CalcMiddle(&sub);
+			auto p2 = NAV_CalcMiddle(seg->back_sub);
 
-			nav_links.push_back(nav_link_c { dest, length });
+			float length = R_PointToDist(p1.x, p1.y, p2.x, p2.y);
+
+			nav_links.push_back(nav_link_c { dest_id, length });
 			area.num_links += 1;
 
 			//DEBUG
-			// fprintf(stderr, "link area %d --> %d\n", area.id, dest->id);
+			// fprintf(stderr, "link area %d --> %d\n", area.id, dest_id);
 		}
 	}
+}
+
+
+static bool NAV_CanTraverseLink(int cur, const nav_link_c& link)
+{
+	const sector_t *s1 = subsectors[cur].sector;
+	const sector_t *s2 = subsectors[link.dest_id].sector;
+
+	// too big a step up?   FIXME check for a manual lift
+	if (s2->f_h > s1->f_h + 24.0f)
+		return false;
+
+	// not enough vertical space?   FIXME check for a manual door
+	float high_f = std::max(s1->f_h, s2->f_h);
+	float  low_c = std::min(s1->c_h, s2->c_h);
+
+	if (high_f - low_c < 56.0f)
+		return false;
+
+	return true;
+}
+
+
+static float NAV_EstimateH(const subsector_t * cur_sub)
+{
+	auto p = NAV_CalcMiddle(cur_sub);
+
+	float dist = R_PointToDist(p.x, p.y, nav_finish_mid.x, nav_finish_mid.y);
+
+	float time = dist / RUNNING_SPEED;
+
+	// over-estimate, to account for height changes, obstacles etc
+	return time * 1.5f;
 }
 
 
@@ -268,7 +319,7 @@ static int NAV_LowestOpenF()
 	// this is a brute force search -- consider OPTIMISING it...
 
 	int result = -1;
-	double best_F = 9e99;
+	float best_F = 9e19;
 
 	for (int i = 0 ; i < (int)nav_areas.size() ; i++)
 	{
@@ -276,7 +327,7 @@ static int NAV_LowestOpenF()
 
 		if (area.state == AST_Open)
 		{
-			double F = area.G + area.H;
+			float F = area.G + area.H;
 			if (F < best_F)
 			{
 				best_F = F;
@@ -289,7 +340,7 @@ static int NAV_LowestOpenF()
 }
 
 
-static void NAV_OpenNode(nav_area_c *area, int parent, double G, double H)
+static void NAV_OpenNode(nav_area_c *area, int parent, float G, float H)
 {
 	area->state  = AST_Open;
 	area->parent = parent;
@@ -327,6 +378,9 @@ static bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, s
 	SYS_ASSERT(start);
 	SYS_ASSERT(finish);
 
+	// get coordinate of finish subsec
+	nav_finish_mid = NAV_CalcMiddle(finish);
+
 	// prepare all nodes
 	for (nav_area_c& area : nav_areas)
 	{
@@ -334,7 +388,7 @@ static bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, s
 		area.parent = -1;
 	}
 
-	NAV_OpenNode(NavArea(start), -1, 0, 999 /* FIXME: H */);
+	NAV_OpenNode(NavArea(start), -1, 0, NAV_EstimateH(start));
 
 	for (;;)
 	{
@@ -358,8 +412,8 @@ static bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, s
 		{
 			const nav_link_c& link = nav_links[area.first_link + k];
 
-			// FIXME
-			// if (! NAV_CanTraverseLink(cur, link)) continue;
+			if (! NAV_CanTraverseLink(cur, link))
+				continue;
 
 			// TODO
 		}

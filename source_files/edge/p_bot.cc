@@ -59,18 +59,12 @@ static mobj_t *lkbot_target;
 static int lkbot_score;
 
 
-static void BOT_SetTarget(bot_t *bot, mobj_t *target)
-{
-	bot->pl->mo->SetTarget(target);
-}
-
-
-static bool BOT_HasWeapon(bot_t *bot, benefit_t *benefit)
+static bool BOT_HasWeapon(bot_t *bot, weapondef_c *info)
 {
 	for (int i=0; i < MAXWEAPONS; i++)
 	{
 		if (bot->pl->weapons[i].owned &&
-			bot->pl->weapons[i].info == benefit->sub.weap)
+			bot->pl->weapons[i].info == info)
 		{
 			return true;
 		}
@@ -227,7 +221,7 @@ static int BOT_EvaluateItem(bot_t *bot, mobj_t *mo)
 		switch (list->type)
 		{
 			case BENEFIT_Weapon:
-				if (! BOT_HasWeapon(bot, list))
+				if (! BOT_HasWeapon(bot, list->sub.weap))
 					score = score + 50;
 				else if (numplayers > 1 && deathmatch != 2 && !(mo->flags & MF_DROPPED))
 					// cannot pick up in CO-OP or OLD DeathMatch
@@ -368,7 +362,7 @@ static bool BOT_LookForItems(bot_t *bot)
 
 	if (best_item)
 	{
-		BOT_SetTarget(bot, best_item);
+		bot->pl->mo->SetTarget(best_item);
 
 #if (DEBUG > 0)
 I_Printf("BOT %d: WANT item %s, score %d\n",
@@ -427,7 +421,7 @@ static bool BOT_LookForEnemies(bot_t *bot)
 		{
 			if (P_CheckSight(we, them))
 			{
-				BOT_SetTarget(bot, them);
+				bot->pl->mo->SetTarget(them);
 #if (DEBUG > 0)
 I_Printf("BOT %d: Targeting Agent: %s\n", bot->pl->pnum,
 them->info->name.c_str());
@@ -494,7 +488,7 @@ static void BOT_Chase(bot_t *bot, bool seetarget, bool move_ok)
 		// picked up the weapon).
 		if (BOT_EvaluateItem(bot, mo->target) <= 0)
 		{
-			BOT_SetTarget(bot, NULL);
+			bot->pl->mo->SetTarget(NULL);
 			return;
 		}
 
@@ -579,7 +573,7 @@ static void BOT_Chase(bot_t *bot, bool seetarget, bool move_ok)
 	}
 
 	// Target died
-	BOT_SetTarget(bot, NULL);
+	bot->pl->mo->SetTarget(NULL);
 }
 
 

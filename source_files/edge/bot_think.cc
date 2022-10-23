@@ -80,32 +80,31 @@ bool bot_t::MeleeWeapon() const
 }
 
 
-static void BOT_NewChaseDir(bot_t * bot, bool move_ok)
+void bot_t::NewChaseDir(bool move_ok)
 {
-	mobj_t *mo = bot->pl->mo;
+	mobj_t *mo = pl->mo;
 
 	// FIXME: This is not very intelligent...
 	int r = M_Random();
 
 	if (mo->target && (r % 3 == 0))
 	{
-		bot->angle = R_PointToAngle(mo->x, mo->y,
+		angle = R_PointToAngle(mo->x, mo->y,
 			mo->target->x, mo->target->y);
 	}
 	else if (mo->supportobj && (r % 3 == 1))
 	{
-		bot->angle = R_PointToAngle(mo->x, mo->y,
+		angle = R_PointToAngle(mo->x, mo->y,
 			mo->supportobj->x, mo->supportobj->y);
 	}
 	else if (move_ok)
 	{
 		angle_t diff = r - M_Random();
 
-		bot->angle += (diff << 21);
+		angle += (diff << 21);
 	}
 	else
-		bot->angle = (r << 24);
-
+		angle = (r << 24);
 }
 
 
@@ -454,20 +453,20 @@ static void BOT_SelectWeapon(bot_t *bot)
 }
 
 
-static void BOT_Move(bot_t *bot)
+void bot_t::Move()
 {
 	int skill = CLAMP(0, bot_skill.d, 2);
 
-	bot->cmd.move_speed = move_speeds[skill];
-	bot->cmd.move_angle = bot->angle + bot->strafedir;
+	cmd.move_speed = move_speeds[skill];
+	cmd.move_angle = angle + strafedir;
 }
 
 
-static void BOT_Chase(bot_t *bot, bool seetarget, bool move_ok)
+void bot_t::Chase(bool seetarget, bool move_ok)
 {
 	int skill = CLAMP(0, bot_skill.d, 2);
 
-	mobj_t *mo = bot->pl->mo;
+	mobj_t *mo = pl->mo;
 
 #if (DEBUG > 1)
 		I_Printf("BOT %d: Chase %s dist %1.1f angle %1.0f | %s\n",
@@ -481,44 +480,44 @@ static void BOT_Chase(bot_t *bot, bool seetarget, bool move_ok)
 	{
 		// have we stopped needed it? (maybe it is old DM and we
 		// picked up the weapon).
-		if (BOT_EvaluateItem(bot, mo->target) <= 0)
+		if (BOT_EvaluateItem(this, mo->target) <= 0)
 		{
-			bot->pl->mo->SetTarget(NULL);
+			pl->mo->SetTarget(NULL);
 			return;
 		}
 
 		// If there is a wall or something in the way, pick a new direction.
-		if (!move_ok || bot->move_count < 0)
+		if (!move_ok || move_count < 0)
 		{
 			if (seetarget && move_ok)
-				bot->cmd.face_target = true;
+				cmd.face_target = true;
 
-			bot->angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
-			bot->strafedir = 0;
-			bot->move_count = 10 + (M_Random() & 31);
+			angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
+			strafedir = 0;
+			move_count = 10 + (M_Random() & 31);
 
 			if (!move_ok)
 			{
 				int r = M_Random();
 
 				if (r < 10)
-					bot->angle = M_Random() << 24;
+					angle = M_Random() << 24;
 				else if (r < 60)
-					bot->strafedir = ANG90;
+					strafedir = ANG90;
 				else if (r < 110)
-					bot->strafedir = ANG270;
+					strafedir = ANG270;
 			}
 		}
-		else if (bot->move_count < 0)
+		else if (move_count < 0)
 		{
 			// Move in the direction of the item.
-			bot->angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
-			bot->strafedir = 0;
+			angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
+			strafedir = 0;
 
-			bot->move_count = 10 + (M_Random() & 31);
+			move_count = 10 + (M_Random() & 31);
 		}
 
-		BOT_Move(bot);
+		Move();
 		return;
 	}
 
@@ -529,46 +528,46 @@ static void BOT_Chase(bot_t *bot, bool seetarget, bool move_ok)
 		if (seetarget)
 		{
 			// So face it,
-			bot->angle = R_PointToAngle(mo->x, mo->y,
+			angle = R_PointToAngle(mo->x, mo->y,
 				mo->target->x, mo->target->y);
 
-			bot->cmd.face_target = true;
+			cmd.face_target = true;
 
 			// Shoot it,
-			bot->cmd.attack = M_Random() < attack_chances[skill];
+			cmd.attack = M_Random() < attack_chances[skill];
 
-			if (bot->move_count < 0)
+			if (move_count < 0)
 			{
-				bot->move_count = 20 + (M_Random() & 63);
-				bot->strafedir = 0;
+				move_count = 20 + (M_Random() & 63);
+				strafedir = 0;
 
-				if (bot->MeleeWeapon())
+				if (MeleeWeapon())
 				{
 					// run directly toward target
 				}
 				else if (M_Random() < strafe_chances[skill])
 				{
 					// strafe it.
-					bot->strafedir = (M_Random()%5 - 2) * (int)ANG45;
+					strafedir = (M_Random()%5 - 2) * (int)ANG45;
 				}
 			}
 		}
 
 		// chase towards target
-		if (bot->move_count < 0 || !move_ok)
+		if (move_count < 0 || !move_ok)
 		{
-			BOT_NewChaseDir(bot, move_ok);
+			NewChaseDir(move_ok);
 
-			bot->move_count = 10 + (M_Random() & 31);
-			bot->strafedir = 0;
+			move_count = 10 + (M_Random() & 31);
+			strafedir = 0;
 		}
 
-		BOT_Move(bot);
+		Move();
 		return;
 	}
 
 	// Target died
-	bot->pl->mo->SetTarget(NULL);
+	pl->mo->SetTarget(NULL);
 }
 
 
@@ -645,20 +644,20 @@ void bot_t::Think()
 
 	if (mo->target)
 	{
-		BOT_Chase(this, seetarget, move_ok);
+		Chase(seetarget, move_ok);
 	}
 	else
 	{
 		// Wander around.
 		if (!move_ok || move_count < 0)
 		{
-			BOT_NewChaseDir(this, move_ok);
+			NewChaseDir(move_ok);
 
 			move_count = 10 + (M_Random() & 31);
 			strafedir = 0;
 		}
 
-		BOT_Move(this);
+		Move();
 	}
 }
 

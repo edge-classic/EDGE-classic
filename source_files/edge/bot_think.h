@@ -108,6 +108,10 @@ public: // TODO private
 
 	bool HasWeapon(weapondef_c *info) const;
 	bool MeleeWeapon() const;
+
+	void NewChaseDir(bool move_ok);
+	void Chase(bool seetarget, bool move_ok);
+	void Move();
 };
 
 void P_BotCreate(struct player_s *pl, bool recreate);

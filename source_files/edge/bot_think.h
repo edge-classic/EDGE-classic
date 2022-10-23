@@ -118,6 +118,10 @@ public: // TODO private
 	int  EvaluateWeapon(int w_num) const;
 	int  EvaluateItem(const mobj_t *mo) const;
 	void SelectWeapon();
+
+	bool LookForEnemies();
+	bool LookForItems();
+	void LineOfSight(angle_t angle);
 };
 
 void P_BotCreate(struct player_s *pl, bool recreate);

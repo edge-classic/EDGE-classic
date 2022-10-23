@@ -300,15 +300,15 @@ static bool PTR_BotLook(intercept_t * in, void *dataptr)
 }
 
 
-static void BOT_LineOfSight(bot_t *bot, angle_t angle)
+void bot_t::LineOfSight(angle_t angle)
 {
-	looking_bot = bot;
+	looking_bot = this;
 
 	lkbot_target = NULL;
 	lkbot_score  = 0;
 
-	float x1 = bot->pl->mo->x;
-	float y1 = bot->pl->mo->y;
+	float x1 = pl->mo->x;
+	float y1 = pl->mo->y;
 	float x2 = x1 + 1024 * M_Cos(angle);
 	float y2 = y1 + 1024 * M_Sin(angle);
 
@@ -319,7 +319,7 @@ static void BOT_LineOfSight(bot_t *bot, angle_t angle)
 
 
 // Finds items for the bot to get.
-static bool BOT_LookForItems(bot_t *bot)
+bool bot_t::LookForItems()
 {
 	mobj_t *best_item  = NULL;
 	int     best_score = 0;
@@ -327,7 +327,7 @@ static bool BOT_LookForItems(bot_t *bot)
 	int search = 6;
 
 	// If we are confident, hunt more than gather.
-	if (bot->confidence > 0)
+	if (confidence > 0)
 		search = 1;
 
 	// Find some stuff!
@@ -335,7 +335,7 @@ static bool BOT_LookForItems(bot_t *bot)
 	{
 		angle_t diff = (int)(ANG45/4) * i;
 
-		BOT_LineOfSight(bot, bot->angle + diff);
+		LineOfSight(angle + diff);
 			
 		if (lkbot_target)
 		{
@@ -349,13 +349,12 @@ static bool BOT_LookForItems(bot_t *bot)
 
 	if (best_item)
 	{
-		bot->pl->mo->SetTarget(best_item);
-
 #if (DEBUG > 0)
 I_Printf("BOT %d: WANT item %s, score %d\n",
-bot->pl->pnum, best_item->info->name.c_str(), best_score);
+	pl->pnum, best_item->info->name.c_str(), best_score);
 #endif
 
+		pl->mo->SetTarget(best_item);
 		return true;
 	}
 
@@ -364,12 +363,11 @@ bot->pl->pnum, best_item->info->name.c_str(), best_score);
 
 
 // Based on P_LookForTargets from p_enemy.c
-static bool BOT_LookForEnemies(bot_t *bot)
+bool bot_t::LookForEnemies()
 {
-	mobj_t *we = bot->pl->mo;
-	mobj_t *them;
+	mobj_t *we = pl->mo;
 
-	for (them = mobjlisthead; them; them = them->next)
+	for (mobj_t *them = mobjlisthead ; them != NULL ; them = them->next)
 	{
 		if (! (them->flags & MF_SHOOTABLE))
 			continue;
@@ -384,7 +382,7 @@ static bool BOT_LookForEnemies(bot_t *bot)
 		bool same_side = ((them->side & we->side) != 0);
 
 		if (them->player && same_side &&
-			!we->supportobj && them->supportobj != we)
+			! we->supportobj && them->supportobj != we)
 		{
 			if (them->supportobj && P_CheckSight(we, them->supportobj))
 			{
@@ -408,10 +406,9 @@ static bool BOT_LookForEnemies(bot_t *bot)
 		{
 			if (P_CheckSight(we, them))
 			{
-				bot->pl->mo->SetTarget(them);
+				pl->mo->SetTarget(them);
 #if (DEBUG > 0)
-I_Printf("BOT %d: Targeting Agent: %s\n", bot->pl->pnum,
-them->info->name.c_str());
+I_Printf("BOT %d: Targeting Agent: %s\n", bot->pl->pnum, them->info->name.c_str());
 #endif
 				return true;
 			}
@@ -619,7 +616,7 @@ void bot_t::Think()
 	// If we aren't confident, gather more than fight.
 	if (!seetarget && patience < 0 && confidence >= 0)
 	{
-		seetarget = BOT_LookForEnemies(this);
+		seetarget = LookForEnemies();
 
 		if (mo->target)
 			patience = 20 + (M_Random() & 31) * 4;
@@ -628,7 +625,7 @@ void bot_t::Think()
 	// Can't see a target || don't have a suitable weapon to take it out with?
 	if (!seetarget && patience < 0)
 	{
-		seetarget = BOT_LookForItems(this);
+		seetarget = LookForItems();
 
 		if (mo->target)
 			patience = 30 + (M_Random() & 31) * 8;

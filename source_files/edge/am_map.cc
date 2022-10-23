@@ -366,7 +366,8 @@ bool AM_Responder(event_t * ev)
 
 	// Had to move the automap cheat check up here thanks to Heretic's 'ravmap' cheat - Dasho
 	// -ACB- 1999/09/28 Proper casting
-	if (!DEATHMATCH() && M_CheckCheat(&cheat_amap, (char)sym))
+	// -AJA- 2022: allow this in deathmatch (as we don't have real multiplayer)
+	if (M_CheckCheat(&cheat_amap, (char)sym))
 	{
 		cheating = (cheating + 1) % 3;
 

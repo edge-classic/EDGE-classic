@@ -29,6 +29,8 @@
 #include "types.h"
 #include "e_ticcmd.h"
 
+class weapondef_c;
+
 
 // the current behavior of the bot.
 // this is very generic, more specific tasks (like using a lift) are
@@ -101,6 +103,11 @@ public:
 public:
 	void Think();
 	void ConvertTiccmd(ticcmd_t *dest);
+
+public: // TODO private
+
+	bool HasWeapon(weapondef_c *info) const;
+	bool MeleeWeapon() const;
 };
 
 void P_BotCreate(struct player_s *pl, bool recreate);

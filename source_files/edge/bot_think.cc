@@ -59,29 +59,24 @@ static mobj_t *lkbot_target;
 static int lkbot_score;
 
 
-static bool BOT_HasWeapon(bot_t *bot, weapondef_c *info)
+bool bot_t::HasWeapon(weapondef_c *info) const
 {
-	for (int i=0; i < MAXWEAPONS; i++)
-	{
-		if (bot->pl->weapons[i].owned &&
-			bot->pl->weapons[i].info == info)
-		{
+	for (int i=0 ; i < MAXWEAPONS ; i++)
+		if (pl->weapons[i].owned && pl->weapons[i].info == info)
 			return true;
-		}
-	}
 
 	return false;
 }
 
 
-static bool BOT_MeleeWeapon(bot_t *bot)
+bool bot_t::MeleeWeapon() const
 {
-	int wp_num = bot->pl->ready_wp;
+	int wp_num = pl->ready_wp;
 
-	if (bot->pl->pending_wp >= 0)
-		wp_num = bot->pl->pending_wp;
+	if (pl->pending_wp >= 0)
+		wp_num = pl->pending_wp;
 
-	return bot->pl->weapons[wp_num].info->ammo[0] == AM_NoAmmo;
+	return pl->weapons[wp_num].info->ammo[0] == AM_NoAmmo;
 }
 
 
@@ -125,7 +120,7 @@ static void BOT_Confidence(bot_t * bot)
 		bot->confidence = 1;
 	else if (mo->health < mo->info->spawnhealth / 3)
 		bot->confidence = -1;
-	else if (mo->health > mo->info->spawnhealth * 3 / 4 && ! BOT_MeleeWeapon(bot))
+	else if (mo->health > mo->info->spawnhealth * 3 / 4 && ! bot->MeleeWeapon())
 	{
         ammotype_e ammo = p->weapons[p->ready_wp].info->ammo[0];
 
@@ -221,7 +216,7 @@ static int BOT_EvaluateItem(bot_t *bot, mobj_t *mo)
 		switch (list->type)
 		{
 			case BENEFIT_Weapon:
-				if (! BOT_HasWeapon(bot, list->sub.weap))
+				if (! bot->HasWeapon(list->sub.weap))
 					score = score + 50;
 				else if (numplayers > 1 && deathmatch != 2 && !(mo->flags & MF_DROPPED))
 					// cannot pick up in CO-OP or OLD DeathMatch
@@ -547,7 +542,7 @@ static void BOT_Chase(bot_t *bot, bool seetarget, bool move_ok)
 				bot->move_count = 20 + (M_Random() & 63);
 				bot->strafedir = 0;
 
-				if (BOT_MeleeWeapon(bot))
+				if (bot->MeleeWeapon())
 				{
 					// run directly toward target
 				}

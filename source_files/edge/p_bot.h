@@ -55,9 +55,6 @@ enum bot_task_e
 };
 
 
-extern int bot_skill;  // 0 to 2
-
-
 // This describes what action the bot wants to do.
 // It will be translated to a ticcmd_t by P_BotPlayerBuilder.
 

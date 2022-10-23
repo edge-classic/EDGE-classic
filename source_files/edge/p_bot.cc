@@ -45,7 +45,8 @@
 #define DEBUG  0
 
 
-int bot_skill = 1;  // range is 0 to 2
+// this ranges from 0 (EASY) to 2 (HARD)
+DEF_CVAR(bot_skill, "1", CVAR_ARCHIVE)
 
 
 static int strafe_chances[3] = { 128, 192, 256 };
@@ -57,10 +58,12 @@ static bot_t *looking_bot;
 static mobj_t *lkbot_target;
 static int lkbot_score;
 
+
 static void BOT_SetTarget(bot_t *bot, mobj_t *target)
 {
 	bot->pl->mo->SetTarget(target);
 }
+
 
 static bool BOT_HasWeapon(bot_t *bot, benefit_t *benefit)
 {
@@ -76,6 +79,7 @@ static bool BOT_HasWeapon(bot_t *bot, benefit_t *benefit)
 	return false;
 }
 
+
 static bool BOT_MeleeWeapon(bot_t *bot)
 {
 	int wp_num = bot->pl->ready_wp;
@@ -85,6 +89,7 @@ static bool BOT_MeleeWeapon(bot_t *bot)
 
 	return bot->pl->weapons[wp_num].info->ammo[0] == AM_NoAmmo;
 }
+
 
 static void BOT_NewChaseDir(bot_t * bot, bool move_ok)
 {
@@ -114,6 +119,7 @@ static void BOT_NewChaseDir(bot_t * bot, bool move_ok)
 
 }
 
+
 static void BOT_Confidence(bot_t * bot)
 {
 	const player_t *p = bot->pl;
@@ -133,6 +139,7 @@ static void BOT_Confidence(bot_t * bot)
 			bot->confidence = 1;
 	}
 }
+
 
 static int BOT_EvaluateWeapon(bot_t *bot, int w_num)
 {
@@ -206,6 +213,7 @@ static int BOT_EvaluateWeapon(bot_t *bot, int w_num)
 	return (int)value;
 }
 
+
 static int BOT_EvaluateItem(bot_t *bot, mobj_t *mo)
 {
 	player_t *pl = bot->pl;
@@ -262,6 +270,7 @@ static int BOT_EvaluateItem(bot_t *bot, mobj_t *mo)
 	return score;
 }
 
+
 static bool PTR_BotLook(intercept_t * in, void *dataptr)
 {
 	if (in->line)
@@ -309,6 +318,7 @@ static bool PTR_BotLook(intercept_t * in, void *dataptr)
 	return false;  // found something
 }
 
+
 static void BOT_LineOfSight(bot_t *bot, angle_t angle)
 {
 	looking_bot = bot;
@@ -325,6 +335,7 @@ static void BOT_LineOfSight(bot_t *bot, angle_t angle)
 
 	looking_bot = NULL;
 }
+
 
 // Finds items for the bot to get.
 static bool BOT_LookForItems(bot_t *bot)
@@ -369,6 +380,7 @@ bot->pl->pnum, best_item->info->name.c_str(), best_score);
 
 	return false;
 }
+
 
 // Based on P_LookForTargets from p_enemy.c
 static bool BOT_LookForEnemies(bot_t *bot)
@@ -428,6 +440,7 @@ them->info->name.c_str());
 	return false;
 }
 
+
 static void BOT_SelectWeapon(bot_t *bot)
 {
 	int best = bot->pl->ready_wp;
@@ -451,14 +464,20 @@ static void BOT_SelectWeapon(bot_t *bot)
 	}
 }
 
+
 static void BOT_Move(bot_t *bot)
 {
-	bot->cmd.move_speed = move_speeds[bot_skill];
+	int skill = CLAMP(0, bot_skill.d, 2);
+
+	bot->cmd.move_speed = move_speeds[skill];
 	bot->cmd.move_angle = bot->angle + bot->strafedir;
 }
 
+
 static void BOT_Chase(bot_t *bot, bool seetarget, bool move_ok)
 {
+	int skill = CLAMP(0, bot_skill.d, 2);
+
 	mobj_t *mo = bot->pl->mo;
 
 #if (DEBUG > 1)
@@ -527,7 +546,7 @@ static void BOT_Chase(bot_t *bot, bool seetarget, bool move_ok)
 			bot->cmd.face_target = true;
 
 			// Shoot it,
-			bot->cmd.attack = M_Random() < attack_chances[bot_skill];
+			bot->cmd.attack = M_Random() < attack_chances[skill];
 
 			if (bot->move_count < 0)
 			{
@@ -538,7 +557,7 @@ static void BOT_Chase(bot_t *bot, bool seetarget, bool move_ok)
 				{
 					// run directly toward target
 				}
-				else if (M_Random() < strafe_chances[bot_skill])
+				else if (M_Random() < strafe_chances[skill])
 				{
 					// strafe it.
 					bot->strafedir = (M_Random()%5 - 2) * (int)ANG45;
@@ -704,8 +723,6 @@ static void BOT_ConvertToTiccmd(bot_t *bot, ticcmd_t *dest, botcmd_t *src)
 }
 
 
-//----------------------------------------------------------------------------
-
 
 void P_BotPlayerBuilder(const player_t *p, void *data, ticcmd_t *cmd)
 {
@@ -724,6 +741,8 @@ void P_BotPlayerBuilder(const player_t *p, void *data, ticcmd_t *cmd)
 	BOT_ConvertToTiccmd(bot, cmd, &bot->cmd);
 }
 
+
+//----------------------------------------------------------------------------
 
 //
 // Converts the player (which should be empty, i.e. neither a network

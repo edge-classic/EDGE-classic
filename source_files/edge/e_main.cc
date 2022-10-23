@@ -1521,6 +1521,7 @@ static void E_Startup(void)
 
 	HU_Init();
 	CON_Start();
+	CON_CreateQuitScreen();
 	SpecialWadVerify();
 	W_BuildNodes();
 	M_InitMiscConVars();

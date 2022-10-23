@@ -62,32 +62,12 @@ static visible_t con_visible;
 static int conwipeactive = 0;
 static int conwipepos = 0;
 static font_c *con_font;
-static font_c *endoom_font;
+font_c *endoom_font;
 
 // the console's background
 static style_c *console_style;
 
 static rgbcol_t current_color;
-
-const rgbcol_t endoom_colors[16] = 
-{
-0x000000,
-0x0000AA,
-0x00AA00,
-0x00AAAA,
-0xAA0000,
-0xAA00AA,
-0xAA5500,
-0xAAAAAA,
-0x555555,
-0x5555FF,
-0x55FF55,
-0x55FFFF,
-0xFF5555,
-0xFF55FF,
-0xFFFF55,
-0xFFFFFF
-};
 
 extern void E_ProgressMessage(const char *message);
 
@@ -96,47 +76,13 @@ extern void E_ProgressMessage(const char *message);
 // TODO: console var
 #define MAX_CON_LINES  160
 
-class console_line_c
-{
-public:
-	std::string line;
-
-	rgbcol_t color;
-
-	std::vector<byte> endoom_bytes;
-
-public:
-	console_line_c(const std::string& text, rgbcol_t _col = T_LGREY) :
-		line(text), color(_col) 
-	{ }
-
-	console_line_c(const char *text, rgbcol_t _col = T_LGREY) :
-		line(text), color(_col)
-	{ }
-
-	~console_line_c()
-	{ }
-
-	void Append(const char *text)
-	{
-		line = line + std::string(text);
-	}
-
-	void AppendEndoom(byte endoom_byte)
-	{
-		endoom_bytes.push_back(endoom_byte);
-	}
-
-	void Clear()
-	{
-		line.clear();
-		endoom_bytes.clear();
-	}
-};
+// For Quit Screen ENDOOM (create once, always store)
+console_line_c * quit_lines[ENDOOM_LINES];
+static int quit_used_lines = 0;
+static bool quit_partial_last_line = false;
 
 // entry [0] is the bottom-most one
 static console_line_c * console_lines[MAX_CON_LINES];
-
 static int con_used_lines = 0;
 static bool con_partial_last_line = false;
 
@@ -150,7 +96,7 @@ static int bottomrow = -1;
 static char input_line[MAX_CON_INPUT+2];
 static int  input_pos = 0;
 
-static int con_cursor;
+int con_cursor;
 
 
 #define KEYREPEATDELAY ((250 * TICRATE) / 1000)
@@ -250,6 +196,68 @@ static void CON_EndoomAddLine(byte endoom_byte, const char *s, bool partial)
 		con_used_lines++;
 }
 
+static void CON_QuitAddLine(const char *s, bool partial)
+{
+	if (quit_partial_last_line)
+	{
+		SYS_ASSERT(quit_lines[0]);
+
+		quit_lines[0]->Append(s);
+
+		quit_partial_last_line = partial;
+		return;
+	}
+
+	// scroll everything up 
+
+	delete quit_lines[ENDOOM_LINES-1];
+
+	for (int i = ENDOOM_LINES-1; i > 0; i--)
+		quit_lines[i] = quit_lines[i-1];
+
+	rgbcol_t col = current_color;
+
+	quit_lines[0] = new console_line_c(s, col);
+
+	quit_partial_last_line = partial;
+
+	if (quit_used_lines < ENDOOM_LINES)
+		quit_used_lines++;
+}
+
+static void CON_QuitEndoomAddLine(byte endoom_byte, const char *s, bool partial)
+{
+	if (quit_partial_last_line)
+	{
+		SYS_ASSERT(quit_lines[0]);
+
+		quit_lines[0]->Append(s);
+
+		quit_lines[0]->AppendEndoom(endoom_byte);
+
+		quit_partial_last_line = partial;
+		return;
+	}
+
+	// scroll everything up 
+
+	delete quit_lines[ENDOOM_LINES-1];
+
+	for (int i = ENDOOM_LINES-1; i > 0; i--)
+		quit_lines[i] = quit_lines[i-1];
+
+	rgbcol_t col = current_color;
+
+	quit_lines[0] = new console_line_c(s, col);
+
+	quit_lines[0]->AppendEndoom(endoom_byte);
+
+	quit_partial_last_line = partial;
+
+	if (quit_used_lines < ENDOOM_LINES)
+		quit_used_lines++;
+}
+
 static void CON_AddCmdHistory(const char *s)
 {
 	// don't add if same as previous command
@@ -322,7 +330,6 @@ static void StripWhitespace(char *src)
 
 	*src = 0;
 }
-
 
 static void SplitIntoLines(char *src)
 {
@@ -398,6 +405,80 @@ static void EndoomSplitIntoLines(byte endoom_byte, char *src)
 	current_color = T_LGREY;
 }
 
+static void QuitSplitIntoLines(char *src)
+{
+	char *dest = src;
+	char *line = dest;
+
+	while (*src)
+	{
+		if (*src == '\n')
+		{
+			*dest++ = 0;
+
+			CON_QuitAddLine(line, false);
+
+			line = dest;
+
+			src++; continue;
+		}
+
+		// disregard if outside of extended ASCII range
+		if (*src > 128 || *src < -128)
+		{
+			src++; continue;
+		}
+
+		*dest++ = *src++;
+	}
+
+	*dest++ = 0;
+
+	if (line[0])
+	{
+		CON_QuitAddLine(line, true);
+	}
+
+	current_color = T_LGREY;
+}
+
+static void QuitEndoomSplitIntoLines(byte endoom_byte, char *src)
+{
+	char *dest = src;
+	char *line = dest;
+
+	while (*src)
+	{
+		if (*src == '\n')
+		{
+			*dest++ = 0;
+
+			CON_QuitAddLine(line, false);
+
+			line = dest;
+
+			src++; continue;
+		}
+
+		// disregard if outside of extended ASCII range
+		if (*src > 128 || *src < -128)
+		{
+			src++; continue;
+		}
+
+		*dest++ = *src++;
+	}
+
+	*dest++ = 0;
+
+	if (line[0])
+	{
+		CON_QuitEndoomAddLine(endoom_byte, line, true);
+	}
+
+	current_color = T_LGREY;
+}
+
 void CON_Printf(const char *message, ...)
 {
 	va_list argptr;
@@ -420,6 +501,30 @@ void CON_EndoomPrintf(byte endoom_byte, const char *message, ...)
 	va_end(argptr);
 
 	EndoomSplitIntoLines(endoom_byte, buffer);
+}
+
+void CON_QuitPrintf(const char *message, ...)
+{
+	va_list argptr;
+	char buffer[1024];
+
+	va_start(argptr, message);
+	vsprintf(buffer, message, argptr);
+	va_end(argptr);
+
+	QuitSplitIntoLines(buffer);
+}
+
+void CON_QuitEndoomPrintf(byte endoom_byte, const char *message, ...)
+{
+	va_list argptr;
+	char buffer[1024];
+
+	va_start(argptr, message);
+	vsprintf(buffer, message, argptr);
+	va_end(argptr);
+
+	QuitEndoomSplitIntoLines(endoom_byte, buffer);
 }
 
 void CON_Message(const char *message,...)
@@ -1685,6 +1790,45 @@ void CON_PrintEndoom(int en_lump)
 		if (row_counter == 80) 
 		{
 			CON_Printf("\n");
+			row_counter = 0;
+		}
+	}
+	W_DoneWithLump(data);
+}
+
+void CON_CreateQuitScreen()
+{
+	int en_lump = W_CheckNumForName("ENDOOM");
+	if (en_lump == -1)
+		en_lump = W_CheckNumForName("ENDTEXT");
+	if (en_lump == -1)
+		en_lump = W_CheckNumForName("ENDBOOM");
+	if (en_lump == -1)
+	{
+		CON_Printf("No ENDOOM screen found for this WAD!\n");
+		return;
+	}
+	int length;
+	byte *data = (byte *)W_LoadLump(en_lump, &length);
+	if (!data)
+	{
+		CON_Printf("CON_CreateQuitScreen: Failed to read data lump!\n");
+		return;
+	}
+	if (length != 4000)
+	{
+		CON_Printf("CON_CreateQuitScreen: Lump exists, but is malformed! (Length not equal to 4000 bytes)\n");
+		W_DoneWithLump(data);
+		return;
+	}
+	int row_counter = 0;
+	for (int i = 0; i < 4000; i+=2)
+	{
+		CON_QuitEndoomPrintf(data[i+1], "%c", ((int)data[i] == 0 || (int)data[i] == 255) ? 0x20 : (int)data[i]);
+		row_counter++;
+		if (row_counter == 80) 
+		{
+			CON_QuitPrintf("\n");
 			row_counter = 0;
 		}
 	}

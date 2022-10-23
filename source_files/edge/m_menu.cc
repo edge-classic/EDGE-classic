@@ -2378,6 +2378,14 @@ static std::string GetMiddle(std::string& str, int pos, int len)
 
 static void DrawMessage(void)
 {
+
+	if (message_key_routine == QuitResponse && !dialog_style->bg_image) // Respect dialog styles with custom backgrounds
+	{
+		I_StartFrame(); // To clear and ensure solid black background regardless of style
+		HUD_DrawQuitScreen();
+		return;
+	}
+
 	//short x; // Seems unused for now - Dasho
 	short y;
 

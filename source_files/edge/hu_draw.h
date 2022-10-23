@@ -116,6 +116,9 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 // draw a text string with the current font, current color (etc).
 void HUD_DrawText(float x, float y, const char *str, float size = 0);
 
+// Draw the ENDOOM/Quit screen
+void HUD_DrawQuitScreen();
+
 // render a view of the world using the given camera object.
 void HUD_RenderWorld(float x, float y, float w, float h, mobj_t *camera, int flags);
 

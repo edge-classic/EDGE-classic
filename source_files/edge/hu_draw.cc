@@ -21,6 +21,8 @@
 
 #include "font.h"
 
+#include "con_main.h"
+
 #include "am_map.h"
 #include "g_game.h"
 #include "r_misc.h"
@@ -43,9 +45,11 @@
 // FIXME: this seems totally arbitrary, review it.
 #define VERT_SPACING  2.0f
 
+extern console_line_c * quit_lines[ENDOOM_LINES];
+extern int con_cursor;
+extern font_c *endoom_font;
 
 static font_c *default_font;
-
 
 extern int gametic;
 int hudtic;
@@ -827,7 +831,6 @@ float HUD_StringHeight(const char *str)
 	return lines * HUD_FontHeight() + (lines - 1) * VERT_SPACING;
 }
 
-
 void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float size)
 {
 	float sc_x = cur_scale; // TODO * aspect;
@@ -885,6 +888,108 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 				  cur_alpha, cur_color, NULL, 0.0, 0.0, (int)ch);
 }
 
+void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img, char ch, rgbcol_t color1, rgbcol_t color2, bool blink)
+{
+	float sc_x = cur_scale; // TODO * aspect;
+	float sc_y = cur_scale;
+
+	float x = left_x - IM_OFFSETX(img) * sc_x;
+	float y = top_y  - IM_OFFSETY(img) * sc_y;
+
+	float w, h;
+	float tx1, tx2, ty1, ty2;
+
+	int character = int((byte)ch);
+
+	if (blink && con_cursor >= 16)
+		character = 0x20;
+
+	int px =      character % 16;
+	int py = 15 - character / 16;
+	tx1 = (px  ) * endoom_font->font_image->ratio_w;
+	tx2 = (px+1) * endoom_font->font_image->ratio_w;
+	ty1 = (py  ) * endoom_font->font_image->ratio_h;
+	ty2 = (py+1) * endoom_font->font_image->ratio_h;
+
+	w = FNX;
+	h = FNX * 2;
+	float hx1 = x;
+	float hy1 = y;
+
+	float old_alpha = cur_alpha;
+
+	cur_alpha = 1.0f;
+
+	float r = 1.0f, g = 1.0f, b = 1.0f;
+
+	r = RGB_RED(color2) / 255.0;
+	g = RGB_GRN(color2) / 255.0;
+	b = RGB_BLU(color2) / 255.0;
+
+	glDisable(GL_TEXTURE_2D);
+
+	glColor4f(r, g, b, cur_alpha);
+	
+	glBegin(GL_QUADS);
+
+	glVertex2f(hx1, hy1);
+
+	glVertex2f(hx1, hy1 + h);
+
+	glVertex2f(hx1 + w, hy1 + h);
+
+	glVertex2f(hx1 + w, hy1);
+
+	glEnd();
+
+	r = RGB_RED(color1) / 255.0;
+	g = RGB_GRN(color1) / 255.0;
+	b = RGB_BLU(color1) / 255.0;
+
+	glEnable(GL_TEXTURE_2D);
+
+	GLuint tex_id = W_ImageCache(img, true, (const colourmap_c *)0, true);
+	glBindTexture(GL_TEXTURE_2D, tex_id);
+
+	if (cur_alpha >= 0.99f && img->opacity == OPAC_Solid)
+		glDisable(GL_ALPHA_TEST);
+	else
+	{
+		glEnable(GL_ALPHA_TEST);
+
+		if (! (cur_alpha < 0.11f || img->opacity == OPAC_Complex))
+			glAlphaFunc(GL_GREATER, cur_alpha * 0.66f);
+	}
+
+	glColor4f(r, g, b, cur_alpha);
+
+	glBegin(GL_QUADS);
+
+	// I really eyeballed this
+	float width_adjust = FNX / 2;
+
+	glTexCoord2f(tx1, ty1);
+	glVertex2f(hx1 - width_adjust, hy1);
+
+	glTexCoord2f(tx2, ty1); 
+	glVertex2f(hx1 + w + width_adjust, hy1);
+
+	glTexCoord2f(tx2, ty2);
+	glVertex2f(hx1 + w + width_adjust, hy1 + h);
+
+	glTexCoord2f(tx1, ty2);
+	glVertex2f(hx1 - width_adjust, hy1 + h);
+
+	glEnd();
+
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_BLEND);
+
+	glAlphaFunc(GL_GREATER, 0);
+
+	cur_alpha = old_alpha;
+}
 
 //
 // Write a string using the current font
@@ -962,6 +1067,46 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 	}
 }
 
+void HUD_DrawQuitText(int line)
+{
+	SYS_ASSERT(quit_lines[line]);
+
+	float FNX = (COORD_X(320) - COORD_X(0)) / 80.0;
+	float FNY = FNX * 2;
+	float cy = COORD_Y(0) - ((25 - line) * FNY);
+	float cx = COORD_X(0);
+
+	const image_c *img = endoom_font->font_image;
+
+	SYS_ASSERT(img);
+
+	for (int i=0; i < 80; i++)
+	{
+		byte info = quit_lines[line]->endoom_bytes.at(i);
+
+		HUD_DrawEndoomChar(cx, cy, FNX, img, quit_lines[line]->line.at(i), endoom_colors[info & 15],
+			endoom_colors[(info >> 4) & 7], info & 128);
+
+		cx += FNX;
+	}
+
+	HUD_SetAlignment(0, -1);
+	HUD_DrawText(160, 185 - HUD_StringHeight("Are you sure you want to quit? (Y/N)"), "Are you sure you want to quit? (Y/N)");
+}
+
+//
+// Draw the ENDOOM screen
+//
+
+void HUD_DrawQuitScreen()
+{
+	SYS_ASSERT(endoom_font);
+
+	for (int i=0; i < ENDOOM_LINES; i++)
+	{
+		HUD_DrawQuitText(i);
+	}
+}
 
 void HUD_RenderWorld(float x, float y, float w, float h, mobj_t *camera, int flags)
 {

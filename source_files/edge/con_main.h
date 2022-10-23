@@ -23,12 +23,74 @@
 
 #include <vector>
 
+#define ENDOOM_LINES 25
+
+const rgbcol_t endoom_colors[16] = 
+{
+0x000000,
+0x0000AA,
+0x00AA00,
+0x00AAAA,
+0xAA0000,
+0xAA00AA,
+0xAA5500,
+0xAAAAAA,
+0x555555,
+0x5555FF,
+0x55FF55,
+0x55FFFF,
+0xFF5555,
+0xFF55FF,
+0xFFFF55,
+0xFFFFFF
+};
+
+class console_line_c
+{
+public:
+	std::string line;
+
+	rgbcol_t color;
+
+	std::vector<byte> endoom_bytes;
+
+public:
+	console_line_c(const std::string& text, rgbcol_t _col = T_LGREY) :
+		line(text), color(_col) 
+	{ }
+
+	console_line_c(const char *text, rgbcol_t _col = T_LGREY) :
+		line(text), color(_col)
+	{ }
+
+	~console_line_c()
+	{ }
+
+	void Append(const char *text)
+	{
+		line = line + std::string(text);
+	}
+
+	void AppendEndoom(byte endoom_byte)
+	{
+		endoom_bytes.push_back(endoom_byte);
+	}
+
+	void Clear()
+	{
+		line.clear();
+		endoom_bytes.clear();
+	}
+};
+
 void CON_TryCommand(const char *cmd);
 
 // Prints messages.  cf printf.
 void CON_Printf(const char *message,...) GCCATTR((format(printf, 1, 2)));
 
 void CON_PrintEndoom(int en_lump);
+
+void CON_CreateQuitScreen();
 
 void CON_ClearLines();
 

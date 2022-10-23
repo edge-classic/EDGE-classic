@@ -365,7 +365,7 @@ static void NAV_StorePath(std::vector<subsector_t *>& path, subsector_t *start, 
 }
 
 
-static bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, subsector_t *finish, int flags)
+bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, subsector_t *finish, int flags)
 {
 	// tries to find a path from start to finish (subsectors).
 	// if successful, returns true and 'path' vector will contain all the
@@ -431,6 +431,63 @@ static bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, s
 
 	return false;
 }
+
+
+#if 1  // DEBUG HELPER
+static void NAV_PotionUpPath(std::vector<subsector_t *>& path, subsector_t *start)
+{
+	const mobjtype_c *type = mobjtypes.Lookup(2014);
+	SYS_ASSERT(type);
+
+	for (size_t i = 0 ; i < path.size() ; i++)
+	{
+		// path is in reverse order
+		subsector_t *sub = path[path.size() - 1 - i];
+
+		position_c p1 = NAV_CalcMiddle(start);
+		position_c p2 = NAV_CalcMiddle(sub);
+
+		float length = R_PointToDist(p1.x, p1.y, p2.x, p2.y);
+
+		for (float k = 0 ; k < length ; k += 12.0)
+		{
+			float x = p1.x + (p2.x - p1.x) * k / length;
+			float y = p1.y + (p2.y - p1.y) * k / length;
+
+			P_MobjCreateObject(x, y, ONFLOORZ, type);
+		}
+
+		start = sub;
+	}
+}
+
+static void NAV_DebugFindPath(subsector_t *start, subsector_t *finish)
+{
+	std::vector<subsector_t *> path;
+
+	int start_id  = (int)(start  - subsectors);
+	int finish_id = (int)(finish - subsectors);
+
+	if (! NAV_FindPath(path, start, finish, 0))
+	{
+		CON_Printf("No path from %d --> %d\n", start_id, finish_id);
+		return;
+	}
+
+	CON_Printf("Path from %d --> %d has %d subsectors\n", start_id, finish_id, (int)path.size());
+
+	NAV_PotionUpPath(path, start);
+}
+
+void NAV_DebugFindPath(float x1, float y1, float x2, float y2)
+{
+	auto start  = R_PointInSubsector(x1, y1);
+	auto finish = R_PointInSubsector(x2, y2);
+
+	NAV_DebugFindPath(start, finish);
+}
+
+#endif
 
 
 //----------------------------------------------------------------------------

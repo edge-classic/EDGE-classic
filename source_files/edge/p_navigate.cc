@@ -378,6 +378,13 @@ bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, subsecto
 	SYS_ASSERT(start);
 	SYS_ASSERT(finish);
 
+	if (start == finish)
+	{
+		path.clear();
+		path.push_back(finish);
+		return true;
+	}
+
 	// get coordinate of finish subsec
 	nav_finish_mid = NAV_CalcMiddle(finish);
 

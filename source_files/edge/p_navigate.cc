@@ -158,14 +158,6 @@ position_c NAV_NextRoamPoint(bot_t *bot)
 #define RUNNING_SPEED  500.0
 
 
-enum astar_state_e
-{
-	AST_Unseen = 0,   // not visited yet
-	AST_Open,         // in the open set
-	AST_Closed,       // in the closed set
-};
-
-
 class nav_area_c
 {
 public:
@@ -175,11 +167,10 @@ public:
 
 	// info for A* path finding...
 
-	astar_state_e  state = AST_Unseen;
-
-	int parent = -1;  // parent nav_area_c / subsector_t
-	float G    =  0;  // cost of this node (from start node)
-	float H    =  0;  // estimated cost to reach end node
+	bool open  = false;  // in the OPEN set?
+	int parent = -1;     // parent nav_area_c / subsector_t
+	float G    =  0;     // cost of this node (from start node)
+	float H    =  0;     // estimated cost to reach end node
 
 	nav_area_c(int _id) : id(_id)
 	{ }
@@ -321,13 +312,13 @@ static int NAV_LowestOpenF()
 	// this is a brute force search -- consider OPTIMISING it...
 
 	int result = -1;
-	float best_F = 9e19;
+	float best_F = 9e18;
 
 	for (int i = 0 ; i < (int)nav_areas.size() ; i++)
 	{
 		const nav_area_c& area = nav_areas[i];
 
-		if (area.state == AST_Open)
+		if (area.open)
 		{
 			float F = area.G + area.H;
 			if (F < best_F)
@@ -342,12 +333,19 @@ static int NAV_LowestOpenF()
 }
 
 
-static void NAV_OpenNode(nav_area_c *area, int parent, float G, float H)
+static void NAV_TryOpenNode(int idx, int parent, float cost)
 {
-	area->state  = AST_Open;
-	area->parent = parent;
-	area->G      = G;
-	area->H      = H;
+	nav_area_c& area = nav_areas[idx];
+
+	if (cost < area.G)
+	{
+		area.open   = true;
+		area.parent = parent;
+		area.G      = cost;
+
+		if (area.H == 0)
+			area.H = NAV_EstimateH(&subsectors[idx]);
+	}
 }
 
 
@@ -386,11 +384,14 @@ static bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, s
 	// prepare all nodes
 	for (nav_area_c& area : nav_areas)
 	{
-		area.state  = AST_Unseen;
+		area.open   = false;
+		area.G      = 9e19;
+		area.H      = 0;
 		area.parent = -1;
 	}
 
-	NAV_OpenNode(NavArea(start), -1, 0, NAV_EstimateH(start));
+	int start_id = (int)(start - subsectors);
+	NAV_TryOpenNode(start_id, -1, 0);
 
 	for (;;)
 	{
@@ -409,7 +410,7 @@ static bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, s
 
 		// move current node to CLOSED set
 		nav_area_c& area = nav_areas[cur];
-		area.state = AST_Closed;
+		area.open = false;
 
 		// visit each neighbor node
 		for (int k = 0 ; k < area.num_links ; k++)
@@ -423,26 +424,8 @@ static bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, s
 			// we need the total traversal time
 			cost += area.G;
 
-			nav_area_c& neighbor = nav_areas[link.dest_id];
-
-			switch (neighbor.state)
-			{
-				case AST_Unseen:
-					NAV_OpenNode(&neighbor, cur, cost, NAV_EstimateH(&subsectors[link.dest_id]));
-					break;
-
-				case AST_Open:
-					// path through neighbor is worse?
-					// if (neighbor.G > cost)
-					//   neighbor.state = AST_Closed;
-					break;
-
-				case AST_Closed:
-					// re-open a closed node if its cost shrank
-					if (cost < neighbor.G)
-						NAV_OpenNode(&neighbor, cur, cost, neighbor.H);
-					break;
-			}
+			// update neighbor if this path is a better one
+			NAV_TryOpenNode(link.dest_id, cur, cost);
 		}
 	}
 

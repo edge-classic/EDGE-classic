@@ -31,6 +31,7 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "g_game.h"
+#include "m_bbox.h"
 #include "m_random.h"
 #include "p_local.h"
 #include "p_weapon.h"
@@ -560,6 +561,72 @@ void bot_t::Chase(bool seetarget, bool move_ok)
 }
 
 
+void bot_t::Roam()
+{
+	if (roam_count-- < 0)
+	{
+		roam_count = 20 * TICRATE;
+
+		if (path != NULL)
+		{
+			delete path;
+			path = NULL;
+		}
+
+		position_c p      = NAV_NextRoamPoint(this);
+		subsector_t *dest = R_PointInSubsector(p.x, p.y);
+
+		// already there?  [ TODO : dist check too ]
+		if (dest != pl->mo->subsector)
+		{
+			path = NAV_FindPath(pl->mo->subsector, dest, 0);
+		}
+
+		if (path == NULL)
+		{
+			// try again soon
+			roam_count = 2 * TICRATE;
+		}
+	}
+
+	// no path?  OH NO!!
+	if (path == NULL)
+		return;
+
+	// check if we have reached the next subsector
+	subsector_t *dest = &subsectors[path->subs.back()];
+
+	if (pl->mo->subsector == dest)
+	{
+		path->subs.pop_back();
+
+		if (path->subs.empty())
+		{
+			delete path;
+			path = NULL;
+
+			// pick a new path soon
+			roam_count = 2 * TICRATE;
+			return;
+		}
+
+		dest = &subsectors[path->subs.back()];
+	}
+
+	position_c p;
+
+	p.x = (dest->bbox[BOXLEFT] + dest->bbox[BOXRIGHT])  * 0.5;
+	p.y = (dest->bbox[BOXTOP]  + dest->bbox[BOXBOTTOM]) * 0.5;
+
+	angle = R_PointToAngle(pl->mo->x, pl->mo->y, p.x, p.y);
+	strafedir = 0;
+	cmd.face_target = false;
+
+	Move();
+}
+
+//----------------------------------------------------------------------------
+
 void bot_t::Think()
 {
 	SYS_ASSERT(pl != NULL);
@@ -583,6 +650,13 @@ void bot_t::Think()
 	if (mo->health <= 0)
 		return;
 
+	// follow a path
+	if (true)
+	{
+		Roam();
+		return;
+	}
+
 	Confidence();
 
 	float move_dx = last_x - mo->x;
@@ -590,7 +664,7 @@ void bot_t::Think()
 
 	last_x = mo->x;
 	last_y = mo->y;
-	
+
 	bool move_ok = (move_dx*move_dx + move_dy*move_dy) > 0.2;
 
 	// Check if we can see the target

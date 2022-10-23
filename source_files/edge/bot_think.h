@@ -31,6 +31,7 @@
 #include "e_ticcmd.h"
 
 class weapondef_c;
+class bot_path_c;
 
 
 // the current behavior of the bot.
@@ -92,6 +93,7 @@ public:
 	int weapon_count = 0;
 	int move_count   = 0;
 	int use_count    = 0;
+	int roam_count   = 0;
 
 	// last position, to check if we actually moved
 	float last_x = 0;
@@ -99,24 +101,26 @@ public:
 
 	angle_t strafedir = 0;
 
+	bot_path_c * path = NULL;
+
 	botcmd_t cmd;
 
 public:
 	void Think();
 	void ConvertTiccmd(ticcmd_t *dest);
 
-public: // TODO private
-
+private:
 	bool HasWeapon(const weapondef_c *info) const;
 	bool MeleeWeapon() const;
 
 	void NewChaseDir(bool move_ok);
 	void Chase(bool seetarget, bool move_ok);
 	void Move();
+	void Roam();
 
 	void Confidence();
 	int  EvaluateWeapon(int w_num) const;
-	int  EvaluateItem(const mobj_t *mo) const;
+	public: int  EvaluateItem(const mobj_t *mo) const; private:
 	void SelectWeapon();
 
 	bool LookForEnemies();

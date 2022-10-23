@@ -27,6 +27,7 @@
 #define __P_BOT_H__
 
 #include "types.h"
+#include "e_ticcmd.h"
 
 
 // the current behavior of the bot.
@@ -96,6 +97,10 @@ public:
 	angle_t strafedir = 0;
 
 	botcmd_t cmd;
+
+public:
+	void Think();
+	void ConvertTiccmd(ticcmd_t *dest);
 };
 
 void P_BotCreate(struct player_s *pl, bool recreate);

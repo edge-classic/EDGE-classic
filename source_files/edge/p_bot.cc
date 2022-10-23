@@ -583,35 +583,36 @@ static void BOT_Chase(bot_t *bot, bool seetarget, bool move_ok)
 }
 
 
-static void BOT_Think(bot_t * bot)
+void bot_t::Think()
 {
-	SYS_ASSERT(bot->pl);
-	SYS_ASSERT(bot->pl->mo);
+	SYS_ASSERT(pl != NULL);
+	SYS_ASSERT(pl->mo != NULL);
 
-	memset(&bot->cmd, 0, sizeof(botcmd_t));
-	bot->cmd.new_weapon = -1;
+	// initialize the botcmd_t
+	memset(&cmd, 0, sizeof(botcmd_t));
+	cmd.new_weapon = -1;
 
-	mobj_t *mo = bot->pl->mo;
+	mobj_t *mo = pl->mo;
 
 	// press USE button sometimes (open doors, respawn)
-	bot->use_count--;
-	if (bot->use_count < 0)
+	use_count--;
+	if (use_count < 0)
 	{
-		bot->cmd.use = true;
-		bot->use_count = 30 + M_Random()/2;
+		cmd.use = true;
+		use_count = 30 + M_Random()/2;
 	}
 
 	// Dead?
 	if (mo->health <= 0)
 		return;
 
-	BOT_Confidence(bot);
+	BOT_Confidence(this);
 
-	float move_dx = bot->last_x - mo->x;
-	float move_dy = bot->last_y - mo->y;
+	float move_dx = last_x - mo->x;
+	float move_dy = last_y - mo->y;
 
-	bot->last_x = mo->x;
-	bot->last_y = mo->y;
+	last_x = mo->x;
+	last_y = mo->y;
 	
 	bool move_ok = (move_dx*move_dx + move_dy*move_dy) > 0.2;
 
@@ -621,83 +622,81 @@ static void BOT_Think(bot_t * bot)
 		seetarget = P_CheckSight(mo, mo->target);
 	
 	// Select a suitable weapon
-	if (bot->confidence <= 0)
+	if (confidence <= 0)
 	{
-		bot->weapon_count--;
-		if (bot->weapon_count < 0)
+		weapon_count--;
+		if (weapon_count < 0)
 		{
-			BOT_SelectWeapon(bot);
-			bot->weapon_count = 30 + (M_Random() & 31) * 4;
+			BOT_SelectWeapon(this);
+			weapon_count = 30 + (M_Random() & 31) * 4;
 		}
 	}
 
-	bot->patience--;
-	bot->move_count--;
+	patience--;
+	move_count--;
 
 	// Look for enemies
 	// If we aren't confident, gather more than fight.
-	if (!seetarget && bot->patience < 0 && bot->confidence >= 0)
+	if (!seetarget && patience < 0 && confidence >= 0)
 	{
-		seetarget = BOT_LookForEnemies(bot);
+		seetarget = BOT_LookForEnemies(this);
 
 		if (mo->target)
-			bot->patience = 20 + (M_Random() & 31) * 4;
+			patience = 20 + (M_Random() & 31) * 4;
 	}
 
 	// Can't see a target || don't have a suitable weapon to take it out with?
-	if (!seetarget && bot->patience < 0)
+	if (!seetarget && patience < 0)
 	{
-		seetarget = BOT_LookForItems(bot);
+		seetarget = BOT_LookForItems(this);
 
 		if (mo->target)
-			bot->patience = 30 + (M_Random() & 31) * 8;
+			patience = 30 + (M_Random() & 31) * 8;
 	}
 
 	if (mo->target)
 	{
-		BOT_Chase(bot, seetarget, move_ok);
+		BOT_Chase(this, seetarget, move_ok);
 	}
 	else
 	{
 		// Wander around.
-		if (!move_ok || bot->move_count < 0)
+		if (!move_ok || move_count < 0)
 		{
-			BOT_NewChaseDir(bot, move_ok);
+			BOT_NewChaseDir(this, move_ok);
 
-			bot->move_count = 10 + (M_Random() & 31);
-			bot->strafedir = 0;
+			move_count = 10 + (M_Random() & 31);
+			strafedir = 0;
 		}
 
-		BOT_Move(bot);
+		BOT_Move(this);
 	}
 }
 
-//
-// Reads the botcmd_t, converts it to ticcmd_t and stores the result in dest.
-//
-static void BOT_ConvertToTiccmd(bot_t *bot, ticcmd_t *dest, botcmd_t *src)
+
+void bot_t::ConvertTiccmd(ticcmd_t *dest)
 {
-	mobj_t *mo = bot->pl->mo;
+	mobj_t *mo = pl->mo;
 
-	if (src->attack)
+	if (cmd.attack)
 		dest->buttons |= BT_ATTACK;
-	if (src->second_attack)
+	if (cmd.second_attack)
 		dest->extbuttons |= EBT_SECONDATK;
-	if (src->use)
+	if (cmd.use)
 		dest->buttons |= BT_USE;
-	if (src->new_weapon != -1)
-		dest->buttons |= (src->new_weapon << BT_WEAPONSHIFT) & BT_WEAPONMASK;
+	if (cmd.new_weapon != -1)
+		dest->buttons |= (cmd.new_weapon << BT_WEAPONSHIFT) & BT_WEAPONMASK;
 
-	dest->player_idx = bot->pl->pnum;
+	dest->player_idx = pl->pnum;
 
-	angle_t new_angle = bot->angle;
+	angle_t new_angle = angle;
 	float   new_slope = 0;		
 
-	if (src->face_target && bot->pl->mo->target != NULL)
+	if (cmd.face_target && pl->mo->target != NULL)
 	{
-		float dx = bot->pl->mo->target->x - mo->x;
-		float dy = bot->pl->mo->target->y - mo->y;
-		float dz = bot->pl->mo->target->z - mo->z;
+		float dx = pl->mo->target->x - mo->x;
+		float dy = pl->mo->target->y - mo->y;
+		float dz = pl->mo->target->z - mo->z;
 
 		new_angle = R_PointToAngle(0,0, dx,dy);
 		new_slope = P_ApproxSlope(dx, dy, dz);
@@ -710,37 +709,21 @@ static void BOT_ConvertToTiccmd(bot_t *bot, ticcmd_t *dest, botcmd_t *src)
 	dest->sidemove    = 0;
 	dest->upwardmove  = 0;
 
-	if (src->move_speed != 0)
+	if (cmd.move_speed != 0)
 	{
 		// set a to the angle relative the player.
-		angle_t a = src->move_angle - new_angle;
+		angle_t a = cmd.move_angle - new_angle;
 
-		float fm = M_Cos(a) * src->move_speed;
-		float sm = M_Sin(a) * src->move_speed;
+		float fwd  = M_Cos(a) * cmd.move_speed;
+		float side = M_Sin(a) * cmd.move_speed;
 
-		dest->forwardmove = (int)fm;
-		dest->sidemove    = (int)sm;
+		dest->forwardmove = (int)fwd;
+		dest->sidemove    = (int)side;
 	}
 
-	if (src->jump)
+	if (cmd.jump)
 		dest->upwardmove = 0x20;
 }
-
-
-void P_BotPlayerBuilder(const player_t *p, void *data, ticcmd_t *cmd)
-{
-	memset(cmd, 0, sizeof(ticcmd_t));
-
-	if (gamestate != GS_LEVEL)
-		return;
-
-	bot_t *bot = (bot_t *)data;
-	SYS_ASSERT(bot);
-
-	BOT_Think(bot);
-	BOT_ConvertToTiccmd(bot, cmd, &bot->cmd);
-}
-
 
 //----------------------------------------------------------------------------
 
@@ -761,6 +744,21 @@ void P_BotCreate(player_t *p, bool recreate)
 
 	if (! recreate)
 		sprintf(p->playername, "Bot%d", p->pnum + 1);
+}
+
+
+void P_BotPlayerBuilder(const player_t *p, void *data, ticcmd_t *cmd)
+{
+	memset(cmd, 0, sizeof(ticcmd_t));
+
+	if (gamestate != GS_LEVEL)
+		return;
+
+	bot_t *bot = (bot_t *)data;
+	SYS_ASSERT(bot);
+
+	bot->Think();
+	bot->ConvertTiccmd(cmd);
 }
 
 

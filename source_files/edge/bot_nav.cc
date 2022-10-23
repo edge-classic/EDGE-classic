@@ -348,13 +348,17 @@ static void NAV_TryOpenArea(int idx, int parent, float cost)
 }
 
 
-static void NAV_StorePath(std::vector<subsector_t *>& path, subsector_t *start, subsector_t *finish)
+static bot_path_c * NAV_StorePath(subsector_t *start, subsector_t *finish)
 {
-	path.clear();
+	bot_path_c *path = new bot_path_c;
 
-	while (finish != start)
+	for (;;)
 	{
-		path.push_back(finish);
+		int idx = (int)(finish - subsectors);
+		path->subs.push_back(idx);
+
+		if (finish == start)
+			return path;
 
 		int parent = NavArea(finish)->parent;
 		SYS_ASSERT(parent >= 0);
@@ -364,12 +368,11 @@ static void NAV_StorePath(std::vector<subsector_t *>& path, subsector_t *start, 
 }
 
 
-bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, subsector_t *finish, int flags)
+bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags)
 {
 	// tries to find a path from start to finish (subsectors).
-	// if successful, returns true and 'path' vector will contain all the
-	// subsectors along the path in REVERSE ORDER (including the finish but
-	// EXCLUDING the start subsector).
+	// if successful, returns a path (containing indices of subsectors).
+	// otherwise returns NULL.
 	//
 	// the path may include manual lifts and doors, but more complicated
 	// things (e.g. a door activated by a nearby switch) will fail.
@@ -377,11 +380,14 @@ bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, subsecto
 	SYS_ASSERT(start);
 	SYS_ASSERT(finish);
 
+	int start_id  = (int)(start  - subsectors);
+	int finish_id = (int)(finish - subsectors);
+
+	(void)finish_id;
+
 	if (start == finish)
 	{
-		path.clear();
-		path.push_back(finish);
-		return true;
+		return NAV_StorePath(start, finish);
 	}
 
 	// get coordinate of finish subsec
@@ -396,7 +402,6 @@ bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, subsecto
 		area.parent = -1;
 	}
 
-	int start_id = (int)(start - subsectors);
 	NAV_TryOpenArea(start_id, -1, 0);
 
 	for (;;)
@@ -405,13 +410,12 @@ bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, subsecto
 
 		// no path at all?
 		if (cur < 0)
-			return false;
+			return NULL;
 
 		// reached the destination?
 		if (&subsectors[cur] == finish)
 		{
-			NAV_StorePath(path, start, finish);
-			return true;
+			return NAV_StorePath(start, finish);
 		}
 
 		// move current node to CLOSED set
@@ -434,21 +438,18 @@ bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, subsecto
 			NAV_TryOpenArea(link.dest_id, cur, cost);
 		}
 	}
-
-	return false;
 }
 
 
 #if 1  // DEBUG HELPER
-static void NAV_PotionUpPath(std::vector<subsector_t *>& path, subsector_t *start)
+static void NAV_PotionUpPath(bot_path_c * path, subsector_t *start)
 {
 	const mobjtype_c *type = mobjtypes.Lookup(2014);
 	SYS_ASSERT(type);
 
-	for (size_t i = 0 ; i < path.size() ; i++)
+	for (int idx : path->subs)
 	{
-		// path is in reverse order
-		subsector_t *sub = path[path.size() - 1 - i];
+		subsector_t *sub = &subsectors[idx];
 
 		position_c p1 = NAV_CalcMiddle(start);
 		position_c p2 = NAV_CalcMiddle(sub);
@@ -469,21 +470,21 @@ static void NAV_PotionUpPath(std::vector<subsector_t *>& path, subsector_t *star
 
 static void NAV_DebugFindPath(subsector_t *start, subsector_t *finish)
 {
-	std::vector<subsector_t *> path;
-
 	int start_id  = (int)(start  - subsectors);
 	int finish_id = (int)(finish - subsectors);
 
 	if (nav_areas.empty())
 		NAV_AnalyseLevel();
 
-	if (! NAV_FindPath(path, start, finish, 0))
+	bot_path_c *path = NAV_FindPath(start, finish, 0);
+
+	if (path == NULL)
 	{
 		CON_Printf("No path from %d --> %d\n", start_id, finish_id);
 		return;
 	}
 
-	CON_Printf("Path from %d --> %d has %d subsectors\n", start_id, finish_id, (int)path.size());
+	CON_Printf("Path from %d --> %d has %d subsectors\n", start_id, finish_id, (int)path->subs.size());
 
 	NAV_PotionUpPath(path, start);
 }

@@ -25,12 +25,23 @@
 
 struct bot_t;
 
+// a path from a start subsector to a finish one.
+// elements are indices into the subsectors[] array.
+// start is NOT included, but finish is.
+class bot_path_c
+{
+public:
+	std::vector<int> subs {};
+};
+
+
 void NAV_AnalyseLevel();
 void NAV_FreeLevel();
 
 position_c NAV_NextRoamPoint(bot_t *bot);
 
-bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, subsector_t *finish, int flags);
+// attempt to find a traversible path, returns NULL if failed.
+bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags);
 
 #endif  /*__P_NAVIGATE_H__*/
 

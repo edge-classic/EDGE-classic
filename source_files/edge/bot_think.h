@@ -92,8 +92,8 @@ public:
 
 	int weapon_count = 0;
 	int move_count   = 0;
-	int use_count    = 0;
 	int roam_count   = 0;
+	int dead_count   = 0;
 
 	// last position, to check if we actually moved
 	float last_x = 0;

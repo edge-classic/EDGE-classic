@@ -638,17 +638,21 @@ void bot_t::Think()
 
 	mobj_t *mo = pl->mo;
 
-	// press USE button sometimes (open doors, respawn)
-	use_count--;
-	if (use_count < 0)
-	{
-		cmd.use = true;
-		use_count = 30 + M_Random()/2;
-	}
-
 	// Dead?
 	if (mo->health <= 0)
+	{
+		dead_count++;
+
+		// respawn after a random interval, at least one second
+		if (dead_count > 30)
+		{
+			dead_count = 0;
+
+			if (M_Random() < 90)
+				cmd.use = true;
+		}
 		return;
+	}
 
 	// follow a path
 	if (true)

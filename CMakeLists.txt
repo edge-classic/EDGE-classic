@@ -53,6 +53,8 @@ add_executable(
 	source_files/edge/i_sound.cc    
 	source_files/edge/i_net.cc      
 	source_files/edge/am_map.cc     
+	source_files/edge/bot_nav.cc     
+	source_files/edge/bot_think.cc      
 	source_files/edge/con_con.cc    
 	source_files/edge/con_main.cc   
 	source_files/edge/con_var.cc    
@@ -83,14 +85,12 @@ add_executable(
 	source_files/edge/n_network.cc  
 	source_files/edge/p_action.cc   
 	source_files/edge/p_blockmap.cc 
-	source_files/edge/p_bot.cc      
 	source_files/edge/p_enemy.cc    
 	source_files/edge/p_inter.cc    
 	source_files/edge/p_lights.cc   
 	source_files/edge/p_map.cc      
 	source_files/edge/p_maputl.cc   
 	source_files/edge/p_mobj.cc     
-	source_files/edge/p_navigate.cc     
 	source_files/edge/p_plane.cc    
 	source_files/edge/p_setup.cc    
 	source_files/edge/p_sight.cc    

@@ -46,7 +46,6 @@
 #include "m_netgame.h"
 #include "n_network.h"
 #include "n_reliable.h"
-#include "p_bot.h"
 #include "p_setup.h"
 #include "r_local.h"
 #include "s_sound.h"

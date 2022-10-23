@@ -21,6 +21,7 @@
 
 #include "types.h"
 #include "p_mobj.h"
+#include "r_defs.h"
 
 struct bot_t;
 

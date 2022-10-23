@@ -27,14 +27,14 @@
 
 #include <limits.h>
 
+#include "bot_think.h"
+#include "bot_nav.h"
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "g_game.h"
 #include "m_random.h"
-#include "p_bot.h"
 #include "p_local.h"
-#include "p_navigate.h"
 #include "p_weapon.h"
 #include "p_action.h"
 #include "rad_trig.h"

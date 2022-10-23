@@ -18,16 +18,15 @@
 
 #include "i_defs.h"
 
+#include "bot_nav.h"
 #include "con_main.h"
 #include "dm_data.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "m_bbox.h"
 #include "m_random.h"
-#include "p_bot.h"
 #include "p_local.h"
 #include "p_mobj.h"
-#include "p_navigate.h"
 #include "r_defs.h"
 #include "r_misc.h"
 #include "r_state.h"

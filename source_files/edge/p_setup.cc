@@ -45,7 +45,6 @@
 #include "m_misc.h"
 #include "m_random.h"
 #include "p_local.h"
-#include "p_bot.h"
 #include "p_setup.h"
 #include "am_map.h"
 #include "r_gldefs.h"

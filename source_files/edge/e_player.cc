@@ -38,7 +38,7 @@
 #include "hu_stuff.h"
 #include "m_argv.h"
 #include "m_random.h"
-#include "p_bot.h"
+#include "bot_think.h"
 #include "p_local.h"
 
 #include "vm_coal.h" // For VM_EndLevel()

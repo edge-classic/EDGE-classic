@@ -30,13 +30,15 @@
 
 #include "i_defs.h"
 
-#include "str_util.h"
-
-#include "main.h"
-
-#include "p_bot.h"
+#include "bot_think.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
+
+// EPI
+#include "str_util.h"
+
+// DDF
+#include "main.h"
 
 
 #undef SF

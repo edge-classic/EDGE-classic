@@ -16,6 +16,7 @@ Bugs fixed
 + Several old DEHACKED issues fixed (original AliensTC for example)
 + Conflicts between Doom graphics and PNGs causing errors are now 
   fixed (the infamous "Error occurred scanning image: xxx")
++ Do not apply invisibility effect to a zoomed weapon
 
 
 
@@ -23,11 +24,13 @@ General Improvements
 --------------------
 + Soundfont selector
 + DEH_EDGE cleanup and improvements
-+ Improved fullscreen resolution mode
++ Improved screen resolution and aspect modes
 + New ENDOOM screen for Harmony
 + Auto-detect music type for DDFPLAY
 + No longer need to press Up/JUMP key to go up ladders: Just mlook + forward is enough.
-+ Tags assigned to map things are now supported 
++ Tags assigned to map things are now supported
++ Allow multiple WAIT_UNTIL_DEAD scripts to trigger for the same object
++ Improved handling in-game messages
 
 
 
@@ -50,11 +53,14 @@ New Features
   
 + THINGS.DDF
   - New property: SIGHT_DISTANCE=<number> which is how far a thing can see in map units.
-  - 2 new actions: 
+  - New property: HEAR_DISTANCE=<number> which is how far a thing can hear the player in map units.
+  - 3 new actions: 
     - JUMP_LIQUID(state:frame,xx%) similar to the normal jump action except that it will only trigger if
       the thing is in contact with a floor flat indicated as LIQUID in DDFFLATS.
     - JUMP_SKY(state:frame,xx%) similar to the normal jump action except that it will only trigger if
       the thing is in an outdoor sector i.e. ceiling is sky.
+	- NOISE_ALERT will cause nearby monsters to be alerted. Add it to a monsters death states so his
+	  final groan will warn nearby monsters to expect trouble ;)
 
 + REKKR added as a recognized IWAD
 
@@ -90,6 +96,9 @@ New Features
 + Improved Boom, MBF and MBF21 support.
 
 + No longer necessary to specify an image type in DDFIMAGE i.e. "IMAGE_DATA=LUMP:FOOBAR;" is now permitted.
+
++ TrueType fonts now supported!
+
 
 
 CHANGELOG for EDGE-Classic 1.21 (since EDGE-Classic 1.2)

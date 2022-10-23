@@ -95,6 +95,7 @@ int key_am_clear;
 //
 
 // scale on entry
+#define  MIN_MSCALE (0.5f)
 #define INIT_MSCALE (4.0f)
 #define  MAX_MSCALE (100.0f)
 
@@ -318,7 +319,7 @@ static void ChangeWindowScale(float factor)
 {
 	m_scale *= factor;
 
-	m_scale = MAX(m_scale, 1.0);
+	m_scale = MAX(m_scale, MIN_MSCALE);
 	m_scale = MIN(m_scale, MAX_MSCALE);
 }
 

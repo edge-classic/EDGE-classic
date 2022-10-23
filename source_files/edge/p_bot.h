@@ -29,6 +29,32 @@
 #include "types.h"
 
 
+// the current behavior of the bot.
+// this is very generic, more specific tasks (like using a lift) are
+// not handled by this enumeration.
+enum bot_behavior_e
+{
+	BHV_Roam = 0,  // roaming about, often trying to get somewhere
+	BHV_Help,      // helping / following a human (in supportobj)
+	BHV_Attack,    // attacking a monster or player (in target)
+	BHV_Flee,      // fleeing from a monster or player (in target)
+};
+
+
+// specific tasks which the bot needs/wants to do.
+// these can occur in combination with the behaviors above, e.g. while
+// attacking something a bot may still want to pickup some health or
+// use a lift.
+enum bot_task_e
+{
+	TASK_None = 0,    // no task right now
+	TASK_GetItem,     // pickup a nearby item (in tracer)
+	TASK_OpenDoor,    // open a door
+	TASK_UseLift,     // lower a lift, ride it to top
+	TSAK_Teleport,    // use a teleporter
+};
+
+
 extern int bot_skill;  // 0 to 2
 
 

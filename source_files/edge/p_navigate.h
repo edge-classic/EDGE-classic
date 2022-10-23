@@ -29,6 +29,8 @@ void NAV_FreeLevel();
 
 position_c NAV_NextRoamPoint(bot_t *bot);
 
+bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, subsector_t *finish, int flags);
+
 #endif  /*__P_NAVIGATE_H__*/
 
 //--- editor settings ---

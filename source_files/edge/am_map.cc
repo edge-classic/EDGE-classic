@@ -686,8 +686,8 @@ static void AM_WalkSeg(seg_t *seg)
 		if (seg->partner && seg > seg->partner)
 			return;
 
-		GetRotatedCoords(seg->v1->x, seg->v1->y, &l.a.x, &l.a.y);
-		GetRotatedCoords(seg->v2->x, seg->v2->y, &l.b.x, &l.b.y);
+		GetRotatedCoords(seg->v1->x, seg->v1->y, l.a.x, l.a.y);
+		GetRotatedCoords(seg->v2->x, seg->v2->y, l.b.x, l.b.y);
 
 		DrawMLine(&l, RGB_MAKE(0,0,128), false);
 #endif

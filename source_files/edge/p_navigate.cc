@@ -282,7 +282,7 @@ static float NAV_TraverseLinkCost(int cur, const nav_link_c& link)
 	float high_f = std::max(s1->f_h, s2->f_h);
 	float  low_c = std::min(s1->c_h, s2->c_h);
 
-	if (high_f - low_c < 56.0f)
+	if (low_c - high_f < 56.0f)
 		return -1;
 
 	// TODO if a drop-off, compute time to fall
@@ -333,7 +333,7 @@ static int NAV_LowestOpenF()
 }
 
 
-static void NAV_TryOpenNode(int idx, int parent, float cost)
+static void NAV_TryOpenArea(int idx, int parent, float cost)
 {
 	nav_area_c& area = nav_areas[idx];
 
@@ -398,7 +398,7 @@ bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, subsecto
 	}
 
 	int start_id = (int)(start - subsectors);
-	NAV_TryOpenNode(start_id, -1, 0);
+	NAV_TryOpenArea(start_id, -1, 0);
 
 	for (;;)
 	{
@@ -432,7 +432,7 @@ bool NAV_FindPath(std::vector<subsector_t *>& path, subsector_t *start, subsecto
 			cost += area.G;
 
 			// update neighbor if this path is a better one
-			NAV_TryOpenNode(link.dest_id, cur, cost);
+			NAV_TryOpenArea(link.dest_id, cur, cost);
 		}
 	}
 
@@ -474,6 +474,9 @@ static void NAV_DebugFindPath(subsector_t *start, subsector_t *finish)
 
 	int start_id  = (int)(start  - subsectors);
 	int finish_id = (int)(finish - subsectors);
+
+	if (nav_areas.empty())
+		NAV_AnalyseLevel();
 
 	if (! NAV_FindPath(path, start, finish, 0))
 	{

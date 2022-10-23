@@ -582,10 +582,14 @@ static void BOT_Chase(bot_t *bot, bool seetarget, bool move_ok)
 	BOT_SetTarget(bot, NULL);
 }
 
+
 static void BOT_Think(bot_t * bot)
 {
 	SYS_ASSERT(bot->pl);
 	SYS_ASSERT(bot->pl->mo);
+
+	memset(&bot->cmd, 0, sizeof(botcmd_t));
+	bot->cmd.new_weapon = -1;
 
 	mobj_t *mo = bot->pl->mo;
 
@@ -723,19 +727,15 @@ static void BOT_ConvertToTiccmd(bot_t *bot, ticcmd_t *dest, botcmd_t *src)
 }
 
 
-
 void P_BotPlayerBuilder(const player_t *p, void *data, ticcmd_t *cmd)
 {
-	Z_Clear(cmd, ticcmd_t, 1);
+	memset(cmd, 0, sizeof(ticcmd_t));
 
 	if (gamestate != GS_LEVEL)
 		return;
 
 	bot_t *bot = (bot_t *)data;
 	SYS_ASSERT(bot);
-
-	Z_Clear(&bot->cmd, botcmd_t, 1);
-	bot->cmd.new_weapon = -1;
 
 	BOT_Think(bot);
 	BOT_ConvertToTiccmd(bot, cmd, &bot->cmd);
@@ -753,13 +753,11 @@ void P_BotCreate(player_t *p, bool recreate)
 {
 	bot_t *bot = new bot_t;
 
-	Z_Clear(bot, bot_t, 1);
+	bot->pl = p;
 
 	p->builder = P_BotPlayerBuilder;
 	p->build_data = (void *)bot;
 	p->playerflags |= PFL_Bot;
-
-	bot->pl = p;
 
 	if (! recreate)
 		sprintf(p->playername, "Bot%d", p->pnum + 1);

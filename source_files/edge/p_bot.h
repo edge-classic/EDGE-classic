@@ -75,23 +75,25 @@ struct botcmd_t
 };
 
 
-struct bot_t
+class bot_t
 {
-	struct player_s *pl;
+public:
+	struct player_s *pl = NULL;
 
-	int confidence;
-	int patience;
+	int confidence = 0;
+	int patience   = 0;
 
-	angle_t angle;
+	angle_t angle = 0;
 
-	int weapon_count;
-	int move_count;
-	int use_count;
+	int weapon_count = 0;
+	int move_count   = 0;
+	int use_count    = 0;
 
 	// last position, to check if we actually moved
-	float last_x, last_y;
+	float last_x = 0;
+	float last_y = 0;
 
-	angle_t strafedir;
+	angle_t strafedir = 0;
 
 	botcmd_t cmd;
 };

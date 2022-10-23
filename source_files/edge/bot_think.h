@@ -27,6 +27,7 @@
 #define __P_BOT_H__
 
 #include "types.h"
+#include "p_mobj.h"
 #include "e_ticcmd.h"
 
 class weapondef_c;
@@ -106,12 +107,17 @@ public:
 
 public: // TODO private
 
-	bool HasWeapon(weapondef_c *info) const;
+	bool HasWeapon(const weapondef_c *info) const;
 	bool MeleeWeapon() const;
 
 	void NewChaseDir(bool move_ok);
 	void Chase(bool seetarget, bool move_ok);
 	void Move();
+
+	void Confidence();
+	int  EvaluateWeapon(int w_num) const;
+	int  EvaluateItem(const mobj_t *mo) const;
+	void SelectWeapon();
 };
 
 void P_BotCreate(struct player_s *pl, bool recreate);

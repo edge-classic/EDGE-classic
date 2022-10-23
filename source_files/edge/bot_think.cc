@@ -25,8 +25,6 @@
 
 #include "i_defs.h"
 
-#include <limits.h>
-
 #include "bot_think.h"
 #include "bot_nav.h"
 #include "con_main.h"
@@ -59,7 +57,7 @@ static mobj_t *lkbot_target;
 static int lkbot_score;
 
 
-bool bot_t::HasWeapon(weapondef_c *info) const
+bool bot_t::HasWeapon(const weapondef_c *info) const
 {
 	for (int i=0 ; i < MAXWEAPONS ; i++)
 		if (pl->weapons[i].owned && pl->weapons[i].info == info)
@@ -108,48 +106,46 @@ void bot_t::NewChaseDir(bool move_ok)
 }
 
 
-static void BOT_Confidence(bot_t * bot)
+void bot_t::Confidence()
 {
-	const player_t *p = bot->pl;
-	const mobj_t *mo = p->mo;
+	const mobj_t *mo = pl->mo;
 
-	bot->confidence = 0;
+	confidence = 0;
 
-	if (p->powers[PW_Invulnerable])
-		bot->confidence = 1;
+	if (pl->powers[PW_Invulnerable])
+		confidence = 1;
 	else if (mo->health < mo->info->spawnhealth / 3)
-		bot->confidence = -1;
-	else if (mo->health > mo->info->spawnhealth * 3 / 4 && ! bot->MeleeWeapon())
+		confidence = -1;
+	else if (mo->health > mo->info->spawnhealth * 3 / 4 && ! MeleeWeapon())
 	{
-        ammotype_e ammo = p->weapons[p->ready_wp].info->ammo[0];
+        ammotype_e ammo = pl->weapons[pl->ready_wp].info->ammo[0];
 
-		if (p->ammo[ammo].num > p->ammo[ammo].max / 2)
-			bot->confidence = 1;
+		if (pl->ammo[ammo].num > pl->ammo[ammo].max / 2)
+			confidence = 1;
 	}
 }
 
 
-static int BOT_EvaluateWeapon(bot_t *bot, int w_num)
+int bot_t::EvaluateWeapon(int w_num) const
 {
-	player_t *p = bot->pl;
-	playerweapon_t *wp = p->weapons + w_num;
+	playerweapon_t *wp = pl->weapons + w_num;
 
 	// don't have this weapon
 	if (! wp->owned)
-		return INT_MIN;
+		return -9999;
 
 	weapondef_c *weapon = wp->info;
 	SYS_ASSERT(weapon);
 
 	atkdef_c *attack = weapon->attack[0];
 	if (!attack)
-		return INT_MIN;
+		return -9999;
 
 	// Don't have enough ammo
 	if (weapon->ammo[0] != AM_NoAmmo)
 	{
-		if (p->ammo[weapon->ammo[0]].num < weapon->ammopershot[0])
-			return INT_MIN;
+		if (pl->ammo[weapon->ammo[0]].num < weapon->ammopershot[0])
+			return -9999;
 	}
 
 	float value = 64 * attack->damage.nominal;
@@ -157,7 +153,7 @@ static int BOT_EvaluateWeapon(bot_t *bot, int w_num)
 	switch (attack->attackstyle)
 	{
 		case ATK_CLOSECOMBAT:
-			if (p->powers[PW_Berserk])
+			if (pl->powers[PW_Berserk])
 				value /= 10;
 			else
 				value /= 20;
@@ -193,7 +189,7 @@ static int BOT_EvaluateWeapon(bot_t *bot, int w_num)
 
 	value -= weapon->ammopershot[0] * 8;
 
-	if (w_num == p->ready_wp || w_num == p->pending_wp)
+	if (w_num == pl->ready_wp || w_num == pl->pending_wp)
 		value += 1024;
 
 	value += (M_Random() - 128) * 16;
@@ -202,20 +198,17 @@ static int BOT_EvaluateWeapon(bot_t *bot, int w_num)
 }
 
 
-static int BOT_EvaluateItem(bot_t *bot, mobj_t *mo)
+int bot_t::EvaluateItem(const mobj_t *mo) const
 {
-	player_t *pl = bot->pl;
-
 	int score = 0;
 	int ammo;
 
-	for (benefit_t *list = mo->info->pickup_benefits;
-		list != NULL; list=list->next)
+	for (benefit_t *list = mo->info->pickup_benefits ; list != NULL ; list=list->next)
 	{
 		switch (list->type)
 		{
 			case BENEFIT_Weapon:
-				if (! bot->HasWeapon(list->sub.weap))
+				if (! HasWeapon(list->sub.weap))
 					score = score + 50;
 				else if (numplayers > 1 && deathmatch != 2 && !(mo->flags & MF_DROPPED))
 					// cannot pick up in CO-OP or OLD DeathMatch
@@ -229,7 +222,7 @@ static int BOT_EvaluateItem(bot_t *bot, mobj_t *mo)
 				break;
 
 			case BENEFIT_Health:
-				if (bot->confidence < 0)
+				if (confidence < 0)
 					score = score + 40 + (int)list->amount;
 				else if (pl->health < list->limit)
 					score = score + 20;
@@ -292,7 +285,7 @@ static bool PTR_BotLook(intercept_t * in, void *dataptr)
 	if (mo->health <= 0)
 		return true;  // already been picked up
 
-	int score = BOT_EvaluateItem(looking_bot, mo);
+	int score = looking_bot->EvaluateItem(mo);
 
 	if (score <= 0)
 		return true;
@@ -429,14 +422,14 @@ them->info->name.c_str());
 }
 
 
-static void BOT_SelectWeapon(bot_t *bot)
+void bot_t::SelectWeapon()
 {
-	int best = bot->pl->ready_wp;
-	int best_val = INT_MIN;
+	int best = pl->ready_wp;
+	int best_val = -9999;
 
-	for (int i=0; i < MAXWEAPONS; i++)
+	for (int i=0 ; i < MAXWEAPONS ; i++)
 	{
-		int val = BOT_EvaluateWeapon(bot, i);
+		int val = EvaluateWeapon(i);
 
 		if (val > best_val)
 		{
@@ -445,10 +438,9 @@ static void BOT_SelectWeapon(bot_t *bot)
 		}
 	}
 
-	if (best != bot->pl->ready_wp &&
-		best != bot->pl->pending_wp)
+	if (best != pl->ready_wp && best != pl->pending_wp)
 	{
-		bot->cmd.new_weapon = best;
+		cmd.new_weapon = best;
 	}
 }
 
@@ -480,7 +472,7 @@ void bot_t::Chase(bool seetarget, bool move_ok)
 	{
 		// have we stopped needed it? (maybe it is old DM and we
 		// picked up the weapon).
-		if (BOT_EvaluateItem(this, mo->target) <= 0)
+		if (EvaluateItem(mo->target) <= 0)
 		{
 			pl->mo->SetTarget(NULL);
 			return;
@@ -594,7 +586,7 @@ void bot_t::Think()
 	if (mo->health <= 0)
 		return;
 
-	BOT_Confidence(this);
+	Confidence();
 
 	float move_dx = last_x - mo->x;
 	float move_dy = last_y - mo->y;
@@ -615,7 +607,7 @@ void bot_t::Think()
 		weapon_count--;
 		if (weapon_count < 0)
 		{
-			BOT_SelectWeapon(this);
+			SelectWeapon();
 			weapon_count = 30 + (M_Random() & 31) * 4;
 		}
 	}
@@ -642,7 +634,7 @@ void bot_t::Think()
 			patience = 30 + (M_Random() & 31) * 8;
 	}
 
-	if (mo->target)
+	if (mo->target != NULL)
 	{
 		Chase(seetarget, move_ok);
 	}

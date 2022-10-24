@@ -31,6 +31,7 @@ General Improvements
 + Tags assigned to map things are now supported
 + Allow multiple WAIT_UNTIL_DEAD scripts to trigger for the same object
 + Improved handling in-game messages
++ ENDOOM screen now integrated into quit dialog (unless custom background image is defined in STYLES.DDF)
 
 
 
@@ -39,6 +40,14 @@ New Features
 + Support OPL emulated playback of MUS and MIDI music lumps.
 
 + DSDHACKED support.
+
++ FONTS.DDF
+  - New font type: TRUETYPE ("TYPE = TRUETYPE;", as opposed to IMAGE or PATCH)
+    - Required parameters:
+      - TTF = <string>, TTF/OTF file or lump
+    - Optional parameters:
+      - TTF_DEFAULT_SIZE = <int>, default (scaled to HUD) rendering size for this font. If not provided,
+        a default value of 7 will be used.
 
 + STYLES.DDF
   - New property: ENTRY_ALIGNMENT = <string>, accepts "LEFT", "CENTER", or "RIGHT" to set text/image alignment for menu item names
@@ -61,6 +70,15 @@ New Features
       the thing is in an outdoor sector i.e. ceiling is sky.
 	- NOISE_ALERT will cause nearby monsters to be alerted. Add it to a monsters death states so his
 	  final groan will warn nearby monsters to expect trouble ;)
+
++ LINES.DDF
+  - New LINE_EFFECT: TAGGED_OFFSET_SCROLL
+    - Matches MBF21 behavior; all lines with the same tag will use this line's offsets for offset scrolling
+    - Target lines can still use their own offsets for texture alignment
+    - Scrolling speed is divided by 8 for fine tuning 
+  - New property: SCROLL_TYPE = DISPLACE or ACCEL
+    - Affects the PUSH_THINGS, SCROLL_FLOOR, SCROLL_CEILING, VECTOR_SCROLL, and TAGGED_OFFSET_SCROLL specials
+    - Matches Boom/MBF21 behavior (see https://github.com/kraflab/mbf21/blob/master/docs/spec.md under 'Linedef Types' for reference if needed)
 
 + REKKR added as a recognized IWAD
 
@@ -96,9 +114,6 @@ New Features
 + Improved Boom, MBF and MBF21 support.
 
 + No longer necessary to specify an image type in DDFIMAGE i.e. "IMAGE_DATA=LUMP:FOOBAR;" is now permitted.
-
-+ TrueType fonts now supported!
-
 
 
 CHANGELOG for EDGE-Classic 1.21 (since EDGE-Classic 1.2)

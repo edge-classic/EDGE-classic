@@ -968,21 +968,12 @@ static void IdentifyVersion(void)
 	s = getenv("DOOMWADPATH");
 	if (s)
 	{
-		std::string dir_test = s;
-    	std::string::size_type oldpos = 0;
-    	std::string::size_type pos = 0;
-    	while (pos != std::string::npos) {
 #ifdef WIN32
-        	pos = dir_test.find(';', oldpos);
+        for (auto dir : epi::STR_SepStringVector(s, ';'))
 #else
-			pos = dir_test.find(':', oldpos);
-#endif
-        	std::string dir_string = dir_test.substr(oldpos, (pos == std::string::npos ? dir_test.size() : pos) - oldpos);
-        	if (!dir_string.empty() && epi::FS_IsDir(dir_string.c_str()))
-            	iwad_dir_vector.push_back(dir_string);
-        	if (pos != std::string::npos)
-            	oldpos = pos + 1;
-    	}
+		for (auto dir : epi::STR_SepStringVector(s, ':'))
+#endif	
+			iwad_dir_vector.push_back(dir);
 	}
 
     // Should the IWAD Parameter not be empty then it means

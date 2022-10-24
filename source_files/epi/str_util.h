@@ -20,6 +20,7 @@
 #define __EPI_STR_UTIL_H__
 
 #include <string>
+#include <vector>
 
 namespace epi
 {
@@ -28,6 +29,8 @@ void str_lower(std::string& s);
 void str_upper(std::string& s);
 
 std::string STR_Format(const char *fmt, ...) GCCATTR((format(printf, 1, 2)));
+
+std::vector<std::string> STR_SepStringVector(std::string str, char separator);
 
 } // namespace epi
 

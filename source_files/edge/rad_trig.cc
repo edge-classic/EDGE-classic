@@ -36,6 +36,7 @@
 
 #include "file.h"
 #include "filesystem.h"
+#include "str_util.h"
 
 #include "dm_defs.h"
 #include "dm_state.h"
@@ -785,9 +786,9 @@ void RAD_MonsterIsDead(mobj_t *mo)
 
 		for (trig = active_triggers ; trig ; trig = trig->next)
 		{
-			for (int i=0;i < mo->wud_tags.size();i++)
+			for (auto tag : epi::STR_SepStringVector(mo->wud_tags, ','))
 			{
-				if (trig->wud_tag == mo->wud_tags.at(i))
+				if (trig->wud_tag == atoi(tag.c_str()))
 					trig->wud_count--;
 			}
 		}

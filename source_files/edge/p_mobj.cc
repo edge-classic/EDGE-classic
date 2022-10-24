@@ -1635,6 +1635,7 @@ void P_RemoveMobj(mobj_t *mo)
 	mo->health = 0;
 	mo->tag = 0;
 	mo->tics = -1;
+	mo->wud_tags.clear();
 
 	// Clear all references to other mobjs
 	mo->SetTarget(NULL);
@@ -2031,6 +2032,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
 	mobj->side = info->side;
 	mobj->model_skin = info->model_skin;
 	mobj->model_last_frame = -1;
+	mobj->wud_tags.clear();
 
 	if (level_flags.fastparm)
 	{

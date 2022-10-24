@@ -56,6 +56,7 @@ bool SR_MobjGetType(void *storage, int index, void *extra);
 bool SR_MobjGetState(void *storage, int index, void *extra);
 bool SR_MobjGetSpawnPoint(void *storage, int index, void *extra);
 bool SR_MobjGetAttack(void *storage, int index, void *extra);
+bool SR_MobjGetWUDs(void *storage, int index, void *extra);
 
 void SR_MobjPutPlayer(void *storage, int index, void *extra);
 void SR_MobjPutMobj(void *storage, int index, void *extra);
@@ -63,6 +64,7 @@ void SR_MobjPutType(void *storage, int index, void *extra);
 void SR_MobjPutState(void *storage, int index, void *extra);
 void SR_MobjPutSpawnPoint(void *storage, int index, void *extra);
 void SR_MobjPutAttack(void *storage, int index, void *extra);
+void SR_MobjPutWUDs(void *storage, int index, void *extra);
 
 //----------------------------------------------------------------------------
 //
@@ -100,6 +102,7 @@ static savefield_t sv_fields_mobj[] =
 	SF(threshold, "threshold", 1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(model_skin, "model_skin", 1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(tag, "tag", 1, SVT_INT, SR_GetInt, SR_PutInt),
+	SF(wud_tags, "wud_tags", 1, SVT_STRING, SR_MobjGetWUDs, SR_MobjPutWUDs),
 	SF(side, "side", 1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(player, "player", 1, SVT_INDEX("players"), 
 		SR_MobjGetPlayer, SR_MobjPutPlayer),
@@ -596,6 +599,35 @@ void SR_MobjPutAttack(void *storage, int index, void *extra)
 	SV_PutString((info == NULL) ? NULL : info->name.c_str());
 }
 
+bool SR_MobjGetWUDs(void *storage, int index, void *extra)
+{
+	std::string *dest = (std::string *)storage;
+
+	SYS_ASSERT(index == 0);
+
+	const char *tags = SV_GetString();
+
+	if (tags)
+	{
+		dest->resize(strlen(tags));
+		std::copy(tags, tags+strlen(tags), dest->data());
+	}
+	else
+		*dest = "";
+
+	SV_FreeString(tags);
+
+	return true;
+}
+
+void SR_MobjPutWUDs(void *storage, int index, void *extra)
+{
+	std::string *src = (std::string *)storage;
+
+	SYS_ASSERT(index == 0);
+
+	SV_PutString(src->empty() ? NULL : src->c_str());
+}
 
 //----------------------------------------------------------------------------
 

@@ -48,6 +48,8 @@
 #include "w_wad.h"
 #include "w_texture.h"
 
+#include "str_util.h"
+
 // current tip slots
 drawtip_t tip_slots[MAXTIPSLOT];
 
@@ -1079,7 +1081,10 @@ void RAD_ActWaitUntilDead(rad_trigger_t *R, void *param)
 
 		// mark the monster
 		mo->hyperflags |= HF_WAIT_UNTIL_DEAD;
-		mo->wud_tags.push_back(wud->tag);
+		if (mo->wud_tags.empty())
+			mo->wud_tags = epi::STR_Format("%d", wud->tag);
+		else
+			mo->wud_tags = epi::STR_Format("%s,%d", mo->wud_tags.c_str(), wud->tag);
 
 		R->wud_count++;
 	}

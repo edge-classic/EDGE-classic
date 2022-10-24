@@ -236,7 +236,7 @@ struct mobj_s : public position_c
 
 	// tag ID (for special operations)
 	int tag;
-	std::vector<int> wud_tags;
+	std::string wud_tags;
 
 	// Movement direction, movement generation (zig-zagging).
 	dirtype_e movedir;  // 0-7

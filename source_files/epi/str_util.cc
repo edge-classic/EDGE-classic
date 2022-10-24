@@ -71,6 +71,22 @@ std::string STR_Format(const char *fmt, ...)
 	}
 }
 
+std::vector<std::string> STR_SepStringVector(std::string str, char separator)
+{
+	std::vector<std::string> vec;
+	std::string::size_type oldpos = 0;
+	std::string::size_type pos = 0;
+	while (pos != std::string::npos) {
+		pos = str.find(separator, oldpos);
+		std::string sub_string = str.substr(oldpos, (pos == std::string::npos ? str.size() : pos) - oldpos);
+		if (!sub_string.empty())
+			vec.push_back(sub_string);
+		if (pos != std::string::npos)
+			oldpos = pos + 1;
+	}
+	return vec;
+}
+
 } // namespace epi
 
 //--- editor settings ---

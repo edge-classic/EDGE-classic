@@ -1045,23 +1045,35 @@ static bool PTR_SlideTraverse(intercept_t * in, void *dataptr)
 			return true;
 	}
 
-	// -AJA- 1999/07/19: Gaps are now stored in line_t.
+	// -AJA- 2022: allow sliding along railings (etc)
+	bool is_blocking = false;
 
-	for (int i = 0; i < ld->gap_num; i++)
+	if (slidemo->player != NULL)
 	{
-		// check if it can fit in the space
-		if (slidemo->height > ld->gaps[i].c - ld->gaps[i].f)
-			continue;
+		if (0 != (ld->flags & (MLF_Blocking | MLF_BlockPlayers)))
+			is_blocking = true;
+	}
 
-		// check slide mobj is not too high
-		if (slidemo->z + slidemo->height > ld->gaps[i].c)
-			continue;
+	if (! is_blocking)
+	{
+		// -AJA- 1999/07/19: Gaps are now stored in line_t.
 
-		// check slide mobj can step over
-		if (slidemo->z + slidemo->info->step_size < ld->gaps[i].f)
-			continue;
+		for (int i = 0; i < ld->gap_num; i++)
+		{
+			// check if it can fit in the space
+			if (slidemo->height > ld->gaps[i].c - ld->gaps[i].f)
+				continue;
 
-		return true;
+			// check slide mobj is not too high
+			if (slidemo->z + slidemo->height > ld->gaps[i].c)
+				continue;
+
+			// check slide mobj can step over
+			if (slidemo->z + slidemo->info->step_size < ld->gaps[i].f)
+				continue;
+
+			return true;
+		}
 	}
 
 	// the line does block movement,

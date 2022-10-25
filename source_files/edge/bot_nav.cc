@@ -507,7 +507,11 @@ static void NAV_EvalSubsector(subsector_t *sub, position_c& pos, float radius, i
 			if (0 == (mo->flags & MF_SPECIAL))
 				continue;
 
-		float dist  = R_PointToDist(pos.x, pos.y, mo->x, mo->y);
+		// radius is really a square box, emulate that here
+		float dx   = fabs(pos.x - mo->x);
+		float dy   = fabs(pos.y - mo->y);
+		float dist = std::max(dx, dy);
+
 		float score = NAV_EvalThing(mo, dist, what);
 
 		if (score > best_score)

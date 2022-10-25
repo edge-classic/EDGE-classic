@@ -119,13 +119,13 @@ static float NAV_EvaluateHealth(const mobj_t *mo)
 }
 
 
-static float NAV_EvaluateItem(const mobj_t *mo)
+static float NAV_EvaluateAny(const mobj_t *mo)
 {
 	float score = NAV_EvaluateBigItem(mo);
 	if (score > 0)
 		return score;
 
-	// FIXME EvaluateItem
+	// TODO EvaluateAny
 
 	return -1;
 }
@@ -416,8 +416,6 @@ bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags)
 	int start_id  = (int)(start  - subsectors);
 	int finish_id = (int)(finish - subsectors);
 
-	(void)finish_id;
-
 	if (start == finish)
 	{
 		return NAV_StorePath(start_id, finish_id);
@@ -484,7 +482,7 @@ static float NAV_EvalThing(const mobj_t *mo, float dist, int what)
 		case NFIND_Enemy:  score = NAV_EvaluateEnemy(mo);   break;
 		case NFIND_Big:    score = NAV_EvaluateBigItem(mo); break;
 		case NFIND_Health: score = NAV_EvaluateHealth(mo);  break;
-		default:           score = NAV_EvaluateItem(mo);    break;
+		default:           score = NAV_EvaluateAny(mo);     break;
 	}
 
 	if (score == 0)
@@ -500,16 +498,39 @@ static float NAV_EvalThing(const mobj_t *mo, float dist, int what)
 }
 
 
-bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t ** mo_ptr)
+static void NAV_EvalStuffInSub(subsector_t *sub, position_c& pos, float radius, int what, float& best_score, mobj_t*& best_mo)
+{
+	for (mobj_t *mo = sub->thinglist ; mo != NULL ; mo = mo->snext)
+	{
+		if (what != NFIND_Enemy)
+			if (0 == (mo->flags & MF_SPECIAL))
+				continue;
+
+		float dist  = R_PointToDist(pos.x, pos.y, mo->x, mo->y);
+		float score = NAV_EvalThing(mo, dist, what);
+
+		if (score > best_score)
+		{
+			best_score = score;
+			best_mo    = mo;
+		}
+	}
+}
+
+
+bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t*& best)
 {
 	// find an item to pickup or enemy to fight (depending on 'what' param).
 	// the distance will be limited by 'radius' (roughly).
 	// returns NULL if none found.
 
-/* FIXME
+	subsector_t *start = R_PointInSubsector(pos.x, pos.y);
 
-	SYS_ASSERT(start);
-	SYS_ASSERT(finish);
+	// the best thing so far.
+	best = NULL;
+	float score = 0;
+
+	/* FIXME
 
 	int start_id  = (int)(start  - subsectors);
 	int finish_id = (int)(finish - subsectors);
@@ -518,6 +539,9 @@ bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t ** mo_
 
 	if (start == finish)
 	{
+		if (mo == NULL)
+			return NULL;
+
 		return NAV_StorePath(start_id, finish_id);
 	}
 

@@ -197,60 +197,6 @@ int bot_t::EvaluateWeapon(int w_num) const
 }
 
 
-int bot_t::EvaluateItem(const mobj_t *mo) const
-{
-	int score = 0;
-	int ammo;
-
-	for (benefit_t *list = mo->info->pickup_benefits ; list != NULL ; list=list->next)
-	{
-		switch (list->type)
-		{
-			case BENEFIT_Weapon:
-				if (! HasWeapon(list->sub.weap))
-					score = score + 50;
-				else if (numplayers > 1 && deathmatch != 2 && !(mo->flags & MF_DROPPED))
-					// cannot pick up in CO-OP or OLD DeathMatch
-					score = -999;
-				break;
-
-			case BENEFIT_Ammo:
-				ammo = list->sub.type;
-				if (ammo != AM_NoAmmo && pl->ammo[ammo].num < pl->ammo[ammo].max)
-					score = score + 10;
-				break;
-
-			case BENEFIT_Health:
-				if (confidence < 0)
-					score = score + 40 + (int)list->amount;
-				else if (pl->health < list->limit)
-					score = score + 20;
-				break;
-
-			case BENEFIT_Armour:
-				score = score + 5 + (int)list->amount / 10;
-				break;
-
-			case BENEFIT_Powerup:
-				switch (list->sub.type)
-				{
-					case PW_Invulnerable: score = 18; break;
-					case PW_PartInvis:    score = 14; break;
-					case PW_Berserk:      score = 12; break;
-					case PW_AcidSuit:     score = 11; break;
-
-					default: break;
-				}
-				break;
-
-			default: break;
-		}
-	}
-
-	return score;
-}
-
-
 static bool PTR_BotLook(intercept_t * in, void *dataptr)
 {
 	if (in->line)
@@ -284,7 +230,7 @@ static bool PTR_BotLook(intercept_t * in, void *dataptr)
 	if (mo->health <= 0)
 		return true;  // already been picked up
 
-	int score = looking_bot->EvaluateItem(mo);
+	int score = 0;  //--  looking_bot->EvaluateItem(mo);
 
 	if (score <= 0)
 		return true;
@@ -517,11 +463,11 @@ void bot_t::Chase(bool seetarget, bool move_ok)
 	{
 		// have we stopped needed it? (maybe it is old DM and we
 		// picked up the weapon).
-		if (EvaluateItem(mo->target) <= 0)
-		{
-			pl->mo->SetTarget(NULL);
-			return;
-		}
+//--		if (EvaluateItem(mo->target) <= 0)
+//--		{
+//--			pl->mo->SetTarget(NULL);
+//--			return;
+//--		}
 
 		// If there is a wall or something in the way, pick a new direction.
 		if (!move_ok || move_count < 0)

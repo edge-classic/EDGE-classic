@@ -64,7 +64,7 @@ bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags);
 // find an item to pickup or enemy to fight (depending on 'what' param).
 // the distance will be limited by 'radius' (roughly).
 // returns NULL if none found.
-bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t ** mo_ptr);
+bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t*& best);
 
 #endif  /*__P_NAVIGATE_H__*/
 

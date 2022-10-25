@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE: DeathBots
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2009  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2
@@ -244,7 +244,7 @@ int bot_t::EvaluateItem(const mobj_t *mo) const
 					default: break;
 				}
 				break;
-			
+
 			default: break;
 		}
 	}
@@ -337,7 +337,7 @@ bool bot_t::LookForItems()
 		angle_t diff = (int)(ANG45/4) * i;
 
 		LineOfSight(angle + diff);
-			
+
 		if (lkbot_target)
 		{
 			if (!best_item || lkbot_score > best_score)
@@ -585,7 +585,7 @@ void bot_t::Roam()
 		if (path == NULL)
 		{
 			// try again soon
-			roam_count = 2 * TICRATE;
+			roam_count = TICRATE;
 		}
 	}
 
@@ -594,24 +594,33 @@ void bot_t::Roam()
 		return;
 
 	// check if we have reached the next subsector
-	subsector_t *dest = &subsectors[path->subs.back()];
+	int d1 = path->subs[path->along];
+	int d2 = -1;
+	if (path->along + 1 < path->subs.size())
+		d2 = path->subs[path->along+1];
 
-	if (pl->mo->subsector == dest)
+	bool at1 = (d1 >= 0 && pl->mo->subsector == &subsectors[d1]);
+	bool at2 = (d2 >= 0 && pl->mo->subsector == &subsectors[d2]);
+
+	if (at2)
+		path->along += 1;
+
+	if (at1 || at2)
 	{
-		path->subs.pop_back();
+		path->along += 1;
 
-		if (path->subs.empty())
+		if (path->finished())
 		{
 			delete path;
 			path = NULL;
 
 			// pick a new path soon
-			roam_count = 2 * TICRATE;
+			roam_count = TICRATE;
 			return;
 		}
-
-		dest = &subsectors[path->subs.back()];
 	}
+
+	subsector_t *dest = &subsectors[path->subs[path->along]];
 
 	position_c p;
 
@@ -675,7 +684,7 @@ void bot_t::Think()
 	bool seetarget = false;
 	if (mo->target)
 		seetarget = P_CheckSight(mo, mo->target);
-	
+
 	// Select a suitable weapon
 	if (confidence <= 0)
 	{

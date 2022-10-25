@@ -27,12 +27,18 @@ struct bot_t;
 
 // a path from a start subsector to a finish one.
 // elements are indices into the subsectors[] array.
-// elements are in REVERSE order (to allow pop_back).
 // start is NOT included, but finish is.
 class bot_path_c
 {
 public:
 	std::vector<int> subs {};
+
+	size_t along = 0;
+
+	bool finished() const
+	{
+		return along == subs.size();
+	}
 };
 
 

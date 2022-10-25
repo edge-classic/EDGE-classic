@@ -35,6 +35,8 @@
 #include "main.h"
 #include "thing.h"
 
+#include <algorithm>
+
 
 class big_item_c
 {
@@ -348,22 +350,22 @@ static void NAV_TryOpenArea(int idx, int parent, float cost)
 }
 
 
-static bot_path_c * NAV_StorePath(subsector_t *start, subsector_t *finish)
+static bot_path_c * NAV_StorePath(int start, int finish)
 {
 	bot_path_c *path = new bot_path_c;
 
 	for (;;)
 	{
-		int idx = (int)(finish - subsectors);
-		path->subs.push_back(idx);
+		path->subs.push_back(finish);
 
 		if (finish == start)
+		{
+			std::reverse(path->subs.begin(), path->subs.end());
 			return path;
+		}
 
-		int parent = NavArea(finish)->parent;
-		SYS_ASSERT(parent >= 0);
-
-		finish = &subsectors[parent];
+		finish = nav_areas[finish].parent;
+		SYS_ASSERT(finish >= 0);
 	}
 }
 
@@ -387,7 +389,7 @@ bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags)
 
 	if (start == finish)
 	{
-		return NAV_StorePath(start, finish);
+		return NAV_StorePath(start_id, finish_id);
 	}
 
 	// get coordinate of finish subsec
@@ -415,7 +417,7 @@ bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags)
 		// reached the destination?
 		if (&subsectors[cur] == finish)
 		{
-			return NAV_StorePath(start, finish);
+			return NAV_StorePath(start_id, finish_id);
 		}
 
 		// move current node to CLOSED set

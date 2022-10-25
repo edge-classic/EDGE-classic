@@ -635,8 +635,27 @@ void bot_t::Roam()
 		path_target = path->calc_target();
 	}
 
-	if ((roam_count % 5) == 0)
-		angle     = (ANG360 / 256) * M_Random();
+	// determine looking angle
+	{
+		int dest_id = (d2 < 0) ? d1 : d2;
+		const subsector_t *dest = &subsectors[dest_id];
+
+		float dest_x = (dest->bbox[BOXLEFT] + dest->bbox[BOXRIGHT])  * 0.5;
+		float dest_y = (dest->bbox[BOXTOP]  + dest->bbox[BOXBOTTOM]) * 0.5;
+
+		float dx = dest_x - pl->mo->x;
+		float dy = dest_y - pl->mo->y;
+
+		angle_t want_angle = R_PointToAngle(0, 0, dx, dy);
+		angle_t delta = want_angle - pl->mo->angle;
+
+		if (delta < ANG180)
+			delta = delta / 8;
+		else
+			delta = ANG_MAX - (ANG_MAX - delta) / 8;
+
+		look_angle = pl->mo->angle + delta;
+	}
 
 	strafedir = 0;
 	cmd.face_target = false;

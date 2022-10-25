@@ -729,7 +729,7 @@ void bot_t::Think()
 	}
 
 	// follow a path
-	if (true)
+	if (false)
 	{
 		Roam();
 		return;
@@ -854,6 +854,22 @@ void bot_t::ConvertTiccmd(ticcmd_t *dest)
 	}
 }
 
+
+void bot_t::EndLevel()
+{
+	// set fields to defaults, ready for next level
+	behave = BHV_Roam;
+	task   = TASK_None;
+
+	roam_count = (C_Random() % 8);
+
+	if (path != NULL)
+	{
+		delete path;
+		path = NULL;
+	}
+}
+
 //----------------------------------------------------------------------------
 
 //
@@ -904,6 +920,18 @@ void BOT_BeginLevel(void)
 //
 void BOT_EndLevel(void)
 {
+	for (int i = 0 ; i < MAXPLAYERS ; i++)
+	{
+		player_t *pl = players[i];
+		if (pl != NULL && pl->isBot())
+		{
+			bot_t *bot = (bot_t *)pl->build_data;
+			SYS_ASSERT(bot);
+
+			bot->EndLevel();
+		}
+	}
+
 	NAV_FreeLevel();
 }
 

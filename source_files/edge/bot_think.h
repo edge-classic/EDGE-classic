@@ -85,6 +85,9 @@ class bot_t
 public:
 	struct player_s *pl = NULL;
 
+	bot_behavior_e behave = BHV_Roam;
+	bot_task_e     task   = TASK_None;
+
 	int confidence = 0;
 	int patience   = 0;
 
@@ -111,6 +114,7 @@ public:
 public:
 	void Think();
 	void ConvertTiccmd(ticcmd_t *dest);
+	void EndLevel();
 
 private:
 	bool HasWeapon(const weapondef_c *info) const;

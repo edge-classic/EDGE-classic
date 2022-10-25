@@ -113,6 +113,7 @@ public:
 
 public:
 	void Think();
+	void DeathThink();
 	void ConvertTiccmd(ticcmd_t *dest);
 	void Respawn();
 	void EndLevel();

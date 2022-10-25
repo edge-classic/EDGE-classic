@@ -88,13 +88,11 @@ void bot_t::NewChaseDir(bool move_ok)
 
 	if (mo->target && (r % 3 == 0))
 	{
-		angle = R_PointToAngle(mo->x, mo->y,
-			mo->target->x, mo->target->y);
+		angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
 	}
 	else if (mo->supportobj && (r % 3 == 1))
 	{
-		angle = R_PointToAngle(mo->x, mo->y,
-			mo->supportobj->x, mo->supportobj->y);
+		angle = R_PointToAngle(mo->x, mo->y, mo->supportobj->x, mo->supportobj->y);
 	}
 	else if (move_ok)
 	{
@@ -722,19 +720,10 @@ void bot_t::Think()
 
 	mobj_t *mo = pl->mo;
 
-	// Dead?
+	// dead?
 	if (mo->health <= 0)
 	{
-		dead_count++;
-
-		// respawn after a random interval, at least one second
-		if (dead_count > 30)
-		{
-			dead_count = 0;
-
-			if (M_Random() < 90)
-				cmd.use = true;
-		}
+		DeathThink();
 		return;
 	}
 
@@ -813,6 +802,21 @@ void bot_t::Think()
 }
 
 
+void bot_t::DeathThink()
+{
+	dead_count++;
+
+	// respawn after a random interval, at least one second
+	if (dead_count > 30)
+	{
+		dead_count = 0;
+
+		if (M_Random() < 90)
+			cmd.use = true;
+	}
+}
+
+
 void bot_t::ConvertTiccmd(ticcmd_t *dest)
 {
 	// we assume caller has cleared the ticcmd_t to zero.
@@ -836,6 +840,7 @@ void bot_t::ConvertTiccmd(ticcmd_t *dest)
 
 	dest->player_idx = pl->pnum;
 
+	// FIXME remove face_target from botcmd_t
 	if (cmd.face_target && mo->target != NULL)
 	{
 		float dx = mo->target->x - mo->x;

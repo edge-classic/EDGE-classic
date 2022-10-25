@@ -452,6 +452,15 @@ void bot_t::Move()
 }
 
 
+void bot_t::MoveToward(const position_c& pos)
+{
+	int skill = CLAMP(0, bot_skill.d, 2);
+
+	cmd.move_speed = move_speeds[skill];
+	cmd.move_angle = R_PointToAngle(pl->mo->x, pl->mo->y, pos.x, pos.y);
+}
+
+
 void bot_t::Chase(bool seetarget, bool move_ok)
 {
 	int skill = CLAMP(0, bot_skill.d, 2);
@@ -626,11 +635,13 @@ void bot_t::Roam()
 		path_target = path->calc_target();
 	}
 
-	angle = R_PointToAngle(pl->mo->x, pl->mo->y, path_target.x, path_target.y);
+	if ((roam_count % 5) == 0)
+		angle     = (ANG360 / 256) * M_Random();
+
 	strafedir = 0;
 	cmd.face_target = false;
 
-	Move();
+	MoveToward(path_target);
 }
 
 //----------------------------------------------------------------------------
@@ -739,53 +750,53 @@ void bot_t::Think()
 
 void bot_t::ConvertTiccmd(ticcmd_t *dest)
 {
+	// we assume caller has cleared the ticcmd_t to zero.
+
 	mobj_t *mo = pl->mo;
 
 	if (cmd.attack)
 		dest->buttons |= BT_ATTACK;
+
 	if (cmd.second_attack)
 		dest->extbuttons |= EBT_SECONDATK;
+
 	if (cmd.use)
 		dest->buttons |= BT_USE;
+
+	if (cmd.jump)
+		dest->upwardmove = 0x20;
+
 	if (cmd.new_weapon != -1)
 		dest->buttons |= (cmd.new_weapon << BT_WEAPONSHIFT) & BT_WEAPONMASK;
 
 	dest->player_idx = pl->pnum;
 
-	angle_t new_angle = angle;
-	float   new_slope = 0;		
-
-	if (cmd.face_target && pl->mo->target != NULL)
+	if (cmd.face_target && mo->target != NULL)
 	{
-		float dx = pl->mo->target->x - mo->x;
-		float dy = pl->mo->target->y - mo->y;
-		float dz = pl->mo->target->z - mo->z;
+		float dx = mo->target->x - mo->x;
+		float dy = mo->target->y - mo->y;
+		float dz = mo->target->z - mo->z;
 
-		new_angle = R_PointToAngle(0,0, dx,dy);
-		new_slope = P_ApproxSlope(dx, dy, dz);
+		// FIXME less abrupt turning
+
+		look_angle = R_PointToAngle(0,0, dx,dy);
+		look_slope = P_ApproxSlope(dx, dy, dz);
 	}
 
-	dest->angleturn = (mo->angle - new_angle) >> 16;
-	dest->mlookturn = (M_ATan(new_slope) - mo->vertangle) >> 16;
-
-	dest->forwardmove = 0;
-	dest->sidemove    = 0;
-	dest->upwardmove  = 0;
+	dest->angleturn = (mo->angle - look_angle) >> 16;
+	dest->mlookturn = (M_ATan(look_slope) - mo->vertangle) >> 16;
 
 	if (cmd.move_speed != 0)
 	{
-		// set a to the angle relative the player.
-		angle_t a = cmd.move_angle - new_angle;
+		// get angle relative the player.
+		angle_t a = cmd.move_angle - look_angle;
 
 		float fwd  = M_Cos(a) * cmd.move_speed;
 		float side = M_Sin(a) * cmd.move_speed;
 
-		dest->forwardmove = (int)fwd;
-		dest->sidemove    = (int)side;
+		dest->forwardmove =  (int)fwd;
+		dest->sidemove    = -(int)side;
 	}
-
-	if (cmd.jump)
-		dest->upwardmove = 0x20;
 }
 
 //----------------------------------------------------------------------------

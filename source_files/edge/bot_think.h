@@ -89,6 +89,10 @@ public:
 	int patience   = 0;
 
 	angle_t angle = 0;
+	angle_t strafedir = 0;
+
+	angle_t look_angle = 0;
+	float   look_slope = 0;
 
 	int weapon_count = 0;
 	int move_count   = 0;
@@ -98,8 +102,6 @@ public:
 	// last position, to check if we actually moved
 	float last_x = 0;
 	float last_y = 0;
-
-	angle_t strafedir = 0;
 
 	bot_path_c * path = NULL;
 	position_c path_target { 0, 0, 0 };
@@ -117,6 +119,7 @@ private:
 	void NewChaseDir(bool move_ok);
 	void Chase(bool seetarget, bool move_ok);
 	void Move();
+	void MoveToward(const position_c& pos);
 	void Roam();
 
 	void Confidence();

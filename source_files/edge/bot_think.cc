@@ -488,6 +488,19 @@ void bot_t::TurnToward(angle_t want_angle, float want_slope)
 }
 
 
+void bot_t::TurnToward(const mobj_t *mo)
+{
+	float dx = mo->x - pl->mo->x;
+	float dy = mo->y - pl->mo->y;
+	float dz = mo->z - pl->mo->z;
+
+	angle_t want_angle = R_PointToAngle(0, 0, dx, dy);
+	float   want_slope = P_ApproxSlope(dx, dy, dz);
+
+	TurnToward(want_angle, want_slope);
+}
+
+
 void bot_t::Chase(bool seetarget, bool move_ok)
 {
 	int skill = CLAMP(0, bot_skill.d, 2);

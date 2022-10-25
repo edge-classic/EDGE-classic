@@ -132,6 +132,7 @@ private:
 	void LineOfSight(angle_t angle);
 
 	void TurnToward(angle_t angle, float slope);
+	void TurnToward(const mobj_t *mo);
 };
 
 void P_BotCreate(struct player_s *pl, bool recreate);

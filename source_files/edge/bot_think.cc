@@ -461,6 +461,33 @@ void bot_t::MoveToward(const position_c& pos)
 }
 
 
+void bot_t::TurnToward(angle_t want_angle, float want_slope)
+{
+	// horizontal (yaw) angle
+	angle_t delta = want_angle - pl->mo->angle;
+
+	if (delta < ANG180)
+		delta = delta / 8;
+	else
+		delta = ANG_MAX - (ANG_MAX - delta) / 8;
+
+	look_angle  = pl->mo->angle + delta;
+
+	// vertical (pitch or mlook) angle
+	if (want_slope < -2.0) want_slope = -2.0;
+	if (want_slope > +2.0) want_slope = +2.0;
+
+	float diff = want_slope - M_Tan(pl->mo->vertangle);
+
+	if (fabs(diff) < 0.025)
+		look_slope = want_slope;
+	else if (diff < 0)
+		look_slope -= 0.02;
+	else
+		look_slope += 0.02;
+}
+
+
 void bot_t::Chase(bool seetarget, bool move_ok)
 {
 	int skill = CLAMP(0, bot_skill.d, 2);
@@ -645,16 +672,12 @@ void bot_t::Roam()
 
 		float dx = dest_x - pl->mo->x;
 		float dy = dest_y - pl->mo->y;
+		float dz = dest->sector->f_h - pl->mo->z;
 
 		angle_t want_angle = R_PointToAngle(0, 0, dx, dy);
-		angle_t delta = want_angle - pl->mo->angle;
+		float   want_slope = P_ApproxSlope(dx, dy, dz);
 
-		if (delta < ANG180)
-			delta = delta / 8;
-		else
-			delta = ANG_MAX - (ANG_MAX - delta) / 8;
-
-		look_angle = pl->mo->angle + delta;
+		TurnToward(want_angle, want_slope);
 	}
 
 	strafedir = 0;

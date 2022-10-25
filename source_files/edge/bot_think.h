@@ -130,6 +130,8 @@ private:
 	bool LookForEnemies();
 	bool LookForItems();
 	void LineOfSight(angle_t angle);
+
+	void TurnToward(angle_t angle, float slope);
 };
 
 void P_BotCreate(struct player_s *pl, bool recreate);

@@ -522,9 +522,19 @@ position_c bot_path_c::calc_target() const
 				// middle of the adjoining seg
 				position_c pos;
 
-				pos.x = (seg->v1->x + seg->v2->x) * 0.5;
-				pos.y = (seg->v1->y + seg->v2->y) * 0.5;
+				pos.x = (seg->v1->x + seg->v2->x) * 0.5f;
+				pos.y = (seg->v1->y + seg->v2->y) * 0.5f;
 				pos.z = dest->sector->f_h;
+
+				// compute normal of seg
+				/*
+				angle_t normal = seg->angle - ANG90;
+				float nx = M_Cos(normal);
+				float ny = M_Sin(normal);
+
+				pos.x += nx * 30.0f;
+				pos.y += ny * 30.0f;
+				*/
 
 				return pos;
 			}

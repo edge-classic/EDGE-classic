@@ -898,19 +898,21 @@ static void DDF_LineGetSlideType(const char *info, void *storage)
 
 static specflags_t line_effect_names[] =
 {
-	{"TRANSLUCENT",    LINEFX_Translucency, 0},
-	{"VECTOR_SCROLL",  LINEFX_VectorScroll, 0},
-	{"OFFSET_SCROLL",  LINEFX_OffsetScroll, 0},
+	{"TRANSLUCENT",          LINEFX_Translucency,          0},
+	{"VECTOR_SCROLL",        LINEFX_VectorScroll,          0},
+	{"OFFSET_SCROLL",        LINEFX_OffsetScroll,          0},
 
-	{"SCALE_TEX",      LINEFX_Scale,         0},
-	{"SKEW_TEX",       LINEFX_Skew,          0},
-	{"LIGHT_WALL",     LINEFX_LightWall,     0},
+	{"SCALE_TEX",            LINEFX_Scale,                 0},
+	{"SKEW_TEX",             LINEFX_Skew,                  0},
+	{"LIGHT_WALL",           LINEFX_LightWall,             0},
 
-	{"UNBLOCK_THINGS", LINEFX_UnblockThings, 0},
-	{"BLOCK_SHOTS",    LINEFX_BlockShots,    0},
-	{"BLOCK_SIGHT",    LINEFX_BlockSight,    0},
-	{"SKY_TRANSFER",    LINEFX_SkyTransfer,    0}, //Lobo 2022
-	{"TAGGED_OFFSET_SCROLL", LINEFX_TaggedOffsetScroll,    0}, //Lobo 2022
+	{"UNBLOCK_THINGS",       LINEFX_UnblockThings,         0},
+	{"BLOCK_SHOTS",          LINEFX_BlockShots,            0},
+	{"BLOCK_SIGHT",          LINEFX_BlockSight,            0},
+	{"SKY_TRANSFER",         LINEFX_SkyTransfer,           0}, //Lobo 2022
+	{"TAGGED_OFFSET_SCROLL", LINEFX_TaggedOffsetScroll,    0}, // MBF21
+	{"BLOCK_LAND_MONSTERS",  LINEFX_BlockGroundedMonsters, 0}, // MBF21
+	{"BLOCK_PLAYERS",        LINEFX_BlockPlayers,          0}, // MBF21
 	{NULL, 0, 0}
 };
 

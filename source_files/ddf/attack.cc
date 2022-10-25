@@ -51,6 +51,12 @@ const commandlist_t damage_commands[] =
 	DF("ERROR", error,      DDF_MainGetFloat),
 	DF("DELAY", delay,      DDF_MainGetTime),
 
+	DF("BYPASS_ALL", bypass_all, DDF_MainGetBoolean),
+	DF("INSTAKILL", instakill, DDF_MainGetBoolean),
+	DF("APPLY_IF_NAKED", if_naked, DDF_MainGetBoolean),
+	DF("ALL_PLAYERS", all_players, DDF_MainGetBoolean), // Doesn't do anything (yet)
+	DF("GROUNDED_MONSTERS_ONLY", grounded_monsters, DDF_MainGetBoolean),
+
 	DF("OBITUARY",    obituary, DDF_MainGetString),
 	DF("PAIN_STATE",  pain,     DDF_AtkGetLabel),
 	DF("DEATH_STATE", death,    DDF_AtkGetLabel),

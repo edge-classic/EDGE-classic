@@ -586,6 +586,12 @@ typedef enum
 
 	// make all tagged lines scroll using this sidedef's offsets (MBF21)
 	LINEFX_TaggedOffsetScroll = (1 << 10),
+
+	// block land monsters (MBF21)
+	LINEFX_BlockGroundedMonsters = (1 << 11),
+
+	// block players (MBF21)
+	LINEFX_BlockPlayers = (1 << 12),
 }
 line_effect_type_e;
 

@@ -260,21 +260,22 @@ static bool PIT_CheckAbsLine(line_t * ld, void *data)
 		if (ld->flags & MLF_Blocking)
 			return false;
 
-		// block players only ?
-		if ((tm_I.mover->player) &&
-			(ld->flags & MLF_BlockPlayers))
+		// block players ?
+		if (tm_I.mover->player && ((ld->flags & MLF_BlockPlayers) ||
+			(ld->special && (ld->special->line_effect & LINEFX_BlockPlayers))))
 		{
 			return false;
 		}
 
-		// block grounded monsters only ?
+		// block grounded monsters ?
 		if ((tm_I.extflags & EF_MONSTER) &&
-			(ld->flags & MLF_BlockGrounded) && (tm_I.mover->z <= tm_I.mover->floorz + 1.0f))
+			((ld->flags & MLF_BlockGrounded) || (ld->special && (ld->special->line_effect & LINEFX_BlockGroundedMonsters))) 
+			&& (tm_I.mover->z <= tm_I.mover->floorz + 1.0f))
 		{
 			return false;
 		}
 
-		// block monsters only ?
+		// block monsters ?
 		if ((tm_I.extflags & EF_MONSTER) &&
 			(ld->flags & MLF_BlockMonsters))
 		{

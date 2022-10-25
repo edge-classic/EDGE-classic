@@ -499,18 +499,24 @@ static float NAV_EvalThing(const mobj_t *mo, float dist, int what)
 
 
 static void NAV_EvalSubsector(subsector_t *sub, position_c& pos, float radius, int what,
-	int sub_id, int& best_id, float& best_score, mobj_t*& best_mo)
+	int sub_id, float G, int& best_id, float& best_score, mobj_t*& best_mo)
 {
 	for (mobj_t *mo = sub->thinglist ; mo != NULL ; mo = mo->snext)
 	{
-		if (what != NFIND_Enemy)
+		if (what == NFIND_Enemy)
+		{
+			if (0 == (mo->flags & MF_SHOOTABLE))
+				continue;
+		}
+		else
+		{
 			if (0 == (mo->flags & MF_SPECIAL))
 				continue;
+		}
 
-		// radius is really a square box, emulate that here
-		float dx   = fabs(pos.x - mo->x);
-		float dy   = fabs(pos.y - mo->y);
-		float dist = std::max(dx, dy);
+		float dist = R_PointToDist(pos.x, pos.y, mo->x, mo->y);
+		if (dist > radius)
+			continue;
 
 		float score = NAV_EvalThing(mo, dist, what);
 
@@ -533,7 +539,7 @@ bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t*& best
 	subsector_t *start = R_PointInSubsector(pos.x, pos.y);
 	int start_id = (int)(start - subsectors);
 
-	// the best thing so far.
+	// the best thing so far...
 	best = NULL;
 	float best_score = 0;
 	int   best_id = -1;
@@ -559,26 +565,20 @@ bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t*& best
 			if (best == NULL)
 				return NULL;
 
-			return NAV_StorePath(start_id, cur);
+			return NAV_StorePath(start_id, best_id);
 		}
-
-		NAV_EvalSubsector(&subsectors[cur], pos, radius, what, cur, best_id, best_score, best);
 
 		// move current node to CLOSED set
 		nav_area_c& area = nav_areas[cur];
 		area.open = false;
 
+		// visit the things
+		NAV_EvalSubsector(&subsectors[cur], pos, radius, what, cur,
+			area.G, best_id, best_score, best);
+
 		// visit each neighbor node
 		for (int k = 0 ; k < area.num_links ; k++)
 		{
-			const subsector_t *nb = &subsectors[area.first_link + k];
-
-			// skip if outside of the radius
-			if (nb->bbox[BOXLEFT]   > pos.x + radius) continue;
-			if (nb->bbox[BOXRIGHT]  < pos.x - radius) continue;
-			if (nb->bbox[BOXBOTTOM] > pos.y + radius) continue;
-			if (nb->bbox[BOXTOP]    < pos.y - radius) continue;
-
 			// check link is passable
 			const nav_link_c& link = nav_links[area.first_link + k];
 
@@ -588,6 +588,9 @@ bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t*& best
 
 			// we need the total traversal time
 			cost += area.G;
+
+			if (cost > (radius * 1.4) / RUNNING_SPEED)
+				continue;
 
 			// update neighbor if this path is a better one
 			NAV_TryOpenArea(link.dest_id, cur, cost);

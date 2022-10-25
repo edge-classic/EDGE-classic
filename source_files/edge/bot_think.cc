@@ -699,6 +699,16 @@ void bot_t::Roam()
 	MoveToward(path_target);
 }
 
+
+void bot_t::DeletePath()
+{
+	if (path != NULL)
+	{
+		delete path;
+		path = NULL;
+	}
+}
+
 //----------------------------------------------------------------------------
 
 void bot_t::Think()
@@ -855,19 +865,20 @@ void bot_t::ConvertTiccmd(ticcmd_t *dest)
 }
 
 
-void bot_t::EndLevel()
+void bot_t::Respawn()
 {
-	// set fields to defaults, ready for next level
 	behave = BHV_Roam;
 	task   = TASK_None;
 
 	roam_count = (C_Random() % 8);
 
-	if (path != NULL)
-	{
-		delete path;
-		path = NULL;
-	}
+	DeletePath();
+}
+
+
+void bot_t::EndLevel()
+{
+	DeletePath();
 }
 
 //----------------------------------------------------------------------------

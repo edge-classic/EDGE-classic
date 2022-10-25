@@ -301,7 +301,7 @@ static void NAV_CreateLinks()
 }
 
 
-static float NAV_TraverseLinkCost(int cur, const nav_link_c& link)
+static float NAV_TraverseLinkCost(int cur, const nav_link_c& link, bool allow_doors)
 {
 	const sector_t *s1 = subsectors[cur].sector;
 	const sector_t *s2 = subsectors[link.dest_id].sector;
@@ -429,7 +429,7 @@ bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags)
 	{
 		area.open   = false;
 		area.G      = 9e19;
-		area.H      = 0;
+		area.H      = 0.0;
 		area.parent = -1;
 	}
 
@@ -458,7 +458,7 @@ bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags)
 		{
 			const nav_link_c& link = nav_links[area.first_link + k];
 
-			float cost = NAV_TraverseLinkCost(cur, link);
+			float cost = NAV_TraverseLinkCost(cur, link, true);
 			if (cost < 0)
 				continue;
 
@@ -498,7 +498,8 @@ static float NAV_EvalThing(const mobj_t *mo, float dist, int what)
 }
 
 
-static void NAV_EvalStuffInSub(subsector_t *sub, position_c& pos, float radius, int what, float& best_score, mobj_t*& best_mo)
+static void NAV_EvalSubsector(subsector_t *sub, position_c& pos, float radius, int what,
+	int sub_id, int& best_id, float& best_score, mobj_t*& best_mo)
 {
 	for (mobj_t *mo = sub->thinglist ; mo != NULL ; mo = mo->snext)
 	{
@@ -511,6 +512,7 @@ static void NAV_EvalStuffInSub(subsector_t *sub, position_c& pos, float radius, 
 
 		if (score > best_score)
 		{
+			best_id    = sub_id;
 			best_score = score;
 			best_mo    = mo;
 		}
@@ -525,35 +527,19 @@ bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t*& best
 	// returns NULL if none found.
 
 	subsector_t *start = R_PointInSubsector(pos.x, pos.y);
+	int start_id = (int)(start - subsectors);
 
 	// the best thing so far.
 	best = NULL;
-	float score = 0;
-
-	/* FIXME
-
-	int start_id  = (int)(start  - subsectors);
-	int finish_id = (int)(finish - subsectors);
-
-	(void)finish_id;
-
-	if (start == finish)
-	{
-		if (mo == NULL)
-			return NULL;
-
-		return NAV_StorePath(start_id, finish_id);
-	}
-
-	// get coordinate of finish subsec
-	nav_finish_mid = NAV_CalcMiddle(finish);
+	float best_score = 0;
+	int   best_id = -1;
 
 	// prepare all nodes
 	for (nav_area_c& area : nav_areas)
 	{
 		area.open   = false;
 		area.G      = 9e19;
-		area.H      = 0;
+		area.H      = 1.0;  // a constant gives a Djikstra search
 		area.parent = -1;
 	}
 
@@ -563,15 +549,16 @@ bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t*& best
 	{
 		int cur = NAV_LowestOpenF();
 
-		// no path at all?
+		// no areas left to visit?
 		if (cur < 0)
-			return NULL;
-
-		// reached the destination?
-		if (&subsectors[cur] == finish)
 		{
-			return NAV_StorePath(start_id, finish_id);
+			if (best == NULL)
+				return NULL;
+
+			return NAV_StorePath(start_id, cur);
 		}
+
+		NAV_EvalSubsector(&subsectors[cur], pos, radius, what, cur, best_id, best_score, best);
 
 		// move current node to CLOSED set
 		nav_area_c& area = nav_areas[cur];
@@ -580,9 +567,18 @@ bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t*& best
 		// visit each neighbor node
 		for (int k = 0 ; k < area.num_links ; k++)
 		{
+			const subsector_t *nb = &subsectors[area.first_link + k];
+
+			// skip if outside of the radius
+			if (nb->bbox[BOXLEFT]   > pos.x + radius) continue;
+			if (nb->bbox[BOXRIGHT]  < pos.x - radius) continue;
+			if (nb->bbox[BOXBOTTOM] > pos.y + radius) continue;
+			if (nb->bbox[BOXTOP]    < pos.y - radius) continue;
+
+			// check link is passable
 			const nav_link_c& link = nav_links[area.first_link + k];
 
-			float cost = NAV_TraverseLinkCost(cur, link);
+			float cost = NAV_TraverseLinkCost(cur, link, false);
 			if (cost < 0)
 				continue;
 
@@ -593,9 +589,6 @@ bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t*& best
 			NAV_TryOpenArea(link.dest_id, cur, cost);
 		}
 	}
-*/
-
-	return NULL;
 }
 
 //----------------------------------------------------------------------------

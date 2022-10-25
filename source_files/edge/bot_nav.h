@@ -39,6 +39,8 @@ public:
 	{
 		return along == subs.size();
 	}
+
+	position_c calc_target() const;
 };
 
 

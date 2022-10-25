@@ -565,7 +565,7 @@ void bot_t::Roam()
 {
 	if (roam_count-- < 0)
 	{
-		roam_count = 20 * TICRATE;
+		roam_count = 15 * TICRATE;
 
 		if (path != NULL)
 		{
@@ -586,6 +586,10 @@ void bot_t::Roam()
 		{
 			// try again soon
 			roam_count = TICRATE;
+		}
+		else
+		{
+			path_target = path->calc_target();
 		}
 	}
 
@@ -618,16 +622,11 @@ void bot_t::Roam()
 			roam_count = TICRATE;
 			return;
 		}
+
+		path_target = path->calc_target();
 	}
 
-	subsector_t *dest = &subsectors[path->subs[path->along]];
-
-	position_c p;
-
-	p.x = (dest->bbox[BOXLEFT] + dest->bbox[BOXRIGHT])  * 0.5;
-	p.y = (dest->bbox[BOXTOP]  + dest->bbox[BOXBOTTOM]) * 0.5;
-
-	angle = R_PointToAngle(pl->mo->x, pl->mo->y, p.x, p.y);
+	angle = R_PointToAngle(pl->mo->x, pl->mo->y, path_target.x, path_target.y);
 	strafedir = 0;
 	cmd.face_target = false;
 

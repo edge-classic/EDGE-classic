@@ -37,7 +37,6 @@
 
 #include <algorithm>
 
-
 class big_item_c
 {
 public:
@@ -442,8 +441,12 @@ bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags)
 	}
 }
 
+//----------------------------------------------------------------------------
+// DEBUGGING
+//----------------------------------------------------------------------------
 
-#if 1  // DEBUG HELPER
+#if 0
+
 static void NAV_PotionUpPath(bot_path_c * path, subsector_t *start)
 {
 	const mobjtype_c *type = mobjtypes.Lookup(2014);
@@ -501,6 +504,35 @@ void NAV_DebugFindPath(float x1, float y1, float x2, float y2)
 
 #endif
 
+//----------------------------------------------------------------------------
+
+position_c bot_path_c::calc_target() const
+{
+	SYS_ASSERT(along < subs.size());
+
+	if (along > 0)
+	{
+		const subsector_t *src  = &subsectors[subs[along - 1]];
+		const subsector_t *dest = &subsectors[subs[along]];
+
+		for (const seg_t *seg = src->segs ; seg != NULL ; seg=seg->sub_next)
+		{
+			if (seg->back_sub == dest)
+			{
+				// middle of the adjoining seg
+				position_c pos;
+
+				pos.x = (seg->v1->x + seg->v2->x) * 0.5;
+				pos.y = (seg->v1->y + seg->v2->y) * 0.5;
+				pos.z = dest->sector->f_h;
+
+				return pos;
+			}
+		}
+	}
+
+	return NAV_CalcMiddle(&subsectors[subs[along]]);
+}
 
 //----------------------------------------------------------------------------
 

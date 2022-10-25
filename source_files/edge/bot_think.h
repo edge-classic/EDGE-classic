@@ -102,6 +102,7 @@ public:
 	angle_t strafedir = 0;
 
 	bot_path_c * path = NULL;
+	position_c path_target { 0, 0, 0 };
 
 	botcmd_t cmd;
 

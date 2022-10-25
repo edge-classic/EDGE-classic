@@ -44,6 +44,15 @@ public:
 };
 
 
+enum nav_find_thing_e
+{
+	NFIND_Enemy = 0,  // must be an enemy (or barrel)
+	NFIND_Big,        // must be a big item
+	NFIND_Health,     // must be a health item
+	NFIND_Any,        // can be any item, "bigger" is better
+};
+
+
 void NAV_AnalyseLevel();
 void NAV_FreeLevel();
 
@@ -51,6 +60,11 @@ position_c NAV_NextRoamPoint(bot_t *bot);
 
 // attempt to find a traversible path, returns NULL if failed.
 bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags);
+
+// find an item to pickup or enemy to fight (depending on 'what' param).
+// the distance will be limited by 'radius' (roughly).
+// returns NULL if none found.
+bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t ** mo_ptr);
 
 #endif  /*__P_NAVIGATE_H__*/
 

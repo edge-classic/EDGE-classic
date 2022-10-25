@@ -78,7 +78,7 @@ static float NAV_EvaluateBigItem(const mobj_t *mo)
 				{
 					case PW_Invulnerable: return 100;
 					case PW_PartInvis:    return 15;
-					default:              return 0;
+					default:              return -1;
 				}
 				break;
 
@@ -103,7 +103,39 @@ static float NAV_EvaluateBigItem(const mobj_t *mo)
 		}
 	}
 
-	return 0;
+	return -1;
+}
+
+
+static float NAV_EvaluateHealth(const mobj_t *mo)
+{
+	for (const benefit_t *B = mo->info->pickup_benefits ; B != NULL ; B = B->next)
+	{
+		if (B->type == BENEFIT_Health)
+			return B->amount;
+	}
+
+	return -1;
+}
+
+
+static float NAV_EvaluateItem(const mobj_t *mo)
+{
+	float score = NAV_EvaluateBigItem(mo);
+	if (score > 0)
+		return score;
+
+	// FIXME EvaluateItem
+
+	return -1;
+}
+
+
+static float NAV_EvaluateEnemy(const mobj_t *mo)
+{
+	// FIXME
+
+	return -1;
 }
 
 
@@ -120,7 +152,7 @@ static void NAV_CollectBigItems()
 			continue;
 
 		float score = NAV_EvaluateBigItem(mo);
-		if (score <= 0)
+		if (score < 0)
 			continue;
 
 		big_items.push_back(big_item_c { mo->x, mo->y, mo->z + 8.0f, score });
@@ -439,6 +471,107 @@ bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags)
 			NAV_TryOpenArea(link.dest_id, cur, cost);
 		}
 	}
+}
+
+//----------------------------------------------------------------------------
+
+static float NAV_EvalThing(const mobj_t *mo, float dist, int what)
+{
+	float score = 0;
+
+	switch (what)
+	{
+		case NFIND_Enemy:  score = NAV_EvaluateEnemy(mo);   break;
+		case NFIND_Big:    score = NAV_EvaluateBigItem(mo); break;
+		case NFIND_Health: score = NAV_EvaluateHealth(mo);  break;
+		default:           score = NAV_EvaluateItem(mo);    break;
+	}
+
+	if (score == 0)
+		return -1;
+
+	if (dist > 300)
+		score = score * 0.5;
+
+	// randomize the score -- to break ties
+	score += (float)C_Random() / 65535.0;
+
+	return score;
+}
+
+
+bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t ** mo_ptr)
+{
+	// find an item to pickup or enemy to fight (depending on 'what' param).
+	// the distance will be limited by 'radius' (roughly).
+	// returns NULL if none found.
+
+/* FIXME
+
+	SYS_ASSERT(start);
+	SYS_ASSERT(finish);
+
+	int start_id  = (int)(start  - subsectors);
+	int finish_id = (int)(finish - subsectors);
+
+	(void)finish_id;
+
+	if (start == finish)
+	{
+		return NAV_StorePath(start_id, finish_id);
+	}
+
+	// get coordinate of finish subsec
+	nav_finish_mid = NAV_CalcMiddle(finish);
+
+	// prepare all nodes
+	for (nav_area_c& area : nav_areas)
+	{
+		area.open   = false;
+		area.G      = 9e19;
+		area.H      = 0;
+		area.parent = -1;
+	}
+
+	NAV_TryOpenArea(start_id, -1, 0);
+
+	for (;;)
+	{
+		int cur = NAV_LowestOpenF();
+
+		// no path at all?
+		if (cur < 0)
+			return NULL;
+
+		// reached the destination?
+		if (&subsectors[cur] == finish)
+		{
+			return NAV_StorePath(start_id, finish_id);
+		}
+
+		// move current node to CLOSED set
+		nav_area_c& area = nav_areas[cur];
+		area.open = false;
+
+		// visit each neighbor node
+		for (int k = 0 ; k < area.num_links ; k++)
+		{
+			const nav_link_c& link = nav_links[area.first_link + k];
+
+			float cost = NAV_TraverseLinkCost(cur, link);
+			if (cost < 0)
+				continue;
+
+			// we need the total traversal time
+			cost += area.G;
+
+			// update neighbor if this path is a better one
+			NAV_TryOpenArea(link.dest_id, cur, cost);
+		}
+	}
+*/
+
+	return NULL;
 }
 
 //----------------------------------------------------------------------------

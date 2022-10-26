@@ -1103,6 +1103,8 @@ std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secattackinfo
 		return "";
 	if (!obj->info->pickup_benefits->sub.weap)
 		return "";	
+	if (obj->info->pickup_benefits->type != BENEFIT_Weapon)
+		return "";	
 
 	weapondef_c *objWep = obj->info->pickup_benefits->sub.weap;
 	if (!objWep)

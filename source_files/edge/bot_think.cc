@@ -57,11 +57,6 @@ static int    move_speeds[3] = {  36,  45,  50 };
 //  EVALUATING ITEMS, MONSTERS, WEAPONS
 //----------------------------------------------------------------------------
 
-static bot_t *looking_bot;
-static mobj_t *lkbot_target;
-static int lkbot_score;
-
-
 bool bot_t::HasWeapon(const weapondef_c *info) const
 {
 	for (int i=0 ; i < MAXWEAPONS ; i++)
@@ -109,14 +104,6 @@ static float NAV_EvaluateAny(const mobj_t *mo)
 }
 
 
-static float NAV_EvaluateEnemy(const mobj_t *mo)
-{
-	// FIXME
-
-	return -1;
-}
-
-
 static float NAV_EvalThing(const mobj_t *mo, float dist, int what)
 {
 		if (what == NFIND_Enemy)
@@ -148,8 +135,47 @@ static float NAV_EvalThing(const mobj_t *mo, float dist, int what)
 */
 
 
-float bot_t::EvalThing(const mobj_t *mo) const
+void bot_t::EvalEnemy(const mobj_t *mo)
 {
+	// The following must be true to justify that you attack a target:
+	// - target may not be yourself or your support obj.
+	// - target must either want to attack you, or be on a different side
+	// - target may not have the same supportobj as you.
+	// - You must be able to see and shoot the target.
+
+	if (! (mo->flags & MF_SHOOTABLE))
+		return;
+
+	/* hmmm, want to allow barrels
+	if (! (them->extendedflags & EF_MONSTER) && ! them->player)
+		continue;
+	*/
+
+	if (mo->player && mo->player == pl)
+		return;
+
+	if (pl->mo->supportobj == mo)
+		return;
+
+	if (COOP_MATCH() && mo->player)
+		return;
+
+	if (COOP_MATCH() && mo->supportobj && mo->supportobj->player)
+		return;
+
+	// EXTERMINATE !!
+
+	pl->mo->SetTarget((mobj_t *) mo);
+}
+
+
+float bot_t::EvalThing(const mobj_t *mo)
+{
+	if (pl->mo->target == NULL)
+	{
+		EvalEnemy(mo);
+	}
+
 	// FIXME EvalThing
 	return -1;
 }
@@ -284,31 +310,9 @@ void bot_t::PainResponse()
 }
 
 
+/* OLD STUFF, REMOVE SOON
 static bool PTR_BotLook(intercept_t * in, void *dataptr)
 {
-	if (in->line)
-	{
-		line_t *ld = in->line;
-
-		if (! (ld->flags & MLF_TwoSided))
-			return false;  // stop
-
-		// Crosses a two sided line.
-		// A two sided line will restrict
-		// the possible target ranges.
-		// -AJA- 1999/07/19: Gaps are now stored in line_t.
-
-		if (ld->gap_num == 0)
-			return false;  // stop
-
-		if (fabs(ld->frontsector->f_h - ld->backsector->f_h) > 24.0f)
-			return false;
-
-		return true;  // sight continues
-	}
-
-	mobj_t *mo = in->thing;
-
 	SYS_ASSERT(mo);
 
 	if (! (mo->flags & MF_SPECIAL))
@@ -330,27 +334,13 @@ static bool PTR_BotLook(intercept_t * in, void *dataptr)
 
 	return false;  // found something
 }
-
-
-void bot_t::LineOfSight(angle_t angle)
-{
-	looking_bot = this;
-
-	lkbot_target = NULL;
-	lkbot_score  = 0;
-
-	float x1 = pl->mo->x;
-	float y1 = pl->mo->y;
-	float x2 = x1 + 1024 * M_Cos(angle);
-	float y2 = y1 + 1024 * M_Sin(angle);
-
-	P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES | PT_ADDTHINGS, PTR_BotLook);
-
-	looking_bot = NULL;
-}
+*/
 
 
 // Finds items for the bot to get.
+
+/* TODO merge logic into new system
+
 bool bot_t::LookForItems()
 {
 	mobj_t *best_item  = NULL;
@@ -448,6 +438,27 @@ I_Printf("BOT %d: Targeting Agent: %s\n", bot->pl->pnum, them->info->name.c_str(
 	}
 
 	return false;
+}
+*/
+
+
+void bot_t::LookAround()
+{
+	look_time--;
+	if (look_time >= 0)
+		return;
+
+	// perform a look every second or so
+	look_time = 30 + C_Random() % 10;
+
+	// FIXME decide what we want most (e.g. health, etc).
+
+	mobj_t * item = NULL;
+	bot_path_c * path = NAV_FindThing(this, 1024, item);
+
+	// FIXME
+	if (path != NULL)
+		delete path;
 }
 
 
@@ -564,7 +575,7 @@ void bot_t::Chase(bool seetarget, bool move_ok)
 
 			angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
 			strafedir = 0;
-			move_count = 10 + (M_Random() & 31);
+			move_count = 10 + (C_Random() & 31);
 
 			if (!move_ok)
 			{
@@ -638,6 +649,18 @@ void bot_t::Chase(bool seetarget, bool move_ok)
 
 	// Target died
 	pl->mo->SetTarget(NULL);
+}
+
+
+void bot_t::DestroyEnemy()
+{
+	// TODO
+}
+
+
+void bot_t::TaskThink()
+{
+	// TODO
 }
 
 
@@ -766,6 +789,14 @@ void bot_t::Think()
 		PainResponse();
 	}
 
+	LookAround();
+
+	// doing a task?
+	if (task != TASK_None)
+	{
+		TaskThink();
+	}
+
 	// follow a path
 	if (false)
 	{
@@ -806,7 +837,7 @@ void bot_t::Think()
 	// If we aren't confident, gather more than fight.
 	if (!seetarget && patience < 0 && confidence >= 0)
 	{
-		seetarget = LookForEnemies();
+		seetarget = false; //!!!  LookForEnemies();
 
 		if (mo->target)
 			patience = 20 + (M_Random() & 31) * 4;
@@ -815,7 +846,7 @@ void bot_t::Think()
 	// Can't see a target || don't have a suitable weapon to take it out with?
 	if (!seetarget && patience < 0)
 	{
-		seetarget = LookForItems();
+		seetarget = false; //!!!  LookForItems();
 
 		if (mo->target)
 			patience = 30 + (M_Random() & 31) * 8;
@@ -823,7 +854,7 @@ void bot_t::Think()
 
 	if (mo->target != NULL)
 	{
-		Chase(seetarget, move_ok);
+		Chase(seetarget || true, move_ok);  // FIXME !!!
 	}
 	else
 	{
@@ -850,7 +881,7 @@ void bot_t::DeathThink()
 	{
 		dead_count = 0;
 
-		if (M_Random() < 90)
+		if (C_Random() % 100 < 35)
 			cmd.use = true;
 	}
 }
@@ -917,6 +948,7 @@ void bot_t::Respawn()
 	task   = TASK_None;
 
 	roam_count = C_Random() % 8;
+	look_time  = C_Random() % 8;
 
 	DeletePath();
 }

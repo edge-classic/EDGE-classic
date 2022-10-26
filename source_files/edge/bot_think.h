@@ -60,6 +60,7 @@ enum bot_task_e
 };
 
 
+/* ???
 // what kind of thing we are looking for
 enum bot_find_thing_e
 {
@@ -67,6 +68,7 @@ enum bot_find_thing_e
 	FIND_Goal,       // a big item (the roam goal)
 	FIND_Other,      // anything useful or needed
 };
+*/
 
 
 // This describes what action the bot wants to do.
@@ -97,8 +99,10 @@ public:
 	bot_behavior_e behave = BHV_Roam;
 	bot_task_e     task   = TASK_None;
 
+	// TODO describe or remove
 	int confidence = 0;
-	int patience   = 0;
+
+	int patience = 0;
 
 	angle_t angle = 0;
 	angle_t strafedir = 0;
@@ -110,6 +114,7 @@ public:
 	int move_count   = 0;
 	int roam_count   = 0;
 	int dead_count   = 0;
+	int look_time    = 0;
 
 	// last position, to check if we actually moved
 	float last_x = 0;
@@ -139,19 +144,21 @@ private:
 	void Chase(bool seetarget, bool move_ok);
 	void Move();
 	void MoveToward(const position_c& pos);
-	void Roam();
 
+	void Roam();
+	void TaskThink();
+	void DestroyEnemy();
 	void PainResponse();
-	bool LookForEnemies();
-	bool LookForItems();
-	void LineOfSight(angle_t angle);
+
+	void LookAround();
+	void EvalEnemy(const mobj_t *mo);
 
 	void TurnToward(angle_t angle, float slope);
 	void TurnToward(const mobj_t *mo);
 	void DeletePath();
 
 public:
-	float EvalThing(const mobj_t *mo) const;
+	float EvalThing(const mobj_t *mo);
 };
 
 void P_BotCreate(struct player_s *pl, bool recreate);

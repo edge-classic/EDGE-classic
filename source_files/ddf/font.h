@@ -71,9 +71,9 @@ public:
 	std::string image_name;
 
 	std::string ttf_name;
-	int ttf_default_size;
+	float ttf_default_size;
 
-	int spacing;
+	float spacing;
 
 private:
 	// disable copy construct and assignment operator

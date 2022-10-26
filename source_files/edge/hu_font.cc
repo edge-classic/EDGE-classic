@@ -157,6 +157,7 @@ void font_c::LoadPatches()
 	p_cache.width  = I_ROUND(IM_WIDTH(Nom));  // XXX: make fields float???
 	p_cache.height = I_ROUND(IM_HEIGHT(Nom));
 	p_cache.ratio = IM_WIDTH(Nom) / IM_HEIGHT(Nom);
+	spacing = def->spacing;
 }
 
 void font_c::LoadFontImage()
@@ -229,7 +230,7 @@ void font_c::LoadFontTTF()
 		stbtt_PackEnd(spc);
 		delete temp_bitmap;
 		float x,y,ascent,descent,linegap = 0.0f;
-		stbtt_GetPackedQuad(M->packed_char, 64, 64, 0, &x, &y, M->char_quad, 0);
+		stbtt_GetPackedQuad(M->packed_char, 64, 64, 0, &x, &y, M->char_quad, 1);
 		stbtt_GetScaledFontVMetrics(ttf_buffer, 0, 64, &ascent, &descent, &linegap);
 		M->width = (M->char_quad->x1 - M->char_quad->x0) * (def->ttf_default_size / 64.0);
 		M->height = (M->char_quad->y1 - M->char_quad->y0) * (def->ttf_default_size / 64.0);
@@ -238,6 +239,7 @@ void font_c::LoadFontTTF()
 		delete M->packed_char;
 		delete M->char_quad;
 		delete M;
+		spacing = def->spacing;
 	}
 }
 
@@ -267,13 +269,13 @@ void font_c::Load()
 int font_c::NominalWidth() const
 {
 	if (def->type == FNTYP_Image)
-		return im_char_width;
+		return im_char_width + spacing;
 
 	if (def->type == FNTYP_Patch)
-		return p_cache.width;
+		return p_cache.width + spacing;
 
 	if (def->type == FNTYP_TrueType)
-		return ttf_char_width;
+		return ttf_char_width + spacing;
 
 	I_Error("font_c::NominalWidth : unknown FONT type %d\n", def->type);
 	return 1; /* NOT REACHED */
@@ -359,9 +361,9 @@ float font_c::CharWidth(char ch)
 	if (def->type == FNTYP_Image)
 	{
 		if (ch == ' ')
-			return im_char_width * 2 / 5 + def->spacing;
+			return im_char_width * 2 / 5 + spacing;
 		else
-			return individual_char_widths[int((byte)ch)] + def->spacing;
+			return individual_char_widths[int((byte)ch)] + spacing;
 	}
 
 	if (def->type == FNTYP_TrueType)
@@ -369,7 +371,7 @@ float font_c::CharWidth(char ch)
 		auto find_glyph = ttf_glyph_map.find(cp437_unicode_values[(int)ch]);
 		if (find_glyph != ttf_glyph_map.end())
 		{
-			return find_glyph->second.width;
+			return find_glyph->second.width + spacing;
 		}
 		else
 		{
@@ -388,29 +390,31 @@ float font_c::CharWidth(char ch)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			delete temp_bitmap;
 			float x,y = 0.0f;
-			stbtt_GetPackedQuad(character.packed_char, 64, 64, 0, &x, &y, character.char_quad, 0);
+			stbtt_GetPackedQuad(character.packed_char, 64, 64, 0, &x, &y, character.char_quad, 1);
 			if (ch == ' ')
-				character.width = ttf_char_width * 4 / 5 + def->spacing;
+				character.width = ttf_char_width * 2 / 5;
 			else
 				character.width = (character.char_quad->x1 - character.char_quad->x0) * (def->ttf_default_size / 64.0);
+			//I_Printf("QUAD FOR %c\nX0: %f\nX1: %f\nY0: %f\nY1: %f\n", ch, character.char_quad->x0, character.char_quad->x1,
+				//character.char_quad->y0, character.char_quad->y1);
 			character.height = (character.char_quad->y1 - character.char_quad->y0) * (def->ttf_default_size / 64.0);
 			character.y_shift = (ttf_char_height - character.height) + (character.char_quad->y1 * (def->ttf_default_size / 64.0));
 			ttf_glyph_map.try_emplace(cp437_unicode_values[(int)ch], character);
-			return character.width;
+			return character.width + spacing;
 		}
 	}
 
 	SYS_ASSERT(def->type == FNTYP_Patch);
 
 	if (ch == ' ')
-		return p_cache.width * 3 / 5;
+		return p_cache.width * 3 / 5 + spacing;
 
 	const image_c *im = CharImage(ch);
 
 	if (! im)
 		return DUMMY_WIDTH;
 
-	return IM_WIDTH(im);
+	return IM_WIDTH(im) + spacing;
 }
 
 

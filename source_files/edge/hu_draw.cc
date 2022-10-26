@@ -836,7 +836,7 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 	float sc_x = cur_scale; // TODO * aspect;
 	float sc_y = cur_scale;
 
-	float x = left_x - IM_OFFSETX(img) * sc_x;
+	float x = left_x - (IM_OFFSETX(img) * sc_x) + (cur_font->spacing / 2 * sc_x);
 	float y = top_y  - IM_OFFSETY(img) * sc_y;
 
 	float w, h;
@@ -845,9 +845,8 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 	if (epi::strcmp(img->name, "TTFDUMMY") == 0)
 	{
 		stbtt_aligned_quad *q = cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].char_quad;
-		x = left_x;
 		y = top_y + (cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].y_shift * sc_y);
-		w = (size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->ttf_default_size)) : cur_font->CharWidth(ch)) * sc_x;
+		w = ((size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->ttf_default_size)) : cur_font->CharWidth(ch)) - cur_font->spacing)* sc_x;
 		h = (size > 0 ? size : cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].height) * sc_y;
 		tx1 = q->s0;
 		ty1 = q->t0;
@@ -856,7 +855,7 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 	}
 	else if (img->is_font)
 	{
-		w = (size > 0 ? (size * cur_font->CharRatio(ch)) : cur_font->CharWidth(ch)) * sc_x;
+		w = ((size > 0 ? (size * cur_font->CharRatio(ch)) : cur_font->CharWidth(ch)) - cur_font->spacing) * sc_x;
 		h = (size > 0 ? size : cur_font->im_char_height) * sc_y;
 		int px =      int((byte)ch) % 16;
 		int py = 15 - int((byte)ch) / 16;
@@ -1031,7 +1030,7 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 			else if (cur_font->def->type == FNTYP_Image)
 				total_w += (size > 0 ? size * cur_font->CharRatio(str[i]) + cur_font->spacing : cur_font->CharWidth(str[i])) * cur_scale;
 			else
-				total_w += (size > 0 ? size * cur_font->p_cache.ratio : cur_font->CharWidth(str[i])) * cur_scale;
+				total_w += (size > 0 ? size * cur_font->p_cache.ratio + cur_font->spacing : cur_font->CharWidth(str[i])) * cur_scale;
 		}
 
 		if (cur_x_align >= 0)
@@ -1056,7 +1055,7 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 			else if (cur_font->def->type == FNTYP_Image)
 				cx += (size > 0 ? size * cur_font->CharRatio(ch) + cur_font->spacing : cur_font->CharWidth(ch)) * cur_scale;
 			else
-				cx += (size > 0 ? size * cur_font->p_cache.ratio : cur_font->CharWidth(ch)) * cur_scale;
+				cx += (size > 0 ? size * cur_font->p_cache.ratio + cur_font->spacing : cur_font->CharWidth(ch)) * cur_scale;
 		}
 
 		if (str[len] == 0)

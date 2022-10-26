@@ -124,10 +124,11 @@ public:
 
 	const image_c *font_image;
 
+	float spacing;
+
 	// For IMAGE type
 	float im_char_width;
 	float im_char_height;
-	float spacing;
 	float *individual_char_widths;
 	float *individual_char_ratios;
 	float im_mono_width;

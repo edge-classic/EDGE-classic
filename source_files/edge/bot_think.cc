@@ -243,23 +243,30 @@ void bot_t::NewChaseDir(bool move_ok)
 }
 
 
-void bot_t::Confidence()
+int bot_t::CalcConfidence()
 {
 	const mobj_t *mo = pl->mo;
 
-	confidence = 0;
+	if (pl->powers[PW_Invulnerable] > 0)
+		return +1;
 
-	if (pl->powers[PW_Invulnerable])
-		confidence = 1;
-	else if (mo->health < mo->info->spawnhealth / 3)
-		confidence = -1;
-	else if (mo->health > mo->info->spawnhealth * 3 / 4 && ! MeleeWeapon())
-	{
-        ammotype_e ammo = pl->weapons[pl->ready_wp].info->ammo[0];
+	// got enough health?
+	if (mo->health < mo->info->spawnhealth * 0.33)
+		return -1;
 
-		if (pl->ammo[ammo].num > pl->ammo[ammo].max / 2)
-			confidence = 1;
-	}
+	if (mo->health < mo->info->spawnhealth * 0.66)
+		return 0;
+
+	if (MeleeWeapon())
+		return 0;
+
+	// got enough ammo?
+	ammotype_e ammo = pl->weapons[pl->ready_wp].info->ammo[0];
+
+	if (pl->ammo[ammo].num < pl->ammo[ammo].max / 2)
+		return 0;
+
+	return 1;
 }
 
 
@@ -766,7 +773,7 @@ void bot_t::Think()
 		return;
 	}
 
-	Confidence();
+	confidence = CalcConfidence();
 
 	float move_dx = last_x - mo->x;
 	float move_dy = last_y - mo->y;
@@ -904,10 +911,12 @@ void bot_t::ConvertTiccmd(ticcmd_t *dest)
 
 void bot_t::Respawn()
 {
+	// TODO in COOP, pick a player to help, try to reach them if far away
+
 	behave = BHV_Roam;
 	task   = TASK_None;
 
-	roam_count = (C_Random() % 8);
+	roam_count = C_Random() % 8;
 
 	DeletePath();
 }

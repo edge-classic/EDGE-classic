@@ -129,7 +129,7 @@ public:
 	void EndLevel();
 
 private:
-	void Confidence();
+	int  CalcConfidence();
 	int  EvaluateWeapon(int w_num) const;
 	void SelectWeapon();
 	bool HasWeapon(const weapondef_c *info) const;

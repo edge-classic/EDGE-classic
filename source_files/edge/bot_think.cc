@@ -263,6 +263,20 @@ void bot_t::Confidence()
 }
 
 
+void bot_t::PainResponse()
+{
+	// oneself?
+	if (pl->attacker == pl->mo)
+		return;
+
+	// ignore friendly fire -- shit happens
+	if (COOP_MATCH() && pl->attacker->player)
+		return;
+
+	// TODO update 'target' if threat is greater than current target
+}
+
+
 static bool PTR_BotLook(intercept_t * in, void *dataptr)
 {
 	if (in->line)
@@ -737,6 +751,12 @@ void bot_t::Think()
 	{
 		DeathThink();
 		return;
+	}
+
+	// hurt by somebody?
+	if (pl->attacker != NULL)
+	{
+		PainResponse();
 	}
 
 	// follow a path

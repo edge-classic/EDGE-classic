@@ -129,6 +129,9 @@ public:
 	void EndLevel();
 
 private:
+	void Confidence();
+	int  EvaluateWeapon(int w_num) const;
+	void SelectWeapon();
 	bool HasWeapon(const weapondef_c *info) const;
 	bool MeleeWeapon() const;
 
@@ -138,10 +141,7 @@ private:
 	void MoveToward(const position_c& pos);
 	void Roam();
 
-	void Confidence();
-	int  EvaluateWeapon(int w_num) const;
-	void SelectWeapon();
-
+	void PainResponse();
 	bool LookForEnemies();
 	bool LookForItems();
 	void LineOfSight(angle_t angle);

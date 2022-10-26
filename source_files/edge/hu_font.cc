@@ -361,7 +361,7 @@ float font_c::CharWidth(char ch)
 	if (def->type == FNTYP_Image)
 	{
 		if (ch == ' ')
-			return im_char_width * 3 / 5 + spacing;
+			return im_char_width * 2 / 5 + spacing;
 		else
 			return individual_char_widths[int((byte)ch)] + spacing;
 	}

@@ -559,8 +559,7 @@ static void NAV_EnemiesInSubsector(const subsector_t *sub, bot_t *bot, float rad
 {
 	for (mobj_t *mo = sub->thinglist ; mo != NULL ; mo = mo->snext)
 	{
-		float score = bot->EvalEnemy(mo);
-		if (score < 0)
+		if (bot->EvalEnemy(mo) < 0)
 			continue;
 
 		float dx = fabs(bot->pl->mo->x - mo->x);
@@ -569,8 +568,8 @@ static void NAV_EnemiesInSubsector(const subsector_t *sub, bot_t *bot, float rad
 		if (dx > radius || dy > radius)
 			continue;
 
-		// randomize the score -- to break ties
-		score += (float)C_Random() / 65535.0f;
+		// pick one of the monsters at random
+		float score = (float)C_Random() / 65535.0f;
 
 		if (score > best_score)
 		{

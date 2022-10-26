@@ -91,48 +91,19 @@ static float NAV_EvaluateHealth(const mobj_t *mo)
 	return -1;
 }
 
-
-static float NAV_EvaluateAny(const mobj_t *mo)
-{
-	float score = NAV_EvaluateBigItem(mo);
-	if (score > 0)
-		return score;
-
-	// TODO EvaluateAny
-
-	return -1;
-}
-
-
-static float NAV_EvalThing(const mobj_t *mo, float dist, int what)
-{
-		if (what == NFIND_Enemy)
-		{
-			if (0 == (mo->flags & MF_SHOOTABLE))
-				continue;
-		}
-		else
-		{
-			if (0 == (mo->flags & MF_SPECIAL))
-				continue;
-		}
-
-	float score = 0;
-
-	switch (what)
-	{
-		case NFIND_Enemy:  score = NAV_EvaluateEnemy(mo);   break;
-		case NFIND_Big:    score = NAV_EvaluateBigItem(mo); break;
-		case NFIND_Health: score = NAV_EvaluateHealth(mo);  break;
-		default:           score = NAV_EvaluateAny(mo);     break;
-	}
-
-	if (score == 0)
-		return -1;
-
-	return score;
-}
 */
+
+
+bool bot_t::IsBarrel(const mobj_t *mo)
+{
+	if (mo->player)
+		return false;
+
+	if (0 == (mo->extendedflags & EF_MONSTER))
+		return false;
+
+	return true;
+}
 
 
 float bot_t::EvalEnemy(const mobj_t *mo)
@@ -143,13 +114,15 @@ float bot_t::EvalEnemy(const mobj_t *mo)
 	// - target may not have the same supportobj as you.
 	// - You must be able to see and shoot the target.
 
-	if (! (mo->flags & MF_SHOOTABLE))
+	if (0 == (mo->flags & MF_SHOOTABLE) || mo->health <= 0)
 		return -1;
 
-	/* hmmm, want to allow barrels
-	if (! (them->extendedflags & EF_MONSTER) && ! them->player)
-		continue;
-	*/
+	// occasionally shoot barrels
+	if (IsBarrel(mo))
+		return (C_Random() % 100 < 5) ? +1 : -1;
+
+	if (0 == (mo->extendedflags & EF_MONSTER) && ! mo->player)
+		return -1;
 
 	if (mo->player && mo->player == pl)
 		return -1;

@@ -845,9 +845,9 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 	if (epi::strcmp(img->name, "TTFDUMMY") == 0)
 	{
 		stbtt_aligned_quad *q = cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].char_quad;
-		y = top_y + (cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].y_shift * sc_y);
+		y = top_y + (cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].y_shift * (size > 0 ? (size / cur_font->def->ttf_default_size) : 1.0) * sc_y);
 		w = ((size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->ttf_default_size)) : cur_font->CharWidth(ch)) - cur_font->spacing) * sc_x;
-		h = (size > 0 ? size : cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].height) * sc_y;
+		h = (cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].height * (size > 0 ? (size / cur_font->def->ttf_default_size) : 1.0)) * sc_y;
 		tx1 = q->s0;
 		ty1 = q->t0;
 		tx2 = q->s1;

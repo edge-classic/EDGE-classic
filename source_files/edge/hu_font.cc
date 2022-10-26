@@ -239,7 +239,7 @@ void font_c::LoadFontTTF()
 		delete M->packed_char;
 		delete M->char_quad;
 		delete M;
-		spacing = def->spacing;
+		spacing = def->spacing + 0.5; // + 0.5 for at least a minimal buffer between letters by default
 	}
 }
 
@@ -361,7 +361,7 @@ float font_c::CharWidth(char ch)
 	if (def->type == FNTYP_Image)
 	{
 		if (ch == ' ')
-			return im_char_width * 2 / 5 + spacing;
+			return im_char_width * 3 / 5 + spacing;
 		else
 			return individual_char_widths[int((byte)ch)] + spacing;
 	}
@@ -392,11 +392,9 @@ float font_c::CharWidth(char ch)
 			float x,y = 0.0f;
 			stbtt_GetPackedQuad(character.packed_char, 64, 64, 0, &x, &y, character.char_quad, 1);
 			if (ch == ' ')
-				character.width = ttf_char_width * 2 / 5;
+				character.width = ttf_char_width * 3 / 5;
 			else
 				character.width = (character.char_quad->x1 - character.char_quad->x0) * (def->ttf_default_size / 64.0);
-			//I_Printf("QUAD FOR %c\nX0: %f\nX1: %f\nY0: %f\nY1: %f\n", ch, character.char_quad->x0, character.char_quad->x1,
-				//character.char_quad->y0, character.char_quad->y1);
 			character.height = (character.char_quad->y1 - character.char_quad->y0) * (def->ttf_default_size / 64.0);
 			character.y_shift = (ttf_char_height - character.height) + (character.char_quad->y1 * (def->ttf_default_size / 64.0));
 			ttf_glyph_map.try_emplace(cp437_unicode_values[(int)ch], character);

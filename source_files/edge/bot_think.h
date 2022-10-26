@@ -106,8 +106,9 @@ public:
 	float last_x = 0;
 	float last_y = 0;
 
-	bot_path_c * path = NULL;
+	position_c roam_goal   { 0, 0, 0 };
 	position_c path_target { 0, 0, 0 };
+	bot_path_c * path = NULL;
 
 	botcmd_t cmd;
 

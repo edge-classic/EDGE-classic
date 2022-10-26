@@ -56,7 +56,7 @@ enum nav_find_thing_e
 void NAV_AnalyseLevel();
 void NAV_FreeLevel();
 
-position_c NAV_NextRoamPoint(bot_t *bot);
+bool NAV_NextRoamPoint(position_c& out);
 
 // attempt to find a traversible path, returns NULL if failed.
 bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags);

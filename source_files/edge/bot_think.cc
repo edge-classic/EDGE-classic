@@ -566,18 +566,18 @@ void bot_t::Roam()
 			path = NULL;
 		}
 
-		position_c p      = NAV_NextRoamPoint(this);
-		subsector_t *dest = R_PointInSubsector(p.x, p.y);
-
-		// already there?  [ TODO : dist check too ]
-		if (dest != pl->mo->subsector)
+		if (! NAV_NextRoamPoint(roam_goal))
 		{
-			path = NAV_FindPath(pl->mo->subsector, dest, 0);
+			// FIXME go into a wander/meander mode
+			return;
 		}
 
+		subsector_t *dest = R_PointInSubsector(roam_goal.x, roam_goal.y);
+
+		path = NAV_FindPath(pl->mo->subsector, dest, 0);
 		if (path == NULL)
 		{
-			// try again soon
+			// try again soon    [ TODO go into wander/meander mode ]
 			roam_count = TICRATE;
 		}
 		else

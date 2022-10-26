@@ -162,20 +162,32 @@ static void NAV_CollectBigItems()
 }
 
 
-position_c NAV_NextRoamPoint(bot_t *bot)
+bool NAV_NextRoamPoint(position_c& out)
 {
-	// TODO ensure it is not different to the last few chosen points
-
 	if (big_items.empty())
+		return false;
+
+	for (int loop = 0 ; loop < 100 ; loop++)
 	{
-		return position_c { 0, 0, 0 };
+		int idx = C_Random() % (int)big_items.size();
+
+		const big_item_c& item = big_items[idx];
+
+		float dx = fabs(item.x - out.x);
+		float dy = fabs(item.y - out.y);
+
+		// too close to last goal?
+		if (dx < 200 && dy < 200)
+			continue;
+
+		out.x = item.x;
+		out.y = item.y;
+		out.z = item.z;
+
+		return true;
 	}
 
-	int idx = C_Random() % (int)big_items.size();
-
-	const big_item_c& item = big_items[idx];
-
-	return position_c { item.x, item.y, item.z };
+	return false;
 }
 
 

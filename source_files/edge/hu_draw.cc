@@ -836,7 +836,7 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 	float sc_x = cur_scale; // TODO * aspect;
 	float sc_y = cur_scale;
 
-	float x = left_x - (IM_OFFSETX(img) * sc_x) + (cur_font->spacing / 2 * sc_x);
+	float x = left_x - IM_OFFSETX(img) * sc_x;
 	float y = top_y  - IM_OFFSETY(img) * sc_y;
 
 	float w, h;
@@ -846,7 +846,7 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 	{
 		stbtt_aligned_quad *q = cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].char_quad;
 		y = top_y + (cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].y_shift * sc_y);
-		w = ((size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->ttf_default_size)) : cur_font->CharWidth(ch)) - cur_font->spacing)* sc_x;
+		w = ((size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->ttf_default_size)) : cur_font->CharWidth(ch)) - cur_font->spacing) * sc_x;
 		h = (size > 0 ? size : cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].height) * sc_y;
 		tx1 = q->s0;
 		ty1 = q->t0;

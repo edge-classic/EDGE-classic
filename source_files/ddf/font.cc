@@ -38,6 +38,7 @@ static const commandlist_t font_commands[] =
 	DDF_FIELD("IMAGE",    image_name, DDF_MainGetString),
 	DDF_FIELD("TTF",    ttf_name, DDF_MainGetString),
 	DDF_FIELD("TTF_DEFAULT_SIZE", ttf_default_size, DDF_MainGetFloat),
+	DDF_FIELD("TTF_SMOOTHING", ttf_smoothing_string, DDF_MainGetString),
 	DDF_FIELD("MISSING_PATCH", missing_patch, DDF_MainGetString),
 	DDF_FIELD("SPACING", spacing, DDF_MainGetFloat),
 
@@ -104,7 +105,21 @@ static void FontFinishEntry(void)
 	if (dynamic_font->type == FNTYP_Patch && ! dynamic_font->patches)
 		DDF_Error("Missing font patch list.\n");
 
-	// FIXME: check FNTYP_Image
+	if (dynamic_font->type == FNTYP_Image && dynamic_font->image_name.empty())
+		DDF_Error("Missing font image name.\n");
+
+	if (dynamic_font->type == FNTYP_TrueType && dynamic_font->ttf_name.empty())
+		DDF_Error("Missing font TTF/OTF lump/file name.\n");
+
+	if (dynamic_font->type == FNTYP_TrueType && !dynamic_font->ttf_smoothing_string.empty())
+	{
+		if (epi::strcmp(dynamic_font->ttf_smoothing_string, "NEVER") == 0)
+			dynamic_font->ttf_smoothing = dynamic_font->TTF_SMOOTH_NEVER;
+		else if (epi::strcmp(dynamic_font->ttf_smoothing_string, "ALWAYS") == 0)
+			dynamic_font->ttf_smoothing = dynamic_font->TTF_SMOOTH_ALWAYS;
+		else if (epi::strcmp(dynamic_font->ttf_smoothing_string, "ON_DEMAND") == 0)
+			dynamic_font->ttf_smoothing = dynamic_font->TTF_SMOOTH_ON_DEMAND;
+	}		
 }
 
 
@@ -270,6 +285,8 @@ void fontdef_c::CopyDetail(const fontdef_c &src)
 	spacing = src.spacing;
 	ttf_name = src.ttf_name;
 	ttf_default_size = src.ttf_default_size;
+	ttf_smoothing = src.ttf_smoothing;
+	ttf_smoothing_string = src.ttf_smoothing_string;
 }
 
 //
@@ -284,6 +301,8 @@ void fontdef_c::Default()
 	ttf_name.clear();
 	ttf_default_size = 7.0;
 	spacing = 0.0;
+	ttf_smoothing = TTF_SMOOTH_ON_DEMAND;
+	ttf_smoothing_string.clear();
 }
 
 

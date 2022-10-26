@@ -410,7 +410,11 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, cur_font->ttf_glyph_map[cp437_unicode_values[ch]].tex_id);
+		if ((var_smoothing && cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ON_DEMAND) ||
+			cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ALWAYS)
+			glBindTexture(GL_TEXTURE_2D, cur_font->ttf_glyph_map[cp437_unicode_values[ch]].smoothed_tex_id);
+		else
+			glBindTexture(GL_TEXTURE_2D, cur_font->ttf_glyph_map[cp437_unicode_values[ch]].tex_id);
 		glColor4f(r, g, b, alpha);
 		glBegin(GL_QUADS);
 		glTexCoord2f(tx1,ty2); glVertex2f(hx1,hy1);

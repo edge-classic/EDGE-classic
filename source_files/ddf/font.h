@@ -70,10 +70,20 @@ public:
 
 	std::string image_name;
 
+	float spacing;
+
+	// TTF Stuff
+	enum
+	{
+		TTF_SMOOTH_ON_DEMAND = 0,
+		TTF_SMOOTH_ALWAYS = 1,
+		TTF_SMOOTH_NEVER = 2
+	};
+
 	std::string ttf_name;
 	float ttf_default_size;
-
-	float spacing;
+	int ttf_smoothing;
+	std::string ttf_smoothing_string; // User convenience
 
 private:
 	// disable copy construct and assignment operator

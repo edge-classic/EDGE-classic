@@ -53,8 +53,12 @@ bool  NAV_NextRoamPoint(position_c& out);
 // attempt to find a traversible path, returns NULL if failed.
 bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags);
 
-// find an pickup item or enemy to fight, returns NULL if none found.
+// find an pickup item in a nearby area, returns NULL if none found.
 bot_path_c * NAV_FindThing(bot_t *bot, float radius, mobj_t*& best);
+
+// find an enemy to fight, or NULL if none found.
+// caller is responsible to do a sight checks.
+mobj_t * NAV_FindEnemy(bot_t *bot, float radius);
 
 #endif  /*__P_NAVIGATE_H__*/
 

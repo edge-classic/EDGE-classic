@@ -454,12 +454,12 @@ bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags)
 
 //----------------------------------------------------------------------------
 
-static void NAV_EvalSubsector(subsector_t *sub, bot_t *bot, position_c& pos, float radius,
+static void NAV_ItemsInSubsector(subsector_t *sub, bot_t *bot, position_c& pos, float radius,
 	int sub_id, int& best_id, float& best_score, mobj_t*& best_mo)
 {
 	for (mobj_t *mo = sub->thinglist ; mo != NULL ; mo = mo->snext)
 	{
-		float score = bot->EvalThing(mo);
+		float score = bot->EvalItem(mo);
 		if (score < 0)
 			continue;
 
@@ -529,7 +529,7 @@ bot_path_c * NAV_FindThing(bot_t *bot, float radius, mobj_t*& best)
 		area.open = false;
 
 		// visit the things
-		NAV_EvalSubsector(&subsectors[cur], bot, pos, radius, cur, best_id, best_score, best);
+		NAV_ItemsInSubsector(&subsectors[cur], bot, pos, radius, cur, best_id, best_score, best);
 
 		// visit each neighbor node
 		for (int k = 0 ; k < area.num_links ; k++)
@@ -551,6 +551,76 @@ bot_path_c * NAV_FindThing(bot_t *bot, float radius, mobj_t*& best)
 			NAV_TryOpenArea(link.dest_id, cur, cost);
 		}
 	}
+}
+
+//----------------------------------------------------------------------------
+
+static void NAV_EnemiesInSubsector(const subsector_t *sub, bot_t *bot, float radius, mobj_t*& best_mo, float& best_score)
+{
+	for (mobj_t *mo = sub->thinglist ; mo != NULL ; mo = mo->snext)
+	{
+		float score = bot->EvalEnemy(mo);
+		if (score < 0)
+			continue;
+
+		float dx = fabs(bot->pl->mo->x - mo->x);
+		float dy = fabs(bot->pl->mo->y - mo->y);
+
+		if (dx > radius || dy > radius)
+			continue;
+
+		// randomize the score -- to break ties
+		score += (float)C_Random() / 65535.0f;
+
+		if (score > best_score)
+		{
+			best_mo    = mo;
+			best_score = score;
+		}
+	}
+}
+
+
+static void NAV_EnemiesInNode(unsigned int bspnum, bot_t *bot, float radius, mobj_t*& best_mo, float& best_score)
+{
+	SYS_ASSERT(bspnum >= 0);
+
+	if (bspnum & NF_V5_SUBSECTOR)
+	{
+		bspnum &= ~NF_V5_SUBSECTOR;
+		NAV_EnemiesInSubsector(&subsectors[bspnum], bot, radius, best_mo, best_score);
+		return;
+	}
+
+	const node_t *node = &nodes[bspnum];
+
+	position_c pos { bot->pl->mo->x, bot->pl->mo->y, bot->pl->mo->z };
+
+	for (int c = 0 ; c < 2 ; c++)
+	{
+		// reject children outside of the bounds
+		if (node->bbox[c][BOXLEFT]   > pos.x + radius) continue;
+		if (node->bbox[c][BOXRIGHT]  < pos.x - radius) continue;
+		if (node->bbox[c][BOXBOTTOM] > pos.y + radius) continue;
+		if (node->bbox[c][BOXTOP]    < pos.y - radius) continue;
+
+		NAV_EnemiesInNode(node->children[c], bot, radius, best_mo, best_score);
+	}
+}
+
+
+mobj_t * NAV_FindEnemy(bot_t *bot, float radius)
+{
+	// find an enemy to fight, or NULL if none found.
+	// caller is responsible to do a sight checks.
+	// radius is the size of a square box (not a circle).
+
+	mobj_t *best_mo  = NULL;
+	float best_score = 0;
+
+	NAV_EnemiesInNode(root_node, bot, radius, best_mo, best_score);
+
+	return best_mo;
 }
 
 //----------------------------------------------------------------------------

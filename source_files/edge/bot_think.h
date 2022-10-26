@@ -146,19 +146,20 @@ private:
 	void MoveToward(const position_c& pos);
 
 	void Roam();
+	void LookAround();
+	void LookForEnemies();
+
 	void TaskThink();
 	void DestroyEnemy();
 	void PainResponse();
-
-	void LookAround();
-	void EvalEnemy(const mobj_t *mo);
 
 	void TurnToward(angle_t angle, float slope);
 	void TurnToward(const mobj_t *mo);
 	void DeletePath();
 
 public:
-	float EvalThing(const mobj_t *mo);
+	float EvalItem (const mobj_t *mo);
+	float EvalEnemy(const mobj_t *mo);
 };
 
 void P_BotCreate(struct player_s *pl, bool recreate);

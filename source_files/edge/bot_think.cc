@@ -135,7 +135,7 @@ static float NAV_EvalThing(const mobj_t *mo, float dist, int what)
 */
 
 
-void bot_t::EvalEnemy(const mobj_t *mo)
+float bot_t::EvalEnemy(const mobj_t *mo)
 {
 	// The following must be true to justify that you attack a target:
 	// - target may not be yourself or your support obj.
@@ -144,7 +144,7 @@ void bot_t::EvalEnemy(const mobj_t *mo)
 	// - You must be able to see and shoot the target.
 
 	if (! (mo->flags & MF_SHOOTABLE))
-		return;
+		return -1;
 
 	/* hmmm, want to allow barrels
 	if (! (them->extendedflags & EF_MONSTER) && ! them->player)
@@ -152,30 +152,25 @@ void bot_t::EvalEnemy(const mobj_t *mo)
 	*/
 
 	if (mo->player && mo->player == pl)
-		return;
+		return -1;
 
 	if (pl->mo->supportobj == mo)
-		return;
+		return -1;
 
 	if (COOP_MATCH() && mo->player)
-		return;
+		return -1;
 
 	if (COOP_MATCH() && mo->supportobj && mo->supportobj->player)
-		return;
+		return -1;
 
 	// EXTERMINATE !!
 
-	pl->mo->SetTarget((mobj_t *) mo);
+	return 1.0;
 }
 
 
-float bot_t::EvalThing(const mobj_t *mo)
+float bot_t::EvalItem(const mobj_t *mo)
 {
-	if (pl->mo->target == NULL)
-	{
-		EvalEnemy(mo);
-	}
-
 	// FIXME EvalThing
 	return -1;
 }
@@ -442,9 +437,32 @@ I_Printf("BOT %d: Targeting Agent: %s\n", bot->pl->pnum, them->info->name.c_str(
 */
 
 
+void bot_t::LookForEnemies()
+{
+	// TODO check sight of existing target
+	//      [ if too many checks, lose patience ]
+
+	if (pl->mo->target == NULL)
+	{
+		mobj_t * enemy = NAV_FindEnemy(this, 768);
+
+		if (enemy != NULL)
+		{
+			// sight check, since enemy may be on other side of a wall
+			if (P_CheckSight(pl->mo, enemy))
+				pl->mo->SetTarget(enemy);
+		}
+	}
+}
+
+
 void bot_t::LookAround()
 {
 	look_time--;
+
+	if (look_time == 8 || look_time == 16 || look_time == 24)
+		LookForEnemies();
+
 	if (look_time >= 0)
 		return;
 

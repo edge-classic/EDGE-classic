@@ -53,6 +53,10 @@ static int attack_chances[3] = {  32,  64, 160 };
 static int    move_speeds[3] = {  36,  45,  50 };
 
 
+//----------------------------------------------------------------------------
+//  EVALUATING ITEMS, MONSTERS, WEAPONS
+//----------------------------------------------------------------------------
+
 static bot_t *looking_bot;
 static mobj_t *lkbot_target;
 static int lkbot_score;
@@ -78,6 +82,140 @@ bool bot_t::MeleeWeapon() const
 	return pl->weapons[wp_num].info->ammo[0] == AM_NoAmmo;
 }
 
+
+/* TODO sort all this out
+
+static float NAV_EvaluateHealth(const mobj_t *mo)
+{
+	for (const benefit_t *B = mo->info->pickup_benefits ; B != NULL ; B = B->next)
+	{
+		if (B->type == BENEFIT_Health)
+			return B->amount;
+	}
+
+	return -1;
+}
+
+
+static float NAV_EvaluateAny(const mobj_t *mo)
+{
+	float score = NAV_EvaluateBigItem(mo);
+	if (score > 0)
+		return score;
+
+	// TODO EvaluateAny
+
+	return -1;
+}
+
+
+static float NAV_EvaluateEnemy(const mobj_t *mo)
+{
+	// FIXME
+
+	return -1;
+}
+
+
+static float NAV_EvalThing(const mobj_t *mo, float dist, int what)
+{
+		if (what == NFIND_Enemy)
+		{
+			if (0 == (mo->flags & MF_SHOOTABLE))
+				continue;
+		}
+		else
+		{
+			if (0 == (mo->flags & MF_SPECIAL))
+				continue;
+		}
+
+	float score = 0;
+
+	switch (what)
+	{
+		case NFIND_Enemy:  score = NAV_EvaluateEnemy(mo);   break;
+		case NFIND_Big:    score = NAV_EvaluateBigItem(mo); break;
+		case NFIND_Health: score = NAV_EvaluateHealth(mo);  break;
+		default:           score = NAV_EvaluateAny(mo);     break;
+	}
+
+	if (score == 0)
+		return -1;
+
+	return score;
+}
+*/
+
+
+float bot_t::EvalThing(const mobj_t *mo) const
+{
+	// FIXME EvalThing
+	return -1;
+}
+
+
+int bot_t::EvaluateWeapon(int w_num) const
+{
+	// this evaluates weapons owned by the bot (NOT ones in the map).
+
+	playerweapon_t *wp = pl->weapons + w_num;
+
+	// don't have this weapon
+	if (! wp->owned)
+		return -9999;
+
+	weapondef_c *weapon = wp->info;
+	SYS_ASSERT(weapon);
+
+	atkdef_c *attack = weapon->attack[0];
+	if (!attack)
+		return -9999;
+
+	// have enough ammo?
+	if (weapon->ammo[0] != AM_NoAmmo)
+	{
+		if (pl->ammo[weapon->ammo[0]].num < weapon->ammopershot[0])
+			return -9999;
+	}
+
+	float value = 64 * attack->damage.nominal;
+
+	switch (attack->attackstyle)
+	{
+		case ATK_SHOT:
+			value *= attack->count;
+			break;
+
+		case ATK_CLOSECOMBAT:
+			if (pl->powers[PW_Berserk])
+				value /= 10;
+			else
+				value /= 20;
+			break;
+
+		case ATK_PROJECTILE:
+		case ATK_SMARTPROJECTILE:
+			value += 256 * attack->atk_mobj->explode_damage.nominal;
+			value *= attack->atk_mobj->speed / 20;
+			break;
+
+		default:
+			// for everything else, no change
+			break;
+	}
+
+	value -= weapon->ammopershot[0] * 8;
+
+	if (w_num == pl->ready_wp || w_num == pl->pending_wp)
+		value += 1024;
+
+	value += (M_Random() - 128) * 16;
+
+	return (int)value;
+}
+
+//----------------------------------------------------------------------------
 
 void bot_t::NewChaseDir(bool move_ok)
 {
@@ -122,78 +260,6 @@ void bot_t::Confidence()
 		if (pl->ammo[ammo].num > pl->ammo[ammo].max / 2)
 			confidence = 1;
 	}
-}
-
-
-int bot_t::EvaluateWeapon(int w_num) const
-{
-	playerweapon_t *wp = pl->weapons + w_num;
-
-	// don't have this weapon
-	if (! wp->owned)
-		return -9999;
-
-	weapondef_c *weapon = wp->info;
-	SYS_ASSERT(weapon);
-
-	atkdef_c *attack = weapon->attack[0];
-	if (!attack)
-		return -9999;
-
-	// Don't have enough ammo
-	if (weapon->ammo[0] != AM_NoAmmo)
-	{
-		if (pl->ammo[weapon->ammo[0]].num < weapon->ammopershot[0])
-			return -9999;
-	}
-
-	float value = 64 * attack->damage.nominal;
-
-	switch (attack->attackstyle)
-	{
-		case ATK_CLOSECOMBAT:
-			if (pl->powers[PW_Berserk])
-				value /= 10;
-			else
-				value /= 20;
-			break;
-
-		case ATK_SMARTPROJECTILE:
-			value *= 2;
-		case ATK_PROJECTILE:
-			value += 256 * attack->atk_mobj->explode_damage.nominal;
-			value *= attack->atk_mobj->speed / 20;
-			break;
-
-		case ATK_SPAWNER:
-			value *= 2;
-			break;
-
-		//Lobo 2021: doom64 pain elemental
-		case ATK_DOUBLESPAWNER:
-			value *= 4;
-			break;
-
-		case ATK_TRIPLESPAWNER:
-			value *= 6;
-			break;
-
-		case ATK_SHOT:
-			value *= attack->count;
-			break;
-
-		default:  // do nothing ??
-			break;
-	}
-
-	value -= weapon->ammopershot[0] * 8;
-
-	if (w_num == pl->ready_wp || w_num == pl->pending_wp)
-		value += 1024;
-
-	value += (M_Random() - 128) * 16;
-
-	return (int)value;
 }
 
 

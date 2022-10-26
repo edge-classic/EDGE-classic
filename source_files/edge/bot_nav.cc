@@ -19,6 +19,7 @@
 #include "i_defs.h"
 
 #include "bot_nav.h"
+#include "bot_think.h"
 #include "con_main.h"
 #include "dm_data.h"
 #include "dm_defs.h"
@@ -49,7 +50,7 @@ public:
 static std::vector<big_item_c> big_items;
 
 
-static float NAV_EvaluateBigItem(const mobj_t *mo)
+float NAV_EvaluateBigItem(const mobj_t *mo)
 {
 	ammotype_e ammotype;
 
@@ -102,38 +103,6 @@ static float NAV_EvaluateBigItem(const mobj_t *mo)
 				break;
 		}
 	}
-
-	return -1;
-}
-
-
-static float NAV_EvaluateHealth(const mobj_t *mo)
-{
-	for (const benefit_t *B = mo->info->pickup_benefits ; B != NULL ; B = B->next)
-	{
-		if (B->type == BENEFIT_Health)
-			return B->amount;
-	}
-
-	return -1;
-}
-
-
-static float NAV_EvaluateAny(const mobj_t *mo)
-{
-	float score = NAV_EvaluateBigItem(mo);
-	if (score > 0)
-		return score;
-
-	// TODO EvaluateAny
-
-	return -1;
-}
-
-
-static float NAV_EvaluateEnemy(const mobj_t *mo)
-{
-	// FIXME
 
 	return -1;
 }
@@ -485,52 +454,25 @@ bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags)
 
 //----------------------------------------------------------------------------
 
-static float NAV_EvalThing(const mobj_t *mo, float dist, int what)
-{
-	float score = 0;
-
-	switch (what)
-	{
-		case NFIND_Enemy:  score = NAV_EvaluateEnemy(mo);   break;
-		case NFIND_Big:    score = NAV_EvaluateBigItem(mo); break;
-		case NFIND_Health: score = NAV_EvaluateHealth(mo);  break;
-		default:           score = NAV_EvaluateAny(mo);     break;
-	}
-
-	if (score == 0)
-		return -1;
-
-	if (dist > 300)
-		score = score * 0.5;
-
-	// randomize the score -- to break ties
-	score += (float)C_Random() / 65535.0;
-
-	return score;
-}
-
-
-static void NAV_EvalSubsector(subsector_t *sub, position_c& pos, float radius, int what,
-	int sub_id, float G, int& best_id, float& best_score, mobj_t*& best_mo)
+static void NAV_EvalSubsector(subsector_t *sub, bot_t *bot, position_c& pos, float radius,
+	int sub_id, int& best_id, float& best_score, mobj_t*& best_mo)
 {
 	for (mobj_t *mo = sub->thinglist ; mo != NULL ; mo = mo->snext)
 	{
-		if (what == NFIND_Enemy)
-		{
-			if (0 == (mo->flags & MF_SHOOTABLE))
-				continue;
-		}
-		else
-		{
-			if (0 == (mo->flags & MF_SPECIAL))
-				continue;
-		}
+		float score = bot->EvalThing(mo);
+		if (score < 0)
+			continue;
 
 		float dist = R_PointToDist(pos.x, pos.y, mo->x, mo->y);
 		if (dist > radius)
 			continue;
 
-		float score = NAV_EvalThing(mo, dist, what);
+		// very close things get a boost
+		if (dist < radius * 0.25f)
+			score = score * 2.0f;
+
+		// randomize the score -- to break ties
+		score += (float)C_Random() / 65535.0f;
 
 		if (score > best_score)
 		{
@@ -542,11 +484,13 @@ static void NAV_EvalSubsector(subsector_t *sub, position_c& pos, float radius, i
 }
 
 
-bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t*& best)
+bot_path_c * NAV_FindThing(bot_t *bot, float radius, mobj_t*& best)
 {
-	// find an item to pickup or enemy to fight (depending on 'what' param).
-	// the distance will be limited by 'radius' (roughly).
-	// returns NULL if none found.
+	// find an item to pickup or enemy to fight.
+	// each nearby thing (limited roughly by `radius') will be passed to the
+	// EvalThing() method of the bot.  returns NULL if nothing was found.
+
+	position_c pos { bot->pl->mo->x, bot->pl->mo->y, bot->pl->mo->z };
 
 	subsector_t *start = R_PointInSubsector(pos.x, pos.y);
 	int start_id = (int)(start - subsectors);
@@ -585,8 +529,7 @@ bot_path_c * NAV_FindThing(position_c pos, float radius, int what, mobj_t*& best
 		area.open = false;
 
 		// visit the things
-		NAV_EvalSubsector(&subsectors[cur], pos, radius, what, cur,
-			area.G, best_id, best_score, best);
+		NAV_EvalSubsector(&subsectors[cur], bot, pos, radius, cur, best_id, best_score, best);
 
 		// visit each neighbor node
 		for (int k = 0 ; k < area.num_links ; k++)

@@ -60,6 +60,15 @@ enum bot_task_e
 };
 
 
+// what kind of thing we are looking for
+enum bot_find_thing_e
+{
+	FIND_Enemy = 0,  // an enemy (or barrel)
+	FIND_Goal,       // a big item (the roam goal)
+	FIND_Other,      // anything useful or needed
+};
+
+
 // This describes what action the bot wants to do.
 // It will be translated to a ticcmd_t by P_BotPlayerBuilder.
 
@@ -131,7 +140,6 @@ private:
 
 	void Confidence();
 	int  EvaluateWeapon(int w_num) const;
-	public: int  EvaluateItem(const mobj_t *mo) const; private:
 	void SelectWeapon();
 
 	bool LookForEnemies();
@@ -141,6 +149,9 @@ private:
 	void TurnToward(angle_t angle, float slope);
 	void TurnToward(const mobj_t *mo);
 	void DeletePath();
+
+public:
+	float EvalThing(const mobj_t *mo) const;
 };
 
 void P_BotCreate(struct player_s *pl, bool recreate);

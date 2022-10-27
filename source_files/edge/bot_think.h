@@ -136,6 +136,7 @@ private:
 	void Move();
 	void MoveToward(const position_c& pos);
 	void WeaveToward(const position_c& pos);
+	void WeaveToward(const mobj_t *mo);
 	void DetectObstacle();
 	bool FollowPath();
 	void Meander();

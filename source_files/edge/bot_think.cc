@@ -602,6 +602,14 @@ void bot_t::WeaveToward(const position_c& pos)
 }
 
 
+void bot_t::WeaveToward(const mobj_t *mo)
+{
+	position_c pos { mo->x, mo->y, mo->z };
+
+	WeaveToward(pos);
+}
+
+
 void bot_t::DetectObstacle()
 {
 	mobj_t *mo = pl->mo;
@@ -760,7 +768,6 @@ void bot_t::Think_Help()
 
 	if (path != NULL)
 	{
-		roam_count--;
 		if (roam_count-- < 0)
 			DeletePath();
 		else
@@ -911,7 +918,44 @@ void bot_t::Think_Roam()
 
 void bot_t::Think_GetItem()
 {
-	// TODO
+	// item gone?  (either we picked it up, or someone else did)
+	if (pl->mo->tracer == NULL)
+	{
+		task = TASK_None;
+		return;
+	}
+
+	// took too long? (e.g. we got stuck)
+	if (roam_count-- < 0)
+	{
+		DeletePath();
+		task = TASK_None;
+		return;
+	}
+
+	// if we are being chased, look at them, shoot sometimes
+	if (pl->mo->target)
+	{
+		TurnToward(pl->mo->target);
+
+		// FIXME shoot
+	}
+	else
+	{
+		TurnToward(pl->mo->tracer);
+	}
+
+	// follow the path previously found
+	if (path != NULL)
+	{
+		FollowPath();
+		return;
+	}
+
+	// move toward the item's location
+	WeaveToward(pl->mo->tracer);
+
+	// TODO : REVIEW FOLLOWING LOGIC
 
 /*
 	// Got a special (item) target?

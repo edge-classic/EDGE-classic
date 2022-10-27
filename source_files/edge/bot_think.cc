@@ -569,6 +569,49 @@ void bot_t::TurnToward(const mobj_t *mo)
 }
 
 
+void bot_t::WeaveToward(const position_c& pos)
+{
+	// usually try to move directly toward a wanted position.
+	// but if something gets in our way, we try to "weave" around it,
+	// by sometimes going diagonally left and sometimes right.
+
+	if (hit_obstacle && weave == 0)
+	{
+		weave = (C_Random() & 1) ? -1 : +1;
+		weave_time = 30 + C_Random() % 30;
+	}
+
+	if (weave_time-- < 0)
+	{
+		if (! hit_obstacle)
+			weave = 0;
+		else
+			weave = -weave;
+
+		weave_time = 30 + C_Random() % 60;
+	}
+
+	MoveToward(pos);
+
+	if (weave < 0) cmd.move_angle -= ANG5 * 12;
+	if (weave > 0) cmd.move_angle += ANG5 * 12;
+}
+
+
+void bot_t::DetectObstacle()
+{
+	mobj_t *mo = pl->mo;
+
+	float dx = last_x - mo->x;
+	float dy = last_y - mo->y;
+
+	last_x = mo->x;
+	last_y = mo->y;
+
+	hit_obstacle = (dx * dx + dy * dy) < 0.2;
+}
+
+
 void bot_t::Chase(bool seetarget, bool move_ok)
 {
 	int skill = CLAMP(0, bot_skill.d, 2);
@@ -624,15 +667,6 @@ void bot_t::Think_Fight()
 {
 	mobj_t *mo = pl->mo;
 
-	// FIXME do this elsewhere
-	float move_dx = last_x - mo->x;
-	float move_dy = last_y - mo->y;
-
-	last_x = mo->x;
-	last_y = mo->y;
-
-	bool move_ok = (move_dx*move_dx + move_dy*move_dy) > 0.2;
-
 	// Check if we can see the target
 	bool seetarget = false;
 	if (mo->target)
@@ -673,14 +707,14 @@ void bot_t::Think_Fight()
 
 	if (mo->target != NULL)
 	{
-		Chase(seetarget || true, move_ok);  // FIXME !!!
+		Chase(seetarget || true, !hit_obstacle);  // FIXME !!!
 	}
 	else
 	{
 		// Wander around.
-		if (!move_ok || move_count < 0)
+		if (hit_obstacle || move_count < 0)
 		{
-			NewChaseDir(move_ok);
+			NewChaseDir(!hit_obstacle);
 
 			move_count = 10 + (M_Random() & 31);
 			strafedir = 0;
@@ -693,7 +727,13 @@ void bot_t::Think_Fight()
 
 void bot_t::Think_Help()
 {
-	// TODO
+	// TODO this just test stuff
+
+	mobj_t *leader = pl->mo->supportobj;
+
+	position_c pos = { leader->x, leader->y, leader->z };
+
+	WeaveToward(pos);
 }
 
 
@@ -898,7 +938,7 @@ void bot_t::Think()
 
 	LookAround();
 
-	// FIXME detect being unable to move
+	DetectObstacle();
 
 	// doing a task?
 	switch (task)
@@ -997,12 +1037,12 @@ void bot_t::ConvertTiccmd(ticcmd_t *dest)
 
 void bot_t::Respawn()
 {
-	// TODO in COOP, pick a player to help, try to reach them if far away
-
 	task = TASK_None;
 
 	roam_count = C_Random() % 8;
 	look_time  = C_Random() % 8;
+
+	hit_obstacle = false;
 
 	DeletePath();
 }

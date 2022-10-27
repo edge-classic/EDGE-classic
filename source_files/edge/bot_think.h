@@ -99,10 +99,15 @@ public:
 	int roam_count   = 0;
 	int dead_count   = 0;
 	int look_time    = 0;
+	int weave_time   = 0;
+
+	// 0 = go straight, 1 = left, 2 = right
+	int weave = 0;
 
 	// last position, to check if we actually moved
 	float last_x = 0;
 	float last_y = 0;
+	bool  hit_obstacle;
 
 	position_c roam_goal   { 0, 0, 0 };
 	position_c path_target { 0, 0, 0 };
@@ -128,6 +133,8 @@ private:
 	void Chase(bool seetarget, bool move_ok);
 	void Move();
 	void MoveToward(const position_c& pos);
+	void WeaveToward(const position_c& pos);
+	void DetectObstacle();
 
 	void LookAround();
 	void LookForEnemies();

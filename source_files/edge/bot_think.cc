@@ -729,13 +729,11 @@ void bot_t::Think_Fight()
 }
 
 
-void bot_t::Think_Help()
+void bot_t::WeaveBehindLeader(const mobj_t *leader)
 {
-	mobj_t *leader = pl->mo->supportobj;
+	// pick a position behind the leader, and a bit to the side
 
 	position_c pos = { leader->x, leader->y, leader->z };
-
-	// pick a position behind the leader, and a bit to the side
 
 	float dx = M_Cos(leader->angle);
 	float dy = M_Sin(leader->angle);
@@ -756,41 +754,61 @@ void bot_t::Think_Help()
 }
 
 
-void bot_t::Think_Roam()
+void bot_t::Think_Help()
 {
-	if (roam_count-- < 0)
+	mobj_t *leader = pl->mo->supportobj;
+
+	if (path != NULL)
 	{
-		roam_count = 15 * TICRATE;
-
-		if (path != NULL)
-		{
-			delete path;
-			path = NULL;
-		}
-
-		if (! NAV_NextRoamPoint(roam_goal))
-		{
-			// FIXME go into a wander/meander mode
-			return;
-		}
-
-		subsector_t *dest = R_PointInSubsector(roam_goal.x, roam_goal.y);
-
-		path = NAV_FindPath(pl->mo->subsector, dest, 0);
-		if (path == NULL)
-		{
-			// try again soon    [ TODO go into wander/meander mode ]
-			roam_count = TICRATE;
-		}
+		roam_count--;
+		if (roam_count-- < 0)
+			DeletePath();
 		else
-		{
-			path_target = path->calc_target();
-		}
+			FollowPath();
+
+		return;
 	}
 
-	// no path?  OH NO!!
-	if (path == NULL)
+	position_c pos = { leader->x, leader->y, leader->z };
+
+	float dist = R_PointToDist(pl->mo->x, pl->mo->y, pos.x, pos.y);
+
+	// check if we are close to the leader, and can see them
+	bool near_them = false;
+
+	if (dist < 256.0)
+		near_them = P_CheckSight(pl->mo, leader);
+
+	if (near_them)
+	{
+		DeletePath();
+		WeaveBehindLeader(leader);
 		return;
+	}
+
+	// leader is too far away, find a path...
+	path = NAV_FindPath(pl->mo->subsector, leader->subsector, 0);
+	if (path != NULL)
+	{
+		roam_goal  = pos;
+		roam_count = 30 * TICRATE;
+		return;
+	}
+
+	// IDEA: try again a few times, then teleport somewhere nearby
+
+	// TODO
+	// Meander()
+
+fprintf(stderr, "cannot find leader: %d\n", gametic);
+}
+
+
+bool bot_t::FollowPath()
+{
+	// returns TRUE when reached the end.
+
+	SYS_ASSERT(path != NULL);
 
 	// check if we have reached the next subsector
 	int d1 = path->subs[path->along];
@@ -810,15 +828,11 @@ void bot_t::Think_Roam()
 
 		if (path->finished())
 		{
-			delete path;
-			path = NULL;
-
-			// pick a new path soon
-			roam_count = TICRATE;
-			return;
+			DeletePath();
+			return true;
 		}
 
-		path_target = path->calc_target();
+		path_point = path->calc_target();
 	}
 
 	// determine looking angle
@@ -841,7 +855,53 @@ void bot_t::Think_Roam()
 
 	strafedir = 0;
 
-	MoveToward(path_target);
+	WeaveToward(path_point);
+
+	return false;  // not finished
+}
+
+
+void bot_t::Think_Roam()
+{
+	if (roam_count-- < 0)
+	{
+		roam_count = TICRATE;
+
+		if (path != NULL)
+			DeletePath();
+
+		if (! NAV_NextRoamPoint(roam_goal))
+			return;
+
+		subsector_t *dest = R_PointInSubsector(roam_goal.x, roam_goal.y);
+
+		path = NAV_FindPath(pl->mo->subsector, dest, 0);
+		if (path == NULL)
+		{
+			// try again soon
+			return;
+		}
+
+		path_point = path->calc_target();
+
+		// after this amount of time, give up and try another place
+		// [ FIXME check if needed, PERHAPS detect lack of progress ]
+		roam_count = 20 * TICRATE;
+	}
+
+	// no path?  OH NO!!   FIXME Meander() or visit nearby items
+	if (path == NULL)
+		return;
+
+	FollowPath();
+
+	// reached the end?
+	if (path == NULL)
+	{
+		// FIXME look for BigItem, go grab it!
+		roam_count = TICRATE;
+		return;
+	}
 }
 
 
@@ -1056,12 +1116,16 @@ void bot_t::ConvertTiccmd(ticcmd_t *dest)
 
 void bot_t::Respawn()
 {
+	// TODO in a few tics, do a NAV_FindThing to find a weapon
+
 	task = TASK_None;
 
 	roam_count = C_Random() % 8;
 	look_time  = C_Random() % 8;
 
 	hit_obstacle = false;
+
+	NAV_NextRoamPoint(roam_goal);
 
 	DeletePath();
 }

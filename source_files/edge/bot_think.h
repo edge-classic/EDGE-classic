@@ -109,8 +109,10 @@ public:
 	float last_y = 0;
 	bool  hit_obstacle;
 
-	position_c roam_goal   { 0, 0, 0 };
-	position_c path_target { 0, 0, 0 };
+	// pathing info.
+	// used for DM roaming, COOP follow-the-leader, and getting items
+	position_c roam_goal  { 0, 0, 0 };
+	position_c path_point { 0, 0, 0 };
 	bot_path_c * path = NULL;
 
 	botcmd_t cmd;
@@ -135,10 +137,12 @@ private:
 	void MoveToward(const position_c& pos);
 	void WeaveToward(const position_c& pos);
 	void DetectObstacle();
+	bool FollowPath();
 
 	void LookAround();
 	void LookForEnemies();
 	void LookForLeader();
+	void WeaveBehindLeader(const mobj_t *leader);
 	bool IsBarrel(const mobj_t *mo);
 
 	void Think_Roam();

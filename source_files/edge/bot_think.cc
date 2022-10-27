@@ -283,7 +283,7 @@ void bot_t::PainResponse()
 	// TODO only update 'target' if threat is greater than current target
 
 	if (pl->mo->target == NULL)
-		pl->mo->SetTarget(pl->mo);
+		pl->mo->SetTarget(pl->attacker);
 }
 
 
@@ -727,11 +727,26 @@ void bot_t::Think_Fight()
 
 void bot_t::Think_Help()
 {
-	// TODO this just test stuff
-
 	mobj_t *leader = pl->mo->supportobj;
 
 	position_c pos = { leader->x, leader->y, leader->z };
+
+	// pick a position behind the leader, and a bit to the side
+
+	float dx = M_Cos(leader->angle);
+	float dy = M_Sin(leader->angle);
+
+	pos.x -= dx * 64.0;
+	pos.y -= dy * 64.0;
+
+	if (pl->pnum & 1)
+	{
+		dx = -dx;
+		dy = -dy;
+	}
+
+	pos.x += dy * 32.0;
+	pos.y += dx * 32.0;
 
 	WeaveToward(pos);
 }

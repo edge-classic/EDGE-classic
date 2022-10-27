@@ -900,19 +900,29 @@ void bot_t::Think_Roam()
 		roam_count = 20 * TICRATE;
 	}
 
-	// no path?  OH NO!!   FIXME Meander() or visit nearby items
-	if (path == NULL)
-		return;
-
-	FollowPath();
-
-	// reached the end?
-	if (path == NULL)
+	if (path != NULL)
 	{
-		// FIXME look for BigItem, go grab it!
-		roam_count = TICRATE;
+		FollowPath();
 		return;
 	}
+
+	// TODO we don't distinguish between "having a goal" vs "no goal"
+
+	// visit the big item's location
+	float dx   = pl->mo->x - roam_goal.x;
+	float dy   = pl->mo->y - roam_goal.y;
+	float dist = std::max(fabs(dx), fabs(dy));
+
+	if (dist > 16.0)
+	{
+		WeaveToward(roam_goal);
+		return;
+	}
+
+	// arrived at the spot!
+	// TODO look for other nearby items
+
+	roam_count = 0;
 }
 
 

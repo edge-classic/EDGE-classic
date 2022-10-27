@@ -148,6 +148,7 @@ private:
 	void Roam();
 	void LookAround();
 	void LookForEnemies();
+	void LookForLeader();
 	bool IsBarrel(const mobj_t *mo);
 
 	void TaskThink();

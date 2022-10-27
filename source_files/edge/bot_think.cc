@@ -274,6 +274,12 @@ void bot_t::PainResponse()
 	if (COOP_MATCH() && pl->attacker->player)
 		return;
 
+	if (pl->attacker->health <= 0)
+	{
+		pl->attacker = NULL;
+		return;
+	}
+
 	// TODO update 'target' if threat is greater than current target
 }
 
@@ -410,6 +416,29 @@ I_Printf("BOT %d: Targeting Agent: %s\n", bot->pl->pnum, them->info->name.c_str(
 */
 
 
+void bot_t::LookForLeader()
+{
+	if (DEATHMATCH())
+		return;
+
+	if (pl->mo->supportobj != NULL)
+		return;
+
+	for (int i = 0 ; i < MAXPLAYERS ; i++)
+	{
+		player_t * p2 = players[i];
+
+		if (p2 == NULL || p2->isBot())
+			continue;
+
+		if (C_Random() % 100 < 80)
+			continue;
+
+		pl->mo->SetSupportObj(p2->mo);
+	}
+}
+
+
 void bot_t::LookForEnemies()
 {
 	// TODO check sight of existing target
@@ -432,6 +461,9 @@ void bot_t::LookForEnemies()
 void bot_t::LookAround()
 {
 	look_time--;
+
+	if (look_time == 4)
+		LookForLeader();
 
 	if (look_time == 8 || look_time == 16 || look_time == 24)
 		LookForEnemies();
@@ -773,6 +805,13 @@ void bot_t::Think()
 		DeathThink();
 		return;
 	}
+
+	// forget target (etc) if they died
+	if (mo->target && mo->target->health <= 0)
+		mo->SetTarget(NULL);
+
+	if (mo->supportobj && mo->supportobj->health <= 0)
+		mo->SetSupportObj(NULL);
 
 	// hurt by somebody?
 	if (pl->attacker != NULL)

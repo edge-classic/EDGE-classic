@@ -667,6 +667,20 @@ void bot_t::Chase(bool seetarget, bool move_ok)
 }
 
 
+void bot_t::Meander()
+{
+	if (hit_obstacle || move_count < 0)
+	{
+		NewChaseDir(!hit_obstacle);
+
+		move_count = 10 + (M_Random() & 31);
+		strafedir = 0;
+	}
+
+	Move();
+}
+
+
 void bot_t::Think_Fight()
 {
 	mobj_t *mo = pl->mo;
@@ -709,23 +723,9 @@ void bot_t::Think_Fight()
 			patience = 30 + (M_Random() & 31) * 8;
 	}
 
-	if (mo->target != NULL)
-	{
-		Chase(seetarget || true, !hit_obstacle);  // FIXME !!!
-	}
-	else
-	{
-		// Wander around.
-		if (hit_obstacle || move_count < 0)
-		{
-			NewChaseDir(!hit_obstacle);
+	SYS_ASSERT(mo->target != NULL);
 
-			move_count = 10 + (M_Random() & 31);
-			strafedir = 0;
-		}
-
-		Move();
-	}
+	Chase(seetarget || true, !hit_obstacle);  // FIXME !!!
 }
 
 

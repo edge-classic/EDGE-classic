@@ -138,6 +138,7 @@ private:
 	void WeaveToward(const position_c& pos);
 	void DetectObstacle();
 	bool FollowPath();
+	void Meander();
 
 	void LookAround();
 	void LookForEnemies();

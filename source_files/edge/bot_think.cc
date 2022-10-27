@@ -776,8 +776,10 @@ void bot_t::Think_Help()
 	// check if we are close to the leader, and can see them
 	bool near_them = false;
 
-	if (dist < 256.0)
+	if (dist < 512.0 && fabs(pl->mo->z - pos.z) <= 24.0)
+	{
 		near_them = P_CheckSight(pl->mo, leader);
+	}
 
 	if (near_them)
 	{
@@ -787,6 +789,8 @@ void bot_t::Think_Help()
 	}
 
 	// leader is too far away, find a path...
+	// FIXME only do this every second or so!!
+
 	path = NAV_FindPath(pl->mo->subsector, leader->subsector, 0);
 	if (path != NULL)
 	{

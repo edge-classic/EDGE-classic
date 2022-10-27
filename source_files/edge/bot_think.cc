@@ -280,7 +280,10 @@ void bot_t::PainResponse()
 		return;
 	}
 
-	// TODO update 'target' if threat is greater than current target
+	// TODO only update 'target' if threat is greater than current target
+
+	if (pl->mo->target == NULL)
+		pl->mo->SetTarget(pl->mo);
 }
 
 
@@ -669,9 +672,6 @@ void bot_t::Chase(bool seetarget, bool move_ok)
 		Move();
 		return;
 	}
-
-	// Target died
-	pl->mo->SetTarget(NULL);
 }
 
 

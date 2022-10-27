@@ -239,8 +239,12 @@ void font_c::LoadFontTTF()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		delete temp_bitmap;
-		float x,y,ascent,descent,linegap = 0.0f;
-		stbtt_GetPackedQuad(M.packed_char, 64, 64, 0, &x, &y, M.char_quad, 1);
+		float x = 0.0f;
+		float y = 0.0f;
+		float ascent = 0.0f;
+		float descent = 0.0f;
+		float linegap = 0.0f;
+		stbtt_GetPackedQuad(M.packed_char, 64, 64, 0, &x, &y, M.char_quad, 0);
 		stbtt_GetScaledFontVMetrics(ttf_buffer, 0, 48, &ascent, &descent, &linegap);
 		M.width = (M.char_quad->x1 - M.char_quad->x0) * (def->ttf_default_size / 48.0);
 		M.height = (M.char_quad->y1 - M.char_quad->y0) * (def->ttf_default_size / 48.0);
@@ -404,8 +408,9 @@ float font_c::CharWidth(char ch)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			delete temp_bitmap;
-			float x,y = 0.0f;
-			stbtt_GetPackedQuad(character.packed_char, 64, 64, 0, &x, &y, character.char_quad, 1);
+			float x = 0.0f;
+			float y = 0.0f;
+			stbtt_GetPackedQuad(character.packed_char, 64, 64, 0, &x, &y, character.char_quad, 0);
 			if (ch == ' ')
 				character.width = ttf_char_width * 3 / 5;
 			else

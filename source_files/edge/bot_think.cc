@@ -675,19 +675,84 @@ void bot_t::Chase(bool seetarget, bool move_ok)
 }
 
 
-void bot_t::DestroyEnemy()
+void bot_t::Think_Fight()
+{
+	mobj_t *mo = pl->mo;
+
+	// FIXME do this elsewhere
+	float move_dx = last_x - mo->x;
+	float move_dy = last_y - mo->y;
+
+	last_x = mo->x;
+	last_y = mo->y;
+
+	bool move_ok = (move_dx*move_dx + move_dy*move_dy) > 0.2;
+
+	// Check if we can see the target
+	bool seetarget = false;
+	if (mo->target)
+		seetarget = P_CheckSight(mo, mo->target);
+
+	// Select a suitable weapon
+	if (confidence <= 0)
+	{
+		weapon_count--;
+		if (weapon_count < 0)
+		{
+			SelectWeapon();
+			weapon_count = 30 + (M_Random() & 31) * 4;
+		}
+	}
+
+	patience--;
+	move_count--;
+
+	// Look for enemies
+	// If we aren't confident, gather more than fight.
+	if (!seetarget && patience < 0 && confidence >= 0)
+	{
+		seetarget = false; //!!!  LookForEnemies();
+
+		if (mo->target)
+			patience = 20 + (M_Random() & 31) * 4;
+	}
+
+	// Can't see a target || don't have a suitable weapon to take it out with?
+	if (!seetarget && patience < 0)
+	{
+		seetarget = false; //!!!  LookForItems();
+
+		if (mo->target)
+			patience = 30 + (M_Random() & 31) * 8;
+	}
+
+	if (mo->target != NULL)
+	{
+		Chase(seetarget || true, move_ok);  // FIXME !!!
+	}
+	else
+	{
+		// Wander around.
+		if (!move_ok || move_count < 0)
+		{
+			NewChaseDir(move_ok);
+
+			move_count = 10 + (M_Random() & 31);
+			strafedir = 0;
+		}
+
+		Move();
+	}
+}
+
+
+void bot_t::Think_Help()
 {
 	// TODO
 }
 
 
-void bot_t::TaskThink()
-{
-	// TODO
-}
-
-
-void bot_t::Roam()
+void bot_t::Think_Roam()
 {
 	if (roam_count-- < 0)
 	{
@@ -777,6 +842,24 @@ void bot_t::Roam()
 }
 
 
+void bot_t::Think_GetItem()
+{
+	// TODO
+}
+
+
+void bot_t::Think_OpenDoor()
+{
+	// TODO
+}
+
+
+void bot_t::Think_UseLift()
+{
+	// TODO
+}
+
+
 void bot_t::DeletePath()
 {
 	if (path != NULL)
@@ -813,6 +896,8 @@ void bot_t::Think()
 	if (mo->supportobj && mo->supportobj->health <= 0)
 		mo->SetSupportObj(NULL);
 
+	confidence = CalcConfidence();
+
 	// hurt by somebody?
 	if (pl->attacker != NULL)
 	{
@@ -821,84 +906,45 @@ void bot_t::Think()
 
 	LookAround();
 
+	// FIXME detect being unable to move
+
 	// doing a task?
-	if (task != TASK_None)
+	switch (task)
 	{
-		TaskThink();
+		case TASK_GetItem:
+			Think_GetItem();
+			return;
+
+		case TASK_OpenDoor:
+			Think_OpenDoor();
+			return;
+
+		case TASK_UseLift:
+			Think_UseLift();
+			return;
+
+		default:
+			break;
 	}
 
-	// follow a path
-	if (false)
+	// if we have a target enemy, fight it or flee it
+	if (pl->mo->target != NULL)
 	{
-		Roam();
+		Think_Fight();
 		return;
 	}
 
-	confidence = CalcConfidence();
-
-	float move_dx = last_x - mo->x;
-	float move_dy = last_y - mo->y;
-
-	last_x = mo->x;
-	last_y = mo->y;
-
-	bool move_ok = (move_dx*move_dx + move_dy*move_dy) > 0.2;
-
-	// Check if we can see the target
-	bool seetarget = false;
-	if (mo->target)
-		seetarget = P_CheckSight(mo, mo->target);
-
-	// Select a suitable weapon
-	if (confidence <= 0)
+	// if we have a leader (in co-op), follow them
+	if (pl->mo->supportobj != NULL)
 	{
-		weapon_count--;
-		if (weapon_count < 0)
-		{
-			SelectWeapon();
-			weapon_count = 30 + (M_Random() & 31) * 4;
-		}
+		Think_Help();
+		return;
 	}
 
-	patience--;
-	move_count--;
+	// in deathmatch, go to the roaming goal.
+	// otherwise just meander around.
 
-	// Look for enemies
-	// If we aren't confident, gather more than fight.
-	if (!seetarget && patience < 0 && confidence >= 0)
-	{
-		seetarget = false; //!!!  LookForEnemies();
-
-		if (mo->target)
-			patience = 20 + (M_Random() & 31) * 4;
-	}
-
-	// Can't see a target || don't have a suitable weapon to take it out with?
-	if (!seetarget && patience < 0)
-	{
-		seetarget = false; //!!!  LookForItems();
-
-		if (mo->target)
-			patience = 30 + (M_Random() & 31) * 8;
-	}
-
-	if (mo->target != NULL)
-	{
-		Chase(seetarget || true, move_ok);  // FIXME !!!
-	}
-	else
-	{
-		// Wander around.
-		if (!move_ok || move_count < 0)
-		{
-			NewChaseDir(move_ok);
-
-			move_count = 10 + (M_Random() & 31);
-			strafedir = 0;
-		}
-
-		Move();
-	}
+	Think_Roam();
 }
 
 
@@ -974,8 +1020,7 @@ void bot_t::Respawn()
 {
 	// TODO in COOP, pick a player to help, try to reach them if far away
 
-	behave = BHV_Roam;
-	task   = TASK_None;
+	task = TASK_None;
 
 	roam_count = C_Random() % 8;
 	look_time  = C_Random() % 8;

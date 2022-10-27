@@ -34,18 +34,6 @@ class weapondef_c;
 class bot_path_c;
 
 
-// the current behavior of the bot.
-// this is very generic, more specific tasks (like using a lift) are
-// not handled by this enumeration.
-enum bot_behavior_e
-{
-	BHV_Roam = 0,  // roaming about, often trying to get somewhere
-	BHV_Help,      // helping / following a human (in supportobj)
-	BHV_Attack,    // attacking a monster or player (in target)
-	BHV_Flee,      // fleeing from a monster or player (in target)
-};
-
-
 // specific tasks which the bot needs/wants to do.
 // these can occur in combination with the behaviors above, e.g. while
 // attacking something a bot may still want to pickup some health or
@@ -56,7 +44,6 @@ enum bot_task_e
 	TASK_GetItem,     // pickup a nearby item (in tracer)
 	TASK_OpenDoor,    // open a door
 	TASK_UseLift,     // lower a lift, ride it to top
-	TSAK_Teleport,    // use a teleporter
 };
 
 
@@ -96,8 +83,7 @@ class bot_t
 public:
 	struct player_s *pl = NULL;
 
-	bot_behavior_e behave = BHV_Roam;
-	bot_task_e     task   = TASK_None;
+	bot_task_e task = TASK_None;
 
 	// TODO describe or remove
 	int confidence = 0;
@@ -145,14 +131,18 @@ private:
 	void Move();
 	void MoveToward(const position_c& pos);
 
-	void Roam();
 	void LookAround();
 	void LookForEnemies();
 	void LookForLeader();
 	bool IsBarrel(const mobj_t *mo);
 
-	void TaskThink();
-	void DestroyEnemy();
+	void Think_Roam();
+	void Think_Help();
+	void Think_Fight();
+	void Think_GetItem();
+	void Think_OpenDoor();
+	void Think_UseLift();
+
 	void PainResponse();
 
 	void TurnToward(angle_t angle, float slope);

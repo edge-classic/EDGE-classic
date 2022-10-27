@@ -434,7 +434,8 @@ void bot_t::LookForLeader()
 		if (p2 == NULL || p2->isBot())
 			continue;
 
-		if (C_Random() % 100 < 80)
+		// when multiple humans, make it random who is picked
+		if (C_Random() % 100 < 90)
 			continue;
 
 		pl->mo->SetSupportObj(p2->mo);
@@ -465,16 +466,19 @@ void bot_t::LookAround()
 {
 	look_time--;
 
-	if (look_time == 4)
+	if (look_time == 10 || look_time == 20)
 		LookForLeader();
 
-	if (look_time == 8 || look_time == 16 || look_time == 24)
+	if (look_time & 1)
+	{
 		LookForEnemies();
+		return;
+	}
 
 	if (look_time >= 0)
 		return;
 
-	// perform a look every second or so
+	// look for items every second or so
 	look_time = 30 + C_Random() % 10;
 
 	// FIXME decide what we want most (e.g. health, etc).

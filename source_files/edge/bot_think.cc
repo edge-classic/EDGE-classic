@@ -582,96 +582,41 @@ void bot_t::Chase(bool seetarget, bool move_ok)
 			ANG_2_FLOAT(bot->angle), move_ok ? "move_ok" : "NO_MOVE");
 #endif
 
-	// Got a special (item) target?
-	if (mo->target->flags & MF_SPECIAL)
+	if (seetarget)
 	{
-		// have we stopped needed it? (maybe it is old DM and we
-		// picked up the weapon).
-//--		if (EvaluateItem(mo->target) <= 0)
-//--		{
-//--			pl->mo->SetTarget(NULL);
-//--			return;
-//--		}
+		// face the target
+		TurnToward(mo->target);
 
-		// If there is a wall or something in the way, pick a new direction.
-		if (!move_ok || move_count < 0)
+		// Shoot it,
+		cmd.attack = M_Random() < attack_chances[skill];
+
+		if (move_count < 0)
 		{
-			if (seetarget && move_ok)
-				cmd.face_target = true;
-
-			angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
+			move_count = 20 + (M_Random() & 63);
 			strafedir = 0;
-			move_count = 10 + (C_Random() & 31);
 
-			if (!move_ok)
+			if (MeleeWeapon())
 			{
-				int r = M_Random();
-
-				if (r < 10)
-					angle = M_Random() << 24;
-				else if (r < 60)
-					strafedir = ANG90;
-				else if (r < 110)
-					strafedir = ANG270;
+				// run directly toward target
+			}
+			else if (M_Random() < strafe_chances[skill])
+			{
+				// strafe it.
+				strafedir = (M_Random()%5 - 2) * (int)ANG45;
 			}
 		}
-		else if (move_count < 0)
-		{
-			// Move in the direction of the item.
-			angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
-			strafedir = 0;
-
-			move_count = 10 + (M_Random() & 31);
-		}
-
-		Move();
-		return;
 	}
 
-	// Target can be killed.
-	if (mo->target->flags & MF_SHOOTABLE)
+	// chase towards target
+	if (move_count < 0 || !move_ok)
 	{
-		// Can see a target,
-		if (seetarget)
-		{
-			// So face it,
-			angle = R_PointToAngle(mo->x, mo->y,
-				mo->target->x, mo->target->y);
+		NewChaseDir(move_ok);
 
-			cmd.face_target = true;
-
-			// Shoot it,
-			cmd.attack = M_Random() < attack_chances[skill];
-
-			if (move_count < 0)
-			{
-				move_count = 20 + (M_Random() & 63);
-				strafedir = 0;
-
-				if (MeleeWeapon())
-				{
-					// run directly toward target
-				}
-				else if (M_Random() < strafe_chances[skill])
-				{
-					// strafe it.
-					strafedir = (M_Random()%5 - 2) * (int)ANG45;
-				}
-			}
-		}
-
-		// chase towards target
-		if (move_count < 0 || !move_ok)
-		{
-			NewChaseDir(move_ok);
-
-			move_count = 10 + (M_Random() & 31);
-			strafedir = 0;
-		}
-
-		Move();
-		return;
+		move_count = 10 + (M_Random() & 31);
+		strafedir = 0;
 	}
+
+	Move();
 }
 
 
@@ -836,7 +781,6 @@ void bot_t::Think_Roam()
 	}
 
 	strafedir = 0;
-	cmd.face_target = false;
 
 	MoveToward(path_target);
 }
@@ -845,6 +789,54 @@ void bot_t::Think_Roam()
 void bot_t::Think_GetItem()
 {
 	// TODO
+
+/*
+	// Got a special (item) target?
+	if (mo->target->flags & MF_SPECIAL)
+	{
+		// have we stopped needed it? (maybe it is old DM and we
+		// picked up the weapon).
+//--		if (EvaluateItem(mo->target) <= 0)
+//--		{
+//--			pl->mo->SetTarget(NULL);
+//--			return;
+//--		}
+
+		// If there is a wall or something in the way, pick a new direction.
+		if (!move_ok || move_count < 0)
+		{
+			if (seetarget && move_ok)
+				cmd.face_target = true;
+
+			angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
+			strafedir = 0;
+			move_count = 10 + (C_Random() & 31);
+
+			if (!move_ok)
+			{
+				int r = M_Random();
+
+				if (r < 10)
+					angle = M_Random() << 24;
+				else if (r < 60)
+					strafedir = ANG90;
+				else if (r < 110)
+					strafedir = ANG270;
+			}
+		}
+		else if (move_count < 0)
+		{
+			// Move in the direction of the item.
+			angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
+			strafedir = 0;
+
+			move_count = 10 + (M_Random() & 31);
+		}
+
+		Move();
+		return;
+	}
+*/
 }
 
 
@@ -985,19 +977,6 @@ void bot_t::ConvertTiccmd(ticcmd_t *dest)
 		dest->buttons |= (cmd.new_weapon << BT_WEAPONSHIFT) & BT_WEAPONMASK;
 
 	dest->player_idx = pl->pnum;
-
-	// FIXME remove face_target from botcmd_t
-	if (cmd.face_target && mo->target != NULL)
-	{
-		float dx = mo->target->x - mo->x;
-		float dy = mo->target->y - mo->y;
-		float dz = mo->target->z - mo->z;
-
-		// FIXME less abrupt turning
-
-		look_angle = R_PointToAngle(0,0, dx,dy);
-		look_slope = P_ApproxSlope(dx, dy, dz);
-	}
 
 	dest->angleturn = (mo->angle - look_angle) >> 16;
 	dest->mlookturn = (M_ATan(look_slope) - mo->vertangle) >> 16;

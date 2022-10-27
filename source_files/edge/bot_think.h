@@ -66,8 +66,6 @@ struct botcmd_t
 	int move_speed;
 	angle_t move_angle;
 
-	bool face_target;
-
 	// The weapon we want to use. -1 if the current one is fine.
 	int new_weapon;
 

@@ -119,7 +119,7 @@ float bot_t::EvalEnemy(const mobj_t *mo)
 
 	// occasionally shoot barrels
 	if (IsBarrel(mo))
-		return (C_Random() % 100 < 5) ? +1 : -1;
+		return (C_Random() % 100 < 10) ? +1 : -1;
 
 	if (0 == (mo->extendedflags & EF_MONSTER) && ! mo->player)
 		return -1;
@@ -822,18 +822,56 @@ bool bot_t::FollowPath()
 	SYS_ASSERT(path != NULL);
 
 	// check if we have reached the next subsector
-	int d1 = path->subs[path->along];
-	int d2 = -1;
-	if (path->along + 1 < path->subs.size())
-		d2 = path->subs[path->along+1];
+	bool reached = false;
 
-	bool at1 = (d1 >= 0 && pl->mo->subsector == &subsectors[d1]);
-	bool at2 = (d2 >= 0 && pl->mo->subsector == &subsectors[d2]);
+	SYS_ASSERT(path->along < path->subs.size());
 
-	if (at2)
-		path->along += 1;
+	int d = path->subs[path->along];
+	const subsector_t * dest = &subsectors[d];
 
-	if (at1 || at2)
+	{
+		// for thin subsectors, do a check with expanded bbox
+		// FIXME make a utility of NAV_XXX
+		float x1 = dest->bbox[BOXLEFT];
+		float x2 = dest->bbox[BOXRIGHT];
+		float y1 = dest->bbox[BOXBOTTOM];
+		float y2 = dest->bbox[BOXTOP];
+
+		bool x_narrow = (x2 - x1) < 24;
+		bool y_narrow = (y2 - y1) < 24;
+
+		if (x_narrow || y_narrow)
+		{
+			// have to be at same height, or higher
+			if (pl->mo->z > dest->sector->f_h - 0.5)
+			{
+				float w = (x2 - x1);
+				float h = (y2 - y1);
+
+				float mx = (x1 + x2) * 0.5;
+				float my = (y1 + y2) * 0.5;
+
+				if (x_narrow) w = 24;
+				if (y_narrow) h = 24;
+
+				w *= 0.5;
+				h *= 0.5;
+
+				if ((mx - w <= pl->mo->x) && (pl->mo->x <= mx + w) &&
+				    (my - h <= pl->mo->y) && (pl->mo->y <= my + h))
+				{
+					reached = true;
+				}
+			}
+		}
+		else
+		{
+			if (pl->mo->subsector == dest)
+				reached = true;
+		}
+	}
+
+	if (reached)
 	{
 		path->along += 1;
 
@@ -848,8 +886,8 @@ bool bot_t::FollowPath()
 
 	// determine looking angle
 	{
-		int dest_id = (d2 < 0) ? d1 : d2;
-		const subsector_t *dest = &subsectors[dest_id];
+		//-- int dest_id = (d2 < 0) ? d1 : d2;
+		//-- const subsector_t *dest = &subsectors[dest_id];
 
 		float dest_x = (dest->bbox[BOXLEFT] + dest->bbox[BOXRIGHT])  * 0.5;
 		float dest_y = (dest->bbox[BOXTOP]  + dest->bbox[BOXBOTTOM]) * 0.5;

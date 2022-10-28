@@ -96,12 +96,13 @@ public:
 
 	int weapon_count = 0;
 	int move_count   = 0;
-	int roam_count   = 0;
 	int dead_count   = 0;
+
 	int look_time    = 0;
+	int roam_time    = 0;
 	int weave_time   = 0;
 
-	// 0 = go straight, 1 = left, 2 = right
+	// 0 = go straight, -1 = left, +1 = right
 	int weave = 0;
 
 	// last position, to check if we actually moved
@@ -137,7 +138,7 @@ private:
 	void MoveToward(const position_c& pos);
 	void WeaveToward(const position_c& pos);
 	void WeaveToward(const mobj_t *mo);
-	void WeaveBehindLeader(const mobj_t *leader);
+	void WeaveNearLeader(const mobj_t *leader);
 
 	void DetectObstacle();
 	bool FollowPath();

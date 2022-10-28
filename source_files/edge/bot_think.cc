@@ -467,7 +467,7 @@ void bot_t::LookAround()
 {
 	look_time--;
 
-	if (look_time == 10 || look_time == 20)
+	if ((look_time & 3) == 2)
 		LookForLeader();
 
 	if (look_time & 1)
@@ -676,6 +676,9 @@ void bot_t::Chase(bool seetarget, bool move_ok)
 
 void bot_t::Meander()
 {
+	// TODO : the follow is utter rubbish
+
+	/*
 	if (hit_obstacle || move_count < 0)
 	{
 		NewChaseDir(!hit_obstacle);
@@ -688,12 +691,17 @@ void bot_t::Meander()
 	}
 
 	Move();
+	*/
+
+	fprintf(stderr, "Meander %d\n", roam_time);
 }
 
 
 void bot_t::Think_Fight()
 {
 	mobj_t *mo = pl->mo;
+
+fprintf(stderr, "FIGHT %d\n", gametic);
 
 	// Check if we can see the target
 	bool seetarget = false;
@@ -739,9 +747,23 @@ void bot_t::Think_Fight()
 }
 
 
-void bot_t::WeaveBehindLeader(const mobj_t *leader)
+void bot_t::WeaveNearLeader(const mobj_t *leader)
 {
-	// pick a position behind the leader, and a bit to the side
+	// pick a position some distance away, so that a human player
+	// can get out of a narrow item closet (etc).
+
+	float dx = pl->mo->x - leader->x;
+	float dy = pl->mo->y - leader->y;
+
+	float dlen = R_PointToDist(0, 0, dx, dy);
+	dlen = std::max(dlen, 1.0f);
+
+	dx = dx * 96.0f / dlen;
+	dy = dy * 96.0f / dlen;
+
+	position_c pos { leader->x + dx, leader->y + dy, leader->z };
+
+/*	OLD LOGIC -- go behind the player
 
 	position_c pos = { leader->x, leader->y, leader->z };
 
@@ -759,6 +781,7 @@ void bot_t::WeaveBehindLeader(const mobj_t *leader)
 
 	pos.x += dy * 32.0;
 	pos.y += dx * 32.0;
+*/
 
 	WeaveToward(pos);
 }
@@ -774,18 +797,9 @@ void bot_t::PathToLeader()
 	path = NAV_FindPath(pl->mo, leader, 0);
 
 	if (path != NULL)
-	{
-		roam_goal  = position_c { leader->x, leader->y, leader->z };
-		roam_count = 20 * TICRATE;
-		return;
-	}
-	else
-	{
-		// TODO look for nearby items to visit
+		roam_goal = position_c { leader->x, leader->y, leader->z };
 
-		// try again in a few seconds
-		roam_count = 4 * TICRATE;
-	}
+	roam_time = 60 + C_Random() % 20;
 }
 
 
@@ -793,17 +807,10 @@ void bot_t::Think_Help()
 {
 	mobj_t *leader = pl->mo->supportobj;
 
-	if (path != NULL)
+	// re-establish path every two seconds or so
+	if (roam_time-- < 0)
 	{
-		if (roam_count-- < 0)
-		{
-			// failed to follow this path, try again
-			PathToLeader();
-			return;
-		}
-
-		FollowPath();
-		return;
+		PathToLeader();
 	}
 
 	// check if we are close to the leader, and can see them
@@ -812,20 +819,21 @@ void bot_t::Think_Help()
 	position_c pos = { leader->x, leader->y, leader->z };
 	float dist = R_PointToDist(pl->mo->x, pl->mo->y, pos.x, pos.y);
 
-	if (dist < 512.0 && fabs(pl->mo->z - pos.z) <= 24.0)
+	if (dist < 192.0 && fabs(pl->mo->z - pos.z) <= 24.0)
 	{
 		near_them = P_CheckSight(pl->mo, leader);
 	}
 
 	if (near_them)
 	{
-		WeaveBehindLeader(leader);
+		WeaveNearLeader(leader);
 		return;
 	}
 
-	if (roam_count-- < 0)
+	if (path != NULL)
 	{
-		PathToLeader();
+fprintf(stderr, "Path to leader %d\n", roam_time);
+		FollowPath();
 		return;
 	}
 
@@ -928,9 +936,9 @@ bool bot_t::FollowPath()
 
 void bot_t::Think_Roam()
 {
-	if (roam_count-- < 0)
+	if (roam_time-- < 0)
 	{
-		roam_count = TICRATE;
+		roam_time = TICRATE;
 
 		if (path != NULL)
 			DeletePath();
@@ -951,7 +959,7 @@ void bot_t::Think_Roam()
 
 		// after this amount of time, give up and try another place
 		// [ FIXME check if needed, PERHAPS detect lack of progress ]
-		roam_count = 20 * TICRATE;
+		roam_time = 20 * TICRATE;
 	}
 
 	if (path == NULL)
@@ -967,7 +975,7 @@ void bot_t::Think_Roam()
 	// TODO look for other nearby items
 
 //	fprintf(stderr, "ARRIVED !! %d\n", gametic);
-	roam_count = 0;
+	roam_time = 0;
 }
 
 
@@ -981,7 +989,7 @@ void bot_t::Think_GetItem()
 	}
 
 	// took too long? (e.g. we got stuck)
-	if (roam_count-- < 0)
+	if (roam_time-- < 0)
 	{
 		DeletePath();
 		task = TASK_None;
@@ -1223,8 +1231,8 @@ void bot_t::Respawn()
 
 	task = TASK_None;
 
-	roam_count = C_Random() % 8;
-	look_time  = C_Random() % 8;
+	roam_time = C_Random() % 8;
+	look_time = C_Random() % 8;
 
 	hit_obstacle = false;
 

@@ -798,8 +798,6 @@ void bot_t::PathToLeader()
 
 	if (path != NULL)
 		roam_goal = position_c { leader->x, leader->y, leader->z };
-
-	roam_time = 60 + C_Random() % 20;
 }
 
 
@@ -807,39 +805,57 @@ void bot_t::Think_Help()
 {
 	mobj_t *leader = pl->mo->supportobj;
 
-	// re-establish path every two seconds or so
-	if (roam_time-- < 0)
-	{
-		PathToLeader();
-	}
-
 	// check if we are close to the leader, and can see them
-	bool near_them = false;
+	bool cur_near = false;
 
 	position_c pos = { leader->x, leader->y, leader->z };
 	float dist = R_PointToDist(pl->mo->x, pl->mo->y, pos.x, pos.y);
 
 	if (dist < 192.0 && fabs(pl->mo->z - pos.z) <= 24.0)
 	{
-		near_them = P_CheckSight(pl->mo, leader);
+		cur_near = P_CheckSight(pl->mo, leader);
 	}
 
-	if (near_them)
+	if (near_leader != cur_near)
 	{
+		near_leader = cur_near;
+
+		if (! cur_near)
+		{
+			// wait a bit then find a path
+			DeletePath();
+			roam_time = 10 + C_Random() % 10;
+		}
+	}
+
+	if (cur_near)
+	{
+fprintf(stderr, "Weave %d\n", gametic);
 		WeaveNearLeader(leader);
 		return;
 	}
 
 	if (path != NULL)
 	{
-fprintf(stderr, "Path to leader %d\n", roam_time);
+fprintf(stderr, "Follow path leader %d\n", gametic);
 		FollowPath();
 		return;
 	}
 
-	// IDEA: try again a few times, then teleport somewhere nearby
+	// we are waiting until we can establish a path
 
-	Meander();
+	if (roam_time-- < 0)
+	{
+		PathToLeader();
+		roam_time = 30 + C_Random() % 10;
+	}
+
+fprintf(stderr, "wait %d\n", roam_time);
+
+	if (dist < 512.0 && fabs(pl->mo->z - pos.z) <= 24.0)
+		WeaveNearLeader(leader);
+	else
+		Meander();
 }
 
 
@@ -899,9 +915,9 @@ bool bot_t::FollowPath()
 			DeletePath();
 			return true;
 		}
-
-		path_point = path->cur_dest();
 	}
+
+	path_point = path->cur_dest();
 
 	// determine looking angle
 
@@ -1235,6 +1251,7 @@ void bot_t::Respawn()
 	look_time = C_Random() % 8;
 
 	hit_obstacle = false;
+	near_leader  = false;
 
 	DeletePath();
 }

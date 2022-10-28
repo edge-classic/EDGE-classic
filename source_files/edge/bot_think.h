@@ -109,6 +109,7 @@ public:
 	float last_x = 0;
 	float last_y = 0;
 	bool  hit_obstacle;
+	bool  near_leader;
 
 	// pathing info.
 	// used for DM roaming, COOP follow-the-leader, and getting items

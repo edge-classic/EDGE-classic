@@ -25,22 +25,33 @@
 
 struct bot_t;
 
-// a path from a start subsector to a finish one.
-// elements are indices into the subsectors[] array.
-// start is NOT included, but finish is.
+class path_node_c
+{
+public:
+	position_c pos { 0, 0, 0 };
+
+	// TODO info for doors and lifts
+
+	int flags = 0;
+};
+
+// a path from a start point to a finish one.
+// includes both start and finish (at least two entries).
 class bot_path_c
 {
 public:
-	std::vector<int> subs {};
+	std::vector<path_node_c> nodes;
 
-	size_t along = 0;
+	size_t along = 1;
 
 	bool finished() const
 	{
-		return along == subs.size();
+		return along == nodes.size();
 	}
 
-	position_c calc_target() const;
+	position_c cur_dest() const;
+
+	bool reached_dest(const position_c *pos) const;
 };
 
 
@@ -51,7 +62,7 @@ float NAV_EvaluateBigItem(const mobj_t *mo);
 bool  NAV_NextRoamPoint(position_c& out);
 
 // attempt to find a traversible path, returns NULL if failed.
-bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags);
+bot_path_c * NAV_FindPath(const position_c *start, const position_c *finish, int flags);
 
 // find an pickup item in a nearby area, returns NULL if none found.
 bot_path_c * NAV_FindThing(bot_t *bot, float radius, mobj_t*& best);

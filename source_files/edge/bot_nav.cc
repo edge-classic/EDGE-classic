@@ -362,31 +362,35 @@ static void NAV_TryOpenArea(int idx, int parent, float cost)
 }
 
 
-static bot_path_c * NAV_StorePath(int start, int finish)
+static bot_path_c * NAV_StorePath(position_c start, int start_id, position_c finish, int finish_id)
 {
 	bot_path_c *path = new bot_path_c;
 
 	for (;;)
 	{
-		path->subs.push_back(finish);
+		path->nodes.push_back(path_node_c { finish, 0 });
 
-		if (finish == start)
-		{
-			std::reverse(path->subs.begin(), path->subs.end());
-			return path;
-		}
+		if (finish_id == start_id)
+			break;
 
-		finish = nav_areas[finish].parent;
-		SYS_ASSERT(finish >= 0);
+		finish_id = nav_areas[finish_id].parent;
+		finish    = NAV_CalcMiddle(&subsectors[finish_id]);
 	}
+
+	path->nodes.push_back(path_node_c { start, 0 });
+
+	std::reverse(path->nodes.begin(), path->nodes.end());
+
+	// FIXME reduce length of final segment in path by 16 units
+
+	return path;
 }
 
 
-bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags)
+bot_path_c * NAV_FindPath(const position_c *start, const position_c *finish, int flags)
 {
-	// tries to find a path from start to finish (subsectors).
-	// if successful, returns a path (containing indices of subsectors).
-	// otherwise returns NULL.
+	// tries to find a path from start to finish.
+	// if successful, returns a path, otherwise returns NULL.
 	//
 	// the path may include manual lifts and doors, but more complicated
 	// things (e.g. a door activated by a nearby switch) will fail.
@@ -394,16 +398,19 @@ bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags)
 	SYS_ASSERT(start);
 	SYS_ASSERT(finish);
 
-	int start_id  = (int)(start  - subsectors);
-	int finish_id = (int)(finish - subsectors);
+	subsector_t * start_sub = R_PointInSubsector( start->x,  start->y);
+	subsector_t *finish_sub = R_PointInSubsector(finish->x, finish->y);
 
-	if (start == finish)
+	int start_id  = (int)(start_sub  - subsectors);
+	int finish_id = (int)(finish_sub - subsectors);
+
+	if (start_id == finish_id)
 	{
-		return NAV_StorePath(start_id, finish_id);
+		return NAV_StorePath(*start, start_id, *finish, finish_id);
 	}
 
 	// get coordinate of finish subsec
-	nav_finish_mid = NAV_CalcMiddle(finish);
+	nav_finish_mid = NAV_CalcMiddle(finish_sub);
 
 	// prepare all nodes
 	for (nav_area_c& area : nav_areas)
@@ -425,9 +432,9 @@ bot_path_c * NAV_FindPath(subsector_t *start, subsector_t *finish, int flags)
 			return NULL;
 
 		// reached the destination?
-		if (&subsectors[cur] == finish)
+		if (&subsectors[cur] == finish_sub)
 		{
-			return NAV_StorePath(start_id, finish_id);
+			return NAV_StorePath(*start, start_id, *finish, finish_id);
 		}
 
 		// move current node to CLOSED set
@@ -486,6 +493,9 @@ static void NAV_ItemsInSubsector(subsector_t *sub, bot_t *bot, position_c& pos, 
 
 bot_path_c * NAV_FindThing(bot_t *bot, float radius, mobj_t*& best)
 {
+	return NULL;
+/* FIXME
+
 	// find an item to pickup or enemy to fight.
 	// each nearby thing (limited roughly by `radius') will be passed to the
 	// EvalThing() method of the bot.  returns NULL if nothing was found.
@@ -551,6 +561,7 @@ bot_path_c * NAV_FindThing(bot_t *bot, float radius, mobj_t*& best)
 			NAV_TryOpenArea(link.dest_id, cur, cost);
 		}
 	}
+*/
 }
 
 //----------------------------------------------------------------------------
@@ -626,6 +637,8 @@ mobj_t * NAV_FindEnemy(bot_t *bot, float radius)
 // DEBUGGING
 //----------------------------------------------------------------------------
 
+// FIXME this stuff is out-of-date, remove it?
+
 #if 0
 
 static void NAV_PotionUpPath(bot_path_c * path, subsector_t *start)
@@ -687,6 +700,28 @@ void NAV_DebugFindPath(float x1, float y1, float x2, float y2)
 
 //----------------------------------------------------------------------------
 
+position_c bot_path_c::cur_dest() const
+{
+	return nodes[along].pos;
+}
+
+
+bool bot_path_c::reached_dest(const position_c *pos) const
+{
+	// FIXME test the half plane !!
+
+	position_c dest = cur_dest();
+
+	if (pos->x < dest.x - 16) return false;
+	if (pos->x > dest.x + 16) return false;
+	if (pos->y < dest.y - 16) return false;
+	if (pos->y > dest.y + 16) return false;
+
+	return true;
+}
+
+
+/* OLD LOGIC, USEFUL ??
 position_c bot_path_c::calc_target() const
 {
 	SYS_ASSERT(along < subs.size());
@@ -708,14 +743,14 @@ position_c bot_path_c::calc_target() const
 				pos.z = dest->sector->f_h;
 
 				// compute normal of seg
-				/*
+				/[[
 				angle_t normal = seg->angle - ANG90;
 				float nx = M_Cos(normal);
 				float ny = M_Sin(normal);
 
 				pos.x += nx * 30.0f;
 				pos.y += ny * 30.0f;
-				*/
+				]]/
 
 				return pos;
 			}
@@ -724,6 +759,7 @@ position_c bot_path_c::calc_target() const
 
 	return NAV_CalcMiddle(&subsectors[subs[along]]);
 }
+*/
 
 //----------------------------------------------------------------------------
 

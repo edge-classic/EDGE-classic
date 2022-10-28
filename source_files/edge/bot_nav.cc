@@ -124,7 +124,7 @@ static void NAV_CollectBigItems()
 		if (score < 0)
 			continue;
 
-		big_items.push_back(big_item_c { mo->x, mo->y, mo->z + 8.0f, score });
+		big_items.push_back(big_item_c { mo->x, mo->y, mo->z, score });
 	}
 
 	// FIXME : if < 4 or so, try small items and/or player spawn points
@@ -493,9 +493,6 @@ static void NAV_ItemsInSubsector(subsector_t *sub, bot_t *bot, position_c& pos, 
 
 bot_path_c * NAV_FindThing(bot_t *bot, float radius, mobj_t*& best)
 {
-	return NULL;
-/* FIXME
-
 	// find an item to pickup or enemy to fight.
 	// each nearby thing (limited roughly by `radius') will be passed to the
 	// EvalThing() method of the bot.  returns NULL if nothing was found.
@@ -531,7 +528,7 @@ bot_path_c * NAV_FindThing(bot_t *bot, float radius, mobj_t*& best)
 			if (best == NULL)
 				return NULL;
 
-			return NAV_StorePath(start_id, best_id);
+			return NAV_StorePath(pos, start_id, *best, best_id);
 		}
 
 		// move current node to CLOSED set
@@ -561,7 +558,6 @@ bot_path_c * NAV_FindThing(bot_t *bot, float radius, mobj_t*& best)
 			NAV_TryOpenArea(link.dest_id, cur, cost);
 		}
 	}
-*/
 }
 
 //----------------------------------------------------------------------------
@@ -708,14 +704,20 @@ position_c bot_path_c::cur_dest() const
 
 bool bot_path_c::reached_dest(const position_c *pos) const
 {
-	// FIXME test the half plane !!
-
 	position_c dest = cur_dest();
 
-	if (pos->x < dest.x - 16) return false;
-	if (pos->x > dest.x + 16) return false;
-	if (pos->y < dest.y - 16) return false;
-	if (pos->y > dest.y + 16) return false;
+	// too low?
+	if (pos->z < dest.z - 15.0)
+	{
+		return false;
+	}
+
+	if (pos->x < dest.x - 64) return false;
+	if (pos->x > dest.x + 64) return false;
+	if (pos->y < dest.y - 64) return false;
+	if (pos->y > dest.y + 64) return false;
+
+	// FIXME test the half plane !!
 
 	return true;
 }

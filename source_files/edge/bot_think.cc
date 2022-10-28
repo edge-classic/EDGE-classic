@@ -798,7 +798,7 @@ void bot_t::Think_Help()
 	// leader is too far away, find a path...
 	// FIXME only do this every second or so!!
 
-	path = NAV_FindPath(pl->mo->subsector, leader->subsector, 0);
+	path = NAV_FindPath(pl->mo, leader, 0);
 	if (path != NULL)
 	{
 		roam_goal  = pos;
@@ -815,63 +815,54 @@ fprintf(stderr, "cannot find leader: %d\n", gametic);
 }
 
 
+/* USEFUL??
+{
+	// for thin subsectors, do a check with expanded bbox
+	// FIXME make a utility of NAV_XXX
+	float x1 = dest->bbox[BOXLEFT];
+	float x2 = dest->bbox[BOXRIGHT];
+	float y1 = dest->bbox[BOXBOTTOM];
+	float y2 = dest->bbox[BOXTOP];
+
+	bool x_narrow = (x2 - x1) < 24;
+	bool y_narrow = (y2 - y1) < 24;
+
+	if (x_narrow || y_narrow)
+	{
+		// have to be at same height, or higher
+		if (pl->mo->z > dest->sector->f_h - 0.5)
+		{
+			float w = (x2 - x1);
+			float h = (y2 - y1);
+
+			float mx = (x1 + x2) * 0.5;
+			float my = (y1 + y2) * 0.5;
+
+			if (x_narrow) w = 24;
+			if (y_narrow) h = 24;
+
+			w *= 0.5;
+			h *= 0.5;
+
+			if ((mx - w <= pl->mo->x) && (pl->mo->x <= mx + w) &&
+				(my - h <= pl->mo->y) && (pl->mo->y <= my + h))
+			{
+				reached = true;
+			}
+		}
+	}
+*/
+
+
 bool bot_t::FollowPath()
 {
 	// returns TRUE when reached the end.
 
 	SYS_ASSERT(path != NULL);
+	SYS_ASSERT(! path->finished());
 
-	// check if we have reached the next subsector
-	bool reached = false;
-
-	SYS_ASSERT(path->along < path->subs.size());
-
-	int d = path->subs[path->along];
-	const subsector_t * dest = &subsectors[d];
-
-	{
-		// for thin subsectors, do a check with expanded bbox
-		// FIXME make a utility of NAV_XXX
-		float x1 = dest->bbox[BOXLEFT];
-		float x2 = dest->bbox[BOXRIGHT];
-		float y1 = dest->bbox[BOXBOTTOM];
-		float y2 = dest->bbox[BOXTOP];
-
-		bool x_narrow = (x2 - x1) < 24;
-		bool y_narrow = (y2 - y1) < 24;
-
-		if (x_narrow || y_narrow)
-		{
-			// have to be at same height, or higher
-			if (pl->mo->z > dest->sector->f_h - 0.5)
-			{
-				float w = (x2 - x1);
-				float h = (y2 - y1);
-
-				float mx = (x1 + x2) * 0.5;
-				float my = (y1 + y2) * 0.5;
-
-				if (x_narrow) w = 24;
-				if (y_narrow) h = 24;
-
-				w *= 0.5;
-				h *= 0.5;
-
-				if ((mx - w <= pl->mo->x) && (pl->mo->x <= mx + w) &&
-				    (my - h <= pl->mo->y) && (pl->mo->y <= my + h))
-				{
-					reached = true;
-				}
-			}
-		}
-		else
-		{
-			if (pl->mo->subsector == dest)
-				reached = true;
-		}
-	}
-
-	if (reached)
+	// have we reached the next node?
+	while (path->reached_dest(pl->mo))
 	{
 		path->along += 1;
 
@@ -881,10 +872,12 @@ bool bot_t::FollowPath()
 			return true;
 		}
 
-		path_point = path->calc_target();
+		path_point = path->cur_dest();
 	}
 
 	// determine looking angle
+
+	/* FIXME !!!
 	{
 		//-- int dest_id = (d2 < 0) ? d1 : d2;
 		//-- const subsector_t *dest = &subsectors[dest_id];
@@ -901,6 +894,7 @@ bool bot_t::FollowPath()
 
 		TurnToward(want_angle, want_slope);
 	}
+	*/
 
 	strafedir = 0;
 
@@ -922,44 +916,35 @@ void bot_t::Think_Roam()
 		if (! NAV_NextRoamPoint(roam_goal))
 			return;
 
-		subsector_t *dest = R_PointInSubsector(roam_goal.x, roam_goal.y);
+		//-- subsector_t *dest = R_PointInSubsector(roam_goal.x, roam_goal.y);
 
-		path = NAV_FindPath(pl->mo->subsector, dest, 0);
+		path = NAV_FindPath(pl->mo, &roam_goal, 0);
 		if (path == NULL)
 		{
 			// try again soon
 			return;
 		}
 
-		path_point = path->calc_target();
+		path_point = path->cur_dest();
 
 		// after this amount of time, give up and try another place
 		// [ FIXME check if needed, PERHAPS detect lack of progress ]
 		roam_count = 20 * TICRATE;
 	}
 
-	if (path != NULL)
+	if (path == NULL)
 	{
-		FollowPath();
+		// TODO meander
 		return;
 	}
 
-	// TODO we don't distinguish between "having a goal" vs "no goal"
-
-	// visit the big item's location
-	float dx   = pl->mo->x - roam_goal.x;
-	float dy   = pl->mo->y - roam_goal.y;
-	float dist = std::max(fabs(dx), fabs(dy));
-
-	if (dist > 16.0)
-	{
-		WeaveToward(roam_goal);
+	if (! FollowPath())
 		return;
-	}
 
 	// arrived at the spot!
 	// TODO look for other nearby items
 
+	fprintf(stderr, "ARRIVED !! %d\n", gametic);
 	roam_count = 0;
 }
 

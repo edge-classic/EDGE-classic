@@ -576,26 +576,28 @@ void bot_t::WeaveToward(const position_c& pos)
 	// but if something gets in our way, we try to "weave" around it,
 	// by sometimes going diagonally left and sometimes right.
 
-	if (hit_obstacle && weave == 0)
-	{
-		weave = (C_Random() & 1) ? -1 : +1;
-		weave_time = 30 + C_Random() % 30;
-	}
+	float dist = R_PointToDist(pl->mo->x, pl->mo->y, pos.x, pos.y);
 
 	if (weave_time-- < 0)
 	{
-		if (! hit_obstacle)
-			weave = 0;
-		else
-			weave = -weave;
+		weave_time = 10 + C_Random() % 20;
 
-		weave_time = 30 + C_Random() % 60;
+		bool neg = weave < 0;
+
+		if (hit_obstacle)
+			weave = neg ? +2 : -2;
+		else if (dist > 128.0)
+			weave = neg ? +1 : -1;
+		else
+			weave = 0;
 	}
 
 	MoveToward(pos);
 
-	if (weave < 0) cmd.move_angle -= ANG5 * 12;
-	if (weave > 0) cmd.move_angle += ANG5 * 12;
+	if (weave == -2) cmd.move_angle -= ANG5 * 12;
+	if (weave == -1) cmd.move_angle -= ANG5 * 3;
+	if (weave == +1) cmd.move_angle += ANG5 * 3;
+	if (weave == +2) cmd.move_angle += ANG5 * 12;
 }
 
 
@@ -808,7 +810,7 @@ void bot_t::Think_Help()
 	// TODO
 	// Meander()
 
-fprintf(stderr, "cannot find leader: %d\n", gametic);
+// fprintf(stderr, "cannot find leader: %d\n", gametic);
 }
 
 
@@ -941,7 +943,7 @@ void bot_t::Think_Roam()
 	// arrived at the spot!
 	// TODO look for other nearby items
 
-	fprintf(stderr, "ARRIVED !! %d\n", gametic);
+//	fprintf(stderr, "ARRIVED !! %d\n", gametic);
 	roam_count = 0;
 }
 

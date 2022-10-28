@@ -876,24 +876,26 @@ bool bot_t::FollowPath()
 
 	// determine looking angle
 
-	/* FIXME !!!
 	{
+		position_c dest = path_point;
+
+		if (path->along+1 < path->nodes.size())
+			dest = path->nodes[path->along+1].pos;
+
 		//-- int dest_id = (d2 < 0) ? d1 : d2;
 		//-- const subsector_t *dest = &subsectors[dest_id];
+		//-- float dest_x = (dest->bbox[BOXLEFT] + dest->bbox[BOXRIGHT])  * 0.5;
+		//-- float dest_y = (dest->bbox[BOXTOP]  + dest->bbox[BOXBOTTOM]) * 0.5;
 
-		float dest_x = (dest->bbox[BOXLEFT] + dest->bbox[BOXRIGHT])  * 0.5;
-		float dest_y = (dest->bbox[BOXTOP]  + dest->bbox[BOXBOTTOM]) * 0.5;
-
-		float dx = dest_x - pl->mo->x;
-		float dy = dest_y - pl->mo->y;
-		float dz = dest->sector->f_h - pl->mo->z;
+		float dx = dest.x - pl->mo->x;
+		float dy = dest.y - pl->mo->y;
+		float dz = dest.z - pl->mo->z;
 
 		angle_t want_angle = R_PointToAngle(0, 0, dx, dy);
 		float   want_slope = P_ApproxSlope(dx, dy, dz);
 
 		TurnToward(want_angle, want_slope);
 	}
-	*/
 
 	strafedir = 0;
 

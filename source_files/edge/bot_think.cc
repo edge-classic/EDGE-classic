@@ -530,15 +530,15 @@ void bot_t::MoveToward(const position_c& pos)
 }
 
 
-void bot_t::TurnToward(angle_t want_angle, float want_slope)
+void bot_t::TurnToward(angle_t want_angle, float want_slope, bool fast)
 {
 	// horizontal (yaw) angle
 	angle_t delta = want_angle - pl->mo->angle;
 
 	if (delta < ANG180)
-		delta = delta / 8;
+		delta = delta / (fast ? 3 : 8);
 	else
-		delta = ANG_MAX - (ANG_MAX - delta) / 8;
+		delta = ANG_MAX - (ANG_MAX - delta) / (fast ? 3 : 8);
 
 	look_angle  = pl->mo->angle + delta;
 
@@ -557,7 +557,7 @@ void bot_t::TurnToward(angle_t want_angle, float want_slope)
 }
 
 
-void bot_t::TurnToward(const mobj_t *mo)
+void bot_t::TurnToward(const mobj_t *mo, bool fast)
 {
 	float dx = mo->x - pl->mo->x;
 	float dy = mo->y - pl->mo->y;
@@ -566,7 +566,7 @@ void bot_t::TurnToward(const mobj_t *mo)
 	angle_t want_angle = R_PointToAngle(0, 0, dx, dy);
 	float   want_slope = P_ApproxSlope(dx, dy, dz);
 
-	TurnToward(want_angle, want_slope);
+	TurnToward(want_angle, want_slope, fast);
 }
 
 
@@ -639,7 +639,7 @@ void bot_t::Chase(bool seetarget, bool move_ok)
 	if (seetarget)
 	{
 		// face the target
-		TurnToward(mo->target);
+		TurnToward(mo->target, true);
 
 		// Shoot it,
 		cmd.attack = M_Random() < attack_chances[skill];
@@ -915,7 +915,7 @@ bool bot_t::FollowPath()
 		angle_t want_angle = R_PointToAngle(0, 0, dx, dy);
 		float   want_slope = P_ApproxSlope(dx, dy, dz);
 
-		TurnToward(want_angle, want_slope);
+		TurnToward(want_angle, want_slope, false);
 	}
 
 	strafedir = 0;
@@ -991,13 +991,13 @@ void bot_t::Think_GetItem()
 	// if we are being chased, look at them, shoot sometimes
 	if (pl->mo->target)
 	{
-		TurnToward(pl->mo->target);
+		TurnToward(pl->mo->target, true);
 
 		// FIXME shoot
 	}
 	else
 	{
-		TurnToward(pl->mo->tracer);
+		TurnToward(pl->mo->tracer, false);
 	}
 
 	// follow the path previously found

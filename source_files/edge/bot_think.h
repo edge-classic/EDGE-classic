@@ -159,8 +159,8 @@ private:
 
 	void PainResponse();
 
-	void TurnToward(angle_t angle, float slope);
-	void TurnToward(const mobj_t *mo);
+	void TurnToward(angle_t angle, float slope, bool fast);
+	void TurnToward(const mobj_t *mo, bool fast);
 	void DeletePath();
 
 public:

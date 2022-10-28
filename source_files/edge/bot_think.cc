@@ -50,7 +50,8 @@ DEF_CVAR(bot_skill, "1", CVAR_ARCHIVE)
 
 static int strafe_chances[3] = { 128, 192, 256 };
 static int attack_chances[3] = {  32,  64, 160 };
-static int    move_speeds[3] = {  36,  45,  50 };
+
+#define MOVE_SPEED  45
 
 
 //----------------------------------------------------------------------------
@@ -517,18 +518,14 @@ void bot_t::SelectWeapon()
 
 void bot_t::Move()
 {
-	int skill = CLAMP(0, bot_skill.d, 2);
-
-	cmd.move_speed = move_speeds[skill];
+	cmd.move_speed = MOVE_SPEED;
 	cmd.move_angle = angle + strafedir;
 }
 
 
 void bot_t::MoveToward(const position_c& pos)
 {
-	int skill = CLAMP(0, bot_skill.d, 2);
-
-	cmd.move_speed = move_speeds[skill];
+	cmd.move_speed = MOVE_SPEED;
 	cmd.move_angle = R_PointToAngle(pl->mo->x, pl->mo->y, pos.x, pos.y);
 }
 

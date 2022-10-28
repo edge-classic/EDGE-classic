@@ -137,6 +137,8 @@ private:
 	void MoveToward(const position_c& pos);
 	void WeaveToward(const position_c& pos);
 	void WeaveToward(const mobj_t *mo);
+	void WeaveBehindLeader(const mobj_t *leader);
+
 	void DetectObstacle();
 	bool FollowPath();
 	void Meander();
@@ -144,7 +146,8 @@ private:
 	void LookAround();
 	void LookForEnemies();
 	void LookForLeader();
-	void WeaveBehindLeader(const mobj_t *leader);
+	void PathToLeader();
+
 	bool IsBarrel(const mobj_t *mo);
 
 	void Think_Roam();

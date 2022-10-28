@@ -680,6 +680,9 @@ void bot_t::Meander()
 	{
 		NewChaseDir(!hit_obstacle);
 
+		look_angle = angle;
+		look_slope = 0.0;
+
 		move_count = 10 + (M_Random() & 31);
 		strafedir = 0;
 	}
@@ -761,6 +764,31 @@ void bot_t::WeaveBehindLeader(const mobj_t *leader)
 }
 
 
+void bot_t::PathToLeader()
+{
+	mobj_t *leader = pl->mo->supportobj;
+	SYS_ASSERT(leader);
+
+	DeletePath();
+
+	path = NAV_FindPath(pl->mo, leader, 0);
+
+	if (path != NULL)
+	{
+		roam_goal  = position_c { leader->x, leader->y, leader->z };
+		roam_count = 20 * TICRATE;
+		return;
+	}
+	else
+	{
+		// TODO look for nearby items to visit
+
+		// try again in a few seconds
+		roam_count = 4 * TICRATE;
+	}
+}
+
+
 void bot_t::Think_Help()
 {
 	mobj_t *leader = pl->mo->supportobj;
@@ -768,19 +796,21 @@ void bot_t::Think_Help()
 	if (path != NULL)
 	{
 		if (roam_count-- < 0)
-			DeletePath();
-		else
-			FollowPath();
+		{
+			// failed to follow this path, try again
+			PathToLeader();
+			return;
+		}
 
+		FollowPath();
 		return;
 	}
 
-	position_c pos = { leader->x, leader->y, leader->z };
-
-	float dist = R_PointToDist(pl->mo->x, pl->mo->y, pos.x, pos.y);
-
 	// check if we are close to the leader, and can see them
 	bool near_them = false;
+
+	position_c pos = { leader->x, leader->y, leader->z };
+	float dist = R_PointToDist(pl->mo->x, pl->mo->y, pos.x, pos.y);
 
 	if (dist < 512.0 && fabs(pl->mo->z - pos.z) <= 24.0)
 	{
@@ -789,28 +819,19 @@ void bot_t::Think_Help()
 
 	if (near_them)
 	{
-		DeletePath();
 		WeaveBehindLeader(leader);
 		return;
 	}
 
-	// leader is too far away, find a path...
-	// FIXME only do this every second or so!!
-
-	path = NAV_FindPath(pl->mo, leader, 0);
-	if (path != NULL)
+	if (roam_count-- < 0)
 	{
-		roam_goal  = pos;
-		roam_count = 30 * TICRATE;
+		PathToLeader();
 		return;
 	}
 
 	// IDEA: try again a few times, then teleport somewhere nearby
 
-	// TODO
-	// Meander()
-
-// fprintf(stderr, "cannot find leader: %d\n", gametic);
+	Meander();
 }
 
 
@@ -935,7 +956,7 @@ void bot_t::Think_Roam()
 
 	if (path == NULL)
 	{
-		// TODO meander
+		Meander();
 		return;
 	}
 
@@ -1206,8 +1227,6 @@ void bot_t::Respawn()
 	look_time  = C_Random() % 8;
 
 	hit_obstacle = false;
-
-	NAV_NextRoamPoint(roam_goal);
 
 	DeletePath();
 }

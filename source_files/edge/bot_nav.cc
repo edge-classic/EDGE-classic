@@ -717,7 +717,23 @@ bool bot_path_c::reached_dest(const position_c *pos) const
 	if (pos->y < dest.y - 64) return false;
 	if (pos->y > dest.y + 64) return false;
 
-	// FIXME test the half plane !!
+	// check bot has entered the other half plane
+	position_c from = nodes.at(along - 1).pos;
+
+	float ux   = dest.x - from.x;
+	float uy   = dest.y - from.y;
+	float ulen = hypotf(ux, uy);
+
+	if (ulen < 1.0)
+		return true;
+
+	ux /= ulen;
+	uy /= ulen;
+
+	float dot_p = (pos->x - dest.x) * ux + (pos->y - dest.y) * uy;
+
+	if (dot_p < -16.0)
+		return false;
 
 	return true;
 }

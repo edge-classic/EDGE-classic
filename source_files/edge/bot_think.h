@@ -47,15 +47,13 @@ enum bot_task_e
 };
 
 
-/* ???
-// what kind of thing we are looking for
-enum bot_find_thing_e
+// results of FollowPath()
+enum bot_follow_path_e
 {
-	FIND_Enemy = 0,  // an enemy (or barrel)
-	FIND_Goal,       // a big item (the roam goal)
-	FIND_Other,      // anything useful or needed
+	FOLLOW_OK = 0,    // going okay...
+	FOLLOW_Done,      // reached end of path
+	FOLLOW_Failed     // got stuck somewhere
 };
-*/
 
 
 // This describes what action the bot wants to do.
@@ -96,10 +94,9 @@ public:
 
 	int weapon_count = 0;
 	int move_count   = 0;
-	int dead_count   = 0;
 
+	int dead_time    = 0;
 	int look_time    = 0;
-	int roam_time    = 0;
 	int weave_time   = 0;
 
 	// 0 = go straight, -1 = left, +1 = right
@@ -112,10 +109,13 @@ public:
 	bool  near_leader;
 
 	// pathing info.
-	// used for DM roaming, COOP follow-the-leader, and getting items
-	position_c roam_goal  { 0, 0, 0 };
-	position_c path_point { 0, 0, 0 };
+	// used for DM roaming, COOP follow-the-leader, and getting items.
+	// path_goal is final target.  travel_time detects losing the path.
+	// path_wait is when we need a path, but are waiting a bit.
 	bot_path_c * path = NULL;
+	position_c path_goal { 0, 0, 0 };
+	int travel_time  = 0;
+	int path_wait    = 0;
 
 	botcmd_t cmd;
 
@@ -141,14 +141,15 @@ private:
 	void WeaveToward(const mobj_t *mo);
 	void WeaveNearLeader(const mobj_t *leader);
 
+	bot_follow_path_e FollowPath();
 	void DetectObstacle();
-	bool FollowPath();
 	void Meander();
 
 	void LookAround();
 	void LookForEnemies();
 	void LookForLeader();
 	void PathToLeader();
+	void EstimateTravelTime();
 
 	bool IsBarrel(const mobj_t *mo);
 

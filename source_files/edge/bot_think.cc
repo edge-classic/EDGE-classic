@@ -288,33 +288,6 @@ void bot_t::PainResponse()
 }
 
 
-/* OLD STUFF, REMOVE SOON
-static bool PTR_BotLook(intercept_t * in, void *dataptr)
-{
-	SYS_ASSERT(mo);
-
-	if (! (mo->flags & MF_SPECIAL))
-		return true;  // has to be able to be got
-
-	if (mo->health <= 0)
-		return true;  // already been picked up
-
-	int score = 0;  //--  looking_bot->EvaluateItem(mo);
-
-	if (score <= 0)
-		return true;
-
-	if (!lkbot_target || score > lkbot_score)
-	{
-		lkbot_target = mo;
-		lkbot_score  = score;
-	}
-
-	return false;  // found something
-}
-*/
-
-
 // Finds items for the bot to get.
 
 /* TODO merge logic into new system
@@ -576,7 +549,7 @@ void bot_t::WeaveToward(const position_c& pos)
 	// but if something gets in our way, we try to "weave" around it,
 	// by sometimes going diagonally left and sometimes right.
 
-	float dist = R_PointToDist(pl->mo->x, pl->mo->y, pos.x, pos.y);
+	float dist = hypotf(pl->mo->x - pos.x, pl->mo->y - pos.y);
 
 	if (weave_time-- < 0)
 	{
@@ -693,7 +666,7 @@ void bot_t::Meander()
 	Move();
 	*/
 
-	fprintf(stderr, "Meander %d\n", roam_time);
+	fprintf(stderr, "Meander %d\n", path_wait);
 }
 
 
@@ -755,33 +728,12 @@ void bot_t::WeaveNearLeader(const mobj_t *leader)
 	float dx = pl->mo->x - leader->x;
 	float dy = pl->mo->y - leader->y;
 
-	float dlen = R_PointToDist(0, 0, dx, dy);
-	dlen = std::max(dlen, 1.0f);
+	float dlen = std::max(1.0f, hypotf(dx, dy));
 
 	dx = dx * 96.0f / dlen;
 	dy = dy * 96.0f / dlen;
 
 	position_c pos { leader->x + dx, leader->y + dy, leader->z };
-
-/*	OLD LOGIC -- go behind the player
-
-	position_c pos = { leader->x, leader->y, leader->z };
-
-	float dx = M_Cos(leader->angle);
-	float dy = M_Sin(leader->angle);
-
-	pos.x -= dx * 64.0;
-	pos.y -= dy * 64.0;
-
-	if (pl->pnum & 1)
-	{
-		dx = -dx;
-		dy = -dy;
-	}
-
-	pos.x += dy * 32.0;
-	pos.y += dx * 32.0;
-*/
 
 	WeaveToward(pos);
 }
@@ -797,7 +749,25 @@ void bot_t::PathToLeader()
 	path = NAV_FindPath(pl->mo, leader, 0);
 
 	if (path != NULL)
-		roam_goal = position_c { leader->x, leader->y, leader->z };
+	{
+		path_goal = position_c { leader->x, leader->y, leader->z };
+
+		EstimateTravelTime();
+	}
+}
+
+
+void bot_t::EstimateTravelTime()
+{
+	// estimate time to travel one segment of a path.
+	// overestimates by quite a bit, to account for obstacles.
+
+	position_c dest = path->cur_dest();
+
+	float dist = hypotf(dest.x - pl->mo->x, dest.y - pl->mo->y);
+	float tics = dist * 1.5f / 10.0f + 5.0f;
+
+	travel_time = (int)tics;
 }
 
 
@@ -809,9 +779,12 @@ void bot_t::Think_Help()
 	bool cur_near = false;
 
 	position_c pos = { leader->x, leader->y, leader->z };
-	float dist = R_PointToDist(pl->mo->x, pl->mo->y, pos.x, pos.y);
+	float dist = hypotf(pl->mo->x - pos.x, pl->mo->y - pos.y);
 
-	if (dist < 192.0 && fabs(pl->mo->z - pos.z) <= 24.0)
+	// allow a bit of "hysteresis"
+	float check_dist = near_leader ? 224.0 : 160.0;
+
+	if (dist < check_dist && fabs(pl->mo->z - pos.z) <= 24.0)
 	{
 		cur_near = P_CheckSight(pl->mo, leader);
 	}
@@ -820,11 +793,12 @@ void bot_t::Think_Help()
 	{
 		near_leader = cur_near;
 
+		DeletePath();
+
 		if (! cur_near)
 		{
 			// wait a bit then find a path
-			DeletePath();
-			roam_time = 10 + C_Random() % 10;
+			path_wait = 10 + C_Random() % 10;
 		}
 	}
 
@@ -837,21 +811,34 @@ fprintf(stderr, "Weave %d\n", gametic);
 
 	if (path != NULL)
 	{
-fprintf(stderr, "Follow path leader %d\n", gametic);
-		FollowPath();
-		return;
+		switch (FollowPath())
+		{
+			case FOLLOW_OK:
+				return;
+
+			case FOLLOW_Done:
+				DeletePath();
+				path_wait = 4 + C_Random() % 4;
+				break;
+
+			case FOLLOW_Failed:
+				DeletePath();
+				path_wait = 30 + C_Random() % 10;
+				break;
+		}
 	}
 
 	// we are waiting until we can establish a path
 
-	if (roam_time-- < 0)
+fprintf(stderr, "wait %d\n", path_wait);
+
+	if (path_wait-- < 0)
 	{
 		PathToLeader();
-		roam_time = 30 + C_Random() % 10;
+		path_wait = 30 + C_Random() % 10;
 	}
 
-fprintf(stderr, "wait %d\n", roam_time);
-
+	// if somewhat close, attempt to follow player
 	if (dist < 512.0 && fabs(pl->mo->z - pos.z) <= 24.0)
 		WeaveNearLeader(leader);
 	else
@@ -859,48 +846,9 @@ fprintf(stderr, "wait %d\n", roam_time);
 }
 
 
-/* USEFUL??
+bot_follow_path_e  bot_t::FollowPath()
 {
-	// for thin subsectors, do a check with expanded bbox
-	// FIXME make a utility of NAV_XXX
-	float x1 = dest->bbox[BOXLEFT];
-	float x2 = dest->bbox[BOXRIGHT];
-	float y1 = dest->bbox[BOXBOTTOM];
-	float y2 = dest->bbox[BOXTOP];
-
-	bool x_narrow = (x2 - x1) < 24;
-	bool y_narrow = (y2 - y1) < 24;
-
-	if (x_narrow || y_narrow)
-	{
-		// have to be at same height, or higher
-		if (pl->mo->z > dest->sector->f_h - 0.5)
-		{
-			float w = (x2 - x1);
-			float h = (y2 - y1);
-
-			float mx = (x1 + x2) * 0.5;
-			float my = (y1 + y2) * 0.5;
-
-			if (x_narrow) w = 24;
-			if (y_narrow) h = 24;
-
-			w *= 0.5;
-			h *= 0.5;
-
-			if ((mx - w <= pl->mo->x) && (pl->mo->x <= mx + w) &&
-				(my - h <= pl->mo->y) && (pl->mo->y <= my + h))
-			{
-				reached = true;
-			}
-		}
-	}
-*/
-
-
-bool bot_t::FollowPath()
-{
-	// returns TRUE when reached the end.
+	// returns a FOLLOW_XXX enum constant.
 
 	SYS_ASSERT(path != NULL);
 	SYS_ASSERT(! path->finished());
@@ -912,25 +860,23 @@ bool bot_t::FollowPath()
 
 		if (path->finished())
 		{
-			DeletePath();
-			return true;
+			return FOLLOW_Done;
 		}
+
+		EstimateTravelTime();
 	}
 
-	path_point = path->cur_dest();
+	if (travel_time-- < 0)
+	{
+		return FOLLOW_Failed;
+	}
 
 	// determine looking angle
-
 	{
-		position_c dest = path_point;
+		position_c dest = path->cur_dest();
 
 		if (path->along+1 < path->nodes.size())
 			dest = path->nodes[path->along+1].pos;
-
-		//-- int dest_id = (d2 < 0) ? d1 : d2;
-		//-- const subsector_t *dest = &subsectors[dest_id];
-		//-- float dest_x = (dest->bbox[BOXLEFT] + dest->bbox[BOXRIGHT])  * 0.5;
-		//-- float dest_y = (dest->bbox[BOXTOP]  + dest->bbox[BOXBOTTOM]) * 0.5;
 
 		float dx = dest.x - pl->mo->x;
 		float dy = dest.y - pl->mo->y;
@@ -944,54 +890,53 @@ bool bot_t::FollowPath()
 
 	strafedir = 0;
 
-	WeaveToward(path_point);
+	WeaveToward(path->cur_dest());
 
-	return false;  // not finished
+	return FOLLOW_OK;
 }
 
 
 void bot_t::Think_Roam()
 {
-	if (roam_time-- < 0)
+	if (path != NULL)
 	{
-		roam_time = TICRATE;
-
-		if (path != NULL)
-			DeletePath();
-
-		if (! NAV_NextRoamPoint(roam_goal))
-			return;
-
-		//-- subsector_t *dest = R_PointInSubsector(roam_goal.x, roam_goal.y);
-
-		path = NAV_FindPath(pl->mo, &roam_goal, 0);
-		if (path == NULL)
+		switch (FollowPath())
 		{
-			// try again soon
-			return;
+			case FOLLOW_OK:
+				return;
+
+			case FOLLOW_Done:
+				// arrived at the spot!
+				// TODO look for other nearby items
+
+				DeletePath();
+				path_wait = 4 + C_Random() % 4;
+				break;
+
+			case FOLLOW_Failed:
+				DeletePath();
+				path_wait = 30 + C_Random() % 10;
+				break;
 		}
-
-		path_point = path->cur_dest();
-
-		// after this amount of time, give up and try another place
-		// [ FIXME check if needed, PERHAPS detect lack of progress ]
-		roam_time = 20 * TICRATE;
 	}
 
-	if (path == NULL)
+	if (path_wait-- < 0)
 	{
-		Meander();
-		return;
+		path_wait = 30 + C_Random() % 10;
+
+		if (! NAV_NextRoamPoint(path_goal))
+			return;
+
+		path = NAV_FindPath(pl->mo, &path_goal, 0);
+
+		// if no path found, try again soon
+		if (path == NULL)
+			return;
+
+		EstimateTravelTime();
 	}
 
-	if (! FollowPath())
-		return;
-
-	// arrived at the spot!
-	// TODO look for other nearby items
-
-//	fprintf(stderr, "ARRIVED !! %d\n", gametic);
-	roam_time = 0;
+	Meander();
 }
 
 
@@ -1000,14 +945,6 @@ void bot_t::Think_GetItem()
 	// item gone?  (either we picked it up, or someone else did)
 	if (pl->mo->tracer == NULL)
 	{
-		task = TASK_None;
-		return;
-	}
-
-	// took too long? (e.g. we got stuck)
-	if (roam_time-- < 0)
-	{
-		DeletePath();
 		task = TASK_None;
 		return;
 	}
@@ -1027,9 +964,25 @@ void bot_t::Think_GetItem()
 	// follow the path previously found
 	if (path != NULL)
 	{
-		FollowPath();
-		return;
+		switch (FollowPath())
+		{
+			case FOLLOW_OK:
+				return;
+
+			case FOLLOW_Done:
+				DeletePath();
+				break;
+
+			case FOLLOW_Failed:
+				// took too long? (e.g. we got stuck)
+				DeletePath();
+				task = TASK_None;
+				pl->mo->SetTracer(NULL);
+				return;
+		}
 	}
+
+	// FIXME !!!! detect reaching the item (and not picking it up), end the task
 
 	// move toward the item's location
 	WeaveToward(pl->mo->tracer);
@@ -1042,11 +995,11 @@ void bot_t::Think_GetItem()
 	{
 		// have we stopped needed it? (maybe it is old DM and we
 		// picked up the weapon).
-//--		if (EvaluateItem(mo->target) <= 0)
-//--		{
-//--			pl->mo->SetTarget(NULL);
-//--			return;
-//--		}
+		if (EvaluateItem(mo->target) <= 0)
+		{
+			pl->mo->SetTarget(NULL);
+			return;
+		}
 
 		// If there is a wall or something in the way, pick a new direction.
 		if (!move_ok || move_count < 0)
@@ -1188,12 +1141,12 @@ void bot_t::Think()
 
 void bot_t::DeathThink()
 {
-	dead_count++;
+	dead_time++;
 
 	// respawn after a random interval, at least one second
-	if (dead_count > 30)
+	if (dead_time > 30)
 	{
-		dead_count = 0;
+		dead_time = 0;
 
 		if (C_Random() % 100 < 35)
 			cmd.use = true;
@@ -1247,7 +1200,7 @@ void bot_t::Respawn()
 
 	task = TASK_None;
 
-	roam_time = C_Random() % 8;
+	path_wait = C_Random() % 8;
 	look_time = C_Random() % 8;
 
 	hit_obstacle = false;

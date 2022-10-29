@@ -168,7 +168,7 @@ bool NAV_NextRoamPoint(position_c& out)
 //       the cost of travelling between two nodes.
 
 // player travel speed when running, in map units per second.
-#define RUNNING_SPEED  500.0
+#define RUNNING_SPEED  450.0f
 
 
 class nav_area_c

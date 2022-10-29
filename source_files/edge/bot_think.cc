@@ -580,13 +580,13 @@ void bot_t::WeaveToward(const position_c& pos)
 
 	if (weave_time-- < 0)
 	{
-		weave_time = 10 + C_Random() % 20;
+		weave_time = 10 + C_Random() % 10;
 
 		bool neg = weave < 0;
 
 		if (hit_obstacle)
 			weave = neg ? +2 : -2;
-		else if (dist > 128.0)
+		else if (dist > 192.0)
 			weave = neg ? +1 : -1;
 		else
 			weave = 0;

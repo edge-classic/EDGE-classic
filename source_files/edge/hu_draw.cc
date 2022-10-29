@@ -379,7 +379,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
                   const image_c *image, 
 				  float tx1, float ty1, float tx2, float ty2,
 				  float alpha, rgbcol_t text_col,
-				  const colourmap_c *palremap, float sx, float sy, int ch)
+				  const colourmap_c *palremap, float sx, float sy, char ch)
 {
 	int x1 = I_ROUND(hx1);
 	int y1 = I_ROUND(hy1);
@@ -412,9 +412,9 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 		glEnable(GL_TEXTURE_2D);
 		if ((var_smoothing && cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ON_DEMAND) ||
 			cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ALWAYS)
-			glBindTexture(GL_TEXTURE_2D, cur_font->ttf_glyph_map[cp437_unicode_values[ch]].smoothed_tex_id);
+			glBindTexture(GL_TEXTURE_2D, cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).smoothed_tex_id);
 		else
-			glBindTexture(GL_TEXTURE_2D, cur_font->ttf_glyph_map[cp437_unicode_values[ch]].tex_id);
+			glBindTexture(GL_TEXTURE_2D, cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).tex_id);
 		glColor4f(r, g, b, alpha);
 		glBegin(GL_QUADS);
 		glTexCoord2f(tx1,ty2); glVertex2f(hx1,hy1);
@@ -848,10 +848,10 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 
 	if (epi::strcmp(img->name, "TTFDUMMY") == 0)
 	{
-		stbtt_aligned_quad *q = cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].char_quad;
-		y = top_y + (cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].y_shift * (size > 0 ? (size / cur_font->def->ttf_default_size) : 1.0) * sc_y);
-		w = ((size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->ttf_default_size)) : cur_font->CharWidth(ch)) - cur_font->spacing) * sc_x;
-		h = (cur_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].height * (size > 0 ? (size / cur_font->def->ttf_default_size) : 1.0)) * sc_y;
+		stbtt_aligned_quad *q = cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).char_quad;
+		y = top_y + (cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).y_shift * (size > 0 ? (size / cur_font->def->default_size) : 1.0) * sc_y);
+		w = ((size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->default_size)) : cur_font->CharWidth(ch)) - cur_font->spacing) * sc_x;
+		h = (cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).height * (size > 0 ? (size / cur_font->def->default_size) : 1.0)) * sc_y;
 		tx1 = q->s0;
 		ty1 = q->t0;
 		tx2 = q->s1;
@@ -861,8 +861,8 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 	{
 		w = ((size > 0 ? (size * cur_font->CharRatio(ch)) : cur_font->CharWidth(ch)) - cur_font->spacing) * sc_x;
 		h = (size > 0 ? size : cur_font->im_char_height) * sc_y;
-		int px =      int((byte)ch) % 16;
-		int py = 15 - int((byte)ch) / 16;
+		int px =      static_cast<u8_t>(ch) % 16;
+		int py = 15 - static_cast<u8_t>(ch) / 16;
 		tx1 = (px  ) * cur_font->font_image->ratio_w;
 		tx2 = (px+1) * cur_font->font_image->ratio_w;
 		float char_texcoord_adjust = ((tx2 - tx1) - ((tx2 - tx1) * (cur_font->CharWidth(ch) / cur_font->im_char_width))) / 2;
@@ -873,8 +873,8 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 	}
 	else
 	{
-		w = (size > 0 ? (size * cur_font->p_cache.ratio) : IM_WIDTH(img)) * sc_x;
-		h = (size > 0 ? size : IM_HEIGHT(img)) * sc_y;
+		w = (size > 0 ? (size * cur_font->p_cache.ratio) : cur_font->CharWidth(ch)) * sc_x;
+		h = (size > 0 ? size : (cur_font->def->default_size > 0.0 ? cur_font->def->default_size : IM_HEIGHT(img))) * sc_y;
 		tx1 = 0;
 		ty1 = 0;
 		tx2 = IM_RIGHT(img);
@@ -888,7 +888,7 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 	float y2 = COORD_Y(y);
 
     HUD_RawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2,
-				  cur_alpha, cur_color, NULL, 0.0, 0.0, (int)ch);
+				  cur_alpha, cur_color, NULL, 0.0, 0.0, ch);
 }
 
 void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img, char ch, rgbcol_t color1, rgbcol_t color2, bool blink)
@@ -902,13 +902,13 @@ void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img
 	float w, h;
 	float tx1, tx2, ty1, ty2;
 
-	int character = int((byte)ch);
+	u8_t character = static_cast<u8_t>(ch);
 
 	if (blink && con_cursor >= 16)
 		character = 0x20;
 
-	int px =      character % 16;
-	int py = 15 - character / 16;
+	u8_t px =      character % 16;
+	u8_t py = 15 - character / 16;
 	tx1 = (px  ) * endoom_font->font_image->ratio_w;
 	tx2 = (px+1) * endoom_font->font_image->ratio_w;
 	ty1 = (py  ) * endoom_font->font_image->ratio_h;
@@ -1030,7 +1030,7 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 		for (int i = 0; i < len; i++)
 		{
 			if (cur_font->def->type == FNTYP_TrueType)
-				total_w += (size > 0 ? cur_font->CharWidth(str[i]) * (size / cur_font->def->ttf_default_size) + cur_font->spacing : cur_font->CharWidth(str[i])) * cur_scale;
+				total_w += (size > 0 ? cur_font->CharWidth(str[i]) * (size / cur_font->def->default_size) : cur_font->CharWidth(str[i])) * cur_scale;
 			else if (cur_font->def->type == FNTYP_Image)
 				total_w += (size > 0 ? size * cur_font->CharRatio(str[i]) + cur_font->spacing : cur_font->CharWidth(str[i])) * cur_scale;
 			else
@@ -1055,7 +1055,7 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 				HUD_DrawChar(cx, cy, img, ch, size);
 
 			if (cur_font->def->type == FNTYP_TrueType)
-				cx += (size > 0 ? cur_font->CharWidth(ch) * (size / cur_font->def->ttf_default_size) + cur_font->spacing : cur_font->CharWidth(ch)) * cur_scale;
+				cx += (size > 0 ? cur_font->CharWidth(ch) * (size / cur_font->def->default_size) + cur_font->spacing : cur_font->CharWidth(ch)) * cur_scale;
 			else if (cur_font->def->type == FNTYP_Image)
 				cx += (size > 0 ? size * cur_font->CharRatio(ch) + cur_font->spacing : cur_font->CharWidth(ch)) * cur_scale;
 			else

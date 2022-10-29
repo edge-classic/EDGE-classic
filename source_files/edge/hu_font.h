@@ -84,7 +84,7 @@ typedef struct
 	// nominal width and height.  Characters can be larger or smaller
 	// than this, but these values give a good guess for formatting
 	// purposes.  Only valid once font has been loaded.
-	int width, height;
+	float width, height;
 	float ratio;
 }
 patchcache_t;
@@ -104,8 +104,8 @@ public:
 
 	bool HasChar(char ch) const;
 
-	int NominalWidth() const;
-	int NominalHeight() const;
+	float NominalWidth() const;
+	float NominalHeight() const;
 
 	float CharRatio(char ch);
 	float CharWidth(char ch);

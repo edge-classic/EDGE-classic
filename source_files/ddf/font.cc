@@ -37,7 +37,7 @@ static const commandlist_t font_commands[] =
 	DDF_FIELD("PATCHES",  patches,    DDF_FontGetPatch),
 	DDF_FIELD("IMAGE",    image_name, DDF_MainGetString),
 	DDF_FIELD("TTF",    ttf_name, DDF_MainGetString),
-	DDF_FIELD("TTF_DEFAULT_SIZE", ttf_default_size, DDF_MainGetFloat),
+	DDF_FIELD("DEFAULT_SIZE", default_size, DDF_MainGetFloat),
 	DDF_FIELD("TTF_SMOOTHING", ttf_smoothing_string, DDF_MainGetString),
 	DDF_FIELD("MISSING_PATCH", missing_patch, DDF_MainGetString),
 	DDF_FIELD("SPACING", spacing, DDF_MainGetFloat),
@@ -284,7 +284,7 @@ void fontdef_c::CopyDetail(const fontdef_c &src)
 	missing_patch = src.missing_patch;
 	spacing = src.spacing;
 	ttf_name = src.ttf_name;
-	ttf_default_size = src.ttf_default_size;
+	default_size = src.default_size;
 	ttf_smoothing = src.ttf_smoothing;
 	ttf_smoothing_string = src.ttf_smoothing_string;
 }
@@ -299,7 +299,7 @@ void fontdef_c::Default()
 	image_name.clear();
 	missing_patch.clear();
 	ttf_name.clear();
-	ttf_default_size = 7.0;
+	default_size = 0.0;
 	spacing = 0.0;
 	ttf_smoothing = TTF_SMOOTH_ON_DEMAND;
 	ttf_smoothing_string.clear();

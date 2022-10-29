@@ -154,9 +154,18 @@ void font_c::LoadPatches()
 		return;
 	}
 
-	p_cache.width  = I_ROUND(IM_WIDTH(Nom));  // XXX: make fields float???
-	p_cache.height = I_ROUND(IM_HEIGHT(Nom));
-	p_cache.ratio = IM_WIDTH(Nom) / IM_HEIGHT(Nom);
+	if (def->default_size > 0.0)
+	{
+		p_cache.height = def->default_size;
+		p_cache.width  = def->default_size * (IM_WIDTH(Nom) / IM_HEIGHT(Nom));
+		p_cache.ratio = p_cache.width / p_cache.height;
+	}
+	else
+	{
+		p_cache.width  = IM_WIDTH(Nom);
+		p_cache.height = IM_HEIGHT(Nom);
+		p_cache.ratio = IM_WIDTH(Nom) / IM_HEIGHT(Nom);
+	}
 	spacing = def->spacing;
 }
 
@@ -170,10 +179,10 @@ void font_c::LoadFontImage()
 			I_Error("LoadFontImage: NULL image name provided for font %s!", def->name.c_str());
 		if (!font_image)
 			I_Error("LoadFontImage: Image %s not found for font %s!", def->image_name.c_str(), def->name.c_str());
-		int char_width = font_image->actual_w / 16;
 		int char_height = font_image->actual_h / 16;
-		im_char_width = char_width * font_image->scale_x;
-		im_char_height = char_height * font_image->scale_y;
+		int char_width = font_image->actual_w / 16;
+		im_char_height = (def->default_size == 0.0 ? char_height : def->default_size) * font_image->scale_y;
+		im_char_width = (def->default_size == 0.0 ? char_width : def->default_size) * font_image->scale_x;
 		im_mono_width = 0;
 		spacing = def->spacing;
 		// Determine individual character widths and ratios
@@ -185,6 +194,8 @@ void font_c::LoadFontImage()
 			int px =      i % 16;
 			int py = 15 - i / 16;
 			individual_char_widths[i] = char_data->ImageCharacterWidth(px * char_width, py * char_height, px * char_width + char_width, py * char_height + char_height) * font_image->scale_x;
+			if (def->default_size > 0.0)
+				individual_char_widths[i] *= (def->default_size / char_width);
 			if (individual_char_widths[i] > im_mono_width)
 				im_mono_width = individual_char_widths[i];
 			individual_char_ratios[i] = individual_char_widths[i] / im_char_height;
@@ -202,31 +213,46 @@ void font_c::LoadFontTTF()
 			I_Error("LoadFontTTF: No TTF file/lump name provided for font %s!", def->name.c_str());
 		}
 
-		int lump = W_CheckNumForName(def->ttf_name.c_str());
-		if (lump < 0)
+		for (int i=0; i < hu_fonts.GetSize(); i++)
 		{
-			I_Error("LoadFontTTF: LUMP '%s' not found for font %s.\n", def->ttf_name.c_str(), def->name.c_str()); 
+			if (epi::strcmp(hu_fonts[i]->def->ttf_name,def->ttf_name) == 0)
+			{
+				if (hu_fonts[i]->ttf_buffer)
+					ttf_buffer = hu_fonts[i]->ttf_buffer;
+			}
 		}
 
-		epi::file_c *F;
+		if (!ttf_buffer)
+		{
+			int lump = W_CheckNumForName(def->ttf_name.c_str());
+			if (lump < 0)
+			{
+				I_Error("LoadFontTTF: LUMP '%s' not found for font %s.\n", def->ttf_name.c_str(), def->name.c_str()); 
+			}
 
-		F = W_OpenLump(lump);
+			epi::file_c *F;
 
-		ttf_buffer = F->LoadIntoMemory();
+			F = W_OpenLump(lump);
 
-		delete F;
+			ttf_buffer = F->LoadIntoMemory();
+
+			delete F;
+		}
 
 		ttf_char_t M;
 
 		M.packed_char = new stbtt_packedchar;
 		M.char_quad = new stbtt_aligned_quad;
 
+		if (def->default_size == 0.0)
+			def->default_size = 7.0f;
+
 		unsigned char *temp_bitmap = new unsigned char [64*64];
 
 		stbtt_pack_context *spc = new stbtt_pack_context;
 		stbtt_PackBegin(spc, temp_bitmap, 64, 64, 0, 1, NULL);
 		stbtt_PackSetOversampling(spc, 1, 1);
-		stbtt_PackFontRange(spc, ttf_buffer, 0, 48, cp437_unicode_values[(int)'M'], 1, M.packed_char);
+		stbtt_PackFontRange(spc, ttf_buffer, 0, 48, cp437_unicode_values[static_cast<u8_t>('M')], 1, M.packed_char);
 		stbtt_PackEnd(spc);
 		glGenTextures(1, &M.tex_id);
 		glBindTexture(GL_TEXTURE_2D, M.tex_id);
@@ -246,12 +272,12 @@ void font_c::LoadFontTTF()
 		float linegap = 0.0f;
 		stbtt_GetPackedQuad(M.packed_char, 64, 64, 0, &x, &y, M.char_quad, 0);
 		stbtt_GetScaledFontVMetrics(ttf_buffer, 0, 48, &ascent, &descent, &linegap);
-		M.width = (M.char_quad->x1 - M.char_quad->x0) * (def->ttf_default_size / 48.0);
-		M.height = (M.char_quad->y1 - M.char_quad->y0) * (def->ttf_default_size / 48.0);
+		M.width = (M.char_quad->x1 - M.char_quad->x0) * (def->default_size / 48.0);
+		M.height = (M.char_quad->y1 - M.char_quad->y0) * (def->default_size / 48.0);
 		ttf_char_width = M.width;
-		ttf_char_height = (ascent - descent) * (def->ttf_default_size / 48.0);
-		M.y_shift = (ttf_char_height - M.height) + (M.char_quad->y1 * (def->ttf_default_size / 48.0));
-		ttf_glyph_map.try_emplace(cp437_unicode_values[(int)'M'], M);
+		ttf_char_height = (ascent - descent) * (def->default_size / 48.0);
+		M.y_shift = (ttf_char_height - M.height) + (M.char_quad->y1 * (def->default_size / 48.0));
+		ttf_glyph_map.try_emplace(static_cast<u8_t>('M'), M);
 		spacing = def->spacing + 0.5; // + 0.5 for at least a minimal buffer between letters by default
 	}
 }
@@ -279,7 +305,7 @@ void font_c::Load()
 }
 
 
-int font_c::NominalWidth() const
+float font_c::NominalWidth() const
 {
 	if (def->type == FNTYP_Image)
 		return im_char_width + spacing;
@@ -294,7 +320,7 @@ int font_c::NominalWidth() const
 	return 1; /* NOT REACHED */
 }
 
-int font_c::NominalHeight() const
+float font_c::NominalHeight() const
 {
 	if (def->type == FNTYP_Image)
 		return im_char_height;
@@ -330,7 +356,7 @@ const image_c *font_c::CharImage(char ch) const
 
 	if (def->type == FNTYP_TrueType)
 	{
-		if (ttf_glyph_map.find((int)ch) != ttf_glyph_map.end())
+		if (ttf_glyph_map.find(static_cast<u8_t>(ch)) != ttf_glyph_map.end())
 			// Create or return faux backup image
 			return W_ImageLookup("TTFDUMMY", INS_Graphic, ILF_Font);
 		else
@@ -363,7 +389,7 @@ float font_c::CharRatio(char ch)
 	if (ch == ' ')
 		return 0.4f;
 	else
-		return individual_char_ratios[int((byte)ch)];
+		return individual_char_ratios[static_cast<u8_t>(ch)];
 }
 
 //
@@ -376,12 +402,12 @@ float font_c::CharWidth(char ch)
 		if (ch == ' ')
 			return im_char_width * 2 / 5 + spacing;
 		else
-			return individual_char_widths[int((byte)ch)] + spacing;
+			return individual_char_widths[static_cast<u8_t>(ch)] + spacing;
 	}
 
 	if (def->type == FNTYP_TrueType)
 	{
-		auto find_glyph = ttf_glyph_map.find(cp437_unicode_values[(int)ch]);
+		auto find_glyph = ttf_glyph_map.find(static_cast<u8_t>(ch));
 		if (find_glyph != ttf_glyph_map.end())
 		{
 			return find_glyph->second.width + spacing;
@@ -395,7 +421,7 @@ float font_c::CharWidth(char ch)
 			stbtt_pack_context *spc = new stbtt_pack_context;
 			stbtt_PackBegin(spc, temp_bitmap, 64, 64, 0, 1, NULL);
 			stbtt_PackSetOversampling(spc, 1, 1);
-			stbtt_PackFontRange(spc, ttf_buffer, 0, 48, cp437_unicode_values[(int)ch], 1, character.packed_char);
+			stbtt_PackFontRange(spc, ttf_buffer, 0, 48, cp437_unicode_values[static_cast<u8_t>(ch)], 1, character.packed_char);
 			stbtt_PackEnd(spc);
 			glGenTextures(1, &character.tex_id);
 			glBindTexture(GL_TEXTURE_2D, character.tex_id);
@@ -414,10 +440,10 @@ float font_c::CharWidth(char ch)
 			if (ch == ' ')
 				character.width = ttf_char_width * 3 / 5;
 			else
-				character.width = (character.char_quad->x1 - character.char_quad->x0) * (def->ttf_default_size / 48.0);
-			character.height = (character.char_quad->y1 - character.char_quad->y0) * (def->ttf_default_size / 48.0);
-			character.y_shift = (ttf_char_height - character.height) + (character.char_quad->y1 * (def->ttf_default_size / 48.0));
-			ttf_glyph_map.try_emplace(cp437_unicode_values[(int)ch], character);
+				character.width = (character.char_quad->x1 - character.char_quad->x0) * (def->default_size / 48.0);
+			character.height = (character.char_quad->y1 - character.char_quad->y0) * (def->default_size / 48.0);
+			character.y_shift = (ttf_char_height - character.height) + (character.char_quad->y1 * (def->default_size / 48.0));
+			ttf_glyph_map.try_emplace(static_cast<u8_t>(ch), character);
 			return character.width + spacing;
 		}
 	}
@@ -432,7 +458,10 @@ float font_c::CharWidth(char ch)
 	if (! im)
 		return DUMMY_WIDTH;
 
-	return IM_WIDTH(im) + spacing;
+	if (def->default_size > 0.0)
+		return (def->default_size * (IM_WIDTH(im) / IM_HEIGHT(im))) + spacing;
+	else
+		return IM_WIDTH(im) + spacing;
 }
 
 

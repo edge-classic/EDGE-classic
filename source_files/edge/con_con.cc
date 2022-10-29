@@ -591,39 +591,35 @@ void CON_MessageColor(rgbcol_t col)
 
 
 
-static int FNSZ;
 static int XMUL;
-static int YMUL;
+static int FNSZ;
 
 static void CalcSizes()
 {
 	// Would it be preferable to store the reduced sizes in the font_c class? Hmm
 	if (SCREENWIDTH <= 400)
 	{
-		FNSZ = 11; 
-		XMUL = 7;
+		FNSZ = 11;
 		if (con_font->def->type == FNTYP_TrueType)
-			YMUL = con_font->ttf_char_height * (11 / con_font->def->ttf_default_size);
-		else;
-			YMUL = 11;
+			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * (FNSZ / con_font->def->default_size));
+		else
+			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height)); 
 	}
 	else if (SCREENWIDTH < 640)
 	{
-		FNSZ = 13; 
-		XMUL = 9; 
+		FNSZ = 13;
 		if (con_font->def->type == FNTYP_TrueType)
-			YMUL = con_font->ttf_char_height * (13 / con_font->def->ttf_default_size);
-		else;
-			YMUL = 13;
+			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * (FNSZ / con_font->def->default_size));
+		else
+			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));  
 	}
 	else
 	{
-		FNSZ = 16; 
-		XMUL = 11; 
+		FNSZ = 16;
 		if (con_font->def->type == FNTYP_TrueType)
-			YMUL = con_font->ttf_char_height * (16 / con_font->def->ttf_default_size);
-		else;
-			YMUL = 16;
+			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * (FNSZ / con_font->def->default_size));
+		else
+			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));  
 	}
 }
 
@@ -667,15 +663,19 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 
 	if (con_font->def->type == FNTYP_TrueType)
 	{
-		float x_adjust = (con_font->ttf_char_width - con_font->CharWidth((int)ch)) * (FNSZ / con_font->def->ttf_default_size) / 2;
-		float y_adjust = con_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].y_shift * (FNSZ / con_font->def->ttf_default_size);
-		float height = con_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].height * (FNSZ / con_font->def->ttf_default_size);
-		float width = con_font->CharWidth((int)ch) * (FNSZ / con_font->def->ttf_default_size);
-		stbtt_aligned_quad *q = con_font->ttf_glyph_map[cp437_unicode_values[(int)ch]].char_quad;
+		float width = XMUL * ((con_font->CharWidth(ch) - con_font->spacing) / con_font->def->default_size);
+		float x_adjust = (XMUL - width) / 2;
+		float y_adjust = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).y_shift * (FNSZ / con_font->ttf_char_height);
+		float height = FNSZ * (con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).height / con_font->ttf_char_height);
+		stbtt_aligned_quad *q = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).char_quad;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, con_font->ttf_glyph_map[cp437_unicode_values[ch]].tex_id);
+		if ((var_smoothing && con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ON_DEMAND) ||
+			con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ALWAYS)
+			glBindTexture(GL_TEXTURE_2D, con_font->ttf_glyph_map.at(cp437_unicode_values[ch]).smoothed_tex_id);
+		else
+			glBindTexture(GL_TEXTURE_2D, con_font->ttf_glyph_map.at(cp437_unicode_values[ch]).tex_id);
 		glBegin(GL_POLYGON);
 		glTexCoord2f(q->s0,q->t0); glVertex2f(x + x_adjust,y - y_adjust);
         glTexCoord2f(q->s1,q->t0); glVertex2f(x + x_adjust + width,y - y_adjust);
@@ -687,8 +687,8 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 		return;
 	}
 
-	int px =      int((byte)ch) % 16;
-	int py = 15 - int((byte)ch) / 16;
+	u8_t px =      static_cast<u8_t>(ch) % 16;
+	u8_t py = 15 - static_cast<u8_t>(ch) / 16;
 
 	float tx1 = (px  ) * con_font->font_image->ratio_w;
 	float tx2 = (px+1) * con_font->font_image->ratio_w;
@@ -746,8 +746,8 @@ static void DrawEndoomChar(int x, int y, char ch, rgbcol_t col, rgbcol_t col2, b
 	if (blink && con_cursor >= 16)
 		ch = 0x20;
 
-	int px =      int((byte)ch) % 16;
-	int py = 15 - int((byte)ch) / 16;
+	u8_t px =      static_cast<u8_t>(ch) % 16;
+	u8_t py = 15 - static_cast<u8_t>(ch) / 16;
 
 	float tx1 = (px  ) * endoom_font->font_image->ratio_w;
 	float tx2 = (px+1) * endoom_font->font_image->ratio_w;
@@ -808,10 +808,7 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 			draw_cursor = false;
 		}
 
-		if (con_font->def->type != FNTYP_TrueType)
-			x += I_ROUND(FNSZ * (con_font->im_mono_width / con_font->im_char_height)) + I_ROUND(con_font->spacing);
-		else
-			x += (FNSZ * (FNSZ / con_font->def->ttf_default_size)) + I_ROUND(con_font->def->spacing);
+		x += XMUL;
 
 		if (x >= SCREENWIDTH)
 			break;
@@ -845,7 +842,7 @@ static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
 		DrawEndoomChar(x, y, endoom_line->line.at(i), endoom_colors[info & 15],
 			endoom_colors[(info >> 4) & 7], info & 128, tex_id);
 
-		x += XMUL + I_ROUND(endoom_font->spacing);
+		x += FNSZ + I_ROUND(endoom_font->spacing);
 
 		if (x >= SCREENWIDTH)
 			break;
@@ -899,9 +896,9 @@ void CON_Drawer(void)
 
 	// -- background --
 
-	int CON_GFX_HT = (SCREENHEIGHT * 3 / 5) / YMUL;
+	int CON_GFX_HT = (SCREENHEIGHT * 3 / 5) / FNSZ;
 
-	CON_GFX_HT = (CON_GFX_HT - 1) * YMUL + YMUL * 3 / 4 - 2;
+	CON_GFX_HT = (CON_GFX_HT - 1) * FNSZ + FNSZ * 3 / 4 - 2;
 
 
 	int y = SCREENHEIGHT;
@@ -926,7 +923,7 @@ void CON_Drawer(void)
 			console_style->def->bg.colour : RGB_MAKE(0,0,0), console_style->def->bg.translucency);
 	}
 
-	y += YMUL / 4;
+	y += FNSZ / 4;
 
 	// -- input line --
 
@@ -948,10 +945,10 @@ void CON_Drawer(void)
 			DrawText(XMUL, y, input_line, T_PURPLE);
 		}
 
-		y += YMUL;
+		y += FNSZ;
 	}
 
-	y += YMUL / 2;
+	y += FNSZ / 2;
 
 	// -- text lines --
 
@@ -963,13 +960,13 @@ void CON_Drawer(void)
 			break;
 
 		if (epi::prefix_case_cmp(CL->line.c_str(), "--------") == 0)
-			HorizontalLine(y + YMUL/2, CL->color);
+			HorizontalLine(y + FNSZ/2, CL->color);
 		else if (CL->endoom_bytes.size() == 80 && CL->line.size() == 80) // 80 ENDOOM characters + newline
 			EndoomDrawText(0, y, CL);
 		else
 			DrawText(0, y, CL->line.c_str(), CL->color);
 
-		y += YMUL;
+		y += FNSZ;
 
 		if (y >= SCREENHEIGHT)
 			break;
@@ -1685,15 +1682,15 @@ void CON_ShowFPS(void)
 	}
 
 	int x = SCREENWIDTH  - XMUL * 16;
-	int y = SCREENHEIGHT - YMUL * 2;
+	int y = SCREENHEIGHT - FNSZ * 2;
 
 	if (abs(debug_fps.d) >= 2)
-		y -= YMUL;
+		y -= FNSZ;
 
 	SolidBox(x, y, SCREENWIDTH, SCREENHEIGHT, RGB_MAKE(0,0,0), 0.5);
 
 	x += XMUL;
-	y = SCREENHEIGHT - YMUL - YMUL/2;
+	y = SCREENHEIGHT - FNSZ - FNSZ/2;
 
 	// show average...
 
@@ -1710,7 +1707,7 @@ void CON_ShowFPS(void)
 
 	if (abs(debug_fps.d) >= 2)
 	{
-		y -= YMUL;
+		y -= FNSZ;
 
 		if (debug_fps.d < 0)
 			sprintf(textbuf, " %6.2f max", worst_shown);
@@ -1736,32 +1733,32 @@ void CON_ShowPosition(void)
 	char textbuf[128];
 
 	int x = SCREENWIDTH  - XMUL * 16;
-	int y = SCREENHEIGHT - YMUL * 5;
+	int y = SCREENHEIGHT - FNSZ * 5;
 
-	SolidBox(x, y - YMUL * 7, XMUL * 16, YMUL * 7 + 2, RGB_MAKE(0,0,0), 0.5);
+	SolidBox(x, y - FNSZ * 7, XMUL * 16, FNSZ * 7 + 2, RGB_MAKE(0,0,0), 0.5);
 
 	x += XMUL;
-	y -= YMUL;
+	y -= FNSZ;
 	sprintf(textbuf, "    x: %d", (int)p->mo->x);
 	DrawText(x, y, textbuf, T_GREY176);
 
-	y -= YMUL;
+	y -= FNSZ;
 	sprintf(textbuf, "    y: %d", (int)p->mo->y);
 	DrawText(x, y, textbuf, T_GREY176);
 
-	y -= YMUL;
+	y -= FNSZ;
 	sprintf(textbuf, "    z: %d", (int)p->mo->z);
 	DrawText(x, y, textbuf, T_GREY176);
 
-	y -= YMUL;
+	y -= FNSZ;
 	sprintf(textbuf, "angle: %d", (int)ANG_2_FLOAT(p->mo->angle));
 	DrawText(x, y, textbuf, T_GREY176);
 
-	y -= YMUL;
+	y -= FNSZ;
 	sprintf(textbuf, "  sec: %d", (int)(p->mo->subsector->sector - sectors));
 	DrawText(x, y, textbuf, T_GREY176);
 
-	y -= YMUL;
+	y -= FNSZ;
 	sprintf(textbuf, "  sub: %d", (int)(p->mo->subsector - subsectors));
 	DrawText(x, y, textbuf, T_GREY176);
 }

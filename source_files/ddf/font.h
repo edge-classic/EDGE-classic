@@ -71,6 +71,7 @@ public:
 	std::string image_name;
 
 	float spacing;
+	float default_size;
 
 	// TTF Stuff
 	enum
@@ -81,7 +82,6 @@ public:
 	};
 
 	std::string ttf_name;
-	float ttf_default_size;
 	int ttf_smoothing;
 	std::string ttf_smoothing_string; // User convenience
 

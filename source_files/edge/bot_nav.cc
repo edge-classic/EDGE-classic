@@ -376,23 +376,58 @@ static void NAV_TryOpenArea(int idx, int parent, float cost)
 }
 
 
+static bool NAV_StoreSegMiddle(bot_path_c *path, const subsector_t *A, const subsector_t *B)
+{
+	const seg_t *seg = NULL;
+
+	for (seg = A->segs ; seg != NULL ; seg=seg->sub_next)
+		if (seg->back_sub == B)
+			break;
+
+	// this should not happen, but we can survive without it
+	if (seg == NULL)
+		return false;
+
+	// calc middle of the adjoining seg
+	position_c pos;
+
+	pos.x = (seg->v1->x + seg->v2->x) * 0.5f;
+	pos.y = (seg->v1->y + seg->v2->y) * 0.5f;
+	pos.z = B->sector->f_h;
+
+	// TODO: detect doors and lifts here
+	int flags = 0;
+
+	path->nodes.push_back(path_node_c { pos, flags });
+	return true;
+}
+
+
 static bot_path_c * NAV_StorePath(position_c start, int start_id, position_c finish, int finish_id)
 {
 	bot_path_c *path = new bot_path_c;
 
+	bool have_seg = false;
+
 	for (;;)
 	{
-		path->nodes.push_back(path_node_c { finish, 0 });
+		if (! have_seg)
+			path->nodes.push_back(path_node_c { finish, 0 });
 
 		if (finish_id == start_id)
 			break;
 
-		finish_id = nav_areas[finish_id].parent;
-		finish    = nav_areas[finish_id].get_middle();
+		int next_id = nav_areas[finish_id].parent;
+
+		have_seg = NAV_StoreSegMiddle(path, &subsectors[finish_id], &subsectors[next_id]);
+
+		finish_id = next_id;
+		finish    = nav_areas[next_id].get_middle();
 	}
 
 	path->nodes.push_back(path_node_c { start, 0 });
 
+	// nodes were added in reverse order, so put them in correct order
 	std::reverse(path->nodes.begin(), path->nodes.end());
 
 	return path;

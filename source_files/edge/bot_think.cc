@@ -666,7 +666,7 @@ void bot_t::Meander()
 	Move();
 	*/
 
-	fprintf(stderr, "Meander %d\n", path_wait);
+//--	fprintf(stderr, "Meander %d\n", path_wait);
 }
 
 
@@ -765,7 +765,7 @@ void bot_t::EstimateTravelTime()
 	position_c dest = path->cur_dest();
 
 	float dist = hypotf(dest.x - pl->mo->x, dest.y - pl->mo->y);
-	float tics = dist * 1.5f / 10.0f + 5.0f;
+	float tics = dist * 1.5f / 10.0f + 6.0f * TICRATE;
 
 	travel_time = (int)tics;
 }

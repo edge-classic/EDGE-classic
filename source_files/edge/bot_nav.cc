@@ -178,6 +178,10 @@ public:
 	int first_link = 0;
 	int num_links  = 0;
 
+	// middle coordinate
+	float mid_x;
+	float mid_y;
+
 	// info for A* path finding...
 
 	bool open  = false;  // in the OPEN set?
@@ -190,6 +194,10 @@ public:
 
 	~nav_area_c()
 	{ }
+
+	position_c get_middle() const;
+
+	void compute_middle(const subsector_t& sub);
 };
 
 
@@ -209,28 +217,32 @@ static std::vector<nav_link_c> nav_links;
 static position_c nav_finish_mid;
 
 
-static nav_area_c * NavArea(const subsector_t *sub)
+position_c nav_area_c::get_middle() const
 {
-	if (sub == NULL)
-		return NULL;
+	float z = subsectors[id].sector->f_h;
 
-	int id = (int)(sub - subsectors);
-
-	SYS_ASSERT(id >= 0 && id < numsubsectors);
-
-	return &nav_areas[id];
+	return position_c { mid_x, mid_y, z };
 }
 
 
-static position_c NAV_CalcMiddle(const subsector_t *sub)
+void nav_area_c::compute_middle(const subsector_t& sub)
 {
-	position_c result;
+	double sum_x = 0;
+	double sum_y = 0;
 
-	result.x = (sub->bbox[BOXLEFT] + sub->bbox[BOXRIGHT])  * 0.5;
-	result.y = (sub->bbox[BOXTOP]  + sub->bbox[BOXBOTTOM]) * 0.5;
-	result.z = sub->sector->f_h;
+	int total = 0;
 
-	return result;
+	for (const seg_t *seg = sub.segs ; seg != NULL ; seg=seg->sub_next, total += 1)
+	{
+		sum_x += seg->v1->x;
+		sum_y += seg->v1->y;
+	}
+
+	if (total == 0)
+		total = 1;
+
+	mid_x = sum_x / total;
+	mid_y = sum_y / total;
 }
 
 
@@ -239,6 +251,8 @@ static void NAV_CreateLinks()
 	for (int i = 0 ; i < numsubsectors ; i++)
 	{
 		nav_areas.push_back(nav_area_c(i));
+
+		nav_areas.back().compute_middle(subsectors[i]);
 	}
 
 	for (int i = 0 ; i < numsubsectors ; i++)
@@ -267,8 +281,8 @@ static void NAV_CreateLinks()
 			// WISH: check if link is blocked by obstacle things
 
 			// compute length of link
-			auto p1 = NAV_CalcMiddle(&sub);
-			auto p2 = NAV_CalcMiddle(seg->back_sub);
+			auto p1 = area.get_middle();
+			auto p2 = nav_areas[dest_id].get_middle();
 
 			float length = R_PointToDist(p1.x, p1.y, p2.x, p2.y);
 
@@ -306,10 +320,10 @@ static float NAV_TraverseLinkCost(int cur, const nav_link_c& link, bool allow_do
 
 static float NAV_EstimateH(const subsector_t * cur_sub)
 {
-	auto p = NAV_CalcMiddle(cur_sub);
+	int id = (int)(cur_sub - subsectors);
+	auto p = nav_areas[id].get_middle();
 
 	float dist = R_PointToDist(p.x, p.y, nav_finish_mid.x, nav_finish_mid.y);
-
 	float time = dist / RUNNING_SPEED;
 
 	// over-estimate, to account for height changes, obstacles etc
@@ -374,14 +388,12 @@ static bot_path_c * NAV_StorePath(position_c start, int start_id, position_c fin
 			break;
 
 		finish_id = nav_areas[finish_id].parent;
-		finish    = NAV_CalcMiddle(&subsectors[finish_id]);
+		finish    = nav_areas[finish_id].get_middle();
 	}
 
 	path->nodes.push_back(path_node_c { start, 0 });
 
 	std::reverse(path->nodes.begin(), path->nodes.end());
-
-	// FIXME reduce length of final segment in path by 16 units
 
 	return path;
 }
@@ -410,7 +422,7 @@ bot_path_c * NAV_FindPath(const position_c *start, const position_c *finish, int
 	}
 
 	// get coordinate of finish subsec
-	nav_finish_mid = NAV_CalcMiddle(finish_sub);
+	nav_finish_mid = nav_areas[finish_id].get_middle();
 
 	// prepare all nodes
 	for (nav_area_c& area : nav_areas)

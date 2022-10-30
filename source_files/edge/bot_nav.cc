@@ -206,6 +206,7 @@ class nav_link_c
 public:
 	int   dest_id = -1;
 	float length  =  0;
+	int   flags   =  PNODE_Normal;
 };
 
 
@@ -243,6 +244,58 @@ void nav_area_c::compute_middle(const subsector_t& sub)
 
 	mid_x = sum_x / total;
 	mid_y = sum_y / total;
+}
+
+
+static int NAV_CheckDoorOrLift(const seg_t *seg)
+{
+	if (seg->miniseg)
+		return PNODE_Normal;
+
+	const line_t *ld = seg->linedef;
+
+	if (ld->special == NULL)
+		return PNODE_Normal;
+
+//	fprintf(stderr, "special line %d : %d\n", (int)(ld - lines), ld->special->number);
+
+	const linetype_c *spec = ld->special;
+
+	if (spec->type == line_manual)
+	{
+		// ok
+	}
+	else if (spec->type == line_pushable)
+	{
+		// require tag to match the back sector
+		if (ld->tag <= 0)
+			return PNODE_Normal;
+
+		if (seg->back_sub->sector->tag != ld->tag)
+			return PNODE_Normal;
+	}
+	else
+	{
+		// we don't support shootable doors
+		return PNODE_Normal;
+	}
+
+	// don't open single-use doors in COOP -- a human should do it
+	if (! DEATHMATCH() && spec->count > 0)
+		return PNODE_Normal;
+
+	if (spec->c.type == mov_Once || spec->c.type == mov_MoveWaitReturn)
+	{
+		return PNODE_Door;
+	}
+
+	if (spec->f.type == mov_Once || spec->f.type == mov_MoveWaitReturn ||
+		spec->f.type == mov_Plat || spec->f.type == mov_Elevator)
+	{
+		return PNODE_Lift;
+	}
+
+	return PNODE_Normal;
 }
 
 
@@ -286,7 +339,10 @@ static void NAV_CreateLinks()
 
 			float length = R_PointToDist(p1.x, p1.y, p2.x, p2.y);
 
-			nav_links.push_back(nav_link_c { dest_id, length });
+			// determine if a manual door or a lift
+			int flags = NAV_CheckDoorOrLift(seg);
+
+			nav_links.push_back(nav_link_c { dest_id, length, flags });
 			area.num_links += 1;
 
 			//DEBUG
@@ -408,6 +464,8 @@ static bot_path_c * NAV_StorePath(position_c start, int start_id, position_c fin
 	bot_path_c *path = new bot_path_c;
 
 	bool have_seg = false;
+
+	// FIXME determine flags
 
 	for (;;)
 	{
@@ -590,6 +648,11 @@ bot_path_c * NAV_FindThing(bot_t *bot, float radius, mobj_t*& best)
 		{
 			// check link is passable
 			const nav_link_c& link = nav_links[area.first_link + k];
+
+			// doors or lifts are not allowed for things.
+			// [ since getting an item and opening a door are both tasks ]
+			if (link.flags != PNODE_Normal)
+				continue;
 
 			float cost = NAV_TraverseLinkCost(cur, link, false);
 			if (cost < 0)

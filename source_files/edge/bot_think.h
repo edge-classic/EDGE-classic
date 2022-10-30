@@ -49,6 +49,24 @@ enum bot_task_e
 };
 
 
+// stages for TASK_OpenDoor
+enum task_open_door_e
+{
+	TKDOOR_Approach = 0,  // walk to door and face it
+	TKDOOR_Wait     = 1,  // wait for door to open
+};
+
+
+// stages for TASK_UseLift
+enum task_use_lift_e
+{
+	TKLIFT_Approach = 0,  // walk to lift and face it
+	TKLIFT_Wait     = 1,  // wait for lift to lower
+	TKLIFT_Embark   = 2,  // get onto the lift (e.g. middle)
+	TKLIFT_Ride     = 3,  // ride the lift to the top
+};
+
+
 // results of FollowPath()
 enum bot_follow_path_e
 {
@@ -94,16 +112,15 @@ public:
 	angle_t look_angle = 0;
 	float   look_slope = 0;
 
+	// 0 = go straight, -1 = left, +1 = right
+	int weave = 0;
+	int weave_time = 0;
+
 	int weapon_count = 0;
 	int move_count   = 0;
 
-	int dead_time    = 0;
-	int look_time    = 0;
-	int weave_time   = 0;
-	int item_time    = 0;
-
-	// 0 = go straight, -1 = left, +1 = right
-	int weave = 0;
+	int dead_time = 0;
+	int look_time = 0;
 
 	// last position, to check if we actually moved
 	float last_x = 0;
@@ -111,7 +128,7 @@ public:
 	bool  hit_obstacle = false;
 	bool  near_leader  = false;
 
-	// pathing info.
+	// -- pathing info --
 	// used for DM roaming, COOP follow-the-leader, and getting items.
 	// main_goal is final target.  travel_time detects losing the path.
 	// path_wait is when we need a path, but are waiting a bit.
@@ -119,6 +136,17 @@ public:
 	position_c roam_goal { 0, 0, 0 };
 	int travel_time  = 0;
 	int path_wait    = 0;
+
+	// information for TASK_GetItem (+ the pathing info)
+	int item_time = 0;
+
+	// information for TASK_OpenDoor
+	int door_stage = 0;
+	int door_time  = 0;
+
+	// information for TASK_UseLift
+	int lift_stage = 0;
+	int lift_time  = 0;
 
 	botcmd_t cmd;
 

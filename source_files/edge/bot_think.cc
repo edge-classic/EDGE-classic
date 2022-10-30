@@ -178,11 +178,32 @@ float bot_t::EvalItem(const mobj_t *mo)
 	if (0 == (mo->flags & MF_SPECIAL))
 		return -1;
 
-	// TODO make this higher if we have no good weapon, or out of ammo
-	float weapon_mul = 1.0;
-
-	// TODO make this higher if we really need health
+	// do we really need some health?
 	float health_mul = 1.0;
+	if (mo->health < 35)
+		health_mul = 4.0;
+
+	// handle weapons first (due to deathmatch rules)
+	for (const benefit_t *B = mo->info->pickup_benefits ; B != NULL ; B = B->next)
+	{
+		if (B->type == BENEFIT_Weapon)
+		{
+			if (! HasWeapon(B->sub.weap))
+				return NAV_EvaluateBigItem(mo);
+
+			// try to get ammo from a dropped weapon
+			if (mo->flags & MF_DROPPED)
+				continue;
+
+			// cannot get the ammo from a placed weapon except in altdeath
+			if (deathmatch != 2)
+				return -1;
+		}
+
+		// ignore backpacks in COOP
+		if (B->type == BENEFIT_AmmoLimit && ! DEATHMATCH())
+			return -1;
+	}
 
 	for (const benefit_t *B = mo->info->pickup_benefits ; B != NULL ; B = B->next)
 	{
@@ -193,14 +214,7 @@ float bot_t::EvalItem(const mobj_t *mo)
 				if (pl->cards & (keys_e) B->sub.type)
 					continue;
 
-				return 90.0;
-
-			case BENEFIT_Weapon:
-				// have it already?
-				if (HasWeapon(B->sub.weap))
-					continue;
-
-				return NAV_EvaluateBigItem(mo) * weapon_mul;
+				return 90;
 
 			case BENEFIT_Powerup:
 				// leave it for human players in COOP
@@ -208,10 +222,6 @@ float bot_t::EvalItem(const mobj_t *mo)
 					continue;
 
 				return NAV_EvaluateBigItem(mo);
-
-			case BENEFIT_Health:
-				// FIXME !!
-				continue;
 
 			case BENEFIT_Armour:
 				// leave it for human players in COOP
@@ -223,9 +233,45 @@ float bot_t::EvalItem(const mobj_t *mo)
 
 				return NAV_EvaluateBigItem(mo);
 
+			case BENEFIT_Health:
+				// cannot get it?
+				if (pl->health >= B->limit)
+					return -1;
+
+				// ignore potions in DM unless really desperate
+				if (B->amount < 2.5)
+				{
+					if (DEATHMATCH() && pl->health > 19)
+						return -1;
+
+					return 2;
+				}
+
+				if (B->amount > 55)
+					return 80 * health_mul;
+				else
+					return 30 * health_mul;
+
 			case BENEFIT_Ammo:
-				// FIXME !!  ammo items
-				continue;
+				if (B->sub.type == AM_NoAmmo)
+					continue;
+
+				{
+					int ammo = B->sub.type;
+					int max  = pl->ammo[ammo].max;
+
+					// in COOP mode, leave some ammo for others
+					if (! DEATHMATCH())
+						max = max / 4;
+
+					if (pl->ammo[ammo].num >= max)
+						continue;
+
+					if (pl->ammo[ammo].num == 0)
+						return 25;
+					else
+						return 10;
+				}
 
 			case BENEFIT_Inventory:
 				// TODO : heretic stuff

@@ -33,6 +33,8 @@
 class weapondef_c;
 class bot_path_c;
 
+typedef struct benefit_s benefit_t;
+
 
 // specific tasks which the bot needs/wants to do.
 // these can occur in combination with the behaviors above, e.g. while
@@ -133,6 +135,7 @@ private:
 	void SelectWeapon();
 	bool HasWeapon(const weapondef_c *info) const;
 	bool MeleeWeapon() const;
+	bool CanGetArmour(const benefit_t *be) const;
 
 	void NewChaseDir(bool move_ok);
 	void Chase(bool seetarget, bool move_ok);

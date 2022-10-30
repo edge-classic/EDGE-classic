@@ -68,6 +68,13 @@ bool bot_t::HasWeapon(const weapondef_c *info) const
 }
 
 
+bool bot_t::CanGetArmour(const benefit_t *be) const
+{
+	// FIXME
+	return false;
+}
+
+
 bool bot_t::MeleeWeapon() const
 {
 	int wp_num = pl->ready_wp;
@@ -77,22 +84,6 @@ bool bot_t::MeleeWeapon() const
 
 	return pl->weapons[wp_num].info->ammo[0] == AM_NoAmmo;
 }
-
-
-/* TODO sort all this out
-
-static float NAV_EvaluateHealth(const mobj_t *mo)
-{
-	for (const benefit_t *B = mo->info->pickup_benefits ; B != NULL ; B = B->next)
-	{
-		if (B->type == BENEFIT_Health)
-			return B->amount;
-	}
-
-	return -1;
-}
-
-*/
 
 
 bool bot_t::IsBarrel(const mobj_t *mo)
@@ -109,6 +100,9 @@ bool bot_t::IsBarrel(const mobj_t *mo)
 
 float bot_t::EvalEnemy(const mobj_t *mo)
 {
+	// returns -1 to ignore, +1 to attack.
+	// [ higher values are not possible, so no way to prioritize enemies ]
+
 	// The following must be true to justify that you attack a target:
 	// - target may not be yourself or your support obj.
 	// - target must either want to attack you, or be on a different side
@@ -120,7 +114,7 @@ float bot_t::EvalEnemy(const mobj_t *mo)
 
 	// occasionally shoot barrels
 	if (IsBarrel(mo))
-		return (C_Random() % 100 < 10) ? +1 : -1;
+		return (C_Random() % 100 < 20) ? +1 : -1;
 
 	if (0 == (mo->extendedflags & EF_MONSTER) && ! mo->player)
 		return -1;
@@ -131,10 +125,10 @@ float bot_t::EvalEnemy(const mobj_t *mo)
 	if (pl->mo->supportobj == mo)
 		return -1;
 
-	if (COOP_MATCH() && mo->player)
+	if (! DEATHMATCH() && mo->player)
 		return -1;
 
-	if (COOP_MATCH() && mo->supportobj && mo->supportobj->player)
+	if (! DEATHMATCH() && mo->supportobj && mo->supportobj->player)
 		return -1;
 
 	// EXTERMINATE !!
@@ -145,7 +139,71 @@ float bot_t::EvalEnemy(const mobj_t *mo)
 
 float bot_t::EvalItem(const mobj_t *mo)
 {
-	// FIXME EvalThing
+	// determine if an item is worth getting.
+	// this depends on our current inventory, whether the game mode is COOP
+	// or DEATHMATCH, and whether we are fighting or not.
+
+	if (0 == (mo->flags & MF_SPECIAL))
+		return -1;
+
+	// TODO make this higher if we have no good weapon, or out of ammo
+	float weapon_mul = 1.0;
+
+	// TODO make this higher if we really need health
+	float health_mul = 1.0;
+
+	for (const benefit_t *B = mo->info->pickup_benefits ; B != NULL ; B = B->next)
+	{
+		switch (B->type)
+		{
+			case BENEFIT_Key:
+				// have it already?
+				if (pl->cards & (keys_e) B->sub.type)
+					continue;
+
+				return 90.0;
+
+			case BENEFIT_Weapon:
+				// have it already?
+				if (HasWeapon(B->sub.weap))
+					continue;
+
+				return NAV_EvaluateBigItem(mo) * weapon_mul;
+
+			case BENEFIT_Powerup:
+				// leave it for human players in COOP
+				if (! DEATHMATCH())
+					continue;
+
+				return NAV_EvaluateBigItem(mo);
+
+			case BENEFIT_Health:
+				// FIXME !!
+				continue;
+
+			case BENEFIT_Armour:
+				// leave it for human players in COOP
+				if (! DEATHMATCH())
+					continue;
+
+				if (! CanGetArmour(B))
+					continue;
+
+				return NAV_EvaluateBigItem(mo);
+
+			case BENEFIT_Ammo:
+				// FIXME !!  ammo items
+				continue;
+
+			case BENEFIT_Inventory:
+				// TODO : heretic stuff
+				continue;
+
+			default:
+				continue;
+		}
+	}
+
 	return -1;
 }
 
@@ -272,7 +330,7 @@ void bot_t::PainResponse()
 		return;
 
 	// ignore friendly fire -- shit happens
-	if (COOP_MATCH() && pl->attacker->player)
+	if (! DEATHMATCH() && pl->attacker->player)
 		return;
 
 	if (pl->attacker->health <= 0)
@@ -401,7 +459,7 @@ void bot_t::LookForItems(float radius)
 	if (item_path == NULL)
 		return;
 
-	// GET IT!!
+	// GET IT !!
 
 fprintf(stderr, "---- GetItem : %s\n", item->info->name.c_str());
 

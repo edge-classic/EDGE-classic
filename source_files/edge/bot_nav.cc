@@ -127,7 +127,7 @@ static void NAV_CollectBigItems()
 		big_items.push_back(big_item_c { mo->x, mo->y, mo->z, score });
 	}
 
-	// FIXME : if < 4 or so, try small items and/or player spawn points
+	// TODO : if < 4, pad out with DM spawn spots or random locs
 }
 
 

@@ -25,14 +25,21 @@
 
 struct bot_t;
 
+
+enum path_node_flags_e
+{
+	PNODE_Normal = 0,
+	PNODE_Door   = (1 << 0),  // manual door (press USE to open)
+	PNODE_Lift   = (1 << 1),  // manual lift (press USE to lower)
+};
+
+
 class path_node_c
 {
 public:
 	position_c pos { 0, 0, 0 };
 
-	// TODO info for doors and lifts
-
-	int flags = 0;
+	int flags = PNODE_Normal;
 };
 
 // a path from a start point to a finish one.

@@ -286,12 +286,20 @@ static int NAV_CheckDoorOrLift(const seg_t *seg)
 
 	if (spec->c.type == mov_Once || spec->c.type == mov_MoveWaitReturn)
 	{
+		// determine "front" of door by ceiling heights
+		if (seg->back_sub->sector->c_h >= seg->front_sub->sector->c_h)
+			return PNODE_Normal;
+
 		return PNODE_Door;
 	}
 
 	if (spec->f.type == mov_Once || spec->f.type == mov_MoveWaitReturn ||
 		spec->f.type == mov_Plat || spec->f.type == mov_Elevator)
 	{
+		// determine "front" of lift by floor heights
+		if (seg->back_sub->sector->f_h <= seg->front_sub->sector->f_h)
+			return PNODE_Normal;
+
 		return PNODE_Lift;
 	}
 

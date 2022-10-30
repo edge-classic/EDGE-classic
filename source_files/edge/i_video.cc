@@ -66,6 +66,7 @@ static struct { int w, h; } possible_modes[] =
 	{  640, 400, },
 	{  640, 480, },
 	{  800, 600, },
+	{  960, 540, },
 	{ 1024, 768, },
 	{ 1280, 720, },
 	{ 1280,1024, },
@@ -225,31 +226,19 @@ void I_StartupGraphics(void)
 
 	// -ACB- 2000/03/16 Test for possible windowed resolutions
 	// -AJA- TODO see if SDL2 can give us a definitive list, rather than this silliness
-	for (int depth = 16; depth <= 32; depth = depth+16)
+	for (int i = 0; possible_modes[i].w != -1; i++)
 	{
-		for (int i = 0; possible_modes[i].w != -1; i++)
-		{
-			scrmode_c mode;
-			SDL_DisplayMode test_mode;
-			SDL_DisplayMode closest_mode;
+		scrmode_c mode;
 
-			if (possible_modes[i].w > v_desktop_width.d || possible_modes[i].h > v_desktop_height.d)
-				continue;
+		if (possible_modes[i].w > v_desktop_width.d || possible_modes[i].h > v_desktop_height.d)
+			continue;
 
-			mode.width = possible_modes[i].w;
-			mode.height = possible_modes[i].h;
-			mode.depth  = depth;
-			mode.display_mode   = mode.SCR_WINDOW;
+		mode.width = possible_modes[i].w;
+		mode.height = possible_modes[i].h;
+		mode.depth  = SDL_BITSPERPIXEL(info.format);
+		mode.display_mode   = mode.SCR_WINDOW;
 
-			test_mode.w = possible_modes[i].w;
-			test_mode.h = possible_modes[i].h;
-			test_mode.format = (depth << 8);
-
-			SDL_GetClosestDisplayMode(0, &test_mode, &closest_mode);
-
-			if (R_DepthIsEquivalent(SDL_BITSPERPIXEL(closest_mode.format), mode.depth))
-				R_AddResolution(&mode);
-		}
+		R_AddResolution(&mode);
 	}
 
 	I_Printf("I_StartupGraphics: initialisation OK\n");

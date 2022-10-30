@@ -98,6 +98,7 @@ public:
 	int dead_time    = 0;
 	int look_time    = 0;
 	int weave_time   = 0;
+	int item_time    = 0;
 
 	// 0 = go straight, -1 = left, +1 = right
 	int weave = 0;

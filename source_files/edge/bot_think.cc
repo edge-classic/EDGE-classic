@@ -411,6 +411,7 @@ fprintf(stderr, "---- GetItem : %s\n", item->info->name.c_str());
 
 	task = TASK_GetItem;
 	path = item_path;
+	item_time = TICRATE;
 
 	EstimateTravelTime();
 }
@@ -994,6 +995,7 @@ void bot_t::Think_GetItem()
 
 			case FOLLOW_Done:
 				DeletePath();
+				item_time = TICRATE;
 				break;
 
 			case FOLLOW_Failed:
@@ -1003,7 +1005,12 @@ void bot_t::Think_GetItem()
 		}
 	}
 
-	// FIXME !!!! detect reaching the item (and not picking it up), end the task
+	// detect not picking up the item
+	if (item_time-- < 0)
+	{
+		FinishGetItem();
+		return;
+	}
 
 	// move toward the item's location
 	WeaveToward(pl->mo->tracer);

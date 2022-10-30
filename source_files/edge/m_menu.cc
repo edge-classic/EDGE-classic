@@ -995,8 +995,13 @@ void M_DrawSave(void)
 			HUD_DrawImage(x, y, R);
 		}
 
+		if (! style->fonts[styledef_c::T_ALT])
+			fontType=styledef_c::T_TEXT;
+		else
+			fontType=styledef_c::T_ALT;
+
 		if (saveStringEnter && i == save_slot)
-			ex_slots[i].width = style->fonts[styledef_c::T_ALT]->StringWidth("_");
+			ex_slots[i].width = style->fonts[fontType]->StringWidth("_");
 		else
 			ex_slots[i].width = 0;
 		ex_slots[i].y = y;
@@ -1012,8 +1017,12 @@ void M_DrawSave(void)
 		int font = styledef_c::T_TEXT;
 		if (saveStringEnter && i == save_slot)
 		{
-			len = save_style->fonts[styledef_c::T_ALT]->StringWidth(ex_slots[save_slot].desc);
-			font = styledef_c::T_ALT;
+			if (! style->fonts[styledef_c::T_ALT])
+				fontType=styledef_c::T_TEXT;
+			else
+				fontType=styledef_c::T_ALT;
+			len = save_style->fonts[fontType]->StringWidth(ex_slots[save_slot].desc);
+			font = fontType;
 		}
 		if (LineHeight == IM_HEIGHT(C))
 		{

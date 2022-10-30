@@ -68,10 +68,42 @@ bool bot_t::HasWeapon(const weapondef_c *info) const
 }
 
 
-bool bot_t::CanGetArmour(const benefit_t *be) const
+bool bot_t::CanGetArmour(const benefit_t *be, int extendedflags) const
 {
-	// FIXME
-	return false;
+	// this matches the logic in GiveArmour() in p_inter.cc
+
+	armour_type_e a_class = (armour_type_e) be->sub.type;
+
+	float amount  = be->amount;
+
+	if (extendedflags & EF_SIMPLEARMOUR)
+	{
+		float slack = be->limit - pl->armours[a_class];
+
+		if (amount > slack)
+			amount = slack;
+
+		return (amount > 0);
+	}
+
+	float slack = be->limit - pl->totalarmour;
+	float upgrade = 0;
+
+	if (slack < 0)
+		return false;
+
+	for (int cl = a_class - 1 ; cl >= 0 ; cl--)
+		upgrade += pl->armours[cl];
+
+	if (upgrade > amount)
+		upgrade = amount;
+
+	slack += upgrade;
+
+	if (amount > slack)
+		amount = slack;
+
+	return ! (amount == 0 && upgrade == 0);
 }
 
 
@@ -186,7 +218,7 @@ float bot_t::EvalItem(const mobj_t *mo)
 				if (! DEATHMATCH())
 					continue;
 
-				if (! CanGetArmour(B))
+				if (! CanGetArmour(B, mo->extendedflags))
 					continue;
 
 				return NAV_EvaluateBigItem(mo);

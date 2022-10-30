@@ -135,7 +135,7 @@ private:
 	void SelectWeapon();
 	bool HasWeapon(const weapondef_c *info) const;
 	bool MeleeWeapon() const;
-	bool CanGetArmour(const benefit_t *be) const;
+	bool CanGetArmour(const benefit_t *be, int extendedflags) const;
 
 	void NewChaseDir(bool move_ok);
 	void Chase(bool seetarget, bool move_ok);

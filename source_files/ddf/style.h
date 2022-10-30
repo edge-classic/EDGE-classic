@@ -140,6 +140,7 @@ public:
 		T_ALT,      // alternative text style
 		T_TITLE,    // title style
 		T_HELP,     // for help messages
+		T_HEADER,   // for header /main title
 
 		NUM_TXST
 	};

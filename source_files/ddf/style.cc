@@ -111,6 +111,7 @@ static const commandlist_t style_commands[] =
 	DDF_SUB_LIST("ALT",   text[1], text_commands),
 	DDF_SUB_LIST("TITLE", text[2], text_commands),
 	DDF_SUB_LIST("HELP",  text[3], text_commands),
+	DDF_SUB_LIST("HEADER",  text[4], text_commands),
 	DDF_SUB_LIST("SOUND",  sounds, sound_commands),
 	DF("X_OFFSET",   x_offset, DDF_MainGetNumeric),
 	DF("Y_OFFSET",   y_offset, DDF_MainGetNumeric),

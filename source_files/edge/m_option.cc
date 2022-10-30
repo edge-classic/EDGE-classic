@@ -910,43 +910,62 @@ void M_OptDrawer()
 
 	style->DrawBackground();
 
-	if (! style->fonts[0])
+	if (! style->fonts[styledef_c::T_TEXT])
 		return;
 
-	float TEXTscale = 1.0;
+	int fontType;
 
-	if(style->def->text[styledef_c::T_TEXT].scale)
+	if (! style->fonts[styledef_c::T_HEADER])
+		fontType=styledef_c::T_TEXT;
+	else
+		fontType=styledef_c::T_HEADER;
+
+	int font_h;
+	int CenterX;
+	float TEXTscale;
+
+	TEXTscale = 1.0;
+
+	if(style->def->text[fontType].scale)
 	{
-		TEXTscale=style->def->text[styledef_c::T_TEXT].scale;
+		TEXTscale=style->def->text[fontType].scale;
 	}
 	
-	int font_h = style->fonts[0]->NominalHeight();
+	font_h = style->fonts[fontType]->NominalHeight();
 	font_h *=TEXTscale;
-	
-	// -ACB- 1998/06/15 Calculate height for menu and then center it.
-	menutop = 68 - ((curr_menu->item_num * font_h) / 2);
-
-	if (curr_menu->key_page[0]) menutop = 9 * font_h / 2;
+	menutop = font_h / 2;
 
 	const image_c *image;
 
-	if (! curr_menu->title_image) curr_menu->title_image = W_ImageLookup(curr_menu->title_name);
+	if (! curr_menu->title_image) 
+		curr_menu->title_image = W_ImageLookup(curr_menu->title_name);
 
 	image = curr_menu->title_image;
 
-	int CenterX = 160;
-	CenterX -= (style->fonts[0]->StringWidth(curr_menu->name) * 1.5) / 2;
-
+	CenterX = 160;
+	CenterX -= (style->fonts[fontType]->StringWidth(curr_menu->name) * 1.5) / 2;
+	
 	//Lobo 2022
 	bool custom_optionmenu = false;
 	if (custom_optionmenu==false) 
 	{
-		HL_WriteText(style,styledef_c::T_TEXT, CenterX, menutop, curr_menu->name,1.5);
+		HL_WriteText(style,fontType, CenterX, menutop, curr_menu->name,1.5);
 	} 
 	else
 	{		
 		HUD_DrawImage(curr_menu->title_x, menutop, image);
 	}
+
+	fontType=styledef_c::T_TEXT;
+	TEXTscale=style->def->text[fontType].scale;
+	font_h = style->fonts[fontType]->NominalHeight();
+	font_h *=TEXTscale;
+	menutop = 68 - ((curr_menu->item_num * font_h) / 2);
+	if (curr_menu->key_page[0]) 
+		menutop = 9 * font_h / 2;
+	CenterX = 160;
+	CenterX -= (style->fonts[fontType]->StringWidth(curr_menu->name) * 1.5) / 2;
+
 
 	//now, draw all the menuitems
 	deltay = 1 + font_h;

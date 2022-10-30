@@ -654,7 +654,7 @@ static float DrawNum(float x, float y, int n, int numdigits)
 	return x;
 }
 
-static void DrawPercent(float x, float y, int p)
+static void DrawPercent(float x, float y, int p, bool drawText = false)
 {
 	if (p < 0)
 		return;
@@ -668,7 +668,7 @@ static void DrawPercent(float x, float y, int p)
 // Display level completion time and par,
 //  or "sucks" message if overflow.
 //
-static void DrawTime(float x, float y, int t)
+static void DrawTime(float x, float y, int t, bool drawText = false)
 {
 	int div;
 	int n;
@@ -676,29 +676,70 @@ static void DrawTime(float x, float y, int t)
 	if (t < 0)
 		return;
 
-	if (t <= 61 * 59)
+	std::string s;
+	
+	
+	if(drawText == true)
 	{
-		div = 1;
-
-		do
+		int seconds, hours, minutes;
+		minutes = t / 60;
+		seconds = t % 60;
+		hours = minutes / 60;
+		minutes = minutes % 60;
+		s = "";
+		if (hours > 0)
 		{
-			n = (t / div) % 60;
-			x = DrawNum(x, y, n, 2) - IM_WIDTH(colon);
-			div *= 60;
-
-			// draw
-			if (div == 60 || t / div)
-				HUD_DrawImage(x, y, colon);
+			if(hours > 9)
+				s = s + std::to_string(hours) + ":";
+			else
+				s = s + "0" + std::to_string(hours) + ":";
 		}
-		while (t / div);
+		if (minutes > 0)
+		{
+			if (minutes > 9)
+				s = s + std::to_string(minutes);
+			else
+				s = s + "0" + std::to_string(minutes);
+		}
+		if (seconds > 0)
+		{
+			if (seconds > 9)
+				s = s + ":" + std::to_string(seconds);
+			else
+				s = s + ":" + "0" + std::to_string(seconds);
+		}
+		HL_WriteText(wi_sp_style,styledef_c::T_ALT,x, y, s.c_str());
 	}
 	else
 	{
-		// "sucks"
-		if (sucks)
-			HUD_DrawImage(x - IM_WIDTH(sucks), y, sucks);
+		if (t <= 61 * 59)
+		{
+			div = 1;
+			
+			do
+			{
+				n = (t / div) % 60;
+				x = DrawNum(x, y, n, 2) - IM_WIDTH(colon);
+				
+				div *= 60;
+
+				// draw
+				if (div == 60 || t / div)
+				{
+					HUD_DrawImage(x, y, colon);
+				}
+			}
+			while (t / div);
+		}
 		else
-			HL_WriteText(wi_sp_style,styledef_c::T_TITLE, x - HUD_StringWidth("Sucks"), y, "Sucks");		
+		{
+			// "sucks"
+			if ((sucks) && (W_IsLumpInPwad(sucks->name)))
+				HUD_DrawImage(x - IM_WIDTH(sucks), y, sucks);
+			else
+				HL_WriteText(wi_sp_style,styledef_c::T_TITLE, x - HUD_StringWidth("Sucks"), y, "Sucks");		
+		}
+
 	}
 }
 
@@ -1223,7 +1264,7 @@ static void DrawCoopStats(void)
 
 		t_type = styledef_c::T_TEXT;
 
-		// hightlight the console player
+		// highlight the console player
 #if 1
 		if (p == consoleplayer)
 			t_type = styledef_c::T_ALT;
@@ -1399,39 +1440,104 @@ static void DrawSinglePlayerStats(void)
 	//WI_drawAnimatedBack();
 
 	DrawLevelFinished();
+	
+	bool drawTextBased = true;
+	if (kills != NULL)
+	{
+		if (W_IsLumpInPwad(kills->name))
+			drawTextBased = false;
+		else
+			drawTextBased = true;
+	}
+	else
+	{
+		drawTextBased = true;
+	}
 
-	if (kills)
+	if (drawTextBased == false)
+	{
 		HUD_DrawImage(SP_STATSX, SP_STATSY, kills);
+		DrawPercent(320 - SP_STATSX, SP_STATSY, cnt_kills[0]);
+	}
 	else
-		HL_WriteText(wi_sp_style,styledef_c::T_TITLE,SP_STATSX, SP_STATSY, "Kills", 0.9);
-	DrawPercent(320 - SP_STATSX, SP_STATSY, cnt_kills[0]);
+	{
+		HL_WriteText(wi_sp_style, styledef_c::T_ALT, SP_STATSX, SP_STATSY, "Kills");
+		
+		//char temp[40];
+		//sprintf(temp, "%02d %%", cnt_kills[0]);
+		//HL_WriteText(wi_sp_style,styledef_c::T_ALT,320 - SP_STATSX, SP_STATSY,temp);
 
-	if (items)
+		
+		std::string s;
+		if (cnt_kills[0] < 0)
+			s = std::to_string(0);
+		else
+			s = std::to_string(cnt_kills[0]);
+		s= s + " %";
+		HL_WriteText(wi_sp_style,styledef_c::T_ALT, 320 - SP_STATSX, SP_STATSY, s.c_str());
+		
+	}
+	if ((items) && (W_IsLumpInPwad(items->name)))
+	{
 		HUD_DrawImage(SP_STATSX, SP_STATSY + lh, items);
+		DrawPercent(320 - SP_STATSX, SP_STATSY + lh, cnt_items[0]);
+	}
 	else
-		HL_WriteText(wi_sp_style,styledef_c::T_TITLE, SP_STATSX, SP_STATSY + lh, "Items", 0.9);
-	DrawPercent(320 - SP_STATSX, SP_STATSY + lh, cnt_items[0]);
+	{
+		HL_WriteText(wi_sp_style,styledef_c::T_ALT, SP_STATSX, SP_STATSY + lh, "Items");
+		std::string s;
+		if (cnt_items[0] < 0)
+			s = std::to_string(0);
+		else
+			s = std::to_string(cnt_items[0]);
+		s= s + " %";
+		HL_WriteText(wi_sp_style,styledef_c::T_ALT,320 - SP_STATSX, SP_STATSY + lh, s.c_str());
+	}
 
-	if (sp_secret)
+	if ((sp_secret) && (W_IsLumpInPwad(sp_secret->name)))
+	{
 		HUD_DrawImage(SP_STATSX, SP_STATSY + 2 * lh, sp_secret);
+		DrawPercent(320 - SP_STATSX, SP_STATSY + 2 * lh, cnt_secrets[0]);
+	}
 	else
-		HL_WriteText(wi_sp_style,styledef_c::T_TITLE, SP_STATSX, SP_STATSY + 2 * lh, "Secrets", 0.9);
-	DrawPercent(320 - SP_STATSX, SP_STATSY + 2 * lh, cnt_secrets[0]);
+	{
+		HL_WriteText(wi_sp_style,styledef_c::T_ALT, SP_STATSX, SP_STATSY + 2 * lh, "Secrets");
+		std::string s;
+		if (cnt_secrets[0] < 0)
+			s = std::to_string(0);
+		else
+			s = std::to_string(cnt_secrets[0]);
+		s= s + " %";
+		HL_WriteText(wi_sp_style,styledef_c::T_ALT,320 - SP_STATSX, SP_STATSY + 2 * lh, s.c_str());
+	}
+	
 
-	if (time_image)
+	if ((time_image) && (W_IsLumpInPwad(time_image->name)))
+	{
 		HUD_DrawImage(SP_TIMEX, SP_TIMEY, time_image);
+		DrawTime(160 - SP_TIMEX, SP_TIMEY, cnt_time);
+	}
 	else
-		HL_WriteText(wi_sp_style,styledef_c::T_TITLE, SP_TIMEX, SP_TIMEY, "Time");
-	DrawTime(160 - SP_TIMEX, SP_TIMEY, cnt_time);
+	{
+		HL_WriteText(wi_sp_style,styledef_c::T_ALT, SP_TIMEX, SP_TIMEY, "Time");
+		DrawTime(160 - 40, SP_TIMEY, cnt_time, true);
+	}
+	
 
 	// -KM- 1998/11/25 Removed episode check. Replaced with partime check
 	if (wi_stats.partime)
 	{
-		if (par)
+		if ((par) && (W_IsLumpInPwad(par->name)))
+		{
 			HUD_DrawImage(160 + SP_TIMEX, SP_TIMEY, par);
+			DrawTime(320 - SP_TIMEX, SP_TIMEY, cnt_par);
+		}
 		else
-			HL_WriteText(wi_sp_style,styledef_c::T_TITLE, 160 + SP_TIMEX, SP_TIMEY, "Par");
-		DrawTime(320 - SP_TIMEX, SP_TIMEY, cnt_par);
+		{
+			HL_WriteText(wi_sp_style,styledef_c::T_ALT, 160 + SP_TIMEX, SP_TIMEY, "Par");
+			DrawTime(320 - 40, SP_TIMEY, cnt_par, true);
+		}
+		
 	}
 }
 
@@ -1669,6 +1775,7 @@ static void LoadData(void)
 	finished = W_ImageLookup("WIF");
 	entering = W_ImageLookup("WIENTER");
 	kills = W_ImageLookup("WIOSTK", INS_Graphic, ILF_Null);
+	//kills = W_ImageLookup("WIOSTK");
 	secret = W_ImageLookup("WIOSTS");  // "scrt"
 
 	sp_secret = W_ImageLookup("WISCRT2", INS_Graphic, ILF_Null);  // "secret"

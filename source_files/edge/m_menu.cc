@@ -155,7 +155,7 @@ static style_c *episode_style;
 static style_c *skill_style;
 static style_c *load_style;
 static style_c *save_style;
-static style_c *dialog_style;
+static style_c *exit_style;
 
 //
 //  SAVE STUFF
@@ -653,15 +653,16 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 
 	sprintf(mbuffer, "PAGE %d", save_page + 1);
 
+
 	// -KM-  1998/06/25 This could quite possibly be replaced by some graphics...
 	if (save_page > 0)
-		HL_WriteText(style,2, LoadDef.x - 4, y, "< PREV");
+		HL_WriteText(style, styledef_c::T_TITLE, LoadDef.x - 4, y, "< PREV");
 
-	HL_WriteText(style,2, LoadDef.x + 94 - style->fonts[2]->StringWidth(mbuffer) / 2, y,
+	HL_WriteText(style, styledef_c::T_TITLE, LoadDef.x + 94 - style->fonts[styledef_c::T_TITLE]->StringWidth(mbuffer) / 2, y,
 					  mbuffer);
 
 	if (save_page < SAVE_PAGES-1)
-		HL_WriteText(style,2, LoadDef.x + 192 - style->fonts[2]->StringWidth("NEXT >"), y,
+		HL_WriteText(style, styledef_c::T_TITLE, LoadDef.x + 192 - style->fonts[styledef_c::T_TITLE]->StringWidth("NEXT >"), y,
 						  "NEXT >");
  
 	info = ex_slots + itemOn;
@@ -678,7 +679,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 
 	strcat(mbuffer, info->timestr);
 
-	HL_WriteText(style,3, 310 - style->fonts[3]->StringWidth(mbuffer), y, mbuffer);
+	HL_WriteText(style, styledef_c::T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer), y, mbuffer);
 
 	y -= LineHeight;
     
@@ -693,7 +694,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 		default: strcat(mbuffer, language["MenuDifficulty5"]); break;
 	}
 
-	HL_WriteText(style,3, 310 - style->fonts[3]->StringWidth(mbuffer), y, mbuffer);
+	HL_WriteText(style, style->def->T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer), y, mbuffer);
 
 	y -= LineHeight;
   
@@ -707,7 +708,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 		default: strcat(mbuffer, "DM MODE"); break;
 	}
   
-	HL_WriteText(style,3, 310 - style->fonts[3]->StringWidth(mbuffer), y, mbuffer);
+	HL_WriteText(style, styledef_c::T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer), y, mbuffer);
 
 	y -= LineHeight;
   
@@ -715,7 +716,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 
 	strcat(mbuffer, info->mapname);
 
-	HL_WriteText(style,3, 310 - style->fonts[3]->StringWidth(mbuffer), y, mbuffer);
+	HL_WriteText(style, styledef_c::T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer), y, mbuffer);
 }
 
 //
@@ -734,10 +735,16 @@ void M_DrawLoad(void)
 	SYS_ASSERT(style);
 
 	style->DrawBackground();
+	
+	int fontType;
+	if (! style->fonts[styledef_c::T_HEADER])
+		fontType=styledef_c::T_TEXT;
+	else
+		fontType=styledef_c::T_HEADER;
 
 	if (custom_MenuMain==false)
 	{
-		HL_WriteText(load_style,styledef_c::T_TEXT, 72, 8, language["MainLoadGame"]);
+		HL_WriteText(load_style, fontType, 72, 8, language["MainLoadGame"]);
 	}
 	else
 	{
@@ -747,8 +754,8 @@ void M_DrawLoad(void)
 	// Use center box graphic for LineHeight unless the load game font text is actually taller
 	// (this should only happen if the boxes aren't being drawn in theory)
 	float LineHeight = IM_HEIGHT(C);
-	if (style->fonts[0]->NominalHeight() > LineHeight) 
-		LineHeight = style->fonts[0]->NominalHeight();
+	if (style->fonts[styledef_c::T_TEXT]->NominalHeight() > LineHeight) 
+		LineHeight = style->fonts[styledef_c::T_TEXT]->NominalHeight();
 	float WidestLine = IM_WIDTH(C) * 24 + IM_WIDTH(L) + IM_WIDTH(R);
 
 	for (i = 0; i < SAVE_SLOTS; i++)
@@ -774,31 +781,32 @@ void M_DrawLoad(void)
 			HUD_DrawImage(x, y, R);
 		}
 		ex_slots[i].y = y;
-		ex_slots[i].width = style->fonts[ex_slots[i].corrupt ? 3 : 0]->StringWidth(ex_slots[i].desc);
+		ex_slots[i].width = style->fonts[ex_slots[i].corrupt ? styledef_c::T_HELP : styledef_c::T_TEXT]->StringWidth(ex_slots[i].desc);
 		if (ex_slots[i].width > WidestLine) 
 			WidestLine = ex_slots[i].width;
 		y += LineHeight + style->def->entry_spacing;
 	}
+	
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
 		if (LineHeight == IM_HEIGHT(C))
 		{
 			if (style->def->entry_alignment == style->def->C_RIGHT)
-				HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x - 8 + WidestLine - (ex_slots[i].width), ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+				HL_WriteText(load_style, ex_slots[i].corrupt ? styledef_c::T_HELP : styledef_c::T_TEXT, LoadDef.x - 8 + WidestLine - (ex_slots[i].width), ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
 			else if (style->def->entry_alignment == style->def->C_CENTER)
-				HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), 
+				HL_WriteText(load_style, ex_slots[i].corrupt ? styledef_c::T_HELP : styledef_c::T_TEXT, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), 
 					ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
 			else
-				HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x + 8, ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+				HL_WriteText(load_style, ex_slots[i].corrupt ? style->def->T_HELP : styledef_c::T_TEXT, LoadDef.x + 8, ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
 		}
 		else
 		{
 			if (style->def->entry_alignment == style->def->C_RIGHT)
-				HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x + WidestLine - ex_slots[i].width, ex_slots[i].y, ex_slots[i].desc);
+				HL_WriteText(load_style, ex_slots[i].corrupt ? styledef_c::T_HELP : styledef_c::T_TEXT, LoadDef.x + WidestLine - ex_slots[i].width, ex_slots[i].y, ex_slots[i].desc);
 			else if (style->def->entry_alignment == style->def->C_CENTER)
-				HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), ex_slots[i].y, ex_slots[i].desc);
+				HL_WriteText(load_style, ex_slots[i].corrupt ? styledef_c::T_HELP : styledef_c::T_TEXT, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), ex_slots[i].y, ex_slots[i].desc);
 			else
-				HL_WriteText(load_style, ex_slots[i].corrupt ? 3 : 0, LoadDef.x, ex_slots[i].y, ex_slots[i].desc);
+				HL_WriteText(load_style, ex_slots[i].corrupt ? styledef_c::T_HELP : styledef_c::T_TEXT, LoadDef.x, ex_slots[i].y, ex_slots[i].desc);
 		}
 	}
 	image_c *cursor;
@@ -847,45 +855,45 @@ void M_DrawLoad(void)
 	{
 		float old_alpha = HUD_GetAlpha();
 		HUD_SetAlpha(style->def->cursor.translucency);
-		float TempWidth = style->fonts[0]->StringWidth(style->def->cursor.cursor_string.c_str()) * style->def->text[styledef_c::T_TEXT].scale;
-		float TempSpacer = style->fonts[0]->CharWidth(style->def->cursor.cursor_string[0]) * style->def->text[styledef_c::T_TEXT].scale * 0.5;
+		float TempWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(style->def->cursor.cursor_string.c_str()) * style->def->text[styledef_c::T_TEXT].scale;
+		float TempSpacer = style->fonts[styledef_c::T_TEXT]->CharWidth(style->def->cursor.cursor_string[0]) * style->def->text[styledef_c::T_TEXT].scale * 0.5;
 		if (LineHeight == IM_HEIGHT(C))
 		{
 			TempSpacer *= 2;
 			if (style->def->cursor.position == style->def->C_BOTH)
 			{
-				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
 					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
-				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
 					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 			}
 			else if (style->def->cursor.position == style->def->C_CENTER)
-				HL_WriteText(style, 0, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
 					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 			else if (style->def->cursor.position == style->def->C_RIGHT)
-				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
 					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 			else
-				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
 					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 		}
 		else
 		{
 			if (style->def->cursor.position == style->def->C_BOTH)
 			{
-				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
 					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
-				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
 					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 			}
 			else if (style->def->cursor.position == style->def->C_CENTER)
-				HL_WriteText(style, 0, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
 					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 			else if (style->def->cursor.position == style->def->C_RIGHT)
-				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
 					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 			else
-				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
 					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 		}
 		HUD_SetAlpha(old_alpha);
@@ -942,9 +950,15 @@ void M_DrawSave(void)
 	SYS_ASSERT(style);
 	style->DrawBackground();
 
+	int fontType;
+	if (! style->fonts[styledef_c::T_HEADER])
+		fontType=styledef_c::T_TEXT;
+	else
+		fontType=styledef_c::T_HEADER;
+
 	if (custom_MenuMain==false)
 	{
-		HL_WriteText(load_style,styledef_c::T_TEXT, 72, 8, language["MainSaveGame"]);
+		HL_WriteText(load_style, fontType, 72, 8, language["MainSaveGame"]);
 	}
 	else
 	{
@@ -954,7 +968,7 @@ void M_DrawSave(void)
 	// Use center box graphic for LineHeight unless the load game font text is actually taller
 	// (this should only happen if the boxes aren't being drawn in theory)
 	float LineHeight = IM_HEIGHT(C);
-	if (style->fonts[0]->NominalHeight() > LineHeight) 
+	if (style->fonts[styledef_c::T_TEXT]->NominalHeight() > LineHeight) 
 		LineHeight = style->fonts[0]->NominalHeight();
 	float WidestLine = IM_WIDTH(C) * 24 + IM_WIDTH(L) + IM_WIDTH(R);
 
@@ -982,23 +996,24 @@ void M_DrawSave(void)
 		}
 
 		if (saveStringEnter && i == save_slot)
-			ex_slots[i].width = style->fonts[1]->StringWidth("_");
+			ex_slots[i].width = style->fonts[styledef_c::T_ALT]->StringWidth("_");
 		else
 			ex_slots[i].width = 0;
 		ex_slots[i].y = y;
-		ex_slots[i].width = ex_slots[i].width + style->fonts[0]->StringWidth(ex_slots[i].desc);
+		ex_slots[i].width = ex_slots[i].width + style->fonts[styledef_c::T_TEXT]->StringWidth(ex_slots[i].desc);
 		if (ex_slots[i].width > WidestLine) 
 			WidestLine = ex_slots[i].width;
 		y += LineHeight + style->def->entry_spacing;
 	}
+
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
 		int len;
-		int font = 0;
+		int font = styledef_c::T_TEXT;
 		if (saveStringEnter && i == save_slot)
 		{
-			len = save_style->fonts[1]->StringWidth(ex_slots[save_slot].desc);
-			font = 1;
+			len = save_style->fonts[styledef_c::T_ALT]->StringWidth(ex_slots[save_slot].desc);
+			font = styledef_c::T_ALT;
 		}
 		if (LineHeight == IM_HEIGHT(C))
 		{
@@ -1098,38 +1113,38 @@ void M_DrawSave(void)
 			TempSpacer *= 2;
 			if (style->def->cursor.position == style->def->C_BOTH)
 			{
-				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
 					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
-				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
 					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 			}
 			else if (style->def->cursor.position == style->def->C_CENTER)
-				HL_WriteText(style, 0, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
 					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 			else if (style->def->cursor.position == style->def->C_RIGHT)
-				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
 					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 			else
-				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
 					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
 		}
 		else
 		{
 			if (style->def->cursor.position == style->def->C_BOTH)
 			{
-				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
 					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
-				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
 					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 			}
 			else if (style->def->cursor.position == style->def->C_CENTER)
-				HL_WriteText(style, 0, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
 					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 			else if (style->def->cursor.position == style->def->C_RIGHT)
-				HL_WriteText(style, 0, LoadDef.x + WidestLine + TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
 					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 			else
-				HL_WriteText(style, 0, LoadDef.x - TempWidth - TempSpacer, 
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
 					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
 		}
 		HUD_SetAlpha(old_alpha);
@@ -1306,8 +1321,15 @@ void M_DrawNewGame(void)
 {
 	if (custom_MenuDifficulty==false)
 	{
-		HL_WriteText(skill_style,styledef_c::T_TITLE, 96, 14, language["MainNewGame"]);
-		HL_WriteText(skill_style,styledef_c::T_TITLE, 54, 38, language["MenuSkill"]);
+		int fontType;
+
+		if (! skill_style->fonts[styledef_c::T_HEADER])
+			fontType=styledef_c::T_TITLE;
+		else
+			fontType=styledef_c::T_HEADER;
+
+		HL_WriteText(skill_style, fontType, 96, 14, language["MainNewGame"]);
+		HL_WriteText(skill_style, styledef_c::T_ALT, 54, 38, language["MenuSkill"]);
 	}
 	else
 	{
@@ -1409,7 +1431,14 @@ void M_DrawEpisode(void)
 {
 	if (custom_MenuEpisode==false)
 	{
-		HL_WriteText(episode_style,styledef_c::T_TITLE, 54, 38, language["MenuWhichEpisode"]);
+		int fontType;
+
+		if (! skill_style->fonts[styledef_c::T_HEADER])
+			fontType=styledef_c::T_TITLE;
+		else
+			fontType=styledef_c::T_HEADER;
+
+		HL_WriteText(episode_style, fontType, 54, 38, language["MenuWhichEpisode"]);
 	}
 	else
 	{
@@ -2379,7 +2408,7 @@ static std::string GetMiddle(std::string& str, int pos, int len)
 static void DrawMessage(void)
 {
 
-	if (message_key_routine == QuitResponse && !dialog_style->bg_image) // Respect dialog styles with custom backgrounds
+	if (message_key_routine == QuitResponse && !exit_style->bg_image) // Respect dialog styles with custom backgrounds
 	{
 		I_StartFrame(); // To clear and ensure solid black background regardless of style
 		HUD_DrawQuitScreen();
@@ -2389,9 +2418,9 @@ static void DrawMessage(void)
 	//short x; // Seems unused for now - Dasho
 	short y;
 
-	SYS_ASSERT(dialog_style);
+	SYS_ASSERT(exit_style);
 
-	dialog_style->DrawBackground();
+	exit_style->DrawBackground();
 
 	// FIXME: HU code should support center justification: this
 	// would remove the code duplication below...
@@ -2407,8 +2436,8 @@ static void DrawMessage(void)
 
 	std::string s = msg + input;
 
-	y = 100 - (dialog_style->fonts[0]->StringLines(s.c_str()) *
-		dialog_style->fonts[0]->NominalHeight()/ 2);
+	y = 100 - (exit_style->fonts[styledef_c::T_TEXT]->StringLines(s.c_str()) *
+		exit_style->fonts[styledef_c::T_TEXT]->NominalHeight()/ 2);
 
 	if (!msg.empty())
 	{
@@ -2426,14 +2455,12 @@ static void DrawMessage(void)
 		
 			if (s.size() > 0)
 			{
-				//x = 160 - (dialog_style->fonts[0]->StringWidth(s.c_str()) / 2);
-				//HL_WriteText(dialog_style,0, x, y, s.c_str());
 				HUD_SetAlignment(0, -1);//center it
-				HL_WriteText(dialog_style,0, 160, y, s.c_str());
+				HL_WriteText(exit_style, styledef_c::T_TEXT, 160, y, s.c_str());
 				HUD_SetAlignment(-1, -1);//set it back to usual
 			}
 			
-			y += dialog_style->fonts[0]->NominalHeight();
+			y += exit_style->fonts[styledef_c::T_TEXT]->NominalHeight();
 
 			oldpos = pos + 1;
 		}
@@ -2454,18 +2481,14 @@ static void DrawMessage(void)
 			else
 				s = GetMiddle(input, oldpos, pos-oldpos);
 		
-			//Lobo: fixme We should be using font 1 not font 0.
-			//Code a check to fallback to 0 if 1 is missing.
 			if (s.size() > 0)
 			{
-				//x = 160 - (dialog_style->fonts[0]->StringWidth(s.c_str()) / 2);
-				//HL_WriteText(dialog_style,0, x, y, s.c_str());
 				HUD_SetAlignment(0, -1);//center it
-				HL_WriteText(dialog_style,0, 160, y, s.c_str());
+				HL_WriteText(exit_style, styledef_c::T_TEXT, 160, y, s.c_str());
 				HUD_SetAlignment(-1, -1);//set it back to usual
 			}
 			
-			y += dialog_style->fonts[0]->NominalHeight();
+			y += exit_style->fonts[0]->NominalHeight();
 
 			oldpos = pos + 1;
 		}
@@ -2543,7 +2566,7 @@ void M_Drawer(void)
 	float ShortestLine;
 	float TallestLine;
 	float WidestLine = 0.0f;
-	int t_type = styledef_c::T_TEXT;
+	//int t_type = styledef_c::T_TEXT;
 	float txtscale = 1.0;
 
 	if(style->def->text[styledef_c::T_TEXT].scale)
@@ -2553,8 +2576,8 @@ void M_Drawer(void)
 	
 	if (custom_menu==false)
 	{
-		ShortestLine = txtscale * style->fonts[0]->NominalHeight();
-		TallestLine = txtscale * style->fonts[0]->NominalHeight();
+		ShortestLine = txtscale * style->fonts[styledef_c::T_TEXT]->NominalHeight();
+		TallestLine = txtscale * style->fonts[styledef_c::T_TEXT]->NominalHeight();
 		for (i = 0; i < max; i++)
 		{
 			currentMenu->menuitems[i].height = ShortestLine;
@@ -2569,13 +2592,13 @@ void M_Drawer(void)
 		for (i=0; i < max; i++)
 		{
 			if (style->def->entry_alignment == style->def->C_RIGHT)
-				HL_WriteText(style,t_type, currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width, 
+				HL_WriteText(style, styledef_c::T_TEXT, currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width, 
 					currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
 			else if (style->def->entry_alignment == style->def->C_CENTER)
-				HL_WriteText(style,t_type, currentMenu->menuitems[i].x + (WidestLine /2) - (currentMenu->menuitems[i].width / 2), 
+				HL_WriteText(style, styledef_c::T_TEXT, currentMenu->menuitems[i].x + (WidestLine /2) - (currentMenu->menuitems[i].width / 2), 
 					currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
 			else
-				HL_WriteText(style,t_type, currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
+				HL_WriteText(style, styledef_c::T_TEXT, currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
 		}
 		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
 		{
@@ -2628,19 +2651,19 @@ void M_Drawer(void)
 				float TempSpacer = style->fonts[styledef_c::T_TEXT]->CharWidth(style->def->cursor.cursor_string[0]) * txtscale * 0.2;
 				if (style->def->cursor.position == style->def->C_BOTH)
 				{
-					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
+					HL_WriteText(style,styledef_c::T_TEXT, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
 						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string.c_str());
-					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
+					HL_WriteText(style,styledef_c::T_TEXT, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
 						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string.c_str());
 				}
 				else if (style->def->cursor.position == style->def->C_CENTER)
-					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2), 
+					HL_WriteText(style,styledef_c::T_TEXT, currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2), 
 						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string.c_str());
 				else if (style->def->cursor.position == style->def->C_RIGHT)
-					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
+					HL_WriteText(style,styledef_c::T_TEXT, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
 						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string.c_str());
 				else
-					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
+					HL_WriteText(style,styledef_c::T_TEXT, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
 						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string.c_str());
 				HUD_SetAlpha(old_alpha);
 			}
@@ -2744,19 +2767,19 @@ void M_Drawer(void)
 				float TempSpacer = style->fonts[styledef_c::T_TEXT]->CharWidth(style->def->cursor.cursor_string[0]) * txtscale * 0.2;
 				if (style->def->cursor.position == style->def->C_BOTH)
 				{
-					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
+					HL_WriteText(style,styledef_c::T_TEXT, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
 						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string.c_str());
-					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
+					HL_WriteText(style,styledef_c::T_TEXT, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
 						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string.c_str());
 				}
 				else if (style->def->cursor.position == style->def->C_CENTER)
-					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2), 
+					HL_WriteText(style,styledef_c::T_TEXT, currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2), 
 						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string.c_str());
 				else if (style->def->cursor.position == style->def->C_RIGHT)
-					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
+					HL_WriteText(style,styledef_c::T_TEXT, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
 						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string.c_str());
 				else
-					HL_WriteText(style,t_type, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
+					HL_WriteText(style,styledef_c::T_TEXT, currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer, 
 						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string.c_str());
 				HUD_SetAlpha(old_alpha);
 			}
@@ -2845,8 +2868,8 @@ void M_Init(void)
 	def = styledefs.Lookup("SAVE MENU");
 	save_style = def ? hu_styles.Lookup(def) : menu_def_style;
 
-	def = styledefs.Lookup("DIALOG");
-	dialog_style = def ? hu_styles.Lookup(def) : menu_def_style;
+	def = styledefs.Lookup("EXIT_SCREEN");
+	exit_style = def ? hu_styles.Lookup(def) : menu_def_style;
 
 	def = styledefs.Lookup("OPTIONS");
 	if (! def) def = default_style;

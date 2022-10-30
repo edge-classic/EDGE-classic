@@ -288,52 +288,7 @@ void bot_t::PainResponse()
 }
 
 
-// Finds items for the bot to get.
-
-/* TODO merge logic into new system
-
-bool bot_t::LookForItems()
-{
-	mobj_t *best_item  = NULL;
-	int     best_score = 0;
-
-	int search = 6;
-
-	// If we are confident, hunt more than gather.
-	if (confidence > 0)
-		search = 1;
-
-	// Find some stuff!
-	for (int i = -search; i <= search; i++)
-	{
-		angle_t diff = (int)(ANG45/4) * i;
-
-		LineOfSight(angle + diff);
-
-		if (lkbot_target)
-		{
-			if (!best_item || lkbot_score > best_score)
-			{
-				best_item  = lkbot_target;
-				best_score = lkbot_score;
-			}
-		}
-	}
-
-	if (best_item)
-	{
-#if (DEBUG > 0)
-I_Printf("BOT %d: WANT item %s, score %d\n",
-	pl->pnum, best_item->info->name.c_str(), best_score);
-#endif
-
-		pl->mo->SetTarget(best_item);
-		return true;
-	}
-
-	return false;
-}
-
+/* TODO OLD STUFF, REVIEW IT
 
 // Based on P_LookForTargets from p_enemy.c
 bool bot_t::LookForEnemies()
@@ -417,14 +372,16 @@ void bot_t::LookForLeader()
 }
 
 
-void bot_t::LookForEnemies()
+void bot_t::LookForEnemies(float radius)
 {
 	// TODO check sight of existing target
 	//      [ if too many checks, lose patience ]
 
+	return; //!!!!
+
 	if (pl->mo->target == NULL)
 	{
-		mobj_t * enemy = NAV_FindEnemy(this, 768);
+		mobj_t * enemy = NAV_FindEnemy(this, radius);
 
 		if (enemy != NULL)
 		{
@@ -433,6 +390,29 @@ void bot_t::LookForEnemies()
 				pl->mo->SetTarget(enemy);
 		}
 	}
+}
+
+
+void bot_t::LookForItems(float radius)
+{
+	mobj_t * item = NULL;
+	bot_path_c * item_path = NAV_FindThing(this, radius, item);
+
+	if (item_path == NULL)
+		return;
+
+	// GET IT!!
+
+fprintf(stderr, "---- GetItem : %s\n", item->info->name.c_str());
+
+	pl->mo->SetTracer(item);
+
+	DeletePath();
+
+	task = TASK_GetItem;
+	path = item_path;
+
+	EstimateTravelTime();
 }
 
 
@@ -445,24 +425,17 @@ void bot_t::LookAround()
 
 	if (look_time & 1)
 	{
-		LookForEnemies();
+		LookForEnemies(768);
 		return;
 	}
 
 	if (look_time >= 0)
 		return;
 
-	// look for items every second or so
-	look_time = 30 + C_Random() % 10;
+	// look for items every two-three seconds
+	look_time = 60 + C_Random() % 40;
 
-	// FIXME decide what we want most (e.g. health, etc).
-
-	mobj_t * item = NULL;
-	bot_path_c * path = NAV_FindThing(this, 1024, item);
-
-	// FIXME
-	if (path != NULL)
-		delete path;
+	LookForItems(1024);
 }
 
 
@@ -750,8 +723,6 @@ void bot_t::PathToLeader()
 
 	if (path != NULL)
 	{
-		path_goal = position_c { leader->x, leader->y, leader->z };
-
 		EstimateTravelTime();
 	}
 }
@@ -860,6 +831,7 @@ bot_follow_path_e  bot_t::FollowPath()
 
 		if (path->finished())
 		{
+fprintf(stderr, "follow done\n");
 			return FOLLOW_Done;
 		}
 
@@ -868,6 +840,7 @@ bot_follow_path_e  bot_t::FollowPath()
 
 	if (travel_time-- < 0)
 	{
+fprintf(stderr, "follow FAILED !!!\n");
 		return FOLLOW_Failed;
 	}
 
@@ -924,14 +897,20 @@ void bot_t::Think_Roam()
 	{
 		path_wait = 30 + C_Random() % 10;
 
-		if (! NAV_NextRoamPoint(path_goal))
+		if (! NAV_NextRoamPoint(roam_goal))
+		{
+			roam_goal = position_c { 0, 0, 0 };
 			return;
+		}
 
-		path = NAV_FindPath(pl->mo, &path_goal, 0);
+		path = NAV_FindPath(pl->mo, &roam_goal, 0);
 
 		// if no path found, try again soon
 		if (path == NULL)
+		{
+			roam_goal = position_c { 0, 0, 0 };
 			return;
+		}
 
 		EstimateTravelTime();
 	}
@@ -940,12 +919,56 @@ void bot_t::Think_Roam()
 }
 
 
+void bot_t::FinishGetItem()
+{
+fprintf(stderr, "---- FinishGetItem\n");
+
+	task = TASK_None;
+	pl->mo->SetTracer(NULL);
+
+	DeletePath();
+	path_wait = 4 + C_Random() % 4;
+
+	// when fighting, look furthe for more items
+	if (pl->mo->target != NULL)
+	{
+		LookForItems(1024);
+		return;
+	}
+
+	// otherwise collect nearby items
+	LookForItems(256);
+
+	if (task == TASK_GetItem)
+		return;
+
+	// continue to follow player
+	if (pl->mo->supportobj != NULL)
+		return;
+
+	// otherwise we were roaming about, so re-establish path
+	if (! (roam_goal.x == 0 && roam_goal.y == 0 && roam_goal.z == 0))
+	{
+		path = NAV_FindPath(pl->mo, &roam_goal, 0);
+
+		// if no path found, try again soon
+		if (path == NULL)
+		{
+			roam_goal = position_c { 0, 0, 0 };
+			return;
+		}
+
+		EstimateTravelTime();
+	}
+}
+
+
 void bot_t::Think_GetItem()
 {
 	// item gone?  (either we picked it up, or someone else did)
 	if (pl->mo->tracer == NULL)
 	{
-		task = TASK_None;
+		FinishGetItem();
 		return;
 	}
 
@@ -975,9 +998,7 @@ void bot_t::Think_GetItem()
 
 			case FOLLOW_Failed:
 				// took too long? (e.g. we got stuck)
-				DeletePath();
-				task = TASK_None;
-				pl->mo->SetTracer(NULL);
+				FinishGetItem();
 				return;
 		}
 	}
@@ -1095,8 +1116,6 @@ void bot_t::Think()
 		PainResponse();
 	}
 
-	LookAround();
-
 	DetectObstacle();
 
 	// doing a task?
@@ -1117,6 +1136,8 @@ void bot_t::Think()
 		default:
 			break;
 	}
+
+	LookAround();
 
 	// if we have a target enemy, fight it or flee it
 	if (pl->mo->target != NULL)
@@ -1205,6 +1226,7 @@ void bot_t::Respawn()
 
 	hit_obstacle = false;
 	near_leader  = false;
+	roam_goal    = position_c { 0, 0, 0 };
 
 	DeletePath();
 }

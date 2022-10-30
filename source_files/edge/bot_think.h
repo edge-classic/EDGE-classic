@@ -105,15 +105,15 @@ public:
 	// last position, to check if we actually moved
 	float last_x = 0;
 	float last_y = 0;
-	bool  hit_obstacle;
-	bool  near_leader;
+	bool  hit_obstacle = false;
+	bool  near_leader  = false;
 
 	// pathing info.
 	// used for DM roaming, COOP follow-the-leader, and getting items.
-	// path_goal is final target.  travel_time detects losing the path.
+	// main_goal is final target.  travel_time detects losing the path.
 	// path_wait is when we need a path, but are waiting a bit.
 	bot_path_c * path = NULL;
-	position_c path_goal { 0, 0, 0 };
+	position_c roam_goal { 0, 0, 0 };
 	int travel_time  = 0;
 	int path_wait    = 0;
 
@@ -146,7 +146,8 @@ private:
 	void Meander();
 
 	void LookAround();
-	void LookForEnemies();
+	void LookForEnemies(float radius);
+	void LookForItems(float radius);
 	void LookForLeader();
 	void PathToLeader();
 	void EstimateTravelTime();
@@ -161,6 +162,7 @@ private:
 	void Think_UseLift();
 
 	void PainResponse();
+	void FinishGetItem();
 
 	void TurnToward(angle_t angle, float slope, bool fast);
 	void TurnToward(const mobj_t *mo, bool fast);

@@ -454,7 +454,7 @@ static void NAV_TryOpenArea(int idx, int parent, float cost)
 }
 
 
-static bool NAV_StoreSegMiddle(bot_path_c *path, const subsector_t *A, const subsector_t *B)
+static bool NAV_StoreSegMiddle(bot_path_c *path, const subsector_t *A, const subsector_t *B, int flags)
 {
 	const seg_t *seg = NULL;
 
@@ -473,9 +473,6 @@ static bool NAV_StoreSegMiddle(bot_path_c *path, const subsector_t *A, const sub
 	pos.y = (seg->v1->y + seg->v2->y) * 0.5f;
 	pos.z = B->sector->f_h;
 
-	// TODO: detect doors and lifts here
-	int flags = 0;
-
 	path->nodes.push_back(path_node_c { pos, flags });
 	return true;
 }
@@ -487,8 +484,6 @@ static bot_path_c * NAV_StorePath(position_c start, int start_id, position_c fin
 
 	bool have_seg = false;
 
-	// FIXME determine flags
-
 	for (;;)
 	{
 		if (! have_seg)
@@ -499,7 +494,21 @@ static bot_path_c * NAV_StorePath(position_c start, int start_id, position_c fin
 
 		int next_id = nav_areas[finish_id].parent;
 
-		have_seg = NAV_StoreSegMiddle(path, &subsectors[finish_id], &subsectors[next_id]);
+		// get the door/lift flags
+		int flags = 0;
+
+		const nav_area_c& next_area = nav_areas[next_id];
+		for (int k = 0 ; k < next_area.num_links ; k++)
+		{
+			const nav_link_c& link = nav_links[next_area.first_link + k];
+			if (link.dest_id == finish_id)
+			{
+				flags = link.flags;
+				break;
+			}
+		}
+
+		have_seg = NAV_StoreSegMiddle(path, &subsectors[finish_id], &subsectors[next_id], flags);
 
 		finish_id = next_id;
 		finish    = nav_areas[next_id].get_middle();

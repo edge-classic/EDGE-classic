@@ -357,20 +357,42 @@ static float NAV_TraverseLinkCost(int cur, const nav_link_c& link, bool allow_do
 	const sector_t *s1 = subsectors[cur].sector;
 	const sector_t *s2 = subsectors[link.dest_id].sector;
 
-	// too big a step up?   FIXME check for a manual lift
-	if (s2->f_h > s1->f_h + 24.0f)
+	float time   = link.length / RUNNING_SPEED;
+	float f_diff = s2->f_h - s1->f_h;
+
+	// estimate time for lift
+	if (link.flags & PNODE_Lift)
+	{
+		time += 10.0f;
+	}
+	else if (f_diff > 24.0f)
+	{
+		// too big a step up
 		return -1;
+	}
 
-	// not enough vertical space?   FIXME check for a manual door
-	float high_f = std::max(s1->f_h, s2->f_h);
-	float  low_c = std::min(s1->c_h, s2->c_h);
+	// estimate time for door
+	if (link.flags & PNODE_Lift)
+	{
+		time += 2.0f;
+	}
+	else
+	{
+		// enough vertical space?
+		float high_f = std::max(s1->f_h, s2->f_h);
+		float  low_c = std::min(s1->c_h, s2->c_h);
 
-	if (low_c - high_f < 56.0f)
-		return -1;
+		if (low_c - high_f < 56.0f)
+			return -1;
+	}
 
-	// TODO if a drop-off, compute time to fall
+	// for a big drop-off, estimate time to fall
+	if (f_diff < -100.0f)
+	{
+		time += sqrtf(-f_diff - 80.0f) / 18.0f;
+	}
 
-	return link.length / RUNNING_SPEED;
+	return time;
 }
 
 

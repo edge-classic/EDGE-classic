@@ -786,6 +786,24 @@ position_c bot_path_c::cur_dest() const
 }
 
 
+float bot_path_c::cur_length() const
+{
+	position_c src  = nodes.at(along - 1).pos;
+	position_c dest = nodes.at(along + 0).pos;
+
+	return hypotf(dest.x - src.x, dest.y - src.y);
+}
+
+
+angle_t bot_path_c::cur_angle() const
+{
+	position_c src  = nodes.at(along - 1).pos;
+	position_c dest = nodes.at(along + 0).pos;
+
+	return R_PointToAngle(src.x, src.y, dest.x, dest.y);
+}
+
+
 bool bot_path_c::reached_dest(const position_c *pos) const
 {
 	position_c dest = cur_dest();

@@ -348,6 +348,15 @@ int bot_t::EvaluateWeapon(int w_num) const
 
 //----------------------------------------------------------------------------
 
+float bot_t::DistTo(position_c pos) const
+{
+	float dx = fabs(pos.x - pl->mo->x);
+	float dy = fabs(pos.y - pl->mo->y);
+
+	return hypotf(dx, dy);
+}
+
+
 void bot_t::NewChaseDir(bool move_ok)
 {
 	mobj_t *mo = pl->mo;
@@ -659,7 +668,7 @@ void bot_t::WeaveToward(const position_c& pos)
 	// but if something gets in our way, we try to "weave" around it,
 	// by sometimes going diagonally left and sometimes right.
 
-	float dist = hypotf(pl->mo->x - pos.x, pl->mo->y - pos.y);
+	float dist = DistTo(pos);
 
 	if (weave_time-- < 0)
 	{
@@ -870,9 +879,7 @@ void bot_t::EstimateTravelTime()
 	// estimate time to travel one segment of a path.
 	// overestimates by quite a bit, to account for obstacles.
 
-	position_c dest = path->cur_dest();
-
-	float dist = hypotf(dest.x - pl->mo->x, dest.y - pl->mo->y);
+	float dist = DistTo(path->cur_dest());
 	float tics = dist * 1.5f / 10.0f + 6.0f * TICRATE;
 
 	travel_time = (int)tics;
@@ -887,7 +894,7 @@ void bot_t::Think_Help()
 	bool cur_near = false;
 
 	position_c pos = { leader->x, leader->y, leader->z };
-	float dist = hypotf(pl->mo->x - pos.x, pl->mo->y - pos.y);
+	float dist = DistTo(pos);
 
 	// allow a bit of "hysteresis"
 	float check_dist = near_leader ? 224.0 : 160.0;
@@ -961,8 +968,26 @@ bot_follow_path_e  bot_t::FollowPath()
 	SYS_ASSERT(path != NULL);
 	SYS_ASSERT(! path->finished());
 
+	// handle doors and lifts
+	int flags = path->nodes[path->along].flags;
+
+	if (flags & PNODE_Door)
+	{
+		task = TASK_OpenDoor;
+		door_stage = TKDOOR_Approach;
+		door_time  = 5 * TICRATE;
+		return FOLLOW_OK;
+	}
+	else if (flags & PNODE_Lift)
+	{
+		task = TASK_UseLift;
+		lift_stage = TKLIFT_Approach;
+		lift_time  = 5 * TICRATE;
+		return FOLLOW_OK;
+	}
+
 	// have we reached the next node?
-	while (path->reached_dest(pl->mo))
+	if (path->reached_dest(pl->mo))
 	{
 		path->along += 1;
 
@@ -1205,12 +1230,57 @@ void bot_t::Think_GetItem()
 
 void bot_t::Think_OpenDoor()
 {
-	// TODO
+fprintf(stderr, "Think_OpenDoor... %d\n", door_time);
+
+	switch (door_stage)
+	{
+		case TKDOOR_Approach:
+		{
+			float dist   = DistTo(path->cur_dest());
+			angle_t ang  = path->cur_angle();
+			angle_t diff = ang - pl->mo->angle;
+
+			if (diff > ANG180)
+				diff = ANG_MAX - diff;
+
+			if (diff < ANG5 && dist < (USERANGE - 16))
+			{
+				// FIXME too simplistic!
+fprintf(stderr, "USING DOOR\n");
+				cmd.use = true;
+				door_stage = TKDOOR_Wait;
+				return;
+			}
+
+			if (door_time-- < 0)
+			{
+				// FAILED!
+				task = TASK_None;
+				DeletePath();
+				roam_goal = position_c { 0, 0, 0 };
+				return;
+			}
+
+			TurnToward(ang, 0.0, false);
+			WeaveToward(path->cur_dest());
+			return;
+		}
+
+		case TKDOOR_Wait:
+		{
+			// FIXME
+
+			path->along += 1;
+			task = TASK_None;
+			return;
+		}
+	}
 }
 
 
 void bot_t::Think_UseLift()
 {
+fprintf(stderr, "Think_UseLift...\n");
 	// TODO
 }
 

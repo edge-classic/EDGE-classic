@@ -158,6 +158,8 @@ public:
 	void EndLevel();
 
 private:
+	float DistTo(position_c pos) const;
+
 	int  CalcConfidence();
 	int  EvaluateWeapon(int w_num) const;
 	void SelectWeapon();

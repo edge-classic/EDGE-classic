@@ -58,6 +58,9 @@ public:
 
 	position_c cur_dest() const;
 
+	float   cur_length() const;
+	angle_t cur_angle()  const;
+
 	bool reached_dest(const position_c *pos) const;
 };
 

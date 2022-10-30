@@ -569,8 +569,8 @@ void bot_t::LookAround()
 	if (look_time >= 0)
 		return;
 
-	// look for items every two-three seconds
-	look_time = 60 + C_Random() % 40;
+	// look for items every 1-to-2 seconds or so
+	look_time = 30 + C_Random() % 30;
 
 	LookForItems(1024);
 }

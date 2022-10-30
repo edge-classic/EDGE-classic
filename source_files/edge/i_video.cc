@@ -58,21 +58,22 @@ static bool grab_state;
 // Possible Screen Modes
 static struct { int w, h; } possible_modes[] =
 {
-	{  320, 200, },
 	{  320, 240, },
-	{  400, 300, },
-	{  512, 384, },
 	{  640, 360, },
-	{  640, 400, },
 	{  640, 480, },
 	{  800, 600, },
+	{  854, 480  },
 	{  960, 540, },
+	{ 1024, 576  },
 	{ 1024, 768, },
+	{ 1152, 864  },
 	{ 1280, 720, },
 	{ 1280,1024, },
 	{ 1366, 768, },
+	{ 1400, 1050 },
 	{ 1600, 900, },
-	{ 1600,1200, },
+	{ 1600, 1200,},
+	{ 1920, 1080 },
 
 	{  -1,  -1, }
 };
@@ -230,7 +231,9 @@ void I_StartupGraphics(void)
 	{
 		scrmode_c mode;
 
-		if (possible_modes[i].w > v_desktop_width.d || possible_modes[i].h > v_desktop_height.d)
+		I_Printf("CHECKING WIDTH %d x HEIGHT %d\n", possible_modes[i].w, possible_modes[i].h);
+
+		if (possible_modes[i].w >= v_desktop_width.d || possible_modes[i].h >= v_desktop_height.d)
 			continue;
 
 		mode.width = possible_modes[i].w;

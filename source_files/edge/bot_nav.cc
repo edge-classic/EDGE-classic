@@ -474,6 +474,8 @@ static void NAV_TryOpenArea(int idx, int parent, float cost)
 
 static void NAV_StoreSegMiddle(bot_path_c *path, int flags, const seg_t *seg)
 {
+	SYS_ASSERT(seg);
+
 	// calc middle of the adjoining seg
 	position_c pos;
 
@@ -524,30 +526,33 @@ static bot_path_c * NAV_StorePath(position_c start, int start_id, position_c fin
 			continue;
 		}
 
-		int flags = 0;
-		const seg_t *seg = NULL;
-
 		// find the link
 		const nav_area_c& area = nav_areas[prev_id];
+		const nav_link_c *link = NULL;
 
 		for (int k = 0 ; k < area.num_links ; k++)
 		{
-			const nav_link_c& link = nav_links[area.first_link + k];
+			int L = area.first_link + k;
 
-			if (link.dest_id == cur_id)
+			if (nav_links[L].dest_id == cur_id)
 			{
-				flags = link.flags;
-				seg   = link.seg;
-				SYS_ASSERT(link.seg);
+				link = &nav_links[L];
 				break;
 			}
 		}
 
 		// this should never happen
-		if (seg == NULL)
+		if (link == NULL)
 			I_Error("could not find link in path (%d -> %d)\n", prev_id, cur_id);
 
-		NAV_StoreSegMiddle(path, flags, seg);
+		NAV_StoreSegMiddle(path, link->flags, link->seg);
+
+		// for a lift, also store the place to ride the lift
+		if (link->flags & PNODE_Lift)
+		{
+			auto pos = nav_areas[link->dest_id].get_middle();
+			path->nodes.push_back(path_node_c { pos, 0, NULL });
+		}
 
 		prev_id = cur_id;
 	}

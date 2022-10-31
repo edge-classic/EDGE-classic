@@ -681,34 +681,42 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
 	
 	if(drawText == true)
 	{
-		int seconds, hours, minutes;
-		minutes = t / 60;
-		seconds = t % 60;
-		hours = minutes / 60;
-		minutes = minutes % 60;
-		s = "";
-		if (hours > 0)
+		if (t > 3599)
 		{
-			if(hours > 9)
-				s = s + std::to_string(hours) + ":";
-			else
-				s = s + "0" + std::to_string(hours) + ":";
+			HL_WriteText(wi_sp_style,styledef_c::T_TITLE, x - HUD_StringWidth("Sucks"), y, "Sucks");
+			return;
 		}
-		if (minutes > 0)
+		else
 		{
-			if (minutes > 9)
-				s = s + std::to_string(minutes);
-			else
-				s = s + "0" + std::to_string(minutes);
+			int seconds, hours, minutes;
+			minutes = t / 60;
+			seconds = t % 60;
+			hours = minutes / 60;
+			minutes = minutes % 60;
+			s = "";
+			if (hours > 0)
+			{
+				if(hours > 9)
+					s = s + std::to_string(hours) + ":";
+				else
+					s = s + "0" + std::to_string(hours) + ":";
+			}
+			if (minutes > 0)
+			{
+				if (minutes > 9)
+					s = s + std::to_string(minutes);
+				else
+					s = s + "0" + std::to_string(minutes);
+			}
+			if (seconds > 0 || minutes > 0)
+			{
+				if (seconds > 9)
+					s = s + ":" + std::to_string(seconds);
+				else
+					s = s + ":" + "0" + std::to_string(seconds);
+			}
+			HL_WriteText(wi_sp_style,styledef_c::T_ALT,x, y, s.c_str());
 		}
-		if (seconds > 0)
-		{
-			if (seconds > 9)
-				s = s + ":" + std::to_string(seconds);
-			else
-				s = s + ":" + "0" + std::to_string(seconds);
-		}
-		HL_WriteText(wi_sp_style,styledef_c::T_ALT,x, y, s.c_str());
 	}
 	else
 	{

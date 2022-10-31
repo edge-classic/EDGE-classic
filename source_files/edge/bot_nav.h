@@ -38,8 +38,8 @@ class path_node_c
 {
 public:
 	position_c pos { 0, 0, 0 };
-
 	int flags = PNODE_Normal;
+	const seg_t * seg = NULL;
 };
 
 // a path from a start point to a finish one.
@@ -57,6 +57,7 @@ public:
 	}
 
 	position_c cur_dest() const;
+	position_c cur_from() const;
 
 	float   cur_length() const;
 	angle_t cur_angle()  const;

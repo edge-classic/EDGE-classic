@@ -37,6 +37,7 @@
 #include "thing.h"
 
 #include <algorithm>
+#include <forward_list>
 
 class big_item_c
 {
@@ -207,6 +208,7 @@ public:
 	int   dest_id = -1;
 	float length  =  0;
 	int   flags   =  PNODE_Normal;
+	const seg_t * seg = NULL;
 };
 
 
@@ -350,7 +352,7 @@ static void NAV_CreateLinks()
 			// determine if a manual door or a lift
 			int flags = NAV_CheckDoorOrLift(seg);
 
-			nav_links.push_back(nav_link_c { dest_id, length, flags });
+			nav_links.push_back(nav_link_c { dest_id, length, flags, seg });
 			area.num_links += 1;
 
 			//DEBUG
@@ -470,27 +472,16 @@ static void NAV_TryOpenArea(int idx, int parent, float cost)
 }
 
 
-static bool NAV_StoreSegMiddle(bot_path_c *path, const subsector_t *A, const subsector_t *B, int flags)
+static void NAV_StoreSegMiddle(bot_path_c *path, int flags, const seg_t *seg)
 {
-	const seg_t *seg = NULL;
-
-	for (seg = A->segs ; seg != NULL ; seg=seg->sub_next)
-		if (seg->back_sub == B)
-			break;
-
-	// this should not happen, but we can survive without it
-	if (seg == NULL)
-		return false;
-
 	// calc middle of the adjoining seg
 	position_c pos;
 
 	pos.x = (seg->v1->x + seg->v2->x) * 0.5f;
 	pos.y = (seg->v1->y + seg->v2->y) * 0.5f;
-	pos.z = B->sector->f_h;
+	pos.z = seg->front_sub->sector->f_h;
 
-	path->nodes.push_back(path_node_c { pos, flags });
-	return true;
+	path->nodes.push_back(path_node_c { pos, flags, seg });
 }
 
 
@@ -498,42 +489,70 @@ static bot_path_c * NAV_StorePath(position_c start, int start_id, position_c fin
 {
 	bot_path_c *path = new bot_path_c;
 
-	bool have_seg = false;
+	path->nodes.push_back(path_node_c { start, 0, NULL });
+
+	// handle case of same subsector -- no segs
+	if (start_id == finish_id)
+	{
+		path->nodes.push_back(path_node_c { finish, 0, NULL });
+		return path;
+	}
+
+	// use a list to put the subsectors into the correct order
+	std::forward_list<int> subsec_list;
+
+	int cur_id = finish_id;
 
 	for (;;)
 	{
-		if (! have_seg)
-			path->nodes.push_back(path_node_c { finish, 0 });
+		subsec_list.push_front(cur_id);
 
-		if (finish_id == start_id)
+		if (cur_id == start_id)
 			break;
 
-		int next_id = nav_areas[finish_id].parent;
+		cur_id = nav_areas[cur_id].parent;
+	}
 
-		// get the door/lift flags
-		int flags = 0;
+	// visit each pair of subsectors in order...
+	int prev_id = -1;
 
-		const nav_area_c& next_area = nav_areas[next_id];
-		for (int k = 0 ; k < next_area.num_links ; k++)
+	for (int cur_id : subsec_list)
+	{
+		if (prev_id < 0)
 		{
-			const nav_link_c& link = nav_links[next_area.first_link + k];
-			if (link.dest_id == finish_id)
+			prev_id = cur_id;
+			continue;
+		}
+
+		int flags = 0;
+		const seg_t *seg = NULL;
+
+		// find the link
+		const nav_area_c& area = nav_areas[prev_id];
+
+		for (int k = 0 ; k < area.num_links ; k++)
+		{
+			const nav_link_c& link = nav_links[area.first_link + k];
+
+			if (link.dest_id == cur_id)
 			{
 				flags = link.flags;
+				seg   = link.seg;
+				SYS_ASSERT(link.seg);
 				break;
 			}
 		}
 
-		have_seg = NAV_StoreSegMiddle(path, &subsectors[finish_id], &subsectors[next_id], flags);
+		// this should never happen
+		if (seg == NULL)
+			I_Error("could not find link in path (%d -> %d)\n", prev_id, cur_id);
 
-		finish_id = next_id;
-		finish    = nav_areas[next_id].get_middle();
+		NAV_StoreSegMiddle(path, flags, seg);
+
+		prev_id = cur_id;
 	}
 
-	path->nodes.push_back(path_node_c { start, 0 });
-
-	// nodes were added in reverse order, so put them in correct order
-	std::reverse(path->nodes.begin(), path->nodes.end());
+	path->nodes.push_back(path_node_c { finish, 0, NULL });
 
 	return path;
 }
@@ -790,7 +809,13 @@ mobj_t * NAV_FindEnemy(bot_t *bot, float radius)
 
 position_c bot_path_c::cur_dest() const
 {
-	return nodes[along].pos;
+	return nodes.at(along).pos;
+}
+
+
+position_c bot_path_c::cur_from() const
+{
+	return nodes.at(along-1).pos;
 }
 
 

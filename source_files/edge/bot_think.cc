@@ -286,7 +286,7 @@ float bot_t::EvalItem(const mobj_t *mo)
 }
 
 
-float bot_t::EvaluateWeapon(int w_num) const
+float bot_t::EvaluateWeapon(int w_num, int& key) const
 {
 	// this evaluates weapons owned by the bot (NOT ones in the map).
 	// returns -1 when not actually usable (e.g. no ammo).
@@ -304,6 +304,8 @@ float bot_t::EvaluateWeapon(int w_num) const
 	if (!attack)
 		return -1;
 
+	key = weapon->bind_key;
+
 	// have enough ammo?
 	if (weapon->ammo[0] != AM_NoAmmo)
 	{
@@ -311,37 +313,32 @@ float bot_t::EvaluateWeapon(int w_num) const
 			return -1;
 	}
 
-	float score = attack->damage.nominal;
+	float score = 10.0f * weapon->priority;
 
-	switch (attack->attackstyle)
+	// prefer smaller weapons for smaller monsters.
+	// when not fighting, prefer biggest non-dangerous weapon.
+	if (pl->mo->target == NULL)
 	{
-		case ATK_SHOT:
-			score *= attack->count;
-			break;
-
-		case ATK_CLOSECOMBAT:
-			if (pl->powers[PW_Berserk])
-				score /= 5.0f;
-			else
-				score /= 10.0f;
-			break;
-
-		case ATK_PROJECTILE:
-		case ATK_SMARTPROJECTILE:
-			score += 4.0f * attack->atk_mobj->explode_damage.nominal;
-			break;
-
-		default:
-			// for everything else, no change
-			break;
+		if (! weapon->dangerous)
+			score += 1000.0f;
+	}
+	else if (pl->mo->target->info->spawnhealth > 250)
+	{
+		if (weapon->priority > 5)
+			score += 1000.0f;
+	}
+	else
+	{
+		if (2 <= weapon->priority && weapon->priority <= 5)
+			score += 1000.0f;
 	}
 
 	// small preference for the current weapon (break ties)
-	if (w_num == pl->ready_wp || w_num == pl->pending_wp)
-		score += 5.0f;
+	if (w_num == pl->ready_wp)
+		score += 2.0f;
 
-	// add randomness to break other ties
-	score += (float)C_Random() / 65536.0f;
+	// ultimate tie breaker (when two weapons have same priority)
+	score += (float)w_num / 32.0f;
 
 	return score;
 }
@@ -462,7 +459,7 @@ void bot_t::LookForEnemies(float radius)
 	// TODO check sight of existing target
 	//      [ if too many checks, lose patience ]
 
-	return; //!!!!
+//	return; //!!!!
 
 	if (pl->mo->target == NULL)
 	{
@@ -525,45 +522,55 @@ void bot_t::LookAround()
 
 void bot_t::SelectWeapon()
 {
-	int best = pl->ready_wp;
-	float best_score = 0;
+	// reconsider every second or so
+	weapon_time = 20 + C_Random() % 20;
+
+//--	// no point while a weapon change is in progress
+//--	if (pl->pending_wp != WPSEL_NoChange)
+//--		return;
+
+	int   best       = pl->ready_wp;
+	int   best_key   = -1;
+	float best_score =  0;
 
 	for (int i = 0 ; i < MAXWEAPONS ; i++)
 	{
-		float score = EvaluateWeapon(i);
+		int   key   = -1;
+		float score = EvaluateWeapon(i, key);
 
 		if (score > best_score)
 		{
-			best = i;
+			best       = i;
+			best_key   = key;
 			best_score = score;
 		}
 	}
 
-	if (best != pl->ready_wp && best != pl->pending_wp)
+	if (best != pl->ready_wp)
 	{
-		cmd.new_weapon = best;
+		cmd.weapon = best_key;
 	}
 }
 
 
 void bot_t::Move()
 {
-	cmd.move_speed = MOVE_SPEED;
-	cmd.move_angle = angle + strafedir;
+	cmd.speed = MOVE_SPEED;
+	cmd.direction = angle + strafedir;
 }
 
 
 void bot_t::MoveToward(const position_c& pos)
 {
-	cmd.move_speed = MOVE_SPEED;
-	cmd.move_angle = R_PointToAngle(pl->mo->x, pl->mo->y, pos.x, pos.y);
+	cmd.speed = MOVE_SPEED;
+	cmd.direction = R_PointToAngle(pl->mo->x, pl->mo->y, pos.x, pos.y);
 }
 
 
 void bot_t::WalkToward(const position_c& pos)
 {
-	cmd.move_speed = MOVE_SPEED * 0.5;
-	cmd.move_angle = R_PointToAngle(pl->mo->x, pl->mo->y, pos.x, pos.y);
+	cmd.speed = MOVE_SPEED * 0.5;
+	cmd.direction = R_PointToAngle(pl->mo->x, pl->mo->y, pos.x, pos.y);
 }
 
 
@@ -631,10 +638,10 @@ void bot_t::WeaveToward(const position_c& pos)
 
 	MoveToward(pos);
 
-	if (weave == -2) cmd.move_angle -= ANG5 * 12;
-	if (weave == -1) cmd.move_angle -= ANG5 * 3;
-	if (weave == +1) cmd.move_angle += ANG5 * 3;
-	if (weave == +2) cmd.move_angle += ANG5 * 12;
+	if (weave == -2) cmd.direction -= ANG5 * 12;
+	if (weave == -1) cmd.direction -= ANG5 * 3;
+	if (weave == +1) cmd.direction += ANG5 * 3;
+	if (weave == +2) cmd.direction += ANG5 * 12;
 
 	// TODO : REVIEW FOLLOWING LOGIC
 /*
@@ -769,17 +776,6 @@ fprintf(stderr, "FIGHT %d\n", gametic);
 	bool seetarget = false;
 	if (mo->target)
 		seetarget = P_CheckSight(mo, mo->target);
-
-	// Select a suitable weapon
-	if (confidence <= 0)
-	{
-		weapon_count--;
-		if (weapon_count < 0)
-		{
-			SelectWeapon();
-			weapon_count = 30 + (M_Random() & 31) * 4;
-		}
-	}
 
 	patience--;
 	move_count--;
@@ -1356,7 +1352,7 @@ void bot_t::Think()
 
 	// initialize the botcmd_t
 	memset(&cmd, 0, sizeof(botcmd_t));
-	cmd.new_weapon = -1;
+	cmd.weapon = -1;
 
 	// do nothing when game is paused
 	if (paused)
@@ -1409,6 +1405,9 @@ void bot_t::Think()
 
 	LookAround();
 
+	if (weapon_time-- < 0)
+		SelectWeapon();
+
 	// if we have a target enemy, fight it or flee it
 	if (pl->mo->target != NULL)
 	{
@@ -1454,7 +1453,7 @@ void bot_t::ConvertTiccmd(ticcmd_t *dest)
 	if (cmd.attack)
 		dest->buttons |= BT_ATTACK;
 
-	if (cmd.second_attack)
+	if (cmd.attack2)
 		dest->extbuttons |= EBT_SECONDATK;
 
 	if (cmd.use)
@@ -1463,21 +1462,24 @@ void bot_t::ConvertTiccmd(ticcmd_t *dest)
 	if (cmd.jump)
 		dest->upwardmove = 0x20;
 
-	if (cmd.new_weapon != -1)
-		dest->buttons |= (cmd.new_weapon << BT_WEAPONSHIFT) & BT_WEAPONMASK;
+	if (cmd.weapon != -1)
+	{
+		dest->buttons |= BT_CHANGE;
+		dest->buttons |= (cmd.weapon << BT_WEAPONSHIFT) & BT_WEAPONMASK;
+	}
 
 	dest->player_idx = pl->pnum;
 
 	dest->angleturn = (mo->angle - look_angle) >> 16;
 	dest->mlookturn = (M_ATan(look_slope) - mo->vertangle) >> 16;
 
-	if (cmd.move_speed != 0)
+	if (cmd.speed != 0)
 	{
 		// get angle relative the player.
-		angle_t a = cmd.move_angle - look_angle;
+		angle_t a = cmd.direction - look_angle;
 
-		float fwd  = M_Cos(a) * cmd.move_speed;
-		float side = M_Sin(a) * cmd.move_speed;
+		float fwd  = M_Cos(a) * cmd.speed;
+		float side = M_Sin(a) * cmd.speed;
 
 		dest->forwardmove =  (int)fwd;
 		dest->sidemove    = -(int)side;
@@ -1491,8 +1493,9 @@ void bot_t::Respawn()
 
 	task = TASK_None;
 
-	path_wait = C_Random() % 8;
-	look_time = C_Random() % 8;
+	path_wait   = C_Random() % 8;
+	look_time   = C_Random() % 8;
+	weapon_time = C_Random() % 8;
 
 	hit_obstacle = false;
 	near_leader  = false;

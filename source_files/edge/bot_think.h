@@ -81,16 +81,18 @@ enum bot_follow_path_e
 
 struct botcmd_t
 {
-	int move_speed;
-	angle_t move_angle;
+	// desired movement
+	int     speed;
+	angle_t direction;
 
-	// The weapon we want to use. -1 if the current one is fine.
-	int new_weapon;
-
+	// buttons
 	bool attack;
-	bool second_attack;
+	bool attack2;
 	bool use;
 	bool jump;
+
+	// weapon to switch to (key number), -1 means no change.
+	int  weapon;
 };
 
 
@@ -116,11 +118,11 @@ public:
 	int weave = 0;
 	int weave_time = 0;
 
-	int weapon_count = 0;
 	int move_count   = 0;
 
 	int dead_time = 0;
 	int look_time = 0;
+	int weapon_time = 0;
 
 	// last position, to check if we actually moved
 	float last_x = 0;
@@ -163,7 +165,7 @@ private:
 	float DistTo(position_c pos) const;
 
 	int  CalcConfidence();
-	float EvaluateWeapon(int w_num) const;
+	float EvaluateWeapon(int w_num, int& key) const;
 	void SelectWeapon();
 	bool HasWeapon(const weapondef_c *info) const;
 	bool MeleeWeapon() const;

@@ -426,13 +426,15 @@ static float NAV_TraverseLinkCost(int cur, const nav_link_c& link, bool allow_do
 	float time   = link.length / RUNNING_SPEED;
 	float f_diff = s2->f_h - s1->f_h;
 
-	// special check for teleport heights (as dest_id is far away)
+	// special check for teleport heights (dest_id is far away)
 	if (link.flags & PNODE_Teleport)
 	{
-		if (link.seg->back_sub->sector->f_h - s1->f_h > 24.0f)
+		const sector_t *s3 = link.seg->back_sub->sector;
+
+		if (s3->f_h > s1->f_h + 24.0f)
 			return -1;
 
-		if (s1->c_h < s1->f_h + 56.0f)
+		if (s3->c_h < s3->f_h + 56.0f)
 			return -1;
 
 		if (s2->c_h < s2->f_h + 56.0f)

@@ -63,8 +63,7 @@ enum task_use_lift_e
 {
 	TKLIFT_Approach = 0,  // walk to lift and face it
 	TKLIFT_Use      = 1,  // press USE button, wait for it to lower
-	TKLIFT_Embark   = 2,  // get onto the lift
-	TKLIFT_Ride     = 4,  // ride the lift to the top
+	TKLIFT_Ride     = 2,  // hop on lift, ride it to the top
 };
 
 
@@ -174,6 +173,7 @@ private:
 	void Chase(bool seetarget, bool move_ok);
 	void Move();
 	void MoveToward(const position_c& pos);
+	void WalkToward(const position_c& pos);
 	void WeaveToward(const position_c& pos);
 	void WeaveToward(const mobj_t *mo);
 	void WeaveNearLeader(const mobj_t *leader);

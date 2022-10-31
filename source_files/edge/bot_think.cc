@@ -622,6 +622,13 @@ void bot_t::MoveToward(const position_c& pos)
 }
 
 
+void bot_t::WalkToward(const position_c& pos)
+{
+	cmd.move_speed = MOVE_SPEED * 0.5;
+	cmd.move_angle = R_PointToAngle(pl->mo->x, pl->mo->y, pos.x, pos.y);
+}
+
+
 void bot_t::TurnToward(angle_t want_angle, float want_slope, bool fast)
 {
 	// horizontal (yaw) angle
@@ -1372,8 +1379,12 @@ void bot_t::Think_UseLift()
 			// already lowered?
 			if (sector->f_h < lift_seg->front_sub->sector->f_h + 24.0f)
 			{
-				lift_stage = TKLIFT_Embark;
-				lift_time  = TICRATE * 5;
+				// navigation code added a place to stand
+				path->along += 1;
+
+				// TODO compute time it will take for lift to go fully up
+				lift_stage = TKLIFT_Ride;
+				lift_time  = TICRATE * 10;
 				return;
 			}
 
@@ -1388,18 +1399,30 @@ void bot_t::Think_UseLift()
 			return;
 		}
 
-		case TKLIFT_Embark:
-			// FIXME
-
-fprintf(stderr, "TKLIFT_Embark\n");
-			FinishDoorOrLift(false);
-			return;
-
 		case TKLIFT_Ride:
-			// FIXME
+			if (lift_time-- < 0)
+			{
+				FinishDoorOrLift(false);
+				return;
+			}
 
-fprintf(stderr, "TKLIFT_Ride\n");
-			FinishDoorOrLift(false);
+			WalkToward(path->cur_dest());
+
+			const sector_t *lift_sec = lift_seg->back_sub->sector;
+
+			if (lift_sec->floor_move != NULL)
+			{
+				// if lift went down again, don't time out
+				if (lift_sec->floor_move->direction <= 0)
+					lift_time = 10 * TICRATE;
+
+				return;
+			}
+
+			// reached the top?
+			bool ok = pl->mo->z > (lift_sec->f_h - 0.5);
+
+			FinishDoorOrLift(ok);
 			return;
 	}
 }

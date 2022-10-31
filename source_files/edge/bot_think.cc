@@ -1232,7 +1232,7 @@ void bot_t::Think_GetItem()
 }
 
 
-void bot_t::FinishOpenDoor(bool ok)
+void bot_t::FinishDoorOrLift(bool ok)
 {
 	task = TASK_None;
 
@@ -1254,6 +1254,12 @@ void bot_t::Think_OpenDoor()
 	{
 		case TKDOOR_Approach:
 		{
+			if (door_time-- < 0)
+			{
+				FinishDoorOrLift(false);
+				return;
+			}
+
 			float dist   = DistTo(path->cur_dest());
 			angle_t ang  = path->nodes[path->along].seg->angle + ANG90;
 			angle_t diff = ang - pl->mo->angle;
@@ -1269,12 +1275,6 @@ fprintf(stderr, "ang %1.0f we %1.0f diff %1.0f\n", ANG_2_FLOAT(ang), ANG_2_FLOAT
 				return;
 			}
 
-			if (door_time-- < 0)
-			{
-				FinishOpenDoor(false);
-				return;
-			}
-
 			TurnToward(ang, 0.0, false);
 			WeaveToward(path->cur_dest());
 			return;
@@ -1284,7 +1284,7 @@ fprintf(stderr, "ang %1.0f we %1.0f diff %1.0f\n", ANG_2_FLOAT(ang), ANG_2_FLOAT
 		{
 			if (door_time-- < 0)
 			{
-				FinishOpenDoor(false);
+				FinishDoorOrLift(false);
 				return;
 			}
 
@@ -1302,7 +1302,7 @@ fprintf(stderr, "ang %1.0f we %1.0f diff %1.0f\n", ANG_2_FLOAT(ang), ANG_2_FLOAT
 			// already open?
 			if (sector->c_h > sector->f_h + 56.0f)
 			{
-				FinishOpenDoor(true);
+				FinishDoorOrLift(true);
 				return;
 			}
 
@@ -1312,6 +1312,8 @@ fprintf(stderr, "ang %1.0f we %1.0f diff %1.0f\n", ANG_2_FLOAT(ang), ANG_2_FLOAT
 
 			if (door_time & 1)
 				cmd.use = true;
+
+			return;
 		}
 	}
 }
@@ -1319,8 +1321,87 @@ fprintf(stderr, "ang %1.0f we %1.0f diff %1.0f\n", ANG_2_FLOAT(ang), ANG_2_FLOAT
 
 void bot_t::Think_UseLift()
 {
-fprintf(stderr, "Think_UseLift...\n");
-	// TODO
+	switch (lift_stage)
+	{
+		case TKDOOR_Approach:
+		{
+			if (lift_time-- < 0)
+			{
+				FinishDoorOrLift(false);
+				return;
+			}
+
+			float dist   = DistTo(path->cur_dest());
+			angle_t ang  = path->nodes[path->along].seg->angle + ANG90;
+			angle_t diff = ang - pl->mo->angle;
+
+			if (diff > ANG180)
+				diff = ANG_MAX - diff;
+
+			if (diff < ANG5 && dist < (USERANGE - 16))
+			{
+				lift_stage = TKLIFT_Use;
+				lift_time  = TICRATE * 5;
+				return;
+			}
+
+			TurnToward(ang, 0.0, false);
+			WeaveToward(path->cur_dest());
+			return;
+		}
+
+		case TKLIFT_Use:
+		{
+			if (lift_time-- < 0)
+			{
+				FinishDoorOrLift(false);
+				return;
+			}
+
+			// if lift is raising, try to re-lower
+			const sector_t *sector = lift_seg->back_sub->sector;
+			const plane_move_t *pm = sector->floor_move;
+
+			if (pm != NULL && pm->direction > 0)
+			{
+				if (lift_time & 1)
+					cmd.use = true;
+				return;
+			}
+
+			// already lowered?
+			if (sector->f_h < lift_seg->front_sub->sector->f_h + 24.0f)
+			{
+				lift_stage = TKLIFT_Embark;
+				lift_time  = TICRATE * 5;
+				return;
+			}
+
+			// lift is lowering, so don't interfere
+			if (pm != NULL)
+				return;
+
+			// try to activate it
+			if (lift_time & 1)
+				cmd.use = true;
+
+			return;
+		}
+
+		case TKLIFT_Embark:
+			// FIXME
+
+fprintf(stderr, "TKLIFT_Embark\n");
+			FinishDoorOrLift(false);
+			return;
+
+		case TKLIFT_Ride:
+			// FIXME
+
+fprintf(stderr, "TKLIFT_Ride\n");
+			FinishDoorOrLift(false);
+			return;
+	}
 }
 
 

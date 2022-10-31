@@ -104,8 +104,6 @@ public:
 	bot_task_e task = TASK_None;
 
 	// TODO describe or remove
-	int confidence = 0;
-
 	int patience = 0;
 
 	angle_t angle = 0;

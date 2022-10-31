@@ -380,33 +380,6 @@ void bot_t::NewChaseDir(bool move_ok)
 }
 
 
-int bot_t::CalcConfidence()
-{
-	const mobj_t *mo = pl->mo;
-
-	if (pl->powers[PW_Invulnerable] > 0)
-		return +1;
-
-	// got enough health?
-	if (mo->health < mo->info->spawnhealth * 0.33)
-		return -1;
-
-	if (mo->health < mo->info->spawnhealth * 0.66)
-		return 0;
-
-	if (MeleeWeapon())
-		return 0;
-
-	// got enough ammo?
-	ammotype_e ammo = pl->weapons[pl->ready_wp].info->ammo[0];
-
-	if (pl->ammo[ammo].num < pl->ammo[ammo].max / 2)
-		return 0;
-
-	return 1;
-}
-
-
 void bot_t::PainResponse()
 {
 	// oneself?
@@ -525,9 +498,9 @@ void bot_t::SelectWeapon()
 	// reconsider every second or so
 	weapon_time = 20 + C_Random() % 20;
 
-//--	// no point while a weapon change is in progress
-//--	if (pl->pending_wp != WPSEL_NoChange)
-//--		return;
+	// allow any weapon change to complete first
+	if (pl->pending_wp != WPSEL_NoChange)
+		return;
 
 	int   best       = pl->ready_wp;
 	int   best_key   = -1;
@@ -782,7 +755,7 @@ fprintf(stderr, "FIGHT %d\n", gametic);
 
 	// Look for enemies
 	// If we aren't confident, gather more than fight.
-	if (!seetarget && patience < 0 && confidence >= 0)
+	if (!seetarget && patience < 0)
 	{
 		seetarget = false; //!!!  LookForEnemies();
 
@@ -1373,8 +1346,6 @@ void bot_t::Think()
 
 	if (mo->supportobj && mo->supportobj->health <= 0)
 		mo->SetSupportObj(NULL);
-
-	confidence = CalcConfidence();
 
 	// hurt by somebody?
 	if (pl->attacker != NULL)

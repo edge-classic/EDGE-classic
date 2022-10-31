@@ -263,8 +263,6 @@ static int NAV_CheckDoorOrLift(const seg_t *seg)
 	if (ld->special == NULL)
 		return PNODE_Normal;
 
-//	fprintf(stderr, "special line %d : %d\n", (int)(ld - lines), ld->special->number);
-
 	const linetype_c *spec = ld->special;
 
 	if (spec->type == line_manual)
@@ -950,47 +948,6 @@ bool bot_path_c::reached_dest(const position_c *pos) const
 
 	return true;
 }
-
-
-/* OLD LOGIC, USEFUL ??
-position_c bot_path_c::calc_target() const
-{
-	SYS_ASSERT(along < subs.size());
-
-	if (along > 0)
-	{
-		const subsector_t *src  = &subsectors[subs[along - 1]];
-		const subsector_t *dest = &subsectors[subs[along]];
-
-		for (const seg_t *seg = src->segs ; seg != NULL ; seg=seg->sub_next)
-		{
-			if (seg->back_sub == dest)
-			{
-				// middle of the adjoining seg
-				position_c pos;
-
-				pos.x = (seg->v1->x + seg->v2->x) * 0.5f;
-				pos.y = (seg->v1->y + seg->v2->y) * 0.5f;
-				pos.z = dest->sector->f_h;
-
-				// compute normal of seg
-				/[[
-				angle_t normal = seg->angle - ANG90;
-				float nx = M_Cos(normal);
-				float ny = M_Sin(normal);
-
-				pos.x += nx * 30.0f;
-				pos.y += ny * 30.0f;
-				]]/
-
-				return pos;
-			}
-		}
-	}
-
-	return NAV_CalcMiddle(&subsectors[subs[along]]);
-}
-*/
 
 //----------------------------------------------------------------------------
 

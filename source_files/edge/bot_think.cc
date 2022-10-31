@@ -433,66 +433,6 @@ void bot_t::PainResponse()
 }
 
 
-/* TODO OLD STUFF, REVIEW IT
-
-// Based on P_LookForTargets from p_enemy.c
-bool bot_t::LookForEnemies()
-{
-	mobj_t *we = pl->mo;
-
-	for (mobj_t *them = mobjlisthead ; them != NULL ; them = them->next)
-	{
-		if (! (them->flags & MF_SHOOTABLE))
-			continue;
-
-		if (them == we)
-			continue;
-
-		// only target monsters or players (not barrels)
-		if (! (them->extendedflags & EF_MONSTER) && ! them->player)
-			continue;
-
-		bool same_side = ((them->side & we->side) != 0);
-
-		if (them->player && same_side &&
-			! we->supportobj && them->supportobj != we)
-		{
-			if (them->supportobj && P_CheckSight(we, them->supportobj))
-			{
-				we->SetSupportObj(them->supportobj);
-				return true;
-			}
-			else if (P_CheckSight(we, them))
-			{
-				we->SetSupportObj(them->supportobj);
-				return true;
-			}
-		}
-
-		// The following must be true to justify that you attack a target:
-		// 1. The target may not be yourself or your support obj.
-		// 2. The target must either want to attack you, or be on a different side
-		// 3. The target may not have the same supportobj as you.
-		// 4. You must be able to see and shoot the target.
-
-		if (!same_side || (them->target && them->target == we))
-		{
-			if (P_CheckSight(we, them))
-			{
-				pl->mo->SetTarget(them);
-#if (DEBUG > 0)
-I_Printf("BOT %d: Targeting Agent: %s\n", bot->pl->pnum, them->info->name.c_str());
-#endif
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-*/
-
-
 void bot_t::LookForLeader()
 {
 	if (DEATHMATCH())
@@ -547,8 +487,6 @@ void bot_t::LookForItems(float radius)
 		return;
 
 	// GET IT !!
-
-fprintf(stderr, "---- GetItem : %s\n", item->info->name.c_str());
 
 	pl->mo->SetTracer(item);
 
@@ -697,6 +635,33 @@ void bot_t::WeaveToward(const position_c& pos)
 	if (weave == -1) cmd.move_angle -= ANG5 * 3;
 	if (weave == +1) cmd.move_angle += ANG5 * 3;
 	if (weave == +2) cmd.move_angle += ANG5 * 12;
+
+	// TODO : REVIEW FOLLOWING LOGIC
+/*
+		// If there is a wall or something in the way, pick a new direction.
+		if (!move_ok || move_count < 0)
+		{
+			if (seetarget && move_ok)
+				cmd.face_target = true;
+
+			angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
+			strafedir = 0;
+			move_count = 10 + (C_Random() & 31);
+
+			if (!move_ok)
+			{
+				int r = M_Random();
+
+				if (r < 10)
+					angle = M_Random() << 24;
+				else if (r < 60)
+					strafedir = ANG90;
+				else if (r < 110)
+					strafedir = ANG270;
+			}
+		}
+	}
+*/
 }
 
 
@@ -791,8 +756,6 @@ void bot_t::Meander()
 
 	Move();
 	*/
-
-//--	fprintf(stderr, "Meander %d\n", path_wait);
 }
 
 
@@ -927,7 +890,6 @@ void bot_t::Think_Help()
 
 	if (cur_near)
 	{
-fprintf(stderr, "Weave %d\n", gametic);
 		WeaveNearLeader(leader);
 		return;
 	}
@@ -952,8 +914,6 @@ fprintf(stderr, "Weave %d\n", gametic);
 	}
 
 	// we are waiting until we can establish a path
-
-fprintf(stderr, "wait %d\n", path_wait);
 
 	if (path_wait-- < 0)
 	{
@@ -997,6 +957,10 @@ bot_follow_path_e  bot_t::FollowPath()
 		SYS_ASSERT(lift_seg != NULL);
 		return FOLLOW_OK;
 	}
+	else if (flags & PNODE_Lift)
+	{
+		// TODO: TASK_Telport which attempts not to telefrag / be telefragged
+	}
 
 	// have we reached the next node?
 	if (path->reached_dest(pl->mo))
@@ -1005,7 +969,6 @@ bot_follow_path_e  bot_t::FollowPath()
 
 		if (path->finished())
 		{
-fprintf(stderr, "follow done\n");
 			return FOLLOW_Done;
 		}
 
@@ -1014,7 +977,6 @@ fprintf(stderr, "follow done\n");
 
 	if (travel_time-- < 0)
 	{
-fprintf(stderr, "follow FAILED !!!\n");
 		return FOLLOW_Failed;
 	}
 
@@ -1095,8 +1057,6 @@ void bot_t::Think_Roam()
 
 void bot_t::FinishGetItem()
 {
-fprintf(stderr, "---- FinishGetItem\n");
-
 	task = TASK_None;
 	pl->mo->SetTracer(NULL);
 
@@ -1187,56 +1147,6 @@ void bot_t::Think_GetItem()
 
 	// move toward the item's location
 	WeaveToward(pl->mo->tracer);
-
-	// TODO : REVIEW FOLLOWING LOGIC
-
-/*
-	// Got a special (item) target?
-	if (mo->target->flags & MF_SPECIAL)
-	{
-		// have we stopped needed it? (maybe it is old DM and we
-		// picked up the weapon).
-		if (EvaluateItem(mo->target) <= 0)
-		{
-			pl->mo->SetTarget(NULL);
-			return;
-		}
-
-		// If there is a wall or something in the way, pick a new direction.
-		if (!move_ok || move_count < 0)
-		{
-			if (seetarget && move_ok)
-				cmd.face_target = true;
-
-			angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
-			strafedir = 0;
-			move_count = 10 + (C_Random() & 31);
-
-			if (!move_ok)
-			{
-				int r = M_Random();
-
-				if (r < 10)
-					angle = M_Random() << 24;
-				else if (r < 60)
-					strafedir = ANG90;
-				else if (r < 110)
-					strafedir = ANG270;
-			}
-		}
-		else if (move_count < 0)
-		{
-			// Move in the direction of the item.
-			angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
-			strafedir = 0;
-
-			move_count = 10 + (M_Random() & 31);
-		}
-
-		Move();
-		return;
-	}
-*/
 }
 
 
@@ -1277,7 +1187,6 @@ void bot_t::Think_OpenDoor()
 
 			if (diff < ANG5 && dist < (USERANGE - 16))
 			{
-fprintf(stderr, "ang %1.0f we %1.0f diff %1.0f\n", ANG_2_FLOAT(ang), ANG_2_FLOAT(pl->mo->angle), ANG_2_FLOAT(diff));
 				door_stage = TKDOOR_Use;
 				door_time  = TICRATE * 5;
 				return;

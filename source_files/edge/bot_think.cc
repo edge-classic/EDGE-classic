@@ -286,49 +286,49 @@ float bot_t::EvalItem(const mobj_t *mo)
 }
 
 
-int bot_t::EvaluateWeapon(int w_num) const
+float bot_t::EvaluateWeapon(int w_num) const
 {
 	// this evaluates weapons owned by the bot (NOT ones in the map).
+	// returns -1 when not actually usable (e.g. no ammo).
 
-	playerweapon_t *wp = pl->weapons + w_num;
+	playerweapon_t *wp = &pl->weapons[w_num];
 
 	// don't have this weapon
 	if (! wp->owned)
-		return -9999;
+		return -1;
 
 	weapondef_c *weapon = wp->info;
 	SYS_ASSERT(weapon);
 
 	atkdef_c *attack = weapon->attack[0];
 	if (!attack)
-		return -9999;
+		return -1;
 
 	// have enough ammo?
 	if (weapon->ammo[0] != AM_NoAmmo)
 	{
 		if (pl->ammo[weapon->ammo[0]].num < weapon->ammopershot[0])
-			return -9999;
+			return -1;
 	}
 
-	float value = 64 * attack->damage.nominal;
+	float score = attack->damage.nominal;
 
 	switch (attack->attackstyle)
 	{
 		case ATK_SHOT:
-			value *= attack->count;
+			score *= attack->count;
 			break;
 
 		case ATK_CLOSECOMBAT:
 			if (pl->powers[PW_Berserk])
-				value /= 10;
+				score /= 5.0f;
 			else
-				value /= 20;
+				score /= 10.0f;
 			break;
 
 		case ATK_PROJECTILE:
 		case ATK_SMARTPROJECTILE:
-			value += 256 * attack->atk_mobj->explode_damage.nominal;
-			value *= attack->atk_mobj->speed / 20;
+			score += 4.0f * attack->atk_mobj->explode_damage.nominal;
 			break;
 
 		default:
@@ -336,14 +336,14 @@ int bot_t::EvaluateWeapon(int w_num) const
 			break;
 	}
 
-	value -= weapon->ammopershot[0] * 8;
-
+	// small preference for the current weapon (break ties)
 	if (w_num == pl->ready_wp || w_num == pl->pending_wp)
-		value += 1024;
+		score += 5.0f;
 
-	value += (M_Random() - 128) * 16;
+	// add randomness to break other ties
+	score += (float)C_Random() / 65536.0f;
 
-	return (int)value;
+	return score;
 }
 
 //----------------------------------------------------------------------------
@@ -526,16 +526,16 @@ void bot_t::LookAround()
 void bot_t::SelectWeapon()
 {
 	int best = pl->ready_wp;
-	int best_val = -9999;
+	float best_score = 0;
 
-	for (int i=0 ; i < MAXWEAPONS ; i++)
+	for (int i = 0 ; i < MAXWEAPONS ; i++)
 	{
-		int val = EvaluateWeapon(i);
+		float score = EvaluateWeapon(i);
 
-		if (val > best_val)
+		if (score > best_score)
 		{
 			best = i;
-			best_val = val;
+			best_score = score;
 		}
 	}
 

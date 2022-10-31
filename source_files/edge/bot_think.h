@@ -163,7 +163,7 @@ private:
 	float DistTo(position_c pos) const;
 
 	int  CalcConfidence();
-	int  EvaluateWeapon(int w_num) const;
+	float EvaluateWeapon(int w_num) const;
 	void SelectWeapon();
 	bool HasWeapon(const weapondef_c *info) const;
 	bool MeleeWeapon() const;

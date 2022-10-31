@@ -1448,6 +1448,10 @@ void bot_t::Think()
 	memset(&cmd, 0, sizeof(botcmd_t));
 	cmd.new_weapon = -1;
 
+	// do nothing when game is paused
+	if (paused)
+		return;
+
 	mobj_t *mo = pl->mo;
 
 	// dead?

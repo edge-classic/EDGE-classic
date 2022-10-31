@@ -39,6 +39,10 @@
 #include <algorithm>
 #include <forward_list>
 
+extern mobj_t * P_FindTeleportMan(int tag, const mobjtype_c *info);
+extern line_t * p_FindTeleportLine(int tag, line_t *original);
+
+
 class big_item_c
 {
 public:
@@ -309,6 +313,53 @@ static int NAV_CheckDoorOrLift(const seg_t *seg)
 }
 
 
+static int NAV_CheckTeleporter(const seg_t *seg)
+{
+	// returns # of destination subsector, or -1 if not a teleporter.
+	// TODO: we don't support line-to-line teleporters yet...
+
+	if (seg->miniseg)
+		return -1;
+
+	// teleporters only work on front of a linedef
+	if (seg->side != 0)
+		return -1;
+
+	const line_t *ld = seg->linedef;
+
+	if (ld->special == NULL)
+		return -1;
+
+	const linetype_c *spec = ld->special;
+
+	if (spec->type != line_walkable)
+		return -1;
+
+	if (! spec->t.teleport)
+		return -1;
+
+	// ignore a single-use teleporter
+	if (spec->count > 0)
+		return -1;
+
+	if (ld->tag <= 0)
+		return -1;
+
+	if (spec->t.special & TELSP_Line)
+		return -1;
+
+	// find the destination thing...
+	if (spec->t.outspawnobj == NULL)
+		return -1;
+
+	const mobj_t * dest = P_FindTeleportMan(ld->tag, spec->t.outspawnobj);
+	if (dest == NULL)
+		return -1;
+
+	return (int) (dest->subsector - subsectors);
+}
+
+
 static void NAV_CreateLinks()
 {
 	for (int i = 0 ; i < numsubsectors ; i++)
@@ -349,10 +400,15 @@ static void NAV_CreateLinks()
 
 			float length = R_PointToDist(p1.x, p1.y, p2.x, p2.y);
 
-			// determine if a manual door or a lift
-			int flags = NAV_CheckDoorOrLift(seg);
+			// determine if a manual door, a lift, or a teleporter
+			int flags   = NAV_CheckDoorOrLift(seg);
+			int tele_id = NAV_CheckTeleporter(seg);
 
-			nav_links.push_back(nav_link_c { dest_id, length, flags, seg });
+			if (tele_id >= 0)
+				nav_links.push_back(nav_link_c { tele_id, length, PNODE_Teleport, seg });
+			else
+				nav_links.push_back(nav_link_c { dest_id, length, flags, seg });
+
 			area.num_links += 1;
 
 			//DEBUG

@@ -28,9 +28,10 @@ struct bot_t;
 
 enum path_node_flags_e
 {
-	PNODE_Normal = 0,
-	PNODE_Door   = (1 << 0),  // manual door (press USE to open)
-	PNODE_Lift   = (1 << 1),  // manual lift (press USE to lower)
+	PNODE_Normal   = 0,
+	PNODE_Door     = (1 << 0),  // manual door (press USE to open)
+	PNODE_Lift     = (1 << 1),  // manual lift (press USE to lower)
+	PNODE_Teleport = (1 << 2),  // teleporter line, walk over it
 };
 
 

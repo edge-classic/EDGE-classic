@@ -29,6 +29,7 @@
 #include "types.h"
 #include "p_mobj.h"
 #include "e_ticcmd.h"
+#include "r_defs.h"
 
 class weapondef_c;
 class bot_path_c;
@@ -53,7 +54,8 @@ enum bot_task_e
 enum task_open_door_e
 {
 	TKDOOR_Approach = 0,  // walk to door and face it
-	TKDOOR_Wait     = 1,  // wait for door to open
+	TKDOOR_Use      = 1,  // press USE button, wait for it to open
+//--	TKDOOR_Wait     = 2,  // wait for door to open
 };
 
 
@@ -61,9 +63,10 @@ enum task_open_door_e
 enum task_use_lift_e
 {
 	TKLIFT_Approach = 0,  // walk to lift and face it
-	TKLIFT_Wait     = 1,  // wait for lift to lower
-	TKLIFT_Embark   = 2,  // get onto the lift (e.g. middle)
-	TKLIFT_Ride     = 3,  // ride the lift to the top
+	TKLIFT_Use      = 1,  // press USE button to lower it
+	TKLIFT_Wait     = 2,  // wait for lift to lower
+	TKLIFT_Embark   = 3,  // get onto the lift
+	TKLIFT_Ride     = 4,  // ride the lift to the top
 };
 
 
@@ -143,10 +146,12 @@ public:
 	// information for TASK_OpenDoor
 	int door_stage = 0;
 	int door_time  = 0;
+	const seg_t * door_seg = NULL;
 
 	// information for TASK_UseLift
 	int lift_stage = 0;
 	int lift_time  = 0;
+	const seg_t * lift_seg = NULL;
 
 	botcmd_t cmd;
 
@@ -197,6 +202,7 @@ private:
 
 	void PainResponse();
 	void FinishGetItem();
+	void FinishOpenDoor(bool ok);
 
 	void TurnToward(angle_t angle, float slope, bool fast);
 	void TurnToward(const mobj_t *mo, bool fast);

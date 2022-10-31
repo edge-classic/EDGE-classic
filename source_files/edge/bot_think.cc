@@ -975,14 +975,18 @@ bot_follow_path_e  bot_t::FollowPath()
 	{
 		task = TASK_OpenDoor;
 		door_stage = TKDOOR_Approach;
+		door_seg   = path->nodes[path->along].seg;
 		door_time  = 5 * TICRATE;
+		SYS_ASSERT(door_seg != NULL);
 		return FOLLOW_OK;
 	}
 	else if (flags & PNODE_Lift)
 	{
 		task = TASK_UseLift;
 		lift_stage = TKLIFT_Approach;
+		lift_seg   = path->nodes[path->along].seg;
 		lift_time  = 5 * TICRATE;
+		SYS_ASSERT(lift_seg != NULL);
 		return FOLLOW_OK;
 	}
 
@@ -1228,16 +1232,30 @@ void bot_t::Think_GetItem()
 }
 
 
+void bot_t::FinishOpenDoor(bool ok)
+{
+	task = TASK_None;
+
+	if (ok)
+	{
+		path->along += 1;
+	}
+	else
+	{
+		DeletePath();
+		roam_goal = position_c { 0, 0, 0 };
+	}
+}
+
+
 void bot_t::Think_OpenDoor()
 {
-fprintf(stderr, "Think_OpenDoor... %d\n", door_time);
-
 	switch (door_stage)
 	{
 		case TKDOOR_Approach:
 		{
 			float dist   = DistTo(path->cur_dest());
-			angle_t ang  = path->cur_angle();
+			angle_t ang  = path->nodes[path->along].seg->angle + ANG90;
 			angle_t diff = ang - pl->mo->angle;
 
 			if (diff > ANG180)
@@ -1245,19 +1263,15 @@ fprintf(stderr, "Think_OpenDoor... %d\n", door_time);
 
 			if (diff < ANG5 && dist < (USERANGE - 16))
 			{
-				// FIXME too simplistic!
-fprintf(stderr, "USING DOOR\n");
-				cmd.use = true;
-				door_stage = TKDOOR_Wait;
+fprintf(stderr, "ang %1.0f we %1.0f diff %1.0f\n", ANG_2_FLOAT(ang), ANG_2_FLOAT(pl->mo->angle), ANG_2_FLOAT(diff));
+				door_stage = TKDOOR_Use;
+				door_time  = TICRATE * 5;
 				return;
 			}
 
 			if (door_time-- < 0)
 			{
-				// FAILED!
-				task = TASK_None;
-				DeletePath();
-				roam_goal = position_c { 0, 0, 0 };
+				FinishOpenDoor(false);
 				return;
 			}
 
@@ -1266,13 +1280,38 @@ fprintf(stderr, "USING DOOR\n");
 			return;
 		}
 
-		case TKDOOR_Wait:
+		case TKDOOR_Use:
 		{
-			// FIXME
+			if (door_time-- < 0)
+			{
+				FinishOpenDoor(false);
+				return;
+			}
 
-			path->along += 1;
-			task = TASK_None;
-			return;
+			// if closing, try to re-open
+			const sector_t *sector = door_seg->back_sub->sector;
+			const plane_move_t *pm = sector->ceil_move;
+
+			if (pm != NULL && pm->direction < 0)
+			{
+				if (door_time & 1)
+					cmd.use = true;
+				return;
+			}
+
+			// already open?
+			if (sector->c_h > sector->f_h + 56.0f)
+			{
+				FinishOpenDoor(true);
+				return;
+			}
+
+			// door is opening, so don't interfere
+			if (pm != NULL)
+				return;
+
+			if (door_time & 1)
+				cmd.use = true;
 		}
 	}
 }

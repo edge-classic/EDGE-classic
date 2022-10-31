@@ -1784,11 +1784,14 @@ static inline void PlayerInProperties(player_t *player,
 	{
 		player->secretcount++;
 
-		CON_ImportantMessageLDF("FoundSecret"); //Lobo: get text from language.ddf
-		S_StartFX(player->mo->info->secretsound,
-				P_MobjGetSfxCategory(player->mo),
-				player->mo);
-		
+		if (! DEATHMATCH())
+		{
+			CON_ImportantMessageLDF("FoundSecret"); //Lobo: get text from language.ddf
+
+			S_StartFX(player->mo->info->secretsound,
+					P_MobjGetSfxCategory(player->mo), player->mo);
+		}
+
 		props->type = 0;
 		props->special = NULL;
 	}

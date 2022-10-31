@@ -861,6 +861,7 @@ void bot_t::WeaveNearLeader(const mobj_t *leader)
 
 	position_c pos { leader->x + dx, leader->y + dy, leader->z };
 
+	TurnToward(leader, false);
 	WeaveToward(pos);
 }
 

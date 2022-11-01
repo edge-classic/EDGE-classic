@@ -100,6 +100,7 @@ static float finale_textbackscale = 1.0f;
 static rgbcol_t finale_textcol;
 
 static style_c *wi_leveltext_style;
+static style_c *wi_cast_style;
 
 static bool HasFinale(const map_finaledef_c *F, finalestage_e cur)
 {
@@ -223,6 +224,12 @@ static void LookupFinaleStuff(void)
 		styledef_c *def = styledefs.Lookup("INTERLEVEL TEXT");
 		if (! def) def = default_style;
 		wi_leveltext_style = hu_styles.Lookup(def);
+	}
+	if (! wi_cast_style)
+	{
+		styledef_c *def = styledefs.Lookup("CAST_SCREEN");
+		if (! def) def = default_style;
+		wi_cast_style = hu_styles.Lookup(def);
 	}
 }
 
@@ -702,13 +709,42 @@ static void CastSkip(void)
 //
 static void CastDrawer(void)
 {
-	const image_c *image = W_ImageLookup("BOSSBACK");
+	float TempScale = 1.0;
+	//const image_c *image = W_ImageLookup("BOSSBACK");
+	//HUD_DrawImageTitleWS(image); //Lobo: Widescreen support
 
-	HUD_DrawImageTitleWS(image); //Lobo: Widescreen support
-	//HUD_StretchImage(0, 0, 320, 200, image);
+	const image_c *image;
 
+	if (wi_cast_style->bg_image)
+	{
+		wi_cast_style->DrawBackground();
+	}
+	else
+	{
+		image = W_ImageLookup("BOSSBACK");
+		HUD_DrawImageTitleWS(image); //Lobo: Widescreen support
+	}
+	
 	HUD_SetAlignment(0, -1);
-	HUD_SetTextColor(T_YELLOW);
+
+	if (wi_cast_style->def->text[styledef_c::T_TEXT].colmap)
+	{
+		HUD_SetTextColor(V_GetFontColor(wi_cast_style->def->text[styledef_c::T_TEXT].colmap));
+	}
+	else
+	{	
+		HUD_SetTextColor(T_YELLOW); 
+	}
+
+	TempScale = wi_cast_style->def->text[styledef_c::T_TEXT].scale;
+	HUD_SetScale(TempScale);
+	
+	if(wi_cast_style->fonts[styledef_c::T_TEXT])
+	{
+		HUD_SetFont(wi_cast_style->fonts[styledef_c::T_TEXT]);
+	}
+	
+
 	HUD_DrawText(160, 180, casttitle);
 
 	HUD_Reset();
@@ -717,6 +753,15 @@ static void CastDrawer(void)
 
 	float pos_x, pos_y;
 	float scale_x, scale_y;
+
+	
+	TempScale = wi_cast_style->def->text[styledef_c::T_HEADER].scale;
+	if (TempScale < 1.0 || TempScale > 1.0)
+	{
+		scale_y = wi_cast_style->def->text[styledef_c::T_HEADER].scale;
+	}
+	else
+		scale_y = 3;
 
 	HUD_GetCastPosition(&pos_x, &pos_y, &scale_x, &scale_y);
 

@@ -181,8 +181,8 @@ float bot_t::EvalItem(const mobj_t *mo)
 	bool fighting = (pl->mo->target != NULL);
 
 	// do we *really* need some health?
-	bool want_health = (mo->health < 90);
-	bool need_health = (mo->health < 45);
+	bool want_health = (pl->mo->health < 90);
+	bool need_health = (pl->mo->health < 45);
 
 	// handle weapons first (due to deathmatch rules)
 	for (const benefit_t *B = mo->info->pickup_benefits ; B != NULL ; B = B->next)

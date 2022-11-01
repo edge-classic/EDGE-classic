@@ -27,6 +27,7 @@
 #include "dm_state.h"
 #include "con_main.h"
 #include "hu_draw.h"
+#include "hu_style.h"
 #include "hu_stuff.h"
 #include "g_game.h"
 #include "m_argv.h"
@@ -49,6 +50,8 @@
 #include "w_texture.h"
 
 #include "str_util.h"
+
+static style_c *rts_tip_style;
 
 // current tip slots
 drawtip_t tip_slots[MAXTIPSLOT];
@@ -168,6 +171,13 @@ void RAD_DisplayTips(void)
 {
 	HUD_Reset();
 
+	// lookup styles
+	styledef_c *def;
+
+	def = styledefs.Lookup("RTS_TIP");
+	if (! def) def = default_style;
+	rts_tip_style = hu_styles.Lookup(def);
+
 	for (int slot=0; slot < MAXTIPSLOT; slot++)
 	{
 		drawtip_t *current = tip_slots + slot;
@@ -215,6 +225,9 @@ void RAD_DisplayTips(void)
 
 		float x = current->p.x_pos * 320.0f;
 		float y = current->p.y_pos * 200.0f;
+
+		if (rts_tip_style->fonts[styledef_c::T_TEXT])
+			HUD_SetFont(rts_tip_style->fonts[styledef_c::T_TEXT]);
 
 		if (current->tip_graphic)
 			HUD_DrawImage(x, y, current->tip_graphic);

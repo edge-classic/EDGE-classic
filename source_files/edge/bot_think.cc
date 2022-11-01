@@ -373,32 +373,6 @@ float bot_t::DistTo(position_c pos) const
 }
 
 
-void bot_t::NewChaseDir(bool move_ok)
-{
-	mobj_t *mo = pl->mo;
-
-	// FIXME: This is not very intelligent...
-	int r = M_Random();
-
-	if (mo->target && (r % 3 == 0))
-	{
-		angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
-	}
-	else if (mo->supportobj && (r % 3 == 1))
-	{
-		angle = R_PointToAngle(mo->x, mo->y, mo->supportobj->x, mo->supportobj->y);
-	}
-	else if (move_ok)
-	{
-		angle_t diff = r - M_Random();
-
-		angle += (diff << 21);
-	}
-	else
-		angle = (r << 24);
-}
-
-
 void bot_t::PainResponse()
 {
 	// oneself?
@@ -700,87 +674,59 @@ void bot_t::DetectObstacle()
 }
 
 
-void bot_t::Chase(bool seetarget, bool move_ok)
+void bot_t::Meander()
 {
-	int skill = CLAMP(0, bot_skill.d, 2);
-
-	mobj_t *mo = pl->mo;
-
-#if (DEBUG > 1)
-		I_Printf("BOT %d: Chase %s dist %1.1f angle %1.0f | %s\n",
-			bot->pl->pnum, mo->target->info->name.c_str(),
-			P_ApproxDistance(mo->x - mo->target->x, mo->y - mo->target->y),
-			ANG_2_FLOAT(bot->angle), move_ok ? "move_ok" : "NO_MOVE");
-#endif
-
-	if (seetarget)
-	{
-		// face the target
-		TurnToward(mo->target, true);
-
-		// Shoot it,
-		cmd.attack = M_Random() < attack_chances[skill];
-
-		if (move_count < 0)
-		{
-			move_count = 20 + (M_Random() & 63);
-			strafedir = 0;
-
-			if (MeleeWeapon())
-			{
-				// run directly toward target
-			}
-			else if (M_Random() < strafe_chances[skill])
-			{
-				// strafe it.
-				strafedir = (M_Random()%5 - 2) * (int)ANG45;
-			}
-		}
-	}
-
-	// chase towards target
-	if (move_count < 0 || !move_ok)
-	{
-		NewChaseDir(move_ok);
-
-		move_count = 10 + (M_Random() & 15);
-		strafedir = 0;
-	}
-
-	Move();
+	// TODO wander about without falling into nukage pits
 }
 
 
-void bot_t::Meander()
+void bot_t::ShootTarget()
 {
-	// TODO : the follow is utter rubbish
+	// FIXME
 
-	/*
-	if (hit_obstacle || move_count < 0)
-	{
-		NewChaseDir(!hit_obstacle);
-
-		look_angle = angle;
-		look_slope = 0.0;
-
-		move_count = 10 + (M_Random() & 31);
-		strafedir = 0;
-	}
-
-	Move();
-	*/
+	cmd.attack = true;
 }
 
 
 void bot_t::Think_Fight()
 {
-	// note that LookAround() has done sight checking of our target
+	// Note: LookAround() has done sight-checking of our target
 
-	mobj_t *mo = pl->mo;
+	const mobj_t *enemy = pl->mo->target;
 
-	move_count--;
+	// if lost sight, weave towards the target
+	if (! see_enemy)
+	{
+		// TODO check if a LOS exists in a position to our left and/or right.
+		//      if it does, the strafe purely left/right.
+		//      [ if that logic works, do it when following the leader too ]
+		WeaveToward(enemy);
+		return;
+	}
 
-	Chase(see_enemy, !hit_obstacle);  // FIXME !!!
+	// face the target
+	TurnToward(enemy, true);
+
+	ShootTarget();
+
+	// decide where to move to....
+
+	if (MeleeWeapon())
+	{
+		// run directly toward target
+		WeaveToward(enemy);
+		return;
+	}
+
+	position_c pos = { enemy->x, enemy->y, enemy->z };
+
+	float dist = DistTo(pos);
+
+	// move_time--;
+
+	bool move_ok = !hit_obstacle;
+
+	// FIXME
 }
 
 
@@ -1084,9 +1030,11 @@ void bot_t::Think_GetItem()
 	// if we are being chased, look at them, shoot sometimes
 	if (pl->mo->target)
 	{
-		TurnToward(pl->mo->target, true);
-
-		// FIXME shoot
+		if (see_enemy)
+		{
+			TurnToward(pl->mo->target, true);
+			ShootTarget();
+		}
 	}
 	else
 	{

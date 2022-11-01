@@ -117,11 +117,10 @@ public:
 	int patience = 0;
 	bool see_enemy = false;
 
-	int move_count   = 0;
-
-	int dead_time = 0;
-	int look_time = 0;
-	int weapon_time = 0;
+	int move_time = 0;    // used when fighting
+	int dead_time = 0;    // increases when dead
+	int look_time = 0;    // when to look for items
+	int weapon_time = 0;  // when to reconsider weapons
 
 	// last position, to check if we actually moved
 	float last_x = 0;
@@ -163,15 +162,12 @@ public:
 private:
 	float DistTo(position_c pos) const;
 
-	int  CalcConfidence();
+	void  SelectWeapon();
+	bool  HasWeapon(const weapondef_c *info) const;
+	bool  MeleeWeapon() const;
 	float EvaluateWeapon(int w_num, int& key) const;
-	void SelectWeapon();
-	bool HasWeapon(const weapondef_c *info) const;
-	bool MeleeWeapon() const;
-	bool CanGetArmour(const benefit_t *be, int extendedflags) const;
+	bool  CanGetArmour(const benefit_t *be, int extendedflags) const;
 
-	void NewChaseDir(bool move_ok);
-	void Chase(bool seetarget, bool move_ok);
 	void Move();
 	void MoveToward(const position_c& pos);
 	void WalkToward(const position_c& pos);
@@ -205,6 +201,8 @@ private:
 
 	void TurnToward(angle_t angle, float slope, bool fast);
 	void TurnToward(const mobj_t *mo, bool fast);
+	void ShootTarget();
+
 	void DeletePath();
 
 public:

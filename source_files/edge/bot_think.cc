@@ -394,6 +394,7 @@ void bot_t::PainResponse()
 	if (pl->mo->target == NULL)
 	{
 		pl->mo->SetTarget(pl->attacker);
+		UpdateEnemy();
 		patience = 4 * TICRATE;
 	}
 }
@@ -428,13 +429,15 @@ void bot_t::LookForEnemies(float radius)
 	// check sight of existing target
 	if (pl->mo->target != NULL)
 	{
-		see_enemy = P_CheckSight(pl->mo, pl->mo->target);
+		UpdateEnemy();
 
 		if (see_enemy)
 		{
 			patience = 4 * TICRATE;
 			return;
 		}
+
+		// TODO: if patience == 2 * TICRATE, try using pathing algo
 
 		if (patience-- >= 0)
 			return;
@@ -453,6 +456,7 @@ void bot_t::LookForEnemies(float radius)
 		if (P_CheckSight(pl->mo, enemy))
 		{
 			pl->mo->SetTarget(enemy);
+			UpdateEnemy();
 			patience = 4 * TICRATE;
 		}
 	}
@@ -564,7 +568,7 @@ void bot_t::TurnToward(angle_t want_angle, float want_slope, bool fast)
 	else
 		delta = ANG_MAX - (ANG_MAX - delta) / (fast ? 3 : 8);
 
-	look_angle  = pl->mo->angle + delta;
+	look_angle = pl->mo->angle + delta;
 
 	// vertical (pitch or mlook) angle
 	if (want_slope < -2.0) want_slope = -2.0;
@@ -676,13 +680,73 @@ void bot_t::DetectObstacle()
 
 void bot_t::Meander()
 {
-	// TODO wander about without falling into nukage pits
+	// TODO wander about without falling into nukage pits (etc)
+}
+
+
+void bot_t::UpdateEnemy()
+{
+	mobj_t *enemy = pl->mo->target;
+
+	// update angle, slope and distance, even if not seen
+	position_c pos = { enemy->x, enemy->y, enemy->z };
+
+	float dx = enemy->x - pl->mo->x;
+	float dy = enemy->y - pl->mo->y;
+	float dz = enemy->z - pl->mo->z;
+
+	enemy_angle = R_PointToAngle(0, 0, dx, dy);
+	enemy_slope = P_ApproxSlope(dx, dy, dz);
+	enemy_dist  = DistTo(pos);
+
+	// can see them?
+	see_enemy = P_CheckSight(pl->mo, enemy);
 }
 
 
 void bot_t::ShootTarget()
 {
-	// FIXME
+	// turn to face them
+	TurnToward(enemy_angle, enemy_slope, true);
+
+	// no weapon to shoot?
+	if (pl->ready_wp == WPSEL_None || pl->pending_wp != WPSEL_NoChange)
+		return;
+
+	// FIXME ammo check
+
+	// too far away?
+	if (enemy_dist > 2000)
+		return;
+
+	// too close for a dangerous weapon?
+	const weapondef_c *weapon = pl->weapons[pl->ready_wp].info;
+	if (weapon->dangerous && enemy_dist < 208)
+		return;
+
+	// check that we are facing the enemy
+	angle_t delta = enemy_angle - pl->mo->angle;
+	float sl_diff = fabs(enemy_slope - M_Tan(pl->mo->vertangle));
+
+	if (delta > ANG180)
+		delta = ANG_MAX - delta;
+
+	// the further away we are, the more accurate our shot must be.
+	// e.g. at point-blank range, even 45 degrees away can hit.
+	float acc_dist = std::max(enemy_dist, 32.0f);
+	float adjust   = acc_dist / 32.0f;
+
+	if (delta > (angle_t)(ANG90 / adjust))
+		return;
+
+	if (sl_diff > (8.0f / adjust))
+		return;
+
+	// in COOP, check if other players might be hit
+	if (! DEATHMATCH())
+	{
+		// TODO
+	}
 
 	cmd.attack = true;
 }
@@ -704,9 +768,7 @@ void bot_t::Think_Fight()
 		return;
 	}
 
-	// face the target
-	TurnToward(enemy, true);
-
+	// face target, try to open fire!
 	ShootTarget();
 
 	// decide where to move to....
@@ -1031,10 +1093,7 @@ void bot_t::Think_GetItem()
 	if (pl->mo->target)
 	{
 		if (see_enemy)
-		{
-			TurnToward(pl->mo->target, true);
 			ShootTarget();
-		}
 	}
 	else
 	{

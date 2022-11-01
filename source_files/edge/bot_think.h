@@ -116,6 +116,9 @@ public:
 	// we lose patience for every tic which we cannot see our target
 	int patience = 0;
 	bool see_enemy = false;
+	angle_t enemy_angle = 0;
+	float   enemy_slope = 0;
+	float   enemy_dist  = 0;
 
 	int move_time = 0;    // used when fighting
 	int dead_time = 0;    // increases when dead
@@ -185,6 +188,7 @@ private:
 	void LookForLeader();
 	void PathToLeader();
 	void EstimateTravelTime();
+	void UpdateEnemy();
 
 	bool IsBarrel(const mobj_t *mo);
 

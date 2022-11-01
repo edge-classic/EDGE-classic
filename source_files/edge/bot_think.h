@@ -177,7 +177,7 @@ private:
 	void WeaveToward(const mobj_t *mo);
 	void WeaveNearLeader(const mobj_t *leader);
 
-	bot_follow_path_e FollowPath();
+	bot_follow_path_e FollowPath(bool do_look);
 	void DetectObstacle();
 	void Meander();
 

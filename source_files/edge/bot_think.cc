@@ -569,12 +569,12 @@ void bot_t::TurnToward(angle_t want_angle, float want_slope, bool fast)
 
 	float diff = want_slope - M_Tan(pl->mo->vertangle);
 
-	if (fabs(diff) < 0.025)
+	if (fabs(diff) < fast ? 0.12 : 0.04)
 		look_slope = want_slope;
 	else if (diff < 0)
-		look_slope -= 0.02;
+		look_slope -= fast ? 0.1 : 0.03;
 	else
-		look_slope += 0.02;
+		look_slope += fast ? 0.1 : 0.03;
 }
 
 
@@ -730,6 +730,7 @@ void bot_t::Think_Fight()
 		// IDEA: check if a LOS exists in a position to our left or right.
 		//       if it does, the strafe purely left/right.
 		//       [ do it in Think_Help too, assuming it works ]
+		TurnToward(enemy, false);
 		WeaveToward(enemy);
 		return;
 	}
@@ -772,7 +773,7 @@ void bot_t::Think_Fight()
 		min_dist = std::max(min_dist, 224.0f);
 
 	// approach if too far away
-	if (enemy_dist < max_dist)
+	if (enemy_dist > max_dist)
 	{
 		WeaveToward(enemy);
 		return;
@@ -783,8 +784,8 @@ void bot_t::Think_Fight()
 
 	if (enemy_dist < min_dist)
 	{
-		float dx = enemy->x - pl->mo->x;
-		float dy = enemy->y - pl->mo->y;
+		float dx = pl->mo->x - enemy->x;
+		float dy = pl->mo->y - enemy->y;
 		float dlen = std::max(hypotf(dx, dy), 1.0f);
 
 		pos.x += min_dist * (dx / dlen);
@@ -886,7 +887,7 @@ void bot_t::Think_Help()
 
 	if (path != NULL)
 	{
-		switch (FollowPath())
+		switch (FollowPath(true))
 		{
 			case FOLLOW_OK:
 				return;
@@ -919,7 +920,7 @@ void bot_t::Think_Help()
 }
 
 
-bot_follow_path_e  bot_t::FollowPath()
+bot_follow_path_e  bot_t::FollowPath(bool do_look)
 {
 	// returns a FOLLOW_XXX enum constant.
 
@@ -971,6 +972,7 @@ bot_follow_path_e  bot_t::FollowPath()
 	}
 
 	// determine looking angle
+	if (do_look)
 	{
 		position_c dest = path->cur_dest();
 
@@ -997,7 +999,7 @@ void bot_t::Think_Roam()
 {
 	if (path != NULL)
 	{
-		switch (FollowPath())
+		switch (FollowPath(true))
 		{
 			case FOLLOW_OK:
 				return;
@@ -1097,6 +1099,8 @@ void bot_t::Think_GetItem()
 	// if we are being chased, look at them, shoot sometimes
 	if (pl->mo->target)
 	{
+		UpdateEnemy();
+
 		if (see_enemy)
 			ShootTarget();
 	}
@@ -1108,7 +1112,7 @@ void bot_t::Think_GetItem()
 	// follow the path previously found
 	if (path != NULL)
 	{
-		switch (FollowPath())
+		switch (FollowPath(false))
 		{
 			case FOLLOW_OK:
 				return;

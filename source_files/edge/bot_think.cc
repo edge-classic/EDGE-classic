@@ -48,7 +48,6 @@
 DEF_CVAR(bot_skill, "1", CVAR_ARCHIVE)
 
 
-static int strafe_chances[3] = { 128, 192, 256 };
 static int attack_chances[3] = {  32,  64, 160 };
 
 #define MOVE_SPEED  45
@@ -538,13 +537,6 @@ void bot_t::SelectWeapon()
 }
 
 
-void bot_t::Move()
-{
-	cmd.speed = MOVE_SPEED;
-	cmd.direction = angle + strafedir;
-}
-
-
 void bot_t::MoveToward(const position_c& pos)
 {
 	cmd.speed = MOVE_SPEED;
@@ -627,33 +619,6 @@ void bot_t::WeaveToward(const position_c& pos)
 	if (weave == -1) cmd.direction -= ANG5 * 3;
 	if (weave == +1) cmd.direction += ANG5 * 3;
 	if (weave == +2) cmd.direction += ANG5 * 12;
-
-	// TODO : REVIEW FOLLOWING LOGIC
-/*
-		// If there is a wall or something in the way, pick a new direction.
-		if (!move_ok || move_count < 0)
-		{
-			if (seetarget && move_ok)
-				cmd.face_target = true;
-
-			angle = R_PointToAngle(mo->x, mo->y, mo->target->x, mo->target->y);
-			strafedir = 0;
-			move_count = 10 + (C_Random() & 31);
-
-			if (!move_ok)
-			{
-				int r = M_Random();
-
-				if (r < 10)
-					angle = M_Random() << 24;
-				else if (r < 60)
-					strafedir = ANG90;
-				else if (r < 110)
-					strafedir = ANG270;
-			}
-		}
-	}
-*/
 }
 
 
@@ -772,10 +737,10 @@ void bot_t::Think_Fight()
 	// face target, try to open fire!
 	ShootTarget();
 
-	// decide where to move to....
+	/* --- decide where to move to --- */
 
 	// DISTANCE:
-	//   (1) melee weapons need to be as close, otherwise want some distance
+	//   (1) melee weapons need to be as close, otherwise want *some* distance
 	//   (2) dangerous weapons need a SAFE distance
 	//   (3) hit-scan weapons lose accuracy when too far away
 	//   (4) projectiles can be dodged when too far away
@@ -794,17 +759,43 @@ void bot_t::Think_Fight()
 		return;
 	}
 
+	// handle slope, equation is: `slope = dz / dist`
+	float dz = fabs(pl->mo->z - enemy->z);
+
+	float min_dist = std::min(dz * 2.0f, 480.0f);
+	float max_dist = 640.0f;
+
+	// handle dangerous weapons
+	const weapondef_c *weapon = pl->weapons[pl->ready_wp].info;
+
+	if (weapon->dangerous)
+		min_dist = std::max(min_dist, 224.0f);
+
+	// approach if too far away
+	if (enemy_dist < max_dist)
+	{
+		WeaveToward(enemy);
+		return;
+	}
+
+	// retreat if too close
 	position_c pos = { enemy->x, enemy->y, enemy->z };
 
-//	const weapondef_c *weapon = pl->weapons[pl->ready_wp].info;
-//	if (weapon->dangerous && enemy_dist < 256)
+	if (enemy_dist < min_dist)
+	{
+		float dx = enemy->x - pl->mo->x;
+		float dy = enemy->y - pl->mo->y;
+		float dlen = std::max(hypotf(dx, dy), 1.0f);
 
+		pos.x += min_dist * (dx / dlen);
+		pos.y += min_dist * (dy / dlen);
 
-	// move_time--;
+		WeaveToward(pos);
+		return;
+	}
 
-	bool move_ok = !hit_obstacle;
+	// TODO strafing
 
-	// FIXME
 }
 
 
@@ -995,8 +986,6 @@ bot_follow_path_e  bot_t::FollowPath()
 
 		TurnToward(want_angle, want_slope, false);
 	}
-
-	strafedir = 0;
 
 	WeaveToward(path->cur_dest());
 

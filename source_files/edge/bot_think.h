@@ -103,15 +103,16 @@ public:
 
 	bot_task_e task = TASK_None;
 
-	angle_t angle = 0;
-	angle_t strafedir = 0;
-
 	angle_t look_angle = 0;
 	float   look_slope = 0;
 
 	// 0 = go straight, -1 = left, +1 = right
 	int weave = 0;
 	int weave_time = 0;
+
+	// these only used during fighting, and count down
+	int strafe_left  = 0;
+	int strafe_right = 0;
 
 	// we lose patience for every tic which we cannot see our target
 	int patience = 0;
@@ -120,7 +121,6 @@ public:
 	float   enemy_slope = 0;
 	float   enemy_dist  = 0;
 
-	int move_time = 0;    // used when fighting
 	int dead_time = 0;    // increases when dead
 	int look_time = 0;    // when to look for items
 	int weapon_time = 0;  // when to reconsider weapons
@@ -171,7 +171,6 @@ private:
 	float EvaluateWeapon(int w_num, int& key) const;
 	bool  CanGetArmour(const benefit_t *be, int extendedflags) const;
 
-	void Move();
 	void MoveToward(const position_c& pos);
 	void WalkToward(const position_c& pos);
 	void WeaveToward(const position_c& pos);

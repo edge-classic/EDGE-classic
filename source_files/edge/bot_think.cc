@@ -774,16 +774,31 @@ void bot_t::Think_Fight()
 
 	// decide where to move to....
 
+	// DISTANCE:
+	//   (1) melee weapons need to be as close, otherwise want some distance
+	//   (2) dangerous weapons need a SAFE distance
+	//   (3) hit-scan weapons lose accuracy when too far away
+	//   (4) projectiles can be dodged when too far away
+	//   (5) want the mlook angle (slope) to be reasonable
+	//   (6) want to dodge a projectile from the side       (IDEA)
+	//   (7) need to avoid [falling into] damaging sectors  (TODO)
+
+	// SIDE-TO-SIDE:
+	//   (1) want to dodge projectiles from the enemy
+	//   (2) if enemy uses hit-scan, want to provide a moving target
+	//   (3) need to avoid [falling into] damaging sectors  (TODO)
+
 	if (MeleeWeapon())
 	{
-		// run directly toward target
 		WeaveToward(enemy);
 		return;
 	}
 
 	position_c pos = { enemy->x, enemy->y, enemy->z };
 
-	float dist = DistTo(pos);
+//	const weapondef_c *weapon = pl->weapons[pl->ready_wp].info;
+//	if (weapon->dangerous && enemy_dist < 256)
+
 
 	// move_time--;
 

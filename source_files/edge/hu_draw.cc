@@ -1162,7 +1162,7 @@ void HUD_GetCastPosition(float *x, float *y, float *scale_x, float *scale_y)
 	*y = COORD_Y(170);
 
 	// FIXME REVIEW THIS
-	*scale_y = 1.0;
+	//*scale_y = 4.0;
 	*scale_x = *scale_y / v_pixelaspect.f;
 }
 

@@ -395,7 +395,7 @@ void bot_t::PainResponse()
 	{
 		pl->mo->SetTarget(pl->attacker);
 		UpdateEnemy();
-		patience = 4 * TICRATE;
+		patience = 2 * TICRATE;
 	}
 }
 
@@ -431,13 +431,14 @@ void bot_t::LookForEnemies(float radius)
 	{
 		UpdateEnemy();
 
-		if (see_enemy)
+		// require slope to not be excessive, e.g. caged imps in MAP13
+		if (see_enemy && fabs(enemy_slope) < 1.0f)
 		{
 			patience = 4 * TICRATE;
 			return;
 		}
 
-		// TODO: if patience == 2 * TICRATE, try using pathing algo
+		// IDEA: if patience == 2 * TICRATE, try using pathing algo
 
 		if (patience-- >= 0)
 			return;
@@ -457,7 +458,7 @@ void bot_t::LookForEnemies(float radius)
 		{
 			pl->mo->SetTarget(enemy);
 			UpdateEnemy();
-			patience = 4 * TICRATE;
+			patience = 2 * TICRATE;
 		}
 	}
 }
@@ -761,9 +762,9 @@ void bot_t::Think_Fight()
 	// if lost sight, weave towards the target
 	if (! see_enemy)
 	{
-		// TODO check if a LOS exists in a position to our left and/or right.
-		//      if it does, the strafe purely left/right.
-		//      [ if that logic works, do it when following the leader too ]
+		// IDEA: check if a LOS exists in a position to our left or right.
+		//       if it does, the strafe purely left/right.
+		//       [ do it in Think_Help too, assuming it works ]
 		WeaveToward(enemy);
 		return;
 	}
@@ -1473,8 +1474,6 @@ void bot_t::ConvertTiccmd(ticcmd_t *dest)
 
 void bot_t::Respawn()
 {
-	// TODO in a few tics, do a NAV_FindThing to find a weapon
-
 	task = TASK_None;
 
 	path_wait   = C_Random() % 8;

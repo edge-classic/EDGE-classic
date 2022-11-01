@@ -792,7 +792,7 @@ bot_path_c * NAV_FindThing(bot_t *bot, float radius, mobj_t*& best)
 			// check link is passable
 			const nav_link_c& link = nav_links[area.first_link + k];
 
-			// doors or lifts are not allowed for things.
+			// doors, lifts and teleporters are not allowed for things.
 			// [ since getting an item and opening a door are both tasks ]
 			if (link.flags != PNODE_Normal)
 				continue;

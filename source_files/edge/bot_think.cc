@@ -763,9 +763,8 @@ void bot_t::Think_Fight()
 		// IDEA: check if a LOS exists in a position to our left or right.
 		//       if it does, the strafe purely left/right.
 		//       [ do it in Think_Help too, assuming it works ]
-		TurnToward(enemy, false);
 
-		RetreatFrom(enemy);
+		// TODO : strafe left or right
 		return;
 	}
 

@@ -392,9 +392,12 @@ void bot_t::PainResponse()
 
 	if (pl->mo->target == NULL)
 	{
-		pl->mo->SetTarget(pl->attacker);
-		UpdateEnemy();
-		patience = 2 * TICRATE;
+		if (IsEnemyVisible(pl->attacker))
+		{
+			pl->mo->SetTarget(pl->attacker);
+			UpdateEnemy();
+			patience = TICRATE;
+		}
 	}
 }
 
@@ -423,6 +426,22 @@ void bot_t::LookForLeader()
 }
 
 
+bool bot_t::IsEnemyVisible(mobj_t *enemy)
+{
+	float dx = enemy->x - pl->mo->x;
+	float dy = enemy->y - pl->mo->y;
+	float dz = enemy->z - pl->mo->z;
+
+	float slope = P_ApproxSlope(dx, dy, dz);
+
+	// require slope to not be excessive, e.g. caged imps in MAP13
+	if (slope > 1.0f)
+		return false;
+
+	return P_CheckSight(pl->mo, enemy);
+}
+
+
 void bot_t::LookForEnemies(float radius)
 {
 	// check sight of existing target
@@ -430,8 +449,7 @@ void bot_t::LookForEnemies(float radius)
 	{
 		UpdateEnemy();
 
-		// require slope to not be excessive, e.g. caged imps in MAP13
-		if (see_enemy && fabs(enemy_slope) < 1.0f)
+		if (see_enemy)
 		{
 			patience = 4 * TICRATE;
 			return;
@@ -453,11 +471,12 @@ void bot_t::LookForEnemies(float radius)
 
 	if (enemy != NULL)
 	{
-		if (P_CheckSight(pl->mo, enemy))
+		if (IsEnemyVisible(enemy))
 		{
+fprintf(stderr, "can see enemy : %s\n", enemy->info->name.c_str());
 			pl->mo->SetTarget(enemy);
 			UpdateEnemy();
-			patience = 2 * TICRATE;
+			patience = TICRATE;
 		}
 	}
 }
@@ -630,6 +649,20 @@ void bot_t::WeaveToward(const mobj_t *mo)
 }
 
 
+void bot_t::RetreatFrom(const mobj_t *enemy)
+{
+	float dx = pl->mo->x - enemy->x;
+	float dy = pl->mo->y - enemy->y;
+	float dlen = std::max(hypotf(dx, dy), 1.0f);
+
+	position_c pos { pl->mo->x, pl->mo->y, pl->mo->z };
+
+	pos.x += 16.0f * (dx / dlen);
+	pos.y += 16.0f * (dy / dlen);
+
+	WeaveToward(pos);
+}
+
 void bot_t::DetectObstacle()
 {
 	mobj_t *mo = pl->mo;
@@ -666,15 +699,12 @@ void bot_t::UpdateEnemy()
 	enemy_dist  = DistTo(pos);
 
 	// can see them?
-	see_enemy = P_CheckSight(pl->mo, enemy);
+	see_enemy = IsEnemyVisible(enemy);
 }
 
 
 void bot_t::ShootTarget()
 {
-	// turn to face them
-	TurnToward(enemy_angle, enemy_slope, true);
-
 	// no weapon to shoot?
 	if (pl->ready_wp == WPSEL_None || pl->pending_wp != WPSEL_NoChange)
 		return;
@@ -722,6 +752,9 @@ void bot_t::Think_Fight()
 {
 	// Note: LookAround() has done sight-checking of our target
 
+	// face our foe
+	TurnToward(enemy_angle, enemy_slope, true);
+
 	const mobj_t *enemy = pl->mo->target;
 
 	// if lost sight, weave towards the target
@@ -731,11 +764,12 @@ void bot_t::Think_Fight()
 		//       if it does, the strafe purely left/right.
 		//       [ do it in Think_Help too, assuming it works ]
 		TurnToward(enemy, false);
-		WeaveToward(enemy);
+
+		RetreatFrom(enemy);
 		return;
 	}
 
-	// face target, try to open fire!
+	// open fire!
 	ShootTarget();
 
 	/* --- decide where to move to --- */
@@ -780,22 +814,15 @@ void bot_t::Think_Fight()
 	}
 
 	// retreat if too close
-	position_c pos = { enemy->x, enemy->y, enemy->z };
-
 	if (enemy_dist < min_dist)
 	{
-		float dx = pl->mo->x - enemy->x;
-		float dy = pl->mo->y - enemy->y;
-		float dlen = std::max(hypotf(dx, dy), 1.0f);
-
-		pos.x += min_dist * (dx / dlen);
-		pos.y += min_dist * (dy / dlen);
-
-		WeaveToward(pos);
+		RetreatFrom(enemy);
 		return;
 	}
 
 	// TODO strafing
+
+	position_c pos = { enemy->x, enemy->y, enemy->z };
 
 }
 
@@ -1100,6 +1127,8 @@ void bot_t::Think_GetItem()
 	if (pl->mo->target)
 	{
 		UpdateEnemy();
+
+		TurnToward(enemy_angle, enemy_slope, false);
 
 		if (see_enemy)
 			ShootTarget();

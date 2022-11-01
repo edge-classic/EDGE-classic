@@ -176,6 +176,7 @@ private:
 	void WeaveToward(const position_c& pos);
 	void WeaveToward(const mobj_t *mo);
 	void WeaveNearLeader(const mobj_t *leader);
+	void RetreatFrom(const mobj_t *mo);
 
 	bot_follow_path_e FollowPath(bool do_look);
 	void DetectObstacle();
@@ -188,6 +189,7 @@ private:
 	void PathToLeader();
 	void EstimateTravelTime();
 	void UpdateEnemy();
+	bool IsEnemyVisible(mobj_t *mo);
 
 	bool IsBarrel(const mobj_t *mo);
 

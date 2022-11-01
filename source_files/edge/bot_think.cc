@@ -415,10 +415,13 @@ void bot_t::PainResponse()
 		return;
 	}
 
-	// TODO only update 'target' if threat is greater than current target
+	// TODO only update target if "threat" is greater than current target
 
 	if (pl->mo->target == NULL)
+	{
 		pl->mo->SetTarget(pl->attacker);
+		patience = 4 * TICRATE;
+	}
 }
 
 
@@ -448,20 +451,35 @@ void bot_t::LookForLeader()
 
 void bot_t::LookForEnemies(float radius)
 {
-	// TODO check sight of existing target
-	//      [ if too many checks, lose patience ]
-
-//	return; //!!!!
-
-	if (pl->mo->target == NULL)
+	// check sight of existing target
+	if (pl->mo->target != NULL)
 	{
-		mobj_t * enemy = NAV_FindEnemy(this, radius);
+		see_enemy = P_CheckSight(pl->mo, pl->mo->target);
 
-		if (enemy != NULL)
+		if (see_enemy)
 		{
-			// sight check, since enemy may be on other side of a wall
-			if (P_CheckSight(pl->mo, enemy))
-				pl->mo->SetTarget(enemy);
+			patience = 4 * TICRATE;
+			return;
+		}
+
+		if (patience-- >= 0)
+			return;
+
+		// look for a new enemy
+		pl->mo->SetTarget(NULL);
+	}
+
+	// pick a random nearby monster, then check sight, since the enemy
+	// may be on the other side of a wall.
+
+	mobj_t * enemy = NAV_FindEnemy(this, radius);
+
+	if (enemy != NULL)
+	{
+		if (P_CheckSight(pl->mo, enemy))
+		{
+			pl->mo->SetTarget(enemy);
+			patience = 4 * TICRATE;
 		}
 	}
 }
@@ -493,14 +511,10 @@ void bot_t::LookAround()
 {
 	look_time--;
 
+	LookForEnemies(1024);
+
 	if ((look_time & 3) == 2)
 		LookForLeader();
-
-	if (look_time & 1)
-	{
-		LookForEnemies(768);
-		return;
-	}
 
 	if (look_time >= 0)
 		return;
@@ -729,7 +743,7 @@ void bot_t::Chase(bool seetarget, bool move_ok)
 	{
 		NewChaseDir(move_ok);
 
-		move_count = 10 + (M_Random() & 31);
+		move_count = 10 + (M_Random() & 15);
 		strafedir = 0;
 	}
 
@@ -760,40 +774,13 @@ void bot_t::Meander()
 
 void bot_t::Think_Fight()
 {
+	// note that LookAround() has done sight checking of our target
+
 	mobj_t *mo = pl->mo;
 
-fprintf(stderr, "FIGHT %d\n", gametic);
-
-	// Check if we can see the target
-	bool seetarget = false;
-	if (mo->target)
-		seetarget = P_CheckSight(mo, mo->target);
-
-	patience--;
 	move_count--;
 
-	// Look for enemies
-	// If we aren't confident, gather more than fight.
-	if (!seetarget && patience < 0)
-	{
-		seetarget = false; //!!!  LookForEnemies();
-
-		if (mo->target)
-			patience = 20 + (M_Random() & 31) * 4;
-	}
-
-	// Can't see a target || don't have a suitable weapon to take it out with?
-	if (!seetarget && patience < 0)
-	{
-		seetarget = false; //!!!  LookForItems();
-
-		if (mo->target)
-			patience = 30 + (M_Random() & 31) * 8;
-	}
-
-	SYS_ASSERT(mo->target != NULL);
-
-	Chase(seetarget || true, !hit_obstacle);  // FIXME !!!
+	Chase(see_enemy, !hit_obstacle);  // FIXME !!!
 }
 
 

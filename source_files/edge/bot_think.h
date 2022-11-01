@@ -103,9 +103,6 @@ public:
 
 	bot_task_e task = TASK_None;
 
-	// TODO describe or remove
-	int patience = 0;
-
 	angle_t angle = 0;
 	angle_t strafedir = 0;
 
@@ -115,6 +112,10 @@ public:
 	// 0 = go straight, -1 = left, +1 = right
 	int weave = 0;
 	int weave_time = 0;
+
+	// we lose patience for every tic which we cannot see our target
+	int patience = 0;
+	bool see_enemy = false;
 
 	int move_count   = 0;
 

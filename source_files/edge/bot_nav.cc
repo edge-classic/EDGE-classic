@@ -79,11 +79,12 @@ float NAV_EvaluateBigItem(const mobj_t *mo)
 				break;
 
 			case BENEFIT_Powerup:
-				// powerups are rare in DM, these are most useful for a bot
+				// invisibility is not here, since in COOP it makes monster
+				// projectiles harder to dodge, and powerups are rare in DM.
+				// hence for bots, only invulnerability is actually useful.
 				switch (B->sub.type)
 				{
 					case PW_Invulnerable: return 100;
-					case PW_PartInvis:    return 15;
 					default:              return -1;
 				}
 				break;

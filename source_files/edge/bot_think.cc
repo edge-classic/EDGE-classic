@@ -178,10 +178,11 @@ float bot_t::EvalItem(const mobj_t *mo)
 	if (0 == (mo->flags & MF_SPECIAL))
 		return -1;
 
-	// do we really need some health?
-	float health_mul = 1.0;
-	if (mo->health < 35)
-		health_mul = 4.0;
+	bool fighting = (pl->mo->target != NULL);
+
+	// do we *really* need some health?
+	bool want_health = (mo->health < 90);
+	bool need_health = (mo->health < 45);
 
 	// handle weapons first (due to deathmatch rules)
 	for (const benefit_t *B = mo->info->pickup_benefits ; B != NULL ; B = B->next)
@@ -231,12 +232,17 @@ float bot_t::EvalItem(const mobj_t *mo)
 				return NAV_EvaluateBigItem(mo);
 
 			case BENEFIT_Armour:
+				// ignore when fighting
+				if (fighting)
+					return -1;
+
 				if (! CanGetArmour(B, mo->extendedflags))
 					continue;
 
 				return NAV_EvaluateBigItem(mo);
 
 			case BENEFIT_Health:
+			{
 				// cannot get it?
 				if (pl->health >= B->limit)
 					return -1;
@@ -250,10 +256,17 @@ float bot_t::EvalItem(const mobj_t *mo)
 					return 2;
 				}
 
-				if (B->amount > 55)
-					return 80 * health_mul;
+				// don't grab health when fighting unless we NEED it
+				if (! (need_health || (want_health && ! fighting)))
+					return -1;
+
+				if (need_health)
+					return 120;
+				else if (B->amount > 55)
+					return 40;
 				else
-					return 30 * health_mul;
+					return 30;
+			}
 
 			case BENEFIT_Ammo:
 			{
@@ -271,7 +284,10 @@ float bot_t::EvalItem(const mobj_t *mo)
 					continue;
 
 				if (pl->ammo[ammo].num == 0)
-					return 25;
+					return 35;
+				else if (fighting)
+					// ignore unneeded ammo when fighting
+					continue;
 				else
 					return 10;
 			}

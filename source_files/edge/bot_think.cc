@@ -200,9 +200,20 @@ float bot_t::EvalItem(const mobj_t *mo)
 				return -1;
 		}
 
-		// ignore backpacks in COOP
-		if (B->type == BENEFIT_AmmoLimit && ! DEATHMATCH())
-			return -1;
+		// ignore powerups, backpacks and armor in COOP.
+		// [ leave them for the human players ]
+		if (! DEATHMATCH())
+		{
+			switch (B->type)
+			{
+				case BENEFIT_Powerup:
+				case BENEFIT_Armour:
+				case BENEFIT_AmmoLimit:
+					return -1;
+
+				default: break;
+			}
+		}
 	}
 
 	for (const benefit_t *B = mo->info->pickup_benefits ; B != NULL ; B = B->next)
@@ -217,17 +228,9 @@ float bot_t::EvalItem(const mobj_t *mo)
 				return 90;
 
 			case BENEFIT_Powerup:
-				// leave it for human players in COOP
-				if (! DEATHMATCH())
-					continue;
-
 				return NAV_EvaluateBigItem(mo);
 
 			case BENEFIT_Armour:
-				// leave it for human players in COOP
-				if (! DEATHMATCH())
-					continue;
-
 				if (! CanGetArmour(B, mo->extendedflags))
 					continue;
 
@@ -238,10 +241,10 @@ float bot_t::EvalItem(const mobj_t *mo)
 				if (pl->health >= B->limit)
 					return -1;
 
-				// ignore potions in DM unless really desperate
+				// ignore potions unless really desperate
 				if (B->amount < 2.5)
 				{
-					if (DEATHMATCH() && pl->health > 19)
+					if (pl->health > 19)
 						return -1;
 
 					return 2;
@@ -253,25 +256,25 @@ float bot_t::EvalItem(const mobj_t *mo)
 					return 30 * health_mul;
 
 			case BENEFIT_Ammo:
+			{
 				if (B->sub.type == AM_NoAmmo)
 					continue;
 
-				{
-					int ammo = B->sub.type;
-					int max  = pl->ammo[ammo].max;
+				int ammo = B->sub.type;
+				int max  = pl->ammo[ammo].max;
 
-					// in COOP mode, leave some ammo for others
-					if (! DEATHMATCH())
-						max = max / 4;
+				// in COOP mode, leave some ammo for others
+				if (! DEATHMATCH())
+					max = max / 4;
 
-					if (pl->ammo[ammo].num >= max)
-						continue;
+				if (pl->ammo[ammo].num >= max)
+					continue;
 
-					if (pl->ammo[ammo].num == 0)
-						return 25;
-					else
-						return 10;
-				}
+				if (pl->ammo[ammo].num == 0)
+					return 25;
+				else
+					return 10;
+			}
 
 			case BENEFIT_Inventory:
 				// TODO : heretic stuff
@@ -486,8 +489,8 @@ void bot_t::LookAround()
 	if (look_time >= 0)
 		return;
 
-	// look for items every 1-to-2 seconds or so
-	look_time = 30 + C_Random() % 30;
+	// look for items every second or so
+	look_time = 20 + C_Random() % 20;
 
 	LookForItems(1024);
 }

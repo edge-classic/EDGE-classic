@@ -2420,6 +2420,18 @@ static void DrawMessage(void)
 	if (message_key_routine == QuitResponse && !exit_style->bg_image) // Respect dialog styles with custom backgrounds
 	{
 		I_StartFrame(); // To clear and ensure solid black background regardless of style
+		
+		if (exit_style->def->text[styledef_c::T_TEXT].colmap)
+		{
+			HUD_SetTextColor(V_GetFontColor(exit_style->def->text[styledef_c::T_TEXT].colmap));
+		}
+		
+		if(exit_style->fonts[styledef_c::T_TEXT])
+		{
+			HUD_SetFont(exit_style->fonts[styledef_c::T_TEXT]);
+		}
+		HUD_SetScale(exit_style->def->text[styledef_c::T_TEXT].scale);
+
 		HUD_DrawQuitScreen();
 		return;
 	}

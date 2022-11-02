@@ -110,9 +110,9 @@ public:
 	int weave = 0;
 	int weave_time = 0;
 
-	// these only used during fighting, and count down
-	int strafe_left  = 0;
-	int strafe_right = 0;
+	// 0 = no strafing, -1 = left, +1 = right.  only used when fighting.
+	int strafe_dir  = 0;
+	int strafe_time = 0;
 
 	// we lose patience for every tic which we cannot see our target
 	int patience = 0;
@@ -178,6 +178,7 @@ private:
 	void WeaveNearLeader(const mobj_t *leader);
 	void RetreatFrom(const mobj_t *mo);
 	void Strafe(bool right);
+	void StrafeAroundEnemy();
 
 	bot_follow_path_e FollowPath(bool do_look);
 	void DetectObstacle();

@@ -711,6 +711,30 @@ void bot_t::UpdateEnemy()
 }
 
 
+void bot_t::StrafeAroundEnemy()
+{
+	if (strafe_time-- < 0)
+	{
+		// pick a random strafe direction.
+		// it will often be the same as before, that is okay.
+		int r = C_Random();
+
+		if ((r & 3) == 0)
+			strafe_dir = 0;
+		else
+			strafe_dir = (r & 16) ? -1 : +1;
+
+		strafe_time = 20 + C_Random() % 20;
+		return;
+	}
+
+	if (strafe_dir != 0)
+	{
+		Strafe(strafe_dir > 0);
+	}
+}
+
+
 void bot_t::ShootTarget()
 {
 	// no weapon to shoot?
@@ -772,7 +796,7 @@ void bot_t::Think_Fight()
 		//       if it does, the strafe purely left/right.
 		//       [ do it in Think_Help too, assuming it works ]
 
-		// TODO : strafe left or right
+		StrafeAroundEnemy();
 		return;
 	}
 
@@ -827,8 +851,7 @@ void bot_t::Think_Fight()
 		return;
 	}
 
-	// TODO strafing
-
+	StrafeAroundEnemy();
 }
 
 

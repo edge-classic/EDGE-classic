@@ -295,6 +295,10 @@ static int NAV_CheckDoorOrLift(const seg_t *seg)
 		if (seg->back_sub->sector->c_h >= seg->front_sub->sector->c_h)
 			return PNODE_Normal;
 
+		// ignore locked doors in COOP, since bots don't puzzle solve (yet)
+		if (! DEATHMATCH() && spec->keys != KF_NONE)
+			return PNODE_Normal;
+
 		return PNODE_Door;
 	}
 

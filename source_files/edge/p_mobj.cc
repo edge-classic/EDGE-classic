@@ -64,7 +64,6 @@
 #include "r_misc.h"
 #include "r_shader.h"
 #include "s_sound.h"
-#include "z_zone.h"
 
 #include "arrays.h"
 
@@ -90,7 +89,7 @@ static void P_AddItemToQueue(const mobj_t *mo)
 	if (! (deathmatch >= 2 || level_flags.itemrespawn))
 		return;
 
-	iteminque_t *newbie = Z_New(iteminque_t, 1);
+	iteminque_t *newbie = new iteminque_t;
 
 	newbie->spawnpoint = mo->spawnpoint;
 	newbie->time = mo->info->respawntime;
@@ -1251,7 +1250,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 static void P_MobjThinker(mobj_t * mobj)
 {
 	if (mobj->next == (mobj_t *)-1)
-		I_Error("P_MobjThinker INTERNAL ERROR: mobj has been Z_Freed");
+		I_Error("P_MobjThinker INTERNAL ERROR: mobj has been freed");
 
 	if (mobj->isRemoved())
 		return;
@@ -1463,7 +1462,7 @@ static void DeleteMobj(mobj_t * mo)
 	mo->next = (mobj_t *) -1;
 	mo->prev = (mobj_t *) -1;
 
-	Z_Free(mo);
+	delete mo;
 }
 
 
@@ -1677,7 +1676,7 @@ void P_RemoveItemsInQue(void)
 		iteminque_t *tmp = itemquehead;
 		itemquehead = itemquehead->next;
 
-		Z_Free(tmp);
+		delete tmp;
 	}
 }
 
@@ -1971,7 +1970,7 @@ void P_MobjItemRespawn(void)
 		else
 			itemquehead = next;
 
-		Z_Free(cur);
+		delete cur;
 	}
 }
 
@@ -2011,9 +2010,7 @@ void P_MobjRemoveMissile(mobj_t * missile)
 //
 mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
 {
-	mobj_t *mobj = Z_New(mobj_t, 1);
-
-	Z_Clear(mobj, mobj_t, 1);
+	mobj_t *mobj = new mobj_t;
 
 #if (DEBUG_MOBJ > 0)
 	L_WriteDebug("tics=%05d  CREATE %p [%s]  AT %1.0f,%1.0f,%1.0f\n", 

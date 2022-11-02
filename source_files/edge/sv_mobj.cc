@@ -30,8 +30,6 @@
 #include "p_setup.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
-#include "z_zone.h"
-
 
 #undef SF
 #define SF  SVFIELD
@@ -323,9 +321,7 @@ void SV_MobjCreateElems(int num_elems)
 
 	for (; num_elems > 0; num_elems--)
 	{
-		mobj_t *cur = Z_New(mobj_t, 1);
-
-		Z_Clear(cur, mobj_t, 1);
+		mobj_t *cur = new mobj_t;
 
 		cur->next = mobjlisthead;
 		cur->prev = NULL;
@@ -435,9 +431,7 @@ void SV_ItemqCreateElems(int num_elems)
 
 	for (; num_elems > 0; num_elems--)
 	{
-		iteminque_t *cur = Z_New(iteminque_t, 1);
-
-		Z_Clear(cur, iteminque_t, 1);
+		iteminque_t *cur = new iteminque_t;
 
 		cur->next = itemquehead;
 		cur->prev = NULL;
@@ -476,7 +470,7 @@ void SV_ItemqFinaliseElems(void)
 		else
 			itemquehead = next;
 
-		Z_Free(cur);
+		delete cur;
 	}
 }
 

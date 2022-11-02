@@ -177,6 +177,7 @@ private:
 	void WeaveToward(const mobj_t *mo);
 	void WeaveNearLeader(const mobj_t *leader);
 	void RetreatFrom(const mobj_t *mo);
+	void Strafe(bool right);
 
 	bot_follow_path_e FollowPath(bool do_look);
 	void DetectObstacle();

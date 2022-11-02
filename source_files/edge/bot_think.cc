@@ -663,6 +663,14 @@ void bot_t::RetreatFrom(const mobj_t *enemy)
 	WeaveToward(pos);
 }
 
+
+void bot_t::Strafe(bool right)
+{
+	cmd.speed     = MOVE_SPEED;
+	cmd.direction = pl->mo->angle + (right ? ANG270 : ANG90);
+}
+
+
 void bot_t::DetectObstacle()
 {
 	mobj_t *mo = pl->mo;
@@ -820,8 +828,6 @@ void bot_t::Think_Fight()
 	}
 
 	// TODO strafing
-
-	position_c pos = { enemy->x, enemy->y, enemy->z };
 
 }
 

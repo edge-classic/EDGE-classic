@@ -293,7 +293,12 @@ static player_t *GetWhoDunnit(rad_trigger_t *R)
 	// there are multiple players who triggered the script.
 	// one option: select one of them (round robin style).
 	// However the following is probably more correct.
-	return NULL;
+	//return NULL;
+	//return players[consoleplayer];
+	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+        if (R->acti_players & (1 << pnum))
+            return players[pnum];
+			
 }
 
 

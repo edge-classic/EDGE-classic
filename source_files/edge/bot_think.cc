@@ -335,7 +335,7 @@ float bot_t::EvaluateWeapon(int w_num, int& key) const
 
 	// prefer smaller weapons for smaller monsters.
 	// when not fighting, prefer biggest non-dangerous weapon.
-	if (pl->mo->target == NULL)
+	if (pl->mo->target == NULL || DEATHMATCH())
 	{
 		if (! weapon->dangerous)
 			score += 1000.0f;
@@ -473,7 +473,6 @@ void bot_t::LookForEnemies(float radius)
 	{
 		if (IsEnemyVisible(enemy))
 		{
-fprintf(stderr, "can see enemy : %s\n", enemy->info->name.c_str());
 			pl->mo->SetTarget(enemy);
 			UpdateEnemy();
 			patience = TICRATE;

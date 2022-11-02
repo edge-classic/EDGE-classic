@@ -29,7 +29,6 @@
 #define ZONEID  0x1d4a11f1
 
 // Memory handling functions.
-void Z_Init(void);
 void *Z_Malloc(int size);
 void Z_Free(void *ptr);
 

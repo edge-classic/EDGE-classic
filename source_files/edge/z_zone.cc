@@ -47,11 +47,5 @@ void *Z_Malloc(int size)
 	return p;
 }
 
-
-void Z_Init(void)
-{
-}
-
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

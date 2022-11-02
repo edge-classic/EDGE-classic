@@ -40,8 +40,6 @@
 #include "rad_trig.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
-#include "z_zone.h"
-
 
 #undef SF
 #define SF  SVFIELD
@@ -625,9 +623,7 @@ void SV_TriggerCreateElems(int num_elems)
 
 	for (; num_elems > 0; num_elems--)
 	{
-		rad_trigger_t *cur = Z_New(rad_trigger_t, 1);
-
-		Z_Clear(cur, rad_trigger_t, 1);
+		rad_trigger_t *cur = new rad_trigger_t;
 
 		// link it in
 		cur->next = active_triggers;

@@ -39,7 +39,6 @@
 #include "p_spec.h"
 #include "r_shader.h"
 #include "r_state.h"
-#include "z_zone.h"
 
 
 // FIXME: have a proper API
@@ -140,7 +139,7 @@ static inline touch_node_t *TouchNodeAlloc(void)
 	}
 	else
 	{
-		tn = Z_New(touch_node_t, 1);
+		tn = new touch_node_t;
 	}
 
 	return tn;

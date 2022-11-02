@@ -84,13 +84,13 @@ struct region_properties_s;
 //
 typedef struct touch_node_s
 {
-	struct mobj_s *mo;
-	struct touch_node_s *mo_next;
-	struct touch_node_s *mo_prev;
+	struct mobj_s *mo = nullptr;
+	struct touch_node_s *mo_next = nullptr;
+	struct touch_node_s *mo_prev = nullptr;
 
-	struct sector_s *sec;
-	struct touch_node_s *sec_next;
-	struct touch_node_s *sec_prev;
+	struct sector_s *sec = nullptr;
+	struct touch_node_s *sec_next = nullptr;
+	struct touch_node_s *sec_prev = nullptr;
 }
 touch_node_t;
 

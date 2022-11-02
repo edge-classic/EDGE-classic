@@ -580,51 +580,51 @@ rad_script_t;
 typedef struct rad_trigger_s
 {
 	// link in list
-	struct rad_trigger_s *next;
-	struct rad_trigger_s *prev;
+	struct rad_trigger_s *next = nullptr;
+	struct rad_trigger_s *prev = nullptr;
 
 	// link for triggers with the same tag
-	struct rad_trigger_s *tag_next;
-	struct rad_trigger_s *tag_prev;
+	struct rad_trigger_s *tag_next = nullptr;
+	struct rad_trigger_s *tag_prev = nullptr;
 
 	// parent info of trigger
-	rad_script_t *info;
+	rad_script_t *info = nullptr;
 
 	// is it disabled ?
-	bool disabled;
+	bool disabled = false;
 
 	// has it been activated yet?
-	bool activated;
+	bool activated = false;
 
 	// players who activated it (bit field)
-	int acti_players;
+	int acti_players = 0;
 
 	// repeat info
-	int repeats_left;
-	int repeat_delay;
+	int repeats_left = 0;
+	int repeat_delay = 0;
 
 	// current state info
-	rts_state_t *state;
-	int wait_tics;
+	rts_state_t *state = nullptr;
+	int wait_tics = 0;
 
 	// current tip slot (each tip slot works independently).
-	int tip_slot;
+	int tip_slot = 0;
 
 	// menu style name, or NULL if not set
-	const char *menu_style_name;
+	const char *menu_style_name = nullptr;
 
 	// result of last SHOW_MENU (1 to 9, or 0 when cancelled)
-	int menu_result;
+	int menu_result = 0;
 
     // Sound handle
-	position_c sfx_origin;
+	position_c sfx_origin = {0,0,0};
 
 	// used for WAIT_UNTIL_DEAD, normally zero
-	int wud_tag;
-	int wud_count;
+	int wud_tag = 0;
+	int wud_count = 0;
 
 	// prevent repeating scripts from clogging the console
-	const char *last_con_message;
+	const char *last_con_message = nullptr;
 }
 rad_trigger_t;
 

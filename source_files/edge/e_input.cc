@@ -325,7 +325,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 {
 	UpdateForces();
 
-	Z_Clear(cmd, ticcmd_t, 1);
+	*cmd = {0,0,0,0,0,0,0,0,0,0,0,0};
 
 	bool strafe = E_IsKeyPressed(key_strafe);
 	int  speed  = E_IsKeyPressed(key_speed) ? 1 : 0;
@@ -633,7 +633,7 @@ void E_SetTurboScale(int scale)
 
 void E_ClearInput(void)
 {
-	Z_Clear(gamekeydown, byte, NUMKEYS);
+	std::fill(gamekeydown, gamekeydown+NUMKEYS, 0);
 
 	turnheld  = 0;
 	mlookheld = 0;

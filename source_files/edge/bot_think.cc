@@ -45,10 +45,9 @@
 
 
 // this ranges from 0 (EASY) to 2 (HARD)
+// TODO: re-implement skill levels
 DEF_CVAR(bot_skill, "1", CVAR_ARCHIVE)
 
-
-static int attack_chances[3] = {  32,  64, 160 };
 
 #define MOVE_SPEED  45
 
@@ -740,7 +739,7 @@ void bot_t::ShootTarget()
 	if (pl->ready_wp == WPSEL_None || pl->pending_wp != WPSEL_NoChange)
 		return;
 
-	// FIXME ammo check
+	// TODO: ammo check
 
 	// too far away?
 	if (enemy_dist > 2000)

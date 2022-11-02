@@ -46,7 +46,6 @@
 #include "m_netgame.h"
 #include "n_network.h"
 #include "n_reliable.h"
-#include "p_bot.h"
 #include "p_setup.h"
 #include "r_local.h"
 #include "s_sound.h"
@@ -60,6 +59,8 @@
 
 
 extern gameflags_t default_gameflags;
+
+extern cvar_c bot_skill;
 
 
 int netgame_menuon;
@@ -471,11 +472,8 @@ static void HostChangeOption(int opt, int key)
 			break;
 
 		case 5: // Bot Skill
-			bot_skill += dir;
-			if (bot_skill < 0)
-				bot_skill = 2;
-			else if (bot_skill > 2)
-				bot_skill = 0;
+			bot_skill = bot_skill.d + dir;
+			bot_skill = CLAMP(0, bot_skill.d, 2);
 
 			break;
 
@@ -572,7 +570,8 @@ void M_DrawHostMenu(void)
 			LocalPrintf(buffer, sizeof(buffer), "%d", host_want_bots));
 	y += 10; idx++;
 
-	DrawKeyword(idx, ng_host_style, y, "BOT SKILL", GetBotSkillName(bot_skill));
+	int skill = CLAMP(0, bot_skill.d, 2);
+	DrawKeyword(idx, ng_host_style, y, "BOT SKILL", GetBotSkillName(skill));
 	y += 18; idx++;
 
 

@@ -95,6 +95,7 @@ int key_am_clear;
 //
 
 // scale on entry
+#define  MIN_MSCALE (0.5f)
 #define INIT_MSCALE (4.0f)
 #define  MAX_MSCALE (100.0f)
 
@@ -318,7 +319,7 @@ static void ChangeWindowScale(float factor)
 {
 	m_scale *= factor;
 
-	m_scale = MAX(m_scale, 1.0);
+	m_scale = MAX(m_scale, MIN_MSCALE);
 	m_scale = MIN(m_scale, MAX_MSCALE);
 }
 
@@ -366,7 +367,8 @@ bool AM_Responder(event_t * ev)
 
 	// Had to move the automap cheat check up here thanks to Heretic's 'ravmap' cheat - Dasho
 	// -ACB- 1999/09/28 Proper casting
-	if (!DEATHMATCH() && M_CheckCheat(&cheat_amap, (char)sym))
+	// -AJA- 2022: allow this in deathmatch (as we don't have real multiplayer)
+	if (M_CheckCheat(&cheat_amap, (char)sym))
 	{
 		cheating = (cheating + 1) % 3;
 
@@ -686,8 +688,8 @@ static void AM_WalkSeg(seg_t *seg)
 		if (seg->partner && seg > seg->partner)
 			return;
 
-		GetRotatedCoords(seg->v1->x, seg->v1->y, &l.a.x, &l.a.y);
-		GetRotatedCoords(seg->v2->x, seg->v2->y, &l.b.x, &l.b.y);
+		GetRotatedCoords(seg->v1->x, seg->v1->y, l.a.x, l.a.y);
+		GetRotatedCoords(seg->v2->x, seg->v2->y, l.b.x, l.b.y);
 
 		DrawMLine(&l, RGB_MAKE(0,0,128), false);
 #endif

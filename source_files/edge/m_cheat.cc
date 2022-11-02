@@ -47,7 +47,6 @@
 #include "s_music.h"
 #include "p_local.h"
 #include "p_mobj.h"
-#include "p_bot.h"
 #include "w_wad.h"
 
 

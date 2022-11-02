@@ -26,7 +26,7 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_FLAGS "-O2 -DINLINE_G=inline -Wall")
+set(CMAKE_CXX_FLAGS "-O2 -Wall")
 if(WIN32 AND NOT MSYS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs")
   set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS")
@@ -53,6 +53,8 @@ add_executable(
 	source_files/edge/i_sound.cc    
 	source_files/edge/i_net.cc      
 	source_files/edge/am_map.cc     
+	source_files/edge/bot_nav.cc     
+	source_files/edge/bot_think.cc      
 	source_files/edge/con_con.cc    
 	source_files/edge/con_main.cc   
 	source_files/edge/con_var.cc    
@@ -83,7 +85,6 @@ add_executable(
 	source_files/edge/n_network.cc  
 	source_files/edge/p_action.cc   
 	source_files/edge/p_blockmap.cc 
-	source_files/edge/p_bot.cc      
 	source_files/edge/p_enemy.cc    
 	source_files/edge/p_inter.cc    
 	source_files/edge/p_lights.cc   

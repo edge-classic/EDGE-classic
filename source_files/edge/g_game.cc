@@ -43,7 +43,7 @@
 #include "m_menu.h"
 #include "m_random.h"
 #include "n_network.h"
-#include "p_bot.h"
+#include "bot_think.h"
 #include "p_setup.h"
 #include "p_tick.h"
 #include "rad_trig.h"

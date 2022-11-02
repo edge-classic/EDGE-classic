@@ -3816,6 +3816,8 @@ void P_PlayerAttack(mobj_t * p_obj, const atkdef_c * attack)
 	mobj_t *target = P_MapTargetAutoAim(p_obj, p_obj->angle, range, 
 				 (attack->flags & AF_ForceAim) ? true : false);
 
+	mobj_t *old_target = p_obj->target;
+
 	p_obj->SetTarget(target);
 
 	if (attack->flags & AF_FaceTarget)
@@ -3827,6 +3829,10 @@ void P_PlayerAttack(mobj_t * p_obj, const atkdef_c * attack)
 	}
 
 	P_DoAttack(p_obj);
+
+	// restore the previous target for bots
+	if (p_obj->player && (p_obj->player->playerflags & PFL_Bot))
+		p_obj->SetTarget(old_target);
 }
 
 

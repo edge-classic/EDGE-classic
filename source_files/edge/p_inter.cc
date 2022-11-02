@@ -1485,7 +1485,7 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 
 	if ((!target->threshold || target->extendedflags & EF_NOGRUDGE) &&
 		source && source != target && (!(source->extendedflags & EF_NEVERTARGET)) &&
-		! ultra_loyal)
+		! target->player && ! ultra_loyal)
 	{
 		// if not intent on another player, chase after this one
 		target->SetTarget(source);

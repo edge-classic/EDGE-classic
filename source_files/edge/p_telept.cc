@@ -36,7 +36,7 @@
 
 #define TELE_FUDGE  0.1f
 
-static mobj_t *FindTeleportMan(int tag, const mobjtype_c *info)
+mobj_t * P_FindTeleportMan(int tag, const mobjtype_c *info)
 {
     for (int i = 0; i < numsectors; i++)
     {
@@ -55,7 +55,7 @@ static mobj_t *FindTeleportMan(int tag, const mobjtype_c *info)
     return NULL;  // not found
 }
 
-static line_t *FindTeleportLine(int tag, line_t *original)
+line_t * P_FindTeleportLine(int tag, line_t *original)
 {
     for (int i = 0; i < numlines; i++)
     {
@@ -139,7 +139,7 @@ bool EV_Teleport(line_t* line, int tag, mobj_t* thing,
         if (!line || tag <= 0)
             return false;
 
-        currline = FindTeleportLine(tag, line);
+        currline = P_FindTeleportLine(tag, line);
 
         if (! currline)
             return false;
@@ -161,7 +161,7 @@ bool EV_Teleport(line_t* line, int tag, mobj_t* thing,
         if (! def->outspawnobj)
             return false;
 
-        currmobj = FindTeleportMan(tag, def->outspawnobj);
+        currmobj = P_FindTeleportMan(tag, def->outspawnobj);
 
         if (! currmobj)
             return false;

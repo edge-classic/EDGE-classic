@@ -38,7 +38,7 @@
 #include "hu_stuff.h"
 #include "m_argv.h"
 #include "m_random.h"
-#include "p_bot.h"
+#include "bot_think.h"
 #include "p_local.h"
 
 #include "vm_coal.h" // For VM_EndLevel()
@@ -396,6 +396,14 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
 
 	if (COOP_MATCH() && ! level_flags.team_damage)
 		mobj->hyperflags |= HF_SIDEIMMUNE;
+
+	if (p->isBot())
+	{
+		bot_t *bot = (bot_t *)p->build_data;
+		SYS_ASSERT(bot);
+
+		bot->Respawn();
+	}
 }
 
 

@@ -33,7 +33,7 @@
 #include "e_input.h"
 #include "m_random.h"
 #include "n_network.h"
-#include "p_bot.h"
+#include "bot_think.h"
 #include "p_local.h"
 #include "rad_trig.h"
 #include "s_blit.h"

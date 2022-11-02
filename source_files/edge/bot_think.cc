@@ -451,11 +451,11 @@ void bot_t::LookForEnemies(float radius)
 
 		if (see_enemy)
 		{
-			patience = 4 * TICRATE;
+			patience = 2 * TICRATE;
 			return;
 		}
 
-		// IDEA: if patience == 2 * TICRATE, try using pathing algo
+		// IDEA: if patience == TICRATE/2, try using pathing algo
 
 		if (patience-- >= 0)
 			return;

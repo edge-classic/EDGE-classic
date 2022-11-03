@@ -237,18 +237,22 @@ static void DrawKeyword(int index, style_c *style, int y,
 	    (netgame_menuon == 1 && index == host_pos) ||
 	    (netgame_menuon == 2 && index == join_pos);
 
-	HL_WriteText(style,(index<0)?3:is_selected?2:0, x - 10 - style->fonts[0]->StringWidth(keyword), y, keyword);
-	HL_WriteText(style,1, x + 10, y, value);
+	x = x - 10; 
+	x = x - (style->fonts[styledef_c::T_TEXT]->StringWidth(keyword) * style->def->text[styledef_c::T_TEXT].scale);
+	HL_WriteText(style,(index<0)?3:is_selected?2:0, x, y, keyword);
+	
+	x = 160;
+	HL_WriteText(style,styledef_c::T_ALT, x + 10, y, value);
 
 	if (is_selected)
 	{
 		if (style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image)
 		{
 			int cursor = 16;
-			HL_WriteText(style,2, x - style->fonts[2]->StringWidth((const char *)&cursor)/2, y, (const char *)&cursor);
+			HL_WriteText(style,styledef_c::T_TITLE, x - style->fonts[styledef_c::T_TITLE]->StringWidth((const char *)&cursor)/2, y, (const char *)&cursor);
 		}
 		else
-			HL_WriteText(style,2, x - style->fonts[2]->StringWidth("*")/2, y, "*");
+			HL_WriteText(style,styledef_c::T_TITLE, x - style->fonts[styledef_c::T_TITLE]->StringWidth("*")/2, y, "*");
 	}
 }
 
@@ -543,7 +547,13 @@ void M_DrawHostMenu(void)
 		HUD_SetAlpha(old_alpha);
 	}
 */
-	HL_WriteText(ng_host_style,2, 160 - (ng_host_style->fonts[2]->StringWidth("Bot Game Settings") / 2), 25, "Bot Game Settings");
+	int CenterX;
+	CenterX = 160;
+	CenterX -= (ng_host_style->fonts[styledef_c::T_HEADER]->StringWidth("Bot Game Settings") * ng_host_style->def->text[styledef_c::T_HEADER].scale) / 2;
+
+	HL_WriteText(ng_host_style,styledef_c::T_HEADER, CenterX, 25, "Bot Game Settings");
+
+	//HL_WriteText(ng_host_style,styledef_c::T_HEADER, 160 - (ng_host_style->fonts[styledef_c::T_HEADER]->StringWidth("Bot Game Settings") / 2), 25, "Bot Game Settings");
 
 	char buffer[200];
 
@@ -584,8 +594,10 @@ void M_DrawHostMenu(void)
 	DrawKeyword(idx, ng_host_style, y, "TEAM DAMAGE", ng_params->flags->team_damage ? "ON" : "OFF");
 	y += 22; idx++;
 
+	CenterX = 160;
+	CenterX -= (ng_host_style->fonts[styledef_c::T_HEADER]->StringWidth("Start") * ng_host_style->def->text[styledef_c::T_HEADER].scale) / 2;
 
-	HL_WriteText(ng_host_style,(host_pos==idx) ? 2:0, 160 - (ng_host_style->fonts[host_pos == idx ? 2 : 0]->StringWidth("Start") / 2),  y, "Start");
+	HL_WriteText(ng_host_style,(host_pos==idx) ? styledef_c::T_HELP:styledef_c::T_HEADER, CenterX,  y, "Start");
 }
 
 bool M_NetHostResponder(event_t * ev, int ch)

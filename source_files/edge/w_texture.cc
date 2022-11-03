@@ -32,8 +32,6 @@
 #include "w_files.h"
 #include "w_texture.h"
 #include "w_wad.h"
-#include "z_zone.h"
-
 
 class texture_set_c
 {
@@ -159,7 +157,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 		// -ES- Allocate texture, patches and columnlump/ofs in one big chunk
 		int base_size = sizeof(texturedef_t) + sizeof(texpatch_t) * (patchcount - 1);
 
-		texturedef_t * texture = (texturedef_t *) Z_Malloc(base_size + width * (sizeof(byte) + sizeof(short)));
+		texturedef_t * texture = (texturedef_t *) std::malloc(base_size + width * (sizeof(byte) + sizeof(short)));
 		cur_set->textures[i] = texture;
 
 		byte *base = (byte *)texture + base_size;

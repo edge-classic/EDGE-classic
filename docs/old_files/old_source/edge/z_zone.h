@@ -2,7 +2,7 @@
 //  EDGE Zone Memory Allocation Code 
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2009  The EDGE Team.
+//  Copyright (c) 1999-2008  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -23,35 +23,25 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+#ifndef __Z_ZONE__
+#define __Z_ZONE__
 
-#include "z_zone.h"
+#define ZONEID  0x1d4a11f1
 
+// Memory handling functions.
+void *Z_Malloc(int size);
+void Z_Free(void *ptr);
 
-void Z_Free(void *ptr)
-{
-	free(ptr);
-}
-
-
-void *Z_Malloc(int size)
-{
-	if (size == 0)
-		return NULL;
-
-	void *p = malloc(size);
-
-	if (p == NULL)
-		I_Error("Z_Malloc: failed on allocation of %i bytes", size);
-
-	return p;
-}
+//
+// Z_New
+//
+// Allocates num elements of type. Use this instead of Z_Malloc whenever
+// possible.
+//
+#define Z_New(type, num) ((type *) Z_Malloc((num) * sizeof(type)))
 
 
-void Z_Init(void)
-{
-}
-
+#endif  /* __Z_ZONE__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

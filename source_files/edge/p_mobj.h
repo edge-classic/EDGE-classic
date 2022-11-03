@@ -187,165 +187,170 @@ typedef struct mobj_s mobj_t;
 
 struct mobj_s : public position_c
 {
-	const mobjtype_c *info;
+	const mobjtype_c *info = nullptr;
 
-	angle_t angle;      // orientation
-	angle_t vertangle;  // looking up or down
+	angle_t angle = 0;      // orientation
+	angle_t vertangle = 0;  // looking up or down
 
 	// For movement checking.
-	float radius;
-	float height;
+	float radius = 0;
+	float height = 0;
 
 	// Momentum, used to update position.
-	vec3_t mom;
+	vec3_t mom = {0,0,0};
 
 	// current subsector
-	struct subsector_s *subsector;
+	struct subsector_s *subsector = nullptr;
 
 	// properties from extrafloor the thing is in
-	struct region_properties_s *props;
+	struct region_properties_s *props = nullptr;
 
 	// The closest interval over all contacted Sectors.
-	float floorz;
-	float ceilingz;
-	float dropoffz;
+	float floorz = 0;
+	float ceilingz = 0;
+	float dropoffz = 0;
 
 	// This is the current speed of the object.
 	// if fastparm, it is already calculated.
-	float speed;
-	int fuse;
+	float speed = 0;
+	int fuse = 0;
 
 	// Thing's health level
-	float health;
+	float health = 0;
 
 	// state tic counter
-	int tics;
-	int tic_skip;
+	int tics = 0;
+	int tic_skip = 0;
 
-	const struct state_s *state;
-	const struct state_s *next_state;
+	const struct state_s *state = nullptr;
+	const struct state_s *next_state = nullptr;
 
 	// flags (Old and New)
-	int flags;
-	int extendedflags;
-	int hyperflags;
-	int mbf21flags;
+	int flags = 0;
+	int extendedflags = 0;
+	int hyperflags = 0;
+	int mbf21flags = 0;
 
-	int model_skin;
-	int model_last_frame;
+	int model_skin = 0;
+	int model_last_frame = 0;
 
 	// tag ID (for special operations)
-	int tag;
-	std::string wud_tags;
+	int tag = 0;
+	std::string wud_tags = "";
 
 	// Movement direction, movement generation (zig-zagging).
-	dirtype_e movedir;  // 0-7
+	dirtype_e movedir = DI_EAST;  // 0-7
 
 	// when 0, select a new dir
-	int movecount;
+	int movecount = 0;
 
 	// Reaction time: if non 0, don't attack yet.
 	// Used by player to freeze a bit after teleporting.
-	int reactiontime;
+	int reactiontime = 0;
 
 	// If >0, the target will be chased
 	// no matter what (even if shot)
-	int threshold;
+	int threshold = 0;
 
 	// Additional info record for player avatars only.
-	struct player_s *player;
+	struct player_s *player = nullptr;
 
 	// Player number last looked for.
-	int lastlook;
+	int lastlook = 0;
 
 	// For respawning.
-	spawnpoint_t spawnpoint;
+	spawnpoint_t spawnpoint = {0,0,0,0,0,nullptr,0,0};
 
-	float origheight;
+	float origheight = 0;
 
 	// current visibility and target visibility
-	float visibility;
-	float vis_target;
+	float visibility = 0;
+	float vis_target = 0;
 
 	// current attack to be made
-	const atkdef_c *currentattack;
+	const atkdef_c *currentattack = nullptr;
 
 	// spread count for Ordered spreaders
-	int spreadcount;
+	int spreadcount = 0;
 
 	// If == validcount, already checked.
-	int validcount;
+	int validcount = 0;
 
 	// -ES- 1999/10/25 Reference Count.
 	// All the following mobj references should be set *only* via the
 	// SetXX() methods, where XX is the field name. This is useful because
 	// it sets the pointer to NULL if the mobj is removed, which protects
 	// us from a crash.
-	int refcount;
+	int refcount = 0;
 
 	// source of the mobj, used for projectiles (i.e. the shooter)
-	mobj_t * source;
+	mobj_t * source = nullptr;
 
 	// target of the mobj
-	mobj_t * target;
+	mobj_t * target = nullptr;
 
 	// current spawned fire of the mobj
-	mobj_t * tracer;
+	mobj_t * tracer = nullptr;
 
 	// if exists, we are supporting/helping this object
-	mobj_t * supportobj;
-	int side;
+	mobj_t * supportobj = nullptr;
+	int side = 0;
 
 	// objects that is above and below this one.  If there were several,
 	// then the closest one (in Z) is chosen.  We are riding the below
 	// object if the head height == our foot height.  We are being
 	// ridden if our head == the above object's foot height.
 	//
-	mobj_t * above_mo;
-	mobj_t * below_mo;
+	mobj_t * above_mo = nullptr;
+	mobj_t * below_mo = nullptr;
 
 	// these delta values give what position from the ride_em thing's
 	// center that we are sitting on.
-	float ride_dx, ride_dy;
+	float ride_dx = 0;
+	float ride_dy = 0;
 
 	// -AJA- 1999/09/25: Path support.
-	struct rad_script_s *path_trigger;
+	struct rad_script_s *path_trigger = nullptr;
 
 	// if we're on a ladder, this is the linedef #, otherwise -1.
-	int on_ladder;
+	int on_ladder = 0;
 
-	dlight_state_t dlight;
+	dlight_state_t dlight = {0,0,0,nullptr};
 
 	// monster reload support: count the number of shots
-	int shot_count;
+	int shot_count = 0;
 
 	// hash values for TUNNEL missiles
-	u32_t tunnel_hash[2];
+	u32_t tunnel_hash[2] = {0,0};
 
 	// position interpolation (disabled when lerp_num <= 1)
-	short lerp_num;
-	short lerp_pos;
+	short lerp_num = 0;
+	short lerp_pos = 0;
 
-	vec3_t lerp_from;
+	vec3_t lerp_from = {0,0,0};
 
 	// touch list: sectors this thing is in or touches
-	struct touch_node_s *touch_sectors;
+	struct touch_node_s *touch_sectors = nullptr;
 
 	// linked list (mobjlisthead)
-	mobj_t *next, *prev;
+	mobj_t *next = nullptr;
+	mobj_t *prev = nullptr;
 
 	// Interaction info, by BLOCKMAP.
 	// Links in blocks (if needed).
-	mobj_t *bnext, *bprev;
+	mobj_t *bnext = nullptr;
+	mobj_t *bprev = nullptr;
 
 	// More list: links in subsector (if needed)
-	mobj_t *snext, *sprev;
+	mobj_t *snext = nullptr;
+	mobj_t *sprev = nullptr;
 
 	// One more: link in dynamic light blockmap
-	mobj_t *dlnext, *dlprev;
+	mobj_t *dlnext = nullptr;
+	mobj_t *dlprev = nullptr;
 
 	// Player number last heard.
-	int lastheard;
+	int lastheard = 0;
 
 public:
 	bool isRemoved() const;
@@ -364,10 +369,10 @@ public:
 // Item-in-Respawn-que Structure -ACB- 1998/07/30
 typedef struct iteminque_s
 {
-	spawnpoint_t spawnpoint;
-	int time;
-	struct iteminque_s *next;
-	struct iteminque_s *prev;
+	spawnpoint_t spawnpoint = {0,0,0,0,0,nullptr,0,0};
+	int time = 0;
+	struct iteminque_s *next = nullptr;
+	struct iteminque_s *prev = nullptr;
 }
 iteminque_t;
 

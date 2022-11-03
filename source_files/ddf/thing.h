@@ -638,13 +638,13 @@ condition_check_type_e;
 typedef struct condition_check_s
 {
 	// next in linked list (order is unimportant)
-	struct condition_check_s *next;
+	struct condition_check_s *next = nullptr;
 
 	// negate the condition
-	bool negate;
+	bool negate = false;
 
 	// condition typing. -ACB- 2003/05/15: Made an integer to hold condition_check_type_e enumeration
-	int cond_type;
+	int cond_type = 0;
 
 	// sub-type (specific type of ammo, weapon, key, powerup, inventory).  Not used
 	// for health, jumping, crouching, etc.
@@ -657,7 +657,7 @@ typedef struct condition_check_s
 
 	// required amount of health, armour, ammo, inventory or "counter",   Not used for
 	// weapon, key, powerup, jumping, crouching, etc.
-	float amount;
+	float amount = 0;
 }
 condition_check_t;
 

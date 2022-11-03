@@ -90,7 +90,6 @@
 #include "w_wad.h"
 #include "version.h"
 #include "vm_coal.h"
-#include "z_zone.h"
 
 // Application active?
 int app_state = APP_STATE_ACTIVE;
@@ -1662,9 +1661,6 @@ void E_Main(int argc, const char **argv)
 {
 	// Seed M_Random RNG
 	M_Random_Init();
-
-	// Start memory allocation system at the very start (SCHEDULED FOR REMOVAL)
-	Z_Init();
 
 	// Implemented here - since we need to bring the memory manager up first
 	// -ACB- 2004/05/31

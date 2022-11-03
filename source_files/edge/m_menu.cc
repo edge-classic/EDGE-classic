@@ -62,7 +62,6 @@
 #include "sv_chunk.h"
 #include "sv_main.h"
 #include "w_wad.h"
-#include "z_zone.h"
 
 #include "font.h"
 
@@ -217,25 +216,25 @@ static slot_extra_info_t ex_slots[SAVE_SLOTS];
 typedef struct
 {
 	// 0 = no cursor here, 1 = ok, 2 = arrows ok
-	int status;
+	int status = 0;
 
   	// image for menu entry
-	char patch_name[10];
-	const image_c *image;
+	char patch_name[10] = {0};
+	const image_c *image = nullptr;
 
   	// choice = menu item #.
   	// if status = 2, choice can be SLIDERLEFT or SLIDERRIGHT
-	void (* select_func)(int choice);
+	void (* select_func)(int choice) = nullptr;
 
 	// hotkey in menu
-	char alpha_key;
+	char alpha_key = 0;
 
 	// Printed name test
-	const char *name = NULL;
+	const char *name = nullptr;
 
 	// Useful for drawing skull/cursor and possible other calculations
-	int x;
-	int y;
+	int x = 0;
+	int y = 0;
 	float height = -1;
 	float width = -1;
 }
@@ -1357,9 +1356,7 @@ static void CreateEpisodeMenu(void)
 	if (gamedefs.GetSize() == 0)
 		I_Error("No defined episodes !\n");
 
-	EpisodeMenu = Z_New(menuitem_t, gamedefs.GetSize());
-
-	Z_Clear(EpisodeMenu, menuitem_t, gamedefs.GetSize());
+	EpisodeMenu = new menuitem_t[gamedefs.GetSize()];
 
 	int e = 0;
 	epi::array_iterator_c it;

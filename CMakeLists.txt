@@ -148,8 +148,7 @@ add_executable(
 	source_files/edge/w_pk3.cc
 	source_files/edge/w_sprite.cc
 	source_files/edge/w_texture.cc
-	source_files/edge/w_wad.cc
-	source_files/edge/z_zone.cc     
+	source_files/edge/w_wad.cc 
 	source_files/edge/vm_coal.cc    
 	source_files/edge/vm_hud.cc     
 	source_files/edge/vm_player.cc  

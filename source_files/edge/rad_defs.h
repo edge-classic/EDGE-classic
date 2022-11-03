@@ -32,25 +32,25 @@ struct rad_trigger_s;
 
 typedef struct s_weapon_s
 {
-	char *name;
+	char *name = nullptr;
 }
 s_weapon_t;
 
 typedef struct s_tip_s
 {
 	// tip text or graphic.  Two of these must be NULL.
-	const char *tip_text;
-	char *tip_ldf;
-	char *tip_graphic;
+	const char *tip_text = nullptr;
+	char *tip_ldf = nullptr;
+	char *tip_graphic = nullptr;
 
 	// display time, in ticks
-	int display_time;
+	int display_time = 0;
 
 	// play the TINK sound ?
-	bool playsound;
+	bool playsound = false;
 
 	// graphic scaling (1.0 is normal, higher is bigger).
-	float gfx_scale;
+	float gfx_scale = 0;
 }
 s_tip_t;
 
@@ -58,38 +58,39 @@ s_tip_t;
 typedef struct s_tip_prop_s
 {
 	// new slot number, or < 0 for no change.
-	int slot_num;
+	int slot_num = 0;
 
 	// tip position (as a percentage, 0-255), < 0 for no change
-	percent_t x_pos, y_pos;
+	percent_t x_pos = 0;
+	percent_t y_pos = 0;
 
 	// left justify.  Can be 1, 0, or < 0 for no change.
-	int left_just;
+	int left_just = 0;
 
 	// tip color, or NULL for no change
-	const char *color_name;
+	const char *color_name = nullptr;
 
 	// translucency value (normally 1.0), or < 0 for no change
-	percent_t translucency;
+	percent_t translucency = 0;
 
 	// time (in tics) to reach target.
-	int time;
+	int time = 0;
 }
 s_tip_prop_t;
 
 
 typedef struct s_show_menu_s
 {
-	bool use_ldf;
+	bool use_ldf = false;
 
-	char *title;
-	char *options[9];
+	char *title = nullptr;
+	char *options[9] = {nullptr};
 }
 s_show_menu_t;
 
 typedef struct s_menu_style_s
 {
-	char *style;
+	char *style = nullptr;
 }
 s_menu_style_t;
 
@@ -97,7 +98,7 @@ typedef struct s_jump_on_s
 {
 	// int vartype;  /* only MENU currently supported */
 
-	char *labels[9];
+	char *labels[9] = {nullptr};
 }
 s_jump_on_t;
 
@@ -105,26 +106,26 @@ s_jump_on_t;
 typedef struct s_thing_s
 {
 	// spawn coordinates.  z can be ONFLOORZ or ONCEILINGZ.
-	float x;
-	float y;
-	float z;
+	float x = 0;
+	float y = 0;
+	float z = 0;
 
-	angle_t angle;
-	float slope;
-	int tag;
+	angle_t angle = 0;
+	float slope = 0;
+	int tag = 0;
 
-	when_appear_e appear;
+	when_appear_e appear = WNAP_None;
 
 	// -AJA- 1999/09/11: since the RSCRIPT lump can be loaded before
 	//       DDF* lumps, we can't store a pointer to a mobjtype_c here
 	//       (and the mobjtypes can move about with later additions).
 
 	// thing's DDF name, or if NULL, then thing's mapnumber.
-	char *thing_name;
-	int thing_type;
+	char *thing_name = nullptr;
+	int thing_type = 0;
 
-	bool ambush;
-	bool spawn_effect;
+	bool ambush = false;
+	bool spawn_effect = false;
 }
 s_thing_t;
 
@@ -132,7 +133,7 @@ s_thing_t;
 // Radius Damage Player Trigger
 typedef struct
 {
-	float damage_amount;
+	float damage_amount = 0;
 }
 s_damagep_t;
 
@@ -140,8 +141,8 @@ s_damagep_t;
 // Radius Heal Player Trigger
 typedef struct
 {
-	float limit;
-	float heal_amount;
+	float limit = 0;
+	float heal_amount = 0;
 }
 s_healp_t;
 
@@ -149,9 +150,9 @@ s_healp_t;
 // Radius GiveArmour Player Trigger
 typedef struct
 {
-	armour_type_e type;
-	float limit;
-	float armour_amount;
+	armour_type_e type = ARMOUR_Green;
+	float limit = 0;
+	float armour_amount = 0;
 }
 s_armour_t;
 
@@ -159,8 +160,8 @@ s_armour_t;
 // Radius Give/Lose Benefit
 typedef struct
 {
-	benefit_t *benefit;
-	bool lose_it;  // or use_it :)
+	benefit_t *benefit = nullptr;
+	bool lose_it = false;  // or use_it :)
 }
 s_benefit_t;
 
@@ -170,12 +171,12 @@ typedef struct s_damage_monsters_s
 {
 	// type of monster to damage: DDF name, or if NULL, then the
 	// monster's mapnumber, or if -1 then ANY monster can be damaged.
-	char *thing_name;
-	int thing_type;
-	int thing_tag;
+	char *thing_name = nullptr;
+	int thing_type = 0;
+	int thing_tag = 0;
 
 	// how much damage to do
-	float damage_amount;
+	float damage_amount = 0;
 }
 s_damage_monsters_t;
 
@@ -183,9 +184,9 @@ s_damage_monsters_t;
 // Set Skill
 typedef struct
 {
-	skill_t skill;
-	bool respawn;
-	bool fastmonsters;
+	skill_t skill = sk_baby;
+	bool respawn = false;
+	bool fastmonsters = false;
 }
 s_skill_t;
 
@@ -193,12 +194,12 @@ s_skill_t;
 // Go to map
 typedef struct
 {
-	char *map_name;
+	char *map_name = nullptr;
 
-	bool skip_all;
-	bool is_hub;
+	bool skip_all = false;
+	bool is_hub = false;
 
-	int tag;
+	int tag = 0;
 }
 s_gotomap_t;
 
@@ -213,12 +214,14 @@ s_sound_kind_e;
 
 typedef struct s_sound_s
 {
-	int kind;
+	int kind = 0;
 
 	// sound location.  z can be ONFLOORZ.
-	float x, y, z;
+	float x = 0;
+	float y = 0;
+	float z = 0;
 
-	struct sfx_s *sfx;
+	struct sfx_s *sfx = nullptr;
 }
 s_sound_t;
 
@@ -227,10 +230,10 @@ s_sound_t;
 typedef struct s_music_s
 {
 	// playlist entry number
-	int playnum;
+	int playnum = 0;
 
 	// whether to loop or not
-	bool looping;
+	bool looping = false;
 }
 s_music_t;
 
@@ -240,16 +243,16 @@ typedef struct s_movesector_s
 {
 	// tag to apply to.  When tag == 0, use the exact sector number
 	// (deprecated, but kept for backwards compat).
-	int tag;
-	int secnum;
+	int tag = 0;
+	int secnum = 0;
 
 	// Ceiling or Floor
-	bool is_ceiling;
+	bool is_ceiling = false;
 
 	// when true, add the value to current height.  Otherwise set it.
-	bool relative;
+	bool relative = false;
 
-	float value;
+	float value = 0;
 }
 s_movesector_t;
 
@@ -259,13 +262,13 @@ typedef struct s_lightsector_s
 {
 	// tag to apply to.  When tag == 0, use the exact sector number
 	// (deprecated, but kept for backwards compat).
-	int tag;
-	int secnum;
+	int tag = 0;
+	int secnum = 0;
 
 	// when true, add the value to current light.  Otherwise set it.
-	bool relative;
+	bool relative = false;
 
-	float value;
+	float value = 0;
 }
 s_lightsector_t;
 
@@ -275,11 +278,11 @@ typedef struct s_enabler_s
 {
 	// script to enable/disable.  If script_name is NULL, then `tag' is
 	// the tag number to enable/disable.
-	char *script_name;
-	int tag;
+	char *script_name = nullptr;
+	int tag = 0;
 
 	// true to disable, false to enable
-	bool new_disabled;
+	bool new_disabled = false;
 }
 s_enabler_t;
 
@@ -288,10 +291,10 @@ s_enabler_t;
 typedef struct s_lineactivator_s
 {
 	// line type
-	int typenum;
+	int typenum = 0;
 
 	// sector tag
-	int tag;
+	int tag = 0;
 }
 s_lineactivator_t;
 
@@ -300,7 +303,7 @@ s_lineactivator_t;
 typedef struct s_lineunblocker_s
 {
 	// line tag
-	int tag;
+	int tag = 0;
 }
 s_lineunblocker_t;
 
@@ -309,15 +312,15 @@ s_lineunblocker_t;
 typedef struct s_jump_s
 {
 	// label name
-	char *label;
+	char *label = nullptr;
 
 	// state to jump to.  Initially NULL, it is looked up when needed
 	// (since the label may be a future reference, we can't rely on
 	// looking it up at parse time).
-	struct rts_state_s *cache_state;
+	struct rts_state_s *cache_state = nullptr;
 
 	// chance that the jump is taken.
-	percent_t random_chance;
+	percent_t random_chance = 0;
 }
 s_jump_t;
 
@@ -326,9 +329,9 @@ s_jump_t;
 typedef struct s_exit_s
 {
 	// exit time, in tics
-	int exittime;
+	int exittime = 0;
 
-	bool is_secret;
+	bool is_secret = false;
 }
 s_exit_t;
 
@@ -358,10 +361,10 @@ changetex_type_e;
 typedef struct s_changetex_s
 {
 	// what to change
-	changetex_type_e what;
+	changetex_type_e what = CHTEX_RightUpper;
 
 	// texture/flat name
-	char texname[10];
+	char texname[10] = {0};
 
 	// tags used to find lines/sectors to change.  The `tag' value must
 	// match sector.tag for sector changers and line.tag for line
@@ -369,7 +372,8 @@ typedef struct s_changetex_s
 	// for sector changers, a line in the sector must match subtag, and
 	// for line changers, the sector on the given side must match the
 	// subtag.  Both are ignored for sky changers.
-	int tag, subtag;
+	int tag = 0;
+	int subtag = 0;
 }
 s_changetex_t;
 
@@ -379,13 +383,13 @@ typedef struct s_thing_event_s
 {
 	// DDF type name of thing to cause the event.  If NULL, then the
 	// thing map number is used instead.
-	const char *thing_name;
-	int thing_type;
-	int thing_tag;
+	const char *thing_name = nullptr;
+	int thing_type = 0;
+	int thing_tag = 0;
 
 	// label to jump to
-	const char *label;
-	int offset;
+	const char *label = nullptr;
+	int offset = 0;
 }
 s_thing_event_t;
 
@@ -393,18 +397,18 @@ s_thing_event_t;
 typedef struct s_weapon_event_s
 {
 	// DDF type name of weapon to cause the event. 
-	const char *weapon_name;
+	const char *weapon_name = nullptr;
 
 	// label to jump to
-	const char *label;
-	int offset;
+	const char *label = nullptr;
+	int offset = 0;
 }
 s_weapon_event_t;
 
 typedef struct s_weapon_replace_s
 {
-	const char *old_weapon;
-	const char *new_weapon;
+	const char *old_weapon = nullptr;
+	const char *new_weapon = nullptr;
 }
 s_weapon_replace_t;
 
@@ -414,20 +418,20 @@ s_weapon_replace_t;
 typedef struct rts_state_s
 {
 	// link in list of states
-	struct rts_state_s *next;
-	struct rts_state_s *prev;
+	struct rts_state_s *next = nullptr;
+	struct rts_state_s *prev = nullptr;
 
 	// duration in tics
-	int tics;
+	int tics = 0;
 
 	// routine to be performed
-	void (*action)(struct rad_trigger_s *trig, void *param);
+	void (*action)(struct rad_trigger_s *trig, void *param) = nullptr;
 
 	// parameter for routine, or NULL
-	void *param;
+	void *param = nullptr;
 
 	// state's label, or NULL
-	char *label;
+	char *label = nullptr;
 }
 rts_state_t;
 
@@ -436,12 +440,12 @@ rts_state_t;
 typedef struct rts_path_s
 {
 	// next in list, or NULL
-	struct rts_path_s *next;
+	struct rts_path_s *next = nullptr;
 
-	const char *name;
+	const char *name = nullptr;
 
 	// cached pointer to script
-	struct rad_script_s *cached_scr;
+	struct rad_script_s *cached_scr = nullptr;
 }
 rts_path_t;
 
@@ -450,19 +454,19 @@ rts_path_t;
 typedef struct s_ondeath_s
 {
 	// next in link (order is unimportant)
-	struct s_ondeath_s *next;
+	struct s_ondeath_s *next = nullptr;
 
 	// thing's DDF name, or if NULL, then thing's mapnumber.
-	char *thing_name;
-	int thing_type;
+	char *thing_name = nullptr;
+	int thing_type = 0;
 
 	// threshhold: number of things still alive before the trigger can
 	// activate.  Defaults to zero (i.e. all of them must be dead).
-	int threshhold;
+	int threshhold = 0;
 
 	// mobjdef pointer, computed the first time this ONDEATH condition
 	// is tested.
-	const mobjtype_c *cached_info;
+	const mobjtype_c *cached_info = nullptr;
 }
 s_ondeath_t;
 
@@ -471,21 +475,22 @@ s_ondeath_t;
 typedef struct s_onheight_s
 {
 	// next in link (order is unimportant)
-	struct s_onheight_s *next;
+	struct s_onheight_s *next = nullptr;
 
 	// Ceiling/Floor
-	bool is_ceil;
+	bool is_ceil = false;
 
 	// height range, trigger won't activate until sector's floor is
 	// within this range (inclusive).
-	float z1, z2;
+	float z1 = 0;
+	float z2 = 0;
 
 	// sector number, < 0 means use the trigger's location
-	int sec_num;
+	int sec_num = 0;
 
 	// sector pointer, computed the first time this ONHEIGHT condition
 	// is tested.
-	sector_t *cached_sector;
+	sector_t *cached_sector = nullptr;
 }
 s_onheight_t;
 
@@ -494,10 +499,10 @@ s_onheight_t;
 typedef struct s_wait_until_dead_s
 {
 	// tag number to give the monsters which we'll wait on
-	int tag;
+	int tag = 0;
 
 	// the DDF names of the monsters to wait for
-	const char *mon_names[10];
+	const char *mon_names[10] = {nullptr};
 }
 s_wait_until_dead_t;
 
@@ -508,64 +513,68 @@ s_wait_until_dead_t;
 typedef struct rad_script_s
 {
 	// link in list
-	struct rad_script_s *next;
-	struct rad_script_s *prev;
+	struct rad_script_s *next = nullptr;
+	struct rad_script_s *prev = nullptr;
 
 	// Which map
-	char *mapid;
+	char *mapid = nullptr;
 
 	// When appears
-	when_appear_e appear;
+	when_appear_e appear = WNAP_None;
 
-	int min_players;
-	int max_players;
+	int min_players = 0;
+	int max_players = 0;
 
 	// Map Coordinates
-	float x, y, z;
+	float x = 0;
+	float y = 0;
+	float z = 0;
 
 	// Trigger size
-	float rad_x, rad_y, rad_z;
+	float rad_x = 0;
+	float rad_y = 0;
+	float rad_z = 0;
 
 	// Script name (or NULL)
-	char *script_name;
+	char *script_name = nullptr;
 
 	// Script tag (or 0 for none)
-	int tag;
+	int tag = 0;
 
 	// ABSOLUTE mode: minimum players needed to trigger, -1 for ALL
-	int absolute_req_players;
+	int absolute_req_players = 0;
 
 	// Initially disabled ?
-	bool tagged_disabled;
+	bool tagged_disabled = false;
 
 	// Check for use.
-	bool tagged_use;
+	bool tagged_use = false;
 
 	// Continues working ?
-	bool tagged_independent;
+	bool tagged_independent = false;
 
 	// Requires no player intervention ?
-	bool tagged_immediate;
+	bool tagged_immediate = false;
 
 	// Tagged_Repeat info (normal if repeat_count < 0)
-	int repeat_count;
-	int repeat_delay;
+	int repeat_count = 0;
+	int repeat_delay = 0;
 
 	// Optional conditions...
-	s_ondeath_t *boss_trig;
-	s_onheight_t *height_trig;
-	condition_check_t *cond_trig;
+	s_ondeath_t *boss_trig = nullptr;
+	s_onheight_t *height_trig = nullptr;
+	condition_check_t *cond_trig = nullptr;
 
 	// Path info
-	rts_path_t *next_in_path;
-	int next_path_total;
+	rts_path_t *next_in_path = nullptr;
+	int next_path_total = 0;
 
-	const char *path_event_label;
-	int path_event_offset;
+	const char *path_event_label = nullptr;
+	int path_event_offset = 0;
 
 	// Set of states
-	rts_state_t *first_state;
-	rts_state_t *last_state;
+	rts_state_t *first_state = nullptr;
+	rts_state_t *last_state = nullptr;
 
 	// CRC of the important parts of this RTS script.
 	epi::crc32_c crc;
@@ -580,51 +589,51 @@ rad_script_t;
 typedef struct rad_trigger_s
 {
 	// link in list
-	struct rad_trigger_s *next;
-	struct rad_trigger_s *prev;
+	struct rad_trigger_s *next = nullptr;
+	struct rad_trigger_s *prev = nullptr;
 
 	// link for triggers with the same tag
-	struct rad_trigger_s *tag_next;
-	struct rad_trigger_s *tag_prev;
+	struct rad_trigger_s *tag_next = nullptr;
+	struct rad_trigger_s *tag_prev = nullptr;
 
 	// parent info of trigger
-	rad_script_t *info;
+	rad_script_t *info = nullptr;
 
 	// is it disabled ?
-	bool disabled;
+	bool disabled = false;
 
 	// has it been activated yet?
-	bool activated;
+	bool activated = false;
 
 	// players who activated it (bit field)
-	int acti_players;
+	int acti_players = 0;
 
 	// repeat info
-	int repeats_left;
-	int repeat_delay;
+	int repeats_left = 0;
+	int repeat_delay = 0;
 
 	// current state info
-	rts_state_t *state;
-	int wait_tics;
+	rts_state_t *state = nullptr;
+	int wait_tics = 0;
 
 	// current tip slot (each tip slot works independently).
-	int tip_slot;
+	int tip_slot = 0;
 
 	// menu style name, or NULL if not set
-	const char *menu_style_name;
+	const char *menu_style_name = nullptr;
 
 	// result of last SHOW_MENU (1 to 9, or 0 when cancelled)
-	int menu_result;
+	int menu_result = 0;
 
     // Sound handle
-	position_c sfx_origin;
+	position_c sfx_origin = {0,0,0};
 
 	// used for WAIT_UNTIL_DEAD, normally zero
-	int wud_tag;
-	int wud_count;
+	int wud_tag = 0;
+	int wud_count = 0;
 
 	// prevent repeating scripts from clogging the console
-	const char *last_con_message;
+	const char *last_con_message = nullptr;
 }
 rad_trigger_t;
 

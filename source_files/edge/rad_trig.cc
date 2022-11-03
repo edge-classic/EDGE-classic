@@ -61,8 +61,6 @@
 #include "r_modes.h"
 #include "s_sound.h"
 #include "w_wad.h"
-#include "z_zone.h"
-
 
 // Static Scripts.  Never change once all scripts have been read in.
 rad_script_t *r_scripts = NULL;
@@ -623,8 +621,7 @@ static void DoRemoveTrigger(rad_trigger_t *trig)
 
     S_StopFX(&trig->sfx_origin);
 
-	// FIXME: delete !
-    Z_Free(trig);
+    delete trig;
 }
 
 //
@@ -861,9 +858,7 @@ void RAD_SpawnTriggers(const char *map_name)
 			continue;
 
 		// OK, spawn new dynamic trigger
-		trig = Z_New(rad_trigger_t, 1);
-
-		Z_Clear(trig, rad_trigger_t, 1);
+		trig = new rad_trigger_t;
 
 		trig->info = scr;
 		trig->disabled = scr->tagged_disabled;
@@ -922,7 +917,7 @@ void RAD_ClearTriggers(void)
 		rad_trigger_t *trig = active_triggers;
 		active_triggers = trig->next;
 
-		Z_Free(trig);
+		delete trig;
 	}
 
 	RAD_ClearCachedInfo();

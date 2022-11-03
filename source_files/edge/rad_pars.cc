@@ -34,11 +34,8 @@
 #include "r_modes.h"
 #include "w_wad.h"
 #include "version.h"
-#include "z_zone.h"
-
 
 typedef std::vector<const char *> param_set_t;
-
 
 // TODO remove these eventually, use std::string
 static char * Z_StrDup(const char *s)
@@ -457,9 +454,7 @@ static void AddStateToScript(rad_script_t *R, int tics,
 							 void (* action)(struct rad_trigger_s *R, void *param), 
 							 void *param)
 {
-	rts_state_t *state = Z_New(rts_state_t, 1);
-
-	Z_Clear(state, rts_state_t, 1);
+	rts_state_t *state = new rts_state_t;
 
 	state->tics = tics;
 	state->action = action;
@@ -488,14 +483,14 @@ static void AddStateToScript(rad_script_t *R, int tics,
 //
 static void ClearOneScript(rad_script_t *scr)
 {
-	Z_Free(scr->mapid);
+	delete scr->mapid;
 
 	while (scr->boss_trig)
 	{
 		s_ondeath_t *cur = scr->boss_trig;
 		scr->boss_trig = cur->next;
 
-		Z_Free(cur);
+		delete cur;
 	}
 
 	while (scr->height_trig)
@@ -503,7 +498,7 @@ static void ClearOneScript(rad_script_t *scr)
 		s_onheight_t *cur = scr->height_trig;
 		scr->height_trig = cur->next;
 
-		Z_Free(cur);
+		delete cur;
 	}
 
 	// free all states
@@ -513,9 +508,9 @@ static void ClearOneScript(rad_script_t *scr)
 		scr->first_state = cur->next;
 
 		if (cur->param)
-			Z_Free(cur->param);
+			delete cur->param;
 
-		Z_Free(cur);
+		delete cur;
 	}
 }
 
@@ -550,7 +545,7 @@ static void ClearPreviousScripts(const char *mapid)
 
 			ClearOneScript(scr);
 
-			Z_Free(scr);
+			delete scr;
 		}
 	}
 }
@@ -568,7 +563,7 @@ static void ClearAllScripts(void)
 
 		ClearOneScript(scr);
 
-		Z_Free(scr);
+		delete scr;
 	}
 }
 
@@ -804,9 +799,7 @@ static void RAD_ParseRadiusTrigger(param_set_t& pars)
 
 	// Set the node up,..
 
-	this_rad = Z_New(rad_script_t, 1);
-
-	Z_Clear(this_rad, rad_script_t, 1);
+	this_rad = new rad_script_t;
 
 	// set defaults
 	this_rad->x = 0;
@@ -1061,9 +1054,7 @@ static void RAD_ParseTaggedPath(param_set_t& pars)
 {
 	// Tagged_Path  <next node>
 
-	rts_path_t *path = Z_New(rts_path_t, 1);
-
-	Z_Clear(path, rts_path_t, 1);
+	rts_path_t *path = new rts_path_t;
 
 	path->next = this_rad->next_in_path;
 	path->name = Z_StrDup(pars[1]);
@@ -1090,7 +1081,7 @@ static void RAD_ParsePathEvent(param_set_t& pars)
 	if (i <= 0)
 		RAD_Error("%s: Bad label '%s'.\n", pars[0], pars[2]);
 
-	this_rad->path_event_label = Z_New(const char, i + 1);
+	this_rad->path_event_label = new char[i+1];
 	Z_StrNCpy((char *)this_rad->path_event_label, pars[1], i);
 
 	this_rad->path_event_offset = div ? MAX(0, atoi(div+1) - 1) : 0;
@@ -1101,9 +1092,7 @@ static void RAD_ParseOnDeath(param_set_t& pars)
 	// OnDeath <thing type>
 	// OnDeath <thing type> <threshhold>
 
-	s_ondeath_t *cond = Z_New(s_ondeath_t, 1);
-
-	Z_Clear(cond, s_ondeath_t, 1);
+	s_ondeath_t *cond = new s_ondeath_t;
 
 	// get map thing
 	if (pars[1][0] == '-' || pars[1][0] == '+' || isdigit(pars[1][0]))
@@ -1131,9 +1120,7 @@ static void RAD_ParseOnHeight(param_set_t& pars)
 	// OnCeilingHeight <low Z> <high Z>
 	// OnCeilingHeight <low Z> <high Z> <sector num>
 
-	s_onheight_t *cond = Z_New(s_onheight_t, 1);
-
-	Z_Clear(cond, s_onheight_t, 1);
+	s_onheight_t *cond = new s_onheight_t;
 
 	cond->sec_num = -1;
 
@@ -1161,13 +1148,11 @@ static void RAD_ParseOnCondition(param_set_t& pars)
 {
 	// OnCondition  <condition>
 
-	condition_check_t *cond = Z_New(condition_check_t, 1);
-
-	Z_Clear(cond, condition_check_t, 1);
+	condition_check_t *cond = new condition_check_t;
 
 	if (! DDF_MainParseCondition(pars[1], cond))
 	{
-		Z_Free(cond);
+		delete cond;
 		return;
 	}
 
@@ -1195,9 +1180,7 @@ static void RAD_ParseEnableScript(param_set_t& pars)
 	// Enable_Script  <script name>
 	// Disable_Script <script name>
 
-	s_enabler_t *t = Z_New(s_enabler_t, 1);
-
-	Z_Clear(t, s_enabler_t, 1);
+	s_enabler_t *t = new s_enabler_t;
 
 	t->script_name = Z_StrDup(pars[1]);
 	t->new_disabled = DDF_CompareName("DISABLE_SCRIPT", pars[0]) == 0;
@@ -1210,9 +1193,7 @@ static void RAD_ParseEnableTagged(param_set_t& pars)
 	// Enable_Tagged  <tag num>
 	// Disable_Tagged <tag num>
 
-	s_enabler_t * t = Z_New(s_enabler_t, 1);
-
-	Z_Clear(t, s_enabler_t, 1);
+	s_enabler_t * t = new s_enabler_t;
 
 	// Modified RAD_CheckForInt
 	const char *pos = pars[1];
@@ -1244,10 +1225,8 @@ static void RAD_ParseExitLevel(param_set_t& pars)
 	// SecretExit
 	// SecretExit <wait time>
 
-	s_exit_t *exit = Z_New(s_exit_t, 1);
+	s_exit_t *exit = new s_exit_t;
 
-	Z_Clear(exit, s_exit_t, 1);
-	
 	exit->exittime = 10;
 	exit->is_secret = DDF_CompareName("SECRETEXIT", pars[0]) == 0;
 
@@ -1277,9 +1256,7 @@ static void RAD_ParseTip(param_set_t& pars)
 	// (likewise for Tip_LDF)
 	// (likewise for Tip_Graphic)
 
-	s_tip_t *tip = Z_New(s_tip_t, 1);
-
-	Z_Clear(tip, s_tip_t, 1);
+	s_tip_t *tip = new s_tip_t;
 
 	tip->display_time = 3 * TICRATE;
 	tip->playsound = false;
@@ -1323,7 +1300,7 @@ static void RAD_ParseTipSlot(param_set_t& pars)
 
 	s_tip_prop_t *tp;
 
-	tp = Z_New(s_tip_prop_t, 1);
+	tp = new s_tip_prop_t;
 	tp[0] = default_tip_props;
 
 	RAD_CheckForInt(pars[1], &tp->slot_num);
@@ -1344,7 +1321,7 @@ static void RAD_ParseTipPos(param_set_t& pars)
 
 	s_tip_prop_t *tp;
 
-	tp = Z_New(s_tip_prop_t, 1);
+	tp = new s_tip_prop_t;
 	tp[0] = default_tip_props;
 
 	RAD_CheckForPercentAny(pars[1], &tp->x_pos);
@@ -1363,7 +1340,7 @@ static void RAD_ParseTipColour(param_set_t& pars)
 
 	s_tip_prop_t *tp;
 
-	tp = Z_New(s_tip_prop_t, 1);
+	tp = new s_tip_prop_t;
 	tp[0] = default_tip_props;
 
 	tp->color_name = Z_StrDup(pars[1]);
@@ -1381,7 +1358,7 @@ static void RAD_ParseTipTrans(param_set_t& pars)
 
 	s_tip_prop_t *tp;
 
-	tp = Z_New(s_tip_prop_t, 1);
+	tp = new s_tip_prop_t;
 	tp[0] = default_tip_props;
 
 	RAD_CheckForPercent(pars[1], &tp->translucency);
@@ -1398,7 +1375,7 @@ static void RAD_ParseTipAlign(param_set_t& pars)
 
 	s_tip_prop_t *tp;
 
-	tp = Z_New(s_tip_prop_t, 1);
+	tp = new s_tip_prop_t;
 	tp[0] = default_tip_props;
 
 	if (DDF_CompareName(pars[1], "CENTER") == 0 ||
@@ -1479,9 +1456,7 @@ static void RAD_ParseSpawnThing(param_set_t& pars)
 
 	// -AJA- 1999/09/11: Reworked for spawning things at Z.
 
-	s_thing_t *t = Z_New(s_thing_t, 1);
-
-	Z_Clear(t, s_thing_t, 1);
+	s_thing_t *t = new s_thing_t;
 
 	// set defaults
 	t->x = this_rad->x;
@@ -1562,9 +1537,7 @@ static void RAD_ParsePlaySound(param_set_t& pars)
 	if (pars.size() == 3)
 		RAD_Error("%s: Wrong number of parameters.\n", pars[0]);
 
-	s_sound_t *t = Z_New(s_sound_t, 1);
-
-	Z_Clear(t, s_sound_t, 1);
+	s_sound_t *t = new s_sound_t;
 
 	if (DDF_CompareName(pars[0], "PLAYSOUND_BOSSMAN") == 0)
 		t->kind = PSOUND_BossMan;
@@ -1602,9 +1575,7 @@ static void RAD_ParseChangeMusic(param_set_t& pars)
 {
 	// ChangeMusic <playlist num>
 
-	s_music_t *music = Z_New(s_music_t, 1);
-
-	Z_Clear(music, s_music_t, 1);
+	s_music_t *music = new s_music_t;
 
 	RAD_CheckForInt(pars[1], &music->playnum);
 
@@ -1617,9 +1588,7 @@ static void RAD_ParseDamagePlayer(param_set_t& pars)
 {
 	// DamagePlayer <amount>
 
-	s_damagep_t *t = Z_New(s_damagep_t, 1);
-
-	Z_Clear(t, s_damagep_t, 1);
+	s_damagep_t *t = new s_damagep_t;
 
 	RAD_CheckForFloat(pars[1], &t->damage_amount);
 
@@ -1632,9 +1601,7 @@ static void RAD_ParseHealPlayer(param_set_t& pars)
 	// HealPlayer <amount>
 	// HealPlayer <amount> <limit>
 
-	s_healp_t *heal = Z_New(s_healp_t, 1);
-
-	Z_Clear(heal, s_healp_t, 1);
+	s_healp_t *heal = new s_healp_t;
 
 	RAD_CheckForFloat(pars[1], &heal->heal_amount);
 
@@ -1658,9 +1625,7 @@ static void RAD_ParseGiveArmour(param_set_t& pars)
 	// GiveArmour <type> <amount>
 	// GiveArmour <type> <amount> <limit>
 
-	s_armour_t *armour = Z_New(s_armour_t, 1);
-
-	Z_Clear(armour, s_armour_t, 1);
+	s_armour_t *armour = new s_armour_t;
 
 	armour->type = RAD_CheckForArmourType(pars[1]);
 
@@ -1686,9 +1651,7 @@ static void RAD_ParseGiveLoseBenefit(param_set_t& pars)
 	//   or
 	// Lose_Benefit  <benefit>
 
-	s_benefit_t *sb = Z_New(s_benefit_t, 1);
-
-	Z_Clear(sb, s_benefit_t, 1);
+	s_benefit_t *sb = new s_benefit_t;
 
 	if (DDF_CompareName(pars[0], "LOSE_BENEFIT") == 0)
 		sb->lose_it = true;
@@ -1707,9 +1670,7 @@ static void RAD_ParseDamageMonsters(param_set_t& pars)
 	//
 	// The monster can be 'ANY' to match all monsters.
 
-	s_damage_monsters_t *mon = Z_New(s_damage_monsters_t, 1);
-
-	Z_Clear(mon, s_damage_monsters_t, 1);
+	s_damage_monsters_t *mon = new s_damage_monsters_t;
 
 	// get monster type
 	if (pars[1][0] == '-' || pars[1][0] == '+' || isdigit(pars[1][0]))
@@ -1748,9 +1709,7 @@ static void RAD_ParseThingEvent(param_set_t& pars)
 	const char *div;
 	int i;
 
-	tev = Z_New(s_thing_event_t, 1);
-
-	Z_Clear(tev, s_thing_event_t, 1);
+	tev = new s_thing_event_t;
 
 	if (pars[1][0] == '-' || pars[1][0] == '+' || isdigit(pars[1][0]))
 		RAD_CheckForInt(pars[1], &tev->thing_type);
@@ -1767,7 +1726,7 @@ static void RAD_ParseThingEvent(param_set_t& pars)
 	if (i <= 0)
 		RAD_Error("%s: Bad label '%s'.\n", pars[0], pars[2]);
 
-	tev->label = Z_New(const char, i + 1);
+	tev->label = new char[i+1];
 	Z_StrNCpy((char *)tev->label, pars[2], i);
 
 	tev->offset = div ? MAX(0, atoi(div+1) - 1) : 0;
@@ -1791,9 +1750,7 @@ static void RAD_ParseSkill(param_set_t& pars)
 	s_skill_t *skill;
 	int val;
 
-	skill = Z_New(s_skill_t, 1);
-
-	Z_Clear(skill, s_skill_t, 1);
+	skill = new s_skill_t;
 
 	RAD_CheckForInt(pars[1], &val);
 
@@ -1810,9 +1767,7 @@ static void RAD_ParseGotoMap(param_set_t& pars)
 	// GotoMap <map> SKIP_ALL
 	// GotoMap <map> HUB
 
-	s_gotomap_t *go = Z_New(s_gotomap_t, 1);
-
-	Z_Clear(go, s_gotomap_t, 1);
+	s_gotomap_t *go = new s_gotomap_t;
 
 	go->map_name = Z_StrDup(pars[1]);
 
@@ -1834,9 +1789,7 @@ static void RAD_ParseHubExit(param_set_t& pars)
 {
 	// HubExit <map> <tag>
 
-	s_gotomap_t *go = Z_New(s_gotomap_t, 1);
-
-	Z_Clear(go, s_gotomap_t, 1);
+	s_gotomap_t *go = new s_gotomap_t;
 
 	go->is_hub = true;
 	go->map_name = Z_StrDup(pars[1]);
@@ -1856,10 +1809,8 @@ static void RAD_ParseMoveSector(param_set_t& pars)
 
 	s_movesector_t *secv;
 
-	secv = Z_New(s_movesector_t, 1);
+	secv = new s_movesector_t;
 
-	Z_Clear(secv, s_movesector_t, 1);
-	
 	secv->relative = true;
 
 	RAD_CheckForInt(pars[1], &secv->tag);
@@ -1905,9 +1856,7 @@ static void RAD_ParseLightSector(param_set_t& pars)
 
 	s_lightsector_t *secl;
 
-	secl = Z_New(s_lightsector_t, 1);
-
-	Z_Clear(secl, s_lightsector_t, 1);
+	secl = new s_lightsector_t;
 
 	secl->relative = true;
 
@@ -1943,9 +1892,7 @@ static void RAD_ParseActivateLinetype(param_set_t& pars)
 
 	s_lineactivator_t *lineact;
 
-	lineact = Z_New(s_lineactivator_t, 1);
-
-	Z_Clear(lineact, s_lineactivator_t, 1);
+	lineact = new s_lineactivator_t;
 
 	RAD_CheckForInt(pars[1], &lineact->typenum);
 	RAD_CheckForInt(pars[2], &lineact->tag);
@@ -1959,9 +1906,7 @@ static void RAD_ParseUnblockLines(param_set_t& pars)
 
 	s_lineunblocker_t *lineact;
 
-	lineact = Z_New(s_lineunblocker_t, 1);
-
-	Z_Clear(lineact, s_lineunblocker_t, 1);
+	lineact = new s_lineunblocker_t;
 
 	RAD_CheckForInt(pars[1], &lineact->tag);
 
@@ -1974,9 +1919,7 @@ static void RAD_ParseBlockLines(param_set_t& pars)
 
 	s_lineunblocker_t *lineact;
 
-	lineact = Z_New(s_lineunblocker_t, 1);
-
-	Z_Clear(lineact, s_lineunblocker_t, 1);
+	lineact = new s_lineunblocker_t;
 
 	RAD_CheckForInt(pars[1], &lineact->tag);
 
@@ -2002,9 +1945,7 @@ static void RAD_ParseJump(param_set_t& pars)
 	// Jump <label>
 	// Jump <label> <random chance>
 
-	s_jump_t *jump = Z_New(s_jump_t, 1);
-
-	Z_Clear(jump, s_jump_t, 1);
+	s_jump_t *jump = new s_jump_t;
 
 	jump->label = Z_StrDup(pars[1]);
 	jump->random_chance = PERCENT_MAKE(100);
@@ -2043,9 +1984,7 @@ static void RAD_ParseChangeTex(param_set_t& pars)
 	if (strlen(pars[2]) > 8)
 		RAD_Error("%s: Texture name too long: %s\n", pars[0], pars[2]);
 
-	ctex = Z_New(s_changetex_t, 1);
-
-	Z_Clear(ctex, s_changetex_t, 1);
+	ctex = new s_changetex_t;
 
 	ctex->what = RAD_CheckForChangetexType(pars[1]);
 
@@ -2065,9 +2004,7 @@ static void RAD_ParseShowMenu(param_set_t& pars)
 	// Show_Menu     <title> <option1> ...
 	// Show_Menu_LDF <title> <option1> ...
 
-	s_show_menu_t *menu = Z_New(s_show_menu_t, 1);
-
-	Z_Clear(menu, s_show_menu_t, 1);
+	s_show_menu_t *menu = new s_show_menu_t;
 
 	if (pars.size() > 11)
 		RAD_Error("%s: too many option strings (limit is 9)\n", pars[0]);
@@ -2091,9 +2028,7 @@ static void RAD_ParseMenuStyle(param_set_t& pars)
 {
 	// Menu_Style  <style>
 
-	s_menu_style_t *mm = Z_New(s_menu_style_t, 1);
-
-	Z_Clear(mm, s_menu_style_t, 1);
+	s_menu_style_t *mm = new s_menu_style_t;
 
 	mm->style = RAD_UnquoteString(pars[1]);
 
@@ -2106,9 +2041,7 @@ static void RAD_ParseJumpOn(param_set_t& pars)
 	//
 	// "MENU" is the only variable supported so far.
 
-	s_jump_on_t *jump = Z_New(s_jump_on_t, 1);
-
-	Z_Clear(jump, s_jump_on_t, 1);
+	s_jump_on_t *jump = new s_jump_on_t;
 
 	if (pars.size() > 11)
 		RAD_Error("%s: too many labels (limit is 9)\n", pars[0]);
@@ -2136,9 +2069,7 @@ static void RAD_ParseWaitUntilDead(param_set_t& pars)
 
 	static int current_tag = 70000;
 
-	s_wait_until_dead_t *wud = Z_New(s_wait_until_dead_t, 1);
-
-	Z_Clear(wud, s_wait_until_dead_t, 1);
+	s_wait_until_dead_t *wud = new s_wait_until_dead_t;
 
 	wud->tag = current_tag;  current_tag++;
 
@@ -2155,8 +2086,7 @@ static void RAD_ParseSwitchWeapon(param_set_t& pars)
 
 	char * WeaponName = RAD_UnquoteString(pars[1]);
 
-	s_weapon_t *weaparg = Z_New(s_weapon_t, 1);
-	Z_Clear(weaparg, s_weapon_t, 1);
+	s_weapon_t *weaparg = new s_weapon_t;
 
 	weaparg->name = WeaponName;
 
@@ -2179,8 +2109,7 @@ static void RAD_ParseReplaceWeapon(param_set_t& pars)
 	char * OldWeaponName = RAD_UnquoteString(pars[1]);
 	char * NewWeaponName = RAD_UnquoteString(pars[2]);
 
-	s_weapon_replace_t *weaparg = Z_New(s_weapon_replace_t, 1);
-	Z_Clear(weaparg, s_weapon_replace_t, 1);
+	s_weapon_replace_t *weaparg = new s_weapon_replace_t;
 
 	weaparg->old_weapon = OldWeaponName;
 	weaparg->new_weapon = NewWeaponName;
@@ -2199,9 +2128,7 @@ static void RAD_ParseWeaponEvent(param_set_t& pars)
 	const char *div;
 	int i;
 
-	tev = Z_New(s_weapon_event_t, 1);
-
-	Z_Clear(tev, s_weapon_event_t, 1);
+	tev = new s_weapon_event_t;
 
 	tev->weapon_name = Z_StrDup(pars[1]);
 
@@ -2213,7 +2140,7 @@ static void RAD_ParseWeaponEvent(param_set_t& pars)
 	if (i <= 0)
 		RAD_Error("%s: Bad label '%s'.\n", pars[0], pars[2]);
 
-	tev->label = Z_New(const char, i + 1);
+	tev->label = new char[i+1];
 	Z_StrNCpy((char *)tev->label, pars[2], i);
 
 	tev->offset = div ? MAX(0, atoi(div+1) - 1) : 0;

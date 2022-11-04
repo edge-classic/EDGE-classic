@@ -277,6 +277,7 @@ static image_c *NewImage(int width, int height, int opacity = OPAC_Unknown)
 	rim->offset_x = rim->offset_y = 0;
 	rim->scale_x  = rim->scale_y = 1.0f;
 	rim->opacity  = opacity;
+	rim->is_empty = false;
 	rim->is_font = false;
 
 	// set initial animation info
@@ -1068,7 +1069,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 	}
 
 	if (rim->opacity == OPAC_Unknown)
-		rim->opacity = R_DetermineOpacity(tmp_img);
+		rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
 
 	if ((tmp_img->bpp == 1) && IM_ShouldHQ2X(rim))
 	{
@@ -1082,7 +1083,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 		if (rim->is_font)
 		{
 			scaled_img->RemoveBackground();
-			rim->opacity = R_DetermineOpacity(tmp_img);
+			rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
 		}
 		if (do_whiten)
 			scaled_img->Whiten();
@@ -1098,7 +1099,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 		if (rim->is_font)
 		{
 			rgb_img->RemoveBackground();
-			rim->opacity = R_DetermineOpacity(tmp_img);
+			rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
 		}
 		if (do_whiten)
 			rgb_img->Whiten();
@@ -1111,7 +1112,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 		if (rim->is_font)
 		{
 			tmp_img->RemoveBackground();
-			rim->opacity = R_DetermineOpacity(tmp_img);
+			rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
 		}
 		if (do_whiten)
 			tmp_img->Whiten();

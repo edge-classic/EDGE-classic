@@ -41,7 +41,7 @@ epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src,
 void R_PaletteRemapRGBA(epi::image_data_c *img,
 		const byte *new_pal, const byte *old_pal);
 
-int R_DetermineOpacity(epi::image_data_c *img);
+int R_DetermineOpacity(epi::image_data_c *img, bool *is_empty);
 
 void R_BlackenClearAreas(epi::image_data_c *img);
 

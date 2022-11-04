@@ -314,29 +314,41 @@ void R_PaletteRemapRGBA(epi::image_data_c *img,
 	}
 }
 
-int R_DetermineOpacity(epi::image_data_c *img)
+int R_DetermineOpacity(epi::image_data_c *img, bool *is_empty)
 {
 	if (img->bpp == 3)
+	{
+		*is_empty = false;
 		return OPAC_Solid;
+	}
 
 	if (img->bpp == 1)
 	{
+
+		image_opacity_e opacity = OPAC_Solid;
+		bool empty = true;
+
 		for (int y=0; y < img->used_h; y++)
 		for (int x=0; x < img->used_w; x++)
 		{
 			u8_t pix = img->PixelAt(x, y)[0];
 
 			if (pix == TRANS_PIXEL)
-				return OPAC_Masked;
+				opacity = OPAC_Masked;
+			else
+				empty = false;
 		}
 
-		return OPAC_Solid;
+		*is_empty = empty;
+		return opacity;
 	}
 	else
 	{
 		SYS_ASSERT(img->bpp == 4);
 
+		image_opacity_e opacity = OPAC_Solid;
 		bool is_masked = false;
+		bool empty = true;
 
 		for (int y=0; y < img->used_h; y++)
 		for (int x=0; x < img->used_w; x++)
@@ -346,9 +358,15 @@ int R_DetermineOpacity(epi::image_data_c *img)
 			if (alpha == 0)
 				is_masked = true;
 			else if (alpha != 255)
-				return OPAC_Complex;
+			{
+				empty = false;
+				opacity = OPAC_Complex;
+			}
+			else
+				empty = false;
 		}
 
+		*is_empty = empty;
 		return is_masked ? OPAC_Masked : OPAC_Solid;
 	}
 }

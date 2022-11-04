@@ -2691,6 +2691,7 @@ void M_Drawer(void)
 	{	
 		ShortestLine = 10000.0f;
 		TallestLine = 0.0f;
+		bool backdrop_menu = false;
 		for (i = 0; i < max; i++)
 		{
 			if (! currentMenu->menuitems[i].patch_name[0])
@@ -2703,29 +2704,49 @@ void M_Drawer(void)
 			currentMenu->menuitems[i].height = IM_HEIGHT(image);
 			currentMenu->menuitems[i].width = IM_WIDTH(image);
 
-			if (currentMenu->menuitems[i].height < ShortestLine) 
-				ShortestLine = currentMenu->menuitems[i].height;
-			if (currentMenu->menuitems[i].height > TallestLine) 
-				TallestLine = currentMenu->menuitems[i].height;
-			if (currentMenu->menuitems[i].width > WidestLine) 
-				WidestLine = currentMenu->menuitems[i].width;
-
-			currentMenu->menuitems[i].x = x + image->offset_x + style->def->x_offset;
-			currentMenu->menuitems[i].y = y - image->offset_y - style->def->y_offset;
-			y += currentMenu->menuitems[i].height + style->def->entry_spacing;
-		}
-		for (i = 0; i < max; i++)
-		{
-			if (! currentMenu->menuitems[i].patch_name[0])
-				continue;
-			if (style->def->entry_alignment == style->def->C_RIGHT)
-				HUD_DrawImage(currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width, 
-					currentMenu->menuitems[i].y, currentMenu->menuitems[i].image);
-			else if (style->def->entry_alignment == style->def->C_CENTER)
-				HUD_DrawImage(currentMenu->menuitems[i].x + (WidestLine / 2) - (currentMenu->menuitems[i].width / 2), 
-					currentMenu->menuitems[i].y, currentMenu->menuitems[i].image);
+			if (!image->is_empty)
+			{
+				if (currentMenu->menuitems[i].height < ShortestLine) 
+					ShortestLine = currentMenu->menuitems[i].height;
+				if (currentMenu->menuitems[i].height > TallestLine) 
+					TallestLine = currentMenu->menuitems[i].height;
+				if (currentMenu->menuitems[i].width > WidestLine) 
+					WidestLine = currentMenu->menuitems[i].width;
+				currentMenu->menuitems[i].x = x + image->offset_x + style->def->x_offset;
+				currentMenu->menuitems[i].y = y - image->offset_y - style->def->y_offset;
+				y += currentMenu->menuitems[i].height + style->def->entry_spacing;
+			}
 			else
-				HUD_DrawImage(currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, currentMenu->menuitems[i].image);
+			{
+				currentMenu->menuitems[i].x = x;
+				currentMenu->menuitems[i].y = y;
+				y += 15 + style->def->entry_spacing;
+			}
+		}
+		if (ShortestLine = 10000.0f && TallestLine == 0.0f)
+		{
+			backdrop_menu = true;
+			ShortestLine = 20.0f;
+			TallestLine = 20.0f;
+			WidestLine = 121.0f;
+		}
+		if (!backdrop_menu)
+		{
+			for (i = 0; i < max; i++)
+			{
+				if (! currentMenu->menuitems[i].patch_name[0])
+					continue;
+				if (currentMenu->menuitems[i].image->is_empty)
+					continue;
+				if (style->def->entry_alignment == style->def->C_RIGHT)
+					HUD_DrawImage(currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width, 
+						currentMenu->menuitems[i].y, currentMenu->menuitems[i].image);
+				else if (style->def->entry_alignment == style->def->C_CENTER)
+					HUD_DrawImage(currentMenu->menuitems[i].x + (WidestLine / 2) - (currentMenu->menuitems[i].width / 2), 
+						currentMenu->menuitems[i].y, currentMenu->menuitems[i].image);
+				else
+					HUD_DrawImage(currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, currentMenu->menuitems[i].image);
+			}
 		}
 		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
 		{

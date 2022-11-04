@@ -503,7 +503,7 @@ static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 	img, img->width, img->height, img->bpp);
 #endif
 */
-	rim->opacity = R_DetermineOpacity(img);
+	rim->opacity = R_DetermineOpacity(img, &rim->is_empty);
 
 	if (def->is_font)
 		return img;

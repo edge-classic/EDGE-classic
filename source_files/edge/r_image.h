@@ -105,6 +105,9 @@ public:
 
 	bool is_font;
 
+	// For fully transparent images
+	bool is_empty;
+
 //!!!!!! private:
 
 	// --- information about where this image came from ---

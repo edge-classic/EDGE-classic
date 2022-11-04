@@ -367,7 +367,15 @@ int R_DetermineOpacity(epi::image_data_c *img, bool *is_empty)
 		}
 
 		*is_empty = empty;
-		return is_masked ? OPAC_Masked : OPAC_Solid;
+		if (opacity == OPAC_Complex)
+			return OPAC_Complex;
+		else
+		{
+			if (is_masked)
+				return OPAC_Masked;
+			else
+				return OPAC_Solid;
+		}
 	}
 }
 

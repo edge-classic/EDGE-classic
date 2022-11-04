@@ -2723,7 +2723,7 @@ void M_Drawer(void)
 				y += 15 + style->def->entry_spacing;
 			}
 		}
-		if (ShortestLine = 10000.0f && TallestLine == 0.0f)
+		if (ShortestLine == 10000.0f && TallestLine == 0.0f)
 		{
 			backdrop_menu = true;
 			ShortestLine = 20.0f;

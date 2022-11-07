@@ -2636,6 +2636,9 @@ void M_Drawer(void)
 				float TempScale = 0;
 				float TempWidth = 0;
 				float TempSpacer = 0;
+				float y_shift = 0;
+				if (style->fonts[styledef_c::T_TEXT]->def->type == FNTYP_TrueType)
+					y_shift = style->fonts[styledef_c::T_TEXT]->ttf_glyph_map[static_cast<u8_t>('M')].y_shift * txtscale;
 				TempScale = ShortestLine / IM_HEIGHT(cursor);
 				TempWidth = IM_WIDTH(cursor) * TempScale;
 				TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
@@ -2643,20 +2646,20 @@ void M_Drawer(void)
 				HUD_SetAlpha(style->def->cursor.translucency);
 				if (style->def->cursor.position == style->def->C_BOTH)
 				{
-					HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
-					HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+					HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+					HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
 				}
 				else if (style->def->cursor.position == style->def->C_CENTER)
 				{
 					if (style->def->cursor.border)
-						HUD_StretchImage(currentMenu->menuitems[itemOn].x,currentMenu->menuitems[itemOn].y,WidestLine,TallestLine,cursor, 0.0, 0.0);
+						HUD_StretchImage(currentMenu->menuitems[itemOn].x,currentMenu->menuitems[itemOn].y + y_shift,WidestLine,TallestLine,cursor, 0.0, 0.0);
 					else
-						HUD_StretchImage(currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2),currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+						HUD_StretchImage(currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2),currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
 				}
 				else if (style->def->cursor.position == style->def->C_RIGHT)
-					HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+					HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
 				else
-					HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+					HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
 				cursor->offset_x = old_offset_x;
 				cursor->offset_y = old_offset_y;
 				HUD_SetAlpha(old_alpha);

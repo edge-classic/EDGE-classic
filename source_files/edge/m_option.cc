@@ -963,8 +963,10 @@ void M_OptDrawer()
 	menutop = 68 - ((curr_menu->item_num * font_h) / 2);
 	if (curr_menu->key_page[0]) 
 		menutop = 9 * font_h / 2;
-	CenterX = 160;
-	CenterX -= (style->fonts[fontType]->StringWidth(curr_menu->name) * 1.5) / 2;
+	
+	// These don't seem used after this point in the function - Dasho
+	//CenterX = 160;
+	//CenterX -= (style->fonts[fontType]->StringWidth(curr_menu->name) * 1.5) / 2;
 
 
 	//now, draw all the menuitems
@@ -1016,7 +1018,8 @@ void M_OptDrawer()
 		}
 
 		HL_WriteText(style, is_selected ? styledef_c::T_TITLE : styledef_c::T_TEXT,
-		             (curr_menu->menu_center) - style->fonts[0]->StringWidth(curr_menu->items[i].name),
+		             (curr_menu->menu_center) - 
+					 (style->fonts[is_selected ? styledef_c::T_TITLE : styledef_c::T_TEXT]->StringWidth(curr_menu->items[i].name) * TEXTscale),
 					 curry, curr_menu->items[i].name);
 		
 		if (curr_menu == &analogue_optmenu && curr_menu->items[i].switchvar == &joystick_device)
@@ -1077,7 +1080,7 @@ void M_OptDrawer()
 			{
 				const char *help = language[curr_menu->items[i].help];
 
-				HL_WriteText(style,styledef_c::T_HELP, 160 - (style->fonts[3]->StringWidth(help) / 2), 200 - deltay*2, 
+				HL_WriteText(style,styledef_c::T_HELP, 160 - (style->fonts[3]->StringWidth(help) * TEXTscale / 2), 200 - deltay*2, 
 								  help);
 			}
 		}

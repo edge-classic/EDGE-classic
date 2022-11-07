@@ -1030,7 +1030,15 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 		for (int i = 0; i < len; i++)
 		{
 			if (cur_font->def->type == FNTYP_TrueType)
-				total_w += (size > 0 ? cur_font->CharWidth(str[i]) * (size / cur_font->def->default_size) : cur_font->CharWidth(str[i])) * cur_scale;
+			{
+				float factor = size > 0 ? (size / cur_font->def->default_size) : 1;
+				total_w += cur_font->CharWidth(str[i]) * factor * cur_scale;
+				if (str[i+1])
+				{
+					total_w += stbtt_GetGlyphKernAdvance(cur_font->ttf_info, cur_font->GetGlyphIndex(str[i]), 
+						cur_font->GetGlyphIndex(str[i+1])) * cur_font->ttf_kern_scale * factor * cur_scale;
+				}
+			}
 			else if (cur_font->def->type == FNTYP_Image)
 				total_w += (size > 0 ? size * cur_font->CharRatio(str[i]) + cur_font->spacing : cur_font->CharWidth(str[i])) * cur_scale;
 			else
@@ -1055,7 +1063,15 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 				HUD_DrawChar(cx, cy, img, ch, size);
 
 			if (cur_font->def->type == FNTYP_TrueType)
-				cx += (size > 0 ? cur_font->CharWidth(ch) * (size / cur_font->def->default_size) + cur_font->spacing : cur_font->CharWidth(ch)) * cur_scale;
+			{
+				float factor = size > 0 ? (size / cur_font->def->default_size) : 1;
+				cx += cur_font->CharWidth(ch) * factor * cur_scale;
+				if (str[k+1])
+				{
+						cx += stbtt_GetGlyphKernAdvance(cur_font->ttf_info, cur_font->GetGlyphIndex(str[k]), 
+							cur_font->GetGlyphIndex(str[k+1])) * cur_font->ttf_kern_scale * factor * cur_scale;
+				}
+			}
 			else if (cur_font->def->type == FNTYP_Image)
 				cx += (size > 0 ? size * cur_font->CharRatio(ch) + cur_font->spacing : cur_font->CharWidth(ch)) * cur_scale;
 			else

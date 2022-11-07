@@ -50,11 +50,15 @@ font_c::font_c(fontdef_c *_def) : def(_def)
 	p_cache.first = 0;
 	p_cache.last  = -1;
 
-	p_cache.images = NULL;
-	p_cache.missing = NULL;
+	p_cache.images = nullptr;
+	p_cache.missing = nullptr;
 
-	font_image = NULL;
-	ttf_buffer = NULL;
+	font_image = nullptr;
+	ttf_buffer = nullptr;
+	ttf_info = nullptr;
+	ttf_kern_scale = 0;
+	ttf_ref_yshift = 0;
+	ttf_ref_height = 0;
 }
 
 font_c::~font_c()
@@ -219,6 +223,8 @@ void font_c::LoadFontTTF()
 			{
 				if (hu_fonts[i]->ttf_buffer)
 					ttf_buffer = hu_fonts[i]->ttf_buffer;
+				if (hu_fonts[i]->ttf_info)
+					ttf_info = hu_fonts[i]->ttf_info;
 			}
 		}
 
@@ -239,28 +245,72 @@ void font_c::LoadFontTTF()
 			delete F;
 		}
 
-		ttf_char_t M;
+		if (!ttf_info)
+		{
+			ttf_info = new stbtt_fontinfo;
+			if (!stbtt_InitFont(ttf_info, ttf_buffer, 0))
+				I_Error("LoadFontTTF: Could not initialize font %s.\n", def->name.c_str());
+		}
 
-		M.packed_char = new stbtt_packedchar;
-		M.char_quad = new stbtt_aligned_quad;
+		ttf_char_t ref;
+
+		ref.glyph_index = 0;
+
+		char ch;
+
+		if (stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<u8_t>('M')]) > 0)
+		{
+			ch = 'M';
+			ref.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<u8_t>(ch)]);
+		} 
+		else if (stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<u8_t>('O')]) > 0)
+		{
+			ch = 'O';
+			ref.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<u8_t>(ch)]);
+		}
+		else if (stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<u8_t>('W')]) > 0)
+		{
+			ch = 'W';
+			ref.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<u8_t>(ch)]);
+		}
+		else
+		{
+			for (char c=32; c < 127; c++)
+			{
+				if (stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<u8_t>(c)]) > 0)
+				{
+					ch = c;
+					ref.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<u8_t>(ch)]);
+					break;
+				}
+			}
+		}
+
+		if (ref.glyph_index == 0)
+			I_Error("LoadFontTTF: No suitable characters in font %s.\n", def->name.c_str());
+
+		ref.packed_char = new stbtt_packedchar;
+		ref.char_quad = new stbtt_aligned_quad;
 
 		if (def->default_size == 0.0)
 			def->default_size = 7.0f;
+
+		ttf_kern_scale = stbtt_ScaleForPixelHeight(ttf_info, def->default_size);
 
 		unsigned char *temp_bitmap = new unsigned char [64*64];
 
 		stbtt_pack_context *spc = new stbtt_pack_context;
 		stbtt_PackBegin(spc, temp_bitmap, 64, 64, 0, 1, NULL);
 		stbtt_PackSetOversampling(spc, 1, 1);
-		stbtt_PackFontRange(spc, ttf_buffer, 0, 48, cp437_unicode_values[static_cast<u8_t>('M')], 1, M.packed_char);
+		stbtt_PackFontRange(spc, ttf_buffer, 0, 48, cp437_unicode_values[static_cast<u8_t>(ch)], 1, ref.packed_char);
 		stbtt_PackEnd(spc);
-		glGenTextures(1, &M.tex_id);
-		glBindTexture(GL_TEXTURE_2D, M.tex_id);
+		glGenTextures(1, &ref.tex_id);
+		glBindTexture(GL_TEXTURE_2D, ref.tex_id);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64,64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glGenTextures(1, &M.smoothed_tex_id);
-		glBindTexture(GL_TEXTURE_2D, M.smoothed_tex_id);
+		glGenTextures(1, &ref.smoothed_tex_id);
+		glBindTexture(GL_TEXTURE_2D, ref.smoothed_tex_id);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64,64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -270,14 +320,16 @@ void font_c::LoadFontTTF()
 		float ascent = 0.0f;
 		float descent = 0.0f;
 		float linegap = 0.0f;
-		stbtt_GetPackedQuad(M.packed_char, 64, 64, 0, &x, &y, M.char_quad, 0);
+		stbtt_GetPackedQuad(ref.packed_char, 64, 64, 0, &x, &y, ref.char_quad, 0);
 		stbtt_GetScaledFontVMetrics(ttf_buffer, 0, 48, &ascent, &descent, &linegap);
-		M.width = (M.char_quad->x1 - M.char_quad->x0) * (def->default_size / 48.0);
-		M.height = (M.char_quad->y1 - M.char_quad->y0) * (def->default_size / 48.0);
-		ttf_char_width = M.width;
+		ref.width = (ref.char_quad->x1 - ref.char_quad->x0) * (def->default_size / 48.0);
+		ref.height = (ref.char_quad->y1 - ref.char_quad->y0) * (def->default_size / 48.0);
+		ttf_char_width = ref.width;
 		ttf_char_height = (ascent - descent) * (def->default_size / 48.0);
-		M.y_shift = (ttf_char_height - M.height) + (M.char_quad->y1 * (def->default_size / 48.0));
-		ttf_glyph_map.try_emplace(static_cast<u8_t>('M'), M);
+		ref.y_shift = (ttf_char_height - ref.height) + (ref.char_quad->y1 * (def->default_size / 48.0));
+		ttf_ref_yshift = ref.y_shift;
+		ttf_ref_height = ref.height;
+		ttf_glyph_map.try_emplace(static_cast<u8_t>(ch), ref);
 		spacing = def->spacing + 0.5; // + 0.5 for at least a minimal buffer between letters by default
 	}
 }
@@ -443,6 +495,7 @@ float font_c::CharWidth(char ch)
 				character.width = (character.char_quad->x1 - character.char_quad->x0) * (def->default_size / 48.0);
 			character.height = (character.char_quad->y1 - character.char_quad->y0) * (def->default_size / 48.0);
 			character.y_shift = (ttf_char_height - character.height) + (character.char_quad->y1 * (def->default_size / 48.0));
+			character.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<u8_t>(ch)]);
 			ttf_glyph_map.try_emplace(static_cast<u8_t>(ch), character);
 			return character.width + spacing;
 		}
@@ -497,6 +550,54 @@ int font_c::MaxFit(int pixel_w, const char *str)
 	return s - str;
 }
 
+//
+// Get glyph index for TTF Character. If character hasn't been cached yet, cache it.
+//
+int font_c::GetGlyphIndex(char ch)
+{
+		assert(def->type == FNTYP_TrueType);
+
+		auto find_glyph = ttf_glyph_map.find(static_cast<u8_t>(ch));
+		if (find_glyph != ttf_glyph_map.end())
+		{
+			return find_glyph->second.glyph_index;
+		}
+		else
+		{
+			ttf_char_t character;
+			character.packed_char = new stbtt_packedchar;
+			character.char_quad = new stbtt_aligned_quad;
+			unsigned char *temp_bitmap = new unsigned char [64 * 64];
+			stbtt_pack_context *spc = new stbtt_pack_context;
+			stbtt_PackBegin(spc, temp_bitmap, 64, 64, 0, 1, NULL);
+			stbtt_PackSetOversampling(spc, 1, 1);
+			stbtt_PackFontRange(spc, ttf_buffer, 0, 48, cp437_unicode_values[static_cast<u8_t>(ch)], 1, character.packed_char);
+			stbtt_PackEnd(spc);
+			glGenTextures(1, &character.tex_id);
+			glBindTexture(GL_TEXTURE_2D, character.tex_id);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64,64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glGenTextures(1, &character.smoothed_tex_id);
+			glBindTexture(GL_TEXTURE_2D, character.smoothed_tex_id);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64,64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			delete temp_bitmap;
+			float x = 0.0f;
+			float y = 0.0f;
+			stbtt_GetPackedQuad(character.packed_char, 64, 64, 0, &x, &y, character.char_quad, 0);
+			if (ch == ' ')
+				character.width = ttf_char_width * 3 / 5;
+			else
+				character.width = (character.char_quad->x1 - character.char_quad->x0) * (def->default_size / 48.0);
+			character.height = (character.char_quad->y1 - character.char_quad->y0) * (def->default_size / 48.0);
+			character.y_shift = (ttf_char_height - character.height) + (character.char_quad->y1 * (def->default_size / 48.0));
+			character.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<u8_t>(ch)]);
+			ttf_glyph_map.try_emplace(static_cast<u8_t>(ch), character);
+			return character.glyph_index;
+		}
+}
 
 //
 // Find string width from hu_font chars.  The string may not contain
@@ -509,7 +610,12 @@ float font_c::StringWidth(const char *str)
 	if (!str) return 0;
 
 	while (*str)
-		w += CharWidth(*str++);
+	{
+		w += CharWidth(*str);
+		if (def->type == FNTYP_TrueType && *(str+1))
+			w += stbtt_GetGlyphKernAdvance(ttf_info, GetGlyphIndex(*str), GetGlyphIndex(*(str+1))) * ttf_kern_scale;
+		*str++;
+	}
 
 	return w;
 }

@@ -2638,7 +2638,10 @@ void M_Drawer(void)
 				float TempSpacer = 0;
 				float y_shift = 0;
 				if (style->fonts[styledef_c::T_TEXT]->def->type == FNTYP_TrueType)
-					y_shift = style->fonts[styledef_c::T_TEXT]->ttf_glyph_map[static_cast<u8_t>('M')].y_shift * txtscale;
+				{
+					ShortestLine = style->fonts[styledef_c::T_TEXT]->ttf_ref_height * txtscale;
+					y_shift = style->fonts[styledef_c::T_TEXT]->ttf_ref_yshift * txtscale;
+				}
 				TempScale = ShortestLine / IM_HEIGHT(cursor);
 				TempWidth = IM_WIDTH(cursor) * TempScale;
 				TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space

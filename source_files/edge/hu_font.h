@@ -67,6 +67,7 @@ typedef struct
 	float width, height;
 	unsigned int tex_id;
 	unsigned int smoothed_tex_id;
+	int glyph_index; // For faster kerning table lookups
 	float y_shift;
 	stbtt_packedchar *packed_char;
 	stbtt_aligned_quad *char_quad;
@@ -112,6 +113,7 @@ public:
 	float StringWidth(const char *str);
 	int StringLines(const char *str) const;
 	int MaxFit(int pixel_w, const char *str);
+	int GetGlyphIndex(char ch);
 
 	void DrawChar320(float x, float y, char ch, float scale, float aspect,
 				     const colourmap_c *colmap, float alpha) const;
@@ -135,7 +137,11 @@ public:
 	float im_mono_width;
 
 	// For TRUETYPE type
+	float ttf_kern_scale;
+	float ttf_ref_yshift;
+	float ttf_ref_height;
 	byte *ttf_buffer;
+	stbtt_fontinfo *ttf_info;
 	int ttf_char_width;
 	int ttf_char_height;
 	std::map<int, ttf_char_t> ttf_glyph_map;

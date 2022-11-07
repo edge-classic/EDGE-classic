@@ -896,10 +896,7 @@ void CON_Drawer(void)
 
 	// -- background --
 
-	int CON_GFX_HT = (SCREENHEIGHT * 3 / 5) / FNSZ;
-
-	CON_GFX_HT = (CON_GFX_HT - 1) * FNSZ + FNSZ * 3 / 4 - 2;
-
+	int CON_GFX_HT = (SCREENHEIGHT * 3 / 5);
 
 	int y = SCREENHEIGHT;
 
@@ -923,7 +920,7 @@ void CON_Drawer(void)
 			console_style->def->bg.colour : RGB_MAKE(0,0,0), console_style->def->bg.translucency);
 	}
 
-	y += FNSZ / 4;
+	y += FNSZ / 4 + (con_font->def->type == FNTYP_TrueType ? FNSZ : 0);
 
 	// -- input line --
 
@@ -1690,7 +1687,7 @@ void CON_ShowFPS(void)
 	SolidBox(x, y, SCREENWIDTH, SCREENHEIGHT, RGB_MAKE(0,0,0), 0.5);
 
 	x += XMUL;
-	y = SCREENHEIGHT - FNSZ - FNSZ/2;
+	y = SCREENHEIGHT - FNSZ - FNSZ * (con_font->def->type == FNTYP_TrueType ? -0.5 : 0.5);
 
 	// show average...
 
@@ -1738,7 +1735,7 @@ void CON_ShowPosition(void)
 	SolidBox(x, y - FNSZ * 7, XMUL * 16, FNSZ * 7 + 2, RGB_MAKE(0,0,0), 0.5);
 
 	x += XMUL;
-	y -= FNSZ;
+	y -= FNSZ * (con_font->def->type == FNTYP_TrueType ? 0.25 : 1.25);
 	sprintf(textbuf, "    x: %d", (int)p->mo->x);
 	DrawText(x, y, textbuf, T_GREY176);
 

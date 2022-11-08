@@ -593,6 +593,7 @@ void CON_MessageColor(rgbcol_t col)
 
 static int XMUL;
 static int FNSZ;
+static float FNSZ_ratio;
 
 static void CalcSizes()
 {
@@ -600,26 +601,29 @@ static void CalcSizes()
 	if (SCREENWIDTH <= 400)
 	{
 		FNSZ = 11;
+		FNSZ_ratio = FNSZ / con_font->def->default_size;
 		if (con_font->def->type == FNTYP_TrueType)
-			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * (FNSZ / con_font->def->default_size));
+			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * FNSZ_ratio);
 		else
-			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height)); 
+			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 	}
 	else if (SCREENWIDTH < 640)
 	{
 		FNSZ = 13;
+		FNSZ_ratio = FNSZ / con_font->def->default_size;
 		if (con_font->def->type == FNTYP_TrueType)
-			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * (FNSZ / con_font->def->default_size));
+			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * FNSZ_ratio);
 		else
-			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));  
+			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 	}
 	else
 	{
 		FNSZ = 16;
+		FNSZ_ratio = FNSZ / con_font->def->default_size;
 		if (con_font->def->type == FNTYP_TrueType)
-			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * (FNSZ / con_font->def->default_size));
+			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * FNSZ_ratio);
 		else
-			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));  
+			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 	}
 }
 
@@ -663,10 +667,10 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 
 	if (con_font->def->type == FNTYP_TrueType)
 	{
-		float width = XMUL * ((con_font->CharWidth(ch) - con_font->spacing) / con_font->def->default_size);
+		float width = (con_font->CharWidth(ch) - con_font->spacing) * FNSZ_ratio;
 		float x_adjust = (XMUL - width) / 2;
-		float y_adjust = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).y_shift * (FNSZ / con_font->ttf_char_height);
-		float height = FNSZ * (con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).height / con_font->ttf_char_height);
+		float y_adjust = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).y_shift * FNSZ_ratio;
+		float height = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).height * FNSZ_ratio;
 		stbtt_aligned_quad *q = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).char_quad;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

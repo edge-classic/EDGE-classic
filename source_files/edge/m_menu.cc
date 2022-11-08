@@ -1762,8 +1762,8 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
 
 	style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
 
-	// If using an IMAGE type font for the menu, use symbols for the slider instead
-	if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image)
+	// If using an IMAGE or TRUETYPE type font for the menu, use symbols for the slider instead
+	if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image || opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
 	{
 		// Quick solid box code if a background is desired for the slider in the future
 		// HUD_SolidBox(x, y, x+(thermWidth*step), y+opt_style->fonts[styledef_c::T_ALT]->im_char_height, RGB_MAKE(100,100,100));

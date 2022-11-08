@@ -55,25 +55,29 @@ DEF_CVAR(v_force_pixelaspect, "0", CVAR_ARCHIVE)
 static bool grab_state;
 
 
-// Possible Screen Modes
+// Possible Windowed Modes
+// These reflect 4:3 and 16:9 historical and current standards
+// Should cover up to ~4K monitors
 static struct { int w, h; } possible_modes[] =
 {
-	{  320, 240  },
-	{  640, 360  },
-	{  640, 480  },
-	{  800, 600  },
-	{  854, 480  },
-	{  960, 540  },
-	{ 1024, 576  },
-	{ 1024, 768  },
-	{ 1152, 864  },
-	{ 1280, 720  },
-	{ 1280, 1024 },
-	{ 1366, 768  },
-	{ 1400, 1050 },
-	{ 1600, 900  },
-	{ 1600, 1200 },
-	{ 1920, 1080 },
+	{  320, 240  }, // 4:3 Quarter VGA
+	{  400, 300  }, // 4:3 Quarter SVGA
+	{  640, 360  }, // 16:9 Ninth HD
+	{  640, 480  }, // 4:3 VGA
+	{  800, 600  }, // 4:3 SVGA
+	{  960, 540  }, // 16:9 Quarter HD
+	{ 1024, 768  }, // 4:3 XGA
+	{ 1152, 864  }, // 4:3 XGA+
+	{ 1280, 720  }, // 16:9 HD
+	{ 1280, 960  }, // 4:3 Super XGA-
+	{ 1400, 1050 }, // 4:3 Super XGA+
+	{ 1600, 900  }, // 16:9 HD+
+	{ 1600, 1200 }, // 4:3 Ultra XGA
+	{ 1920, 1080 }, // 16:9 Full HD
+	{ 2048, 1152 }, // 16:9 Quad WXGA
+	{ 2048, 1536 }, // 4:3 Quad XGA
+	{ 2560, 1440 }, // 16:9 Quad HD
+	{ 2800, 2100 }, // 4:3 Quad SXGA+
 
 	{  -1,  -1   }
 };

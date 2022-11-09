@@ -349,11 +349,6 @@ static void SplitIntoLines(char *src)
 			src++; continue;
 		}
 
-		// disregard if outside of extended ASCII range
-		if (*src > 128 || *src < -128)
-		{
-			src++; continue;
-		}
 
 		*dest++ = *src++;
 	}
@@ -386,11 +381,6 @@ static void EndoomSplitIntoLines(byte endoom_byte, char *src)
 			src++; continue;
 		}
 
-		// disregard if outside of extended ASCII range
-		if (*src > 128 || *src < -128)
-		{
-			src++; continue;
-		}
 
 		*dest++ = *src++;
 	}
@@ -423,11 +413,6 @@ static void QuitSplitIntoLines(char *src)
 			src++; continue;
 		}
 
-		// disregard if outside of extended ASCII range
-		if (*src > 128 || *src < -128)
-		{
-			src++; continue;
-		}
 
 		*dest++ = *src++;
 	}
@@ -460,11 +445,6 @@ static void QuitEndoomSplitIntoLines(byte endoom_byte, char *src)
 			src++; continue;
 		}
 
-		// disregard if outside of extended ASCII range
-		if (*src > 128 || *src < -128)
-		{
-			src++; continue;
-		}
 
 		*dest++ = *src++;
 	}
@@ -1822,7 +1802,8 @@ void CON_CreateQuitScreen()
 	int row_counter = 0;
 	for (int i = 0; i < 4000; i+=2)
 	{
-		CON_QuitEndoomPrintf(data[i+1], "%c", ((int)data[i] == 0 || (int)data[i] == 255) ? 0x20 : (int)data[i]);
+		CON_QuitEndoomPrintf(data[i+1], "%c", (static_cast<u8_t>(data[i]) == 0 || 
+			static_cast<u8_t>(data[i]) == 255) ? 0x20 : static_cast<u8_t>(data[i]));
 		row_counter++;
 		if (row_counter == 80) 
 		{

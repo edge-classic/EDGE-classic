@@ -827,6 +827,12 @@ void M_DrawLoad(void)
 		float TempSpacer = 0;
 		TempScale = TempHeight / IM_HEIGHT(cursor);
 		TempWidth = IM_WIDTH(cursor) * TempScale;
+		if (!style->def->cursor.scaling)
+		{
+			ex_slots[itemOn].y -= (IM_HEIGHT(cursor) - TempHeight) / 2;
+			TempHeight = IM_HEIGHT(cursor);
+			TempWidth = IM_WIDTH(cursor);
+		}
 		TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
 		float old_alpha = HUD_GetAlpha();
 		HUD_SetAlpha(style->def->cursor.translucency);
@@ -2644,6 +2650,12 @@ void M_Drawer(void)
 				}
 				TempScale = ShortestLine / IM_HEIGHT(cursor);
 				TempWidth = IM_WIDTH(cursor) * TempScale;
+				if (!style->def->cursor.scaling)
+				{
+					currentMenu->menuitems[itemOn].y -= (IM_HEIGHT(cursor) - ShortestLine) / 2;
+					ShortestLine = IM_HEIGHT(cursor);
+					TempWidth = IM_WIDTH(cursor);
+				}
 				TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
 				float old_alpha = HUD_GetAlpha();
 				HUD_SetAlpha(style->def->cursor.translucency);
@@ -2774,6 +2786,12 @@ void M_Drawer(void)
 				float TempSpacer = 0;
 				TempScale = ShortestLine / IM_HEIGHT(cursor);
 				TempWidth = IM_WIDTH(cursor) * TempScale;
+				if (!style->def->cursor.scaling)
+				{
+					currentMenu->menuitems[itemOn].y -= (IM_HEIGHT(cursor) - ShortestLine) / 2;
+					ShortestLine = IM_HEIGHT(cursor);
+					TempWidth = IM_WIDTH(cursor);
+				}
 				TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
 				float old_alpha = HUD_GetAlpha();
 				HUD_SetAlpha(style->def->cursor.translucency);

@@ -181,8 +181,14 @@ static void HD_text_font(coal::vm_c *vm, int argc)
 	fontdef_c *DEF = fontdefs.Lookup(font_name);
 	SYS_ASSERT(DEF);
 
+	if(!DEF)
+		I_Error("hud.text_font: Bad font name: %s\n", font_name);
+
 	font_c *font = hu_fonts.Lookup(DEF);
 	SYS_ASSERT(font);
+
+	if(!font)
+		I_Error("hud.text_font: Bad font name: %s\n", font_name);
 
 	HUD_SetFont(font);
 }

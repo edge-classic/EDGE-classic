@@ -39,6 +39,7 @@
 #include "s_mod.h"
 #include "s_opl.h"
 #include "s_sid.h"
+#include "s_vgm.h"
 #include "m_misc.h"
 #include "w_files.h"
 #include "w_wad.h"
@@ -189,6 +190,11 @@ void S_ChangeMusic(int entrynum, bool loop)
 		case epi::FMT_GME:
 			delete F;
 			music_player = S_PlayGMEMusic(data, length, volume, loop);
+			break;
+
+		case epi::FMT_VGM:
+			delete F;
+			music_player = S_PlayVGMMusic(data, length, volume, loop);
 			break;
 
 		case epi::FMT_SID:

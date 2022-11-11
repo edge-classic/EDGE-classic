@@ -13,4 +13,7 @@ else()
   set(CMAKE_CC_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -fno-strict-aliasing")
 endif()
 
-add_library(miniz miniz.c)
+add_library(
+  miniz
+  miniz.c 
+  mini_gzip.c)

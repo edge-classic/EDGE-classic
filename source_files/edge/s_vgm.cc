@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------------
-//  EDGE Modplug Music Player
+//  EDGE VGM Music Player
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 2022 - The EDGE-Classic Community
+//  Copyright (c) 2022 - The EDGE-Classic Team
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -22,27 +22,28 @@
 #include "file.h"
 #include "filesystem.h"
 #include "sound_gather.h"
+#include "mini_gzip.h"
 
 #include "playlist.h"
 
 #include "s_cache.h"
 #include "s_blit.h"
 #include "s_music.h"
-#include "s_mod.h"
+#include "s_vgm.h"
 #include "w_wad.h"
 
-#include "modplug.h"
+#include "ymfm_interface.h"
 
-#define MODPLUG_BUFFER 4096
+#define VGM_BUFFER 1024 * 10
 
 extern bool dev_stereo;  // FIXME: encapsulation
 extern int  dev_freq;
 
-class modplayer_c : public abstract_music_c
+class vgmplayer_c : public abstract_music_c
 {
 public:
-	 modplayer_c();
-	~modplayer_c();
+	 vgmplayer_c();
+	~vgmplayer_c();
 private:
 
 	enum status_e
@@ -53,11 +54,15 @@ private:
 	int status;
 	bool looping;
 
-	ModPlugFile *mod_track;
-
 	s16_t *mono_buffer;
 
 public:
+
+	uint32_t vgm_track_begin;
+	uint32_t vgm_data_start;
+	std::vector<uint8_t> vgm_buffer;
+	std::vector<int> test_buffer;
+
 	bool OpenMemory(byte *data, int length);
 
 	virtual void Close(void);
@@ -71,9 +76,9 @@ public:
 	virtual void Ticker(void);
 	virtual void Volume(float gain);
 
-private:
-
 	void PostOpenInit(void);
+
+private:
 
 	bool StreamIntoBuffer(epi::sound_data_c *buf);
 	
@@ -81,12 +86,12 @@ private:
 
 //----------------------------------------------------------------------------
 
-modplayer_c::modplayer_c() : status(NOT_LOADED)
+vgmplayer_c::vgmplayer_c() : status(NOT_LOADED)
 {
-	mono_buffer = new s16_t[MODPLUG_BUFFER * 2];
+	mono_buffer = new s16_t[VGM_BUFFER * 2];
 }
 
-modplayer_c::~modplayer_c()
+vgmplayer_c::~vgmplayer_c()
 {
 	Close();
 
@@ -94,9 +99,11 @@ modplayer_c::~modplayer_c()
 		delete[] mono_buffer;
 }
 
-void modplayer_c::PostOpenInit()
+void vgmplayer_c::PostOpenInit()
 {   
 	// Loaded, but not playing
+	vgm_data_start = vgm_track_begin;
+
 	status = STOPPED;
 }
 
@@ -112,7 +119,7 @@ static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
 	}
 }
 
-bool modplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
+bool vgmplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 {
 	s16_t *data_buf;
 
@@ -123,12 +130,20 @@ bool modplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	else
 		data_buf = buf->data_L;
 
-	int did_play = ModPlug_Read(mod_track, data_buf, MODPLUG_BUFFER);
+	uint32_t samples = MIN(test_buffer.size() - vgm_data_start, VGM_BUFFER);
 
-	if (did_play == 0)
+	for (int i=0; i < samples; i=i+2)
+	{
+		data_buf[i] = test_buffer[vgm_data_start + i];
+		data_buf[i+1] = test_buffer[vgm_data_start + i+1];
+	}
+
+	vgm_data_start += samples;
+
+	if (vgm_data_start == test_buffer.size())
 		song_done = true;
 
-	buf->length = did_play / sizeof(s16_t) / 2;
+	buf->length = samples / 2;
 
 	if (!dev_stereo)
 		ConvertToMono(buf->data_L, mono_buffer, buf->length);
@@ -137,7 +152,7 @@ bool modplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	{
 		if (! looping)
 			return false;
-		ModPlug_Seek(mod_track, 0);
+		vgm_data_start = 0;
 		return true;
 	}
 
@@ -145,31 +160,76 @@ bool modplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 }
 
 
-void modplayer_c::Volume(float gain)
+void vgmplayer_c::Volume(float gain)
 {
 	// not needed, music volume is handled in s_blit.cc
 	// (see mix_channel_c::ComputeMusicVolume).
 }
 
-
-bool modplayer_c::OpenMemory(byte *data, int length)
+bool vgmplayer_c::OpenMemory(byte *data, int length)
 {
 	SYS_ASSERT(data);
 
-	mod_track = ModPlug_Load(data, length);
+	vgm_buffer.resize(length);
+	std::copy(data, data+length, vgm_buffer.data());
 
-    if (!mod_track)
-    {
-		I_Warning("[modplayer_c::Open](DataLump) Failed!\n");
+	// Decompress if VGZ
+	if (vgm_buffer.size() >= 10 && vgm_buffer[0] == 0x1f && 
+		vgm_buffer[1] == 0x8b && vgm_buffer[2] == 0x08)
+	{
+		// copy the raw data to a new buffer
+		std::vector<uint8_t> compressed = vgm_buffer;
+
+		// determine uncompressed size and resize the buffer
+		uint8_t *end = &compressed[compressed.size()-1];
+		uint32_t uncompressed = end[-3] | (end[-2] << 8) | (end[-1] << 16) | (end[0] << 24);
+		if (length < compressed.size() || length > 32*1024*1024)
+		{
+			I_Debugf("[vgmplayer_c::S_PlayVGMMusic] Failed to load VGZ file with odd size!\n");
+			return false;
+		}
+		vgm_buffer.resize(uncompressed);
+
+		// decompress the data
+		mini_gzip *vgz = new mini_gzip;
+		mini_gz_init(vgz);
+		if (mini_gz_start(vgz, &compressed[0], compressed.size()) != 0)
+		{
+			I_Debugf("[vgmplayer_c::S_PlayVGMMusic] Error decompressing VGZ!\n");
+			delete vgz;
+			return false;
+		}
+
+		if (mini_gz_unpack(vgz, &vgm_buffer[0], uncompressed) < 0)
+		{
+			I_Debugf("[vgmplayer_c::S_PlayVGMMusic] Failed decompressing VGZ file!\n");
+			delete vgz;
+			return false;
+		}
+
+		delete vgz;
+	}
+
+	if (vgm_buffer.size() < 64 || vgm_buffer[0] != 'V' || vgm_buffer[1] != 'g' || 
+		vgm_buffer[2] != 'm' || vgm_buffer[3] != ' ')
+	{
+		I_Debugf("[vgmplayer_c::S_PlayVGMMusic] Invalid VGM file loaded!\n");
 		return false;
-    }
+	}
+
+	vgm_track_begin = ymfm_parse_header(vgm_buffer);
+
+	if (vgm_track_begin == 0)
+	{
+		I_Debugf("[vgmplayer_c::S_PlayVGMMusic] No compatible chips for VGM file!\n");
+		return false;
+	}
 
 	PostOpenInit();
 	return true;
 }
 
-
-void modplayer_c::Close()
+void vgmplayer_c::Close()
 {
 	if (status == NOT_LOADED)
 		return;
@@ -178,13 +238,13 @@ void modplayer_c::Close()
 	if (status != STOPPED)
 		Stop();
 		
-	ModPlug_Unload(mod_track);
+	ymfm_delete_chips();
 
 	status = NOT_LOADED;
 }
 
 
-void modplayer_c::Pause()
+void vgmplayer_c::Pause()
 {
 	if (status != PLAYING)
 		return;
@@ -193,7 +253,7 @@ void modplayer_c::Pause()
 }
 
 
-void modplayer_c::Resume()
+void vgmplayer_c::Resume()
 {
 	if (status != PAUSED)
 		return;
@@ -202,19 +262,20 @@ void modplayer_c::Resume()
 }
 
 
-void modplayer_c::Play(bool loop)
+void vgmplayer_c::Play(bool loop)
 {
     if (status != NOT_LOADED && status != STOPPED) return;
 
 	status = PLAYING;
 	looping = loop;
+	vgm_data_start = 0;
 
 	// Load up initial buffer data
 	Ticker();
 }
 
 
-void modplayer_c::Stop()
+void vgmplayer_c::Stop()
 {
 	if (status != PLAYING && status != PAUSED)
 		return;
@@ -225,11 +286,11 @@ void modplayer_c::Stop()
 }
 
 
-void modplayer_c::Ticker()
+void vgmplayer_c::Ticker()
 {
 	while (status == PLAYING)
 	{
-		epi::sound_data_c *buf = S_QueueGetFreeBuffer(MODPLUG_BUFFER, 
+		epi::sound_data_c *buf = S_QueueGetFreeBuffer(VGM_BUFFER, 
 				(dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 
 		if (! buf)
@@ -258,33 +319,23 @@ void modplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayMODMusic(byte *data, int length, float volume, bool looping)
+abstract_music_c * S_PlayVGMMusic(byte *data, int length, float volume, bool looping)
 {
-	modplayer_c *player = new modplayer_c();
-
-	// Need to set settings before loading module :/
-	ModPlug_Settings *mod_settings = new ModPlug_Settings;
-
-	mod_settings->mFlags = MODPLUG_ENABLE_OVERSAMPLING | MODPLUG_ENABLE_NOISE_REDUCTION;
-	mod_settings->mChannels = 2;
-	mod_settings->mBits = 16;
-	mod_settings->mFrequency = dev_freq;
-	mod_settings->mResamplingMode = MODPLUG_RESAMPLE_LINEAR;
-	mod_settings->mStereoSeparation = 128;
-	mod_settings->mMaxMixChannels = 32;
-
-	ModPlug_SetSettings(mod_settings);
-
-	delete mod_settings;
+	vgmplayer_c *player = new vgmplayer_c();
 
 	if (! player->OpenMemory(data, length))
 	{
 		delete[] data;
 		delete player;
-		return NULL;
+		return nullptr;
 	}
 
+	// we retain a copy of the VGM data, so can free it here
 	delete[] data;
+
+	// This will be replaced by a batch sample generation function; but works for initial implementation with
+	// a small bit of delay when loading a track
+	ymfm_generate_all(player->vgm_buffer, player->vgm_track_begin, dev_freq, player->test_buffer);
 
 	player->Volume(volume);
 	player->Play(looping);

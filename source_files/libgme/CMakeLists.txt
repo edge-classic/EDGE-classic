@@ -50,7 +50,7 @@ if (NOT DEFINED GME_SPC_ISOLATED_ECHO_BUFFER)
 endif()
 
 if (NOT DEFINED USE_GME_VGM)
-    SET(USE_GME_VGM 1 CACHE BOOL "Enable Sega VGM/VGZ music emulation")
+    SET(USE_GME_VGM 0 CACHE BOOL "Enable Sega VGM/VGZ music emulation")
 endif()
 
 if (NOT DEFINED GME_YM2612_EMU)

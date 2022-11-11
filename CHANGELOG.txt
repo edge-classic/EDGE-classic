@@ -1,6 +1,6 @@
 https://github.com/dashodanger/EDGE-classic
 
-Current as of: October 2022
+Current as of: November 2022
 
 
 CHANGELOG for EDGE-Classic 1.3 (since EDGE-Classic 1.21)
@@ -17,6 +17,7 @@ Bugs fixed
 + Conflicts between Doom graphics and PNGs causing errors are now 
   fixed (the infamous "Error occurred scanning image: xxx")
 + Do not apply invisibility effect to a zoomed weapon
++ Fixed IDCLEV mistakenly identifying non-marker lumps as valid map markers
 
 
 
@@ -32,12 +33,15 @@ General Improvements
 + Allow multiple WAIT_UNTIL_DEAD scripts to trigger for the same object
 + Improved handling in-game messages
 + ENDOOM screen now integrated into quit dialog (unless custom background image is defined in STYLES.DDF)
++ Added libYMFM for improved VGM music handling and format support; disabled Game Music Emu VGM support
 
 
 
 New Features
 ------------
 + Support OPL emulated playback of MUS and MIDI music lumps.
+
++ VGZ (compressed VGM) format music is now supported
 
 + DSDHACKED support.
 

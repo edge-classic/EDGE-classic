@@ -9,6 +9,7 @@ add_subdirectory(source_files/glad)
 add_subdirectory(source_files/libgme)
 add_subdirectory(source_files/libmodplug)
 add_subdirectory(source_files/libwebsid)
+add_subdirectory(source_files/libymfm)
 add_subdirectory(source_files/miniz)
 add_subdirectory(source_files/opl)
 add_subdirectory(source_files/whereami)
@@ -132,6 +133,7 @@ add_executable(
 	source_files/edge/s_mod.cc
 	source_files/edge/s_opl.cc
 	source_files/edge/s_sid.cc
+	source_files/edge/s_vgm.cc
 	source_files/edge/s_wav.cc  
 	source_files/edge/sv_chunk.cc   
 	source_files/edge/sv_glob.cc    
@@ -169,6 +171,7 @@ target_include_directories(edge-classic PRIVATE source_files/epi)
 target_include_directories(edge-classic PRIVATE source_files/glad/include/glad)
 target_include_directories(edge-classic PRIVATE source_files/libgme/gme)
 target_include_directories(edge-classic PRIVATE source_files/libmodplug/src)
+target_include_directories(edge-classic PRIVATE source_files/libymfm)
 target_include_directories(edge-classic PRIVATE source_files/libwebsid)
 target_include_directories(edge-classic PRIVATE source_files/minimp3)
 target_include_directories(edge-classic PRIVATE source_files/minivorbis)
@@ -251,6 +254,7 @@ if(WIN32 OR MSYS)
 			miniz
 			modplug
 			libwebsid
+			libymfm
 			opl
 			whereami
 			wsock32
@@ -270,6 +274,7 @@ else()
 			miniz
 			modplug
 			libwebsid
+			libymfm
 			opl
 			whereami
 	)

@@ -33,6 +33,7 @@ typedef enum
 	FMT_MOD,
 	FMT_GME,
 	FMT_SID,
+	FMT_VGM,
 	FMT_MUS,
 	FMT_MIDI,
 	FMT_DOOM,

@@ -62,6 +62,15 @@ sound_format_e Sound_DetectFormat(byte *data, int header_len)
 		return FMT_MIDI;
 	}
 
+	// Assume gzip format is VGZ and will be handled
+	// by the VGM library
+	if ((data[0] == 0x1f && data[1] == 0x8b &&
+		data[2] == 0x08) || (data[0] == 'V' && data[1] == 'g' &&
+		data[2] == 'm'  && data[3] == ' '))
+	{
+		return FMT_VGM;
+	}
+
 	// Moving on to more specialized or less reliable detections
 
 	if (!std::string(gme_identify_header(data)).empty())
@@ -126,8 +135,11 @@ sound_format_e Sound_FilenameToFormat(const std::string& filename)
 		ext == ".psm")
 		return FMT_MOD;
 
+	if (ext == ".vgm" || ext == ".vgz")
+		return FMT_VGM;
+
 	if (ext == ".ay" || ext == ".gbs" || ext == ".gym" || ext == ".hes" || ext == ".nsf" ||
-		ext == ".sap" || ext == ".spc" || ext == ".vgm")
+		ext == ".sap" || ext == ".spc")
 		return FMT_GME;
 
 	// Not sure if these will ever be encountered in the wild, but according to the VGMPF Wiki

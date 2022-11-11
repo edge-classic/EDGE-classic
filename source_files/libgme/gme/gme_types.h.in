@@ -18,6 +18,6 @@
 #cmakedefine USE_GME_SAP
 #cmakedefine USE_GME_SPC
 /* VGM and VGZ are a package deal */
-#cmakedefine USE_GME_VGM
+//#cmakedefine USE_GME_VGM
 
 #endif /* GME_TYPES_H */

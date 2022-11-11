@@ -195,9 +195,9 @@ extern BLARGG_EXPORT const gme_type_t
 	gme_nsfe_type,
 	gme_sap_type,
 	gme_spc_type,
-	gme_rsn_type,
-	gme_vgm_type,
-	gme_vgz_type;
+	gme_rsn_type;
+	//gme_vgm_type,
+	//gme_vgz_type;
 
 /* Type of this emulator */
 BLARGG_EXPORT gme_type_t gme_type( Music_Emu const* );

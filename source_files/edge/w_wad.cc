@@ -1926,6 +1926,12 @@ int W_GetFileForLump(int lump)
 	return lumpinfo[lump].file;
 }
 
+int W_GetKindForLump(int lump)
+{
+	SYS_ASSERT(W_VerifyLump(lump));
+
+	return lumpinfo[lump].kind;
+}
 
 //
 // Loads the lump into the given buffer,

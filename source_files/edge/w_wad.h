@@ -91,6 +91,8 @@ void W_CheckWADFixes(void);
 void W_BuildNodes(void);
 void W_ReadUMAPINFOLumps(void);
 
+int W_GetKindForLump(int lump);
+
 #endif // __W_WAD__
 
 //--- editor settings ---

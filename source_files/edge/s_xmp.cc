@@ -33,7 +33,7 @@
 
 #include "xmp.h"
 
-#define XMP_ONE_SECOND XMP_MAX_FRAMESIZE * 50 // From XMP's site, one second of a song is roughly 50 frames - Dasho
+#define XMP_BUFFER 4096 // From XMP's site, one second of a song is roughly 50 frames - Dasho
 
 extern bool dev_stereo;  // FIXME: encapsulation
 extern int  dev_freq;
@@ -83,7 +83,7 @@ private:
 
 xmpplayer_c::xmpplayer_c() : status(NOT_LOADED)
 {
-	mono_buffer = new s16_t[XMP_ONE_SECOND * 2];
+	mono_buffer = new s16_t[XMP_BUFFER * 2];
 }
 
 xmpplayer_c::~xmpplayer_c()
@@ -120,7 +120,7 @@ bool xmpplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 
 	int played = 0;
 
-	int did_play = xmp_play_buffer(mod_track, data_buf, XMP_ONE_SECOND, 0, &played);
+	int did_play = xmp_play_buffer(mod_track, data_buf, XMP_BUFFER, 0, &played);
 
 	if (did_play < -XMP_END) // ERROR
 	{
@@ -246,7 +246,7 @@ void xmpplayer_c::Ticker()
 {
 	while (status == PLAYING)
 	{
-		epi::sound_data_c *buf = S_QueueGetFreeBuffer(XMP_ONE_SECOND, 
+		epi::sound_data_c *buf = S_QueueGetFreeBuffer(XMP_BUFFER, 
 				(dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 
 		if (! buf)

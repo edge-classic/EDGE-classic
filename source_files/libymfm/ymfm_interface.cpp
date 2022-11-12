@@ -716,14 +716,15 @@ void add_rom_data(chip_type type, ymfm::access_class access, std::vector<uint8_t
 //  from the vgmplay file
 //-------------------------------------------------
 
-uint32_t ymfm_generate_batch(std::vector<uint8_t> &buffer, uint32_t *data_start, uint32_t output_rate, int16_t *wav_buffer, uint32_t samples)
+uint32_t ymfm_generate_batch(std::vector<uint8_t> &buffer, uint32_t *data_start, 
+	int64_t *cur_pos, uint32_t output_rate, int16_t *wav_buffer, uint32_t samples)
 {
 	// set the offset to the data start and go
 	uint32_t offset = *data_start;
 	uint32_t samples_processed = 0;
 	bool done = false;
 	emulated_time output_step = 0x100000000ull / output_rate;
-	emulated_time output_pos = 0;
+	emulated_time output_pos = *cur_pos;
 	while (!done && offset < buffer.size() && samples_processed < samples)
 	{
 		int delay = 0;
@@ -1039,19 +1040,17 @@ uint32_t ymfm_generate_batch(std::vector<uint8_t> &buffer, uint32_t *data_start,
 		// handle delays
 		while (delay-- != 0)
 		{
-			bool more_remaining = false;
 			int32_t outputs[2] = { 0 };
 			for (auto chip : active_chips)
 				chip->generate(output_pos, output_step, outputs);
 			output_pos += output_step;
-			*wav_buffer = static_cast<int16_t>(outputs[0]);
-			wav_buffer++;
-			*wav_buffer = static_cast<int16_t>(outputs[1]);
-			wav_buffer++;
+			*wav_buffer++ = outputs[0];
+			*wav_buffer++ = outputs[1];
 			samples_processed++;
 		}
 	}
 	*data_start = offset;
+	*cur_pos = output_pos;
 	return samples_processed;
 }
 

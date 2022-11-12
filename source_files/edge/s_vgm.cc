@@ -34,7 +34,7 @@
 
 #include "ymfm_interface.h"
 
-#define VGM_BUFFER 1024 * 10
+#define VGM_BUFFER 4096
 
 extern bool dev_stereo;  // FIXME: encapsulation
 extern int  dev_freq;
@@ -55,6 +55,8 @@ private:
 	bool looping;
 
 	s16_t *mono_buffer;
+
+	int64_t vgm_cur_pos;
 
 public:
 
@@ -130,20 +132,14 @@ bool vgmplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	else
 		data_buf = buf->data_L;
 
-	uint32_t samples = MIN(test_buffer.size() - vgm_data_start, VGM_BUFFER);
+	// Divide the buffer size by 8 to give some headroom because there's no way to determine the total size of
+	// the generated output until after the cycles are run
+	uint32_t samples = ymfm_generate_batch(vgm_buffer, &vgm_data_start, &vgm_cur_pos, dev_freq, data_buf, VGM_BUFFER / 8);
 
-	for (int i=0; i < samples; i=i+2)
-	{
-		data_buf[i] = test_buffer[vgm_data_start + i];
-		data_buf[i+1] = test_buffer[vgm_data_start + i+1];
-	}
-
-	vgm_data_start += samples;
-
-	if (vgm_data_start == test_buffer.size())
+	if (vgm_data_start >= vgm_buffer.size())
 		song_done = true;
 
-	buf->length = samples / 2;
+	buf->length = samples;
 
 	if (!dev_stereo)
 		ConvertToMono(buf->data_L, mono_buffer, buf->length);
@@ -153,6 +149,7 @@ bool vgmplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 		if (! looping)
 			return false;
 		vgm_data_start = 0;
+		vgm_cur_pos = 0;
 		return true;
 	}
 
@@ -269,6 +266,7 @@ void vgmplayer_c::Play(bool loop)
 	status = PLAYING;
 	looping = loop;
 	vgm_data_start = 0;
+	vgm_cur_pos = 0;
 
 	// Load up initial buffer data
 	Ticker();
@@ -332,10 +330,6 @@ abstract_music_c * S_PlayVGMMusic(byte *data, int length, float volume, bool loo
 
 	// we retain a copy of the VGM data, so can free it here
 	delete[] data;
-
-	// This will be replaced by a batch sample generation function; but works for initial implementation with
-	// a small bit of delay when loading a track
-	ymfm_generate_all(player->vgm_buffer, player->vgm_track_begin, dev_freq, player->test_buffer);
 
 	player->Volume(volume);
 	player->Play(looping);

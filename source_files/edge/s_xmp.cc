@@ -103,8 +103,13 @@ void xmpplayer_c::PostOpenInit()
 
 static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
 {
-	// Unlike the other players, libxmp seems to already handle this internally, so just copy the buffer - Dasho
-	memcpy(dest, src, len);
+	const s16_t *s_end = src + len*2;
+
+	for (; src < s_end; src += 2)
+	{
+		// compute average of samples
+		*dest++ = ( (int)src[0] + (int)src[1] ) >> 1;
+	}
 }
 
 bool xmpplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
@@ -222,7 +227,7 @@ void xmpplayer_c::Play(bool loop)
 	status = PLAYING;
 	looping = loop;
 
-	xmp_start_player(mod_track, dev_freq, dev_stereo ? 0 : XMP_FORMAT_MONO);
+	xmp_start_player(mod_track, dev_freq, 0);
 
 	// Load up initial buffer data
 	Ticker();

@@ -124,11 +124,14 @@ sound_format_e Sound_FilenameToFormat(const std::string& filename)
 	if (ext == ".mid" || ext == ".midi")
 		return FMT_MIDI;
 
-	if (ext == ".mod" || ext == ".s3m" || ext == ".xm" || ext == ".it" || ext == ".669" ||
-		ext == ".amf" || ext == ".ams" || ext == ".dbm" || ext == ".dmf" || ext == ".dsm" ||
-		ext == ".far" || ext == ".mdl" || ext == ".med" || ext == ".mtm" || ext == ".okt" ||
-		ext == ".ptm" || ext == ".stm" || ext == ".ult" || ext == ".umx" || ext == ".mt2" ||
-		ext == ".psm")
+	if (ext == ".mod" || ext == ".m15" || ext == ".flx" || ext == ".wow" || ext == ".dbm" ||
+		ext == ".digi" || ext == ".emod" || ext == ".med" || ext == ".mtn" || ext == ".okt" ||
+		ext == ".sfx" || ext == ".mgt" || ext == ".669" || ext == ".far" || ext == ".fnk" ||
+		ext == ".imf" || ext == ".it" || ext == ".liq" || ext == ".mdl" || ext == ".mtm" || 
+		ext == ".ptm" || ext == ".rtm" || ext == ".s3m" || ext == ".stm" || ext == ".ult" ||
+		ext == ".xm" || ext == ".amf" || ext == ".gdm" || ext == ".stx" || ext == ".abk" ||
+		ext == ".psm" || ext == ".j2b" || ext == ".mfp" || ext == ".smp" || ext == ".mmdc" ||
+		ext == ".stim" || ext == ".umx")
 		return FMT_XMP;
 
 	if (ext == ".vgm" || ext == ".vgz")

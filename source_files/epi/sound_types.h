@@ -30,7 +30,7 @@ typedef enum
 	FMT_WAV,
 	FMT_OGG,
 	FMT_MP3,
-	FMT_MOD,
+	FMT_XMP,
 	FMT_GME,
 	FMT_SID,
 	FMT_VGM,

@@ -7,7 +7,7 @@ add_subdirectory(source_files/dehacked)
 add_subdirectory(source_files/epi)
 add_subdirectory(source_files/glad)
 add_subdirectory(source_files/libgme)
-add_subdirectory(source_files/libmodplug)
+add_subdirectory(source_files/libxmp)
 add_subdirectory(source_files/libwebsid)
 add_subdirectory(source_files/libymfm)
 add_subdirectory(source_files/miniz)
@@ -130,7 +130,7 @@ add_executable(
 	source_files/edge/s_ogg.cc      
 	source_files/edge/s_tsf.cc
 	source_files/edge/s_gme.cc
-	source_files/edge/s_mod.cc
+	source_files/edge/s_xmp.cc
 	source_files/edge/s_opl.cc
 	source_files/edge/s_sid.cc
 	source_files/edge/s_vgm.cc
@@ -170,8 +170,8 @@ target_include_directories(edge-classic PRIVATE source_files/dr_wav)
 target_include_directories(edge-classic PRIVATE source_files/epi)
 target_include_directories(edge-classic PRIVATE source_files/glad/include/glad)
 target_include_directories(edge-classic PRIVATE source_files/libgme/gme)
-target_include_directories(edge-classic PRIVATE source_files/libmodplug/src)
 target_include_directories(edge-classic PRIVATE source_files/libymfm)
+target_include_directories(edge-classic PRIVATE source_files/libxmp)
 target_include_directories(edge-classic PRIVATE source_files/libwebsid)
 target_include_directories(edge-classic PRIVATE source_files/minimp3)
 target_include_directories(edge-classic PRIVATE source_files/minivorbis)
@@ -252,7 +252,7 @@ if(WIN32 OR MSYS)
 			${SDL2_LIBRARIES}
 			gme
 			miniz
-			modplug
+			libxmp
 			libwebsid
 			libymfm
 			opl
@@ -272,7 +272,7 @@ else()
 			${SDL2_LIBRARIES}
 			gme
 			miniz
-			modplug
+			libxmp
 			libwebsid
 			libymfm
 			opl

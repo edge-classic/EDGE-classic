@@ -36,7 +36,7 @@
 #include "s_mp3.h"
 #include "s_tsf.h"
 #include "s_gme.h"
-#include "s_mod.h"
+#include "s_xmp.h"
 #include "s_opl.h"
 #include "s_sid.h"
 #include "s_vgm.h"
@@ -156,7 +156,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 	if (play->infotype == MUSINF_LUMP)
 	{
 		// lumps must use auto-detection based on their contents
-		fmt = epi::Sound_DetectFormat(data, std::min(length, 2048));
+		fmt = epi::Sound_DetectFormat(data, length);
 	}
 	else
 	{
@@ -182,9 +182,9 @@ void S_ChangeMusic(int entrynum, bool loop)
 			music_player = S_PlayMP3Music(F, volume, loop);
 			break;
 
-		case epi::FMT_MOD:
+		case epi::FMT_XMP:
 			delete F;
-			music_player = S_PlayMODMusic(data, length, volume, loop);
+			music_player = S_PlayXMPMusic(data, length, volume, loop);
 			break;
 
 		case epi::FMT_GME:

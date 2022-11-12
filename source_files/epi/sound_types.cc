@@ -23,7 +23,7 @@
 #include "str_util.h"
 
 #include "gme.h"
-#include "modplug.h"
+#include "xmp.h"
 
 namespace epi
 {
@@ -78,12 +78,8 @@ sound_format_e Sound_DetectFormat(byte *data, int header_len)
 		return FMT_GME;
 	}
 
-	ModPlugFile *mod_checker = ModPlug_Load(data, header_len);
-	if (mod_checker)
-	{
-		ModPlug_Unload(mod_checker);
-		return FMT_MOD;
-	}
+	if (xmp_test_module_from_memory(data, header_len, NULL) == 0)
+		return FMT_XMP;
 
 	if ((data[0] == 'I' && data[1] == 'D' && data[2] == '3') ||
 		(data[0] == 0xFF && (data[1] >> 4 & 0xF)))
@@ -133,7 +129,7 @@ sound_format_e Sound_FilenameToFormat(const std::string& filename)
 		ext == ".far" || ext == ".mdl" || ext == ".med" || ext == ".mtm" || ext == ".okt" ||
 		ext == ".ptm" || ext == ".stm" || ext == ".ult" || ext == ".umx" || ext == ".mt2" ||
 		ext == ".psm")
-		return FMT_MOD;
+		return FMT_XMP;
 
 	if (ext == ".vgm" || ext == ".vgz")
 		return FMT_VGM;

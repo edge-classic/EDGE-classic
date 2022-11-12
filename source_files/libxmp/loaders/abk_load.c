@@ -22,7 +22,7 @@
  */
 
 #include "loader.h"
-#include "effects.h"
+#include "../effects.h"
 #include "../period.h"
 
 #define AMOS_BANK 0x416d426b

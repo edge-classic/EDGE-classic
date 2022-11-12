@@ -63,7 +63,6 @@ public:
 	uint32_t vgm_track_begin;
 	uint32_t vgm_data_start;
 	std::vector<uint8_t> vgm_buffer;
-	std::vector<int> test_buffer;
 
 	bool OpenMemory(byte *data, int length);
 

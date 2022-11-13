@@ -241,6 +241,7 @@ abstract_music_c * S_PlayOPL(byte *data, int length, bool is_mus, float volume, 
 		if (! S_StartupOPL())
 		{
 			opl_disabled = true;
+			return nullptr;
 		}
 		opl_inited = true;
 	}

@@ -343,6 +343,7 @@ abstract_music_c * S_PlayTSF(byte *data, int length, bool is_mus,
 		if (! S_StartupTSF())
 		{
 			tsf_disabled = true;
+			return nullptr;
 		}
 		tsf_inited = true;
 	}

@@ -208,6 +208,8 @@ static scrmode_c new_scrmode;
 
 bool splash_screen;
 
+extern std::vector<std::string> available_soundfonts;
+
 // -ES- 1998/11/28 Wipe and Faded teleportation options
 //static char FadeT[] = "Off/On, flash/On, no flash";
 

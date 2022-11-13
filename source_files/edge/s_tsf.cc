@@ -44,12 +44,13 @@ extern bool dev_stereo;
 extern int  dev_freq; 
 
 static bool tsf_inited;
+static bool tsf_disabled = false;
 
 tsf *edge_tsf;
 
 DEF_CVAR(s_soundfont, "default.sf2", CVAR_ARCHIVE)
 
-std::vector<std::string> available_soundfonts;
+extern std::vector<std::string> available_soundfonts;
 
 class tsf_player_c : public abstract_music_c
 {
@@ -245,25 +246,6 @@ bool S_StartupTSF(void)
 {
 	I_Printf("Initializing TinySoundFont...\n");
 
-	// Populate available soundfont vector here (might as well)
-	std::vector<epi::dir_entry_c> sfd;
-	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
-
-	if (!FS_ReadDir(sfd, soundfont_dir.c_str(), "*.sf2"))
-	{
-		I_Warning("TinySoundFont: Failed to read '%s' directory!\n", soundfont_dir.c_str());
-	}
-	else
-	{
-		for (size_t i = 0 ; i < sfd.size() ; i++) 
-		{
-			if(!sfd[i].is_dir)
-			{
-				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name.c_str()));
-			}
-		}
-	}
-
 	// Check for presence of previous CVAR value's file
 	bool cvar_good = false;
 	for (int i=0; i < available_soundfonts.size(); i++)
@@ -277,6 +259,8 @@ bool S_StartupTSF(void)
 		I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
 		s_soundfont = "default.sf2";
 	}
+
+ 	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
 
 	edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), s_soundfont.c_str()).c_str());
 
@@ -306,6 +290,9 @@ bool S_StartupTSF(void)
 // Should only be invoked when switching soundfonts
 void S_RestartTSF(void)
 {
+	if (!tsf_inited)
+		return;
+
 	I_Printf("Restarting TinySoundFont...\n");
 
 	int old_entry = entry_playing;
@@ -348,8 +335,17 @@ void S_RestartTSF(void)
 abstract_music_c * S_PlayTSF(byte *data, int length, bool is_mus,
 			float volume, bool loop)
 {
-	if (!tsf_inited)
-		return NULL;
+	if (tsf_disabled)
+		return nullptr;
+
+	if (! tsf_inited)
+	{
+		if (! S_StartupTSF())
+		{
+			tsf_disabled = true;
+		}
+		tsf_inited = true;
+	}
 
 	if (is_mus)
 	{

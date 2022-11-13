@@ -43,7 +43,7 @@ extern bool dev_stereo;
 extern int  dev_freq;
 
 static bool opl_inited;
-static bool opl_disabled;
+static bool opl_disabled = false;
 
 static bool S_StartupOPL(void)
 {
@@ -232,6 +232,10 @@ private:
 
 abstract_music_c * S_PlayOPL(byte *data, int length, bool is_mus, float volume, bool loop)
 {
+
+	if (opl_disabled)
+		return nullptr;
+
 	if (! opl_inited)
 	{
 		if (! S_StartupOPL())
@@ -240,9 +244,6 @@ abstract_music_c * S_PlayOPL(byte *data, int length, bool is_mus, float volume, 
 		}
 		opl_inited = true;
 	}
-
-	if (opl_disabled)
-		return NULL;
 
 	if (is_mus)
 	{

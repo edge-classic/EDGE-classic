@@ -22,8 +22,6 @@
 
 #include "i_defs.h"
 
-extern std::vector<std::string> available_soundfonts;
-
 bool S_StartupTSF(void);
 
 void S_RestartTSF(void);

@@ -201,10 +201,9 @@ void language_c::AddOrReplace(const char *ref, const char *value)
 {
 	if (umap == NULL)
 	{
-		umap = new lang_choice_c;
-
-		umap->AddEntry(ref, value);
+		umap = new lang_choice_c;	
 	}
+	umap->AddEntry(ref, value);
 }
 
 

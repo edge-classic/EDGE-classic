@@ -109,7 +109,7 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
-        name: edge-classic-linux
+        name: edge-classic-macos
         path: |
           ${{github.workspace}}/autoload
           ${{github.workspace}}/edge_base

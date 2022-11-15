@@ -586,7 +586,7 @@ void bot_t::TurnToward(angle_t want_angle, float want_slope, bool fast)
 
 	float diff = want_slope - M_Tan(pl->mo->vertangle);
 
-	if (fabs(diff) < fast ? 0.12 : 0.04)
+	if (fabs(diff) < (fast ? 0.12 : 0.04))
 		look_slope = want_slope;
 	else if (diff < 0)
 		look_slope -= fast ? 0.1 : 0.03;

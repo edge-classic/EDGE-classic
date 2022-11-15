@@ -57,7 +57,7 @@ const char* GetResourcePath()
 	dir_match += '/';
 	dir_match += exe_subdir; 
 
-    const char *ep = GetExecutablePath(NULL);
+    const char *ep = GetExecutablePath();
 	std::string exe_path = ep;
     free((void*)ep);
 

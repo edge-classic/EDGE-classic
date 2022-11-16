@@ -21,7 +21,7 @@
 
 #include "midifile.h"
 
-bool OPLAY_Init(int freq, bool stereo);
+bool OPLAY_Init(int freq, bool stereo, bool opl3_wanted);
 
 bool OPLAY_StartSong(midi_file_t *song);
 void OPLAY_FinishSong(void);

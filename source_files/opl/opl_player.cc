@@ -1436,12 +1436,12 @@ static void ParseDMXOptions(void)
 	if (strstr(dmxoption, "-opl3") != NULL)
 	{
 		opl3mode = true;
-		num_opl_voices = OPL_NUM_VOICES * 2;
 	}
 	else
 	{
+		// If they are setting a DMXOPTION env variable assume
+		// that omitting -opl3 means a desire for opl2
 		opl3mode = false;
-		num_opl_voices = OPL_NUM_VOICES;
 	}
 
 	if (strstr(dmxoption, "-reverse") != NULL)
@@ -1456,14 +1456,18 @@ static void ParseDMXOptions(void)
 //
 //----------------------------------------------------------------------
 
-bool OPLAY_Init(int freq, bool stereo)
+bool OPLAY_Init(int freq, bool stereo, bool opl3_wanted)
 {
 	if (freq < 8000)
 		return false;
 
 	sample_rate = freq;
 
+	opl3mode = opl3_wanted;
+
 	ParseDMXOptions();
+
+	num_opl_voices = OPL_NUM_VOICES * (opl3mode ? 2 : 1);
 
 	OPL3_Reset(&opl_chip, freq);
 

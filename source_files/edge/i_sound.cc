@@ -63,6 +63,7 @@ static char scratcherror[256];
 static bool audio_is_locked = false;
 
 std::vector<std::string> available_soundfonts;
+std::vector<std::string> available_genmidis;
 extern std::string game_dir;
 
 
@@ -281,6 +282,28 @@ void I_StartupMusic(void)
 			if(!sfd[i].is_dir)
 			{
 				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name.c_str()));
+			}
+		}
+	}
+
+	// Populate available genmidi vector
+	sfd.clear();
+
+	// Start with empty string to represent using whichever GENMIDI
+	// is found in the load order (usually just the IWAD)
+	available_genmidis.push_back("");
+
+	if (!FS_ReadDir(sfd, soundfont_dir.c_str(), "*.op2"))
+	{
+		I_Warning("OPL: Failed to read '%s' directory!\n", soundfont_dir.c_str());
+	}
+	else
+	{
+		for (size_t i = 0 ; i < sfd.size() ; i++) 
+		{
+			if(!sfd[i].is_dir)
+			{
+				available_genmidis.push_back(epi::PATH_GetFilename(sfd[i].name.c_str()));
 			}
 		}
 	}

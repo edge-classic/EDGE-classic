@@ -106,6 +106,7 @@
 #include "r_image.h"
 #include "w_wad.h"
 #include "r_wipe.h"
+#include "s_opl.h"
 #include "s_tsf.h"
 
 #include "i_ctrl.h"
@@ -120,6 +121,7 @@ extern cvar_c m_language;
 extern cvar_c r_crosshair;
 extern cvar_c r_crosscolor;
 extern cvar_c r_crosssize;
+extern cvar_c s_genmidi;
 extern cvar_c s_soundfont;
 
 static int menu_crosshair;
@@ -179,6 +181,7 @@ static void M_ChangeResFull(int keypressed);
 static void M_LanguageDrawer(int x, int y, int deltay);
 static void M_ChangeLanguage(int keypressed);
 static void M_ChangeSoundfont(int keypressed);
+static void M_ChangeGENMIDI(int keypressed);
 static void InitMonitorSize();
 
 static char YesNo[]     = "Off/On";  // basic on/off
@@ -203,12 +206,15 @@ static char MixChans[]    = "32/64/96/128/160/192/224/256";
 
 static char CrosshairColor[] = "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange";
 
+static char OPLMode[]  = "Off/OPL2/OPL3";
+
 // Screen resolution changes
 static scrmode_c new_scrmode;
 
 bool splash_screen;
 
 extern std::vector<std::string> available_soundfonts;
+extern std::vector<std::string> available_genmidis;
 
 // -ES- 1998/11/28 Wipe and Faded teleportation options
 //static char FadeT[] = "Off/On, flash/On, no flash";
@@ -483,7 +489,8 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Function, "MIDI Soundfont", NULL,  0, NULL, M_ChangeSoundfont, NULL},
-	{OPT_Boolean, "OPL Music Mode",  YesNo, 2,  &var_opl_music, NULL, "NeedRestart"},
+	{OPT_Switch,  "OPL Music Mode",  OPLMode, 3,  &var_opl_music, NULL, "NeedRestart"},
+	{OPT_Function, "OPL Instrument Bank", NULL,  0, NULL, M_ChangeGENMIDI, NULL},
 	{OPT_Boolean, "PC Speaker Mode", YesNo, 2,  &var_pc_speaker_mode, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Boolean, "Dynamic Reverb",       YesNo, 2, &dynamic_reverb, NULL, NULL},
@@ -1065,6 +1072,13 @@ void M_OptDrawer()
 		if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeSoundfont)
 		{
 			HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, epi::PATH_GetBasename(s_soundfont.c_str()).c_str());
+		}
+
+		// Draw current GENMIDI
+		if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeGENMIDI)
+		{
+			HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, 
+				s_genmidi.s.empty() ? "default" : epi::PATH_GetBasename(s_genmidi.c_str()).c_str());
 		}
 
 		// -ACB- 1998/07/15 Menu Cursor is colour indexed.
@@ -1953,7 +1967,8 @@ static void M_ChangeSoundfont(int keypressed)
 
 	if (sf2_pos < 0)
 	{
-		I_Warning("M_ChangeSoundfont: Could not read list of available soundfonts. Keeping current selection!\n");
+		I_Warning("M_ChangeSoundfont: Could not read list of available soundfonts. Falling back to default!\n");
+		s_soundfont = "default.sf2";
 		return;
 	}
 
@@ -1975,6 +1990,49 @@ static void M_ChangeSoundfont(int keypressed)
 	// update cvar
 	s_soundfont = available_soundfonts.at(sf2_pos);
 	S_RestartTSF();
+}
+
+//
+// M_ChangeGENMIDI
+//
+//
+static void M_ChangeGENMIDI(int keypressed)
+{
+	int op2_pos = -1;
+	for(int i=0; i < (int)available_genmidis.size(); i++)
+	{
+		if (epi::case_cmp(s_genmidi.s, available_genmidis.at(i)) == 0)
+		{
+			op2_pos = i;
+			break;
+		}
+	}
+
+	if (op2_pos < 0)
+	{
+		I_Warning("M_ChangeGENMIDI: Could not read list of available GENMIDIs. Falling back to default!\n");
+		s_genmidi.s = "";
+		return;
+	}
+
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	{
+		if (op2_pos - 1 >= 0)
+			op2_pos--;
+		else
+			op2_pos = available_genmidis.size() - 1;
+	}
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	{
+		if (op2_pos + 1 >= (int)available_genmidis.size())
+			op2_pos = 0;
+		else
+			op2_pos++;
+	}
+
+	// update cvar
+	s_genmidi = available_genmidis.at(op2_pos);
+	S_RestartOPL();
 }
 
 //

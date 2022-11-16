@@ -282,15 +282,13 @@ bool S_StartupTSF(void)
 	// songs with a lot of simultaneous notes.
 	tsf_set_output(edge_tsf, dev_stereo ? TSF_STEREO_INTERLEAVED : TSF_MONO, dev_freq, -6.0);
 
-	tsf_inited = true;
-
 	return true; // OK!
 }
 
 // Should only be invoked when switching soundfonts
 void S_RestartTSF(void)
 {
-	if (!tsf_inited)
+	if (tsf_disabled || !tsf_inited)
 		return;
 
 	I_Printf("Restarting TinySoundFont...\n");
@@ -303,27 +301,8 @@ void S_RestartTSF(void)
 
 	tsf_close(edge_tsf);
 
-	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
-
-	edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), s_soundfont.c_str()).c_str());
-
-	if (!edge_tsf)
-	{
-		I_Warning("TinySoundFont: Could not load requested soundfont %s! Falling back to default soundfont!\n", s_soundfont.c_str());
-		edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), "default.sf2").c_str());
-	}
-
-	if (!edge_tsf) 
-	{
-		I_Warning("Could not load any soundfonts! Ensure that default.sf2 is present in the soundfont directory!\n");
+	if (!S_StartupTSF())
 		return;
-	}
-
-	tsf_channel_set_bank_preset(edge_tsf, 9, 128, 0);
-
-	// reduce the overall gain by 6dB, to minimize the chance of clipping in
-	// songs with a lot of simultaneous notes.
-	tsf_set_output(edge_tsf, dev_stereo ? TSF_STEREO_INTERLEAVED : TSF_MONO, dev_freq, -6.0);
 
 	tsf_inited = true;
 

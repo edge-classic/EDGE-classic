@@ -1,0 +1,90 @@
+===========================================================================
+Archive Maintainer      : Move to Music please, Replace previous!
+Advanced engine needed  : None
+Primary purpose         : No levels included
+===========================================================================
+Title                   : DMXOPL v1.11
+Filename                : DMXOPL.ZIP
+Release date            : August 22, 2017
+Author                  : ConSiGno
+Email Address           : consigno@soulsphere.org
+Misc. Author Info       : OPL Goddess.
+
+Description             : This is a GENMIDI patch for DMX for OPL2-OPL3 FM
+                          synthesis. This patch aims to remedy the "weak"
+                          default instruments to better match the Roland
+                          Sound Canvas, most notably the SC-55 and SC-88.
+                          Recommended minimum setup for no note-cuts is 
+                          ZDoom 2.8.1 with MAME OPL2 emulator core, 
+                          with 6 chips emulated.
+
+Additional Credits to   : Wohlstand, Bisqwuit, Fraggle, Esselfortium, Jimmy,
+                          The Fat Man, Diode Milliampere, Patchouli, Graf
+                          Zahl, Randi, Fisk, Stewboy, Xaser, Minigunner,
+                          Altazimuth, MTrop, Quasar, Glaice, BlastFrog,
+                          Vogons Forums, AtariAge, NintendoAge, and John
+                          Chowning, the father of FM synthesis. Extra 
+                          Thanks to Doomworld Forums and the IRC/DISCORD 
+                          channels, Giest118, Nuke.YKT, kode54, Patch93,
+                          GYRIDION, MovieMovies, Gali, and Infurnus.
+                          YMF262 forever.
+        
+===========================================================================
+* What is included *
+
+New levels              : None
+Sounds                  : No
+Music                   : No
+Graphics                : No
+Dehacked/BEX Patch      : No
+Demos                   : No
+Other                   : GENMIDI patch
+Other files required    : None
+
+
+* Play Information *
+
+Game                    : Doom, Raven, Strife, Square, Hacx, and more!
+Single Player           : Designed for
+Cooperative 2-4 Player  : Designed for
+Deathmatch 2-4 Player   : Designed for
+Other game styles       : None
+Difficulty Settings     : Not implemented
+
+
+* Construction *
+
+Base                    : Stock DMX GENMIDI
+Build Time              : About 5 years
+Editor(s) used          : Hex Editors, OPL3 Bank Editor, Fraggle's Python
+                          scripts, Adlib Tracker II, Edlib, ADLMidi
+Known Bugs              : Due to the number of pseudo 4-op voices, certain 
+                          notes may cut sooner than they would have using 
+                          the stock patches. Most of Doom and Doom 2 play 
+                          just fine. Depending on your CPU, there may be
+                          skips in the sound due to buffer underrun, as 
+                          this patch takes more channels than the stock
+                          GENMIDI.
+May Not Run With        : Recent dev builds of GZDoom have broken OPL
+                          support as of this writing.
+Tested With             : ZDoom 2.8.1, Chocolate Doom, Vanilla Doom, ADLMidi
+
+
+* Copyright / Permissions *
+
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0
+International License. To view a copy of this license, visit
+http://creativecommons.org/licenses/by-sa/4.0/
+
+You are free to copy and redistribute the material in any medium or format;
+and remix, transform, and build upon the material for any purpose, even
+commercially. If you do so, you must give appropriate credit, provide a link
+to the license, and indicate if changes were made. You may do so in any
+reasonable manner, but not in any way that suggests the licensor endorses you
+or your use. If you remix, transform, or build upon the material, you must
+distribute your contributions under the same license as the original.
+
+* Where to get the file that this text file describes *
+
+The Usual: ftp://archives.gamers.org/pub/idgames/ and mirrors
+Web sites: https://github.com/sneakernets/DMXOPL/

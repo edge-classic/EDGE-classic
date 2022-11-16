@@ -427,7 +427,11 @@ struct Compare_lump_pred
 		if (cmp != 0) return (cmp > 0);
 
 		// lump type
-		return C.kind > D.kind;
+		if (C.kind != D.kind)
+			return C.kind > D.kind;
+
+		// tie breaker
+		return C.position > D.position;
 	}
 };
 

@@ -1616,7 +1616,8 @@ void P_RemoveMobj(mobj_t *mo)
 
 	if ((mo->info->flags & MF_SPECIAL) && 
 		0 == (mo->extendedflags & EF_NORESPAWN) &&
-	    0 == (mo->flags & (MF_MISSILE | MF_DROPPED)))
+	    0 == (mo->flags & (MF_MISSILE | MF_DROPPED)) &&
+		mo->spawnpoint.info)
 	{
 		P_AddItemToQueue(mo);
 	}

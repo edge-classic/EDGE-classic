@@ -75,8 +75,11 @@ int TranslateSDLKey(SDL_Scancode key)
 	// if keypad is not wanted, convert to normal keys
 	if (! in_keypad.d)
 	{
-		if (SDL_SCANCODE_KP_0 <= key && key <= SDL_SCANCODE_KP_9)
-			return '0' + (key - SDL_SCANCODE_KP_0);
+		if (SDL_SCANCODE_KP_1 <= key && key < SDL_SCANCODE_KP_0)
+			return '0' + (key - 88);
+
+		if (key == SDL_SCANCODE_KP_0)
+			return '0';
 
 		switch (key)
 		{

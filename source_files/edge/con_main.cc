@@ -21,6 +21,7 @@
 #include "filesystem.h"
 #include "math_crc.h"
 #include "path.h"
+#include "str_util.h"
 
 #include "language.h"
 #include "sfx.h"
@@ -327,6 +328,21 @@ int CMD_ShowCmds(char **argv, int argc)
 	return 0;
 }
 
+int CMD_ShowMaps(char **argv, int argc)
+{
+
+	I_Printf("Warp Name           Description\n");
+
+	for (int i = 1; i < mapdefs.GetSize(); i++)
+	{
+		if (G_MapExists(mapdefs[i]))
+			I_Printf("  %s           %s\n", mapdefs[i]->name.c_str(),
+				language[mapdefs[i]->description.c_str()]);
+	}
+
+	return 0;
+}
+
 int CMD_ShowKeys(char **argv, int argc)
 {
 #if 0  // TODO
@@ -513,6 +529,7 @@ const con_cmd_t builtin_commands[] =
 //	{ "showkeys",       CMD_ShowKeys },
 	{ "showlumps",      CMD_ShowLumps },
 	{ "showcmds",       CMD_ShowCmds },
+	{ "showmaps",       CMD_ShowMaps },
 	{ "showvars",       CMD_ShowVars },
 	{ "screenshot",     CMD_ScreenShot },
 	{ "type",           CMD_Type },

@@ -333,7 +333,7 @@ int CMD_ShowMaps(char **argv, int argc)
 
 	I_Printf("Warp Name           Description\n");
 
-	for (int i = 1; i < mapdefs.GetSize(); i++)
+	for (int i = 0; i < mapdefs.GetSize(); i++)
 	{
 		if (G_MapExists(mapdefs[i]))
 			I_Printf("  %s           %s\n", mapdefs[i]->name.c_str(),

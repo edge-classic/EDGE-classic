@@ -121,7 +121,8 @@ add_executable(
 	source_files/edge/r_md2.cc      
 	source_files/edge/r_image.cc    
 	source_files/edge/r_doomtex.cc  
-	source_files/edge/r_texgl.cc    
+	source_files/edge/r_texgl.cc
+	source_files/edge/r_voxel.cc
 	source_files/edge/s_blit.cc     
 	source_files/edge/s_cache.cc    
 	source_files/edge/s_sound.cc 

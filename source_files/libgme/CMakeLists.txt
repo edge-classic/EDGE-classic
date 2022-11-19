@@ -17,10 +17,6 @@ if (NOT DEFINED USE_GME_GBS)
     SET(USE_GME_GBS 1 CACHE BOOL "Enable support for Game Boy music emulation")
 endif()
 
-if (NOT DEFINED USE_GME_GYM)
-    SET(USE_GME_GYM 1 CACHE BOOL "Enable Sega MegaDrive/Genesis music emulation")
-endif()
-
 if (NOT DEFINED USE_GME_HES)
     SET(USE_GME_HES 1 CACHE BOOL "Enable PC Engine/TurboGrafx-16 music emulation")
 endif()
@@ -47,14 +43,6 @@ endif()
 
 if (NOT DEFINED GME_SPC_ISOLATED_ECHO_BUFFER)
     option(GME_SPC_ISOLATED_ECHO_BUFFER "Enable isolated echo buffer on SPC emulator to allow correct playing of \"dodgy\" SPC files made for various ROM hacks ran on ZSNES" OFF)
-endif()
-
-if (NOT DEFINED USE_GME_VGM)
-    SET(USE_GME_VGM 0 CACHE BOOL "Enable Sega VGM/VGZ music emulation")
-endif()
-
-if (NOT DEFINED GME_YM2612_EMU)
-    SET(GME_YM2612_EMU "MAME" CACHE STRING "Which YM2612 emulator to use: \"Nuked\" (LGPLv2.1+), \"MAME\" (GPLv2+), or \"GENS\" (LGPLv2.1+)")
 endif()
 
 if (USE_GME_NSFE AND NOT USE_GME_NSF)
@@ -94,15 +82,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     # This has caused miscompilation of code already and there are other
     # potential uses; see https://bitbucket.org/mpyne/game-music-emu/issues/18/
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fwrapv")
-
-    #if (USE_GME_SPC)
-    #    list(APPEND CMAKE_MODULE_PATH "${CMAKE_HOME_DIRECTORY}/cmake")
-    #    find_package(UNRAR QUIET)
-    #    if (UNRAR_FOUND)
-    #        # POSIX Threading for unRAR
-    #        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-    #    endif()
-    #endif()
 
     if (ENABLE_UBSAN)
         # GCC needs -static-libubsan

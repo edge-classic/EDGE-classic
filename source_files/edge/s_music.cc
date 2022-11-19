@@ -40,6 +40,7 @@
 #include "s_opl.h"
 #include "s_sid.h"
 #include "s_vgm.h"
+#include "s_flac.h"
 #include "m_misc.h"
 #include "w_files.h"
 #include "w_wad.h"
@@ -180,6 +181,11 @@ void S_ChangeMusic(int entrynum, bool loop)
 			F->Seek(0, epi::file_c::SEEKPOINT_START);
 			delete data;
 			music_player = S_PlayMP3Music(F, volume, loop);
+			break;
+
+		case epi::FMT_FLAC:
+			delete F;
+			music_player = S_PlayFLACMusic(data, length, volume, loop);
 			break;
 
 		case epi::FMT_XMP:

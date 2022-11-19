@@ -28,6 +28,7 @@ typedef enum
 {
 	FMT_Unknown = 0,
 	FMT_WAV,
+	FMT_FLAC,
 	FMT_OGG,
 	FMT_MP3,
 	FMT_XMP,

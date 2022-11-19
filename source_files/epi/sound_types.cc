@@ -38,6 +38,12 @@ sound_format_e Sound_DetectFormat(byte *data, int header_len)
 		return FMT_WAV;
 	}
 
+	if (data[0] == 'f' && data[1] == 'L' &&
+		data[2] == 'a'  && data[3] == 'C')
+	{
+		return FMT_FLAC;
+	}
+
 	if (data[0] == 'O' && data[1] == 'g' &&
 		data[2] == 'g')
 	{
@@ -108,6 +114,9 @@ sound_format_e Sound_FilenameToFormat(const std::string& filename)
 
 	if (ext == ".wav" || ext == ".wave")
 		return FMT_WAV;
+
+	if (ext == ".flac")
+		return FMT_FLAC;
 
 	if (ext == ".ogg")
 		return FMT_OGG;

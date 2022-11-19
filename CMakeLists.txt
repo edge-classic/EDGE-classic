@@ -135,7 +135,8 @@ add_executable(
 	source_files/edge/s_opl.cc
 	source_files/edge/s_sid.cc
 	source_files/edge/s_vgm.cc
-	source_files/edge/s_wav.cc  
+	source_files/edge/s_wav.cc
+	source_files/edge/s_flac.cc 
 	source_files/edge/sv_chunk.cc   
 	source_files/edge/sv_glob.cc    
 	source_files/edge/sv_level.cc   
@@ -167,7 +168,7 @@ target_include_directories(edge-classic PRIVATE source_files/ajbsp)
 target_include_directories(edge-classic PRIVATE source_files/coal)
 target_include_directories(edge-classic PRIVATE source_files/ddf)
 target_include_directories(edge-classic PRIVATE source_files/dehacked)
-target_include_directories(edge-classic PRIVATE source_files/dr_wav)
+target_include_directories(edge-classic PRIVATE source_files/dr_libs)
 target_include_directories(edge-classic PRIVATE source_files/epi)
 target_include_directories(edge-classic PRIVATE source_files/glad/include/glad)
 target_include_directories(edge-classic PRIVATE source_files/libgme/gme)

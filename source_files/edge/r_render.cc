@@ -2315,7 +2315,7 @@ bool RGL_CheckBBox(float *bspcoord)
 			return false;
 
 		if (r_culling.d && 
-			R_PointToDist(viewx, viewy, (x1+x2)/2, (y1+y2)/2) > 8000)
+			R_PointToDist(viewx, viewy, (x1+x2)/2, (y1+y2)/2) > 16000)
 			return false;
 
 	}
@@ -2706,7 +2706,7 @@ static void RGL_WalkSubsector(int num)
 			float sx2 = seg->v2->x;
 			float sy2 = seg->v2->y;
 
-			if (R_PointToDist(viewx, viewy, sx1, sy1) <= 3000 && R_PointToDist(viewx, viewy, sx2, sy2) <= 3000)
+			if (R_PointToDist(viewx, viewy, (sx1+sx2)/2, (sy1+sy2)/2) <= 3000)
 			{
 				skip = false;
 				break;

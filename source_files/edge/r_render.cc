@@ -2315,7 +2315,7 @@ bool RGL_CheckBBox(float *bspcoord)
 			return false;
 
 		if (r_culling.d && 
-			R_PointToDist(viewx, viewy, (x1+x2)/2, (y1+y2)/2) > 16000)
+			R_PointToDist(viewx, viewy, (x1+x2)/2, (y1+y2)/2) > 8000)
 			return false;
 
 	}

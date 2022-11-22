@@ -21,6 +21,8 @@
 #include "file.h"
 #include "filesystem.h"
 #include "mus_2_midi.h"
+#include "xmi_2_mid.h"
+#include "sound_types.h"
 #include "path.h"
 #include "str_util.h"
 
@@ -310,7 +312,7 @@ void S_RestartOPL(void)
 	return; // OK!
 }
 
-abstract_music_c * S_PlayOPL(byte *data, int length, bool is_mus, float volume, bool loop)
+abstract_music_c * S_PlayOPL(byte *data, int length, int fmt, float volume, bool loop)
 {
 
 	if (opl_disabled)
@@ -326,7 +328,7 @@ abstract_music_c * S_PlayOPL(byte *data, int length, bool is_mus, float volume, 
 		opl_inited = true;
 	}
 
-	if (is_mus)
+	if (fmt == epi::FMT_MUS)
 	{
 		I_Debugf("opl_player_c: Converting MUS format to MIDI...\n");
 
@@ -338,7 +340,30 @@ abstract_music_c * S_PlayOPL(byte *data, int length, bool is_mus, float volume, 
 			delete[] data;
 
 			I_Warning("Unable to convert MUS to MIDI !\n");
-			return NULL;
+			return nullptr;
+		}
+
+		delete[] data;
+
+		data   = midi_data;
+		length = midi_len;
+
+		I_Debugf("Conversion done: new length is %d\n", length);
+	}
+
+	if (fmt == epi::FMT_XMI)
+	{
+		I_Debugf("opl_player_c: Converting XMI format to MIDI...\n");
+
+		byte *midi_data;
+		uint32_t  midi_len;
+
+		if (Convert_xmi2midi(data, length, &midi_data, &midi_len, XMIDI_CONVERT_NOCONVERSION) != 0)
+		{
+			delete[] data;
+
+			I_Warning("Unable to convert XMI to MIDI !\n");
+			return nullptr;
 		}
 
 		delete[] data;
@@ -354,7 +379,7 @@ abstract_music_c * S_PlayOPL(byte *data, int length, bool is_mus, float volume, 
 	if (! song)
 	{
 		I_Debugf("OPL player: failed to load MIDI file!\n");
-		return NULL;
+		return nullptr;
 	}
 
 	delete[] data;

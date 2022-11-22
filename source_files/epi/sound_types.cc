@@ -63,9 +63,17 @@ sound_format_e Sound_DetectFormat(byte *data, int header_len)
 	}
 
 	if (data[0] == 'M' && data[1] == 'T' &&
-		data[2] == 'h'  && data[3] == 'd')
+		data[2] == 'h' && data[3] == 'd')
 	{
 		return FMT_MIDI;
+	}
+
+	if (data[0] == 'F' && data[1] == 'O' &&
+		data[2] == 'R' && data[3] == 'M' &&
+		data[8] == 'X' && data[9] == 'D' &&
+		data[10] == 'I' && data[11] == 'R')
+	{
+		return FMT_XMI;
 	}
 
 	// Assume gzip format is VGZ and will be handled
@@ -132,6 +140,9 @@ sound_format_e Sound_FilenameToFormat(const std::string& filename)
 
 	if (ext == ".mid" || ext == ".midi")
 		return FMT_MIDI;
+
+	if (ext == ".xmi")
+		return FMT_XMI;
 
 	if (ext == ".mod" || ext == ".m15" || ext == ".flx" || ext == ".wow" || ext == ".dbm" ||
 		ext == ".digi" || ext == ".emod" || ext == ".med" || ext == ".mtn" || ext == ".okt" ||

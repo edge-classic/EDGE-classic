@@ -37,6 +37,7 @@ typedef enum
 	FMT_VGM,
 	FMT_MUS,
 	FMT_MIDI,
+	FMT_XMI,
 	FMT_DOOM,
 	FMT_SPK
 }

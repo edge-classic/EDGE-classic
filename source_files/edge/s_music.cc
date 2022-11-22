@@ -210,15 +210,16 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 		case epi::FMT_MIDI:
 		case epi::FMT_MUS:
+		case epi::FMT_XMI:
 			delete F;
 
 			if (var_opl_music)
 			{
-				music_player = S_PlayOPL(data, length, fmt == epi::FMT_MUS, volume, loop);
+				music_player = S_PlayOPL(data, length, fmt, volume, loop);
 			}
 			else
 			{
-				music_player = S_PlayTSF(data, length, fmt == epi::FMT_MUS, volume, loop);
+				music_player = S_PlayTSF(data, length, fmt, volume, loop);
 			}
 			break;
 

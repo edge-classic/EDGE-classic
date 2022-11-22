@@ -24,7 +24,7 @@
 
 void S_RestartTSF(void);
 
-abstract_music_c * S_PlayTSF(byte *data, int length, bool is_mus,
+abstract_music_c * S_PlayTSF(byte *data, int length, int fmt,
 			float volume, bool loop);
 
 #endif /* __S_TSF_H__ */

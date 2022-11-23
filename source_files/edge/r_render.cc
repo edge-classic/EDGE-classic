@@ -2175,7 +2175,7 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
 	// --- handle sky (using the depth buffer) ---
 
-	if (!r_culling.d)
+	if (r_culling.d != 1)
 	{
 		if (backsector && IS_SKY(frontsector->floor) && IS_SKY(backsector->floor))
 		{
@@ -2315,7 +2315,7 @@ bool RGL_CheckBBox(float *bspcoord)
 			return false;
 
 		if (r_culling.d && 
-			R_PointToDist(viewx, viewy, (x1+x2)/2, (y1+y2)/2) > 8000)
+			R_PointToDist(viewx, viewy, (x1+x2)/2, (y1+y2)/2) > 16000)
 			return false;
 
 	}
@@ -2594,12 +2594,12 @@ static void RGL_WalkSubsector(int num)
 
 	// --- handle sky (using the depth buffer) ---
 
-	if (!r_culling.d && IS_SKY(sub->sector->floor) && viewz > sub->sector->f_h)
+	if (r_culling.d != 1 && IS_SKY(sub->sector->floor) && viewz > sub->sector->f_h)
 	{
 		RGL_DrawSkyPlane(sub, sub->sector->f_h);
 	}
 
-	if (!r_culling.d && IS_SKY(sub->sector->ceil) && viewz < sub->sector->sky_h)
+	if (r_culling.d != 1 && IS_SKY(sub->sector->ceil) && viewz < sub->sector->sky_h)
 	{
 		RGL_DrawSkyPlane(sub, sub->sector->sky_h);
 	}
@@ -2730,6 +2730,16 @@ static void RGL_WalkSubsector(int num)
 				active_mirrors[num_active_mirrors-1].def->drawsubs.push_back(K);
 			else
 				drawsubs.push_back(K);
+		}
+		else if (r_culling.d == 2)
+		{
+			RGL_DrawSkyPlane(sub, sub->sector->sky_h);
+			for (seg_t *seg = sub->segs ; seg ; seg=seg->sub_next)
+			{
+				RGL_DrawSkyWall(seg, seg->frontsector->f_h, seg->frontsector->sky_h);
+				if (seg->backsector)
+					RGL_DrawSkyWall(seg, seg->backsector->f_h, seg->backsector->sky_h);
+			}
 		}
 	}
 	else

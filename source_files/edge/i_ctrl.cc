@@ -564,13 +564,6 @@ void InactiveEventProcess(SDL_Event *sdl_ev)
 	}
 }
 
-
-void I_CentreMouse(void)
-{
-	SDL_WarpMouseInWindow(my_vis, SCREENWIDTH/2, SCREENHEIGHT/2);
-}
-
-
 void I_ShowJoysticks(void)
 {
 	if (nojoy)

@@ -21,11 +21,11 @@
 
 #ifdef _MSC_VER
 #include "SDL.h"
+#elif __APPLE__
+#include <SDL.h>
 #else
 #include <SDL2/SDL.h>
 #endif
-
-#include "i_local.h"  // FIXME: remove
 
 #endif /* __SDL_SYSTEM_INTERNAL_H__ */
 

@@ -2,7 +2,7 @@
 //  Sound Format Detection
 //------------------------------------------------------------------------
 // 
-//  Copyright (c) 2022 - The EDGE-Classic Team
+//  Copyright (c) 2022 - The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -28,13 +28,16 @@ typedef enum
 {
 	FMT_Unknown = 0,
 	FMT_WAV,
+	FMT_FLAC,
 	FMT_OGG,
 	FMT_MP3,
-	FMT_MOD,
+	FMT_XMP,
 	FMT_GME,
 	FMT_SID,
+	FMT_VGM,
 	FMT_MUS,
 	FMT_MIDI,
+	FMT_XMI,
 	FMT_DOOM,
 	FMT_SPK
 }

@@ -2,7 +2,7 @@
 //  EDGE Level Loading/Setup Code
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2022  The EDGE-Classic Team.
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License

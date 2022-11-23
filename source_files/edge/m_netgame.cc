@@ -595,9 +595,9 @@ void M_DrawHostMenu(void)
 	y += 22; idx++;
 
 	CenterX = 160;
-	CenterX -= (ng_host_style->fonts[styledef_c::T_HEADER]->StringWidth("Start") * ng_host_style->def->text[styledef_c::T_HEADER].scale) / 2;
+	CenterX -= (ng_host_style->fonts[styledef_c::T_TEXT]->StringWidth("Start") * ng_host_style->def->text[styledef_c::T_TEXT].scale) / 2;
 
-	HL_WriteText(ng_host_style,(host_pos==idx) ? styledef_c::T_HELP:styledef_c::T_HEADER, CenterX,  y, "Start");
+	HL_WriteText(ng_host_style,(host_pos==idx) ? styledef_c::T_HELP:styledef_c::T_TEXT, CenterX,  y, "Start");
 }
 
 bool M_NetHostResponder(event_t * ev, int ch)

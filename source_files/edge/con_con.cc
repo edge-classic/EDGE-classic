@@ -349,11 +349,6 @@ static void SplitIntoLines(char *src)
 			src++; continue;
 		}
 
-		// disregard if outside of extended ASCII range
-		if (*src > 128 || *src < -128)
-		{
-			src++; continue;
-		}
 
 		*dest++ = *src++;
 	}
@@ -386,11 +381,6 @@ static void EndoomSplitIntoLines(byte endoom_byte, char *src)
 			src++; continue;
 		}
 
-		// disregard if outside of extended ASCII range
-		if (*src > 128 || *src < -128)
-		{
-			src++; continue;
-		}
 
 		*dest++ = *src++;
 	}
@@ -423,11 +413,6 @@ static void QuitSplitIntoLines(char *src)
 			src++; continue;
 		}
 
-		// disregard if outside of extended ASCII range
-		if (*src > 128 || *src < -128)
-		{
-			src++; continue;
-		}
 
 		*dest++ = *src++;
 	}
@@ -460,11 +445,6 @@ static void QuitEndoomSplitIntoLines(byte endoom_byte, char *src)
 			src++; continue;
 		}
 
-		// disregard if outside of extended ASCII range
-		if (*src > 128 || *src < -128)
-		{
-			src++; continue;
-		}
 
 		*dest++ = *src++;
 	}
@@ -593,6 +573,7 @@ void CON_MessageColor(rgbcol_t col)
 
 static int XMUL;
 static int FNSZ;
+static float FNSZ_ratio;
 
 static void CalcSizes()
 {
@@ -600,26 +581,29 @@ static void CalcSizes()
 	if (SCREENWIDTH <= 400)
 	{
 		FNSZ = 11;
+		FNSZ_ratio = FNSZ / con_font->def->default_size;
 		if (con_font->def->type == FNTYP_TrueType)
-			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * (FNSZ / con_font->def->default_size));
+			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * FNSZ_ratio);
 		else
-			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height)); 
+			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 	}
 	else if (SCREENWIDTH < 640)
 	{
 		FNSZ = 13;
+		FNSZ_ratio = FNSZ / con_font->def->default_size;
 		if (con_font->def->type == FNTYP_TrueType)
-			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * (FNSZ / con_font->def->default_size));
+			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * FNSZ_ratio);
 		else
-			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));  
+			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 	}
 	else
 	{
 		FNSZ = 16;
+		FNSZ_ratio = FNSZ / con_font->def->default_size;
 		if (con_font->def->type == FNTYP_TrueType)
-			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * (FNSZ / con_font->def->default_size));
+			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * FNSZ_ratio);
 		else
-			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));  
+			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 	}
 }
 
@@ -663,19 +647,19 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 
 	if (con_font->def->type == FNTYP_TrueType)
 	{
-		float width = XMUL * ((con_font->CharWidth(ch) - con_font->spacing) / con_font->def->default_size);
+		float width = (con_font->CharWidth(ch) - con_font->spacing) * FNSZ_ratio;
 		float x_adjust = (XMUL - width) / 2;
-		float y_adjust = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).y_shift * (FNSZ / con_font->ttf_char_height);
-		float height = FNSZ * (con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).height / con_font->ttf_char_height);
+		float y_adjust = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).y_shift * FNSZ_ratio;
+		float height = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).height * FNSZ_ratio;
 		stbtt_aligned_quad *q = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).char_quad;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_TEXTURE_2D);
 		if ((var_smoothing && con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ON_DEMAND) ||
 			con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ALWAYS)
-			glBindTexture(GL_TEXTURE_2D, con_font->ttf_glyph_map.at(cp437_unicode_values[ch]).smoothed_tex_id);
+			glBindTexture(GL_TEXTURE_2D, con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).smoothed_tex_id);
 		else
-			glBindTexture(GL_TEXTURE_2D, con_font->ttf_glyph_map.at(cp437_unicode_values[ch]).tex_id);
+			glBindTexture(GL_TEXTURE_2D, con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).tex_id);
 		glBegin(GL_POLYGON);
 		glTexCoord2f(q->s0,q->t0); glVertex2f(x + x_adjust,y - y_adjust);
         glTexCoord2f(q->s1,q->t0); glVertex2f(x + x_adjust + width,y - y_adjust);
@@ -1818,7 +1802,8 @@ void CON_CreateQuitScreen()
 	int row_counter = 0;
 	for (int i = 0; i < 4000; i+=2)
 	{
-		CON_QuitEndoomPrintf(data[i+1], "%c", ((int)data[i] == 0 || (int)data[i] == 255) ? 0x20 : (int)data[i]);
+		CON_QuitEndoomPrintf(data[i+1], "%c", (static_cast<u8_t>(data[i]) == 0 || 
+			static_cast<u8_t>(data[i]) == 255) ? 0x20 : static_cast<u8_t>(data[i]));
 		row_counter++;
 		if (row_counter == 80) 
 		{

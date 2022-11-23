@@ -2,7 +2,7 @@
 //  Sound Format Detection
 //------------------------------------------------------------------------
 // 
-//  Copyright (c) 2022 - The EDGE-Classic Team
+//  Copyright (c) 2022 - The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -23,7 +23,7 @@
 #include "str_util.h"
 
 #include "gme.h"
-#include "modplug.h"
+#include "xmp.h"
 
 namespace epi
 {
@@ -36,6 +36,12 @@ sound_format_e Sound_DetectFormat(byte *data, int header_len)
 		data[2] == 'F'  && data[3] == 'F')
 	{
 		return FMT_WAV;
+	}
+
+	if (data[0] == 'f' && data[1] == 'L' &&
+		data[2] == 'a'  && data[3] == 'C')
+	{
+		return FMT_FLAC;
 	}
 
 	if (data[0] == 'O' && data[1] == 'g' &&
@@ -57,9 +63,26 @@ sound_format_e Sound_DetectFormat(byte *data, int header_len)
 	}
 
 	if (data[0] == 'M' && data[1] == 'T' &&
-		data[2] == 'h'  && data[3] == 'd')
+		data[2] == 'h' && data[3] == 'd')
 	{
 		return FMT_MIDI;
+	}
+
+	if (data[0] == 'F' && data[1] == 'O' &&
+		data[2] == 'R' && data[3] == 'M' &&
+		data[8] == 'X' && data[9] == 'D' &&
+		data[10] == 'I' && data[11] == 'R')
+	{
+		return FMT_XMI;
+	}
+
+	// Assume gzip format is VGZ and will be handled
+	// by the VGM library
+	if ((data[0] == 0x1f && data[1] == 0x8b &&
+		data[2] == 0x08) || (data[0] == 'V' && data[1] == 'g' &&
+		data[2] == 'm'  && data[3] == ' '))
+	{
+		return FMT_VGM;
 	}
 
 	// Moving on to more specialized or less reliable detections
@@ -69,12 +92,8 @@ sound_format_e Sound_DetectFormat(byte *data, int header_len)
 		return FMT_GME;
 	}
 
-	ModPlugFile *mod_checker = ModPlug_Load(data, header_len);
-	if (mod_checker)
-	{
-		ModPlug_Unload(mod_checker);
-		return FMT_MOD;
-	}
+	if (xmp_test_module_from_memory(data, header_len, NULL) == 0)
+		return FMT_XMP;
 
 	if ((data[0] == 'I' && data[1] == 'D' && data[2] == '3') ||
 		(data[0] == 0xFF && (data[1] >> 4 & 0xF)))
@@ -104,6 +123,9 @@ sound_format_e Sound_FilenameToFormat(const std::string& filename)
 	if (ext == ".wav" || ext == ".wave")
 		return FMT_WAV;
 
+	if (ext == ".flac")
+		return FMT_FLAC;
+
 	if (ext == ".ogg")
 		return FMT_OGG;
 
@@ -119,15 +141,24 @@ sound_format_e Sound_FilenameToFormat(const std::string& filename)
 	if (ext == ".mid" || ext == ".midi")
 		return FMT_MIDI;
 
-	if (ext == ".mod" || ext == ".s3m" || ext == ".xm" || ext == ".it" || ext == ".669" ||
-		ext == ".amf" || ext == ".ams" || ext == ".dbm" || ext == ".dmf" || ext == ".dsm" ||
-		ext == ".far" || ext == ".mdl" || ext == ".med" || ext == ".mtm" || ext == ".okt" ||
-		ext == ".ptm" || ext == ".stm" || ext == ".ult" || ext == ".umx" || ext == ".mt2" ||
-		ext == ".psm")
-		return FMT_MOD;
+	if (ext == ".xmi")
+		return FMT_XMI;
+
+	if (ext == ".mod" || ext == ".m15" || ext == ".flx" || ext == ".wow" || ext == ".dbm" ||
+		ext == ".digi" || ext == ".emod" || ext == ".med" || ext == ".mtn" || ext == ".okt" ||
+		ext == ".sfx" || ext == ".mgt" || ext == ".669" || ext == ".far" || ext == ".fnk" ||
+		ext == ".imf" || ext == ".it" || ext == ".liq" || ext == ".mdl" || ext == ".mtm" || 
+		ext == ".ptm" || ext == ".rtm" || ext == ".s3m" || ext == ".stm" || ext == ".ult" ||
+		ext == ".xm" || ext == ".amf" || ext == ".gdm" || ext == ".stx" || ext == ".abk" ||
+		ext == ".psm" || ext == ".j2b" || ext == ".mfp" || ext == ".smp" || ext == ".mmdc" ||
+		ext == ".stim" || ext == ".umx")
+		return FMT_XMP;
+
+	if (ext == ".vgm" || ext == ".vgz")
+		return FMT_VGM;
 
 	if (ext == ".ay" || ext == ".gbs" || ext == ".gym" || ext == ".hes" || ext == ".nsf" ||
-		ext == ".sap" || ext == ".spc" || ext == ".vgm")
+		ext == ".sap" || ext == ".spc")
 		return FMT_GME;
 
 	// Not sure if these will ever be encountered in the wild, but according to the VGMPF Wiki

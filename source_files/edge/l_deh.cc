@@ -75,28 +75,10 @@ static void GCCATTR((format (printf,1,2)))
 	I_Error("Converting DEH patch failed: %s\n", dh_message);
 }
 
-//
-// DH_ProgressText
-//
-static void DH_ProgressText(const char *str)
-{
-	/* nothing needed */
-}
-
-//
-// DH_ProgressBar
-//
-static void DH_ProgressBar(int percentage)
-{
-	/* nothing needed */
-}
-
 static const dehconvfuncs_t edge_dehconv_funcs =
 {
 	DH_FatalError,
 	DH_PrintMsg,
-	DH_ProgressBar,
-	DH_ProgressText
 };
 
 

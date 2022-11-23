@@ -48,12 +48,6 @@ typedef struct dehconvfuncs_s
 	// and warning messages (when enabled).
 	// 
 	void (* print_msg)(const char *str, ...);
-
-	// The next two routines control the progress bar.  'progress_text'
-	// can be used to set the message appearing above or below the bar.
-	// 
-	void (* progress_bar)(int percentage);
-	void (* progress_text)(const char *str);
 }
 dehconvfuncs_t;
 

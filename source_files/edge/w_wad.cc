@@ -427,7 +427,11 @@ struct Compare_lump_pred
 		if (cmp != 0) return (cmp > 0);
 
 		// lump type
-		return C.kind > D.kind;
+		if (C.kind != D.kind)
+			return C.kind > D.kind;
+
+		// tie breaker
+		return C.position > D.position;
 	}
 };
 
@@ -1926,6 +1930,12 @@ int W_GetFileForLump(int lump)
 	return lumpinfo[lump].file;
 }
 
+int W_GetKindForLump(int lump)
+{
+	SYS_ASSERT(W_VerifyLump(lump));
+
+	return lumpinfo[lump].kind;
+}
 
 //
 // Loads the lump into the given buffer,

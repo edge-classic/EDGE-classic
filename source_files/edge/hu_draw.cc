@@ -893,12 +893,6 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 
 void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img, char ch, rgbcol_t color1, rgbcol_t color2, bool blink)
 {
-	float sc_x = cur_scale; // TODO * aspect;
-	float sc_y = cur_scale;
-
-	float x = left_x - IM_OFFSETX(img) * sc_x;
-	float y = top_y  - IM_OFFSETY(img) * sc_y;
-
 	float w, h;
 	float tx1, tx2, ty1, ty2;
 
@@ -916,8 +910,6 @@ void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img
 
 	w = FNX;
 	h = FNX * 2;
-	float hx1 = x;
-	float hy1 = y;
 
 	float old_alpha = cur_alpha;
 
@@ -935,13 +927,13 @@ void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img
 	
 	glBegin(GL_QUADS);
 
-	glVertex2f(hx1, hy1);
+	glVertex2f(left_x, top_y);
 
-	glVertex2f(hx1, hy1 + h);
+	glVertex2f(left_x, top_y + h);
 
-	glVertex2f(hx1 + w, hy1 + h);
+	glVertex2f(left_x + w, top_y + h);
 
-	glVertex2f(hx1 + w, hy1);
+	glVertex2f(left_x + w, top_y);
 
 	glEnd();
 
@@ -968,20 +960,19 @@ void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img
 
 	glBegin(GL_QUADS);
 
-	// I really eyeballed this
-	float width_adjust = FNX / 2;
+	float width_adjust = FNX / 2 + .5;
 
 	glTexCoord2f(tx1, ty1);
-	glVertex2f(hx1 - width_adjust, hy1);
+	glVertex2f(left_x - width_adjust, top_y);
 
 	glTexCoord2f(tx2, ty1); 
-	glVertex2f(hx1 + w + width_adjust, hy1);
+	glVertex2f(left_x + w + width_adjust, top_y);
 
 	glTexCoord2f(tx2, ty2);
-	glVertex2f(hx1 + w + width_adjust, hy1 + h);
+	glVertex2f(left_x + w + width_adjust, top_y + h);
 
 	glTexCoord2f(tx1, ty2);
-	glVertex2f(hx1 - width_adjust, hy1 + h);
+	glVertex2f(left_x - width_adjust, top_y + h);
 
 	glEnd();
 

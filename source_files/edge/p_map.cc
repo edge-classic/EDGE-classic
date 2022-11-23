@@ -2040,6 +2040,8 @@ static bool PIT_RadiusAttack(mobj_t * thing, void *data)
 	//
 	if (thing->info->extendedflags & EF_EXPLODEIMMUNE)
 	{
+		if (!bomb_I.source)
+			return true;
 		// MBF21 FORCERADIUSDMG flag
 		if (!(bomb_I.source->mbf21flags & MBF21_FORCERADIUSDMG))
 			return true;

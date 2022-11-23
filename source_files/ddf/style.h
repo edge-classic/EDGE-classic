@@ -86,6 +86,7 @@ public:
 	std::string pos_string; // Here for user convenience, is translated to a value for position
 	std::string cursor_string;
 
+	bool scaling;
 	bool border;
 };
 

@@ -827,6 +827,12 @@ void M_DrawLoad(void)
 		float TempSpacer = 0;
 		TempScale = TempHeight / IM_HEIGHT(cursor);
 		TempWidth = IM_WIDTH(cursor) * TempScale;
+		if (!style->def->cursor.scaling)
+		{
+			ex_slots[itemOn].y -= (IM_HEIGHT(cursor) - TempHeight) / 2;
+			TempHeight = IM_HEIGHT(cursor);
+			TempWidth = IM_WIDTH(cursor);
+		}
 		TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
 		float old_alpha = HUD_GetAlpha();
 		HUD_SetAlpha(style->def->cursor.translucency);
@@ -1762,8 +1768,8 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
 
 	style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
 
-	// If using an IMAGE type font for the menu, use symbols for the slider instead
-	if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image)
+	// If using an IMAGE or TRUETYPE type font for the menu, use symbols for the slider instead
+	if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image || opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
 	{
 		// Quick solid box code if a background is desired for the slider in the future
 		// HUD_SolidBox(x, y, x+(thermWidth*step), y+opt_style->fonts[styledef_c::T_ALT]->im_char_height, RGB_MAKE(100,100,100));
@@ -2644,6 +2650,12 @@ void M_Drawer(void)
 				}
 				TempScale = ShortestLine / IM_HEIGHT(cursor);
 				TempWidth = IM_WIDTH(cursor) * TempScale;
+				if (!style->def->cursor.scaling)
+				{
+					currentMenu->menuitems[itemOn].y -= (IM_HEIGHT(cursor) - ShortestLine) / 2;
+					ShortestLine = IM_HEIGHT(cursor);
+					TempWidth = IM_WIDTH(cursor);
+				}
 				TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
 				float old_alpha = HUD_GetAlpha();
 				HUD_SetAlpha(style->def->cursor.translucency);
@@ -2774,6 +2786,12 @@ void M_Drawer(void)
 				float TempSpacer = 0;
 				TempScale = ShortestLine / IM_HEIGHT(cursor);
 				TempWidth = IM_WIDTH(cursor) * TempScale;
+				if (!style->def->cursor.scaling)
+				{
+					currentMenu->menuitems[itemOn].y -= (IM_HEIGHT(cursor) - ShortestLine) / 2;
+					ShortestLine = IM_HEIGHT(cursor);
+					TempWidth = IM_WIDTH(cursor);
+				}
 				TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
 				float old_alpha = HUD_GetAlpha();
 				HUD_SetAlpha(style->def->cursor.translucency);

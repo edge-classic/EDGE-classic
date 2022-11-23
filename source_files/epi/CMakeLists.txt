@@ -40,6 +40,6 @@ add_library(
 target_include_directories(edge_epi PRIVATE ../whereami)
 target_include_directories(edge_epi PRIVATE ../stb)
 target_include_directories(edge_epi PRIVATE ../libgme/gme)
-target_include_directories(edge_epi PRIVATE ../libmodplug/src)
+target_include_directories(edge_epi PRIVATE ../libxmp)
 
 target_link_libraries(edge_epi PUBLIC whereami)

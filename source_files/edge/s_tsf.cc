@@ -22,6 +22,8 @@
 #include "file.h"
 #include "filesystem.h"
 #include "mus_2_midi.h"
+#include "xmi_2_mid.h"
+#include "sound_types.h"
 #include "path.h"
 #include "str_util.h"
 
@@ -44,12 +46,13 @@ extern bool dev_stereo;
 extern int  dev_freq; 
 
 static bool tsf_inited;
+static bool tsf_disabled = false;
 
 tsf *edge_tsf;
 
 DEF_CVAR(s_soundfont, "default.sf2", CVAR_ARCHIVE)
 
-std::vector<std::string> available_soundfonts;
+extern std::vector<std::string> available_soundfonts;
 
 class tsf_player_c : public abstract_music_c
 {
@@ -245,25 +248,6 @@ bool S_StartupTSF(void)
 {
 	I_Printf("Initializing TinySoundFont...\n");
 
-	// Populate available soundfont vector here (might as well)
-	std::vector<epi::dir_entry_c> sfd;
-	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
-
-	if (!FS_ReadDir(sfd, soundfont_dir.c_str(), "*.sf2"))
-	{
-		I_Warning("TinySoundFont: Failed to read '%s' directory!\n", soundfont_dir.c_str());
-	}
-	else
-	{
-		for (size_t i = 0 ; i < sfd.size() ; i++) 
-		{
-			if(!sfd[i].is_dir)
-			{
-				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name.c_str()));
-			}
-		}
-	}
-
 	// Check for presence of previous CVAR value's file
 	bool cvar_good = false;
 	for (int i=0; i < available_soundfonts.size(); i++)
@@ -277,6 +261,8 @@ bool S_StartupTSF(void)
 		I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
 		s_soundfont = "default.sf2";
 	}
+
+ 	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
 
 	edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), s_soundfont.c_str()).c_str());
 
@@ -298,14 +284,15 @@ bool S_StartupTSF(void)
 	// songs with a lot of simultaneous notes.
 	tsf_set_output(edge_tsf, dev_stereo ? TSF_STEREO_INTERLEAVED : TSF_MONO, dev_freq, -6.0);
 
-	tsf_inited = true;
-
 	return true; // OK!
 }
 
 // Should only be invoked when switching soundfonts
 void S_RestartTSF(void)
 {
+	if (tsf_disabled || !tsf_inited)
+		return;
+
 	I_Printf("Restarting TinySoundFont...\n");
 
 	int old_entry = entry_playing;
@@ -316,27 +303,8 @@ void S_RestartTSF(void)
 
 	tsf_close(edge_tsf);
 
-	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
-
-	edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), s_soundfont.c_str()).c_str());
-
-	if (!edge_tsf)
-	{
-		I_Warning("TinySoundFont: Could not load requested soundfont %s! Falling back to default soundfont!\n", s_soundfont.c_str());
-		edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), "default.sf2").c_str());
-	}
-
-	if (!edge_tsf) 
-	{
-		I_Warning("Could not load any soundfonts! Ensure that default.sf2 is present in the soundfont directory!\n");
+	if (!S_StartupTSF())
 		return;
-	}
-
-	tsf_channel_set_bank_preset(edge_tsf, 9, 128, 0);
-
-	// reduce the overall gain by 6dB, to minimize the chance of clipping in
-	// songs with a lot of simultaneous notes.
-	tsf_set_output(edge_tsf, dev_stereo ? TSF_STEREO_INTERLEAVED : TSF_MONO, dev_freq, -6.0);
 
 	tsf_inited = true;
 
@@ -345,13 +313,23 @@ void S_RestartTSF(void)
 	return; // OK!
 }
 
-abstract_music_c * S_PlayTSF(byte *data, int length, bool is_mus,
+abstract_music_c * S_PlayTSF(byte *data, int length, int fmt,
 			float volume, bool loop)
 {
-	if (!tsf_inited)
-		return NULL;
+	if (tsf_disabled)
+		return nullptr;
 
-	if (is_mus)
+	if (! tsf_inited)
+	{
+		if (! S_StartupTSF())
+		{
+			tsf_disabled = true;
+			return nullptr;
+		}
+		tsf_inited = true;
+	}
+
+	if (fmt == epi::FMT_MUS)
 	{
 		I_Debugf("tsf_player_c: Converting MUS format to MIDI...\n");
 
@@ -364,7 +342,30 @@ abstract_music_c * S_PlayTSF(byte *data, int length, bool is_mus,
 			delete[] data;
 
 			I_Warning("Unable to convert MUS to MIDI !\n");
-			return NULL;
+			return nullptr;
+		}
+
+		delete[] data;
+
+		data   = midi_data;
+		length = midi_len;
+
+		I_Debugf("Conversion done: new length is %d\n", length);
+	}
+
+	if (fmt == epi::FMT_XMI)
+	{
+		I_Debugf("tsf_player_c: Converting XMI format to MIDI...\n");
+
+		byte *midi_data;
+		uint32_t  midi_len;
+
+		if (Convert_xmi2midi(data, length, &midi_data, &midi_len, XMIDI_CONVERT_NOCONVERSION) != 0)
+		{
+			delete[] data;
+
+			I_Warning("Unable to convert XMI to MIDI !\n");
+			return nullptr;
 		}
 
 		delete[] data;
@@ -380,7 +381,7 @@ abstract_music_c * S_PlayTSF(byte *data, int length, bool is_mus,
 	if (!song) //Lobo: quietly log it instead of completely exiting EDGE
 	{
 		I_Debugf("TinySoundfont player: failed to load MIDI file!\n");
-		return NULL;
+		return nullptr;
 	}
 
 	tsf_player_c *player = new tsf_player_c(song, data, length);

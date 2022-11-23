@@ -74,6 +74,7 @@ static const commandlist_t cursor_commands[] =
 	DF("IMAGE", alt_cursor, DDF_MainGetString),
 	DF("STRING", cursor_string, DDF_MainGetString),
 	DF("BORDER", border, DDF_MainGetBoolean),
+	DF("SCALING", scaling, DDF_MainGetBoolean),
 
 	DDF_CMD_END
 };
@@ -430,6 +431,7 @@ void cursorstyle_c::Default()
 	alt_cursor = "";
 	cursor_string = "";
 	border = false;
+	scaling = true;
 }
 
 //
@@ -445,6 +447,7 @@ cursorstyle_c& cursorstyle_c::operator= (const cursorstyle_c &rhs)
 		alt_cursor = rhs.alt_cursor;
 		cursor_string = rhs.cursor_string;
 		border = rhs.border;
+		scaling = rhs.scaling;
 	}
 		
 	return *this;

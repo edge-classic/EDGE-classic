@@ -42,13 +42,11 @@ namespace Deh_Edge
 
 #define DEBUG_ENABLED   0
 #define DEBUG_ENDIAN    0
-#define DEBUG_PROGRESS  0
 
 #define DEBUGGING_FILE  "deh_debug.log"
 
 
 int cpu_big_endian = 0;
-bool disable_progress = false;
 
 char message_buf[1024];
 
@@ -58,47 +56,6 @@ bool has_error_msg = false;
 #if (DEBUG_ENABLED)
 FILE *debug_fp = NULL;
 #endif
-
-
-typedef struct
-{
-public:
-	// current major range
-	int low_perc;
-	int high_perc;
-
-	// current percentage
-	int cur_perc;
-
-	void Reset(void)
-	{
-		low_perc = high_perc = 0;
-		cur_perc = 0;
-	}
-
-	void Major(int low, int high)
-	{
-		low_perc = cur_perc = low;
-		high_perc = high;
-	}
-
-	bool Minor(int count, int limit)
-	{
-		int new_perc = low_perc + (high_perc - low_perc) * count / limit;
-
-		if (new_perc > cur_perc)
-		{
-			cur_perc = new_perc;
-			return true;
-		}
-
-		return false;
-	}
-}
-progress_info_t;
-
-progress_info_t progress;
-
 
 // forward decls
 void Debug_Startup(void);
@@ -111,8 +68,6 @@ void Debug_Shutdown(void);
 void System_Startup(void)
 {
 	has_error_msg = false;
-
-	progress.Reset();
 
 	Debug_Startup();
 }

@@ -29,13 +29,16 @@
 #include <sys/time.h>
 #endif
 
+#include "file.h"
+#include "filesystem.h"
+#include "path.h"
+
 #include "m_argv.h"
 #include "m_misc.h"
 #include "m_random.h"
 #include "s_sound.h"
 #include "s_cache.h"
 #include "s_blit.h"
-#include "s_tsf.h" // Needed for I_StartupMusic
 #include "w_wad.h"
 
 
@@ -58,6 +61,10 @@ static char errordesc[256] = "FOO";
 static char scratcherror[256];
 
 static bool audio_is_locked = false;
+
+std::vector<std::string> available_soundfonts;
+std::vector<std::string> available_genmidis;
+extern std::string game_dir;
 
 
 void SoundFill_Callback(void *udata, Uint8 *stream, int len)
@@ -260,15 +267,45 @@ void I_UnlockAudio(void)
 // Moved I_StartupMusic from platform-specific system.cc files to here - Dasho
 void I_StartupMusic(void)
 {
-	if (nomusic) return;
+	// Populate available soundfont vector here, even if music is disabled
+	std::vector<epi::dir_entry_c> sfd;
+	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
 
-	if (S_StartupTSF())
+	if (!FS_ReadDir(sfd, soundfont_dir.c_str(), "*.sf2"))
 	{
-		I_Printf("I_StartupMusic: TinySoundfont Init OK\n");
+		I_Warning("TinySoundFont: Failed to read '%s' directory!\n", soundfont_dir.c_str());
 	}
 	else
 	{
-		I_Printf("I_StartupMusic: TinySoundfont Init FAILED\n");
+		for (size_t i = 0 ; i < sfd.size() ; i++) 
+		{
+			if(!sfd[i].is_dir)
+			{
+				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name.c_str()));
+			}
+		}
+	}
+
+	// Populate available genmidi vector
+	sfd.clear();
+
+	// Start with empty string to represent using whichever GENMIDI
+	// is found in the load order (usually just the IWAD)
+	available_genmidis.push_back("");
+
+	if (!FS_ReadDir(sfd, soundfont_dir.c_str(), "*.op2"))
+	{
+		I_Warning("OPL: Failed to read '%s' directory!\n", soundfont_dir.c_str());
+	}
+	else
+	{
+		for (size_t i = 0 ; i < sfd.size() ; i++) 
+		{
+			if(!sfd[i].is_dir)
+			{
+				available_genmidis.push_back(epi::PATH_GetFilename(sfd[i].name.c_str()));
+			}
+		}
 	}
 
 	return;

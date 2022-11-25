@@ -18,30 +18,55 @@ Bugs fixed
   fixed (the infamous "Error occurred scanning image: xxx")
 + Do not apply invisibility effect to a zoomed weapon
 + Fixed IDCLEV mistakenly identifying non-marker lumps as valid map markers
++ Fixed crash involving items without a map spawnpoint being added to the
+  Deathmatch item respawn queue
++ Fixed incorrect parsing of keypad (10-key) scancodes
++ Fixed main menu cursor scaling/placement when all menu item images are empty
+  (i.e., background image alone is used as the "menu")
 
 
 
 General Improvements
 --------------------
-+ Soundfont selector
++ Live soundfont (TinySoundFont)/instrument bank (OPL) selector
 + DEH_EDGE cleanup and improvements
 + Improved screen resolution and aspect modes
-+ New ENDOOM screen for Harmony
-+ Auto-detect music type for DDFPLAY
-+ No longer need to press Up/JUMP key to go up ladders: Just mlook + forward is enough.
++ New Haromy base WAD assets
++ Auto-detect music type for DDFPLAY (with one exception: IMF, as detailed under New Features)
++ No longer need to press Up/JUMP or Down/CROUCH key to navigate ladders: Just mlook + forward is enough.
 + Tags assigned to map things are now supported
 + Allow multiple WAIT_UNTIL_DEAD scripts to trigger for the same object
-+ Improved handling in-game messages
++ Improved handling of in-game messages
 + ENDOOM screen now integrated into quit dialog (unless custom background image is defined in STYLES.DDF)
 + Added libYMFM for improved VGM music handling and format support; disabled Game Music Emu VGM support
-
++ Replaced Modplug with XMP (non-lite version) for module tracker music for better compatibility
+  - Formats requiring prior depacking are still not supported
++ Multiple DDFANIM entries can now reference the same images (the entries themselves must still have unique names
+  to prevent conflicts)
++ Borderless Fullscreen mode added to the Set Resolution menu; list of Windowed resolutions updated to accommodate
+  displays up to 4K
 
 
 New Features
 ------------
-+ Support OPL emulated playback of MUS and MIDI music lumps.
 
-+ VGZ (compressed VGM) format music is now supported
++ Vastly improved Deathbot navigation and combat
+
++ New console command: showmaps
+  - Will show the warp name and level description for accessible map
+
++ Added experimental distance culling accessible via the r_culling CVAR
+  - r_culling 0 : No distance culling
+  - r_culling 1 : Distance culling with fade-to-black; sky texture will not be visible
+  - r_culling 2 : Distance culling without fade; will have visible pop-in at a distance
+
++ Support OPL emulated playback of MUS and MIDI music lumps.
+  - Can use GENMIDI lumps (Default) or external *.op2 instrument bank files
+  - External banks must be placed in the /soundfont directory prior to startup
+
++ New music formats supported: FLAC, XMI, VGZ (compressed VGM), IMF
+  - IMF songs must have a playlist entry type of 'IMF280', 'IMF560', or 'IMF700' to correctly
+    set the song's playback rate
 
 + DSDHACKED support.
 
@@ -52,6 +77,8 @@ New Features
     - Optional parameters:
       - TTF_DEFAULT_SIZE = <int>, default (scaled to HUD) rendering size for this font. If not provided,
         a default value of 7 will be used.
+      - TTF_SMOOTHING = "ALWAYS", "NEVER", or "ON_DEMAND". Affects behavior of the font when the Smoothing
+        option in the Video Options menu is adjusted. Defaults to "ON_DEMAND".
 
 + STYLES.DDF
   - New property: ENTRY_ALIGNMENT = <string>, accepts "LEFT", "CENTER", or "RIGHT" to set text/image alignment for menu item names
@@ -63,6 +90,7 @@ New Features
     - CURSOR.TRANSLUCENCY = <percentage>, controls cursor image translucency
     - CURSOR.IMAGE = <string>, image to use instead of the default for this menu's cursor
     - CURSOR.STRING = <string>, if present, will use these characters from the style's font as the cursor instead of an image
+    - CURSOR.SCALING = <bool>, will set whether or not the cursor scales proportionally to menu item heights. Defaults to true.
   
 + THINGS.DDF
   - New property: SIGHT_DISTANCE=<number> which is how far a thing can see in map units.

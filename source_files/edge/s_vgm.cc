@@ -21,6 +21,7 @@
 #include "endianess.h"
 #include "file.h"
 #include "filesystem.h"
+#include "imf_2_vgm.h"
 #include "sound_gather.h"
 #include "mini_gzip.h"
 
@@ -64,7 +65,7 @@ public:
 	uint32_t vgm_data_start;
 	std::vector<uint8_t> vgm_buffer;
 
-	bool OpenMemory(byte *data, int length);
+	bool OpenMemory(byte *data, int length, int type);
 
 	virtual void Close(void);
 
@@ -162,12 +163,46 @@ void vgmplayer_c::Volume(float gain)
 	// (see mix_channel_c::ComputeMusicVolume).
 }
 
-bool vgmplayer_c::OpenMemory(byte *data, int length)
+bool vgmplayer_c::OpenMemory(byte *data, int length, int type)
 {
 	SYS_ASSERT(data);
 
-	vgm_buffer.resize(length);
-	std::copy(data, data+length, vgm_buffer.data());
+	// Used for DRO/IMF conversion (if applicable)
+	u32_t conv_length = 0;
+	u8_t *conv_data = nullptr;
+
+	switch (type)
+	{
+		case 12: // 280 Hz IMF
+			conv_length = vgm_header_size + length * 2;
+			conv_data = new u8_t[conv_length];
+			ConvertIMF2VGM(data, length, conv_data, conv_length, 280, dev_freq);
+			break;
+		case 13: // 560 Hz IMF
+			conv_length = vgm_header_size + length * 2;
+			conv_data = new u8_t[conv_length];
+			ConvertIMF2VGM(data, length, conv_data, conv_length, 560, dev_freq);
+			break;
+		case 14: // 700 Hz IMF
+			conv_length = vgm_header_size + length * 2;
+			conv_data = new u8_t[conv_length];
+			ConvertIMF2VGM(data, length, conv_data, conv_length, 700, dev_freq);
+			break;
+		default:
+			break;
+	}	
+
+	if (conv_data)
+	{
+		vgm_buffer.resize(conv_length);
+		std::copy(conv_data, conv_data+conv_length, vgm_buffer.data());
+		delete[] conv_data;
+	}
+	else
+	{
+		vgm_buffer.resize(length);
+		std::copy(data, data+length, vgm_buffer.data());
+	}
 
 	// Decompress if VGZ
 	if (vgm_buffer.size() >= 10 && vgm_buffer[0] == 0x1f && 
@@ -316,11 +351,11 @@ void vgmplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayVGMMusic(byte *data, int length, float volume, bool looping)
+abstract_music_c * S_PlayVGMMusic(byte *data, int length, float volume, bool looping, int type)
 {
 	vgmplayer_c *player = new vgmplayer_c();
 
-	if (! player->OpenMemory(data, length))
+	if (! player->OpenMemory(data, length, type))
 	{
 		delete[] data;
 		delete player;

@@ -23,6 +23,7 @@ add_library(
   image_data.cc
   image_hq2x.cc
   image_funcs.cc
+  imf_2_vgm.cc
   math_angle.cc
   math_bbox.cc
   math_crc.cc

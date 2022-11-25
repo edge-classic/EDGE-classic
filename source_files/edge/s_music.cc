@@ -154,15 +154,22 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 	epi::sound_format_e fmt = epi::FMT_Unknown;
 
-	if (play->infotype == MUSINF_LUMP)
-	{
-		// lumps must use auto-detection based on their contents
-		fmt = epi::Sound_DetectFormat(data, length);
-	}
+	// IMF Music is the outlier in that it must be predefined in DDFPLAY with the appropriate
+	// IMF frequency, as there is no way of determining this from file information alone
+	if (play->type == MUS_IMF280 || play->type == MUS_IMF560 || play->type == MUS_IMF700)
+		fmt = epi::FMT_VGM;
 	else
 	{
-		// for FILE and PACK, use the file extension
-		fmt = epi::Sound_FilenameToFormat(play->info);
+		if (play->infotype == MUSINF_LUMP)
+		{
+			// lumps must use auto-detection based on their contents
+			fmt = epi::Sound_DetectFormat(data, length);
+		}
+		else
+		{
+			// for FILE and PACK, use the file extension
+			fmt = epi::Sound_FilenameToFormat(play->info);
+		}
 	}
 
 	// NOTE: the players that take `data` are responsible to free it
@@ -200,7 +207,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 		case epi::FMT_VGM:
 			delete F;
-			music_player = S_PlayVGMMusic(data, length, volume, loop);
+			music_player = S_PlayVGMMusic(data, length, volume, loop, play->type);
 			break;
 
 		case epi::FMT_SID:

@@ -1,9 +1,10 @@
 //----------------------------------------------------------------------------
-//  EDGE VGM Music Player (HEADER)
+//  EDGE IMF to VGM conversion header
 //----------------------------------------------------------------------------
-// 
-//  Copyright (c) 2022 - The EDGE Team.
-// 
+//
+//  Copyright (c) 2015-2020 ValleyBell
+//  Copyright (c) 2022  The EDGE Team.
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2
@@ -16,18 +17,13 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __VGMPLAYER_H__
-#define __VGMPLAYER_H__
+#ifndef __EPI_IMF2VGM_H__
+#define __EPI_IMF2VGM_H__
 
-#include "i_defs.h"
+#include "epi.h"
 
-#include "sound_data.h"
+void ConvertIMF2VGM(UINT8 *IMFBuffer, UINT32 IMFBufferLen, UINT8 *VGMBuffer, UINT32 VGMBufferLen, INT32 IMFFreq, INT32 DevFreq);
 
-/* FUNCTIONS */
+extern UINT32 vgm_header_size;
 
-abstract_music_c * S_PlayVGMMusic(byte *data, int length, float volume, bool looping, int type);
-
-#endif  /* __VGMPLAYER_H__ */
-
-//--- editor settings ---
-// vi:ts=4:sw=4:noexpandtab
+#endif

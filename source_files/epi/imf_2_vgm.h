@@ -22,8 +22,8 @@
 
 #include "epi.h"
 
-void ConvertIMF2VGM(UINT8 *IMFBuffer, UINT32 IMFBufferLen, UINT8 *VGMBuffer, UINT32 VGMBufferLen, INT32 IMFFreq, INT32 DevFreq);
+void ConvertIMF2VGM(u8_t *IMFBuffer, u32_t IMFBufferLen, u8_t *VGMBuffer, u32_t VGMBufferLen, s32_t IMFFreq, s32_t DevFreq);
 
-extern UINT32 vgm_header_size;
+extern u32_t vgm_header_size;
 
 #endif

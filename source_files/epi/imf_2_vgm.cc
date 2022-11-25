@@ -19,24 +19,24 @@
 
 #include "VGMFile.h"
 
-UINT8 IMFType;
-UINT32 PITPeriod; // Counter value of 8254 Programmable Interval Timer
+u8_t IMFType;
+u32_t PITPeriod; // Counter value of 8254 Programmable Interval Timer
 VGM_HEADER VGMHead;
-UINT32 IMFPos;
-UINT32 IMFDataStart;
-UINT32 IMFDataEnd;
-UINT32 VGMPos;
-UINT8 LoopOn = false;
-UINT32 vgm_header_size = sizeof(VGM_HEADER);
+u32_t IMFPos;
+u32_t IMFDataStart;
+u32_t IMFDataEnd;
+u32_t VGMPos;
+u8_t LoopOn = false;
+u32_t vgm_header_size = sizeof(VGM_HEADER);
 
-void ConvertIMF2VGM(UINT8 *IMFBuffer, UINT32 IMFBufferLen, UINT8 *VGMBuffer, UINT32 VGMBufferLen, INT32 IMFFreq, INT32 DevFreq)
+void ConvertIMF2VGM(u8_t *IMFBuffer, u32_t IMFBufferLen, u8_t *VGMBuffer, u32_t VGMBufferLen, s32_t IMFFreq, s32_t DevFreq)
 {
-	UINT16 CurDelay;
-	UINT32 VGMSmplL;
+	u16_t CurDelay;
+	u32_t VGMSmplL;
 	float  VGMSmplFraction;
-	UINT32 SmplVal;
+	u32_t SmplVal;
 
-	UINT16 TempSht;
+	u16_t TempSht;
 	memcpy(&TempSht, &IMFBuffer[0x00], 0x02);
 	if (! TempSht)
 		IMFType = 0x00;
@@ -84,16 +84,16 @@ void ConvertIMF2VGM(UINT8 *IMFBuffer, UINT32 IMFBufferLen, UINT8 *VGMBuffer, UIN
 	VGMBuffer[VGMPos++] = 0x20;
 	while(IMFPos < IMFDataEnd)
 	{
-		UINT16 IMFDelayInIMFTicks;
-		UINT32 IMFDelayInPITTicks;
+		u16_t IMFDelayInIMFTicks;
+		u32_t IMFDelayInPITTicks;
 		float IMFDelayInMilliseconds;
 		float IMFDelayInVGMSamplesFloat;
-		UINT32 IMFDelayInVGMSamplesInt;
+		u32_t IMFDelayInVGMSamplesInt;
 
 		if (VGMPos >= VGMBufferLen - 0x08)
 		{
 			VGMBufferLen += 0x8000;
-			VGMBuffer = (UINT8*)realloc(VGMBuffer, VGMBufferLen);
+			VGMBuffer = (u8_t*)realloc(VGMBuffer, VGMBufferLen);
 		}
 		VGMBuffer[VGMPos + 0x00] = 0x5A;
 		VGMBuffer[VGMPos + 0x01] = IMFBuffer[IMFPos + 0x00];	// register
@@ -118,14 +118,14 @@ void ConvertIMF2VGM(UINT8 *IMFBuffer, UINT32 IMFBufferLen, UINT8 *VGMBuffer, UIN
 
 		/* Store the delay, specified as the number of samples. */
 		while (IMFDelayInVGMSamplesInt) {
-			UINT32 ThisCommandDelay = (IMFDelayInVGMSamplesInt > 65535) ? 65535 : IMFDelayInVGMSamplesInt;
+			u32_t ThisCommandDelay = (IMFDelayInVGMSamplesInt > 65535) ? 65535 : IMFDelayInVGMSamplesInt;
 			VGMBuffer[VGMPos++] = 0x61; // Wait n samples
 			VGMBuffer[VGMPos++] = ThisCommandDelay & 0xFF;
 			VGMBuffer[VGMPos++] = ThisCommandDelay >> 8;
 			/* Enlarge output buffer, if necessary */
 			if (VGMPos >= VGMBufferLen - 0x10) {
 				VGMBufferLen += 0x8000;
-				VGMBuffer = (UINT8*)realloc(VGMBuffer, VGMBufferLen);
+				VGMBuffer = (u8_t*)realloc(VGMBuffer, VGMBufferLen);
 			}
 			IMFDelayInVGMSamplesInt -= ThisCommandDelay;
 		}

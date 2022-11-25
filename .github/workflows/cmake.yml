@@ -93,7 +93,9 @@ jobs:
 
     - name: Install dependencies
       run: |
-        brew install sdl2
+        curl -LO https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
+        source ./macports-ci install
+        sudo port install libsdl2
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.

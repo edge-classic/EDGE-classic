@@ -17,9 +17,6 @@
 //
 //----------------------------------------------------------------------------
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "VGMFile.h"
 
 UINT8 IMFType;
@@ -109,7 +106,7 @@ void ConvertIMF2VGM(UINT8 *IMFBuffer, UINT32 IMFBufferLen, UINT8 *VGMBuffer, UIN
 		/* Convert the delay time, specified relative to the IMF's rate (IMFDelayInIMFTicks)...
 		   - first to the number of ticks of the 8254 Programmable Interval Timer's master clock (IMFDelayInPitTicks);
 		   - from that to the number of milliseconds (IMFDelayInMilliseconds);
-		   - from that to the number of 44.1 kHz samples.
+		   - from that to the number of samples.
 		   Store the fractional component in VGMSmplFraction so that it is not lost between successive delays. */
 		IMFDelayInPITTicks = IMFDelayInIMFTicks * PITPeriod;
 		IMFDelayInMilliseconds = (float) IMFDelayInPITTicks * 11 / 13125;
@@ -117,9 +114,9 @@ void ConvertIMF2VGM(UINT8 *IMFBuffer, UINT32 IMFBufferLen, UINT8 *VGMBuffer, UIN
 		IMFDelayInVGMSamplesInt = IMFDelayInVGMSamplesFloat;
 		VGMSmplFraction = IMFDelayInVGMSamplesFloat - IMFDelayInVGMSamplesInt;
 
-		VGMSmplL += IMFDelayInVGMSamplesInt; // Add the delay in 44.1 kHz samples to the total VGM file length in samples
+		VGMSmplL += IMFDelayInVGMSamplesInt; // Add the delay in samples to the total VGM file length in samples
 
-		/* Store the delay, specified as the number of 44.1 kHz samples. */
+		/* Store the delay, specified as the number of samples. */
 		while (IMFDelayInVGMSamplesInt) {
 			UINT32 ThisCommandDelay = (IMFDelayInVGMSamplesInt > 65535) ? 65535 : IMFDelayInVGMSamplesInt;
 			VGMBuffer[VGMPos++] = 0x61; // Wait n samples

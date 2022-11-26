@@ -201,6 +201,8 @@ std::string shot_dir;
 // not using DEF_CVAR here since var name != cvar name
 cvar_c m_language("language", "ENGLISH", CVAR_ARCHIVE);
 
+DEF_CVAR(r_overlay, "0", CVAR_ARCHIVE)
+
 DEF_CVAR(g_aggression, "0", CVAR_ARCHIVE)
 
 DEF_CVAR(ddf_strict, "0", CVAR_ARCHIVE)
@@ -246,6 +248,15 @@ public:
 				HUD_DrawText(26, y, startup_messages[i].c_str());
 			y += 10;
 		}
+
+		if (!hud_overlays.at(r_overlay.d).empty())
+		{
+			const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d).c_str(), INS_Graphic, ILF_Null);
+			if (overlay)
+				HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay), \
+					SCREENHEIGHT / IM_HEIGHT(overlay));
+		}
+
 		I_FinishFrame();
 	}
 };
@@ -613,6 +624,14 @@ void E_Display(void)
 	N_NetUpdate();
 
 	CON_Drawer();
+
+	if (!hud_overlays.at(r_overlay.d).empty())
+	{
+		const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d).c_str(), INS_Graphic, ILF_Null);
+		if (overlay)
+			HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay), \
+				SCREENHEIGHT / IM_HEIGHT(overlay));
+	}
 
 	if (m_screenshot_required)
 	{

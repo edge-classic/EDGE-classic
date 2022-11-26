@@ -123,6 +123,7 @@ extern cvar_c r_crosscolor;
 extern cvar_c r_crosssize;
 extern cvar_c s_genmidi;
 extern cvar_c s_soundfont;
+extern cvar_c r_overlay;
 
 static int menu_crosshair;
 static int menu_crosscolor;
@@ -162,6 +163,7 @@ static void M_ChangeMonitorSize(int keypressed);
 static void M_ChangeKicking(int keypressed);
 static void M_ChangeWeaponSwitch(int keypressed);
 static void M_ChangeMipMap(int keypressed);
+static void M_SaveOverlay(int keypressed);
 static void M_ChangeDLights(int keypressed);
 
 // -ES- 1998/08/20 Added resolution options
@@ -197,6 +199,7 @@ static char Details[]   = "Low/Medium/High";
 static char Hq2xMode[]  = "Off/UI Only/UI & Sprites/All";
 static char Invuls[]    = "Simple/Textured";
 static char MonitSiz[]  = "5:4/4:3/3:2/16:10/16:9/21:9";
+static char VidOverlays[]  = "None/Lines 1x/Lines 2x/Checkered/Vertical/Grill";
 
 // for CVar enums
 const char WIPE_EnumStr[] = "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors";
@@ -386,6 +389,7 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Switch,  "Dynamic Lighting", DLMode, 2, &use_dlights, M_ChangeDLights, NULL},
 	{OPT_Switch,  "Detail Level",   Details,  3, &detail_level, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Mipmapping",     MipMaps,  3, &var_mipmapping, M_ChangeMipMap, NULL},
+	{OPT_Switch,  "Overlay",  		VidOverlays, 6, &r_overlay.d, M_SaveOverlay, NULL},
 
 	{OPT_Plain,   "",  NULL, 0, NULL, NULL, NULL},
 
@@ -1874,6 +1878,12 @@ static void M_ChangePassMissile(int keypressed)
 static void M_ChangeMipMap(int keypressed)
 {
 	W_DeleteAllImages();
+}
+
+// Blah
+static void M_SaveOverlay(int keypressed)
+{
+	r_overlay.s = std::to_string(r_overlay.d);
 }
 
 static void M_ChangeKicking(int keypressed)

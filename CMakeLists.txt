@@ -12,7 +12,6 @@ add_subdirectory(source_files/libwebsid)
 add_subdirectory(source_files/libymfm)
 add_subdirectory(source_files/miniz)
 add_subdirectory(source_files/opl)
-add_subdirectory(source_files/whereami)
 
 project(
   edge-classic
@@ -258,7 +257,6 @@ if(WIN32 OR MSYS)
 			libwebsid
 			libymfm
 			opl
-			whereami
 			wsock32
 	)
 else()
@@ -278,6 +276,5 @@ else()
 			libwebsid
 			libymfm
 			opl
-			whereami
 	)
 endif()

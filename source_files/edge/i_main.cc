@@ -18,29 +18,26 @@
 
 #include "i_defs.h"
 #include "i_sdlinc.h"  // needed for proper SDL main linkage
-
-#include "exe_path.h"
+#include "filesystem.h"
 
 #include "dm_defs.h"
 #include "m_argv.h"
 #include "e_main.h"
 #include "version.h"
 
-const char *exe_path = ".";
+std::filesystem::path exe_path = ".";
 
 extern "C" {
 
 int main(int argc, char *argv[])
 {
-	exe_path = epi::GetExecutablePath();
+	if (SDL_Init(0) < 0)
+		I_Error("Couldn't init SDL!!\n%s\n", SDL_GetError());
+	exe_path = SDL_GetBasePath();
 
 #ifdef WIN32
-	const char* title_string = "EDGE-Classic Engine";
-	// -AJA- give us a proper name in the Task Manager
-	SDL_RegisterApp((char *)title_string, 0, 0);
-
     // -AJA- change current dir to match executable
-    ::SetCurrentDirectory(exe_path);
+    epi::FS_SetCurrDir(exe_path);
 #endif
 
 	// Run EDGE. it never returns

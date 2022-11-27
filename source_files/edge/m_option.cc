@@ -1275,7 +1275,7 @@ bool M_OptResponder(event_t * ev, int ch)
 
 		keyscan = 0;
 
-		if (ch == KEYD_ESCAPE)
+		if (ch == KEYD_ESCAPE || ch == KEYD_MENU_CANCEL)
 			return true;
      
 		blah = (int*)(curr_item->switchvar);
@@ -1930,7 +1930,7 @@ static void M_ChangeCrossSize(int keypressed)
 //
 static void M_ChangeLanguage(int keypressed)
 {
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
 		int idx, max;
 		
@@ -1942,7 +1942,7 @@ static void M_ChangeLanguage(int keypressed)
 			
 		language.Select(idx);
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
 		int idx, max;
 		
@@ -1982,14 +1982,14 @@ static void M_ChangeSoundfont(int keypressed)
 		return;
 	}
 
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
 		if (sf2_pos - 1 >= 0)
 			sf2_pos--;
 		else
 			sf2_pos = available_soundfonts.size() - 1;
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
 		if (sf2_pos + 1 >= (int)available_soundfonts.size())
 			sf2_pos = 0;
@@ -2025,14 +2025,14 @@ static void M_ChangeGENMIDI(int keypressed)
 		return;
 	}
 
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
 		if (op2_pos - 1 >= 0)
 			op2_pos--;
 		else
 			op2_pos = available_genmidis.size() - 1;
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
 		if (op2_pos + 1 >= (int)available_genmidis.size())
 			op2_pos = 0;
@@ -2052,11 +2052,11 @@ static void M_ChangeGENMIDI(int keypressed)
 //
 static void M_ChangeResSize(int keypressed)
 {
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Size, -1);
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Size, +1);
 	}
@@ -2069,11 +2069,11 @@ static void M_ChangeResSize(int keypressed)
 //
 static void M_ChangeResFull(int keypressed)
 {
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_DisplayMode, +1);
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_DisplayMode, +1);
 	}

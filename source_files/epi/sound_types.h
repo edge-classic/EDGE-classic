@@ -37,7 +37,6 @@ typedef enum
 	FMT_VGM,
 	FMT_MUS,
 	FMT_MIDI,
-	FMT_CMF,
 	FMT_IMF, // Used with DDFPLAY; not in auto-detection
 	FMT_DOOM,
 	FMT_SPK

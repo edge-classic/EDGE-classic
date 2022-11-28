@@ -215,9 +215,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 			music_player = S_PlaySIDMusic(data, length, volume, loop);
 			break;
 
-		// These two send write raw OPL registers, so must use the OPL player
-		// unconditionally
-		case epi::FMT_CMF:
+		// IMF writes raw OPL registers, so must use the OPL player unconditionally
 		case epi::FMT_IMF:
 			delete F;
 			music_player = S_PlayOPL(data, length, fmt, volume, loop, play->type);

@@ -44,7 +44,6 @@ typedef enum
 	MUS_FLAC,
 	MUS_XMP,
 	MUS_VGM,
-	MUS_XMI,
 	MUS_IMF280,
 	MUS_IMF560,
 	MUS_IMF700,

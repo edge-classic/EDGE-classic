@@ -1514,6 +1514,7 @@ static void E_Startup(void)
 
 	RAD_Init();
 	W_ProcessMultipleFiles();
+	I_StartupMusic(); // Must be done after all files loaded to locate appropriate GENMIDI lump
 	V_InitPalette();
 
 	DDF_ParseEverything();

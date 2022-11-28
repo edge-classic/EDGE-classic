@@ -47,7 +47,6 @@ void I_SystemStartup(void)
 	I_StartupGraphics(); // SDL requires this to be called first
 	I_StartupControl();
 	I_StartupSound();
-	I_StartupMusic();
 	I_StartupNetwork();
 }
 

@@ -64,7 +64,7 @@ New Features
   - Can use GENMIDI lumps (Default) or external *.op2 instrument bank files
   - External banks must be placed in the /soundfont directory prior to startup
 
-+ New music formats supported: FLAC, XMI, VGZ (compressed VGM), IMF
++ New music formats supported: FLAC, VGZ (compressed VGM), IMF, XMI/RMI/GMF/EA MIDI Formats
   - IMF songs must have a playlist entry type of 'IMF280', 'IMF560', or 'IMF700' to correctly
     set the song's playback rate
 

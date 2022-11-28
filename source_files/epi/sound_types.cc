@@ -56,12 +56,6 @@ sound_format_e Sound_DetectFormat(byte *data, int song_len)
 		return FMT_SID;
 	}
 
-	if (data[0] == 'C' && data[1] == 'T' &&
-		data[2] == 'M' && data[3] == 'F')
-	{
-		return FMT_CMF;
-	}
-
 	if (data[0] == 'M' && data[1] == 'U' &&
 		data[2] == 'S')
 	{
@@ -157,9 +151,6 @@ sound_format_e Sound_FilenameToFormat(const std::string& filename)
 
 	if (ext == ".sid" || ext == ".psid")
 		return FMT_SID;
-
-	if (ext == ".cmf")
-		return FMT_CMF;
 
 	if (ext == ".mus")
 		return FMT_MUS;

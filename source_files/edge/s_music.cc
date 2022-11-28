@@ -215,6 +215,8 @@ void S_ChangeMusic(int entrynum, bool loop)
 			music_player = S_PlaySIDMusic(data, length, volume, loop);
 			break;
 
+		// These two send write raw OPL registers, so must use the OPL player
+		// unconditionally
 		case epi::FMT_CMF:
 		case epi::FMT_IMF:
 			delete F;
@@ -223,7 +225,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 		case epi::FMT_MIDI:
 		case epi::FMT_MUS:
-		case epi::FMT_XMI:
+		case epi::FMT_WAV: // RIFF MIDI has the same header as WAV
 			delete F;
 			if (var_opl_music)
 			{

@@ -2,6 +2,7 @@
  * BW_Midi_Sequencer - MIDI Sequencer for C++
  *
  * Copyright (c) 2015-2022 Vitaly Novichkov <admin@wohlnet.ru>
+ * Copyright (c) 2022 The EDGE Team.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the "Software"),
@@ -2235,13 +2236,10 @@ static bool detectRSXX(const char *head, epi::mem_file_c *mfr)
     bool ret = false;
 
     // Try to identify RSXX format
-    if(head[0] == 0x7D)
-    {
-        mfr->Seek(0x6D, epi::file_c::SEEKPOINT_START);
-        mfr->Read(headerBuf, 6);
-        if(std::memcmp(headerBuf, "rsxx}u", 6) == 0)
-            ret = true;
-    }
+    mfr->Seek(head[0] - 0x10, epi::file_c::SEEKPOINT_START);
+    mfr->Read(headerBuf, 6);
+    if(std::memcmp(headerBuf, "rsxx}u", 6) == 0)
+        ret = true;
 
     mfr->Seek(0, epi::file_c::SEEKPOINT_START);
     return ret;
@@ -2472,22 +2470,20 @@ bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
     }
 
     // Try to identify RSXX format
-    if(headerBuf[0] == 0x7D)
+    char start = headerBuf[0];
+    mfr->Seek(headerBuf[0] - 0x10, epi::file_c::SEEKPOINT_START);
+    mfr->Read(headerBuf, 6);
+    if(std::memcmp(headerBuf, "rsxx}u", 6) == 0)
     {
-        mfr->Seek(0x6D, epi::file_c::SEEKPOINT_START);
-        mfr->Read(headerBuf, 6);
-        if(std::memcmp(headerBuf, "rsxx}u", 6) == 0)
-        {
-            m_format = Format_RSXX;
-            mfr->Seek(0x7D, epi::file_c::SEEKPOINT_START);
-            trackCount = 1;
-            deltaTicks = 60;
-        }
-        else
-        {
-            m_errorString = "Invalid RSXX header!\n";
-            return false;
-        }
+        m_format = Format_RSXX;
+        mfr->Seek(start, epi::file_c::SEEKPOINT_START);
+        trackCount = 1;
+        deltaTicks = 60;
+    }
+    else
+    {
+        m_errorString = "Invalid RSXX header!\n";
+        return false;
     }
 
     rawTrackData.clear();
@@ -2650,7 +2646,7 @@ bool BW_MidiSequencer::parseCMF(epi::mem_file_c *mfr)
     // Build new MIDI events table
     if(!buildSmfTrackData(rawTrackData))
     {
-        m_errorString = "MIDI Loader: MIDI data parsing error has occouped!\n" + m_parsingErrorsString;
+        m_errorString = "MIDI Loader: MIDI data parsing error has occurred!\n" + m_parsingErrorsString;
         return false;
     }
 

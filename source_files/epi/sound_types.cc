@@ -91,7 +91,7 @@ sound_format_e Sound_DetectFormat(byte *data, int song_len)
 	}
 
 	// Electronic Arts MIDI
-	if (song_len > data[0])
+	if (song_len > data[0] && data[0] >= 0x5D)
 	{
 		int offset = data[0] - 0x10;
 		if (data[offset] == 'r' && data[offset+1] == 's' && data[offset+2] == 'x' &&

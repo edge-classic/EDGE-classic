@@ -2236,10 +2236,13 @@ static bool detectRSXX(const char *head, epi::mem_file_c *mfr)
     bool ret = false;
 
     // Try to identify RSXX format
-    mfr->Seek(head[0] - 0x10, epi::file_c::SEEKPOINT_START);
-    mfr->Read(headerBuf, 6);
-    if(std::memcmp(headerBuf, "rsxx}u", 6) == 0)
-        ret = true;
+    if (head[0] >= 0x5D)
+    {
+        mfr->Seek(head[0] - 0x10, epi::file_c::SEEKPOINT_START);
+        mfr->Read(headerBuf, 6);
+        if(std::memcmp(headerBuf, "rsxx}u", 6) == 0)
+            ret = true;
+    }
 
     mfr->Seek(0, epi::file_c::SEEKPOINT_START);
     return ret;
@@ -2493,20 +2496,29 @@ bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
 
     // Try to identify RSXX format
     char start = headerBuf[0];
-    mfr->Seek(headerBuf[0] - 0x10, epi::file_c::SEEKPOINT_START);
-    mfr->Read(headerBuf, 6);
-    if(std::memcmp(headerBuf, "rsxx}u", 6) == 0)
+    if (start < 0x5D)
     {
-        m_format = Format_RSXX;
-        mfr->Seek(start, epi::file_c::SEEKPOINT_START);
-        trackCount = 1;
-        deltaTicks = 60;
+        m_errorString = "RSXX song too short!\n";
+        delete mfr;
+        return false;
     }
     else
     {
-        m_errorString = "Invalid RSXX header!\n";
-        delete mfr;
-        return false;
+        mfr->Seek(headerBuf[0] - 0x10, epi::file_c::SEEKPOINT_START);
+        mfr->Read(headerBuf, 6);
+        if(std::memcmp(headerBuf, "rsxx}u", 6) == 0)
+        {
+            m_format = Format_RSXX;
+            mfr->Seek(start, epi::file_c::SEEKPOINT_START);
+            trackCount = 1;
+            deltaTicks = 60;
+        }
+        else
+        {
+            m_errorString = "Invalid RSXX header!\n";
+            delete mfr;
+            return false;
+        }
     }
 
     rawTrackData.clear();

@@ -2305,6 +2305,7 @@ bool BW_MidiSequencer::loadMIDI(epi::mem_file_c *mfr, uint16_t rate)
     if(fsize < headerSize)
     {
         m_errorString = "Unexpected end of file at header!\n";
+        delete mfr;
         return false;
     }
 
@@ -2362,6 +2363,7 @@ bool BW_MidiSequencer::loadMIDI(epi::mem_file_c *mfr, uint16_t rate)
     }
 
     m_errorString = "Unknown or unsupported file format";
+    delete mfr;
     return false;
 }
 
@@ -2407,6 +2409,7 @@ bool BW_MidiSequencer::parseIMF(epi::mem_file_c *mfr, uint16_t rate)
     if(mfr->Read(imfRaw, 2) != 2)
     {
         m_errorString = "Unexpected end of file at header!\n";
+        delete mfr;
         return false;
     }
 
@@ -2467,6 +2470,8 @@ bool BW_MidiSequencer::parseIMF(epi::mem_file_c *mfr, uint16_t rate)
 
     buildTimeLine(temposList);
 
+    delete mfr;
+
     return true;
 }
 
@@ -2482,6 +2487,7 @@ bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
     if(fsize < headerSize)
     {
         m_errorString = "Unexpected end of file at header!\n";
+        delete mfr;
         return false;
     }
 
@@ -2499,6 +2505,7 @@ bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
     else
     {
         m_errorString = "Invalid RSXX header!\n";
+        delete mfr;
         return false;
     }
 
@@ -2525,6 +2532,7 @@ bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
         if(fsize < trackLength)
         {
             m_errorString = "MIDI Loader: Unexpected file ending while getting raw track data!\n";
+            delete mfr;
             return false;
         }
         totalGotten += fsize;
@@ -2539,6 +2547,7 @@ bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
     if(totalGotten == 0)
     {
         m_errorString = "MIDI Loader: Empty track data";
+        delete mfr;
         return false;
     }
 
@@ -2546,11 +2555,14 @@ bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
     if(!buildSmfTrackData(rawTrackData))
     {
         m_errorString = "MIDI Loader: MIDI data parsing error has occouped!\n" + m_parsingErrorsString;
+        delete mfr;
         return false;
     }
 
     m_smfFormat = 0;
     m_loop.stackLevel   = -1;
+
+    delete mfr;
 
     return true;
 }
@@ -2567,12 +2579,14 @@ bool BW_MidiSequencer::parseCMF(epi::mem_file_c *mfr)
     if(fsize < headerSize)
     {
         m_errorString = "Unexpected end of file at header!\n";
+        delete mfr;
         return false;
     }
 
     if(std::memcmp(headerBuf, "CTMF", 4) != 0)
     {
         m_errorString = "MIDI Loader: Invalid format, CTMF signature is not found!\n";
+        delete mfr;
         return false;
     }
 
@@ -2587,8 +2601,8 @@ bool BW_MidiSequencer::parseCMF(epi::mem_file_c *mfr)
     fsize = mfr->Read(headerBuf, 6);
     if(fsize < 6)
     {
-        delete mfr; // Actually delete here?
         m_errorString = "Unexpected file ending on attempt to read CTMF header!";
+        delete mfr;
         return false;
     }
 
@@ -2597,8 +2611,8 @@ bool BW_MidiSequencer::parseCMF(epi::mem_file_c *mfr)
     fsize = mfr->Read(headerBuf, 4);
     if(fsize < 4)
     {
-        delete mfr;
         m_errorString = "Unexpected file ending on attempt to read CMF instruments block header!";
+        delete mfr;
         return false;
     }
 
@@ -2612,8 +2626,8 @@ bool BW_MidiSequencer::parseCMF(epi::mem_file_c *mfr)
         fsize = mfr->Read(inst.data, 16);
         if(fsize < 16)
         {
-            delete mfr;
             m_errorString = "Unexpected file ending on attempt to read CMF instruments raw data!";
+            delete mfr;
             return false;
         }
         m_cmfInstruments.push_back(inst);
@@ -2645,6 +2659,7 @@ bool BW_MidiSequencer::parseCMF(epi::mem_file_c *mfr)
         if(fsize < trackLength)
         {
             m_errorString = "MIDI Loader: Unexpected file ending while getting raw track data!\n";
+            delete mfr;
             return false;
         }
         totalGotten += fsize;
@@ -2656,6 +2671,7 @@ bool BW_MidiSequencer::parseCMF(epi::mem_file_c *mfr)
     if(totalGotten == 0)
     {
         m_errorString = "MIDI Loader: Empty track data";
+        delete mfr;
         return false;
     }
 
@@ -2663,8 +2679,11 @@ bool BW_MidiSequencer::parseCMF(epi::mem_file_c *mfr)
     if(!buildSmfTrackData(rawTrackData))
     {
         m_errorString = "MIDI Loader: MIDI data parsing error has occurred!\n" + m_parsingErrorsString;
+        delete mfr;
         return false;
     }
+
+    delete mfr;
 
     return true;
 }
@@ -2681,12 +2700,14 @@ bool BW_MidiSequencer::parseGMF(epi::mem_file_c *mfr)
     if(fsize < headerSize)
     {
         m_errorString = "Unexpected end of file at header!\n";
+        delete mfr;
         return false;
     }
 
     if(std::memcmp(headerBuf, "GMF\x1", 4) != 0)
     {
         m_errorString = "MIDI Loader: Invalid format, GMF\\x1 signature is not found!\n";
+        delete mfr;
         return false;
     }
 
@@ -2714,6 +2735,7 @@ bool BW_MidiSequencer::parseGMF(epi::mem_file_c *mfr)
         if(fsize < trackLength)
         {
             m_errorString = "MIDI Loader: Unexpected file ending while getting raw track data!\n";
+            delete mfr;
             return false;
         }
         totalGotten += fsize;
@@ -2727,6 +2749,7 @@ bool BW_MidiSequencer::parseGMF(epi::mem_file_c *mfr)
     if(totalGotten == 0)
     {
         m_errorString = "MIDI Loader: Empty track data";
+        delete mfr;
         return false;
     }
 
@@ -2734,8 +2757,11 @@ bool BW_MidiSequencer::parseGMF(epi::mem_file_c *mfr)
     if(!buildSmfTrackData(rawTrackData))
     {
         m_errorString = "MIDI Loader: : MIDI data parsing error has occouped!\n" + m_parsingErrorsString;
+        delete mfr;
         return false;
     }
+
+    delete mfr;
 
     return true;
 }
@@ -2753,12 +2779,14 @@ bool BW_MidiSequencer::parseSMF(epi::mem_file_c *mfr)
     if(fsize < headerSize)
     {
         m_errorString = "Unexpected end of file at header!\n";
+        delete mfr;
         return false;
     }
 
     if(std::memcmp(headerBuf, "MThd\0\0\0\6", 8) != 0)
     {
         m_errorString = "MIDI Loader: Invalid format, MThd signature is not found!\n";
+        delete mfr;
         return false;
     }
 
@@ -2785,6 +2813,7 @@ bool BW_MidiSequencer::parseSMF(epi::mem_file_c *mfr)
         if((fsize < 8) || (std::memcmp(headerBuf, "MTrk", 4) != 0))
         {
             m_errorString = "MIDI Loader: Invalid format, MTrk signature is not found!\n";
+            delete mfr;
             return false;
         }
         trackLength = (size_t)readBEint(headerBuf + 4, 4);
@@ -2795,6 +2824,7 @@ bool BW_MidiSequencer::parseSMF(epi::mem_file_c *mfr)
         if(fsize < trackLength)
         {
             m_errorString = "MIDI Loader: Unexpected file ending while getting raw track data!\n";
+            delete mfr;
             return false;
         }
 
@@ -2807,6 +2837,7 @@ bool BW_MidiSequencer::parseSMF(epi::mem_file_c *mfr)
     if(totalGotten == 0)
     {
         m_errorString = "MIDI Loader: Empty track data";
+        delete mfr;
         return false;
     }
 
@@ -2814,11 +2845,14 @@ bool BW_MidiSequencer::parseSMF(epi::mem_file_c *mfr)
     if(!buildSmfTrackData(rawTrackData))
     {
         m_errorString = "MIDI Loader: MIDI data parsing error has occouped!\n" + m_parsingErrorsString;
+        delete mfr;
         return false;
     }
 
     m_smfFormat = smfFormat;
     m_loop.stackLevel   = -1;
+
+    delete mfr;
 
     return true;
 }
@@ -2832,12 +2866,14 @@ bool BW_MidiSequencer::parseRMI(epi::mem_file_c *mfr)
     if(fsize < headerSize)
     {
         m_errorString = "Unexpected end of file at header!\n";
+        delete mfr;
         return false;
     }
 
     if(std::memcmp(headerBuf, "RIFF", 4) != 0)
     {
         m_errorString = "MIDI Loader: Invalid format, RIFF signature is not found!\n";
+        delete mfr;
         return false;
     }
 
@@ -2859,12 +2895,14 @@ bool BW_MidiSequencer::parseMUS(epi::mem_file_c *mfr)
     if(fsize < headerSize)
     {
         m_errorString = "Unexpected end of file at header!\n";
+        delete mfr;
         return false;
     }
 
     if(std::memcmp(headerBuf, "MUS\x1A", 4) != 0)
     {
         m_errorString = "MIDI Loader: Invalid format, MUS\\x1A signature is not found!\n";
+        delete mfr;
         return false;
     }
 
@@ -2875,12 +2913,14 @@ bool BW_MidiSequencer::parseMUS(epi::mem_file_c *mfr)
     if(!mus)
     {
         m_errorString = "Out of memory!";
+        delete mfr;
         return false;
     }
     fsize = mfr->Read(mus, mus_len);
     if(fsize < mus_len)
     {
         m_errorString = "Failed to read MUS file data!\n";
+        delete mfr;
         return false;
     }
 
@@ -2898,6 +2938,8 @@ bool BW_MidiSequencer::parseMUS(epi::mem_file_c *mfr)
     if(m2mret < 0)
     {
         m_errorString = "Invalid MUS/DMX data format!";
+        if (mid)
+            free(mid);
         return false;
     }
     cvt_buf.set(mid);
@@ -2924,18 +2966,21 @@ bool BW_MidiSequencer::parseXMI(epi::mem_file_c *mfr)
     if(fsize < headerSize)
     {
         m_errorString = "Unexpected end of file at header!\n";
+        delete mfr;
         return false;
     }
 
     if(std::memcmp(headerBuf, "FORM", 4) != 0)
     {
         m_errorString = "MIDI Loader: Invalid format, FORM signature is not found!\n";
+        delete mfr;
         return false;
     }
 
     if(std::memcmp(headerBuf + 8, "XDIR", 4) != 0)
     {
         m_errorString = "MIDI Loader: Invalid format\n";
+        delete mfr;
         return false;
     }
 
@@ -2946,6 +2991,7 @@ bool BW_MidiSequencer::parseXMI(epi::mem_file_c *mfr)
     if(!mus)
     {
         m_errorString = "Out of memory!";
+        delete mfr;
         return false;
     }
 
@@ -2955,6 +3001,7 @@ bool BW_MidiSequencer::parseXMI(epi::mem_file_c *mfr)
     if(fsize < mus_len)
     {
         m_errorString = "Failed to read XMI file data!\n";
+        delete mfr;
         return false;
     }
 
@@ -2962,8 +3009,6 @@ bool BW_MidiSequencer::parseXMI(epi::mem_file_c *mfr)
     delete mfr;
     mfr = nullptr;
 
-//    uint8_t *mid = NULL;
-//    uint32_t mid_len = 0;
     int m2mret = Convert_xmi2midi_multi(mus, static_cast<uint32_t>(mus_len + 20),
                                         song_buf, XMIDI_CONVERT_NOCONVERSION);
     if(mus)

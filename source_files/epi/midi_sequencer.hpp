@@ -714,16 +714,18 @@ public:
      * @brief Load MIDI file from a memory block
      * @param data Pointer to memory block with MIDI data
      * @param size Size of source memory block
+     * @param rate For IMF formats, the proper playback rate in Hz
      * @return true if file successfully opened, false on any error
      */
-    bool loadMIDI(const byte *data, size_t size);
+    bool loadMIDI(const byte *data, size_t size, uint16_t rate = 0);
 
     /**
      * @brief Load MIDI file by using FileAndMemReader interface
      * @param mfr mem_file_c with opened source file
+     * @param rate For IMF formats, the proper playback rate in Hz
      * @return true if file successfully opened, false on any error
      */
-    bool loadMIDI(epi::mem_file_c *mfr);
+    bool loadMIDI(epi::mem_file_c *mfr, uint16_t rate);
 
     /**
      * @brief Periodic tick handler.
@@ -786,9 +788,10 @@ private:
     /**
      * @brief Load file as Id-software-Music-File (Wolfenstein)
      * @param mfr mem_file_c with opened source file
+     * @param rate For IMF formats, the proper playback rate in Hz
      * @return true on successful load
      */
-    bool parseIMF(epi::mem_file_c *mfr);
+    bool parseIMF(epi::mem_file_c *mfr, uint16_t rate);
 
     /**
      * @brief Load file as EA MUS

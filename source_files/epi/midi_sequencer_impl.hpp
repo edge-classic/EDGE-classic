@@ -2197,10 +2197,10 @@ void BW_MidiSequencer::setTempo(double tempo)
     m_tempoMultiplier = tempo;
 }
 
-bool BW_MidiSequencer::loadMIDI(const byte *data, size_t size)
+bool BW_MidiSequencer::loadMIDI(const byte *data, size_t size, uint16_t rate)
 {
     epi::mem_file_c *mfr = new epi::mem_file_c(data, size);
-    return loadMIDI(mfr);
+    return loadMIDI(mfr, rate);
 }
 
 template<class T>
@@ -2280,7 +2280,7 @@ static bool detectIMF(const char *head, epi::mem_file_c *mfr)
     return (sum1 > sum2);
 }
 
-bool BW_MidiSequencer::loadMIDI(epi::mem_file_c *mfr)
+bool BW_MidiSequencer::loadMIDI(epi::mem_file_c *mfr, uint16_t rate)
 {
     size_t  fsize = 0;
     BW_MidiSequencer_UNUSED(fsize);
@@ -2352,7 +2352,7 @@ bool BW_MidiSequencer::loadMIDI(epi::mem_file_c *mfr)
     if(detectIMF(headerBuf, mfr))
     {
         mfr->Seek(0, epi::file_c::SEEKPOINT_START);
-        return parseIMF(mfr);
+        return parseIMF(mfr, rate);
     }
 
     if(detectRSXX(headerBuf, mfr))
@@ -2366,17 +2366,33 @@ bool BW_MidiSequencer::loadMIDI(epi::mem_file_c *mfr)
 }
 
 
-bool BW_MidiSequencer::parseIMF(epi::mem_file_c *mfr)
+bool BW_MidiSequencer::parseIMF(epi::mem_file_c *mfr, uint16_t rate)
 {
     const size_t    deltaTicks = 1;
     const size_t    trackCount = 1;
-    const uint32_t  imfTempo = 1428;
+    uint32_t        imfTempo = 0;
     size_t          imfEnd = 0;
     uint64_t        abs_position = 0;
     uint8_t         imfRaw[4];
 
     MidiTrackRow    evtPos;
     MidiEvent       event;
+
+    switch (rate)
+    {
+        case 280:
+            imfTempo = 3570;
+            break;
+        case 560:
+            imfTempo = 1785;
+            break;
+        case 700:
+            imfTempo = 1428;
+            break;
+        default:
+            imfTempo = 1428;
+            break;
+    }
 
     std::vector<MidiEvent> temposList;
 

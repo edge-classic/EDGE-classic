@@ -274,9 +274,9 @@ public:
 		opl_seq->setInterface(opl_iface);
 	}
 
-	bool LoadTrack(const byte *data, int length)
+	bool LoadTrack(const byte *data, int length, uint16_t rate)
 	{
-		return opl_seq->loadMIDI(data, length);
+		return opl_seq->loadMIDI(data, length, rate);
 	}		
 
 	void Close(void)
@@ -405,7 +405,25 @@ abstract_music_c * S_PlayOPL(byte *data, int length, int fmt, float volume, bool
 		return nullptr;
 	}
 
-	if (!player->LoadTrack(data, length)) //Lobo: quietly log it instead of completely exiting EDGE
+	uint16_t rate;
+
+	switch (type)
+	{
+		case 12: // IMF280
+			rate = 280;
+			break;
+		case 13: // IMF560
+			rate = 560;
+			break;
+		case 14: // IMF700
+			rate = 700;
+			break;
+		default:
+			rate = 0;
+			break;
+	}
+
+	if (!player->LoadTrack(data, length, rate)) //Lobo: quietly log it instead of completely exiting EDGE
 	{
 		I_Debugf("OPL player: failed to load MIDI file!\n");
 		delete[] data;

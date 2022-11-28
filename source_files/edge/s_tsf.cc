@@ -265,6 +265,17 @@ public:
 	
 		tsf_reset(edge_tsf);
 
+		if (tsf_seq)
+		{
+			delete tsf_seq;
+			tsf_seq = nullptr;
+		}
+		if (tsf_iface)
+		{
+			delete tsf_iface;
+			tsf_iface = nullptr;
+		}
+
 		status = NOT_LOADED;
 	}
 

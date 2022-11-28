@@ -288,6 +288,17 @@ public:
 		if (status != STOPPED)
 		  Stop();
 
+		if (opl_seq)
+		{
+			delete opl_seq;
+			opl_seq = nullptr;
+		}
+		if (opl_iface)
+		{
+			delete opl_iface;
+			opl_iface = nullptr;
+		}
+
 		status = NOT_LOADED;
 	}
 

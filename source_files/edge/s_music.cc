@@ -157,7 +157,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 	// IMF Music is the outlier in that it must be predefined in DDFPLAY with the appropriate
 	// IMF frequency, as there is no way of determining this from file information alone
 	if (play->type == MUS_IMF280 || play->type == MUS_IMF560 || play->type == MUS_IMF700)
-		fmt = epi::FMT_VGM;
+		fmt = epi::FMT_IMF;
 	else
 	{
 		if (play->infotype == MUSINF_LUMP)
@@ -207,7 +207,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 		case epi::FMT_VGM:
 			delete F;
-			music_player = S_PlayVGMMusic(data, length, volume, loop, play->type);
+			music_player = S_PlayVGMMusic(data, length, volume, loop);
 			break;
 
 		case epi::FMT_SID:
@@ -215,14 +215,19 @@ void S_ChangeMusic(int entrynum, bool loop)
 			music_player = S_PlaySIDMusic(data, length, volume, loop);
 			break;
 
+		case epi::FMT_CMF:
+		case epi::FMT_IMF:
+			delete F;
+			music_player = S_PlayOPL(data, length, fmt, volume, loop, play->type);
+			break;
+
 		case epi::FMT_MIDI:
 		case epi::FMT_MUS:
 		case epi::FMT_XMI:
 			delete F;
-
 			if (var_opl_music)
 			{
-				music_player = S_PlayOPL(data, length, fmt, volume, loop);
+				music_player = S_PlayOPL(data, length, fmt, volume, loop, play->type);
 			}
 			else
 			{
@@ -233,7 +238,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 		default:
 			delete F;
 			delete data;
-			I_Printf("S_ChangeMusic: unknown format (not MUS or MIDI)\n");
+			I_Printf("S_ChangeMusic: unknown format\n");
 			break;
 	}
 }

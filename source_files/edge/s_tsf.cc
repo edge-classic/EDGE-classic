@@ -2,8 +2,7 @@
 //  EDGE TinySoundfont Music Player
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 2004-2009  The EDGE Team.
-//  Converted from the original Timidity-based player in 2021 - Dashodanger
+//  Copyright (c) 2004-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -21,9 +20,6 @@
 
 #include "file.h"
 #include "filesystem.h"
-#include "mus_2_midi.h"
-#include "xmi_2_mid.h"
-#include "sound_types.h"
 #include "path.h"
 #include "str_util.h"
 
@@ -34,25 +30,104 @@
 
 #include "dm_state.h"
 
+#define BW_MidiSequencer TSFSequencer
+typedef struct BW_MidiRtInterface TSFInterface;
+#include "midi_sequencer_impl.hpp"
+
 #define TSF_IMPLEMENTATION
 #include "tsf.h"
-
-#define TML_IMPLEMENTATION
-#include "tml.h"
 
 #define TSF_NUM_SAMPLES  4096
 
 extern bool dev_stereo;
 extern int  dev_freq; 
 
-static bool tsf_inited;
-static bool tsf_disabled = false;
+bool tsf_disabled = false;
 
 tsf *edge_tsf;
 
 DEF_CVAR(s_soundfont, "default.sf2", CVAR_ARCHIVE)
 
 extern std::vector<std::string> available_soundfonts;
+
+static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
+{
+	const s16_t *s_end = src + len*2;
+
+	for (; src < s_end; src += 2)
+	{
+		// compute average of samples
+		*dest++ = ( (int)src[0] + (int)src[1] ) >> 1;
+	}
+}
+
+bool S_StartupTSF(void)
+{
+	I_Printf("Initializing TinySoundFont...\n");
+
+	// Check for presence of previous CVAR value's file
+	bool cvar_good = false;
+	for (int i=0; i < available_soundfonts.size(); i++)
+	{
+		if(epi::case_cmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
+			cvar_good = true;
+	}
+
+	if (!cvar_good)
+	{
+		I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
+		s_soundfont = "default.sf2";
+	}
+
+ 	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
+
+	edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), s_soundfont.c_str()).c_str());
+
+	if (!edge_tsf)
+	{
+		I_Warning("TinySoundFont: Could not load requested soundfont %s! Falling back to default soundfont!\n", s_soundfont.c_str());
+		edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), "default.sf2").c_str());
+	}
+
+	if (!edge_tsf) 
+	{
+		I_Warning("Could not load any soundfonts! Ensure that default.sf2 is present in the soundfont directory!\n");
+		return false;
+	}
+
+	tsf_channel_set_bank_preset(edge_tsf, 9, 128, 0);
+
+	// reduce the overall gain by 6dB, to minimize the chance of clipping in
+	// songs with a lot of simultaneous notes.
+	tsf_set_output(edge_tsf, TSF_STEREO_INTERLEAVED, dev_freq, -6.0);
+
+	return true; // OK!
+}
+
+// Should only be invoked when switching soundfonts
+void S_RestartTSF(void)
+{
+	if (tsf_disabled)
+		return;
+
+	I_Printf("Restarting TinySoundFont...\n");
+
+	int old_entry = entry_playing;
+
+	S_StopMusic();
+
+	tsf_close(edge_tsf);
+
+	if (!S_StartupTSF())
+	{
+		tsf_disabled = true;
+		return;
+	}
+
+	S_ChangeMusic(old_entry, true); // Restart track that was playing when switched
+
+	return; // OK!
+}
 
 class tsf_player_c : public abstract_music_c
 {
@@ -64,22 +139,120 @@ private:
 	
 	int status;
 	bool looping;
-	double current_time;
 
-	tml_message *song;
-	byte *data;
-	int length;
+	TSFInterface *tsf_iface;
+
+	s16_t *mono_buffer;
 
 public:
-	tsf_player_c(tml_message *_song, byte *_data, int _length) : status(NOT_LOADED), song(_song), data(_data), length(_length)
-	{ }
+	tsf_player_c(byte *_data, int _length, bool _looping) : status(NOT_LOADED), looping(_looping)
+	{ 
+		mono_buffer = new s16_t[TSF_NUM_SAMPLES * 2];
+		SequencerInit(); 
+	}
 
 	~tsf_player_c()
 	{
 		Close();
+
+		if (mono_buffer)
+			delete[] mono_buffer;
 	}
 
 public:
+
+	TSFSequencer *tsf_seq;
+
+	static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
+	{
+		tsf_channel_note_on(edge_tsf, channel, note, static_cast<float>(velocity) / 127.0f);
+	}
+
+	static void rtNoteOff(void *userdata, uint8_t channel, uint8_t note)
+	{
+		tsf_channel_note_off(edge_tsf, channel, note);
+	}
+
+	static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
+	{
+		(void)userdata; (void)channel; (void)note; (void)atVal;
+	}
+
+	static void rtChannelAfterTouch(void *userdata, uint8_t channel, uint8_t atVal)
+	{
+		(void)userdata; (void)channel; (void)atVal;
+	}
+
+	static void rtControllerChange(void *userdata, uint8_t channel, uint8_t type, uint8_t value)
+	{
+		tsf_channel_midi_control(edge_tsf, channel, type, value);
+	}
+
+	static void rtPatchChange(void *userdata, uint8_t channel, uint8_t patch)
+	{
+		tsf_channel_set_presetnumber(edge_tsf, channel, patch, channel == 9);
+	}
+
+	static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
+	{
+		tsf_channel_set_pitchwheel(edge_tsf, channel, (msb << 7) | lsb);
+	}
+
+	static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
+	{
+		(void)userdata; (void)msg; (void)size;
+	}
+
+	static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
+	{
+		(void)userdata; (void)track; (void)data; (void)length;
+	}
+
+	static size_t rtCurrentDevice(void *userdata, size_t track)
+	{
+		(void)userdata; (void)track;
+		return 0;
+	}
+
+	static void playSynth(void *userdata, uint8_t *stream, size_t length)
+	{
+		tsf_render_short(edge_tsf,
+						reinterpret_cast<short*>(stream),
+						static_cast<int>(length) / 4, 0);
+	}
+
+	void SequencerInit()
+	{
+		tsf_seq = new TSFSequencer;
+		tsf_iface = new TSFInterface;
+		std::memset(tsf_iface, 0, sizeof(BW_MidiRtInterface));
+
+		tsf_iface->rtUserData = this;
+		tsf_iface->rt_noteOn  = rtNoteOn;
+		tsf_iface->rt_noteOff = rtNoteOff;
+		tsf_iface->rt_noteAfterTouch = rtNoteAfterTouch;
+		tsf_iface->rt_channelAfterTouch = rtChannelAfterTouch;
+		tsf_iface->rt_controllerChange = rtControllerChange;
+		tsf_iface->rt_patchChange = rtPatchChange;
+		tsf_iface->rt_pitchBend = rtPitchBend;
+		tsf_iface->rt_systemExclusive = rtSysEx;
+
+		tsf_iface->onPcmRender = playSynth;
+		tsf_iface->onPcmRender_userData = this;
+
+		tsf_iface->pcmSampleRate = dev_freq;
+		tsf_iface->pcmFrameSize = 2 /*channels*/ * 2 /*size of one sample*/;
+
+		tsf_iface->rt_deviceSwitch = rtDeviceSwitch;
+		tsf_iface->rt_currentDevice = rtCurrentDevice;
+
+		tsf_seq->setInterface(tsf_iface);
+	}
+
+	bool LoadTrack(const byte *data, int length)
+	{
+		return tsf_seq->loadMIDI(data, length);
+	}
 
 	void Close(void)
 	{
@@ -92,9 +265,6 @@ public:
 	
 		tsf_reset(edge_tsf);
 
-		if (data)
-			delete[] data;
-
 		status = NOT_LOADED;
 	}
 
@@ -105,9 +275,6 @@ public:
 
 		status = PLAYING;
 		looping = loop;
-
-		SYS_ASSERT(song);
-		current_time = 0;
 
 		// Load up initial buffer data
 		Ticker();
@@ -175,216 +342,66 @@ public:
 
 private:
 
-	bool PlaySome(s16_t *data_buf, int samples) {
-
-		int SampleBlock, SampleCount = samples;
-
-		for (SampleBlock = TSF_RENDER_EFFECTSAMPLEBLOCK; SampleCount; SampleCount -= SampleBlock, data_buf += (SampleBlock * (dev_stereo ? 2 : 1)))
-		{
-			//We progress the MIDI playback and then process TSF_RENDER_EFFECTSAMPLEBLOCK samples at once
-			if (SampleBlock > SampleCount) SampleBlock = SampleCount;
-
-			for (current_time += SampleBlock * (1000.0 / dev_freq); song && current_time >= song->time; song = song->next)
-			{
-				switch (song->type)
-				{
-					case TML_PROGRAM_CHANGE: //channel program (preset) change (special handling for 10th MIDI channel with drums)
-						tsf_channel_set_presetnumber(edge_tsf, song->channel, song->program, (song->channel == 9));
-						break;
-					case TML_NOTE_ON: //play a note
-						tsf_channel_note_on(edge_tsf, song->channel, song->key, song->velocity / 127.0f);
-						break;
-					case TML_NOTE_OFF: //stop a note
-						tsf_channel_note_off(edge_tsf, song->channel, song->key);
-						break;
-					case TML_PITCH_BEND: //pitch wheel modification
-						tsf_channel_set_pitchwheel(edge_tsf, song->channel, song->pitch_bend);
-						break;
-					case TML_CONTROL_CHANGE: //MIDI controller messages
-						tsf_channel_midi_control(edge_tsf, song->channel, song->control, song->control_value);
-						break;
-				}
-			}
-
-			// Render the block of audio samples in short format
-			tsf_render_short(edge_tsf, data_buf, SampleBlock, 0);
-		}
-		return (song == NULL);
-	}
-
 	bool StreamIntoBuffer(epi::sound_data_c *buf)
 	{
-		int samples = 0;
+		s16_t *data_buf;
 
 		bool song_done = false;
 
-		while (samples < TSF_NUM_SAMPLES)
+		if (!dev_stereo)
+			data_buf = mono_buffer;
+		else
+			data_buf = buf->data_L;
+
+		int played = tsf_seq->playStream(reinterpret_cast<u8_t *>(data_buf), TSF_NUM_SAMPLES);
+
+		if (tsf_seq->positionAtEnd())
+			song_done = true;
+
+		buf->length = played / 4;
+
+		if (!dev_stereo)
+			ConvertToMono(buf->data_L, mono_buffer, buf->length);
+
+		if (song_done)  /* EOF */
 		{
-			s16_t *data_buf = buf->data_L + samples * (dev_stereo ? 2 : 1);
-
-			song_done = PlaySome(data_buf, TSF_NUM_SAMPLES - samples);
-
-			if (song_done)  /* EOF */
-			{
-				if (looping)
-				{
-					tml_free(song);
-					song = tml_load_memory(data, length);
-					current_time = 0;
-					continue; // try again
-				}
-
-				return (false);
-			}
-
-			samples += TSF_NUM_SAMPLES;
+			if (! looping)
+				return false;
+			tsf_seq->rewind();
+			return true;
 		}
 
-		return true;
+    	return true;
 	}
 };
-
-bool S_StartupTSF(void)
-{
-	I_Printf("Initializing TinySoundFont...\n");
-
-	// Check for presence of previous CVAR value's file
-	bool cvar_good = false;
-	for (int i=0; i < available_soundfonts.size(); i++)
-	{
-		if(epi::case_cmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
-			cvar_good = true;
-	}
-
-	if (!cvar_good)
-	{
-		I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
-		s_soundfont = "default.sf2";
-	}
-
- 	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
-
-	edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), s_soundfont.c_str()).c_str());
-
-	if (!edge_tsf)
-	{
-		I_Warning("TinySoundFont: Could not load requested soundfont %s! Falling back to default soundfont!\n", s_soundfont.c_str());
-		edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), "default.sf2").c_str());
-	}
-
-	if (!edge_tsf) 
-	{
-		I_Warning("Could not load any soundfonts! Ensure that default.sf2 is present in the soundfont directory!\n");
-		return false;
-	}
-
-	tsf_channel_set_bank_preset(edge_tsf, 9, 128, 0);
-
-	// reduce the overall gain by 6dB, to minimize the chance of clipping in
-	// songs with a lot of simultaneous notes.
-	tsf_set_output(edge_tsf, dev_stereo ? TSF_STEREO_INTERLEAVED : TSF_MONO, dev_freq, -6.0);
-
-	return true; // OK!
-}
-
-// Should only be invoked when switching soundfonts
-void S_RestartTSF(void)
-{
-	if (tsf_disabled || !tsf_inited)
-		return;
-
-	I_Printf("Restarting TinySoundFont...\n");
-
-	int old_entry = entry_playing;
-
-	S_StopMusic();
-
-	tsf_inited = false;
-
-	tsf_close(edge_tsf);
-
-	if (!S_StartupTSF())
-		return;
-
-	tsf_inited = true;
-
-	S_ChangeMusic(old_entry, true); // Restart track that was playing when switched
-
-	return; // OK!
-}
 
 abstract_music_c * S_PlayTSF(byte *data, int length, int fmt,
 			float volume, bool loop)
 {
 	if (tsf_disabled)
+	{
+		delete[] data;
 		return nullptr;
-
-	if (! tsf_inited)
-	{
-		if (! S_StartupTSF())
-		{
-			tsf_disabled = true;
-			return nullptr;
-		}
-		tsf_inited = true;
 	}
 
-	if (fmt == epi::FMT_MUS)
+	tsf_player_c *player = new tsf_player_c(data, length, loop);
+
+	if (!player)
 	{
-		I_Debugf("tsf_player_c: Converting MUS format to MIDI...\n");
-
-		byte *midi_data;
-		int midi_len;
-
-		if (! Mus2Midi::Convert(data, length, &midi_data, &midi_len,
-					Mus2Midi::DOOM_DIVIS, true))
-		{
-			delete[] data;
-
-			I_Warning("Unable to convert MUS to MIDI !\n");
-			return nullptr;
-		}
-
+		I_Debugf("TinySoundfont player: error initializing!\n");
 		delete[] data;
-
-		data   = midi_data;
-		length = midi_len;
-
-		I_Debugf("Conversion done: new length is %d\n", length);
+		return nullptr;
 	}
 
-	if (fmt == epi::FMT_XMI)
-	{
-		I_Debugf("tsf_player_c: Converting XMI format to MIDI...\n");
-
-		byte *midi_data;
-		uint32_t  midi_len;
-
-		if (Convert_xmi2midi(data, length, &midi_data, &midi_len, XMIDI_CONVERT_NOCONVERSION) != 0)
-		{
-			delete[] data;
-
-			I_Warning("Unable to convert XMI to MIDI !\n");
-			return nullptr;
-		}
-
-		delete[] data;
-
-		data   = midi_data;
-		length = midi_len;
-
-		I_Debugf("Conversion done: new length is %d\n", length);
-	}
-
-	tml_message *song = tml_load_memory(data, length);
-
-	if (!song) //Lobo: quietly log it instead of completely exiting EDGE
+	if (!player->LoadTrack(data, length)) //Lobo: quietly log it instead of completely exiting EDGE
 	{
 		I_Debugf("TinySoundfont player: failed to load MIDI file!\n");
+		delete[] data;
+		delete player;
 		return nullptr;
 	}
 
-	tsf_player_c *player = new tsf_player_c(song, data, length);
+	delete[] data;
 
 	player->Volume(volume);
 	player->Play(loop);

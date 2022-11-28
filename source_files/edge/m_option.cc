@@ -182,6 +182,7 @@ static void M_ChangeResFull(int keypressed);
 
 static void M_LanguageDrawer(int x, int y, int deltay);
 static void M_ChangeLanguage(int keypressed);
+static void M_ChangeOPL(int keypressed);
 static void M_ChangeSoundfont(int keypressed);
 static void M_ChangeGENMIDI(int keypressed);
 static void InitMonitorSize();
@@ -493,7 +494,7 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Function, "MIDI Soundfont", NULL,  0, NULL, M_ChangeSoundfont, NULL},
-	{OPT_Switch,  "OPL Music Mode",  OPLMode, 3,  &var_opl_music, NULL, "NeedRestart"},
+	{OPT_Switch,  "OPL Music Mode",  OPLMode, 3,  &var_opl_music, M_ChangeOPL, NULL},
 	{OPT_Function, "OPL Instrument Bank", NULL,  0, NULL, M_ChangeGENMIDI, NULL},
 	{OPT_Boolean, "PC Speaker Mode", YesNo, 2,  &var_pc_speaker_mode, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
@@ -1957,6 +1958,18 @@ static void M_ChangeLanguage(int keypressed)
 
 	// update cvar
 	m_language = language.GetName();
+}
+
+//
+// M_ChangeOPL
+//
+//
+static void M_ChangeOPL(int keypressed)
+{
+	if (var_opl_music)
+		S_RestartOPL();
+	else
+		S_RestartTSF();
 }
 
 //

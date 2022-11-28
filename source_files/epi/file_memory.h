@@ -1,9 +1,8 @@
 //----------------------------------------------------------------------------
-//  EDGE IMF to VGM conversion header
+//  Block of memory with File interface
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 2015-2020 ValleyBell
-//  Copyright (c) 2022  The EDGE Team.
+//  Copyright (c) 2007-2008  The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -17,13 +16,39 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_IMF2VGM_H__
-#define __EPI_IMF2VGM_H__
+#ifndef __EPI_FILE_MEMORY_H__
+#define __EPI_FILE_MEMORY_H__
 
-#include "epi.h"
+#include "file.h"
 
-void ConvertIMF2VGM(u8_t *IMFBuffer, u32_t IMFBufferLen, u8_t *VGMBuffer, u32_t VGMBufferLen, s32_t IMFFreq, s32_t DevFreq);
+namespace epi
+{
 
-extern u32_t vgm_header_size;
+class mem_file_c : public file_c
+{
+private:
+	byte *data;
 
-#endif
+	int length;
+	int pos;
+	bool copied;
+
+public:
+     mem_file_c(const byte *_block, int _len, bool copy_it = true);
+    ~mem_file_c();
+
+    int GetLength()   { return length; }
+    int GetPosition() { return pos; }
+
+    unsigned int Read(void *dest, unsigned int size);
+    unsigned int Write(const void *src, unsigned int size);
+
+    bool Seek(int offset, int seekpoint);
+};
+
+} // namespace epi
+
+#endif /*__EPI_FILE_MEMORY_H__*/
+
+//--- editor settings ---
+// vi:ts=4:sw=4:noexpandtab

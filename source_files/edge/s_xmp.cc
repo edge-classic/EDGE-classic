@@ -149,7 +149,7 @@ bool xmpplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 		return true;
 	}
 
-    return (true);
+    return true;
 }
 
 

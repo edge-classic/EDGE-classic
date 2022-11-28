@@ -21,9 +21,13 @@
 
 #include "i_defs.h"
 
+extern bool opl_disabled;
+
+bool S_StartupOPL(void);
+
 void S_RestartOPL(void);
 
-abstract_music_c * S_PlayOPL(byte *data, int length, int fmt, float volume, bool loop);
+abstract_music_c * S_PlayOPL(byte *data, int length, int fmt, float volume, bool loop, int type);
 
 #endif /* __S_OPL_H__ */
 

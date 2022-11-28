@@ -22,6 +22,10 @@
 
 #include "i_defs.h"
 
+extern bool tsf_disabled;
+
+bool S_StartupTSF(void);
+
 void S_RestartTSF(void);
 
 abstract_music_c * S_PlayTSF(byte *data, int length, int fmt,

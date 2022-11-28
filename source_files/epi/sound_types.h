@@ -38,6 +38,8 @@ typedef enum
 	FMT_MUS,
 	FMT_MIDI,
 	FMT_XMI,
+	FMT_CMF,
+	FMT_IMF,
 	FMT_DOOM,
 	FMT_SPK
 }

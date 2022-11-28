@@ -39,8 +39,9 @@
 #include "s_sound.h"
 #include "s_cache.h"
 #include "s_blit.h"
+#include "s_opl.h"
+#include "s_tsf.h"
 #include "w_wad.h"
-
 
 // If true, sound system is off/not working. Changed to false if sound init ok.
 bool nosound = false;
@@ -264,7 +265,6 @@ void I_UnlockAudio(void)
 	}
 }
 
-// Moved I_StartupMusic from platform-specific system.cc files to here - Dasho
 void I_StartupMusic(void)
 {
 	// Populate available soundfont vector here, even if music is disabled
@@ -307,6 +307,14 @@ void I_StartupMusic(void)
 			}
 		}
 	}
+
+	// Startup both TinySoundFont and OPL, as some formats require OPL now (IMF/CMF)
+
+	if (!S_StartupTSF())
+		tsf_disabled = true;
+
+	if (!S_StartupOPL())
+		opl_disabled = true;
 
 	return;
 }

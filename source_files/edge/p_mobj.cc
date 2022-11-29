@@ -1713,8 +1713,7 @@ void P_RunMobjThinkers(void)
 		}
 
 		// Culling test
-		if (r_culling.d == 0 ||
-			R_PointToDist(players[consoleplayer]->mo->x, players[consoleplayer]->mo->y, mo->x, mo->y) < 4000)
+		if (r_culling.d == 0 || gametic % (1 + I_ROUND(R_PointToDist(players[consoleplayer]->mo->x, players[consoleplayer]->mo->y, mo->x, mo->y) / 1000)) == 0)
 			P_MobjThinker(mo);
 	}
 }

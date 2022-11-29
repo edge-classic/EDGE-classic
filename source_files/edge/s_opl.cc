@@ -23,6 +23,7 @@
 #include "sound_types.h"
 #include "path.h"
 #include "str_util.h"
+#include "playlist.h"
 
 #include "m_misc.h"
 #include "s_blit.h"
@@ -420,13 +421,13 @@ abstract_music_c * S_PlayOPL(byte *data, int length, int fmt, float volume, bool
 
 	switch (type)
 	{
-		case 12: // IMF280
+		case MUS_IMF280:
 			rate = 280;
 			break;
-		case 13: // IMF560
+		case MUS_IMF560:
 			rate = 560;
 			break;
-		case 14: // IMF700
+		case MUS_IMF700:
 			rate = 700;
 			break;
 		default:

@@ -73,6 +73,7 @@
 
 #define DEBUG_MOBJ  0
 
+extern cvar_c r_culling;
 
 // List of all objects in map.
 mobj_t *mobjlisthead;
@@ -1711,7 +1712,10 @@ void P_RunMobjThinkers(void)
 			continue;
 		}
 
-		P_MobjThinker(mo);
+		// Culling test
+		if (r_culling.d == 0 ||
+			R_PointToDist(players[consoleplayer]->mo->x, players[consoleplayer]->mo->y, mo->x, mo->y) < 4000)
+			P_MobjThinker(mo);
 	}
 }
 

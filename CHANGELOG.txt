@@ -57,8 +57,7 @@ New Features
 
 + Added experimental distance culling accessible via the r_culling CVAR
   - r_culling 0 : No distance culling
-  - r_culling 1 : Distance culling with fade-to-black; sky texture will not be visible
-  - r_culling 2 : Distance culling without fade; will have visible pop-in at a distance
+  - r_culling (any non-zero value) : Distance culling with fade-to-black; sky texture will not be visible
 
 + Support OPL emulated playback of MUS and MIDI music lumps.
   - Can use GENMIDI lumps (Default) or external *.op2 instrument bank files

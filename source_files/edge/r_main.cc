@@ -41,6 +41,7 @@ DEF_CVAR(r_nearclip, "4",      CVAR_ARCHIVE)
 DEF_CVAR(r_farclip,  "64000",  CVAR_ARCHIVE)
 DEF_CVAR(r_culling, "0", CVAR_ARCHIVE)
 
+DEF_CVAR(r_fogofwar, "0", CVAR_ARCHIVE)
 
 typedef enum
 {

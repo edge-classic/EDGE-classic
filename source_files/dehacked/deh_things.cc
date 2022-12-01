@@ -733,7 +733,7 @@ namespace Things
 {
 	typedef struct
 	{
-		int64_t flag;          // flag in mobjinfo_t (MF_XXX), 0 if ignored
+		long long int flag;          // flag in mobjinfo_t (MF_XXX), 0 if ignored
 		const char *bex;   // name in a DEHACKED or BEX file
 		const char *conv;  // edge name, NULL if none, can be multiple
 	}

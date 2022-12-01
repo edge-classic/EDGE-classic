@@ -57,6 +57,9 @@ DEF_CVAR(r_dumbclamp,     DUMB_CLAMP, 0)
 
 #define DUMMY_CLAMP  789
 
+extern cvar_c r_culling;
+
+extern cvar_c r_fogofwar;
 
 // a single unit (polygon, quad, etc) to pass to the GL
 typedef struct local_gl_unit_s
@@ -330,6 +333,7 @@ void RGL_DrawUnits(void)
 				  Compare_Unit_pred());
 	}
 
+
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);
@@ -338,6 +342,17 @@ void RGL_DrawUnits(void)
 
 	glPolygonOffset(0, 0);
 
+if (r_fogofwar.d && !r_culling.d)
+{
+//glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
+GLfloat fogColor[4]= {0.0f, 0.0f, 0.0f, 1.0f};
+glFogi(GL_FOG_MODE, GL_LINEAR);
+glFogfv(GL_FOG_COLOR, fogColor);  
+glFogf(GL_FOG_DENSITY, 0.9f); 
+glFogf(GL_FOG_START, 10.0f);
+glFogf(GL_FOG_END, 1000.f);
+glEnable(GL_FOG);
+}
 
 	for (int j=0; j < cur_unit; j++)
 	{
@@ -497,6 +512,8 @@ void RGL_DrawUnits(void)
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glAlphaFunc(GL_GREATER, 0);
+
+glDisable(GL_FOG);
 
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);

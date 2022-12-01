@@ -29,7 +29,6 @@
 #include <ctype.h>
 #include <string.h>
 #include <unordered_map>
-#include <cstddef>
 
 #include "deh_i_defs.h"
 #include "deh_edge.h"

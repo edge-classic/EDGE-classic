@@ -36,6 +36,8 @@
 #include "r_texgl.h"
 #include "r_shader.h"
 
+#include "r_colormap.h"
+
 // TODO review if these should be archived
 DEF_CVAR(r_colorlighting, "1", 0)
 DEF_CVAR(r_colormaterial, "1", 0)
@@ -344,13 +346,34 @@ void RGL_DrawUnits(void)
 
 if (r_fogofwar.d && !r_culling.d)
 {
-//glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
-GLfloat fogColor[4]= {0.0f, 0.0f, 0.0f, 1.0f};
+float r = 0.0f;
+float g = 0.0f;
+float b = 0.0f;
+
+if (r_fogofwar.d == 2)
+{
+	r = 0.5f;
+	g = 0.5f;
+	b = 0.5f;
+}
+
+//Lobo: prep for when we read it from DDF
+//V_GetColmapRGB(level->colourmap, &r, &g, &b);
+
+GLfloat fogColor[4];
+fogColor[0] = r;
+fogColor[1] = g;
+fogColor[2] = b;
+fogColor[3] = 1.0f;
+
+glClearColor(fogColor[0],fogColor[1],fogColor[2],fogColor[3]);
+
 glFogi(GL_FOG_MODE, GL_LINEAR);
+//glFogi(GL_FOG_MODE, GL_EXP2);
+//glFogf(GL_FOG_DENSITY, 0.002f); //only use with GL_EXP2
 glFogfv(GL_FOG_COLOR, fogColor);  
-glFogf(GL_FOG_DENSITY, 0.9f); 
-glFogf(GL_FOG_START, 10.0f);
-glFogf(GL_FOG_END, 1000.f);
+glFogf(GL_FOG_START, 2.0f);
+glFogf(GL_FOG_END, 1000.0f);
 glEnable(GL_FOG);
 }
 
@@ -507,13 +530,16 @@ glEnable(GL_FOG);
 		glDisable(GL_TEXTURE_2D);
 	}
 
+
+glDisable(GL_FOG);
+
 	glDepthMask(GL_TRUE);
 	glCullFace(GL_BACK);
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glAlphaFunc(GL_GREATER, 0);
 
-glDisable(GL_FOG);
+
 
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);

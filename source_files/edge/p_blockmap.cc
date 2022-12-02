@@ -855,8 +855,6 @@ void P_DynamicLightIterator(float x1, float y1, float z1,
 				mo->z + r <= z1 || mo->z - r >= z2)
 				continue;
 			
-			total_dlights++;
-
 			// create shader if necessary
 			if (! mo->dlight.shader)
 				  mo->dlight.shader = MakeDLightShader(mo);
@@ -864,6 +862,8 @@ void P_DynamicLightIterator(float x1, float y1, float z1,
 //			mo->dlight.shader->CheckReset();
 
 			func(mo, data);
+
+			total_dlights++;
 		}
 	}
 }

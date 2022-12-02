@@ -63,7 +63,7 @@
 
 DEF_CVAR(debug_hom, "0", CVAR_CHEAT)
 
-DEF_CVAR(r_dlightculling, "2000", CVAR_ARCHIVE)
+DEF_CVAR(r_dlightculling, "500", CVAR_ARCHIVE)
 
 extern cvar_c r_culling;
 

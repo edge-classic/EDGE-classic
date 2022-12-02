@@ -344,38 +344,38 @@ void RGL_DrawUnits(void)
 
 	glPolygonOffset(0, 0);
 
-if (r_fogofwar.d && !r_culling.d)
-{
-float r = 0.0f;
-float g = 0.0f;
-float b = 0.0f;
+	if (r_fogofwar.d && !r_culling.d)
+	{
+		float r = 0.0f;
+		float g = 0.0f;
+		float b = 0.0f;
 
-if (r_fogofwar.d == 2)
-{
-	r = 0.5f;
-	g = 0.5f;
-	b = 0.5f;
-}
+		if (r_fogofwar.d == 2)
+		{
+			r = 0.5f;
+			g = 0.5f;
+			b = 0.5f;
+		}
 
-//Lobo: prep for when we read it from DDF
-//V_GetColmapRGB(level->colourmap, &r, &g, &b);
+		//Lobo: prep for when we read it from DDF
+		//V_GetColmapRGB(level->colourmap, &r, &g, &b);
 
-GLfloat fogColor[4];
-fogColor[0] = r;
-fogColor[1] = g;
-fogColor[2] = b;
-fogColor[3] = 1.0f;
+		GLfloat fogColor[4];
+		fogColor[0] = r;
+		fogColor[1] = g;
+		fogColor[2] = b;
+		fogColor[3] = 1.0f;
 
-glClearColor(fogColor[0],fogColor[1],fogColor[2],fogColor[3]);
+		glClearColor(fogColor[0],fogColor[1],fogColor[2],fogColor[3]);
 
-glFogi(GL_FOG_MODE, GL_LINEAR);
-//glFogi(GL_FOG_MODE, GL_EXP2);
-//glFogf(GL_FOG_DENSITY, 0.002f); //only use with GL_EXP2
-glFogfv(GL_FOG_COLOR, fogColor);  
-glFogf(GL_FOG_START, 2.0f);
-glFogf(GL_FOG_END, 1000.0f);
-glEnable(GL_FOG);
-}
+		glFogi(GL_FOG_MODE, GL_LINEAR);
+		//glFogi(GL_FOG_MODE, GL_EXP2);
+		//glFogf(GL_FOG_DENSITY, 0.002f); //only use with GL_EXP2
+		glFogfv(GL_FOG_COLOR, fogColor);  
+		glFogf(GL_FOG_START, 2.0f);
+		glFogf(GL_FOG_END, 1000.0f);
+		glEnable(GL_FOG);
+	}
 
 	for (int j=0; j < cur_unit; j++)
 	{
@@ -455,6 +455,12 @@ glEnable(GL_FOG);
 		for (int t=1; t >= 0; t--)
 		{
 			myActiveTexture(GL_TEXTURE0 + t);
+
+			if (unit->pass > 0)
+			{ 
+				if ((unit->blending & BL_Foggable) != BL_Foggable)
+					glDisable(GL_FOG);
+			}
 
 			if (active_tex[t] != unit->tex[t])
 			{

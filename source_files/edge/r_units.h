@@ -59,6 +59,7 @@ typedef enum
 	BL_CullFront= (1<<5),  // enable front-face culling
 	BL_NoZBuf   = (1<<6),  // don't update the Z buffer
 	BL_ClampY   = (1<<7),  // force texture to be Y clamped
+	BL_Foggable   = (1<<8),  // force texture to be Y clamped
 }
 blending_mode_e;
 

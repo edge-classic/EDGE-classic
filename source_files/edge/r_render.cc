@@ -63,6 +63,8 @@
 
 DEF_CVAR(debug_hom, "0", CVAR_CHEAT)
 
+DEF_CVAR(r_dlightculling, "2000", CVAR_ARCHIVE)
+
 extern cvar_c r_culling;
 
 side_t *sidedef;
@@ -75,6 +77,7 @@ unsigned int root_node;
 
 int detail_level = 1;
 int use_dlights = 0;
+int total_dlights = 0;
 
 int doom_fading = 1;
 
@@ -3275,6 +3278,7 @@ void R_Render(int x, int y, int w, int h, mobj_t *camera,
 	framecount++;
 	validcount++;
 
+	total_dlights = 0;
 	RGL_RenderTrueBSP();
 }
 

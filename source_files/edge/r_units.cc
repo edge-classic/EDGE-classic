@@ -536,8 +536,9 @@ void RGL_DrawUnits(void)
 		glDisable(GL_TEXTURE_2D);
 	}
 
-
-	if (r_fogofwar.d && !r_culling.d)
+	if (r_culling.d)
+		glEnable(GL_FOG);
+	else if (r_fogofwar.d)
 		glDisable(GL_FOG);
 
 	glDepthMask(GL_TRUE);

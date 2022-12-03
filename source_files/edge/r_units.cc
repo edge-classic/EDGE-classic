@@ -537,7 +537,8 @@ void RGL_DrawUnits(void)
 	}
 
 
-glDisable(GL_FOG);
+	if (r_fogofwar.d && !r_culling.d)
+		glDisable(GL_FOG);
 
 	glDepthMask(GL_TRUE);
 	glCullFace(GL_BACK);

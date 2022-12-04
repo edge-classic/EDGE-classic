@@ -458,7 +458,7 @@ void RGL_DrawUnits(void)
 
 			if (unit->pass > 0)
 			{ 
-				if ((unit->blending & BL_Foggable) != BL_Foggable)
+				if ((unit->blending & BL_Foggable) != BL_Foggable && !r_culling.d)
 					glDisable(GL_FOG);
 			}
 
@@ -536,9 +536,7 @@ void RGL_DrawUnits(void)
 		glDisable(GL_TEXTURE_2D);
 	}
 
-	if (r_culling.d)
-		glEnable(GL_FOG);
-	else if (r_fogofwar.d)
+	if (r_fogofwar.d && !r_culling.d)
 		glDisable(GL_FOG);
 
 	glDepthMask(GL_TRUE);

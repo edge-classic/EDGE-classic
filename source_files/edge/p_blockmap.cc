@@ -78,9 +78,6 @@ int dlmap_height;
 
 mobj_t **dlmap_things = NULL;
 
-extern int total_dlights;
-extern cvar_c r_dlightculling;
-
 void P_CreateThingBlockMap(void)
 {
 	bmap_things  = new mobj_t* [bmap_width * bmap_height];
@@ -825,9 +822,6 @@ void P_DynamicLightIterator(float x1, float y1, float z1,
 		                    float x2, float y2, float z2,
 		                    void (*func)(mobj_t *, void *), void *data)
 {
-	if (total_dlights > r_dlightculling.d)
-		return;
-
 	int lx = LIGHTMAP_GET_X(x1) - 1;
 	int ly = LIGHTMAP_GET_Y(y1) - 1;
 	int hx = LIGHTMAP_GET_X(x2) + 1;
@@ -862,8 +856,6 @@ void P_DynamicLightIterator(float x1, float y1, float z1,
 //			mo->dlight.shader->CheckReset();
 
 			func(mo, data);
-
-			total_dlights++;
 		}
 	}
 }

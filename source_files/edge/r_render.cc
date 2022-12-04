@@ -27,6 +27,7 @@
 #include "i_defs_gl.h"
 
 #include <math.h>
+#include <unordered_set>
 
 #include "dm_data.h"
 #include "dm_defs.h"
@@ -62,8 +63,11 @@
 
 
 DEF_CVAR(debug_hom, "0", CVAR_CHEAT)
+DEF_CVAR(r_maxdlights, "20", CVAR_ARCHIVE)
 
 extern cvar_c r_culling;
+
+
 
 side_t *sidedef;
 line_t *linedef;
@@ -75,6 +79,8 @@ unsigned int root_node;
 
 int detail_level = 1;
 int use_dlights = 0;
+
+std::unordered_set<abstract_shader_c *> seen_dlights;
 
 int doom_fading = 1;
 
@@ -3275,6 +3281,7 @@ void R_Render(int x, int y, int w, int h, mobj_t *camera,
 	framecount++;
 	validcount++;
 
+	seen_dlights.clear();
 	RGL_RenderTrueBSP();
 }
 

@@ -30,6 +30,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <unordered_set>
 
 #include "dm_data.h"
 #include "dm_defs.h"
@@ -77,6 +78,9 @@ int dlmap_width;
 int dlmap_height;
 
 mobj_t **dlmap_things = NULL;
+
+extern std::unordered_set<abstract_shader_c *> seen_dlights;
+extern cvar_c r_maxdlights;
 
 void P_CreateThingBlockMap(void)
 {
@@ -853,6 +857,16 @@ void P_DynamicLightIterator(float x1, float y1, float z1,
 			if (! mo->dlight.shader)
 				  mo->dlight.shader = MakeDLightShader(mo);
 
+			if (seen_dlights.count(mo->dlight.shader) == 0)
+			{
+				if (seen_dlights.size() >= r_maxdlights.d)
+					continue;
+				else
+				{
+					seen_dlights.insert(mo->dlight.shader);
+				}
+			}
+
 //			mo->dlight.shader->CheckReset();
 
 			func(mo, data);
@@ -886,6 +900,16 @@ void P_SectorGlowIterator(sector_t *sec,
 		// create shader if necessary
 		if (! mo->dlight.shader)
 			  mo->dlight.shader = MakePlaneGlow(mo);
+
+		if (seen_dlights.count(mo->dlight.shader) == 0)
+		{
+			if (seen_dlights.size() >= r_maxdlights.d)
+				continue;
+			else
+			{
+				seen_dlights.insert(mo->dlight.shader);
+			}
+		}
 
 //		mo->dlight.shader->CheckReset();
 

@@ -81,6 +81,7 @@ mobj_t **dlmap_things = NULL;
 
 extern std::unordered_set<abstract_shader_c *> seen_dlights;
 extern cvar_c r_maxdlights;
+extern cvar_c r_culling;
 
 void P_CreateThingBlockMap(void)
 {
@@ -648,7 +649,7 @@ void P_SetThingPosition(mobj_t * mo)
 
 	// link into dynamic light blockmap
 	if (mo->info && (mo->info->dlight[0].type != DLITE_None) &&
-		(mo->info->glow_type == GLOW_None))
+		(mo->info->glow_type == GLOW_None) && (r_culling.d ? R_PointToDist(viewx, viewy, mo->x, mo->y) <= 2000 : true))
 	{
 		blockx = LIGHTMAP_GET_X(mo->x);
 		blocky = LIGHTMAP_GET_Y(mo->y);
@@ -886,6 +887,9 @@ void P_SectorGlowIterator(sector_t *sec,
 
 		// skip "off" lights
 		if (mo->state->bright <= 0 || mo->dlight.r <= 0)
+			continue;
+
+		if (r_culling.d && R_PointToDist(viewx, viewy, mo->x, mo->y) > 2000)
 			continue;
 
 		// check whether radius touches the given bbox

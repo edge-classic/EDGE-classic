@@ -2302,9 +2302,6 @@ static void ObjectSpawning(mobj_t * parent, angle_t angle)
 		P_SetMobjDirAndSpeed(child, angle, slope, attack->assault_speed);
 
 	P_SetMobjStateDeferred(child, attack->objinitstate, 0);
-
-	if (parent->player && (child->flags & MF_SPECIAL))
-		P_TouchSpecialThing(child, parent, true); // "true" forces the pickup even if player isn't moving
 }
 
 //

@@ -721,7 +721,7 @@ static void RunPickupEffects(player_t *player, mobj_t *special,
 //  picked up.  Picked up object is set to death frame instead
 //  of removed so that effects can happen.
 //
-void P_TouchSpecialThing(mobj_t * special, mobj_t * toucher, bool force)
+void P_TouchSpecialThing(mobj_t * special, mobj_t * toucher)
 {
 	float delta = special->z - toucher->z;
 
@@ -736,8 +736,8 @@ void P_TouchSpecialThing(mobj_t * special, mobj_t * toucher, bool force)
 	if (toucher->health <= 0)
 		return;
 
-	// Do not pick up the item if completely still
-	if (!force && toucher->mom.x == 0 && toucher->mom.y == 0 && toucher->mom.z == 0)
+	// VOODOO DOLLS: Do not pick up the item if completely still
+	if (toucher->is_voodoo && toucher->mom.x == 0 && toucher->mom.y == 0 && toucher->mom.z == 0)
 		return;
 
 	// -KM- 1998/09/27 Sounds.ddf

@@ -352,6 +352,8 @@ struct mobj_s : public position_c
 	// Player number last heard.
 	int lastheard = 0;
 
+	bool is_voodoo = false;
+
 public:
 	bool isRemoved() const;
 

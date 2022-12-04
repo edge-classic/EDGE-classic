@@ -304,7 +304,7 @@ void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special);
 // P_INTER
 //
 
-void P_TouchSpecialThing(mobj_t * special, mobj_t * toucher, bool force = false);
+void P_TouchSpecialThing(mobj_t * special, mobj_t * toucher);
 void P_ThrustMobj(mobj_t * target, mobj_t * inflictor, float thrust);
 void P_PushMobj(mobj_t * target, mobj_t * inflictor, float thrust);
 void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,

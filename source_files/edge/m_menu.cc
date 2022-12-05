@@ -268,12 +268,6 @@ menu_t;
 // menu item skull is on
 static int itemOn;
 
-// skull animation counter
-static int skullAnimCounter;
-
-// which skull to draw
-static int whichSkull;
-
 // current menudef
 static menu_t *currentMenu;
 
@@ -2887,12 +2881,6 @@ void M_Ticker(void)
 		M_NetGameTicker();
 		return;
 	}
-
-	if (--skullAnimCounter <= 0)
-	{
-		whichSkull ^= 1;
-		skullAnimCounter = 8;
-	}
 }
 
 void M_Init(void)
@@ -2902,8 +2890,6 @@ void M_Init(void)
 	currentMenu = &MainDef;
 	menuactive = false;
 	itemOn = currentMenu->lastOn;
-	whichSkull = 0;
-	skullAnimCounter = 10;
 	msg_mode = 0;
 	msg_string.clear();
 	msg_lastmenu = menuactive;

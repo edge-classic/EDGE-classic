@@ -1685,9 +1685,22 @@ bool W_InitImages(void)
 //
 void W_UpdateImageAnims(void)
 {
-	do_Animate(real_graphics);
-	do_Animate(real_textures);
-	do_Animate(real_flats);
+	// Fix menu animations if not in-game
+	if (menuactive && gamestate != GS_LEVEL)
+	{
+		if (!r_doubleframes.d || !(hudtic & 1))
+		{
+			do_Animate(real_graphics);
+			do_Animate(real_textures);
+			do_Animate(real_flats);
+		}
+	}
+	else
+	{
+		do_Animate(real_graphics);
+		do_Animate(real_textures);
+		do_Animate(real_flats);
+	}
 }
 
 

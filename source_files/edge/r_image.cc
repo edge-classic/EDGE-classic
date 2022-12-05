@@ -74,6 +74,7 @@ extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
 
 extern epi::file_c *OpenUserFileOrLump(imagedef_c *def);
 
+extern cvar_c r_doubleframes;
 
 extern void DeleteSkyTextures(void);
 extern void DeleteColourmapTextures(void);
@@ -1064,7 +1065,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 
 	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
 	{
-		tmp_img->Swirl(hudtic, rim->liquid_type); // Using leveltime disabled swirl for intermission screens
+		tmp_img->Swirl(hudtic/(r_doubleframes.d ? 2 : 1), rim->liquid_type); // Using leveltime disabled swirl for intermission screens
 		rim->swirled_gametic = hudtic;
 	}
 

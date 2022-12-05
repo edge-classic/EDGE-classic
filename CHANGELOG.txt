@@ -50,16 +50,19 @@ General Improvements
 New Features
 ------------
 
++ New Video Options menu item: Framerate Target
+  - Can cycle between 35/70 FPS
+
++ New Video Options menu item: Overlay
+  - Can cycle through various pseudo-CRT/scanline effects
+  - Current options: None, Lines 1X, Lines 2X, Checkered, Vertical, and Grill
+
 + New Gameplay Options menu item: Erraticism
   - Time will only advance when the player moves or fires ("SuperHot")
   - Player's momentum will be preserved if in mid-air/jumping, 
     otherwise it will be lost when the movement keys are released
   - Can hold the Use key to advance time without having to move or fire
     (helpful when waiting for lifts, etc)
-
-+ New Video Options menu item: Overlay
-  - Can cycle through various pseudo-CRT/scanline effects
-  - Current options: None, Lines 1X, Lines 2X, Checkered, Vertical, and Grill
 
 + Vastly improved Deathbot navigation and combat
 

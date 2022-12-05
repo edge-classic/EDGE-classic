@@ -97,7 +97,7 @@ static char input_line[MAX_CON_INPUT+2];
 static int  input_pos = 0;
 
 int con_cursor;
-
+extern cvar_c r_doubleframes;
 
 #define KEYREPEATDELAY ((250 * TICRATE) / 1000)
 #define KEYREPEATRATE  (TICRATE / 15)
@@ -1540,7 +1540,11 @@ bool CON_Responder(event_t * ev)
 
 void CON_Ticker(void)
 {
-	con_cursor = (con_cursor + 1) & 31;
+	int add = 1;
+	if (r_doubleframes.d && !(hudtic &1))
+		add = 0;
+
+	con_cursor = (con_cursor + add) & 31;
 
 	if (con_visible != vs_notvisible)
 	{

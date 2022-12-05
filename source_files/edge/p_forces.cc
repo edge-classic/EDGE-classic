@@ -46,6 +46,7 @@
 
 #define PUSH_FACTOR  64.0f  // should be 128 ??
 
+extern cvar_c r_doubleframes;
 
 std::vector<force_t *> active_forces;
 
@@ -213,8 +214,12 @@ void P_AddSectorForce(sector_t *sec, bool is_wind, float x_mag, float y_mag)
 //
 // Executes all force effects for the current tic.
 //
-void P_RunForces(void)
+void P_RunForces(bool extra_tic)
 {
+	// TODO: review what needs updating here for 70 Hz
+	if (extra_tic && r_doubleframes.d)
+		return;
+
 	std::vector<force_t *>::iterator FI;
 
 	for (FI = active_forces.begin(); FI != active_forces.end(); FI++)

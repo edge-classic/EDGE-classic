@@ -42,7 +42,7 @@
 
 #include <cmath>
 
-
+extern cvar_c r_doubleframes;
 extern coal::vm_c *ui_vm;
 
 extern void VM_SetFloat(coal::vm_c *vm, const char *mod, const char *name, double value);
@@ -168,7 +168,8 @@ static void HD_check_automap(coal::vm_c *vm, int argc)
 //
 static void HD_get_time(coal::vm_c *vm, int argc)
 {
-	vm->ReturnFloat((double) I_GetTime());
+	int time = I_GetTime() / (r_doubleframes.d ? 2 : 1);
+	vm->ReturnFloat((double) time);
 }
 
 

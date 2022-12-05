@@ -49,6 +49,7 @@ extern console_line_c * quit_lines[ENDOOM_LINES];
 extern int con_cursor;
 extern font_c *endoom_font;
 extern cvar_c r_overlay;
+extern cvar_c r_doubleframes;
 
 static font_c *default_font;
 
@@ -319,7 +320,7 @@ void HUD_CalcScrollTexCoords( float x_scroll, float y_scroll, float *tx1, float 
 {
 	float timeScale, adjustedScrollS, adjustedScrollT;
 
-	timeScale = gametic / 100.0f;
+	timeScale = gametic / (r_doubleframes.d ? 200.0f : 100.0f);
 
 	adjustedScrollS = x_scroll * timeScale;
 	adjustedScrollT = y_scroll * timeScale;

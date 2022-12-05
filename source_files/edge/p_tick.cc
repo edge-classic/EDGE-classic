@@ -43,12 +43,13 @@ int leveltime;
 
 bool fast_forward_active;
 
-extern cvar_c r_erraticism;
+extern cvar_c g_erraticism;
+extern cvar_c r_doubleframes;
 
 //
 // P_Ticker
 //
-void P_Ticker(void)
+void P_Ticker(bool extra_tic)
 {
 	if (paused)
 		return;
@@ -60,29 +61,34 @@ void P_Ticker(void)
 		return;
 	}
 
-	if (r_erraticism.d)
+	if (g_erraticism.d)
 	{
-		bool keep_thinking = P_PlayerThink(players[consoleplayer]);
+		bool keep_thinking = P_PlayerThink(players[consoleplayer], extra_tic);
 
 		if (!keep_thinking) return;
 
 		for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
 		{
 			if (players[pnum] && players[pnum] != players[consoleplayer])
-				P_PlayerThink(players[pnum]);
+				P_PlayerThink(players[pnum], extra_tic);
 		}
 	}
 	else
 	{
 		for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
 			if (players[pnum])
-				P_PlayerThink(players[pnum]);	
+				P_PlayerThink(players[pnum], extra_tic);	
 	}
 
-	RAD_RunTriggers();
+	if (!extra_tic || !r_doubleframes.d)
+		RAD_RunTriggers();
 
-	P_RunForces();
-	P_RunMobjThinkers();
+	P_RunForces(extra_tic);
+	P_RunMobjThinkers(extra_tic);
+
+	if (extra_tic && r_doubleframes.d)
+		return;
+
 	P_RunLights();
 	P_RunActivePlanes();
 	P_RunActiveSliders();
@@ -113,7 +119,7 @@ void P_HubFastForward(void)
 	}
 
 	for (int k = 0; k < TICRATE / 3; k++)
-		P_Ticker();
+		P_Ticker(false);
 
 	fast_forward_active = false;
 }

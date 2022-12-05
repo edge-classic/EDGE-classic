@@ -124,7 +124,8 @@ extern cvar_c r_crosssize;
 extern cvar_c s_genmidi;
 extern cvar_c s_soundfont;
 extern cvar_c r_overlay;
-extern cvar_c r_erraticism;
+extern cvar_c g_erraticism;
+extern cvar_c r_doubleframes;
 
 static int menu_crosshair;
 static int menu_crosscolor;
@@ -187,6 +188,7 @@ static void M_ChangeOPL(int keypressed);
 static void M_ChangeSoundfont(int keypressed);
 static void M_ChangeGENMIDI(int keypressed);
 static void M_ChangeErraticism(int keypressed);
+static void M_ChangeDoubleFrames(int keypressed);
 static void InitMonitorSize();
 
 static char YesNo[]     = "Off/On";  // basic on/off
@@ -386,6 +388,7 @@ static optmenuitem_t vidoptions[] =
 
 	{OPT_Plain,   "",  NULL,  0,  NULL, NULL, NULL},
 
+	{OPT_Switch,  "Framerate Target", "35 FPS/70 FPS", 2, &r_doubleframes.d, M_ChangeDoubleFrames, NULL},
 	{OPT_Switch,  "Monitor Size",  MonitSiz,  6, &monitor_size, M_ChangeMonitorSize, NULL},
 	{OPT_Switch,  "Smoothing",         YesNo, 2, &var_smoothing, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "H.Q.2x Scaling", Hq2xMode, 4, &hq2x_scaling, M_ChangeMipMap, NULL},
@@ -393,9 +396,6 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Switch,  "Detail Level",   Details,  3, &detail_level, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Mipmapping",     MipMaps,  3, &var_mipmapping, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Overlay",  		VidOverlays, 6, &r_overlay.d, M_SaveOverlay, NULL},
-
-	{OPT_Plain,   "",  NULL, 0, NULL, NULL, NULL},
-
 	{OPT_Switch,  "Crosshair",       CrossH, 10, &menu_crosshair, M_ChangeCrossHair, NULL},
 	{OPT_Switch,  "Crosshair Color", CrosshairColor,  8, &menu_crosscolor, M_ChangeCrossColor, NULL},
 	{OPT_Slider,  "Crosshair Size",    NULL,  4,  &menu_crosssize, M_ChangeCrossSize, NULL},
@@ -574,7 +574,7 @@ static optmenuitem_t playoptions[] =
      &global_flags.pass_missile, M_ChangePassMissile, NULL},
 
 	{OPT_Boolean, "Erraticism",   YesNo, 2, 
-     &r_erraticism.d, M_ChangeErraticism, "Time only advances when you move or fire"},
+     &g_erraticism.d, M_ChangeErraticism, "Time only advances when you move or fire"},
 
 	{OPT_Slider,  "Gravity",            NULL, 20, 
      &global_flags.menu_grav, NULL, "Gravity"},
@@ -1891,7 +1891,13 @@ static void M_SaveOverlay(int keypressed)
 // See above
 static void M_ChangeErraticism(int keypressed)
 {
-	r_erraticism.s = std::to_string(r_erraticism.d);
+	g_erraticism.s = std::to_string(g_erraticism.d);
+}
+
+// See above the above
+static void M_ChangeDoubleFrames(int keypressed)
+{
+	r_doubleframes.s = std::to_string(r_doubleframes.d);
 }
 
 static void M_ChangeKicking(int keypressed)

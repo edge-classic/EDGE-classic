@@ -47,6 +47,8 @@ extern bool   G_Responder(event_t *ev);
 
 extern int I_JoyGetAxis(int n);
 
+extern cvar_c r_doubleframes;
+
 
 //
 // EVENT HANDLING
@@ -365,7 +367,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 	// Turning
 	if (! strafe)
 	{
-		float turn = angleturn[t_speed] * joy_forces[AXIS_TURN];
+		float turn = angleturn[t_speed]/(r_doubleframes.d ? 2 : 1) * joy_forces[AXIS_TURN];
 		
 		turn *= speed_factors[var_turnspeed];
 
@@ -387,7 +389,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 		cmd->mlookturn = I_ROUND(mlook);
 	}
 
-	// Forward
+	// Forward [ no change for 70Hz ]
 	{
 		float forward = forwardmove[speed] * joy_forces[AXIS_FORWARD];
 
@@ -401,7 +403,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 		cmd->forwardmove = I_ROUND(forward);
 	}
 
-	// Sideways
+	// Sideways [ no change for 70Hz ]
 	{
 		float side = sidemove[speed] * joy_forces[AXIS_STRAFE];
 

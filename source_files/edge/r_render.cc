@@ -66,7 +66,7 @@ DEF_CVAR(debug_hom, "0", CVAR_CHEAT)
 DEF_CVAR(r_maxdlights, "20", CVAR_ARCHIVE)
 
 extern cvar_c r_culling;
-
+extern cvar_c r_doubleframes;
 
 
 side_t *sidedef;
@@ -609,7 +609,7 @@ wall_plane_data_t;
 // Adapted from Quake 3 GPL release - Dasho (not used yet, but might be for future effects)
 void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
 {
-	float timeScale = gametic / 100.0f;
+	float timeScale = gametic / (r_doubleframes.d ? 200.0f : 100.0f);
 	float adjustedScrollS, adjustedScrollT;
 
 	adjustedScrollS = x_scroll * timeScale;

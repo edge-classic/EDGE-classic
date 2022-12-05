@@ -91,6 +91,8 @@
 #include "version.h"
 #include "vm_coal.h"
 
+extern cvar_c r_doubleframes;
+
 // Application active?
 int app_state = APP_STATE_ACTIVE;
 
@@ -770,14 +772,14 @@ void E_AdvanceTitle(void)
 		if (title_pic == 0 && g->titlemusic > 0)
 			S_ChangeMusic(g->titlemusic, false);
 
-		title_countdown = g->titletics;
+		title_countdown = g->titletics * (r_doubleframes.d ? 2 : 1);
 		return;
 	}
 
 	// not found
 
 	title_image = NULL;
-	title_countdown = TICRATE;
+	title_countdown = TICRATE * (r_doubleframes.d ? 2 : 1);
 }
 
 void E_StartTitle(void)

@@ -1270,6 +1270,18 @@ static bool P_ActivateSpecialLine(line_t * line,
 		}
 	}
 
+	// Don't let monsters activate crossable special lines that they
+	// wouldn't otherwise cross (for now, the edge of a high dropoff)
+	// Note: I believe this assumes no 3D floors, but I think it's a 
+	// very particular situation anyway - Dasho
+	if (trig == line_walkable && line->backsector && 
+		thing && (thing->info->extendedflags & EF_MONSTER) &&
+		!(thing->flags & (MF_TELEPORT | MF_DROPOFF | MF_FLOAT)))
+	{
+		if (std::abs(line->frontsector->f_h - line->backsector->f_h) > thing->info->step_size)
+			return false;
+	}
+
 	if (thing && !no_care_who)
 	{
 		// Check for keys

@@ -124,6 +124,7 @@ extern cvar_c r_crosssize;
 extern cvar_c s_genmidi;
 extern cvar_c s_soundfont;
 extern cvar_c r_overlay;
+extern cvar_c r_erraticism;
 
 static int menu_crosshair;
 static int menu_crosscolor;
@@ -185,6 +186,7 @@ static void M_ChangeLanguage(int keypressed);
 static void M_ChangeOPL(int keypressed);
 static void M_ChangeSoundfont(int keypressed);
 static void M_ChangeGENMIDI(int keypressed);
+static void M_ChangeErraticism(int keypressed);
 static void InitMonitorSize();
 
 static char YesNo[]     = "Off/On";  // basic on/off
@@ -571,12 +573,11 @@ static optmenuitem_t playoptions[] =
 	{OPT_Boolean, "Shoot-thru Scenery",   YesNo, 2, 
      &global_flags.pass_missile, M_ChangePassMissile, NULL},
 
-	{OPT_Plain,   "", NULL, 0, NULL, NULL, NULL},
+	{OPT_Boolean, "Erraticism",   YesNo, 2, 
+     &r_erraticism.d, M_ChangeErraticism, "Time only advances when you move or fire"},
 
 	{OPT_Slider,  "Gravity",            NULL, 20, 
      &global_flags.menu_grav, NULL, "Gravity"},
-
-	{OPT_Plain,   "", NULL, 0, NULL, NULL, NULL},
 
     {OPT_Boolean, "Respawn Enemies",            YesNo, 2, 
      &global_flags.respawn, M_ChangeRespawn, NULL},
@@ -1881,10 +1882,16 @@ static void M_ChangeMipMap(int keypressed)
 	W_DeleteAllImages();
 }
 
-// Blah
+// Need to make a generic CVAR save function
 static void M_SaveOverlay(int keypressed)
 {
 	r_overlay.s = std::to_string(r_overlay.d);
+}
+
+// See above
+static void M_ChangeErraticism(int keypressed)
+{
+	r_erraticism.s = std::to_string(r_erraticism.d);
 }
 
 static void M_ChangeKicking(int keypressed)

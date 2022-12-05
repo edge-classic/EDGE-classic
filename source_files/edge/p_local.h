@@ -119,7 +119,7 @@ void P_CreatePlayer(int pnum, bool is_bot);
 void P_DestroyAllPlayers(void);
 void P_GiveInitialBenefits(player_t *player, const mobjtype_c *info);
 
-void P_PlayerThink(player_t * player);
+bool P_PlayerThink(player_t * player);
 void P_UpdateAvailWeapons(player_t *p);
 void P_UpdateTotalArmour(player_t *p);
 

@@ -43,6 +43,8 @@ int leveltime;
 
 bool fast_forward_active;
 
+extern cvar_c r_erraticism;
+
 //
 // P_Ticker
 //
@@ -58,9 +60,24 @@ void P_Ticker(void)
 		return;
 	}
 
-	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-		if (players[pnum])
-			P_PlayerThink(players[pnum]);
+	if (r_erraticism.d)
+	{
+		bool keep_thinking = P_PlayerThink(players[consoleplayer]);
+
+		if (!keep_thinking) return;
+
+		for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+		{
+			if (players[pnum] && players[pnum] != players[consoleplayer])
+				P_PlayerThink(players[pnum]);
+		}
+	}
+	else
+	{
+		for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+			if (players[pnum])
+				P_PlayerThink(players[pnum]);	
+	}
 
 	RAD_RunTriggers();
 

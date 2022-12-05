@@ -48,6 +48,8 @@ extern coal::vm_c *ui_vm;
 
 extern void VM_SetVector(coal::vm_c *vm, const char *mod_name, const char *var_name, double val_1, double val_2, double val_3);
 
+DEF_CVAR(r_erraticism, "0", CVAR_ARCHIVE)
+
 float room_area;
 
 struct room_measure
@@ -659,11 +661,13 @@ bool P_PlayerSwitchWeapon(player_t *player, weapondef_c *choice)
 }
 
 
-void P_PlayerThink(player_t * player)
+bool P_PlayerThink(player_t * player)
 {
 	ticcmd_t *cmd;
 
 	SYS_ASSERT(player->mo);
+
+	bool should_think = true;
 
 #if 0  // DEBUG ONLY
 	{
@@ -709,7 +713,7 @@ void P_PlayerThink(player_t * player)
 	if (player->playerstate == PST_DEAD)
 	{
 		DeathThink(player);
-		return;
+		return true;
 	}
 
 	// Move/Look around.  Reactiontime is used to prevent movement for a
@@ -721,6 +725,19 @@ void P_PlayerThink(player_t * player)
 		MovePlayer(player);
 
 	CalcHeight(player);
+
+	if (r_erraticism.d)
+	{
+		if (cmd->forwardmove == 0 && cmd->sidemove == 0 && cmd->upwardmove == 0 && (!cmd->buttons & BT_ATTACK))
+		{
+			should_think = false;
+			if (!player->mo->mom.z)
+			{
+				player->mo->mom.x = 0;
+				player->mo->mom.y = 0;
+			}
+		}
+	}
 
 	// Reset environmental FX in case player has left sector in which they apply - Dasho
 	vacuum_sfx = false;
@@ -839,6 +856,8 @@ void P_PlayerThink(player_t * player)
 		line_lengths += abs(room_checker.x - player_x);
 		room_area = line_lengths / 8;
 	}
+
+	return should_think;
 }
 
 

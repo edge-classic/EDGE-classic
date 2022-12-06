@@ -497,7 +497,7 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
-	{OPT_Function, "MIDI Soundfont", NULL,  0, NULL, M_ChangeSoundfont, NULL},
+	{OPT_Function, "MIDI Soundfont", NULL,  0, NULL, M_ChangeSoundfont, "Warning! SF3 Soundfonts may have long loading times!"},
 	{OPT_Switch,  "OPL Music Mode",  OPLMode, 3,  &var_opl_music, M_ChangeOPL, NULL},
 	{OPT_Function, "OPL Instrument Bank", NULL,  0, NULL, M_ChangeGENMIDI, NULL},
 	{OPT_Boolean, "PC Speaker Mode", YesNo, 2,  &var_pc_speaker_mode, NULL, "NeedRestart"},
@@ -1994,17 +1994,17 @@ static void M_ChangeOPL(int keypressed)
 //
 static void M_ChangeSoundfont(int keypressed)
 {
-	int sf2_pos = -1;
+	int sf_pos = -1;
 	for(int i=0; i < (int)available_soundfonts.size(); i++)
 	{
 		if (epi::case_cmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
 		{
-			sf2_pos = i;
+			sf_pos = i;
 			break;
 		}
 	}
 
-	if (sf2_pos < 0)
+	if (sf_pos < 0)
 	{
 		I_Warning("M_ChangeSoundfont: Could not read list of available soundfonts. Falling back to default!\n");
 		s_soundfont = "default.sf2";
@@ -2013,21 +2013,21 @@ static void M_ChangeSoundfont(int keypressed)
 
 	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
-		if (sf2_pos - 1 >= 0)
-			sf2_pos--;
+		if (sf_pos - 1 >= 0)
+			sf_pos--;
 		else
-			sf2_pos = available_soundfonts.size() - 1;
+			sf_pos = available_soundfonts.size() - 1;
 	}
 	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
-		if (sf2_pos + 1 >= (int)available_soundfonts.size())
-			sf2_pos = 0;
+		if (sf_pos + 1 >= (int)available_soundfonts.size())
+			sf_pos = 0;
 		else
-			sf2_pos++;
+			sf_pos++;
 	}
 
 	// update cvar
-	s_soundfont = available_soundfonts.at(sf2_pos);
+	s_soundfont = available_soundfonts.at(sf_pos);
 	S_RestartFluid();
 }
 

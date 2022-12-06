@@ -45,6 +45,7 @@ General Improvements
   to prevent conflicts)
 + Borderless Fullscreen mode added to the Set Resolution menu; list of Windowed resolutions updated to accommodate
   displays up to 4K
++ Replaced TinySoundFont with FluidLite, supporting a wider range of MIDI events and effects
 
 
 New Features
@@ -80,6 +81,9 @@ New Features
 + New music formats supported: FLAC, VGZ (compressed VGM), IMF, XMI/RMI/GMF/EA MIDI Formats
   - IMF songs must have a playlist entry type of 'IMF280', 'IMF560', or 'IMF700' to correctly
     set the song's playback rate
+
++ SF3 formatted soundfonts are now supported in addition to SF2
+  - Loading times for SF3 fonts are typically longer due to the need for decompression
 
 + DSDHACKED support.
 

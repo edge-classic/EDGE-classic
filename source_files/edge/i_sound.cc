@@ -267,13 +267,13 @@ void I_UnlockAudio(void)
 
 void I_StartupMusic(void)
 {
-	// Populate available soundfont vector here, even if music is disabled
+	// Check for SF2 soundfonts
 	std::vector<epi::dir_entry_c> sfd;
 	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
 
 	if (!FS_ReadDir(sfd, soundfont_dir.c_str(), "*.sf2"))
 	{
-		I_Warning("TinySoundFont: Failed to read '%s' directory!\n", soundfont_dir.c_str());
+		I_Warning("FluidLite: Failed to read '%s' directory!\n", soundfont_dir.c_str());
 	}
 	else
 	{
@@ -286,7 +286,25 @@ void I_StartupMusic(void)
 		}
 	}
 
-	// Populate available genmidi vector
+	// Check for SF3 soundfonts
+	sfd.clear();
+
+	if (!FS_ReadDir(sfd, soundfont_dir.c_str(), "*.sf3"))
+	{
+		I_Warning("FluidLite: Failed to read '%s' directory!\n", soundfont_dir.c_str());
+	}
+	else
+	{
+		for (size_t i = 0 ; i < sfd.size() ; i++) 
+		{
+			if(!sfd[i].is_dir)
+			{
+				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name.c_str()));
+			}
+		}
+	}
+
+	// Check for OP2 instrument banks
 	sfd.clear();
 
 	// Start with empty string to represent using whichever GENMIDI
@@ -308,7 +326,7 @@ void I_StartupMusic(void)
 		}
 	}
 
-	// Startup both TinySoundFont and OPL, as some formats require OPL now (IMF/CMF)
+	// Startup both FluidLite and OPL, as some formats require OPL now (IMF/CMF)
 
 	if (!S_StartupFluid())
 		fluid_disabled = true;

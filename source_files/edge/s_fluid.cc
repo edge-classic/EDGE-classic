@@ -396,14 +396,14 @@ abstract_music_c * S_PlayFluid(byte *data, int length, float volume, bool loop)
 
 	if (!player)
 	{
-		I_Debugf("TinySoundfont player: error initializing!\n");
+		I_Debugf("FluidLite player: error initializing!\n");
 		delete[] data;
 		return nullptr;
 	}
 
 	if (!player->LoadTrack(data, length)) //Lobo: quietly log it instead of completely exiting EDGE
 	{
-		I_Debugf("TinySoundfont player: failed to load MIDI file!\n");
+		I_Debugf("FluidLite player: failed to load MIDI file!\n");
 		delete[] data;
 		delete player;
 		return nullptr;

@@ -458,8 +458,11 @@ void RGL_DrawUnits(void)
 
 			if (unit->pass > 0)
 			{ 
-				if ((unit->blending & BL_Foggable) != BL_Foggable && !r_culling.d)
+				if (r_fogofwar.d && !r_culling.d)
+				{
+					if ((unit->blending & BL_Foggable) != BL_Foggable)
 					glDisable(GL_FOG);
+				}
 			}
 
 			if (active_tex[t] != unit->tex[t])

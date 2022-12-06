@@ -27,6 +27,7 @@
 #define __R_IMAGE__
 
 #include <vector>
+#include <unordered_map>
 
 #include "main.h"
 #include "image.h"
@@ -102,6 +103,7 @@ public:
 	liquid_type_e liquid_type;
 
 	int swirled_gametic;
+	std::unordered_map<unsigned int, unsigned int> swirled_texids;
 
 	bool is_font;
 

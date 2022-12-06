@@ -1129,6 +1129,13 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 
 	delete tmp_img;
 
+	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
+	{
+		unsigned int sinevalue = (hudtic / (r_doubleframes.d ? 2 : 1) * 
+				(rim->liquid_type == LIQ_Thin ? 40 : 10) * 5 + 900) & 8191;
+		rim->swirled_texids.try_emplace(sinevalue, tex_id);
+	}
+
 	if (what_pal_cached)
 		W_DoneWithLump(what_palette);
 	
@@ -1549,11 +1556,16 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 	{
 		if (rc->parent->liquid_type > LIQ_None && rc->parent->swirled_gametic != hudtic)
 		{
-			if (rc->tex_id != 0)
+			unsigned int sinevalue = (hudtic / (r_doubleframes.d ? 2 : 1) * 
+				(rc->parent->liquid_type == LIQ_Thin ? 40 : 10) * 5 + 900) & 8191;
+			auto find_texid = rim->swirled_texids.find(sinevalue);
+			if (find_texid != rim->swirled_texids.end())
 			{
-				glDeleteTextures(1, &rc->tex_id);
-				rc->tex_id = 0;
+				rc->tex_id = find_texid->second;
+				rc->parent->swirled_gametic = hudtic;
 			}
+			else
+				rc->tex_id = 0;
 		}
 	}
 
@@ -1717,6 +1729,17 @@ void W_DeleteAllImages(void)
 		{
 			glDeleteTextures(1, &rc->tex_id);
 			rc->tex_id = 0;
+		}
+		if (!rc->parent->swirled_texids.empty())
+		{
+			for (auto texid : rc->parent->swirled_texids)
+			{
+				if (texid.second != 0)
+				{
+					glDeleteTextures(1, &texid.second);
+				}
+			}
+			rc->parent->swirled_texids.clear();
 		}
 	}
 

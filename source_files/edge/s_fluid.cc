@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------------
-//  EDGE TinySoundfont Music Player
+//  EDGE FluidLite Music Player
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 2004-2022  The EDGE Team.
+//  Copyright (c) 2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -26,25 +26,25 @@
 #include "m_misc.h"
 #include "s_blit.h"
 #include "s_music.h"
-#include "s_tsf.h"
+#include "s_fluid.h"
 
 #include "dm_state.h"
 
-#define BW_MidiSequencer TSFSequencer
-typedef struct BW_MidiRtInterface TSFInterface;
+#define BW_MidiSequencer FluidSequencer
+typedef struct BW_MidiRtInterface FluidInterface;
 #include "midi_sequencer_impl.hpp"
 
-#define TSF_IMPLEMENTATION
-#include "tsf.h"
+#include "fluidlite.h"
 
-#define TSF_NUM_SAMPLES  4096
+#define FLUID_NUM_SAMPLES  4096
 
 extern bool dev_stereo;
 extern int  dev_freq; 
 
-bool tsf_disabled = false;
+bool fluid_disabled = false;
 
-tsf *edge_tsf;
+fluid_synth_t *edge_fluid;
+fluid_settings_t *edge_fluid_settings;
 
 DEF_CVAR(s_soundfont, "default.sf2", CVAR_ARCHIVE)
 
@@ -61,9 +61,9 @@ static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
 	}
 }
 
-bool S_StartupTSF(void)
+bool S_StartupFluid(void)
 {
-	I_Printf("Initializing TinySoundFont...\n");
+	I_Printf("Initializing FluidLite...\n");
 
 	// Check for presence of previous CVAR value's file
 	bool cvar_good = false;
@@ -81,46 +81,45 @@ bool S_StartupTSF(void)
 
  	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
 
-	edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), s_soundfont.c_str()).c_str());
-
-	if (!edge_tsf)
+	edge_fluid_settings = new_fluid_settings();
+	edge_fluid = new_fluid_synth(edge_fluid_settings);
+	fluid_synth_set_sample_rate(edge_fluid, dev_freq);
+	
+	if (fluid_synth_sfload(edge_fluid, epi::PATH_Join(soundfont_dir.c_str(), s_soundfont.c_str()).c_str(), 1) == -1)
 	{
-		I_Warning("TinySoundFont: Could not load requested soundfont %s! Falling back to default soundfont!\n", s_soundfont.c_str());
-		edge_tsf = tsf_load_filename(epi::PATH_Join(soundfont_dir.c_str(), "default.sf2").c_str());
+		I_Warning("FluidLite: Could not load requested soundfont %s! Falling back to default soundfont!\n", s_soundfont.c_str());
+		if (fluid_synth_sfload(edge_fluid, epi::PATH_Join(soundfont_dir.c_str(), "default.sf2").c_str(), 1) == -1) 
+		{
+			I_Warning("Could not load any soundfonts! Ensure that default.sf2 is present in the soundfont directory!\n");
+			delete_fluid_synth(edge_fluid);
+			delete_fluid_settings(edge_fluid_settings);
+			return false;
+		}
 	}
-
-	if (!edge_tsf) 
-	{
-		I_Warning("Could not load any soundfonts! Ensure that default.sf2 is present in the soundfont directory!\n");
-		return false;
-	}
-
-	tsf_channel_set_bank_preset(edge_tsf, 9, 128, 0);
-
-	// reduce the overall gain by 6dB, to minimize the chance of clipping in
-	// songs with a lot of simultaneous notes.
-	tsf_set_output(edge_tsf, TSF_STEREO_INTERLEAVED, dev_freq, -6.0);
 
 	return true; // OK!
 }
 
 // Should only be invoked when switching soundfonts
-void S_RestartTSF(void)
+void S_RestartFluid(void)
 {
-	if (tsf_disabled)
+	if (fluid_disabled)
 		return;
 
-	I_Printf("Restarting TinySoundFont...\n");
+	I_Printf("Restarting FluidLite...\n");
 
 	int old_entry = entry_playing;
 
 	S_StopMusic();
 
-	tsf_close(edge_tsf);
+	delete_fluid_synth(edge_fluid);
+	delete_fluid_settings(edge_fluid_settings);
+	edge_fluid = nullptr;
+	edge_fluid_settings = nullptr;
 
-	if (!S_StartupTSF())
+	if (!S_StartupFluid())
 	{
-		tsf_disabled = true;
+		fluid_disabled = true;
 		return;
 	}
 
@@ -129,7 +128,7 @@ void S_RestartTSF(void)
 	return; // OK!
 }
 
-class tsf_player_c : public abstract_music_c
+class fluid_player_c : public abstract_music_c
 {
 private:
 	enum status_e
@@ -140,18 +139,18 @@ private:
 	int status;
 	bool looping;
 
-	TSFInterface *tsf_iface;
+	FluidInterface *fluid_iface;
 
 	s16_t *mono_buffer;
 
 public:
-	tsf_player_c(byte *_data, int _length, bool _looping) : status(NOT_LOADED), looping(_looping)
+	fluid_player_c(byte *_data, int _length, bool _looping) : status(NOT_LOADED), looping(_looping)
 	{ 
-		mono_buffer = new s16_t[TSF_NUM_SAMPLES * 2];
+		mono_buffer = new s16_t[FLUID_NUM_SAMPLES * 2];
 		SequencerInit(); 
 	}
 
-	~tsf_player_c()
+	~fluid_player_c()
 	{
 		Close();
 
@@ -161,46 +160,46 @@ public:
 
 public:
 
-	TSFSequencer *tsf_seq;
+	FluidSequencer *fluid_seq;
 
 	static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
 	{
-		tsf_channel_note_on(edge_tsf, channel, note, static_cast<float>(velocity) / 127.0f);
+		fluid_synth_noteon(edge_fluid, channel, note, velocity);
 	}
 
 	static void rtNoteOff(void *userdata, uint8_t channel, uint8_t note)
 	{
-		tsf_channel_note_off(edge_tsf, channel, note);
+		fluid_synth_noteoff(edge_fluid, channel, note);
 	}
 
 	static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
 	{
-		(void)userdata; (void)channel; (void)note; (void)atVal;
+		fluid_synth_key_pressure(edge_fluid, channel, note, atVal);
 	}
 
 	static void rtChannelAfterTouch(void *userdata, uint8_t channel, uint8_t atVal)
 	{
-		(void)userdata; (void)channel; (void)atVal;
+		fluid_synth_channel_pressure(edge_fluid, channel, atVal);
 	}
 
 	static void rtControllerChange(void *userdata, uint8_t channel, uint8_t type, uint8_t value)
 	{
-		tsf_channel_midi_control(edge_tsf, channel, type, value);
+		fluid_synth_cc(edge_fluid, channel, type, value);
 	}
 
 	static void rtPatchChange(void *userdata, uint8_t channel, uint8_t patch)
 	{
-		tsf_channel_set_presetnumber(edge_tsf, channel, patch, channel == 9);
+		fluid_synth_program_change(edge_fluid, channel, patch);
 	}
 
 	static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
 	{
-		tsf_channel_set_pitchwheel(edge_tsf, channel, (msb << 7) | lsb);
+		fluid_synth_pitch_bend(edge_fluid, channel, (msb << 7) | lsb);
 	}
 
 	static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
 	{
-		(void)userdata; (void)msg; (void)size;
+		fluid_synth_sysex(edge_fluid, reinterpret_cast<const char*>(msg), static_cast<int>(size), nullptr, nullptr, nullptr, 0);
 	}
 
 	static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
@@ -216,42 +215,41 @@ public:
 
 	static void playSynth(void *userdata, uint8_t *stream, size_t length)
 	{
-		tsf_render_short(edge_tsf,
-						reinterpret_cast<short*>(stream),
-						static_cast<int>(length) / 4, 0);
+		fluid_synth_write_s16(edge_fluid, static_cast<int>(length) / 4,
+			stream, 0, 2, stream + 2, 0, 2);
 	}
 
 	void SequencerInit()
 	{
-		tsf_seq = new TSFSequencer;
-		tsf_iface = new TSFInterface;
-		std::memset(tsf_iface, 0, sizeof(BW_MidiRtInterface));
+		fluid_seq = new FluidSequencer;
+		fluid_iface = new FluidInterface;
+		std::memset(fluid_iface, 0, sizeof(BW_MidiRtInterface));
 
-		tsf_iface->rtUserData = this;
-		tsf_iface->rt_noteOn  = rtNoteOn;
-		tsf_iface->rt_noteOff = rtNoteOff;
-		tsf_iface->rt_noteAfterTouch = rtNoteAfterTouch;
-		tsf_iface->rt_channelAfterTouch = rtChannelAfterTouch;
-		tsf_iface->rt_controllerChange = rtControllerChange;
-		tsf_iface->rt_patchChange = rtPatchChange;
-		tsf_iface->rt_pitchBend = rtPitchBend;
-		tsf_iface->rt_systemExclusive = rtSysEx;
+		fluid_iface->rtUserData = this;
+		fluid_iface->rt_noteOn  = rtNoteOn;
+		fluid_iface->rt_noteOff = rtNoteOff;
+		fluid_iface->rt_noteAfterTouch = rtNoteAfterTouch;
+		fluid_iface->rt_channelAfterTouch = rtChannelAfterTouch;
+		fluid_iface->rt_controllerChange = rtControllerChange;
+		fluid_iface->rt_patchChange = rtPatchChange;
+		fluid_iface->rt_pitchBend = rtPitchBend;
+		fluid_iface->rt_systemExclusive = rtSysEx;
 
-		tsf_iface->onPcmRender = playSynth;
-		tsf_iface->onPcmRender_userData = this;
+		fluid_iface->onPcmRender = playSynth;
+		fluid_iface->onPcmRender_userData = this;
 
-		tsf_iface->pcmSampleRate = dev_freq;
-		tsf_iface->pcmFrameSize = 2 /*channels*/ * 2 /*size of one sample*/;
+		fluid_iface->pcmSampleRate = dev_freq;
+		fluid_iface->pcmFrameSize = 2 /*channels*/ * 2 /*size of one sample*/;
 
-		tsf_iface->rt_deviceSwitch = rtDeviceSwitch;
-		tsf_iface->rt_currentDevice = rtCurrentDevice;
+		fluid_iface->rt_deviceSwitch = rtDeviceSwitch;
+		fluid_iface->rt_currentDevice = rtCurrentDevice;
 
-		tsf_seq->setInterface(tsf_iface);
+		fluid_seq->setInterface(fluid_iface);
 	}
 
 	bool LoadTrack(const byte *data, int length)
 	{
-		return tsf_seq->loadMIDI(data, length);
+		return fluid_seq->loadMIDI(data, length);
 	}
 
 	void Close(void)
@@ -263,17 +261,17 @@ public:
 		if (status != STOPPED)
 		  Stop();
 	
-		tsf_reset(edge_tsf);
+		fluid_synth_program_reset(edge_fluid);
 
-		if (tsf_seq)
+		if (fluid_seq)
 		{
-			delete tsf_seq;
-			tsf_seq = nullptr;
+			delete fluid_seq;
+			fluid_seq = nullptr;
 		}
-		if (tsf_iface)
+		if (fluid_iface)
 		{
-			delete tsf_iface;
-			tsf_iface = nullptr;
+			delete fluid_iface;
+			fluid_iface = nullptr;
 		}
 
 		status = NOT_LOADED;
@@ -296,7 +294,7 @@ public:
 		if (! (status == PLAYING || status == PAUSED))
 			return;
 
-		tsf_note_off_all(edge_tsf);
+		fluid_synth_system_reset(edge_fluid);
 
 		S_QueueStop();
 
@@ -308,7 +306,7 @@ public:
 		if (status != PLAYING)
 			return;
 
-		tsf_note_off_all(edge_tsf);
+		fluid_synth_system_reset(edge_fluid);
 
 		status = PAUSED;
 	}
@@ -325,7 +323,7 @@ public:
 	{
 		while (status == PLAYING)
 		{
-			epi::sound_data_c *buf = S_QueueGetFreeBuffer(TSF_NUM_SAMPLES, 
+			epi::sound_data_c *buf = S_QueueGetFreeBuffer(FLUID_NUM_SAMPLES, 
 					dev_stereo ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 
 			if (! buf)
@@ -364,9 +362,9 @@ private:
 		else
 			data_buf = buf->data_L;
 
-		int played = tsf_seq->playStream(reinterpret_cast<u8_t *>(data_buf), TSF_NUM_SAMPLES);
+		int played = fluid_seq->playStream(reinterpret_cast<u8_t *>(data_buf), FLUID_NUM_SAMPLES);
 
-		if (tsf_seq->positionAtEnd())
+		if (fluid_seq->positionAtEnd())
 			song_done = true;
 
 		buf->length = played / 4;
@@ -378,7 +376,7 @@ private:
 		{
 			if (! looping)
 				return false;
-			tsf_seq->rewind();
+			fluid_seq->rewind();
 			return true;
 		}
 
@@ -386,16 +384,15 @@ private:
 	}
 };
 
-abstract_music_c * S_PlayTSF(byte *data, int length, int fmt,
-			float volume, bool loop)
+abstract_music_c * S_PlayFluid(byte *data, int length, float volume, bool loop)
 {
-	if (tsf_disabled)
+	if (fluid_disabled)
 	{
 		delete[] data;
 		return nullptr;
 	}
 
-	tsf_player_c *player = new tsf_player_c(data, length, loop);
+	fluid_player_c *player = new fluid_player_c(data, length, loop);
 
 	if (!player)
 	{

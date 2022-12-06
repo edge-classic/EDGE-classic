@@ -107,7 +107,7 @@
 #include "w_wad.h"
 #include "r_wipe.h"
 #include "s_opl.h"
-#include "s_tsf.h"
+#include "s_fluid.h"
 
 #include "i_ctrl.h"
 
@@ -1985,7 +1985,7 @@ static void M_ChangeOPL(int keypressed)
 	if (var_opl_music)
 		S_RestartOPL();
 	else
-		S_RestartTSF();
+		S_RestartFluid();
 }
 
 //
@@ -2028,7 +2028,7 @@ static void M_ChangeSoundfont(int keypressed)
 
 	// update cvar
 	s_soundfont = available_soundfonts.at(sf2_pos);
-	S_RestartTSF();
+	S_RestartFluid();
 }
 
 //

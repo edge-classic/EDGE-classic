@@ -5,6 +5,7 @@ add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/dehacked)
 add_subdirectory(source_files/epi)
+add_subdirectory(source_files/fluidlite)
 add_subdirectory(source_files/glad)
 add_subdirectory(source_files/libgme)
 add_subdirectory(source_files/libxmp)
@@ -128,7 +129,7 @@ add_executable(
 	source_files/edge/s_mp3.cc   
 	source_files/edge/s_music.cc    
 	source_files/edge/s_ogg.cc      
-	source_files/edge/s_tsf.cc
+	source_files/edge/s_fluid.cc
 	source_files/edge/s_gme.cc
 	source_files/edge/s_xmp.cc
 	source_files/edge/s_opl.cc
@@ -169,6 +170,7 @@ target_include_directories(edge-classic PRIVATE source_files/ddf)
 target_include_directories(edge-classic PRIVATE source_files/dehacked)
 target_include_directories(edge-classic PRIVATE source_files/dr_libs)
 target_include_directories(edge-classic PRIVATE source_files/epi)
+target_include_directories(edge-classic PRIVATE source_files/fluidlite/include)
 target_include_directories(edge-classic PRIVATE source_files/glad/include/glad)
 target_include_directories(edge-classic PRIVATE source_files/libgme/gme)
 target_include_directories(edge-classic PRIVATE source_files/libymfm)
@@ -182,7 +184,6 @@ if(WIN32 AND NOT MSYS)
   target_include_directories(edge-classic PRIVATE source_files/sdl2/include)
 endif()
 target_include_directories(edge-classic PRIVATE source_files/stb)
-target_include_directories(edge-classic PRIVATE source_files/tinysoundfont)
 
 if(WIN32 OR MSYS)
   target_compile_definitions(edge-classic PRIVATE WIN32)
@@ -251,6 +252,7 @@ if(WIN32 OR MSYS)
 			glad
 			${OPENGL_LIBRARIES}
 			${SDL2_LIBRARIES}
+			fluidlite
 			gme
 			miniz
 			libxmp
@@ -270,6 +272,7 @@ else()
 			${OPENGL_LIBRARIES}
 			glad
 			${SDL2_LIBRARIES}
+			fluidlite
 			gme
 			miniz
 			libxmp

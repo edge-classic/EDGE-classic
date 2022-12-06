@@ -1,9 +1,8 @@
 //----------------------------------------------------------------------------
-//  EDGE TinySoundfont Music Player
+//  EDGE FluidLite Music Player
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 2004-2009  The EDGE Team.
-//  Converted from the original Timidity-based player in 2021 - Dashodanger
+//  Copyright (c) 2022 The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -17,21 +16,20 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __S_TSF_H__
-#define __S_TSF_H__
+#ifndef __S_FLUID_H__
+#define __S_FLUID_H__
 
 #include "i_defs.h"
 
-extern bool tsf_disabled;
+extern bool fluid_disabled;
 
-bool S_StartupTSF(void);
+bool S_StartupFluid(void);
 
-void S_RestartTSF(void);
+void S_RestartFluid(void);
 
-abstract_music_c * S_PlayTSF(byte *data, int length, int fmt,
-			float volume, bool loop);
+abstract_music_c * S_PlayFluid(byte *data, int length, float volume, bool loop);
 
-#endif /* __S_TSF_H__ */
+#endif /* __S_FLUID_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

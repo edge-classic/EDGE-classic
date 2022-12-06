@@ -34,7 +34,7 @@
 #include "s_music.h"
 #include "s_ogg.h"
 #include "s_mp3.h"
-#include "s_tsf.h"
+#include "s_fluid.h"
 #include "s_gme.h"
 #include "s_xmp.h"
 #include "s_opl.h"
@@ -231,7 +231,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 			}
 			else
 			{
-				music_player = S_PlayTSF(data, length, fmt, volume, loop);
+				music_player = S_PlayFluid(data, length, volume, loop);
 			}
 			break;
 

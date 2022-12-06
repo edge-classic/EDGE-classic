@@ -40,7 +40,7 @@
 #include "s_cache.h"
 #include "s_blit.h"
 #include "s_opl.h"
-#include "s_tsf.h"
+#include "s_fluid.h"
 #include "w_wad.h"
 
 // If true, sound system is off/not working. Changed to false if sound init ok.
@@ -310,8 +310,8 @@ void I_StartupMusic(void)
 
 	// Startup both TinySoundFont and OPL, as some formats require OPL now (IMF/CMF)
 
-	if (!S_StartupTSF())
-		tsf_disabled = true;
+	if (!S_StartupFluid())
+		fluid_disabled = true;
 
 	if (!S_StartupOPL())
 		opl_disabled = true;

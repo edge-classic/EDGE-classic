@@ -1522,7 +1522,7 @@ bool CON_Responder(event_t * ev)
 			case KEYD_SPACE:
 			case KEYD_BACKSPACE:
 			case KEYD_DELETE:
-				repeat_countdown = KEYREPEATDELAY;
+				repeat_countdown = KEYREPEATDELAY * (r_doubleframes.d ? 2 : 1);
 				break;
 			default:
 				repeat_countdown = 0;
@@ -1568,7 +1568,7 @@ void CON_Ticker(void)
 
 				while (repeat_countdown <= 0)
 				{
-					repeat_countdown += KEYREPEATRATE;
+					repeat_countdown += KEYREPEATRATE * (r_doubleframes.d ? 2 : 1);
 					CON_HandleKey(repeat_key, KeysShifted, false);
 				}
 			}

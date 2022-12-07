@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.1)
 project(fluidlite)
 
 add_library(fluidlite
-    src/fluid_init.c
     src/fluid_chan.c
     src/fluid_chorus.c
     src/fluid_conv.c

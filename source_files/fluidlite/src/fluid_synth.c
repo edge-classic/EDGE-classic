@@ -111,10 +111,10 @@ void fluid_synth_settings(fluid_settings_t* settings)
   fluid_settings_register_num(settings, "synth.reverb.width", 0.76f, 0.0f, 100.0f, 0, NULL, NULL);
   fluid_settings_register_num(settings, "synth.reverb.level", 0.57, 0.0f, 1.0f, 0, NULL, NULL);
   fluid_settings_register_str(settings, "synth.chorus.active", "yes", 0, NULL, NULL);
-  fluid_settings_register_int(settings, "synth.chorus.nr", FLUID_CHORUS_DEFAULT_N, 0, 99, 0, 0, NULL, NULL);
+  fluid_settings_register_int(settings, "synth.chorus.nr", FLUID_CHORUS_DEFAULT_N, 0, 99, 0, NULL, NULL);
   fluid_settings_register_num(settings, "synth.chorus.level", 1.2f, 0.0f, 10.0f, 0, NULL, NULL);
-  fluid_settings_register_num(settings, "synth.chorus.speed", FLUID_CHORUS_DEFAULT_SPEED, 0.1f, 5.0f, 0, 0, NULL, NULL);
-  fluid_settings_register_num(settings, "synth.chorus.depth", FLUID_CHORUS_DEFAULT_DEPTH, 0.0f, 256.0f, 0, 0, NULL, NULL);
+  fluid_settings_register_num(settings, "synth.chorus.speed", FLUID_CHORUS_DEFAULT_SPEED, 0.1f, 5.0f, 0, NULL, NULL);
+  fluid_settings_register_num(settings, "synth.chorus.depth", FLUID_CHORUS_DEFAULT_DEPTH, 0.0f, 256.0f, 0, NULL, NULL);
   fluid_settings_register_str(settings, "synth.ladspa.active", "no", 0, NULL, NULL);
   fluid_settings_register_str(settings, "midi.portname", "", 0, NULL, NULL);
   fluid_settings_register_str(settings, "synth.drums-channel.active", "yes", 0, NULL, NULL);

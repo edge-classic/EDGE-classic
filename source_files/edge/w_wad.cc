@@ -547,7 +547,7 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
 	else if (strcmp(info.name, "DEHACKED") == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
-		if (wad != NULL)
+		if (wad != NULL && info.size > 0)
 			wad->deh_lump = lump;
 		return;
 	}

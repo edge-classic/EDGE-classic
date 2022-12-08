@@ -292,6 +292,8 @@ void P_LineAttack(mobj_t * t1, angle_t angle, float distance, float slope, float
 
 void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special);
 
+bool ReplaceMidTexFromPart(line_t *TheLine, scroll_part_e parts);
+
 //
 // P_SETUP
 //

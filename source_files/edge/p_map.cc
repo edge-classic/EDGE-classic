@@ -1438,6 +1438,75 @@ static inline bool ShootCheckGap(float z,
 	return false;
 }
 
+
+//Lobo: 2022
+//Try and get a texture for our midtex.
+//-If we specified a LINE_PART copy that texture over.
+//-If not, just remove the current midtex we have (only on 2-sided lines).
+bool ReplaceMidTexFromPart(line_t *TheLine, scroll_part_e parts)
+{
+	bool IsFront = false;
+
+	if (parts <= SCPT_RightLower) //assume right is front
+		IsFront = true;
+
+	if (IsFront == false)
+	{
+		if (!TheLine->side[1]) //back and 1-sided so no-go
+			return false;
+	}
+	side_t *side = (IsFront) ?
+			TheLine->side[0] : TheLine->side[1];
+
+	const image_c *image = nullptr;
+	
+	//if (parts == SCPT_None)
+		//return false;
+		//parts = (scroll_part_e)(SCPT_LEFT | SCPT_RIGHT);
+
+	if (parts & (SCPT_LeftUpper))
+	{
+		image = side->top.image;
+	}
+	if (parts & (SCPT_RightUpper))
+	{
+		image = side->top.image;
+	}
+	if (parts & (SCPT_LeftLower))
+	{
+		image = side->bottom.image;
+	}
+	if (parts & (SCPT_RightLower))
+	{
+		image = side->bottom.image;
+	}
+	
+	if (parts & (SCPT_LeftMiddle))
+	{
+		image = side->middle.image; //redundant but whatever ;)
+	}
+	if (parts & (SCPT_RightMiddle))
+	{
+		image = side->middle.image; //redundant but whatever ;)
+	}
+	
+	
+	if (!image && !TheLine->side[1]) // no image and 1-sided so leave alone
+		return false;
+
+	if (!image) // 2 sided and no image so add default
+	{
+		image = W_ImageLookup("-", INS_Texture); //default is blank
+	}
+
+	TheLine->side[0]->middle.image = image;
+
+	if(TheLine->side[1])
+		TheLine->side[1]->middle.image = image;
+
+	return true;
+}
+
 //
 // Lobo:2021 Unblock and remove texture from our special debris linetype.
 //
@@ -1447,29 +1516,39 @@ void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
 	{
 		return;
 	}
-	//Unblock the line
+	
+	bool TwoSided = false;
+
+	if (TheLine->side[0] && TheLine->side[1])
+		TwoSided = true;
+
 	if (special->glass)
 	{
-		if (TheLine->side[0] && TheLine->side[1])
+		//1. Change the texture on our line
+
+		//if it's got a BROKEN_TEXTURE=<tex> then use that
+		if (!special->brokentex.empty())
+		{
+			const image_c *image = W_ImageLookup(special->brokentex.c_str(), INS_Texture);
+			TheLine->side[0]->middle.image = image;
+			if (TwoSided)
+			{
+				TheLine->side[1]->middle.image = image;
+			}
+		}
+		else //otherwise try get the texture from our LINE_PART=
+		{
+			ReplaceMidTexFromPart(TheLine, special->line_parts);
+		}
+
+		//2. if it's 2 sided, make it unblocking now
+		if (TwoSided)
 		{
 			// clear standard flags
 			TheLine->flags &= ~(MLF_Blocking | MLF_BlockMonsters | MLF_BlockGrounded | MLF_BlockPlayers);
 
 			// clear EDGE's extended lineflags too
 			TheLine->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
-
-			//2. Remove existing texture from line
-			const image_c *image;
-			if (special->brokentex.c_str())
-			{
-				image = W_ImageLookup(special->brokentex.c_str(), INS_Texture);
-			}
-			else
-			{
-				image = W_ImageLookup("-", INS_Texture);
-			}
-			TheLine->side[0]->middle.image = image;
-			TheLine->side[1]->middle.image = image;
 		}
 	}
 }

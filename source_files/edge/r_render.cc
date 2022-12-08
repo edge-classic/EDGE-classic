@@ -1469,7 +1469,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 		slope_ch += MAX(sec->c_slope->dz1, sec->c_slope->dz2);
 
 	// Boom compatibility -- invisible walkways
-	if (sec->heightsec != NULL)
+	if (sec->heightsec != nullptr)
 		slope_fh = std::min(slope_fh, sec->heightsec->f_h);
 
 	if (! other)
@@ -2165,7 +2165,6 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
 	dsub->segs.push_back(dseg);
 
-
 	sector_t *frontsector = seg->front_sub->sector;
 	sector_t *backsector  = NULL;
 
@@ -2176,6 +2175,9 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
 	if (seg->linedef->blocked)
 	{
+		// Check if this is a Line 242 "window" (I think) - Dasho
+		if ((!(seg->frontsector && seg->frontsector->heightsec && seg->frontsector->heightsec_side) &&
+			!(seg->backsector && seg->backsector->heightsec && seg->backsector->heightsec_side)))
 		RGL_1DOcclusionSet(angle_R, angle_L);
 	}
 

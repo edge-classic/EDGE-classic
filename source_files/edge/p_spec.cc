@@ -923,6 +923,12 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 	{
 		target->heightsec = source->frontsector;
 		target->heightsec_side = source->side[0];
+		// Quick band-aid fix for Line 242 "windows" - Dasho
+		if (target->c_h - target->f_h < 1)
+		{
+			target->c_h = source->frontsector->c_h;
+			target->f_h = source->frontsector->f_h;
+		}
 	}
 }
 

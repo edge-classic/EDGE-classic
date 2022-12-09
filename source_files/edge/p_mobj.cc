@@ -1041,7 +1041,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props, bool extr
 	zmove = mo->mom.z * (1.0f - props->viscosity);
 
 	if (do_extra && r_doubleframes.d) // 70 Hz
-		zmove *= 0.5;
+		zmove *= 0.52;
 
 	// adjust height
 	mo->z += zmove;
@@ -1155,7 +1155,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props, bool extr
 			!(mo->player && mo->player->powers[PW_Jetpack] > 0) &&
 			!(mo->on_ladder >= 0))
 		{
-			// 70 Hz: apply gravity only on extra tics
+			// 70 Hz: apply gravity only on real tics
 			if (! extra_tic || !r_doubleframes.d)
 				mo->mom.z -= gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
 		}
@@ -1242,7 +1242,9 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props, bool extr
 			!(mo->player && mo->player->powers[PW_Jetpack] > 0) &&
 			!(mo->on_ladder >= 0))
 		{
-			mo->mom.z += -gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
+			// 70 Hz: apply gravity only on real tics
+			if (! extra_tic || !r_doubleframes.d)
+				mo->mom.z += -gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
 		}
 	}
 

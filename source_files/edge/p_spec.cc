@@ -2985,7 +2985,7 @@ void P_SpawnSpecials2(int autotag)
 
 			sector->props.push.x += M_Cos(secSpecial->push_angle) * mul;
 			sector->props.push.y += M_Sin(secSpecial->push_angle) * mul;
-			sector->props.push.z += secSpecial->push_zspeed / 100.0f;
+			sector->props.push.z += secSpecial->push_zspeed / (r_doubleframes.d ? 89.2f : 100.0f);
 		}
 
 		// Scrollers

@@ -48,6 +48,8 @@
 
 #include "r_sky.h" //Lobo 2022: added for our Sky Transfer special
 
+extern cvar_c r_doubleframes;
+
 // Level exit timer
 bool levelTimer;
 int levelTimeCount;
@@ -1713,7 +1715,10 @@ static inline void PlayerInProperties(player_t *player,
 		mouth_z >= f_h && mouth_z <= c_h &&
 		player->powers[PW_Scuba] <= 0)
 	{
-		player->air_in_lungs--;
+		int subtract = 1;
+		if (r_doubleframes.d && (gametic & 1 == 1))
+			subtract = 0;
+		player->air_in_lungs -= subtract;
 		player->underwater = true;
 
 		if (player->air_in_lungs <= 0 &&
@@ -1764,7 +1769,6 @@ static inline void PlayerInProperties(player_t *player,
 		if (special->special_flags & SECSP_Proportional)
 		{
 			// only partially in region -- mitigate damage
-
 			if (tz > c_h)
 				factor -= factor * (tz - c_h) / (tz-bz);
 
@@ -1779,7 +1783,6 @@ static inline void PlayerInProperties(player_t *player,
 	}
 	else
 	{
-
 		// Not touching the floor ?
 		if (player->mo->z > f_h + 2.0f)
 			return;

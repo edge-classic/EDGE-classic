@@ -295,23 +295,12 @@ public:
     };
 
     /**
-     * @brief Container of one raw CMF instrument
-     */
-    struct CmfInstrument
-    {
-        //! Raw CMF instrument data
-        uint8_t data[16];
-    };
-
-    /**
      * @brief The FileFormat enum
      */
     enum FileFormat
     {
         //! MIDI format
         Format_MIDI,
-        //! CMF format
-        Format_CMF,
         //! Id-Software Music File
         Format_IMF,
         //! EA-MUS format
@@ -363,9 +352,6 @@ private:
 
     //! Pre-processed track data storage
     std::vector<MidiTrackQueue > m_trackData;
-
-    //! CMF instruments
-    std::vector<CmfInstrument> m_cmfInstruments;
 
     //! Title of music
     std::string m_musTitle;
@@ -639,12 +625,6 @@ public:
     void setTriggerHandler(TriggerHandler handler, void *userData);
 
     /**
-     * @brief Get the list of CMF instruments (CMF only)
-     * @return Array of raw CMF instruments entries
-     */
-    const std::vector<CmfInstrument> getRawCmfInstruments();
-
-    /**
      * @brief Get string that describes reason of error
      * @return Error string
      */
@@ -799,13 +779,6 @@ private:
      * @return true on successful load
      */
     bool parseRSXX(epi::mem_file_c *mfr);
-
-    /**
-     * @brief Load file as Creative Music Format
-     * @param mfr mem_file_c with opened source file
-     * @return true on successful load
-     */
-    bool parseCMF(epi::mem_file_c *mfr);
 
     /**
      * @brief Load file as GMD/MUS files (ScummVM)

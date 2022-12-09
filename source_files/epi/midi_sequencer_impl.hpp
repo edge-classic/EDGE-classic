@@ -489,11 +489,6 @@ void BW_MidiSequencer::setTriggerHandler(TriggerHandler handler, void *userData)
     m_triggerUserData = userData;
 }
 
-const std::vector<BW_MidiSequencer::CmfInstrument> BW_MidiSequencer::getRawCmfInstruments()
-{
-    return m_cmfInstruments;
-}
-
 const std::string &BW_MidiSequencer::getErrorString()
 {
     return m_errorString;
@@ -1061,7 +1056,7 @@ void BW_MidiSequencer::buildTimeLine(const std::vector<MidiEvent> &tempos,
     // move too short percussion note-offs far far away as possible
     /********************************************************************************/
 #if 0 // Use this to record WAVEs for comparison before/after implementing of this
-    if(m_format == Format_MIDI) // Percussion fix is needed for MIDI only, not for IMF/RSXX or CMF
+    if(m_format == Format_MIDI) // Percussion fix is needed for MIDI only, not for IMF/RSXX
     {
         //! Minimal real time in seconds
 #define DRUM_NOTE_MIN_TIME  0.03
@@ -2298,7 +2293,6 @@ bool BW_MidiSequencer::loadMIDI(epi::mem_file_c *mfr, uint16_t rate)
     m_format = Format_MIDI;
     m_smfFormat = 0;
 
-    m_cmfInstruments.clear();
     m_rawSongsData.clear();
 
     const size_t headerSize = 4 + 4 + 2 + 2 + 2; // 14
@@ -2346,12 +2340,6 @@ bool BW_MidiSequencer::loadMIDI(epi::mem_file_c *mfr, uint16_t rate)
         return parseXMI(mfr);
     }
 #endif
-
-    if(std::memcmp(headerBuf, "CTMF", 4) == 0)
-    {
-        mfr->Seek(0, epi::file_c::SEEKPOINT_START);
-        return parseCMF(mfr);
-    }
 
     if(detectIMF(headerBuf, mfr))
     {
@@ -2573,127 +2561,6 @@ bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
 
     m_smfFormat = 0;
     m_loop.stackLevel   = -1;
-
-    delete mfr;
-
-    return true;
-}
-
-bool BW_MidiSequencer::parseCMF(epi::mem_file_c *mfr)
-{
-    const size_t headerSize = 14;
-    char headerBuf[headerSize] = "";
-    size_t fsize = 0;
-    size_t deltaTicks = 192, trackCount = 1;
-    std::vector<std::vector<uint8_t> > rawTrackData;
-
-    fsize = mfr->Read(headerBuf, headerSize);
-    if(fsize < headerSize)
-    {
-        m_errorString = "Unexpected end of file at header!\n";
-        delete mfr;
-        return false;
-    }
-
-    if(std::memcmp(headerBuf, "CTMF", 4) != 0)
-    {
-        m_errorString = "MIDI Loader: Invalid format, CTMF signature is not found!\n";
-        delete mfr;
-        return false;
-    }
-
-    m_format = Format_CMF;
-
-    //unsigned version   = ReadLEint(HeaderBuf+4, 2);
-    uint64_t ins_start = readLEint(headerBuf + 6, 2);
-    uint64_t mus_start = readLEint(headerBuf + 8, 2);
-    //unsigned deltas    = ReadLEint(HeaderBuf+10, 2);
-    uint64_t ticks     = readLEint(headerBuf + 12, 2);
-    // Read title, author, remarks start offsets in file
-    fsize = mfr->Read(headerBuf, 6);
-    if(fsize < 6)
-    {
-        m_errorString = "Unexpected file ending on attempt to read CTMF header!";
-        delete mfr;
-        return false;
-    }
-
-    //uint64_t notes_starts[3] = {readLEint(headerBuf + 0, 2), readLEint(headerBuf + 0, 4), readLEint(headerBuf + 0, 6)};
-    mfr->Seek(16, epi::file_c::SEEKPOINT_CURRENT); // Skip the channels-in-use table
-    fsize = mfr->Read(headerBuf, 4);
-    if(fsize < 4)
-    {
-        m_errorString = "Unexpected file ending on attempt to read CMF instruments block header!";
-        delete mfr;
-        return false;
-    }
-
-    uint64_t ins_count =  readLEint(headerBuf + 0, 2);
-    mfr->Seek(static_cast<long>(ins_start), epi::file_c::SEEKPOINT_START);
-
-    m_cmfInstruments.reserve(static_cast<size_t>(ins_count));
-    for(uint64_t i = 0; i < ins_count; ++i)
-    {
-        CmfInstrument inst;
-        fsize = mfr->Read(inst.data, 16);
-        if(fsize < 16)
-        {
-            m_errorString = "Unexpected file ending on attempt to read CMF instruments raw data!";
-            delete mfr;
-            return false;
-        }
-        m_cmfInstruments.push_back(inst);
-    }
-
-    mfr->Seek(static_cast<long>(mus_start), epi::file_c::SEEKPOINT_START); // seeku?
-    trackCount = 1;
-    deltaTicks = (size_t)ticks;
-
-    rawTrackData.clear();
-    rawTrackData.resize(trackCount, std::vector<uint8_t>());
-    m_invDeltaTicks = fraction<uint64_t>(1, 1000000l * static_cast<uint64_t>(deltaTicks));
-    m_tempo         = fraction<uint64_t>(1,            static_cast<uint64_t>(deltaTicks));
-
-    size_t totalGotten = 0;
-
-    for(size_t tk = 0; tk < trackCount; ++tk)
-    {
-        // Read track header
-        size_t trackLength;
-        size_t pos = mfr->GetPosition();
-        mfr->Seek(0, epi::file_c::SEEKPOINT_END);
-        trackLength = mfr->GetPosition() - pos;
-        mfr->Seek(static_cast<long>(pos), epi::file_c::SEEKPOINT_START);
-
-        // Read track data
-        rawTrackData[tk].resize(trackLength);
-        fsize = mfr->Read(&rawTrackData[tk][0], trackLength);
-        if(fsize < trackLength)
-        {
-            m_errorString = "MIDI Loader: Unexpected file ending while getting raw track data!\n";
-            delete mfr;
-            return false;
-        }
-        totalGotten += fsize;
-    }
-
-    for(size_t tk = 0; tk < trackCount; ++tk)
-        totalGotten += rawTrackData[tk].size();
-
-    if(totalGotten == 0)
-    {
-        m_errorString = "MIDI Loader: Empty track data";
-        delete mfr;
-        return false;
-    }
-
-    // Build new MIDI events table
-    if(!buildSmfTrackData(rawTrackData))
-    {
-        m_errorString = "MIDI Loader: MIDI data parsing error has occurred!\n" + m_parsingErrorsString;
-        delete mfr;
-        return false;
-    }
 
     delete mfr;
 

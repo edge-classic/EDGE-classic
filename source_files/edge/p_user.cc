@@ -297,14 +297,8 @@ static void MovePlayer(player_t * player, bool extra_tic)
 	// compute XY and Z speeds, taking swimming (etc) into account
 	// (we try to swim in view direction -- assumes no gravity).
 
-	base_xy_speed = player->mo->speed / 32.0f;
-	base_z_speed  = player->mo->speed / 64.0f;
-
-	if (r_doubleframes.d)
-	{
-		base_xy_speed *= 0.5; // 70 Hz
-		base_z_speed *= 0.5;
-	}
+	base_xy_speed = player->mo->speed / (r_doubleframes.d ? 64.0f : 32.0f);
+	base_z_speed  = player->mo->speed / (r_doubleframes.d ? 57.0f : 64.0f);
 
 	// Do not let the player control movement if not onground.
 	// -MH- 1998/06/18  unless he has the JetPack!

@@ -1445,10 +1445,10 @@ static inline bool ShootCheckGap(float z,
 //-If not, just remove the current midtex we have (only on 2-sided lines).
 bool ReplaceMidTexFromPart(line_t *TheLine, scroll_part_e parts)
 {
-	bool IsFront = false;
+	bool IsFront = true;
 
-	if (parts <= SCPT_RightLower) //assume right is front
-		IsFront = true;
+	if (parts <= SCPT_RightLower) //assume right is back
+		IsFront = false;
 
 	if (IsFront == false)
 	{

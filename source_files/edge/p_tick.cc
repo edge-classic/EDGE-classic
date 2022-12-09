@@ -86,12 +86,15 @@ void P_Ticker(bool extra_tic)
 	P_RunForces(extra_tic);
 	P_RunMobjThinkers(extra_tic);
 
+	if (!extra_tic || !r_doubleframes.d)
+		P_RunLights();
+
+	P_RunActivePlanes();
+	P_RunActiveSliders();
+
 	if (extra_tic && r_doubleframes.d)
 		return;
 
-	P_RunLights();
-	P_RunActivePlanes();
-	P_RunActiveSliders();
 	P_RunAmbientSFX();
 
 	P_UpdateSpecials();

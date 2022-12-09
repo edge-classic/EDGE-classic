@@ -1314,5 +1314,5 @@ void OPLAY_WriteReg(uint8_t reg, uint8_t value)
 	{
 		return;
 	}
-	OPL3_WriteReg(&opl_chip, reg, value);
+	RawWriteRegister(reg, value);
 }

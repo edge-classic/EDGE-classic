@@ -27,7 +27,7 @@ bool S_StartupOPL(void);
 
 void S_RestartOPL(void);
 
-abstract_music_c * S_PlayOPL(byte *data, int length, int fmt, float volume, bool loop, int type);
+abstract_music_c * S_PlayOPL(byte *data, int length, float volume, bool loop, int type);
 
 #endif /* __S_OPL_H__ */
 

@@ -56,7 +56,7 @@ bool S_StartupOPL(void)
 {
 	I_Debugf("Initializing OPL player...\n");
 
-	if (! OPLAY_Init(dev_freq, dev_stereo, var_opl_music == 2))
+	if (! OPLAY_Init(dev_freq, dev_stereo, var_opl_music != 1))
 	{
 		return false;
 	}
@@ -169,7 +169,7 @@ private:
 	OPLInterface *opl_iface;
 
 public:
-	opl_player_c(byte *_data, int _length, bool _looping) : status(NOT_LOADED), looping(_looping)
+	opl_player_c(bool _looping) : status(NOT_LOADED), looping(_looping)
 	{
 		SequencerInit();
 	}
@@ -399,7 +399,7 @@ private:
 	}
 };
 
-abstract_music_c * S_PlayOPL(byte *data, int length, int fmt, float volume, bool loop, int type)
+abstract_music_c * S_PlayOPL(byte *data, int length, float volume, bool loop, int type)
 {
 
 	if (opl_disabled)
@@ -408,7 +408,7 @@ abstract_music_c * S_PlayOPL(byte *data, int length, int fmt, float volume, bool
 		return nullptr;
 	}
 
-	opl_player_c *player = new opl_player_c(data, length, loop);
+	opl_player_c *player = new opl_player_c(loop);
 
 	if (!player)
 	{

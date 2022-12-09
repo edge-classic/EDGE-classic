@@ -218,7 +218,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 		// IMF writes raw OPL registers, so must use the OPL player unconditionally
 		case epi::FMT_IMF:
 			delete F;
-			music_player = S_PlayOPL(data, length, fmt, volume, loop, play->type);
+			music_player = S_PlayOPL(data, length, volume, loop, play->type);
 			break;
 
 		case epi::FMT_MIDI:
@@ -227,7 +227,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 			delete F;
 			if (var_opl_music)
 			{
-				music_player = S_PlayOPL(data, length, fmt, volume, loop, play->type);
+				music_player = S_PlayOPL(data, length, volume, loop, play->type);
 			}
 			else
 			{

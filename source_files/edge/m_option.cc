@@ -79,6 +79,8 @@
 #include "path.h"
 #include "str_util.h"
 
+#include "playlist.h"
+
 #include "main.h"
 
 #include "dm_state.h"
@@ -133,6 +135,8 @@ static int menu_crosssize;
 static int monitor_size;
 
 extern int joystick_device;
+
+extern int entry_playing;
 
 extern bool zerotic_ok;
 
@@ -1982,7 +1986,9 @@ static void M_ChangeLanguage(int keypressed)
 //
 static void M_ChangeOPL(int keypressed)
 {
-	if (var_opl_music)
+	pl_entry_c *playing = playlist.Find(entry_playing);
+	if (var_opl_music || (playing && 
+		(playing->type == MUS_IMF280 || playing->type == MUS_IMF560 || playing->type == MUS_IMF700)))
 		S_RestartOPL();
 	else
 		S_RestartFluid();

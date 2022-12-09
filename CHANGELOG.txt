@@ -130,7 +130,7 @@ New Features
     - Matches Boom/MBF21 behavior (see https://github.com/kraflab/mbf21/blob/master/docs/spec.md under 'Linedef Types' for reference if needed)
   - Improved GLASS=TRUE functionality: LINE_PARTS= can now be used to define what the "broken" mid-texture will be.
     LINE_PARTS accepts the following arguments: LEFT_LOWER, LEFT_UPPER, RIGHT_LOWER, RIGHT_UPPER. 
-	(back of linedef is left, front of linedef is right).
+	(back of linedef is right, front of linedef is left).
   - Added 4 new BREAKABLE wall line types (similar behaviour to glass): 
     [835] Breakable: when shot, midtex will change to back lower texture
     [836] Breakable: when shot, midtex will change to back upper texture

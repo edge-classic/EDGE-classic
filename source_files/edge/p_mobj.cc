@@ -1742,6 +1742,18 @@ void P_RunMobjThinkers(bool extra_tic)
 	mobj_t *mo;
 	mobj_t *next;
 
+	// Make global? - Dasho
+	bool time_stop_active = false;
+
+	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+	{
+		if (players[pnum] && players[pnum]->powers[PW_TimeStop] > 0)
+		{
+			time_stop_active = true;
+			break;
+		}
+	}
+
 	for (mo = mobjlisthead ; mo != NULL ; mo = next)
 	{
 		next = mo->next;
@@ -1764,6 +1776,8 @@ void P_RunMobjThinkers(bool extra_tic)
 			P_MobjThinker(mo, extra_tic);
 		else
 		{
+			if (time_stop_active)
+				continue;
 			// Culling test
 			if (!r_culling.d || (!r_doubleframes.d || !extra_tic || mo->flags & MF_MISSILE) && 
 				((gametic/2) % I_ROUND(1 + R_PointToDist(players[consoleplayer]->mo->x, players[consoleplayer]->mo->y, mo->x, mo->y) / 1500) == 0))

@@ -497,7 +497,7 @@ typedef enum
 	PW_NightVision,
 	PW_Scuba,
 
-	PW_Unused9,
+	PW_TimeStop,
 	PW_Unused10,
 	PW_Unused11,
 

@@ -753,7 +753,8 @@ bool P_PlayerThink(player_t * player, bool extra_tic)
 
 	if (g_erraticism.d)
 	{
-		if (cmd->forwardmove == 0 && cmd->sidemove == 0 && cmd->upwardmove == 0 && (!cmd->buttons & BT_ATTACK))
+		if (cmd->forwardmove == 0 && cmd->sidemove == 0 && cmd->upwardmove <= 0 && (!cmd->buttons & BT_ATTACK) && 
+			(player->mo->height == player->mo->info->height || player->mo->height == player->mo->info->crouchheight))
 		{
 			should_think = false;
 			if (!player->mo->mom.z)

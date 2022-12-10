@@ -84,6 +84,7 @@ iteminque_t *itemquehead;
 
 std::unordered_set<const mobjtype_c *> seen_monsters;
 
+bool time_stop_active = false;
 
 static void P_AddItemToQueue(const mobj_t *mo)
 {
@@ -1742,8 +1743,7 @@ void P_RunMobjThinkers(bool extra_tic)
 	mobj_t *mo;
 	mobj_t *next;
 
-	// Make global? - Dasho
-	bool time_stop_active = false;
+	time_stop_active = false;
 
 	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
 	{

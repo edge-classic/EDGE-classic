@@ -1707,7 +1707,7 @@ void W_UpdateImageAnims(void)
 			do_Animate(real_flats);
 		}
 	}
-	else
+	else if (!time_stop_active) // Need to account for Erraticism as well - Dasho
 	{
 		do_Animate(real_graphics);
 		do_Animate(real_textures);

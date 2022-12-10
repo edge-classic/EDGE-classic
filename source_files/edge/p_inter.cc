@@ -784,6 +784,8 @@ void P_TouchSpecialThing(mobj_t * special, mobj_t * toucher)
 	if (! info.keep_it)
 	{
 		special->health = 0;
+		if (time_stop_active) // Hide pickup after gaining benefit while time stop is still active
+			special->visibility = INVISIBLE;
 		P_KillMobj(info.player->mo, special, NULL);
 	}
 

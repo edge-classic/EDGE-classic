@@ -1280,6 +1280,8 @@ bool EV_DoSlider(line_t * door, line_t *act_line, mobj_t * thing,
 //
 void P_RunActivePlanes(void)
 {
+    if (time_stop_active) return;
+
 	std::vector<plane_move_t *> ::iterator PMI;
 
 	bool removed_plane = false;
@@ -1319,6 +1321,8 @@ void P_RunActivePlanes(void)
 
 void P_RunActiveSliders(void)
 {
+    if (time_stop_active) return;
+
 	std::vector<slider_move_t *>::iterator SMI;
 
 	bool removed_slider = false;

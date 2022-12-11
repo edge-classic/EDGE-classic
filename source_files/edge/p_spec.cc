@@ -540,6 +540,9 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const linetype_c *special)
 	info = special->effectobject;
 	if (! info) return; //found nothing so exit
 
+	if (!level_flags.have_extra && (info->extendedflags & EF_EXTRA))
+		return;
+
 	//if it's shootable we've already handled this elsewhere
 	if(special->type == line_shootable) return;
 

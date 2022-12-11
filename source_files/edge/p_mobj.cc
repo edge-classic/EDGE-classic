@@ -1796,6 +1796,11 @@ void P_RunMobjThinkers(bool extra_tic)
 //
 void P_SpawnSplash(float x, float y, float z, const mobjtype_c * splash, angle_t angle)
 {
+	if (!level_flags.have_extra && (splash->extendedflags & EF_EXTRA))
+		return;
+	
+	if (! (splash->extendedflags & EF_EXTRA)) return; //Optional extra
+
 	mobj_t *th;
 
 	z += (float) P_RandomNegPos() / 16.0f;

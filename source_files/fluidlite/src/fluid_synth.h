@@ -168,7 +168,8 @@ fluid_preset_t* fluid_synth_find_preset(fluid_synth_t* synth,
 				      unsigned int banknum,
 				      unsigned int prognum);
 
-int fluid_synth_all_voices_noteoff(fluid_synth_t* synth);
+int fluid_synth_all_voices_stop(fluid_synth_t* synth);
+int fluid_synth_all_voices_pause(fluid_synth_t* synth);
 int fluid_synth_all_notes_off(fluid_synth_t* synth, int chan);
 int fluid_synth_all_sounds_off(fluid_synth_t* synth, int chan);
 int fluid_synth_modulate_voices(fluid_synth_t* synth, int chan, int is_cc, int ctrl);

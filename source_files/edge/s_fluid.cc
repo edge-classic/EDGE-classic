@@ -294,7 +294,7 @@ public:
 		if (! (status == PLAYING || status == PAUSED))
 			return;
 
-		fluid_synth_all_voices_noteoff(edge_fluid);
+		fluid_synth_all_voices_stop(edge_fluid);
 
 		S_QueueStop();
 
@@ -306,7 +306,7 @@ public:
 		if (status != PLAYING)
 			return;
 
-		fluid_synth_all_voices_noteoff(edge_fluid);
+		fluid_synth_all_voices_pause(edge_fluid);
 
 		status = PAUSED;
 	}

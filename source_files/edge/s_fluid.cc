@@ -97,6 +97,8 @@ bool S_StartupFluid(void)
 		}
 	}
 
+	fluid_synth_program_reset(edge_fluid);
+
 	return true; // OK!
 }
 
@@ -261,8 +263,6 @@ public:
 		if (status != STOPPED)
 		  Stop();
 	
-		fluid_synth_program_reset(edge_fluid);
-
 		if (fluid_seq)
 		{
 			delete fluid_seq;
@@ -294,7 +294,7 @@ public:
 		if (! (status == PLAYING || status == PAUSED))
 			return;
 
-		fluid_synth_system_reset(edge_fluid);
+		fluid_synth_all_voices_noteoff(edge_fluid);
 
 		S_QueueStop();
 
@@ -306,7 +306,7 @@ public:
 		if (status != PLAYING)
 			return;
 
-		fluid_synth_system_reset(edge_fluid);
+		fluid_synth_all_voices_noteoff(edge_fluid);
 
 		status = PAUSED;
 	}

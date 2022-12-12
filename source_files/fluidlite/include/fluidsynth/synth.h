@@ -158,6 +158,8 @@ FLUIDSYNTH_API int fluid_synth_program_reset(fluid_synth_t* synth);
       controller values. */
 FLUIDSYNTH_API int fluid_synth_system_reset(fluid_synth_t* synth);
 
+/** Stop all notes without any other modifications to the synth */
+FLUIDSYNTH_API int fluid_synth_all_voices_noteoff(fluid_synth_t* synth);
 
   /*
    * 

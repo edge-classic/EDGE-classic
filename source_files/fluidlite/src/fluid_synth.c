@@ -1215,6 +1215,28 @@ fluid_synth_all_sounds_off(fluid_synth_t* synth, int chan)
 }
 
 /*
+ * fluid_synth_all_voices_noteoff
+ *
+ * Purpose:
+ * Just stop playing all notes without any other funny business
+ */
+int
+fluid_synth_all_voices_noteoff(fluid_synth_t* synth)
+{
+  int i;
+  fluid_voice_t* voice;
+
+  for (i = 0; i < synth->polyphony; i++) {
+    voice = synth->voice[i];
+    if (_PLAYING(voice)) {
+      fluid_voice_noteoff(voice);
+    }
+  }
+
+  return FLUID_OK;
+}
+
+/*
  * fluid_synth_system_reset
  *
  * Purpose:

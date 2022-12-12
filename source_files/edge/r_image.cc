@@ -1065,8 +1065,8 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 
 	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
 	{
-		tmp_img->Swirl(hudtic/(r_doubleframes.d ? 2 : 1), rim->liquid_type); // Using leveltime disabled swirl for intermission screens
-		rim->swirled_gametic = hudtic;
+		rim->swirled_gametic = hudtic / (r_doubleframes.d ? 2 : 1);
+		tmp_img->Swirl(rim->swirled_gametic, rim->liquid_type); // Using leveltime disabled swirl for intermission screens
 	}
 
 	if (rim->opacity == OPAC_Unknown)
@@ -1128,13 +1128,6 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 		((rim->opacity == OPAC_Masked) ? UPL_Thresh : 0), max_pix);
 
 	delete tmp_img;
-
-	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
-	{
-		unsigned int sinevalue = (hudtic / (r_doubleframes.d ? 2 : 1) * 
-				(rim->liquid_type == LIQ_Thin ? 40 : 10) * 5 + 900) & 8191;
-		rim->swirled_texids.try_emplace(sinevalue, tex_id);
-	}
 
 	if (what_pal_cached)
 		W_DoneWithLump(what_palette);
@@ -1554,18 +1547,13 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 
 	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
 	{
-		if (rc->parent->liquid_type > LIQ_None && rc->parent->swirled_gametic != hudtic)
+		if (rim->swirled_gametic != hudtic / (r_doubleframes.d ? 2 : 1))
 		{
-			unsigned int sinevalue = (hudtic / (r_doubleframes.d ? 2 : 1) * 
-				(rc->parent->liquid_type == LIQ_Thin ? 40 : 10) * 5 + 900) & 8191;
-			auto find_texid = rim->swirled_texids.find(sinevalue);
-			if (find_texid != rim->swirled_texids.end())
+			if (rc->tex_id != 0)
 			{
-				rc->tex_id = find_texid->second;
-				rc->parent->swirled_gametic = hudtic;
-			}
-			else
+				glDeleteTextures(1, &rc->tex_id);
 				rc->tex_id = 0;
+			}
 		}
 	}
 
@@ -1729,17 +1717,6 @@ void W_DeleteAllImages(void)
 		{
 			glDeleteTextures(1, &rc->tex_id);
 			rc->tex_id = 0;
-		}
-		if (!rc->parent->swirled_texids.empty())
-		{
-			for (auto texid : rc->parent->swirled_texids)
-			{
-				if (texid.second != 0)
-				{
-					glDeleteTextures(1, &texid.second);
-				}
-			}
-			rc->parent->swirled_texids.clear();
 		}
 	}
 

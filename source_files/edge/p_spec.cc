@@ -933,6 +933,20 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 		{
 			target->c_h = source->frontsector->c_h;
 			target->f_h = source->frontsector->f_h;
+			for (int i = 0; i < target->linecount; i++)
+			{
+				if (target->lines[i]->side[1] && target->lines[i]->side[0]->middle.image && target->lines[i]->side[1]->middle.image &&
+					target->lines[i]->side[0]->middle.image == target->lines[i]->side[1]->middle.image)
+				{
+					target->lines[i]->side[0]->midmask_offset = 0;
+					target->lines[i]->side[1]->midmask_offset = 0;
+					for (seg_t *seg = target->subsectors->segs; seg != nullptr; seg = seg->sub_next)
+					{
+						if (seg->linedef == target->lines[i])
+							seg->linedef->flags |= MLF_LowerUnpegged;
+					}
+				}
+			}
 		}
 	}
 }

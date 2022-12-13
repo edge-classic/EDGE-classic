@@ -495,6 +495,8 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 
 	if (Frames::act_flags & AF_EXPLODE)
 		WAD::Printf("EXPLODE_DAMAGE.VAL = 128;\n");
+	else if (Frames::act_flags & AF_DETONATE)
+		WAD::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
 
 	WAD::Printf("\n");
 }

@@ -41,6 +41,8 @@
 #include "w_sprite.h"
 #include "w_wad.h"
 
+static void BobWeapon(player_t *p, weapondef_c *info);
+
 static sound_category_e WeapSfxCat(player_t *p)
 {
 	if (p == players[consoleplayer])
@@ -852,7 +854,13 @@ void P_MovePsprites(player_t * p)
 			psp->tics--;
 
 			if (psp->tics > 0)
+			{
+				if (psp->state->action == A_WeaponReady)
+				{
+					BobWeapon(p, p->weapons[p->ready_wp].info);
+				}
 				break;
+			}
 
 			weapondef_c *info = NULL;
 			if (p->ready_wp >= 0)

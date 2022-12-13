@@ -23,6 +23,7 @@ Bugs fixed
 + Fixed incorrect parsing of keypad (10-key) scancodes
 + Fixed main menu cursor scaling/placement when all menu item images are empty
   (i.e., background image alone is used as the "menu")
++ Fixed weapons with animated ready states having jittery swaying/bobbing
 
 
 

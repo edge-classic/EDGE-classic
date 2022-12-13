@@ -110,8 +110,6 @@ bool custom_MenuMain = false;
 bool custom_MenuEpisode = false;
 bool custom_MenuDifficulty = false;
 
-bool zerotic_ok = false;
-
 FILE *logfile = NULL;
 FILE *debugfile = NULL;
 
@@ -1748,14 +1746,12 @@ void E_Tick(void)
 	// this also runs the responder chain via E_ProcessEvents
 	int counts = N_TryRunTics();
 
-	// zerotic_ok is set to true if switching between 35/70FPS
-	// in the Options Menu, as it can occasionally produce a
+	// ignore this assertion if in a menu; switching between 35/70FPS
+	// in Video Options can occasionally produce a 'valid'
 	// zero count for N_TryRunTics()
 
-	if (!zerotic_ok)
+	if (!menuactive)
 		SYS_ASSERT(counts > 0);
-
-	zerotic_ok = false;
 
 	// run the tics
 	for (; counts > 0 ; counts--)

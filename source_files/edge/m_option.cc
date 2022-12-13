@@ -138,8 +138,6 @@ extern int joystick_device;
 
 extern int entry_playing;
 
-extern bool zerotic_ok;
-
 //submenus
 static void M_KeyboardOptions(int keypressed);
 static void M_VideoOptions(int keypressed);
@@ -1904,7 +1902,6 @@ static void M_ChangeErraticism(int keypressed)
 static void M_ChangeDoubleFrames(int keypressed)
 {
 	r_doubleframes.s = std::to_string(r_doubleframes.d);
-	zerotic_ok = true;
 }
 
 static void M_ChangeKicking(int keypressed)

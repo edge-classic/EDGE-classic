@@ -21,7 +21,7 @@
 
 #include "r_image.h"
 #include "stb_truetype.h"
-#include <map>
+#include <unordered_map>
 
 class fontdef_c;
 
@@ -144,7 +144,7 @@ public:
 	stbtt_fontinfo *ttf_info;
 	int ttf_char_width;
 	int ttf_char_height;
-	std::map<int, ttf_char_t> ttf_glyph_map;
+	std::unordered_map<int, ttf_char_t> ttf_glyph_map;
 
 private:
 	void BumpPatchName(char *name);

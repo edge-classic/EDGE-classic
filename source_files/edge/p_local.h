@@ -119,7 +119,7 @@ void P_CreatePlayer(int pnum, bool is_bot);
 void P_DestroyAllPlayers(void);
 void P_GiveInitialBenefits(player_t *player, const mobjtype_c *info);
 
-void P_PlayerThink(player_t * player);
+bool P_PlayerThink(player_t * player, bool extra_tic);
 void P_UpdateAvailWeapons(player_t *p);
 void P_UpdateTotalArmour(player_t *p);
 
@@ -145,7 +145,7 @@ statenum_t P_MobjFindLabel(mobj_t * mobj, const char *label);
 bool P_SetMobjState(mobj_t * mobj, statenum_t state);
 bool P_SetMobjStateDeferred(mobj_t * mobj, statenum_t state, int tic_skip);
 void P_SetMobjDirAndSpeed(mobj_t * mobj, angle_t angle, float slope, float speed);
-void P_RunMobjThinkers(void);
+void P_RunMobjThinkers(bool extra_tic);
 void P_SpawnSplash(float x, float y, float z, const mobjtype_c * splash, angle_t angle);
 void P_SpawnPuff(float x, float y, float z, const mobjtype_c * puff, angle_t angle);
 void P_SpawnBlood(float x, float y, float z, float damage, angle_t angle, const mobjtype_c * blood);
@@ -291,6 +291,8 @@ void P_UseLines(player_t * player);
 void P_LineAttack(mobj_t * t1, angle_t angle, float distance, float slope, float damage, const damage_c * damtype, const mobjtype_c *puff);
 
 void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special);
+
+bool ReplaceMidTexFromPart(line_t *TheLine, scroll_part_e parts);
 
 //
 // P_SETUP

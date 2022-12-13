@@ -39,7 +39,9 @@ int glmax_tex_units;
 
 DEF_CVAR(r_nearclip, "4",      CVAR_ARCHIVE)
 DEF_CVAR(r_farclip,  "64000",  CVAR_ARCHIVE)
+DEF_CVAR(r_culling, "0", CVAR_ARCHIVE)
 
+DEF_CVAR(r_fogofwar, "0", CVAR_ARCHIVE)
 
 typedef enum
 {
@@ -253,7 +255,6 @@ void RGL_CheckExtensions(void)
 // 
 void RGL_SoftInit(void)
 {
-	glDisable(GL_FOG);
 	glDisable(GL_BLEND);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_CULL_FACE);
@@ -279,7 +280,7 @@ void RGL_SoftInit(void)
 	glCullFace(GL_BACK);
 	glDisable(GL_CULL_FACE);
 
-	glHint(GL_FOG_HINT, GL_NICEST);
+	glHint(GL_FOG_HINT, GL_FASTEST);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 }
 

@@ -33,6 +33,8 @@
 
 // FIXME: Combine all these SDL bool vars into an int/enum'd flags structure
 
+extern cvar_c r_doubleframes;
+
 // Work around for alt-tabbing
 bool alt_is_down;
 bool eat_mouse_motion = true;
@@ -75,8 +77,11 @@ int TranslateSDLKey(SDL_Scancode key)
 	// if keypad is not wanted, convert to normal keys
 	if (! in_keypad.d)
 	{
-		if (SDL_SCANCODE_KP_0 <= key && key <= SDL_SCANCODE_KP_9)
-			return '0' + (key - SDL_SCANCODE_KP_0);
+		if (SDL_SCANCODE_KP_1 <= key && key < SDL_SCANCODE_KP_0)
+			return '0' + (key - 88);
+
+		if (key == SDL_SCANCODE_KP_0)
+			return '0';
 
 		switch (key)
 		{
@@ -561,13 +566,6 @@ void InactiveEventProcess(SDL_Event *sdl_ev)
 	}
 }
 
-
-void I_CentreMouse(void)
-{
-	SDL_WarpMouseInWindow(my_vis, SCREENWIDTH/2, SCREENHEIGHT/2);
-}
-
-
 void I_ShowJoysticks(void)
 {
 	if (nojoy)
@@ -720,8 +718,10 @@ int I_GetTime(void)
 {
     Uint32 t = SDL_GetTicks();
 
-    // more complex than "t*35/1000" to give more accuracy
-    return (t / 1000) * 35 + (t % 1000) * 35 / 1000;
+	int factor = (r_doubleframes.d ? 70 : 35);
+
+    // more complex than "t*70/1000" to give more accuracy
+    return (t / 1000) * factor + (t % 1000) * factor / 1000;
 }
 
 

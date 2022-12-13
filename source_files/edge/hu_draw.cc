@@ -48,6 +48,8 @@
 extern console_line_c * quit_lines[ENDOOM_LINES];
 extern int con_cursor;
 extern font_c *endoom_font;
+extern cvar_c r_overlay;
+extern cvar_c r_doubleframes;
 
 static font_c *default_font;
 
@@ -77,6 +79,16 @@ static float margin_X;
 static float margin_Y;
 static float margin_XMUL;
 static float margin_YMUL;
+
+std::vector<std::string> hud_overlays = 
+{
+	"",
+	"ECSCNLN1",
+	"ECSCNLN2",
+	"ECSCNLN3",
+	"ECSCNLN4",
+	"ECSCNLN5",
+};
 
 static inline float COORD_X(float x)
 {
@@ -308,7 +320,7 @@ void HUD_CalcScrollTexCoords( float x_scroll, float y_scroll, float *tx1, float 
 {
 	float timeScale, adjustedScrollS, adjustedScrollT;
 
-	timeScale = gametic / 100.0f;
+	timeScale = gametic / (r_doubleframes.d ? 200.0f : 100.0f);
 
 	adjustedScrollS = x_scroll * timeScale;
 	adjustedScrollT = y_scroll * timeScale;
@@ -459,6 +471,14 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 				GL_REPEAT);
 
 		HUD_CalcScrollTexCoords(sx, sy, &tx1, &ty1, &tx2, &ty2);
+	}
+
+	if (epi::strcmp(image->name, hud_overlays.at(r_overlay.d)) == 0)
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+				GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+				GL_REPEAT);
 	}
 
 	bool hud_swirl = false;

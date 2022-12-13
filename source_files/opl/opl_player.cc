@@ -19,11 +19,17 @@
 #include <string.h>
 
 #include "genmidi.h"
-#include "midifile.h"
 #include "opl_player.h"
 #include "opl3.h"
 
 // #define OPL_MIDI_DEBUG
+
+#define MIDI_CHANNELS_PER_TRACK 16
+
+#define MIDI_CONTROLLER_MAIN_VOLUME 0x7
+#define MIDI_CONTROLLER_ALL_NOTES_OFF 0x7b
+#define MIDI_CONTROLLER_PAN 0xa
+
 
 // Data associated with a MIDI channel of the currently playing song.
 
@@ -42,17 +48,6 @@ typedef struct
     int bend;
 
 } opl_channel_data_t;
-
-// Data associated with a track that is currently playing.
-
-typedef struct
-{
-    // the next event to process
-    midi_event_t *iter;
-
-    // absolute time of previous event, in microseconds
-    uint64_t  prev_time;
-} opl_track_data_t;
 
 // Information for an active voice (on the OPL chip)
 
@@ -266,19 +261,10 @@ static opl_channel_data_t channels[MIDI_CHANNELS_PER_TRACK];
 
 // Track data for playing tracks:
 
-static midi_file_t *the_song;
-static uint64_t  absolute_time;  // microseconds
+static uint64_t  absolute_time = 0;  // microseconds
 
 // number of sample pairs awaiting generation by the OPL3 emulator
 static int render_samples;
-
-static opl_track_data_t *tracks;
-static unsigned int num_tracks = 0;
-
-// Tempo control variables
-
-static unsigned int ticks_per_beat;  // constant per song
-static unsigned int us_per_beat;     // can change via a Meta event
 
 static int opl_io_port = 0x388;
 
@@ -996,10 +982,9 @@ static void Chan_AllNotesOff(opl_channel_data_t *channel, unsigned int param)
 	}
 }
 
-static opl_channel_data_t *TrackChannelForEvent(opl_track_data_t *track,
-                                                midi_event_t *event)
+static opl_channel_data_t *TrackChannelForEvent(uint8_t channel)
 {
-	unsigned int channel_num = event->data.channel.channel;
+	unsigned int channel_num = channel;
 
 	// MIDI uses track #9 for percussion, but for MUS it's track #15
 	// instead. Because DMX works on MUS data internally, we need to
@@ -1022,40 +1007,31 @@ static opl_channel_data_t *TrackChannelForEvent(opl_track_data_t *track,
 //
 //----------------------------------------------------------------------
 
-static void KeyOffEvent(opl_track_data_t *track, midi_event_t *event);
+void OPLAY_KeyOff(uint8_t channel, uint8_t note);
 
-static void KeyOnEvent(opl_track_data_t *track, midi_event_t *event)
+void OPLAY_KeyOn(uint8_t channel, uint8_t note, uint8_t volume)
 {
 	genmidi_instr_t *instrument;
-	opl_channel_data_t *channel;
-	unsigned int note, key, volume;
+	opl_channel_data_t *opl_channel;
+	unsigned int key;
 	bool double_voice;
 
-/*
-    printf("note on: channel %i, %i, %i\n",
-           event->data.channel.channel,
-           event->data.channel.param1,
-           event->data.channel.param2);
-*/
-
-	note   = event->data.channel.param1;
-	key    = event->data.channel.param1;
-	volume = event->data.channel.param2;
+	key = note;
 
 	// A volume of zero means key off. Some MIDI tracks, eg. the ones
 	// in AV.wad, use a second key on with a volume of zero to mean
 	// key off.
 	if (volume <= 0)
 	{
-		KeyOffEvent(track, event);
+		OPLAY_KeyOff(channel, note);
 		return;
 	}
 
 	// The channel.
-	channel = TrackChannelForEvent(track, event);
+	opl_channel = TrackChannelForEvent(channel);
 
 	// Percussion channel is treated differently.
-	if (event->data.channel.channel == 9)
+	if (channel == 9)
 	{
 		instrument = GM_GetPercussion(key);
 		if (instrument == NULL)
@@ -1067,7 +1043,7 @@ static void KeyOnEvent(opl_track_data_t *track, midi_event_t *event)
 	}
 	else
 	{
-		instrument = channel->instrument;
+		instrument = opl_channel->instrument;
 	}
 
 	double_voice = (LE_SHORT(instrument->flags) & GENMIDI_FLAG_2VOICE) != 0;
@@ -1081,36 +1057,29 @@ static void KeyOnEvent(opl_track_data_t *track, midi_event_t *event)
 	// is a double voice instrument, we must do this twice, but it
 	// doesn't matter if the second one cannot get a free voice.
 
-	V_KeyOn(channel, instrument, 0, note, key, volume);
+	V_KeyOn(opl_channel, instrument, 0, note, key, volume);
 
 	if (double_voice)
 	{
-		V_KeyOn(channel, instrument, 1, note, key, volume);
+		V_KeyOn(opl_channel, instrument, 1, note, key, volume);
 	}
 }
 
-static void KeyOffEvent(opl_track_data_t *track, midi_event_t *event)
+void OPLAY_KeyOff(uint8_t channel, uint8_t note)
 {
-	opl_channel_data_t *channel;
+	opl_channel_data_t *opl_channel;
 	int i;
 	unsigned int key;
 
-/*
-    printf("note off: channel %i, %i, %i\n",
-           event->data.channel.channel,
-           event->data.channel.param1,
-           event->data.channel.param2);
-*/
-
-	channel = TrackChannelForEvent(track, event);
-	key = event->data.channel.param1;
+	opl_channel = TrackChannelForEvent(channel);
+	key = note;
 
 	// Turn off voices being used to play this key.
 	// If it is a double voice instrument there will be two.
 
 	for (i = 0; i < voice_alloced_num; i++)
 	{
-		if (voice_alloced_list[i]->channel == channel &&
+		if (voice_alloced_list[i]->channel == opl_channel &&
 		    voice_alloced_list[i]->key == key)
 		{
 			// Finished with this voice now.
@@ -1122,50 +1091,43 @@ static void KeyOffEvent(opl_track_data_t *track, midi_event_t *event)
 	}
 }
 
-static void ProgramChangeEvent(opl_track_data_t *track, midi_event_t *event)
+void OPLAY_ProgramChange(uint8_t channel, uint8_t patch)
 {
-	opl_channel_data_t *channel;
+	opl_channel_data_t *opl_channel;
 	int instrument;
 
 	// Set the instrument used on this channel.
 
-	channel = TrackChannelForEvent(track, event);
-	instrument = event->data.channel.param1;
-	channel->instrument = GM_GetInstrument(instrument);
+	opl_channel = TrackChannelForEvent(channel);
+	instrument = patch;
+	opl_channel->instrument = GM_GetInstrument(instrument);
 
 	// WISH: Look through existing voices that are turned on on this
 	// channel, and change the instrument.
 }
 
-static void ControllerEvent(opl_track_data_t *track, midi_event_t *event)
+void OPLAY_ControllerChange(uint8_t channel, uint8_t type, uint8_t value)
 {
-	opl_channel_data_t *channel;
+	opl_channel_data_t *opl_channel;
 	unsigned int controller;
 	unsigned int param;
 
-/*
-    printf("change controller: channel %i, %i, %i\n",
-           event->data.channel.channel,
-           event->data.channel.param1,
-           event->data.channel.param2);
-*/
-
-	channel = TrackChannelForEvent(track, event);
-	controller = event->data.channel.param1;
-	param = event->data.channel.param2;
+	opl_channel = TrackChannelForEvent(channel);
+	controller = type;
+	param = value;
 
 	switch (controller)
 	{
 		case MIDI_CONTROLLER_MAIN_VOLUME:
-			Chan_SetVolume(channel, param, true);
+			Chan_SetVolume(opl_channel, param, true);
 			break;
 
 		case MIDI_CONTROLLER_PAN:
-			Chan_SetPan(channel, param);
+			Chan_SetPan(opl_channel, param);
 			break;
 
 		case MIDI_CONTROLLER_ALL_NOTES_OFF:
-			Chan_AllNotesOff(channel, param);
+			Chan_AllNotesOff(opl_channel, param);
 			break;
 
 		default:
@@ -1178,9 +1140,9 @@ static void ControllerEvent(opl_track_data_t *track, midi_event_t *event)
 
 // Process a pitch bend event.
 
-static void PitchBendEvent(opl_track_data_t *track, midi_event_t *event)
+void OPLAY_PitchBend(uint8_t channel, uint8_t msb)
 {
-	opl_channel_data_t *channel;
+	opl_channel_data_t *opl_channel;
 	int i;
 	opl_voice_t *voice_updated_list[OPL_NUM_VOICES * 2];
 	unsigned int voice_updated_num = 0;
@@ -1190,14 +1152,14 @@ static void PitchBendEvent(opl_track_data_t *track, midi_event_t *event)
 	// Update the channel bend value.  Only the MSB of the pitch bend
 	// value is considered: this is what Doom does.
 
-	channel = TrackChannelForEvent(track, event);
-	channel->bend = event->data.channel.param2 - 64;
+	opl_channel = TrackChannelForEvent(channel);
+	opl_channel->bend = msb - 64;
 
 	// Update all voices for this channel.
 
 	for (i = 0; i < voice_alloced_num; ++i)
 	{
-		if (voice_alloced_list[i]->channel == channel)
+		if (voice_alloced_list[i]->channel == opl_channel)
 		{
 			V_UpdateFrequency(voice_alloced_list[i]);
 			voice_updated_list[voice_updated_num++] = voice_alloced_list[i];
@@ -1220,228 +1182,21 @@ static void PitchBendEvent(opl_track_data_t *track, midi_event_t *event)
 	}
 }
 
-static void MetaSetTempo(unsigned int tempo)
-{
-	// tempo is defined as microseconds per "quarter note" (aka "beat").
-	// divide this by `ticks_per_beat` to get microseconds per tick.
-
-	us_per_beat = tempo;
-}
-
-// Process a meta event.
-
-static void MetaEvent(opl_track_data_t *track, midi_event_t *event)
-{
-	uint8_t *data = event->data.meta.data;
-	unsigned int data_len = event->data.meta.length;
-
-	switch (event->data.meta.type)
-	{
-		// Things we can just ignore.
-
-		case MIDI_META_SEQUENCE_NUMBER:
-		case MIDI_META_TEXT:
-		case MIDI_META_COPYRIGHT:
-		case MIDI_META_TRACK_NAME:
-		case MIDI_META_INSTR_NAME:
-		case MIDI_META_LYRICS:
-		case MIDI_META_MARKER:
-		case MIDI_META_CUE_POINT:
-		case MIDI_META_SEQUENCER_SPECIFIC:
-			break;
-
-		case MIDI_META_SET_TEMPO:
-			if (data_len == 3)
-			{
-				MetaSetTempo((data[0] << 16) | (data[1] << 8) | data[2]);
-			}
-			break;
-
-			// End of track - actually handled when we run out of events
-			// in the track, see below.
-
-		case MIDI_META_END_OF_TRACK:
-			break;
-
-		default:
-#ifdef OPL_MIDI_DEBUG
-			fprintf(stderr, "Unknown MIDI meta event type: %i\n",
-					event->data.meta.type);
-#endif
-			break;
-	}
-}
-
-// Process a MIDI event from a track.
-
-static void ProcessEvent(opl_track_data_t *track, midi_event_t *event)
-{
-	switch (event->event_type)
-	{
-		case MIDI_EVENT_NOTE_OFF:
-			KeyOffEvent(track, event);
-			break;
-
-		case MIDI_EVENT_NOTE_ON:
-			KeyOnEvent(track, event);
-			break;
-
-		case MIDI_EVENT_CONTROLLER:
-			ControllerEvent(track, event);
-			break;
-
-		case MIDI_EVENT_PROGRAM_CHANGE:
-			ProgramChangeEvent(track, event);
-			break;
-
-		case MIDI_EVENT_PITCH_BEND:
-			PitchBendEvent(track, event);
-			break;
-
-		case MIDI_EVENT_META:
-			MetaEvent(track, event);
-			break;
-
-			// SysEx events can be ignored.
-
-		case MIDI_EVENT_SYSEX:
-		case MIDI_EVENT_SYSEX_SPLIT:
-			break;
-
-		default:
-#ifdef OPL_MIDI_DEBUG
-			fprintf(stderr, "Unknown MIDI event type %i\n", event->event_type);
-#endif
-			break;
-	}
-}
-
-//----------------------------------------------------------------------
-
-static bool ProcessNextTrack(void)
-{
-	// returns true when all tracks are finished.
-
-	int best = -1;
-	uint64_t best_time = (1ULL << 60);
-	uint64_t best_delta = 0;
-
-	// Find track with earliest next event.
-
-	unsigned int i;
-	for (i = 0 ; i < num_tracks ; i++)
-	{
-		opl_track_data_t *track = &tracks[i];
-
-		if (track->iter == NULL)
-		{
-			// ignore a finished track
-			continue;
-		}
-
-		uint64_t delta = (uint64_t)track->iter->delta_time;
-
-		// convert "ticks" of delta time to microseconds
-		delta = delta * (uint64_t)us_per_beat / (uint64_t)ticks_per_beat;
-
-		uint64_t time = track->prev_time + delta;
-
-		if (time < best_time)
-		{
-			best       = i;
-			best_time  = time;
-			best_delta = delta;
-		}
-	}
-
-	if (best < 0)
-	{
-		// that's all folks!
-		return true;
-	}
-
-	if (best_time > absolute_time)
-	{
-		// convert time to number of samples
-		uint64_t time = best_time - absolute_time;
-		absolute_time = best_time;
-
-		render_samples = time * (uint64_t)sample_rate / 1000000ULL;
-		if (render_samples < 1)
-			render_samples = 1;
-
-		// render these samples *before* doing the event
-		return false;
-	}
-
-	opl_track_data_t *track = &tracks[best];
-
-	ProcessEvent(track, track->iter);
-
-	track->iter = track->iter->next;
-	track->prev_time = best_time;
-
-	return false;
-}
-
-static bool AllocateTracks(void)
-{
-	num_tracks = MIDI_NumTracks(the_song);
-
-	tracks = (opl_track_data_t *) malloc(num_tracks * sizeof(opl_track_data_t));
-	if (tracks == NULL)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-static void FreeTracks(void)
-{
-	if (tracks != NULL)
-	{
-		free(tracks);
-		tracks = NULL;
-	}
-	num_tracks = 0;
-}
-
-static void RewindSong(void)
-{
-	unsigned int i;
-	for (i = 0 ; i < num_tracks ; i++)
-	{
-		tracks[i].iter = MIDI_IterateTrack(the_song, i);
-		tracks[i].prev_time = 0;
-	}
-
-	absolute_time = 0;
-
-	// guard against a zero-length MIDI, generate a very short pause at start
-	render_samples = 64;
-
-	// default tempo is 120 bpm (as per MIDI standard).
-	us_per_beat = 500 * 1000;
-
-	InitChannels();
-}
-
 static void ParseDMXOptions(void)
 {
 	const char *dmxoption = getenv("DMXOPTION");
-	if (dmxoption == NULL)
-		dmxoption = "";
+	if (!dmxoption)
+		return;
 
 	if (strstr(dmxoption, "-opl3") != NULL)
 	{
 		opl3mode = true;
-		num_opl_voices = OPL_NUM_VOICES * 2;
 	}
 	else
 	{
+		// If they are setting a DMXOPTION env variable assume
+		// that omitting -opl3 means a desire for opl2
 		opl3mode = false;
-		num_opl_voices = OPL_NUM_VOICES;
 	}
 
 	if (strstr(dmxoption, "-reverse") != NULL)
@@ -1456,14 +1211,18 @@ static void ParseDMXOptions(void)
 //
 //----------------------------------------------------------------------
 
-bool OPLAY_Init(int freq, bool stereo)
+bool OPLAY_Init(int freq, bool stereo, bool opl3_wanted)
 {
 	if (freq < 8000)
 		return false;
 
 	sample_rate = freq;
 
+	opl3mode = opl3_wanted;
+
 	ParseDMXOptions();
+
+	num_opl_voices = OPL_NUM_VOICES * (opl3mode ? 2 : 1);
 
 	OPL3_Reset(&opl_chip, freq);
 
@@ -1471,59 +1230,31 @@ bool OPLAY_Init(int freq, bool stereo)
 
 	InitVoices();
 
-	tracks = NULL;
-	num_tracks = 0;
-
 	music_initialized = true;
 	return true;
 }
 
-bool OPLAY_StartSong(midi_file_t *song)
+bool OPLAY_StartSong()
 {
 	if (! music_initialized)
 	{
 		return false;
 	}
 
-	// if we are already playing this song, just jump back to the start
-	if (song == the_song)
-	{
-		RewindSong();
-		return true;
-	}
-
-	FreeTracks();
-
-	the_song = song;
-
-	if (! AllocateTracks())
-	{
-		the_song = NULL;
-		return false;
-	}
-
-	ticks_per_beat = MIDI_GetFileTimeDivision(song);
-
-	RewindSong();
-
 	return true;
 }
 
 void OPLAY_FinishSong(void)
 {
-	if (! music_initialized || the_song == NULL)
+	if (! music_initialized)
 	{
 		return;
 	}
-
-	FreeTracks();
-
-	the_song = NULL;
 }
 
 void OPLAY_NotesOff(void)
 {
-	if (! music_initialized || the_song == NULL)
+	if (! music_initialized)
 	{
 		return;
 	}
@@ -1540,7 +1271,9 @@ int OPLAY_Stream(int16_t *buf, int samples, bool stereo)
 	// number of sample pairs stored in the buffer
 	int stored = 0;
 
-	if (! music_initialized || the_song == NULL)
+	render_samples = samples;
+
+	if (! music_initialized)
 	{
 		return 0;
 	}
@@ -1570,13 +1303,16 @@ int OPLAY_Stream(int16_t *buf, int samples, bool stereo)
 
 		if (stored >= samples)
 			break;
-
-		if (ProcessNextTrack())
-		{
-			// all tracks are finished
-			break;
-		}
 	}
 
 	return stored;
+}
+
+void OPLAY_WriteReg(uint8_t reg, uint8_t value)
+{
+	if (! music_initialized)
+	{
+		return;
+	}
+	RawWriteRegister(reg, value);
 }

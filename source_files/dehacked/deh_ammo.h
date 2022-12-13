@@ -24,9 +24,10 @@ typedef enum
 	am_cell,      // Plasma rifle, BFG.
 	am_rocket,    // Missile launcher.
 
-	NUMAMMO,
+	am_unused,	  // Not used
 
-	am_noammo     // Fist / chainsaw
+	am_noammo,     // Fist / chainsaw
+	NUMAMMO
 }
 ammotype_e;
 

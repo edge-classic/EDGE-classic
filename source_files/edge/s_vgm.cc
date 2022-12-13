@@ -2,7 +2,7 @@
 //  EDGE VGM Music Player
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 2022 - The EDGE-Classic Team
+//  Copyright (c) 2022 - The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -34,7 +34,7 @@
 
 #include "ymfm_interface.h"
 
-#define VGM_BUFFER 4096
+#define VGM_BUFFER 65536 // Apparently up to this many samples can be generated in one instruction cycle
 
 extern bool dev_stereo;  // FIXME: encapsulation
 extern int  dev_freq;
@@ -103,7 +103,6 @@ vgmplayer_c::~vgmplayer_c()
 void vgmplayer_c::PostOpenInit()
 {   
 	// Loaded, but not playing
-	vgm_data_start = vgm_track_begin;
 
 	status = STOPPED;
 }
@@ -131,14 +130,12 @@ bool vgmplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	else
 		data_buf = buf->data_L;
 
-	// Divide the buffer size by 8 to give some headroom because there's no way to determine the total size of
-	// the generated output until after the cycles are run
-	uint32_t samples = ymfm_generate_batch(vgm_buffer, &vgm_data_start, &vgm_cur_pos, dev_freq, data_buf, VGM_BUFFER / 8);
+	int32_t samples = ymfm_generate_batch(vgm_buffer, &vgm_data_start, &vgm_cur_pos, dev_freq, data_buf);
 
-	if (vgm_data_start >= vgm_buffer.size())
+	if (samples == -1)
 		song_done = true;
 
-	buf->length = samples;
+	buf->length = samples < 2 ? 0 : samples; // Not sure about this yet
 
 	if (!dev_stereo)
 		ConvertToMono(buf->data_L, mono_buffer, buf->length);
@@ -147,8 +144,11 @@ bool vgmplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	{
 		if (! looping)
 			return false;
-		vgm_data_start = 0;
+		vgm_data_start = vgm_track_begin;
 		vgm_cur_pos = 0;
+		// Gotta be a better way to restart the track
+		ymfm_delete_chips();
+		ymfm_parse_header(vgm_buffer);
 		return true;
 	}
 
@@ -264,7 +264,7 @@ void vgmplayer_c::Play(bool loop)
 
 	status = PLAYING;
 	looping = loop;
-	vgm_data_start = 0;
+	vgm_data_start = vgm_track_begin;
 	vgm_cur_pos = 0;
 
 	// Load up initial buffer data

@@ -27,6 +27,7 @@
 #include "i_defs_gl.h"
 
 #include <math.h>
+#include <unordered_set>
 
 #include "dm_data.h"
 #include "dm_defs.h"
@@ -62,6 +63,10 @@
 
 
 DEF_CVAR(debug_hom, "0", CVAR_CHEAT)
+DEF_CVAR(r_maxdlights, "20", CVAR_ARCHIVE)
+
+extern cvar_c r_culling;
+extern cvar_c r_doubleframes;
 
 
 side_t *sidedef;
@@ -74,6 +79,8 @@ unsigned int root_node;
 
 int detail_level = 1;
 int use_dlights = 0;
+
+std::unordered_set<abstract_shader_c *> seen_dlights;
 
 int doom_fading = 1;
 
@@ -602,7 +609,7 @@ wall_plane_data_t;
 // Adapted from Quake 3 GPL release - Dasho (not used yet, but might be for future effects)
 void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
 {
-	float timeScale = gametic / 100.0f;
+	float timeScale = gametic / (r_doubleframes.d ? 200.0f : 100.0f);
 	float adjustedScrollS, adjustedScrollT;
 
 	adjustedScrollS = x_scroll * timeScale;
@@ -1462,7 +1469,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 		slope_ch += MAX(sec->c_slope->dz1, sec->c_slope->dz2);
 
 	// Boom compatibility -- invisible walkways
-	if (sec->heightsec != NULL)
+	if (sec->heightsec != nullptr)
 		slope_fh = std::min(slope_fh, sec->heightsec->f_h);
 
 	if (! other)
@@ -2158,7 +2165,6 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
 	dsub->segs.push_back(dseg);
 
-
 	sector_t *frontsector = seg->front_sub->sector;
 	sector_t *backsector  = NULL;
 
@@ -2169,44 +2175,50 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
 	if (seg->linedef->blocked)
 	{
+		// Check if this is a Line 242 "window" (I think) - Dasho
+		if ((!(seg->frontsector && seg->frontsector->heightsec && seg->frontsector->heightsec_side) &&
+			!(seg->backsector && seg->backsector->heightsec && seg->backsector->heightsec_side)))
 		RGL_1DOcclusionSet(angle_R, angle_L);
 	}
 
 	// --- handle sky (using the depth buffer) ---
 
-	if (backsector && IS_SKY(frontsector->floor) && IS_SKY(backsector->floor))
+	if (!r_culling.d)
 	{
-		if (frontsector->f_h < backsector->f_h)
+		if (backsector && IS_SKY(frontsector->floor) && IS_SKY(backsector->floor))
 		{
-			RGL_DrawSkyWall(seg, frontsector->f_h, backsector->f_h);
-		}
-	}
-
-	if (IS_SKY(frontsector->ceil))
-	{
-		if (frontsector->c_h < frontsector->sky_h &&
-			(! backsector || ! IS_SKY(backsector->ceil) ||
-			backsector->f_h >= frontsector->c_h))
-		{
-			RGL_DrawSkyWall(seg, frontsector->c_h, frontsector->sky_h);
-		}
-		else if (backsector && IS_SKY(backsector->ceil) &&
-			frontsector->heightsec == NULL && backsector->heightsec == NULL)
-		{
-			float max_f = MAX(frontsector->f_h, backsector->f_h);
-
-			if (backsector->c_h <= max_f && max_f < frontsector->sky_h)
+			if (frontsector->f_h < backsector->f_h)
 			{
-				RGL_DrawSkyWall(seg, max_f, frontsector->sky_h);
+				RGL_DrawSkyWall(seg, frontsector->f_h, backsector->f_h);
 			}
 		}
-	}
-	// -AJA- 2004/08/29: Emulate Sky-Flooding TRICK
-	else if (! debug_hom.d && backsector && IS_SKY(backsector->ceil) &&
-			 seg->sidedef->top.image == NULL &&
-			 backsector->c_h < frontsector->c_h)
-	{
-		RGL_DrawSkyWall(seg, backsector->c_h, frontsector->c_h);
+
+		if (IS_SKY(frontsector->ceil))
+		{
+			if (frontsector->c_h < frontsector->sky_h &&
+				(! backsector || ! IS_SKY(backsector->ceil) ||
+				backsector->f_h >= frontsector->c_h))
+			{
+				RGL_DrawSkyWall(seg, frontsector->c_h, frontsector->sky_h);
+			}
+			else if (backsector && IS_SKY(backsector->ceil) &&
+				frontsector->heightsec == NULL && backsector->heightsec == NULL)
+			{
+				float max_f = MAX(frontsector->f_h, backsector->f_h);
+
+				if (backsector->c_h <= max_f && max_f < frontsector->sky_h)
+				{
+					RGL_DrawSkyWall(seg, max_f, frontsector->sky_h);
+				}
+			}
+		}
+		// -AJA- 2004/08/29: Emulate Sky-Flooding TRICK
+		else if (! debug_hom.d && backsector && IS_SKY(backsector->ceil) &&
+				seg->sidedef->top.image == NULL &&
+				backsector->c_h < frontsector->c_h)
+		{
+			RGL_DrawSkyWall(seg, backsector->c_h, frontsector->c_h);
+		}
 	}
 }
 
@@ -2309,6 +2321,11 @@ bool RGL_CheckBBox(float *bspcoord)
 
 		if (angle_L == angle_R)
 			return false;
+
+		if (r_culling.d && 
+			R_PointToDist(viewx, viewy, (x1+x2)/2, (y1+y2)/2) > 16000)
+			return false;
+
 	}
 
 	return ! RGL_1DOcclusionTest(angle_R, angle_L);
@@ -2585,12 +2602,12 @@ static void RGL_WalkSubsector(int num)
 
 	// --- handle sky (using the depth buffer) ---
 
-	if (IS_SKY(sub->sector->floor) && viewz > sub->sector->f_h)
+	if (!r_culling.d && IS_SKY(sub->sector->floor) && viewz > sub->sector->f_h)
 	{
 		RGL_DrawSkyPlane(sub, sub->sector->f_h);
 	}
 
-	if (IS_SKY(sub->sector->ceil) && viewz < sub->sector->sky_h)
+	if (!r_culling.d && IS_SKY(sub->sector->ceil) && viewz < sub->sector->sky_h)
 	{
 		RGL_DrawSkyPlane(sub, sub->sector->sky_h);
 	}
@@ -2682,23 +2699,65 @@ static void RGL_WalkSubsector(int num)
 	// handle each sprite in the subsector.  Must be done before walls,
 	// since the wall code will update the 1D occlusion buffer.
 
-	for (mobj_t *mo = sub->thinglist ; mo ; mo=mo->snext)
+	if (r_culling.d)
 	{
-		RGL_WalkThing(K, mo);
+		bool skip = true;
+
+		for (seg_t *seg = sub->segs ; seg ; seg=seg->sub_next)
+		{
+			if (MIR_SegOnPortal(seg))
+				continue;
+
+			float sx1 = seg->v1->x;
+			float sy1 = seg->v1->y;
+
+			float sx2 = seg->v2->x;
+			float sy2 = seg->v2->y;
+
+			if (R_PointToDist(viewx, viewy, (sx1+sx2)/2, (sy1+sy2)/2) <= 3000)
+			{
+				skip = false;
+				break;
+			}
+		}
+
+		if (!skip)
+		{
+			for (mobj_t *mo = sub->thinglist ; mo ; mo=mo->snext)
+			{
+				RGL_WalkThing(K, mo);
+			}
+			// clip 1D occlusion buffer.
+			for (seg_t *seg = sub->segs ; seg ; seg=seg->sub_next)
+			{
+				RGL_WalkSeg(K, seg);
+			}
+
+			// add drawsub to list (closest -> furthest)
+			if (num_active_mirrors > 0)
+				active_mirrors[num_active_mirrors-1].def->drawsubs.push_back(K);
+			else
+				drawsubs.push_back(K);
+		}
 	}
-
-	// clip 1D occlusion buffer.
-	for (seg_t *seg = sub->segs ; seg ; seg=seg->sub_next)
-	{
-		RGL_WalkSeg(K, seg);
-	}
-
-	// add drawsub to list (closest -> furthest)
-
-	if (num_active_mirrors > 0)
-		active_mirrors[num_active_mirrors-1].def->drawsubs.push_back(K);
 	else
-		drawsubs.push_back(K);
+	{
+		for (mobj_t *mo = sub->thinglist ; mo ; mo=mo->snext)
+		{
+			RGL_WalkThing(K, mo);
+		}
+		// clip 1D occlusion buffer.
+		for (seg_t *seg = sub->segs ; seg ; seg=seg->sub_next)
+		{
+			RGL_WalkSeg(K, seg);
+		}
+
+		// add drawsub to list (closest -> furthest)
+		if (num_active_mirrors > 0)
+			active_mirrors[num_active_mirrors-1].def->drawsubs.push_back(K);
+		else
+			drawsubs.push_back(K);
+	}
 }
 
 
@@ -3224,6 +3283,7 @@ void R_Render(int x, int y, int w, int h, mobj_t *camera,
 	framecount++;
 	validcount++;
 
+	seen_dlights.clear();
 	RGL_RenderTrueBSP();
 }
 

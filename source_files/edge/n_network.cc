@@ -52,6 +52,9 @@ int base_port;
 
 DEF_CVAR(m_busywait, "1", CVAR_ARCHIVE)
 
+// 70Hz
+DEF_CVAR(r_doubleframes, "0", CVAR_ARCHIVE)
+
 
 // gametic is the tic about to (or currently being) run.
 // maketic is the tic that hasn't had control made for it yet.
@@ -189,7 +192,7 @@ void N_GrabTiccmds(void)
 		memcpy(&p->cmd, p->in_cmds + buf, sizeof(ticcmd_t));
 	}
 
-	VM_SetFloat(ui_vm, "sys", "gametic", gametic);
+	VM_SetFloat(ui_vm, "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));
 
 	gametic++;
 }

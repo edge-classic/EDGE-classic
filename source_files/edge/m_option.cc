@@ -79,6 +79,8 @@
 #include "path.h"
 #include "str_util.h"
 
+#include "playlist.h"
+
 #include "main.h"
 
 #include "dm_state.h"
@@ -106,7 +108,8 @@
 #include "r_image.h"
 #include "w_wad.h"
 #include "r_wipe.h"
-#include "s_tsf.h"
+#include "s_opl.h"
+#include "s_fluid.h"
 
 #include "i_ctrl.h"
 
@@ -120,7 +123,11 @@ extern cvar_c m_language;
 extern cvar_c r_crosshair;
 extern cvar_c r_crosscolor;
 extern cvar_c r_crosssize;
+extern cvar_c s_genmidi;
 extern cvar_c s_soundfont;
+extern cvar_c r_overlay;
+extern cvar_c g_erraticism;
+extern cvar_c r_doubleframes;
 
 static int menu_crosshair;
 static int menu_crosscolor;
@@ -128,6 +135,10 @@ static int menu_crosssize;
 static int monitor_size;
 
 extern int joystick_device;
+
+extern int entry_playing;
+
+extern bool zerotic_ok;
 
 //submenus
 static void M_KeyboardOptions(int keypressed);
@@ -160,6 +171,7 @@ static void M_ChangeMonitorSize(int keypressed);
 static void M_ChangeKicking(int keypressed);
 static void M_ChangeWeaponSwitch(int keypressed);
 static void M_ChangeMipMap(int keypressed);
+static void M_SaveOverlay(int keypressed);
 static void M_ChangeDLights(int keypressed);
 
 // -ES- 1998/08/20 Added resolution options
@@ -178,7 +190,11 @@ static void M_ChangeResFull(int keypressed);
 
 static void M_LanguageDrawer(int x, int y, int deltay);
 static void M_ChangeLanguage(int keypressed);
+static void M_ChangeOPL(int keypressed);
 static void M_ChangeSoundfont(int keypressed);
+static void M_ChangeGENMIDI(int keypressed);
+static void M_ChangeErraticism(int keypressed);
+static void M_ChangeDoubleFrames(int keypressed);
 static void InitMonitorSize();
 
 static char YesNo[]     = "Off/On";  // basic on/off
@@ -194,6 +210,7 @@ static char Details[]   = "Low/Medium/High";
 static char Hq2xMode[]  = "Off/UI Only/UI & Sprites/All";
 static char Invuls[]    = "Simple/Textured";
 static char MonitSiz[]  = "5:4/4:3/3:2/16:10/16:9/21:9";
+static char VidOverlays[]  = "None/Lines 1x/Lines 2x/Checkered/Vertical/Grill";
 
 // for CVar enums
 const char WIPE_EnumStr[] = "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors";
@@ -203,10 +220,15 @@ static char MixChans[]    = "32/64/96/128/160/192/224/256";
 
 static char CrosshairColor[] = "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange";
 
+static char OPLMode[]  = "Off/OPL2/OPL3";
+
 // Screen resolution changes
 static scrmode_c new_scrmode;
 
 bool splash_screen;
+
+extern std::vector<std::string> available_soundfonts;
+extern std::vector<std::string> available_genmidis;
 
 // -ES- 1998/11/28 Wipe and Faded teleportation options
 //static char FadeT[] = "Off/On, flash/On, no flash";
@@ -372,15 +394,14 @@ static optmenuitem_t vidoptions[] =
 
 	{OPT_Plain,   "",  NULL,  0,  NULL, NULL, NULL},
 
+	{OPT_Switch,  "Framerate Target", "35 FPS/70 FPS", 2, &r_doubleframes.d, M_ChangeDoubleFrames, NULL},
 	{OPT_Switch,  "Monitor Size",  MonitSiz,  6, &monitor_size, M_ChangeMonitorSize, NULL},
 	{OPT_Switch,  "Smoothing",         YesNo, 2, &var_smoothing, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "H.Q.2x Scaling", Hq2xMode, 4, &hq2x_scaling, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Dynamic Lighting", DLMode, 2, &use_dlights, M_ChangeDLights, NULL},
 	{OPT_Switch,  "Detail Level",   Details,  3, &detail_level, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Mipmapping",     MipMaps,  3, &var_mipmapping, M_ChangeMipMap, NULL},
-
-	{OPT_Plain,   "",  NULL, 0, NULL, NULL, NULL},
-
+	{OPT_Switch,  "Overlay",  		VidOverlays, 6, &r_overlay.d, M_SaveOverlay, NULL},
 	{OPT_Switch,  "Crosshair",       CrossH, 10, &menu_crosshair, M_ChangeCrossHair, NULL},
 	{OPT_Switch,  "Crosshair Color", CrosshairColor,  8, &menu_crosscolor, M_ChangeCrossColor, NULL},
 	{OPT_Slider,  "Crosshair Size",    NULL,  4,  &menu_crosssize, M_ChangeCrossSize, NULL},
@@ -480,8 +501,9 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
-	{OPT_Function, "MIDI Soundfont", NULL,  0, NULL, M_ChangeSoundfont, NULL},
-	{OPT_Boolean, "OPL Music Mode",  YesNo, 2,  &var_opl_music, NULL, "NeedRestart"},
+	{OPT_Function, "MIDI Soundfont", NULL,  0, NULL, M_ChangeSoundfont, "Warning! SF3 Soundfonts may have long loading times!"},
+	{OPT_Switch,  "OPL Music Mode",  OPLMode, 3,  &var_opl_music, M_ChangeOPL, NULL},
+	{OPT_Function, "OPL Instrument Bank", NULL,  0, NULL, M_ChangeGENMIDI, NULL},
 	{OPT_Boolean, "PC Speaker Mode", YesNo, 2,  &var_pc_speaker_mode, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Boolean, "Dynamic Reverb",       YesNo, 2, &dynamic_reverb, NULL, NULL},
@@ -557,12 +579,11 @@ static optmenuitem_t playoptions[] =
 	{OPT_Boolean, "Shoot-thru Scenery",   YesNo, 2, 
      &global_flags.pass_missile, M_ChangePassMissile, NULL},
 
-	{OPT_Plain,   "", NULL, 0, NULL, NULL, NULL},
+	{OPT_Boolean, "Erraticism",   YesNo, 2, 
+     &g_erraticism.d, M_ChangeErraticism, "Time only advances when you move or fire"},
 
 	{OPT_Slider,  "Gravity",            NULL, 20, 
      &global_flags.menu_grav, NULL, "Gravity"},
-
-	{OPT_Plain,   "", NULL, 0, NULL, NULL, NULL},
 
     {OPT_Boolean, "Respawn Enemies",            YesNo, 2, 
      &global_flags.respawn, M_ChangeRespawn, NULL},
@@ -1065,6 +1086,13 @@ void M_OptDrawer()
 			HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, epi::PATH_GetBasename(s_soundfont.c_str()).c_str());
 		}
 
+		// Draw current GENMIDI
+		if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeGENMIDI)
+		{
+			HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, 
+				s_genmidi.s.empty() ? "default" : epi::PATH_GetBasename(s_genmidi.c_str()).c_str());
+		}
+
 		// -ACB- 1998/07/15 Menu Cursor is colour indexed.
 		if (is_selected)
 		{
@@ -1255,7 +1283,7 @@ bool M_OptResponder(event_t * ev, int ch)
 
 		keyscan = 0;
 
-		if (ch == KEYD_ESCAPE)
+		if (ch == KEYD_ESCAPE || ch == KEYD_MENU_CANCEL)
 			return true;
      
 		blah = (int*)(curr_item->switchvar);
@@ -1860,6 +1888,25 @@ static void M_ChangeMipMap(int keypressed)
 	W_DeleteAllImages();
 }
 
+// Need to make a generic CVAR save function
+static void M_SaveOverlay(int keypressed)
+{
+	r_overlay.s = std::to_string(r_overlay.d);
+}
+
+// See above
+static void M_ChangeErraticism(int keypressed)
+{
+	g_erraticism.s = std::to_string(g_erraticism.d);
+}
+
+// See above the above
+static void M_ChangeDoubleFrames(int keypressed)
+{
+	r_doubleframes.s = std::to_string(r_doubleframes.d);
+	zerotic_ok = true;
+}
+
 static void M_ChangeKicking(int keypressed)
 {
 	if (currmap && ((currmap->force_on | currmap->force_off) & MPF_Kicking))
@@ -1904,7 +1951,7 @@ static void M_ChangeCrossSize(int keypressed)
 //
 static void M_ChangeLanguage(int keypressed)
 {
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
 		int idx, max;
 		
@@ -1916,7 +1963,7 @@ static void M_ChangeLanguage(int keypressed)
 			
 		language.Select(idx);
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
 		int idx, max;
 		
@@ -1934,45 +1981,103 @@ static void M_ChangeLanguage(int keypressed)
 }
 
 //
+// M_ChangeOPL
+//
+//
+static void M_ChangeOPL(int keypressed)
+{
+	pl_entry_c *playing = playlist.Find(entry_playing);
+	if (var_opl_music || (playing && 
+		(playing->type == MUS_IMF280 || playing->type == MUS_IMF560 || playing->type == MUS_IMF700)))
+		S_RestartOPL();
+	else
+		S_RestartFluid();
+}
+
+//
 // M_ChangeSoundfont
 //
 //
 static void M_ChangeSoundfont(int keypressed)
 {
-	int sf2_pos = -1;
+	int sf_pos = -1;
 	for(int i=0; i < (int)available_soundfonts.size(); i++)
 	{
 		if (epi::case_cmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
 		{
-			sf2_pos = i;
+			sf_pos = i;
 			break;
 		}
 	}
 
-	if (sf2_pos < 0)
+	if (sf_pos < 0)
 	{
-		I_Warning("M_ChangeSoundfont: Could not read list of available soundfonts. Keeping current selection!\n");
+		I_Warning("M_ChangeSoundfont: Could not read list of available soundfonts. Falling back to default!\n");
+		s_soundfont = "default.sf2";
 		return;
 	}
 
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
-		if (sf2_pos - 1 >= 0)
-			sf2_pos--;
+		if (sf_pos - 1 >= 0)
+			sf_pos--;
 		else
-			sf2_pos = available_soundfonts.size() - 1;
+			sf_pos = available_soundfonts.size() - 1;
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
-		if (sf2_pos + 1 >= (int)available_soundfonts.size())
-			sf2_pos = 0;
+		if (sf_pos + 1 >= (int)available_soundfonts.size())
+			sf_pos = 0;
 		else
-			sf2_pos++;
+			sf_pos++;
 	}
 
 	// update cvar
-	s_soundfont = available_soundfonts.at(sf2_pos);
-	S_RestartTSF();
+	s_soundfont = available_soundfonts.at(sf_pos);
+	S_RestartFluid();
+}
+
+//
+// M_ChangeGENMIDI
+//
+//
+static void M_ChangeGENMIDI(int keypressed)
+{
+	int op2_pos = -1;
+	for(int i=0; i < (int)available_genmidis.size(); i++)
+	{
+		if (epi::case_cmp(s_genmidi.s, available_genmidis.at(i)) == 0)
+		{
+			op2_pos = i;
+			break;
+		}
+	}
+
+	if (op2_pos < 0)
+	{
+		I_Warning("M_ChangeGENMIDI: Could not read list of available GENMIDIs. Falling back to default!\n");
+		s_genmidi.s = "";
+		return;
+	}
+
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
+	{
+		if (op2_pos - 1 >= 0)
+			op2_pos--;
+		else
+			op2_pos = available_genmidis.size() - 1;
+	}
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
+	{
+		if (op2_pos + 1 >= (int)available_genmidis.size())
+			op2_pos = 0;
+		else
+			op2_pos++;
+	}
+
+	// update cvar
+	s_genmidi = available_genmidis.at(op2_pos);
+	S_RestartOPL();
 }
 
 //
@@ -1982,11 +2087,11 @@ static void M_ChangeSoundfont(int keypressed)
 //
 static void M_ChangeResSize(int keypressed)
 {
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Size, -1);
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Size, +1);
 	}
@@ -1999,11 +2104,11 @@ static void M_ChangeResSize(int keypressed)
 //
 static void M_ChangeResFull(int keypressed)
 {
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_DisplayMode, +1);
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_DisplayMode, +1);
 	}

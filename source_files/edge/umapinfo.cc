@@ -705,6 +705,24 @@ static int ParseMapEntry(Scanner &scanner, MapEntry *val)
 	{
 		ParseStandardProperty(scanner, val);
 	}
+	// Some fallback handling
+	if (!val->nextsecret[0])
+	{
+		if (val->nextmap[0])
+			Z_StrNCpy(val->nextsecret, val->nextmap, 8);
+	}
+	if (!val->enterpic[0])
+	{
+		for(int i = 0; i < Maps.mapcount; i++)
+		{
+			if (!strcmp(val->mapname, Maps.maps[i].nextmap))
+			{
+				if (Maps.maps[i].exitpic[0])
+					Z_StrNCpy(val->enterpic, Maps.maps[i].exitpic, 8);
+				break;
+			}
+		}
+	}
 	return 1;
 }
 

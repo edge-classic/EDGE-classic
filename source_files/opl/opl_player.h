@@ -19,14 +19,21 @@
 
 #include <inttypes.h>
 
-#include "midifile.h"
+bool OPLAY_Init(int freq, bool stereo, bool opl3_wanted);
 
-bool OPLAY_Init(int freq, bool stereo);
-
-bool OPLAY_StartSong(midi_file_t *song);
+bool OPLAY_StartSong(void);
 void OPLAY_FinishSong(void);
 
 void OPLAY_NotesOff(void);
 int  OPLAY_Stream(int16_t *buf, int samples, bool stereo);
+void OPLAY_WriteReg(uint8_t reg, uint8_t value);
+
+// Event Handling
+extern void OPLAY_KeyOff(uint8_t channel, uint8_t note);
+void OPLAY_KeyOn(uint8_t channel, uint8_t note, uint8_t volume);
+void OPLAY_ProgramChange(uint8_t channel, uint8_t patch);
+void OPLAY_ControllerChange(uint8_t channel, uint8_t type, uint8_t value);
+void OPLAY_PitchBend(uint8_t channel, uint8_t msb);
+
 
 #endif /* #ifndef OPL_PLAYER_H */

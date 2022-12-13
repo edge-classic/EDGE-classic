@@ -1,9 +1,8 @@
 //----------------------------------------------------------------------------
-//  EDGE-Classic RNG
+//  EDGE RNG
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2009  The EDGE Team.
-//  Transition to C++ STD random library 2022 - EDGE-Classic Community
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License

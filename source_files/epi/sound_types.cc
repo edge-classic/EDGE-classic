@@ -2,7 +2,7 @@
 //  Sound Format Detection
 //------------------------------------------------------------------------
 // 
-//  Copyright (c) 2022 - The EDGE-Classic Team
+//  Copyright (c) 2022 - The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -28,7 +28,7 @@
 namespace epi
 {
 
-sound_format_e Sound_DetectFormat(byte *data, int header_len)
+sound_format_e Sound_DetectFormat(byte *data, int song_len)
 {
 	// Start by trying the simple reliable header checks
 
@@ -36,6 +36,12 @@ sound_format_e Sound_DetectFormat(byte *data, int header_len)
 		data[2] == 'F'  && data[3] == 'F')
 	{
 		return FMT_WAV;
+	}
+
+	if (data[0] == 'f' && data[1] == 'L' &&
+		data[2] == 'a'  && data[3] == 'C')
+	{
+		return FMT_FLAC;
 	}
 
 	if (data[0] == 'O' && data[1] == 'g' &&
@@ -57,9 +63,34 @@ sound_format_e Sound_DetectFormat(byte *data, int header_len)
 	}
 
 	if (data[0] == 'M' && data[1] == 'T' &&
-		data[2] == 'h'  && data[3] == 'd')
+		data[2] == 'h' && data[3] == 'd')
 	{
 		return FMT_MIDI;
+	}
+
+	// XMI MIDI
+	if (song_len > 12 && data[0] == 'F' && data[1] == 'O' &&
+		data[2] == 'R' && data[3] == 'M' &&
+		data[8] == 'X' && data[9] == 'D' &&
+		data[10] == 'I' && data[11] == 'R')
+	{
+		return FMT_MIDI;
+	}
+
+	// GMF MIDI
+	if (data[0] == 'G' && data[1] == 'M' &&
+		data[2] == 'F' && data[3] == '\x1')
+	{
+		return FMT_MIDI;
+	}
+
+	// Electronic Arts MIDI
+	if (song_len > data[0] && data[0] >= 0x5D)
+	{
+		int offset = data[0] - 0x10;
+		if (data[offset] == 'r' && data[offset+1] == 's' && data[offset+2] == 'x' &&
+			data[offset+3] == 'x' && data[offset+4] == '}' && data[offset+5] == 'u')
+			return FMT_MIDI;
 	}
 
 	// Assume gzip format is VGZ and will be handled
@@ -78,7 +109,7 @@ sound_format_e Sound_DetectFormat(byte *data, int header_len)
 		return FMT_GME;
 	}
 
-	if (xmp_test_module_from_memory(data, header_len, NULL) == 0)
+	if (xmp_test_module_from_memory(data, song_len, NULL) == 0)
 		return FMT_XMP;
 
 	if ((data[0] == 'I' && data[1] == 'D' && data[2] == '3') ||
@@ -109,6 +140,9 @@ sound_format_e Sound_FilenameToFormat(const std::string& filename)
 	if (ext == ".wav" || ext == ".wave")
 		return FMT_WAV;
 
+	if (ext == ".flac")
+		return FMT_FLAC;
+
 	if (ext == ".ogg")
 		return FMT_OGG;
 
@@ -121,7 +155,7 @@ sound_format_e Sound_FilenameToFormat(const std::string& filename)
 	if (ext == ".mus")
 		return FMT_MUS;
 
-	if (ext == ".mid" || ext == ".midi")
+	if (ext == ".mid" || ext == ".midi" || ext == ".xmi" || ext == ".rmi" || ext == ".rmid")
 		return FMT_MIDI;
 
 	if (ext == ".mod" || ext == ".m15" || ext == ".flx" || ext == ".wow" || ext == ".dbm" ||

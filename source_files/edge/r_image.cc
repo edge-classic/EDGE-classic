@@ -74,6 +74,7 @@ extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
 
 extern epi::file_c *OpenUserFileOrLump(imagedef_c *def);
 
+extern cvar_c r_doubleframes;
 
 extern void DeleteSkyTextures(void);
 extern void DeleteColourmapTextures(void);
@@ -1064,8 +1065,8 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 
 	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
 	{
-		tmp_img->Swirl(hudtic, rim->liquid_type); // Using leveltime disabled swirl for intermission screens
-		rim->swirled_gametic = hudtic;
+		rim->swirled_gametic = hudtic / (r_doubleframes.d ? 2 : 1);
+		tmp_img->Swirl(rim->swirled_gametic, rim->liquid_type); // Using leveltime disabled swirl for intermission screens
 	}
 
 	if (rim->opacity == OPAC_Unknown)
@@ -1546,7 +1547,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 
 	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
 	{
-		if (rc->parent->liquid_type > LIQ_None && rc->parent->swirled_gametic != hudtic)
+		if (rim->swirled_gametic != hudtic / (r_doubleframes.d ? 2 : 1))
 		{
 			if (rc->tex_id != 0)
 			{
@@ -1684,9 +1685,22 @@ bool W_InitImages(void)
 //
 void W_UpdateImageAnims(void)
 {
-	do_Animate(real_graphics);
-	do_Animate(real_textures);
-	do_Animate(real_flats);
+	// Fix menu animations if not in-game
+	if (menuactive && gamestate != GS_LEVEL)
+	{
+		if (!r_doubleframes.d || !(hudtic & 1))
+		{
+			do_Animate(real_graphics);
+			do_Animate(real_textures);
+			do_Animate(real_flats);
+		}
+	}
+	else if (!time_stop_active) // Need to account for Erraticism as well - Dasho
+	{
+		do_Animate(real_graphics);
+		do_Animate(real_textures);
+		do_Animate(real_flats);
+	}
 }
 
 
@@ -1737,9 +1751,33 @@ void W_AnimateImageSet(const image_c ** images, int number, int speed)
 			continue;
 
 		if (rim->anim.speed > 0)
-			continue;
+		{
+			// Make new image but keep it out of the lookup list ? - Dasho
+			// I don't think image_c class has a CopyDetail function...is it worth it for this one use?
+			image_c *dupe_image = new image_c;
+			strcpy(dupe_image->name, rim->name);
+			dupe_image->actual_h = rim->actual_h;
+			dupe_image->actual_w = rim->actual_w;
+			dupe_image->cache = rim->cache;
+			dupe_image->is_empty = rim->is_empty;
+			dupe_image->is_font = rim->is_font;
+			dupe_image->liquid_type = rim->liquid_type;
+			dupe_image->offset_x = rim->offset_x;
+			dupe_image->offset_y = rim->offset_y;
+			dupe_image->opacity = rim->opacity;
+			dupe_image->ratio_h = rim->ratio_h;
+			dupe_image->ratio_w = rim->ratio_w;
+			dupe_image->scale_x = rim->scale_x;
+			dupe_image->scale_y = rim->scale_y;
+			dupe_image->source = rim->source;
+			dupe_image->source_palette = rim->source_palette;
+			dupe_image->source_type = rim->source_type;
+			dupe_image->total_h = rim->total_h;
+			dupe_image->total_w = rim->total_w;
+			rim = dupe_image;
+		}
 
-		images[total++] = images[i];
+		images[total++] = rim;
 	}
 
 	// anything left to animate ?

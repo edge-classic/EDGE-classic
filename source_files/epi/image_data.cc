@@ -647,11 +647,9 @@ void image_data_c::DarkestColor(u8_t *rgb)
 
 void image_data_c::Swirl(int leveltime, int thickness)
 {
-	const int sizefactor = (height + width) / 128;
 	const int swirlfactor =  8192 / 64;
     const int swirlfactor2 = 8192 / 32;
-	const int amp = 1 + sizefactor;
-    const int amp2 = 0 + sizefactor;
+	const int amp = 2;
     int speed;
 
 	if (thickness == 1) // Thin liquid
@@ -679,13 +677,13 @@ void image_data_c::Swirl(int leveltime, int thickness)
 			sinvalue2 = (x * swirlfactor2 + leveltime * speed * 4 + 300) & 8191;
 			x1 = x + width + height
 			+ ((finesine[sinvalue] * amp) >> FRACBITS)
-			+ ((finesine[sinvalue2] * amp2) >> FRACBITS);
+			+ ((finesine[sinvalue2] * amp) >> FRACBITS);
 
 			sinvalue = (x * swirlfactor + leveltime * speed * 3 + 700) & 8191;
 			sinvalue2 = (y * swirlfactor2 + leveltime * speed * 4 + 1200) & 8191;
 			y1 = y + width + height
 			+ ((finesine[sinvalue] * amp) >> FRACBITS)
-			+ ((finesine[sinvalue2] * amp2) >> FRACBITS);
+			+ ((finesine[sinvalue2] * amp) >> FRACBITS);
 
 			x1 &= width - 1;
 			y1 &= height - 1;

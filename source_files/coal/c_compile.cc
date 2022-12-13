@@ -1741,7 +1741,7 @@ void real_vm_c::GLOB_Module()
 
 	def_t * def = FindDef(&type_module, mod_name, comp.scope);
 
-	scope_c * mod;
+	scope_c * mod = nullptr;
 
 	if (def)
 		mod = comp.all_modules[def->ofs];
@@ -1926,8 +1926,8 @@ void real_vm_c::SetAsmDump(bool enable)
 
 double real_vm_c::GetFloat(const char *mod_name, const char *var_name)
 {
-	def_t *mod_def;
-	scope_c *mod_scope;
+	def_t *mod_def = nullptr;
+	scope_c *mod_scope = nullptr;
 	if (mod_name)
 	{
 		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
@@ -1938,7 +1938,7 @@ double real_vm_c::GetFloat(const char *mod_name, const char *var_name)
 		mod_scope = comp.all_modules[mod_def->ofs];
 	}
 
-	def_t *var;
+	def_t *var = nullptr;
 	if (mod_scope)
 		var = FindDef(&type_float, (char *)var_name, mod_scope);
 	else
@@ -1952,8 +1952,8 @@ double real_vm_c::GetFloat(const char *mod_name, const char *var_name)
 
 const char *real_vm_c::GetString(const char *mod_name, const char *var_name)
 {
-	def_t *mod_def;
-	scope_c *mod_scope;
+	def_t *mod_def = nullptr;
+	scope_c *mod_scope = nullptr;
 	if (mod_name)
 	{
 		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
@@ -1964,7 +1964,7 @@ const char *real_vm_c::GetString(const char *mod_name, const char *var_name)
 		mod_scope = comp.all_modules[mod_def->ofs];
 	}
 
-	def_t *var;
+	def_t *var = nullptr;
 	if (mod_scope)
 		var = FindDef(&type_string, (char *)var_name, mod_scope);
 	else
@@ -1980,8 +1980,8 @@ const char *real_vm_c::GetString(const char *mod_name, const char *var_name)
 
 double *real_vm_c::GetVector(const char *mod_name, const char *var_name)
 {
-	def_t *mod_def;
-	scope_c *mod_scope;
+	def_t *mod_def = nullptr;
+	scope_c *mod_scope = nullptr;
 	if (mod_name)
 	{
 		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
@@ -1992,7 +1992,7 @@ double *real_vm_c::GetVector(const char *mod_name, const char *var_name)
 		mod_scope = comp.all_modules[mod_def->ofs];
 	}
 
-	def_t *var;
+	def_t *var = nullptr;
 	if (mod_scope)
 		var = FindDef(&type_vector, (char *)var_name, mod_scope);
 	else
@@ -2008,8 +2008,8 @@ double *real_vm_c::GetVector(const char *mod_name, const char *var_name)
 
 void real_vm_c::SetFloat(const char *mod_name, const char *var_name, double value)
 {
-	def_t *mod_def;
-	scope_c *mod_scope;
+	def_t *mod_def = nullptr;
+	scope_c *mod_scope = nullptr;
 	if (mod_name)
 	{
 		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
@@ -2021,7 +2021,7 @@ void real_vm_c::SetFloat(const char *mod_name, const char *var_name, double valu
 		mod_scope = comp.all_modules[mod_def->ofs];
 	}
 
-	def_t *var;
+	def_t *var = nullptr;
 	if (mod_scope)
 		var = FindDef(&type_float, (char *)var_name, mod_scope);
 	else
@@ -2039,8 +2039,8 @@ void real_vm_c::SetFloat(const char *mod_name, const char *var_name, double valu
 
 void real_vm_c::SetString(const char *mod_name, const char *var_name, const char *value)
 {
-	def_t *mod_def;
-	scope_c *mod_scope;
+	def_t *mod_def = nullptr;
+	scope_c *mod_scope = nullptr;
 	if (mod_name)
 	{
 		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
@@ -2052,7 +2052,7 @@ void real_vm_c::SetString(const char *mod_name, const char *var_name, const char
 		mod_scope = comp.all_modules[mod_def->ofs];
 	}
 
-	def_t *var;
+	def_t *var = nullptr;
 	if (mod_scope)
 		var = FindDef(&type_string, (char *)var_name, mod_scope);
 	else
@@ -2070,8 +2070,8 @@ void real_vm_c::SetString(const char *mod_name, const char *var_name, const char
 
 void real_vm_c::SetVector(const char *mod_name, const char *var_name, double val_1, double val_2, double val_3)
 {
-	def_t *mod_def;
-	scope_c *mod_scope;
+	def_t *mod_def = nullptr;
+	scope_c *mod_scope = nullptr;
 	if (mod_name)
 	{
 		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
@@ -2083,7 +2083,7 @@ void real_vm_c::SetVector(const char *mod_name, const char *var_name, double val
 		mod_scope = comp.all_modules[mod_def->ofs];
 	}
 
-	def_t *var;
+	def_t *var = nullptr;
 	if (mod_scope)
 		var = FindDef(&type_vector, (char *)var_name, mod_scope);
 	else

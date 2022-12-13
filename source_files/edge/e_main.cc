@@ -32,6 +32,7 @@
 //
 
 #include "i_defs.h"
+#include "i_sdlinc.h"
 #include "e_main.h"
 
 #include <sys/stat.h>
@@ -42,7 +43,6 @@
 #include <vector>
 #include <chrono> // PurgeCache
 
-#include "exe_path.h"
 #include "file.h"
 #include "filesystem.h"
 #include "path.h"
@@ -91,6 +91,8 @@
 #include "version.h"
 #include "vm_coal.h"
 
+extern cvar_c r_doubleframes;
+
 // Application active?
 int app_state = APP_STATE_ACTIVE;
 
@@ -107,6 +109,8 @@ bool need_save_screenshot  = false;
 bool custom_MenuMain = false;
 bool custom_MenuEpisode = false;
 bool custom_MenuDifficulty = false;
+
+bool zerotic_ok = false;
 
 FILE *logfile = NULL;
 FILE *debugfile = NULL;
@@ -201,6 +205,8 @@ std::string shot_dir;
 // not using DEF_CVAR here since var name != cvar name
 cvar_c m_language("language", "ENGLISH", CVAR_ARCHIVE);
 
+DEF_CVAR(r_overlay, "0", CVAR_ARCHIVE)
+
 DEF_CVAR(g_aggression, "0", CVAR_ARCHIVE)
 
 DEF_CVAR(ddf_strict, "0", CVAR_ARCHIVE)
@@ -246,6 +252,15 @@ public:
 				HUD_DrawText(26, y, startup_messages[i].c_str());
 			y += 10;
 		}
+
+		if (!hud_overlays.at(r_overlay.d).empty())
+		{
+			const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d).c_str(), INS_Graphic, ILF_Null);
+			if (overlay)
+				HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay), \
+					SCREENHEIGHT / IM_HEIGHT(overlay));
+		}
+
 		I_FinishFrame();
 	}
 };
@@ -614,6 +629,14 @@ void E_Display(void)
 
 	CON_Drawer();
 
+	if (!hud_overlays.at(r_overlay.d).empty())
+	{
+		const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d).c_str(), INS_Graphic, ILF_Null);
+		if (overlay)
+			HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay), \
+				SCREENHEIGHT / IM_HEIGHT(overlay));
+	}
+
 	if (m_screenshot_required)
 	{
 		m_screenshot_required = false;
@@ -751,14 +774,14 @@ void E_AdvanceTitle(void)
 		if (title_pic == 0 && g->titlemusic > 0)
 			S_ChangeMusic(g->titlemusic, false);
 
-		title_countdown = g->titletics;
+		title_countdown = g->titletics * (r_doubleframes.d ? 2 : 1);
 		return;
 	}
 
 	// not found
 
 	title_image = NULL;
-	title_countdown = TICRATE;
+	title_countdown = TICRATE * (r_doubleframes.d ? 2 : 1);
 }
 
 void E_StartTitle(void)
@@ -793,19 +816,17 @@ void E_TitleTicker(void)
 //
 void InitDirectories(void)
 {
-    std::string path;
-
-	const char *s = M_GetParm("-home");
-    if (s)
-        home_dir = s;
+	std::filesystem::path s = M_GetParm("-home") ? M_GetParm("-home") : "";
+    if (!s.empty())
+        home_dir = s.generic_string();
 
 	// Get the Home Directory from environment if set
     if (home_dir.empty())
     {
-        s = getenv("HOME");
-        if (s)
+        s = getenv("HOME") ? getenv("HOME") : "";
+        if (!s.empty())
         {
-            home_dir = epi::PATH_Join(s, EDGEHOMESUBDIR); 
+            home_dir = epi::PATH_Join(s.generic_string().c_str(), EDGEHOMESUBDIR); 
 
 			if (! epi::FS_IsDir(home_dir.c_str()))
 			{
@@ -821,17 +842,16 @@ void InitDirectories(void)
     if (home_dir.empty()) home_dir = "."; // Default to current directory
 
 	// Get the Game Directory from parameter.
-#ifdef __APPLE__
-	s = epi::GetResourcePath();
-#else
-	s = epi::GetExecutablePath();
-#endif
-	game_dir = s;
-	free((void*)s);
+	
+	// Note: This might need adjusting for Apple
+	s = SDL_GetBasePath();
 
-	s = M_GetParm("-game");
-	if (s)
-		game_dir = s;
+	game_dir = s.generic_string();
+	s.clear();
+
+	s = M_GetParm("-game") ? M_GetParm("-game") : "";
+	if (!s.empty())
+		game_dir = s.generic_string();
 
 	// add parameter file "gamedir/parms" if it exists.
 	std::string parms = epi::PATH_Join(game_dir.c_str(), "parms");
@@ -843,10 +863,10 @@ void InitDirectories(void)
 	}
 
 	// config file
-	s = M_GetParm("-config");
-	if (s)
+	s = M_GetParm("-config") ? M_GetParm("-config") : "";
+	if (!s.empty())
 	{
-		cfgfile = std::string(s);
+		cfgfile = std::string(s.generic_string());
 	}
 	else
     {
@@ -854,10 +874,10 @@ void InitDirectories(void)
 	}
 
 	// edge.wad file
-	s = M_GetParm("-ewad");
-	if (s)
+	s = M_GetParm("-ewad") ? M_GetParm("-ewad") : "";
+	if (!s.empty())
 	{
-		ewadfile = std::string(s);
+		ewadfile = std::string(s.generic_string());
 	}
 	else
     {
@@ -1196,7 +1216,7 @@ static void ShowDateAndVersion(void)
 	I_Printf("EDGE-Classic homepage is at https://github.com/dashodanger/EDGE-classic/\n");
 	I_Printf("EDGE-Classic is based on DOOM by id Software http://www.idsoftware.com/\n");
 
-	I_Printf("Executable path: '%s'\n", exe_path);
+	I_Printf("Executable path: '%s'\n", exe_path.generic_string().c_str());
 
 	M_DebugDumpArgs();
 }
@@ -1498,6 +1518,7 @@ static void E_Startup(void)
 
 	RAD_Init();
 	W_ProcessMultipleFiles();
+	I_StartupMusic(); // Must be done after all files loaded to locate appropriate GENMIDI lump
 	V_InitPalette();
 
 	DDF_ParseEverything();
@@ -1727,7 +1748,14 @@ void E_Tick(void)
 	// this also runs the responder chain via E_ProcessEvents
 	int counts = N_TryRunTics();
 
-	SYS_ASSERT(counts > 0);
+	// zerotic_ok is set to true if switching between 35/70FPS
+	// in the Options Menu, as it can occasionally produce a
+	// zero count for N_TryRunTics()
+
+	if (!zerotic_ok)
+		SYS_ASSERT(counts > 0);
+
+	zerotic_ok = false;
 
 	// run the tics
 	for (; counts > 0 ; counts--)

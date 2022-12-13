@@ -2,7 +2,7 @@
 //  Sound Format Detection
 //------------------------------------------------------------------------
 // 
-//  Copyright (c) 2022 - The EDGE-Classic Team
+//  Copyright (c) 2022 - The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -28,6 +28,7 @@ typedef enum
 {
 	FMT_Unknown = 0,
 	FMT_WAV,
+	FMT_FLAC,
 	FMT_OGG,
 	FMT_MP3,
 	FMT_XMP,
@@ -36,13 +37,14 @@ typedef enum
 	FMT_VGM,
 	FMT_MUS,
 	FMT_MIDI,
+	FMT_IMF, // Used with DDFPLAY; not in auto-detection
 	FMT_DOOM,
 	FMT_SPK
 }
 sound_format_e;
 
-// determine sound format from the first 32 bytes (or so) of the file.
-sound_format_e Sound_DetectFormat(byte *data, int header_len);
+// determine sound format from the file.
+sound_format_e Sound_DetectFormat(byte *data, int song_len);
 
 // determine sound format from the filename (by its extension).
 sound_format_e Sound_FilenameToFormat(const std::string& filename);

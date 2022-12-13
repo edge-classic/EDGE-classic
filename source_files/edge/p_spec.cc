@@ -48,6 +48,8 @@
 
 #include "r_sky.h" //Lobo 2022: added for our Sky Transfer special
 
+extern cvar_c r_doubleframes;
+
 // Level exit timer
 bool levelTimer;
 int levelTimeCount;
@@ -538,6 +540,9 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const linetype_c *special)
 	info = special->effectobject;
 	if (! info) return; //found nothing so exit
 
+	if (!level_flags.have_extra && (info->extendedflags & EF_EXTRA))
+		return;
+
 	//if it's shootable we've already handled this elsewhere
 	if(special->type == line_shootable) return;
 
@@ -923,6 +928,26 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 	{
 		target->heightsec = source->frontsector;
 		target->heightsec_side = source->side[0];
+		// Quick band-aid fix for Line 242 "windows" - Dasho
+		if (target->c_h - target->f_h < 1)
+		{
+			target->c_h = source->frontsector->c_h;
+			target->f_h = source->frontsector->f_h;
+			for (int i = 0; i < target->linecount; i++)
+			{
+				if (target->lines[i]->side[1] && target->lines[i]->side[0]->middle.image && target->lines[i]->side[1]->middle.image &&
+					target->lines[i]->side[0]->middle.image == target->lines[i]->side[1]->middle.image)
+				{
+					target->lines[i]->side[0]->midmask_offset = 0;
+					target->lines[i]->side[1]->midmask_offset = 0;
+					for (seg_t *seg = target->subsectors->segs; seg != nullptr; seg = seg->sub_next)
+					{
+						if (seg->linedef == target->lines[i])
+							seg->linedef->flags |= MLF_LowerUnpegged;
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -1268,6 +1293,18 @@ static bool P_ActivateSpecialLine(line_t * line,
 			if (line && (line->flags & MLF_Secret))
 				return false;
 		}
+	}
+
+	// Don't let monsters activate crossable special lines that they
+	// wouldn't otherwise cross (for now, the edge of a high dropoff)
+	// Note: I believe this assumes no 3D floors, but I think it's a 
+	// very particular situation anyway - Dasho
+	if (trig == line_walkable && line->backsector && 
+		thing && (thing->info->extendedflags & EF_MONSTER) &&
+		!(thing->flags & (MF_TELEPORT | MF_DROPOFF | MF_FLOAT)))
+	{
+		if (std::abs(line->frontsector->f_h - line->backsector->f_h) > thing->info->step_size)
+			return false;
 	}
 
 	if (thing && !no_care_who)
@@ -1695,7 +1732,10 @@ static inline void PlayerInProperties(player_t *player,
 		mouth_z >= f_h && mouth_z <= c_h &&
 		player->powers[PW_Scuba] <= 0)
 	{
-		player->air_in_lungs--;
+		int subtract = 1;
+		if (r_doubleframes.d && (gametic & 1 == 1))
+			subtract = 0;
+		player->air_in_lungs -= subtract;
 		player->underwater = true;
 
 		if (player->air_in_lungs <= 0 &&
@@ -1746,7 +1786,6 @@ static inline void PlayerInProperties(player_t *player,
 		if (special->special_flags & SECSP_Proportional)
 		{
 			// only partially in region -- mitigate damage
-
 			if (tz > c_h)
 				factor -= factor * (tz - c_h) / (tz-bz);
 
@@ -1761,7 +1800,6 @@ static inline void PlayerInProperties(player_t *player,
 	}
 	else
 	{
-
 		// Not touching the floor ?
 		if (player->mo->z > f_h + 2.0f)
 			return;
@@ -2964,7 +3002,7 @@ void P_SpawnSpecials2(int autotag)
 
 			sector->props.push.x += M_Cos(secSpecial->push_angle) * mul;
 			sector->props.push.y += M_Sin(secSpecial->push_angle) * mul;
-			sector->props.push.z += secSpecial->push_zspeed / 100.0f;
+			sector->props.push.z += secSpecial->push_zspeed / (r_doubleframes.d ? 89.2f : 100.0f);
 		}
 
 		// Scrollers

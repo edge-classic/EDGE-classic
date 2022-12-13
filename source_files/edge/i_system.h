@@ -32,6 +32,8 @@
 #undef max
 #endif
 
+#include <filesystem>
+
 //--------------------------------------------------------
 //  SYSTEM functions.
 //--------------------------------------------------------
@@ -93,7 +95,7 @@ void I_Sleep(int millisecs);
 void I_MessageBox(const char *message, const char *title);
 
 
-extern const char *exe_path;
+extern std::filesystem::path exe_path;
 
 
 //--------------------------------------------------------
@@ -166,9 +168,6 @@ void I_StartupMusic(void);
 // I_StartupMusic().  Must be called by I_SystemShutdown(), the main
 // code never calls this function.
 void I_ShutdownMusic(void);
-
-abstract_music_c * I_PlayNativeMusic(const byte *data, int length,
-									 float volume, bool loop);
 
 
 //--------------------------------------------------------

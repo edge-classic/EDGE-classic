@@ -20,9 +20,10 @@
 
 #include "file.h"
 #include "filesystem.h"
-#include "mus_2_midi.h"
+#include "sound_types.h"
 #include "path.h"
 #include "str_util.h"
+#include "playlist.h"
 
 #include "m_misc.h"
 #include "s_blit.h"
@@ -32,45 +33,127 @@
 
 #include "dm_state.h"
 
+#define BW_MidiSequencer OPLSequencer
+typedef struct BW_MidiRtInterface OPLInterface;
+#include "midi_sequencer_impl.hpp"
+
 // these are in the opl/ directory
 #include "genmidi.h"
-#include "midifile.h"
 #include "opl_player.h"
 
-#define NUM_SAMPLES  1024
+#define NUM_SAMPLES  4096
 
 extern bool dev_stereo;
 extern int  dev_freq;
 
-static bool opl_inited;
-static bool opl_disabled;
+bool opl_disabled = false;
 
-static bool S_StartupOPL(void)
+DEF_CVAR(s_genmidi, "", CVAR_ARCHIVE)
+
+extern std::vector<std::string> available_genmidis;
+
+bool S_StartupOPL(void)
 {
 	I_Debugf("Initializing OPL player...\n");
 
-	if (! OPLAY_Init(dev_freq, dev_stereo))
+	if (! OPLAY_Init(dev_freq, dev_stereo, var_opl_music != 1))
 	{
 		return false;
 	}
 
-	int p = W_CheckNumForName("GENMIDI");
-	if (p < 0)
+	// Check if CVAR value is still good
+	bool cvar_good = false;
+	if (s_genmidi.s.empty())
+		cvar_good = true;
+	else
 	{
-		I_Debugf("no GENMIDI lump !\n");
-		return false;
+		for (int i=0; i < available_genmidis.size(); i++)
+		{
+			if(epi::case_cmp(s_genmidi.s, available_genmidis.at(i)) == 0)
+				cvar_good = true;
+		}
+	}
+
+	if (!cvar_good)
+	{
+		I_Warning("Cannot find previously used GENMIDI %s, falling back to default!\n", s_genmidi.c_str());
+		s_genmidi.s = "";
 	}
 
 	int length;
-	const byte *data = (const byte*)W_LoadLump(p, &length);
+	const byte *data;
+	epi::file_c *F;
 
-	GM_LoadInstruments(data, (size_t)length);
+	if (s_genmidi.s.empty())
+	{
+		int p = W_CheckNumForName("GENMIDI");
+		if (p < 0)
+		{
+			I_Debugf("no GENMIDI lump !\n");
+			return false;
+		}
+		data = (const byte*)W_LoadLump(p, &length);
+	}
+	else
+	{
+		std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
 
-	W_DoneWithLump(data);
+		F = epi::FS_Open(epi::PATH_Join(soundfont_dir.c_str(), s_genmidi.c_str()).c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+		if (! F)
+		{
+			I_Warning("S_StartupOPL: Error opening GENMIDI!\n");
+			return false;
+		}
+		length = F->GetLength();
+		data = F->LoadIntoMemory();
+	}
+
+	if (!GM_LoadInstruments(data, (size_t)length))
+	{
+		I_Debugf("error loading GENMIDI!\n");
+		if (s_genmidi.s.empty())
+			W_DoneWithLump(data);
+		else
+		{
+			delete F;
+			delete data;
+		}
+		return false;
+	}
+
+	if (s_genmidi.s.empty())
+		W_DoneWithLump(data);
+	else
+	{
+		delete F;
+		delete data;
+	}
 
 	// OK
 	return true;
 }
+
+// Should only be invoked when switching GENMIDI lumps
+void S_RestartOPL(void)
+{
+	if (opl_disabled)
+		return;
+
+	int old_entry = entry_playing;
+
+	S_StopMusic();
+
+	if (!S_StartupOPL())
+	{
+		opl_disabled = true;
+		return;
+	}
+
+	S_ChangeMusic(old_entry, true); // Restart track that was playing when switched
+
+	return; // OK!
+}
+
 
 class opl_player_c : public abstract_music_c
 {
@@ -83,11 +166,13 @@ private:
 	int status;
 	bool looping;
 
-	midi_file_t *song;
+	OPLInterface *opl_iface;
 
 public:
-	opl_player_c(midi_file_t *_song) : status(NOT_LOADED), looping(false), song(_song)
-	{ }
+	opl_player_c(bool _looping) : status(NOT_LOADED), looping(_looping)
+	{
+		SequencerInit();
+	}
 
 	~opl_player_c()
 	{
@@ -95,6 +180,106 @@ public:
 	}
 
 public:
+
+	OPLSequencer *opl_seq;
+
+	static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
+	{
+		OPLAY_KeyOn(channel, note, velocity);
+	}
+
+	static void rtNoteOff(void *userdata, uint8_t channel, uint8_t note)
+	{
+		OPLAY_KeyOff(channel, note);
+	}
+
+	static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
+	{
+		(void)userdata; (void)channel; (void)note; (void)atVal;
+	}
+
+	static void rtChannelAfterTouch(void *userdata, uint8_t channel, uint8_t atVal)
+	{
+		(void)userdata; (void)channel; (void)atVal;
+	}
+
+	static void rtControllerChange(void *userdata, uint8_t channel, uint8_t type, uint8_t value)
+	{
+		OPLAY_ControllerChange(channel, type, value);
+	}
+
+	static void rtPatchChange(void *userdata, uint8_t channel, uint8_t patch)
+	{
+		OPLAY_ProgramChange(channel, patch);
+	}
+
+	static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
+	{
+		OPLAY_PitchBend(channel, msb);
+	}
+
+	static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
+	{
+		(void)userdata; (void)msg; (void)size;
+	}
+
+	static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
+	{
+		(void)userdata; (void)track; (void)data; (void)length;
+	}
+
+	static size_t rtCurrentDevice(void *userdata, size_t track)
+	{
+		(void)userdata; (void)track;
+		return 0;
+	}
+
+	static void rtRawOPL(void *userdata, uint8_t reg, uint8_t value)
+	{
+		OPLAY_WriteReg(reg, value);
+	}
+
+	static void playSynth(void *userdata, uint8_t *stream, size_t length)
+	{
+		opl_player_c *player = (opl_player_c *)userdata;
+		OPLAY_Stream(reinterpret_cast<short*>(stream),
+						static_cast<int>(length) / (dev_stereo ? 4 : 2), dev_stereo);
+	}
+
+	void SequencerInit()
+	{
+		opl_seq = new OPLSequencer;
+		opl_iface = new OPLInterface;
+		std::memset(opl_iface, 0, sizeof(BW_MidiRtInterface));
+
+		opl_iface->rtUserData = this;
+		opl_iface->rt_noteOn  = rtNoteOn;
+		opl_iface->rt_noteOff = rtNoteOff;
+		opl_iface->rt_noteAfterTouch = rtNoteAfterTouch;
+		opl_iface->rt_channelAfterTouch = rtChannelAfterTouch;
+		opl_iface->rt_controllerChange = rtControllerChange;
+		opl_iface->rt_patchChange = rtPatchChange;
+		opl_iface->rt_pitchBend = rtPitchBend;
+		opl_iface->rt_systemExclusive = rtSysEx;
+
+		opl_iface->onPcmRender = playSynth;
+		opl_iface->onPcmRender_userData = this;
+
+		opl_iface->pcmSampleRate = dev_freq;
+		opl_iface->pcmFrameSize = (dev_stereo ? 2 : 1) /*channels*/ * 2 /*size of one sample*/;
+
+		opl_iface->rt_deviceSwitch = rtDeviceSwitch;
+		opl_iface->rt_currentDevice = rtCurrentDevice;
+		opl_iface->rt_rawOPL = rtRawOPL;
+
+		opl_seq->setInterface(opl_iface);
+	}
+
+	bool LoadTrack(const byte *data, int length, uint16_t rate)
+	{
+		return opl_seq->loadMIDI(data, length, rate);
+	}		
+
 	void Close(void)
 	{
 		if (status == NOT_LOADED)
@@ -104,9 +289,16 @@ public:
 		if (status != STOPPED)
 		  Stop();
 
-		OPLAY_FinishSong();
-
-		MIDI_FreeFile(song);
+		if (opl_seq)
+		{
+			delete opl_seq;
+			opl_seq = nullptr;
+		}
+		if (opl_iface)
+		{
+			delete opl_iface;
+			opl_iface = nullptr;
+		}
 
 		status = NOT_LOADED;
 	}
@@ -118,8 +310,6 @@ public:
 
 		status  = PLAYING;
 		looping = loop;
-
-		OPLAY_StartSong(song);
 
 		// Load up initial buffer data
 		Ticker();
@@ -188,96 +378,72 @@ public:
 private:
 	bool StreamIntoBuffer(epi::sound_data_c *buf)
 	{
-		int samples = 0;
+		bool song_done = false;
 
-		while (samples < NUM_SAMPLES)
+		int played = opl_seq->playStream(reinterpret_cast<u8_t *>(buf->data_L), NUM_SAMPLES);
+
+		if (opl_seq->positionAtEnd())
+			song_done = true;
+
+		buf->length = played / (dev_stereo ? 4 : 2);
+
+		if (song_done)  /* EOF */
 		{
-			s16_t *data_buf = buf->data_L + samples * (dev_stereo ? 2 : 1);
-
-			int got = OPLAY_Stream(data_buf, NUM_SAMPLES - samples, dev_stereo);
-
-			samples += got;
-
-			if (got > 0)
-				continue;
-
-			/* EOF */
-
-			if (looping)
-			{
-				OPLAY_StartSong(song);
-				continue;
-			}
-
-			if (samples == 0)
-			{
-				// buffer not used at all, so free it
+			if (! looping)
 				return false;
-			}
-
-			// buffer partially used, fill rest with zeroes
-			data_buf += got * (dev_stereo ? 2 : 1);
-			int total = (NUM_SAMPLES - samples) * (dev_stereo ? 2 : 1);
-
-			for (; total > 0 ; total--)
-			{
-				*data_buf++ = 0;
-			}
-			break;
+			opl_seq->rewind();
+			return true;
 		}
 
-		return true;
+    	return true;
 	}
 };
 
-abstract_music_c * S_PlayOPL(byte *data, int length, bool is_mus, float volume, bool loop)
+abstract_music_c * S_PlayOPL(byte *data, int length, float volume, bool loop, int type)
 {
-	if (! opl_inited)
-	{
-		if (! S_StartupOPL())
-		{
-			opl_disabled = true;
-		}
-		opl_inited = true;
-	}
 
 	if (opl_disabled)
-		return NULL;
-
-	if (is_mus)
 	{
-		I_Debugf("opl_player_c: Converting MUS format to MIDI...\n");
-
-		byte *midi_data;
-		int   midi_len;
-
-		if (! Mus2Midi::Convert(data, length, &midi_data, &midi_len, Mus2Midi::DOOM_DIVIS, true))
-		{
-			delete[] data;
-
-			I_Warning("Unable to convert MUS to MIDI !\n");
-			return NULL;
-		}
-
 		delete[] data;
-
-		data   = midi_data;
-		length = midi_len;
-
-		I_Debugf("Conversion done: new length is %d\n", length);
+		return nullptr;
 	}
 
-	midi_file_t *song = MIDI_LoadFile(data, length);
+	opl_player_c *player = new opl_player_c(loop);
 
-	if (! song)
+	if (!player)
+	{
+		I_Debugf("OPL player: error initializing!\n");
+		delete[] data;
+		return nullptr;
+	}
+
+	uint16_t rate;
+
+	switch (type)
+	{
+		case MUS_IMF280:
+			rate = 280;
+			break;
+		case MUS_IMF560:
+			rate = 560;
+			break;
+		case MUS_IMF700:
+			rate = 700;
+			break;
+		default:
+			rate = 0;
+			break;
+	}
+
+	if (!player->LoadTrack(data, length, rate)) //Lobo: quietly log it instead of completely exiting EDGE
 	{
 		I_Debugf("OPL player: failed to load MIDI file!\n");
-		return NULL;
+		delete[] data;
+		delete player;
+		return nullptr;
 	}
 
 	delete[] data;
-
-	opl_player_c *player = new opl_player_c(song);
 
 	player->Volume(volume);
 	player->Play(loop);

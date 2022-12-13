@@ -736,8 +736,8 @@ void P_TouchSpecialThing(mobj_t * special, mobj_t * toucher)
 	if (toucher->health <= 0)
 		return;
 
-	// Do not pick up the item if completely still
-	if (toucher->mom.x == 0 && toucher->mom.y == 0 && toucher->mom.z == 0)
+	// VOODOO DOLLS: Do not pick up the item if completely still
+	if (toucher->is_voodoo && toucher->mom.x == 0 && toucher->mom.y == 0 && toucher->mom.z == 0)
 		return;
 
 	// -KM- 1998/09/27 Sounds.ddf
@@ -784,6 +784,8 @@ void P_TouchSpecialThing(mobj_t * special, mobj_t * toucher)
 	if (! info.keep_it)
 	{
 		special->health = 0;
+		if (time_stop_active) // Hide pickup after gaining benefit while time stop is still active
+			special->visibility = INVISIBLE;
 		P_KillMobj(info.player->mo, special, NULL);
 	}
 

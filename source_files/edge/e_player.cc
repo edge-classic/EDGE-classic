@@ -424,12 +424,10 @@ static void P_SpawnVoodooDoll(player_t *p, const spawnpoint_t *point)
 	mobj->player = p;
 	mobj->health = p->health;
 
+	mobj->is_voodoo = true;
+
 	if (COOP_MATCH())
 		mobj->side = ~0;
-
-	// Test fix for stuff like Ancient Aliens MAP29 - Dasho
-	// Don't get stuck spawned in things: telefrag them.
-	//P_TeleportMove(mobj, mobj->x, mobj->y, mobj->z);
 }
 
 //

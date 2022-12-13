@@ -39,9 +39,14 @@ typedef enum
 	MUS_MUS,
 	MUS_OGG,
 	MUS_MP3,
-	MUS_MOD,
 	MUS_GME,
 	MUS_SID,
+	MUS_FLAC,
+	MUS_XMP,
+	MUS_VGM,
+	MUS_IMF280,
+	MUS_IMF560,
+	MUS_IMF700,
 	ENDOFMUSTYPES
 }
 musictype_t;

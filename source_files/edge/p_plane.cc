@@ -52,6 +52,7 @@ std::vector<slider_move_t *> active_sliders;
 linetype_c donut[2];
 static int donut_setup = 0;
 
+extern cvar_c r_doubleframes;
 
 static bool P_ActivateInStasis(int tag);
 static bool P_StasifySector(int tag);
@@ -225,6 +226,9 @@ static move_result_e AttemptMovePlane(sector_t * sector,
 {
     bool past = false;
     bool nofit;
+
+    if (r_doubleframes.d)
+        speed *= 0.5f;
 
     //
     // check whether we have gone past the destination height
@@ -1075,7 +1079,9 @@ static bool MoveSlider(slider_move_t *smov)
 {
 	// RETURNS true if slider_move_t should be removed.
 
-    sector_t *sec = smov->line->frontsector;
+    sector_t *sec = smov->line->frontsector;     
+
+    float factor = r_doubleframes.d ? 0.5f : 1.0f;
 
     switch (smov->direction)
     {
@@ -1105,7 +1111,7 @@ static bool MoveSlider(slider_move_t *smov)
 			MakeMovingSound(&smov->sfxstarted, smov->info->sfx_open,
                             &sec->sfx_origin);
 
-            smov->opening += smov->info->speed;
+            smov->opening += (smov->info->speed * factor);
 
             // mark line as non-blocking (at some point)
             P_ComputeGaps(smov->line);
@@ -1145,7 +1151,7 @@ static bool MoveSlider(slider_move_t *smov)
                 MakeMovingSound(&smov->sfxstarted, smov->info->sfx_close,
                                 &sec->sfx_origin);
 
-                smov->opening -= smov->info->speed;
+                smov->opening -= (smov->info->speed * factor);
 
                 // mark line as blocking (at some point)
                 P_ComputeGaps(smov->line);
@@ -1164,7 +1170,7 @@ static bool MoveSlider(slider_move_t *smov)
                 MakeMovingSound(&smov->sfxstarted, smov->info->sfx_open,
                                 &sec->sfx_origin);
 
-                smov->opening += smov->info->speed;
+                smov->opening += (smov->info->speed * factor);
 
                 // mark line as non-blocking (at some point)
                 P_ComputeGaps(smov->line);
@@ -1274,6 +1280,8 @@ bool EV_DoSlider(line_t * door, line_t *act_line, mobj_t * thing,
 //
 void P_RunActivePlanes(void)
 {
+    if (time_stop_active) return;
+
 	std::vector<plane_move_t *> ::iterator PMI;
 
 	bool removed_plane = false;
@@ -1313,6 +1321,8 @@ void P_RunActivePlanes(void)
 
 void P_RunActiveSliders(void)
 {
+    if (time_stop_active) return;
+
 	std::vector<slider_move_t *>::iterator SMI;
 
 	bool removed_slider = false;

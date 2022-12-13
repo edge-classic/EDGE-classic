@@ -34,12 +34,13 @@
 #include "s_music.h"
 #include "s_ogg.h"
 #include "s_mp3.h"
-#include "s_tsf.h"
+#include "s_fluid.h"
 #include "s_gme.h"
 #include "s_xmp.h"
 #include "s_opl.h"
 #include "s_sid.h"
 #include "s_vgm.h"
+#include "s_flac.h"
 #include "m_misc.h"
 #include "w_files.h"
 #include "w_wad.h"
@@ -153,15 +154,22 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 	epi::sound_format_e fmt = epi::FMT_Unknown;
 
-	if (play->infotype == MUSINF_LUMP)
-	{
-		// lumps must use auto-detection based on their contents
-		fmt = epi::Sound_DetectFormat(data, length);
-	}
+	// IMF Music is the outlier in that it must be predefined in DDFPLAY with the appropriate
+	// IMF frequency, as there is no way of determining this from file information alone
+	if (play->type == MUS_IMF280 || play->type == MUS_IMF560 || play->type == MUS_IMF700)
+		fmt = epi::FMT_IMF;
 	else
 	{
-		// for FILE and PACK, use the file extension
-		fmt = epi::Sound_FilenameToFormat(play->info);
+		if (play->infotype == MUSINF_LUMP)
+		{
+			// lumps must use auto-detection based on their contents
+			fmt = epi::Sound_DetectFormat(data, length);
+		}
+		else
+		{
+			// for FILE and PACK, use the file extension
+			fmt = epi::Sound_FilenameToFormat(play->info);
+		}
 	}
 
 	// NOTE: the players that take `data` are responsible to free it
@@ -180,6 +188,11 @@ void S_ChangeMusic(int entrynum, bool loop)
 			F->Seek(0, epi::file_c::SEEKPOINT_START);
 			delete data;
 			music_player = S_PlayMP3Music(F, volume, loop);
+			break;
+
+		case epi::FMT_FLAC:
+			delete F;
+			music_player = S_PlayFLACMusic(data, length, volume, loop);
 			break;
 
 		case epi::FMT_XMP:
@@ -202,24 +215,30 @@ void S_ChangeMusic(int entrynum, bool loop)
 			music_player = S_PlaySIDMusic(data, length, volume, loop);
 			break;
 
+		// IMF writes raw OPL registers, so must use the OPL player unconditionally
+		case epi::FMT_IMF:
+			delete F;
+			music_player = S_PlayOPL(data, length, volume, loop, play->type);
+			break;
+
 		case epi::FMT_MIDI:
 		case epi::FMT_MUS:
+		case epi::FMT_WAV: // RIFF MIDI has the same header as WAV
 			delete F;
-
 			if (var_opl_music)
 			{
-				music_player = S_PlayOPL(data, length, fmt == epi::FMT_MUS, volume, loop);
+				music_player = S_PlayOPL(data, length, volume, loop, play->type);
 			}
 			else
 			{
-				music_player = S_PlayTSF(data, length, fmt == epi::FMT_MUS, volume, loop);
+				music_player = S_PlayFluid(data, length, volume, loop);
 			}
 			break;
 
 		default:
 			delete F;
 			delete data;
-			I_Printf("S_ChangeMusic: unknown format (not MUS or MIDI)\n");
+			I_Printf("S_ChangeMusic: unknown format\n");
 			break;
 	}
 }

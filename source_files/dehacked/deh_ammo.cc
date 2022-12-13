@@ -74,7 +74,7 @@ void Ammo::Shutdown()
 
 void Ammo::MarkAmmo(int a_num)
 {
-	assert(0 <= a_num && a_num < NUMAMMO);
+	assert(0 <= a_num && a_num < NUMAMMO && a_num != am_unused);
 
 	ammo_modified[a_num] = true;
 }
@@ -138,7 +138,7 @@ void Ammo::AlterAmmo(int new_val)
 	int a_num = Patch::active_obj;
 	const char *deh_field = Patch::line_buf;
 
-	assert(0 <= a_num && a_num < NUMAMMO);
+	assert(0 <= a_num && a_num < NUMAMMO && a_num != am_unused);
 
 	bool max_m = (0 == StrCaseCmp(deh_field, "Max ammo"));
 	bool per_m = (0 == StrCaseCmp(deh_field, "Per ammo"));

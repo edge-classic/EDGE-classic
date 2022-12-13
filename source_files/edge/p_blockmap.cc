@@ -30,6 +30,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <unordered_set>
 
 #include "dm_data.h"
 #include "dm_defs.h"
@@ -78,6 +79,9 @@ int dlmap_height;
 
 mobj_t **dlmap_things = NULL;
 
+extern std::unordered_set<abstract_shader_c *> seen_dlights;
+extern cvar_c r_maxdlights;
+extern cvar_c r_culling;
 
 void P_CreateThingBlockMap(void)
 {
@@ -645,7 +649,7 @@ void P_SetThingPosition(mobj_t * mo)
 
 	// link into dynamic light blockmap
 	if (mo->info && (mo->info->dlight[0].type != DLITE_None) &&
-		(mo->info->glow_type == GLOW_None))
+		(mo->info->glow_type == GLOW_None) && (r_culling.d ? R_PointToDist(viewx, viewy, mo->x, mo->y) <= 2000 : true))
 	{
 		blockx = LIGHTMAP_GET_X(mo->x);
 		blocky = LIGHTMAP_GET_Y(mo->y);
@@ -854,6 +858,16 @@ void P_DynamicLightIterator(float x1, float y1, float z1,
 			if (! mo->dlight.shader)
 				  mo->dlight.shader = MakeDLightShader(mo);
 
+			if (seen_dlights.count(mo->dlight.shader) == 0)
+			{
+				if (seen_dlights.size() >= r_maxdlights.d)
+					continue;
+				else
+				{
+					seen_dlights.insert(mo->dlight.shader);
+				}
+			}
+
 //			mo->dlight.shader->CheckReset();
 
 			func(mo, data);
@@ -875,6 +889,9 @@ void P_SectorGlowIterator(sector_t *sec,
 		if (mo->state->bright <= 0 || mo->dlight.r <= 0)
 			continue;
 
+		if (r_culling.d && R_PointToDist(viewx, viewy, mo->x, mo->y) > 2000)
+			continue;
+
 		// check whether radius touches the given bbox
 		float r = mo->dlight.r;
 
@@ -887,6 +904,16 @@ void P_SectorGlowIterator(sector_t *sec,
 		// create shader if necessary
 		if (! mo->dlight.shader)
 			  mo->dlight.shader = MakePlaneGlow(mo);
+
+		if (seen_dlights.count(mo->dlight.shader) == 0)
+		{
+			if (seen_dlights.size() >= r_maxdlights.d)
+				continue;
+			else
+			{
+				seen_dlights.insert(mo->dlight.shader);
+			}
+		}
 
 //		mo->dlight.shader->CheckReset();
 

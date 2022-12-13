@@ -29,6 +29,8 @@
 #undef  DF
 #define DF  DDF_FIELD
 
+std::vector<std::string> flag_tests;
+
 static weapondef_c *dynamic_weapon;
 
 weapondef_container_c weapondefs;
@@ -308,6 +310,8 @@ const specflags_t ammo_types[] =
 
 static void WeaponStartEntry(const char *name, bool extend)
 {
+	flag_tests.clear();
+
 	if (!name || !name[0])
 	{
 		DDF_WarnError("New weapon entry is missing a name!");
@@ -464,6 +468,21 @@ static void WeaponFinishEntry(void)
 
 	if (dynamic_weapon->zoom_factor > 0.0)
 		dynamic_weapon->zoom_fov = I_ROUND(90 / dynamic_weapon->zoom_factor);
+
+	// Check MBF21 weapon flags that don't correlate to DDFWEAP flags
+	for (auto flag : flag_tests)
+	{
+		if (epi::strcmp(flag, "NOTHRUST") == 0)
+			dynamic_weapon->nothrust = true;
+		else if (epi::strcmp(flag, "DANGEROUS") == 0)
+			dynamic_weapon->dangerous = true;
+		else if (epi::strcmp(flag, "FLEEMELEE") == 0)
+			continue; // We don't implement FLEEMELEE, but don't present the 
+					  // user with an error as it's a valid MBF21 flag
+		else
+			DDF_WarnError("DDF_WGetSpecialFlags: Unknown Special: %s", flag.c_str());
+	}
+	flag_tests.clear();
 }
 
 
@@ -610,8 +629,12 @@ static void DDF_WGetSpecialFlags(const char *info, void *storage)
 
 		case CHKF_User:
 		case CHKF_Unknown:
-			DDF_WarnError("DDF_WGetSpecialFlags: Unknown Special: %s", info);
+		{
+			// Check unknown flags in WeaponFinishEntry as some MBF21 flags
+			// correlate to non-flag variables
+			flag_tests.push_back(info);
 			return;
+		}
 	}
 }
 

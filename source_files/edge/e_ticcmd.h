@@ -39,7 +39,7 @@ typedef struct
 	// vertical angle for mlook, *65536 for angle delta
 	s16_t mlookturn;
 
-	u16_t __unused;
+	u16_t unused;
 
 	// active player number, -1 for "dropped out" player
 	s16_t player_idx;

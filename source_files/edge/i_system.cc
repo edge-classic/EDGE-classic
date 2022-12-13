@@ -1,9 +1,8 @@
 //----------------------------------------------------------------------------
-//  EDGE-Classic Misc System Interface Code
+//  EDGE Misc System Interface Code
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2008  The EDGE Team.
-//  Copyright (c) 2022 The EDGE-Classic Community
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -45,13 +44,9 @@ static char msgbuf[MSGBUFSIZE];
 
 void I_SystemStartup(void)
 {
-	if (SDL_Init(0) < 0)
-		I_Error("Couldn't init SDL!!\n%s\n", SDL_GetError());
-
 	I_StartupGraphics(); // SDL requires this to be called first
 	I_StartupControl();
 	I_StartupSound();
-	I_StartupMusic();
 	I_StartupNetwork();
 }
 

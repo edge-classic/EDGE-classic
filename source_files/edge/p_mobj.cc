@@ -73,6 +73,8 @@
 
 #define DEBUG_MOBJ  0
 
+extern cvar_c r_culling;
+extern cvar_c r_doubleframes;
 
 // List of all objects in map.
 mobj_t *mobjlisthead;
@@ -82,6 +84,7 @@ iteminque_t *itemquehead;
 
 std::unordered_set<const mobjtype_c *> seen_monsters;
 
+bool time_stop_active = false;
 
 static void P_AddItemToQueue(const mobj_t *mo)
 {
@@ -704,8 +707,14 @@ void P_CalcFullProperties(const mobj_t *mo, region_properties_t *new_p)
 //
 // P_XYMovement  
 //
-static void P_XYMovement(mobj_t * mo, const region_properties_t *props)
+static void P_XYMovement(mobj_t * mo, const region_properties_t *props, bool extra_tic)
 {
+	bool do_extra = mo->player != nullptr; // 70 Hz
+
+	// missiles should run every tic too
+	if (mo->flags & MF_MISSILE)
+		do_extra = true;
+
 	float orig_x = mo->x;
 	float orig_y = mo->y;
 
@@ -732,6 +741,12 @@ static void P_XYMovement(mobj_t * mo, const region_properties_t *props)
 
 	float xmove = mo->mom.x;
 	float ymove = mo->mom.y;
+
+	if (do_extra && r_doubleframes.d) // 70Hz
+	{
+		xmove *= 0.52;
+		ymove *= 0.52;
+	}
 
 	// -AJA- 1999/07/31: Ride that rawhide :->
 	if (mo->above_mo && !(mo->above_mo->flags & MF_FLOAT) &&
@@ -957,18 +972,23 @@ static void P_XYMovement(mobj_t * mo, const region_properties_t *props)
 	//      it's not worth playing - a bit like having auto-aim
 	//      permanently off (as most real people are not crack-shots!)
 	//
+	float friction = props->friction;
+
 	if ((mo->z > mo->floorz) && !(mo->on_ladder >= 0) &&
 		!(mo->player && mo->player->powers[PW_Jetpack] > 0))
 	{
 		// apply drag when airborne
-		mo->mom.x *= props->drag;
-		mo->mom.y *= props->drag;
+		friction = props->drag;
 	}
-	else
+
+	// 70hz : adjust friction to account for extra tic
+	if (do_extra && r_doubleframes.d)
 	{
-		mo->mom.x *= props->friction;
-		mo->mom.y *= props->friction;
+		friction = sqrt(friction);
 	}
+
+	mo->mom.x *= friction;
+	mo->mom.y *= friction;
 
 	if (mo->player)
 	{
@@ -994,8 +1014,13 @@ static void P_XYMovement(mobj_t * mo, const region_properties_t *props)
 //
 // P_ZMovement
 //
-static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
+static void P_ZMovement(mobj_t * mo, const region_properties_t *props, bool extra_tic)
 {
+	bool do_extra = mo->player != nullptr; // 70 Hz
+
+	if (mo->flags & MF_MISSILE)
+		do_extra = true;
+
 	float dist;
 	float delta;
 	float zmove;
@@ -1015,6 +1040,9 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 	}
 
 	zmove = mo->mom.z * (1.0f - props->viscosity);
+
+	if (do_extra && r_doubleframes.d) // 70 Hz
+		zmove *= 0.52;
 
 	// adjust height
 	mo->z += zmove;
@@ -1053,7 +1081,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 			{
 				// Squat down. Decrease viewheight for a moment after hitting the
 				// ground (hard), and utter appropriate sound.
-				mo->player->deltaviewheight = zmove / 8.0f;
+				mo->player->deltaviewheight = zmove / 8.0f * (r_doubleframes.d ? 2.0 : 1.0); // 70Hz
 				S_StartFX(mo->info->oof_sound, P_MobjGetSfxCategory(mo), mo);
 				P_HitLiquidFloor(mo);
 			}
@@ -1128,7 +1156,9 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 			!(mo->player && mo->player->powers[PW_Jetpack] > 0) &&
 			!(mo->on_ladder >= 0))
 		{
-			mo->mom.z -= gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
+			// 70 Hz: apply gravity only on real tics
+			if (! extra_tic || !r_doubleframes.d)
+				mo->mom.z -= gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
 		}
 	}
 
@@ -1213,7 +1243,9 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 			!(mo->player && mo->player->powers[PW_Jetpack] > 0) &&
 			!(mo->on_ladder >= 0))
 		{
-			mo->mom.z += -gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
+			// 70 Hz: apply gravity only on real tics
+			if (! extra_tic || !r_doubleframes.d)
+				mo->mom.z += -gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
 		}
 	}
 
@@ -1247,7 +1279,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props)
 //
 #define MAX_THINK_LOOP  8
 
-static void P_MobjThinker(mobj_t * mobj)
+static void P_MobjThinker(mobj_t * mobj, bool extra_tic)
 {
 	if (mobj->next == (mobj_t *)-1)
 		I_Error("P_MobjThinker INTERNAL ERROR: mobj has been freed");
@@ -1255,38 +1287,41 @@ static void P_MobjThinker(mobj_t * mobj)
 	if (mobj->isRemoved())
 		return;
 
-	mobj->ClearStaleRefs();
-
 	const region_properties_t *props;
 	region_properties_t player_props;
 
-	SYS_ASSERT(mobj->state);
-	SYS_ASSERT(mobj->refcount >= 0);
+	mobj->ClearStaleRefs();
 
-	mobj->visibility = (15 * mobj->visibility + mobj->vis_target)  / 16;
-	mobj->dlight.r   = (15 * mobj->dlight.r + mobj->dlight.target) / 16;
-
-	// position interpolation
-	if (mobj->lerp_num > 1)
+	if (!extra_tic || !r_doubleframes.d)
 	{
-		mobj->lerp_pos++;
+		SYS_ASSERT(mobj->state);
+		SYS_ASSERT(mobj->refcount >= 0);
 
-		if (mobj->lerp_pos >= mobj->lerp_num)
+		mobj->visibility = (15 * mobj->visibility + mobj->vis_target)  / 16;
+		mobj->dlight.r   = (15 * mobj->dlight.r + mobj->dlight.target) / 16;
+
+		// position interpolation
+		if (mobj->lerp_num > 1)
 		{
-			mobj->lerp_pos = mobj->lerp_num = 0;
+			mobj->lerp_pos++;
+
+			if (mobj->lerp_pos >= mobj->lerp_num)
+			{
+				mobj->lerp_pos = mobj->lerp_num = 0;
+			}
 		}
-	}
 
-	// handle SKULLFLY attacks
-	if ((mobj->flags & MF_SKULLFLY) && mobj->mom.x == 0 && mobj->mom.y == 0)
-	{
-		// the skull slammed into something
-		mobj->flags &= ~MF_SKULLFLY;
-		mobj->mom.x = mobj->mom.y = mobj->mom.z = 0;
+		// handle SKULLFLY attacks
+		if ((mobj->flags & MF_SKULLFLY) && mobj->mom.x == 0 && mobj->mom.y == 0)
+		{
+			// the skull slammed into something
+			mobj->flags &= ~MF_SKULLFLY;
+			mobj->mom.x = mobj->mom.y = mobj->mom.z = 0;
 
-		P_SetMobjState(mobj, mobj->info->idle_state);
+			P_SetMobjState(mobj, mobj->info->idle_state);
 
-		if (mobj->isRemoved()) return;
+			if (mobj->isRemoved()) return;
+		}
 	}
 
 	// determine properties, & handle push sectors
@@ -1315,15 +1350,18 @@ static void P_MobjThinker(mobj_t * mobj)
 			if (!((mobj->flags & MF_NOGRAVITY) || (flags & SECSP_PushAll))  &&
 				(mobj->z <= mobj->floorz + 1.0f || (flags & SECSP_WholeRegion)))
 			{
-				float push_mul = 1.0f;
+				if (!extra_tic || !r_doubleframes.d)
+				{
+					float push_mul = 1.0f;
 
-				SYS_ASSERT(mobj->info->mass > 0);
-				if (! (flags & SECSP_PushConstant))
-					push_mul = 100.0f / mobj->info->mass;
+					SYS_ASSERT(mobj->info->mass > 0);
+					if (! (flags & SECSP_PushConstant))
+						push_mul = 100.0f / mobj->info->mass;
 
-				mobj->mom.x += push_mul * props->push.x;
-				mobj->mom.y += push_mul * props->push.y;
-				mobj->mom.z += push_mul * props->push.z;
+					mobj->mom.x += push_mul * props->push.x;
+					mobj->mom.y += push_mul * props->push.y;
+					mobj->mom.z += push_mul * props->push.z;
+				}
 			}
 		}
 
@@ -1335,19 +1373,31 @@ static void P_MobjThinker(mobj_t * mobj)
 	}
 
 	// momentum movement
-	if (mobj->mom.x != 0 || mobj->mom.y != 0 || mobj->player)
-	{
-		P_XYMovement(mobj, props);
 
-		if (mobj->isRemoved()) return;
+	bool do_extra = mobj->player != nullptr; // 70 Hz
+	if (mobj->flags & MF_MISSILE)
+		do_extra = true;
+
+	if (!r_doubleframes.d || !extra_tic || do_extra)
+	{
+		if (mobj->mom.x != 0 || mobj->mom.y != 0 || mobj->player)
+		{
+			P_XYMovement(mobj, props, extra_tic);
+
+			if (mobj->isRemoved()) return;
+		}
+
+		if ((mobj->z != mobj->floorz) || mobj->mom.z != 0) //  || mobj->ride_em)
+		{
+			P_ZMovement(mobj, props, extra_tic);
+
+			if (mobj->isRemoved()) return;
+		}
 	}
 
-	if ((mobj->z != mobj->floorz) || mobj->mom.z != 0) //  || mobj->ride_em)
-	{
-		P_ZMovement(mobj, props);
-
-		if (mobj->isRemoved()) return;
-	}
+	// FIXME factor out the player-related code from the rest
+	if (extra_tic && r_doubleframes.d)
+		return;
 
 	if (mobj->fuse >= 0)
 	{
@@ -1616,7 +1666,8 @@ void P_RemoveMobj(mobj_t *mo)
 
 	if ((mo->info->flags & MF_SPECIAL) && 
 		0 == (mo->extendedflags & EF_NORESPAWN) &&
-	    0 == (mo->flags & (MF_MISSILE | MF_DROPPED)))
+	    0 == (mo->flags & (MF_MISSILE | MF_DROPPED)) &&
+		mo->spawnpoint.info)
 	{
 		P_AddItemToQueue(mo);
 	}
@@ -1687,10 +1738,21 @@ void P_RemoveItemsInQue(void)
 // Cycle through all mobjs and let them think.
 // Also handles removed objects which have no more references.
 //
-void P_RunMobjThinkers(void)
+void P_RunMobjThinkers(bool extra_tic)
 {
 	mobj_t *mo;
 	mobj_t *next;
+
+	time_stop_active = false;
+
+	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+	{
+		if (players[pnum] && players[pnum]->powers[PW_TimeStop] > 0)
+		{
+			time_stop_active = true;
+			break;
+		}
+	}
 
 	for (mo = mobjlisthead ; mo != NULL ; mo = next)
 	{
@@ -1710,7 +1772,17 @@ void P_RunMobjThinkers(void)
 			continue;
 		}
 
-		P_MobjThinker(mo);
+		if (mo->player)
+			P_MobjThinker(mo, extra_tic);
+		else
+		{
+			if (time_stop_active)
+				continue;
+			// Culling test
+			if (!r_culling.d || (!r_doubleframes.d || !extra_tic || mo->flags & MF_MISSILE) && 
+				((gametic/2) % I_ROUND(1 + R_PointToDist(players[consoleplayer]->mo->x, players[consoleplayer]->mo->y, mo->x, mo->y) / 1500) == 0))
+				P_MobjThinker(mo, extra_tic);
+		}
 	}
 }
 
@@ -1724,6 +1796,11 @@ void P_RunMobjThinkers(void)
 //
 void P_SpawnSplash(float x, float y, float z, const mobjtype_c * splash, angle_t angle)
 {
+	if (!level_flags.have_extra && (splash->extendedflags & EF_EXTRA))
+		return;
+	
+	if (! (splash->extendedflags & EF_EXTRA)) return; //Optional extra
+
 	mobj_t *th;
 
 	z += (float) P_RandomNegPos() / 16.0f;

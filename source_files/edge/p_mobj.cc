@@ -75,6 +75,7 @@
 
 extern cvar_c r_culling;
 extern cvar_c r_doubleframes;
+extern cvar_c g_mbf21compat;
 
 // List of all objects in map.
 mobj_t *mobjlisthead;
@@ -1365,8 +1366,8 @@ static void P_MobjThinker(mobj_t * mobj, bool extra_tic)
 			}
 		}
 
-		// Probably needs to be retooled to be a little more generalized - Dasho
-		if (props->special && props->special->damage.grounded_monsters && mobj->z <= mobj->floorz + 1.0f)
+		// MBF21 - Only damage grounded monsters (not players)
+		if (props->special && props->special->damage.grounded_monsters && g_mbf21compat.d && mobj->z <= mobj->floorz + 1.0f)
 		{
 			P_DamageMobj(mobj, NULL, NULL, 5.0, &props->special->damage, false);
 		}

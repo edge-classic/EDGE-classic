@@ -45,6 +45,7 @@
 
 bool var_obituaries = true;
 
+extern cvar_c g_mbf21compat;
 
 typedef struct
 {
@@ -1285,18 +1286,19 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 	{
 		int i;
 
-		if (damtype && damtype->grounded_monsters)
+		// MBF21 - Don't damage player if sector type should only affect grounded monsters
+		if (damtype && damtype->grounded_monsters && g_mbf21compat.d)
 			return;
 
 		// ignore damage in GOD mode, or with INVUL powerup
 		if ((player->cheats & CF_GODMODE) || player->powers[PW_Invulnerable] > 0)
 		{
-			if (! (damtype && damtype->bypass_all))
+			if (! (damtype && damtype->bypass_all)) // Dasho - this may need an MBF21 but at least one vanilla sector should damage uncondtionally (E1M8 end)
 				return;
 		}
 
 		// MBF21 - Only damage if not wearing a radsuit (also if not invul, but the above check should theoretically cover that already)
-		if (damtype && damtype->if_naked && player->powers[PW_AcidSuit] > 0)
+		if (damtype && damtype->if_naked && g_mbf21compat.d && player->powers[PW_AcidSuit] > 0)
 			return;
 
 		// take half damage in trainer mode
@@ -1391,7 +1393,8 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 
 		player->attacker = source;
 
-		if (damtype && damtype->instakill)
+		// MBF21 instakill sectors
+		if (damtype && damtype->instakill && g_mbf21compat.d)
 			damage = target->player->health + 1;
 
 		// add damage after armour / invuln detection
@@ -1407,7 +1410,8 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 	}
 	else
 	{
-		if (damtype && damtype->instakill)
+		// MBF21 instakill sectors
+		if (damtype && damtype->instakill && g_mbf21compat.d)
 			damage = target->health + 1;
 	}
 

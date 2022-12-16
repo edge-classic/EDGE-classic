@@ -87,12 +87,7 @@ int key_quick_load;
 int key_quit_edge;
 int key_gamma_toggle;
 
-// Copy of E_MatchesKey so I don't have to pull in e_input.h
-bool M_MatchesKey(int keyvar, int key)
-{
-	return ((keyvar >> 16) == key) ||
-	       ((keyvar & 0xffff) == key);
-}
+extern bool E_MatchesKey(int keyvar, int key);
 
 //
 // defaulted values
@@ -1863,31 +1858,31 @@ bool M_Responder(event_t * ev)
 	int ch = ev->value.key.sym;
 
 	// Produce psuedo keycodes from menu navigation buttons bound in the options menu
-	if (M_MatchesKey(key_menu_open, ch))
+	if (E_MatchesKey(key_menu_open, ch))
 	{
 		ch = KEYD_MENU_OPEN;
 	}
-	else if (M_MatchesKey(key_menu_up, ch))
+	else if (E_MatchesKey(key_menu_up, ch))
 	{
 		ch = KEYD_MENU_UP;
 	}
-	else if (M_MatchesKey(key_menu_down, ch))
+	else if (E_MatchesKey(key_menu_down, ch))
 	{
 		ch = KEYD_MENU_DOWN;
 	}
-	else if (M_MatchesKey(key_menu_left, ch))
+	else if (E_MatchesKey(key_menu_left, ch))
 	{
 		ch = KEYD_MENU_LEFT;
 	}
-	else if (M_MatchesKey(key_menu_right, ch))
+	else if (E_MatchesKey(key_menu_right, ch))
 	{
 		ch = KEYD_MENU_RIGHT;
 	}
-	else if (M_MatchesKey(key_menu_select, ch))
+	else if (E_MatchesKey(key_menu_select, ch))
 	{
 		ch = KEYD_MENU_SELECT;
 	}
-	else if (M_MatchesKey(key_menu_cancel, ch))
+	else if (E_MatchesKey(key_menu_cancel, ch))
 	{
 		ch = KEYD_MENU_CANCEL;
 	}
@@ -2045,47 +2040,47 @@ bool M_Responder(event_t * ev)
 	if (!menuactive)
 	{
 
-		if (M_MatchesKey(key_screenshot, ch))
+		if (E_MatchesKey(key_screenshot, ch))
 		{
 			ch = KEYD_SCREENSHOT;
 		}
-		if (M_MatchesKey(key_save_game, ch))
+		if (E_MatchesKey(key_save_game, ch))
 		{
 			ch = KEYD_SAVEGAME;
 		}
-		if (M_MatchesKey(key_load_game, ch))
+		if (E_MatchesKey(key_load_game, ch))
 		{
 			ch = KEYD_LOADGAME;
 		}
-		if (M_MatchesKey(key_sound_controls, ch))
+		if (E_MatchesKey(key_sound_controls, ch))
 		{
 			ch = KEYD_SOUNDCONTROLS;
 		}
-		if (M_MatchesKey(key_options_menu, ch))
+		if (E_MatchesKey(key_options_menu, ch))
 		{
 			ch = KEYD_OPTIONSMENU;
 		}
-		if (M_MatchesKey(key_quick_save, ch))
+		if (E_MatchesKey(key_quick_save, ch))
 		{
 			ch = KEYD_QUICKSAVE;
 		}
-		if (M_MatchesKey(key_end_game, ch))
+		if (E_MatchesKey(key_end_game, ch))
 		{
 			ch = KEYD_ENDGAME;
 		}
-		if (M_MatchesKey(key_message_toggle, ch))
+		if (E_MatchesKey(key_message_toggle, ch))
 		{
 			ch = KEYD_MESSAGETOGGLE;
 		}
-		if (M_MatchesKey(key_quick_load, ch))
+		if (E_MatchesKey(key_quick_load, ch))
 		{
 			ch = KEYD_QUICKLOAD;
 		}
-		if (M_MatchesKey(key_quit_edge, ch))
+		if (E_MatchesKey(key_quit_edge, ch))
 		{
 			ch = KEYD_QUITEDGE;
 		}
-		if (M_MatchesKey(key_gamma_toggle, ch))
+		if (E_MatchesKey(key_gamma_toggle, ch))
 		{
 			ch = KEYD_GAMMATOGGLE;
 		}

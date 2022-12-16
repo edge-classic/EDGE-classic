@@ -128,6 +128,7 @@ extern cvar_c s_soundfont;
 extern cvar_c r_overlay;
 extern cvar_c g_erraticism;
 extern cvar_c r_doubleframes;
+extern cvar_c g_mbf21compat;
 
 static int menu_crosshair;
 static int menu_crosscolor;
@@ -159,6 +160,7 @@ static void M_ChangeCrossHair(int keypressed);
 static void M_ChangeCrossColor(int keypressed);
 static void M_ChangeCrossSize(int keypressed);
 
+static void M_ChangeMBF21Compat(int keypressed);
 static void M_ChangeBlood(int keypressed);
 static void M_ChangeMLook(int keypressed);
 static void M_ChangeJumping(int keypressed);
@@ -541,6 +543,9 @@ static menuinfo_t f4sound_optmenu =
 //
 static optmenuitem_t playoptions[] =
 {
+	{OPT_Boolean, "MBF21 Map Compatibility", YesNo, 2, 
+     &g_mbf21compat.d, M_ChangeMBF21Compat, "Toggle support for MBF21 lines and sectors"},
+
 	{OPT_Boolean, "Pistol Starts",         YesNo, 2, 
      &pistol_starts, NULL, NULL},
 
@@ -569,7 +574,7 @@ static optmenuitem_t playoptions[] =
      &global_flags.more_blood, M_ChangeBlood, "Blood"},
 
 	{OPT_Boolean, "Extras",             YesNo, 2, 
-     &global_flags.have_extra, M_ChangeExtra, "Compatibility setting for older mods (recommend leaving on)"},
+     &global_flags.have_extra, M_ChangeExtra, NULL},
 
 	{OPT_Boolean, "True 3D Gameplay",   YesNo, 2, 
      &global_flags.true3dgameplay, M_ChangeTrue3d, "True3d"},
@@ -1902,6 +1907,12 @@ static void M_ChangeErraticism(int keypressed)
 static void M_ChangeDoubleFrames(int keypressed)
 {
 	r_doubleframes.s = std::to_string(r_doubleframes.d);
+}
+
+// See above the above the above
+static void M_ChangeMBF21Compat(int keypressed)
+{
+	g_mbf21compat.s = std::to_string(g_mbf21compat.d);
 }
 
 static void M_ChangeKicking(int keypressed)

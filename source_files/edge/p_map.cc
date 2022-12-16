@@ -50,6 +50,10 @@
 
 #define RAISE_RADIUS  32
 
+DEF_CVAR(g_mbf21compat, "0", CVAR_ARCHIVE)
+
+extern cvar_c g_mbf21compat;
+
 typedef struct try_move_info_s
 {
 	// --- input --
@@ -260,15 +264,15 @@ static bool PIT_CheckAbsLine(line_t * ld, void *data)
 		if (ld->flags & MLF_Blocking)
 			return false;
 
-		// block players ?
-		if (tm_I.mover->player && ((ld->flags & MLF_BlockPlayers) ||
+		// MBF21: block players ?
+		if (tm_I.mover->player && g_mbf21compat.d && ((ld->flags & MLF_BlockPlayers) ||
 			(ld->special && (ld->special->line_effect & LINEFX_BlockPlayers))))
 		{
 			return false;
 		}
 
-		// block grounded monsters ?
-		if ((tm_I.extflags & EF_MONSTER) &&
+		// MBF21: block grounded monsters ?
+		if ((tm_I.extflags & EF_MONSTER) && g_mbf21compat.d &&
 			((ld->flags & MLF_BlockGrounded) || (ld->special && (ld->special->line_effect & LINEFX_BlockGroundedMonsters))) 
 			&& (tm_I.mover->z <= tm_I.mover->floorz + 1.0f))
 		{
@@ -467,8 +471,8 @@ static bool PIT_CheckRelLine(line_t * ld, void *data)
 		if ((ld->flags & MLF_Blocking) ||
 			((ld->flags & MLF_BlockMonsters) &&
 			(tm_I.extflags & EF_MONSTER)) ||
-			((ld->flags & MLF_BlockGrounded) && (tm_I.extflags & EF_MONSTER) && (tm_I.mover->z <= tm_I.mover->floorz + 1.0f)) ||
-			((ld->flags & MLF_BlockPlayers) && (tm_I.mover->player)))
+			(g_mbf21compat.d && (ld->flags & MLF_BlockGrounded) && (tm_I.extflags & EF_MONSTER) && (tm_I.mover->z <= tm_I.mover->floorz + 1.0f)) ||
+			(g_mbf21compat.d && (ld->flags & MLF_BlockPlayers) && (tm_I.mover->player)))
 		{
 			blockline = ld;
 			return false;

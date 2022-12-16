@@ -24,7 +24,10 @@ Bugs fixed
 + Fixed main menu cursor scaling/placement when all menu item images are empty
   (i.e., background image alone is used as the "menu")
 + Fixed weapons with animated ready states having jittery swaying/bobbing
-
++ Fixed Boom generalized ceilings using their sector's floors for movement targets
++ Fixed monsters being able to activate W1/WR lines at the edge of a dropoff that
+  is too high for them to descend
++ Fixed Boom Set Friction lines with very short line lengths being ineffective
 
 
 General Improvements
@@ -149,10 +152,6 @@ New Features
 
 + REKKR added as a recognized IWAD
 
-+ MBF Dog is back! Rocking new sprites and sounds, credits to gzdoom(original sprites: Nash Muhandes, original sfx: Kinsie)
-
-+ New CVAR: dogs <number> which will spawn 1-3 friendly helper dogs at coop spawn points.
-
 + COALHUDS: new commands
   -mapobject.count(thingID): returns number of objects of this type on the map
   -player.query_object(MaxDistance, WhatInfo): returns information about the currently targetted thing.
@@ -178,9 +177,27 @@ New Features
     8 (RANGE)
     9 (AUTOMATIC)
 
-+ Improved Boom, MBF and MBF21 support.
-
 + No longer necessary to specify an image type in DDFIMAGE i.e. "IMAGE_DATA=LUMP:FOOBAR;" is now permitted.
+
++ Improved Boom Support
+  - Line 254 vector scrolling will use the appropriate direction instead of only scrolling vertically
+  - Implemented Lines 245-249: Displace scroll/push
+  - Implemented Lines 214-418: Accel scroll/push
+  - Improved Line 242 compatibility (colormaps/invisible platforms/etc)
+  - Implemented light level changes for tagged manual door sectors
+  - Implemented BEX-specific keycard/skull strings
+  - Implemented OB_* DEHACKED string replacements (not stricktly BEX, but Freedoom 1/2 use them)
+
++ Improved MBF Support
+  - Implemented A_Mushroom
+  - MBF Dog is back! Rocking new sprites and sounds, credits to gzdoom(original sprites: Nash Muhandes, original sfx: Kinsie)
+    New CVAR: dogs <number> which will spawn 1-3 friendly helper dogs at coop spawn points.
+
++ Initial MBF21 Support
+  - Implemented Lines 1024-1026: Tagged offset scrolling (Normal/Displace/Accel)
+  - Implemented "Block land monsters" and "Block players" linedef flags
+  - Implemented "Alternate damage mode" and "Kill grounded monsters" sector types
+
 
 
 CHANGELOG for EDGE-Classic 1.21 (since EDGE-Classic 1.2)

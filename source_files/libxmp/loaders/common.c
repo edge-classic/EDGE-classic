@@ -253,7 +253,8 @@ char *libxmp_copy_adjust(char *s, uint8 *r, int n)
 	strncpy(s, (char *)r, n);
 
 	for (i = 0; s[i] && i < n; i++) {
-		if (!isprint((int)s[i]) || ((uint8)s[i] > 127))
+		//if (!isprint((int)s[i]) || ((uint8)s[i] > 127)) This threw an assertion error with certain instrument strings - Dasho
+		if (!(s[i] >= 32 && s[i] <= 126))
 			s[i] = '.';
 	}
 

@@ -59,6 +59,10 @@ New Features
   - Can cycle through various pseudo-CRT/scanline effects
   - Current options: None, Lines 1X, Lines 2X, Checkered, Vertical, and Grill
 
++ New Gameplay Options menu item: MBF21 Map compatibility
+  - Can toggle to enable/disable MBF21 line and sector types/flags/specials
+  - Default is "Off"
+
 + New Gameplay Options menu item: Erraticism
   - Time will only advance when the player moves or fires ("SuperHot")
   - Player's momentum will be preserved if in mid-air/jumping, 
@@ -120,6 +124,11 @@ New Features
       the thing is in an outdoor sector i.e. ceiling is sky.
 	- NOISE_ALERT will cause nearby monsters to be alerted. Add it to a monsters death states so his
 	  final groan will warn nearby monsters to expect trouble ;)
+  - New pickup benefit: POWERUP_TIMESTOP
+    - Player can move and fire normally
+    - Projectiles will remain at the point at which they were fired until time resumes; hitscan or melee 
+      attacks will damage an enemy but they won't react/"die" until time resumes
+    - Switches/doors/lifts can be activated during time stop, but will not move until time resumes
 
 + LINES.DDF
   - New LINE_EFFECT: TAGGED_OFFSET_SCROLL

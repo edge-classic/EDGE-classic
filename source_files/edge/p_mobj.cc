@@ -73,9 +73,10 @@
 
 #define DEBUG_MOBJ  0
 
-extern cvar_c r_culling;
 extern cvar_c r_doubleframes;
 extern cvar_c g_mbf21compat;
+
+DEF_CVAR(g_cullthinkers, "0", CVAR_ARCHIVE)
 
 // List of all objects in map.
 mobj_t *mobjlisthead;
@@ -1779,10 +1780,26 @@ void P_RunMobjThinkers(bool extra_tic)
 		{
 			if (time_stop_active)
 				continue;
-			// Culling test
-			if (!r_culling.d || (!r_doubleframes.d || !extra_tic || mo->flags & MF_MISSILE) && 
-				((gametic/2) % I_ROUND(1 + R_PointToDist(players[consoleplayer]->mo->x, players[consoleplayer]->mo->y, mo->x, mo->y) / 1500) == 0))
-				P_MobjThinker(mo, extra_tic);
+			if (!r_doubleframes.d)
+			{
+				if (!g_cullthinkers.d ||
+					(gametic/2 % I_ROUND(1 + R_PointToDist(players[consoleplayer]->mo->x, players[consoleplayer]->mo->y, mo->x, mo->y) / 1500) == 0))
+					P_MobjThinker(mo, extra_tic);
+			}
+			else
+			{
+				if (extra_tic)
+				{	
+					if (!(mo->flags & MF_MISSILE))
+						continue;
+					else if (!g_cullthinkers.d ||
+						((gametic/4) % I_ROUND(1 + R_PointToDist(players[consoleplayer]->mo->x, players[consoleplayer]->mo->y, mo->x, mo->y) / 1500) == 0))
+						P_MobjThinker(mo, extra_tic);
+				}
+				else if (!g_cullthinkers.d ||
+					((gametic/4) % I_ROUND(1 + R_PointToDist(players[consoleplayer]->mo->x, players[consoleplayer]->mo->y, mo->x, mo->y) / 1500) == 0))
+					P_MobjThinker(mo, extra_tic);
+			}
 		}
 	}
 }

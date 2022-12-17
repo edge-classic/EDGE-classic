@@ -63,11 +63,9 @@
 
 
 DEF_CVAR(debug_hom, "0", CVAR_CHEAT)
-DEF_CVAR(r_maxdlights, "20", CVAR_ARCHIVE)
 
 extern cvar_c r_culling;
 extern cvar_c r_doubleframes;
-
 
 side_t *sidedef;
 line_t *linedef;

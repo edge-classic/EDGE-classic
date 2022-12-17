@@ -32,7 +32,8 @@ Bugs fixed
 
 General Improvements
 --------------------
-+ Live soundfont (TinySoundFont)/instrument bank (OPL) selector
++ Replaced TinySoundFont with FluidLite, supporting a wider range of MIDI events and effects
++ Live soundfont (FluidLite)/instrument bank (OPL) selector
 + DEH_EDGE cleanup and improvements
 + Improved screen resolution and aspect modes
 + New Harmony base WAD assets
@@ -49,7 +50,6 @@ General Improvements
   to prevent conflicts)
 + Borderless Fullscreen mode added to the Set Resolution menu; list of Windowed resolutions updated to accommodate
   displays up to 4K
-+ Replaced TinySoundFont with FluidLite, supporting a wider range of MIDI events and effects
 
 
 New Features
@@ -73,14 +73,17 @@ New Features
   - Can hold the Use key to advance time without having to move or fire
     (helpful when waiting for lifts, etc)
 
++ New Performance Options menu
+  - Current options
+    - Reduce Draw Distance: Will cull rendering at a set distance
+    - Slow Thinkers Over Distance: Helps alleviate performance hit from extreme
+      monster/missile counts. Not recommended for normal gameplay
+    - Dynamic Light Limit: Set maximum number of dynamic lights to render at once
+
 + Vastly improved Deathbot navigation and combat
 
 + New console command: showmaps
   - Will show the warp name and level description for accessible map
-
-+ Added experimental distance culling accessible via the r_culling CVAR
-  - r_culling 0 : No distance culling
-  - r_culling (any non-zero value) : Distance culling with fade-to-black; sky texture will not be visible
 
 + Support OPL emulated playback of MUS and MIDI music lumps.
   - Can use GENMIDI lumps (Default) or external *.op2 instrument bank files

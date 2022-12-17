@@ -129,6 +129,9 @@ extern cvar_c r_overlay;
 extern cvar_c g_erraticism;
 extern cvar_c r_doubleframes;
 extern cvar_c g_mbf21compat;
+extern cvar_c r_culling;
+extern cvar_c g_cullthinkers;
+extern cvar_c r_maxdlights;
 
 static int menu_crosshair;
 static int menu_crosscolor;
@@ -143,6 +146,7 @@ extern int entry_playing;
 static void M_KeyboardOptions(int keypressed);
 static void M_VideoOptions(int keypressed);
 static void M_GameplayOptions(int keypressed);
+static void M_PerformanceOptions(int keypressed);
 static void M_AnalogueOptions(int keypressed);
 static void M_SoundOptions(int keypressed);
 
@@ -160,6 +164,9 @@ static void M_ChangeCrossHair(int keypressed);
 static void M_ChangeCrossColor(int keypressed);
 static void M_ChangeCrossSize(int keypressed);
 
+static void M_ChangeMaxDLights(int keypressed);
+static void M_ChangeCulling(int keypressed);
+static void M_ChangeThinkerCulling(int keypressed);
 static void M_ChangeMBF21Compat(int keypressed);
 static void M_ChangeBlood(int keypressed);
 static void M_ChangeMLook(int keypressed);
@@ -221,6 +228,8 @@ static char MixChans[]    = "32/64/96/128/160/192/224/256";
 static char CrosshairColor[] = "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange";
 
 static char OPLMode[]  = "Off/OPL2/OPL3";
+
+static char DLightMax[]  = "Unlimited/20/40/60/80/100";
 
 // Screen resolution changes
 static scrmode_c new_scrmode;
@@ -363,6 +372,7 @@ static optmenuitem_t mainoptions[] =
 	{OPT_Function, "Key Bindings", NULL,  0, NULL, M_KeyboardOptions, "Controls"},
 	{OPT_Function, "Mouse / Controller",  NULL,  0, NULL, M_AnalogueOptions, "AnalogueOptions"},
 	{OPT_Function, "Gameplay Options",  NULL,  0, NULL, M_GameplayOptions, "GameplayOptions"},
+	{OPT_Function, "Performance Options",  NULL,  0, NULL, M_PerformanceOptions, "PerformanceOptions"},
 	{OPT_Plain,    "",                  NULL,  0, NULL, NULL, NULL},
 	{OPT_Function, "Sound Options",     NULL,  0, NULL, M_SoundOptions, "SoundOptions"},
 	{OPT_Function, "Video Options",     NULL,  0, NULL, M_VideoOptions, "VideoOptions"},
@@ -605,6 +615,26 @@ static menuinfo_t gameplay_optmenu =
 {
 	playoptions, sizeof(playoptions) / sizeof(optmenuitem_t),
 	&opt_def_style, 160, 46, "M_GAMEPL", NULL, 0, "", language["MenuGameplay"]
+};
+
+//
+//  PERFORMANCE OPTIONS
+//
+//
+static optmenuitem_t perfoptions[] =
+{
+	{OPT_Boolean, "Reduce Draw Distance", YesNo, 2, 
+     &r_culling.d, M_ChangeCulling, "Note: Skies will not be visible with this setting enabled"},
+	{OPT_Boolean, "Slow Thinkers Over Distance", YesNo, 2, 
+     &g_cullthinkers.d, M_ChangeThinkerCulling, "Only recommended for extreme monster/projectile counts"},
+	{OPT_Switch, "Maximum Dynamic Lights", DLightMax, 6, 
+     &r_maxdlights.d, M_ChangeMaxDLights, "Control how many dynamic lights are rendered per tick"},
+};
+
+static menuinfo_t perf_optmenu = 
+{
+	perfoptions, sizeof(perfoptions) / sizeof(optmenuitem_t),
+	&opt_def_style, 160, 46, "M_PRFOPT", NULL, 0, "", language["MenuPerformance"]
 };
 
 //
@@ -901,6 +931,7 @@ void M_OptMenuInit()
 	sound_optmenu.name=language["MenuSound"];
 	f4sound_optmenu.name=language["MenuSound"];
 	gameplay_optmenu.name=language["MenuGameplay"];
+	perf_optmenu.name=language["MenuPerformance"];
 	movement_optmenu.name=language["MenuBinding"];
 	attack_optmenu.name=language["MenuBinding"];
 	otherkey_optmenu.name=language["MenuBinding"];
@@ -1704,6 +1735,20 @@ static void M_GameplayOptions(int keypressed)
 }
 
 //
+// M_PerformanceOptions
+//
+static void M_PerformanceOptions(int keypressed)
+{
+	// not allowed in netgames (changing most of these options would
+	// break synchronisation with the other machines).
+	if (netgame)
+		return;
+
+	curr_menu = &perf_optmenu;
+	curr_item = curr_menu->items + curr_menu->pos;
+}
+
+//
 // M_KeyboardOptions
 //
 static void M_KeyboardOptions(int keypressed)
@@ -1913,6 +1958,24 @@ static void M_ChangeDoubleFrames(int keypressed)
 static void M_ChangeMBF21Compat(int keypressed)
 {
 	g_mbf21compat.s = std::to_string(g_mbf21compat.d);
+}
+
+// See above the above the above the above
+static void M_ChangeCulling(int keypressed)
+{
+	r_culling.s = std::to_string(r_culling.d);
+}
+
+// See above the above the above the above the above
+static void M_ChangeThinkerCulling(int keypressed)
+{
+	g_cullthinkers.s = std::to_string(g_cullthinkers.d);
+}
+
+// See above the above the above the above the above the above
+static void M_ChangeMaxDLights(int keypressed)
+{
+	r_maxdlights.s = std::to_string(r_maxdlights.d);
 }
 
 static void M_ChangeKicking(int keypressed)

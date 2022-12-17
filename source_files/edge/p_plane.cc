@@ -400,7 +400,8 @@ static bool MovePlane(plane_move_t *plane)
             break;
 
         case DIRECTION_WAIT:
-            if (--plane->waited <= 0)
+            plane->waited -= (!r_doubleframes.d || !(gametic & 1)) ? 1 : 0;
+            if (plane->waited <= 0)
             {
                 int dir;
                 float dest;

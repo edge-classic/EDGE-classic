@@ -1034,17 +1034,12 @@ void OPLAY_KeyOn(uint8_t channel, uint8_t note, uint8_t volume)
 	if (channel == 9)
 	{
 		instrument = GM_GetPercussion(key);
-		if (instrument == NULL)
-		{
-			return;
-		}
-
 		note = 60;
 	}
 	else
-	{
 		instrument = opl_channel->instrument;
-	}
+
+	if (!instrument) return;
 
 	double_voice = (LE_SHORT(instrument->flags) & GENMIDI_FLAG_2VOICE) != 0;
 

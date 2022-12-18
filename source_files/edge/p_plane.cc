@@ -1088,7 +1088,8 @@ static bool MoveSlider(slider_move_t *smov)
     {
         // WAITING
         case 0:
-            if (--smov->waited <= 0)
+            smov->waited -= (!r_doubleframes.d || !(gametic & 1)) ? 1 : 0;
+            if (smov->waited <= 0)
             {
                 if (SliderCanClose(smov->line))
                 {

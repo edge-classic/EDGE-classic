@@ -1720,6 +1720,8 @@ static inline void PlayerInProperties(player_t *player,
 	const sectortype_c *special = props->special;
 	float damage, factor;
 
+	bool extra_tic = ((gametic & 1) == 1);
+
 	if (!special || c_h < f_h)
 		return;
 
@@ -1736,7 +1738,7 @@ static inline void PlayerInProperties(player_t *player,
 		player->powers[PW_Scuba] <= 0)
 	{
 		int subtract = 1;
-		if (r_doubleframes.d && (gametic & 1 == 1))
+		if (r_doubleframes.d && extra_tic)
 			subtract = 0;
 		player->air_in_lungs -= subtract;
 		player->underwater = true;
@@ -1809,6 +1811,9 @@ static inline void PlayerInProperties(player_t *player,
 	}
 
 	if (player->powers[PW_AcidSuit] && (!g_mbf21compat.d || !special->damage.bypass_all))
+		factor = 0;
+
+	if (r_doubleframes.d && extra_tic)
 		factor = 0;
 
 	if (factor > 0 &&

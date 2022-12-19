@@ -33,7 +33,7 @@ SDL_Window *my_vis;
 int graphics_shutdown = 0;
 
 DEF_CVAR(in_grab, "1", CVAR_ARCHIVE)
-DEF_CVAR(v_sync,  "1", CVAR_ARCHIVE)
+DEF_CVAR(v_sync,  "0", CVAR_ARCHIVE)
 
 // this is the Monitor Size setting, really an aspect ratio.
 // it defaults to 16:9, as that is the most common monitor size nowadays.
@@ -277,7 +277,17 @@ static bool I_CreateWindow(scrmode_c *mode)
 	if (SDL_GL_CreateContext(my_vis) == NULL)
 		I_Error("Failed to create OpenGL context.\n");
 
-	SDL_GL_SetSwapInterval(v_sync.d ? 1 : 0);
+	if (v_sync.d == 2)
+	{
+		// Fallback to normal VSync if Adaptive doesn't work
+		if (SDL_GL_SetSwapInterval(-1) == -1)
+		{
+			v_sync = 1;
+			SDL_GL_SetSwapInterval(v_sync.d);
+		}
+	}
+	else
+		SDL_GL_SetSwapInterval(v_sync.d);
 
 	gladLoaderLoadGL();
 
@@ -383,7 +393,19 @@ void I_FinishFrame(void)
 		I_GrabCursor(grab_state);
 
 	if (v_sync.CheckModified())
-		SDL_GL_SetSwapInterval(v_sync.d ? 1 : 0);
+	{
+		if (v_sync.d == 2)
+		{
+			// Fallback to normal VSync if Adaptive doesn't work
+			if (SDL_GL_SetSwapInterval(-1) == -1)
+			{
+				v_sync = 1;
+				SDL_GL_SetSwapInterval(v_sync.d);
+			}
+		}
+		else
+			SDL_GL_SetSwapInterval(v_sync.d);
+	}
 
 	if (v_monitorsize.CheckModified() || v_force_pixelaspect.CheckModified())
 		I_DeterminePixelAspect();

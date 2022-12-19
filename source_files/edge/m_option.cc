@@ -132,6 +132,7 @@ extern cvar_c g_mbf21compat;
 extern cvar_c r_culling;
 extern cvar_c g_cullthinkers;
 extern cvar_c r_maxdlights;
+extern cvar_c v_sync;
 
 static int menu_crosshair;
 static int menu_crosscolor;
@@ -202,6 +203,7 @@ static void M_ChangeSoundfont(int keypressed);
 static void M_ChangeGENMIDI(int keypressed);
 static void M_ChangeErraticism(int keypressed);
 static void M_ChangeDoubleFrames(int keypressed);
+static void M_ChangeVSync(int keypressed);
 static void InitMonitorSize();
 
 static char YesNo[]     = "Off/On";  // basic on/off
@@ -401,10 +403,8 @@ static menuinfo_t main_optmenu =
 static optmenuitem_t vidoptions[] =
 {
 	{OPT_Slider,  "Brightness",    NULL,  6,  &var_gamma, M_ChangeGamma, NULL},
-
-	{OPT_Plain,   "",  NULL,  0,  NULL, NULL, NULL},
-
 	{OPT_Switch,  "Framerate Target", "35 FPS/70 FPS", 2, &r_doubleframes.d, M_ChangeDoubleFrames, NULL},
+	{OPT_Switch,  "V-Sync", "Off/Standard/Adaptive", 3, &v_sync.d, M_ChangeVSync, "Will fallback to Standard if Adaptive is not supported"},
 	{OPT_Switch,  "Monitor Size",  MonitSiz,  6, &monitor_size, M_ChangeMonitorSize, NULL},
 	{OPT_Switch,  "Smoothing",         YesNo, 2, &var_smoothing, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "H.Q.2x Scaling", Hq2xMode, 4, &hq2x_scaling, M_ChangeMipMap, NULL},
@@ -1939,43 +1939,49 @@ static void M_ChangeMipMap(int keypressed)
 // Need to make a generic CVAR save function
 static void M_SaveOverlay(int keypressed)
 {
-	r_overlay.s = std::to_string(r_overlay.d);
+	r_overlay = r_overlay.d;
 }
 
 // See above
 static void M_ChangeErraticism(int keypressed)
 {
-	g_erraticism.s = std::to_string(g_erraticism.d);
+	g_erraticism = g_erraticism.d;
 }
 
 // See above the above
 static void M_ChangeDoubleFrames(int keypressed)
 {
-	r_doubleframes.s = std::to_string(r_doubleframes.d);
+	r_doubleframes = r_doubleframes.d;
 }
 
 // See above the above the above
 static void M_ChangeMBF21Compat(int keypressed)
 {
-	g_mbf21compat.s = std::to_string(g_mbf21compat.d);
+	g_mbf21compat = g_mbf21compat.d;
 }
 
 // See above the above the above the above
 static void M_ChangeCulling(int keypressed)
 {
-	r_culling.s = std::to_string(r_culling.d);
+	r_culling = r_culling.d;
 }
 
 // See above the above the above the above the above
 static void M_ChangeThinkerCulling(int keypressed)
 {
-	g_cullthinkers.s = std::to_string(g_cullthinkers.d);
+	g_cullthinkers = g_cullthinkers.d;
 }
 
 // See above the above the above the above the above the above
 static void M_ChangeMaxDLights(int keypressed)
 {
-	r_maxdlights.s = std::to_string(r_maxdlights.d);
+	r_maxdlights = r_maxdlights.d;
+}
+
+// See above the above the above the above the above the above the above
+static void M_ChangeVSync(int keypressed)
+{
+	v_sync = v_sync.d;
 }
 
 static void M_ChangeKicking(int keypressed)

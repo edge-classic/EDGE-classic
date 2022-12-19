@@ -83,7 +83,7 @@ New Features
 + Vastly improved Deathbot navigation and combat
 
 + New console command: showmaps
-  - Will show the warp name and level description for accessible map
+  - Will show the warp name and level description for accessible maps
 
 + Support OPL emulated playback of MUS and MIDI music lumps.
   - Can use GENMIDI lumps (Default) or external *.op2 instrument bank files
@@ -189,7 +189,7 @@ New Features
   - Improved Line 242 compatibility (colormaps/invisible platforms/etc)
   - Implemented light level changes for tagged manual door sectors
   - Implemented BEX-specific keycard/skull strings
-  - Implemented OB_* DEHACKED string replacements (not stricktly BEX, but Freedoom 1/2 use them)
+  - Implemented OB_* DEHACKED string replacements (not strictly BEX, but Freedoom 1/2 use them)
 
 + Improved MBF Support
   - Implemented A_Mushroom

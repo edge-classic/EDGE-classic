@@ -48,6 +48,8 @@
 
 #include "r_sky.h" //Lobo 2022: added for our Sky Transfer special
 
+#define BOOM_CARRY_FACTOR 0.09375f
+
 extern cvar_c r_doubleframes;
 extern cvar_c g_mbf21compat;
 
@@ -819,8 +821,8 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 			}
 			if (special->sector_effect & SECTFX_PushThings)
 			{
-				anim.push.x += source->dx / 320.0f;
-				anim.push.y += source->dy / 320.0f;
+				anim.push.x += source->dx / 32.0f * BOOM_CARRY_FACTOR;
+				anim.push.y += source->dy / 32.0f * BOOM_CARRY_FACTOR;
 			}
 		}
 		else
@@ -2649,8 +2651,8 @@ void P_UpdateSpecials(void)
 						{
 							if (special_ref->sector_effect & SECTFX_PushThings)
 							{
-								sec->props.net_push.y += line_ref->dy / 320.0f * ratio * sec_ref->floor_move->speed;
-								sec->props.net_push.x += line_ref->dx / 320.0f * ratio * sec_ref->floor_move->speed;
+								sec->props.net_push.y += line_ref->dy / 32.0f * BOOM_CARRY_FACTOR * sec_ref->floor_move->speed;
+								sec->props.net_push.x += line_ref->dx / 32.0f * BOOM_CARRY_FACTOR * sec_ref->floor_move->speed;
 							}
 							if (special_ref->sector_effect & SECTFX_ScrollFloor)
 							{
@@ -2667,8 +2669,8 @@ void P_UpdateSpecials(void)
 						{
 							if (special_ref->sector_effect & SECTFX_PushThings)
 							{
-								sec->props.net_push.y -= line_ref->dy / 320.0f * ratio * sec_ref->floor_move->speed;
-								sec->props.net_push.x -= line_ref->dx / 320.0f * ratio * sec_ref->floor_move->speed;
+								sec->props.net_push.y -= line_ref->dy / 32.0f * BOOM_CARRY_FACTOR * sec_ref->floor_move->speed;
+								sec->props.net_push.x -= line_ref->dx / 32.0f * BOOM_CARRY_FACTOR * sec_ref->floor_move->speed;
 							}
 							if (special_ref->sector_effect & SECTFX_ScrollFloor)
 							{
@@ -2688,8 +2690,8 @@ void P_UpdateSpecials(void)
 						{
 							if (special_ref->sector_effect & SECTFX_PushThings)
 							{
-								sec->props.net_push.y += line_ref->dy / 320.0f * ratio * sec_ref->ceil_move->speed;
-								sec->props.net_push.x += line_ref->dx / 320.0f * ratio * sec_ref->ceil_move->speed;
+								sec->props.net_push.y += line_ref->dy / 32.0f * BOOM_CARRY_FACTOR * sec_ref->ceil_move->speed;
+								sec->props.net_push.x += line_ref->dx / 32.0f * BOOM_CARRY_FACTOR * sec_ref->ceil_move->speed;
 							}
 							if (special_ref->sector_effect & SECTFX_ScrollFloor)
 							{
@@ -2706,8 +2708,8 @@ void P_UpdateSpecials(void)
 						{
 							if (special_ref->sector_effect & SECTFX_PushThings)
 							{
-								sec->props.net_push.y -= line_ref->dy / 320.0f * ratio * sec_ref->ceil_move->speed;
-								sec->props.net_push.x -= line_ref->dx / 320.0f * ratio * sec_ref->ceil_move->speed;
+								sec->props.net_push.y -= line_ref->dy / 32.0f * BOOM_CARRY_FACTOR * sec_ref->ceil_move->speed;
+								sec->props.net_push.x -= line_ref->dx / 32.0f * BOOM_CARRY_FACTOR * sec_ref->ceil_move->speed;
 							}
 							if (special_ref->sector_effect & SECTFX_ScrollFloor)
 							{
@@ -2733,8 +2735,8 @@ void P_UpdateSpecials(void)
 						float dist = (lowering ? sec_ref->floor_move->startheight : sec_ref->floor_move->destheight) - sec_ref->f_h;
 						if (special_ref->sector_effect & SECTFX_PushThings)
 						{
-							sec->props.net_push.y -= ratio * sdy / 10.0f * dist; 
-							sec->props.net_push.x -= ratio * sdx / 10.0f * dist; 
+							sec->props.net_push.y -= ratio * sdy * BOOM_CARRY_FACTOR * dist; 
+							sec->props.net_push.x -= ratio * sdx * BOOM_CARRY_FACTOR * dist; 
 						}
 						if (special_ref->sector_effect & SECTFX_ScrollFloor)
 						{
@@ -2753,8 +2755,8 @@ void P_UpdateSpecials(void)
 						float dist = (lowering ? sec_ref->ceil_move->startheight : sec_ref->ceil_move->destheight) - sec_ref->c_h;
 						if (special_ref->sector_effect & SECTFX_PushThings)
 						{
-							sec->props.net_push.y -= ratio * sdy / 10.0f * dist; 
-							sec->props.net_push.x -= ratio * sdx / 10.0f * dist; 
+							sec->props.net_push.y -= ratio * sdy * BOOM_CARRY_FACTOR * dist; 
+							sec->props.net_push.x -= ratio * sdx * BOOM_CARRY_FACTOR * dist; 
 						}
 						if (special_ref->sector_effect & SECTFX_ScrollFloor)
 						{

@@ -1955,12 +1955,15 @@ static inline void ApplyScroll(vec2_t& offset, const vec2_t& delta, unsigned sho
 //
 // Animate planes, scroll walls, etc.
 //
-void P_UpdateSpecials(void)
+void P_UpdateSpecials(bool extra_tic)
 {
+	// For anim stuff
+	float factor = r_doubleframes.d ? 0.5f : 1.0f;
+
 	// LEVEL TIMER
 	if (levelTimer == true)
 	{
-		levelTimeCount--;
+		levelTimeCount -= (r_doubleframes.d && extra_tic) ? 0 : 1;
 
 		if (!levelTimeCount)
 			G_ExitLevel(1);
@@ -2574,20 +2577,20 @@ void P_UpdateSpecials(void)
 		{
 			if (ld->side[0]->top.image)
 			{
-				ld->side[0]->top.offset.x = fmod(ld->side[0]->top.offset.x + ld->side[0]->top.scroll.x + ld->side[0]->top.net_scroll.x, ld->side[0]->top.image->actual_w);
-				ld->side[0]->top.offset.y = fmod(ld->side[0]->top.offset.y + ld->side[0]->top.scroll.y + ld->side[0]->top.net_scroll.y, ld->side[0]->top.image->actual_h);
+				ld->side[0]->top.offset.x = fmod(ld->side[0]->top.offset.x + (ld->side[0]->top.scroll.x + ld->side[0]->top.net_scroll.x) * factor, ld->side[0]->top.image->actual_w);
+				ld->side[0]->top.offset.y = fmod(ld->side[0]->top.offset.y + (ld->side[0]->top.scroll.y + ld->side[0]->top.net_scroll.y) * factor, ld->side[0]->top.image->actual_h);
 				ld->side[0]->top.net_scroll = {0,0};
 			}
 			if (ld->side[0]->middle.image)
 			{
-				ld->side[0]->middle.offset.x = fmod(ld->side[0]->middle.offset.x + ld->side[0]->middle.scroll.x + ld->side[0]->middle.net_scroll.x, ld->side[0]->middle.image->actual_w);
-				ld->side[0]->middle.offset.y = fmod(ld->side[0]->middle.offset.y + ld->side[0]->middle.scroll.y + ld->side[0]->middle.net_scroll.y, ld->side[0]->middle.image->actual_h);
+				ld->side[0]->middle.offset.x = fmod(ld->side[0]->middle.offset.x + (ld->side[0]->middle.scroll.x + ld->side[0]->middle.net_scroll.x) * factor, ld->side[0]->middle.image->actual_w);
+				ld->side[0]->middle.offset.y = fmod(ld->side[0]->middle.offset.y + (ld->side[0]->middle.scroll.y + ld->side[0]->middle.net_scroll.y) * factor, ld->side[0]->middle.image->actual_h);
 				ld->side[0]->middle.net_scroll = {0,0};
 			}
 			if (ld->side[0]->bottom.image)
 			{
-				ld->side[0]->bottom.offset.x = fmod(ld->side[0]->bottom.offset.x + ld->side[0]->bottom.scroll.x + ld->side[0]->bottom.net_scroll.x, ld->side[0]->bottom.image->actual_w);
-				ld->side[0]->bottom.offset.y = fmod(ld->side[0]->bottom.offset.y + ld->side[0]->bottom.scroll.y + ld->side[0]->bottom.net_scroll.y, ld->side[0]->bottom.image->actual_h);
+				ld->side[0]->bottom.offset.x = fmod(ld->side[0]->bottom.offset.x + (ld->side[0]->bottom.scroll.x + ld->side[0]->bottom.net_scroll.x) * factor, ld->side[0]->bottom.image->actual_w);
+				ld->side[0]->bottom.offset.y = fmod(ld->side[0]->bottom.offset.y + (ld->side[0]->bottom.scroll.y + ld->side[0]->bottom.net_scroll.y) * factor, ld->side[0]->bottom.image->actual_h);
 				ld->side[0]->bottom.net_scroll = {0,0};
 			}
 		}
@@ -2596,20 +2599,20 @@ void P_UpdateSpecials(void)
 		{
 			if (ld->side[1]->top.image)
 			{
-				ld->side[1]->top.offset.x = fmod(ld->side[1]->top.offset.x + ld->side[1]->top.scroll.x + ld->side[1]->top.net_scroll.x, ld->side[1]->top.image->actual_w);
-				ld->side[1]->top.offset.y = fmod(ld->side[1]->top.offset.y + ld->side[1]->top.scroll.y + ld->side[1]->top.net_scroll.y, ld->side[1]->top.image->actual_h);
+				ld->side[1]->top.offset.x = fmod(ld->side[1]->top.offset.x + (ld->side[1]->top.scroll.x + ld->side[1]->top.net_scroll.x) * factor, ld->side[1]->top.image->actual_w);
+				ld->side[1]->top.offset.y = fmod(ld->side[1]->top.offset.y + (ld->side[1]->top.scroll.y + ld->side[1]->top.net_scroll.y) * factor, ld->side[1]->top.image->actual_h);
 				ld->side[1]->top.net_scroll = {0,0};
 			}
 			if (ld->side[1]->middle.image)
 			{
-				ld->side[1]->middle.offset.x = fmod(ld->side[1]->middle.offset.x + ld->side[1]->middle.scroll.x + ld->side[1]->middle.net_scroll.x, ld->side[1]->middle.image->actual_w);
-				ld->side[1]->middle.offset.y = fmod(ld->side[1]->middle.offset.y + ld->side[1]->middle.scroll.y + ld->side[1]->middle.net_scroll.y, ld->side[1]->middle.image->actual_h);
+				ld->side[1]->middle.offset.x = fmod(ld->side[1]->middle.offset.x + (ld->side[1]->middle.scroll.x + ld->side[1]->middle.net_scroll.x) * factor, ld->side[1]->middle.image->actual_w);
+				ld->side[1]->middle.offset.y = fmod(ld->side[1]->middle.offset.y + (ld->side[1]->middle.scroll.y + ld->side[1]->middle.net_scroll.y) * factor, ld->side[1]->middle.image->actual_h);
 				ld->side[1]->middle.net_scroll = {0,0};
 			}
 			if (ld->side[1]->bottom.image)
 			{
-				ld->side[1]->bottom.offset.x = fmod(ld->side[1]->bottom.offset.x + ld->side[1]->bottom.scroll.x + ld->side[1]->bottom.net_scroll.x, ld->side[1]->bottom.image->actual_w);
-				ld->side[1]->bottom.offset.y = fmod(ld->side[1]->bottom.offset.y + ld->side[1]->bottom.scroll.y + ld->side[1]->bottom.net_scroll.y, ld->side[1]->bottom.image->actual_h);
+				ld->side[1]->bottom.offset.x = fmod(ld->side[1]->bottom.offset.x + (ld->side[1]->bottom.scroll.x + ld->side[1]->bottom.net_scroll.x) * factor, ld->side[1]->bottom.image->actual_w);
+				ld->side[1]->bottom.offset.y = fmod(ld->side[1]->bottom.offset.y + (ld->side[1]->bottom.scroll.y + ld->side[1]->bottom.net_scroll.y) * factor, ld->side[1]->bottom.image->actual_h);
 				ld->side[1]->bottom.net_scroll = {0,0};
 			}
 		}
@@ -2804,10 +2807,10 @@ void P_UpdateSpecials(void)
 			sec->props.push.z = sec->props.old_push.z;
 		}
 
-		sec->floor.offset.x = fmod(sec->floor.offset.x + sec->floor.scroll.x + sec->floor.net_scroll.x, sec->floor.image->actual_w);
-		sec->floor.offset.y = fmod(sec->floor.offset.y + sec->floor.scroll.y + sec->floor.net_scroll.y, sec->floor.image->actual_h);
-		sec->ceil.offset.x = fmod(sec->ceil.offset.x + sec->ceil.scroll.x + sec->ceil.net_scroll.x, sec->ceil.image->actual_w);
-		sec->ceil.offset.y = fmod(sec->ceil.offset.y + sec->ceil.scroll.y + sec->ceil.net_scroll.y, sec->ceil.image->actual_h);
+		sec->floor.offset.x = fmod(sec->floor.offset.x + (sec->floor.scroll.x + sec->floor.net_scroll.x) * factor, sec->floor.image->actual_w);
+		sec->floor.offset.y = fmod(sec->floor.offset.y + (sec->floor.scroll.y + sec->floor.net_scroll.y) * factor, sec->floor.image->actual_h);
+		sec->ceil.offset.x = fmod(sec->ceil.offset.x + (sec->ceil.scroll.x + sec->ceil.net_scroll.x) * factor, sec->ceil.image->actual_w);
+		sec->ceil.offset.y = fmod(sec->ceil.offset.y + (sec->ceil.scroll.y + sec->ceil.net_scroll.y) * factor, sec->ceil.image->actual_h);
 		sec->props.push.x = sec->props.push.x + sec->props.net_push.x;
 		sec->props.push.y = sec->props.push.y + sec->props.net_push.y;
 
@@ -2818,7 +2821,8 @@ void P_UpdateSpecials(void)
 	}
 
 	// DO BUTTONS
-	P_UpdateButtons();
+	if (!r_doubleframes.d || !extra_tic)
+		P_UpdateButtons();
 }
 
 //

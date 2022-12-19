@@ -92,12 +92,14 @@ void P_Ticker(bool extra_tic)
 	P_RunActivePlanes();
 	P_RunActiveSliders();
 
+	if (!extra_tic || !r_doubleframes.d)
+		P_RunAmbientSFX();
+
+	P_UpdateSpecials(extra_tic);
+
 	if (extra_tic && r_doubleframes.d)
 		return;
 
-	P_RunAmbientSFX();
-
-	P_UpdateSpecials();
 	P_MobjItemRespawn();
 
 	// for par times

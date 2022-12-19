@@ -175,7 +175,7 @@ void P_SpawnSpecials2(int autotag);
 void P_StopAmbientSectorSfx(void);
 
 // every tic
-void P_UpdateSpecials(void);
+void P_UpdateSpecials(bool extra_tic);
 
 // when needed
 bool P_UseSpecialLine(mobj_t * thing, line_t * line, int side,

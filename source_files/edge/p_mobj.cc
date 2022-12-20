@@ -1334,9 +1334,12 @@ static void P_MobjThinker(mobj_t * mobj, bool extra_tic)
 	{
 		P_CalcFullProperties(mobj, &player_props);
 
-		mobj->mom.x += player_props.push.x;
-		mobj->mom.y += player_props.push.y;
-		mobj->mom.z += player_props.push.z;
+		if (!extra_tic || !r_doubleframes.d)
+		{
+			mobj->mom.x += player_props.push.x;
+			mobj->mom.y += player_props.push.y;
+			mobj->mom.z += player_props.push.z;
+		}
 
 		props = &player_props;
 	}

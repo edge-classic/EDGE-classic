@@ -52,6 +52,8 @@ extern void VM_SetVector(coal::vm_c *vm, const char *mod_name, const char *var_n
 
 DEF_CVAR(g_erraticism, "0", CVAR_ARCHIVE)
 
+DEF_CVAR(g_bobbing, "0", CVAR_ARCHIVE)
+
 float room_area;
 
 struct room_measure
@@ -196,6 +198,9 @@ static void CalcHeight(player_t * player, bool extra_tic)
 
 	if (r_doubleframes.d)
 		bob_z *= 0.5;
+
+	if (g_bobbing.d > 1)
+		bob_z = 0;
 
 	player->viewz = player->viewheight + bob_z;
 

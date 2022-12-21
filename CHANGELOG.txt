@@ -66,6 +66,11 @@ New Features
   - Can toggle to enable/disable MBF21 line and sector types/flags/specials
   - Default is "Off"
 
++ New Gameplay Options menu item: Bobbing
+  - Controls if view/weapon are bobbed while moving
+  - Options are "Full", "Head Only", "Weapon Only", "None"
+  - Default is "Full"
+
 + New Gameplay Options menu item: Erraticism
   - Time will only advance when the player moves or fires ("SuperHot")
   - Player's momentum will be preserved if in mid-air/jumping, 

@@ -133,6 +133,7 @@ extern cvar_c r_culling;
 extern cvar_c g_cullthinkers;
 extern cvar_c r_maxdlights;
 extern cvar_c v_sync;
+extern cvar_c g_bobbing;
 
 static int menu_crosshair;
 static int menu_crosscolor;
@@ -169,6 +170,7 @@ static void M_ChangeMaxDLights(int keypressed);
 static void M_ChangeCulling(int keypressed);
 static void M_ChangeThinkerCulling(int keypressed);
 static void M_ChangeMBF21Compat(int keypressed);
+static void M_ChangeBobbing(int keypressed);
 static void M_ChangeBlood(int keypressed);
 static void M_ChangeMLook(int keypressed);
 static void M_ChangeJumping(int keypressed);
@@ -558,6 +560,9 @@ static optmenuitem_t playoptions[] =
 
 	{OPT_Boolean, "Pistol Starts",         YesNo, 2, 
      &pistol_starts, NULL, NULL},
+
+	{OPT_Switch,  "Bobbing", "Full/Head Only/Weapon Only/None", 4, 
+     &g_bobbing.d, M_ChangeBobbing, NULL},
 
 	{OPT_Boolean, "Mouse Look",         YesNo, 2, 
      &global_flags.mlook, M_ChangeMLook, NULL},
@@ -1982,6 +1987,23 @@ static void M_ChangeMaxDLights(int keypressed)
 static void M_ChangeVSync(int keypressed)
 {
 	v_sync = v_sync.d;
+}
+
+// See above the above the above the above the above the above the above the above
+static void M_ChangeBobbing(int keypressed)
+{
+	g_bobbing = g_bobbing.d;
+	player_t *player = players[consoleplayer];
+	if (player)
+	{
+		player->bob = 0;
+		pspdef_t *psp = &player->psprites[player->action_psp];
+		if (psp)
+		{
+			psp->sx = 0;
+			psp->sy = 0;
+		}
+	}
 }
 
 static void M_ChangeKicking(int keypressed)

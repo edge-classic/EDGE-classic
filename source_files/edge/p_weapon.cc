@@ -41,6 +41,8 @@
 #include "w_sprite.h"
 #include "w_wad.h"
 
+extern cvar_c g_bobbing;
+
 static void BobWeapon(player_t *p, weapondef_c *info);
 
 static sound_category_e WeapSfxCat(player_t *p)
@@ -892,6 +894,9 @@ void P_MovePsprites(player_t * p)
 
 static void BobWeapon(player_t *p, weapondef_c *info)
 {
+	if (g_bobbing.d == 1 || g_bobbing.d == 3)
+		return;
+
 	bool hasjetpack = p->powers[PW_Jetpack] > 0;
 	pspdef_t *psp = &p->psprites[p->action_psp];
 

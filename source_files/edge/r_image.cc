@@ -79,6 +79,8 @@ extern cvar_c r_doubleframes;
 extern void DeleteSkyTextures(void);
 extern void DeleteColourmapTextures(void);
 
+extern bool erraticism_active;
+
 //
 // This structure is for "cached" images (i.e. ready to be used for
 // rendering), and is the non-opaque version of cached_image_t.  A
@@ -1547,7 +1549,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 
 	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
 	{
-		if (rim->swirled_gametic != hudtic / (r_doubleframes.d ? 2 : 1))
+		if (!erraticism_active && !time_stop_active && rim->swirled_gametic != hudtic / (r_doubleframes.d ? 2 : 1))
 		{
 			if (rc->tex_id != 0)
 			{
@@ -1695,7 +1697,7 @@ void W_UpdateImageAnims(void)
 			do_Animate(real_flats);
 		}
 	}
-	else if (!time_stop_active) // Need to account for Erraticism as well - Dasho
+	else if (!time_stop_active && !erraticism_active)
 	{
 		do_Animate(real_graphics);
 		do_Animate(real_textures);

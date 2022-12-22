@@ -33,6 +33,9 @@ void P_Ticker(bool extra_tic);
 
 void P_HubFastForward(void);
 
+// Needed to pause flat anims, etc when not moving or firing in Erraticism - Dasho
+extern bool erraticism_active;
+
 #endif // __P_TICK__
 
 //--- editor settings ---

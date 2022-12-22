@@ -43,6 +43,8 @@ int leveltime;
 
 bool fast_forward_active;
 
+bool erraticism_active = false;
+
 extern cvar_c g_erraticism;
 extern cvar_c r_doubleframes;
 
@@ -61,11 +63,17 @@ void P_Ticker(bool extra_tic)
 		return;
 	}
 
+	erraticism_active = false;
+
 	if (g_erraticism.d)
 	{
 		bool keep_thinking = P_PlayerThink(players[consoleplayer], extra_tic);
 
-		if (!keep_thinking) return;
+		if (!keep_thinking) 
+		{
+			erraticism_active = true;
+			return;
+		}
 
 		for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
 		{

@@ -60,6 +60,8 @@ extern player_t *ui_player_who;
 
 extern std::string w_map_title;
 
+extern bool erraticism_active;
+
 static int ui_hud_automap_flags[2];  // 0 = disabled, 1 = enabled
 static float ui_hud_automap_zoom;
 
@@ -516,7 +518,35 @@ static void HD_draw_number(coal::vm_c *vm, int argc)
 //
 static void HD_game_paused(coal::vm_c *vm, int argc)
 {
-	if (paused || menuactive || rts_menuactive)
+	if (paused || menuactive || rts_menuactive || time_stop_active || erraticism_active)
+	{
+		vm->ReturnFloat(1);
+	}
+	else 
+	{
+		vm->ReturnFloat(0);
+	}
+}
+
+// hud.erraticism_active()
+//
+static void HD_erraticism_active(coal::vm_c *vm, int argc)
+{
+	if (erraticism_active)
+	{
+		vm->ReturnFloat(1);
+	}
+	else 
+	{
+		vm->ReturnFloat(0);
+	}
+}
+
+// hud.time_stop_active()
+//
+static void HD_time_stop_active(coal::vm_c *vm, int argc)
+{
+	if (time_stop_active)
 	{
 		vm->ReturnFloat(1);
 	}
@@ -833,6 +863,8 @@ void VM_RegisterHUD()
 
 	ui_vm->AddNativeFunction("hud.draw_number",     HD_draw_number);
 	ui_vm->AddNativeFunction("hud.game_paused",     HD_game_paused);
+	ui_vm->AddNativeFunction("hud.erraticism_active", HD_erraticism_active);
+	ui_vm->AddNativeFunction("hud.time_stop_active",  HD_time_stop_active);
 	ui_vm->AddNativeFunction("hud.screen_aspect",  HD_screen_aspect);
 	
     ui_vm->AddNativeFunction("hud.render_world",    HD_render_world);

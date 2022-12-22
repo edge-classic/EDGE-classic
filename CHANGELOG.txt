@@ -184,6 +184,7 @@ New Features
     7 (DAMAGE Max)
     8 (RANGE)
     9 (AUTOMATIC)
+  -hud.erraticism_active() and hud.time_stop_active(): Check Time Stop/Erraticism state from within COALHUDS
 
 + No longer necessary to specify an image type in DDFIMAGE i.e. "IMAGE_DATA=LUMP:FOOBAR;" is now permitted.
 

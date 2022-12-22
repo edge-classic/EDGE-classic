@@ -897,7 +897,6 @@ static void BobWeapon(player_t *p, weapondef_c *info)
 	if (g_bobbing.d == 1 || g_bobbing.d == 3)
 		return;
 
-	bool hasjetpack = p->powers[PW_Jetpack] > 0;
 	pspdef_t *psp = &p->psprites[p->action_psp];
 
 	float new_sx = p->mo->mom.z ? psp->sx : 0;

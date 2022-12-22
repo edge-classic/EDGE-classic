@@ -1333,7 +1333,8 @@ static void PL_query_object(coal::vm_c *vm, int argc)
 	if (whatinfo < 1 || whatinfo > 5)
 		I_Error("player.query_object: bad whatInfo number: %d\n", whatinfo);
 
-	mobj_t *obj = DoMapTargetAutoAim(ui_player_who->mo, ui_player_who->mo->angle, maxdistance, true, true);
+	
+	mobj_t *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
 	if (!obj)
 	{
 		vm->ReturnString("");
@@ -1448,7 +1449,7 @@ static void PL_query_weapon(coal::vm_c *vm, int argc)
 	if (secattackinfo < 0 || secattackinfo > 1)
 		I_Error("player.query_weapon: bad secAttackInfo number: %d\n", whatinfo);
 
-	mobj_t *obj = DoMapTargetAutoAim(ui_player_who->mo, ui_player_who->mo->angle, maxdistance, true, true);
+	mobj_t *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
 	if (!obj)
 	{
 		vm->ReturnString("");

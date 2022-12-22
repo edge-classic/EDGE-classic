@@ -1857,6 +1857,58 @@ void P_TargetTheory(mobj_t * source, mobj_t * target, float *x, float *y, float 
 	}
 }
 
+
+mobj_t *GetMapTargetAimInfo(mobj_t * source, angle_t angle, float distance)
+{
+	float x2, y2;
+
+	Z_Clear(&aim_I, shoot_trav_info_t, 1);
+
+	aim_I.source = source;
+	aim_I.forced = false;
+
+	x2 = source->x + distance * M_Cos(angle);
+	y2 = source->y + distance * M_Sin(angle);
+
+	if (source->info)
+		aim_I.start_z = source->z + source->height * PERCENT_2_FLOAT(source->info->shotheight);
+	else
+		aim_I.start_z = source->z + source->height / 2 + 8;
+
+
+	aim_I.range = distance;
+	aim_I.target = NULL;
+
+	//Lobo: try and limit the vertical range somewhat
+	float vertslope = M_Tan(source->vertangle);
+	aim_I.topslope = (100 + vertslope * 320) / 160.0f;
+	aim_I.bottomslope = (-100 + vertslope * 576) / 160.0f;
+	//aim_I.topslope = 100.0f / 160.0f;
+	//aim_I.bottomslope = -100.0f / 160.0f;
+
+	P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, 
+	PTR_AimTraverse2);	
+	
+
+	if (! aim_I.target)
+		return NULL;
+
+/*
+	// -KM- 1999/01/31 Look at the thing you aimed at.  Is sometimes
+	//   useful, sometimes annoying :-)
+	if (source->player && level_flags.autoaim == AA_MLOOK)
+	{
+		float slope = P_ApproxSlope(source->x - aim_I.target->x,
+				source->y - aim_I.target->y, aim_I.target->z - source->z);
+
+		slope = CLAMP(-1.0f, slope, 1.0f);
+
+		source->vertangle = M_ATan(slope);
+	}
+*/
+	return aim_I.target;
+}
+
 //
 // P_MapTargetAutoAim
 //
@@ -1866,7 +1918,7 @@ void P_TargetTheory(mobj_t * source, mobj_t * target, float *x, float *y, float 
 // -ACB- 1998/09/01
 // -AJA- 1999/08/08: Added `force_aim' to fix chainsaw.
 //
-mobj_t *DoMapTargetAutoAim(mobj_t * source, angle_t angle, float distance, bool force_aim, bool everythingbutscenery)
+mobj_t *DoMapTargetAutoAim(mobj_t * source, angle_t angle, float distance, bool force_aim)
 {
 	float x2, y2;
 
@@ -1905,22 +1957,10 @@ mobj_t *DoMapTargetAutoAim(mobj_t * source, angle_t angle, float distance, bool 
 	aim_I.range = distance;
 	aim_I.target = NULL;
 
-	if(!everythingbutscenery)
-	{
-		P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, 
+
+	P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, 
 		PTR_AimTraverse);
-	}
-	else
-	{
-		//Lobo: try and limit the vertical range somewhat
-		float vertslope = M_Tan(source->vertangle);
-		aim_I.topslope = (100 + vertslope * 320) / 160.0f;
-		aim_I.bottomslope = (-100 + vertslope * 576) / 160.0f;
-
-		P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, 
-		PTR_AimTraverse2);	
-	}
-
+	
 	if (! aim_I.target)
 		return NULL;
 

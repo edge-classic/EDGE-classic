@@ -124,8 +124,11 @@ static void CalcHeight(player_t * player, bool extra_tic)
 	// -AJA- Moved up here, to prevent weapon jumps when running down
 	// stairs.
 
-	player->bob = (player->mo->mom.x * player->mo->mom.x
-		+ player->mo->mom.y * player->mo->mom.y) / 8;
+	if (g_erraticism.d)
+		player->bob = 12.0f;
+	else
+		player->bob = (player->mo->mom.x * player->mo->mom.x
+			+ player->mo->mom.y * player->mo->mom.y) / 8;
 
 	if (player->bob > MAXBOB)
 		player->bob = MAXBOB;

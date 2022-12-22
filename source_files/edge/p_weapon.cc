@@ -900,11 +900,11 @@ static void BobWeapon(player_t *p, weapondef_c *info)
 	bool hasjetpack = p->powers[PW_Jetpack] > 0;
 	pspdef_t *psp = &p->psprites[p->action_psp];
 
-	float new_sx = 0;
-	float new_sy = 0;
+	float new_sx = p->mo->mom.z ? psp->sx : 0;
+	float new_sy = p->mo->mom.z ? psp->sy : 0;
 	
 	// bob the weapon based on movement speed
-	if (! hasjetpack)
+	if (! p->mo->mom.z) // Don't bob in mid-air and such
 	{
 		angle_t angle = (128 * leveltime) << 19;
 		new_sx = p->bob * PERCENT_2_FLOAT(info->swaying) * M_Cos(angle);

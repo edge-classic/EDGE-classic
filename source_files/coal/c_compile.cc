@@ -853,6 +853,7 @@ def_t * real_vm_c::EXP_FunctionCall(def_t *func)
 		LEX_Expect(")");
 
 		if (arg != t->parm_num)
+		{
 			if (df->optional_parm_start == -1)
 				CompileError("COAL: Too few parameters for function %s (needed %d)\n", df->name, t->parm_num);
 			else
@@ -865,6 +866,7 @@ def_t * real_vm_c::EXP_FunctionCall(def_t *func)
 					arg++;
 				}
 			}
+		}
 	}
 
 
@@ -1948,6 +1950,8 @@ double real_vm_c::GetFloat(const char *mod_name, const char *var_name)
 		return G_FLOAT(var->ofs);
 
 	RunError("GetFloat failed: Could not find variable %s\n", var_name);
+
+	return 0; // Not reached
 }
 
 const char *real_vm_c::GetString(const char *mod_name, const char *var_name)
@@ -1976,6 +1980,8 @@ const char *real_vm_c::GetString(const char *mod_name, const char *var_name)
 	}
 	
 	RunError("GetString failed: Could not find variable %s\n", var_name);
+
+	return 0; // Not reached
 }
 
 double *real_vm_c::GetVector(const char *mod_name, const char *var_name)
@@ -2004,6 +2010,8 @@ double *real_vm_c::GetVector(const char *mod_name, const char *var_name)
 	}
 
 	RunError("SetVector failed: Could not find variable %s\n", var_name);
+
+	return 0; // Not reached
 }
 
 void real_vm_c::SetFloat(const char *mod_name, const char *var_name, double value)

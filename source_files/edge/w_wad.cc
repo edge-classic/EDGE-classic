@@ -1229,7 +1229,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 	// compute MD5 hash over wad directory
 	wad->dir_md5.Compute((const byte *)raw_info, length);
 
-	wad->md5_string = epi::STR_Format("%02x%02x%02x%02x%02x%02x%02x%02x", 
+	wad->md5_string = epi::STR_Format("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", 
 			wad->dir_md5.hash[0],  wad->dir_md5.hash[1],
 			wad->dir_md5.hash[2],  wad->dir_md5.hash[3],
 			wad->dir_md5.hash[4],  wad->dir_md5.hash[5],

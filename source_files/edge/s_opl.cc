@@ -67,7 +67,7 @@ bool S_StartupOPL(void)
 		cvar_good = true;
 	else
 	{
-		for (int i=0; i < available_genmidis.size(); i++)
+		for (size_t i=0; i < available_genmidis.size(); i++)
 		{
 			if(epi::case_cmp(s_genmidi.s, available_genmidis.at(i)) == 0)
 				cvar_good = true;
@@ -81,8 +81,8 @@ bool S_StartupOPL(void)
 	}
 
 	int length;
-	const byte *data;
-	epi::file_c *F;
+	byte *data = nullptr;
+	epi::file_c *F = nullptr;
 
 	if (s_genmidi.s.empty())
 	{
@@ -92,7 +92,7 @@ bool S_StartupOPL(void)
 			I_Debugf("no GENMIDI lump !\n");
 			return false;
 		}
-		data = (const byte*)W_LoadLump(p, &length);
+		data = W_LoadLump(p, &length);
 	}
 	else
 	{
@@ -108,9 +108,17 @@ bool S_StartupOPL(void)
 		data = F->LoadIntoMemory();
 	}
 
-	if (!GM_LoadInstruments(data, (size_t)length))
+	if (!data)
 	{
-		I_Debugf("error loading GENMIDI!\n");
+		I_Warning("S_StartupOPL: Error loading instruments!\n");
+		if (F)
+			delete F;
+		return false;
+	}
+
+	if (!GM_LoadInstruments((const byte *)data, (size_t)length))
+	{
+		I_Warning("S_StartupOPL: Error loading instruments!\n");
 		if (s_genmidi.s.empty())
 			W_DoneWithLump(data);
 		else
@@ -241,7 +249,7 @@ public:
 
 	static void playSynth(void *userdata, uint8_t *stream, size_t length)
 	{
-		opl_player_c *player = (opl_player_c *)userdata;
+		(void)userdata;
 		OPLAY_Stream(reinterpret_cast<short*>(stream),
 						static_cast<int>(length) / (dev_stereo ? 4 : 2), dev_stereo);
 	}

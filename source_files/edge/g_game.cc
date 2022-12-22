@@ -483,6 +483,8 @@ void G_Ticker(void)
 			case GS_FINALE:
 				N_GrabTiccmds();
 				break;
+			default:
+				break;
 		}
 
 		return;

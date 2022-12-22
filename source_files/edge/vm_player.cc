@@ -1034,7 +1034,7 @@ static void PL_use_inventory(coal::vm_c *vm, int argc)
 {
 	double *num = vm->AccessParam(0);
 	std::string script_name = "INVENTORY";
-	int inv;
+	int inv = 0;
 	if (!num)
 		I_Error("player.use_inventory: can't parse inventory number!\n");
 	else

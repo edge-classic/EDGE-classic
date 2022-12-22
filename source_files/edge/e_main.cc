@@ -978,8 +978,7 @@ static void IdentifyVersion(void)
 
     // Should the IWAD directory not be set by now, then we
     // use our standby option of the current directory.
-    if (iwad_dir.empty())
-        iwad_dir = ".";
+    if (iwad_dir.empty()) iwad_dir = ".";
 
 	// Add DOOMWADPATH directories if they exist
 	s = getenv("DOOMWADPATH");
@@ -1019,7 +1018,7 @@ static void IdentifyVersion(void)
 			// Check DOOMWADPATH directories if present
 			if (!iwad_dir_vector.empty())
 			{
-				for (int i=0; i < iwad_dir_vector.size(); i++)
+				for (size_t i=0; i < iwad_dir_vector.size(); i++)
 				{
 					iwad_file = epi::PATH_Join(iwad_dir_vector[i].c_str(), fn.c_str());
 					if (epi::FS_Access(iwad_file.c_str(), epi::file_c::ACCESS_READ))
@@ -1035,7 +1034,7 @@ static void IdentifyVersion(void)
 
 		epi::file_c *iwad_test = epi::FS_Open(iwad_file.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 		bool unique_lump_match = false;
-		for (int i=0; i < iwad_checker.size(); i++) {
+		for (size_t i=0; i < iwad_checker.size(); i++) {
 			if (W_CheckForUniqueLumps(iwad_test, iwad_checker[i].unique_lumps[0], iwad_checker[i].unique_lumps[1]))
 			{
 				unique_lump_match = true;
@@ -1091,7 +1090,7 @@ static void IdentifyVersion(void)
 					if(!fsd[i].is_dir)
 					{
 						epi::file_c *iwad_test = epi::FS_Open(fsd[i].name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-						for (int j = 0; j < iwad_checker.size(); j++) 
+						for (size_t j = 0; j < iwad_checker.size(); j++) 
 						{
 							if (W_CheckForUniqueLumps(iwad_test, iwad_checker[j].unique_lumps[0], iwad_checker[j].unique_lumps[1]))
 							{
@@ -1114,7 +1113,7 @@ static void IdentifyVersion(void)
 
 		if (!iwad_dir_vector.empty())
 		{
-			for (int i=0; i < iwad_dir_vector.size(); i++)
+			for (size_t i=0; i < iwad_dir_vector.size(); i++)
 			{
 				location = iwad_dir_vector[i].c_str();
 
@@ -1131,7 +1130,7 @@ static void IdentifyVersion(void)
 						if(!fsd[i].is_dir)
 						{
 							epi::file_c *iwad_test = epi::FS_Open(fsd[i].name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-							for (int j = 0; j < iwad_checker.size(); j++) 
+							for (size_t j = 0; j < iwad_checker.size(); j++) 
 							{
 								if (W_CheckForUniqueLumps(iwad_test, iwad_checker[j].unique_lumps[0], iwad_checker[j].unique_lumps[1]))
 								{

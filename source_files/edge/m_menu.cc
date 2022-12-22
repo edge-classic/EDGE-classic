@@ -300,7 +300,7 @@ static void M_DrawEpisode(void);
 static void M_DrawLoad(void);
 static void M_DrawSave(void);
 
-static void M_DrawSaveLoadBorder(float x, float y, int len);
+// static void M_DrawSaveLoadBorder(float x, float y, int len);
 static void M_SetupNextMenu(menu_t * menudef);
 void M_ClearMenus(void);
 void M_StartControlPanel(void);
@@ -936,7 +936,7 @@ void M_DrawSave(void)
 	const image_c *L = W_ImageLookup("M_LSLEFT");
 	const image_c *C = W_ImageLookup("M_LSCNTR");
 	const image_c *R = W_ImageLookup("M_LSRGHT");
-	int i, len;
+	int i;
 	int y = LoadDef.y;
 
 	style_c *style = SaveDef.style_var[0];
@@ -1007,7 +1007,7 @@ void M_DrawSave(void)
 
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
-		int len;
+		int len = 0;
 		int font = styledef_c::T_TEXT;
 		if (saveStringEnter && i == save_slot)
 		{

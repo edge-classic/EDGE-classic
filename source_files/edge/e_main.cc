@@ -842,7 +842,11 @@ void InitDirectories(void)
 	// Get the Game Directory from parameter.
 	
 	// Note: This might need adjusting for Apple
+#ifndef WIN32
 	s = SDL_GetBasePath();
+#else
+	s = (char32_t *)SDL_iconv_utf8_ucs4(SDL_GetBasePath());
+#endif
 
 	game_dir = s.generic_string();
 	s.clear();

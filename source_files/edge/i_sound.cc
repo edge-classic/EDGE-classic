@@ -136,7 +136,7 @@ void I_StartupSound(void)
 		SDL_setenv("SDL_AUDIODRIVER", driver.c_str(), 1);
 	}
 
-	I_Printf("SDL_Audio_Driver: %s\n", driver);
+	I_Printf("SDL_Audio_Driver: %s\n", driver.c_str());
 
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
 	{

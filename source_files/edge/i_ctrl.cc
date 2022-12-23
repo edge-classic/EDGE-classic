@@ -625,7 +625,7 @@ void I_StartupJoystick(void)
 {
 	cur_joy = 0;
 
-	if (M_CheckParm("-nojoy"))
+	if (argv::Find(0, "nojoy") > 0)
 	{
 		I_Printf("I_StartupControl: Joystick system disabled.\n");
 		nojoy = true;

@@ -933,14 +933,14 @@ void M_NetGameInit(void)
 	def = styledefs.Lookup("NET PLAYER LIST");
 	ng_list_style = def ? hu_styles.Lookup(def) : ng_default;
 
+	std::string str = argv::Value(0, "connect");
 
-	const char *str = M_GetParm("-connect");
-	if (str)
+	if (!str.empty())
 	{
 		join_addr = new net_address_c();
-		if (! join_addr->FromString(str))
+		if (! join_addr->FromString(str.c_str()))
 		{
-			I_Error("Bad IP address for -connect: %s\n", str);
+			I_Error("Bad IP address for -connect: %s\n", str.c_str());
 		}
 	}
 }

@@ -239,29 +239,29 @@ int CON_MatchAllVars(std::vector<const char *>& list, const char *pattern)
 
 void CON_HandleProgramArgs(void)
 {
-	for (int p = 1; p < M_GetArgCount(); p++)
+	for (int p = 1; p < argv::list.size(); p++)
 	{
-		const char *s = M_GetArgument(p);
-
-		if (s[0] != '-')
+		if (!argv::IsOption(p))
 			continue;
+
+		const char *s = argv::list[p].data();
 
 		cvar_c *var = CON_FindVar(s+1);
 
-		if (var == NULL)
+		if (var == nullptr)
 			continue;
 
 		p++;
 
-		if (p >= M_GetArgCount() || M_GetArgument(p)[0] == '-')
+		if (p >= argv::list.size() || argv::IsOption(p))
 		{
-			I_Error("Missing value for option: %s\n", s);
+			I_Warning("Missing value for option: %s\n", s);
 			continue;
 		}
 
 		// FIXME allow CVAR_ROM here ?
 
-		*var = M_GetArgument(p);
+		*var = argv::list[p].c_str();
 	}
 }
 

@@ -1,9 +1,11 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------
 //  EDGE Arguments/Parameters Code
-//----------------------------------------------------------------------------
-// 
-//  Copyright (c) 1999-2009  The EDGE Team.
-// 
+//------------------------------------------------------------------------
+//
+//  Copyright (C) 2022 The EDGE Team
+//  Copyright (C) 2021-2022 The OBSIDIAN Team
+//  Copyright (C) 2006-2017 Andrew Apted
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2
@@ -14,24 +16,14 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
 //
-//----------------------------------------------------------------------------
-//
-//  Based on the DOOM source code, released by Id Software under the
-//  following copyright:
-//
-//    Copyright (C) 1993-1996 by id Software, Inc.
-//
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------
 
 #include "i_defs.h"
-
-#include "file.h"
-#include "filesystem.h"
-
 #include "m_argv.h"
+#include "str_util.h"
 
-static int myargc;
-static const char **myargv = NULL;
+std::vector<std::string> argv::list;
+std::unordered_set<char> argv::short_flags;
 
 // this one is here to avoid infinite recursion of param files.
 typedef struct added_parm_s
@@ -43,93 +35,190 @@ added_parm_t;
 
 static added_parm_t *added_parms;
 
-//
-// AddArgument
-//
-// Helper function that adds s to the argument list.
-// Must use realloc, since this is done before Z_Init
-//
-static void AddArgument(const char *s, int pos)
-{
-	int i;
+static void Parse_LongArg(std::string_view arg) {
+    // long argument, e.g. --foo=bar
 
-#ifdef DEVELOPERS
-	L_WriteDebug("Adding parameter '%s'\n", s);
+    // keep first hyphen
+    std::string_view name = arg.substr(1);
+
+    std::string_view value;
+
+    if (auto pos = name.find('='); pos != std::string_view::npos) {
+        value = name.substr(pos + 1);
+        name = name.substr(0, pos);
+    }
+
+    argv::list.emplace_back(name);
+    if (!value.empty()) {
+        argv::list.emplace_back(value);
+    }
+}
+
+static void Parse_ShortArgs(std::string_view arg) {
+    for (std::size_t i = 1; i < arg.size(); ++i) {
+        char ch = arg[i];
+
+        if (argv::short_flags.find(ch) != argv::short_flags.end()) {
+            // argument
+            argv::list.emplace_back(std::string{"-"} + std::string{&ch, 1});
+            std::string_view argument = arg.substr(i + 1);
+            if (!argument.empty()) {
+                argv::list.emplace_back(argument);
+            }
+            // no more to parse
+            break;
+        } else {
+            // no argument
+            argv::list.emplace_back(std::string{"-"} + std::string{&ch, 1});
+        }
+    }
+}
+
+//
+// ArgvInit
+//
+// Initialise argument list. The strings (and array) are copied.
+//
+// NOTE: doesn't merge multiple uses of an option, hence
+//       using ArgvFind() will only return the first usage.
+//
+void argv::Init(const int argc, const char *const *argv) {
+    list.reserve(argc);
+    SYS_ASSERT(argv::list.size() >= 0);
+
+    for (int i = 0; i < argc; i++) {
+        SYS_ASSERT(argv[i] != nullptr);
+        std::string_view cur = argv[i];
+
+#ifdef __APPLE__
+        // ignore MacOS X rubbish
+        if (cur == "-psn") {
+            continue;
+        }
 #endif
+        // Just place argv[0] as is
+        if (i == 0)
+        {
+            list.emplace_back(cur);
+            continue;
+        }
 
-	SYS_ASSERT(pos >= 0 && pos <= myargc);
+        if (argv[i][0] == '@')
+        {  // add it as a response file
+            ApplyResponseFile(&argv[i][1], i);
+            continue;
+        }
 
-	if (s[0] == '@')
-	{  // add it as a response file
-		M_ApplyResponseFile(&s[1], pos);
+        // support GNU-style long and short options
+        if (cur[0] == '-') {
+            if (cur[1] == '-') {
+                Parse_LongArg(cur);
+            } else {
+                Parse_ShortArgs(cur);
+            }
+        } else {
+            list.emplace_back(cur);
+        }
+
+        // support DOS-style short options
+        if (cur[0] == '/' && (isalnum(cur[1]) || cur[1] == '?') &&
+            cur[2] == '\0') {
+            list.emplace_back(std::string{"-"} + std::string{&cur[1], 1});
+        }
+    }
+}
+
+int argv::Find(const char shortName, const char *longName, int *numParams) {
+    SYS_ASSERT(shortName || longName);
+
+    if (numParams) {
+        *numParams = 0;
+    }
+
+    size_t p = 0;
+
+    for (; p < list.size(); ++p) {
+        if (!IsOption(p)) {
+            continue;
+        }
+
+        const std::string &str = list[p];
+
+        if (shortName && (shortName == tolower(str[1])) && str[2] == 0) {
+            break;
+        }
+
+        if (longName &&
+            epi::case_cmp(longName,
+                          std::string{&str[1], (str.size() - 1)}) == 0) {
+            break;
+        }
+    }
+
+    if (p == list.size()) {
+        // NOT FOUND
+        return -1;
+    }
+
+    if (numParams) {
+        size_t q = p + 1;
+
+        while (q < list.size() && !IsOption(q)) {
+            ++q;
+        }
+
+        *numParams = q - p - 1;
+    }
+
+    return p;
+}
+
+std::string argv::Value(const char shortName, const char *longName, int *numParams) {
+    SYS_ASSERT(shortName || longName);
+
+    int pos = Find(shortName, longName, numParams);
+
+    if (pos <= 0)
+        return "";
+
+    if (pos + 1 < list.size() && !IsOption(pos+1))
+        return list[pos+1];
+    else
+        return "";
+}
+
+// Sets boolean variable to true if parm (prefixed with `-') is
+// present, sets it to false if parm prefixed with `-no' is present,
+// otherwise leaves it unchanged.
+//
+void argv::CheckBooleanParm(const char *parm, bool *boolval, bool reverse)
+{
+	if (Find(0, parm) > 0)
+	{
+		*boolval = ! reverse;
 		return;
 	}
 
-	myargc++;
-	myargv = (const char**)realloc((void*)myargv, myargc * sizeof(char *));
-	if (!myargv)
-		I_Error("AddArgument: Out of memory!");
-
-	// move any parameters forward
-	for (i = myargc - 1; i > pos; i--)
-		myargv[i] = myargv[i - 1];
-
-	myargv[pos] = s;
+	if (Find(0, epi::STR_Format("no%s", parm).c_str()) > 0)
+	{
+		*boolval = reverse;
+		return;
+	}
 }
 
-//
-// M_CheckNextParm
-//
-// Checks for the given parameter in the program's command line arguments.
-// Starts at parameter prev+1, so this routine is useful if you want to
-// check for several equal parameters (pass the last parameter number as
-// prev).
-//
-// Returns the argument number (last+1 to argc-1)
-// or 0 if not present
-//
-// -ES- 2000/01/01 Written.
-//
-int M_CheckNextParm(const char *check, int prev)
+void argv::CheckBooleanCVar(const char *parm, cvar_c *var, bool reverse)
 {
-	int i;
-
-	for (i = prev + 1; i < myargc; i++)
+	if (Find(0, parm) > 0)
 	{
-		if (!epi::case_cmp(check, myargv[i]))
-			return i;
+		*var = (reverse ? 0 : 1);
+		return;
 	}
 
-	return 0;
-}
-
-//
-// M_CheckParm
-//
-// Checks for the given parameter
-// in the program's command line arguments.
-// Returns the argument number (1 to argc-1)
-// or 0 if not present
-int M_CheckParm(const char *check)
-{
-	return M_CheckNextParm(check, 0);
-}
-
-//
-// M_GetParm
-//
-// Checks for the string in the command line, and returns the parameter after
-// if it exists. Useful for all those parameters that look something like
-// "-foo bar".
-const char *M_GetParm(const char *check)
-{
-	int p;
-
-	p = M_CheckParm(check);
-	if (p && p + 1 < myargc)
-		return myargv[p + 1];
-	else
-		return NULL;
+	if (Find(0, epi::STR_Format("no%s", parm).c_str()) > 0)
+	{
+		*var = (reverse ? 1 : 0);
+		return;
+	}
 }
 
 static int ParseOneFilename(FILE *fp, char *buf)
@@ -174,11 +263,9 @@ static int ParseOneFilename(FILE *fp, char *buf)
 }
 
 //
-// M_ApplyResponseFile
-//
 // Adds a response file
 //
-void M_ApplyResponseFile(const char *name, int position)
+void argv::ApplyResponseFile(const char *name, int position)
 {
 	char buf[1024];
 	FILE *f;
@@ -188,7 +275,7 @@ void M_ApplyResponseFile(const char *name, int position)
 	// check if the file has already been added
 	for (p = added_parms; p; p = p->next)
 	{
-		if (!strcmp(p->name, name))
+		if (!epi::strcmp(p->name, name))
 			return;
 	}
 
@@ -201,9 +288,14 @@ void M_ApplyResponseFile(const char *name, int position)
 	if (!f)
 		I_Error("Couldn't open \"%s\" for reading!", name);
 
+    auto it = list.begin();
+
 	for (; EOF != ParseOneFilename(f, buf); position++)
+    {
 		// we must use strdup: Z_Init might not have been called
-		AddArgument(strdup(buf), position);
+        list.insert(it, position+1, strdup(buf));
+        it = list.begin();
+    }
 
 	// unlink from list
 	added_parms = p;
@@ -211,124 +303,26 @@ void M_ApplyResponseFile(const char *name, int position)
 	fclose(f);
 }
 
-//
-// M_InitArguments
-//
-// Initialises the CheckParm system. Only called once, by main().
-//
-void M_InitArguments(int argc, const char **argv)
-{
-	int i;
-
-	// argv[0] should always be placed before the response file.
-	AddArgument(argv[0], 0);
-
-	if (epi::FS_Access("edge.cmd", epi::file_c::ACCESS_READ))
-		M_ApplyResponseFile("edge.cmd", 1);
-
-	// scan through the arguments
-	for (i = 1; i < argc; i++)
-	{
-		// add all new arguments to the end of the arg list.
-		AddArgument(argv[i], myargc);
-	}
-}
-
-//
-// M_CheckBooleanParm
-//
-// Sets boolean variable to true if parm (prefixed with `-') is
-// present, sets it to false if parm prefixed with `-no' is present,
-// otherwise leaves it unchanged.
-//
-void M_CheckBooleanParm(const char *parm, bool *boolval, bool reverse)
-{
-	char parmbuf[100];
-
-	sprintf(parmbuf, "-%s", parm);
-
-	if (M_CheckParm(parmbuf) > 0)
-	{
-		*boolval = ! reverse;
-		return;
-	}
-
-	sprintf(parmbuf, "-no%s", parm);
-
-	if (M_CheckParm(parmbuf) > 0)
-	{
-		*boolval = reverse;
-		return;
-	}
-}
-
-void M_CheckBooleanCVar(const char *parm, cvar_c *var, bool reverse)
-{
-	char parmbuf[100];
-
-	sprintf(parmbuf, "-%s", parm);
-
-	if (M_CheckParm(parmbuf) > 0)
-	{
-		*var = (reverse ? 0 : 1);
-		return;
-	}
-
-	sprintf(parmbuf, "-no%s", parm);
-
-	if (M_CheckParm(parmbuf) > 0)
-	{
-		*var = (reverse ? 1 : 0);
-		return;
-	}
-}
-
-//
-// M_GetArgument
-//
-// Returns the wished argument. argnum must be less than M_GetArgCount().
-//
-const char *M_GetArgument(int argnum)
-{
-	// this should never happen, so crash out if DEVELOPERS.
-	if (argnum < 0 || argnum >= myargc)
-#ifdef DEVELOPERS
-		I_Error("M_GetArgument: Out of range (%d)", argnum);
-#else
-		return "";
-#endif
-
-	return myargv[argnum];
-}
-
-//
-// M_GetArgCount
-//
-// Returns the number of program arguments.
-int M_GetArgCount(void)
-{
-	return myargc;
-}
-
-
-void M_DebugDumpArgs(void)
+void argv::DebugDumpArgs(void)
 {
 	I_Printf("Command-line Options:\n");
 
 	int i = 0;
 
-	while (i < myargc)
+	while (i < list.size())
 	{
 		bool pair_it_up = false;
 
-		if (i > 0 && i+1 < myargc && myargv[i+1][0] != '-')
+		if (i > 0 && i+1 < list.size() && !IsOption(i+1))
 			pair_it_up = true;
 
-		I_Printf("  %s %s\n", myargv[i], pair_it_up ? myargv[i+1] : "");
+		I_Printf("  %s %s\n", list[i].c_str(), pair_it_up ? list[i+1].c_str() : "");
 
 		i += pair_it_up ? 2 : 1;
 	}
 }
+
+bool argv::IsOption(const int index) { return list.at(index)[0] == '-'; }
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

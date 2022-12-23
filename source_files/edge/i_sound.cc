@@ -110,18 +110,18 @@ void I_StartupSound(void)
 {
 	if (nosound) return;
 
-	if (M_CheckParm("-waveout"))
+	if (argv::Find(0, "waveout") > 0)
 		force_waveout = true;
 
-	if (M_CheckParm("-dsound") || M_CheckParm("-nowaveout"))
+	if (argv::Find(0, "dsound") > 0 || argv::Find(0, "nowaveout") > 0)
 		force_waveout = false;
 
-	const char *driver = M_GetParm("-audiodriver");
+	std::string driver = argv::Value(0, "audiodriver");
 
-	if (! driver)
-		driver = SDL_getenv("SDL_AUDIODRIVER");
+	if (driver.empty())
+		driver = SDL_getenv("SDL_AUDIODRIVER") ? SDL_getenv("SDL_AUDIODRIVER") : "";
 
-	if (! driver)
+	if (driver.empty())
 	{
 		driver = "default";
 
@@ -133,7 +133,7 @@ void I_StartupSound(void)
 
 	if (epi::case_cmp(driver, "default") != 0)
 	{
-		SDL_setenv("SDL_AUDIODRIVER", driver, 1);
+		SDL_setenv("SDL_AUDIODRIVER", driver.c_str(), 1);
 	}
 
 	I_Printf("SDL_Audio_Driver: %s\n", driver);
@@ -146,17 +146,16 @@ void I_StartupSound(void)
 		return;
 	}
 
-	const char *p;
-
 	int want_freq = 48000;
 	bool want_stereo = (var_sound_stereo >= 1);
 
-	p = M_GetParm("-freq");
-	if (p)
-		want_freq = atoi(p);
+	std::string p = argv::Value(0, "freq");
 
-	if (M_CheckParm("-mono")   > 0) want_stereo = false;
-	if (M_CheckParm("-stereo") > 0) want_stereo = true;
+	if (!p.empty())
+		want_freq = atoi(p.c_str());
+
+	if (argv::Find(0, "mono")   > 0) want_stereo = false;
+	if (argv::Find(0, "stereo") > 0) want_stereo = true;
 
 	bool success = false;
 	

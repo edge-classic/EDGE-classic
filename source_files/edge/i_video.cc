@@ -143,18 +143,18 @@ void I_DeterminePixelAspect()
 
 void I_StartupGraphics(void)
 {
-	if (M_CheckParm("-directx"))
+	if (argv::Find(0, "directx") > 0)
 		force_directx = true;
 
-	if (M_CheckParm("-gdi") || M_CheckParm("-nodirectx"))
+	if (argv::Find(0, "gdi") > 0 || argv::Find(0, "nodirectx") > 0)
 		force_directx = false;
 
-	const char *driver = M_GetParm("-videodriver");
+	std::string driver = argv::Value(0, "videodriver");
 
-	if (! driver)
-		driver = SDL_getenv("SDL_VIDEODRIVER");
+	if (driver.empty())
+		driver = SDL_getenv("SDL_VIDEODRIVER") ? SDL_getenv("SDL_VIDEODRIVER") : "";
 
-	if (! driver)
+	if (driver.empty())
 	{
 		driver = "default";
 
@@ -166,16 +166,16 @@ void I_StartupGraphics(void)
 
 	if (epi::case_cmp(driver, "default") != 0)
 	{
-		SDL_setenv("SDL_VIDEODRIVER", driver, 1);
+		SDL_setenv("SDL_VIDEODRIVER", driver.c_str(), 1);
 	}
 
-	I_Printf("SDL_Video_Driver: %s\n", driver);
+	I_Printf("SDL_Video_Driver: %s\n", driver.c_str());
 
 
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
 		I_Error("Couldn't init SDL VIDEO!\n%s\n", SDL_GetError());
 
-	if (M_CheckParm("-nograb"))
+	if (argv::Find(0, "nograb") > 0)
 		in_grab = 0;
 
 	// -AJA- FIXME these are wrong (probably ignored though)

@@ -87,9 +87,10 @@ void N_InitNetwork(void)
 
 	base_port = MP_EDGE_PORT;
 
-	const char *str = M_GetParm("-port");
-	if (str)
-		base_port = atoi(str);
+	std::string str = argv::Value(0, "port");
+
+	if (!str.empty())
+		base_port = atoi(str.c_str());
 
 	I_Printf("Network: base port is %d\n", base_port);
 

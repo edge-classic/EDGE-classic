@@ -2849,7 +2849,6 @@ void P_UpdateSpecials(bool extra_tic)
 //
 void P_SpawnSpecials1(void)
 {
-	const char *s;
 	int i;
 
 	active_sector_anims.clear();
@@ -2863,19 +2862,20 @@ void P_SpawnSpecials1(void)
 	// See if -TIMER needs to be used.
 	levelTimer = false;
 
-	i = M_CheckParm("-avg");
-	if (i && DEATHMATCH())
+	i = argv::Find(0, "avg");
+	if (i > 0 && DEATHMATCH())
 	{
 		levelTimer = true;
 		levelTimeCount = 20 * 60 * TICRATE;
 	}
 
-	s = M_GetParm("-timer");
-	if (s && DEATHMATCH())
+	std::string s = argv::Value(0, "timer");
+
+	if (!s.empty() && DEATHMATCH())
 	{
 		int time;
 
-		time = atoi(s) * 60 * TICRATE;
+		time = atoi(s.c_str()) * 60 * TICRATE;
 		levelTimer = true;
 		levelTimeCount = time;
 	}

@@ -439,9 +439,9 @@ void M_LoadDefaults(void)
 
 void M_InitMiscConVars(void)
 {
-	if (M_CheckParm("-hqscale") || M_CheckParm("-hqall"))
+	if (argv::Find(0, "hqscale") > 0 || argv::Find(0, "hqall") > 0)
 		hq2x_scaling = 3;
-	else if (M_CheckParm("-nohqscale"))
+	else if (argv::Find(0, "nohqscale") > 0)
 		hq2x_scaling = 0;
 }
 

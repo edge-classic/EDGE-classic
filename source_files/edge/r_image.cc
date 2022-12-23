@@ -1662,19 +1662,19 @@ static void W_CreateDummyImages(void)
 bool W_InitImages(void)
 {
     // check options
-	if (M_CheckParm("-nosmoothing"))
+	if (argv::Find(0, "nosmoothing") > 0)
 		var_smoothing = 0;
-	else if (M_CheckParm("-smoothing"))
+	else if (argv::Find(0, "smoothing") > 0)
 		var_smoothing = 1;
 
-	if (M_CheckParm("-nomipmap"))
+	if (argv::Find(0, "nomipmap") > 0)
 		var_mipmapping = 0;
-	else if (M_CheckParm("-mipmap"))
+	else if (argv::Find(0, "mipmap") > 0)
 		var_mipmapping = 1;
-	else if (M_CheckParm("-trilinear"))
+	else if (argv::Find(0, "trilinear") > 0)
 		var_mipmapping = 2;
 
-	M_CheckBooleanParm("dither", &var_dithering, false);
+	argv::CheckBooleanParm("dither", &var_dithering, false);
 
 	W_CreateDummyImages();
 

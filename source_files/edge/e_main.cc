@@ -1309,14 +1309,12 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("file");
 
-	if (p > 0) p++;
-
-	while (p > 0 && p < argv::list.size() && !argv::IsOption(p))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-file") == 0))
 	{
 		// the parms after p are wadfile/lump names,
 		// go until end of parms or another '-' preceded parm
-
-		AddSingleCmdLineFile(argv::list[p].c_str(), false);
+		if (!argv::IsOption(p))
+			AddSingleCmdLineFile(argv::list[p].c_str(), false);
 
 		p++;
 	}
@@ -1325,9 +1323,7 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("script");
 
-	if (p > 0) p++;
-
-	while (p > 0 && p < argv::list.size() && !argv::IsOption(p))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-script") == 0))
 	{
 		// the parms after p are script filenames,
 		// go until end of parms or another '-' preceded parm
@@ -1354,9 +1350,7 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("deh");
 
-	if (p > 0) p++;
-
-	while (p > 0 && p < argv::list.size() && !argv::IsOption(p))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-deh") == 0))
 	{
 		// the parms after p are Dehacked/BEX filenames,
 		// go until end of parms or another '-' preceded parm
@@ -1382,9 +1376,7 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("dir");
 
-	if (p > 0) p++;
-
-	while (p > 0 && p < argv::list.size() && !argv::IsOption(p))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-dir") == 0))
 	{
 		// the parms after p are directory names,
 		// go until end of parms or another '-' preceded parm

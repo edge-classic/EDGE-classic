@@ -123,7 +123,7 @@ static int cur_palette = -1;
 
 void V_InitColour(void)
 {
-	std::string s = argv::Value(0, "gamma");
+	std::string s = argv::Value("gamma");
 
 	if (!s.empty())
 	{

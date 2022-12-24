@@ -280,14 +280,14 @@ static void SetGlobalVars(void)
 	std::string s;
 
 	// Screen Resolution Check...
-	if (argv::Find(0, "borderless") > 0)
+	if (argv::Find("borderless") > 0)
 		DISPLAYMODE = 2;
-	else if (argv::Find(0, "fullscreen") > 0)
+	else if (argv::Find("fullscreen") > 0)
 		DISPLAYMODE = 1;
-	else if (argv::Find(0, "windowed") > 0)
+	else if (argv::Find("windowed") > 0)
 		DISPLAYMODE = 0;
 
-	s = argv::Value(0, "width");
+	s = argv::Value("width");
 	if (!s.empty())
 	{
 		if (DISPLAYMODE == 2)
@@ -296,7 +296,7 @@ static void SetGlobalVars(void)
 			SCREENWIDTH = atoi(s.c_str());
 	}
 
-	s = argv::Value(0, "height");
+	s = argv::Value("height");
 	if (!s.empty())
 	{
 		if (DISPLAYMODE == 2)
@@ -305,7 +305,7 @@ static void SetGlobalVars(void)
 			SCREENHEIGHT = atoi(s.c_str());
 	}
 
-	p = argv::Find(0, "res");
+	p = argv::Find("res");
 	if (p > 0 && p + 2 < argv::list.size() && !argv::IsOption(p+1) && !argv::IsOption(p+2))
 	{
 		if (DISPLAYMODE == 2)
@@ -319,7 +319,7 @@ static void SetGlobalVars(void)
 	}
 
 	// Bits per pixel check....
-	s = argv::Value(0, "bpp");
+	s = argv::Value("bpp");
 	if (!s.empty())
 	{
 		SCREENBITS = atoi(s.c_str());
@@ -340,7 +340,7 @@ static void SetGlobalVars(void)
 	}
 
 	// sprite kludge (TrueBSP)
-	p = argv::Find(0, "spritekludge");
+	p = argv::Find("spritekludge");
 	if (p > 0)
 	{
 		if (p + 1 < argv::list.size() && !argv::IsOption(p+1))
@@ -350,7 +350,7 @@ static void SetGlobalVars(void)
 			sprite_kludge = 1;
 	}
 
-	s = argv::Value(0, "screenshot");
+	s = argv::Value("screenshot");
 	if (!s.empty())
 	{
 		screenshot_rate = atoi(s.c_str());
@@ -376,22 +376,22 @@ static void SetGlobalVars(void)
 	argv::CheckBooleanParm("weaponswitch", &global_flags.weapon_switch, false);
 	argv::CheckBooleanParm("autoload", &autoquickload, false);
 
-	if (argv::Find(0, "infight") > 0)
+	if (argv::Find("infight") > 0)
 		g_aggression = 1;
 
-	if (argv::Find(0, "dlights") > 0)
+	if (argv::Find("dlights") > 0)
 		use_dlights = 1;
-	else if (argv::Find(0, "nodlights") > 0)
+	else if (argv::Find("nodlights") > 0)
 		use_dlights = 0;
 
 	if (!global_flags.respawn)
 	{
-		if (argv::Find(0, "newnmrespawn") > 0)
+		if (argv::Find("newnmrespawn") > 0)
 		{
 			global_flags.res_respawn = true;
 			global_flags.respawn = true;
 		}
-		else if (argv::Find(0, "respawn") > 0)
+		else if (argv::Find("respawn") > 0)
 		{
 			global_flags.respawn = true;
 		}
@@ -412,7 +412,7 @@ static void SetGlobalVars(void)
 //
 void SetLanguage(void)
 {
-	std::string want_lang = argv::Value(0, "lang");
+	std::string want_lang = argv::Value("lang");
 	if (!want_lang.empty())
 		m_language = want_lang;
 
@@ -814,7 +814,7 @@ void E_TitleTicker(void)
 //
 void InitDirectories(void)
 {
-	std::filesystem::path s = argv::Value(0, "home");
+	std::filesystem::path s = argv::Value("home");
     if (!s.empty())
         home_dir = s.generic_string();
 
@@ -851,7 +851,7 @@ void InitDirectories(void)
 	game_dir = s.generic_string();
 	s.clear();
 
-	s = argv::Value(0, "game");
+	s = argv::Value("game");
 	if (!s.empty())
 		game_dir = s.generic_string();
 
@@ -861,11 +861,11 @@ void InitDirectories(void)
 	if (epi::FS_Access(parms.c_str(), epi::file_c::ACCESS_READ))
 	{
 		// Insert it right after the game parameter
-		argv::ApplyResponseFile(parms.c_str(), argv::Find(0, "game") + 2);
+		argv::ApplyResponseFile(parms.c_str());
 	}
 
 	// config file
-	s = argv::Value(0, "config");
+	s = argv::Value("config");
 	if (!s.empty())
 	{
 		cfgfile = std::string(s.generic_string());
@@ -876,7 +876,7 @@ void InitDirectories(void)
 	}
 
 	// edge.wad file
-	s = argv::Value(0, "ewad");
+	s = argv::Value("ewad");
 	if (!s.empty())
 	{
 		ewadfile = std::string(s.generic_string());
@@ -957,7 +957,7 @@ static void IdentifyVersion(void)
     std::string iwad_dir;
 	std::vector<std::string> iwad_dir_vector;
 
-	std::string s = argv::Value(0, "iwad");
+	std::string s = argv::Value("iwad");
 
     iwad_par = s;
 
@@ -1182,7 +1182,7 @@ static void CheckTurbo(void)
 {
 	int turbo_scale = 100;
 
-	int p = argv::Find(0, "turbo");
+	int p = argv::Find("turbo");
 
 	if (p > 0)
 	{
@@ -1233,9 +1233,8 @@ static void SetupLogAndDebugFiles(void)
 	logfile = NULL;
 	debugfile = NULL;
 
-	if (argv::Find(0, "nolog") < 0)
+	if (argv::Find("nolog") < 0)
 	{
-
 		logfile = fopen(log_fn.c_str(), "w");
 
 		if (!logfile)
@@ -1251,7 +1250,7 @@ static void SetupLogAndDebugFiles(void)
 	//
 	// -ACB- 1999/10/02 Don't print to console, since we don't have a console yet.
 
-	/// int p = argv::Find(0, "debug");
+	/// int p = argv::Find("debug");
 	if (true)
 	{
 		debugfile = fopen(debug_fn.c_str(), "w");
@@ -1308,7 +1307,7 @@ static void AddCommandLineFiles(void)
 
 	// next handle the -file option (we allow multiple uses)
 
-	p = argv::Find(0, "file");
+	p = argv::Find("file");
 
 	if (p > 0) p++;
 
@@ -1324,7 +1323,7 @@ static void AddCommandLineFiles(void)
 
 	// scripts....
 
-	p = argv::Find(0, "script");
+	p = argv::Find("script");
 
 	if (p > 0) p++;
 
@@ -1353,7 +1352,7 @@ static void AddCommandLineFiles(void)
 
 	// dehacked/bex....
 
-	p = argv::Find(0, "deh");
+	p = argv::Find("deh");
 
 	if (p > 0) p++;
 
@@ -1381,7 +1380,7 @@ static void AddCommandLineFiles(void)
 
 	// directories....
 
-	p = argv::Find(0, "dir");
+	p = argv::Find("dir");
 
 	if (p > 0) p++;
 
@@ -1398,7 +1397,7 @@ static void AddCommandLineFiles(void)
 
 	// handle -ddf option (backwards compatibility)
 
-	std::string ps = argv::Value(0, "ddf");
+	std::string ps = argv::Value("ddf");
 
 	if (!ps.empty())
 	{
@@ -1479,7 +1478,7 @@ static void E_Shutdown(void);
 static void E_Startup(void)
 {
 	// Version check ?
-	if (argv::Find(0, "version") > 0)
+	if (argv::Find("version") > 0)
 	{
 		// -AJA- using I_Error here, since I_Printf crashes this early on
 		I_Error("\nEDGE-Classic version is " EDGEVERSTR "\n");
@@ -1570,13 +1569,13 @@ static void E_InitialState(void)
 	// do loadgames first, as they contain all of the
 	// necessary state already (in the savegame).
 
-	if (argv::Find(0, "playdemo") > 0 || argv::Find(0, "timedemo") > 0 ||
-	    argv::Find(0, "record") > 0)
+	if (argv::Find("playdemo") > 0 || argv::Find("timedemo") > 0 ||
+	    argv::Find("record") > 0)
 	{
 		I_Error("Demos are no longer supported\n");
 	}
 
-	ps = argv::Value(0, "loadgame");
+	ps = argv::Value("loadgame");
 	if (!ps.empty())
 	{
 		G_DeferredLoadGame(atoi(ps.c_str()));
@@ -1592,11 +1591,11 @@ static void E_InitialState(void)
 
 	int bots = 0;
 
-	ps = argv::Value(0, "bots");
+	ps = argv::Value("bots");
 	if (!ps.empty())
 		bots = atoi(ps.c_str());
 
-	ps = argv::Value(0, "warp");
+	ps = argv::Value("warp");
 	if (!ps.empty())
 	{
 		warp = true;
@@ -1604,7 +1603,7 @@ static void E_InitialState(void)
 	}
 
 	// -KM- 1999/01/29 Use correct skill: 1 is easiest, not 0
-	ps = argv::Value(0, "skill");
+	ps = argv::Value("skill");
 	if (!ps.empty())
 	{
 		warp = true;
@@ -1612,7 +1611,7 @@ static void E_InitialState(void)
 	}
 
 	// deathmatch check...
-	int pp = argv::Find(0, "deathmatch");
+	int pp = argv::Find("deathmatch");
 	if (pp > 0)
 	{
 		warp_deathmatch = 1;
@@ -1620,7 +1619,7 @@ static void E_InitialState(void)
 		if (pp + 1 < argv::list.size() && !argv::IsOption(pp+1))
 			warp_deathmatch = MAX(1, atoi(argv::list[pp+1].c_str()));
 	}
-	else if (argv::Find(0, "altdeath") > 0)
+	else if (argv::Find("altdeath") > 0)
 	{
 		warp_deathmatch = 2;
 	}

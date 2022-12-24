@@ -28,22 +28,20 @@
 namespace argv {
 
 extern std::vector<std::string> list;
-// for parsing disambiguation
-extern std::unordered_set<char> short_flags;
 
 void Init(int argc, const char *const *argv);
 
 // Return position in arg list, if found
-int Find(char shortName, const char *longName, int *numParams = nullptr);
+int Find(const char *longName, int *numParams = nullptr);
 
 //  Same as above, but return the value of position + 1 if valid, else an empty std::string
-std::string Value(char shortName, const char *longName, int *numParams = nullptr);
+std::string Value(const char *longName, int *numParams = nullptr);
 
 void CheckBooleanParm(const char *parm, bool *boolval, bool reverse);
 
 void CheckBooleanCVar(const char *parm, cvar_c *var, bool reverse);
 
-void ApplyResponseFile(const char *name, int position);
+void ApplyResponseFile(const char *name);
 
 void DebugDumpArgs(void);
 

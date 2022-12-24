@@ -23,7 +23,6 @@
 #include "str_util.h"
 
 std::vector<std::string> argv::list;
-std::unordered_set<char> argv::short_flags;
 
 // this one is here to avoid infinite recursion of param files.
 typedef struct added_parm_s
@@ -34,45 +33,6 @@ typedef struct added_parm_s
 added_parm_t;
 
 static added_parm_t *added_parms;
-
-static void Parse_LongArg(std::string_view arg) {
-    // long argument, e.g. --foo=bar
-
-    // keep first hyphen
-    std::string_view name = arg.substr(1);
-
-    std::string_view value;
-
-    if (auto pos = name.find('='); pos != std::string_view::npos) {
-        value = name.substr(pos + 1);
-        name = name.substr(0, pos);
-    }
-
-    argv::list.emplace_back(name);
-    if (!value.empty()) {
-        argv::list.emplace_back(value);
-    }
-}
-
-static void Parse_ShortArgs(std::string_view arg) {
-    for (std::size_t i = 1; i < arg.size(); ++i) {
-        char ch = arg[i];
-
-        if (argv::short_flags.find(ch) != argv::short_flags.end()) {
-            // argument
-            argv::list.emplace_back(std::string{"-"} + std::string{&ch, 1});
-            std::string_view argument = arg.substr(i + 1);
-            if (!argument.empty()) {
-                argv::list.emplace_back(argument);
-            }
-            // no more to parse
-            break;
-        } else {
-            // no argument
-            argv::list.emplace_back(std::string{"-"} + std::string{&ch, 1});
-        }
-    }
-}
 
 //
 // ArgvInit
@@ -105,31 +65,16 @@ void argv::Init(const int argc, const char *const *argv) {
 
         if (argv[i][0] == '@')
         {  // add it as a response file
-            ApplyResponseFile(&argv[i][1], i);
+            ApplyResponseFile(&argv[i][1]);
             continue;
         }
 
-        // support GNU-style long and short options
-        if (cur[0] == '-') {
-            if (cur[1] == '-') {
-                Parse_LongArg(cur);
-            } else {
-                Parse_ShortArgs(cur);
-            }
-        } else {
-            list.emplace_back(cur);
-        }
-
-        // support DOS-style short options
-        if (cur[0] == '/' && (isalnum(cur[1]) || cur[1] == '?') &&
-            cur[2] == '\0') {
-            list.emplace_back(std::string{"-"} + std::string{&cur[1], 1});
-        }
+        list.emplace_back(cur);
     }
 }
 
-int argv::Find(const char shortName, const char *longName, int *numParams) {
-    SYS_ASSERT(shortName || longName);
+int argv::Find(const char *longName, int *numParams) {
+    SYS_ASSERT(longName);
 
     if (numParams) {
         *numParams = 0;
@@ -143,10 +88,6 @@ int argv::Find(const char shortName, const char *longName, int *numParams) {
         }
 
         const std::string &str = list[p];
-
-        if (shortName && (shortName == tolower(str[1])) && str[2] == 0) {
-            break;
-        }
 
         if (longName &&
             epi::case_cmp(longName,
@@ -173,10 +114,10 @@ int argv::Find(const char shortName, const char *longName, int *numParams) {
     return p;
 }
 
-std::string argv::Value(const char shortName, const char *longName, int *numParams) {
-    SYS_ASSERT(shortName || longName);
+std::string argv::Value(const char *longName, int *numParams) {
+    SYS_ASSERT(longName);
 
-    int pos = Find(shortName, longName, numParams);
+    int pos = Find(longName, numParams);
 
     if (pos <= 0)
         return "";
@@ -193,13 +134,13 @@ std::string argv::Value(const char shortName, const char *longName, int *numPara
 //
 void argv::CheckBooleanParm(const char *parm, bool *boolval, bool reverse)
 {
-	if (Find(0, parm) > 0)
+	if (Find(parm) > 0)
 	{
 		*boolval = ! reverse;
 		return;
 	}
 
-	if (Find(0, epi::STR_Format("no%s", parm).c_str()) > 0)
+	if (Find(epi::STR_Format("no%s", parm).c_str()) > 0)
 	{
 		*boolval = reverse;
 		return;
@@ -208,13 +149,13 @@ void argv::CheckBooleanParm(const char *parm, bool *boolval, bool reverse)
 
 void argv::CheckBooleanCVar(const char *parm, cvar_c *var, bool reverse)
 {
-	if (Find(0, parm) > 0)
+	if (Find(parm) > 0)
 	{
 		*var = (reverse ? 0 : 1);
 		return;
 	}
 
-	if (Find(0, epi::STR_Format("no%s", parm).c_str()) > 0)
+	if (Find(epi::STR_Format("no%s", parm).c_str()) > 0)
 	{
 		*var = (reverse ? 1 : 0);
 		return;
@@ -265,7 +206,7 @@ static int ParseOneFilename(FILE *fp, char *buf)
 //
 // Adds a response file
 //
-void argv::ApplyResponseFile(const char *name, int position)
+void argv::ApplyResponseFile(const char *name)
 {
 	char buf[1024];
 	FILE *f;
@@ -288,13 +229,10 @@ void argv::ApplyResponseFile(const char *name, int position)
 	if (!f)
 		I_Error("Couldn't open \"%s\" for reading!", name);
 
-    auto it = list.begin();
-
-	for (; EOF != ParseOneFilename(f, buf); position++)
+	for (; EOF != ParseOneFilename(f, buf);)
     {
 		// we must use strdup: Z_Init might not have been called
-        list.insert(it, position+1, strdup(buf));
-        it = list.begin();
+        list.push_back(strdup(buf));
     }
 
 	// unlink from list

@@ -143,13 +143,13 @@ void I_DeterminePixelAspect()
 
 void I_StartupGraphics(void)
 {
-	if (argv::Find(0, "directx") > 0)
+	if (argv::Find("directx") > 0)
 		force_directx = true;
 
-	if (argv::Find(0, "gdi") > 0 || argv::Find(0, "nodirectx") > 0)
+	if (argv::Find("gdi") > 0 || argv::Find("nodirectx") > 0)
 		force_directx = false;
 
-	std::string driver = argv::Value(0, "videodriver");
+	std::string driver = argv::Value("videodriver");
 
 	if (driver.empty())
 		driver = SDL_getenv("SDL_VIDEODRIVER") ? SDL_getenv("SDL_VIDEODRIVER") : "";
@@ -175,7 +175,7 @@ void I_StartupGraphics(void)
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
 		I_Error("Couldn't init SDL VIDEO!\n%s\n", SDL_GetError());
 
-	if (argv::Find(0, "nograb") > 0)
+	if (argv::Find("nograb") > 0)
 		in_grab = 0;
 
 	// -AJA- FIXME these are wrong (probably ignored though)

@@ -87,7 +87,7 @@ void N_InitNetwork(void)
 
 	base_port = MP_EDGE_PORT;
 
-	std::string str = argv::Value(0, "port");
+	std::string str = argv::Value("port");
 
 	if (!str.empty())
 		base_port = atoi(str.c_str());

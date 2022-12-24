@@ -1327,21 +1327,23 @@ static void AddCommandLineFiles(void)
 	{
 		// the parms after p are script filenames,
 		// go until end of parms or another '-' preceded parm
-
-		std::string ext = epi::PATH_GetExtension(argv::list[p].c_str());
-
-		// sanity check...
-		if (epi::case_cmp(ext.c_str(), ".wad") == 0 || 
-            epi::case_cmp(ext.c_str(), ".pk3") == 0 ||
-            epi::case_cmp(ext.c_str(), ".ddf") == 0 ||
-		    epi::case_cmp(ext.c_str(), ".deh") == 0 ||
-		    epi::case_cmp(ext.c_str(), ".bex") == 0)
+		if (!argv::IsOption(p))
 		{
-			I_Error("Illegal filename for -script: %s\n", argv::list[p].c_str());
-		}
+			std::string ext = epi::PATH_GetExtension(argv::list[p].c_str());
 
-		std::string filename = M_ComposeFileName(game_dir.c_str(), argv::list[p].c_str());
-		W_AddFilename(filename.c_str(), FLKIND_RTS);
+			// sanity check...
+			if (epi::case_cmp(ext.c_str(), ".wad") == 0 || 
+				epi::case_cmp(ext.c_str(), ".pk3") == 0 ||
+				epi::case_cmp(ext.c_str(), ".ddf") == 0 ||
+				epi::case_cmp(ext.c_str(), ".deh") == 0 ||
+				epi::case_cmp(ext.c_str(), ".bex") == 0)
+			{
+				I_Error("Illegal filename for -script: %s\n", argv::list[p].c_str());
+			}
+
+			std::string filename = M_ComposeFileName(game_dir.c_str(), argv::list[p].c_str());
+			W_AddFilename(filename.c_str(), FLKIND_RTS);
+		}
 
 		p++;
 	}
@@ -1354,20 +1356,22 @@ static void AddCommandLineFiles(void)
 	{
 		// the parms after p are Dehacked/BEX filenames,
 		// go until end of parms or another '-' preceded parm
-
-		std::string ext(epi::PATH_GetExtension(argv::list[p].c_str()));
-
-		// sanity check...
-		if (epi::case_cmp(ext.c_str(), ".wad") == 0 || 
-            epi::case_cmp(ext.c_str(), ".pk3") == 0 ||
-            epi::case_cmp(ext.c_str(), ".ddf") == 0 ||
-		    epi::case_cmp(ext.c_str(), ".rts") == 0)
+		if (!argv::IsOption(p))
 		{
-			I_Error("Illegal filename for -deh: %s\n", argv::list[p].c_str());
-		}
+			std::string ext(epi::PATH_GetExtension(argv::list[p].c_str()));
 
-		std::string filename = M_ComposeFileName(game_dir.c_str(), argv::list[p].c_str());
-		W_AddFilename(filename.c_str(), FLKIND_Deh);
+			// sanity check...
+			if (epi::case_cmp(ext.c_str(), ".wad") == 0 || 
+				epi::case_cmp(ext.c_str(), ".pk3") == 0 ||
+				epi::case_cmp(ext.c_str(), ".ddf") == 0 ||
+				epi::case_cmp(ext.c_str(), ".rts") == 0)
+			{
+				I_Error("Illegal filename for -deh: %s\n", argv::list[p].c_str());
+			}
+
+			std::string filename = M_ComposeFileName(game_dir.c_str(), argv::list[p].c_str());
+			W_AddFilename(filename.c_str(), FLKIND_Deh);
+		}
 
 		p++;
 	}
@@ -1380,9 +1384,11 @@ static void AddCommandLineFiles(void)
 	{
 		// the parms after p are directory names,
 		// go until end of parms or another '-' preceded parm
-
-		std::string dirname = M_ComposeFileName(game_dir.c_str(), argv::list[p].c_str());
-		W_AddFilename(dirname.c_str(), FLKIND_Folder);
+		if (!argv::IsOption(p))
+		{
+			std::string dirname = M_ComposeFileName(game_dir.c_str(), argv::list[p].c_str());
+			W_AddFilename(dirname.c_str(), FLKIND_Folder);
+		}
 
 		p++;
 	}

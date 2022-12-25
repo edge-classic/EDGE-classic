@@ -124,7 +124,7 @@ void fluid_synth_settings(fluid_settings_t* settings)
   fluid_settings_register_int(settings, "synth.midi-channels",
 			     16, 16, 256, 0, NULL, NULL);
   fluid_settings_register_num(settings, "synth.gain",
-			     0.6f, 0.0f, 10.0f,
+			     0.4f, 0.0f, 10.0f,
 			     0, NULL, NULL);
   fluid_settings_register_int(settings, "synth.audio-channels",
 			     1, 1, 128, 0, NULL, NULL);

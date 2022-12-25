@@ -1286,8 +1286,8 @@ void OPL3_GenerateResampled(opl3_chip *chip, int16_t *buf)
 {
     int16_t samples[4];
     OPL3_Generate4ChResampled(chip, samples);
-    buf[0] = samples[0];
-    buf[1] = samples[1];
+    buf[0] = OPL3_ClipSample((int32_t)samples[0] << 1);
+    buf[1] = OPL3_ClipSample((int32_t)samples[1] << 1);
 }
 
 void OPL3_Reset(opl3_chip *chip, uint32_t samplerate)

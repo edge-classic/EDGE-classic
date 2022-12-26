@@ -42,6 +42,7 @@
 #include "w_wad.h"
 
 extern cvar_c g_bobbing;
+extern cvar_c g_erraticism;
 
 static void BobWeapon(player_t *p, weapondef_c *info);
 
@@ -894,7 +895,7 @@ void P_MovePsprites(player_t * p)
 
 static void BobWeapon(player_t *p, weapondef_c *info)
 {
-	if (g_bobbing.d == 1 || g_bobbing.d == 3)
+	if (g_bobbing.d == 1 || g_bobbing.d == 3 || (g_erraticism.d && (!p->cmd.forwardmove && !p->cmd.sidemove)))
 		return;
 
 	pspdef_t *psp = &p->psprites[p->action_psp];
@@ -905,7 +906,7 @@ static void BobWeapon(player_t *p, weapondef_c *info)
 	// bob the weapon based on movement speed
 	if (! p->mo->mom.z) // Don't bob in mid-air and such
 	{
-		angle_t angle = (128 * leveltime) << 19;
+		angle_t angle = (128 * (g_erraticism.d ? p->e_bob_ticker++ : leveltime)) << 19;
 		new_sx = p->bob * PERCENT_2_FLOAT(info->swaying) * M_Cos(angle);
 
 		angle &= (ANG180 - 1);

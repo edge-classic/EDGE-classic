@@ -197,6 +197,7 @@ typedef struct player_s
 
 	// bounded/scaled total momentum.
 	float bob;
+	int e_bob_ticker = 0; // Erraticism bob timer to prevent weapon bob jumps
 
 	// Kick offset for vertangle (in mobj_t)
 	float kick_offset;

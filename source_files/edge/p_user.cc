@@ -106,6 +106,9 @@ static sfx_t * sfx_jpflow;
 
 static void CalcHeight(player_t * player, bool extra_tic)
 {
+	if (g_erraticism.d && leveltime > 0 && (!player->cmd.forwardmove && !player->cmd.sidemove))
+		return;
+
 	bool onground = player->mo->z <= player->mo->floorz;
 
 	if (player->mo->height < (player->mo->info->height + player->mo->info->crouchheight) / 2.0f)

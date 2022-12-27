@@ -21,7 +21,6 @@
 
 #include <string>
 #include <vector>
-#include <cuchar>
 #include <codecvt>
 
 namespace epi

@@ -19,6 +19,7 @@
 #include "i_defs.h"
 #include "i_sdlinc.h"  // needed for proper SDL main linkage
 #include "filesystem.h"
+#include "str_util.h"
 
 #include "dm_defs.h"
 #include "m_argv.h"
@@ -37,7 +38,7 @@ int main(int argc, char *argv[])
 #ifndef WIN32
 	exe_path = SDL_GetBasePath();
 #else
-	exe_path = (char32_t *)SDL_iconv_utf8_ucs4(SDL_GetBasePath());
+	exe_path = epi::to_u32string(SDL_GetBasePath());
 #endif
 
 #ifdef WIN32

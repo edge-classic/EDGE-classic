@@ -87,6 +87,70 @@ std::vector<std::string> STR_SepStringVector(std::string str, char separator)
 	return vec;
 }
 
+// The following string conversion classes/code are adapted from public domain
+// code by Andrew Choi originally found at https://web.archive.org/web/20151209032329/http://members.shaw.ca/akochoi/articles/unicode-processing-c++0x/
+
+template<>
+int storageMultiplier<UTF8, UTF32>() { return 4; }
+
+template<>
+int storageMultiplier<UTF8, UTF16>() { return 3; }
+
+template<>
+int storageMultiplier<UTF16, UTF8>() { return 1; }
+
+template<>
+int storageMultiplier<UTF16, UTF32>() { return 2; }
+
+template<>
+int storageMultiplier<UTF32, UTF8>() { return 1; }
+
+template<>
+int storageMultiplier<UTF32, UTF16>() { return 1; }
+
+
+std::string to_u8string(const std::u16string& s)
+{
+  static str_converter<UTF8, UTF16> converter;
+
+  return converter(s);
+}
+
+std::string to_u8string(const std::u32string& s)
+{
+  static str_converter<UTF8, UTF32> converter;
+
+  return converter(s);
+}
+
+std::u16string to_u16string(const std::string& s)
+{
+  static str_converter<UTF16, UTF8> converter;
+
+  return converter(s);
+}
+
+std::u16string to_u16string(const std::u32string& s)
+{
+  static str_converter<UTF16, UTF32> converter;
+
+  return converter(s);
+}
+
+std::u32string to_u32string(const std::string& s)
+{
+  static str_converter<UTF32, UTF8> converter;
+
+  return converter(s);
+}
+
+std::u32string to_u32string(const std::u16string& s)
+{
+  static str_converter<UTF32, UTF16> converter;
+
+  return converter(s);
+}
+
 } // namespace epi
 
 //--- editor settings ---

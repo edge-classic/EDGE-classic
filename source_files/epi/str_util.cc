@@ -19,8 +19,6 @@
 #include "epi.h"
 #include "str_util.h"
 
-#include <locale>
-
 namespace epi
 {
 
@@ -100,55 +98,35 @@ template<>
 int storageMultiplier<UTF16, UTF8>() { return 1; }
 
 template<>
-int storageMultiplier<UTF16, UTF32>() { return 2; }
-
-template<>
 int storageMultiplier<UTF32, UTF8>() { return 1; }
-
-template<>
-int storageMultiplier<UTF32, UTF16>() { return 1; }
 
 
 std::string to_u8string(const std::u16string& s)
 {
-  static str_converter<UTF8, UTF16> converter;
+  static str_converter<UTF8, UTF16, UTF16> converter;
 
-  return converter(s);
+  return converter.out(s);
 }
 
 std::string to_u8string(const std::u32string& s)
 {
-  static str_converter<UTF8, UTF32> converter;
+  static str_converter<UTF8, UTF32, UTF32> converter;
 
-  return converter(s);
+  return converter.out(s);
 }
 
 std::u16string to_u16string(const std::string& s)
 {
-  static str_converter<UTF16, UTF8> converter;
+  static str_converter<UTF16, UTF8, UTF16> converter;
 
-  return converter(s);
-}
-
-std::u16string to_u16string(const std::u32string& s)
-{
-  static str_converter<UTF16, UTF32> converter;
-
-  return converter(s);
+  return converter.in(s);
 }
 
 std::u32string to_u32string(const std::string& s)
 {
-  static str_converter<UTF32, UTF8> converter;
+  static str_converter<UTF32, UTF8, UTF32> converter;
 
-  return converter(s);
-}
-
-std::u32string to_u32string(const std::u16string& s)
-{
-  static str_converter<UTF32, UTF16> converter;
-
-  return converter(s);
+  return converter.in(s);
 }
 
 } // namespace epi

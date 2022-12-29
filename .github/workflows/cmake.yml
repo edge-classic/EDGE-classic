@@ -59,7 +59,7 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           update: false
-          msystem: mingw32
+          msystem: clang32
           install: >-
             git
             make
@@ -68,7 +68,7 @@ jobs:
             cmake:p
             SDL2:p
       - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "MSYS Makefiles"
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "MSYS Makefiles" -DCMAKE_MAKE_PROGRAM=/clang32/bin/mingw32-make.exe
       - name: Build
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - name: Copy Executable

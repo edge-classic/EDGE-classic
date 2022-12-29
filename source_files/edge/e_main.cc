@@ -1132,7 +1132,7 @@ static void IdentifyVersion(void)
 
 				if (!FS_ReadDir(fsd, location, UTFSTR("*.wad")))
 				{
-					I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location);
+					I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location.u8string().c_str());
 				}
 				else
 				{

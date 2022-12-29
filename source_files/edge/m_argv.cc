@@ -307,7 +307,7 @@ void argv::ApplyResponseFile(std::filesystem::path name)
 	// add arguments from the given file
 	f = fopen(name.u8string().c_str(), "rb");
 	if (!f)
-		I_Error("Couldn't open \"%s\" for reading!", name);
+		I_Error("Couldn't open \"%s\" for reading!", name.u8string().c_str());
 
 	for (; EOF != ParseOneFilename(f, buf);)
     {

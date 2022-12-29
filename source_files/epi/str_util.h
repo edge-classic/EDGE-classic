@@ -97,7 +97,7 @@ class str_converter {
       cvt.out(state, s.c_str(), s.c_str() + s.length(), enx, i, i + len, inx);
 
     if (r != codecvt_type::ok)
-      I_Error("EPI: String Conversion Failed for %s!\n");
+      I_Error("EPI: String Conversion Failed!\n");
 
     return to_string_type(i, inx - i);
   }

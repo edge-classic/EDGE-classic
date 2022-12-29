@@ -18,6 +18,9 @@
 
 #include "epi.h"
 #include "str_compare.h"
+#ifdef __clang__
+#include "str_util.h"
+#endif
 
 #include <cstring>
 #include <cctype>
@@ -129,12 +132,16 @@ int case_cmp(const std::u32string& A, const std::u32string& B)
 	if (A.size() != B.size())
 		return A.size() - B.size();
 
+#ifndef __clang__
 	for (int i=0; i < A.size(); i++)
 	{
 		if (std::tolower(A.at(i), std::locale()) != std::tolower(B.at(i), std::locale()))
 			return A.at(i) - B.at(i);
 	}
 	return 0;
+#else
+	return epi::case_cmp(epi::to_u8string(A), epi::to_u8string(B));
+#endif
 }
 
 //----------------------------------------------------------------------------

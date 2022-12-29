@@ -18,56 +18,64 @@
 //
 #include "epi.h"
 #include "path.h"
-#include <filesystem>
 
 namespace epi
 {
 
 // Path Manipulation Functions
-std::string PATH_GetDir(const char *path)
+std::filesystem::path PATH_GetDir(std::filesystem::path path)
 {
-	SYS_ASSERT(path);
+	SYS_ASSERT(!path.empty());
 
-	return std::filesystem::path(path).remove_filename().string();
+	return std::filesystem::path(path).remove_filename();
 }
 
 
-std::string PATH_GetFilename(const char *path)
+std::filesystem::path PATH_GetFilename(std::filesystem::path path)
 {
-	SYS_ASSERT(path);
+	SYS_ASSERT(!path.empty());
 
-	return std::filesystem::path(path).filename().string();
+	return std::filesystem::path(path).filename();
 }
 
 
-std::string PATH_GetExtension(const char *path)
+std::filesystem::path PATH_GetExtension(std::filesystem::path path)
 {
-	SYS_ASSERT(path);
+	SYS_ASSERT(!path.empty());
 
-	return std::filesystem::path(path).extension().string();
+	return std::filesystem::path(path).extension();
 }
 
 
-std::string PATH_GetBasename(const char *path) 
+std::filesystem::path PATH_GetBasename(std::filesystem::path path) 
 {
-	SYS_ASSERT(path);
+	SYS_ASSERT(!path.empty());
 
-	return std::filesystem::path(path).stem().string();
+	return std::filesystem::path(path).stem();
 }
 
-bool PATH_IsAbsolute(const char *path)
+bool PATH_IsAbsolute(std::filesystem::path path)
 {
-	SYS_ASSERT(path);
+	SYS_ASSERT(!path.empty());
 
 	return std::filesystem::path(path).is_absolute();
 }
 
-std::string PATH_Join(const char *lhs, const char *rhs)
+std::filesystem::path PATH_Join(std::filesystem::path lhs, std::string rhs)
 {
-	SYS_ASSERT(lhs && rhs);
+	SYS_ASSERT(!lhs.empty() && !rhs.empty());
 
-	return std::filesystem::path(lhs).append(rhs).string();
+	return std::filesystem::path(lhs).append(rhs);
 }
+
+#ifdef _WIN32
+std::filesystem::path PATH_Join(std::filesystem::path lhs, std::u32string rhs)
+{
+	SYS_ASSERT(!lhs.empty() && !rhs.empty());
+
+	return std::filesystem::path(lhs).append(rhs);
+}
+#endif
 
 
 } // namespace epi

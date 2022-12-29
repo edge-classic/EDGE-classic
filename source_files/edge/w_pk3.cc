@@ -66,7 +66,7 @@ public:
 
 	bool HasExtension(const char *match) const
 	{
-		std::string ext = epi::PATH_GetExtension(name.c_str());
+		std::string ext = epi::PATH_GetExtension(UTFSTR(name)).u8string();
 		return epi::case_cmp(ext, match) == 0;
 	}
 };
@@ -285,9 +285,9 @@ void ProcessSubDir(pack_file_c *pack, const std::string& fullpath)
 {
 	std::vector<epi::dir_entry_c> fsd;
 
-	std::string dirname = epi::PATH_GetFilename(fullpath.c_str());
+	std::string dirname = epi::PATH_GetFilename(UTFSTR(fullpath)).u8string();
 
-	if (! epi::FS_ReadDir(fsd, fullpath.c_str(), "*.*"))
+	if (! epi::FS_ReadDir(fsd, UTFSTR(fullpath), UTFSTR("*.*")))
 	{
 		I_Warning("Failed to read dir: %s\n", fullpath.c_str());
 		return;
@@ -299,8 +299,8 @@ void ProcessSubDir(pack_file_c *pack, const std::string& fullpath)
 	{
 		if (! fsd[i].is_dir)
 		{
-			std::string filename = epi::PATH_GetFilename(fsd[i].name.c_str());
-			pack->dirs[d].AddEntry(filename, fsd[i].name, 0);
+			std::string filename = epi::PATH_GetFilename(fsd[i].name).u8string();
+			pack->dirs[d].AddEntry(filename, fsd[i].name.u8string(), 0);
 		}
 	}
 }
@@ -310,9 +310,9 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 {
 	std::vector<epi::dir_entry_c> fsd;
 
-	if (! epi::FS_ReadDir(fsd, df->name.c_str(), "*.*"))
+	if (! epi::FS_ReadDir(fsd, df->name, UTFSTR("*.*")))
 	{
-		I_Error("Failed to read dir: %s\n", df->name.c_str());
+		I_Error("Failed to read dir: %s\n", df->name.u8string().c_str());
 	}
 
 	pack_file_c *pack = new pack_file_c(df, true);
@@ -324,12 +324,12 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 	{
 		if (fsd[i].is_dir)
 		{
-			ProcessSubDir(pack, fsd[i].name);
+			ProcessSubDir(pack, fsd[i].name.u8string());
 		}
 		else
 		{
-			std::string filename = epi::PATH_GetFilename(fsd[i].name.c_str());
-			pack->dirs[0].AddEntry(filename, fsd[i].name, 0);
+			std::string filename = epi::PATH_GetFilename(fsd[i].name).u8string();
+			pack->dirs[0].AddEntry(filename, fsd[i].name.u8string(), 0);
 		}
 	}
 
@@ -353,10 +353,10 @@ epi::file_c * pack_file_c::OpenEntry_Folder(size_t dir, size_t index)
 
 epi::file_c * pack_file_c::OpenFile_Folder(const std::string& name)
 {
-	std::string fullpath = epi::PATH_Join(parent->name.c_str(), name.c_str());
+	std::filesystem::path fullpath = epi::PATH_Join(parent->name, UTFSTR(name));
 
 	// NOTE: it is okay here when file does not exist
-	return epi::FS_Open(fullpath.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+	return epi::FS_Open(fullpath, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 }
 
 
@@ -373,17 +373,17 @@ static pack_file_c * ProcessZip(data_file_c *df)
 	// this is necessary (but stupid)
 	memset(pack->arch, 0, sizeof(mz_zip_archive));
 
-	if (! mz_zip_reader_init_file(pack->arch, df->name.c_str(), 0))
+	if (! mz_zip_reader_init_file(pack->arch, df->name.u8string().c_str(), 0))
 	{
 		switch (mz_zip_get_last_error(pack->arch))
 		{
 			case MZ_ZIP_FILE_OPEN_FAILED:
 			case MZ_ZIP_FILE_READ_FAILED:
 			case MZ_ZIP_FILE_SEEK_FAILED:
-				I_Error("Failed to open PK3 file: %s\n", df->name.c_str());
+				I_Error("Failed to open PK3 file: %s\n", df->name.u8string().c_str());
 
 			default:
-				I_Error("Not a PK3 file (or is corrupted): %s\n", df->name.c_str());
+				I_Error("Not a PK3 file (or is corrupted): %s\n", df->name.u8string().c_str());
 		}
 	}
 
@@ -605,9 +605,9 @@ static void ProcessDDFInPack(pack_file_c *pack)
 {
 	data_file_c *df = pack->parent;
 
-	std::string bare_filename = epi::PATH_GetFilename(df->name.c_str());
-	if (bare_filename == "")
-		bare_filename = df->name;
+	std::string bare_filename = epi::PATH_GetFilename(df->name).u8string();
+	if (bare_filename.empty())
+		bare_filename = df->name.u8string();
 
 	for (size_t i = 0 ; i < pack->dirs[0].entries.size() ; i++)
 	{
@@ -618,7 +618,7 @@ static void ProcessDDFInPack(pack_file_c *pack)
 		source += bare_filename;
 
 		// this handles RTS scripts too!
-		ddf_type_e type = DDF_FilenameToType(entry.name);
+		ddf_type_e type = DDF_FilenameToType(UTFSTR(entry.name));
 
 		if (type != DDF_UNKNOWN)
 		{
@@ -659,9 +659,9 @@ static void ProcessCoalInPack(pack_file_c *pack)
 
 	data_file_c *df = pack->parent;
 
-	std::string bare_filename = epi::PATH_GetFilename(df->name.c_str());
-	if (bare_filename == "")
-		bare_filename = df->name;
+	std::string bare_filename = epi::PATH_GetFilename(df->name).u8string();
+	if (bare_filename.empty())
+		bare_filename = df->name.u8string();
 
 	std::string source = name;
 	source += " in ";
@@ -726,8 +726,8 @@ static void ProcessImagesInPack(pack_file_c *pack, const std::string& dir_name, 
 		pack_entry_c& entry = pack->dirs[d].entries[i];
 
 		// split filename in stem + extension
-		std::string stem = epi::PATH_GetBasename(entry.name.c_str());
-		std::string ext  = epi::PATH_GetExtension(entry.name.c_str());
+		std::string stem = epi::PATH_GetBasename(UTFSTR(entry.name)).u8string();
+		std::string ext  = epi::PATH_GetExtension(UTFSTR(entry.name)).u8string();
 
 		epi::str_lower(ext);
 
@@ -765,7 +765,7 @@ static void ProcessImagesInPack(pack_file_c *pack, const std::string& dir_name, 
 	// DEBUG:
 	// DDF_DumpFile(text);
 
-	DDF_AddFile(DDF_Image, text, df->name);
+	DDF_AddFile(DDF_Image, text, df->name.u8string());
 }
 
 
@@ -792,7 +792,7 @@ static void ProcessSoundsInPack(pack_file_c *pack)
 		}
 
 		// stem must consist of only digits
-		std::string stem = epi::PATH_GetBasename(entry.name.c_str());
+		std::string stem = epi::PATH_GetBasename(UTFSTR(entry.name)).u8string();
 		std::string sfxname;
 
 		if (! TextureNameFromFilename(sfxname, stem, false))
@@ -820,7 +820,7 @@ static void ProcessSoundsInPack(pack_file_c *pack)
 	// DEBUG:
 	// DDF_DumpFile(text);
 
-	DDF_AddFile(DDF_SFX, text, df->name);
+	DDF_AddFile(DDF_SFX, text, df->name.u8string());
 }
 
 
@@ -847,7 +847,7 @@ static void ProcessMusicsInPack(pack_file_c *pack)
 		}
 
 		// stem must consist of only digits
-		std::string stem = epi::PATH_GetBasename(entry.name.c_str());
+		std::string stem = epi::PATH_GetBasename(entry.name).u8string();
 
 		bool valid = stem.size() > 0;
 		for (char ch : stem)
@@ -876,7 +876,7 @@ static void ProcessMusicsInPack(pack_file_c *pack)
 	// DEBUG:
 	// DDF_DumpFile(text);
 
-	DDF_AddFile(DDF_Playlist, text, df->name);
+	DDF_AddFile(DDF_Playlist, text, df->name.u8string());
 }
 
 
@@ -891,8 +891,8 @@ static void ProcessColourmapsInPack(pack_file_c *pack)
 		pack_entry_c& entry = pack->dirs[d].entries[i];
 
 		// split filename in stem + extension
-		std::string stem = epi::PATH_GetBasename(entry.name.c_str());
-		std::string ext  = epi::PATH_GetExtension(entry.name.c_str());
+		std::string stem = epi::PATH_GetBasename(UTFSTR(entry.name)).u8string();
+		std::string ext  = epi::PATH_GetExtension(UTFSTR(entry.name)).u8string();
 
 		// extension is currently ignored
 		(void)ext;

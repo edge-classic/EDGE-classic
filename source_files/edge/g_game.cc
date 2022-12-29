@@ -132,8 +132,8 @@ static void InitNew(newgame_params_c& params);
 static void RespawnPlayer(player_t *p);
 static void SpawnInitialPlayers(void);
 
-static bool G_LoadGameFromFile(const char *filename, bool is_hub = false);
-static bool G_SaveGameToFile(const char *filename, const char *description);
+static bool G_LoadGameFromFile(std::filesystem::path filename, bool is_hub = false);
+static bool G_SaveGameToFile(std::filesystem::path filename, const char *description);
 
 
 void LoadLevel_Bits(void)
@@ -278,14 +278,14 @@ void G_DoLoadLevel(void)
 		// HUB system: check for loading a previously visited map
 		const char *mapname = SV_MapName(currmap);
 
-		std::string fn(SV_FileName("current", mapname));
+		std::filesystem::path fn(SV_FileName("current", mapname));
 
-		if (epi::FS_Access(fn.c_str(), epi::file_c::ACCESS_READ))
+		if (epi::FS_Access(fn, epi::file_c::ACCESS_READ))
 		{
 			I_Printf("Loading HUB...\n");
 
-			if (! G_LoadGameFromFile(fn.c_str(), true))
-				I_Error("LOAD-HUB failed with filename: %s\n", fn.c_str());
+			if (! G_LoadGameFromFile(fn, true))
+				I_Error("LOAD-HUB failed with filename: %s\n", fn.u8string().c_str());
 
 			SpawnInitialPlayers();
 
@@ -694,10 +694,10 @@ static void G_DoCompleted(void)
 
 				const char *mapname = SV_MapName(currmap);
 
-				std::string fn(SV_FileName("current", mapname));
+				std::filesystem::path fn(SV_FileName("current", mapname));
 
-				if (! G_SaveGameToFile(fn.c_str(), "__HUB_SAVE__"))
-					I_Error("SAVE-HUB failed with filename: %s\n", fn.c_str());
+				if (! G_SaveGameToFile(fn, "__HUB_SAVE__"))
+					I_Error("SAVE-HUB failed with filename: %s\n", fn.u8string().c_str());
 
 				if (! curr_hub_first)
 					curr_hub_first = currmap;
@@ -734,11 +734,11 @@ void G_DeferredLoadGame(int slot)
 }
 
 
-static bool G_LoadGameFromFile(const char *filename, bool is_hub)
+static bool G_LoadGameFromFile(std::filesystem::path filename, bool is_hub)
 {
 	if (! SV_OpenReadFile(filename))
 	{
-		I_Printf("LOAD-GAME: cannot open %s\n", filename);
+		I_Printf("LOAD-GAME: cannot open %s\n", filename.u8string().c_str());
 		return false;
 	}
 	
@@ -867,9 +867,9 @@ static void G_DoLoadGame(void)
 	SV_ClearSlot("current");
 	SV_CopySlot(dir_name, "current");
 
-	std::string fn(SV_FileName("current", "head"));
+	std::filesystem::path fn(SV_FileName("current", "head"));
 
-	if (! G_LoadGameFromFile(fn.c_str()))
+	if (! G_LoadGameFromFile(fn))
 	{
 		// !!! FIXME: what to do?
 	}
@@ -895,7 +895,7 @@ void G_DeferredSaveGame(int slot, const char *description)
 	gameaction = ga_savegame;
 }
 
-static bool G_SaveGameToFile(const char *filename, const char *description)
+static bool G_SaveGameToFile(std::filesystem::path filename, const char *description)
 {
 	time_t cur_time;
 	char timebuf[100];
@@ -904,7 +904,7 @@ static bool G_SaveGameToFile(const char *filename, const char *description)
 
 	if (! SV_OpenWriteFile(filename, (EDGEVERHEX << 8) | EDGEPATCH))
 	{
-		I_Printf("Unable to create savegame file: %s\n", filename);
+		I_Printf("Unable to create savegame file: %s\n", filename.u8string().c_str());
 		return false; /* NOT REACHED */
 	}
 
@@ -966,9 +966,9 @@ static void G_DoSaveGame(void)
 {
 	VM_SaveGame(); //Stub for now; eventually things like determining if saving is allowed, etc
 
-	std::string fn(SV_FileName("current", "head"));
+	std::filesystem::path fn(SV_FileName("current", "head"));
 
-	if (G_SaveGameToFile(fn.c_str(), defer_save_desc))
+	if (G_SaveGameToFile(fn, defer_save_desc))
 	{
 		const char *dir_name = SV_SlotName(defer_save_slot);
 

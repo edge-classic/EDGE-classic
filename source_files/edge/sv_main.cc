@@ -469,30 +469,30 @@ const char *SV_MapName(const mapdef_c *map)
 	return buffer;
 }
 
-std::string SV_FileName(const char *slot_name, const char *map_name)
+std::filesystem::path SV_FileName(const char *slot_name, const char *map_name)
 {
     std::string temp(epi::STR_Format("%s/%s.%s", slot_name, map_name, SAVEGAMEEXT));
 
-	return epi::PATH_Join(save_dir.c_str(), temp.c_str());
+	return epi::PATH_Join(save_dir, UTFSTR(temp));
 }
 
-std::string SV_DirName(const char *slot_name)
+std::filesystem::path SV_DirName(const char *slot_name)
 {
-	return epi::PATH_Join(save_dir.c_str(), slot_name);
+	return epi::PATH_Join(save_dir, UTFSTR(slot_name));
 }
 
 void SV_ClearSlot(const char *slot_name)
 {
-	std::string full_dir = SV_DirName(slot_name);
+	std::filesystem::path full_dir = SV_DirName(slot_name);
 
 	// make sure the directory exists
-	epi::FS_MakeDir(full_dir.c_str());
+	epi::FS_MakeDir(full_dir);
 
 	std::vector<epi::dir_entry_c> fsd;
 
-	if (! FS_ReadDir(fsd, full_dir.c_str(), "*.esg"))
+	if (! FS_ReadDir(fsd, full_dir, UTFSTR("*.esg")))
 	{
-		I_Debugf("Failed to read directory: %s\n", full_dir.c_str());
+		I_Debugf("Failed to read directory: %s\n", full_dir.u8string().c_str());
 		return;
 	}
 
@@ -502,25 +502,27 @@ void SV_ClearSlot(const char *slot_name)
 	{
 		if (fsd[i].is_dir)
 			continue;
+#ifdef _WIN32
+		std::filesystem::path cur_file = epi::PATH_Join(full_dir, epi::PATH_GetFilename(fsd[i].name).u32string());
+#else
+		std::filesystem::path cur_file = epi::PATH_Join(full_dir, epi::PATH_GetFilename(fsd[i].name).string());
+#endif
+		I_Debugf("  Deleting %s\n", cur_file.u8string().c_str());
 
-		std::string cur_file = epi::PATH_Join(full_dir.c_str(), epi::PATH_GetFilename(fsd[i].name.c_str()).c_str());
-
-		I_Debugf("  Deleting %s\n", cur_file.c_str());
-
-		epi::FS_Delete(cur_file.c_str());
+		epi::FS_Delete(cur_file);
 	}
 }
 
 void SV_CopySlot(const char *src_name, const char *dest_name)
 {
-	std::string src_dir  = SV_DirName(src_name);
-	std::string dest_dir = SV_DirName(dest_name);
+	std::filesystem::path src_dir  = SV_DirName(src_name);
+	std::filesystem::path dest_dir = SV_DirName(dest_name);
 
 	std::vector<epi::dir_entry_c> fsd;
 
-	if (! FS_ReadDir(fsd, src_dir.c_str(), "*.esg"))
+	if (! FS_ReadDir(fsd, src_dir, UTFSTR("*.esg")))
 	{
-		I_Error("SV_CopySlot: failed to read dir: %s\n", src_dir.c_str());
+		I_Error("SV_CopySlot: failed to read dir: %s\n", src_dir.u8string().c_str());
 		return;
 	}
 
@@ -530,15 +532,19 @@ void SV_CopySlot(const char *src_name, const char *dest_name)
 	{
 		if (fsd[i].is_dir)
 			continue;
+#ifdef _WIN32
+		std::filesystem::path src_file  = epi::PATH_Join( src_dir, epi::PATH_GetFilename(fsd[i].name).u32string());
+		std::filesystem::path dest_file = epi::PATH_Join(dest_dir,epi::PATH_GetFilename(fsd[i].name).u32string());
+#else
+		std::filesystem::path src_file  = epi::PATH_Join( src_dir, epi::PATH_GetFilename(fsd[i].name).string());
+		std::filesystem::path dest_file = epi::PATH_Join(dest_dir,epi::PATH_GetFilename(fsd[i].name).string());
+#endif
 
-		std::string src_file  = epi::PATH_Join( src_dir.c_str(), epi::PATH_GetFilename(fsd[i].name.c_str()).c_str());
-		std::string dest_file = epi::PATH_Join(dest_dir.c_str(),epi::PATH_GetFilename(fsd[i].name.c_str()).c_str());
-
-		I_Debugf("  Copying %s --> %s\n", src_file.c_str(), dest_file.c_str());
+		I_Debugf("  Copying %s --> %s\n", src_file.u8string().c_str(), dest_file.u8string().c_str());
  
-		if (! epi::FS_Copy(src_file.c_str(), dest_file.c_str()))
+		if (! epi::FS_Copy(src_file, dest_file))
 			I_Error("SV_CopySlot: failed to copy '%s' to '%s'\n",
-			        src_file.c_str(), dest_file.c_str());
+			        src_file.u8string().c_str(), dest_file.u8string().c_str());
 	}
 }
 

@@ -27,6 +27,7 @@
 #include "m_misc.h"
 #include "r_modes.h"
 
+#include "str_util.h"
 
 SDL_Window *my_vis;
 
@@ -143,13 +144,13 @@ void I_DeterminePixelAspect()
 
 void I_StartupGraphics(void)
 {
-	if (argv::Find("directx") > 0)
+	if (argv::Find(UTFSTR("directx")) > 0)
 		force_directx = true;
 
-	if (argv::Find("gdi") > 0 || argv::Find("nodirectx") > 0)
+	if (argv::Find(UTFSTR("gdi")) > 0 || argv::Find(UTFSTR("nodirectx")) > 0)
 		force_directx = false;
 
-	std::string driver = argv::Value("videodriver");
+	std::string driver = epi::to_u8string(argv::Value(UTFSTR("videodriver")));
 
 	if (driver.empty())
 		driver = SDL_getenv("SDL_VIDEODRIVER") ? SDL_getenv("SDL_VIDEODRIVER") : "";
@@ -175,7 +176,7 @@ void I_StartupGraphics(void)
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
 		I_Error("Couldn't init SDL VIDEO!\n%s\n", SDL_GetError());
 
-	if (argv::Find("nograb") > 0)
+	if (argv::Find(UTFSTR("nograb")) > 0)
 		in_grab = 0;
 
 	// -AJA- FIXME these are wrong (probably ignored though)

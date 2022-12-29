@@ -739,12 +739,12 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
 }
 
 // We need this to distinguish between old versus new .gwa cache files to trigger a rebuild
-bool W_CheckForXGLNodes(std::string filename)
+bool W_CheckForXGLNodes(std::filesystem::path filename)
 {
 	int length;
 	bool xgl_nodes_found = false;
 
-	epi::file_c *file = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+	epi::file_c *file = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 
 	if (file == NULL)
 	{
@@ -861,14 +861,14 @@ static void ComputeFileMD5(epi::md5hash_c& md5, epi::file_c *file)
 	delete[] buffer;
 }
 
-static bool FindCacheFilename (std::string& out_name,
-		const char *filename, epi::md5hash_c& dir_md5,
+static bool FindCacheFilename (std::filesystem::path& out_name,
+		std::filesystem::path filename, epi::md5hash_c& dir_md5,
 		const char *extension)
 {
-	std::string wad_dir;
+	std::filesystem::path wad_dir;
 	std::string md5_file_string;
-	std::string local_name;
-	std::string cache_name;
+	std::filesystem::path local_name;
+	std::filesystem::path cache_name;
 
 	// Get the directory which the wad is currently stored
 	wad_dir = epi::PATH_GetDir(filename);
@@ -881,25 +881,31 @@ static bool FindCacheFilename (std::string& out_name,
 
 	// Determine the full path filename for "local" (same-directory) version
 	local_name = epi::PATH_GetBasename(filename);
-	local_name += (".");
-	local_name += (extension);
-
-	local_name = epi::PATH_Join(wad_dir.c_str(), local_name.c_str());
+	local_name += (UTFSTR("."));
+	local_name += (UTFSTR(extension));
+#ifdef _WIN32
+	local_name = epi::PATH_Join(wad_dir, local_name.u32string());
+#else
+	local_name = epi::PATH_Join(wad_dir, local_name.string());
+#endif
 
 	// Determine the full path filename for the cached version
 	cache_name = epi::PATH_GetBasename(filename);
-	cache_name += (md5_file_string);
-	cache_name += (".");
-	cache_name += (extension);
+	cache_name += (UTFSTR(md5_file_string));
+	cache_name += (UTFSTR("."));
+	cache_name += (UTFSTR(extension));
+#ifdef _WIN32
+	cache_name = epi::PATH_Join(cache_dir, cache_name.u32string());
+#else
+	cache_name = epi::PATH_Join(cache_dir, cache_name.string());
+#endif
 
-	cache_name = epi::PATH_Join(cache_dir.c_str(), cache_name.c_str());
-
-	I_Debugf("FindCacheFilename: local_name = '%s'\n", local_name.c_str());
-	I_Debugf("FindCacheFilename: cache_name = '%s'\n", cache_name.c_str());
+	I_Debugf("FindCacheFilename: local_name = '%s'\n", local_name.u8string().c_str());
+	I_Debugf("FindCacheFilename: cache_name = '%s'\n", cache_name.u8string().c_str());
 	
 	// Check for the existance of the local and cached dir files
-	bool has_local = epi::FS_Access(local_name.c_str(), epi::file_c::ACCESS_READ);
-	bool has_cache = epi::FS_Access(cache_name.c_str(), epi::file_c::ACCESS_READ);
+	bool has_local = epi::FS_Access(local_name, epi::file_c::ACCESS_READ);
+	bool has_cache = epi::FS_Access(cache_name, epi::file_c::ACCESS_READ);
 
 	// If both exist, use the local one.
 	// If neither exist, create one in the cache directory.
@@ -931,7 +937,7 @@ static bool FindCacheFilename (std::string& out_name,
 			return true;
 		}
 		else
-			epi::FS_Delete(cache_name.c_str());
+			epi::FS_Delete(cache_name);
 	}
 
 	// Neither is valid so create one in the cached directory
@@ -1019,11 +1025,11 @@ void ProcessFixersForWad(wad_file_c *wad)
 	{
 		if (epi::case_cmp(fix_checker, fixdefs[i]->md5_string) == 0)
 		{
-			std::string fix_path = epi::PATH_Join(game_dir.c_str(), "edge_fixes");
-			fix_path = epi::PATH_Join(fix_path.c_str(), fix_checker.append(".wad").c_str());
-			if (epi::FS_Access(fix_path.c_str(), epi::file_c::ACCESS_READ))
+			std::filesystem::path fix_path = epi::PATH_Join(game_dir, UTFSTR("edge_fixes"));
+			fix_path = epi::PATH_Join(fix_path, UTFSTR(fix_checker.append(".wad")));
+			if (epi::FS_Access(fix_path, epi::file_c::ACCESS_READ))
 			{
-				W_AddPending(fix_path.c_str(), FLKIND_PWad);
+				W_AddPending(fix_path, FLKIND_PWad);
 
 				I_Printf("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name.c_str());
 			}
@@ -1045,12 +1051,12 @@ void ProcessDehackedInWad(data_file_c *df)
 
 	const char *lump_name = lumpinfo[deh_lump].name;
 
-	I_Printf("Converting [%s] lump in: %s\n", lump_name, df->name.c_str());
+	I_Printf("Converting [%s] lump in: %s\n", lump_name, df->name.u8string().c_str());
 
 	int length = -1;
 	const byte *data = (const byte *)W_LoadLump(deh_lump, &length);
 
-	std::string bare_name = epi::PATH_GetFilename(df->name.c_str());
+	std::string bare_name = epi::PATH_GetFilename(df->name).u8string();
 
 	std::string source = lump_name;
 	source += " in ";
@@ -1064,7 +1070,7 @@ void ProcessDehackedInWad(data_file_c *df)
 
 static void ProcessDDFInWad(data_file_c *df)
 {
-	std::string bare_filename = epi::PATH_GetFilename(df->name.c_str());
+	std::string bare_filename = epi::PATH_GetFilename(df->name).u8string();
 
 	for (size_t d = 0 ; d < DDF_NUM_TYPES ; d++)
 	{
@@ -1088,7 +1094,7 @@ static void ProcessDDFInWad(data_file_c *df)
 
 static void ProcessCoalInWad(data_file_c *df)
 {
-	std::string bare_filename = epi::PATH_GetFilename(df->name.c_str());
+	std::string bare_filename = epi::PATH_GetFilename(df->name).u8string();
 
 	wad_file_c *wad = df->wad;
 
@@ -1214,7 +1220,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 	}
 
 	// check for unclosed sprite/flat/patch lists
-	const char *filename = df->name.c_str();
+	const char *filename = df->name.u8string().c_str();
 	if (within_sprite_list) I_Warning("Missing S_END marker in %s.\n", filename);
 	if (within_flat_list)   I_Warning("Missing F_END marker in %s.\n", filename);
 	if (within_patch_list)  I_Warning("Missing P_END marker in %s.\n", filename);
@@ -1258,23 +1264,23 @@ void ProcessWad(data_file_c *df, size_t file_index)
 }
 
 
-std::string W_BuildNodesForWad(data_file_c *df)
+std::filesystem::path W_BuildNodesForWad(data_file_c *df)
 {
 	if (df->wad->level_markers.empty())
-		return std::string();
+		return UTFSTR("");
 
-	std::string gwa_filename;
+	std::filesystem::path gwa_filename;
 
-	bool exists = FindCacheFilename(gwa_filename, df->name.c_str(), df->wad->dir_md5, EDGEGWAEXT);
+	bool exists = FindCacheFilename(gwa_filename, df->name, df->wad->dir_md5, EDGEGWAEXT);
 
-	I_Debugf("Actual_GWA_filename: %s\n", gwa_filename.c_str());
+	I_Debugf("Actual_GWA_filename: %s\n", gwa_filename.u8string().c_str());
 
 	if (! exists)
 	{
-		I_Printf("Building GL Nodes for: %s\n", df->name.c_str());
+		I_Printf("Building GL Nodes for: %s\n", df->name.u8string().c_str());
 
-		if (! AJ_BuildNodes(df->name.c_str(), gwa_filename.c_str()))
-			I_Error("Failed to build GL nodes for: %s\n", df->name.c_str());
+		if (! AJ_BuildNodes(df->name.u8string().c_str(), gwa_filename.u8string().c_str()))
+			I_Error("Failed to build GL nodes for: %s\n", df->name.u8string().c_str());
 	}
 
 	return gwa_filename;

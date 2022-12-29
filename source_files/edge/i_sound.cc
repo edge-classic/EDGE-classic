@@ -2,7 +2,7 @@
 //  EDGE Sound System for SDL
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2009  The EDGE Team.
+//  Copyright (c) 1999-2022  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -32,6 +32,7 @@
 #include "file.h"
 #include "filesystem.h"
 #include "path.h"
+#include "str_util.h"
 
 #include "m_argv.h"
 #include "m_misc.h"
@@ -63,9 +64,9 @@ static char scratcherror[256];
 
 static bool audio_is_locked = false;
 
-std::vector<std::string> available_soundfonts;
-std::vector<std::string> available_genmidis;
-extern std::string game_dir;
+std::vector<std::filesystem::path> available_soundfonts;
+std::vector<std::filesystem::path> available_genmidis;
+extern std::filesystem::path game_dir;
 
 
 void SoundFill_Callback(void *udata, Uint8 *stream, int len)
@@ -110,13 +111,13 @@ void I_StartupSound(void)
 {
 	if (nosound) return;
 
-	if (argv::Find("waveout") > 0)
+	if (argv::Find(UTFSTR("waveout")) > 0)
 		force_waveout = true;
 
-	if (argv::Find("dsound") > 0 || argv::Find("nowaveout") > 0)
+	if (argv::Find(UTFSTR("dsound")) > 0 || argv::Find(UTFSTR("nowaveout")) > 0)
 		force_waveout = false;
 
-	std::string driver = argv::Value("audiodriver");
+	std::string driver = epi::to_u8string(argv::Value(UTFSTR("audiodriver")));
 
 	if (driver.empty())
 		driver = SDL_getenv("SDL_AUDIODRIVER") ? SDL_getenv("SDL_AUDIODRIVER") : "";
@@ -149,13 +150,13 @@ void I_StartupSound(void)
 	int want_freq = 48000;
 	bool want_stereo = (var_sound_stereo >= 1);
 
-	std::string p = argv::Value("freq");
+	std::string p = epi::to_u8string(argv::Value(UTFSTR("freq")));
 
 	if (!p.empty())
 		want_freq = atoi(p.c_str());
 
-	if (argv::Find("mono")   > 0) want_stereo = false;
-	if (argv::Find("stereo") > 0) want_stereo = true;
+	if (argv::Find(UTFSTR("mono"))   > 0) want_stereo = false;
+	if (argv::Find(UTFSTR("stereo")) > 0) want_stereo = true;
 
 	bool success = false;
 	
@@ -268,11 +269,11 @@ void I_StartupMusic(void)
 {
 	// Check for SF2 soundfonts
 	std::vector<epi::dir_entry_c> sfd;
-	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
+	std::filesystem::path soundfont_dir = epi::PATH_Join(game_dir, UTFSTR("soundfont"));
 
-	if (!FS_ReadDir(sfd, soundfont_dir.c_str(), "*.sf2"))
+	if (!FS_ReadDir(sfd, soundfont_dir, UTFSTR("*.sf2")))
 	{
-		I_Warning("FluidLite: Failed to read '%s' directory!\n", soundfont_dir.c_str());
+		I_Warning("FluidLite: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
 	}
 	else
 	{
@@ -280,7 +281,7 @@ void I_StartupMusic(void)
 		{
 			if(!sfd[i].is_dir)
 			{
-				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name.c_str()));
+				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name));
 			}
 		}
 	}
@@ -288,9 +289,9 @@ void I_StartupMusic(void)
 	// Check for SF3 soundfonts
 	sfd.clear();
 
-	if (!FS_ReadDir(sfd, soundfont_dir.c_str(), "*.sf3"))
+	if (!FS_ReadDir(sfd, soundfont_dir, UTFSTR("*.sf3")))
 	{
-		I_Warning("FluidLite: Failed to read '%s' directory!\n", soundfont_dir.c_str());
+		I_Warning("FluidLite: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
 	}
 	else
 	{
@@ -298,7 +299,7 @@ void I_StartupMusic(void)
 		{
 			if(!sfd[i].is_dir)
 			{
-				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name.c_str()));
+				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name));
 			}
 		}
 	}
@@ -308,11 +309,11 @@ void I_StartupMusic(void)
 
 	// Start with empty string to represent using whichever GENMIDI
 	// is found in the load order (usually just the IWAD)
-	available_genmidis.push_back("");
+	available_genmidis.push_back(UTFSTR(""));
 
-	if (!FS_ReadDir(sfd, soundfont_dir.c_str(), "*.op2"))
+	if (!FS_ReadDir(sfd, soundfont_dir, UTFSTR("*.op2")))
 	{
-		I_Warning("OPL: Failed to read '%s' directory!\n", soundfont_dir.c_str());
+		I_Warning("OPL: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
 	}
 	else
 	{
@@ -320,7 +321,7 @@ void I_StartupMusic(void)
 		{
 			if(!sfd[i].is_dir)
 			{
-				available_genmidis.push_back(epi::PATH_GetFilename(sfd[i].name.c_str()));
+				available_genmidis.push_back(epi::PATH_GetFilename(sfd[i].name));
 			}
 		}
 	}

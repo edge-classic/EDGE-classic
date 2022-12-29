@@ -190,15 +190,15 @@ bool mus_pause_stop = false;
 bool png_scrshots = false;
 bool autoquickload = false;
 
-std::string cfgfile;
-std::string ewadfile;
+std::filesystem::path cfgfile;
+std::filesystem::path ewadfile;
 std::string iwad_base;
 
-std::string cache_dir;
-std::string game_dir;
-std::string home_dir;
-std::string save_dir;
-std::string shot_dir;
+std::filesystem::path cache_dir;
+std::filesystem::path game_dir;
+std::filesystem::path home_dir;
+std::filesystem::path save_dir;
+std::filesystem::path shot_dir;
 
 // not using DEF_CVAR here since var name != cvar name
 cvar_c m_language("language", "ENGLISH", CVAR_ARCHIVE);
@@ -280,14 +280,14 @@ static void SetGlobalVars(void)
 	std::string s;
 
 	// Screen Resolution Check...
-	if (argv::Find("borderless") > 0)
+	if (argv::Find(UTFSTR("borderless")) > 0)
 		DISPLAYMODE = 2;
-	else if (argv::Find("fullscreen") > 0)
+	else if (argv::Find(UTFSTR("fullscreen")) > 0)
 		DISPLAYMODE = 1;
-	else if (argv::Find("windowed") > 0)
+	else if (argv::Find(UTFSTR("windowed")) > 0)
 		DISPLAYMODE = 0;
 
-	s = argv::Value("width");
+	s = epi::to_u8string(argv::Value(UTFSTR("width")));
 	if (!s.empty())
 	{
 		if (DISPLAYMODE == 2)
@@ -296,7 +296,7 @@ static void SetGlobalVars(void)
 			SCREENWIDTH = atoi(s.c_str());
 	}
 
-	s = argv::Value("height");
+	s = epi::to_u8string(argv::Value(UTFSTR("height")));
 	if (!s.empty())
 	{
 		if (DISPLAYMODE == 2)
@@ -305,21 +305,21 @@ static void SetGlobalVars(void)
 			SCREENHEIGHT = atoi(s.c_str());
 	}
 
-	p = argv::Find("res");
+	p = argv::Find(UTFSTR("res"));
 	if (p > 0 && p + 2 < argv::list.size() && !argv::IsOption(p+1) && !argv::IsOption(p+2))
 	{
 		if (DISPLAYMODE == 2)
 			I_Warning("Current display mode set to borderless fullscreen. Provided resolution of %dx%d will be ignored!\n", 
-				atoi(argv::list[p+1].c_str()), atoi(argv::list[p+2].c_str()));
+				atoi(epi::to_u8string(argv::list[p+1]).c_str()), atoi(epi::to_u8string(argv::list[p+2]).c_str()));
 		else
 		{
-			SCREENWIDTH  = atoi(argv::list[p+1].c_str());
-			SCREENHEIGHT = atoi(argv::list[p+2].c_str());
+			SCREENWIDTH  = atoi(epi::to_u8string(argv::list[p+1]).c_str());
+			SCREENHEIGHT = atoi(epi::to_u8string(argv::list[p+2]).c_str());
 		}
 	}
 
 	// Bits per pixel check....
-	s = argv::Value("bpp");
+	s = epi::to_u8string(argv::Value(UTFSTR("bpp")));
 	if (!s.empty())
 	{
 		SCREENBITS = atoi(s.c_str());
@@ -340,17 +340,17 @@ static void SetGlobalVars(void)
 	}
 
 	// sprite kludge (TrueBSP)
-	p = argv::Find("spritekludge");
+	p = argv::Find(UTFSTR("spritekludge"));
 	if (p > 0)
 	{
 		if (p + 1 < argv::list.size() && !argv::IsOption(p+1))
-			sprite_kludge = atoi(argv::list[p+1].c_str());
+			sprite_kludge = atoi(epi::to_u8string(argv::list[p+1]).c_str());
 
 		if (!sprite_kludge)
 			sprite_kludge = 1;
 	}
 
-	s = argv::Value("screenshot");
+	s = epi::to_u8string(argv::Value(UTFSTR("screenshot")));
 	if (!s.empty())
 	{
 		screenshot_rate = atoi(s.c_str());
@@ -358,49 +358,49 @@ static void SetGlobalVars(void)
 	}
 
 	// -AJA- 1999/10/18: Reworked these with argv::CheckBooleanParm
-	argv::CheckBooleanParm("rotatemap", &rotatemap, false);
-	argv::CheckBooleanParm("sound", &nosound, true);
-	argv::CheckBooleanParm("music", &nomusic, true);
-	argv::CheckBooleanParm("itemrespawn", &global_flags.itemrespawn, false);
-	argv::CheckBooleanParm("mlook", &global_flags.mlook, false);
-	argv::CheckBooleanParm("monsters", &global_flags.nomonsters, true);
-	argv::CheckBooleanParm("fast", &global_flags.fastparm, false);
-	argv::CheckBooleanParm("extras", &global_flags.have_extra, false);
-	argv::CheckBooleanParm("kick", &global_flags.kicking, false);
-	argv::CheckBooleanParm("singletics", &singletics, false);
-	argv::CheckBooleanParm("true3d", &global_flags.true3dgameplay, false);
-	argv::CheckBooleanParm("blood", &global_flags.more_blood, false);
-	argv::CheckBooleanParm("cheats", &global_flags.cheats, false);
-	argv::CheckBooleanParm("jumping", &global_flags.jump, false);
-	argv::CheckBooleanParm("crouching", &global_flags.crouch, false);
-	argv::CheckBooleanParm("weaponswitch", &global_flags.weapon_switch, false);
-	argv::CheckBooleanParm("autoload", &autoquickload, false);
+	argv::CheckBooleanParm(UTFSTR("rotatemap"), &rotatemap, false);
+	argv::CheckBooleanParm(UTFSTR("sound"), &nosound, true);
+	argv::CheckBooleanParm(UTFSTR("music"), &nomusic, true);
+	argv::CheckBooleanParm(UTFSTR("itemrespawn"), &global_flags.itemrespawn, false);
+	argv::CheckBooleanParm(UTFSTR("mlook"), &global_flags.mlook, false);
+	argv::CheckBooleanParm(UTFSTR("monsters"), &global_flags.nomonsters, true);
+	argv::CheckBooleanParm(UTFSTR("fast"), &global_flags.fastparm, false);
+	argv::CheckBooleanParm(UTFSTR("extras"), &global_flags.have_extra, false);
+	argv::CheckBooleanParm(UTFSTR("kick"), &global_flags.kicking, false);
+	argv::CheckBooleanParm(UTFSTR("singletics"), &singletics, false);
+	argv::CheckBooleanParm(UTFSTR("true3d"), &global_flags.true3dgameplay, false);
+	argv::CheckBooleanParm(UTFSTR("blood"), &global_flags.more_blood, false);
+	argv::CheckBooleanParm(UTFSTR("cheats"), &global_flags.cheats, false);
+	argv::CheckBooleanParm(UTFSTR("jumping"), &global_flags.jump, false);
+	argv::CheckBooleanParm(UTFSTR("crouching"), &global_flags.crouch, false);
+	argv::CheckBooleanParm(UTFSTR("weaponswitch"), &global_flags.weapon_switch, false);
+	argv::CheckBooleanParm(UTFSTR("autoload"), &autoquickload, false);
 
-	if (argv::Find("infight") > 0)
+	if (argv::Find(UTFSTR("infight")) > 0)
 		g_aggression = 1;
 
-	if (argv::Find("dlights") > 0)
+	if (argv::Find(UTFSTR("dlights")) > 0)
 		use_dlights = 1;
-	else if (argv::Find("nodlights") > 0)
+	else if (argv::Find(UTFSTR("nodlights")) > 0)
 		use_dlights = 0;
 
 	if (!global_flags.respawn)
 	{
-		if (argv::Find("newnmrespawn") > 0)
+		if (argv::Find(UTFSTR("newnmrespawn")) > 0)
 		{
 			global_flags.res_respawn = true;
 			global_flags.respawn = true;
 		}
-		else if (argv::Find("respawn") > 0)
+		else if (argv::Find(UTFSTR("respawn")) > 0)
 		{
 			global_flags.respawn = true;
 		}
 	}
 
 	// check for strict and no-warning options
-	argv::CheckBooleanCVar("strict", &ddf_strict, false);
-	argv::CheckBooleanCVar("lax",    &ddf_lax,    false);
-	argv::CheckBooleanCVar("warn",   &ddf_quiet,  true);
+	argv::CheckBooleanCVar(UTFSTR("strict"), &ddf_strict, false);
+	argv::CheckBooleanCVar(UTFSTR("lax"),    &ddf_lax,    false);
+	argv::CheckBooleanCVar(UTFSTR("warn"),   &ddf_quiet,  true);
 
 	strict_errors = ddf_strict.d ? true : false;
 	lax_errors    = ddf_lax.d    ? true : false;
@@ -412,7 +412,7 @@ static void SetGlobalVars(void)
 //
 void SetLanguage(void)
 {
-	std::string want_lang = argv::Value("lang");
+	std::string want_lang = epi::to_u8string(argv::Value(UTFSTR("lang")));
 	if (!want_lang.empty())
 		m_language = want_lang;
 
@@ -814,96 +814,92 @@ void E_TitleTicker(void)
 //
 void InitDirectories(void)
 {
-	std::filesystem::path s = argv::Value("home");
+	std::filesystem::path s = argv::Value(UTFSTR("home"));
     if (!s.empty())
-        home_dir = s.generic_string();
+        home_dir = s;
 
 	// Get the Home Directory from environment if set
     if (home_dir.empty())
     {
-        s = getenv("HOME") ? getenv("HOME") : "";
+		s.clear();
+		if (getenv("HOME"))
+			s = UTFSTR(getenv("HOME"));
         if (!s.empty())
         {
-            home_dir = epi::PATH_Join(s.generic_string().c_str(), EDGEHOMESUBDIR); 
+            home_dir = epi::PATH_Join(s, UTFSTR(EDGEHOMESUBDIR)); 
 
-			if (! epi::FS_IsDir(home_dir.c_str()))
+			if (! epi::FS_IsDir(home_dir))
 			{
-                epi::FS_MakeDir(home_dir.c_str());
+                epi::FS_MakeDir(home_dir);
 
                 // Check whether the directory was created
-                if (! epi::FS_IsDir(home_dir.c_str()))
+                if (! epi::FS_IsDir(home_dir))
                     home_dir.clear();
 			}
         }
     }
 
-    if (home_dir.empty()) home_dir = "."; // Default to current directory
+    if (home_dir.empty()) home_dir = UTFSTR("."); // Default to current directory
 
 	// Get the Game Directory from parameter.
 	
 	// Note: This might need adjusting for Apple
-#ifndef WIN32
-	s = SDL_GetBasePath();
-#else
-	s = (char32_t *)SDL_iconv_utf8_ucs4(SDL_GetBasePath());
-#endif
+	s = UTFSTR(SDL_GetBasePath());
 
-	game_dir = s.generic_string();
-	s.clear();
-
-	s = argv::Value("game");
+	game_dir = s;
+	s = argv::Value(UTFSTR("game"));
 	if (!s.empty())
-		game_dir = s.generic_string();
+		game_dir = s;
 
 	// add parameter file "gamedir/parms" if it exists.
-	std::string parms = epi::PATH_Join(game_dir.c_str(), "parms");
+	std::filesystem::path parms = epi::PATH_Join(game_dir, UTFSTR("parms"));
 
-	if (epi::FS_Access(parms.c_str(), epi::file_c::ACCESS_READ))
+	if (epi::FS_Access(parms, epi::file_c::ACCESS_READ))
 	{
 		// Insert it right after the game parameter
-		argv::ApplyResponseFile(parms.c_str());
+		argv::ApplyResponseFile(parms);
 	}
 
 	// config file
-	s = argv::Value("config");
+	s = argv::Value(UTFSTR("config"));
 	if (!s.empty())
 	{
-		cfgfile = std::string(s.generic_string());
+		cfgfile = s;
 	}
 	else
     {
-        cfgfile = epi::PATH_Join(home_dir.c_str(), EDGECONFIGFILE);
+        cfgfile = epi::PATH_Join(home_dir, UTFSTR(EDGECONFIGFILE));
 	}
 
 	// edge.wad file
-	s = argv::Value("ewad");
+	s = argv::Value(UTFSTR("ewad"));
 	if (!s.empty())
 	{
-		ewadfile = std::string(s.generic_string());
+		ewadfile = s;
 	}
 	else
     {
-        ewadfile = epi::PATH_Join(game_dir.c_str(), "edge-defs.wad");
+        ewadfile = epi::PATH_Join(game_dir, UTFSTR("edge-defs.wad"));
 	}
 
 	// cache directory
-    cache_dir = epi::PATH_Join(home_dir.c_str(), CACHEDIR);
+    cache_dir = epi::PATH_Join(home_dir, UTFSTR(CACHEDIR));
 
-    if (! epi::FS_IsDir(cache_dir.c_str()))
-        epi::FS_MakeDir(cache_dir.c_str());
+    if (! epi::FS_IsDir(cache_dir))
+        epi::FS_MakeDir(cache_dir);
 
 	// savegame directory
-    save_dir = epi::PATH_Join(home_dir.c_str(), SAVEGAMEDIR);
+    save_dir = epi::PATH_Join(home_dir, UTFSTR(SAVEGAMEDIR));
 	
-    if (! epi::FS_IsDir(save_dir.c_str())) epi::FS_MakeDir(save_dir.c_str());
+    if (! epi::FS_IsDir(save_dir)) epi::FS_MakeDir(save_dir);
 
 	SV_ClearSlot("current");
 
 	// screenshot directory
-    shot_dir = epi::PATH_Join(home_dir.c_str(), SCRNSHOTDIR);
+    shot_dir = epi::PATH_Join(home_dir, UTFSTR(SCRNSHOTDIR));
 
-    if (!epi::FS_IsDir(shot_dir.c_str()))
-        epi::FS_MakeDir(shot_dir.c_str());
+    if (!epi::FS_IsDir(shot_dir))
+        epi::FS_MakeDir(shot_dir);
 }
 
 // Remove cache files that are older than roughly ~6 months to keep cache dir from going nuts
@@ -915,9 +911,9 @@ static void PurgeCache(void)
 	std::vector<epi::dir_entry_c> fsd;
 
 	// GWA should be the only filetypes we need to worry about now that HWA files are internal
-	if (!FS_ReadDir(fsd, cache_dir.c_str(), "*.gwa"))
+	if (!FS_ReadDir(fsd, cache_dir, UTFSTR("*.gwa")))
 	{
-		I_Error("PurgeCache: Failed to read '%s' directory!\n", cache_dir.c_str());
+		I_Error("PurgeCache: Failed to read '%s' directory!\n", cache_dir.u8string().c_str());
 	}
 	else
 	{
@@ -925,9 +921,9 @@ static void PurgeCache(void)
 		{
 			if(!fsd[i].is_dir)
 			{
-				if(std::filesystem::last_write_time(fsd[i].name.c_str()) < expiry)
+				if(std::filesystem::last_write_time(fsd[i].name) < expiry)
 				{
-					epi::FS_Delete(fsd[i].name.c_str());
+					epi::FS_Delete(fsd[i].name);
 				}			
 			}
 		}
@@ -941,29 +937,29 @@ static void PurgeCache(void)
 
 static void IdentifyVersion(void)
 {
-    std::string reqwad(epi::PATH_Join(game_dir.c_str(), REQUIREDWAD "." EDGEWADEXT));
+    std::filesystem::path reqwad = epi::PATH_Join(game_dir, UTFSTR(REQUIREDWAD "." EDGEWADEXT));
 
-    if (! epi::FS_Access(reqwad.c_str(), epi::file_c::ACCESS_READ))
+    if (! epi::FS_Access(reqwad, epi::file_c::ACCESS_READ))
         I_Error("IdentifyVersion: Could not find required %s.%s!\n", 
             REQUIREDWAD, EDGEWADEXT);
 
-    W_AddFilename(reqwad.c_str(), FLKIND_EWad);
+    W_AddFilename(reqwad, FLKIND_EWad);
 
 	I_Debugf("- Identify Version\n");
 
 	// Check -iwad parameter, find out if it is the IWADs directory
-    std::string iwad_par;
-    std::string iwad_file;
-    std::string iwad_dir;
-	std::vector<std::string> iwad_dir_vector;
+    std::filesystem::path iwad_par;
+    std::filesystem::path iwad_file;
+    std::filesystem::path iwad_dir;
+	std::vector<std::filesystem::path> iwad_dir_vector;
 
-	std::string s = argv::Value("iwad");
+	std::filesystem::path s = argv::Value(UTFSTR("iwad"));
 
     iwad_par = s;
 
     if (! iwad_par.empty())
     {
-        if (epi::FS_IsDir(iwad_par.c_str()))
+        if (epi::FS_IsDir(iwad_par))
         {
             iwad_dir = iwad_par;
             iwad_par.clear(); // Discard 
@@ -974,24 +970,27 @@ static void IdentifyVersion(void)
     // the DOOMWADDIR environment variable
     if (iwad_dir.empty())
     {
-        s = getenv("DOOMWADDIR") ? getenv("DOOMWADDIR") : "";
+		if (getenv("DOOMWADDIR"))
+        	s = UTFSTR(getenv("DOOMWADDIR"));
 
-        if (!s.empty() && epi::FS_IsDir(s.c_str()))
+        if (!s.empty() && epi::FS_IsDir(s))
             iwad_dir_vector.push_back(s);
     }
 
     // Should the IWAD directory not be set by now, then we
     // use our standby option of the current directory.
-    if (iwad_dir.empty()) iwad_dir = ".";
+    if (iwad_dir.empty()) iwad_dir = UTFSTR(".");
 
 	// Add DOOMWADPATH directories if they exist
-	s = getenv("DOOMWADPATH") ? getenv("DOOMWADPATH") : "";
+	s.clear();
+	if (getenv("DOOMWADPATH"))
+		s = UTFSTR(getenv("DOOMWADPATH"));
 	if (!s.empty())
 	{
-#ifdef WIN32
-        for (auto dir : epi::STR_SepStringVector(s, ';'))
+#ifdef _WIN32
+        for (auto dir : epi::STR_SepStringVector(s.u32string(), ';'))
 #else
-		for (auto dir : epi::STR_SepStringVector(s, ':'))
+		for (auto dir : epi::STR_SepStringVector(s.string(), ':'))
 #endif	
 			iwad_dir_vector.push_back(dir);
 	}
@@ -1001,42 +1000,50 @@ static void IdentifyVersion(void)
     // we assume it to be a name
     if (!iwad_par.empty())
     {
-        std::string fn = iwad_par;
+        std::filesystem::path fn = iwad_par;
         
         // Is it missing the extension?
-        std::string ext = epi::PATH_GetExtension(iwad_par.c_str());
+        std::filesystem::path ext = epi::PATH_GetExtension(iwad_par);
         if (ext.empty())
         {
-            fn += ("." EDGEWADEXT);
+            fn += UTFSTR("." EDGEWADEXT);
         }
 
         // If no directory given use the IWAD directory
-        std::string dir = epi::PATH_GetDir(fn.c_str());
+        std::filesystem::path dir = epi::PATH_GetDir(fn);
         if (dir.empty())
-            iwad_file = epi::PATH_Join(iwad_dir.c_str(), fn.c_str()); 
+#ifdef _WIN32
+            iwad_file = epi::PATH_Join(iwad_dir, fn.u32string());
+#else
+			iwad_file = epi::PATH_Join(iwad_dir, fn.string());
+#endif
         else
             iwad_file = fn;
 
-        if (!epi::FS_Access(iwad_file.c_str(), epi::file_c::ACCESS_READ))
+        if (!epi::FS_Access(iwad_file, epi::file_c::ACCESS_READ))
         {
 			// Check DOOMWADPATH directories if present
 			if (!iwad_dir_vector.empty())
 			{
 				for (size_t i=0; i < iwad_dir_vector.size(); i++)
 				{
-					iwad_file = epi::PATH_Join(iwad_dir_vector[i].c_str(), fn.c_str());
-					if (epi::FS_Access(iwad_file.c_str(), epi::file_c::ACCESS_READ))
+#ifdef _WIN32
+					iwad_file = epi::PATH_Join(iwad_dir_vector[i], fn.u32string());
+#else
+					iwad_file = epi::PATH_Join(iwad_dir_vector[i], fn.string());
+#endif
+					if (epi::FS_Access(iwad_file, epi::file_c::ACCESS_READ))
 						goto foundindoomwadpath;
 				}
-				I_Error("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
+				I_Error("IdentifyVersion: Unable to access specified '%s'", fn.u8string().c_str());
 			}
 			else
-				I_Error("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
+				I_Error("IdentifyVersion: Unable to access specified '%s'", fn.u8string().c_str());
         }
 
 		foundindoomwadpath:
 
-		epi::file_c *iwad_test = epi::FS_Open(iwad_file.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+		epi::file_c *iwad_test = epi::FS_Open(iwad_file, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 		bool unique_lump_match = false;
 		for (size_t i=0; i < iwad_checker.size(); i++) {
 			if (W_CheckForUniqueLumps(iwad_test, iwad_checker[i].unique_lumps[0], iwad_checker[i].unique_lumps[1]))
@@ -1048,21 +1055,21 @@ static void IdentifyVersion(void)
     	}
 		if (iwad_test) delete iwad_test;
 		if (unique_lump_match)
-			W_AddFilename(iwad_file.c_str(), FLKIND_IWad);
+			W_AddFilename(iwad_file, FLKIND_IWad);
 		else
-			I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
+			I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.u8string().c_str());
     }
     else
     {
-        const char *location;
+        std::filesystem::path location;
 		
 		// Track the "best" IWAD found throughout the various paths based on scores stored in iwad_checker
 		u8_t best_score = 0;
-		std::string best_match;
+		std::filesystem::path best_match;
 
         int max = 1;
 
-        if (epi::case_cmp(iwad_dir.c_str(), game_dir.c_str()) != 0) 
+        if (iwad_dir.compare(game_dir) != 0) 
         {
             // IWAD directory & game directory differ 
             // therefore do a second loop which will
@@ -1072,7 +1079,7 @@ static void IdentifyVersion(void)
 
 		for (int i = 0; i < max; i++)
 		{
-			location = (i == 0 ? iwad_dir.c_str() : game_dir.c_str());
+			location = (i == 0 ? iwad_dir : game_dir);
 
 			//
 			// go through the available *.wad files, attempting IWAD
@@ -1083,9 +1090,9 @@ static void IdentifyVersion(void)
 			//
 			std::vector<epi::dir_entry_c> fsd;
 
-			if (!FS_ReadDir(fsd, location, "*.wad"))
+			if (!FS_ReadDir(fsd, location, UTFSTR("*.wad")))
 			{
-				I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location);
+				I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location.u8string().c_str());
 			}
 			else
 			{
@@ -1093,7 +1100,7 @@ static void IdentifyVersion(void)
 				{
 					if(!fsd[i].is_dir)
 					{
-						epi::file_c *iwad_test = epi::FS_Open(fsd[i].name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+						epi::file_c *iwad_test = epi::FS_Open(fsd[i].name, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 						for (size_t j = 0; j < iwad_checker.size(); j++) 
 						{
 							if (W_CheckForUniqueLumps(iwad_test, iwad_checker[j].unique_lumps[0], iwad_checker[j].unique_lumps[1]))
@@ -1123,7 +1130,7 @@ static void IdentifyVersion(void)
 
 				std::vector<epi::dir_entry_c> fsd;
 
-				if (!FS_ReadDir(fsd, location, "*.wad"))
+				if (!FS_ReadDir(fsd, location, UTFSTR("*.wad")))
 				{
 					I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location);
 				}
@@ -1133,7 +1140,7 @@ static void IdentifyVersion(void)
 					{
 						if(!fsd[i].is_dir)
 						{
-							epi::file_c *iwad_test = epi::FS_Open(fsd[i].name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+							epi::file_c *iwad_test = epi::FS_Open(fsd[i].name, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 							for (size_t j = 0; j < iwad_checker.size(); j++) 
 							{
 								if (W_CheckForUniqueLumps(iwad_test, iwad_checker[j].unique_lumps[0], iwad_checker[j].unique_lumps[1]))
@@ -1157,7 +1164,7 @@ static void IdentifyVersion(void)
 		if (best_score == 0)
 			I_Error("IdentifyVersion: No IWADs found!\n");
 		else
-			W_AddFilename(best_match.c_str(), FLKIND_IWad);
+			W_AddFilename(best_match, FLKIND_IWad);
     }
 
 	I_Debugf("IWAD BASE = [%s]\n", iwad_base.c_str());
@@ -1168,12 +1175,12 @@ static void Add_Base(void)
 {
 	if (epi::case_cmp("CUSTOM", iwad_base) == 0)
 		return; // Custom standalone EDGE IWADs should already contain their necessary resources and definitions - Dasho
-	std::string base_path = epi::PATH_Join(game_dir.c_str(), "edge_base");
+	std::filesystem::path base_path = epi::PATH_Join(game_dir, UTFSTR("edge_base"));
 	std::string base_wad = iwad_base;
 	std::transform(base_wad.begin(), base_wad.end(), base_wad.begin(), ::tolower);
-	base_path = epi::PATH_Join(base_path.c_str(), base_wad.append("_base.wad").c_str());
-	if (epi::FS_Access(base_path.c_str(), epi::file_c::ACCESS_READ)) 
-		W_AddFilename(base_path.c_str(), FLKIND_EWad);
+	base_path = epi::PATH_Join(base_path, UTFSTR(base_wad.append("_base.wad")));
+	if (epi::FS_Access(base_path, epi::file_c::ACCESS_READ)) 
+		W_AddFilename(base_path, FLKIND_EWad);
 	else
 		I_Warning("Base WAD not found for the %s IWAD! Check the /edge_base folder of your EDGE-Classic install!\n", iwad_base.c_str());
 }
@@ -1182,12 +1189,12 @@ static void CheckTurbo(void)
 {
 	int turbo_scale = 100;
 
-	int p = argv::Find("turbo");
+	int p = argv::Find(UTFSTR("turbo"));
 
 	if (p > 0)
 	{
 		if (p + 1 < argv::list.size() && !argv::IsOption(p+1))
-			turbo_scale = atoi(argv::list[p+1].c_str());
+			turbo_scale = atoi(epi::to_u8string(argv::list[p+1]).c_str());
 		else
 			turbo_scale = 200;
 
@@ -1214,10 +1221,10 @@ static void ShowDateAndVersion(void)
 
 	// 23-6-98 KM Changed to hex to allow versions such as 0.65a etc
 	I_Printf("EDGE-Classic v" EDGEVERSTR " compiled on " __DATE__ " at " __TIME__ "\n");
-	I_Printf("EDGE-Classic homepage is at https://github.com/dashodanger/EDGE-classic/\n");
+	I_Printf("EDGE-Classic homepage is at https://edge-classic.github.io\n");
 	I_Printf("EDGE-Classic is based on DOOM by id Software http://www.idsoftware.com/\n");
 
-	I_Printf("Executable path: '%s'\n", exe_path.generic_string().c_str());
+	I_Printf("Executable path: '%s'\n", exe_path.u8string().c_str());
 
 	argv::DebugDumpArgs();
 }
@@ -1227,15 +1234,15 @@ static void SetupLogAndDebugFiles(void)
 	// -AJA- 2003/11/08 The log file gets all CON_Printfs, I_Printfs,
 	//                  I_Warnings and I_Errors.
 
-	std::string log_fn  (epi::PATH_Join(home_dir.c_str(), EDGELOGFILE));
-	std::string debug_fn(epi::PATH_Join(home_dir.c_str(), "debug.txt"));
+	std::filesystem::path log_fn  (epi::PATH_Join(home_dir, UTFSTR(EDGELOGFILE)));
+	std::filesystem::path debug_fn(epi::PATH_Join(home_dir, UTFSTR("debug.txt")));
 
 	logfile = NULL;
 	debugfile = NULL;
 
-	if (argv::Find("nolog") < 0)
+	if (argv::Find(UTFSTR("nolog")) < 0)
 	{
-		logfile = fopen(log_fn.c_str(), "w");
+		logfile = fopen(log_fn.u8string().c_str(), "w");
 
 		if (!logfile)
 			I_Error("[E_Startup] Unable to create log file\n");
@@ -1253,45 +1260,49 @@ static void SetupLogAndDebugFiles(void)
 	/// int p = argv::Find("debug");
 	if (true)
 	{
-		debugfile = fopen(debug_fn.c_str(), "w");
+		debugfile = fopen(debug_fn.u8string().c_str(), "w");
 
 		if (!debugfile)
 			I_Error("[E_Startup] Unable to create debugfile");
 	}
 }
 
-static void AddSingleCmdLineFile(const char *name, bool ignore_unknown)
+static void AddSingleCmdLineFile(std::filesystem::path name, bool ignore_unknown)
 {
-	std::string ext = epi::PATH_GetExtension(name);
+#ifdef _WIN32
+	std::u32string ext = epi::PATH_GetExtension(name).u32string();
+#else
+	std::u32string ext = epi::PATH_GetExtension(name).string();
+#endif
 
 	epi::str_lower(ext);
 
-	if (ext == ".edm")
+	if (ext == UTFSTR(".edm"))
 		I_Error("Demos are not supported\n");
 
 	// no need to check for GWA (shouldn't be added manually)
 
 	filekind_e kind;
 
-	if (ext == ".wad")
+	if (ext == UTFSTR(".wad"))
 		kind = FLKIND_PWad;
-	else if (ext == ".pk3")
+	else if (ext == UTFSTR(".pk3"))
 		kind = FLKIND_PK3;
-	else if (ext == ".rts")
+	else if (ext == UTFSTR(".rts"))
 		kind = FLKIND_RTS;
-	else if (ext == ".ddf" || ext == ".ldf")
+	else if (ext == UTFSTR(".ddf") || ext == UTFSTR(".ldf"))
 		kind = FLKIND_DDF;
-	else if (ext == ".deh" || ext == ".bex")
+	else if (ext == UTFSTR(".deh") || ext == UTFSTR(".bex"))
 		kind = FLKIND_Deh;
 	else
 	{
 		if (! ignore_unknown)
-			I_Error("unknown file type: %s\n", name);
+			I_Error("unknown file type: %s\n", name.u8string().c_str());
 		return;
 	}
 
-	std::string filename = M_ComposeFileName(game_dir.c_str(), name);
-	W_AddFilename(filename.c_str(), kind);
+	std::filesystem::path filename = M_ComposeFileName(game_dir, name);
+	W_AddFilename(filename, kind);
 }
 
 static void AddCommandLineFiles(void)
@@ -1302,47 +1313,50 @@ static void AddCommandLineFiles(void)
 
 	for (p = 1; p < argv::list.size() && !argv::IsOption(p); p++)
 	{
-		AddSingleCmdLineFile(argv::list[p].c_str(), false);
+		AddSingleCmdLineFile(argv::list[p], false);
 	}
 
 	// next handle the -file option (we allow multiple uses)
 
-	p = argv::Find("file");
+	p = argv::Find(UTFSTR("file"));
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-file") == 0))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], UTFSTR("-file")) == 0))
 	{
 		// the parms after p are wadfile/lump names,
 		// go until end of parms or another '-' preceded parm
 		if (!argv::IsOption(p))
-			AddSingleCmdLineFile(argv::list[p].c_str(), false);
+			AddSingleCmdLineFile(argv::list[p], false);
 
 		p++;
 	}
 
 	// scripts....
 
-	p = argv::Find("script");
+	p = argv::Find(UTFSTR("script"));
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-script") == 0))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], UTFSTR("-script")) == 0))
 	{
 		// the parms after p are script filenames,
 		// go until end of parms or another '-' preceded parm
 		if (!argv::IsOption(p))
 		{
-			std::string ext = epi::PATH_GetExtension(argv::list[p].c_str());
-
+#ifdef _WIN32
+			std::u32string ext = epi::PATH_GetExtension(argv::list[p]).u32string();
+#else
+			std::string ext = epi::PATH_GetExtension(argv::list[p]).string();
+#endif
 			// sanity check...
-			if (epi::case_cmp(ext.c_str(), ".wad") == 0 || 
-				epi::case_cmp(ext.c_str(), ".pk3") == 0 ||
-				epi::case_cmp(ext.c_str(), ".ddf") == 0 ||
-				epi::case_cmp(ext.c_str(), ".deh") == 0 ||
-				epi::case_cmp(ext.c_str(), ".bex") == 0)
+			if (epi::case_cmp(ext, UTFSTR(".wad")) == 0 || 
+				epi::case_cmp(ext, UTFSTR(".pk3")) == 0 ||
+				epi::case_cmp(ext, UTFSTR(".ddf")) == 0 ||
+				epi::case_cmp(ext, UTFSTR(".deh")) == 0 ||
+				epi::case_cmp(ext, UTFSTR(".bex")) == 0)
 			{
-				I_Error("Illegal filename for -script: %s\n", argv::list[p].c_str());
+				I_Error("Illegal filename for -script: %s\n", epi::to_u8string(argv::list[p]).c_str());
 			}
 
-			std::string filename = M_ComposeFileName(game_dir.c_str(), argv::list[p].c_str());
-			W_AddFilename(filename.c_str(), FLKIND_RTS);
+			std::filesystem::path filename = M_ComposeFileName(game_dir, argv::list[p]);
+			W_AddFilename(filename, FLKIND_RTS);
 		}
 
 		p++;
@@ -1350,27 +1364,30 @@ static void AddCommandLineFiles(void)
 
 	// dehacked/bex....
 
-	p = argv::Find("deh");
+	p = argv::Find(UTFSTR("deh"));
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-deh") == 0))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], UTFSTR("-deh")) == 0))
 	{
 		// the parms after p are Dehacked/BEX filenames,
 		// go until end of parms or another '-' preceded parm
 		if (!argv::IsOption(p))
 		{
-			std::string ext(epi::PATH_GetExtension(argv::list[p].c_str()));
-
+#ifdef _WIN32
+			std::u32string ext = epi::PATH_GetExtension(argv::list[p]).u32string();
+#else
+			std::string ext = epi::PATH_GetExtension(argv::list[p]).string();
+#endif
 			// sanity check...
-			if (epi::case_cmp(ext.c_str(), ".wad") == 0 || 
-				epi::case_cmp(ext.c_str(), ".pk3") == 0 ||
-				epi::case_cmp(ext.c_str(), ".ddf") == 0 ||
-				epi::case_cmp(ext.c_str(), ".rts") == 0)
+			if (epi::case_cmp(ext.c_str(), UTFSTR(".wad")) == 0 || 
+				epi::case_cmp(ext.c_str(), UTFSTR(".pk3")) == 0 ||
+				epi::case_cmp(ext.c_str(), UTFSTR(".ddf")) == 0 ||
+				epi::case_cmp(ext.c_str(), UTFSTR(".rts")) == 0)
 			{
-				I_Error("Illegal filename for -deh: %s\n", argv::list[p].c_str());
+				I_Error("Illegal filename for -deh: %s\n", epi::to_u8string(argv::list[p]).c_str());
 			}
 
-			std::string filename = M_ComposeFileName(game_dir.c_str(), argv::list[p].c_str());
-			W_AddFilename(filename.c_str(), FLKIND_Deh);
+			std::filesystem::path filename = M_ComposeFileName(game_dir, argv::list[p]);
+			W_AddFilename(filename, FLKIND_Deh);
 		}
 
 		p++;
@@ -1378,16 +1395,16 @@ static void AddCommandLineFiles(void)
 
 	// directories....
 
-	p = argv::Find("dir");
+	p = argv::Find(UTFSTR("dir"));
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-dir") == 0))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], UTFSTR("-dir")) == 0))
 	{
 		// the parms after p are directory names,
 		// go until end of parms or another '-' preceded parm
 		if (!argv::IsOption(p))
 		{
-			std::string dirname = M_ComposeFileName(game_dir.c_str(), argv::list[p].c_str());
-			W_AddFilename(dirname.c_str(), FLKIND_Folder);
+			std::filesystem::path dirname = M_ComposeFileName(game_dir, argv::list[p]);
+			W_AddFilename(dirname, FLKIND_Folder);
 		}
 
 		p++;
@@ -1395,11 +1412,11 @@ static void AddCommandLineFiles(void)
 
 	// handle -ddf option (backwards compatibility)
 
-	std::string ps = argv::Value("ddf");
+	std::filesystem::path ps = argv::Value(UTFSTR("ddf"));
 
 	if (!ps.empty())
 	{
-		std::string filename = M_ComposeFileName(game_dir.c_str(), ps.c_str());
+		std::filesystem::path filename = M_ComposeFileName(game_dir, ps);
 		W_AddFilename(filename.c_str(), FLKIND_Folder);
 	}
 }
@@ -1407,9 +1424,9 @@ static void AddCommandLineFiles(void)
 static void Add_Autoload(void) {
 	
 	std::vector<epi::dir_entry_c> fsd;
-	std::string folder = "autoload";
+	std::filesystem::path folder = UTFSTR("autoload");
 
-	if (!FS_ReadDir(fsd, folder.c_str(), "*.*"))
+	if (!FS_ReadDir(fsd, folder, UTFSTR("*.*")))
 	{
 		I_Warning("Failed to read autoload directory!\n");
 	}
@@ -1419,16 +1436,20 @@ static void Add_Autoload(void) {
 		{
 			if(!fsd[i].is_dir)
 			{
-				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i].name.c_str()).c_str(), true);
+#ifdef _WIN32
+				AddSingleCmdLineFile(epi::PATH_Join(folder, fsd[i].name.u32string()), true);
+#else
+				AddSingleCmdLineFile(epi::PATH_Join(folder, fsd[i].name.string()), true);
+#endif
 			}
 		}
 	}
 
 	std::string lowercase_base = iwad_base;
 	std::transform(lowercase_base.begin(), lowercase_base.end(), lowercase_base.begin(), ::tolower);
-	folder = epi::PATH_Join(folder.c_str(), lowercase_base.c_str());
+	folder = epi::PATH_Join(folder, UTFSTR(lowercase_base));
 
-	if (!FS_ReadDir(fsd, folder.c_str(), "*.*"))
+	if (!FS_ReadDir(fsd, folder, UTFSTR("*.*")))
 	{
 		I_Warning("Failed to read game-specific autoload directory!\n");
 	}
@@ -1438,7 +1459,11 @@ static void Add_Autoload(void) {
 		{
 			if(!fsd[i].is_dir)
 			{
-				AddSingleCmdLineFile(epi::PATH_Join(folder.c_str(), fsd[i].name.c_str()).c_str(), true);
+#ifdef _WIN32
+				AddSingleCmdLineFile(epi::PATH_Join(folder, fsd[i].name.u32string()), true);
+#else
+				AddSingleCmdLineFile(epi::PATH_Join(folder, fsd[i].name.string()), true);
+#endif
 			}
 		}		
 	}
@@ -1476,7 +1501,7 @@ static void E_Shutdown(void);
 static void E_Startup(void)
 {
 	// Version check ?
-	if (argv::Find("version") > 0)
+	if (argv::Find(UTFSTR("version")) > 0)
 	{
 		// -AJA- using I_Error here, since I_Printf crashes this early on
 		I_Error("\nEDGE-Classic version is " EDGEVERSTR "\n");
@@ -1562,21 +1587,25 @@ static void E_InitialState(void)
 {
 	I_Debugf("- Setting up Initial State...\n");
 
+#ifdef _WIN32
+	std::u32string ps;
+#else
 	std::string ps;
+#endif
 
 	// do loadgames first, as they contain all of the
 	// necessary state already (in the savegame).
 
-	if (argv::Find("playdemo") > 0 || argv::Find("timedemo") > 0 ||
-	    argv::Find("record") > 0)
+	if (argv::Find(UTFSTR("playdemo")) > 0 || argv::Find(UTFSTR("timedemo")) > 0 ||
+	    argv::Find(UTFSTR("record")) > 0)
 	{
 		I_Error("Demos are no longer supported\n");
 	}
 
-	ps = argv::Value("loadgame");
+	ps = argv::Value(UTFSTR("loadgame"));
 	if (!ps.empty())
 	{
-		G_DeferredLoadGame(atoi(ps.c_str()));
+		G_DeferredLoadGame(atoi(epi::to_u8string(ps).c_str()));
 		return;
 	}
 
@@ -1589,35 +1618,35 @@ static void E_InitialState(void)
 
 	int bots = 0;
 
-	ps = argv::Value("bots");
+	ps = argv::Value(UTFSTR("bots"));
 	if (!ps.empty())
-		bots = atoi(ps.c_str());
+		bots = atoi(epi::to_u8string(ps).c_str());
 
-	ps = argv::Value("warp");
+	ps = argv::Value(UTFSTR("warp"));
 	if (!ps.empty())
 	{
 		warp = true;
-		warp_map = ps;
+		warp_map = epi::to_u8string(ps);
 	}
 
 	// -KM- 1999/01/29 Use correct skill: 1 is easiest, not 0
-	ps = argv::Value("skill");
+	ps = argv::Value(UTFSTR("skill"));
 	if (!ps.empty())
 	{
 		warp = true;
-		warp_skill = (skill_t)(atoi(ps.c_str()) - 1);
+		warp_skill = (skill_t)(atoi(epi::to_u8string(ps).c_str()) - 1);
 	}
 
 	// deathmatch check...
-	int pp = argv::Find("deathmatch");
+	int pp = argv::Find(UTFSTR("deathmatch"));
 	if (pp > 0)
 	{
 		warp_deathmatch = 1;
 
 		if (pp + 1 < argv::list.size() && !argv::IsOption(pp+1))
-			warp_deathmatch = MAX(1, atoi(argv::list[pp+1].c_str()));
+			warp_deathmatch = MAX(1, atoi(epi::to_u8string(argv::list[pp+1]).c_str()));
 	}
-	else if (argv::Find("altdeath") > 0)
+	else if (argv::Find(UTFSTR("altdeath")) > 0)
 	{
 		warp_deathmatch = 2;
 	}

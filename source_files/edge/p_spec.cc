@@ -46,6 +46,8 @@
 #include "s_sound.h"
 #include "s_music.h"
 
+#include "str_util.h"
+
 #include "r_sky.h" //Lobo 2022: added for our Sky Transfer special
 
 #define BOOM_CARRY_FACTOR 0.09375f
@@ -2862,14 +2864,14 @@ void P_SpawnSpecials1(void)
 	// See if -TIMER needs to be used.
 	levelTimer = false;
 
-	i = argv::Find("avg");
+	i = argv::Find(UTFSTR("avg"));
 	if (i > 0 && DEATHMATCH())
 	{
 		levelTimer = true;
 		levelTimeCount = 20 * 60 * TICRATE;
 	}
 
-	std::string s = argv::Value("timer");
+	std::string s = epi::to_u8string(argv::Value(UTFSTR("timer")));
 
 	if (!s.empty() && DEATHMATCH())
 	{

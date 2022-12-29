@@ -62,7 +62,7 @@
 std::vector<data_file_c *> data_files;
 
 
-data_file_c::data_file_c(const char *_name, filekind_e _kind) :
+data_file_c::data_file_c(std::filesystem::path _name, filekind_e _kind) :
 		name(_name), kind(_kind), file(NULL), wad(NULL), pack(NULL)
 { }
 
@@ -76,9 +76,9 @@ int W_GetNumFiles()
 }
 
 
-size_t W_AddFilename(const char *file, filekind_e kind)
+size_t W_AddFilename(std::filesystem::path file, filekind_e kind)
 {
-	I_Debugf("Added filename: %s\n", file);
+	I_Debugf("Added filename: %s\n", file.u8string().c_str());
 
 	size_t index = data_files.size();
 
@@ -92,7 +92,7 @@ size_t W_AddFilename(const char *file, filekind_e kind)
 
 std::vector<data_file_c *> pending_files;
 
-size_t W_AddPending(const char *file, filekind_e kind)
+size_t W_AddPending(std::filesystem::path file, filekind_e kind)
 {
 	size_t index = pending_files.size();
 
@@ -107,7 +107,7 @@ extern void ProcessFixersForWad(wad_file_c *wad);
 extern void ProcessWad(data_file_c *df, size_t file_index);
 extern void ProcessPackage(data_file_c *df, size_t file_index);
 
-extern std::string W_BuildNodesForWad(data_file_c *df);
+extern std::filesystem::path W_BuildNodesForWad(data_file_c *df);
 
 
 
@@ -142,48 +142,48 @@ static void W_ExternalDDF(data_file_c *df)
 {
 	ddf_type_e type = DDF_FilenameToType(df->name);
 
-	std::string bare_name = epi::PATH_GetFilename(df->name.c_str());
+	std::string bare_name = epi::PATH_GetFilename(df->name).u8string();
 
 	if (type == DDF_UNKNOWN)
 		I_Error("Unknown DDF filename: %s\n", bare_name.c_str());
 
-	I_Printf("Reading DDF file: %s\n", df->name.c_str());
+	I_Printf("Reading DDF file: %s\n", df->name.u8string().c_str());
 
-	epi::file_c *F = epi::FS_Open(df->name.c_str(), epi::file_c::ACCESS_READ);
+	epi::file_c *F = epi::FS_Open(df->name, epi::file_c::ACCESS_READ);
 	if (F == NULL)
-		I_Error("Couldn't open file: %s\n", df->name.c_str());
+		I_Error("Couldn't open file: %s\n", df->name.u8string().c_str());
 
 	// WISH: load directly into a std::string
 
 	char *raw_data = (char *) F->LoadIntoMemory();
 	if (raw_data == NULL)
-		I_Error("Couldn't read file: %s\n", df->name.c_str());
+		I_Error("Couldn't read file: %s\n", df->name.u8string().c_str());
 
 	std::string data(raw_data);
 	delete[] raw_data;
 
-	DDF_AddFile(type, data, df->name);
+	DDF_AddFile(type, data, df->name.u8string());
 }
 
 
 static void W_ExternalRTS(data_file_c *df)
 {
-	I_Printf("Reading RTS script: %s\n", df->name.c_str());
+	I_Printf("Reading RTS script: %s\n", df->name.u8string().c_str());
 
-	epi::file_c *F = epi::FS_Open(df->name.c_str(), epi::file_c::ACCESS_READ);
+	epi::file_c *F = epi::FS_Open(df->name, epi::file_c::ACCESS_READ);
 	if (F == NULL)
-		I_Error("Couldn't open file: %s\n", df->name.c_str());
+		I_Error("Couldn't open file: %s\n", df->name.u8string().c_str());
 
 	// WISH: load directly into a std::string
 
 	char *raw_data = (char *) F->LoadIntoMemory();
 	if (raw_data == NULL)
-		I_Error("Couldn't read file: %s\n", df->name.c_str());
+		I_Error("Couldn't read file: %s\n", df->name.u8string().c_str());
 
 	std::string data(raw_data);
 	delete[] raw_data;
 
-	DDF_AddFile(DDF_RadScript, data, df->name);
+	DDF_AddFile(DDF_RadScript, data, df->name.u8string());
 }
 
 
@@ -193,16 +193,16 @@ static void ProcessFile(data_file_c *df)
 	data_files.push_back(df);
 
 	// open a WAD/PK3 file and add contents to directory
-	const char *filename = df->name.c_str();
+	std::filesystem::path filename = df->name;
 
-	I_Printf("  Processing: %s\n", filename);
+	I_Printf("  Processing: %s\n", filename.u8string().c_str());
 
 	if (df->kind <= FLKIND_GWad)
 	{
 		epi::file_c *file = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 		if (file == NULL)
 		{
-			I_Error("Couldn't open file: %s\n", filename);
+			I_Error("Couldn't open file: %s\n", filename.u8string().c_str());
 			return;
 		}
 
@@ -229,7 +229,7 @@ static void ProcessFile(data_file_c *df)
 		// handle stand-alone DeHackEd patches
 		I_Printf("Converting DEH file: %s\n", df->name.c_str());
 
-		DEH_ConvertFile(df->name);
+		DEH_ConvertFile(df->name.u8string());
 	}
 
 	// handle fixer-uppers   [ TODO support it for PK3 files too ]
@@ -269,11 +269,11 @@ void W_BuildNodes(void)
 
 		if (df->kind == FLKIND_IWad || df->kind == FLKIND_PWad)
 		{
-			std::string gwa_filename = W_BuildNodesForWad(df);
+			std::filesystem::path gwa_filename = W_BuildNodesForWad(df);
 
 			if (! gwa_filename.empty())
 			{
-				data_file_c *new_df = new data_file_c(gwa_filename.c_str(), FLKIND_GWad);
+				data_file_c *new_df = new data_file_c(gwa_filename, FLKIND_GWad);
 				ProcessFile(new_df);
 			}
 		}

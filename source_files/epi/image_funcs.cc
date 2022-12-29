@@ -121,22 +121,26 @@ image_format_e Image_DetectFormat(byte *header, int header_len, int file_size)
 }
 
 
-image_format_e Image_FilenameToFormat(const std::string& filename)
+image_format_e Image_FilenameToFormat(const std::filesystem::path& filename)
 {
-	std::string ext = epi::PATH_GetExtension(filename.c_str());
+#ifdef _WIN32
+	std::u32string ext = epi::PATH_GetExtension(filename).u32string();
+#else
+	std::string ext = epi::PATH_GetExtension(filename).string();
+#endif
 
 	str_lower(ext);
 
-	if (ext == ".png")
+	if (ext == UTFSTR(".png"))
 		return FMT_PNG;
 
-	if (ext == ".tga")
+	if (ext == UTFSTR(".tga"))
 		return FMT_TGA;
 
-	if (ext == ".jpg" || ext == ".jpeg")
+	if (ext == UTFSTR(".jpg") || ext == UTFSTR(".jpeg"))
 		return FMT_JPEG;
 
-	if (ext == ".gif" || ext == ".bmp" || ext == ".dds")
+	if (ext == UTFSTR(".gif") || ext == UTFSTR(".bmp") || ext == UTFSTR(".dds"))
 		return FMT_OTHER;
 
 	return FMT_Unknown;
@@ -218,22 +222,22 @@ bool Image_GetInfo(file_c *f, int *width, int *height, int *bpp)
 
 //------------------------------------------------------------------------
 
-bool JPEG_Save(const char *fn, image_data_c *img)
+bool JPEG_Save(std::filesystem::path fn, image_data_c *img)
 {
 	SYS_ASSERT(img->bpp == 3);
 
 	// zero means failure here
-	int result = stbi_write_jpg(fn, img->used_w, img->used_h, img->bpp, img->pixels, 95);
+	int result = stbi_write_jpg(fn.u8string().c_str(), img->used_w, img->used_h, img->bpp, img->pixels, 95);
 
 	return result != 0;
 }
 
-bool PNG_Save(const char *fn, image_data_c *img)
+bool PNG_Save(std::filesystem::path fn, image_data_c *img)
 {
 	SYS_ASSERT(img->bpp >= 3);
 
 	// zero means failure here
-	int result = stbi_write_png(fn, img->used_w, img->used_h, img->bpp, img->pixels, 0);
+	int result = stbi_write_png(fn.u8string().c_str(), img->used_w, img->used_h, img->bpp, img->pixels, 0);
 
 	return result != 0;
 }

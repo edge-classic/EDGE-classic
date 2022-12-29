@@ -23,6 +23,7 @@
 
 #include "m_argv.h"
 
+#include "str_util.h"
 
 // NOTE: we must use a plain linked list (and not std::vector) here,
 //       because constructors run very early (before main is called)
@@ -244,7 +245,7 @@ void CON_HandleProgramArgs(void)
 		if (!argv::IsOption(p))
 			continue;
 
-		const char *s = argv::list[p].data();
+		const char *s = epi::to_u8string(argv::list[p]).data();
 
 		cvar_c *var = CON_FindVar(s+1);
 
@@ -261,7 +262,7 @@ void CON_HandleProgramArgs(void)
 
 		// FIXME allow CVAR_ROM here ?
 
-		*var = argv::list[p].c_str();
+		*var = epi::to_u8string(argv::list[p]).c_str();
 	}
 }
 

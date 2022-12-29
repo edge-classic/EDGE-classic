@@ -57,6 +57,7 @@
 #include "w_wad.h"
 #include "f_interm.h"
 
+#include "str_util.h"
 
 extern gameflags_t default_gameflags;
 
@@ -933,7 +934,7 @@ void M_NetGameInit(void)
 	def = styledefs.Lookup("NET PLAYER LIST");
 	ng_list_style = def ? hu_styles.Lookup(def) : ng_default;
 
-	std::string str = argv::Value("connect");
+	std::string str = epi::to_u8string(argv::Value(UTFSTR("connect")));
 
 	if (!str.empty())
 	{

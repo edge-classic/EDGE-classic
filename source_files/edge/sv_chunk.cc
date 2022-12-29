@@ -143,16 +143,16 @@ int SV_GetError(void)
 //  READING PRIMITIVES
 //----------------------------------------------------------------------------
 
-bool SV_OpenReadFile(const char *filename)
+bool SV_OpenReadFile(std::filesystem::path filename)
 {
-	L_WriteDebug("Opening savegame file (R): %s\n", filename);
+	L_WriteDebug("Opening savegame file (R): %s\n", filename.u8string().c_str());
 			
 	chunk_stack_size = 0;
 	last_error = 0;
 
 	current_crc.Reset();
 
-	current_fp = fopen(filename, "rb");
+	current_fp = fopen(filename.u8string().c_str(), "rb");
 
 	if (! current_fp)
 		return false;
@@ -494,9 +494,9 @@ bool SV_SkipReadChunk(const char *id)
 //  WRITING PRIMITIVES
 //----------------------------------------------------------------------------
 
-bool SV_OpenWriteFile(const char *filename, int version)
+bool SV_OpenWriteFile(std::filesystem::path filename, int version)
 {
-	L_WriteDebug("Opening savegame file (W): %s\n", filename);
+	L_WriteDebug("Opening savegame file (W): %s\n", filename.u8string().c_str());
 
 	chunk_stack_size = 0;
 	last_error = 0;
@@ -505,11 +505,11 @@ bool SV_OpenWriteFile(const char *filename, int version)
 
 	current_crc.Reset();
 
-	current_fp = fopen(filename, "wb");
+	current_fp = fopen(filename.u8string().c_str(), "wb");
 
 	if (! current_fp)
 	{
-		I_Warning("SAVEGAME: Couldn't open file: %s\n", filename);
+		I_Warning("SAVEGAME: Couldn't open file: %s\n", filename.u8string().c_str());
 		return false;
 	}
 

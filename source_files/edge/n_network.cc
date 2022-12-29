@@ -39,6 +39,8 @@
 
 #include "coal.h" // for coal::vm_c
 
+#include "str_util.h"
+
 extern coal::vm_c *ui_vm;
 
 extern void VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value);
@@ -87,7 +89,7 @@ void N_InitNetwork(void)
 
 	base_port = MP_EDGE_PORT;
 
-	std::string str = argv::Value("port");
+	std::string str = epi::to_u8string(argv::Value(UTFSTR("port")));
 
 	if (!str.empty())
 		base_port = atoi(str.c_str());

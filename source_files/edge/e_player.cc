@@ -41,6 +41,8 @@
 #include "bot_think.h"
 #include "p_local.h"
 
+#include "str_util.h"
+
 #include "vm_coal.h" // For VM_EndLevel()
 
 
@@ -280,7 +282,7 @@ void G_SetConsolePlayer(int pnum)
 	
 	players[pnum]->playerflags |= PFL_Console;
 
-	if (argv::Find("testbot") > 0)
+	if (argv::Find(UTFSTR("testbot")) > 0)
 	{
 		P_BotCreate(players[pnum], false);
 	}

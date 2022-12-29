@@ -106,15 +106,15 @@ extern int gametic;
 //
 
 // File handling stuff.
-extern std::string cfgfile;
+extern std::filesystem::path cfgfile;
 
 extern std::string iwad_base;
 
-extern std::string cache_dir;
-extern std::string game_dir;
-extern std::string home_dir;
-extern std::string save_dir;
-extern std::string shot_dir;
+extern std::filesystem::path cache_dir;
+extern std::filesystem::path game_dir;
+extern std::filesystem::path home_dir;
+extern std::filesystem::path save_dir;
+extern std::filesystem::path shot_dir;
 
 // if true, load all graphics at level load
 extern bool precache;

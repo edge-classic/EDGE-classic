@@ -19,6 +19,8 @@
 #ifndef __EPI_PATH_MODULE__
 #define __EPI_PATH_MODULE__
 
+#include <filesystem>
+
 namespace epi
 {
 
@@ -26,22 +28,25 @@ namespace epi
 
 
 // Returns the basename (filename minus extension) if it exists
-std::string PATH_GetBasename(const char *path);
+std::filesystem::path PATH_GetBasename(std::filesystem::path path);
 
 // Returns the directory from the path if it exists
-std::string PATH_GetDir(const char *path);
+std::filesystem::path PATH_GetDir(std::filesystem::path path);
 
 // Returns a filename extension from the path if it exists
-std::string PATH_GetExtension(const char *path);
+std::filesystem::path PATH_GetExtension(std::filesystem::path path);
 
 // Returns a filename from the path if it exists
-std::string PATH_GetFilename(const char *path);
+std::filesystem::path PATH_GetFilename(std::filesystem::path path);
 
 // Returns true if the given is an absolute path
-bool PATH_IsAbsolute(const char *path);
+bool PATH_IsAbsolute(std::filesystem:: path);
 
 // Join two paths together
-std::string PATH_Join(const char *lhs, const char *rhs);
+std::filesystem::path PATH_Join(std::filesystem::path lhs, std::string rhs);
+#ifdef _WIN32
+std::filesystem::path PATH_Join(std::filesystem::path lhs, std::u32string rhs);
+#endif
 
 
 } // namespace epi

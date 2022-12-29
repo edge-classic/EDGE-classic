@@ -2152,7 +2152,7 @@ struct ddf_reader_t
 // -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
 static ddf_reader_t ddf_readers[DDF_NUM_TYPES] =
 {
-	{ DDF_Language,  "DDFLANG",  "language.ddf", "Languages",  DDF_ReadLangs },
+	{ DDF_Language,  "DDFLANG",  "language.ldf", "Languages",  DDF_ReadLangs },
 	{ DDF_SFX,       "DDFSFX",   "sounds.ddf",   "Sounds",     DDF_ReadSFX },
 	{ DDF_ColourMap, "DDFCOLM",  "colmap.ddf",   "ColourMaps", DDF_ReadColourMaps },
 	{ DDF_Image,     "DDFIMAGE", "images.ddf",   "Images",     DDF_ReadImages },

@@ -1272,7 +1272,7 @@ static void AddSingleCmdLineFile(std::filesystem::path name, bool ignore_unknown
 #ifdef _WIN32
 	std::u32string ext = epi::PATH_GetExtension(name).u32string();
 #else
-	std::u32string ext = epi::PATH_GetExtension(name).string();
+	std::string ext = epi::PATH_GetExtension(name).string();
 #endif
 
 	epi::str_lower(ext);

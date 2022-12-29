@@ -219,7 +219,7 @@ void argv::CheckBooleanParm(std::string parm, bool *boolval, bool reverse)
 		return;
 	}
 
-	if (Find(epi::STR_Format("no%s", parm).c_str()) > 0)
+	if (Find(epi::STR_Format("no%s", parm.c_str())) > 0)
 	{
 		*boolval = reverse;
 		return;
@@ -234,7 +234,7 @@ void argv::CheckBooleanCVar(std::string parm, cvar_c *var, bool reverse)
 		return;
 	}
 
-	if (Find(epi::STR_Format("no%s", parm).c_str()) > 0)
+	if (Find(epi::STR_Format("no%s", parm.c_str())) > 0)
 	{
 		*var = (reverse ? 1 : 0);
 		return;

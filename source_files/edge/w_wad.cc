@@ -1137,7 +1137,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
 
 	if (animated >= 0)
 	{
-		I_Printf("Loading ANIMATED from: %s\n", df->name.c_str());
+		I_Printf("Loading ANIMATED from: %s\n", df->name.u8string().c_str());
 
 		int length = -1;
 		byte *data = W_LoadLump(animated, &length);
@@ -1148,7 +1148,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
 
 	if (switches >= 0)
 	{
-		I_Printf("Loading SWITCHES from: %s\n", df->name.c_str());
+		I_Printf("Loading SWITCHES from: %s\n", df->name.u8string().c_str());
 
 		int length = -1;
 		byte *data = W_LoadLump(switches, &length);
@@ -1187,7 +1187,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 		// Homebrew levels?
 		if (strncmp(header.identification, "PWAD", 4) != 0)
 		{
-			I_Error("Wad file %s doesn't have IWAD or PWAD id\n", df->name.c_str());
+			I_Error("Wad file %s doesn't have IWAD or PWAD id\n", df->name.u8string().c_str());
 		}
 	}
 

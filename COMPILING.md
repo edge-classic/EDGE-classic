@@ -73,7 +73,4 @@ In all cases, the executable will be copied to the root of the project folder up
 * soundfont
 * edge-classic/edge-classic.exe (OS-dependent)
 * edge-defs.wad
-* libgcc_s_dw2-1.dll (Windows-only, if present; can appear with MSYS2 builds)
-* libstdc++-6.dll (Windows-only, if present; can appear with MSYS2 builds)
-* libwinpthread-1.dll (Windows-only, if present; can appear with MSYS2 builds)
 * SDL2.dll (Windows-only)

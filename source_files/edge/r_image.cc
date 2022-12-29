@@ -74,9 +74,12 @@ extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
 
 extern epi::file_c *OpenUserFileOrLump(imagedef_c *def);
 
+extern cvar_c r_doubleframes;
 
 extern void DeleteSkyTextures(void);
 extern void DeleteColourmapTextures(void);
+
+extern bool erraticism_active;
 
 //
 // This structure is for "cached" images (i.e. ready to be used for
@@ -1064,8 +1067,8 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 
 	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
 	{
-		tmp_img->Swirl(hudtic, rim->liquid_type); // Using leveltime disabled swirl for intermission screens
-		rim->swirled_gametic = hudtic;
+		rim->swirled_gametic = hudtic / (r_doubleframes.d ? 2 : 1);
+		tmp_img->Swirl(rim->swirled_gametic, rim->liquid_type); // Using leveltime disabled swirl for intermission screens
 	}
 
 	if (rim->opacity == OPAC_Unknown)
@@ -1546,7 +1549,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim,
 
 	if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
 	{
-		if (rc->parent->liquid_type > LIQ_None && rc->parent->swirled_gametic != hudtic)
+		if (!erraticism_active && !time_stop_active && rim->swirled_gametic != hudtic / (r_doubleframes.d ? 2 : 1))
 		{
 			if (rc->tex_id != 0)
 			{
@@ -1659,19 +1662,19 @@ static void W_CreateDummyImages(void)
 bool W_InitImages(void)
 {
     // check options
-	if (M_CheckParm("-nosmoothing"))
+	if (argv::Find("nosmoothing") > 0)
 		var_smoothing = 0;
-	else if (M_CheckParm("-smoothing"))
+	else if (argv::Find("smoothing") > 0)
 		var_smoothing = 1;
 
-	if (M_CheckParm("-nomipmap"))
+	if (argv::Find("nomipmap") > 0)
 		var_mipmapping = 0;
-	else if (M_CheckParm("-mipmap"))
+	else if (argv::Find("mipmap") > 0)
 		var_mipmapping = 1;
-	else if (M_CheckParm("-trilinear"))
+	else if (argv::Find("trilinear") > 0)
 		var_mipmapping = 2;
 
-	M_CheckBooleanParm("dither", &var_dithering, false);
+	argv::CheckBooleanParm("dither", &var_dithering, false);
 
 	W_CreateDummyImages();
 
@@ -1684,9 +1687,22 @@ bool W_InitImages(void)
 //
 void W_UpdateImageAnims(void)
 {
-	do_Animate(real_graphics);
-	do_Animate(real_textures);
-	do_Animate(real_flats);
+	// Fix menu animations if not in-game
+	if (menuactive && gamestate != GS_LEVEL)
+	{
+		if (!r_doubleframes.d || !(hudtic & 1))
+		{
+			do_Animate(real_graphics);
+			do_Animate(real_textures);
+			do_Animate(real_flats);
+		}
+	}
+	else if (!time_stop_active && !erraticism_active)
+	{
+		do_Animate(real_graphics);
+		do_Animate(real_textures);
+		do_Animate(real_flats);
+	}
 }
 
 

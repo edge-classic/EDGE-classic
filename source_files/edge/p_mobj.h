@@ -53,6 +53,8 @@ struct touch_node_s;
 
 extern std::unordered_set<const mobjtype_c *> seen_monsters;
 
+extern bool time_stop_active;
+
 #define STOPSPEED   		0.07f
 #define OOF_SPEED   		9.0f //Lobo: original value 20.0f too high, almost never played oof
 
@@ -351,6 +353,8 @@ struct mobj_s : public position_c
 
 	// Player number last heard.
 	int lastheard = 0;
+
+	bool is_voodoo = false;
 
 public:
 	bool isRemoved() const;

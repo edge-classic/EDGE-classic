@@ -29,9 +29,6 @@
 #include <ctype.h>
 #include <string.h>
 #include <unordered_map>
-#if defined __arm__ || defined __aarch64__
-#include <cstddef> // offsetof
-#endif
 
 #include "deh_i_defs.h"
 #include "deh_edge.h"

@@ -123,10 +123,11 @@ static int cur_palette = -1;
 
 void V_InitColour(void)
 {
-	const char *s = M_GetParm("-gamma");
-	if (s)
+	std::string s = argv::Value("gamma");
+
+	if (!s.empty())
 	{
-		var_gamma = MAX(0, MIN(5, atoi(s)));
+		var_gamma = MAX(0, MIN(5, atoi(s.c_str())));
 	}
 }
 

@@ -175,7 +175,7 @@ void P_SpawnSpecials2(int autotag);
 void P_StopAmbientSectorSfx(void);
 
 // every tic
-void P_UpdateSpecials(void);
+void P_UpdateSpecials(bool extra_tic);
 
 // when needed
 bool P_UseSpecialLine(mobj_t * thing, line_t * line, int side,
@@ -231,7 +231,7 @@ bool EV_DoSlider(line_t * door, line_t *act_line, mobj_t * thing,
 		         const linetype_c * special);
 bool P_SectorIsLowering(sector_t *sec);
 
-void P_RunForces(void);
+void P_RunForces(bool extra_tic);
 void P_DestroyAllForces(void);
 void P_AddPointForce(sector_t *sec, float length);
 void P_AddSectorForce(sector_t *sec, bool is_wind, float x_mag, float y_mag);

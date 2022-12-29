@@ -125,19 +125,23 @@ typedef enum
 	MF_TRANSLATION1 = 0x4000000,
 	MF_TRANSLATION2 = 0x8000000,
 
-	// ---- BOOM and MBF flags ----
+	MF_TOUCHY = 0x10000000,
+
+	MF_BOUNCES = 0x20000000,
+
+	MF_FRIEND = 0x40000000,
 
 	// Stealth Mode - Creatures that dissappear and reappear.
-	MF_STEALTH = 0x10000000,
+	// MF_STEALTH = 0x10000000, // What to do with this ? - Dasho
 
 	// Translucent sprite?
-	MF_TRANSLUCENT = 0x40000000,
+	MF_TRANSLUCENT = 0x80000000
 
-	MF_TOUCHY  = 0x20000000     // Should be: (0x1 << 32)
-
-// FIXME place these in `flags2` or similar
-#define MF_BOUNCES  MF_JUSTHIT  // Should be: (0x2 << 32)
-#define MF_FRIEND   MF_INFLOAT  // Should be: (0x4 << 32)
+	// Pre-MBF mappings
+	#define MF_UNUSED1 MF_TRANSLATION2
+	#define MF_UNUSED2 MF_TOUCHY
+	#define MF_UNUSED3 MF_BOUNCES
+	#define MF_UNUSED4 MF_FRIEND
 }
 mobjflag_t;
 
@@ -207,7 +211,7 @@ mobjmbf21flag_t;
 
 #define MF_TRANSLATION  (MF_TRANSLATION1 | MF_TRANSLATION2)
 #define ALL_BEX_FLAGS  \
-	(MF_STEALTH | MF_TRANSLUCENT | MF_TOUCHY | MF_BOUNCES | MF_FRIEND)
+	(MF_TRANSLUCENT | MF_TOUCHY | MF_BOUNCES | MF_FRIEND) // Also housed MF_STEALTH, but this is not a BEX flag
 
 
 typedef enum

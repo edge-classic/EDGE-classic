@@ -20,33 +20,10 @@ namespace Deh_Edge
 	typedef unsigned char byte;
 }
 
-/*
-#include <stdlib.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <errno.h>
-
-#include <limits.h>
-#include <math.h>
-#include <time.h>
-#include <assert.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-*/
-
-// DOS GCC
-#if defined(DJGPP)
-
-namespace Deh_Edge
-{
-	typedef long long Int64;
-}
+#include <cstddef>
 
 // Windows
-#elif defined(WIN32) || defined(_WIN32) || defined(_WIN64)
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
 
 #define STRICT
 #define _WINDOWS
@@ -55,31 +32,12 @@ namespace Deh_Edge
 #define WIN32
 #endif
 
-namespace Deh_Edge
-{
-#ifdef __GNUC__
-	typedef long long Int64;
-#else
-	typedef __int64 Int64;
-#endif
-}
-
 // Access() define values. Nicked from DJGPP's <unistd.h>
 #ifndef R_OK
 #define R_OK    0x02
 #define W_OK    0x04
 #endif
 
-// *NIX/APPLE
-#elif defined(__linux__) || defined (__unix__) || defined (__APPLE__)
-
-namespace Deh_Edge
-{
-	typedef long long Int64;
-}
-
-#else
-#error Unknown System (not DJGPP, WIN32, LINUX, UNIX or APPLE)
 #endif
 
 #endif /*__DEH_SYSTEM_SPECIFIC_DEFS__*/

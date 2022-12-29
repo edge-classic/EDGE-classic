@@ -29,9 +29,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-#if defined __arm__ || defined __aarch64__
-#include <cstddef> // offsetof
-#endif
 
 #include <string>
 
@@ -498,6 +495,8 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 
 	if (Frames::act_flags & AF_EXPLODE)
 		WAD::Printf("EXPLODE_DAMAGE.VAL = 128;\n");
+	else if (Frames::act_flags & AF_DETONATE)
+		WAD::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
 
 	WAD::Printf("\n");
 }
@@ -733,7 +732,7 @@ namespace Things
 {
 	typedef struct
 	{
-		int flag;          // flag in mobjinfo_t (MF_XXX), 0 if ignored
+		long long int flag;          // flag in mobjinfo_t (MF_XXX), 0 if ignored
 		const char *bex;   // name in a DEHACKED or BEX file
 		const char *conv;  // edge name, NULL if none, can be multiple
 	}
@@ -741,52 +740,47 @@ namespace Things
 
 	const flagname_t flag_list[] =
 	{
-		{ MF_NOBLOCKMAP,   "NOBLOCKMAP",    "NOBLOCKMAP" },
-		{ MF_NOBLOOD,      "NOBLOOD",       "DAMAGESMOKE" },
-		{ MF_NOCLIP,       "NOCLIP",        "NOCLIP" },
-		{ MF_NOGRAVITY,    "NOGRAVITY",     "NOGRAVITY" },
-		{ MF_NOSECTOR,     "NOSECTOR",      "NOSECTOR" },
-		{ MF_NOTDMATCH,    "NOTDMATCH",     "NODEATHMATCH" },
-
-		{ MF_AMBUSH,       "AMBUSH",        "AMBUSH" },
-		{ MF_CORPSE,       "CORPSE",        "CORPSE" },
-		{ MF_COUNTITEM,    "COUNTITEM",     "COUNT_AS_ITEM" },
-		{ MF_COUNTKILL,    "COUNTKILL",     "COUNT_AS_KILL" },
-		{ MF_DROPOFF,      "DROPOFF",       "DROPOFF" },
-		{ MF_DROPPED,      "DROPPED",       "DROPPED" },
-		{ MF_FLOAT,        "FLOAT",         "FLOAT" },
-		{ MF_MISSILE,      "MISSILE",       "MISSILE" },
-		{ MF_PICKUP,       "PICKUP",        "PICKUP" },
-		{ MF_SHADOW,       "SHADOW",        "FUZZY"  },
-		{ MF_SHOOTABLE,    "SHOOTABLE",     "SHOOTABLE" },
-		{ MF_SKULLFLY,     "SKULLFLY",      "SKULLFLY" },
-		{ MF_SLIDE,        "SLIDE",         "SLIDER" },
-		{ MF_SOLID,        "SOLID",         "SOLID" },
-		{ MF_SPAWNCEILING, "SPAWNCEILING",  "SPAWNCEILING" },
 		{ MF_SPECIAL,      "SPECIAL",       "SPECIAL" },
+		{ MF_SOLID,        "SOLID",         "SOLID" },
+		{ MF_SHOOTABLE,    "SHOOTABLE",     "SHOOTABLE" },
+		{ MF_NOSECTOR,     "NOSECTOR",      "NOSECTOR" },
+		{ MF_NOBLOCKMAP,   "NOBLOCKMAP",    "NOBLOCKMAP" },
+		{ MF_AMBUSH,       "AMBUSH",        "AMBUSH" },
+		{ 0,               "JUSTHIT",       NULL },
+		{ 0,               "JUSTATTACKED",  NULL },
+		{ MF_SPAWNCEILING, "SPAWNCEILING",  "SPAWNCEILING" },
+		{ MF_NOGRAVITY,    "NOGRAVITY",     "NOGRAVITY" },
+		{ MF_DROPOFF,      "DROPOFF",       "DROPOFF" },
+		{ MF_PICKUP,       "PICKUP",        "PICKUP" },
+		{ MF_NOCLIP,       "NOCLIP",        "NOCLIP" },
+		{ MF_SLIDE,        "SLIDE",         "SLIDER" },
+		{ MF_FLOAT,        "FLOAT",         "FLOAT" },
 		{ MF_TELEPORT,     "TELEPORT",      "TELEPORT" },
-
-		// BOOM and MBF flags...
-		{ MF_BOUNCES,      "BOUNCES",       "BOUNCE" },
-		{ MF_STEALTH,      "STEALTH",       "STEALTH" },
-		{ MF_TOUCHY,       "TOUCHY",        "TOUCHY" },
-
-		// flags which don't produce an Edge SPECIAL
+		{ MF_MISSILE,      "MISSILE",       "MISSILE" },
+		{ MF_DROPPED,      "DROPPED",       "DROPPED" },
+		{ MF_SHADOW,       "SHADOW",        "FUZZY"  },
+		{ MF_NOBLOOD,      "NOBLOOD",       "DAMAGESMOKE" },
+		{ MF_CORPSE,       "CORPSE",        "CORPSE" },
+		{ 0,               "INFLOAT",       NULL },
+		{ MF_COUNTKILL,    "COUNTKILL",     "COUNT_AS_KILL" },
+		{ MF_COUNTITEM,    "COUNTITEM",     "COUNT_AS_ITEM" },
+		{ MF_SKULLFLY,     "SKULLFLY",      "SKULLFLY" },
+		{ MF_NOTDMATCH,    "NOTDMATCH",     "NODEATHMATCH" },
 		{ MF_TRANSLATION1, "TRANSLATION1",  NULL },
 		{ MF_TRANSLATION2, "TRANSLATION2",  NULL },
 		{ MF_TRANSLATION1, "TRANSLATION",   NULL },  // bug compat
+		{ MF_TOUCHY,       "TOUCHY",        "TOUCHY" },
+		{ MF_BOUNCES,      "BOUNCES",       "BOUNCE" },
+		{ MF_FRIEND,  	   "FRIEND",   		NULL },
 		{ MF_TRANSLUCENT,  "TRANSLUCENT",   NULL },
 		{ MF_TRANSLUCENT,  "TRANSLUC50",    NULL },
-		{ MF_TRANSLUCENT,  "TRANSLUC25",    NULL },  // WISH
-		{ MF_TRANSLUCENT,  "TRANSLUC75",    NULL },  // WISH
+		// BOOM and MBF flags...
+		//{ MF_STEALTH,      "STEALTH",       "STEALTH" },
 
-		{ 0,               "INFLOAT",       NULL },
-		{ 0,               "JUSTATTACKED",  NULL },
-		{ 0,               "JUSTHIT",       NULL },
-		{ 0,               "UNUSED1",       NULL },
-		{ 0,               "UNUSED2",       NULL },
-		{ 0,               "UNUSED3",       NULL },
-		{ 0,               "UNUSED4",       NULL },
+		{ MF_UNUSED1,       "UNUSED1",       NULL },
+		{ MF_UNUSED2,       "UNUSED2",       NULL },
+		{ MF_UNUSED3,       "UNUSED3",       NULL },
+		{ MF_UNUSED4,       "UNUSED4",       NULL },
 
 		{ 0, NULL, NULL }  // End sentinel
 	};

@@ -60,6 +60,7 @@
 #include "f_interm.h"
 #include "vm_coal.h"
 
+extern cvar_c r_doubleframes;
 
 gamestate_e gamestate = GS_NOTHING;
 
@@ -463,6 +464,32 @@ void G_BigStuff(void)
 
 void G_Ticker(void)
 {
+
+	bool extra_tic = (gametic & 1) == 1;
+
+	if (extra_tic && r_doubleframes.d)
+	{
+		switch (gamestate)
+		{
+			case GS_LEVEL:
+				// get commands
+				N_GrabTiccmds();
+
+				//!!!  P_Ticker();
+				P_Ticker(true);
+				break;
+
+			case GS_INTERMISSION:
+			case GS_FINALE:
+				N_GrabTiccmds();
+				break;
+			default:
+				break;
+		}
+
+		return;
+	}
+
 	// ANIMATE FLATS AND TEXTURES GLOBALLY
 	W_UpdateImageAnims();
 
@@ -477,7 +504,7 @@ void G_Ticker(void)
 			// get commands
 			N_GrabTiccmds();
 
-			P_Ticker();
+			P_Ticker(false);
 			AM_Ticker();
 			HU_Ticker();
 			RAD_Ticker();

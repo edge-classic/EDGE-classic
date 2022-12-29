@@ -27,6 +27,7 @@
 #include "i_defs_gl.h"
 
 #include <math.h>
+#include <unordered_set>
 
 #include "dm_data.h"
 #include "dm_defs.h"
@@ -64,6 +65,7 @@
 DEF_CVAR(debug_hom, "0", CVAR_CHEAT)
 
 extern cvar_c r_culling;
+extern cvar_c r_doubleframes;
 
 side_t *sidedef;
 line_t *linedef;
@@ -75,6 +77,8 @@ unsigned int root_node;
 
 int detail_level = 1;
 int use_dlights = 0;
+
+std::unordered_set<abstract_shader_c *> seen_dlights;
 
 int doom_fading = 1;
 
@@ -603,7 +607,7 @@ wall_plane_data_t;
 // Adapted from Quake 3 GPL release - Dasho (not used yet, but might be for future effects)
 void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
 {
-	float timeScale = gametic / 100.0f;
+	float timeScale = gametic / (r_doubleframes.d ? 200.0f : 100.0f);
 	float adjustedScrollS, adjustedScrollT;
 
 	adjustedScrollS = x_scroll * timeScale;
@@ -1463,7 +1467,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 		slope_ch += MAX(sec->c_slope->dz1, sec->c_slope->dz2);
 
 	// Boom compatibility -- invisible walkways
-	if (sec->heightsec != NULL)
+	if (sec->heightsec != nullptr)
 		slope_fh = std::min(slope_fh, sec->heightsec->f_h);
 
 	if (! other)
@@ -2159,7 +2163,6 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
 	dsub->segs.push_back(dseg);
 
-
 	sector_t *frontsector = seg->front_sub->sector;
 	sector_t *backsector  = NULL;
 
@@ -2170,6 +2173,9 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
 	if (seg->linedef->blocked)
 	{
+		// Check if this is a Line 242 "window" (I think) - Dasho
+		if ((!(seg->frontsector && seg->frontsector->heightsec && seg->frontsector->heightsec_side) &&
+			!(seg->backsector && seg->backsector->heightsec && seg->backsector->heightsec_side)))
 		RGL_1DOcclusionSet(angle_R, angle_L);
 	}
 
@@ -2315,7 +2321,7 @@ bool RGL_CheckBBox(float *bspcoord)
 			return false;
 
 		if (r_culling.d && 
-			R_PointToDist(viewx, viewy, (x1+x2)/2, (y1+y2)/2) > 8000)
+			R_PointToDist(viewx, viewy, (x1+x2)/2, (y1+y2)/2) > 16000)
 			return false;
 
 	}
@@ -3275,6 +3281,7 @@ void R_Render(int x, int y, int w, int h, mobj_t *camera,
 	framecount++;
 	validcount++;
 
+	seen_dlights.clear();
 	RGL_RenderTrueBSP();
 }
 

@@ -29,9 +29,12 @@
 // Called by C_Ticker,
 // can call G_PlayerExited.
 // Carries out all thinking of monsters and players.
-void P_Ticker(void);
+void P_Ticker(bool extra_tic);
 
 void P_HubFastForward(void);
+
+// Needed to pause flat anims, etc when not moving or firing in Erraticism - Dasho
+extern bool erraticism_active;
 
 #endif // __P_TICK__
 

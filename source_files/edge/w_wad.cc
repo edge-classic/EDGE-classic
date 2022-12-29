@@ -547,7 +547,7 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
 	else if (strcmp(info.name, "DEHACKED") == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
-		if (wad != NULL)
+		if (wad != NULL && info.size > 0)
 			wad->deh_lump = lump;
 		return;
 	}
@@ -1229,7 +1229,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 	// compute MD5 hash over wad directory
 	wad->dir_md5.Compute((const byte *)raw_info, length);
 
-	wad->md5_string = epi::STR_Format("%02x%02x%02x%02x%02x%02x%02x%02x", 
+	wad->md5_string = epi::STR_Format("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", 
 			wad->dir_md5.hash[0],  wad->dir_md5.hash[1],
 			wad->dir_md5.hash[2],  wad->dir_md5.hash[3],
 			wad->dir_md5.hash[4],  wad->dir_md5.hash[5],

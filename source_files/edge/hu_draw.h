@@ -37,6 +37,7 @@
 extern float hud_x_left;
 extern float hud_x_right;
 extern float hud_x_mid;
+extern std::vector<std::string> hud_overlays;
 
 
 void HUD_SetCoordSys(int width, int height);

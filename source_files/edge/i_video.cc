@@ -33,7 +33,7 @@ SDL_Window *my_vis;
 int graphics_shutdown = 0;
 
 DEF_CVAR(in_grab, "1", CVAR_ARCHIVE)
-DEF_CVAR(v_sync,  "1", CVAR_ARCHIVE)
+DEF_CVAR(v_sync,  "0", CVAR_ARCHIVE)
 
 // this is the Monitor Size setting, really an aspect ratio.
 // it defaults to 16:9, as that is the most common monitor size nowadays.
@@ -143,18 +143,18 @@ void I_DeterminePixelAspect()
 
 void I_StartupGraphics(void)
 {
-	if (M_CheckParm("-directx"))
+	if (argv::Find("directx") > 0)
 		force_directx = true;
 
-	if (M_CheckParm("-gdi") || M_CheckParm("-nodirectx"))
+	if (argv::Find("gdi") > 0 || argv::Find("nodirectx") > 0)
 		force_directx = false;
 
-	const char *driver = M_GetParm("-videodriver");
+	std::string driver = argv::Value("videodriver");
 
-	if (! driver)
-		driver = SDL_getenv("SDL_VIDEODRIVER");
+	if (driver.empty())
+		driver = SDL_getenv("SDL_VIDEODRIVER") ? SDL_getenv("SDL_VIDEODRIVER") : "";
 
-	if (! driver)
+	if (driver.empty())
 	{
 		driver = "default";
 
@@ -166,16 +166,16 @@ void I_StartupGraphics(void)
 
 	if (epi::case_cmp(driver, "default") != 0)
 	{
-		SDL_setenv("SDL_VIDEODRIVER", driver, 1);
+		SDL_setenv("SDL_VIDEODRIVER", driver.c_str(), 1);
 	}
 
-	I_Printf("SDL_Video_Driver: %s\n", driver);
+	I_Printf("SDL_Video_Driver: %s\n", driver.c_str());
 
 
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
 		I_Error("Couldn't init SDL VIDEO!\n%s\n", SDL_GetError());
 
-	if (M_CheckParm("-nograb"))
+	if (argv::Find("nograb") > 0)
 		in_grab = 0;
 
 	// -AJA- FIXME these are wrong (probably ignored though)
@@ -277,7 +277,17 @@ static bool I_CreateWindow(scrmode_c *mode)
 	if (SDL_GL_CreateContext(my_vis) == NULL)
 		I_Error("Failed to create OpenGL context.\n");
 
-	SDL_GL_SetSwapInterval(v_sync.d ? 1 : 0);
+	if (v_sync.d == 2)
+	{
+		// Fallback to normal VSync if Adaptive doesn't work
+		if (SDL_GL_SetSwapInterval(-1) == -1)
+		{
+			v_sync = 1;
+			SDL_GL_SetSwapInterval(v_sync.d);
+		}
+	}
+	else
+		SDL_GL_SetSwapInterval(v_sync.d);
 
 	gladLoaderLoadGL();
 
@@ -383,7 +393,19 @@ void I_FinishFrame(void)
 		I_GrabCursor(grab_state);
 
 	if (v_sync.CheckModified())
-		SDL_GL_SetSwapInterval(v_sync.d ? 1 : 0);
+	{
+		if (v_sync.d == 2)
+		{
+			// Fallback to normal VSync if Adaptive doesn't work
+			if (SDL_GL_SetSwapInterval(-1) == -1)
+			{
+				v_sync = 1;
+				SDL_GL_SetSwapInterval(v_sync.d);
+			}
+		}
+		else
+			SDL_GL_SetSwapInterval(v_sync.d);
+	}
 
 	if (v_monitorsize.CheckModified() || v_force_pixelaspect.CheckModified())
 		I_DeterminePixelAspect();

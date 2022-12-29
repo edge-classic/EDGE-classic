@@ -432,7 +432,7 @@ static void ChangeLevel(newgame_params_c *param, int dir)
 
 static void HostChangeOption(int opt, int key)
 {
-	int dir = (key == KEYD_LEFTARROW || key == KEYD_DPAD_LEFT) ? -1 : +1;
+	int dir = (key == KEYD_LEFTARROW || key == KEYD_DPAD_LEFT || key == KEYD_MENU_LEFT) ? -1 : +1;
 
 	switch (opt)
 	{
@@ -602,7 +602,7 @@ void M_DrawHostMenu(void)
 
 bool M_NetHostResponder(event_t * ev, int ch)
 {
-	if (ch == KEYD_ENTER)
+	if (ch == KEYD_ENTER || ch == KEYD_MENU_SELECT)
 	{
 		if (host_pos == (HOST_OPTIONS-1))
 		{
@@ -612,19 +612,19 @@ bool M_NetHostResponder(event_t * ev, int ch)
 		}
 	}
 
-	if (ch == KEYD_DOWNARROW || ch == KEYD_WHEEL_DN || ch == KEYD_DPAD_DOWN)
+	if (ch == KEYD_DOWNARROW || ch == KEYD_WHEEL_DN || ch == KEYD_DPAD_DOWN || ch == KEYD_MENU_DOWN)
 	{
 		host_pos = (host_pos + 1) % HOST_OPTIONS;
 		return true;
 	}
-	else if (ch == KEYD_UPARROW || ch == KEYD_WHEEL_UP || ch == KEYD_DPAD_UP)
+	else if (ch == KEYD_UPARROW || ch == KEYD_WHEEL_UP || ch == KEYD_DPAD_UP || ch == KEYD_MENU_UP)
 	{
 		host_pos = (host_pos + HOST_OPTIONS - 1) % HOST_OPTIONS;
 		return true;
 	}
 
 	if (ch == KEYD_LEFTARROW || ch == KEYD_RIGHTARROW || ch == KEYD_DPAD_LEFT || ch == KEYD_DPAD_RIGHT ||
-		ch == KEYD_ENTER)
+		ch == KEYD_MENU_LEFT || ch == KEYD_MENU_RIGHT || ch == KEYD_ENTER || KEYD_MENU_SELECT)
 	{
 		HostChangeOption(host_pos, ch);
 		return true;
@@ -667,7 +667,7 @@ static void JoinConnect(void)
 
 static void JoinChangeOption(int opt, int key)
 {
-	int dir = (key == KEYD_LEFTARROW || key == KEYD_DPAD_LEFT) ? -1 : +1;
+	int dir = (key == KEYD_LEFTARROW || key == KEYD_DPAD_LEFT || key == KEYD_MENU_LEFT) ? -1 : +1;
 
 	if (join_connect_timer > 0)
 	{
@@ -678,14 +678,14 @@ static void JoinChangeOption(int opt, int key)
 	switch (opt)
 	{
 		case 0: // Host Addr
-			if (key == KEYD_ENTER)
+			if (key == KEYD_ENTER || key == KEYD_MENU_SELECT)
 			{ // pop up input box !!!!
 			// FIXME !!!!
 			}
 			break;
 
 		case 1: // Host Port
-			if (key == KEYD_ENTER)
+			if (key == KEYD_ENTER || key == KEYD_MENU_SELECT)
 			{ // pop up input box !!!!
 			// FIXME !!!!
 			}
@@ -766,19 +766,19 @@ void M_DrawJoinMenu(void)
 
 bool M_NetJoinResponder(event_t * ev, int ch)
 {
-	if (ch == KEYD_DOWNARROW || ch == KEYD_WHEEL_DN || ch == KEYD_DPAD_DOWN)
+	if (ch == KEYD_DOWNARROW || ch == KEYD_WHEEL_DN || ch == KEYD_DPAD_DOWN || ch == KEYD_MENU_DOWN)
 	{
 		join_pos = (join_pos + 1) % JOIN_OPTIONS;
 		return true;
 	}
-	else if (ch == KEYD_UPARROW || ch == KEYD_WHEEL_UP || ch == KEYD_DPAD_UP)
+	else if (ch == KEYD_UPARROW || ch == KEYD_WHEEL_UP || ch == KEYD_DPAD_UP || ch == KEYD_MENU_UP)
 	{
 		join_pos = (join_pos + JOIN_OPTIONS - 1) % JOIN_OPTIONS;
 		return true;
 	}
 
 	if (ch == KEYD_LEFTARROW || ch == KEYD_RIGHTARROW || ch == KEYD_DPAD_LEFT || ch == KEYD_DPAD_RIGHT ||
-		ch == KEYD_ENTER)
+		ch == KEYD_MENU_LEFT || ch == KEYD_MENU_RIGHT || ch == KEYD_ENTER || ch == KEYD_MENU_SELECT)
 	{
 		JoinChangeOption(join_pos, ch);
 		return true;
@@ -889,7 +889,7 @@ static void ListAccept()
 
 bool M_NetListResponder(event_t * ev, int ch)
 {
-	if (ch == KEYD_ENTER && netgame_we_are_host)
+	if ((ch == KEYD_ENTER || ch == KEYD_MENU_SELECT) && netgame_we_are_host)
 	{
 		ListAccept();
 		return true;
@@ -933,14 +933,14 @@ void M_NetGameInit(void)
 	def = styledefs.Lookup("NET PLAYER LIST");
 	ng_list_style = def ? hu_styles.Lookup(def) : ng_default;
 
+	std::string str = argv::Value("connect");
 
-	const char *str = M_GetParm("-connect");
-	if (str)
+	if (!str.empty())
 	{
 		join_addr = new net_address_c();
-		if (! join_addr->FromString(str))
+		if (! join_addr->FromString(str.c_str()))
 		{
-			I_Error("Bad IP address for -connect: %s\n", str);
+			I_Error("Bad IP address for -connect: %s\n", str.c_str());
 		}
 	}
 }

@@ -673,7 +673,7 @@ void SV_SectorFinaliseElems(void)
 
 	extern std::vector<lineanim_t> lineanims;
 
-	for (int i=0; i < lineanims.size(); i++)
+	for (size_t i=0; i < lineanims.size(); i++)
 	{
 		if (lineanims[i].scroll_sec_ref)
 		{
@@ -684,7 +684,7 @@ void SV_SectorFinaliseElems(void)
 
 	extern std::vector<lightanim_t> lightanims;
 
-	for (int i=0; i < lightanims.size(); i++)
+	for (size_t i=0; i < lightanims.size(); i++)
 	{
 		if (lightanims[i].light_sec_ref)
 		{

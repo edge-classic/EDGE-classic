@@ -79,6 +79,8 @@
 #include "path.h"
 #include "str_util.h"
 
+#include "playlist.h"
+
 #include "main.h"
 
 #include "dm_state.h"
@@ -107,7 +109,7 @@
 #include "w_wad.h"
 #include "r_wipe.h"
 #include "s_opl.h"
-#include "s_tsf.h"
+#include "s_fluid.h"
 
 #include "i_ctrl.h"
 
@@ -123,6 +125,15 @@ extern cvar_c r_crosscolor;
 extern cvar_c r_crosssize;
 extern cvar_c s_genmidi;
 extern cvar_c s_soundfont;
+extern cvar_c r_overlay;
+extern cvar_c g_erraticism;
+extern cvar_c r_doubleframes;
+extern cvar_c g_mbf21compat;
+extern cvar_c r_culling;
+extern cvar_c g_cullthinkers;
+extern cvar_c r_maxdlights;
+extern cvar_c v_sync;
+extern cvar_c g_bobbing;
 
 static int menu_crosshair;
 static int menu_crosscolor;
@@ -131,10 +142,13 @@ static int monitor_size;
 
 extern int joystick_device;
 
+extern int entry_playing;
+
 //submenus
 static void M_KeyboardOptions(int keypressed);
 static void M_VideoOptions(int keypressed);
 static void M_GameplayOptions(int keypressed);
+static void M_PerformanceOptions(int keypressed);
 static void M_AnalogueOptions(int keypressed);
 static void M_SoundOptions(int keypressed);
 
@@ -152,6 +166,11 @@ static void M_ChangeCrossHair(int keypressed);
 static void M_ChangeCrossColor(int keypressed);
 static void M_ChangeCrossSize(int keypressed);
 
+static void M_ChangeMaxDLights(int keypressed);
+static void M_ChangeCulling(int keypressed);
+static void M_ChangeThinkerCulling(int keypressed);
+static void M_ChangeMBF21Compat(int keypressed);
+static void M_ChangeBobbing(int keypressed);
 static void M_ChangeBlood(int keypressed);
 static void M_ChangeMLook(int keypressed);
 static void M_ChangeJumping(int keypressed);
@@ -162,6 +181,7 @@ static void M_ChangeMonitorSize(int keypressed);
 static void M_ChangeKicking(int keypressed);
 static void M_ChangeWeaponSwitch(int keypressed);
 static void M_ChangeMipMap(int keypressed);
+static void M_SaveOverlay(int keypressed);
 static void M_ChangeDLights(int keypressed);
 
 // -ES- 1998/08/20 Added resolution options
@@ -180,8 +200,12 @@ static void M_ChangeResFull(int keypressed);
 
 static void M_LanguageDrawer(int x, int y, int deltay);
 static void M_ChangeLanguage(int keypressed);
+static void M_ChangeOPL(int keypressed);
 static void M_ChangeSoundfont(int keypressed);
 static void M_ChangeGENMIDI(int keypressed);
+static void M_ChangeErraticism(int keypressed);
+static void M_ChangeDoubleFrames(int keypressed);
+static void M_ChangeVSync(int keypressed);
 static void InitMonitorSize();
 
 static char YesNo[]     = "Off/On";  // basic on/off
@@ -197,6 +221,7 @@ static char Details[]   = "Low/Medium/High";
 static char Hq2xMode[]  = "Off/UI Only/UI & Sprites/All";
 static char Invuls[]    = "Simple/Textured";
 static char MonitSiz[]  = "5:4/4:3/3:2/16:10/16:9/21:9";
+static char VidOverlays[]  = "None/Lines 1x/Lines 2x/Checkered/Vertical/Grill";
 
 // for CVar enums
 const char WIPE_EnumStr[] = "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors";
@@ -207,6 +232,8 @@ static char MixChans[]    = "32/64/96/128/160/192/224/256";
 static char CrosshairColor[] = "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange";
 
 static char OPLMode[]  = "Off/OPL2/OPL3";
+
+static char DLightMax[]  = "Unlimited/20/40/60/80/100";
 
 // Screen resolution changes
 static scrmode_c new_scrmode;
@@ -341,14 +368,15 @@ static int M_GetCurrentSwitchValue(optmenuitem_t *item)
 //
 //  MAIN MENU
 //
-#define LANGUAGE_POS  8
-#define HOSTNET_POS   11
+#define LANGUAGE_POS  9
+#define HOSTNET_POS   12
 
 static optmenuitem_t mainoptions[] =
 {
 	{OPT_Function, "Key Bindings", NULL,  0, NULL, M_KeyboardOptions, "Controls"},
 	{OPT_Function, "Mouse / Controller",  NULL,  0, NULL, M_AnalogueOptions, "AnalogueOptions"},
 	{OPT_Function, "Gameplay Options",  NULL,  0, NULL, M_GameplayOptions, "GameplayOptions"},
+	{OPT_Function, "Performance Options",  NULL,  0, NULL, M_PerformanceOptions, "PerformanceOptions"},
 	{OPT_Plain,    "",                  NULL,  0, NULL, NULL, NULL},
 	{OPT_Function, "Sound Options",     NULL,  0, NULL, M_SoundOptions, "SoundOptions"},
 	{OPT_Function, "Video Options",     NULL,  0, NULL, M_VideoOptions, "VideoOptions"},
@@ -377,18 +405,15 @@ static menuinfo_t main_optmenu =
 static optmenuitem_t vidoptions[] =
 {
 	{OPT_Slider,  "Brightness",    NULL,  6,  &var_gamma, M_ChangeGamma, NULL},
-
-	{OPT_Plain,   "",  NULL,  0,  NULL, NULL, NULL},
-
+	{OPT_Switch,  "Framerate Target", "35 FPS/70 FPS", 2, &r_doubleframes.d, M_ChangeDoubleFrames, NULL},
+	{OPT_Switch,  "V-Sync", "Off/Standard/Adaptive", 3, &v_sync.d, M_ChangeVSync, "Will fallback to Standard if Adaptive is not supported"},
 	{OPT_Switch,  "Monitor Size",  MonitSiz,  6, &monitor_size, M_ChangeMonitorSize, NULL},
 	{OPT_Switch,  "Smoothing",         YesNo, 2, &var_smoothing, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "H.Q.2x Scaling", Hq2xMode, 4, &hq2x_scaling, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Dynamic Lighting", DLMode, 2, &use_dlights, M_ChangeDLights, NULL},
 	{OPT_Switch,  "Detail Level",   Details,  3, &detail_level, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Mipmapping",     MipMaps,  3, &var_mipmapping, M_ChangeMipMap, NULL},
-
-	{OPT_Plain,   "",  NULL, 0, NULL, NULL, NULL},
-
+	{OPT_Switch,  "Overlay",  		VidOverlays, 6, &r_overlay.d, M_SaveOverlay, NULL},
 	{OPT_Switch,  "Crosshair",       CrossH, 10, &menu_crosshair, M_ChangeCrossHair, NULL},
 	{OPT_Switch,  "Crosshair Color", CrosshairColor,  8, &menu_crosscolor, M_ChangeCrossColor, NULL},
 	{OPT_Slider,  "Crosshair Size",    NULL,  4,  &menu_crosssize, M_ChangeCrossSize, NULL},
@@ -488,8 +513,8 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
-	{OPT_Function, "MIDI Soundfont", NULL,  0, NULL, M_ChangeSoundfont, NULL},
-	{OPT_Switch,  "OPL Music Mode",  OPLMode, 3,  &var_opl_music, NULL, "NeedRestart"},
+	{OPT_Function, "MIDI Soundfont", NULL,  0, NULL, M_ChangeSoundfont, "Warning! SF3 Soundfonts may have long loading times!"},
+	{OPT_Switch,  "OPL Music Mode",  OPLMode, 3,  &var_opl_music, M_ChangeOPL, NULL},
 	{OPT_Function, "OPL Instrument Bank", NULL,  0, NULL, M_ChangeGENMIDI, NULL},
 	{OPT_Boolean, "PC Speaker Mode", YesNo, 2,  &var_pc_speaker_mode, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
@@ -530,8 +555,14 @@ static menuinfo_t f4sound_optmenu =
 //
 static optmenuitem_t playoptions[] =
 {
+	{OPT_Boolean, "MBF21 Map Compatibility", YesNo, 2, 
+     &g_mbf21compat.d, M_ChangeMBF21Compat, "Toggle support for MBF21 lines and sectors"},
+
 	{OPT_Boolean, "Pistol Starts",         YesNo, 2, 
      &pistol_starts, NULL, NULL},
+
+	{OPT_Switch,  "Bobbing", "Full/Head Only/Weapon Only/None", 4, 
+     &g_bobbing.d, M_ChangeBobbing, NULL},
 
 	{OPT_Boolean, "Mouse Look",         YesNo, 2, 
      &global_flags.mlook, M_ChangeMLook, NULL},
@@ -558,7 +589,7 @@ static optmenuitem_t playoptions[] =
      &global_flags.more_blood, M_ChangeBlood, "Blood"},
 
 	{OPT_Boolean, "Extras",             YesNo, 2, 
-     &global_flags.have_extra, M_ChangeExtra, "Compatibility setting for older mods (recommend leaving on)"},
+     &global_flags.have_extra, M_ChangeExtra, NULL},
 
 	{OPT_Boolean, "True 3D Gameplay",   YesNo, 2, 
      &global_flags.true3dgameplay, M_ChangeTrue3d, "True3d"},
@@ -566,12 +597,11 @@ static optmenuitem_t playoptions[] =
 	{OPT_Boolean, "Shoot-thru Scenery",   YesNo, 2, 
      &global_flags.pass_missile, M_ChangePassMissile, NULL},
 
-	{OPT_Plain,   "", NULL, 0, NULL, NULL, NULL},
+	{OPT_Boolean, "Erraticism",   YesNo, 2, 
+     &g_erraticism.d, M_ChangeErraticism, "Time only advances when you move or fire"},
 
 	{OPT_Slider,  "Gravity",            NULL, 20, 
      &global_flags.menu_grav, NULL, "Gravity"},
-
-	{OPT_Plain,   "", NULL, 0, NULL, NULL, NULL},
 
     {OPT_Boolean, "Respawn Enemies",            YesNo, 2, 
      &global_flags.respawn, M_ChangeRespawn, NULL},
@@ -590,6 +620,26 @@ static menuinfo_t gameplay_optmenu =
 {
 	playoptions, sizeof(playoptions) / sizeof(optmenuitem_t),
 	&opt_def_style, 160, 46, "M_GAMEPL", NULL, 0, "", language["MenuGameplay"]
+};
+
+//
+//  PERFORMANCE OPTIONS
+//
+//
+static optmenuitem_t perfoptions[] =
+{
+	{OPT_Boolean, "Reduce Draw Distance", YesNo, 2, 
+     &r_culling.d, M_ChangeCulling, "Note: Skies will not be visible with this setting enabled"},
+	{OPT_Boolean, "Slow Thinkers Over Distance", YesNo, 2, 
+     &g_cullthinkers.d, M_ChangeThinkerCulling, "Only recommended for extreme monster/projectile counts"},
+	{OPT_Switch, "Maximum Dynamic Lights", DLightMax, 6, 
+     &r_maxdlights.d, M_ChangeMaxDLights, "Control how many dynamic lights are rendered per tick"},
+};
+
+static menuinfo_t perf_optmenu = 
+{
+	perfoptions, sizeof(perfoptions) / sizeof(optmenuitem_t),
+	&opt_def_style, 160, 46, "M_PRFOPT", NULL, 0, "", language["MenuPerformance"]
 };
 
 //
@@ -886,6 +936,7 @@ void M_OptMenuInit()
 	sound_optmenu.name=language["MenuSound"];
 	f4sound_optmenu.name=language["MenuSound"];
 	gameplay_optmenu.name=language["MenuGameplay"];
+	perf_optmenu.name=language["MenuPerformance"];
 	movement_optmenu.name=language["MenuBinding"];
 	attack_optmenu.name=language["MenuBinding"];
 	otherkey_optmenu.name=language["MenuBinding"];
@@ -1271,7 +1322,7 @@ bool M_OptResponder(event_t * ev, int ch)
 
 		keyscan = 0;
 
-		if (ch == KEYD_ESCAPE)
+		if (ch == KEYD_ESCAPE || ch == KEYD_MENU_CANCEL)
 			return true;
      
 		blah = (int*)(curr_item->switchvar);
@@ -1689,6 +1740,20 @@ static void M_GameplayOptions(int keypressed)
 }
 
 //
+// M_PerformanceOptions
+//
+static void M_PerformanceOptions(int keypressed)
+{
+	// not allowed in netgames (changing most of these options would
+	// break synchronisation with the other machines).
+	if (netgame)
+		return;
+
+	curr_menu = &perf_optmenu;
+	curr_item = curr_menu->items + curr_menu->pos;
+}
+
+//
 // M_KeyboardOptions
 //
 static void M_KeyboardOptions(int keypressed)
@@ -1876,6 +1941,71 @@ static void M_ChangeMipMap(int keypressed)
 	W_DeleteAllImages();
 }
 
+// Need to make a generic CVAR save function
+static void M_SaveOverlay(int keypressed)
+{
+	r_overlay = r_overlay.d;
+}
+
+// See above
+static void M_ChangeErraticism(int keypressed)
+{
+	g_erraticism = g_erraticism.d;
+}
+
+// See above the above
+static void M_ChangeDoubleFrames(int keypressed)
+{
+	r_doubleframes = r_doubleframes.d;
+}
+
+// See above the above the above
+static void M_ChangeMBF21Compat(int keypressed)
+{
+	g_mbf21compat = g_mbf21compat.d;
+}
+
+// See above the above the above the above
+static void M_ChangeCulling(int keypressed)
+{
+	r_culling = r_culling.d;
+}
+
+// See above the above the above the above the above
+static void M_ChangeThinkerCulling(int keypressed)
+{
+	g_cullthinkers = g_cullthinkers.d;
+}
+
+// See above the above the above the above the above the above
+static void M_ChangeMaxDLights(int keypressed)
+{
+	r_maxdlights = r_maxdlights.d;
+}
+
+// See above the above the above the above the above the above the above
+static void M_ChangeVSync(int keypressed)
+{
+	v_sync = v_sync.d;
+}
+
+// See above the above the above the above the above the above the above the above
+static void M_ChangeBobbing(int keypressed)
+{
+	g_bobbing = g_bobbing.d;
+	player_t *player = players[consoleplayer];
+	if (player)
+	{
+		player->bob = 0;
+		pspdef_t *psp = &player->psprites[player->action_psp];
+		if (psp)
+		{
+			psp->sx = 0;
+			psp->sy = 0;
+		}
+	}
+}
+
 static void M_ChangeKicking(int keypressed)
 {
 	if (currmap && ((currmap->force_on | currmap->force_off) & MPF_Kicking))
@@ -1920,7 +2050,7 @@ static void M_ChangeCrossSize(int keypressed)
 //
 static void M_ChangeLanguage(int keypressed)
 {
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
 		int idx, max;
 		
@@ -1932,7 +2062,7 @@ static void M_ChangeLanguage(int keypressed)
 			
 		language.Select(idx);
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
 		int idx, max;
 		
@@ -1950,46 +2080,60 @@ static void M_ChangeLanguage(int keypressed)
 }
 
 //
+// M_ChangeOPL
+//
+//
+static void M_ChangeOPL(int keypressed)
+{
+	pl_entry_c *playing = playlist.Find(entry_playing);
+	if (var_opl_music || (playing && 
+		(playing->type == MUS_IMF280 || playing->type == MUS_IMF560 || playing->type == MUS_IMF700)))
+		S_RestartOPL();
+	else
+		S_RestartFluid();
+}
+
+//
 // M_ChangeSoundfont
 //
 //
 static void M_ChangeSoundfont(int keypressed)
 {
-	int sf2_pos = -1;
+	int sf_pos = -1;
 	for(int i=0; i < (int)available_soundfonts.size(); i++)
 	{
 		if (epi::case_cmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
 		{
-			sf2_pos = i;
+			sf_pos = i;
 			break;
 		}
 	}
 
-	if (sf2_pos < 0)
+	if (sf_pos < 0)
 	{
 		I_Warning("M_ChangeSoundfont: Could not read list of available soundfonts. Falling back to default!\n");
 		s_soundfont = "default.sf2";
 		return;
 	}
 
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
-		if (sf2_pos - 1 >= 0)
-			sf2_pos--;
+		if (sf_pos - 1 >= 0)
+			sf_pos--;
 		else
-			sf2_pos = available_soundfonts.size() - 1;
+			sf_pos = available_soundfonts.size() - 1;
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
-		if (sf2_pos + 1 >= (int)available_soundfonts.size())
-			sf2_pos = 0;
+		if (sf_pos + 1 >= (int)available_soundfonts.size())
+			sf_pos = 0;
 		else
-			sf2_pos++;
+			sf_pos++;
 	}
 
 	// update cvar
-	s_soundfont = available_soundfonts.at(sf2_pos);
-	S_RestartTSF();
+	s_soundfont = available_soundfonts.at(sf_pos);
+	S_RestartFluid();
 }
 
 //
@@ -2015,14 +2159,14 @@ static void M_ChangeGENMIDI(int keypressed)
 		return;
 	}
 
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
 		if (op2_pos - 1 >= 0)
 			op2_pos--;
 		else
 			op2_pos = available_genmidis.size() - 1;
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
 		if (op2_pos + 1 >= (int)available_genmidis.size())
 			op2_pos = 0;
@@ -2042,11 +2186,11 @@ static void M_ChangeGENMIDI(int keypressed)
 //
 static void M_ChangeResSize(int keypressed)
 {
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Size, -1);
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Size, +1);
 	}
@@ -2059,11 +2203,11 @@ static void M_ChangeResSize(int keypressed)
 //
 static void M_ChangeResFull(int keypressed)
 {
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_DisplayMode, +1);
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_DisplayMode, +1);
 	}

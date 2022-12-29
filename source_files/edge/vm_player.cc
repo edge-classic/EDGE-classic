@@ -46,6 +46,7 @@
 #include "flat.h" // DDFFLAT - Dasho
 #include "s_sound.h" // play_footstep() - Dasho
 
+
 extern coal::vm_c *ui_vm;
 
 extern void VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value);
@@ -440,6 +441,133 @@ static void PL_cur_weapon(coal::vm_c *vm, int argc)
 	weapondef_c *info = ui_player_who->weapons[ui_player_who->ready_wp].info;
 
 	vm->ReturnString(info->name.c_str());
+}
+
+
+static void COAL_SetPsprite(player_t * p, int position, int stnum, weapondef_c *info = NULL)
+{
+    pspdef_t *psp = &p->psprites[position];
+
+    if (stnum == S_NULL)
+    {
+        // object removed itself
+        psp->state = psp->next_state = NULL;
+        return;
+    }
+
+    // state is old? -- Mundo hack for DDF inheritance
+    if (info && stnum < info->state_grp.back().first)
+    {
+        state_t *st = &states[stnum];
+
+        if (st->label)
+        {
+            statenum_t new_state = DDF_StateFindLabel(info->state_grp, st->label, true /* quiet */);
+            if (new_state != S_NULL)
+                stnum = new_state;
+        }
+    }
+
+    state_t *st = &states[stnum];
+
+    // model interpolation stuff
+    if (psp->state &&
+        (st->flags & SFF_Model) && (psp->state->flags & SFF_Model) &&
+        (st->sprite == psp->state->sprite) && st->tics > 1)
+    {
+        p->weapon_last_frame = psp->state->frame;
+    }
+    else
+        p->weapon_last_frame = -1;
+
+    psp->state = st;
+    psp->tics  = st->tics;
+    psp->next_state = (st->nextstate == S_NULL) ? NULL : 
+        (states + st->nextstate);
+
+    // call action routine
+
+    p->action_psp = position;
+
+    if (st->action)
+        (* st->action)(p->mo);
+}
+
+//
+// P_SetPspriteDeferred
+//
+// -AJA- 2004/11/05: This is preferred method, doesn't run any actions,
+//       which (ideally) should only happen during P_MovePsprites().
+//
+void COAL_SetPspriteDeferred(player_t * p, int position, int stnum)
+{
+    pspdef_t *psp = &p->psprites[position];
+
+    if (stnum == S_NULL || psp->state == NULL)
+    {
+        COAL_SetPsprite(p, position, stnum);
+        return;
+    }
+
+    psp->tics = 0;
+    psp->next_state = (states + stnum);
+}
+
+// player.weapon_state()
+// 
+static void PL_weapon_state(coal::vm_c *vm, int argc)
+{
+	const char * weapon_name = vm->AccessParamString(0);
+	const char * weapon_state = vm->AccessParamString(1);
+
+	if (ui_player_who->pending_wp >= 0)
+	{
+		vm->ReturnFloat(0);
+		return;
+	}
+
+	if (ui_player_who->ready_wp < 0)
+	{
+		vm->ReturnFloat(0);
+		return;
+	}
+
+	//weapondef_c *info = ui_player_who->weapons[ui_player_who->ready_wp].info;
+	weapondef_c *oldWep = weapondefs.Lookup(weapon_name);
+	if (!oldWep)
+	{
+		I_Error("player.weapon_state: Unknown weapon name '%s'.\n", weapon_name);
+	}
+
+	int pw_index;
+
+	// see if player owns this kind of weapon
+	for (pw_index=0; pw_index < MAXWEAPONS; pw_index++)
+	{
+		if (! ui_player_who->weapons[pw_index].owned)
+			continue;
+
+		if (ui_player_who->weapons[pw_index].info == oldWep)
+			break;
+	}
+
+	if (pw_index == MAXWEAPONS) //we dont have the weapon
+	{
+		vm->ReturnFloat(0);
+		return;
+	}
+
+	ui_player_who->ready_wp = (weapon_selection_e) pw_index; //insta-switch to it
+
+	statenum_t state = DDF_StateFindLabel(oldWep->state_grp, weapon_state, true /* quiet */);
+	if (state == S_NULL)
+		I_Error("player.weapon_state: frame '%s' in [%s] not found!\n",
+		weapon_state, weapon_name);
+	//state += 1;
+
+	COAL_SetPspriteDeferred(ui_player_who,ps_weapon,state); //refresh the sprite
+	
+	vm->ReturnFloat(1);
 }
 
 
@@ -906,7 +1034,7 @@ static void PL_use_inventory(coal::vm_c *vm, int argc)
 {
 	double *num = vm->AccessParam(0);
 	std::string script_name = "INVENTORY";
-	int inv;
+	int inv = 0;
 	if (!num)
 		I_Error("player.use_inventory: can't parse inventory number!\n");
 	else
@@ -1205,7 +1333,8 @@ static void PL_query_object(coal::vm_c *vm, int argc)
 	if (whatinfo < 1 || whatinfo > 5)
 		I_Error("player.query_object: bad whatInfo number: %d\n", whatinfo);
 
-	mobj_t *obj = DoMapTargetAutoAim(ui_player_who->mo, ui_player_who->mo->angle, maxdistance, true, true);
+	
+	mobj_t *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
 	if (!obj)
 	{
 		vm->ReturnString("");
@@ -1320,7 +1449,7 @@ static void PL_query_weapon(coal::vm_c *vm, int argc)
 	if (secattackinfo < 0 || secattackinfo > 1)
 		I_Error("player.query_weapon: bad secAttackInfo number: %d\n", whatinfo);
 
-	mobj_t *obj = DoMapTargetAutoAim(ui_player_who->mo, ui_player_who->mo->angle, maxdistance, true, true);
+	mobj_t *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
 	if (!obj)
 	{
 		vm->ReturnString("");
@@ -1429,6 +1558,8 @@ void VM_RegisterPlaysim()
     ui_vm->AddNativeFunction("mapobject.count",     MO_count);
 
 	ui_vm->AddNativeFunction("player.is_zoomed",        PL_is_zoomed);
+
+	ui_vm->AddNativeFunction("player.weapon_state",      PL_weapon_state);
 	
 }
 

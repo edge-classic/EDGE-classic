@@ -87,12 +87,7 @@ int key_quick_load;
 int key_quit_edge;
 int key_gamma_toggle;
 
-// Copy of E_MatchesKey so I don't have to pull in e_input.h
-bool M_MatchesKey(int keyvar, int key)
-{
-	return ((keyvar >> 16) == key) ||
-	       ((keyvar & 0xffff) == key);
-}
+extern bool E_MatchesKey(int keyvar, int key);
 
 //
 // defaulted values
@@ -268,12 +263,6 @@ menu_t;
 // menu item skull is on
 static int itemOn;
 
-// skull animation counter
-static int skullAnimCounter;
-
-// which skull to draw
-static int whichSkull;
-
 // current menudef
 static menu_t *currentMenu;
 
@@ -311,7 +300,7 @@ static void M_DrawEpisode(void);
 static void M_DrawLoad(void);
 static void M_DrawSave(void);
 
-static void M_DrawSaveLoadBorder(float x, float y, int len);
+// static void M_DrawSaveLoadBorder(float x, float y, int len);
 static void M_SetupNextMenu(menu_t * menudef);
 void M_ClearMenus(void);
 void M_StartControlPanel(void);
@@ -947,7 +936,7 @@ void M_DrawSave(void)
 	const image_c *L = W_ImageLookup("M_LSLEFT");
 	const image_c *C = W_ImageLookup("M_LSCNTR");
 	const image_c *R = W_ImageLookup("M_LSRGHT");
-	int i, len;
+	int i;
 	int y = LoadDef.y;
 
 	style_c *style = SaveDef.style_var[0];
@@ -1018,7 +1007,7 @@ void M_DrawSave(void)
 
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
-		int len;
+		int len = 0;
 		int font = styledef_c::T_TEXT;
 		if (saveStringEnter && i == save_slot)
 		{
@@ -1869,31 +1858,31 @@ bool M_Responder(event_t * ev)
 	int ch = ev->value.key.sym;
 
 	// Produce psuedo keycodes from menu navigation buttons bound in the options menu
-	if (M_MatchesKey(key_menu_open, ch))
+	if (E_MatchesKey(key_menu_open, ch))
 	{
 		ch = KEYD_MENU_OPEN;
 	}
-	else if (M_MatchesKey(key_menu_up, ch))
+	else if (E_MatchesKey(key_menu_up, ch))
 	{
 		ch = KEYD_MENU_UP;
 	}
-	else if (M_MatchesKey(key_menu_down, ch))
+	else if (E_MatchesKey(key_menu_down, ch))
 	{
 		ch = KEYD_MENU_DOWN;
 	}
-	else if (M_MatchesKey(key_menu_left, ch))
+	else if (E_MatchesKey(key_menu_left, ch))
 	{
 		ch = KEYD_MENU_LEFT;
 	}
-	else if (M_MatchesKey(key_menu_right, ch))
+	else if (E_MatchesKey(key_menu_right, ch))
 	{
 		ch = KEYD_MENU_RIGHT;
 	}
-	else if (M_MatchesKey(key_menu_select, ch))
+	else if (E_MatchesKey(key_menu_select, ch))
 	{
 		ch = KEYD_MENU_SELECT;
 	}
-	else if (M_MatchesKey(key_menu_cancel, ch))
+	else if (E_MatchesKey(key_menu_cancel, ch))
 	{
 		ch = KEYD_MENU_CANCEL;
 	}
@@ -2051,47 +2040,47 @@ bool M_Responder(event_t * ev)
 	if (!menuactive)
 	{
 
-		if (M_MatchesKey(key_screenshot, ch))
+		if (E_MatchesKey(key_screenshot, ch))
 		{
 			ch = KEYD_SCREENSHOT;
 		}
-		if (M_MatchesKey(key_save_game, ch))
+		if (E_MatchesKey(key_save_game, ch))
 		{
 			ch = KEYD_SAVEGAME;
 		}
-		if (M_MatchesKey(key_load_game, ch))
+		if (E_MatchesKey(key_load_game, ch))
 		{
 			ch = KEYD_LOADGAME;
 		}
-		if (M_MatchesKey(key_sound_controls, ch))
+		if (E_MatchesKey(key_sound_controls, ch))
 		{
 			ch = KEYD_SOUNDCONTROLS;
 		}
-		if (M_MatchesKey(key_options_menu, ch))
+		if (E_MatchesKey(key_options_menu, ch))
 		{
 			ch = KEYD_OPTIONSMENU;
 		}
-		if (M_MatchesKey(key_quick_save, ch))
+		if (E_MatchesKey(key_quick_save, ch))
 		{
 			ch = KEYD_QUICKSAVE;
 		}
-		if (M_MatchesKey(key_end_game, ch))
+		if (E_MatchesKey(key_end_game, ch))
 		{
 			ch = KEYD_ENDGAME;
 		}
-		if (M_MatchesKey(key_message_toggle, ch))
+		if (E_MatchesKey(key_message_toggle, ch))
 		{
 			ch = KEYD_MESSAGETOGGLE;
 		}
-		if (M_MatchesKey(key_quick_load, ch))
+		if (E_MatchesKey(key_quick_load, ch))
 		{
 			ch = KEYD_QUICKLOAD;
 		}
-		if (M_MatchesKey(key_quit_edge, ch))
+		if (E_MatchesKey(key_quit_edge, ch))
 		{
 			ch = KEYD_QUITEDGE;
 		}
-		if (M_MatchesKey(key_gamma_toggle, ch))
+		if (E_MatchesKey(key_gamma_toggle, ch))
 		{
 			ch = KEYD_GAMMATOGGLE;
 		}
@@ -2887,12 +2876,6 @@ void M_Ticker(void)
 		M_NetGameTicker();
 		return;
 	}
-
-	if (--skullAnimCounter <= 0)
-	{
-		whichSkull ^= 1;
-		skullAnimCounter = 8;
-	}
 }
 
 void M_Init(void)
@@ -2902,8 +2885,6 @@ void M_Init(void)
 	currentMenu = &MainDef;
 	menuactive = false;
 	itemOn = currentMenu->lastOn;
-	whichSkull = 0;
-	skullAnimCounter = 10;
 	msg_mode = 0;
 	msg_string.clear();
 	msg_lastmenu = menuactive;

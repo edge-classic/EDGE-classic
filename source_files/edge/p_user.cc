@@ -44,9 +44,15 @@
 
 #include "coal.h" // for coal::vm_c
 
+extern cvar_c r_doubleframes;
+
 extern coal::vm_c *ui_vm;
 
 extern void VM_SetVector(coal::vm_c *vm, const char *mod_name, const char *var_name, double val_1, double val_2, double val_3);
+
+DEF_CVAR(g_erraticism, "0", CVAR_ARCHIVE)
+
+DEF_CVAR(g_bobbing, "0", CVAR_ARCHIVE)
 
 float room_area;
 
@@ -98,8 +104,11 @@ static sfx_t * sfx_jprise;
 static sfx_t * sfx_jpdown;
 static sfx_t * sfx_jpflow;
 
-static void CalcHeight(player_t * player)
+static void CalcHeight(player_t * player, bool extra_tic)
 {
+	if (g_erraticism.d && leveltime > 0 && (!player->cmd.forwardmove && !player->cmd.sidemove))
+		return;
+
 	bool onground = player->mo->z <= player->mo->floorz;
 
 	if (player->mo->height < (player->mo->info->height + player->mo->info->crouchheight) / 2.0f)
@@ -118,8 +127,11 @@ static void CalcHeight(player_t * player)
 	// -AJA- Moved up here, to prevent weapon jumps when running down
 	// stairs.
 
-	player->bob = (player->mo->mom.x * player->mo->mom.x
-		+ player->mo->mom.y * player->mo->mom.y) / 8;
+	if (g_erraticism.d)
+		player->bob = 12.0f;
+	else
+		player->bob = (player->mo->mom.x * player->mo->mom.x
+			+ player->mo->mom.y * player->mo->mom.y) / 8;
 
 	if (player->bob > MAXBOB)
 		player->bob = MAXBOB;
@@ -135,7 +147,7 @@ static void CalcHeight(player_t * player)
 	// ----CALCULATE VIEWHEIGHT----
 	if (player->playerstate == PST_LIVE)
 	{
-		player->viewheight += player->deltaviewheight;
+		player->viewheight += player->deltaviewheight * (r_doubleframes.d ? 0.5 : 1);
 
 		if (player->viewheight > player->std_viewheight)
 		{
@@ -154,7 +166,8 @@ static void CalcHeight(player_t * player)
 		{
 			// use a weird number to minimise chance of hitting
 			// zero when deltaviewheight goes neg -> positive.
-			player->deltaviewheight += 0.24162f;
+			if (!extra_tic || !r_doubleframes.d)
+				player->deltaviewheight += 0.24162f;
 		}
 	}
 
@@ -189,6 +202,12 @@ static void CalcHeight(player_t * player)
 			bob_z *= (6 - player->jumpwait) / 6.0;
 	}
 
+	if (r_doubleframes.d)
+		bob_z *= 0.5;
+
+	if (g_bobbing.d > 1)
+		bob_z = 0;
+
 	player->viewz = player->viewheight + bob_z;
 
 #if 0  // DEBUG
@@ -202,7 +221,7 @@ I_Debugf("Jump:%d bob_z:%1.2f  z:%1.2f  height:%1.2f delta:%1.2f --> viewz:%1.3f
 
 void P_PlayerJump(player_t *pl, float dz, int wait)
 {
-	pl->mo->mom.z += pl->mo->info->jumpheight / 1.4f;
+	pl->mo->mom.z += pl->mo->info->jumpheight / (r_doubleframes.d ? 1.25f : 1.4f);
 
 	if (pl->jumpwait < wait)
 		pl->jumpwait = wait;
@@ -227,7 +246,7 @@ void P_PlayerJump(player_t *pl, float dz, int wait)
 }
 
 
-static void MovePlayer(player_t * player)
+static void MovePlayer(player_t * player, bool extra_tic)
 {
 	ticcmd_t *cmd;
 	mobj_t *mo = player->mo;
@@ -289,8 +308,8 @@ static void MovePlayer(player_t * player)
 	// compute XY and Z speeds, taking swimming (etc) into account
 	// (we try to swim in view direction -- assumes no gravity).
 
-	base_xy_speed = player->mo->speed / 32.0f;
-	base_z_speed  = player->mo->speed / 64.0f;
+	base_xy_speed = player->mo->speed / (r_doubleframes.d ? 64.0f : 32.0f);
+	base_z_speed  = player->mo->speed / (r_doubleframes.d ? 57.0f : 64.0f);
 
 	// Do not let the player control movement if not onground.
 	// -MH- 1998/06/18  unless he has the JetPack!
@@ -387,13 +406,16 @@ static void MovePlayer(player_t * player)
 	// -ACB- 1998/08/09 Check that jumping is allowed in the currmap
 	//                  Make player pause before jumping again
 
-	if (level_flags.jump && mo->info->jumpheight > 0 &&
-	    (cmd->upwardmove > 4))
+	if (!extra_tic || !r_doubleframes.d)
 	{
-		if (!jumping && !crouching && !swimming && !flying && onground && !onladder)
+		if (level_flags.jump && mo->info->jumpheight > 0 &&
+			(cmd->upwardmove > 4))
 		{
-			P_PlayerJump(player, player->mo->info->jumpheight / 1.4f,
-			             player->mo->info->jump_delay);
+			if (!jumping && !crouching && !swimming && !flying && onground && !onladder)
+			{
+				P_PlayerJump(player, player->mo->info->jumpheight / (r_doubleframes.d ? 1.25f : 1.4f),
+							player->mo->info->jump_delay);
+			}
 		}
 	}
 
@@ -406,7 +428,7 @@ static void MovePlayer(player_t * player)
 	{
 		if (mo->height > mo->info->crouchheight)
 		{
-			mo->height = MAX(mo->height - 2.0f, mo->info->crouchheight);
+			mo->height = MAX(mo->height - 2.0f / (r_doubleframes.d ? 2.0 : 1.0), mo->info->crouchheight);
 
 			// update any things near the player
 			P_ChangeThingSize(mo);
@@ -418,10 +440,12 @@ static void MovePlayer(player_t * player)
 	{
 		if (mo->height < mo->info->height)
 		{
+			float new_height = MIN(mo->height + 2 / (r_doubleframes.d? 2 : 1), mo->info->height);
+
 			// prevent standing up inside a solid area
-			if ((mo->flags & MF_NOCLIP) || mo->z+mo->height+2 <= mo->ceilingz)
+			if ((mo->flags & MF_NOCLIP) || mo->z+ new_height <= mo->ceilingz)
 			{
-				mo->height = MIN(mo->height + 2, mo->info->height);
+				mo->height = new_height;
 
 				// update any things near the player
 				P_ChangeThingSize(mo);
@@ -451,8 +475,13 @@ static void MovePlayer(player_t * player)
 }
 
 
-static void DeathThink(player_t * player)
+static void DeathThink(player_t * player, bool extra_tic)
 {
+	int subtract = extra_tic ? 0 : 1;
+
+	if (!r_doubleframes.d)
+		subtract = 1;
+
 	// fall on your face when dying.
 
 	float dx, dy, dz;
@@ -464,18 +493,19 @@ static void DeathThink(player_t * player)
 	// -AJA- 1999/12/07: don't die mid-air.
 	player->powers[PW_Jetpack] = 0;
 
-	P_MovePsprites(player);
+	if (!extra_tic)
+		P_MovePsprites(player);
 
 	// fall to the ground
 	if (player->viewheight > player->std_viewheight)
-		player->viewheight -= 1.0f;
+		player->viewheight -= 1.0f / (r_doubleframes.d ? 2.0 : 1.0);
 	else if (player->viewheight < player->std_viewheight)
 		player->viewheight = player->std_viewheight;
 
 	player->deltaviewheight = 0.0f;
 	player->kick_offset = 0.0f;
 
-	CalcHeight(player);
+	CalcHeight(player, extra_tic);
 
 	if (player->attacker && player->attacker != player->mo)
 	{
@@ -499,31 +529,32 @@ static void DeathThink(player_t * player)
 			player->mo->vertangle = M_ATan(slope);
 
 			if (player->damagecount > 0)
-				player->damagecount--;
+				player->damagecount -= subtract;
 		}
 		else 
 		{
+			int factor = r_doubleframes.d ? 2 : 1;
 			if (delta < ANG180)
-				delta /= 5;
+				delta /= (5 * factor);
 			else
-				delta = (angle_t)(0 - (angle_t)(0 - delta) / 5);
+				delta = (angle_t)(0 - (angle_t)(0 - delta) / (5 * factor));
 			
-			if (delta > ANG5 && delta < (angle_t)(0 - ANG5))
-				delta = (delta < ANG180) ? ANG5 : (angle_t)(0 - ANG5);
+			if (delta > ANG5/factor && delta < (angle_t)(0 - ANG5/factor))
+				delta = (delta < ANG180) ? ANG5/factor : (angle_t)(0 - ANG5/factor);
 
 			if (delta_s < ANG180)
-				delta_s /= 5;
+				delta_s /= (5 * factor);
 			else
-				delta_s = (angle_t)(0 - (angle_t)(0 - delta_s) / 5);
+				delta_s = (angle_t)(0 - (angle_t)(0 - delta_s) / (5 * factor));
 			
-			if (delta_s > (ANG5/2) && delta_s < (angle_t)(0 - ANG5/2))
-				delta_s = (delta_s < ANG180) ? (ANG5/2) : (angle_t)(0 - ANG5/2);
+			if (delta_s > (ANG5/(factor * 2)) && delta_s < (angle_t)(0 - ANG5/(factor * 2)))
+				delta_s = (delta_s < ANG180) ? (ANG5/(factor * 2)) : (angle_t)(0 - ANG5/(factor * 2));
 
 			player->mo->angle += delta;
 			player->mo->vertangle += delta_s;
 
 			if (player->damagecount && (leveltime % 3) == 0)
-				player->damagecount--;
+				player->damagecount -= subtract;
 		}
 	}
 	else if (player->damagecount > 0)
@@ -531,7 +562,7 @@ static void DeathThink(player_t * player)
 
 	// -AJA- 1999/08/07: Fade out armor points too.
 	if (player->bonuscount)
-		player->bonuscount--;
+		player->bonuscount -= subtract;
 
 	P_UpdatePowerups(player);
 
@@ -659,11 +690,13 @@ bool P_PlayerSwitchWeapon(player_t *player, weapondef_c *choice)
 }
 
 
-void P_PlayerThink(player_t * player)
+bool P_PlayerThink(player_t * player, bool extra_tic)
 {
-	ticcmd_t *cmd;
+	ticcmd_t *cmd = &player->cmd;
 
 	SYS_ASSERT(player->mo);
+
+	bool should_think = true;
 
 #if 0  // DEBUG ONLY
 	{
@@ -697,30 +730,51 @@ void P_PlayerThink(player_t * player)
 		player->mo->flags &= ~MF_NOCLIP;
 
 	// chain saw run forward
-	cmd = &player->cmd;
-	if (player->mo->flags & MF_JUSTATTACKED)
+	if (extra_tic || !r_doubleframes.d)
 	{
-		cmd->angleturn = 0;
-		cmd->forwardmove = 64;
-		cmd->sidemove = 0;
-		player->mo->flags &= ~MF_JUSTATTACKED;
+		if (player->mo->flags & MF_JUSTATTACKED)
+		{
+			cmd->angleturn = 0;
+			cmd->forwardmove = 64;
+			cmd->sidemove = 0;
+			player->mo->flags &= ~MF_JUSTATTACKED;
+		}
 	}
 
 	if (player->playerstate == PST_DEAD)
 	{
-		DeathThink(player);
-		return;
+		DeathThink(player, extra_tic);
+		return true;
 	}
+
+	int subtract = extra_tic ? 0 : 1;
+	if (!r_doubleframes.d)
+		subtract = 1;
 
 	// Move/Look around.  Reactiontime is used to prevent movement for a
 	// bit after a teleport.
 
 	if (player->mo->reactiontime)
-		player->mo->reactiontime--;
-	else
-		MovePlayer(player);
+		player->mo->reactiontime -= subtract;
 
-	CalcHeight(player);
+	if (player->mo->reactiontime == 0)
+		MovePlayer(player, extra_tic);
+
+	CalcHeight(player, extra_tic);
+
+	if (g_erraticism.d)
+	{
+		if (cmd->forwardmove == 0 && cmd->sidemove == 0 && cmd->upwardmove <= 0 && (!cmd->buttons & BT_ATTACK) && 
+			(player->mo->height == player->mo->info->height || player->mo->height == player->mo->info->crouchheight))
+		{
+			should_think = false;
+			if (!player->mo->mom.z)
+			{
+				player->mo->mom.x = 0;
+				player->mo->mom.y = 0;
+			}
+		}
+	}
 
 	// Reset environmental FX in case player has left sector in which they apply - Dasho
 	vacuum_sfx = false;
@@ -784,6 +838,10 @@ void P_PlayerThink(player_t * player)
 	VM_SetVector(ui_vm, "player", "inventory_event_handler", cmd->extbuttons & EBT_INVPREV ? 1 : 0, 
 		cmd->extbuttons & EBT_INVUSE ? 1 : 0, cmd->extbuttons & EBT_INVNEXT ? 1 : 0);
 
+	// FIXME separate code more cleanly
+	if (extra_tic && r_doubleframes.d)
+		return should_think;
+
 	// decrement jumpwait counter
 	if (player->jumpwait > 0)
 		player->jumpwait--;
@@ -839,6 +897,8 @@ void P_PlayerThink(player_t * player)
 		line_lengths += abs(room_checker.x - player_x);
 		room_area = line_lengths / 8;
 	}
+
+	return should_think;
 }
 
 

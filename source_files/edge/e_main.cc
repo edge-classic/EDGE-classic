@@ -32,6 +32,7 @@
 //
 
 #include "i_defs.h"
+#include "i_sdlinc.h"
 #include "e_main.h"
 
 #include <sys/stat.h>
@@ -42,7 +43,6 @@
 #include <vector>
 #include <chrono> // PurgeCache
 
-#include "exe_path.h"
 #include "file.h"
 #include "filesystem.h"
 #include "path.h"
@@ -90,6 +90,8 @@
 #include "w_wad.h"
 #include "version.h"
 #include "vm_coal.h"
+
+extern cvar_c r_doubleframes;
 
 // Application active?
 int app_state = APP_STATE_ACTIVE;
@@ -201,6 +203,8 @@ std::string shot_dir;
 // not using DEF_CVAR here since var name != cvar name
 cvar_c m_language("language", "ENGLISH", CVAR_ARCHIVE);
 
+DEF_CVAR(r_overlay, "0", CVAR_ARCHIVE)
+
 DEF_CVAR(g_aggression, "0", CVAR_ARCHIVE)
 
 DEF_CVAR(ddf_strict, "0", CVAR_ARCHIVE)
@@ -246,6 +250,15 @@ public:
 				HUD_DrawText(26, y, startup_messages[i].c_str());
 			y += 10;
 		}
+
+		if (!hud_overlays.at(r_overlay.d).empty())
+		{
+			const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d).c_str(), INS_Graphic, ILF_Null);
+			if (overlay)
+				HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay), \
+					SCREENHEIGHT / IM_HEIGHT(overlay));
+		}
+
 		I_FinishFrame();
 	}
 };
@@ -264,52 +277,52 @@ void E_ProgressMessage(const char *message)
 static void SetGlobalVars(void)
 {
 	int p;
-	const char *s;
+	std::string s;
 
 	// Screen Resolution Check...
-	if (M_CheckParm("-borderless"))
+	if (argv::Find("borderless") > 0)
 		DISPLAYMODE = 2;
-	else if (M_CheckParm("-fullscreen"))
+	else if (argv::Find("fullscreen") > 0)
 		DISPLAYMODE = 1;
-	else if (M_CheckParm("-windowed"))
+	else if (argv::Find("windowed") > 0)
 		DISPLAYMODE = 0;
 
-	s = M_GetParm("-width");
-	if (s)
+	s = argv::Value("width");
+	if (!s.empty())
 	{
 		if (DISPLAYMODE == 2)
-			I_Warning("Current display mode set to borderless fullscreen. Provided width of %d will be ignored!\n", atoi(s));
+			I_Warning("Current display mode set to borderless fullscreen. Provided width of %d will be ignored!\n", atoi(s.c_str()));
 		else
-			SCREENWIDTH = atoi(s);
+			SCREENWIDTH = atoi(s.c_str());
 	}
 
-	s = M_GetParm("-height");
-	if (s)
+	s = argv::Value("height");
+	if (!s.empty())
 	{
 		if (DISPLAYMODE == 2)
-			I_Warning("Current display mode set to borderless fullscreen. Provided height of %d will be ignored!\n", atoi(s));
+			I_Warning("Current display mode set to borderless fullscreen. Provided height of %d will be ignored!\n", atoi(s.c_str()));
 		else
-			SCREENHEIGHT = atoi(s);
+			SCREENHEIGHT = atoi(s.c_str());
 	}
 
-	p = M_CheckParm("-res");
-	if (p && p + 2 < M_GetArgCount())
+	p = argv::Find("res");
+	if (p > 0 && p + 2 < argv::list.size() && !argv::IsOption(p+1) && !argv::IsOption(p+2))
 	{
 		if (DISPLAYMODE == 2)
 			I_Warning("Current display mode set to borderless fullscreen. Provided resolution of %dx%d will be ignored!\n", 
-				atoi(M_GetArgument(p + 1)), atoi(M_GetArgument(p + 2)));
+				atoi(argv::list[p+1].c_str()), atoi(argv::list[p+2].c_str()));
 		else
 		{
-			SCREENWIDTH  = atoi(M_GetArgument(p + 1));
-			SCREENHEIGHT = atoi(M_GetArgument(p + 2));
+			SCREENWIDTH  = atoi(argv::list[p+1].c_str());
+			SCREENHEIGHT = atoi(argv::list[p+2].c_str());
 		}
 	}
 
 	// Bits per pixel check....
-	s = M_GetParm("-bpp");
-	if (s)
+	s = argv::Value("bpp");
+	if (!s.empty())
 	{
-		SCREENBITS = atoi(s);
+		SCREENBITS = atoi(s.c_str());
 
 		if (SCREENBITS <= 4) // backwards compat
 			SCREENBITS *= 8;
@@ -327,67 +340,67 @@ static void SetGlobalVars(void)
 	}
 
 	// sprite kludge (TrueBSP)
-	p = M_CheckParm("-spritekludge");
-	if (p)
+	p = argv::Find("spritekludge");
+	if (p > 0)
 	{
-		if (p + 1 < M_GetArgCount())
-			sprite_kludge = atoi(M_GetArgument(p + 1));
+		if (p + 1 < argv::list.size() && !argv::IsOption(p+1))
+			sprite_kludge = atoi(argv::list[p+1].c_str());
 
 		if (!sprite_kludge)
 			sprite_kludge = 1;
 	}
 
-	s = M_GetParm("-screenshot");
-	if (s)
+	s = argv::Value("screenshot");
+	if (!s.empty())
 	{
-		screenshot_rate = atoi(s);
+		screenshot_rate = atoi(s.c_str());
 		singletics = true;
 	}
 
-	// -AJA- 1999/10/18: Reworked these with M_CheckBooleanParm
-	M_CheckBooleanParm("rotatemap", &rotatemap, false);
-	M_CheckBooleanParm("sound", &nosound, true);
-	M_CheckBooleanParm("music", &nomusic, true);
-	M_CheckBooleanParm("itemrespawn", &global_flags.itemrespawn, false);
-	M_CheckBooleanParm("mlook", &global_flags.mlook, false);
-	M_CheckBooleanParm("monsters", &global_flags.nomonsters, true);
-	M_CheckBooleanParm("fast", &global_flags.fastparm, false);
-	M_CheckBooleanParm("extras", &global_flags.have_extra, false);
-	M_CheckBooleanParm("kick", &global_flags.kicking, false);
-	M_CheckBooleanParm("singletics", &singletics, false);
-	M_CheckBooleanParm("true3d", &global_flags.true3dgameplay, false);
-	M_CheckBooleanParm("blood", &global_flags.more_blood, false);
-	M_CheckBooleanParm("cheats", &global_flags.cheats, false);
-	M_CheckBooleanParm("jumping", &global_flags.jump, false);
-	M_CheckBooleanParm("crouching", &global_flags.crouch, false);
-	M_CheckBooleanParm("weaponswitch", &global_flags.weapon_switch, false);
-	M_CheckBooleanParm("autoload", &autoquickload, false);
+	// -AJA- 1999/10/18: Reworked these with argv::CheckBooleanParm
+	argv::CheckBooleanParm("rotatemap", &rotatemap, false);
+	argv::CheckBooleanParm("sound", &nosound, true);
+	argv::CheckBooleanParm("music", &nomusic, true);
+	argv::CheckBooleanParm("itemrespawn", &global_flags.itemrespawn, false);
+	argv::CheckBooleanParm("mlook", &global_flags.mlook, false);
+	argv::CheckBooleanParm("monsters", &global_flags.nomonsters, true);
+	argv::CheckBooleanParm("fast", &global_flags.fastparm, false);
+	argv::CheckBooleanParm("extras", &global_flags.have_extra, false);
+	argv::CheckBooleanParm("kick", &global_flags.kicking, false);
+	argv::CheckBooleanParm("singletics", &singletics, false);
+	argv::CheckBooleanParm("true3d", &global_flags.true3dgameplay, false);
+	argv::CheckBooleanParm("blood", &global_flags.more_blood, false);
+	argv::CheckBooleanParm("cheats", &global_flags.cheats, false);
+	argv::CheckBooleanParm("jumping", &global_flags.jump, false);
+	argv::CheckBooleanParm("crouching", &global_flags.crouch, false);
+	argv::CheckBooleanParm("weaponswitch", &global_flags.weapon_switch, false);
+	argv::CheckBooleanParm("autoload", &autoquickload, false);
 
-	if (M_CheckParm("-infight"))
+	if (argv::Find("infight") > 0)
 		g_aggression = 1;
 
-	if (M_CheckParm("-dlights"))
+	if (argv::Find("dlights") > 0)
 		use_dlights = 1;
-	else if (M_CheckParm("-nodlights"))
+	else if (argv::Find("nodlights") > 0)
 		use_dlights = 0;
 
 	if (!global_flags.respawn)
 	{
-		if (M_CheckParm("-newnmrespawn"))
+		if (argv::Find("newnmrespawn") > 0)
 		{
 			global_flags.res_respawn = true;
 			global_flags.respawn = true;
 		}
-		else if (M_CheckParm("-respawn"))
+		else if (argv::Find("respawn") > 0)
 		{
 			global_flags.respawn = true;
 		}
 	}
 
 	// check for strict and no-warning options
-	M_CheckBooleanCVar("strict", &ddf_strict, false);
-	M_CheckBooleanCVar("lax",    &ddf_lax,    false);
-	M_CheckBooleanCVar("warn",   &ddf_quiet,  true);
+	argv::CheckBooleanCVar("strict", &ddf_strict, false);
+	argv::CheckBooleanCVar("lax",    &ddf_lax,    false);
+	argv::CheckBooleanCVar("warn",   &ddf_quiet,  true);
 
 	strict_errors = ddf_strict.d ? true : false;
 	lax_errors    = ddf_lax.d    ? true : false;
@@ -399,8 +412,8 @@ static void SetGlobalVars(void)
 //
 void SetLanguage(void)
 {
-	const char *want_lang = M_GetParm("-lang");
-	if (want_lang)
+	std::string want_lang = argv::Value("lang");
+	if (!want_lang.empty())
 		m_language = want_lang;
 
 	if (language.Select(m_language.c_str()))
@@ -614,6 +627,14 @@ void E_Display(void)
 
 	CON_Drawer();
 
+	if (!hud_overlays.at(r_overlay.d).empty())
+	{
+		const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d).c_str(), INS_Graphic, ILF_Null);
+		if (overlay)
+			HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay), \
+				SCREENHEIGHT / IM_HEIGHT(overlay));
+	}
+
 	if (m_screenshot_required)
 	{
 		m_screenshot_required = false;
@@ -751,14 +772,14 @@ void E_AdvanceTitle(void)
 		if (title_pic == 0 && g->titlemusic > 0)
 			S_ChangeMusic(g->titlemusic, false);
 
-		title_countdown = g->titletics;
+		title_countdown = g->titletics * (r_doubleframes.d ? 2 : 1);
 		return;
 	}
 
 	// not found
 
 	title_image = NULL;
-	title_countdown = TICRATE;
+	title_countdown = TICRATE * (r_doubleframes.d ? 2 : 1);
 }
 
 void E_StartTitle(void)
@@ -793,19 +814,17 @@ void E_TitleTicker(void)
 //
 void InitDirectories(void)
 {
-    std::string path;
-
-	const char *s = M_GetParm("-home");
-    if (s)
-        home_dir = s;
+	std::filesystem::path s = argv::Value("home");
+    if (!s.empty())
+        home_dir = s.generic_string();
 
 	// Get the Home Directory from environment if set
     if (home_dir.empty())
     {
-        s = getenv("HOME");
-        if (s)
+        s = getenv("HOME") ? getenv("HOME") : "";
+        if (!s.empty())
         {
-            home_dir = epi::PATH_Join(s, EDGEHOMESUBDIR); 
+            home_dir = epi::PATH_Join(s.generic_string().c_str(), EDGEHOMESUBDIR); 
 
 			if (! epi::FS_IsDir(home_dir.c_str()))
 			{
@@ -821,17 +840,20 @@ void InitDirectories(void)
     if (home_dir.empty()) home_dir = "."; // Default to current directory
 
 	// Get the Game Directory from parameter.
-#ifdef __APPLE__
-	s = epi::GetResourcePath();
+	
+	// Note: This might need adjusting for Apple
+#ifndef WIN32
+	s = SDL_GetBasePath();
 #else
-	s = epi::GetExecutablePath();
+	s = (char32_t *)SDL_iconv_utf8_ucs4(SDL_GetBasePath());
 #endif
-	game_dir = s;
-	free((void*)s);
 
-	s = M_GetParm("-game");
-	if (s)
-		game_dir = s;
+	game_dir = s.generic_string();
+	s.clear();
+
+	s = argv::Value("game");
+	if (!s.empty())
+		game_dir = s.generic_string();
 
 	// add parameter file "gamedir/parms" if it exists.
 	std::string parms = epi::PATH_Join(game_dir.c_str(), "parms");
@@ -839,14 +861,14 @@ void InitDirectories(void)
 	if (epi::FS_Access(parms.c_str(), epi::file_c::ACCESS_READ))
 	{
 		// Insert it right after the game parameter
-		M_ApplyResponseFile(parms.c_str(), M_CheckParm("-game") + 2);
+		argv::ApplyResponseFile(parms.c_str());
 	}
 
 	// config file
-	s = M_GetParm("-config");
-	if (s)
+	s = argv::Value("config");
+	if (!s.empty())
 	{
-		cfgfile = std::string(s);
+		cfgfile = std::string(s.generic_string());
 	}
 	else
     {
@@ -854,10 +876,10 @@ void InitDirectories(void)
 	}
 
 	// edge.wad file
-	s = M_GetParm("-ewad");
-	if (s)
+	s = argv::Value("ewad");
+	if (!s.empty())
 	{
-		ewadfile = std::string(s);
+		ewadfile = std::string(s.generic_string());
 	}
 	else
     {
@@ -935,9 +957,9 @@ static void IdentifyVersion(void)
     std::string iwad_dir;
 	std::vector<std::string> iwad_dir_vector;
 
-	const char *s = M_GetParm("-iwad");
+	std::string s = argv::Value("iwad");
 
-    iwad_par = std::string(s ? s : "");
+    iwad_par = s;
 
     if (! iwad_par.empty())
     {
@@ -952,20 +974,19 @@ static void IdentifyVersion(void)
     // the DOOMWADDIR environment variable
     if (iwad_dir.empty())
     {
-        s = getenv("DOOMWADDIR");
+        s = getenv("DOOMWADDIR") ? getenv("DOOMWADDIR") : "";
 
-        if (s && epi::FS_IsDir(s))
-            iwad_dir_vector.push_back(std::string(s));
+        if (!s.empty() && epi::FS_IsDir(s.c_str()))
+            iwad_dir_vector.push_back(s);
     }
 
     // Should the IWAD directory not be set by now, then we
     // use our standby option of the current directory.
-    if (iwad_dir.empty())
-        iwad_dir = ".";
+    if (iwad_dir.empty()) iwad_dir = ".";
 
 	// Add DOOMWADPATH directories if they exist
-	s = getenv("DOOMWADPATH");
-	if (s)
+	s = getenv("DOOMWADPATH") ? getenv("DOOMWADPATH") : "";
+	if (!s.empty())
 	{
 #ifdef WIN32
         for (auto dir : epi::STR_SepStringVector(s, ';'))
@@ -1001,7 +1022,7 @@ static void IdentifyVersion(void)
 			// Check DOOMWADPATH directories if present
 			if (!iwad_dir_vector.empty())
 			{
-				for (int i=0; i < iwad_dir_vector.size(); i++)
+				for (size_t i=0; i < iwad_dir_vector.size(); i++)
 				{
 					iwad_file = epi::PATH_Join(iwad_dir_vector[i].c_str(), fn.c_str());
 					if (epi::FS_Access(iwad_file.c_str(), epi::file_c::ACCESS_READ))
@@ -1017,7 +1038,7 @@ static void IdentifyVersion(void)
 
 		epi::file_c *iwad_test = epi::FS_Open(iwad_file.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 		bool unique_lump_match = false;
-		for (int i=0; i < iwad_checker.size(); i++) {
+		for (size_t i=0; i < iwad_checker.size(); i++) {
 			if (W_CheckForUniqueLumps(iwad_test, iwad_checker[i].unique_lumps[0], iwad_checker[i].unique_lumps[1]))
 			{
 				unique_lump_match = true;
@@ -1073,7 +1094,7 @@ static void IdentifyVersion(void)
 					if(!fsd[i].is_dir)
 					{
 						epi::file_c *iwad_test = epi::FS_Open(fsd[i].name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-						for (int j = 0; j < iwad_checker.size(); j++) 
+						for (size_t j = 0; j < iwad_checker.size(); j++) 
 						{
 							if (W_CheckForUniqueLumps(iwad_test, iwad_checker[j].unique_lumps[0], iwad_checker[j].unique_lumps[1]))
 							{
@@ -1096,7 +1117,7 @@ static void IdentifyVersion(void)
 
 		if (!iwad_dir_vector.empty())
 		{
-			for (int i=0; i < iwad_dir_vector.size(); i++)
+			for (size_t i=0; i < iwad_dir_vector.size(); i++)
 			{
 				location = iwad_dir_vector[i].c_str();
 
@@ -1113,7 +1134,7 @@ static void IdentifyVersion(void)
 						if(!fsd[i].is_dir)
 						{
 							epi::file_c *iwad_test = epi::FS_Open(fsd[i].name.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-							for (int j = 0; j < iwad_checker.size(); j++) 
+							for (size_t j = 0; j < iwad_checker.size(); j++) 
 							{
 								if (W_CheckForUniqueLumps(iwad_test, iwad_checker[j].unique_lumps[0], iwad_checker[j].unique_lumps[1]))
 								{
@@ -1161,12 +1182,12 @@ static void CheckTurbo(void)
 {
 	int turbo_scale = 100;
 
-	int p = M_CheckParm("-turbo");
+	int p = argv::Find("turbo");
 
-	if (p)
+	if (p > 0)
 	{
-		if (p + 1 < M_GetArgCount())
-			turbo_scale = atoi(M_GetArgument(p + 1));
+		if (p + 1 < argv::list.size() && !argv::IsOption(p+1))
+			turbo_scale = atoi(argv::list[p+1].c_str());
 		else
 			turbo_scale = 200;
 
@@ -1196,9 +1217,9 @@ static void ShowDateAndVersion(void)
 	I_Printf("EDGE-Classic homepage is at https://github.com/dashodanger/EDGE-classic/\n");
 	I_Printf("EDGE-Classic is based on DOOM by id Software http://www.idsoftware.com/\n");
 
-	I_Printf("Executable path: '%s'\n", exe_path);
+	I_Printf("Executable path: '%s'\n", exe_path.generic_string().c_str());
 
-	M_DebugDumpArgs();
+	argv::DebugDumpArgs();
 }
 
 static void SetupLogAndDebugFiles(void)
@@ -1212,9 +1233,8 @@ static void SetupLogAndDebugFiles(void)
 	logfile = NULL;
 	debugfile = NULL;
 
-	if (! M_CheckParm("-nolog"))
+	if (argv::Find("nolog") < 0)
 	{
-
 		logfile = fopen(log_fn.c_str(), "w");
 
 		if (!logfile)
@@ -1230,7 +1250,7 @@ static void SetupLogAndDebugFiles(void)
 	//
 	// -ACB- 1999/10/02 Don't print to console, since we don't have a console yet.
 
-	/// int p = M_CheckParm("-debug");
+	/// int p = argv::Find("debug");
 	if (true)
 	{
 		debugfile = fopen(debug_fn.c_str(), "w");
@@ -1279,114 +1299,107 @@ static void AddCommandLineFiles(void)
 	// first handle "loose" files (arguments before the first option)
 
 	int p;
-	const char *ps;
 
-	for (p = 1; p < M_GetArgCount() && '-' != (ps = M_GetArgument(p))[0]; p++)
+	for (p = 1; p < argv::list.size() && !argv::IsOption(p); p++)
 	{
-		AddSingleCmdLineFile(ps, false);
+		AddSingleCmdLineFile(argv::list[p].c_str(), false);
 	}
 
 	// next handle the -file option (we allow multiple uses)
 
-	p = M_CheckNextParm("-file", 0);
+	p = argv::Find("file");
 
-	while (p)
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-file") == 0))
 	{
 		// the parms after p are wadfile/lump names,
 		// go until end of parms or another '-' preceded parm
+		if (!argv::IsOption(p))
+			AddSingleCmdLineFile(argv::list[p].c_str(), false);
 
-		for (p++; p < M_GetArgCount() && '-' != (ps = M_GetArgument(p))[0]; p++)
-		{
-			AddSingleCmdLineFile(ps, false);
-		}
-
-		p = M_CheckNextParm("-file", p-1);
+		p++;
 	}
 
 	// scripts....
 
-	p = M_CheckNextParm("-script", 0);
+	p = argv::Find("script");
 
-	while (p)
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-script") == 0))
 	{
 		// the parms after p are script filenames,
 		// go until end of parms or another '-' preceded parm
-
-		for (p++; p < M_GetArgCount() && '-' != (ps = M_GetArgument(p))[0]; p++)
+		if (!argv::IsOption(p))
 		{
-			std::string ext = epi::PATH_GetExtension(ps);
+			std::string ext = epi::PATH_GetExtension(argv::list[p].c_str());
 
 			// sanity check...
 			if (epi::case_cmp(ext.c_str(), ".wad") == 0 || 
-                epi::case_cmp(ext.c_str(), ".pk3") == 0 ||
-                epi::case_cmp(ext.c_str(), ".ddf") == 0 ||
-			    epi::case_cmp(ext.c_str(), ".deh") == 0 ||
-			    epi::case_cmp(ext.c_str(), ".bex") == 0)
+				epi::case_cmp(ext.c_str(), ".pk3") == 0 ||
+				epi::case_cmp(ext.c_str(), ".ddf") == 0 ||
+				epi::case_cmp(ext.c_str(), ".deh") == 0 ||
+				epi::case_cmp(ext.c_str(), ".bex") == 0)
 			{
-				I_Error("Illegal filename for -script: %s\n", ps);
+				I_Error("Illegal filename for -script: %s\n", argv::list[p].c_str());
 			}
 
-			std::string filename = M_ComposeFileName(game_dir.c_str(), ps);
+			std::string filename = M_ComposeFileName(game_dir.c_str(), argv::list[p].c_str());
 			W_AddFilename(filename.c_str(), FLKIND_RTS);
 		}
 
-		p = M_CheckNextParm("-script", p-1);
+		p++;
 	}
 
 	// dehacked/bex....
 
-	p = M_CheckNextParm("-deh", 0);
+	p = argv::Find("deh");
 
-	while (p)
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-deh") == 0))
 	{
 		// the parms after p are Dehacked/BEX filenames,
 		// go until end of parms or another '-' preceded parm
-
-		for (p++; p < M_GetArgCount() && '-' != (ps = M_GetArgument(p))[0]; p++)
+		if (!argv::IsOption(p))
 		{
-			std::string ext(epi::PATH_GetExtension(ps));
+			std::string ext(epi::PATH_GetExtension(argv::list[p].c_str()));
 
 			// sanity check...
 			if (epi::case_cmp(ext.c_str(), ".wad") == 0 || 
-                epi::case_cmp(ext.c_str(), ".pk3") == 0 ||
-                epi::case_cmp(ext.c_str(), ".ddf") == 0 ||
-			    epi::case_cmp(ext.c_str(), ".rts") == 0)
+				epi::case_cmp(ext.c_str(), ".pk3") == 0 ||
+				epi::case_cmp(ext.c_str(), ".ddf") == 0 ||
+				epi::case_cmp(ext.c_str(), ".rts") == 0)
 			{
-				I_Error("Illegal filename for -deh: %s\n", ps);
+				I_Error("Illegal filename for -deh: %s\n", argv::list[p].c_str());
 			}
 
-			std::string filename = M_ComposeFileName(game_dir.c_str(), ps);
+			std::string filename = M_ComposeFileName(game_dir.c_str(), argv::list[p].c_str());
 			W_AddFilename(filename.c_str(), FLKIND_Deh);
 		}
 
-		p = M_CheckNextParm("-deh", p-1);
+		p++;
 	}
 
 	// directories....
 
-	p = M_CheckNextParm("-dir", 0);
+	p = argv::Find("dir");
 
-	while (p)
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-dir") == 0))
 	{
 		// the parms after p are directory names,
 		// go until end of parms or another '-' preceded parm
-
-		for (p++; p < M_GetArgCount() && '-' != (ps = M_GetArgument(p))[0]; p++)
+		if (!argv::IsOption(p))
 		{
-			std::string dirname = M_ComposeFileName(game_dir.c_str(), ps);
+			std::string dirname = M_ComposeFileName(game_dir.c_str(), argv::list[p].c_str());
 			W_AddFilename(dirname.c_str(), FLKIND_Folder);
 		}
 
-		p = M_CheckNextParm("-dir", p-1);
+		p++;
 	}
 
 	// handle -ddf option (backwards compatibility)
 
-	ps = M_GetParm("-ddf");
+	std::string ps = argv::Value("ddf");
 
-	if (ps != NULL)
+	if (!ps.empty())
 	{
-		std::string filename = M_ComposeFileName(game_dir.c_str(), ps);
+		std::string filename = M_ComposeFileName(game_dir.c_str(), ps.c_str());
 		W_AddFilename(filename.c_str(), FLKIND_Folder);
 	}
 }
@@ -1463,10 +1476,10 @@ static void E_Shutdown(void);
 static void E_Startup(void)
 {
 	// Version check ?
-	if (M_CheckParm("-version"))
+	if (argv::Find("version") > 0)
 	{
 		// -AJA- using I_Error here, since I_Printf crashes this early on
-		I_Error("\nEDGE version is " EDGEVERSTR "\n");
+		I_Error("\nEDGE-Classic version is " EDGEVERSTR "\n");
 	}
 
 	// -AJA- 2000/02/02: initialise global gameflags to defaults
@@ -1498,6 +1511,7 @@ static void E_Startup(void)
 
 	RAD_Init();
 	W_ProcessMultipleFiles();
+	I_StartupMusic(); // Must be done after all files loaded to locate appropriate GENMIDI lump
 	V_InitPalette();
 
 	DDF_ParseEverything();
@@ -1548,21 +1562,21 @@ static void E_InitialState(void)
 {
 	I_Debugf("- Setting up Initial State...\n");
 
-	const char *ps;
+	std::string ps;
 
 	// do loadgames first, as they contain all of the
 	// necessary state already (in the savegame).
 
-	if (M_CheckParm("-playdemo") || M_CheckParm("-timedemo") ||
-	    M_CheckParm("-record"))
+	if (argv::Find("playdemo") > 0 || argv::Find("timedemo") > 0 ||
+	    argv::Find("record") > 0)
 	{
 		I_Error("Demos are no longer supported\n");
 	}
 
-	ps = M_GetParm("-loadgame");
-	if (ps)
+	ps = argv::Value("loadgame");
+	if (!ps.empty())
 	{
-		G_DeferredLoadGame(atoi(ps));
+		G_DeferredLoadGame(atoi(ps.c_str()));
 		return;
 	}
 
@@ -1575,42 +1589,38 @@ static void E_InitialState(void)
 
 	int bots = 0;
 
-	ps = M_GetParm("-bots");
-	if (ps)
-		bots = atoi(ps);
+	ps = argv::Value("bots");
+	if (!ps.empty())
+		bots = atoi(ps.c_str());
 
-	ps = M_GetParm("-warp");
-	if (ps)
+	ps = argv::Value("warp");
+	if (!ps.empty())
 	{
 		warp = true;
-		warp_map = std::string(ps);
+		warp_map = ps;
 	}
 
 	// -KM- 1999/01/29 Use correct skill: 1 is easiest, not 0
-	ps = M_GetParm("-skill");
-	if (ps)
+	ps = argv::Value("skill");
+	if (!ps.empty())
 	{
 		warp = true;
-		warp_skill = (skill_t)(atoi(ps) - 1);
+		warp_skill = (skill_t)(atoi(ps.c_str()) - 1);
 	}
 
 	// deathmatch check...
-	int pp = M_CheckParm("-deathmatch");
-	if (pp)
+	int pp = argv::Find("deathmatch");
+	if (pp > 0)
 	{
 		warp_deathmatch = 1;
 
-		if (pp + 1 < M_GetArgCount())
-			warp_deathmatch = MAX(1, atoi(M_GetArgument(pp + 1)));
+		if (pp + 1 < argv::list.size() && !argv::IsOption(pp+1))
+			warp_deathmatch = MAX(1, atoi(argv::list[pp+1].c_str()));
 	}
-	else if (M_CheckParm("-altdeath") > 0)
+	else if (argv::Find("altdeath") > 0)
 	{
 		warp_deathmatch = 2;
 	}
-
-
-	if (M_GetParm("-record"))
-		warp = true;
 
 	// start the appropriate game based on parms
 	if (! warp)
@@ -1664,7 +1674,7 @@ void E_Main(int argc, const char **argv)
 
 	// Implemented here - since we need to bring the memory manager up first
 	// -ACB- 2004/05/31
-	M_InitArguments(argc, argv);
+	argv::Init(argc, argv);
 
 	try
 	{
@@ -1727,7 +1737,12 @@ void E_Tick(void)
 	// this also runs the responder chain via E_ProcessEvents
 	int counts = N_TryRunTics();
 
-	SYS_ASSERT(counts > 0);
+	// ignore this assertion if in a menu; switching between 35/70FPS
+	// in Video Options can occasionally produce a 'valid'
+	// zero count for N_TryRunTics()
+
+	if (!menuactive)
+		SYS_ASSERT(counts > 0);
 
 	// run the tics
 	for (; counts > 0 ; counts--)

@@ -116,7 +116,6 @@ typedef enum
 	//       be pushed simultaneously.
 	MLF_PassThru = 0x0200,
 
-
 	// MBF21
 	MLF_BlockGrounded = 0x1000,
 	MLF_BlockPlayers = 0x2000,

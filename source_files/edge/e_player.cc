@@ -280,7 +280,7 @@ void G_SetConsolePlayer(int pnum)
 	
 	players[pnum]->playerflags |= PFL_Console;
 
-	if (M_CheckParm("-testbot") > 0)
+	if (argv::Find("testbot") > 0)
 	{
 		P_BotCreate(players[pnum], false);
 	}
@@ -424,12 +424,10 @@ static void P_SpawnVoodooDoll(player_t *p, const spawnpoint_t *point)
 	mobj->player = p;
 	mobj->health = p->health;
 
+	mobj->is_voodoo = true;
+
 	if (COOP_MATCH())
 		mobj->side = ~0;
-
-	// Test fix for stuff like Ancient Aliens MAP29 - Dasho
-	// Don't get stuck spawned in things: telefrag them.
-	//P_TeleportMove(mobj, mobj->x, mobj->y, mobj->z);
 }
 
 //

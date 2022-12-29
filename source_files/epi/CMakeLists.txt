@@ -16,9 +16,9 @@ endif()
 add_library(
   edge_epi
   arrays.cc
-  exe_path.cc
   file_sub.cc
   file.cc
+  file_memory.cc
   filesystem.cc
   image_data.cc
   image_hq2x.cc
@@ -37,9 +37,6 @@ add_library(
   str_compare.cc
   str_util.cc
 )
-target_include_directories(edge_epi PRIVATE ../whereami)
 target_include_directories(edge_epi PRIVATE ../stb)
 target_include_directories(edge_epi PRIVATE ../libgme/gme)
 target_include_directories(edge_epi PRIVATE ../libxmp)
-
-target_link_libraries(edge_epi PUBLIC whereami)

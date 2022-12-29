@@ -50,6 +50,10 @@
 
 #define RAISE_RADIUS  32
 
+DEF_CVAR(g_mbf21compat, "0", CVAR_ARCHIVE)
+
+extern cvar_c g_mbf21compat;
+
 typedef struct try_move_info_s
 {
 	// --- input --
@@ -260,15 +264,15 @@ static bool PIT_CheckAbsLine(line_t * ld, void *data)
 		if (ld->flags & MLF_Blocking)
 			return false;
 
-		// block players ?
-		if (tm_I.mover->player && ((ld->flags & MLF_BlockPlayers) ||
+		// MBF21: block players ?
+		if (tm_I.mover->player && g_mbf21compat.d && ((ld->flags & MLF_BlockPlayers) ||
 			(ld->special && (ld->special->line_effect & LINEFX_BlockPlayers))))
 		{
 			return false;
 		}
 
-		// block grounded monsters ?
-		if ((tm_I.extflags & EF_MONSTER) &&
+		// MBF21: block grounded monsters ?
+		if ((tm_I.extflags & EF_MONSTER) && g_mbf21compat.d &&
 			((ld->flags & MLF_BlockGrounded) || (ld->special && (ld->special->line_effect & LINEFX_BlockGroundedMonsters))) 
 			&& (tm_I.mover->z <= tm_I.mover->floorz + 1.0f))
 		{
@@ -467,8 +471,8 @@ static bool PIT_CheckRelLine(line_t * ld, void *data)
 		if ((ld->flags & MLF_Blocking) ||
 			((ld->flags & MLF_BlockMonsters) &&
 			(tm_I.extflags & EF_MONSTER)) ||
-			((ld->flags & MLF_BlockGrounded) && (tm_I.extflags & EF_MONSTER) && (tm_I.mover->z <= tm_I.mover->floorz + 1.0f)) ||
-			((ld->flags & MLF_BlockPlayers) && (tm_I.mover->player)))
+			(g_mbf21compat.d && (ld->flags & MLF_BlockGrounded) && (tm_I.extflags & EF_MONSTER) && (tm_I.mover->z <= tm_I.mover->floorz + 1.0f)) ||
+			(g_mbf21compat.d && (ld->flags & MLF_BlockPlayers) && (tm_I.mover->player)))
 		{
 			blockline = ld;
 			return false;
@@ -1438,6 +1442,75 @@ static inline bool ShootCheckGap(float z,
 	return false;
 }
 
+
+//Lobo: 2022
+//Try and get a texture for our midtex.
+//-If we specified a LINE_PART copy that texture over.
+//-If not, just remove the current midtex we have (only on 2-sided lines).
+bool ReplaceMidTexFromPart(line_t *TheLine, scroll_part_e parts)
+{
+	bool IsFront = true;
+
+	if (parts <= SCPT_RightLower) //assume right is back
+		IsFront = false;
+
+	if (IsFront == false)
+	{
+		if (!TheLine->side[1]) //back and 1-sided so no-go
+			return false;
+	}
+	side_t *side = (IsFront) ?
+			TheLine->side[0] : TheLine->side[1];
+
+	const image_c *image = nullptr;
+	
+	//if (parts == SCPT_None)
+		//return false;
+		//parts = (scroll_part_e)(SCPT_LEFT | SCPT_RIGHT);
+
+	if (parts & (SCPT_LeftUpper))
+	{
+		image = side->top.image;
+	}
+	if (parts & (SCPT_RightUpper))
+	{
+		image = side->top.image;
+	}
+	if (parts & (SCPT_LeftLower))
+	{
+		image = side->bottom.image;
+	}
+	if (parts & (SCPT_RightLower))
+	{
+		image = side->bottom.image;
+	}
+	
+	if (parts & (SCPT_LeftMiddle))
+	{
+		image = side->middle.image; //redundant but whatever ;)
+	}
+	if (parts & (SCPT_RightMiddle))
+	{
+		image = side->middle.image; //redundant but whatever ;)
+	}
+	
+	
+	if (!image && !TheLine->side[1]) // no image and 1-sided so leave alone
+		return false;
+
+	if (!image) // 2 sided and no image so add default
+	{
+		image = W_ImageLookup("-", INS_Texture); //default is blank
+	}
+
+	TheLine->side[0]->middle.image = image;
+
+	if(TheLine->side[1])
+		TheLine->side[1]->middle.image = image;
+
+	return true;
+}
+
 //
 // Lobo:2021 Unblock and remove texture from our special debris linetype.
 //
@@ -1447,29 +1520,39 @@ void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
 	{
 		return;
 	}
-	//Unblock the line
+	
+	bool TwoSided = false;
+
+	if (TheLine->side[0] && TheLine->side[1])
+		TwoSided = true;
+
 	if (special->glass)
 	{
-		if (TheLine->side[0] && TheLine->side[1])
+		//1. Change the texture on our line
+
+		//if it's got a BROKEN_TEXTURE=<tex> then use that
+		if (!special->brokentex.empty())
+		{
+			const image_c *image = W_ImageLookup(special->brokentex.c_str(), INS_Texture);
+			TheLine->side[0]->middle.image = image;
+			if (TwoSided)
+			{
+				TheLine->side[1]->middle.image = image;
+			}
+		}
+		else //otherwise try get the texture from our LINE_PART=
+		{
+			ReplaceMidTexFromPart(TheLine, special->line_parts);
+		}
+
+		//2. if it's 2 sided, make it unblocking now
+		if (TwoSided)
 		{
 			// clear standard flags
 			TheLine->flags &= ~(MLF_Blocking | MLF_BlockMonsters | MLF_BlockGrounded | MLF_BlockPlayers);
 
 			// clear EDGE's extended lineflags too
 			TheLine->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
-
-			//2. Remove existing texture from line
-			const image_c *image;
-			if (special->brokentex.c_str())
-			{
-				image = W_ImageLookup(special->brokentex.c_str(), INS_Texture);
-			}
-			else
-			{
-				image = W_ImageLookup("-", INS_Texture);
-			}
-			TheLine->side[0]->middle.image = image;
-			TheLine->side[1]->middle.image = image;
 		}
 	}
 }
@@ -1774,6 +1857,58 @@ void P_TargetTheory(mobj_t * source, mobj_t * target, float *x, float *y, float 
 	}
 }
 
+
+mobj_t *GetMapTargetAimInfo(mobj_t * source, angle_t angle, float distance)
+{
+	float x2, y2;
+
+	Z_Clear(&aim_I, shoot_trav_info_t, 1);
+
+	aim_I.source = source;
+	aim_I.forced = false;
+
+	x2 = source->x + distance * M_Cos(angle);
+	y2 = source->y + distance * M_Sin(angle);
+
+	if (source->info)
+		aim_I.start_z = source->z + source->height * PERCENT_2_FLOAT(source->info->shotheight);
+	else
+		aim_I.start_z = source->z + source->height / 2 + 8;
+
+
+	aim_I.range = distance;
+	aim_I.target = NULL;
+
+	//Lobo: try and limit the vertical range somewhat
+	float vertslope = M_Tan(source->vertangle);
+	aim_I.topslope = (100 + vertslope * 320) / 160.0f;
+	aim_I.bottomslope = (-100 + vertslope * 576) / 160.0f;
+	//aim_I.topslope = 100.0f / 160.0f;
+	//aim_I.bottomslope = -100.0f / 160.0f;
+
+	P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, 
+	PTR_AimTraverse2);	
+	
+
+	if (! aim_I.target)
+		return NULL;
+
+/*
+	// -KM- 1999/01/31 Look at the thing you aimed at.  Is sometimes
+	//   useful, sometimes annoying :-)
+	if (source->player && level_flags.autoaim == AA_MLOOK)
+	{
+		float slope = P_ApproxSlope(source->x - aim_I.target->x,
+				source->y - aim_I.target->y, aim_I.target->z - source->z);
+
+		slope = CLAMP(-1.0f, slope, 1.0f);
+
+		source->vertangle = M_ATan(slope);
+	}
+*/
+	return aim_I.target;
+}
+
 //
 // P_MapTargetAutoAim
 //
@@ -1783,7 +1918,7 @@ void P_TargetTheory(mobj_t * source, mobj_t * target, float *x, float *y, float 
 // -ACB- 1998/09/01
 // -AJA- 1999/08/08: Added `force_aim' to fix chainsaw.
 //
-mobj_t *DoMapTargetAutoAim(mobj_t * source, angle_t angle, float distance, bool force_aim, bool everythingbutscenery)
+mobj_t *DoMapTargetAutoAim(mobj_t * source, angle_t angle, float distance, bool force_aim)
 {
 	float x2, y2;
 
@@ -1822,22 +1957,10 @@ mobj_t *DoMapTargetAutoAim(mobj_t * source, angle_t angle, float distance, bool 
 	aim_I.range = distance;
 	aim_I.target = NULL;
 
-	if(!everythingbutscenery)
-	{
-		P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, 
+
+	P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, 
 		PTR_AimTraverse);
-	}
-	else
-	{
-		//Lobo: try and limit the vertical range somewhat
-		float vertslope = M_Tan(source->vertangle);
-		aim_I.topslope = (100 + vertslope * 320) / 160.0f;
-		aim_I.bottomslope = (-100 + vertslope * 576) / 160.0f;
-
-		P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, 
-		PTR_AimTraverse2);	
-	}
-
+	
 	if (! aim_I.target)
 		return NULL;
 

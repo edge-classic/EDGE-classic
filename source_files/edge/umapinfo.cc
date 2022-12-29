@@ -622,11 +622,13 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape)
 	else if (!stricmp(pname, "bossaction"))
 	{
 		scanner.MustGetToken(TK_Identifier);
-		int classnum, special, tag;
+		// int classnum; Not currently used - Dasho
+		int special, tag;
 		if (!stricmp(scanner.string, "clear"))
 		{
 			// mark level free of boss actions
-			classnum = special = tag = -1;
+			//classnum = special = tag = -1; classnum not currently used - Dasho
+			special = tag = -1;
 			if (mape->bossactions) free(mape->bossactions);
 			mape->bossactions = NULL;
 			mape->numbossactions = -1;
@@ -704,6 +706,24 @@ static int ParseMapEntry(Scanner &scanner, MapEntry *val)
 	while(!scanner.CheckToken('}'))
 	{
 		ParseStandardProperty(scanner, val);
+	}
+	// Some fallback handling
+	if (!val->nextsecret[0])
+	{
+		if (val->nextmap[0])
+			Z_StrNCpy(val->nextsecret, val->nextmap, 8);
+	}
+	if (!val->enterpic[0])
+	{
+		for(size_t i = 0; i < Maps.mapcount; i++)
+		{
+			if (!strcmp(val->mapname, Maps.maps[i].nextmap))
+			{
+				if (Maps.maps[i].exitpic[0])
+					Z_StrNCpy(val->enterpic, Maps.maps[i].exitpic, 8);
+				break;
+			}
+		}
 	}
 	return 1;
 }

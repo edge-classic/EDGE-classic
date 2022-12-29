@@ -32,7 +32,7 @@
 
 uint32_t ymfm_parse_header(std::vector<uint8_t> &buffer);
 
-uint32_t ymfm_generate_batch(std::vector<uint8_t> &buffer, uint32_t *data_start, 
-    int64_t *cur_pos, uint32_t output_rate, int16_t *wav_buffer, uint32_t samples);
+int32_t ymfm_generate_batch(std::vector<uint8_t> &buffer, uint32_t *data_start, 
+    int64_t *cur_pos, uint32_t output_rate, int16_t *wav_buffer);
 
 void ymfm_delete_chips();

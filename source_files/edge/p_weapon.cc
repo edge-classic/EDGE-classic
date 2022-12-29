@@ -41,6 +41,11 @@
 #include "w_sprite.h"
 #include "w_wad.h"
 
+extern cvar_c g_bobbing;
+extern cvar_c g_erraticism;
+
+static void BobWeapon(player_t *p, weapondef_c *info);
+
 static sound_category_e WeapSfxCat(player_t *p)
 {
 	if (p == players[consoleplayer])
@@ -852,7 +857,13 @@ void P_MovePsprites(player_t * p)
 			psp->tics--;
 
 			if (psp->tics > 0)
+			{
+				if (psp->state->action == A_WeaponReady)
+				{
+					BobWeapon(p, p->weapons[p->ready_wp].info);
+				}
 				break;
+			}
 
 			weapondef_c *info = NULL;
 			if (p->ready_wp >= 0)
@@ -884,16 +895,18 @@ void P_MovePsprites(player_t * p)
 
 static void BobWeapon(player_t *p, weapondef_c *info)
 {
-	bool hasjetpack = p->powers[PW_Jetpack] > 0;
+	if (g_bobbing.d == 1 || g_bobbing.d == 3 || (g_erraticism.d && (!p->cmd.forwardmove && !p->cmd.sidemove)))
+		return;
+
 	pspdef_t *psp = &p->psprites[p->action_psp];
 
-	float new_sx = 0;
-	float new_sy = 0;
+	float new_sx = p->mo->mom.z ? psp->sx : 0;
+	float new_sy = p->mo->mom.z ? psp->sy : 0;
 	
 	// bob the weapon based on movement speed
-	if (! hasjetpack)
+	if (! p->mo->mom.z) // Don't bob in mid-air and such
 	{
-		angle_t angle = (128 * leveltime) << 19;
+		angle_t angle = (128 * (g_erraticism.d ? p->e_bob_ticker++ : leveltime)) << 19;
 		new_sx = p->bob * PERCENT_2_FLOAT(info->swaying) * M_Cos(angle);
 
 		angle &= (ANG180 - 1);

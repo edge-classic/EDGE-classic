@@ -716,16 +716,15 @@ void add_rom_data(chip_type type, ymfm::access_class access, std::vector<uint8_t
 //  from the vgmplay file
 //-------------------------------------------------
 
-uint32_t ymfm_generate_batch(std::vector<uint8_t> &buffer, uint32_t *data_start, 
-	int64_t *cur_pos, uint32_t output_rate, int16_t *wav_buffer, uint32_t samples)
+int32_t ymfm_generate_batch(std::vector<uint8_t> &buffer, uint32_t *data_start, 
+	int64_t *cur_pos, uint32_t output_rate, int16_t *wav_buffer)
 {
 	// set the offset to the data start and go
 	uint32_t offset = *data_start;
 	uint32_t samples_processed = 0;
-	bool done = false;
 	emulated_time output_step = 0x100000000ull / output_rate;
 	emulated_time output_pos = *cur_pos;
-	while (!done && offset < buffer.size() && samples_processed < samples)
+	if (offset < buffer.size())
 	{
 		int delay = 0;
 		uint8_t cmd = buffer[offset++];
@@ -847,7 +846,7 @@ uint32_t ymfm_generate_batch(std::vector<uint8_t> &buffer, uint32_t *data_start,
 
 			// end of sound data
 			case 0x66:
-				done = true;
+				return -1;
 				break;
 
 			// data block

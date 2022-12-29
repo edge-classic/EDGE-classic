@@ -39,8 +39,9 @@
 #include "s_sound.h"
 #include "s_cache.h"
 #include "s_blit.h"
+#include "s_opl.h"
+#include "s_fluid.h"
 #include "w_wad.h"
-
 
 // If true, sound system is off/not working. Changed to false if sound init ok.
 bool nosound = false;
@@ -109,18 +110,18 @@ void I_StartupSound(void)
 {
 	if (nosound) return;
 
-	if (M_CheckParm("-waveout"))
+	if (argv::Find("waveout") > 0)
 		force_waveout = true;
 
-	if (M_CheckParm("-dsound") || M_CheckParm("-nowaveout"))
+	if (argv::Find("dsound") > 0 || argv::Find("nowaveout") > 0)
 		force_waveout = false;
 
-	const char *driver = M_GetParm("-audiodriver");
+	std::string driver = argv::Value("audiodriver");
 
-	if (! driver)
-		driver = SDL_getenv("SDL_AUDIODRIVER");
+	if (driver.empty())
+		driver = SDL_getenv("SDL_AUDIODRIVER") ? SDL_getenv("SDL_AUDIODRIVER") : "";
 
-	if (! driver)
+	if (driver.empty())
 	{
 		driver = "default";
 
@@ -132,10 +133,10 @@ void I_StartupSound(void)
 
 	if (epi::case_cmp(driver, "default") != 0)
 	{
-		SDL_setenv("SDL_AUDIODRIVER", driver, 1);
+		SDL_setenv("SDL_AUDIODRIVER", driver.c_str(), 1);
 	}
 
-	I_Printf("SDL_Audio_Driver: %s\n", driver);
+	I_Printf("SDL_Audio_Driver: %s\n", driver.c_str());
 
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
 	{
@@ -145,17 +146,16 @@ void I_StartupSound(void)
 		return;
 	}
 
-	const char *p;
-
 	int want_freq = 48000;
 	bool want_stereo = (var_sound_stereo >= 1);
 
-	p = M_GetParm("-freq");
-	if (p)
-		want_freq = atoi(p);
+	std::string p = argv::Value("freq");
 
-	if (M_CheckParm("-mono")   > 0) want_stereo = false;
-	if (M_CheckParm("-stereo") > 0) want_stereo = true;
+	if (!p.empty())
+		want_freq = atoi(p.c_str());
+
+	if (argv::Find("mono")   > 0) want_stereo = false;
+	if (argv::Find("stereo") > 0) want_stereo = true;
 
 	bool success = false;
 	
@@ -264,16 +264,15 @@ void I_UnlockAudio(void)
 	}
 }
 
-// Moved I_StartupMusic from platform-specific system.cc files to here - Dasho
 void I_StartupMusic(void)
 {
-	// Populate available soundfont vector here, even if music is disabled
+	// Check for SF2 soundfonts
 	std::vector<epi::dir_entry_c> sfd;
 	std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
 
 	if (!FS_ReadDir(sfd, soundfont_dir.c_str(), "*.sf2"))
 	{
-		I_Warning("TinySoundFont: Failed to read '%s' directory!\n", soundfont_dir.c_str());
+		I_Warning("FluidLite: Failed to read '%s' directory!\n", soundfont_dir.c_str());
 	}
 	else
 	{
@@ -286,7 +285,25 @@ void I_StartupMusic(void)
 		}
 	}
 
-	// Populate available genmidi vector
+	// Check for SF3 soundfonts
+	sfd.clear();
+
+	if (!FS_ReadDir(sfd, soundfont_dir.c_str(), "*.sf3"))
+	{
+		I_Warning("FluidLite: Failed to read '%s' directory!\n", soundfont_dir.c_str());
+	}
+	else
+	{
+		for (size_t i = 0 ; i < sfd.size() ; i++) 
+		{
+			if(!sfd[i].is_dir)
+			{
+				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name.c_str()));
+			}
+		}
+	}
+
+	// Check for OP2 instrument banks
 	sfd.clear();
 
 	// Start with empty string to represent using whichever GENMIDI
@@ -307,6 +324,14 @@ void I_StartupMusic(void)
 			}
 		}
 	}
+
+	// Startup both FluidLite and OPL, as some formats require OPL now (IMF/CMF)
+
+	if (!S_StartupFluid())
+		fluid_disabled = true;
+
+	if (!S_StartupOPL())
+		opl_disabled = true;
 
 	return;
 }

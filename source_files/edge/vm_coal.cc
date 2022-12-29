@@ -40,6 +40,7 @@
 
 #include "m_random.h"
 
+extern cvar_c r_doubleframes;
 
 // user interface VM
 coal::vm_c *ui_vm;
@@ -432,7 +433,7 @@ void VM_LoadScripts()
 
 	unread_scripts.clear();
 
-	VM_SetFloat(ui_vm, "sys", "gametic", gametic);
+	VM_SetFloat(ui_vm, "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));
 
 	if (W_IsLumpInPwad("STBAR"))
 	{

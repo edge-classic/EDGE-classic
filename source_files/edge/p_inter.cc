@@ -45,6 +45,7 @@
 
 bool var_obituaries = true;
 
+extern cvar_c g_mbf21compat;
 
 typedef struct
 {
@@ -736,8 +737,8 @@ void P_TouchSpecialThing(mobj_t * special, mobj_t * toucher)
 	if (toucher->health <= 0)
 		return;
 
-	// Do not pick up the item if completely still
-	if (toucher->mom.x == 0 && toucher->mom.y == 0 && toucher->mom.z == 0)
+	// VOODOO DOLLS: Do not pick up the item if completely still
+	if (toucher->is_voodoo && toucher->mom.x == 0 && toucher->mom.y == 0 && toucher->mom.z == 0)
 		return;
 
 	// -KM- 1998/09/27 Sounds.ddf
@@ -784,6 +785,8 @@ void P_TouchSpecialThing(mobj_t * special, mobj_t * toucher)
 	if (! info.keep_it)
 	{
 		special->health = 0;
+		if (time_stop_active) // Hide pickup after gaining benefit while time stop is still active
+			special->visibility = INVISIBLE;
 		P_KillMobj(info.player->mo, special, NULL);
 	}
 
@@ -1283,18 +1286,19 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 	{
 		int i;
 
-		if (damtype && damtype->grounded_monsters)
+		// MBF21 - Don't damage player if sector type should only affect grounded monsters
+		if (damtype && damtype->grounded_monsters && g_mbf21compat.d)
 			return;
 
 		// ignore damage in GOD mode, or with INVUL powerup
 		if ((player->cheats & CF_GODMODE) || player->powers[PW_Invulnerable] > 0)
 		{
-			if (! (damtype && damtype->bypass_all))
+			if (! (damtype && damtype->bypass_all && g_mbf21compat.d))
 				return;
 		}
 
 		// MBF21 - Only damage if not wearing a radsuit (also if not invul, but the above check should theoretically cover that already)
-		if (damtype && damtype->if_naked && player->powers[PW_AcidSuit] > 0)
+		if (damtype && damtype->if_naked && (!g_mbf21compat.d || player->powers[PW_AcidSuit] > 0))
 			return;
 
 		// take half damage in trainer mode
@@ -1389,8 +1393,14 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 
 		player->attacker = source;
 
+		// MBF21 instakill sectors
 		if (damtype && damtype->instakill)
-			damage = target->player->health + 1;
+		{
+			if (g_mbf21compat.d)
+				damage = target->player->health + 1;
+			else
+				return;
+		}
 
 		// add damage after armour / invuln detection
 		if (damage > 0)
@@ -1405,8 +1415,14 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 	}
 	else
 	{
+		// MBF21 instakill sectors
 		if (damtype && damtype->instakill)
-			damage = target->health + 1;
+		{
+			if (g_mbf21compat.d)
+				damage = target->health + 1;
+			else
+				return;
+		}
 	}
 
 	// do the damage

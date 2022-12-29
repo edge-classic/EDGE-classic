@@ -410,6 +410,7 @@ const specflags_t powertype_names[] =
 	{"POWERUP_JETPACK",      PW_Jetpack,      0},
 	{"POWERUP_NIGHTVISION",  PW_NightVision,  0},
 	{"POWERUP_SCUBA",        PW_Scuba,        0},
+	{"POWERUP_TIMESTOP",     PW_TimeStop,     0},
 	{NULL, 0, 0}
 };
 

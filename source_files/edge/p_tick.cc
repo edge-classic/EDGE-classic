@@ -43,10 +43,15 @@ int leveltime;
 
 bool fast_forward_active;
 
+bool erraticism_active = false;
+
+extern cvar_c g_erraticism;
+extern cvar_c r_doubleframes;
+
 //
 // P_Ticker
 //
-void P_Ticker(void)
+void P_Ticker(bool extra_tic)
 {
 	if (paused)
 		return;
@@ -58,20 +63,51 @@ void P_Ticker(void)
 		return;
 	}
 
-	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-		if (players[pnum])
-			P_PlayerThink(players[pnum]);
+	erraticism_active = false;
 
-	RAD_RunTriggers();
+	if (g_erraticism.d)
+	{
+		bool keep_thinking = P_PlayerThink(players[consoleplayer], extra_tic);
 
-	P_RunForces();
-	P_RunMobjThinkers();
-	P_RunLights();
+		if (!keep_thinking) 
+		{
+			erraticism_active = true;
+			return;
+		}
+
+		for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+		{
+			if (players[pnum] && players[pnum] != players[consoleplayer])
+				P_PlayerThink(players[pnum], extra_tic);
+		}
+	}
+	else
+	{
+		for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+			if (players[pnum])
+				P_PlayerThink(players[pnum], extra_tic);	
+	}
+
+	if (!extra_tic || !r_doubleframes.d)
+		RAD_RunTriggers();
+
+	P_RunForces(extra_tic);
+	P_RunMobjThinkers(extra_tic);
+
+	if (!extra_tic || !r_doubleframes.d)
+		P_RunLights();
+
 	P_RunActivePlanes();
 	P_RunActiveSliders();
-	P_RunAmbientSFX();
 
-	P_UpdateSpecials();
+	if (!extra_tic || !r_doubleframes.d)
+		P_RunAmbientSFX();
+
+	P_UpdateSpecials(extra_tic);
+
+	if (extra_tic && r_doubleframes.d)
+		return;
+
 	P_MobjItemRespawn();
 
 	// for par times
@@ -96,7 +132,7 @@ void P_HubFastForward(void)
 	}
 
 	for (int k = 0; k < TICRATE / 3; k++)
-		P_Ticker();
+		P_Ticker(false);
 
 	fast_forward_active = false;
 }

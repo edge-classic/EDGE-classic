@@ -1,9 +1,11 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------
 //  EDGE Arguments/Parameters Code
-//----------------------------------------------------------------------------
-// 
-//  Copyright (c) 1999-2009  The EDGE Team.
-// 
+//------------------------------------------------------------------------
+//
+//  Copyright (C) 2022 The EDGE Team
+//  Copyright (C) 2021-2022 The OBSIDIAN Team
+//  Copyright (C) 2006-2017 Andrew Apted
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2
@@ -14,34 +16,40 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
 //
-//----------------------------------------------------------------------------
-//
-//  Based on the DOOM source code, released by Id Software under the
-//  following copyright:
-//
-//    Copyright (C) 1993-1996 by id Software, Inc.
-//
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------
 
-#ifndef __M_ARGV__
-#define __M_ARGV__
+#ifndef M_ARGV_H_
+#define M_ARGV_H_
 
-#include "i_defs.h"
+#include <string>
+#include <vector>
+#include <unordered_set>
 
-// Returns the position of the given parameter
-// in the arg list (0 if not found).
-int M_CheckParm(const char *check);
-int M_CheckNextParm(const char *check, int prev);
-const char *M_GetParm(const char *check);
-void M_InitArguments(int argc, const char **argv);
-void M_ApplyResponseFile(const char *name, int position);
-void M_CheckBooleanParm(const char *parm, bool *boolval, bool reverse);
-void M_CheckBooleanCVar(const char *parm, cvar_c *var, bool reverse);
-const char *M_GetArgument(int argnum);
-int M_GetArgCount(void);
-void M_DebugDumpArgs(void);
+namespace argv {
 
-#endif // __M_ARGV__
+extern std::vector<std::string> list;
+
+void Init(int argc, const char *const *argv);
+
+// Return position in arg list, if found
+int Find(const char *longName, int *numParams = nullptr);
+
+//  Same as above, but return the value of position + 1 if valid, else an empty std::string
+std::string Value(const char *longName, int *numParams = nullptr);
+
+void CheckBooleanParm(const char *parm, bool *boolval, bool reverse);
+
+void CheckBooleanCVar(const char *parm, cvar_c *var, bool reverse);
+
+void ApplyResponseFile(const char *name);
+
+void DebugDumpArgs(void);
+
+bool IsOption(int index);
+
+}  // namespace argv
+
+#endif /* __LIB_ARGV_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

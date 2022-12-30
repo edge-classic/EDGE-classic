@@ -26,9 +26,7 @@
 
 #include "i_defs.h"
 
-#ifdef HAVE_EDGE_AJBSP_H
-#include "edge_ajbsp.h"
-#else
+#ifndef HAVE_EDGE_AJBSP_H
 #include "edge_ajbsp.h"
 #endif
 
@@ -49,7 +47,7 @@ static const nodebuildfuncs_t display_funcs =
 // Attempt to build nodes for the WAD file containing the given
 // WAD file.  Returns true if successful, otherwise false.
 //
-bool AJ_BuildNodes(const char *filename, const char *outname)
+bool AJ_BuildNodes(std::filesystem::path filename, std::filesystem::path outname)
 {
 	L_WriteDebug("AJ_BuildNodes: STARTED\n");
 	L_WriteDebug("# source: '%s'\n", filename);

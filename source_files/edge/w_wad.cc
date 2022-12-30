@@ -1279,7 +1279,7 @@ std::filesystem::path W_BuildNodesForWad(data_file_c *df)
 	{
 		I_Printf("Building GL Nodes for: %s\n", df->name.u8string().c_str());
 
-		if (! AJ_BuildNodes(df->name.u8string().c_str(), gwa_filename.u8string().c_str()))
+		if (! AJ_BuildNodes(df->name, gwa_filename))
 			I_Error("Failed to build GL nodes for: %s\n", df->name.u8string().c_str());
 	}
 

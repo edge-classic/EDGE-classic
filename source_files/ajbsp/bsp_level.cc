@@ -309,11 +309,11 @@ static void CheckUDMFNamespace(parser_t *psr)
 	char value[128];
 
 	if (!GetNextAssign(&udmf_psr, (u8_t*)ident, (u8_t*)value) || y_stricmp(ident, "namespace"))
-		FatalError(StringPrintf("AJBSP: Missing UDMF namespace in %s of %s!\n",	lev_current_name, FindBaseName(edit_wad->PathName())));
+		FatalError(StringPrintf("AJBSP: Missing UDMF namespace in %s of %s!\n",	lev_current_name, edit_wad->PathName().stem().u8string().c_str()));
 
 	if (y_stricmp(value, "doom") != 0 && y_stricmp(value, "heretic") != 0 && y_strnicmp(value, "zdoomt", 6) != 0 && y_stricmp(value, "edge") != 0)
 		FatalError(StringPrintf("AJBSP: Incompatible UDMF namespace \"%s\" detected in %s of %s!\nNamespace must be \"Edge\", \"Doom\", \"Heretic\", or \"ZDoomTranslated\"!\n",
-			value, lev_current_name, FindBaseName(edit_wad->PathName())));
+			value, lev_current_name, edit_wad->PathName().stem().u8string().c_str()));
 }
 
 static void LoadUDMFVertexes(parser_t *psr)
@@ -1602,19 +1602,19 @@ static int node_cur_index;
 
 void CheckLimits()
 {
-	if (num_sectors > 65534)
+	if (num_sectors > 65535)
 	{
-		FatalError(StringPrintf("AJBSP: %s in file %s has too many sectors! (%d)", lev_current_name, FindBaseName(edit_wad->PathName()), num_sectors));
+		FatalError(StringPrintf("AJBSP: %s in file %s has too many sectors! (%d)", lev_current_name, edit_wad->PathName().stem().u8string().c_str(), num_sectors));
 	}
 
-	if (num_sidedefs > 65534)
+	if (num_sidedefs > 65535)
 	{
-		FatalError(StringPrintf("AJBSP: %s in file %s has too many sidedefs! (%d)", lev_current_name, FindBaseName(edit_wad->PathName()), num_sidedefs));
+		FatalError(StringPrintf("AJBSP: %s in file %s has too many sidedefs! (%d)", lev_current_name, edit_wad->PathName().stem().u8string().c_str(), num_sidedefs));
 	}
 
 	if (num_linedefs > 65535)
 	{
-		FatalError(StringPrintf("AJBSP: %s in file %s has too many linedefs (%d)", lev_current_name, FindBaseName(edit_wad->PathName()), num_linedefs));
+		FatalError(StringPrintf("AJBSP: %s in file %s has too many linedefs (%d)", lev_current_name, edit_wad->PathName().stem().u8string().c_str(), num_linedefs));
 	}
 }
 

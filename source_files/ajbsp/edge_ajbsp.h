@@ -16,6 +16,8 @@
 //
 //------------------------------------------------------------------------
 
+#include <filesystem>
+
 // Callback functions
 typedef struct nodebuildfuncs_s
 {
@@ -33,4 +35,4 @@ typedef struct nodebuildfuncs_s
 }
 nodebuildfuncs_t;
 
-int AJBSP_Build(const char *filename, const char *outname, const nodebuildfuncs_t *display_funcs);
+int AJBSP_Build(std::filesystem::path filename, std::filesystem::path outname, const nodebuildfuncs_t *display_funcs);

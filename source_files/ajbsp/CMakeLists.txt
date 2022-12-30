@@ -13,7 +13,6 @@ add_library(
 	bsp_level.cc
 	bsp_node.cc
 	bsp_util.cc
-	lib_file.cc
 	lib_util.cc
 	w_wad.cc
 )

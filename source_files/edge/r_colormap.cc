@@ -47,6 +47,8 @@
 #include "w_files.h"
 #include "w_wad.h"
 
+#include "str_util.h"
+
 // -AJA- 1999/06/30: added this
 byte playpal_data[14][256][3];
 
@@ -123,7 +125,7 @@ static int cur_palette = -1;
 
 void V_InitColour(void)
 {
-	std::string s = argv::Value("gamma");
+	std::string s = epi::to_u8string(argv::Value(UTFSTR("gamma")));
 
 	if (!s.empty())
 	{

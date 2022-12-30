@@ -27,7 +27,9 @@
 #ifndef __L_AJBSP__
 #define __L_AJBSP__
 
-bool AJ_BuildNodes(const char *filename, const char *outname);
+#include <filesystem>
+
+bool AJ_BuildNodes(std::filesystem::path filename, std::filesystem::path outname);
 
 #endif  // __L_AJBSP__
 

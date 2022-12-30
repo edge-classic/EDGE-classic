@@ -27,14 +27,34 @@ void str_lower(std::string& s)
 	for (size_t i = 0 ; i < s.size() ; i++)
 		s[i] = std::tolower(s[i]);
 }
-
-
 void str_upper(std::string& s)
 {
 	for (size_t i = 0 ; i < s.size() ; i++)
 		s[i] = std::toupper(s[i]);
 }
 
+void str_lower(std::u32string& s)
+{
+#ifndef __clang__
+	for (size_t i = 0 ; i < s.size() ; i++)
+		s[i] = std::tolower(s[i], std::locale());
+#else
+	std::string temp = epi::to_u8string(s);
+	epi::str_lower(temp);
+	s = epi::to_u32string(temp);
+#endif
+}
+void str_upper(std::u32string& s)
+{
+#ifndef __clang__
+	for (size_t i = 0 ; i < s.size() ; i++)
+		s[i] = std::toupper(s[i], std::locale());
+#else
+	std::string temp = epi::to_u8string(s);
+	epi::str_upper(temp);
+	s = epi::to_u32string(temp);
+#endif
+}
 
 std::string STR_Format(const char *fmt, ...)
 {
@@ -85,6 +105,24 @@ std::vector<std::string> STR_SepStringVector(std::string str, char separator)
 	return vec;
 }
 
+#ifdef _WIN32
+std::vector<std::u32string> STR_SepStringVector(std::u32string str, char32_t separator)
+{
+	std::vector<std::u32string> vec;
+	std::u32string::size_type oldpos = 0;
+	std::u32string::size_type pos = 0;
+	while (pos != std::u32string::npos) {
+		pos = str.find(separator, oldpos);
+		std::u32string sub_string = str.substr(oldpos, (pos == std::string::npos ? str.size() : pos) - oldpos);
+		if (!sub_string.empty())
+			vec.push_back(sub_string);
+		if (pos != std::string::npos)
+			oldpos = pos + 1;
+	}
+	return vec;
+}
+#endif
+
 // The following string conversion classes/code are adapted from public domain
 // code by Andrew Choi originally found at https://web.archive.org/web/20151209032329/http://members.shaw.ca/akochoi/articles/unicode-processing-c++0x/
 
@@ -100,6 +138,10 @@ int storageMultiplier<UTF16, UTF8>() { return 1; }
 template<>
 int storageMultiplier<UTF32, UTF8>() { return 1; }
 
+std::string to_u8string(const std::string& s)
+{
+  return s;
+}
 
 std::string to_u8string(const std::u16string& s)
 {

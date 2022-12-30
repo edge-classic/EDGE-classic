@@ -56,7 +56,7 @@ class data_file_c
 {
 public:
 	// full name of file
-	std::string name;
+	std::filesystem::path name;
 
 	// type of file (FLKIND_XXX)
 	filekind_e kind;
@@ -71,18 +71,18 @@ public:
 	pack_file_c * pack;
 
 public:
-	data_file_c(const char *_name, filekind_e _kind);
+	data_file_c(std::filesystem::path _name, filekind_e _kind);
 	~data_file_c();
 };
 
 extern std::vector<data_file_c *> data_files;
 
-size_t W_AddFilename(const char *file, filekind_e kind);
+size_t W_AddFilename(std::filesystem::path file, filekind_e kind);
 int W_GetNumFiles();
 void W_ShowFiles();
 
 void W_ProcessMultipleFiles();
-size_t W_AddPending(const char *file, filekind_e kind);
+size_t W_AddPending(std::filesystem::path file, filekind_e kind);
 int W_CheckDDFLumpName(const char *name);
 
 epi::file_c * W_OpenPackFile(const std::string& name);

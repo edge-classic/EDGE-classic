@@ -50,7 +50,7 @@ bool opl_disabled = false;
 
 DEF_CVAR(s_genmidi, "", CVAR_ARCHIVE)
 
-extern std::vector<std::string> available_genmidis;
+extern std::vector<std::filesystem::path> available_genmidis;
 
 bool S_StartupOPL(void)
 {
@@ -69,7 +69,7 @@ bool S_StartupOPL(void)
 	{
 		for (size_t i=0; i < available_genmidis.size(); i++)
 		{
-			if(epi::case_cmp(s_genmidi.s, available_genmidis.at(i)) == 0)
+			if(epi::case_cmp(s_genmidi.s, available_genmidis.at(i).u8string()) == 0)
 				cvar_good = true;
 		}
 	}
@@ -96,9 +96,9 @@ bool S_StartupOPL(void)
 	}
 	else
 	{
-		std::string soundfont_dir = epi::PATH_Join(game_dir.c_str(), "soundfont");
+		std::filesystem::path soundfont_dir = epi::PATH_Join(game_dir, UTFSTR("soundfont"));
 
-		F = epi::FS_Open(epi::PATH_Join(soundfont_dir.c_str(), s_genmidi.c_str()).c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+		F = epi::FS_Open(epi::PATH_Join(soundfont_dir, UTFSTR(s_genmidi.s)), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 		if (! F)
 		{
 			I_Warning("S_StartupOPL: Error opening GENMIDI!\n");

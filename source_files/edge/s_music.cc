@@ -26,6 +26,7 @@
 #include "file.h"
 #include "filesystem.h"
 #include "sound_types.h"
+#include "str_util.h"
 
 #include "main.h"
 
@@ -95,12 +96,12 @@ void S_ChangeMusic(int entrynum, bool loop)
 	{
 		case MUSINF_FILE:
 		{
-			std::string fn = M_ComposeFileName(game_dir.c_str(), play->info.c_str());
+			std::filesystem::path fn = M_ComposeFileName(game_dir, UTFSTR(play->info));
 
-			F = epi::FS_Open(fn.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+			F = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 			if (! F)
 			{
-				I_Warning("S_ChangeMusic: Can't Find File '%s'\n", fn.c_str());
+				I_Warning("S_ChangeMusic: Can't Find File '%s'\n", fn.u8string().c_str());
 				return;
 			}
 			break;

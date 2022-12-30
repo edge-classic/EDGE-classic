@@ -23,15 +23,26 @@
 #include <vector>
 #include <locale>
 
+#ifdef _WIN32
+#define UTFSTR(x) epi::to_u32string(x)
+#else
+#define UTFSTR(x) (x)
+#endif
+
 namespace epi
 {
 
 void str_lower(std::string& s);
 void str_upper(std::string& s);
+void str_lower(std::u32string& s);
+void str_upper(std::u32string& s);
 
 std::string STR_Format(const char *fmt, ...) GCCATTR((format(printf, 1, 2)));
 
 std::vector<std::string> STR_SepStringVector(std::string str, char separator);
+#ifdef _WIN32
+std::vector<std::u32string> STR_SepStringVector(std::u32string str, char32_t separator);
+#endif
 
 // The following string conversion classes/code are adapted from public domain
 // code by Andrew Choi originally found at https://web.archive.org/web/20151209032329/http://members.shaw.ca/akochoi/articles/unicode-processing-c++0x/
@@ -69,11 +80,14 @@ class str_converter {
 
   to_string_type out(const from_string_type& s)
   {
+    if (s.empty())
+      return to_string_type();
+
     static std::locale loc(std::locale::classic(), new codecvt_type);
     static std::mbstate_t state;
     static const codecvt_type& cvt = std::use_facet<codecvt_type>(loc);
 
-    const from_storage_type * enx;
+    const from_storage_type* enx;
 
     int len = s.length() * storageMultiplier<T, F>();
     to_storage_type *i = new to_storage_type[len];
@@ -90,6 +104,9 @@ class str_converter {
 
   to_string_type in(const from_string_type& s)
   {
+    if (s.empty())
+      return to_string_type();
+
     static std::locale loc(std::locale::classic(), new codecvt_type);
     static std::mbstate_t state;
     static const codecvt_type& cvt = std::use_facet<codecvt_type>(loc);
@@ -110,6 +127,7 @@ class str_converter {
   }
 };
 
+extern std::string to_u8string(const std::string& s);
 extern std::string to_u8string(const std::u16string& s);
 extern std::string to_u8string(const std::u32string& s);
 extern std::u16string to_u16string(const std::string& s);

@@ -277,7 +277,7 @@ void M_SaveDefaults(void)
 	// -ACB- 1999/09/24 idiot proof checking as required by MSVC
 	SYS_ASSERT(! cfgfile.empty());
 
-	FILE *f = fopen(cfgfile.c_str(), "w");
+	FILE *f = EPIFOPEN(cfgfile, "w");
 	if (!f)
 	{
 		I_Warning("Couldn't open config file %s for writing.", cfgfile.c_str());
@@ -357,7 +357,7 @@ void M_LoadDefaults(void)
 	I_Printf("M_LoadDefaults from %s\n", cfgfile.c_str());
 
 	// read the file in, overriding any set defaults
-	FILE *f = fopen(cfgfile.c_str(), "r");
+	FILE *f = EPIFOPEN(cfgfile, "r");
 
 	if (! f)
 	{
@@ -439,9 +439,9 @@ void M_LoadDefaults(void)
 
 void M_InitMiscConVars(void)
 {
-	if (argv::Find("hqscale") > 0 || argv::Find("hqall") > 0)
+	if (argv::Find(UTFSTR("hqscale")) > 0 || argv::Find(UTFSTR("hqall")) > 0)
 		hq2x_scaling = 3;
-	else if (argv::Find("nohqscale") > 0)
+	else if (argv::Find(UTFSTR("nohqscale")) > 0)
 		hq2x_scaling = 0;
 }
 
@@ -460,16 +460,16 @@ void M_ScreenShot(bool show_msg)
 	else
 		extension = "jpg";
 
-	std::string fn;
+	std::filesystem::path fn;
 
 	// find a file name to save it to
 	for (int i = 1; i <= 9999; i++)
 	{
 		std::string base(epi::STR_Format("shot%02d.%s", i, extension));
 
-		fn = epi::PATH_Join(shot_dir.c_str(), base.c_str());
+		fn = epi::PATH_Join(shot_dir, UTFSTR(base));
 
-		if (! epi::FS_Access(fn.c_str(), epi::file_c::ACCESS_READ))
+		if (! epi::FS_Access(fn, epi::file_c::ACCESS_READ))
 		{
 			break; // file doesn't exist
 		}
@@ -485,17 +485,17 @@ void M_ScreenShot(bool show_msg)
 	bool result;
 
 	if (png_scrshots) {
-		result = epi::PNG_Save(fn.c_str(), img);
+		result = epi::PNG_Save(fn, img);
 	} else {
-		result = epi::JPEG_Save(fn.c_str(), img);
+		result = epi::JPEG_Save(fn, img);
 	}
 
 	if (show_msg)
 	{
 		if (result)
-			I_Printf("Captured to file: %s\n", fn.c_str());
+			I_Printf("Captured to file: %s\n", fn.u8string().c_str());
 		else
-			I_Printf("Error saving file: %s\n", fn.c_str());
+			I_Printf("Error saving file: %s\n", fn.u8string().c_str());
 	}
 
 	delete img;
@@ -519,61 +519,25 @@ void M_MakeSaveScreenShot(void)
 // just "file" in the given string if it 
 // was an absolute address.
 //
-std::string M_ComposeFileName(const char *dir, const char *file)
+std::filesystem::path M_ComposeFileName(std::filesystem::path dir, std::filesystem::path file)
 {
 	if (epi::PATH_IsAbsolute(file))
-		return std::string(file);
-
-	return epi::PATH_Join(dir, file);
+		return file;
+#ifdef _WIN32
+	return epi::PATH_Join(dir, file.u32string());
+#else
+	return epi::PATH_Join(dir, file.string());
+#endif
 }
 
 
-epi::file_c *M_OpenComposedEPIFile(const char *dir, const char *file)
+epi::file_c *M_OpenComposedEPIFile(std::filesystem::path dir, std::filesystem::path file)
 {
-	std::string fullname = M_ComposeFileName(dir, file);
+	std::filesystem::path fullname = M_ComposeFileName(dir, file);
 
-	return epi::FS_Open(fullname.c_str(),
+	return epi::FS_Open(fullname,
 		epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 }
-
-//
-// Loads file into memory. This sets a pointer to the data and
-// the length.
-//
-// NOTE: The data must be freed by delete[] when not used.
-//
-// Returns NULL on failure.
-//
-// -ACB- 2000/01/08 Written
-// -ES-  2000/06/12 Now returns the allocated pointer, or NULL on failure.
-//
-byte* M_GetFileData(const char *filename, int *length)
-{
-	FILE *lumpfile;
-	byte *data;
-
-	// Sanity Checks..
-	SYS_ASSERT(filename);
-	SYS_ASSERT(length);
-
-	lumpfile = fopen(filename, "rb");  
-	if (!lumpfile)
-	{
-		I_Warning("M_GetFileData: Cannot open '%s'\n", filename);
-		return NULL;
-	}
-
-	fseek(lumpfile, 0, SEEK_END);                   // get the end of the file
-	(*length) = ftell(lumpfile);                    // get the size
-	fseek(lumpfile, 0, SEEK_SET);                   // reset to beginning
-
-	data = new byte[*length];						// malloc the size
-	fread(data, sizeof(char), (*length), lumpfile); // read file
-	fclose(lumpfile);                               // close the file
-
-	return data;
-}
-
 
 void M_WarnError(const char *error,...)
 {

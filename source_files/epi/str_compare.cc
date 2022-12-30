@@ -18,9 +18,13 @@
 
 #include "epi.h"
 #include "str_compare.h"
+#ifdef __clang__
+#include "str_util.h"
+#endif
 
 #include <cstring>
 #include <cctype>
+#include <locale>
 
 #undef strcmp
 #undef strncmp
@@ -47,6 +51,21 @@ int strcmp(const std::string& A, const char *B)
 int strcmp(const std::string& A, const std::string& B)
 {
 	return epi::strcmp(A.c_str(), B.c_str());
+}
+
+int strcmp(const std::u32string& A, const std::u32string& B)
+{
+	SYS_ASSERT(!A.empty() && !B.empty());
+
+	if (A.size() != B.size())
+		return A.size() - B.size();
+
+	for (int i=0; i < A.size(); i++)
+	{
+		if (A != B)
+			return A.at(i) - B.at(i);
+	}
+	return 0;
 }
 
 //----------------------------------------------------------------------------
@@ -104,6 +123,25 @@ int case_cmp(const std::string& A, const char *B)
 int case_cmp(const std::string& A, const std::string& B)
 {
 	return epi::case_cmp(A.c_str(), B.c_str());
+}
+
+int case_cmp(const std::u32string& A, const std::u32string& B)
+{
+	SYS_ASSERT(!A.empty() && !B.empty());
+
+	if (A.size() != B.size())
+		return A.size() - B.size();
+
+#ifndef __clang__
+	for (int i=0; i < A.size(); i++)
+	{
+		if (std::tolower(A.at(i), std::locale()) != std::tolower(B.at(i), std::locale()))
+			return A.at(i) - B.at(i);
+	}
+	return 0;
+#else
+	return epi::case_cmp(epi::to_u8string(A), epi::to_u8string(B));
+#endif
 }
 
 //----------------------------------------------------------------------------

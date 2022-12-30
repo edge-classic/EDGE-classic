@@ -190,19 +190,19 @@ bool Lump_c::Finish()
 //  WAD Reading Interface
 //------------------------------------------------------------------------
 
-Wad_file::Wad_file(const char *_name, char _mode, FILE * _fp) :
+Wad_file::Wad_file(std::filesystem::path _name, char _mode, FILE * _fp) :
 	mode(_mode), fp(_fp), kind('P'),
 	total_size(0), directory(),
 	dir_start(0), dir_count(0),
 	levels(), patches(), sprites(), flats(), tx_tex(),
 	begun_write(false), insert_point(-1)
 {
-	filename = StringDup(_name);
+	filename = _name;
 }
 
 Wad_file::~Wad_file()
 {
-	FileMessage("Closing WAD file: %s\n", filename);
+	FileMessage("Closing WAD file: %s\n", filename.u8string().c_str());
 
 	fclose(fp);
 
@@ -212,23 +212,27 @@ Wad_file::~Wad_file()
 
 	directory.clear();
 
-	StringFree(filename);
+	filename.clear();
 }
 
 
-Wad_file * Wad_file::Open(const char *filename, char mode)
+Wad_file * Wad_file::Open(std::filesystem::path filename, char mode)
 {
 	SYS_ASSERT(mode == 'r' || mode == 'w' || mode == 'a');
 
 	if (mode == 'w')
 		return Create(filename, mode);
 
-	FileMessage("Opening WAD file: %s\n", filename);
+	FileMessage("Opening WAD file: %s\n", filename.u8string().c_str());
 
 	FILE *fp = NULL;
 
 retry:
-	fp = fopen(filename, (mode == 'r' ? "rb" : "r+b"));
+#ifdef _WIN32
+	fp = _wfopen(filename.c_str(), (mode == 'r' ? L"rb" : L"r+b"));
+#else
+	fp = fopen(filename.c_str(), (mode == 'r' ? "rb" : "r+b"));
+#endif
 
 	if (! fp)
 	{
@@ -270,11 +274,14 @@ retry:
 }
 
 
-Wad_file * Wad_file::Create(const char *filename, char mode)
+Wad_file * Wad_file::Create(std::filesystem::path filename, char mode)
 {
-	FileMessage("Creating new WAD file: %s\n", filename);
-
-	FILE *fp = fopen(filename, "w+b");
+	FileMessage("Creating new WAD file: %s\n", filename.u8string().c_str());
+#ifdef _WIN32
+	FILE *fp = _wfopen(filename.c_str(), L"w+b");
+#else
+	FILE *fp = fopen(filename.c_str(), "w+b");
+#endif
 	if (! fp)
 		return NULL;
 
@@ -295,9 +302,13 @@ Wad_file * Wad_file::Create(const char *filename, char mode)
 }
 
 
-bool Wad_file::Validate(const char *filename)
+bool Wad_file::Validate(std::filesystem::path filename)
 {
-	FILE *fp = fopen(filename, "rb");
+#ifdef _WIN32
+	FILE *fp = _wfopen(filename.c_str(), L"rb");
+#else
+	FILE *fp = fopen(filename.c_str(), "rb");
+#endif
 
 	if (! fp)
 		return false;
@@ -1234,19 +1245,9 @@ void Wad_file::WriteDirectory()
 	fflush(fp);
 }
 
-
-bool Wad_file::Backup(const char *new_filename)
-{
-	fflush(fp);
-
-	return FileCopy(PathName(), new_filename);
-}
-
-
 //------------------------------------------------------------------------
 //  GLOBAL API
 //------------------------------------------------------------------------
-
 
 int W_LoadLumpData(Lump_c *lump, byte ** buf_ptr)
 {

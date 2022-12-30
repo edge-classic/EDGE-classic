@@ -67,7 +67,7 @@ int CMD_Exec(char **argv, int argc)
 		return 1;
 	}
 
-	FILE *script = fopen(argv[1], "rb");
+	FILE *script = EPIFOPEN(std::filesystem::path(UTFSTR(argv[1])), "rb");
 	if (!script)
 	{
 		CON_Printf("Unable to open file: %s\n", argv[1]);
@@ -96,7 +96,7 @@ int CMD_Type(char **argv, int argc)
 		return 2;
 	}
 
-	script = fopen(argv[1], "r");
+	script = EPIFOPEN(std::filesystem::path(UTFSTR(argv[1])), "r");
 	if (!script)
 	{
 		CON_Printf("Unable to open \'%s\'!\n", argv[1]);
@@ -113,43 +113,47 @@ int CMD_Type(char **argv, int argc)
 
 int CMD_Dir(char **argv, int argc)
 {
-	const char *path = ".";
-	const char *mask = "*.*";
+	std::filesystem::path path = UTFSTR(".");
+#ifdef _WIN32
+	std::u32string mask = UTFSTR("*.*");
+#else
+	std::string mask = "*.*";
+#endif
 
 	if (argc >= 2)
 	{
 		// Assume a leading * is the beginning of a mask for the current dir
 		if (argv[1][0] == '*')
-			mask = argv[1];
+			mask = UTFSTR(argv[1]);
 		else
-			path = argv[1];
+			path = UTFSTR(argv[1]);
 	}
 
 	if (argc >= 3)
-		mask = argv[2];
+		mask = UTFSTR(argv[2]);
 
 	std::vector<epi::dir_entry_c> fsd;
 
 	if (! FS_ReadDir(fsd, path, mask))
 	{
-		I_Printf("Failed to read dir: %s\n", path);
+		I_Printf("Failed to read dir: %s\n", path.u8string().c_str());
 		return 1;
 	}
 
 	if (fsd.empty())
 	{
-		I_Printf("No files found in provided path %s\n", path);
+		I_Printf("No files found in provided path %s\n", path.u8string().c_str());
 		return 0;
 	}
 
-	I_Printf("Directory contents for %s matching %s\n", epi::PATH_GetDir(fsd[0].name.c_str()).c_str(), mask);
+	I_Printf("Directory contents for %s matching %s\n", epi::PATH_GetDir(fsd[0].name).u8string().c_str(), epi::to_u8string(mask).c_str());
 
 	for (size_t i = 0 ; i < fsd.size() ; i++)
 	{
 		I_Printf("%4d: %10d  %s  \"%s\"\n", (int)i + 1,
 			(int)fsd[i].size,
 			fsd[i].is_dir ? "DIR" : "   ",
-			epi::PATH_GetFilename(fsd[i].name.c_str()).c_str());
+			epi::PATH_GetFilename(fsd[i].name).u8string().c_str());
 	}
 
 	return 0;

@@ -27,6 +27,7 @@
 #include "m_argv.h"
 #include "r_modes.h"
 
+#include "str_util.h"
 
 #undef DEBUG_KB
 
@@ -625,7 +626,7 @@ void I_StartupJoystick(void)
 {
 	cur_joy = 0;
 
-	if (argv::Find("nojoy") > 0)
+	if (argv::Find(UTFSTR("nojoy")) > 0)
 	{
 		I_Printf("I_StartupControl: Joystick system disabled.\n");
 		nojoy = true;

@@ -35,13 +35,9 @@ int main(int argc, char *argv[])
 	if (SDL_Init(0) < 0)
 		I_Error("Couldn't init SDL!!\n%s\n", SDL_GetError());
 
-#ifndef WIN32
-	exe_path = SDL_GetBasePath();
-#else
-	exe_path = epi::to_u32string(SDL_GetBasePath());
-#endif
+	exe_path = UTFSTR(SDL_GetBasePath());
 
-#ifdef WIN32
+#ifdef _WIN32
     // -AJA- change current dir to match executable
     epi::FS_SetCurrDir(exe_path);
 #endif

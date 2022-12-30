@@ -552,9 +552,9 @@ void M_ReadSaveStrings(void)
 		ex_slots[i].gamename[0] = 0;
     
 		int slot = save_page * SAVE_SLOTS + i;
-		std::string fn(SV_FileName(SV_SlotName(slot), "head"));
+		std::filesystem::path fn(SV_FileName(SV_SlotName(slot), "head"));
 
-		if (! SV_OpenReadFile(fn.c_str()))
+		if (! SV_OpenReadFile(fn))
 		{
 			ex_slots[i].empty = true;
 			ex_slots[i].corrupt = false;

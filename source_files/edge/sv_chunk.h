@@ -45,7 +45,7 @@ int SV_GetError(void);
 
 extern int savegame_version;
 
-bool SV_OpenReadFile(const char *filename);
+bool SV_OpenReadFile(std::filesystem::path filename);
 bool SV_CloseReadFile(void);
 bool SV_VerifyHeader(int *version);
 bool SV_VerifyContents(void);
@@ -72,7 +72,7 @@ bool SV_GetMarker(char id[5]);
 //  WRITING
 //
 
-bool SV_OpenWriteFile(const char *filename, int version);
+bool SV_OpenWriteFile(std::filesystem::path filename, int version);
 bool SV_CloseWriteFile(void);
 
 bool SV_PushWriteChunk(const char *id);

@@ -2140,7 +2140,6 @@ weakness_info_c& weakness_info_c::operator=(weakness_info_c &rhs)
 
 static ddf_collection_c unread_ddf;
 
-
 struct ddf_reader_t
 {
 	ddf_type_e  type;
@@ -2190,19 +2189,26 @@ ddf_type_e DDF_LumpToType(const std::string& name)
 }
 
 
-ddf_type_e DDF_FilenameToType(const std::string& path)
+ddf_type_e DDF_FilenameToType(const std::filesystem::path& path)
 {
-	std::string low_name = epi::PATH_GetExtension(path.c_str());
+#ifdef _WIN32
+	std::u32string low_name = epi::PATH_GetExtension(path).u32string();
+#else
+	std::string low_name = epi::PATH_GetExtension(path).string();
+#endif
 	epi::str_lower(low_name);
 
-	if (low_name == ".rts")
+	if (low_name == UTFSTR(".rts"))
 		return DDF_RadScript;
-
-	low_name = epi::PATH_GetFilename(path.c_str());
+#ifdef _WIN32
+	low_name = epi::PATH_GetFilename(path).u32string();
+#else
+	low_name = epi::PATH_GetFilename(path).string();
+#endif
 	epi::str_lower(low_name);
 
 	for (size_t i = 0 ; i < DDF_NUM_TYPES ; i++)
-		if (low_name == ddf_readers[i].pack_name)
+		if (epi::case_cmp(epi::to_u8string(low_name).c_str(), ddf_readers[i].pack_name) == 0)
 			return ddf_readers[i].type;
 
 	return DDF_UNKNOWN;

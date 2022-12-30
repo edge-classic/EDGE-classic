@@ -19,6 +19,8 @@
 #ifndef __AJBSP_W_WAD_H__
 #define __AJBSP_W_WAD_H__
 
+#include <filesystem>
+
 class Wad_file;
 
 
@@ -107,7 +109,7 @@ friend void W_LoadFlats();
 friend void W_LoadTextures_TX_START(Wad_file *wf);
 
 private:
-	const char *filename;
+	std::filesystem::path filename;
 
 	char mode;  // mode value passed to ::Open()
 
@@ -139,7 +141,7 @@ private:
 	int insert_point;
 
 	// constructor is private
-	Wad_file(const char *_name, char _mode, FILE * _fp);
+	Wad_file(std::filesystem::path _name, char _mode, FILE * _fp);
 
 public:
 	~Wad_file();
@@ -154,12 +156,12 @@ public:
 	// Note: if 'a' is used and the file is read-only, it will be
 	//       silently opened in 'r' mode instead.
 	//
-	static Wad_file * Open(const char *filename, char mode = 'a');
+	static Wad_file * Open(std::filesystem::path filename, char mode = 'a');
 
 	// check the given wad file exists and is a WAD file
-	static bool Validate(const char *filename);
+	static bool Validate(std::filesystem::path filename);
 
-	const char *PathName() const { return filename; }
+	std::filesystem::path PathName() const { return filename; }
 	bool IsReadOnly() const { return mode == 'r'; }
 
 	int TotalSize() const { return total_size; }
@@ -193,9 +195,6 @@ public:
 	// [ NOT USED YET.... ]
 	bool WasExternallyModified();
 
-	// backup the current wad into the given filename.
-	// returns true if successful, false on error.
-	bool Backup(const char *new_filename);
 
 	// all changes to the wad must occur between calls to BeginWrite()
 	// and EndWrite() methods.  the on-disk wad directory may be trashed
@@ -241,7 +240,7 @@ public:
 	void InsertPoint(short index = -1);
 
 private:
-	static Wad_file * Create(const char *filename, char mode);
+	static Wad_file * Create(std::filesystem::path filename, char mode);
 
 	// read the existing directory.
 	void ReadDirectory();

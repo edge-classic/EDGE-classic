@@ -31,6 +31,7 @@
 #include "filesystem.h"
 #include "sound_data.h"
 #include "sound_types.h"
+#include "str_util.h"
 
 #include "main.h"
 #include "sfx.h"
@@ -157,13 +158,13 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	}
 	else if (def->file_name != "")
 	{
-		std::string fn = M_ComposeFileName(game_dir.c_str(), def->file_name.c_str());
+		std::filesystem::path fn = M_ComposeFileName(game_dir, UTFSTR(def->file_name));
 
-		F = epi::FS_Open(fn.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+		F = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 
 		if (! F)
 		{
-			M_WarnError("SFX Loader: Can't Find File '%s'\n", fn.c_str());
+			M_WarnError("SFX Loader: Can't Find File '%s'\n", fn.u8string().c_str());
 			return false;
 		}
 

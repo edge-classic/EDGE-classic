@@ -240,8 +240,8 @@ static scrmode_c new_scrmode;
 
 bool splash_screen;
 
-extern std::vector<std::string> available_soundfonts;
-extern std::vector<std::string> available_genmidis;
+extern std::vector<std::filesystem::path> available_soundfonts;
+extern std::vector<std::filesystem::path> available_genmidis;
 
 // -ES- 1998/11/28 Wipe and Faded teleportation options
 //static char FadeT[] = "Off/On, flash/On, no flash";
@@ -1122,14 +1122,14 @@ void M_OptDrawer()
 		// Draw current soundfont
 		if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeSoundfont)
 		{
-			HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, epi::PATH_GetBasename(s_soundfont.c_str()).c_str());
+			HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, epi::PATH_GetBasename(UTFSTR(s_soundfont.s)).u8string().c_str());
 		}
 
 		// Draw current GENMIDI
 		if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeGENMIDI)
 		{
 			HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, 
-				s_genmidi.s.empty() ? "default" : epi::PATH_GetBasename(s_genmidi.c_str()).c_str());
+				s_genmidi.s.empty() ? "default" : epi::PATH_GetBasename(UTFSTR(s_genmidi.s)).u8string().c_str());
 		}
 
 		// -ACB- 1998/07/15 Menu Cursor is colour indexed.
@@ -2102,7 +2102,7 @@ static void M_ChangeSoundfont(int keypressed)
 	int sf_pos = -1;
 	for(int i=0; i < (int)available_soundfonts.size(); i++)
 	{
-		if (epi::case_cmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
+		if (epi::case_cmp(s_soundfont.s, available_soundfonts.at(i).u8string()) == 0)
 		{
 			sf_pos = i;
 			break;
@@ -2132,7 +2132,7 @@ static void M_ChangeSoundfont(int keypressed)
 	}
 
 	// update cvar
-	s_soundfont = available_soundfonts.at(sf_pos);
+	s_soundfont = available_soundfonts.at(sf_pos).u8string();
 	S_RestartFluid();
 }
 
@@ -2145,7 +2145,7 @@ static void M_ChangeGENMIDI(int keypressed)
 	int op2_pos = -1;
 	for(int i=0; i < (int)available_genmidis.size(); i++)
 	{
-		if (epi::case_cmp(s_genmidi.s, available_genmidis.at(i)) == 0)
+		if (epi::case_cmp(s_genmidi.s, available_genmidis.at(i).u8string()) == 0)
 		{
 			op2_pos = i;
 			break;
@@ -2175,7 +2175,7 @@ static void M_ChangeGENMIDI(int keypressed)
 	}
 
 	// update cvar
-	s_genmidi = available_genmidis.at(op2_pos);
+	s_genmidi = available_genmidis.at(op2_pos).u8string();
 	S_RestartOPL();
 }
 

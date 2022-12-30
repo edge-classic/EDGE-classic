@@ -50,6 +50,7 @@ General Improvements
   to prevent conflicts)
 + Borderless Fullscreen mode added to the Set Resolution menu; list of Windowed resolutions updated to accommodate
   displays up to 4K
++ Improved support for filepaths and program arguments with non-ASCII characters
 
 
 New Features

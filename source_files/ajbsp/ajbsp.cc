@@ -24,9 +24,9 @@
 //  global variables
 //
 
-const char *opt_output = NULL;
+std::filesystem::path opt_output;
 
-std::vector< const char * > wad_list;
+std::vector<std::filesystem::path> wad_list;
 
 const char *Level_name;
 
@@ -61,8 +61,8 @@ void FatalError(const char *fmt)
 		delete gwa_wad; 
 		gwa_wad = NULL;
 	}
-	if (FileExists(opt_output))
-		FileDelete(opt_output);
+	if (std::filesystem::exists(opt_output))
+		std::filesystem::remove(opt_output);
 	cur_funcs->log_error(fmt);
 }
 
@@ -200,47 +200,49 @@ static build_result_e BuildFile()
 }
 
 
-void ValidateInputFilename(const char *filename)
+void ValidateInputFilename(std::filesystem::path filename)
 {
 	// NOTE: these checks are case-insensitive
 
+	const char *extension = filename.extension().u8string().c_str();
+
 	// files with ".bak" extension cannot be backed up, so refuse them
-	if (MatchExtension(filename, "bak"))
-		FatalError(StringPrintf("cannot process a backup file: %s\n", filename));
+	if (y_stricmp(extension, "bak") == 0)
+		FatalError(StringPrintf("cannot process a backup file: %s\n", filename.u8string().c_str()));
 
 	// GWA files only contain GL-nodes, never any maps
-	if (MatchExtension(filename, "gwa"))
-		FatalError(StringPrintf("cannot process a GWA file: %s\n", filename));
+	if (y_stricmp(extension, "gwa") == 0)
+		FatalError(StringPrintf("cannot process a GWA file: %s\n", filename.u8string().c_str()));
 
 	// we do not support packages
-	if (MatchExtension(filename, "pak") || MatchExtension(filename, "pk2") ||
-		MatchExtension(filename, "pk3") || MatchExtension(filename, "pk4") ||
-		MatchExtension(filename, "pk7") ||
-		MatchExtension(filename, "epk") || MatchExtension(filename, "pack") ||
-		MatchExtension(filename, "zip") || MatchExtension(filename, "rar"))
+	if (y_stricmp(extension, "pak") == 0 || y_stricmp(extension, "pk2") == 0 ||
+		y_stricmp(extension, "pk3") == 0 || y_stricmp(extension, "pk4") == 0 ||
+		y_stricmp(extension, "pk7") == 0 ||
+		y_stricmp(extension, "epk") == 0 || y_stricmp(extension, "pack") == 0 ||
+		y_stricmp(extension, "zip") == 0 || y_stricmp(extension, "rar") == 0)
 	{
-		FatalError(StringPrintf("package files (like PK3) are not supported: %s\n", filename));
+		FatalError(StringPrintf("package files (like PK3) are not supported: %s\n", filename.u8string().c_str()));
 	}
 
 	// check some very common formats
-	if (MatchExtension(filename, "exe") || MatchExtension(filename, "dll") ||
-		MatchExtension(filename, "com") || MatchExtension(filename, "bat") ||
-		MatchExtension(filename, "txt") || MatchExtension(filename, "doc") ||
-		MatchExtension(filename, "deh") || MatchExtension(filename, "bex") ||
-		MatchExtension(filename, "lmp") || MatchExtension(filename, "cfg") ||
-		MatchExtension(filename, "gif") || MatchExtension(filename, "png") ||
-		MatchExtension(filename, "jpg") || MatchExtension(filename, "jpeg"))
+	if (y_stricmp(extension, "exe") == 0 || y_stricmp(extension, "dll") == 0 ||
+		y_stricmp(extension, "com") == 0 || y_stricmp(extension, "bat") == 0 ||
+		y_stricmp(extension, "txt") == 0 || y_stricmp(extension, "doc") == 0 ||
+		y_stricmp(extension, "deh") == 0 || y_stricmp(extension, "bex") == 0 ||
+		y_stricmp(extension, "lmp") == 0 || y_stricmp(extension, "cfg") == 0 ||
+		y_stricmp(extension, "gif") == 0 || y_stricmp(extension, "png") == 0 ||
+		y_stricmp(extension, "jpg") == 0 || y_stricmp(extension, "jpeg")== 0)
 	{
-		FatalError(StringPrintf("not a wad file: %s\n", filename));
+		FatalError(StringPrintf("not a wad file: %s\n", filename.u8string().c_str()));
 	}
 }
 
-void VisitFile(unsigned int idx, const char *filename)
+void VisitFile(unsigned int idx, std::filesystem::path filename)
 {
 
 	edit_wad = Wad_file::Open(filename, 'r');
 	if (! edit_wad)
-		FatalError(StringPrintf("Cannot open file: %s\n", filename));
+		FatalError(StringPrintf("Cannot open file: %s\n", filename.u8string().c_str()));
 
 	gwa_wad = Wad_file::Open(opt_output, 'w');
 
@@ -248,7 +250,7 @@ void VisitFile(unsigned int idx, const char *filename)
 	{
 		delete gwa_wad; gwa_wad = NULL;
 
-		FatalError(StringPrintf("output file is read only: %s\n", filename));
+		FatalError(StringPrintf("output file is read only: %s\n", filename.u8string().c_str()));
 	}
 
 	build_result_e res = BuildFile();
@@ -361,7 +363,7 @@ void ParseMapList(const char *from_arg)
 //
 //  the program starts here
 //
-int AJBSP_Build(const char *filename, const char *outname, const nodebuildfuncs_t *display_funcs)
+int AJBSP_Build(std::filesystem::path filename, std::filesystem::path outname, const nodebuildfuncs_t *display_funcs)
 {
 
 	wad_list.push_back(filename);
@@ -379,24 +381,24 @@ int AJBSP_Build(const char *filename, const char *outname, const nodebuildfuncs_
 		return 0;
 	}
 
-	if (opt_output != NULL)
+	if (!opt_output.empty())
 	{
 		if (total_files > 1)
 			FatalError(StringPrintf("cannot use multiple input files with --output\n"));
 
-		if (y_stricmp(wad_list[0], opt_output) == 0)
+		if (wad_list[0].compare(opt_output) == 0)
 			FatalError(StringPrintf("input and output files are the same\n"));
 	}
 
 	// validate all filenames before processing any of them
 	for (unsigned int i = 0 ; i < wad_list.size() ; i++)
 	{
-		const char *filename = wad_list[i];
+		std::filesystem::path filename = wad_list[i];
 
 		ValidateInputFilename(filename);
 
-		if (! FileExists(filename))
-			FatalError(StringPrintf("no such file: %s\n", filename));
+		if (! std::filesystem::exists(filename))
+			FatalError(StringPrintf("no such file: %s\n", filename.u8string().c_str()));
 	}
 
 	for (unsigned int i = 0 ; i < wad_list.size() ; i++)

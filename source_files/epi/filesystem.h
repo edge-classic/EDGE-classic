@@ -21,6 +21,13 @@
 
 #include <vector>
 #include <filesystem>
+#include "str_util.h"
+
+#ifdef _WIN32
+#define EPIFOPEN(name,mode) _wfopen(name.c_str(), (const wchar_t *)epi::to_u16string(mode).c_str())
+#else
+#define EPIFOPEN(name,mode) std::fopen(name.c_str(), mode)
+#endif
 
 namespace epi
 {
@@ -33,7 +40,7 @@ class file_c;
 class dir_entry_c
 {
 public:
-	std::string name = "";
+	std::filesystem::path name;
 	size_t size      = 0;
 	bool is_dir      = false;
 };
@@ -43,20 +50,22 @@ public:
 std::filesystem::path FS_GetCurrDir();
 bool FS_SetCurrDir(std::filesystem::path dir);
 
-bool FS_IsDir(const char *dir);
-bool FS_MakeDir(const char *dir);
+bool FS_IsDir(std::filesystem::path dir);
+bool FS_MakeDir(std::filesystem::path dir);
 bool FS_RemoveDir(const char *dir);
-
-bool FS_ReadDir(std::vector<dir_entry_c>& fsd, const char *dir, const char *mask);
-
+#ifdef _WIN32
+bool FS_ReadDir(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::u32string mask);
+#else
+bool FS_ReadDir(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::string mask);
+#endif
 // File Functions
-bool FS_Access(const char *name, unsigned int flags);
-file_c *FS_Open(const char *name, unsigned int flags);
+bool FS_Access(std::filesystem::path name, unsigned int flags);
+file_c *FS_Open(std::filesystem::path name, unsigned int flags);
 
 // NOTE: there's no FS_Close() function, just delete the object.
 
-bool FS_Copy(const char *src, const char *dest);
-bool FS_Delete(const char *name);
+bool FS_Copy(std::filesystem::path src, std::filesystem::path dest);
+bool FS_Delete(std::filesystem::path name);
 bool FS_Rename(const char *oldname, const char *newname);
 
 } // namespace epi

@@ -23,25 +23,41 @@
 
 #include <string>
 #include <vector>
-#include <unordered_set>
+#include <filesystem>
 
 namespace argv {
 
+#ifdef _WIN32
+extern std::vector<std::u32string> list;
+#else
 extern std::vector<std::string> list;
+#endif
 
 void Init(int argc, const char *const *argv);
 
 // Return position in arg list, if found
-int Find(const char *longName, int *numParams = nullptr);
+#ifdef _WIN32
+int Find(std::u32string longName, int *numParams = nullptr);
+#else
+int Find(std::string longName, int *numParams = nullptr);
+#endif
 
-//  Same as above, but return the value of position + 1 if valid, else an empty std::string
-std::string Value(const char *longName, int *numParams = nullptr);
+//  Same as above, but return the value of position + 1 if valid, else an empty string
+#ifdef _WIN32
+std::u32string Value(std::u32string longName, int *numParams = nullptr);
+#else
+std::string Value(std::string longName, int *numParams = nullptr);
+#endif
 
-void CheckBooleanParm(const char *parm, bool *boolval, bool reverse);
+#ifdef _WIN32
+void CheckBooleanParm(std::u32string parm, bool *boolval, bool reverse);
+void CheckBooleanCVar(std::u32string parm, cvar_c *var, bool reverse);
+#else
+void CheckBooleanParm(std::string parm, bool *boolval, bool reverse);
+void CheckBooleanCVar(std::string parm, cvar_c *var, bool reverse);
+#endif
 
-void CheckBooleanCVar(const char *parm, cvar_c *var, bool reverse);
-
-void ApplyResponseFile(const char *name);
+void ApplyResponseFile(std::filesystem::path name);
 
 void DebugDumpArgs(void);
 

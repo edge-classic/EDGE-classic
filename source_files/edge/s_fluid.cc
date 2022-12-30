@@ -107,7 +107,7 @@ bool S_StartupFluid(void)
 	fluid_synth_set_sample_rate(edge_fluid, dev_freq);
 	
 	char *pointer_filename = new char[64];
-	const void *pointer_to_sf2_in_mem;
+	void *pointer_to_sf2_in_mem = nullptr;
 	FILE* sf_fp = EPIFOPEN(epi::PATH_Join(soundfont_dir, UTFSTR(s_soundfont.s)), "rb");
 	if (sf_fp)
 	{

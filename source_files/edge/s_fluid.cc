@@ -51,7 +51,7 @@ DEF_CVAR(s_soundfont, "default.sf2", CVAR_ARCHIVE)
 
 extern std::vector<std::filesystem::path> available_soundfonts;
 
-// Nneeded to support loading soundfonts from memory in Fluidlite
+// Needed to support loading soundfonts from memory in Fluidlite
 void *edge_fluid_open(fluid_fileapi_t *fileapi, const char *filename)
 {
     void *p;
@@ -114,10 +114,11 @@ bool S_StartupFluid(void)
 		pointer_to_sf2_in_mem = (void *)sf_fp;
 		sprintf(pointer_filename, "&%p", pointer_to_sf2_in_mem);
 	}
-	if (fluid_synth_sfload(edge_fluid, pointer_filename, 1) == -1)
+	if (!sf_fp || fluid_synth_sfload(edge_fluid, pointer_filename, 1) == -1)
 	{
 		I_Warning("FluidLite: Could not load requested soundfont %s! Falling back to default soundfont!\n", s_soundfont.c_str());
-		std::fclose(sf_fp);
+		if(sf_fp)
+			std::fclose(sf_fp);
 		pointer_to_sf2_in_mem = nullptr;
 		memset(pointer_filename, 0, 64);
 		sf_fp = EPIFOPEN(epi::PATH_Join(soundfont_dir, UTFSTR("default.sf2")), "rb");
@@ -126,10 +127,11 @@ bool S_StartupFluid(void)
 			pointer_to_sf2_in_mem = (void *)sf_fp;
 			sprintf(pointer_filename, "&%p", pointer_to_sf2_in_mem);
 		}
-		if (fluid_synth_sfload(edge_fluid, pointer_filename, 1) == -1) 
+		if (!sf_fp || fluid_synth_sfload(edge_fluid, pointer_filename, 1) == -1) 
 		{
 			I_Warning("Could not load any soundfonts! Ensure that default.sf2 is present in the soundfont directory!\n");
-			std::fclose(sf_fp);
+			if(sf_fp)
+				std::fclose(sf_fp);
 			pointer_to_sf2_in_mem = nullptr;
 			delete[] pointer_filename;
 			delete_fluid_synth(edge_fluid);

@@ -16,20 +16,18 @@
 
 ## Windows Compilation using MSYS2
 
-This section assumes that you have completed the steps at https://www.msys2.org/ and have a working basic MSYS2 install. Using the clang32/clang64 environment
-is required due to the need to build against the Windows UCRT
+This section assumes that you have completed the steps at https://www.msys2.org/ and have a working basic MSYS2 install
 
 From an MSYS prompt for your target architecture:
 
 Install the following additional packages:
-* `mingw-w64-clang-(i686 or x86_64)-toolchain` (if not already performed on initial setup)
-* `mingw-w64-clang-(i686 or x86_64)-cmake`
-* `mingw-w64-clang-(i686 or x86_64)-SDL2`
+* `mingw-w64-(arch)-cmake`
+* `mingw-w64-(arch)-SDL2`
 
 Then, after navigating to the project directory:
 
 ```
-> cmake -B build -G "MSYS Makefiles" -DCMAKE_MAKE_PROGRAM=/(clang32 or clang64)/bin/mingw32-make.exe
+> cmake -B build -G "MSYS Makefiles"
 > cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
 ```
 
@@ -73,4 +71,7 @@ In all cases, the executable will be copied to the root of the project folder up
 * soundfont
 * edge-classic/edge-classic.exe (OS-dependent)
 * edge-defs.wad
+* libgcc_s_dw2-1.dll (Windows-only, if present; can appear with MSYS2 builds)
+* libstdc++-6.dll (Windows-only, if present; can appear with MSYS2 builds)
+* libwinpthread-1.dll (Windows-only, if present; can appear with MSYS2 builds)
 * SDL2.dll (Windows-only)

@@ -192,7 +192,7 @@ New Features
 + Improved Boom Support
   - Line 254 vector scrolling will use the appropriate direction instead of only scrolling vertically
   - Implemented Lines 245-249: Displace scroll/push
-  - Implemented Lines 214-418: Accel scroll/push
+  - Implemented Lines 214-218: Accel scroll/push
   - Improved Line 242 compatibility (colormaps/invisible platforms/etc)
   - Implemented light level changes for tagged manual door sectors
   - Implemented BEX-specific keycard/skull strings

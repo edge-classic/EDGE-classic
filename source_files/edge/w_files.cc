@@ -331,7 +331,7 @@ void W_ShowFiles()
 	{
 		data_file_c *df = data_files[i];
 
-		I_Printf(" %2d: %-4s \"%s\"\n", i+1, FileKindString(df->kind), df->name.c_str());
+		I_Printf(" %2d: %-4s \"%s\"\n", i+1, FileKindString(df->kind), df->name.u8string().c_str());
 	}
 }
 

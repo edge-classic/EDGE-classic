@@ -55,7 +55,7 @@ void argv::Init(const int argc, const char *const *argv) {
 
 #ifdef __APPLE__
         // ignore MacOS X rubbish
-        if (cur == "-psn") {
+        if (argv[i] == "-psn") {
             continue;
         }
 #endif

@@ -223,7 +223,7 @@ Wad_file * Wad_file::Open(std::filesystem::path filename, char mode)
 	if (mode == 'w')
 		return Create(filename, mode);
 
-	FileMessage("Opening WAD file: %s\n", filename);
+	FileMessage("Opening WAD file: %s\n", filename.u8string().c_str());
 
 	FILE *fp = NULL;
 

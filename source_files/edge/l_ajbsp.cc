@@ -50,8 +50,8 @@ static const nodebuildfuncs_t display_funcs =
 bool AJ_BuildNodes(std::filesystem::path filename, std::filesystem::path outname)
 {
 	L_WriteDebug("AJ_BuildNodes: STARTED\n");
-	L_WriteDebug("# source: '%s'\n", filename);
-	L_WriteDebug("#   dest:  '%s'\n", outname);
+	L_WriteDebug("# source: '%s'\n", filename.u8string().c_str());
+	L_WriteDebug("#   dest:  '%s'\n", outname.u8string().c_str());
 
 	int ret = AJBSP_Build(filename, outname, &display_funcs);
 

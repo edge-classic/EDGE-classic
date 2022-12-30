@@ -61,7 +61,8 @@ An optional texture pack to enhance the experience can be found [here.](https://
 
 - UDMF map support
 - DEHEXTRA compatibility
-- A soundfont-capable MIDI player (.sf2 support)
+- A soundfont-capable MIDI player (SF2 and SF3 support)
+- OPL emulation with external OP2 instrument support
 - Support for MP3 music and sound effects
 - UMAPINFO compatibility (almost complete)
 - Migration from SDL1 to SDL2 (longevity and potential new features)
@@ -74,8 +75,8 @@ An optional texture pack to enhance the experience can be found [here.](https://
 - Replaced GLBSP with AJBSP as the internal nodebuilder
 - Inventory system
 - Autoload folder
-- New Liquid animation (SMMU and Parallax)
-- Many more music formats (module/tracker music as well as AY, GBS, GYM, HES, NSF, SAP, SPC, VGM and even C64 SID)
+- New Liquid animation (SMMU, SMMU+Swirl and Parallax)
+- Many more music formats (module/tracker music as well as FLAC, AY, GBS, GYM, HES, NSF, SAP, SPC, VGM and even C64 SID)
 - Optional Dynamic Sound Reverb
 - Optional Pistol Start feature
 - Support for image/spritesheet fonts

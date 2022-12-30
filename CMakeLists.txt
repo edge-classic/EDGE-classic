@@ -222,14 +222,20 @@ elseif(MSYS)
 	add_custom_command(
 	TARGET edge-classic
 	POST_BUILD
-	COMMAND "${CMAKE_COMMAND}" -E copy "/clang64/bin/SDL2.dll"
+	COMMAND "${CMAKE_COMMAND}" -E copy "/mingw64/bin/SDL2.dll"
 			"${CMAKE_CURRENT_LIST_DIR}"
 	)
 	else ()
 	add_custom_command(
 	TARGET edge-classic
 	POST_BUILD
-	COMMAND "${CMAKE_COMMAND}" -E copy "/clang32/bin/SDL2.dll"
+	COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/SDL2.dll"
+			"${CMAKE_CURRENT_LIST_DIR}"
+		COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libgcc_s_dw2-1.dll"
+			"${CMAKE_CURRENT_LIST_DIR}"
+		COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libstdc++-6.dll"
+			"${CMAKE_CURRENT_LIST_DIR}"
+		COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libwinpthread-1.dll"
 			"${CMAKE_CURRENT_LIST_DIR}"
 	)
 	endif ()

@@ -398,7 +398,7 @@ int AJBSP_Build(std::filesystem::path filename, std::filesystem::path outname, c
 		ValidateInputFilename(filename);
 
 		if (! std::filesystem::exists(filename))
-			FatalError(StringPrintf("no such file: %s\n", filename));
+			FatalError(StringPrintf("no such file: %s\n", filename.u8string().c_str()));
 	}
 
 	for (unsigned int i = 0 ; i < wad_list.size() ; i++)

@@ -231,7 +231,7 @@ retry:
 #ifdef _WIN32
 	fp = _wfopen(filename.c_str(), (mode == 'r' ? L"rb" : L"r+b"));
 #else
-	p = fopen(filename.c_str(), (mode == 'r' ? "rb" : "r+b"));
+	fp = fopen(filename.c_str(), (mode == 'r' ? "rb" : "r+b"));
 #endif
 
 	if (! fp)

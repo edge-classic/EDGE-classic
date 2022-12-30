@@ -99,5 +99,6 @@ Bugfixes and detailed changes can be found in CHANGELOG.txt
 - Heretic/Blasphemer
 - HacX 1.2
 - Harmony
+- REKKR
 
 To learn more about EDGE-Classic, DDF, RTS, or COAL, please visit [our wiki](https://github.com/dashodanger/EDGE-classic/wiki).

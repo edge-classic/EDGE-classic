@@ -38,7 +38,6 @@ int main(int argc, char *argv[])
 	exe_path = UTFSTR(SDL_GetBasePath());
 
 #ifdef _WIN32
-	setlocale(LC_ALL, ".UTF8");
     // -AJA- change current dir to match executable
     epi::FS_SetCurrDir(exe_path);
 #endif

@@ -21,6 +21,7 @@
 #include "i_defs.h"
 #include "m_argv.h"
 #include "str_util.h"
+#include "filesystem.h"
 
 #ifdef _WIN32
 std::vector<std::u32string> argv::list;
@@ -305,7 +306,7 @@ void argv::ApplyResponseFile(std::filesystem::path name)
 	p = this_parm.next = added_parms;
 
 	// add arguments from the given file
-	f = fopen(name.u8string().c_str(), "rb");
+	f = EPIFOPEN(name, "rb");
 	if (!f)
 		I_Error("Couldn't open \"%s\" for reading!", name.u8string().c_str());
 

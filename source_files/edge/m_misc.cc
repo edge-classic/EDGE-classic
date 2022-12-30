@@ -277,7 +277,7 @@ void M_SaveDefaults(void)
 	// -ACB- 1999/09/24 idiot proof checking as required by MSVC
 	SYS_ASSERT(! cfgfile.empty());
 
-	FILE *f = fopen(cfgfile.u8string().c_str(), "w");
+	FILE *f = EPIFOPEN(cfgfile, "w");
 	if (!f)
 	{
 		I_Warning("Couldn't open config file %s for writing.", cfgfile.c_str());
@@ -357,7 +357,7 @@ void M_LoadDefaults(void)
 	I_Printf("M_LoadDefaults from %s\n", cfgfile.c_str());
 
 	// read the file in, overriding any set defaults
-	FILE *f = fopen(cfgfile.u8string().c_str(), "r");
+	FILE *f = EPIFOPEN(cfgfile, "r");
 
 	if (! f)
 	{
@@ -538,45 +538,6 @@ epi::file_c *M_OpenComposedEPIFile(std::filesystem::path dir, std::filesystem::p
 	return epi::FS_Open(fullname,
 		epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 }
-
-//
-// Loads file into memory. This sets a pointer to the data and
-// the length.
-//
-// NOTE: The data must be freed by delete[] when not used.
-//
-// Returns NULL on failure.
-//
-// -ACB- 2000/01/08 Written
-// -ES-  2000/06/12 Now returns the allocated pointer, or NULL on failure.
-//
-byte* M_GetFileData(const char *filename, int *length)
-{
-	FILE *lumpfile;
-	byte *data;
-
-	// Sanity Checks..
-	SYS_ASSERT(filename);
-	SYS_ASSERT(length);
-
-	lumpfile = fopen(filename, "rb");  
-	if (!lumpfile)
-	{
-		I_Warning("M_GetFileData: Cannot open '%s'\n", filename);
-		return NULL;
-	}
-
-	fseek(lumpfile, 0, SEEK_END);                   // get the end of the file
-	(*length) = ftell(lumpfile);                    // get the size
-	fseek(lumpfile, 0, SEEK_SET);                   // reset to beginning
-
-	data = new byte[*length];						// malloc the size
-	fread(data, sizeof(char), (*length), lumpfile); // read file
-	fclose(lumpfile);                               // close the file
-
-	return data;
-}
-
 
 void M_WarnError(const char *error,...)
 {

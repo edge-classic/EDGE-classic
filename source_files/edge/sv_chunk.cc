@@ -30,6 +30,8 @@
 
 #include "sv_chunk.h"
 
+#include "filesystem.h"
+
 
 #define DEBUG_GETBYTE  0
 #define DEBUG_PUTBYTE  0
@@ -152,7 +154,7 @@ bool SV_OpenReadFile(std::filesystem::path filename)
 
 	current_crc.Reset();
 
-	current_fp = fopen(filename.u8string().c_str(), "rb");
+	current_fp = EPIFOPEN(filename, "rb");
 
 	if (! current_fp)
 		return false;
@@ -505,7 +507,7 @@ bool SV_OpenWriteFile(std::filesystem::path filename, int version)
 
 	current_crc.Reset();
 
-	current_fp = fopen(filename.u8string().c_str(), "wb");
+	current_fp = EPIFOPEN(filename, "wb");
 
 	if (! current_fp)
 	{

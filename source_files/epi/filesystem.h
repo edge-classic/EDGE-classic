@@ -21,6 +21,13 @@
 
 #include <vector>
 #include <filesystem>
+#include "str_util.h"
+
+#ifdef _WIN32
+#define EPIFOPEN(name,mode) _wfopen(name.c_str(), (const wchar_t *)epi::to_u16string(mode).c_str())
+#else
+#define EPIFOPEN(name,mode) std::fopen(name.c_str(), mode)
+#endif
 
 namespace epi
 {

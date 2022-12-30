@@ -67,7 +67,7 @@ int CMD_Exec(char **argv, int argc)
 		return 1;
 	}
 
-	FILE *script = fopen(argv[1], "rb");
+	FILE *script = EPIFOPEN(std::filesystem::path(UTFSTR(argv[1])), "rb");
 	if (!script)
 	{
 		CON_Printf("Unable to open file: %s\n", argv[1]);
@@ -96,7 +96,7 @@ int CMD_Type(char **argv, int argc)
 		return 2;
 	}
 
-	script = fopen(argv[1], "r");
+	script = EPIFOPEN(std::filesystem::path(UTFSTR(argv[1])), "r");
 	if (!script)
 	{
 		CON_Printf("Unable to open \'%s\'!\n", argv[1]);

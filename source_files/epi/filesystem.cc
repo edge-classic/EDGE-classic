@@ -20,7 +20,6 @@
 
 #include "file.h"
 #include "filesystem.h"
-#include "str_util.h"
 
 #define MAX_MODE_CHARS  32
 
@@ -36,7 +35,8 @@ bool FS_Access(std::filesystem::path name, unsigned int flags)
     if (! FS_FlagsToAnsiMode(flags, mode))
         return false;
 
-    FILE *fp = std::fopen(name.u8string().c_str(), mode);
+	FILE *fp = EPIFOPEN(name, mode);
+
     if (!fp)
         return false;
 
@@ -54,7 +54,8 @@ file_c* FS_Open(std::filesystem::path name, unsigned int flags)
     if (! FS_FlagsToAnsiMode(flags, mode))
         return NULL;
 
-    FILE *fp = fopen(name.u8string().c_str(), mode);
+	FILE *fp = EPIFOPEN(name, mode);
+
     if (!fp) return NULL;
 
 	return new ansi_file_c(fp);

@@ -1242,7 +1242,7 @@ static void SetupLogAndDebugFiles(void)
 
 	if (argv::Find(UTFSTR("nolog")) < 0)
 	{
-		logfile = fopen(log_fn.u8string().c_str(), "w");
+		logfile = EPIFOPEN(log_fn, "w");
 
 		if (!logfile)
 			I_Error("[E_Startup] Unable to create log file\n");
@@ -1260,7 +1260,7 @@ static void SetupLogAndDebugFiles(void)
 	/// int p = argv::Find("debug");
 	if (true)
 	{
-		debugfile = fopen(debug_fn.u8string().c_str(), "w");
+		debugfile = EPIFOPEN(debug_fn, "w");
 
 		if (!debugfile)
 			I_Error("[E_Startup] Unable to create debugfile");

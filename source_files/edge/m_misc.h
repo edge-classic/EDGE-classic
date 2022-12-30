@@ -62,7 +62,6 @@ void M_InitMiscConVars(void);
 void M_ScreenShot(bool show_msg);
 void M_MakeSaveScreenShot(void);
 
-byte *M_GetFileData(const char *filename, int *length);
 std::filesystem::path M_ComposeFileName(std::filesystem::path dir, std::filesystem::path file);
 epi::file_c *M_OpenComposedEPIFile(std::filesystem::path dir, std::filesystem::path file);
 void M_WarnError(const char *error,...) GCCATTR((format(printf, 1, 2)));

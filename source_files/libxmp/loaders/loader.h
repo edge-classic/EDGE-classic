@@ -8,7 +8,9 @@
 
 #define LIBXMP_NO_DEPACKERS
 
+#ifndef PATH_MAX
 #define PATH_MAX 1024
+#endif
 
 /* Sample flags */
 #define SAMPLE_FLAG_DIFF	0x0001	/* Differential */

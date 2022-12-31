@@ -28,7 +28,7 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS "-O2 -Wall")
-if(WIN32 AND NOT MSYS)
+if(WIN32 AND NOT MSYS AND NOT MINGW)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs")
   set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS")
 else()
@@ -180,12 +180,12 @@ target_include_directories(edge-classic PRIVATE source_files/minimp3)
 target_include_directories(edge-classic PRIVATE source_files/minivorbis)
 target_include_directories(edge-classic PRIVATE source_files/miniz)
 target_include_directories(edge-classic PRIVATE source_files/opl)
-if(WIN32 AND NOT MSYS)
+if(WIN32 AND NOT MSYS AND NOT MINGW)
   target_include_directories(edge-classic PRIVATE source_files/sdl2/include)
 endif()
 target_include_directories(edge-classic PRIVATE source_files/stb)
 
-if(WIN32 OR MSYS)
+if(WIN32 OR MSYS OR MINGW)
   target_compile_definitions(edge-classic PRIVATE WIN32)
 else()
   target_compile_definitions(edge-classic PRIVATE UNIX)
@@ -200,7 +200,7 @@ COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge-classic>"
 )
 
 # Copy appropriate SDL2.dll to local install directory when built with MSVC
-if(WIN32 AND NOT MSYS)
+if(WIN32 AND NOT MSYS AND NOT MINGW)
   if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
     add_custom_command(
 	TARGET edge-classic
@@ -241,7 +241,7 @@ elseif(MSYS)
 	endif ()
 endif()
 
-if(WIN32 OR MSYS)
+if(WIN32 OR MSYS OR MINGW)
 	target_link_libraries(
 	edge-classic
 	PRIVATE edge_ajbsp

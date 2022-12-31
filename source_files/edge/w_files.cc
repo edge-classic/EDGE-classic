@@ -227,7 +227,7 @@ static void ProcessFile(data_file_c *df)
 	else if (df->kind == FLKIND_Deh)
 	{
 		// handle stand-alone DeHackEd patches
-		I_Printf("Converting DEH file: %s\n", df->name.c_str());
+		I_Printf("Converting DEH file: %s\n", df->name.u8string().c_str());
 
 		DEH_ConvertFile(df->name.u8string());
 	}

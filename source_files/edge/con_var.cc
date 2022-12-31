@@ -240,7 +240,7 @@ int CON_MatchAllVars(std::vector<const char *>& list, const char *pattern)
 
 void CON_HandleProgramArgs(void)
 {
-	for (int p = 1; p < argv::list.size(); p++)
+	for (size_t p = 1; p < argv::list.size(); p++)
 	{
 		if (!argv::IsOption(p))
 			continue;

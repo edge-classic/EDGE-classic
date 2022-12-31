@@ -106,10 +106,11 @@ static sfx_t * sfx_jpflow;
 
 static void CalcHeight(player_t * player, bool extra_tic)
 {
-	if (g_erraticism.d && leveltime > 0 && (!player->cmd.forwardmove && !player->cmd.sidemove))
-		return;
-
 	bool onground = player->mo->z <= player->mo->floorz;
+
+	if (g_erraticism.d && leveltime > 0 && (!player->cmd.forwardmove && !player->cmd.sidemove) && 
+		((player->mo->height == player->mo->info->height || player->mo->height == player->mo->info->crouchheight) && player->deltaviewheight == 0))
+		return;
 
 	if (player->mo->height < (player->mo->info->height + player->mo->info->crouchheight) / 2.0f)
 		player->mo->extendedflags |= EF_CROUCHING;
@@ -764,8 +765,9 @@ bool P_PlayerThink(player_t * player, bool extra_tic)
 
 	if (g_erraticism.d)
 	{
-		if (cmd->forwardmove == 0 && cmd->sidemove == 0 && cmd->upwardmove <= 0 && (!cmd->buttons & BT_ATTACK) && 
-			(player->mo->height == player->mo->info->height || player->mo->height == player->mo->info->crouchheight))
+		if (cmd->forwardmove == 0 && cmd->sidemove == 0 && !player->swimming && cmd->upwardmove <= 0 &&
+			!(cmd->buttons & (BT_ATTACK | BT_USE | BT_CHANGE | EBT_SECONDATK | EBT_RELOAD | EBT_ACTION1 | EBT_ACTION2 | EBT_INVUSE)) && 
+			((player->mo->height == player->mo->info->height || player->mo->height == player->mo->info->crouchheight) && player->deltaviewheight == 0))
 		{
 			should_think = false;
 			if (!player->mo->mom.z)
@@ -790,7 +792,7 @@ bool P_PlayerThink(player_t * player, bool extra_tic)
 		player->underwater ||
 		player->swimming)
 	{
-		P_PlayerInSpecialSector(player, player->mo->subsector->sector);
+		P_PlayerInSpecialSector(player, player->mo->subsector->sector, should_think);
 	}
 
 	if (IS_SKY(player->mo->subsector->sector->ceil))

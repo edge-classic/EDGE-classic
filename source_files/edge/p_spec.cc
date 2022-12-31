@@ -1717,7 +1717,7 @@ void P_RemoteActivation(mobj_t * thing, int typenum, int tag,
 static inline void PlayerInProperties(player_t *player,
 		float bz, float tz, float f_h, float c_h,
 		region_properties_t *props,
-		const sectortype_c ** swim_special)
+		const sectortype_c ** swim_special, bool should_choke = true)
 {
 	const sectortype_c *special = props->special;
 	float damage, factor;
@@ -1740,7 +1740,7 @@ static inline void PlayerInProperties(player_t *player,
 		player->powers[PW_Scuba] <= 0)
 	{
 		int subtract = 1;
-		if (r_doubleframes.d && extra_tic)
+		if ((r_doubleframes.d && extra_tic) || !should_choke)
 			subtract = 0;
 		player->air_in_lungs -= subtract;
 		player->underwater = true;
@@ -1873,7 +1873,7 @@ static inline void PlayerInProperties(player_t *player,
 // -KM- 1998/09/27 Generalised for sectors.ddf
 // -AJA- 1999/10/09: Updated for new sector handling.
 //
-void P_PlayerInSpecialSector(player_t * player, sector_t * sec)
+void P_PlayerInSpecialSector(player_t * player, sector_t * sec, bool should_choke)
 {
 	extrafloor_t *S, *L, *C;
 	float floor_h;
@@ -1913,12 +1913,12 @@ void P_PlayerInSpecialSector(player_t * player, sector_t * sec)
 		if (C->bottom_h < floor_h || C->bottom_h > sec->c_h)
 			continue;
 
-		PlayerInProperties(player, bz, tz, floor_h, C->top_h, C->p, &swim_special);
+		PlayerInProperties(player, bz, tz, floor_h, C->top_h, C->p, &swim_special, should_choke);
 
 		floor_h = C->top_h;
 	}
 
-	PlayerInProperties(player, bz, tz, floor_h, sec->c_h, sec->p, &swim_special);
+	PlayerInProperties(player, bz, tz, floor_h, sec->c_h, sec->p, &swim_special, should_choke);
 
 	// breathing support: handle gasping when leaving the water
 	if (was_underwater && !player->underwater)

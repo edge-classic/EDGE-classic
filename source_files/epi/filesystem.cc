@@ -32,8 +32,7 @@ bool FS_Access(std::filesystem::path name, unsigned int flags)
 
     char mode[MAX_MODE_CHARS];
 
-    if (! FS_FlagsToAnsiMode(flags, mode))
-        return false;
+    if (! FS_FlagsToAnsiMode(flags, mode)) return false;
 
 	FILE *fp = EPIFOPEN(name, mode);
 
@@ -51,8 +50,7 @@ file_c* FS_Open(std::filesystem::path name, unsigned int flags)
 
     char mode[MAX_MODE_CHARS];
 
-    if (! FS_FlagsToAnsiMode(flags, mode))
-        return NULL;
+    if (! FS_FlagsToAnsiMode(flags, mode)) return NULL;
 
 	FILE *fp = EPIFOPEN(name, mode);
 

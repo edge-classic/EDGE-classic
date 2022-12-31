@@ -35,25 +35,15 @@ void str_upper(std::string& s)
 
 void str_lower(std::u32string& s)
 {
-#ifndef __clang__
-	for (size_t i = 0 ; i < s.size() ; i++)
-		s[i] = std::tolower(s[i], std::locale());
-#else
 	std::string temp = epi::to_u8string(s);
 	epi::str_lower(temp);
 	s = epi::to_u32string(temp);
-#endif
 }
 void str_upper(std::u32string& s)
 {
-#ifndef __clang__
-	for (size_t i = 0 ; i < s.size() ; i++)
-		s[i] = std::toupper(s[i], std::locale());
-#else
 	std::string temp = epi::to_u8string(s);
 	epi::str_upper(temp);
 	s = epi::to_u32string(temp);
-#endif
 }
 
 std::string STR_Format(const char *fmt, ...)

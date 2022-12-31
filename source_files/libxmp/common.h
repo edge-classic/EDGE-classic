@@ -7,7 +7,9 @@
 #include <string.h>
 #include "xmp.h"
 
+#ifndef PATH_MAX
 #define PATH_MAX 1024
+#endif
 
 #undef  LIBXMP_EXPORT_VAR
 #if defined(EMSCRIPTEN)

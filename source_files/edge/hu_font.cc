@@ -609,12 +609,13 @@ float font_c::StringWidth(const char *str)
 
 	if (!str) return 0;
 
-	while (*str)
+	std::string_view width_checker = str;
+
+	for (size_t i = 0; i < width_checker.size(); i++)
 	{
-		w += CharWidth(*str);
-		if (def->type == FNTYP_TrueType && *(str+1))
-			w += stbtt_GetGlyphKernAdvance(ttf_info, GetGlyphIndex(*str), GetGlyphIndex(*(str+1))) * ttf_kern_scale;
-		*str++;
+		w += CharWidth(width_checker[i]);
+		if (def->type == FNTYP_TrueType && i+1 < width_checker.size())
+			w += stbtt_GetGlyphKernAdvance(ttf_info, GetGlyphIndex(width_checker[i]), GetGlyphIndex(width_checker[i+1])) * ttf_kern_scale;
 	}
 
 	return w;

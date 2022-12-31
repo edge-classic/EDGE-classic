@@ -7,7 +7,7 @@ project(
 )
 
 set(CMAKE_CC_FLAGS "-O2 -Wall")
-if(WIN32 AND NOT MSYS)
+if(WIN32 AND NOT MSYS AND NOT MINGW)
   set(CMAKE_CC_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs")
 else()
   set(CMAKE_CC_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -fno-strict-aliasing")

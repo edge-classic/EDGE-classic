@@ -184,7 +184,7 @@ bool P_CrossSpecialLine(line_t *ld, int side, mobj_t * thing);
 void P_ShootSpecialLine(line_t *ld, int side, mobj_t * thing);
 void P_RemoteActivation(mobj_t * thing, int typenum, int tag, 
     int side, trigger_e method);
-void P_PlayerInSpecialSector(struct player_s * pl, sector_t *sec);
+void P_PlayerInSpecialSector(struct player_s * pl, sector_t *sec, bool should_choke = true);
 
 // Utilities...
 int P_TwoSided(int sector, int line);

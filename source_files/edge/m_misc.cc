@@ -280,7 +280,7 @@ void M_SaveDefaults(void)
 	FILE *f = EPIFOPEN(cfgfile, "w");
 	if (!f)
 	{
-		I_Warning("Couldn't open config file %s for writing.", cfgfile.c_str());
+		I_Warning("Couldn't open config file %s for writing.", cfgfile.u8string().c_str());
 		return;  // can't write the file, but don't complain
 	}
 
@@ -354,14 +354,14 @@ void M_LoadDefaults(void)
 
 	M_ResetDefaults(0);
 
-	I_Printf("M_LoadDefaults from %s\n", cfgfile.c_str());
+	I_Printf("M_LoadDefaults from %s\n", cfgfile.u8string().c_str());
 
 	// read the file in, overriding any set defaults
 	FILE *f = EPIFOPEN(cfgfile, "r");
 
 	if (! f)
 	{
-		I_Warning("Couldn't open config file %s for reading.\n", cfgfile.c_str());
+		I_Warning("Couldn't open config file %s for reading.\n", cfgfile.u8string().c_str());
 		I_Warning("Resetting config to RECOMMENDED values...\n");
 		return;
 	}

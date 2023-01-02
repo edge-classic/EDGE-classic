@@ -89,6 +89,11 @@ public:
 	{
 	}
 
+	// destruction
+	virtual ~vgm_chip_base()
+	{
+	}
+
 	// simple getters
 	chip_type type() const { return m_type; }
 	virtual uint32_t sample_rate() const = 0;
@@ -200,8 +205,8 @@ public:
 		}
 		else if (m_type == CHIP_YMF278B)
 		{
-			*buffer++ += m_output.data[4];
-			*buffer++ += m_output.data[5];
+			*buffer++ += m_output.data[4 % ChipType::OUTPUTS];
+			*buffer++ += m_output.data[5 % ChipType::OUTPUTS];
 		}
 		else if (ChipType::OUTPUTS == 1)
 		{
@@ -241,7 +246,7 @@ protected:
 //*********************************************************
 
 // global list of active chips
-std::list<vgm_chip_base *> active_chips;
+std::vector<std::unique_ptr<vgm_chip_base>> active_chips;
 
 
 //-------------------------------------------------
@@ -273,7 +278,7 @@ void add_chips(uint32_t clock, chip_type type, char const *chipname)
 	{
 		char name[100];
 		sprintf(name, "%s #%d", chipname, index);
-		active_chips.push_back(new vgm_chip<ChipType>(clockval, type, (numchips == 2) ? name : chipname));
+		active_chips.push_back(std::make_unique<vgm_chip<ChipType>>(clockval, type, (numchips == 2) ? name : chipname));
 	}
 
 	if (type == CHIP_YM2608)
@@ -289,7 +294,7 @@ void add_chips(uint32_t clock, chip_type type, char const *chipname)
 			std::vector<uint8_t> temp(size);
 			fread(&temp[0], 1, size, rom);
 			fclose(rom);
-			for (auto chip : active_chips)
+			for (auto &chip : active_chips)
 				if (chip->type() == type)
 					chip->write_data(ymfm::ACCESS_ADPCM_A, 0, size, &temp[0]);
 		}
@@ -674,9 +679,9 @@ uint32_t ymfm_parse_header(std::vector<uint8_t> &buffer)
 
 vgm_chip_base *find_chip(chip_type type, uint8_t index)
 {
-	for (auto chip : active_chips)
+	for (auto &chip : active_chips)
 		if (chip->type() == type && index-- == 0)
-			return chip;
+			return chip.get();
 	return nullptr;
 }
 
@@ -1040,7 +1045,7 @@ int32_t ymfm_generate_batch(std::vector<uint8_t> &buffer, uint32_t *data_start,
 		while (delay-- != 0)
 		{
 			int32_t outputs[2] = { 0 };
-			for (auto chip : active_chips)
+			for (auto &chip : active_chips)
 				chip->generate(output_pos, output_step, outputs);
 			output_pos += output_step;
 			*wav_buffer++ = outputs[0];
@@ -1055,7 +1060,5 @@ int32_t ymfm_generate_batch(std::vector<uint8_t> &buffer, uint32_t *data_start,
 
 void ymfm_delete_chips()
 {
-	for (auto chip : active_chips)
-		delete chip;
 	active_chips.clear();
 }

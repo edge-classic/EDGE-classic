@@ -592,7 +592,7 @@ static uint8_t clockT(struct Timer* t, uint8_t timer_idx) {
 	return 0;
 }
 
-static void clock(struct Timer* t) {
+static void cia_clock(struct Timer* t) {
 
 	HANDLE_INTERRUPT1(t);
 
@@ -624,10 +624,10 @@ void (*ciaClock)();
 void ciaClockRSID() {
 	// advance all the timers by one clock cycle..
 	struct Timer* timer1 = &(_cia[CIA1]);
-	clock(timer1);
+	cia_clock(timer1);
 
 	struct Timer* timer2 = &(_cia[CIA2]);
-	clock(timer2);
+	cia_clock(timer2);
 }
 
 

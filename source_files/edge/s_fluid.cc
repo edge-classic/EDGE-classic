@@ -43,9 +43,9 @@ extern int  dev_freq;
 
 bool fluid_disabled = false;
 
-fluid_synth_t *edge_fluid;
-fluid_settings_t *edge_fluid_settings;
-fluid_sfloader_t *edge_fluid_sfloader;
+fluid_synth_t *edge_fluid = nullptr;
+fluid_settings_t *edge_fluid_settings = nullptr;
+fluid_sfloader_t *edge_fluid_sfloader = nullptr;
 
 DEF_CVAR(s_soundfont, "default.sf2", CVAR_ARCHIVE)
 
@@ -133,6 +133,7 @@ void S_RestartFluid(void)
 	delete_fluid_settings(edge_fluid_settings);
 	edge_fluid = nullptr;
 	edge_fluid_settings = nullptr;
+	edge_fluid_sfloader = nullptr; // This is already deleted upon invoking delete_fluid_synth
 
 	if (!S_StartupFluid())
 	{

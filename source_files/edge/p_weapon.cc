@@ -904,7 +904,7 @@ static void BobWeapon(player_t *p, weapondef_c *info)
 	float new_sy = p->mo->mom.z ? psp->sy : 0;
 	
 	// bob the weapon based on movement speed
-	if (! p->mo->mom.z) // Don't bob in mid-air and such
+	if (p->powers[PW_Jetpack] <= 0) // Don't bob when using jetpack
 	{
 		angle_t angle = (128 * (g_erraticism.d ? p->e_bob_ticker++ : leveltime)) << 19;
 		new_sx = p->bob * PERCENT_2_FLOAT(info->swaying) * M_Cos(angle);

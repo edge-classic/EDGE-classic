@@ -19,7 +19,7 @@
 
 #include <inttypes.h>
 
-bool OPLAY_Init(int freq, bool stereo, bool opl3_wanted);
+bool OPLAY_Init(int freq, bool stereo, int opl_wanted);
 
 bool OPLAY_StartSong(void);
 void OPLAY_FinishSong(void);

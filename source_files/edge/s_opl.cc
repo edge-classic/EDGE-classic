@@ -56,7 +56,7 @@ bool S_StartupOPL(void)
 {
 	I_Debugf("Initializing OPL player...\n");
 
-	if (! OPLAY_Init(dev_freq, dev_stereo, var_opl_music != 1))
+	if (! OPLAY_Init(dev_freq, dev_stereo, var_opl_music))
 	{
 		return false;
 	}

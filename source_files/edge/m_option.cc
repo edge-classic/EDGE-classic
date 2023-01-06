@@ -231,7 +231,7 @@ static char MixChans[]    = "32/64/96/128/160/192/224/256";
 
 static char CrosshairColor[] = "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange";
 
-static char OPLMode[]  = "Off/OPL2/OPL3";
+static char OPLMode[]  = "Off/OPL/OPL2/OPL3";
 
 static char DLightMax[]  = "Unlimited/20/40/60/80/100";
 
@@ -514,7 +514,7 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Function, "MIDI Soundfont", NULL,  0, NULL, M_ChangeSoundfont, "Warning! SF3 Soundfonts may have long loading times!"},
-	{OPT_Switch,  "OPL Music Mode",  OPLMode, 3,  &var_opl_music, M_ChangeOPL, NULL},
+	{OPT_Switch,  "OPL Music Mode",  OPLMode, 4,  &var_opl_music, M_ChangeOPL, NULL},
 	{OPT_Function, "OPL Instrument Bank", NULL,  0, NULL, M_ChangeGENMIDI, NULL},
 	{OPT_Boolean, "PC Speaker Mode", YesNo, 2,  &var_pc_speaker_mode, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},

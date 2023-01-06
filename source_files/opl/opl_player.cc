@@ -252,7 +252,7 @@ static bool music_initialized = false;
 // OPL emulator info:
 
 static opl3_chip opl_chip;
-static bool opl3mode;
+static int oplmode;
 static int sample_rate;
 
 // Data for each channel.
@@ -320,7 +320,8 @@ static void RawWriteRegister(unsigned int reg_num, unsigned int value)
             break;
 
         case OPL_REG_NEW:
-            opl3mode = (value & 0x01) > 0;
+			if ((value & 0x01) > 0) oplmode = 3;
+            break;
 
         default:
             OPL3_WriteRegBuffered(&opl_chip, reg_num, value);
@@ -397,9 +398,10 @@ static void OPL_InitRegisters(void)
     OPL_WriteRegister(OPL_REG_TIMER_CTRL,      0x80);
 
     // "Allow FM chips to control the waveform of each operator":
-    OPL_WriteRegister(OPL_REG_WAVEFORM_ENABLE, 0x20);
+	if (oplmode > 1)
+    	OPL_WriteRegister(OPL_REG_WAVEFORM_ENABLE, 0x20);
 
-    if (opl3mode)
+    if (oplmode == 3)
     {
         OPL_WriteRegister(OPL_REG_NEW, 0x01);
 
@@ -431,7 +433,7 @@ static void OPL_InitRegisters(void)
     // Keyboard split point on (?)
     OPL_WriteRegister(OPL_REG_FM_MODE,         0x40);
 
-    if (opl3mode)
+    if (oplmode == 3)
     {
         OPL_WriteRegister(OPL_REG_NEW, 0x01);
     }
@@ -464,7 +466,8 @@ static void OPL_LoadOperator(int oper, genmidi_op_t *data,
     OPL_WriteRegister(OPL_REGS_TREMOLO  + oper, data->tremolo);
     OPL_WriteRegister(OPL_REGS_ATTACK   + oper, data->attack);
     OPL_WriteRegister(OPL_REGS_SUSTAIN  + oper, data->sustain);
-    OPL_WriteRegister(OPL_REGS_WAVEFORM + oper, data->waveform);
+	if (oplmode > 1)
+    	OPL_WriteRegister(OPL_REGS_WAVEFORM + oper, data->waveform);
 }
 
 //----------------------------------------------------------------------
@@ -639,7 +642,7 @@ static void V_SetVolume(opl_voice_t *voice, unsigned int volume)
 
 	// Multiply note volume and channel volume to get the actual volume.
 
-	midi_volume = 2 * (volume_mapping_table[voice->channel->volume] + 1);
+	midi_volume = 3 * (volume_mapping_table[voice->channel->volume] + 1) / 2;
 
 	full_volume = (volume_mapping_table[voice->note_volume] * midi_volume) >> 9;
 
@@ -936,7 +939,7 @@ static void Chan_SetPan(opl_channel_data_t *channel, unsigned int pan)
 		pan = 144 - pan;
 	}
 
-	if (opl3mode)
+	if (oplmode == 3)
 	{
 		if (pan >= 96)
 		{
@@ -1185,13 +1188,13 @@ static void ParseDMXOptions(void)
 
 	if (strstr(dmxoption, "-opl3") != NULL)
 	{
-		opl3mode = true;
+		oplmode = 3;
 	}
 	else
 	{
 		// If they are setting a DMXOPTION env variable assume
 		// that omitting -opl3 means a desire for opl2
-		opl3mode = false;
+		oplmode = 2;
 	}
 
 	if (strstr(dmxoption, "-reverse") != NULL)
@@ -1206,18 +1209,20 @@ static void ParseDMXOptions(void)
 //
 //----------------------------------------------------------------------
 
-bool OPLAY_Init(int freq, bool stereo, bool opl3_wanted)
+bool OPLAY_Init(int freq, bool stereo, int opl_wanted)
 {
 	if (freq < 8000)
 		return false;
 
 	sample_rate = freq;
 
-	opl3mode = opl3_wanted;
+	oplmode = opl_wanted;
+
+	if (oplmode == 0) oplmode = 3;
 
 	ParseDMXOptions();
 
-	num_opl_voices = OPL_NUM_VOICES * (opl3mode ? 2 : 1);
+	num_opl_voices = OPL_NUM_VOICES * (oplmode == 3 ? 2 : 1);
 
 	OPL3_Reset(&opl_chip, freq);
 

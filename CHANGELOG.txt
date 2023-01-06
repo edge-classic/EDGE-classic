@@ -92,6 +92,7 @@ New Features
   - Will show the warp name and level description for accessible maps
 
 + Support OPL emulated playback of MUS and MIDI music lumps.
+  - Can select between OPL1/OPL2/OPL3 modes
   - Can use GENMIDI lumps (Default) or external *.op2 instrument bank files
   - External banks must be placed in the /soundfont directory prior to startup
 

@@ -123,24 +123,20 @@ image_format_e Image_DetectFormat(byte *header, int header_len, int file_size)
 
 image_format_e Image_FilenameToFormat(const std::filesystem::path& filename)
 {
-#ifdef _WIN32
-	std::u32string ext = epi::PATH_GetExtension(filename).u32string();
-#else
-	std::string ext = epi::PATH_GetExtension(filename).string();
-#endif
+	std::string ext = epi::PATH_GetExtension(filename).u8string();
 
 	str_lower(ext);
 
-	if (ext == UTFSTR(".png"))
+	if (ext == ".png")
 		return FMT_PNG;
 
-	if (ext == UTFSTR(".tga"))
+	if (ext == ".tga")
 		return FMT_TGA;
 
-	if (ext == UTFSTR(".jpg") || ext == UTFSTR(".jpeg"))
+	if (ext == ".jpg" || ext == ".jpeg")
 		return FMT_JPEG;
 
-	if (ext == UTFSTR(".gif") || ext == UTFSTR(".bmp") || ext == UTFSTR(".dds"))
+	if (ext == ".gif" || ext == ".bmp" || ext == ".dds")
 		return FMT_OTHER;
 
 	return FMT_Unknown;

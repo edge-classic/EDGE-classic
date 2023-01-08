@@ -37,9 +37,9 @@
 typedef struct BW_MidiRtInterface OPLInterface;
 #include "midi_sequencer_impl.hpp"
 
-// these are in the opl/ directory
-#include "genmidi.h"
-#include "opl_player.h"
+#include "ymf_player.h"
+
+OPLPlayer *edge_opl = nullptr;
 
 #define NUM_SAMPLES  4096
 
@@ -54,12 +54,13 @@ extern std::vector<std::filesystem::path> available_genmidis;
 
 bool S_StartupOPL(void)
 {
-	I_Debugf("Initializing OPL player...\n");
+	I_Printf("Initializing OPL player...\n");
 
-	if (! OPLAY_Init(dev_freq, dev_stereo, var_opl_music))
-	{
-		return false;
-	}
+	if (edge_opl) delete edge_opl;
+
+	edge_opl = new OPLPlayer(dev_freq);
+
+	if (!edge_opl) return false;
 
 	// Check if CVAR value is still good
 	bool cvar_good = false;
@@ -116,7 +117,7 @@ bool S_StartupOPL(void)
 		return false;
 	}
 
-	if (!GM_LoadInstruments((const byte *)data, (size_t)length))
+	if (!edge_opl->loadPatches((const byte *)data, (size_t)length))
 	{
 		I_Warning("S_StartupOPL: Error loading instruments!\n");
 		if (s_genmidi.s.empty())
@@ -193,12 +194,12 @@ public:
 
 	static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
 	{
-		OPLAY_KeyOn(channel, note, velocity);
+		edge_opl->midiNoteOn(channel, note, velocity);
 	}
 
 	static void rtNoteOff(void *userdata, uint8_t channel, uint8_t note)
 	{
-		OPLAY_KeyOff(channel, note);
+		edge_opl->midiNoteOff(channel, note);
 	}
 
 	static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
@@ -213,22 +214,22 @@ public:
 
 	static void rtControllerChange(void *userdata, uint8_t channel, uint8_t type, uint8_t value)
 	{
-		OPLAY_ControllerChange(channel, type, value);
+		edge_opl->midiControlChange(channel, type, value);
 	}
 
 	static void rtPatchChange(void *userdata, uint8_t channel, uint8_t patch)
 	{
-		OPLAY_ProgramChange(channel, patch);
+		edge_opl->midiProgramChange(channel, patch);
 	}
 
 	static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
 	{
-		OPLAY_PitchBend(channel, msb);
+		edge_opl->midiPitchControl(channel, (msb - 64) / 127.0);
 	}
 
 	static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
 	{
-		(void)userdata; (void)msg; (void)size;
+		edge_opl->midiSysEx(msg, size);
 	}
 
 	static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
@@ -244,14 +245,13 @@ public:
 
 	static void rtRawOPL(void *userdata, uint8_t reg, uint8_t value)
 	{
-		OPLAY_WriteReg(reg, value);
+		edge_opl->midiRawOPL(reg, value);
 	}
 
 	static void playSynth(void *userdata, uint8_t *stream, size_t length)
 	{
 		(void)userdata;
-		OPLAY_Stream(reinterpret_cast<short*>(stream),
-						static_cast<int>(length) / (dev_stereo ? 4 : 2), dev_stereo);
+		edge_opl->generate(reinterpret_cast<int16_t *>(stream), length / (2 * sizeof(int16_t)));
 	}
 
 	void SequencerInit()
@@ -328,7 +328,7 @@ public:
 		if (! (status == PLAYING || status == PAUSED))
 			return;
 
-		OPLAY_NotesOff();
+		edge_opl->reset();
 
 		S_QueueStop();
 
@@ -340,7 +340,7 @@ public:
 		if (status != PLAYING)
 			return;
 
-		OPLAY_NotesOff();
+		edge_opl->reset();
 
 		status = PAUSED;
 	}
@@ -442,6 +442,12 @@ abstract_music_c * S_PlayOPL(byte *data, int length, float volume, bool loop, in
 			rate = 0;
 			break;
 	}
+
+	// Ensure OPL register is set correctly for song type
+	if (rate > 0)
+		edge_opl->disableOPL3();
+	else
+		edge_opl->enableOPL3();
 
 	if (!player->LoadTrack(data, length, rate)) //Lobo: quietly log it instead of completely exiting EDGE
 	{

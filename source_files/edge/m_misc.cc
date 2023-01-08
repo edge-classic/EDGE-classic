@@ -79,7 +79,7 @@ unsigned short save_screenshot[160][100];
 bool save_screenshot_valid = false;
 
 bool var_pc_speaker_mode = false;
-int var_opl_music    = 0;
+int var_midi_player    = 0;
 int var_sound_stereo = 0;
 int var_mix_channels = 0;
 
@@ -105,7 +105,7 @@ static default_t defaults[] =
     {CFGT_Int,      "music_volume",      &mus_volume,     CFGDEF_MUSIC_VOLUME},
     {CFGT_Int,      "sound_stereo",      &var_sound_stereo, CFGDEF_SOUND_STEREO},
     {CFGT_Boolean,	"pc_speaker_mode",	 &var_pc_speaker_mode,  0},
-    {CFGT_Int,		"opl_music",		 &var_opl_music,   0},
+    {CFGT_Int,		"midi_player",		 &var_midi_player,   0},
     {CFGT_Boolean,	"dynamic_reverb",	 &dynamic_reverb,  0},
     {CFGT_Int,      "mix_channels",      &var_mix_channels, CFGDEF_MIX_CHANNELS},
 

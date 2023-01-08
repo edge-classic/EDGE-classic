@@ -39,9 +39,9 @@ extern "C" {
 
 #include <inttypes.h>
 
-#ifndef OPL_ENABLE_STEREOEXT
+/*#ifndef OPL_ENABLE_STEREOEXT
 #define OPL_ENABLE_STEREOEXT 1
-#endif
+#endif*/
 
 #define OPL_WRITEBUF_SIZE   1024
 #define OPL_WRITEBUF_DELAY  2

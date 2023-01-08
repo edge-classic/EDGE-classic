@@ -267,53 +267,16 @@ void I_UnlockAudio(void)
 
 void I_StartupMusic(void)
 {
-	// Check for SF2 soundfonts
+	// Check for soundfonts and instrument banks
 	std::vector<epi::dir_entry_c> sfd;
 	std::filesystem::path soundfont_dir = epi::PATH_Join(game_dir, UTFSTR("soundfont"));
 
-	if (!FS_ReadDir(sfd, soundfont_dir, UTFSTR("*.sf2")))
-	{
-		I_Warning("FluidLite: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
-	}
-	else
-	{
-		for (size_t i = 0 ; i < sfd.size() ; i++) 
-		{
-			if(!sfd[i].is_dir)
-			{
-				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name));
-			}
-		}
-	}
-
-	// Check for SF3 soundfonts
-	sfd.clear();
-
-	if (!FS_ReadDir(sfd, soundfont_dir, UTFSTR("*.sf3")))
-	{
-		I_Warning("FluidLite: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
-	}
-	else
-	{
-		for (size_t i = 0 ; i < sfd.size() ; i++) 
-		{
-			if(!sfd[i].is_dir)
-			{
-				available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name));
-			}
-		}
-	}
-
-	// Check for OP2 instrument banks
-	sfd.clear();
-
-	// Start with empty string to represent using whichever GENMIDI
-	// is found in the load order (usually just the IWAD)
+	// Always add an empty path for the instrument banks as the default/internal GENMIDI lump choice
 	available_genmidis.push_back(UTFSTR(""));
 
-	if (!FS_ReadDir(sfd, soundfont_dir, UTFSTR("*.op2")))
+	if (!FS_ReadDir(sfd, soundfont_dir, UTFSTR("*.*")))
 	{
-		I_Warning("OPL: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
+		I_Warning("FluidLite: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
 	}
 	else
 	{
@@ -321,12 +284,17 @@ void I_StartupMusic(void)
 		{
 			if(!sfd[i].is_dir)
 			{
-				available_genmidis.push_back(epi::PATH_GetFilename(sfd[i].name));
+				std::string ext = epi::PATH_GetExtension(sfd[i].name).u8string();
+				epi::str_lower(ext);
+				if (ext == ".sf2" || ext == ".sf3")
+					available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name));
+				else if (ext == ".op2" || ext == ".wopl" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
+					available_genmidis.push_back(epi::PATH_GetFilename(sfd[i].name));
 			}
 		}
 	}
 
-	// Startup both FluidLite and OPL, as some formats require OPL now (IMF/CMF)
+	// Startup both FluidLite and OPL, as some formats require OPL now (IMF, possibly CMF/DRO/etc in the future)
 
 	if (!S_StartupFluid())
 		fluid_disabled = true;

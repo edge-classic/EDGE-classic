@@ -12,7 +12,7 @@ add_subdirectory(source_files/libxmp)
 add_subdirectory(source_files/libwebsid)
 add_subdirectory(source_files/libymfm)
 add_subdirectory(source_files/miniz)
-add_subdirectory(source_files/opl)
+add_subdirectory(source_files/ymfmidi)
 
 project(
   edge-classic
@@ -179,11 +179,11 @@ target_include_directories(edge-classic PRIVATE source_files/libwebsid)
 target_include_directories(edge-classic PRIVATE source_files/minimp3)
 target_include_directories(edge-classic PRIVATE source_files/minivorbis)
 target_include_directories(edge-classic PRIVATE source_files/miniz)
-target_include_directories(edge-classic PRIVATE source_files/opl)
 if(WIN32 AND NOT MSYS AND NOT MINGW)
   target_include_directories(edge-classic PRIVATE source_files/sdl2/include)
 endif()
 target_include_directories(edge-classic PRIVATE source_files/stb)
+target_include_directories(edge-classic PRIVATE source_files/ymfmidi)
 
 if(WIN32 OR MSYS OR MINGW)
   target_compile_definitions(edge-classic PRIVATE WIN32)
@@ -258,7 +258,7 @@ if(WIN32 OR MSYS OR MINGW)
 			libxmp
 			libwebsid
 			libymfm
-			opl
+			ymfmidi
 			wsock32
 	)
 else()
@@ -278,6 +278,6 @@ else()
 			libxmp
 			libwebsid
 			libymfm
-			opl
+			ymfmidi
 	)
 endif()

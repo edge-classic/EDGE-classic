@@ -200,7 +200,7 @@ static void M_ChangeResFull(int keypressed);
 
 static void M_LanguageDrawer(int x, int y, int deltay);
 static void M_ChangeLanguage(int keypressed);
-static void M_ChangeOPL(int keypressed);
+static void M_ChangeMIDIPlayer(int keypressed);
 static void M_ChangeSoundfont(int keypressed);
 static void M_ChangeGENMIDI(int keypressed);
 static void M_ChangeErraticism(int keypressed);
@@ -513,9 +513,9 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
-	{OPT_Function, "MIDI Soundfont", NULL,  0, NULL, M_ChangeSoundfont, "Warning! SF3 Soundfonts may have long loading times!"},
-	{OPT_Switch,  "OPL Music Mode",  OPLMode, 4,  &var_opl_music, M_ChangeOPL, NULL},
-	{OPT_Function, "OPL Instrument Bank", NULL,  0, NULL, M_ChangeGENMIDI, NULL},
+	{OPT_Switch,  "MIDI Player",  "Fluidlite (Soundfont)/YMFM (OPL3)", 2,  &var_midi_player, M_ChangeMIDIPlayer, NULL},
+	{OPT_Function, "Fluidlite Soundfont", NULL,  0, NULL, M_ChangeSoundfont, "Warning! SF3 Soundfonts may have long loading times!"},
+	{OPT_Function, "YMFM Instrument Bank", NULL,  0, NULL, M_ChangeGENMIDI, NULL},
 	{OPT_Boolean, "PC Speaker Mode", YesNo, 2,  &var_pc_speaker_mode, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Boolean, "Dynamic Reverb",       YesNo, 2, &dynamic_reverb, NULL, NULL},
@@ -2080,13 +2080,13 @@ static void M_ChangeLanguage(int keypressed)
 }
 
 //
-// M_ChangeOPL
+// M_ChangeMIDIPlayer
 //
 //
-static void M_ChangeOPL(int keypressed)
+static void M_ChangeMIDIPlayer(int keypressed)
 {
 	pl_entry_c *playing = playlist.Find(entry_playing);
-	if (var_opl_music || (playing && 
+	if (var_midi_player == 1 || (playing && 
 		(playing->type == MUS_IMF280 || playing->type == MUS_IMF560 || playing->type == MUS_IMF700)))
 		S_RestartOPL();
 	else

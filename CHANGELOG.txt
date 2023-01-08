@@ -91,9 +91,9 @@ New Features
 + New console command: showmaps
   - Will show the warp name and level description for accessible maps
 
-+ Support OPL emulated playback of MUS and MIDI music lumps.
-  - Can select between OPL1/OPL2/OPL3 modes
-  - Can use GENMIDI lumps (Default) or external *.op2 instrument bank files
++ Support OPL emulated playback of MUS and MIDI music lumps via YMFM.
+  - Can use GENMIDI lumps (Default) or external instrument bank files
+  - *.wopl, *.op2, *.opl, *.ad, and *.tmb external banks supported
   - External banks must be placed in the /soundfont directory prior to startup
 
 + New music formats supported: FLAC, VGZ (compressed VGM), IMF, XMI/RMI/GMF/EA MIDI Formats

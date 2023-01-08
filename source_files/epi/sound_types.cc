@@ -133,56 +133,52 @@ sound_format_e Sound_DetectFormat(byte *data, int song_len)
 
 sound_format_e Sound_FilenameToFormat(const std::filesystem::path& filename)
 {
-#ifdef _WIN32
-	std::u32string ext = epi::PATH_GetExtension(filename).u32string();
-#else
-	std::string ext = epi::PATH_GetExtension(filename).string();
-#endif
+	std::string ext = epi::PATH_GetExtension(filename).u8string();
 
 	str_lower(ext);
 
-	if (ext == UTFSTR(".wav") || ext == UTFSTR(".wave"))
+	if (ext == ".wav" || ext == ".wave")
 		return FMT_WAV;
 
-	if (ext == UTFSTR(".flac"))
+	if (ext == ".flac")
 		return FMT_FLAC;
 
-	if (ext == UTFSTR(".ogg"))
+	if (ext == ".ogg")
 		return FMT_OGG;
 
-	if (ext == UTFSTR(".mp3"))
+	if (ext == ".mp3")
 		return FMT_MP3;
 
-	if (ext == UTFSTR(".sid") || ext == UTFSTR(".psid"))
+	if (ext == ".sid" || ext == ".psid")
 		return FMT_SID;
 
-	if (ext == UTFSTR(".mus"))
+	if (ext == ".mus")
 		return FMT_MUS;
 
-	if (ext == UTFSTR(".mid") || ext == UTFSTR(".midi") || ext == UTFSTR(".xmi") || 
-		ext == UTFSTR(".rmi") || ext == UTFSTR(".rmid"))
+	if (ext == ".mid" || ext == ".midi" || ext == ".xmi" || 
+		ext == ".rmi" || ext == ".rmid")
 		return FMT_MIDI;
 
-	if (ext == UTFSTR(".mod") || ext == UTFSTR(".m15") || ext == UTFSTR(".flx") || ext == UTFSTR(".wow") || ext == UTFSTR(".dbm") ||
-		ext == UTFSTR(".digi") || ext == UTFSTR(".emod") || ext == UTFSTR(".med") || ext == UTFSTR(".mtn") || ext == UTFSTR(".okt") ||
-		ext == UTFSTR(".sfx") || ext == UTFSTR(".mgt") || ext == UTFSTR(".669") || ext == UTFSTR(".far") || ext == UTFSTR(".fnk") ||
-		ext == UTFSTR(".imf") || ext == UTFSTR(".it") || ext == UTFSTR(".liq") || ext == UTFSTR(".mdl") || ext == UTFSTR(".mtm") || 
-		ext == UTFSTR(".ptm") || ext == UTFSTR(".rtm") || ext == UTFSTR(".s3m") || ext == UTFSTR(".stm") || ext == UTFSTR(".ult") ||
-		ext == UTFSTR(".xm") || ext == UTFSTR(".amf") || ext == UTFSTR(".gdm") || ext == UTFSTR(".stx") || ext == UTFSTR(".abk") ||
-		ext == UTFSTR(".psm") || ext == UTFSTR(".j2b") || ext == UTFSTR(".mfp") || ext == UTFSTR(".smp") || ext == UTFSTR(".mmdc") ||
-		ext == UTFSTR(".stim") || ext == UTFSTR(".umx"))
+	if (ext == ".mod" || ext == ".m15" || ext == ".flx" || ext == ".wow" || ext == ".dbm" ||
+		ext == ".digi" || ext == ".emod" || ext == ".med" || ext == ".mtn" || ext == ".okt" ||
+		ext == ".sfx" || ext == ".mgt" || ext == ".669" || ext == ".far" || ext == ".fnk" ||
+		ext == ".imf" || ext == ".it" || ext == ".liq" || ext == ".mdl" || ext == ".mtm" || 
+		ext == ".ptm" || ext == ".rtm" || ext == ".s3m" || ext == ".stm" || ext == ".ult" ||
+		ext == ".xm" || ext == ".amf" || ext == ".gdm" || ext == ".stx" || ext == ".abk" ||
+		ext == ".psm" || ext == ".j2b" || ext == ".mfp" || ext == ".smp" || ext == ".mmdc" ||
+		ext == ".stim" || ext == ".umx")
 		return FMT_XMP;
 
-	if (ext == UTFSTR(".vgm") || ext == UTFSTR(".vgz"))
+	if (ext == ".vgm" || ext == ".vgz")
 		return FMT_VGM;
 
-	if (ext == UTFSTR(".ay") || ext == UTFSTR(".gbs") || ext == UTFSTR(".gym") || ext == UTFSTR(".hes") || ext == UTFSTR(".nsf") ||
-		ext == UTFSTR(".sap") || ext == UTFSTR(".spc"))
+	if (ext == ".ay" || ext == ".gbs" || ext == ".gym" || ext == ".hes" || ext == ".nsf" ||
+		ext == ".sap" || ext == ".spc")
 		return FMT_GME;
 
 	// Not sure if these will ever be encountered in the wild, but according to the VGMPF Wiki
 	// they are valid DMX file extensions
-	if (ext == UTFSTR(".dsp") || ext == UTFSTR(".pcs") || ext == UTFSTR(".gsp") || ext == UTFSTR(".gsw"))
+	if (ext == ".dsp" || ext == ".pcs" || ext == ".gsp" || ext == ".gsw")
 		return FMT_DOOM;
 
 	return FMT_Unknown;

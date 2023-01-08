@@ -226,7 +226,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 		case epi::FMT_MUS:
 		case epi::FMT_WAV: // RIFF MIDI has the same header as WAV
 			delete F;
-			if (var_opl_music)
+			if (var_midi_player == 1)
 			{
 				music_player = S_PlayOPL(data, length, volume, loop, play->type);
 			}

@@ -77,7 +77,7 @@ extern bool force_waveout;
 extern bool var_obituaries;
 
 extern bool var_pc_speaker_mode;
-extern int var_opl_music;
+extern int var_midi_player;
 extern int var_sound_stereo;
 extern int var_mix_channels;
 

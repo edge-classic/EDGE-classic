@@ -41,7 +41,7 @@ typedef struct BW_MidiRtInterface OPLInterface;
 
 OPLPlayer *edge_opl = nullptr;
 
-#define NUM_SAMPLES  4096
+#define MID_BUFFER  4096
 
 extern bool dev_stereo;
 extern int  dev_freq;
@@ -163,6 +163,16 @@ void S_RestartOPL(void)
 	return; // OK!
 }
 
+static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
+{
+	const s16_t *s_end = src + len*2;
+
+	for (; src < s_end; src += 2)
+	{
+		// compute average of samples
+		*dest++ = ( (int)src[0] + (int)src[1] ) >> 1;
+	}
+}
 
 class opl_player_c : public abstract_music_c
 {
@@ -175,17 +185,23 @@ private:
 	int status;
 	bool looping;
 
+	s16_t *mono_buffer;
+
 	OPLInterface *opl_iface;
 
 public:
 	opl_player_c(bool _looping) : status(NOT_LOADED), looping(_looping)
 	{
+		mono_buffer = new s16_t[2 * MID_BUFFER];
 		SequencerInit();
 	}
 
 	~opl_player_c()
 	{
 		Close();
+
+		if (mono_buffer)
+			delete[] mono_buffer;
 	}
 
 public:
@@ -274,7 +290,7 @@ public:
 		opl_iface->onPcmRender_userData = this;
 
 		opl_iface->pcmSampleRate = dev_freq;
-		opl_iface->pcmFrameSize = (dev_stereo ? 2 : 1) /*channels*/ * 2 /*size of one sample*/;
+		opl_iface->pcmFrameSize = 2 /*channels*/ * 2 /*size of one sample*/; // OPL3 is 2 'channels' regardless of the dev_stereo setting
 
 		opl_iface->rt_deviceSwitch = rtDeviceSwitch;
 		opl_iface->rt_currentDevice = rtCurrentDevice;
@@ -357,7 +373,7 @@ public:
 	{
 		while (status == PLAYING)
 		{
-			epi::sound_data_c *buf = S_QueueGetFreeBuffer(NUM_SAMPLES,
+			epi::sound_data_c *buf = S_QueueGetFreeBuffer(MID_BUFFER,
 					dev_stereo ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 
 			if (! buf)
@@ -386,14 +402,24 @@ public:
 private:
 	bool StreamIntoBuffer(epi::sound_data_c *buf)
 	{
+		s16_t *data_buf;
+
 		bool song_done = false;
 
-		int played = opl_seq->playStream(reinterpret_cast<u8_t *>(buf->data_L), NUM_SAMPLES);
+		if (!dev_stereo)
+			data_buf = mono_buffer;
+		else
+			data_buf = buf->data_L;
+
+		int played = opl_seq->playStream(reinterpret_cast<u8_t *>(data_buf), MID_BUFFER);
 
 		if (opl_seq->positionAtEnd())
 			song_done = true;
 
-		buf->length = played / (dev_stereo ? 4 : 2);
+		buf->length = played / (2 * sizeof(s16_t));
+
+		if (!dev_stereo)
+			ConvertToMono(buf->data_L, mono_buffer, buf->length);
 
 		if (song_done)  /* EOF */
 		{

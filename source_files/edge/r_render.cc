@@ -63,6 +63,7 @@
 
 
 DEF_CVAR(debug_hom, "0", CVAR_CHEAT)
+DEF_CVAR(r_forceflatlighting, "0", CVAR_ARCHIVE)
 
 extern cvar_c r_culling;
 extern cvar_c r_doubleframes;
@@ -995,7 +996,7 @@ static void DrawWallPart(drawfloor_t *dfloor,
 	int lit_adjust = 0;
 
 	// do the N/S/W/E bizzo...
-	if (currmap->episode->lighting == LMODEL_Doom && props->lightlevel > 0)
+	if (!r_forceflatlighting.d && currmap->episode->lighting == LMODEL_Doom && props->lightlevel > 0)
 	{
 		if (cur_seg->v1->y == cur_seg->v2->y)
 			lit_adjust -= 16;

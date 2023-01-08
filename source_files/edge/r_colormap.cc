@@ -49,6 +49,8 @@
 
 #include "str_util.h"
 
+extern cvar_c r_forceflatlighting;
+
 // -AJA- 1999/06/30: added this
 byte playpal_data[14][256][3];
 
@@ -887,7 +889,7 @@ private:
 public:
 	void Update()
 	{
-		if (fade_tex == 0 ||
+		if (fade_tex == 0 || (r_forceflatlighting.d && lt_model != LMODEL_Flat) ||
 		    lt_model != currmap->episode->lighting)
 		{
 			if (fade_tex != 0)
@@ -895,7 +897,10 @@ public:
 				glDeleteTextures(1, &fade_tex);
 			}
 
-			lt_model = currmap->episode->lighting;
+			if (r_forceflatlighting.d)
+				lt_model = LMODEL_Flat;
+			else
+				lt_model = currmap->episode->lighting;
 
 			MakeColormapTexture(0);
 		}

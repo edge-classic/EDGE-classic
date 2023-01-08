@@ -890,7 +890,7 @@ public:
 	void Update()
 	{
 		if (fade_tex == 0 || (r_forceflatlighting.d && lt_model != LMODEL_Flat) ||
-		    lt_model != currmap->episode->lighting)
+		    (!r_forceflatlighting.d && lt_model != currmap->episode->lighting))
 		{
 			if (fade_tex != 0)
 			{

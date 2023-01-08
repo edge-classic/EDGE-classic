@@ -58,6 +58,7 @@ New Features
 
 + New Video Options menu item: Framerate Target
   - Can cycle between 35/70 FPS
+  - Default framerate target is now 70 FPS
 
 + New Video Options menu item: Overlay
   - Can cycle through various pseudo-CRT/scanline effects
@@ -90,6 +91,11 @@ New Features
 
 + New console command: showmaps
   - Will show the warp name and level description for accessible maps
+
++ New console variable: r_forceflatlighting
+  - When set to 1, will use a flat lighting formula versus Doom's traditional distance-based light banding calculations
+  - Overrides any lighting settings in an episode's DDFGAME definition
+  - Default is 0, "traditional" Doom behavior
 
 + Support OPL emulated playback of MUS and MIDI music lumps via YMFM.
   - Can use GENMIDI lumps (Default) or external instrument bank files

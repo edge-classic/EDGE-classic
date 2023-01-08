@@ -55,7 +55,7 @@ int base_port;
 DEF_CVAR(m_busywait, "1", CVAR_ARCHIVE)
 
 // 70Hz
-DEF_CVAR(r_doubleframes, "0", CVAR_ARCHIVE)
+DEF_CVAR(r_doubleframes, "1", CVAR_ARCHIVE)
 
 
 // gametic is the tic about to (or currently being) run.

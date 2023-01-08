@@ -58,7 +58,7 @@
 #define WI_SPACINGY 33
 
 // SINGPLE-PLAYER STUFF
-#define SP_STATSX 50
+#define SP_STATSX 55
 #define SP_STATSY 50
 
 #define SP_TIMEX 16

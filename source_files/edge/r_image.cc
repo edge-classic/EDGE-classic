@@ -552,6 +552,9 @@ static image_c *AddImage_DOOM(imagedef_c *def)
 		rim->offset_y += int(dy / rim->scale_y);
 	}
 
+	if (def->special & IMGSP_Grayscale)
+		rim->grayscale = true;
+
 	return rim;
 }
 
@@ -676,6 +679,9 @@ static image_c *AddImageUser(imagedef_c *def)
 		float dy = (200.0f - rim->actual_h * rim->scale_y) / 2.0f - WEAPONTOP;
 		rim->offset_y += int(dy / rim->scale_y);
 	}
+
+	if (def->special & IMGSP_Grayscale)
+		rim->grayscale = true;
 
 	switch (def->belong)
 	{
@@ -1586,6 +1592,8 @@ GLuint W_ImageCache(const image_c *image, bool anim,
 		if (rim->liquid_type == LIQ_None || swirling_flats == SWIRL_Vanilla)
 			rim = rim->anim.cur;
 	}
+
+	if (rim->grayscale) do_whiten = true;
 
 	cached_image_t *rc = ImageCacheOGL(rim, trans, do_whiten);
 

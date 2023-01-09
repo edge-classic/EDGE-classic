@@ -108,6 +108,8 @@ public:
 	// For fully transparent images
 	bool is_empty;
 
+	bool grayscale = false;
+
 //!!!!!! private:
 
 	// --- information about where this image came from ---

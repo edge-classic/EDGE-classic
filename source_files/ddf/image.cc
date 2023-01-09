@@ -337,6 +337,7 @@ static specflags_t image_specials[] =
     {"FORCE_SMOOTH",  IMGSP_Smooth,    0},
     {"FORCE_NOSMOOTH",IMGSP_NoSmooth,  0},
     {"CROSSHAIR",     IMGSP_Crosshair, 0},
+	{"GRAYSCALE",     IMGSP_Grayscale, 0},
     {NULL, 0, 0}
 };
 

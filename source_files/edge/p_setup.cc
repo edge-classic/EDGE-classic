@@ -1082,7 +1082,10 @@ static sector_t *DetermineSubsectorSector(subsector_t *ss, int pass)
 		if (seg->partner == NULL)
 			continue;
 
-		if (seg->partner->front_sub->sector != NULL)
+		// only do this for self-referencing linedefs if the original sector isn't tagged, otherwise
+		// save it for the next pass
+		if ((seg->frontsector == seg->backsector && seg->frontsector && seg->frontsector->tag == 0) && 
+			seg->partner->front_sub->sector != NULL)
 			return seg->partner->front_sub->sector;
 	}
 

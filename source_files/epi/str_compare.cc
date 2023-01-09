@@ -51,21 +51,6 @@ int strcmp(const std::string& A, const std::string& B)
 	return epi::strcmp(A.c_str(), B.c_str());
 }
 
-int strcmp(const std::u32string& A, const std::u32string& B)
-{
-	SYS_ASSERT(!A.empty() && !B.empty());
-
-	if (A.size() != B.size())
-		return A.size() - B.size();
-
-	for (size_t i=0; i < A.size(); i++)
-	{
-		if (A != B)
-			return A.at(i) - B.at(i);
-	}
-	return 0;
-}
-
 //----------------------------------------------------------------------------
 
 int strncmp(const char *A, const char *B, size_t n)
@@ -121,16 +106,6 @@ int case_cmp(const std::string& A, const char *B)
 int case_cmp(const std::string& A, const std::string& B)
 {
 	return epi::case_cmp(A.c_str(), B.c_str());
-}
-
-int case_cmp(const std::u32string& A, const std::u32string& B)
-{
-	SYS_ASSERT(!A.empty() && !B.empty());
-
-	if (A.size() != B.size())
-		return A.size() - B.size();
-
-	return epi::case_cmp(epi::to_u8string(A), epi::to_u8string(B));
 }
 
 //----------------------------------------------------------------------------

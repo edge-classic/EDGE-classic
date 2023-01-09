@@ -111,13 +111,13 @@ void I_StartupSound(void)
 {
 	if (nosound) return;
 
-	if (argv::Find(UTFSTR("waveout")) > 0)
+	if (argv::Find("waveout") > 0)
 		force_waveout = true;
 
-	if (argv::Find(UTFSTR("dsound")) > 0 || argv::Find(UTFSTR("nowaveout")) > 0)
+	if (argv::Find("dsound") > 0 || argv::Find("nowaveout") > 0)
 		force_waveout = false;
 
-	std::string driver = epi::to_u8string(argv::Value(UTFSTR("audiodriver")));
+	std::string driver = epi::to_u8string(argv::Value("audiodriver"));
 
 	if (driver.empty())
 		driver = SDL_getenv("SDL_AUDIODRIVER") ? SDL_getenv("SDL_AUDIODRIVER") : "";
@@ -150,13 +150,13 @@ void I_StartupSound(void)
 	int want_freq = 48000;
 	bool want_stereo = (var_sound_stereo >= 1);
 
-	std::string p = epi::to_u8string(argv::Value(UTFSTR("freq")));
+	std::string p = epi::to_u8string(argv::Value("freq"));
 
 	if (!p.empty())
 		want_freq = atoi(p.c_str());
 
-	if (argv::Find(UTFSTR("mono"))   > 0) want_stereo = false;
-	if (argv::Find(UTFSTR("stereo")) > 0) want_stereo = true;
+	if (argv::Find("mono")   > 0) want_stereo = false;
+	if (argv::Find("stereo") > 0) want_stereo = true;
 
 	bool success = false;
 	

@@ -2864,14 +2864,14 @@ void P_SpawnSpecials1(void)
 	// See if -TIMER needs to be used.
 	levelTimer = false;
 
-	i = argv::Find(UTFSTR("avg"));
+	i = argv::Find("avg");
 	if (i > 0 && DEATHMATCH())
 	{
 		levelTimer = true;
 		levelTimeCount = 20 * 60 * TICRATE;
 	}
 
-	std::string s = epi::to_u8string(argv::Value(UTFSTR("timer")));
+	std::string s = epi::to_u8string(argv::Value("timer"));
 
 	if (!s.empty() && DEATHMATCH())
 	{

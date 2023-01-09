@@ -127,7 +127,7 @@ static int cur_palette = -1;
 
 void V_InitColour(void)
 {
-	std::string s = epi::to_u8string(argv::Value(UTFSTR("gamma")));
+	std::string s = epi::to_u8string(argv::Value("gamma"));
 
 	if (!s.empty())
 	{

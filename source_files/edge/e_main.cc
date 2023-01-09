@@ -280,14 +280,14 @@ static void SetGlobalVars(void)
 	std::string s;
 
 	// Screen Resolution Check...
-	if (argv::Find(UTFSTR("borderless")) > 0)
+	if (argv::Find("borderless") > 0)
 		DISPLAYMODE = 2;
-	else if (argv::Find(UTFSTR("fullscreen")) > 0)
+	else if (argv::Find("fullscreen") > 0)
 		DISPLAYMODE = 1;
-	else if (argv::Find(UTFSTR("windowed")) > 0)
+	else if (argv::Find("windowed") > 0)
 		DISPLAYMODE = 0;
 
-	s = epi::to_u8string(argv::Value(UTFSTR("width")));
+	s = epi::to_u8string(argv::Value("width"));
 	if (!s.empty())
 	{
 		if (DISPLAYMODE == 2)
@@ -296,7 +296,7 @@ static void SetGlobalVars(void)
 			SCREENWIDTH = atoi(s.c_str());
 	}
 
-	s = epi::to_u8string(argv::Value(UTFSTR("height")));
+	s = epi::to_u8string(argv::Value("height"));
 	if (!s.empty())
 	{
 		if (DISPLAYMODE == 2)
@@ -305,7 +305,7 @@ static void SetGlobalVars(void)
 			SCREENHEIGHT = atoi(s.c_str());
 	}
 
-	p = argv::Find(UTFSTR("res"));
+	p = argv::Find("res");
 	if (p > 0 && p + 2 < argv::list.size() && !argv::IsOption(p+1) && !argv::IsOption(p+2))
 	{
 		if (DISPLAYMODE == 2)
@@ -319,7 +319,7 @@ static void SetGlobalVars(void)
 	}
 
 	// Bits per pixel check....
-	s = epi::to_u8string(argv::Value(UTFSTR("bpp")));
+	s = epi::to_u8string(argv::Value("bpp"));
 	if (!s.empty())
 	{
 		SCREENBITS = atoi(s.c_str());
@@ -340,7 +340,7 @@ static void SetGlobalVars(void)
 	}
 
 	// sprite kludge (TrueBSP)
-	p = argv::Find(UTFSTR("spritekludge"));
+	p = argv::Find("spritekludge");
 	if (p > 0)
 	{
 		if (p + 1 < argv::list.size() && !argv::IsOption(p+1))
@@ -350,7 +350,7 @@ static void SetGlobalVars(void)
 			sprite_kludge = 1;
 	}
 
-	s = epi::to_u8string(argv::Value(UTFSTR("screenshot")));
+	s = epi::to_u8string(argv::Value("screenshot"));
 	if (!s.empty())
 	{
 		screenshot_rate = atoi(s.c_str());
@@ -358,49 +358,49 @@ static void SetGlobalVars(void)
 	}
 
 	// -AJA- 1999/10/18: Reworked these with argv::CheckBooleanParm
-	argv::CheckBooleanParm(UTFSTR("rotatemap"), &rotatemap, false);
-	argv::CheckBooleanParm(UTFSTR("sound"), &nosound, true);
-	argv::CheckBooleanParm(UTFSTR("music"), &nomusic, true);
-	argv::CheckBooleanParm(UTFSTR("itemrespawn"), &global_flags.itemrespawn, false);
-	argv::CheckBooleanParm(UTFSTR("mlook"), &global_flags.mlook, false);
-	argv::CheckBooleanParm(UTFSTR("monsters"), &global_flags.nomonsters, true);
-	argv::CheckBooleanParm(UTFSTR("fast"), &global_flags.fastparm, false);
-	argv::CheckBooleanParm(UTFSTR("extras"), &global_flags.have_extra, false);
-	argv::CheckBooleanParm(UTFSTR("kick"), &global_flags.kicking, false);
-	argv::CheckBooleanParm(UTFSTR("singletics"), &singletics, false);
-	argv::CheckBooleanParm(UTFSTR("true3d"), &global_flags.true3dgameplay, false);
-	argv::CheckBooleanParm(UTFSTR("blood"), &global_flags.more_blood, false);
-	argv::CheckBooleanParm(UTFSTR("cheats"), &global_flags.cheats, false);
-	argv::CheckBooleanParm(UTFSTR("jumping"), &global_flags.jump, false);
-	argv::CheckBooleanParm(UTFSTR("crouching"), &global_flags.crouch, false);
-	argv::CheckBooleanParm(UTFSTR("weaponswitch"), &global_flags.weapon_switch, false);
-	argv::CheckBooleanParm(UTFSTR("autoload"), &autoquickload, false);
+	argv::CheckBooleanParm("rotatemap", &rotatemap, false);
+	argv::CheckBooleanParm("sound", &nosound, true);
+	argv::CheckBooleanParm("music", &nomusic, true);
+	argv::CheckBooleanParm("itemrespawn", &global_flags.itemrespawn, false);
+	argv::CheckBooleanParm("mlook", &global_flags.mlook, false);
+	argv::CheckBooleanParm("monsters", &global_flags.nomonsters, true);
+	argv::CheckBooleanParm("fast", &global_flags.fastparm, false);
+	argv::CheckBooleanParm("extras", &global_flags.have_extra, false);
+	argv::CheckBooleanParm("kick", &global_flags.kicking, false);
+	argv::CheckBooleanParm("singletics", &singletics, false);
+	argv::CheckBooleanParm("true3d", &global_flags.true3dgameplay, false);
+	argv::CheckBooleanParm("blood", &global_flags.more_blood, false);
+	argv::CheckBooleanParm("cheats", &global_flags.cheats, false);
+	argv::CheckBooleanParm("jumping", &global_flags.jump, false);
+	argv::CheckBooleanParm("crouching", &global_flags.crouch, false);
+	argv::CheckBooleanParm("weaponswitch", &global_flags.weapon_switch, false);
+	argv::CheckBooleanParm("autoload", &autoquickload, false);
 
-	if (argv::Find(UTFSTR("infight")) > 0)
+	if (argv::Find("infight") > 0)
 		g_aggression = 1;
 
-	if (argv::Find(UTFSTR("dlights")) > 0)
+	if (argv::Find("dlights") > 0)
 		use_dlights = 1;
-	else if (argv::Find(UTFSTR("nodlights")) > 0)
+	else if (argv::Find("nodlights") > 0)
 		use_dlights = 0;
 
 	if (!global_flags.respawn)
 	{
-		if (argv::Find(UTFSTR("newnmrespawn")) > 0)
+		if (argv::Find("newnmrespawn") > 0)
 		{
 			global_flags.res_respawn = true;
 			global_flags.respawn = true;
 		}
-		else if (argv::Find(UTFSTR("respawn")) > 0)
+		else if (argv::Find("respawn") > 0)
 		{
 			global_flags.respawn = true;
 		}
 	}
 
 	// check for strict and no-warning options
-	argv::CheckBooleanCVar(UTFSTR("strict"), &ddf_strict, false);
-	argv::CheckBooleanCVar(UTFSTR("lax"),    &ddf_lax,    false);
-	argv::CheckBooleanCVar(UTFSTR("warn"),   &ddf_quiet,  true);
+	argv::CheckBooleanCVar("strict", &ddf_strict, false);
+	argv::CheckBooleanCVar("lax",    &ddf_lax,    false);
+	argv::CheckBooleanCVar("warn",   &ddf_quiet,  true);
 
 	strict_errors = ddf_strict.d ? true : false;
 	lax_errors    = ddf_lax.d    ? true : false;
@@ -412,7 +412,7 @@ static void SetGlobalVars(void)
 //
 void SetLanguage(void)
 {
-	std::string want_lang = epi::to_u8string(argv::Value(UTFSTR("lang")));
+	std::string want_lang = epi::to_u8string(argv::Value("lang"));
 	if (!want_lang.empty())
 		m_language = want_lang;
 
@@ -814,7 +814,7 @@ void E_TitleTicker(void)
 //
 void InitDirectories(void)
 {
-	std::filesystem::path s = argv::Value(UTFSTR("home"));
+	std::filesystem::path s = argv::Value("home");
     if (!s.empty())
         home_dir = s;
 
@@ -847,7 +847,7 @@ void InitDirectories(void)
 	s = UTFSTR(SDL_GetBasePath());
 
 	game_dir = s;
-	s = argv::Value(UTFSTR("game"));
+	s = argv::Value("game");
 	if (!s.empty())
 		game_dir = s;
 
@@ -861,7 +861,7 @@ void InitDirectories(void)
 	}
 
 	// config file
-	s = argv::Value(UTFSTR("config"));
+	s = argv::Value("config");
 	if (!s.empty())
 	{
 		cfgfile = s;
@@ -872,7 +872,7 @@ void InitDirectories(void)
 	}
 
 	// edge.wad file
-	s = argv::Value(UTFSTR("ewad"));
+	s = argv::Value("ewad");
 	if (!s.empty())
 	{
 		ewadfile = s;
@@ -953,7 +953,7 @@ static void IdentifyVersion(void)
     std::filesystem::path iwad_dir;
 	std::vector<std::filesystem::path> iwad_dir_vector;
 
-	std::filesystem::path s = argv::Value(UTFSTR("iwad"));
+	std::filesystem::path s = argv::Value("iwad");
 
     iwad_par = s;
 
@@ -1189,7 +1189,7 @@ static void CheckTurbo(void)
 {
 	int turbo_scale = 100;
 
-	int p = argv::Find(UTFSTR("turbo"));
+	int p = argv::Find("turbo");
 
 	if (p > 0)
 	{
@@ -1240,7 +1240,7 @@ static void SetupLogAndDebugFiles(void)
 	logfile = NULL;
 	debugfile = NULL;
 
-	if (argv::Find(UTFSTR("nolog")) < 0)
+	if (argv::Find("nolog") < 0)
 	{
 		logfile = EPIFOPEN(log_fn, "w");
 
@@ -1269,30 +1269,26 @@ static void SetupLogAndDebugFiles(void)
 
 static void AddSingleCmdLineFile(std::filesystem::path name, bool ignore_unknown)
 {
-#ifdef _WIN32
-	std::u32string ext = epi::PATH_GetExtension(name).u32string();
-#else
-	std::string ext = epi::PATH_GetExtension(name).string();
-#endif
+	std::string ext = epi::PATH_GetExtension(name).u8string();
 
 	epi::str_lower(ext);
 
-	if (ext == UTFSTR(".edm"))
+	if (ext == ".edm")
 		I_Error("Demos are not supported\n");
 
 	// no need to check for GWA (shouldn't be added manually)
 
 	filekind_e kind;
 
-	if (ext == UTFSTR(".wad"))
+	if (ext == ".wad")
 		kind = FLKIND_PWad;
-	else if (ext == UTFSTR(".pk3"))
+	else if (ext == ".pk3")
 		kind = FLKIND_PK3;
-	else if (ext == UTFSTR(".rts"))
+	else if (ext == ".rts")
 		kind = FLKIND_RTS;
-	else if (ext == UTFSTR(".ddf") || ext == UTFSTR(".ldf"))
+	else if (ext == ".ddf" || ext == ".ldf")
 		kind = FLKIND_DDF;
-	else if (ext == UTFSTR(".deh") || ext == UTFSTR(".bex"))
+	else if (ext == ".deh" || ext == ".bex")
 		kind = FLKIND_Deh;
 	else
 	{
@@ -1318,9 +1314,9 @@ static void AddCommandLineFiles(void)
 
 	// next handle the -file option (we allow multiple uses)
 
-	p = argv::Find(UTFSTR("file"));
+	p = argv::Find("file");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], UTFSTR("-file")) == 0))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(epi::to_u8string(argv::list[p]), "-file") == 0))
 	{
 		// the parms after p are wadfile/lump names,
 		// go until end of parms or another '-' preceded parm
@@ -1332,25 +1328,21 @@ static void AddCommandLineFiles(void)
 
 	// scripts....
 
-	p = argv::Find(UTFSTR("script"));
+	p = argv::Find("script");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], UTFSTR("-script")) == 0))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(epi::to_u8string(argv::list[p]), "-script") == 0))
 	{
 		// the parms after p are script filenames,
 		// go until end of parms or another '-' preceded parm
 		if (!argv::IsOption(p))
 		{
-#ifdef _WIN32
-			std::u32string ext = epi::PATH_GetExtension(argv::list[p]).u32string();
-#else
-			std::string ext = epi::PATH_GetExtension(argv::list[p]).string();
-#endif
+			std::string ext = epi::PATH_GetExtension(argv::list[p]).u8string();
 			// sanity check...
-			if (epi::case_cmp(ext, UTFSTR(".wad")) == 0 || 
-				epi::case_cmp(ext, UTFSTR(".pk3")) == 0 ||
-				epi::case_cmp(ext, UTFSTR(".ddf")) == 0 ||
-				epi::case_cmp(ext, UTFSTR(".deh")) == 0 ||
-				epi::case_cmp(ext, UTFSTR(".bex")) == 0)
+			if (epi::case_cmp(ext, ".wad") == 0 || 
+				epi::case_cmp(ext, ".pk3") == 0 ||
+				epi::case_cmp(ext, ".ddf") == 0 ||
+				epi::case_cmp(ext, ".deh") == 0 ||
+				epi::case_cmp(ext, ".bex") == 0)
 			{
 				I_Error("Illegal filename for -script: %s\n", epi::to_u8string(argv::list[p]).c_str());
 			}
@@ -1364,24 +1356,20 @@ static void AddCommandLineFiles(void)
 
 	// dehacked/bex....
 
-	p = argv::Find(UTFSTR("deh"));
+	p = argv::Find("deh");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], UTFSTR("-deh")) == 0))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(epi::to_u8string(argv::list[p]), "-deh") == 0))
 	{
 		// the parms after p are Dehacked/BEX filenames,
 		// go until end of parms or another '-' preceded parm
 		if (!argv::IsOption(p))
 		{
-#ifdef _WIN32
-			std::u32string ext = epi::PATH_GetExtension(argv::list[p]).u32string();
-#else
-			std::string ext = epi::PATH_GetExtension(argv::list[p]).string();
-#endif
+			std::string ext = epi::PATH_GetExtension(argv::list[p]).u8string();
 			// sanity check...
-			if (epi::case_cmp(ext.c_str(), UTFSTR(".wad")) == 0 || 
-				epi::case_cmp(ext.c_str(), UTFSTR(".pk3")) == 0 ||
-				epi::case_cmp(ext.c_str(), UTFSTR(".ddf")) == 0 ||
-				epi::case_cmp(ext.c_str(), UTFSTR(".rts")) == 0)
+			if (epi::case_cmp(ext, ".wad") == 0 || 
+				epi::case_cmp(ext, ".pk3") == 0 ||
+				epi::case_cmp(ext, ".ddf") == 0 ||
+				epi::case_cmp(ext, ".rts") == 0)
 			{
 				I_Error("Illegal filename for -deh: %s\n", epi::to_u8string(argv::list[p]).c_str());
 			}
@@ -1395,9 +1383,9 @@ static void AddCommandLineFiles(void)
 
 	// directories....
 
-	p = argv::Find(UTFSTR("dir"));
+	p = argv::Find("dir");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], UTFSTR("-dir")) == 0))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(epi::to_u8string(argv::list[p]),"-dir") == 0))
 	{
 		// the parms after p are directory names,
 		// go until end of parms or another '-' preceded parm
@@ -1412,7 +1400,7 @@ static void AddCommandLineFiles(void)
 
 	// handle -ddf option (backwards compatibility)
 
-	std::filesystem::path ps = argv::Value(UTFSTR("ddf"));
+	std::filesystem::path ps = argv::Value("ddf");
 
 	if (!ps.empty())
 	{
@@ -1501,7 +1489,7 @@ static void E_Shutdown(void);
 static void E_Startup(void)
 {
 	// Version check ?
-	if (argv::Find(UTFSTR("version")) > 0)
+	if (argv::Find("version") > 0)
 	{
 		// -AJA- using I_Error here, since I_Printf crashes this early on
 		I_Error("\nEDGE-Classic version is " EDGEVERSTR "\n");
@@ -1596,13 +1584,13 @@ static void E_InitialState(void)
 	// do loadgames first, as they contain all of the
 	// necessary state already (in the savegame).
 
-	if (argv::Find(UTFSTR("playdemo")) > 0 || argv::Find(UTFSTR("timedemo")) > 0 ||
-	    argv::Find(UTFSTR("record")) > 0)
+	if (argv::Find("playdemo") > 0 || argv::Find("timedemo") > 0 ||
+	    argv::Find("record") > 0)
 	{
 		I_Error("Demos are no longer supported\n");
 	}
 
-	ps = argv::Value(UTFSTR("loadgame"));
+	ps = argv::Value("loadgame");
 	if (!ps.empty())
 	{
 		G_DeferredLoadGame(atoi(epi::to_u8string(ps).c_str()));
@@ -1618,11 +1606,11 @@ static void E_InitialState(void)
 
 	int bots = 0;
 
-	ps = argv::Value(UTFSTR("bots"));
+	ps = argv::Value("bots");
 	if (!ps.empty())
 		bots = atoi(epi::to_u8string(ps).c_str());
 
-	ps = argv::Value(UTFSTR("warp"));
+	ps = argv::Value("warp");
 	if (!ps.empty())
 	{
 		warp = true;
@@ -1630,7 +1618,7 @@ static void E_InitialState(void)
 	}
 
 	// -KM- 1999/01/29 Use correct skill: 1 is easiest, not 0
-	ps = argv::Value(UTFSTR("skill"));
+	ps = argv::Value("skill");
 	if (!ps.empty())
 	{
 		warp = true;
@@ -1638,7 +1626,7 @@ static void E_InitialState(void)
 	}
 
 	// deathmatch check...
-	int pp = argv::Find(UTFSTR("deathmatch"));
+	int pp = argv::Find("deathmatch");
 	if (pp > 0)
 	{
 		warp_deathmatch = 1;
@@ -1646,7 +1634,7 @@ static void E_InitialState(void)
 		if (pp + 1 < argv::list.size() && !argv::IsOption(pp+1))
 			warp_deathmatch = MAX(1, atoi(epi::to_u8string(argv::list[pp+1]).c_str()));
 	}
-	else if (argv::Find(UTFSTR("altdeath")) > 0)
+	else if (argv::Find("altdeath") > 0)
 	{
 		warp_deathmatch = 2;
 	}

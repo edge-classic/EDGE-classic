@@ -22,6 +22,13 @@
 
 #include "tables.h"
 
+#include <unordered_map>
+
+#define RGB_MAKE(r,g,b)  (((r) << 16) | ((g) << 8) | (b))
+#define RGB_RED(rgbcol)  (((rgbcol) >> 16) & 0xFF)
+#define RGB_GRN(rgbcol)  (((rgbcol) >>  8) & 0xFF)
+#define RGB_BLU(rgbcol)  (((rgbcol)      ) & 0xFF)
+
 namespace epi
 {
 
@@ -514,6 +521,9 @@ void image_data_c::AverageColor(u8_t *rgb)
 	// make sure we don't overflow
 	SYS_ASSERT(used_w * used_h <= 2048 * 2048);
 
+	std::unordered_map<unsigned int, unsigned int> seen_colors;
+	std::vector<unsigned int>most_colors;
+
 	int r_sum = 0;
 	int g_sum = 0;
 	int b_sum = 0;
@@ -524,15 +534,41 @@ void image_data_c::AverageColor(u8_t *rgb)
 
 		for (int x = 0; x < used_w; x++, src += bpp)
 		{
-			r_sum += src[0];
-			g_sum += src[1];
-			b_sum += src[2];
+			if (bpp == 4 && src[3] == 0)
+				continue;
+			unsigned int color = RGB_MAKE((unsigned int)src[0],(unsigned int)src[1],(unsigned int)src[2]);
+			auto res = seen_colors.try_emplace(color, 0);
+			// If color already seen, increment the hit counter
+			if (!res.second)
+				res.first->second++;
 		}
 	}
 
-	rgb[0] = r_sum / (used_w * used_h);
-	rgb[1] = g_sum / (used_w * used_h);
-	rgb[2] = b_sum / (used_w * used_h);
+	int highest_count = 0;
+	for (auto color : seen_colors)
+	{
+		if (color.second > highest_count)
+			highest_count = color.second;
+	}
+
+	for (auto color : seen_colors)
+	{
+		if (color.second == highest_count)
+		{
+			most_colors.push_back(color.first);
+		}
+	}
+
+	for (auto color : most_colors)
+	{
+		r_sum += RGB_RED(color);
+		g_sum += RGB_GRN(color);
+		b_sum += RGB_BLU(color);
+	}
+
+	rgb[0] = r_sum / most_colors.size();
+	rgb[1] = g_sum / most_colors.size();
+	rgb[2] = b_sum / most_colors.size();
 }
 
 void image_data_c::AverageTopBorderColor(u8_t *rgb)

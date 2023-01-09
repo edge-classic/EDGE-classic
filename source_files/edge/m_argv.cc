@@ -77,47 +77,6 @@ void argv::Init(const int argc, const char *const *argv) {
     }
 }
 
-#ifdef _WIN32
-int argv::Find(std::u32string longName, int *numParams) {
-    SYS_ASSERT(!longName.empty());
-
-    if (numParams) {
-        *numParams = 0;
-    }
-
-    size_t p = 0;
-
-    for (; p < list.size(); ++p) {
-        if (!IsOption(p)) {
-            continue;
-        }
-
-        const std::u32string &str = list[p];
-
-        if (epi::case_cmp(longName,
-                std::u32string{&str[1], (str.size() - 1)}) == 0) {
-            break;
-        }
-    }
-
-    if (p == list.size()) {
-        // NOT FOUND
-        return -1;
-    }
-
-    if (numParams) {
-        size_t q = p + 1;
-
-        while (q < list.size() && !IsOption(q)) {
-            ++q;
-        }
-
-        *numParams = q - p - 1;
-    }
-
-    return p;
-}
-#else
 int argv::Find(std::string longName, int *numParams) {
     SYS_ASSERT(!longName.empty());
 
@@ -132,7 +91,7 @@ int argv::Find(std::string longName, int *numParams) {
             continue;
         }
 
-        const std::string &str = list[p];
+        const std::string &str = epi::to_u8string(list[p]);
 
         if (epi::case_cmp(longName,
                 std::string{&str[1], (str.size() - 1)}) == 0) {
@@ -157,16 +116,15 @@ int argv::Find(std::string longName, int *numParams) {
 
     return p;
 }
-#endif
 
 #ifdef _WIN32
-std::u32string argv::Value(std::u32string longName, int *numParams) {
+std::u32string argv::Value(std::string longName, int *numParams) {
 #else
 std::string argv::Value(std::string longName, int *numParams) {
 #endif
     SYS_ASSERT(!longName.empty());
 
-    int pos = Find(longName, numParams);
+    int pos = Find(epi::to_u8string(longName), numParams);
 
     if (pos <= 0)
         return UTFSTR("");
@@ -181,37 +139,6 @@ std::string argv::Value(std::string longName, int *numParams) {
 // present, sets it to false if parm prefixed with `-no' is present,
 // otherwise leaves it unchanged.
 //
-#ifdef _WIN32
-void argv::CheckBooleanParm(std::u32string parm, bool *boolval, bool reverse)
-{
-	if (Find(parm) > 0)
-	{
-		*boolval = ! reverse;
-		return;
-	}
-
-	if (Find(UTFSTR("no").append(parm)) > 0)
-	{
-		*boolval = reverse;
-		return;
-	}
-}
-
-void argv::CheckBooleanCVar(std::u32string parm, cvar_c *var, bool reverse)
-{
-	if (Find(parm) > 0)
-	{
-		*var = (reverse ? 0 : 1);
-		return;
-	}
-	
-	if (Find(UTFSTR("no").append(parm)) > 0)
-	{
-		*var = (reverse ? 1 : 0);
-		return;
-	}
-}
-#else
 void argv::CheckBooleanParm(std::string parm, bool *boolval, bool reverse)
 {
 	if (Find(parm) > 0)
@@ -241,7 +168,6 @@ void argv::CheckBooleanCVar(std::string parm, cvar_c *var, bool reverse)
 		return;
 	}
 }
-#endif
 
 static int ParseOneFilename(FILE *fp, char *buf)
 {
@@ -341,7 +267,7 @@ void argv::DebugDumpArgs(void)
 	}
 }
 
-bool argv::IsOption(const int index) { return list.at(index)[0] == '-'; }
+bool argv::IsOption(const int index) { return epi::to_u8string(list.at(index))[0] == '-'; }
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

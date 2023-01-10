@@ -1715,6 +1715,8 @@ void W_UpdateImageAnims(void)
 		do_Animate(real_textures);
 		do_Animate(real_flats);
 	}
+	else if (menuactive)
+		do_Animate(real_graphics);
 }
 
 

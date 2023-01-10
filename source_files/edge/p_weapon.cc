@@ -1438,7 +1438,7 @@ static void DoWeaponShoot(mobj_t * mo, int ATK)
 
 	P_PlayerAttack(mo, attack);
 
-	if (level_flags.kicking && !g_erraticism.d)
+	if (level_flags.kicking && ATK == 0 && !g_erraticism.d)
 	{
 		p->deltaviewheight -= info->kick;
 		p->kick_offset = info->kick;

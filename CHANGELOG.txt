@@ -166,6 +166,12 @@ New Features
     [837] Breakable: when shot, midtex will change to front lower texture
     [838] Breakable: when shot, midtex will change to front upper texture
 
++ IMAGES.DDF
+  - New SPECIAL: FORCE_PRECACHE
+    - Will force image to be precached on startup regardless of other settings
+  - New SPECIAL: GRAYSCALE
+    - Will force image (for this definition) to be in grayscale even if the original lump/file isn't
+
 + REKKR added as a recognized IWAD
 
 + COALHUDS: new commands

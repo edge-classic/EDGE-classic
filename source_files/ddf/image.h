@@ -59,6 +59,7 @@ typedef enum
 	IMGSP_NoSmooth  = 0x0020,   // disable smoothing
 	IMGSP_Crosshair = 0x0040,   // weapon crosshair (center vertically)
 	IMGSP_Grayscale = 0x0080,   // forces image to be grayscaled upon creation
+	IMGSP_Precache  = 0x0100,   // forces image to be precached upon creation
 }
 image_special_e;
 

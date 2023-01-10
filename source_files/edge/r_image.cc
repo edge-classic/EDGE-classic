@@ -694,6 +694,9 @@ static image_c *AddImageUser(imagedef_c *def)
 			I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);
 	}
 
+	if (def->special & IMGSP_Precache)
+		W_ImagePreCache(rim);
+
 	return rim;
 }
 

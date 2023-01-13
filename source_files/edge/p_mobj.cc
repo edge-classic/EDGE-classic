@@ -1079,7 +1079,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props, bool extr
 			bool fly_or_swim = mo->player && (mo->player->swimming ||
 				mo->player->powers[PW_Jetpack] > 0 || mo->on_ladder >= 0);
 
-			if (mo->player && gravity > 0 && -zmove > OOF_SPEED && ! fly_or_swim)
+			if (mo->player && gravity > 0 && -zmove > (OOF_SPEED / r_doubleframes.d ? 2 : 1) && ! fly_or_swim)
 			{
 				// Squat down. Decrease viewheight for a moment after hitting the
 				// ground (hard), and utter appropriate sound.
@@ -1180,7 +1180,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props, bool extr
 			bool fly_or_swim = mo->player && (mo->player->swimming ||
 				mo->player->powers[PW_Jetpack] > 0 || mo->on_ladder >= 0);
 
-			if (mo->player && gravity < 0 && zmove > OOF_SPEED && ! fly_or_swim)
+			if (mo->player && gravity < 0 && zmove > (OOF_SPEED / r_doubleframes.d ? 2 : 1) && ! fly_or_swim)
 			{
 				mo->player->deltaviewheight = zmove / 8.0f;
 				S_StartFX(mo->info->oof_sound, P_MobjGetSfxCategory(mo), mo);

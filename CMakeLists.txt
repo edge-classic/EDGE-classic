@@ -5,6 +5,7 @@ add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/dehacked)
 add_subdirectory(source_files/epi)
+add_subdirectory(source_files/fmmidi)
 add_subdirectory(source_files/fluidlite)
 add_subdirectory(source_files/glad)
 add_subdirectory(source_files/libgme)
@@ -137,6 +138,7 @@ add_executable(
 	source_files/edge/s_vgm.cc
 	source_files/edge/s_wav.cc
 	source_files/edge/s_flac.cc 
+	source_files/edge/s_fmm.cc
 	source_files/edge/sv_chunk.cc   
 	source_files/edge/sv_glob.cc    
 	source_files/edge/sv_level.cc   
@@ -171,6 +173,7 @@ target_include_directories(edge-classic PRIVATE source_files/dehacked)
 target_include_directories(edge-classic PRIVATE source_files/dr_libs)
 target_include_directories(edge-classic PRIVATE source_files/epi)
 target_include_directories(edge-classic PRIVATE source_files/fluidlite/include)
+target_include_directories(edge-classic PRIVATE source_files/fmmidi)
 target_include_directories(edge-classic PRIVATE source_files/glad/include/glad)
 target_include_directories(edge-classic PRIVATE source_files/libgme/gme)
 target_include_directories(edge-classic PRIVATE source_files/libymfm)
@@ -252,6 +255,7 @@ if(WIN32 OR MSYS OR MINGW)
 			glad
 			${OPENGL_LIBRARIES}
 			${SDL2_LIBRARIES}
+			fmmidi
 			fluidlite
 			gme
 			miniz
@@ -272,6 +276,7 @@ else()
 			${OPENGL_LIBRARIES}
 			glad
 			${SDL2_LIBRARIES}
+			fmmidi
 			fluidlite
 			gme
 			miniz

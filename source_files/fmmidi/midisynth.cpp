@@ -418,6 +418,8 @@ namespace midisynth{
     // ������������B��������Ԃ��B
     int synthesizer::synthesize(int_least16_t* output, std::size_t samples, float rate)
     {
+        if (samples == 0)
+            return 0;
         std::size_t n = samples * 2;
         std::vector<int_least32_t> buf(n);
         int num_notes = synthesize_mixing(&buf[0], samples, rate);

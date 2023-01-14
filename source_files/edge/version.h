@@ -2,7 +2,7 @@
 //  EDGE Version Header
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 1999-2010  The EDGE Team.
+//  Copyright (c) 1999-2023  The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -18,15 +18,15 @@
 
 #define TITLE  "EDGE-Classic"
 
-#define EDGEVER       121
-#define EDGEVERHEX  0x121
-#define EDGEVERSTR  "1.21"
+#define EDGEVER       130
+#define EDGEVERHEX  0x130
+#define EDGEVERSTR  "1.30"
 
 // patch level (Savegames and Demos)
 #define EDGEPATCH  1
 
 // -ES- 2000/03/04 The version of EDGE.WAD we require.
-#define EDGE_WAD_VERSION  121
+#define EDGE_WAD_VERSION  130
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

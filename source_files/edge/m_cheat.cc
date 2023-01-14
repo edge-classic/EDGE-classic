@@ -239,8 +239,8 @@ bool M_CheatResponder(event_t * ev)
 
 	char key = (char) ev->value.key.sym;
 
-	// no cheating in netgames or if disallowed in levels.ddf
-	if (!level_flags.cheats)
+	// no cheating in bot deathmatch or if disallowed in levels.ddf
+	if (!level_flags.cheats || deathmatch)
 		return false;
 
 #if 0 //!!!! TEMP DISABLED, NETWORK DEBUGGING

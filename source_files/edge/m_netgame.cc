@@ -470,8 +470,8 @@ static void HostChangeOption(int opt, int key)
 			host_want_bots += dir;
 
 			if (host_want_bots < 0)
-				host_want_bots = 15;
-			else if (host_want_bots > 15)
+				host_want_bots = 3;
+			else if (host_want_bots > 3)
 				host_want_bots = 0;
 
 			break;

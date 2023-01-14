@@ -481,10 +481,7 @@ void G_CoopSpawnPlayer(player_t *p)
 {
 	spawnpoint_t *point = G_FindCoopPlayer(p->pnum+1);
 
-	if (point == NULL)
-		I_Error("Missing player %d start !\n", p->pnum+1);
-
-	if (G_CheckSpot(p, point))
+	if (point && G_CheckSpot(p, point))
 		return;
 
 	I_Warning("Player %d start is invalid.\n", p->pnum+1);

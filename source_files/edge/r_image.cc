@@ -157,7 +157,7 @@ static void do_Animate(real_image_container_c& bucket)
 
 		SYS_ASSERT(rim->anim.count > 0);
 
-		rim->anim.count--;
+		rim->anim.count -= (!r_doubleframes.d || !(hudtic & 1)) ? 1 : 0;
 
 		if (rim->anim.count == 0 && rim->anim.cur->anim.next)
 		{
@@ -1699,15 +1699,11 @@ bool W_InitImages(void)
 //
 void W_UpdateImageAnims(void)
 {
-	// Fix menu animations if not in-game
-	if (menuactive && gamestate != GS_LEVEL)
+	if (gamestate < GS_LEVEL)
 	{
-		if (!r_doubleframes.d || !(hudtic & 1))
-		{
-			do_Animate(real_graphics);
-			do_Animate(real_textures);
-			do_Animate(real_flats);
-		}
+		do_Animate(real_graphics);
+		do_Animate(real_textures);
+		do_Animate(real_flats);
 	}
 	else if (!time_stop_active && !erraticism_active)
 	{

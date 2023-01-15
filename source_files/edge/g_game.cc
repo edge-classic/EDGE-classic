@@ -486,7 +486,8 @@ void G_Ticker(void)
 			default:
 				break;
 		}
-
+		// ANIMATE FLATS AND TEXTURES GLOBALLY
+		W_UpdateImageAnims();
 		return;
 	}
 

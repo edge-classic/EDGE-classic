@@ -123,8 +123,8 @@ void I_DeterminePixelAspect()
 	// will have square pixels (1:1 aspect).
 	bool is_crt = (v_desktop_width.d < v_desktop_height.d * 7 / 5);
 
-	bool is_fullscreen = (DISPLAYMODE == 1);
-	if (is_fullscreen && SCREENWIDTH == v_desktop_width.d && SCREENHEIGHT == v_desktop_height.d)
+	bool is_fullscreen = (DISPLAYMODE > 0);
+	if (is_fullscreen && SCREENWIDTH == v_desktop_width.d && SCREENHEIGHT == v_desktop_height.d && graphics_shutdown)
 		is_fullscreen = false;
 
 	if (! is_fullscreen && ! is_crt)
@@ -431,6 +431,7 @@ void I_ShutdownGraphics(void)
 	{
         // reset gamma to default
         I_SetGamma(1.0f);
+		I_DeterminePixelAspect();
 
 		SDL_Quit ();
 	}

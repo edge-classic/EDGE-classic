@@ -160,7 +160,7 @@ void mix_channel_c::ComputeVolume()
 
 	float MAX_VOL = (1 << (16 - SAFE_BITS)) - 3;
 
-	MAX_VOL = boss ? MAX_VOL : MAX_VOL / dist * slider_to_gain[sfx_volume];
+	MAX_VOL = (boss ? MAX_VOL : MAX_VOL / dist) * slider_to_gain[sfx_volume];
 
 	if (def)
 		MAX_VOL *= PERCENT_2_FLOAT(def->volume);

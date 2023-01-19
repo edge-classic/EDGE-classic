@@ -108,6 +108,29 @@ void RGL_SetupMatrices2D(void)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
+//
+// RGL_SetupMatricesWorld2D
+//
+// Setup the GL matrices for drawing 2D stuff within the "world" rendered by HUD_RenderWorld
+//
+void RGL_SetupMatricesWorld2D(void)
+{
+	glViewport(viewwindow_x, viewwindow_y, viewwindow_w, viewwindow_h);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho((float)viewwindow_x, (float)viewwindow_w, 
+			(float)viewwindow_y, (float)viewwindow_h, -1.0f, 1.0f);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	// turn off lighting stuff
+	glDisable(GL_LIGHTING);
+	glDisable(GL_COLOR_MATERIAL);
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
 
 //
 // RGL_SetupMatrices3D

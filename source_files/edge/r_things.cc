@@ -209,8 +209,7 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 	float ty1 = - psp->sy + IM_OFFSETY(image);
 	
 	//Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
-	//Should not affect zooming or our aim will be off
-	if ((state->flags & SFF_Weapon) && (player->ready_wp >=0) && !viewiszoomed && which != ps_crosshair)
+	if ((state->flags & SFF_Weapon) && (player->ready_wp >=0))
 		ty1 += VM_GetFloat(ui_vm, "hud", "universal_y_adjust") + player->weapons[player->ready_wp].info->y_adjust;
 
 	

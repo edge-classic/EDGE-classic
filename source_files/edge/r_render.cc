@@ -3118,7 +3118,7 @@ static void RGL_RenderTrueBSP(void)
 	glDisable(GL_DEPTH_TEST);
 
 	// now draw 2D stuff like psprites, and add effects
-	RGL_SetupMatrices2D();
+	RGL_SetupMatricesWorld2D();
 
 	if (v_player)
 	{
@@ -3126,7 +3126,7 @@ static void RGL_RenderTrueBSP(void)
 
 		RGL_ColourmapEffect(v_player);
 		RGL_PaletteEffect(v_player);
-
+		RGL_SetupMatrices2D();
 		RGL_DrawCrosshair(v_player);
 	}
 	

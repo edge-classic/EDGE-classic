@@ -991,6 +991,15 @@ static void LoadLineDefs(int lump)
 
 		ld->special = P_LookupLineType(MAX(0, EPI_LE_S16(mld->special)));
 
+		if (ld->special && ld->special->type == line_walkable)
+			ld->flags |= MLF_PassThru;
+
+		if (ld->special && ld->special->type == line_none && 
+			(ld->special->s_xspeed || ld->special->s_yspeed || ld->special->scroll_type > ScrollType_None ||
+			ld->special->line_effect == LINEFX_VectorScroll || ld->special->line_effect == LINEFX_OffsetScroll ||
+			ld->special->line_effect == LINEFX_TaggedOffsetScroll))
+			ld->flags |= MLF_PassThru;
+
 		int side0 = EPI_LE_U16(mld->side_R);
 		int side1 = EPI_LE_U16(mld->side_L);
 
@@ -2035,6 +2044,15 @@ static void LoadUDMFLineDefs(parser_t *psr)
 			ld->v2 = &vertexes[v2];
 
 			ld->special = P_LookupLineType(MAX(0, special));
+
+			if (ld->special && ld->special->type == line_walkable)
+				ld->flags |= MLF_PassThru;
+
+			if (ld->special && ld->special->type == line_none && 
+				(ld->special->s_xspeed || ld->special->s_yspeed || ld->special->scroll_type > ScrollType_None ||
+				ld->special->line_effect == LINEFX_VectorScroll || ld->special->line_effect == LINEFX_OffsetScroll ||
+				ld->special->line_effect == LINEFX_TaggedOffsetScroll))
+				ld->flags |= MLF_PassThru;
 
 			ComputeLinedefData(ld, side0, side1);
 

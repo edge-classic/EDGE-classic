@@ -56,6 +56,7 @@ extern int glmax_tex_units;
 void RGL_Init(void);
 void RGL_SoftInit(void);
 void RGL_SetupMatrices2D(void);
+void RGL_SetupMatricesWorld2D(void);
 void RGL_SetupMatrices3D(void);
 
 #define LT_RED(light)  (MIN(255,light) * ren_red_mul / 255.0f)

@@ -1000,6 +1000,12 @@ static void LoadLineDefs(int lump)
 			ld->special->line_effect == LINEFX_TaggedOffsetScroll))
 			ld->flags |= MLF_PassThru;
 
+		if(ld->special && ld->special->slope_type & SLP_DetailFloor)
+			ld->flags |= MLF_PassThru;
+			
+		if(ld->special && ld->special->slope_type & SLP_DetailCeiling)
+			ld->flags |= MLF_PassThru;
+
 		if (ld->special && ld->special == linetypes.Lookup(0)) // Add passthru to unknown/templated
 			ld->flags |= MLF_PassThru;
 
@@ -2055,6 +2061,12 @@ static void LoadUDMFLineDefs(parser_t *psr)
 				(ld->special->s_xspeed || ld->special->s_yspeed || ld->special->scroll_type > ScrollType_None ||
 				ld->special->line_effect == LINEFX_VectorScroll || ld->special->line_effect == LINEFX_OffsetScroll ||
 				ld->special->line_effect == LINEFX_TaggedOffsetScroll))
+				ld->flags |= MLF_PassThru;
+
+			if(ld->special && ld->special->slope_type & SLP_DetailFloor)
+				ld->flags |= MLF_PassThru;
+			
+			if(ld->special && ld->special->slope_type & SLP_DetailCeiling)
 				ld->flags |= MLF_PassThru;
 
 			if (ld->special && ld->special == linetypes.Lookup(0)) // Add passthru to unknown/templated

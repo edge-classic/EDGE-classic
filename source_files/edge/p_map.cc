@@ -2066,12 +2066,13 @@ static bool PTR_UseTraverse(intercept_t * in, void *dataptr)
 	
 	//Lobo 2022: slopes should be considered PASSTHRU by default
 	// otherwise you cant open a door if there's a slope just in front of it
+	/*
 	if (ld->special)
 	{
 		if(ld->special->slope_type & SLP_DetailFloor || ld->special->slope_type & SLP_DetailCeiling)
 			return true;
 	}	
-
+	*/
 	return (ld->flags & MLF_PassThru) ? true : false;
 }
 

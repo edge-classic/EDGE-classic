@@ -14,7 +14,7 @@ Bugs fixed
 
 General Improvements
 --------------------
-+ W1/WR lines and scrolling linedefs without any activation method will have the BOOM passuse flag added
++ W1/WR lines, unknown linetypes and scrolling linedefs without any activation method will have the BOOM passuse flag added
   upon map load
 
 

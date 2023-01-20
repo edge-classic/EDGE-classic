@@ -12,7 +12,8 @@ Bugs fixed
 + Fixed sound volume slider not being respected in some cases
 + Fixed aspect ratio of psprites when HUD.render_world doesn't use the entire screen height
 + Fixed secret sector discovery completely clearing the sector special afterwards (this broke
-  generalized sector specials)
+  generalized sector specials).
++ Doom2 Map05 bug fixed.
 
 General Improvements
 --------------------

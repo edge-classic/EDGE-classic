@@ -18,15 +18,15 @@
 
 #define TITLE  "EDGE-Classic"
 
-#define EDGEVER       131
-#define EDGEVERHEX  0x131
-#define EDGEVERSTR  "1.31"
+#define EDGEVER       132
+#define EDGEVERHEX  0x132
+#define EDGEVERSTR  "1.32"
 
 // patch level (Savegames and Demos)
 #define EDGEPATCH  1
 
 // -ES- 2000/03/04 The version of EDGE.WAD we require.
-#define EDGE_WAD_VERSION  131
+#define EDGE_WAD_VERSION  132
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

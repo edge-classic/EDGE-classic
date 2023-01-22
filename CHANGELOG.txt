@@ -3,6 +3,24 @@ https://github.com/dashodanger/EDGE-classic
 Current as of: January 2023
 
 
+CHANGELOG for EDGE-Classic 1.32 (since EDGE-Classic 1.31)
+====================================
+
+Bugs fixed
+----------
++ Secrets not working after finding the first one.
++ player.use_inventory() consuming item without running the associated script.
+
+
+New Features
+------------
++ COALHUDS: new commands
+  -hud.rts_isactive(tag): Returns 1 if the script "tag" is currently enabled, 0 if disabled.
+  -hud.rts_enable(name): Will execute RTS script with matching tag, if one exists. This replaces previous COAL command "player.rts_enable_tagged(name)" which should be considered depricated.
+
+
+
+
 CHANGELOG for EDGE-Classic 1.31 (since EDGE-Classic 1.3)
 ====================================
 

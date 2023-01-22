@@ -39,6 +39,7 @@
 #include "am_map.h"     // AM_Drawer
 #include "r_colormap.h"
 #include "s_sound.h"
+#include "rad_trig.h" //Lobo: need this to access RTS
 
 #include <cmath>
 
@@ -818,6 +819,31 @@ static void HD_get_average_hue(coal::vm_c *vm, int argc)
 	vm->ReturnVector(rgb);
 }
 
+// hud.rts_enable(tag)
+//
+static void HD_rts_enable(coal::vm_c *vm, int argc)
+{
+	std::string name = vm->AccessParamString(0);
+
+	if (!name.empty())
+		RAD_EnableByTag(NULL, name.c_str(), false);
+}
+
+// hud.rts_isactive(tag)
+//
+static void HD_rts_isactive(coal::vm_c *vm, int argc)
+{
+	std::string name = vm->AccessParamString(0);
+
+	if (!name.empty())
+	{
+		if (RAD_IsActiveByTag(NULL, name.c_str()) == true)
+			vm->ReturnFloat(1);
+		else
+			vm->ReturnFloat(0);
+	}
+}
+
 //------------------------------------------------------------------------
 // HUD Functions
 //------------------------------------------------------------------------
@@ -880,6 +906,9 @@ void VM_RegisterHUD()
 	ui_vm->AddNativeFunction("hud.get_lightest_color",      HD_get_lightest_color);
 	ui_vm->AddNativeFunction("hud.get_darkest_color",      HD_get_darkest_color);
 	ui_vm->AddNativeFunction("hud.get_average_hue",      HD_get_average_hue);
+
+	ui_vm->AddNativeFunction("hud.rts_enable",        HD_rts_enable);
+	ui_vm->AddNativeFunction("hud.rts_isactive",      HD_rts_isactive);
 }
 
 void VM_NewGame(void)

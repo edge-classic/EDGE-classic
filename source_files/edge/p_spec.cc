@@ -1828,7 +1828,7 @@ static inline void PlayerInProperties(player_t *player,
 					&special->damage);
 	}
 
-	if (special->secret)
+	if (special->secret && !props->secret_found)
 	{
 		player->secretcount++;
 
@@ -1840,10 +1840,7 @@ static inline void PlayerInProperties(player_t *player,
 					P_MobjGetSfxCategory(player->mo), player->mo);
 		}
 
-		sectortype_c *mod_special = new sectortype_c;
-		mod_special->CopyDetail(*(sectortype_c *)props->special);
-		mod_special->secret = false;
-		props->special = mod_special;
+		props->secret_found = true;
 	}
 
 	if (special->e_exit != EXIT_None)

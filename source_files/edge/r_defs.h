@@ -110,6 +110,7 @@ typedef struct region_properties_s
 	// special type (e.g. damaging)
 	int type;
 	const sectortype_c *special;
+	bool secret_found = false;
 
 	// -KM- 1998/10/29 Added gravity + friction
 	float gravity;

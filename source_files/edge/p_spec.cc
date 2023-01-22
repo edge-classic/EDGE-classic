@@ -1840,8 +1840,10 @@ static inline void PlayerInProperties(player_t *player,
 					P_MobjGetSfxCategory(player->mo), player->mo);
 		}
 
-		sectortype_c *mod_special = (sectortype_c *)props->special;  // Intentional const override
+		sectortype_c *mod_special = new sectortype_c;
+		mod_special->CopyDetail(*(sectortype_c *)props->special);
 		mod_special->secret = false;
+		props->special = mod_special;
 	}
 
 	if (special->e_exit != EXIT_None)

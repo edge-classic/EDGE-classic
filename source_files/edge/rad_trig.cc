@@ -398,6 +398,45 @@ void RAD_EnableByTag(mobj_t *actor, const char *name, bool disable)
 	}
 }
 
+//
+// Looks for all current triggers based on a hash of the given string, and
+// check if it is active).
+// Actor can be NULL.
+//
+bool RAD_IsActiveByTag(mobj_t *actor, const char *name)
+{
+	rad_trigger_t *trig;
+
+	int tag = RAD_StringHashFunc(name);
+
+	if (tag <= 0)
+		I_Error("INTERNAL ERROR: RAD_IsActiveByTag: bad tag %d\n", tag);
+
+	for (trig=active_triggers; trig; trig=trig->next)
+	{
+		if (trig->info->tag == tag)
+			break;
+	}
+
+	// were there any ?
+	if (! trig)
+		return false;
+
+	if (trig->disabled == false)
+		return true;
+
+	return false;
+/*
+	for (; trig; trig=trig->tag_next)
+	{
+		if (disable)
+			trig->disabled = true;
+		else
+			trig->disabled = false;
+	}
+*/
+}
+
 bool RAD_WithinRadius(mobj_t * mo, rad_script_t * r)
 {
 	if (r->rad_x >= 0 && fabs(r->x - mo->x) > r->rad_x + mo->radius)

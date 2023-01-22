@@ -1050,14 +1050,21 @@ static void PL_use_inventory(coal::vm_c *vm, int argc)
 
 	inv--;
 
-	if (ui_player_who->inventory[inv].num > 0)
+	//******
+	//If the same inventory script is already running then
+	// don't start the same one again
+	if (RAD_IsActiveByTag(NULL, script_name.c_str()) == false)
 	{
-		ui_player_who->inventory[inv].num -= 1;
-		RAD_EnableByTag(NULL, script_name.c_str(), false);
+		if (ui_player_who->inventory[inv].num > 0)
+		{
+			ui_player_who->inventory[inv].num -= 1;
+			RAD_EnableByTag(NULL, script_name.c_str(), false);
+		}
 	}
-	
+
 	vm->ReturnFloat(ui_player_who->inventory[inv].num);
 }
+
 
 // player.rts_enable_tagged(tag)
 //
@@ -1560,7 +1567,7 @@ void VM_RegisterPlaysim()
 	ui_vm->AddNativeFunction("player.is_zoomed",        PL_is_zoomed);
 
 	ui_vm->AddNativeFunction("player.weapon_state",      PL_weapon_state);
-	
+
 }
 
 

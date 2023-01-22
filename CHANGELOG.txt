@@ -8,7 +8,7 @@ CHANGELOG for EDGE-Classic 1.32 (since EDGE-Classic 1.31)
 
 Bugs fixed
 ----------
-+ Secrets not working after finding the first one.
++ A recently introduced bug which caused Secrets to not work after finding the first one.
 + player.use_inventory() consuming item without running the associated script.
 
 

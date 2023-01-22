@@ -16,7 +16,7 @@ New Features
 ------------
 + COALHUDS: new commands
   -hud.rts_isactive(tag): Returns 1 if the script "tag" is currently enabled, 0 if disabled.
-  -hud.rts_enable(name): Will execute RTS script with matching tag, if one exists. This replaces previous COAL command "player.rts_enable_tagged(name)" which should be considered depricated.
+  -hud.rts_enable(name): Will execute RTS script with matching tag, if one exists. This replaces previous COAL command "player.rts_enable_tagged(name)" which should be considered deprecated.
 
 
 

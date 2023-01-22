@@ -595,73 +595,118 @@ static void DrawOnLnode(wi_mappos_c* mappos, const image_c * images[2])
 	}
 }
 
-//
-// Draws a number.
-//
-// If numdigits > 0, then use that many digits minimum,
-//  otherwise only use as many as necessary.
-// Returns new x position.
-//
-static float DrawNum(float x, float y, int n, int numdigits)
+static float PercentWidth(std::string &s)
 {
-	int neg;
-	int temp;
+	float perc_width = 0;
+	for (auto c : s)
+	{
+		if (c == '%')
+		{
+			perc_width += IM_WIDTH(percent);
+		}
+		else if (std::isdigit(c))
+		{
+			perc_width += IM_WIDTH(digits[c-48]);
+		}
+	}
+	return perc_width;
+}
 
-	neg = n < 0;
+static void DrawPercent(float x, float y, std::string &s)
+{
+	for (auto c : s)
+	{
+		if (c == '%')
+		{
+			HUD_DrawImage(x, y, percent);
+			x += IM_WIDTH(percent);
+		}
+		else if (std::isdigit(c))
+		{
+			HUD_DrawImage(x, y, digits[c-48]);
+			x += IM_WIDTH(digits[c-48]);
+		}
+	}
+}
 
-	if (neg)
-		n = -n;
+//
+// Calculate width of time message
+//
+static float TimeWidth(int t, bool drawText = false)
+{
+	int div;
+	int n;
 
-	// if non-number, do not draw it
-	if (n == 1994)
+	if (t < 0)
 		return 0;
 
-	if (numdigits < 0)
+	std::string s;
+	int seconds, hours, minutes;
+	minutes = t / 60;
+	seconds = t % 60;
+	hours = minutes / 60;
+	minutes = minutes % 60;
+	s = "";
+	if (hours > 0)
 	{
-		if (!n)
+		if(hours > 9)
+			s = s + std::to_string(hours) + ":";
+		else
+			s = s + "0" + std::to_string(hours) + ":";
+	}
+	if (minutes > 0)
+	{
+		if (minutes > 9)
+			s = s + std::to_string(minutes);
+		else
+			s = s + "0" + std::to_string(minutes);
+	}
+	if (seconds > 0 || minutes > 0)
+	{
+		if (seconds > 9)
+			s = s + ":" + std::to_string(seconds);
+		else
+			s = s + ":" + "0" + std::to_string(seconds);
+	}
+	
+	if(drawText == true)
+	{
+		if (t > 3599)
 		{
-			// make variable-length zeros 1 digit long
-			numdigits = 1;
+			return wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth("Sucks");
 		}
 		else
 		{
-			// figure out # of digits in #
-			numdigits = 0;
-			temp = n;
-
-			while (temp)
-			{
-				temp /= 10;
-				numdigits++;
-			}
+			return wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str());
 		}
 	}
-
-	// draw the new number
-	for (; numdigits > 0; n /= 10, numdigits--)
+	else
 	{
-		x -= IM_WIDTH(digits[0]);
-		HUD_DrawImage(x, y, digits[n % 10]);
+		if (t > 3599)
+		{
+			// "sucks"
+			if ((sucks) && (W_IsLumpInPwad(sucks->name)))
+				return IM_WIDTH(sucks);
+			else
+				return wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth("Sucks");
+		}
+		else
+		{
+			float time_width = 0;
+			for (auto c : s)
+			{
+				if (c == ':')
+				{
+					time_width += IM_WIDTH(colon);
+				}
+				else if (std::isdigit(c))
+				{
+					time_width += IM_WIDTH(digits[c-48]);
+				}
+			}
+			return time_width;
+		}
 	}
-
-	// draw a minus sign if necessary
-	if (neg)
-	{
-		x -= IM_WIDTH(wiminus);
-		HUD_DrawImage(x, y, wiminus);
-	}
-
-	return x;
-}
-
-static void DrawPercent(float x, float y, int p, bool drawText = false)
-{
-	if (p < 0)
-		return;
-
-	HUD_DrawImage(x, y, percent);
-
-	DrawNum(x, y, p, -1);
 }
 
 //
@@ -677,77 +722,71 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
 		return;
 
 	std::string s;
-	
+	int seconds, hours, minutes;
+	minutes = t / 60;
+	seconds = t % 60;
+	hours = minutes / 60;
+	minutes = minutes % 60;
+	s = "";
+	if (hours > 0)
+	{
+		if(hours > 9)
+			s = s + std::to_string(hours) + ":";
+		else
+			s = s + "0" + std::to_string(hours) + ":";
+	}
+	if (minutes > 0)
+	{
+		if (minutes > 9)
+			s = s + std::to_string(minutes);
+		else
+			s = s + "0" + std::to_string(minutes);
+	}
+	if (seconds > 0 || minutes > 0)
+	{
+		if (seconds > 9)
+			s = s + ":" + std::to_string(seconds);
+		else
+			s = s + ":" + "0" + std::to_string(seconds);
+	}
 	
 	if(drawText == true)
 	{
 		if (t > 3599)
 		{
-			HL_WriteText(wi_sp_style,styledef_c::T_TITLE, x - HUD_StringWidth("Sucks"), y, "Sucks");
-			return;
+			HL_WriteText(wi_sp_style,styledef_c::T_TITLE, x, y, "Sucks");
 		}
 		else
 		{
-			int seconds, hours, minutes;
-			minutes = t / 60;
-			seconds = t % 60;
-			hours = minutes / 60;
-			minutes = minutes % 60;
-			s = "";
-			if (hours > 0)
-			{
-				if(hours > 9)
-					s = s + std::to_string(hours) + ":";
-				else
-					s = s + "0" + std::to_string(hours) + ":";
-			}
-			if (minutes > 0)
-			{
-				if (minutes > 9)
-					s = s + std::to_string(minutes);
-				else
-					s = s + "0" + std::to_string(minutes);
-			}
-			if (seconds > 0 || minutes > 0)
-			{
-				if (seconds > 9)
-					s = s + ":" + std::to_string(seconds);
-				else
-					s = s + ":" + "0" + std::to_string(seconds);
-			}
 			HL_WriteText(wi_sp_style,styledef_c::T_ALT,x, y, s.c_str());
 		}
 	}
 	else
 	{
-		if (t <= 61 * 59)
-		{
-			div = 1;
-			
-			do
-			{
-				n = (t / div) % 60;
-				x = DrawNum(x, y, n, 2) - IM_WIDTH(colon);
-				
-				div *= 60;
-
-				// draw
-				if (div == 60 || t / div)
-				{
-					HUD_DrawImage(x, y, colon);
-				}
-			}
-			while (t / div);
-		}
-		else
+		if (t > 3599)
 		{
 			// "sucks"
 			if ((sucks) && (W_IsLumpInPwad(sucks->name)))
-				HUD_DrawImage(x - IM_WIDTH(sucks), y, sucks);
+				HUD_DrawImage(x, y, sucks);
 			else
-				HL_WriteText(wi_sp_style,styledef_c::T_TITLE, x - HUD_StringWidth("Sucks"), y, "Sucks");		
+				HL_WriteText(wi_sp_style,styledef_c::T_TITLE, x, y, "Sucks");
 		}
-
+		else
+		{
+			for (auto c : s)
+			{
+				if (c == ':')
+				{
+					HUD_DrawImage(x, y, colon);
+					x += IM_WIDTH(colon);
+				}
+				else if (std::isdigit(c))
+				{
+					HUD_DrawImage(x, y, digits[c-48]);
+					x += IM_WIDTH(digits[c-48]);
+				}
+			}	
+		}
 	}
 }
 
@@ -1462,73 +1501,68 @@ static void DrawSinglePlayerStats(void)
 		drawTextBased = true;
 	}
 
+	std::string s;
+	if (cnt_kills[0] < 0)
+		s = std::to_string(0);
+	else
+		s = std::to_string(cnt_kills[0]);
+	s= s + "%";
+
 	if (drawTextBased == false)
 	{
 		HUD_DrawImage(SP_STATSX, SP_STATSY, kills);
-		DrawPercent(320 - SP_STATSX, SP_STATSY, cnt_kills[0]);
+		DrawPercent(320 - SP_STATSX - PercentWidth(s), SP_STATSY, s);
 	}
 	else
 	{
 		HL_WriteText(wi_sp_style, styledef_c::T_ALT, SP_STATSX, SP_STATSY, "Kills");
-		
-		//char temp[40];
-		//sprintf(temp, "%02d %%", cnt_kills[0]);
-		//HL_WriteText(wi_sp_style,styledef_c::T_ALT,320 - SP_STATSX, SP_STATSY,temp);
-
-		
-		std::string s;
-		if (cnt_kills[0] < 0)
-			s = std::to_string(0);
-		else
-			s = std::to_string(cnt_kills[0]);
-		s= s + " %";
-		HL_WriteText(wi_sp_style,styledef_c::T_ALT, 320 - SP_STATSX, SP_STATSY, s.c_str());
-		
+		HL_WriteText(wi_sp_style, styledef_c::T_ALT, 320 - SP_STATSX - wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str()), SP_STATSY, s.c_str());
 	}
+
+	if (cnt_items[0] < 0)
+		s = std::to_string(0);
+	else
+		s = std::to_string(cnt_items[0]);
+	s= s + "%";
+
 	if ((items) && (W_IsLumpInPwad(items->name)))
 	{
 		HUD_DrawImage(SP_STATSX, SP_STATSY + lh, items);
-		DrawPercent(320 - SP_STATSX, SP_STATSY + lh, cnt_items[0]);
+		DrawPercent(320 - SP_STATSX - PercentWidth(s), SP_STATSY + lh, s);
 	}
 	else
 	{
 		HL_WriteText(wi_sp_style,styledef_c::T_ALT, SP_STATSX, SP_STATSY + lh, "Items");
-		std::string s;
-		if (cnt_items[0] < 0)
-			s = std::to_string(0);
-		else
-			s = std::to_string(cnt_items[0]);
-		s= s + " %";
-		HL_WriteText(wi_sp_style,styledef_c::T_ALT,320 - SP_STATSX, SP_STATSY + lh, s.c_str());
+		HL_WriteText(wi_sp_style,styledef_c::T_ALT,320 - SP_STATSX - wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str()), SP_STATSY + lh, s.c_str());
 	}
+
+	if (cnt_secrets[0] < 0)
+		s = std::to_string(0);
+	else
+		s = std::to_string(cnt_secrets[0]);
+	s= s + "%";
 
 	if ((sp_secret) && (W_IsLumpInPwad(sp_secret->name)))
 	{
 		HUD_DrawImage(SP_STATSX, SP_STATSY + 2 * lh, sp_secret);
-		DrawPercent(320 - SP_STATSX, SP_STATSY + 2 * lh, cnt_secrets[0]);
+		DrawPercent(320 - SP_STATSX - PercentWidth(s), SP_STATSY + 2 * lh, s);
 	}
 	else
 	{
 		HL_WriteText(wi_sp_style,styledef_c::T_ALT, SP_STATSX, SP_STATSY + 2 * lh, "Secrets");
-		std::string s;
-		if (cnt_secrets[0] < 0)
-			s = std::to_string(0);
-		else
-			s = std::to_string(cnt_secrets[0]);
-		s= s + " %";
-		HL_WriteText(wi_sp_style,styledef_c::T_ALT,320 - SP_STATSX, SP_STATSY + 2 * lh, s.c_str());
+		HL_WriteText(wi_sp_style,styledef_c::T_ALT,320 - SP_STATSX - wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str()), SP_STATSY + 2 * lh, s.c_str());
 	}
 	
 
 	if ((time_image) && (W_IsLumpInPwad(time_image->name)))
 	{
 		HUD_DrawImage(SP_TIMEX, SP_TIMEY, time_image);
-		DrawTime(160 - SP_TIMEX, SP_TIMEY, cnt_time);
+		DrawTime(160 - SP_TIMEX - TimeWidth(cnt_time), SP_TIMEY, cnt_time);
 	}
 	else
 	{
 		HL_WriteText(wi_sp_style,styledef_c::T_ALT, SP_TIMEX, SP_TIMEY, "Time");
-		DrawTime(160 - 40, SP_TIMEY, cnt_time, true);
+		DrawTime(160 - SP_TIMEX - TimeWidth(cnt_time, true), SP_TIMEY, cnt_time, true);
 	}
 	
 
@@ -1537,13 +1571,13 @@ static void DrawSinglePlayerStats(void)
 	{
 		if ((par) && (W_IsLumpInPwad(par->name)))
 		{
-			HUD_DrawImage(160 + SP_TIMEX, SP_TIMEY, par);
-			DrawTime(320 - SP_TIMEX, SP_TIMEY, cnt_par);
+			HUD_DrawImage(160, SP_TIMEY, par);
+			DrawTime(320 - SP_TIMEX - TimeWidth(cnt_par), SP_TIMEY, cnt_par);
 		}
 		else
 		{
-			HL_WriteText(wi_sp_style,styledef_c::T_ALT, 160 + SP_TIMEX, SP_TIMEY, "Par");
-			DrawTime(320 - 40, SP_TIMEY, cnt_par, true);
+			HL_WriteText(wi_sp_style,styledef_c::T_ALT, 160, SP_TIMEY, "Par");
+			DrawTime(320 - SP_TIMEX - TimeWidth(cnt_par, true), SP_TIMEY, cnt_par, true);
 		}
 		
 	}

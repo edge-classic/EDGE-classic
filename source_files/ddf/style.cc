@@ -75,6 +75,7 @@ static const commandlist_t cursor_commands[] =
 	DF("STRING", cursor_string, DDF_MainGetString),
 	DF("BORDER", border, DDF_MainGetBoolean),
 	DF("SCALING", scaling, DDF_MainGetBoolean),
+	DF("FORCE_OFFSETS", force_offsets, DDF_MainGetBoolean),
 
 	DDF_CMD_END
 };
@@ -433,6 +434,7 @@ void cursorstyle_c::Default()
 	cursor_string = "";
 	border = false;
 	scaling = true;
+	force_offsets = false;
 }
 
 //
@@ -449,6 +451,7 @@ cursorstyle_c& cursorstyle_c::operator= (const cursorstyle_c &rhs)
 		cursor_string = rhs.cursor_string;
 		border = rhs.border;
 		scaling = rhs.scaling;
+		force_offsets = rhs.force_offsets;
 	}
 		
 	return *this;

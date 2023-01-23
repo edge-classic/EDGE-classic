@@ -812,6 +812,11 @@ void M_DrawLoad(void)
 		short old_offset_y = cursor->offset_y;
 		cursor->offset_x = LineHeight == IM_HEIGHT(C) ? C->offset_x : 0;
 		cursor->offset_y = LineHeight == IM_HEIGHT(C) ? C->offset_y : 0;
+		if (style->def->cursor.force_offsets)
+		{
+			cursor->offset_x += old_offset_x;
+			cursor->offset_y += old_offset_y;
+		}
 		float TempHeight = MIN(LineHeight, IM_HEIGHT(cursor));
 		float TempScale = 0;
 		float TempWidth = 0;
@@ -1081,6 +1086,11 @@ void M_DrawSave(void)
 		short old_offset_y = cursor->offset_y;
 		cursor->offset_x = LineHeight == IM_HEIGHT(C) ? C->offset_x : 0;
 		cursor->offset_y = LineHeight == IM_HEIGHT(C) ? C->offset_y : 0;
+		if (style->def->cursor.force_offsets)
+		{
+			cursor->offset_x += old_offset_x;
+			cursor->offset_y += old_offset_y;
+		}
 		float TempHeight = MIN(LineHeight, IM_HEIGHT(cursor));
 		float TempScale = 0;
 		float TempWidth = 0;
@@ -2635,6 +2645,11 @@ void M_Drawer(void)
 				short old_offset_y = cursor->offset_y;
 				cursor->offset_x = 0;
 				cursor->offset_y = 0;
+				if (style->def->cursor.force_offsets)
+				{
+					cursor->offset_x += old_offset_x;
+					cursor->offset_y += old_offset_y;
+				}
 				float TempScale = 0;
 				float TempWidth = 0;
 				float TempSpacer = 0;
@@ -2779,6 +2794,11 @@ void M_Drawer(void)
 				short old_offset_y = cursor->offset_y;
 				cursor->offset_x = currentMenu->menuitems[itemOn].image->offset_x;
 				cursor->offset_y = currentMenu->menuitems[itemOn].image->offset_y;
+				if (style->def->cursor.force_offsets)
+				{
+					cursor->offset_x += old_offset_x;
+					cursor->offset_y += old_offset_y;
+				}
 				float TempScale = 0;
 				float TempWidth = 0;
 				float TempSpacer = 0;

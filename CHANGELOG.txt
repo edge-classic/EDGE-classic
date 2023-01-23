@@ -18,6 +18,9 @@ General Improvements
 + DDFSTYLE: Menu items that are images instead of fonts will now also apply the font colormap setting in that menu's
   style entry (if defined)
 
++ DDFSTYLE: CURSOR.FORCE_OFFSETS=<boolean> - When set to true, will honor cursor image's offsets even if they cause misalignment with
+  menu entries. Default value is false
+
 New Features
 ------------
 + COALHUDS: new commands

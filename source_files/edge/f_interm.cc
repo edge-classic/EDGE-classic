@@ -634,9 +634,6 @@ static void DrawPercent(float x, float y, std::string &s)
 //
 static float TimeWidth(int t, bool drawText = false)
 {
-	int div;
-	int n;
-
 	if (t < 0)
 		return 0;
 
@@ -715,9 +712,6 @@ static float TimeWidth(int t, bool drawText = false)
 //
 static void DrawTime(float x, float y, int t, bool drawText = false)
 {
-	int div;
-	int n;
-
 	if (t < 0)
 		return;
 
@@ -1503,54 +1497,66 @@ static void DrawSinglePlayerStats(void)
 
 	std::string s;
 	if (cnt_kills[0] < 0)
-		s = std::to_string(0);
+		s.clear();
 	else
+	{
 		s = std::to_string(cnt_kills[0]);
-	s= s + "%";
+		s = s + "%";
+	}
 
 	if (drawTextBased == false)
 	{
 		HUD_DrawImage(SP_STATSX, SP_STATSY, kills);
-		DrawPercent(320 - SP_STATSX - PercentWidth(s), SP_STATSY, s);
+		if (!s.empty())
+			DrawPercent(320 - SP_STATSX - PercentWidth(s), SP_STATSY, s);
 	}
 	else
 	{
 		HL_WriteText(wi_sp_style, styledef_c::T_ALT, SP_STATSX, SP_STATSY, "Kills");
-		HL_WriteText(wi_sp_style, styledef_c::T_ALT, 320 - SP_STATSX - wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str()), SP_STATSY, s.c_str());
+		if (!s.empty())
+			HL_WriteText(wi_sp_style, styledef_c::T_ALT, 320 - SP_STATSX - wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str()), SP_STATSY, s.c_str());
 	}
 
 	if (cnt_items[0] < 0)
-		s = std::to_string(0);
+		s.clear();
 	else
+	{
 		s = std::to_string(cnt_items[0]);
-	s= s + "%";
+		s = s + "%";
+	}
 
 	if ((items) && (W_IsLumpInPwad(items->name)))
 	{
 		HUD_DrawImage(SP_STATSX, SP_STATSY + lh, items);
-		DrawPercent(320 - SP_STATSX - PercentWidth(s), SP_STATSY + lh, s);
+		if (!s.empty())
+			DrawPercent(320 - SP_STATSX - PercentWidth(s), SP_STATSY + lh, s);
 	}
 	else
 	{
 		HL_WriteText(wi_sp_style,styledef_c::T_ALT, SP_STATSX, SP_STATSY + lh, "Items");
-		HL_WriteText(wi_sp_style,styledef_c::T_ALT,320 - SP_STATSX - wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str()), SP_STATSY + lh, s.c_str());
+		if (!s.empty())
+			HL_WriteText(wi_sp_style,styledef_c::T_ALT,320 - SP_STATSX - wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str()), SP_STATSY + lh, s.c_str());
 	}
 
 	if (cnt_secrets[0] < 0)
-		s = std::to_string(0);
+		s.clear();
 	else
+	{
 		s = std::to_string(cnt_secrets[0]);
-	s= s + "%";
+		s = s + "%";
+	}
 
 	if ((sp_secret) && (W_IsLumpInPwad(sp_secret->name)))
 	{
 		HUD_DrawImage(SP_STATSX, SP_STATSY + 2 * lh, sp_secret);
-		DrawPercent(320 - SP_STATSX - PercentWidth(s), SP_STATSY + 2 * lh, s);
+		if (!s.empty())
+			DrawPercent(320 - SP_STATSX - PercentWidth(s), SP_STATSY + 2 * lh, s);
 	}
 	else
 	{
 		HL_WriteText(wi_sp_style,styledef_c::T_ALT, SP_STATSX, SP_STATSY + 2 * lh, "Secrets");
-		HL_WriteText(wi_sp_style,styledef_c::T_ALT,320 - SP_STATSX - wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str()), SP_STATSY + 2 * lh, s.c_str());
+		if (!s.empty())
+			HL_WriteText(wi_sp_style,styledef_c::T_ALT,320 - SP_STATSX - wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str()), SP_STATSY + 2 * lh, s.c_str());
 	}
 	
 

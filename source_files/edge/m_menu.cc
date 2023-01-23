@@ -777,24 +777,26 @@ void M_DrawLoad(void)
 	
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
+		int textstyle = i == itemOn ? (style->def->text[styledef_c::T_SELECTED].font ? styledef_c::T_SELECTED : styledef_c::T_TEXT) : 
+					styledef_c::T_TEXT;
 		if (LineHeight == IM_HEIGHT(C))
 		{
 			if (style->def->entry_alignment == style->def->C_RIGHT)
-				HL_WriteText(load_style, ex_slots[i].corrupt ? styledef_c::T_HELP : styledef_c::T_TEXT, LoadDef.x - 8 + WidestLine - (ex_slots[i].width), ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+				HL_WriteText(load_style, textstyle, LoadDef.x - 8 + WidestLine - (ex_slots[i].width), ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
 			else if (style->def->entry_alignment == style->def->C_CENTER)
-				HL_WriteText(load_style, ex_slots[i].corrupt ? styledef_c::T_HELP : styledef_c::T_TEXT, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), 
+				HL_WriteText(load_style, textstyle, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), 
 					ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
 			else
-				HL_WriteText(load_style, ex_slots[i].corrupt ? style->def->T_HELP : styledef_c::T_TEXT, LoadDef.x + 8, ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+				HL_WriteText(load_style, textstyle, LoadDef.x + 8, ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
 		}
 		else
 		{
 			if (style->def->entry_alignment == style->def->C_RIGHT)
-				HL_WriteText(load_style, ex_slots[i].corrupt ? styledef_c::T_HELP : styledef_c::T_TEXT, LoadDef.x + WidestLine - ex_slots[i].width, ex_slots[i].y, ex_slots[i].desc);
+				HL_WriteText(load_style, textstyle, LoadDef.x + WidestLine - ex_slots[i].width, ex_slots[i].y, ex_slots[i].desc);
 			else if (style->def->entry_alignment == style->def->C_CENTER)
-				HL_WriteText(load_style, ex_slots[i].corrupt ? styledef_c::T_HELP : styledef_c::T_TEXT, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), ex_slots[i].y, ex_slots[i].desc);
+				HL_WriteText(load_style, textstyle, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), ex_slots[i].y, ex_slots[i].desc);
 			else
-				HL_WriteText(load_style, ex_slots[i].corrupt ? styledef_c::T_HELP : styledef_c::T_TEXT, LoadDef.x, ex_slots[i].y, ex_slots[i].desc);
+				HL_WriteText(load_style, textstyle, LoadDef.x, ex_slots[i].y, ex_slots[i].desc);
 		}
 	}
 	image_c *cursor;
@@ -1008,36 +1010,39 @@ void M_DrawSave(void)
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
 		int len = 0;
-		int font = styledef_c::T_TEXT;
+		int font = i == itemOn ? (style->def->text[styledef_c::T_SELECTED].font ? styledef_c::T_SELECTED : styledef_c::T_TEXT) : 
+			styledef_c::T_TEXT;
+		bool entering_save = false;
 		if (saveStringEnter && i == save_slot)
 		{
-			if (! style->fonts[styledef_c::T_ALT])
+			if (! style->fonts[styledef_c::T_SELECTED])
 				fontType=styledef_c::T_TEXT;
 			else
-				fontType=styledef_c::T_ALT;
+				fontType=styledef_c::T_SELECTED;
 			len = save_style->fonts[fontType]->StringWidth(ex_slots[save_slot].desc);
 			font = fontType;
+			entering_save = true;
 		}
 		if (LineHeight == IM_HEIGHT(C))
 		{
 			if (style->def->entry_alignment == style->def->C_RIGHT)
 			{
 				HL_WriteText(save_style, font, LoadDef.x - 8 + WidestLine - (ex_slots[i].width), ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
-				if (font)
+				if (entering_save)
 					HL_WriteText(save_style, font, LoadDef.x - 8 + WidestLine - (ex_slots[i].width) + len, ex_slots[i].y - C->offset_y + (LineHeight / 4), "_");
 			}
 			else if (style->def->entry_alignment == style->def->C_CENTER)
 			{
 				HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), 
 					ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
-				if (font)
+				if (entering_save)
 					HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2) + len, 
 						ex_slots[i].y - C->offset_y + (LineHeight / 4), "_");
 			}
 			else
 			{
 				HL_WriteText(save_style, font, LoadDef.x + 8, ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
-				if (font)
+				if (entering_save)
 					HL_WriteText(save_style, font, LoadDef.x + 8 + len, ex_slots[i].y - C->offset_y + (LineHeight / 4), "_");
 			}
 		}
@@ -1046,19 +1051,19 @@ void M_DrawSave(void)
 			if (style->def->entry_alignment == style->def->C_RIGHT)
 			{
 				HL_WriteText(save_style, font, LoadDef.x + WidestLine - ex_slots[i].width, ex_slots[i].y, ex_slots[i].desc);
-				if (font)
+				if (entering_save)
 					HL_WriteText(save_style, font, LoadDef.x + WidestLine - ex_slots[i].width + len, ex_slots[i].y, "_");
 			}
 			else if (style->def->entry_alignment == style->def->C_CENTER)
 			{
 				HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), ex_slots[i].y, ex_slots[i].desc);
-				if (font)
+				if (entering_save)
 					HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2) + len, ex_slots[i].y, "_");
 			}
 			else
 			{
 				HL_WriteText(save_style, font, LoadDef.x, ex_slots[i].y, ex_slots[i].desc);
-				if (font)
+				if (entering_save)
 					HL_WriteText(save_style, font, LoadDef.x + len, ex_slots[i].y, "_");
 			}
 		}
@@ -2604,14 +2609,16 @@ void M_Drawer(void)
 		}
 		for (i=0; i < max; i++)
 		{
+			int textstyle = i == itemOn ? (style->def->text[styledef_c::T_SELECTED].font ? styledef_c::T_SELECTED : styledef_c::T_TEXT) : 
+					styledef_c::T_TEXT;
 			if (style->def->entry_alignment == style->def->C_RIGHT)
-				HL_WriteText(style, styledef_c::T_TEXT, currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width, 
+				HL_WriteText(style, textstyle, currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width, 
 					currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
 			else if (style->def->entry_alignment == style->def->C_CENTER)
-				HL_WriteText(style, styledef_c::T_TEXT, currentMenu->menuitems[i].x + (WidestLine /2) - (currentMenu->menuitems[i].width / 2), 
+				HL_WriteText(style, textstyle, currentMenu->menuitems[i].x + (WidestLine /2) - (currentMenu->menuitems[i].width / 2), 
 					currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
 			else
-				HL_WriteText(style, styledef_c::T_TEXT, currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
+				HL_WriteText(style, textstyle, currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
 		}
 		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
 		{
@@ -2745,14 +2752,16 @@ void M_Drawer(void)
 					continue;
 				if (currentMenu->menuitems[i].image->is_empty)
 					continue;
+				const colourmap_c *colmap = i == itemOn ? style->def->text[styledef_c::T_SELECTED].colmap : 
+					style->def->text[styledef_c::T_TEXT].colmap;
 				if (style->def->entry_alignment == style->def->C_RIGHT)
 					HUD_DrawImage(currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width, 
-						currentMenu->menuitems[i].y, currentMenu->menuitems[i].image);
+						currentMenu->menuitems[i].y, currentMenu->menuitems[i].image, colmap);
 				else if (style->def->entry_alignment == style->def->C_CENTER)
 					HUD_DrawImage(currentMenu->menuitems[i].x + (WidestLine / 2) - (currentMenu->menuitems[i].width / 2), 
-						currentMenu->menuitems[i].y, currentMenu->menuitems[i].image);
+						currentMenu->menuitems[i].y, currentMenu->menuitems[i].image, colmap);
 				else
-					HUD_DrawImage(currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, currentMenu->menuitems[i].image);
+					HUD_DrawImage(currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, currentMenu->menuitems[i].image, colmap);
 			}
 		}
 		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))

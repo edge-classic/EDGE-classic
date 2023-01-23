@@ -566,7 +566,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 }
 
 
-void HUD_StretchImage(float x, float y, float w, float h, const image_c *img, float sx, float sy)
+void HUD_StretchImage(float x, float y, float w, float h, const image_c *img, float sx, float sy, const colourmap_c *colmap)
 {
 	if (cur_x_align >= 0)
 		x -= w / (cur_x_align == 0 ? 2.0f : 1.0f);
@@ -583,7 +583,14 @@ void HUD_StretchImage(float x, float y, float w, float h, const image_c *img, fl
 	float y1 = COORD_Y(y+h);
 	float y2 = COORD_Y(y);
 
-    HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha, RGB_NO_VALUE, NULL, sx, sy);
+	rgbcol_t text_col = RGB_NO_VALUE;
+
+	if (colmap)
+	{
+		text_col = V_GetFontColor(colmap);
+	}
+
+    HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha, text_col, colmap, sx, sy);
 }
 
 void HUD_StretchImageNoOffset(float x, float y, float w, float h, const image_c *img, float sx, float sy)
@@ -634,12 +641,12 @@ void HUD_DrawImageTitleWS(const image_c *title_image)
 	HUD_StretchImage(CenterX, 0, TempWidth, TempHeight, title_image, 0.0, 0.0);
 }
 
-void HUD_DrawImage(float x, float y, const image_c *img)
+void HUD_DrawImage(float x, float y, const image_c *img, const colourmap_c *colmap)
 {
 	float w = IM_WIDTH(img)  * cur_scale;
 	float h = IM_HEIGHT(img) * cur_scale;
 
-    HUD_StretchImage(x, y, w, h, img, 0.0, 0.0);
+    HUD_StretchImage(x, y, w, h, img, 0.0, 0.0, colmap);
 }
 
 void HUD_DrawImageNoOffset(float x, float y, const image_c *img)

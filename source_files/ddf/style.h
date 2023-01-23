@@ -142,6 +142,7 @@ public:
 		T_TITLE,    // title style
 		T_HELP,     // for help messages
 		T_HEADER,   // for header /main title
+		T_SELECTED, // for selected menu item
 
 		NUM_TXST
 	};

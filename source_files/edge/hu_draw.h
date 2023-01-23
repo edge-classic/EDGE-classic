@@ -93,12 +93,12 @@ void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col);
 // be specified individually.
 void HUD_GradientBox(float x1, float y1, float x2, float y2, rgbcol_t *cols);
 
-void HUD_DrawImage(float x, float y, const image_c *image);
+void HUD_DrawImage(float x, float y, const image_c *image, const colourmap_c *colmap = nullptr);
 void HUD_DrawImageNoOffset(float x, float y, const image_c *image);
 void HUD_ScrollImage(float x, float y, const image_c *image, float sx, float sy);
 void HUD_ScrollImageNoOffset(float x, float y, const image_c *image, float sx, float sy);
 void HUD_DrawImageTitleWS(const image_c *image);
-void HUD_StretchImage(float x, float y, float w, float h, const image_c *image, float sx, float sy);
+void HUD_StretchImage(float x, float y, float w, float h, const image_c *image, float sx, float sy, const colourmap_c *colmap = nullptr);
 void HUD_StretchImageNoOffset(float x, float y, float w, float h, const image_c *image, float sx, float sy);
 void HUD_TileImage(float x, float y, float w, float h, const image_c *image,
 				   float offset_x = 0.0f, float offset_y = 0.0f);

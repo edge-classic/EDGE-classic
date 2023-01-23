@@ -11,6 +11,7 @@ Bugs fixed
 + A recently introduced bug which caused the Secrets Found % to not increment after finding the first one.
 + player.use_inventory() consuming item without running the associated script if the script was already running
 + Changed hardcoded finish/par time widths to prevent custom fonts from being clipped at 4:3 resolutions
++ "Read This!" menu item missing for Doom.
 
 General Improvements
 --------------------

@@ -3027,35 +3027,27 @@ void M_Init(void)
 	//    else if (W_CheckNumForName("M_EPI5") < 0)
 	//      EpiDef.numitems--;
 
-	if (W_CheckNumForName("HELP") >= 0)
-		menu_readthis[0] = W_ImageLookup("HELP");
-	else
-		menu_readthis[0] = W_ImageLookup("HELP1");
-
-	if (W_CheckNumForName("HELP2") >= 0)
-		menu_readthis[1] = W_ImageLookup("HELP2");
-	else
-	{
-		menu_readthis[1] = W_ImageLookup("CREDIT");
-
-		// This is used because DOOM 2 had only one HELP
-		//  page. I use CREDIT as second page now, but
-		//  kept this hack for educational purposes.
-
-		// Reverting this to simulate more vanilla Doom 2 behavior - Dasho		
-
-		//if (W_IsLumpInPwad("M_NGAME") && !W_IsLumpInPwad("M_RDTHIS"))
-		//{
-			MainMenu[readthis] = MainMenu[quitdoom];
-			MainDef.numitems--;
-			MainDef.y += 8; // FIXME
-			SkillDef.prevMenu = &MainDef;
-			ReadDef1.draw_func = M_DrawReadThis1;
-			ReadDef1.x = 330;
-			ReadDef1.y = 165;
-			ReadMenu1[0].select_func = M_FinishReadThis;
-		//}
-	}
+	if (W_CheckNumForName("HELP") >= 0) //doom2
+    {
+        menu_readthis[0] = W_ImageLookup("HELP");
+        menu_readthis[1] = W_ImageLookup("CREDIT"); //Unnecessary since we won't see it anyway...
+        MainMenu[readthis] = MainMenu[quitdoom];
+        MainDef.numitems--;
+        MainDef.y += 8; // FIXME
+        SkillDef.prevMenu = &MainDef;
+        ReadDef1.draw_func = M_DrawReadThis1;
+        ReadDef1.x = 330;
+        ReadDef1.y = 165;
+        ReadMenu1[0].select_func = M_FinishReadThis;
+    }
+    else //doom or shareware doom
+    {
+        menu_readthis[0] = W_ImageLookup("HELP1");
+        if (W_CheckNumForName("HELP2") >= 0)
+            menu_readthis[1] = W_ImageLookup("HELP2"); //Shareware doom
+        else
+            menu_readthis[1] = W_ImageLookup("CREDIT"); //Full doom
+    }
 
  	//Lobo 2022: Use new sfx definitions so we don't have to share names with
 	//normal doom sfx.

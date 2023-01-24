@@ -114,7 +114,7 @@ public:
 	image_special_e special;
 
 	// offsets for sprites (mainly)
-	int x_offset, y_offset;
+	float x_offset, y_offset;
 
 	int fix_trans;   // FIXTRN_XXX value
 

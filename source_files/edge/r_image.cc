@@ -771,7 +771,8 @@ const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon)
 	}
 	else
 	{
-		rim->offset_x -= rim->actual_w / 2;   // loss of accuracy
+		//rim->offset_x -= rim->actual_w / 2;   // loss of accuracy
+		rim->offset_x -= ((float)rim->actual_w) / 2.0f; //Lobo 2023: dancing eye fix
 		rim->offset_y -= rim->actual_h;
 	}
 

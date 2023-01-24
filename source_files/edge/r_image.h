@@ -88,8 +88,8 @@ public:
 	float ratio_h;
 
     // offset values.  Only used for sprites and on-screen patches.
-	short offset_x;
-	short offset_y;
+	float offset_x;
+	float offset_y;
 
     // scale values, where 1.0f is normal.  Higher values stretch the
     // image (on the wall/floor), lower values shrink it.

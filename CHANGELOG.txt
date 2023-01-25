@@ -36,6 +36,8 @@ New Features
   - Will only apply to the currently selected/highlighted menu item
   - If not defined, will fall back to previous behavior for backwards compatibility
 
++ Added MD3 model support from EDGE 1.32 codebase
+
 
 
 

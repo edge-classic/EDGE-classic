@@ -100,15 +100,32 @@ modeldef_c *LoadModelFromLump(int model_num)
 	char lumpname[16];
 	char skinname[16];
 
-	sprintf(lumpname, "%sMD2", basename);
+	epi::file_c *f;
 
-	I_Debugf("Loading model from lump : %s\n", lumpname);
+	// try MD3 first, then MD2
+	sprintf(lumpname, "%sMD3", basename);
 
-	epi::file_c *f = W_OpenLump(lumpname);
-	if (! f)
-		I_Error("Missing model lump: %s\n", lumpname);
+	if (W_CheckNumForName(lumpname) >= 0)
+	{
+		I_Debugf("Loading model from lump : %s\n", lumpname);
 
-	def->model = MD2_LoadModel(f);
+		f = W_OpenLump(lumpname);
+		SYS_ASSERT(f);
+
+		def->model = MD3_LoadModel(f);
+	}
+	else
+	{
+		sprintf(lumpname, "%sMD2", basename);
+		I_Debugf("Loading model from lump : %s\n", lumpname);
+
+		f = W_OpenLump(lumpname);
+		if (! f)
+			I_Error("Missing model lump: %s\n", lumpname);
+
+		def->model = MD2_LoadModel(f);
+	}
+
 	SYS_ASSERT(def->model);
 
 	// close the lump

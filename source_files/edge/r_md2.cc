@@ -2,7 +2,7 @@
 //  MD2 Models
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 2002-2009  The EDGE Team.
+//  Copyright (c) 2002-2023  The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -29,6 +29,7 @@
 #include "types.h"
 #include "endianess.h"
 
+#include "r_mdcommon.h"
 #include "r_md2.h"
 #include "r_gldefs.h"
 #include "r_colormap.h"
@@ -40,7 +41,6 @@
 #include "r_shader.h"
 #include "r_units.h"
 #include "p_blockmap.h"
-#include "m_math.h"
 
 #include <vector>
 
@@ -50,7 +50,7 @@ extern float P_ApproxDistance(float dx, float dy, float dz);
 // #define DEBUG_MD2_LOAD  1
 
 
-/*============== FORMAT DEFINITIONS ====================*/
+/*============== MD2 FORMAT DEFINITIONS ====================*/
 
 
 // format uses float pointing values, but to allow for endianness
@@ -131,177 +131,85 @@ typedef struct
 }
 raw_md2_skin_t;
 
+/*============== MD3 FORMAT DEFINITIONS ====================*/
 
-/* ---- normals ---- */
 
-#define MD2_NUM_NORMALS  162
+// format uses float pointing values, but to allow for endianness
+// conversions they are represented here as unsigned integers.
 
-static vec3_t md2_normals[MD2_NUM_NORMALS] =
+#define MD3_IDENTIFIER  "IDP3"
+#define MD3_VERSION     15
+
+typedef struct
 {
-	{ -0.525731f,  0.000000f,  0.850651f },
-	{ -0.442863f,  0.238856f,  0.864188f },
-	{ -0.295242f,  0.000000f,  0.955423f },
-	{ -0.309017f,  0.500000f,  0.809017f },
-	{ -0.162460f,  0.262866f,  0.951056f },
-	{  0.000000f,  0.000000f,  1.000000f },
-	{  0.000000f,  0.850651f,  0.525731f },
-	{ -0.147621f,  0.716567f,  0.681718f },
-	{  0.147621f,  0.716567f,  0.681718f },
-	{  0.000000f,  0.525731f,  0.850651f },
-	{  0.309017f,  0.500000f,  0.809017f },
-	{  0.525731f,  0.000000f,  0.850651f },
-	{  0.295242f,  0.000000f,  0.955423f },
-	{  0.442863f,  0.238856f,  0.864188f },
-	{  0.162460f,  0.262866f,  0.951056f },
-	{ -0.681718f,  0.147621f,  0.716567f },
-	{ -0.809017f,  0.309017f,  0.500000f },
-	{ -0.587785f,  0.425325f,  0.688191f },
-	{ -0.850651f,  0.525731f,  0.000000f },
-	{ -0.864188f,  0.442863f,  0.238856f },
-	{ -0.716567f,  0.681718f,  0.147621f },
-	{ -0.688191f,  0.587785f,  0.425325f },
-	{ -0.500000f,  0.809017f,  0.309017f },
-	{ -0.238856f,  0.864188f,  0.442863f },
-	{ -0.425325f,  0.688191f,  0.587785f },
-	{ -0.716567f,  0.681718f, -0.147621f },
-	{ -0.500000f,  0.809017f, -0.309017f },
-	{ -0.525731f,  0.850651f,  0.000000f },
-	{  0.000000f,  0.850651f, -0.525731f },
-	{ -0.238856f,  0.864188f, -0.442863f },
-	{  0.000000f,  0.955423f, -0.295242f },
-	{ -0.262866f,  0.951056f, -0.162460f },
-	{  0.000000f,  1.000000f,  0.000000f },
-	{  0.000000f,  0.955423f,  0.295242f },
-	{ -0.262866f,  0.951056f,  0.162460f },
-	{  0.238856f,  0.864188f,  0.442863f },
-	{  0.262866f,  0.951056f,  0.162460f },
-	{  0.500000f,  0.809017f,  0.309017f },
-	{  0.238856f,  0.864188f, -0.442863f },
-	{  0.262866f,  0.951056f, -0.162460f },
-	{  0.500000f,  0.809017f, -0.309017f },
-	{  0.850651f,  0.525731f,  0.000000f },
-	{  0.716567f,  0.681718f,  0.147621f },
-	{  0.716567f,  0.681718f, -0.147621f },
-	{  0.525731f,  0.850651f,  0.000000f },
-	{  0.425325f,  0.688191f,  0.587785f },
-	{  0.864188f,  0.442863f,  0.238856f },
-	{  0.688191f,  0.587785f,  0.425325f },
-	{  0.809017f,  0.309017f,  0.500000f },
-	{  0.681718f,  0.147621f,  0.716567f },
-	{  0.587785f,  0.425325f,  0.688191f },
-	{  0.955423f,  0.295242f,  0.000000f },
-	{  1.000000f,  0.000000f,  0.000000f },
-	{  0.951056f,  0.162460f,  0.262866f },
-	{  0.850651f, -0.525731f,  0.000000f },
-	{  0.955423f, -0.295242f,  0.000000f },
-	{  0.864188f, -0.442863f,  0.238856f },
-	{  0.951056f, -0.162460f,  0.262866f },
-	{  0.809017f, -0.309017f,  0.500000f },
-	{  0.681718f, -0.147621f,  0.716567f },
-	{  0.850651f,  0.000000f,  0.525731f },
-	{  0.864188f,  0.442863f, -0.238856f },
-	{  0.809017f,  0.309017f, -0.500000f },
-	{  0.951056f,  0.162460f, -0.262866f },
-	{  0.525731f,  0.000000f, -0.850651f },
-	{  0.681718f,  0.147621f, -0.716567f },
-	{  0.681718f, -0.147621f, -0.716567f },
-	{  0.850651f,  0.000000f, -0.525731f },
-	{  0.809017f, -0.309017f, -0.500000f },
-	{  0.864188f, -0.442863f, -0.238856f },
-	{  0.951056f, -0.162460f, -0.262866f },
-	{  0.147621f,  0.716567f, -0.681718f },
-	{  0.309017f,  0.500000f, -0.809017f },
-	{  0.425325f,  0.688191f, -0.587785f },
-	{  0.442863f,  0.238856f, -0.864188f },
-	{  0.587785f,  0.425325f, -0.688191f },
-	{  0.688191f,  0.587785f, -0.425325f },
-	{ -0.147621f,  0.716567f, -0.681718f },
-	{ -0.309017f,  0.500000f, -0.809017f },
-	{  0.000000f,  0.525731f, -0.850651f },
-	{ -0.525731f,  0.000000f, -0.850651f },
-	{ -0.442863f,  0.238856f, -0.864188f },
-	{ -0.295242f,  0.000000f, -0.955423f },
-	{ -0.162460f,  0.262866f, -0.951056f },
-	{  0.000000f,  0.000000f, -1.000000f },
-	{  0.295242f,  0.000000f, -0.955423f },
-	{  0.162460f,  0.262866f, -0.951056f },
-	{ -0.442863f, -0.238856f, -0.864188f },
-	{ -0.309017f, -0.500000f, -0.809017f },
-	{ -0.162460f, -0.262866f, -0.951056f },
-	{  0.000000f, -0.850651f, -0.525731f },
-	{ -0.147621f, -0.716567f, -0.681718f },
-	{  0.147621f, -0.716567f, -0.681718f },
-	{  0.000000f, -0.525731f, -0.850651f },
-	{  0.309017f, -0.500000f, -0.809017f },
-	{  0.442863f, -0.238856f, -0.864188f },
-	{  0.162460f, -0.262866f, -0.951056f },
-	{  0.238856f, -0.864188f, -0.442863f },
-	{  0.500000f, -0.809017f, -0.309017f },
-	{  0.425325f, -0.688191f, -0.587785f },
-	{  0.716567f, -0.681718f, -0.147621f },
-	{  0.688191f, -0.587785f, -0.425325f },
-	{  0.587785f, -0.425325f, -0.688191f },
-	{  0.000000f, -0.955423f, -0.295242f },
-	{  0.000000f, -1.000000f,  0.000000f },
-	{  0.262866f, -0.951056f, -0.162460f },
-	{  0.000000f, -0.850651f,  0.525731f },
-	{  0.000000f, -0.955423f,  0.295242f },
-	{  0.238856f, -0.864188f,  0.442863f },
-	{  0.262866f, -0.951056f,  0.162460f },
-	{  0.500000f, -0.809017f,  0.309017f },
-	{  0.716567f, -0.681718f,  0.147621f },
-	{  0.525731f, -0.850651f,  0.000000f },
-	{ -0.238856f, -0.864188f, -0.442863f },
-	{ -0.500000f, -0.809017f, -0.309017f },
-	{ -0.262866f, -0.951056f, -0.162460f },
-	{ -0.850651f, -0.525731f,  0.000000f },
-	{ -0.716567f, -0.681718f, -0.147621f },
-	{ -0.716567f, -0.681718f,  0.147621f },
-	{ -0.525731f, -0.850651f,  0.000000f },
-	{ -0.500000f, -0.809017f,  0.309017f },
-	{ -0.238856f, -0.864188f,  0.442863f },
-	{ -0.262866f, -0.951056f,  0.162460f },
-	{ -0.864188f, -0.442863f,  0.238856f },
-	{ -0.809017f, -0.309017f,  0.500000f },
-	{ -0.688191f, -0.587785f,  0.425325f },
-	{ -0.681718f, -0.147621f,  0.716567f },
-	{ -0.442863f, -0.238856f,  0.864188f },
-	{ -0.587785f, -0.425325f,  0.688191f },
-	{ -0.309017f, -0.500000f,  0.809017f },
-	{ -0.147621f, -0.716567f,  0.681718f },
-	{ -0.425325f, -0.688191f,  0.587785f },
-	{ -0.162460f, -0.262866f,  0.951056f },
-	{  0.442863f, -0.238856f,  0.864188f },
-	{  0.162460f, -0.262866f,  0.951056f },
-	{  0.309017f, -0.500000f,  0.809017f },
-	{  0.147621f, -0.716567f,  0.681718f },
-	{  0.000000f, -0.525731f,  0.850651f },
-	{  0.425325f, -0.688191f,  0.587785f },
-	{  0.587785f, -0.425325f,  0.688191f },
-	{  0.688191f, -0.587785f,  0.425325f },
-	{ -0.955423f,  0.295242f,  0.000000f },
-	{ -0.951056f,  0.162460f,  0.262866f },
-	{ -1.000000f,  0.000000f,  0.000000f },
-	{ -0.850651f,  0.000000f,  0.525731f },
-	{ -0.955423f, -0.295242f,  0.000000f },
-	{ -0.951056f, -0.162460f,  0.262866f },
-	{ -0.864188f,  0.442863f, -0.238856f },
-	{ -0.951056f,  0.162460f, -0.262866f },
-	{ -0.809017f,  0.309017f, -0.500000f },
-	{ -0.864188f, -0.442863f, -0.238856f },
-	{ -0.951056f, -0.162460f, -0.262866f },
-	{ -0.809017f, -0.309017f, -0.500000f },
-	{ -0.681718f,  0.147621f, -0.716567f },
-	{ -0.681718f, -0.147621f, -0.716567f },
-	{ -0.850651f,  0.000000f, -0.525731f },
-	{ -0.688191f,  0.587785f, -0.425325f },
-	{ -0.587785f,  0.425325f, -0.688191f },
-	{ -0.425325f,  0.688191f, -0.587785f },
-	{ -0.425325f, -0.688191f, -0.587785f },
-	{ -0.587785f, -0.425325f, -0.688191f },
-	{ -0.688191f, -0.587785f, -0.425325f }  
-};
+	char ident[4];
+	s32_t version;
 
+	char name[64];
+	u32_t flags;
+
+	s32_t num_frames;
+	s32_t num_tags;
+	s32_t num_meshes;
+	s32_t num_skins;
+
+	s32_t ofs_frames;
+	s32_t ofs_tags;
+	s32_t ofs_meshes;
+	s32_t ofs_end;
+} 
+raw_md3_header_t;
+
+typedef struct
+{
+	char ident[4];
+	char name[64];
+	
+	u32_t flags;
+
+	s32_t num_frames;
+	s32_t num_shaders;
+	s32_t num_verts;
+	s32_t num_tris;
+
+	s32_t ofs_tris;
+	s32_t ofs_shaders;
+	s32_t ofs_texcoords;  // one texcoord per vertex
+	s32_t ofs_verts;
+	s32_t ofs_next_mesh;
+}
+raw_md3_mesh_t;
+
+typedef struct
+{
+	f32_t s, t;
+} 
+raw_md3_texcoord_t;
+
+typedef struct 
+{
+	u32_t index_xyz[3];
+} 
+raw_md3_triangle_t;
+
+typedef struct
+{
+	s16_t x, y, z;
+
+	u8_t pitch, yaw;
+} 
+raw_md3_vertex_t;
+
+typedef struct
+{
+	f32_t mins[3];
+	f32_t maxs[3];
+	f32_t origin[3];
+	f32_t radius;
+
+	char name[16];
+} 
+raw_md3_frame_t;
 
 /*============== EDGE REPRESENTATION ====================*/
 
@@ -389,12 +297,24 @@ static const char *CopyFrameName(raw_md2_frame_t *frm)
 	return str;
 }
 
+static const char *CopyFrameName(raw_md3_frame_t *frm)
+{
+	char *str = new char[20];
+
+	memcpy(str, frm->name, 16);
+
+	// ensure it is NUL terminated
+	str[16] = 0;
+
+	return str;
+}
+
 static short *CreateNormalList(byte *which_normals)
 {
 	int count = 0;
 	int i;
 	
-	for (i=0; i < MD2_NUM_NORMALS; i++)
+	for (i=0; i < MD_NUM_NORMALS; i++)
 		if (which_normals[i])
 			count++;
 
@@ -402,7 +322,7 @@ static short *CreateNormalList(byte *which_normals)
 
 	count = 0;
 
-	for (i=0; i < MD2_NUM_NORMALS; i++)
+	for (i=0; i < MD_NUM_NORMALS; i++)
 		if (which_normals[i])
 			n_list[count++] = i;
 
@@ -520,7 +440,7 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 
 	/* PARSE FRAMES */
 
-	byte which_normals[MD2_NUM_NORMALS];
+	byte which_normals[MD_NUM_NORMALS];
 
 	raw_md2_vertex_t *raw_verts = new raw_md2_vertex_t[md->verts_per_frame];
 
@@ -583,7 +503,7 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 			good_V->normal_idx = raw_V->light_normal;
 
 			SYS_ASSERT(good_V->normal_idx >= 0);
-			SYS_ASSERT(good_V->normal_idx < MD2_NUM_NORMALS);
+			SYS_ASSERT(good_V->normal_idx < MD_NUM_NORMALS);
 
 			which_normals[good_V->normal_idx] = 1;
 		}
@@ -611,6 +531,241 @@ short MD2_FindFrame(md2_model_c *md, const char *name)
 	return -1; // NOT FOUND
 }
 
+/*============== MD3 LOADING CODE ====================*/
+
+static byte md3_normal_to_md2[128][128];
+static bool md3_normal_map_built = false;
+
+static byte MD2_FindNormal(float x, float y, float z)
+{
+	// -AJA- we make the search around SIX times faster by only
+	// considering the first quadrant (where x, y, z are >= 0).
+
+	int quadrant = 0;
+
+	if (x < 0) { x = -x; quadrant |= 4; }
+	if (y < 0) { y = -y; quadrant |= 2; }
+	if (z < 0) { z = -z; quadrant |= 1; }
+
+	int   best_g = 0;
+	float best_dot = -1;
+
+	for (int i = 0; i < 27; i++)
+	{
+		int n = md_normal_groups[i][0];
+
+		float nx = md_normals[n].x;
+		float ny = md_normals[n].y;
+		float nz = md_normals[n].z;
+
+		float dot = (x*nx + y*ny + z*nz);
+
+		if (dot > best_dot)
+		{
+			best_g   = i;
+			best_dot = dot;
+		}
+	}
+
+	return md_normal_groups[best_g][quadrant];
+}
+
+static void MD3_CreateNormalMap(void)
+{
+	// Create a table mapping MD3 normals to MD2 normals.
+	// We discard the least significant bit of pitch and yaw
+	// (for speed and memory saving).
+
+
+	// build a sine table for even faster calcs
+	float sintab[160];
+
+	for (int i = 0; i < 160; i++)
+		sintab[i] = sin(i * M_PI / 64.0);
+
+	for (int pitch = 0; pitch < 128; pitch++)
+	{
+		byte *dest = &md3_normal_to_md2[pitch][0];
+
+		for (int yaw = 0; yaw < 128; yaw++)
+		{
+			float z = sintab[pitch+32];
+			float w = sintab[pitch];
+
+			float x = w * sintab[yaw+32];
+			float y = w * sintab[yaw];
+
+			*dest++ = MD2_FindNormal(x, y, z);
+		}
+	}
+
+	md3_normal_map_built = true;
+}
+
+
+md2_model_c *MD3_LoadModel(epi::file_c *f)
+{
+	int i;
+	float *ff;
+
+	if (! md3_normal_map_built)
+		MD3_CreateNormalMap();
+
+	raw_md3_header_t header;
+
+	/* read header */
+	f->Read(&header, sizeof (raw_md3_header_t));
+
+	int version = EPI_LE_S32(header.version);
+
+	I_Debugf("MODEL IDENT: [%c%c%c%c] VERSION: %d",
+			 header.ident[0], header.ident[1],
+			 header.ident[2], header.ident[3], version);
+
+	if (strncmp(header.ident, MD3_IDENTIFIER, 4) != 0)
+	{
+		I_Error("MD3_LoadModel: lump is not an MD3 model!");
+		return NULL; /* NOT REACHED */
+	}
+			
+	if (version != MD3_VERSION)
+	{
+		I_Error("MD3_LoadModel: strange version!");
+		return NULL; /* NOT REACHED */
+	}
+
+	if (EPI_LE_S32(header.num_meshes) > 1)
+		I_Warning("Ignoring extra meshes in MD3 model.\n");
+
+
+	/* LOAD MESH #1 */
+	
+	int mesh_base = EPI_LE_S32(header.ofs_meshes);
+
+	f->Seek(mesh_base, epi::file_c::SEEKPOINT_START);
+
+	raw_md3_mesh_t mesh;
+
+	f->Read(&mesh, sizeof (raw_md3_mesh_t));
+
+	int num_frames = EPI_LE_S32(mesh.num_frames);
+	int num_verts  = EPI_LE_S32(mesh.num_verts);
+	int num_strips = EPI_LE_S32(mesh.num_tris);
+
+	I_Debugf("  frames:%d  verts:%d  strips: %d\n",
+			num_frames, num_verts, num_strips);
+
+	md2_model_c *md = new md2_model_c(num_frames, num_strips*3, num_strips);
+
+	md->verts_per_frame = num_verts;
+
+
+	/* PARSE TEXCOORD */
+
+	md2_point_c * temp_TEXC = new md2_point_c[num_verts];
+
+	f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_texcoords), epi::file_c::SEEKPOINT_START);
+
+	for (i = 0; i < num_verts; i++)
+	{
+		raw_md3_texcoord_t texc;
+
+		f->Read(&texc, sizeof (raw_md3_texcoord_t));
+
+		texc.s = EPI_LE_U32(texc.s);
+		texc.t = EPI_LE_U32(texc.t);
+
+		ff = (float *) &texc.s;  temp_TEXC[i].skin_s = *ff;
+		ff = (float *) &texc.t;  temp_TEXC[i].skin_t = 1.0f - *ff;
+
+		temp_TEXC[i].vert_idx = i;
+	}
+
+
+	/* PARSE TRIANGLES */
+
+	f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_tris), epi::file_c::SEEKPOINT_START);
+
+	for (i = 0; i < num_strips; i++)
+	{
+		raw_md3_triangle_t tri;
+
+		f->Read(&tri, sizeof (raw_md3_triangle_t));
+
+		int a = EPI_LE_U32(tri.index_xyz[0]);
+		int b = EPI_LE_U32(tri.index_xyz[1]);
+		int c = EPI_LE_U32(tri.index_xyz[2]);
+
+		SYS_ASSERT(a < num_verts);
+		SYS_ASSERT(b < num_verts);
+		SYS_ASSERT(c < num_verts);
+
+		md->strips[i].mode  = GL_TRIANGLE_STRIP;
+		md->strips[i].first = i * 3;
+		md->strips[i].count = 3;
+
+		md2_point_c *point = md->points + i * 3;
+
+		point[0] = temp_TEXC[a];
+		point[1] = temp_TEXC[b];
+		point[2] = temp_TEXC[c];
+	}
+
+	delete[] temp_TEXC;
+
+
+	/* PARSE VERTEX FRAMES */
+
+	f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_verts), epi::file_c::SEEKPOINT_START);
+
+	byte which_normals[MD_NUM_NORMALS];
+
+	for (i = 0; i < num_frames; i++)
+	{
+		md->frames[i].vertices = new md2_vertex_c[num_verts];
+
+		memset(which_normals, 0, sizeof(which_normals));
+
+		md2_vertex_c *good_V = md->frames[i].vertices;
+
+		for (int v = 0; v < num_verts; v++, good_V++)
+		{
+			raw_md3_vertex_t vert;
+
+			f->Read(&vert, sizeof(raw_md3_vertex_t));
+
+			good_V->x = EPI_LE_S16(vert.x) / 64.0;
+			good_V->y = EPI_LE_S16(vert.y) / 64.0;
+			good_V->z = EPI_LE_S16(vert.z) / 64.0;
+
+			good_V->normal_idx = md3_normal_to_md2[vert.pitch >> 1][vert.yaw >> 1];
+
+			which_normals[good_V->normal_idx] = 1;
+		}
+
+		md->frames[i].used_normals = CreateNormalList(which_normals);
+	}
+
+
+	/* PARSE FRAME INFO */
+
+	f->Seek(EPI_LE_S32(header.ofs_frames), epi::file_c::SEEKPOINT_START);
+
+	for (i = 0; i < num_frames; i++)
+	{
+		raw_md3_frame_t frame;
+
+		f->Read(&frame, sizeof(raw_md3_frame_t));
+
+		md->frames[i].name = CopyFrameName(&frame);
+
+		I_Debugf("Frame %d = '%s'\n", i+1, md->frames[i].name);
+
+		// TODO: load in bbox (for visibility checking)
+	}
+
+	return md;
+}
 
 /*============== MODEL RENDERING ====================*/
 
@@ -652,7 +807,7 @@ typedef struct
 	vec2_t rx_mat;
 	vec2_t ry_mat;
 
-	multi_color_c nm_colors[MD2_NUM_NORMALS];
+	multi_color_c nm_colors[MD_NUM_NORMALS];
 
 	short * used_normals;
 
@@ -678,9 +833,9 @@ public:
 	{
 		short n = vert->normal_idx;
 
-		float nx1 = md2_normals[n].x;
-		float ny1 = md2_normals[n].y;
-		float nz1 = md2_normals[n].z;
+		float nx1 = md_normals[n].x;
+		float ny1 = md_normals[n].y;
+		float nz1 = md_normals[n].z;
 
 		float nx2 = nx1 * kx_mat.x + nz1 * kx_mat.y;
 		float nz2 = nx1 * kz_mat.x + nz1 * kz_mat.y;
@@ -716,9 +871,9 @@ static void ShadeNormals(abstract_shader_c *shader,
 		// FIXME !!!! pre-rotate normals too
 		float nx, ny, nz;
 		{
-			float nx1 = md2_normals[n].x;
-			float ny1 = md2_normals[n].y;
-			float nz1 = md2_normals[n].z;
+			float nx1 = md_normals[n].x;
+			float ny1 = md_normals[n].y;
+			float nz1 = md_normals[n].z;
 
 			float nx2 = nx1 * data->kx_mat.x + nz1 * data->kx_mat.y;
 			float nz2 = nx1 * data->kz_mat.x + nz1 * data->kz_mat.y;
@@ -1088,9 +1243,9 @@ void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame,
 		
 			short n = vert->normal_idx;
 
-			float norm_x = md2_normals[n].x;
-			float norm_y = md2_normals[n].y;
-			float norm_z = md2_normals[n].z;
+			float norm_x = md_normals[n].x;
+			float norm_y = md_normals[n].y;
+			float norm_z = md_normals[n].z;
 
 			glNormal3f(norm_y, norm_z, norm_x);
 

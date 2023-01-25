@@ -97,7 +97,7 @@ static bool I_TryOpenSound(int want_freq, bool want_stereo)
 	trydev.callback = SoundFill_Callback;
 
 	// Ask for signed 16-bit @ 48khz by default; allow SDL to adjust frequency if needed but never the format
-	mydev_id = SDL_OpenAudioDevice(NULL, 0, &trydev, &mydev, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
+	mydev_id = SDL_OpenAudioDevice(NULL, 0, &trydev, &mydev, 0);
 
 	if (mydev_id > 0)
 		return true;

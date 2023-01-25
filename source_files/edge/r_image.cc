@@ -423,6 +423,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump,
 	rim->source_type = type;
 	rim->source.graphic.lump = lump;
 	rim->source.graphic.is_patch = is_patch;
+	rim->source.graphic.user_defined = false; // This should only get set to true with DDFIMAGE specified DOOM format images
 	rim->source_palette = W_GetPaletteForLump(lump);
 
 	if (replaces)
@@ -514,7 +515,7 @@ static image_c *AddImageFlat(const char *name, int lump)
 }
 
 
-static image_c *AddImage_DOOM(imagedef_c *def)
+static image_c *AddImage_DOOM(imagedef_c *def, bool user_defined = false)
 {
 	const char *name = def->name.c_str();
 	const char *lump_name = def->info.c_str();
@@ -546,6 +547,9 @@ static image_c *AddImage_DOOM(imagedef_c *def)
 
 	rim->is_font = def->is_font;
 
+	if (user_defined)
+		rim->source.graphic.user_defined = true;
+
 	if (def->special & IMGSP_Crosshair)
 	{
 		float dy = (200.0f - rim->actual_h * rim->scale_y) / 2.0f - WEAPONTOP;
@@ -565,7 +569,7 @@ static image_c *AddImageUser(imagedef_c *def)
 	bool solid=false;
 
 	if (def->type == IMGDT_Lump && def->format == LIF_DOOM)
-		return AddImage_DOOM(def);
+		return AddImage_DOOM(def, true);
 
 	switch (def->type)
 	{
@@ -621,7 +625,7 @@ static image_c *AddImageUser(imagedef_c *def)
 				delete f;  // close file
 
 				if (def->type == IMGDT_Lump)
-					return AddImage_DOOM(def);
+					return AddImage_DOOM(def, true);
 
 				I_Warning("Unknown image format in: %s\n", filename);
 				return NULL;
@@ -872,7 +876,7 @@ const image_c ** W_ImageGetUserSprites(int *count)
 	{
 		image_c *rim = *it;
 
-		if (rim->source_type == IMSRC_User)
+		if (rim->source_type == IMSRC_User || rim->source.graphic.user_defined)
 			(*count) += 1;
 	}
 
@@ -889,7 +893,7 @@ const image_c ** W_ImageGetUserSprites(int *count)
 	{
 		image_c *rim = *it;
     
-		if (rim->source_type == IMSRC_User)
+		if (rim->source_type == IMSRC_User || rim->source.graphic.user_defined)
 			array[pos++] = rim;
 	}
 

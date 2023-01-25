@@ -122,7 +122,7 @@ public:
 		// case IMSRC_Graphic:
 		// case IMSRC_Sprite:
 		// case IMSRC_TX_HI:
-		struct { int lump; bool is_patch; } graphic;
+		struct { int lump; bool is_patch; bool user_defined; } graphic;
 
 		// case IMSRC_Flat:
 		// case IMSRC_Raw320x200:

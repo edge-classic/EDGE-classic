@@ -256,7 +256,7 @@ static void InstallSpriteImage(spritedef_c *def, const image_c *img,
 //
 // FillSpriteFrames
 //
-static void FillSpriteFrames(int file, int prog_base, int prog_total)
+static void FillSpriteFrames(int file)
 {
 	std::vector<int> * lumps = W_GetSpriteList(file);
 	if (lumps == NULL)
@@ -316,7 +316,7 @@ static void FillSpriteFrames(int file, int prog_base, int prog_total)
 //
 // Like the above, but made especially for IMAGES.DDF.
 //
-static void FillSpriteFramesUser(int prog_base, int prog_total)
+static void FillSpriteFramesUser()
 {
 	int img_num;
 	const image_c ** images = W_ImageGetUserSprites(&img_num);
@@ -553,11 +553,11 @@ void W_InitSprites(void)
 
 	int numfiles = W_GetNumFiles();
 
-	FillSpriteFramesUser(0, (numfiles+1) * 100);
+	FillSpriteFramesUser();
 
 	for (int file = numfiles - 1; file >= 0; file--)
 	{
-		FillSpriteFrames(file, (numfiles - file) * 100, (numfiles+1) * 100);
+		FillSpriteFrames(file);
 	}
 
 	MarkCompletedFrames();

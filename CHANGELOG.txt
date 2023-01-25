@@ -12,6 +12,10 @@ Bugs fixed
 + player.use_inventory() consuming item without running the associated script if the script was already running
 + Changed hardcoded finish/par time widths to prevent custom fonts from being clipped at 4:3 resolutions
 + "Read This!" menu item missing for Doom.
++ Fixed sprite frame overrides in DDFIMAGE not applying if they were Doom formatted images
++ Fixed jitter in Evil Eye and other animations
++ Fixed SDL sound device frequency being allowed to be set far above intended values if OS doesn't report the ability
+  to use 48kHz sample rate
 
 General Improvements
 --------------------

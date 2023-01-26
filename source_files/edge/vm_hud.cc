@@ -837,7 +837,7 @@ static void HD_rts_isactive(coal::vm_c *vm, int argc)
 
 	if (!name.empty())
 	{
-		if (RAD_IsActiveByTag(NULL, name.c_str()) == true)
+		if (RAD_IsActiveByTag(NULL, name.c_str()))
 			vm->ReturnFloat(1);
 		else
 			vm->ReturnFloat(0);

@@ -1053,7 +1053,7 @@ static void PL_use_inventory(coal::vm_c *vm, int argc)
 	//******
 	//If the same inventory script is already running then
 	// don't start the same one again
-	if (RAD_IsActiveByTag(NULL, script_name.c_str()) == false)
+	if (! RAD_IsActiveByTag(NULL, script_name.c_str()))
 	{
 		if (ui_player_who->inventory[inv].num > 0)
 		{

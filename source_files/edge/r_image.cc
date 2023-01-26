@@ -770,8 +770,8 @@ const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon)
 	// adjust sprite offsets so that (0,0) is normal
 	if (is_weapon)
 	{
-		rim->offset_x += (320 / 2 - rim->actual_w / 2);  // loss of accuracy
-		rim->offset_y += (200 - 32 - rim->actual_h);
+		rim->offset_x += (320.0f / 2.0f - rim->actual_w / 2.0f);  // loss of accuracy
+		rim->offset_y += (200.0f - 32.0f - rim->actual_h);
 	}
 	else
 	{

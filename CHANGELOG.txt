@@ -25,6 +25,10 @@ General Improvements
 + DDFSTYLE: CURSOR.FORCE_OFFSETS=<boolean> - When set to true, will honor cursor image's offsets even if they cause misalignment with
   menu entries. Default value is false
 
++ Added simplified R_PointToAngle and angle calculation constants from usernameAK (backported from EDGE 2.x)
+
++ Added some rearranged sky and unit drawing functions from dpjudas (backported from EDGE 2.x)
+
 New Features
 ------------
 + COALHUDS: new commands

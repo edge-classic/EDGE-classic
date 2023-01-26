@@ -92,8 +92,8 @@ typedef u32_t angle_t;
 // Conversion macros:
 
 #define F2AX(n)  (((n) < 0) ? (360.0f + (n)) : (n))
-#define ANG_2_FLOAT(a)  ((float) (a) * 360.0f / 4294967296.0f)
-#define FLOAT_2_ANG(n)  ((angle_t) (F2AX(n) / 360.0f * 4294967296.0f))
+#define ANG_2_FLOAT(a)  ((float) (a) * 0.00000008381903171539306640625f)
+#define FLOAT_2_ANG(n)  ((angle_t) (F2AX(n) * 11930464.7111f))
 
 
 class mobj_strref_c

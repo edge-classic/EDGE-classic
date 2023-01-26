@@ -296,11 +296,17 @@ void RGL_BeginSky(void)
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	glEdgeFlag(GL_TRUE);
+	// Draw the entire sky using only one glBegin/glEnd clause.
+	// glEnd is called in RGL_FinishSky and this code assumes that only
+	// RGL_DrawSkyWall and RGL_DrawSkyPlane is doing OpenGL calls in between.
+	glBegin(GL_TRIANGLES);
 }
 
 
 void RGL_FinishSky(void)
 {
+	glEnd(); // End glBegin(GL_TRIANGLES) from RGL_BeginSky
+
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 	if (! need_to_draw_sky)
@@ -541,19 +547,38 @@ void RGL_DrawSkyPlane(subsector_t *sub, float h)
 
 	glNormal3f(0, 0, (viewz > h) ? 1.0f : -1.0f);
 
-	glBegin(GL_POLYGON);
+	seg_t *seg = sub->segs;
+	if (!seg)
+		return;
 
-	for (seg_t *seg=sub->segs; seg; seg=seg->sub_next)
+	float x0 = seg->v1->x;
+	float y0 = seg->v1->y;
+	MIR_Coordinate(x0, y0);
+	seg = seg->sub_next;
+	if (!seg)
+		return;
+
+	float x1 = seg->v1->x;
+	float y1 = seg->v1->y;
+	MIR_Coordinate(x1, y1);
+	seg = seg->sub_next;
+	if (!seg)
+		return;
+
+	while(seg)
 	{
-		float x = seg->v1->x;
-		float y = seg->v1->y;
+		float x2 = seg->v1->x;
+		float y2 = seg->v1->y;
+		MIR_Coordinate(x2, y2);
 
-		MIR_Coordinate(x, y);
+		glVertex3f(x0, y0, h);
+		glVertex3f(x1, y1, h);
+		glVertex3f(x2, y2, h);
 
-		glVertex3f(x, y, h);
+		x1 = x2;
+		y1 = y2;
+		seg = seg->sub_next;
 	}
-
-	glEnd();
 }
 
 
@@ -577,14 +602,13 @@ void RGL_DrawSkyWall(seg_t *seg, float h1, float h2)
 
 	glNormal3f(y2 - y1, x1 - x2, 0);
 
-	glBegin(GL_QUADS);
-
 	glVertex3f(x1, y1, h1);
 	glVertex3f(x1, y1, h2);
 	glVertex3f(x2, y2, h2);
-	glVertex3f(x2, y2, h1);
 
-	glEnd();
+	glVertex3f(x2, y2, h1);
+	glVertex3f(x2, y2, h2);
+	glVertex3f(x1, y1, h1);
 }
 
 

@@ -65,6 +65,8 @@
 
 #include "font.h"
 
+#include "i_sdlinc.h"
+
 // Menu navigation stuff
 int key_menu_open;
 int key_menu_up;
@@ -1872,6 +1874,8 @@ bool M_Responder(event_t * ev)
 
 	int ch = ev->value.key.sym;
 
+	SDL_Keymod mod = SDL_GetModState();
+
 	// Produce psuedo keycodes from menu navigation buttons bound in the options menu
 	if (E_MatchesKey(key_menu_open, ch))
 	{
@@ -1971,7 +1975,8 @@ bool M_Responder(event_t * ev)
 			return true;
 		}
 		
-		ch = toupper(ch);
+		if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
+			ch = toupper(ch);
 		if (ch == '-')
 			ch = '_';
 			
@@ -2036,7 +2041,8 @@ bool M_Responder(event_t * ev)
 				break;
 
 			default:
-				ch = toupper(ch);
+				if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
+					ch = toupper(ch);
 				SYS_ASSERT(save_style);
 				if (ch >= 32 && ch <= 127 &&
 					saveCharIndex < SAVESTRINGSIZE - 1 &&

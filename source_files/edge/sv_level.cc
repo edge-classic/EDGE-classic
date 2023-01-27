@@ -259,6 +259,7 @@ static savefield_t sv_fields_regprops[] =
 
 	SF(type, "type", 1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(special, "special", 1, SVT_STRING, SR_SectorGetSpecial, SR_SectorPutSpecial),
+	SF(secret_found, "secret_found", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
 
 	SF(gravity, "gravity", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
 	SF(friction, "friction", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),

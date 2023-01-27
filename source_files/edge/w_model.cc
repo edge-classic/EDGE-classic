@@ -22,6 +22,7 @@
 #include "e_main.h"
 #include "r_image.h"
 #include "r_md2.h"
+#include "r_mdl.h"
 #include "r_things.h"
 #include "w_model.h"
 #include "w_wad.h"
@@ -34,12 +35,12 @@ static modeldef_c **models;
 static int nummodels = 0;
 
 
-modeldef_c::modeldef_c(const char *_prefix) : model(NULL)
+modeldef_c::modeldef_c(const char *_prefix) : md2_model(nullptr), mdl_model(nullptr)
 {
 	strcpy(name, _prefix);
 
 	for (int i=0; i < MAX_MODEL_SKINS; i++)
-		skins[i] = NULL;
+		skins[i] = nullptr;
 }
 
 modeldef_c::~modeldef_c()
@@ -49,12 +50,11 @@ modeldef_c::~modeldef_c()
 	// TODO: free the skins
 }
 
-
 static void FindModelFrameNames(md2_model_c *md, int model_num)
 {
 	int missing = 0;
 
-	I_Printf("Finding frame names for model '%sMD2'...\n",
+	I_Debugf("Finding frame names for model '%s'...\n",
 			 ddf_model_names[model_num].c_str());
 
 	for (int stnum = 1; stnum < num_states; stnum++)
@@ -86,10 +86,49 @@ static void FindModelFrameNames(md2_model_c *md, int model_num)
 	}
 
 	if (missing > 0)
-		I_Error("Failed to find %d frames for model '%sMD2' (see EDGE.LOG)\n",
+		I_Error("Failed to find %d frames for model '%s' (see EDGE.LOG)\n",
 				missing, ddf_model_names[model_num].c_str());
 }
 
+static void FindModelFrameNames(mdl_model_c *md, int model_num)
+{
+	int missing = 0;
+
+	I_Debugf("Finding frame names for model '%s'...\n",
+			 ddf_model_names[model_num].c_str());
+
+	for (int stnum = 1; stnum < num_states; stnum++)
+	{
+		state_t *st = &states[stnum];
+
+		if (st->sprite != model_num)
+			continue;
+
+		if (! (st->flags & SFF_Model))
+			continue;
+
+		if (! (st->flags & SFF_Unmapped))
+			continue;
+
+		SYS_ASSERT(st->model_frame);
+
+		st->frame = MDL_FindFrame(md, st->model_frame);
+
+		if (st->frame >= 0)
+		{
+			st->flags &= ~SFF_Unmapped;
+		}
+		else
+		{
+			missing++;
+			I_Printf("-- no such frame '%s'\n", st->model_frame);
+		}
+	}
+
+	if (missing > 0)
+		I_Error("Failed to find %d frames for model '%s' (see EDGE.LOG)\n",
+				missing, ddf_model_names[model_num].c_str());
+}
 
 modeldef_c *LoadModelFromLump(int model_num)
 {
@@ -102,9 +141,8 @@ modeldef_c *LoadModelFromLump(int model_num)
 
 	epi::file_c *f;
 
-	// try MD3 first, then MD2
+	// try MD3 first, then MD2, then MDL
 	sprintf(lumpname, "%sMD3", basename);
-
 	if (W_CheckNumForName(lumpname) >= 0)
 	{
 		I_Debugf("Loading model from lump : %s\n", lumpname);
@@ -112,37 +150,58 @@ modeldef_c *LoadModelFromLump(int model_num)
 		f = W_OpenLump(lumpname);
 		SYS_ASSERT(f);
 
-		def->model = MD3_LoadModel(f);
+		def->md2_model = MD3_LoadModel(f);
 	}
-	else
+	sprintf(lumpname, "%sMD2", basename);
+	if (W_CheckNumForName(lumpname) >= 0)
 	{
-		sprintf(lumpname, "%sMD2", basename);
 		I_Debugf("Loading model from lump : %s\n", lumpname);
 
 		f = W_OpenLump(lumpname);
 		if (! f)
 			I_Error("Missing model lump: %s\n", lumpname);
 
-		def->model = MD2_LoadModel(f);
+		def->md2_model = MD2_LoadModel(f);
+	}
+	sprintf(lumpname, "%sMDL", basename);
+	if (W_CheckNumForName(lumpname) >= 0)
+	{
+		I_Debugf("Loading model from lump : %s\n", lumpname);
+
+		f = W_OpenLump(lumpname);
+		if (! f)
+			I_Error("Missing model lump: %s\n", lumpname);
+
+		def->mdl_model = MDL_LoadModel(f);
 	}
 
-	SYS_ASSERT(def->model);
+	SYS_ASSERT(def->md2_model || def->mdl_model);
 
 	// close the lump
 	delete f;
 
-	for (int i=0; i < 10; i++)
+	if (def->md2_model)
 	{
-		sprintf(skinname, "%sSKN%d", basename, i);
+		for (int i=0; i < 10; i++)
+		{
+			sprintf(skinname, "%sSKN%d", basename, i);
 
-		def->skins[i] = W_ImageLookup(skinname, INS_Sprite, ILF_Null);
+			def->skins[i] = W_ImageLookup(skinname, INS_Sprite, ILF_Null);
+		}
 	}
 
-	// need at least one skin
-	if (! def->skins[1])
-		I_Error("Missing model skin: %sSKN1\n", basename);
+	// need at least one skin (MD2/MD3 only; MDLs should have them baked in already)
+	if (def->md2_model)
+	{
+		if (! def->skins[1])
+			I_Error("Missing model skin: %sSKN1\n", basename);
+	}
 
-	FindModelFrameNames(def->model, model_num);
+	if (def->md2_model)
+		FindModelFrameNames(def->md2_model, model_num);
+
+	if (def->mdl_model)
+		FindModelFrameNames(def->mdl_model, model_num);
 
 	return def;
 }

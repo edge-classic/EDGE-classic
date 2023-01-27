@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------------
-//  MD2 Models
+//  MDL Models
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 2002-2023  The EDGE Team.
+//  Copyright (c) 2023  The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -19,7 +19,7 @@
 //  Based on "qfiles.h" and "anorms.h" from the GPL'd quake 2 source
 //  release.  Copyright (C) 1997-2001 Id Software, Inc.
 //
-//  Based on MD2 loading and rendering code (C) 2004 David Henry.
+//  Based on MDL loading and rendering code (C) 2004 David Henry.
 //
 //----------------------------------------------------------------------------
 
@@ -28,9 +28,10 @@
 
 #include "types.h"
 #include "endianess.h"
+#include "image_data.h"
 
 #include "r_mdcommon.h"
-#include "r_md2.h"
+#include "r_mdl.h"
 #include "r_gldefs.h"
 #include "r_colormap.h"
 #include "r_effects.h"
@@ -41,24 +42,22 @@
 #include "r_shader.h"
 #include "r_units.h"
 #include "p_blockmap.h"
+#include "r_texgl.h"
 
 #include <vector>
 
 extern float P_ApproxDistance(float dx, float dy, float dz);
 
 
-// #define DEBUG_MD2_LOAD  1
-
-
-/*============== MD2 FORMAT DEFINITIONS ====================*/
+/*============== MDL FORMAT DEFINITIONS ====================*/
 
 
 // format uses float pointing values, but to allow for endianness
 // conversions they are represented here as unsigned integers.
 typedef u32_t f32_t;
 
-#define MD2_IDENTIFIER  "IDP2"
-#define MD2_VERSION     8
+#define MDL_IDENTIFIER  "IDPO"
+#define MDL_VERSION     6
 
 typedef struct
 {
@@ -66,154 +65,86 @@ typedef struct
 
 	s32_t version;
 
+	f32_t scale_x;
+	f32_t scale_y;
+	f32_t scale_z;
+
+	f32_t trans_x;
+	f32_t trans_y;
+	f32_t trans_z;
+
+	f32_t boundingradius;
+
+	f32_t eyepos_x;
+	f32_t eyepos_y;
+	f32_t eyepos_z;
+
+	s32_t num_skins;
+
 	s32_t skin_width;
 	s32_t skin_height;
 
-	s32_t frame_size;
-
-	s32_t num_skins;
 	s32_t num_vertices;  // per frame
-	s32_t num_st;
 	s32_t num_tris;
-	s32_t num_glcmds;
 	s32_t num_frames;
 
-	s32_t ofs_skins;
-	s32_t ofs_st;
-	s32_t ofs_tris;
-	s32_t ofs_frames;
-	s32_t ofs_glcmds;  
-	s32_t ofs_end;
+	s32_t synctype;
+	s32_t flags;
+	f32_t size;
 } 
-raw_md2_header_t;
+raw_mdl_header_t;
 
 typedef struct
 {
-	u16_t s, t;
+	s32_t onseam;
+	s32_t s;
+	s32_t t;
 } 
-raw_md2_texcoord_t;
+raw_mdl_texcoord_t;
 
 typedef struct 
 {
-	u16_t index_xyz[3];
-	u16_t index_st[3];
+	s32_t facesfront;
+	s32_t vertex[3];
 } 
-raw_md2_triangle_t;
+raw_mdl_triangle_t;
 
 typedef struct
 {
 	u8_t x, y, z;
 	u8_t light_normal;
 } 
-raw_md2_vertex_t;
+raw_mdl_vertex_t;
 
 typedef struct
 {
-	f32_t scale[3];
-	f32_t translate[3];
-
+	raw_mdl_vertex_t bboxmin;
+	raw_mdl_vertex_t bboxmax;
 	char name[16];
+	raw_mdl_vertex_t *verts;
 } 
-raw_md2_frame_t;
+raw_mdl_simpleframe_t;
 
 typedef struct
 {
-	char name[64];
+	s32_t type;
+	raw_mdl_simpleframe_t frame;
 }
-raw_md2_skin_t;
+raw_mdl_frame_t;
 
-/*============== MD3 FORMAT DEFINITIONS ====================*/
-
-
-// format uses float pointing values, but to allow for endianness
-// conversions they are represented here as unsigned integers.
-
-#define MD3_IDENTIFIER  "IDP3"
-#define MD3_VERSION     15
-
-typedef struct
-{
-	char ident[4];
-	s32_t version;
-
-	char name[64];
-	u32_t flags;
-
-	s32_t num_frames;
-	s32_t num_tags;
-	s32_t num_meshes;
-	s32_t num_skins;
-
-	s32_t ofs_frames;
-	s32_t ofs_tags;
-	s32_t ofs_meshes;
-	s32_t ofs_end;
-} 
-raw_md3_header_t;
-
-typedef struct
-{
-	char ident[4];
-	char name[64];
-	
-	u32_t flags;
-
-	s32_t num_frames;
-	s32_t num_shaders;
-	s32_t num_verts;
-	s32_t num_tris;
-
-	s32_t ofs_tris;
-	s32_t ofs_shaders;
-	s32_t ofs_texcoords;  // one texcoord per vertex
-	s32_t ofs_verts;
-	s32_t ofs_next_mesh;
-}
-raw_md3_mesh_t;
-
-typedef struct
-{
-	f32_t s, t;
-} 
-raw_md3_texcoord_t;
-
-typedef struct 
-{
-	u32_t index_xyz[3];
-} 
-raw_md3_triangle_t;
-
-typedef struct
-{
-	s16_t x, y, z;
-
-	u8_t pitch, yaw;
-} 
-raw_md3_vertex_t;
-
-typedef struct
-{
-	f32_t mins[3];
-	f32_t maxs[3];
-	f32_t origin[3];
-	f32_t radius;
-
-	char name[16];
-} 
-raw_md3_frame_t;
 
 /*============== EDGE REPRESENTATION ====================*/
 
-struct md2_vertex_c
+struct mdl_vertex_c
 {
 	float x, y, z;
 
 	short normal_idx;
 };
 
-struct md2_frame_c
+struct mdl_frame_c
 {
-	md2_vertex_c *vertices;
+	mdl_vertex_c *vertices;
 
 	const char *name;
 
@@ -221,15 +152,15 @@ struct md2_frame_c
 	short *used_normals;
 };
 
-struct md2_point_c
+struct mdl_point_c
 {
 	float skin_s, skin_t;
 
-	// index into frame's vertex array (md2_frame_c::verts)
+	// index into frame's vertex array (mdl_frame_c::verts)
 	int vert_idx;
 };
 
-struct md2_strip_c
+struct mdl_strip_c
 {
 	// either GL_TRIANGLE_STRIP or GL_TRIANGLE_FAN
 	GLenum mode;
@@ -237,35 +168,40 @@ struct md2_strip_c
 	// number of points in this strip / fan
 	int count;
 
-	// index to the first point (within md2_model_c::points).
+	// index to the first point (within mdl_model_c::points).
 	// All points for the strip are contiguous in that array.
 	int first;
 };
 
-class md2_model_c
+class mdl_model_c
 {
 public:
 	int num_frames;
 	int num_points;
 	int num_strips;
+	int skin_width;
+	int skin_height;
 
-	md2_frame_c *frames;
-	md2_point_c *points;
-	md2_strip_c *strips;
+	mdl_frame_c *frames;
+	mdl_point_c *points;
+	mdl_strip_c *strips;
 
 	int verts_per_frame;
 
+	std::vector<u32_t> skin_ids;
+
 public:
-	md2_model_c(int _nframe, int _npoint, int _nstrip) :
+	mdl_model_c(int _nframe, int _npoint, int _nstrip, int _swidth, int _sheight) :
 		num_frames(_nframe), num_points(_npoint),
-		num_strips(_nstrip), verts_per_frame(0)
+		num_strips(_nstrip), skin_width(_swidth),
+		skin_height(_sheight), verts_per_frame(0)
 	{
-		frames = new md2_frame_c[num_frames];
-		points = new md2_point_c[num_points];
-		strips = new md2_strip_c[num_strips];
+		frames = new mdl_frame_c[num_frames];
+		points = new mdl_point_c[num_points];
+		strips = new mdl_strip_c[num_strips];
 	}
 
-	~md2_model_c()
+	~mdl_model_c()
 	{
 		delete[] frames;
 		delete[] points;
@@ -276,19 +212,7 @@ public:
 
 /*============== LOADING CODE ====================*/
 
-static const char *CopyFrameName(raw_md2_frame_t *frm)
-{
-	char *str = new char[20];
-
-	memcpy(str, frm->name, 16);
-
-	// ensure it is NUL terminated
-	str[16] = 0;
-
-	return str;
-}
-
-static const char *CopyFrameName(raw_md3_frame_t *frm)
+static const char *CopyFrameName(raw_mdl_simpleframe_t *frm)
 {
 	char *str = new char[20];
 
@@ -323,14 +247,14 @@ static short *CreateNormalList(byte *which_normals)
 }
 
 
-md2_model_c *MD2_LoadModel(epi::file_c *f)
+mdl_model_c *MDL_LoadModel(epi::file_c *f)
 {
 	int i;
 
-	raw_md2_header_t header;
+	raw_mdl_header_t header;
 
 	/* read header */
-	f->Read(&header, sizeof (raw_md2_header_t));
+	f->Read(&header, sizeof (raw_mdl_header_t));
 
 	int version = EPI_LE_S32(header.version);
 
@@ -338,65 +262,91 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 			 header.ident[0], header.ident[1],
 			 header.ident[2], header.ident[3], version);
 
-	if (epi::prefix_cmp(header.ident, MD2_IDENTIFIER) != 0)
+	if (epi::prefix_cmp(header.ident, MDL_IDENTIFIER) != 0)
 	{
-		I_Error("MD2_LoadModel: lump is not an MD2 model!");
+		I_Error("MDL_LoadModel: lump is not an MDL model!");
 		return NULL; /* NOT REACHED */
 	}
 			
-	if (version != MD2_VERSION)
+	if (version != MDL_VERSION)
 	{
-		I_Error("MD2_LoadModel: strange version!");
+		I_Error("MDL_LoadModel: strange version!");
 		return NULL; /* NOT REACHED */
 	}
 
 	int num_frames = EPI_LE_S32(header.num_frames);
 	int num_tris = EPI_LE_S32(header.num_tris);
-	int num_sts = EPI_LE_S32(header.num_st);
+	int num_verts = EPI_LE_S32(header.num_vertices);
+	int swidth = EPI_LE_S32(header.skin_width);
+	int sheight = EPI_LE_S32(header.skin_height);
 	int num_points = num_tris * 3;
 	int num_strips = num_tris;
 
-	/* PARSE TRIANGLES */
+	mdl_model_c *md = new mdl_model_c(num_frames, num_points, num_strips, swidth, sheight);
 
-	raw_md2_triangle_t *md2_tris = new raw_md2_triangle_t[num_tris];
+	/* PARSE SKINS */
 
-	f->Seek(EPI_LE_S32(header.ofs_tris), epi::file_c::SEEKPOINT_START);
-	f->Read(md2_tris, num_tris * sizeof(raw_md2_triangle_t));
-
-	for (int tri = 0; tri < num_tris; tri++)
+	for (i=0; i < EPI_LE_S32(header.num_skins); i++)
 	{
-		md2_tris[tri].index_xyz[0] = EPI_LE_U16(md2_tris[tri].index_xyz[0]);
-		md2_tris[tri].index_xyz[1] = EPI_LE_U16(md2_tris[tri].index_xyz[1]);
-		md2_tris[tri].index_xyz[2] = EPI_LE_U16(md2_tris[tri].index_xyz[2]);
-		md2_tris[tri].index_st[0] = EPI_LE_U16(md2_tris[tri].index_st[0]);
-		md2_tris[tri].index_st[1] = EPI_LE_U16(md2_tris[tri].index_st[1]);
+		int group = 0;
+		u8_t *pixels = new u8_t[sheight * swidth];
+
+		// Check for single vs. group skins; error if group skin found
+		f->Read(&group, sizeof(int));
+		if (EPI_LE_S32(group))
+		{
+			I_Error("MDL_LoadModel: Group skins unsupported!\n");
+			return nullptr; // Not reached
+		}
+
+		f->Read(pixels, sheight * swidth * sizeof(u8_t));
+		epi::image_data_c *tmp_img = new epi::image_data_c(swidth, sheight, 3);
+		// Expand 8 bits paletted image to RGB
+		for (int i = 0; i < swidth * sheight; ++i)
+		{
+			for (int j = 0; j < 3; ++j)
+			{
+				tmp_img->pixels[(i * 3) + j] = md_colormap[pixels[i]][j];
+			}
+		}
+		delete[] pixels;
+		md->skin_ids.push_back(R_UploadTexture(tmp_img, UPL_MipMap | UPL_Smooth));
+		delete tmp_img;
 	}
 
 	/* PARSE TEXCOORDS */
+	raw_mdl_texcoord_t *texcoords = new raw_mdl_texcoord_t[num_verts];
+	f->Read(texcoords, num_verts * sizeof(raw_mdl_texcoord_t));
 
-	raw_md2_texcoord_t *md2_sts = new raw_md2_texcoord_t[num_sts];
+	/* PARSE TRIANGLES */
 
-	f->Seek(EPI_LE_S32(header.ofs_st), epi::file_c::SEEKPOINT_START);
-	f->Read(md2_sts, num_sts * sizeof(raw_md2_texcoord_t));
+	raw_mdl_triangle_t *tris = new raw_mdl_triangle_t[num_tris];
+	f->Read(tris, num_tris * sizeof(raw_mdl_triangle_t));
 
-	for (int st = 0; st < num_sts; st++)
+	/* PARSE FRAMES */
+
+	raw_mdl_frame_t *frames = new raw_mdl_frame_t[num_frames];
+
+	for (int fr = 0; fr < num_frames; fr++)
 	{
-		md2_sts[st].s = EPI_LE_U16(md2_sts[st].s);
-		md2_sts[st].t = EPI_LE_U16(md2_sts[st].t);
+		frames[fr].frame.verts = new raw_mdl_vertex_t[num_verts];
+		f->Read(&frames[fr].type, sizeof(int));
+		f->Read(&frames[fr].frame.bboxmin, sizeof(raw_mdl_vertex_t));
+		f->Read(&frames[fr].frame.bboxmax, sizeof(raw_mdl_vertex_t));
+		f->Read(frames[fr].frame.name, 16 * sizeof(char));
+		f->Read(frames[fr].frame.verts, num_verts * sizeof(raw_mdl_vertex_t));
 	}
 
 	I_Debugf("  frames:%d  points:%d  tris: %d\n",
 			num_frames, num_tris * 3, num_tris);
 
-	md2_model_c *md = new md2_model_c(num_frames, num_points, num_strips);
-
-	md->verts_per_frame = EPI_LE_S32(header.num_vertices);
+	md->verts_per_frame = num_verts;
 
 	I_Debugf("  verts_per_frame:%d\n", md->verts_per_frame);
 
-	// convert tris into strips and points
-	md2_strip_c *strip = md->strips;
-	md2_point_c *point = md->points;
+	// convert glcmds into strips and points
+	mdl_strip_c *strip = md->strips;
+	mdl_point_c *point = md->points;
 
 	for (i = 0; i < num_tris; i++)
 	{
@@ -412,12 +362,14 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 
 		for (int j=0; j < 3; j++, point++)
 		{
-			raw_md2_triangle_t t = md2_tris[i];
-
-			point->skin_s   = (float)md2_sts[t.index_st[j]].s / header.skin_width;
-			point->skin_t   = 1.0f - ((float)md2_sts[t.index_st[j]].t / header.skin_height);
-			point->vert_idx = t.index_xyz[j];
-
+			raw_mdl_triangle_t tri = tris[i];
+			point->vert_idx = EPI_LE_S32(tri.vertex[j]);
+			float s = (float)texcoords[point->vert_idx].s;
+			float t = (float)texcoords[point->vert_idx].t;
+			if (!EPI_LE_S32(tri.facesfront) && EPI_LE_S32(texcoords[tri.vertex[j]].onseam))
+				s += (float)swidth * 0.5f;
+			point->skin_s   = (s + 0.5f) / (float)swidth;
+			point->skin_t   = (t + 0.5f) / (float)sheight;
 			SYS_ASSERT(point->vert_idx >= 0);
 			SYS_ASSERT(point->vert_idx < md->verts_per_frame);
 		}
@@ -426,71 +378,54 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 	SYS_ASSERT(strip == md->strips + md->num_strips);
 	SYS_ASSERT(point == md->points + md->num_points);
 
-	delete[] md2_tris;
-	delete[] md2_sts;
-
 	/* PARSE FRAMES */
 
 	byte which_normals[MD_NUM_NORMALS];
 
-	raw_md2_vertex_t *raw_verts = new raw_md2_vertex_t[md->verts_per_frame];
+	u32_t raw_scale[3];
+	u32_t raw_translate[3];
 
-	f->Seek(EPI_LE_S32(header.ofs_frames), epi::file_c::SEEKPOINT_START);
+	raw_scale[0] = EPI_LE_U32(header.scale_x);
+	raw_scale[1] = EPI_LE_U32(header.scale_y);
+	raw_scale[2] = EPI_LE_U32(header.scale_z);
+	raw_translate[0] = EPI_LE_U32(header.trans_x);
+	raw_translate[1] = EPI_LE_U32(header.trans_y);
+	raw_translate[2] = EPI_LE_U32(header.trans_z);
+
+	float *f_ptr = (float *) raw_scale;
+	float scale[3];
+	float translate[3];
+
+	scale[0] = f_ptr[0];
+	scale[1] = f_ptr[1];
+	scale[2] = f_ptr[2];
+
+	f_ptr = (float *) raw_translate;
+	translate[0] = f_ptr[0];
+	translate[1] = f_ptr[1];
+	translate[2] = f_ptr[2];
 
 	for (i = 0; i < num_frames; i++)
 	{
-		raw_md2_frame_t raw_frame;
+		raw_mdl_frame_t raw_frame = frames[i];
 
-		f->Read(&raw_frame, sizeof(raw_frame));
+		md->frames[i].name = CopyFrameName(&raw_frame.frame);
 
-		for (int j = 0; j < 3; j++)
-		{
-			raw_frame.scale[j]     = EPI_LE_U32(raw_frame.scale[j]);
-			raw_frame.translate[j] = EPI_LE_U32(raw_frame.translate[j]);
-		}
+		raw_mdl_vertex_t *raw_verts = frames[i].frame.verts;
 
-		float *f_ptr = (float *) raw_frame.scale;
-
-		float scale[3];
-		float translate[3];
-
-		scale[0] = f_ptr[0];
-		scale[1] = f_ptr[1];
-		scale[2] = f_ptr[2];
-
-		translate[0] = f_ptr[3];
-		translate[1] = f_ptr[4];
-		translate[2] = f_ptr[5];
-
-		md->frames[i].name = CopyFrameName(&raw_frame);
-
-#ifdef DEBUG_MD2_LOAD
-		I_Debugf("  __FRAME_%d__[%s]\n", i+1, md->frames[i].name);
-		I_Debugf("    scale: %1.2f, %1.2f, %1.2f\n", scale[0], scale[1], scale[2]);
-		I_Debugf("    translate: %1.2f, %1.2f, %1.2f\n", translate[0], translate[1], translate[2]);
-#endif
-
-		f->Read(raw_verts, md->verts_per_frame * sizeof(raw_md2_vertex_t));
-
-		md->frames[i].vertices = new md2_vertex_c[md->verts_per_frame];
+		md->frames[i].vertices = new mdl_vertex_c[md->verts_per_frame];
 
 		memset(which_normals, 0, sizeof(which_normals));
 
 		for (int v = 0; v < md->verts_per_frame; v++)
 		{
-			raw_md2_vertex_t *raw_V  = raw_verts + v;
-			md2_vertex_c     *good_V = md->frames[i].vertices + v;
+			raw_mdl_vertex_t *raw_V  = raw_verts + v;
+			mdl_vertex_c     *good_V = md->frames[i].vertices + v;
 
 			good_V->x = (int)raw_V->x * scale[0] + translate[0];
 			good_V->y = (int)raw_V->y * scale[1] + translate[1];
 			good_V->z = (int)raw_V->z * scale[2] + translate[2];
 
-#ifdef DEBUG_MD2_LOAD
-			I_Debugf("    __VERT_%d__\n", v);
-			I_Debugf("      raw: %d,%d,%d\n", raw_V->x, raw_V->y, raw_V->z);
-			I_Debugf("      normal: %d\n", raw_V->light_normal);
-			I_Debugf("      good: %1.2f, %1.2f, %1.2f\n", good_V->x, good_V->y, good_V->z);
-#endif
 			good_V->normal_idx = raw_V->light_normal;
 
 			SYS_ASSERT(good_V->normal_idx >= 0);
@@ -502,260 +437,26 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 		md->frames[i].used_normals = CreateNormalList(which_normals);
 	}
 
-	delete[] raw_verts;
-
+	delete[] texcoords;
+	delete[] tris;
+	delete[] frames;
+	
 	return md;
 }
 
-short MD2_FindFrame(md2_model_c *md, const char *name)
+short MDL_FindFrame(mdl_model_c *md, const char *name)
 {
 	SYS_ASSERT(strlen(name) > 0);
 
  	for (int f = 0; f < md->num_frames; f++)
 	{
-		md2_frame_c *frame = &md->frames[f];
+		mdl_frame_c *frame = &md->frames[f];
 
 		if (DDF_CompareName(name, frame->name) == 0)
 			return f;
 	}
 
 	return -1; // NOT FOUND
-}
-
-/*============== MD3 LOADING CODE ====================*/
-
-static byte md3_normal_to_md2[128][128];
-static bool md3_normal_map_built = false;
-
-static byte MD2_FindNormal(float x, float y, float z)
-{
-	// -AJA- we make the search around SIX times faster by only
-	// considering the first quadrant (where x, y, z are >= 0).
-
-	int quadrant = 0;
-
-	if (x < 0) { x = -x; quadrant |= 4; }
-	if (y < 0) { y = -y; quadrant |= 2; }
-	if (z < 0) { z = -z; quadrant |= 1; }
-
-	int   best_g = 0;
-	float best_dot = -1;
-
-	for (int i = 0; i < 27; i++)
-	{
-		int n = md_normal_groups[i][0];
-
-		float nx = md_normals[n].x;
-		float ny = md_normals[n].y;
-		float nz = md_normals[n].z;
-
-		float dot = (x*nx + y*ny + z*nz);
-
-		if (dot > best_dot)
-		{
-			best_g   = i;
-			best_dot = dot;
-		}
-	}
-
-	return md_normal_groups[best_g][quadrant];
-}
-
-static void MD3_CreateNormalMap(void)
-{
-	// Create a table mapping MD3 normals to MD2 normals.
-	// We discard the least significant bit of pitch and yaw
-	// (for speed and memory saving).
-
-
-	// build a sine table for even faster calcs
-	float sintab[160];
-
-	for (int i = 0; i < 160; i++)
-		sintab[i] = sin(i * M_PI / 64.0);
-
-	for (int pitch = 0; pitch < 128; pitch++)
-	{
-		byte *dest = &md3_normal_to_md2[pitch][0];
-
-		for (int yaw = 0; yaw < 128; yaw++)
-		{
-			float z = sintab[pitch+32];
-			float w = sintab[pitch];
-
-			float x = w * sintab[yaw+32];
-			float y = w * sintab[yaw];
-
-			*dest++ = MD2_FindNormal(x, y, z);
-		}
-	}
-
-	md3_normal_map_built = true;
-}
-
-
-md2_model_c *MD3_LoadModel(epi::file_c *f)
-{
-	int i;
-	float *ff;
-
-	if (! md3_normal_map_built)
-		MD3_CreateNormalMap();
-
-	raw_md3_header_t header;
-
-	/* read header */
-	f->Read(&header, sizeof (raw_md3_header_t));
-
-	int version = EPI_LE_S32(header.version);
-
-	I_Debugf("MODEL IDENT: [%c%c%c%c] VERSION: %d",
-			 header.ident[0], header.ident[1],
-			 header.ident[2], header.ident[3], version);
-
-	if (strncmp(header.ident, MD3_IDENTIFIER, 4) != 0)
-	{
-		I_Error("MD3_LoadModel: lump is not an MD3 model!");
-		return NULL; /* NOT REACHED */
-	}
-			
-	if (version != MD3_VERSION)
-	{
-		I_Error("MD3_LoadModel: strange version!");
-		return NULL; /* NOT REACHED */
-	}
-
-	if (EPI_LE_S32(header.num_meshes) > 1)
-		I_Warning("Ignoring extra meshes in MD3 model.\n");
-
-
-	/* LOAD MESH #1 */
-	
-	int mesh_base = EPI_LE_S32(header.ofs_meshes);
-
-	f->Seek(mesh_base, epi::file_c::SEEKPOINT_START);
-
-	raw_md3_mesh_t mesh;
-
-	f->Read(&mesh, sizeof (raw_md3_mesh_t));
-
-	int num_frames = EPI_LE_S32(mesh.num_frames);
-	int num_verts  = EPI_LE_S32(mesh.num_verts);
-	int num_strips = EPI_LE_S32(mesh.num_tris);
-
-	I_Debugf("  frames:%d  verts:%d  strips: %d\n",
-			num_frames, num_verts, num_strips);
-
-	md2_model_c *md = new md2_model_c(num_frames, num_strips*3, num_strips);
-
-	md->verts_per_frame = num_verts;
-
-
-	/* PARSE TEXCOORD */
-
-	md2_point_c * temp_TEXC = new md2_point_c[num_verts];
-
-	f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_texcoords), epi::file_c::SEEKPOINT_START);
-
-	for (i = 0; i < num_verts; i++)
-	{
-		raw_md3_texcoord_t texc;
-
-		f->Read(&texc, sizeof (raw_md3_texcoord_t));
-
-		texc.s = EPI_LE_U32(texc.s);
-		texc.t = EPI_LE_U32(texc.t);
-
-		ff = (float *) &texc.s;  temp_TEXC[i].skin_s = *ff;
-		ff = (float *) &texc.t;  temp_TEXC[i].skin_t = 1.0f - *ff;
-
-		temp_TEXC[i].vert_idx = i;
-	}
-
-
-	/* PARSE TRIANGLES */
-
-	f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_tris), epi::file_c::SEEKPOINT_START);
-
-	for (i = 0; i < num_strips; i++)
-	{
-		raw_md3_triangle_t tri;
-
-		f->Read(&tri, sizeof (raw_md3_triangle_t));
-
-		int a = EPI_LE_U32(tri.index_xyz[0]);
-		int b = EPI_LE_U32(tri.index_xyz[1]);
-		int c = EPI_LE_U32(tri.index_xyz[2]);
-
-		SYS_ASSERT(a < num_verts);
-		SYS_ASSERT(b < num_verts);
-		SYS_ASSERT(c < num_verts);
-
-		md->strips[i].mode  = GL_TRIANGLE_STRIP;
-		md->strips[i].first = i * 3;
-		md->strips[i].count = 3;
-
-		md2_point_c *point = md->points + i * 3;
-
-		point[0] = temp_TEXC[a];
-		point[1] = temp_TEXC[b];
-		point[2] = temp_TEXC[c];
-	}
-
-	delete[] temp_TEXC;
-
-
-	/* PARSE VERTEX FRAMES */
-
-	f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_verts), epi::file_c::SEEKPOINT_START);
-
-	byte which_normals[MD_NUM_NORMALS];
-
-	for (i = 0; i < num_frames; i++)
-	{
-		md->frames[i].vertices = new md2_vertex_c[num_verts];
-
-		memset(which_normals, 0, sizeof(which_normals));
-
-		md2_vertex_c *good_V = md->frames[i].vertices;
-
-		for (int v = 0; v < num_verts; v++, good_V++)
-		{
-			raw_md3_vertex_t vert;
-
-			f->Read(&vert, sizeof(raw_md3_vertex_t));
-
-			good_V->x = EPI_LE_S16(vert.x) / 64.0;
-			good_V->y = EPI_LE_S16(vert.y) / 64.0;
-			good_V->z = EPI_LE_S16(vert.z) / 64.0;
-
-			good_V->normal_idx = md3_normal_to_md2[vert.pitch >> 1][vert.yaw >> 1];
-
-			which_normals[good_V->normal_idx] = 1;
-		}
-
-		md->frames[i].used_normals = CreateNormalList(which_normals);
-	}
-
-
-	/* PARSE FRAME INFO */
-
-	f->Seek(EPI_LE_S32(header.ofs_frames), epi::file_c::SEEKPOINT_START);
-
-	for (i = 0; i < num_frames; i++)
-	{
-		raw_md3_frame_t frame;
-
-		f->Read(&frame, sizeof(raw_md3_frame_t));
-
-		md->frames[i].name = CopyFrameName(&frame);
-
-		I_Debugf("Frame %d = '%s'\n", i+1, md->frames[i].name);
-
-		// TODO: load in bbox (for visibility checking)
-	}
-
-	return md;
 }
 
 /*============== MODEL RENDERING ====================*/
@@ -765,11 +466,11 @@ typedef struct
 {
 	mobj_t *mo;
 
-	md2_model_c *model;
+	mdl_model_c *model;
 
-	const md2_frame_c *frame1;
-	const md2_frame_c *frame2;
-	const md2_strip_c *strip;
+	const mdl_frame_c *frame1;
+	const mdl_frame_c *frame2;
+	const mdl_strip_c *strip;
 
 	float lerp;
 	float x, y, z;
@@ -820,7 +521,7 @@ public:
 		pos->z = z + z2;
 	}
 
-	void CalcNormal(vec3_t *normal, const md2_vertex_c *vert) const
+	void CalcNormal(vec3_t *normal, const mdl_vertex_c *vert) const
 	{
 		short n = vert->normal_idx;
 
@@ -892,7 +593,7 @@ static void DLIT_Model(mobj_t *mo, void *dataptr)
 	ShadeNormals(mo->dlight.shader, data);
 }
 
-static int MD2_MulticolMaxRGB(model_coord_data_t *data, bool additive)
+static int MDL_MulticolMaxRGB(model_coord_data_t *data, bool additive)
 {
 	int result = 0;
 
@@ -934,21 +635,20 @@ static inline void ModelCoordFunc(model_coord_data_t *data,
 					 int v_idx, vec3_t *pos,
 					 float *rgb, vec2_t *texc, vec3_t *normal)
 {
-	const md2_model_c *md = data->model;
+	const mdl_model_c *md = data->model;
 
-	const md2_frame_c *frame1 = data->frame1;
-	const md2_frame_c *frame2 = data->frame2;
-	const md2_strip_c *strip  = data->strip;
+	const mdl_frame_c *frame1 = data->frame1;
+	const mdl_frame_c *frame2 = data->frame2;
+	const mdl_strip_c *strip  = data->strip;
 
 	SYS_ASSERT(strip->first + v_idx >= 0);
 	SYS_ASSERT(strip->first + v_idx < md->num_points);
 
-	const md2_point_c *point = &md->points[strip->first + v_idx];
+	const mdl_point_c *point = &md->points[strip->first + v_idx];
 
-	const md2_vertex_c *vert1 = &frame1->vertices[point->vert_idx];
-	const md2_vertex_c *vert2 = &frame2->vertices[point->vert_idx];
+	const mdl_vertex_c *vert1 = &frame1->vertices[point->vert_idx];
+	const mdl_vertex_c *vert2 = &frame2->vertices[point->vert_idx];
 
-	
 	float x1 = LerpIt(vert1->x, vert2->x, data->lerp);
 	float y1 = LerpIt(vert1->y, vert2->y, data->lerp);
 	float z1 = LerpIt(vert1->z, vert2->z, data->lerp) + data->bias;
@@ -958,11 +658,9 @@ static inline void ModelCoordFunc(model_coord_data_t *data,
 
 	data->CalcPos(pos, x1, y1, z1);
 
-
-	const md2_vertex_c *n_vert = (data->lerp < 0.5) ? vert1 : vert2;
+	const mdl_vertex_c *n_vert = (data->lerp < 0.5) ? vert1 : vert2;
 
 	data->CalcNormal(normal, n_vert);
-
 
 	if (data->is_fuzzy)
 	{
@@ -993,7 +691,7 @@ static inline void ModelCoordFunc(model_coord_data_t *data,
 }
 
 
-void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon,
+void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon,
 		             int frame1, int frame2, float lerp,
 		             float x, float y, float z, mobj_t *mo,
 					 region_properties_t *props,
@@ -1011,7 +709,6 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 		return;
 	}
 
-
 	model_coord_data_t data;
 
 	data.is_fuzzy = (mo->flags & MF_FUZZY) ? true : false;
@@ -1021,18 +718,7 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 	if (trans <= 0)
 		return;
 
-
-	int blending;
-
-	if (trans >= 0.99f && skin_img->opacity == OPAC_Solid)
-		blending = BL_NONE;
-	else if (trans < 0.11f || skin_img->opacity == OPAC_Complex)
-		blending = BL_Masked;
-	else
-		blending = BL_Less;
-
-	if (trans < 0.99f || skin_img->opacity == OPAC_Complex)
-		blending |= BL_Alpha;
+	int blending = BL_NONE;
 
 	if (mo->hyperflags & HF_NOZBUFFER)
 		blending |= BL_NoZBuf;
@@ -1041,7 +727,6 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 		blending |= BL_CullFront;
 	else
 		blending |= BL_CullBack;
-
 
 	data.mo = mo;
 	data.model = md;
@@ -1065,18 +750,15 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 
 	M_Angle2Matrix(tilt ? ~mo->vertangle : 0, &data.kx_mat, &data.kz_mat);
 
-	
 	angle_t ang = mo->angle;
 
 	MIR_Angle(ang);
 
 	M_Angle2Matrix(~ ang, &data.rx_mat, &data.ry_mat);
 
-
 	data.used_normals = (lerp < 0.5) ? data.frame1->used_normals : data.frame2->used_normals;
 
 	InitNormalColors(&data);
-
 
 	GLuint skin_tex = 0;
 
@@ -1106,13 +788,13 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 	}
 	else /* (! data.is_fuzzy) */
 	{
-		skin_tex = W_ImageCache(skin_img, false,
-			ren_fx_colmap ? ren_fx_colmap :
-			is_weapon ? NULL : mo->info->palremap);
+		skin_tex = md->skin_ids[0]; // Just use skin 0?
 
-		data.im_right = IM_RIGHT(skin_img);
-		data.im_top   = IM_TOP(skin_img);
+		if (skin_tex == 0)
+			I_Error("MDL Frame %s missing skins?\n", md->frames[frame1].name);
 
+		data.im_right = (float)md->skin_width / (float)W_MakeValidSize(md->skin_width);
+		data.im_top   = (float)md->skin_height / (float)W_MakeValidSize(md->skin_height);
 
 		abstract_shader_c *shader = R_GetColormapShader(props, mo->state->bright);
 
@@ -1153,12 +835,12 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 		if (pass > 0 && pass < num_pass-1)
 		{
 			UpdateMulticols(&data);
-			if (MD2_MulticolMaxRGB(&data, false) <= 0)
+			if (MDL_MulticolMaxRGB(&data, false) <= 0)
 				continue;
 		}
 		else if (data.is_additive)
 		{
-			if (MD2_MulticolMaxRGB(&data, true) <= 0)
+			if (MDL_MulticolMaxRGB(&data, true) <= 0)
 				continue;
 		}
 
@@ -1187,7 +869,7 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 }
 
 
-void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame,
+void MDL_RenderModel_2D(mdl_model_c *md, const image_c *skin_img, int frame,
 		                float x, float y, float xscale, float yscale,
 		                const mobjtype_c *info)
 {
@@ -1195,10 +877,13 @@ void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame,
 	if (frame < 0 || frame >= md->num_frames)
 		return;
 
-	GLuint skin_tex = W_ImageCache(skin_img, false, info->palremap);
+	GLuint skin_tex = md->skin_ids[0]; // Just use skin 0?
 
-	float im_right = IM_RIGHT(skin_img);
-	float im_top   = IM_TOP(skin_img);
+	if (skin_tex == 0)
+		I_Error("MDL Frame %s missing skins?\n", md->frames[frame].name);
+
+	float im_right = (float)md->skin_width / (float)W_MakeValidSize(md->skin_width);
+	float im_top   = (float)md->skin_height / (float)W_MakeValidSize(md->skin_height);
 
 	xscale = yscale * info->model_scale * info->model_aspect;
 	yscale = yscale * info->model_scale;
@@ -1216,19 +901,19 @@ void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame,
 
 	for (int i = 0; i < md->num_strips; i++)
 	{
-		const md2_strip_c *strip = & md->strips[i];
+		const mdl_strip_c *strip = & md->strips[i];
 
 		glBegin(strip->mode);
 
 		for (int v_idx=0; v_idx < md->strips[i].count; v_idx++)
 		{
-			const md2_frame_c *frame_ptr = & md->frames[frame];
+			const mdl_frame_c *frame_ptr = & md->frames[frame];
 
 			SYS_ASSERT(strip->first + v_idx >= 0);
 			SYS_ASSERT(strip->first + v_idx < md->num_points);
 
-			const md2_point_c *point = &md->points[strip->first + v_idx];
-			const md2_vertex_c *vert = &frame_ptr->vertices[point->vert_idx];
+			const mdl_point_c *point = &md->points[strip->first + v_idx];
+			const mdl_vertex_c *vert = &frame_ptr->vertices[point->vert_idx];
 
 			glTexCoord2f(point->skin_s * im_right, point->skin_t * im_top);
 		

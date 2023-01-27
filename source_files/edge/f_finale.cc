@@ -48,6 +48,7 @@
 #include "am_map.h"
 #include "r_colormap.h"
 #include "r_draw.h"
+#include "r_mdl.h"
 #include "r_md2.h"
 #include "r_modes.h"
 #include "r_state.h"
@@ -777,8 +778,12 @@ static void CastDrawer(void)
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
-		MD2_RenderModel_2D(md->model, skin_img, caststate->frame,
-						   pos_x, pos_y, scale_x, scale_y, castorder);
+		if (md->md2_model)
+			MD2_RenderModel_2D(md->md2_model, skin_img, caststate->frame,
+							pos_x, pos_y, scale_x, scale_y, castorder);
+		else
+			MDL_RenderModel_2D(md->mdl_model, skin_img, caststate->frame,
+							pos_x, pos_y, scale_x, scale_y, castorder);
 
 		glDisable(GL_DEPTH_TEST);
 		return;

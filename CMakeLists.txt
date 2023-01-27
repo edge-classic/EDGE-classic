@@ -118,7 +118,8 @@ add_executable(
 	source_files/edge/r_misc.cc     
 	source_files/edge/r_sky.cc      
 	source_files/edge/r_colormap.cc 
-	source_files/edge/r_modes.cc    
+	source_files/edge/r_modes.cc
+	source_files/edge/r_mdl.cc    
 	source_files/edge/r_md2.cc      
 	source_files/edge/r_image.cc    
 	source_files/edge/r_doomtex.cc  

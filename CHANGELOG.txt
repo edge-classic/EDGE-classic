@@ -2,6 +2,24 @@ https://github.com/dashodanger/EDGE-classic
 
 Current as of: January 2023
 
+CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)
+====================================
+
+Bugs fixed
+----------
++ Fixed 1.32 secret sector fix not being preserved in save games; i.e. the same secret would increment the
+  secret counter when re-loading the game
+
+General Improvements
+--------------------
++ Improved model and unit rendering to thrash the GL state a bit less
+
+New Features
+------------
++ Added support for MDL (Quake 1) models
+
++ Ported MD3 model support from EDGE 1.32 codebase
+
 
 CHANGELOG for EDGE-Classic 1.32 (since EDGE-Classic 1.31)
 ====================================
@@ -39,10 +57,6 @@ New Features
   - Uses all parameters that regular style font entries use (SELECTED.FONT, SELECTED.SCALE, etc)
   - Will only apply to the currently selected/highlighted menu item
   - If not defined, will fall back to previous behavior for backwards compatibility
-
-+ Added MD3 model support from EDGE 1.32 codebase
-
-
 
 
 CHANGELOG for EDGE-Classic 1.31 (since EDGE-Classic 1.3)

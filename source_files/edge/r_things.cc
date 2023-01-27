@@ -41,6 +41,7 @@
 #include "r_effects.h"
 #include "r_gldefs.h"
 #include "r_image.h"
+#include "r_mdl.h"
 #include "r_md2.h"
 #include "r_misc.h"
 #include "r_modes.h"
@@ -613,10 +614,16 @@ I_Debugf("Render model: no skin %d\n", skin_num);
 		lerp = CLAMP(0, lerp, 1);
 	}
 
-	MD2_RenderModel(md->model, skin_img, true,
-			        last_frame, psp->state->frame, lerp,
-			        x, y, z, p->mo, view_props,
-					1.0f /* scale */, w->model_aspect, w->model_bias);
+	if (md->md2_model)
+		MD2_RenderModel(md->md2_model, skin_img, true,
+						last_frame, psp->state->frame, lerp,
+						x, y, z, p->mo, view_props,
+						1.0f /* scale */, w->model_aspect, w->model_bias);
+	else
+		MDL_RenderModel(md->mdl_model, skin_img, true,
+						last_frame, psp->state->frame, lerp,
+						x, y, z, p->mo, view_props,
+						1.0f /* scale */, w->model_aspect, w->model_bias);
 }
 
 
@@ -1166,11 +1173,18 @@ I_Debugf("Render model: no skin %d\n", mo->model_skin);
 		lerp = CLAMP(0, lerp, 1);
 	}
 
-	MD2_RenderModel(md->model, skin_img, false,
-			        last_frame, mo->state->frame, lerp,
-					dthing->mx, dthing->my, z, mo, mo->props,
-					mo->info->model_scale, mo->info->model_aspect,
-					mo->info->model_bias);
+	if (md->md2_model)
+		MD2_RenderModel(md->md2_model, skin_img, false,
+						last_frame, mo->state->frame, lerp,
+						dthing->mx, dthing->my, z, mo, mo->props,
+						mo->info->model_scale, mo->info->model_aspect,
+						mo->info->model_bias);
+	else
+		MDL_RenderModel(md->mdl_model, skin_img, false,
+						last_frame, mo->state->frame, lerp,
+						dthing->mx, dthing->my, z, mo, mo->props,
+						mo->info->model_scale, mo->info->model_aspect,
+						mo->info->model_bias);
 }
 
 

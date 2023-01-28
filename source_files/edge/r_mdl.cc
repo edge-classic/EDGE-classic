@@ -364,9 +364,9 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
 		{
 			raw_mdl_triangle_t tri = tris[i];
 			point->vert_idx = EPI_LE_S32(tri.vertex[j]);
-			float s = (float)texcoords[point->vert_idx].s;
-			float t = (float)texcoords[point->vert_idx].t;
-			if (!EPI_LE_S32(tri.facesfront) && EPI_LE_S32(texcoords[tri.vertex[j]].onseam))
+			float s = (float)EPI_LE_S16(texcoords[point->vert_idx].s);
+			float t = (float)EPI_LE_S16(texcoords[point->vert_idx].t);
+			if (!EPI_LE_S32(tri.facesfront) && EPI_LE_S32(texcoords[point->vert_idx].onseam))
 				s += (float)swidth * 0.5f;
 			point->skin_s   = (s + 0.5f) / (float)swidth;
 			point->skin_t   = (t + 0.5f) / (float)sheight;
@@ -671,7 +671,7 @@ static inline void ModelCoordFunc(model_coord_data_t *data,
 		return;
 	}
 
-	texc->Set(point->skin_s * data->im_right, point->skin_t * data->im_top);
+	texc->Set(point->skin_s, point->skin_t);
 
 
 	multi_color_c *col = &data->nm_colors[n_vert->normal_idx];

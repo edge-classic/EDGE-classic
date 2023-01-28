@@ -120,6 +120,8 @@ public:
 	float im_right;
 	float im_top;
 
+	multi_color_c *nm_colors;
+
 public:
 	vxl_model_c(int _nframe, int _npoint, int _nstrip) :
 		num_frames(_nframe), num_points(_npoint),
@@ -217,6 +219,13 @@ vxl_model_c *VXL_LoadModel(epi::file_c *f)
 	int num_strips = num_tris;
 
 	vxl_model_c *md = new vxl_model_c(num_frames, num_points, num_strips);
+
+	md->nm_colors = new multi_color_c[num_verts];
+
+	for (i=0; i < num_verts; i++)
+	{
+		md->nm_colors[i].Clear();
+	}
 
 	md->skin_width = glvmesh.imgWidth;
 	md->skin_height = glvmesh.imgHeight;
@@ -324,8 +333,6 @@ typedef struct
 	vec2_t rx_mat;
 	vec2_t ry_mat;
 
-	multi_color_c *nm_colors;
-
 	bool is_additive;
 
 public:
@@ -362,13 +369,11 @@ public:
 model_coord_data_t;
 
 
-static void InitNormalColors(model_coord_data_t *data)
+static void ClearNormalColors(model_coord_data_t *data)
 {
-	data->nm_colors = new multi_color_c[data->model->verts_per_frame];
-
 	for (int i=0; i < data->model->verts_per_frame; i++)
 	{
-		data->nm_colors[i].Clear();
+		data->model->nm_colors[i].Clear();
 	}
 }
 
@@ -393,7 +398,7 @@ static void ShadeNormals(abstract_shader_c *shader,
 			nz = nz2;
 		}
 
-		shader->Corner(&data->nm_colors[i], nx, ny, nz, data->mo, data->is_weapon);
+		shader->Corner(&data->model->nm_colors[i], nx, ny, nz, data->mo, data->is_weapon);
 	}
 }
 
@@ -416,7 +421,7 @@ static int MDL_MulticolMaxRGB(model_coord_data_t *data, bool additive)
 
 	for (int i=0; i < data->model->verts_per_frame; i++)
 	{
-		multi_color_c *col = &data->nm_colors[i];
+		multi_color_c *col = &data->model->nm_colors[i];
 
 		int mx = additive ? col->add_MAX() : col->mod_MAX();
 
@@ -430,7 +435,7 @@ static void UpdateMulticols(model_coord_data_t *data)
 {
 	for (int i=0; i < data->model->verts_per_frame; i++)
 	{
-		multi_color_c *col = &data->nm_colors[i];
+		multi_color_c *col = &data->model->nm_colors[i];
 
 		col->mod_R -= 256;
 		col->mod_G -= 256;
@@ -476,7 +481,7 @@ static inline void ModelCoordFunc(model_coord_data_t *data,
 
 	texc->Set(point->skin_s * data->im_right, point->skin_t * data->im_top);
 
-	multi_color_c *col = &data->nm_colors[point->vert_idx];
+	multi_color_c *col = &data->model->nm_colors[point->vert_idx];
 
 	if (! data->is_additive)
 	{
@@ -548,7 +553,7 @@ void VXL_RenderModel(vxl_model_c *md, const image_c *skin_img, bool is_weapon,
 
 	M_Angle2Matrix(~ ang, &data.rx_mat, &data.ry_mat);
 
-	InitNormalColors(&data);
+	ClearNormalColors(&data);
 
 	GLuint skin_tex = 0;
 

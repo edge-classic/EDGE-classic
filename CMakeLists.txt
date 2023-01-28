@@ -4,6 +4,7 @@ add_subdirectory(source_files/ajbsp)
 add_subdirectory(source_files/coal)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/dehacked)
+add_subdirectory(source_files/ec_voxelib)
 add_subdirectory(source_files/epi)
 add_subdirectory(source_files/fmmidi)
 add_subdirectory(source_files/fluidlite)
@@ -120,11 +121,11 @@ add_executable(
 	source_files/edge/r_colormap.cc 
 	source_files/edge/r_modes.cc
 	source_files/edge/r_mdl.cc    
-	source_files/edge/r_md2.cc      
+	source_files/edge/r_md2.cc
+	source_files/edge/r_voxel.cc     
 	source_files/edge/r_image.cc    
 	source_files/edge/r_doomtex.cc  
 	source_files/edge/r_texgl.cc
-	source_files/edge/r_voxel.cc
 	source_files/edge/s_blit.cc     
 	source_files/edge/s_cache.cc    
 	source_files/edge/s_sound.cc 
@@ -172,6 +173,7 @@ target_include_directories(edge-classic PRIVATE source_files/coal)
 target_include_directories(edge-classic PRIVATE source_files/ddf)
 target_include_directories(edge-classic PRIVATE source_files/dehacked)
 target_include_directories(edge-classic PRIVATE source_files/dr_libs)
+target_include_directories(edge-classic PRIVATE source_files/ec_voxelib)
 target_include_directories(edge-classic PRIVATE source_files/epi)
 target_include_directories(edge-classic PRIVATE source_files/fluidlite/include)
 target_include_directories(edge-classic PRIVATE source_files/fmmidi)
@@ -256,6 +258,7 @@ if(WIN32 OR MSYS OR MINGW)
 			glad
 			${OPENGL_LIBRARIES}
 			${SDL2_LIBRARIES}
+			ec_voxelib
 			fmmidi
 			fluidlite
 			gme
@@ -277,6 +280,7 @@ else()
 			${OPENGL_LIBRARIES}
 			glad
 			${SDL2_LIBRARIES}
+			ec_voxelib
 			fmmidi
 			fluidlite
 			gme

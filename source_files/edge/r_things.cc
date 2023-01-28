@@ -43,6 +43,7 @@
 #include "r_image.h"
 #include "r_mdl.h"
 #include "r_md2.h"
+#include "r_voxel.h"
 #include "r_misc.h"
 #include "r_modes.h"
 #include "r_shader.h"
@@ -575,9 +576,9 @@ void RGL_DrawWeaponModel(player_t * p)
 
 	const image_c *skin_img = md->skins[skin_num];
 
-	if (! skin_img)  // FIXME: use a dummy image
+	if (! skin_img && md->md2_model)
 	{
-I_Debugf("Render model: no skin %d\n", skin_num);
+//I_Debugf("Render model: no skin %d\n", skin_num);
 		skin_img = W_ImageForDummySkin();
 	}
 
@@ -619,10 +620,14 @@ I_Debugf("Render model: no skin %d\n", skin_num);
 						last_frame, psp->state->frame, lerp,
 						x, y, z, p->mo, view_props,
 						1.0f /* scale */, w->model_aspect, w->model_bias);
-	else
+	else if (md->mdl_model)
 		MDL_RenderModel(md->mdl_model, skin_img, true,
 						last_frame, psp->state->frame, lerp,
 						x, y, z, p->mo, view_props,
+						1.0f /* scale */, w->model_aspect, w->model_bias);
+	else
+		VXL_RenderModel(md->vxl_model, skin_img, true,
+						0, x, y, z, p->mo, view_props,
 						1.0f /* scale */, w->model_aspect, w->model_bias);
 }
 
@@ -1146,9 +1151,9 @@ static void RGL_DrawModel(drawthing_t *dthing)
 
 	const image_c *skin_img = md->skins[mo->model_skin];
 
-	if (! skin_img)
+	if (! skin_img && md->md2_model)
 	{
-I_Debugf("Render model: no skin %d\n", mo->model_skin);
+//I_Debugf("Render model: no skin %d\n", mo->model_skin);
 		skin_img = W_ImageForDummySkin();
 	}
 
@@ -1179,10 +1184,15 @@ I_Debugf("Render model: no skin %d\n", mo->model_skin);
 						dthing->mx, dthing->my, z, mo, mo->props,
 						mo->info->model_scale, mo->info->model_aspect,
 						mo->info->model_bias);
-	else
+	else if (md->mdl_model)
 		MDL_RenderModel(md->mdl_model, skin_img, false,
 						last_frame, mo->state->frame, lerp,
 						dthing->mx, dthing->my, z, mo, mo->props,
+						mo->info->model_scale, mo->info->model_aspect,
+						mo->info->model_bias);
+	else
+		VXL_RenderModel(md->vxl_model, skin_img, false,
+						0, dthing->mx, dthing->my, z, mo, mo->props,
 						mo->info->model_scale, mo->info->model_aspect,
 						mo->info->model_bias);
 }

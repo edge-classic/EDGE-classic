@@ -23,6 +23,7 @@
 #include "r_image.h"
 #include "r_md2.h"
 #include "r_mdl.h"
+#include "r_voxel.h"
 #include "r_things.h"
 #include "w_model.h"
 #include "w_wad.h"
@@ -174,8 +175,19 @@ modeldef_c *LoadModelFromLump(int model_num)
 
 		def->mdl_model = MDL_LoadModel(f);
 	}
+	sprintf(lumpname, "%sVXL", basename);
+	if (W_CheckNumForName(lumpname) >= 0)
+	{
+		I_Debugf("Loading model from lump : %s\n", lumpname);
 
-	SYS_ASSERT(def->md2_model || def->mdl_model);
+		f = W_OpenLump(lumpname);
+		if (! f)
+			I_Error("Missing model lump: %s\n", lumpname);
+
+		def->vxl_model = VXL_LoadModel(f);
+	}
+
+	SYS_ASSERT(def->md2_model || def->mdl_model || def->vxl_model);
 
 	// close the lump
 	delete f;
@@ -190,7 +202,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 		}
 	}
 
-	// need at least one skin (MD2/MD3 only; MDLs should have them baked in already)
+	// need at least one skin (MD2/MD3 only; MDLs and VXLs should have them baked in already)
 	if (def->md2_model)
 	{
 		if (! def->skins[1])

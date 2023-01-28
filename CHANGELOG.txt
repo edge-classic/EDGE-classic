@@ -16,7 +16,9 @@ General Improvements
 
 New Features
 ------------
-+ Added support for MDL (Quake 1) models
++ Added support for MDL (Quake 1) model format
+
++ Added support for KVX and KV6 voxel model formats
 
 + Ported MD3 model support from EDGE 1.32 codebase
 

@@ -62,13 +62,13 @@ std::vector<vxl_vertex_c> voxel_verts;
 void ec_voxelib_callback(u32_t v0, u32_t v1, u32_t v2, void *udata)
 {
 	GLVoxelMesh *mesh = (GLVoxelMesh *)udata;
-	voxel_verts.push_back({mesh->vertices[v0].x, mesh->vertices[v0].y, mesh->vertices[v0].z,
+	voxel_verts.push_back({mesh->vertices[v0].y, -mesh->vertices[v0].x, mesh->vertices[v0].z,
 	mesh->vertices[v0].s, mesh->vertices[v0].t,
 	mesh->vertices[v0].nx, mesh->vertices[v0].ny, mesh->vertices[v0].nz});
-	voxel_verts.push_back({mesh->vertices[v1].x, mesh->vertices[v1].y, mesh->vertices[v1].z,
+	voxel_verts.push_back({mesh->vertices[v1].y, -mesh->vertices[v1].x, mesh->vertices[v1].z,
 	mesh->vertices[v1].s, mesh->vertices[v1].t,
 	mesh->vertices[v1].nx, mesh->vertices[v1].ny, mesh->vertices[v1].nz});
-	voxel_verts.push_back({mesh->vertices[v2].x, mesh->vertices[v2].y, mesh->vertices[v2].z,
+	voxel_verts.push_back({mesh->vertices[v2].y, -mesh->vertices[v2].x, mesh->vertices[v2].z,
 	mesh->vertices[v2].s, mesh->vertices[v2].t,
 	mesh->vertices[v2].nx, mesh->vertices[v2].ny, mesh->vertices[v2].nz});
 };

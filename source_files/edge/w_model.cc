@@ -140,7 +140,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 	char lumpname[16];
 	char skinname[16];
 
-	epi::file_c *f;
+	epi::file_c *f = nullptr;
 
 	// try MD3 first, then MD2, then MDL
 	sprintf(lumpname, "%sMD3", basename);
@@ -186,6 +186,9 @@ modeldef_c *LoadModelFromLump(int model_num)
 
 		def->vxl_model = VXL_LoadModel(f);
 	}
+
+	if (! f)
+		I_Error("Missing model lump for: %s\nIs it missing the MD3, MD2, MDL, or VXL suffix?\n", basename);
 
 	SYS_ASSERT(def->md2_model || def->mdl_model || def->vxl_model);
 

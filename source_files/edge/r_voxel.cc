@@ -196,7 +196,7 @@ vxl_model_c *VXL_LoadModel(epi::file_c *f)
 	bool doHollowFill = true;
     bool fixTJunctions = false;
     const uint32_t BreakIndex = 65535;
-    int optLevel = 3;
+    int optLevel = 4;
 
 	vox.optimise(doHollowFill);
 

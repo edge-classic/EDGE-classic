@@ -646,7 +646,7 @@ static void P_LineEffect(line_t *target, line_t *source,
 			std::swap(x, y);
 		if (x) 
 		{
-			float d = x/std::sinf(std::atan(y/x)+90.0);
+			float d = x/std::sin(std::atan(y/x)+90.0);
 			if (std::isfinite(d)) 
 			{
 				x = -(dy*ldy+dx*ldx)/d * 1.09375f;

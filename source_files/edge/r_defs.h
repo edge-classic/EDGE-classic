@@ -572,10 +572,10 @@ typedef struct lineanim_s
 	float side1_xspeed = 0.0;
 	float side0_yspeed = 0.0;
 	float side1_yspeed = 0.0;
-	bool parallel = false;
-	bool perpendicular = false;
 	float side0_xoffspeed = 0.0;
 	float side0_yoffspeed = 0.0;
+	float dynamic_dx = 0.0;
+	float dynamic_dy = 0.0;
 }
 lineanim_t;
 

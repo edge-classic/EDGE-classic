@@ -9,6 +9,8 @@ Bugs fixed
 ----------
 + Fixed 1.32 secret sector fix not being preserved in save games; i.e. the same secret would increment the
   secret counter when re-loading the game
++ Fixed Boom tagged line effects also applying the effect to the control linedef (when a tag was present)
++ Fixed Boom vector linedef scroll directions for angles other than 0/45/90
 
 General Improvements
 --------------------

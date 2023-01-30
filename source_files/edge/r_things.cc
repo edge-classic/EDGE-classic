@@ -626,8 +626,8 @@ void RGL_DrawWeaponModel(player_t * p)
 						x, y, z, p->mo, view_props,
 						1.0f /* scale */, w->model_aspect, w->model_bias);
 	else
-		VXL_RenderModel(md->vxl_model, skin_img, true,
-						0, x, y, z, p->mo, view_props,
+		VXL_RenderModel(md->vxl_model, true,
+						x, y, z, p->mo, view_props,
 						1.0f /* scale */, w->model_aspect, w->model_bias);
 }
 
@@ -1191,8 +1191,8 @@ static void RGL_DrawModel(drawthing_t *dthing)
 						mo->info->model_scale, mo->info->model_aspect,
 						mo->info->model_bias);
 	else
-		VXL_RenderModel(md->vxl_model, skin_img, false,
-						0, dthing->mx, dthing->my, z, mo, mo->props,
+		VXL_RenderModel(md->vxl_model, false,
+						dthing->mx, dthing->my, z, mo, mo->props,
 						mo->info->model_scale, mo->info->model_aspect,
 						mo->info->model_bias);
 }

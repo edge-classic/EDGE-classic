@@ -29,18 +29,15 @@
 class vxl_model_c;
 
 
-vxl_model_c *VXL_LoadModel(epi::file_c *f);
+vxl_model_c *VXL_LoadModel(epi::file_c *f, const char *name);
 
-short VXL_FindFrame(vxl_model_c *md, const char *name);
-
-void VXL_RenderModel(vxl_model_c *md, const image_c * skin_img, bool is_weapon,
-		             int frame, float x, float y, float z, mobj_t *mo,
+void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
+		             float x, float y, float z, mobj_t *mo,
 					 region_properties_t *props,
 					 float scale, float aspect, float bias);
 
-void VXL_RenderModel_2D(vxl_model_c *md, const image_c * skin_img, int frame,
-		                float x, float y, float xscale, float yscale,
-		                const mobjtype_c *info);
+void VXL_RenderModel_2D(vxl_model_c *md, float x, float y, 
+					 float xscale, float yscale, const mobjtype_c *info);
 
 #endif /* __R_VOXEL_H__ */
 

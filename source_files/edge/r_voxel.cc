@@ -29,7 +29,7 @@
 #include "endianess.h"
 #include "image_data.h"
 
-#include "../ec_voxelib/ec_voxelib.h"
+#include "ec_voxelib.h"
 
 #include "r_voxel.h"
 #include "r_gldefs.h"
@@ -76,8 +76,6 @@ void ec_voxelib_callback(u32_t v0, u32_t v1, u32_t v2, void *udata)
 struct vxl_frame_c
 {
 	vxl_vertex_c *vertices;
-
-	const char *name;
 };
 
 struct vxl_point_c
@@ -90,12 +88,6 @@ struct vxl_point_c
 
 struct vxl_strip_c
 {
-	// either GL_TRIANGLE_STRIP or GL_TRIANGLE_FAN
-	GLenum mode;
-
-	// number of points in this strip / fan
-	int count;
-
 	// index to the first point (within vxl_model_c::points).
 	// All points for the strip are contiguous in that array.
 	int first;
@@ -104,11 +96,10 @@ struct vxl_strip_c
 class vxl_model_c
 {
 public:
-	int num_frames;
 	int num_points;
 	int num_strips;
 
-	vxl_frame_c *frames;
+	vxl_frame_c *frame;
 	vxl_point_c *points;
 	vxl_strip_c *strips;
 
@@ -122,19 +113,21 @@ public:
 
 	multi_color_c *nm_colors;
 
+	const char *name;
+
 public:
 	vxl_model_c(int _nframe, int _npoint, int _nstrip) :
-		num_frames(_nframe), num_points(_npoint),
-		num_strips(_nstrip), verts_per_frame(0)
+		num_points(_npoint), num_strips(_nstrip), 
+		verts_per_frame(0)
 	{
-		frames = new vxl_frame_c[num_frames];
+		frame = new vxl_frame_c;
 		points = new vxl_point_c[num_points];
 		strips = new vxl_strip_c[num_strips];
 	}
 
 	~vxl_model_c()
 	{
-		delete[] frames;
+		delete frame;
 		delete[] points;
 		delete[] strips;
 	}
@@ -143,7 +136,7 @@ public:
 
 /*============== LOADING CODE ====================*/
 
-vxl_model_c *VXL_LoadModel(epi::file_c *f)
+vxl_model_c *VXL_LoadModel(epi::file_c *f, const char *name)
 {
 	int i;
 
@@ -220,6 +213,8 @@ vxl_model_c *VXL_LoadModel(epi::file_c *f)
 
 	vxl_model_c *md = new vxl_model_c(num_frames, num_points, num_strips);
 
+	md->name = name;
+
 	md->nm_colors = new multi_color_c[num_verts];
 
 	for (i=0; i < num_verts; i++)
@@ -237,6 +232,8 @@ vxl_model_c *VXL_LoadModel(epi::file_c *f)
 	epi::image_data_c *tmp_img = new epi::image_data_c(md->skin_width, md->skin_height, 4);
 	tmp_img->pixels = (u8_t *)glvmesh.img.ptr();
 	md->skin_id = R_UploadTexture(tmp_img, UPL_MipMap | UPL_Smooth);
+	tmp_img->pixels = nullptr;
+	delete tmp_img; // pixels are cleaned up later with glvmesh closure
 
 	I_Debugf("  frames:%d  points:%d  tris: %d\n",
 			num_frames, num_tris * 3, num_tris);
@@ -254,9 +251,6 @@ vxl_model_c *VXL_LoadModel(epi::file_c *f)
 		SYS_ASSERT(strip < md->strips + md->num_strips);
 		SYS_ASSERT(point < md->points + md->num_points);
 
-		strip->mode = GL_TRIANGLES;
-
-		strip->count = 3;
 		strip->first = point - md->points;
 
 		strip++;
@@ -275,23 +269,13 @@ vxl_model_c *VXL_LoadModel(epi::file_c *f)
 	SYS_ASSERT(strip == md->strips + md->num_strips);
 	SYS_ASSERT(point == md->points + md->num_points);
 
-	md->frames[0].vertices = new vxl_vertex_c[md->verts_per_frame];
-	std::copy(voxel_verts.begin(), voxel_verts.end(), md->frames[0].vertices);
+	md->frame->vertices = new vxl_vertex_c[md->verts_per_frame];
+	std::copy(voxel_verts.begin(), voxel_verts.end(), md->frame->vertices);
 
 	glvmesh.clear();
 	voxel_verts.clear();
 
 	return md;
-}
-
-short VXL_FindFrame(vxl_model_c *md)
-{
-	vxl_frame_c *frame = &md->frames[0];
-
-	if (frame)
-		return 0;
-
-	return -1; // NOT FOUND
 }
 
 /*============== MODEL RENDERING ====================*/
@@ -385,9 +369,9 @@ static void ShadeNormals(abstract_shader_c *shader,
 		// FIXME !!!! pre-rotate normals too
 		float nx, ny, nz;
 		{
-			float nx1 = data->model->frames[0].vertices[i].nx;
-			float ny1 = data->model->frames[0].vertices[i].ny;
-			float nz1 = data->model->frames[0].vertices[i].nz;
+			float nx1 = data->model->frame->vertices[i].nx;
+			float ny1 = data->model->frame->vertices[i].ny;
+			float nz1 = data->model->frame->vertices[i].nz;
 
 			float nx2 = nx1 * data->kx_mat.x + nz1 * data->kx_mat.y;
 			float nz2 = nx1 * data->kz_mat.x + nz1 * data->kz_mat.y;
@@ -498,14 +482,14 @@ static inline void ModelCoordFunc(model_coord_data_t *data,
 }
 
 
-void VXL_RenderModel(vxl_model_c *md, const image_c *skin_img, bool is_weapon,
-		             int frame, float x, float y, float z, mobj_t *mo,
+void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
+		             float x, float y, float z, mobj_t *mo,
 					 region_properties_t *props,
 					 float scale, float aspect, float bias)
 {
-	if (frame != 0)
+	if (!md->frame)
 	{
-		I_Debugf("Render model: bad frame %d\n", frame);
+		I_Debugf("Render model: bad frame for voxel %s\n", md->name);
 				return;
 	}
 
@@ -531,7 +515,7 @@ void VXL_RenderModel(vxl_model_c *md, const image_c *skin_img, bool is_weapon,
 	data.mo = mo;
 	data.model = md;
 
-	data.frame = & md->frames[frame];
+	data.frame = md->frame;
 
 	data.x = x;
 	data.y = y;
@@ -586,7 +570,7 @@ void VXL_RenderModel(vxl_model_c *md, const image_c *skin_img, bool is_weapon,
 		skin_tex = md->skin_id;
 
 		if (skin_tex == 0)
-			I_Error("Voxel %s missing skin?\n", md->frames[frame].name);
+			I_Error("Voxel %s missing skin?\n", md->name);
 
 		data.im_right = md->im_right;
 		data.im_top   = md->im_top;
@@ -648,7 +632,7 @@ void VXL_RenderModel(vxl_model_c *md, const image_c *skin_img, bool is_weapon,
 		{
 			data.strip = & md->strips[i];
 
-			for (int v_idx=0; v_idx < md->strips[i].count; v_idx++)
+			for (int v_idx=0; v_idx < 3; v_idx++)
 			{
 				local_gl_vert_t *dest = glvert + (i*3) + v_idx;
 
@@ -664,18 +648,17 @@ void VXL_RenderModel(vxl_model_c *md, const image_c *skin_img, bool is_weapon,
 }
 
 
-void VXL_RenderModel_2D(vxl_model_c *md, const image_c *skin_img, int frame,
-		                float x, float y, float xscale, float yscale,
-		                const mobjtype_c *info)
+void VXL_RenderModel_2D(vxl_model_c *md, float x, float y, 
+						float xscale, float yscale, const mobjtype_c *info)
 {
 	// check if frame is valid
-	if (frame != 0)
+	if (!md->frame)
 		return;
 
-	GLuint skin_tex = md->skin_id; // Just use skin 0?
+	GLuint skin_tex = md->skin_id;
 
 	if (skin_tex == 0)
-		I_Error("Voxel %s missing skin?\n", md->frames[frame].name);
+		I_Error("Voxel %s missing skin?\n", md->name);
 
 	float im_right = md->im_right;
 	float im_top   = md->im_top;
@@ -698,11 +681,11 @@ void VXL_RenderModel_2D(vxl_model_c *md, const image_c *skin_img, int frame,
 	{
 		const vxl_strip_c *strip = & md->strips[i];
 
-		glBegin(strip->mode);
+		glBegin(GL_TRIANGLES);
 
-		for (int v_idx=0; v_idx < md->strips[i].count; v_idx++)
+		for (int v_idx=0; v_idx < 3; v_idx++)
 		{
-			const vxl_frame_c *frame_ptr = & md->frames[frame];
+			const vxl_frame_c *frame_ptr = md->frame;
 
 			SYS_ASSERT(strip->first + v_idx >= 0);
 			SYS_ASSERT(strip->first + v_idx < md->num_points);
@@ -712,9 +695,9 @@ void VXL_RenderModel_2D(vxl_model_c *md, const image_c *skin_img, int frame,
 
 			glTexCoord2f(point->skin_s * im_right, point->skin_t * im_top);
 		
-			float norm_x = md->frames[0].vertices[v_idx].nx;
-			float norm_y = md->frames[0].vertices[v_idx].ny;
-			float norm_z = md->frames[0].vertices[v_idx].nz;
+			float norm_x = md->frame->vertices[v_idx].nx;
+			float norm_y = md->frame->vertices[v_idx].ny;
+			float norm_z = md->frame->vertices[v_idx].nz;
 
 			glNormal3f(norm_y, norm_z, norm_x);
 

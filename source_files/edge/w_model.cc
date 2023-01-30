@@ -184,7 +184,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 		if (! f)
 			I_Error("Missing model lump: %s\n", lumpname);
 
-		def->vxl_model = VXL_LoadModel(f);
+		def->vxl_model = VXL_LoadModel(f, lumpname);
 	}
 
 	if (! f)

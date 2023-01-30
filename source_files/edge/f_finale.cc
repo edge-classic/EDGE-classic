@@ -786,7 +786,7 @@ static void CastDrawer(void)
 			MDL_RenderModel_2D(md->mdl_model, skin_img, caststate->frame,
 							pos_x, pos_y, scale_x, scale_y, castorder);
 		else
-			VXL_RenderModel_2D(md->vxl_model, skin_img, 0, pos_x, pos_y,
+			VXL_RenderModel_2D(md->vxl_model, pos_x, pos_y,
 							scale_x, scale_y, castorder);
 
 		glDisable(GL_DEPTH_TEST);

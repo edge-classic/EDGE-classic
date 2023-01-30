@@ -788,7 +788,13 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 	}
 	else /* (! data.is_fuzzy) */
 	{
-		skin_tex = md->skin_ids[0]; // Just use skin 0?
+		int mdlSkin = 0;
+		mdlSkin = mo->model_skin - 1; //ddf MODEL_SKIN starts at 1 not 0
+
+		if (mdlSkin > -1)
+			skin_tex = md->skin_ids[mdlSkin];
+		else
+			skin_tex = md->skin_ids[0]; // Just use skin 0?
 
 		if (skin_tex == 0)
 			I_Error("MDL Frame %s missing skins?\n", md->frames[frame1].name);

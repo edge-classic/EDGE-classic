@@ -274,8 +274,19 @@ void W_PrecacheModels(void)
 
 		int model = mo->state->sprite;
 
+		const char *model_name = nullptr;
+
 		if (model >= 1 && model < nummodels)
-			model_present[model] = 1;
+			model_name = ddf_model_names[model].c_str();
+
+		if (model_name)
+		{
+			for (int i = 1 ; i < nummodels ; i++)
+			{
+				if (epi::strncmp(model_name, ddf_model_names[i].c_str(), 4) == 0)
+					model_present[i] = 1;
+			}
+		}
 	}
 
 	// mark all weapons
@@ -286,8 +297,19 @@ void W_PrecacheModels(void)
 
 		int model = states[k].sprite;
 
+		const char *model_name = nullptr;
+
 		if (model >= 1 && model < nummodels)
-			model_present[model] = 1;
+			model_name = ddf_model_names[model].c_str();
+
+		if (model_name)
+		{
+			for (int i = 1 ; i < nummodels ; i++)
+			{
+				if (epi::strncmp(model_name, ddf_model_names[i].c_str(), 4) == 0)
+					model_present[i] = 1;
+			}
+		}
 	}
 
 	for (int i = 1 ; i < nummodels ; i++)  // ignore SPR_NULL

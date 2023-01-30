@@ -54,8 +54,8 @@ DEF_CVAR(r_dumbcombine,   "0", 0)
 DEF_CVAR(r_dumbclamp,     DUMB_CLAMP, 0)
 
 
-#define MAX_L_VERT  4096 * 12
-#define MAX_L_UNIT  (MAX_L_VERT / 4)
+#define MAX_L_VERT  4096 * 24
+#define MAX_L_UNIT  (MAX_L_VERT / 3)
 
 #define DUMMY_CLAMP  789
 

@@ -67,6 +67,8 @@ public:
 
 	float scale;
 	float aspect;
+	int x_offset;
+	int y_offset;
 };
 
 class cursorstyle_c

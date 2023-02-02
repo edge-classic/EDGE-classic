@@ -646,14 +646,15 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 
 	// -KM-  1998/06/25 This could quite possibly be replaced by some graphics...
 	if (save_page > 0)
-		HL_WriteText(style, styledef_c::T_TITLE, LoadDef.x - 4, y, "< PREV");
+		HL_WriteText(style, styledef_c::T_TITLE, LoadDef.x - 4 + style->def->text[styledef_c::T_TITLE].x_offset, 
+			y + style->def->text[styledef_c::T_TITLE].y_offset, "< PREV");
 
-	HL_WriteText(style, styledef_c::T_TITLE, LoadDef.x + 94 - style->fonts[styledef_c::T_TITLE]->StringWidth(mbuffer) / 2, y,
-					  mbuffer);
+	HL_WriteText(style, styledef_c::T_TITLE, LoadDef.x + 94 - style->fonts[styledef_c::T_TITLE]->StringWidth(mbuffer) / 2 + 
+		style->def->text[styledef_c::T_TITLE].x_offset, y + style->def->text[styledef_c::T_TITLE].y_offset, mbuffer);
 
 	if (save_page < SAVE_PAGES-1)
-		HL_WriteText(style, styledef_c::T_TITLE, LoadDef.x + 192 - style->fonts[styledef_c::T_TITLE]->StringWidth("NEXT >"), y,
-						  "NEXT >");
+		HL_WriteText(style, styledef_c::T_TITLE, LoadDef.x + 192 - style->fonts[styledef_c::T_TITLE]->StringWidth("NEXT >") +
+		style->def->text[styledef_c::T_TITLE].x_offset, y + style->def->text[styledef_c::T_TITLE].y_offset, "NEXT >");
  
 	info = ex_slots + itemOn;
 	SYS_ASSERT(0 <= itemOn && itemOn < SAVE_SLOTS);
@@ -669,7 +670,8 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 
 	strcat(mbuffer, info->timestr);
 
-	HL_WriteText(style, styledef_c::T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer), y, mbuffer);
+	HL_WriteText(style, styledef_c::T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer) + style->def->text[styledef_c::T_HELP].x_offset, 
+		y + style->def->text[styledef_c::T_HELP].y_offset, mbuffer);
 
 	y -= LineHeight;
     
@@ -684,7 +686,8 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 		default: strcat(mbuffer, language["MenuDifficulty5"]); break;
 	}
 
-	HL_WriteText(style, style->def->T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer), y, mbuffer);
+	HL_WriteText(style, style->def->T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer) + style->def->text[styledef_c::T_HELP].x_offset, 
+		y + style->def->text[styledef_c::T_HELP].y_offset, mbuffer);
 
 	y -= LineHeight;
   
@@ -698,7 +701,8 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 		default: strcat(mbuffer, "DM MODE"); break;
 	}
   
-	HL_WriteText(style, styledef_c::T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer), y, mbuffer);
+	HL_WriteText(style, styledef_c::T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer) + style->def->text[styledef_c::T_HELP].x_offset, 
+		y + style->def->text[styledef_c::T_HELP].y_offset, mbuffer);
 
 	y -= LineHeight;
   
@@ -706,7 +710,8 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 
 	strcat(mbuffer, info->mapname);
 
-	HL_WriteText(style, styledef_c::T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer), y, mbuffer);
+	HL_WriteText(style, styledef_c::T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer) + style->def->text[styledef_c::T_HELP].x_offset, 
+		y + style->def->text[styledef_c::T_HELP].y_offset, mbuffer);
 }
 
 //
@@ -734,11 +739,12 @@ void M_DrawLoad(void)
 
 	if (custom_MenuMain==false)
 	{
-		HL_WriteText(load_style, fontType, 72, 8, language["MainLoadGame"]);
+		HL_WriteText(load_style, fontType, 72 + style->def->text[fontType].x_offset, 
+			8 + style->def->text[fontType].y_offset, language["MainLoadGame"]);
 	}
 	else
 	{
-		HUD_DrawImage(72, 8, menu_loadg);
+		HUD_DrawImage(72 + style->def->text[styledef_c::T_HEADER].x_offset, 8 + style->def->text[styledef_c::T_HEADER].y_offset, menu_loadg);
 	}
 
 	// Use center box graphic for LineHeight unless the load game font text is actually taller
@@ -753,22 +759,28 @@ void M_DrawLoad(void)
 		if (custom_MenuMain==false)
 		{
 			float x = LoadDef.x;
-			HUD_StretchImage(x, y,IM_WIDTH(L),IM_HEIGHT(L),L, 0.0, 0.0);
+			HUD_StretchImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
+				y + style->def->text[styledef_c::T_TEXT].y_offset,IM_WIDTH(L),IM_HEIGHT(L),L, 0.0, 0.0);
 			x += IM_WIDTH(L);
 			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
-				HUD_StretchImage(x, y,IM_WIDTH(C),IM_HEIGHT(C),C, 0.0, 0.0);
+				HUD_StretchImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
+					y + style->def->text[styledef_c::T_TEXT].y_offset,IM_WIDTH(C),IM_HEIGHT(C),C, 0.0, 0.0);
 
-			HUD_StretchImage(x, y,IM_WIDTH(R),IM_HEIGHT(R),R, 0.0, 0.0);
+			HUD_StretchImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
+				y + style->def->text[styledef_c::T_TEXT].y_offset,IM_WIDTH(R),IM_HEIGHT(R),R, 0.0, 0.0);
 		}
 		else
 		{
 			float x = LoadDef.x;
-			HUD_DrawImage(x, y, L);
+			HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
+				y + style->def->text[styledef_c::T_TEXT].y_offset, L);
 			x += IM_WIDTH(L);
 			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
-				HUD_DrawImage(x, y, C);
+				HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
+					y + style->def->text[styledef_c::T_TEXT].y_offset, C);
 
-			HUD_DrawImage(x, y, R);
+			HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
+				y + style->def->text[styledef_c::T_TEXT].y_offset, R);
 		}
 		ex_slots[i].y = y;
 		ex_slots[i].width = style->fonts[ex_slots[i].corrupt ? styledef_c::T_HELP : styledef_c::T_TEXT]->StringWidth(ex_slots[i].desc);
@@ -784,21 +796,26 @@ void M_DrawLoad(void)
 		if (LineHeight == IM_HEIGHT(C))
 		{
 			if (style->def->entry_alignment == style->def->C_RIGHT)
-				HL_WriteText(load_style, textstyle, LoadDef.x - 8 + WidestLine - (ex_slots[i].width), ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+				HL_WriteText(load_style, textstyle, LoadDef.x - 8 + WidestLine - (ex_slots[i].width) + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[i].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, ex_slots[i].desc);
 			else if (style->def->entry_alignment == style->def->C_CENTER)
-				HL_WriteText(load_style, textstyle, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), 
-					ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+				HL_WriteText(load_style, textstyle, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2) + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[i].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, ex_slots[i].desc);
 			else
-				HL_WriteText(load_style, textstyle, LoadDef.x + 8, ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+				HL_WriteText(load_style, textstyle, LoadDef.x + 8 + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[i].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, ex_slots[i].desc);
 		}
 		else
 		{
 			if (style->def->entry_alignment == style->def->C_RIGHT)
-				HL_WriteText(load_style, textstyle, LoadDef.x + WidestLine - ex_slots[i].width, ex_slots[i].y, ex_slots[i].desc);
+				HL_WriteText(load_style, textstyle, LoadDef.x + WidestLine - ex_slots[i].width + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[i].y + style->def->text[styledef_c::T_TEXT].y_offset, ex_slots[i].desc);
 			else if (style->def->entry_alignment == style->def->C_CENTER)
-				HL_WriteText(load_style, textstyle, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), ex_slots[i].y, ex_slots[i].desc);
+				HL_WriteText(load_style, textstyle, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2) + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[i].y + style->def->text[styledef_c::T_TEXT].y_offset, ex_slots[i].desc);
 			else
-				HL_WriteText(load_style, textstyle, LoadDef.x, ex_slots[i].y, ex_slots[i].desc);
+				HL_WriteText(load_style, textstyle, LoadDef.x + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[i].y + style->def->text[styledef_c::T_TEXT].y_offset, ex_slots[i].desc);
 		}
 	}
 	image_c *cursor;
@@ -819,6 +836,8 @@ void M_DrawLoad(void)
 			cursor->offset_x += old_offset_x;
 			cursor->offset_y += old_offset_y;
 		}
+		cursor->offset_x -= style->def->text[styledef_c::T_TEXT].x_offset;
+		cursor->offset_y += style->def->text[styledef_c::T_TEXT].y_offset;
 		float TempHeight = MIN(LineHeight, IM_HEIGHT(cursor));
 		float TempScale = 0;
 		float TempWidth = 0;
@@ -865,39 +884,39 @@ void M_DrawLoad(void)
 			TempSpacer *= 2;
 			if (style->def->cursor.position == style->def->C_BOTH)
 			{
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 			}
 			else if (style->def->cursor.position == style->def->C_CENTER)
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + (WidestLine/2) - (TempWidth / 2) + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 			else if (style->def->cursor.position == style->def->C_RIGHT)
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 			else
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 		}
 		else
 		{
 			if (style->def->cursor.position == style->def->C_BOTH)
 			{
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 			}
 			else if (style->def->cursor.position == style->def->C_CENTER)
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + (WidestLine/2) - (TempWidth / 2) + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 			else if (style->def->cursor.position == style->def->C_RIGHT)
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 			else
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 		}
 		HUD_SetAlpha(old_alpha);
 	}
@@ -961,11 +980,12 @@ void M_DrawSave(void)
 
 	if (custom_MenuMain==false)
 	{
-		HL_WriteText(load_style, fontType, 72, 8, language["MainSaveGame"]);
+		HL_WriteText(load_style, fontType, 72 + style->def->text[fontType].x_offset, 
+			8 + style->def->text[fontType].y_offset, language["MainSaveGame"]);
 	}
 	else
 	{
-		HUD_DrawImage(72, 8, menu_saveg);
+		HUD_DrawImage(72 + style->def->text[styledef_c::T_HEADER].x_offset, 8 + style->def->text[styledef_c::T_HEADER].y_offset, menu_saveg);
 	}
 
 	// Use center box graphic for LineHeight unless the load game font text is actually taller
@@ -980,22 +1000,26 @@ void M_DrawSave(void)
 		if (custom_MenuMain==false)
 		{
 			float x = LoadDef.x;
-			HUD_StretchImage(x, y,IM_WIDTH(L),IM_HEIGHT(L),L, 0.0, 0.0);
+			HUD_StretchImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
+				y + style->def->text[styledef_c::T_TEXT].y_offset,IM_WIDTH(L),IM_HEIGHT(L),L, 0.0, 0.0);
 			x += IM_WIDTH(L);
 			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
-				HUD_StretchImage(x, y,IM_WIDTH(C),IM_HEIGHT(C),C, 0.0, 0.0);
+				HUD_StretchImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
+					y + style->def->text[styledef_c::T_TEXT].y_offset,IM_WIDTH(C),IM_HEIGHT(C),C, 0.0, 0.0);
 
-			HUD_StretchImage(x, y,IM_WIDTH(R),IM_HEIGHT(R),R, 0.0, 0.0);
+			HUD_StretchImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
+				y + style->def->text[styledef_c::T_TEXT].y_offset,IM_WIDTH(R),IM_HEIGHT(R),R, 0.0, 0.0);
 		}
 		else
 		{
 			float x = LoadDef.x; 
-			HUD_DrawImage(x, y, L);
+			HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
+				y + style->def->text[styledef_c::T_TEXT].y_offset, L);
 			x += IM_WIDTH(L);
 			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
-				HUD_DrawImage(x, y, C);
+				HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, y + style->def->text[styledef_c::T_TEXT].y_offset, C);
 
-			HUD_DrawImage(x, y, R);
+			HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, y + style->def->text[styledef_c::T_TEXT].y_offset, R);
 		}
 
 		if (! style->fonts[styledef_c::T_ALT])
@@ -1034,44 +1058,54 @@ void M_DrawSave(void)
 		{
 			if (style->def->entry_alignment == style->def->C_RIGHT)
 			{
-				HL_WriteText(save_style, font, LoadDef.x - 8 + WidestLine - (ex_slots[i].width), ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+				HL_WriteText(save_style, font, LoadDef.x - 8 + WidestLine - (ex_slots[i].width) + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[i].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, ex_slots[i].desc);
 				if (entering_save)
-					HL_WriteText(save_style, font, LoadDef.x - 8 + WidestLine - (ex_slots[i].width) + len, ex_slots[i].y - C->offset_y + (LineHeight / 4), "_");
+					HL_WriteText(save_style, font, LoadDef.x - 8 + WidestLine - (ex_slots[i].width) + len + style->def->text[styledef_c::T_TEXT].x_offset, 
+						ex_slots[i].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, "_");
 			}
 			else if (style->def->entry_alignment == style->def->C_CENTER)
 			{
-				HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), 
-					ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+				HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2) + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[i].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, ex_slots[i].desc);
 				if (entering_save)
-					HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2) + len, 
-						ex_slots[i].y - C->offset_y + (LineHeight / 4), "_");
+					HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2) + len + style->def->text[styledef_c::T_TEXT].x_offset, 
+						ex_slots[i].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, "_");
 			}
 			else
 			{
-				HL_WriteText(save_style, font, LoadDef.x + 8, ex_slots[i].y - C->offset_y + (LineHeight / 4), ex_slots[i].desc);
+				HL_WriteText(save_style, font, LoadDef.x + 8 + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[i].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, ex_slots[i].desc);
 				if (entering_save)
-					HL_WriteText(save_style, font, LoadDef.x + 8 + len, ex_slots[i].y - C->offset_y + (LineHeight / 4), "_");
+					HL_WriteText(save_style, font, LoadDef.x + 8 + len + style->def->text[styledef_c::T_TEXT].x_offset, 
+						ex_slots[i].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, "_");
 			}
 		}
 		else
 		{
 			if (style->def->entry_alignment == style->def->C_RIGHT)
 			{
-				HL_WriteText(save_style, font, LoadDef.x + WidestLine - ex_slots[i].width, ex_slots[i].y, ex_slots[i].desc);
+				HL_WriteText(save_style, font, LoadDef.x + WidestLine - ex_slots[i].width + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[i].y + style->def->text[styledef_c::T_TEXT].y_offset, ex_slots[i].desc);
 				if (entering_save)
-					HL_WriteText(save_style, font, LoadDef.x + WidestLine - ex_slots[i].width + len, ex_slots[i].y, "_");
+					HL_WriteText(save_style, font, LoadDef.x + WidestLine - ex_slots[i].width + len + style->def->text[styledef_c::T_TEXT].x_offset, 
+						ex_slots[i].y + style->def->text[styledef_c::T_TEXT].y_offset, "_");
 			}
 			else if (style->def->entry_alignment == style->def->C_CENTER)
 			{
-				HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2), ex_slots[i].y, ex_slots[i].desc);
+				HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2) + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[i].y + style->def->text[styledef_c::T_TEXT].y_offset, ex_slots[i].desc);
 				if (entering_save)
-					HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2) + len, ex_slots[i].y, "_");
+					HL_WriteText(save_style, font, LoadDef.x + (WidestLine / 2) - (ex_slots[i].width / 2) + len + style->def->text[styledef_c::T_TEXT].x_offset, 
+						ex_slots[i].y + style->def->text[styledef_c::T_TEXT].y_offset, "_");
 			}
 			else
 			{
-				HL_WriteText(save_style, font, LoadDef.x, ex_slots[i].y, ex_slots[i].desc);
+				HL_WriteText(save_style, font, LoadDef.x + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[i].y + style->def->text[styledef_c::T_TEXT].y_offset, ex_slots[i].desc);
 				if (entering_save)
-					HL_WriteText(save_style, font, LoadDef.x + len, ex_slots[i].y, "_");
+					HL_WriteText(save_style, font, LoadDef.x + len + style->def->text[styledef_c::T_TEXT].x_offset, 
+						ex_slots[i].y + style->def->text[styledef_c::T_TEXT].y_offset, "_");
 			}
 		}
 	}
@@ -1093,6 +1127,8 @@ void M_DrawSave(void)
 			cursor->offset_x += old_offset_x;
 			cursor->offset_y += old_offset_y;
 		}
+		cursor->offset_x -= style->def->text[styledef_c::T_TEXT].x_offset;
+		cursor->offset_y += style->def->text[styledef_c::T_TEXT].y_offset;
 		float TempHeight = MIN(LineHeight, IM_HEIGHT(cursor));
 		float TempScale = 0;
 		float TempWidth = 0;
@@ -1133,39 +1169,39 @@ void M_DrawSave(void)
 			TempSpacer *= 2;
 			if (style->def->cursor.position == style->def->C_BOTH)
 			{
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 			}
 			else if (style->def->cursor.position == style->def->C_CENTER)
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + (WidestLine/2) - (TempWidth / 2) + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 			else if (style->def->cursor.position == style->def->C_RIGHT)
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 			else
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4), style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y - C->offset_y + (LineHeight / 4) + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 		}
 		else
 		{
 			if (style->def->cursor.position == style->def->C_BOTH)
 			{
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 			}
 			else if (style->def->cursor.position == style->def->C_CENTER)
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + (WidestLine/2) - (TempWidth / 2), 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + (WidestLine/2) - (TempWidth / 2) + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 			else if (style->def->cursor.position == style->def->C_RIGHT)
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x + WidestLine + TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 			else
-				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer, 
-					ex_slots[itemOn].y, style->def->cursor.cursor_string.c_str());
+				HL_WriteText(style, styledef_c::T_TEXT, LoadDef.x - TempWidth - TempSpacer + style->def->text[styledef_c::T_TEXT].x_offset, 
+					ex_slots[itemOn].y + style->def->text[styledef_c::T_TEXT].y_offset, style->def->cursor.cursor_string.c_str());
 		}
 		HUD_SetAlpha(old_alpha);
 	}
@@ -1348,13 +1384,17 @@ void M_DrawNewGame(void)
 		else
 			fontType=styledef_c::T_HEADER;
 
-		HL_WriteText(skill_style, fontType, 96, 14, language["MainNewGame"]);
-		HL_WriteText(skill_style, styledef_c::T_ALT, 54, 38, language["MenuSkill"]);
+		HL_WriteText(skill_style, fontType, 96 + skill_style->def->text[fontType].x_offset, 
+			14 + skill_style->def->text[fontType].y_offset, language["MainNewGame"]);
+		HL_WriteText(skill_style, styledef_c::T_ALT, 54 + skill_style->def->text[fontType].x_offset, 
+			38 + skill_style->def->text[fontType].y_offset, language["MenuSkill"]);
 	}
 	else
 	{
-		HUD_DrawImage(96, 14, menu_newgame);
-		HUD_DrawImage(54, 38, menu_skill);
+		HUD_DrawImage(96 + skill_style->def->text[styledef_c::T_HEADER].x_offset, 
+			14 + skill_style->def->text[styledef_c::T_HEADER].y_offset, menu_newgame);
+		HUD_DrawImage(54 + skill_style->def->text[styledef_c::T_HEADER].x_offset, 
+			38 + skill_style->def->text[styledef_c::T_HEADER].y_offset, menu_skill);
 	}
 }
 
@@ -1456,11 +1496,13 @@ void M_DrawEpisode(void)
 		else
 			fontType=styledef_c::T_HEADER;
 
-		HL_WriteText(episode_style, fontType, 54, 38, language["MenuWhichEpisode"]);
+		HL_WriteText(episode_style, fontType, 54 + skill_style->def->text[fontType].x_offset, 
+			38 + skill_style->def->text[fontType].y_offset, language["MenuWhichEpisode"]);
 	}
 	else
 	{
-		HUD_DrawImage(54, 38, menu_episode);
+		HUD_DrawImage(54 + skill_style->def->text[styledef_c::T_HEADER].x_offset, 
+			38 + skill_style->def->text[styledef_c::T_HEADER].y_offset, menu_episode);
 	}
 }
 
@@ -2615,8 +2657,8 @@ void M_Drawer(void)
 		for (i = 0; i < max; i++)
 		{
 			currentMenu->menuitems[i].height = ShortestLine;
-			currentMenu->menuitems[i].x = x + style->def->x_offset;
-			currentMenu->menuitems[i].y = y + style->def->y_offset;
+			currentMenu->menuitems[i].x = x + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
+			currentMenu->menuitems[i].y = y + style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
 			if (currentMenu->menuitems[i].width < 0)
 				currentMenu->menuitems[i].width = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[i].name) * txtscale;
 			if (currentMenu->menuitems[i].width > WidestLine) 
@@ -2747,8 +2789,8 @@ void M_Drawer(void)
 					TallestLine = currentMenu->menuitems[i].height;
 				if (currentMenu->menuitems[i].width > WidestLine) 
 					WidestLine = currentMenu->menuitems[i].width;
-				currentMenu->menuitems[i].x = x + image->offset_x + style->def->x_offset;
-				currentMenu->menuitems[i].y = y - image->offset_y - style->def->y_offset;
+				currentMenu->menuitems[i].x = x + image->offset_x + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
+				currentMenu->menuitems[i].y = y - image->offset_y - style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
 				y += currentMenu->menuitems[i].height + style->def->entry_spacing;
 			}
 			else

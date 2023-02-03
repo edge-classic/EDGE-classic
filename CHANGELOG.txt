@@ -9,12 +9,20 @@ Bugs fixed
 ----------
 + Fixed 1.32 secret sector fix not being preserved in save games; i.e. the same secret would increment the
   secret counter when re-loading the game
++ Fixed jitter in Evil Eye and other animations
++ Fixed sprite frame overrides in DDFIMAGE not applying if they were Doom formatted images
++ Fixed SDL sound device frequency being allowed to be set far above intended values if OS doesn't report the ability
+  to use 48kHz sample rate
 + Fixed Boom tagged line effects also applying the effect to the control linedef (when a tag was present)
 + Fixed Boom vector linedef scroll directions for angles other than 0/45/90
 
 General Improvements
 --------------------
 + Improved model and unit rendering to thrash the GL state a bit less
+
++ DDFSTYLE text styles can now have their own individual X_OFFSET and Y_OFFSET values,
+  giving more flexibility for menu item placement
+
 
 New Features
 ------------
@@ -34,10 +42,6 @@ Bugs fixed
 + player.use_inventory() consuming item without running the associated script if the script was already running
 + Changed hardcoded finish/par time widths to prevent custom fonts from being clipped at 4:3 resolutions
 + "Read This!" menu item missing for Doom.
-+ Fixed sprite frame overrides in DDFIMAGE not applying if they were Doom formatted images
-+ Fixed jitter in Evil Eye and other animations
-+ Fixed SDL sound device frequency being allowed to be set far above intended values if OS doesn't report the ability
-  to use 48kHz sample rate
 
 General Improvements
 --------------------

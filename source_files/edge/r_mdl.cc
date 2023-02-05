@@ -921,7 +921,7 @@ void MDL_RenderModel_2D(mdl_model_c *md, const image_c *skin_img, int frame,
 			const mdl_point_c *point = &md->points[strip->first + v_idx];
 			const mdl_vertex_c *vert = &frame_ptr->vertices[point->vert_idx];
 
-			glTexCoord2f(point->skin_s * im_right, point->skin_t * im_top);
+			glTexCoord2f(point->skin_s, point->skin_t);
 		
 			short n = vert->normal_idx;
 

@@ -24,6 +24,9 @@ General Improvements
 
 + DDFSTYLE text styles can now have their own individual X_OFFSET and Y_OFFSET values,
   giving more flexibility for menu item placement
+  
++ Changed how LOSE_BENEFIT HEALTH is handled in RTS. Now it will simply subtract from current health and not
+  behave like DAMAGE_PLAYER(which reduces armour, causes pain states, respects immunity/resistence/invulnerable/immortal etc).
 
 
 New Features

@@ -338,6 +338,52 @@ static void CheckEvilutionBug(byte *data, int length)
 }
 
 
+static void CheckDoom2Map05Bug(byte *data, int length)
+{
+	// The IWAD for Doom2 has a bug in MAP05 where 2 sectors 
+	// are incorrectly tagged 9.  This fixes it.
+
+	static const byte sector_4_data[] =
+	{
+		0x60,0, 0xc8,0, 0x46,0x4c, 0x41,0x54, 0x31,0,0,0,0x46,0x4c,0x41,0x54,0x31,0x30,0,0,0x70,0,0,0,9,0
+	};
+	
+	static const byte sector_153_data[] =
+	{
+		0x98,0, 0xe8,0, 0x46,0x4c, 0x41,0x54, 0x31,0,0,0,0x46,0x4c,0x41,0x54,0x31,0x30,0,0,0x70,0,9,0,9,0
+	};
+
+	static const int sector_4_offset = 0x68; //104
+	static const int sector_153_offset = 3978; //0xf8a; //3978
+
+	if (length < sector_4_offset + 26)
+		return;
+
+	if (length < sector_153_offset + 26)
+		return;
+
+	//Sector 4 first
+	data += sector_4_offset;
+
+	if (memcmp(data, sector_4_data, 26) != 0)
+		return;
+	
+	if(data[24] == 9) //check just in case
+		data[24] = 0; //set tag to 0 instead of 9
+	
+	//now sector 153
+	data += (sector_153_offset - sector_4_offset);
+
+	if (memcmp(data, sector_153_data, 26) != 0)
+		return;
+
+	if(data[24] == 9) //check just in case
+		data[24] = 0; //set tag to 0 instead of 9
+	
+	I_Printf("Detected Doom2 MAP05 bug, adding fix.\n");
+}
+
+
 static void LoadVertexes(int lump)
 {
 	const void *data;
@@ -471,6 +517,8 @@ static void LoadSectors(int lump)
 
 	data = W_CacheLumpNum(lump);
 	mapsector_CRC.AddBlock((const byte*)data, W_LumpLength(lump));
+
+	CheckDoom2Map05Bug((byte *)data, W_LumpLength(lump)); //Lobo: 2023
 
 	ms = (const raw_sector_t *) data;
 	ss = sectors;

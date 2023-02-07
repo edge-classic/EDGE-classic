@@ -386,7 +386,19 @@ static void GiveHealth(pickup_info_t *pu, benefit_t *be)
 {
 	if (pu->lose_em)
 	{
-		P_DamageMobj(pu->player->mo, pu->special, NULL, be->amount, NULL);
+		//P_DamageMobj(pu->player->mo, pu->special, NULL, be->amount, NULL);
+		if (pu->player->health <= 0)
+			return;
+
+		pu->player->health -= be->amount;
+		pu->player->mo->health = pu->player->health;
+
+		if (pu->player->mo->health <= 0)
+		{
+			P_KillMobj(NULL, pu->player->mo);
+			//return;
+		}
+
 		pu->got_it = true;
 		return;
 	}

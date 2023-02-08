@@ -1,6 +1,6 @@
 https://github.com/dashodanger/EDGE-classic
 
-Current as of: January 2023
+Current as of: February 2023
 
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)
 ====================================
@@ -17,6 +17,8 @@ Bugs fixed
 + Fixed Boom vector linedef scroll directions for angles other than 0/45/90
 + Fixed Boom displacement scrollers not returning back to their exact original position
 + Fixed overzealous oofing when falling
++ Doom2 Map05 bug fixed properly this time ;)
+
 
 General Improvements
 --------------------
@@ -24,6 +26,9 @@ General Improvements
 
 + DDFSTYLE text styles can now have their own individual X_OFFSET and Y_OFFSET values,
   giving more flexibility for menu item placement
+  
++ Changed how LOSE_BENEFIT HEALTH is handled in RTS. Now it will simply subtract from current health and not
+  behave like DAMAGE_PLAYER(which reduces armour, causes pain states, respects immunity/resistence/invulnerable/immortal etc).
 
 
 New Features

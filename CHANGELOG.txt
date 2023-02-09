@@ -30,6 +30,8 @@ General Improvements
 + Changed how LOSE_BENEFIT HEALTH is handled in RTS. Now it will simply subtract from current health and not
   behave like DAMAGE_PLAYER(which reduces armour, causes pain states, respects immunity/resistence/invulnerable/immortal etc).
 
++ Monsters resurrected by Archviles will no longer count as kills.
+
 
 New Features
 ------------

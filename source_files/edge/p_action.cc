@@ -460,6 +460,8 @@ void P_BringCorpseToLife(mobj_t * corpse)
 	corpse->vis_target = PERCENT_2_FLOAT(info->translucency);
 	corpse->tag = corpse->spawnpoint.tag;
 
+	corpse->flags &= ~MF_COUNTKILL; //Lobo 2023: don't add to killcount
+
 	if (corpse->player)
 	{
 		corpse->player->playerstate = PST_LIVE;

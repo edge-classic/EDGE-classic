@@ -789,7 +789,13 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 	else /* (! data.is_fuzzy) */
 	{
 		int mdlSkin = 0;
-		mdlSkin = mo->model_skin - 1; //ddf MODEL_SKIN starts at 1 not 0
+
+		if (is_weapon == true)
+			mdlSkin = mo->player->weapons[mo->player->ready_wp].model_skin;
+		else
+			mdlSkin = mo->model_skin;
+
+		mdlSkin --; //ddf MODEL_SKIN starts at 1 not 0
 
 		if (mdlSkin > -1)
 			skin_tex = md->skin_ids[mdlSkin];

@@ -146,7 +146,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 	sprintf(lumpname, "%sMD3", basename);
 	if (W_CheckNumForName(lumpname) >= 0)
 	{
-		I_Debugf("Loading model from lump : %s\n", lumpname);
+		I_Debugf("Loading MD3 model from lump : %s\n", lumpname);
 
 		f = W_OpenLump(lumpname);
 		SYS_ASSERT(f);
@@ -156,7 +156,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 	sprintf(lumpname, "%sMD2", basename);
 	if (W_CheckNumForName(lumpname) >= 0)
 	{
-		I_Debugf("Loading model from lump : %s\n", lumpname);
+		I_Debugf("Loading MD2 model from lump : %s\n", lumpname);
 
 		f = W_OpenLump(lumpname);
 		if (! f)
@@ -167,7 +167,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 	sprintf(lumpname, "%sMDL", basename);
 	if (W_CheckNumForName(lumpname) >= 0)
 	{
-		I_Debugf("Loading model from lump : %s\n", lumpname);
+		I_Debugf("Loading MDL model from lump : %s\n", lumpname);
 
 		f = W_OpenLump(lumpname);
 		if (! f)
@@ -178,7 +178,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 	sprintf(lumpname, "%sVXL", basename);
 	if (W_CheckNumForName(lumpname) >= 0)
 	{
-		I_Debugf("Loading model from lump : %s\n", lumpname);
+		I_Debugf("Loading voxel from lump : %s\n", lumpname);
 
 		f = W_OpenLump(lumpname);
 		if (! f)

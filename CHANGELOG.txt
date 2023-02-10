@@ -32,6 +32,8 @@ General Improvements
 
 + "Crosshair Size" option in Video Options menu will now apply to both the standard crosshair and custom weapon crosshair states
   (previously this only affected standard crosshairs)
+  
++ Monsters resurrected by Archviles will no longer count as kills.
 
 
 New Features

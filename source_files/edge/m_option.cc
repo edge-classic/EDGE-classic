@@ -417,7 +417,7 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Switch,  "Overlay",  		VidOverlays, 6, &r_overlay.d, M_SaveOverlay, NULL},
 	{OPT_Switch,  "Crosshair",       CrossH, 10, &menu_crosshair, M_ChangeCrossHair, NULL},
 	{OPT_Switch,  "Crosshair Color", CrosshairColor,  8, &menu_crosscolor, M_ChangeCrossColor, NULL},
-	{OPT_Slider,  "Crosshair Size",    NULL,  4,  &menu_crosssize, M_ChangeCrossSize, NULL},
+	{OPT_Slider,  "Crosshair Size",    NULL,  6,  &menu_crosssize, M_ChangeCrossSize, NULL},
 	{OPT_Boolean, "Map Rotation",    YesNo,   2, &rotatemap, NULL, NULL},
 	{OPT_Switch,  "Teleport Flash",  YesNo,   2, &telept_flash, NULL, NULL},
 	{OPT_Switch,  "Invulnerability", Invuls, NUM_INVULFX,  &var_invul_fx, NULL, NULL},
@@ -2284,7 +2284,7 @@ void M_Options(int choice)
 	// hack
 	menu_crosshair = CLAMP(0, r_crosshair.d, 9);
 	menu_crosscolor = CLAMP(0, r_crosscolor.d, 7);
-	menu_crosssize = CLAMP(0, (r_crosssize.d / 8 - 1), 3);
+	menu_crosssize = CLAMP(0, (r_crosssize.d / 8 - 1), 5);
 }
 
 

@@ -30,6 +30,9 @@ General Improvements
 + Changed how LOSE_BENEFIT HEALTH is handled in RTS. Now it will simply subtract from current health and not
   behave like DAMAGE_PLAYER(which reduces armour, causes pain states, respects immunity/resistence/invulnerable/immortal etc).
 
++ "Crosshair Size" option in Video Options menu will now apply to both the standard crosshair and custom weapon crosshair states
+  (previously this only affected standard crosshairs)
+
 
 New Features
 ------------

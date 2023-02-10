@@ -150,14 +150,6 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 	if (!image)
 		return;
 
-	// Situations like these should hopefully be fixable with WADFIXES now - Dasho
-	// Trying to fix edge case where an empty sprite is used in a state that has a duration greater than 0
-	/*if (image->actual_w == 1 && image->actual_h == 1)
-	{
-		image = R2_GetOtherSprite(state->sprite + 1, state->frame, &flip);
-		if (!image) return;
-	}*/	
-
 	GLuint tex_id = W_ImageCache(image, false,
 					  (which == ps_crosshair) ? NULL : ren_fx_colmap);
 
@@ -165,6 +157,7 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 	float h = IM_HEIGHT(image);
 	float right = IM_RIGHT(image);
 	float top = IM_TOP(image);
+	float ratio = 1.0f;
 
 	bool is_fuzzy = (player->mo->flags & MF_FUZZY) ? true : false;
 
@@ -172,6 +165,9 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 
 	if (which == ps_crosshair)
 	{
+		ratio = r_crosssize.f / w;
+		w *= ratio;
+		h *= ratio;
 		is_fuzzy = false;
 		trans = 1.0f;
 	}
@@ -205,10 +201,10 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 	float coord_W = 320.0f * view_expand_w;
 	float coord_H = 200.0f;
 
-	float tx1 = (coord_W - IM_WIDTH(image)) / 2.0 + psp->sx - IM_OFFSETX(image);
+	float tx1 = (coord_W - w) / 2.0 + psp->sx - IM_OFFSETX(image);
 	float tx2 = tx1 + w;
 
-	float ty1 = - psp->sy + IM_OFFSETY(image);
+	float ty1 = - psp->sy + IM_OFFSETY(image) - ((h - IM_HEIGHT(image)) * 0.5f);
 	
 	//Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
 	if ((state->flags & SFF_Weapon) && (player->ready_wp >=0))

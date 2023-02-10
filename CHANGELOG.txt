@@ -44,6 +44,8 @@ New Features
 
 + Ported MD3 model support from EDGE 1.32 codebase
 
++ New DDFTHING command: FALLPAIN_SOUND which is the sfx to be played when the player is hurt from a big fall
+
 
 CHANGELOG for EDGE-Classic 1.32 (since EDGE-Classic 1.31)
 ====================================

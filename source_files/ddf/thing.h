@@ -943,6 +943,7 @@ public:
 	struct sfx_s *jump_sound;
 	struct sfx_s *noway_sound;
 	struct sfx_s *oof_sound;
+	struct sfx_s *fallpain_sound;
 	struct sfx_s *gasp_sound;
 	struct sfx_s *secretsound;
 	struct sfx_s *falling_sound;

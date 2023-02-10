@@ -165,6 +165,7 @@ const commandlist_t thing_commands[] =
 	DF("JUMP_SOUND", jump_sound, DDF_MainLookupSound),
 	DF("NOWAY_SOUND", noway_sound, DDF_MainLookupSound),
 	DF("OOF_SOUND", oof_sound, DDF_MainLookupSound),
+	DF("FALLPAIN_SOUND", fallpain_sound, DDF_MainLookupSound),
 	DF("GASP_SOUND", gasp_sound, DDF_MainLookupSound),
 	DF("SECRET_SOUND", secretsound, DDF_MainLookupSound),
 	DF("FALLING_SOUND", falling_sound, DDF_MainLookupSound),
@@ -2319,6 +2320,7 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	jump_sound = src.jump_sound; 
 	noway_sound = src.noway_sound; 
 	oof_sound = src.oof_sound; 
+	fallpain_sound = src.fallpain_sound; 
 	gasp_sound = src.gasp_sound; 
 	secretsound = src.secretsound;
 	falling_sound = src.falling_sound;
@@ -2461,6 +2463,7 @@ void mobjtype_c::Default()
 	jump_sound = sfx_None;
 	noway_sound = sfx_None;
 	oof_sound = sfx_None;
+	fallpain_sound = sfx_None;
 	gasp_sound = sfx_None;
 	//secretsound = sfx_None;
 	secretsound = sfxdefs.GetEffect("SECRET");

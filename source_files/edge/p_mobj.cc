@@ -1084,7 +1084,13 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props, bool extr
 				// Squat down. Decrease viewheight for a moment after hitting the
 				// ground (hard), and utter appropriate sound.
 				mo->player->deltaviewheight = zmove / 8.0f * (r_doubleframes.d ? 2.0 : 1.0); // 70Hz
-				S_StartFX(mo->info->oof_sound, P_MobjGetSfxCategory(mo), mo);
+				if (mo->info->maxfall > 0 && -mo->mom.z > hurt_momz)
+				{
+					S_StartFX(mo->info->fallpain_sound, P_MobjGetSfxCategory(mo), mo);
+				}
+				else
+					S_StartFX(mo->info->oof_sound, P_MobjGetSfxCategory(mo), mo);
+				
 				P_HitLiquidFloor(mo);
 			}
 			// -KM- 1998/12/16 If bigger than max fall, take damage.

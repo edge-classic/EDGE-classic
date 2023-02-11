@@ -1061,8 +1061,6 @@ static void PL_use_inventory(coal::vm_c *vm, int argc)
 			RAD_EnableByTag(NULL, script_name.c_str(), false);
 		}
 	}
-
-	vm->ReturnFloat(ui_player_who->inventory[inv].num);
 }
 
 

@@ -16,8 +16,9 @@ Bugs fixed
 + Fixed Boom tagged line effects also applying the effect to the control linedef (when a tag was present)
 + Fixed Boom vector linedef scroll directions for angles other than 0/45/90
 + Fixed Boom displacement scrollers not returning back to their exact original position
-+ Fixed overzealous oofing when falling
++ Fixed overzealous oofing when falling or bumping into a ceiling
 + Doom2 Map05 bug fixed properly this time ;)
++ Fixed some new DDFSTYLE additions (entry and cursor alignment, etc) not working as intended with the Episode Select menu
 
 
 General Improvements
@@ -45,6 +46,10 @@ New Features
 + Ported MD3 model support from EDGE 1.32 codebase
 
 + New DDFTHING command: FALLPAIN_SOUND which is the sfx to be played when the player is hurt from a big fall
+
++ New COAL Features:
+  - C++ Interop: Can now retrieve and set individual vector elements with the VM_GetVectorX/Y/Z and VM_SetVectorX/Y/Z functions
+  - COALHUDS: Can now access individual vector elements with .x, .y, or .z
 
 
 CHANGELOG for EDGE-Classic 1.32 (since EDGE-Classic 1.31)

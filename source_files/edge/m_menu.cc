@@ -1445,14 +1445,6 @@ static void CreateEpisodeMenu(void)
 		{
 			if (! EpisodeMenu[e].image)
 				EpisodeMenu[e].image = W_ImageLookup(EpisodeMenu[e].patch_name);
-			const image_c *image = EpisodeMenu[e].image;
-			EpisodeMenu[e].height = IM_HEIGHT(image);
-			EpisodeMenu[e].width =  IM_WIDTH(image);
-		}
-		else
-		{
-			EpisodeMenu[e].height = episode_style->def->text[styledef_c::T_TEXT].scale * episode_style->fonts[0]->NominalHeight();
-			EpisodeMenu[e].width = episode_style->fonts[styledef_c::T_TEXT]->StringWidth(EpisodeMenu[e].name) * episode_style->def->text[styledef_c::T_TEXT].scale;
 		}
 
 		e++;

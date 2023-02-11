@@ -80,6 +80,21 @@ double *VM_GetVector(coal::vm_c *vm, const char *mod_name, const char *var_name)
 	return vm->GetVector(mod_name, var_name);
 }
 
+double VM_GetVectorX(coal::vm_c *vm, const char *mod_name, const char *var_name)
+{
+	return vm->GetVectorX(mod_name, var_name);
+}
+
+double VM_GetVectorY(coal::vm_c *vm, const char *mod_name, const char *var_name)
+{
+	return vm->GetVectorY(mod_name, var_name);
+}
+
+double VM_GetVectorZ(coal::vm_c *vm, const char *mod_name, const char *var_name)
+{
+	return vm->GetVectorZ(mod_name, var_name);
+}
+
 // VM_SetFloat/VM_SetString/VM_SetVector usage:
 // mod_name = NULL to search global scope or a module name such as "hud", "math", etc
 // var_name = Variable name, without the module prefix, i.e. "custom_stbar" instead of "hud.custom_stbar"
@@ -98,6 +113,21 @@ void VM_SetString(coal::vm_c *vm, const char *mod_name, const char *var_name, co
 void VM_SetVector(coal::vm_c *vm, const char *mod_name, const char *var_name, double val_1, double val_2, double val_3)
 {
 	vm->SetVector(mod_name, var_name, val_1, val_2, val_3);
+}
+
+void VM_SetVectorX(coal::vm_c *vm, const char *mod_name, const char *var_name, double val)
+{
+	vm->SetVectorX(mod_name, var_name, val);
+}
+
+void VM_SetVectorY(coal::vm_c *vm, const char *mod_name, const char *var_name, double val)
+{
+	vm->SetVectorY(mod_name, var_name, val);
+}
+
+void VM_SetVectorZ(coal::vm_c *vm, const char *mod_name, const char *var_name, double val)
+{
+	vm->SetVectorZ(mod_name, var_name, val);
 }
 
 void VM_CallFunction(coal::vm_c *vm, const char *name)

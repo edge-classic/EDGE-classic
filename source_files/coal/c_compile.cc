@@ -1108,7 +1108,25 @@ def_t * real_vm_c::EXP_FieldQuery(def_t *e, bool lvalue)
 	char *name = ParseName();
 
 	if (e->type->type == ev_vector)
-		CompileError("vector x/y/z access not yet implemented\n");
+	{
+		def_t *vec = FindDef(&type_vector, (char *)e->name, e->scope);
+		if (vec)
+		{
+			def_t *element = NewTemporary(&type_float);
+			if (strcmp(name, "x") == 0)
+				element->ofs = vec->ofs;
+			else if (strcmp(name, "y") == 0)
+				element->ofs = vec->ofs + sizeof(double);
+			else if (strcmp(name, "z") == 0)
+				element->ofs = vec->ofs + (2 * sizeof(double));
+			else
+				CompileError("Bad element access!\n");
+
+			return element;
+		}
+		else
+			CompileError("unknown identifier: %s.%s\n", e->name, name);
+	}
 
 	if (e->type->type == ev_module)
 	{
@@ -1993,7 +2011,7 @@ double *real_vm_c::GetVector(const char *mod_name, const char *var_name)
 		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
 		if (!mod_def)
 		{
-			RunError("SetVector failed: Could not find module %s\n", mod_name);
+			RunError("GetVector failed: Could not find module %s\n", mod_name);
 		}
 		mod_scope = comp.all_modules[mod_def->ofs];
 	}
@@ -2009,7 +2027,97 @@ double *real_vm_c::GetVector(const char *mod_name, const char *var_name)
 		return G_VECTOR(var->ofs);
 	}
 
-	RunError("SetVector failed: Could not find variable %s\n", var_name);
+	RunError("GetVector failed: Could not find variable %s\n", var_name);
+
+	return 0; // Not reached
+}
+
+double real_vm_c::GetVectorX(const char *mod_name, const char *var_name)
+{
+	def_t *mod_def = nullptr;
+	scope_c *mod_scope = nullptr;
+	if (mod_name)
+	{
+		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+		if (!mod_def)
+		{
+			RunError("GetVectorX failed: Could not find module %s\n", mod_name);
+		}
+		mod_scope = comp.all_modules[mod_def->ofs];
+	}
+
+	def_t *var = nullptr;
+	if (mod_scope)
+		var = FindDef(&type_vector, (char *)var_name, mod_scope);
+	else
+		var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+
+	if (var)
+	{
+		return G_VECTOR(var->ofs)[0];
+	}
+
+	RunError("GetVectorX failed: Could not find variable %s\n", var_name);
+
+	return 0; // Not reached
+}
+
+double real_vm_c::GetVectorY(const char *mod_name, const char *var_name)
+{
+	def_t *mod_def = nullptr;
+	scope_c *mod_scope = nullptr;
+	if (mod_name)
+	{
+		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+		if (!mod_def)
+		{
+			RunError("GetVectorY failed: Could not find module %s\n", mod_name);
+		}
+		mod_scope = comp.all_modules[mod_def->ofs];
+	}
+
+	def_t *var = nullptr;
+	if (mod_scope)
+		var = FindDef(&type_vector, (char *)var_name, mod_scope);
+	else
+		var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+
+	if (var)
+	{
+		return G_VECTOR(var->ofs)[1];
+	}
+
+	RunError("GetVectorY failed: Could not find variable %s\n", var_name);
+
+	return 0; // Not reached
+}
+
+double real_vm_c::GetVectorZ(const char *mod_name, const char *var_name)
+{
+	def_t *mod_def = nullptr;
+	scope_c *mod_scope = nullptr;
+	if (mod_name)
+	{
+		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+		if (!mod_def)
+		{
+			RunError("GetVectorZ failed: Could not find module %s\n", mod_name);
+		}
+		mod_scope = comp.all_modules[mod_def->ofs];
+	}
+
+	def_t *var = nullptr;
+	if (mod_scope)
+		var = FindDef(&type_vector, (char *)var_name, mod_scope);
+	else
+		var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+
+	if (var)
+	{
+		return G_VECTOR(var->ofs)[2];
+	}
+
+	RunError("GetVectorZ failed: Could not find variable %s\n", var_name);
 
 	return 0; // Not reached
 }
@@ -2106,6 +2214,99 @@ void real_vm_c::SetVector(const char *mod_name, const char *var_name, double val
 	}
 
 	printer("SetVector failed: Could not find variable %s\n", var_name);
+	return;
+}
+
+void real_vm_c::SetVectorX(const char *mod_name, const char *var_name, double val)
+{
+	def_t *mod_def = nullptr;
+	scope_c *mod_scope = nullptr;
+	if (mod_name)
+	{
+		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+		if (!mod_def)
+		{
+			printer("SetVectorX failed: Could not find module %s\n", mod_name);
+			return;
+		}
+		mod_scope = comp.all_modules[mod_def->ofs];
+	}
+
+	def_t *var = nullptr;
+	if (mod_scope)
+		var = FindDef(&type_vector, (char *)var_name, mod_scope);
+	else
+		var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+
+	if (var)
+	{
+		G_VECTOR(var->ofs)[0] = val;
+		return;
+	}
+
+	printer("SetVectorX failed: Could not find variable %s\n", var_name);
+	return;
+}
+
+void real_vm_c::SetVectorY(const char *mod_name, const char *var_name, double val)
+{
+	def_t *mod_def = nullptr;
+	scope_c *mod_scope = nullptr;
+	if (mod_name)
+	{
+		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+		if (!mod_def)
+		{
+			printer("SetVectorY failed: Could not find module %s\n", mod_name);
+			return;
+		}
+		mod_scope = comp.all_modules[mod_def->ofs];
+	}
+
+	def_t *var = nullptr;
+	if (mod_scope)
+		var = FindDef(&type_vector, (char *)var_name, mod_scope);
+	else
+		var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+
+	if (var)
+	{
+		G_VECTOR(var->ofs)[1] = val;
+		return;
+	}
+
+	printer("SetVectorY failed: Could not find variable %s\n", var_name);
+	return;
+}
+
+void real_vm_c::SetVectorZ(const char *mod_name, const char *var_name, double val)
+{
+	def_t *mod_def = nullptr;
+	scope_c *mod_scope = nullptr;
+	if (mod_name)
+	{
+		mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+		if (!mod_def)
+		{
+			printer("SetVectorZ failed: Could not find module %s\n", mod_name);
+			return;
+		}
+		mod_scope = comp.all_modules[mod_def->ofs];
+	}
+
+	def_t *var = nullptr;
+	if (mod_scope)
+		var = FindDef(&type_vector, (char *)var_name, mod_scope);
+	else
+		var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+
+	if (var)
+	{
+		G_VECTOR(var->ofs)[2] = val;
+		return;
+	}
+
+	printer("SetVectorZ failed: Could not find variable %s\n", var_name);
 	return;
 }
 

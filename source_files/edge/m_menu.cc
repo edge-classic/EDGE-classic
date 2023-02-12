@@ -1391,10 +1391,12 @@ void M_DrawNewGame(void)
 	}
 	else
 	{
+		const colourmap_c *colmap = skill_style->def->text[styledef_c::T_HEADER].colmap;
+					
 		HUD_DrawImage(96 + skill_style->def->text[styledef_c::T_HEADER].x_offset, 
-			14 + skill_style->def->text[styledef_c::T_HEADER].y_offset, menu_newgame);
+			14 + skill_style->def->text[styledef_c::T_HEADER].y_offset, menu_newgame, colmap);
 		HUD_DrawImage(54 + skill_style->def->text[styledef_c::T_HEADER].x_offset, 
-			38 + skill_style->def->text[styledef_c::T_HEADER].y_offset, menu_skill);
+			38 + skill_style->def->text[styledef_c::T_HEADER].y_offset, menu_skill, colmap);
 	}
 }
 
@@ -1483,18 +1485,19 @@ void M_DrawEpisode(void)
 	{
 		int fontType;
 
-		if (! skill_style->fonts[styledef_c::T_HEADER])
+		if (! episode_style->fonts[styledef_c::T_HEADER])
 			fontType=styledef_c::T_TITLE;
 		else
 			fontType=styledef_c::T_HEADER;
 
-		HL_WriteText(episode_style, fontType, 54 + skill_style->def->text[fontType].x_offset, 
-			38 + skill_style->def->text[fontType].y_offset, language["MenuWhichEpisode"]);
+		HL_WriteText(episode_style, fontType, 54 + episode_style->def->text[fontType].x_offset, 
+			38 + episode_style->def->text[fontType].y_offset, language["MenuWhichEpisode"]);
 	}
 	else
 	{
-		HUD_DrawImage(54 + skill_style->def->text[styledef_c::T_HEADER].x_offset, 
-			38 + skill_style->def->text[styledef_c::T_HEADER].y_offset, menu_episode);
+		const colourmap_c *colmap = episode_style->def->text[styledef_c::T_HEADER].colmap;
+		HUD_DrawImage(54 + episode_style->def->text[styledef_c::T_HEADER].x_offset, 
+			38 + episode_style->def->text[styledef_c::T_HEADER].y_offset, menu_episode,colmap);
 	}
 }
 

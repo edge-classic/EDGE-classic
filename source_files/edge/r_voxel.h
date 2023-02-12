@@ -34,7 +34,7 @@ vxl_model_c *VXL_LoadModel(epi::file_c *f, const char *name);
 void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 		             float x, float y, float z, mobj_t *mo,
 					 region_properties_t *props,
-					 float scale, float aspect, float bias);
+					 float scale, float aspect, float bias, int rotation);
 
 void VXL_RenderModel_2D(vxl_model_c *md, float x, float y, 
 					 float xscale, float yscale, const mobjtype_c *info);

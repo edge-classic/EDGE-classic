@@ -46,6 +46,8 @@
 
 #include <vector>
 
+#define DEGREE 0x00B60B61
+
 extern float P_ApproxDistance(float dx, float dy, float dz);
 
 /*============== EDGE REPRESENTATION ====================*/
@@ -362,12 +364,12 @@ static void ClearNormalColors(model_coord_data_t *data)
 }
 
 static void ShadeNormals(abstract_shader_c *shader,
-		 model_coord_data_t *data)
+		 model_coord_data_t *data, bool skip_calc)
 {
 	for (int i=0; i < data->model->verts_per_frame; i++)
 	{
-		// FIXME !!!! pre-rotate normals too
 		float nx, ny, nz;
+		if (!skip_calc)
 		{
 			float nx1 = data->model->frame->vertices[i].nx;
 			float ny1 = data->model->frame->vertices[i].ny;
@@ -396,7 +398,7 @@ static void DLIT_Model(mobj_t *mo, void *dataptr)
 
 	SYS_ASSERT(mo->dlight.shader);
 
-	ShadeNormals(mo->dlight.shader, data);
+	ShadeNormals(mo->dlight.shader, data, false);
 }
 
 static int MDL_MulticolMaxRGB(model_coord_data_t *data, bool additive)
@@ -485,7 +487,7 @@ static inline void ModelCoordFunc(model_coord_data_t *data,
 void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 		             float x, float y, float z, mobj_t *mo,
 					 region_properties_t *props,
-					 float scale, float aspect, float bias)
+					 float scale, float aspect, float bias, int rotation)
 {
 	if (!md->frame)
 	{
@@ -531,7 +533,7 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 
 	M_Angle2Matrix(tilt ? ~mo->vertangle : 0, &data.kx_mat, &data.kz_mat);
 
-	angle_t ang = mo->angle;
+	angle_t ang = mo->angle + (DEGREE*rotation);
 
 	MIR_Angle(ang);
 
@@ -577,7 +579,7 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 
 		abstract_shader_c *shader = R_GetColormapShader(props, mo->state->bright);
 
-		ShadeNormals(shader, &data);
+		ShadeNormals(shader, &data, true);
 
 		if (use_dlights && ren_extralight < 250)
 		{

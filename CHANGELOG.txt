@@ -45,7 +45,10 @@ New Features
 
 + Ported MD3 model support from EDGE 1.32 codebase
 
-+ New DDFTHING command: FALLPAIN_SOUND which is the sfx to be played when the player is hurt from a big fall
++ DDFTHING:
+  - New command: FALLPAIN_SOUND, which is the sfx to be played when the player is hurt from a big fall
+  - New command: MODEL_ROTATE = <integer>, which for MDL/MD2/MD3/Voxels will rotate all vertices' x/y coordinates by the
+    given (positive or negative). Used to correct imported models whose rotations are wrong. Default is 0.
 
 + New COAL Features:
   - C++ Interop: Can now retrieve and set individual vector elements with the VM_GetVectorX/Y/Z and VM_SetVectorX/Y/Z functions

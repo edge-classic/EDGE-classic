@@ -969,6 +969,7 @@ public:
 	float model_scale;
 	float model_aspect;
 	float model_bias;
+	int model_rotate;
 
 	// breathing support: lung_capacity is how many tics we can last
 	// underwater.  gasp_start is how long underwater before we gasp

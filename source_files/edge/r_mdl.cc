@@ -46,6 +46,8 @@
 
 #include <vector>
 
+#define DEGREE 0x00B60B61
+
 extern float P_ApproxDistance(float dx, float dy, float dz);
 
 
@@ -552,16 +554,16 @@ static void InitNormalColors(model_coord_data_t *data)
 }
 
 static void ShadeNormals(abstract_shader_c *shader,
-		 model_coord_data_t *data)
+		 model_coord_data_t *data, bool skip_calc)
 {
 	short *n_list = data->used_normals;
 
 	for (; *n_list >= 0; n_list++)
 	{
 		short n = *n_list;
-
-		// FIXME !!!! pre-rotate normals too
 		float nx, ny, nz;
+
+		if (!skip_calc)
 		{
 			float nx1 = md_normals[n].x;
 			float ny1 = md_normals[n].y;
@@ -590,7 +592,7 @@ static void DLIT_Model(mobj_t *mo, void *dataptr)
 
 	SYS_ASSERT(mo->dlight.shader);
 
-	ShadeNormals(mo->dlight.shader, data);
+	ShadeNormals(mo->dlight.shader, data, false);
 }
 
 static int MDL_MulticolMaxRGB(model_coord_data_t *data, bool additive)
@@ -695,7 +697,7 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon,
 		             int frame1, int frame2, float lerp,
 		             float x, float y, float z, mobj_t *mo,
 					 region_properties_t *props,
-					 float scale, float aspect, float bias)
+					 float scale, float aspect, float bias, int rotation)
 {
 	// check if frames are valid
 	if (frame1 < 0 || frame1 >= md->num_frames)
@@ -750,7 +752,7 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 
 	M_Angle2Matrix(tilt ? ~mo->vertangle : 0, &data.kx_mat, &data.kz_mat);
 
-	angle_t ang = mo->angle;
+	angle_t ang = mo->angle + (DEGREE*rotation);
 
 	MIR_Angle(ang);
 
@@ -810,7 +812,7 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 
 		abstract_shader_c *shader = R_GetColormapShader(props, mo->state->bright);
 
-		ShadeNormals(shader, &data);
+		ShadeNormals(shader, &data, true);
 
 		if (use_dlights && ren_extralight < 250)
 		{

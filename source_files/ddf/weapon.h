@@ -168,6 +168,7 @@ public:
 	float model_bias;
 	float model_forward;
 	float model_side;
+	int model_rotate;
 	
 	//Lobo 2022: render order is Crosshair, Flash, Weapon
 	// instead of Weapon, Flash, CrossHair

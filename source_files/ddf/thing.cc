@@ -180,6 +180,7 @@ const commandlist_t thing_commands[] =
 	DF("MODEL_SCALE", model_scale, DDF_MainGetFloat),
 	DF("MODEL_ASPECT", model_aspect, DDF_MainGetFloat),
 	DF("MODEL_BIAS", model_bias, DDF_MainGetFloat),
+	DF("MODEL_ROTATE", model_rotate, DDF_MainGetNumeric),
 	DF("BOUNCE_SPEED", bounce_speed, DDF_MainGetFloat),
 	DF("BOUNCE_UP", bounce_up, DDF_MainGetFloat),
 	DF("SIGHT_SLOPE", sight_slope, DDF_MainGetSlope),
@@ -2301,6 +2302,7 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	model_scale = src.model_scale;
 	model_aspect = src.model_aspect;
 	model_bias = src.model_bias;
+	model_rotate = src.model_rotate;
 
 	bounce_speed = src.bounce_speed; 
 	bounce_up = src.bounce_up; 
@@ -2444,6 +2446,7 @@ void mobjtype_c::Default()
 	model_scale = 1.0f;
 	model_aspect = 1.0f;
 	model_bias = 0.0f;
+	model_rotate = 0;
 
 	bounce_speed = 0.5f;
 	bounce_up = 0.5f;

@@ -615,16 +615,16 @@ void RGL_DrawWeaponModel(player_t * p)
 		MD2_RenderModel(md->md2_model, skin_img, true,
 						last_frame, psp->state->frame, lerp,
 						x, y, z, p->mo, view_props,
-						1.0f /* scale */, w->model_aspect, w->model_bias);
+						1.0f /* scale */, w->model_aspect, w->model_bias, w->model_rotate);
 	else if (md->mdl_model)
 		MDL_RenderModel(md->mdl_model, skin_img, true,
 						last_frame, psp->state->frame, lerp,
 						x, y, z, p->mo, view_props,
-						1.0f /* scale */, w->model_aspect, w->model_bias);
+						1.0f /* scale */, w->model_aspect, w->model_bias, w->model_rotate);
 	else
 		VXL_RenderModel(md->vxl_model, true,
 						x, y, z, p->mo, view_props,
-						1.0f /* scale */, w->model_aspect, w->model_bias);
+						1.0f /* scale */, w->model_aspect, w->model_bias, w->model_rotate);
 }
 
 
@@ -1179,18 +1179,18 @@ static void RGL_DrawModel(drawthing_t *dthing)
 						last_frame, mo->state->frame, lerp,
 						dthing->mx, dthing->my, z, mo, mo->props,
 						mo->info->model_scale, mo->info->model_aspect,
-						mo->info->model_bias);
+						mo->info->model_bias, mo->info->model_rotate);
 	else if (md->mdl_model)
 		MDL_RenderModel(md->mdl_model, skin_img, false,
 						last_frame, mo->state->frame, lerp,
 						dthing->mx, dthing->my, z, mo, mo->props,
 						mo->info->model_scale, mo->info->model_aspect,
-						mo->info->model_bias);
+						mo->info->model_bias, mo->info->model_rotate);
 	else
 		VXL_RenderModel(md->vxl_model, false,
 						dthing->mx, dthing->my, z, mo, mo->props,
 						mo->info->model_scale, mo->info->model_aspect,
-						mo->info->model_bias);
+						mo->info->model_bias, mo->info->model_rotate);
 }
 
 

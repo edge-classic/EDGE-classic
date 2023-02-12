@@ -1014,7 +1014,8 @@ void M_OptDrawer()
 	} 
 	else
 	{		
-		HUD_DrawImage(curr_menu->title_x, menutop, image);
+		const colourmap_c *colmap = style->def->text[fontType].colmap;
+		HUD_DrawImage(curr_menu->title_x, menutop, image, colmap);
 	}
 
 	fontType=styledef_c::T_TEXT;

@@ -27,6 +27,7 @@
 
 #include "local.h"
 #include "thing.h"
+#include "types.h"
 
 #include "p_action.h"
 
@@ -875,6 +876,8 @@ static void ThingFinishEntry(void)
 
 		dlight_radius_warnings++;
 	}
+
+	dynamic_mobj->model_rotate *= ANG1;
 
 	// FIXME: check more stuff
 

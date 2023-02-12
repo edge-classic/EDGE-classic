@@ -46,8 +46,6 @@
 
 #include <vector>
 
-#define DEGREE 0x00B60B61
-
 extern float P_ApproxDistance(float dx, float dy, float dz);
 
 
@@ -752,7 +750,7 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 
 	M_Angle2Matrix(tilt ? ~mo->vertangle : 0, &data.kx_mat, &data.kz_mat);
 
-	angle_t ang = mo->angle + (DEGREE*rotation);
+	angle_t ang = mo->angle + rotation;
 
 	MIR_Angle(ang);
 

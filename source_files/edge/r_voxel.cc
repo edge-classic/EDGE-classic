@@ -46,8 +46,6 @@
 
 #include <vector>
 
-#define DEGREE 0x00B60B61
-
 extern float P_ApproxDistance(float dx, float dy, float dz);
 
 /*============== EDGE REPRESENTATION ====================*/
@@ -533,7 +531,7 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 
 	M_Angle2Matrix(tilt ? ~mo->vertangle : 0, &data.kx_mat, &data.kz_mat);
 
-	angle_t ang = mo->angle + (DEGREE*rotation);
+	angle_t ang = mo->angle + rotation;
 
 	MIR_Angle(ang);
 

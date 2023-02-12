@@ -26,6 +26,8 @@
 
 #include "p_action.h"
 
+#include "types.h"
+
 #undef  DF
 #define DF  DDF_FIELD
 
@@ -469,6 +471,8 @@ static void WeaponFinishEntry(void)
 
 	if (dynamic_weapon->zoom_factor > 0.0)
 		dynamic_weapon->zoom_fov = I_ROUND(90 / dynamic_weapon->zoom_factor);
+
+	dynamic_weapon->model_rotate *= ANG1;
 
 	// Check MBF21 weapon flags that don't correlate to DDFWEAP flags
 	for (auto flag : flag_tests)

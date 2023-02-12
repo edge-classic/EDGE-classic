@@ -110,6 +110,8 @@ public:
 
 	bool grayscale = false;
 
+	int hue_rotation = 0;
+
 //!!!!!! private:
 
 	// --- information about where this image came from ---

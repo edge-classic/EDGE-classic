@@ -547,6 +547,8 @@ static image_c *AddImage_DOOM(imagedef_c *def, bool user_defined = false)
 
 	rim->is_font = def->is_font;
 
+	rim->hue_rotation = def->hue_rotation;
+
 	if (user_defined)
 		rim->source.graphic.user_defined = true;
 
@@ -677,6 +679,8 @@ static image_c *AddImageUser(imagedef_c *def)
 	rim->source.user.def = def;
 
 	rim->is_font = def->is_font;
+
+	rim->hue_rotation = def->hue_rotation;
 
 	if (def->special & IMGSP_Crosshair)
 	{
@@ -1103,8 +1107,6 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 			scaled_img->RemoveBackground();
 			rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
 		}
-		if (do_whiten)
-			scaled_img->Whiten();
 
 		delete tmp_img;
 		tmp_img = scaled_img;
@@ -1119,8 +1121,6 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 			rgb_img->RemoveBackground();
 			rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
 		}
-		if (do_whiten)
-			rgb_img->Whiten();
 
 		delete tmp_img;
 		tmp_img = rgb_img;
@@ -1132,11 +1132,15 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 			tmp_img->RemoveBackground();
 			rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
 		}
-		if (do_whiten)
-			tmp_img->Whiten();
-		else if (trans != NULL)
+		if (trans != NULL)
 			R_PaletteRemapRGBA(tmp_img, what_palette, (const byte *) &playpal_data[0]);
 	}
+
+	if (rim->hue_rotation)
+		tmp_img->RotateHue(rim->hue_rotation);
+	
+	if (do_whiten)
+		tmp_img->Whiten();
 
 	GLuint tex_id = R_UploadTexture(tmp_img,
 		(clamp  ? UPL_Clamp  : 0) |

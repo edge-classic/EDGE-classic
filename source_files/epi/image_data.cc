@@ -22,6 +22,8 @@
 
 #include "tables.h"
 
+#include "math_color.h"
+
 #include <unordered_map>
 
 #define RGB_MAKE(r,g,b)  (((r) << 16) | ((g) << 8) | (b))
@@ -821,6 +823,31 @@ void image_data_c::FillMarginY(int actual_h)
 	{
 		memcpy(pixels + (y + actual_h) * width * bpp,
 		       pixels +  y             * width * bpp,  width * bpp);
+	}
+}
+
+void image_data_c::RotateHue(int rotation)
+{
+	SYS_ASSERT(bpp >= 3);
+
+	rotation = CLAMP(-1800, rotation, 1800);
+
+	for (int y = 0; y < height; y++)
+	for (int x = 0; x < width;  x++)
+	{
+		u8_t *src = PixelAt(x, y);
+
+		color_c col(src[0], src[1], src[2], bpp == 4 ? src[3] : 255);
+
+		hsv_col_c hue(col);
+
+		hue.Rotate(rotation);
+
+		col = hue.GetRGBA();
+
+		src[0] = col.r;
+		src[1] = col.g;
+		src[2] = col.b;
 	}
 }
 

@@ -152,6 +152,9 @@ public:
 	// properly, but it looks better than having areas of black.
 	void FillMarginX(int actual_w);
 	void FillMarginY(int actual_h);
+
+	// Rotate the hue of the image, i.e. hopefully automagical "palette swaps"
+	void RotateHue(int rotation);
 };
 
 } // namespace epi

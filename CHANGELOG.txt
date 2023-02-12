@@ -50,7 +50,11 @@ New Features
   - New command: MODEL_ROTATE = <integer>, which for MDL/MD2/MD3/Voxels will rotate all vertices' x/y coordinates by the
     given (positive or negative) number of degrees. Used to correct imported models whose rotations are wrong. Default is 0.
 
-+ New COAL Features:
++ DDFIMAGE:
+  - New command: ROTATE_HUE = <integer>, will rotate the hue of the given image while keeping other values the same. Valid range is -1800
+    to 1800, with a default of 0.
+
++ COAL:
   - C++ Interop: Can now retrieve and set individual vector elements with the VM_GetVectorX/Y/Z and VM_SetVectorX/Y/Z functions
   - COALHUDS: Can now access individual vector elements with .x, .y, or .z
 

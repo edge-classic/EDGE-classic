@@ -123,6 +123,8 @@ public:
 	// RENDERING specifics:
 	float scale, aspect;
 
+	int hue_rotation;
+
 private:
 	// disable copy construct and assignment operator
 	explicit imagedef_c(imagedef_c &rhs) { }

@@ -2785,7 +2785,7 @@ void M_Drawer(void)
 				if (currentMenu->menuitems[i].width > WidestLine) 
 					WidestLine = currentMenu->menuitems[i].width;
 				currentMenu->menuitems[i].x = x + image->offset_x + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
-				currentMenu->menuitems[i].y = y - image->offset_y - style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
+				currentMenu->menuitems[i].y = y - image->offset_y + style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
 				y += currentMenu->menuitems[i].height + style->def->entry_spacing;
 			}
 			else

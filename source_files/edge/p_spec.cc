@@ -1801,7 +1801,9 @@ static inline void PlayerInProperties(player_t *player,
 			CON_ImportantMessageLDF("FoundSecret"); //Lobo: get text from language.ddf
 
 			S_StartFX(player->mo->info->secretsound,
-					P_MobjGetSfxCategory(player->mo), player->mo);
+					SNCAT_UI, player->mo);
+			//S_StartFX(player->mo->info->secretsound,
+			//		P_MobjGetSfxCategory(player->mo), player->mo);
 		}
 
 		props->secret_found = true;
@@ -1907,7 +1909,10 @@ void P_PlayerInSpecialSector(player_t * player, sector_t * sec, bool should_chok
 
 		if (player->splashwait == 0 && swim_special->splash_sfx)
 		{
-			S_StartFX(swim_special->splash_sfx, SNCAT_Level, player->mo);
+			//S_StartFX(swim_special->splash_sfx, SNCAT_UI, player->mo);
+			S_StartFX(swim_special->splash_sfx, P_MobjGetSfxCategory(player->mo), player->mo);
+			
+			P_HitLiquidFloor(player->mo);
 		}
 	}
 	else if (was_swimming && !player->swimming)

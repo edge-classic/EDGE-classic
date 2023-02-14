@@ -280,10 +280,12 @@ bool P_Move(mobj_t * actor, bool path)
 	if (!(actor->flags & MF_FLOAT) &&
 		!(actor->extendedflags & EF_GRAVFALL))
 		{
+			/*
 			if (actor->z > actor->floorz)
 			{
 				P_HitLiquidFloor(actor);
 			}
+			*/
 			actor->z = actor->floorz;
 		}
 	// -AJA- 2008/01/16: position interpolation
@@ -311,14 +313,12 @@ bool P_Move(mobj_t * actor, bool path)
 //
 static bool TryWalk(mobj_t * actor)
 {
-	P_HitLiquidFloor(actor);
+	//P_HitLiquidFloor(actor);
 	
 	if (!P_Move(actor, false))
 		return false;
 
 	actor->movecount = P_Random() & 15;
-
-	
 
 	return true;
 }

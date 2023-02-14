@@ -55,6 +55,7 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
+extern flatdef_c* P_IsThingOnLiquidFloor(mobj_t * thing);
 
 static int AttackSfxCat(const mobj_t *mo)
 {
@@ -3635,7 +3636,7 @@ void P_ActJumpLiquid(mobj_t * mo)
 	//
 	// Note: nothing to do with monsters physically jumping.
 
-    if (P_HitLiquidFloor(mo) == false) //Are we touching a liquid floor?
+    if (!P_IsThingOnLiquidFloor(mo)) //Are we touching a liquid floor?
 	{
 		return;
 	}

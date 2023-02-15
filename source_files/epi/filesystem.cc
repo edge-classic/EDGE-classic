@@ -112,19 +112,12 @@ bool FS_ReadDir(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::s
 	if (dir.empty() || mask.empty())
 		return false;
 
-	std::filesystem::path prev_dir = FS_GetCurrDir();
 	std::filesystem::path mask_ext = std::filesystem::path(mask).extension(); // Allows us to retain the *.extension syntax - Dasho
-
-	if (prev_dir.empty())
-		return false;
-
-	if (! FS_SetCurrDir(dir))
-		return false;
 
 	// Ensure the container is empty
 	fsd.clear();
 
-	for (auto const& entry : std::filesystem::directory_iterator{std::filesystem::current_path()})
+	for (auto const& entry : std::filesystem::directory_iterator{dir})
 	{
 		if (epi::case_cmp(mask_ext.u8string(), ".*") != 0 &&
 			epi::case_cmp(mask_ext.u8string(), entry.path().extension().u8string()) != 0)
@@ -136,7 +129,6 @@ bool FS_ReadDir(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::s
 		fsd.push_back(dir_entry_c { entry.path(), size, is_dir });
 	}
 
-	FS_SetCurrDir(prev_dir);
 	return true;
 }
 

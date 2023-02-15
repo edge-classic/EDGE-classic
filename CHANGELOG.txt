@@ -36,6 +36,8 @@ General Improvements
   
 + Monsters resurrected by Archviles will no longer count as kills.
 
++ Replaced WebSID SID backend with cRSID for easier compilation and better performance
+
 
 New Features
 ------------

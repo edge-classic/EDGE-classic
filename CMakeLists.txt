@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.12..3.20)
 
 add_subdirectory(source_files/ajbsp)
 add_subdirectory(source_files/coal)
+add_subdirectory(source_files/crsid)
 add_subdirectory(source_files/ddf)
 add_subdirectory(source_files/dehacked)
 add_subdirectory(source_files/ec_voxelib)
@@ -11,7 +12,6 @@ add_subdirectory(source_files/fluidlite)
 add_subdirectory(source_files/glad)
 add_subdirectory(source_files/libgme)
 add_subdirectory(source_files/libxmp)
-add_subdirectory(source_files/libwebsid)
 add_subdirectory(source_files/libymfm)
 add_subdirectory(source_files/miniz)
 add_subdirectory(source_files/ymfmidi)
@@ -170,6 +170,7 @@ find_package(OpenGL REQUIRED)
 
 target_include_directories(edge-classic PRIVATE source_files/ajbsp)
 target_include_directories(edge-classic PRIVATE source_files/coal)
+target_include_directories(edge-classic PRIVATE source_files/crsid)
 target_include_directories(edge-classic PRIVATE source_files/ddf)
 target_include_directories(edge-classic PRIVATE source_files/dehacked)
 target_include_directories(edge-classic PRIVATE source_files/dr_libs)
@@ -181,7 +182,6 @@ target_include_directories(edge-classic PRIVATE source_files/glad/include/glad)
 target_include_directories(edge-classic PRIVATE source_files/libgme/gme)
 target_include_directories(edge-classic PRIVATE source_files/libymfm)
 target_include_directories(edge-classic PRIVATE source_files/libxmp)
-target_include_directories(edge-classic PRIVATE source_files/libwebsid)
 target_include_directories(edge-classic PRIVATE source_files/minimp3)
 target_include_directories(edge-classic PRIVATE source_files/minivorbis)
 target_include_directories(edge-classic PRIVATE source_files/miniz)
@@ -258,13 +258,13 @@ if(WIN32 OR MSYS OR MINGW)
 			glad
 			${OPENGL_LIBRARIES}
 			${SDL2_LIBRARIES}
+			crsid
 			ec_voxelib
 			fmmidi
 			fluidlite
 			gme
 			miniz
 			libxmp
-			libwebsid
 			libymfm
 			ymfmidi
 			wsock32
@@ -280,13 +280,13 @@ else()
 			${OPENGL_LIBRARIES}
 			glad
 			${SDL2_LIBRARIES}
+			crsid
 			ec_voxelib
 			fmmidi
 			fluidlite
 			gme
 			miniz
 			libxmp
-			libwebsid
 			libymfm
 			ymfmidi
 	)

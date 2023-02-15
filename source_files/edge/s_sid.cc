@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------------
-//  EDGE TinySID Music Player
+//  EDGE LibCSID Music Player
 //----------------------------------------------------------------------------
 // 
-//  Copyright (c) 2022 - The EDGE Team.
+//  Copyright (c) 2023 - The EDGE Team.
 // 
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -31,9 +31,9 @@
 #include "s_sid.h"
 #include "w_wad.h"
 
-#include "sidplayer.h"
+#include "libcRSID.h"
 
-#define SID_BUFFER 96000 / 50
+#define SID_BUFFER 4096
 extern bool dev_stereo;  // FIXME: encapsulation
 extern int  dev_freq;
 
@@ -54,8 +54,8 @@ private:
 
 	s16_t *mono_buffer;
 
-	byte *sid_data;
-	int sid_length;
+	cRSID_C64instance* C64 = nullptr;
+	cRSID_SIDheader* C64_song = nullptr;
 
 public:
 	bool OpenMemory(byte *data, int length);
@@ -92,13 +92,12 @@ sidplayer_c::~sidplayer_c()
 
 	if (mono_buffer)
 		delete[] mono_buffer;
-
-	if (sid_data)
-		delete[] sid_data;
 }
 
 void sidplayer_c::PostOpenInit()
 {   
+	cRSID_initSIDtune(C64, C64_song, 0);
+
 	// Loaded, but not playing
 	status = STOPPED;
 }
@@ -126,21 +125,9 @@ bool sidplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	else
 		data_buf = buf->data_L;
 
-	if (computeAudioSamples() == -1)
-	{
-		if (! looping)
-			return false;
-		else
-		{
-			loadSidFile(0, sid_data, sid_length, dev_freq, NULL, NULL, NULL, NULL);
-			sid_playTune(0, 0);
-			computeAudioSamples();
-		}
-	}
+	cRSID_generateSound(C64, (unsigned char *)data_buf, SID_BUFFER);
 
-	buf->length = getSoundBufferLen();
-
-	memcpy(data_buf, getSoundBuffer(), buf->length * sizeof(s16_t) * 2);
+	buf->length = SID_BUFFER / sizeof(s16_t) / 2;
 
 	if (!dev_stereo)
 		ConvertToMono(buf->data_L, mono_buffer, buf->length);
@@ -163,15 +150,21 @@ bool sidplayer_c::OpenMemory(byte *data, int length)
 	if (status != NOT_LOADED)
 		Close();
 
-    if (loadSidFile(0, data, length, dev_freq, NULL, NULL, NULL, NULL) != 0)
+	C64 = cRSID_init(dev_freq);
+
+	if (!C64)
+	{
+		I_Warning("[sidplayer_c]) Failed to initialize CRSID!\n");
+		return false;
+	}
+
+	C64_song = cRSID_processSIDfile(C64, data, length);
+
+    if (!C64_song)
     {
 		I_Warning("[sidplayer_c::Open](DataLump) Failed\n");
 		return false;
     }
-
-	// Need to keep the song in memory for SID restarts
-	sid_data   = data;
-	sid_length = length;
 
 	PostOpenInit();
 	return true;
@@ -215,8 +208,6 @@ void sidplayer_c::Play(bool loop)
 
 	status = PLAYING;
 	looping = loop;
-
-	sid_playTune(0, 0);
 
 	// Load up initial buffer data
 	Ticker();
@@ -277,6 +268,9 @@ abstract_music_c * S_PlaySIDMusic(byte *data, int length, float volume, bool loo
 		delete player;
 		return NULL;
 	}
+
+	// cRSID retains the data after initializing the track
+	delete[] data;
 
 	player->Volume(volume);
 	player->Play(looping);

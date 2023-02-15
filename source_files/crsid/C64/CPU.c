@@ -13,7 +13,7 @@ static unsigned int PC, Addr, PrevPC;
 static void loadReg (cRSID_CPUinstance *CPU) { PC = CPU->PC; SP = CPU->SP; ST = CPU->ST; A = CPU->A; X = CPU->X; Y = CPU->Y; }
 static void storeReg (cRSID_CPUinstance *CPU) { CPU->PC = PC; CPU->SP = SP; CPU->ST = ST; CPU->A = A; CPU->X = X; CPU->Y = Y; }
 
-static unsigned char rd (register unsigned short address) {
+static unsigned char rd (unsigned short address) {
   static unsigned char value;
   value = *cRSID_getMemReadPtr(address);
   if (C64->RealSIDmode) {
@@ -25,7 +25,7 @@ static unsigned char rd (register unsigned short address) {
   return value;
  }
 
-static void wr (register unsigned short address, register unsigned char data) {
+static void wr (unsigned short address, unsigned char data) {
   *cRSID_getMemWritePtr(address)=data;
   if ( C64->RealSIDmode && (C64->RAMbank[1] & 3) ) {
    //if(data&1) { //only writing 1 to $d019 bit0 would acknowledge, not any value (but RMW instructions write $d019 back before mod.)
@@ -34,7 +34,7 @@ static void wr (register unsigned short address, register unsigned char data) {
   }
  }
 
-static void wr2 (register unsigned short address, register unsigned char data) { //PSID-hack specific memory-write
+static void wr2 (unsigned short address, unsigned char data) { //PSID-hack specific memory-write
   static int Tmp;
   *cRSID_getMemWritePtr(address)=data;
   if ( C64->RAMbank[1] & 3 ) {

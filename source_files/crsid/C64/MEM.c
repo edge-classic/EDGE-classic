@@ -2,7 +2,7 @@
 //Emulation of C64 memories and memory bus (PLA & MUXes)
 
 
-static inline unsigned char* cRSID_getMemReadPtr (register unsigned short address) {
+static inline unsigned char* cRSID_getMemReadPtr (unsigned short address) {
  //cRSID_C64instance* const C64 = &cRSID_C64; //for faster (?) operation we use a global object as memory
  if (address<0xA000) return &cRSID_C64.RAMbank[address];
  else if ( 0xD000<=address && address<0xE000 && (cRSID_C64.RAMbank[1]&3) ) {
@@ -14,7 +14,7 @@ static inline unsigned char* cRSID_getMemReadPtr (register unsigned short addres
  return &cRSID_C64.RAMbank[address];
 }
 
-static inline unsigned char* cRSID_getMemReadPtrC64 (cRSID_C64instance* C64, register unsigned short address) {
+static inline unsigned char* cRSID_getMemReadPtrC64 (cRSID_C64instance* C64, unsigned short address) {
  if (address<0xA000) return &C64->RAMbank[address];
  else if ( 0xD000<=address && address<0xE000 && (C64->RAMbank[1]&3) ) {
   if (0xD400 <= address && address < 0xD419) return &cRSID_C64.IObankWR[address]; //emulate peculiar SID-read (e.g. Lift Off)
@@ -26,7 +26,7 @@ static inline unsigned char* cRSID_getMemReadPtrC64 (cRSID_C64instance* C64, reg
 }
 
 
-static inline unsigned char* cRSID_getMemWritePtr (register unsigned short address) {
+static inline unsigned char* cRSID_getMemWritePtr (unsigned short address) {
  //cRSID_C64instance* const C64 = &cRSID_C64; //for faster (?) operation we use a global object as memory
  if (address<0xD000 || 0xE000<=address) return &cRSID_C64.RAMbank[address];
  else if ( cRSID_C64.RAMbank[1]&3 ) { //handle SID-mirrors! (CJ in the USA workaround (writing above $d420, except SID2/SID3))
@@ -45,7 +45,7 @@ static inline unsigned char* cRSID_getMemWritePtr (register unsigned short addre
 }
 
 
-static inline unsigned char* cRSID_getMemWritePtrC64 (cRSID_C64instance* C64, register unsigned short address) {
+static inline unsigned char* cRSID_getMemWritePtrC64 (cRSID_C64instance* C64, unsigned short address) {
  if (address<0xD000 || 0xE000<=address) return &C64->RAMbank[address];
  else if ( C64->RAMbank[1]&3 ) { //handle SID-mirrors! (CJ in the USA workaround (writing above $d420, except SID2/SID3/PSIDdigi))
   if (0xD420 <= address && address < 0xD800) { //CIA/VIC mirrors needed?
@@ -63,20 +63,20 @@ static inline unsigned char* cRSID_getMemWritePtrC64 (cRSID_C64instance* C64, re
 }
 
 
-static inline unsigned char cRSID_readMem (register unsigned short address) {
+static inline unsigned char cRSID_readMem (unsigned short address) {
  return *cRSID_getMemReadPtr(address);
 }
 
-static inline unsigned char cRSID_readMemC64 (cRSID_C64instance* C64, register unsigned short address) {
+static inline unsigned char cRSID_readMemC64 (cRSID_C64instance* C64, unsigned short address) {
  return *cRSID_getMemReadPtrC64(C64,address);
 }
 
 
-static inline void cRSID_writeMem (register unsigned short address, register unsigned char data) {
+static inline void cRSID_writeMem (unsigned short address, unsigned char data) {
  *cRSID_getMemWritePtr(address)=data;
 }
 
-static inline void cRSID_writeMemC64 (cRSID_C64instance* C64, register unsigned short address, register unsigned char data) {
+static inline void cRSID_writeMemC64 (cRSID_C64instance* C64, unsigned short address, unsigned char data) {
  *cRSID_getMemWritePtrC64(C64,address)=data;
 }
 

@@ -9,6 +9,7 @@
 #include "host/file.c"
 #include "host/audio.c"
 
+cRSID_C64instance cRSID_C64;
 
 cRSID_C64instance* cRSID_init (unsigned short samplerate) {
  static cRSID_C64instance* C64 = &cRSID_C64;

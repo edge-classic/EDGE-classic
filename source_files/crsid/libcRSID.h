@@ -48,14 +48,14 @@ void                cRSID_initC64       (cRSID_C64instance* C64); //hard-reset
 cRSID_Output        cRSID_emulateC64    (cRSID_C64instance* C64);
 static inline short cRSID_playPSIDdigi  (cRSID_C64instance* C64);
 // C64/MEM.c
-static inline unsigned char* cRSID_getMemReadPtr     (register unsigned short address); //for global cSID_C64 fast-access
-static inline unsigned char* cRSID_getMemReadPtrC64  (cRSID_C64instance* C64, register unsigned short address); //maybe slower
-static inline unsigned char* cRSID_getMemWritePtr    (register unsigned short address); //for global cSID_C64 fast-access
-static inline unsigned char* cRSID_getMemWritePtrC64 (cRSID_C64instance* C64, register unsigned short address); //maybe slower
-static inline unsigned char  cRSID_readMem     (register unsigned short address); //for global cSID_C64 fast-access
-static inline unsigned char  cRSID_readMemC64  (cRSID_C64instance* C64, register unsigned short address); //maybe slower
-static inline void           cRSID_writeMem    (register unsigned short address, register unsigned char data); //for global cSID_C64 fast-access
-static inline void           cRSID_writeMemC64 (cRSID_C64instance* C64, register unsigned short address, register unsigned char data); //maybe slower
+static inline unsigned char* cRSID_getMemReadPtr     (unsigned short address); //for global cSID_C64 fast-access
+static inline unsigned char* cRSID_getMemReadPtrC64  (cRSID_C64instance* C64, unsigned short address); //maybe slower
+static inline unsigned char* cRSID_getMemWritePtr    (unsigned short address); //for global cSID_C64 fast-access
+static inline unsigned char* cRSID_getMemWritePtrC64 (cRSID_C64instance* C64, unsigned short address); //maybe slower
+static inline unsigned char  cRSID_readMem     (unsigned short address); //for global cSID_C64 fast-access
+static inline unsigned char  cRSID_readMemC64  (cRSID_C64instance* C64, unsigned short address); //maybe slower
+static inline void           cRSID_writeMem    (unsigned short address, unsigned char data); //for global cSID_C64 fast-access
+static inline void           cRSID_writeMemC64 (cRSID_C64instance* C64, unsigned short address, unsigned char data); //maybe slower
 void                         cRSID_setROMcontent (cRSID_C64instance* C64); //KERNAL, BASIC
 void                         cRSID_initMem       (cRSID_C64instance* C64);
 // C64/CPU.c
@@ -245,7 +245,7 @@ struct cRSID_C64instance {
  unsigned char ROMbanks[0x10100]; //$1000..$1FFF/$9000..$9FFF (CHARGEN), $A000..$BFFF (BASIC), $E000..$FFFF (KERNAL)
 };
 
-cRSID_C64instance cRSID_C64; //the only global object (for faster & simpler access than with struct-pointers, in some places)
+extern cRSID_C64instance cRSID_C64; //the only global object (for faster & simpler access than with struct-pointers, in some places)
 
 #ifdef __cplusplus
 }

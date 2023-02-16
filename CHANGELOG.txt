@@ -19,6 +19,7 @@ Bugs fixed
 + Fixed overzealous oofing when falling or bumping into a ceiling
 + Doom2 Map05 bug fixed properly this time ;)
 + Fixed some new DDFSTYLE additions (entry and cursor alignment, etc) not working as intended with the Episode Select menu
++ Clip size was not being updated with RTS ReplaceWeapon and DDF weapon BECOME()
 
 
 General Improvements
@@ -26,7 +27,7 @@ General Improvements
 + Improved model and unit rendering to thrash the GL state a bit less
 
 + DDFSTYLE text styles can now have their own individual X_OFFSET and Y_OFFSET values,
-  giving more flexibility for menu item placement
+  giving more flexibility for menu item placement i.e. TITLE.Y_OFFSET or TEXT.Y_OFFSET etc
   
 + Changed how LOSE_BENEFIT HEALTH is handled in RTS. Now it will simply subtract from current health and not
   behave like DAMAGE_PLAYER(which reduces armour, causes pain states, respects immunity/resistence/invulnerable/immortal etc).
@@ -37,6 +38,9 @@ General Improvements
 + Monsters resurrected by Archviles will no longer count as kills.
 
 + Replaced WebSID SID backend with cRSID for easier compilation and better performance
+
++ Things no longer constantly trigger splashes when walking on a flat defined as LIQUID (and having an IMPACT_OBJECT defined). 
+  They will only cause a splash when they step down onto the flat.
 
 
 New Features

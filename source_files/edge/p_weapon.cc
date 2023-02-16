@@ -1752,6 +1752,8 @@ void A_WeaponBecome(mobj_t * mo)
 
 	state += become->start.offset;
 	P_SetPspriteDeferred(p,ps_weapon,state); //refresh the sprite
+	P_FillWeapon(p, p->ready_wp); //handle the potential clip_size difference
+	P_UpdateAvailWeapons(p);
 
 	//P_SetPspriteDeferred(p,ps_weapon,p->weapons[p->ready_wp].info->ready_state);
 }

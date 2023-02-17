@@ -554,7 +554,7 @@ static image_c *AddImage_DOOM(imagedef_c *def, bool user_defined = false)
 
 	if (def->special & IMGSP_Crosshair)
 	{
-		float dy = (200.0f - rim->actual_h * rim->scale_y) / 2.0f - WEAPONTOP;
+		float dy = (200.0f - rim->actual_h * rim->scale_y) / 2.0f; // - WEAPONTOP;
 		rim->offset_y += int(dy / rim->scale_y);
 	}
 
@@ -684,7 +684,7 @@ static image_c *AddImageUser(imagedef_c *def)
 
 	if (def->special & IMGSP_Crosshair)
 	{
-		float dy = (200.0f - rim->actual_h * rim->scale_y) / 2.0f - WEAPONTOP;
+		float dy = (200.0f - rim->actual_h * rim->scale_y) / 2.0f; // - WEAPONTOP;
 		rim->offset_y += int(dy / rim->scale_y);
 	}
 

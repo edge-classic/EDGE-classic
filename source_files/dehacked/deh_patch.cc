@@ -1188,8 +1188,8 @@ namespace Patch
 
 			if (StrCaseCmpPartial(line_buf, "include") == 0)
 			{
-				SetErrorMsg("BEX INCLUDE directive is not supported.\n");
-				return DEH_E_ParseError;
+				Deh_Edge::PrintMsg("- Warning: BEX INCLUDE directive not supported!\n");
+				continue;
 			}
 
 			if (StrCaseCmpPartial(line_buf, "Text") == 0 &&

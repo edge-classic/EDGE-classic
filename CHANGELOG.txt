@@ -42,6 +42,8 @@ General Improvements
 + Things no longer constantly trigger splashes when walking on a flat defined as LIQUID (and having an IMPACT_OBJECT defined). 
   They will only cause a splash when they step down onto the flat.
 
++ Unsupported BEX INCLUDE directive for Dehacked downgraded from a program-ending error to a warning with an appropriate console/log message.
+
 
 New Features
 ------------

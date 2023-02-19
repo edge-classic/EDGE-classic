@@ -217,7 +217,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	else
 	{
 		// for lumps, we must detect the format from the lump contents
-		fmt = epi::Sound_DetectFormat(data, std::min(length, 32));
+		fmt = epi::Sound_DetectFormat(data, length);
 	}
 
 	bool OK = false;

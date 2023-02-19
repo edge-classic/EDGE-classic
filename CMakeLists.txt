@@ -11,8 +11,8 @@ add_subdirectory(source_files/fmmidi)
 add_subdirectory(source_files/fluidlite)
 add_subdirectory(source_files/glad)
 add_subdirectory(source_files/libgme)
-add_subdirectory(source_files/libxmp)
 add_subdirectory(source_files/libymfm)
+add_subdirectory(source_files/m4p)
 add_subdirectory(source_files/miniz)
 add_subdirectory(source_files/ymfmidi)
 
@@ -134,7 +134,7 @@ add_executable(
 	source_files/edge/s_ogg.cc      
 	source_files/edge/s_fluid.cc
 	source_files/edge/s_gme.cc
-	source_files/edge/s_xmp.cc
+	source_files/edge/s_m4p.cc
 	source_files/edge/s_opl.cc
 	source_files/edge/s_sid.cc
 	source_files/edge/s_vgm.cc
@@ -181,7 +181,7 @@ target_include_directories(edge-classic PRIVATE source_files/fmmidi)
 target_include_directories(edge-classic PRIVATE source_files/glad/include/glad)
 target_include_directories(edge-classic PRIVATE source_files/libgme/gme)
 target_include_directories(edge-classic PRIVATE source_files/libymfm)
-target_include_directories(edge-classic PRIVATE source_files/libxmp)
+target_include_directories(edge-classic PRIVATE source_files/m4p)
 target_include_directories(edge-classic PRIVATE source_files/minimp3)
 target_include_directories(edge-classic PRIVATE source_files/minivorbis)
 target_include_directories(edge-classic PRIVATE source_files/miniz)
@@ -263,8 +263,8 @@ if(WIN32 OR MSYS OR MINGW)
 			fmmidi
 			fluidlite
 			gme
+			m4p
 			miniz
-			libxmp
 			libymfm
 			ymfmidi
 			wsock32
@@ -285,8 +285,8 @@ else()
 			fmmidi
 			fluidlite
 			gme
+			m4p
 			miniz
-			libxmp
 			libymfm
 			ymfmidi
 	)

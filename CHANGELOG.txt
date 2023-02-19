@@ -44,6 +44,9 @@ General Improvements
 
 + Unsupported BEX INCLUDE directive for Dehacked downgraded from a program-ending error to a warning with an appropriate console/log message.
 
++ Migrated from libXMP to Mod4Play (custom library) for portability/performance
+  - Only the "Big 4" tracker formats are supported now (IT/S3M/XM/MOD)
+
 
 New Features
 ------------

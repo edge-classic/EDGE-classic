@@ -40,4 +40,4 @@ add_library(
 )
 target_include_directories(edge_epi PRIVATE ../stb)
 target_include_directories(edge_epi PRIVATE ../libgme/gme)
-target_include_directories(edge_epi PRIVATE ../libxmp)
+target_include_directories(edge_epi PRIVATE ../m4p)

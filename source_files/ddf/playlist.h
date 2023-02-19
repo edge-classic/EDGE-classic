@@ -42,7 +42,7 @@ typedef enum
 	MUS_GME,
 	MUS_SID,
 	MUS_FLAC,
-	MUS_XMP,
+	MUS_M4P,
 	MUS_VGM,
 	MUS_IMF280,
 	MUS_IMF560,

@@ -37,7 +37,7 @@
 #include "s_mp3.h"
 #include "s_fluid.h"
 #include "s_gme.h"
-#include "s_xmp.h"
+#include "s_m4p.h"
 #include "s_opl.h"
 #include "s_sid.h"
 #include "s_vgm.h"
@@ -197,9 +197,9 @@ void S_ChangeMusic(int entrynum, bool loop)
 			music_player = S_PlayFLACMusic(data, length, volume, loop);
 			break;
 
-		case epi::FMT_XMP:
+		case epi::FMT_M4P:
 			delete F;
-			music_player = S_PlayXMPMusic(data, length, volume, loop);
+			music_player = S_PlayM4PMusic(data, length, volume, loop);
 			break;
 
 		case epi::FMT_GME:

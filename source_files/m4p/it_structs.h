@@ -245,8 +245,3 @@ typedef struct song_t
 	uint16_t Tempo, GlobalVolume;
 	uint16_t DecodeExpectedPattern, DecodeExpectedRow;
 } song_t;
-
-extern hostChn_t hChn[MAX_HOST_CHANNELS];
-extern slaveChn_t sChn[MAX_SLAVE_CHANNELS];
-extern song_t Song;
-extern driver_t Driver;

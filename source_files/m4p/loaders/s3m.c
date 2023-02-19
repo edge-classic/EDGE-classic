@@ -12,6 +12,11 @@
 #include "../it_structs.h"
 #include "../it_d_rm.h"
 
+extern hostChn_t hChn[MAX_HOST_CHANNELS];
+extern slaveChn_t sChn[MAX_SLAVE_CHANNELS];
+extern song_t Song;
+extern driver_t Driver;
+
 #define S3M_ROWS 64
 
 static void ClearEncodingInfo(void);

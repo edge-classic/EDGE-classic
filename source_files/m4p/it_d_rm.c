@@ -18,6 +18,11 @@
 #include "loaders/it.h"
 #include "loaders/s3m.h"
 
+extern hostChn_t hChn[MAX_HOST_CHANNELS];
+extern slaveChn_t sChn[MAX_SLAVE_CHANNELS];
+extern song_t Song;
+extern driver_t Driver;
+
 static bool FirstTimeLoading = true;
 
 static int8_t GetModuleType(MEMFILE *m) // 8bb: added this

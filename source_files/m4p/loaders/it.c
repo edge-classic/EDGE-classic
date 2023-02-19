@@ -14,6 +14,11 @@
 #include "../it_structs.h"
 #include "../it_d_rm.h"
 
+extern hostChn_t hChn[MAX_HOST_CHANNELS];
+extern slaveChn_t sChn[MAX_SLAVE_CHANNELS];
+extern song_t Song;
+extern driver_t Driver;
+
 static void Decompress16BitData(int16_t *Dst, const uint8_t *Src, uint32_t BlockLen);
 static void Decompress8BitData(int8_t *Dst, const uint8_t *Src, uint32_t BlockLen);
 static bool LoadCompressed16BitSample(MEMFILE *m, sample_t *s, bool Stereo, bool DeltaEncoded);

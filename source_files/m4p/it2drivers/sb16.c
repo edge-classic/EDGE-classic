@@ -13,6 +13,11 @@
 #include "sb16_m.h"
 #include "zerovol.h"
 
+extern hostChn_t hChn[MAX_HOST_CHANNELS];
+extern slaveChn_t sChn[MAX_SLAVE_CHANNELS];
+extern song_t Song;
+extern driver_t Driver;
+
 static uint16_t MixVolume;
 static int32_t BytesToMix, *MixBuffer, MixTransferRemaining, MixTransferOffset;
 

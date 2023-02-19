@@ -4,6 +4,11 @@
 #include "../it_music.h"
 #include "sb16_m.h"
 
+extern hostChn_t hChn[MAX_HOST_CHANNELS];
+extern slaveChn_t sChn[MAX_SLAVE_CHANNELS];
+extern song_t Song;
+extern driver_t Driver;
+
 static void M32Mix8(slaveChn_t *sc, int32_t *mixBufPtr, int32_t numSamples);
 static void M32Mix16(slaveChn_t *sc, int32_t *mixBufPtr, int32_t numSamples);
 static void M32Mix8S(slaveChn_t *sc, int32_t *mixBufPtr, int32_t numSamples);

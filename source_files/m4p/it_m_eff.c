@@ -8,6 +8,11 @@
 #include "it_music.h"
 #include "it_m_eff.h"
 
+extern hostChn_t hChn[MAX_HOST_CHANNELS];
+extern slaveChn_t sChn[MAX_SLAVE_CHANNELS];
+extern song_t Song;
+extern driver_t Driver;
+
 static const uint8_t SlideTable[9] = { 1, 4, 8, 16, 32, 64, 96, 128, 255 };
 
 static void InitCommandG11(hostChn_t *hc);

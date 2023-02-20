@@ -17,6 +17,11 @@
 #include "it_music.h"
 #include "it2drivers/sb16.h"
 
+hostChn_t hChn[MAX_HOST_CHANNELS];
+slaveChn_t sChn[MAX_SLAVE_CHANNELS];
+driver_t Driver;
+song_t Song;
+
 enum
 {
 	NNA_NOTE_CUT = 0,

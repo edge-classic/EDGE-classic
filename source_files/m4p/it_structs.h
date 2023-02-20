@@ -95,25 +95,25 @@ enum // 8bb: audio driver flags
 #define MAX_SLAVE_CHANNELS 256
 #define MAX_SONGMSG_LENGTH 8000
 
-typedef struct pattern_s
+typedef struct pattern_t
 {
 	uint16_t Rows;
 	uint8_t *PackedData;
 } pattern_t;
 
-typedef struct envNode_s
+typedef struct envNode_t
 {
 	int8_t Magnitude;
 	uint16_t Tick;
 } envNode_t;
 
-typedef struct env_s
+typedef struct env_t
 {
 	uint8_t Flags, Num, LoopBegin, LoopEnd, SustainLoopBegin, SustainLoopEnd;
 	envNode_t NodePoints[25];
 } env_t;
 
-typedef struct instrument_s
+typedef struct instrument_t
 {
 	char DOSFilename[12+1];
 	uint8_t NNA, DCT, DCA;
@@ -126,7 +126,7 @@ typedef struct instrument_s
 	env_t VolEnv, PanEnv, PitchEnv;
 } instrument_t;
 
-typedef struct smp_s
+typedef struct smp_t
 {
 	char DOSFilename[12+1];
 	uint8_t GlobVol, Flags, Vol;
@@ -140,7 +140,7 @@ typedef struct smp_s
 	void *OrigData, *DataR, *OrigDataR;
 } sample_t;
 
-typedef struct hostChn_s
+typedef struct hostChn_t
 {
 	uint16_t Flags;
 	uint8_t NotePackMask, RawNote, Ins, Vol, Cmd, CmdVal, OldCmd, OldCmdVal, VolCmd, VolCmdVal;
@@ -161,13 +161,13 @@ typedef struct hostChn_s
 	uint8_t MiscEfxData[16];
 } hostChn_t;
 
-typedef struct envState_s
+typedef struct envState_t
 {
 	int32_t Value, Delta;
 	int16_t Tick, CurNode, NextTick;
 } envState_t;
 
-typedef struct slaveChn_s
+typedef struct slaveChn_t
 {
 	uint16_t Flags;
 	uint32_t MixOffset; // 8bb: which sample mix function to use
@@ -206,7 +206,7 @@ typedef struct slaveChn_s
 	uint64_t Frac64, Delta64;
 } slaveChn_t;
 
-typedef struct it_header_s
+typedef struct it_header_t
 {
 	char SongName[26];
 	uint16_t OrdNum, InsNum, SmpNum, PatNum, Cwtv, Cmwt, Flags, Special;
@@ -216,7 +216,7 @@ typedef struct it_header_s
 	uint8_t ChnlPan[MAX_HOST_CHANNELS], ChnlVol[MAX_HOST_CHANNELS];
 } it_header_t;
 
-typedef struct driver_s// 8bb: custom struct
+typedef struct // 8bb: custom struct
 {
 	uint32_t NumChannels;
 	uint8_t Flags, FilterParameters[128];
@@ -226,7 +226,7 @@ typedef struct driver_s// 8bb: custom struct
 	float QualityFactorTable[128], FreqParameterMultiplier, FreqMultiplier;
 } driver_t;
 
-typedef struct song_s
+typedef struct song_t
 {
 	it_header_t Header;
 	uint8_t Orders[MAX_ORDERS];

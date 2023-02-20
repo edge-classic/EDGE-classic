@@ -9,7 +9,7 @@ project(
 set(CMAKE_CC_FLAGS "-O2 -Wall")
 
 add_library(
-  m4p
+  m4p STATIC
   it2drivers/sb16_m.c
   it2drivers/sb16.c
   it2drivers/zerovol.c

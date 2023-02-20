@@ -21,7 +21,6 @@ add_library(
   it_d_rm.c
   it_m_eff.c
   it_music.c
-  it_structs.c
   it_tables.c
   pmp_main.c
   pmp_mix.c

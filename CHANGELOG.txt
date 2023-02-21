@@ -49,6 +49,9 @@ General Improvements
 
 + Upgraded to AJBSP 1.04
 
++ Added support for ZGL3 compressed lumps to AJBSP and EDGE-Classic's node loading routines to conserve cache folder space. ZGL3 will now
+  be the default node format.
+
 
 New Features
 ------------

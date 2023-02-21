@@ -21,3 +21,4 @@ add_library(edge_ajbsp
 )
 
 target_include_directories(edge_ajbsp PRIVATE ../epi)
+target_include_directories(edge_ajbsp PRIVATE ../miniz)

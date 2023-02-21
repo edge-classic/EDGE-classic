@@ -60,6 +60,8 @@
   #include "str_util.h"
 #endif
 
+#include "miniz.h" // ZGL3 nodes
+
 // debugging aide:
 #define FORCE_LOCATION  0
 #define FORCE_LOC_X     12766
@@ -1228,12 +1230,15 @@ static void AssignSubsectorsToSectors()
 	AssignSubsectorsPass(2);
 }
 
-// Adapted from EDGE 2.x's ZNode loading routine; only handles XGL3 as that is all
+// Adapted from EDGE 2.x's ZNode loading routine; only handles XGL3/ZGL3 as that is all
 // our built-in AJBSP produces now
 static void LoadXGL3Nodes(int lumpnum)
 {
 	int i, xglen = 0;
-	byte *xgldata;
+	size_t zglen = 0;
+	byte *xgldata = nullptr;
+	std::vector<byte> zgldata;
+	byte *td = nullptr;
 
 	I_Debugf("LoadXGL3Nodes:\n");
 
@@ -1250,6 +1255,38 @@ static void LoadXGL3Nodes(int lumpnum)
 
 	if(!memcmp(xgldata, "XGL3", 4))
 		I_Debugf(" AJBSP uncompressed GL nodes v3\n");
+	else if(!memcmp(xgldata, "ZGL3", 4))
+	{
+		I_Debugf(" AJBSP compressed GL nodes v3\n");
+		zgldata.resize(xglen);
+		z_stream zgl_stream;
+		memset(&zgl_stream, 0, sizeof(z_stream));
+		zgl_stream.next_in = &xgldata[4];
+		zgl_stream.avail_in = xglen - 4;
+		zgl_stream.next_out = zgldata.data();
+		zgl_stream.avail_out = zgldata.size();
+		inflateInit2(&zgl_stream, MZ_DEFAULT_WINDOW_BITS);
+		int inflate_status;
+		for (;;)
+		{	
+			inflate_status = inflate(&zgl_stream, Z_NO_FLUSH);
+			if (inflate_status == MZ_OK || inflate_status == MZ_BUF_ERROR) // Need to resize output buffer
+			{
+				zgldata.resize(zgldata.size() * 2);
+				zgl_stream.next_out = &zgldata[zgl_stream.total_out];
+				zgl_stream.avail_out = zgldata.size() - zgl_stream.total_out;
+			}
+			else if (inflate_status == Z_STREAM_END)
+			{
+				inflateEnd(&zgl_stream);
+				zgldata.resize(zgl_stream.total_out);
+				zgldata.shrink_to_fit();
+				break;
+			}
+			else
+				I_Error("LoadXGL3Nodes: Failed to decompress ZGL3 nodes!\n");
+		}	
+	}
 	else
 	{
 		static char xgltemp[6];
@@ -1258,7 +1295,10 @@ static void LoadXGL3Nodes(int lumpnum)
 		I_Error("LoadXGL3Nodes: Unrecognized node type %s\n", xgltemp);
 	}
 
-	byte *td = &xgldata[4];
+	if (!zgldata.empty())
+		td = zgldata.data();
+	else
+		td = &xgldata[4];
 
 	// after signature, 1st u32 is number of original vertexes - should be <= numvertexes
 	int oVerts = EPI_LE_U32(*(uint32_t*)td);
@@ -1490,6 +1530,7 @@ static void LoadXGL3Nodes(int lumpnum)
 
 	I_Debugf("LoadXGL3Nodes: Finished\n");
 	W_DoneWithLump(xgldata);
+	zgldata.clear();
 }
 
 static void LoadUDMFVertexes(parser_t *psr)

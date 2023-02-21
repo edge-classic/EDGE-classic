@@ -1169,16 +1169,6 @@ std::filesystem::path W_BuildNodesForWad(data_file_c *df)
 	// check whether an XWA file for this map exists in the cache
 	bool exists = epi::FS_Access(xwa_filename, epi::file_c::ACCESS_READ);
 
-	// check whether the cached XWA is out of date
-	if (exists)
-	{
-		if (std::filesystem::last_write_time(xwa_filename) <= std::filesystem::last_write_time(df->name))
-		{
-			// yes, but it will be overwritten by AJ_BuildNodes
-			exists = false;
-		}
-	}
-
 	if (! exists)
 	{
 		I_Printf("Building XGL nodes for: %s\n", df->name.u8string().c_str());

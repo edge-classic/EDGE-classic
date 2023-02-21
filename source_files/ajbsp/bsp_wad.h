@@ -164,7 +164,6 @@ public:
 	// check the given wad file exists and is a WAD file
 	static bool Validate(std::filesystem::path filename);
 
-	const char *PathName() const { return filename.u8string().c_str(); }
 	bool IsReadOnly() const { return mode == 'r'; }
 
 	int TotalSize() const { return total_size; }
@@ -200,7 +199,7 @@ public:
 
 	// backup the current wad into the given filename.
 	// returns true if successful, false on error.
-	bool Backup(const char *new_filename);
+	bool Backup(std::filesystem::path new_filename);
 
 	// all changes to the wad must occur between calls to BeginWrite()
 	// and EndWrite() methods.  the on-disk wad directory may be trashed

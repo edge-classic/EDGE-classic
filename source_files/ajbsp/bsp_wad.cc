@@ -1255,12 +1255,11 @@ void Wad_file::WriteDirectory()
 	fflush(fp);
 }
 
-
-bool Wad_file::Backup(const char *new_filename)
+bool Wad_file::Backup(std::filesystem::path new_filename)
 {
 	fflush(fp);
 
-	return FileCopy(PathName(), new_filename);
+	return std::filesystem::copy_file(filename, new_filename);
 }
 
 } // namespace ajbsp

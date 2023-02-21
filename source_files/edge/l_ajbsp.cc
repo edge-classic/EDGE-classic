@@ -100,8 +100,8 @@ public:
 bool AJ_BuildNodes(std::filesystem::path filename, std::filesystem::path outname)
 {
 	I_Debugf("AJ_BuildNodes: STARTED\n");
-	I_Debugf("# source: '%s'\n", filename);
-	I_Debugf("#   dest: '%s'\n", outname);
+	I_Debugf("# source: '%s'\n", filename.u8string().c_str());
+	I_Debugf("#   dest: '%s'\n", outname.u8string().c_str());
 
 	ec_buildinfo_t info;
 

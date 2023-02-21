@@ -902,7 +902,7 @@ void InitDirectories(void)
         epi::FS_MakeDir(shot_dir);
 }
 
-// Remove cache files that are older than roughly ~6 months to keep cache dir from going nuts
+// Get rid of legacy GWA/HWA files or XWA files older than 6 months
 
 static void PurgeCache(void)
 {
@@ -910,8 +910,7 @@ static void PurgeCache(void)
 
 	std::vector<epi::dir_entry_c> fsd;
 
-	// GWA should be the only filetypes we need to worry about now that HWA files are internal
-	if (!FS_ReadDir(fsd, cache_dir, UTFSTR("*.gwa")))
+	if (!FS_ReadDir(fsd, cache_dir, UTFSTR("*.*")))
 	{
 		I_Error("PurgeCache: Failed to read '%s' directory!\n", cache_dir.u8string().c_str());
 	}
@@ -921,10 +920,17 @@ static void PurgeCache(void)
 		{
 			if(!fsd[i].is_dir)
 			{
-				if(std::filesystem::last_write_time(fsd[i].name) < expiry)
-				{
+				if (fsd[i].name.extension().compare(UTFSTR(".gwa")) == 0)
 					epi::FS_Delete(fsd[i].name);
-				}			
+				else if (fsd[i].name.extension().compare(UTFSTR(".hwa")) == 0)
+					epi::FS_Delete(fsd[i].name);
+				else if (fsd[i].name.extension().compare(UTFSTR(".xwa")) == 0)
+				{
+					if(std::filesystem::last_write_time(fsd[i].name) < expiry)
+					{
+						epi::FS_Delete(fsd[i].name);
+					}
+				}		
 			}
 		}
 	}	
@@ -937,11 +943,11 @@ static void PurgeCache(void)
 
 static void IdentifyVersion(void)
 {
-    std::filesystem::path reqwad = epi::PATH_Join(game_dir, UTFSTR(REQUIREDWAD "." EDGEWADEXT));
+    std::filesystem::path reqwad = epi::PATH_Join(game_dir, UTFSTR(REQUIREDWAD ".wad"));
 
     if (! epi::FS_Access(reqwad, epi::file_c::ACCESS_READ))
         I_Error("IdentifyVersion: Could not find required %s.%s!\n", 
-            REQUIREDWAD, EDGEWADEXT);
+            REQUIREDWAD, "wad");
 
     W_AddFilename(reqwad, FLKIND_EWad);
 
@@ -1006,7 +1012,7 @@ static void IdentifyVersion(void)
         std::filesystem::path ext = epi::PATH_GetExtension(iwad_par);
         if (ext.empty())
         {
-            fn += UTFSTR("." EDGEWADEXT);
+            fn += UTFSTR(".wad");
         }
 
         // If no directory given use the IWAD directory

@@ -1,6 +1,4 @@
 //------------------------------------------------------------------------
-//  RAWDEF : Doom structures, raw on-disk layout
-//------------------------------------------------------------------------
 //
 //  AJ-BSP  Copyright (C) 2007-2018  Andrew Apted
 //
@@ -16,8 +14,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __AJBSP_W_RAWDEF_H__
-#define __AJBSP_W_RAWDEF_H__
+#ifndef __AJBSP_RAW_DEF_H__
+#define __AJBSP_RAW_DEF_H__
 
 
 /* ----- The wad structures ---------------------- */
@@ -537,7 +535,7 @@ hexen_option_e;
 #define ZDOOM_PO_SPAWNCRUSH_TYPE  9302
 
 
-#endif  /* __AJBSP_W_RAWDEF_H__ */
+#endif  /* __AJBSP_RAW_DEF_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

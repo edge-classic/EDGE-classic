@@ -86,6 +86,7 @@ public:
 	std::vector<int> colmap_lumps;
 	std::vector<int> tx_lumps;
 	std::vector<int> hires_lumps;
+	std::vector<int> xgl_lumps;
 
 	// level markers and skin markers
 	std::vector<int> level_markers;
@@ -108,21 +109,17 @@ public:
 	int animated;
 	int switches;
 
-	// MD5 hash of the contents of the WAD directory.
-	// This is used to disambiguate cached GWA/HWA filenames.
-	epi::md5hash_c dir_md5;
-
 	std::string md5_string;
 
 public:
 	wad_file_c() :
 		sprite_lumps(), flat_lumps(), patch_lumps(),
-		colmap_lumps(), tx_lumps(), hires_lumps(),
+		colmap_lumps(), tx_lumps(), hires_lumps(), xgl_lumps(),
 		level_markers(), skin_markers(),
 		wadtex(),
 		deh_lump(-1), coal_apis(-1), coal_huds(-1),
 		animated(-1), switches(-1),
-		dir_md5(), md5_string()
+		md5_string()
 	{
 		for (int d = 0 ; d < DDF_NUM_TYPES ; d++)
 			ddf_lumps[d] = -1;
@@ -147,7 +144,8 @@ typedef enum
 	LMKIND_Flat   = 16,
 	LMKIND_Sprite = 17,
 	LMKIND_Patch  = 18,
-	LMKIND_HiRes  = 19 
+	LMKIND_HiRes  = 19,
+	LMKIND_XGL    = 20,
 }
 lump_kind_e;
 
@@ -190,6 +188,7 @@ static bool within_patch_list;
 static bool within_colmap_list;
 static bool within_tex_list;
 static bool within_hires_list;
+static bool within_xgl_list;
 
 //
 // Is the name a sprite list start flag?
@@ -325,6 +324,19 @@ static bool IsHI_START(char *name)
 static bool IsHI_END(char *name)
 {
 	return (strncmp(name, "HI_END", 8) == 0);
+}
+
+//
+// Is the name a XGL nodes start/end flag?
+//
+static bool IsXG_START(char *name)
+{
+	return (strncmp(name, "XG_START", 8) == 0);
+}
+
+static bool IsXG_END(char *name)
+{
+	return (strncmp(name, "XG_END", 8) == 0);
 }
 
 //
@@ -693,6 +705,21 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
 		within_hires_list = false;
 		return;
 	}
+	else if (IsXG_START(lump_p->name))
+	{
+		lump_p->kind = LMKIND_Marker;
+		within_xgl_list = true;
+		return;
+	}
+	else if (IsXG_END(lump_p->name))
+	{
+		if (!within_xgl_list)
+			I_Warning("Unexpected XG_END marker in wad.\n");
+
+		lump_p->kind = LMKIND_Marker;
+		within_xgl_list = false;
+		return;
+	}
 
 	// ignore zero size lumps or dummy markers
 	if (lump_p->size == 0 || IsDummySF(lump_p->name))
@@ -736,52 +763,12 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
 		lump_p->kind = LMKIND_HiRes;
 		wad->hires_lumps.push_back(lump);
 	}
-}
 
-// We need this to distinguish between old versus new .gwa cache files to trigger a rebuild
-bool W_CheckForXGLNodes(std::filesystem::path filename)
-{
-	int length;
-	bool xgl_nodes_found = false;
-
-	epi::file_c *file = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-
-	if (file == NULL)
+	if (within_xgl_list)
 	{
-		I_Error("W_CheckForXGLNodes: Received null file_c pointer!\n");
+		lump_p->kind = LMKIND_XGL;
+		wad->xgl_lumps.push_back(lump);
 	}
-
-	raw_wad_header_t header;
-
-	// WAD file
-	// TODO: handle Read failure
-    file->Read(&header, sizeof(raw_wad_header_t));
-
-	header.num_entries = EPI_LE_S32(header.num_entries);
-	header.dir_start   = EPI_LE_S32(header.dir_start);
-
-	length = header.num_entries * sizeof(raw_wad_entry_t);
-
-    raw_wad_entry_t *raw_info = new raw_wad_entry_t[header.num_entries];
-
-    file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
-	// TODO: handle Read failure
-    file->Read(raw_info, length);
-
-	unsigned int i;
-	for (i=0 ; i < header.num_entries ; i++)
-	{
-		if (strncmp("XGLNODES", raw_info[i].name, 8) == 0)
-		{
-			xgl_nodes_found = true;
-			break;
-		}
-	}
-
-	delete[] raw_info;
-	delete file;
-
-	return xgl_nodes_found;
 }
 
 //
@@ -842,109 +829,6 @@ static void CheckForLevel(wad_file_c *wad, int lump, const char *name,
 		return;
 	}
 }
-
-// FIXME why is this unused ??
-static void ComputeFileMD5(epi::md5hash_c& md5, epi::file_c *file)
-{
-	int length = file->GetLength();
-
-	if (length <= 0)
-		return;
-
-	byte *buffer = new byte[length];
-
-	// TODO: handle Read failure
-	file->Read(buffer, length);
-	
-	md5.Compute(buffer, length);
-
-	delete[] buffer;
-}
-
-static bool FindCacheFilename (std::filesystem::path& out_name,
-		std::filesystem::path filename, epi::md5hash_c& dir_md5,
-		const char *extension)
-{
-	std::filesystem::path wad_dir;
-	std::string md5_file_string;
-	std::filesystem::path local_name;
-	std::filesystem::path cache_name;
-
-	// Get the directory which the wad is currently stored
-	wad_dir = epi::PATH_GetDir(filename);
-
-	// MD5 string used for files in the cache directory
-	md5_file_string = epi::STR_Format("-%02X%02X%02X-%02X%02X%02X",
-		dir_md5.hash[0], dir_md5.hash[1],
-		dir_md5.hash[2], dir_md5.hash[3],
-		dir_md5.hash[4], dir_md5.hash[5]);
-
-	// Determine the full path filename for "local" (same-directory) version
-	local_name = epi::PATH_GetBasename(filename);
-	local_name += (UTFSTR("."));
-	local_name += (UTFSTR(extension));
-#ifdef _WIN32
-	local_name = epi::PATH_Join(wad_dir, local_name.u32string());
-#else
-	local_name = epi::PATH_Join(wad_dir, local_name.string());
-#endif
-
-	// Determine the full path filename for the cached version
-	cache_name = epi::PATH_GetBasename(filename);
-	cache_name += (UTFSTR(md5_file_string));
-	cache_name += (UTFSTR("."));
-	cache_name += (UTFSTR(extension));
-#ifdef _WIN32
-	cache_name = epi::PATH_Join(cache_dir, cache_name.u32string());
-#else
-	cache_name = epi::PATH_Join(cache_dir, cache_name.string());
-#endif
-
-	I_Debugf("FindCacheFilename: local_name = '%s'\n", local_name.u8string().c_str());
-	I_Debugf("FindCacheFilename: cache_name = '%s'\n", cache_name.u8string().c_str());
-	
-	// Check for the existance of the local and cached dir files
-	bool has_local = epi::FS_Access(local_name, epi::file_c::ACCESS_READ);
-	bool has_cache = epi::FS_Access(cache_name, epi::file_c::ACCESS_READ);
-
-	// If both exist, use the local one.
-	// If neither exist, create one in the cache directory.
-
-	// Check whether the waddir gwa is out of date
-	if (has_local) 
-		has_local = std::filesystem::last_write_time(local_name) > std::filesystem::last_write_time(filename);
-
-	// Check whether the cached gwa is out of date
-	if (has_cache) 
-		has_cache = std::filesystem::last_write_time(cache_name) > std::filesystem::last_write_time(filename);
-
-	I_Debugf("FindCacheFilename: has_local=%s  has_cache=%s\n",
-		has_local ? "YES" : "NO", has_cache ? "YES" : "NO");
-
-	if (has_local)
-	{
-		if (W_CheckForXGLNodes(local_name))
-		{
-			out_name = local_name;
-			return true;
-		}
-	}
-	else if (has_cache)
-	{
-		if (W_CheckForXGLNodes(cache_name))
-		{
-			out_name = cache_name;
-			return true;
-		}
-		else
-			epi::FS_Delete(cache_name);
-	}
-
-	// Neither is valid so create one in the cached directory
-	out_name = cache_name;
-	return false;
-}
-
 
 bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char *lumpname2)
 {
@@ -1174,6 +1058,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 	within_sprite_list = within_flat_list   = false;
 	within_patch_list  = within_colmap_list = false;
 	within_tex_list    = within_hires_list  = false;
+	within_xgl_list    =                      false;
 
 	raw_wad_header_t header;
 
@@ -1227,23 +1112,25 @@ void ProcessWad(data_file_c *df, size_t file_index)
 	if (within_colmap_list) I_Warning("Missing C_END marker in %s.\n", filename);
 	if (within_tex_list)    I_Warning("Missing TX_END marker in %s.\n", filename);
 	if (within_hires_list)  I_Warning("Missing HI_END marker in %s.\n", filename);
+	if (within_xgl_list)    I_Warning("Missing XG_END marker in %s.\n", filename);
 
 	SortLumps();
 
 	SortSpriteLumps(wad);
 
 	// compute MD5 hash over wad directory
-	wad->dir_md5.Compute((const byte *)raw_info, length);
+	epi::md5hash_c dir_md5;
+	dir_md5.Compute((const byte *)raw_info, length);
 
 	wad->md5_string = epi::STR_Format("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", 
-			wad->dir_md5.hash[0],  wad->dir_md5.hash[1],
-			wad->dir_md5.hash[2],  wad->dir_md5.hash[3],
-			wad->dir_md5.hash[4],  wad->dir_md5.hash[5],
-			wad->dir_md5.hash[6],  wad->dir_md5.hash[7],
-			wad->dir_md5.hash[8],  wad->dir_md5.hash[9],
-			wad->dir_md5.hash[10], wad->dir_md5.hash[11],
-			wad->dir_md5.hash[12], wad->dir_md5.hash[13],
-			wad->dir_md5.hash[14], wad->dir_md5.hash[15]);
+			dir_md5.hash[0],  dir_md5.hash[1],
+			dir_md5.hash[2],  dir_md5.hash[3],
+			dir_md5.hash[4],  dir_md5.hash[5],
+			dir_md5.hash[6],  dir_md5.hash[7],
+			dir_md5.hash[8],  dir_md5.hash[9],
+			dir_md5.hash[10], dir_md5.hash[11],
+			dir_md5.hash[12], dir_md5.hash[13],
+			dir_md5.hash[14], dir_md5.hash[15]);
 
 	I_Debugf("   md5hash = %s\n", wad->md5_string.c_str());
 
@@ -1269,21 +1156,38 @@ std::filesystem::path W_BuildNodesForWad(data_file_c *df)
 	if (df->wad->level_markers.empty())
 		return UTFSTR("");
 
-	std::filesystem::path gwa_filename;
+	// determine XWA filename in the cache
+	std::filesystem::path cache_name = epi::PATH_GetBasename(df->name);
+	cache_name += "-";
+	cache_name += df->wad->md5_string;
+	cache_name += ".xwa";
 
-	bool exists = FindCacheFilename(gwa_filename, df->name, df->wad->dir_md5, EDGEGWAEXT);
+	std::filesystem::path xwa_filename = epi::PATH_Join(cache_dir, cache_name.string());
 
-	I_Debugf("Actual_GWA_filename: %s\n", gwa_filename.u8string().c_str());
+	I_Debugf("XWA filename: %s\n", xwa_filename.u8string().c_str());
+
+	// check whether an XWA file for this map exists in the cache
+	bool exists = epi::FS_Access(xwa_filename, epi::file_c::ACCESS_READ);
+
+	// check whether the cached XWA is out of date
+	if (exists)
+	{
+		if (std::filesystem::last_write_time(xwa_filename) <= std::filesystem::last_write_time(df->name))
+		{
+			// yes, but it will be overwritten by AJ_BuildNodes
+			exists = false;
+		}
+	}
 
 	if (! exists)
 	{
-		I_Printf("Building GL Nodes for: %s\n", df->name.u8string().c_str());
+		I_Printf("Building XGL nodes for: %s\n", df->name.u8string().c_str());
 
-		if (! AJ_BuildNodes(df->name, gwa_filename))
-			I_Error("Failed to build GL nodes for: %s\n", df->name.u8string().c_str());
+		if (! AJ_BuildNodes(df->name, xwa_filename))
+			I_Error("Failed to build XGL nodes for: %s\n", df->name.u8string().c_str());
 	}
 
-	return gwa_filename;
+	return xwa_filename;
 }
 
 
@@ -1746,7 +1650,7 @@ int W_CheckNumForName_GFX(const char *name)
 	buf[i] = 0;
 
 	// search backwards
-	for (i = (int)lumpinfo.size()-1; i >= 0; i--)
+	for (i = (int)lumpinfo.size()-1 ; i >= 0 ; i--)
 	{
 		if (lumpinfo[i].kind == LMKIND_Normal ||
 		    lumpinfo[i].kind == LMKIND_Sprite ||
@@ -1759,6 +1663,67 @@ int W_CheckNumForName_GFX(const char *name)
 
 	return -1; // not found
 }
+
+int W_CheckNumForName_XGL(const char *name)
+{
+	// limit search to stuff between XG_START and XG_END.
+
+	int i;
+	char buf[9];
+
+	if (strlen(name) > 8)
+	{
+		I_Warning("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
+		return -1;
+	}
+
+	for (i = 0; name[i]; i++)
+	{
+		buf[i] = toupper(name[i]);
+	}
+	buf[i] = 0;
+
+	// search backwards
+	for (i = (int)lumpinfo.size()-1 ; i >= 0 ; i--)
+	{
+		if (lumpinfo[i].kind == LMKIND_XGL)
+			if (strncmp(lumpinfo[i].name, buf, 8) == 0)
+				return i;
+	}
+
+	return -1; // not found
+}
+
+int W_CheckNumForName_MAP(const char *name)
+{
+	// avoids anything in XGL namespace
+
+	int i;
+	char buf[9];
+
+	if (strlen(name) > 8)
+	{
+		I_Warning("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
+		return -1;
+	}
+
+	for (i = 0; name[i]; i++)
+	{
+		buf[i] = toupper(name[i]);
+	}
+	buf[i] = 0;
+
+	// search backwards
+	for (i = (int)lumpinfo.size()-1 ; i >= 0 ; i--)
+	{
+		if (lumpinfo[i].kind != LMKIND_XGL)
+			if (strncmp(lumpinfo[i].name, buf, 8) == 0)
+				return i;
+	}
+
+	return -1; // not found
+}
+
 
 //
 // W_GetNumForName

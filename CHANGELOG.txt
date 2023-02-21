@@ -47,6 +47,8 @@ General Improvements
 + Migrated from libXMP to Mod4Play (custom library) for portability/performance
   - Only the "Big 4" tracker formats are supported now (IT/S3M/XM/MOD)
 
++ Upgraded to AJBSP 1.04
+
 
 New Features
 ------------
@@ -68,6 +70,10 @@ New Features
 + COAL:
   - C++ Interop: Can now retrieve and set individual vector elements with the VM_GetVectorX/Y/Z and VM_SetVectorX/Y/Z functions
   - COALHUDS: Can now access individual vector elements with .x, .y, or .z
+
++ Transition from GWA to XWA cache file format
+  - Improved organization of AJBSP-generated XGL lumps
+  - Legacy GWA files will be purged from cache directory on startup
 
 
 CHANGELOG for EDGE-Classic 1.32 (since EDGE-Classic 1.31)

@@ -36,7 +36,7 @@ typedef enum
 	FLKIND_IWad = 0,  // iwad file
 	FLKIND_PWad,      // normal .wad file
 	FLKIND_EWad,      // EDGE.wad
-	FLKIND_GWad,      // ajbsp node wad
+	FLKIND_XWad,      // ajbsp node wad
 
 	FLKIND_Folder,    // a folder somewhere
 	FLKIND_PK3,       // pk3 (zip) package

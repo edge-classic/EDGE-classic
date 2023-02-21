@@ -1232,25 +1232,20 @@ static void AssignSubsectorsToSectors()
 // our built-in AJBSP produces now
 static void LoadXGL3Nodes(int lumpnum)
 {
-	int i, xglumpnum = 0, xglen = 0;
+	int i, xglen = 0;
 	byte *xgldata;
 
 	I_Debugf("LoadXGL3Nodes:\n");
 
-	if (W_VerifyLumpName(lumpnum, "XGLNODES"))
-		xglumpnum = lumpnum;
-	else
-		I_Error("LoadXGL3Nodes: Couldn't find XGLNODES lump\n");
-
-	xglen = W_LumpLength(xglumpnum);
-	xgldata = (byte *)W_CacheLumpNum(xglumpnum);
+	xglen = W_LumpLength(lumpnum);
+	xgldata = (byte *)W_CacheLumpNum(lumpnum);
 	if (!xgldata)
-		I_Error("LoadXGL3Nodes: Couldn't load XGLNODES lump\n");
+		I_Error("LoadXGL3Nodes: Couldn't load lump\n");
 
 	if (xglen < 12)
 	{
 		W_DoneWithLump(xgldata);
-		I_Error("LoadXGL3Nodes: XGLNODES lump too short\n");
+		I_Error("LoadXGL3Nodes: Lump too short\n");
 	}
 
 	if(!memcmp(xgldata, "XGL3", 4))
@@ -1344,10 +1339,10 @@ static void LoadXGL3Nodes(int lumpnum)
 		side = (int)(*td);
 		td += 1;
 
-		if (v1num < (uint32_t)numvertexes)
+		if (v1num < (uint32_t)oVerts)
 			seg->v1 = &vertexes[v1num];
 		else
-			seg->v1 = &gl_vertexes[v1num - numvertexes];
+			seg->v1 = &gl_vertexes[v1num - oVerts];
 
 		seg->side = side ? 1 : 0;
 
@@ -2749,7 +2744,7 @@ static void DetectDeepWaterTrick(void)
 }
 
 
-static void DoBlockMap(int lump)
+static void DoBlockMap()
 {
 	int min_x = (int)vertexes[0].x;
 	int min_y = (int)vertexes[0].y;
@@ -2766,9 +2761,6 @@ static void DoBlockMap(int lump)
 		max_x = MAX((int)v->x, max_x);
 		max_y = MAX((int)v->y, max_y);
 	}
-
-	// int map_width  = max_x - min_x;
-	// int map_height = max_y - min_y;
 
 	P_GenerateBlockMap(min_x, min_y, max_x, max_y);
 
@@ -3065,11 +3057,6 @@ void P_SetupLevel(void)
 	//
 	// -ACB- 1998/08/09 Use currmap to ref lump and par time
 
-	int j;
-	int lumpnum;
-	int gl_lumpnum;
-	char gl_lumpname[16];
-
 	if (level_active)
 		ShutdownLevel();
 
@@ -3078,17 +3065,22 @@ void P_SetupLevel(void)
 	mobjlisthead = NULL;
 	seen_monsters.clear();
 
-	lumpnum = W_GetNumForName(currmap->lump.c_str());
+	// get lump for map header e.g. MAP01
+	int lumpnum = W_CheckNumForName_MAP(currmap->lump.c_str());
+	if (lumpnum < 0)
+		I_Error("No such level: %s\n", currmap->lump.c_str());
 
-	// -AJA- 1999/12/20: Support for "GL-Friendly Nodes".
-	// Dasho - Changed to XG for our specific XGL3 nodes
-	sprintf(gl_lumpname, "XG_%s", currmap->lump.c_str());
-	gl_lumpnum = W_CheckNumForName(gl_lumpname);
+	// get lump for XGL3 nodes from an XWA file
+	int xgl_lump = W_CheckNumForName_XGL(currmap->lump.c_str());
 
-	// ignore GL info if the level marker occurs _before_ the normal
-	// level marker.
-	if (gl_lumpnum >= 0 && gl_lumpnum < lumpnum)
-		gl_lumpnum = -1;
+	// ignore XGL nodes if it occurs _before_ the normal level marker.
+	// [ something has gone horribly wrong if this happens! ]
+	if (xgl_lump < lumpnum)
+		xgl_lump = -1;
+
+	// shouldn't happen (as during startup we checked for XWA files)
+	if (xgl_lump < 0)
+		I_Error("Internal error: missing XGL nodes.\n");
 
 	// -CW- 2017/01/29: check for UDMF map lump
 	if (W_VerifyLumpName(lumpnum + 1, "TEXTMAP"))
@@ -3109,54 +3101,10 @@ void P_SetupLevel(void)
 		udmf_lumpnum = -1;
 	}
 
-	if (gl_lumpnum < 0)  // shouldn't happen
-		I_Error("Internal error: missing GL-Nodes.\n");
-
 	// clear CRC values
 	mapsector_CRC.Reset();
 	mapline_CRC.Reset();
 	mapthing_CRC.Reset();
-
-#ifdef DEVELOPERS
-
-#define SHOWLUMPNAME(outstr, ln) \
-	L_WriteDebug(outstr, W_GetLumpName(ln));
-
-	SHOWLUMPNAME("MAP            : %s\n", lumpnum);
-	SHOWLUMPNAME("MAP VERTEXES   : %s\n", lumpnum + ML_VERTEXES);
-	SHOWLUMPNAME("MAP SECTORS    : %s\n", lumpnum + ML_SECTORS);
-	SHOWLUMPNAME("MAP SIDEDEFS   : %s\n", lumpnum + ML_SIDEDEFS);
-	SHOWLUMPNAME("MAP LINEDEFS   : %s\n", lumpnum + ML_LINEDEFS);
-	SHOWLUMPNAME("MAP BLOCKMAP   : %s\n", lumpnum + ML_BLOCKMAP);
-
-	if (gl_lumpnum >= 0)
-	{
-		SHOWLUMPNAME("MAP GL         : %s\n", gl_lumpnum);
-		SHOWLUMPNAME("MAP GL VERTEXES: %s\n", gl_lumpnum + ML_GL_VERT);
-		SHOWLUMPNAME("MAP GL SEGS    : %s\n", gl_lumpnum + ML_GL_SEGS);
-		SHOWLUMPNAME("MAP GL SSECTORS: %s\n", gl_lumpnum + ML_GL_SSECT);
-		SHOWLUMPNAME("MAP GL NODES   : %s\n", gl_lumpnum + ML_GL_NODES);
-	}
-	else
-	{
-		SHOWLUMPNAME("MAP SEGS       : %s\n", lumpnum + ML_SEGS);
-		SHOWLUMPNAME("MAP SSECTORS   : %s\n", lumpnum + ML_SSECTORS);
-		SHOWLUMPNAME("MAP NODES      : %s\n", lumpnum + ML_NODES);
-	}
-
-	SHOWLUMPNAME("MAP REJECT     : %s\n", lumpnum + ML_REJECT);
-
-#undef SHOWLUMPNAME
-#endif
-	// check if the level is for Hexen
-	hexen_level = false;
-
-	if (W_VerifyLump(lumpnum + ML_BEHAVIOR) &&
-		W_VerifyLumpName(lumpnum + ML_BEHAVIOR, "BEHAVIOR"))
-	{
-		L_WriteDebug("Detected Hexen level.\n");
-		hexen_level = true;
-	}
 
 	// note: most of this ordering is important
 	// 23-6-98 KM, eg, Sectors must be loaded before sidedefs,
@@ -3170,6 +3118,16 @@ void P_SetupLevel(void)
 
 	if (!udmf_level)
 	{
+		// check if the level is for Hexen
+		hexen_level = false;
+
+		if (W_VerifyLump(lumpnum + ML_BEHAVIOR) &&
+			W_VerifyLumpName(lumpnum + ML_BEHAVIOR, "BEHAVIOR"))
+		{
+			L_WriteDebug("Detected Hexen level.\n");
+			hexen_level = true;
+		}
+
 		LoadVertexes(lumpnum + ML_VERTEXES);
 		LoadSectors(lumpnum + ML_SECTORS);
 
@@ -3194,13 +3152,11 @@ void P_SetupLevel(void)
 
 	delete[] temp_line_sides;
 
-	SYS_ASSERT(gl_lumpnum >= 0);
+	LoadXGL3Nodes(xgl_lump);
 
-	LoadXGL3Nodes(gl_lumpnum + 1);
+	// REJECT is ignored, and we generate our own BLOCKMAP
 
-	// REJECT is ignored
-
-	DoBlockMap(lumpnum + ML_BLOCKMAP);
+	DoBlockMap();
 
 	GroupLines();
 
@@ -3209,7 +3165,7 @@ void P_SetupLevel(void)
 	R_ComputeSkyHeights();
 
 	// compute sector and line gaps
-	for (j=0; j < numsectors; j++)
+	for (int j=0; j < numsectors; j++)
 		P_RecomputeGapsAroundSector(sectors + j);
 
 	G_ClearBodyQueue();

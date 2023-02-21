@@ -46,8 +46,11 @@ public:
 
 int W_CheckNumForName(const char *name);
 int W_CheckNumForName_GFX(const char *name);
-int W_GetNumForName(const char *name);
+int W_CheckNumForName_XGL(const char *name);
+int W_CheckNumForName_MAP(const char *name);
 int W_CheckNumForTexPatch(const char *name);
+
+int W_GetNumForName(const char *name);
 
 int W_LumpLength(int lump);
 

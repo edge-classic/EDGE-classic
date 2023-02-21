@@ -197,7 +197,7 @@ static void ProcessFile(data_file_c *df)
 
 	I_Printf("  Processing: %s\n", filename.u8string().c_str());
 
-	if (df->kind <= FLKIND_GWad)
+	if (df->kind <= FLKIND_XWad)
 	{
 		epi::file_c *file = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 		if (file == NULL)
@@ -269,11 +269,11 @@ void W_BuildNodes(void)
 
 		if (df->kind == FLKIND_IWad || df->kind == FLKIND_PWad)
 		{
-			std::filesystem::path gwa_filename = W_BuildNodesForWad(df);
+			std::filesystem::path xwa_filename = W_BuildNodesForWad(df);
 
-			if (! gwa_filename.empty())
+			if (! xwa_filename.empty())
 			{
-				data_file_c *new_df = new data_file_c(gwa_filename, FLKIND_GWad);
+				data_file_c *new_df = new data_file_c(xwa_filename, FLKIND_XWad);
 				ProcessFile(new_df);
 			}
 		}
@@ -309,7 +309,7 @@ static const char *FileKindString(filekind_e kind)
 		case FLKIND_IWad:   return "iwad";
 		case FLKIND_PWad:   return "pwad";
 		case FLKIND_EWad:   return "edge";
-		case FLKIND_GWad:   return "gwa";
+		case FLKIND_XWad:   return "xwa";
 
 		case FLKIND_Folder: return "DIR";
 		case FLKIND_PK3:    return "pk3";

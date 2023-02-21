@@ -18,12 +18,29 @@
 //
 //------------------------------------------------------------------------
 
-#include "ajbsp.h"
+#include "bsp_system.h"
+#include "bsp_local.h"
+#include "bsp_parse.h"
+#include "bsp_raw_def.h"
+#include "bsp_utility.h"
+#include "bsp_wad.h"
+
+#ifdef HAVE_ZLIB
+#include <zlib.h>
+#endif
+
+#define DEBUG_BLOCKMAP  0
+#define DEBUG_REJECT    0
+
+#define DEBUG_LOAD      0
+#define DEBUG_BSP       0
+
 
 namespace ajbsp
 {
 
-#define DEBUG_BLOCKMAP  0
+Wad_file * cur_wad;
+Wad_file * xwa_wad;
 
 
 static int block_x, block_y;
@@ -41,190 +58,10 @@ static u16_t *block_dups;
 static int block_compression;
 static int block_overflowed;
 
-const char *lev_current_name;
-
 #define BLOCK_LIMIT  16000
 
 #define DUMMY_DUP  0xFFFF
 
-// UDMF parser and loading routines backported from EDGE 2.x codebase
-// with non-Vanilla namespace items removed for the time being
-typedef struct {
-	u8_t *buffer;
-	u8_t line[512];
-	int length;
-	int next;
-	int prev;
-} parser_t;
-
-static byte *udmf_lump;
-
-static parser_t udmf_psr;
-
-static bool GetNextLine(parser_t *psr)
-{
-	if (psr->next >= psr->length)
-		return false; // no more lines
-
-	int i;
-	// get next line
-	psr->prev = psr->next;
-	u8_t *lp = &psr->buffer[psr->next];
-	for (i=0; i<(psr->length - psr->next); i++, lp++)
-		if (*lp == 0x0A || *lp == 0x0D)
-			break;
-	if (i == (psr->length - psr->next))
-		lp = &psr->buffer[psr->length - 1]; // last line
-	psr->next = (int)(lp - psr->buffer) + 1;
-	memcpy(psr->line, &psr->buffer[psr->prev], MIN(511, psr->next - psr->prev - 1));
-	psr->line[MIN(511, psr->next - psr->prev) - 1] = 0;
-	// skip any more CR/LF
-	while (psr->buffer[psr->next] == 0x0A || psr->buffer[psr->next] == 0x0D)
-		psr->next++;
-
-	// check for comments
-	lp = psr->line;
-	while (lp[0] != 0 && lp[0] != 0x2F && lp[1] != 0x2F)
-		lp++; // find full line comment start (if present)
-	if (lp[0] != 0)
-	{
-		*lp = 0; // terminate at full line comment start
-	}
-	else
-	{
-		lp = psr->line;
-		while (lp[0] != 0 && lp[0] != 0x2F && lp[1] != 0x2A)
-			lp++; // find multi-line comment start (if present)
-		if (lp[0] != 0)
-		{
-			*lp = 0; // terminate at multi-line comment start
-			u8_t *ep = &lp[2];
-			while (ep[0] != 0 && ep[0] != 0x2A && ep[1] != 0x2F)
-				ep++; // find multi-line comment end (if present)
-			if (ep[0] == 0)
-			{
-				ep = &psr->buffer[psr->next];
-				for (i=0; i<(psr->length - psr->next); i++, ep++)
-					if (ep[0] == 0x2A && ep[1] == 0x2F)
-						break;
-				if (i == (psr->length - psr->next))
-					ep = &psr->buffer[psr->length - 2];
-			}
-			psr->next = (int)(ep - psr->buffer) + 2; // skip comment for next line
-		}
-	}
-
-	//I_Debugf(" parser next line: %s\n", (char *)psr->line);
-	return true;
-}
-
-static bool GetNextAssign(parser_t *psr, u8_t *ident, u8_t *val)
-{
-	if (!GetNextLine(psr))
-		return false; // no more lines
-
-	int len = 0;
-	while (psr->line[len] != 0 && psr->line[len] != 0x7D)
-		len++;
-	if (psr->line[len] == 0x7D)
-	{
-		//I_Debugf(" parser: block end\n");
-		return false;
-	}
-	else if (len < 4)
-		return false; //line too short for assignment
-
-	u8_t *lp = psr->line;
-	while (*lp != 0x3D && *lp != 0)
-		lp++; // find '='
-	if (lp[0] != 0x3D)
-		return false; // not an assignment line
-
-	*lp++ = 0; // split at assignment operator
-	int i = 0;
-	while (psr->line[i] == 0x20 || psr->line[i] == 0x09)
-		i++; // skip whitespace before indentifier
-	memcpy(ident, &psr->line[i], lp - &psr->line[i] - 1);
-	i = lp - &psr->line[i] - 2;
-	while (ident[i] == 0x20 || ident[i] == 0x09)
-		i--; // skip whitespace after identifier
-	ident[i+1] = 0;
-
-	i = 0;
-	while (lp[i] == 0x20 || lp[i] == 0x09 || lp[i] == 0x22)
-		i++; // skip whitespace and quotes before value
-	memcpy(val, &lp[i], &psr->line[len] - &lp[i]);
-	i = (int)(&psr->line[len] - &lp[i]) - 2;
-	while (val[i] == 0x20 || val[i] == 0x09 || val[i] == 0x22  || val[i] == 0x3B)
-		i--; // skip whitespace, quote, and semi-colon after value
-	val[i+1] = 0;
-
-	//I_Debugf(" parser: ident = %s, val = %s\n", (char *)ident, (char *)val);
-	return true;
-}
-
-static bool GetNextBlock(parser_t *psr, u8_t *ident)
-{
-	if (!GetNextLine(psr))
-		return false; // no more lines
-
-	int len, i = 0;
-	while (psr->line[i] == 0x20 || psr->line[i] == 0x09)
-		i++; // skip whitespace
-blk_loop:
-	len = 0;
-	while (psr->line[len] != 0)
-		len++;
-
-	memcpy(ident, &psr->line[i], len - i);
-	i = len - i - 1;
-	while (ident[i] == 0x20 || ident[i] == 0x09)
-		i--; // skip whitespace from end of line
-	ident[i+1] = 0;
-
-	if (!GetNextLine(psr))
-		return false; // no more lines
-
-	i = 0;
-	while (psr->line[i] == 0x20 || psr->line[i] == 0x09)
-		i++; // skip whitespace before indentifier or block start
-	if (psr->line[i] != 0x7B)
-		goto blk_loop; // not a block start
-
-	//I_Debugf(" parser: block start = %s\n", ident);
-	return true;
-}
-
-static bool str2bool(char *val)
-{
-	if (y_stricmp(val, "true") == 0)
-		return true;
-
-	// default is always false
-	return false;
-}
-
-static int str2int(char *val, int def)
-{
-	int ret;
-
-	if (sscanf(val, "%d", &ret) == 1)
-		return ret;
-
-	// error - return default
-	return def;
-}
-
-static float str2float(char *val, float def)
-{
-	float ret;
-
-	if (sscanf(val, "%f", &ret) == 1)
-		return ret;
-
-	// error - return default
-	return def;
-}
 
 void GetBlockmapBounds(int *x, int *y, int *w, int *h)
 {
@@ -303,501 +140,6 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
 	return true;
 }
 
-static void CheckUDMFNamespace(parser_t *psr)
-{
-	char ident[128];
-	char value[128];
-
-	if (!GetNextAssign(&udmf_psr, (u8_t*)ident, (u8_t*)value) || y_stricmp(ident, "namespace"))
-		FatalError(StringPrintf("AJBSP: Missing UDMF namespace in %s of %s!\n",	lev_current_name, edit_wad->PathName().stem().u8string().c_str()));
-
-	if (y_stricmp(value, "doom") != 0 && y_stricmp(value, "heretic") != 0 && y_strnicmp(value, "zdoomt", 6) != 0 && y_stricmp(value, "edge") != 0)
-		FatalError(StringPrintf("AJBSP: Incompatible UDMF namespace \"%s\" detected in %s of %s!\nNamespace must be \"Edge\", \"Doom\", \"Heretic\", or \"ZDoomTranslated\"!\n",
-			value, lev_current_name, edit_wad->PathName().stem().u8string().c_str()));
-}
-
-static void LoadUDMFVertexes(parser_t *psr)
-{
-	char ident[128];
-	char val[128];
-
-	psr->next = 0; // restart from start of lump
-	while (1)
-	{
-		if (!GetNextBlock(psr, (u8_t*)ident))
-			break;
-
-		if (y_stricmp(ident, "vertex") == 0)
-		{
-			float x = 0.0f, y = 0.0f;
-
-			// process vertex block
-			while (1)
-			{
-				if (!GetNextAssign(psr, (u8_t*)ident, (u8_t*)val))
-				{
-					u8_t *lp = psr->line;
-					while (*lp != 0 && *lp != 0x7D)
-						lp++; // find end of line or '}'
-					if (*lp == 0x7D)
-					{
-						break; // end of block
-					}
-					if (psr->next >= psr->length)
-					{
-						break; // end of lump
-					}
-
-					continue; // skip line
-				}
-				// process assignment
-				if (y_stricmp(ident, "x") == 0)
-				{
-					x = str2float(val, 0.0f);
-				}
-				else if (y_stricmp(ident, "y") == 0)
-				{
-					y = str2float(val, 0.0f);
-				}
-			}
-
-			vertex_t *vv = NewVertex();
-			vv->x = x;
-			vv->y = y;
-			vv->index = num_vertices - 1;
-			num_old_vert = num_vertices;
-		}
-	}
-}
-
-static void LoadUDMFSectors(parser_t *psr)
-{
-	char ident[128];
-	char val[128];
-
-	psr->next = 0; // restart from start of lump
-	while (1)
-	{
-		if (!GetNextBlock(psr, (u8_t*)ident))
-			break;
-
-		if (y_stricmp(ident, "sector") == 0)
-		{
-			float cz = 0.0f, fz = 0.0f;
-			int light = 160, type = 0, tag = 0;
-			char floor_tex[10];
-			char ceil_tex[10];
-			strcpy(floor_tex, "-");
-			strcpy(ceil_tex, "-");
-
-			// process sector block
-			while (1)
-			{
-				if (!GetNextAssign(psr, (u8_t*)ident, (u8_t*)val))
-				{
-					u8_t *lp = psr->line;
-					while (*lp != 0 && *lp != 0x7D)
-						lp++; // find end of line or '}'
-					if (*lp == 0x7D)
-					{
-						break; // end of block
-					}
-					if (psr->next >= psr->length)
-					{
-						break; // end of lump
-					}
-
-					continue; // skip line
-				}
-				// process assignment
-				if (y_stricmp(ident, "heightfloor") == 0)
-				{
-					fz = str2float(val, 0.0f);
-				}
-				else if (y_stricmp(ident, "heightceiling") == 0)
-				{
-					cz = str2float(val, 0.0f);
-				}
-				else if (y_stricmp(ident, "texturefloor") == 0)
-				{
-					strncpy(floor_tex, val, 8);
-				}
-				else if (y_stricmp(ident, "textureceiling") == 0)
-				{
-					strncpy(ceil_tex, val, 8);
-				}
-				else if (y_stricmp(ident, "lightlevel") == 0)
-				{
-					light = str2int(val, 160);
-				}
-				else if (y_stricmp(ident, "special") == 0)
-				{
-					type = str2int(val, 0);
-				}
-				else if (y_stricmp(ident, "id") == 0)
-				{
-					tag = str2int(val, 0);
-				}
-			}
-
-			sector_t *ss = NewSector();
-			ss->light = light;
-			ss->index = num_sectors - 1;
-			ss->warned_facing = -1;
-			ss->floor_h = fz;
-			ss->ceil_h = cz;
-			strncpy(ss->ceil_tex, ceil_tex, 8);
-			strncpy(ss->floor_tex, floor_tex, 8);
-			ss->special = type;
-			ss->tag = tag;
-			ss->coalesce = (ss->tag >= 900 && ss->tag < 1000) ? 1 : 0;
-		}
-	}
-}
-
-static void LoadUDMFSideDefs(parser_t *psr)
-{
-	char ident[128];
-	char val[128];
-
-	psr->next = 0; // restart from start of lump
-	while (1)
-	{
-		if (!GetNextBlock(psr, (u8_t*)ident))
-			break;
-
-		if (y_stricmp(ident, "sidedef") == 0)
-		{
-			float x = 0, y = 0;
-			int sec_num = 0;
-			char top_tex[10];
-			char bottom_tex[10];
-			char middle_tex[10];
-			strcpy(top_tex, "-");
-			strcpy(bottom_tex, "-");
-			strcpy(middle_tex, "-");
-
-			// process sidedef block
-			while (1)
-			{
-				if (!GetNextAssign(psr, (u8_t*)ident, (u8_t*)val))
-				{
-					u8_t *lp = psr->line;
-					while (*lp != 0 && *lp != 0x7D)
-						lp++; // find end of line or '}'
-					if (*lp == 0x7D)
-					{
-						break; // end of block
-					}
-					if (psr->next >= psr->length)
-					{
-						break; // end of lump
-					}
-
-					continue; // skip line
-				}
-				// process assignment
-				if (y_stricmp(ident, "offsetx") == 0)
-				{
-					x = str2float(val, 0);
-				}
-				else if (y_stricmp(ident, "offsety") == 0)
-				{
-					y = str2float(val, 0);
-				}
-				else if (y_stricmp(ident, "texturetop") == 0)
-				{
-					strncpy(top_tex, val, 8);
-				}
-				else if (y_stricmp(ident, "texturebottom") == 0)
-				{
-					strncpy(bottom_tex, val, 8);
-				}
-				else if (y_stricmp(ident, "texturemiddle") == 0)
-				{
-					strncpy(middle_tex, val, 8);
-				}
-				else if (y_stricmp(ident, "sector") == 0)
-				{
-					sec_num = str2int(val, 0);
-				}
-			}
-			sidedef_t *sd = NewSidedef();
-			sd->index = num_sidedefs - 1;
-			sd->sector = sec_num == -1 ? NULL : LookupSector(sec_num);
-			if (sd->sector)
-				sd->sector->is_used = 1;
-			sd->x_offset = x;
-			sd->y_offset = y;
-			strncpy(sd->upper_tex, top_tex, 8);
-			strncpy(sd->mid_tex, middle_tex, 8);
-			strncpy(sd->lower_tex, bottom_tex, 8);
-		}
-	}
-}
-
-static void LoadUDMFLineDefs(parser_t *psr)
-{
-	char ident[128];
-	char val[128];
-	int i = 0;
-
-	psr->next = 0; // restart from start of lump
-	while (1)
-	{
-		if (!GetNextBlock(psr, (u8_t*)ident))
-			break;
-
-		if (y_stricmp(ident, "linedef") == 0)
-		{
-			int flags = 0, v1 = 0, v2 = 0;
-			int side0 = -1, side1 = -1, tag = -1;
-			int special = 0;
-
-			// process lindef block
-			while (1)
-			{
-				if (!GetNextAssign(psr, (u8_t*)ident, (u8_t*)val))
-				{
-					u8_t *lp = psr->line;
-					while (*lp != 0 && *lp != 0x7D)
-						lp++; // find end of line or '}'
-					if (*lp == 0x7D)
-					{
-						break; // end of block
-					}
-					if (psr->next >= psr->length)
-					{
-						break; // end of lump
-					}
-
-					continue; // skip line
-				}
-				// process assignment
-				if (y_stricmp(ident, "id") == 0)
-				{
-					tag = str2int(val, -1);
-				}
-				else if (y_stricmp(ident, "v1") == 0)
-				{
-					v1 = str2int(val, 0);
-				}
-				else if (y_stricmp(ident, "v2") == 0)
-				{
-					v2 = str2int(val, 0);
-				}
-				else if (y_stricmp(ident, "special") == 0)
-				{
-					special = str2int(val, 0);
-				}
-				else if (y_stricmp(ident, "arg0") == 0)
-				{
-					tag = str2int(val, 0);
-				}
-				else if (y_stricmp(ident, "sidefront") == 0)
-				{
-					side0 = str2int(val, -1);
-				}
-				else if (y_stricmp(ident, "sideback") == 0)
-				{
-					side1 = str2int(val, -1);
-				}
-				else if (y_stricmp(ident, "blocking") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0001;
-				}
-				else if (y_stricmp(ident, "blockmonsters") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0002;
-				}
-				else if (y_stricmp(ident, "twosided") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0004;
-				}
-				else if (y_stricmp(ident, "dontpegtop") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0008;
-				}
-				else if (y_stricmp(ident, "dontpegbottom") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0010;
-				}
-				else if (y_stricmp(ident, "secret") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0020;
-				}
-				else if (y_stricmp(ident, "blocksound") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0040;
-				}
-				else if (y_stricmp(ident, "dontdraw") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0080;
-				}
-				else if (y_stricmp(ident, "mapped") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0100;
-				}
-				else if (y_stricmp(ident, "passuse") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0200; // BOOM flag
-				}
-			}
-
-			linedef_t *ld = NewLinedef();
-			ld->index = num_linedefs - 1;
-			ld->start = LookupVertex(v1);
-			ld->start->is_used = 1;
-			ld->end = LookupVertex(v2);
-			ld->end->is_used = 1;
-			ld->zero_len = (fabs(ld->start->x - ld->end->x) < DIST_EPSILON) &&
-				(fabs(ld->start->y - ld->end->y) < DIST_EPSILON);
-			ld->type = special;
-			ld->tag = tag;
-			ld->flags = flags;
-			ld->two_sided = (ld->flags & MLF_TwoSided) ? 1 : 0;
-			ld->right = side0 == -1 ? NULL : SafeLookupSidedef(side0);
-			ld->left = side1 == -1 ? NULL : SafeLookupSidedef(side1);
-			ld->is_precious = (ld->tag >= 900 && ld->tag < 1000) ? 1 : 0;
-			if (ld->right)
-			{
-				ld->right->is_used = 1;
-				ld->right->on_special |= (ld->type > 0) ? 1 : 0;			
-			}
-			if (ld->left)
-			{
-				ld->left->is_used = 1;
-				ld->left->on_special |= (ld->type > 0) ? 1 : 0;			
-			}
-			if (ld->right || ld->left)
-				num_real_lines++;
-			ld->self_ref = (ld->left && ld->right &&
-				(ld->left->sector == ld->right->sector));
-		}
-	}
-}
-
-static void LoadUDMFThings(parser_t *psr)
-{
-	char ident[128];
-	char val[128];
-
-	psr->next = 0; // restart from start of lump
-	while (1)
-	{
-		if (!GetNextBlock(psr, (u8_t*)ident))
-			break;
-
-		if (y_stricmp(ident, "thing") == 0)
-		{
-			float x = 0.0f, y = 0.0f, z = 0.0f;
-			int options = MTF_Not_SP | MTF_Not_DM | MTF_Not_COOP;
-			int typenum = -1;
-			int tag = 0;
-
-			// process thing block
-			while (1)
-			{
-				if (!GetNextAssign(psr, (u8_t*)ident, (u8_t*)val))
-				{
-					u8_t *lp = psr->line;
-					while (*lp != 0 && *lp != 0x7D)
-						lp++; // find end of line or '}'
-					if (*lp == 0x7D)
-						break; // end of block
-					if (psr->next >= psr->length)
-						break; // end of lump
-
-					continue; // skip line
-				}
-				// process assignment
-				if (y_stricmp(ident, "id") == 0)
-				{
-					tag = str2int(val, 0);
-				}
-				else if (y_stricmp(ident, "x") == 0)
-				{
-					x = str2float(val, 0.0f);
-				}
-				else if (y_stricmp(ident, "y") == 0)
-				{
-					y = str2float(val, 0.0f);
-				}
-				else if (y_stricmp(ident, "type") == 0)
-				{
-					typenum = str2int(val, 0);
-				}
-				else if (y_stricmp(ident, "skill1") == 0)
-				{
-					options |= MTF_Easy;
-				}
-				else if (y_stricmp(ident, "skill2") == 0)
-				{
-					if (str2bool(val))
-						options |= MTF_Easy;
-				}
-				else if (y_stricmp(ident, "skill3") == 0)
-				{
-					if (str2bool(val))
-						options |= MTF_Medium;
-				}
-				else if (y_stricmp(ident, "skill4") == 0)
-				{
-					if (str2bool(val))
-						options |= MTF_Hard;
-				}
-				else if (y_stricmp(ident, "skill5") == 0)
-				{
-					if (str2bool(val))
-						options |= MTF_Hard;
-				}
-				else if (y_stricmp(ident, "ambush") == 0)
-				{
-					if (str2bool(val))
-						options |= MTF_Ambush;
-				}
-				else if (y_stricmp(ident, "single") == 0)
-				{
-					if (str2bool(val))
-						options &= ~MTF_Not_SP;
-				}
-				else if (y_stricmp(ident, "dm") == 0)
-				{
-					if (str2bool(val))
-						options &= ~MTF_Not_DM;
-				}
-				else if (y_stricmp(ident, "coop") == 0)
-				{
-					if (str2bool(val))
-						options &= ~MTF_Not_COOP;
-				}
-				// MBF flag
-				else if (y_stricmp(ident, "friend") == 0)
-				{
-					if (str2bool(val))
-						options |= MTF_Friend;
-				}
-
-				thing_t *t = NewThing();
-				t->index = num_things - 1;
-				t->x = x;
-				t->y = y;
-				t->type = typenum;
-				t->options = options;
-			}
-		}
-	}
-}
 
 /* ----- create blockmap ------------------------------------ */
 
@@ -812,12 +154,12 @@ static void BlockAdd(int blk_num, int line_index)
 {
 	u16_t *cur = block_lines[blk_num];
 
-# if DEBUG_BLOCKMAP
-	DebugPrintf("Block %d has line %d\n", blk_num, line_index);
-# endif
+#if DEBUG_BLOCKMAP
+	cur_info->Debug("Block %d has line %d\n", blk_num, line_index);
+#endif
 
 	if (blk_num < 0 || blk_num >= block_count)
-		BugError(StringPrintf("BlockAdd: bad block number %d\n", blk_num));
+		BugError("BlockAdd: bad block number %d\n", blk_num);
 
 	if (! cur)
 	{
@@ -837,32 +179,32 @@ static void BlockAdd(int blk_num, int line_index)
 	}
 
 	// compute new checksum
-	cur[BK_XOR] = ((cur[BK_XOR] << 4) | (cur[BK_XOR] >> 12)) ^ line_index;
+	cur[BK_XOR] = (u16_t) (((cur[BK_XOR] << 4) | (cur[BK_XOR] >> 12)) ^ line_index);
 
 	cur[BK_FIRST + cur[BK_NUM]] = LE_U16(line_index);
 	cur[BK_NUM]++;
 }
 
 
-static void BlockAddLine(linedef_t *L)
+static void BlockAddLine(const linedef_t *L)
 {
 	int x1 = (int) L->start->x;
 	int y1 = (int) L->start->y;
 	int x2 = (int) L->end->x;
 	int y2 = (int) L->end->y;
 
-	int bx1 = (MIN(x1,x2) - block_x) / 128;
-	int by1 = (MIN(y1,y2) - block_y) / 128;
-	int bx2 = (MAX(x1,x2) - block_x) / 128;
-	int by2 = (MAX(y1,y2) - block_y) / 128;
+	int bx1 = (std::min(x1,x2) - block_x) / 128;
+	int by1 = (std::min(y1,y2) - block_y) / 128;
+	int bx2 = (std::max(x1,x2) - block_x) / 128;
+	int by2 = (std::max(y1,y2) - block_y) / 128;
 
 	int bx, by;
 	int line_index = L->index;
 
-# if DEBUG_BLOCKMAP
-	DebugPrintf("BlockAddLine: %d (%d,%d) -> (%d,%d)\n", line_index,
+#if DEBUG_BLOCKMAP
+	cur_info->Debug("BlockAddLine: %d (%d,%d) -> (%d,%d)\n", line_index,
 			x1, y1, x2, y2);
-# endif
+#endif
 
 	// handle truncated blockmaps
 	if (bx1 < 0) bx1 = 0;
@@ -917,13 +259,11 @@ static void BlockAddLine(linedef_t *L)
 
 static void CreateBlockmap(void)
 {
-	int i;
-
 	block_lines = (u16_t **) UtilCalloc(block_count * sizeof(u16_t *));
 
-	for (i=0 ; i < num_linedefs ; i++)
+	for (int i=0 ; i < num_linedefs ; i++)
 	{
-		linedef_t *L = LookupLinedef(i);
+		const linedef_t *L = lev_linedefs[i];
 
 		// ignore zero-length lines
 		if (L->zero_len)
@@ -961,19 +301,212 @@ static int BlockCompare(const void *p1, const void *p2)
 	return memcmp(A+BK_FIRST, B+BK_FIRST, A[BK_NUM] * sizeof(u16_t));
 }
 
-static void FindBlockmapLimits(bbox_t *bbox)
+
+static void CompressBlockmap(void)
+{
+	int i;
+	int cur_offset;
+	int dup_count=0;
+
+	int orig_size, new_size;
+
+	block_ptrs = (u16_t *)UtilCalloc(block_count * sizeof(u16_t));
+	block_dups = (u16_t *)UtilCalloc(block_count * sizeof(u16_t));
+
+	// sort duplicate-detecting array.  After the sort, all duplicates
+	// will be next to each other.  The duplicate array gives the order
+	// of the blocklists in the BLOCKMAP lump.
+
+	for (i=0 ; i < block_count ; i++)
+		block_dups[i] = (u16_t) i;
+
+	qsort(block_dups, block_count, sizeof(u16_t), BlockCompare);
+
+	// scan duplicate array and build up offset array
+
+	cur_offset = 4 + block_count + 2;
+
+	orig_size = 4 + block_count;
+	new_size  = cur_offset;
+
+	for (i=0 ; i < block_count ; i++)
+	{
+		int blk_num = block_dups[i];
+		int count;
+
+		// empty block ?
+		if (block_lines[blk_num] == NULL)
+		{
+			block_ptrs[blk_num] = (u16_t) (4 + block_count);
+			block_dups[i] = DUMMY_DUP;
+
+			orig_size += 2;
+			continue;
+		}
+
+		count = 2 + block_lines[blk_num][BK_NUM];
+
+		// duplicate ?  Only the very last one of a sequence of duplicates
+		// will update the current offset value.
+
+		if (i+1 < block_count && BlockCompare(block_dups + i, block_dups + i+1) == 0)
+		{
+			block_ptrs[blk_num] = (u16_t) cur_offset;
+			block_dups[i] = DUMMY_DUP;
+
+			// free the memory of the duplicated block
+			UtilFree(block_lines[blk_num]);
+			block_lines[blk_num] = NULL;
+
+			dup_count++;
+
+			orig_size += count;
+			continue;
+		}
+
+		// OK, this block is either the last of a series of duplicates, or
+		// just a singleton.
+
+		block_ptrs[blk_num] = (u16_t) cur_offset;
+
+		cur_offset += count;
+
+		orig_size += count;
+		new_size  += count;
+	}
+
+	if (cur_offset > 65535)
+	{
+		block_overflowed = true;
+		return;
+	}
+
+#if DEBUG_BLOCKMAP
+	cur_info->Debug("Blockmap: Last ptr = %d  duplicates = %d\n",
+			cur_offset, dup_count);
+#endif
+
+	block_compression = (orig_size - new_size) * 100 / orig_size;
+
+	// there's a tiny chance of new_size > orig_size
+	if (block_compression < 0)
+		block_compression = 0;
+}
+
+
+static int CalcBlockmapSize()
+{
+	// compute size of final BLOCKMAP lump.
+	// it does not need to be exact, but it *does* need to be bigger
+	// (or equal) to the actual size of the lump.
+
+	// header + null_block + a bit extra
+	int size = 20;
+
+	// the pointers (offsets to the line lists)
+	size = size + block_count * 2;
+
+	// add size of each block
+	for (int i=0 ; i < block_count ; i++)
+	{
+		int blk_num = block_dups[i];
+
+		// ignore duplicate or empty blocks
+		if (blk_num == DUMMY_DUP)
+			continue;
+
+		u16_t *blk = block_lines[blk_num];
+		SYS_ASSERT(blk);
+
+		size += (1 + (int)(blk[BK_NUM]) + 1) * 2;
+	}
+
+	return size;
+}
+
+
+static void WriteBlockmap(void)
 {
 	int i;
 
-	int mid_x = 0;
-	int mid_y = 0;
+	int max_size = CalcBlockmapSize();
+
+	Lump_c *lump = CreateLevelLump("BLOCKMAP", max_size);
+
+	u16_t null_block[2] = { 0x0000, 0xFFFF };
+	u16_t m_zero = 0x0000;
+	u16_t m_neg1 = 0xFFFF;
+
+	// fill in header
+	raw_blockmap_header_t header;
+
+	header.x_origin = LE_U16(block_x);
+	header.y_origin = LE_U16(block_y);
+	header.x_blocks = LE_U16(block_w);
+	header.y_blocks = LE_U16(block_h);
+
+	lump->Write(&header, sizeof(header));
+
+	// handle pointers
+	for (i=0 ; i < block_count ; i++)
+	{
+		u16_t ptr = LE_U16(block_ptrs[i]);
+
+		if (ptr == 0)
+			BugError("WriteBlockmap: offset %d not set.\n", i);
+
+		lump->Write(&ptr, sizeof(u16_t));
+	}
+
+	// add the null block which *all* empty blocks will use
+	lump->Write(null_block, sizeof(null_block));
+
+	// handle each block list
+	for (i=0 ; i < block_count ; i++)
+	{
+		int blk_num = block_dups[i];
+
+		// ignore duplicate or empty blocks
+		if (blk_num == DUMMY_DUP)
+			continue;
+
+		u16_t *blk = block_lines[blk_num];
+		SYS_ASSERT(blk);
+
+		lump->Write(&m_zero, sizeof(u16_t));
+		lump->Write(blk + BK_FIRST, blk[BK_NUM] * sizeof(u16_t));
+		lump->Write(&m_neg1, sizeof(u16_t));
+	}
+
+	lump->Finish();
+}
+
+
+static void FreeBlockmap(void)
+{
+	for (int i=0 ; i < block_count ; i++)
+	{
+		if (block_lines[i])
+			UtilFree(block_lines[i]);
+	}
+
+	UtilFree(block_lines);
+	UtilFree(block_ptrs);
+	UtilFree(block_dups);
+}
+
+
+static void FindBlockmapLimits(bbox_t *bbox)
+{
+	double mid_x = 0;
+	double mid_y = 0;
 
 	bbox->minx = bbox->miny = SHRT_MAX;
 	bbox->maxx = bbox->maxy = SHRT_MIN;
 
-	for (i=0 ; i < num_linedefs ; i++)
+	for (int i=0 ; i < num_linedefs ; i++)
 	{
-		linedef_t *L = LookupLinedef(i);
+		const linedef_t *L = lev_linedefs[i];
 
 		if (! L->zero_len)
 		{
@@ -982,31 +515,31 @@ static void FindBlockmapLimits(bbox_t *bbox)
 			double x2 = L->end->x;
 			double y2 = L->end->y;
 
-			int lx = (int)floor(MIN(x1, x2));
-			int ly = (int)floor(MIN(y1, y2));
-			int hx = (int)ceil(MAX(x1, x2));
-			int hy = (int)ceil(MAX(y1, y2));
+			int lx = (int)floor(std::min(x1, x2));
+			int ly = (int)floor(std::min(y1, y2));
+			int hx = (int)ceil (std::max(x1, x2));
+			int hy = (int)ceil (std::max(y1, y2));
 
 			if (lx < bbox->minx) bbox->minx = lx;
 			if (ly < bbox->miny) bbox->miny = ly;
 			if (hx > bbox->maxx) bbox->maxx = hx;
 			if (hy > bbox->maxy) bbox->maxy = hy;
 
-			// compute middle of cluster (roughly, so we don't overflow)
-			mid_x += (lx + hx) / 32;
-			mid_y += (ly + hy) / 32;
+			// compute middle of cluster
+			mid_x += (lx + hx) / 2;
+			mid_y += (ly + hy) / 2;
 		}
 	}
 
 	if (num_linedefs > 0)
 	{
-		block_mid_x = (mid_x / num_linedefs) * 16;
-		block_mid_y = (mid_y / num_linedefs) * 16;
+		block_mid_x = I_ROUND(mid_x / (double)num_linedefs);
+		block_mid_y = I_ROUND(mid_y / (double)num_linedefs);
 	}
 
-# if DEBUG_BLOCKMAP
-	DebugPrintf("Blockmap lines centered at (%d,%d)\n", block_mid_x, block_mid_y);
-# endif
+#if DEBUG_BLOCKMAP
+	cur_info->Debug("Blockmap lines centered at (%d,%d)\n", block_mid_x, block_mid_y);
+#endif
 }
 
 
@@ -1017,6 +550,10 @@ void InitBlockmap()
 	// find limits of linedefs, and store as map limits
 	FindBlockmapLimits(&map_bbox);
 
+	cur_info->Print(2, "    Map limits: (%d,%d) to (%d,%d)\n",
+			map_bbox.minx, map_bbox.miny,
+			map_bbox.maxx, map_bbox.maxy);
+
 	block_x = map_bbox.minx - (map_bbox.minx & 0x7);
 	block_y = map_bbox.miny - (map_bbox.miny & 0x7);
 
@@ -1026,6 +563,234 @@ void InitBlockmap()
 	block_count = block_w * block_h;
 }
 
+
+void PutBlockmap()
+{
+	if (! cur_info->do_blockmap || num_linedefs == 0)
+	{
+		// just create an empty blockmap lump
+		CreateLevelLump("BLOCKMAP")->Finish();
+		return;
+	}
+
+	block_overflowed = false;
+
+	// initial phase: create internal blockmap containing the index of
+	// all lines in each block.
+
+	CreateBlockmap();
+
+	// -AJA- second phase: compress the blockmap.  We do this by sorting
+	//       the blocks, which is a typical way to detect duplicates in
+	//       a large list.  This also detects BLOCKMAP overflow.
+
+	CompressBlockmap();
+
+	// final phase: write it out in the correct format
+
+	if (block_overflowed)
+	{
+		// leave an empty blockmap lump
+		CreateLevelLump("BLOCKMAP")->Finish();
+
+		Warning("Blockmap overflowed (lump will be empty)\n");
+	}
+	else
+	{
+		WriteBlockmap();
+
+		cur_info->Print(2, "    Blockmap size: %dx%d (compression: %d%%)\n",
+				block_w, block_h, block_compression);
+	}
+
+	FreeBlockmap();
+}
+
+
+//------------------------------------------------------------------------
+// REJECT : Generate the reject table
+//------------------------------------------------------------------------
+
+
+static u8_t *rej_matrix;
+static int   rej_total_size;	// in bytes
+
+
+//
+// Allocate the matrix, init sectors into individual groups.
+//
+static void Reject_Init()
+{
+	rej_total_size = (num_sectors * num_sectors + 7) / 8;
+
+	rej_matrix = new u8_t[rej_total_size];
+	memset(rej_matrix, 0, rej_total_size);
+
+	for (int i=0 ; i < num_sectors ; i++)
+	{
+		sector_t *sec = lev_sectors[i];
+
+		sec->rej_group = i;
+		sec->rej_next = sec->rej_prev = sec;
+	}
+}
+
+
+static void Reject_Free()
+{
+	delete[] rej_matrix;
+	rej_matrix = NULL;
+}
+
+
+//
+// Algorithm: Initially all sectors are in individual groups.
+// Now we scan the linedef list.  For each two-sectored line,
+// merge the two sector groups into one.  That's it !
+//
+static void Reject_GroupSectors()
+{
+	for (int i=0 ; i < num_linedefs ; i++)
+	{
+		const linedef_t *line = lev_linedefs[i];
+
+		if (! line->right || ! line->left)
+			continue;
+
+		sector_t *sec1 = line->right->sector;
+		sector_t *sec2 = line->left->sector;
+		sector_t *tmp;
+
+		if (! sec1 || ! sec2 || sec1 == sec2)
+			continue;
+
+		// already in the same group ?
+		if (sec1->rej_group == sec2->rej_group)
+			continue;
+
+		// swap sectors so that the smallest group is added to the biggest
+		// group.  This is based on the assumption that sector numbers in
+		// wads will generally increase over the set of linedefs, and so
+		// (by swapping) we'll tend to add small groups into larger groups,
+		// thereby minimising the updates to 'rej_group' fields when merging.
+
+		if (sec1->rej_group > sec2->rej_group)
+		{
+			tmp = sec1; sec1 = sec2; sec2 = tmp;
+		}
+
+		// update the group numbers in the second group
+
+		sec2->rej_group = sec1->rej_group;
+
+		for (tmp=sec2->rej_next ; tmp != sec2 ; tmp=tmp->rej_next)
+			tmp->rej_group = sec1->rej_group;
+
+		// merge 'em baby...
+
+		sec1->rej_next->rej_prev = sec2;
+		sec2->rej_next->rej_prev = sec1;
+
+		tmp = sec1->rej_next;
+		sec1->rej_next = sec2->rej_next;
+		sec2->rej_next = tmp;
+	}
+}
+
+
+#if DEBUG_REJECT
+static void Reject_DebugGroups()
+{
+	// Note: this routine is destructive to the group numbers
+
+	for (int i=0 ; i < num_sectors ; i++)
+	{
+		sector_t *sec = lev_sectors[i];
+		sector_t *tmp;
+
+		int group = sec->rej_group;
+		int num = 0;
+
+		if (group < 0)
+			continue;
+
+		sec->rej_group = -1;
+		num++;
+
+		for (tmp=sec->rej_next ; tmp != sec ; tmp=tmp->rej_next)
+		{
+			tmp->rej_group = -1;
+			num++;
+		}
+
+		cur_info->Debug("Group %d  Sectors %d\n", group, num);
+	}
+}
+#endif
+
+
+static void Reject_ProcessSectors()
+{
+	for (int view=0 ; view < num_sectors ; view++)
+	{
+		for (int target=0 ; target < view ; target++)
+		{
+			sector_t *view_sec = lev_sectors[view];
+			sector_t *targ_sec = lev_sectors[target];
+
+			if (view_sec->rej_group == targ_sec->rej_group)
+				continue;
+
+			// for symmetry, do both sides at same time
+
+			int p1 = view * num_sectors + target;
+			int p2 = target * num_sectors + view;
+
+			rej_matrix[p1 >> 3] |= (1 << (p1 & 7));
+			rej_matrix[p2 >> 3] |= (1 << (p2 & 7));
+		}
+	}
+}
+
+
+static void Reject_WriteLump()
+{
+	Lump_c *lump = CreateLevelLump("REJECT", rej_total_size);
+
+	lump->Write(rej_matrix, rej_total_size);
+	lump->Finish();
+}
+
+
+//
+// For now we only do very basic reject processing, limited to
+// determining all isolated groups of sectors (islands that are
+// surrounded by void space).
+//
+void PutReject()
+{
+	if (! cur_info->do_reject || num_sectors == 0)
+	{
+		// just create an empty reject lump
+		CreateLevelLump("REJECT")->Finish();
+		return;
+	}
+
+	Reject_Init();
+	Reject_GroupSectors();
+	Reject_ProcessSectors();
+
+#if DEBUG_REJECT
+	Reject_DebugGroups();
+#endif
+
+	Reject_WriteLump();
+	Reject_Free();
+
+	cur_info->Print(2, "    Reject size: %d\n", rej_total_size);
+}
+
+
 //------------------------------------------------------------------------
 // LEVEL : Level structure read/write functions.
 //------------------------------------------------------------------------
@@ -1034,423 +799,424 @@ void InitBlockmap()
 // Note: ZDoom format support based on code (C) 2002,2003 Randy Heit
 
 
-#define DEBUG_LOAD      0
-#define DEBUG_BSP       0
-
-#define ALLOC_BLKNUM  1024
-
-
 // per-level variables
 
-short lev_current_idx;
-short lev_current_start;
+const char *lev_current_name;
 
-bool lev_doing_hexen;
+int lev_current_idx;
+int lev_current_start;
+
+map_format_e lev_format;
 
 bool lev_force_v5;
+bool lev_force_xnod;
 
 bool lev_long_name;
-
-#define LEVELARRAY(TYPE, BASEVAR, NUMVAR)  \
-	TYPE ** BASEVAR = NULL;  \
-	int NUMVAR = 0;
+bool lev_overflows;
 
 
-LEVELARRAY(vertex_t,  lev_vertices,   num_vertices)
-LEVELARRAY(linedef_t, lev_linedefs,   num_linedefs)
-LEVELARRAY(sidedef_t, lev_sidedefs,   num_sidedefs)
-LEVELARRAY(sector_t,  lev_sectors,    num_sectors)
-LEVELARRAY(thing_t,   lev_things,     num_things)
+// objects of loaded level, and stuff we've built
+std::vector<vertex_t *>  lev_vertices;
+std::vector<linedef_t *> lev_linedefs;
+std::vector<sidedef_t *> lev_sidedefs;
+std::vector<sector_t *>  lev_sectors;
+std::vector<thing_t *>   lev_things;
 
-static LEVELARRAY(seg_t,     segs,       num_segs)
-static LEVELARRAY(subsec_t,  subsecs,    num_subsecs)
-static LEVELARRAY(node_t,    nodes,      num_nodes)
-static LEVELARRAY(wall_tip_t,wall_tips,  num_wall_tips)
-
+std::vector<seg_t *>     lev_segs;
+std::vector<subsec_t *>  lev_subsecs;
+std::vector<node_t *>    lev_nodes;
+std::vector<walltip_t *> lev_walltips;
 
 int num_old_vert = 0;
 int num_new_vert = 0;
-int num_complete_seg = 0;
 int num_real_lines = 0;
 
 
 /* ----- allocation routines ---------------------------- */
 
-#define ALLIGATOR(TYPE, BASEVAR, NUMVAR)  \
-{  \
-	if ((NUMVAR % ALLOC_BLKNUM) == 0)  \
-	{  \
-		BASEVAR = (TYPE **) UtilRealloc(BASEVAR, (NUMVAR + ALLOC_BLKNUM) * sizeof(TYPE *));  \
-	}  \
-	BASEVAR[NUMVAR] = (TYPE *) UtilCalloc(sizeof(TYPE));  \
-	NUMVAR += 1;  \
-	return BASEVAR[NUMVAR - 1];  \
+vertex_t *NewVertex()
+{
+	vertex_t *V = (vertex_t *) UtilCalloc(sizeof(vertex_t));
+	V->index = (int)lev_vertices.size();
+	lev_vertices.push_back(V);
+	return V;
 }
 
+linedef_t *NewLinedef()
+{
+	linedef_t *L = (linedef_t *) UtilCalloc(sizeof(linedef_t));
+	L->index = (int)lev_linedefs.size();
+	lev_linedefs.push_back(L);
+	return L;
+}
 
-vertex_t *NewVertex(void)
-	ALLIGATOR(vertex_t, lev_vertices, num_vertices)
+sidedef_t *NewSidedef()
+{
+	sidedef_t *S = (sidedef_t *) UtilCalloc(sizeof(sidedef_t));
+	S->index = (int)lev_sidedefs.size();
+	lev_sidedefs.push_back(S);
+	return S;
+}
 
-linedef_t *NewLinedef(void)
-	ALLIGATOR(linedef_t, lev_linedefs, num_linedefs)
+sector_t *NewSector()
+{
+	sector_t *S = (sector_t *) UtilCalloc(sizeof(sector_t));
+	S->index = (int)lev_sectors.size();
+	lev_sectors.push_back(S);
+	return S;
+}
 
-sidedef_t *NewSidedef(void)
-	ALLIGATOR(sidedef_t, lev_sidedefs, num_sidedefs)
+thing_t *NewThing()
+{
+	thing_t *T = (thing_t *) UtilCalloc(sizeof(thing_t));
+	T->index = (int)lev_things.size();
+	lev_things.push_back(T);
+	return T;
+}
 
-sector_t *NewSector(void)
-	ALLIGATOR(sector_t, lev_sectors, num_sectors)
+seg_t *NewSeg()
+{
+	seg_t *S = (seg_t *) UtilCalloc(sizeof(seg_t));
+	lev_segs.push_back(S);
+	return S;
+}
 
-thing_t *NewThing(void)
-	ALLIGATOR(thing_t, lev_things, num_things)
+subsec_t *NewSubsec()
+{
+	subsec_t *S = (subsec_t *) UtilCalloc(sizeof(subsec_t));
+	lev_subsecs.push_back(S);
+	return S;
+}
 
-seg_t *NewSeg(void)
-	ALLIGATOR(seg_t, segs, num_segs)
+node_t *NewNode()
+{
+	node_t *N = (node_t *) UtilCalloc(sizeof(node_t));
+	lev_nodes.push_back(N);
+	return N;
+}
 
-subsec_t *NewSubsec(void)
-	ALLIGATOR(subsec_t, subsecs, num_subsecs)
-
-node_t *NewNode(void)
-	ALLIGATOR(node_t, nodes, num_nodes)
-
-wall_tip_t *NewWallTip(void)
-	ALLIGATOR(wall_tip_t, wall_tips, num_wall_tips)
+walltip_t *NewWallTip()
+{
+	walltip_t *WT = (walltip_t *) UtilCalloc(sizeof(walltip_t));
+	lev_walltips.push_back(WT);
+	return WT;
+}
 
 
 /* ----- free routines ---------------------------- */
 
-#define FREEMASON(TYPE, BASEVAR, NUMVAR)  \
-{  \
-	int i;  \
-	for (i=0 ; i < NUMVAR ; i++)  \
-		UtilFree(BASEVAR[i]);  \
-	if (BASEVAR)  \
-		UtilFree(BASEVAR);  \
-	BASEVAR = NULL; NUMVAR = 0;  \
+void FreeVertices()
+{
+	for (unsigned int i = 0 ; i < lev_vertices.size() ; i++)
+		UtilFree((void *) lev_vertices[i]);
+
+	lev_vertices.clear();
 }
 
+void FreeLinedefs()
+{
+	for (unsigned int i = 0 ; i < lev_linedefs.size() ; i++)
+		UtilFree((void *) lev_linedefs[i]);
 
-void FreeVertices(void)
-	FREEMASON(vertex_t, lev_vertices, num_vertices)
-
-void FreeLinedefs(void)
-	FREEMASON(linedef_t, lev_linedefs, num_linedefs)
-
-void FreeSidedefs(void)
-	FREEMASON(sidedef_t, lev_sidedefs, num_sidedefs)
-
-void FreeSectors(void)
-	FREEMASON(sector_t, lev_sectors, num_sectors)
-
-void FreeThings(void)
-	FREEMASON(thing_t, lev_things, num_things)
-
-void FreeSegs(void)
-	FREEMASON(seg_t, segs, num_segs)
-
-void FreeSubsecs(void)
-	FREEMASON(subsec_t, subsecs, num_subsecs)
-
-void FreeNodes(void)
-	FREEMASON(node_t, nodes, num_nodes)
-
-void FreeWallTips(void)
-	FREEMASON(wall_tip_t, wall_tips, num_wall_tips)
-
-
-/* ----- lookup routines ------------------------------ */
-
-#define LOOKERUPPER(BASEVAR, NUMVAR, NAMESTR)  \
-{  \
-	if (index < 0 || index >= NUMVAR)  \
-		BugError(StringPrintf("No such %s number #%d\n", NAMESTR, index));  \
-	return BASEVAR[index];  \
+	lev_linedefs.clear();
 }
 
-vertex_t *LookupVertex(int index)
-	LOOKERUPPER(lev_vertices, num_vertices, "vertex")
+void FreeSidedefs()
+{
+	for (unsigned int i = 0 ; i < lev_sidedefs.size() ; i++)
+		UtilFree((void *) lev_sidedefs[i]);
 
-linedef_t *LookupLinedef(int index)
-	LOOKERUPPER(lev_linedefs, num_linedefs, "linedef")
+	lev_sidedefs.clear();
+}
 
-sidedef_t *LookupSidedef(int index)
-	LOOKERUPPER(lev_sidedefs, num_sidedefs, "sidedef")
+void FreeSectors()
+{
+	for (unsigned int i = 0 ; i < lev_sectors.size() ; i++)
+		UtilFree((void *) lev_sectors[i]);
 
-sector_t *LookupSector(int index)
-	LOOKERUPPER(lev_sectors, num_sectors, "sector")
+	lev_sectors.clear();
+}
 
-thing_t *LookupThing(int index)
-	LOOKERUPPER(lev_things, num_things, "thing")
+void FreeThings()
+{
+	for (unsigned int i = 0 ; i < lev_things.size() ; i++)
+		UtilFree((void *) lev_things[i]);
 
-seg_t *LookupSeg(int index)
-	LOOKERUPPER(segs, num_segs, "seg")
+	lev_things.clear();
+}
 
-subsec_t *LookupSubsec(int index)
-	LOOKERUPPER(subsecs, num_subsecs, "subsector")
+void FreeSegs()
+{
+	for (unsigned int i = 0 ; i < lev_segs.size() ; i++)
+		UtilFree((void *) lev_segs[i]);
 
-node_t *LookupNode(int index)
-	LOOKERUPPER(nodes, num_nodes, "node")
+	lev_segs.clear();
+}
+
+void FreeSubsecs()
+{
+	for (unsigned int i = 0 ; i < lev_subsecs.size() ; i++)
+		UtilFree((void *) lev_subsecs[i]);
+
+	lev_subsecs.clear();
+}
+
+void FreeNodes()
+{
+	for (unsigned int i = 0 ; i < lev_nodes.size() ; i++)
+		UtilFree((void *) lev_nodes[i]);
+
+	lev_nodes.clear();
+}
+
+void FreeWallTips()
+{
+	for (unsigned int i = 0 ; i < lev_walltips.size() ; i++)
+		UtilFree((void *) lev_walltips[i]);
+
+	lev_walltips.clear();
+}
 
 
 /* ----- reading routines ------------------------------ */
 
-
-void GetVertices(void)
+static vertex_t *SafeLookupVertex(int num)
 {
-	int i, count=-1;
+	if (num >= num_vertices)
+		cur_info->FatalError("illegal vertex number #%d\n", num);
+
+	return lev_vertices[num];
+}
+
+static sector_t *SafeLookupSector(u16_t num)
+{
+	if (num == 0xFFFF)
+		return NULL;
+
+	if (num >= num_sectors)
+		cur_info->FatalError("illegal sector number #%d\n", (int)num);
+
+	return lev_sectors[num];
+}
+
+static inline sidedef_t *SafeLookupSidedef(u16_t num)
+{
+	if (num == 0xFFFF)
+		return NULL;
+
+	// silently ignore illegal sidedef numbers
+	if (num >= (unsigned int)num_sidedefs)
+		return NULL;
+
+	return lev_sidedefs[num];
+}
+
+
+void GetVertices()
+{
+	int count = 0;
 
 	Lump_c *lump = FindLevelLump("VERTEXES");
 
 	if (lump)
-		count = lump->Length() / sizeof(raw_vertex_t);
+		count = lump->Length() / (int)sizeof(raw_vertex_t);
 
-# if DEBUG_LOAD
-	DebugPrintf("GetVertices: num = %d\n", count);
-# endif
+#if DEBUG_LOAD
+	cur_info->Debug("GetVertices: num = %d\n", count);
+#endif
 
-	if (!lump || count == 0)
+	if (lump == NULL || count == 0)
 		return;
 
-	if (! lump->Seek())
-		FatalError(StringPrintf("Error seeking to vertices.\n"));
+	if (! lump->Seek(0))
+		cur_info->FatalError("Error seeking to vertices.\n");
 
-	for (i = 0 ; i < count ; i++)
+	for (int i = 0 ; i < count ; i++)
 	{
 		raw_vertex_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError(StringPrintf("Error reading vertices.\n"));
+			cur_info->FatalError("Error reading vertices.\n");
 
 		vertex_t *vert = NewVertex();
 
 		vert->x = (double) LE_S16(raw.x);
 		vert->y = (double) LE_S16(raw.y);
-
-		vert->index = i;
 	}
 
 	num_old_vert = num_vertices;
 }
 
 
-void GetSectors(void)
+void GetSectors()
 {
-	int i, count=-1;
+	int count = 0;
 
 	Lump_c *lump = FindLevelLump("SECTORS");
 
 	if (lump)
-		count = lump->Length() / sizeof(raw_sector_t);
+		count = lump->Length() / (int)sizeof(raw_sector_t);
 
-	if (!lump || count == 0)
+	if (lump == NULL || count == 0)
 		return;
 
-	if (! lump->Seek())
-		FatalError(StringPrintf("Error seeking to sectors.\n"));
+	if (! lump->Seek(0))
+		cur_info->FatalError("Error seeking to sectors.\n");
 
-# if DEBUG_LOAD
-	DebugPrintf("GetSectors: num = %d\n", count);
-# endif
+#if DEBUG_LOAD
+	cur_info->Debug("GetSectors: num = %d\n", count);
+#endif
 
-	for (i = 0 ; i < count ; i++)
+	for (int i = 0 ; i < count ; i++)
 	{
 		raw_sector_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError(StringPrintf("Error reading sectors.\n"));
+			cur_info->FatalError("Error reading sectors.\n");
 
 		sector_t *sector = NewSector();
 
-		sector->floor_h = LE_S16(raw.floorh);
-		sector->ceil_h  = LE_S16(raw.ceilh);
-
-		memcpy(sector->floor_tex, raw.floor_tex, sizeof(sector->floor_tex));
-		memcpy(sector->ceil_tex,  raw.ceil_tex,  sizeof(sector->ceil_tex));
-
-		sector->light = LE_U16(raw.light);
-		sector->special = LE_U16(raw.type);
-		sector->tag = LE_S16(raw.tag);
-
-		sector->coalesce = (sector->tag >= 900 && sector->tag < 1000) ? 1 : 0;
-
-		// sector indices never change
-		sector->index = i;
-
-		sector->warned_facing = -1;
-
-		// Note: rej_* fields are handled completely in reject.c
+		(void) sector;
 	}
 }
 
 
-void GetThings(void)
+void GetThings()
 {
-	int i, count=-1;
+	int count = 0;
 
 	Lump_c *lump = FindLevelLump("THINGS");
 
 	if (lump)
-		count = lump->Length() / sizeof(raw_thing_t);
+		count = lump->Length() / (int)sizeof(raw_thing_t);
 
-	if (!lump || count == 0)
+	if (lump == NULL || count == 0)
 		return;
 
-	if (! lump->Seek())
-		FatalError(StringPrintf("Error seeking to things.\n"));
+	if (! lump->Seek(0))
+		cur_info->FatalError("Error seeking to things.\n");
 
-# if DEBUG_LOAD
-	DebugPrintf("GetThings: num = %d\n", count);
-# endif
+#if DEBUG_LOAD
+	cur_info->Debug("GetThings: num = %d\n", count);
+#endif
 
-	for (i = 0 ; i < count ; i++)
+	for (int i = 0 ; i < count ; i++)
 	{
 		raw_thing_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError(StringPrintf("Error reading things.\n"));
+			cur_info->FatalError("Error reading things.\n");
 
 		thing_t *thing = NewThing();
 
-		thing->x = LE_S16(raw.x);
-		thing->y = LE_S16(raw.y);
-
+		thing->x    = LE_S16(raw.x);
+		thing->y    = LE_S16(raw.y);
 		thing->type = LE_U16(raw.type);
-		thing->options = LE_U16(raw.options);
-
-		thing->index = i;
 	}
 }
 
 
-void GetThingsHexen(void)
+void GetThingsHexen()
 {
-	int i, count=-1;
+	int count = 0;
 
 	Lump_c *lump = FindLevelLump("THINGS");
 
 	if (lump)
-		count = lump->Length() / sizeof(raw_hexen_thing_t);
+		count = lump->Length() / (int)sizeof(raw_hexen_thing_t);
 
-	if (!lump || count == 0)
+	if (lump == NULL || count == 0)
 		return;
 
-	if (! lump->Seek())
-		FatalError(StringPrintf("Error seeking to things.\n"));
+	if (! lump->Seek(0))
+		cur_info->FatalError("Error seeking to things.\n");
 
-# if DEBUG_LOAD
-	DebugPrintf("GetThingsHexen: num = %d\n", count);
-# endif
+#if DEBUG_LOAD
+	cur_info->Debug("GetThingsHexen: num = %d\n", count);
+#endif
 
-	for (i = 0 ; i < count ; i++)
+	for (int i = 0 ; i < count ; i++)
 	{
 		raw_hexen_thing_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError(StringPrintf("Error reading things.\n"));
+			cur_info->FatalError("Error reading things.\n");
 
 		thing_t *thing = NewThing();
 
-		thing->x = LE_S16(raw.x);
-		thing->y = LE_S16(raw.y);
-
+		thing->x    = LE_S16(raw.x);
+		thing->y    = LE_S16(raw.y);
 		thing->type = LE_U16(raw.type);
-		thing->options = LE_U16(raw.options);
-
-		thing->index = i;
 	}
 }
 
 
-void GetSidedefs(void)
+void GetSidedefs()
 {
-	int i, count=-1;
+	int count = 0;
 
 	Lump_c *lump = FindLevelLump("SIDEDEFS");
 
 	if (lump)
-		count = lump->Length() / sizeof(raw_sidedef_t);
+		count = lump->Length() / (int)sizeof(raw_sidedef_t);
 
-	if (!lump || count == 0)
+	if (lump == NULL || count == 0)
 		return;
 
-	if (! lump->Seek())
-		FatalError(StringPrintf("Error seeking to sidedefs.\n"));
+	if (! lump->Seek(0))
+		cur_info->FatalError("Error seeking to sidedefs.\n");
 
-# if DEBUG_LOAD
-	DebugPrintf("GetSidedefs: num = %d\n", count);
-# endif
+#if DEBUG_LOAD
+	cur_info->Debug("GetSidedefs: num = %d\n", count);
+#endif
 
-	for (i = 0 ; i < count ; i++)
+	for (int i = 0 ; i < count ; i++)
 	{
 		raw_sidedef_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError(StringPrintf("Error reading sidedefs.\n"));
+			cur_info->FatalError("Error reading sidedefs.\n");
 
 		sidedef_t *side = NewSidedef();
 
-		side->sector = (LE_S16(raw.sector) == -1) ? NULL :
-			LookupSector(LE_U16(raw.sector));
-
-		if (side->sector)
-			side->sector->is_used = 1;
-
-		side->x_offset = LE_S16(raw.x_offset);
-		side->y_offset = LE_S16(raw.y_offset);
-
-		memcpy(side->upper_tex, raw.upper_tex, sizeof(side->upper_tex));
-		memcpy(side->lower_tex, raw.lower_tex, sizeof(side->lower_tex));
-		memcpy(side->mid_tex,   raw.mid_tex,   sizeof(side->mid_tex));
-
-		// sidedef indices never change
-		side->index = i;
+		side->sector = SafeLookupSector(LE_S16(raw.sector));
 	}
 }
 
-sidedef_t *SafeLookupSidedef(u16_t num)
+
+void GetLinedefs()
 {
-	if (num == 0xFFFF)
-		return NULL;
-
-	if ((int)num >= num_sidedefs && (s16_t)(num) < 0)
-		return NULL;
-
-	return LookupSidedef(num);
-}
-
-
-void GetLinedefs(void)
-{
-	int i, count=-1;
+	int count = 0;
 
 	Lump_c *lump = FindLevelLump("LINEDEFS");
 
 	if (lump)
-		count = lump->Length() / sizeof(raw_linedef_t);
+		count = lump->Length() / (int)sizeof(raw_linedef_t);
 
-	if (!lump || count == 0)
+	if (lump == NULL || count == 0)
 		return;
 
-	if (! lump->Seek())
-		FatalError(StringPrintf("Error seeking to linedefs.\n"));
+	if (! lump->Seek(0))
+		cur_info->FatalError("Error seeking to linedefs.\n");
 
-# if DEBUG_LOAD
-	DebugPrintf("GetLinedefs: num = %d\n", count);
-# endif
+#if DEBUG_LOAD
+	cur_info->Debug("GetLinedefs: num = %d\n", count);
+#endif
 
-	for (i = 0 ; i < count ; i++)
+	for (int i = 0 ; i < count ; i++)
 	{
 		raw_linedef_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError(StringPrintf("Error reading linedefs.\n"));
+			cur_info->FatalError("Error reading linedefs.\n");
 
 		linedef_t *line;
 
-		vertex_t *start = LookupVertex(LE_U16(raw.start));
-		vertex_t *end   = LookupVertex(LE_U16(raw.end));
+		vertex_t *start = SafeLookupVertex(LE_U16(raw.start));
+		vertex_t *end   = SafeLookupVertex(LE_U16(raw.end));
 
-		start->is_used = 1;
-		  end->is_used = 1;
+		start->is_used = true;
+		  end->is_used = true;
 
 		line = NewLinedef();
 
@@ -1458,75 +1224,62 @@ void GetLinedefs(void)
 		line->end   = end;
 
 		// check for zero-length line
-		line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) &&
+		line->zero_len =
+			(fabs(start->x - end->x) < DIST_EPSILON) &&
 			(fabs(start->y - end->y) < DIST_EPSILON);
 
-		line->flags = LE_U16(raw.flags);
-		line->type = LE_U16(raw.type);
-		line->tag  = LE_S16(raw.tag);
+		line->type  = LE_U16(raw.type);
+		u16_t flags = LE_U16(raw.flags);
+		s16_t tag   = LE_S16(raw.tag);
 
-		line->two_sided = (line->flags & MLF_TwoSided) ? 1 : 0;
-		line->is_precious = (line->tag >= 900 && line->tag < 1000) ? 1 : 0;
+		line->two_sided   = (flags & MLF_TwoSided) != 0;
+		line->is_precious = (tag >= 900 && tag < 1000);
 
 		line->right = SafeLookupSidedef(LE_U16(raw.right));
 		line->left  = SafeLookupSidedef(LE_U16(raw.left));
-
-		if (line->right)
-		{
-			line->right->is_used = 1;
-			line->right->on_special |= (line->type > 0) ? 1 : 0;
-		}
-
-		if (line->left)
-		{
-			line->left->is_used = 1;
-			line->left->on_special |= (line->type > 0) ? 1 : 0;
-		}
 
 		if (line->right || line->left)
 			num_real_lines++;
 
 		line->self_ref = (line->left && line->right &&
 				(line->left->sector == line->right->sector));
-
-		line->index = i;
 	}
 }
 
 
-void GetLinedefsHexen(void)
+void GetLinedefsHexen()
 {
-	int i, j, count=-1;
+	int count = 0;
 
 	Lump_c *lump = FindLevelLump("LINEDEFS");
 
 	if (lump)
-		count = lump->Length() / sizeof(raw_hexen_linedef_t);
+		count = lump->Length() / (int)sizeof(raw_hexen_linedef_t);
 
-	if (!lump || count == 0)
+	if (lump == NULL || count == 0)
 		return;
 
-	if (! lump->Seek())
-		FatalError(StringPrintf("Error seeking to linedefs.\n"));
+	if (! lump->Seek(0))
+		cur_info->FatalError("Error seeking to linedefs.\n");
 
-# if DEBUG_LOAD
-	DebugPrintf("GetLinedefsHexen: num = %d\n", count);
-# endif
+#if DEBUG_LOAD
+	cur_info->Debug("GetLinedefsHexen: num = %d\n", count);
+#endif
 
-	for (i = 0 ; i < count ; i++)
+	for (int i = 0 ; i < count ; i++)
 	{
 		raw_hexen_linedef_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError(StringPrintf("Error reading linedefs.\n"));
+			cur_info->FatalError("Error reading linedefs.\n");
 
 		linedef_t *line;
 
-		vertex_t *start = LookupVertex(LE_U16(raw.start));
-		vertex_t *end   = LookupVertex(LE_U16(raw.end));
+		vertex_t *start = SafeLookupVertex(LE_U16(raw.start));
+		vertex_t *end   = SafeLookupVertex(LE_U16(raw.end));
 
-		start->is_used = 1;
-		  end->is_used = 1;
+		start->is_used = true;
+		  end->is_used = true;
 
 		line = NewLinedef();
 
@@ -1534,61 +1287,436 @@ void GetLinedefsHexen(void)
 		line->end   = end;
 
 		// check for zero-length line
-		line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) &&
+		line->zero_len =
+			(fabs(start->x - end->x) < DIST_EPSILON) &&
 			(fabs(start->y - end->y) < DIST_EPSILON);
 
-		line->flags = LE_U16(raw.flags);
-		line->type = (u8_t)(raw.type);
-		line->tag  = 0;
-
-		// read specials
-		for (j=0 ; j < 5 ; j++)
-			line->specials[j] = (u8_t)(raw.args[j]);
+		line->type  = (u8_t) raw.type;
+		u16_t flags = LE_U16(raw.flags);
 
 		// -JL- Added missing twosided flag handling that caused a broken reject
-		line->two_sided = (line->flags & MLF_TwoSided) ? 1 : 0;
+		line->two_sided = (flags & MLF_TwoSided) != 0;
 
 		line->right = SafeLookupSidedef(LE_U16(raw.right));
 		line->left  = SafeLookupSidedef(LE_U16(raw.left));
-
-		// -JL- Added missing sidedef handling that caused all sidedefs to be pruned
-		if (line->right)
-		{
-			line->right->is_used = 1;
-			line->right->on_special |= (line->type > 0) ? 1 : 0;
-		}
-
-		if (line->left)
-		{
-			line->left->is_used = 1;
-			line->left->on_special |= (line->type > 0) ? 1 : 0;
-		}
 
 		if (line->right || line->left)
 			num_real_lines++;
 
 		line->self_ref = (line->left && line->right &&
 				(line->left->sector == line->right->sector));
-
-		line->index = i;
 	}
 }
 
-static int SegCompare(const void *p1, const void *p2)
+
+static inline int VanillaSegDist(const seg_t *seg)
 {
-	const seg_t *A = ((const seg_t **) p1)[0];
-	const seg_t *B = ((const seg_t **) p2)[0];
+	double lx = seg->side ? seg->linedef->end->x : seg->linedef->start->x;
+	double ly = seg->side ? seg->linedef->end->y : seg->linedef->start->y;
 
-	if (A->index < 0)
-		BugError(StringPrintf("Seg %p never reached a subsector !\n", A));
+	// use the "true" starting coord (as stored in the wad)
+	double sx = round(seg->start->x);
+	double sy = round(seg->start->y);
 
-	if (B->index < 0)
-		BugError(StringPrintf("Seg %p never reached a subsector !\n", B));
-
-	return (A->index - B->index);
+	return (int) floor(hypot(sx - lx, sy - ly) + 0.5);
 }
 
+static inline int VanillaSegAngle(const seg_t *seg)
+{
+	// compute the "true" delta
+	double dx = round(seg->end->x) - round(seg->start->x);
+	double dy = round(seg->end->y) - round(seg->start->y);
+
+	double angle = ComputeAngle(dx, dy);
+
+	if (angle < 0)
+		angle += 360.0;
+
+	int result = (int) floor(angle * 65536.0 / 360.0 + 0.5);
+
+	return (result & 0xFFFF);
+}
+
+
+/* ----- UDMF reading routines ------------------------- */
+
+#define UDMF_THING    1
+#define UDMF_VERTEX   2
+#define UDMF_SECTOR   3
+#define UDMF_SIDEDEF  4
+#define UDMF_LINEDEF  5
+
+void ParseThingField(thing_t *thing, const std::string& key, token_kind_e kind, const std::string& value)
+{
+	if (key == "x")
+		thing->x = LEX_Double(value);
+
+	if (key == "y")
+		thing->y = LEX_Double(value);
+
+	if (key == "type")
+		thing->type = LEX_Double(value);
+}
+
+
+void ParseVertexField(vertex_t *vertex, const std::string& key, token_kind_e kind, const std::string& value)
+{
+	if (key == "x")
+		vertex->x = LEX_Double(value);
+
+	if (key == "y")
+		vertex->y = LEX_Double(value);
+}
+
+
+void ParseSectorField(sector_t *sector, const std::string& key, token_kind_e kind, const std::string& value)
+{
+	// nothing actually needed
+}
+
+
+void ParseSidedefField(sidedef_t *side, const std::string& key, token_kind_e kind, const std::string& value)
+{
+	if (key == "sector")
+	{
+		int num = LEX_Int(value);
+
+		if (num < 0 || num >= num_sectors)
+			cur_info->FatalError("illegal sector number #%d\n", (int)num);
+
+		side->sector = lev_sectors[num];
+	}
+}
+
+
+void ParseLinedefField(linedef_t *line, const std::string& key, token_kind_e kind, const std::string& value)
+{
+	if (key == "v1")
+		line->start = SafeLookupVertex(LEX_Int(value));
+
+	if (key == "v2")
+		line->end = SafeLookupVertex(LEX_Int(value));
+
+	if (key == "special")
+		line->type = LEX_Int(value);
+
+	if (key == "twosided")
+		line->two_sided = LEX_Boolean(value);
+
+	if (key == "sidefront")
+	{
+		int num = LEX_Int(value);
+
+		if (num < 0 || num >= (int)num_sidedefs)
+			line->right = NULL;
+		else
+			line->right = lev_sidedefs[num];
+	}
+
+	if (key == "sideback")
+	{
+		int num = LEX_Int(value);
+
+		if (num < 0 || num >= (int)num_sidedefs)
+			line->left = NULL;
+		else
+			line->left = lev_sidedefs[num];
+	}
+}
+
+
+void ParseUDMF_Block(lexer_c& lex, int cur_type)
+{
+	vertex_t  * vertex = NULL;
+	thing_t   * thing  = NULL;
+	sector_t  * sector = NULL;
+	sidedef_t * side   = NULL;
+	linedef_t * line   = NULL;
+
+	switch (cur_type)
+	{
+		case UDMF_VERTEX:  vertex = NewVertex();  break;
+		case UDMF_THING:   thing  = NewThing();   break;
+		case UDMF_SECTOR:  sector = NewSector();  break;
+		case UDMF_SIDEDEF: side   = NewSidedef(); break;
+		case UDMF_LINEDEF: line   = NewLinedef(); break;
+		default: break;
+	}
+
+	for (;;)
+	{
+		if (lex.Match("}"))
+			break;
+
+		std::string key;
+		std::string value;
+
+		token_kind_e tok = lex.Next(key);
+
+		if (tok == TOK_EOF)
+			cur_info->FatalError("Malformed TEXTMAP lump: unclosed block\n");
+
+		if (tok != TOK_Ident)
+			cur_info->FatalError("Malformed TEXTMAP lump: missing key\n");
+
+		if (! lex.Match("="))
+			cur_info->FatalError("Malformed TEXTMAP lump: missing '='\n");
+
+		tok = lex.Next(value);
+
+		if (tok == TOK_EOF || tok == TOK_ERROR || value == "}")
+			cur_info->FatalError("Malformed TEXTMAP lump: missing value\n");
+
+		if (! lex.Match(";"))
+			cur_info->FatalError("Malformed TEXTMAP lump: missing ';'\n");
+
+		switch (cur_type)
+		{
+			case UDMF_VERTEX:  ParseVertexField (vertex, key, tok, value); break;
+			case UDMF_THING:   ParseThingField  (thing,  key, tok, value); break;
+			case UDMF_SECTOR:  ParseSectorField (sector, key, tok, value); break;
+			case UDMF_SIDEDEF: ParseSidedefField(side,   key, tok, value); break;
+			case UDMF_LINEDEF: ParseLinedefField(line,   key, tok, value); break;
+
+			default: /* just skip it */ break;
+		}
+	}
+
+	// validate stuff
+
+	if (line != NULL)
+	{
+		if (line->start == NULL || line->end == NULL)
+			cur_info->FatalError("Linedef #%d is missing a vertex!\n", line->index);
+
+		if (line->right || line->left)
+			num_real_lines++;
+
+		line->self_ref = (line->left && line->right &&
+				(line->left->sector == line->right->sector));
+	}
+}
+
+
+void ParseUDMF_Pass(const std::string& data, int pass)
+{
+	// pass = 1 : vertices, sectors, things
+	// pass = 2 : sidedefs
+	// pass = 3 : linedefs
+
+	lexer_c lex(data);
+
+	for (;;)
+	{
+		std::string section;
+		token_kind_e tok = lex.Next(section);
+
+		if (tok == TOK_EOF)
+			return;
+
+		if (tok != TOK_Ident)
+		{
+			cur_info->FatalError("Malformed TEXTMAP lump.\n");
+			return;
+		}
+
+		// ignore top-level assignments
+		if (lex.Match("="))
+		{
+			lex.Next(section);
+			if (! lex.Match(";"))
+				cur_info->FatalError("Malformed TEXTMAP lump: missing ';'\n");
+			continue;
+		}
+
+		if (! lex.Match("{"))
+			cur_info->FatalError("Malformed TEXTMAP lump: missing '{'\n");
+
+		int cur_type = 0;
+
+		if (section == "thing")
+		{
+			if (pass == 1)
+				cur_type = UDMF_THING;
+		}
+		else if (section == "vertex")
+		{
+			if (pass == 1)
+				cur_type = UDMF_VERTEX;
+		}
+		else if (section == "sector")
+		{
+			if (pass == 1)
+				cur_type = UDMF_SECTOR;
+		}
+		else if (section == "sidedef")
+		{
+			if (pass == 2)
+				cur_type = UDMF_SIDEDEF;
+		}
+		else if (section == "linedef")
+		{
+			if (pass == 3)
+				cur_type = UDMF_LINEDEF;
+		}
+
+		// process the block
+		ParseUDMF_Block(lex, cur_type);
+	}
+}
+
+
+void ParseUDMF()
+{
+	Lump_c *lump = FindLevelLump("TEXTMAP");
+
+	if (lump == NULL || ! lump->Seek(0))
+		cur_info->FatalError("Error finding TEXTMAP lump.\n");
+
+	int remain = lump->Length();
+
+	// load the lump into this string
+	std::string data;
+
+	while (remain > 0)
+	{
+		char buffer[4096];
+
+		int want = std::min(remain, (int)sizeof(buffer));
+
+		if (! lump->Read(buffer, want))
+			cur_info->FatalError("Error reading TEXTMAP lump.\n");
+
+		data.append(buffer, want);
+
+		remain -= want;
+	}
+
+	// now parse it...
+
+	// the UDMF spec does not require objects to be in a dependency order.
+	// for example: sidedefs may occur *after* the linedefs which refer to
+	// them.  hence we perform multiple passes over the TEXTMAP data.
+
+	ParseUDMF_Pass(data, 1);
+	ParseUDMF_Pass(data, 2);
+	ParseUDMF_Pass(data, 3);
+
+	num_old_vert = num_vertices;
+}
+
+
 /* ----- writing routines ------------------------------ */
+
+static const u8_t *lev_v2_magic = (u8_t *) "gNd2";
+static const u8_t *lev_v5_magic = (u8_t *) "gNd5";
+
+
+void MarkOverflow(int flags)
+{
+	// flags are ignored
+
+	lev_overflows = true;
+}
+
+
+void PutVertices(const char *name, int do_gl)
+{
+	int count, i;
+
+	// this size is worst-case scenario
+	int size = num_vertices * (int)sizeof(raw_vertex_t);
+
+	Lump_c *lump = CreateLevelLump(name, size);
+
+	for (i=0, count=0 ; i < num_vertices ; i++)
+	{
+		raw_vertex_t raw;
+
+		const vertex_t *vert = lev_vertices[i];
+
+		if ((do_gl ? 1 : 0) != (vert->is_new ? 1 : 0))
+		{
+			continue;
+		}
+
+		raw.x = LE_S16(I_ROUND(vert->x));
+		raw.y = LE_S16(I_ROUND(vert->y));
+
+		lump->Write(&raw, sizeof(raw));
+
+		count++;
+	}
+
+	lump->Finish();
+
+	if (count != (do_gl ? num_new_vert : num_old_vert))
+		BugError("PutVertices miscounted (%d != %d)\n", count,
+				do_gl ? num_new_vert : num_old_vert);
+
+	if (! do_gl && count > 65534)
+	{
+		Failure("Number of vertices has overflowed.\n");
+		MarkOverflow(LIMIT_VERTEXES);
+	}
+}
+
+
+void PutGLVertices(int do_v5)
+{
+	int count, i;
+
+	// this size is worst-case scenario
+	int size = 4 + num_vertices * (int)sizeof(raw_v2_vertex_t);
+
+	Lump_c *lump = CreateLevelLump("GL_VERT", size);
+
+	if (do_v5)
+		lump->Write(lev_v5_magic, 4);
+	else
+		lump->Write(lev_v2_magic, 4);
+
+	for (i=0, count=0 ; i < num_vertices ; i++)
+	{
+		raw_v2_vertex_t raw;
+
+		const vertex_t *vert = lev_vertices[i];
+
+		if (! vert->is_new)
+			continue;
+
+		raw.x = LE_S32(I_ROUND(vert->x * 65536.0));
+		raw.y = LE_S32(I_ROUND(vert->y * 65536.0));
+
+		lump->Write(&raw, sizeof(raw));
+
+		count++;
+	}
+
+	lump->Finish();
+
+	if (count != num_new_vert)
+		BugError("PutGLVertices miscounted (%d != %d)\n", count, num_new_vert);
+}
+
+
+static inline u16_t VertexIndex16Bit(const vertex_t *v)
+{
+	if (v->is_new)
+		return (u16_t) (v->index | 0x8000U);
+
+	return (u16_t) v->index;
+}
+
+
+static inline u32_t VertexIndex_V5(const vertex_t *v)
+{
+	if (v->is_new)
+		return (u32_t) (v->index | 0x80000000U);
+
+	return (u32_t) v->index;
+}
+
 
 static inline u32_t VertexIndex_XNOD(const vertex_t *v)
 {
@@ -1598,167 +1726,212 @@ static inline u32_t VertexIndex_XNOD(const vertex_t *v)
 	return (u32_t) v->index;
 }
 
+
+void PutSegs()
+{
+	// this size is worst-case scenario
+	int size = num_segs * (int)sizeof(raw_seg_t);
+
+	Lump_c *lump = CreateLevelLump("SEGS", size);
+
+	for (int i=0 ; i < num_segs ; i++)
+	{
+		raw_seg_t raw;
+
+		const seg_t *seg = lev_segs[i];
+
+		raw.start   = LE_U16(VertexIndex16Bit(seg->start));
+		raw.end     = LE_U16(VertexIndex16Bit(seg->end));
+		raw.angle   = LE_U16(VanillaSegAngle(seg));
+		raw.linedef = LE_U16(seg->linedef->index);
+		raw.flip    = LE_U16(seg->side);
+		raw.dist    = LE_U16(VanillaSegDist(seg));
+
+		lump->Write(&raw, sizeof(raw));
+
+#if DEBUG_BSP
+		cur_info->Debug("PUT SEG: %04X  Vert %04X->%04X  Line %04X %s  "
+				"Angle %04X  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index,
+				LE_U16(raw.start), LE_U16(raw.end), LE_U16(raw.linedef),
+				seg->side ? "L" : "R", LE_U16(raw.angle),
+				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
+#endif
+	}
+
+	lump->Finish();
+
+	if (num_segs > 65534)
+	{
+		Failure("Number of segs has overflowed.\n");
+		MarkOverflow(LIMIT_SEGS);
+	}
+}
+
+
+void PutGLSegs_V2()
+{
+	// should not happen (we should have upgraded to V5)
+	SYS_ASSERT(num_segs <= 65534);
+
+	// this size is worst-case scenario
+	int size = num_segs * (int)sizeof(raw_gl_seg_t);
+
+	Lump_c *lump = CreateLevelLump("GL_SEGS", size);
+
+	for (int i=0 ; i < num_segs ; i++)
+	{
+		raw_gl_seg_t raw;
+
+		const seg_t *seg = lev_segs[i];
+
+		raw.start = LE_U16(VertexIndex16Bit(seg->start));
+		raw.end   = LE_U16(VertexIndex16Bit(seg->end));
+		raw.side  = LE_U16(seg->side);
+
+		if (seg->linedef != NULL)
+			raw.linedef = LE_U16(seg->linedef->index);
+		else
+			raw.linedef = LE_U16(0xFFFF);
+
+		if (seg->partner != NULL)
+			raw.partner = LE_U16(seg->partner->index);
+		else
+			raw.partner = LE_U16(0xFFFF);
+
+		lump->Write(&raw, sizeof(raw));
+
+#if DEBUG_BSP
+		cur_info->Debug("PUT GL SEG: %04X  Line %04X %s  Partner %04X  "
+				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, LE_U16(raw.linedef),
+				seg->side ? "L" : "R", LE_U16(raw.partner),
+				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
+#endif
+	}
+
+	lump->Finish();
+}
+
+
+void PutGLSegs_V5()
+{
+	// this size is worst-case scenario
+	int size = num_segs * (int)sizeof(raw_v5_seg_t);
+
+	Lump_c *lump = CreateLevelLump("GL_SEGS", size);
+
+	for (int i=0 ; i < num_segs ; i++)
+	{
+		raw_v5_seg_t raw;
+
+		const seg_t *seg = lev_segs[i];
+
+		raw.start = LE_U32(VertexIndex_V5(seg->start));
+		raw.end   = LE_U32(VertexIndex_V5(seg->end));
+		raw.side  = LE_U16(seg->side);
+
+		if (seg->linedef != NULL)
+			raw.linedef = LE_U16(seg->linedef->index);
+		else
+			raw.linedef = LE_U16(0xFFFF);
+
+		if (seg->partner != NULL)
+			raw.partner = LE_U32(seg->partner->index);
+		else
+			raw.partner = LE_U32(0xFFFFFFFF);
+
+		lump->Write(&raw, sizeof(raw));
+
+#if DEBUG_BSP
+		cur_info->Debug("PUT V3 SEG: %06X  Line %04X %s  Partner %06X  "
+				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, LE_U16(raw.linedef),
+				seg->side ? "L" : "R", LE_U32(raw.partner),
+				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
+#endif
+	}
+
+	lump->Finish();
+}
+
+
+void PutSubsecs(const char *name, int do_gl)
+{
+	int size = num_subsecs * (int)sizeof(raw_subsec_t);
+
+	Lump_c * lump = CreateLevelLump(name, size);
+
+	for (int i=0 ; i < num_subsecs ; i++)
+	{
+		raw_subsec_t raw;
+
+		const subsec_t *sub = lev_subsecs[i];
+
+		raw.first = LE_U16(sub->seg_list->index);
+		raw.num   = LE_U16(sub->seg_count);
+
+		lump->Write(&raw, sizeof(raw));
+
+#if DEBUG_BSP
+		cur_info->Debug("PUT SUBSEC %04X  First %04X  Num %04X\n",
+				sub->index, LE_U16(raw.first), LE_U16(raw.num));
+#endif
+	}
+
+	if (num_subsecs > 32767)
+	{
+		Failure("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
+		MarkOverflow(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
+	}
+
+	lump->Finish();
+}
+
+
+void PutGLSubsecs_V5()
+{
+	int size = num_subsecs * (int)sizeof(raw_v5_subsec_t);
+
+	Lump_c *lump = CreateLevelLump("GL_SSECT", size);
+
+	for (int i=0 ; i < num_subsecs ; i++)
+	{
+		raw_v5_subsec_t raw;
+
+		const subsec_t *sub = lev_subsecs[i];
+
+		raw.first = LE_U32(sub->seg_list->index);
+		raw.num   = LE_U32(sub->seg_count);
+
+		lump->Write(&raw, sizeof(raw));
+
+#if DEBUG_BSP
+		cur_info->Debug("PUT V3 SUBSEC %06X  First %06X  Num %06X\n",
+					sub->index, LE_U32(raw.first), LE_U32(raw.num));
+#endif
+	}
+
+	lump->Finish();
+}
+
+
 static int node_cur_index;
 
-void CheckLimits()
+static void PutOneNode(node_t *node, Lump_c *lump)
 {
-	if (num_sectors > 65535)
-	{
-		FatalError(StringPrintf("AJBSP: %s in file %s has too many sectors! (%d)", lev_current_name, edit_wad->PathName().stem().u8string().c_str(), num_sectors));
-	}
-
-	if (num_sidedefs > 65535)
-	{
-		FatalError(StringPrintf("AJBSP: %s in file %s has too many sidedefs! (%d)", lev_current_name, edit_wad->PathName().stem().u8string().c_str(), num_sidedefs));
-	}
-
-	if (num_linedefs > 65535)
-	{
-		FatalError(StringPrintf("AJBSP: %s in file %s has too many linedefs (%d)", lev_current_name, edit_wad->PathName().stem().u8string().c_str(), num_linedefs));
-	}
-}
-
-void SortSegs()
-{
-	// sort segs into ascending index
-	qsort(segs, num_segs, sizeof(seg_t *), SegCompare);
-}
-
-/* ----- ZDoom format writing --------------------------- */
-
-static const u8_t *lev_XGL3_magic = (u8_t *) "XGL3";
-
-void PutXGL3Vertices(void)
-{
-	int count, i;
-
-	u32_t orgverts = LE_U32(num_old_vert);
-	u32_t newverts = LE_U32(num_new_vert);
-
-	XGL3AppendLump(&orgverts, 4);
-	XGL3AppendLump(&newverts, 4);
-
-	for (i=0, count=0 ; i < num_vertices ; i++)
-	{
-		raw_v2_vertex_t raw;
-
-		vertex_t *vert = lev_vertices[i];
-
-		if (! vert->is_new)
-			continue;
-
-		raw.x = LE_S32(I_ROUND(vert->x * 65536.0));
-		raw.y = LE_S32(I_ROUND(vert->y * 65536.0));
-
-		XGL3AppendLump(&raw, sizeof(raw));
-
-		count++;
-	}
-
-	if (count != num_new_vert)
-		BugError(StringPrintf("PutXGL3Vertices miscounted (%d != %d)\n",
-				count, num_new_vert));
-}
-
-
-void PutXGL3Subsecs(void)
-{
-	int i;
-	int count;
-	u32_t raw_num = LE_U32(num_subsecs);
-
-	int cur_seg_index = 0;
-
-	XGL3AppendLump(&raw_num, 4);
-
-	for (i=0 ; i < num_subsecs ; i++)
-	{
-		subsec_t *sub = subsecs[i];
-		seg_t *seg;
-
-		raw_num = LE_U32(sub->seg_count);
-
-		XGL3AppendLump(&raw_num, 4);
-
-		// sanity check the seg index values
-		count = 0;
-		for (seg = sub->seg_list ; seg ; seg = seg->next, cur_seg_index++)
-		{
-			if (cur_seg_index != seg->index)
-				BugError(StringPrintf("PutXGL3Subsecs: seg index mismatch in sub %d (%d != %d)\n",
-						i, cur_seg_index, seg->index));
-
-			count++;
-		}
-
-		if (count != sub->seg_count)
-			BugError(StringPrintf("PutXGL3Subsecs: miscounted segs in sub %d (%d != %d)\n",
-					i, count, sub->seg_count));
-	}
-
-	if (cur_seg_index != num_complete_seg)
-		BugError(StringPrintf("PutXGL3Subsecs miscounted segs (%d != %d)\n",
-				cur_seg_index, num_complete_seg));
-}
-
-void PutXGL3Segs()
-{
-	int i, count;
-	u32_t raw_num = LE_U32(num_segs);
-
-	XGL3AppendLump(&raw_num, 4);
-
-	for (i=0, count=0 ; i < num_segs ; i++)
-	{
-		seg_t *seg = segs[i];
-
-		if (count != seg->index)
-			BugError(StringPrintf("PutXGL3Segs: seg index mismatch (%d != %d)\n",
-					count, seg->index));
-
-		{
-			u32_t v1   = LE_U32(VertexIndex_XNOD(seg->start));
-			u32_t partner = LE_U32(seg->partner ? seg->partner->index : -1);
-			u32_t line = LE_U32(seg->linedef ? seg->linedef->index : -1);
-			u8_t  side = ((seg->linedef && seg->linedef->two_sided) ? seg->side : 0);
-
-# if DEBUG_BSP
-			fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);
-# endif
-			XGL3AppendLump(&v1,      4);
-			XGL3AppendLump(&partner, 4);
-			XGL3AppendLump(&line,    4);
-			XGL3AppendLump(&side,    1);
-		}
-
-		count++;
-	}
-
-	if (count != num_segs)
-		BugError(StringPrintf("PutXGL3Segs miscounted (%d != %d)\n", count, num_segs));
-}
-
-static void PutOneXGL3Node(node_t *node)
-{
-	raw_v5_node_t raw;
-
 	if (node->r.node)
-		PutOneXGL3Node(node->r.node);
+		PutOneNode(node->r.node, lump);
 
 	if (node->l.node)
-		PutOneXGL3Node(node->l.node);
+		PutOneNode(node->l.node, lump);
 
 	node->index = node_cur_index++;
 
-	u32_t x  = LE_S32(I_ROUND(node->x  * 65536.0));
-	u32_t y  = LE_S32(I_ROUND(node->y  * 65536.0));
-	u32_t dx = LE_S32(I_ROUND(node->dx * 65536.0));
-	u32_t dy = LE_S32(I_ROUND(node->dy * 65536.0));
+	raw_node_t raw;
 
-	XGL3AppendLump(&x,  4);
-	XGL3AppendLump(&y,  4);
-	XGL3AppendLump(&dx, 4);
-	XGL3AppendLump(&dy, 4);
+	// note that x/y/dx/dy are always integral in non-UDMF maps
+	raw.x  = LE_S16(I_ROUND(node->x));
+	raw.y  = LE_S16(I_ROUND(node->y));
+	raw.dx = LE_S16(I_ROUND(node->dx));
+	raw.dy = LE_S16(I_ROUND(node->dy));
 
 	raw.b1.minx = LE_S16(node->r.bounds.minx);
 	raw.b1.miny = LE_S16(node->r.bounds.miny);
@@ -1770,120 +1943,501 @@ static void PutOneXGL3Node(node_t *node)
 	raw.b2.maxx = LE_S16(node->l.bounds.maxx);
 	raw.b2.maxy = LE_S16(node->l.bounds.maxy);
 
-	XGL3AppendLump(&raw.b1, sizeof(raw.b1));
-	XGL3AppendLump(&raw.b2, sizeof(raw.b2));
+	if (node->r.node)
+		raw.right = LE_U16(node->r.node->index);
+	else if (node->r.subsec)
+		raw.right = LE_U16(node->r.subsec->index | 0x8000);
+	else
+		BugError("Bad right child in node %d\n", node->index);
+
+	if (node->l.node)
+		raw.left = LE_U16(node->l.node->index);
+	else if (node->l.subsec)
+		raw.left = LE_U16(node->l.subsec->index | 0x8000);
+	else
+		BugError("Bad left child in node %d\n", node->index);
+
+	lump->Write(&raw, sizeof(raw));
+
+#if DEBUG_BSP
+	cur_info->Debug("PUT NODE %04X  Left %04X  Right %04X  "
+			"(%d,%d) -> (%d,%d)\n", node->index, LE_U16(raw.left),
+			LE_U16(raw.right), node->x, node->y,
+			node->x + node->dx, node->y + node->dy);
+#endif
+}
+
+
+static void PutOneNode_V5(node_t *node, Lump_c *lump)
+{
+	if (node->r.node)
+		PutOneNode_V5(node->r.node, lump);
+
+	if (node->l.node)
+		PutOneNode_V5(node->l.node, lump);
+
+	node->index = node_cur_index++;
+
+	raw_v5_node_t raw;
+
+	raw.x  = LE_S16(I_ROUND(node->x));
+	raw.y  = LE_S16(I_ROUND(node->y));
+	raw.dx = LE_S16(I_ROUND(node->dx));
+	raw.dy = LE_S16(I_ROUND(node->dy));
+
+	raw.b1.minx = LE_S16(node->r.bounds.minx);
+	raw.b1.miny = LE_S16(node->r.bounds.miny);
+	raw.b1.maxx = LE_S16(node->r.bounds.maxx);
+	raw.b1.maxy = LE_S16(node->r.bounds.maxy);
+
+	raw.b2.minx = LE_S16(node->l.bounds.minx);
+	raw.b2.miny = LE_S16(node->l.bounds.miny);
+	raw.b2.maxx = LE_S16(node->l.bounds.maxx);
+	raw.b2.maxy = LE_S16(node->l.bounds.maxy);
 
 	if (node->r.node)
 		raw.right = LE_U32(node->r.node->index);
 	else if (node->r.subsec)
 		raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
 	else
-		BugError(StringPrintf("Bad right child in node %d\n", node->index));
+		BugError("Bad right child in V5 node %d\n", node->index);
 
 	if (node->l.node)
 		raw.left = LE_U32(node->l.node->index);
 	else if (node->l.subsec)
 		raw.left = LE_U32(node->l.subsec->index | 0x80000000U);
 	else
-		BugError(StringPrintf("Bad left child in node %d\n", node->index));
+		BugError("Bad left child in V5 node %d\n", node->index);
 
-	XGL3AppendLump(&raw.right, 4);
-	XGL3AppendLump(&raw.left,  4);
+	lump->Write(&raw, sizeof(raw));
 
-# if DEBUG_BSP
-	DebugPrintf("PUT Z NODE %08X  Left %08X  Right %08X  "
+#if DEBUG_BSP
+	cur_info->Debug("PUT V5 NODE %08X  Left %08X  Right %08X  "
 			"(%d,%d) -> (%d,%d)\n", node->index, LE_U32(raw.left),
 			LE_U32(raw.right), node->x, node->y,
 			node->x + node->dx, node->y + node->dy);
-# endif
+#endif
 }
 
 
-void PutXGL3Nodes(node_t *root)
+void PutNodes(const char *name, int do_v5, node_t *root)
+{
+	int struct_size = do_v5 ? (int)sizeof(raw_v5_node_t) : (int)sizeof(raw_node_t);
+
+	// this can be bigger than the actual size, but never smaller
+	int max_size = (num_nodes + 1) * struct_size;
+
+	Lump_c *lump = CreateLevelLump(name, max_size);
+
+	node_cur_index = 0;
+
+	if (root != NULL)
+	{
+		if (do_v5)
+			PutOneNode_V5(root, lump);
+		else
+			PutOneNode(root, lump);
+	}
+
+	lump->Finish();
+
+	if (node_cur_index != num_nodes)
+		BugError("PutNodes miscounted (%d != %d)\n", node_cur_index, num_nodes);
+
+	if (!do_v5 && node_cur_index > 32767)
+	{
+		Failure("Number of nodes has overflowed.\n");
+		MarkOverflow(LIMIT_NODES);
+	}
+}
+
+
+void CheckLimits()
+{
+	if (num_sectors > 65534)
+	{
+		Failure("Map has too many sectors.\n");
+		MarkOverflow(LIMIT_SECTORS);
+	}
+
+	if (num_sidedefs > 65534)
+	{
+		Failure("Map has too many sidedefs.\n");
+		MarkOverflow(LIMIT_SIDEDEFS);
+	}
+
+	if (num_linedefs > 65534)
+	{
+		Failure("Map has too many linedefs.\n");
+		MarkOverflow(LIMIT_LINEDEFS);
+	}
+
+	if (cur_info->gl_nodes && !cur_info->force_v5)
+	{
+		if (num_old_vert > 32767 ||
+			num_new_vert > 32767 ||
+			num_segs     > 65534 ||
+			num_nodes    > 32767)
+		{
+			Warning("Forcing V5 of GL-Nodes due to overflows.\n");
+			lev_force_v5 = true;
+		}
+	}
+
+	if (! cur_info->force_xnod)
+	{
+		if (num_old_vert > 32767 ||
+			num_new_vert > 32767 ||
+			num_segs     > 32767 ||
+			num_nodes    > 32767)
+		{
+			Warning("Forcing XNOD format nodes due to overflows.\n");
+			lev_force_xnod = true;
+		}
+	}
+}
+
+
+struct Compare_seg_pred
+{
+	inline bool operator() (const seg_t *A, const seg_t *B) const
+	{
+		return A->index < B->index;
+	}
+};
+
+void SortSegs()
+{
+	// do a sanity check
+	for (int i = 0 ; i < num_segs ; i++)
+		if (lev_segs[i]->index < 0)
+			BugError("Seg %p never reached a subsector!\n", i);
+
+	// sort segs into ascending index
+	std::sort(lev_segs.begin(), lev_segs.end(), Compare_seg_pred());
+
+	// remove unwanted segs
+	while (lev_segs.size() > 0 && lev_segs.back()->index == SEG_IS_GARBAGE)
+	{
+		UtilFree((void *) lev_segs.back());
+		lev_segs.pop_back();
+	}
+}
+
+
+/* ----- ZDoom format writing --------------------------- */
+
+static const u8_t *lev_XNOD_magic = (u8_t *) "XNOD";
+static const u8_t *lev_XGL3_magic = (u8_t *) "XGL3";
+static const u8_t *lev_ZNOD_magic = (u8_t *) "ZNOD";
+
+void PutZVertices()
+{
+	int count, i;
+
+	u32_t orgverts = LE_U32(num_old_vert);
+	u32_t newverts = LE_U32(num_new_vert);
+
+	ZLibAppendLump(&orgverts, 4);
+	ZLibAppendLump(&newverts, 4);
+
+	for (i=0, count=0 ; i < num_vertices ; i++)
+	{
+		raw_v2_vertex_t raw;
+
+		const vertex_t *vert = lev_vertices[i];
+
+		if (! vert->is_new)
+			continue;
+
+		raw.x = LE_S32(I_ROUND(vert->x * 65536.0));
+		raw.y = LE_S32(I_ROUND(vert->y * 65536.0));
+
+		ZLibAppendLump(&raw, sizeof(raw));
+
+		count++;
+	}
+
+	if (count != num_new_vert)
+		BugError("PutZVertices miscounted (%d != %d)\n", count, num_new_vert);
+}
+
+
+void PutZSubsecs()
+{
+	u32_t raw_num = LE_U32(num_subsecs);
+	ZLibAppendLump(&raw_num, 4);
+
+	int cur_seg_index = 0;
+
+	for (int i=0 ; i < num_subsecs ; i++)
+	{
+		const subsec_t *sub = lev_subsecs[i];
+
+		raw_num = LE_U32(sub->seg_count);
+		ZLibAppendLump(&raw_num, 4);
+
+		// sanity check the seg index values
+		int count = 0;
+		for (const seg_t *seg = sub->seg_list ; seg ; seg = seg->next, cur_seg_index++)
+		{
+			if (cur_seg_index != seg->index)
+				BugError("PutZSubsecs: seg index mismatch in sub %d (%d != %d)\n",
+						i, cur_seg_index, seg->index);
+
+			count++;
+		}
+
+		if (count != sub->seg_count)
+			BugError("PutZSubsecs: miscounted segs in sub %d (%d != %d)\n",
+					i, count, sub->seg_count);
+	}
+
+	if (cur_seg_index != num_segs)
+		BugError("PutZSubsecs miscounted segs (%d != %d)\n", cur_seg_index, num_segs);
+}
+
+
+void PutZSegs()
+{
+	u32_t raw_num = LE_U32(num_segs);
+	ZLibAppendLump(&raw_num, 4);
+
+	for (int i=0 ; i < num_segs ; i++)
+	{
+		const seg_t *seg = lev_segs[i];
+
+		if (seg->index != i)
+			BugError("PutZSegs: seg index mismatch (%d != %d)\n", seg->index, i);
+
+		u32_t v1 = LE_U32(VertexIndex_XNOD(seg->start));
+		u32_t v2 = LE_U32(VertexIndex_XNOD(seg->end));
+
+		u16_t line = LE_U16(seg->linedef->index);
+		u8_t  side = (u8_t) seg->side;
+
+		ZLibAppendLump(&v1,   4);
+		ZLibAppendLump(&v2,   4);
+		ZLibAppendLump(&line, 2);
+		ZLibAppendLump(&side, 1);
+	}
+}
+
+
+void PutXGL3Segs()
+{
+	u32_t raw_num = LE_U32(num_segs);
+	ZLibAppendLump(&raw_num, 4);
+
+	for (int i=0 ; i < num_segs ; i++)
+	{
+		const seg_t *seg = lev_segs[i];
+
+		if (seg->index != i)
+			BugError("PutXGL3Segs: seg index mismatch (%d != %d)\n", seg->index, i);
+
+		u32_t v1      = LE_U32(VertexIndex_XNOD(seg->start));
+		u32_t partner = LE_U32(seg->partner ? seg->partner->index : -1);
+		u32_t line    = LE_U32(seg->linedef ? seg->linedef->index : -1);
+		u8_t  side    = (u8_t) seg->side;
+
+		ZLibAppendLump(&v1,      4);
+		ZLibAppendLump(&partner, 4);
+		ZLibAppendLump(&line,    4);
+		ZLibAppendLump(&side,    1);
+
+#if DEBUG_BSP
+		fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);
+#endif
+	}
+}
+
+
+static void PutOneZNode(node_t *node, bool do_xgl3)
+{
+	raw_v5_node_t raw;
+
+	if (node->r.node)
+		PutOneZNode(node->r.node, do_xgl3);
+
+	if (node->l.node)
+		PutOneZNode(node->l.node, do_xgl3);
+
+	node->index = node_cur_index++;
+
+	if (do_xgl3)
+	{
+		u32_t x  = LE_S32(I_ROUND(node->x  * 65536.0));
+		u32_t y  = LE_S32(I_ROUND(node->y  * 65536.0));
+		u32_t dx = LE_S32(I_ROUND(node->dx * 65536.0));
+		u32_t dy = LE_S32(I_ROUND(node->dy * 65536.0));
+
+		ZLibAppendLump(&x,  4);
+		ZLibAppendLump(&y,  4);
+		ZLibAppendLump(&dx, 4);
+		ZLibAppendLump(&dy, 4);
+	}
+	else
+	{
+		raw.x  = LE_S16(I_ROUND(node->x));
+		raw.y  = LE_S16(I_ROUND(node->y));
+		raw.dx = LE_S16(I_ROUND(node->dx));
+		raw.dy = LE_S16(I_ROUND(node->dy));
+
+		ZLibAppendLump(&raw.x,  2);
+		ZLibAppendLump(&raw.y,  2);
+		ZLibAppendLump(&raw.dx, 2);
+		ZLibAppendLump(&raw.dy, 2);
+	}
+
+	raw.b1.minx = LE_S16(node->r.bounds.minx);
+	raw.b1.miny = LE_S16(node->r.bounds.miny);
+	raw.b1.maxx = LE_S16(node->r.bounds.maxx);
+	raw.b1.maxy = LE_S16(node->r.bounds.maxy);
+
+	raw.b2.minx = LE_S16(node->l.bounds.minx);
+	raw.b2.miny = LE_S16(node->l.bounds.miny);
+	raw.b2.maxx = LE_S16(node->l.bounds.maxx);
+	raw.b2.maxy = LE_S16(node->l.bounds.maxy);
+
+	ZLibAppendLump(&raw.b1, sizeof(raw.b1));
+	ZLibAppendLump(&raw.b2, sizeof(raw.b2));
+
+	if (node->r.node)
+		raw.right = LE_U32(node->r.node->index);
+	else if (node->r.subsec)
+		raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
+	else
+		BugError("Bad right child in V5 node %d\n", node->index);
+
+	if (node->l.node)
+		raw.left = LE_U32(node->l.node->index);
+	else if (node->l.subsec)
+		raw.left = LE_U32(node->l.subsec->index | 0x80000000U);
+	else
+		BugError("Bad left child in V5 node %d\n", node->index);
+
+	ZLibAppendLump(&raw.right, 4);
+	ZLibAppendLump(&raw.left,  4);
+
+#if DEBUG_BSP
+	cur_info->Debug("PUT Z NODE %08X  Left %08X  Right %08X  "
+			"(%d,%d) -> (%d,%d)\n", node->index, LE_U32(raw.left),
+			LE_U32(raw.right), node->x, node->y,
+			node->x + node->dx, node->y + node->dy);
+#endif
+}
+
+
+void PutZNodes(node_t *root, bool do_xgl3)
 {
 	u32_t raw_num = LE_U32(num_nodes);
-
-	XGL3AppendLump(&raw_num, 4);
+	ZLibAppendLump(&raw_num, 4);
 
 	node_cur_index = 0;
 
 	if (root)
-		PutOneXGL3Node(root);
+		PutOneZNode(root, do_xgl3);
 
 	if (node_cur_index != num_nodes)
-		BugError(StringPrintf("PutXGL3Nodes miscounted (%d != %d)\n",
-				node_cur_index, num_nodes));
+		BugError("PutZNodes miscounted (%d != %d)\n", node_cur_index, num_nodes);
 }
 
-void SaveXGL3Format(node_t *root_node)
+
+static int CalcZDoomNodesSize()
+{
+	// compute size of the ZDoom format nodes.
+	// it does not need to be exact, but it *does* need to be bigger
+	// (or equal) to the actual size of the lump.
+
+	int size = 32;  // header + a bit extra
+
+	size += 8 + num_vertices * 8;
+	size += 4 + num_subsecs  * 4;
+	size += 4 + num_segs     * 11;
+	size += 4 + num_nodes    * sizeof(raw_v5_node_t);
+
+	if (cur_info->force_compress)
+	{
+		// according to RFC1951, the zlib compression worst-case
+		// scenario is 5 extra bytes per 32KB (0.015% increase).
+		// we are significantly more conservative!
+
+		size += ((size + 255) >> 5);
+	}
+
+	return size;
+}
+
+
+void SaveZDFormat(node_t *root_node)
+{
+	// leave SEGS and SSECTORS empty
+	CreateLevelLump("SEGS")->Finish();
+	CreateLevelLump("SSECTORS")->Finish();
+
+	int max_size = CalcZDoomNodesSize();
+
+	Lump_c *lump = CreateLevelLump("NODES", max_size);
+
+	if (cur_info->force_compress)
+		lump->Write(lev_ZNOD_magic, 4);
+	else
+		lump->Write(lev_XNOD_magic, 4);
+
+	// the ZLibXXX functions do no compression for XNOD format
+	ZLibBeginLump(lump);
+
+	PutZVertices();
+	PutZSubsecs();
+	PutZSegs();
+	PutZNodes(root_node, false);
+
+	ZLibFinishLump();
+}
+
+
+void SaveXGL3Format(Lump_c *lump, node_t *root_node)
 {
 	// WISH : compute a max_size
 
-	Lump_c *lump = CreateLevelLump("XGLNODES", -1);
-
 	lump->Write(lev_XGL3_magic, 4);
 
-	XGL3BeginLump(lump);
+	// disable compression
+	bool force_compress = cur_info->force_compress;
+	cur_info->force_compress = false;
 
-	PutXGL3Vertices();
-	PutXGL3Subsecs();
+	ZLibBeginLump(lump);
+
+	PutZVertices();
+	PutZSubsecs();
 	PutXGL3Segs();
-	PutXGL3Nodes(root_node);
+	PutZNodes(root_node, true /* do_xgl3 */);
 
-	XGL3FinishLump();
+	ZLibFinishLump();
+
+	cur_info->force_compress = force_compress;
 }
+
 
 /* ----- whole-level routines --------------------------- */
 
-void PruneVerticesAtEnd(void)
-{
-	// scan all vertices.
-	// only remove from the end, so stop when hit a used one.
-
-	for (int i = num_vertices - 1 ; i >= 0 ; i--)
-	{
-		vertex_t *V = lev_vertices[i];
-
-		if (V->is_used)
-			break;
-
-		UtilFree(V);
-
-		num_vertices -= 1;
-	}
-}
-
 void LoadLevel()
 {
-	Lump_c *LEV = edit_wad->GetLump(lev_current_start);
+	Lump_c *LEV = cur_wad->GetLump(lev_current_start);
 
 	lev_current_name = LEV->Name();
+	lev_long_name = false;
+	lev_overflows = false;
 
-	// -JL- Identify Hexen mode by presence of BEHAVIOR lump
-	lev_doing_hexen = (FindLevelLump("BEHAVIOR") != NULL);
+	cur_info->ShowMap(lev_current_name);
 
-	UpdateProgress(StringPrintf("Building nodes for %s...\n", lev_current_name));
-
-	PrintMsg(StringPrintf("Building nodes for %s...\n", lev_current_name));
-
-	num_new_vert = 0;
-	num_complete_seg = 0;
+	num_new_vert   = 0;
 	num_real_lines = 0;
 
-	if (Level_format == MAPF_UDMF)
+	if (lev_format == MAPF_UDMF)
 	{
-		Lump_c *lump = FindLevelLump("TEXTMAP");
-		int udmf_lump_len = W_LoadLumpData(lump, &udmf_lump);
-		// initialize the parser
-		udmf_psr.buffer = (u8_t *)udmf_lump;
-		udmf_psr.length = udmf_lump_len;
-		udmf_psr.next = 0; // start at first line
-		CheckUDMFNamespace(&udmf_psr);
-		LoadUDMFVertexes(&udmf_psr);
-		LoadUDMFSectors(&udmf_psr);
-		LoadUDMFSideDefs(&udmf_psr);
-		LoadUDMFLineDefs(&udmf_psr);
-		LoadUDMFThings(&udmf_psr);
+		ParseUDMF();
 	}
 	else
 	{
@@ -1891,7 +2445,7 @@ void LoadLevel()
 		GetSectors();
 		GetSidedefs();
 
-		if (lev_doing_hexen)
+		if (lev_format == MAPF_Hexen)
 		{
 			GetLinedefsHexen();
 			GetThingsHexen();
@@ -1901,25 +2455,31 @@ void LoadLevel()
 			GetLinedefs();
 			GetThings();
 		}
+
+		// always prune vertices at end of lump, otherwise all the
+		// unused vertices from seg splits would keep accumulating.
+		PruneVerticesAtEnd();
 	}
 
-	PrintDetail(StringPrintf("%s: Level Loaded...\n", lev_current_name));
-
-	PruneVerticesAtEnd();
+	cur_info->Print(2, "    Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
+				num_vertices, num_sectors, num_sidedefs, num_linedefs, num_things);
 
 	DetectOverlappingVertices();
 	DetectOverlappingLines();
 
 	CalculateWallTips();
 
-	if (lev_doing_hexen)
+	// -JL- Find sectors containing polyobjs
+	switch (lev_format)
 	{
-		// -JL- Find sectors containing polyobjs
-		DetectPolyobjSectors();
+		case MAPF_Hexen: DetectPolyobjSectors(false); break;
+		case MAPF_UDMF:  DetectPolyobjSectors(true);  break;
+		default:         break;
 	}
 }
 
-void FreeLevel(void)
+
+void FreeLevel()
 {
 	FreeVertices();
 	FreeSidedefs();
@@ -1945,9 +2505,9 @@ static u32_t CalcGLChecksum(void)
 	{
 		u8_t *data = new u8_t[lump->Length()];
 
-		if (! lump->Seek() ||
+		if (! lump->Seek(0) ||
 		    ! lump->Read(data, lump->Length()))
-			FatalError(StringPrintf("Error reading vertices (for checksum).\n"));
+			cur_info->FatalError("Error reading vertices (for checksum).\n");
 
 		Adler32_AddBlock(&crc, data, lump->Length());
 		delete[] data;
@@ -1959,9 +2519,9 @@ static u32_t CalcGLChecksum(void)
 	{
 		u8_t *data = new u8_t[lump->Length()];
 
-		if (! lump->Seek() ||
+		if (! lump->Seek(0) ||
 		    ! lump->Read(data, lump->Length()))
-			FatalError(StringPrintf("Error reading linedefs (for checksum).\n"));
+			cur_info->FatalError("Error reading linedefs (for checksum).\n");
 
 		Adler32_AddBlock(&crc, data, lump->Length());
 		delete[] data;
@@ -1970,18 +2530,6 @@ static u32_t CalcGLChecksum(void)
 	Adler32_Finish(&crc);
 
 	return crc;
-}
-
-static const char *CalcOptionsString()
-{
-	static char buffer[256];
-
-	sprintf(buffer, "--cost %d", cur_info->factor);
-
-	if (cur_info->fast)
-		strcat(buffer, " --fast");
-
-	return buffer;
 }
 
 
@@ -1994,7 +2542,7 @@ void UpdateGLMarker(Lump_c *marker)
 	// [ otherwise we write data into the wrong part of the file ]
 	u32_t crc = CalcGLChecksum();
 
-	gwa_wad->RecreateLump(marker, max_size);
+	cur_wad->RecreateLump(marker, max_size);
 
 	if (lev_long_name)
 	{
@@ -2002,9 +2550,6 @@ void UpdateGLMarker(Lump_c *marker)
 	}
 
 	marker->Printf("BUILDER=%s\n", "AJBSP " AJBSP_VERSION);
-
-	marker->Printf("OPTIONS=%s\n", CalcOptionsString());
-
 	marker->Printf("CHECKSUM=0x%08x\n", crc);
 
 	marker->Finish();
@@ -2013,71 +2558,297 @@ void UpdateGLMarker(Lump_c *marker)
 
 static void AddMissingLump(const char *name, const char *after)
 {
-	if (edit_wad->LevelLookupLump(lev_current_idx, name) >= 0)
+	if (cur_wad->LevelLookupLump(lev_current_idx, name) >= 0)
 		return;
 
-	short exist = edit_wad->LevelLookupLump(lev_current_idx, after);
+	int exist = cur_wad->LevelLookupLump(lev_current_idx, after);
 
 	// if this happens, the level structure is very broken
 	if (exist < 0)
 	{
-		Warning("Lump missing -- level structure is broken\n");
+		Warning("Missing %s lump -- level structure is broken\n", after);
 
-		exist = edit_wad->LevelLastLump(lev_current_idx);
+		exist = cur_wad->LevelLastLump(lev_current_idx);
 	}
 
-	edit_wad->InsertPoint(exist + 1);
+	cur_wad->InsertPoint(exist + 1);
 
-	edit_wad->AddLump(name)->Finish();
+	cur_wad->AddLump(name)->Finish();
 }
+
 
 build_result_e SaveLevel(node_t *root_node)
 {
-	if (Level_format != MAPF_UDMF)
-		CheckLimits();
+	// Note: root_node may be NULL
 
-	gwa_wad->BeginWrite();
+	cur_wad->BeginWrite();
+
+	// remove any existing GL-Nodes
+	cur_wad->RemoveGLNodes(lev_current_idx);
+
+	// ensure all necessary level lumps are present
+	AddMissingLump("SEGS",     "VERTEXES");
+	AddMissingLump("SSECTORS", "SEGS");
+	AddMissingLump("NODES",    "SSECTORS");
+	AddMissingLump("REJECT",   "SECTORS");
+	AddMissingLump("BLOCKMAP", "REJECT");
+
+	// user preferences
+	lev_force_v5   = cur_info->force_v5;
+	lev_force_xnod = cur_info->force_xnod;
+
+	// check for overflows...
+	// this sets the force_xxx vars if certain limits are breached
+	CheckLimits();
+
+
+	/* --- GL Nodes --- */
 
 	Lump_c * gl_marker = NULL;
 
-	if (num_real_lines > 0)
+	if (cur_info->gl_nodes && num_real_lines > 0)
 	{
+		// this also removes minisegs and degenerate segs
+		SortSegs();
+
+		// create empty marker now, flesh it out later
 		gl_marker = CreateGLMarker();
+
+		PutGLVertices(lev_force_v5);
+
+		if (lev_force_v5)
+			PutGLSegs_V5();
+		else
+			PutGLSegs_V2();
+
+		if (lev_force_v5)
+			PutGLSubsecs_V5();
+		else
+			PutSubsecs("GL_SSECT", true);
+
+		PutNodes("GL_NODES", lev_force_v5, root_node);
+
+		// -JL- Add empty PVS lump
+		CreateLevelLump("GL_PVS")->Finish();
+	}
+
+
+	/* --- Normal nodes --- */
+
+	// remove all the mini-segs from subsectors
+	NormaliseBspTree();
+
+	if (lev_force_xnod && num_real_lines > 0)
+	{
+		SortSegs();
+		SaveZDFormat(root_node);
+	}
+	else
+	{
+		// reduce vertex precision for classic DOOM nodes.
+		// some segs can become "degenerate" after this, and these
+		// are removed from subsectors.
+		RoundOffBspTree();
 
 		SortSegs();
 
-		SaveXGL3Format(root_node);
+		PutVertices("VERTEXES", false);
+
+		PutSegs();
+		PutSubsecs("SSECTORS", false);
+		PutNodes("NODES", false, root_node);
 	}
 
+	PutBlockmap();
+	PutReject();
+
+	// keyword support (v5.0 of the specs).
+	// must be done *after* doing normal nodes, for proper checksum.
 	if (gl_marker)
 	{
 		UpdateGLMarker(gl_marker);
 	}
 
-	gwa_wad->EndWrite();
+	cur_wad->EndWrite();
+
+	if (lev_overflows)
+	{
+		// no message here
+		// [ in verbose mode, each overflow already printed a message ]
+		// [ in normal mode, we don't want any messages at all ]
+
+		return BUILD_LumpOverflow;
+	}
 
 	return BUILD_OK;
 }
 
+
+build_result_e SaveUDMF(node_t *root_node)
+{
+	cur_wad->BeginWrite();
+
+	// remove any existing ZNODES lump
+	cur_wad->RemoveZNodes(lev_current_idx);
+
+	Lump_c *lump = CreateLevelLump("ZNODES", -1);
+
+	if (num_real_lines == 0)
+	{
+		lump->Finish();
+	}
+	else
+	{
+		SortSegs();
+		SaveXGL3Format(lump, root_node);
+	}
+
+	cur_wad->EndWrite();
+
+	return BUILD_OK;
+}
+
+
+build_result_e SaveXWA(node_t *root_node)
+{
+	xwa_wad->BeginWrite();
+
+	const char *lev_name = GetLevelName(lev_current_idx);
+	Lump_c *lump = xwa_wad->AddLump(lev_name);
+
+	if (num_real_lines == 0)
+	{
+		lump->Finish();
+	}
+	else
+	{
+		SortSegs();
+		SaveXGL3Format(lump, root_node);
+	}
+
+	xwa_wad->EndWrite();
+
+	return BUILD_OK;
+}
+
+
 //----------------------------------------------------------------------
 
-static Lump_c  *xgl3_lump;
+static Lump_c  *zout_lump;
 
-void XGL3BeginLump(Lump_c *lump)
+#ifdef HAVE_ZLIB
+static z_stream zout_stream;
+static Bytef    zout_buffer[1024];
+#endif
+
+
+void ZLibBeginLump(Lump_c *lump)
 {
-	xgl3_lump = lump;
+	zout_lump = lump;
+
+	if (! cur_info->force_compress)
+		return;
+
+#ifndef HAVE_ZLIB
+	cur_info->FatalError("No zlib!\n");
+#else
+	zout_stream.zalloc = (alloc_func)0;
+	zout_stream.zfree  = (free_func)0;
+	zout_stream.opaque = (voidpf)0;
+
+	if (Z_OK != deflateInit(&zout_stream, Z_DEFAULT_COMPRESSION))
+		cur_info->FatalError("Trouble setting up zlib compression\n");
+
+	zout_stream.next_out  = zout_buffer;
+	zout_stream.avail_out = sizeof(zout_buffer);
+#endif
 }
 
-void XGL3AppendLump(const void *data, int length)
+
+void ZLibAppendLump(const void *data, int length)
 {
-	xgl3_lump->Write(data, length);
-	return;
+	// ASSERT(zout_lump)
+	// ASSERT(length > 0)
+
+	if (! cur_info->force_compress)
+	{
+		zout_lump->Write(data, length);
+		return;
+	}
+
+#ifndef HAVE_ZLIB
+	cur_info->FatalError("No zlib!\n");
+#else
+	zout_stream.next_in  = (Bytef*)data;   // const override
+	zout_stream.avail_in = length;
+
+	while (zout_stream.avail_in > 0)
+	{
+		int err = deflate(&zout_stream, Z_NO_FLUSH);
+
+		if (err != Z_OK)
+			cur_info->FatalError("Trouble compressing %d bytes (zlib)\n", length);
+
+		if (zout_stream.avail_out == 0)
+		{
+			zout_lump->Write(zout_buffer, sizeof(zout_buffer));
+
+			zout_stream.next_out  = zout_buffer;
+			zout_stream.avail_out = sizeof(zout_buffer);
+		}
+	}
+#endif
 }
 
-void XGL3FinishLump(void)
+
+void ZLibFinishLump(void)
 {
-	xgl3_lump = NULL;
-	return;
+	if (! cur_info->force_compress)
+	{
+		zout_lump->Finish();
+		zout_lump = NULL;
+		return;
+	}
+
+#ifndef HAVE_ZLIB
+	cur_info->FatalError("No zlib!\n");
+#else
+	int left_over;
+
+	// ASSERT(zout_stream.avail_out > 0)
+
+	zout_stream.next_in  = Z_NULL;
+	zout_stream.avail_in = 0;
+
+	for (;;)
+	{
+		int err = deflate(&zout_stream, Z_FINISH);
+
+		if (err == Z_STREAM_END)
+			break;
+
+		if (err != Z_OK)
+			cur_info->FatalError("Trouble finishing compression (zlib)\n");
+
+		if (zout_stream.avail_out == 0)
+		{
+			zout_lump->Write(zout_buffer, sizeof(zout_buffer));
+
+			zout_stream.next_out  = zout_buffer;
+			zout_stream.avail_out = sizeof(zout_buffer);
+		}
+	}
+
+	left_over = sizeof(zout_buffer) - zout_stream.avail_out;
+
+	if (left_over > 0)
+		zout_lump->Write(zout_buffer, left_over);
+
+	deflateEnd(&zout_stream);
+
+	zout_lump->Finish();
+	zout_lump = NULL;
+#endif
 }
 
 
@@ -2085,18 +2856,39 @@ void XGL3FinishLump(void)
 
 Lump_c * FindLevelLump(const char *name)
 {
-	short idx = edit_wad->LevelLookupLump(lev_current_idx, name);
+	int idx = cur_wad->LevelLookupLump(lev_current_idx, name);
 
 	if (idx < 0)
 		return NULL;
 
-	return edit_wad->GetLump(idx);
+	return cur_wad->GetLump(idx);
 }
 
 
 Lump_c * CreateLevelLump(const char *name, int max_size)
 {
-	return gwa_wad->AddLump(name, max_size);
+	// look for existing one
+	Lump_c *lump = FindLevelLump(name);
+
+	if (lump)
+	{
+		cur_wad->RecreateLump(lump, max_size);
+	}
+	else
+	{
+		int last_idx = cur_wad->LevelLastLump(lev_current_idx);
+
+		// in UDMF maps, insert before the ENDMAP lump, otherwise insert
+		// after the last known lump of the level.
+		if (lev_format != MAPF_UDMF)
+			last_idx += 1;
+
+		cur_wad->InsertPoint(last_idx);
+
+		lump = cur_wad->AddLump(name, max_size);
+	}
+
+	return lump;
 }
 
 
@@ -2106,19 +2898,23 @@ Lump_c * CreateGLMarker()
 
 	if (strlen(lev_current_name) <= 5)
 	{
-		sprintf(name_buf, "XG_%s", lev_current_name);
+		sprintf(name_buf, "GL_%s", lev_current_name);
 
 		lev_long_name = false;
 	}
 	else
 	{
 		// support for level names longer than 5 letters
-		strcpy(name_buf, "XG_LEVEL");
+		strcpy(name_buf, "GL_LEVEL");
 
 		lev_long_name = true;
 	}
 
-	Lump_c *marker = gwa_wad->AddLump(name_buf);
+	int last_idx = cur_wad->LevelLastLump(lev_current_idx);
+
+	cur_wad->InsertPoint(last_idx + 1);
+
+	Lump_c *marker = cur_wad->AddLump(name_buf);
 
 	marker->Finish();
 
@@ -2130,53 +2926,137 @@ Lump_c * CreateGLMarker()
 // MAIN STUFF
 //------------------------------------------------------------------------
 
+buildinfo_t * cur_info = NULL;
 
-nodebuildinfo_t * cur_info = NULL;
+void SetInfo(buildinfo_t *info)
+{
+	cur_info = info;
+}
+
+
+void OpenWad(std::filesystem::path filename)
+{
+	cur_wad = Wad_file::Open(filename, 'a');
+	if (cur_wad == NULL)
+		cur_info->FatalError("Cannot open file: %s\n", filename);
+
+	if (cur_wad->IsReadOnly())
+	{
+		delete cur_wad;
+		cur_wad = NULL;
+
+		cur_info->FatalError("file is read only: %s\n", filename);
+	}
+}
+
+
+void CreateXWA(std::filesystem::path filename)
+{
+	xwa_wad = Wad_file::Open(filename, 'w');
+	if (xwa_wad == NULL)
+		cur_info->FatalError("Cannot create file: %s\n", filename);
+
+	xwa_wad->BeginWrite();
+	xwa_wad->AddLump("XG_START")->Finish();
+	xwa_wad->EndWrite();
+}
+
+
+void FinishXWA()
+{
+	xwa_wad->BeginWrite();
+	xwa_wad->AddLump("XG_END")->Finish();
+	xwa_wad->EndWrite();
+}
+
+
+void CloseWad()
+{
+	if (cur_wad != NULL)
+	{
+		// this closes the file
+		delete cur_wad;
+		cur_wad = NULL;
+	}
+
+	if (xwa_wad != NULL)
+	{
+		delete xwa_wad;
+		xwa_wad = NULL;
+	}
+}
+
+
+int LevelsInWad()
+{
+	if (cur_wad == NULL)
+		return 0;
+
+	return cur_wad->LevelCount();
+}
+
+
+const char * GetLevelName(int lev_idx)
+{
+	SYS_ASSERT(cur_wad != NULL);
+
+	int lump_idx = cur_wad->LevelHeader(lev_idx);
+
+	return cur_wad->GetLump(lump_idx)->Name();
+}
 
 
 /* ----- build nodes for a single level ----- */
 
-build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
+build_result_e BuildLevel(int lev_idx)
 {
-	cur_info = info;
-
-	node_t *root_node  = NULL;
-	subsec_t *root_sub = NULL;
-
-	build_result_e ret = BUILD_OK;
-
 	if (cur_info->cancelled)
 		return BUILD_Cancelled;
 
-	Level_format = edit_wad->LevelFormat(lev_idx);
+	node_t   *root_node = NULL;
+	subsec_t *root_sub  = NULL;
 
 	lev_current_idx   = lev_idx;
-	lev_current_start = edit_wad->LevelHeader(lev_idx);
+	lev_current_start = cur_wad->LevelHeader(lev_idx);
+	lev_format        = cur_wad->LevelFormat(lev_idx);
 
 	LoadLevel();
 
 	InitBlockmap();
 
+	build_result_e ret = BUILD_OK;
+
 	if (num_real_lines > 0)
 	{
-		bbox_t seg_bbox;
+		bbox_t dummy;
 
 		// create initial segs
-		superblock_t * seg_list = CreateSegs();
-
-		FindLimits(seg_list, &seg_bbox);
+		seg_t *list = CreateSegs();
 
 		// recursively create nodes
-		ret = BuildNodes(seg_list, &root_node, &root_sub, 0, &seg_bbox);
-
-		FreeSuper(seg_list);
+		ret = BuildNodes(list, 0, &dummy, &root_node, &root_sub);
 	}
 
 	if (ret == BUILD_OK)
 	{
+		cur_info->Print(2, "    Built %d NODES, %d SSECTORS, %d SEGS, %d VERTEXES\n",
+				num_nodes, num_subsecs, num_segs, num_old_vert + num_new_vert);
+
+		if (root_node != NULL)
+		{
+			cur_info->Print(2, "    Heights of subtrees: %d / %d\n",
+					ComputeBspHeight(root_node->r.node),
+					ComputeBspHeight(root_node->l.node));
+		}
+
 		ClockwiseBspTree();
 
-		SaveLevel(root_node);
+		if (xwa_wad != NULL)
+			ret = SaveXWA(root_node);
+		else if (lev_format == MAPF_UDMF)
+			ret = SaveUDMF(root_node);
+		else
+			ret = SaveLevel(root_node);
 	}
 	else
 	{
@@ -2184,19 +3064,13 @@ build_result_e BuildNodesForLevel(nodebuildinfo_t *info, short lev_idx)
 	}
 
 	FreeLevel();
-	FreeQuickAllocCuts();
-	FreeQuickAllocSupers();
 
 	return ret;
 }
 
+
 }  // namespace ajbsp
 
-
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, short lev_idx)
-{
-	return ajbsp::BuildNodesForLevel(info, lev_idx);
-}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -31,10 +31,6 @@
 #define EDGECONFIGFILE "edge-classic.cfg"
 #define EDGELOGFILE    "edge-classic.log"
 
-#define EDGEGWAEXT     "gwa"
-#define EDGEHWAEXT     "hwa"
-#define EDGEWADEXT     "wad"
-
 #define SAVEGAMEBASE   "save"
 #define SAVEGAMEEXT    "esg"
 #define SAVEGAMEMODE   0755

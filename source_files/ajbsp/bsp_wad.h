@@ -16,10 +16,13 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __AJBSP_W_WAD_H__
-#define __AJBSP_W_WAD_H__
+#ifndef __AJBSP_WAD_H__
+#define __AJBSP_WAD_H__
 
 #include <filesystem>
+
+namespace ajbsp
+{
 
 class Wad_file;
 
@@ -48,7 +51,7 @@ private:
 	int l_length;
 
 	// constructor is private
-	Lump_c(Wad_file *_par, const char *_nam, int _start, int _len);
+	Lump_c(Wad_file *_par, const char *_name, int _start, int _len);
 	Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry);
 
 	void MakeEntry(struct raw_wad_entry_s *entry);
@@ -64,7 +67,7 @@ public:
 
 	// attempt to seek to a position within the lump (default is
 	// the beginning).  Returns true if OK, false on error.
-	bool Seek(int offset = 0);
+	bool Seek(int offset);
 
 	// read some data from the lump, returning true if OK.
 	bool Read(void *data, int len);
@@ -128,11 +131,11 @@ private:
 	int dir_count;
 
 	// these are lump indices (into 'directory' vector)
-	std::vector<short> levels;
-	std::vector<short> patches;
-	std::vector<short> sprites;
-	std::vector<short> flats;
-	std::vector<short> tx_tex;
+	std::vector<int> levels;
+	std::vector<int> patches;
+	std::vector<int> sprites;
+	std::vector<int> flats;
+	std::vector<int> tx_tex;
 
 	bool begun_write;
 	int  begun_max_size;
@@ -161,31 +164,31 @@ public:
 	// check the given wad file exists and is a WAD file
 	static bool Validate(std::filesystem::path filename);
 
-	std::filesystem::path PathName() const { return filename; }
+	const char *PathName() const { return filename.u8string().c_str(); }
 	bool IsReadOnly() const { return mode == 'r'; }
 
 	int TotalSize() const { return total_size; }
 
-	short NumLumps() const { return (short)directory.size(); }
-	Lump_c * GetLump(short index);
+	int NumLumps() const { return (int)directory.size(); }
+	Lump_c * GetLump(int index);
 	Lump_c * FindLump(const char *name);
-	short FindLumpNum(const char *name);
+	int FindLumpNum(const char *name);
 
 	Lump_c * FindLumpInNamespace(const char *name, char group);
 
-	short LevelCount() const { return (short)levels.size(); }
-	short LevelHeader(short lev_num);
-	short LevelLastLump(short lev_num);
+	int LevelCount() const { return (int)levels.size(); }
+	int LevelHeader(int lev_num);
+	int LevelLastLump(int lev_num);
 
 	// these return a level number (0 .. count-1)
-	short LevelFind(const char *name);
-	short LevelFindByNumber(int number);
-	short LevelFindFirst();
+	int LevelFind(const char *name);
+	int LevelFindByNumber(int number);
+	int LevelFindFirst();
 
 	// returns a lump index, -1 if not found
-	short LevelLookupLump(short lev_num, const char *name);
+	int LevelLookupLump(int lev_num, const char *name);
 
-	map_format_e LevelFormat(short lev_num);
+	map_format_e LevelFormat(int lev_num);
 
 	void  SortLevels();
 
@@ -195,6 +198,9 @@ public:
 	// [ NOT USED YET.... ]
 	bool WasExternallyModified();
 
+	// backup the current wad into the given filename.
+	// returns true if successful, false on error.
+	bool Backup(const char *new_filename);
 
 	// all changes to the wad must occur between calls to BeginWrite()
 	// and EndWrite() methods.  the on-disk wad directory may be trashed
@@ -203,20 +209,22 @@ public:
 	void EndWrite();
 
 	// change name of a lump (can be a level marker too)
-	void RenameLump(short index, const char *new_name);
+	void RenameLump(int index, const char *new_name);
 
 	// remove the given lump(s)
 	// this will change index numbers on existing lumps
 	// (previous results of FindLumpNum or LevelHeader are invalidated).
-	void RemoveLumps(short index, short count = 1);
+	void RemoveLumps(int index, int count = 1);
 
 	// this removes the level marker PLUS all associated level lumps
 	// which follow it.
-	void RemoveLevel(short lev_num);
+	void RemoveLevel(int lev_num);
 
-	// removes any GL-Nodes lumps that are associated with the given
-	// level.
-	void RemoveGLNodes(short lev_num);
+	// removes any GL-Nodes lumps that are associated with the given level.
+	void RemoveGLNodes(int lev_num);
+
+	// removes any ZNODES lump from a UDMF level.
+	void RemoveZNodes(int lev_num);
 
 	// insert a new lump.
 	// The second form is for a level marker.
@@ -224,20 +232,20 @@ public:
 	// you will write into the lump -- writing more will corrupt
 	// something else in the WAD.
 	Lump_c * AddLump (const char *name, int max_size = -1);
-	Lump_c * AddLevel(const char *name, int max_size = -1, short *lev_num = NULL);
+	Lump_c * AddLevel(const char *name, int max_size = -1, int *lev_num = NULL);
 
 	// setup lump to write new data to it.
 	// the old contents are lost.
 	void RecreateLump(Lump_c *lump, int max_size = -1);
 
-	// set the insertion point -- the next lump will be added _before_
+	// set the insertion point -- the next lump will be added *before*
 	// this index, and it will be incremented so that a sequence of
 	// AddLump() calls produces lumps in the same order.
 	//
 	// passing a negative value or invalid index will reset the
 	// insertion point -- future lumps get added at the END.
 	// RemoveLumps(), RemoveLevel() and EndWrite() also reset it.
-	void InsertPoint(short index = -1);
+	void InsertPoint(int index = -1);
 
 private:
 	static Wad_file * Create(std::filesystem::path filename, char mode);
@@ -272,7 +280,7 @@ private:
 	// (including the CRC).
 	void WriteDirectory();
 
-	void FixGroup(std::vector<short>& group, short index, short num_added, short num_removed);
+	void FixGroup(std::vector<int>& group, int index, int num_added, int num_removed);
 
 private:
 	// deliberately don't implement these
@@ -290,7 +298,7 @@ private:
 		level_name_CMP_pred(Wad_file * _w) : wad(_w)
 		{ }
 
-		inline bool operator() (const short A, const short B) const
+		inline bool operator() (const int A, const int B) const
 		{
 			const Lump_c *L1 = wad->directory[A];
 			const Lump_c *L2 = wad->directory[B];
@@ -301,23 +309,9 @@ private:
 };
 
 
-// the IWAD, never NULL, always at master_dir.front()
-extern Wad_file * game_wad;
+} // namespace ajbsp
 
-// the current PWAD, or NULL for none.
-// when present it is also at master_dir.back()
-extern Wad_file * edit_wad;
-
-// WAD file with only GL-Node lumps created when using the -g option
-extern Wad_file * gwa_wad;
-
-
-// load the lump into memory, returning the size
-int  W_LoadLumpData(Lump_c *lump, byte ** buf_ptr);
-void W_FreeLumpData(byte ** buf_ptr);
-
-
-#endif  /* __AJBSP_W_WAD_H__ */
+#endif  /* __AJBSP_WAD_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

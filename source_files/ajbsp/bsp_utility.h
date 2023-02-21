@@ -23,26 +23,6 @@
 namespace ajbsp
 {
 
-#ifdef WIN32
-#define DIR_SEP_CH   '\\'
-#define DIR_SEP_STR  "\\"
-#else
-#define DIR_SEP_CH   '/'
-#define DIR_SEP_STR  "/"
-#endif
-
-// filename functions
-bool HasExtension(const char *filename);
-bool MatchExtension(const char *filename, const char *ext);
-char *ReplaceExtension(const char *filename, const char *ext);
-const char *FindBaseName(const char *filename);
-
-// file utilities
-bool FileExists(const char *filename);
-bool FileCopy(const char *src_name, const char *dest_name);
-bool FileRename(const char *old_name, const char *new_name);
-bool FileDelete(const char *filename);
-
 // memory allocation, guaranteed to not return NULL.
 void *UtilCalloc(int size);
 void *UtilRealloc(void *old, int size);

@@ -42,10 +42,6 @@ public:
 	// create GL Nodes?
 	bool gl_nodes;
 
-	// when these two are false, they create an empty lump
-	bool do_blockmap;
-	bool do_reject;
-
 	bool force_v5;
 	bool force_xnod;
 	bool force_compress;	// NOTE: only supported when HAVE_ZLIB is defined
@@ -64,12 +60,9 @@ public:
 
 public:
 	buildinfo_t() :
-		fast(false),
+		fast(true),
 
 		gl_nodes(true),
-
-		do_blockmap(true),
-		do_reject  (true),
 
 		force_v5(false),
 		force_xnod(false),

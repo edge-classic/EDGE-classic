@@ -20,10 +20,12 @@
 
 #include "bsp_system.h"
 #include "bsp_local.h"
-#include "bsp_parse.h"
 #include "bsp_raw_def.h"
 #include "bsp_utility.h"
 #include "bsp_wad.h"
+
+// EPI
+#include "str_lexer.h"
 
 #ifdef HAVE_ZLIB
 #include <zlib.h>
@@ -49,14 +51,6 @@ static int block_count;
 
 static int block_mid_x = 0;
 static int block_mid_y = 0;
-
-static u16_t ** block_lines;
-
-static u16_t *block_ptrs;
-static u16_t *block_dups;
-
-static int block_compression;
-static int block_overflowed;
 
 #define BLOCK_LIMIT  16000
 
@@ -150,352 +144,6 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
 
 #define BK_QUANTUM  32
 
-static void BlockAdd(int blk_num, int line_index)
-{
-	u16_t *cur = block_lines[blk_num];
-
-#if DEBUG_BLOCKMAP
-	cur_info->Debug("Block %d has line %d\n", blk_num, line_index);
-#endif
-
-	if (blk_num < 0 || blk_num >= block_count)
-		BugError("BlockAdd: bad block number %d\n", blk_num);
-
-	if (! cur)
-	{
-		// create empty block
-		block_lines[blk_num] = cur = (u16_t *)UtilCalloc(BK_QUANTUM * sizeof(u16_t));
-		cur[BK_NUM] = 0;
-		cur[BK_MAX] = BK_QUANTUM;
-		cur[BK_XOR] = 0x1234;
-	}
-
-	if (BK_FIRST + cur[BK_NUM] == cur[BK_MAX])
-	{
-		// no more room, so allocate some more...
-		cur[BK_MAX] += BK_QUANTUM;
-
-		block_lines[blk_num] = cur = (u16_t *)UtilRealloc(cur, cur[BK_MAX] * sizeof(u16_t));
-	}
-
-	// compute new checksum
-	cur[BK_XOR] = (u16_t) (((cur[BK_XOR] << 4) | (cur[BK_XOR] >> 12)) ^ line_index);
-
-	cur[BK_FIRST + cur[BK_NUM]] = LE_U16(line_index);
-	cur[BK_NUM]++;
-}
-
-
-static void BlockAddLine(const linedef_t *L)
-{
-	int x1 = (int) L->start->x;
-	int y1 = (int) L->start->y;
-	int x2 = (int) L->end->x;
-	int y2 = (int) L->end->y;
-
-	int bx1 = (std::min(x1,x2) - block_x) / 128;
-	int by1 = (std::min(y1,y2) - block_y) / 128;
-	int bx2 = (std::max(x1,x2) - block_x) / 128;
-	int by2 = (std::max(y1,y2) - block_y) / 128;
-
-	int bx, by;
-	int line_index = L->index;
-
-#if DEBUG_BLOCKMAP
-	cur_info->Debug("BlockAddLine: %d (%d,%d) -> (%d,%d)\n", line_index,
-			x1, y1, x2, y2);
-#endif
-
-	// handle truncated blockmaps
-	if (bx1 < 0) bx1 = 0;
-	if (by1 < 0) by1 = 0;
-	if (bx2 >= block_w) bx2 = block_w - 1;
-	if (by2 >= block_h) by2 = block_h - 1;
-
-	if (bx2 < bx1 || by2 < by1)
-		return;
-
-	// handle simple case #1: completely horizontal
-	if (by1 == by2)
-	{
-		for (bx=bx1 ; bx <= bx2 ; bx++)
-		{
-			int blk_num = by1 * block_w + bx;
-			BlockAdd(blk_num, line_index);
-		}
-		return;
-	}
-
-	// handle simple case #2: completely vertical
-	if (bx1 == bx2)
-	{
-		for (by=by1 ; by <= by2 ; by++)
-		{
-			int blk_num = by * block_w + bx1;
-			BlockAdd(blk_num, line_index);
-		}
-		return;
-	}
-
-	// handle the rest (diagonals)
-
-	for (by=by1 ; by <= by2 ; by++)
-	for (bx=bx1 ; bx <= bx2 ; bx++)
-	{
-		int blk_num = by * block_w + bx;
-
-		int minx = block_x + bx * 128;
-		int miny = block_y + by * 128;
-		int maxx = minx + 127;
-		int maxy = miny + 127;
-
-		if (CheckLinedefInsideBox(minx, miny, maxx, maxy, x1, y1, x2, y2))
-		{
-			BlockAdd(blk_num, line_index);
-		}
-	}
-}
-
-
-static void CreateBlockmap(void)
-{
-	block_lines = (u16_t **) UtilCalloc(block_count * sizeof(u16_t *));
-
-	for (int i=0 ; i < num_linedefs ; i++)
-	{
-		const linedef_t *L = lev_linedefs[i];
-
-		// ignore zero-length lines
-		if (L->zero_len)
-			continue;
-
-		BlockAddLine(L);
-	}
-}
-
-
-static int BlockCompare(const void *p1, const void *p2)
-{
-	int blk_num1 = ((const u16_t *) p1)[0];
-	int blk_num2 = ((const u16_t *) p2)[0];
-
-	const u16_t *A = block_lines[blk_num1];
-	const u16_t *B = block_lines[blk_num2];
-
-	if (A == B)
-		return 0;
-
-	if (A == NULL) return -1;
-	if (B == NULL) return +1;
-
-	if (A[BK_NUM] != B[BK_NUM])
-	{
-		return A[BK_NUM] - B[BK_NUM];
-	}
-
-	if (A[BK_XOR] != B[BK_XOR])
-	{
-		return A[BK_XOR] - B[BK_XOR];
-	}
-
-	return memcmp(A+BK_FIRST, B+BK_FIRST, A[BK_NUM] * sizeof(u16_t));
-}
-
-
-static void CompressBlockmap(void)
-{
-	int i;
-	int cur_offset;
-	int dup_count=0;
-
-	int orig_size, new_size;
-
-	block_ptrs = (u16_t *)UtilCalloc(block_count * sizeof(u16_t));
-	block_dups = (u16_t *)UtilCalloc(block_count * sizeof(u16_t));
-
-	// sort duplicate-detecting array.  After the sort, all duplicates
-	// will be next to each other.  The duplicate array gives the order
-	// of the blocklists in the BLOCKMAP lump.
-
-	for (i=0 ; i < block_count ; i++)
-		block_dups[i] = (u16_t) i;
-
-	qsort(block_dups, block_count, sizeof(u16_t), BlockCompare);
-
-	// scan duplicate array and build up offset array
-
-	cur_offset = 4 + block_count + 2;
-
-	orig_size = 4 + block_count;
-	new_size  = cur_offset;
-
-	for (i=0 ; i < block_count ; i++)
-	{
-		int blk_num = block_dups[i];
-		int count;
-
-		// empty block ?
-		if (block_lines[blk_num] == NULL)
-		{
-			block_ptrs[blk_num] = (u16_t) (4 + block_count);
-			block_dups[i] = DUMMY_DUP;
-
-			orig_size += 2;
-			continue;
-		}
-
-		count = 2 + block_lines[blk_num][BK_NUM];
-
-		// duplicate ?  Only the very last one of a sequence of duplicates
-		// will update the current offset value.
-
-		if (i+1 < block_count && BlockCompare(block_dups + i, block_dups + i+1) == 0)
-		{
-			block_ptrs[blk_num] = (u16_t) cur_offset;
-			block_dups[i] = DUMMY_DUP;
-
-			// free the memory of the duplicated block
-			UtilFree(block_lines[blk_num]);
-			block_lines[blk_num] = NULL;
-
-			dup_count++;
-
-			orig_size += count;
-			continue;
-		}
-
-		// OK, this block is either the last of a series of duplicates, or
-		// just a singleton.
-
-		block_ptrs[blk_num] = (u16_t) cur_offset;
-
-		cur_offset += count;
-
-		orig_size += count;
-		new_size  += count;
-	}
-
-	if (cur_offset > 65535)
-	{
-		block_overflowed = true;
-		return;
-	}
-
-#if DEBUG_BLOCKMAP
-	cur_info->Debug("Blockmap: Last ptr = %d  duplicates = %d\n",
-			cur_offset, dup_count);
-#endif
-
-	block_compression = (orig_size - new_size) * 100 / orig_size;
-
-	// there's a tiny chance of new_size > orig_size
-	if (block_compression < 0)
-		block_compression = 0;
-}
-
-
-static int CalcBlockmapSize()
-{
-	// compute size of final BLOCKMAP lump.
-	// it does not need to be exact, but it *does* need to be bigger
-	// (or equal) to the actual size of the lump.
-
-	// header + null_block + a bit extra
-	int size = 20;
-
-	// the pointers (offsets to the line lists)
-	size = size + block_count * 2;
-
-	// add size of each block
-	for (int i=0 ; i < block_count ; i++)
-	{
-		int blk_num = block_dups[i];
-
-		// ignore duplicate or empty blocks
-		if (blk_num == DUMMY_DUP)
-			continue;
-
-		u16_t *blk = block_lines[blk_num];
-		SYS_ASSERT(blk);
-
-		size += (1 + (int)(blk[BK_NUM]) + 1) * 2;
-	}
-
-	return size;
-}
-
-
-static void WriteBlockmap(void)
-{
-	int i;
-
-	int max_size = CalcBlockmapSize();
-
-	Lump_c *lump = CreateLevelLump("BLOCKMAP", max_size);
-
-	u16_t null_block[2] = { 0x0000, 0xFFFF };
-	u16_t m_zero = 0x0000;
-	u16_t m_neg1 = 0xFFFF;
-
-	// fill in header
-	raw_blockmap_header_t header;
-
-	header.x_origin = LE_U16(block_x);
-	header.y_origin = LE_U16(block_y);
-	header.x_blocks = LE_U16(block_w);
-	header.y_blocks = LE_U16(block_h);
-
-	lump->Write(&header, sizeof(header));
-
-	// handle pointers
-	for (i=0 ; i < block_count ; i++)
-	{
-		u16_t ptr = LE_U16(block_ptrs[i]);
-
-		if (ptr == 0)
-			BugError("WriteBlockmap: offset %d not set.\n", i);
-
-		lump->Write(&ptr, sizeof(u16_t));
-	}
-
-	// add the null block which *all* empty blocks will use
-	lump->Write(null_block, sizeof(null_block));
-
-	// handle each block list
-	for (i=0 ; i < block_count ; i++)
-	{
-		int blk_num = block_dups[i];
-
-		// ignore duplicate or empty blocks
-		if (blk_num == DUMMY_DUP)
-			continue;
-
-		u16_t *blk = block_lines[blk_num];
-		SYS_ASSERT(blk);
-
-		lump->Write(&m_zero, sizeof(u16_t));
-		lump->Write(blk + BK_FIRST, blk[BK_NUM] * sizeof(u16_t));
-		lump->Write(&m_neg1, sizeof(u16_t));
-	}
-
-	lump->Finish();
-}
-
-
-static void FreeBlockmap(void)
-{
-	for (int i=0 ; i < block_count ; i++)
-	{
-		if (block_lines[i])
-			UtilFree(block_lines[i]);
-	}
-
-	UtilFree(block_lines);
-	UtilFree(block_ptrs);
-	UtilFree(block_dups);
-}
-
-
 static void FindBlockmapLimits(bbox_t *bbox)
 {
 	double mid_x = 0;
@@ -566,44 +214,9 @@ void InitBlockmap()
 
 void PutBlockmap()
 {
-	if (! cur_info->do_blockmap || num_linedefs == 0)
-	{
-		// just create an empty blockmap lump
-		CreateLevelLump("BLOCKMAP")->Finish();
-		return;
-	}
-
-	block_overflowed = false;
-
-	// initial phase: create internal blockmap containing the index of
-	// all lines in each block.
-
-	CreateBlockmap();
-
-	// -AJA- second phase: compress the blockmap.  We do this by sorting
-	//       the blocks, which is a typical way to detect duplicates in
-	//       a large list.  This also detects BLOCKMAP overflow.
-
-	CompressBlockmap();
-
-	// final phase: write it out in the correct format
-
-	if (block_overflowed)
-	{
-		// leave an empty blockmap lump
-		CreateLevelLump("BLOCKMAP")->Finish();
-
-		Warning("Blockmap overflowed (lump will be empty)\n");
-	}
-	else
-	{
-		WriteBlockmap();
-
-		cur_info->Print(2, "    Blockmap size: %dx%d (compression: %d%%)\n",
-				block_w, block_h, block_compression);
-	}
-
-	FreeBlockmap();
+	// just create an empty blockmap lump
+	CreateLevelLump("BLOCKMAP")->Finish();
+	return;
 }
 
 
@@ -611,183 +224,11 @@ void PutBlockmap()
 // REJECT : Generate the reject table
 //------------------------------------------------------------------------
 
-
-static u8_t *rej_matrix;
-static int   rej_total_size;	// in bytes
-
-
-//
-// Allocate the matrix, init sectors into individual groups.
-//
-static void Reject_Init()
-{
-	rej_total_size = (num_sectors * num_sectors + 7) / 8;
-
-	rej_matrix = new u8_t[rej_total_size];
-	memset(rej_matrix, 0, rej_total_size);
-
-	for (int i=0 ; i < num_sectors ; i++)
-	{
-		sector_t *sec = lev_sectors[i];
-
-		sec->rej_group = i;
-		sec->rej_next = sec->rej_prev = sec;
-	}
-}
-
-
-static void Reject_Free()
-{
-	delete[] rej_matrix;
-	rej_matrix = NULL;
-}
-
-
-//
-// Algorithm: Initially all sectors are in individual groups.
-// Now we scan the linedef list.  For each two-sectored line,
-// merge the two sector groups into one.  That's it !
-//
-static void Reject_GroupSectors()
-{
-	for (int i=0 ; i < num_linedefs ; i++)
-	{
-		const linedef_t *line = lev_linedefs[i];
-
-		if (! line->right || ! line->left)
-			continue;
-
-		sector_t *sec1 = line->right->sector;
-		sector_t *sec2 = line->left->sector;
-		sector_t *tmp;
-
-		if (! sec1 || ! sec2 || sec1 == sec2)
-			continue;
-
-		// already in the same group ?
-		if (sec1->rej_group == sec2->rej_group)
-			continue;
-
-		// swap sectors so that the smallest group is added to the biggest
-		// group.  This is based on the assumption that sector numbers in
-		// wads will generally increase over the set of linedefs, and so
-		// (by swapping) we'll tend to add small groups into larger groups,
-		// thereby minimising the updates to 'rej_group' fields when merging.
-
-		if (sec1->rej_group > sec2->rej_group)
-		{
-			tmp = sec1; sec1 = sec2; sec2 = tmp;
-		}
-
-		// update the group numbers in the second group
-
-		sec2->rej_group = sec1->rej_group;
-
-		for (tmp=sec2->rej_next ; tmp != sec2 ; tmp=tmp->rej_next)
-			tmp->rej_group = sec1->rej_group;
-
-		// merge 'em baby...
-
-		sec1->rej_next->rej_prev = sec2;
-		sec2->rej_next->rej_prev = sec1;
-
-		tmp = sec1->rej_next;
-		sec1->rej_next = sec2->rej_next;
-		sec2->rej_next = tmp;
-	}
-}
-
-
-#if DEBUG_REJECT
-static void Reject_DebugGroups()
-{
-	// Note: this routine is destructive to the group numbers
-
-	for (int i=0 ; i < num_sectors ; i++)
-	{
-		sector_t *sec = lev_sectors[i];
-		sector_t *tmp;
-
-		int group = sec->rej_group;
-		int num = 0;
-
-		if (group < 0)
-			continue;
-
-		sec->rej_group = -1;
-		num++;
-
-		for (tmp=sec->rej_next ; tmp != sec ; tmp=tmp->rej_next)
-		{
-			tmp->rej_group = -1;
-			num++;
-		}
-
-		cur_info->Debug("Group %d  Sectors %d\n", group, num);
-	}
-}
-#endif
-
-
-static void Reject_ProcessSectors()
-{
-	for (int view=0 ; view < num_sectors ; view++)
-	{
-		for (int target=0 ; target < view ; target++)
-		{
-			sector_t *view_sec = lev_sectors[view];
-			sector_t *targ_sec = lev_sectors[target];
-
-			if (view_sec->rej_group == targ_sec->rej_group)
-				continue;
-
-			// for symmetry, do both sides at same time
-
-			int p1 = view * num_sectors + target;
-			int p2 = target * num_sectors + view;
-
-			rej_matrix[p1 >> 3] |= (1 << (p1 & 7));
-			rej_matrix[p2 >> 3] |= (1 << (p2 & 7));
-		}
-	}
-}
-
-
-static void Reject_WriteLump()
-{
-	Lump_c *lump = CreateLevelLump("REJECT", rej_total_size);
-
-	lump->Write(rej_matrix, rej_total_size);
-	lump->Finish();
-}
-
-
-//
-// For now we only do very basic reject processing, limited to
-// determining all isolated groups of sectors (islands that are
-// surrounded by void space).
-//
 void PutReject()
 {
-	if (! cur_info->do_reject || num_sectors == 0)
-	{
-		// just create an empty reject lump
-		CreateLevelLump("REJECT")->Finish();
-		return;
-	}
-
-	Reject_Init();
-	Reject_GroupSectors();
-	Reject_ProcessSectors();
-
-#if DEBUG_REJECT
-	Reject_DebugGroups();
-#endif
-
-	Reject_WriteLump();
-	Reject_Free();
-
-	cur_info->Print(2, "    Reject size: %d\n", rej_total_size);
+	// just create an empty reject lump
+	CreateLevelLump("REJECT")->Finish();
+	return;
 }
 
 
@@ -1346,40 +787,40 @@ static inline int VanillaSegAngle(const seg_t *seg)
 #define UDMF_SIDEDEF  4
 #define UDMF_LINEDEF  5
 
-void ParseThingField(thing_t *thing, const std::string& key, token_kind_e kind, const std::string& value)
+void ParseThingField(thing_t *thing, const std::string& key, epi::token_kind_e kind, const std::string& value)
 {
 	if (key == "x")
-		thing->x = LEX_Double(value);
+		thing->x = epi::LEX_Double(value);
 
 	if (key == "y")
-		thing->y = LEX_Double(value);
+		thing->y = epi::LEX_Double(value);
 
 	if (key == "type")
-		thing->type = LEX_Double(value);
+		thing->type = epi::LEX_Double(value);
 }
 
 
-void ParseVertexField(vertex_t *vertex, const std::string& key, token_kind_e kind, const std::string& value)
+void ParseVertexField(vertex_t *vertex, const std::string& key, epi::token_kind_e kind, const std::string& value)
 {
 	if (key == "x")
-		vertex->x = LEX_Double(value);
+		vertex->x = epi::LEX_Double(value);
 
 	if (key == "y")
-		vertex->y = LEX_Double(value);
+		vertex->y = epi::LEX_Double(value);
 }
 
 
-void ParseSectorField(sector_t *sector, const std::string& key, token_kind_e kind, const std::string& value)
+void ParseSectorField(sector_t *sector, const std::string& key, epi::token_kind_e kind, const std::string& value)
 {
 	// nothing actually needed
 }
 
 
-void ParseSidedefField(sidedef_t *side, const std::string& key, token_kind_e kind, const std::string& value)
+void ParseSidedefField(sidedef_t *side, const std::string& key, epi::token_kind_e kind, const std::string& value)
 {
 	if (key == "sector")
 	{
-		int num = LEX_Int(value);
+		int num = epi::LEX_Int(value);
 
 		if (num < 0 || num >= num_sectors)
 			cur_info->FatalError("illegal sector number #%d\n", (int)num);
@@ -1389,23 +830,23 @@ void ParseSidedefField(sidedef_t *side, const std::string& key, token_kind_e kin
 }
 
 
-void ParseLinedefField(linedef_t *line, const std::string& key, token_kind_e kind, const std::string& value)
+void ParseLinedefField(linedef_t *line, const std::string& key, epi::token_kind_e kind, const std::string& value)
 {
 	if (key == "v1")
-		line->start = SafeLookupVertex(LEX_Int(value));
+		line->start = SafeLookupVertex(epi::LEX_Int(value));
 
 	if (key == "v2")
-		line->end = SafeLookupVertex(LEX_Int(value));
+		line->end = SafeLookupVertex(epi::LEX_Int(value));
 
 	if (key == "special")
-		line->type = LEX_Int(value);
+		line->type = epi::LEX_Int(value);
 
 	if (key == "twosided")
-		line->two_sided = LEX_Boolean(value);
+		line->two_sided = epi::LEX_Boolean(value);
 
 	if (key == "sidefront")
 	{
-		int num = LEX_Int(value);
+		int num = epi::LEX_Int(value);
 
 		if (num < 0 || num >= (int)num_sidedefs)
 			line->right = NULL;
@@ -1415,7 +856,7 @@ void ParseLinedefField(linedef_t *line, const std::string& key, token_kind_e kin
 
 	if (key == "sideback")
 	{
-		int num = LEX_Int(value);
+		int num = epi::LEX_Int(value);
 
 		if (num < 0 || num >= (int)num_sidedefs)
 			line->left = NULL;
@@ -1425,7 +866,7 @@ void ParseLinedefField(linedef_t *line, const std::string& key, token_kind_e kin
 }
 
 
-void ParseUDMF_Block(lexer_c& lex, int cur_type)
+void ParseUDMF_Block(epi::lexer_c& lex, int cur_type)
 {
 	vertex_t  * vertex = NULL;
 	thing_t   * thing  = NULL;
@@ -1451,12 +892,12 @@ void ParseUDMF_Block(lexer_c& lex, int cur_type)
 		std::string key;
 		std::string value;
 
-		token_kind_e tok = lex.Next(key);
+		epi::token_kind_e tok = lex.Next(key);
 
-		if (tok == TOK_EOF)
+		if (tok == epi::TOK_EOF)
 			cur_info->FatalError("Malformed TEXTMAP lump: unclosed block\n");
 
-		if (tok != TOK_Ident)
+		if (tok != epi::TOK_Ident)
 			cur_info->FatalError("Malformed TEXTMAP lump: missing key\n");
 
 		if (! lex.Match("="))
@@ -1464,7 +905,7 @@ void ParseUDMF_Block(lexer_c& lex, int cur_type)
 
 		tok = lex.Next(value);
 
-		if (tok == TOK_EOF || tok == TOK_ERROR || value == "}")
+		if (tok == epi::TOK_EOF || tok == epi::TOK_ERROR || value == "}")
 			cur_info->FatalError("Malformed TEXTMAP lump: missing value\n");
 
 		if (! lex.Match(";"))
@@ -1504,17 +945,17 @@ void ParseUDMF_Pass(const std::string& data, int pass)
 	// pass = 2 : sidedefs
 	// pass = 3 : linedefs
 
-	lexer_c lex(data);
+	epi::lexer_c lex(data);
 
 	for (;;)
 	{
 		std::string section;
-		token_kind_e tok = lex.Next(section);
+		epi::token_kind_e tok = lex.Next(section);
 
-		if (tok == TOK_EOF)
+		if (tok == epi::TOK_EOF)
 			return;
 
-		if (tok != TOK_Ident)
+		if (tok != epi::TOK_Ident)
 		{
 			cur_info->FatalError("Malformed TEXTMAP lump.\n");
 			return;

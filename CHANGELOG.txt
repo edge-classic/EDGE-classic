@@ -16,6 +16,8 @@ Bugs fixed
 + Fixed Boom tagged line effects also applying the effect to the control linedef (when a tag was present)
 + Fixed Boom vector linedef scroll directions for angles other than 0/45/90
 + Fixed Boom displacement scrollers not returning back to their exact original position
++ Fixed Boom scrollers tied to permanently moving sectors (i.e., Door Open and Stay Open) being ineffective
++ Fixed inanimate objects adhering to monster dropoff limits when being carried over a drop
 + Fixed overzealous oofing when falling or bumping into a ceiling
 + Doom2 Map05 bug fixed properly this time ;)
 + Fixed some new DDFSTYLE additions (entry and cursor alignment, etc) not working as intended with the Episode Select menu

@@ -22,6 +22,8 @@ Bugs fixed
 + Doom2 Map05 bug fixed properly this time ;)
 + Fixed some new DDFSTYLE additions (entry and cursor alignment, etc) not working as intended with the Episode Select menu
 + Clip size was not being updated with RTS ReplaceWeapon and DDF weapon BECOME()
++ Fixed items with the HOVER flag still hovering when time is stopped
++ Fixed HUD and other non-game world animations unintentionally freezing during time stop
 
 
 General Improvements

@@ -60,6 +60,7 @@ extern coal::vm_c *ui_vm;
 
 extern double VM_GetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name);
 
+extern bool erraticism_active;
 
 #define DEBUG  0
 
@@ -92,12 +93,17 @@ static int crosshair_which;
 
 static float GetHoverDZ(mobj_t *mo)
 {
+	if (time_stop_active || erraticism_active)
+		return mo->phase;
+
 	// compute a different phase for different objects
 	angle_t phase = (angle_t)(long long)mo;
 	phase ^= (angle_t)(phase << 19);
 	phase += (angle_t)(leveltime << (ANGLEBITS-6));
 
-	return M_Sin(phase) * 4.0f;
+	mo->phase = M_Sin(phase) * 4.0f;
+
+	return mo->phase;
 }
 
 

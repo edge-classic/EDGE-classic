@@ -1708,20 +1708,17 @@ bool W_InitImages(void)
 //
 void W_UpdateImageAnims(void)
 {
+	do_Animate(real_graphics);
 	if (gamestate < GS_LEVEL)
 	{
-		do_Animate(real_graphics);
 		do_Animate(real_textures);
 		do_Animate(real_flats);
 	}
 	else if (!time_stop_active && !erraticism_active)
 	{
-		do_Animate(real_graphics);
 		do_Animate(real_textures);
 		do_Animate(real_flats);
 	}
-	else if (menuactive)
-		do_Animate(real_graphics);
 }
 
 

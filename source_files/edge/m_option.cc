@@ -135,6 +135,7 @@ extern cvar_c g_cullthinkers;
 extern cvar_c r_maxdlights;
 extern cvar_c v_sync;
 extern cvar_c g_bobbing;
+extern cvar_c v_secbright;
 
 static int menu_crosshair;
 static int menu_crosscolor;
@@ -177,7 +178,7 @@ static void M_ChangeMLook(int keypressed);
 static void M_ChangeJumping(int keypressed);
 static void M_ChangeCrouching(int keypressed);
 static void M_ChangeExtra(int keypressed);
-static void M_ChangeGamma(int keypressed);
+static void M_ChangeSecBright(int keypressed);
 static void M_ChangeMonitorSize(int keypressed);
 static void M_ChangeKicking(int keypressed);
 static void M_ChangeWeaponSwitch(int keypressed);
@@ -232,7 +233,7 @@ static char MixChans[]    = "32/64/96/128/160/192/224/256";
 
 static char CrosshairColor[] = "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange";
 
-static char OPLMode[]  = "Off/OPL/OPL2/OPL3";
+static char SecBrights[]  = "-50/-40/-30/-20/-10/Default/+10/+20/+30/+40/+50";
 
 static char DLightMax[]  = "Unlimited/20/40/60/80/100";
 
@@ -405,7 +406,7 @@ static menuinfo_t main_optmenu =
 
 static optmenuitem_t vidoptions[] =
 {
-	{OPT_Slider,  "Brightness",    NULL,  6,  &var_gamma, M_ChangeGamma, NULL},
+	{OPT_Switch,  "Sector Brightness",    SecBrights,  11,  &v_secbright.d, M_ChangeSecBright, NULL},
 	{OPT_Switch,  "Framerate Target", "35 FPS/70 FPS", 2, &r_doubleframes.d, M_ChangeDoubleFrames, NULL},
 	{OPT_Switch,  "V-Sync", "Off/Standard/Adaptive", 3, &v_sync.d, M_ChangeVSync, "Will fallback to Standard if Adaptive is not supported"},
 	{OPT_Switch,  "Monitor Size",  MonitSiz,  6, &monitor_size, M_ChangeMonitorSize, NULL},
@@ -1791,17 +1792,6 @@ static void M_Key2String(int key, char *deststring)
 }
 
 
-//
-// M_ChangeGamma
-//
-// -AJA- 1999/07/03: stuck this here & removed PLAYPAL reference.
-//
-static void M_ChangeGamma(int keypressed)
-{
-  /* nothing to do */
-}
-
-
 static void InitMonitorSize()
 {
 	     if (v_monitorsize.f > 2.00) monitor_size = 5;
@@ -2006,6 +1996,12 @@ static void M_ChangeBobbing(int keypressed)
 			psp->sy = 0;
 		}
 	}
+}
+
+// See above the above the above the above the above the above the above the above the above
+static void M_ChangeSecBright(int keypressed)
+{
+	v_secbright = v_secbright.d;
 }
 
 static void M_ChangeKicking(int keypressed)

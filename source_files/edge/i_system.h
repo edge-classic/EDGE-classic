@@ -298,9 +298,6 @@ void I_DeterminePixelAspect();
 
 void I_GrabCursor(bool enable);
 
-void I_SetGamma(float gamma);
-
-
 #endif /*__I_SYSTEM_H__*/
 
 //--- editor settings ---

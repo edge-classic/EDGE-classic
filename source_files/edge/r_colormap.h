@@ -44,9 +44,6 @@ void V_IndexColourToRGB(int indexcol, byte *returncol);
 
 rgbcol_t V_LookupColour(int col);
 
-// -AJA- 1999/07/03: moved here from v_res.h.
-extern int var_gamma;
-
 #define GAMMA_CONV(light)  (light)
 
 // -AJA- 1999/07/03: Some palette stuff.

@@ -80,7 +80,6 @@
 #define CFGDEF_MIX_CHANNELS     (2)  // 32 channels
 
 // Video Options
-#define CFGDEF_CURRENT_GAMMA    (0)
 #define CFGDEF_USE_SMOOTHING    (1)
 #define CFGDEF_USE_DLIGHTS      (1)
 #define CFGDEF_DOOM_FADING      (1)

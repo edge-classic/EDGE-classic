@@ -99,7 +99,6 @@ static default_t defaults[] =
     {CFGT_Int,	    "displaymode",		 &DISPLAYMODE,	  CFGDEF_DISPLAYMODE},
     {CFGT_Boolean,	"directx",			 &force_directx,  0},
     {CFGT_Boolean,	"waveout",			 &force_waveout,  0},
-    {CFGT_Int,      "usegamma",          &var_gamma,  CFGDEF_CURRENT_GAMMA},
  
     {CFGT_Int,      "sfx_volume",        &sfx_volume,     CFGDEF_SOUND_VOLUME},
     {CFGT_Int,      "music_volume",      &mus_volume,     CFGDEF_MUSIC_VOLUME},

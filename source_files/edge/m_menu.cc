@@ -91,6 +91,8 @@ int key_gamma_toggle;
 
 extern bool E_MatchesKey(int keyvar, int key);
 
+extern cvar_c v_secbright;
+
 //
 // defaulted values
 //
@@ -2226,26 +2228,42 @@ bool M_Responder(event_t * ev)
 
 			case KEYD_GAMMATOGGLE:  // gamma toggle
 
-				var_gamma++;
-				if (var_gamma > 5)
-					var_gamma = 0;
+				v_secbright.d++;
+				if (v_secbright.d > 10)
+					v_secbright.d = 0;
 
-				const char *msg = NULL;
-				
-				switch(var_gamma)
+				v_secbright = v_secbright.d;
+
+				std::string msg = "Sector Brightness "; // TODO: Make language entry - Dasho
+
+				switch(v_secbright.d)
 				{
-					case 0: { msg = language["GammaOff"];  break; }
-					case 1: { msg = language["GammaLevelOne"];  break; }
-					case 2: { msg = language["GammaLevelTwo"];  break; }
-					case 3: { msg = language["GammaLevelThree"];  break; }
-					case 4: { msg = language["GammaLevelFour"];  break; }
-					case 5: { msg = language["GammaLevelFive"];  break; }
-
-					default: { msg = NULL; break; }
+					case 0:
+					case 1:
+					case 2:
+					case 3:
+					case 4:
+					  msg.append("-");
+					  msg.append(std::to_string((5 - v_secbright.d) * 10));
+					  break;
+					case 5:
+					  msg.append("Default");  
+					  break;
+					case 6:
+					case 7:
+					case 8:
+					case 9:
+					case 10:
+					  msg.append("+");
+					  msg.append(std::to_string((5 - v_secbright.d) * -10));
+					  break;
+					default:
+						msg.clear();
+						break;
 				}
 				
-				if (msg)
-					CON_PlayerMessage(consoleplayer, "%s", msg);
+				if (!msg.empty())
+					CON_PlayerMessage(consoleplayer, "%s", msg.c_str());
 
 				// -AJA- 1999/07/03: removed PLAYPAL reference.
 				return true;

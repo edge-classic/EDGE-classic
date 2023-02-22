@@ -412,14 +412,6 @@ void I_FinishFrame(void)
 		I_DeterminePixelAspect();
 }
 
-
-void I_SetGamma(float gamma)
-{
-	if (SDL_SetWindowBrightness(my_vis, gamma) < 0)
-		I_Printf("Failed to change gamma.\n");
-}
-
-
 void I_ShutdownGraphics(void)
 {
 	if (graphics_shutdown)
@@ -429,8 +421,6 @@ void I_ShutdownGraphics(void)
 
 	if (SDL_WasInit(SDL_INIT_EVERYTHING))
 	{
-        // reset gamma to default
-        I_SetGamma(1.0f);
 		I_DeterminePixelAspect();
 
 		SDL_Quit ();

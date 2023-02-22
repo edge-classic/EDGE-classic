@@ -68,11 +68,7 @@ static bool loaded_playpal = false;
 // Radiation suit, green shift.
 #define RADIATION_PAL     13
 
-// -AJA- 1999/07/03: moved these here from v_res.c:
-int var_gamma;
-
-static bool old_gamma = -1;
-
+DEF_CVAR(v_secbright, "5", CVAR_ARCHIVE)
 
 // colour indices from palette
 int pal_black, pal_white, pal_gray239;
@@ -127,12 +123,7 @@ static int cur_palette = -1;
 
 void V_InitColour(void)
 {
-	std::string s = epi::to_u8string(argv::Value("gamma"));
 
-	if (!s.empty())
-	{
-		var_gamma = MAX(0, MIN(5, atoi(s.c_str())));
-	}
 }
 
 // 
@@ -550,14 +541,7 @@ rgbcol_t V_ParseFontColor(const char *name, bool strict)
 //
 void V_ColourNewFrame(void)
 {
-	if (var_gamma != old_gamma)
-	{
-		float gamma = 1.0 / (1.0 - var_gamma/8.0);
-
-		I_SetGamma(gamma);
-
-		old_gamma = var_gamma;
-	}
+	
 }
 
 //
@@ -952,8 +936,7 @@ abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props,
 
 	shader->Update();
 
-
-	int lit_Nom = props->lightlevel + light_add;
+	int lit_Nom = props->lightlevel + light_add + ((v_secbright.d - 5) * 10);
 
 	if (! (props->colourmap &&
 		   (props->colourmap->special & COLSP_NoFlash)) ||

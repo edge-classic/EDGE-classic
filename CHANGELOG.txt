@@ -56,6 +56,8 @@ General Improvements
 + Added support for ZGL3 compressed lumps to AJBSP and EDGE-Classic's node loading routines to conserve cache folder space. ZGL3 will now
   be the default node format.
 
++ Replaced Gamma options with Sector Brightness for better results without affecting other windows on the same display
+
 
 New Features
 ------------

@@ -69,7 +69,7 @@ static void DDF_MusicParseInfo(const char *info)
 		while (musinftype[i] != NULL && epi::case_cmp(charbuff, musinftype[i]) != 0)
 			i++;
 		if (i==ENDOFMUSINFTYPES)
-			DDF_Error("DDF_MusicParseInfo: Unknown music type: '%s'\n", charbuff);
+			DDF_Warning("DDF_MusicParseInfo: Unknown music type: '%s'\n", charbuff);
 		else
 		{
 			dynamic_plentry->infotype = (musicinftype_e)i;

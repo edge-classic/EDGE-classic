@@ -856,7 +856,7 @@ bool P_TryMove(mobj_t * thing, float x, float y)
 			return false;
 		}
 
-		if (!fell_off_thing && (thing->flags & EF_MONSTER) && 
+		if (!fell_off_thing && (thing->extendedflags & EF_MONSTER) && 
 			!(thing->flags & (MF_TELEPORT | MF_DROPOFF | MF_FLOAT)) &&
 			(thing->z - thing->info->step_size) > tm_I.floorz)
 		{
@@ -864,7 +864,7 @@ bool P_TryMove(mobj_t * thing, float x, float y)
 			return false;
 		}
 
-		if (!fell_off_thing && (thing->flags & EF_MONSTER) &&
+		if (!fell_off_thing && (thing->extendedflags & EF_MONSTER) &&
 			!((thing->flags & (MF_DROPOFF | MF_FLOAT)) ||
 			(thing->extendedflags & (EF_EDGEWALKER | EF_WATERWALKER))) &&
 			(tm_I.floorz - tm_I.dropoff > thing->info->step_size) &&

@@ -1235,7 +1235,6 @@ static void AssignSubsectorsToSectors()
 static void LoadXGL3Nodes(int lumpnum)
 {
 	int i, xglen = 0;
-	size_t zglen = 0;
 	byte *xgldata = nullptr;
 	std::vector<byte> zgldata;
 	byte *td = nullptr;

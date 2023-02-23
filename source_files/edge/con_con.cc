@@ -434,18 +434,6 @@ static void QuitEndoomSplitIntoLines(byte endoom_byte, char *src)
 
 	while (*src)
 	{
-		if (*src == '\n')
-		{
-			*dest++ = 0;
-
-			CON_QuitAddLine(line, false);
-
-			line = dest;
-
-			src++; continue;
-		}
-
-
 		*dest++ = *src++;
 	}
 

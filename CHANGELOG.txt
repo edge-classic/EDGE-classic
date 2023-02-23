@@ -24,6 +24,7 @@ Bugs fixed
 + Clip size was not being updated with RTS ReplaceWeapon and DDF weapon BECOME()
 + Fixed items with the HOVER flag still hovering when time is stopped
 + Fixed HUD and other non-game world animations unintentionally freezing during time stop
++ Fixed ENDOOM bytes that hapen to match the value of a newline character being intepreted as newline characters
 
 
 General Improvements

@@ -35,7 +35,7 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Copy Executable
-      run: cp ${{github.workspace}}/build/edge-classic ${{github.workspace}}
+      run: cp ${{github.workspace}}/build/source_files/edge/edge-classic ${{github.workspace}}
 
     - uses: actions/upload-artifact@v3
       with:
@@ -72,7 +72,7 @@ jobs:
       - name: Build
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - name: Copy Executable
-        run: cp build/edge-classic.exe .
+        run: cp /build/source_files/edge/edge-classic.exe .
       - uses: actions/upload-artifact@v3
         with:
           name: edge-classic-msys2
@@ -106,7 +106,7 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Copy Executable
-      run: cp ${{github.workspace}}/build/edge-classic ${{github.workspace}}
+      run: cp ${{github.workspace}}/build/source_files/edge/edge-classic ${{github.workspace}}
 
     - uses: actions/upload-artifact@v3
       with:

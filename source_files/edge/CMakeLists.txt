@@ -179,7 +179,7 @@ endif()
 target_link_libraries(edge-classic PRIVATE ${EDGE_LINK_LIBRARIES})
 
 # Copies executable to local install directory after build
-set (DEST_DIR "${CMAKE_CURRENT_LIST_DIR}/../../")
+set (DEST_DIR "${CMAKE_SOURCE_DIR}")
 
 add_custom_command(
 TARGET edge-classic

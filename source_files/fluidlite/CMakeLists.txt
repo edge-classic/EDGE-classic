@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.1)
-
-project(fluidlite)
+##########################################
+# fluidlite
+##########################################
 
 add_library(fluidlite
     src/fluid_chan.c

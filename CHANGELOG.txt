@@ -82,7 +82,7 @@ New Features
   - COALHUDS: Can now access individual vector elements with .x, .y, or .z
 
 + Transition from GWA to XWA cache file format
-  - Improved organization of AJBSP-generated XGL lumps
+  - Improved organization of AJBSP-generated XGL/ZGL lumps
   - Legacy GWA files will be purged from cache directory on startup
 
 

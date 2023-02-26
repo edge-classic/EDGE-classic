@@ -16,7 +16,8 @@ General Improvements
 
 New Features
 ------------
-
++ Added WebGL platform support
++ Added GLES2 rendering backend using GL4ES (https://github.com/ptitSeb/gl4es) 
 
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)
 ====================================

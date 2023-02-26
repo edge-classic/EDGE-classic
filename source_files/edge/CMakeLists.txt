@@ -184,15 +184,47 @@ endif()
 
 target_link_libraries(edge-classic PRIVATE ${EDGE_LINK_LIBRARIES})
 
-# Copies executable to local install directory after build
-set (DEST_DIR "${CMAKE_SOURCE_DIR}")
 
-add_custom_command(
-TARGET edge-classic
-POST_BUILD
-COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge-classic>"
-		"${DEST_DIR}"
-)
+if (NOT EMSCRIPTEN)
+  
+  set (DEST_DIR "${CMAKE_SOURCE_DIR}")
+
+  # Copies executable to local install directory after build
+  add_custom_command(
+  TARGET edge-classic
+  POST_BUILD
+  COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge-classic>"
+      "${DEST_DIR}"
+  )
+else()
+  set (SOURCE_DIR "${CMAKE_SOURCE_DIR}/build/source_files/edge")
+  set (DEST_DIR "${CMAKE_SOURCE_DIR}/web/site")
+
+  add_custom_command(
+  TARGET edge-classic
+  POST_BUILD
+  COMMAND "${CMAKE_COMMAND}" -E copy 
+      "${SOURCE_DIR}/edge-classic.js"
+      "${SOURCE_DIR}/edge-classic.wasm"
+      "${SOURCE_DIR}/edge-classic.wasm.map"      
+      "${DEST_DIR}"
+  )
+  
+  add_custom_command(
+  TARGET edge-classic
+  POST_BUILD
+  COMMAND python ${EMPACKAGER} ${DEST_DIR}/edge-classic.data --preload 
+    ${CMAKE_SOURCE_DIR}/web/preload@/ 
+    ${CMAKE_SOURCE_DIR}/edge-defs.wad@/edge-defs.wad
+    ${CMAKE_SOURCE_DIR}/autoload@/autoload
+    ${CMAKE_SOURCE_DIR}/edge_base@/edge_base
+    ${CMAKE_SOURCE_DIR}/edge_fixes@/edge_fixes
+    ${CMAKE_SOURCE_DIR}/soundfont@/soundfont
+    --js-output=${DEST_DIR}/edge-classic-data.js 
+    --use-preload-cache
+  )  
+
+endif()
 
 # Copy appropriate SDL2.dll to local install directory when built with MSVC
 if(MSVC)

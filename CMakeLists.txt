@@ -13,8 +13,10 @@ project(
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+option(EDGE_GL_ES2 "Enable GLES2 Rendering Backend" OFF)
+
 if (EMSCRIPTEN)
-	include("cmake/Emscripten.cmake")
+	include("cmake/Emscripten.cmake")  
 endif()
 
 if (MSVC)

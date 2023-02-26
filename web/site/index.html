@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Edge-Classic 1.33</title>
+    <style type="text/css">
+        .game {
+            border: 0;
+            overflow: hidden;
+            display: inline;
+            image-rendering: optimizeSpeed;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -o-crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+        }
+    </style>
+</head>
+
+<body style="background:black">
+
+    <div style="padding-top: 24px; padding-bottom: 24px; text-align: center;">
+        <a href="https://edge-classic.github.io/"><img src="logo.png" width="320px" /></a>
+    </div>
+    <div style="width: 100%; text-align: center">
+        <canvas class="game" id="canvas" width="1280px" height="720px" oncontextmenu="event.preventDefault()"></canvas>
+    </div>
+    <div style="padding-top: 4px; padding-bottom: 8px; text-align: center;">
+        <a style="color: white;" href="https://edge-classic.github.io/"><h4>https://edge-classic.github.io</h4></a>
+    </div>
+
+    <script type="text/javascript">
+        var Module = {
+            arguments: ["-iwad", "DOOM2.WAD", "-config", "edge-classic.cfg"],
+            preRun: [],
+            postRun: [],
+            print: (function () {
+                return function (text) {
+                    text = Array.prototype.slice.call(arguments).join(' ');
+                    console.log(text);
+                };
+            })(),
+            printErr: function (text) {
+                text = Array.prototype.slice.call(arguments).join(' ');
+                console.error(text);
+            },
+            canvas: (function () {
+                var canvas = document.getElementById('canvas');
+                canvas.addEventListener("webglcontextlost", function (e) { alert('FIXME: WebGL context lost, please reload the page'); e.preventDefault(); }, false);
+                return canvas;
+            })(),
+            setStatus: function (text) { },
+            monitorRunDependencies: function (left) { },
+        };
+        window.onerror = function (event) {
+            console.log("onerror: " + event.message);
+        };
+    </script>
+    <script async src=edge-classic.js></script>
+    <script src=edge-classic-data.js></script>
+</body>
+
+</html>

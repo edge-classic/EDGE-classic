@@ -123,8 +123,6 @@ set (EDGE_LINK_LIBRARIES
   edge_ddf
   edge_deh
   edge_epi
-  glad
-  ${OPENGL_LIBRARIES}
   ${SDL2_LIBRARIES}
   crsid
   ec_voxelib
@@ -153,6 +151,15 @@ else()
   target_compile_definitions(edge-classic PRIVATE UNIX)
 endif()
 
+if (NOT EDGE_GL_ES2)
+  target_include_directories(edge-classic PRIVATE ../glad/include/glad)
+	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} glad ${OPENGL_LIBRARIES})
+else()	
+  target_include_directories(edge-classic PRIVATE ../gl4es/include ../gl4es/include/GL)
+	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} gl4es)
+endif()
+
+
 target_include_directories(edge-classic PRIVATE ../ajbsp)
 target_include_directories(edge-classic PRIVATE ../coal)
 target_include_directories(edge-classic PRIVATE ../crsid)
@@ -163,7 +170,6 @@ target_include_directories(edge-classic PRIVATE ../ec_voxelib)
 target_include_directories(edge-classic PRIVATE ../epi)
 target_include_directories(edge-classic PRIVATE ../fluidlite/include)
 target_include_directories(edge-classic PRIVATE ../fmmidi)
-target_include_directories(edge-classic PRIVATE ../glad/include/glad)
 target_include_directories(edge-classic PRIVATE ../libgme/gme)
 target_include_directories(edge-classic PRIVATE ../libymfm)
 target_include_directories(edge-classic PRIVATE ../m4p)

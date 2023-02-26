@@ -1710,6 +1710,7 @@ void E_Main(int argc, const char **argv)
 
 		I_Debugf("- Entering game loop...\n");
 
+#ifndef EDGE_WEB
 		while (! (app_state & APP_STATE_PENDING_QUIT))
 		{
 			// We always do this once here, although the engine may
@@ -1719,6 +1720,9 @@ void E_Main(int argc, const char **argv)
 			if (app_state & APP_STATE_ACTIVE)
 				E_Tick();
 		}
+#else
+		return;
+#endif		
 	}
 	catch(const std::exception& e)
 	{

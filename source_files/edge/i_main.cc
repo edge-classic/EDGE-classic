@@ -26,12 +26,33 @@
 #include "e_main.h"
 #include "version.h"
 
+#ifdef EDGE_WEB
+	#include <emscripten.h>
+#endif
+
 std::filesystem::path exe_path = ".";
+
+#ifdef EDGE_WEB
+void E_WebTick(void)
+{
+	// We always do this once here, although the engine may
+	// makes in own calls to keep on top of the event processing
+	I_ControlGetEvents(); 
+
+	if (app_state & APP_STATE_ACTIVE)
+		E_Tick();
+}
+#endif
 
 extern "C" {
 
 int main(int argc, char *argv[])
 {
+
+#ifdef EDGE_WEB
+	emscripten_set_main_loop(E_WebTick, 0, 0);	
+#endif	
+
 	if (SDL_Init(0) < 0)
 		I_Error("Couldn't init SDL!!\n%s\n", SDL_GetError());
 

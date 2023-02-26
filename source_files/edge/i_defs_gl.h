@@ -26,7 +26,11 @@
 #ifndef __SYSTEM_SPECIFIC_DEFS_OPENGL__
 #define __SYSTEM_SPECIFIC_DEFS_OPENGL__
 
-#include "gl.h" // GLAD
+#include "gl.h" // GLAD or gl4es
+
+#ifdef EDGE_GL_ES2
+#include "gl4esinit.h"
+#endif
 
 #define USING_GL_TYPES 1
 

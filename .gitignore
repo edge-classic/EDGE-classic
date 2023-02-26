@@ -7,6 +7,10 @@ cache/
 /edge
 edge-classic.exe
 edge-classic
+edge-classic.data
+edge-classic-data.js
+edge-classic.js
+edge-classic.wasm*
 edge-classic.log
 debug.txt
 /*.dll

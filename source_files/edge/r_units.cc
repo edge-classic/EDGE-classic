@@ -150,18 +150,26 @@ void RGL_FinishUnits(void)
 
 static inline void myActiveTexture(GLuint id)
 {
+#ifndef EDGE_GL_ES2	
 	if (GLAD_GL_VERSION_1_3)
 		glActiveTexture(id);
 	else /* GLEW_ARB_multitexture */
 		glActiveTextureARB(id);
+#else
+	glActiveTexture(id);
+#endif
 }
 
 static inline void myMultiTexCoord2f(GLuint id, GLfloat s, GLfloat t)
 {
+#ifndef EDGE_GL_ES2		
 	if (GLAD_GL_VERSION_1_3)
 		glMultiTexCoord2f(id, s, t);
 	else /* GLEW_ARB_multitexture */
 		glMultiTexCoord2fARB(id, s, t);
+#else
+	glMultiTexCoord2f(id, s, t);
+#endif
 }
 
 //

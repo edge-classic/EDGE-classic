@@ -214,6 +214,8 @@ void RGL_CheckExtensions(void)
 		}		
 	}
 
+#ifndef EDGE_GL_ES2
+
 	// Check for various extensions
 	if (GLAD_GL_VERSION_1_3 || GLAD_GL_ARB_multitexture)
 	{ /* OK */ }
@@ -269,6 +271,9 @@ void RGL_CheckExtensions(void)
 		if (bug->enable & PFT_SKY)        r_dumbsky = 0;
 		if (bug->enable & PFT_MULTI_TEX)  r_dumbmulti = 0;
 	}
+
+#endif
+
 }
 
 //
@@ -286,7 +291,10 @@ void RGL_SoftInit(void)
 	glDisable(GL_STENCIL_TEST);
 
 	glDisable(GL_LINE_SMOOTH);
+
+#ifndef EDGE_GL_ES2
 	glDisable(GL_POLYGON_SMOOTH);
+#endif
 
 	if (var_dithering)
 		glEnable(GL_DITHER);

@@ -186,6 +186,12 @@ void I_StartupGraphics(void)
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,   16);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
+#ifdef EDGE_GL_ES2
+	SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "1");
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+	initialize_gl4es();
+#endif
 
     // -DS- 2005/06/27 Detect SDL Resolutions
 	SDL_DisplayMode info;
@@ -290,7 +296,9 @@ static bool I_CreateWindow(scrmode_c *mode)
 	else
 		SDL_GL_SetSwapInterval(v_sync.d);
 
+#ifndef EDGE_GL_ES2
 	gladLoaderLoadGL();
+#endif
 
 	return true;
 }
@@ -426,7 +434,12 @@ void I_ShutdownGraphics(void)
 		SDL_Quit ();
 	}
 
+#ifndef EDGE_GL_ES2
 	gladLoaderUnloadGL();
+#else
+	close_gl4es();
+#endif
+
 }
 
 //--- editor settings ---

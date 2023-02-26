@@ -61,6 +61,32 @@ Then, after navigating to the project directory in a terminal:
 > cmake -B build
 > cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
 ```
+## WebGL Compilation
+
+*Please note, the web version is less mature than other platforms and there is ongoing work to better integrate it.*
+
+In order to build for the web you'll need:
+
+* `cmake`
+* `python3` - (Required by Emscripten)
+* `Emscripten` - Download and install the [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html)  
+
+Before building, copy an IWAD such as DOOM2.WAD to the example website template in the project's root ```/web/preload``` folder, if you are using an IWAD other than DOOM2.WAD, edit ```/web/site/index.html``` accordingly.  
+
+You can add other WAD files to the preload folder.  For example, to play  [Arctic Wolf: Revisited](https://www.moddb.com/mods/edge-classic-add-ons/downloads/arctic-wolf-revisited), copy the WAD and then modify the arguments list in ```index.html``` adding ```"-file", "arctre.wad"```
+
+When adding files to the preload folder, building is required as the data is processed to be loaded by browser. 
+
+Now, configure and build:
+
+```
+> cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -G "Unix Makefiles"
+> cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
+```
+
+Once the build is complete, all the required files should be in the ```/web/site``` folder, change directory to this folder and run ```python -m http.server```
+
+Open a web browser, navigate to ```http://127.0.0.1:8000```, and play Edge Classic!   
 
 # Launching EDGE-Classic
 

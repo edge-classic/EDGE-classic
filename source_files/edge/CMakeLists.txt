@@ -123,8 +123,6 @@ set (EDGE_LINK_LIBRARIES
   edge_ddf
   edge_deh
   edge_epi
-  glad
-  ${OPENGL_LIBRARIES}
   ${SDL2_LIBRARIES}
   crsid
   ec_voxelib
@@ -153,6 +151,15 @@ else()
   target_compile_definitions(edge-classic PRIVATE UNIX)
 endif()
 
+if (NOT EDGE_GL_ES2)
+  target_include_directories(edge-classic PRIVATE ../glad/include/glad)
+	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} glad ${OPENGL_LIBRARIES})
+else()	
+  target_include_directories(edge-classic PRIVATE ../gl4es/include ../gl4es/include/GL)
+	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} gl4es)
+endif()
+
+
 target_include_directories(edge-classic PRIVATE ../ajbsp)
 target_include_directories(edge-classic PRIVATE ../coal)
 target_include_directories(edge-classic PRIVATE ../crsid)
@@ -163,7 +170,6 @@ target_include_directories(edge-classic PRIVATE ../ec_voxelib)
 target_include_directories(edge-classic PRIVATE ../epi)
 target_include_directories(edge-classic PRIVATE ../fluidlite/include)
 target_include_directories(edge-classic PRIVATE ../fmmidi)
-target_include_directories(edge-classic PRIVATE ../glad/include/glad)
 target_include_directories(edge-classic PRIVATE ../libgme/gme)
 target_include_directories(edge-classic PRIVATE ../libymfm)
 target_include_directories(edge-classic PRIVATE ../m4p)
@@ -178,15 +184,47 @@ endif()
 
 target_link_libraries(edge-classic PRIVATE ${EDGE_LINK_LIBRARIES})
 
-# Copies executable to local install directory after build
-set (DEST_DIR "${CMAKE_SOURCE_DIR}")
 
-add_custom_command(
-TARGET edge-classic
-POST_BUILD
-COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge-classic>"
-		"${DEST_DIR}"
-)
+if (NOT EMSCRIPTEN)
+  
+  set (DEST_DIR "${CMAKE_SOURCE_DIR}")
+
+  # Copies executable to local install directory after build
+  add_custom_command(
+  TARGET edge-classic
+  POST_BUILD
+  COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge-classic>"
+      "${DEST_DIR}"
+  )
+else()
+  set (SOURCE_DIR "${CMAKE_SOURCE_DIR}/build/source_files/edge")
+  set (DEST_DIR "${CMAKE_SOURCE_DIR}/web/site")
+
+  add_custom_command(
+  TARGET edge-classic
+  POST_BUILD
+  COMMAND "${CMAKE_COMMAND}" -E copy 
+      "${SOURCE_DIR}/edge-classic.js"
+      "${SOURCE_DIR}/edge-classic.wasm"
+      "${SOURCE_DIR}/edge-classic.wasm.map"      
+      "${DEST_DIR}"
+  )
+  
+  add_custom_command(
+  TARGET edge-classic
+  POST_BUILD
+  COMMAND python ${EMPACKAGER} ${DEST_DIR}/edge-classic.data --preload 
+    ${CMAKE_SOURCE_DIR}/web/preload@/ 
+    ${CMAKE_SOURCE_DIR}/edge-defs.wad@/edge-defs.wad
+    ${CMAKE_SOURCE_DIR}/autoload@/autoload
+    ${CMAKE_SOURCE_DIR}/edge_base@/edge_base
+    ${CMAKE_SOURCE_DIR}/edge_fixes@/edge_fixes
+    ${CMAKE_SOURCE_DIR}/soundfont@/soundfont
+    --js-output=${DEST_DIR}/edge-classic-data.js 
+    --use-preload-cache
+  )  
+
+endif()
 
 # Copy appropriate SDL2.dll to local install directory when built with MSVC
 if(MSVC)

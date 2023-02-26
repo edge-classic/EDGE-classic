@@ -2,6 +2,22 @@ https://github.com/dashodanger/EDGE-classic
 
 Current as of: February 2023
 
+CHANGELOG for EDGE-Classic 1.34 (since EDGE-Classic 1.33)
+====================================
+
+Bugs fixed
+----------
++ Fixed incorrect height for Doom 2 Thing 53.
+
+General Improvements
+--------------------
++ Changed AJBSP to open loaded IWADs/PWADs in read mode as an additional means of ensuring original file
+  integrity (was previously set to open in append mode despite not writing nodes to the original files)
+
+New Features
+------------
+
+
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)
 ====================================
 

@@ -2359,17 +2359,9 @@ void SetInfo(buildinfo_t *info)
 
 void OpenWad(std::filesystem::path filename)
 {
-	cur_wad = Wad_file::Open(filename, 'a');
+	cur_wad = Wad_file::Open(filename, 'r');
 	if (cur_wad == NULL)
 		cur_info->FatalError("Cannot open file: %s\n", filename.u8string().c_str());
-
-	if (cur_wad->IsReadOnly())
-	{
-		delete cur_wad;
-		cur_wad = NULL;
-
-		cur_info->FatalError("file is read only: %s\n", filename.u8string().c_str());
-	}
 }
 
 

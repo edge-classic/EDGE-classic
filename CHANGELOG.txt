@@ -14,10 +14,23 @@ General Improvements
 + Changed AJBSP to open loaded IWADs/PWADs in read mode as an additional means of ensuring original file
   integrity (was previously set to open in append mode despite not writing nodes to the original files)
 
++ Added 'udmf_strict' CVAR (on by default) to control whether or not loading a UDMF map with an unsupported namespace will generate an error.
+
 New Features
 ------------
 + Added WebGL platform support
+
 + Added GLES2 rendering backend using GL4ES (https://github.com/ptitSeb/gl4es) 
+
++ UDMF:
+  - Vertex slope support: Must define "zfloor" or "zceiling" for a vertex.
+  - Applies effects to any triangular sector or rectangular sectors that fulfill the following conditions:
+    - Only two out of the four vertices utilize zfloor/zceiling values
+    - The two vertices must be part of the same line segment
+    - The zfloor value must be identical between the two vertices for a floor slope
+    - The zceiling value must be identical between the two vertices for a ceiling slope
+    - The floor and ceiling slope for a rectangular sector can use different vertices as long
+      as they fulfill the other conditions
 
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)
 ====================================

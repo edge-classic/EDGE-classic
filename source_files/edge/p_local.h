@@ -204,7 +204,7 @@ int P_ThingOnLineSide(const mobj_t *mo, line_t * ld);
 
 int P_FindThingGap(vgap_t * gaps, int gap_num, float z1, float z2);
 void P_ComputeGaps(line_t * ld);
-float P_ComputeThingGap(mobj_t * thing, sector_t * sec, float z, float * f, float * c);
+float P_ComputeThingGap(mobj_t * thing, sector_t * sec, float z, float * f, float * c, float f_slope_z = 0.0f, float c_slope_z = 0.0f);
 void P_AddExtraFloor(sector_t *sec, line_t *line);
 void P_RecomputeGapsAroundSector(sector_t *sec);
 void P_FloodExtraFloors(sector_t *sector);

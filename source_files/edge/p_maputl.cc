@@ -575,7 +575,7 @@ int P_FindThingGap(vgap_t * gaps, int gap_num, float z1, float z2)
 // values of Z are recognised: ONFLOORZ & ONCEILINGZ.
 //
 float P_ComputeThingGap(mobj_t * thing, sector_t * sec, float z,
-						float * f, float * c)
+						float * f, float * c, float f_slope_z, float c_slope_z)
 {
 	vgap_t temp_gaps[100];
 	int temp_num;
@@ -588,7 +588,9 @@ float P_ComputeThingGap(mobj_t * thing, sector_t * sec, float z,
 	if (z == ONCEILINGZ)
 		z = sec->c_h - thing->height;
 
-	temp_num = P_FindThingGap(temp_gaps, temp_num, z, z + thing->height);
+	z += f_slope_z;
+
+	temp_num = P_FindThingGap(temp_gaps, temp_num, z, z + thing->height + c_slope_z);
 
 	if (temp_num < 0)
 	{
@@ -597,8 +599,8 @@ float P_ComputeThingGap(mobj_t * thing, sector_t * sec, float z,
 		return *f;
 	}
 
-	*f = temp_gaps[temp_num].f;
-	*c = temp_gaps[temp_num].c;
+	*f = temp_gaps[temp_num].f + f_slope_z;
+	*c = temp_gaps[temp_num].c - c_slope_z;
 
 	return z;
 }

@@ -36,6 +36,7 @@
 //
 extern int numvertexes;
 extern vec2_t *vertexes;
+extern vec2_t *zvertexes;
 
 extern int num_gl_vertexes;
 extern vec2_t *gl_vertexes;

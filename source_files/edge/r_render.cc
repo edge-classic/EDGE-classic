@@ -1437,7 +1437,7 @@ static inline void AddWallTile2( seg_t *seg, drawfloor_t *dfloor,
 
 #define IM_HEIGHT_SAFE(im)  ((im) ? IM_HEIGHT(im) : 0)
 
-static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float f_min, float c_max)
+static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float f_min, float c_max, bool mirror_sub = false)
 {
 	line_t *ld = seg->linedef;
 	side_t *sd = ld->side[sidenum];
@@ -1486,9 +1486,20 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 
 	// handle lower, upper and mid-masker
 
-	if (slope_fh < other->f_h)
+	if (slope_fh < other->f_h || (!sec->floor_vertex_slope && other->floor_vertex_slope))
 	{
-		if (! sd->bottom.image && ! debug_hom.d)
+		if (other->floor_vertex_slope)
+		{
+			float zv1 = zvertexes[seg->v1 - vertexes].x;
+			float zv2 = zvertexes[seg->v2 - vertexes].x;
+			if (mirror_sub)
+				std::swap(zv1, zv2);
+			AddWallTile2(seg, dfloor,
+				sd->bottom.image ? &sd->bottom : &other->floor, sec->f_h, 
+				(zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->f_h, sec->f_h, (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->f_h,
+				(ld->flags & MLF_LowerUnpegged) ? sec->c_h : MAX(zv1, zv2), 0);
+		}
+		else if (! sd->bottom.image && ! debug_hom.d)
 		{
 			lower_invis = true;
 		}
@@ -1520,10 +1531,21 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 		}
 	}
 
-	if (slope_ch > other->c_h &&
+	if ((slope_ch > other->c_h || (!sec->ceil_vertex_slope && other->ceil_vertex_slope)) &&
 		! (IS_SKY(sec->ceil) && IS_SKY(other->ceil)))
 	{
-		if (! sd->top.image && ! debug_hom.d)
+		if (other->ceil_vertex_slope)
+		{
+			float zv1 = zvertexes[seg->v1 - vertexes].y;
+			float zv2 = zvertexes[seg->v2 - vertexes].y;
+			if (mirror_sub)
+				std::swap(zv1, zv2);
+			AddWallTile2(seg, dfloor,
+				sd->top.image ? &sd->top : &other->ceil, sec->c_h, 
+				(zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->c_h, sec->c_h, (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->c_h,
+				(ld->flags & MLF_UpperUnpegged) ? sec->f_h : MIN(zv1, zv2), 0);
+		}
+		else if (! sd->top.image && ! debug_hom.d)
 		{
 			upper_invis = true;
 		}
@@ -1913,7 +1935,7 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor,
 }
 
 
-static void RGL_DrawSeg(drawfloor_t *dfloor, seg_t *seg)
+static void RGL_DrawSeg(drawfloor_t *dfloor, seg_t *seg, bool mirror_sub = false)
 {
 	//
 	// Analyses floor/ceiling heights, and add corresponding walls/floors
@@ -1950,7 +1972,7 @@ static void RGL_DrawSeg(drawfloor_t *dfloor, seg_t *seg)
 	}
 
 
-	ComputeWallTiles(seg, dfloor, seg->side, f_min, c_max);
+	ComputeWallTiles(seg, dfloor, seg->side, f_min, c_max, mirror_sub);
 
 
 	// -AJA- 2004/04/21: Emulate Flat-Flooding TRICK
@@ -2429,9 +2451,26 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 			float x = seg->v1->x;
 			float y = seg->v1->y;
 			float z = h;
+			int vi = seg->v1 - vertexes;
 
 			// must do this before mirror adjustment
 			M_AddToBox(v_bbox, x, y);
+
+			if (cur_sub->sector->floor_vertex_slope && face_dir > 0)
+			{
+				// floor - check vertex heights
+				if (vi >= 0 && vi < numvertexes && zvertexes)
+					if (zvertexes[vi].x < 32767.0f && zvertexes[vi].x > -32768.0f)
+						z = zvertexes[vi].x;
+			}
+
+			if (cur_sub->sector->ceil_vertex_slope && face_dir < 0)
+			{
+				// ceiling - check vertex heights
+				if (vi >= 0 && vi < numvertexes && zvertexes)
+					if (zvertexes[vi].y < 32767.0f && zvertexes[vi].y > -32768.0f)
+						z = zvertexes[vi].y;
+			}
 
 			if (slope)
 			{
@@ -2760,10 +2799,10 @@ static void RGL_WalkSubsector(int num)
 }
 
 
-static void RGL_DrawSubsector(drawsub_c *dsub);
+static void RGL_DrawSubsector(drawsub_c *dsub, bool mirror_sub = false);
 
 
-static void RGL_DrawSubList(std::list<drawsub_c *> &dsubs)
+static void RGL_DrawSubList(std::list<drawsub_c *> &dsubs, bool for_mirror = false)
 {
 	// draw all solid walls and planes
 	solid_mode = true;
@@ -2772,7 +2811,7 @@ static void RGL_DrawSubList(std::list<drawsub_c *> &dsubs)
 	std::list<drawsub_c *>::iterator FI;  // Forward Iterator
 
 	for (FI = dsubs.begin(); FI != dsubs.end(); FI++)
-		RGL_DrawSubsector(*FI);
+		RGL_DrawSubsector(*FI, for_mirror);
 
 	RGL_FinishUnits();
 
@@ -2783,7 +2822,7 @@ static void RGL_DrawSubList(std::list<drawsub_c *> &dsubs)
 	std::list<drawsub_c *>::reverse_iterator RI;
 
 	for (RI = dsubs.rbegin(); RI != dsubs.rend(); RI++)
-		RGL_DrawSubsector(*RI);
+		RGL_DrawSubsector(*RI, for_mirror);
 
 	RGL_FinishUnits();
 
@@ -2923,7 +2962,7 @@ static void RGL_DrawMirror(drawmirror_c *mir)
 
 	MIR_Push(mir);
 	{
-		RGL_DrawSubList(mir->drawsubs);
+		RGL_DrawSubList(mir->drawsubs, true);
 	}
 	MIR_Pop();
 
@@ -2937,7 +2976,7 @@ static void RGL_DrawMirror(drawmirror_c *mir)
 }
 
 
-static void RGL_DrawSubsector(drawsub_c *dsub)
+static void RGL_DrawSubsector(drawsub_c *dsub, bool mirror_sub)
 {
 	subsector_t *sub = dsub->sub;
 
@@ -2968,7 +3007,7 @@ static void RGL_DrawSubsector(drawsub_c *dsub)
 
 		for (SEGI = dsub->segs.begin(); SEGI != dsub->segs.end(); SEGI++)
 		{
-			RGL_DrawSeg(dfloor, (*SEGI)->seg);
+			RGL_DrawSeg(dfloor, (*SEGI)->seg, mirror_sub);
 		}
 
 		RGL_DrawPlane(dfloor, dfloor->c_h, dfloor->ceil,  -1);

@@ -274,6 +274,12 @@ typedef struct sector_s
 	slope_plane_t *f_slope;
 	slope_plane_t *c_slope;
 
+	// UDMF vertex slope stuff
+	bool floor_vertex_slope = false;
+	bool ceil_vertex_slope = false;
+	std::vector<vec3_t> floor_z_verts;
+	std::vector<vec3_t> ceil_z_verts;
+
 	// linked list of extrafloors that this sector controls.  NULL means
 	// that this sector is not a controller.
 	extrafloor_t *control_floors;

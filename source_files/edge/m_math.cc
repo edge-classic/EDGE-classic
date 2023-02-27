@@ -58,6 +58,39 @@ void M_Angle2Matrix (angle_t ang, vec2_t * x, vec2_t * y)
     y->y =  x->x;
 }
 
+static vec3_t M_CrossProduct(vec3_t v1, vec3_t v2, vec3_t v3)
+{
+	vec3_t A{v2.x-v1.x, v2.y-v1.y, v2.z-v1.z};
+	vec3_t B{v3.x-v1.x, v3.y-v1.y, v3.z-v1.z};
+	float x = (A.y * B.z) - (A.z * B.y);
+	float y = (A.z * B.x) - (A.x * B.z);
+	float z = (A.x * B.y) - (A.y * B.x);
+	return {x,y,z};
+}
+
+static vec3_t M_CrossProduct(vec3_t v1, vec3_t v2)
+{
+	float x = (v1.y * v2.z) - (v1.z * v2.y);
+	float y = (v1.z * v2.x) - (v1.x * v2.z);
+	float z = (v1.x * v2.y) - (v1.y * v2.x);
+	return {x,y,z};
+}
+
+static float M_DotProduct(vec3_t v1, vec3_t v2)
+{
+	return (v1.x*v2.x) + (v1.y*v2.y) + (v1.z*v2.z);
+}
+
+vec3_t M_LinePlaneIntersection(vec3_t line_a, vec3_t line_b,
+	vec3_t plane_a, vec3_t plane_b, vec3_t plane_c)
+{
+	vec3_t plane_normal = M_CrossProduct(plane_a, plane_b, plane_c);
+	float n = M_DotProduct(plane_normal, {plane_c.x-line_a.x,plane_c.y-line_a.y,plane_c.z-line_a.z});
+	vec3_t line_subtract{line_b.x-line_a.x,line_b.y-line_a.y,line_b.z-line_a.z};
+	float d = M_DotProduct(plane_normal, line_subtract);
+	float u = n/d;
+	return{line_a.x+u*line_subtract.x, line_a.y+u*line_subtract.y, line_a.z+u*line_subtract.z};
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

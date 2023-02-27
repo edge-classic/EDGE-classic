@@ -75,13 +75,15 @@
 
 static bool level_active = false;
 
+DEF_CVAR(udmf_strict, "1", CVAR_ARCHIVE)
 
 //
 // MAP related Lookup tables.
 // Store VERTEXES, LINEDEFS, SIDEDEFS, etc.
 //
 int numvertexes;
-vec2_t *vertexes;
+vec2_t *vertexes = nullptr;
+vec2_t *zvertexes = nullptr;
 
 int num_gl_vertexes;
 vec2_t *gl_vertexes;
@@ -1575,6 +1577,7 @@ static void LoadUDMFVertexes(parser_t *psr)
 	}
 
 	vertexes = new vec2_t[numvertexes];
+	zvertexes = new vec2_t[numvertexes];
 
 	psr->next = 0; // restart from start of lump
 	while (1)
@@ -1585,6 +1588,7 @@ static void LoadUDMFVertexes(parser_t *psr)
 		if (epi::case_cmp(ident, "vertex") == 0)
 		{
 			float x = 0.0f, y = 0.0f;
+			float zf = -40000.0f, zc = 40000.0f;
 
 			// process vertex block
 			while (1)
@@ -1614,11 +1618,22 @@ static void LoadUDMFVertexes(parser_t *psr)
 				{
 					y = str2float(val, 0.0f);
 				}
+				else if (epi::case_cmp(ident, "zfloor") == 0)
+				{
+					zf = str2float(val, -40000.0f);
+				}
+				else if (epi::case_cmp(ident, "zceiling") == 0)
+				{
+					zc = str2float(val, 40000.0f);
+				}
 			}
 
 			vec2_t *vv = vertexes + i;
 			vv->x = x;
 			vv->y = y;
+			vv = zvertexes + i;
+			vv->x = zf;
+			vv->y = zc;
 
 			i++;
 		}
@@ -2876,6 +2891,144 @@ void GroupLines(void)
 		if (line_p - sector->lines != sector->linecount)
 			I_Error("GroupLines: miscounted");
 
+		// Allow vertex slope if a triangular sector or a rectangular
+		// sector in which two adjacent verts have an identical z-height
+		// and the other two have it unset
+		if (sector->linecount == 3 && zvertexes)
+		{
+			for (j=0; j < 3; j++)
+			{
+				vec2_t *vert = sector->lines[j]->v1;
+				bool add_it = true;
+				for (auto v : sector->floor_z_verts)
+					if (v.x == vert->x && v.y == vert->y) add_it = false;
+				if (add_it)
+				{
+					int vi = vert - vertexes;
+					if (vi >= 0 && vi < numvertexes && zvertexes)
+					{
+						if (zvertexes[vi].x < 32767.0f && zvertexes[vi].x > -32768.0f)
+						{
+							sector->floor_vertex_slope = true;
+							sector->floor_z_verts.push_back({vert->x,vert->y,zvertexes[vi].x});
+						}
+						else
+							sector->floor_z_verts.push_back({vert->x,vert->y,sector->f_h});
+						if (zvertexes[vi].y < 32767.0f && zvertexes[vi].y > -32768.0f)
+						{
+							sector->ceil_vertex_slope = true;
+							sector->ceil_z_verts.push_back({vert->x,vert->y,zvertexes[vi].y});
+						}
+						else
+							sector->ceil_z_verts.push_back({vert->x,vert->y,sector->c_h});
+					}
+				}
+				vert = sector->lines[j]->v2;
+				add_it = true;
+				for (auto v : sector->floor_z_verts)
+					if (v.x == vert->x && v.y == vert->y) add_it = false;
+				if (add_it)
+				{
+					int vi = vert - vertexes;
+					if (vi >= 0 && vi < numvertexes && zvertexes)
+					{
+						if (zvertexes[vi].x < 32767.0f && zvertexes[vi].x > -32768.0f)
+						{
+							sector->floor_vertex_slope = true;
+							sector->floor_z_verts.push_back({vert->x,vert->y,zvertexes[vi].x});
+						}
+						else
+							sector->floor_z_verts.push_back({vert->x,vert->y,sector->f_h});
+						if (zvertexes[vi].y < 32767.0f && zvertexes[vi].y > -32768.0f)
+						{
+							sector->ceil_vertex_slope = true;
+							sector->ceil_z_verts.push_back({vert->x,vert->y,zvertexes[vi].y});
+						}
+						else
+							sector->ceil_z_verts.push_back({vert->x,vert->y,sector->c_h});
+					}
+				}
+			}
+			if (!sector->floor_vertex_slope)
+				sector->floor_z_verts.clear();
+			if (!sector->ceil_vertex_slope)
+				sector->ceil_z_verts.clear();
+		}
+		if (sector->linecount == 4 && zvertexes)
+		{
+			int floor_z_lines = 0;
+			int ceil_z_lines = 0;
+			for (j=0; j < 4; j++)
+			{
+				vec2_t *vert = sector->lines[j]->v1;
+				vec2_t *vert2 = sector->lines[j]->v2;
+				bool add_it_v1 = true;
+				bool add_it_v2 = true;
+				for (auto v : sector->floor_z_verts)
+					if (v.x == vert->x && v.y == vert->y) add_it_v1 = false;
+				for (auto v : sector->floor_z_verts)
+					if (v.x == vert2->x && v.y == vert2->y) add_it_v2 = false;
+				int vi = vert - vertexes;
+				int vi2 = vert2 - vertexes;
+				if (add_it_v1)
+				{
+					if (zvertexes[vi].x < 32767.0f && zvertexes[vi].x > -32768.0f)
+					{
+						sector->floor_z_verts.push_back({vert->x,vert->y,zvertexes[vi].x});
+					}
+					else
+						sector->floor_z_verts.push_back({vert->x,vert->y,sector->f_h});
+					if (zvertexes[vi].y < 32767.0f && zvertexes[vi].y > -32768.0f)
+					{
+						sector->ceil_z_verts.push_back({vert->x,vert->y,zvertexes[vi].y});
+					}
+					else
+						sector->ceil_z_verts.push_back({vert->x,vert->y,sector->c_h});
+				}
+				if (add_it_v2)
+				{
+					if (zvertexes[vi2].x < 32767.0f && zvertexes[vi2].x > -32768.0f)
+					{
+						sector->floor_z_verts.push_back({vert2->x,vert2->y,zvertexes[vi2].x});
+					}
+					else
+						sector->floor_z_verts.push_back({vert2->x,vert2->y,sector->f_h});
+					if (zvertexes[vi2].y < 32767.0f && zvertexes[vi2].y > -32768.0f)
+					{
+						sector->ceil_z_verts.push_back({vert2->x,vert2->y,zvertexes[vi2].y});
+					}
+					else
+						sector->ceil_z_verts.push_back({vert2->x,vert2->y,sector->c_h});
+				}
+				if ((zvertexes[vi].x < 32767.0f && zvertexes[vi].x > -32768.0f) && 
+					(zvertexes[vi2].x < 32767.0f && zvertexes[vi2].x > -32768.0f) &&
+					zvertexes[vi].x == zvertexes[vi2].x)
+				{
+					floor_z_lines++;
+				}
+				if ((zvertexes[vi].y < 32767.0f && zvertexes[vi].y > -32768.0f) && 
+					(zvertexes[vi2].y < 32767.0f && zvertexes[vi2].y > -32768.0f) &&
+					zvertexes[vi].y == zvertexes[vi2].y)
+				{
+					ceil_z_lines++;
+				}
+			}
+			if (floor_z_lines == 1 && sector->floor_z_verts.size() == 4)
+			{
+				sector->floor_z_verts.pop_back();
+				sector->floor_vertex_slope = true;
+			}
+			else
+				sector->floor_z_verts.clear();
+			if (ceil_z_lines == 1 && sector->ceil_z_verts.size() == 4)
+			{
+				sector->ceil_z_verts.pop_back();
+				sector->ceil_vertex_slope = true;
+			}
+			else
+				sector->ceil_z_verts.clear();
+		}
+
 		// set the degenmobj_t to the middle of the bounding box
 		sector->sfx_origin.x = (bbox[BOXRIGHT] + bbox[BOXLEFT]) / 2;
 		sector->sfx_origin.y = (bbox[BOXTOP] + bbox[BOXBOTTOM]) / 2;
@@ -3075,6 +3228,11 @@ void ShutdownLevel(void)
 	delete[] segs;         segs = NULL;
 	delete[] nodes;        nodes = NULL;
 	delete[] vertexes;     vertexes = NULL;
+	if (zvertexes)
+	{
+		delete[] zvertexes;    
+		zvertexes = NULL;
+	}
 	delete[] sides;        sides = NULL;
 	delete[] lines;        lines = NULL;
 	delete[] sectors;      sectors = NULL;
@@ -3180,6 +3338,22 @@ void P_SetupLevel(void)
 	}
 	else
 	{
+		char ident[128];
+		char value[128];
+
+		if (!GetNextAssign(&udmf_psr, (uint8_t*)ident, (uint8_t*)value) || epi::case_cmp(ident, "namespace"))
+			I_Error("UDMF: TEXTMAP must start with namespace assignment.\n");
+
+		if (udmf_strict.d)
+		{
+			if(!(epi::case_cmp(value, "doom") == 0 || epi::case_cmp(value, "heretic") == 0) || epi::case_cmp(value, "edge") == 0
+				|| epi::case_cmp(value, "zdoomtranslated") == 0)
+			{
+				I_Error("UDMF: %s uses unsupported namespace \"%s\"!\nSupported namespaces are \"doom\", \"heretic\", \"edge\", or \"zdoomtranslated\"!\n",
+					currmap->lump.c_str(), value);
+			}
+		}
+
 		LoadUDMFVertexes(&udmf_psr);
 		LoadUDMFSectors(&udmf_psr);
 		LoadUDMFLineDefs(&udmf_psr);

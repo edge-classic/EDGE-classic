@@ -1,0 +1,104 @@
+===============================================================================
+Universal Doom Map Format EDGE extensions DRAFT - 2023.02.27
+
+    Copyright (c) 2023 The EDGE Team.
+    Permission is granted to copy, distribute and/or modify this document
+    under the terms of the GNU Free Documentation License, Version 1.2
+    or any later version published by the Free Software Foundation;
+    with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+    
+===============================================================================
+
+This document discusses only the additions EDGE makes to the UDMF 
+specification.
+
+=======================================
+I. Grammar / Syntax
+=======================================
+
+    No changes.
+
+=======================================
+II. Implementation Semantics
+=======================================
+ 
+--------------------------------
+II.C : Implementation Dependence
+--------------------------------
+
+EDGE supports the "Doom" and "Heretic" namespaces defined in the base specification and adds one new
+one:
+    "EDGE"
+
+In addition, the following namespace extensions from other source ports are supported:
+    "ZDoomTranslated"
+    
+The only difference between these two namespaces is how line, thing and sector
+specials are handled:
+
+'EDGE' uses Doom-type specials extended with additional fields and parameters not
+possible in the binary map format to complement the existing specials defined by its
+DDF and RTS content definition and scripting languages.
+
+'ZDoomTranslated' uses Doom-type specials. Specials in these maps that are not already
+defined by EDGE will produce a message in the log but will not prevent a map from being loaded.
+
+
+=======================================
+III. Standardized Fields
+=======================================
+
+In addition to the standard fields, EDGE defines the following:
+Note: All <bool> fields default to false unless mentioned otherwise.
+
+   vertex
+   {
+      zfloor = <float>;         // Floor height at this vertex. 
+                                // Default should be a value beyond the minimum/maximum height limit of the engine.
+                                // EDGE-Classic uses -40000.0.
+                                // Effective in any triangular sector or rectangular sectors that fulfill the following
+                                // conditions:
+                                // - Only two out of the four vertices utilize zfloor values
+                                // - The two vertices must be part of the same line segment
+                                // - The zfloor value must be identical between the two vertices
+
+      zceiling = <float>;       // Ceiling height at this vertex.
+                                // Default should be a value beyond the minimum/maximum height limit of the engine.
+                                // EDGE-Classic uses 40000.0.
+                                // Effective in any triangular sector or rectangular sectors that fulfill the following
+                                // conditions:
+                                // - Only two out of the four vertices utilize zceiling values
+                                // - The two vertices must be part of the same line segment
+                                // - The zceiling value must be identical between the two vertices
+   }    
+
+   linedef
+   {
+      No changes.
+   }
+
+   sidedef
+   {
+      No changes.
+   }
+
+   sector
+   {
+      No changes.
+   }
+
+   thing
+   {
+      No changes.
+   }
+
+
+=======================================
+Changelog
+=======================================
+2023.02.27 - Initial draft; addition of zfloor/zceiling vertex fields
+
+
+===============================================================================
+EOF
+===============================================================================

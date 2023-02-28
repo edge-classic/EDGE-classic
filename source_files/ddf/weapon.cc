@@ -155,6 +155,18 @@ static const actioncode_t weapon_actions[] =
 	
 	{"DJNE",              A_WeaponDJNE, DDF_StateGetJump},
 
+	{"ZOOM",              A_WeaponZoom, NULL},
+	{"SET_INVULNERABLE",  A_SetInvuln,   NULL},
+	{"CLEAR_INVULNERABLE",A_ClearInvuln, NULL},
+	{"MOVE_FWD",          A_MoveFwd, DDF_StateGetFloat},
+	{"MOVE_RIGHT",        A_MoveRight, DDF_StateGetFloat},
+	{"MOVE_UP",           A_MoveUp, DDF_StateGetFloat},
+	{"STOP",              A_StopMoving, NULL},
+	{"TURN",              A_TurnDir, DDF_StateGetAngle},
+    {"TURN_RANDOM",       A_TurnRandom, DDF_StateGetAngle},
+	{"MLOOK_TURN",        A_MlookTurn, DDF_StateGetSlope},
+	
+
 	{"RTS_ENABLE_TAGGED", A_WeaponEnableRadTrig,  DDF_WStateGetRADTrigger},
 	{"RTS_DISABLE_TAGGED",A_WeaponDisableRadTrig, DDF_WStateGetRADTrigger},
 	{"SEC_SHOOT",         A_WeaponShootSA, DDF_StateGetAttack},

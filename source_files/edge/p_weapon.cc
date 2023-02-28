@@ -1758,5 +1758,157 @@ void A_WeaponBecome(mobj_t * mo)
 	//P_SetPspriteDeferred(p,ps_weapon,p->weapons[p->ready_wp].info->ready_state);
 }
 
+
+
+void A_WeaponZoom(mobj_t * mo)
+{
+	player_t *p = mo->player;
+	
+	int fov = p->zoom_fov;
+	
+	if (p->zoom_fov == 0) //only zoom if we're not already
+	{
+		if (! (p->ready_wp < 0 || p->pending_wp >= 0))
+			fov =p->weapons[p->ready_wp].info->zoom_fov;
+	
+		if (fov == ANG_MAX)
+			fov = 0;
+	}
+
+	p->zoom_fov = fov;
+}
+
+
+void A_SetInvuln(struct mobj_s *mo)
+{
+	mo->hyperflags |= HF_INVULNERABLE;
+}
+
+
+void A_ClearInvuln(struct mobj_s *mo)
+{
+	mo->hyperflags &= ~HF_INVULNERABLE;
+}
+
+
+void A_MoveFwd(mobj_t * mo)
+{
+	player_t *p = mo->player;
+	pspdef_t *psp = &p->psprites[p->action_psp];
+	
+	const state_t *st = psp->state;
+
+	if (st && st->action_par)
+	{
+		float amount = *(float *)st->action_par;
+    
+		float dx = M_Cos(mo->angle);
+		float dy = M_Sin(mo->angle);
+
+		mo->mom.x += dx * amount;
+		mo->mom.y += dy * amount;
+	}
+}
+
+void A_MoveRight(mobj_t * mo)
+{
+	player_t *p = mo->player;
+	pspdef_t *psp = &p->psprites[p->action_psp];
+	
+	const state_t *st = psp->state;
+
+	if (st && st->action_par)
+	{
+		float amount = *(float *)st->action_par;
+    
+		float dx = M_Cos(mo->angle - ANG90);
+		float dy = M_Sin(mo->angle - ANG90);
+
+		mo->mom.x += dx * amount;
+		mo->mom.y += dy * amount;
+	}
+}
+
+void A_MoveUp(mobj_t * mo)
+{
+	player_t *p = mo->player;
+	pspdef_t *psp = &p->psprites[p->action_psp];
+	
+	const state_t *st = psp->state;
+
+	if (st && st->action_par)
+		mo->mom.z += *(float *)st->action_par;
+}
+
+void A_StopMoving(mobj_t * mo)
+{
+	mo->mom.x = mo->mom.y = mo->mom.z = 0;
+}
+
+
+void A_TurnDir(mobj_t * mo)
+{
+	player_t *p = mo->player;
+	pspdef_t *psp = &p->psprites[p->action_psp];
+	
+	const state_t *st = psp->state;
+
+	angle_t turn = ANG180;
+
+	if (st && st->action_par)
+		turn = *(angle_t *)st->action_par;
+
+	mo->angle += turn;
+}
+
+void A_TurnRandom(mobj_t * mo)
+{
+	player_t *p = mo->player;
+	pspdef_t *psp = &p->psprites[p->action_psp];
+	
+	const state_t *st = psp->state;
+	int turn = 359;
+
+	if (st && st->action_par)
+	{
+        turn = (int)ANG_2_FLOAT(*(angle_t *)st->action_par);
+	}
+
+	turn = turn * P_Random() / 90;  // 10 bits of angle
+   
+	if (turn < 0)
+		mo->angle -= (angle_t)((-turn) << (ANGLEBITS - 10));
+	else
+		mo->angle += (angle_t)(turn << (ANGLEBITS - 10));
+
+}
+
+void A_MlookTurn(mobj_t * mo)
+{
+	player_t *p = mo->player;
+	pspdef_t *psp = &p->psprites[p->action_psp];
+	
+	const state_t *st = psp->state;
+
+	angle_t turn = 0;
+	
+	if (st && st->action_par)
+		turn = M_ATan(*(float *)st->action_par);
+		//mo->vertangle = M_ATan(*(float *)st->action_par);
+	
+	if (turn < 0)
+		mo->vertangle -= turn;
+	else
+		mo->vertangle += turn;
+	
+	// don't look up/down too far...
+	if (mo->vertangle < ANG180 && mo->vertangle > ANG45)
+		mo->vertangle = ANG45;
+		
+	if (mo->vertangle >= ANG180 && mo->vertangle < ANG315)
+		mo->vertangle = ANG315;
+	
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

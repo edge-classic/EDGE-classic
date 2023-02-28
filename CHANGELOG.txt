@@ -31,6 +31,19 @@ New Features
     - The zceiling value must be identical between the two vertices for a ceiling slope
     - The floor and ceiling slope for a rectangular sector can use different vertices as long
       as they fulfill the other conditions
+	  
++ WEAPONS.DDF: 10 new action commands. Behave identically as the things.ddf actions of the same name
+  - ZOOM
+  - SET_INVULNERABLE
+  - CLEAR_INVULNERABLE
+  - MOVE_FWD(num)
+  - MOVE_RIGHT(num)
+  - MOVE_UP(num)
+  - STOP
+  - TURN(angle)
+  - TURN_RANDOM(angle)
+  - MLOOK_TURN(angle)
+	  
 
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)
 ====================================

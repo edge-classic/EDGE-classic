@@ -2204,42 +2204,39 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
 	// --- handle sky (using the depth buffer) ---
 
-	if (!r_culling.d)
+	if (backsector && IS_SKY(frontsector->floor) && IS_SKY(backsector->floor))
 	{
-		if (backsector && IS_SKY(frontsector->floor) && IS_SKY(backsector->floor))
+		if (frontsector->f_h < backsector->f_h)
 		{
-			if (frontsector->f_h < backsector->f_h)
-			{
-				RGL_DrawSkyWall(seg, frontsector->f_h, backsector->f_h);
-			}
+			RGL_DrawSkyWall(seg, frontsector->f_h, backsector->f_h);
 		}
+	}
 
-		if (IS_SKY(frontsector->ceil))
+	if (IS_SKY(frontsector->ceil))
+	{
+		if (frontsector->c_h < frontsector->sky_h &&
+			(! backsector || ! IS_SKY(backsector->ceil) ||
+			backsector->f_h >= frontsector->c_h))
 		{
-			if (frontsector->c_h < frontsector->sky_h &&
-				(! backsector || ! IS_SKY(backsector->ceil) ||
-				backsector->f_h >= frontsector->c_h))
-			{
-				RGL_DrawSkyWall(seg, frontsector->c_h, frontsector->sky_h);
-			}
-			else if (backsector && IS_SKY(backsector->ceil) &&
-				frontsector->heightsec == NULL && backsector->heightsec == NULL)
-			{
-				float max_f = MAX(frontsector->f_h, backsector->f_h);
+			RGL_DrawSkyWall(seg, frontsector->c_h, frontsector->sky_h);
+		}
+		else if (backsector && IS_SKY(backsector->ceil) &&
+			frontsector->heightsec == NULL && backsector->heightsec == NULL)
+		{
+			float max_f = MAX(frontsector->f_h, backsector->f_h);
 
-				if (backsector->c_h <= max_f && max_f < frontsector->sky_h)
-				{
-					RGL_DrawSkyWall(seg, max_f, frontsector->sky_h);
-				}
+			if (backsector->c_h <= max_f && max_f < frontsector->sky_h)
+			{
+				RGL_DrawSkyWall(seg, max_f, frontsector->sky_h);
 			}
 		}
-		// -AJA- 2004/08/29: Emulate Sky-Flooding TRICK
-		else if (! debug_hom.d && backsector && IS_SKY(backsector->ceil) &&
-				seg->sidedef->top.image == NULL &&
-				backsector->c_h < frontsector->c_h)
-		{
-			RGL_DrawSkyWall(seg, backsector->c_h, frontsector->c_h);
-		}
+	}
+	// -AJA- 2004/08/29: Emulate Sky-Flooding TRICK
+	else if (! debug_hom.d && backsector && IS_SKY(backsector->ceil) &&
+			seg->sidedef->top.image == NULL &&
+			backsector->c_h < frontsector->c_h)
+	{
+		RGL_DrawSkyWall(seg, backsector->c_h, frontsector->c_h);
 	}
 }
 
@@ -2640,12 +2637,12 @@ static void RGL_WalkSubsector(int num)
 
 	// --- handle sky (using the depth buffer) ---
 
-	if (!r_culling.d && IS_SKY(sub->sector->floor) && viewz > sub->sector->f_h)
+	if (IS_SKY(sub->sector->floor) && viewz > sub->sector->f_h)
 	{
 		RGL_DrawSkyPlane(sub, sub->sector->f_h);
 	}
 
-	if (!r_culling.d && IS_SKY(sub->sector->ceil) && viewz < sub->sector->sky_h)
+	if (IS_SKY(sub->sector->ceil) && viewz < sub->sector->sky_h)
 	{
 		RGL_DrawSkyPlane(sub, sub->sector->sky_h);
 	}

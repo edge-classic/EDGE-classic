@@ -59,8 +59,6 @@ DEF_CVAR(r_dumbclamp,     DUMB_CLAMP, 0)
 
 #define DUMMY_CLAMP  789
 
-extern cvar_c r_culling;
-
 extern cvar_c r_fogofwar;
 
 // a single unit (polygon, quad, etc) to pass to the GL
@@ -372,7 +370,7 @@ void RGL_DrawUnits(void)
 
 	glPolygonOffset(0, 0);
 
-	if (r_fogofwar.d && !r_culling.d)
+	if (r_fogofwar.d)
 	{
 		float r = 0.0f;
 		float g = 0.0f;
@@ -495,7 +493,7 @@ void RGL_DrawUnits(void)
 
 			if (unit->pass > 0)
 			{ 
-				if (r_fogofwar.d && !r_culling.d)
+				if (r_fogofwar.d)
 				{
 					if ((unit->blending & BL_Foggable) != BL_Foggable)
 					glDisable(GL_FOG);
@@ -610,7 +608,7 @@ void RGL_DrawUnits(void)
 		glDisable(GL_TEXTURE_2D);
 	}
 
-	if (r_fogofwar.d && !r_culling.d)
+	if (r_fogofwar.d)
 		glDisable(GL_FOG);
 
 	glDepthMask(GL_TRUE);

@@ -39,7 +39,6 @@
 
 #define DEBUG  0
 
-
 const image_c *sky_image;
 
 bool custom_sky_box;
@@ -47,6 +46,7 @@ bool custom_sky_box;
 // needed for SKY
 extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
 
+extern cvar_c r_culling;
 
 typedef struct sec_sky_ring_s
 {
@@ -321,6 +321,9 @@ void RGL_FinishSky(void)
 
 	glDepthMask(GL_FALSE);
 
+	if (r_culling.d)
+		glDisable(GL_DEPTH_TEST);
+
 	if (level_flags.mlook || custom_sky_box)
 	{
 		if (! r_dumbsky.d)
@@ -332,6 +335,9 @@ void RGL_FinishSky(void)
 	{
 		RGL_DrawSkyOriginal();
 	}
+
+	if (r_culling.d)
+		glEnable(GL_DEPTH_TEST);
 
 	glDepthFunc(GL_LEQUAL);
 	glDepthMask(GL_TRUE);

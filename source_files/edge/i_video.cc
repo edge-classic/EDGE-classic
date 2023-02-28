@@ -380,11 +380,11 @@ void I_StartFrame(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	if (r_culling.d)
 	{
-		glEnable(GL_FOG);
+		/*glEnable(GL_FOG);
 		glFogi(GL_FOG_MODE, GL_LINEAR);
 		glFogf(GL_FOG_START, 1.0f);
-		glFogf(GL_FOG_END, 3000.f);
-		r_farclip.f = 4000.0;
+		glFogf(GL_FOG_END, 3000.f);*/
+		r_farclip.f = 3000.0f;
 	}
 	else
 	{

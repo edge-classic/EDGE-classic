@@ -71,6 +71,17 @@ void A_NoFireReturnSA(struct mobj_s *mo);
 void A_CheckReloadSA(struct mobj_s *mo);
 void A_GunFlashSA(struct mobj_s *mo);
 
+void A_WeaponZoom(struct mobj_s *mo);
+void A_SetInvuln(struct mobj_s *mo);
+void A_ClearInvuln(struct mobj_s *mo);
+void A_MoveFwd(struct mobj_s *mo);
+void A_MoveRight(struct mobj_s *mo);
+void A_MoveUp(struct mobj_s *mo);
+void A_StopMoving(struct mobj_s *mo);
+void A_TurnDir(struct mobj_s *mo);
+void A_TurnRandom(struct mobj_s *mo);
+void A_MlookTurn(struct mobj_s *mo);
+
 // Needed for the bossbrain.
 void P_ActBrainScream(struct mobj_s *mo);
 void P_ActBrainDie(struct mobj_s *mo);

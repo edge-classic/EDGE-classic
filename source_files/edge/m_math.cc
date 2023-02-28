@@ -29,6 +29,11 @@
 
 #include "m_math.h"
 
+#ifdef __APPLE__
+#include <cmath>
+#endif
+
+
 float M_Sin (angle_t ang)
 {
 	return (float) sin ((double) ang * M_PI / (float) ANG180);

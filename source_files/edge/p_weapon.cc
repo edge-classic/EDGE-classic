@@ -1853,12 +1853,9 @@ void A_TurnDir(mobj_t * mo)
 	
 	const state_t *st = psp->state;
 
-	angle_t turn = ANG180;
-
 	if (st && st->action_par)
-		turn = *(angle_t *)st->action_par;
+		mo->angle += *(angle_t *)st->action_par;
 
-	mo->angle += turn;
 }
 
 void A_TurnRandom(mobj_t * mo)
@@ -1890,24 +1887,8 @@ void A_MlookTurn(mobj_t * mo)
 	
 	const state_t *st = psp->state;
 
-	angle_t turn = 0;
-	
 	if (st && st->action_par)
-		turn = M_ATan(*(float *)st->action_par);
-		//mo->vertangle = M_ATan(*(float *)st->action_par);
-	
-	if (turn < 0)
-		mo->vertangle -= turn;
-	else
-		mo->vertangle += turn;
-	
-	// don't look up/down too far...
-	if (mo->vertangle < ANG180 && mo->vertangle > ANG45)
-		mo->vertangle = ANG45;
-		
-	if (mo->vertangle >= ANG180 && mo->vertangle < ANG315)
-		mo->vertangle = ANG315;
-	
+		mo->vertangle += M_ATan(*(float *)st->action_par);
 }
 
 //--- editor settings ---

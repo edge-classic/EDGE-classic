@@ -57,6 +57,7 @@ static bool grab_state;
 
 extern cvar_c r_farclip;
 extern cvar_c r_culling;
+extern cvar_c r_culldist;
 
 // Possible Windowed Modes
 // These reflect 4:3 and 16:9 historical and current standards
@@ -379,18 +380,9 @@ void I_StartFrame(void)
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	if (r_culling.d)
-	{
-		/*glEnable(GL_FOG);
-		glFogi(GL_FOG_MODE, GL_LINEAR);
-		glFogf(GL_FOG_START, 1.0f);
-		glFogf(GL_FOG_END, 3000.f);*/
-		r_farclip.f = 3000.0f;
-	}
+		r_farclip.f = 1500.0f + (r_culldist.d * 1000.0f);
 	else
-	{
-		glDisable(GL_FOG);
 		r_farclip.f = 64000.0;
-	}
 }
 
 

@@ -16,6 +16,8 @@ General Improvements
 
 + Added 'udmf_strict' CVAR (on by default) to control whether or not loading a UDMF map with an unsupported namespace will generate an error.
 
++ Draw Distance Culling will no longer prevent the skybox from being drawn; maximum distance is now adjustable in the Performance Options menu
+
 New Features
 ------------
 + Added WebGL platform support

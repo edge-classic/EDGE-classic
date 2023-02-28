@@ -92,5 +92,46 @@ vec3_t M_LinePlaneIntersection(vec3_t line_a, vec3_t line_b,
 	return{line_a.x+u*line_subtract.x, line_a.y+u*line_subtract.y, line_a.z+u*line_subtract.z};
 }
 
+double M_PointToSegDistance(vec2_t seg_a, vec2_t seg_b, vec2_t point)
+{
+ 
+    vec2_t seg_ab;
+	seg_ab.x = seg_b.x - seg_a.x;
+    seg_ab.y = seg_b.y - seg_a.y;
+ 
+    vec2_t seg_bp;
+	seg_bp.x = point.x - seg_b.x;
+	seg_bp.y = point.y - seg_b.y;
+ 
+    vec2_t seg_ap;
+	seg_ap.x = point.x - seg_a.x;
+	seg_ap.y = point.y - seg_a.y;
+ 
+    double ab_bp = (seg_ab.x * seg_bp.x + seg_ab.y * seg_bp.y);
+    double ab_ap = (seg_ab.x * seg_ap.x + seg_ab.y * seg_ap.y);
+ 
+    if (ab_bp > 0) 
+	{
+        double y = point.y - seg_b.y;
+        double x = point.x - seg_b.x;
+        return std::sqrt(x * x + y * y);
+    }
+    else if (ab_ap < 0) 
+	{
+        double y = point.y - seg_a.y;
+        double x = point.x - seg_a.x;
+        return std::sqrt(x * x + y * y);
+    }
+    else 
+	{
+        double x1 = seg_ab.x;
+        double y1 = seg_ab.y;
+        double x2 = seg_ap.x;
+        double y2 = seg_ap.y;
+        double mod = std::sqrt(x1 * x1 + y1 * y1);
+        return std::abs(x1 * y2 - y1 * x2) / mod;
+    }
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

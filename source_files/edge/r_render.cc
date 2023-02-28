@@ -2340,10 +2340,20 @@ bool RGL_CheckBBox(float *bspcoord)
 		if (angle_L == angle_R)
 			return false;
 
-		if (r_culling.d && 
-			R_PointToDist(viewx, viewy, (x1+x2)/2, (y1+y2)/2) > 16000)
-			return false;
-
+		if (r_culling.d)
+		{
+			float closest = 1000000.0f;
+			float check = M_PointToSegDistance({x1,y1}, {x2,y1}, {viewx,viewy});
+			if (check < closest) closest = check;
+			check = M_PointToSegDistance({x1,y1}, {x1,y2}, {viewx,viewy});
+			if (check < closest) closest = check;
+			check = M_PointToSegDistance({x2,y1}, {x2,y2}, {viewx,viewy});
+			if (check < closest) closest = check;
+			check = M_PointToSegDistance({x1,y2}, {x2,y2}, {viewx,viewy});
+			if (check < closest) closest = check;
+			if (closest > (r_farclip.f + 500.0f))	
+				return false;
+		}
 	}
 
 	return ! RGL_1DOcclusionTest(angle_R, angle_L);
@@ -2749,7 +2759,7 @@ static void RGL_WalkSubsector(int num)
 			float sx2 = seg->v2->x;
 			float sy2 = seg->v2->y;
 
-			if (R_PointToDist(viewx, viewy, (sx1+sx2)/2, (sy1+sy2)/2) <= 3000)
+			if (R_PointToDist(viewx, viewy, (sx1+sx2)/2, (sy1+sy2)/2) <= (r_farclip.f + 500.0f))
 			{
 				skip = false;
 				break;

@@ -131,6 +131,7 @@ extern cvar_c g_erraticism;
 extern cvar_c r_doubleframes;
 extern cvar_c g_mbf21compat;
 extern cvar_c r_culling;
+extern cvar_c r_culldist;
 extern cvar_c g_cullthinkers;
 extern cvar_c r_maxdlights;
 extern cvar_c v_sync;
@@ -170,6 +171,7 @@ static void M_ChangeCrossSize(int keypressed);
 
 static void M_ChangeMaxDLights(int keypressed);
 static void M_ChangeCulling(int keypressed);
+static void M_ChangeCullDist(int keypressed);
 static void M_ChangeThinkerCulling(int keypressed);
 static void M_ChangeMBF21Compat(int keypressed);
 static void M_ChangeBobbing(int keypressed);
@@ -630,8 +632,10 @@ static menuinfo_t gameplay_optmenu =
 //
 static optmenuitem_t perfoptions[] =
 {
-	{OPT_Boolean, "Reduce Draw Distance", YesNo, 2, 
-     &r_culling.d, M_ChangeCulling, "Note: Skies will not be visible with this setting enabled"},
+	{OPT_Boolean, "Draw Distance Culling", YesNo, 2, 
+     &r_culling.d, M_ChangeCulling, NULL},
+	{OPT_Switch, "Maximum Draw Distance", "2000/3000/4000/5000/6000/7000/8000", 7, 
+     &r_culldist.d, M_ChangeCullDist, "Only effective when Draw Distance Culling is On"},
 	{OPT_Boolean, "Slow Thinkers Over Distance", YesNo, 2, 
      &g_cullthinkers.d, M_ChangeThinkerCulling, "Only recommended for extreme monster/projectile counts"},
 	{OPT_Switch, "Maximum Dynamic Lights", DLightMax, 6, 
@@ -1964,24 +1968,30 @@ static void M_ChangeCulling(int keypressed)
 }
 
 // See above the above the above the above the above
+static void M_ChangeCullDist(int keypressed)
+{
+	r_culldist = r_culldist.d;
+}
+
+// See above the above the above the above the above the above
 static void M_ChangeThinkerCulling(int keypressed)
 {
 	g_cullthinkers = g_cullthinkers.d;
 }
 
-// See above the above the above the above the above the above
+// See above the above the above the above the above the above the above
 static void M_ChangeMaxDLights(int keypressed)
 {
 	r_maxdlights = r_maxdlights.d;
 }
 
-// See above the above the above the above the above the above the above
+// See above the above the above the above the above the above the above the above
 static void M_ChangeVSync(int keypressed)
 {
 	v_sync = v_sync.d;
 }
 
-// See above the above the above the above the above the above the above the above
+// See above the above the above the above the above the above the above the above the above
 static void M_ChangeBobbing(int keypressed)
 {
 	g_bobbing = g_bobbing.d;
@@ -1998,7 +2008,7 @@ static void M_ChangeBobbing(int keypressed)
 	}
 }
 
-// See above the above the above the above the above the above the above the above the above
+// See above the above the above the above the above the above the above the above the above the above
 static void M_ChangeSecBright(int keypressed)
 {
 	v_secbright = v_secbright.d;

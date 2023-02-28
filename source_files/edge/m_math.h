@@ -72,6 +72,7 @@ vec3_t;
     (dest).x *= (val); (dest).y *= (val);  \
     (dest).z *= (val); } while(0)
 
+double M_PointToSegDistance(vec2_t seg_a, vec2_t seg_b, vec2_t point);
 vec3_t M_LinePlaneIntersection(vec3_t line_a, vec3_t line_b,
 	vec3_t plane_a, vec3_t plane_b, vec3_t plane_c);
 float M_Tan(angle_t ang)    GCCATTR((const));

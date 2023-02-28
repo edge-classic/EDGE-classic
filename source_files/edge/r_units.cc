@@ -310,7 +310,10 @@ static inline void RGL_SendRawVector(const local_gl_vert_t *V)
 	myMultiTexCoord2f(GL_TEXTURE1, V->texc[1].x, V->texc[1].y);
 
 	glNormal3f(V->normal.x, V->normal.y, V->normal.z);
-	glEdgeFlag(V->edge);
+
+	// I don't think we need glEdgeFlag anymore; from what I've read this only
+	// matters if we switch glPolygonMode away from GL_FILL - Dasho
+	//glEdgeFlag(V->edge);
 
 	// vertex must be last
 	glVertex3f(V->pos.x, V->pos.y, V->pos.z);

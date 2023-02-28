@@ -295,7 +295,10 @@ void RGL_BeginSky(void)
 	glDisable(GL_TEXTURE_2D);
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	glEdgeFlag(GL_TRUE);
+	// I don't think we need glEdgeFlag anymore; from what I've read this only
+	// matters if we switch glPolygonMode away from GL_FILL - Dasho
+	//glEdgeFlag(GL_TRUE);
+
 	// Draw the entire sky using only one glBegin/glEnd clause.
 	// glEnd is called in RGL_FinishSky and this code assumes that only
 	// RGL_DrawSkyWall and RGL_DrawSkyPlane is doing OpenGL calls in between.

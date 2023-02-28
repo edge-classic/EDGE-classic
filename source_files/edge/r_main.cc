@@ -216,7 +216,21 @@ void RGL_CheckExtensions(void)
 
 #ifndef EDGE_GL_ES2
 
+
+
 	// Check for various extensions
+
+	if (GLAD_GL_VERSION_1_5 || GLAD_GL_ARB_vertex_buffer_object)
+	{ /* OK */ }
+	else
+		I_Error("OpenGL driver does not support Vertex Buffer Objects.\n");
+
+	// I added this to glad but not sure if we'll use it - Dasho
+	/*if (GLAD_GL_ARB_shading_language_100)
+	{  }
+	else
+		I_Error("OpenGL driver does not support shaders.\n");*/
+
 	if (GLAD_GL_VERSION_1_3 || GLAD_GL_ARB_multitexture)
 	{ /* OK */ }
 	else

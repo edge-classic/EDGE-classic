@@ -39,6 +39,8 @@ typedef struct local_gl_vert_s
 }
 local_gl_vert_t;
 
+extern GLfloat cull_fog_color[4];
+
 void RGL_InitUnits(void);
 void RGL_SoftInitUnits(void);
 

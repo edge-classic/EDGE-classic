@@ -2342,15 +2342,24 @@ bool RGL_CheckBBox(float *bspcoord)
 
 		if (r_culling.d)
 		{
-			float closest = 1000000.0f;
-			float check = M_PointToSegDistance({x1,y1}, {x2,y1}, {viewx,viewy});
-			if (check < closest) closest = check;
-			check = M_PointToSegDistance({x1,y1}, {x1,y2}, {viewx,viewy});
-			if (check < closest) closest = check;
-			check = M_PointToSegDistance({x2,y1}, {x2,y2}, {viewx,viewy});
-			if (check < closest) closest = check;
-			check = M_PointToSegDistance({x1,y2}, {x2,y2}, {viewx,viewy});
-			if (check < closest) closest = check;
+			float closest;
+			float mid_x = (x2-x1)/2.0f;
+			float mid_y = (y2-y1)/2.0f;
+
+			// Determine "quadrant" so that you only have to check the two closest segs
+			if (viewx <= mid_x && viewy >= mid_y)
+				closest = MIN(M_PointToSegDistance({x1,y1}, {x1,y2}, {viewx,viewy}),
+					M_PointToSegDistance({x1,y2}, {x2,y2}, {viewx,viewy}));
+			else if (viewx > mid_x && viewy >= mid_y)
+				closest = MIN(M_PointToSegDistance({x2,y1}, {x2,y2}, {viewx,viewy}),
+					M_PointToSegDistance({x1,y2}, {x2,y2}, {viewx,viewy}));
+			else if (viewx <= mid_x && viewy < mid_y)
+				closest = MIN(M_PointToSegDistance({x1,y1}, {x1,y2}, {viewx,viewy}),
+					M_PointToSegDistance({x1,y1}, {x2,y1}, {viewx,viewy}));
+			else
+				closest = MIN(M_PointToSegDistance({x2,y1}, {x2,y2}, {viewx,viewy}),
+					M_PointToSegDistance({x1,y1}, {x2,y1}, {viewx,viewy}));
+
 			if (closest > (r_farclip.f + 500.0f))	
 				return false;
 		}
@@ -2759,7 +2768,7 @@ static void RGL_WalkSubsector(int num)
 			float sx2 = seg->v2->x;
 			float sy2 = seg->v2->y;
 
-			if (R_PointToDist(viewx, viewy, (sx1+sx2)/2, (sy1+sy2)/2) <= (r_farclip.f + 500.0f))
+			if (M_PointToSegDistance({sx1,sy1}, {sx2,sy2}, {viewx, viewy}) <= (r_farclip.f + 500.0f))
 			{
 				skip = false;
 				break;

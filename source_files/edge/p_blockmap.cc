@@ -847,7 +847,7 @@ void P_DynamicLightIterator(float x1, float y1, float z1,
 			if (mo->state->bright <= 0 || mo->dlight.r <= 0)
 				continue;
 
-			if (r_culling.d && R_PointToDist(viewx, viewy, mo->x, mo->y) > (r_farclip.f + 500.0f))
+			if (r_culling.d && R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f)
 				continue;
 
 			// check whether radius touches the given bbox
@@ -893,7 +893,7 @@ void P_SectorGlowIterator(sector_t *sec,
 		if (mo->state->bright <= 0 || mo->dlight.r <= 0)
 			continue;
 
-		if (r_culling.d && R_PointToDist(viewx, viewy, mo->x, mo->y) > (r_farclip.f + 500.0f))
+		if (r_culling.d && R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f)
 			continue;
 
 		// check whether radius touches the given bbox

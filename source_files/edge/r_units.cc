@@ -59,7 +59,9 @@ DEF_CVAR(r_dumbclamp,     DUMB_CLAMP, 0)
 
 #define DUMMY_CLAMP  789
 
+extern cvar_c r_culling;
 extern cvar_c r_fogofwar;
+extern bool need_to_draw_sky;
 
 // a single unit (polygon, quad, etc) to pass to the GL
 typedef struct local_gl_unit_s
@@ -95,6 +97,7 @@ static int cur_unit;
 
 static bool batch_sort;
 
+GLfloat cull_fog_color[4];
 
 //
 // RGL_InitUnits
@@ -370,36 +373,65 @@ void RGL_DrawUnits(void)
 
 	glPolygonOffset(0, 0);
 
-	if (r_fogofwar.d)
+	if (r_fogofwar.d || r_culling.d)
 	{
-		float r = 0.0f;
-		float g = 0.0f;
-		float b = 0.0f;
-
-		if (r_fogofwar.d == 2)
+		GLfloat fogColor[4];
+		if (!r_culling.d)
 		{
-			r = 0.5f;
-			g = 0.5f;
-			b = 0.5f;
+			if (r_fogofwar.d == 1)
+			{
+				fogColor[0] = 0.0f;
+				fogColor[1] = 0.0f;
+				fogColor[2] = 0.0f;
+			}
+			else
+			{
+				fogColor[0] = 0.5f;
+				fogColor[1] = 0.5f;
+				fogColor[2] = 0.5f;
+			}
+		}
+		else
+		{
+			if (need_to_draw_sky)
+			{
+				fogColor[0] = cull_fog_color[0];
+				fogColor[1] = cull_fog_color[1];
+				fogColor[2] = cull_fog_color[2];
+			}
+			else
+			{
+				fogColor[0] = 0;
+				fogColor[1] = 0;
+				fogColor[2] = 0;
+			}
 		}
 
 		//Lobo: prep for when we read it from DDF
 		//V_GetColmapRGB(level->colourmap, &r, &g, &b);
 
-		GLfloat fogColor[4];
+		/*GLfloat fogColor[4];
 		fogColor[0] = r;
 		fogColor[1] = g;
 		fogColor[2] = b;
-		fogColor[3] = 1.0f;
+		fogColor[3] = 1.0f;*/
 
 		glClearColor(fogColor[0],fogColor[1],fogColor[2],fogColor[3]);
 
 		glFogi(GL_FOG_MODE, GL_LINEAR);
 		//glFogi(GL_FOG_MODE, GL_EXP2);
 		//glFogf(GL_FOG_DENSITY, 0.002f); //only use with GL_EXP2
-		glFogfv(GL_FOG_COLOR, fogColor);  
-		glFogf(GL_FOG_START, 2.0f);
-		glFogf(GL_FOG_END, 1000.0f);
+		glFogfv(GL_FOG_COLOR, fogColor);
+		if (r_culling.d)
+		{
+			glFogf(GL_FOG_START, r_farclip.f - 750.0f);
+			glFogf(GL_FOG_END, r_farclip.f - 250.0f);
+		}
+		else
+		{
+			glFogf(GL_FOG_START, 2.0f);
+			glFogf(GL_FOG_END, 1000.0f);
+		}
 		glEnable(GL_FOG);
 	}
 
@@ -493,7 +525,7 @@ void RGL_DrawUnits(void)
 
 			if (unit->pass > 0)
 			{ 
-				if (r_fogofwar.d)
+				if (r_fogofwar.d || r_culling.d)
 				{
 					if ((unit->blending & BL_Foggable) != BL_Foggable)
 					glDisable(GL_FOG);
@@ -608,7 +640,7 @@ void RGL_DrawUnits(void)
 		glDisable(GL_TEXTURE_2D);
 	}
 
-	if (r_fogofwar.d)
+	if (r_fogofwar.d || r_culling.d)
 		glDisable(GL_FOG);
 
 	glDepthMask(GL_TRUE);

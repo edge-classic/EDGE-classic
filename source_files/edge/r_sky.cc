@@ -183,7 +183,7 @@ void R_ComputeSkyHeights(void)
 //----------------------------------------------------------------------------
 
 
-static bool need_to_draw_sky = false;
+bool need_to_draw_sky = false;
 
 
 typedef struct
@@ -944,8 +944,19 @@ int RGL_UpdateSkyBoxTextures(void)
 		//I_Printf("Skybox turned OFF\n");
 	}
 	
-	
-	
+	// Set sky color for culling fog - Dasho
+	const byte *what_palette = (const byte *) &playpal_data[0];
+	if (sky_image->source_palette >= 0)
+		what_palette = (const byte *) W_CacheLumpNum(sky_image->source_palette);
+	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)sky_image), what_palette, sky_image->opacity);
+	u8_t *temp_rgb = new u8_t[3];
+	tmp_img_data->AverageColor(temp_rgb);
+	cull_fog_color[0] = (float)temp_rgb[0] / 255.0f;
+	cull_fog_color[1] = (float)temp_rgb[1] / 255.0f;
+	cull_fog_color[2] = (float)temp_rgb[2] / 255.0f;
+	delete tmp_img_data;
+	delete[] temp_rgb;
+
 	if (info->face[WSKY_North])
 	{
 		custom_sky_box = true;

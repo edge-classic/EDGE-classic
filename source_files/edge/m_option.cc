@@ -137,6 +137,7 @@ extern cvar_c r_maxdlights;
 extern cvar_c v_sync;
 extern cvar_c g_bobbing;
 extern cvar_c v_secbright;
+extern cvar_c v_gamma;
 
 static int menu_crosshair;
 static int menu_crosscolor;
@@ -181,6 +182,7 @@ static void M_ChangeJumping(int keypressed);
 static void M_ChangeCrouching(int keypressed);
 static void M_ChangeExtra(int keypressed);
 static void M_ChangeSecBright(int keypressed);
+static void M_ChangeGamma(int keypressed);
 static void M_ChangeMonitorSize(int keypressed);
 static void M_ChangeKicking(int keypressed);
 static void M_ChangeWeaponSwitch(int keypressed);
@@ -194,13 +196,11 @@ static void M_ChangeDLights(int keypressed);
 static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int centrex);
 static void M_ResolutionOptions(int keypressed);
 static void M_OptionSetResolution(int keypressed);
-///--  static void M_OptionTestResolution(int keypressed);
-///--  static void M_RestoreResSettings(int keypressed);
 static void M_ChangeResSize(int keypressed);
 static void M_ChangeResFull(int keypressed);
 
-       void M_HostNetGame(int keypressed);
-       void M_JoinNetGame(int keypressed);
+ void M_HostNetGame(int keypressed);
+void M_JoinNetGame(int keypressed);
 
 static void M_LanguageDrawer(int x, int y, int deltay);
 static void M_ChangeLanguage(int keypressed);
@@ -384,7 +384,7 @@ static optmenuitem_t mainoptions[] =
 	{OPT_Plain,    "",                  NULL,  0, NULL, NULL, NULL},
 	{OPT_Function, "Sound Options",     NULL,  0, NULL, M_SoundOptions, "SoundOptions"},
 	{OPT_Function, "Video Options",     NULL,  0, NULL, M_VideoOptions, "VideoOptions"},
-	{OPT_Function, "Set Resolution",    NULL,  0, NULL, M_ResolutionOptions, "ChangeRes"},
+	{OPT_Function, "Screen Options",    NULL,  0, NULL, M_ResolutionOptions, "ChangeRes"},
 
 	{OPT_Plain,    "",                  NULL,  0, NULL, NULL, NULL},
 	{OPT_Function, "Language",          NULL,  0, NULL, M_ChangeLanguage, NULL},
@@ -408,10 +408,9 @@ static menuinfo_t main_optmenu =
 
 static optmenuitem_t vidoptions[] =
 {
+	{OPT_Slider,  "Gamma Adjustment",    NULL,  21,  &v_gamma.d, M_ChangeGamma, NULL},
 	{OPT_Switch,  "Sector Brightness",    SecBrights,  11,  &v_secbright.d, M_ChangeSecBright, NULL},
 	{OPT_Switch,  "Framerate Target", "35 FPS/70 FPS", 2, &r_doubleframes.d, M_ChangeDoubleFrames, NULL},
-	{OPT_Switch,  "V-Sync", "Off/Standard/Adaptive", 3, &v_sync.d, M_ChangeVSync, "Will fallback to Standard if Adaptive is not supported"},
-	{OPT_Switch,  "Monitor Size",  MonitSiz,  6, &monitor_size, M_ChangeMonitorSize, NULL},
 	{OPT_Switch,  "Smoothing",         YesNo, 2, &var_smoothing, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "H.Q.2x Scaling", Hq2xMode, 4, &hq2x_scaling, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Dynamic Lighting", DLMode, 2, &use_dlights, M_ChangeDLights, NULL},
@@ -446,17 +445,16 @@ static menuinfo_t video_optmenu =
 };
 
 //
-//  SET RESOLUTION MENU
+//  SCREEN OPTIONS MENU
 //
 static optmenuitem_t resoptions[] =
 {
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
-	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
-	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
+	{OPT_Switch,  "V-Sync", "Off/Standard/Adaptive", 3, &v_sync.d, M_ChangeVSync, "Will fallback to Standard if Adaptive is not supported"},
+	{OPT_Switch,  "Aspect Ratio",  MonitSiz,  6, &monitor_size, M_ChangeMonitorSize, "Only applies to Fullscreen/Borderless Fullscreen Modes"},
 	{OPT_Function, "New Mode",  NULL, 0, NULL, M_ChangeResFull, NULL},
-	{OPT_Function, "New Size",  NULL, 0, NULL, M_ChangeResSize, NULL},
-	{OPT_Function, "Apply Changes", NULL, 0, NULL, M_OptionSetResolution, NULL},
-/*	{OPT_Function, "Test Resolution", NULL, 0, NULL, M_OptionTestResolution, NULL}, */
+	{OPT_Function, "New Resolution",  NULL, 0, NULL, M_ChangeResSize, NULL},
+	{OPT_Function, "Apply Mode/Resolution", NULL, 0, NULL, M_OptionSetResolution, NULL},
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL}
@@ -1233,9 +1231,8 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
 	int y = topy;
 
 	// Draw resolution selection option
-	y += (dy*2);
+	y += (dy*3);
 
-	y += dy;
 	sprintf(tempstring, "%s", new_scrmode.display_mode == 2 ? "Borderless Fullscreen" :
 		(new_scrmode.display_mode == new_scrmode.SCR_FULLSCREEN ? "Fullscreen" : "Windowed"));
 	HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
@@ -2012,6 +2009,12 @@ static void M_ChangeBobbing(int keypressed)
 static void M_ChangeSecBright(int keypressed)
 {
 	v_secbright = v_secbright.d;
+}
+
+// See above the above the above the above the above the above the above the above the above the above the above
+static void M_ChangeGamma(int keypressed)
+{
+	v_gamma = v_gamma.d;
 }
 
 static void M_ChangeKicking(int keypressed)

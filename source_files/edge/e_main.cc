@@ -34,6 +34,7 @@
 #include "i_defs.h"
 #include "i_sdlinc.h"
 #include "e_main.h"
+#include "i_defs_gl.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -92,6 +93,8 @@
 #include "vm_coal.h"
 
 extern cvar_c r_doubleframes;
+
+extern cvar_c v_gamma;
 
 // Application active?
 int app_state = APP_STATE_ACTIVE;
@@ -258,6 +261,25 @@ public:
 				HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay), \
 					SCREENHEIGHT / IM_HEIGHT(overlay));
 		}
+
+	if (v_gamma.d < 10)
+	{
+		int col = (1.0f - (0.1f * (10 - v_gamma.d))) * 255;
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+		HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, RGB_MAKE(col, col, col));
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_BLEND);
+	}
+	else if (v_gamma.d > 10)
+	{
+		int col = (0.1f * -(10 - v_gamma.d)) * 255;
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_DST_COLOR, GL_ONE);
+		HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, RGB_MAKE(col, col, col));
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_BLEND);
+	}
 
 		I_FinishFrame();
 	}
@@ -633,6 +655,25 @@ void E_Display(void)
 		if (overlay)
 			HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay), \
 				SCREENHEIGHT / IM_HEIGHT(overlay));
+	}
+
+	if (v_gamma.d < 10)
+	{
+		int col = (1.0f - (0.1f * (10 - v_gamma.d))) * 255;
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+		HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, RGB_MAKE(col, col, col));
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_BLEND);
+	}
+	else if (v_gamma.d > 10)
+	{
+		int col = (0.1f * -(10 - v_gamma.d)) * 255;
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_DST_COLOR, GL_ONE);
+		HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, RGB_MAKE(col, col, col));
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_BLEND);
 	}
 
 	if (m_screenshot_required)

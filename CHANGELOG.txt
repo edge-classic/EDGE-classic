@@ -9,6 +9,9 @@ Bugs fixed
 ----------
 + Fixed incorrect height for Doom 2 Thing 53.
 
++ Fixed autoload folder items paths being prepended with the autoload folder path itself
+  (cleanup from prior method of using PATH_Join)
+
 General Improvements
 --------------------
 + Changed AJBSP to open loaded IWADs/PWADs in read mode as an additional means of ensuring original file

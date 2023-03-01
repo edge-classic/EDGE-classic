@@ -1429,13 +1429,7 @@ static void Add_Autoload(void) {
 		for (size_t i = 0 ; i < fsd.size() ; i++) 
 		{
 			if(!fsd[i].is_dir)
-			{
-#ifdef _WIN32
-				AddSingleCmdLineFile(epi::PATH_Join(folder, fsd[i].name.u32string()), true);
-#else
-				AddSingleCmdLineFile(epi::PATH_Join(folder, fsd[i].name.string()), true);
-#endif
-			}
+				AddSingleCmdLineFile(fsd[i].name, true);
 		}
 	}
 
@@ -1452,13 +1446,7 @@ static void Add_Autoload(void) {
 		for (size_t i = 0 ; i < fsd.size() ; i++) 
 		{
 			if(!fsd[i].is_dir)
-			{
-#ifdef _WIN32
-				AddSingleCmdLineFile(epi::PATH_Join(folder, fsd[i].name.u32string()), true);
-#else
-				AddSingleCmdLineFile(epi::PATH_Join(folder, fsd[i].name.string()), true);
-#endif
-			}
+				AddSingleCmdLineFile(fsd[i].name, true);
 		}		
 	}
 }

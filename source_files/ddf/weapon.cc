@@ -163,7 +163,7 @@ static const actioncode_t weapon_actions[] =
 	{"MOVE_UP",           A_MoveUp, DDF_StateGetFloat},
 	{"STOP",              A_StopMoving, NULL},
 	{"TURN",              A_TurnDir, DDF_StateGetAngle},
-    {"TURN_RANDOM",       A_TurnRandom, DDF_StateGetAngle},
+    {"TURN_RANDOM",       A_TurnRandom, DDF_StateGetInteger},
 	{"MLOOK_TURN",        A_MlookTurn, DDF_StateGetSlope},
 	
 

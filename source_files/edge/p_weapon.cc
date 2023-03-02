@@ -1865,19 +1865,28 @@ void A_TurnRandom(mobj_t * mo)
 	
 	const state_t *st = psp->state;
 	int turn = 359;
+	int random_angle = 0;
+	int current_angle = (int)ANG_2_FLOAT(mo->angle);
+
+	if (current_angle >= 360) 
+		current_angle -= 360;
+
+	if (current_angle < 0)      
+		current_angle += 360;
 
 	if (st && st->action_par)
 	{
-        turn = (int)ANG_2_FLOAT(*(angle_t *)st->action_par);
+		turn = *(int *)st->action_par;
 	}
 
-	turn = turn * P_Random() / 90;  // 10 bits of angle
-   
-	if (turn < 0)
-		mo->angle -= (angle_t)((-turn) << (ANGLEBITS - 10));
-	else
-		mo->angle += (angle_t)(turn << (ANGLEBITS - 10));
+	//We want a random number between 0 and our parameter
+	if (turn < 0) //between -x and 0
+		random_angle = turn + (0 - turn) * (C_Random() / double(0x10000));  
+	else //between 0 and x
+		random_angle = 0 + (turn - 0) * (C_Random() / double(0x10000));
 
+	turn = current_angle + random_angle;
+	mo->angle = FLOAT_2_ANG(turn);
 }
 
 void A_MlookTurn(mobj_t * mo)

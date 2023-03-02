@@ -293,7 +293,6 @@ void I_StartupMusic(void)
 				epi::str_lower(ext);
 				if (ext == ".sf2" || ext == ".sf3")
 				{
-					I_Printf("SF: %s\n", sfd[i].name.u8string().c_str());
 					available_soundfonts.push_back(sfd[i].name);
 				}
 				else if (ext == ".op2" || ext == ".wopl" || ext == ".ad" || ext == ".opl" || ext == ".tmb")

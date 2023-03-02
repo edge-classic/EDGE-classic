@@ -60,6 +60,7 @@ DEF_CVAR(r_dumbclamp,     DUMB_CLAMP, 0)
 #define DUMMY_CLAMP  789
 
 extern cvar_c r_culling;
+extern cvar_c r_cullfog;
 extern cvar_c r_fogofwar;
 extern bool need_to_draw_sky;
 
@@ -395,9 +396,35 @@ void RGL_DrawUnits(void)
 		{
 			if (need_to_draw_sky)
 			{
-				fogColor[0] = cull_fog_color[0];
-				fogColor[1] = cull_fog_color[1];
-				fogColor[2] = cull_fog_color[2];
+				switch (r_cullfog.d)
+				{
+					case 0:
+						fogColor[0] = cull_fog_color[0];
+						fogColor[1] = cull_fog_color[1];
+						fogColor[2] = cull_fog_color[2];
+						break;
+					case 1:
+						// Not pure white, but 1.0f felt like a little much - Dasho
+						fogColor[0] = 0.75f;
+						fogColor[1] = 0.75f;
+						fogColor[2] = 0.75f;
+						break;
+					case 2:
+						fogColor[0] = 0.25f;
+						fogColor[1] = 0.25f;
+						fogColor[2] = 0.25f;;
+						break;
+					case 3:
+						fogColor[0] = 0;
+						fogColor[1] = 0;
+						fogColor[2] = 0;
+						break;
+					default:
+						fogColor[0] = cull_fog_color[0];
+						fogColor[1] = cull_fog_color[1];
+						fogColor[2] = cull_fog_color[2];
+						break;
+				}
 			}
 			else
 			{

@@ -15,6 +15,7 @@ edge-classic.log
 debug.txt
 /*.dll
 edge-classic.cfg
+edge-classic-portable.cfg
 
 # EDGE game folders
 /screenshot

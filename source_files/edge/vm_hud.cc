@@ -709,51 +709,18 @@ static void HD_get_average_color(coal::vm_c *vm, int argc)
 {
 	double rgb[3];
 	const char *name = vm->AccessParamString(0);
+	double *from_x = vm->AccessParam(1);
+	double *to_x = vm->AccessParam(2);
+	double *from_y = vm->AccessParam(3);
+	double *to_y = vm->AccessParam(4);
 	const byte *what_palette = (const byte *) &playpal_data[0];
 	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
 	if (tmp_img_c->source_palette >= 0)
 		what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
 	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
 	u8_t *temp_rgb = new u8_t[3];
-	tmp_img_data->AverageColor(temp_rgb);
-	rgb[0] = temp_rgb[0];
-	rgb[1] = temp_rgb[1];
-	rgb[2] = temp_rgb[2];
-	delete tmp_img_data;
-	delete[] temp_rgb;
-	vm->ReturnVector(rgb);
-}
-
-static void HD_get_average_top_border_color(coal::vm_c *vm, int argc)
-{
-	double rgb[3];
-	const char *name = vm->AccessParamString(0);
-	const byte *what_palette = (const byte *) &playpal_data[0];
-	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
-	if (tmp_img_c->source_palette >= 0)
-		what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
-	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-	u8_t *temp_rgb = new u8_t[3];
-	tmp_img_data->AverageTopBorderColor(temp_rgb);
-	rgb[0] = temp_rgb[0];
-	rgb[1] = temp_rgb[1];
-	rgb[2] = temp_rgb[2];
-	delete tmp_img_data;
-	delete[] temp_rgb;
-	vm->ReturnVector(rgb);
-}
-
-static void HD_get_average_bottom_border_color(coal::vm_c *vm, int argc)
-{
-	double rgb[3];
-	const char *name = vm->AccessParamString(0);
-	const byte *what_palette = (const byte *) &playpal_data[0];
-	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
-	if (tmp_img_c->source_palette >= 0)
-		what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
-	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-	u8_t *temp_rgb = new u8_t[3];
-	tmp_img_data->AverageBottomBorderColor(temp_rgb);
+	tmp_img_data->AverageColor(temp_rgb, from_x ? *from_x : -1, to_x ? *to_x : 1000000,
+		from_y ? *from_y : -1, to_y ? *to_y : 1000000);
 	rgb[0] = temp_rgb[0];
 	rgb[1] = temp_rgb[1];
 	rgb[2] = temp_rgb[2];
@@ -766,13 +733,18 @@ static void HD_get_lightest_color(coal::vm_c *vm, int argc)
 {
 	double rgb[3];
 	const char *name = vm->AccessParamString(0);
+	double *from_x = vm->AccessParam(1);
+	double *to_x = vm->AccessParam(2);
+	double *from_y = vm->AccessParam(3);
+	double *to_y = vm->AccessParam(4);
 	const byte *what_palette = (const byte *) &playpal_data[0];
 	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
 	if (tmp_img_c->source_palette >= 0)
 		what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
 	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
 	u8_t *temp_rgb = new u8_t[3];
-	tmp_img_data->LightestColor(temp_rgb);
+	tmp_img_data->LightestColor(temp_rgb, from_x ? *from_x : -1, to_x ? *to_x : 1000000,
+		from_y ? *from_y : -1, to_y ? *to_y : 1000000);
 	rgb[0] = temp_rgb[0];
 	rgb[1] = temp_rgb[1];
 	rgb[2] = temp_rgb[2];
@@ -785,13 +757,18 @@ static void HD_get_darkest_color(coal::vm_c *vm, int argc)
 {
 	double rgb[3];
 	const char *name = vm->AccessParamString(0);
+	double *from_x = vm->AccessParam(1);
+	double *to_x = vm->AccessParam(2);
+	double *from_y = vm->AccessParam(3);
+	double *to_y = vm->AccessParam(4);
 	const byte *what_palette = (const byte *) &playpal_data[0];
 	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
 	if (tmp_img_c->source_palette >= 0)
 		what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
 	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
 	u8_t *temp_rgb = new u8_t[3];
-	tmp_img_data->DarkestColor(temp_rgb);
+	tmp_img_data->DarkestColor(temp_rgb, from_x ? *from_x : -1, to_x ? *to_x : 1000000,
+		from_y ? *from_y : -1, to_y ? *to_y : 1000000);
 	rgb[0] = temp_rgb[0];
 	rgb[1] = temp_rgb[1];
 	rgb[2] = temp_rgb[2];
@@ -804,13 +781,56 @@ static void HD_get_average_hue(coal::vm_c *vm, int argc)
 {
 	double rgb[3];
 	const char *name = vm->AccessParamString(0);
+	double *from_x = vm->AccessParam(1);
+	double *to_x = vm->AccessParam(2);
+	double *from_y = vm->AccessParam(3);
+	double *to_y = vm->AccessParam(4);
 	const byte *what_palette = (const byte *) &playpal_data[0];
 	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
 	if (tmp_img_c->source_palette >= 0)
 		what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
 	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
 	u8_t *temp_rgb = new u8_t[3];
-	tmp_img_data->AverageHue(temp_rgb, NULL);
+	tmp_img_data->AverageHue(temp_rgb, NULL, from_x ? *from_x : -1, to_x ? *to_x : 1000000,
+		from_y ? *from_y : -1, to_y ? *to_y : 1000000);
+	rgb[0] = temp_rgb[0];
+	rgb[1] = temp_rgb[1];
+	rgb[2] = temp_rgb[2];
+	delete tmp_img_data;
+	delete[] temp_rgb;
+	vm->ReturnVector(rgb);
+}
+
+// These two aren't really needed anymore with the AverageColor rework, but keeping them in case COALHUDS in the wild use them - Dasho
+static void HD_get_average_top_border_color(coal::vm_c *vm, int argc)
+{
+	double rgb[3];
+	const char *name = vm->AccessParamString(0);
+	const byte *what_palette = (const byte *) &playpal_data[0];
+	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
+	if (tmp_img_c->source_palette >= 0)
+		what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
+	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+	u8_t *temp_rgb = new u8_t[3];
+	tmp_img_data->AverageColor(temp_rgb, 0, tmp_img_c->actual_w, tmp_img_c->actual_h-1, tmp_img_c->actual_h);
+	rgb[0] = temp_rgb[0];
+	rgb[1] = temp_rgb[1];
+	rgb[2] = temp_rgb[2];
+	delete tmp_img_data;
+	delete[] temp_rgb;
+	vm->ReturnVector(rgb);
+}
+static void HD_get_average_bottom_border_color(coal::vm_c *vm, int argc)
+{
+	double rgb[3];
+	const char *name = vm->AccessParamString(0);
+	const byte *what_palette = (const byte *) &playpal_data[0];
+	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
+	if (tmp_img_c->source_palette >= 0)
+		what_palette = (const byte *) W_CacheLumpNum(tmp_img_c->source_palette);
+	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+	u8_t *temp_rgb = new u8_t[3];
+	tmp_img_data->AverageColor(temp_rgb, 0, tmp_img_c->actual_w, 0, 1);
 	rgb[0] = temp_rgb[0];
 	rgb[1] = temp_rgb[1];
 	rgb[2] = temp_rgb[2];

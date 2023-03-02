@@ -950,7 +950,7 @@ int RGL_UpdateSkyBoxTextures(void)
 		what_palette = (const byte *) W_CacheLumpNum(sky_image->source_palette);
 	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)sky_image), what_palette, sky_image->opacity);
 	u8_t *temp_rgb = new u8_t[3];
-	tmp_img_data->AverageColor(temp_rgb);
+	tmp_img_data->AverageColor(temp_rgb, 0, sky_image->actual_w, 0, sky_image->actual_h/2);
 	cull_fog_color[0] = (float)temp_rgb[0] / 255.0f;
 	cull_fog_color[1] = (float)temp_rgb[1] / 255.0f;
 	cull_fog_color[2] = (float)temp_rgb[2] / 255.0f;

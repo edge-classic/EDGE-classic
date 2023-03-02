@@ -439,7 +439,7 @@ int image_data_c::ImageCharacterWidth(int x1, int y1, int x2, int y2)
 	return MAX(last_last - first_first, 0) + 3; // Some padding on each side of the letter
 }
 
-void image_data_c::AverageHue(u8_t *hue, u8_t *ity)
+void image_data_c::AverageHue(u8_t *hue, u8_t *ity, int from_x, int to_x, int from_y, int to_y)
 {
 	// make sure we don't overflow
 	SYS_ASSERT(used_w * used_h <= 2048 * 2048);
@@ -451,11 +451,17 @@ void image_data_c::AverageHue(u8_t *hue, u8_t *ity)
 
 	int weight = 0;
 
-	for (int y = 0; y < used_h; y++)
+	// Sanity checking; at a minimum sample a 1x1 portion of the image
+	from_x = CLAMP(0, from_x, width-1);
+	to_x = CLAMP(1, to_x, width);
+	from_y = CLAMP(0, from_y, height-1);
+	to_y = CLAMP(1, to_y, height);
+
+	for (int y = from_y; y < to_y; y++)
 	{
 		const u8_t *src = PixelAt(0, y);
 
-		for (int x = 0; x < used_w; x++, src += bpp)
+		for (int x = from_x; x < to_x; x++, src += bpp)
 		{
 			int r = src[0];
 			int g = src[1];
@@ -518,7 +524,7 @@ void image_data_c::AverageHue(u8_t *hue, u8_t *ity)
 	}
 }
 
-void image_data_c::AverageColor(u8_t *rgb)
+void image_data_c::AverageColor(u8_t *rgb, int from_x, int to_x, int from_y, int to_y)
 {
 	// make sure we don't overflow
 	SYS_ASSERT(used_w * used_h <= 2048 * 2048);
@@ -526,15 +532,21 @@ void image_data_c::AverageColor(u8_t *rgb)
 	std::unordered_map<unsigned int, unsigned int> seen_colors;
 	std::vector<unsigned int>most_colors;
 
+	// Sanity checking; at a minimum sample a 1x1 portion of the image
+	from_x = CLAMP(0, from_x, width-1);
+	to_x = CLAMP(1, to_x, width);
+	from_y = CLAMP(0, from_y, height-1);
+	to_y = CLAMP(1, to_y, height);
+
 	int r_sum = 0;
 	int g_sum = 0;
 	int b_sum = 0;
 
-	for (int y = 0; y < used_h; y++)
+	for (int y = from_y; y < to_y; y++)
 	{
 		const u8_t *src = PixelAt(0, y);
 
-		for (int x = 0; x < used_w; x++, src += bpp)
+		for (int x = from_x; x < to_x; x++, src += bpp)
 		{
 			if (bpp == 4 && src[3] == 0)
 				continue;
@@ -573,111 +585,7 @@ void image_data_c::AverageColor(u8_t *rgb)
 	rgb[2] = b_sum / most_colors.size();
 }
 
-void image_data_c::AverageTopBorderColor(u8_t *rgb)
-{
-	// make sure we don't overflow
-	SYS_ASSERT(used_w * used_h <= 2048 * 2048);
-
-	std::unordered_map<unsigned int, unsigned int> seen_colors;
-	std::vector<unsigned int>most_colors;
-
-	int r_sum = 0;
-	int g_sum = 0;
-	int b_sum = 0;
-
-	for (int x = 0; x < used_w; x++)
-	{
-		const u8_t *src = PixelAt(x, used_h - 1);
-
-		if (bpp == 4 && src[3] == 0)
-				continue;
-		unsigned int color = RGB_MAKE((unsigned int)src[0],(unsigned int)src[1],(unsigned int)src[2]);
-		auto res = seen_colors.try_emplace(color, 0);
-		// If color already seen, increment the hit counter
-		if (!res.second)
-			res.first->second++;
-	}
-
-	int highest_count = 0;
-	for (auto color : seen_colors)
-	{
-		if (color.second > highest_count)
-			highest_count = color.second;
-	}
-
-	for (auto color : seen_colors)
-	{
-		if (color.second == highest_count)
-		{
-			most_colors.push_back(color.first);
-		}
-	}
-
-	for (auto color : most_colors)
-	{
-		r_sum += RGB_RED(color);
-		g_sum += RGB_GRN(color);
-		b_sum += RGB_BLU(color);
-	}
-
-	rgb[0] = r_sum / most_colors.size();
-	rgb[1] = g_sum / most_colors.size();
-	rgb[2] = b_sum / most_colors.size();
-}
-
-void image_data_c::AverageBottomBorderColor(u8_t *rgb)
-{
-	// make sure we don't overflow
-	SYS_ASSERT(used_w * used_h <= 2048 * 2048);
-
-	std::unordered_map<unsigned int, unsigned int> seen_colors;
-	std::vector<unsigned int>most_colors;
-
-	int r_sum = 0;
-	int g_sum = 0;
-	int b_sum = 0;
-
-	for (int x = 0; x < used_w; x++)
-	{
-		const u8_t *src = PixelAt(x, 0);
-
-		if (bpp == 4 && src[3] == 0)
-				continue;
-		unsigned int color = RGB_MAKE((unsigned int)src[0],(unsigned int)src[1],(unsigned int)src[2]);
-		auto res = seen_colors.try_emplace(color, 0);
-		// If color already seen, increment the hit counter
-		if (!res.second)
-			res.first->second++;
-	}
-
-	int highest_count = 0;
-	for (auto color : seen_colors)
-	{
-		if (color.second > highest_count)
-			highest_count = color.second;
-	}
-
-	for (auto color : seen_colors)
-	{
-		if (color.second == highest_count)
-		{
-			most_colors.push_back(color.first);
-		}
-	}
-
-	for (auto color : most_colors)
-	{
-		r_sum += RGB_RED(color);
-		g_sum += RGB_GRN(color);
-		b_sum += RGB_BLU(color);
-	}
-
-	rgb[0] = r_sum / most_colors.size();
-	rgb[1] = g_sum / most_colors.size();
-	rgb[2] = b_sum / most_colors.size();
-}
-
-void image_data_c::LightestColor(u8_t *rgb)
+void image_data_c::LightestColor(u8_t *rgb, int from_x, int to_x, int from_y, int to_y)
 {
 	// make sure we don't overflow
 	SYS_ASSERT(used_w * used_h <= 2048 * 2048);
@@ -687,11 +595,17 @@ void image_data_c::LightestColor(u8_t *rgb)
 	int lightest_g = 0;
 	int lightest_b = 0;
 
-	for (int y = 0; y < used_h; y++)
+	// Sanity checking; at a minimum sample a 1x1 portion of the image
+	from_x = CLAMP(0, from_x, width-1);
+	to_x = CLAMP(1, to_x, width);
+	from_y = CLAMP(0, from_y, height-1);
+	to_y = CLAMP(1, to_y, height);
+
+	for (int y = from_y; y < to_y; y++)
 	{
 		const u8_t *src = PixelAt(0, y);
 
-		for (int x = 0; x < used_w; x++, src += bpp)
+		for (int x = from_x; x < to_x; x++, src += bpp)
 		{
 			if (bpp == 4 && src[3] == 0)
 				continue;
@@ -711,7 +625,7 @@ void image_data_c::LightestColor(u8_t *rgb)
 	rgb[2] = lightest_b;
 }
 
-void image_data_c::DarkestColor(u8_t *rgb)
+void image_data_c::DarkestColor(u8_t *rgb, int from_x, int to_x, int from_y, int to_y)
 {
 	// make sure we don't overflow
 	SYS_ASSERT(used_w * used_h <= 2048 * 2048);
@@ -721,11 +635,17 @@ void image_data_c::DarkestColor(u8_t *rgb)
 	int darkest_g = 0;
 	int darkest_b = 0;
 
-	for (int y = 0; y < used_h; y++)
+	// Sanity checking; at a minimum sample a 1x1 portion of the image
+	from_x = CLAMP(0, from_x, width-1);
+	to_x = CLAMP(1, to_x, width);
+	from_y = CLAMP(0, from_y, height-1);
+	to_y = CLAMP(1, to_y, height);
+
+	for (int y = from_y; y < to_y; y++)
 	{
 		const u8_t *src = PixelAt(0, y);
 
-		for (int x = 0; x < used_w; x++, src += bpp)
+		for (int x = from_x; x < to_x; x++, src += bpp)
 		{
 			if (bpp == 4 && src[3] == 0)
 				continue;

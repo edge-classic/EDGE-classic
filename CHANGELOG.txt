@@ -21,6 +21,15 @@ General Improvements
 
 + Draw Distance Culling will no longer prevent the skybox from being drawn; maximum distance is now adjustable in the Performance Options menu
 
++ Draw Distance Culling's BSP culling math has been reworked and offers far better FPS savings versus the previous method in applicable environments
+
++ COAL:
+  - Color and Hue averaging functions have been reworked to allow for a specific portion of an image to be sampled. Function definitions are now as follows:
+    - hud.get_average_color(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
+    - hud.get_lightest_color(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
+    - hud.get_darkest_color(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
+    - hud.get_average_hue(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
+
 New Features
 ------------
 + Added WebGL platform support

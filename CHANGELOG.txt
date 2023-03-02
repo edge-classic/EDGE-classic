@@ -62,8 +62,8 @@ New Features
   - MLOOK_TURN(angle)
 
 + Portable install option
-  - If "edge-classic.cfg" is found in the same directory as the program, files and folders will be written to that directory instead
-    of a location in the user's home path
+  - If the program is launched with "-portable" or "edge-classic.cfg" is found in the same directory as the program, files and folders will be written
+    to that directory instead of a location in the user's home path
 	  
 
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)

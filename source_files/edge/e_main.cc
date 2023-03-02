@@ -883,7 +883,7 @@ void InitDirectories(void)
 	else
     {
 		cfgfile = epi::PATH_Join(game_dir, UTFSTR(EDGECFGFILE));
-		if (epi::FS_Access(cfgfile, epi::file_c::ACCESS_READ))
+		if (epi::FS_Access(cfgfile, epi::file_c::ACCESS_READ) || argv::Find("portable") > 0)
 			home_dir = game_dir;
 		else
         	cfgfile.clear();

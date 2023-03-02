@@ -882,7 +882,7 @@ void InitDirectories(void)
 	}
 	else
     {
-		cfgfile = epi::PATH_Join(game_dir, UTFSTR("edge-classic-portable.cfg"));
+		cfgfile = epi::PATH_Join(game_dir, UTFSTR(EDGECFGFILE));
 		if (epi::FS_Access(cfgfile, epi::file_c::ACCESS_READ))
 			home_dir = game_dir;
 		else
@@ -923,7 +923,7 @@ void InitDirectories(void)
         epi::FS_MakeDir(home_dir);
 
 	if (cfgfile.empty())
-		cfgfile = epi::PATH_Join(home_dir, UTFSTR("edge-classic.cfg"));
+		cfgfile = epi::PATH_Join(home_dir, UTFSTR(EDGECFGFILE));
 
 	// edge.wad file
 	s = argv::Value("ewad");

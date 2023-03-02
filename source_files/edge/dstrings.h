@@ -29,6 +29,7 @@
 // Misc. other strings.
 #define REQUIREDWAD    "edge-defs"
 #define EDGELOGFILE    "edge-classic.log"
+#define EDGECFGFILE    "edge-classic.cfg"
 
 #define SAVEGAMEBASE   "save"
 #define SAVEGAMEEXT    "esg"

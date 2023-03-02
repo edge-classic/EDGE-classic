@@ -97,9 +97,7 @@ bool S_StartupOPL(void)
 	}
 	else
 	{
-		std::filesystem::path soundfont_dir = epi::PATH_Join(game_dir, UTFSTR("soundfont"));
-
-		F = epi::FS_Open(epi::PATH_Join(soundfont_dir, UTFSTR(s_genmidi.s)), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+		F = epi::FS_Open(UTFSTR(s_genmidi.s), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 		if (! F)
 		{
 			I_Warning("S_StartupOPL: Error opening GENMIDI!\n");

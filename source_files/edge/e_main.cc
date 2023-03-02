@@ -855,37 +855,10 @@ void E_TitleTicker(void)
 //
 void InitDirectories(void)
 {
-	std::filesystem::path s = argv::Value("home");
-    if (!s.empty())
-        home_dir = s;
-
-	// Get the Home Directory from environment if set
-    if (home_dir.empty())
-    {
-		s.clear();
-		if (getenv("HOME"))
-			s = UTFSTR(getenv("HOME"));
-        if (!s.empty())
-        {
-            home_dir = epi::PATH_Join(s, UTFSTR(EDGEHOMESUBDIR)); 
-
-			if (! epi::FS_IsDir(home_dir))
-			{
-                epi::FS_MakeDir(home_dir);
-
-                // Check whether the directory was created
-                if (! epi::FS_IsDir(home_dir))
-                    home_dir.clear();
-			}
-        }
-    }
-
-    if (home_dir.empty()) home_dir = UTFSTR("."); // Default to current directory
-
 	// Get the Game Directory from parameter.
 	
 	// Note: This might need adjusting for Apple
-	s = UTFSTR(SDL_GetBasePath());
+	std::filesystem::path s = UTFSTR(SDL_GetBasePath());
 
 	game_dir = s;
 	s = argv::Value("game");
@@ -901,7 +874,7 @@ void InitDirectories(void)
 		argv::ApplyResponseFile(parms);
 	}
 
-	// config file
+	// config file - check for portable config
 	s = argv::Value("config");
 	if (!s.empty())
 	{
@@ -909,8 +882,48 @@ void InitDirectories(void)
 	}
 	else
     {
-        cfgfile = epi::PATH_Join(home_dir, UTFSTR(EDGECONFIGFILE));
+		cfgfile = epi::PATH_Join(game_dir, UTFSTR("edge-classic-portable.cfg"));
+		if (epi::FS_Access(cfgfile, epi::file_c::ACCESS_READ))
+			home_dir = game_dir;
+		else
+        	cfgfile.clear();
 	}
+
+	if (home_dir.empty())
+	{
+		s = argv::Value("home");
+		if (!s.empty())
+			home_dir = s;
+	}
+
+	// Get the Home Directory from environment if set
+    if (home_dir.empty())
+    {
+		s.clear();
+		if (getenv("HOME"))
+			s = UTFSTR(getenv("HOME"));
+        if (!s.empty())
+        {
+            home_dir = epi::PATH_Join(s, UTFSTR("edge-classic")); 
+
+			if (! epi::FS_IsDir(home_dir))
+			{
+                epi::FS_MakeDir(home_dir);
+
+                // Check whether the directory was created
+                if (! epi::FS_IsDir(home_dir))
+                    home_dir.clear();
+			}
+        }
+    }
+
+    if (home_dir.empty()) home_dir = UTFSTR(SDL_GetPrefPath(nullptr, "edge-classic"));
+
+	if (! epi::FS_IsDir(home_dir))
+        epi::FS_MakeDir(home_dir);
+
+	if (cfgfile.empty())
+		cfgfile = epi::PATH_Join(home_dir, UTFSTR("edge-classic.cfg"));
 
 	// edge.wad file
 	s = argv::Value("ewad");
@@ -1459,11 +1472,11 @@ static void AddCommandLineFiles(void)
 static void Add_Autoload(void) {
 	
 	std::vector<epi::dir_entry_c> fsd;
-	std::filesystem::path folder = UTFSTR("autoload");
+	std::filesystem::path folder = epi::PATH_Join(game_dir, UTFSTR("autoload"));
 
 	if (!FS_ReadDir(fsd, folder, UTFSTR("*.*")))
 	{
-		I_Warning("Failed to read autoload directory!\n");
+		I_Warning("Failed to read %s directory!\n", folder.u8string().c_str());
 	}
 	else
 	{
@@ -1473,14 +1486,48 @@ static void Add_Autoload(void) {
 				AddSingleCmdLineFile(fsd[i].name, true);
 		}
 	}
-
+	fsd.clear();
 	std::string lowercase_base = iwad_base;
 	std::transform(lowercase_base.begin(), lowercase_base.end(), lowercase_base.begin(), ::tolower);
 	folder = epi::PATH_Join(folder, UTFSTR(lowercase_base));
+	if (!FS_ReadDir(fsd, folder, UTFSTR("*.*")))
+	{
+		I_Warning("Failed to read %s directory!\n", folder.u8string().c_str());
+	}
+	else
+	{
+		for (size_t i = 0 ; i < fsd.size() ; i++) 
+		{
+			if(!fsd[i].is_dir)
+				AddSingleCmdLineFile(fsd[i].name, true);
+		}		
+	}
+	fsd.clear();
+
+	// Check if autoload folder stuff is in home_dir as well, make the folder/subfolder if they don't exist (in home_dir only)
+	folder = epi::PATH_Join(home_dir, UTFSTR("autoload"));
+	if (!epi::FS_IsDir(folder))
+		epi::FS_MakeDir(folder);
 
 	if (!FS_ReadDir(fsd, folder, UTFSTR("*.*")))
 	{
-		I_Warning("Failed to read game-specific autoload directory!\n");
+		I_Warning("Failed to read %s directory!\n", folder.u8string().c_str());
+	}
+	else
+	{
+		for (size_t i = 0 ; i < fsd.size() ; i++) 
+		{
+			if(!fsd[i].is_dir)
+				AddSingleCmdLineFile(fsd[i].name, true);
+		}
+	}
+	fsd.clear();
+	folder = epi::PATH_Join(folder, UTFSTR(lowercase_base));
+	if (!epi::FS_IsDir(folder))
+		epi::FS_MakeDir(folder);
+	if (!FS_ReadDir(fsd, folder, UTFSTR("*.*")))
+	{
+		I_Warning("Failed to read %s directory!\n", folder.u8string().c_str());
 	}
 	else
 	{

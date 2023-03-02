@@ -109,7 +109,7 @@ bool FS_ReadDir(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::u
 bool FS_ReadDir(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::string mask)
 #endif
 {
-	if (dir.empty() || mask.empty())
+	if (dir.empty() || !std::filesystem::exists(dir) || mask.empty())
 		return false;
 
 	std::filesystem::path mask_ext = std::filesystem::path(mask).extension(); // Allows us to retain the *.extension syntax - Dasho

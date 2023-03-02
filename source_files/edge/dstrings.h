@@ -28,7 +28,6 @@
 
 // Misc. other strings.
 #define REQUIREDWAD    "edge-defs"
-#define EDGECONFIGFILE "edge-classic.cfg"
 #define EDGELOGFILE    "edge-classic.log"
 
 #define SAVEGAMEBASE   "save"
@@ -41,14 +40,6 @@
 
 #define HUBDIR         "hubs"
 #define HUBBASE        "hub"
-
-#ifdef WIN32
-#define EDGEHOMESUBDIR  "Application Data\\Edge"
-#elif __APPLE__
-#define EDGEHOMESUBDIR  "Library/Application Support/EDGE"
-#else // Linux
-#define EDGEHOMESUBDIR  ".edge"
-#endif
 
 #endif // __DOOM_STRINGS__
 

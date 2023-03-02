@@ -47,7 +47,7 @@ fluid_synth_t *edge_fluid = nullptr;
 fluid_settings_t *edge_fluid_settings = nullptr;
 fluid_sfloader_t *edge_fluid_sfloader = nullptr;
 
-DEF_CVAR(s_soundfont, "default.sf2", CVAR_ARCHIVE)
+DEF_CVAR(s_soundfont, "", CVAR_ARCHIVE)
 
 extern std::vector<std::filesystem::path> available_soundfonts;
 
@@ -86,10 +86,8 @@ bool S_StartupFluid(void)
 	if (!cvar_good)
 	{
 		I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
-		s_soundfont = "default.sf2";
+		s_soundfont = epi::PATH_Join(epi::PATH_Join(game_dir, UTFSTR("soundfont")), UTFSTR("default.sf2")).u8string();
 	}
-
- 	std::filesystem::path soundfont_dir = epi::PATH_Join(game_dir, UTFSTR("soundfont"));
 
 	edge_fluid_settings = new_fluid_settings();
 	edge_fluid = new_fluid_synth(edge_fluid_settings);
@@ -101,12 +99,12 @@ bool S_StartupFluid(void)
 
 	fluid_synth_set_sample_rate(edge_fluid, dev_freq);
 	
-	if (fluid_synth_sfload(edge_fluid, epi::PATH_Join(soundfont_dir, UTFSTR(s_soundfont.s)).u8string().c_str(), 1) == -1)
+	if (fluid_synth_sfload(edge_fluid, s_soundfont.c_str(), 1) == -1)
 	{
 		I_Warning("FluidLite: Could not load requested soundfont %s! Falling back to default soundfont!\n", s_soundfont.c_str());
-		if (fluid_synth_sfload(edge_fluid, epi::PATH_Join(soundfont_dir, UTFSTR("default.sf2")).u8string().c_str(), 1) == -1) 
+		if (fluid_synth_sfload(edge_fluid, epi::PATH_Join(epi::PATH_Join(game_dir, UTFSTR("soundfont")), UTFSTR("default.sf2")).u8string().c_str(), 1) == -1) 
 		{
-			I_Warning("Could not load any soundfonts! Ensure that default.sf2 is present in the soundfont directory!\n");
+			I_Warning("Could not load any soundfont! Ensure that default.sf2 is present in the soundfont directory!\n");
 			delete_fluid_synth(edge_fluid);
 			delete_fluid_settings(edge_fluid_settings);
 			return false;

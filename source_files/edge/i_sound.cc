@@ -67,6 +67,8 @@ static bool audio_is_locked = false;
 std::vector<std::filesystem::path> available_soundfonts;
 std::vector<std::filesystem::path> available_genmidis;
 extern std::filesystem::path game_dir;
+extern std::filesystem::path home_dir;
+extern cvar_c s_soundfont;
 
 
 void SoundFill_Callback(void *udata, Uint8 *stream, int len)
@@ -273,10 +275,13 @@ void I_StartupMusic(void)
 
 	// Always add an empty path for the instrument banks as the default/internal GENMIDI lump choice
 	available_genmidis.push_back(UTFSTR(""));
+	// Set default SF2 location in CVAR if needed
+	if (s_soundfont.s.empty())
+		s_soundfont = epi::PATH_Join(soundfont_dir, UTFSTR("default.sf2")).u8string();
 
 	if (!FS_ReadDir(sfd, soundfont_dir, UTFSTR("*.*")))
 	{
-		I_Warning("FluidLite: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
+		I_Warning("I_StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
 	}
 	else
 	{
@@ -287,9 +292,38 @@ void I_StartupMusic(void)
 				std::string ext = epi::PATH_GetExtension(sfd[i].name).u8string();
 				epi::str_lower(ext);
 				if (ext == ".sf2" || ext == ".sf3")
-					available_soundfonts.push_back(epi::PATH_GetFilename(sfd[i].name));
+				{
+					I_Printf("SF: %s\n", sfd[i].name.u8string().c_str());
+					available_soundfonts.push_back(sfd[i].name);
+				}
 				else if (ext == ".op2" || ext == ".wopl" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
-					available_genmidis.push_back(epi::PATH_GetFilename(sfd[i].name));
+					available_genmidis.push_back(sfd[i].name);
+			}
+		}
+	}
+
+	// Check home_dir soundfont folder as well; create it if it doesn't exist (home_dir only)
+	sfd.clear();
+	soundfont_dir = epi::PATH_Join(home_dir, UTFSTR("soundfont"));
+	if (!epi::FS_IsDir(soundfont_dir))
+		epi::FS_MakeDir(soundfont_dir);
+
+	if (!FS_ReadDir(sfd, soundfont_dir, UTFSTR("*.*")))
+	{
+		I_Warning("I_StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
+	}
+	else
+	{
+		for (size_t i = 0 ; i < sfd.size() ; i++) 
+		{
+			if(!sfd[i].is_dir)
+			{
+				std::string ext = epi::PATH_GetExtension(sfd[i].name).u8string();
+				epi::str_lower(ext);
+				if (ext == ".sf2" || ext == ".sf3")
+					available_soundfonts.push_back(sfd[i].name);
+				else if (ext == ".op2" || ext == ".wopl" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
+					available_genmidis.push_back(sfd[i].name);
 			}
 		}
 	}

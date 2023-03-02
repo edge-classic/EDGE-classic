@@ -30,6 +30,9 @@ General Improvements
     - hud.get_darkest_color(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
     - hud.get_average_hue(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
 
++ New directories, logfiles, etc, will now be written to an appropriate location in the user's home directory by default (AppData, etc, depending on OS). Portable
+  usage is covered in "New Features"
+
 New Features
 ------------
 + Added WebGL platform support
@@ -57,6 +60,10 @@ New Features
   - TURN(angle)
   - TURN_RANDOM(angle)
   - MLOOK_TURN(angle)
+
++ Portable install option
+  - If "edge-classic-portable.cfg" is found in the same directory as the program, files and folders will be written to that directory instead
+    of a location in the user's home path
 	  
 
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)

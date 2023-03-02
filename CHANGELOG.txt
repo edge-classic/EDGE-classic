@@ -1,6 +1,6 @@
 https://github.com/dashodanger/EDGE-classic
 
-Current as of: February 2023
+Current as of: March 2023
 
 CHANGELOG for EDGE-Classic 1.34 (since EDGE-Classic 1.33)
 ====================================
@@ -11,6 +11,9 @@ Bugs fixed
 
 + Fixed autoload folder items paths being prepended with the autoload folder path itself
   (cleanup from prior method of using PATH_Join)
+  
++ COAL player.query_weapon() would not return ZOOM FACTOR in some cases.
+
 
 General Improvements
 --------------------

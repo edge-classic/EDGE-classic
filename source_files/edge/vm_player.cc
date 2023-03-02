@@ -1253,6 +1253,8 @@ std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secattackinfo
 
 	const damage_c *damtype;
 
+	float temp_num2;
+
 	switch (whatinfo)
 	{
 		case 1:  //name
@@ -1261,8 +1263,8 @@ std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secattackinfo
 			break;
 		
 		case 2:  //ZOOM_FACTOR
-			temp_num = objWep->zoom_factor;
-			temp_string = std::to_string(temp_num);
+			temp_num2 = 90.0f / objWep->zoom_fov;
+			temp_string = std::to_string(temp_num2);
 			break;
 
 		case 3: //AMMOTYPE

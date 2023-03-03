@@ -1708,7 +1708,7 @@ void CON_ShowPosition(void)
 	int x = SCREENWIDTH  - XMUL * 16;
 	int y = SCREENHEIGHT - FNSZ * 5;
 
-	SolidBox(x, y - FNSZ * 7, XMUL * 16, FNSZ * 7 + 2, RGB_MAKE(0,0,0), 0.5);
+	SolidBox(x, y - FNSZ * 10, XMUL * 16, FNSZ * 10 + 2, RGB_MAKE(0,0,0), 0.5);
 
 	x += XMUL;
 	y -= FNSZ * (con_font->def->type == FNTYP_TrueType ? 0.25 : 1.25);
@@ -1725,6 +1725,18 @@ void CON_ShowPosition(void)
 
 	y -= FNSZ;
 	sprintf(textbuf, "angle: %d", (int)ANG_2_FLOAT(p->mo->angle));
+	DrawText(x, y, textbuf, T_GREY176);
+
+	y -= FNSZ;
+	sprintf(textbuf, "x mom: %.4f", p->mo->mom.x);
+	DrawText(x, y, textbuf, T_GREY176);
+
+	y -= FNSZ;
+	sprintf(textbuf, "y mom: %.4f", p->mo->mom.y);
+	DrawText(x, y, textbuf, T_GREY176);
+
+	y -= FNSZ;
+	sprintf(textbuf, "z mom: %.4f", p->mo->mom.z);
 	DrawText(x, y, textbuf, T_GREY176);
 
 	y -= FNSZ;

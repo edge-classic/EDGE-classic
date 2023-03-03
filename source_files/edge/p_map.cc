@@ -65,6 +65,9 @@ typedef struct try_move_info_s
 	// attempted destination
 	float x, y, z;
 
+	float f_slope_z = -40000;
+	float c_slope_z = 40000;
+
 	float bbox[4];
 
 	// --- output ---
@@ -763,8 +766,8 @@ static bool P_CheckRelPosition(mobj_t * thing, float x, float y)
 
 	tm_I.sub = R_PointInSubsector(x, y);
 
-	float f_slope_z = -40000.0f;
-	float c_slope_z = 40000.0f;
+	tm_I.f_slope_z = -40000.0f;
+	tm_I.c_slope_z = 40000.0f;
 
 	// Vertex slope check here?
 	if (tm_I.sub->sector->floor_vertex_slope)
@@ -774,7 +777,7 @@ static bool P_CheckRelPosition(mobj_t * thing, float x, float y)
 		float z_test = M_LinePlaneIntersection(line_a, line_b, tm_I.sub->sector->floor_z_verts[0], 
 			tm_I.sub->sector->floor_z_verts[1], tm_I.sub->sector->floor_z_verts[2]).z;
 		if (std::isfinite(z_test))
-			f_slope_z = z_test;
+			tm_I.f_slope_z = z_test;
 	}
 
 	if (tm_I.sub->sector->ceil_vertex_slope)
@@ -784,7 +787,7 @@ static bool P_CheckRelPosition(mobj_t * thing, float x, float y)
 		float z_test = M_LinePlaneIntersection(line_a, line_b, tm_I.sub->sector->ceil_z_verts[0], 
 			tm_I.sub->sector->ceil_z_verts[1], tm_I.sub->sector->ceil_z_verts[2]).z;
 		if (std::isfinite(z_test))
-			c_slope_z = z_test;
+			tm_I.c_slope_z = z_test;
 	}
 
 	float r = tm_I.mover->radius;
@@ -798,8 +801,8 @@ static bool P_CheckRelPosition(mobj_t * thing, float x, float y)
 	// point.  Any contacted lines the step closer together will adjust them.
 	// -AJA- 1999/07/19: Extra floor support.
 	P_ComputeThingGap(thing, tm_I.sub->sector, tm_I.z, &tm_I.floorz, &tm_I.ceilnz, 
-		f_slope_z > -40000.0f ? (f_slope_z-tm_I.sub->sector->f_h) : 0.0f,
-		c_slope_z < 40000.0f ? (tm_I.sub->sector->c_h - c_slope_z) : 0.0f);
+		tm_I.f_slope_z > -40000.0f ? (tm_I.f_slope_z-tm_I.sub->sector->f_h) : 0.0f,
+		tm_I.c_slope_z < 40000.0f ? (tm_I.sub->sector->c_h - tm_I.c_slope_z) : 0.0f);
 
 	tm_I.dropoff = tm_I.floorz;
 	tm_I.above = NULL;

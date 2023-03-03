@@ -3015,14 +3015,14 @@ void GroupLines(void)
 			}
 			if (floor_z_lines == 1 && sector->floor_z_verts.size() == 4)
 			{
-				sector->floor_z_verts.pop_back();
+				//sector->floor_z_verts.pop_back(); - This messes up MSVC Debug builds - Dasho
 				sector->floor_vertex_slope = true;
 			}
 			else
 				sector->floor_z_verts.clear();
 			if (ceil_z_lines == 1 && sector->ceil_z_verts.size() == 4)
 			{
-				sector->ceil_z_verts.pop_back();
+				//sector->ceil_z_verts.pop_back(); - This messes up MSVC Debug builds - Dasho
 				sector->ceil_vertex_slope = true;
 			}
 			else

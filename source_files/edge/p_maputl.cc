@@ -372,7 +372,7 @@ static int GAP_RemoveSolid(vgap_t * dest, int d_num, float z1, float z2)
 	return new_num;
 }
 
-static int GAP_Construct(vgap_t * gaps, sector_t * sec, mobj_t * thing)
+static int GAP_Construct(vgap_t * gaps, sector_t * sec, mobj_t * thing, float f_slope_z = 0, float c_slope_z = 0)
 {
 	extrafloor_t * ef;
 
@@ -382,8 +382,8 @@ static int GAP_Construct(vgap_t * gaps, sector_t * sec, mobj_t * thing)
 	if (sec->f_h >= sec->c_h)
 		return 0;
 
-	gaps[0].f = sec->f_h;
-	gaps[0].c = sec->c_h;
+	gaps[0].f = sec->f_h + f_slope_z;
+	gaps[0].c = sec->c_h - c_slope_z;
 
 	for (ef = sec->bottom_ef; ef; ef = ef->higher)
 	{
@@ -580,7 +580,7 @@ float P_ComputeThingGap(mobj_t * thing, sector_t * sec, float z,
 	vgap_t temp_gaps[100];
 	int temp_num;
 
-	temp_num = GAP_Construct(temp_gaps, sec, thing);
+	temp_num = GAP_Construct(temp_gaps, sec, thing, f_slope_z, c_slope_z);
 
 	if (z == ONFLOORZ)
 		z = sec->f_h;
@@ -590,7 +590,7 @@ float P_ComputeThingGap(mobj_t * thing, sector_t * sec, float z,
 
 	z += f_slope_z;
 
-	temp_num = P_FindThingGap(temp_gaps, temp_num, z, z + thing->height + c_slope_z);
+	temp_num = P_FindThingGap(temp_gaps, temp_num, z, z + thing->height);
 
 	if (temp_num < 0)
 	{
@@ -599,8 +599,8 @@ float P_ComputeThingGap(mobj_t * thing, sector_t * sec, float z,
 		return *f;
 	}
 
-	*f = temp_gaps[temp_num].f + f_slope_z;
-	*c = temp_gaps[temp_num].c - c_slope_z;
+	*f = temp_gaps[temp_num].f;
+	*c = temp_gaps[temp_num].c;
 
 	return z;
 }
@@ -671,8 +671,49 @@ void P_ComputeGaps(line_t * ld)
 
 	// handle normal gaps ("movement" gaps)
 
-	ld->gap_num = GAP_Construct(ld->gaps, front, NULL);
-	temp_num = GAP_Construct(temp_gaps, back, NULL);
+	float f_slope_z = 0;
+	float c_slope_z = 0;
+
+	if (front->floor_vertex_slope)
+	{
+		f_slope_z = front->floor_z_verts[0].z;
+		if (front->floor_z_verts[1].z < f_slope_z)
+			f_slope_z = front->floor_z_verts[1].z;
+		if (front->floor_z_verts[2].z < f_slope_z)
+			f_slope_z = front->floor_z_verts[2].z;
+	}
+	if (front->ceil_vertex_slope)
+	{
+		c_slope_z = front->floor_z_verts[0].z;
+		if (front->ceil_z_verts[1].z > c_slope_z)
+			c_slope_z = front->ceil_z_verts[1].z;
+		if (front->ceil_z_verts[2].z > c_slope_z)
+			c_slope_z = front->ceil_z_verts[2].z;
+	}
+
+	ld->gap_num = GAP_Construct(ld->gaps, front, NULL, f_slope_z, c_slope_z);
+
+	f_slope_z = 0;
+	c_slope_z = 0;
+
+	if (back->floor_vertex_slope)
+	{
+		f_slope_z = back->floor_z_verts[0].z;
+		if (back->floor_z_verts[1].z < f_slope_z)
+			f_slope_z = back->floor_z_verts[1].z;
+		if (back->floor_z_verts[2].z < f_slope_z)
+			f_slope_z = back->floor_z_verts[2].z;
+	}
+	if (back->ceil_vertex_slope)
+	{
+		c_slope_z = back->floor_z_verts[0].z;
+		if (back->ceil_z_verts[1].z > c_slope_z)
+			c_slope_z = back->ceil_z_verts[1].z;
+		if (back->ceil_z_verts[2].z > c_slope_z)
+			c_slope_z = back->ceil_z_verts[2].z;
+	}
+
+	temp_num = GAP_Construct(temp_gaps, back, NULL, f_slope_z, c_slope_z);
 
 	ld->gap_num = GAP_Restrict(ld->gaps, ld->gap_num, temp_gaps, temp_num);
 }

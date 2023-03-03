@@ -691,7 +691,7 @@ void P_ComputeGaps(line_t * ld)
 			c_slope_z = front->ceil_z_verts[2].z;
 	}
 
-	ld->gap_num = GAP_Construct(ld->gaps, front, NULL, f_slope_z, c_slope_z);
+	/*ld->gap_num = GAP_Construct(ld->gaps, front, NULL, f_slope_z, c_slope_z);
 
 	f_slope_z = 0;
 	c_slope_z = 0;
@@ -713,7 +713,10 @@ void P_ComputeGaps(line_t * ld)
 			c_slope_z = back->ceil_z_verts[2].z;
 	}
 
-	temp_num = GAP_Construct(temp_gaps, back, NULL, f_slope_z, c_slope_z);
+	temp_num = GAP_Construct(temp_gaps, back, NULL, f_slope_z, c_slope_z);*/
+
+	ld->gap_num = GAP_Construct(ld->gaps, front, NULL);
+	temp_num = GAP_Construct(temp_gaps, back, NULL);
 
 	ld->gap_num = GAP_Restrict(ld->gaps, ld->gap_num, temp_gaps, temp_num);
 }

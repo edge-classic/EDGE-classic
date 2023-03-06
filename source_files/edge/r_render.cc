@@ -1486,18 +1486,29 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 
 	// handle lower, upper and mid-masker
 
-	if (slope_fh < other->f_h || (!sec->floor_vertex_slope && other->floor_vertex_slope))
+	if (slope_fh < other->f_h || (sec->floor_vertex_slope || other->floor_vertex_slope))
 	{
-		if (other->floor_vertex_slope)
+		if (!sec->floor_vertex_slope && other->floor_vertex_slope)
 		{
 			float zv1 = zvertexes[seg->v1 - vertexes].x;
 			float zv2 = zvertexes[seg->v2 - vertexes].x;
 			if (mirror_sub)
 				std::swap(zv1, zv2);
 			AddWallTile2(seg, dfloor,
-				sd->bottom.image ? &sd->bottom : &other->floor, sec->f_h, 
-				(zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->f_h, sec->f_h, (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->f_h,
-				(ld->flags & MLF_LowerUnpegged) ? sec->c_h : MAX(zv1, zv2), 0);
+				sd->bottom.image ? &sd->bottom : &other->floor, (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->f_h, 
+				sec->f_h, (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->f_h, sec->f_h,
+				(ld->flags & MLF_LowerUnpegged) ? sec->c_h : MAX(sec->f_h, MAX(zv1, zv2)), 0);
+		}
+		else if (sec->floor_vertex_slope && !other->floor_vertex_slope)
+		{
+			float zv1 = zvertexes[seg->v1 - vertexes].x;
+			float zv2 = zvertexes[seg->v2 - vertexes].x;
+			if (mirror_sub)
+				std::swap(zv1, zv2);
+			AddWallTile2(seg, dfloor,
+				sd->bottom.image ? &sd->bottom : &sec->floor, (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : other->f_h, 
+				other->f_h, (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->f_h, other->f_h,
+				(ld->flags & MLF_LowerUnpegged) ? other->c_h : MAX(other->f_h, MAX(zv1, zv2)), 0);
 		}
 		else if (! sd->bottom.image && ! debug_hom.d)
 		{
@@ -1531,10 +1542,10 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 		}
 	}
 
-	if ((slope_ch > other->c_h || (!sec->ceil_vertex_slope && other->ceil_vertex_slope)) &&
+	if ((slope_ch > other->c_h || (sec->ceil_vertex_slope || other->ceil_vertex_slope)) &&
 		! (IS_SKY(sec->ceil) && IS_SKY(other->ceil)))
 	{
-		if (other->ceil_vertex_slope)
+		if (!sec->ceil_vertex_slope && other->ceil_vertex_slope)
 		{
 			float zv1 = zvertexes[seg->v1 - vertexes].y;
 			float zv2 = zvertexes[seg->v2 - vertexes].y;
@@ -1544,6 +1555,17 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 				sd->top.image ? &sd->top : &other->ceil, sec->c_h, 
 				(zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->c_h, sec->c_h, (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->c_h,
 				(ld->flags & MLF_UpperUnpegged) ? sec->f_h : MIN(zv1, zv2), 0);
+		}
+		else if (sec->ceil_vertex_slope && !other->ceil_vertex_slope)
+		{
+			float zv1 = zvertexes[seg->v1 - vertexes].y;
+			float zv2 = zvertexes[seg->v2 - vertexes].y;
+			if (mirror_sub)
+				std::swap(zv1, zv2);
+			AddWallTile2(seg, dfloor,
+				sd->top.image ? &sd->top : &sec->ceil, other->c_h, 
+				(zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : other->c_h, other->c_h, (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->c_h,
+				(ld->flags & MLF_UpperUnpegged) ? other->f_h : MIN(zv1, zv2), 0);
 		}
 		else if (! sd->top.image && ! debug_hom.d)
 		{

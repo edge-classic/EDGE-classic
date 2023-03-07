@@ -2489,8 +2489,9 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 			if (cur_sub->sector->floor_vertex_slope && face_dir > 0)
 			{
 				// floor - check vertex heights
-				for (auto v : cur_sub->sector->floor_z_verts)
-					if (x == v.x && y == v.y) z = v.z;
+				if (vi >= 0 && vi < numvertexes && zvertexes)
+					if (zvertexes[vi].x < 32767.0f && zvertexes[vi].x > -32768.0f)
+						z = zvertexes[vi].x;
 			}
 
 			if (cur_sub->sector->ceil_vertex_slope && face_dir < 0)

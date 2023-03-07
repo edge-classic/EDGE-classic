@@ -673,7 +673,8 @@ void P_CalcFullProperties(const mobj_t *mo, region_properties_t *new_p)
 	// Note: friction not averaged: comes from region foot is in
 	new_p->friction = sector->p->friction;
 
-	floor_h = sector->f_h;
+	if (sector->floor_vertex_slope)
+		floor_h = mo->floorz;
 
 	S = sector->bottom_ef;
 	L = sector->bottom_liq;

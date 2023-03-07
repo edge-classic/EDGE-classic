@@ -563,7 +563,7 @@ static bool PIT_CheckRelLine(line_t * ld, void *data)
 
 	if (i >= 0)
 	{
-		if (ld->gaps[i].f >= tm_I.floorz)
+		if (ld->gaps[i].f >= tm_I.floorz && !tm_I.sub->sector->floor_vertex_slope)
 		{
 			tm_I.floorz = ld->gaps[i].f;
 			tm_I.below = NULL;

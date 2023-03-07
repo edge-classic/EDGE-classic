@@ -1495,8 +1495,8 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 			if (mirror_sub)
 				std::swap(zv1, zv2);
 			AddWallTile2(seg, dfloor,
-				sd->bottom.image ? &sd->bottom : &other->floor, (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->f_h, 
-				sec->f_h, (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->f_h, sec->f_h,
+				sd->bottom.image ? &sd->bottom : &other->floor, sec->f_h, 
+				(zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->f_h, sec->f_h, (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->f_h,
 				(ld->flags & MLF_LowerUnpegged) ? sec->c_h : MAX(sec->f_h, MAX(zv1, zv2)), 0);
 		}
 		else if (sec->floor_vertex_slope && !other->floor_vertex_slope)
@@ -2489,9 +2489,8 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 			if (cur_sub->sector->floor_vertex_slope && face_dir > 0)
 			{
 				// floor - check vertex heights
-				if (vi >= 0 && vi < numvertexes && zvertexes)
-					if (zvertexes[vi].x < 32767.0f && zvertexes[vi].x > -32768.0f)
-						z = zvertexes[vi].x;
+				for (auto v : cur_sub->sector->floor_z_verts)
+					if (x == v.x && y == v.y) z = v.z;
 			}
 
 			if (cur_sub->sector->ceil_vertex_slope && face_dir < 0)

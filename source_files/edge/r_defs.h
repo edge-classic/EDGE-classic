@@ -279,6 +279,8 @@ typedef struct sector_s
 	bool ceil_vertex_slope = false;
 	std::vector<vec3_t> floor_z_verts;
 	std::vector<vec3_t> ceil_z_verts;
+	vec3_t floor_vs_normal;
+	vec3_t ceil_vs_normal;
 
 	// linked list of extrafloors that this sector controls.  NULL means
 	// that this sector is not a controller.

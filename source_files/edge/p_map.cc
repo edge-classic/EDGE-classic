@@ -44,6 +44,7 @@
 #include "dm_state.h"
 #include "g_game.h"
 #include "m_bbox.h"
+#include "m_math.h" // Vert slope intercept check
 #include "m_random.h"
 #include "p_local.h"
 #include "s_sound.h"
@@ -766,8 +767,8 @@ static bool P_CheckRelPosition(mobj_t * thing, float x, float y)
 
 	tm_I.sub = R_PointInSubsector(x, y);
 
-	tm_I.f_slope_z = -40000.0f;
-	tm_I.c_slope_z = 40000.0f;
+	tm_I.f_slope_z = 0;
+	tm_I.c_slope_z = 0;
 
 	// Vertex slope check here?
 	if (tm_I.sub->sector->floor_vertex_slope)
@@ -775,9 +776,9 @@ static bool P_CheckRelPosition(mobj_t * thing, float x, float y)
 		vec3_t line_a{tm_I.x, tm_I.y, -40000};
 		vec3_t line_b{tm_I.x, tm_I.y, 40000};
 		float z_test = M_LinePlaneIntersection(line_a, line_b, tm_I.sub->sector->floor_z_verts[0], 
-			tm_I.sub->sector->floor_z_verts[1], tm_I.sub->sector->floor_z_verts[2]).z;
+			tm_I.sub->sector->floor_z_verts[1], tm_I.sub->sector->floor_z_verts[2], tm_I.sub->sector->floor_vs_normal).z;
 		if (std::isfinite(z_test))
-			tm_I.f_slope_z = z_test;
+			tm_I.f_slope_z = z_test - tm_I.sub->sector->f_h;
 	}
 
 	if (tm_I.sub->sector->ceil_vertex_slope)
@@ -785,9 +786,9 @@ static bool P_CheckRelPosition(mobj_t * thing, float x, float y)
 		vec3_t line_a{tm_I.x, tm_I.y, -40000};
 		vec3_t line_b{tm_I.x, tm_I.y, 40000};
 		float z_test = M_LinePlaneIntersection(line_a, line_b, tm_I.sub->sector->ceil_z_verts[0], 
-			tm_I.sub->sector->ceil_z_verts[1], tm_I.sub->sector->ceil_z_verts[2]).z;
+			tm_I.sub->sector->ceil_z_verts[1], tm_I.sub->sector->ceil_z_verts[2], tm_I.sub->sector->ceil_vs_normal).z;
 		if (std::isfinite(z_test))
-			tm_I.c_slope_z = z_test;
+			tm_I.c_slope_z = tm_I.sub->sector->c_h - z_test;
 	}
 
 	float r = tm_I.mover->radius;
@@ -801,8 +802,7 @@ static bool P_CheckRelPosition(mobj_t * thing, float x, float y)
 	// point.  Any contacted lines the step closer together will adjust them.
 	// -AJA- 1999/07/19: Extra floor support.
 	P_ComputeThingGap(thing, tm_I.sub->sector, tm_I.z, &tm_I.floorz, &tm_I.ceilnz, 
-		tm_I.f_slope_z > -40000.0f ? (tm_I.f_slope_z-tm_I.sub->sector->f_h) : 0.0f,
-		tm_I.c_slope_z < 40000.0f ? (tm_I.sub->sector->c_h - tm_I.c_slope_z) : 0.0f);
+		tm_I.f_slope_z,	tm_I.c_slope_z);
 
 	tm_I.dropoff = tm_I.floorz;
 	tm_I.above = NULL;
@@ -1412,14 +1412,23 @@ static bool PTR_AimTraverse2(intercept_t * in, void *dataptr)
 	return false;  // don't go any farther
 }
 
-static inline bool ShootCheckGap(float z,
-	float f_h, surface_t *floor, float c_h, surface_t *ceil)
+static inline bool ShootCheckGap(float sx, float sy, float z,
+	float f_h, surface_t *floor, float c_h, surface_t *ceil, sector_t *sec_check)
 {
 	/* Returns true if successfully passed gap */
 
 	// perfectly horizontal shots cannot hit planes
 	if (shoot_I.slope == 0)
 		return true;
+
+	// Check floor vertex slope intersect
+	if (sec_check->floor_vertex_slope)
+	{
+		float sz = M_LinePlaneIntersection({sx,sy,-40000},{sx,sy,40000}, sec_check->floor_z_verts[0],
+			sec_check->floor_z_verts[1], sec_check->floor_z_verts[2], sec_check->floor_vs_normal).z;
+		if (std::isfinite(sz))
+			f_h = sz;
+	}
 
 	// check if hit the floor
 	if (shoot_I.prev_z > f_h && z < f_h)
@@ -1624,15 +1633,15 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 			// FIXME: must go in correct order
 			for (ef=side->sector->bottom_ef; ef; ef=ef->higher)
 			{
-				if (! ShootCheckGap(z, floor_h, floor_s, ef->bottom_h, ef->bottom))
+				if (! ShootCheckGap(x, y, z, floor_h, floor_s, ef->bottom_h, ef->bottom, side->sector))
 					return false;
 
 				floor_s = ef->top;
 				floor_h = ef->top_h;
 			}
 
-			if (! ShootCheckGap(z, floor_h, floor_s, 
-				side->sector->c_h, &side->sector->ceil))
+			if (! ShootCheckGap(x, y, z, floor_h, floor_s, 
+				side->sector->c_h, &side->sector->ceil, side->sector))
 			{
 				return false;
 			}

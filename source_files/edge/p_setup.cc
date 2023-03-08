@@ -42,6 +42,7 @@
 #include "l_ajbsp.h"
 #include "m_argv.h"
 #include "m_bbox.h"
+#include "m_math.h"
 #include "m_misc.h"
 #include "m_random.h"
 #include "p_local.h"
@@ -2951,8 +2952,14 @@ void GroupLines(void)
 			}
 			if (!sector->floor_vertex_slope)
 				sector->floor_z_verts.clear();
+			else
+				sector->floor_vs_normal = 
+					M_CrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
 			if (!sector->ceil_vertex_slope)
 				sector->ceil_z_verts.clear();
+			else
+				sector->ceil_vs_normal = 
+					M_CrossProduct(sector->ceil_z_verts[0], sector->ceil_z_verts[1], sector->ceil_z_verts[2]);
 		}
 		if (sector->linecount == 4 && zvertexes)
 		{
@@ -3015,15 +3022,17 @@ void GroupLines(void)
 			}
 			if (floor_z_lines == 1 && sector->floor_z_verts.size() == 4)
 			{
-				//sector->floor_z_verts.pop_back(); - This messes up MSVC Debug builds - Dasho
 				sector->floor_vertex_slope = true;
+				sector->floor_vs_normal = 
+					M_CrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
 			}
 			else
 				sector->floor_z_verts.clear();
 			if (ceil_z_lines == 1 && sector->ceil_z_verts.size() == 4)
 			{
-				//sector->ceil_z_verts.pop_back(); - This messes up MSVC Debug builds - Dasho
 				sector->ceil_vertex_slope = true;
+				sector->ceil_vs_normal = 
+					M_CrossProduct(sector->ceil_z_verts[0], sector->ceil_z_verts[1], sector->ceil_z_verts[2]);
 			}
 			else
 				sector->ceil_z_verts.clear();

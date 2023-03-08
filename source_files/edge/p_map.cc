@@ -1418,7 +1418,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
 	/* Returns true if successfully passed gap */
 
 	// perfectly horizontal shots cannot hit planes
-	if (shoot_I.slope == 0)
+	if (shoot_I.slope == 0 && !sec_check->floor_vertex_slope && !sec_check->ceil_vertex_slope)
 		return true;
 
 	// Check floor vertex slope intersect

@@ -1238,9 +1238,16 @@ static const image_c *BackupTexture(const char *tex_name, int flags)
 	return dummy;
 }
 
+void W_MakeEdgeTex()
+{
+	real_textures.push_back(CreateDummyImage("EDGETEX", 0xAA5511, 0x663300));
+}
+
+
 //
 // BackupFlat
 //
+
 static const image_c *BackupFlat(const char *flat_name, int flags)
 {
 	const image_c *rim;
@@ -1276,6 +1283,11 @@ static const image_c *BackupFlat(const char *flat_name, int flags)
     // keep dummy flat so that future lookups will succeed
     real_flats.push_back(dummy);
     return dummy;
+}
+
+void W_MakeEdgeFlat()
+{
+	real_flats.push_back(CreateDummyImage("EDGEFLAT", 0x11AA11, 0x115511));
 }
 
 //

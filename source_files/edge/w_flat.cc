@@ -289,7 +289,11 @@ void W_InitFlats(void)
 	}
 
 	if (flats.size() == 0)
-		I_Error("No flats found !  Make sure the chosen IWAD is valid.\n");
+	{
+		I_Warning("No flats found! Generating fallback flat!\n");
+		W_MakeEdgeFlat();
+		return;
+	}
 
 	// now sort the flats, primarily by increasing name, secondarily by
 	// increasing lump number (a measure of newness).

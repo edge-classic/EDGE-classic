@@ -249,6 +249,9 @@ void W_ImageAddTX(int lump, const char *name, bool hires);
 void W_AnimateImageSet(const image_c ** images, int number, int speed);
 void W_DrawSavePic(const byte *pixels);
 
+void W_MakeEdgeFlat(void);
+void W_MakeEdgeTex(void);
+
 #ifdef USING_GL_TYPES
 GLuint W_ImageCache(const image_c *image, bool anim = true,
 					const colourmap_c *trans = NULL, bool do_whiten = false);

@@ -260,7 +260,12 @@ void W_InitTextures(void)
 	}
 
 	if (tex_sets.empty())
-		I_Error("No textures found !  Make sure the chosen IWAD is valid.\n");
+	{
+		//I_Error("No textures found !  Make sure the chosen IWAD is valid.\n");
+		I_Warning("No textures found! Generating fallback texture!\n");
+		W_MakeEdgeTex();
+		return;
+	}
 
 	// now clump all of the texturedefs together and sort 'em, primarily
 	// by increasing name, secondarily by increasing file number

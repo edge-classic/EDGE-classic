@@ -2430,11 +2430,11 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 		return;
 
 	// ignore non-facing planes
-	if ((viewz > h) != (face_dir > 0) && !slope)
+	if ((viewz > h) != (face_dir > 0) && !slope && !cur_sub->sector->floor_vertex_slope)
 		return;
 
 	// ignore dud regions (floor >= ceiling)
-	if (dfloor->f_h > dfloor->c_h && !slope)
+	if (dfloor->f_h > dfloor->c_h && !slope && !cur_sub->sector->ceil_vertex_slope)
 		return;
 
 	// ignore empty subsectors

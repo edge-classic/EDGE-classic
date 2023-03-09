@@ -1093,7 +1093,8 @@ void ProcessWad(data_file_c *df, size_t file_index)
 	{
 		raw_wad_entry_t& entry = raw_info[i];
 
-		bool allow_ddf = (df->kind == FLKIND_EWad) || (df->kind == FLKIND_PWad);
+		bool allow_ddf = (df->kind == FLKIND_EWad || (df->kind == FLKIND_IWad && 
+			epi::strcmp(iwad_base, "CUSTOM") == 0) || df->kind == FLKIND_PWad);
 
 		AddLump(df, entry.name, EPI_LE_S32(entry.pos), EPI_LE_S32(entry.size),
 				(int)file_index, allow_ddf);

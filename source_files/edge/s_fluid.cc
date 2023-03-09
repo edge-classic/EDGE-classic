@@ -38,6 +38,7 @@ typedef struct BW_MidiRtInterface FluidInterface;
 
 #define FLUID_NUM_SAMPLES  4096
 
+extern bool var_pc_speaker_mode;
 extern bool dev_stereo;
 extern int  dev_freq; 
 
@@ -99,7 +100,8 @@ bool S_StartupFluid(void)
 
 	fluid_synth_set_sample_rate(edge_fluid, dev_freq);
 	
-	if (fluid_synth_sfload(edge_fluid, s_soundfont.c_str(), 1) == -1)
+	if (fluid_synth_sfload(edge_fluid, var_pc_speaker_mode ? epi::PATH_Join(epi::PATH_Join(game_dir, UTFSTR("soundfont")), UTFSTR("bonkers_for_bits.sf2")).u8string().c_str() :
+		s_soundfont.c_str(), 1) == -1)
 	{
 		I_Warning("FluidLite: Could not load requested soundfont %s! Falling back to default soundfont!\n", s_soundfont.c_str());
 		if (fluid_synth_sfload(edge_fluid, epi::PATH_Join(epi::PATH_Join(game_dir, UTFSTR("soundfont")), UTFSTR("default.sf2")).u8string().c_str(), 1) == -1) 

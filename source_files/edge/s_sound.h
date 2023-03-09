@@ -98,6 +98,7 @@ void S_StartFX(struct sfx_s *sfx, int category = SNCAT_UI, position_c *pos = NUL
 
 void S_StopFX(position_c *pos);
 void S_StopLevelFX(void);
+void S_StopAllFX(void);
 
 void S_ResumeSound(void);
 void S_PauseSound(void);

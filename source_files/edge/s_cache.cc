@@ -137,10 +137,6 @@ void S_CacheClearAll(void)
 
 static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 {
-/* Lobo 2022: info overload. Shut up.
-	I_Debugf("S_CacheLoad: [%s]\n", def->name.c_str());
-*/
-
 	// open the file or lump, and read it into memory
 	epi::file_c *F;
 
@@ -172,11 +168,16 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	}
 	else 
 	{
-		int lump = W_CheckNumForName(def->lump_name.c_str());
+		int lump = -1;
+		if (var_pc_speaker_mode)
+			lump = W_CheckNumForName(def->pc_speaker_lump.c_str());
+		else
+			lump = W_CheckNumForName(def->lump_name.c_str());
 		if (lump < 0)
 		{
 			// Just write a debug message for SFX lumps; this prevents spam amongst the various IWADs
-			M_DebugError("SFX Loader: Missing sound lump: %s\n", def->lump_name.c_str());
+			M_DebugError("SFX Loader: Missing sound lump: %s\n", var_pc_speaker_mode ? def->pc_speaker_lump.c_str() :
+				 def->lump_name.c_str());
 			return false;
 		}
 
@@ -262,9 +263,7 @@ epi::sound_data_c *S_CacheLoad(sfxdef_c *def)
 
 	if (var_pc_speaker_mode)
 	{
-		if (!def->pc_speaker_lump.empty())
-			def->lump_name = def->pc_speaker_lump;
-		else	
+		if (def->pc_speaker_lump.empty())
 			pc_speaker_skip = true;
 	}
 

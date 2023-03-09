@@ -47,6 +47,8 @@
 #include "w_files.h"
 #include "w_wad.h"
 
+extern bool var_pc_speaker_mode;
+
 // music slider value
 int mus_volume;
 
@@ -227,7 +229,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 		case epi::FMT_MUS:
 		case epi::FMT_WAV: // RIFF MIDI has the same header as WAV
 			delete F;
-			if (var_midi_player == 0)
+			if (var_midi_player == 0 || var_pc_speaker_mode)
 			{
 				music_player = S_PlayFluid(data, length, volume, loop);
 			}

@@ -509,6 +509,25 @@ void S_StopLevelFX(void)
 	I_UnlockAudio();
 }
 
+void S_StopAllFX(void)
+{
+	if (nosound) return;
+
+	I_LockAudio();
+	{
+		for (int i = 0; i < num_chan; i++)
+		{
+			mix_channel_c *chan = mix_chan[i];
+
+			if (chan->state != CHAN_Empty)
+			{
+				S_KillChannel(i);
+			}
+		}
+	}
+	I_UnlockAudio();
+}
+
 
 void S_SoundTicker(void)
 {

@@ -36,6 +36,8 @@ General Improvements
 + New directories, logfiles, etc, will now be written to an appropriate location in the user's home directory by default (AppData, etc, depending on OS). Portable
   usage is covered in "New Features"
 
++ "PC Speaker Mode" Sound Option no longer requires a restart to toggle; when On it will always use Fluidlite + the Bonkers for Bits soundfont when playing MIDI music
+
 New Features
 ------------
 + Added WebGL platform support

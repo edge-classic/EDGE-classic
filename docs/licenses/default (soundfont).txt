@@ -1,1 +1,0 @@
-The default soundfont for EDGE-Classic is GMGSx.sf2 by Kenneth Rundt, which he has placed in the public domain. This file usually accompanies installations of SynthFont 2. More information can be found at https://www.synthfont.com/

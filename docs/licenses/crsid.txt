@@ -1,5 +1,0 @@
-         cRSID-1.2 by Hermit (Mihaly Horvath) - Year 2022
-         ------------------------------------------------
-
-License is still WTF: Do what the fuck you want with this code, but
-                      it would be nice mentioning me as the original author.

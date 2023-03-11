@@ -366,7 +366,9 @@ static void ShadeNormals(abstract_shader_c *shader,
 {
 	for (int i=0; i < data->model->verts_per_frame; i++)
 	{
-		float nx, ny, nz;
+		float nx = 0;
+		float ny = 0;
+		float nz = 0;
 		if (!skip_calc)
 		{
 			float nx1 = data->model->frame->vertices[i].nx;

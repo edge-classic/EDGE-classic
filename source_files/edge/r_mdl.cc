@@ -559,7 +559,9 @@ static void ShadeNormals(abstract_shader_c *shader,
 	for (; *n_list >= 0; n_list++)
 	{
 		short n = *n_list;
-		float nx, ny, nz;
+		float nx = 0;
+		float ny = 0;
+		float nz = 0;
 
 		if (!skip_calc)
 		{

@@ -76,7 +76,7 @@
 
 static bool level_active = false;
 
-DEF_CVAR(udmf_strict, "1", CVAR_ARCHIVE)
+DEF_CVAR(udmf_strict, "0", CVAR_ARCHIVE)
 
 //
 // MAP related Lookup tables.
@@ -3358,7 +3358,7 @@ void P_SetupLevel(void)
 			if(!(epi::case_cmp(value, "doom") == 0 || epi::case_cmp(value, "heretic") == 0) || epi::case_cmp(value, "edge") == 0
 				|| epi::case_cmp(value, "zdoomtranslated") == 0)
 			{
-				I_Error("UDMF: %s uses unsupported namespace \"%s\"!\nSupported namespaces are \"doom\", \"heretic\", \"edge\", or \"zdoomtranslated\"!\n",
+				I_Warning("UDMF: %s uses unsupported namespace \"%s\"!\nSupported namespaces are \"doom\", \"heretic\", \"edge\", or \"zdoomtranslated\"!\n",
 					currmap->lump.c_str(), value);
 			}
 		}

@@ -2228,7 +2228,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
 	float f_slope_z = 0;
 	float c_slope_z = 0;
 
-	/*if (sec->floor_vertex_slope)
+	if (sec->floor_vertex_slope)
 	{
 		float sz = M_LinePlaneIntersection({x,y,-40000},{x,y,40000}, sec->floor_z_verts[0],
 			sec->floor_z_verts[1], sec->floor_z_verts[2], sec->floor_vs_normal).z;
@@ -2241,7 +2241,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
 			sec->ceil_z_verts[1], sec->ceil_z_verts[2], sec->ceil_vs_normal).z;
 		if (std::isfinite(sz))
 			c_slope_z = sec->c_h - sz;
-	}*/
+	}
 
 	mobj->z = P_ComputeThingGap(mobj, sec, z, &mobj->floorz, &mobj->ceilingz, f_slope_z, c_slope_z);
 

@@ -210,6 +210,11 @@ struct mobj_s : public position_c
 	// properties from extrafloor the thing is in
 	struct region_properties_s *props = nullptr;
 
+	// Vert slope stuff maybe
+	float old_z = 0;
+	float old_floorz = 0;
+	bool on_slope = false;
+
 	// The closest interval over all contacted Sectors.
 	float floorz = 0;
 	float ceilingz = 0;
@@ -318,7 +323,7 @@ struct mobj_s : public position_c
 	struct rad_script_s *path_trigger = nullptr;
 
 	// if we're on a ladder, this is the linedef #, otherwise -1.
-	int on_ladder = 0;
+	int on_ladder = -1;
 
 	dlight_state_t dlight = {0,0,0,nullptr};
 

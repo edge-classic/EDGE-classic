@@ -980,7 +980,7 @@ static void P_XYMovement(mobj_t * mo, const region_properties_t *props, bool ext
 	float friction = props->friction;
 
 	if ((mo->z > mo->floorz) && !(mo->on_ladder >= 0) &&
-		!(mo->player && mo->player->powers[PW_Jetpack] > 0))
+		!(mo->player && mo->player->powers[PW_Jetpack] > 0) && !mo->on_slope)
 	{
 		// apply drag when airborne
 		friction = props->drag;
@@ -1029,6 +1029,7 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props, bool extr
 	float dist;
 	float delta;
 	float zmove;
+	float zmove_vs = 0;
 
 	// -KM- 1998/11/25 Gravity is now not precalculated so that
 	//  menu changes affect instantly.
@@ -1049,8 +1050,12 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props, bool extr
 	if (do_extra && r_doubleframes.d) // 70 Hz
 		zmove *= 0.52;
 
+	if (mo->on_slope && mo->z > mo->floorz &&
+		std::abs(mo->z - mo->floorz) < 6.0f) // 1/4 of default step size
+		zmove_vs = mo->floorz - mo->z;
+
 	// adjust height
-	mo->z += zmove;
+	mo->z += zmove + zmove_vs;
 
 	if (mo->flags & MF_FLOAT && mo->target)
 	{
@@ -1301,6 +1306,10 @@ static void P_MobjThinker(mobj_t * mobj, bool extra_tic)
 	const region_properties_t *props;
 	region_properties_t player_props;
 
+	mobj->old_z = mobj->z;
+	mobj->old_floorz = mobj->floorz;
+	mobj->on_slope = false;
+
 	mobj->ClearStaleRefs();
 
 	if (!extra_tic || !r_doubleframes.d)
@@ -1394,6 +1403,12 @@ static void P_MobjThinker(mobj_t * mobj, bool extra_tic)
 
 	if (!r_doubleframes.d || !extra_tic || do_extra)
 	{
+		if (do_extra && mobj->subsector->sector->floor_vertex_slope)
+		{
+			if (mobj->old_z == mobj->old_floorz)
+				mobj->on_slope = true;
+		}	
+
 		if (mobj->mom.x != 0 || mobj->mom.y != 0 || mobj->player)
 		{
 			P_XYMovement(mobj, props, extra_tic);

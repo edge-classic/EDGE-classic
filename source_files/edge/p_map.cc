@@ -490,18 +490,26 @@ static bool PIT_CheckRelLine(line_t * ld, void *data)
 	}
 	else if (tm_I.mover->player && ld->backsector == tm_I.mover->subsector->sector && ld->backsector->floor_vertex_slope)
 	{
-		if (ld->frontsector->f_h > tm_I.mover->old_z && std::abs(ld->frontsector->f_h - tm_I.mover->old_z) > tm_I.mover->info->step_size)
+		sector_t *sec_test = R_PointInSubsector(tm_I.x+tm_I.mover->mom.x, tm_I.y+tm_I.mover->mom.y)->sector;
+		if (sec_test && sec_test == ld->frontsector)
 		{
-			blockline = ld;
-			return false;
+			if (ld->frontsector->f_h > tm_I.mover->old_z && std::abs(ld->frontsector->f_h - tm_I.mover->old_z) > tm_I.mover->info->step_size)
+			{
+				blockline = ld;
+				return false;
+			}
 		}
 	}
 	else if (tm_I.mover->player && ld->frontsector == tm_I.mover->subsector->sector && ld->frontsector->floor_vertex_slope)
 	{
-		if (ld->backsector->f_h > tm_I.mover->old_z && std::abs(ld->backsector->f_h - tm_I.mover->old_z) > tm_I.mover->info->step_size)
+		sector_t *sec_test = R_PointInSubsector(tm_I.x+tm_I.mover->mom.x, tm_I.y+tm_I.mover->mom.y)->sector;
+		if (sec_test && sec_test == ld->backsector)
 		{
-			blockline = ld;
-			return false;
+			if (ld->backsector->f_h > tm_I.mover->old_z && std::abs(ld->backsector->f_h - tm_I.mover->old_z) > tm_I.mover->info->step_size)
+			{
+				blockline = ld;
+				return false;
+			}
 		}
 	}
 

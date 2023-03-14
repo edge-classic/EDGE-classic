@@ -470,12 +470,15 @@ static bool PIT_CheckRelLine(line_t * ld, void *data)
 		div.y  = ld->v1->y;
 		div.dx = ld->v2->x - div.x;
 		div.dy = ld->v2->y - div.y;
-		P_ComputeIntersection(&div, coords[0], coords[1], coords[2], coords[3], &ix, &iy);
-		float z_test = M_LinePlaneIntersection({ix,iy,-40000}, {ix,iy,40000}, ld->backsector->floor_z_verts[0], 
-			ld->backsector->floor_z_verts[1], ld->backsector->floor_z_verts[2], ld->backsector->floor_vs_normal).z;
-		if (z_test > tm_I.mover->old_z && std::abs(z_test - tm_I.mover->old_z) > tm_I.mover->info->step_size)
+		if (P_PointOnDivlineThick(tm_I.x, tm_I.y, &div, ld->length, tm_I.mover->radius/2) != 2)
 		{
-			return false;
+			P_ComputeIntersection(&div, coords[0], coords[1], coords[2], coords[3], &ix, &iy);
+			float z_test = M_LinePlaneIntersection({ix,iy,-40000}, {ix,iy,40000}, ld->backsector->floor_z_verts[0], 
+				ld->backsector->floor_z_verts[1], ld->backsector->floor_z_verts[2], ld->backsector->floor_vs_normal).z;
+			if (z_test > tm_I.mover->old_z && std::abs(z_test - tm_I.mover->old_z) > tm_I.mover->info->step_size)
+			{
+				return false;
+			}
 		}
 	}
 	else if (tm_I.mover->player && ld->backsector == tm_I.mover->subsector->sector && ld->frontsector->floor_vertex_slope)
@@ -488,26 +491,45 @@ static bool PIT_CheckRelLine(line_t * ld, void *data)
 		div.y  = ld->v1->y;
 		div.dx = ld->v2->x - div.x;
 		div.dy = ld->v2->y - div.y;
-		P_ComputeIntersection(&div, coords[0], coords[1], coords[2], coords[3], &ix, &iy);
-		float z_test = M_LinePlaneIntersection({ix,iy,-40000}, {ix,iy,40000}, ld->frontsector->floor_z_verts[0], 
-			ld->frontsector->floor_z_verts[1], ld->frontsector->floor_z_verts[2], ld->frontsector->floor_vs_normal).z;
-		if (z_test > tm_I.mover->old_z && std::abs(z_test - tm_I.mover->old_z) > tm_I.mover->info->step_size)
+		if (P_PointOnDivlineThick(tm_I.x, tm_I.y, &div, ld->length, tm_I.mover->radius/2) != 2)
 		{
-			return false;
+			P_ComputeIntersection(&div, coords[0], coords[1], coords[2], coords[3], &ix, &iy);
+			float z_test = M_LinePlaneIntersection({ix,iy,-40000}, {ix,iy,40000}, ld->frontsector->floor_z_verts[0], 
+				ld->frontsector->floor_z_verts[1], ld->frontsector->floor_z_verts[2], ld->frontsector->floor_vs_normal).z;
+			if (z_test > tm_I.mover->old_z && std::abs(z_test - tm_I.mover->old_z) > tm_I.mover->info->step_size)
+			{
+				return false;
+			}
 		}
 	}
 	else if (tm_I.mover->player && ld->backsector == tm_I.mover->subsector->sector && ld->backsector->floor_vertex_slope)
 	{
-		if (ld->frontsector->f_h > tm_I.mover->old_z && std::abs(ld->frontsector->f_h - tm_I.mover->old_z) > tm_I.mover->info->step_size)
+		divline_t div;
+		div.x  = ld->v1->x;
+		div.y  = ld->v1->y;
+		div.dx = ld->v2->x - div.x;
+		div.dy = ld->v2->y - div.y;
+		if (P_PointOnDivlineThick(tm_I.x, tm_I.y, &div, ld->length, tm_I.mover->radius/2) != 2)
 		{
-			return false;
+			if (ld->frontsector->f_h > tm_I.mover->old_z && std::abs(ld->frontsector->f_h - tm_I.mover->old_z) > tm_I.mover->info->step_size)
+			{
+				return false;
+			}
 		}
 	}
 	else if (tm_I.mover->player && ld->frontsector == tm_I.mover->subsector->sector && ld->frontsector->floor_vertex_slope)
 	{
-		if (ld->backsector->f_h > tm_I.mover->old_z && std::abs(ld->backsector->f_h - tm_I.mover->old_z) > tm_I.mover->info->step_size)
+		divline_t div;
+		div.x  = ld->v1->x;
+		div.y  = ld->v1->y;
+		div.dx = ld->v2->x - div.x;
+		div.dy = ld->v2->y - div.y;
+		if (P_PointOnDivlineThick(tm_I.x, tm_I.y, &div, ld->length, tm_I.mover->radius/2) != 2)
 		{
-			return false;
+			if (ld->backsector->f_h > tm_I.mover->old_z && std::abs(ld->backsector->f_h - tm_I.mover->old_z) > tm_I.mover->info->step_size)
+			{
+				return false;
+			}
 		}
 	}
 
@@ -880,7 +902,7 @@ static bool P_CheckRelPosition(mobj_t * thing, float x, float y)
 
 	thing->on_ladder = -1;
 
-	float *coords = new float[4];
+	float coords[4];
 
 	coords[0] = x-r;
 	coords[1] = y-r;
@@ -889,8 +911,6 @@ static bool P_CheckRelPosition(mobj_t * thing, float x, float y)
 
 	if (! P_BlockLinesIterator(coords[0], coords[1], coords[2], coords[3], PIT_CheckRelLine, coords))
 		return false;
-
-	delete coords;
 
 	return true;
 }

@@ -1470,27 +1470,137 @@ static bool PTR_AimTraverse2(intercept_t * in, void *dataptr)
 }
 
 static inline bool ShootCheckGap(float sx, float sy, float z,
-	float f_h, surface_t *floor, float c_h, surface_t *ceil, sector_t *sec_check)
+	float f_h, surface_t *floor, float c_h, surface_t *ceil, sector_t *sec_check, line_t *ld)
 {
 	/* Returns true if successfully passed gap */
 
 	// perfectly horizontal shots cannot hit planes
-	if (shoot_I.slope == 0 && !sec_check->floor_vertex_slope && !sec_check->ceil_vertex_slope)
+	if (shoot_I.slope == 0 && (!sec_check || (!sec_check->floor_vertex_slope && !sec_check->ceil_vertex_slope)))
 		return true;
 
-	if (sec_check->floor_vertex_slope)
+	if (sec_check && sec_check->floor_vertex_slope)
 	{
-		float sz = M_LinePlaneIntersection({sx,sy,-40000},{sx,sy,40000}, sec_check->floor_z_verts[0],
-		sec_check->floor_z_verts[1], sec_check->floor_z_verts[2], sec_check->floor_vs_normal).z;
-		if (std::isfinite(sz))
-			f_h = sz;
+		if (sec_check->floor_vs_hilo.x > sec_check->f_h)
+		{
+			// Check to see if hitting the side of a vertex slope sector
+			vec3_t tri_v1 = {0,0,0};
+			vec3_t tri_v2 = {0,0,0};
+			for (auto v : sec_check->floor_z_verts)
+			{
+				if (ld->v1->x == v.x && ld->v1->y == v.y)
+				{
+					tri_v1.x = v.x;
+					tri_v1.y = v.y;
+					tri_v1.z = v.z;
+				}
+				else if (ld->v2->x == v.x && ld->v2->y == v.y)
+				{
+					tri_v2.x = v.x;
+					tri_v2.y = v.y;
+					tri_v2.z = v.z;
+				}
+			}
+			if (tri_v1.z == tri_v2.z && CLAMP(MIN(sec_check->f_h, tri_v1.z), z, MAX(sec_check->f_h, tri_v1.z)) == z) // Hitting rectangular side; no fancier check needed
+			{
+				if (shoot_I.puff)
+				{
+					sx -= trace.dx * 6.0f / shoot_I.range;
+					sy -= trace.dy * 6.0f / shoot_I.range;
+					P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + ANG180);
+				}
+				return false;
+			}
+			else
+			{
+				// Test point against 2D projection of the slope side
+				if (std::abs(tri_v1.x - tri_v2.x) > std::abs(tri_v1.y - tri_v2.y))
+				{
+					if (M_PointInTri({tri_v1.x,tri_v1.z},{tri_v2.x,tri_v2.z}, 
+						{(tri_v1.z > tri_v2.z ? tri_v1.x : tri_v2.x),sec_check->f_h}, {sx, z}))
+					{
+						if (shoot_I.puff)
+						{
+							sx -= trace.dx * 6.0f / shoot_I.range;
+							sy -= trace.dy * 6.0f / shoot_I.range;
+							P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + ANG180);
+						}
+						return false;
+					}
+				}
+				else
+				{
+					if (M_PointInTri({tri_v1.y,tri_v1.z},{tri_v2.y,tri_v2.z}, 
+						{(tri_v1.z > tri_v2.z ? tri_v1.y : tri_v2.y),sec_check->f_h}, {sy, z}))
+					{
+						if (shoot_I.puff)
+							P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + ANG180);
+						return false;
+					}
+				}
+			}
+		}
 	}
-	if (sec_check->ceil_vertex_slope)
+	if (sec_check && sec_check->ceil_vertex_slope)
 	{
-		float sz = M_LinePlaneIntersection({sx,sy,-40000},{sx,sy,40000}, sec_check->ceil_z_verts[0],
-		sec_check->ceil_z_verts[1], sec_check->ceil_z_verts[2], sec_check->ceil_vs_normal).z;
-		if (std::isfinite(sz))
-			c_h = sz;
+		if (sec_check->ceil_vs_hilo.y < sec_check->c_h)
+		{
+			// Check to see if hitting the side of a vertex slope sector
+			vec3_t tri_v1 = {0,0,0};
+			vec3_t tri_v2 = {0,0,0};
+			for (auto v : sec_check->ceil_z_verts)
+			{
+				if (ld->v1->x == v.x && ld->v1->y == v.y)
+				{
+					tri_v1.x = v.x;
+					tri_v1.y = v.y;
+					tri_v1.z = v.z;
+				}
+				else if (ld->v2->x == v.x && ld->v2->y == v.y)
+				{
+					tri_v2.x = v.x;
+					tri_v2.y = v.y;
+					tri_v2.z = v.z;
+				}
+			}
+			if (tri_v1.z == tri_v2.z && CLAMP(MIN(sec_check->c_h, tri_v1.z), z, MAX(sec_check->c_h, tri_v1.z)) == z) // Hitting rectangular side; no fancier check needed
+			{
+				if (shoot_I.puff)
+				{
+					sx -= trace.dx * 6.0f / shoot_I.range;
+					sy -= trace.dy * 6.0f / shoot_I.range;
+					P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + ANG180);
+				}
+				return false;
+			}
+			else
+			{
+				// Test point against 2D projection of the slope side
+				if (std::abs(tri_v1.x - tri_v2.x) > std::abs(tri_v1.y - tri_v2.y))
+				{
+					if (M_PointInTri({tri_v1.x,tri_v1.z},{tri_v2.x,tri_v2.z}, 
+						{(tri_v1.z < tri_v2.z ? tri_v1.x : tri_v2.x),sec_check->c_h}, {sx, z}))
+					{
+						if (shoot_I.puff)
+						{
+							sx -= trace.dx * 6.0f / shoot_I.range;
+							sy -= trace.dy * 6.0f / shoot_I.range;
+							P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + ANG180);
+						}
+						return false;
+					}
+				}
+				else
+				{
+					if (M_PointInTri({tri_v1.y,tri_v1.z},{tri_v2.y,tri_v2.z}, 
+						{(tri_v1.z < tri_v2.z ? tri_v1.y : tri_v2.y),sec_check->c_h}, {sy, z}))
+					{
+						if (shoot_I.puff)
+							P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + ANG180);
+						return false;
+					}
+				}
+			}
+		}
 	}
 
 	// check if hit the floor
@@ -1506,7 +1616,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
 	}
 	else
 	{
-		if (sec_check->floor_vertex_slope)
+		if (sec_check && sec_check->floor_vertex_slope)
 		{
 			// Check floor vertex slope intersect from shooter's angle
 			vec3_t shoota = M_LinePlaneIntersection({shoot_I.source->x,shoot_I.source->y,shoot_I.start_z},{sx,sy,z}, sec_check->floor_z_verts[0],
@@ -1546,7 +1656,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
 			else
 				return true;
 		}
-		else if (sec_check->ceil_vertex_slope)
+		else if (sec_check && sec_check->ceil_vertex_slope)
 		{
 			// Check ceiling vertex slope intersect from shooter's angle
 			vec3_t shoota = M_LinePlaneIntersection({shoot_I.source->x,shoot_I.source->y,shoot_I.start_z},{sx,sy,z}, sec_check->ceil_z_verts[0],
@@ -1755,11 +1865,14 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 			extrafloor_t *ef;
 			surface_t *floor_s = &side->sector->floor;
 			float floor_h = side->sector->f_h;
+			sector_t *sec_check = nullptr;
+			if (ld->side[sidenum^1])
+				sec_check = ld->side[sidenum^1]->sector;
 
 			// FIXME: must go in correct order
 			for (ef=side->sector->bottom_ef; ef; ef=ef->higher)
 			{
-				if (! ShootCheckGap(x, y, z, floor_h, floor_s, ef->bottom_h, ef->bottom, side->sector))
+				if (! ShootCheckGap(x, y, z, floor_h, floor_s, ef->bottom_h, ef->bottom, sec_check, ld))
 					return false;
 
 				floor_s = ef->top;
@@ -1767,7 +1880,7 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 			}
 
 			if (! ShootCheckGap(x, y, z, floor_h, floor_s, 
-				side->sector->c_h, &side->sector->ceil, side->sector))
+				side->sector->c_h, &side->sector->ceil, sec_check, ld))
 			{
 				return false;
 			}

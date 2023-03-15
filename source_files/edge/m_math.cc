@@ -22,6 +22,16 @@
 //    Copyright (C) 1993-1996 by id Software, Inc.
 //
 //----------------------------------------------------------------------------
+// M_PointInTri is adapted from the PNPOLY algorithm with the following license:
+//
+// Copyright (c) 1970-2003, Wm. Randolph Franklin
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+//
+// Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimers.
+// Redistributions in binary form must reproduce the above copyright notice in the documentation and/or other materials provided with the distribution.
+// The name of W. Randolph Franklin may not be used to endorse or promote products derived from this Software without specific prior written permission.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "i_defs.h"
 
@@ -147,6 +157,21 @@ double M_PointToSegDistance(vec2_t seg_a, vec2_t seg_b, vec2_t point)
         double mod = std::sqrt(x1 * x1 + y1 * y1);
         return std::abs(x1 * y2 - y1 * x2) / mod;
     }
+}
+
+int M_PointInTri(vec2_t v1, vec2_t v2, vec2_t v3, vec2_t test)
+{
+	std::vector<vec2_t> tri_vec = {v1,v2,v3};
+	int i = 0;
+	int j = 0;
+	int c = 0;
+	for (i=0, j=2; i < 3; j = i++)
+	{
+		if ( ((tri_vec[i].y > test.y) != (tri_vec[j].y > test.y)) &&
+			(test.x < (tri_vec[j].x - tri_vec[i].x) * (test.y - tri_vec[i].y) / (tri_vec[j].y - tri_vec[i].y) + tri_vec[i].x) )
+			c = !c;
+	}
+	return c;
 }
 
 //--- editor settings ---

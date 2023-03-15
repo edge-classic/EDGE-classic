@@ -2912,6 +2912,10 @@ void GroupLines(void)
 						{
 							sector->floor_vertex_slope = true;
 							sector->floor_z_verts.push_back({vert->x,vert->y,zvertexes[vi].x});
+							if (zvertexes[vi].x > sector->floor_vs_hilo.x)
+								sector->floor_vs_hilo.x = zvertexes[vi].x;
+							if (zvertexes[vi].x < sector->floor_vs_hilo.y)
+								sector->floor_vs_hilo.y = zvertexes[vi].x;
 						}
 						else
 							sector->floor_z_verts.push_back({vert->x,vert->y,sector->f_h});
@@ -2937,6 +2941,10 @@ void GroupLines(void)
 						{
 							sector->floor_vertex_slope = true;
 							sector->floor_z_verts.push_back({vert->x,vert->y,zvertexes[vi].x});
+							if (zvertexes[vi].x > sector->floor_vs_hilo.x)
+								sector->floor_vs_hilo.x = zvertexes[vi].x;
+							if (zvertexes[vi].x < sector->floor_vs_hilo.y)
+								sector->floor_vs_hilo.y = zvertexes[vi].x;
 						}
 						else
 							sector->floor_z_verts.push_back({vert->x,vert->y,sector->f_h});
@@ -2953,8 +2961,14 @@ void GroupLines(void)
 			if (!sector->floor_vertex_slope)
 				sector->floor_z_verts.clear();
 			else
+			{
 				sector->floor_vs_normal = 
 					M_CrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
+				if (sector->f_h > sector->floor_vs_hilo.x)
+					sector->floor_vs_hilo.x = sector->f_h;
+				if (sector->f_h < sector->floor_vs_hilo.y)
+					sector->floor_vs_hilo.y = sector->f_h;
+			}
 			if (!sector->ceil_vertex_slope)
 				sector->ceil_z_verts.clear();
 			else
@@ -2982,6 +2996,10 @@ void GroupLines(void)
 					if (zvertexes[vi].x < 32767.0f && zvertexes[vi].x > -32768.0f)
 					{
 						sector->floor_z_verts.push_back({vert->x,vert->y,zvertexes[vi].x});
+						if (zvertexes[vi].x > sector->floor_vs_hilo.x)
+							sector->floor_vs_hilo.x = zvertexes[vi].x;
+						if (zvertexes[vi].x < sector->floor_vs_hilo.y)
+							sector->floor_vs_hilo.y = zvertexes[vi].x;
 					}
 					else
 						sector->floor_z_verts.push_back({vert->x,vert->y,sector->f_h});
@@ -2997,6 +3015,10 @@ void GroupLines(void)
 					if (zvertexes[vi2].x < 32767.0f && zvertexes[vi2].x > -32768.0f)
 					{
 						sector->floor_z_verts.push_back({vert2->x,vert2->y,zvertexes[vi2].x});
+						if (zvertexes[vi].x > sector->floor_vs_hilo.x)
+							sector->floor_vs_hilo.x = zvertexes[vi].x;
+						if (zvertexes[vi].x < sector->floor_vs_hilo.y)
+							sector->floor_vs_hilo.y = zvertexes[vi].x;
 					}
 					else
 						sector->floor_z_verts.push_back({vert2->x,vert2->y,sector->f_h});
@@ -3025,6 +3047,10 @@ void GroupLines(void)
 				sector->floor_vertex_slope = true;
 				sector->floor_vs_normal = 
 					M_CrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
+				if (sector->f_h > sector->floor_vs_hilo.x)
+					sector->floor_vs_hilo.x = sector->f_h;
+				if (sector->f_h < sector->floor_vs_hilo.y)
+					sector->floor_vs_hilo.y = sector->f_h;
 			}
 			else
 				sector->floor_z_verts.clear();

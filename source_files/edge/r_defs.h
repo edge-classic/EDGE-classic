@@ -281,6 +281,8 @@ typedef struct sector_s
 	std::vector<vec3_t> ceil_z_verts;
 	vec3_t floor_vs_normal;
 	vec3_t ceil_vs_normal;
+	vec2_t floor_vs_hilo = {-40000,40000};
+	vec2_t ceil_vs_hilo = {-40000,40000};
 
 	// linked list of extrafloors that this sector controls.  NULL means
 	// that this sector is not a controller.

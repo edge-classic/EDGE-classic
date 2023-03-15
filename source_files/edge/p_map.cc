@@ -55,6 +55,9 @@ DEF_CVAR(g_mbf21compat, "0", CVAR_ARCHIVE)
 
 extern cvar_c g_mbf21compat;
 
+// Forward declaration for ShootCheckGap
+static bool PTR_ShootTraverse(intercept_t * in, void *dataptr);
+
 typedef struct try_move_info_s
 {
 	// --- input --
@@ -1475,13 +1478,19 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
 	if (shoot_I.slope == 0 && !sec_check->floor_vertex_slope && !sec_check->ceil_vertex_slope)
 		return true;
 
-	// Check floor vertex slope intersect
 	if (sec_check->floor_vertex_slope)
 	{
 		float sz = M_LinePlaneIntersection({sx,sy,-40000},{sx,sy,40000}, sec_check->floor_z_verts[0],
-			sec_check->floor_z_verts[1], sec_check->floor_z_verts[2], sec_check->floor_vs_normal).z;
+		sec_check->floor_z_verts[1], sec_check->floor_z_verts[2], sec_check->floor_vs_normal).z;
 		if (std::isfinite(sz))
 			f_h = sz;
+	}
+	if (sec_check->ceil_vertex_slope)
+	{
+		float sz = M_LinePlaneIntersection({sx,sy,-40000},{sx,sy,40000}, sec_check->ceil_z_verts[0],
+		sec_check->ceil_z_verts[1], sec_check->ceil_z_verts[2], sec_check->ceil_vs_normal).z;
+		if (std::isfinite(sz))
+			c_h = sz;
 	}
 
 	// check if hit the floor
@@ -1496,7 +1505,30 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
 		floor = ceil;
 	}
 	else
-		return true;
+	{
+		if (sec_check->floor_vertex_slope)
+		{
+			// Check floor vertex slope intersect from shooter's angle
+			vec3_t shoota = M_LinePlaneIntersection({shoot_I.source->x,shoot_I.source->y,shoot_I.start_z},{sx,sy,z}, sec_check->floor_z_verts[0],
+				sec_check->floor_z_verts[1], sec_check->floor_z_verts[2], sec_check->floor_vs_normal);
+			sector_t *shoota_sec = R_PointInSubsector(shoota.x, shoota.y)->sector;
+			if (shoota_sec && shoota_sec == sec_check && 
+				shoota.z <= sec_check->floor_vs_hilo.x && shoota.z >= sec_check->floor_vs_hilo.y)
+			{
+				// It will strike the floor slope in this sector; see if it will hit a thing first, otherwise let it hit the slope
+				if (P_PathTraverse(sx, sy, shoota.x, shoota.y, PT_ADDTHINGS, PTR_ShootTraverse))
+				{
+					if (shoot_I.puff)
+						P_SpawnPuff(shoota.x, shoota.y, shoota.z, shoot_I.puff, shoot_I.angle + ANG180);
+					return false;
+				}
+			}
+			else
+				return true;
+		}
+		else
+			return true;
+	}
 
 	// don't shoot the sky!
 	if (IS_SKY(floor[0]))

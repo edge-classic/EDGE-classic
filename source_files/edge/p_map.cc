@@ -1523,6 +1523,46 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
 					return false;
 				}
 			}
+			else if (sec_check->ceil_vertex_slope)
+			{
+				// Check ceiling vertex slope intersect from shooter's angle
+				shoota = M_LinePlaneIntersection({shoot_I.source->x,shoot_I.source->y,shoot_I.start_z},{sx,sy,z}, sec_check->ceil_z_verts[0],
+					sec_check->ceil_z_verts[1], sec_check->ceil_z_verts[2], sec_check->ceil_vs_normal);
+				shoota_sec = R_PointInSubsector(shoota.x, shoota.y)->sector;
+				if (shoota_sec && shoota_sec == sec_check && 
+					shoota.z <= sec_check->ceil_vs_hilo.x && shoota.z >= sec_check->ceil_vs_hilo.y)
+				{
+					// It will strike the ceiling slope in this sector; see if it will hit a thing first, otherwise let it hit the slope
+					if (P_PathTraverse(sx, sy, shoota.x, shoota.y, PT_ADDTHINGS, PTR_ShootTraverse))
+					{
+						if (shoot_I.puff)
+							P_SpawnPuff(shoota.x, shoota.y, shoota.z, shoot_I.puff, shoot_I.angle + ANG180);
+						return false;
+					}
+				}
+				else
+					return true;
+			}
+			else
+				return true;
+		}
+		else if (sec_check->ceil_vertex_slope)
+		{
+			// Check ceiling vertex slope intersect from shooter's angle
+			vec3_t shoota = M_LinePlaneIntersection({shoot_I.source->x,shoot_I.source->y,shoot_I.start_z},{sx,sy,z}, sec_check->ceil_z_verts[0],
+				sec_check->ceil_z_verts[1], sec_check->ceil_z_verts[2], sec_check->ceil_vs_normal);
+			sector_t *shoota_sec = R_PointInSubsector(shoota.x, shoota.y)->sector;
+			if (shoota_sec && shoota_sec == sec_check && 
+				shoota.z <= sec_check->ceil_vs_hilo.x && shoota.z >= sec_check->ceil_vs_hilo.y)
+			{
+				// It will strike the ceiling slope in this sector; see if it will hit a thing first, otherwise let it hit the slope
+				if (P_PathTraverse(sx, sy, shoota.x, shoota.y, PT_ADDTHINGS, PTR_ShootTraverse))
+				{
+					if (shoot_I.puff)
+						P_SpawnPuff(shoota.x, shoota.y, shoota.z, shoot_I.puff, shoot_I.angle + ANG180);
+					return false;
+				}
+			}
 			else
 				return true;
 		}

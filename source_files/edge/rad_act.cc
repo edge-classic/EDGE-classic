@@ -1273,7 +1273,7 @@ void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param)
 	{
 	 	RAD_SetPspriteDeferred(p,ps_weapon,p->weapons[p->ready_wp].info->ready_state);
 
-		P_FillWeapon(p, p->ready_wp); //handle the potential clip_size difference
+		P_FixWeaponClip(p, p->ready_wp); //handle the potential clip_size difference
 		P_UpdateAvailWeapons(p);
 	} 	
 		 

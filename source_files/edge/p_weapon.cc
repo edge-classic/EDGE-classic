@@ -1718,6 +1718,37 @@ void A_WeaponUnzoom(mobj_t * mo)
 	p->zoom_fov = 0;
 }
 
+//Handle potential New clip size being smaller than old
+void P_FixWeaponClip(player_t *p, int slot)
+{
+	weapondef_c *info = p->weapons[slot].info;
+
+	for (int ATK = 0; ATK < 2; ATK++)
+	{
+		if (! info->attack_state[ATK])
+			continue;
+
+		if (info->ammo[ATK] == AM_NoAmmo) //infinite ammo?
+		{
+			if (info->clip_size[ATK] > 0) //and has a clip?
+			{
+				//Current ammo bigger than new clipsize?
+				//If so, reduce ammo to new clip size
+				if (p->weapons[slot].clip_size[ATK] > info->clip_size[ATK])
+					p->weapons[slot].clip_size[ATK] = info->clip_size[ATK];
+			}
+				
+			continue;
+		}
+
+		//Current ammo bigger than new clipsize?
+		//If so, reduce ammo to new clip size
+		if (p->weapons[slot].clip_size[ATK] > info->clip_size[ATK])
+			p->weapons[slot].clip_size[ATK] = info->clip_size[ATK];
+
+	}
+
+}
 
 void A_WeaponBecome(mobj_t * mo)
 {
@@ -1725,7 +1756,7 @@ void A_WeaponBecome(mobj_t * mo)
 	pspdef_t *psp = &p->psprites[p->action_psp];
 
 	weapondef_c *oldWep = p->weapons[p->ready_wp].info;
-
+	
 	if (!psp->state || !psp->state->action_par)
 	{
 		I_Error("BECOME used in weapon [%s] without a label !\n",
@@ -1752,12 +1783,14 @@ void A_WeaponBecome(mobj_t * mo)
 
 	state += become->start.offset;
 	P_SetPspriteDeferred(p,ps_weapon,state); //refresh the sprite
-	P_FillWeapon(p, p->ready_wp); //handle the potential clip_size difference
+	
+	P_FixWeaponClip(p, p->ready_wp); //handle the potential clip_size difference
+
 	P_UpdateAvailWeapons(p);
+
 
 	//P_SetPspriteDeferred(p,ps_weapon,p->weapons[p->ready_wp].info->ready_state);
 }
-
 
 
 void A_WeaponZoom(mobj_t * mo)

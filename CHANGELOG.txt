@@ -38,6 +38,9 @@ General Improvements
 
 + "PC Speaker Mode" Sound Option no longer requires a restart to toggle; when On it will always use Fluidlite + the Bonkers for Bits soundfont when playing MIDI music
 
++ For the rts REPLACE_WEAPON command and the weapon.ddf BECOME() action: If current ammo is bigger than the new clip size, reduce current ammo to new clip size.
+
+
 New Features
 ------------
 + Added WebGL platform support

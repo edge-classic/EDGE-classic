@@ -1094,7 +1094,10 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props, bool extr
 				mo->player->deltaviewheight = zmove / 8.0f * (r_doubleframes.d ? 2.0 : 1.0); // 70Hz
 				if (mo->info->maxfall > 0 && -mo->mom.z > hurt_momz)
 				{
-					S_StartFX(mo->info->fallpain_sound, P_MobjGetSfxCategory(mo), mo);
+					if (!(mo->player->cheats & CF_GODMODE) && mo->player->powers[PW_Invulnerable] < 1)
+						S_StartFX(mo->info->fallpain_sound, P_MobjGetSfxCategory(mo), mo);
+					else
+						S_StartFX(mo->info->oof_sound, P_MobjGetSfxCategory(mo), mo);
 				}
 				else
 					S_StartFX(mo->info->oof_sound, P_MobjGetSfxCategory(mo), mo);

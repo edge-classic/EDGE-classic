@@ -617,20 +617,26 @@ void RGL_DrawWeaponModel(player_t * p)
 		lerp = CLAMP(0, lerp, 1);
 	}
 
+	float bias = 0.0f;
+
+	bias = VM_GetFloat(ui_vm, "hud", "universal_y_adjust") + p->weapons[p->ready_wp].info->y_adjust;
+	bias /= 5;
+	bias += w->model_bias;
+
 	if (md->md2_model)
 		MD2_RenderModel(md->md2_model, skin_img, true,
 						last_frame, psp->state->frame, lerp,
 						x, y, z, p->mo, view_props,
-						1.0f /* scale */, w->model_aspect, w->model_bias, w->model_rotate);
+						1.0f /* scale */, w->model_aspect, bias, w->model_rotate);
 	else if (md->mdl_model)
 		MDL_RenderModel(md->mdl_model, skin_img, true,
 						last_frame, psp->state->frame, lerp,
 						x, y, z, p->mo, view_props,
-						1.0f /* scale */, w->model_aspect, w->model_bias, w->model_rotate);
+						1.0f /* scale */, w->model_aspect, bias, w->model_rotate);
 	else
 		VXL_RenderModel(md->vxl_model, true,
 						x, y, z, p->mo, view_props,
-						1.0f /* scale */, w->model_aspect, w->model_bias, w->model_rotate);
+						1.0f /* scale */, w->model_aspect, bias, w->model_rotate);
 }
 
 

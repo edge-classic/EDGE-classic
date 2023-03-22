@@ -446,8 +446,6 @@ void RGL_DrawUnits(void)
 		glClearColor(fogColor[0],fogColor[1],fogColor[2],fogColor[3]);
 
 		glFogi(GL_FOG_MODE, GL_LINEAR);
-		//glFogi(GL_FOG_MODE, GL_EXP2);
-		//glFogf(GL_FOG_DENSITY, 0.002f); //only use with GL_EXP2
 		glFogfv(GL_FOG_COLOR, fogColor);
 		if (r_culling.d)
 		{
@@ -675,8 +673,6 @@ void RGL_DrawUnits(void)
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glAlphaFunc(GL_GREATER, 0);
-
-
 
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);

@@ -1715,10 +1715,14 @@ static void E_InitialState(void)
 
 		if (pp + 1 < argv::list.size() && !argv::IsOption(pp+1))
 			warp_deathmatch = MAX(1, atoi(epi::to_u8string(argv::list[pp+1]).c_str()));
+
+		warp = true;
 	}
 	else if (argv::Find("altdeath") > 0)
 	{
 		warp_deathmatch = 2;
+
+		warp = true;
 	}
 
 	// start the appropriate game based on parms

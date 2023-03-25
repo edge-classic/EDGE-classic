@@ -134,7 +134,7 @@ void RGL_StartUnits(bool sort_em)
 {
 	cur_vert = cur_unit = 0;
 
-	batch_sort = sort_em;
+	batch_sort = true;
 
 	local_unit_map.resize(MAX_L_UNIT);
 }
@@ -548,11 +548,10 @@ void RGL_DrawUnits(void)
 				myActiveTexture(GL_TEXTURE0 + t);
 			}
 
-			if (unit->pass > 0)
+			if (r_fogofwar.d || r_culling.d)
 			{ 
-				if (r_fogofwar.d || r_culling.d)
+				if (unit->pass > 0)
 				{
-					if ((unit->blending & BL_Foggable) != BL_Foggable)
 					glDisable(GL_FOG);
 				}
 			}

@@ -1423,8 +1423,6 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 				continue;
 		}
 
-		blending |= BL_Foggable;
-
 		GLuint fuzz_tex = is_fuzzy ? W_ImageCache(fuzz_image, false) : 0;
 
 		local_gl_vert_t * glvert = RGL_BeginUnit(GL_POLYGON, 4,

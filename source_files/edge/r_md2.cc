@@ -46,6 +46,8 @@
 
 extern float P_ApproxDistance(float dx, float dy, float dz);
 
+extern cvar_c r_culling;
+extern cvar_c r_fogofwar;
 
 // #define DEBUG_MD2_LOAD  1
 
@@ -229,14 +231,8 @@ struct md2_point_c
 	int vert_idx;
 };
 
-struct md2_strip_c
+struct md2_triangle_c
 {
-	// either GL_TRIANGLE_STRIP or GL_TRIANGLE_FAN
-	GLenum mode;
-
-	// number of points in this strip / fan
-	int count;
-
 	// index to the first point (within md2_model_c::points).
 	// All points for the strip are contiguous in that array.
 	int first;
@@ -247,29 +243,31 @@ class md2_model_c
 public:
 	int num_frames;
 	int num_points;
-	int num_strips;
+	int num_tris;
 
 	md2_frame_c *frames;
 	md2_point_c *points;
-	md2_strip_c *strips;
+	md2_triangle_c *tris;
 
 	int verts_per_frame;
 
+	GLuint vbo; // One VBO updated with lerping info
+
 public:
-	md2_model_c(int _nframe, int _npoint, int _nstrip) :
+	md2_model_c(int _nframe, int _npoint, int _ntris) :
 		num_frames(_nframe), num_points(_npoint),
-		num_strips(_nstrip), verts_per_frame(0)
+		num_tris(_ntris), verts_per_frame(0), vbo(0)
 	{
 		frames = new md2_frame_c[num_frames];
 		points = new md2_point_c[num_points];
-		strips = new md2_strip_c[num_strips];
+		tris = new md2_triangle_c[num_tris];
 	}
 
 	~md2_model_c()
 	{
 		delete[] frames;
 		delete[] points;
-		delete[] strips;
+		delete[] tris;
 	}
 };
 
@@ -354,7 +352,6 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 	int num_tris = EPI_LE_S32(header.num_tris);
 	int num_sts = EPI_LE_S32(header.num_st);
 	int num_points = num_tris * 3;
-	int num_strips = num_tris;
 
 	/* PARSE TRIANGLES */
 
@@ -385,30 +382,27 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 		md2_sts[st].t = EPI_LE_U16(md2_sts[st].t);
 	}
 
-	I_Debugf("  frames:%d  points:%d  tris: %d\n",
+	I_Debugf("  frames:%d  points:%d  triangles: %d\n",
 			num_frames, num_tris * 3, num_tris);
 
-	md2_model_c *md = new md2_model_c(num_frames, num_points, num_strips);
+	md2_model_c *md = new md2_model_c(num_frames, num_points, num_tris);
 
 	md->verts_per_frame = EPI_LE_S32(header.num_vertices);
 
 	I_Debugf("  verts_per_frame:%d\n", md->verts_per_frame);
 
-	// convert tris into strips and points
-	md2_strip_c *strip = md->strips;
+	// convert raw tris
+	md2_triangle_c *tri = md->tris;
 	md2_point_c *point = md->points;
 
 	for (i = 0; i < num_tris; i++)
 	{
-		SYS_ASSERT(strip < md->strips + md->num_strips);
+		SYS_ASSERT(tri < md->tris + md->num_tris);
 		SYS_ASSERT(point < md->points + md->num_points);
 
-		strip->mode = GL_TRIANGLES;
+		tri->first = point - md->points;
 
-		strip->count = 3;
-		strip->first = point - md->points;
-
-		strip++;
+		tri++;
 
 		for (int j=0; j < 3; j++, point++)
 		{
@@ -423,7 +417,7 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 		}
 	}
 
-	SYS_ASSERT(strip == md->strips + md->num_strips);
+	SYS_ASSERT(tri == md->tris + md->num_tris);
 	SYS_ASSERT(point == md->points + md->num_points);
 
 	delete[] md2_tris;
@@ -503,6 +497,14 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 	}
 
 	delete[] raw_verts;
+
+#ifdef EDGE_GL_ES2
+	glGenBuffers(1, &md->vbo);
+	if (md->vbo == 0)
+		I_Error("MD2_LoadModel: Failed to bind VBO!\n");
+	glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
+	glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), NULL, GL_STREAM_DRAW);
+#endif
 
 	return md;
 }
@@ -641,12 +643,12 @@ md2_model_c *MD3_LoadModel(epi::file_c *f)
 
 	int num_frames = EPI_LE_S32(mesh.num_frames);
 	int num_verts  = EPI_LE_S32(mesh.num_verts);
-	int num_strips = EPI_LE_S32(mesh.num_tris);
+	int num_tris = EPI_LE_S32(mesh.num_tris);
 
-	I_Debugf("  frames:%d  verts:%d  strips: %d\n",
-			num_frames, num_verts, num_strips);
+	I_Debugf("  frames:%d  verts:%d  triangles: %d\n",
+			num_frames, num_verts, num_tris);
 
-	md2_model_c *md = new md2_model_c(num_frames, num_strips*3, num_strips);
+	md2_model_c *md = new md2_model_c(num_frames, num_tris*3, num_tris);
 
 	md->verts_per_frame = num_verts;
 
@@ -677,7 +679,7 @@ md2_model_c *MD3_LoadModel(epi::file_c *f)
 
 	f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_tris), epi::file_c::SEEKPOINT_START);
 
-	for (i = 0; i < num_strips; i++)
+	for (i = 0; i < num_tris; i++)
 	{
 		raw_md3_triangle_t tri;
 
@@ -691,9 +693,7 @@ md2_model_c *MD3_LoadModel(epi::file_c *f)
 		SYS_ASSERT(b < num_verts);
 		SYS_ASSERT(c < num_verts);
 
-		md->strips[i].mode  = GL_TRIANGLE_STRIP;
-		md->strips[i].first = i * 3;
-		md->strips[i].count = 3;
+		md->tris[i].first = i * 3;
 
 		md2_point_c *point = md->points + i * 3;
 
@@ -754,7 +754,13 @@ md2_model_c *MD3_LoadModel(epi::file_c *f)
 
 		// TODO: load in bbox (for visibility checking)
 	}
-
+#ifdef EDGE_GL_ES2
+	glGenBuffers(1, &md->vbo);
+	if (md->vbo == 0)
+		I_Error("MD3_LoadModel: Failed to create VBO!\n");
+	glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
+	glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), NULL, GL_STREAM_DRAW);	
+#endif
 	return md;
 }
 
@@ -769,7 +775,7 @@ typedef struct
 
 	const md2_frame_c *frame1;
 	const md2_frame_c *frame2;
-	const md2_strip_c *strip;
+	const md2_triangle_c *tri;
 
 	float lerp;
 	float x, y, z;
@@ -940,12 +946,12 @@ static inline void ModelCoordFunc(model_coord_data_t *data,
 
 	const md2_frame_c *frame1 = data->frame1;
 	const md2_frame_c *frame2 = data->frame2;
-	const md2_strip_c *strip  = data->strip;
+	const md2_triangle_c *tri  = data->tri;
 
-	SYS_ASSERT(strip->first + v_idx >= 0);
-	SYS_ASSERT(strip->first + v_idx < md->num_points);
+	SYS_ASSERT(tri->first + v_idx >= 0);
+	SYS_ASSERT(tri->first + v_idx < md->num_points);
 
-	const md2_point_c *point = &md->points[strip->first + v_idx];
+	const md2_point_c *point = &md->points[tri->first + v_idx];
 
 	const md2_vertex_c *vert1 = &frame1->vertices[point->vert_idx];
 	const md2_vertex_c *vert2 = &frame2->vertices[point->vert_idx];
@@ -1141,6 +1147,10 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 		           data.is_weapon ? (3 + detail_level) :
 					                (2 + detail_level*2);
 
+#ifdef EDGE_GL_ES2
+	glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
+#endif
+
 	for (int pass = 0; pass < num_pass; pass++)
 	{
 		if (pass == 1)
@@ -1163,16 +1173,137 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 				continue;
 		}
 
+#ifdef EDGE_GL_ES2
+		GLuint model_env = data.is_additive ? ENV_SKIP_RGB : GL_MODULATE;
+
+		glPolygonOffset(0, -pass);
+
+		if (blending & (BL_Masked | BL_Less))
+		{
+			if (blending & BL_Less)
+			{
+				glEnable(GL_ALPHA_TEST);
+			}
+			else if (blending & BL_Masked)
+			{
+				glEnable(GL_ALPHA_TEST);
+				glAlphaFunc(GL_GREATER, 0);
+			}
+			else
+				glDisable(GL_ALPHA_TEST);
+		}
+
+		if (blending & (BL_Alpha | BL_Add))
+		{
+			if (blending & BL_Add)
+			{
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+			}
+			else if (blending & BL_Alpha)
+			{
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			}
+			else
+				glDisable(GL_BLEND);
+		}
+
+		if (blending & BL_CULL_BOTH)
+		{
+			if (blending & BL_CULL_BOTH)
+			{
+				glEnable(GL_CULL_FACE);
+				glCullFace((blending & BL_CullFront) ? GL_FRONT : GL_BACK);
+			}
+			else
+				glDisable(GL_CULL_FACE);
+		}
+
+		if (blending & BL_NoZBuf)
+		{
+			glDepthMask((blending & BL_NoZBuf) ? GL_FALSE : GL_TRUE);
+		}
+
+		if (blending & BL_Less)
+		{
+			// NOTE: assumes alpha is constant over whole model
+			glAlphaFunc(GL_GREATER, trans * 0.66f);
+		}
+
+		if (pass > 0)
+		{ 
+			if (r_fogofwar.d || r_culling.d)
+			{
+				if ((blending & BL_Foggable) != BL_Foggable)
+				glDisable(GL_FOG);
+			}
+		}
+
+		glActiveTexture(GL_TEXTURE1);
+		glDisable(GL_TEXTURE_2D);
+		glActiveTexture(GL_TEXTURE0);
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, skin_tex);
+
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, model_env);
+
+		GLint old_clamp = 789;
+
+		if (blending & BL_ClampY)
+		{
+			glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &old_clamp);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+				r_dumbclamp.d ? GL_CLAMP : GL_CLAMP_TO_EDGE);
+		}
+
+		local_gl_vert_t *start = (local_gl_vert_t *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+
+		for (int i = 0; i < md->num_tris; i++)
+		{
+			data.tri = & md->tris[i];
+
+			for (int v_idx=0; v_idx < 3; v_idx++)
+			{
+				local_gl_vert_t *dest = start + (i*3) + v_idx;
+
+				ModelCoordFunc(&data, v_idx, &dest->pos, dest->rgba,
+						&dest->texc[0], &dest->normal);
+
+				dest->rgba[3] = trans;
+			}
+		}
+
+		glUnmapBuffer(GL_ARRAY_BUFFER);
+
+		// setup pointers to client state
+		glVertexPointer(3, GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, pos.x)));
+		glColorPointer (4, GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, rgba)));
+		glNormalPointer(GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, normal.x)));
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);
+		glEnableClientState(GL_NORMAL_ARRAY);
+		glClientActiveTexture(GL_TEXTURE0);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, texc[0])));
+
+		glDrawArrays(GL_TRIANGLES, 0, md->num_tris * 3);
+
+		// restore the clamping mode
+		if (old_clamp != 789)
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, old_clamp);
+#else
 		local_gl_vert_t * glvert = RGL_BeginUnit(
-			 GL_TRIANGLES, md->num_strips * 3,
+			 GL_TRIANGLES, md->num_tris * 3,
 			 data.is_additive ? ENV_SKIP_RGB : GL_MODULATE, skin_tex,
 			 ENV_NONE, 0, pass, blending);
 
-		for (int i = 0; i < md->num_strips; i++)
+		for (int i = 0; i < md->num_tris; i++)
 		{
-			data.strip = & md->strips[i];
+			data.tri = & md->tris[i];
 
-			for (int v_idx=0; v_idx < md->strips[i].count; v_idx++)
+			for (int v_idx=0; v_idx < 3; v_idx++)
 			{
 				local_gl_vert_t *dest = glvert + (i*3) + v_idx;
 
@@ -1183,8 +1314,24 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 			}
 		}
 
-		RGL_EndUnit(md->num_strips * 3);
+		RGL_EndUnit(md->num_tris * 3);
+#endif
 	}
+#ifdef EDGE_GL_ES2
+	glPolygonOffset(0, 0);
+
+	glDisable(GL_TEXTURE_2D);
+
+	glDepthMask(GL_TRUE);
+	glCullFace(GL_BACK);
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glAlphaFunc(GL_GREATER, 0);
+
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_BLEND);
+	glDisable(GL_CULL_FACE);
+#endif
 }
 
 
@@ -1215,20 +1362,20 @@ void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame,
 	else
 		glColor4f(1, 1, 1, 1.0f);
 
-	for (int i = 0; i < md->num_strips; i++)
+	for (int i = 0; i < md->num_tris; i++)
 	{
-		const md2_strip_c *strip = & md->strips[i];
+		const md2_triangle_c *tri = & md->tris[i];
 
-		glBegin(strip->mode);
+		glBegin(GL_TRIANGLES);
 
-		for (int v_idx=0; v_idx < md->strips[i].count; v_idx++)
+		for (int v_idx=0; v_idx < 3; v_idx++)
 		{
 			const md2_frame_c *frame_ptr = & md->frames[frame];
 
-			SYS_ASSERT(strip->first + v_idx >= 0);
-			SYS_ASSERT(strip->first + v_idx < md->num_points);
+			SYS_ASSERT(tri->first + v_idx >= 0);
+			SYS_ASSERT(tri->first + v_idx < md->num_points);
 
-			const md2_point_c *point = &md->points[strip->first + v_idx];
+			const md2_point_c *point = &md->points[tri->first + v_idx];
 			const md2_vertex_c *vert = &frame_ptr->vertices[point->vert_idx];
 
 			glTexCoord2f(point->skin_s * im_right, point->skin_t * im_top);

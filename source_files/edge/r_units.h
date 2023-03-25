@@ -35,7 +35,6 @@ typedef struct local_gl_vert_s
 	vec3_t pos;
 	vec2_t texc[2];
 	vec3_t normal;
-	GLboolean edge;
 }
 local_gl_vert_t;
 

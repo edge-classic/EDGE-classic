@@ -34,6 +34,7 @@
 #include <list>
 #include <vector>
 
+#define BUFFER_OFFSET(i) ((void*)(i))
 
 extern cvar_c r_colorlighting;
 extern cvar_c r_colormaterial;

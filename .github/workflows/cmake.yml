@@ -60,12 +60,13 @@ jobs:
           install: >-
             git
             make
+            ninja
           pacboy: >-
             toolchain:p
             cmake:p
             SDL2:p
       - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "MSYS Makefiles"
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G"Ninja"
       - name: Build
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v3
@@ -80,6 +81,7 @@ jobs:
             edge-defs.wad
             *.dll
           retention-days: 2
+          
   build-macos:
     runs-on: macos-latest
 

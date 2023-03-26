@@ -694,11 +694,10 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 			glAlphaFunc(GL_GREATER, trans * 0.66f);
 		}
 
-		if (pass > 0)
+		if (r_fogofwar.d || r_culling.d)
 		{ 
-			if (r_fogofwar.d || r_culling.d)
+			if (pass > 0)
 			{
-				if ((blending & BL_Foggable) != BL_Foggable)
 				glDisable(GL_FOG);
 			}
 		}

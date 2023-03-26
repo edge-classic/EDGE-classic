@@ -579,5 +579,36 @@ void S_PrecacheSounds(void)
 	}
 }
 
+void S_ResumeAudioDevice()
+{
+	SDL_PauseAudioDevice(mydev_id, 0);
+	
+#ifdef EDGE_WEB
+	// Yield back to main thread for audio processing
+	if (emscripten_has_asyncify())
+	{
+		emscripten_sleep(100);
+	}	
+#endif
+
+}
+
+void S_PauseAudioDevice()
+{
+	S_StopAllFX();
+	SDL_PauseAudioDevice(mydev_id, 1);
+
+#ifdef EDGE_WEB
+	// Yield back to main thread for audio processing
+	// If complied without async support, as with debug build, will stutter
+	if (emscripten_has_asyncify())
+	{
+		emscripten_sleep(100);
+	}	
+#endif
+
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -67,6 +67,8 @@ file_c *FS_Open(std::filesystem::path name, unsigned int flags);
 bool FS_Copy(std::filesystem::path src, std::filesystem::path dest);
 bool FS_Delete(std::filesystem::path name);
 bool FS_Rename(const char *oldname, const char *newname);
+// Performs a sync for platforms with virtualized file systems
+void FS_Sync(bool populate = false);
 
 } // namespace epi
 

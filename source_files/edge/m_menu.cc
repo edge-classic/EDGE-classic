@@ -1751,6 +1751,11 @@ static void QuitResponse(int ch)
 //
 void M_QuitEDGE(int choice)
 {
+#if EDGE_WEB
+	I_Printf("Quit ignored on web platform\n");
+	return;
+#endif	
+
 	char ref[64];
 
 	std::string msg;
@@ -1790,6 +1795,12 @@ void M_QuitEDGE(int choice)
 // Accessible from console's 'quit now' command
 void M_ImmediateQuit()
 {
+
+#if EDGE_WEB
+	I_Printf("Quit ignored on web platform\n");
+	return;
+#endif	
+
 	I_Printf("Saving system defaults...\n");
 	M_SaveDefaults();
 

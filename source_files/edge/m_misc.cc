@@ -308,6 +308,8 @@ void M_SaveDefaults(void)
 		}
 	}
 
+	epi::FS_Sync();
+
 	fclose(f);
 }
 

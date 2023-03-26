@@ -2,8 +2,7 @@
 # edge
 ##########################################
 
-set (EDGE_SOURCE_FILES
-  i_main.cc
+set (EDGE_SOURCE_FILES  
   i_ctrl.cc
   i_video.cc
   i_sound.cc
@@ -117,6 +116,12 @@ set (EDGE_SOURCE_FILES
   umapinfo.cc
 )
 
+if (EMSCRIPTEN)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} i_web.cc)
+else()
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} i_main.cc)
+endif()
+
 set (EDGE_LINK_LIBRARIES
   edge_ajbsp
   edge_coal
@@ -200,6 +205,8 @@ else()
   set (SOURCE_DIR "${CMAKE_SOURCE_DIR}/build/source_files/edge")
   set (DEST_DIR "${CMAKE_SOURCE_DIR}/web/site")
 
+  target_link_options(edge-classic PRIVATE "--pre-js=${DEST_DIR}/edge-classic-data.js")
+  
   add_custom_command(
   TARGET edge-classic
   POST_BUILD
@@ -212,16 +219,16 @@ else()
   
   add_custom_command(
   TARGET edge-classic
-  POST_BUILD
+  PRE_BUILD
   COMMAND python ${EMPACKAGER} ${DEST_DIR}/edge-classic.data --preload 
     ${CMAKE_SOURCE_DIR}/web/preload@/ 
-    ${CMAKE_SOURCE_DIR}/edge-defs.wad@/edge-defs.wad
-    ${CMAKE_SOURCE_DIR}/autoload@/autoload
     ${CMAKE_SOURCE_DIR}/edge_base@/edge_base
-    ${CMAKE_SOURCE_DIR}/edge_fixes@/edge_fixes
+    ${CMAKE_SOURCE_DIR}/edge-defs.wad@/edge-defs.wad
     ${CMAKE_SOURCE_DIR}/soundfont@/soundfont
     --js-output=${DEST_DIR}/edge-classic-data.js 
     --use-preload-cache
+    --no-node
+    --lz4
   )  
 
 endif()

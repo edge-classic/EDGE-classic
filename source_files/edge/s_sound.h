@@ -102,6 +102,8 @@ void S_StopAllFX(void);
 
 void S_ResumeSound(void);
 void S_PauseSound(void);
+void S_ResumeAudioDevice();
+void S_PauseAudioDevice();
 
 void S_SoundTicker(void);
 

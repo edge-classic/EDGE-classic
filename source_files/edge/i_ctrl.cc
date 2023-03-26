@@ -489,6 +489,18 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 			{
 				HandleFocusLost();
 			}
+#ifdef EDGE_WEB
+			if (sdl_ev->window.event == SDL_WINDOWEVENT_RESIZED)
+			{
+				printf("SDL window resize event %i %i\n", sdl_ev->window.data1, sdl_ev->window.data2);	
+				SCREENWIDTH  = sdl_ev->window.data1;
+				SCREENHEIGHT = sdl_ev->window.data2;
+				SCREENBITS   = 24;
+				DISPLAYMODE  = 0;
+				I_DeterminePixelAspect();				
+			}
+#endif
+
 			break;
 		}
 		
@@ -499,7 +511,14 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 				
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
+#ifdef EDGE_WEB		
+			// On web, we don't want clicks coming through when changing pointer lock
+			// Otherwise, menus will be selected, weapons fired, unexpectedly
+			if (SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE)
+				HandleMouseButtonEvent(sdl_ev);
+#else
 			HandleMouseButtonEvent(sdl_ev);
+#endif
 			break;
 
 		case SDL_MOUSEWHEEL:

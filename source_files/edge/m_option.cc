@@ -388,8 +388,9 @@ static optmenuitem_t mainoptions[] =
 	{OPT_Plain,    "",                  NULL,  0, NULL, NULL, NULL},
 	{OPT_Function, "Sound Options",     NULL,  0, NULL, M_SoundOptions, "SoundOptions"},
 	{OPT_Function, "Video Options",     NULL,  0, NULL, M_VideoOptions, "VideoOptions"},
+#ifndef EDGE_WEB
 	{OPT_Function, "Screen Options",    NULL,  0, NULL, M_ResolutionOptions, "ChangeRes"},
-
+#endif
 	{OPT_Plain,    "",                  NULL,  0, NULL, NULL, NULL},
 	{OPT_Function, "Language",          NULL,  0, NULL, M_ChangeLanguage, NULL},
 	{OPT_Switch,   "Messages",          YesNo, 2, &showMessages, NULL, "Messages"},
@@ -427,7 +428,9 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Boolean, "Map Rotation",    YesNo,   2, &rotatemap, NULL, NULL},
 	{OPT_Switch,  "Teleport Flash",  YesNo,   2, &telept_flash, NULL, NULL},
 	{OPT_Switch,  "Invulnerability", Invuls, NUM_INVULFX,  &var_invul_fx, NULL, NULL},
+#ifndef EDGE_WEB
 	{OPT_Switch,  "Wipe method",     WIPE_EnumStr, WIPE_NUMWIPES, &wipe_method, NULL, NULL},
+#endif
 	{OPT_Boolean, "Screenshot Format", JpgPng, 2, &png_scrshots, NULL, NULL},
 	{OPT_Boolean, "Splash Screen",    YesNo,   2, &splash_screen, NULL, NULL},
 	{OPT_Switch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax",   4, &swirling_flats, NULL, NULL}

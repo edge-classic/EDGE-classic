@@ -32,6 +32,10 @@
   #undef max
 #endif
 
+#ifdef EDGE_WEB
+  #include <emscripten.h>
+#endif
+
 // standard C headers
 #include <stdio.h>
 #include <stdlib.h>

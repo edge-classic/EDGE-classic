@@ -549,6 +549,12 @@ static bool need_wipe = false;
 
 void E_ForceWipe(void)
 {
+
+#ifdef EDGE_WEB
+	// Wiping blocks the main thread while rendering outside of the main loop tick
+	// Disabled on the platform until can be better integrated
+	return;
+#endif	
 	if (gamestate == GS_NOTHING)
 		return;
 

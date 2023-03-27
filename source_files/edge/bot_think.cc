@@ -49,7 +49,7 @@
 DEF_CVAR(bot_skill, "1", CVAR_ARCHIVE)
 
 
-#define MOVE_SPEED  45
+#define MOVE_SPEED  25
 
 
 //----------------------------------------------------------------------------
@@ -556,14 +556,14 @@ void bot_t::SelectWeapon()
 
 void bot_t::MoveToward(const position_c& pos)
 {
-	cmd.speed = MOVE_SPEED;
+	cmd.speed = MOVE_SPEED + (10 * bot_skill.d);
 	cmd.direction = R_PointToAngle(pl->mo->x, pl->mo->y, pos.x, pos.y);
 }
 
 
 void bot_t::WalkToward(const position_c& pos)
 {
-	cmd.speed = MOVE_SPEED * 0.5;
+	cmd.speed = (MOVE_SPEED + (10 * bot_skill.d)) * 0.5;
 	cmd.direction = R_PointToAngle(pl->mo->x, pl->mo->y, pos.x, pos.y);
 }
 
@@ -664,7 +664,7 @@ void bot_t::RetreatFrom(const mobj_t *enemy)
 
 void bot_t::Strafe(bool right)
 {
-	cmd.speed     = MOVE_SPEED;
+	cmd.speed     = MOVE_SPEED + (10 * bot_skill.d);
 	cmd.direction = pl->mo->angle + (right ? ANG270 : ANG90);
 }
 

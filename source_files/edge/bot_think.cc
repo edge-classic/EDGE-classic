@@ -586,12 +586,12 @@ void bot_t::TurnToward(angle_t want_angle, float want_slope, bool fast)
 
 	float diff = want_slope - M_Tan(pl->mo->vertangle);
 
-	if (fabs(diff) < (fast ? 0.12 : 0.04))
+	if (fabs(diff) < (fast ? (0.04 + (0.04 * bot_skill.f)) : 0.04))
 		look_slope = want_slope;
 	else if (diff < 0)
-		look_slope -= fast ? 0.1 : 0.03;
+		look_slope -= fast ? (0.03 + (0.03 * bot_skill.f)) : 0.03;
 	else
-		look_slope += fast ? 0.1 : 0.03;
+		look_slope += fast ? (0.03 + (0.03 * bot_skill.f)) : 0.03;
 }
 
 
@@ -722,7 +722,9 @@ void bot_t::StrafeAroundEnemy()
 		else
 			strafe_dir = (r & 16) ? -1 : +1;
 
-		strafe_time = 20 + C_Random() % 20;
+		u8_t wait = 40 - (bot_skill.d * 10);
+
+		strafe_time = wait + r % wait;
 		return;
 	}
 
@@ -762,7 +764,7 @@ void bot_t::ShootTarget()
 	float acc_dist = std::max(enemy_dist, 32.0f);
 	float adjust   = acc_dist / 32.0f;
 
-	if (delta > (angle_t)(ANG90 / adjust))
+	if (delta > (angle_t)(ANG90 / adjust / (11 - (5 * bot_skill.d))))
 		return;
 
 	if (sl_diff > (8.0f / adjust))

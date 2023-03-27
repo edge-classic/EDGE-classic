@@ -59,7 +59,7 @@
 
 // SINGPLE-PLAYER STUFF
 #define SP_STATSX 55
-#define SP_STATSY 50
+#define SP_STATSY 65 //50
 
 #define SP_TIMEX 16
 #define SP_TIMEY (200-32)
@@ -442,18 +442,56 @@ static void DrawLevelFinished(void)
 			w1 = IM_WIDTH(lnames[0]);
 			h1 = IM_HEIGHT(lnames[0]);
 			HUD_SetAlignment(-1, -1);//center it
-			HUD_DrawImage(160 - w1/2, y, lnames[0]);
+			if(w1 > 320)
+				HUD_StretchImage(0, y, 320, h1, lnames[0], 0.0, 0.0);
+			else
+				HUD_DrawImage(160 - w1/2, y, lnames[0]);
 		}
 		else
 		{
 			h1 = style->fonts[t_type]->NominalHeight();
-			HL_WriteText(style,t_type, 160, y, language[wi_stats.cur->description.c_str()]);
+
+			float txtscale = 1.0;
+			if(style->def->text[t_type].scale)
+			{
+				txtscale=style->def->text[t_type].scale;
+			}
+			int txtWidth = 0;
+			txtWidth = style->fonts[t_type]->StringWidth(language[wi_stats.cur->description.c_str()]) * txtscale;
+			
+			if(txtWidth > 320)
+			{
+				float TempScale = 0;
+				TempScale = 320;
+				TempScale /= txtWidth;
+				HL_WriteText(style,t_type, 160, y, language[wi_stats.cur->description.c_str()],TempScale);
+			}
+			else
+				HL_WriteText(style,t_type, 160, y, language[wi_stats.cur->description.c_str()]);
 		}
 	}
 	else
 	{
 		h1 = style->fonts[t_type]->NominalHeight();
-		HL_WriteText(style,t_type, 160, y, language[wi_stats.cur->description.c_str()]);
+
+		float txtscale = 1.0;
+		if(style->def->text[t_type].scale)
+		{
+			txtscale=style->def->text[t_type].scale;
+		}
+		int txtWidth = 0;
+		txtWidth = style->fonts[t_type]->StringWidth(language[wi_stats.cur->description.c_str()]) * txtscale;
+		
+		if(txtWidth > 320)
+		{
+			float TempScale = 0;
+			TempScale = 320;
+			TempScale /= txtWidth;
+			HL_WriteText(style,t_type, 160, y, language[wi_stats.cur->description.c_str()],TempScale);
+		}
+		else
+			HL_WriteText(style,t_type, 160, y, language[wi_stats.cur->description.c_str()]);
+	
 	}
 	HUD_SetAlignment(-1, -1);//set it back to usual
 
@@ -544,16 +582,54 @@ static void DrawEnteringLevel(void)
 			w1 = IM_WIDTH(lnames[1]);
 			h1 = IM_HEIGHT(lnames[1]);
 			HUD_SetAlignment(-1, -1);//center it
-			HUD_DrawImage(160 - w1/2, y * 5/4, lnames[1]);
+			if(w1 > 320)
+				HUD_StretchImage(0, y * 5/4, 320, h1, lnames[1], 0.0, 0.0);
+			else
+				HUD_DrawImage(160 - w1/2, y * 5/4, lnames[1]);
+
 		}
 		else
 		{
-			HL_WriteText(style,t_type, 160, y * 5/4, language[wi_stats.next->description.c_str()]);	
+			float txtscale = 1.0;
+			if(style->def->text[t_type].scale)
+			{
+				txtscale=style->def->text[t_type].scale;
+			}
+			int txtWidth = 0;
+			txtWidth = style->fonts[t_type]->StringWidth(language[wi_stats.next->description.c_str()]) * txtscale;
+			
+			if(txtWidth > 320)
+			{
+				float TempScale = 0;
+				TempScale = 320;
+				TempScale /= txtWidth;
+				HL_WriteText(style,t_type, 160, y * 5/4, language[wi_stats.next->description.c_str()],TempScale);
+			}
+			else
+				HL_WriteText(style,t_type, 160, y * 5/4, language[wi_stats.next->description.c_str()]);
+
 		}
 	}
 	else
 	{
-		HL_WriteText(style,t_type, 160, y * 5/4, language[wi_stats.next->description.c_str()]);
+		float txtscale = 1.0;
+		if(style->def->text[t_type].scale)
+		{
+			txtscale=style->def->text[t_type].scale;
+		}
+		int txtWidth = 0;
+		txtWidth = style->fonts[t_type]->StringWidth(language[wi_stats.next->description.c_str()]) * txtscale;
+		
+		if(txtWidth > 320)
+		{
+			float TempScale = 0;
+			TempScale = 320;
+			TempScale /= txtWidth;
+			HL_WriteText(style,t_type, 160, y * 5/4, language[wi_stats.next->description.c_str()],TempScale);
+		}
+		else
+			HL_WriteText(style,t_type, 160, y * 5/4, language[wi_stats.next->description.c_str()]);
+
 	}
 	HUD_SetAlignment(-1, -1);//set it back to usual
 
@@ -1279,7 +1355,7 @@ static void DrawCoopStats(void)
 	DrawLevelFinished();
 
 	int t_type = styledef_c::T_TITLE;
-	int y = 40;
+	int y = SP_STATSY; //40;
 
 	// FIXME: better alignment
 

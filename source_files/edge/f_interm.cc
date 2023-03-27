@@ -1088,7 +1088,7 @@ static void DrawDeathmatchStats(void)
 	DrawLevelFinished();
 
 	int t_type = styledef_c::T_TITLE;
-	int y = 40;
+	int y = SP_STATSY; //40;
 
 	HL_WriteText(wi_net_style, t_type,  20, y, "Player");
 	HL_WriteText(wi_net_style, t_type, 100, y, "Frags");

@@ -102,7 +102,9 @@
 #if defined(_WIN32) && !defined(_WINGDI_) && !defined(_WIN32_WCE) \
      && !defined(_GNU_H_WINDOWS32_DEFINES) && !defined(OPENSTEP) \
      && !defined(__CYGWIN__) || defined(__MINGW32__)
-#include <GL/mesa_wgl.h>
+// EDGE: not sure what is going on here, though no mingw setup 
+// I have tried has this and compiles without it
+//#include <GL/mesa_wgl.h>
 #endif
 
 #if defined(macintosh) && PRAGMA_IMPORT_SUPPORTED

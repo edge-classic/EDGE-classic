@@ -81,7 +81,32 @@ jobs:
             edge-defs.wad
             *.dll
           retention-days: 2
-          
+
+  build-msys-es2:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          update: false
+          msystem: mingw32
+          install: >-
+            git
+            make
+            ninja
+          pacboy: >-
+            toolchain:p
+            cmake:p
+            SDL2:p
+      - name: Configure CMake GLES2
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEDGE_GL_ES2=ON -G"Ninja"
+      - name: Build GLES2
+        run: cmake --build build --config ${{env.BUILD_TYPE}}
+
   build-macos:
     runs-on: macos-latest
 

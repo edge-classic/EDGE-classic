@@ -56,6 +56,7 @@ default_t;
 
 void M_ResetDefaults(int _dummy);
 void M_LoadDefaults(void);
+void M_LoadBranding(void);
 void M_SaveDefaults(void);
 
 void M_InitMiscConVars(void);

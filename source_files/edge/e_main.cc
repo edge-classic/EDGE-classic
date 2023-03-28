@@ -193,6 +193,7 @@ bool mus_pause_stop = false;
 bool png_scrshots = false;
 bool autoquickload = false;
 
+std::filesystem::path brandingfile;
 std::filesystem::path cfgfile;
 std::filesystem::path ewadfile;
 std::string iwad_base;
@@ -205,6 +206,15 @@ std::filesystem::path shot_dir;
 
 // not using DEF_CVAR here since var name != cvar name
 cvar_c m_language("language", "ENGLISH", CVAR_ARCHIVE);
+
+DEF_CVAR(logfilename, "edge-classic.log", 0)
+DEF_CVAR(configfilename, "edge-classic.cfg", 0)
+DEF_CVAR(debugfilename, "debug.txt", 0)
+DEF_CVAR(windowtitle, "EDGE-Classic", 0)
+DEF_CVAR(versionstring, "1.33", 0)
+DEF_CVAR(orgname, "EDGE Team", 0)
+DEF_CVAR(appname, "EDGE-Classic", 0)
+DEF_CVAR(homepage, "https://edge-classic.github.io", 0)
 
 DEF_CVAR(r_overlay, "0", CVAR_ARCHIVE)
 
@@ -458,7 +468,7 @@ static void SpecialWadVerify(void)
 
 	int lump = W_CheckNumForName("EDGEVER");
 	if (lump < 0)
-		I_Error("EDGEVER lump not found. Get EDGE-DEFS.WAD at https://github.com/dashodanger/EDGE-classic");
+		I_Error("EDGEVER lump not found. Get EDGE-DEFS.WAD at https://github.com/edge-classic/EDGE-classic");
 
 	const void *data = W_CacheLumpNum(lump);
 
@@ -871,6 +881,10 @@ void InitDirectories(void)
 	if (!s.empty())
 		game_dir = s;
 
+	brandingfile = epi::PATH_Join(game_dir, UTFSTR(EDGEBRANDINGFILE));
+
+	M_LoadBranding();
+
 	// add parameter file "gamedir/parms" if it exists.
 	std::filesystem::path parms = epi::PATH_Join(game_dir, UTFSTR("parms"));
 
@@ -888,7 +902,7 @@ void InitDirectories(void)
 	}
 	else
     {
-		cfgfile = epi::PATH_Join(game_dir, UTFSTR(EDGECFGFILE));
+		cfgfile = epi::PATH_Join(game_dir, UTFSTR(configfilename.s));
 		if (epi::FS_Access(cfgfile, epi::file_c::ACCESS_READ) || argv::Find("portable") > 0)
 			home_dir = game_dir;
 		else
@@ -910,7 +924,7 @@ void InitDirectories(void)
 			s = UTFSTR(getenv("HOME"));
         if (!s.empty())
         {
-            home_dir = epi::PATH_Join(s, UTFSTR("edge-classic")); 
+            home_dir = epi::PATH_Join(s, UTFSTR(appname.c_str())); 
 
 			if (! epi::FS_IsDir(home_dir))
 			{
@@ -923,13 +937,17 @@ void InitDirectories(void)
         }
     }
 
-    if (home_dir.empty()) home_dir = UTFSTR(SDL_GetPrefPath(nullptr, "edge-classic"));
+#ifdef _WIN32
+    if (home_dir.empty()) home_dir = UTFSTR(SDL_GetPrefPath(nullptr, appname.c_str()));
+#else
+	if (home_dir.empty()) home_dir = UTFSTR(SDL_GetPrefPath(orgname.c_str(), appname.c_str()));
+#endif
 
 	if (! epi::FS_IsDir(home_dir))
         epi::FS_MakeDir(home_dir);
 
 	if (cfgfile.empty())
-		cfgfile = epi::PATH_Join(home_dir, UTFSTR(EDGECFGFILE));
+		cfgfile = epi::PATH_Join(home_dir, UTFSTR(configfilename.s));
 
 	// edge.wad file
 	s = argv::Value("ewad");
@@ -1248,7 +1266,7 @@ static void Add_Base(void)
 	if (epi::FS_Access(base_path, epi::file_c::ACCESS_READ)) 
 		W_AddFilename(base_path, FLKIND_EWad);
 	else
-		I_Warning("Base WAD not found for the %s IWAD! Check the /edge_base folder of your EDGE-Classic install!\n", iwad_base.c_str());
+		I_Warning("Base WAD not found for the %s IWAD! Check the /edge_base folder of your %s install!\n", iwad_base.c_str(), appname.c_str());
 }
 
 static void CheckTurbo(void)
@@ -1286,9 +1304,9 @@ static void ShowDateAndVersion(void)
 	I_Debugf("[Debug file created at %s]\n\n", timebuf);
 
 	// 23-6-98 KM Changed to hex to allow versions such as 0.65a etc
-	I_Printf("EDGE-Classic v" EDGEVERSTR " compiled on " __DATE__ " at " __TIME__ "\n");
-	I_Printf("EDGE-Classic homepage is at https://edge-classic.github.io\n");
-	I_Printf("EDGE-Classic is based on DOOM by id Software http://www.idsoftware.com/\n");
+	I_Printf("%s v%s compiled on " __DATE__ " at " __TIME__ "\n", appname.c_str(), versionstring.c_str());
+	I_Printf("%s homepage is at %s\n", appname.c_str(), homepage.c_str());
+	//I_Printf("EDGE-Classic is based on DOOM by id Software http://www.idsoftware.com/\n");
 
 	I_Printf("Executable path: '%s'\n", exe_path.u8string().c_str());
 
@@ -1300,8 +1318,8 @@ static void SetupLogAndDebugFiles(void)
 	// -AJA- 2003/11/08 The log file gets all CON_Printfs, I_Printfs,
 	//                  I_Warnings and I_Errors.
 
-	std::filesystem::path log_fn  (epi::PATH_Join(home_dir, UTFSTR(EDGELOGFILE)));
-	std::filesystem::path debug_fn(epi::PATH_Join(home_dir, UTFSTR("debug.txt")));
+	std::filesystem::path log_fn  (epi::PATH_Join(home_dir, UTFSTR(logfilename.s)));
+	std::filesystem::path debug_fn(epi::PATH_Join(home_dir, UTFSTR(debugfilename.s)));
 
 	logfile = NULL;
 	debugfile = NULL;
@@ -1576,11 +1594,13 @@ static void E_Shutdown(void);
 
 static void E_Startup(void)
 {
+	CON_InitConsole();
+
 	// Version check ?
 	if (argv::Find("version") > 0)
 	{
 		// -AJA- using I_Error here, since I_Printf crashes this early on
-		I_Error("\nEDGE-Classic version is " EDGEVERSTR "\n");
+		I_Error("\n%s version is %s\n", appname.c_str(), versionstring.c_str());
 	}
 
 	// -AJA- 2000/02/02: initialise global gameflags to defaults
@@ -1591,8 +1611,6 @@ static void E_Startup(void)
 	SetupLogAndDebugFiles();
 
 	PurgeCache();
-
-	CON_InitConsole();
 
 	ShowDateAndVersion();
 
@@ -1792,7 +1810,7 @@ void E_Main(int argc, const char **argv)
 		E_InitialState();
 
 		CON_MessageColor(RGB_MAKE(255,255,0));
-		I_Printf("EDGE-Classic v" EDGEVERSTR " initialisation complete.\n");
+		I_Printf("%s v%s initialisation complete.\n", appname.c_str(), versionstring.c_str());
 
 		I_Debugf("- Entering game loop...\n");
 

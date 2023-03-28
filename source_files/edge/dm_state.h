@@ -107,6 +107,7 @@ extern int gametic;
 
 // File handling stuff.
 extern std::filesystem::path cfgfile;
+extern std::filesystem::path brandingfile;
 
 extern std::string iwad_base;
 

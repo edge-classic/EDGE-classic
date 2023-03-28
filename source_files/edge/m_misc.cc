@@ -375,7 +375,6 @@ void M_LoadDefaults(void)
 		int parm;
 
 		std::string newstr;
-		//bool isstring = false; - This doesn't seem to have an impact on anything other than being set to true in this function - Dasho
 
 		if (fscanf(f, "%79s %[^\n]\n", def, strparm) != 2)
 			continue;
@@ -395,8 +394,6 @@ void M_LoadDefaults(void)
 
 		if (strparm[0] == '"')
 		{
-			// get a string default
-			//isstring = true;
 			// overwrite the last "
 			strparm[strlen(strparm) - 1] = 0;
 			// skip the first "
@@ -437,6 +434,55 @@ void M_LoadDefaults(void)
 	return;
 }
 
+void M_LoadBranding(void)
+{
+	int i;
+
+	// read the file in, overriding any set defaults
+	FILE *f = EPIFOPEN(brandingfile, "r");
+
+	// Use hardcoded CVAR defaults if branding.cfg not found
+	if (! f)
+		return;
+
+	while (!feof(f))
+	{
+		char def[80];
+		char strparm[100];
+
+		int parm;
+
+		std::string newstr;
+
+		if (fscanf(f, "%79s %[^\n]\n", def, strparm) != 2)
+			continue;
+
+		// console var?
+		if (def[0] == '/')
+		{
+			std::string con_line;
+
+			con_line += (def+1);
+			con_line += " ";
+			con_line += strparm;
+
+			CON_TryCommand(con_line.c_str());
+			continue;
+		}
+
+		if (strparm[0] == '"')
+		{
+			// overwrite the last "
+			strparm[strlen(strparm) - 1] = 0;
+			// skip the first "
+			newstr = std::string(strparm + 1);
+		}
+	}
+
+	fclose(f);
+
+	return;
+}
 
 void M_InitMiscConVars(void)
 {

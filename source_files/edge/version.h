@@ -16,11 +16,12 @@
 //
 //----------------------------------------------------------------------------
 
-#define TITLE  "EDGE-Classic"
+extern cvar_c windowtitle;
+extern cvar_c versionstring;
+extern cvar_c appname;
 
 #define EDGEVER       133
 #define EDGEVERHEX  0x133
-#define EDGEVERSTR  "1.33"
 
 // patch level (Savegames and Demos)
 #define EDGEPATCH  1

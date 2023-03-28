@@ -1132,12 +1132,12 @@ static int CoopScore(int pl)
 {
 	if (pl >= 0)
 	{
-		int kills = players[pl]->killcount * 400 / wi_stats.kills;
-		int items = players[pl]->itemcount * 100 / wi_stats.items;
-		int secret = players[pl]->secretcount * 200 / wi_stats.secret;
-		int frags = (players[pl]->frags + players[pl]->totalfrags) * 25;
+		int coop_kills = players[pl]->killcount * 400 / wi_stats.kills;
+		int coop_items = players[pl]->itemcount * 100 / wi_stats.items;
+		int coop_secret = players[pl]->secretcount * 200 / wi_stats.secret;
+		int coop_frags = (players[pl]->frags + players[pl]->totalfrags) * 25;
 
-		return kills + items + secret - frags;
+		return coop_kills + coop_items + coop_secret - coop_frags;
 	}
 
 	return -999;

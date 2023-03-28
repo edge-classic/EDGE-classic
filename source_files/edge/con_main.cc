@@ -406,7 +406,7 @@ int CMD_Help(char **argv, int argc)
 
 int CMD_Version(char **argv, int argc)
 {
-	I_Printf("EDGE v" EDGEVERSTR "\n");
+	I_Printf("%s v%s\n", appname.c_str(), versionstring.c_str());
 	return 0;
 }
 

@@ -59,7 +59,7 @@
 
 // SINGPLE-PLAYER STUFF
 #define SP_STATSX 55
-#define SP_STATSY 65 //50
+#define SP_STATSY 70 //50
 
 #define SP_TIMEX 16
 #define SP_TIMEY (200-32)
@@ -442,7 +442,7 @@ static void DrawLevelFinished(void)
 			w1 = IM_WIDTH(lnames[0]);
 			h1 = IM_HEIGHT(lnames[0]);
 			HUD_SetAlignment(-1, -1);//center it
-			if(w1 > 320)
+			if(w1 > 320) //Too big? Shrink it to fit the screen
 				HUD_StretchImage(0, y, 320, h1, lnames[0], 0.0, 0.0);
 			else
 				HUD_DrawImage(160 - w1/2, y, lnames[0]);
@@ -459,7 +459,7 @@ static void DrawLevelFinished(void)
 			int txtWidth = 0;
 			txtWidth = style->fonts[t_type]->StringWidth(language[wi_stats.cur->description.c_str()]) * txtscale;
 			
-			if(txtWidth > 320)
+			if(txtWidth > 320) //Too big? Shrink it to fit the screen
 			{
 				float TempScale = 0;
 				TempScale = 320;
@@ -482,7 +482,7 @@ static void DrawLevelFinished(void)
 		int txtWidth = 0;
 		txtWidth = style->fonts[t_type]->StringWidth(language[wi_stats.cur->description.c_str()]) * txtscale;
 		
-		if(txtWidth > 320)
+		if(txtWidth > 320)  //Too big? Shrink it to fit the screen
 		{
 			float TempScale = 0;
 			TempScale = 320;
@@ -582,7 +582,7 @@ static void DrawEnteringLevel(void)
 			w1 = IM_WIDTH(lnames[1]);
 			h1 = IM_HEIGHT(lnames[1]);
 			HUD_SetAlignment(-1, -1);//center it
-			if(w1 > 320)
+			if(w1 > 320)  //Too big? Shrink it to fit the screen
 				HUD_StretchImage(0, y * 5/4, 320, h1, lnames[1], 0.0, 0.0);
 			else
 				HUD_DrawImage(160 - w1/2, y * 5/4, lnames[1]);
@@ -598,7 +598,7 @@ static void DrawEnteringLevel(void)
 			int txtWidth = 0;
 			txtWidth = style->fonts[t_type]->StringWidth(language[wi_stats.next->description.c_str()]) * txtscale;
 			
-			if(txtWidth > 320)
+			if(txtWidth > 320)  //Too big? Shrink it to fit the screen
 			{
 				float TempScale = 0;
 				TempScale = 320;
@@ -620,7 +620,7 @@ static void DrawEnteringLevel(void)
 		int txtWidth = 0;
 		txtWidth = style->fonts[t_type]->StringWidth(language[wi_stats.next->description.c_str()]) * txtscale;
 		
-		if(txtWidth > 320)
+		if(txtWidth > 320)  //Too big? Shrink it to fit the screen
 		{
 			float TempScale = 0;
 			TempScale = 320;

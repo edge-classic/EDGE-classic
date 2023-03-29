@@ -34,6 +34,7 @@
 #include "file.h"
 #include "filesystem.h"
 #include "path.h"
+#include "str_lexer.h"
 #include "str_util.h"
 
 #include "image_data.h"
@@ -87,8 +88,6 @@ static int edge_version;
 static bool done_first_init = false;
 
 extern int joystick_device;
-
-
 
 static default_t defaults[] =
 {
@@ -266,6 +265,7 @@ static default_t defaults[] =
 	{CFGT_Key,      "key_show_players",      &key_show_players,   KEYD_F12},
 };
 
+static int numdefaults = sizeof(defaults) / sizeof(defaults[0]);
 
 void M_SaveDefaults(void)
 {
@@ -345,14 +345,80 @@ void M_ResetDefaults(int _dummy)
 	done_first_init = true;
 }
 
+static void ParseConfigBlock(epi::lexer_c& lex)
+{
+	for (;;)
+	{
+		std::string key;
+		std::string value;
+
+		epi::token_kind_e tok = lex.Next(key);
+
+		if (key == "/") // CVAR keys will start with this, but we need to discard it
+			continue;
+
+		if (tok == epi::TOK_EOF)
+			return;
+
+		if (tok == epi::TOK_ERROR)
+			I_Error("ParseConfig: error parsing file!\n");
+
+		tok = lex.Next(value);
+
+		// The last line of the config writer causes a weird blank key with an EOF value, so just return here
+		if (tok == epi::TOK_EOF) 
+			return;
+
+		if (tok == epi::TOK_ERROR)
+			I_Error("ParseConfig: malformed value for key %s!\n", key.c_str());
+
+		if (tok == epi::TOK_String)
+		{
+			std::string try_cvar = key;
+			try_cvar.append(" ").append(value);
+			CON_TryCommand(try_cvar.c_str());
+		}
+		else if (tok == epi::TOK_Number)
+		{
+			for (int i = 0; i < numdefaults; i++)
+			{
+				if (0 == strcmp(key.c_str(), defaults[i].name))
+				{
+					if (defaults[i].type == CFGT_Boolean)
+					{
+						*(bool*)defaults[i].location = epi::LEX_Int(value) ? true : false;
+					}
+					else /* CFGT_Int and CFGT_Key */
+					{
+						*(int*)defaults[i].location = epi::LEX_Int(value);
+					}
+					break;
+				}
+			}
+		}
+	}
+}
+
+static void ParseConfig(const std::string& data)
+{
+	epi::lexer_c lex(data);
+
+	for (;;)
+	{
+		std::string section;
+		epi::token_kind_e tok = lex.Next(section);
+
+		if (tok == epi::TOK_EOF)
+			return;
+
+		// process the block
+		ParseConfigBlock(lex);
+	}
+}
 
 void M_LoadDefaults(void)
 {
-	int i;
-
 	// set everything to base values
-	int numdefaults = sizeof(defaults) / sizeof(defaults[0]);
-
 	M_ResetDefaults(0);
 
 	I_Printf("M_LoadDefaults from %s\n", cfgfile.u8string().c_str());
@@ -367,119 +433,73 @@ void M_LoadDefaults(void)
 		return;
 	}
 
-	while (!feof(f))
+	int remain = std::filesystem::file_size(cfgfile);
+
+	// load the file into this string
+	std::string data;
+
+	while (remain > 0)
 	{
-		char def[80];
-		char strparm[100];
+		char buffer[4096];
 
-		int parm;
+		int want = std::min(remain, (int)sizeof(buffer));
 
-		std::string newstr;
+		int got = fread(buffer, 1, want, f);
 
-		if (fscanf(f, "%79s %[^\n]\n", def, strparm) != 2)
-			continue;
-
-		// console var?
-		if (def[0] == '/')
+		if (got != want)
 		{
-			std::string con_line;
-
-			con_line += (def+1);
-			con_line += " ";
-			con_line += strparm;
-
-			CON_TryCommand(con_line.c_str());
-			continue;
+			if (!feof(f))
+				I_Error("Error reading config file %s!\n", cfgfile.u8string().c_str());
 		}
 
-		if (strparm[0] == '"')
-		{
-			// overwrite the last "
-			strparm[strlen(strparm) - 1] = 0;
-			// skip the first "
-			newstr = std::string(strparm + 1);
-		}
-		else if (strparm[0] == '0' && strparm[1] == 'x')
-			sscanf(strparm + 2, "%x", &parm);
-		else
-			sscanf(strparm, "%i", &parm);
+		data.append(buffer, want);
 
-		for (i = 0; i < numdefaults; i++)
-		{
-			if (0 == strcmp(def, defaults[i].name))
-			{
-				if (defaults[i].type == CFGT_Boolean)
-				{
-					*(bool*)defaults[i].location = parm?true:false;
-				}
-				else /* CFGT_Int and CFGT_Key */
-				{
-					*(int*)defaults[i].location = parm;
-				}
-				break;
-			}
-		}
+		remain -= want;
 	}
 
 	fclose(f);
 
-	if (edge_version == 0)
-	{
-		// config file is from an older version (< 1.31)
-		// Hence fix some things up here...
-
-		key_console = KEYD_TILDE;
-	}
+	ParseConfig(data);
 
 	return;
 }
 
 void M_LoadBranding(void)
 {
-	int i;
-
 	// read the file in, overriding any set defaults
 	FILE *f = EPIFOPEN(brandingfile, "r");
 
-	// Use hardcoded CVAR defaults if branding.cfg not found
+	// Just use hardcoded values if no branding file present
 	if (! f)
 		return;
 
-	while (!feof(f))
+	int remain = std::filesystem::file_size(brandingfile);
+
+	// load the file into this string
+	std::string data;
+
+	while (remain > 0)
 	{
-		char def[80];
-		char strparm[100];
+		char buffer[4096];
 
-		int parm;
+		int want = std::min(remain, (int)sizeof(buffer));
 
-		std::string newstr;
+		int got = fread(buffer, 1, want, f);
 
-		if (fscanf(f, "%79s %[^\n]\n", def, strparm) != 2)
-			continue;
-
-		// console var?
-		if (def[0] == '/')
+		if (got != want)
 		{
-			std::string con_line;
-
-			con_line += (def+1);
-			con_line += " ";
-			con_line += strparm;
-
-			CON_TryCommand(con_line.c_str());
-			continue;
+			if (!feof(f))
+				I_Error("Error reading branding file %s!\n", brandingfile.u8string().c_str());
 		}
 
-		if (strparm[0] == '"')
-		{
-			// overwrite the last "
-			strparm[strlen(strparm) - 1] = 0;
-			// skip the first "
-			newstr = std::string(strparm + 1);
-		}
+		data.append(buffer, want);
+
+		remain -= want;
 	}
 
 	fclose(f);
+
+	ParseConfig(data);
 
 	return;
 }

@@ -602,8 +602,16 @@ void CON_TryCommand(const char *cmd)
 	{
 		if (argc <= 1)
 			I_Printf("%s \"%s\"\n", argv[0], var->c_str());
-		else if (argc-1 >= 2)
-			I_Printf("Can only assign one value to cvar (%d given).\n", argc-1);
+		else if (argc-1 >= 2) // Assume string with spaces; concat args into one string and try it
+		{
+			std::string concatter = argv[1];
+			for (int i = 2; i < argc; i++)
+			{
+				// preserve spaces in original string
+				concatter.append(" ").append(argv[i]);
+			}
+			*var = concatter.c_str();
+		}
 		else if ((var->flags & CVAR_ROM) != 0)
 			I_Printf("The cvar '%s' is read only.\n", var->name);
 		else

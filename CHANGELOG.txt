@@ -14,13 +14,19 @@ Bugs fixed
   
 + COAL player.query_weapon() would not return ZOOM FACTOR in some cases.
 
++ Fixed CVAR value strings with spaces not being processed as intended
+
++ Migrated cfg file parser to EPI::Lex, fixing a potential buffer overflow in the previous method
+
++ Fixed -deathmatch startup parameter not being respected
+
 
 General Improvements
 --------------------
 + Changed AJBSP to open loaded IWADs/PWADs in read mode as an additional means of ensuring original file
   integrity (was previously set to open in append mode despite not writing nodes to the original files)
 
-+ Added 'udmf_strict' CVAR (on by default) to control whether or not loading a UDMF map with an unsupported namespace will generate an error.
++ Added 'udmf_strict' CVAR (off by default until "Edge" namespace is finalized) to control whether or not loading a UDMF map with an unsupported namespace will generate an error.
 
 + Draw Distance Culling will no longer prevent the skybox from being drawn; maximum distance is now adjustable in the Performance Options menu
 
@@ -33,13 +39,22 @@ General Improvements
     - hud.get_darkest_color(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
     - hud.get_average_hue(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
 
++ WEAPONS.DDF:
+  - Y_ADJUST parameter will now affect weapons that use models instead of sprites
+
++ THINGS.DDF:
+  - FALLPAIN_SOUND will now account for whether or not the player is invulnerable to damage at the time of the fall
+
 + New directories, logfiles, etc, will now be written to an appropriate location in the user's home directory by default (AppData, etc, depending on OS). Portable
   usage is covered in "New Features"
 
 + "PC Speaker Mode" Sound Option no longer requires a restart to toggle; when On it will always use Fluidlite + the Bonkers for Bits soundfont when playing MIDI music
 
-+ For the rts REPLACE_WEAPON command and the weapon.ddf BECOME() action: If current ammo is bigger than the new clip size, reduce current ammo to new clip size.
++ For the RTS REPLACE_WEAPON command and the WEAPONS.DDF BECOME() action: If current ammo is bigger than the new clip size, reduce current ammo to new clip size.
 
++ Stats screen item layout improved so that long map names are not truncated or overlapping level score/stats
+
++ Bot Skill will now affect bot movement speed, strafing frequency, turn speed, and angle/confidence required to fire on target
 
 New Features
 ------------
@@ -76,7 +91,10 @@ New Features
 + "Outdoor Culling Fog Color" option added to Performance Options menu
   - Options are "Match Sky", "White", "Grey" and "Black"
   - Default is "Match Sky"
-	  
+
++ Customizable branding options
+  - New "branding.cfg" file present in game directory will control values like folder names, window titles, configuration and logging filenames
+  - Will default to hardcoded values if file is missing	  
 
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)
 ====================================

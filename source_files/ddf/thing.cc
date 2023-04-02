@@ -2435,8 +2435,8 @@ void mobjtype_c::Default()
 	palremap = NULL;
 
 	jump_delay = 1 * TICRATE;
-    jumpheight = 0;
-    crouchheight = 0;
+    jumpheight = 10;
+    crouchheight = 28;
 	viewheight = PERCENT_MAKE(75);
 	shotheight = PERCENT_MAKE(64);
     maxfall = 0;

@@ -393,17 +393,17 @@ void real_vm_c::DoExecute(int fnum)
 			{
 				double * a = Operand(st->a);
 
-				int fnum = (int)*a;
-				if (fnum <= 0)
+				int fnum_call = (int)*a;
+				if (fnum_call <= 0)
 					RunError("NULL function");
 
-				function_t *newf = functions[fnum];
+				function_t *newf = functions[fnum_call];
 
 				/* negative statements are built in functions */
 				if (newf->first_statement < 0)
-					EnterNative(fnum, st->b);
+					EnterNative(fnum_call, st->b);
 				else
-					EnterFunction(fnum);
+					EnterFunction(fnum_call);
 				continue;
 			}
 

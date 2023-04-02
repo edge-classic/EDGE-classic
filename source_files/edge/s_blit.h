@@ -32,7 +32,7 @@
 
 // Forward declarations
 class sfxdef_c;
-class position_c;
+struct position_c;
 
 
 // We use a 22.10 fixed point for sound offsets.  It's a reasonable

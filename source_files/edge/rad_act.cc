@@ -279,6 +279,7 @@ static player_t *GetWhoDunnit(rad_trigger_t *R)
 {
 	return players[consoleplayer];
 
+	/*
 	// this IS NOT CORRECT, but matches old behavior
 	if (numplayers == 1)
 		return players[consoleplayer];
@@ -300,7 +301,7 @@ static player_t *GetWhoDunnit(rad_trigger_t *R)
 	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
         if (R->acti_players & (1 << pnum))
             return players[pnum];
-			
+	*/
 }
 
 

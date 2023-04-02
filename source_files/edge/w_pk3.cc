@@ -97,10 +97,10 @@ public:
 		return entries.size() - 1;
 	}
 
-	int Find(const std::string& name) const
+	int Find(const std::string& name_in) const
 	{
 		for (int i = 0 ; i < (int)entries.size() ; i++)
-			if (entries[i] == name)
+			if (entries[i] == name_in)
 				return i;
 
 		return -1; // not found

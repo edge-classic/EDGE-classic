@@ -546,7 +546,7 @@ bool TextStr::ReplaceCheat(const char *deh_name, const char *str)
 	assert(str[0]);
 
 	// DOOM cheats were terminated with an 0xff byte
-	char eoln = (char) 0xff;
+	int eoln = 0xff;
 
 	for (int i = 0; cheat_list[i].orig_text; i++)
 	{

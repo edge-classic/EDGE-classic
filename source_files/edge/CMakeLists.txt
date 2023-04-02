@@ -189,6 +189,10 @@ endif()
 
 target_link_libraries(edge-classic PRIVATE ${EDGE_LINK_LIBRARIES})
 
+target_compile_options(edge-classic PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/W4>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
+)
 
 if (NOT EMSCRIPTEN)
   

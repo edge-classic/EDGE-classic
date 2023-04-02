@@ -487,7 +487,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 	if (E_IsKeyPressed(key_180))
 	{
 		if (allow180)
-			cmd->angleturn ^= (s16_t)0x8000;
+			cmd->angleturn ^= 0x8000;
 
 		allow180 = false;
 	}

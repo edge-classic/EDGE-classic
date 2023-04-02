@@ -131,7 +131,7 @@ s_thing_t;
 
 
 // Radius Damage Player Trigger
-typedef struct
+typedef struct s_damagep_s
 {
 	float damage_amount = 0;
 }
@@ -139,7 +139,7 @@ s_damagep_t;
 
 
 // Radius Heal Player Trigger
-typedef struct
+typedef struct s_healp_s
 {
 	float limit = 0;
 	float heal_amount = 0;
@@ -148,7 +148,7 @@ s_healp_t;
 
 
 // Radius GiveArmour Player Trigger
-typedef struct
+typedef struct s_armour_s
 {
 	armour_type_e type = ARMOUR_Green;
 	float limit = 0;
@@ -158,7 +158,7 @@ s_armour_t;
 
 
 // Radius Give/Lose Benefit
-typedef struct
+typedef struct s_benefit_s
 {
 	benefit_t *benefit = nullptr;
 	bool lose_it = false;  // or use_it :)
@@ -182,7 +182,7 @@ s_damage_monsters_t;
 
 
 // Set Skill
-typedef struct
+typedef struct s_skill_s
 {
 	skill_t skill = sk_baby;
 	bool respawn = false;
@@ -192,7 +192,7 @@ s_skill_t;
 
 
 // Go to map
-typedef struct
+typedef struct s_gotomap_s
 {
 	char *map_name = nullptr;
 
@@ -205,7 +205,7 @@ s_gotomap_t;
 
 
 // Play Sound function
-typedef enum
+typedef enum 
 {
 	PSOUND_Normal = 0,
 	PSOUND_BossMan

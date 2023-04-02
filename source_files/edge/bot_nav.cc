@@ -577,11 +577,9 @@ static bot_path_c * NAV_StorePath(position_c start, int start_id, position_c fin
 	}
 
 	// use a list to put the subsectors into the correct order
-	std::forward_list<int> subsec_list;
+	std::forward_list<int> subsec_list;	
 
-	int cur_id = finish_id;
-
-	for (;;)
+	for (int cur_id = finish_id;;)
 	{
 		subsec_list.push_front(cur_id);
 

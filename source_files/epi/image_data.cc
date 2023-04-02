@@ -558,7 +558,7 @@ void image_data_c::AverageColor(u8_t *rgb, int from_x, int to_x, int from_y, int
 		}
 	}
 
-	int highest_count = 0;
+	unsigned int highest_count = 0;
 	for (auto color : seen_colors)
 	{
 		if (color.second > highest_count)

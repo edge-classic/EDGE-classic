@@ -102,9 +102,9 @@ static bool DoDonut_wrapper(sector_t *s, const void *p1, void *p2)
 //
 side_t *P_GetSide(int currentSector, int line, int side)
 {
-	line_t *linedef = sectors[currentSector].lines[line];
+	line_t *ldef = sectors[currentSector].lines[line];
 
-	return linedef->side[side];
+	return ldef->side[side];
 }
 
 //
@@ -114,9 +114,9 @@ side_t *P_GetSide(int currentSector, int line, int side)
 //
 sector_t *P_GetSector(int currentSector, int line, int side)
 {
-	line_t *linedef = sectors[currentSector].lines[line];
+	line_t *ldef = sectors[currentSector].lines[line];
 
-	return side ? linedef->backsector : linedef->frontsector;
+	return side ? ldef->backsector : ldef->frontsector;
 }
 
 //

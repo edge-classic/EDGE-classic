@@ -1046,11 +1046,11 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 
 			case SPYA_Middle:
 			{
-				float mz = mo->z + mo->height * 0.5 + top_offset * mo->info->scale;
+				float _mz = mo->z + mo->height * 0.5 + top_offset * mo->info->scale;
 				float dz = sprite_height * 0.5 * mo->info->scale;
 
-				gzt = mz + dz;
-				gzb = mz - dz;
+				gzt = _mz + dz;
+				gzb = _mz - dz;
 				break;
 			}
 
@@ -1281,23 +1281,23 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 	// MLook: tilt sprites so they look better
 	if (MIR_XYScale() >= 0.99)
 	{
-		float h = dthing->orig_top - dthing->orig_bottom;
-		float skew2 = h;
+		float _h = dthing->orig_top - dthing->orig_bottom;
+		float skew2 = _h;
 
 		if (mo->radius >= 1.0f && h > mo->radius)
 			skew2 = mo->radius;
 
-		float dx = viewcos * sprite_skew * skew2;
-		float dy = viewsin * sprite_skew * skew2;
+		float _dx = viewcos * sprite_skew * skew2;
+		float _dy = viewsin * sprite_skew * skew2;
 
-		float top_q    = ((dthing->top - dthing->orig_bottom)  / h) - 0.5f;
-		float bottom_q = ((dthing->orig_top - dthing->bottom)  / h) - 0.5f;
+		float top_q    = ((dthing->top - dthing->orig_bottom)  / _h) - 0.5f;
+		float bottom_q = ((dthing->orig_top - dthing->bottom)  / _h) - 0.5f;
 
-		x1t += top_q * dx; y1t += top_q * dy;
-		x2t += top_q * dx; y2t += top_q * dy;
+		x1t += top_q * _dx; y1t += top_q * _dy;
+		x2t += top_q * _dx; y2t += top_q * _dy;
 
-		x1b -= bottom_q * dx; y1b -= bottom_q * dy;
-		x2b -= bottom_q * dx; y2b -= bottom_q * dy;
+		x1b -= bottom_q * _dx; y1b -= bottom_q * _dy;
+		x2b -= bottom_q * _dx; y2b -= bottom_q * _dy;
 	}
 
 	float tex_x1 = 0.001f;

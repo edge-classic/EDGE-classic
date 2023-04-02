@@ -767,7 +767,7 @@ md2_model_c *MD3_LoadModel(epi::file_c *f)
 /*============== MODEL RENDERING ====================*/
 
 
-typedef struct
+typedef struct model_coord_data_s
 {
 	mobj_t *mo;
 

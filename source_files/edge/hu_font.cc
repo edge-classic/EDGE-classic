@@ -256,7 +256,7 @@ void font_c::LoadFontTTF()
 
 		ref.glyph_index = 0;
 
-		char ch;
+		char ch = 0;
 
 		if (stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<u8_t>('M')]) > 0)
 		{
@@ -627,13 +627,13 @@ float font_c::StringWidth(const char *str)
 //
 int font_c::StringLines(const char *str) const
 {
-	int lines = 1;
+	int slines = 1;
 
 	for (; *str; str++)
 		if (*str == '\n')
-			lines++;
+			slines++;
 
-	return lines;
+	return slines;
 }
 
 

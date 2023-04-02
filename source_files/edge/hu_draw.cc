@@ -857,9 +857,9 @@ float HUD_StringWidth(const char *str)
 
 float HUD_StringHeight(const char *str)
 {
-	int lines = cur_font->StringLines(str);
+	int slines = cur_font->StringLines(str);
 
-	return lines * HUD_FontHeight() + (lines - 1) * VERT_SPACING;
+	return slines * HUD_FontHeight() + (slines - 1) * VERT_SPACING;
 }
 
 void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float size)

@@ -291,7 +291,7 @@ vxl_model_c *VXL_LoadModel(epi::file_c *f, const char *name)
 /*============== MODEL RENDERING ====================*/
 
 
-typedef struct
+typedef struct model_coord_data_s
 {
 	mobj_t *mo;
 

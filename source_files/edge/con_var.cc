@@ -245,9 +245,9 @@ void CON_HandleProgramArgs(void)
 		if (!argv::IsOption(p))
 			continue;
 
-		const char *s = epi::to_u8string(argv::list[p]).data();
+		std::string s = epi::to_u8string(argv::list[p]);
 
-		cvar_c *var = CON_FindVar(s+1);
+		cvar_c *var = CON_FindVar(s.data() + 1);
 
 		if (var == nullptr)
 			continue;

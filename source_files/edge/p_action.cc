@@ -1790,7 +1790,7 @@ static void LaunchOrderedSpread(mobj_t * mo)
 
 	int count = mo->spreadcount;
 
-	if (count < 0 || count > 12)
+	if (count < 0 || count > 10)
 		count = mo->spreadcount = 0;
 
 	// object or projectile?

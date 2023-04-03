@@ -87,8 +87,8 @@ public:
 
 private:
 	// disable copy construct and assignment operator
-	explicit fontdef_c(fontdef_c &rhs) { }
-	fontdef_c& operator=(fontdef_c &rhs) { return *this; }
+	explicit fontdef_c(fontdef_c &rhs) { (void) rhs; }
+	fontdef_c& operator=(fontdef_c &rhs) { (void) rhs; return *this; }
 };
 
 

@@ -216,8 +216,8 @@ public:
 
 private:
 	// disable copy construct and assignment operator
-	explicit gamedef_c(gamedef_c &rhs) { }
-	gamedef_c& operator= (gamedef_c &rhs) { return *this; }
+	explicit gamedef_c(gamedef_c &rhs) { (void) rhs; }
+	gamedef_c& operator= (gamedef_c &rhs) { (void) rhs; return *this; }
 };
 
 

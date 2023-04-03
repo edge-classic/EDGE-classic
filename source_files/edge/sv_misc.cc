@@ -833,6 +833,8 @@ void SV_SliderMoveFinaliseElems(void)
 
 bool SR_LightGetType(void *storage, int index, void *extra)
 {
+	(void) extra;
+	
 	const lightdef_c ** dest = (const lightdef_c **)storage + index;
 
 	int number;

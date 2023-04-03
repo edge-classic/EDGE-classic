@@ -188,8 +188,8 @@ public:
 
 private:
 	// disable copy construct and assignment operator
-	explicit weapondef_c(weapondef_c &rhs) { }
-	weapondef_c& operator= (weapondef_c &rhs) { return *this; }
+	explicit weapondef_c(weapondef_c &rhs) { (void) rhs; }
+	weapondef_c& operator= (weapondef_c &rhs) { (void) rhs; return *this; }
 };
 
 

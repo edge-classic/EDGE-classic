@@ -94,8 +94,8 @@ public:
 
 private:
 	// disable copy construct and assignment operator
-	explicit sfxdef_c(sfxdef_c &rhs) { }
-	sfxdef_c& operator= (sfxdef_c &rhs) { return *this; }
+	explicit sfxdef_c(sfxdef_c &rhs) { (void) rhs; }
+	sfxdef_c& operator= (sfxdef_c &rhs) { (void) rhs; return *this; }
 };
 
 

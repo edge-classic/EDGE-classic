@@ -134,8 +134,8 @@ public:
 
 private:
 	// disable copy construct and assignment operator
-	explicit atkdef_c(atkdef_c &rhs) { }
-	atkdef_c& operator= (atkdef_c &rhs) { return *this; }
+	explicit atkdef_c(atkdef_c &rhs) { (void) rhs; }
+	atkdef_c& operator= (atkdef_c &rhs) { (void) rhs; return *this; }
 };
 
 

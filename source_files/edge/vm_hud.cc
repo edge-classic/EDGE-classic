@@ -98,6 +98,8 @@ rgbcol_t VM_VectorToColor(double * v)
 //
 static void HD_coord_sys(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	int w = (int) *vm->AccessParam(0);
 	int h = (int) *vm->AccessParam(1);
 
@@ -115,6 +117,8 @@ static void HD_coord_sys(coal::vm_c *vm, int argc)
 //
 static void HD_game_mode(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	if (DEATHMATCH())
 		vm->ReturnString("dm");
 	else if (COOP_MATCH())
@@ -128,6 +132,8 @@ static void HD_game_mode(coal::vm_c *vm, int argc)
 //
 static void HD_game_name(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	gamedef_c *g = currmap->episode;
 	SYS_ASSERT(g);
 
@@ -139,6 +145,8 @@ static void HD_game_name(coal::vm_c *vm, int argc)
 //
 static void HD_map_name(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	vm->ReturnString(currmap->name.c_str());
 }
 
@@ -147,6 +155,8 @@ static void HD_map_name(coal::vm_c *vm, int argc)
 //
 static void HD_map_title(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	vm->ReturnString(w_map_title.c_str());
 }
 
@@ -155,6 +165,8 @@ static void HD_map_title(coal::vm_c *vm, int argc)
 //
 static void HD_which_hud(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	vm->ReturnFloat((double)screen_hud);
 }
 
@@ -163,6 +175,8 @@ static void HD_which_hud(coal::vm_c *vm, int argc)
 //
 static void HD_check_automap(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	vm->ReturnFloat(automapactive ? 1 : 0);
 }
 
@@ -171,6 +185,8 @@ static void HD_check_automap(coal::vm_c *vm, int argc)
 //
 static void HD_get_time(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	int time = I_GetTime() / (r_doubleframes.d ? 2 : 1);
 	vm->ReturnFloat((double) time);
 }
@@ -180,6 +196,8 @@ static void HD_get_time(coal::vm_c *vm, int argc)
 //
 static void HD_text_font(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	const char *font_name = vm->AccessParamString(0);
 
 	fontdef_c *DEF = fontdefs.Lookup(font_name);
@@ -202,6 +220,8 @@ static void HD_text_font(coal::vm_c *vm, int argc)
 //
 static void HD_text_color(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double * v = vm->AccessParam(0);
 
 	rgbcol_t color = VM_VectorToColor(v);
@@ -214,6 +234,8 @@ static void HD_text_color(coal::vm_c *vm, int argc)
 //
 static void HD_set_scale(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	float scale = *vm->AccessParam(0);
 
 	if (scale <= 0)
@@ -227,6 +249,8 @@ static void HD_set_scale(coal::vm_c *vm, int argc)
 //
 static void HD_set_alpha(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+	
 	float alpha = *vm->AccessParam(0);
 
 	HUD_SetAlpha(alpha);
@@ -237,6 +261,8 @@ static void HD_set_alpha(coal::vm_c *vm, int argc)
 //
 static void HD_solid_box(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	float x = *vm->AccessParam(0);
 	float y = *vm->AccessParam(1);
 	float w = *vm->AccessParam(2);
@@ -267,6 +293,8 @@ static void HD_solid_line(coal::vm_c *vm, int argc)
 //
 static void HD_thin_box(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	float x = *vm->AccessParam(0);
 	float y = *vm->AccessParam(1);
 	float w = *vm->AccessParam(2);
@@ -282,6 +310,8 @@ static void HD_thin_box(coal::vm_c *vm, int argc)
 //
 static void HD_gradient_box(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	float x = *vm->AccessParam(0);
 	float y = *vm->AccessParam(1);
 	float w = *vm->AccessParam(2);
@@ -304,6 +334,8 @@ static void HD_gradient_box(coal::vm_c *vm, int argc)
 //
 static void HD_draw_image(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	float x = *vm->AccessParam(0);
 	float y = *vm->AccessParam(1);
 	const char *name = vm->AccessParamString(2);
@@ -328,6 +360,8 @@ static void HD_draw_image(coal::vm_c *vm, int argc)
 //
 static void HD_scroll_image(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	float x = *vm->AccessParam(0);
 	float y = *vm->AccessParam(1);
 	const char *name = vm->AccessParamString(2);
@@ -378,6 +412,8 @@ static void HD_stretch_image(coal::vm_c *vm, int argc)
 //
 static void HD_tile_image(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	float x = *vm->AccessParam(0);
 	float y = *vm->AccessParam(1);
 	float w = *vm->AccessParam(2);
@@ -401,6 +437,8 @@ static void HD_tile_image(coal::vm_c *vm, int argc)
 //
 static void HD_draw_text(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	float x = *vm->AccessParam(0);
 	float y = *vm->AccessParam(1);
 
@@ -416,6 +454,8 @@ static void HD_draw_text(coal::vm_c *vm, int argc)
 //
 static void HD_draw_num2(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	float x = *vm->AccessParam(0);
 	float y = *vm->AccessParam(1);
 
@@ -465,6 +505,8 @@ static void HD_draw_num2(coal::vm_c *vm, int argc)
 //
 static void HD_draw_number(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	float x = *vm->AccessParam(0);
 	float y = *vm->AccessParam(1);
 
@@ -519,6 +561,8 @@ static void HD_draw_number(coal::vm_c *vm, int argc)
 //
 static void HD_game_paused(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	if (paused || menuactive || rts_menuactive || time_stop_active || erraticism_active)
 	{
 		vm->ReturnFloat(1);
@@ -533,6 +577,8 @@ static void HD_game_paused(coal::vm_c *vm, int argc)
 //
 static void HD_erraticism_active(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	if (erraticism_active)
 	{
 		vm->ReturnFloat(1);
@@ -547,6 +593,8 @@ static void HD_erraticism_active(coal::vm_c *vm, int argc)
 //
 static void HD_time_stop_active(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	if (time_stop_active)
 	{
 		vm->ReturnFloat(1);
@@ -561,6 +609,8 @@ static void HD_time_stop_active(coal::vm_c *vm, int argc)
 //
 static void HD_render_world(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	float x = *vm->AccessParam(0);
 	float y = *vm->AccessParam(1);
 	float w = *vm->AccessParam(2);
@@ -576,6 +626,8 @@ static void HD_render_world(coal::vm_c *vm, int argc)
 //
 static void HD_render_automap(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	float x = *vm->AccessParam(0);
 	float y = *vm->AccessParam(1);
 	float w = *vm->AccessParam(2);
@@ -608,6 +660,8 @@ static void HD_render_automap(coal::vm_c *vm, int argc)
 //
 static void HD_automap_color(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	int which = (int) *vm->AccessParam(0);
 
 	if (which < 1 || which > AM_NUM_COLORS)
@@ -625,6 +679,8 @@ static void HD_automap_color(coal::vm_c *vm, int argc)
 //
 static void HD_automap_option(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	int which = (int) *vm->AccessParam(0);
 	int value = (int) *vm->AccessParam(1);
 
@@ -644,6 +700,8 @@ static void HD_automap_option(coal::vm_c *vm, int argc)
 //
 static void HD_automap_zoom(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	float zoom = *vm->AccessParam(0);
 
 	// impose a very broad limit
@@ -655,6 +713,8 @@ static void HD_automap_zoom(coal::vm_c *vm, int argc)
 //
 static void HD_set_render_who(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	int index = (int) *vm->AccessParam(0);
 
 	if (index < 0 || index >= numplayers)
@@ -685,6 +745,8 @@ static void HD_set_render_who(coal::vm_c *vm, int argc)
 //
 static void HD_play_sound(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	const char *name = vm->AccessParamString(0);
 
 	sfx_t *fx = sfxdefs.GetEffect(name);
@@ -700,6 +762,8 @@ static void HD_play_sound(coal::vm_c *vm, int argc)
 //
 static void HD_screen_aspect(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	float TempAspect= std::ceil(v_pixelaspect.f * 100.0) / 100.0;
 	
 	vm->ReturnFloat(TempAspect);
@@ -707,6 +771,8 @@ static void HD_screen_aspect(coal::vm_c *vm, int argc)
 
 static void HD_get_average_color(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double rgb[3];
 	const char *name = vm->AccessParamString(0);
 	double *from_x = vm->AccessParam(1);
@@ -731,6 +797,8 @@ static void HD_get_average_color(coal::vm_c *vm, int argc)
 
 static void HD_get_lightest_color(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+	
 	double rgb[3];
 	const char *name = vm->AccessParamString(0);
 	double *from_x = vm->AccessParam(1);
@@ -755,6 +823,8 @@ static void HD_get_lightest_color(coal::vm_c *vm, int argc)
 
 static void HD_get_darkest_color(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double rgb[3];
 	const char *name = vm->AccessParamString(0);
 	double *from_x = vm->AccessParam(1);
@@ -779,6 +849,8 @@ static void HD_get_darkest_color(coal::vm_c *vm, int argc)
 
 static void HD_get_average_hue(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double rgb[3];
 	const char *name = vm->AccessParamString(0);
 	double *from_x = vm->AccessParam(1);
@@ -804,6 +876,8 @@ static void HD_get_average_hue(coal::vm_c *vm, int argc)
 // These two aren't really needed anymore with the AverageColor rework, but keeping them in case COALHUDS in the wild use them - Dasho
 static void HD_get_average_top_border_color(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double rgb[3];
 	const char *name = vm->AccessParamString(0);
 	const byte *what_palette = (const byte *) &playpal_data[0];
@@ -822,6 +896,8 @@ static void HD_get_average_top_border_color(coal::vm_c *vm, int argc)
 }
 static void HD_get_average_bottom_border_color(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double rgb[3];
 	const char *name = vm->AccessParamString(0);
 	const byte *what_palette = (const byte *) &playpal_data[0];
@@ -843,6 +919,8 @@ static void HD_get_average_bottom_border_color(coal::vm_c *vm, int argc)
 //
 static void HD_rts_enable(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	std::string name = vm->AccessParamString(0);
 
 	if (!name.empty())
@@ -853,6 +931,8 @@ static void HD_rts_enable(coal::vm_c *vm, int argc)
 //
 static void HD_rts_isactive(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	std::string name = vm->AccessParamString(0);
 
 	if (!name.empty())

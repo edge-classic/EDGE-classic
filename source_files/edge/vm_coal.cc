@@ -151,6 +151,8 @@ void VM_CallFunction(coal::vm_c *vm, const char *name)
 //
 static void SYS_error(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	const char * s = vm->AccessParamString(0);
 
 	I_Error("%s\n", s);
@@ -160,6 +162,8 @@ static void SYS_error(coal::vm_c *vm, int argc)
 //
 static void SYS_print(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	const char * s = vm->AccessParamString(0);
 
 	I_Printf("%s\n", s);
@@ -169,6 +173,8 @@ static void SYS_print(coal::vm_c *vm, int argc)
 //
 static void SYS_debug_print(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	const char * s = vm->AccessParamString(0);
 
 	I_Debugf("%s\n", s);
@@ -179,6 +185,8 @@ static void SYS_debug_print(coal::vm_c *vm, int argc)
 //
 static void SYS_edge_version(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	vm->ReturnFloat(EDGEVER / 100.0);
 }
 
@@ -192,6 +200,8 @@ static void SYS_edge_version(coal::vm_c *vm, int argc)
 // math.rint(val)
 static void MATH_rint(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double val = *vm->AccessParam(0);
 	vm->ReturnFloat(I_ROUND(val));
 }
@@ -199,6 +209,8 @@ static void MATH_rint(coal::vm_c *vm, int argc)
 // math.floor(val)
 static void MATH_floor(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double val = *vm->AccessParam(0);
 	vm->ReturnFloat(floor(val));
 }
@@ -206,6 +218,8 @@ static void MATH_floor(coal::vm_c *vm, int argc)
 // math.ceil(val)
 static void MATH_ceil(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double val = *vm->AccessParam(0);
 	vm->ReturnFloat(ceil(val));
 }
@@ -214,6 +228,8 @@ static void MATH_ceil(coal::vm_c *vm, int argc)
 // math.random()
 static void MATH_random(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	vm->ReturnFloat(C_Random() / double(0x10000));
 }
 
@@ -221,12 +237,16 @@ static void MATH_random(coal::vm_c *vm, int argc)
 //Lobo November 2021: math.random2() always between 0 and 10
 static void MATH_random2(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	vm->ReturnFloat(C_Random() % 11);
 }
 
 // math.cos(val)
 static void MATH_cos(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double val = *vm->AccessParam(0);
 	vm->ReturnFloat(cos(val * M_PI / 180.0));
 }
@@ -234,6 +254,8 @@ static void MATH_cos(coal::vm_c *vm, int argc)
 // math.sin(val)
 static void MATH_sin(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double val = *vm->AccessParam(0);
 	vm->ReturnFloat(sin(val * M_PI / 180.0));
 }
@@ -241,6 +263,8 @@ static void MATH_sin(coal::vm_c *vm, int argc)
 // math.tan(val)
 static void MATH_tan(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double val = *vm->AccessParam(0);
 	vm->ReturnFloat(tan(val * M_PI / 180.0));
 }
@@ -248,6 +272,8 @@ static void MATH_tan(coal::vm_c *vm, int argc)
 // math.acos(val)
 static void MATH_acos(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double val = *vm->AccessParam(0);
 	vm->ReturnFloat(acos(val) * 180.0 / M_PI);
 }
@@ -255,6 +281,8 @@ static void MATH_acos(coal::vm_c *vm, int argc)
 // math.asin(val)
 static void MATH_asin(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double val = *vm->AccessParam(0);
 	vm->ReturnFloat(asin(val) * 180.0 / M_PI);
 }
@@ -262,6 +290,8 @@ static void MATH_asin(coal::vm_c *vm, int argc)
 // math.atan(val)
 static void MATH_atan(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double val = *vm->AccessParam(0);
 	vm->ReturnFloat(atan(val) * 180.0 / M_PI);
 }
@@ -269,6 +299,8 @@ static void MATH_atan(coal::vm_c *vm, int argc)
 // math.atan2(x, y)
 static void MATH_atan2(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double x = *vm->AccessParam(0);
 	double y = *vm->AccessParam(1);
 
@@ -278,6 +310,8 @@ static void MATH_atan2(coal::vm_c *vm, int argc)
 // math.log(val)
 static void MATH_log(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	double val = *vm->AccessParam(0);
 
 	if (val <= 0)
@@ -297,6 +331,8 @@ static void MATH_log(coal::vm_c *vm, int argc)
 //
 static void STRINGS_len(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	const char * s = vm->AccessParamString(0);
 
 	vm->ReturnFloat(strlen(s));
@@ -309,6 +345,8 @@ static void STRINGS_len(coal::vm_c *vm, int argc)
 //
 static void STRINGS_find(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	const char * s1 = vm->AccessParamString(0);
 	const char * s2 = vm->AccessParamString(1);
 
@@ -324,6 +362,8 @@ static void STRINGS_find(coal::vm_c *vm, int argc)
 //
 static void STRINGS_sub(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+
 	const char * s = vm->AccessParamString(0);
 
 	int start = (int) *vm->AccessParam(1);
@@ -359,6 +399,8 @@ static void STRINGS_sub(coal::vm_c *vm, int argc)
 //
 static void STRINGS_tonumber(coal::vm_c *vm, int argc)
 {
+	(void) argc;
+	
 	const char * s = vm->AccessParamString(0);
 
 	vm->ReturnFloat(atof(s));

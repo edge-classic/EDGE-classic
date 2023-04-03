@@ -169,8 +169,8 @@ public:
 
 private:
 	// disable copy construct and assignment operator
-	explicit mapdef_c(mapdef_c &rhs) { }
-	mapdef_c& operator= (mapdef_c &rhs) { return *this; }
+	explicit mapdef_c(mapdef_c &rhs) { (void) rhs; }
+	mapdef_c& operator= (mapdef_c &rhs) { (void) rhs; return *this; }
 };
 
 

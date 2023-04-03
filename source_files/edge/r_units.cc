@@ -132,6 +132,8 @@ void RGL_SoftInitUnits()
 //
 void RGL_StartUnits(bool sort_em)
 {
+	(void) sort_em;
+
 	cur_vert = cur_unit = 0;
 
 	batch_sort = true;
@@ -278,7 +280,7 @@ static void EnableCustomEnv(GLuint env, bool enable)
 {
 	switch (env)
 	{
-		case ENV_SKIP_RGB:
+		case uint32_t(ENV_SKIP_RGB):
 			if (enable)
 			{
 				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);

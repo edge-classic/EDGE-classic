@@ -2818,20 +2818,20 @@ void GroupLines(void)
 					if (zvertexes[vi2].x < 32767.0f && zvertexes[vi2].x > -32768.0f)
 					{
 						sector->floor_z_verts.push_back({vert2->x,vert2->y,zvertexes[vi2].x});
-						if (zvertexes[vi].x > sector->floor_vs_hilo.x)
-							sector->floor_vs_hilo.x = zvertexes[vi].x;
-						if (zvertexes[vi].x < sector->floor_vs_hilo.y)
-							sector->floor_vs_hilo.y = zvertexes[vi].x;
+						if (zvertexes[vi2].x > sector->floor_vs_hilo.x)
+							sector->floor_vs_hilo.x = zvertexes[vi2].x;
+						if (zvertexes[vi2].x < sector->floor_vs_hilo.y)
+							sector->floor_vs_hilo.y = zvertexes[vi2].x;
 					}
 					else
 						sector->floor_z_verts.push_back({vert2->x,vert2->y,sector->f_h});
 					if (zvertexes[vi2].y < 32767.0f && zvertexes[vi2].y > -32768.0f)
 					{
 						sector->ceil_z_verts.push_back({vert2->x,vert2->y,zvertexes[vi2].y});
-						if (zvertexes[vi].y > sector->ceil_vs_hilo.x)
-							sector->ceil_vs_hilo.x = zvertexes[vi].y;
-						if (zvertexes[vi].y < sector->ceil_vs_hilo.y)
-							sector->ceil_vs_hilo.y = zvertexes[vi].y;
+						if (zvertexes[vi2].y > sector->ceil_vs_hilo.x)
+							sector->ceil_vs_hilo.x = zvertexes[vi2].y;
+						if (zvertexes[vi2].y < sector->ceil_vs_hilo.y)
+							sector->ceil_vs_hilo.y = zvertexes[vi2].y;
 					}
 					else
 						sector->ceil_z_verts.push_back({vert2->x,vert2->y,sector->c_h});

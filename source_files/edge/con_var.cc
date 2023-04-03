@@ -256,7 +256,7 @@ void CON_HandleProgramArgs(void)
 
 		if (p >= argv::list.size() || argv::IsOption(p))
 		{
-			I_Warning("Missing value for option: %s\n", s);
+			I_Warning("Missing value for option: %s\n", s.c_str());
 			continue;
 		}
 

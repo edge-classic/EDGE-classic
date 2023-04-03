@@ -27,7 +27,7 @@
 #define __S_SOUND_H__
 
 // Forward declarations
-class position_c;
+struct position_c;
 struct mobj_s;
 struct sfx_s;
 

@@ -2208,11 +2208,11 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
 	dsub->segs.push_back(dseg);
 
-	sector_t *frontsector = seg->front_sub->sector;
-	sector_t *backsector  = NULL;
+	sector_t *fsector = seg->front_sub->sector;
+	sector_t *bsector  = NULL;
 
 	if (seg->back_sub)
-		backsector = seg->back_sub->sector;
+		bsector = seg->back_sub->sector;
 		
 	// only 1 sided walls affect the 1D occlusion buffer
 
@@ -2226,39 +2226,39 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
 	// --- handle sky (using the depth buffer) ---
 
-	if (backsector && IS_SKY(frontsector->floor) && IS_SKY(backsector->floor))
+	if (bsector && IS_SKY(fsector->floor) && IS_SKY(bsector->floor))
 	{
-		if (frontsector->f_h < backsector->f_h)
+		if (fsector->f_h < bsector->f_h)
 		{
-			RGL_DrawSkyWall(seg, frontsector->f_h, backsector->f_h);
+			RGL_DrawSkyWall(seg, fsector->f_h, bsector->f_h);
 		}
 	}
 
-	if (IS_SKY(frontsector->ceil))
+	if (IS_SKY(fsector->ceil))
 	{
-		if (frontsector->c_h < frontsector->sky_h &&
-			(! backsector || ! IS_SKY(backsector->ceil) ||
-			backsector->f_h >= frontsector->c_h))
+		if (fsector->c_h < fsector->sky_h &&
+			(! bsector || ! IS_SKY(bsector->ceil) ||
+			bsector->f_h >= fsector->c_h))
 		{
-			RGL_DrawSkyWall(seg, frontsector->c_h, frontsector->sky_h);
+			RGL_DrawSkyWall(seg, fsector->c_h, fsector->sky_h);
 		}
-		else if (backsector && IS_SKY(backsector->ceil) &&
-			frontsector->heightsec == NULL && backsector->heightsec == NULL)
+		else if (bsector && IS_SKY(bsector->ceil) &&
+			fsector->heightsec == NULL && bsector->heightsec == NULL)
 		{
-			float max_f = MAX(frontsector->f_h, backsector->f_h);
+			float max_f = MAX(fsector->f_h, bsector->f_h);
 
-			if (backsector->c_h <= max_f && max_f < frontsector->sky_h)
+			if (bsector->c_h <= max_f && max_f < fsector->sky_h)
 			{
-				RGL_DrawSkyWall(seg, max_f, frontsector->sky_h);
+				RGL_DrawSkyWall(seg, max_f, fsector->sky_h);
 			}
 		}
 	}
 	// -AJA- 2004/08/29: Emulate Sky-Flooding TRICK
-	else if (! debug_hom.d && backsector && IS_SKY(backsector->ceil) &&
+	else if (! debug_hom.d && bsector && IS_SKY(bsector->ceil) &&
 			seg->sidedef->top.image == NULL &&
-			backsector->c_h < frontsector->c_h)
+			bsector->c_h < fsector->c_h)
 	{
-		RGL_DrawSkyWall(seg, backsector->c_h, frontsector->c_h);
+		RGL_DrawSkyWall(seg, bsector->c_h, fsector->c_h);
 	}
 }
 
@@ -3329,7 +3329,7 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 		// not clipping to the viewport.  Dummy values.
 		clip_scope = ANG180;
 		clip_left  = 0 + ANG45;
-		clip_right = 0 - ANG45;
+		clip_right = uint32_t(0 - ANG45);
 	}
 }
 

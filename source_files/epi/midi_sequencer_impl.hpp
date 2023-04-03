@@ -983,14 +983,14 @@ void BW_MidiSequencer::buildTimeLine(const std::vector<MidiEvent> &tempos,
     {
         unsigned caughLoopStart = 0;
         bool scanDone = false;
-        const size_t  trackCount = m_currentPosition.track.size();
+        const size_t  ctrackCount = m_currentPosition.track.size();
         Position      rowPosition(m_currentPosition);
 
         while(!scanDone)
         {
             const Position      rowBeginPosition(rowPosition);
 
-            for(size_t tk = 0; tk < trackCount; ++tk)
+            for(size_t tk = 0; tk < ctrackCount; ++tk)
             {
                 Position::TrackInfo &track = rowPosition.track[tk];
                 if((track.lastHandledEvent >= 0) && (track.delay <= 0))
@@ -1025,7 +1025,7 @@ void BW_MidiSequencer::buildTimeLine(const std::vector<MidiEvent> &tempos,
             uint64_t shortestDelay = 0;
             bool     shortestDelayNotFound = true;
 
-            for(size_t tk = 0; tk < trackCount; ++tk)
+            for(size_t tk = 0; tk < ctrackCount; ++tk)
             {
                 Position::TrackInfo &track = rowPosition.track[tk];
                 if((track.lastHandledEvent >= 0) && (shortestDelayNotFound || track.delay < shortestDelay))
@@ -1036,7 +1036,7 @@ void BW_MidiSequencer::buildTimeLine(const std::vector<MidiEvent> &tempos,
             }
 
             // Schedule the next playevent to be processed after that delay
-            for(size_t tk = 0; tk < trackCount; ++tk)
+            for(size_t tk = 0; tk < ctrackCount; ++tk)
                 rowPosition.track[tk].delay -= shortestDelay;
 
             if(caughLoopStart > 0)
@@ -2837,9 +2837,7 @@ bool BW_MidiSequencer::parseXMI(epi::mem_file_c *mfr)
     char headerBuf[headerSize] = "";
     size_t fsize = 0;
     std::vector<std::vector<uint8_t > > song_buf;
-    bool ret;
-
-    (void)Convert_xmi2midi; /* Shut up the warning */
+    bool ret;   
 
     fsize = mfr->Read(headerBuf, headerSize);
     if(fsize < headerSize)

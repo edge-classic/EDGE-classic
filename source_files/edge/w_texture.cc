@@ -173,8 +173,8 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 		texture->patchcount = patchcount;
 
 		Z_StrNCpy(texture->name, mtexture->name, 8);
-		for (size_t i=0;i<strlen(texture->name);i++) {
-			texture->name[i] = toupper(texture->name[i]);
+		for (size_t j=0;j<strlen(texture->name);j++) {
+			texture->name[j] = toupper(texture->name[j]);
 		}
 
 		const raw_patchdef_t *mpatch = &mtexture->patches[0];
@@ -225,7 +225,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 void W_InitTextures(void)
 {
 	int num_files = W_GetNumFiles();
-	int j, t, file;
+	int file;
 
 	texturedef_t ** textures = NULL;
 	texturedef_t ** cur;
@@ -272,18 +272,18 @@ void W_InitTextures(void)
 	// (measure of newness).  We ignore "dud" textures (missing
 	// patches).
 
-	for (j=0; j < (int)tex_sets.size(); j++)
-		numtextures += tex_sets[j]->num_tex;
+	for (int k=0; k < (int)tex_sets.size(); k++)
+		numtextures += tex_sets[k]->num_tex;
 
 	textures = cur = new texturedef_t*[numtextures];
 
-	for (j=0; j < (int)tex_sets.size(); j++)
+	for (int k=0; k < (int)tex_sets.size(); k++)
 	{
-		texture_set_c *set = tex_sets[j];
+		texture_set_c *set = tex_sets[k];
 
-		for (t=0; t < set->num_tex; t++)
-			if (set->textures[t]->patchcount > 0)
-				*cur++ = set->textures[t];
+		for (int m=0; m < set->num_tex; m++)
+			if (set->textures[m]->patchcount > 0)
+				*cur++ = set->textures[m];
 	}
 
 	numtextures = cur - textures;
@@ -298,14 +298,14 @@ void W_InitTextures(void)
 	// account, only the last entry in a run of identically named
 	// textures needs to be kept.
 
-	for (j=1; j < numtextures; j++)
+	for (int k=1; k < numtextures; k++)
 	{
-		texturedef_t * a = textures[j - 1];
-		texturedef_t * b = textures[j];
+		texturedef_t * a = textures[k - 1];
+		texturedef_t * b = textures[k];
 
 		if (strcmp(a->name, b->name) == 0)
 		{
-			textures[j - 1] = NULL;
+			textures[k - 1] = NULL;
 		}
 	}
 

@@ -271,8 +271,6 @@ void M_SaveDefaults(void)
 {
 	edge_version = EDGEVER;
 
-	int numdefaults = sizeof(defaults) / sizeof(defaults[0]);
-
 	// -ACB- 1999/09/24 idiot proof checking as required by MSVC
 	SYS_ASSERT(! cfgfile.empty());
 
@@ -331,8 +329,7 @@ static void SetToBaseValue(default_t *def)
 
 void M_ResetDefaults(int _dummy)
 {
-	int numdefaults = sizeof(defaults) / sizeof(defaults[0]);
-
+	
 	for (int i = 0; i < numdefaults; i++)
 	{
 		// don't reset the first five entries except at startup

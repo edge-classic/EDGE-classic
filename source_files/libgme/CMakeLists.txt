@@ -67,6 +67,11 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+if (MSVC)
+    # EDGE: silence no matching operator delete found; memory will not be freed if initialization throws an exception
+    add_definitions("/wd4291")
+endif()
+
 # Check for GCC/Clang "visibility" support.
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     OR

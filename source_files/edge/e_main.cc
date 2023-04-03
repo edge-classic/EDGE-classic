@@ -1180,20 +1180,20 @@ static void IdentifyVersion(void)
 			}
 			else
 			{
-				for (size_t i = 0 ; i < fsd.size() ; i++) 
+				for (size_t j = 0 ; j < fsd.size() ; j++) 
 				{
-					if(!fsd[i].is_dir)
+					if(!fsd[j].is_dir)
 					{
-						epi::file_c *iwad_test = epi::FS_Open(fsd[i].name, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-						for (size_t j = 0; j < iwad_checker.size(); j++) 
+						epi::file_c *iwad_test = epi::FS_Open(fsd[j].name, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+						for (size_t k = 0; k < iwad_checker.size(); k++) 
 						{
-							if (W_CheckForUniqueLumps(iwad_test, iwad_checker[j].unique_lumps[0], iwad_checker[j].unique_lumps[1]))
+							if (W_CheckForUniqueLumps(iwad_test, iwad_checker[k].unique_lumps[0], iwad_checker[k].unique_lumps[1]))
 							{
-								if (iwad_checker[j].score > best_score)
+								if (iwad_checker[k].score > best_score)
 								{
-									best_score = iwad_checker[j].score;
-									best_match = fsd[i].name;
-									iwad_base = iwad_checker[j].base;
+									best_score = iwad_checker[k].score;
+									best_match = fsd[j].name;
+									iwad_base = iwad_checker[k].base;
 								}
 								break;
 							}
@@ -1220,20 +1220,20 @@ static void IdentifyVersion(void)
 				}
 				else
 				{
-					for (size_t i = 0 ; i < fsd.size() ; i++) 
+					for (size_t j = 0 ; j < fsd.size() ; j++) 
 					{
-						if(!fsd[i].is_dir)
+						if(!fsd[j].is_dir)
 						{
-							epi::file_c *iwad_test = epi::FS_Open(fsd[i].name, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-							for (size_t j = 0; j < iwad_checker.size(); j++) 
+							epi::file_c *iwad_test = epi::FS_Open(fsd[j].name, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+							for (size_t k = 0; k < iwad_checker.size(); k++) 
 							{
-								if (W_CheckForUniqueLumps(iwad_test, iwad_checker[j].unique_lumps[0], iwad_checker[j].unique_lumps[1]))
+								if (W_CheckForUniqueLumps(iwad_test, iwad_checker[k].unique_lumps[0], iwad_checker[k].unique_lumps[1]))
 								{
-									if (iwad_checker[j].score > best_score)
+									if (iwad_checker[k].score > best_score)
 									{
-										best_score = iwad_checker[j].score;
-										best_match = fsd[i].name;
-										iwad_base = iwad_checker[j].base;
+										best_score = iwad_checker[k].score;
+										best_match = fsd[j].name;
+										iwad_base = iwad_checker[k].base;
 									}
 									break;
 								}

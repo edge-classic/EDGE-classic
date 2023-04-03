@@ -3958,11 +3958,11 @@ STBTT_DEF int stbtt_PackBegin(stbtt_pack_context *spc, unsigned char *pixels, in
 {
    stbrp_context *context = (stbrp_context *) STBTT_malloc(sizeof(*context)            ,alloc_context);
    int            num_nodes = pw - padding;
-   stbrp_node    *nodes   = (stbrp_node    *) STBTT_malloc(sizeof(*nodes  ) * num_nodes,alloc_context);
+   stbrp_node    *rnodes   = (stbrp_node    *) STBTT_malloc(sizeof(*rnodes  ) * num_nodes,alloc_context);
 
-   if (context == NULL || nodes == NULL) {
+   if (context == NULL || rnodes == NULL) {
       if (context != NULL) STBTT_free(context, alloc_context);
-      if (nodes   != NULL) STBTT_free(nodes  , alloc_context);
+      if (rnodes   != NULL) STBTT_free(rnodes  , alloc_context);
       return 0;
    }
 
@@ -3971,14 +3971,14 @@ STBTT_DEF int stbtt_PackBegin(stbtt_pack_context *spc, unsigned char *pixels, in
    spc->height = ph;
    spc->pixels = pixels;
    spc->pack_info = context;
-   spc->nodes = nodes;
+   spc->nodes = rnodes;
    spc->padding = padding;
    spc->stride_in_bytes = stride_in_bytes != 0 ? stride_in_bytes : pw;
    spc->h_oversample = 1;
    spc->v_oversample = 1;
    spc->skip_missing = 0;
 
-   stbrp_init_target(context, pw-padding, ph-padding, nodes, num_nodes);
+   stbrp_init_target(context, pw-padding, ph-padding, rnodes, num_nodes);
 
    if (pixels)
       STBTT_memset(pixels, 0, pw*ph); // background of 0 around pixels
@@ -4851,7 +4851,7 @@ static int stbtt__matchpair(stbtt_uint8 *fc, stbtt_uint32 nm, stbtt_uint8 *name,
       stbtt_int32 id = ttUSHORT(fc+loc+6);
       if (id == target_id) {
          // find the encoding
-         stbtt_int32 platform = ttUSHORT(fc+loc+0), encoding = ttUSHORT(fc+loc+2), language = ttUSHORT(fc+loc+4);
+         stbtt_int32 platform = ttUSHORT(fc+loc+0), encoding = ttUSHORT(fc+loc+2), clanguage = ttUSHORT(fc+loc+4);
 
          // is this a Unicode encoding?
          if (platform == 0 || (platform == 3 && encoding == 1) || (platform == 3 && encoding == 10)) {
@@ -4862,7 +4862,7 @@ static int stbtt__matchpair(stbtt_uint8 *fc, stbtt_uint32 nm, stbtt_uint8 *name,
             stbtt_int32 matchlen = stbtt__CompareUTF8toUTF16_bigendian_prefix(name, nlen, fc+stringOffset+off,slen);
             if (matchlen >= 0) {
                // check for target_id+1 immediately following, with same encoding & language
-               if (i+1 < count && ttUSHORT(fc+loc+12+6) == next_id && ttUSHORT(fc+loc+12) == platform && ttUSHORT(fc+loc+12+2) == encoding && ttUSHORT(fc+loc+12+4) == language) {
+               if (i+1 < count && ttUSHORT(fc+loc+12+6) == next_id && ttUSHORT(fc+loc+12) == platform && ttUSHORT(fc+loc+12+2) == encoding && ttUSHORT(fc+loc+12+4) == clanguage) {
                   slen = ttUSHORT(fc+loc+12+8);
                   off = ttUSHORT(fc+loc+12+10);
                   if (slen == 0) {

@@ -258,16 +258,16 @@ STBRP_DEF void stbrp_setup_allow_out_of_mem(stbrp_context *context, int allow_ou
    }
 }
 
-STBRP_DEF void stbrp_init_target(stbrp_context *context, int width, int height, stbrp_node *nodes, int num_nodes)
+STBRP_DEF void stbrp_init_target(stbrp_context *context, int width, int height, stbrp_node *rnodes, int num_nodes)
 {
    int i;
 
    for (i=0; i < num_nodes-1; ++i)
-      nodes[i].next = &nodes[i+1];
-   nodes[i].next = NULL;
+      rnodes[i].next = &rnodes[i+1];
+   rnodes[i].next = NULL;
    context->init_mode = STBRP__INIT_skyline;
    context->heuristic = STBRP_HEURISTIC_Skyline_default;
-   context->free_head = &nodes[0];
+   context->free_head = &rnodes[0];
    context->active_head = &context->extra[0];
    context->width = width;
    context->height = height;

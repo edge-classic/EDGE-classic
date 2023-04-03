@@ -514,6 +514,8 @@ static const char xmi2mid_mt32asgs[256] = {
     121, 0  /* 127 Jungle Tune set to Breath Noise */
 };
 
+#if 0
+
 static int Convert_xmi2midi(uint8_t *in, uint32_t insize,
                             uint8_t **out, uint32_t *outsize,
                             uint32_t convert_type, int32_t trackNumber = -1)
@@ -588,6 +590,8 @@ _end:   /* cleanup */
 
     return (ret);
 }
+
+#endif
 
 static int Convert_xmi2midi_multi(uint8_t *in, uint32_t insize,
                                   std::vector<std::vector<uint8_t > > &out,
@@ -1167,7 +1171,7 @@ static uint32_t xmi2mid_ExtractTracksFromXmi(struct xmi2mid_xmi_ctx *ctx) {
         }
 
         /* Convert it */
-        if (!(ppqn = xmi2mid_ConvertFiletoList(ctx, &rbrn))) {
+        if ((ppqn = xmi2mid_ConvertFiletoList(ctx, &rbrn)) == 0) {
             /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_CORUPT, NULL, 0);*/
             break;
         }

@@ -83,10 +83,10 @@ public:
 	 scope_c() : kind('g'), names(NULL), def(NULL) { }
 	~scope_c() { }
 
-	void push_back(def_t *def)
+	void push_back(def_t *def_in)
 	{
-		def->scope = this;
-		def->next = names; names = def;
+		def_in->scope = this;
+		def_in->next = names; names = def_in;
 	}
 };
 

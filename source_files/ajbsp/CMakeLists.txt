@@ -16,3 +16,8 @@ add_library(edge_ajbsp
 
 target_include_directories(edge_ajbsp PRIVATE ../epi)
 target_include_directories(edge_ajbsp PRIVATE ../miniz)
+
+target_compile_options(edge_ajbsp PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/W4>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
+)

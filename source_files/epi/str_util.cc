@@ -19,6 +19,8 @@
 #include "epi.h"
 #include "str_util.h"
 
+#include "xxhash.hpp"
+
 namespace epi
 {
 
@@ -112,6 +114,12 @@ std::vector<std::u32string> STR_SepStringVector(std::u32string str, char32_t sep
 	return vec;
 }
 #endif
+
+int32_t STR_Hash32(std::string str_to_hash)
+{
+	int32_t strhash = xxh::xxhash<32>(str_to_hash);
+	return (strhash < 0) ? -strhash : strhash;
+}
 
 // The following string conversion classes/code are adapted from public domain
 // code by Andrew Choi originally found at https://web.archive.org/web/20151209032329/http://members.shaw.ca/akochoi/articles/unicode-processing-c++0x/

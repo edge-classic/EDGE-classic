@@ -59,8 +59,6 @@ void RAD_FinishMenu(int result);
 // Path support
 bool RAD_CheckReachedTrigger(mobj_t * thing);
 
-int RAD_StringHashFunc(const char *s);
-
 #endif  /* __RAD_TRIG__ */
 
 //--- editor settings ---

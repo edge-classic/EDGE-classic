@@ -374,7 +374,7 @@ void RAD_EnableByTag(mobj_t *actor, const char *name, bool disable)
 {
 	rad_trigger_t *trig;
 
-	int tag = RAD_StringHashFunc(name);
+	int tag = epi::STR_Hash32(name);
 
 	if (tag <= 0)
 		I_Error("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
@@ -407,7 +407,7 @@ bool RAD_IsActiveByTag(mobj_t *actor, const char *name)
 {
 	rad_trigger_t *trig;
 
-	int tag = RAD_StringHashFunc(name);
+	int tag = epi::STR_Hash32(name);
 
 	if (tag <= 0)
 		I_Error("INTERNAL ERROR: RAD_IsActiveByTag: bad tag %d\n", tag);

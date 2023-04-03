@@ -2179,7 +2179,7 @@ static void M_ChangeGENMIDI(int keypressed)
 	int op2_pos = -1;
 	for(int i=0; i < (int)available_genmidis.size(); i++)
 	{
-		if (epi::case_cmp(s_genmidi.s, available_genmidis.at(i).u8string()) == 0)
+		if (epi::case_cmp(s_genmidi.s, available_genmidis.at(i).generic_u8string()) == 0)
 		{
 			op2_pos = i;
 			break;
@@ -2209,7 +2209,7 @@ static void M_ChangeGENMIDI(int keypressed)
 	}
 
 	// update cvar
-	s_genmidi = available_genmidis.at(op2_pos).u8string();
+	s_genmidi = available_genmidis.at(op2_pos).generic_u8string();
 	S_RestartOPL();
 }
 

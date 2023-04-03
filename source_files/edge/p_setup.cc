@@ -1412,11 +1412,11 @@ static void LoadUDMFVertexes()
 
 				if (key == "x")
 					x = epi::LEX_Double(value);
-				if (key == "y")
+				else if (key == "y")
 					y = epi::LEX_Double(value);
-				if (key == "zfloor")
+				else if (key == "zfloor")
 					zf = epi::LEX_Double(value);
-				if (key == "zceiling")
+				else if (key == "zceiling")
 					zc = epi::LEX_Double(value);
 			}
 			vertexes[cur_vertex].Set(x, y);
@@ -1504,17 +1504,17 @@ static void LoadUDMFSectors()
 
 				if (key == "heightfloor")
 					fz = epi::LEX_Double(value);
-				if (key == "heightceiling")
+				else if (key == "heightceiling")
 					cz = epi::LEX_Double(value);
-				if (key == "texturefloor")
+				else if (key == "texturefloor")
 					Z_StrNCpy(floor_tex, value.c_str(), 8);
-				if (key == "textureceiling")
+				else if (key == "textureceiling")
 					Z_StrNCpy(ceil_tex, value.c_str(), 8);
-				if (key == "lightlevel")
+				else if (key == "lightlevel")
 					light = epi::LEX_Int(value);
-				if (key == "special")
+				else if (key == "special")
 					type = epi::LEX_Int(value);
-				if (key == "id")
+				else if (key == "id")
 					tag = epi::LEX_Int(value);
 			}
 			sector_t *ss = sectors + cur_sector;
@@ -1662,15 +1662,15 @@ static void LoadUDMFSideDefs()
 
 				if (key == "offsetx")
 					x = epi::LEX_Double(value);
-				if (key == "offsety")
+				else if (key == "offsety")
 					y = epi::LEX_Double(value);
-				if (key == "texturetop")
+				else if (key == "texturetop")
 					Z_StrNCpy(top_tex, value.c_str(), 8);
-				if (key == "texturebottom")
+				else if (key == "texturebottom")
 					Z_StrNCpy(bottom_tex, value.c_str(), 8);
-				if (key == "texturemiddle")
+				else if (key == "texturemiddle")
 					Z_StrNCpy(middle_tex, value.c_str(), 8);
-				if (key == "sector")
+				else if (key == "sector")
 					sec_num = epi::LEX_Int(value);
 			}
 			SYS_ASSERT(nummapsides <= numsides);  // sanity check
@@ -1841,35 +1841,35 @@ static void LoadUDMFLineDefs()
 
 				if (key == "id")
 					tag = epi::LEX_Int(value);
-				if (key == "v1")
+				else if (key == "v1")
 					v1 = epi::LEX_Int(value);
-				if (key == "v2")
+				else if (key == "v2")
 					v2 = epi::LEX_Int(value);
-				if (key == "special")
+				else if (key == "special")
 					special = epi::LEX_Int(value);
-				if (key == "sidefront")
+				else if (key == "sidefront")
 					side0 = epi::LEX_Int(value);
-				if (key == "sideback")
+				else if (key == "sideback")
 					side1 = epi::LEX_Int(value);
-				if (key == "blocking")
+				else if (key == "blocking")
 					flags |= (epi::LEX_Boolean(value) ? MLF_Blocking : 0);
-				if (key == "blockmonsters")
+				else if (key == "blockmonsters")
 					flags |= (epi::LEX_Boolean(value) ? MLF_BlockMonsters : 0);
-				if (key == "twosided")
+				else if (key == "twosided")
 					flags |= (epi::LEX_Boolean(value) ? MLF_TwoSided : 0);
-				if (key == "dontpegtop")
+				else if (key == "dontpegtop")
 					flags |= (epi::LEX_Boolean(value) ? MLF_UpperUnpegged : 0);
-				if (key == "dontpegbottom")
+				else if (key == "dontpegbottom")
 					flags |= (epi::LEX_Boolean(value) ? MLF_LowerUnpegged : 0);
-				if (key == "secret")
+				else if (key == "secret")
 					flags |= (epi::LEX_Boolean(value) ? MLF_Secret : 0);
-				if (key == "blocksound")
+				else if (key == "blocksound")
 					flags |= (epi::LEX_Boolean(value) ? MLF_SoundBlock : 0);
-				if (key == "dontdraw")
+				else if (key == "dontdraw")
 					flags |= (epi::LEX_Boolean(value) ? MLF_DontDraw : 0);
-				if (key == "mapped")
+				else if (key == "mapped")
 					flags |= (epi::LEX_Boolean(value) ? MLF_Mapped : 0);
-				if (key == "passuse")
+				else if (key == "passuse")
 					flags |= (epi::LEX_Boolean(value) ? MLF_PassThru : 0);
 			}
 			line_t *ld = lines + cur_line;
@@ -1993,35 +1993,35 @@ static void LoadUDMFThings()
 
 				if (key == "id")
 					tag = epi::LEX_Int(value);
-				if (key == "x")
+				else if (key == "x")
 					x = epi::LEX_Double(value);
-				if (key == "y")
+				else if (key == "y")
 					y = epi::LEX_Double(value);
-				if (key == "height")
+				else if (key == "height")
 					z = epi::LEX_Double(value);
-				if (key == "angle")
+				else if (key == "angle")
 					angle = FLOAT_2_ANG((float)epi::LEX_Int(value));
-				if (key == "type")
+				else if (key == "type")
 					typenum = epi::LEX_Int(value);
-				if (key == "skill1")
+				else if (key == "skill1")
 					options |= (epi::LEX_Boolean(value) ? MTF_EASY : 0);
-				if (key == "skill2")
+				else if (key == "skill2")
 					options |= (epi::LEX_Boolean(value) ? MTF_EASY : 0);
-				if (key == "skill3")
+				else if (key == "skill3")
 					options |= (epi::LEX_Boolean(value) ? MTF_NORMAL : 0);
-				if (key == "skill4")
+				else if (key == "skill4")
 					options |= (epi::LEX_Boolean(value) ? MTF_HARD : 0);
-				if (key == "skill5")
+				else if (key == "skill5")
 					options |= (epi::LEX_Boolean(value) ? MTF_HARD : 0);
-				if (key == "ambush")
+				else if (key == "ambush")
 					options |= (epi::LEX_Boolean(value) ? MTF_AMBUSH : 0);
-				if (key == "single")
+				else if (key == "single")
 					options &= (epi::LEX_Boolean(value) ? ~MTF_NOT_SINGLE : options);
-				if (key == "dm")
+				else if (key == "dm")
 					options &= (epi::LEX_Boolean(value) ? ~MTF_NOT_DM : options);
-				if (key == "coop")
+				else if (key == "coop")
 					options &= (epi::LEX_Boolean(value) ? ~MTF_NOT_COOP : options);
-				if (key == "friend")
+				else if (key == "friend")
 					options |= (epi::LEX_Boolean(value) ? MTF_FRIEND : 0);
 			}
 			objtype = mobjtypes.Lookup(typenum);
@@ -3135,7 +3135,7 @@ void P_SetupLevel(void)
 		byte *raw_udmf = W_LoadLump(udmf_lumpnum, &raw_length);
 		udmf_lump.clear();
 		udmf_lump.resize(raw_length);
-		std::memcpy(udmf_lump.data(), raw_udmf, raw_length);
+		memcpy(udmf_lump.data(), raw_udmf, raw_length);
 		if (udmf_lump.empty())
 			I_Error("Internal error: can't load UDMF lump.\n");
 		W_DoneWithLump(raw_udmf);

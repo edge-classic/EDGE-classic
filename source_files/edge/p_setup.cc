@@ -30,6 +30,7 @@
 
 #include "endianess.h"
 #include "math_crc.h"
+#include "str_lexer.h"
 
 #include "main.h"
 #include "colormap.h"
@@ -130,191 +131,13 @@ static bool hexen_level;
 
 static bool udmf_level;
 static int udmf_lumpnum;
-static char *udmf_lump;
+static std::string udmf_lump;
 
 // a place to store sidedef numbers of the loaded linedefs.
 // There is two values for every line: side0 and side1.
 static int *temp_line_sides;
 
 DEF_CVAR(m_goobers, "0", 0)
-
-
-// UDMF parser and loading routines backported from EDGE 2.x codebase
-// with non-Vanilla namespace items removed for the time being
-typedef struct {
-	uint8_t *buffer;
-	uint8_t line[512];
-	int length;
-	int next;
-	int prev;
-} parser_t;
-
-static parser_t udmf_psr;
-
-static bool GetNextLine(parser_t *psr)
-{
-	if (psr->next >= psr->length)
-		return false; // no more lines
-
-	int i;
-	// get next line
-	psr->prev = psr->next;
-	uint8_t *lp = &psr->buffer[psr->next];
-	for (i=0; i<(psr->length - psr->next); i++, lp++)
-		if (*lp == 0x0A || *lp == 0x0D)
-			break;
-	if (i == (psr->length - psr->next))
-		lp = &psr->buffer[psr->length - 1]; // last line
-	psr->next = (int)(lp - psr->buffer) + 1;
-	memcpy(psr->line, &psr->buffer[psr->prev], MIN(511, psr->next - psr->prev - 1));
-	psr->line[MIN(511, psr->next - psr->prev) - 1] = 0;
-	// skip any more CR/LF
-	while (psr->buffer[psr->next] == 0x0A || psr->buffer[psr->next] == 0x0D)
-		psr->next++;
-
-	// check for comments
-	lp = psr->line;
-	while (lp[0] != 0 && lp[0] != 0x2F && lp[1] != 0x2F)
-		lp++; // find full line comment start (if present)
-	if (lp[0] != 0)
-	{
-		*lp = 0; // terminate at full line comment start
-	}
-	else
-	{
-		lp = psr->line;
-		while (lp[0] != 0 && lp[0] != 0x2F && lp[1] != 0x2A)
-			lp++; // find multi-line comment start (if present)
-		if (lp[0] != 0)
-		{
-			*lp = 0; // terminate at multi-line comment start
-			uint8_t *ep = &lp[2];
-			while (ep[0] != 0 && ep[0] != 0x2A && ep[1] != 0x2F)
-				ep++; // find multi-line comment end (if present)
-			if (ep[0] == 0)
-			{
-				ep = &psr->buffer[psr->next];
-				for (i=0; i<(psr->length - psr->next); i++, ep++)
-					if (ep[0] == 0x2A && ep[1] == 0x2F)
-						break;
-				if (i == (psr->length - psr->next))
-					ep = &psr->buffer[psr->length - 2];
-			}
-			psr->next = (int)(ep - psr->buffer) + 2; // skip comment for next line
-		}
-	}
-
-	//I_Debugf(" parser next line: %s\n", (char *)psr->line);
-	return true;
-}
-
-static bool GetNextAssign(parser_t *psr, uint8_t *ident, uint8_t *val)
-{
-	if (!GetNextLine(psr))
-		return false; // no more lines
-
-	int len = 0;
-	while (psr->line[len] != 0 && psr->line[len] != 0x7D)
-		len++;
-	if (psr->line[len] == 0x7D)
-	{
-		//I_Debugf(" parser: block end\n");
-		return false;
-	}
-	else if (len < 4)
-		return false; //line too short for assignment
-
-	uint8_t *lp = psr->line;
-	while (*lp != 0x3D && *lp != 0)
-		lp++; // find '='
-	if (lp[0] != 0x3D)
-		return false; // not an assignment line
-
-	*lp++ = 0; // split at assignment operator
-	int i = 0;
-	while (psr->line[i] == 0x20 || psr->line[i] == 0x09)
-		i++; // skip whitespace before indentifier
-	memcpy(ident, &psr->line[i], lp - &psr->line[i] - 1);
-	i = lp - &psr->line[i] - 2;
-	while (ident[i] == 0x20 || ident[i] == 0x09)
-		i--; // skip whitespace after identifier
-	ident[i+1] = 0;
-
-	i = 0;
-	while (lp[i] == 0x20 || lp[i] == 0x09 || lp[i] == 0x22)
-		i++; // skip whitespace and quotes before value
-	memcpy(val, &lp[i], &psr->line[len] - &lp[i]);
-	i = (int)(&psr->line[len] - &lp[i]) - 2;
-	while (val[i] == 0x20 || val[i] == 0x09 || val[i] == 0x22  || val[i] == 0x3B)
-		i--; // skip whitespace, quote, and semi-colon after value
-	val[i+1] = 0;
-
-	//I_Debugf(" parser: ident = %s, val = %s\n", (char *)ident, (char *)val);
-	return true;
-}
-
-static bool GetNextBlock(parser_t *psr, uint8_t *ident)
-{
-	if (!GetNextLine(psr))
-		return false; // no more lines
-
-	int len, i = 0;
-	while (psr->line[i] == 0x20 || psr->line[i] == 0x09)
-		i++; // skip whitespace
-blk_loop:
-	len = 0;
-	while (psr->line[len] != 0)
-		len++;
-
-	memcpy(ident, &psr->line[i], len - i);
-	i = len - i - 1;
-	while (ident[i] == 0x20 || ident[i] == 0x09)
-		i--; // skip whitespace from end of line
-	ident[i+1] = 0;
-
-	if (!GetNextLine(psr))
-		return false; // no more lines
-
-	i = 0;
-	while (psr->line[i] == 0x20 || psr->line[i] == 0x09)
-		i++; // skip whitespace before indentifier or block start
-	if (psr->line[i] != 0x7B)
-		goto blk_loop; // not a block start
-
-	//I_Debugf(" parser: block start = %s\n", ident);
-	return true;
-}
-
-static bool str2bool(char *val)
-{
-	if (epi::case_cmp(val, "true") == 0)
-		return true;
-
-	// default is always false
-	return false;
-}
-
-static int str2int(char *val, int def)
-{
-	int ret;
-
-	if (sscanf(val, "%d", &ret) == 1)
-		return ret;
-
-	// error - return default
-	return def;
-}
-
-static float str2float(char *val, float def)
-{
-	float ret;
-
-	if (sscanf(val, "%f", &ret) == 1)
-		return ret;
-
-	// error - return default
-	return def;
-}
 
 static void CheckEvilutionBug(byte *data, int length)
 {
@@ -776,23 +599,19 @@ static void LoadThings(int lump)
 	const void *data;
 	const raw_thing_t *mt;
 	const mobjtype_c *objtype;
-	int numthings;
-
-	unknown_thing_map.clear();
 
 	if (!W_VerifyLumpName(lump, "THINGS"))
 		I_Error("Bad WAD: level %s missing THINGS.\n", 
 				currmap->lump.c_str());
 
-	numthings = W_LumpLength(lump) / sizeof(raw_thing_t);
+	mapthing_NUM = W_LumpLength(lump) / sizeof(raw_thing_t);
 
-	if (numthings == 0)
+	if (mapthing_NUM == 0)
 		I_Error("Bad WAD: level %s contains 0 things.\n", 
 				currmap->lump.c_str());
 
 	data = W_CacheLumpNum(lump);
 	mapthing_CRC.AddBlock((const byte*)data, W_LumpLength(lump));
-	mapthing_NUM = numthings;
 
 	CheckEvilutionBug((byte *)data, W_LumpLength(lump));
 
@@ -805,7 +624,7 @@ static void LoadThings(int lump)
 
 	mt = (const raw_thing_t *) data;
 
-	for (i = 0; i < numthings; i++)
+	for (i = 0; i < mapthing_NUM; i++)
 	{
 		options = EPI_LE_U16(mt[i].options);
 
@@ -813,7 +632,7 @@ static void LoadThings(int lump)
 			limit_options = true;
 	}
 
-	for (i = 0; i < numthings; i++, mt++)
+	for (i = 0; i < mapthing_NUM; i++, mt++)
 	{
 		x = (float) EPI_LE_S16(mt->x);
 		y = (float) EPI_LE_S16(mt->y);
@@ -884,26 +703,22 @@ static void LoadHexenThings(int lump)
 	const void *data;
 	const raw_hexen_thing_t *mt;
 	const mobjtype_c *objtype;
-	int numthings;
-
-	unknown_thing_map.clear();
 
 	if (!W_VerifyLumpName(lump, "THINGS"))
 		I_Error("Bad WAD: level %s missing THINGS.\n", 
 				currmap->lump.c_str());
 
-	numthings = W_LumpLength(lump) / sizeof(raw_hexen_thing_t);
+	mapthing_NUM = W_LumpLength(lump) / sizeof(raw_hexen_thing_t);
 
-	if (numthings == 0)
+	if (mapthing_NUM == 0)
 		I_Error("Bad WAD: level %s contains 0 things.\n", 
 				currmap->lump.c_str());
 
 	data = W_CacheLumpNum(lump);
 	mapthing_CRC.AddBlock((const byte*)data, W_LumpLength(lump));
-	mapthing_NUM = numthings;
 
 	mt = (const raw_hexen_thing_t *) data;
-	for (i = 0; i < numthings; i++, mt++)
+	for (i = 0; i < mapthing_NUM; i++, mt++)
 	{
 		x = (float) EPI_LE_S16(mt->x);
 		y = (float) EPI_LE_S16(mt->y);
@@ -1535,166 +1350,125 @@ static void LoadXGL3Nodes(int lumpnum)
 	zgldata.clear();
 }
 
-static void LoadUDMFVertexes(parser_t *psr)
+static void LoadUDMFVertexes()
 {
-	char ident[128];
-	char val[128];
-	int i = 0;
+	epi::lexer_c lex(udmf_lump);
 
 	I_Debugf("LoadUDMFVertexes: parsing TEXTMAP\n");
-	numvertexes = 0;
+	int cur_vertex = 0;
 
-	psr->next = 0; // restart from start of lump
-	while (1)
+	for (;;)
 	{
-		if (!GetNextBlock(psr, (uint8_t*)ident))
+		std::string section;
+		epi::token_kind_e tok = lex.Next(section);
+
+		if (tok == epi::TOK_EOF)
 			break;
 
-		if (epi::case_cmp(ident, "vertex") == 0)
+		if (tok != epi::TOK_Ident)
+			I_Error("Malformed TEXTMAP lump.\n");
+
+		// check namespace
+		if (lex.Match("="))
 		{
-			// count vertex blocks
-			while (1)
-			{
-				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
-				{
-					uint8_t *lp = psr->line;
-					while (*lp != 0 && *lp != 0x7D)
-						lp++; // find end of line or '}'
-					if (*lp == 0x7D)
-					{
-						numvertexes++;
-						break; // end of block
-					}
-					if (psr->next >= psr->length)
-					{
-						numvertexes++;
-						break; // end of lump
-					}
-
-					continue; // skip line
-				}
-			}
+			lex.Next(section);
+			if (! lex.Match(";"))
+				I_Error("Malformed TEXTMAP lump: missing ';'\n");
+			continue;
 		}
-	}
 
-	vertexes = new vec2_t[numvertexes];
-	zvertexes = new vec2_t[numvertexes];
+		if (! lex.Match("{"))
+			I_Error("Malformed TEXTMAP lump: missing '{'\n");
 
-	psr->next = 0; // restart from start of lump
-	while (1)
-	{
-		if (!GetNextBlock(psr, (uint8_t*)ident))
-			break;
-
-		if (epi::case_cmp(ident, "vertex") == 0)
+		if (section == "vertex")
 		{
 			float x = 0.0f, y = 0.0f;
 			float zf = -40000.0f, zc = 40000.0f;
-
-			// process vertex block
-			while (1)
+			for (;;)
 			{
-				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
-				{
-					uint8_t *lp = psr->line;
-					while (*lp != 0 && *lp != 0x7D)
-						lp++; // find end of line or '}'
-					if (*lp == 0x7D)
-					{
-						break; // end of block
-					}
-					if (psr->next >= psr->length)
-					{
-						break; // end of lump
-					}
+				if (lex.Match("}"))
+					break;
 
-					continue; // skip line
-				}
-				// process assignment
-				if (epi::case_cmp(ident, "x") == 0)
-				{
-					x = str2float(val, 0.0f);
-				}
-				else if (epi::case_cmp(ident, "y") == 0)
-				{
-					y = str2float(val, 0.0f);
-				}
-				else if (epi::case_cmp(ident, "zfloor") == 0)
-				{
-					zf = str2float(val, -40000.0f);
-				}
-				else if (epi::case_cmp(ident, "zceiling") == 0)
-				{
-					zc = str2float(val, 40000.0f);
-				}
+				std::string key;
+				std::string value;
+				epi::token_kind_e block_tok = lex.Next(key);
+
+				if (block_tok == epi::TOK_EOF)
+					I_Error("Malformed TEXTMAP lump: unclosed block\n");
+
+				if (block_tok != epi::TOK_Ident)
+					I_Error("Malformed TEXTMAP lump: missing key\n");
+
+				if (! lex.Match("="))
+					I_Error("Malformed TEXTMAP lump: missing '='\n");
+
+				block_tok = lex.Next(value);
+
+				if (block_tok == epi::TOK_EOF || block_tok == epi::TOK_ERROR || value == "}")
+					I_Error("Malformed TEXTMAP lump: missing value\n");
+
+				if (! lex.Match(";"))
+					I_Error("Malformed TEXTMAP lump: missing ';'\n");
+
+				if (key == "x")
+					x = epi::LEX_Double(value);
+				else if (key == "y")
+					y = epi::LEX_Double(value);
+				else if (key == "zfloor")
+					zf = epi::LEX_Double(value);
+				else if (key == "zceiling")
+					zc = epi::LEX_Double(value);
 			}
-
-			vec2_t *vv = vertexes + i;
-			vv->x = x;
-			vv->y = y;
-			vv = zvertexes + i;
-			vv->x = zf;
-			vv->y = zc;
-
-			i++;
+			vertexes[cur_vertex].Set(x, y);
+			zvertexes[cur_vertex].Set(zf, zc);
+			cur_vertex++;
+		}
+		else // consume other blocks
+		{
+			for (;;)
+			{
+				tok = lex.Next(section);
+				if (lex.Match("}") || tok == epi::TOK_EOF)
+					break;
+			}
 		}
 	}
+	SYS_ASSERT(cur_vertex == numvertexes);
 
 	I_Debugf("LoadUDMFVertexes: finished parsing TEXTMAP\n");
 }
 
-static void LoadUDMFSectors(parser_t *psr)
+static void LoadUDMFSectors()
 {
-	char ident[128];
-	char val[128];
-	int i = 0;
+	epi::lexer_c lex(udmf_lump);
 
 	I_Debugf("LoadUDMFSectors: parsing TEXTMAP\n");
-	numsectors = 0;
+	int cur_sector = 0;
 
-	psr->next = 0; // restart from start of lump
-	while (1)
+	for (;;)
 	{
-		if (!GetNextBlock(psr, (uint8_t*)ident))
+		std::string section;
+		epi::token_kind_e tok = lex.Next(section);
+
+		if (tok == epi::TOK_EOF)
 			break;
 
-		if (epi::case_cmp(ident, "sector") == 0)
+		if (tok != epi::TOK_Ident)
+			I_Error("Malformed TEXTMAP lump.\n");
+
+		// check namespace
+		if (lex.Match("="))
 		{
-			// count sector blocks
-			while (1)
-			{
-				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
-				{
-					uint8_t *lp = psr->line;
-					while (*lp != 0 && *lp != 0x7D)
-						lp++; // find end of line or '}'
-					if (*lp == 0x7D)
-					{
-						numsectors++;
-						break; // end of block
-					}
-					if (psr->next >= psr->length)
-					{
-						numsectors++;
-						break; // end of lump
-					}
-
-					continue; // skip line
-				}
-			}
+			lex.Next(section);
+			if (! lex.Match(";"))
+				I_Error("Malformed TEXTMAP lump: missing ';'\n");
+			continue;
 		}
-	}
 
-	sectors = new sector_t[numsectors];
-	Z_Clear(sectors, sector_t, numsectors);
+		if (! lex.Match("{"))
+			I_Error("Malformed TEXTMAP lump: missing '{'\n");
 
-	psr->next = 0; // restart from start of lump
-	while (1)
-	{
-		if (!GetNextBlock(psr, (uint8_t*)ident))
-			break;
-
-		if (epi::case_cmp(ident, "sector") == 0)
+		if (section == "sector")
 		{
 			float cz = 0.0f, fz = 0.0f;
 			int light = 160, type = 0, tag = 0;
@@ -1702,59 +1476,48 @@ static void LoadUDMFSectors(parser_t *psr)
 			char ceil_tex[10];
 			strcpy(floor_tex, "-");
 			strcpy(ceil_tex, "-");
-
-			// process sector block
-			while (1)
+			for (;;)
 			{
-				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
-				{
-					uint8_t *lp = psr->line;
-					while (*lp != 0 && *lp != 0x7D)
-						lp++; // find end of line or '}'
-					if (*lp == 0x7D)
-					{
-						break; // end of block
-					}
-					if (psr->next >= psr->length)
-					{
-						break; // end of lump
-					}
+				if (lex.Match("}"))
+					break;
 
-					continue; // skip line
-				}
-				// process assignment
-				if (epi::case_cmp(ident, "heightfloor") == 0)
-				{
-					fz = str2float(val, 0.0f);
-				}
-				else if (epi::case_cmp(ident, "heightceiling") == 0)
-				{
-					cz = str2float(val, 0.0f);
-				}
-				else if (epi::case_cmp(ident, "texturefloor") == 0)
-				{
-					Z_StrNCpy(floor_tex, val, 8);
-				}
-				else if (epi::case_cmp(ident, "textureceiling") == 0)
-				{
-					Z_StrNCpy(ceil_tex, val, 8);
-				}
-				else if (epi::case_cmp(ident, "lightlevel") == 0)
-				{
-					light = str2int(val, 160);
-				}
-				else if (epi::case_cmp(ident, "special") == 0)
-				{
-					type = str2int(val, 0);
-				}
-				else if (epi::case_cmp(ident, "id") == 0)
-				{
-					tag = str2int(val, 0);
-				}
+				std::string key;
+				std::string value;
+				epi::token_kind_e block_tok = lex.Next(key);
+
+				if (block_tok == epi::TOK_EOF)
+					I_Error("Malformed TEXTMAP lump: unclosed block\n");
+
+				if (block_tok != epi::TOK_Ident)
+					I_Error("Malformed TEXTMAP lump: missing key\n");
+
+				if (! lex.Match("="))
+					I_Error("Malformed TEXTMAP lump: missing '='\n");
+
+				block_tok = lex.Next(value);
+
+				if (block_tok == epi::TOK_EOF || block_tok == epi::TOK_ERROR || value == "}")
+					I_Error("Malformed TEXTMAP lump: missing value\n");
+
+				if (! lex.Match(";"))
+					I_Error("Malformed TEXTMAP lump: missing ';'\n");
+
+				if (key == "heightfloor")
+					fz = epi::LEX_Double(value);
+				else if (key == "heightceiling")
+					cz = epi::LEX_Double(value);
+				else if (key == "texturefloor")
+					Z_StrNCpy(floor_tex, value.c_str(), 8);
+				else if (key == "textureceiling")
+					Z_StrNCpy(ceil_tex, value.c_str(), 8);
+				else if (key == "lightlevel")
+					light = epi::LEX_Int(value);
+				else if (key == "special")
+					type = epi::LEX_Int(value);
+				else if (key == "id")
+					tag = epi::LEX_Int(value);
 			}
-
-			sector_t *ss = sectors + i;
-
+			sector_t *ss = sectors + cur_sector;
 			ss->f_h = fz;
 			ss->c_h = cz;
 
@@ -1776,12 +1539,12 @@ static void LoadUDMFSectors(parser_t *psr)
 
 			if (! ss->floor.image)
 			{
-				I_Warning("Bad Level: sector #%d has missing floor texture.\n", i);
+				I_Warning("Bad Level: sector #%d has missing floor texture.\n", cur_sector);
 				ss->floor.image = W_ImageLookup("FLAT1", INS_Flat);
 			}
 			if (! ss->ceil.image)
 			{
-				I_Warning("Bad Level: sector #%d has missing ceiling texture.\n", i);
+				I_Warning("Bad Level: sector #%d has missing ceiling texture.\n", cur_sector);
 				ss->ceil.image = ss->floor.image;
 			}
 
@@ -1808,36 +1571,61 @@ static void LoadUDMFSectors(parser_t *psr)
 			ss->sound_player = -1;
 
 			// -AJA- 1999/07/29: Keep sectors with same tag in a list.
-			GroupSectorTags(ss, sectors, i);
-
-			i++;
+			GroupSectorTags(ss, sectors, cur_sector);
+			cur_sector++;
+		}
+		else // consume other blocks
+		{
+			for (;;)
+			{
+				tok = lex.Next(section);
+				if (lex.Match("}") || tok == epi::TOK_EOF)
+					break;
+			}
 		}
 	}
+	SYS_ASSERT(cur_sector == numsectors);
 
 	I_Debugf("LoadUDMFSectors: finished parsing TEXTMAP\n");
 }
 
-static void LoadUDMFSideDefs(parser_t *psr)
+static void LoadUDMFSideDefs()
 {
-	char ident[128];
-	char val[128];
+	epi::lexer_c lex(udmf_lump);
 
-	int nummapsides = 0;
+	I_Debugf("LoadUDMFSectors: parsing TEXTMAP\n");
 
 	sides = new side_t[numsides];
 	Z_Clear(sides, side_t, numsides);
 
-	I_Debugf("LoadUDMFSideDefs: parsing TEXTMAP\n");
-	nummapsides = 0;
+	int nummapsides = 0;
 
-	psr->next = 0; // restart from start of lump
-	while (1)
+	for (;;)
 	{
-		if (!GetNextBlock(psr, (uint8_t*)ident))
+		std::string section;
+		epi::token_kind_e tok = lex.Next(section);
+
+		if (tok == epi::TOK_EOF)
 			break;
 
-		if (epi::case_cmp(ident, "sidedef") == 0)
+		if (tok != epi::TOK_Ident)
+			I_Error("Malformed TEXTMAP lump.\n");
+
+		// check namespace
+		if (lex.Match("="))
 		{
+			lex.Next(section);
+			if (! lex.Match(";"))
+				I_Error("Malformed TEXTMAP lump: missing ';'\n");
+			continue;
+		}
+
+		if (! lex.Match("{"))
+			I_Error("Malformed TEXTMAP lump: missing '{'\n");
+
+		if (section == "sidedef")
+		{
+			nummapsides++;
 			float x = 0, y = 0;
 			int sec_num = 0;
 			char top_tex[10];
@@ -1846,55 +1634,45 @@ static void LoadUDMFSideDefs(parser_t *psr)
 			strcpy(top_tex, "-");
 			strcpy(bottom_tex, "-");
 			strcpy(middle_tex, "-");
-
-			// process sidedef block
-			while (1)
+			for (;;)
 			{
-				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
-				{
-					uint8_t *lp = psr->line;
-					while (*lp != 0 && *lp != 0x7D)
-						lp++; // find end of line or '}'
-					if (*lp == 0x7D)
-					{
-						nummapsides++;
-						break; // end of block
-					}
-					if (psr->next >= psr->length)
-					{
-						nummapsides++;
-						break; // end of lump
-					}
+				if (lex.Match("}"))
+					break;
 
-					continue; // skip line
-				}
-				// process assignment
-				if (epi::case_cmp(ident, "offsetx") == 0)
-				{
-					x = str2float(val, 0);
-				}
-				else if (epi::case_cmp(ident, "offsety") == 0)
-				{
-					y = str2float(val, 0);
-				}
-				else if (epi::case_cmp(ident, "texturetop") == 0)
-				{
-					Z_StrNCpy(top_tex, val, 8);
-				}
-				else if (epi::case_cmp(ident, "texturebottom") == 0)
-				{
-					Z_StrNCpy(bottom_tex, val, 8);
-				}
-				else if (epi::case_cmp(ident, "texturemiddle") == 0)
-				{
-					Z_StrNCpy(middle_tex, val, 8);
-				}
-				else if (epi::case_cmp(ident, "sector") == 0)
-				{
-					sec_num = str2int(val, 0);
-				}
+				std::string key;
+				std::string value;
+				epi::token_kind_e block_tok = lex.Next(key);
+
+				if (block_tok == epi::TOK_EOF)
+					I_Error("Malformed TEXTMAP lump: unclosed block\n");
+
+				if (block_tok != epi::TOK_Ident)
+					I_Error("Malformed TEXTMAP lump: missing key\n");
+
+				if (! lex.Match("="))
+					I_Error("Malformed TEXTMAP lump: missing '='\n");
+
+				block_tok = lex.Next(value);
+
+				if (block_tok == epi::TOK_EOF || block_tok == epi::TOK_ERROR || value == "}")
+					I_Error("Malformed TEXTMAP lump: missing value\n");
+
+				if (! lex.Match(";"))
+					I_Error("Malformed TEXTMAP lump: missing ';'\n");
+
+				if (key == "offsetx")
+					x = epi::LEX_Double(value);
+				else if (key == "offsety")
+					y = epi::LEX_Double(value);
+				else if (key == "texturetop")
+					Z_StrNCpy(top_tex, value.c_str(), 8);
+				else if (key == "texturebottom")
+					Z_StrNCpy(bottom_tex, value.c_str(), 8);
+				else if (key == "texturemiddle")
+					Z_StrNCpy(middle_tex, value.c_str(), 8);
+				else if (key == "sector")
+					sec_num = epi::LEX_Int(value);
 			}
-
 			SYS_ASSERT(nummapsides <= numsides);  // sanity check
 
 			side_t *sd = sides + nummapsides - 1;
@@ -1927,6 +1705,15 @@ static void LoadUDMFSideDefs(parser_t *psr)
 			sd->top   .boom_colmap = colourmaps.Lookup(top_tex);
 			sd->middle.boom_colmap = colourmaps.Lookup(middle_tex);
 			sd->bottom.boom_colmap = colourmaps.Lookup(bottom_tex);
+		}
+		else // consume other blocks
+		{
+			for (;;)
+			{
+				tok = lex.Next(section);
+				if (lex.Match("}") || tok == epi::TOK_EOF)
+					break;
+			}
 		}
 	}
 
@@ -1990,161 +1777,102 @@ static void LoadUDMFSideDefs(parser_t *psr)
 	I_Debugf("LoadUDMFSideDefs: finished parsing TEXTMAP\n");
 }
 
-static void LoadUDMFLineDefs(parser_t *psr)
+static void LoadUDMFLineDefs()
 {
-	char ident[128];
-	char val[128];
-	int i = 0;
+	epi::lexer_c lex(udmf_lump);
 
 	I_Debugf("LoadUDMFLineDefs: parsing TEXTMAP\n");
-	numlines = 0;
 
-	psr->next = 0; // restart from start of lump
-	while (1)
+	int cur_line = 0;
+
+	for (;;)
 	{
-		if (!GetNextBlock(psr, (uint8_t*)ident))
+		std::string section;
+		epi::token_kind_e tok = lex.Next(section);
+
+		if (tok == epi::TOK_EOF)
 			break;
 
-		if (epi::case_cmp(ident, "linedef") == 0)
+		if (tok != epi::TOK_Ident)
+			I_Error("Malformed TEXTMAP lump.\n");
+
+		// check namespace
+		if (lex.Match("="))
 		{
-			// count linedef blocks
-			while (1)
-			{
-				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
-				{
-					uint8_t *lp = psr->line;
-					while (*lp != 0 && *lp != 0x7D)
-						lp++; // find end of line or '}'
-					if (*lp == 0x7D)
-					{
-						numlines++;
-						break; // end of block
-					}
-					if (psr->next >= psr->length)
-					{
-						numlines++;
-						break; // end of lump
-					}
-
-					continue; // skip line
-				}
-			}
+			lex.Next(section);
+			if (! lex.Match(";"))
+				I_Error("Malformed TEXTMAP lump: missing ';'\n");
+			continue;
 		}
-	}
 
-	lines = new line_t[numlines];
-	Z_Clear(lines, line_t, numlines);
-	temp_line_sides = new int[numlines * 2];
+		if (! lex.Match("{"))
+			I_Error("Malformed TEXTMAP lump: missing '{'\n");
 
-	psr->next = 0; // restart from start of lump
-	while (1)
-	{
-		if (!GetNextBlock(psr, (uint8_t*)ident))
-			break;
-
-		if (epi::case_cmp(ident, "linedef") == 0)
+		if (section == "linedef")
 		{
 			int flags = 0, v1 = 0, v2 = 0;
 			int side0 = -1, side1 = -1, tag = -1;
 			int special = 0;
-
-			// process lindef block
-			while (1)
+			for (;;)
 			{
-				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
-				{
-					uint8_t *lp = psr->line;
-					while (*lp != 0 && *lp != 0x7D)
-						lp++; // find end of line or '}'
-					if (*lp == 0x7D)
-					{
-						break; // end of block
-					}
-					if (psr->next >= psr->length)
-					{
-						break; // end of lump
-					}
+				if (lex.Match("}"))
+					break;
 
-					continue; // skip line
-				}
-				// process assignment
-				if (epi::case_cmp(ident, "id") == 0)
-				{
-					tag = str2int(val, -1);
-				}
-				else if (epi::case_cmp(ident, "v1") == 0)
-				{
-					v1 = str2int(val, 0);
-				}
-				else if (epi::case_cmp(ident, "v2") == 0)
-				{
-					v2 = str2int(val, 0);
-				}
-				else if (epi::case_cmp(ident, "special") == 0)
-				{
-					special = str2int(val, 0);
-				}
-				else if (epi::case_cmp(ident, "sidefront") == 0)
-				{
-					side0 = str2int(val, -1);
-				}
-				else if (epi::case_cmp(ident, "sideback") == 0)
-				{
-					side1 = str2int(val, -1);
-				}
-				else if (epi::case_cmp(ident, "blocking") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0001;
-				}
-				else if (epi::case_cmp(ident, "blockmonsters") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0002;
-				}
-				else if (epi::case_cmp(ident, "twosided") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0004;
-				}
-				else if (epi::case_cmp(ident, "dontpegtop") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0008;
-				}
-				else if (epi::case_cmp(ident, "dontpegbottom") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0010;
-				}
-				else if (epi::case_cmp(ident, "secret") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0020;
-				}
-				else if (epi::case_cmp(ident, "blocksound") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0040;
-				}
-				else if (epi::case_cmp(ident, "dontdraw") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0080;
-				}
-				else if (epi::case_cmp(ident, "mapped") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0100;
-				}
-				else if (epi::case_cmp(ident, "passuse") == 0)
-				{
-					if (str2bool(val))
-						flags |= 0x0200; // BOOM flag
-				}
+				std::string key;
+				std::string value;
+				epi::token_kind_e block_tok = lex.Next(key);
+
+				if (block_tok == epi::TOK_EOF)
+					I_Error("Malformed TEXTMAP lump: unclosed block\n");
+
+				if (block_tok != epi::TOK_Ident)
+					I_Error("Malformed TEXTMAP lump: missing key\n");
+
+				if (! lex.Match("="))
+					I_Error("Malformed TEXTMAP lump: missing '='\n");
+
+				block_tok = lex.Next(value);
+
+				if (block_tok == epi::TOK_EOF || block_tok == epi::TOK_ERROR || value == "}")
+					I_Error("Malformed TEXTMAP lump: missing value\n");
+
+				if (! lex.Match(";"))
+					I_Error("Malformed TEXTMAP lump: missing ';'\n");
+
+				if (key == "id")
+					tag = epi::LEX_Int(value);
+				else if (key == "v1")
+					v1 = epi::LEX_Int(value);
+				else if (key == "v2")
+					v2 = epi::LEX_Int(value);
+				else if (key == "special")
+					special = epi::LEX_Int(value);
+				else if (key == "sidefront")
+					side0 = epi::LEX_Int(value);
+				else if (key == "sideback")
+					side1 = epi::LEX_Int(value);
+				else if (key == "blocking")
+					flags |= (epi::LEX_Boolean(value) ? MLF_Blocking : 0);
+				else if (key == "blockmonsters")
+					flags |= (epi::LEX_Boolean(value) ? MLF_BlockMonsters : 0);
+				else if (key == "twosided")
+					flags |= (epi::LEX_Boolean(value) ? MLF_TwoSided : 0);
+				else if (key == "dontpegtop")
+					flags |= (epi::LEX_Boolean(value) ? MLF_UpperUnpegged : 0);
+				else if (key == "dontpegbottom")
+					flags |= (epi::LEX_Boolean(value) ? MLF_LowerUnpegged : 0);
+				else if (key == "secret")
+					flags |= (epi::LEX_Boolean(value) ? MLF_Secret : 0);
+				else if (key == "blocksound")
+					flags |= (epi::LEX_Boolean(value) ? MLF_SoundBlock : 0);
+				else if (key == "dontdraw")
+					flags |= (epi::LEX_Boolean(value) ? MLF_DontDraw : 0);
+				else if (key == "mapped")
+					flags |= (epi::LEX_Boolean(value) ? MLF_Mapped : 0);
+				else if (key == "passuse")
+					flags |= (epi::LEX_Boolean(value) ? MLF_PassThru : 0);
 			}
-
-			line_t *ld = lines + i;
+			line_t *ld = lines + cur_line;
 
 			ld->flags = flags;
 			ld->tag = MAX(0, tag);
@@ -2184,32 +1912,52 @@ static void LoadUDMFLineDefs(parser_t *psr)
 					numextrafloors++;
 				}
 			}
-
-			i++;
+			cur_line++;
+		}
+		else // consume other blocks
+		{
+			for (;;)
+			{
+				tok = lex.Next(section);
+				if (lex.Match("}") || tok == epi::TOK_EOF)
+					break;
+			}
 		}
 	}
+	SYS_ASSERT(cur_line == numlines);
 
 	I_Debugf("LoadUDMFLineDefs: finished parsing TEXTMAP\n");
 }
 
-static void LoadUDMFThings(parser_t *psr)
+static void LoadUDMFThings()
 {
-	char ident[128];
-	char val[128];
-
-	int numthings = 0;
+	epi::lexer_c lex(udmf_lump);
 
 	I_Debugf("LoadUDMFThings: parsing TEXTMAP\n");
-
-	unknown_thing_map.clear();
-
-	psr->next = 0; // restart from start of lump
-	while (1)
+	for (;;)
 	{
-		if (!GetNextBlock(psr, (uint8_t*)ident))
+		std::string section;
+		epi::token_kind_e tok = lex.Next(section);
+
+		if (tok == epi::TOK_EOF)
 			break;
 
-		if (epi::case_cmp(ident, "thing") == 0)
+		if (tok != epi::TOK_Ident)
+			I_Error("Malformed TEXTMAP lump.\n");
+
+		// check namespace
+		if (lex.Match("="))
+		{
+			lex.Next(section);
+			if (! lex.Match(";"))
+				I_Error("Malformed TEXTMAP lump: missing ';'\n");
+			continue;
+		}
+
+		if (! lex.Match("{"))
+			I_Error("Malformed TEXTMAP lump: missing '{'\n");
+
+		if (section == "thing")
 		{
 			float x = 0.0f, y = 0.0f, z = 0.0f;
 			angle_t angle = ANG0;
@@ -2217,100 +1965,65 @@ static void LoadUDMFThings(parser_t *psr)
 			int typenum = -1;
 			int tag = 0;
 			const mobjtype_c *objtype;
-
-			// process thing block
-			while (1)
+			for (;;)
 			{
-				if (!GetNextAssign(psr, (uint8_t*)ident, (uint8_t*)val))
-				{
-					uint8_t *lp = psr->line;
-					while (*lp != 0 && *lp != 0x7D)
-						lp++; // find end of line or '}'
-					if (*lp == 0x7D)
-						break; // end of block
-					if (psr->next >= psr->length)
-						break; // end of lump
+				if (lex.Match("}"))
+					break;
 
-					continue; // skip line
-				}
-				// process assignment
-				if (epi::case_cmp(ident, "id") == 0)
-				{
-					tag = str2int(val, 0);
-				}
-				else if (epi::case_cmp(ident, "x") == 0)
-				{
-					x = str2float(val, 0.0f);
-				}
-				else if (epi::case_cmp(ident, "y") == 0)
-				{
-					y = str2float(val, 0.0f);
-				}
-				else if (epi::case_cmp(ident, "height") == 0)
-				{
-					z = str2float(val, 0.0f);
-				}
-				else if (epi::case_cmp(ident, "angle") == 0)
-				{
-					int ta = str2int(val, 0);
-					angle = FLOAT_2_ANG((float)ta);
-				}
-				else if (epi::case_cmp(ident, "type") == 0)
-				{
-					typenum = str2int(val, 0);
-				}
-				else if (epi::case_cmp(ident, "skill1") == 0)
-				{
-					options |= MTF_EASY;
-				}
-				else if (epi::case_cmp(ident, "skill2") == 0)
-				{
-					if (str2bool(val))
-						options |= MTF_EASY;
-				}
-				else if (epi::case_cmp(ident, "skill3") == 0)
-				{
-					if (str2bool(val))
-						options |= MTF_NORMAL;
-				}
-				else if (epi::case_cmp(ident, "skill4") == 0)
-				{
-					if (str2bool(val))
-						options |= MTF_HARD;
-				}
-				else if (epi::case_cmp(ident, "skill5") == 0)
-				{
-					if (str2bool(val))
-						options |= MTF_HARD;
-				}
-				else if (epi::case_cmp(ident, "ambush") == 0)
-				{
-					if (str2bool(val))
-						options |= MTF_AMBUSH;
-				}
-				else if (epi::case_cmp(ident, "single") == 0)
-				{
-					if (str2bool(val))
-						options &= ~MTF_NOT_SINGLE;
-				}
-				else if (epi::case_cmp(ident, "dm") == 0)
-				{
-					if (str2bool(val))
-						options &= ~MTF_NOT_DM;
-				}
-				else if (epi::case_cmp(ident, "coop") == 0)
-				{
-					if (str2bool(val))
-						options &= ~MTF_NOT_COOP;
-				}
-				// MBF flag
-				else if (epi::case_cmp(ident, "friend") == 0)
-				{
-					if (str2bool(val))
-						options |= MTF_FRIEND;
-				}
+				std::string key;
+				std::string value;
+				epi::token_kind_e block_tok = lex.Next(key);
+
+				if (block_tok == epi::TOK_EOF)
+					I_Error("Malformed TEXTMAP lump: unclosed block\n");
+
+				if (block_tok != epi::TOK_Ident)
+					I_Error("Malformed TEXTMAP lump: missing key\n");
+
+				if (! lex.Match("="))
+					I_Error("Malformed TEXTMAP lump: missing '='\n");
+
+				block_tok = lex.Next(value);
+
+				if (block_tok == epi::TOK_EOF || block_tok == epi::TOK_ERROR || value == "}")
+					I_Error("Malformed TEXTMAP lump: missing value\n");
+
+				if (! lex.Match(";"))
+					I_Error("Malformed TEXTMAP lump: missing ';'\n");
+
+				if (key == "id")
+					tag = epi::LEX_Int(value);
+				else if (key == "x")
+					x = epi::LEX_Double(value);
+				else if (key == "y")
+					y = epi::LEX_Double(value);
+				else if (key == "height")
+					z = epi::LEX_Double(value);
+				else if (key == "angle")
+					angle = FLOAT_2_ANG((float)epi::LEX_Int(value));
+				else if (key == "type")
+					typenum = epi::LEX_Int(value);
+				else if (key == "skill1")
+					options |= (epi::LEX_Boolean(value) ? MTF_EASY : 0);
+				else if (key == "skill2")
+					options |= (epi::LEX_Boolean(value) ? MTF_EASY : 0);
+				else if (key == "skill3")
+					options |= (epi::LEX_Boolean(value) ? MTF_NORMAL : 0);
+				else if (key == "skill4")
+					options |= (epi::LEX_Boolean(value) ? MTF_HARD : 0);
+				else if (key == "skill5")
+					options |= (epi::LEX_Boolean(value) ? MTF_HARD : 0);
+				else if (key == "ambush")
+					options |= (epi::LEX_Boolean(value) ? MTF_AMBUSH : 0);
+				else if (key == "single")
+					options &= (epi::LEX_Boolean(value) ? ~MTF_NOT_SINGLE : options);
+				else if (key == "dm")
+					options &= (epi::LEX_Boolean(value) ? ~MTF_NOT_DM : options);
+				else if (key == "coop")
+					options &= (epi::LEX_Boolean(value) ? ~MTF_NOT_COOP : options);
+				else if (key == "friend")
+					options |= (epi::LEX_Boolean(value) ? MTF_FRIEND : 0);
 			}
-
 			objtype = mobjtypes.Lookup(typenum);
 
 			// MOBJTYPE not found, don't crash out: JDS Compliance.
@@ -2329,15 +2042,87 @@ static void LoadUDMFThings(parser_t *psr)
 				z += sec->f_h;
 
 			SpawnMapThing(objtype, x, y, z, sec, angle, options, tag);
+			mapthing_NUM++;
+		}
+		else // consume other blocks
+		{
+			for (;;)
+			{
+				tok = lex.Next(section);
+				if (lex.Match("}") || tok == epi::TOK_EOF)
+					break;
+			}
+		}
+	}
+	I_Debugf("LoadUDMFThings: finished parsing TEXTMAP\n");
+}
 
-			numthings++;
+static void LoadUDMFCounts()
+{
+	epi::lexer_c lex(udmf_lump);
+
+	for (;;)
+	{
+		std::string section;
+		epi::token_kind_e tok = lex.Next(section);
+
+		if (tok == epi::TOK_EOF)
+			break;
+
+		if (tok != epi::TOK_Ident)
+			I_Error("Malformed TEXTMAP lump.\n");
+
+		// check namespace
+		if (lex.Match("="))
+		{
+			lex.Next(section);
+
+			if (udmf_strict.d)
+			{
+				if (section != "doom" && section != "heretic" && section != "edge" && section != "zdoomtranslated")
+				{
+					I_Warning("UDMF: %s uses unsupported namespace \"%s\"!\nSupported namespaces are \"doom\", \"heretic\", \"edge\", or \"zdoomtranslated\"!\n",
+						currmap->lump.c_str(), section.c_str());
+				}
+			}
+
+			if (! lex.Match(";"))
+				I_Error("Malformed TEXTMAP lump: missing ';'\n");
+			continue;
+		}
+
+		if (! lex.Match("{"))
+			I_Error("Malformed TEXTMAP lump: missing '{'\n");
+
+		// side counts are computed during linedef loading
+		if (section == "thing")
+			mapthing_NUM++;
+		else if (section == "vertex")
+			numvertexes++;
+		else if (section == "sector")
+			numsectors++;
+		else if (section == "linedef")
+			numlines++;
+
+		// ignore block contents
+		for (;;)
+		{
+			tok = lex.Next(section);
+			if (lex.Match("}") || tok == epi::TOK_EOF)
+				break;
 		}
 	}
 
-	mapthing_NUM = numthings;
-
-	I_Debugf("LoadUDMFThings: finished parsing TEXTMAP\n");
+	// initialize arrays
+	vertexes = new vec2_t[numvertexes];
+	zvertexes = new vec2_t[numvertexes];
+	sectors = new sector_t[numsectors];
+	Z_Clear(sectors, sector_t, numsectors);
+	lines = new line_t[numlines];
+	Z_Clear(lines, line_t, numlines);
+	temp_line_sides = new int[numlines * 2];
 }
+
 
 static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd,
 							   bool two_sided)
@@ -3346,13 +3131,14 @@ void P_SetupLevel(void)
 	{
 		udmf_level = true;
 		udmf_lumpnum = lumpnum + 1;
-		udmf_lump = (char *)W_CacheLumpNum(udmf_lumpnum);
-		if (!udmf_lump)
+		int raw_length = 0;
+		byte *raw_udmf = W_LoadLump(udmf_lumpnum, &raw_length);
+		udmf_lump.clear();
+		udmf_lump.resize(raw_length);
+		memcpy(udmf_lump.data(), raw_udmf, raw_length);
+		if (udmf_lump.empty())
 			I_Error("Internal error: can't load UDMF lump.\n");
-		// initialize the parser
-		udmf_psr.buffer = (uint8_t *)udmf_lump;
-		udmf_psr.length = W_LumpLength(udmf_lumpnum);
-		udmf_psr.next = 0; // start at first line
+		W_DoneWithLump(raw_udmf);
 	}
 	else
 	{
@@ -3399,26 +3185,11 @@ void P_SetupLevel(void)
 	}
 	else
 	{
-		char ident[128];
-		char value[128];
-
-		if (!GetNextAssign(&udmf_psr, (uint8_t*)ident, (uint8_t*)value) || epi::case_cmp(ident, "namespace"))
-			I_Error("UDMF: TEXTMAP must start with namespace assignment.\n");
-
-		if (udmf_strict.d)
-		{
-			if(!(epi::case_cmp(value, "doom") == 0 || epi::case_cmp(value, "heretic") == 0) || epi::case_cmp(value, "edge") == 0
-				|| epi::case_cmp(value, "zdoomtranslated") == 0)
-			{
-				I_Warning("UDMF: %s uses unsupported namespace \"%s\"!\nSupported namespaces are \"doom\", \"heretic\", \"edge\", or \"zdoomtranslated\"!\n",
-					currmap->lump.c_str(), value);
-			}
-		}
-
-		LoadUDMFVertexes(&udmf_psr);
-		LoadUDMFSectors(&udmf_psr);
-		LoadUDMFLineDefs(&udmf_psr);
-		LoadUDMFSideDefs(&udmf_psr);
+		LoadUDMFCounts();
+		LoadUDMFVertexes();
+		LoadUDMFSectors();
+		LoadUDMFLineDefs();
+		LoadUDMFSideDefs();
 	}
 
 	SetupExtrafloors();
@@ -3452,6 +3223,8 @@ void P_SetupLevel(void)
 	// -AJA- 1999/10/21: Clear out player starts (ready to load).
 	G_ClearPlayerStarts();
 
+	unknown_thing_map.clear();
+
 	if (!udmf_level)
 	{
 		if (hexen_level)
@@ -3460,11 +3233,7 @@ void P_SetupLevel(void)
 			LoadThings(lumpnum + ML_THINGS);
 	}
 	else
-	{
-		LoadUDMFThings(&udmf_psr);
-
-		W_DoneWithLump(udmf_lump);
-	}
+		LoadUDMFThings();
 
 	// OK, CRC values have now been computed
 #ifdef DEVELOPERS

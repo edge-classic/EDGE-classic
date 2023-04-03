@@ -64,13 +64,13 @@ bool S_StartupOPL(void)
 
 	// Check if CVAR value is still good
 	bool cvar_good = false;
-	if (s_genmidi.s.empty())
+	if (s_genmidi.s == "GENMIDI")
 		cvar_good = true;
 	else
 	{
 		for (size_t i=0; i < available_genmidis.size(); i++)
 		{
-			if(epi::case_cmp(s_genmidi.s, available_genmidis.at(i).u8string()) == 0)
+			if(epi::case_cmp(s_genmidi.s, available_genmidis.at(i).generic_u8string()) == 0)
 				cvar_good = true;
 		}
 	}
@@ -78,14 +78,14 @@ bool S_StartupOPL(void)
 	if (!cvar_good)
 	{
 		I_Warning("Cannot find previously used GENMIDI %s, falling back to default!\n", s_genmidi.c_str());
-		s_genmidi.s = "";
+		s_genmidi.s = "GENMIDI";
 	}
 
 	int length;
 	byte *data = nullptr;
 	epi::file_c *F = nullptr;
 
-	if (s_genmidi.s.empty())
+	if (s_genmidi.s == "GENMIDI")
 	{
 		int p = W_CheckNumForName("GENMIDI");
 		if (p < 0)
@@ -118,7 +118,7 @@ bool S_StartupOPL(void)
 	if (!edge_opl->loadPatches((const byte *)data, (size_t)length))
 	{
 		I_Warning("S_StartupOPL: Error loading instruments!\n");
-		if (s_genmidi.s.empty())
+		if (s_genmidi.s == "GENMIDI")
 			W_DoneWithLump(data);
 		else
 		{
@@ -128,7 +128,7 @@ bool S_StartupOPL(void)
 		return false;
 	}
 
-	if (s_genmidi.s.empty())
+	if (s_genmidi.s == "GENMIDI")
 		W_DoneWithLump(data);
 	else
 	{

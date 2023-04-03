@@ -2136,7 +2136,7 @@ static void M_ChangeSoundfont(int keypressed)
 	int sf_pos = -1;
 	for(int i=0; i < (int)available_soundfonts.size(); i++)
 	{
-		if (epi::case_cmp(s_soundfont.s, available_soundfonts.at(i).u8string()) == 0)
+		if (epi::case_cmp(s_soundfont.s, available_soundfonts.at(i).generic_u8string()) == 0)
 		{
 			sf_pos = i;
 			break;
@@ -2146,7 +2146,7 @@ static void M_ChangeSoundfont(int keypressed)
 	if (sf_pos < 0)
 	{
 		I_Warning("M_ChangeSoundfont: Could not read list of available soundfonts. Falling back to default!\n");
-		s_soundfont = epi::PATH_Join(game_dir, UTFSTR("soundfont/default.sf2")).u8string();
+		s_soundfont = epi::PATH_Join(game_dir, UTFSTR("soundfont/default.sf2")).generic_u8string();
 		return;
 	}
 
@@ -2166,7 +2166,7 @@ static void M_ChangeSoundfont(int keypressed)
 	}
 
 	// update cvar
-	s_soundfont = available_soundfonts.at(sf_pos).u8string();
+	s_soundfont = available_soundfonts.at(sf_pos).generic_u8string();
 	S_RestartFluid();
 }
 
@@ -2179,7 +2179,7 @@ static void M_ChangeGENMIDI(int keypressed)
 	int op2_pos = -1;
 	for(int i=0; i < (int)available_genmidis.size(); i++)
 	{
-		if (epi::case_cmp(s_genmidi.s, available_genmidis.at(i).u8string()) == 0)
+		if (epi::case_cmp(s_genmidi.s, available_genmidis.at(i).generic_u8string()) == 0)
 		{
 			op2_pos = i;
 			break;
@@ -2209,7 +2209,7 @@ static void M_ChangeGENMIDI(int keypressed)
 	}
 
 	// update cvar
-	s_genmidi = available_genmidis.at(op2_pos).u8string();
+	s_genmidi = available_genmidis.at(op2_pos).generic_u8string();
 	S_RestartOPL();
 }
 

@@ -1179,10 +1179,7 @@ static void RAD_ParseEnableTagged(param_set_t& pars)
 
 	// Is the value an integer?
 	if (length != count)
-	{
 		t->tag = epi::STR_Hash32(pars[1]);
-		I_Printf("TAG: %d\n", t->tag);
-	}
 	else
 		t->tag = atoi(pars[1]);
 

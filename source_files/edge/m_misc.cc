@@ -420,41 +420,18 @@ void M_LoadDefaults(void)
 
 	I_Printf("M_LoadDefaults from %s\n", cfgfile.u8string().c_str());
 
-	// read the file in, overriding any set defaults
-	FILE *f = EPIFOPEN(cfgfile, "r");
+	epi::file_c* file = FS_Open(cfgfile, epi::file_c::ACCESS_READ);
 
-	if (! f)
+	if (!file)
 	{
 		I_Warning("Couldn't open config file %s for reading.\n", cfgfile.u8string().c_str());
 		I_Warning("Resetting config to RECOMMENDED values...\n");
 		return;
 	}
-
-	int remain = std::filesystem::file_size(cfgfile);
-
 	// load the file into this string
-	std::string data;
+	std::string data = file->ReadText();
 
-	while (remain > 0)
-	{
-		char buffer[4096];
-
-		int want = std::min(remain, (int)sizeof(buffer));
-
-		int got = fread(buffer, 1, want, f);
-
-		if (got != want)
-		{
-			if (!feof(f))
-				I_Error("Error reading config file %s!\n", cfgfile.u8string().c_str());
-		}
-
-		data.append(buffer, want);
-
-		remain -= want;
-	}
-
-	fclose(f);
+	delete file;
 
 	ParseConfig(data);
 
@@ -463,42 +440,18 @@ void M_LoadDefaults(void)
 
 void M_LoadBranding(void)
 {
-	// read the file in, overriding any set defaults
-	FILE *f = EPIFOPEN(brandingfile, "r");
+	epi::file_c* file = FS_Open(brandingfile, epi::file_c::ACCESS_READ);
 
 	// Just use hardcoded values if no branding file present
-	if (! f)
+	if (!file)
 		return;
 
-	int remain = std::filesystem::file_size(brandingfile);
-
 	// load the file into this string
-	std::string data;
+	std::string data = file->ReadText();
 
-	while (remain > 0)
-	{
-		char buffer[4096];
-
-		int want = std::min(remain, (int)sizeof(buffer));
-
-		int got = fread(buffer, 1, want, f);
-
-		if (got != want)
-		{
-			if (!feof(f))
-				I_Error("Error reading branding file %s!\n", brandingfile.u8string().c_str());
-		}
-
-		data.append(buffer, want);
-
-		remain -= want;
-	}
-
-	fclose(f);
+	delete file;
 
 	ParseConfig(data);
-
-	return;
 }
 
 void M_InitMiscConVars(void)

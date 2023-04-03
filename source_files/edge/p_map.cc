@@ -1691,6 +1691,29 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
 
 	z = (z < shoot_I.prev_z) ? f_h + 2 : f_h - 2;
 	
+	// Check for vert slope at potential puff point
+	sector_t *last_shoota_sec = R_PointInSubsector(x, y)->sector;
+
+	if (last_shoota_sec && (last_shoota_sec->floor_vertex_slope || last_shoota_sec->ceil_vertex_slope))
+	{
+		bool fs_good = true;
+		bool cs_good = true;
+		if (last_shoota_sec->floor_vertex_slope)
+		{
+			if (z <= M_LinePlaneIntersection({x,y,-40000}, {x,y,40000}, last_shoota_sec->floor_z_verts[0],
+				last_shoota_sec->floor_z_verts[1], last_shoota_sec->floor_z_verts[2], last_shoota_sec->floor_vs_normal).z)
+				fs_good = false;
+		}
+		if (last_shoota_sec->ceil_vertex_slope)
+		{
+			if (z >= M_LinePlaneIntersection({x,y,-40000}, {x,y,40000}, last_shoota_sec->ceil_z_verts[0],
+				last_shoota_sec->ceil_z_verts[1], last_shoota_sec->ceil_z_verts[2], last_shoota_sec->ceil_vs_normal).z)
+				cs_good = false;
+		}
+		if (fs_good && cs_good)
+			return true;
+	}
+
 	//Lobo 2021: respect our NO_TRIGGER_LINES attack flag
 	if (! shoot_I.source || ! shoot_I.source->currentattack ||
 			! (shoot_I.source->currentattack->flags & AF_NoTriggerLines))
@@ -1934,6 +1957,28 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 				if (MIN(f1,f2) <= z && z <= MAX(f1,f2))
 					return false;
 			}
+		}
+
+		sector_t *last_shoota_sec = R_PointInSubsector(x, y)->sector;
+
+		if (last_shoota_sec && (last_shoota_sec->floor_vertex_slope || last_shoota_sec->ceil_vertex_slope))
+		{
+			bool fs_good = true;
+			bool cs_good = true;
+			if (last_shoota_sec->floor_vertex_slope)
+			{
+				if (z <= M_LinePlaneIntersection({x,y,-40000}, {x,y,40000}, last_shoota_sec->floor_z_verts[0],
+					last_shoota_sec->floor_z_verts[1], last_shoota_sec->floor_z_verts[2], last_shoota_sec->floor_vs_normal).z)
+					fs_good = false;
+			}
+			if (last_shoota_sec->ceil_vertex_slope)
+			{
+				if (z >= M_LinePlaneIntersection({x,y,-40000}, {x,y,40000}, last_shoota_sec->ceil_z_verts[0],
+					last_shoota_sec->ceil_z_verts[1], last_shoota_sec->ceil_z_verts[2], last_shoota_sec->ceil_vs_normal).z)
+					cs_good = false;
+			}
+			if (fs_good && cs_good)
+				return true;
 		}
 
 		// position puff off the wall

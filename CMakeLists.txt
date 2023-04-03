@@ -23,11 +23,6 @@ if (WIN32)
   endif()
 endif()
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DEDGE_DEBUG=1")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DEDGE_DEBUG=1")
-endif()
-
 if (EMSCRIPTEN)
   include("cmake/Emscripten.cmake")  
 endif()

@@ -189,7 +189,11 @@ namespace xxh
 #	define XXH_NO_INLINE static __declspec(noinline)
 #	include <intrin.h>
 #elif defined(__GNUC__)  /* Clang / GCC */
-#	define XXH_FORCE_INLINE static inline __attribute__((always_inline))
+	#ifndef EDGE_DEBUG
+		#define XXH_FORCE_INLINE static inline __attribute__((always_inline))
+	#else
+		#define XXH_FORCE_INLINE static 
+	#endif
 #	define XXH_NO_INLINE static __attribute__((noinline))
 #	include <mmintrin.h>
 #else

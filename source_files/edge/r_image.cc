@@ -235,6 +235,7 @@ static inline void InsertAtTail(cached_image_t *rc)
 static inline void Unlink(cached_image_t *rc)
 {
 	// FIXME: Unlink
+	(void) rc;
 #if 0
 	SYS_ASSERT(rc != &imagecachehead);
 

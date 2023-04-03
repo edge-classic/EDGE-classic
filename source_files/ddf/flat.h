@@ -51,8 +51,8 @@ public:
 
 private:
 	// disable copy construct and assignment operator
-	explicit flatdef_c(flatdef_c &rhs) { }
-	flatdef_c& operator=(flatdef_c &rhs) { return *this; }
+	explicit flatdef_c(flatdef_c &rhs) { (void) rhs; }
+	flatdef_c& operator=(flatdef_c &rhs) { (void) rhs; return *this; }
 };
 
 

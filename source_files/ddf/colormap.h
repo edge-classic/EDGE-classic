@@ -79,8 +79,8 @@ public:
 
 private:
 	// disable copy construct and assignment operator
-	explicit colourmap_c(colourmap_c &rhs) { }
-	colourmap_c& operator=(colourmap_c &rhs) { return *this; }
+	explicit colourmap_c(colourmap_c &rhs) { (void) rhs; }
+	colourmap_c& operator=(colourmap_c &rhs) { (void) rhs; return *this; }
 };
 
 

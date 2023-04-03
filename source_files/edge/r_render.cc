@@ -958,6 +958,8 @@ static void DrawWallPart(drawfloor_t *dfloor,
 	// Note: tex_x1 and tex_x2 are in world coordinates.
 	//       top, bottom and tex_top_h as well.
 
+	(void) opaque;
+
 	if (! props)
 		props = surf->override_p ? surf->override_p : dfloor->props;
 
@@ -1804,6 +1806,8 @@ static void DLIT_Flood(mobj_t *mo, void *dataptr)
 static void EmulateFloodPlane(const drawfloor_t *dfloor,
 	const sector_t *flood_ref, int face_dir, float h1, float h2)
 {
+	(void) dfloor;
+	
 	if (num_active_mirrors > 0)
 		return;
 

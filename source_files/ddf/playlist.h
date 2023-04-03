@@ -82,8 +82,8 @@ public:
 
 private:
 	// disable copy construct and assignment operator
-	explicit pl_entry_c(pl_entry_c &rhs) { }
-	pl_entry_c& operator= (pl_entry_c &rhs) { return *this; }
+	explicit pl_entry_c(pl_entry_c &rhs) {(void) rhs; }
+	pl_entry_c& operator= (pl_entry_c &rhs) { (void) rhs; return *this; }
 };
 
 

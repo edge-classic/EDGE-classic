@@ -258,6 +258,8 @@ region_properties_t *R_PointGetProps(subsector_t *sub, float z)
 
 void R_StartFading(int start, int range)
 {
+	(void) range;
+
 	telept_active = true;
 	telept_starttic = start + leveltime;
 }

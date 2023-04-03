@@ -102,42 +102,56 @@ extern savearray_t sv_array_slider_move;
 
 bool SR_GetByte(void *storage, int index, void *extra)
 {
+	(void) extra;
+
 	((unsigned char *)storage)[index] = SV_GetByte();
 	return true;
 }
 
 bool SR_GetShort(void *storage, int index, void *extra)
 {
+	(void) extra;
+
 	((unsigned short *)storage)[index] = SV_GetShort();
 	return true;
 }
 
 bool SR_GetInt(void *storage, int index, void *extra)
 {
+	(void) extra;
+
 	((unsigned int *)storage)[index] = SV_GetInt();
 	return true;
 }
 
 bool SR_GetAngle(void *storage, int index, void *extra)
 {
+	(void) extra;
+
 	((angle_t *)storage)[index] = SV_GetAngle();
 	return true;
 }
 
 bool SR_GetFloat(void *storage, int index, void *extra)
 {
+	(void) extra;
+
 	((float *)storage)[index] = SV_GetFloat();
 	return true;
 }
 
 bool SR_GetBoolean(void *storage, int index, void *extra)
 {
+	(void) extra;
+
 	((bool *)storage)[index] = SV_GetInt() ? true : false;
 	return true;
 }
 
 bool SR_GetVec2(void *storage, int index, void *extra)
 {
+	(void) extra;
+
 	((vec2_t *)storage)[index].x = SV_GetFloat();
 	((vec2_t *)storage)[index].y = SV_GetFloat();
 	return true;
@@ -145,6 +159,8 @@ bool SR_GetVec2(void *storage, int index, void *extra)
 
 bool SR_GetVec3(void *storage, int index, void *extra)
 {
+	(void) extra;
+
 	((vec3_t *)storage)[index].x = SV_GetFloat();
 	((vec3_t *)storage)[index].y = SV_GetFloat();
 	((vec3_t *)storage)[index].z = SV_GetFloat();
@@ -153,6 +169,8 @@ bool SR_GetVec3(void *storage, int index, void *extra)
 
 bool SR_GetFloatFromInt(void *storage, int index, void *extra)
 {
+	(void) extra;
+
 	((float *)storage)[index] = (float)SV_GetInt();
 	return true;
 }
@@ -164,6 +182,8 @@ bool SR_GetFloatFromInt(void *storage, int index, void *extra)
 //
 bool SR_GetAngleFromSlope(void *storage, int index, void *extra)
 {
+	(void) extra;
+	
 	((angle_t *)storage)[index] = M_ATan(SV_GetFloat());
 	return true;
 }

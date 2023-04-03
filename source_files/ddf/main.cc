@@ -1395,6 +1395,8 @@ void DDF_MainGetTime(const char *info, void *storage)
 void DDF_DummyFunction(const char *info, void *storage)
 {
 	/* does nothing */
+	(void) info;
+	(void) storage;	
 }
 
 //

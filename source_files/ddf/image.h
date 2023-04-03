@@ -127,8 +127,8 @@ public:
 
 private:
 	// disable copy construct and assignment operator
-	explicit imagedef_c(imagedef_c &rhs) { }
-	imagedef_c& operator=(imagedef_c &rhs) { return *this; }
+	explicit imagedef_c(imagedef_c &rhs) { (void) rhs; }
+	imagedef_c& operator=(imagedef_c &rhs) { (void) rhs; return *this; }
 };
 
 

@@ -1041,8 +1041,8 @@ public:
 
 private:
 	// disable copy construct and assignment operator
-	explicit mobjtype_c(mobjtype_c &rhs) { }
-	mobjtype_c& operator= (mobjtype_c &rhs) { return *this; }
+	explicit mobjtype_c(mobjtype_c &rhs) { (void) rhs; }
+	mobjtype_c& operator= (mobjtype_c &rhs) { (void) rhs; return *this; }
 };
 
 

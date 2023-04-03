@@ -140,7 +140,7 @@ set (EDGE_LINK_LIBRARIES
   ymfmidi
 )
 
-if (MSVC OR MINGW OR MSYS)
+if (MSVC OR MINGW OR MSYS OR WIN32_CLANG)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} w32_res.rc)
   set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} wsock32)
 endif()
@@ -150,7 +150,7 @@ add_executable(
   ${EDGE_SOURCE_FILES}
 )
 
-if(MSVC OR MSYS OR MINGW)
+if(MSVC OR MSYS OR MINGW OR WIN32_CLANG)
   target_compile_definitions(edge-classic PRIVATE WIN32)
 else()
   target_compile_definitions(edge-classic PRIVATE UNIX)
@@ -183,7 +183,7 @@ target_include_directories(edge-classic PRIVATE ../minivorbis)
 target_include_directories(edge-classic PRIVATE ../miniz)
 target_include_directories(edge-classic PRIVATE ../stb)
 target_include_directories(edge-classic PRIVATE ../ymfmidi)
-if(MSVC)
+if(MSVC OR WIN32_CLANG)
   target_include_directories(edge-classic PRIVATE ../sdl2/include)
 endif()
 

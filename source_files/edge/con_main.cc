@@ -379,6 +379,9 @@ int CMD_ShowKeys(char **argv, int argc)
 
 int CMD_ShowJoysticks(char **argv, int argc)
 {
+	(void) argv;
+	(void) argc;
+	
 	I_ShowJoysticks();
 	return 0;
 }

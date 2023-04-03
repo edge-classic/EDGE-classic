@@ -64,8 +64,8 @@ public:
 
 private:
 	// disable copy construct and assignment operator
-	explicit animdef_c(animdef_c &rhs) { }
-	animdef_c& operator= (animdef_c &rhs) { return *this; }
+	explicit animdef_c(animdef_c &rhs) { (void) rhs; }
+	animdef_c& operator= (animdef_c &rhs) { (void) rhs; return *this; }
 };
 
 

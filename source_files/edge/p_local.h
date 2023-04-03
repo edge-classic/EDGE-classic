@@ -250,7 +250,7 @@ public:
 	~linelist_c() { Clear(); }
 
 private:
-	void CleanupObject(void *obj) { /* ... */ }
+	void CleanupObject(void *obj) { /* ... */ (void) obj; }
 
 public:
 	int GetSize() {	return array_entries; } 

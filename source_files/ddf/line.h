@@ -832,8 +832,8 @@ public:
 
 private:
 	// disable copy construct and assignment operator
-	explicit linetype_c(linetype_c &rhs) { }
-	linetype_c& operator= (linetype_c &rhs) { return *this; }
+	explicit linetype_c(linetype_c &rhs) { (void) rhs; }
+	linetype_c& operator= (linetype_c &rhs) { (void) rhs; return *this; }
 };
 
 
@@ -964,8 +964,8 @@ public:
 
 private:
 	// disable copy construct and assignment operator
-	explicit sectortype_c(sectortype_c &rhs) { }
-	sectortype_c& operator= (sectortype_c &rhs) { return *this; }
+	explicit sectortype_c(sectortype_c &rhs) { (void) rhs; }
+	sectortype_c& operator= (sectortype_c &rhs) { (void) rhs; return *this; }
 };
 
 

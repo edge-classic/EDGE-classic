@@ -1012,24 +1012,10 @@ void ParseUDMF()
 	if (lump == NULL || ! lump->Seek(0))
 		cur_info->FatalError("Error finding TEXTMAP lump.\n");
 
-	int remain = lump->Length();
-
 	// load the lump into this string
-	std::string data;
-
-	while (remain > 0)
-	{
-		char buffer[4096];
-
-		int want = std::min(remain, (int)sizeof(buffer));
-
-		if (! lump->Read(buffer, want))
-			cur_info->FatalError("Error reading TEXTMAP lump.\n");
-
-		data.append(buffer, want);
-
-		remain -= want;
-	}
+	std::string data(lump->Length(), 0);
+	if (!lump->Read(data.data(), lump->Length()))
+		cur_info->FatalError("Error reading TEXTMAP lump.\n");
 
 	// now parse it...
 

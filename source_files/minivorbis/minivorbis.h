@@ -39,6 +39,19 @@
 #ifndef _OS_TYPES_H
 #define _OS_TYPES_H
 
+#ifdef _MSC_VER
+    #pragma warning( push )
+    // disable declaration of 'i' hides previous local declaration
+    #pragma warning( disable : 4456 )
+    // disable declaration of 'mask' hides global declaration
+    #pragma warning( disable : 4459 )
+    // disable assignment within conditional expression
+    #pragma warning( disable : 4706 )
+    // disable declaration of 'a' hides function parameter
+    #pragma warning( disable : 4457 )
+#endif
+
+
 /* make it easy on the folks that want to compile the libs with a
    different malloc than stdlib */
 #define _ogg_malloc  malloc
@@ -21724,6 +21737,11 @@ int ov_time_seek_page_lap(OggVorbis_File *vf,double pos){
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #endif /* VORBIS_IMPL */
 /*
 Copyright (c) 2002-2020 Xiph.org Foundation

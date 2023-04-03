@@ -974,8 +974,7 @@ void M_OptTicker(void)
 void M_OptDrawer()
 {
 	char tempstring[80];
-	int curry, deltay, menutop;
-	int i, j;
+	int curry, deltay, menutop;	
 	unsigned int k;
 
 	style_c *style = curr_menu->style_var[0];
@@ -1078,7 +1077,7 @@ void M_OptDrawer()
 		M_LanguageDrawer(curr_menu->menu_center, curry, deltay);
 	}
 
-	for (i = 0; i < curr_menu->item_num; i++)
+	for (int i = 0; i < curr_menu->item_num; i++)
 	{
 		bool is_selected = (i == curr_menu->pos);
 
@@ -1172,7 +1171,7 @@ void M_OptDrawer()
 			case OPT_Switch:
 			{
 				k = 0;
-				for (j = 0; j < M_GetCurrentSwitchValue(&curr_menu->items[i]); j++)
+				for (int j = 0; j < M_GetCurrentSwitchValue(&curr_menu->items[i]); j++)
 				{
 					while ((curr_menu->items[i].typenames[k] != '/') && (k < strlen(curr_menu->items[i].typenames)))
 						k++;
@@ -1182,7 +1181,7 @@ void M_OptDrawer()
 
 				if (k < strlen(curr_menu->items[i].typenames))
 				{
-					j = 0;
+					int j = 0;
 					while ((curr_menu->items[i].typenames[k] != '/') && (k < strlen(curr_menu->items[i].typenames)))
 					{
 						tempstring[j] = curr_menu->items[i].typenames[k];

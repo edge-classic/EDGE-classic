@@ -1181,11 +1181,11 @@ uint32_t VoxelDataSmall::queryVox (int x, int y, int z) {
       return *dv;
     } else {
       dptr -= 4;
-      const uint16_t cz = *dptr;
-      vassert(cz < z);
+      const uint16_t curZ = *dptr;
+      vassert(curZ < z);
       if ((uint16_t)z >= dptr[1]) return 0; // no such voxel
       const uint32_t *dv = (const uint32_t *)(((const uint8_t *)dptr)+dptr[2]);
-      return *(dv+z-cz);
+      return *(dv+z-curZ);
     }
   } else {
     // perform binary search

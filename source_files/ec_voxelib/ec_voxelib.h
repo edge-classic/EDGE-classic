@@ -288,8 +288,9 @@ public:
   //inline void reserve (int maxsize) { if (maxsize > ArrSize) return resize(maxsize); }
 
   template<bool DoResize=true, bool DoReserve=false> void setLength (int NewNum) {
-    vassert(NewNum >= 0);
-    if (DoResize || NewNum > ArrSize) {
+    vassert(NewNum >= 0);    
+    bool doResize = DoResize; // silence constant in conditional warning
+    if (doResize || NewNum > ArrSize) {
       resize(NewNum+(DoReserve ? NewNum*3/8+(NewNum < 64 ? 64 : 0) : 0));
     }
     vassert(ArrSize >= NewNum);
@@ -600,7 +601,7 @@ private:
   int imgWidth, imgHeight;
   VoxLibArray<Rect> rects;
 
-  enum { BadRect = 0xffffffffU };
+  const uint32_t BadRect = 0xffffffff;
 
   // node id or BadRect
   uint32_t findBestFit (int w, int h);

@@ -74,14 +74,14 @@ Scanner::~Scanner()
 	delete[] data;
 }
 
-void Scanner::SetString(char **ptr, const char *start, unsigned int length)
+void Scanner::SetString(char **ptr, const char *start, unsigned int lengthIn)
 {
-	if (length == -1)
-		length = strlen(start);
+	if (lengthIn == -1)
+		lengthIn = strlen(start);
 	if (*ptr != NULL) free(*ptr);
-	*ptr = (char*)malloc(length + 1);
-	memcpy(*ptr, start, length);
-	(*ptr)[length] = 0;
+	*ptr = (char*)malloc(lengthIn + 1);
+	memcpy(*ptr, start, lengthIn);
+	(*ptr)[lengthIn] = 0;
 }
 
 void Scanner::CheckForWhitespace()
@@ -156,7 +156,7 @@ void Scanner::CheckForWhitespace()
 	}
 }
 
-bool Scanner::CheckToken(char token)
+bool Scanner::CheckToken(char tokenIn)
 {
 	if(needNext)
 	{
@@ -165,7 +165,7 @@ bool Scanner::CheckToken(char token)
 	}
 
 	// An int can also be a float.
-	if(nextState.token == token || (nextState.token == TK_IntConst && token == TK_FloatConst))
+	if(nextState.token == tokenIn || (nextState.token == TK_IntConst && tokenIn == TK_FloatConst))
 	{
 		needNext = true;
 		ExpandState();
@@ -180,7 +180,7 @@ void Scanner::ExpandState()
 	logicalPosition = scanPos;
 	CheckForWhitespace();
 
-	SetString(&string, nextState.string, -1);
+	SetString(&string, nextState.string, (unsigned int)-1);
 	number = nextState.number;
 	decimal = nextState.decimal;
 	boolean = nextState.boolean;
@@ -319,9 +319,9 @@ bool Scanner::GetNextToken(bool expandState)
 						end = scanPos;
 					break;
 				case TK_IntConst:
-					if(cur == '.' || (scanPos-1 != start && cur == 'e'))
+					if(cur == '.' || (scanPos-1 != uint32_t(start) && cur == 'e'))
 						nextState.token = TK_FloatConst;
-					else if((cur == 'x' || cur == 'X') && scanPos-1 == start)
+					else if((cur == 'x' || cur == 'X') && scanPos-1 == uint32_t(start))
 					{
 						integerBase = 16;
 						break;
@@ -444,18 +444,18 @@ void Scanner::IncrementLine()
 	lineStart = scanPos;
 }
 
-void Scanner::Error(int token)
+void Scanner::Error(int tokenIn)
 {
-	if (token < TK_NumSpecialTokens && this->token >= TK_Identifier && this->token < TK_NumSpecialTokens)
-		error("UMAPINFO: %d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), TokenNames[token], TokenNames[this->token]);
-	else if (token < TK_NumSpecialTokens && this->token >= TK_NumSpecialTokens)
-		error("UMAPINFO: %d:%d:Expected '%s' but got '%c' instead.", GetLine(), GetLinePos(), TokenNames[token], this->token);
-	else if (token < TK_NumSpecialTokens && this->token == TK_NoToken)
-		error("UMAPINFO: %d:%d:Expected '%s'", GetLine(), GetLinePos(), TokenNames[token]);
-	else if (token >= TK_NumSpecialTokens && this->token >= TK_Identifier && this->token < TK_NumSpecialTokens)
-		error("UMAPINFO: %d:%d:Expected '%c' but got '%s' instead.", GetLine(), GetLinePos(), token, TokenNames[this->token]);
+	if (tokenIn < TK_NumSpecialTokens && this->token >= TK_Identifier && this->token < TK_NumSpecialTokens)
+		error("UMAPINFO: %d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), TokenNames[tokenIn], TokenNames[this->token]);
+	else if (tokenIn < TK_NumSpecialTokens && this->token >= TK_NumSpecialTokens)
+		error("UMAPINFO: %d:%d:Expected '%s' but got '%c' instead.", GetLine(), GetLinePos(), TokenNames[tokenIn], this->token);
+	else if (tokenIn < TK_NumSpecialTokens && this->token == TK_NoToken)
+		error("UMAPINFO: %d:%d:Expected '%s'", GetLine(), GetLinePos(), TokenNames[tokenIn]);
+	else if (tokenIn >= TK_NumSpecialTokens && this->token >= TK_Identifier && this->token < TK_NumSpecialTokens)
+		error("UMAPINFO: %d:%d:Expected '%c' but got '%s' instead.", GetLine(), GetLinePos(), tokenIn, TokenNames[this->token]);
 	else
-		error("UMAPINFO: %d:%d:Expected '%c' but got '%c' instead.", GetLine(), GetLinePos(), token, this->token);
+		error("UMAPINFO: %d:%d:Expected '%c' but got '%c' instead.", GetLine(), GetLinePos(), tokenIn, this->token);
 }
 
 void Scanner::Error(const char *mustget)
@@ -476,12 +476,12 @@ void Scanner::ErrorF(const char *msg, ...)
 	error("%d:%d:%s.", GetLine(), GetLinePos(), buffer);
 }
 
-void Scanner::MustGetToken(char token)
+void Scanner::MustGetToken(char tokenIn)
 {
-	if(!CheckToken(token))
+	if(!CheckToken(tokenIn))
 	{
 		ExpandState();
-		Error(token);
+		Error(tokenIn);
 	}
 }
 
@@ -600,11 +600,10 @@ bool Scanner::TokensLeft() const
 // This is taken from ZDoom's strbin function which can do a lot more than just unescaping backslashes and quotation marks.
 void Scanner::Unescape(char *str)
 {
-	char *start = str;
 	char *p = str, c;
 	int i;
 
-	while ((c = *p++)) {
+	while ((c = *p++) != 0) {
 		if (c != '\\') {
 			*str++ = c;
 		}

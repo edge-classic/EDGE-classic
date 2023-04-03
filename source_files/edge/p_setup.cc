@@ -251,21 +251,21 @@ static void LoadVertexes(int lump)
 	W_DoneWithLump(data);
 }
 
-static void SegCommonStuff(seg_t *seg, int linedef)
+static void SegCommonStuff(seg_t *seg, int linedef_in)
 {
 	seg->frontsector = seg->backsector = NULL;
 
-	if (linedef == -1)
+	if (linedef_in == -1)
 	{
 		seg->miniseg = true;
 	}
 	else
 	{
-		if (linedef >= numlines)  // sanity check
+		if (linedef_in >= numlines)  // sanity check
 			I_Error("Bad GWA file: seg #%d has invalid linedef.\n", (int)(seg - segs));
 
 		seg->miniseg = false;
-		seg->linedef = &lines[linedef];
+		seg->linedef = &lines[linedef_in];
 
 		float sx = seg->side ? seg->linedef->v2->x : seg->linedef->v1->x;
 		float sy = seg->side ? seg->linedef->v2->y : seg->linedef->v1->y;
@@ -1185,13 +1185,13 @@ static void LoadXGL3Nodes(int lumpnum)
 	for (i = 0; i < numsegs; i++, seg++)
 	{
 		unsigned int v1num;
-		int linedef, partner, side;
+		int slinedef, partner, side;
 
 		v1num = EPI_LE_U32(*(uint32_t*)td);
 		td += 4;
 		partner = EPI_LE_S32(*(int32_t*)td);
 		td += 4;
-		linedef = EPI_LE_S32(*(int32_t*)td);
+		slinedef = EPI_LE_S32(*(int32_t*)td);
 		td += 4;
 		side = (int)(*td);
 		td += 1;
@@ -1211,7 +1211,7 @@ static void LoadXGL3Nodes(int lumpnum)
 			seg->partner = &segs[partner];
 		}
 
-		SegCommonStuff(seg, linedef);
+		SegCommonStuff(seg, slinedef);
 
 		// The following fields are filled out elsewhere:
 		//     sub_next, front_sub, back_sub, frontsector, backsector.

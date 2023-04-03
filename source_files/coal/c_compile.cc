@@ -579,8 +579,8 @@ type_t * real_vm_c::ParseType()
 		type = &type_void;
 	else
 	{
-		CompileError("unknown type: %s\n", comp.token_buf);
 		type = &type_float;	// shut up compiler warning
+		CompileError("unknown type: %s\n", comp.token_buf);		
 	}
 	LEX_Next();
 

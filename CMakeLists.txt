@@ -2,7 +2,7 @@
 # Edge Classic - CMake Script
 ##########################################
 
-cmake_minimum_required(VERSION 3.12..3.20)
+cmake_minimum_required(VERSION 3.15..3.20)
 
 project(
   edge-classic
@@ -23,10 +23,6 @@ if (MSVC)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:fast")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs")
   
-  # Set /W4, can add /W4 to CMAKE_CXX_FLAGS instead, when bump to cmake 3.19 minimum
-  string(REGEX REPLACE "/W3" "/W4" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-  string(REGEX REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-
   # Disable some very noisy warnings from the MSVC build
   # CRT security and POSIX deprecation warnings
   add_definitions("-D_CRT_SECURE_NO_WARNINGS /wd4996")

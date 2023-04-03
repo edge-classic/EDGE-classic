@@ -26,7 +26,9 @@ namespace Deh_Edge
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
 
 #define STRICT
-#define _WINDOWS
+#ifndef _WINDOWS
+	#define _WINDOWS
+#endif
 #define WIN32_LEAN_AND_MEAN
 #ifndef WIN32
 #define WIN32

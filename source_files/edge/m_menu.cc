@@ -212,7 +212,7 @@ static slot_extra_info_t ex_slots[SAVE_SLOTS];
 //
 // MENU TYPEDEFS
 //
-typedef struct
+typedef struct menuitem_s
 {
 	// 0 = no cursor here, 1 = ok, 2 = arrows ok
 	int status = 0;
@@ -764,7 +764,7 @@ void M_DrawLoad(void)
 			HUD_StretchImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
 				y + style->def->text[styledef_c::T_TEXT].y_offset,IM_WIDTH(L),IM_HEIGHT(L),L, 0.0, 0.0);
 			x += IM_WIDTH(L);
-			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
+			for (int j = 0; j < 24; j++, x += IM_WIDTH(C))
 				HUD_StretchImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
 					y + style->def->text[styledef_c::T_TEXT].y_offset,IM_WIDTH(C),IM_HEIGHT(C),C, 0.0, 0.0);
 
@@ -777,7 +777,7 @@ void M_DrawLoad(void)
 			HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
 				y + style->def->text[styledef_c::T_TEXT].y_offset, L);
 			x += IM_WIDTH(L);
-			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
+			for (int j = 0; j < 24; j++, x += IM_WIDTH(C))
 				HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
 					y + style->def->text[styledef_c::T_TEXT].y_offset, C);
 
@@ -1005,7 +1005,7 @@ void M_DrawSave(void)
 			HUD_StretchImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
 				y + style->def->text[styledef_c::T_TEXT].y_offset,IM_WIDTH(L),IM_HEIGHT(L),L, 0.0, 0.0);
 			x += IM_WIDTH(L);
-			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
+			for (int j = 0; j < 24; j++, x += IM_WIDTH(C))
 				HUD_StretchImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
 					y + style->def->text[styledef_c::T_TEXT].y_offset,IM_WIDTH(C),IM_HEIGHT(C),C, 0.0, 0.0);
 
@@ -1018,7 +1018,7 @@ void M_DrawSave(void)
 			HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
 				y + style->def->text[styledef_c::T_TEXT].y_offset, L);
 			x += IM_WIDTH(L);
-			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
+			for (int j = 0; j < 24; j++, x += IM_WIDTH(C))
 				HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, y + style->def->text[styledef_c::T_TEXT].y_offset, C);
 
 			HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, y + style->def->text[styledef_c::T_TEXT].y_offset, R);
@@ -2691,7 +2691,7 @@ void M_Drawer(void)
 		}
 		for (i=0; i < max; i++)
 		{
-			int textstyle = i == itemOn ? (style->def->text[styledef_c::T_SELECTED].font ? styledef_c::T_SELECTED : styledef_c::T_TEXT) : 
+			unsigned int textstyle = i == (unsigned int) itemOn ? (style->def->text[styledef_c::T_SELECTED].font ? styledef_c::T_SELECTED : styledef_c::T_TEXT) : 
 					styledef_c::T_TEXT;
 			if (style->def->entry_alignment == style->def->C_RIGHT)
 				HL_WriteText(style, textstyle, currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width, 
@@ -2839,7 +2839,7 @@ void M_Drawer(void)
 					continue;
 				if (currentMenu->menuitems[i].image->is_empty)
 					continue;
-				const colourmap_c *colmap = i == itemOn ? style->def->text[styledef_c::T_SELECTED].colmap : 
+				const colourmap_c *colmap = i == (unsigned int)itemOn ? style->def->text[styledef_c::T_SELECTED].colmap : 
 					style->def->text[styledef_c::T_TEXT].colmap;
 				if (style->def->entry_alignment == style->def->C_RIGHT)
 					HUD_DrawImage(currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width, 

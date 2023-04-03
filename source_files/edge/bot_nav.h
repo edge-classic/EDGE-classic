@@ -23,7 +23,7 @@
 #include "p_mobj.h"
 #include "r_defs.h"
 
-struct bot_t;
+class bot_t;
 
 
 enum path_node_flags_e

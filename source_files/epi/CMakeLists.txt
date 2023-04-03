@@ -31,3 +31,8 @@ add_library(
 target_include_directories(edge_epi PRIVATE ../stb)
 target_include_directories(edge_epi PRIVATE ../libgme/gme)
 target_include_directories(edge_epi PRIVATE ../m4p)
+
+target_compile_options(edge_epi PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/W4>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
+)

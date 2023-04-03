@@ -115,7 +115,7 @@ sound_format_e Sound_DetectFormat(byte *data, int song_len)
 	}
 
 	if ((data[0] == 'I' && data[1] == 'D' && data[2] == '3') ||
-		(data[0] == 0xFF && (data[1] >> 4 & 0xF == 0xF)))
+		(data[0] == 0xFF && ((data[1] >> 4 & 0xF) == 0xF)))
 	{
 		return FMT_MP3;
 	}

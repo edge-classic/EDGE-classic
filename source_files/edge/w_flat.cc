@@ -363,8 +363,6 @@ void W_InitPicAnims(void)
 
 void W_PrecacheTextures(void)
 {
-	int i;
-
 	// maximum possible images
 	int max_image = 1 + 3 * numsides + 2 * numsectors;
 	int count = 0;
@@ -375,7 +373,7 @@ void W_PrecacheTextures(void)
 	images[count++] = sky_image;
 
 	// add in sidedefs
-	for (i=0; i < numsides; i++)
+	for (int i=0; i < numsides; i++)
 	{
 		if (sides[i].top.image)
 			images[count++] = sides[i].top.image;
@@ -390,7 +388,7 @@ void W_PrecacheTextures(void)
 	SYS_ASSERT(count <= max_image);
 
 	// add in planes
-	for (i=0; i < numsectors; i++)
+	for (int i=0; i < numsectors; i++)
 	{
 		if (sectors[i].floor.image)
 			images[count++] = sectors[i].floor.image;
@@ -407,7 +405,7 @@ void W_PrecacheTextures(void)
 	QSORT(const image_c *, images, count, CUTOFF);
 #undef CMP
 
-	for (i=0; i < count; i++)
+	for (int i=0; i < count; i++)
 	{
 		SYS_ASSERT(images[i]);
 

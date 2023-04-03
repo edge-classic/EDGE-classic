@@ -83,14 +83,6 @@ vec3_t M_CrossProduct(vec3_t v1, vec3_t v2, vec3_t v3)
 	return {x,y,z};
 }
 
-static vec3_t M_CrossProduct(vec3_t v1, vec3_t v2)
-{
-	float x = (v1.y * v2.z) - (v1.z * v2.y);
-	float y = (v1.z * v2.x) - (v1.x * v2.z);
-	float z = (v1.x * v2.y) - (v1.y * v2.x);
-	return {x,y,z};
-}
-
 static float M_DotProduct(vec3_t v1, vec3_t v2)
 {
 	return (v1.x*v2.x) + (v1.y*v2.y) + (v1.z*v2.z);

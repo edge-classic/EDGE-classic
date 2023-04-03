@@ -534,7 +534,7 @@ static void DeathThink(player_t * player, bool extra_tic)
 		}
 		else 
 		{
-			int factor = r_doubleframes.d ? 2 : 1;
+			unsigned int factor = r_doubleframes.d ? 2 : 1;
 			if (delta < ANG180)
 				delta /= (5 * factor);
 			else

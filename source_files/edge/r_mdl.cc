@@ -247,8 +247,6 @@ static short *CreateNormalList(byte *which_normals)
 
 mdl_model_c *MDL_LoadModel(epi::file_c *f)
 {
-	int i;
-
 	raw_mdl_header_t header;
 
 	/* read header */
@@ -283,7 +281,7 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
 
 	/* PARSE SKINS */
 
-	for (i=0; i < EPI_LE_S32(header.num_skins); i++)
+	for (int i=0; i < EPI_LE_S32(header.num_skins); i++)
 	{
 		int group = 0;
 		u8_t *pixels = new u8_t[sheight * swidth];
@@ -299,11 +297,11 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
 		f->Read(pixels, sheight * swidth * sizeof(u8_t));
 		epi::image_data_c *tmp_img = new epi::image_data_c(swidth, sheight, 3);
 		// Expand 8 bits paletted image to RGB
-		for (int i = 0; i < swidth * sheight; ++i)
+		for (int j = 0; j < swidth * sheight; ++j)
 		{
-			for (int j = 0; j < 3; ++j)
+			for (int k = 0; k < 3; ++k)
 			{
-				tmp_img->pixels[(i * 3) + j] = md_colormap[pixels[i]][j];
+				tmp_img->pixels[(j * 3) + k] = md_colormap[pixels[j]][k];
 			}
 		}
 		delete[] pixels;
@@ -345,7 +343,7 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
 	mdl_triangle_c *tri = md->tris;
 	mdl_point_c *point = md->points;
 
-	for (i = 0; i < num_tris; i++)
+	for (int i = 0; i < num_tris; i++)
 	{
 		SYS_ASSERT(tri < md->tris + md->num_tris);
 		SYS_ASSERT(point < md->points + md->num_points);
@@ -399,7 +397,7 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
 	translate[1] = f_ptr[1];
 	translate[2] = f_ptr[2];
 
-	for (i = 0; i < num_frames; i++)
+	for (int i = 0; i < num_frames; i++)
 	{
 		raw_mdl_frame_t raw_frame = frames[i];
 
@@ -462,7 +460,7 @@ short MDL_FindFrame(mdl_model_c *md, const char *name)
 /*============== MODEL RENDERING ====================*/
 
 
-typedef struct
+typedef struct model_coord_data_s
 {
 	mobj_t *mo;
 
@@ -1033,9 +1031,6 @@ void MDL_RenderModel_2D(mdl_model_c *md, const image_c *skin_img, int frame,
 
 	if (skin_tex == 0)
 		I_Error("MDL Frame %s missing skins?\n", md->frames[frame].name);
-
-	float im_right = (float)md->skin_width / (float)W_MakeValidSize(md->skin_width);
-	float im_top   = (float)md->skin_height / (float)W_MakeValidSize(md->skin_height);
 
 	xscale = yscale * info->model_scale * info->model_aspect;
 	yscale = yscale * info->model_scale;

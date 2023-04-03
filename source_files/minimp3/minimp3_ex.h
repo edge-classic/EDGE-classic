@@ -6,6 +6,15 @@
     This software is distributed without any warranty.
     See <http://creativecommons.org/publicdomain/zero/1.0/>.
 */
+
+#ifdef _MSC_VER
+    #pragma warning( push )
+    // disable assignment within conditional
+    #pragma warning( disable : 4706 )
+    // disable declaration of '*' hides previous local declaration
+    #pragma warning( disable : 4456 )
+#endif
+
 #include "minimp3.h"
 
 /* flags for mp3dec_ex_open_* functions */
@@ -1389,6 +1398,10 @@ void mp3dec_ex_close(mp3dec_ex_t *dec)
         free(dec->index.frames);
     memset(dec, 0, sizeof(*dec));
 }
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(pop)
 #endif
 
 #endif /*MINIMP3_IMPLEMENTATION*/

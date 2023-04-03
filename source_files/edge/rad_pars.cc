@@ -20,6 +20,8 @@
 
 #include <limits.h>
 
+#include "str_util.h"
+
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "g_game.h"
@@ -93,34 +95,6 @@ static char *pending_label = NULL;
 // Default tip properties (position, colour, etc)
 static s_tip_prop_t default_tip_props =
 { -1, -1, -1, -1, NULL, -1.0f, 0 };
-
-
-int RAD_StringHashFunc(const char *s)
-{
-	int r = 0;
-	int c;
-
-	while (*s)
-	{
-		r *= 36;
-		if (*s >= 'a' && *s <= 'z')
-			c = *s - 'a';
-		else if (*s >= 'A' && *s <= 'Z')
-			c = *s - 'A';
-		else if (*s >= '0' && *s <= '9')
-			c = *s - '0' + 'Z' - 'A' + 1;
-		else
-			c = *s;
-		r += c % 36;
-		s++;
-	}
-
-	if (r < 0)
-		r = -r;
-
-	return r;
-}
-
 
 void RAD_Error(const char *err, ...)
 {
@@ -956,7 +930,7 @@ static void RAD_ParseTag(param_set_t& pars)
 
 	// Is the value an integer?
 	if (length != count)
-		this_rad->tag = RAD_StringHashFunc(pars[1]);
+		this_rad->tag = epi::STR_Hash32(pars[1]);
 	else
 		this_rad->tag = atoi(pars[1]);
 }
@@ -1205,7 +1179,7 @@ static void RAD_ParseEnableTagged(param_set_t& pars)
 
 	// Is the value an integer?
 	if (length != count)
-		t->tag = RAD_StringHashFunc(pars[1]);
+		t->tag = epi::STR_Hash32(pars[1]);
 	else
 		t->tag = atoi(pars[1]);
 

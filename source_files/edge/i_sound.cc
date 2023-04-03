@@ -98,7 +98,6 @@ static bool I_TryOpenSound(int want_freq, bool want_stereo)
 	trydev.samples  = samples;
 	trydev.callback = SoundFill_Callback;
 
-	// Ask for signed 16-bit @ 48khz by default; allow SDL to adjust frequency if needed but never the format
 	mydev_id = SDL_OpenAudioDevice(NULL, 0, &trydev, &mydev, 0);
 
 	if (mydev_id > 0)
@@ -273,11 +272,11 @@ void I_StartupMusic(void)
 	std::vector<epi::dir_entry_c> sfd;
 	std::filesystem::path soundfont_dir = epi::PATH_Join(game_dir, UTFSTR("soundfont"));
 
-	// Always add an empty path for the instrument banks as the default/internal GENMIDI lump choice
-	available_genmidis.push_back(UTFSTR(""));
+	// Always add the default/internal GENMIDI lump choice
+	available_genmidis.push_back(UTFSTR("GENMIDI"));
 	// Set default SF2 location in CVAR if needed
 	if (s_soundfont.s.empty())
-		s_soundfont = epi::PATH_Join(soundfont_dir, UTFSTR("default.sf2")).u8string();
+		s_soundfont = epi::PATH_Join(soundfont_dir, UTFSTR("default.sf2")).generic_u8string();
 
 	if (!FS_ReadDir(sfd, soundfont_dir, UTFSTR("*.*")))
 	{
@@ -293,10 +292,10 @@ void I_StartupMusic(void)
 				epi::str_lower(ext);
 				if (ext == ".sf2" || ext == ".sf3")
 				{
-					available_soundfonts.push_back(sfd[i].name);
+					available_soundfonts.push_back(sfd[i].name.generic_u8string());
 				}
 				else if (ext == ".op2" || ext == ".wopl" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
-					available_genmidis.push_back(sfd[i].name);
+					available_genmidis.push_back(sfd[i].name.generic_u8string());
 			}
 		}
 	}
@@ -320,9 +319,9 @@ void I_StartupMusic(void)
 				std::string ext = epi::PATH_GetExtension(sfd[i].name).u8string();
 				epi::str_lower(ext);
 				if (ext == ".sf2" || ext == ".sf3")
-					available_soundfonts.push_back(sfd[i].name);
+					available_soundfonts.push_back(sfd[i].name.generic_u8string());
 				else if (ext == ".op2" || ext == ".wopl" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
-					available_genmidis.push_back(sfd[i].name);
+					available_genmidis.push_back(sfd[i].name.generic_u8string());
 			}
 		}
 	}

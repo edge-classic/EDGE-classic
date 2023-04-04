@@ -626,6 +626,14 @@ static void P_LineEffect(line_t *target, line_t *source,
 				anim.scroll_line_ref = source;
 				anim.side0_xoffspeed = -source->side[0]->middle.offset.x / 8.0;
 				anim.side0_yoffspeed = source->side[0]->middle.offset.y / 8.0;
+				for (int i=0; i < numlines; i++)
+				{
+					if (lines[i].tag == source->frontsector->tag)
+					{
+						if (lines[i].special->count == 1)
+							anim.permanent = true;
+					}
+				}
 			}
 		}
 		lineanims.push_back(anim);
@@ -800,6 +808,14 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 				anim.scroll_sec_ref = source->frontsector;
 				anim.scroll_special_ref = special;
 				anim.scroll_line_ref = source;
+				for (int i=0; i < numlines; i++)
+				{
+					if (lines[i].tag == source->frontsector->tag)
+					{
+						if (lines[i].special->count == 1)
+							anim.permanent = true;
+					}
+				}
 			}
 		}
 		secanims.push_back(anim);

@@ -1306,7 +1306,7 @@ void P_RunActivePlanes(void)
                 for (auto anim : secanims)
                 {
                     if (anim.scroll_sec_ref && (anim.scroll_sec_ref->ceil_move == pmov ||
-                        anim.scroll_sec_ref->floor_move == pmov))
+                        anim.scroll_sec_ref->floor_move == pmov) && anim.permanent)
                     {
                         struct sector_s *sec_ref = anim.scroll_sec_ref;
                         sector_t *sec = anim.target;
@@ -1319,7 +1319,7 @@ void P_RunActivePlanes(void)
                             float ratio = line_ref->length / 32.0f;
                             float sdx = -(line_ref->dx / line_ref->length);
                             float sdy = -(line_ref->dy / line_ref->length);
-                            if (sec_ref->floor_move)
+                            if (sec_ref->floor_move && sec_ref->floor_move == pmov)
                             {
                                 float speed = sec_ref->floor_move->speed;
                                 int dir = sec_ref->floor_move->direction;
@@ -1349,7 +1349,7 @@ void P_RunActivePlanes(void)
                                     sec->ceil.scroll.x -= sx;
                                 }
                             }
-                            if (sec_ref->ceil_move)
+                            if (sec_ref->ceil_move && sec_ref->ceil_move == pmov)
                             {
                                 float speed = sec_ref->ceil_move->speed;
                                 int dir = sec_ref->ceil_move->direction;
@@ -1385,7 +1385,7 @@ void P_RunActivePlanes(void)
                             float ratio = line_ref->length / 32.0f;
                             float sdx = line_ref->dx / line_ref->length;
                             float sdy = line_ref->dy / line_ref->length;
-                            if (sec_ref->floor_move)
+                            if (sec_ref->floor_move && sec_ref->floor_move == pmov)
                             {
                                 bool lowering = sec_ref->floor_move->startheight > sec_ref->floor_move->destheight;
                                 float dist = (lowering ? sec_ref->floor_move->startheight : sec_ref->floor_move->destheight) - sec_ref->f_h;
@@ -1415,7 +1415,7 @@ void P_RunActivePlanes(void)
                                     sec->ceil.scroll.x += sx;
                                 }	
                             }
-                            if (sec_ref->ceil_move)
+                            if (sec_ref->ceil_move && sec_ref->ceil_move == pmov)
                             {
                                 bool lowering = sec_ref->ceil_move->startheight > sec_ref->ceil_move->destheight;
                                 float dist = (lowering ? sec_ref->ceil_move->startheight : sec_ref->ceil_move->destheight) - sec_ref->c_h;
@@ -1451,7 +1451,7 @@ void P_RunActivePlanes(void)
                 for (auto anim : lineanims)
                 {
                     if (anim.scroll_sec_ref && (anim.scroll_sec_ref->ceil_move == pmov ||
-                        anim.scroll_sec_ref->floor_move == pmov))
+                        anim.scroll_sec_ref->floor_move == pmov) && anim.permanent)
                     {
                         struct sector_s *sec_ref = anim.scroll_sec_ref;
                         line_t *ld = anim.target;
@@ -1467,7 +1467,8 @@ void P_RunActivePlanes(void)
                             {
                                 float tdx = anim.dynamic_dx;
                                 float tdy = anim.dynamic_dy;
-                                if (sec_ref->floor_move && sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
+                                if (sec_ref->floor_move && sec_ref->floor_move == pmov &&
+                                    sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
                                 {
                                     float speed = sec_ref->floor_move->speed;
                                     int dir = sec_ref->floor_move->direction;
@@ -1522,7 +1523,8 @@ void P_RunActivePlanes(void)
                                         }
                                     }
                                 }
-                                if (sec_ref->ceil_move && sec_ref->ceil_move->sector->c_h != sec_ref->ceil_move->startheight)
+                                if (sec_ref->ceil_move && sec_ref->ceil_move == pmov &&
+                                    sec_ref->ceil_move->sector->c_h != sec_ref->ceil_move->startheight)
                                 {
                                     float speed = sec_ref->ceil_move->speed;
                                     int dir = sec_ref->ceil_move->direction;
@@ -1582,7 +1584,8 @@ void P_RunActivePlanes(void)
                             {
                                 float tdx = anim.dynamic_dx;
                                 float tdy = anim.dynamic_dy;
-                                if (sec_ref->floor_move && sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
+                                if (sec_ref->floor_move && sec_ref->floor_move == pmov &&
+                                    sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
                                 {
                                     bool lowering = sec_ref->floor_move->startheight > sec_ref->floor_move->destheight;
                                     float dist = (lowering ? sec_ref->floor_move->startheight : sec_ref->floor_move->destheight) - sec_ref->f_h;
@@ -1637,7 +1640,8 @@ void P_RunActivePlanes(void)
                                         }
                                     }	
                                 }
-                                if (sec_ref->ceil_move && sec_ref->ceil_move->sector->c_h != sec_ref->ceil_move->startheight)
+                                if (sec_ref->ceil_move && sec_ref->ceil_move == pmov &&
+                                    sec_ref->ceil_move->sector->c_h != sec_ref->ceil_move->startheight)
                                 {
                                     bool lowering = sec_ref->ceil_move->startheight > sec_ref->ceil_move->destheight;
                                     float dist = (lowering ? sec_ref->ceil_move->startheight : sec_ref->ceil_move->destheight) - sec_ref->c_h;
@@ -1700,7 +1704,8 @@ void P_RunActivePlanes(void)
                             float y_speed = anim.side0_yoffspeed;
                             if (special_ref->scroll_type & ScrollType_Displace)
                             {
-                                if (sec_ref->floor_move && sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
+                                if (sec_ref->floor_move && sec_ref->floor_move == pmov &&
+                                    sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
                                 {
                                     float speed = sec_ref->floor_move->speed;
                                     int dir = sec_ref->floor_move->direction;
@@ -1731,7 +1736,8 @@ void P_RunActivePlanes(void)
                                         }
                                     }
                                 }
-                                if (sec_ref->ceil_move && sec_ref->ceil_move->sector->c_h != sec_ref->ceil_move->startheight)
+                                if (sec_ref->ceil_move && sec_ref->ceil_move == pmov &&
+                                    sec_ref->ceil_move->sector->c_h != sec_ref->ceil_move->startheight)
                                 {
                                     float speed = sec_ref->ceil_move->speed;
                                     int dir = sec_ref->ceil_move->direction;
@@ -1765,7 +1771,8 @@ void P_RunActivePlanes(void)
                             }
                             if (special_ref->scroll_type & ScrollType_Accel)
                             {
-                                if (sec_ref->floor_move && sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
+                                if (sec_ref->floor_move && sec_ref->floor_move == pmov &&
+                                    sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
                                 {
                                     bool lowering = sec_ref->floor_move->startheight > sec_ref->floor_move->destheight;
                                     float dist = (lowering ? sec_ref->floor_move->startheight : sec_ref->floor_move->destheight) - sec_ref->f_h;
@@ -1796,7 +1803,8 @@ void P_RunActivePlanes(void)
                                         }
                                     }	
                                 }
-                                if (sec_ref->ceil_move && sec_ref->ceil_move->sector->c_h != sec_ref->ceil_move->startheight)
+                                if (sec_ref->ceil_move && sec_ref->ceil_move == pmov &&
+                                    sec_ref->ceil_move->sector->c_h != sec_ref->ceil_move->startheight)
                                 {
                                     bool lowering = sec_ref->ceil_move->startheight > sec_ref->ceil_move->destheight;
                                     float dist = (lowering ? sec_ref->ceil_move->startheight : sec_ref->ceil_move->destheight) - sec_ref->c_h;

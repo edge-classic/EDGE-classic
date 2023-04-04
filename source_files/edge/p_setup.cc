@@ -3160,6 +3160,10 @@ void P_SetupLevel(void)
 	numsides = 0;
 	numextrafloors = 0;
 	numvertgaps = 0;
+	mapthing_NUM = 0;
+	numvertexes = 0;
+	numsectors = 0;
+	numlines = 0;
 
 	if (!udmf_level)
 	{

@@ -122,10 +122,11 @@ void I_Debugf(const char *message,...) GCCATTR((format(printf, 1, 2)));
 
 // assertion macro
 #ifdef NDEBUG
-#define SYS_ASSERT(cond)  ((void) 0)
-#else
 #define SYS_ASSERT(cond)  \
 	((cond) ? (void)0 : I_Error("Assertion '%s' failed (%s:%d).\n", #cond , __FILE__ , __LINE__ ))
+#else
+#define SYS_ASSERT(cond)  \
+	((cond) ? (void)0 : I_Warning("Assertion '%s' failed (%s:%d).\n", #cond , __FILE__ , __LINE__ ))
 #endif // NDEBUG
 
 

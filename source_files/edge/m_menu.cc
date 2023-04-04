@@ -212,7 +212,7 @@ static slot_extra_info_t ex_slots[SAVE_SLOTS];
 //
 // MENU TYPEDEFS
 //
-typedef struct
+typedef struct menuitem_s
 {
 	// 0 = no cursor here, 1 = ok, 2 = arrows ok
 	int status = 0;
@@ -343,7 +343,7 @@ static menu_t MainDef =
 	MainMenu,
 	&main_menu_style,
 	M_DrawMainMenu,
-	97, 64,
+	94, 64,
 	0
 };
 
@@ -716,6 +716,53 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 		y + style->def->text[styledef_c::T_HELP].y_offset, mbuffer);
 }
 
+int CenterMenuImage(const image_c *img)
+{
+	float CenterX = 160;
+	CenterX -= IM_WIDTH(img) / 2;
+
+	return CenterX;
+}
+
+int CenterMenuImage2(style_c *style, int text_type, const image_c *img)
+{
+	float CenterX = 160;
+	float txtscale = 1.0;
+	float gfxWidth = 0;
+
+	if(style->def->text[text_type].scale)
+	{
+		txtscale = style->def->text[text_type].scale;
+	}
+
+	gfxWidth = IM_WIDTH(img) * txtscale;
+	CenterX -= gfxWidth / 2;
+	CenterX += style->def->text[text_type].x_offset;
+
+	return CenterX;
+}
+
+int CenterMenuText(style_c *style, int text_type, const char *str)
+{
+	float CenterX = 160;
+	float txtscale = 1.0;
+	float txtWidth = 0;
+
+	if(style->def->text[text_type].scale)
+	{
+		txtscale = style->def->text[text_type].scale;
+	}
+	txtWidth = style->fonts[text_type]->StringWidth(str) * txtscale;
+	CenterX -= txtWidth / 2;
+	CenterX += style->def->text[text_type].x_offset;
+
+	// Should we also add "style->def->x_offset" here too?
+	// CenterX += style->def->x_offset;
+
+	return CenterX;
+}
+
+
 //
 // 1998/07/10 KM Savegame slots increased
 //
@@ -730,24 +777,36 @@ void M_DrawLoad(void)
 	style_c *style = LoadDef.style_var[0];
 
 	SYS_ASSERT(style);
-
 	style->DrawBackground();
-	
+
 	int fontType;
+	float x = 72;
 	if (! style->fonts[styledef_c::T_HEADER])
 		fontType=styledef_c::T_TEXT;
 	else
 		fontType=styledef_c::T_HEADER;
 
-	if (custom_MenuMain==false)
+	if (custom_MenuMain == false) //Yeah, this depends on what main menu is, so sue me.
 	{
-		HL_WriteText(load_style, fontType, 72 + style->def->text[fontType].x_offset, 
+		if (style->def->entry_alignment == episode_style->def->C_CENTER)
+			x = CenterMenuText(style, fontType, language["MainLoadGame"]);
+		else
+			x = 72;
+		
+		HL_WriteText(style, fontType, x + style->def->text[fontType].x_offset, 
 			8 + style->def->text[fontType].y_offset, language["MainLoadGame"]);
 	}
 	else
 	{
-		HUD_DrawImage(72 + style->def->text[styledef_c::T_HEADER].x_offset, 8 + style->def->text[styledef_c::T_HEADER].y_offset, menu_loadg);
+		const colourmap_c *colmap = style->def->text[fontType].colmap;
+		if (menu_loadg->offset_x != 0.0f) //Only auto-center if no Xoffset 
+			x = 72; //SaveDef.x; //cannot get away from the damn hardcoded value
+		else
+			x = CenterMenuImage(menu_loadg);
+		
+		HUD_DrawImage(x + style->def->text[fontType].x_offset, 8 + style->def->text[fontType].y_offset, menu_loadg, colmap);
 	}
+
 
 	// Use center box graphic for LineHeight unless the load game font text is actually taller
 	// (this should only happen if the boxes aren't being drawn in theory)
@@ -760,11 +819,11 @@ void M_DrawLoad(void)
 	{
 		if (custom_MenuMain==false)
 		{
-			float x = LoadDef.x;
+			x = LoadDef.x;
 			HUD_StretchImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
 				y + style->def->text[styledef_c::T_TEXT].y_offset,IM_WIDTH(L),IM_HEIGHT(L),L, 0.0, 0.0);
 			x += IM_WIDTH(L);
-			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
+			for (int j = 0; j < 24; j++, x += IM_WIDTH(C))
 				HUD_StretchImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
 					y + style->def->text[styledef_c::T_TEXT].y_offset,IM_WIDTH(C),IM_HEIGHT(C),C, 0.0, 0.0);
 
@@ -773,11 +832,11 @@ void M_DrawLoad(void)
 		}
 		else
 		{
-			float x = LoadDef.x;
+			x = LoadDef.x;
 			HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
 				y + style->def->text[styledef_c::T_TEXT].y_offset, L);
 			x += IM_WIDTH(L);
-			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
+			for (int j = 0; j < 24; j++, x += IM_WIDTH(C))
 				HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
 					y + style->def->text[styledef_c::T_TEXT].y_offset, C);
 
@@ -967,7 +1026,7 @@ void M_DrawSave(void)
 	const image_c *C = W_ImageLookup("M_LSCNTR");
 	const image_c *R = W_ImageLookup("M_LSRGHT");
 	int i;
-	int y = LoadDef.y;
+	int y = SaveDef.y;
 
 	style_c *style = SaveDef.style_var[0];
 
@@ -975,19 +1034,31 @@ void M_DrawSave(void)
 	style->DrawBackground();
 
 	int fontType;
+	float x = 72;
 	if (! style->fonts[styledef_c::T_HEADER])
 		fontType=styledef_c::T_TEXT;
 	else
 		fontType=styledef_c::T_HEADER;
 
-	if (custom_MenuMain==false)
+	if (custom_MenuMain == false) //Yeah, this depends on what main menu is, so sue me.
 	{
-		HL_WriteText(load_style, fontType, 72 + style->def->text[fontType].x_offset, 
+		if (style->def->entry_alignment == episode_style->def->C_CENTER)
+			x = CenterMenuText(style, fontType, language["MainSaveGame"]);
+		else
+			x = 72;
+		
+		HL_WriteText(style, fontType, x + style->def->text[fontType].x_offset, 
 			8 + style->def->text[fontType].y_offset, language["MainSaveGame"]);
 	}
 	else
 	{
-		HUD_DrawImage(72 + style->def->text[styledef_c::T_HEADER].x_offset, 8 + style->def->text[styledef_c::T_HEADER].y_offset, menu_saveg);
+		const colourmap_c *colmap = style->def->text[fontType].colmap;
+		if (menu_saveg->offset_x != 0.0f) //Only auto-center if no Xoffset 
+			x = 72; //SaveDef.x; //cannot get away from the damn hardcoded value
+		else
+			x = CenterMenuImage(menu_saveg);
+		
+		HUD_DrawImage(x + style->def->text[fontType].x_offset, 8 + style->def->text[fontType].y_offset, menu_saveg, colmap);
 	}
 
 	// Use center box graphic for LineHeight unless the load game font text is actually taller
@@ -1001,11 +1072,11 @@ void M_DrawSave(void)
 	{
 		if (custom_MenuMain==false)
 		{
-			float x = LoadDef.x;
+			x = LoadDef.x;
 			HUD_StretchImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
 				y + style->def->text[styledef_c::T_TEXT].y_offset,IM_WIDTH(L),IM_HEIGHT(L),L, 0.0, 0.0);
 			x += IM_WIDTH(L);
-			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
+			for (int j = 0; j < 24; j++, x += IM_WIDTH(C))
 				HUD_StretchImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
 					y + style->def->text[styledef_c::T_TEXT].y_offset,IM_WIDTH(C),IM_HEIGHT(C),C, 0.0, 0.0);
 
@@ -1014,11 +1085,11 @@ void M_DrawSave(void)
 		}
 		else
 		{
-			float x = LoadDef.x; 
+			x = LoadDef.x; 
 			HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, 
 				y + style->def->text[styledef_c::T_TEXT].y_offset, L);
 			x += IM_WIDTH(L);
-			for (int i = 0; i < 24; i++, x += IM_WIDTH(C))
+			for (int j = 0; j < 24; j++, x += IM_WIDTH(C))
 				HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, y + style->def->text[styledef_c::T_TEXT].y_offset, C);
 
 			HUD_DrawImage(x + style->def->text[styledef_c::T_TEXT].x_offset, y + style->def->text[styledef_c::T_TEXT].y_offset, R);
@@ -1370,35 +1441,69 @@ void M_DrawReadThis2(void)
 	HUD_DrawImageTitleWS(menu_readthis[1]);
 }
 
+
+
 void M_DrawMainMenu(void)
 {
-	HUD_DrawImage(94, 2, menu_doom);
+	float CenterX = 0;
+	if (menu_doom->offset_x != 0.0f) //Only auto-center if no Xoffset 
+		CenterX = MainDef.x; //cannot get away from the damn hardcoded value
+	else
+		CenterX = CenterMenuImage(menu_doom);
+
+	HUD_DrawImage(CenterX, 2, menu_doom);
 }
 
 void M_DrawNewGame(void)
 {
+	int fontType;
+	int x = 54;
+
+	if (! skill_style->fonts[styledef_c::T_HEADER])
+		fontType = styledef_c::T_TITLE;
+	else
+		fontType = styledef_c::T_HEADER;
+
 	if (custom_MenuDifficulty==false)
 	{
-		int fontType;
-
-		if (! skill_style->fonts[styledef_c::T_HEADER])
-			fontType=styledef_c::T_TITLE;
+		if (skill_style->def->entry_alignment == episode_style->def->C_CENTER)
+			x = CenterMenuText(skill_style, fontType, language["MainNewGame"]);
 		else
-			fontType=styledef_c::T_HEADER;
-
-		HL_WriteText(skill_style, fontType, 96 + skill_style->def->text[fontType].x_offset, 
+			x = 94;
+		HL_WriteText(skill_style, fontType, x + skill_style->def->text[fontType].x_offset, 
 			14 + skill_style->def->text[fontType].y_offset, language["MainNewGame"]);
-		HL_WriteText(skill_style, styledef_c::T_ALT, 54 + skill_style->def->text[fontType].x_offset, 
+
+		fontType = styledef_c::T_TITLE;
+		if (skill_style->def->entry_alignment == episode_style->def->C_CENTER)
+			x = CenterMenuText(skill_style, fontType, language["MenuSkill"]);
+		else
+			x = 54;
+		HL_WriteText(skill_style, fontType, x + skill_style->def->text[fontType].x_offset, 
 			38 + skill_style->def->text[fontType].y_offset, language["MenuSkill"]);
 	}
 	else
 	{
-		const colourmap_c *colmap = skill_style->def->text[styledef_c::T_HEADER].colmap;
-					
-		HUD_DrawImage(96 + skill_style->def->text[styledef_c::T_HEADER].x_offset, 
-			14 + skill_style->def->text[styledef_c::T_HEADER].y_offset, menu_newgame, colmap);
-		HUD_DrawImage(54 + skill_style->def->text[styledef_c::T_HEADER].x_offset, 
-			38 + skill_style->def->text[styledef_c::T_HEADER].y_offset, menu_skill, colmap);
+		const colourmap_c *colmap = skill_style->def->text[fontType].colmap;
+		if (menu_newgame->offset_x != 0.0f) //Only auto-center if no Xoffset 
+			x = MainDef.x; //cannot get away from the damn hardcoded value
+		else
+			x = CenterMenuImage(menu_newgame);
+		
+		HUD_DrawImage(x + skill_style->def->text[fontType].x_offset, 
+			14 + skill_style->def->text[fontType].y_offset, menu_newgame, colmap);
+
+		fontType = styledef_c::T_TITLE;
+		x = 54;
+		if (skill_style->def->entry_alignment == skill_style->def->C_CENTER)
+		{
+			if (menu_skill->offset_x != 0.0f) //Only auto-center if no Xoffset 
+				x = 54; //cannot get away from the damn hardcoded value
+			else
+				x = CenterMenuImage(menu_skill);
+		}
+		colmap = skill_style->def->text[fontType].colmap;
+		HUD_DrawImage(x + skill_style->def->text[fontType].x_offset, 
+			38 + skill_style->def->text[fontType].y_offset, menu_skill, colmap);
 	}
 }
 
@@ -1483,23 +1588,36 @@ void M_NewGame(int choice)
 
 void M_DrawEpisode(void)
 {
+	int fontType;
+	int x = 54;
+
+	if (! episode_style->fonts[styledef_c::T_HEADER])
+		fontType=styledef_c::T_TITLE;
+	else
+		fontType=styledef_c::T_HEADER;
+
 	if (custom_MenuEpisode==false)
 	{
-		int fontType;
+		if (episode_style->def->entry_alignment == episode_style->def->C_CENTER)
+			x = CenterMenuText(episode_style,fontType, language["MenuWhichEpisode"]);
 
-		if (! episode_style->fonts[styledef_c::T_HEADER])
-			fontType=styledef_c::T_TITLE;
-		else
-			fontType=styledef_c::T_HEADER;
-
-		HL_WriteText(episode_style, fontType, 54 + episode_style->def->text[fontType].x_offset, 
+		HL_WriteText(episode_style, fontType, x + episode_style->def->text[fontType].x_offset, 
 			38 + episode_style->def->text[fontType].y_offset, language["MenuWhichEpisode"]);
 	}
 	else
 	{
-		const colourmap_c *colmap = episode_style->def->text[styledef_c::T_HEADER].colmap;
-		HUD_DrawImage(54 + episode_style->def->text[styledef_c::T_HEADER].x_offset, 
-			38 + episode_style->def->text[styledef_c::T_HEADER].y_offset, menu_episode,colmap);
+		x = 54;
+		if (episode_style->def->entry_alignment == episode_style->def->C_CENTER)
+		{
+			if (menu_episode->offset_x != 0.0f) //Only auto-center if no Xoffset 
+				x = 54; //cannot get away from the damn hardcoded value
+			else
+				x = CenterMenuImage(menu_episode);
+		}
+
+		const colourmap_c *colmap = episode_style->def->text[fontType].colmap;
+		HUD_DrawImage(x + episode_style->def->text[fontType].x_offset, 
+			38 + episode_style->def->text[fontType].y_offset, menu_episode, colmap);
 	}
 }
 
@@ -2596,11 +2714,422 @@ static void DrawMessage(void)
 	}
 }
 
+
+float ShortestLine;
+float TallestLine;
+float WidestLine;
+//
+// Draw our menu cursor
+//
+void M_DrawCursor(style_c *style, bool graphical_item)
+{
+	float txtscale = 1.0;
+	bool graphical_cursor = false;
+	float TempScale = 0;
+	float TempWidth = 0;
+	float TempSpacer = 0;
+	float y_shift = 0;
+	int txtWidth = 0;
+	short old_offset_x = 0;
+	short old_offset_y = 0;
+	
+	float old_alpha = HUD_GetAlpha();
+
+	if (style->def->text[styledef_c::T_TEXT].scale)
+		txtscale=style->def->text[styledef_c::T_TEXT].scale;
+
+	//const colourmap_c *colmap = style->def->text[styledef_c::T_TEXT].colmap; // Should we allow a colmap for the cursor?
+	const colourmap_c *colmap = NULL;
+					
+	//-------------------------------------------------------------
+	// 1. First up, do we want a graphical cursor or a text one?
+	//-------------------------------------------------------------
+	image_c *cursor;
+	if (style->def->cursor.cursor_string != "")
+		cursor = NULL;
+	else if (style->def->cursor.alt_cursor != "")
+		cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor.c_str());
+	else
+		cursor = menu_skull[0];
+
+	if (cursor) //we're using a graphic for the cursor
+		graphical_cursor = true;
+
+	HUD_SetAlpha(style->def->cursor.translucency);
+	
+	//-------------------------------------------------------------
+	// 2. Start drawing our cursor. We have to check if the 
+	// current menu item is graphical or text to do the calcs.
+	//-------------------------------------------------------------
+	// graphical_item==false //We're going text-based menu items
+	// graphical_item==true //We're going graphic-based menu items
+	if (graphical_cursor == false) //We're going text-based cursor
+	{
+		TempWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(style->def->cursor.cursor_string.c_str()) * txtscale;
+		TempSpacer = style->fonts[styledef_c::T_TEXT]->CharWidth(style->def->cursor.cursor_string[0]) * txtscale * 0.2;
+		//TempSpacer = TempWidth * 0.2;
+	}
+	else //We're going graphical cursor
+	{		
+		old_offset_x = cursor->offset_x;
+		old_offset_y = cursor->offset_y;
+		cursor->offset_x = 0;
+		cursor->offset_y = 0;
+		if (style->def->cursor.force_offsets)
+		{
+			cursor->offset_x += old_offset_x;
+			cursor->offset_y += old_offset_y;
+		}
+		
+		if (graphical_item == false)
+		{
+			if (style->fonts[styledef_c::T_TEXT]->def->type == FNTYP_TrueType)
+			{
+				ShortestLine = style->fonts[styledef_c::T_TEXT]->ttf_ref_height * txtscale;
+				y_shift = style->fonts[styledef_c::T_TEXT]->ttf_ref_yshift * txtscale;
+			}
+		}	
+		TempScale = ShortestLine / IM_HEIGHT(cursor);
+		TempWidth = IM_WIDTH(cursor) * TempScale;
+		if (!style->def->cursor.scaling)
+		{
+			currentMenu->menuitems[itemOn].y -= (IM_HEIGHT(cursor) - ShortestLine) / 2;
+			ShortestLine = IM_HEIGHT(cursor);
+			TempWidth = IM_WIDTH(cursor);
+		}
+		
+	}
+	
+	TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
+	if (style->def->cursor.position == style->def->C_BOTH)
+	{
+		int TempX = 0;
+
+		if (style->def->entry_alignment == style->def->C_RIGHT)
+		{
+			//Left cursor
+			if(graphical_item == false)
+				txtWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
+			else
+				txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
+			
+			TempX = currentMenu->menuitems[itemOn].x + WidestLine - TempSpacer;
+			TempX -= txtWidth; 
+			TempX -= TempWidth;
+			
+			if (graphical_cursor == true)
+			{
+				HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0,colmap);
+			}
+			else
+				HL_WriteText(style,styledef_c::T_TEXT, TempX, 
+				currentMenu->menuitems[itemOn].y + y_shift, style->def->cursor.cursor_string.c_str());
+			
+			//Right cursor
+			TempX=currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer;
+			
+			if (graphical_cursor == true)
+			{
+				HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0,colmap);
+			}
+			else
+				HL_WriteText(style,styledef_c::T_TEXT, TempX, 
+				currentMenu->menuitems[itemOn].y + y_shift, style->def->cursor.cursor_string.c_str());
+		}
+		else
+		{
+			//Left cursor
+			TempX = currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer;
+			
+			if (graphical_cursor == true)
+			{
+				HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0,colmap);
+			}
+			else
+				HL_WriteText(style,styledef_c::T_TEXT, TempX, 
+				currentMenu->menuitems[itemOn].y + y_shift, style->def->cursor.cursor_string.c_str());
+			
+			//Right cursor
+			if (graphical_item == false)
+				txtWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
+			else
+				txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
+			
+			TempX=currentMenu->menuitems[itemOn].x + txtWidth + TempSpacer;
+			if (graphical_cursor == true)
+			{
+				HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0,colmap);
+			}
+			else
+				HL_WriteText(style,styledef_c::T_TEXT, TempX, 
+				currentMenu->menuitems[itemOn].y + y_shift, style->def->cursor.cursor_string.c_str());
+		}
+	}
+	else if (style->def->cursor.position == style->def->C_CENTER)
+	{
+		int TempX = 0;
+		
+			if (graphical_cursor == true)
+			{	
+				TempX = CenterMenuImage2(style, styledef_c::T_TEXT,cursor) + TempSpacer;
+				if (style->def->cursor.border)
+					HUD_StretchImage(currentMenu->menuitems[itemOn].x,currentMenu->menuitems[itemOn].y + y_shift,WidestLine,TallestLine,cursor, 0.0, 0.0,colmap);
+				else
+					HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0,colmap);
+			}
+			else
+			{
+				TempX = CenterMenuText(style, styledef_c::T_TEXT,style->def->cursor.cursor_string.c_str());// + TempSpacer;
+				HL_WriteText(style,styledef_c::T_TEXT, TempX, 
+				currentMenu->menuitems[itemOn].y + y_shift, style->def->cursor.cursor_string.c_str());
+			}
+	}
+	else if (style->def->cursor.position == style->def->C_RIGHT)
+	{
+		int TempX = 0;
+		
+		if (style->def->entry_alignment == style->def->C_CENTER)
+		{
+			if (graphical_item == false)
+				txtWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
+			else
+				txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
+			
+			TempX = currentMenu->menuitems[itemOn].x + txtWidth + TempSpacer;
+		}
+		else
+			TempX = currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer;
+		
+		if (graphical_cursor == true)
+		{
+			HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0,colmap);
+		}
+		else
+			HL_WriteText(style,styledef_c::T_TEXT, TempX, 
+			currentMenu->menuitems[itemOn].y + y_shift, style->def->cursor.cursor_string.c_str());
+	}
+	else
+	{
+		int TempX = currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer;
+		if (graphical_cursor == true)
+		{
+			HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0,colmap);
+		}
+		else
+			HL_WriteText(style,styledef_c::T_TEXT, TempX, 
+			currentMenu->menuitems[itemOn].y + y_shift, style->def->cursor.cursor_string.c_str());
+	}
+
+	if (graphical_cursor == true)
+	{	
+		cursor->offset_x = old_offset_x;
+		cursor->offset_y = old_offset_y;
+	}
+	HUD_SetAlpha(old_alpha);
+}
+
+//
+// Draw our menu items
+//
+void M_DrawItems(style_c *style, bool graphical_item)
+{
+	short x, y;
+	unsigned int i;
+	unsigned int max;
+
+	float txtscale = 1.0;
+	short TempX = 0;
+	
+	ShortestLine = 0.0f;
+	TallestLine = 0.0f;
+	WidestLine = 0.0f;
+
+	x = currentMenu->x;
+	y = currentMenu->y;
+	
+	max = currentMenu->numitems;
+	
+	float old_alpha = HUD_GetAlpha();
+	
+	HUD_SetAlpha(style->def->text[styledef_c::T_TEXT].translucency);
+	
+	if(style->def->text[styledef_c::T_TEXT].scale)
+		txtscale=style->def->text[styledef_c::T_TEXT].scale;
+
+	//---------------------------------------------------
+	// 1. For each menu item calculate x, width, height
+	//---------------------------------------------------
+	if (graphical_item == false) //We're going text-based menu items
+	{
+		ShortestLine = txtscale * style->fonts[styledef_c::T_TEXT]->NominalHeight();
+		TallestLine = txtscale * style->fonts[styledef_c::T_TEXT]->NominalHeight();
+		for (i = 0; i < max; i++)
+		{
+			currentMenu->menuitems[i].height = ShortestLine;
+			if (style->def->entry_alignment == style->def->C_CENTER)
+				currentMenu->menuitems[i].x = CenterMenuText(style, styledef_c::T_TEXT, currentMenu->menuitems[i].name);
+			else
+				currentMenu->menuitems[i].x = x + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
+			
+			currentMenu->menuitems[i].y = y + style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
+			if (currentMenu->menuitems[i].width < 0)
+				currentMenu->menuitems[i].width = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[i].name) * txtscale;
+			if (currentMenu->menuitems[i].width > WidestLine) 
+				WidestLine = currentMenu->menuitems[i].width;
+			
+			y += currentMenu->menuitems[i].height + 1 + style->def->entry_spacing;
+		}
+	}
+	else
+	{
+		ShortestLine = 10000.0f;
+		TallestLine = 0.0f;
+		bool backdrop_menu = false;
+		for (i = 0; i < max; i++)
+		{
+			if (! currentMenu->menuitems[i].patch_name[0])
+				continue;
+			if (! currentMenu->menuitems[i].image)
+				currentMenu->menuitems[i].image = W_ImageLookup(currentMenu->menuitems[i].patch_name);
+		
+			const image_c *image = currentMenu->menuitems[i].image;
+
+			currentMenu->menuitems[i].height = IM_HEIGHT(image) * txtscale;
+			currentMenu->menuitems[i].width = IM_WIDTH(image) * txtscale;
+
+			if (!image->is_empty)
+			{
+				if (currentMenu->menuitems[i].height < ShortestLine) 
+					ShortestLine = currentMenu->menuitems[i].height;
+				if (currentMenu->menuitems[i].height > TallestLine) 
+					TallestLine = currentMenu->menuitems[i].height;
+				if (currentMenu->menuitems[i].width > WidestLine) 
+					WidestLine = currentMenu->menuitems[i].width;
+
+				if (style->def->entry_alignment == style->def->C_CENTER)
+					currentMenu->menuitems[i].x = CenterMenuImage2(style, styledef_c::T_TEXT, image);
+				else
+					currentMenu->menuitems[i].x = x + image->offset_x + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
+
+				currentMenu->menuitems[i].y = y - image->offset_y + style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
+				y += currentMenu->menuitems[i].height + style->def->entry_spacing;
+			}
+			else
+			{
+				currentMenu->menuitems[i].x = x;
+				currentMenu->menuitems[i].y = y;
+				y += 15 + style->def->entry_spacing;
+			}
+		}
+		if (ShortestLine == 10000.0f && TallestLine == 0.0f)
+		{
+			backdrop_menu = true;
+			ShortestLine = 20.0f;
+			TallestLine = 20.0f;
+			WidestLine = 121.0f;
+			HUD_SetAlpha(old_alpha);
+			//We have empty menu items so don't draw anything...
+			return; 
+		}
+	}
+
+	//---------------------------------------------------
+	// 2. Draw each menu item
+	//---------------------------------------------------
+	for (i=0; i < max; i++)
+	{
+		int textstyle = i == itemOn ? (style->def->text[styledef_c::T_SELECTED].font ? styledef_c::T_SELECTED : styledef_c::T_TEXT) : 
+				styledef_c::T_TEXT;
+
+		if (style->def->entry_alignment == style->def->C_RIGHT)
+			TempX = currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width;
+		else
+			TempX = currentMenu->menuitems[i].x;
+
+		if (graphical_item == false) //We're going text-based menu items
+		{
+			HL_WriteText(style, textstyle, TempX, 
+				currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
+		}
+		else //We're going graphical menu items
+		{
+			const colourmap_c *colmap = i == itemOn ? style->def->text[styledef_c::T_SELECTED].colmap : 
+					style->def->text[styledef_c::T_TEXT].colmap;
+			HUD_StretchImage(TempX, currentMenu->menuitems[i].y,
+				currentMenu->menuitems[i].width,currentMenu->menuitems[i].height,currentMenu->menuitems[i].image,0.0,0.0,colmap);
+		}
+	}
+	HUD_SetAlpha(old_alpha);
+	
+}
+
+void M_Drawer(void)
+{
+	if (!menuactive)
+		return;
+
+	// Horiz. & Vertically center string and print it.
+	if (msg_mode)
+	{
+		DrawMessage();
+		return;
+	}
+
+	// new options menu enable, use that drawer instead
+	if (option_menuon)
+	{
+		M_OptDrawer();
+		return;
+	}
+
+	if (netgame_menuon)
+	{
+		M_NetGameDrawer();
+		return;
+	}
+	
+	//Lobo 2022: Check if we're going to use text-based menus
+	//or the users (custom)graphics
+	bool custom_menu = false;
+	if ((currentMenu->draw_func == M_DrawMainMenu) && (custom_MenuMain == true)) 
+		custom_menu=true;
+
+	if ((currentMenu->draw_func == M_DrawNewGame) && (custom_MenuDifficulty == true)) 
+		custom_menu=true;
+
+	if (currentMenu->draw_func == M_DrawEpisode && custom_MenuEpisode == true) 
+		custom_menu=true;
+
+
+	style_c *style = currentMenu->style_var[0];
+	SYS_ASSERT(style);
+
+	style->DrawBackground();
+
+	// call Draw routine
+	if (currentMenu->draw_func)
+		(* currentMenu->draw_func)();
+
+	// custom_menu==false //We're going text-based menu items
+	// custom_menu==true //We're going graphic-based menu items
+	M_DrawItems(style, custom_menu);
+	
+	if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
+	{
+		// custom_menu==false //We're going text-based menu items
+		// custom_menu==true //We're going graphic-based menu items
+		M_DrawCursor(style, custom_menu);
+	}
+
+
+}
+
+
 //
 // Called after the view has been rendered,
 // but before it has been blitted.
 //
-void M_Drawer(void)
+void M_Drawer_old(void)
 {
 	short x, y;
 
@@ -2657,16 +3186,20 @@ void M_Drawer(void)
 	if (currentMenu->draw_func)
 		(* currentMenu->draw_func)();
 
+
 	// DRAW MENU
 	x = currentMenu->x;
 	y = currentMenu->y;
 	
 	max = currentMenu->numitems;
 	
-	float ShortestLine;
-	float TallestLine;
-	float WidestLine = 0.0f;
-	//int t_type = styledef_c::T_TEXT;
+	//float ShortestLine;
+	//float TallestLine;
+	//float WidestLine = 0.0f;
+	ShortestLine = 0.0f;
+	TallestLine = 0.0f;
+	WidestLine = 0.0f;
+
 	float txtscale = 1.0;
 
 	if(style->def->text[styledef_c::T_TEXT].scale)
@@ -2674,14 +3207,18 @@ void M_Drawer(void)
 		txtscale=style->def->text[styledef_c::T_TEXT].scale;
 	}
 	
-	if (custom_menu==false)
+	if (custom_menu==false) //We're going text-based menu items
 	{
 		ShortestLine = txtscale * style->fonts[styledef_c::T_TEXT]->NominalHeight();
 		TallestLine = txtscale * style->fonts[styledef_c::T_TEXT]->NominalHeight();
 		for (i = 0; i < max; i++)
 		{
 			currentMenu->menuitems[i].height = ShortestLine;
-			currentMenu->menuitems[i].x = x + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
+			if (style->def->entry_alignment == style->def->C_CENTER)
+				currentMenu->menuitems[i].x = CenterMenuText(style, styledef_c::T_TEXT, currentMenu->menuitems[i].name);
+			else
+				currentMenu->menuitems[i].x = x + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
+			
 			currentMenu->menuitems[i].y = y + style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
 			if (currentMenu->menuitems[i].width < 0)
 				currentMenu->menuitems[i].width = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[i].name) * txtscale;
@@ -2696,11 +3233,9 @@ void M_Drawer(void)
 			if (style->def->entry_alignment == style->def->C_RIGHT)
 				HL_WriteText(style, textstyle, currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width, 
 					currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
-			else if (style->def->entry_alignment == style->def->C_CENTER)
-				HL_WriteText(style, textstyle, currentMenu->menuitems[i].x + (WidestLine /2) - (currentMenu->menuitems[i].width / 2), 
+			else //CENTER and LEFT are the same
+				HL_WriteText(style, textstyle, currentMenu->menuitems[i].x, 
 					currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
-			else
-				HL_WriteText(style, textstyle, currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
 		}
 		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
 		{
@@ -2711,7 +3246,7 @@ void M_Drawer(void)
 				cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor.c_str());
 			else
 				cursor = menu_skull[0];
-			if (cursor)
+			if (cursor) //we're using a graphic for the cursor
 			{
 				short old_offset_x = cursor->offset_x;
 				short old_offset_y = cursor->offset_y;
@@ -2744,25 +3279,68 @@ void M_Drawer(void)
 				HUD_SetAlpha(style->def->cursor.translucency);
 				if (style->def->cursor.position == style->def->C_BOTH)
 				{
-					HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
-					HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+					int TempX = 0;
+					int txtWidth = 0;
+					if (style->def->entry_alignment == style->def->C_RIGHT)
+					{
+						//Left cursor
+						txtWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
+						TempX = currentMenu->menuitems[itemOn].x + WidestLine - TempSpacer;
+						TempX -= txtWidth; 
+						TempX -= TempWidth;
+						
+						HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+						
+						//Right cursor
+						TempX=currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer;
+						HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+					}
+					else
+					{
+						//Left cursor
+						TempX = currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer;
+						HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+						
+						//Right cursor
+						txtWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
+						TempX=currentMenu->menuitems[itemOn].x + txtWidth + TempSpacer;
+						HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+					}
 				}
 				else if (style->def->cursor.position == style->def->C_CENTER)
 				{
+					int TempX = 0;
+					TempX = CenterMenuImage2(style, styledef_c::T_TEXT,cursor) + TempSpacer;
 					if (style->def->cursor.border)
 						HUD_StretchImage(currentMenu->menuitems[itemOn].x,currentMenu->menuitems[itemOn].y + y_shift,WidestLine,TallestLine,cursor, 0.0, 0.0);
 					else
-						HUD_StretchImage(currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2),currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+						HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
 				}
 				else if (style->def->cursor.position == style->def->C_RIGHT)
-					HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+				{
+					int TempX = 0;
+					
+					if (style->def->entry_alignment == style->def->C_CENTER)
+					{
+						int txtWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
+						TempX = currentMenu->menuitems[itemOn].x + txtWidth + TempSpacer;
+					}
+					else
+						TempX = currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer;
+					
+					HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+				}
 				else
-					HUD_StretchImage(currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+				{
+					int TempX = currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer;
+					HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y + y_shift,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+				}
+					
 				cursor->offset_x = old_offset_x;
 				cursor->offset_y = old_offset_y;
 				HUD_SetAlpha(old_alpha);
 			}
-			else
+			else //we're using text for the cursor
 			{
 				float old_alpha = HUD_GetAlpha();
 				HUD_SetAlpha(style->def->cursor.translucency);
@@ -2776,8 +3354,10 @@ void M_Drawer(void)
 						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string.c_str());
 				}
 				else if (style->def->cursor.position == style->def->C_CENTER)
+				{
 					HL_WriteText(style,styledef_c::T_TEXT, currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2), 
 						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string.c_str());
+				}
 				else if (style->def->cursor.position == style->def->C_RIGHT)
 					HL_WriteText(style,styledef_c::T_TEXT, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
 						currentMenu->menuitems[itemOn].y, style->def->cursor.cursor_string.c_str());
@@ -2788,7 +3368,7 @@ void M_Drawer(void)
 			}
 		}
 	}
-	else
+	else //We're going graphic-based menu items
 	{	
 		ShortestLine = 10000.0f;
 		TallestLine = 0.0f;
@@ -2802,8 +3382,8 @@ void M_Drawer(void)
 		
 			const image_c *image = currentMenu->menuitems[i].image;
 
-			currentMenu->menuitems[i].height = IM_HEIGHT(image);
-			currentMenu->menuitems[i].width = IM_WIDTH(image);
+			currentMenu->menuitems[i].height = IM_HEIGHT(image) * txtscale;
+			currentMenu->menuitems[i].width = IM_WIDTH(image) * txtscale;
 
 			if (!image->is_empty)
 			{
@@ -2813,7 +3393,12 @@ void M_Drawer(void)
 					TallestLine = currentMenu->menuitems[i].height;
 				if (currentMenu->menuitems[i].width > WidestLine) 
 					WidestLine = currentMenu->menuitems[i].width;
-				currentMenu->menuitems[i].x = x + image->offset_x + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
+
+				if (style->def->entry_alignment == style->def->C_CENTER)
+					currentMenu->menuitems[i].x = CenterMenuImage2(style, styledef_c::T_TEXT, image);
+				else
+					currentMenu->menuitems[i].x = x + image->offset_x + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
+
 				currentMenu->menuitems[i].y = y - image->offset_y + style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
 				y += currentMenu->menuitems[i].height + style->def->entry_spacing;
 			}
@@ -2841,14 +3426,15 @@ void M_Drawer(void)
 					continue;
 				const colourmap_c *colmap = i == itemOn ? style->def->text[styledef_c::T_SELECTED].colmap : 
 					style->def->text[styledef_c::T_TEXT].colmap;
+
 				if (style->def->entry_alignment == style->def->C_RIGHT)
-					HUD_DrawImage(currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width, 
-						currentMenu->menuitems[i].y, currentMenu->menuitems[i].image, colmap);
-				else if (style->def->entry_alignment == style->def->C_CENTER)
-					HUD_DrawImage(currentMenu->menuitems[i].x + (WidestLine / 2) - (currentMenu->menuitems[i].width / 2), 
-						currentMenu->menuitems[i].y, currentMenu->menuitems[i].image, colmap);
-				else
-					HUD_DrawImage(currentMenu->menuitems[i].x, currentMenu->menuitems[i].y, currentMenu->menuitems[i].image, colmap);
+				{
+					HUD_StretchImage(currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width, currentMenu->menuitems[i].y,currentMenu->menuitems[i].width,currentMenu->menuitems[i].height,currentMenu->menuitems[i].image,0.0,0.0,colmap);
+				}
+				else //CENTER and LEFT are the same
+				{
+					HUD_StretchImage(currentMenu->menuitems[i].x, currentMenu->menuitems[i].y,currentMenu->menuitems[i].width,currentMenu->menuitems[i].height,currentMenu->menuitems[i].image,0.0,0.0,colmap);
+				}
 			}
 		}
 		if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
@@ -2864,8 +3450,8 @@ void M_Drawer(void)
 			{
 				short old_offset_x = cursor->offset_x;
 				short old_offset_y = cursor->offset_y;
-				cursor->offset_x = currentMenu->menuitems[itemOn].image->offset_x;
-				cursor->offset_y = currentMenu->menuitems[itemOn].image->offset_y;
+				cursor->offset_x = 0; //currentMenu->menuitems[itemOn].image->offset_x;
+				cursor->offset_y = 0; //currentMenu->menuitems[itemOn].image->offset_y;
 				if (style->def->cursor.force_offsets)
 				{
 					cursor->offset_x += old_offset_x;
@@ -2887,27 +3473,62 @@ void M_Drawer(void)
 				HUD_SetAlpha(style->def->cursor.translucency);
 				if (style->def->cursor.position == style->def->C_BOTH)
 				{
-					HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,
-						currentMenu->menuitems[itemOn].y ,TempWidth,ShortestLine,cursor, 0.0, 0.0);
-					HUD_StretchImage(currentMenu->menuitems[itemOn].x + MAX(0, ((IM_WIDTH(currentMenu->menuitems[itemOn].image) - WidestLine) / 2)) - TempWidth - TempSpacer, 
-						currentMenu->menuitems[itemOn].y, TempWidth,ShortestLine,cursor, 0.0, 0.0);
+					int TempX = 0;
+					int txtWidth = 0;
+					if (style->def->entry_alignment == style->def->C_RIGHT)
+					{
+						//Left cursor
+						txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
+						TempX = currentMenu->menuitems[itemOn].x + WidestLine - TempSpacer;
+						TempX -= txtWidth; 
+						TempX -= TempWidth;
+						
+						HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+						
+						//Right cursor
+						TempX=currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer;
+						HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+					}
+					else
+					{
+						//Left cursor
+						TempX = currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer;
+						HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+						
+						//Right cursor
+						txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
+						TempX=currentMenu->menuitems[itemOn].x + txtWidth + TempSpacer;
+						HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+					}
 				}
 				else if (style->def->cursor.position == style->def->C_CENTER)
 				{
+					int TempX = 0;
+					TempX = CenterMenuImage2(style, styledef_c::T_TEXT,cursor) + TempSpacer;
 					if (style->def->cursor.border)
-						HUD_StretchImage(currentMenu->menuitems[itemOn].x, 
-							currentMenu->menuitems[itemOn].y, WidestLine,TallestLine,cursor, 0.0, 0.0);
+						HUD_StretchImage(currentMenu->menuitems[itemOn].x,currentMenu->menuitems[itemOn].y,WidestLine,TallestLine,cursor, 0.0, 0.0);
 					else
-						HUD_StretchImage(currentMenu->menuitems[itemOn].x + + (WidestLine/2) - (TempWidth / 2), 
-							currentMenu->menuitems[itemOn].y, TempWidth,ShortestLine,cursor, 0.0, 0.0);
+						HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
 				}
 				else if (style->def->cursor.position == style->def->C_RIGHT)
-					HUD_StretchImage(currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer,
-						currentMenu->menuitems[itemOn].y ,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+				{
+					int TempX = 0;
+					
+					if (style->def->entry_alignment == style->def->C_CENTER)
+					{
+						int txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
+						TempX = currentMenu->menuitems[itemOn].x + txtWidth + TempSpacer;
+					}
+					else
+						TempX = currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer;
+					
+					HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+				}
 				else
-					HUD_StretchImage(currentMenu->menuitems[itemOn].x + MAX(0, ((IM_WIDTH(currentMenu->menuitems[itemOn].image) - WidestLine) / 2)) - TempWidth - TempSpacer, 
-						currentMenu->menuitems[itemOn].y, TempWidth,ShortestLine,cursor, 0.0, 0.0);
-
+				{
+					int TempX = currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer;
+					HUD_StretchImage(TempX,currentMenu->menuitems[itemOn].y,TempWidth,ShortestLine,cursor, 0.0, 0.0);
+				}
 				cursor->offset_x = old_offset_x;
 				cursor->offset_y = old_offset_y;
 				HUD_SetAlpha(old_alpha);
@@ -2926,8 +3547,10 @@ void M_Drawer(void)
 						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string.c_str());
 				}
 				else if (style->def->cursor.position == style->def->C_CENTER)
+				{
 					HL_WriteText(style,styledef_c::T_TEXT, currentMenu->menuitems[itemOn].x + (WidestLine/2) - (TempWidth / 2), 
 						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string.c_str());
+				}
 				else if (style->def->cursor.position == style->def->C_RIGHT)
 					HL_WriteText(style,styledef_c::T_TEXT, currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer, 
 						currentMenu->menuitems[itemOn].y - currentMenu->menuitems[itemOn].image->offset_y, style->def->cursor.cursor_string.c_str());

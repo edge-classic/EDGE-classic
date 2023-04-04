@@ -462,7 +462,7 @@ static void DrawLevelFinished(void)
 			if(txtWidth > 320) //Too big? Shrink it to fit the screen
 			{
 				float TempScale = 0;
-				TempScale = 320;
+				TempScale = 310;
 				TempScale /= txtWidth;
 				HL_WriteText(style,t_type, 160, y, language[wi_stats.cur->description.c_str()],TempScale);
 			}
@@ -485,7 +485,7 @@ static void DrawLevelFinished(void)
 		if(txtWidth > 320)  //Too big? Shrink it to fit the screen
 		{
 			float TempScale = 0;
-			TempScale = 320;
+			TempScale = 310;
 			TempScale /= txtWidth;
 			HL_WriteText(style,t_type, 160, y, language[wi_stats.cur->description.c_str()],TempScale);
 		}
@@ -601,7 +601,7 @@ static void DrawEnteringLevel(void)
 			if(txtWidth > 320)  //Too big? Shrink it to fit the screen
 			{
 				float TempScale = 0;
-				TempScale = 320;
+				TempScale = 310;
 				TempScale /= txtWidth;
 				HL_WriteText(style,t_type, 160, y * 5/4, language[wi_stats.next->description.c_str()],TempScale);
 			}
@@ -623,7 +623,7 @@ static void DrawEnteringLevel(void)
 		if(txtWidth > 320)  //Too big? Shrink it to fit the screen
 		{
 			float TempScale = 0;
-			TempScale = 320;
+			TempScale = 310;
 			TempScale /= txtWidth;
 			HL_WriteText(style,t_type, 160, y * 5/4, language[wi_stats.next->description.c_str()],TempScale);
 		}
@@ -1653,12 +1653,12 @@ static void DrawSinglePlayerStats(void)
 	{
 		if ((par) && (W_IsLumpInPwad(par->name)))
 		{
-			HUD_DrawImage(160, SP_TIMEY, par);
+			HUD_DrawImage(170, SP_TIMEY, par);
 			DrawTime(320 - SP_TIMEX - TimeWidth(cnt_par), SP_TIMEY, cnt_par);
 		}
 		else
 		{
-			HL_WriteText(wi_sp_style,styledef_c::T_ALT, 160, SP_TIMEY, "Par");
+			HL_WriteText(wi_sp_style,styledef_c::T_ALT, 170, SP_TIMEY, "Par");
 			DrawTime(320 - SP_TIMEX - TimeWidth(cnt_par, true), SP_TIMEY, cnt_par, true);
 		}
 		

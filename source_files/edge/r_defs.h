@@ -570,7 +570,6 @@ typedef struct secanim_s
 	vec2_t ceil_scroll = {0,0};
 	vec3_t push = {0,0,0};
 	bool permanent = false;
-	vec2_t orig_heights = {0,0};
 }
 secanim_t;
 
@@ -589,7 +588,6 @@ typedef struct lineanim_s
 	float dynamic_dx = 0.0;
 	float dynamic_dy = 0.0;
 	bool permanent = false;
-	vec2_t orig_heights = {0,0};
 }
 lineanim_t;
 

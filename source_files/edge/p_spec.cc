@@ -634,7 +634,6 @@ static void P_LineEffect(line_t *target, line_t *source,
 							anim.permanent = true;
 					}
 				}
-				anim.orig_heights.Set(source->frontsector->f_h, source->frontsector->c_h);
 			}
 		}
 		lineanims.push_back(anim);
@@ -701,7 +700,6 @@ static void P_LineEffect(line_t *target, line_t *source,
 								anim.permanent = true;
 						}
 					}
-					anim.orig_heights.Set(source->frontsector->f_h, source->frontsector->c_h);
 				}
 			}
 			lineanims.push_back(anim);
@@ -826,7 +824,6 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 							anim.permanent = true;
 					}
 				}
-				anim.orig_heights.Set(source->frontsector->f_h, source->frontsector->c_h);
 			}
 		}
 		secanims.push_back(anim);
@@ -2144,8 +2141,8 @@ void P_UpdateSpecials(bool extra_tic)
 					float tdy = lineanims[i].dynamic_dy;
 					if (sec_ref->floor_move && sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
 					{
-						bool lowering = lineanims[i].orig_heights.x < sec_ref->floor_move->startheight;
-						float dist = (lowering ? sec_ref->floor_move->destheight : sec_ref->floor_move->startheight) - sec_ref->f_h;
+						float dist = (sec_ref->floor_move->destheight < sec_ref->floor_move->startheight ? 
+							std::abs(sec_ref->floor_move->startheight - sec_ref->f_h) : -std::abs(sec_ref->floor_move->startheight - sec_ref->f_h));
 						float sx = tdx * dist;
 						float sy = tdy * dist;
 						if (ld->side[0])
@@ -2291,8 +2288,8 @@ void P_UpdateSpecials(bool extra_tic)
 				{
 					if (sec_ref->floor_move && sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
 					{
-						bool lowering = lineanims[i].orig_heights.x < sec_ref->floor_move->startheight;
-						float dist = (lowering ? sec_ref->floor_move->destheight : sec_ref->floor_move->startheight) - sec_ref->f_h;
+						float dist = (sec_ref->floor_move->destheight < sec_ref->floor_move->startheight ? 
+							std::abs(sec_ref->floor_move->startheight - sec_ref->f_h) : -std::abs(sec_ref->floor_move->startheight - sec_ref->f_h));
 						float sx = x_speed * dist;
 						float sy = y_speed * dist;
 						if (ld->side[0])
@@ -2562,10 +2559,10 @@ void P_UpdateSpecials(bool extra_tic)
 				float ratio = line_ref->length / 32.0f;
 				float sdx = line_ref->dx / line_ref->length;
 				float sdy = line_ref->dy / line_ref->length;
-				if (sec_ref->floor_move)
+				if (sec_ref->floor_move && sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
 				{
-					bool lowering = secanims[i].orig_heights.x < sec_ref->floor_move->startheight;
-					float dist = (lowering ? sec_ref->floor_move->destheight : sec_ref->floor_move->startheight) - sec_ref->f_h;
+					float dist = (sec_ref->floor_move->destheight < sec_ref->floor_move->startheight ? 
+						std::abs(sec_ref->floor_move->startheight - sec_ref->f_h) : -std::abs(sec_ref->floor_move->startheight - sec_ref->f_h));
 					float sy = ratio * sdy * dist;
 					float sx = ratio * sdx * dist;
 					if (special_ref->sector_effect & SECTFX_PushThings)

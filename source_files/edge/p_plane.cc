@@ -1306,7 +1306,7 @@ void P_RunActivePlanes(void)
                 for (auto anim : secanims)
                 {
                     if (anim.scroll_sec_ref && (anim.scroll_sec_ref->ceil_move == pmov ||
-                        anim.scroll_sec_ref->floor_move == pmov) && (anim.permanent || anim.scroll_special_ref->scroll_type == ScrollType_Accel))
+                        anim.scroll_sec_ref->floor_move == pmov) && (anim.permanent || anim.scroll_special_ref->scroll_type & ScrollType_Accel))
                     {
                         struct sector_s *sec_ref = anim.scroll_sec_ref;
                         sector_t *sec = anim.target;
@@ -1385,10 +1385,11 @@ void P_RunActivePlanes(void)
                             float ratio = line_ref->length / 32.0f;
                             float sdx = line_ref->dx / line_ref->length;
                             float sdy = line_ref->dy / line_ref->length;
-                            if (sec_ref->floor_move && sec_ref->floor_move == pmov)
+                            if (sec_ref->floor_move && sec_ref->floor_move == pmov &&
+                                sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
                             {
-                                bool lowering = anim.orig_heights.x < sec_ref->floor_move->startheight;
-					            float dist = (lowering ? sec_ref->floor_move->destheight : sec_ref->floor_move->startheight) - sec_ref->f_h;
+                                float dist = (sec_ref->floor_move->destheight < sec_ref->floor_move->startheight ? 
+						            std::abs(sec_ref->floor_move->startheight - sec_ref->f_h) : -std::abs(sec_ref->floor_move->startheight - sec_ref->f_h));
                                 float sy = ratio * sdy * dist;
                                 float sx = ratio * sdx * dist;
                                 if (special_ref->sector_effect & SECTFX_PushThings)
@@ -1451,7 +1452,7 @@ void P_RunActivePlanes(void)
                 for (auto anim : lineanims)
                 {
                     if (anim.scroll_sec_ref && (anim.scroll_sec_ref->ceil_move == pmov ||
-                        anim.scroll_sec_ref->floor_move == pmov) && (anim.permanent || anim.scroll_special_ref->scroll_type == ScrollType_Accel))
+                        anim.scroll_sec_ref->floor_move == pmov) && (anim.permanent || anim.scroll_special_ref->scroll_type & ScrollType_Accel))
                     {
                         struct sector_s *sec_ref = anim.scroll_sec_ref;
                         line_t *ld = anim.target;
@@ -1587,8 +1588,8 @@ void P_RunActivePlanes(void)
                                 if (sec_ref->floor_move && sec_ref->floor_move == pmov &&
                                     sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
                                 {
-                                    bool lowering = anim.orig_heights.x < sec_ref->floor_move->startheight;
-                                    float dist = (lowering ? sec_ref->floor_move->destheight : sec_ref->floor_move->startheight) - sec_ref->f_h;
+                                    float dist = (sec_ref->floor_move->destheight < sec_ref->floor_move->startheight ? 
+						                std::abs(sec_ref->floor_move->startheight - sec_ref->f_h) : -std::abs(sec_ref->floor_move->startheight - sec_ref->f_h));
                                     float sx = tdx * dist;
                                     float sy = tdy * dist;
                                     if (ld->side[0])
@@ -1774,8 +1775,8 @@ void P_RunActivePlanes(void)
                                 if (sec_ref->floor_move && sec_ref->floor_move == pmov &&
                                     sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
                                 {
-                                    bool lowering = anim.orig_heights.x < sec_ref->floor_move->startheight;
-					                float dist = (lowering ? sec_ref->floor_move->destheight : sec_ref->floor_move->startheight) - sec_ref->f_h;
+                                    float dist = (sec_ref->floor_move->destheight < sec_ref->floor_move->startheight ? 
+						                std::abs(sec_ref->floor_move->startheight - sec_ref->f_h) : -std::abs(sec_ref->floor_move->startheight - sec_ref->f_h));
                                     float sx = x_speed * dist;
                                     float sy = y_speed * dist;
                                     if (ld->side[0])

@@ -1,0 +1,43 @@
+##################################################
+# Setup Info
+##################################################
+# Set EDGE_SANITIZE cmake option 
+# export ASAN_OPTIONS=detect_leaks=1
+# export LSAN_OPTIONS=suppressions=ASanSuppress.txt
+
+##################################################
+# Investigate: High Priority
+##################################################
+leak:MDL_LoadModel
+leak:DetailSlope_BoundIt
+
+##################################################
+# Investigate: Low Priority
+##################################################
+
+# ignore anything cached images, though should be investigated
+leak:ImageCacheOGL
+
+# this is probably fine, should be investigated
+leak:RGL_UpdateSkyBoxTextures
+
+# should be once per font, needs investigation
+leak:LoadFontImage
+leak:font_c::LoadFontTTF
+leak:font_c::LoadPatches
+leak:font_c::CharWidth
+leak:font_c::GetGlyphIndex
+leak:font_c::CharImage
+
+# These are cached it appears, S_CacheClearAll would delete instances, though is never called and not sure if frees members
+leak:epi::sound_data_c::Mix_Reverb
+
+# assuming cached, should be investigated
+leak:HD_draw_image
+
+##################################################
+# Ignore
+##################################################
+
+# anything that leaks in E_Startup, assuming lifetime is process
+leak:E_Startup

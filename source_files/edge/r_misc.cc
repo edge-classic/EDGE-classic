@@ -106,6 +106,8 @@ float *r_sawtoothtable = new float[FUNCTABLE_SIZE];
 float *r_inversesawtoothtable = new float[FUNCTABLE_SIZE];
 float *r_triangletable = new float[FUNCTABLE_SIZE];
 
+void R2_FreeupBSP(void);
+
 //
 // To get a global angle from cartesian coordinates,
 // the coordinates are flipped until they are in
@@ -195,6 +197,13 @@ void R_Init(void)
 	V_InitColour();
 }
 
+//
+// Called at shutdown
+//
+void R_Shutdown(void)
+{
+	R2_FreeupBSP();
+}
 
 subsector_t *R_PointInSubsector(float x, float y)
 {

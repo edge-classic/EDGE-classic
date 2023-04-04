@@ -183,7 +183,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 		case epi::FMT_OGG:
 			// rewind the file
 			F->Seek(0, epi::file_c::SEEKPOINT_START);
-			delete data;
+			delete[] data;
 			music_player = S_PlayOGGMusic(F, volume, loop);
 			break;
 

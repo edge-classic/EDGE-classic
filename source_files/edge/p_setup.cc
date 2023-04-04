@@ -3090,7 +3090,9 @@ void ShutdownLevel(void)
 	delete[] linebuffer;   linebuffer = NULL;
 	delete[] v_seclists;   v_seclists = NULL;
 
-	P_DestroyBlockMap();
+	P_DestroyBlockMap();	
+
+	P_RemoveAllMobjs(false);
 }
 
 
@@ -3316,6 +3318,14 @@ sectortype_c *P_LookupSectorType(int num)
 	I_Warning("P_LookupSectorType(): Unknown sector type %d\n", num);
 
 	return sectortypes.Lookup(0);	// template sector
+}
+
+void P_Shutdown(void)
+{
+	if (level_active)
+	{		
+		ShutdownLevel();
+	}
 }
 
 //--- editor settings ---

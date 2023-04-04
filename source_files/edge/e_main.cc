@@ -1584,7 +1584,11 @@ void E_EngineShutdown(void)
 		I_Sleep(50);
 	}
 
+	P_Shutdown();
+
     S_Shutdown();
+	R_Shutdown();
+
 }
 
 // Local Prototypes

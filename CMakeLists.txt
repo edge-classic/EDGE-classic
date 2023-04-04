@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 option(EDGE_GL_ES2 "Enable GLES2 Rendering Backend" OFF)
+option(EDGE_SANITIZE "Enable code sanitizing (Clang/GCC) " OFF)
 
 if (WIN32)
   if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -46,7 +47,15 @@ else()
   endif()
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math -fno-strict-aliasing -Wall")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -fno-strict-aliasing -Wall")
+
+  if (EDGE_SANITIZE)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+    set(CMAKE_EXE_LINKER_FLAGS "-fsanitize=address -static-libasan")
+  endif()
+
 endif()
+
 
 if (MSVC OR MINGW OR MSYS OR WIN32_CLANG)
   set(CMAKE_MODULE_PATH cmake)

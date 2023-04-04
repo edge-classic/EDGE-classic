@@ -578,7 +578,7 @@ bool Mus2Midi::CompactMidi(MIDI_c& info, byte **mid, int *midlen)
 		return false;
 	}
 
-	*mid = new byte[total];
+	*mid = (byte*) malloc(sizeof(byte) * total);
 
 	if (*mid == NULL)
 	{

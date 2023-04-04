@@ -2184,8 +2184,8 @@ void P_UpdateSpecials(bool extra_tic)
 					}
 					if (sec_ref->ceil_move && sec_ref->ceil_move->sector->c_h != sec_ref->ceil_move->startheight)
 					{
-						bool lowering = sec_ref->ceil_move->startheight > sec_ref->ceil_move->destheight;
-						float dist = (lowering ? sec_ref->ceil_move->startheight : sec_ref->ceil_move->destheight) - sec_ref->c_h;
+						float dist = (sec_ref->ceil_move->destheight < sec_ref->ceil_move->startheight ? 
+							std::abs(sec_ref->ceil_move->startheight - sec_ref->c_h) : -std::abs(sec_ref->ceil_move->startheight - sec_ref->c_h));
 						float sx = tdx * dist;
 						float sy = tdy * dist;
 						if (ld->side[0])
@@ -2313,8 +2313,8 @@ void P_UpdateSpecials(bool extra_tic)
 					}
 					if (sec_ref->ceil_move && sec_ref->ceil_move->sector->c_h != sec_ref->ceil_move->startheight)
 					{
-						bool lowering = sec_ref->ceil_move->startheight > sec_ref->ceil_move->destheight;
-						float dist = (lowering ? sec_ref->ceil_move->startheight : sec_ref->ceil_move->destheight) - sec_ref->c_h;
+						float dist = (sec_ref->ceil_move->destheight < sec_ref->ceil_move->startheight ? 
+							std::abs(sec_ref->ceil_move->startheight - sec_ref->c_h) : -std::abs(sec_ref->ceil_move->startheight - sec_ref->c_h));
 						float sx = x_speed * dist;
 						float sy = y_speed * dist;
 						if (ld->side[0])
@@ -2583,8 +2583,8 @@ void P_UpdateSpecials(bool extra_tic)
 				}
 				if (sec_ref->ceil_move)
 				{
-					bool lowering = sec_ref->ceil_move->startheight > sec_ref->ceil_move->destheight;
-					float dist = (lowering ? sec_ref->ceil_move->startheight : sec_ref->ceil_move->destheight) - sec_ref->c_h;
+					float dist = (sec_ref->ceil_move->destheight < sec_ref->ceil_move->startheight ? 
+						std::abs(sec_ref->ceil_move->startheight - sec_ref->c_h) : -std::abs(sec_ref->ceil_move->startheight - sec_ref->c_h));
 					float sy = ratio * sdy * dist;
 					float sx = ratio * sdx * dist;
 					if (special_ref->sector_effect & SECTFX_PushThings)

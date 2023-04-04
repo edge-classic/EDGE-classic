@@ -634,6 +634,7 @@ static void P_LineEffect(line_t *target, line_t *source,
 							anim.permanent = true;
 					}
 				}
+				anim.orig_heights.Set(source->frontsector->f_h, source->frontsector->c_h);
 			}
 		}
 		lineanims.push_back(anim);
@@ -692,6 +693,15 @@ static void P_LineEffect(line_t *target, line_t *source,
 					anim.scroll_line_ref = source;
 					anim.dynamic_dx += x;
 					anim.dynamic_dy += y;
+					for (int i=0; i < numlines; i++)
+					{
+						if (lines[i].tag == source->frontsector->tag)
+						{
+							if (lines[i].special->count == 1)
+								anim.permanent = true;
+						}
+					}
+					anim.orig_heights.Set(source->frontsector->f_h, source->frontsector->c_h);
 				}
 			}
 			lineanims.push_back(anim);

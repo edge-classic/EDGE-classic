@@ -1539,7 +1539,10 @@ static void DeleteMobj(mobj_t * mo)
 
     S_StopFX(mo);
 
-	delete mo->dlight.shader;
+	if (mo->dlight.shader)
+	{
+		delete mo->dlight.shader;
+	}	
 
 	mo->next = (mobj_t *) -1;
 	mo->prev = (mobj_t *) -1;

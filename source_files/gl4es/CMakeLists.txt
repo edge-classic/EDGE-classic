@@ -10,6 +10,7 @@ if (EMSCRIPTEN)
     set(NO_INIT_CONSTRUCTOR ON)
 endif()
 
+
 if(CMAKE_SYSTEM_NAME MATCHES "Windows" OR CMAKE_SYSTEM_NAME MATCHES "MSYS")
     set(NOX11 ON)
     set(NO_GBM ON)
@@ -19,6 +20,12 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows" OR CMAKE_SYSTEM_NAME MATCHES "MSYS")
     if(CMAKE_C_COMPILER_ID MATCHES "MSVC" OR "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
         set(WIN32_MSVC ON)  #msvc or icl or clang-cl
     endif()
+else()
+    set(NOX11 ON)
+    set(NO_GBM ON)
+    set(NO_EGL ON)
+    set(STATICLIB ON)
+    set(NO_INIT_CONSTRUCTOR ON)
 endif()
 
 # Pandora

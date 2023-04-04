@@ -3091,6 +3091,29 @@ static bool PIT_CheckBlockingLine(line_t * line, void *data)
 			return true;
 	}
 
+	// Vertex slope check
+	sector_t *slope_sec = R_PointInSubsector(mx2, my2)->sector;
+
+	if (slope_sec && (slope_sec->floor_vertex_slope || slope_sec->ceil_vertex_slope))
+	{
+		bool fs_good = true;
+		bool cs_good = true;
+		if (slope_sec->floor_vertex_slope)
+		{
+			if (mb2 <= M_LinePlaneIntersection({mx2,my2,-40000}, {mx2,my2,40000}, slope_sec->floor_z_verts[0],
+				slope_sec->floor_z_verts[1], slope_sec->floor_z_verts[2], slope_sec->floor_vs_normal).z)
+				fs_good = false;
+		}
+		if (slope_sec->ceil_vertex_slope)
+		{
+			if (mt2 >= M_LinePlaneIntersection({mx2,my2,-40000}, {mx2,my2,40000}, slope_sec->ceil_z_verts[0],
+				slope_sec->ceil_z_verts[1], slope_sec->ceil_z_verts[2], slope_sec->ceil_vs_normal).z)
+				cs_good = false;
+		}
+		if (fs_good && cs_good)
+			return true;
+	}
+
 	// stop checking, objects are on different sides of a blocking line
 	blockline = line;
 	return false;

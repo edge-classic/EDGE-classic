@@ -1737,14 +1737,19 @@ void P_RemoveMobj(mobj_t *mo)
 }
 
 
-void P_RemoveAllMobjs(void)
+void P_RemoveAllMobjs(bool loading)
 {
 	while (mobjlisthead != NULL)
 	{
 		mobj_t *mo = mobjlisthead;
 		mobjlisthead = mo->next;
 
-		P_UnsetThingFinally(mo);
+		// Need to unlink from existing map in the case of loading a savegame
+		if (loading)
+		{
+			P_UnsetThingFinally(mo);
+		}
+		
 
 		mo->refcount = 0;
 		DeleteMobj(mo);

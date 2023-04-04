@@ -102,6 +102,8 @@ void R_Render(int x, int y, int w, int h, mobj_t *camera,
 
 // Called by startup code.
 void R_Init(void);
+// Called by shutdown code
+void R_Shutdown(void);
 
 // -ES- 1998/09/11 Added these prototypes.
 void R_SetViewSize(int blocks);

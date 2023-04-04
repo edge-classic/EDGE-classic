@@ -41,6 +41,8 @@ void P_Init(void);
 
 void P_SetupLevel(void);
 
+void P_Shutdown(void);
+
 #endif /* __P_SETUP__ */
 
 //--- editor settings ---

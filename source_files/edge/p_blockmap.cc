@@ -59,8 +59,8 @@ extern abstract_shader_c *MakePlaneGlow(mobj_t *mo);
 //
 // Blockmap size.
 // 23-6-98 KM Promotion of short * to int *
-int bmap_width;
-int bmap_height;  // size in mapblocks
+int bmap_width = 0;
+int bmap_height = 0;  // size in mapblocks
 
 // origin of block map
 float bmap_orgx;
@@ -104,10 +104,23 @@ void P_CreateThingBlockMap(void)
 
 void P_DestroyBlockMap(void)
 {
+	if (bmap_lines)
+	{
+		for (int i = 0; i < bmap_width * bmap_height; i++)
+		{
+			if (bmap_lines[i]) 
+			{
+				delete bmap_lines[i];
+			}
+		}
+	}
+
 	delete[] bmap_lines;    bmap_lines  = NULL;
 	delete[] bmap_things;   bmap_things = NULL;
 
 	delete[] dlmap_things;  dlmap_things = NULL;
+
+	bmap_width = bmap_height = 0;
 }
 
 

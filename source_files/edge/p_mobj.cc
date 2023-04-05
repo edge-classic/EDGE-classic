@@ -288,7 +288,31 @@ static bool CorpseShouldSlide(mobj_t * mo)
 		return false;
 	}
 
-	P_ComputeThingGap(mo, mo->subsector->sector, mo->z, &floor, &ceil);
+	float f_slope_z = 0;
+	float c_slope_z = 0;
+
+	// Vertex slope check here?
+	if (mo->subsector->sector->floor_vertex_slope)
+	{
+		vec3_t line_a{mo->x, mo->y, -40000};
+		vec3_t line_b{mo->x, mo->y, 40000};
+		float z_test = M_LinePlaneIntersection(line_a, line_b, mo->subsector->sector->floor_z_verts[0], 
+			mo->subsector->sector->floor_z_verts[1], mo->subsector->sector->floor_z_verts[2], mo->subsector->sector->floor_vs_normal).z;
+		if (std::isfinite(z_test))
+			f_slope_z = z_test - mo->subsector->sector->f_h;
+	}
+
+	if (mo->subsector->sector->ceil_vertex_slope)
+	{
+		vec3_t line_a{mo->x, mo->y, -40000};
+		vec3_t line_b{mo->x, mo->y, 40000};
+		float z_test = M_LinePlaneIntersection(line_a, line_b, mo->subsector->sector->ceil_z_verts[0], 
+			mo->subsector->sector->ceil_z_verts[1],mo->subsector->sector->ceil_z_verts[2], mo->subsector->sector->ceil_vs_normal).z;
+		if (std::isfinite(z_test))
+			c_slope_z = mo->subsector->sector->c_h - z_test;
+	}
+
+	P_ComputeThingGap(mo, mo->subsector->sector, mo->z, &floor, &ceil, f_slope_z, c_slope_z);
 
 	return (mo->floorz != floor);
 }

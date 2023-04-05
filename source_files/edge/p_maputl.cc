@@ -588,8 +588,6 @@ float P_ComputeThingGap(mobj_t * thing, sector_t * sec, float z,
 	if (z == ONCEILINGZ)
 		z = sec->c_h - thing->height;
 
-	//z += f_slope_z;
-
 	temp_num = P_FindThingGap(temp_gaps, temp_num, z, z + thing->height);
 
 	if (temp_num < 0)

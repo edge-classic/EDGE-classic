@@ -462,60 +462,6 @@ static bool PIT_CheckRelLine(line_t * ld, void *data)
 		return false;
 	}
 
-	// Vertex slope checks (player only? don't know how expensive this is)
-	if (tm_I.mover->player && ld->frontsector == tm_I.mover->subsector->sector && ld->backsector->floor_vertex_slope)
-	{
-		sector_t *sec_test = R_PointInSubsector(tm_I.x+tm_I.mover->mom.x, tm_I.y+tm_I.mover->mom.y)->sector;
-		if (sec_test && sec_test == ld->backsector)
-		{
-			float z_test = M_LinePlaneIntersection({tm_I.x+tm_I.mover->mom.x,tm_I.y+tm_I.mover->mom.y,-40000}, {tm_I.x+tm_I.mover->mom.x,tm_I.y+tm_I.mover->mom.y,40000}, ld->backsector->floor_z_verts[0], 
-				ld->backsector->floor_z_verts[1], ld->backsector->floor_z_verts[2], ld->backsector->floor_vs_normal).z;
-			if (z_test > tm_I.mover->old_z && std::abs(z_test - tm_I.mover->old_z) > tm_I.mover->info->step_size)
-			{
-				blockline = ld;
-				return false;
-			}
-		}
-	}
-	else if (tm_I.mover->player && ld->backsector == tm_I.mover->subsector->sector && ld->frontsector->floor_vertex_slope)
-	{
-		sector_t *sec_test = R_PointInSubsector(tm_I.x+tm_I.mover->mom.x, tm_I.y+tm_I.mover->mom.y)->sector;
-		if (sec_test && sec_test == ld->frontsector)
-		{
-			float z_test = M_LinePlaneIntersection({tm_I.x+tm_I.mover->mom.x,tm_I.y+tm_I.mover->mom.y,-40000}, {tm_I.x+tm_I.mover->mom.x,tm_I.y+tm_I.mover->mom.y,40000}, ld->frontsector->floor_z_verts[0], 
-				ld->frontsector->floor_z_verts[1], ld->frontsector->floor_z_verts[2], ld->frontsector->floor_vs_normal).z;
-			if (z_test > tm_I.mover->old_z && std::abs(z_test - tm_I.mover->old_z) > tm_I.mover->info->step_size)
-			{
-				blockline = ld;
-				return false;
-			}
-		}
-	}
-	else if (tm_I.mover->player && ld->backsector == tm_I.mover->subsector->sector && ld->backsector->floor_vertex_slope)
-	{
-		sector_t *sec_test = R_PointInSubsector(tm_I.x+tm_I.mover->mom.x, tm_I.y+tm_I.mover->mom.y)->sector;
-		if (sec_test && sec_test == ld->frontsector)
-		{
-			if (ld->frontsector->f_h > tm_I.mover->old_z && std::abs(ld->frontsector->f_h - tm_I.mover->old_z) > tm_I.mover->info->step_size)
-			{
-				blockline = ld;
-				return false;
-			}
-		}
-	}
-	else if (tm_I.mover->player && ld->frontsector == tm_I.mover->subsector->sector && ld->frontsector->floor_vertex_slope)
-	{
-		sector_t *sec_test = R_PointInSubsector(tm_I.x+tm_I.mover->mom.x, tm_I.y+tm_I.mover->mom.y)->sector;
-		if (sec_test && sec_test == ld->backsector)
-		{
-			if (ld->backsector->f_h > tm_I.mover->old_z && std::abs(ld->backsector->f_h - tm_I.mover->old_z) > tm_I.mover->info->step_size)
-			{
-				blockline = ld;
-				return false;
-			}
-		}
-	}
-
 	if (tm_I.extflags & EF_CROSSLINES)
 	{
 		if ((ld->flags & MLF_ShootBlock) && (tm_I.flags & MF_MISSILE))
@@ -607,6 +553,11 @@ static bool PIT_CheckRelLine(line_t * ld, void *data)
 			mobj_hit_sky = true;
 		}
 	}
+
+	// Linedef gap checks won't work properly with these, but more detailed
+	// collision checks should be occuring later anyway
+	if (ld->backsector->floor_vertex_slope || ld->frontsector->floor_vertex_slope)
+		return true;
 
 	// CHOOSE GAP
 	//
@@ -1961,7 +1912,8 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 
 		sector_t *last_shoota_sec = R_PointInSubsector(x, y)->sector;
 
-		if (last_shoota_sec && (last_shoota_sec->floor_vertex_slope || last_shoota_sec->ceil_vertex_slope))
+		if (last_shoota_sec && (ld->frontsector->floor_vertex_slope || ld->backsector->floor_vertex_slope ||
+			ld->frontsector->ceil_vertex_slope || ld->backsector->ceil_vertex_slope))
 		{
 			bool fs_good = true;
 			bool cs_good = true;
@@ -1971,10 +1923,20 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 					last_shoota_sec->floor_z_verts[1], last_shoota_sec->floor_z_verts[2], last_shoota_sec->floor_vs_normal).z)
 					fs_good = false;
 			}
+			else
+			{
+				if (z <= last_shoota_sec->f_h)
+					fs_good = false;
+			}
 			if (last_shoota_sec->ceil_vertex_slope)
 			{
 				if (z >= M_LinePlaneIntersection({x,y,-40000}, {x,y,40000}, last_shoota_sec->ceil_z_verts[0],
 					last_shoota_sec->ceil_z_verts[1], last_shoota_sec->ceil_z_verts[2], last_shoota_sec->ceil_vs_normal).z)
+					cs_good = false;
+			}
+			else
+			{
+				if (z >= last_shoota_sec->c_h)
 					cs_good = false;
 			}
 			if (fs_good && cs_good)

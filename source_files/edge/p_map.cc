@@ -1912,8 +1912,8 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 
 		sector_t *last_shoota_sec = R_PointInSubsector(x, y)->sector;
 
-		if (last_shoota_sec && (ld->frontsector->floor_vertex_slope || ld->backsector->floor_vertex_slope ||
-			ld->frontsector->ceil_vertex_slope || ld->backsector->ceil_vertex_slope))
+		if (last_shoota_sec && (ld->frontsector && (ld->frontsector->floor_vertex_slope || ld->frontsector->ceil_vertex_slope)) ||
+			(ld->backsector && (ld->backsector->floor_vertex_slope || ld->backsector->ceil_vertex_slope)))
 		{
 			bool fs_good = true;
 			bool cs_good = true;

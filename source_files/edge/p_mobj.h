@@ -364,6 +364,8 @@ struct mobj_s : public position_c
 
 	bool is_voodoo = false;
 
+	bool slopesighthit = false;
+
 public:
 	bool isRemoved() const;
 

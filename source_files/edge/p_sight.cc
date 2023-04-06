@@ -81,6 +81,9 @@ typedef struct sight_info_s
 
 	// true if one of the sectors contained extrafloors
 	bool exfloors;
+
+	// true if one of the sectors contained vertex slopes
+	bool vertslopes;
 }
 sight_info_t;
 
@@ -314,6 +317,9 @@ static bool CheckSightBSP(unsigned int bspnum)
 		if (sub->sector->exfloor_used > 0)
 			sight_I.exfloors = true;
 
+		if (sub->sector->floor_vertex_slope || sub->sector->ceil_vertex_slope)
+			sight_I.vertslopes = true;
+
 		// when target subsector is reached, there are no more lines to
 		// check, since we only check lines on the _far_ side of the
 		// subsector and the target object is inside its subsector.
@@ -510,18 +516,33 @@ bool P_CheckSight(mobj_t * src, mobj_t * dest)
 	wall_icpts.clear(); // FIXME
 
 	sight_I.exfloors = false;
+	sight_I.vertslopes = false;
 
 	// initial pass -- check for basic blockage & create intercepts
 	if (! CheckSightBSP(root_node))
 		return false;
 
-	// no extrafloors encountered ?  Then the checks made by
+	// no extrafloors or vertslopes encountered ?  Then the checks made by
 	// CheckSightBSP are sufficient.  (-AJA- double check this)
 	//
-#if 1
-	if (! sight_I.exfloors)
+	if (!sight_I.exfloors && !sight_I.vertslopes)
 		return true;
-#endif
+
+	// Leveraging the existing hitscan attack code is easier than trying to wrangle this stuff
+	if (sight_I.vertslopes)
+	{
+		float objslope;
+		P_AimLineAttack(src, sight_I.angle, 64000, &objslope);
+		P_LineAttack(src, sight_I.angle, 64000, objslope, 0, nullptr, nullptr);
+		bool slope_sight_good = dest->slopesighthit;
+		if (slope_sight_good)
+		{
+			dest->slopesighthit = false; // reset for future sight checks
+			return true;
+		}
+		else
+			return false;
+	}
 
 	// Enter the HackMan...  The new sight code only tests LOS to one
 	// destination height.  (The old code kept track of angles -- but

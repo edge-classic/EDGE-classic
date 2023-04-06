@@ -2000,6 +2000,11 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 		return true;
 
 	// hit thing
+
+	// Checking sight against target on vertex slope?
+	if (mo->subsector->sector || mo->subsector->sector->ceil_vertex_slope)
+		mo->slopesighthit = true;
+
 	// position a bit closer
 	float frac = in->frac - 10.0f / shoot_I.range;
 

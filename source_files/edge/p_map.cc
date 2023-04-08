@@ -554,10 +554,204 @@ static bool PIT_CheckRelLine(line_t * ld, void *data)
 		}
 	}
 
-	// Linedef gap checks won't work properly with these, but more detailed
-	// collision checks should be occuring later anyway
-	if (ld->backsector->floor_vertex_slope || ld->frontsector->floor_vertex_slope)
+	// Only basic vertex slope checks will work here (simple rectangular slope sides),
+	// but more detailed movement checks are made later on so it shouldn't allow anything
+	// crazy - Dasho
+	if (ld->frontsector->floor_vertex_slope || ld->backsector->floor_vertex_slope)
+	{
+		divline_t divver;
+		divver.x = ld->v1->x;
+		divver.y = ld->v1->y;
+		divver.dx = ld->dx;
+		divver.dy = ld->dy;
+		float iz = 0;
+		// Prevent player from getting stuck if actually on linedef and moving parallel to it
+		if (P_PointOnDivlineThick(tm_I.mover->x, tm_I.mover->y, &divver, ld->length, tm_I.mover->radius) == 2)
+			return true;
+		if (ld->frontsector->floor_vertex_slope && ld->frontsector->linecount == 4 &&
+			R_PointInSubsector(tm_I.mover->x, tm_I.mover->y)->sector != ld->frontsector)
+		{
+			float ix = 0;
+			float iy = 0;
+			P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
+			if (std::isfinite(ix) && std::isfinite(iy))
+			{
+				iz = M_LinePlaneIntersection({ix,iy,-40000},{ix,iy,40000},ld->frontsector->floor_z_verts[0],
+					ld->frontsector->floor_z_verts[1],ld->frontsector->floor_z_verts[2],ld->frontsector->floor_vs_normal).z;
+				if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size)
+				{
+					blockline = ld;
+					return false;
+				}
+			}
+		}
+		else if (ld->backsector->floor_vertex_slope && ld->backsector->linecount == 4 &&
+			R_PointInSubsector(tm_I.mover->x, tm_I.mover->y)->sector != ld->backsector)
+		{
+			float ix = 0;
+			float iy = 0;
+			P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
+			if (std::isfinite(ix) && std::isfinite(iy))
+			{
+				iz = M_LinePlaneIntersection({ix,iy,-40000},{ix,iy,40000},ld->backsector->floor_z_verts[0],
+					ld->backsector->floor_z_verts[1],ld->backsector->floor_z_verts[2],ld->backsector->floor_vs_normal).z;
+				if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size)
+				{
+					blockline = ld;
+					return false;
+				}
+			}
+		}
+		else if (ld->frontsector->floor_vertex_slope && ld->frontsector->linecount == 4 &&
+			R_PointInSubsector(tm_I.mover->x, tm_I.mover->y)->sector == ld->frontsector)
+		{
+			if (!ld->backsector->floor_vertex_slope)
+			{
+				iz = ld->backsector->f_h;
+				if (tm_I.mover->z + tm_I.mover->info->step_size < iz)
+				{
+					blockline = ld;
+					return false;
+				}
+			}
+			else
+			{
+				float ix = 0;
+				float iy = 0;
+				P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
+				if (std::isfinite(ix) && std::isfinite(iy))
+				{
+					iz = M_LinePlaneIntersection({ix,iy,-40000},{ix,iy,40000},ld->backsector->floor_z_verts[0],
+						ld->backsector->floor_z_verts[1],ld->backsector->floor_z_verts[2],ld->backsector->floor_vs_normal).z;
+					if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size)
+					{
+						blockline = ld;
+						return false;
+					}
+				}
+			}
+		}
+		else if (ld->backsector->floor_vertex_slope && ld->backsector->linecount == 4 &&
+			R_PointInSubsector(tm_I.mover->x, tm_I.mover->y)->sector == ld->backsector)
+		{
+			if (!ld->frontsector->floor_vertex_slope)
+			{
+				iz = ld->frontsector->f_h;
+				if (tm_I.mover->z + tm_I.mover->info->step_size < iz)
+				{
+					blockline = ld;
+					return false;
+				}
+			}
+			else
+			{
+				float ix = 0;
+				float iy = 0;
+				P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
+				if (std::isfinite(ix) && std::isfinite(iy))
+				{
+					iz = M_LinePlaneIntersection({ix,iy,-40000},{ix,iy,40000},ld->frontsector->floor_z_verts[0],
+						ld->frontsector->floor_z_verts[1],ld->frontsector->floor_z_verts[2],ld->frontsector->floor_vs_normal).z;
+					if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size)
+					{
+						blockline = ld;
+						return false;
+					}
+				}
+			}
+		}
+		if (ld->frontsector->ceil_vertex_slope && ld->frontsector->linecount == 4 &&
+			R_PointInSubsector(tm_I.mover->x, tm_I.mover->y)->sector != ld->frontsector)
+		{
+			float ix = 0;
+			float iy = 0;
+			P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
+			if (std::isfinite(ix) && std::isfinite(iy))
+			{
+				float icz = M_LinePlaneIntersection({ix,iy,-40000},{ix,iy,40000},ld->frontsector->ceil_z_verts[0],
+					ld->frontsector->ceil_z_verts[1],ld->frontsector->ceil_z_verts[2],ld->frontsector->ceil_vs_normal).z;
+				if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
+				{
+					blockline = ld;
+					return false;
+				}
+			}
+		}
+		else if (ld->backsector->ceil_vertex_slope && ld->backsector->linecount == 4 &&
+			R_PointInSubsector(tm_I.mover->x, tm_I.mover->y)->sector != ld->backsector)
+		{
+			float ix = 0;
+			float iy = 0;
+			P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
+			if (std::isfinite(ix) && std::isfinite(iy))
+			{
+				float icz = M_LinePlaneIntersection({ix,iy,-40000},{ix,iy,40000},ld->backsector->ceil_z_verts[0],
+					ld->backsector->ceil_z_verts[1],ld->backsector->ceil_z_verts[2],ld->backsector->ceil_vs_normal).z;
+				if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
+				{
+					blockline = ld;
+					return false;
+				}
+			}
+		}
+		else if (ld->frontsector->ceil_vertex_slope && ld->frontsector->linecount == 4 &&
+			R_PointInSubsector(tm_I.mover->x, tm_I.mover->y)->sector == ld->frontsector)
+		{
+			if (!ld->backsector->ceil_vertex_slope)
+			{
+				if (iz + tm_I.mover->height >= ld->backsector->c_h)
+				{
+					blockline = ld;
+					return false;
+				}
+			}
+			else
+			{
+				float ix = 0;
+				float iy = 0;
+				P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
+				if (std::isfinite(ix) && std::isfinite(iy))
+				{
+					float icz = M_LinePlaneIntersection({ix,iy,-40000},{ix,iy,40000},ld->backsector->ceil_z_verts[0],
+						ld->backsector->ceil_z_verts[1],ld->backsector->ceil_z_verts[2],ld->backsector->ceil_vs_normal).z;
+					if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
+					{
+						blockline = ld;
+						return false;
+					}
+				}
+			}
+		}
+		else if (ld->backsector->ceil_vertex_slope && ld->backsector->linecount == 4 &&
+			R_PointInSubsector(tm_I.mover->x, tm_I.mover->y)->sector == ld->backsector)
+		{
+			if (!ld->frontsector->ceil_vertex_slope)
+			{
+				if (iz + tm_I.mover->height >= ld->frontsector->c_h)
+				{
+					blockline = ld;
+					return false;
+				}
+			}
+			else
+			{
+				float ix = 0;
+				float iy = 0;
+				P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
+				if (std::isfinite(ix) && std::isfinite(iy))
+				{
+					float icz = M_LinePlaneIntersection({ix,iy,-40000},{ix,iy,40000},ld->frontsector->ceil_z_verts[0],
+						ld->frontsector->ceil_z_verts[1],ld->frontsector->ceil_z_verts[2],ld->frontsector->ceil_vs_normal).z;
+					if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
+					{
+						blockline = ld;
+						return false;
+					}
+				}
+			}
+		}
 		return true;
+	}
 
 	// CHOOSE GAP
 	//

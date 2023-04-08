@@ -501,7 +501,7 @@ static menu_t SaveDef =
 	SavingMenu,
 	&save_style,
 	M_DrawSave,
-	30, 34,
+	30, 42,
 	0
 };
 
@@ -724,6 +724,9 @@ int CenterMenuImage(const image_c *img)
 	return CenterX;
 }
 
+//
+// Center an image applying any SCALE and X_OFFSET from
+// styles.ddf
 int CenterMenuImage2(style_c *style, int text_type, const image_c *img)
 {
 	float CenterX = 160;
@@ -1458,53 +1461,84 @@ void M_DrawNewGame(void)
 {
 	int fontType;
 	int x = 54;
+	float txtscale = 1.0f;
 
-	if (! skill_style->fonts[styledef_c::T_HEADER])
+	style_c *style = skill_style;
+
+	if (! style->fonts[styledef_c::T_HEADER])
 		fontType = styledef_c::T_TITLE;
 	else
 		fontType = styledef_c::T_HEADER;
 
+	if (style->def->text[fontType].scale)
+		txtscale = style->def->text[fontType].scale;
+	else
+		txtscale = 1.0f;
+
+	float old_alpha = HUD_GetAlpha();
+
+	HUD_SetAlpha(style->def->text[fontType].translucency);
+
 	if (custom_MenuDifficulty==false)
 	{
-		if (skill_style->def->entry_alignment == episode_style->def->C_CENTER)
-			x = CenterMenuText(skill_style, fontType, language["MainNewGame"]);
+		if (style->def->entry_alignment == style->def->C_CENTER)
+			x = CenterMenuText(style, fontType, language["MainNewGame"]);
 		else
 			x = 94;
-		HL_WriteText(skill_style, fontType, x + skill_style->def->text[fontType].x_offset, 
-			14 + skill_style->def->text[fontType].y_offset, language["MainNewGame"]);
+		HL_WriteText(style, fontType, x + style->def->text[fontType].x_offset, 
+			14 + style->def->text[fontType].y_offset, language["MainNewGame"]);
 
+		HUD_SetAlpha(old_alpha);
 		fontType = styledef_c::T_TITLE;
-		if (skill_style->def->entry_alignment == episode_style->def->C_CENTER)
-			x = CenterMenuText(skill_style, fontType, language["MenuSkill"]);
+		HUD_SetAlpha(style->def->text[fontType].translucency);
+
+		if (style->def->entry_alignment == style->def->C_CENTER)
+			x = CenterMenuText(style, fontType, language["MenuSkill"]);
 		else
 			x = 54;
-		HL_WriteText(skill_style, fontType, x + skill_style->def->text[fontType].x_offset, 
-			38 + skill_style->def->text[fontType].y_offset, language["MenuSkill"]);
+
+		HL_WriteText(style, fontType, x + style->def->text[fontType].x_offset, 
+			38 + style->def->text[fontType].y_offset, language["MenuSkill"]);
 	}
 	else
 	{
-		const colourmap_c *colmap = skill_style->def->text[fontType].colmap;
+		const colourmap_c *colmap = style->def->text[fontType].colmap;
 		if (menu_newgame->offset_x != 0.0f) //Only auto-center if no Xoffset 
 			x = MainDef.x; //cannot get away from the damn hardcoded value
 		else
-			x = CenterMenuImage(menu_newgame);
+			x = CenterMenuImage2(style, fontType, menu_newgame);
 		
-		HUD_DrawImage(x + skill_style->def->text[fontType].x_offset, 
-			14 + skill_style->def->text[fontType].y_offset, menu_newgame, colmap);
+		HUD_StretchImage(x, 14 + style->def->text[fontType].y_offset,
+				IM_WIDTH(menu_newgame) * txtscale, IM_HEIGHT(menu_newgame) * txtscale,menu_newgame,0.0,0.0,colmap);
 
+		//HUD_DrawImage(x + style->def->text[fontType].x_offset, 
+		//	14 + style->def->text[fontType].y_offset, menu_newgame, colmap);
+
+		HUD_SetAlpha(old_alpha);
 		fontType = styledef_c::T_TITLE;
+		HUD_SetAlpha(style->def->text[fontType].translucency);
+
+		if (style->def->text[fontType].scale)
+			txtscale = style->def->text[fontType].scale;
+		else
+			txtscale = 1.0f;
+
 		x = 54;
-		if (skill_style->def->entry_alignment == skill_style->def->C_CENTER)
+		if (style->def->entry_alignment == style->def->C_CENTER)
 		{
 			if (menu_skill->offset_x != 0.0f) //Only auto-center if no Xoffset 
 				x = 54; //cannot get away from the damn hardcoded value
 			else
-				x = CenterMenuImage(menu_skill);
+				x = CenterMenuImage2(style, fontType, menu_skill);
 		}
-		colmap = skill_style->def->text[fontType].colmap;
-		HUD_DrawImage(x + skill_style->def->text[fontType].x_offset, 
-			38 + skill_style->def->text[fontType].y_offset, menu_skill, colmap);
+		colmap = style->def->text[fontType].colmap;
+		HUD_StretchImage(x, 38 + style->def->text[fontType].y_offset,
+				IM_WIDTH(menu_skill) * txtscale, IM_HEIGHT(menu_skill) * txtscale,menu_skill,0.0,0.0,colmap);
+
+		//HUD_DrawImage(x + style->def->text[fontType].x_offset, 
+		//	38 + style->def->text[fontType].y_offset, menu_skill, colmap);
 	}
+	HUD_SetAlpha(old_alpha);
 }
 
 //
@@ -1590,35 +1624,48 @@ void M_DrawEpisode(void)
 {
 	int fontType;
 	int x = 54;
+	float txtscale = 1.0f;
 
-	if (! episode_style->fonts[styledef_c::T_HEADER])
+	style_c *style = episode_style;
+
+	if (! style->fonts[styledef_c::T_HEADER])
 		fontType=styledef_c::T_TITLE;
 	else
 		fontType=styledef_c::T_HEADER;
 
+	if (style->def->text[fontType].scale)
+		txtscale = style->def->text[fontType].scale;
+
+	float old_alpha = HUD_GetAlpha();
+	HUD_SetAlpha(style->def->text[fontType].translucency);
+
 	if (custom_MenuEpisode==false)
 	{
-		if (episode_style->def->entry_alignment == episode_style->def->C_CENTER)
-			x = CenterMenuText(episode_style,fontType, language["MenuWhichEpisode"]);
+		if (style->def->entry_alignment == style->def->C_CENTER)
+			x = CenterMenuText(style,fontType, language["MenuWhichEpisode"]);
 
-		HL_WriteText(episode_style, fontType, x + episode_style->def->text[fontType].x_offset, 
-			38 + episode_style->def->text[fontType].y_offset, language["MenuWhichEpisode"]);
+		HL_WriteText(style, fontType, x + style->def->text[fontType].x_offset, 
+			38 + style->def->text[fontType].y_offset, language["MenuWhichEpisode"]);
 	}
 	else
 	{
-		x = 54;
-		if (episode_style->def->entry_alignment == episode_style->def->C_CENTER)
+		if (style->def->entry_alignment == style->def->C_CENTER)
 		{
 			if (menu_episode->offset_x != 0.0f) //Only auto-center if no Xoffset 
 				x = 54; //cannot get away from the damn hardcoded value
 			else
-				x = CenterMenuImage(menu_episode);
+				x = CenterMenuImage2(style, fontType, menu_episode);
 		}
 
-		const colourmap_c *colmap = episode_style->def->text[fontType].colmap;
-		HUD_DrawImage(x + episode_style->def->text[fontType].x_offset, 
-			38 + episode_style->def->text[fontType].y_offset, menu_episode, colmap);
+		const colourmap_c *colmap = style->def->text[fontType].colmap;
+		HUD_StretchImage(x, 38 + style->def->text[fontType].y_offset,
+				IM_WIDTH(menu_episode) * txtscale, IM_HEIGHT(menu_episode) * txtscale,menu_episode,0.0,0.0,colmap);
+
+		//HUD_DrawImage(x + episode_style->def->text[fontType].x_offset, 
+		//	38 + episode_style->def->text[fontType].y_offset, menu_episode, colmap);
 	}
+
+	HUD_SetAlpha(old_alpha);
 }
 
 static void ReallyDoStartLevel(skill_t skill, gamedef_c *g)
@@ -2775,6 +2822,7 @@ void M_DrawCursor(style_c *style, bool graphical_item)
 		old_offset_y = cursor->offset_y;
 		cursor->offset_x = 0;
 		cursor->offset_y = 0;
+		
 		if (style->def->cursor.force_offsets)
 		{
 			cursor->offset_x += old_offset_x;
@@ -3009,7 +3057,7 @@ void M_DrawItems(style_c *style, bool graphical_item)
 				if (style->def->entry_alignment == style->def->C_CENTER)
 					currentMenu->menuitems[i].x = CenterMenuImage2(style, styledef_c::T_TEXT, image);
 				else
-					currentMenu->menuitems[i].x = x + image->offset_x + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
+					currentMenu->menuitems[i].x = x + (image->offset_x * txtscale) + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
 
 				currentMenu->menuitems[i].y = y - image->offset_y + style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
 				y += currentMenu->menuitems[i].height + style->def->entry_spacing;
@@ -3055,6 +3103,10 @@ void M_DrawItems(style_c *style, bool graphical_item)
 		{
 			const colourmap_c *colmap = i == itemOn ? style->def->text[styledef_c::T_SELECTED].colmap : 
 					style->def->text[styledef_c::T_TEXT].colmap;
+
+			if (!colmap) //no SELECTED colmap? fallback to the TEXT one
+				colmap = style->def->text[styledef_c::T_TEXT].colmap;
+
 			HUD_StretchImage(TempX, currentMenu->menuitems[i].y,
 				currentMenu->menuitems[i].width,currentMenu->menuitems[i].height,currentMenu->menuitems[i].image,0.0,0.0,colmap);
 		}

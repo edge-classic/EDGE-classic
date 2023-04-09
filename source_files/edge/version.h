@@ -26,8 +26,8 @@ extern cvar_c appname;
 // patch level (Savegames and Demos)
 #define EDGEPATCH  1
 
-// -ES- 2000/03/04 The version of EDGE.WAD we require.
-#define EDGE_WAD_VERSION  133
+// -ES- 2000/03/04 The version of edge-defs.epk we require.
+#define EDGE_EPK_VERSION  133
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

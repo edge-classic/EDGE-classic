@@ -1,0 +1,329 @@
+// https://edge-classic.github.io/
+
+
+<LANGUAGES>
+
+[ENGLISH]
+MenuSkill="Choose Skill Level:";
+MenuDifficulty1="Please Don't Kill Me!";
+MenuDifficulty2="Will This Hurt?";
+MenuDifficulty3="Bring On The Pain.";
+MenuDifficulty4="Extreme Carnage.";
+MenuDifficulty5="MAYHEM!";
+
+MenuWhichEpisode="Choose Episode:";
+
+M_EPI6_Desc="Phase 2";
+
+AutoMapFollowOff = "Map no longer following player.";
+AutoMapFollowOn = "Map following player.";
+AutoMapGridOff = "Map grid off.";
+AutoMapGridOn = "Map grid on.";
+AutoMapMarkedSpot = "Added map bookmark.";
+AutoMapMarksClear = "All map bookmarks cleared.";
+GotArmourHelmet = "Got a 1% armor bonus.";
+GotArmour = "Picked up a light armor vest.";
+GotBackpack = "You found a backpack!";
+GotBerserk = "Punch 'em to death!";
+GotBFG = "The SKAG 1337 ... time to kick some ass!";
+GotBlueCard = "Picked up a blue passcard.";
+GotBlueSkull = "Picked up a blue skeleton key.";
+GotCellPack = "Picked up a large energy recharge.";
+GotCell = "Picked up a small energy recharge.";
+GotChainGun = "You got the minigun!";
+GotChainSaw = "You got the angle grinder!";
+GotClipBox = "Picked up a box of ammo.";
+GotClip = "Picked up an ammo clip.";
+GotHealthPotion = "Got a 1% health bonus.";
+GotInvis = "You got the stealth sphere!";
+GotInvulner = "You are untouchable!";
+GotRocketLauncher = "You got the missile launcher!";
+GotMap = "Got the tactical survey map.";
+GotMedi = "Picked up a large health pack.";
+GotMediNeed = "Found a large health pack, just in time!";
+GotMegaArmour = "Picked up a heavy armor vest.";
+GotMega = "You got the ultra-overdrive sphere!";
+GotPlasmaGun = "You got the polaric energy cannon!";
+GotRedCard = "Picked up a red passcard.";
+GotRedSkull = "Picked up a red skeleton key.";
+GotRocketBox = "Picked up a crate of missiles.";
+GotRocket = "Picked up a missile.";
+GotShellBox = "Picked up a box of shotgun shells.";
+GotShells = "Picked up some shotgun shells.";
+GotDoubleBarrel = "You got the double-barrelled shotgun!";
+GotShotgun = "You got the pump-action shotgun!";
+GotStim = "Picked up a small health pack.";
+GotSuit = "Picked up a hazard suit.";
+GotSoul = "You got the overdrive sphere!";
+GotVisor = "Got the night vision goggles.";
+GotYellowCard = "Picked up a yellow passcard.";
+GotYellowSkull = "Picked up a yellow skeleton key.";
+Player3Name = "b:";
+Player1Name = "g:";
+Player2Name = "i:";
+Player4Name = "r:";
+NightmareCheck = "This is the highest skill level.\n"
+  "Not recommended unless you're experienced.\n"
+  "\n"
+  "(Press Y to confirm)";
+NeedBlueForDoor = "This door requires a blue key.";
+NeedBlueForObject = "This object requires a blue key.";
+NeedRedForDoor = "This door requires a red key.";
+NeedRedForObject = "This object requires a red key.";
+NeedYellowForDoor = "This door requires a yellow key.";
+NeedYellowForObject = "This object requires a yellow key.";
+BEHOLDNote = "v=invuln, s=steroids, i=invis, r=hazard, a=map, l=night vision";
+ChoppersNote = "Vroom!";
+GodModeOFF = "God mode off.";
+GodModeON = "God mode on.";
+AmmoAdded = "Weapons and ammo added.";
+VeryHappyAmmo = "Keys, weapons and ammo added.";
+MusChange = "Music changed.";
+ClipOFF = "Noclip off.";
+ClipON = "Noclip on.";
+ImpossibleChange = "Unknown music track?";
+E1M1Desc = "C1M1: Outer Prison";
+E1M2Desc = "C1M2: Communications Center";
+E1M3Desc = "C1M3: Waste Disposal";
+E1M4Desc = "C1M4: Supply Depot";
+E1M5Desc = "C1M5: Main Control";
+E1M6Desc = "C1M6: Training Facility";
+E1M7Desc = "C1M7: Transportation Bay";
+E1M8Desc = "C1M8: Outpost Quarry";
+E1M9Desc = "C1M9: Armory";
+E2M1Desc = "C2M1: Ruins";
+E2M2Desc = "C2M2: Power Plant";
+E2M3Desc = "C2M3: Archaelogy Site";
+E2M4Desc = "C2M4: Sample Holding Site";
+E2M5Desc = "C2M5: Fortress 31";
+E2M6Desc = "C2M6: Trepidation Site";
+E2M7Desc = "C2M7: Quarantine Vessel";
+E2M8Desc = "C2M8: Containment Cell";
+E2M9Desc = "C2M9: Corruption of Man";
+E3M1Desc = "C3M1: Land of the Lost";
+E3M2Desc = "C3M2: Infernal Caverns";
+E3M3Desc = "C3M3: Derelict Temple";
+E3M4Desc = "C3M4: Sacrificial Bastion";
+E3M5Desc = "C3M5: Oblation Temple";
+E3M6Desc = "C3M6: Igneous Intrusion";
+E3M7Desc = "C3M7: No Regrets";
+E3M8Desc = "C3M8: Ancient Lair";
+E3M9Desc = "C3M9: Acquainted With Grief";
+E4M1Desc = "C4M1: Maintenance Area";
+E4M2Desc = "C4M2: Research Complex";
+E4M3Desc = "C4M3: Central Computing";
+E4M4Desc = "C4M4: Hydroponic Facility";
+E4M5Desc = "C4M5: Engineering Station";
+E4M6Desc = "C4M6: Command Center";
+E4M7Desc = "C4M7: Waste Treatment";
+E4M8Desc = "C4M8: Launch Bay";
+E4M9Desc = "C4M9: Operations";
+Episode1Text = "You've made it out of the outpost.\n"
+  "But you're still stuck on this rock.\n"
+  "AGM sure has been busy with their\n"
+  "\"experiments,\" with those monsters\n"
+  "infesting that dreadful place. You are\n"
+  "an experiment as well, so who cares?\n"
+  "There weren't any ships inside the\n"
+  "outpost. The only section that might\n"
+  "have one is the Military Labs. The\n"
+  "very place you got your strength\n"
+  "from. Damned AGM scientists.\n"
+  "\n"
+  "This nightmare is too much. You\n"
+  "step through the massive doors of\n"
+  "the Military Labs.\n"
+  "\n"
+  "There could be a way to escape in there.";
+Episode2Text = "The massive brutes collapse onto\n"
+  "the ground. They fall apart bit by bit.\n"
+  "Unfortunately, there was no ship\n"
+  "here either. The Labs have bizarre\n"
+  "technology though. Like this one.\n"
+  "\n"
+  "A huge teleporter machine, set for...\n"
+  "A place called Horizon?\n"
+  "\n"
+  "You never heard of such a thing before.\n"
+  "Maybe it's another AGM facility.\n"
+  "Meaning there could be a ship on\n"
+  "the other side. Sounds like a good\n"
+  "plan. Or at least, as good as it gets.\n"
+  "\n"
+  "Next stop, Horizon.";
+Episode3Text = "The abomination explodes into\n"
+  "oblivion. That's that. Horizon is a\n"
+  "whole new world, not a facility.\n"
+  "Even worse than the outpost you\n"
+  "rotted away for years in. Meaning\n"
+  "you're still trapped.\n"
+  "\n"
+  "An AGM teleporter is here somehow.\n"
+  "They must have been here, then.\n"
+  "The teleporter is set for a facility\n"
+  "called \"Double Impact,\" which is a\n"
+  "ridiculous name. Who cares? All\n"
+  "you need is a working ship.\n"
+  "\n"
+  "You drop all your weapons on\n"
+  "the ground and step on the platform,\n"
+  "reintegrating on Double Impact.";
+Episode4Text = "After yet another army of monsters\n"
+  "you manage to find a functioning ship.\n"
+  "Looks like freedom is yours.\n"
+  "\n"
+  "You practically melt into the soft\n"
+  "pilot's seat, a luxurious welcome\n"
+  "as you leave this wretched rock.\n"
+  "\n"
+  "The ship rumbles as she wakes up;\n"
+  "you think of Earth as she lifts off.\n"
+  "Hopefully, AGM won't find you there:\n"
+  "they've got the outbreak to deal\n"
+  "with, so that'll give you some time.\n"
+  "\n"
+  "Destination: Earth!";
+Map10Desc = "MAP10: Deadly Outlands";
+Map11Desc = "MAP11: Infinite Plain";
+Map12Desc = "MAP12: Railroads";
+Map13Desc = "MAP13: Station Earth";
+Map14Desc = "MAP14: Nuclear Zone";
+Map15Desc = "MAP15: Hostile Takeover";
+Map16Desc = "MAP16: Urban Jungle";
+Map17Desc = "MAP17: City Capitol";
+Map18Desc = "MAP18: Aquatics Lab";
+Map19Desc = "MAP19: Sewage Control";
+Map01Desc = "MAP01: Hydroelectric Plant";
+Map20Desc = "MAP20: Blood Ember Fortress";
+Map21Desc = "MAP21: Under Realm";
+Map22Desc = "MAP22: Remanasu";
+Map23Desc = "MAP23: Underground Facility";
+Map24Desc = "MAP24: Tertiary Loading Bay";
+Map25Desc = "MAP25: Red Works";
+Map26Desc = "MAP26: Dark Depths";
+Map27Desc = "MAP27: Warped Elementality";
+Map28Desc = "MAP28: Grim Redoubt";
+Map29Desc = "MAP29: Last Stand";
+Map02Desc = "MAP02: Filtration Tunnels";
+Map30Desc = "MAP30: Jaws of Defeat";
+Map31Desc = "MAP31: Be Quiet";
+Map32Desc = "MAP32: Not Sure";
+Map03Desc = "MAP03: Crude Processing Center";
+Map04Desc = "MAP04: Containment Bay";
+Map05Desc = "MAP05: Sludge Burrow";
+Map06Desc = "MAP06: Gamma Labs";
+Map07Desc = "MAP07: Outer Storage Warehouse";
+Map08Desc = "MAP08: Astronomy Complex";
+Map09Desc = "MAP09: Datacenter";
+Level7Text = "You've found your way to the\n"
+  "complex's outer storage warehouse.\n"
+  "Not even Earth was safe from the\n"
+  "monsters. This AGM space terminal\n"
+  "is a lost cause. Best to get out.\n"
+  "\n"
+  "You press the panel to call the lift.\n"
+  "It slowly lowers, then speeds up.\n"
+  "Growls come along with it.\n"
+  "Looks like you're not alone here.\n"
+  "\n"
+  "Planted your feet.\n"
+  "\n"
+  "Checked your weapons.\n"
+  "\n"
+  "Time to go up.";
+Level12Text = "The facility is gone, no doubt there.\n"
+  "You didn't find anyone alive.\n"
+  "But you don't want to keep fighting\n"
+  "either. You are only human.\n"
+  "There's a teleporter here, set for\n"
+  "a city unknown to you. City means\n"
+  "people, right?\n"
+  "\n"
+  "The bolts holding the platform\n"
+  "fly off over the ledge. The place\n"
+  "is falling apart. You quickly step on\n"
+  "the platform and reappear at the city.\n"
+  "It's been destroyed to the ground.\n"
+  "\n"
+  "You can't go back either.";
+Level21Text = "There is no AGM here. No humans.\n"
+  "Just monsters and monsters.\n"
+  "And you.\n"
+  "This could be the beginning of\n"
+  "your freedom.\n"
+  "The finale of this endless fighting\n"
+  "against the monsters.\n"
+  "No man has ever survived in this\n"
+  "wasteland.\n"
+  "\n"
+  "Other than you, that is.\n"
+  "Maybe AGM saw this place.\n"
+  "But never got through here.\n"
+  "Either way, it doesn't matter.\n"
+  "\n"
+  "You're stuck here once again.";
+EndGameText = "The evil thing becomes unstable.\n"
+  "\n"
+  "Its final roars echo throughout the\n"
+  "room until it crumples into scrap metal.\n"
+  "A portal opens up, and in it, you see a\n"
+  "small town. You jump in quickly.\n"
+  "AGM learned its lesson this time.\n"
+  "\n"
+  "Hopefully.\n"
+  "\n"
+  "No one will know who saved them.\n"
+  "\n"
+  "No one will know what happened here.\n"
+  "\n"
+  "No one will ever find you again.";
+Level31Text = "You step onto the machine and\n"
+  "after a strange flash you find\n"
+  "yourself in a rusty cage.\n"
+  "\n"
+  "What happened? Where is this?\n"
+  "\n"
+  "Before you can wonder further\n"
+  "you notice that you are surrounded\n"
+  "by monsters. It was a trap.\n"
+  "\n"
+  "You silently bring out\n"
+  "your gun, ready to kill.";
+Level32Text = "The world dissipitates around\n"
+  "you. You got out of that trap. Only\n"
+  "to find yourself inside another.\n"
+  "As the glow of the teleporter\n"
+  "subsides, it looks like you may\n"
+  "have made a wrong turn.\n"
+  "\n"
+  "Again.\n"
+  "\n"
+  "The world comes back to you.\n"
+  "The monsters you fought before\n"
+  "raise their weapons,\n"
+  "\n"
+  "aiming for your head.";
+
+ZombiemanName = "Zombie";
+ShotgunGuyName = "Shotgun Zombie";
+HeavyWeaponDudeName = "Minigun Zombie";
+ImpName = "Serpentipede";
+DemonName = "Flesh Worm";
+LostSoulName = "Deadflare";
+CacodemonName = "Trilobite";
+HellKnightName = "Pain Bringer";
+BaronOfHellName = "Pain Lord";
+ArachnotronName = "Technospider";
+PainElementalName = "Summoner";
+RevenantName = "Dark Soldier";
+MancubusName = "Combat Slug";
+ArchVileName = "Necromancer";
+SpiderMastermindName = "Large Technospider";
+CyberdemonName = "Assault Tripod";
+OurHeroName = "Savior of Humanity";
+
+
+ 
+ 
+ 
+ 

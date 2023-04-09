@@ -1,0 +1,129 @@
+//https://edge-classic.github.io/
+
+
+<LANGUAGES>
+
+[ENGLISH]
+M_EPI6_Desc="Harmony";
+MenuSkill="Select Difficulty";
+MenuDifficulty1="Very Easy";
+MenuDifficulty2="Easy";
+MenuDifficulty3="Medium";
+MenuDifficulty4="Hard";
+MenuDifficulty5="Very Hard";
+
+OB_Generic  = "%o was killed by %k.";
+
+AutoMapMarkedSpot = "Spot marked";
+GotArmour = "Picked up armor.";
+GotBackpack = "Acquired: ammo backpack";
+GotBFG = "Acquired: Grenade";
+GotBlueCard = "Obtained the GREEN keycard";
+GotBlueSkull = "Obtained the GREEN key";
+GotChainGun = "Aquired: Minigun.";
+GotClipBox = "Aquired: case of bullets.";
+GotRocketLauncher = "Aquired: Grenade launcher.";
+GotMap = "Map [press TAB]";
+GotMedi = "Aquired: medical kit.";
+GotMegaArmour = "Picked up Combat Armor";
+GotMega = "superhealth";
+GotPlasmaGun = "Entropy thrower!";
+GotRedCard = "Obtained the Purple keycard";
+GotRedSkull = "Obtained the PURPLE key";
+GotRocketBox = "Aquired: Grenades";
+GotRocket = "Acquired: Grenade";
+GotShellBox = "Acquired: Box of shotgun shells.";
+GotShotgun = "Acquired: Shotgun.";
+GotStim = "Healing mushroom";
+GotYellowCard = "Obtained the YELLOW keycard";
+GotYellowSkull = "Obtained the YELLOW key";
+NeedBlueForDoor = "Requires the GREEN key";
+NeedBlueForObject = "Requires the GREEN keycard";
+NeedRedForDoor = "Requires the PURPLE key";
+NeedRedForObject = "Requires the PURPLE keycard";
+NeedYellowForDoor = "Requires the YELLOW key";
+NeedYellowForObject = "Requires the YELLOW keycard";
+GodModeOFF = "God Mode Off";
+GodModeON = "God Mode On";
+AmmoAdded = "All weapons and ammo";
+VeryHappyAmmo = "All weapons/ ammo/ keys";
+Map01Desc = "01: Abduction";
+Map02Desc = "02: Harm's way";
+Map03Desc = "03: Owt mood";
+Map04Desc = "04: Megalapolis";
+Map05Desc = "05: The hospital";
+Map06Desc = "06: The weapons factory";
+Map07Desc = "07: The underwater lab";
+Map08Desc = "08: Airstrip one";
+Map09Desc = "09: The launch base";
+Map10Desc = "10: The radioactive zone";
+Map11Desc = "11: Echidna";
+
+Level7Text = "HEADING DOWN YOU FINALLY HAVE SOME TIME\n"
+  "TO THINK OF ALL THAT HAS HAPPENED:\n"
+  "\n"
+  "YOUR LEADER AND FRIEND AMIRA WAS ABDUCTED.\n"
+  "THE MUTANTS OF THE PAX POX HAVE TAKEN HER\n"
+  "BUT YOU DON'T KNOW WHERE TO.\n"
+  "\n"
+  "THIS WEAPONS FACTORY PRODUCED MANY OF THE \n"
+  "WEAPONS THAT HELPED CREATE THE MUTANTS.\n"
+  "IT MAKES SENSE YOU WILL BE ABLE TO FIND MORE\n"
+  "INFORMATION HERE AND HOPEFULLY A WAY TO\n"
+  "END THE PAX POX ONCE AND FOR ALL...\n"
+  "\n"
+  "HERE WE GO";
+  
+Level12Text = "YOU FEEL SICK IN YOUR STOMACH...\n"
+  "LOOKING IN THE FACE OF THE MUTANT QUEEN... \n"
+  "THAT THING... THAT USED TO BE... \n"
+  "YOUR FRIEND... AMIRA!\n"
+  "\n"
+  "THOSE MONSTERS MUST HAVE FOUND A WAY TO \n"
+  "MUTATE HER AND TURN HER INTO THIS\n"
+  "HIDIOUS CREATURE TO BEAR THEIR OFFSPRING.\n"
+  "\n"
+  "-sigh-\n"
+  "\n"
+  "YOU GET YOURSELF TOGETHER... \n"
+  "THEY ARE GOING TO PAY FOR MAKING YOU KILL\n"
+  "YOUR FRIEND...\n"
+  "\n"
+  "'HELL HAS NO FURY LIKE A WOMAN SCORNED!'\n"
+  "      = T H E   E N D =\n";
+
+idbehold5 = "tvmap????";
+idbehold3 = "tvinvis??";
+idbehold6 = "tvlight??";
+idbehold4 = "tvsuit???";
+idbehold2 = "tvred????";
+idbehold1 = "tvpsych??";
+idchoppers = "tvchoppers";
+idclev = "idclev"; //""tvwarp";
+idclip = "idclip"; //"tvclip";
+iddqd = "iddqd"; //"tvgod";
+iddt = "tvmp";
+idfa = "idfa"; //"tvmo";
+idkfa = "idkfa"; //"tvall";
+idmus = "tvmus";
+idmypos = "tvpos??";
+idspispopd = "tvclip????";
+
+ 
+ enemyBeastling = "Beastling";
+ enemyCentaur = "Centaur";
+ enemyCritter = "Critter";
+ enemyEchidna = "Echidna";
+ enemyFollower = "Follower";
+ enemyPhage = "Phage";
+ enemyPredator = "Predator";
+ enemyMutant = "Mutant Soldier";
+ enemyMine = "Mine";
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

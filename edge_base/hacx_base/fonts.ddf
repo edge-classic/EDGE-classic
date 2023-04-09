@@ -1,0 +1,19 @@
+// 
+//    EDGE FONTS.DDF -redefine or add new fonts.
+//    For documentation, see https://edge-classic.github.io/
+//
+
+<FONTS>
+
+#VERSION 1.10
+
+[EDGE1] //font used for the big menu graphics
+TYPE=PATCH;
+PATCHES=BIGFN065("A":"Z"),BIGFN033("!"),BIGFN037("%"),BIGFN039("'"),BIGFN044(","),BIGFN045("-"),BIGFN046("."),BIGFN048("0":"9"),BIGFN058(":"),BIGFN063("?");
+MISSING_PATCH="BIGFN045";
+
+[EDGE2] //font used for the big menu graphics
+TYPE=PATCH;
+PATCHES=BIGFN065("A":"Z"),BIGFN033("!"),BIGFN037("%"),BIGFN039("'"),BIGFN044(","),BIGFN045("-"),BIGFN046("."),BIGFN048("0":"9"),BIGFN058(":"),BIGFN063("?");
+MISSING_PATCH="BIGFN045";
+ 

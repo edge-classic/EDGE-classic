@@ -44,7 +44,7 @@
 #include "style.h"
 #include "switch.h"
 #include "flat.h"
-#include "wadfixes.h"
+#include "wadfixes.h" 
 
 // DEHACKED
 #include "deh_edge.h"
@@ -55,7 +55,7 @@
 #include "l_deh.h"
 #include "rad_trig.h"
 #include "w_files.h"
-#include "w_pk3.h"
+#include "w_epk.h"
 #include "w_wad.h"
 
 
@@ -210,7 +210,7 @@ static void ProcessFile(data_file_c *df)
 
 		ProcessWad(df, file_index);
 	}
-	else if (df->kind == FLKIND_Folder || df->kind == FLKIND_PK3)
+	else if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
 	{
 		ProcessPackage(df, file_index);
 	}
@@ -288,7 +288,7 @@ epi::file_c * W_OpenPackFile(const std::string& name)
 	for (int i = (int)data_files.size() - 1 ; i >= 0 ; i--)
 	{
 		data_file_c *df = data_files[i];
-		if (df->kind == FLKIND_Folder || df->kind == FLKIND_PK3)
+		if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
 		{
 			epi::file_c *F = Pack_OpenFile(df->pack, name);
 			if (F != NULL)
@@ -306,17 +306,19 @@ static const char *FileKindString(filekind_e kind)
 {
 	switch (kind)
 	{
-		case FLKIND_IWad:   return "iwad";
-		case FLKIND_PWad:   return "pwad";
-		case FLKIND_EWad:   return "edge";
-		case FLKIND_XWad:   return "xwa";
+		case FLKIND_IWad:    return "iwad";
+		case FLKIND_PWad:    return "pwad";
+		case FLKIND_EWad:    return "edge";
+		case FLKIND_EEPK:    return "edge";
+		case FLKIND_XWad:    return "xwa";
 
-		case FLKIND_Folder: return "DIR";
-		case FLKIND_PK3:    return "pk3";
+		case FLKIND_Folder:  return "DIR";
+		case FLKIND_EFolder: return "edge";
+		case FLKIND_EPK:     return "epk";
 
-		case FLKIND_DDF:    return "ddf";
-		case FLKIND_RTS:    return "rts";
-		case FLKIND_Deh:    return "deh";
+		case FLKIND_DDF:     return "ddf";
+		case FLKIND_RTS:     return "rts";
+		case FLKIND_Deh:     return "deh";
 
 		default: return "???";
 	}

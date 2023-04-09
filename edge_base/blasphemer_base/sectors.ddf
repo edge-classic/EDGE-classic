@@ -1,0 +1,92 @@
+//
+//    EDGE SECTORS.DDF -redefine or add new sector types.
+//    For documentation, see https://edge-classic.github.io/
+//
+
+<SECTORS>
+
+#VERSION 1.30
+
+
+[15] // Heretic ice sector
+FRICTION=0.96;
+
+[21] // Scroll EAST (slow)
+PUSH_ANGLE=0;
+PUSH_SPEED=10;
+SPECIAL=PUSH_CONSTANT;
+
+[22] // Scroll EAST (medium)
+PUSH_ANGLE=0;
+PUSH_SPEED=30;
+SPECIAL=PUSH_CONSTANT;
+
+[23] // Scroll EAST (fast)
+PUSH_ANGLE=0;
+PUSH_SPEED=50;
+SPECIAL=PUSH_CONSTANT;
+
+[26] // Scroll NORTH (slow)
+PUSH_ANGLE=90;
+PUSH_SPEED=10;
+SPECIAL=PUSH_CONSTANT;
+
+[27] // Scroll NORTH (medium)
+PUSH_ANGLE=90;
+PUSH_SPEED=30;
+SPECIAL=PUSH_CONSTANT;
+
+[28] // Scroll NORTH (fast)
+PUSH_ANGLE=90;
+PUSH_SPEED=50;
+SPECIAL=PUSH_CONSTANT;
+
+[31] // Scroll SOUTH (slow)
+PUSH_ANGLE=360;
+PUSH_SPEED=10;
+SPECIAL=PUSH_CONSTANT;
+
+[32] // Scroll SOUTH (medium)
+PUSH_ANGLE=360;
+PUSH_SPEED=30;
+SPECIAL=PUSH_CONSTANT;
+
+[33] // Scroll SOUTH (fast)
+PUSH_ANGLE=360;
+PUSH_SPEED=50;
+SPECIAL=PUSH_CONSTANT;
+
+[36] // Scroll WEST (slow)
+PUSH_ANGLE=180;
+PUSH_SPEED=10;
+SPECIAL=PUSH_CONSTANT;
+
+[37] // Scroll WEST (medium)
+PUSH_ANGLE=180;
+PUSH_SPEED=30;
+SPECIAL=PUSH_CONSTANT;
+
+[38] // Scroll WEST (fast)
+PUSH_ANGLE=180;
+PUSH_SPEED=50;
+SPECIAL=PUSH_CONSTANT;
+
+[40] // Heretic Wind EAST (weak)
+PUSH_ANGLE=0;
+PUSH_SPEED=10;
+
+[45] // Heretic Wind NORTH (strong)
+PUSH_ANGLE=90;
+PUSH_SPEED=22;
+
+[50] // Heretic Wind WEST (medium)
+PUSH_ANGLE=180;
+PUSH_SPEED=16;
+
+
+
+
+
+ 
+ 
+ 

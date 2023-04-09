@@ -102,7 +102,6 @@ public:
 	int deh_lump;
 
 	// COAL scripts
-	int coal_apis;
 	int coal_huds;
 
 	// BOOM stuff
@@ -117,7 +116,7 @@ public:
 		colmap_lumps(), tx_lumps(), hires_lumps(), xgl_lumps(),
 		level_markers(), skin_markers(),
 		wadtex(),
-		deh_lump(-1), coal_apis(-1), coal_huds(-1),
+		deh_lump(-1), coal_huds(-1),
 		animated(-1), switches(-1),
 		md5_string()
 	{
@@ -563,13 +562,6 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
 			wad->deh_lump = lump;
 		return;
 	}
-	else if (strcmp(info.name, "COALAPI") == 0)
-	{
-		lump_p->kind = LMKIND_DDFRTS;
-		if (wad != NULL)
-			wad->coal_apis = lump;
-		return;
-	}
 	else if (strcmp(info.name, "COALHUDS") == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
@@ -982,21 +974,6 @@ static void ProcessCoalInWad(data_file_c *df)
 
 	wad_file_c *wad = df->wad;
 
-	// only load COALAPI from edge-defs, because (like WADFIXES)
-	// it is not something that user mods should mess with.
-	if (wad->coal_apis >= 0 && df->kind == FLKIND_EWad)
-	{
-		int lump = wad->coal_apis;
-
-		std::string data   = W_LoadString(lump);
-		std::string source = W_GetLumpName(lump);
-
-		source += " in ";
-		source += bare_filename;
-
-		VM_AddScript(0, data, source);
-	}
-
 	if (wad->coal_huds >= 0)
 	{
 		int lump = wad->coal_huds;
@@ -1136,14 +1113,6 @@ void ProcessWad(data_file_c *df, size_t file_index)
 	I_Debugf("   md5hash = %s\n", wad->md5_string.c_str());
 
 	delete[] raw_info;
-
-	// parse the WADFIXES lump from `edge-defs.wad` immediately
-	if (df->kind == FLKIND_EWad)
-	{
-		I_Printf("Loading WADFIXES\n");
-		std::string data = W_LoadString("WADFIXES");
-		DDF_ReadFixes(data);
-	}
 
 	ProcessDehackedInWad(df);
 	ProcessBoomStuffInWad(df);

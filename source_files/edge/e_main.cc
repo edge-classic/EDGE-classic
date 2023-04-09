@@ -195,7 +195,7 @@ bool autoquickload = false;
 
 std::filesystem::path brandingfile;
 std::filesystem::path cfgfile;
-std::filesystem::path ewadfile;
+std::filesystem::path epkfile;
 std::string iwad_base;
 
 std::filesystem::path cache_dir;
@@ -466,33 +466,33 @@ static void SpecialWadVerify(void)
 {
 	E_ProgressMessage("Verifying EDGE-DEFS version...");
 
-	int lump = W_CheckNumForName("EDGEVER");
-	if (lump < 0)
-		I_Error("EDGEVER lump not found. Get EDGE-DEFS.WAD at https://github.com/edge-classic/EDGE-classic");
+	epi::file_c *data = W_OpenPackFile("edgever.txt");
 
-	const void *data = W_CacheLumpNum(lump);
+	if (!data)
+		I_Error("EDGEVER file not found. Get EDGE-DEFS.EPK at https://github.com/edge-classic/EDGE-classic");
 
 	// parse version number
-	const char *s = (const char*)data;
-	int wad_ver = atoi(s) * 100;
+	std::string verstring = data->ReadText();
+	const char *s = verstring.data();
+	int epk_ver = atoi(s) * 100;
 
 	while (isdigit(*s)) s++;
 	s++;
-	wad_ver += atoi(s);
+	epk_ver += atoi(s);
 
-	W_DoneWithLump(data);
+	delete data;
 
-	I_Printf("EDGE-DEFS.WAD version %1.2f found.\n", wad_ver / 100.0);
+	I_Printf("EDGE-DEFS.EPK version %1.2f found.\n", epk_ver / 100.0);
 
-	if (wad_ver < EDGE_WAD_VERSION)
+	if (epk_ver < EDGE_EPK_VERSION)
 	{
-		I_Error("EDGE-DEFS.WAD is an older version (expected %1.2f)\n",
-		          EDGE_WAD_VERSION / 100.0);
+		I_Error("EDGE-DEFS.EPK is an older version (expected %1.2f)\n",
+		          EDGE_EPK_VERSION / 100.0);
 	}
-	else if (wad_ver > EDGE_WAD_VERSION)
+	else if (epk_ver > EDGE_EPK_VERSION)
 	{
-		I_Warning("EDGE-DEFS.WAD is a newer version (expected %1.2f)\n",
-		          EDGE_WAD_VERSION / 100.0);
+		I_Warning("EDGE-DEFS.EPK is a newer version (expected %1.2f)\n",
+		          EDGE_EPK_VERSION / 100.0);
 	}
 }
 
@@ -949,15 +949,18 @@ void InitDirectories(void)
 	if (cfgfile.empty())
 		cfgfile = epi::PATH_Join(home_dir, UTFSTR(configfilename.s));
 
-	// edge.wad file
-	s = argv::Value("ewad");
+	// edge-defs.epk file
+	s = argv::Value("eepk");
 	if (!s.empty())
 	{
-		ewadfile = s;
+		epkfile = s;
 	}
 	else
     {
-        ewadfile = epi::PATH_Join(game_dir, UTFSTR("edge-defs.wad"));
+		if (epi::FS_IsDir(epi::PATH_Join(game_dir, UTFSTR("edge-defs"))))
+			epkfile = epi::PATH_Join(game_dir, UTFSTR("edge-defs"));
+		else
+        	epkfile = epi::PATH_Join(game_dir, UTFSTR("edge-defs.epk"));
 	}
 
 	// cache directory
@@ -1015,19 +1018,20 @@ static void PurgeCache(void)
 }
 
 //
-// Adds an IWAD and EDGE.WAD
-// First checks agains known Adler-32 checksums, then attempts to find unique lumps as a fallback
+// Adds an IWAD and edge-defs.epk
 //
 
 static void IdentifyVersion(void)
 {
-    std::filesystem::path reqwad = epi::PATH_Join(game_dir, UTFSTR(REQUIREDWAD ".wad"));
-
-    if (! epi::FS_Access(reqwad, epi::file_c::ACCESS_READ))
-        I_Error("IdentifyVersion: Could not find required %s.%s!\n", 
-            REQUIREDWAD, "wad");
-
-    W_AddFilename(reqwad, FLKIND_EWad);
+	if (epi::FS_IsDir(epkfile))
+    	W_AddFilename(epkfile, FLKIND_EFolder);
+	else
+	{
+		if (! epi::FS_Access(epkfile, epi::file_c::ACCESS_READ))
+			I_Error("IdentifyVersion: Could not find required %s.%s!\n", 
+				REQUIREDEPK, "epk");
+		W_AddFilename(epkfile, FLKIND_EEPK);
+	}
 
 	I_Debugf("- Identify Version\n");
 
@@ -1254,7 +1258,7 @@ static void IdentifyVersion(void)
 	I_Debugf("IWAD BASE = [%s]\n", iwad_base.c_str());
 }
 
-// Add game-specific base EWADs (widepix, skyboxes, etc) - Dasho
+// Add game-specific base EPKs (widepix, skyboxes, etc) - Dasho
 static void Add_Base(void) 
 {
 	if (epi::case_cmp("CUSTOM", iwad_base) == 0)
@@ -1262,11 +1266,14 @@ static void Add_Base(void)
 	std::filesystem::path base_path = epi::PATH_Join(game_dir, UTFSTR("edge_base"));
 	std::string base_wad = iwad_base;
 	std::transform(base_wad.begin(), base_wad.end(), base_wad.begin(), ::tolower);
-	base_path = epi::PATH_Join(base_path, UTFSTR(base_wad.append("_base.wad")));
-	if (epi::FS_Access(base_path, epi::file_c::ACCESS_READ)) 
-		W_AddFilename(base_path, FLKIND_EWad);
+	base_path = epi::PATH_Join(base_path, UTFSTR(base_wad.append("_base")));
+	if (epi::FS_IsDir(base_path))
+		W_AddFilename(base_path, FLKIND_EFolder);
+	else if (epi::FS_Access(base_path.replace_extension(".epk"), epi::file_c::ACCESS_READ)) 
+		W_AddFilename(base_path, FLKIND_EEPK);
 	else
-		I_Warning("Base WAD not found for the %s IWAD! Check the /edge_base folder of your %s install!\n", iwad_base.c_str(), appname.c_str());
+		I_Error("%s not found for the %s IWAD! Check the /edge_base folder of your %s install!\n", base_path.filename().u8string().c_str(),
+			iwad_base.c_str(), appname.c_str());
 }
 
 static void CheckTurbo(void)
@@ -1366,8 +1373,8 @@ static void AddSingleCmdLineFile(std::filesystem::path name, bool ignore_unknown
 
 	if (ext == ".wad")
 		kind = FLKIND_PWad;
-	else if (ext == ".pk3")
-		kind = FLKIND_PK3;
+	else if (ext == ".pk3" || ext == ".epk")
+		kind = FLKIND_EPK;
 	else if (ext == ".rts")
 		kind = FLKIND_RTS;
 	else if (ext == ".ddf" || ext == ".ldf")
@@ -1424,6 +1431,7 @@ static void AddCommandLineFiles(void)
 			// sanity check...
 			if (epi::case_cmp(ext, ".wad") == 0 || 
 				epi::case_cmp(ext, ".pk3") == 0 ||
+				epi::case_cmp(ext, ".epk") == 0 ||
 				epi::case_cmp(ext, ".ddf") == 0 ||
 				epi::case_cmp(ext, ".deh") == 0 ||
 				epi::case_cmp(ext, ".bex") == 0)
@@ -1450,7 +1458,8 @@ static void AddCommandLineFiles(void)
 		{
 			std::string ext = epi::PATH_GetExtension(argv::list[p]).u8string();
 			// sanity check...
-			if (epi::case_cmp(ext, ".wad") == 0 || 
+			if (epi::case_cmp(ext, ".wad") == 0 ||
+				epi::case_cmp(ext, ".epk") == 0 ||
 				epi::case_cmp(ext, ".pk3") == 0 ||
 				epi::case_cmp(ext, ".ddf") == 0 ||
 				epi::case_cmp(ext, ".rts") == 0)
@@ -1660,6 +1669,7 @@ static void E_Startup(void)
 	W_InitSprites();
 	W_ProcessTX_HI();
 	W_InitModels();
+	W_ImageAddPackImages();
 
 	M_Init();
 	R_Init();

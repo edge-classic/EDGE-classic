@@ -159,10 +159,12 @@ static void ImageParseField(const char *field, const char *contents, int index, 
 
 static void ImageFinishEntry(void)
 {
-	// files and PK3 only support standard image formats
 	if (dynamic_image->type == IMGDT_File || dynamic_image->type == IMGDT_Package)
 	{
-		dynamic_image->format = LIF_STANDARD;
+		if (std::filesystem::path(dynamic_image->info).extension().u8string() == ".lmp")
+			dynamic_image->format = LIF_DOOM;
+		else
+			dynamic_image->format = LIF_STANDARD;
 	}
 
 	// Add these automatically so modders don't have to remember them
@@ -217,8 +219,25 @@ static void ImageParseColour(const char *value)
 
 static void ImageParseInfo(const char *value)
 {
-	// ouch, hard work here...
-	dynamic_image->info = value;
+	// Enforce internal path for package image files
+	if (dynamic_image->type == IMGDT_Package)
+	{
+		std::string pathname;
+		switch (dynamic_image->belong)
+		{
+			case INS_Graphic: pathname = "graphics/"; break;
+			case INS_Texture: pathname = "textures/"; break;
+			case INS_Flat:    pathname = "flats/"; break;
+			case INS_Sprite:  pathname = "sprites/"; break;
+			case INS_Patch:   pathname = "patches/"; break;
+
+			default:
+				I_Error("INTERNAL ERROR: Bad belong value: %d\n", dynamic_image->belong);
+		}
+		dynamic_image->info = pathname.append(value);
+	}
+	else
+		dynamic_image->info = value;
 }
 
 

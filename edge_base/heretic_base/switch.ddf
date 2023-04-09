@@ -1,0 +1,30 @@
+//
+//    EDGE SWITCH.DDF -redefine or add new switch textures and sounds.
+//    For documentation, see https://edge-classic.github.io/
+//
+
+<SWITCHES>
+
+#VERSION 1.30
+
+// 
+// ------------------------ Heretic stuff ------------------------
+//
+
+
+[SW1OFF]
+ON_TEXTURE ="SW1ON";
+OFF_TEXTURE="SW1OFF";
+ON_SOUND=SWITCH;
+OFF_SOUND=SWITCH;
+
+[SW2OFF]
+ON_TEXTURE ="SW2ON";
+OFF_TEXTURE="SW2OFF";
+ON_SOUND=SWITCH;
+OFF_SOUND=SWITCH;
+
+
+ 
+ 
+ 

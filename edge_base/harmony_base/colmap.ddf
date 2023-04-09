@@ -1,0 +1,18 @@
+// 
+//    EDGE COLMAP.DDF -redefine or add new color maps.
+//    For documentation, see https://github.com/dashodanger/EDGE-classic/
+//
+
+
+<COLOURMAPS>
+
+#VERSION 1.10
+
+[TEXT_HARMONY_BLUE]
+gl_colour = #0F648C;
+
+[TEXT_HARMONY_PURPLE]
+gl_colour = #A050FF;
+
+[TEXT_HARMONY_LIGHT_BLUE]
+gl_colour = #6EB4E6;

@@ -603,7 +603,7 @@ void M_DrawHostMenu(void)
 
 bool M_NetHostResponder(event_t * ev, int ch)
 {
-	if (ch == KEYD_ENTER || ch == KEYD_MENU_SELECT)
+	if (ch == KEYD_ENTER || ch == KEYD_MENU_SELECT || ch == KEYD_MOUSE1)
 	{
 		if (host_pos == (HOST_OPTIONS-1))
 		{
@@ -625,7 +625,7 @@ bool M_NetHostResponder(event_t * ev, int ch)
 	}
 
 	if (ch == KEYD_LEFTARROW || ch == KEYD_RIGHTARROW || ch == KEYD_DPAD_LEFT || ch == KEYD_DPAD_RIGHT ||
-		ch == KEYD_MENU_LEFT || ch == KEYD_MENU_RIGHT || ch == KEYD_ENTER || KEYD_MENU_SELECT)
+		ch == KEYD_MENU_LEFT || ch == KEYD_MENU_RIGHT || ch == KEYD_ENTER || ch == KEYD_MENU_SELECT || ch == KEYD_MOUSE1)
 	{
 		HostChangeOption(host_pos, ch);
 		return true;

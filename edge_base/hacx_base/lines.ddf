@@ -1,0 +1,40 @@
+// 
+//    EDGE LINES.DDF -redefine or add new line triggers.
+//    For documentation, see https://edge-classic.github.io/
+//
+
+<LINES>
+
+// BUILD STAIRS TURBO 16 S1
+[127]
+TYPE=PUSH;
+ACTIVATORS=PLAYER;
+COUNT=1;
+FLOOR.TYPE=BUILDSTAIRS;
+FLOOR.SPEED_UP=4;
+FLOOR.SPEED_DOWN=4; // set to 0 in stock EDGE, is that right?
+FLOOR.DEST_REF=FLOOR;
+FLOOR.DEST_OFFSET=16;
+FLOOR.SFX_UP=STNMOV; 
+
+[270] // HACX 2.0 hack :) EDGE Translucent Linedef
+TYPE=PUSH;
+ACTIVATORS=PLAYER;
+TRANSLUCENCY=30%;
+ 
+[389]  // Eternity equivalent is EDGE Detail Slope : FLOOR
+TYPE=PUSH;
+ACTIVATORS=PLAYER;
+SLOPE_TYPE=FAKE_FLOOR;
+
+[390]  // Eternity equivalent is EDGE Detail Slope : CEILING
+TYPE=PUSH;
+ACTIVATORS=PLAYER;
+SLOPE_TYPE=FAKE_CEILING; 
+
+[391]  // Eternity equivalent is EDGE Detail Slope : FLOOR+CEILING
+TYPE=PUSH;
+ACTIVATORS=PLAYER;
+SLOPE_TYPE=FAKE_FLOOR,FAKE_CEILING;
+ 
+ 

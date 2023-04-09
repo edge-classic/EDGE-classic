@@ -1,0 +1,112 @@
+//
+//    EDGE LANG_TNT.LDF - messages for TNT Evilution.
+//    For documentation, see https://edge-classic.github.io/
+//
+
+<LANGUAGES>
+
+#VERSION 1.00
+
+// ------ English Language Definition File ----------
+
+[ENGLISH]
+
+M_EPI5_Desc="Evilution";
+
+Map01Desc="level 1: System control";
+Map02Desc="level 2: Human BBQ";
+Map03Desc="level 3: Power control";
+Map04Desc="level 4: Wormhole";
+Map05Desc="level 5: Hanger";
+Map06Desc="level 6: Open season";
+Map07Desc="level 7: Prison";
+Map08Desc="level 8: Metal";
+Map09Desc="level 9: Stronghold";
+Map10Desc="level 10: Redemption";
+Map11Desc="level 11: Storage facility";
+Map12Desc="level 12: Crater";
+Map13Desc="level 13: Nukage processing";
+Map14Desc="level 14: Steel works";
+Map15Desc="level 15: Dead zone";
+Map16Desc="level 16: Deepest reaches";
+Map17Desc="level 17: Processing area";
+Map18Desc="level 18: Mill";
+Map19Desc="level 19: Shipping/respawning";
+Map20Desc="level 20: Central processing";
+Map21Desc="level 21: Administration center";
+Map22Desc="level 22: Habitat";
+Map23Desc="level 23: Lunar mining project";
+Map24Desc="level 24: Quarry";
+Map25Desc="level 25: Baron's den";
+Map26Desc="level 26: Ballistyx";
+Map27Desc="level 27: Mount pain";
+Map28Desc="level 28: Heck";
+Map29Desc="level 29: River Styx";
+Map30Desc="level 30: Last call";
+Map31Desc="level 31: Pharaoh";
+Map32Desc="level 32: Caribbean";
+
+Level7Text="You've fought your way out of the infested\n"
+  "experimental labs.   It seems that UAC has\n"
+  "once again gulped it down.  With their\n"
+  "high turnover, it must be hard for poor\n"
+  "old UAC to buy corporate health insurance\n"
+  "nowadays..\n"
+  "\n"
+  "Ahead lies the military complex, now\n"
+  "swarming with diseased horrors hot to get\n"
+  "their teeth into you. With luck, the\n"
+  "complex still has some warlike ordnance\n"
+  "laying around.";
+
+Level12Text="You hear the grinding of heavy machinery\n"
+  "ahead.  You sure hope they're not stamping\n"
+  "out new hellspawn, but you're ready to\n"
+  "ream out a whole herd if you have to.\n"
+  "They might be planning a blood feast, but\n"
+  "you feel about as mean as two thousand\n"
+  "maniacs packed into one mad killer.\n"
+  "\n"
+  "You don't plan to go down easy.";
+
+Level21Text="The vista opening ahead looks real damn\n"
+  "familiar. Smells familiar, too -- like\n"
+  "fried excrement. You didn't like this\n"
+  "place before, and you sure as hell ain't\n"
+  "planning to like it now. The more you\n"
+  "brood on it, the madder you get.\n"
+  "Hefting your gun, an evil grin trickles\n"
+  "onto your face. Time to take some names.";
+
+EndGameText="Suddenly, all is silent, from one horizon\n"
+  "to the other. The agonizing echo of Hell\n"
+  "fades away, the nightmare sky turns to\n"
+  "blue, the heaps of monster corpses start \n"
+  "to evaporate along with the evil stench \n"
+  "that filled the air. Jeeze, maybe you've\n"
+  "done it. Have you really won?\n"
+  "\n"
+  "Something rumbles in the distance.\n"
+  "A blue light begins to glow inside the\n"
+  "ruined skull of the demon-spitter.";
+
+Level31Text="What now? Looks totally different. Kind\n"
+  "of like King Tut's condo. Well,\n"
+  "whatever's here can't be any worse\n"
+  "than usual. Can it?  Or maybe it's best\n"
+  "to let sleeping gods lie..";
+
+Level32Text="Time for a vacation. You've burst the\n"
+  "bowels of hell and by golly you're ready\n"
+  "for a break. You mutter to yourself,\n"
+  "Maybe someone else can kick Hell's ass\n"
+  "next time around. Ahead lies a quiet town,\n"
+  "with peaceful flowing water, quaint\n"
+  "buildings, and presumably no Hellspawn.\n"
+  "\n"
+  "As you step off the transport, you hear\n"
+  "the stomp of a cyberdemon's iron shoe.";
+
+ 
+ 
+ 

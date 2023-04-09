@@ -63,7 +63,9 @@
 #include "r_texgl.h"
 #include "r_colormap.h"
 #include "w_texture.h"
+#include "w_epk.h"
 #include "w_wad.h"
+#include "w_files.h"
 
 
 swirl_type_e swirling_flats = SWIRL_Vanilla;
@@ -107,9 +109,6 @@ typedef struct cached_image_s
 	bool is_whitened;
 }
 cached_image_t;
-
-
-typedef std::list<image_c *> real_image_container_c;
 
 
 static image_c *do_Lookup(real_image_container_c& bucket, const char *name,
@@ -200,10 +199,10 @@ int hq2x_scaling = 1;
 
 
 // total set of images
-static real_image_container_c real_graphics;
-static real_image_container_c real_textures;
-static real_image_container_c real_flats;
-static real_image_container_c real_sprites;
+real_image_container_c real_graphics;
+real_image_container_c real_textures;
+real_image_container_c real_flats;
+real_image_container_c real_sprites;
 
 
 const image_c *skyflatimage;
@@ -315,6 +314,133 @@ static image_c *CreateDummyImage(const char *name, rgbcol_t fg, rgbcol_t bg)
 	return rim;
 }
 
+image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *packfile_name,
+								real_image_container_c& container,
+								const image_c *replaces)
+{
+	/* used for Graphics, Sprites and TX/HI stuff */
+	epi::file_c *f = W_OpenPackFile(packfile_name);
+	SYS_ASSERT(f);
+	int packfile_len = f->GetLength();
+
+	// determine format and size information
+	byte header[32];
+	memset(header, 255, sizeof(header));
+
+	f->Read(header, sizeof(header));
+	f->Seek(0, epi::file_c::SEEKPOINT_START);
+
+	int width=0, height=0, bpp=0;
+	int offset_x=0, offset_y=0;
+
+	bool is_patch = false;
+	bool solid    = false;
+
+	int header_len = std::min((int)sizeof(header), packfile_len);
+	auto fmt = epi::Image_DetectFormat(header, header_len, packfile_len);
+
+	if (fmt == epi::FMT_OTHER)
+	{
+		// close it
+		delete f;
+
+		I_Warning("Unsupported image format in '%s'\n", packfile_name);
+		return NULL;
+	}
+	else if (fmt == epi::FMT_Unknown)
+	{
+		// close it
+		delete f;
+
+		// check for Heretic/Hexen images, which are raw 320x200
+		if (packfile_len == 320*200 && type == IMSRC_Graphic)
+		{
+			image_c *rim = NewImage(320, 200, OPAC_Solid);
+			strcpy(rim->name, name);
+
+			rim->source_type = IMSRC_Raw320x200;
+			Z_StrNCpy(rim->source.flat.packfile_name, packfile_name, 63);
+			//rim->source_palette = W_GetPaletteForLump(lump);
+			rim->source_palette = -1;
+			return rim;
+		}
+
+		if (packfile_len == 64*64 || packfile_len == 64*65 || packfile_len == 64*128)
+			I_Warning("Graphic '%s' seems to be a flat.\n", name);
+		else
+			I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
+
+		return NULL;
+	}
+	else if (fmt == epi::FMT_DOOM)
+	{
+		// close it
+		delete f;
+
+		const patch_t *pat = (patch_t *) header;
+
+		width    = EPI_LE_S16(pat->width);
+		height   = EPI_LE_S16(pat->height);
+		offset_x = EPI_LE_S16(pat->leftoffset);
+		offset_y = EPI_LE_S16(pat->topoffset);
+
+		is_patch = true;
+	}
+	else  // PNG, TGA or JPEG
+	{
+		if (! Image_GetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
+		{
+			I_Warning("Error scanning image in '%s'\n", packfile_name);
+			return NULL;
+		}
+
+		solid = (bpp == 3);
+
+		// close it
+		delete f;
+	}
+
+	// create new image
+	image_c *rim = NewImage(width, height, solid ? OPAC_Solid : OPAC_Unknown);
+
+	rim->offset_x = offset_x;
+	rim->offset_y = offset_y;
+
+	strcpy(rim->name, name);
+
+	flatdef_c *current_flatdef = flatdefs.Find(rim->name);
+
+	if (current_flatdef && !current_flatdef->liquid.empty())
+	{
+		if (epi::case_cmp(current_flatdef->liquid, "THIN") == 0)
+			rim->liquid_type = LIQ_Thin;
+		else if (epi::case_cmp(current_flatdef->liquid, "THICK") == 0)
+			rim->liquid_type = LIQ_Thick;
+	}
+
+	rim->source_type = type;
+	Z_StrNCpy(rim->source.graphic.packfile_name, packfile_name, 63);
+	rim->source.graphic.is_patch = is_patch;
+	rim->source.graphic.user_defined = false; // This should only get set to true with DDFIMAGE specified DOOM format images
+	//rim->source_palette = W_GetPaletteForLump(lump);
+	rim->source_palette = -1;
+
+	if (replaces)
+	{
+		rim->scale_x = replaces->actual_w / (float)width;
+		rim->scale_y = replaces->actual_h / (float)height;
+
+		if (! is_patch && replaces->source_type == IMSRC_Sprite)
+		{
+			rim->offset_x = replaces->offset_x;
+			rim->offset_y = replaces->offset_y;
+		}
+	}
+
+	container.push_back(rim);
+
+	return rim;
+}
 
 static image_c *AddImage_Smart(const char *name, image_source_e type, int lump,
 								real_image_container_c& container,
@@ -523,15 +649,31 @@ static image_c *AddImage_DOOM(imagedef_c *def, bool user_defined = false)
 
 	image_c *rim = NULL;
 
-	switch (def->belong)
+	if (def->type == IMGDT_Package)
 	{
-		case INS_Graphic: rim = AddImage_Smart(name, IMSRC_Graphic, W_GetNumForName(lump_name), real_graphics); break;
-		case INS_Texture: rim = AddImage_Smart(name, IMSRC_Texture, W_GetNumForName(lump_name), real_textures); break;
-		case INS_Flat:    rim = AddImage_Smart(name, IMSRC_Flat,    W_GetNumForName(lump_name), real_flats);    break;
-		case INS_Sprite:  rim = AddImage_Smart(name, IMSRC_Sprite,  W_GetNumForName(lump_name), real_sprites);  break;
+		switch (def->belong)
+		{
+			case INS_Graphic: rim = AddImage_SmartPack(name, IMSRC_Graphic, lump_name, real_graphics); break;
+			case INS_Texture: rim = AddImage_SmartPack(name, IMSRC_Texture, lump_name, real_textures); break;
+			case INS_Flat:    rim = AddImage_SmartPack(name, IMSRC_Flat,    lump_name, real_flats);    break;
+			case INS_Sprite:  rim = AddImage_SmartPack(name, IMSRC_Sprite,  lump_name, real_sprites);  break;
 
-		default:
-			I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);
+			default:
+				I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);
+		}
+	}
+	else
+	{
+		switch (def->belong)
+		{
+			case INS_Graphic: rim = AddImage_Smart(name, IMSRC_Graphic, W_GetNumForName(lump_name), real_graphics); break;
+			case INS_Texture: rim = AddImage_Smart(name, IMSRC_Texture, W_GetNumForName(lump_name), real_textures); break;
+			case INS_Flat:    rim = AddImage_Smart(name, IMSRC_Flat,    W_GetNumForName(lump_name), real_flats);    break;
+			case INS_Sprite:  rim = AddImage_Smart(name, IMSRC_Sprite,  W_GetNumForName(lump_name), real_sprites);  break;
+
+			default:
+				I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);
+		}
 	}
 
 	if (rim == NULL)
@@ -616,9 +758,7 @@ static image_c *AddImageUser(imagedef_c *def)
 				fmt = epi::Image_DetectFormat(header, header_len, file_size);
 			}
 			else
-			{
 				fmt = epi::Image_FilenameToFormat(def->info);
-			}
 
 			// when a lump uses DOOM patch format, use the other method.
 			// for lumps, assume FMT_Unknown is a mis-detection of DOOM patch
@@ -627,7 +767,7 @@ static image_c *AddImageUser(imagedef_c *def)
 			{
 				delete f;  // close file
 
-				if (def->type == IMGDT_Lump)
+				if (fmt == epi::FMT_DOOM)
 					return AddImage_DOOM(def, true);
 
 				I_Warning("Unknown image format in: %s\n", filename);
@@ -652,12 +792,6 @@ static image_c *AddImageUser(imagedef_c *def)
 			delete f;
 
 			solid = (bpp == 3);
-
-/* Lobo 2022: info overload. Shut up.
-#if 1
-			L_WriteDebug("GETINFO [%s] : size %dx%d\n", def->name.c_str(), w, h);
-#endif
-*/
 		}
 		break;
 
@@ -1451,8 +1585,6 @@ const image_c *W_ImageParseSaveString(char type, const char *name)
 		case 'T':
 			return W_ImageLookup(name, INS_Texture);
 	}
-
-	return NULL; /* NOT REACHED */
 }
 
 
@@ -1715,6 +1847,19 @@ bool W_InitImages(void)
 	return true;
 }
 
+void W_ImageAddPackImages(void)
+{
+	for (auto df : data_files)
+	{
+		if (df->pack)
+		{
+			Pack_ProcessImages(df->pack, "textures", "tex");
+			Pack_ProcessImages(df->pack, "flats",    "flat");
+			Pack_ProcessImages(df->pack, "graphics", "gfx");
+			Pack_ProcessImages(df->pack, "sprites",  "spr");
+		}
+	}
+}
 
 //
 // Animate all the images.

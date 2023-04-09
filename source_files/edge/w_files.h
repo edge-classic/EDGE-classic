@@ -35,11 +35,13 @@ typedef enum
 {
 	FLKIND_IWad = 0,  // iwad file
 	FLKIND_PWad,      // normal .wad file
-	FLKIND_EWad,      // EDGE.wad
+	FLKIND_EWad,      // edge wad, priority loading
 	FLKIND_XWad,      // ajbsp node wad
 
 	FLKIND_Folder,    // a folder somewhere
-	FLKIND_PK3,       // pk3 (zip) package
+	FLKIND_EFolder,   // edge folder, priority loading
+	FLKIND_EPK,       // epk (zip) package
+	FLKIND_EEPK,	  // edge epks, priority loading (same extension as epk)
 
 	FLKIND_DDF,       // .ddf or .ldf file
 	FLKIND_RTS,       // .rts script  file

@@ -136,6 +136,9 @@ image_format_e Image_FilenameToFormat(const std::filesystem::path& filename)
 	if (ext == ".jpg" || ext == ".jpeg")
 		return FMT_JPEG;
 
+	if (ext == ".lmp") // Kind of a gamble, but whatever
+		return FMT_DOOM;
+
 	if (ext == ".gif" || ext == ".bmp" || ext == ".dds")
 		return FMT_OTHER;
 

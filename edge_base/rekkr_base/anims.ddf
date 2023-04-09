@@ -1,0 +1,10 @@
+// https://edge-classic.github.io/
+
+<ANIMATIONS>
+
+#VERSION 1.10
+
+[M_SKULL3]
+TYPE =GRAPHIC;
+SEQUENCE="M_SKULL3","M_SKULL4";
+SPEED=8T; 

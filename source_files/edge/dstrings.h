@@ -27,7 +27,7 @@
 #define __DOOM_STRINGS__
 
 // Misc. other strings.
-#define REQUIREDWAD    "edge-defs"
+#define REQUIREDEPK    "edge-defs"
 #define EDGEBRANDINGFILE "branding.cfg"
 
 #define SAVEGAMEBASE   "save"

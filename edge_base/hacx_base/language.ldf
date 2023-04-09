@@ -1,0 +1,166 @@
+// https://edge-classic.github.io/
+
+<LANGUAGES>
+
+[ENGLISH]
+M_EPI6_Desc="Twitch n' Kill";
+MenuSkill="Choose Difficulty Level:";
+MenuDifficulty1="Please Don't Shoot!";
+MenuDifficulty2="Arrgh, I Need Health!";
+MenuDifficulty3="Let's Rip Them Apart!";
+MenuDifficulty4="I Am Immortal";
+MenuDifficulty5="INSANITY!";
+EndGameCheck = "are you insane or maladjusted?\n"
+  "Well? Yes or No!     ";
+GotArmourHelmet = "You grab a Dampener!    ";
+GotArmour = "You grab a Kevlar vest!";
+GotBackpack = "Grab a Valise stuffed with goods!";
+GotBerserk = "007Microtel";
+GotBFG = "You grab a NUKER! Suck on this!";
+GotBlueCard = "You found a KeyCard!    ";
+GotBlueSkull = "You found a blue Z-Key! ";
+GotCellPack = "Grab a tank full of molecules!";
+GotCell = "Grab a molecule module! ";
+GotChainGun = "You got an UZI!!    ";
+GotChainSaw = "A HOIG Reznator - FRY some butt";
+GotClipBox = "You grab a case of rounds!";
+GotClip = "Grab some rounds!";
+GotHealthPotion = "You grab a MicroKit!    ";
+GotInvis = "You are EnK Blind!  ";
+GotInvulner = "Force Field!    ";
+GotRocketLauncher = "You got a Photon 'Zooka!    ";
+GotMap = "SI Array mapping!";
+GotMedi = "You grab a Hypo!    ";
+GotMediNeed = "A dose of Hydergine from a Hypo saves you!";
+GotMegaArmour = "You grab Super Kevlar vest!";
+GotMega = "Body Armor!";
+GotPlasmaGun = "You carry a Big Stick!";
+GotRedCard = "You found a Password!   ";
+GotRedSkull = "You found a red Z-Key!  ";
+GotRocketBox = "Grab a case of Torpedos!";
+GotRocket = "Grap a Torpedo! ";
+GotShellBox = "You grab a case of Cartridges!  ";
+GotShells = "Grab some Cartridges!   ";
+GotDoubleBarrel = "You grab a Cryogun! FREEZE!";
+GotShotgun = "You got a Tazer!!   ";
+GotStim = "Breath deep, Inhaler!";
+GotSuit = "Vulcan rubber Boots!    ";
+GotSoul = "Centrophenoxine";
+GotVisor = "You wear Infrared Visor!";
+GotYellowCard = "You found a C-Key!      ";
+GotYellowSkull = "You found a yellow Z-Key!   ";
+NeedBlueForDoor = "You need a Blue Z-Key to make this work";
+NeedBlueForObject = "You need a KeyCard to access this item! ";
+NeedRedForDoor = "You need a Red Z-Key to make this work!";
+NeedRedForObject = "You need a Password to access this item!";
+NeedYellowForDoor = "You need a Yellow Z-Key to open this!";
+NeedYellowForObject = "You need a C-Key to access this item!       ";
+E1M1Desc = "GENEMP CORP.";
+Map01Desc = "level 1: GenEmp Corp";
+Map02Desc = "level 2: Tunnel Town";
+Map03Desc = "level 3: Lava Annex";
+Map04Desc = "level 4: Alcatraz";
+Map05Desc = "level 5: Cyber Circus";
+Map06Desc = "level 6: Digi-Ota";
+Map07Desc = "level 7: The Great Wall";
+Map08Desc = "level 8: Garden of Delights";
+Map09Desc = "level 9: Hidden Fortress";
+Map10Desc = "level 10: Anarchist Dream";
+Map11Desc = "level 11: Notus Us!";
+Map12Desc = "Level 12: Gothik Gauntlet";
+Map13Desc = "level 13: The Sewers";
+Map14Desc = "level 14: 'Trode Wars";
+Map15Desc = "level 15: Twilight of Enk's";
+Map16Desc = "level 16: Protean Cybex";
+Map17Desc = "level 17: River of Blood";
+Map18Desc = "level 18: Bizarro";
+Map19Desc = "level 19: The War Rooms";
+Map20Desc = "level 20: Intruder!";
+Map31Desc = "level 31: Desiccant Room";
+
+Level7Text = "TWENTY MILL IN GOLD DOESN'T SEEM WORTH ALL\n"
+  "THIS AGGRAVATION, DOES IT, HACKER? MAKES\n"
+  "THE PEN LOOK LIKE A FREAKIN' PICNIC!\n"
+  "\n"
+  "BUTT-UGLY BIO-MUTATIONS AND YOUR FELLOW\n"
+  "HUMANS HUNG FROM A CEILING LIKE\n"
+  "FOOD SACKS.\n"
+  "\n"
+  "WHAT THE HELL IS THIS GENIE? LIKE NO\n"
+  "COMPUTER YOU'VE EVER HACKED!\n"
+  "\n"
+  "YOU BETTER FIND THE NEXT TERMINAL, SLICE\n"
+  "A RIDE THROUGH C-SPACE, DICE SOME MUTANT\n"
+  "BUTT, AND GET THE HELL OUT OF DODGE!\n"
+  "              ";
+Level12Text = "WHERE ARE ALL THE PEOPLE!\n"
+  "\n"
+  "PARIS IS A GHOST TOWN, UNLESS YOU CONSIDER\n"
+  "MUTANT BUGS OUTSTANDING CITIZENS.\n"
+  "\n"
+  "YOU'VE HIT BLOODY RESISTANCE. MAN, CAN\n"
+  "THESE BUGS FIGHT! LUCKY FOR YOU THEY'RE NOT\n"
+  "THE BRIGHTEST PORCH LIGHTS ON THE BLOCK.\n"
+  "\n"
+  "BUT YOU'VE GOTTEN SOME OF THE INFORMATICS\n"
+  "THE SUBCOMMITTEE WANTS. AND IT'S NASTY!\n"
+  "\n"
+  "HUMAN NEURAL FLUIDS FEED THESE BUGS! NO\n"
+  "WONDER THE NEIGHBORHOOD'S GETTING KIND OF\n"
+  "SPARSE. REPORT TO THE SUBCOMMITTEE. AND\n"
+  "WATCH YOUR BACK\n"
+  "                                                                                                                                                                        ";
+Level21Text = "CIVILIZATION AS YOU KNEW IT IS NADA!\n"
+  "\n"
+  "NO FRIENDS, NO FAMILY. NO MORE PEOPLE.\n"
+  "\n"
+  "NOT NORMAL PEOPLE, ANYWAY.\n"
+  "\n"
+  "ONLY ONE THING LEFT...GENIE!\n"
+  "AND IF YOU HAVE TO GO TO THE END OF THE\n"
+  "UNIVERSE YOU'LL FIND ITS MUTANT BUTT!\n"
+  "\n"
+  "'CAUSE NOW YOU'RE PISSED!\n"
+  "\n"
+  "AND THE GOLD? HELL, THIS IS FOR FREE.\n"
+  "\n"
+  ".....(TO BE CONTINUED).....        ";
+Level31Text = "YOU'RE ALIVE!\n"
+  "\n"
+  "WHAT ARE THOSE ODDS, HACKER?!\n"
+  "'CAUSE IT'S CRAWLING WITH BUGS.\n"
+  "\n"
+  "YOU CAN'T REACH THE SUBCOMMITTEE, WHICH\n"
+  "MEANS IT'S BEEN COMPROMISED.\n"
+  "\n"
+  "\n"
+  "YOU... ARE ALONE. ";
+Title2 = "                         HACX: Twitch n' Kill                               ";
+Title3 = "                         HACX: Twitch n' Kill v1.0                              ";
+Notice = "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+  "             This is the ALPHA version of HacX, do NOT distribute!! \n"
+  "                  Contact Banjo Software at : 1-504-737-7037 \n"
+  "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+  "";
+
+idbehold9 = "seeit";
+idbehold5 = "where";
+idbehold3 = "ghost";
+idbehold6 = "bright";
+idbehold4 = "boots";
+idbehold2 = "whacko";
+idbehold1 = "superman";
+idchoppers = "zap";
+idclev = "warpme";
+idclip = "walk";
+iddqd = "wuss";
+iddt = "show";
+idfa = "ammo";
+idkfa = "blast";
+idmus = "tunes";
+idmypos = "wheream";
+idspispopd = "walk";
+
+ 
+ 
+ 

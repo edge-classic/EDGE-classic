@@ -915,24 +915,11 @@ static void RAD_ParseName(param_set_t& pars)
 
 static void RAD_ParseTag(param_set_t& pars)
 {
-	// Tag <number>
-
+	// Tag <hashed identifier>
 	if (this_rad->tag != 0)
 		RAD_Error("Script already has a tag: '%d'\n", this_rad->tag);
 
-	// Modified RAD_CheckForInt
-	const char *pos = pars[1];
-	int count = 0;
-	int length = strlen(pars[1]);
-
-	while (isdigit(*pos++))
-		count++;
-
-	// Is the value an integer?
-	if (length != count)
-		this_rad->tag = epi::STR_Hash32(pars[1]);
-	else
-		this_rad->tag = atoi(pars[1]);
+	this_rad->tag = epi::STR_Hash32(pars[1]);
 }
 
 static void RAD_ParseWhenAppear(param_set_t& pars)
@@ -1169,21 +1156,9 @@ static void RAD_ParseEnableTagged(param_set_t& pars)
 
 	s_enabler_t * t = new s_enabler_t;
 
-	// Modified RAD_CheckForInt
-	const char *pos = pars[1];
-	int count = 0;
-	int length = strlen(pars[1]);
+	t->tag = epi::STR_Hash32(pars[1]);
 
-	while (isdigit(*pos++))
-		count++;
-
-	// Is the value an integer?
-	if (length != count)
-		t->tag = epi::STR_Hash32(pars[1]);
-	else
-		t->tag = atoi(pars[1]);
-
-	if (t->tag <= 0)
+	if (t->tag == 0)
 		RAD_Error("Bad tag value: %s\n", pars[1]);
 
 	t->new_disabled = DDF_CompareName("DISABLE_TAGGED", pars[0]) == 0;

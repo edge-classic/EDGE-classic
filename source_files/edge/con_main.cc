@@ -428,17 +428,7 @@ int CMD_Map(char **argv, int argc)
 
 int CMD_Endoom(char **argv, int argc)
 {
-	int en_lump = W_CheckNumForName("ENDOOM");
-	if (en_lump == -1)
-		en_lump = W_CheckNumForName("ENDTEXT");
-	if (en_lump == -1)
-		en_lump = W_CheckNumForName("ENDBOOM");
-	if (en_lump == -1)
-	{
-		CON_Printf("No ENDOOM screen found for this WAD!\n");
-		return 0;
-	}
-	CON_PrintEndoom(en_lump);
+	CON_PrintEndoom();
 	return 0;
 }
 

@@ -19,6 +19,7 @@
 #include "i_defs.h"
 
 #include <limits.h>
+#include <unordered_map>
 
 #include "str_util.h"
 
@@ -38,6 +39,8 @@
 #include "version.h"
 
 typedef std::vector<const char *> param_set_t;
+
+static std::unordered_map<uint32_t, std::string> parsed_string_tags;
 
 // TODO remove these eventually, use std::string
 static char * Z_StrDup(const char *s)
@@ -922,7 +925,12 @@ static void RAD_ParseTag(param_set_t& pars)
 		RAD_Error("Script already has a tag: '%d'\n", this_rad->tag[0]);
 
 	if (this_rad->tag[1] != 0)
-		RAD_Error("Script already has a tag: '%d'\n", this_rad->tag[1]); // Would be more meaningful to show string :/
+	{
+		if (parsed_string_tags.find(this_rad->tag[1]) != parsed_string_tags.end())
+			RAD_Error("Script already has a tag: '%s'\n", parsed_string_tags[this_rad->tag[1]].c_str());
+		else
+			RAD_Error("Script already has a tag: '%d'\n", this_rad->tag[1]);
+	}
 
 	// Modified RAD_CheckForInt
 	const char *pos = pars[1];
@@ -934,7 +942,10 @@ static void RAD_ParseTag(param_set_t& pars)
 
 	// Is the value an integer?
 	if (length != count)
+	{
 		this_rad->tag[1] = epi::STR_Hash32(pars[1]);
+		parsed_string_tags.try_emplace(this_rad->tag[1], pars[1]);
+	}
 	else
 		this_rad->tag[0] = atoi(pars[1]);
 }

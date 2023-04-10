@@ -343,14 +343,12 @@ void RAD_EnableByTag(mobj_t *actor, uint32_t tag, bool disable)
 {
 	rad_trigger_t *trig;
 
-	uint32_t hashtag = epi::STR_Hash32(std::to_string(tag));
-
 	if (tag == 0)
 		I_Error("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
 
 	for (trig=active_triggers; trig; trig=trig->next)
 	{
-		if (trig->info->tag == hashtag)
+		if (trig->info->tag == tag)
 			break;
 	}
 

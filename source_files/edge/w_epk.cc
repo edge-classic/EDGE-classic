@@ -41,6 +41,38 @@
 
 #include "miniz.h"
 
+static bool TextureNameFromFilename(std::string& buf, const std::string& stem, bool is_sprite)
+{
+	// returns false if the name is invalid (e.g. longer than 8 chars).
+
+	size_t pos = 0;
+
+	buf.clear();
+
+	while (pos < stem.size())
+	{
+		if (buf.size() >= 8)
+			return false;
+
+		int ch = (unsigned char) stem[pos++];
+
+		// sprites allow a few special characters, but remap caret --> backslash
+		if (is_sprite && ch == '^')
+			ch = '\\';
+		else if (is_sprite && (ch == '[' || ch == ']'))
+			{ /* ok */ }
+		else if (isalnum(ch) || ch == '_')
+			{ /* ok */ }
+		else
+			return false;
+
+		buf.push_back((char) ch);
+	}
+
+	epi::str_upper(buf);
+
+	return (buf.size() > 0);
+}
 
 class pack_entry_c
 {
@@ -104,6 +136,22 @@ public:
 		for (int i = 0 ; i < (int)entries.size() ; i++)
 			if (entries[i] == name_in)
 				return i;
+
+		return -1; // not found
+	}
+
+	int FindStem(const std::string& name_in) const
+	{
+		bool checking_sprites = (name == "sprites");
+		for (int i = 0 ; i < (int)entries.size() ; i++)
+		{
+			std::string entryname;
+			if (!TextureNameFromFilename(entryname, 
+				std::filesystem::path(entries[i].name).stem().u8string(), checking_sprites))
+				continue;
+			else if (entryname == name_in)
+				return i;
+		}
 
 		return -1; // not found
 	}
@@ -704,41 +752,6 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
 	VM_AddScript(0, data, source);
 }
 
-
-static bool TextureNameFromFilename(std::string& buf, const std::string& stem, bool is_sprite)
-{
-	// returns false if the name is invalid (e.g. longer than 8 chars).
-
-	size_t pos = 0;
-
-	buf.clear();
-
-	while (pos < stem.size())
-	{
-		if (buf.size() >= 8)
-			return false;
-
-		int ch = (unsigned char) stem[pos++];
-
-		// sprites allow a few special characters, but remap caret --> backslash
-		if (is_sprite && ch == '^')
-			ch = '\\';
-		else if (is_sprite && (ch == '[' || ch == ']'))
-			{ /* ok */ }
-		else if (isalnum(ch) || ch == '_')
-			{ /* ok */ }
-		else
-			return false;
-
-		buf.push_back((char) ch);
-	}
-
-	epi::str_upper(buf);
-
-	return (buf.size() > 0);
-}
-
-
 void Pack_ProcessImages(pack_file_c *pack, const std::string& dir_name, const std::string& prefix)
 {
 	int d = pack->FindDir(dir_name);
@@ -952,6 +965,18 @@ epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name)
 
 	// try an arbitrary place
 	return pack->OpenFileByName(name);
+}
+
+int Pack_FindStem(pack_file_c *pack, const std::string& name)
+{
+	int entry_found = -1;
+	for (auto packdir : pack->dirs)
+	{
+		entry_found = packdir.FindStem(name);
+		if (entry_found >= 0)
+			return entry_found;
+	}
+	return entry_found;
 }
 
 void ProcessPackage(data_file_c *df, size_t file_index)

@@ -28,6 +28,9 @@ class pack_file_c;
 
 epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name);
 
+// Equivalent to W_IsLumpInPwad....doesn't care or check filetype itself, just the 8-character name
+int Pack_FindStem(pack_file_c *pack, const std::string& name);
+
 void Pack_ProcessImages(pack_file_c *pack, const std::string& dir_name, const std::string& prefix);
 
 #endif /* __W_PK3__ */

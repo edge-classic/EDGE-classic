@@ -68,6 +68,7 @@
 #include "m_misc.h"
 #include "r_image.h"
 #include "vm_coal.h"
+#include "w_epk.h"
 #include "w_files.h"
 #include "w_wad.h"
 #include "w_texture.h"
@@ -2209,7 +2210,7 @@ bool W_IsLumpInPwad(const char *name)
 	tempImage = W_ImageLookup(name);
 	if (tempImage)
 	{
-		if(tempImage->source_type ==IMSRC_User)//from images.ddf
+		if(tempImage->source_type == IMSRC_User)//from images.ddf
 		{
 			return true;
 		}
@@ -2218,24 +2219,40 @@ bool W_IsLumpInPwad(const char *name)
 	//if we're here then check pwad lumps
 	int lumpnum = W_CheckNumForName(name);
 	int filenum = -1;
+	bool in_pwad = false;
 
 	if (lumpnum != -1)
 	{
 		filenum = W_GetFileForLump(lumpnum);
 
-		if (filenum < 2) return false; //it's edge_defs or the IWAD so we're done
-
-		data_file_c *df = data_files[filenum];
-
-		//we only want pwads
-		//or ewads ;)
-		if (df->kind == FLKIND_PWad || df->kind == FLKIND_EWad)
+		if (filenum >= 2) // ignore edge_defs and the IWAD itself
 		{
-			return true;
+			data_file_c *df = data_files[filenum];
+
+			//we only want pwads
+			//or ewads ;)
+			if (df->kind == FLKIND_PWad || df->kind == FLKIND_EWad)
+			{
+				in_pwad = true;
+			}
 		}
 	}
 
-	return false;
+	if (!in_pwad) // Check EPKs/folders now
+	{
+		// search from newest file to oldest
+		for (int i = (int)data_files.size() - 1 ; i >= 0 ; i--)
+		{
+			data_file_c *df = data_files[i];
+			if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
+			{
+				if (Pack_FindStem(df->pack, name) >= 0 && i >= 2) // ignore edge_defs and the IWAD itself
+					in_pwad = true;
+			}
+		}
+	}
+
+	return in_pwad;
 }
 
 //--- editor settings ---

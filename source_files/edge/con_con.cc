@@ -45,6 +45,7 @@
 #include "r_image.h"
 #include "r_modes.h"
 #include "r_wipe.h"
+#include "w_files.h"
 #include "w_wad.h"
 
 #include <vector>
@@ -1749,13 +1750,36 @@ void CON_ShowPosition(void)
 }
 
 
-void CON_PrintEndoom(int en_lump)
+void CON_PrintEndoom()
 {
-	int length;
-	byte *data = (byte *)W_LoadLump(en_lump, &length);
+	int length = 0;
+	byte *data = nullptr;
+	int en_lump = W_CheckNumForName("ENDOOM");
+	if (en_lump == -1)
+		en_lump = W_CheckNumForName("ENDTEXT");
+	if (en_lump == -1)
+		en_lump = W_CheckNumForName("ENDBOOM");
+	if (en_lump == -1)
+	{
+		epi::file_c *endoom_pack = W_OpenPackFile("ENDOOM.bin");
+		if (!endoom_pack)
+			endoom_pack = W_OpenPackFile("ENDTEXT.bin");
+		if (!endoom_pack)
+			endoom_pack = W_OpenPackFile("ENDBOOM.bin");
+		if (endoom_pack)
+		{
+			data = endoom_pack->LoadIntoMemory();
+			length = endoom_pack->GetLength();
+			delete endoom_pack;
+		}
+	}
+	else
+	{
+		data = (byte *)W_LoadLump(en_lump, &length);
+	}
 	if (!data)
 	{
-		CON_Printf("CON_PrintEndoom: Failed to read data lump!\n");
+		CON_Printf("CON_PrintEndoom: No ENDOOM screen found!\n");
 		return;
 	}
 	if (length != 4000)
@@ -1775,11 +1799,16 @@ void CON_PrintEndoom(int en_lump)
 			row_counter = 0;
 		}
 	}
-	W_DoneWithLump(data);
+	if (en_lump == -1)
+		delete[] data;
+	else
+		W_DoneWithLump(data);
 }
 
 void CON_CreateQuitScreen()
 {
+	int length = 0;
+	byte *data = nullptr;
 	int en_lump = W_CheckNumForName("ENDOOM");
 	if (en_lump == -1)
 		en_lump = W_CheckNumForName("ENDTEXT");
@@ -1787,19 +1816,30 @@ void CON_CreateQuitScreen()
 		en_lump = W_CheckNumForName("ENDBOOM");
 	if (en_lump == -1)
 	{
-		CON_Printf("No ENDOOM screen found for this WAD!\n");
-		return;
+		epi::file_c *endoom_pack = W_OpenPackFile("ENDOOM.bin");
+		if (!endoom_pack)
+			endoom_pack = W_OpenPackFile("ENDTEXT.bin");
+		if (!endoom_pack)
+			endoom_pack = W_OpenPackFile("ENDBOOM.bin");
+		if (endoom_pack)
+		{
+			data = endoom_pack->LoadIntoMemory();
+			length = endoom_pack->GetLength();
+			delete endoom_pack;
+		}
 	}
-	int length;
-	byte *data = (byte *)W_LoadLump(en_lump, &length);
+	else
+	{
+		data = (byte *)W_LoadLump(en_lump, &length);
+	}
 	if (!data)
 	{
-		CON_Printf("CON_CreateQuitScreen: Failed to read data lump!\n");
+		CON_Printf("No ENDOOM screen found for this WAD!\n");
 		return;
 	}
 	if (length != 4000)
 	{
-		CON_Printf("CON_CreateQuitScreen: Lump exists, but is malformed! (Length not equal to 4000 bytes)\n");
+		CON_Printf("CON_CreateQuitScreen: ENDOOM exists, but is malformed! (Length not equal to 4000 bytes)\n");
 		W_DoneWithLump(data);
 		return;
 	}
@@ -1815,7 +1855,10 @@ void CON_CreateQuitScreen()
 			row_counter = 0;
 		}
 	}
-	W_DoneWithLump(data);
+	if (en_lump == -1)
+		delete[] data;
+	else
+		W_DoneWithLump(data);
 }
 
 

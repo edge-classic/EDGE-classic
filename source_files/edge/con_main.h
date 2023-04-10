@@ -88,7 +88,7 @@ void CON_TryCommand(const char *cmd);
 // Prints messages.  cf printf.
 void CON_Printf(const char *message,...) GCCATTR((format(printf, 1, 2)));
 
-void CON_PrintEndoom(int en_lump);
+void CON_PrintEndoom();
 
 void CON_CreateQuitScreen();
 

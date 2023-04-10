@@ -95,6 +95,16 @@ New Features
 + Customizable branding options
   - New "branding.cfg" file present in game directory will control values like folder names, window titles, configuration and logging filenames
   - Will default to hardcoded values if file is missing	  
+  
++ STYLES.DDF: expanded control over [MAIN_MENU], [CHOOSE_EPISODE] and [CHOOSE_SKILL] menus. 
+  Both graphic and text menus now behave coherently (i.e. scaling now applies to both graphics and text).
+  - TRANSLUCENCY now works with menu items and cursors
+  - SCALE now works with menu items
+  - COLOURMAP now works with menu items
+  - HEADER.xxxx and TITLE.xxxx commands now affect graphics like "Choose Skill"
+  - ENTRY_ALIGNMENT=CENTER now properly centers items
+  
+  
 
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)
 ====================================

@@ -145,9 +145,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	{
 		if (std::filesystem::path(def->pc_speaker_sound).has_extension())
 		{
-			std::string pc_sound = "sounds/";
-			pc_sound.append(def->pc_speaker_sound);
-			F = W_OpenPackFile(pc_sound);
+			F = W_OpenPackFile(std::string("sounds/").append(def->pc_speaker_sound));
 			if (!F)
 				F = epi::FS_Open(M_ComposeFileName(game_dir, UTFSTR(def->pc_speaker_sound)),
 					epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
@@ -176,7 +174,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 	{
 		if (def->pack_name != "")
 		{
-			F = W_OpenPackFile(def->pack_name);
+			F = W_OpenPackFile(std::string("sounds/").append(def->pack_name));
 			if (! F)
 			{
 				M_DebugError("SFX Loader: Missing sound in EPK: '%s'\n", def->pack_name.c_str());

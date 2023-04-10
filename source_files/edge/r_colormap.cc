@@ -242,11 +242,9 @@ static void LoadColourmap(const colourmap_c * colm)
 
 	if (colm->pack_name != "")
 	{
-		std::string colmpack = "colormaps/"; // Maybe add dir params to W_OpenPackFile instead? - Dasho
-		colmpack.append(colm->pack_name);
-		epi::file_c *f = W_OpenPackFile(colmpack);
+		epi::file_c *f = W_OpenPackFile(std::string("colormaps/").append(colm->pack_name));
 		if (f == NULL)
-			I_Error("No such colormap file: %s\n", colmpack.c_str());
+			I_Error("No such colormap file: %s\n", colm->pack_name.c_str());
 		size = f->GetLength();
 		data = f->LoadIntoMemory();
 		delete f;  // close file

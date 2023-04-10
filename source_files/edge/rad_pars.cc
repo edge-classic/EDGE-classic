@@ -553,7 +553,8 @@ static void RAD_ComputeScriptCRC(rad_script_t *scr)
 	if (scr->script_name)
 		scr->crc.AddCStr(scr->script_name);
 
-	scr->crc += (int) scr->tag;
+	scr->crc += (int) scr->tag[0];
+	scr->crc += (int) scr->tag[1];
 	scr->crc += (int) scr->appear;
 	scr->crc += (int) scr->min_players;
 	scr->crc += (int) scr->max_players;
@@ -917,8 +918,11 @@ static void RAD_ParseTag(param_set_t& pars)
 {
 	// Tag <number>
 
-	if (this_rad->tag != 0)
-		RAD_Error("Script already has a tag: '%d'\n", this_rad->tag);
+	if (this_rad->tag[0] != 0)
+		RAD_Error("Script already has a tag: '%d'\n", this_rad->tag[0]);
+
+	if (this_rad->tag[1] != 0)
+		RAD_Error("Script already has a tag: '%d'\n", this_rad->tag[1]); // Would be more meaningful to show string :/
 
 	// Modified RAD_CheckForInt
 	const char *pos = pars[1];
@@ -930,9 +934,9 @@ static void RAD_ParseTag(param_set_t& pars)
 
 	// Is the value an integer?
 	if (length != count)
-		this_rad->tag = epi::STR_Hash32(pars[1]);
+		this_rad->tag[1] = epi::STR_Hash32(pars[1]);
 	else
-		this_rad->tag = atoi(pars[1]);
+		this_rad->tag[0] = atoi(pars[1]);
 }
 
 static void RAD_ParseWhenAppear(param_set_t& pars)
@@ -1179,12 +1183,12 @@ static void RAD_ParseEnableTagged(param_set_t& pars)
 
 	// Is the value an integer?
 	if (length != count)
-		t->tag = epi::STR_Hash32(pars[1]);
+		t->tag[1] = epi::STR_Hash32(pars[1]);
 	else
-		t->tag = atoi(pars[1]);
+		t->tag[0] = atoi(pars[1]);
 
-	if (t->tag <= 0)
-		RAD_Error("Bad tag value: %s\n", pars[1]);
+	//if (t->tag <= 0)
+		//RAD_Error("Bad tag value: %s\n", pars[1]);
 
 	t->new_disabled = DDF_CompareName("DISABLE_TAGGED", pars[0]) == 0;
 

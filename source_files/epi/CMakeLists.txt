@@ -30,7 +30,7 @@ add_library(
 target_include_directories(edge_epi PRIVATE ../stb)
 target_include_directories(edge_epi PRIVATE ../libgme/gme)
 target_include_directories(edge_epi PRIVATE ../m4p)
-target_include_directories(edge_epi PRIVATE ../xxhash)
+target_include_directories(edge_epi PRIVATE ../superfasthash)
 
 target_compile_options(edge_epi PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/W4>

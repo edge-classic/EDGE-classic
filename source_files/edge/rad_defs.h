@@ -279,7 +279,7 @@ typedef struct s_enabler_s
 	// script to enable/disable.  If script_name is NULL, then `tag' is
 	// the tag number to enable/disable.
 	char *script_name = nullptr;
-	int tag = 0;
+	uint32_t tag[2] = {0,0};
 
 	// true to disable, false to enable
 	bool new_disabled = false;
@@ -539,7 +539,7 @@ typedef struct rad_script_s
 	char *script_name = nullptr;
 
 	// Script tag (or 0 for none)
-	int tag = 0;
+	uint32_t tag[2] = {0,0};
 
 	// ABSOLUTE mode: minimum players needed to trigger, -1 for ALL
 	int absolute_req_players = 0;

@@ -538,8 +538,8 @@ typedef struct rad_script_s
 	// Script name (or NULL)
 	char *script_name = nullptr;
 
-	// Hashed script tag (or 0 for none)
-	uint32_t tag = 0;
+	// Script tag (or 0 for none)
+	int tag = 0;
 
 	// ABSOLUTE mode: minimum players needed to trigger, -1 for ALL
 	int absolute_req_players = 0;

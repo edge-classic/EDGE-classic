@@ -339,11 +339,11 @@ rts_state_t * RAD_FindStateByLabel(rad_script_t *scr, char *label)
 // either enables them or disables them (based on `disable').
 // Actor can be NULL.
 //
-void RAD_EnableByTag(mobj_t *actor, uint32_t tag, bool disable)
+void RAD_EnableByTag(mobj_t *actor, int tag, bool disable)
 {
 	rad_trigger_t *trig;
 
-	if (tag == 0)
+	if (tag <= 0)
 		I_Error("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
 
 	for (trig=active_triggers; trig; trig=trig->next)
@@ -374,9 +374,9 @@ void RAD_EnableByTag(mobj_t *actor, const char *name, bool disable)
 {
 	rad_trigger_t *trig;
 
-	uint32_t tag = epi::STR_Hash32(name);
+	int tag = epi::STR_Hash32(name);
 
-	if (tag == 0)
+	if (tag <= 0)
 		I_Error("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
 
 	for (trig=active_triggers; trig; trig=trig->next)
@@ -407,9 +407,9 @@ bool RAD_IsActiveByTag(mobj_t *actor, const char *name)
 {
 	rad_trigger_t *trig;
 
-	uint32_t tag = epi::STR_Hash32(name);
+	int tag = epi::STR_Hash32(name);
 
-	if (tag == 0)
+	if (tag <= 0)
 		I_Error("INTERNAL ERROR: RAD_IsActiveByTag: bad tag %d\n", tag);
 
 	for (trig=active_triggers; trig; trig=trig->next)

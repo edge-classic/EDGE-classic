@@ -19,7 +19,7 @@
 #include "epi.h"
 #include "str_util.h"
 
-#include "xxhash.hpp"
+#include "superfasthash.h"
 
 namespace epi
 {
@@ -115,10 +115,14 @@ std::vector<std::u32string> STR_SepStringVector(std::u32string str, char32_t sep
 }
 #endif
 
-int32_t STR_Hash32(std::string str_to_hash)
+uint32_t STR_Hash32(std::string str_to_hash)
 {
-	int32_t strhash = xxh::xxhash<32>(str_to_hash);
-	return (strhash < 0) ? -strhash : strhash;
+	if (!str_to_hash.length())
+	{
+		return 0;		
+	}
+
+	return SFH_MakeKey(str_to_hash.c_str(), str_to_hash.length());
 }
 
 // The following string conversion classes/code are adapted from public domain

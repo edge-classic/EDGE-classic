@@ -233,13 +233,10 @@ void font_c::LoadFontTTF()
 		{
 			epi::file_c *F;
 			
-			int lump = W_CheckNumForName(def->ttf_name.c_str());
-			if (lump < 0) // check for pack file
-			{
+			if (std::filesystem::path(def->ttf_name).has_extension()) // check for pack file
 				F = W_OpenPackFile(std::string("fonts/").append(def->ttf_name));
-			}
 			else
-				F = W_OpenLump(lump);
+				F = W_OpenLump(W_CheckNumForName(def->ttf_name.c_str()));
 
 			if (!F)
 				I_Error("LoadFontTTF: '%s' not found for font %s.\n", def->ttf_name.c_str(), def->name.c_str()); 

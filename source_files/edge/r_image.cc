@@ -1857,6 +1857,7 @@ void W_ImageAddPackImages(void)
 			Pack_ProcessImages(df->pack, "flats",    "flat");
 			Pack_ProcessImages(df->pack, "graphics", "gfx");
 			Pack_ProcessImages(df->pack, "sprites",  "spr");
+			Pack_ProcessImages(df->pack, "skins",  	 "spr");
 		}
 	}
 }

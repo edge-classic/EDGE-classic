@@ -789,7 +789,7 @@ void Pack_ProcessImages(pack_file_c *pack, const std::string& dir_name, const st
 				AddImage_SmartPack(texname.c_str(), IMSRC_Graphic, packpath.c_str(), real_graphics);
 			else if (dir_name == "flats")
 				AddImage_SmartPack(texname.c_str(), IMSRC_Flat, packpath.c_str(), real_flats);
-			else if (dir_name == "sprites")
+			else if (dir_name == "sprites" || dir_name == "skins")
 				AddImage_SmartPack(texname.c_str(), IMSRC_Sprite, packpath.c_str(), real_sprites);
 		}
 		else

@@ -132,11 +132,9 @@ void RGL_SoftInitUnits()
 //
 void RGL_StartUnits(bool sort_em)
 {
-	(void) sort_em;
-
 	cur_vert = cur_unit = 0;
 
-	batch_sort = true;
+	batch_sort = sort_em;
 
 	local_unit_map.resize(MAX_L_UNIT);
 }
@@ -260,9 +258,6 @@ struct Compare_Unit_pred
 		if (A->pass != B->pass)
 			return A->pass < B->pass;
 
-		if (A->blending != B->blending)
-			return A->blending < B->blending;
-
 		if (A->tex[0] != B->tex[0])
 			return A->tex[0] < B->tex[0];
 
@@ -272,7 +267,10 @@ struct Compare_Unit_pred
 		if (A->env[0] != B->env[0])
 			return A->env[0] < B->env[0];
 
-		return A->env[1] < B->env[1];
+		if (A->env[1] != B->env[1])
+			return A->env[1] < B->env[1];
+
+		return A->blending < B->blending;
 	}
 };
 

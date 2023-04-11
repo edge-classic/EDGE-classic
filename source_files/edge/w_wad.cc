@@ -1144,7 +1144,7 @@ std::filesystem::path W_BuildNodesForWad(data_file_c *df)
 	{
 		I_Printf("Building XGL nodes for: %s\n", df->name.u8string().c_str());
 
-		if (! AJ_BuildNodes(df->name, xwa_filename))
+		if (! AJ_BuildNodes(df, xwa_filename))
 			I_Error("Failed to build XGL nodes for: %s\n", df->name.u8string().c_str());
 
 		epi::FS_Sync();

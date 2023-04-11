@@ -187,7 +187,7 @@ static void W_ExternalRTS(data_file_c *df)
 }
 
 
-static void ProcessFile(data_file_c *df)
+void ProcessFile(data_file_c *df)
 {
 	size_t file_index = data_files.size();
 	data_files.push_back(df);
@@ -208,6 +208,11 @@ static void ProcessFile(data_file_c *df)
 
 		df->file = file;
 
+		ProcessWad(df, file_index);
+	}
+	else if (df->kind == FLKIND_PackWAD)
+	{
+		SYS_ASSERT(df->file); // This should already be handled by the epk processing
 		ProcessWad(df, file_index);
 	}
 	else if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
@@ -267,7 +272,7 @@ void W_BuildNodes(void)
 	{
 		data_file_c *df = data_files[i];
 
-		if (df->kind == FLKIND_IWad || df->kind == FLKIND_PWad)
+		if (df->kind == FLKIND_IWad || df->kind == FLKIND_PWad || df->kind == FLKIND_PackWAD)
 		{
 			std::filesystem::path xwa_filename = W_BuildNodesForWad(df);
 

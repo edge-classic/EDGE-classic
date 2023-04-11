@@ -42,6 +42,7 @@ typedef enum
 	FLKIND_EFolder,   // edge folder, priority loading
 	FLKIND_EPK,       // epk (zip) package
 	FLKIND_EEPK,	  // edge epks, priority loading (same extension as epk)
+	FLKIND_PackWAD,   // WADs within pack files; should only be used for maps
 
 	FLKIND_DDF,       // .ddf or .ldf file
 	FLKIND_RTS,       // .rts script  file
@@ -86,6 +87,7 @@ void W_ShowFiles();
 void W_ProcessMultipleFiles();
 size_t W_AddPending(std::filesystem::path file, filekind_e kind);
 int W_CheckDDFLumpName(const char *name);
+void ProcessFile(data_file_c *df);
 
 epi::file_c * W_OpenPackFile(const std::string& name);
 

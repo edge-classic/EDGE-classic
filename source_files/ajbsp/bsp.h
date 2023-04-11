@@ -112,6 +112,10 @@ void SetInfo(buildinfo_t *info);
 // buildinfo_t interface is called.
 void OpenWad(std::filesystem::path filename);
 
+// attempt to open a wad from memory; only intended for the use
+// of WAD files inside archives
+void OpenMem(std::filesystem::path filename, byte *raw_wad, int raw_length);
+
 // close a previously opened wad.
 void CloseWad();
 

@@ -944,7 +944,6 @@ static void ProcessColourmapsInPack(pack_file_c *pack)
 	}
 }
 
-
 epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name)
 {
 	// when file does not exist, this returns NULL.
@@ -965,6 +964,30 @@ epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name)
 
 	// try an arbitrary place
 	return pack->OpenFileByName(name);
+}
+
+static void ProcessMapsInPack(pack_file_c *pack)
+{
+	int d = pack->FindDir("maps");
+	if (d < 0)
+		return;
+
+	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+	{
+		pack_entry_c& entry = pack->dirs[d].entries[i];
+
+		if (std::filesystem::path(entry.name).extension().u8string() != ".wad") continue;
+
+		epi::file_c *pack_wad = Pack_OpenFile(pack, std::string("maps/").append(entry.name));
+
+		if (pack_wad)
+		{
+			data_file_c *pack_wad_df = new data_file_c(entry.name, FLKIND_PackWAD);
+			pack_wad_df->name = entry.name;
+			pack_wad_df->file = pack_wad;
+			ProcessFile(pack_wad_df);
+		}
+	}
 }
 
 int Pack_FindStem(pack_file_c *pack, const std::string& name)
@@ -998,15 +1021,12 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 	}
 
 	ProcessColourmapsInPack(df->pack);
-
-	/*ProcessSoundsInPack(df->pack);
-	ProcessMusicsInPack(df->pack);*/
-
 	ProcessDDFInPack(df->pack);
 	// parse COALAPI only from edge-defs folder or `edge-defs.epk`
 	if ((df->kind == FLKIND_EFolder || df->kind == FLKIND_EEPK) && file_index == 0)
 		ProcessCoalAPIInPack(df->pack);
 	ProcessCoalHUDInPack(df->pack);
+	ProcessMapsInPack(df->pack);
 }
 
 //--- editor settings ---

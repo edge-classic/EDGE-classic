@@ -104,7 +104,10 @@ bool Lump_c::Seek(int offset)
 {
 	SYS_ASSERT(offset >= 0);
 
-	return (fseek(parent->fp, l_start + offset, SEEK_SET) == 0);
+	if (parent->mem_fp)
+		return (parent->mem_fp->Seek(l_start + offset, epi::file_c::SEEKPOINT_START));
+	else
+		return (fseek(parent->fp, l_start + offset, SEEK_SET) == 0);
 }
 
 
@@ -112,13 +115,21 @@ bool Lump_c::Read(void *data, int len)
 {
 	SYS_ASSERT(data && len > 0);
 
-	return (fread(data, len, 1, parent->fp) == 1);
+	if (parent->mem_fp)
+		return (parent->mem_fp->Read(data, len) == len);
+	else
+		return (fread(data, len, 1, parent->fp) == 1);
 }
 
 
 bool Lump_c::GetLine(char *buffer, size_t buf_size)
 {
-	int cur_pos = (int)ftell(parent->fp);
+	int cur_pos = -1;
+	
+	if (parent->mem_fp)
+		cur_pos = parent->mem_fp->GetPosition();
+	else
+		cur_pos = (int)ftell(parent->fp);
 
 	if (cur_pos < 0)
 		return false;
@@ -133,15 +144,22 @@ bool Lump_c::GetLine(char *buffer, size_t buf_size)
 
 	for (; cur_pos < l_length && dest < dest_end ; cur_pos++)
 	{
-		*dest++ = fgetc(parent->fp);
+		int mem_pos = 0;
+		if (parent->mem_fp)
+		{
+			mem_pos = parent->mem_fp->Read(dest, 1);
+			*dest++;
+		}
+		else
+			*dest++ = fgetc(parent->fp);
 
 		if (dest[-1] == '\n')
 			break;
 
-		if (ferror(parent->fp))
+		if (parent->fp && ferror(parent->fp))
 			return false;
 
-		if (feof(parent->fp))
+		if ((parent->mem_fp && mem_pos == 0) || (parent->fp && feof(parent->fp)))
 			break;
 	}
 
@@ -190,8 +208,8 @@ bool Lump_c::Finish()
 //  WAD Reading Interface
 //------------------------------------------------------------------------
 
-Wad_file::Wad_file(std::filesystem::path _name, char _mode, FILE * _fp) :
-	mode(_mode), fp(_fp), kind('P'),
+Wad_file::Wad_file(std::filesystem::path _name, char _mode, FILE * _fp, epi::mem_file_c * _mem_fp) :
+	mode(_mode), fp(_fp), mem_fp(_mem_fp), kind('P'),
 	total_size(0), directory(),
 	dir_start(0), dir_count(0),
 	levels(), patches(), sprites(), flats(), tx_tex(),
@@ -204,7 +222,10 @@ Wad_file::~Wad_file()
 {
 	FileMessage("Closing WAD file: %s\n", filename.u8string().c_str());
 
-	fclose(fp);
+	if (fp)
+		fclose(fp);
+	if (mem_fp)
+		delete mem_fp;
 
 	// free the directory
 	for (int k = 0 ; k < NumLumps() ; k++)
@@ -249,7 +270,7 @@ retry:
 		return NULL;
 	}
 
-	Wad_file *w = new Wad_file(filename, mode, fp);
+	Wad_file *w = new Wad_file(filename, mode, fp, nullptr);
 
 	// determine total size (seek to end)
 	if (fseek(fp, 0, SEEK_END) != 0)
@@ -271,6 +292,35 @@ retry:
 	return w;
 }
 
+Wad_file * Wad_file::OpenMem(std::filesystem::path filename, byte *raw_wad, int raw_length)
+{
+	SYS_ASSERT(raw_wad);
+
+	FileMessage("Opening WAD from memory: %s\n", filename.string().c_str());
+
+	epi::mem_file_c *mem_fp = new epi::mem_file_c(raw_wad, raw_length, false); // maybe true?
+
+	if (!mem_fp)
+	{
+		FileMessage("Open memfile failed: %s\n", filename.string().c_str());
+		return NULL;
+	}
+
+	Wad_file *w = new Wad_file(filename, 'r', nullptr, mem_fp);
+
+	w->total_size = raw_length;
+
+	if (w->total_size < 0)
+		cur_info->FatalError("Nonsensical WAD size.\n");
+
+	w->ReadDirectory();
+	w->DetectLevels();
+	w->ProcessNamespaces();
+
+	return w;
+}
+
+
 
 Wad_file * Wad_file::Create(std::filesystem::path filename, char mode)
 {
@@ -280,7 +330,7 @@ Wad_file * Wad_file::Create(std::filesystem::path filename, char mode)
 	if (! fp)
 		return NULL;
 
-	Wad_file *w = new Wad_file(filename, mode, fp);
+	Wad_file *w = new Wad_file(filename, mode, fp, nullptr);
 
 	// write out base header
 	raw_wad_header_t header;
@@ -295,36 +345,6 @@ Wad_file * Wad_file::Create(std::filesystem::path filename, char mode)
 
 	return w;
 }
-
-
-bool Wad_file::Validate(std::filesystem::path filename)
-{
-	FILE *fp = fopen(filename.u8string().c_str(), "rb");
-
-	if (! fp)
-		return false;
-
-	raw_wad_header_t header;
-
-	if (fread(&header, sizeof(header), 1, fp) != 1)
-	{
-		fclose(fp);
-		return false;
-	}
-
-	if (! ( header.ident[1] == 'W' &&
-			header.ident[2] == 'A' &&
-			header.ident[3] == 'D'))
-	{
-		fclose(fp);
-		return false;
-	}
-
-	fclose(fp);
-
-	return true;  // OK
-}
-
 
 static int WhatLevelPart(const char *name)
 {
@@ -562,11 +582,16 @@ void Wad_file::ReadDirectory()
 {
 	// WISH: no fatal errors
 
-	rewind(fp);
+	if (mem_fp)
+		mem_fp->Seek(0, epi::file_c::SEEKPOINT_START);
+	else
+		rewind(fp);
 
 	raw_wad_header_t header;
 
-	if (fread(&header, sizeof(header), 1, fp) != 1)
+	if (mem_fp && mem_fp->Read(&header, sizeof(header)) != sizeof(header))
+		cur_info->FatalError("Error reading WAD header.\n");
+	else if (fp && fread(&header, sizeof(header), 1, fp) != 1)
 		cur_info->FatalError("Error reading WAD header.\n");
 
 	// WISH: check ident for PWAD or IWAD
@@ -579,14 +604,18 @@ void Wad_file::ReadDirectory()
 	if (dir_count < 0 || dir_count > 32000)
 		cur_info->FatalError("Bad WAD header, too many entries (%d)\n", dir_count);
 
-	if (fseek(fp, dir_start, SEEK_SET) != 0)
+	if (mem_fp && !mem_fp->Seek(dir_start, epi::file_c::SEEKPOINT_START))
+		cur_info->FatalError("Error seeking to WAD directory.\n");
+	else if (fp && fseek(fp, dir_start, SEEK_SET) != 0)
 		cur_info->FatalError("Error seeking to WAD directory.\n");
 
 	for (int i = 0 ; i < dir_count ; i++)
 	{
 		raw_wad_entry_t entry;
 
-		if (fread(&entry, sizeof(entry), 1, fp) != 1)
+		if (mem_fp && mem_fp->Read(&entry, sizeof(entry)) != sizeof(entry))
+			cur_info->FatalError("Error reading WAD directory.\n");
+		else if (fp && fread(&entry, sizeof(entry), 1, fp) != 1)
 			cur_info->FatalError("Error reading WAD directory.\n");
 
 		Lump_c *lump = new Lump_c(this, &entry);

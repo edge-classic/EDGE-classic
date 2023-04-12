@@ -21,6 +21,9 @@
 
 #include <filesystem>
 
+// EPI
+#include "file_memory.h"
+
 namespace ajbsp
 {
 
@@ -118,6 +121,8 @@ private:
 
 	FILE * fp;
 
+	epi::mem_file_c *mem_fp;
+
 	char kind;  // 'P' for PWAD, 'I' for IWAD
 
 	// zero means "currently unknown", which only occurs after a
@@ -144,7 +149,7 @@ private:
 	int insert_point;
 
 	// constructor is private
-	Wad_file(std::filesystem::path _name, char _mode, FILE * _fp);
+	Wad_file(std::filesystem::path _name, char _mode, FILE * _fp, epi::mem_file_c * _mem_fp);
 
 public:
 	~Wad_file();
@@ -161,8 +166,7 @@ public:
 	//
 	static Wad_file * Open(std::filesystem::path filename, char mode = 'a');
 
-	// check the given wad file exists and is a WAD file
-	static bool Validate(std::filesystem::path filename);
+	static Wad_file * OpenMem(std::filesystem::path filename, byte *raw_wad, int raw_length);
 
 	bool IsReadOnly() const { return mode == 'r'; }
 

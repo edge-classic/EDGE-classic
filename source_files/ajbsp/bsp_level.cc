@@ -2350,6 +2350,12 @@ void OpenWad(std::filesystem::path filename)
 		cur_info->FatalError("Cannot open file: %s\n", filename.u8string().c_str());
 }
 
+void OpenMem(std::filesystem::path filename, byte *raw_data, int raw_length)
+{
+	cur_wad = Wad_file::OpenMem(filename, raw_data, raw_length);
+	if (cur_wad == NULL)
+		cur_info->FatalError("Cannot open file from memory: %s\n", filename.u8string().c_str());
+}
 
 void CreateXWA(std::filesystem::path filename)
 {

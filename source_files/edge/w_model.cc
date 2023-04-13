@@ -149,7 +149,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 	bool pack_file = false;
 
 	// try MD3 first, then MD2, then MDL, then voxels
-	lumpname = epi::STR_Format("models/%s.md3", basename.c_str());
+	lumpname = epi::STR_Format("%s.md3", basename.c_str());
 	f = W_OpenPackFile(lumpname);
 	if (f)
 	{
@@ -170,7 +170,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 	}
 	if (!f)
 	{
-		lumpname = epi::STR_Format("models/%s.md2", basename.c_str());
+		lumpname = epi::STR_Format("%s.md2", basename.c_str());
 		f = W_OpenPackFile(lumpname);
 		if (f)
 		{
@@ -193,7 +193,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 	}
 	if (!f)
 	{
-		lumpname = epi::STR_Format("models/%s.mdl", basename.c_str());
+		lumpname = epi::STR_Format("%s.mdl", basename.c_str());
 		f = W_OpenPackFile(lumpname);
 		if (f)
 		{
@@ -216,7 +216,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 	}
 	if (!f)
 	{
-		lumpname = epi::STR_Format("voxels/%s.vxl", basename.c_str());
+		lumpname = epi::STR_Format("%s.vxl", basename.c_str());
 		f = W_OpenPackFile(lumpname);
 		if (f)
 		{
@@ -226,7 +226,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 		}
 		if (!f)
 		{
-			lumpname = epi::STR_Format("voxels/%s.kv6", basename.c_str());
+			lumpname = epi::STR_Format("%s.kv6", basename.c_str());
 			f = W_OpenPackFile(lumpname);
 			if (f)
 			{
@@ -237,7 +237,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 		}
 		if (!f)
 		{
-			lumpname = epi::STR_Format("voxels/%s.kvx", basename.c_str());
+			lumpname = epi::STR_Format("%s.kvx", basename.c_str());
 			f = W_OpenPackFile(lumpname);
 			if (f)
 			{

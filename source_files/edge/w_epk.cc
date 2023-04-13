@@ -840,7 +840,7 @@ epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name)
 	{
 		for (int entry = 0; entry < pack->dirs[dir].entries.size(); entry++)
 		{
-			if (pack->dirs[dir].entries[entry].name == name)
+			if (epi::PATH_GetFilename(pack->dirs[dir].entries[entry].name).u8string() == name)
 				return pack->OpenEntry((size_t)dir, (size_t)entry);
 		}
 	}

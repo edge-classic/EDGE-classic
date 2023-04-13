@@ -466,10 +466,10 @@ static void SpecialWadVerify(void)
 {
 	E_ProgressMessage("Verifying EDGE-DEFS version...");
 
-	epi::file_c *data = W_OpenPackFile("edgever.txt");
+	epi::file_c *data = W_OpenPackFile("version.txt");
 
 	if (!data)
-		I_Error("EDGEVER file not found. Get EDGE-DEFS.EPK at https://github.com/edge-classic/EDGE-classic");
+		I_Error("Version file not found. Get edge_defs.epk at https://github.com/edge-classic/EDGE-classic");
 
 	// parse version number
 	std::string verstring = data->ReadText();

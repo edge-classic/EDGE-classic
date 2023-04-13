@@ -30,6 +30,7 @@
 
 #include "image_data.h"
 #include "image_funcs.h"
+#include "str_util.h"
 
 #include "dm_data.h"
 #include "dm_defs.h"
@@ -410,10 +411,7 @@ static void DrawStdCrossHair(void)
 	{
 		crosshair_which = r_crosshair.d;
 
-		char name[32];
-		sprintf(name, "STDCROSS%d", crosshair_which);
-
-		crosshair_image = W_ImageLookup(name);
+		crosshair_image = W_ImageLookup(epi::STR_Format("STANDARD_CROSSHAIR_%d", crosshair_which).c_str());
 	}
 
 	GLuint tex_id = W_ImageCache(crosshair_image);

@@ -145,22 +145,6 @@ public:
 		return -1; // not found
 	}
 
-	int FindStem(const std::string& name_in) const
-	{
-		bool checking_sprites = (name == "sprites");
-		for (int i = 0 ; i < (int)entries.size() ; i++)
-		{
-			std::string entryname;
-			if (!TextureNameFromFilename(entryname, 
-				std::filesystem::path(entries[i].name).stem().u8string(), checking_sprites))
-				continue;
-			else if (entryname == name_in)
-				return i;
-		}
-
-		return -1; // not found
-	}
-
 	bool operator== (const std::string& other) const
 	{
 		return epi::case_cmp(name, other) == 0;
@@ -776,24 +760,24 @@ void Pack_ProcessImages(pack_file_c *pack)
 
 			if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" || ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
 			{
-				std::string texname;
+				//std::string texname;
 
-				if (! TextureNameFromFilename(texname, stem, (dir_name == "skins" || dir_name == "sprites")))
-				{
-					I_Warning("Illegal image name in EPK: %s\n", entry.name.c_str());
-					continue;
-				}
+				//if (! TextureNameFromFilename(texname, stem, (dir_name == "skins" || dir_name == "sprites")))
+				//{
+					//I_Warning("Illegal image name in EPK: %s\n", entry.name.c_str());
+					//continue;
+				//}
 
 				I_Debugf("- Adding image file in EPK: %s\n", entry.packpath.c_str());
 
 				if (dir_name == "textures")
-					AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_textures);
+					AddImage_SmartPack(stem.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_textures);
 				else if (dir_name == "graphics")
-					AddImage_SmartPack(texname.c_str(), IMSRC_Graphic, entry.packpath.c_str(), real_graphics);
+					AddImage_SmartPack(stem.c_str(), IMSRC_Graphic, entry.packpath.c_str(), real_graphics);
 				else if (dir_name == "flats")
-					AddImage_SmartPack(texname.c_str(), IMSRC_Flat, entry.packpath.c_str(), real_flats);
+					AddImage_SmartPack(stem.c_str(), IMSRC_Flat, entry.packpath.c_str(), real_flats);
 				else if (dir_name == "sprites" || dir_name == "skins")
-					AddImage_SmartPack(texname.c_str(), IMSRC_Sprite, entry.packpath.c_str(), real_sprites);
+					AddImage_SmartPack(stem.c_str(), IMSRC_Sprite, entry.packpath.c_str(), real_sprites);
 			}
 			else
 			{
@@ -820,17 +804,17 @@ static void ProcessColourmapsInPack(pack_file_c *pack)
 		// extension is currently ignored
 		(void)ext;
 
-		std::string colname;
+		/*std::string colname;
 
 		if (! TextureNameFromFilename(colname, stem, false))
 		{
 			I_Warning("Illegal colourmap name in EPK: %s\n", entry.name.c_str());
 			continue;
-		}
+		}*/
 
 		int size = pack->EntryLength(d, i);
 
-		DDF_AddRawColourmap(colname.c_str(), size, entry.packpath.c_str());
+		DDF_AddRawColourmap(stem.c_str(), size, entry.packpath.c_str());
 	}
 }
 

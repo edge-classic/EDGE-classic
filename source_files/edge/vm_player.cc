@@ -978,7 +978,7 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
 	// If no 3D floors, just return the flat
 	if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
 	{
-		vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
+		vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name.c_str());
 	}
 	else
 	{
@@ -989,12 +989,12 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
 		{
 			if (player_floor_height + 1 > ef->top_h)
 			{
-				vm->ReturnString(ef->top->image->name);
+				vm->ReturnString(ef->top->image->name.c_str());
 				return;
 			}
 		}
 		// Fallback if nothing else satisfies these conditions
-		vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name);
+		vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name.c_str());
 	}
 }
 

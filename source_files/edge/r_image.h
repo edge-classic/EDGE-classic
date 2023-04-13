@@ -116,7 +116,8 @@ public:
 //!!!!!! private:
 
 	// --- information about where this image came from ---
-	char name[16];
+	//char name[16];
+	std::string name;
 
 	int source_type;  // image_source_e
  

@@ -35,11 +35,13 @@
 #include "colormap.h"
 #include "wadfixes.h"
 
-#include <list>
+#include <unordered_set>
 #include <vector>
 #include <algorithm>
 
 #include "miniz.h"
+
+static std::string image_dirs[5] = {"flats", "graphics", "skins", "sprites", "textures"};
 
 static bool TextureNameFromFilename(std::string& buf, const std::string& stem, bool is_sprite)
 {
@@ -83,11 +85,14 @@ public:
 	// only for Folder: the full pathname to file (for FS_Open).
 	std::string fullpath;
 
+	// for both types: path relative to pack's "root" directory
+	std::string packpath;
+
 	// only for EPK: the index into the archive.
 	mz_uint file_idx;
 
-	pack_entry_c(const std::string& _name, const std::string& _path, mz_uint _idx) :
-		name(_name), fullpath(_path), file_idx(_idx)
+	pack_entry_c(const std::string& _name, const std::string& _path, const std::string& _ppath, mz_uint _idx) :
+		name(_name), fullpath(_path), packpath(_ppath), file_idx(_idx)
 	{ }
 
 	~pack_entry_c()
@@ -120,14 +125,14 @@ public:
 
 	void SortEntries();
 
-	size_t AddEntry(const std::string& _name, const std::string& _path, mz_uint _idx)
+	size_t AddEntry(const std::string& _name, const std::string& _path, const std::string& _ppath, mz_uint _idx)
 	{
 		// check if already there
 		for (size_t i = 0 ; i < entries.size() ; i++)
 			if (entries[i] == _name)
 				return i;
 
-		entries.push_back(pack_entry_c(_name, _path, _idx));
+		entries.push_back(pack_entry_c(_name, _path, _ppath, _idx));
 		return entries.size() - 1;
 	}
 
@@ -174,6 +179,9 @@ public:
 	// everything else is from a second-level directory.
 	// things in deeper directories are not stored.
 	std::vector<pack_dir_c> dirs;
+
+	// for fast W_IsLumpInPWAD-type lookups
+	std::unordered_set<std::string> search_stems;
 
 	mz_zip_archive *arch;
 
@@ -337,7 +345,7 @@ void ProcessSubDir(pack_file_c *pack, const std::string& fullpath)
 
 	std::string dirname = epi::PATH_GetFilename(UTFSTR(fullpath)).u8string();
 
-	if (! epi::FS_ReadDir(fsd, UTFSTR(fullpath), UTFSTR("*.*")))
+	if (! epi::FS_ReadDirRecursive(fsd, UTFSTR(fullpath), UTFSTR("*.*")))
 	{
 		I_Warning("Failed to read dir: %s\n", fullpath.c_str());
 		return;
@@ -350,7 +358,9 @@ void ProcessSubDir(pack_file_c *pack, const std::string& fullpath)
 		if (! fsd[i].is_dir)
 		{
 			std::string filename = epi::PATH_GetFilename(fsd[i].name).u8string();
-			pack->dirs[d].AddEntry(filename, fsd[i].name.u8string(), 0);
+			pack->dirs[d].AddEntry(filename, fsd[i].name.u8string(), 
+				fsd[i].name.lexically_relative(pack->parent->name).u8string(), 0);
+			pack->search_stems.insert(epi::PATH_GetBasename(fsd[i].name).u8string());
 		}
 	}
 }
@@ -379,7 +389,9 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 		else
 		{
 			std::string filename = epi::PATH_GetFilename(fsd[i].name).u8string();
-			pack->dirs[0].AddEntry(filename, fsd[i].name.u8string(), 0);
+			pack->dirs[0].AddEntry(filename, fsd[i].name.u8string(), 
+				fsd[i].name.lexically_relative(df->name).u8string(), 0);
+			pack->search_stems.insert(epi::PATH_GetBasename(fsd[i].name).u8string());
 		}
 	}
 
@@ -453,6 +465,8 @@ static pack_file_c * ProcessZip(data_file_c *df)
 
 		mz_zip_reader_get_filename(pack->arch, idx, filename, sizeof(filename));
 
+		std::string packpath = filename;
+
 		// decode into DIR + FILE
 		char *p = filename;
 		while (*p != 0 && *p != '/' && *p != '\\')
@@ -472,20 +486,11 @@ static pack_file_c * ProcessZip(data_file_c *df)
 			if (basename[0] == 0)
 				continue;
 
-			// skip file if it has more sub-directories
-			while (*p != 0 && *p != '/' && *p != '\\')
-				p++;
-
-			if (*p != 0)
-				continue;
-
 			dir_idx = pack->AddDir(filename);
 		}
 
-		pack->dirs[dir_idx].AddEntry(basename, "", idx);
-
-		// DEBUG
-		//   fprintf(stderr, "FILE %d : dir %d '%s'\n", (int)idx, (int)dir_idx, basename);
+		pack->dirs[dir_idx].AddEntry(basename, "", packpath, idx);
+		pack->search_stems.insert(epi::PATH_GetBasename(basename).u8string());
 	}
 
 	return pack;
@@ -752,163 +757,51 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
 	VM_AddScript(0, data, source);
 }
 
-void Pack_ProcessImages(pack_file_c *pack, const std::string& dir_name, const std::string& prefix)
+void Pack_ProcessImages(pack_file_c *pack)
 {
-	int d = pack->FindDir(dir_name);
-	if (d < 0)
-		return;
-
-	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+	for (auto dir_name : image_dirs)
 	{
-		pack_entry_c& entry = pack->dirs[d].entries[i];
-
-		// split filename in stem + extension
-		std::string stem = epi::PATH_GetBasename(UTFSTR(entry.name)).u8string();
-		std::string ext  = epi::PATH_GetExtension(UTFSTR(entry.name)).u8string();
-
-		epi::str_lower(ext);
-
-		if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" || ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
+		int d = pack->FindDir(dir_name);
+		if (d < 0)
+			continue;
+		for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
 		{
-			std::string texname;
-			std::string packpath = dir_name;
+			pack_entry_c& entry = pack->dirs[d].entries[i];
 
-			if (! TextureNameFromFilename(texname, stem, prefix == "spr"))
+			// split filename in stem + extension
+			std::string stem = epi::PATH_GetBasename(UTFSTR(entry.name)).u8string();
+			std::string ext  = epi::PATH_GetExtension(UTFSTR(entry.name)).u8string();
+
+			epi::str_lower(ext);
+
+			if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" || ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
 			{
-				I_Warning("Illegal image name in EPK: %s\n", entry.name.c_str());
-				continue;
+				std::string texname;
+
+				if (! TextureNameFromFilename(texname, stem, (dir_name == "skins" || dir_name == "sprites")))
+				{
+					I_Warning("Illegal image name in EPK: %s\n", entry.name.c_str());
+					continue;
+				}
+
+				I_Debugf("- Adding image file in EPK: %s\n", entry.packpath.c_str());
+
+				if (dir_name == "textures")
+					AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_textures);
+				else if (dir_name == "graphics")
+					AddImage_SmartPack(texname.c_str(), IMSRC_Graphic, entry.packpath.c_str(), real_graphics);
+				else if (dir_name == "flats")
+					AddImage_SmartPack(texname.c_str(), IMSRC_Flat, entry.packpath.c_str(), real_flats);
+				else if (dir_name == "sprites" || dir_name == "skins")
+					AddImage_SmartPack(texname.c_str(), IMSRC_Sprite, entry.packpath.c_str(), real_sprites);
 			}
-
-			I_Debugf("- Adding image file in EPK: %s/%s\n", dir_name.c_str(), entry.name.c_str());
-
-			packpath.append("/").append(entry.name);
-
-			if (dir_name == "textures")
-				AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, packpath.c_str(), real_textures);
-			else if (dir_name == "graphics")
-				AddImage_SmartPack(texname.c_str(), IMSRC_Graphic, packpath.c_str(), real_graphics);
-			else if (dir_name == "flats")
-				AddImage_SmartPack(texname.c_str(), IMSRC_Flat, packpath.c_str(), real_flats);
-			else if (dir_name == "sprites" || dir_name == "skins")
-				AddImage_SmartPack(texname.c_str(), IMSRC_Sprite, packpath.c_str(), real_sprites);
-		}
-		else
-		{
-			I_Warning("Unknown image type in EPK: %s\n", entry.name.c_str());
+			else
+			{
+				I_Warning("Unknown image type in EPK: %s\n", entry.name.c_str());
+			}
 		}
 	}
 }
-
-
-/*static void ProcessSoundsInPack(pack_file_c *pack)
-{
-	data_file_c *df = pack->parent;
-
-	int d = pack->FindDir("sounds");
-	if (d < 0)
-		return;
-
-	std::string text = "<SOUNDS>\n\n";
-
-	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
-	{
-		pack_entry_c& entry = pack->dirs[d].entries[i];
-
-		epi::sound_format_e fmt = epi::Sound_FilenameToFormat(entry.name);
-
-		if (fmt == epi::FMT_Unknown)
-		{
-			I_Warning("Unknown sound type in EPK: %s\n", entry.name.c_str());
-			continue;
-		}
-
-		// stem must consist of only digits
-		std::string stem = epi::PATH_GetBasename(UTFSTR(entry.name)).u8string();
-		std::string sfxname;
-
-		if (! TextureNameFromFilename(sfxname, stem, false))
-		{
-			I_Warning("Illegal sound name in EPK: %s\n", entry.name.c_str());
-			continue;
-		}
-
-		I_Debugf("- Adding sound file in EPK: %s\n", entry.name.c_str());
-
-		// generate DDF for it...
-		text += "[";
-		text += sfxname;
-		text += "]\n";
-
-		text += "pack_name = \"";
-		text += "sounds/";
-		text += entry.name;
-		text += "\";\n";
-
-		text += "priority  = 64;\n";
-		text += "\n";
-	}
-
-	// DEBUG:
-	// DDF_DumpFile(text);
-
-	DDF_AddFile(DDF_SFX, text, df->name.u8string());
-}*/
-
-
-/*static void ProcessMusicsInPack(pack_file_c *pack)
-{
-	data_file_c *df = pack->parent;
-
-	int d = pack->FindDir("music");
-	if (d < 0)
-		return;
-
-	std::string text = "<PLAYLISTS>\n\n";
-
-	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
-	{
-		pack_entry_c& entry = pack->dirs[d].entries[i];
-
-		epi::sound_format_e fmt = epi::Sound_FilenameToFormat(entry.name);
-
-		if (fmt == epi::FMT_Unknown)
-		{
-			I_Warning("Unknown music type in EPK: %s\n", entry.name.c_str());
-			continue;
-		}
-
-		// stem must consist of only digits
-		std::string stem = epi::PATH_GetBasename(entry.name).u8string();
-
-		bool valid = stem.size() > 0;
-		for (char ch : stem)
-			if (ch < '0' || ch > '9')
-				valid = false;
-
-		if (! valid)
-		{
-			I_Warning("Non-numeric music name in EPK: %s\n", entry.name.c_str());
-			continue;
-		}
-
-		I_Debugf("- Adding music file in EPK: %s\n", entry.name.c_str());
-
-		// generate DDF for it...
-		text += "[";
-		text += stem;
-		text += "]\n";
-
-		text += "MUSICINFO=MUS:PACK:\"";
-		text += "music/";
-		text += entry.name;
-		text += "\";\n\n";
-	}
-
-	// DEBUG:
-	// DDF_DumpFile(text);
-
-	DDF_AddFile(DDF_Playlist, text, df->name.u8string());
-}*/
 
 static void ProcessColourmapsInPack(pack_file_c *pack)
 {
@@ -935,12 +828,9 @@ static void ProcessColourmapsInPack(pack_file_c *pack)
 			continue;
 		}
 
-		std::string fullname = "colormaps/";
-		fullname += entry.name;
-
 		int size = pack->EntryLength(d, i);
 
-		DDF_AddRawColourmap(colname.c_str(), size, fullname.c_str());
+		DDF_AddRawColourmap(colname.c_str(), size, entry.packpath.c_str());
 	}
 }
 
@@ -949,21 +839,24 @@ epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name)
 	// when file does not exist, this returns NULL.
 
 	// disallow absolute names
-	if (name.size() >= 1 && (name[0] == '/' || name[0] == '\\'))
+	if (epi::PATH_IsAbsolute(name))
 		return NULL;
 
-	if (name.size() >= 2 && name[1] == ':')
-		return NULL;
+	// Specific path given; attempt to open as-is, otherwise return NULL
+	if (name != epi::PATH_GetFilename(name).u8string())
+		return pack->OpenFileByName(name);
 
-	// try the top-level directory
-	int ent = pack->dirs[0].Find(name);
-	if (ent >= 0)
+	// Only filename given; return first instance found in pack (if any)
+	for (int dir = 0; dir < pack->dirs.size(); dir++)
 	{
-		return pack->OpenEntry(0, (size_t)ent);
+		for (int entry = 0; entry < pack->dirs[dir].entries.size(); entry++)
+		{
+			if (pack->dirs[dir].entries[entry].name == name)
+				return pack->OpenEntry((size_t)dir, (size_t)entry);
+		}
 	}
 
-	// try an arbitrary place
-	return pack->OpenFileByName(name);
+	return NULL;
 }
 
 static void ProcessMapsInPack(pack_file_c *pack)
@@ -976,9 +869,9 @@ static void ProcessMapsInPack(pack_file_c *pack)
 	{
 		pack_entry_c& entry = pack->dirs[d].entries[i];
 
-		if (std::filesystem::path(entry.name).extension().u8string() != ".wad") continue;
+		if (epi::PATH_GetExtension(entry.name) != ".wad") continue;
 
-		epi::file_c *pack_wad = Pack_OpenFile(pack, std::string("maps/").append(entry.name));
+		epi::file_c *pack_wad = Pack_OpenFile(pack, entry.packpath);
 
 		if (pack_wad)
 		{
@@ -992,14 +885,7 @@ static void ProcessMapsInPack(pack_file_c *pack)
 
 int Pack_FindStem(pack_file_c *pack, const std::string& name)
 {
-	int entry_found = -1;
-	for (auto packdir : pack->dirs)
-	{
-		entry_found = packdir.FindStem(name);
-		if (entry_found >= 0)
-			return entry_found;
-	}
-	return entry_found;
+	return pack->search_stems.count(name);
 }
 
 void ProcessPackage(data_file_c *df, size_t file_index)
@@ -1016,7 +902,8 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 	{
 		I_Printf("Loading WADFIXES\n");
 		epi::file_c *wadfixes = Pack_OpenFile(df->pack, "wadfixes.ddf");
-		DDF_ReadFixes(wadfixes->ReadText());
+		if (wadfixes)
+			DDF_ReadFixes(wadfixes->ReadText());
 		delete wadfixes;
 	}
 

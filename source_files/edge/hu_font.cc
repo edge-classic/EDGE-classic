@@ -234,7 +234,7 @@ void font_c::LoadFontTTF()
 			epi::file_c *F;
 			
 			if (std::filesystem::path(def->ttf_name).has_extension()) // check for pack file
-				F = W_OpenPackFile(std::string("fonts/").append(def->ttf_name));
+				F = W_OpenPackFile(def->ttf_name);
 			else
 				F = W_OpenLump(W_CheckNumForName(def->ttf_name.c_str()));
 

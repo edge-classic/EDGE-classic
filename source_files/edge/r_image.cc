@@ -1847,18 +1847,15 @@ bool W_InitImages(void)
 	return true;
 }
 
+//
+// Automatically add images if in one of the traditional pack folder names
+//
 void W_ImageAddPackImages(void)
 {
 	for (auto df : data_files)
 	{
 		if (df->pack)
-		{
-			Pack_ProcessImages(df->pack, "textures", "tex");
-			Pack_ProcessImages(df->pack, "flats",    "flat");
-			Pack_ProcessImages(df->pack, "graphics", "gfx");
-			Pack_ProcessImages(df->pack, "sprites",  "spr");
-			Pack_ProcessImages(df->pack, "skins",  	 "spr");
-		}
+			Pack_ProcessImages(df->pack);
 	}
 }
 

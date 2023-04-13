@@ -242,7 +242,7 @@ static void LoadColourmap(const colourmap_c * colm)
 
 	if (colm->pack_name != "")
 	{
-		epi::file_c *f = W_OpenPackFile(std::string("colormaps/").append(colm->pack_name));
+		epi::file_c *f = W_OpenPackFile(colm->pack_name);
 		if (f == NULL)
 			I_Error("No such colormap file: %s\n", colm->pack_name.c_str());
 		size = f->GetLength();

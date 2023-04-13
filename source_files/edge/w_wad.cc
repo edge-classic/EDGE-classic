@@ -2246,7 +2246,7 @@ bool W_IsLumpInPwad(const char *name)
 			data_file_c *df = data_files[i];
 			if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
 			{
-				if (Pack_FindStem(df->pack, name) >= 0 && i >= 2) // ignore edge_defs and the IWAD itself
+				if (Pack_FindStem(df->pack, name) && i >= 2) // ignore edge_defs and the IWAD itself
 					in_pwad = true;
 			}
 		}

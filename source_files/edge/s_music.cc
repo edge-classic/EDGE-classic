@@ -112,7 +112,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 
 		case MUSINF_PACKAGE:
 		{
-			F = W_OpenPackFile(std::string("music/").append(play->info));
+			F = W_OpenPackFile(play->info);
 			if (! F)
 			{
 				I_Warning("S_ChangeMusic: PK3 entry '%s' not found.\n", play->info.c_str());

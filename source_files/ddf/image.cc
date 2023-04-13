@@ -219,25 +219,7 @@ static void ImageParseColour(const char *value)
 
 static void ImageParseInfo(const char *value)
 {
-	// Enforce internal path for package image files
-	if (dynamic_image->type == IMGDT_Package)
-	{
-		std::string pathname;
-		switch (dynamic_image->belong)
-		{
-			case INS_Graphic: pathname = "graphics/"; break;
-			case INS_Texture: pathname = "textures/"; break;
-			case INS_Flat:    pathname = "flats/"; break;
-			case INS_Sprite:  pathname = "sprites/"; break;
-			case INS_Patch:   pathname = "patches/"; break;
-
-			default:
-				I_Error("INTERNAL ERROR: Bad belong value: %d\n", dynamic_image->belong);
-		}
-		dynamic_image->info = pathname.append(value);
-	}
-	else
-		dynamic_image->info = value;
+	dynamic_image->info = value;
 }
 
 

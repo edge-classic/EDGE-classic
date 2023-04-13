@@ -132,6 +132,34 @@ bool FS_ReadDir(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::s
 	return true;
 }
 
+#ifdef _WIN32
+bool FS_ReadDirRecursive(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::u32string mask)
+#else
+bool FS_ReadDirRecursive(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::string mask)
+#endif
+{
+	if (dir.empty() || !std::filesystem::exists(dir) || mask.empty())
+		return false;
+
+	std::filesystem::path mask_ext = std::filesystem::path(mask).extension(); // Allows us to retain the *.extension syntax - Dasho
+
+	// Ensure the container is empty
+	fsd.clear();
+
+	for (auto const& entry : std::filesystem::recursive_directory_iterator{dir})
+	{
+		if (epi::case_cmp(mask_ext.u8string(), ".*") != 0 &&
+			epi::case_cmp(mask_ext.u8string(), entry.path().extension().u8string()) != 0)
+			continue;
+
+		bool is_dir = entry.is_directory();
+		size_t size = is_dir ? 0 : entry.file_size();
+
+		fsd.push_back(dir_entry_c { entry.path(), size, is_dir });
+	}
+
+	return true;
+}
 
 bool FS_Copy(std::filesystem::path src, std::filesystem::path dest)
 {

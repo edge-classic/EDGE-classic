@@ -111,8 +111,8 @@ static void ImageStartEntry(const char *name, bool extend)
 	}
 
 	// W_Image code has limited space for the name
-	if (strlen(name) > 15)
-		DDF_Error("Image name [%s] too long.\n", name);
+	//if (strlen(name) > 15)
+		//DDF_Error("Image name [%s] too long.\n", name);
 
 	dynamic_image = imagedefs.Lookup(name, belong);
 

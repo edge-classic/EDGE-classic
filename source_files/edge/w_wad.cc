@@ -2124,7 +2124,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 	{
 		if(tempImage->source_type ==IMSRC_User)//from images.ddf
 		{
-			lumpnum = W_CheckNumForName(tempImage->name);
+			lumpnum = W_CheckNumForName(tempImage->name.c_str());
 
 			if (lumpnum != -1)
 			{
@@ -2136,7 +2136,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 				//we only want pwads
 				if (data_files[filenum]->kind == FLKIND_PWad)
 				{
-					I_Debugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name, tempImage->source_type, lumpnum, filenum);
+					I_Debugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name.c_str(), tempImage->source_type, lumpnum, filenum);
 					TurnOffSkyBox = false;
 					return TurnOffSkyBox; //get out of here
 				}
@@ -2156,13 +2156,13 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 		}
 		else if(tempImage->source_type ==IMSRC_User)// texture from images.ddf
 		{
-			I_Debugf("SKYBOX: Sky is: %s. Type:%d  \n", tempImage->name, tempImage->source_type);
+			I_Debugf("SKYBOX: Sky is: %s. Type:%d  \n", tempImage->name.c_str(), tempImage->source_type);
 			TurnOffSkyBox = true; //turn off or not? hmmm...
 			return TurnOffSkyBox;
 		}
 		else //could be a png or jpg i.e. TX_ or HI_
 		{
-			lumpnum = W_CheckNumForName(tempImage->name);
+			lumpnum = W_CheckNumForName(tempImage->name.c_str());
 			//lumpnum = tempImage->source.graphic.lump;
 			if (lumpnum != -1)
 			{
@@ -2190,7 +2190,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 		}
 	}	
 
-	I_Debugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name, tempImage->source_type, lumpnum, filenum);
+	I_Debugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name.c_str(), tempImage->source_type, lumpnum, filenum);
 	return TurnOffSkyBox;
 }
 

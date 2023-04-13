@@ -932,13 +932,13 @@ int RGL_UpdateSkyBoxTextures(void)
 
 	// check for custom sky boxes
 	info->face[WSKY_North] = W_ImageLookup(
-			UserSkyFaceName(sky_image->name, WSKY_North), INS_Texture, ILF_Null);
+			UserSkyFaceName(sky_image->name.c_str(), WSKY_North), INS_Texture, ILF_Null);
 
 	//LOBO 2022:
 	//If we do nothing, our EWAD skybox will be used for all maps.
 	//So we need to disable it if we have a pwad that contains it's
 	//own sky.
-	if (W_LoboDisableSkybox(sky_image->name))
+	if (W_LoboDisableSkybox(sky_image->name.c_str()))
 	{
 		info->face[WSKY_North] = NULL;
 		//I_Printf("Skybox turned OFF\n");
@@ -965,7 +965,7 @@ int RGL_UpdateSkyBoxTextures(void)
 
 		for (int i = WSKY_East; i < 6; i++)
 			info->face[i] = W_ImageLookup(
-					UserSkyFaceName(sky_image->name, i), INS_Texture);
+					UserSkyFaceName(sky_image->name.c_str(), i), INS_Texture);
 
 		for (int k = 0; k < 6; k++)
 			info->tex[k] = W_ImageCache(info->face[k], false, ren_fx_colmap);

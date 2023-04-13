@@ -256,7 +256,7 @@ image_c::image_c() : actual_w(0), actual_h(0), total_w(0), total_h(0),
 					 source_palette(-1),
 					 cache()
 {
-	strcpy(name, "_UNINIT_");
+	name = "_UNINIT_";
 
 	memset(&source, 0, sizeof(source));
 	memset(&anim,   0, sizeof(anim));
@@ -303,7 +303,7 @@ static image_c *CreateDummyImage(const char *name, rgbcol_t fg, rgbcol_t bg)
   
 	rim = NewImage(DUMMY_X, DUMMY_Y, (bg == TRANS_PIXEL) ? OPAC_Masked : OPAC_Solid);
  
- 	strcpy(rim->name, name);
+ 	rim->name = name;
 
 	rim->source_type = IMSRC_Dummy;
 	rim->source_palette = -1;
@@ -356,7 +356,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
 		if (packfile_len == 320*200 && type == IMSRC_Graphic)
 		{
 			image_c *rim = NewImage(320, 200, OPAC_Solid);
-			strcpy(rim->name, name);
+			rim->name = name;
 
 			rim->source_type = IMSRC_Raw320x200;
 			Z_StrNCpy(rim->source.flat.packfile_name, packfile_name, 63);
@@ -406,9 +406,9 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
 	rim->offset_x = offset_x;
 	rim->offset_y = offset_y;
 
-	strcpy(rim->name, name);
+	rim->name = name;
 
-	flatdef_c *current_flatdef = flatdefs.Find(rim->name);
+	flatdef_c *current_flatdef = flatdefs.Find(rim->name.c_str());
 
 	if (current_flatdef && !current_flatdef->liquid.empty())
 	{
@@ -486,7 +486,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump,
 		if (lump_len == 320*200 && type == IMSRC_Graphic)
 		{
 			image_c *rim = NewImage(320, 200, OPAC_Solid);
-			strcpy(rim->name, name);
+			rim->name = name;
 
 			rim->source_type = IMSRC_Raw320x200;
 			rim->source.flat.lump = lump;
@@ -535,9 +535,9 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump,
 	rim->offset_x = offset_x;
 	rim->offset_y = offset_y;
 
-	strcpy(rim->name, name);
+	rim->name = name;
 
-	flatdef_c *current_flatdef = flatdefs.Find(rim->name);
+	flatdef_c *current_flatdef = flatdefs.Find(rim->name.c_str());
 
 	if (current_flatdef && !current_flatdef->liquid.empty())
 	{
@@ -577,7 +577,7 @@ static image_c *AddImageTexture(const char *name, texturedef_t *tdef)
 
 	rim = NewImage(tdef->width, tdef->height);
 
-	strcpy(rim->name, name);
+	rim->name = name;
 
 	if (tdef->scale_x) rim->scale_x = 8.0 / tdef->scale_x;
 	if (tdef->scale_y) rim->scale_y = 8.0 / tdef->scale_y;
@@ -620,13 +620,13 @@ static image_c *AddImageFlat(const char *name, int lump)
    
 	rim = NewImage(size, size, OPAC_Solid);
  
-	strcpy(rim->name, name);
+	rim->name = name;
 
 	rim->source_type = IMSRC_Flat;
 	rim->source.flat.lump = lump;
 	rim->source_palette = W_GetPaletteForLump(lump);
 
-	flatdef_c *current_flatdef = flatdefs.Find(rim->name);
+	flatdef_c *current_flatdef = flatdefs.Find(rim->name.c_str());
 
 	if (current_flatdef && !current_flatdef->liquid.empty())
 	{
@@ -802,7 +802,7 @@ static image_c *AddImageUser(imagedef_c *def)
  
 	image_c *rim = NewImage(width, height, solid ? OPAC_Solid : OPAC_Unknown);
  
-	strcpy(rim->name, def->name.c_str());
+	rim->name = def->name;
 
 	rim->offset_x = def->x_offset;
 	rim->offset_y = def->y_offset;
@@ -1601,7 +1601,7 @@ void W_ImageMakeSaveString(const image_c *image, char *type, char *namebuf)
 
 	const image_c *rim = (const image_c *) image;
 
-	strcpy(namebuf, rim->name);
+	strcpy(namebuf, rim->name.c_str());
 
 	/* handle User images (convert to a more general type) */
 	if (rim->source_type == IMSRC_User)
@@ -1645,7 +1645,7 @@ const char *W_ImageGetName(const image_c *image)
 
 	rim = (const image_c *) image;
 
-	return rim->name;
+	return rim->name.c_str();
 }
 
 
@@ -1783,16 +1783,15 @@ void W_ImagePreCache(const image_c *image)
 	image_c *rim = (image_c *) image;
 
 	// pre-cache alternative images for switches too
-	if (strlen(rim->name) >= 4 &&
+	if (rim->name.size() >= 4 &&
 		(epi::prefix_case_cmp(rim->name, "SW1") == 0 ||
 		 epi::prefix_case_cmp(rim->name, "SW2") == 0 ))
 	{
-		char alt_name[16];
+		std::string alt_name = rim->name;
 
-		strcpy(alt_name, rim->name);
 		alt_name[2] = (alt_name[2] == '1') ? '2' : '1';
 
-		image_c *alt = do_Lookup(real_textures, alt_name);
+		image_c *alt = do_Lookup(real_textures, alt_name.c_str());
 
 		if (alt) W_ImageCache(alt, false);
 	}
@@ -1929,7 +1928,7 @@ void W_AnimateImageSet(const image_c ** images, int number, int speed)
 			// Make new image but keep it out of the lookup list ? - Dasho
 			// I don't think image_c class has a CopyDetail function...is it worth it for this one use?
 			image_c *dupe_image = new image_c;
-			strcpy(dupe_image->name, rim->name);
+			dupe_image->name = rim->name;
 			dupe_image->actual_h = rim->actual_h;
 			dupe_image->actual_w = rim->actual_w;
 			dupe_image->cache = rim->cache;

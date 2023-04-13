@@ -1863,7 +1863,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
 	if (! shoot_I.source || ! shoot_I.source->currentattack ||
 			! (shoot_I.source->currentattack->flags & AF_NoTriggerLines))
 	{
-		const char *flat = floor->image->name;
+		const char *flat = floor->image->name.c_str();
 		flatdef_c *current_flatdef = flatdefs.Find(flat);
 		if (current_flatdef)
 		{ 

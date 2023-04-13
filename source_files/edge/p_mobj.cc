@@ -1982,7 +1982,7 @@ flatdef_c* P_IsThingOnLiquidFloor(mobj_t * thing)
 	// If no 3D floors, just return the flat
     if (thing->subsector->sector->exfloor_used == 0)
     {
-		current_flatdef = flatdefs.Find(thing->subsector->sector->floor.image->name);
+		current_flatdef = flatdefs.Find(thing->subsector->sector->floor.image->name.c_str());
 	}
     // Start from the lowest exfloor and check if the player is standing on it, then return the control sector's flat
     else
@@ -1993,12 +1993,12 @@ flatdef_c* P_IsThingOnLiquidFloor(mobj_t * thing)
 		for (extrafloor_t *ef = floor_checker; ef; ef=ef->higher)
 		{
 			if (player_floor_height == ef->top_h)
-				current_flatdef = flatdefs.Find(ef->ef_line->frontsector->floor.image->name);
+				current_flatdef = flatdefs.Find(ef->ef_line->frontsector->floor.image->name.c_str());
 		}
 		for (extrafloor_t *ef = liquid_checker; ef; ef=ef->higher)
 		{
 			if (player_floor_height == ef->top_h)
-				current_flatdef = flatdefs.Find(ef->ef_line->frontsector->floor.image->name);
+				current_flatdef = flatdefs.Find(ef->ef_line->frontsector->floor.image->name.c_str());
 		}
 		//if (!current_flatdef)
 		//	current_flatdef = flatdefs.Find(thing->subsector->sector->floor.image->name); // Fallback if nothing else satisfies these conditions

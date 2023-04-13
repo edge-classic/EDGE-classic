@@ -252,8 +252,13 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 			OK = Load_MP3(buf, data, length);
 			break;
 
+		// Double-check first byte here because pack filename detection could
+		// return FMT_SPK for either
 		case epi::FMT_SPK:
-			OK = Load_WAV(buf, data, length, true);
+			if (data[0] == 0x3)
+				OK = Load_DOOM(buf, data, length);
+			else
+				OK = Load_WAV(buf, data, length, true);
 			break;
 
 		case epi::FMT_DOOM:

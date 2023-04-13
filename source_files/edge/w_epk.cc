@@ -53,20 +53,20 @@ static bool TextureNameFromFilename(std::string& buf, const std::string& stem, b
 
 	while (pos < stem.size())
 	{
-		if (buf.size() >= 8)
-			return false;
+		//if (buf.size() >= 8)
+			//return false;
 
 		int ch = (unsigned char) stem[pos++];
 
 		// sprites allow a few special characters, but remap caret --> backslash
 		if (is_sprite && ch == '^')
 			ch = '\\';
-		else if (is_sprite && (ch == '[' || ch == ']'))
-			{ /* ok */ }
-		else if (isalnum(ch) || ch == '_')
-			{ /* ok */ }
-		else
-			return false;
+		//else if (is_sprite && (ch == '[' || ch == ']'))
+			//{ /* ok */ }
+		//else if (isalnum(ch) || ch == '_')
+			//{ /* ok */ }
+		//else
+			//return false;
 
 		buf.push_back((char) ch);
 	}
@@ -652,97 +652,107 @@ static void ProcessDDFInPack(pack_file_c *pack)
 	if (bare_filename.empty())
 		bare_filename = df->name.u8string();
 
-	for (size_t i = 0 ; i < pack->dirs[0].entries.size() ; i++)
+	for (int dir=0; dir < pack->dirs.size(); dir++)
 	{
-		pack_entry_c& entry = pack->dirs[0].entries[i];
-
-		std::string source = entry.name;
-		source += " in ";
-		source += bare_filename;
-
-		// this handles RTS scripts too!
-		ddf_type_e type = DDF_FilenameToType(UTFSTR(entry.name));
-
-		if (type != DDF_UNKNOWN)
+		for (int entry=0; entry < pack->dirs[dir].entries.size(); entry++)
 		{
-			int length = -1;
-			const byte *raw_data = pack->LoadEntry(0, i, length);
+			pack_entry_c& ent = pack->dirs[dir].entries[entry];
 
-			std::string data((const char *)raw_data);
-			delete[] raw_data;
+			std::string source = ent.name;
+			source += " in ";
+			source += bare_filename;
 
-			DDF_AddFile(type, data, source);
-			continue;
-		}
+			// this handles RTS scripts too!
+			ddf_type_e type = DDF_FilenameToType(UTFSTR(ent.name));
 
-		if (entry.HasExtension(".deh") || entry.HasExtension(".bex"))
-		{
-			I_Printf("Converting DEH file%s: %s\n",
-				pack->is_folder ? "" : " in EPK", entry.name.c_str());
+			if (type != DDF_UNKNOWN)
+			{
+				int length = -1;
+				const byte *raw_data = pack->LoadEntry(dir, entry, length);
 
-			int length = -1;
-			const byte *data = pack->LoadEntry(0, i, length);
+				std::string data((const char *)raw_data);
+				delete[] raw_data;
 
-			DEH_Convert(data, length, source);
-			delete[] data;
+				DDF_AddFile(type, data, source);
+				continue;
+			}
 
-			continue;
+			if (ent.HasExtension(".deh") || ent.HasExtension(".bex"))
+			{
+				I_Printf("Converting DEH file%s: %s\n",
+					pack->is_folder ? "" : " in EPK", ent.name.c_str());
+
+				int length = -1;
+				const byte *data = pack->LoadEntry(dir, entry, length);
+
+				DEH_Convert(data, length, source);
+				delete[] data;
+
+				continue;
+			}
 		}
 	}
 }
 
 static void ProcessCoalAPIInPack(pack_file_c *pack)
 {
-	const char *name = "coal_api.ec";
-
-	int idx = pack->dirs[0].Find(name);
-	if (idx < 0)
-		I_Error("coal_api.ec not found in edge-defs.epk; unable to initialize COAL!\n");
-
 	data_file_c *df = pack->parent;
 
 	std::string bare_filename = epi::PATH_GetFilename(df->name).u8string();
 	if (bare_filename.empty())
 		bare_filename = df->name.u8string();
 
-	std::string source = name;
+	std::string source = "coal_api.ec";
 	source += " in ";
 	source += bare_filename;
 
-	int length = -1;
-	const byte *raw_data = pack->LoadEntry(0, idx, length);
-
-	std::string data((const char *)raw_data);
-	delete[] raw_data;
-
-	VM_AddScript(0, data, source);
+	for (int dir=0; dir < pack->dirs.size(); dir++)
+	{
+		for (int entry=0; entry < pack->dirs[dir].entries.size(); entry++)
+		{
+			pack_entry_c& ent = pack->dirs[dir].entries[entry];
+			if (epi::PATH_GetFilename(ent.name) == "coal_api.ec")
+			{
+				int length = -1;
+				const byte *raw_data = pack->LoadEntry(dir, entry, length);
+				std::string data((const char *)raw_data);
+				delete[] raw_data;
+				VM_AddScript(0, data, source);
+				return; // Should only be present once
+			}
+		}
+	}
+	I_Error("coal_api.ec not found in edge-defs; unable to initialize COAL!\n");
 }
 
 static void ProcessCoalHUDInPack(pack_file_c *pack)
 {
-	const char *name = "coal_hud.ec";
-
-	int idx = pack->dirs[0].Find(name);
-	if (idx < 0)
-		return;
-
 	data_file_c *df = pack->parent;
 
 	std::string bare_filename = epi::PATH_GetFilename(df->name).u8string();
 	if (bare_filename.empty())
 		bare_filename = df->name.u8string();
 
-	std::string source = name;
+	std::string source = "coal_hud.ec";
 	source += " in ";
 	source += bare_filename;
 
-	int length = -1;
-	const byte *raw_data = pack->LoadEntry(0, idx, length);
-
-	std::string data((const char *)raw_data);
-	delete[] raw_data;
-
-	VM_AddScript(0, data, source);
+	for (int dir=0; dir < pack->dirs.size(); dir++)
+	{
+		for (int entry=0; entry < pack->dirs[dir].entries.size(); entry++)
+		{
+			pack_entry_c& ent = pack->dirs[dir].entries[entry];
+			if (epi::PATH_GetFilename(ent.name) == "coal_hud.ec")
+			{
+				int length = -1;
+				const byte *raw_data = pack->LoadEntry(dir, entry, length);
+				std::string data((const char *)raw_data);
+				delete[] raw_data;
+				VM_AddScript(0, data, source);
+				return; // Should only be present once
+			}
+		}
+	}
 }
 
 void Pack_ProcessImages(pack_file_c *pack)
@@ -764,24 +774,24 @@ void Pack_ProcessImages(pack_file_c *pack)
 
 			if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" || ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
 			{
-				//std::string texname;
+				std::string texname;
 
-				//if (! TextureNameFromFilename(texname, stem, (dir_name == "skins" || dir_name == "sprites")))
-				//{
-					//I_Warning("Illegal image name in EPK: %s\n", entry.name.c_str());
-					//continue;
-				//}
+				if (! TextureNameFromFilename(texname, stem, (dir_name == "skins" || dir_name == "sprites")))
+				{
+					I_Warning("Illegal image name in EPK: %s\n", entry.name.c_str());
+					continue;
+				}
 
 				I_Debugf("- Adding image file in EPK: %s\n", entry.packpath.c_str());
 
 				if (dir_name == "textures")
-					AddImage_SmartPack(stem.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_textures);
+					AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_textures);
 				else if (dir_name == "graphics")
-					AddImage_SmartPack(stem.c_str(), IMSRC_Graphic, entry.packpath.c_str(), real_graphics);
+					AddImage_SmartPack(texname.c_str(), IMSRC_Graphic, entry.packpath.c_str(), real_graphics);
 				else if (dir_name == "flats")
-					AddImage_SmartPack(stem.c_str(), IMSRC_Flat, entry.packpath.c_str(), real_flats);
+					AddImage_SmartPack(texname.c_str(), IMSRC_Flat, entry.packpath.c_str(), real_flats);
 				else if (dir_name == "sprites" || dir_name == "skins")
-					AddImage_SmartPack(stem.c_str(), IMSRC_Sprite, entry.packpath.c_str(), real_sprites);
+					AddImage_SmartPack(texname.c_str(), IMSRC_Sprite, entry.packpath.c_str(), real_sprites);
 			}
 			else
 			{
@@ -801,20 +811,7 @@ static void ProcessColourmapsInPack(pack_file_c *pack)
 	{
 		pack_entry_c& entry = pack->dirs[d].entries[i];
 
-		// split filename in stem + extension
 		std::string stem = epi::PATH_GetBasename(UTFSTR(entry.name)).u8string();
-		std::string ext  = epi::PATH_GetExtension(UTFSTR(entry.name)).u8string();
-
-		// extension is currently ignored
-		(void)ext;
-
-		/*std::string colname;
-
-		if (! TextureNameFromFilename(colname, stem, false))
-		{
-			I_Warning("Illegal colourmap name in EPK: %s\n", entry.name.c_str());
-			continue;
-		}*/
 
 		int size = pack->EntryLength(d, i);
 
@@ -861,7 +858,7 @@ static void ProcessMapsInPack(pack_file_c *pack)
 	{
 		pack_entry_c& entry = pack->dirs[d].entries[i];
 
-		if (epi::PATH_GetExtension(entry.name) != ".wad") continue;
+		if (!entry.HasExtension(".wad")) continue;
 
 		epi::file_c *pack_wad = Pack_OpenFile(pack, entry.packpath);
 

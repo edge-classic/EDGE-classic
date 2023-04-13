@@ -262,6 +262,10 @@ private:
 	epi::file_c * OpenFile_Zip   (const std::string& name);
 };
 
+int Pack_FindStem(pack_file_c *pack, const std::string& name)
+{
+	return pack->search_stems.count(name);
+}
 
 //----------------------------------------------------------------------------
 
@@ -826,6 +830,10 @@ epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name)
 	if (epi::PATH_IsAbsolute(name))
 		return NULL;
 
+	// quick file stem check to see if it's present at all
+	if (!Pack_FindStem(pack, epi::PATH_GetBasename(name).u8string()))
+		return NULL;
+
 	// Specific path given; attempt to open as-is, otherwise return NULL
 	if (name != epi::PATH_GetFilename(name).u8string())
 		return pack->OpenFileByName(name);
@@ -865,11 +873,6 @@ static void ProcessMapsInPack(pack_file_c *pack)
 			ProcessFile(pack_wad_df);
 		}
 	}
-}
-
-int Pack_FindStem(pack_file_c *pack, const std::string& name)
-{
-	return pack->search_stems.count(name);
 }
 
 void ProcessPackage(data_file_c *df, size_t file_index)

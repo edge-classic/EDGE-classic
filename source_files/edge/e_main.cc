@@ -1652,6 +1652,7 @@ static void E_Startup(void)
 
 	W_InitFlats();
 	W_InitTextures();
+	W_ImageAddPackImages();
 	W_ImageCreateUser();
 	E_PickLoadingScreen();
 
@@ -1669,7 +1670,6 @@ static void E_Startup(void)
 	W_InitSprites();
 	W_ProcessTX_HI();
 	W_InitModels();
-	W_ImageAddPackImages();
 
 	M_Init();
 	R_Init();

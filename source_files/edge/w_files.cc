@@ -307,6 +307,17 @@ epi::file_c * W_OpenPackFile(const std::string& name)
 
 //----------------------------------------------------------------------------
 
+void W_AddPackSoundsAndMusic()
+{
+	for (auto df : data_files)
+	{
+		if (df->pack)
+			Pack_ProcessSoundsAndMusic(df->pack);
+	}
+}
+
+//----------------------------------------------------------------------------
+
 static const char *FileKindString(filekind_e kind)
 {
 	switch (kind)

@@ -801,6 +801,53 @@ void Pack_ProcessImages(pack_file_c *pack)
 	}
 }
 
+void Pack_ProcessSoundsAndMusic(pack_file_c *pack)
+{
+	int d = pack->FindDir("sounds");
+	if (d > 0)
+	{
+		for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+		{
+			pack_entry_c& entry = pack->dirs[d].entries[i];
+			for (size_t j = 0; j < sfxdefs.GetSize(); j++)
+			{
+				sfxdef_c *sfx = sfxdefs[j];
+				// Assume that same stem name is meant to replace an identically named lump entry
+				if (!sfx->lump_name.empty())
+				{
+					if (epi::PATH_GetBasename(entry.name).u8string() == sfx->lump_name)
+					{
+						// Need to check that lump isn't later than this datafile
+						sfx->pack_name = entry.packpath;
+						sfx->lump_name.clear();
+					}
+				}
+			}
+		}
+	}
+	d = pack->FindDir("music");
+	if (d > 0)
+	{
+		for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+		{
+			pack_entry_c& entry = pack->dirs[d].entries[i];
+			for (size_t j = 0; j < playlist.GetSize(); j++)
+			{
+				pl_entry_c *song = playlist[j];
+				if (epi::PATH_GetExtension(song->info).empty())
+				{
+					// Need to check that lump isn't later than this datafile
+					if (epi::PATH_GetBasename(entry.name).u8string() == song->info)
+					{
+						song->info = entry.packpath;
+						song->infotype = MUSINF_PACKAGE;
+					}
+				}
+			}
+		}
+	}
+}
+
 static void ProcessColourmapsInPack(pack_file_c *pack)
 {
 	int d = pack->FindDir("colormaps");

@@ -33,6 +33,8 @@ int Pack_FindStem(pack_file_c *pack, const std::string& name);
 
 void Pack_ProcessImages(pack_file_c *pack);
 
+void Pack_ProcessSoundsAndMusic(pack_file_c *pack);
+
 #endif /* __W_PK3__ */
 
 //--- editor settings ---

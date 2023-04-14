@@ -35,7 +35,7 @@
 #include "colormap.h"
 #include "wadfixes.h"
 
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 #include <algorithm>
 
@@ -164,8 +164,9 @@ public:
 	// things in deeper directories are not stored.
 	std::vector<pack_dir_c> dirs;
 
-	// for fast W_IsLumpInPWAD-type lookups
-	std::unordered_set<std::string> search_stems;
+	// for faster file lookups
+	// stored as filename stems as keys; packpath as values
+	std::unordered_multimap<std::string, std::string> search_files;
 
 	mz_zip_archive *arch;
 
@@ -264,7 +265,7 @@ private:
 
 int Pack_FindStem(pack_file_c *pack, const std::string& name)
 {
-	return pack->search_stems.count(name);
+	return pack->search_files.count(name);
 }
 
 //----------------------------------------------------------------------------
@@ -346,9 +347,9 @@ void ProcessSubDir(pack_file_c *pack, const std::string& fullpath)
 		if (! fsd[i].is_dir)
 		{
 			std::string filename = epi::PATH_GetFilename(fsd[i].name).u8string();
-			pack->dirs[d].AddEntry(filename, fsd[i].name.u8string(), 
-				fsd[i].name.lexically_relative(pack->parent->name).u8string(), 0);
-			pack->search_stems.insert(epi::PATH_GetBasename(fsd[i].name).u8string());
+			std::string packpath = fsd[i].name.lexically_relative(pack->parent->name).u8string();
+			pack->dirs[d].AddEntry(filename, fsd[i].name.u8string(), packpath, 0);
+			pack->search_files.insert({epi::PATH_GetBasename(fsd[i].name).u8string(), packpath});
 		}
 	}
 }
@@ -377,9 +378,9 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 		else
 		{
 			std::string filename = epi::PATH_GetFilename(fsd[i].name).u8string();
-			pack->dirs[0].AddEntry(filename, fsd[i].name.u8string(), 
-				fsd[i].name.lexically_relative(df->name).u8string(), 0);
-			pack->search_stems.insert(epi::PATH_GetBasename(fsd[i].name).u8string());
+			std::string packpath = fsd[i].name.lexically_relative(df->name).u8string();
+			pack->dirs[0].AddEntry(filename, fsd[i].name.u8string(), packpath, 0);
+			pack->search_files.insert({epi::PATH_GetBasename(fsd[i].name).u8string(), packpath});
 		}
 	}
 
@@ -478,7 +479,7 @@ static pack_file_c * ProcessZip(data_file_c *df)
 		}
 
 		pack->dirs[dir_idx].AddEntry(epi::PATH_GetFilename(basename).u8string(), "", packpath, idx);
-		pack->search_stems.insert(epi::PATH_GetBasename(basename).u8string());
+		pack->search_files.insert({epi::PATH_GetBasename(basename).u8string(), packpath});
 	}
 
 	return pack;
@@ -874,21 +875,24 @@ epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name)
 	if (epi::PATH_IsAbsolute(name))
 		return NULL;
 
+	std::string open_stem = epi::PATH_GetBasename(name).u8string();
+
 	// quick file stem check to see if it's present at all
-	if (!Pack_FindStem(pack, epi::PATH_GetBasename(name).u8string()))
+	if (!Pack_FindStem(pack, open_stem))
 		return NULL;
 
 	// Specific path given; attempt to open as-is, otherwise return NULL
 	if (name != epi::PATH_GetFilename(name).u8string())
 		return pack->OpenFileByName(name);
-
-	// Only filename given; return first instance found in pack (if any)
-	for (int dir = 0; dir < pack->dirs.size(); dir++)
+	// Only filename given; return first full match from search list, if present
+	// Search list is unordered, but realistically identical filename+extensions wouldn't be in the same pack
+	else
 	{
-		for (int entry = 0; entry < pack->dirs[dir].entries.size(); entry++)
+		auto results = pack->search_files.equal_range(open_stem);
+		for (auto file = results.first; file != results.second; ++file)
 		{
-			if (pack->dirs[dir].entries[entry].name == name)
-				return pack->OpenEntry((size_t)dir, (size_t)entry);
+			if (name == epi::PATH_GetFilename(file->second))
+				return pack->OpenFileByName(file->second);
 		}
 	}
 

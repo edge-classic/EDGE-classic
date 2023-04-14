@@ -1643,16 +1643,17 @@ static void E_Startup(void)
 
 	RAD_Init();
 	W_ProcessMultipleFiles();
+	DDF_ParseEverything();
+	W_ImageAddPackImages();
+	W_AddPackSoundsAndMusic(); // Must be done after all DDF is parse to check for SFX/Music replacements
 	I_StartupMusic(); // Must be done after all files loaded to locate appropriate GENMIDI lump
 	V_InitPalette();
 
-	DDF_ParseEverything();
 	DDF_CleanUp();
 	W_ReadUMAPINFOLumps();
 
 	W_InitFlats();
 	W_InitTextures();
-	W_ImageAddPackImages();
 	W_ImageCreateUser();
 	E_PickLoadingScreen();
 

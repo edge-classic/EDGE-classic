@@ -90,6 +90,7 @@ int W_CheckDDFLumpName(const char *name);
 void ProcessFile(data_file_c *df);
 
 epi::file_c * W_OpenPackFile(const std::string& name);
+void W_AddPackSoundsAndMusic(void);
 
 #endif // __W_FILES__
 

@@ -961,7 +961,6 @@ void M_DrawLoad(void)
 			HUD_SetAlpha(0.33f);
 			HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
 			HUD_SetAlpha(old_alpha);
-			
 		}
 		HL_WriteText(style, fontType, TempX, 
 				TempY - (LineHeight / 2), ex_slots[i].desc);
@@ -1290,8 +1289,11 @@ void M_DrawSave(void)
 
 		if (fontType == styledef_c::T_SELECTED)
 		{
+			// ttf_ref_yshift is important for TTF fonts.
+			float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift; // * txtscale;
+			
 			HUD_SetAlpha(0.33f);
-			HUD_SolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
+			HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
 			HUD_SetAlpha(old_alpha);
 		}
 

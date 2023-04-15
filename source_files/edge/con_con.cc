@@ -1754,29 +1754,12 @@ void CON_PrintEndoom()
 {
 	int length = 0;
 	byte *data = nullptr;
-	int en_lump = W_CheckNumForName("ENDOOM");
-	if (en_lump == -1)
-		en_lump = W_CheckNumForName("ENDTEXT");
-	if (en_lump == -1)
-		en_lump = W_CheckNumForName("ENDBOOM");
-	if (en_lump == -1)
-	{
-		epi::file_c *endoom_pack = W_OpenPackFile("ENDOOM.bin");
-		if (!endoom_pack)
-			endoom_pack = W_OpenPackFile("ENDTEXT.bin");
-		if (!endoom_pack)
-			endoom_pack = W_OpenPackFile("ENDBOOM.bin");
-		if (endoom_pack)
-		{
-			data = endoom_pack->LoadIntoMemory();
-			length = endoom_pack->GetLength();
-			delete endoom_pack;
-		}
-	}
-	else
-	{
-		data = (byte *)W_LoadLump(en_lump, &length);
-	}
+
+	data = W_OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
+	if (!data)
+		data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
+	if (!data)
+		data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
 	if (!data)
 	{
 		CON_Printf("CON_PrintEndoom: No ENDOOM screen found!\n");
@@ -1785,7 +1768,7 @@ void CON_PrintEndoom()
 	if (length != 4000)
 	{
 		CON_Printf("CON_PrintEndoom: Lump exists, but is malformed! (Length not equal to 4000 bytes)\n");
-		W_DoneWithLump(data);
+		delete[] data;
 		return;
 	}
 	int row_counter = 0;
@@ -1799,39 +1782,19 @@ void CON_PrintEndoom()
 			row_counter = 0;
 		}
 	}
-	if (en_lump == -1)
-		delete[] data;
-	else
-		W_DoneWithLump(data);
+	delete[] data;
 }
 
 void CON_CreateQuitScreen()
 {
 	int length = 0;
 	byte *data = nullptr;
-	int en_lump = W_CheckNumForName("ENDOOM");
-	if (en_lump == -1)
-		en_lump = W_CheckNumForName("ENDTEXT");
-	if (en_lump == -1)
-		en_lump = W_CheckNumForName("ENDBOOM");
-	if (en_lump == -1)
-	{
-		epi::file_c *endoom_pack = W_OpenPackFile("ENDOOM.bin");
-		if (!endoom_pack)
-			endoom_pack = W_OpenPackFile("ENDTEXT.bin");
-		if (!endoom_pack)
-			endoom_pack = W_OpenPackFile("ENDBOOM.bin");
-		if (endoom_pack)
-		{
-			data = endoom_pack->LoadIntoMemory();
-			length = endoom_pack->GetLength();
-			delete endoom_pack;
-		}
-	}
-	else
-	{
-		data = (byte *)W_LoadLump(en_lump, &length);
-	}
+
+	data = W_OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
+	if (!data)
+		data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
+	if (!data)
+		data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
 	if (!data)
 	{
 		CON_Printf("No ENDOOM screen found for this WAD!\n");
@@ -1855,10 +1818,7 @@ void CON_CreateQuitScreen()
 			row_counter = 0;
 		}
 	}
-	if (en_lump == -1)
-		delete[] data;
-	else
-		W_DoneWithLump(data);
+	delete[] data;
 }
 
 

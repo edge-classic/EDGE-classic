@@ -307,6 +307,41 @@ epi::file_c * W_OpenPackFile(const std::string& name)
 
 //----------------------------------------------------------------------------
 
+byte *W_OpenPackOrLumpInMemory(const std::string& name, const std::vector<std::string>& extensions, int *length)
+{
+	int lump_df = -1;
+	int lump_num = W_GetNumForName(name.c_str());
+	if (lump_num > -1)
+		lump_df = W_GetFileForLump(lump_num);
+
+	for (int i = (int)data_files.size() - 1 ; i >= 0 ; i--)
+	{
+		if (i > lump_df)
+		{
+			data_file_c *df = data_files[i];
+			if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
+			{
+				epi::file_c *F = Pack_OpenMatch(df->pack, name, extensions);
+				if (F != NULL)
+				{
+					byte *raw_packfile = F->LoadIntoMemory();
+					*length = F->GetLength();
+					delete F;
+					return raw_packfile;
+				}
+			}
+		}
+	}
+
+	if (lump_num > -1)
+		return W_LoadLump(lump_num, length);
+
+	// not found
+	return nullptr;	
+}
+
+//----------------------------------------------------------------------------
+
 void W_AddPackSoundsAndMusic()
 {
 	for (auto df : data_files)

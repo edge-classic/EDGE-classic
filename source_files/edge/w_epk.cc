@@ -899,6 +899,31 @@ epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name)
 	return NULL;
 }
 
+// Like the above, but is in the form of a stem + acceptable extensions
+epi::file_c * Pack_OpenMatch(pack_file_c *pack, const std::string& name, const std::vector<std::string>& extensions)
+{
+	// when file does not exist, this returns NULL.
+
+	std::filesystem::path open_stem = name;
+
+	// quick file stem check to see if it's present at all
+	if (!Pack_FindStem(pack, name))
+		return NULL;
+
+	auto results = pack->search_files.equal_range(name);
+	for (auto file = results.first; file != results.second; ++file)
+	{
+		for (auto ext : extensions)
+		{
+			open_stem.replace_extension(ext);
+			if (open_stem.u8string() == epi::PATH_GetFilename(file->second))
+				return pack->OpenFileByName(file->second);
+		}
+	}
+
+	return NULL;
+}
+
 static void ProcessMapsInPack(pack_file_c *pack)
 {
 	int d = pack->FindDir("maps");

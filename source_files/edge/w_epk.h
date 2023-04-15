@@ -28,6 +28,8 @@ class pack_file_c;
 
 epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name);
 
+epi::file_c * Pack_OpenMatch(pack_file_c *pack, const std::string& name, const std::vector<std::string>& extensions);
+
 // Equivalent to W_IsLumpInPwad....doesn't care or check filetype itself
 int Pack_FindStem(pack_file_c *pack, const std::string& name);
 

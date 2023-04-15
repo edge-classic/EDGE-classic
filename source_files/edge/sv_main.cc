@@ -510,7 +510,7 @@ void SV_ClearSlot(const char *slot_name)
 
 	std::vector<epi::dir_entry_c> fsd;
 
-	if (! FS_ReadDir(fsd, full_dir, UTFSTR("*.esg")))
+	if (! FS_ReadDir(fsd, full_dir, UTFSTR("*.*")))
 	{
 		I_Debugf("Failed to read directory: %s\n", full_dir.u8string().c_str());
 		return;
@@ -540,7 +540,7 @@ void SV_CopySlot(const char *src_name, const char *dest_name)
 
 	std::vector<epi::dir_entry_c> fsd;
 
-	if (! FS_ReadDir(fsd, src_dir, UTFSTR("*.esg")))
+	if (! FS_ReadDir(fsd, src_dir, UTFSTR("*.*")))
 	{
 		I_Error("SV_CopySlot: failed to read dir: %s\n", src_dir.u8string().c_str());
 		return;

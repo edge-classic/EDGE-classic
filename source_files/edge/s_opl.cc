@@ -119,21 +119,21 @@ bool S_StartupOPL(void)
 	{
 		I_Warning("S_StartupOPL: Error loading instruments!\n");
 		if (s_genmidi.s == "GENMIDI")
-			W_DoneWithLump(data);
+			delete[] data;
 		else
 		{
 			delete F;
-			delete data;
+			delete[] data;
 		}
 		return false;
 	}
 
 	if (s_genmidi.s == "GENMIDI")
-		W_DoneWithLump(data);
+		delete[] data;
 	else
 	{
 		delete F;
-		delete data;
+		delete[] data;
 	}
 
 	// OK

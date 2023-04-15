@@ -217,7 +217,7 @@ static epi::image_data_c *ReadFlatAsEpiBlock(image_c *rim)
 			dest_pix[0] = src_pix;
 	}
 
-	W_DoneWithLump(src);
+	delete[] src;
 
 	// CW: Textures MUST tile! If actual size not total size, manually tile
 	// [ AJA: this does not make them tile, just fills in the black gaps ]
@@ -296,7 +296,7 @@ static epi::image_data_c *ReadTextureAsEpiBlock(image_c *rim)
 			DrawColumnIntoEpiBlock(rim, img, patchcol, x, y1);
 		}
 
-		W_DoneWithLump(realpatch);
+		delete[] realpatch;
 	}
 
 	// CW: Textures MUST tile! If actual size not total size, manually tile
@@ -404,10 +404,7 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 		DrawColumnIntoEpiBlock(rim, img, patchcol, x, 0);
 	}
 
-	if (packfile_name[0] != NULL)
-		delete[] realpatch;
-	else
-		W_DoneWithLump(realpatch);
+	delete[] realpatch;
 
 	return img;
 }

@@ -1803,7 +1803,7 @@ void CON_CreateQuitScreen()
 	if (length != 4000)
 	{
 		CON_Printf("CON_CreateQuitScreen: ENDOOM exists, but is malformed! (Length not equal to 4000 bytes)\n");
-		W_DoneWithLump(data);
+		delete[] data;
 		return;
 	}
 	int row_counter = 0;

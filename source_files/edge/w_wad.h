@@ -56,7 +56,6 @@ int W_LumpLength(int lump);
 
 byte *W_LoadLump(int lump, int *length = NULL);
 byte *W_LoadLump(const char *name, int *length = NULL);
-void W_DoneWithLump(const void *ptr);
 
 std::string W_LoadString(int lump);
 std::string W_LoadString(const char *name);

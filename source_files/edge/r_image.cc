@@ -1286,7 +1286,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 	delete tmp_img;
 
 	if (what_pal_cached)
-		W_DoneWithLump(what_palette);
+		delete[] what_palette;
 	
 	return tex_id;
 }

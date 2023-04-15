@@ -248,7 +248,7 @@ static void LoadVertexes(int lump)
 	}
 
 	// Free buffer memory.
-	W_DoneWithLump(data);
+	delete[] data;
 }
 
 static void SegCommonStuff(seg_t *seg, int linedef_in)
@@ -414,7 +414,7 @@ static void LoadSectors(int lump)
 		GroupSectorTags(ss, sectors, i);
 	}
 
-	W_DoneWithLump(data);
+	delete[] data;
 }
 
 static void SetupRootNode(void)
@@ -686,7 +686,7 @@ static void LoadThings(int lump)
 		SpawnMapThing(objtype, x, y, z, sec, angle, options, 0);
 	}
 
-	W_DoneWithLump(data);
+	delete[] data;
 }
 
 
@@ -749,7 +749,7 @@ static void LoadHexenThings(int lump)
 		SpawnMapThing(objtype, x, y, z, sec, angle, options, tag);
 	}
 
-	W_DoneWithLump(data);
+	delete[] data;
 }
 
 
@@ -898,7 +898,7 @@ static void LoadLineDefs(int lump)
 		}
 	}
 
-	W_DoneWithLump(data);
+	delete[] data;
 }
 
 static void LoadHexenLineDefs(int lump)
@@ -944,7 +944,7 @@ static void LoadHexenLineDefs(int lump)
 		ComputeLinedefData(ld, side0, side1);
 	}
 
-	W_DoneWithLump(data);
+	delete[] data;
 }
 
 static sector_t *DetermineSubsectorSector(subsector_t *ss, int pass)
@@ -1066,7 +1066,7 @@ static void LoadXGL3Nodes(int lumpnum)
 
 	if (xglen < 12)
 	{
-		W_DoneWithLump(xgldata);
+		delete[] xgldata;
 		I_Error("LoadXGL3Nodes: Lump too short\n");
 	}
 
@@ -1108,7 +1108,7 @@ static void LoadXGL3Nodes(int lumpnum)
 	{
 		static char xgltemp[6];
 		Z_StrNCpy(xgltemp, (char *)xgldata, 4);
-		W_DoneWithLump(xgldata);
+		delete[] xgldata;
 		I_Error("LoadXGL3Nodes: Unrecognized node type %s\n", xgltemp);
 	}
 
@@ -1122,7 +1122,7 @@ static void LoadXGL3Nodes(int lumpnum)
 	td += 4;
 	if (oVerts > numvertexes)
 	{
-		W_DoneWithLump(xgldata);
+		delete[] xgldata;
 		I_Error("LoadXGL3Nodes: Vertex/Node mismatch\n");
 	}
 
@@ -1150,7 +1150,7 @@ static void LoadXGL3Nodes(int lumpnum)
 	td += 4;
 	if (numsubsectors <= 0)
 	{
-		W_DoneWithLump(xgldata);
+		delete[] xgldata;
 		I_Error("LoadXGL3Nodes: No subsectors\n");
 	}
 	I_Debugf("LoadXGL3Nodes: Num SSECTORS = %d\n", numsubsectors);
@@ -1173,7 +1173,7 @@ static void LoadXGL3Nodes(int lumpnum)
 	td += 4;
 	if (numsegs != xglSegs)
 	{
-		W_DoneWithLump(xgldata);
+		delete[] xgldata;
 		I_Error("LoadXGL3Nodes: Incorrect number of segs in nodes\n");
 	}
 	I_Debugf("LoadXGL3Nodes: Num SEGS = %d\n", numsegs);
@@ -1346,7 +1346,7 @@ static void LoadXGL3Nodes(int lumpnum)
 	SetupRootNode();
 
 	I_Debugf("LoadXGL3Nodes: Finished\n");
-	W_DoneWithLump(xgldata);
+	delete[] xgldata;
 	zgldata.clear();
 }
 
@@ -2277,7 +2277,7 @@ static void LoadSideDefs(int lump)
 
 	SYS_ASSERT(sd == sides + numsides);
 
-	W_DoneWithLump(data);
+	delete[] data;
 
 }
 
@@ -3140,7 +3140,7 @@ void P_SetupLevel(void)
 		memcpy(udmf_lump.data(), raw_udmf, raw_length);
 		if (udmf_lump.empty())
 			I_Error("Internal error: can't load UDMF lump.\n");
-		W_DoneWithLump(raw_udmf);
+		delete[] raw_udmf;
 	}
 	else
 	{

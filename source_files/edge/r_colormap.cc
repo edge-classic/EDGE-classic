@@ -95,7 +95,7 @@ void V_InitPalette(void)
 		}
 	}
 
-	W_DoneWithLump(pal);
+	delete[] pal;
 	loaded_playpal = true;
 
 	// lookup useful colours
@@ -264,10 +264,7 @@ static void LoadColourmap(const colourmap_c * colm)
 
 	memcpy(cache->data, data + (colm->start * 256), cache->size);
 
-	if (colm->pack_name != "")
-		delete[] data;
-	else
-		W_DoneWithLump(data);
+	delete[] data;
 }
 
 

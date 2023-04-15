@@ -54,10 +54,6 @@ int W_GetNumForName(const char *name);
 
 int W_LumpLength(int lump);
 
-// TODO: one day tidy this up
-#define W_CacheLumpNum(x)   W_LoadLump((x), NULL)
-#define W_CacheLumpName(x)  W_LoadLump((x), NULL)
-
 byte *W_LoadLump(int lump, int *length = NULL);
 byte *W_LoadLump(const char *name, int *length = NULL);
 void W_DoneWithLump(const void *ptr);

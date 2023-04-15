@@ -1213,7 +1213,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 	}
 	else if (rim->source_palette >= 0)
 	{
-		what_palette = (const byte *) W_CacheLumpNum(rim->source_palette);
+		what_palette = (const byte *) W_LoadLump(rim->source_palette);
 		what_pal_cached = true;
 	}
 

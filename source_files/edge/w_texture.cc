@@ -74,7 +74,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 	const int *directory;
 
 	// Load the patch names from pnames.lmp.
-	const char *names = (const char*)W_CacheLumpNum(WT->pnames);
+	const char *names = (const char*)W_LoadLump(WT->pnames);
 	int nummappatches = EPI_LE_S32(*((const int *)names));  // Eww...
 
 	const char *name_p = names + 4;
@@ -99,14 +99,14 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 	//   TEXTURE1 for shareware
 	//   TEXTURE2 for commercial.
 	//
-	maptex = maptex1 = (const int*)W_CacheLumpNum(WT->texture1);
+	maptex = maptex1 = (const int*)W_LoadLump(WT->texture1);
 	numtextures1 = EPI_LE_S32(*maptex);
 	maxoff = W_LumpLength(WT->texture1);
 	directory = maptex + 1;
 
 	if (WT->texture2 != -1)
 	{
-		maptex2 = (const int*)W_CacheLumpNum(WT->texture2);
+		maptex2 = (const int*)W_LoadLump(WT->texture2);
 		numtextures2 = EPI_LE_S32(*maptex2);
 		maxoff2 = W_LumpLength(WT->texture2);
 	}

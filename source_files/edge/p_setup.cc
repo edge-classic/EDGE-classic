@@ -234,7 +234,7 @@ static void LoadVertexes(int lump)
 	vertexes = new vec2_t[numvertexes];
 
 	// Load data into cache.
-	data = W_CacheLumpNum(lump);
+	data = W_LoadLump(lump);
 
 	ml = (const raw_vertex_t *) data;
 	li = vertexes;
@@ -343,7 +343,7 @@ static void LoadSectors(int lump)
 	sectors = new sector_t[numsectors];
 	Z_Clear(sectors, sector_t, numsectors);
 
-	data = W_CacheLumpNum(lump);
+	data = W_LoadLump(lump);
 	mapsector_CRC.AddBlock((const byte*)data, W_LumpLength(lump));
 
 	CheckDoom2Map05Bug((byte *)data, W_LumpLength(lump)); //Lobo: 2023
@@ -610,7 +610,7 @@ static void LoadThings(int lump)
 		I_Error("Bad WAD: level %s contains 0 things.\n", 
 				currmap->lump.c_str());
 
-	data = W_CacheLumpNum(lump);
+	data = W_LoadLump(lump);
 	mapthing_CRC.AddBlock((const byte*)data, W_LumpLength(lump));
 
 	CheckEvilutionBug((byte *)data, W_LumpLength(lump));
@@ -714,7 +714,7 @@ static void LoadHexenThings(int lump)
 		I_Error("Bad WAD: level %s contains 0 things.\n", 
 				currmap->lump.c_str());
 
-	data = W_CacheLumpNum(lump);
+	data = W_LoadLump(lump);
 	mapthing_CRC.AddBlock((const byte*)data, W_LumpLength(lump));
 
 	mt = (const raw_hexen_thing_t *) data;
@@ -844,7 +844,7 @@ static void LoadLineDefs(int lump)
 
 	temp_line_sides = new int[numlines * 2];
 
-	const void *data = W_CacheLumpNum(lump);
+	const void *data = W_LoadLump(lump);
 	mapline_CRC.AddBlock((const byte*)data, W_LumpLength(lump));
 
 	line_t *ld = lines;
@@ -921,7 +921,7 @@ static void LoadHexenLineDefs(int lump)
 
 	temp_line_sides = new int[numlines * 2];
 
-	const void *data = W_CacheLumpNum(lump);
+	const void *data = W_LoadLump(lump);
 	mapline_CRC.AddBlock((const byte*)data, W_LumpLength(lump));
 
 	line_t *ld = lines;
@@ -1060,7 +1060,7 @@ static void LoadXGL3Nodes(int lumpnum)
 	I_Debugf("LoadXGL3Nodes:\n");
 
 	xglen = W_LumpLength(lumpnum);
-	xgldata = (byte *)W_CacheLumpNum(lumpnum);
+	xgldata = (byte *)W_LoadLump(lumpnum);
 	if (!xgldata)
 		I_Error("LoadXGL3Nodes: Couldn't load lump\n");
 
@@ -2228,7 +2228,7 @@ static void LoadSideDefs(int lump)
 
 	Z_Clear(sides, side_t, numsides);
 
-	data = W_CacheLumpNum(lump);
+	data = W_LoadLump(lump);
 	msd = (const raw_sidedef_t *) data;
 
 	sd = sides;

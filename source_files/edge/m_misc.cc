@@ -529,6 +529,45 @@ void M_MakeSaveScreenShot(void)
 	// ...
 	// delete [] buffer;
 #endif
+
+const char *extension = "jpg";
+
+std::filesystem::path filename;
+std::string temp(epi::STR_Format("%s/%s.%s", "current", "head", extension));
+filename= epi::PATH_Join(save_dir, UTFSTR(temp));
+
+epi::FS_Delete(filename);
+
+epi::image_data_c *img = new epi::image_data_c(SCREENWIDTH, SCREENHEIGHT, 3);
+
+/*
+	epi::file_c* file = FS_Open(filename, epi::file_c::ACCESS_READ);
+	if (!file)
+	{
+	I_Warning("Couldn't open image %s for reading.\n", filename.u8string().c_str());
+	return;
+	}
+	else
+	{
+	epi::image_data_c *tempimg = epi::Image_Load(file);
+	}
+*/
+RGL_ReadScreen(0, 0, SCREENWIDTH, SCREENHEIGHT, img->PixelAt(0,0));
+
+// ReadScreen produces a bottom-up image, need to invert it
+img->Invert();
+
+bool result;
+result = epi::JPEG_Save(filename, img);
+
+if (result)
+	I_Printf("Captured to file: %s\n", filename.u8string().c_str());
+else
+	I_Printf("Error saving file: %s\n", filename.u8string().c_str());
+
+delete img;
+
+
 }
 
 //

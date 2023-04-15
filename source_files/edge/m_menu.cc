@@ -635,7 +635,57 @@ void M_ReadSaveStrings(void)
 	}
 }
 
-static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHeight)
+int CenterMenuImage(const image_c *img)
+{
+	float CenterX = 160;
+	CenterX -= IM_WIDTH(img) / 2;
+
+	return CenterX;
+}
+
+//
+// Center an image applying any SCALE and X_OFFSET from
+// styles.ddf
+int CenterMenuImage2(style_c *style, int text_type, const image_c *img)
+{
+	float CenterX = 160;
+	float txtscale = 1.0;
+	float gfxWidth = 0;
+
+	if(style->def->text[text_type].scale)
+	{
+		txtscale = style->def->text[text_type].scale;
+	}
+
+	gfxWidth = IM_WIDTH(img) * txtscale;
+	CenterX -= gfxWidth / 2;
+	CenterX += style->def->text[text_type].x_offset;
+
+	return CenterX;
+}
+
+int CenterMenuText(style_c *style, int text_type, const char *str)
+{
+	float CenterX = 160;
+	float txtscale = 1.0;
+	float txtWidth = 0;
+
+	if(style->def->text[text_type].scale)
+	{
+		txtscale = style->def->text[text_type].scale;
+	}
+	txtWidth = style->fonts[text_type]->StringWidth(str) * txtscale;
+	CenterX -= txtWidth / 2;
+	CenterX += style->def->text[text_type].x_offset;
+
+	// Should we also add "style->def->x_offset" here too?
+	// CenterX += style->def->x_offset;
+
+	return CenterX;
+}
+
+//the old one
+static void M_DrawSaveLoadCommon_old(int row, int row2, style_c *style, float LineHeight)
 {
 	int y = LoadDef.y + LineHeight * row;
 
@@ -716,60 +766,213 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 		y + style->def->text[styledef_c::T_HELP].y_offset, mbuffer);
 }
 
-int CenterMenuImage(const image_c *img)
-{
-	float CenterX = 160;
-	CenterX -= IM_WIDTH(img) / 2;
 
-	return CenterX;
+static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHeight)
+{
+	int y = 0; //LoadDef.y + LineHeight * row;
+	int x = 0;
+	float txtscale = 1.0;
+
+	//TITLE.FONT="EDGE3"; // next page text
+	//TEXT.FONT="EDGE3"; // save name & slot
+	//ALT.FONT="EDGE3";  // when we edit the save name
+	//HELP.FONT="EDGE3"; // save info text
+
+	y = style->def->text[styledef_c::T_TITLE].y_offset;
+	y += style->def->entry_spacing;
+	x = style->def->text[styledef_c::T_TITLE].x_offset;
+	slot_extra_info_t *info;
+
+	char mbuffer[200];
+
+	sprintf(mbuffer, "PAGE %d", save_page + 1);
+
+	
+	if (style->def->text[styledef_c::T_TITLE].scale)
+		txtscale=style->def->text[styledef_c::T_TITLE].scale;
+
+	if (save_page > 0)
+		HL_WriteText(style, styledef_c::T_TITLE, x - 4, y, "< PREV");
+
+	x += style->fonts[styledef_c::T_TITLE]->StringWidth("< PREV") * txtscale;
+	x += 30;
+
+	HL_WriteText(style, styledef_c::T_TITLE, x, y, mbuffer);
+
+	x += style->fonts[styledef_c::T_TITLE]->StringWidth(mbuffer) * txtscale;
+	x += 30;
+
+	if (save_page < SAVE_PAGES-1)
+		HL_WriteText(style, styledef_c::T_TITLE, x, y, "NEXT >");
+ 
+	info = ex_slots + itemOn;
+	SYS_ASSERT(0 <= itemOn && itemOn < SAVE_SLOTS);
+
+	// show some info about the savegame
+
+	//y = LoadDef.y + LineHeight * (row2 + 1);
+	y = style->def->text[styledef_c::T_HELP].y_offset;
+	y += style->def->entry_spacing;
+	x = style->def->text[styledef_c::T_HELP].x_offset;
+
+	if (style->def->text[styledef_c::T_HELP].scale)
+		txtscale=style->def->text[styledef_c::T_HELP].scale;
+
+	LineHeight = style->fonts[styledef_c::T_HELP]->NominalHeight() * txtscale;
+
+	const colourmap_c *colmap = style->def->text[styledef_c::T_HELP].colmap;
+	rgbcol_t col = V_GetFontColor(colmap);
+	HUD_ThinBox(x - 5, y - 5, x + 95, y + 50, col);
+
+	if (saveStringEnter || info->empty || info->corrupt)
+		return;
+
+	mbuffer[0] = 0;
+	strcat(mbuffer, info->timestr);
+	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
+
+	y += LineHeight + (LineHeight/2);
+	y += style->def->entry_spacing;
+	mbuffer[0] = 0;
+	strcat(mbuffer, info->mapname);
+	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
+
+	y += LineHeight + (LineHeight/2);
+	y += style->def->entry_spacing;
+	mbuffer[0] = 0;
+	strcat(mbuffer, info->gamename);
+	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
+
+	y += LineHeight + (LineHeight/2);
+	y += style->def->entry_spacing;
+	mbuffer[0] = 0;
+	switch (info->skill)
+	{
+		case 0: strcat(mbuffer, language["MenuDifficulty1"]); break;
+		case 1: strcat(mbuffer, language["MenuDifficulty2"]); break;
+		case 2: strcat(mbuffer, language["MenuDifficulty3"]); break;
+		case 3: strcat(mbuffer, language["MenuDifficulty4"]); break;
+		default: strcat(mbuffer, language["MenuDifficulty5"]); break;
+	}
+	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
+
+/*
+	y += LineHeight + (LineHeight/2);
+	mbuffer[0] = 0;
+	// FIXME: use Language entries
+	switch (info->netgame)
+	{
+		case 0: strcat(mbuffer, "SP MODE"); break;
+		case 1: strcat(mbuffer, "COOP MODE"); break;
+		default: strcat(mbuffer, "DM MODE"); break;
+	}
+	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
+*/
+	
 }
 
-//
-// Center an image applying any SCALE and X_OFFSET from
-// styles.ddf
-int CenterMenuImage2(style_c *style, int text_type, const image_c *img)
+//the new one
+void M_DrawLoad(void)
 {
-	float CenterX = 160;
+	int i;
+	int fontType;
 	float txtscale = 1.0;
-	float gfxWidth = 0;
+	float LineHeight;
+	int TempX = 0;
+	int TempY = 0;
 
-	if(style->def->text[text_type].scale)
+	float old_alpha = HUD_GetAlpha();
+
+	style_c *style = LoadDef.style_var[0];
+
+	SYS_ASSERT(style);
+	style->DrawBackground();
+
+	if (! style->fonts[styledef_c::T_HEADER])
+		fontType=styledef_c::T_TEXT;
+	else
+		fontType=styledef_c::T_HEADER;
+
+	if (style->def->text[fontType].scale)
+		txtscale=style->def->text[fontType].scale;
+
+	HUD_SetAlpha(style->def->text[fontType].translucency);
+
+	//1. Draw the header i.e. "Load Game"
+	TempX = CenterMenuText(style, fontType, language["MainLoadGame"]);
+	TempY = 5;
+	TempY += style->def->text[fontType].y_offset;
+
+	HL_WriteText(style, fontType, TempX, TempY, language["MainLoadGame"]);
+
+/*
+	const colourmap_c *colmap = style->def->text[fontType].colmap;
+	if (custom_MenuMain == false) //text-based
 	{
-		txtscale = style->def->text[text_type].scale;
+		TempX = CenterMenuText(style, fontType, language["MainLoadGame"]);
+		TempY = 5;
+		TempY += style->def->text[fontType].y_offset;
+
+		HL_WriteText(style, fontType, TempX, TempY, language["MainLoadGame"]);
+	}
+	else //graphic based
+	{
+		TempX = CenterMenuImage2(style, fontType, menu_loadg);
+		TempY = 5;
+		TempY += style->def->text[fontType].y_offset;
+
+		HUD_StretchImage(TempX, TempY,
+				IM_WIDTH(menu_loadg) * txtscale, IM_HEIGHT(menu_loadg) * txtscale,menu_loadg,0.0,0.0,colmap);
+	}
+*/
+	HUD_SetAlpha(old_alpha);
+
+	TempX = 0;
+	TempY = 0; 
+
+	fontType=styledef_c::T_TEXT;
+	if (style->def->text[fontType].scale)
+		txtscale=style->def->text[fontType].scale;
+
+	TempX += style->def->text[styledef_c::T_TEXT].x_offset;
+	TempY += style->def->text[styledef_c::T_TEXT].y_offset;
+	TempY += style->def->entry_spacing;
+
+	rgbcol_t col = V_GetFontColor(style->def->text[styledef_c::T_TEXT].colmap);
+	HUD_ThinBox(TempX - 5,TempY - 5, TempX + 175,  TempY + 115, col);
+
+	//2. draw the save games
+	for (i = 0; i < SAVE_SLOTS; i++)
+	{
+		fontType = styledef_c::T_TEXT;
+		if (i == itemOn)
+		{
+			if (style->def->text[styledef_c::T_SELECTED].font)
+				fontType = styledef_c::T_SELECTED;
+		}
+
+		LineHeight = style->fonts[fontType]->NominalHeight(); // * txtscale
+
+		if (fontType == styledef_c::T_SELECTED)
+		{
+			HUD_SetAlpha(0.33f);
+			HUD_SolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
+			HUD_SetAlpha(old_alpha);
+		}
+		HL_WriteText(style, fontType, TempX, 
+				TempY - (LineHeight / 2), ex_slots[i].desc);
+		TempY += LineHeight + (LineHeight/2);
+		TempY += style->def->entry_spacing;
 	}
 
-	gfxWidth = IM_WIDTH(img) * txtscale;
-	CenterX -= gfxWidth / 2;
-	CenterX += style->def->text[text_type].x_offset;
-
-	return CenterX;
-}
-
-int CenterMenuText(style_c *style, int text_type, const char *str)
-{
-	float CenterX = 160;
-	float txtscale = 1.0;
-	float txtWidth = 0;
-
-	if(style->def->text[text_type].scale)
-	{
-		txtscale = style->def->text[text_type].scale;
-	}
-	txtWidth = style->fonts[text_type]->StringWidth(str) * txtscale;
-	CenterX -= txtWidth / 2;
-	CenterX += style->def->text[text_type].x_offset;
-
-	// Should we also add "style->def->x_offset" here too?
-	// CenterX += style->def->x_offset;
-
-	return CenterX;
+	M_DrawSaveLoadCommon(i, i+1, load_style, LineHeight);
 }
 
 
 //
 // 1998/07/10 KM Savegame slots increased
 //
-void M_DrawLoad(void)
+void M_DrawLoad_old(void)
 {
 	const image_c *L = W_ImageLookup("M_LSLEFT");
 	const image_c *C = W_ImageLookup("M_LSCNTR");
@@ -1020,10 +1223,118 @@ void M_LoadGame(int choice)
 	M_ReadSaveStrings();
 }
 
+
+
+
+//the new one
+void M_DrawSave(void)
+{
+	int i;
+	int fontType;
+	float txtscale = 1.0;
+	float LineHeight;
+	int TempX = 0;
+	int TempY = 0;
+
+	float old_alpha = HUD_GetAlpha();
+
+	style_c *style = SaveDef.style_var[0];
+
+	SYS_ASSERT(style);
+	style->DrawBackground();
+
+	if (! style->fonts[styledef_c::T_HEADER])
+		fontType=styledef_c::T_TEXT;
+	else
+		fontType=styledef_c::T_HEADER;
+
+	if (style->def->text[fontType].scale)
+		txtscale=style->def->text[fontType].scale;
+
+	HUD_SetAlpha(style->def->text[fontType].translucency);
+
+	//1. Draw the header i.e. "Load Game"
+	TempX = CenterMenuText(style, fontType, language["MainSaveGame"]);
+	TempY = 5;
+	TempY += style->def->text[fontType].y_offset;
+
+	HL_WriteText(style, fontType, TempX, TempY, language["MainSaveGame"]);
+
+	HUD_SetAlpha(old_alpha);
+
+	TempX = 0;
+	TempY = 0; 
+	TempX += style->def->text[styledef_c::T_TEXT].x_offset;
+	TempY += style->def->text[styledef_c::T_TEXT].y_offset;
+	TempY += style->def->entry_spacing;
+	fontType=styledef_c::T_TEXT;
+	
+	rgbcol_t col = V_GetFontColor(style->def->text[styledef_c::T_TEXT].colmap);
+	HUD_ThinBox(TempX - 5,TempY - 5, TempX + 175,  TempY + 115, col);
+
+	//2. draw the save games
+	for (i = 0; i < SAVE_SLOTS; i++)
+	{
+		fontType = styledef_c::T_TEXT;
+		if (i == itemOn)
+		{
+			if (style->def->text[styledef_c::T_SELECTED].font)
+				fontType = styledef_c::T_SELECTED;
+		}
+		
+		LineHeight = style->fonts[fontType]->NominalHeight(); // * txtscale
+
+		if (fontType == styledef_c::T_SELECTED)
+		{
+			HUD_SetAlpha(0.33f);
+			HUD_SolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
+			HUD_SetAlpha(old_alpha);
+		}
+
+		int len = 0;
+		bool entering_save = false;
+		if (saveStringEnter && i == save_slot)
+		{
+			entering_save = true;
+			if (! style->fonts[styledef_c::T_ALT])
+				fontType=styledef_c::T_TEXT;
+			else
+				fontType=styledef_c::T_ALT;
+
+			if (style->def->text[fontType].scale)
+				txtscale=style->def->text[fontType].scale;
+			len = style->fonts[fontType]->StringWidth(ex_slots[save_slot].desc) * txtscale;
+		}
+
+		HL_WriteText(style, fontType, TempX, 
+				TempY - (LineHeight / 2), ex_slots[i].desc);
+		
+		if (entering_save)
+		{
+			HL_WriteText(style, fontType, TempX + len, 
+				TempY - (LineHeight / 2), "_");
+		}
+
+		TempY += LineHeight + (LineHeight/2);
+		TempY += style->def->entry_spacing;
+	}
+
+/*
+	col = V_GetFontColor(style->def->text[styledef_c::T_HELP].colmap);
+	int ScreenshotX =style->def->text[styledef_c::T_HELP].x_offset - 5;
+	int ScreenshotY =style->def->text[styledef_c::T_HELP].y_offset;
+	ScreenshotY += 55;
+	HUD_ThinBox(ScreenshotX, ScreenshotY, ScreenshotX + 100, ScreenshotY + 60, col);
+	HUD_RenderWorld(ScreenshotX + 5, ScreenshotY + 5, 
+		90,  50, players[0]->mo, 0);
+*/
+	M_DrawSaveLoadCommon(i, i+1, save_style, LineHeight);
+}
+
 //
 // 98-7-10 KM Savegame slots increased
 //
-void M_DrawSave(void)
+void M_DrawSave_old(void)
 {
 	const image_c *L = W_ImageLookup("M_LSLEFT");
 	const image_c *C = W_ImageLookup("M_LSCNTR");
@@ -3069,8 +3380,9 @@ void M_DrawCursor(style_c *style, bool graphical_item)
 void M_DrawItems(style_c *style, bool graphical_item)
 {
 	short x, y;
-	unsigned int i;
-	unsigned int max;
+	int i;
+	int j;
+	int max;
 
 	float txtscale = 1.0;
 	short TempX = 0;
@@ -3088,6 +3400,7 @@ void M_DrawItems(style_c *style, bool graphical_item)
 	
 	if(style->def->text[styledef_c::T_TEXT].scale)
 		txtscale=style->def->text[styledef_c::T_TEXT].scale;
+
 
 	//---------------------------------------------------
 	// 1. For each menu item calculate x, width, height
@@ -3166,40 +3479,57 @@ void M_DrawItems(style_c *style, bool graphical_item)
 		}
 	}
 
+	int textstyle = styledef_c::T_TEXT;
+	
 	//---------------------------------------------------
 	// 2. Draw each menu item
 	//---------------------------------------------------
-	for (i=0; i < max; i++)
+	for (j = 0; j < max; j++)
 	{
-		int textstyle = i == itemOn ? (style->def->text[styledef_c::T_SELECTED].font ? styledef_c::T_SELECTED : styledef_c::T_TEXT) : 
-				styledef_c::T_TEXT;
+		//int textstyle = i == itemOn ? (style->def->text[styledef_c::T_SELECTED].font ? styledef_c::T_SELECTED : styledef_c::T_TEXT) : 
+		//		styledef_c::T_TEXT;
 
+		textstyle = styledef_c::T_TEXT;
+		if (j == itemOn)
+		{
+			if (style->def->text[styledef_c::T_SELECTED].font)
+				textstyle = styledef_c::T_SELECTED;
+		}
+		
 		HUD_SetAlpha(style->def->text[textstyle].translucency);
 
 		if (style->def->entry_alignment == style->def->C_RIGHT)
-			TempX = currentMenu->menuitems[i].x + WidestLine - currentMenu->menuitems[i].width;
+			TempX = currentMenu->menuitems[j].x + WidestLine - currentMenu->menuitems[j].width;
 		else
-			TempX = currentMenu->menuitems[i].x;
+			TempX = currentMenu->menuitems[j].x;
 
 		if (graphical_item == false) //We're going text-based menu items
 		{
 			HL_WriteText(style, textstyle, TempX, 
-				currentMenu->menuitems[i].y, currentMenu->menuitems[i].name);
+				currentMenu->menuitems[j].y, currentMenu->menuitems[j].name);
 		}
 		else //We're going graphical menu items
 		{
-			const colourmap_c *colmap = i == itemOn ? style->def->text[styledef_c::T_SELECTED].colmap : 
-					style->def->text[styledef_c::T_TEXT].colmap;
+			//const colourmap_c *colmap = i == itemOn ? style->def->text[styledef_c::T_SELECTED].colmap : 
+			//		style->def->text[styledef_c::T_TEXT].colmap;
 
-			if (!colmap) //no SELECTED colmap? fallback to the TEXT one
-				colmap = style->def->text[styledef_c::T_TEXT].colmap;
+			textstyle = styledef_c::T_TEXT;
+			if (j == itemOn)
+			{
+				if (style->def->text[styledef_c::T_SELECTED].colmap)
+					textstyle = styledef_c::T_SELECTED;
+			}
+
+			const colourmap_c *colmap = style->def->text[textstyle].colmap;
+			//colourmap_c *colmap = NULL;
 
 			//HUD_StretchImage() will apply image.offset_x again so subtract it first
-			TempX -= (currentMenu->menuitems[i].image->offset_x * txtscale);
-			HUD_StretchImage(TempX, currentMenu->menuitems[i].y,
-				currentMenu->menuitems[i].width,currentMenu->menuitems[i].height,currentMenu->menuitems[i].image,0.0,0.0,colmap);
+			TempX -= (currentMenu->menuitems[j].image->offset_x * txtscale);
+			HUD_StretchImage(TempX, currentMenu->menuitems[j].y,
+				currentMenu->menuitems[j].width,currentMenu->menuitems[j].height,currentMenu->menuitems[j].image, 0.0, 0.0, colmap);
 		}
 		HUD_SetAlpha(old_alpha);
+		
 	}
 	HUD_SetAlpha(old_alpha);
 	
@@ -3336,10 +3666,10 @@ void M_Init(void)
 	def = styledefs.Lookup("CHOOSE SKILL");
 	skill_style = def ? hu_styles.Lookup(def) : menu_def_style;
 
-	def = styledefs.Lookup("LOAD MENU");
+	def = styledefs.Lookup("LOAD SAVE MENU");
 	load_style = def ? hu_styles.Lookup(def) : menu_def_style;
 
-	def = styledefs.Lookup("SAVE MENU");
+	def = styledefs.Lookup("LOAD SAVE MENU");
 	save_style = def ? hu_styles.Lookup(def) : menu_def_style;
 
 	def = styledefs.Lookup("EXIT_SCREEN");

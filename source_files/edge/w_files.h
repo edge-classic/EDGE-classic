@@ -92,6 +92,8 @@ void ProcessFile(data_file_c *df);
 epi::file_c * W_OpenPackFile(const std::string& name);
 void W_AddPackSoundsAndMusic(void);
 
+byte *W_OpenPackOrLumpInMemory(const std::string& name, const std::vector<std::string>& extensions);
+
 #endif // __W_FILES__
 
 //--- editor settings ---

@@ -200,7 +200,7 @@ static epi::image_data_c *ReadFlatAsEpiBlock(image_c *rim)
 	img->Clear(pal_black);
 
 	// read in pixels
-	const byte *src = (const byte*)W_CacheLumpNum(rim->source.flat.lump);
+	const byte *src = (const byte*)W_LoadLump(rim->source.flat.lump);
 
 	for (int y=0; y < h; y++)
 	for (int x=0; x < w; x++)
@@ -271,7 +271,7 @@ static epi::image_data_c *ReadTextureAsEpiBlock(image_c *rim)
 	// Composite the columns into the block.
 	for (i=0, patch=tdef->patches; i < tdef->patchcount; i++, patch++)
 	{
-		const patch_t *realpatch = (const patch_t*)W_CacheLumpNum(patch->patch);
+		const patch_t *realpatch = (const patch_t*)W_LoadLump(patch->patch);
 
 		int realsize = W_LumpLength(patch->patch);
 
@@ -288,7 +288,7 @@ static epi::image_data_c *ReadTextureAsEpiBlock(image_c *rim)
 			int offset = EPI_LE_S32(realpatch->columnofs[x - x1]);
 
 			if (offset < 0 || offset >= realsize)
-				I_Error("Bad image offset 0x%08x in image [%s]\n", offset, rim->name);
+				I_Error("Bad image offset 0x%08x in image [%s]\n", offset, rim->name.c_str());
 
 			const column_t *patchcol = (const column_t *)
 				((const byte *) realpatch + offset);
@@ -366,8 +366,8 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 		img->Clear(TRANS_PIXEL);
 
 	// Composite the columns into the block.
-	const patch_t *realpatch;
-	int realsize;
+	const patch_t *realpatch = nullptr;
+	int realsize = 0;
 	
 	if (packfile_name[0] != NULL)
 	{
@@ -383,10 +383,11 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 	}
 	else
 	{
-		realpatch = (const patch_t*)W_CacheLumpNum(lump);
+		realpatch = (const patch_t*)W_LoadLump(lump);
 		realsize = W_LumpLength(lump);
 	}
 
+	SYS_ASSERT(realpatch);
 	SYS_ASSERT(rim->actual_w == EPI_LE_S16(realpatch->width));
 	SYS_ASSERT(rim->actual_h == EPI_LE_S16(realpatch->height));
   
@@ -395,7 +396,7 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 		int offset = EPI_LE_S32(realpatch->columnofs[x]);
 
 		if (offset < 0 || offset >= realsize)
-			I_Error("Bad image offset 0x%08x in image [%s]\n", offset, rim->name);
+			I_Error("Bad image offset 0x%08x in image [%s]\n", offset, rim->name.c_str());
 
 		const column_t *patchcol = (const column_t *)
 			((const byte *) realpatch + offset);

@@ -82,7 +82,7 @@ void V_InitPalette(void)
 {
 	int t, i;
 
-	const byte *pal = (const byte*)W_CacheLumpName("PLAYPAL");
+	const byte *pal = (const byte*)W_LoadLump("PLAYPAL");
 
 	// read in palette colours
 	for (t = 0; t < 14; t++)

@@ -214,7 +214,7 @@ int CMD_Crc(char **argv, int argc)
 			result.Reset();
 			result.AddBlock(data, length);
 
-			W_DoneWithLump(data);
+			delete[] data;
 
 			CON_Printf("  %s  %d bytes  crc = %08x\n", argv[i], length, result.crc);
 		}

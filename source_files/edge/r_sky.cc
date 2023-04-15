@@ -1020,7 +1020,7 @@ int RGL_UpdateSkyBoxTextures(void)
 	delete block;
 
 	if (what_pal_cached)
-		W_DoneWithLump(what_pal);
+		delete[] what_pal;
 
 	return SK;
 }

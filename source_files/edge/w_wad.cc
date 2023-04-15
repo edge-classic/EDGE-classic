@@ -941,7 +941,7 @@ void ProcessDehackedInWad(data_file_c *df)
 
 	DEH_Convert(data, length, source);
 
-	W_DoneWithLump(data);
+	delete[] data;
 }
 
 
@@ -1005,7 +1005,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
 		byte *data = W_LoadLump(animated, &length);
 
 		DDF_ConvertANIMATED(data, length);
-		W_DoneWithLump(data);
+		delete[] data;
 	}
 
 	if (switches >= 0)
@@ -1016,7 +1016,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
 		byte *data = W_LoadLump(switches, &length);
 
 		DDF_ConvertSWITCHES(data, length);
-		W_DoneWithLump(data);
+		delete[] data;
 	}
 
 	// handle BOOM Colourmaps (between C_START and C_END)
@@ -1926,7 +1926,7 @@ std::string W_LoadString(int lump)
 
 	std::string result((char *)data, length);
 
-	W_DoneWithLump(data);
+	delete[] data;
 
 	return result;
 }
@@ -1934,19 +1934,6 @@ std::string W_LoadString(int lump)
 std::string W_LoadString(const char *name)
 {
 	return W_LoadString(W_GetNumForName(name));
-}
-
-//
-// W_DoneWithLump
-//
-void W_DoneWithLump(const void *ptr)
-{
-	if (ptr == NULL)
-		I_Error("W_DoneWithLump: NULL pointer");
-
-	byte *data = (byte *)ptr;
-
-	delete[] data;
 }
 
 //

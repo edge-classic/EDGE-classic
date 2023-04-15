@@ -90,7 +90,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 		patchlookup[i] = W_CheckNumForTexPatch(name);
 	}
 
-	W_DoneWithLump(names);
+	delete[] names;
 
 	//
 	// Load the map texture definitions from textures.lmp.
@@ -207,10 +207,10 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 	}
 
 	// free stuff
-	W_DoneWithLump(maptex1);
+	delete[] maptex1;
 
 	if (maptex2)
-		W_DoneWithLump(maptex2);
+		delete[] maptex2;
 	
 	delete[] patchlookup;
 }

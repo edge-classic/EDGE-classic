@@ -205,7 +205,7 @@ void HU_StartImportantMessage(const char *msg)
 		w_important_message = std::string(msg);
 
 		important_message_on = true;
-		important_message_counter = HU_MSGTIMEOUT;
+		important_message_counter = HU_IMPMSGTIMEOUT;
 		message_no_overwrite = false;
 	}
 	

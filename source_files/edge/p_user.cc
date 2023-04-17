@@ -690,6 +690,28 @@ bool P_PlayerSwitchWeapon(player_t *player, weapondef_c *choice)
 	return true;
 }
 
+void P_DumpMobjsTemp(void)
+{
+	mobj_t *mo;
+
+	int index = 0;
+
+	I_Warning("MOBJs:\n");
+
+	for (mo=mobjlisthead; mo; mo=mo->next, index++)
+	{
+		I_Warning(" %4d: %p next:%p prev:%p [%s] at (%1.0f,%1.0f,%1.0f) states=%d > %d tics=%d\n",
+			index,
+			mo, mo->next, mo->prev,
+			mo->info->name.c_str(),
+			mo->x, mo->y, mo->z,
+			(int)(mo->state ? mo->state - states : -1),
+			(int)(mo->next_state ? mo->next_state - states : -1),
+			mo->tics);
+	}
+
+	I_Warning("END OF MOBJs\n");
+}
 
 bool P_PlayerThink(player_t * player, bool extra_tic)
 {
@@ -719,7 +741,11 @@ bool P_PlayerThink(player_t * player, bool extra_tic)
 #endif
 
 	if (player->attacker && player->attacker->isRemoved())
-		I_Error("INTERNAL ERROR: player has a removed attacker.\n");
+	{
+		P_DumpMobjsTemp();
+		I_Error("INTERNAL ERROR: player has a removed attacker. %s\n",player->attacker->info->name.c_str());
+	}
+		
 
 	if (player->damagecount <= 0)
 		player->damage_pain = 0;

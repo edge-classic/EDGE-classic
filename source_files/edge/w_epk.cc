@@ -20,6 +20,7 @@
 #include "l_deh.h"
 #include "r_image.h"
 #include "w_files.h"
+#include "w_wad.h"
 #include "vm_coal.h"
 
 // EPI
@@ -756,7 +757,7 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
 	}
 }
 
-void Pack_ProcessImages(pack_file_c *pack)
+void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 {
 	for (auto dir_name : image_dirs)
 	{
@@ -782,6 +783,9 @@ void Pack_ProcessImages(pack_file_c *pack)
 					I_Warning("Illegal image name in EPK: %s\n", entry.name.c_str());
 					continue;
 				}
+
+				if (W_CheckFileNumForName(texname.c_str()) > pack_index)
+					continue;
 
 				I_Debugf("- Adding image file in EPK: %s\n", entry.packpath.c_str());
 

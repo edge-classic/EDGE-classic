@@ -1847,18 +1847,6 @@ bool W_InitImages(void)
 }
 
 //
-// Automatically add images if in one of the traditional pack folder names
-//
-void W_ImageAddPackImages(void)
-{
-	for (auto df : data_files)
-	{
-		if (df->pack)
-			Pack_ProcessImages(df->pack);
-	}
-}
-
-//
 // Animate all the images.
 //
 void W_UpdateImageAnims(void)

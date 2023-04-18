@@ -36,9 +36,8 @@ int Pack_FindStem(pack_file_c *pack, const std::string& name);
 // Checks if exact filename is found in a pack; used to help load order determination
 bool Pack_FindFile(pack_file_c *pack, const std::string& name);
 
-void Pack_ProcessImages(pack_file_c *pack);
-
-void Pack_ProcessSoundsAndMusic(pack_file_c *pack);
+// Check images/sound/etc that may override WAD-oriented lumps or definitions
+void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index);
 
 #endif /* __W_PK3__ */
 

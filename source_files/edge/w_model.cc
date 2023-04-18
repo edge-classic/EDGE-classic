@@ -141,121 +141,144 @@ modeldef_c *LoadModelFromLump(int model_num)
 
 	modeldef_c *def = new modeldef_c(basename.c_str());
 
-	std::string lumpname; // will also be used as a pack file test
-	std::string skinname; // same
+	std::string lumpname;
+	std::string packname;
+	std::string skinname;
 
+	int lump_num = -1;
+	int pack_num = -1;
 	epi::file_c *f = nullptr;
-
 	bool pack_file = false;
 
 	// try MD3 first, then MD2, then MDL, then voxels
-	lumpname = epi::STR_Format("%s.md3", basename.c_str());
-	f = W_OpenPackFile(lumpname);
-	if (f)
+
+	// This section is going to get kinda weird with the introduction of EPKs
+	lumpname = epi::STR_Format("%sMD3", basename.c_str());
+	lump_num = W_CheckFileNumForName(lumpname.c_str());
+	packname = epi::STR_Format("%s.md3", basename.c_str());
+	pack_num = W_CheckPackForName(packname);
+
+	if (lump_num > -1 || pack_num > -1)
 	{
-		I_Debugf("Loading MD3 model from pack file : %s\n", lumpname.c_str());
-		def->md2_model = MD3_LoadModel(f);
-		pack_file = true;
-	}
-	else
-	{
-		lumpname = epi::STR_Format("%sMD3", basename.c_str());
-		if (W_CheckNumForName(lumpname.c_str()) >= 0)
+		if (pack_num > lump_num)
+		{
+			f = W_OpenPackFile(packname);
+			if (f)
+			{
+				I_Debugf("Loading MD3 model from pack file : %s\n", packname.c_str());
+				def->md2_model = MD3_LoadModel(f);
+				pack_file = true;
+			}
+		}
+		else
 		{
 			I_Debugf("Loading MD3 model from lump : %s\n", lumpname.c_str());
 			f = W_OpenLump(lumpname.c_str());
-			SYS_ASSERT(f);
-			def->md2_model = MD3_LoadModel(f);
+			if (f)
+				def->md2_model = MD3_LoadModel(f);
 		}
 	}
+
 	if (!f)
 	{
-		lumpname = epi::STR_Format("%s.md2", basename.c_str());
-		f = W_OpenPackFile(lumpname);
-		if (f)
+		lumpname = epi::STR_Format("%sMD2", basename.c_str());
+		lump_num = W_CheckFileNumForName(lumpname.c_str());
+		packname = epi::STR_Format("%s.md2", basename.c_str());
+		pack_num = W_CheckPackForName(packname);
+		if (lump_num > -1 || pack_num > -1)
 		{
-			I_Debugf("Loading MD2 model from pack file : %s\n", lumpname.c_str());
-			def->md2_model = MD2_LoadModel(f);
-			pack_file = true;
-		}
-		else
-		{
-			lumpname = epi::STR_Format("%sMD2", basename.c_str());
-			if (W_CheckNumForName(lumpname.c_str()) >= 0)
+			if (pack_num > lump_num)
+			{
+				f = W_OpenPackFile(packname);
+				if (f)
+				{
+					I_Debugf("Loading MD2 model from pack file : %s\n", packname.c_str());
+					def->md2_model = MD2_LoadModel(f);
+					pack_file = true;
+				}
+			}
+			else
 			{
 				I_Debugf("Loading MD2 model from lump : %s\n", lumpname.c_str());
-
 				f = W_OpenLump(lumpname.c_str());
-				SYS_ASSERT(f);
-				def->md2_model = MD2_LoadModel(f);
+				if (f)
+					def->md2_model = MD2_LoadModel(f);
 			}
 		}
 	}
+
 	if (!f)
 	{
-		lumpname = epi::STR_Format("%s.mdl", basename.c_str());
-		f = W_OpenPackFile(lumpname);
-		if (f)
+		lumpname = epi::STR_Format("%sMDL", basename.c_str());
+		lump_num = W_CheckFileNumForName(lumpname.c_str());
+		packname = epi::STR_Format("%s.mdl", basename.c_str());
+		pack_num = W_CheckPackForName(packname);
+		if (lump_num > -1 || pack_num > -1)
 		{
-			I_Debugf("Loading MDL model from pack file : %s\n", lumpname.c_str());
-			def->mdl_model = MDL_LoadModel(f);
-			pack_file = true;
-		}
-		else
-		{
-			lumpname = epi::STR_Format("%sMDL", basename.c_str());
-			if (W_CheckNumForName(lumpname.c_str()) >= 0)
+			if (pack_num > lump_num)
+			{
+				f = W_OpenPackFile(packname);
+				if (f)
+				{
+					I_Debugf("Loading MDL model from pack file : %s\n", packname.c_str());
+					def->mdl_model = MDL_LoadModel(f);
+					pack_file = true;
+				}
+			}
+			else
 			{
 				I_Debugf("Loading MDL model from lump : %s\n", lumpname.c_str());
-
 				f = W_OpenLump(lumpname.c_str());
-				SYS_ASSERT(f);
-				def->mdl_model = MDL_LoadModel(f);
+				if (f)
+					def->mdl_model = MDL_LoadModel(f);
 			}
 		}
 	}
+
 	if (!f)
 	{
-		lumpname = epi::STR_Format("%s.vxl", basename.c_str());
-		f = W_OpenPackFile(lumpname);
-		if (f)
+		// This only needs to be checked once for lumps; all voxel formats use this name
+		lumpname = epi::STR_Format("%sVXL", basename.c_str());
+		lump_num = W_CheckFileNumForName(lumpname.c_str());
+		pack_num = -1;
+
+		std::string vxlname = epi::STR_Format("%s.vxl", basename.c_str());
+		int vxl_num = W_CheckPackForName(vxlname);
+		if (vxl_num > pack_num) pack_num = vxl_num;
+		std::string kv6name = epi::STR_Format("%s.kv6", basename.c_str());
+		int kv6_num = W_CheckPackForName(kv6name);
+		if (kv6_num > pack_num) pack_num = kv6_num;
+		std::string kvxname = epi::STR_Format("%s.kvx", basename.c_str());
+		int kvx_num = W_CheckPackForName(kvxname);
+		if (kvx_num > pack_num) pack_num = kvx_num;
+
+		if (pack_num == vxl_num)
+			packname = vxlname;
+		else if (pack_num == kv6_num)
+			packname = kv6name;
+		else if (pack_num == kvx_num)
+			packname = kvxname;
+		else
+			packname = "";
+
+		if (lump_num > -1 || pack_num > -1)
 		{
-			I_Debugf("Loading VXL model from pack file : %s\n", lumpname.c_str());
-			def->vxl_model = VXL_LoadModel(f, basename.c_str());
-			pack_file = true;
-		}
-		if (!f)
-		{
-			lumpname = epi::STR_Format("%s.kv6", basename.c_str());
-			f = W_OpenPackFile(lumpname);
-			if (f)
+			if (pack_num > lump_num)
 			{
-				I_Debugf("Loading KV6 model from pack file : %s\n", lumpname.c_str());
-				def->vxl_model = VXL_LoadModel(f, basename.c_str());
-				pack_file = true;
+				f = W_OpenPackFile(packname);
+				if (f)
+				{
+					I_Debugf("Loading voxel model from pack file : %s\n", packname.c_str());
+					def->vxl_model = VXL_LoadModel(f, basename.c_str());
+					pack_file = true;
+				}
 			}
-		}
-		if (!f)
-		{
-			lumpname = epi::STR_Format("%s.kvx", basename.c_str());
-			f = W_OpenPackFile(lumpname);
-			if (f)
-			{
-				I_Debugf("Loading KVX model from pack file : %s\n", lumpname.c_str());
-				def->vxl_model = VXL_LoadModel(f, basename.c_str());
-				pack_file = true;
-			}
-		}
-		if (!f)
-		{
-			lumpname = epi::STR_Format("%sVXL", basename.c_str());
-			if (W_CheckNumForName(lumpname.c_str()) >= 0)
+			else
 			{
 				I_Debugf("Loading voxel model from lump : %s\n", lumpname.c_str());
-
 				f = W_OpenLump(lumpname.c_str());
-				SYS_ASSERT(f);
-				def->vxl_model = VXL_LoadModel(f, basename.c_str());
+				if (f)
+					def->vxl_model = VXL_LoadModel(f, basename.c_str());
 			}
 		}
 	}
@@ -265,7 +288,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 
 	SYS_ASSERT(def->md2_model || def->mdl_model || def->vxl_model);
 
-	// close the lump
+	// close the lump/packfile
 	delete f;
 
 	if (def->md2_model)

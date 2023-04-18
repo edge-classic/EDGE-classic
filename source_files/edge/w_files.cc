@@ -286,6 +286,22 @@ void W_BuildNodes(void)
 }
 
 //----------------------------------------------------------------------------
+int W_CheckPackForName(const std::string& name)
+{
+	// search from newest file to oldest
+	for (int i = (int)data_files.size() - 1 ; i >= 0 ; i--)
+	{
+		data_file_c *df = data_files[i];
+		if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
+		{
+			if (Pack_FindFile(df->pack, name))
+				return i;
+		}
+	}
+	return -1;
+}
+
+//----------------------------------------------------------------------------
 
 epi::file_c * W_OpenPackFile(const std::string& name)
 {

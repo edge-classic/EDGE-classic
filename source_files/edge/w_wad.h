@@ -45,10 +45,14 @@ public:
 };
 
 int W_CheckNumForName(const char *name);
+// Like above, but returns the data file index instead of the sortedlump index
+int W_CheckFileNumForName(const char *name);
+
 int W_CheckNumForName_GFX(const char *name);
 int W_CheckNumForName_XGL(const char *name);
 int W_CheckNumForName_MAP(const char *name);
 int W_CheckNumForTexPatch(const char *name);
+
 
 int W_GetNumForName(const char *name);
 

@@ -743,7 +743,7 @@ bool P_PlayerThink(player_t * player, bool extra_tic)
 	if (player->attacker && player->attacker->isRemoved())
 	{
 		P_DumpMobjsTemp();
-		I_Error("INTERNAL ERROR: player has a removed attacker. %s\n",player->attacker->info->name.c_str());
+		I_Error("INTERNAL ERROR: player has a removed attacker. \n");
 	}
 		
 

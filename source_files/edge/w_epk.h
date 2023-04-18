@@ -33,6 +33,9 @@ epi::file_c * Pack_OpenMatch(pack_file_c *pack, const std::string& name, const s
 // Equivalent to W_IsLumpInPwad....doesn't care or check filetype itself
 int Pack_FindStem(pack_file_c *pack, const std::string& name);
 
+// Checks if exact filename is found in a pack; used to help load order determination
+bool Pack_FindFile(pack_file_c *pack, const std::string& name);
+
 void Pack_ProcessImages(pack_file_c *pack);
 
 void Pack_ProcessSoundsAndMusic(pack_file_c *pack);

@@ -1591,6 +1591,36 @@ int W_CheckNumForName(const char *name)
 	return sortedlumps[i];
 }
 
+//
+// W_CheckFileNumForName
+//
+// Returns data_files index or -1 if name not found.
+//
+//
+int W_CheckFileNumForName(const char *name)
+{
+	int i;
+	char buf[9];
+
+	if (strlen(name) > 8)
+	{
+		I_Warning("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
+		return -1;
+	}
+
+	for (i = 0; name[i]; i++)
+	{
+		buf[i] = toupper(name[i]);
+	}
+	buf[i] = 0;
+
+	i = QuickFindLumpMap(buf);
+
+	if (i < 0)
+		return -1; // not found
+
+	return lumpinfo[sortedlumps[i]].file;
+}
 
 int W_CheckNumForName_GFX(const char *name)
 {
@@ -2256,7 +2286,6 @@ bool W_IsLumpInAnyWad(const char *name)
 		return false;
 
 	int lumpnum = W_CheckNumForName(name);
-	int filenum = -1;
 	bool in_anywad = false;
 
 	if (lumpnum != -1)

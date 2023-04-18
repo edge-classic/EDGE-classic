@@ -94,6 +94,8 @@ void W_AddPackSoundsAndMusic(void);
 
 byte *W_OpenPackOrLumpInMemory(const std::string& name, const std::vector<std::string>& extensions, int *length);
 
+int W_CheckPackForName(const std::string& name);
+
 #endif // __W_FILES__
 
 //--- editor settings ---

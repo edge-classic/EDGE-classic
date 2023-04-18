@@ -867,6 +867,30 @@ static void ProcessColourmapsInPack(pack_file_c *pack)
 	}
 }
 
+bool Pack_FindFile(pack_file_c *pack, const std::string& name)
+{
+	// when file does not exist, this returns NULL.
+
+	// disallow absolute names
+	if (epi::PATH_IsAbsolute(name))
+		return false;
+
+	std::string open_stem = epi::PATH_GetBasename(name).u8string();
+
+	// quick file stem check to see if it's present at all
+	if (!Pack_FindStem(pack, open_stem))
+		return false;
+
+	auto results = pack->search_files.equal_range(open_stem);
+	for (auto file = results.first; file != results.second; ++file)
+	{
+		if (name == epi::PATH_GetFilename(file->second))
+			return true;
+	}
+
+	return false;
+}
+
 epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name)
 {
 	// when file does not exist, this returns NULL.

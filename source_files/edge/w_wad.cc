@@ -2228,18 +2228,58 @@ bool W_IsLumpInPwad(const char *name)
 	if (!in_pwad) // Check EPKs/folders now
 	{
 		// search from newest file to oldest
-		for (int i = (int)data_files.size() - 1 ; i >= 0 ; i--)
+		for (int i = (int)data_files.size() - 1 ; i >= 2 ; i--) // ignore edge_defs and the IWAD itself
 		{
 			data_file_c *df = data_files[i];
 			if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
 			{
-				if (Pack_FindStem(df->pack, name) && i >= 2) // ignore edge_defs and the IWAD itself
+				if (Pack_FindStem(df->pack, name))
+				{
 					in_pwad = true;
+					break;
+				}
 			}
 		}
 	}
 
 	return in_pwad;
+}
+
+//W_IsLumpInAnyWad
+//
+//check if a lump is in any wad/epk at all
+//
+//Returns true if found
+bool W_IsLumpInAnyWad(const char *name)
+{
+	if(!name)
+		return false;
+
+	int lumpnum = W_CheckNumForName(name);
+	int filenum = -1;
+	bool in_anywad = false;
+
+	if (lumpnum != -1)
+		in_anywad = true;
+
+	if (!in_anywad)
+	{
+		// search from oldest to newest
+		for (int i = 0 ; i < (int)data_files.size() - 1 ; i++)
+		{
+			data_file_c *df = data_files[i];
+			if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
+			{
+				if (Pack_FindStem(df->pack, name))
+				{
+					in_anywad = true;
+					break;
+				}
+			}
+		}
+	}
+
+	return in_anywad;
 }
 
 //--- editor settings ---

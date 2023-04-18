@@ -3764,7 +3764,7 @@ void M_Init(void)
 	//    else if (W_CheckNumForName("M_EPI5") < 0)
 	//      EpiDef.numitems--;
 
-	if (W_CheckNumForName("HELP") >= 0) //doom2
+	if (W_IsLumpInAnyWad("HELP")) //doom2
     {
         menu_readthis[0] = W_ImageLookup("HELP");
         menu_readthis[1] = W_ImageLookup("CREDIT"); //Unnecessary since we won't see it anyway...
@@ -3780,7 +3780,7 @@ void M_Init(void)
     else //doom or shareware doom
     {
         menu_readthis[0] = W_ImageLookup("HELP1");
-        if (W_CheckNumForName("HELP2") >= 0)
+        if (W_IsLumpInAnyWad("HELP2"))
             menu_readthis[1] = W_ImageLookup("HELP2"); //Shareware doom
         else
             menu_readthis[1] = W_ImageLookup("CREDIT"); //Full doom

@@ -147,7 +147,7 @@ void G_PlayerFinishLevel(player_t *p, bool keep_cards)
 	
 	//Lobo 2023: uncomment if still getting 
 	// "INTERNAL ERROR: player has a removed attacker"
-	//p->attacker = NULL; 
+	p->attacker = NULL; 
 	
 
 	VM_EndLevel();

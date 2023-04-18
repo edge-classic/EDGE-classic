@@ -904,6 +904,10 @@ epi::file_c * Pack_OpenMatch(pack_file_c *pack, const std::string& name, const s
 {
 	// when file does not exist, this returns NULL.
 
+	// Nothing to match (may change this to allow a wildcard in the future)
+	if (extensions.empty())
+		return NULL;
+
 	std::filesystem::path open_stem = name;
 
 	// quick file stem check to see if it's present at all

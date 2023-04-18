@@ -82,6 +82,8 @@ bool W_LoboDisableSkybox(const char *ActualSky);
 
 bool W_IsLumpInPwad(const char *name);
 
+bool W_IsLumpInAnyWad(const char *name);
+
 bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char *lumpname2);
 
 void W_CheckWADFixes(void);

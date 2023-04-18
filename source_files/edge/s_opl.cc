@@ -29,6 +29,7 @@
 #include "s_blit.h"
 #include "s_music.h"
 #include "s_opl.h"
+#include "w_files.h"
 #include "w_wad.h"
 
 #include "dm_state.h"
@@ -48,7 +49,7 @@ extern int  dev_freq;
 
 bool opl_disabled = false;
 
-DEF_CVAR(s_genmidi, "", CVAR_ARCHIVE)
+DEF_CVAR(s_genmidi, "GENMIDI", CVAR_ARCHIVE)
 
 extern std::vector<std::filesystem::path> available_genmidis;
 
@@ -78,7 +79,7 @@ bool S_StartupOPL(void)
 	if (!cvar_good)
 	{
 		I_Warning("Cannot find previously used GENMIDI %s, falling back to default!\n", s_genmidi.c_str());
-		s_genmidi.s = "GENMIDI";
+		s_genmidi = "GENMIDI";
 	}
 
 	int length;
@@ -87,13 +88,12 @@ bool S_StartupOPL(void)
 
 	if (s_genmidi.s == "GENMIDI")
 	{
-		int p = W_CheckNumForName("GENMIDI");
-		if (p < 0)
+		data = W_OpenPackOrLumpInMemory("GENMIDI", {".op2", ".wopl"}, &length);
+		if (!data)
 		{
 			I_Debugf("no GENMIDI lump !\n");
 			return false;
 		}
-		data = W_LoadLump(p, &length);
 	}
 	else
 	{
@@ -118,23 +118,13 @@ bool S_StartupOPL(void)
 	if (!edge_opl->loadPatches((const byte *)data, (size_t)length))
 	{
 		I_Warning("S_StartupOPL: Error loading instruments!\n");
-		if (s_genmidi.s == "GENMIDI")
-			delete[] data;
-		else
-		{
-			delete F;
-			delete[] data;
-		}
+		delete F;
+		delete[] data;
 		return false;
 	}
 
-	if (s_genmidi.s == "GENMIDI")
-		delete[] data;
-	else
-	{
-		delete F;
-		delete[] data;
-	}
+	delete F;
+	delete[] data;
 
 	// OK
 	return true;

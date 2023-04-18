@@ -310,7 +310,7 @@ epi::file_c * W_OpenPackFile(const std::string& name)
 byte *W_OpenPackOrLumpInMemory(const std::string& name, const std::vector<std::string>& extensions, int *length)
 {
 	int lump_df = -1;
-	int lump_num = W_GetNumForName(name.c_str());
+	int lump_num = W_CheckNumForName(name.c_str());
 	if (lump_num > -1)
 		lump_df = W_GetFileForLump(lump_num);
 

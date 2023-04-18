@@ -90,7 +90,8 @@ int W_CheckDDFLumpName(const char *name);
 void ProcessFile(data_file_c *df);
 
 epi::file_c * W_OpenPackFile(const std::string& name);
-void W_AddPackSoundsAndMusic(void);
+
+void W_DoPackSubstitutions(void);
 
 byte *W_OpenPackOrLumpInMemory(const std::string& name, const std::vector<std::string>& extensions, int *length);
 

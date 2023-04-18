@@ -248,7 +248,6 @@ void W_ImageCreateTextures(struct texturedef_s ** defs, int number);
 const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon);
 void W_ImageCreateUser(void);
 void W_ImageAddTX(int lump, const char *name, bool hires);
-void W_ImageAddPackImages(void);
 void W_AnimateImageSet(const image_c ** images, int number, int speed);
 void W_DrawSavePic(const byte *pixels);
 

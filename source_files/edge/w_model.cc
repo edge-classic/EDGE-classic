@@ -302,7 +302,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 			}
 			else
 			{
-				skinname = epi::STR_Format("%sSKIN%d", basename.c_str(), i);
+				skinname = epi::STR_Format("%sSKN%d", basename.c_str(), i);
 				def->skins[i] = W_ImageLookup(skinname.c_str(), INS_Sprite, ILF_Null);		
 			}
 		}

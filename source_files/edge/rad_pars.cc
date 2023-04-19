@@ -19,6 +19,7 @@
 #include "i_defs.h"
 
 #include <limits.h>
+#include <unordered_map>
 
 #include "str_util.h"
 
@@ -38,6 +39,8 @@
 #include "version.h"
 
 typedef std::vector<const char *> param_set_t;
+
+static std::unordered_map<uint32_t, std::string> parsed_string_tags;
 
 // TODO remove these eventually, use std::string
 static char * Z_StrDup(const char *s)
@@ -553,7 +556,8 @@ static void RAD_ComputeScriptCRC(rad_script_t *scr)
 	if (scr->script_name)
 		scr->crc.AddCStr(scr->script_name);
 
-	scr->crc += (int) scr->tag;
+	scr->crc += (int) scr->tag[0];
+	scr->crc += (int) scr->tag[1];
 	scr->crc += (int) scr->appear;
 	scr->crc += (int) scr->min_players;
 	scr->crc += (int) scr->max_players;
@@ -915,11 +919,35 @@ static void RAD_ParseName(param_set_t& pars)
 
 static void RAD_ParseTag(param_set_t& pars)
 {
-	// Tag <hashed identifier>
-	if (this_rad->tag != 0)
-		RAD_Error("Script already has a tag: '%d'\n", this_rad->tag);
+	// Tag <number>
 
-	this_rad->tag = epi::STR_Hash32(pars[1]);
+	if (this_rad->tag[0] != 0)
+		RAD_Error("Script already has a tag: '%d'\n", this_rad->tag[0]);
+
+	if (this_rad->tag[1] != 0)
+	{
+		if (parsed_string_tags.find(this_rad->tag[1]) != parsed_string_tags.end())
+			RAD_Error("Script already has a tag: '%s'\n", parsed_string_tags[this_rad->tag[1]].c_str());
+		else
+			RAD_Error("Script already has a tag: '%d'\n", this_rad->tag[1]);
+	}
+
+	// Modified RAD_CheckForInt
+	const char *pos = pars[1];
+	int count = 0;
+	int length = strlen(pars[1]);
+
+	while (isdigit(*pos++))
+		count++;
+
+	// Is the value an integer?
+	if (length != count)
+	{
+		this_rad->tag[1] = epi::STR_Hash32(pars[1]);
+		parsed_string_tags.try_emplace(this_rad->tag[1], pars[1]);
+	}
+	else
+		this_rad->tag[0] = atoi(pars[1]);
 }
 
 static void RAD_ParseWhenAppear(param_set_t& pars)
@@ -1156,10 +1184,22 @@ static void RAD_ParseEnableTagged(param_set_t& pars)
 
 	s_enabler_t * t = new s_enabler_t;
 
-	t->tag = epi::STR_Hash32(pars[1]);
+	// Modified RAD_CheckForInt
+	const char *pos = pars[1];
+	int count = 0;
+	int length = strlen(pars[1]);
 
-	if (t->tag == 0)
-		RAD_Error("Bad tag value: %s\n", pars[1]);
+	while (isdigit(*pos++))
+		count++;
+
+	// Is the value an integer?
+	if (length != count)
+		t->tag[1] = epi::STR_Hash32(pars[1]);
+	else
+		t->tag[0] = atoi(pars[1]);
+
+	//if (t->tag <= 0)
+		//RAD_Error("Bad tag value: %s\n", pars[1]);
 
 	t->new_disabled = DDF_CompareName("DISABLE_TAGGED", pars[0]) == 0;
 

@@ -499,8 +499,12 @@ static void DrawLevelFinished(void)
 	if (!style->fonts[t_type]) 
 		t_type = styledef_c::T_TEXT;
 	
-	y = y + h1;
+	// ttf_ref_yshift is important for TTF fonts.
+	float y_shift = style->fonts[t_type]->ttf_ref_yshift; // * txtscale;
 
+	y = y + h1;
+	y += y_shift;
+	
 	HUD_SetAlignment(0, -1);//center it
 	//If we have a custom Finished graphic e.g.WIF then use that
 	if (W_IsLumpInPwad(finished->name.c_str()))
@@ -568,7 +572,11 @@ static void DrawEnteringLevel(void)
 	}
 	HUD_SetAlignment(-1, -1);//set it back to usual
 
+	// ttf_ref_yshift is important for TTF fonts.
+	float y_shift = style->fonts[t_type]->ttf_ref_yshift; // * txtscale;
+
 	y = y + h1;
+	y += y_shift;
 
 	t_type = styledef_c::T_TEXT;
 	

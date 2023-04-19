@@ -439,7 +439,8 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 		return;
 	}
 
-	GLuint tex_id = W_ImageCache(image, true, palremap, do_whiten);
+	//GLuint tex_id = W_ImageCache(image, true, palremap, do_whiten);
+	GLuint tex_id = W_ImageCache(image, true, nullptr, do_whiten);
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -590,7 +591,8 @@ void HUD_StretchImage(float x, float y, float w, float h, const image_c *img, fl
 		text_col = V_GetFontColor(colmap);
 	}
 
-    HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha, text_col, colmap, sx, sy);
+    //HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha, text_col, colmap, sx, sy);
+	HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha, text_col, nullptr, sx, sy);
 }
 
 void HUD_StretchImageNoOffset(float x, float y, float w, float h, const image_c *img, float sx, float sy)

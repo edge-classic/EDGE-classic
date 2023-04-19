@@ -759,9 +759,10 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
 
 void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 {
+	int d = -1;
 	for (auto dir_name : image_dirs)
 	{
-		int d = pack->FindDir(dir_name);
+		d = pack->FindDir(dir_name);
 		if (d < 0)
 			continue;
 		for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
@@ -784,7 +785,26 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 					continue;
 				}
 
+				bool add_it = true;
+
+				// Check DDFIMAGE definitions to see if this is replacing a lump type def
+				for (size_t j = 0; j < imagedefs.GetSize(); j++)
+				{
+					imagedef_c *img = imagedefs[j];
+					if (img->type == IMGDT_Lump && img->info == texname && 
+						W_CheckFileNumForName(texname.c_str()) < pack_index)
+					{
+						img->type = IMGDT_Package;
+						img->info = entry.packpath;
+						add_it = false;
+					}
+				}
+
+				// If no DDF just see if a bare lump with the same name comes later
 				if (W_CheckFileNumForName(texname.c_str()) > pack_index)
+					add_it = false;
+
+				if (!add_it)
 					continue;
 
 				I_Debugf("- Adding image file in EPK: %s\n", entry.packpath.c_str());
@@ -804,11 +824,9 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 			}
 		}
 	}
-}
-
-void Pack_ProcessSoundsAndMusic(pack_file_c *pack)
-{
-	int d = pack->FindDir("sounds");
+	// Only sub out sounds and music if they would replace an existing DDF entry
+	// This MAY expand to create automatic simple DDFSFX entries if they aren't defined anywhere else	
+	d = pack->FindDir("sounds");
 	if (d > 0)
 	{
 		for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
@@ -820,9 +838,9 @@ void Pack_ProcessSoundsAndMusic(pack_file_c *pack)
 				// Assume that same stem name is meant to replace an identically named lump entry
 				if (!sfx->lump_name.empty())
 				{
-					if (epi::PATH_GetBasename(entry.name).u8string() == sfx->lump_name)
+					if (epi::PATH_GetBasename(entry.name).u8string() == sfx->lump_name && 
+						W_CheckFileNumForName(sfx->lump_name.c_str()) < pack_index)
 					{
-						// Need to check that lump isn't later than this datafile
 						sfx->pack_name = entry.packpath;
 						sfx->lump_name.clear();
 					}
@@ -841,8 +859,8 @@ void Pack_ProcessSoundsAndMusic(pack_file_c *pack)
 				pl_entry_c *song = playlist[j];
 				if (epi::PATH_GetExtension(song->info).empty())
 				{
-					// Need to check that lump isn't later than this datafile
-					if (epi::PATH_GetBasename(entry.name).u8string() == song->info)
+					if (song->infotype == MUSINF_LUMP && epi::PATH_GetBasename(entry.name).u8string() == song->info &&
+						W_CheckFileNumForName(song->info.c_str()) < pack_index)
 					{
 						song->info = entry.packpath;
 						song->infotype = MUSINF_PACKAGE;

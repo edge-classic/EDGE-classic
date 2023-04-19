@@ -14,7 +14,7 @@ gl_colour = #333333;
 
  
 [DOG_GREY]
-LUMP="GRYREMAP";
+PACK="GRYREMAP.cmp";
 START=0;
 LENGTH=1;  
  

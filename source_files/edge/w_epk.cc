@@ -869,23 +869,32 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 			}
 		}
 	}
-}
-
-static void ProcessColourmapsInPack(pack_file_c *pack)
-{
-	int d = pack->FindDir("colormaps");
-	if (d < 0)
-		return;
-
-	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+	d = pack->FindDir("colormaps");
+	if (d > 0)
 	{
-		pack_entry_c& entry = pack->dirs[d].entries[i];
+		for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+		{
+			pack_entry_c& entry = pack->dirs[d].entries[i];
 
-		std::string stem = epi::PATH_GetBasename(UTFSTR(entry.name)).u8string();
+			std::string stem = epi::PATH_GetBasename(UTFSTR(entry.name)).u8string();
 
-		int size = pack->EntryLength(d, i);
+			bool add_it = true;
 
-		DDF_AddRawColourmap(stem.c_str(), size, entry.packpath.c_str());
+			for (int j = 0; j < colourmaps.GetSize(); j++)
+			{
+				colourmap_c *colm = colourmaps[j];
+				if (!colm->lump_name.empty() && colm->lump_name == epi::PATH_GetBasename(entry.name).u8string() &&
+					W_CheckFileNumForName(colm->lump_name.c_str()) < pack_index)
+				{
+					colm->lump_name.clear();
+					colm->pack_name = entry.packpath;
+					add_it = false;
+				}
+			}
+
+			if (add_it)
+				DDF_AddRawColourmap(stem.c_str(), pack->EntryLength(d, i), entry.packpath.c_str());
+		}
 	}
 }
 
@@ -1017,7 +1026,8 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 		delete wadfixes;
 	}
 
-	ProcessColourmapsInPack(df->pack);
+	// Only load some things here; the rest are deferred until
+	// after all files loaded so that pack substitutions can work properly
 	ProcessDDFInPack(df->pack);
 	// parse COALAPI only from edge-defs folder or `edge-defs.epk`
 	if ((df->kind == FLKIND_EFolder || df->kind == FLKIND_EEPK) && file_index == 0)

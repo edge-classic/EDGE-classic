@@ -331,7 +331,7 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 	{
 		epi::file_c *f;
 
-		if (packfile_name)
+		if (packfile_name[0])
 			f = W_OpenPackFile(packfile_name);
 		else
 			f = W_OpenLump(lump);

@@ -66,20 +66,6 @@ END_MAP
 // * DOOM2 scripts *
 // *****************
 
-//START_MAP map05
-//
-//Workaround for a bug in Doom2 where TAG 9 is used incorrectly
-//	RADIUS_TRIGGER 0 0 -1
-//		//As soon as we detect it goes down.
-//		ONCEILINGHEIGHT 90 199 4 //sector 4 is the first problematic one
-//
-//		wait 1T //must wait a little bit or it doesn't run
-//
-//		SECTORV 4 104 ceiling //Just raise the ceiling back up for sector 4
-//		SECTORV 153 80 ceiling //Just raise the ceiling back up for sector 153
-//	END_RADIUS_TRIGGER
-//
-//END_MAP
 
 START_MAP map07
 

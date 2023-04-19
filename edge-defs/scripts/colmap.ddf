@@ -20,17 +20,17 @@ start = 0;
 length = 32;
 
 [AUTOMAP_NORMAL]
-pack = "AUTOMAPS.cmp";
+pack = "AUTOMAPS.dat";
 start = 0;
 length = 1;
 
 [AUTOMAP_OVERLAY]
-pack = "AUTOMAPS.cmp";
+pack = "AUTOMAPS.dat";
 start = 1;
 length = 1;
 
 [YELLOW_THING]
-pack = "TXTYLWS2.cmp";
+pack = "TXTYLWS2.dat";
 start = 1;
 length = 1;
 
@@ -44,7 +44,7 @@ length = 1;
 
 // For the EDGE night-vision effect
 [ALLGREEN]
-lump = "NITEVMAP";
+pack = "NITEVMAP.cmp";
 start = 0;
 length = 1;
 
@@ -128,134 +128,134 @@ start = 0;
 length = 1;
 
 [PLAYER_GREY] 
-pack = "PLYRMAPS.cmp"; 
+pack = "PLYRMAPS.dat"; 
 start = 14; 
 length = 1;
 
 [PLAYER_LT_GREY] 
-pack = "PLYRMAPS.cmp"; 
+pack = "PLYRMAPS.dat"; 
 start = 4; 
 length = 1;
 
 [PLAYER_DK_GREY] 
-pack = "PLYRMAPS.cmp";  
+pack = "PLYRMAPS.dat"; 
 start = 0; 
 length = 1;
 
 [PLAYER_BROWN] 
-pack = "PLYRMAPS.cmp";  
+pack = "PLYRMAPS.dat"; 
 start = 1; 
 length = 1;
 
 [PLAYER_DULL_RED] 
-pack = "PLYRMAPS.cmp";  
+pack = "PLYRMAPS.dat"; 
 start = 2; 
 length = 1;
 
 [PLAYER_LT_RED] 
-pack = "PLYRMAPS.cmp";  
+pack = "PLYRMAPS.dat"; 
 start = 5; 
 length = 1;
 
 [PLAYER_DK_RED] 
-pack = "PLYRMAPS.cmp";  
+pack = "PLYRMAPS.dat"; 
 start = 11; 
 length = 1;
 
 [PLAYER_ORANGE] 
-pack = "PLYRMAPS.cmp"; 
+pack = "PLYRMAPS.dat"; 
 start = 3; 
 length = 1;
 
 [PLAYER_PINK] 
-pack = "PLYRMAPS.cmp";  
+pack = "PLYRMAPS.dat"; 
 start = 6; 
 length = 1;
 
 [PLAYER_GOLD] 
-pack = "PLYRMAPS.cmp";  
+pack = "PLYRMAPS.dat"; 
 start = 7; 
 length = 1;
 
 [PLAYER_BLUE] 
-pack = "PLYRMAPS.cmp";  
+pack = "PLYRMAPS.dat"; 
 start = 8; 
 length = 1;
 
 [PLAYER_DK_BLUE] 
-pack = "PLYRMAPS.cmp";  
+pack = "PLYRMAPS.dat"; 
 start = 9; 
 length = 1;
 
 [PLAYER_DK_GREEN] 
-pack = "PLYRMAPS.cmp";  
+pack = "PLYRMAPS.dat"; 
 start = 10; 
 length = 1;
 
 [PLAYER_RED_SKIN] 
-pack = "PLYRMAPS.cmp";
+pack = "PLYRMAPS.dat"; 
 start = 12; 
 length = 1;
 
 [PLAYER_PALE_SKIN] 
-pack = "PLYRMAPS.cmp";  
+pack = "PLYRMAPS.dat"; 
 start = 13; 
 length = 1;
 
 // ----- Monster Skin Remaps ---------------
 
 [SKIN_PALE] 
-pack = "SKINMAPS.cmp"; 
+pack = "SKINMAPS.dat"; 
 start = 0; 
 length = 1;
 
 [SKIN_GREY] 
-pack = "SKINMAPS.cmp"; 
+pack = "SKINMAPS.dat"; 
 start = 1; 
 length = 1;
 
 [SKIN_BLUE] 
-pack = "SKINMAPS.cmp"; 
+pack = "SKINMAPS.dat"; 
 start = 2; 
 length = 1;
 
 [SKIN_GREEN] 
-pack = "SKINMAPS.cmp"; 
+pack = "SKINMAPS.dat"; 
 start = 3; 
 length = 1;
 
 [SKIN_LT_RED] 
-pack = "SKINMAPS.cmp"; 
+pack = "SKINMAPS.dat"; 
 start = 4; 
 length = 1;
 
 [SARG_BLACK] 
-pack = "SARGMAPS.cmp"; 
+pack = "SARGMAPS.dat"; 
 start = 0; 
 length = 1;
 
 [SARG_BLUE] 
-pack = "SARGMAPS.cmp"; 
+pack = "SARGMAPS.dat"; 
 start = 1; 
 length = 1;
 
 [SARG_BROWN] 
-pack = "SARGMAPS.cmp"; 
+pack = "SARGMAPS.dat"; 
 start = 2; 
 length = 1;
 
 [SARG_GRAY] 
-pack = "SARGMAPS.cmp"; 
+pack = "SARGMAPS.dat"; 
 start = 3; 
 length = 1;
 
 [SARG_GREEN] 
-pack = "SARGMAPS.cmp"; 
+pack = "SARGMAPS.dat"; 
 start = 4; 
 length = 1;
 
 [SARG_RED] 
-pack = "SARGMAPS.cmp"; 
+pack = "SARGMAPS.dat"; 
 start = 5; 
 length = 1;
 

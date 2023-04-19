@@ -8,9 +8,11 @@
 #VERSION 1.30
 
 [CON_FONT_2]
-TYPE=IMAGE;
-IMAGE="CONFONT2";
-SPACING = -10;
+TYPE=TRUETYPE;
+TTF="ECFONT01.ttf";
+//SPACING = -0.3;
+//TTF_DEFAULT_SIZE=15;
+
 
 [ENDFONT] //font used for the ENDOOM lump
 TYPE=IMAGE;
@@ -18,9 +20,11 @@ IMAGE="ENDFONT";
 SPACING = -8;
 
 [EDGE3] //font used for the options menus
-TYPE=IMAGE;
-IMAGE="FONTVERD";
-DEFAULT_SIZE=7.5;
+TYPE=TRUETYPE;
+TTF="ECFONT01.ttf";
+//SPACING = -0.3;
+//TTF_DEFAULT_SIZE=15;
+
 
 [EDGE1] //font used for the big menu graphics
 TYPE=PATCH;

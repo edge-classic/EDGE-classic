@@ -27,6 +27,7 @@
 #define __R_IMAGE__
 
 #include <vector>
+#include <list>
 
 #include "main.h"
 #include "image.h"

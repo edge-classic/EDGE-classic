@@ -348,9 +348,10 @@ void ProcessSubDir(pack_file_c *pack, const std::string& fullpath)
 		if (! fsd[i].is_dir)
 		{
 			std::string filename = epi::PATH_GetFilename(fsd[i].name).u8string();
+			epi::str_upper(filename);
 			std::string packpath = fsd[i].name.lexically_relative(pack->parent->name).u8string();
 			pack->dirs[d].AddEntry(filename, fsd[i].name.u8string(), packpath, 0);
-			pack->search_files.insert({epi::PATH_GetBasename(fsd[i].name).u8string(), packpath});
+			pack->search_files.insert({epi::PATH_GetBasename(filename).u8string(), packpath});
 		}
 	}
 }
@@ -379,9 +380,10 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 		else
 		{
 			std::string filename = epi::PATH_GetFilename(fsd[i].name).u8string();
+			epi::str_upper(filename);
 			std::string packpath = fsd[i].name.lexically_relative(df->name).u8string();
 			pack->dirs[0].AddEntry(filename, fsd[i].name.u8string(), packpath, 0);
-			pack->search_files.insert({epi::PATH_GetBasename(fsd[i].name).u8string(), packpath});
+			pack->search_files.insert({epi::PATH_GetBasename(filename).u8string(), packpath});
 		}
 	}
 
@@ -478,9 +480,10 @@ static pack_file_c * ProcessZip(data_file_c *df)
 
 			dir_idx = pack->AddDir(filename);
 		}
-
-		pack->dirs[dir_idx].AddEntry(epi::PATH_GetFilename(basename).u8string(), "", packpath, idx);
-		pack->search_files.insert({epi::PATH_GetBasename(basename).u8string(), packpath});
+		std::string add_name = basename;
+		epi::str_upper(add_name);
+		pack->dirs[dir_idx].AddEntry(epi::PATH_GetFilename(add_name).u8string(), "", packpath, idx);
+		pack->search_files.insert({epi::PATH_GetBasename(add_name).u8string(), packpath});
 	}
 
 	return pack;
@@ -713,7 +716,7 @@ static void ProcessCoalAPIInPack(pack_file_c *pack)
 		for (int entry=0; entry < pack->dirs[dir].entries.size(); entry++)
 		{
 			pack_entry_c& ent = pack->dirs[dir].entries[entry];
-			if (epi::PATH_GetFilename(ent.name) == "coal_api.ec")
+			if (epi::PATH_GetFilename(ent.name) == "COAL_API.EC")
 			{
 				int length = -1;
 				const byte *raw_data = pack->LoadEntry(dir, entry, length);
@@ -744,7 +747,7 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
 		for (int entry=0; entry < pack->dirs[dir].entries.size(); entry++)
 		{
 			pack_entry_c& ent = pack->dirs[dir].entries[entry];
-			if (epi::PATH_GetFilename(ent.name) == "coal_hud.ec")
+			if (epi::PATH_GetFilename(ent.name) == "COAL_HUD.EC")
 			{
 				int length = -1;
 				const byte *raw_data = pack->LoadEntry(dir, entry, length);
@@ -907,6 +910,7 @@ bool Pack_FindFile(pack_file_c *pack, const std::string& name)
 		return false;
 
 	std::string open_stem = epi::PATH_GetBasename(name).u8string();
+	epi::str_upper(open_stem);
 
 	// quick file stem check to see if it's present at all
 	if (!Pack_FindStem(pack, open_stem))
@@ -915,7 +919,7 @@ bool Pack_FindFile(pack_file_c *pack, const std::string& name)
 	auto results = pack->search_files.equal_range(open_stem);
 	for (auto file = results.first; file != results.second; ++file)
 	{
-		if (name == epi::PATH_GetFilename(file->second))
+		if (epi::case_cmp(name,epi::PATH_GetFilename(file->second).u8string()) == 0)
 			return true;
 	}
 
@@ -931,6 +935,7 @@ epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name)
 		return NULL;
 
 	std::string open_stem = epi::PATH_GetBasename(name).u8string();
+	epi::str_upper(open_stem);
 
 	// quick file stem check to see if it's present at all
 	if (!Pack_FindStem(pack, open_stem))
@@ -946,7 +951,7 @@ epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name)
 		auto results = pack->search_files.equal_range(open_stem);
 		for (auto file = results.first; file != results.second; ++file)
 		{
-			if (name == epi::PATH_GetFilename(file->second))
+			if (epi::case_cmp(name,epi::PATH_GetFilename(file->second).u8string()) == 0)
 				return pack->OpenFileByName(file->second);
 		}
 	}

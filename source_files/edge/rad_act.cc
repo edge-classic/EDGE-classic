@@ -903,9 +903,9 @@ void RAD_ActEnableScript(rad_trigger_t *R, void *param)
 	else
 	{
 		if (t->tag[0] != 0)
-			RAD_EnableByTag(NULL, t->tag[0], t->new_disabled, RTS_TAG_NUMBER);
+			RAD_EnableByTag(NULL, t->tag[0], t->new_disabled, false);
 		else
-			RAD_EnableByTag(NULL, t->tag[1], t->new_disabled, RTS_TAG_HASH);
+			RAD_EnableByTag(NULL, t->tag[1], t->new_disabled, true);
 	}
 }
 

@@ -339,7 +339,7 @@ rts_state_t * RAD_FindStateByLabel(rad_script_t *scr, char *label)
 // either enables them or disables them (based on `disable').
 // Actor can be NULL.
 //
-void RAD_EnableByTag(mobj_t *actor, uint32_t tag, bool disable, s_tagtype_e tagtype)
+void RAD_EnableByTag(mobj_t *actor, uint32_t tag, bool disable, bool using_string_hash)
 {
 	rad_trigger_t *trig;
 
@@ -348,7 +348,8 @@ void RAD_EnableByTag(mobj_t *actor, uint32_t tag, bool disable, s_tagtype_e tagt
 
 	for (trig=active_triggers; trig; trig=trig->next)
 	{
-		if (trig->info->tag[tagtype] == tag)
+		if ((!using_string_hash && trig->info->tag[0] == tag) ||
+			(using_string_hash && trig->info->tag[1] == tag))
 			break;
 	}
 
@@ -381,7 +382,7 @@ void RAD_EnableByTag(mobj_t *actor, const char *name, bool disable)
 
 	for (trig=active_triggers; trig; trig=trig->next)
 	{
-		if (trig->info->tag[RTS_TAG_HASH] == tag)
+		if (trig->info->tag[1] == tag)
 			break;
 	}
 

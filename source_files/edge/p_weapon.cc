@@ -1671,7 +1671,7 @@ void A_WeaponEnableRadTrig(mobj_t *mo)
 	if (psp->state && psp->state->action_par)
 	{
 		int tag = *(int *)psp->state->action_par;
-		RAD_EnableByTag(mo, tag, false, RTS_TAG_NUMBER);
+		RAD_EnableByTag(mo, tag, false, false);
 	}
 }
 
@@ -1683,7 +1683,7 @@ void A_WeaponDisableRadTrig(mobj_t *mo)
 	if (psp->state && psp->state->action_par)
 	{
 		int tag = *(int *)psp->state->action_par;
-		RAD_EnableByTag(mo, tag, true, RTS_TAG_NUMBER);
+		RAD_EnableByTag(mo, tag, true, false);
 	}
 }
 

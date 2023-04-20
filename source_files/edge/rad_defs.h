@@ -30,13 +30,6 @@ struct rts_state_s;
 struct rad_script_s;
 struct rad_trigger_s;
 
-typedef enum
-{
-	RTS_TAG_NUMBER = 0,
-	RTS_TAG_HASH
-}
-s_tagtype_e;
-
 typedef struct s_weapon_s
 {
 	char *name = nullptr;

@@ -1583,7 +1583,7 @@ static bool P_ActivateSpecialLine(line_t * line,
 
 	if (special->trigger_effect && tag > 0)
 	{
-		RAD_EnableByTag(thing, tag, special->trigger_effect < 0, false);
+		RAD_EnableByTag(thing, tag, special->trigger_effect < 0);
 		texSwitch = true;
 	}
 

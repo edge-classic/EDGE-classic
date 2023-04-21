@@ -849,7 +849,7 @@ void RAD_GroupTriggerTags(rad_trigger_t *trig)
 		if (cur == trig)
 			continue;
 
-		if (cur->info->tag == trig->info->tag)
+		if ((cur->info->tag[0] && (cur->info->tag[0] == trig->info->tag[0])) || (cur->info->tag[1] && (cur->info->tag[1] == trig->info->tag[1])))
 			break;
 	}
 

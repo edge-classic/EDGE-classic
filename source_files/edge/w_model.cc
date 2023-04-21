@@ -314,6 +314,11 @@ modeldef_c *LoadModelFromLump(int model_num)
 			{
 				skinname = epi::STR_Format("%s%d",basename.c_str(), i);
 				def->skins[i] = W_ImageLookup(skinname.c_str(), INS_Sprite, ILF_Null);
+				if (!def->skins[i])
+				{
+					skinname = epi::STR_Format("%sSKN%d",basename.c_str(), i);
+					def->skins[i] = W_ImageLookup(skinname.c_str(), INS_Sprite, ILF_Null);
+				}
 			}
 			else
 			{
@@ -326,7 +331,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 	// need at least one skin (MD2/MD3 only; MDLs and VXLs should have them baked in already)
 	if (def->md2_model)
 	{
-		if (! def->skins[1])
+		if (! def->skins[1]) // What happened to skin 0? - Dasho
 		{
 			if (pack_file)
 				I_Error("Missing model skin: %s1\n", basename.c_str());

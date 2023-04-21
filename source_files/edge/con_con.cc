@@ -1771,6 +1771,7 @@ void CON_PrintEndoom()
 		delete[] data;
 		return;
 	}
+	CON_Printf("\n\n");
 	int row_counter = 0;
 	for (int i = 0; i < 4000; i+=2)
 	{
@@ -1782,6 +1783,7 @@ void CON_PrintEndoom()
 			row_counter = 0;
 		}
 	}
+	CON_Printf("\n");
 	delete[] data;
 }
 

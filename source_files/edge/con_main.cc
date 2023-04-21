@@ -508,6 +508,7 @@ static void KillArgs(char **argv, int argc)
 const con_cmd_t builtin_commands[] =
 {
 	{ "args",           CMD_ArgList },
+	{ "cat",            CMD_Type },
 	{ "cls",            CMD_Clear },
 	{ "clear",          CMD_Clear },
 	{ "crc",            CMD_Crc },

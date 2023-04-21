@@ -157,6 +157,11 @@ modeldef_c *LoadModelFromLump(int model_num)
 	lump_num = W_CheckFileNumForName(lumpname.c_str());
 	packname = epi::STR_Format("%s.md3", basename.c_str());
 	pack_num = W_CheckPackForName(packname);
+	if (pack_num == -1)
+	{
+		packname = epi::STR_Format("%sMD3.md3", basename.c_str());
+		pack_num = W_CheckPackForName(packname);
+	}
 
 	if (lump_num > -1 || pack_num > -1)
 	{
@@ -185,6 +190,11 @@ modeldef_c *LoadModelFromLump(int model_num)
 		lump_num = W_CheckFileNumForName(lumpname.c_str());
 		packname = epi::STR_Format("%s.md2", basename.c_str());
 		pack_num = W_CheckPackForName(packname);
+		if (pack_num == -1)
+		{
+			packname = epi::STR_Format("%sMD2.md2", basename.c_str());
+			pack_num = W_CheckPackForName(packname);
+		}
 		if (lump_num > -1 || pack_num > -1)
 		{
 			if (pack_num > lump_num)
@@ -213,6 +223,11 @@ modeldef_c *LoadModelFromLump(int model_num)
 		lump_num = W_CheckFileNumForName(lumpname.c_str());
 		packname = epi::STR_Format("%s.mdl", basename.c_str());
 		pack_num = W_CheckPackForName(packname);
+		if (pack_num == -1)
+		{
+			packname = epi::STR_Format("%sMDL.mdl", basename.c_str());
+			pack_num = W_CheckPackForName(packname);
+		}
 		if (lump_num > -1 || pack_num > -1)
 		{
 			if (pack_num > lump_num)

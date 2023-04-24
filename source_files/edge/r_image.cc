@@ -45,6 +45,7 @@
 #include "image_data.h"
 #include "image_hq2x.h"
 #include "image_funcs.h"
+#include "path.h"
 #include "str_util.h"
 
 #include "dm_data.h"
@@ -903,6 +904,31 @@ const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon)
 	SYS_ASSERT(lump >= 0);
 
 	image_c *rim = AddImage_Smart(name, IMSRC_Sprite, lump, real_sprites);
+	if (! rim)
+		return NULL;
+
+	// adjust sprite offsets so that (0,0) is normal
+	if (is_weapon)
+	{
+		rim->offset_x += (320.0f / 2.0f - rim->actual_w / 2.0f);  // loss of accuracy
+		rim->offset_y += (200.0f - 32.0f - rim->actual_h);
+	}
+	else
+	{
+		//rim->offset_x -= rim->actual_w / 2;   // loss of accuracy
+		rim->offset_x -= ((float)rim->actual_w) / 2.0f; //Lobo 2023: dancing eye fix
+		rim->offset_y -= rim->actual_h;
+	}
+
+	return rim;
+}
+
+const image_c *W_ImageCreatePackSprite(std::string packname, pack_file_c *pack, bool is_weapon)
+{
+	SYS_ASSERT(pack);
+
+	image_c *rim = AddImage_SmartPack(epi::PATH_GetBasename(packname).u8string().c_str(), 
+		IMSRC_Sprite, packname.c_str(), real_sprites);
 	if (! rim)
 		return NULL;
 

@@ -44,7 +44,7 @@
 
 static std::string image_dirs[5] = {"flats", "graphics", "skins", "sprites", "textures"};
 
-static bool TextureNameFromFilename(std::string& buf, const std::string& stem, bool is_sprite)
+bool Pack_TextureNameFromFilename(std::string& buf, const std::string& stem, bool is_sprite)
 {
 	// returns false if the name is invalid (e.g. longer than 8 chars).
 
@@ -54,20 +54,14 @@ static bool TextureNameFromFilename(std::string& buf, const std::string& stem, b
 
 	while (pos < stem.size())
 	{
-		//if (buf.size() >= 8)
-			//return false;
+		if (buf.size() >= 8 && is_sprite)
+			return false;
 
 		int ch = (unsigned char) stem[pos++];
 
-		// sprites allow a few special characters, but remap caret --> backslash
-		if (is_sprite && ch == '^')
+		// remap caret --> backslash
+		if (ch == '^')
 			ch = '\\';
-		//else if (is_sprite && (ch == '[' || ch == ']'))
-			//{ /* ok */ }
-		//else if (isalnum(ch) || ch == '_')
-			//{ /* ok */ }
-		//else
-			//return false;
 
 		buf.push_back((char) ch);
 	}
@@ -782,7 +776,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 			{
 				std::string texname;
 
-				if (! TextureNameFromFilename(texname, stem, (dir_name == "skins" || dir_name == "sprites")))
+				if (! Pack_TextureNameFromFilename(texname, stem, false))
 				{
 					I_Warning("Illegal image name in EPK: %s\n", entry.name.c_str());
 					continue;
@@ -818,7 +812,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 					AddImage_SmartPack(texname.c_str(), IMSRC_Graphic, entry.packpath.c_str(), real_graphics);
 				else if (dir_name == "flats")
 					AddImage_SmartPack(texname.c_str(), IMSRC_Flat, entry.packpath.c_str(), real_flats);
-				else if (dir_name == "sprites" || dir_name == "skins")
+				else if (dir_name == "skins") // Not sure about this still
 					AddImage_SmartPack(texname.c_str(), IMSRC_Sprite, entry.packpath.c_str(), real_sprites);
 			}
 			else
@@ -986,6 +980,38 @@ epi::file_c * Pack_OpenMatch(pack_file_c *pack, const std::string& name, const s
 	}
 
 	return NULL;
+}
+
+std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack)
+{
+	std::vector<std::string> found_sprites;
+
+	int d = pack->FindDir("sprites");
+	if (d > 0)
+	{
+		for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+		{
+			pack_entry_c& entry = pack->dirs[d].entries[i];
+
+			// split filename in stem + extension
+			std::string stem = epi::PATH_GetBasename(UTFSTR(entry.name)).u8string();
+			std::string ext  = epi::PATH_GetExtension(UTFSTR(entry.name)).u8string();
+
+			epi::str_lower(ext);
+
+			if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" || ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
+			{
+				std::string texname;
+
+				if (! Pack_TextureNameFromFilename(texname, stem, true))
+					continue;
+
+				found_sprites.push_back(entry.packpath);				
+			}
+		}
+	}
+
+	return found_sprites;
 }
 
 static void ProcessMapsInPack(pack_file_c *pack)

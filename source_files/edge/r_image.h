@@ -34,6 +34,7 @@
 
 #include "r_defs.h"
 #include "r_state.h"
+#include "w_epk.h"
 
 struct texturedef_s;
 
@@ -247,6 +248,7 @@ void W_DeleteAllImages(void);
 void W_ImageCreateFlats(std::vector<int>& lumps);
 void W_ImageCreateTextures(struct texturedef_s ** defs, int number);
 const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon);
+const image_c *W_ImageCreatePackSprite(std::string packname, pack_file_c *pack, bool is_weapon);
 void W_ImageCreateUser(void);
 void W_ImageAddTX(int lump, const char *name, bool hires);
 void W_AnimateImageSet(const image_c ** images, int number, int speed);

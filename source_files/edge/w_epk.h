@@ -39,6 +39,12 @@ bool Pack_FindFile(pack_file_c *pack, const std::string& name);
 // Check images/sound/etc that may override WAD-oriented lumps or definitions
 void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index);
 
+// Check /sprites directory for sprites to automatically add during W_InitSprites
+std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack);
+
+// Move to EPI utility class?
+bool Pack_TextureNameFromFilename(std::string& buf, const std::string& stem, bool is_sprite);
+
 #endif /* __W_PK3__ */
 
 //--- editor settings ---

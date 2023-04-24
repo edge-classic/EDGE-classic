@@ -30,12 +30,17 @@
 
 #include "i_defs.h"
 
+// EPI
+#include "path.h"
+#include "str_util.h"
+
 #include "e_main.h"
 #include "e_search.h"
 #include "r_image.h"
 #include "r_things.h"
 #include "w_sprite.h"
 #include "w_files.h"
+#include "w_epk.h"
 #include "w_wad.h"
 
 #include "p_local.h"  // mobjlisthead
@@ -227,6 +232,36 @@ static void InstallSpriteLump(spritedef_c *def, int lump,
 	frame->flip[rot] = flip;
 }
 
+static void InstallSpritePack(spritedef_c *def, pack_file_c *pack,
+    std::string spritebase, std::string packname, int pos, byte flip)
+{
+	spriteframe_c *frame = WhatFrame(def, spritebase.c_str(), pos);
+	if (! frame)
+		return;
+
+	// don't disturb any frames already loaded
+	if (frame->finished)
+		return;
+
+	int rot = WhatRot(frame, spritebase.c_str(), pos+1);
+	if (rot < 0)
+		return;
+
+	SYS_ASSERT(0 <= rot && rot < 16);
+
+	if (frame->images[rot])
+	{
+		//I_Warning("Sprite %s has two lumps mapped to it (frame %c).\n", 
+				//lumpname, lumpname[pos]);
+		return;
+	}
+
+	frame->images[rot] = W_ImageCreatePackSprite(packname, pack,
+		frame->is_weapon);
+
+	frame->flip[rot] = flip;
+}
+
 static void InstallSpriteImage(spritedef_c *def, const image_c *img,
     const char *img_name, int pos, byte flip)
 {
@@ -258,56 +293,105 @@ static void InstallSpriteImage(spritedef_c *def, const image_c *img,
 //
 static void FillSpriteFrames(int file)
 {
-	std::vector<int> * lumps = W_GetSpriteList(file);
-	if (lumps == NULL)
-		return;
-
-	int lumpnum = (int)lumps->size();
-	if (lumpnum == 0)
-		return;
-
-	// check all lumps for prefixes matching the ones in the sprite
-	// list.  Both lists have already been sorted to make this as fast
-	// as possible.
-
-	int S = 0, L = 0;
-
-	while (S < sprite_map_len && L < lumpnum)
+	if (data_files[file]->wad)
 	{
-		const char *sprname  = sprite_map[S]->name;
-		const char *lumpname = W_GetLumpName((*lumps)[L]);
+		std::vector<int> * lumps = W_GetSpriteList(file);
+		if (lumps == NULL)
+			return;
 
-		// ignore model skins
-		if (lumpname[4] == 'S' && lumpname[5] == 'K' && lumpname[6] == 'N')
+		int lumpnum = (int)lumps->size();
+		if (lumpnum == 0)
+			return;
+
+		// check all lumps for prefixes matching the ones in the sprite
+		// list.  Both lists have already been sorted to make this as fast
+		// as possible.
+
+		int S = 0, L = 0;
+
+		while (S < sprite_map_len && L < lumpnum)
 		{
-			L++; continue;
-		}
+			const char *sprname  = sprite_map[S]->name;
+			const char *lumpname = W_GetLumpName((*lumps)[L]);
 
-		if (strlen(lumpname) != 6 && strlen(lumpname) != 8)
+			// ignore model skins
+			if (lumpname[4] == 'S' && lumpname[5] == 'K' && lumpname[6] == 'N')
+			{
+				L++; continue;
+			}
+
+			if (strlen(lumpname) != 6 && strlen(lumpname) != 8)
+			{
+				I_Warning("Sprite name %s has illegal length.\n", lumpname);
+				L++; continue;
+			}
+
+			int comp = strncmp(sprname, lumpname, 4);
+
+			if (comp < 0)  // S < L
+			{
+				S++; continue;
+			}
+			else if (comp > 0)  // S > L
+			{
+				L++; continue;
+			}
+
+			// we have a match
+			InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, 4, 0);
+
+			if (lumpname[6])
+				InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, 6, 1);
+
+			L++;
+
+		}
+	}
+	else if (data_files[file]->pack)
+	{
+		std::vector<std::string> packsprites = Pack_GetSpriteList(data_files[file]->pack);
+		if (!packsprites.empty())
 		{
-			I_Warning("Sprite name %s has illegal length.\n", lumpname);
-			L++; continue;
+			int S = 0, L = 0;
+
+			while (S < sprite_map_len && L < packsprites.size())
+			{
+				const char *sprname  = sprite_map[S]->name;
+				std::string spritebase;
+				Pack_TextureNameFromFilename(spritebase, epi::PATH_GetBasename(packsprites[L]).u8string(), true);
+
+				if (spritebase.size() != 6 && spritebase.size() != 8)
+				{
+					I_Warning("Sprite name %s has illegal length.\n", spritebase.c_str());
+					L++; continue;
+				}
+
+				// ignore model skins
+				if (spritebase[4] == 'S' && spritebase[5] == 'K' && spritebase[6] == 'N')
+				{
+					L++; continue;
+				}
+
+				int comp = strncmp(sprname, spritebase.c_str(), 4);
+
+				if (comp < 0)  // S < L
+				{
+					S++; continue;
+				}
+				else if (comp > 0)  // S > L
+				{
+					L++; continue;
+				}
+
+				// we have a match
+				InstallSpritePack(sprite_map[S], data_files[file]->pack, spritebase, packsprites[L], 4, 0);
+
+				if (spritebase.size() == 6)
+					InstallSpritePack(sprite_map[S], data_files[file]->pack, spritebase, packsprites[L], 6, 1);
+
+				L++;
+			}
 		}
-
-		int comp = strncmp(sprname, lumpname, 4);
-
-		if (comp < 0)  // S < L
-		{
-			S++; continue;
-		}
-		else if (comp > 0)  // S > L
-		{
-			L++; continue;
-		}
-
-		// we have a match
-		InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, 4, 0);
-
-		if (lumpname[6])
-			InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, 6, 1);
-
-		L++;
-
 	}
 }
 
@@ -431,7 +515,7 @@ static void CheckSpriteFrames(spritedef_c *def)
 	for (int i = 0; i < def->numframes; i++)
 		if (! def->frames[i].finished)
 		{
-			I_Debugf("Frame %d/%d is not finished\n", 1+i, def->numframes);
+			I_Debugf("Frame %d/%d in sprite %s is not finished\n", 1+i, def->numframes, def->name);
 			missing++;
 		}
 

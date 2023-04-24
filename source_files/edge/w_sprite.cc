@@ -386,7 +386,7 @@ static void FillSpriteFrames(int file)
 				// we have a match
 				InstallSpritePack(sprite_map[S], data_files[file]->pack, spritebase, packsprites[L], 4, 0);
 
-				if (spritebase.size() == 6)
+				if (spritebase.size() == 8)
 					InstallSpritePack(sprite_map[S], data_files[file]->pack, spritebase, packsprites[L], 6, 1);
 
 				L++;

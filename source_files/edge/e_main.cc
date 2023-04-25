@@ -1373,7 +1373,7 @@ static void AddSingleCmdLineFile(std::filesystem::path name, bool ignore_unknown
 
 	if (ext == ".wad")
 		kind = FLKIND_PWad;
-	else if (ext == ".pk3" || ext == ".epk")
+	else if (ext == ".pk3" || ext == ".epk" || ext == ".zip")
 		kind = FLKIND_EPK;
 	else if (ext == ".rts")
 		kind = FLKIND_RTS;
@@ -1431,6 +1431,7 @@ static void AddCommandLineFiles(void)
 			// sanity check...
 			if (epi::case_cmp(ext, ".wad") == 0 || 
 				epi::case_cmp(ext, ".pk3") == 0 ||
+				epi::case_cmp(ext, ".zip") == 0 ||
 				epi::case_cmp(ext, ".epk") == 0 ||
 				epi::case_cmp(ext, ".ddf") == 0 ||
 				epi::case_cmp(ext, ".deh") == 0 ||
@@ -1461,6 +1462,7 @@ static void AddCommandLineFiles(void)
 			if (epi::case_cmp(ext, ".wad") == 0 ||
 				epi::case_cmp(ext, ".epk") == 0 ||
 				epi::case_cmp(ext, ".pk3") == 0 ||
+				epi::case_cmp(ext, ".zip") == 0 ||
 				epi::case_cmp(ext, ".ddf") == 0 ||
 				epi::case_cmp(ext, ".rts") == 0)
 			{

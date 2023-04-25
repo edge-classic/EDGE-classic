@@ -2248,7 +2248,7 @@ bool W_IsLumpInPwad(const char *name)
 
 			//we only want pwads
 			//or ewads ;)
-			if (df->kind == FLKIND_PWad || df->kind == FLKIND_EWad)
+			if (df->kind == FLKIND_PWad || df->kind == FLKIND_EWad || df->kind == FLKIND_PackWAD)
 			{
 				in_pwad = true;
 			}

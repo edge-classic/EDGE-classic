@@ -48,6 +48,26 @@ void str_upper(std::u32string& s)
 	s = epi::to_u32string(temp);
 }
 
+void STR_TextureNameFromFilename(std::string& buf, const std::string& stem)
+{
+	size_t pos = 0;
+
+	buf.clear();
+
+	while (pos < stem.size())
+	{
+		int ch = (unsigned char) stem[pos++];
+
+		// remap caret --> backslash
+		if (ch == '^')
+			ch = '\\';
+
+		buf.push_back((char) ch);
+	}
+
+	epi::str_upper(buf);
+}
+
 std::string STR_Format(const char *fmt, ...)
 {
 	/* Algorithm: keep doubling the allocated buffer size

@@ -44,33 +44,6 @@
 
 static std::string image_dirs[5] = {"flats", "graphics", "skins", "sprites", "textures"};
 
-bool Pack_TextureNameFromFilename(std::string& buf, const std::string& stem, bool is_sprite)
-{
-	// returns false if the name is invalid (e.g. longer than 8 chars).
-
-	size_t pos = 0;
-
-	buf.clear();
-
-	while (pos < stem.size())
-	{
-		if (buf.size() >= 8 && is_sprite)
-			return false;
-
-		int ch = (unsigned char) stem[pos++];
-
-		// remap caret --> backslash
-		if (ch == '^')
-			ch = '\\';
-
-		buf.push_back((char) ch);
-	}
-
-	epi::str_upper(buf);
-
-	return (buf.size() > 0);
-}
-
 class pack_entry_c
 {
 public:
@@ -776,11 +749,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 			{
 				std::string texname;
 
-				if (! Pack_TextureNameFromFilename(texname, stem, false))
-				{
-					I_Warning("Illegal image name in EPK: %s\n", entry.name.c_str());
-					continue;
-				}
+				epi::STR_TextureNameFromFilename(texname, stem);
 
 				bool add_it = true;
 
@@ -1003,8 +972,7 @@ std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack)
 			{
 				std::string texname;
 
-				if (! Pack_TextureNameFromFilename(texname, stem, true))
-					continue;
+				epi::STR_TextureNameFromFilename(texname, stem);
 
 				found_sprites.push_back(entry.packpath);				
 			}

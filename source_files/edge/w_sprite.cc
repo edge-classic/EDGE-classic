@@ -312,21 +312,23 @@ static void FillSpriteFrames(int file)
 		while (S < sprite_map_len && L < lumpnum)
 		{
 			const char *sprname  = sprite_map[S]->name;
+			size_t spr_len = strlen(sprname);
 			const char *lumpname = W_GetLumpName((*lumps)[L]);
 
-			// ignore model skins
-			if (lumpname[4] == 'S' && lumpname[5] == 'K' && lumpname[6] == 'N')
-			{
-				L++; continue;
-			}
-
-			if (strlen(lumpname) != 6 && strlen(lumpname) != 8)
+			if (strlen(lumpname) != spr_len+2 && strlen(lumpname) != spr_len+4)
 			{
 				I_Warning("Sprite name %s has illegal length.\n", lumpname);
 				L++; continue;
 			}
 
-			int comp = strncmp(sprname, lumpname, 4);
+			// ignore model skins
+			if (strlen(lumpname) == spr_len+4 &&
+				lumpname[spr_len] == 'S' && lumpname[spr_len+1] == 'K' && lumpname[spr_len+2] == 'N')
+			{
+				L++; continue;
+			}
+
+			int comp = strncmp(sprname, lumpname, spr_len);
 
 			if (comp < 0)  // S < L
 			{
@@ -338,10 +340,10 @@ static void FillSpriteFrames(int file)
 			}
 
 			// we have a match
-			InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, 4, 0);
+			InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, spr_len, 0);
 
-			if (lumpname[6])
-				InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, 6, 1);
+			if (strlen(lumpname) == spr_len+4)
+				InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, spr_len+2, 1);
 
 			L++;
 
@@ -352,27 +354,31 @@ static void FillSpriteFrames(int file)
 		std::vector<std::string> packsprites = Pack_GetSpriteList(data_files[file]->pack);
 		if (!packsprites.empty())
 		{
+			std::sort(packsprites.begin(), packsprites.end());
+
 			int S = 0, L = 0;
 
 			while (S < sprite_map_len && L < packsprites.size())
 			{
 				const char *sprname  = sprite_map[S]->name;
+				size_t spr_len = strlen(sprname);
 				std::string spritebase;
-				Pack_TextureNameFromFilename(spritebase, epi::PATH_GetBasename(packsprites[L]).u8string(), true);
+				epi::STR_TextureNameFromFilename(spritebase, epi::PATH_GetBasename(packsprites[L]).u8string());
 
-				if (spritebase.size() != 6 && spritebase.size() != 8)
+				if (spritebase.size() != spr_len+2 && spritebase.size() != spr_len+4)
 				{
 					I_Warning("Sprite name %s has illegal length.\n", spritebase.c_str());
 					L++; continue;
 				}
 
 				// ignore model skins
-				if (spritebase[4] == 'S' && spritebase[5] == 'K' && spritebase[6] == 'N')
+				if (spritebase.size() == spr_len+4 &&
+					spritebase[spr_len] == 'S' && spritebase[spr_len+1] == 'K' && spritebase[spr_len+2] == 'N')
 				{
 					L++; continue;
 				}
 
-				int comp = strncmp(sprname, spritebase.c_str(), 4);
+				int comp = strncmp(sprname, spritebase.c_str(), spr_len);
 
 				if (comp < 0)  // S < L
 				{
@@ -384,10 +390,10 @@ static void FillSpriteFrames(int file)
 				}
 
 				// we have a match
-				InstallSpritePack(sprite_map[S], data_files[file]->pack, spritebase, packsprites[L], 4, 0);
+				InstallSpritePack(sprite_map[S], data_files[file]->pack, spritebase, packsprites[L], spr_len, 0);
 
-				if (spritebase.size() == 8)
-					InstallSpritePack(sprite_map[S], data_files[file]->pack, spritebase, packsprites[L], 6, 1);
+				if (spritebase.size() == spr_len+4)
+					InstallSpritePack(sprite_map[S], data_files[file]->pack, spritebase, packsprites[L], spr_len+2, 1);
 
 				L++;
 			}
@@ -415,21 +421,23 @@ static void FillSpriteFramesUser()
 	while (S < sprite_map_len && L < img_num)
 	{
 		const char *sprname  = sprite_map[S]->name;
+		size_t spr_len = strlen(sprname);
 		const char *img_name = W_ImageGetName(images[L]);
 
-		// ignore model skins
-		if (img_name[4] == 'S' && img_name[5] == 'K' && img_name[6] == 'N')
-		{
-			L++; continue;
-		}
-
-		if (strlen(img_name) != 6 && strlen(img_name) != 8)
+		if (strlen(img_name) != spr_len+2 && strlen(img_name) != spr_len+4)
 		{
 			I_Warning("Sprite name %s (IMAGES.DDF) has illegal length.\n", img_name);
 			L++; continue;
 		}
 
-		int comp = strncmp(sprname, img_name, 4);
+		// ignore model skins
+		if (strlen(img_name) == spr_len+4 && 
+			img_name[spr_len] == 'S' && img_name[spr_len+1] == 'K' && img_name[spr_len+2] == 'N')
+		{
+			L++; continue;
+		}
+
+		int comp = strncmp(sprname, img_name, spr_len);
 
 		if (comp < 0)  // S < L
 		{
@@ -441,10 +449,10 @@ static void FillSpriteFramesUser()
 		}
 
 		// we have a match
-		InstallSpriteImage(sprite_map[S], images[L], img_name, 4, 0);
+		InstallSpriteImage(sprite_map[S], images[L], img_name, spr_len, 0);
 
-		if (img_name[6])
-			InstallSpriteImage(sprite_map[S], images[L], img_name, 6, 1);
+		if (strlen(img_name) == spr_len+4)
+			InstallSpriteImage(sprite_map[S], images[L], img_name, spr_len+2, 1);
 
 		L++;
 

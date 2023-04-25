@@ -37,6 +37,8 @@ void str_upper(std::string& s);
 void str_lower(std::u32string& s);
 void str_upper(std::u32string& s);
 
+void STR_TextureNameFromFilename(std::string& buf, const std::string& stem);
+
 std::string STR_Format(const char *fmt, ...) GCCATTR((format(printf, 1, 2)));
 
 std::vector<std::string> STR_SepStringVector(std::string str, char separator);

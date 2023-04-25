@@ -45,6 +45,8 @@
 
 #include "p_local.h"  // mobjlisthead
 
+#include <algorithm> // sort
+
 
 //
 // A sprite definition: a number of animation frames.

@@ -38,6 +38,7 @@
 #include "w_wad.h"
 #include "version.h"
 
+#include <sstream>
 
 #define MAX_CON_ARGS  64
 
@@ -92,7 +93,7 @@ int CMD_Type(char **argv, int argc)
 
 	if (argc != 2)
 	{
-		CON_Printf("Usage: type <filename.txt>\n");
+		CON_Printf("Usage: %s <filename.txt>\n", argv[0]);
 		return 2;
 	}
 
@@ -107,6 +108,40 @@ int CMD_Type(char **argv, int argc)
 		CON_Printf("%s", buffer);
 	}
 	fclose(script);
+
+	return 0;
+}
+
+int CMD_Readme(char **argv, int argc)
+{
+	epi::file_c *readme_file = nullptr;
+
+	for (int i = data_files.size() - 1; i > 0; i--)
+	{
+		if (data_files[i]->pack)
+		{
+			std::filesystem::path readme_check = epi::PATH_GetFilename(data_files[i]->name);
+			readme_check.replace_extension(".txt");
+			readme_file = W_OpenPackFile(readme_check.u8string());
+			if (readme_file) break;
+		}
+	}
+
+	if (!readme_file)
+	{
+		CON_Printf("No readme text files found in current load order!\n");
+		return 1;
+	}
+	else
+	{
+		std::string readme = readme_file->ReadText();
+		delete readme_file;
+		std::istringstream readme_strings(readme);
+		for (std::string line; std::getline(readme_strings, line); )
+		{
+			CON_Printf("%s\n", line.c_str());
+		}
+	}
 
 	return 0;
 }
@@ -521,6 +556,7 @@ const con_cmd_t builtin_commands[] =
 	{ "warp",           CMD_Map },  // compatibility
 	{ "playsound",      CMD_PlaySound },
 //	{ "resetkeys",      CMD_ResetKeys },
+	{ "readme",      	CMD_Readme },
 	{ "resetvars",      CMD_ResetVars },
 	{ "showfiles",      CMD_ShowFiles },
   	{ "showjoysticks",  CMD_ShowJoysticks },

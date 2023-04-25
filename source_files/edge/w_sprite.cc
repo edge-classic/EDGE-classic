@@ -31,6 +31,7 @@
 #include "i_defs.h"
 
 // EPI
+#include "endianess.h"
 #include "path.h"
 #include "str_util.h"
 
@@ -44,6 +45,8 @@
 #include "w_wad.h"
 
 #include "p_local.h"  // mobjlisthead
+
+#include "dm_data.h" // patch_t
 
 #include <algorithm> // sort
 
@@ -448,6 +451,43 @@ static void FillSpriteFramesUser()
 		else if (comp > 0)  // S > L
 		{
 			L++; continue;
+		}
+
+		// Fix offsets if Doom formatted
+		// Not sure if this is the 'proper' place to do this yet - Dasho
+		if (images[L]->source.graphic.is_patch)
+		{
+			// const override
+			image_c *change_img = (image_c *)images[L];
+			epi::file_c *offset_check = nullptr;
+			if (images[L]->source.graphic.packfile_name[0])
+				offset_check = W_OpenPackFile(images[L]->source.graphic.packfile_name);
+			else
+				offset_check = W_OpenLump(images[L]->source.graphic.lump);
+			
+			if (!offset_check)
+				I_Error("FillSpriteFramesUser: Error loading %s!\n", images[L]->name.c_str());
+
+			byte header[32];
+			memset(header, 255, sizeof(header));
+			offset_check->Read(header, sizeof(header));
+			delete offset_check;
+
+			const patch_t *pat = (patch_t *) header;
+			change_img->offset_x = EPI_LE_S16(pat->leftoffset);
+			change_img->offset_y = EPI_LE_S16(pat->topoffset);
+			// adjust sprite offsets so that (0,0) is normal
+			if (sprite_map[S]->HasWeapon())
+			{
+				change_img->offset_x += (320.0f / 2.0f - change_img->actual_w / 2.0f);  // loss of accuracy
+				change_img->offset_y += (200.0f - 32.0f - change_img->actual_h);
+			}
+			else
+			{
+				//rim->offset_x -= rim->actual_w / 2;   // loss of accuracy
+				change_img->offset_x -= ((float)change_img->actual_w) / 2.0f; //Lobo 2023: dancing eye fix
+				change_img->offset_y -= change_img->actual_h;
+			}
 		}
 
 		// we have a match

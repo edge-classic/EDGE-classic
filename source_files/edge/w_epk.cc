@@ -982,26 +982,26 @@ std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack)
 	return found_sprites;
 }
 
-static void ProcessMapsInPack(pack_file_c *pack)
+
+static void ProcessWADsInPack(pack_file_c *pack)
 {
-	int d = pack->FindDir("maps");
-	if (d < 0)
-		return;
-
-	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+	for (size_t d = 0; d < pack->dirs.size(); d++)
 	{
-		pack_entry_c& entry = pack->dirs[d].entries[i];
-
-		if (!entry.HasExtension(".wad")) continue;
-
-		epi::file_c *pack_wad = Pack_OpenFile(pack, entry.packpath);
-
-		if (pack_wad)
+		for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
 		{
-			data_file_c *pack_wad_df = new data_file_c(entry.name, FLKIND_PackWAD);
-			pack_wad_df->name = entry.name;
-			pack_wad_df->file = pack_wad;
-			ProcessFile(pack_wad_df);
+			pack_entry_c& entry = pack->dirs[d].entries[i];
+
+			if (!entry.HasExtension(".wad")) continue;
+
+			epi::file_c *pack_wad = Pack_OpenFile(pack, entry.packpath);
+
+			if (pack_wad)
+			{
+				data_file_c *pack_wad_df = new data_file_c(entry.name, FLKIND_PackWAD);
+				pack_wad_df->name = entry.name;
+				pack_wad_df->file = pack_wad;
+				ProcessFile(pack_wad_df);
+			}
 		}
 	}
 }
@@ -1032,7 +1032,7 @@ void ProcessPackage(data_file_c *df, size_t file_index)
 	if ((df->kind == FLKIND_EFolder || df->kind == FLKIND_EEPK) && file_index == 0)
 		ProcessCoalAPIInPack(df->pack);
 	ProcessCoalHUDInPack(df->pack);
-	ProcessMapsInPack(df->pack);
+	ProcessWADsInPack(df->pack);
 }
 
 //--- editor settings ---

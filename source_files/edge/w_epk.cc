@@ -26,6 +26,7 @@
 // EPI
 #include "epi.h"
 #include "file.h"
+#include "file_memory.h"
 #include "filesystem.h"
 #include "path.h"
 #include "sound_types.h"
@@ -997,11 +998,16 @@ static void ProcessWADsInPack(pack_file_c *pack)
 
 			if (pack_wad)
 			{
+				byte *raw_pack_wad = pack_wad->LoadIntoMemory();
+				epi::mem_file_c *pack_wad_mem = new epi::mem_file_c(raw_pack_wad, pack_wad->GetLength(), true);
+				delete[] raw_pack_wad; // copied on pack_wad_mem creation
 				data_file_c *pack_wad_df = new data_file_c(entry.name, FLKIND_PackWAD);
 				pack_wad_df->name = entry.name;
-				pack_wad_df->file = pack_wad;
+				pack_wad_df->file = pack_wad_mem;
 				ProcessFile(pack_wad_df);
 			}
+
+			delete pack_wad;
 		}
 	}
 }

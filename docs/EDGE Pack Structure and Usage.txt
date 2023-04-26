@@ -1,0 +1,32 @@
+
+=======================================
+EDGE Pack Structure and Usage (Draft)
+=======================================
+
+by The EDGE Team.  April 2023.
+
+=======================================
+Introduction
+=======================================
+
+The term "Pack" is used to refer to both compressed archives and whole directories that are passed
+to the program via the -file and -dir parameters, drag-and-drop, response files, et cetera. They are
+handled in the same manner by the underlying program, and as such follow the same file heirarchy and
+usage patterns.
+
+=======================================
+Supported Archive Formats
+=======================================
+
+Zip-compressed archives with the following extensions are recognized and loaded by the program:
+
+.epk - An abbreviation of "EDGE PacKage"; this is the preferred extension to differentiate EDGE-specific
+       archives from archives supported by other source ports. Currently works with SLADE; other editing
+       tools may not recognize this by default (yet).
+
+.pk3 - The most common extension recognized by various editing tools, but runs a high risk of being mistaken for a 
+       file meant to be used with the ZDoom family of ports.
+
+.zip - The default format for files from the /idgames archive, this should also be easily loaded by most editing tools.
+
+(To be continued)

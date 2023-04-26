@@ -2,7 +2,7 @@
 BSD 2-Clause License
 ------------------------------------------------------------------------------------------
 
-miniz library gzip support - Copyright (c) 2015 Wojciech Adam Koszek
+miniz library (gzip support) - Copyright (c) 2015 Wojciech Adam Koszek
 
 ------------------------------------------------------------------------------------------
 BSD 3-Clause License
@@ -29,7 +29,7 @@ CC 1.0 Universal License
 
 minimp3 library - lieff
 
-ProtoSquare!.sf2 - Yingchun Soul
+"ProtoSquare!" soundfont - Yingchun Soul
 
 ------------------------------------------------------------------------------------------
 CC-BY-3.0 Unported License
@@ -38,20 +38,26 @@ CC-BY-3.0 Unported License
 German Shepherd Dog Sprites - Copyright (c) 2017 Nash Muhandes
 
 ------------------------------------------------------------------------------------------
+CC-BY-NC-4.0 International License
+------------------------------------------------------------------------------------------
+
+REKKR (various assets) - Copyright (c) 2021 Mockingbird Softworks
+
+------------------------------------------------------------------------------------------
 CC-BY-SA-4.0 International License
 ------------------------------------------------------------------------------------------
 
 "Bonkers for Bits" soundfont - Copyright (c) Marcel J. Therrien
 
-dmxopl.op2 and dmxopl3.wopl - Copyright (c) ConSiGno
+"DMXOPL" and "DMXPOL3" instrument banks - Copyright (c) ConSiGno
 
 ------------------------------------------------------------------------------------------
 GPL2 License
 ------------------------------------------------------------------------------------------
 
-adplug.op2 - Copyright (C) 1999, 2000, 2001 Simon Peter, et al.
+"Adplug" instrument bank - Copyright (C) 1999, 2000, 2001 Simon Peter, et al.
 
-AJ-BSP - Copyright (c) 2000-2023 Andrew Apted, et al
+AJBSP - Copyright (c) 2000-2023 Andrew Apted, et al
 	 Copyright (c) 1994-1998 Colin Reed
 	 Copyright (c) 1997-1998 Lee Killough
 
@@ -83,7 +89,7 @@ XMIDI library - Copyright (c) 2015-2022 Vitaly Novichkov
 MIT License
 ------------------------------------------------------------------------------------------
 
-16-Bit Game Station.op2 - Copyright (c) 2022 Yingchun Soul
+"16-Bit Game Station" soundfont - Copyright (c) 2022 Yingchun Soul
 
 BW_Midi_Sequencer library - Copyright (c) 2015-2022 Vitaly Novichkov
 
@@ -97,7 +103,7 @@ miniz library - Copyright (c) 2013-2014 RAD Game Tools and Valve Software
 
 PNPOLY algorithm - Copyright (c) 1970-2003 Wm. Randolph Franklin
 
-wadsmoosh.op2 - Copyright (c) 2016-2020 JP LeBreton
+"WadSmoosh" instrument bank - Copyright (c) 2016-2020 JP LeBreton
 
 ------------------------------------------------------------------------------------------
 Public Domain
@@ -105,7 +111,7 @@ Public Domain
 
 Fraction.hpp - Bisqwit
 
-GMGSx.sf2 (renamed to default.sf2) - Kenneth Rundt
+"GMGSx" soundfont (renamed to default.sf2) - Kenneth Rundt
 
 dr_wav and dr_flac libraries - David Reid
 
@@ -121,7 +127,7 @@ WidePix (various assets) - Copyright (c) 2020-2021 Nash Muhandes
 WTF License
 ------------------------------------------------------------------------------------------
 
-crsid - Copyright (c) 2022 Hermit (Mihaly Horvath)
+crsid library - Copyright (c) 2022 Hermit (Mihaly Horvath)
 
 ------------------------------------------------------------------------------------------
 zlib License

@@ -32,6 +32,12 @@ minimp3 library - lieff
 ProtoSquare!.sf2 - Yingchun Soul
 
 ------------------------------------------------------------------------------------------
+CC-BY-3.0 Unported License
+------------------------------------------------------------------------------------------
+
+German Shepherd Dog Sprites - Copyright (c) 2017 Nash Muhandes
+
+------------------------------------------------------------------------------------------
 CC-BY-SA-4.0 International License
 ------------------------------------------------------------------------------------------
 
@@ -104,6 +110,12 @@ GMGSx.sf2 (renamed to default.sf2) - Kenneth Rundt
 dr_wav and dr_flac libraries - David Reid
 
 stb_image, stb_image_write, stb_rect_pack and stb_truetype libraries - Sean Barrett
+
+------------------------------------------------------------------------------------------
+WidePix License
+------------------------------------------------------------------------------------------
+
+WidePix (various assets) - Copyright (c) 2020-2021 Nash Muhandes
 
 ------------------------------------------------------------------------------------------
 WTF License

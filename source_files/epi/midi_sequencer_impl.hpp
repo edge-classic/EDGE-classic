@@ -2,7 +2,6 @@
  * BW_Midi_Sequencer - MIDI Sequencer for C++
  *
  * Copyright (c) 2015-2022 Vitaly Novichkov <admin@wohlnet.ru>
- * Copyright (c) 2022 The EDGE Team.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the "Software"),

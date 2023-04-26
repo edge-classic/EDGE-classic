@@ -103,7 +103,7 @@ size_t W_AddPending(std::filesystem::path file, filekind_e kind)
 }
 
 // TODO tidy this
-extern void ProcessFixersForWad(wad_file_c *wad);
+extern void ProcessFixersForWad(data_file_c *df);
 extern void ProcessWad(data_file_c *df, size_t file_index);
 extern void ProcessPackage(data_file_c *df, size_t file_index);
 
@@ -237,9 +237,9 @@ void ProcessFile(data_file_c *df)
 		DEH_ConvertFile(df->name.u8string());
 	}
 
-	// handle fixer-uppers   [ TODO support it for PK3 files too ]
+	// handle fixer-uppers   [ TODO support it for EPK files too ]
 	if (df->wad != NULL)
-		ProcessFixersForWad(df->wad);
+		ProcessFixersForWad(df);
 }
 
 

@@ -841,8 +841,9 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 	// TODO: handle Read failure
     file->Read(&header, sizeof(raw_wad_header_t));
 
- 	// Do not require IWAD header if loading Harmony, REKKR, or a custom standalone IWAD
+ 	// Do not require IWAD header if loading Harmony, REKKR, BFG Edition WADs or a custom standalone IWAD
 	if (epi::prefix_cmp(header.identification, "IWAD") != 0 &&
+		epi::case_cmp(lumpname1, "DMENUPIC") != 0 &&
 		epi::case_cmp(lumpname1, "REKCREDS") != 0 && 
 		epi::case_cmp(lumpname1, "0HAWK01" ) != 0 &&
 		epi::case_cmp(lumpname1, "EDGEIWAD") != 0)
@@ -889,11 +890,30 @@ bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char 
 }
 
 
-void ProcessFixersForWad(wad_file_c *wad)
+void ProcessFixersForWad(data_file_c *df)
 {
+	// Special handling for Doom 2 BFG Edition
+	if (df->kind == FLKIND_IWad)
+	{
+		if (W_CheckNumForName("MAP33") > -1 && W_CheckNumForName("DMENUPIC") > -1)
+		{
+			std::filesystem::path fix_path = epi::PATH_Join(game_dir, UTFSTR("edge_fixes"));
+			fix_path = epi::PATH_Join(fix_path, UTFSTR("doom2_bfg.wad"));
+			if (epi::FS_Access(fix_path, epi::file_c::ACCESS_READ))
+			{
+				W_AddPending(fix_path, FLKIND_PWad);
+
+				I_Printf("WADFIXES: Applying fixes for Doom 2 BFG Edition\n");
+			}
+			else
+				I_Warning("WADFIXES: Doom 2 BFG Edition detected, but fix not found in edge_fixes directory!\n");
+			return;
+		}
+	}
+
 	std::string fix_checker;
 
-	fix_checker = wad->md5_string;
+	fix_checker = df->wad->md5_string;
 
 	if (fix_checker.empty())
 		return;

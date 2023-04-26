@@ -29,4 +29,81 @@ Zip-compressed archives with the following extensions are recognized and loaded 
 
 .zip - The default format for files from the /idgames archive, this should also be easily loaded by most editing tools.
 
+=======================================
+Standard Folder and File References
+=======================================
+
+If using resources that are not referenced by any DDF entries, in order to have them be loaded and used like their equivalent
+lumps, certain locations are enforced:
+
+/colormaps - Location for raw COLORMAP files; no enforced file extension but usually .cmp or .lmp.
+/flats, /graphics, /textures, and /sprites - Location for supported image files, extension must match file type 
+                                             (.lmp is assumed to be a Doom format graphic).
+/skins - Location for MD2/MD3 model skin images with supported filetype; must be placed here instead of /sprites to avoid being treated
+         as a sprite frame with rotation.
+/sounds - Location for supported audio files intended to be used as sound effects. Extension must match file type
+          (.lmp is assumed to be either a Doom or PC Speaker format sound).
+/music - Location for supported audio files intended to be used as music tracks. Extension must match file type.
+
+If a pack file is intended to replace a lump from a previous WAD in the load order, it must have an identical name (minus the file extension).
+For instance, an entry of /music/D_RUNNIN.ogg would be used in lieu of the D_RUNNIN lump as far as the playlist is concerned.
+
+Note that for images, the ^ character in a filename will be remapped to \ to support replacing sprite frames that use the problematic
+(for file paths) \ character.
+
+COAL, DDF, and RTS scripts can be placed in any location within a pack, but the filenames must adhere to EDGE's historical standards:
+
+Lump Name            Filename Equivalent
+---------            -------------------
+
+COALAPI              coal_api.ec
+COALHUDS             coal_hud.ec
+DDFANIM              anims.ddf
+DDFATK               attacks.ddf
+DDFCOLM              colmap.ddf
+DDFFLAT              flats.ddf
+DDFFONT              fonts.ddf
+DDFGAME              games.ddf
+DDFIMAGE             images.ddf
+DDFLANG              language.ldf (Note, LDF not DDF!)
+DDFLEVL              levels.ddf
+DDFLINE              lines.ddf
+DDFPLAY              playlist.ddf
+DDFSECT              sectors.ddf
+DDFSFX               sounds.ddf
+DDFSTYLE             styles.ddf
+DDFSWTH              switch.ddf
+DDFTHING             things.ddf
+DDFWEAP              weapons.ddf
+RSCRIPT              rscript.rts
+
+=======================================
+DDF Folder and File References
+=======================================
+
+When defining resource locations via DDF, there is no restriction or enforcement regarding where a file can be
+located within a pack. 
+
+If a complete path (folder + filename) is used, it should be relative to the root of the pack itself.
+
+Full Path Example (note that there is no leading / - do not start a reference with this character):
+
+[SPR:SNW1A0]
+IMAGE_DATA=PACK:"graphics/snowflakes/SNOW1.png";
+
+This would be valid for a compressed archive that has an entry of /graphics/snowflakes/SNOW1.png, or a folder/file
+path of C:\Users\EDGE-User\Pictures\graphics\snowflakes\SNOW1.png (assuming C:\Users\EDGE-User\Pictures was
+mounted as a folder on startup)
+
+If only a filename is provided, it will return the first matching file within a pack that it can find.
+
+Bare Filename Example:
+
+[SPR:SNW1A0]
+IMAGE_DATA=PACK:"SNOW1.png";
+
+This will use the first SNOW1.png that it encounters unconditionally. The downside to this method is that if there are
+multiple pack entries with the exact same filename, it is not guarnateed which one will be used. It is recommended
+to either avoid identical file names, or to provide a full path if it is intended to use a specific entry.
+
 (To be continued)

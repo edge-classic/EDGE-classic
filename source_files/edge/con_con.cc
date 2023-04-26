@@ -629,6 +629,9 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 	if (x + FNSZ < 0)
 		return;
 
+	if (!std::isprint(cp437_unicode_values[static_cast<u8_t>(ch)]))
+		return;
+
 	float alpha = 1.0f;
 
 	glColor4f(RGB_RED(col)/255.0f, RGB_GRN(col)/255.0f, 

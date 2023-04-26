@@ -42,7 +42,7 @@ typedef enum
 	IMGDT_Colour = 0,   // solid colour
 	IMGDT_File,         // load from an image file
 	IMGDT_Lump,         // load from lump in a WAD
-	IMGDT_Package,      // load from a PK3 package
+	IMGDT_Package,      // load from an EPK package
 	IMGDT_Compose       // compose from patches
 }
 imagedata_type_e;

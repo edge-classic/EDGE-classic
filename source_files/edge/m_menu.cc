@@ -685,7 +685,7 @@ int CenterMenuText(style_c *style, int text_type, const char *str)
 }
 
 //the old one
-static void M_DrawSaveLoadCommon_old(int row, int row2, style_c *style, float LineHeight)
+/*static void M_DrawSaveLoadCommon_old(int row, int row2, style_c *style, float LineHeight)
 {
 	int y = LoadDef.y + LineHeight * row;
 
@@ -764,7 +764,7 @@ static void M_DrawSaveLoadCommon_old(int row, int row2, style_c *style, float Li
 
 	HL_WriteText(style, styledef_c::T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer) + style->def->text[styledef_c::T_HELP].x_offset, 
 		y + style->def->text[styledef_c::T_HELP].y_offset, mbuffer);
-}
+}*/
 
 
 static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHeight)
@@ -3752,7 +3752,7 @@ void M_Init(void)
 	I_Debugf("custom_MenuEpisode =%d \n",custom_MenuEpisode);
 	I_Debugf("custom_MenuDifficulty =%d \n",custom_MenuDifficulty);
 
-	if (W_CheckNumForName("M_HTIC") >= 0)
+	if (W_IsLumpInAnyWad("M_HTIC"))
 		menu_doom = W_ImageLookup("M_HTIC");
 	else
 		menu_doom = W_ImageLookup("M_DOOM");
@@ -3764,7 +3764,7 @@ void M_Init(void)
 	//    else if (W_CheckNumForName("M_EPI5") < 0)
 	//      EpiDef.numitems--;
 
-	if (W_CheckNumForName("HELP") >= 0) //doom2
+	if (W_IsLumpInAnyWad("HELP")) //doom2
     {
         menu_readthis[0] = W_ImageLookup("HELP");
         menu_readthis[1] = W_ImageLookup("CREDIT"); //Unnecessary since we won't see it anyway...
@@ -3780,7 +3780,7 @@ void M_Init(void)
     else //doom or shareware doom
     {
         menu_readthis[0] = W_ImageLookup("HELP1");
-        if (W_CheckNumForName("HELP2") >= 0)
+        if (W_IsLumpInAnyWad("HELP2"))
             menu_readthis[1] = W_ImageLookup("HELP2"); //Shareware doom
         else
             menu_readthis[1] = W_ImageLookup("CREDIT"); //Full doom

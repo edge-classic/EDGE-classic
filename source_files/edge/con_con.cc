@@ -45,6 +45,7 @@
 #include "r_image.h"
 #include "r_modes.h"
 #include "r_wipe.h"
+#include "w_files.h"
 #include "w_wad.h"
 
 #include <vector>
@@ -1749,21 +1750,28 @@ void CON_ShowPosition(void)
 }
 
 
-void CON_PrintEndoom(int en_lump)
+void CON_PrintEndoom()
 {
-	int length;
-	byte *data = (byte *)W_LoadLump(en_lump, &length);
+	int length = 0;
+	byte *data = nullptr;
+
+	data = W_OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
+	if (!data)
+		data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
+	if (!data)
+		data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
 	if (!data)
 	{
-		CON_Printf("CON_PrintEndoom: Failed to read data lump!\n");
+		CON_Printf("CON_PrintEndoom: No ENDOOM screen found!\n");
 		return;
 	}
 	if (length != 4000)
 	{
 		CON_Printf("CON_PrintEndoom: Lump exists, but is malformed! (Length not equal to 4000 bytes)\n");
-		W_DoneWithLump(data);
+		delete[] data;
 		return;
 	}
+	CON_Printf("\n\n");
 	int row_counter = 0;
 	for (int i = 0; i < 4000; i+=2)
 	{
@@ -1775,32 +1783,29 @@ void CON_PrintEndoom(int en_lump)
 			row_counter = 0;
 		}
 	}
-	W_DoneWithLump(data);
+	CON_Printf("\n");
+	delete[] data;
 }
 
 void CON_CreateQuitScreen()
 {
-	int en_lump = W_CheckNumForName("ENDOOM");
-	if (en_lump == -1)
-		en_lump = W_CheckNumForName("ENDTEXT");
-	if (en_lump == -1)
-		en_lump = W_CheckNumForName("ENDBOOM");
-	if (en_lump == -1)
+	int length = 0;
+	byte *data = nullptr;
+
+	data = W_OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
+	if (!data)
+		data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
+	if (!data)
+		data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
+	if (!data)
 	{
 		CON_Printf("No ENDOOM screen found for this WAD!\n");
 		return;
 	}
-	int length;
-	byte *data = (byte *)W_LoadLump(en_lump, &length);
-	if (!data)
-	{
-		CON_Printf("CON_CreateQuitScreen: Failed to read data lump!\n");
-		return;
-	}
 	if (length != 4000)
 	{
-		CON_Printf("CON_CreateQuitScreen: Lump exists, but is malformed! (Length not equal to 4000 bytes)\n");
-		W_DoneWithLump(data);
+		CON_Printf("CON_CreateQuitScreen: ENDOOM exists, but is malformed! (Length not equal to 4000 bytes)\n");
+		delete[] data;
 		return;
 	}
 	int row_counter = 0;
@@ -1815,7 +1820,7 @@ void CON_CreateQuitScreen()
 			row_counter = 0;
 		}
 	}
-	W_DoneWithLump(data);
+	delete[] data;
 }
 
 

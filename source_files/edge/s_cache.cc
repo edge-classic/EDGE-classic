@@ -139,50 +139,75 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 {
 	// open the file or lump, and read it into memory
 	epi::file_c *F;
+	epi::sound_format_e fmt = epi::FMT_Unknown;
 
-	if (def->pack_name != "")
+	if (var_pc_speaker_mode)
 	{
-		F = W_OpenPackFile(def->pack_name);
-
-		if (! F)
+		if (std::filesystem::path(def->pc_speaker_sound).has_extension())
 		{
-			M_WarnError("SFX Loader: Missing sound in PK3: '%s'\n", def->pack_name.c_str());
-			return false;
+			F = W_OpenPackFile(def->pc_speaker_sound);
+			if (!F)
+				F = epi::FS_Open(M_ComposeFileName(game_dir, UTFSTR(def->pc_speaker_sound)),
+					epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+			if (!F)
+			{
+				M_DebugError("SFX Loader: Missing sound: '%s'\n", def->pc_speaker_sound.c_str());
+				return false;
+			}
+			fmt = epi::Sound_FilenameToFormat(def->pc_speaker_sound);
 		}
-
-		// FIXME: get the format from filename (Sound_FilenameToFormat)
-	}
-	else if (def->file_name != "")
-	{
-		std::filesystem::path fn = M_ComposeFileName(game_dir, UTFSTR(def->file_name));
-
-		F = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-
-		if (! F)
+		else // Assume bare name is a lump reference
 		{
-			M_WarnError("SFX Loader: Can't Find File '%s'\n", fn.u8string().c_str());
-			return false;
+			int lump = -1;
+			lump = W_CheckNumForName(def->pc_speaker_sound.c_str());
+			if (lump < 0)
+			{
+				// Just write a debug message for SFX lumps; this prevents spam amongst the various IWADs
+				M_DebugError("SFX Loader: Missing sound lump: %s\n", def->pc_speaker_sound.c_str());
+				return false;
+			}
+			F = W_OpenLump(lump);
+			SYS_ASSERT(F);
 		}
-
-		// FIXME: get the format from filename (Sound_FilenameToFormat)
 	}
-	else 
+	else
 	{
-		int lump = -1;
-		if (var_pc_speaker_mode)
-			lump = W_CheckNumForName(def->pc_speaker_lump.c_str());
-		else
+		if (def->pack_name != "")
+		{
+			F = W_OpenPackFile(def->pack_name);
+			if (! F)
+			{
+				M_DebugError("SFX Loader: Missing sound in EPK: '%s'\n", def->pack_name.c_str());
+				return false;
+			}
+			fmt = epi::Sound_FilenameToFormat(def->pack_name);
+		}
+		else if (def->file_name != "")
+		{
+			std::filesystem::path fn;
+			// Why is this composed with the game dir? - Dasho
+			fn = M_ComposeFileName(game_dir, UTFSTR(def->file_name));
+			F = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+			if (! F)
+			{
+				M_DebugError("SFX Loader: Can't Find File '%s'\n", fn.u8string().c_str());
+				return false;
+			}
+			fmt = epi::Sound_FilenameToFormat(def->file_name);
+		}
+		else 
+		{
+			int lump = -1;
 			lump = W_CheckNumForName(def->lump_name.c_str());
-		if (lump < 0)
-		{
-			// Just write a debug message for SFX lumps; this prevents spam amongst the various IWADs
-			M_DebugError("SFX Loader: Missing sound lump: %s\n", var_pc_speaker_mode ? def->pc_speaker_lump.c_str() :
-				 def->lump_name.c_str());
-			return false;
+			if (lump < 0)
+			{
+				// Just write a debug message for SFX lumps; this prevents spam amongst the various IWADs
+				M_DebugError("SFX Loader: Missing sound lump: %s\n", def->lump_name.c_str());
+				return false;
+			}
+			F = W_OpenLump(lump);
+			SYS_ASSERT(F);
 		}
-
-		F = W_OpenLump(lump);
-		SYS_ASSERT(F);
 	}
 
 	// Load the data into the buffer
@@ -204,18 +229,8 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 		return false;
 	}
 
-	// determine format information
-	epi::sound_format_e fmt = epi::FMT_Unknown;
-
-	if (def->pack_name != "")
-	{
-		fmt = epi::Sound_FilenameToFormat(def->pack_name);
-	}
-	else if (def->file_name != "")
-	{
-		fmt = epi::Sound_FilenameToFormat(def->file_name);
-	}
-	else
+	if ((var_pc_speaker_mode && !std::filesystem::path(def->pc_speaker_sound).has_extension()) ||
+		(def->pack_name == "" && def->file_name == ""))
 	{
 		// for lumps, we must detect the format from the lump contents
 		fmt = epi::Sound_DetectFormat(data, length);
@@ -237,8 +252,13 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 			OK = Load_MP3(buf, data, length);
 			break;
 
+		// Double-check first byte here because pack filename detection could
+		// return FMT_SPK for either
 		case epi::FMT_SPK:
-			OK = Load_WAV(buf, data, length, true);
+			if (data[0] == 0x3)
+				OK = Load_DOOM(buf, data, length);
+			else
+				OK = Load_WAV(buf, data, length, true);
 			break;
 
 		case epi::FMT_DOOM:
@@ -263,7 +283,7 @@ epi::sound_data_c *S_CacheLoad(sfxdef_c *def)
 
 	if (var_pc_speaker_mode)
 	{
-		if (def->pc_speaker_lump.empty())
+		if (def->pc_speaker_sound.empty())
 			pc_speaker_skip = true;
 	}
 

@@ -19,12 +19,16 @@
 #include "i_defs.h"
 #include "i_defs_gl.h"
 
+// EPI
+#include "str_util.h"
+
 #include "e_main.h"
 #include "r_image.h"
 #include "r_md2.h"
 #include "r_mdl.h"
 #include "r_voxel.h"
 #include "r_things.h"
+#include "w_files.h"
 #include "w_model.h"
 #include "w_wad.h"
 
@@ -133,83 +137,207 @@ static void FindModelFrameNames(mdl_model_c *md, int model_num)
 
 modeldef_c *LoadModelFromLump(int model_num)
 {
-	const char *basename = ddf_model_names[model_num].c_str();
+	std::string basename = ddf_model_names[model_num];
 
-	modeldef_c *def = new modeldef_c(basename);
+	modeldef_c *def = new modeldef_c(basename.c_str());
 
-	char lumpname[16];
-	char skinname[16];
+	std::string lumpname;
+	std::string packname;
+	std::string skinname;
 
+	int lump_num = -1;
+	int pack_num = -1;
 	epi::file_c *f = nullptr;
+	bool pack_file = false;
 
-	// try MD3 first, then MD2, then MDL
-	sprintf(lumpname, "%sMD3", basename);
-	if (W_CheckNumForName(lumpname) >= 0)
+	// try MD3 first, then MD2, then MDL, then voxels
+
+	// This section is going to get kinda weird with the introduction of EPKs
+	lumpname = epi::STR_Format("%sMD3", basename.c_str());
+	lump_num = W_CheckFileNumForName(lumpname.c_str());
+	packname = epi::STR_Format("%s.md3", basename.c_str());
+	pack_num = W_CheckPackForName(packname);
+	if (pack_num == -1)
 	{
-		I_Debugf("Loading MD3 model from lump : %s\n", lumpname);
-
-		f = W_OpenLump(lumpname);
-		SYS_ASSERT(f);
-
-		def->md2_model = MD3_LoadModel(f);
+		packname = epi::STR_Format("%sMD3.md3", basename.c_str());
+		pack_num = W_CheckPackForName(packname);
 	}
-	sprintf(lumpname, "%sMD2", basename);
-	if (W_CheckNumForName(lumpname) >= 0)
+
+	if (lump_num > -1 || pack_num > -1)
 	{
-		I_Debugf("Loading MD2 model from lump : %s\n", lumpname);
-
-		f = W_OpenLump(lumpname);
-		if (! f)
-			I_Error("Missing model lump: %s\n", lumpname);
-
-		def->md2_model = MD2_LoadModel(f);
+		if (pack_num > lump_num)
+		{
+			f = W_OpenPackFile(packname);
+			if (f)
+			{
+				I_Debugf("Loading MD3 model from pack file : %s\n", packname.c_str());
+				def->md2_model = MD3_LoadModel(f);
+				pack_file = true;
+			}
+		}
+		else
+		{
+			I_Debugf("Loading MD3 model from lump : %s\n", lumpname.c_str());
+			f = W_OpenLump(lumpname.c_str());
+			if (f)
+				def->md2_model = MD3_LoadModel(f);
+		}
 	}
-	sprintf(lumpname, "%sMDL", basename);
-	if (W_CheckNumForName(lumpname) >= 0)
+
+	if (!f)
 	{
-		I_Debugf("Loading MDL model from lump : %s\n", lumpname);
-
-		f = W_OpenLump(lumpname);
-		if (! f)
-			I_Error("Missing model lump: %s\n", lumpname);
-
-		def->mdl_model = MDL_LoadModel(f);
+		lumpname = epi::STR_Format("%sMD2", basename.c_str());
+		lump_num = W_CheckFileNumForName(lumpname.c_str());
+		packname = epi::STR_Format("%s.md2", basename.c_str());
+		pack_num = W_CheckPackForName(packname);
+		if (pack_num == -1)
+		{
+			packname = epi::STR_Format("%sMD2.md2", basename.c_str());
+			pack_num = W_CheckPackForName(packname);
+		}
+		if (lump_num > -1 || pack_num > -1)
+		{
+			if (pack_num > lump_num)
+			{
+				f = W_OpenPackFile(packname);
+				if (f)
+				{
+					I_Debugf("Loading MD2 model from pack file : %s\n", packname.c_str());
+					def->md2_model = MD2_LoadModel(f);
+					pack_file = true;
+				}
+			}
+			else
+			{
+				I_Debugf("Loading MD2 model from lump : %s\n", lumpname.c_str());
+				f = W_OpenLump(lumpname.c_str());
+				if (f)
+					def->md2_model = MD2_LoadModel(f);
+			}
+		}
 	}
-	sprintf(lumpname, "%sVXL", basename);
-	if (W_CheckNumForName(lumpname) >= 0)
+
+	if (!f)
 	{
-		I_Debugf("Loading voxel from lump : %s\n", lumpname);
+		lumpname = epi::STR_Format("%sMDL", basename.c_str());
+		lump_num = W_CheckFileNumForName(lumpname.c_str());
+		packname = epi::STR_Format("%s.mdl", basename.c_str());
+		pack_num = W_CheckPackForName(packname);
+		if (pack_num == -1)
+		{
+			packname = epi::STR_Format("%sMDL.mdl", basename.c_str());
+			pack_num = W_CheckPackForName(packname);
+		}
+		if (lump_num > -1 || pack_num > -1)
+		{
+			if (pack_num > lump_num)
+			{
+				f = W_OpenPackFile(packname);
+				if (f)
+				{
+					I_Debugf("Loading MDL model from pack file : %s\n", packname.c_str());
+					def->mdl_model = MDL_LoadModel(f);
+					pack_file = true;
+				}
+			}
+			else
+			{
+				I_Debugf("Loading MDL model from lump : %s\n", lumpname.c_str());
+				f = W_OpenLump(lumpname.c_str());
+				if (f)
+					def->mdl_model = MDL_LoadModel(f);
+			}
+		}
+	}
 
-		f = W_OpenLump(lumpname);
-		if (! f)
-			I_Error("Missing model lump: %s\n", lumpname);
+	if (!f)
+	{
+		// This only needs to be checked once for lumps; all voxel formats use this name
+		lumpname = epi::STR_Format("%sVXL", basename.c_str());
+		lump_num = W_CheckFileNumForName(lumpname.c_str());
+		pack_num = -1;
 
-		def->vxl_model = VXL_LoadModel(f, lumpname);
+		std::string vxlname = epi::STR_Format("%s.vxl", basename.c_str());
+		int vxl_num = W_CheckPackForName(vxlname);
+		if (vxl_num > pack_num) pack_num = vxl_num;
+		std::string kv6name = epi::STR_Format("%s.kv6", basename.c_str());
+		int kv6_num = W_CheckPackForName(kv6name);
+		if (kv6_num > pack_num) pack_num = kv6_num;
+		std::string kvxname = epi::STR_Format("%s.kvx", basename.c_str());
+		int kvx_num = W_CheckPackForName(kvxname);
+		if (kvx_num > pack_num) pack_num = kvx_num;
+
+		if (pack_num == vxl_num)
+			packname = vxlname;
+		else if (pack_num == kv6_num)
+			packname = kv6name;
+		else if (pack_num == kvx_num)
+			packname = kvxname;
+		else
+			packname = "";
+
+		if (lump_num > -1 || pack_num > -1)
+		{
+			if (pack_num > lump_num)
+			{
+				f = W_OpenPackFile(packname);
+				if (f)
+				{
+					I_Debugf("Loading voxel model from pack file : %s\n", packname.c_str());
+					def->vxl_model = VXL_LoadModel(f, basename.c_str());
+					pack_file = true;
+				}
+			}
+			else
+			{
+				I_Debugf("Loading voxel model from lump : %s\n", lumpname.c_str());
+				f = W_OpenLump(lumpname.c_str());
+				if (f)
+					def->vxl_model = VXL_LoadModel(f, basename.c_str());
+			}
+		}
 	}
 
 	if (! f)
-		I_Error("Missing model lump for: %s\nIs it missing the MD3, MD2, MDL, or VXL suffix?\n", basename);
+		I_Error("Missing model lump for: %s\n!", basename.c_str());
 
 	SYS_ASSERT(def->md2_model || def->mdl_model || def->vxl_model);
 
-	// close the lump
+	// close the lump/packfile
 	delete f;
 
 	if (def->md2_model)
 	{
 		for (int i=0; i < 10; i++)
 		{
-			sprintf(skinname, "%sSKN%d", basename, i);
-
-			def->skins[i] = W_ImageLookup(skinname, INS_Sprite, ILF_Null);
+			if (pack_file)
+			{
+				skinname = epi::STR_Format("%s%d",basename.c_str(), i);
+				def->skins[i] = W_ImageLookup(skinname.c_str(), INS_Sprite, ILF_Null);
+				if (!def->skins[i])
+				{
+					skinname = epi::STR_Format("%sSKN%d",basename.c_str(), i);
+					def->skins[i] = W_ImageLookup(skinname.c_str(), INS_Sprite, ILF_Null);
+				}
+			}
+			else
+			{
+				skinname = epi::STR_Format("%sSKN%d", basename.c_str(), i);
+				def->skins[i] = W_ImageLookup(skinname.c_str(), INS_Sprite, ILF_Null);		
+			}
 		}
 	}
 
 	// need at least one skin (MD2/MD3 only; MDLs and VXLs should have them baked in already)
 	if (def->md2_model)
 	{
-		if (! def->skins[1])
-			I_Error("Missing model skin: %sSKN1\n", basename);
+		if (! def->skins[1]) // What happened to skin 0? - Dasho
+		{
+			if (pack_file)
+				I_Error("Missing model skin: %s1\n", basename.c_str());
+			else
+				I_Error("Missing model skin: %sSKN1\n", basename.c_str());
+		}
 	}
 
 	if (def->md2_model)

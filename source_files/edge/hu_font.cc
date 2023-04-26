@@ -31,6 +31,7 @@
 #include "r_draw.h"
 #include "r_modes.h"
 #include "r_image.h"
+#include "w_files.h"
 #include "w_wad.h"
 #define STB_RECT_PACK_IMPLEMENTATION
 #include "stb_rect_pack.h"
@@ -230,15 +231,15 @@ void font_c::LoadFontTTF()
 
 		if (!ttf_buffer)
 		{
-			int lump = W_CheckNumForName(def->ttf_name.c_str());
-			if (lump < 0)
-			{
-				I_Error("LoadFontTTF: LUMP '%s' not found for font %s.\n", def->ttf_name.c_str(), def->name.c_str()); 
-			}
-
 			epi::file_c *F;
+			
+			if (std::filesystem::path(def->ttf_name).has_extension()) // check for pack file
+				F = W_OpenPackFile(def->ttf_name);
+			else
+				F = W_OpenLump(W_CheckNumForName(def->ttf_name.c_str()));
 
-			F = W_OpenLump(lump);
+			if (!F)
+				I_Error("LoadFontTTF: '%s' not found for font %s.\n", def->ttf_name.c_str(), def->name.c_str()); 
 
 			ttf_buffer = F->LoadIntoMemory();
 

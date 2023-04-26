@@ -110,10 +110,6 @@ static void ImageStartEntry(const char *name, bool extend)
 			DDF_Error("Missing image name.\n");
 	}
 
-	// W_Image code has limited space for the name
-	if (strlen(name) > 15)
-		DDF_Error("Image name [%s] too long.\n", name);
-
 	dynamic_image = imagedefs.Lookup(name, belong);
 
 	if (extend)
@@ -159,10 +155,12 @@ static void ImageParseField(const char *field, const char *contents, int index, 
 
 static void ImageFinishEntry(void)
 {
-	// files and PK3 only support standard image formats
 	if (dynamic_image->type == IMGDT_File || dynamic_image->type == IMGDT_Package)
 	{
-		dynamic_image->format = LIF_STANDARD;
+		if (std::filesystem::path(dynamic_image->info).extension().u8string() == ".lmp")
+			dynamic_image->format = LIF_DOOM;
+		else
+			dynamic_image->format = LIF_STANDARD;
 	}
 
 	// Add these automatically so modders don't have to remember them
@@ -217,7 +215,6 @@ static void ImageParseColour(const char *value)
 
 static void ImageParseInfo(const char *value)
 {
-	// ouch, hard work here...
 	dynamic_image->info = value;
 }
 

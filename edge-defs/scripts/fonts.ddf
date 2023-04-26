@@ -1,0 +1,85 @@
+// 
+//    EDGE FONTS.DDF -redefine or add new fonts.
+//    For documentation, see https://edge-classic.github.io/
+//
+
+<FONTS>
+
+#VERSION 1.30
+
+[CON_FONT_2]
+TYPE=TRUETYPE;
+TTF="ECFONT01.ttf";
+TTF_SMOOTHING = "ALWAYS";
+//SPACING = -0.3;
+//TTF_DEFAULT_SIZE=15;
+
+
+[ENDFONT] //font used for the ENDOOM lump
+TYPE=IMAGE;
+IMAGE="ENDFONT";
+SPACING = -8;
+
+[EDGE3] //font used for the options menus
+TYPE=TRUETYPE;
+TTF="ECFONT01.ttf";
+TTF_SMOOTHING = "ALWAYS";
+//SPACING = -0.3;
+//TTF_DEFAULT_SIZE=15;
+
+
+[EDGE1] //font used for the big menu graphics
+TYPE=PATCH;
+PATCHES=ED1FN001("A":"Z"),ED1FN046("a":"z"),ED1FN027("!"),ED1FN028("%"),ED1FN029("'"),ED1FN030(","),ED1FN031("-"),ED1FN074("."),ED1FN033("0":"9"),ED1FN043(":"),ED1FN044("?");
+MISSING_PATCH="ED1FN031";
+
+[EDGE2] //font used for the big menu graphics
+TYPE=PATCH;
+PATCHES=ED1FN001("A":"Z"),ED1FN046("a":"z"),ED1FN027("!"),ED1FN028("%"),ED1FN029("'"),ED1FN030(","),ED1FN031("-"),ED1FN074("."),ED1FN033("0":"9"),ED1FN043(":"),ED1FN044("?");
+MISSING_PATCH="ED1FN031";
+
+
+[DOOM]
+TYPE=PATCH;
+PATCHES=STCFN033("!":"_"),STCFN121("|"),
+          STCFN132("?"),STCFN134("?"),STCFN148("?");  // FIXME: charset
+MISSING_PATCH="STCFN000";
+
+[HEXEN]
+TYPE=PATCH;
+PATCHES=FONTA01("!":"Z"),FONTA59("_");
+
+[HEXEN_BIG]
+TYPE=PATCH;
+PATCHES=FONTB01("!":"Z");
+
+[BIG_DIGIT]
+TYPE=PATCH;
+PATCHES=STTNUM0("0":"9"),STTMINUS("-"),STTPRCNT("%");
+
+[STAT_DIGIT]
+TYPE=PATCH;
+PATCHES=WINUM0("0":"9"),WIMINUS("-"),WIPCNT("%"),WICOLON(":");
+
+[GREY_DIGIT]
+TYPE=PATCH;
+PATCHES=STGNUM0("0":"9");
+
+[YELLOW_DIGIT]
+TYPE=PATCH;
+PATCHES=STYSNUM0("0":"9");
+
+[AUTOMAP_DIGIT]
+TYPE=PATCH;
+PATCHES=AMMNUM0("0":"9");
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

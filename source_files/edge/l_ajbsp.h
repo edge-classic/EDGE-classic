@@ -28,8 +28,9 @@
 #define __L_AJBSP__
 
 #include <filesystem>
+#include "w_files.h"
 
-bool AJ_BuildNodes(std::filesystem::path filename, std::filesystem::path outname);
+bool AJ_BuildNodes(data_file_c *df, std::filesystem::path outname);
 
 #endif  // __L_AJBSP__
 

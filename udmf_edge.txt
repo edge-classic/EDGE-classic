@@ -22,9 +22,9 @@ I. Grammar / Syntax
 II. Implementation Semantics
 =======================================
  
---------------------------------
+
 II.C : Implementation Dependence
---------------------------------
+
 
 EDGE supports the "Doom" and "Heretic" namespaces defined in the base specification and adds one new
 one:

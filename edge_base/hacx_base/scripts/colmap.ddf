@@ -1,0 +1,10 @@
+//
+//    EDGE COLMAP.DDF -redefine or add new color maps.
+//    For documentation, see https://edge-classic.github.io/
+//
+
+<COLOURMAPS>
+
+// For HacX's invulnerability power-up you get a blue tinted screen instead of the monochrome white
+[ALLWHITE]
+gl_colour=#3737ff; 

@@ -1,0 +1,56 @@
+// 
+//    EDGE COLMAP.DDF -redefine or add new color maps.
+//    For documentation, see https://edge-classic.github.io/
+//
+
+
+<COLOURMAPS>
+
+#VERSION 1.00
+
+
+[DOG_BLACK]
+gl_colour = #333333;
+
+ 
+[DOG_GREY]
+PACK="GRYREMAP.cmp";
+START=0;
+LENGTH=1;  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

@@ -35,11 +35,14 @@ typedef enum
 {
 	FLKIND_IWad = 0,  // iwad file
 	FLKIND_PWad,      // normal .wad file
-	FLKIND_EWad,      // EDGE.wad
+	FLKIND_EWad,      // edge wad, priority loading
 	FLKIND_XWad,      // ajbsp node wad
 
 	FLKIND_Folder,    // a folder somewhere
-	FLKIND_PK3,       // pk3 (zip) package
+	FLKIND_EFolder,   // edge folder, priority loading
+	FLKIND_EPK,       // epk (zip) package
+	FLKIND_EEPK,	  // edge epks, priority loading (same extension as epk)
+	FLKIND_PackWAD,   // WADs within pack files; should only be used for maps
 
 	FLKIND_DDF,       // .ddf or .ldf file
 	FLKIND_RTS,       // .rts script  file
@@ -84,8 +87,15 @@ void W_ShowFiles();
 void W_ProcessMultipleFiles();
 size_t W_AddPending(std::filesystem::path file, filekind_e kind);
 int W_CheckDDFLumpName(const char *name);
+void ProcessFile(data_file_c *df);
 
 epi::file_c * W_OpenPackFile(const std::string& name);
+
+void W_DoPackSubstitutions(void);
+
+byte *W_OpenPackOrLumpInMemory(const std::string& name, const std::vector<std::string>& extensions, int *length);
+
+int W_CheckPackForName(const std::string& name);
 
 #endif // __W_FILES__
 

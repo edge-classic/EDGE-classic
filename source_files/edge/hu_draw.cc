@@ -1135,17 +1135,23 @@ void HUD_DrawQuitScreen()
 {
 	SYS_ASSERT(endoom_font);
 
-	float FNX = MIN((float)SCREENWIDTH / 80.0f, 320.0f / 80.0f * ((float)SCREENHEIGHT * 0.90f / 200.0f));
-	float FNY = FNX * 2;
-	float cx = MAX(0, (((float)SCREENWIDTH - (FNX * 80.0f)) / 2.0f));
-
-	for (int i=0; i < ENDOOM_LINES; i++)
+	if (quit_lines[0])
 	{
-		HUD_DrawQuitText(i, FNX, FNY, cx);
+		float FNX = MIN((float)SCREENWIDTH / 80.0f, 320.0f / 80.0f * ((float)SCREENHEIGHT * 0.90f / 200.0f));
+		float FNY = FNX * 2;
+		float cx = MAX(0, (((float)SCREENWIDTH - (FNX * 80.0f)) / 2.0f));
+		for (int i=0; i < ENDOOM_LINES; i++)
+		{
+			HUD_DrawQuitText(i, FNX, FNY, cx);
+		}
+		HUD_SetAlignment(0, -1);
+		HUD_DrawText(160, 195 - HUD_StringHeight("Are you sure you want to quit? (Y/N)"), "Are you sure you want to quit? (Y/N)");
 	}
-
-	HUD_SetAlignment(0, -1);
-	HUD_DrawText(160, 195 - HUD_StringHeight("Are you sure you want to quit? (Y/N)"), "Are you sure you want to quit? (Y/N)");
+	else
+	{
+		HUD_SetAlignment(0, -1);
+		HUD_DrawText(160, 100 - (HUD_StringHeight("Are you sure you want to quit? (Y/N)")/2), "Are you sure you want to quit? (Y/N)");
+	}
 }
 
 void HUD_RenderWorld(float x, float y, float w, float h, mobj_t *camera, int flags)

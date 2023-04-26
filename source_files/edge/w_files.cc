@@ -44,7 +44,7 @@
 #include "style.h"
 #include "switch.h"
 #include "flat.h"
-#include "wadfixes.h"
+#include "wadfixes.h" 
 
 // DEHACKED
 #include "deh_edge.h"
@@ -55,7 +55,7 @@
 #include "l_deh.h"
 #include "rad_trig.h"
 #include "w_files.h"
-#include "w_pk3.h"
+#include "w_epk.h"
 #include "w_wad.h"
 
 
@@ -187,7 +187,7 @@ static void W_ExternalRTS(data_file_c *df)
 }
 
 
-static void ProcessFile(data_file_c *df)
+void ProcessFile(data_file_c *df)
 {
 	size_t file_index = data_files.size();
 	data_files.push_back(df);
@@ -210,7 +210,12 @@ static void ProcessFile(data_file_c *df)
 
 		ProcessWad(df, file_index);
 	}
-	else if (df->kind == FLKIND_Folder || df->kind == FLKIND_PK3)
+	else if (df->kind == FLKIND_PackWAD)
+	{
+		SYS_ASSERT(df->file); // This should already be handled by the epk processing
+		ProcessWad(df, file_index);
+	}
+	else if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
 	{
 		ProcessPackage(df, file_index);
 	}
@@ -267,7 +272,7 @@ void W_BuildNodes(void)
 	{
 		data_file_c *df = data_files[i];
 
-		if (df->kind == FLKIND_IWad || df->kind == FLKIND_PWad)
+		if (df->kind == FLKIND_IWad || df->kind == FLKIND_PWad || df->kind == FLKIND_PackWAD)
 		{
 			std::filesystem::path xwa_filename = W_BuildNodesForWad(df);
 
@@ -281,6 +286,22 @@ void W_BuildNodes(void)
 }
 
 //----------------------------------------------------------------------------
+int W_CheckPackForName(const std::string& name)
+{
+	// search from newest file to oldest
+	for (int i = (int)data_files.size() - 1 ; i >= 0 ; i--)
+	{
+		data_file_c *df = data_files[i];
+		if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
+		{
+			if (Pack_FindFile(df->pack, name))
+				return i;
+		}
+	}
+	return -1;
+}
+
+//----------------------------------------------------------------------------
 
 epi::file_c * W_OpenPackFile(const std::string& name)
 {
@@ -288,7 +309,7 @@ epi::file_c * W_OpenPackFile(const std::string& name)
 	for (int i = (int)data_files.size() - 1 ; i >= 0 ; i--)
 	{
 		data_file_c *df = data_files[i];
-		if (df->kind == FLKIND_Folder || df->kind == FLKIND_PK3)
+		if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
 		{
 			epi::file_c *F = Pack_OpenFile(df->pack, name);
 			if (F != NULL)
@@ -302,21 +323,69 @@ epi::file_c * W_OpenPackFile(const std::string& name)
 
 //----------------------------------------------------------------------------
 
+byte *W_OpenPackOrLumpInMemory(const std::string& name, const std::vector<std::string>& extensions, int *length)
+{
+	int lump_df = -1;
+	int lump_num = W_CheckNumForName(name.c_str());
+	if (lump_num > -1)
+		lump_df = W_GetFileForLump(lump_num);
+
+	for (int i = (int)data_files.size() - 1 ; i >= 0 ; i--)
+	{
+		if (i > lump_df)
+		{
+			data_file_c *df = data_files[i];
+			if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
+			{
+				epi::file_c *F = Pack_OpenMatch(df->pack, name, extensions);
+				if (F != NULL)
+				{
+					byte *raw_packfile = F->LoadIntoMemory();
+					*length = F->GetLength();
+					delete F;
+					return raw_packfile;
+				}
+			}
+		}
+	}
+
+	if (lump_num > -1)
+		return W_LoadLump(lump_num, length);
+
+	// not found
+	return nullptr;	
+}
+
+//----------------------------------------------------------------------------
+
+void W_DoPackSubstitutions()
+{
+	for (int i=0; i < data_files.size(); i++)
+	{
+		if (data_files[i]->pack)
+			Pack_ProcessSubstitutions(data_files[i]->pack, i);
+	}
+}
+
+//----------------------------------------------------------------------------
+
 static const char *FileKindString(filekind_e kind)
 {
 	switch (kind)
 	{
-		case FLKIND_IWad:   return "iwad";
-		case FLKIND_PWad:   return "pwad";
-		case FLKIND_EWad:   return "edge";
-		case FLKIND_XWad:   return "xwa";
+		case FLKIND_IWad:    return "iwad";
+		case FLKIND_PWad:    return "pwad";
+		case FLKIND_EWad:    return "edge";
+		case FLKIND_EEPK:    return "edge";
+		case FLKIND_XWad:    return "xwa";
 
-		case FLKIND_Folder: return "DIR";
-		case FLKIND_PK3:    return "pk3";
+		case FLKIND_Folder:  return "DIR";
+		case FLKIND_EFolder: return "edge";
+		case FLKIND_EPK:     return "epk";
 
-		case FLKIND_DDF:    return "ddf";
-		case FLKIND_RTS:    return "rts";
-		case FLKIND_Deh:    return "deh";
+		case FLKIND_DDF:     return "ddf";
+		case FLKIND_RTS:     return "rts";
+		case FLKIND_Deh:     return "deh";
 
 		default: return "???";
 	}

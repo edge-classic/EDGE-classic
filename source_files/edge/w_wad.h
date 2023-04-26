@@ -45,22 +45,21 @@ public:
 };
 
 int W_CheckNumForName(const char *name);
+// Like above, but returns the data file index instead of the sortedlump index
+int W_CheckFileNumForName(const char *name);
+
 int W_CheckNumForName_GFX(const char *name);
 int W_CheckNumForName_XGL(const char *name);
 int W_CheckNumForName_MAP(const char *name);
 int W_CheckNumForTexPatch(const char *name);
 
+
 int W_GetNumForName(const char *name);
 
 int W_LumpLength(int lump);
 
-// TODO: one day tidy this up
-#define W_CacheLumpNum(x)   W_LoadLump((x), NULL)
-#define W_CacheLumpName(x)  W_LoadLump((x), NULL)
-
 byte *W_LoadLump(int lump, int *length = NULL);
 byte *W_LoadLump(const char *name, int *length = NULL);
-void W_DoneWithLump(const void *ptr);
 
 std::string W_LoadString(int lump);
 std::string W_LoadString(const char *name);
@@ -86,6 +85,8 @@ int W_LoboFindSkyImage(int for_file, const char *match);
 bool W_LoboDisableSkybox(const char *ActualSky);
 
 bool W_IsLumpInPwad(const char *name);
+
+bool W_IsLumpInAnyWad(const char *name);
 
 bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char *lumpname2);
 

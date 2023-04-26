@@ -177,6 +177,11 @@ sound_format_e Sound_FilenameToFormat(const std::filesystem::path& filename)
 	if (ext == ".dsp" || ext == ".pcs" || ext == ".gsp" || ext == ".gsw")
 		return FMT_DOOM;
 
+	// Will actually result in checking the first byte to further determine if it's Doom or PC Speaker format;
+	// the above FMT_DOOM stuff is unconditional which is why I didn't throw it up there
+	if (ext == ".lmp")
+		return FMT_SPK;
+
 	return FMT_Unknown;
 }
 

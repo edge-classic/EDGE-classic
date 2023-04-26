@@ -63,8 +63,8 @@ public:
 	std::string file_name;
 	std::string pack_name;
 
-	// PC Speaker equivalent lump
-	std::string pc_speaker_lump;
+	// PC Speaker equivalent sound
+	std::string pc_speaker_sound;
 
 	// sfxinfo ID number
 	// -AJA- Changed to a sfx_t.  It serves two purposes: (a) hold the

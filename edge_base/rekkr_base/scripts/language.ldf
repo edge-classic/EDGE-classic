@@ -1,0 +1,76 @@
+//
+//    EDGE LANGUAGE.LDF -redefine or add new messages.
+//    For documentation, see https://edge-classic.github.io/
+//
+
+<LANGUAGES>
+
+#VERSION 1.10
+
+// ------ English Language Definition File ----------
+
+[ENGLISH]
+
+MenuWhichEpisode="Which Episode?";
+M_EPI1_Desc="Homecoming";
+M_EPI2_Desc="Downfall";
+M_EPI3_Desc="Otherworld";
+M_EPI4_Desc="Bonus";
+
+MenuSkill="Choose skill level:";
+MenuDifficulty1="Scrapper";
+MenuDifficulty2="Brawler";
+MenuDifficulty3="Fighter";
+MenuDifficulty4="Wrecker";
+MenuDifficulty5="BERSERKER";
+
+BotCoop="Co-Op";
+BotOldDM="Deathmatch (Old)";
+BotNewDM="Deathmatch (New)";
+
+BotLow="Low";
+BotMedium="Medium";
+BotHigh="High";
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

@@ -27,15 +27,18 @@
 #define __R_IMAGE__
 
 #include <vector>
+#include <list>
 
 #include "main.h"
 #include "image.h"
 
 #include "r_defs.h"
 #include "r_state.h"
+#include "w_epk.h"
 
 struct texturedef_s;
 
+typedef std::list<image_c *> real_image_container_c;
 
 // the transparent pixel value we use
 #define TRANS_PIXEL  247
@@ -115,7 +118,8 @@ public:
 //!!!!!! private:
 
 	// --- information about where this image came from ---
-	char name[16];
+	//char name[16];
+	std::string name;
 
 	int source_type;  // image_source_e
  
@@ -124,11 +128,11 @@ public:
 		// case IMSRC_Graphic:
 		// case IMSRC_Sprite:
 		// case IMSRC_TX_HI:
-		struct { int lump; bool is_patch; bool user_defined; } graphic;
+		struct { int lump; char packfile_name[64]; bool is_patch; bool user_defined; } graphic;
 
 		// case IMSRC_Flat:
 		// case IMSRC_Raw320x200:
-		struct { int lump; } flat;
+		struct { int lump; char packfile_name[64]; } flat;
 
 		// case IMSRC_Texture:
 		struct { struct texturedef_s *tdef; } texture;
@@ -244,6 +248,7 @@ void W_DeleteAllImages(void);
 void W_ImageCreateFlats(std::vector<int>& lumps);
 void W_ImageCreateTextures(struct texturedef_s ** defs, int number);
 const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon);
+const image_c *W_ImageCreatePackSprite(std::string packname, pack_file_c *pack, bool is_weapon);
 void W_ImageCreateUser(void);
 void W_ImageAddTX(int lump, const char *name, bool hires);
 void W_AnimateImageSet(const image_c ** images, int number, int speed);
@@ -298,6 +303,15 @@ typedef enum
 }
 image_source_e;
 
+// Helper stuff for images in packages
+extern real_image_container_c real_graphics;
+extern real_image_container_c real_textures;
+extern real_image_container_c real_flats;
+extern real_image_container_c real_sprites;
+
+image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *packfile_name,
+								real_image_container_c& container,
+								const image_c *replaces = nullptr);
 
 #endif  // __R_IMAGE__
 

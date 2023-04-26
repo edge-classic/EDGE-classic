@@ -932,13 +932,13 @@ int RGL_UpdateSkyBoxTextures(void)
 
 	// check for custom sky boxes
 	info->face[WSKY_North] = W_ImageLookup(
-			UserSkyFaceName(sky_image->name, WSKY_North), INS_Texture, ILF_Null);
+			UserSkyFaceName(sky_image->name.c_str(), WSKY_North), INS_Texture, ILF_Null);
 
 	//LOBO 2022:
 	//If we do nothing, our EWAD skybox will be used for all maps.
 	//So we need to disable it if we have a pwad that contains it's
 	//own sky.
-	if (W_LoboDisableSkybox(sky_image->name))
+	if (W_LoboDisableSkybox(sky_image->name.c_str()))
 	{
 		info->face[WSKY_North] = NULL;
 		//I_Printf("Skybox turned OFF\n");
@@ -947,7 +947,7 @@ int RGL_UpdateSkyBoxTextures(void)
 	// Set sky color for culling fog - Dasho
 	const byte *what_palette = (const byte *) &playpal_data[0];
 	if (sky_image->source_palette >= 0)
-		what_palette = (const byte *) W_CacheLumpNum(sky_image->source_palette);
+		what_palette = (const byte *) W_LoadLump(sky_image->source_palette);
 	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)sky_image), what_palette, sky_image->opacity);
 	u8_t *temp_rgb = new u8_t[3];
 	tmp_img_data->AverageColor(temp_rgb, 0, sky_image->actual_w, 0, sky_image->actual_h/2);
@@ -965,7 +965,7 @@ int RGL_UpdateSkyBoxTextures(void)
 
 		for (int i = WSKY_East; i < 6; i++)
 			info->face[i] = W_ImageLookup(
-					UserSkyFaceName(sky_image->name, i), INS_Texture);
+					UserSkyFaceName(sky_image->name.c_str(), i), INS_Texture);
 
 		for (int k = 0; k < 6; k++)
 			info->tex[k] = W_ImageCache(info->face[k], false, ren_fx_colmap);
@@ -998,7 +998,7 @@ int RGL_UpdateSkyBoxTextures(void)
 	}
 	else if (sky_image->source_palette >= 0)
 	{
-		what_pal = (const byte *) W_CacheLumpNum(sky_image->source_palette);
+		what_pal = (const byte *) W_LoadLump(sky_image->source_palette);
 		what_pal_cached = true;
 	}
 
@@ -1020,7 +1020,7 @@ int RGL_UpdateSkyBoxTextures(void)
 	delete block;
 
 	if (what_pal_cached)
-		W_DoneWithLump(what_pal);
+		delete[] what_pal;
 
 	return SK;
 }

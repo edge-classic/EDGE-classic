@@ -1,0 +1,42 @@
+// 
+//    EDGE WADFIXES - PWAD-specific fixes
+//    For documentation, see https://github.com/dashodanger/EDGE-classic/
+//
+
+<FIXES>
+
+#VERSION 1.30
+
+[PREACHER]
+MD5="553051da2b974e6c03ef4129d7835748";
+
+[EVITERNITY]
+MD5="fb7662c7adb2e49cb8f693d7ca1c364e";
+
+[ANCIENT_ALIENS]
+MD5="c39a2dd6c81481c364119c2ca5099fd2"; 
+ 
+[AD_MORTEM]
+MD5="85e20664039c4ea273e40565a4ec8b5a";
+
+[AUGER_ZENITH]
+MD5="aaa4ac5f82e61154e5110f09761371b6";
+
+[DBP36]
+MD5="cfdf8bb2c16e43842ab2f2f5ea196fe5";
+
+[HARMONY_1_1]
+MD5="1b0458421d1b8109907a426090a7b842";
+
+[COVERTOPS]
+MD5="dd832bfc809b1bab8d0b1d17e31384e0"; 
+ 
+[QDOOMEC]
+MD5="f22db40f110c9b67d1b7ebab3dcbe63a";  
+
+[QDOOM_101_ORIG]
+MD5="ae7c73085764f97403823c8ec770146d";
+
+[COLD_HARD_CASH]
+MD5="450842739e332f0dab3ba0b7a7889d03";   
+ 

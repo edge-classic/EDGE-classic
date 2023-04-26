@@ -97,17 +97,29 @@ public:
 // Attempt to build nodes for the WAD file containing the given
 // WAD file.  Returns true if successful, otherwise false.
 //
-bool AJ_BuildNodes(std::filesystem::path filename, std::filesystem::path outname)
+bool AJ_BuildNodes(data_file_c *df, std::filesystem::path outname)
 {
 	I_Debugf("AJ_BuildNodes: STARTED\n");
-	I_Debugf("# source: '%s'\n", filename.u8string().c_str());
+	I_Debugf("# source: '%s'\n", df->name.u8string().c_str());
 	I_Debugf("#   dest: '%s'\n", outname.u8string().c_str());
 
 	ec_buildinfo_t info;
 
 	ajbsp::SetInfo(&info);
 
-	ajbsp::OpenWad(filename);
+	epi::file_c *mem_wad = nullptr;
+	byte *raw_wad = nullptr;
+	int raw_length = 0;
+
+	if (df->kind == FLKIND_PackWAD)
+	{
+		mem_wad = W_OpenPackFile(df->name.u8string());
+		raw_length = mem_wad->GetLength();
+		raw_wad = mem_wad->LoadIntoMemory();
+		ajbsp::OpenMem(df->name, raw_wad, raw_length);
+	}
+	else
+		ajbsp::OpenWad(df->name);
 	ajbsp::CreateXWA(outname);
 
 	for (int i = 0 ; i < ajbsp::LevelsInWad() ; i++)
@@ -117,6 +129,12 @@ bool AJ_BuildNodes(std::filesystem::path filename, std::filesystem::path outname
 
 	ajbsp::FinishXWA();
 	ajbsp::CloseWad();
+
+	if (df->kind == FLKIND_PackWAD)
+	{
+		delete[] raw_wad;
+		delete mem_wad;
+	}
 
 	I_Debugf("AJ_BuildNodes: FINISHED\n");
 	return true;

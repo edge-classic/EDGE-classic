@@ -1,0 +1,319 @@
+// 
+//    EDGE COLMAP.DDF -redefine or add new color maps.
+//    For documentation, see https://edge-classic.github.io/
+//
+
+<COLOURMAPS>
+
+#VERSION 1.30
+
+[BERSERK]
+gl_colour = #FF7979; //red
+//gl_colour = #7171FF; //blue
+//gl_colour = #95FF95; //green
+//gl_colour = #FFFF3E; //yellow
+
+
+[NORMAL]
+lump = "COLORMAP";
+start = 0;
+length = 32;
+
+[AUTOMAP_NORMAL]
+pack = "AUTOMAPS.dat";
+start = 0;
+length = 1;
+
+[AUTOMAP_OVERLAY]
+pack = "AUTOMAPS.dat";
+start = 1;
+length = 1;
+
+[YELLOW_THING]
+pack = "TXTYLWS2.dat";
+start = 1;
+length = 1;
+
+// --- Powerup effects -------------
+
+// For the invulnerability effect
+[ALLWHITE]
+lump = "COLORMAP";
+start = 32;
+length = 1;
+
+// For the EDGE night-vision effect
+[ALLGREEN]
+pack = "NITEVMAP.cmp";
+start = 0;
+length = 1;
+
+// --- Environment effects ------------
+
+[WATER] // BLUE WATER HUE
+pack = "WATERMAP.cmp";
+start = 0;
+length = 32;
+special = NO_FLASH;
+
+[SLIME] // GREEN WATER HUE
+pack = "SLIMEMAP.cmp";
+start = 0;
+length = 32;
+special = NO_FLASH;
+
+[LAVA] // RED WATER HUE
+pack = "LAVAMAP.cmp";
+start = 0;
+length = 32;
+special = NO_FLASH;
+
+[YELLOW]
+gl_colour = #FFFF00;
+//special = NO_FLASH;
+
+[PURPLE]
+gl_colour = #8000FF;
+//special = NO_FLASH;
+
+[GREY]
+gl_colour = #171717;
+//special = NO_FLASH;
+
+
+
+// ----- Text Colour remaps ---------------
+
+[TEXT_RED]
+gl_colour = #FF2222;
+
+[TEXT_WHITE]
+gl_colour = #FFFFFF;
+
+[TEXT_GREY]
+gl_colour = #AAAAAA;
+
+[TEXT_GREEN]
+gl_colour = #33FF33;
+
+[TEXT_LT_BLUE]
+gl_colour = #77BBFF;
+
+[TEXT_BLUE]
+gl_colour = #2222FF;
+
+[TEXT_YELLOW]
+gl_colour = #FFFF22;
+
+[TEXT_ORANGE]
+gl_colour = #FFAA22;
+
+[TEXT_BROWN]
+gl_colour = #993311;
+
+[TEXT_BEIGE]
+gl_colour = #BB7B4B;
+
+[TEXT_PINK]
+gl_colour = #FFBBBB;
+
+[TEXT_PURPLE]
+gl_colour = #FF33FF;
+
+// ----- Player Colour Remaps ---------------
+
+[PLAYER_GREEN]
+lump = "COLORMAP";
+start = 0;
+length = 1;
+
+[PLAYER_GREY] 
+pack = "PLYRMAPS.dat"; 
+start = 14; 
+length = 1;
+
+[PLAYER_LT_GREY] 
+pack = "PLYRMAPS.dat"; 
+start = 4; 
+length = 1;
+
+[PLAYER_DK_GREY] 
+pack = "PLYRMAPS.dat"; 
+start = 0; 
+length = 1;
+
+[PLAYER_BROWN] 
+pack = "PLYRMAPS.dat"; 
+start = 1; 
+length = 1;
+
+[PLAYER_DULL_RED] 
+pack = "PLYRMAPS.dat"; 
+start = 2; 
+length = 1;
+
+[PLAYER_LT_RED] 
+pack = "PLYRMAPS.dat"; 
+start = 5; 
+length = 1;
+
+[PLAYER_DK_RED] 
+pack = "PLYRMAPS.dat"; 
+start = 11; 
+length = 1;
+
+[PLAYER_ORANGE] 
+pack = "PLYRMAPS.dat"; 
+start = 3; 
+length = 1;
+
+[PLAYER_PINK] 
+pack = "PLYRMAPS.dat"; 
+start = 6; 
+length = 1;
+
+[PLAYER_GOLD] 
+pack = "PLYRMAPS.dat"; 
+start = 7; 
+length = 1;
+
+[PLAYER_BLUE] 
+pack = "PLYRMAPS.dat"; 
+start = 8; 
+length = 1;
+
+[PLAYER_DK_BLUE] 
+pack = "PLYRMAPS.dat"; 
+start = 9; 
+length = 1;
+
+[PLAYER_DK_GREEN] 
+pack = "PLYRMAPS.dat"; 
+start = 10; 
+length = 1;
+
+[PLAYER_RED_SKIN] 
+pack = "PLYRMAPS.dat"; 
+start = 12; 
+length = 1;
+
+[PLAYER_PALE_SKIN] 
+pack = "PLYRMAPS.dat"; 
+start = 13; 
+length = 1;
+
+// ----- Monster Skin Remaps ---------------
+
+[SKIN_PALE] 
+pack = "SKINMAPS.dat"; 
+start = 0; 
+length = 1;
+
+[SKIN_GREY] 
+pack = "SKINMAPS.dat"; 
+start = 1; 
+length = 1;
+
+[SKIN_BLUE] 
+pack = "SKINMAPS.dat"; 
+start = 2; 
+length = 1;
+
+[SKIN_GREEN] 
+pack = "SKINMAPS.dat"; 
+start = 3; 
+length = 1;
+
+[SKIN_LT_RED] 
+pack = "SKINMAPS.dat"; 
+start = 4; 
+length = 1;
+
+[SARG_BLACK] 
+pack = "SARGMAPS.dat"; 
+start = 0; 
+length = 1;
+
+[SARG_BLUE] 
+pack = "SARGMAPS.dat"; 
+start = 1; 
+length = 1;
+
+[SARG_BROWN] 
+pack = "SARGMAPS.dat"; 
+start = 2; 
+length = 1;
+
+[SARG_GRAY] 
+pack = "SARGMAPS.dat"; 
+start = 3; 
+length = 1;
+
+[SARG_GREEN] 
+pack = "SARGMAPS.dat"; 
+start = 4; 
+length = 1;
+
+[SARG_RED] 
+pack = "SARGMAPS.dat"; 
+start = 5; 
+length = 1;
+
+
+// --- Backwards Compatibility cruft ---------
+
+[SKY]
+lump = "COLORMAP";
+start = 0;
+length = 1;
+
+[FUZZY]
+gl_colour = #777777;
+
+[SHADOW]
+gl_colour = #777777;
+
+[FOG]
+gl_colour = #777777;
+
+[DIMSCREEN]
+gl_colour = #777777;
+
+[ALLBRIGHT]
+gl_colour = #777777;
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

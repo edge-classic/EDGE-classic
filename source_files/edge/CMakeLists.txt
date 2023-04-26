@@ -105,7 +105,7 @@ set (EDGE_SOURCE_FILES
   w_files.cc
   w_flat.cc
   w_model.cc
-  w_pk3.cc
+  w_epk.cc
   w_sprite.cc
   w_texture.cc
   w_wad.cc

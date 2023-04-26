@@ -200,7 +200,7 @@ static epi::image_data_c *ReadFlatAsEpiBlock(image_c *rim)
 	img->Clear(pal_black);
 
 	// read in pixels
-	const byte *src = (const byte*)W_CacheLumpNum(rim->source.flat.lump);
+	const byte *src = (const byte*)W_LoadLump(rim->source.flat.lump);
 
 	for (int y=0; y < h; y++)
 	for (int x=0; x < w; x++)
@@ -217,7 +217,7 @@ static epi::image_data_c *ReadFlatAsEpiBlock(image_c *rim)
 			dest_pix[0] = src_pix;
 	}
 
-	W_DoneWithLump(src);
+	delete[] src;
 
 	// CW: Textures MUST tile! If actual size not total size, manually tile
 	// [ AJA: this does not make them tile, just fills in the black gaps ]
@@ -271,7 +271,7 @@ static epi::image_data_c *ReadTextureAsEpiBlock(image_c *rim)
 	// Composite the columns into the block.
 	for (i=0, patch=tdef->patches; i < tdef->patchcount; i++, patch++)
 	{
-		const patch_t *realpatch = (const patch_t*)W_CacheLumpNum(patch->patch);
+		const patch_t *realpatch = (const patch_t*)W_LoadLump(patch->patch);
 
 		int realsize = W_LumpLength(patch->patch);
 
@@ -288,7 +288,7 @@ static epi::image_data_c *ReadTextureAsEpiBlock(image_c *rim)
 			int offset = EPI_LE_S32(realpatch->columnofs[x - x1]);
 
 			if (offset < 0 || offset >= realsize)
-				I_Error("Bad image offset 0x%08x in image [%s]\n", offset, rim->name);
+				I_Error("Bad image offset 0x%08x in image [%s]\n", offset, rim->name.c_str());
 
 			const column_t *patchcol = (const column_t *)
 				((const byte *) realpatch + offset);
@@ -296,7 +296,7 @@ static epi::image_data_c *ReadTextureAsEpiBlock(image_c *rim)
 			DrawColumnIntoEpiBlock(rim, img, patchcol, x, y1);
 		}
 
-		W_DoneWithLump(realpatch);
+		delete[] realpatch;
 	}
 
 	// CW: Textures MUST tile! If actual size not total size, manually tile
@@ -324,11 +324,17 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 			   rim->source_type == IMSRC_TX_HI);
 
 	int lump = rim->source.graphic.lump;
+	const char *packfile_name = rim->source.graphic.packfile_name;
 
 	// handle PNG/JPEG/TGA images
 	if (! rim->source.graphic.is_patch)
 	{
-		epi::file_c * f = W_OpenLump(lump);
+		epi::file_c *f;
+
+		if (packfile_name[0])
+			f = W_OpenPackFile(packfile_name);
+		else
+			f = W_OpenLump(lump);
 
 		epi::image_data_c *img = epi::Image_Load(f);
 
@@ -336,7 +342,8 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 		delete f;
 
 		if (! img)
-			I_Error("Error loading image in lump: %s\n", W_GetLumpName(lump));
+			I_Error("Error loading image in lump: %s\n", 
+				packfile_name ? packfile_name : W_GetLumpName(lump));
 				
 		return img;
 	}
@@ -359,10 +366,28 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 		img->Clear(TRANS_PIXEL);
 
 	// Composite the columns into the block.
-	const patch_t *realpatch = (const patch_t*)W_CacheLumpNum(lump);
+	const patch_t *realpatch = nullptr;
+	int realsize = 0;
+	
+	if (packfile_name[0] != NULL)
+	{
+		epi::file_c *f = W_OpenPackFile(packfile_name);
+		if (f)
+		{
+			realpatch = (const patch_t*)f->LoadIntoMemory();
+			realsize = f->GetLength();
+		}
+		else
+			I_Error("ReadPatchAsEpiBlock: Failed to load %s!\n", packfile_name);
+		delete f;
+	}
+	else
+	{
+		realpatch = (const patch_t*)W_LoadLump(lump);
+		realsize = W_LumpLength(lump);
+	}
 
-	int realsize = W_LumpLength(lump);
-
+	SYS_ASSERT(realpatch);
 	SYS_ASSERT(rim->actual_w == EPI_LE_S16(realpatch->width));
 	SYS_ASSERT(rim->actual_h == EPI_LE_S16(realpatch->height));
   
@@ -371,7 +396,7 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 		int offset = EPI_LE_S32(realpatch->columnofs[x]);
 
 		if (offset < 0 || offset >= realsize)
-			I_Error("Bad image offset 0x%08x in image [%s]\n", offset, rim->name);
+			I_Error("Bad image offset 0x%08x in image [%s]\n", offset, rim->name.c_str());
 
 		const column_t *patchcol = (const column_t *)
 			((const byte *) realpatch + offset);
@@ -379,7 +404,7 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 		DrawColumnIntoEpiBlock(rim, img, patchcol, x, 0);
 	}
 
-	W_DoneWithLump(realpatch);
+	delete[] realpatch;
 
 	return img;
 }

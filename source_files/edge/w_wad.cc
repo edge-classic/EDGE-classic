@@ -68,6 +68,7 @@
 #include "m_misc.h"
 #include "r_image.h"
 #include "vm_coal.h"
+#include "w_epk.h"
 #include "w_files.h"
 #include "w_wad.h"
 #include "w_texture.h"
@@ -102,7 +103,6 @@ public:
 	int deh_lump;
 
 	// COAL scripts
-	int coal_apis;
 	int coal_huds;
 
 	// BOOM stuff
@@ -117,7 +117,7 @@ public:
 		colmap_lumps(), tx_lumps(), hires_lumps(), xgl_lumps(),
 		level_markers(), skin_markers(),
 		wadtex(),
-		deh_lump(-1), coal_apis(-1), coal_huds(-1),
+		deh_lump(-1), coal_huds(-1),
 		animated(-1), switches(-1),
 		md5_string()
 	{
@@ -563,13 +563,6 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
 			wad->deh_lump = lump;
 		return;
 	}
-	else if (strcmp(info.name, "COALAPI") == 0)
-	{
-		lump_p->kind = LMKIND_DDFRTS;
-		if (wad != NULL)
-			wad->coal_apis = lump;
-		return;
-	}
 	else if (strcmp(info.name, "COALHUDS") == 0)
 	{
 		lump_p->kind = LMKIND_DDFRTS;
@@ -948,7 +941,7 @@ void ProcessDehackedInWad(data_file_c *df)
 
 	DEH_Convert(data, length, source);
 
-	W_DoneWithLump(data);
+	delete[] data;
 }
 
 
@@ -982,21 +975,6 @@ static void ProcessCoalInWad(data_file_c *df)
 
 	wad_file_c *wad = df->wad;
 
-	// only load COALAPI from edge-defs, because (like WADFIXES)
-	// it is not something that user mods should mess with.
-	if (wad->coal_apis >= 0 && df->kind == FLKIND_EWad)
-	{
-		int lump = wad->coal_apis;
-
-		std::string data   = W_LoadString(lump);
-		std::string source = W_GetLumpName(lump);
-
-		source += " in ";
-		source += bare_filename;
-
-		VM_AddScript(0, data, source);
-	}
-
 	if (wad->coal_huds >= 0)
 	{
 		int lump = wad->coal_huds;
@@ -1027,7 +1005,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
 		byte *data = W_LoadLump(animated, &length);
 
 		DDF_ConvertANIMATED(data, length);
-		W_DoneWithLump(data);
+		delete[] data;
 	}
 
 	if (switches >= 0)
@@ -1038,7 +1016,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
 		byte *data = W_LoadLump(switches, &length);
 
 		DDF_ConvertSWITCHES(data, length);
-		W_DoneWithLump(data);
+		delete[] data;
 	}
 
 	// handle BOOM Colourmaps (between C_START and C_END)
@@ -1137,14 +1115,6 @@ void ProcessWad(data_file_c *df, size_t file_index)
 
 	delete[] raw_info;
 
-	// parse the WADFIXES lump from `edge-defs.wad` immediately
-	if (df->kind == FLKIND_EWad)
-	{
-		I_Printf("Loading WADFIXES\n");
-		std::string data = W_LoadString("WADFIXES");
-		DDF_ReadFixes(data);
-	}
-
 	ProcessDehackedInWad(df);
 	ProcessBoomStuffInWad(df);
 	ProcessDDFInWad(df);
@@ -1174,7 +1144,7 @@ std::filesystem::path W_BuildNodesForWad(data_file_c *df)
 	{
 		I_Printf("Building XGL nodes for: %s\n", df->name.u8string().c_str());
 
-		if (! AJ_BuildNodes(df->name, xwa_filename))
+		if (! AJ_BuildNodes(df, xwa_filename))
 			I_Error("Failed to build XGL nodes for: %s\n", df->name.u8string().c_str());
 
 		epi::FS_Sync();
@@ -1621,6 +1591,36 @@ int W_CheckNumForName(const char *name)
 	return sortedlumps[i];
 }
 
+//
+// W_CheckFileNumForName
+//
+// Returns data_files index or -1 if name not found.
+//
+//
+int W_CheckFileNumForName(const char *name)
+{
+	int i;
+	char buf[9];
+
+	if (strlen(name) > 8)
+	{
+		I_Warning("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
+		return -1;
+	}
+
+	for (i = 0; name[i]; i++)
+	{
+		buf[i] = toupper(name[i]);
+	}
+	buf[i] = 0;
+
+	i = QuickFindLumpMap(buf);
+
+	if (i < 0)
+		return -1; // not found
+
+	return lumpinfo[sortedlumps[i]].file;
+}
 
 int W_CheckNumForName_GFX(const char *name)
 {
@@ -1956,7 +1956,7 @@ std::string W_LoadString(int lump)
 
 	std::string result((char *)data, length);
 
-	W_DoneWithLump(data);
+	delete[] data;
 
 	return result;
 }
@@ -1964,19 +1964,6 @@ std::string W_LoadString(int lump)
 std::string W_LoadString(const char *name)
 {
 	return W_LoadString(W_GetNumForName(name));
-}
-
-//
-// W_DoneWithLump
-//
-void W_DoneWithLump(const void *ptr)
-{
-	if (ptr == NULL)
-		I_Error("W_DoneWithLump: NULL pointer");
-
-	byte *data = (byte *)ptr;
-
-	delete[] data;
 }
 
 //
@@ -2154,7 +2141,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 	{
 		if(tempImage->source_type ==IMSRC_User)//from images.ddf
 		{
-			lumpnum = W_CheckNumForName(tempImage->name);
+			lumpnum = W_CheckNumForName(tempImage->name.c_str());
 
 			if (lumpnum != -1)
 			{
@@ -2166,7 +2153,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 				//we only want pwads
 				if (data_files[filenum]->kind == FLKIND_PWad)
 				{
-					I_Debugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name, tempImage->source_type, lumpnum, filenum);
+					I_Debugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name.c_str(), tempImage->source_type, lumpnum, filenum);
 					TurnOffSkyBox = false;
 					return TurnOffSkyBox; //get out of here
 				}
@@ -2186,13 +2173,13 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 		}
 		else if(tempImage->source_type ==IMSRC_User)// texture from images.ddf
 		{
-			I_Debugf("SKYBOX: Sky is: %s. Type:%d  \n", tempImage->name, tempImage->source_type);
+			I_Debugf("SKYBOX: Sky is: %s. Type:%d  \n", tempImage->name.c_str(), tempImage->source_type);
 			TurnOffSkyBox = true; //turn off or not? hmmm...
 			return TurnOffSkyBox;
 		}
 		else //could be a png or jpg i.e. TX_ or HI_
 		{
-			lumpnum = W_CheckNumForName(tempImage->name);
+			lumpnum = W_CheckNumForName(tempImage->name.c_str());
 			//lumpnum = tempImage->source.graphic.lump;
 			if (lumpnum != -1)
 			{
@@ -2220,7 +2207,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 		}
 	}	
 
-	I_Debugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name, tempImage->source_type, lumpnum, filenum);
+	I_Debugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name.c_str(), tempImage->source_type, lumpnum, filenum);
 	return TurnOffSkyBox;
 }
 
@@ -2240,7 +2227,7 @@ bool W_IsLumpInPwad(const char *name)
 	tempImage = W_ImageLookup(name);
 	if (tempImage)
 	{
-		if(tempImage->source_type ==IMSRC_User)//from images.ddf
+		if(tempImage->source_type == IMSRC_User)//from images.ddf
 		{
 			return true;
 		}
@@ -2249,24 +2236,79 @@ bool W_IsLumpInPwad(const char *name)
 	//if we're here then check pwad lumps
 	int lumpnum = W_CheckNumForName(name);
 	int filenum = -1;
+	bool in_pwad = false;
 
 	if (lumpnum != -1)
 	{
 		filenum = W_GetFileForLump(lumpnum);
 
-		if (filenum < 2) return false; //it's edge_defs or the IWAD so we're done
-
-		data_file_c *df = data_files[filenum];
-
-		//we only want pwads
-		//or ewads ;)
-		if (df->kind == FLKIND_PWad || df->kind == FLKIND_EWad)
+		if (filenum >= 2) // ignore edge_defs and the IWAD itself
 		{
-			return true;
+			data_file_c *df = data_files[filenum];
+
+			//we only want pwads
+			//or ewads ;)
+			if (df->kind == FLKIND_PWad || df->kind == FLKIND_EWad || df->kind == FLKIND_PackWAD)
+			{
+				in_pwad = true;
+			}
 		}
 	}
 
-	return false;
+	if (!in_pwad) // Check EPKs/folders now
+	{
+		// search from newest file to oldest
+		for (int i = (int)data_files.size() - 1 ; i >= 2 ; i--) // ignore edge_defs and the IWAD itself
+		{
+			data_file_c *df = data_files[i];
+			if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
+			{
+				if (Pack_FindStem(df->pack, name))
+				{
+					in_pwad = true;
+					break;
+				}
+			}
+		}
+	}
+
+	return in_pwad;
+}
+
+//W_IsLumpInAnyWad
+//
+//check if a lump is in any wad/epk at all
+//
+//Returns true if found
+bool W_IsLumpInAnyWad(const char *name)
+{
+	if(!name)
+		return false;
+
+	int lumpnum = W_CheckNumForName(name);
+	bool in_anywad = false;
+
+	if (lumpnum != -1)
+		in_anywad = true;
+
+	if (!in_anywad)
+	{
+		// search from oldest to newest
+		for (int i = 0 ; i < (int)data_files.size() - 1 ; i++)
+		{
+			data_file_c *df = data_files[i];
+			if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
+			{
+				if (Pack_FindStem(df->pack, name))
+				{
+					in_anywad = true;
+					break;
+				}
+			}
+		}
+	}
+
+	return in_anywad;
 }
 
 //--- editor settings ---

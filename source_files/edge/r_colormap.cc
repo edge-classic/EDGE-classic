@@ -88,7 +88,7 @@ void V_InitPalette(void)
 	if (!pal)
 		I_Error("V_InitPalette: Error opening PLAYPAL!\n");
 	
-	if (pal_length < 10752 || pal_length % 768 != 0)
+	if (pal_length < 10752)
 		I_Error("V_InitPalette: Malformed PLAYPAL!\n");
 
 	// read in palette colours

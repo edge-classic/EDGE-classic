@@ -2159,7 +2159,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 	tempImage = W_ImageLookup(UserSkyBoxName(ActualSky, 0), INS_Texture, ILF_Null);
 	if (tempImage)
 	{
-		if(tempImage->source_type ==IMSRC_User)//from images.ddf
+		if(tempImage->source_type == IMSRC_User)//from images.ddf
 		{
 			lumpnum = W_CheckNumForName(tempImage->name.c_str());
 
@@ -2171,7 +2171,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 			if (filenum != -1) //make sure we actually have a file
 			{
 				//we only want pwads
-				if (data_files[filenum]->kind == FLKIND_PWad)
+				if (data_files[filenum]->kind == FLKIND_PWad || data_files[filenum]->kind == FLKIND_PackWAD)
 				{
 					I_Debugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name.c_str(), tempImage->source_type, lumpnum, filenum);
 					TurnOffSkyBox = false;
@@ -2220,7 +2220,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 		if (filenum != -1) //make sure we actually have a file
 		{
 			//we only want pwads
-			if (data_files[filenum]->kind == FLKIND_PWad)
+			if (data_files[filenum]->kind == FLKIND_PWad || data_files[filenum]->kind == FLKIND_PackWAD)
 			{
 				TurnOffSkyBox = true;
 			}

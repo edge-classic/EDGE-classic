@@ -11,7 +11,7 @@ Introduction
 
 The term "Pack" is used to refer to both compressed archives and whole directories that are passed
 to the program via the -file and -dir parameters, drag-and-drop, response files, et cetera. They are
-handled in the same manner by the underlying program, and as such follow the same file heirarchy and
+handled in the same manner by the underlying program, and as such follow the same file hierarchy and
 usage patterns.
 
 =======================================
@@ -45,11 +45,18 @@ lumps, certain locations are enforced:
           (.lmp is assumed to be either a Doom or PC Speaker format sound).
 /music - Location for supported audio files intended to be used as music tracks. Extension must match file type.
 
+Subfolders within the aforementioned directories are acceptable, and need no specific naming convention or structure.
+
 If a pack file is intended to replace a lump from a previous WAD in the load order, it must have an identical name (minus the file extension).
 For instance, an entry of /music/D_RUNNIN.ogg would be used in lieu of the D_RUNNIN lump as far as the playlist is concerned.
 
 Note that for images, the ^ character in a filename will be remapped to \ to support replacing sprite frames that use the problematic
 (for file paths) \ character.
+
+WADs within a pack will also be processed and do not need to reside in any particular location. That being said, any WAD within a pack
+will be considered to come 'after' the pack itself for load order purposes. To avoid the confusion that this may cause, it is recommend to 
+only store maps and their associated lumps within pack WADs. The alternative to this would be to store ALL in-game resources within a WAD, 
+with documentation and other miscellany outside of it.
 
 COAL, DDF, and RTS scripts can be placed in any location within a pack, but the filenames must adhere to EDGE's historical standards:
 

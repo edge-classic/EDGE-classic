@@ -85,8 +85,11 @@ void V_InitPalette(void)
 	int pal_length = 0;
 	const byte *pal = (const byte*)W_OpenPackOrLumpInMemory("PLAYPAL", {".pal"}, &pal_length);
 
-	if (!pal || pal_length != 10752)
+	if (!pal)
 		I_Error("V_InitPalette: Error opening PLAYPAL!\n");
+	
+	if (pal_length < 10752 || pal_length % 768 != 0)
+		I_Error("V_InitPalette: Malformed PLAYPAL!\n");
 
 	// read in palette colours
 	for (t = 0; t < 14; t++)

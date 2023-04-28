@@ -50,6 +50,8 @@ fluid_sfloader_t *edge_fluid_sfloader = nullptr;
 
 DEF_CVAR(s_soundfont, "", CVAR_ARCHIVE)
 
+DEF_CVAR(s_fluidgain, "0.3", CVAR_ARCHIVE)
+
 extern std::vector<std::filesystem::path> available_soundfonts;
 
 // Needed to support loading soundfonts from memory in Fluidlite
@@ -99,6 +101,7 @@ bool S_StartupFluid(void)
 	fluid_synth_add_sfloader(edge_fluid, edge_fluid_sfloader);
 
 	fluid_synth_set_sample_rate(edge_fluid, dev_freq);
+	fluid_synth_set_gain(edge_fluid, s_fluidgain.f);
 	
 	if (fluid_synth_sfload(edge_fluid, var_pc_speaker_mode ? epi::PATH_Join(epi::PATH_Join(game_dir, UTFSTR("soundfont")), UTFSTR("bonkers_for_bits.sf2")).generic_u8string().c_str() :
 		s_soundfont.c_str(), 1) == -1)
@@ -337,6 +340,13 @@ public:
 
 	void Ticker(void)
 	{
+		if (s_fluidgain.CheckModified())
+		{
+			s_fluidgain.f = CLAMP(0.0, s_fluidgain.f, 2.0f);
+			s_fluidgain = s_fluidgain.f;
+			fluid_synth_set_gain(edge_fluid, s_fluidgain.f);
+		}
+
 		while (status == PLAYING)
 		{
 			epi::sound_data_c *buf = S_QueueGetFreeBuffer(FLUID_NUM_SAMPLES, 

@@ -43,7 +43,7 @@
 
 #include "miniz.h"
 
-static std::string image_dirs[4] = {"flats", "graphics", "skins", "textures"};
+static std::string image_dirs[5] = {"flats", "graphics", "skins", "textures", "sprites"};
 
 class pack_entry_c
 {
@@ -1040,9 +1040,17 @@ std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack)
 
 			if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" || ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
 			{
-				std::string texname;
 
+				std::string texname;
 				epi::STR_TextureNameFromFilename(texname, stem);
+
+				// Don't add things already defined in DDFIMAGE
+				for (size_t j = 0; j < imagedefs.GetSize(); j++)
+				{
+					imagedef_c *img = imagedefs[j];
+					if (img->name == texname)
+						continue;
+				}
 
 				found_sprites.push_back(entry.packpath);				
 			}

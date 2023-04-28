@@ -2290,7 +2290,7 @@ char **resolveParam(sCurStatus_NewVar *newVar, int vertex, int type) {
 		return ret;
 	}
 	
-	return (char**)0xFFFFFFFFU; // Unreachable
+	return (char**) ((size_t)0xFFFFFFFFU); // Unreachable
 }
 
 #define FAIL(str) curStatusPtr->status = ST_ERROR; if (*error_msg) free(*error_msg); \

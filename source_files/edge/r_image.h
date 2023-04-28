@@ -210,6 +210,7 @@ typedef enum
 }
 image_lookup_flags_e;
 
+image_c *W_ImageDoLookup(real_image_container_c& bucket, const char *name, int source_type = -1);
 const image_c *W_ImageLookup(const char *name, image_namespace_e = INS_Graphic,
 	int flags = 0);
 

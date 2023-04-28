@@ -2025,15 +2025,18 @@ void W_ProcessTX_HI(void)
 	for (int file = 0; file < (int)data_files.size(); file++)
 	{
 		data_file_c *df = data_files[file];
-		wad_file_c *wad = df->wad;
 
-		if (wad == NULL)
-			continue;
-
-		for (int i = 0; i < (int)wad->hires_lumps.size(); i++)
+		if (df->wad)
+		{		
+			for (int i = 0; i < (int)df->wad->hires_lumps.size(); i++)
+			{
+				int lump = df->wad->hires_lumps[i];
+				W_ImageAddTX(lump, W_GetLumpName(lump), true);
+			}
+		}
+		else if (df->pack)
 		{
-			int lump = wad->hires_lumps[i];
-			W_ImageAddTX(lump, W_GetLumpName(lump), true);
+			Pack_ProcessHiresSubstitutions(df->pack, file);
 		}
 	}
 }

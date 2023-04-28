@@ -112,14 +112,14 @@ typedef struct cached_image_s
 cached_image_t;
 
 
-static image_c *do_Lookup(real_image_container_c& bucket, const char *name,
-                          int source_type = -1
+image_c *W_ImageDoLookup(real_image_container_c& bucket, const char *name,
+                          int source_type
 						  /* use -2 to prevent USER override */)
 {
 	// for a normal lookup, we want USER images to override
 	if (source_type == -1)
 	{
-		image_c *rim = do_Lookup(bucket, name, IMSRC_User);  // recursion
+		image_c *rim = W_ImageDoLookup(bucket, name, IMSRC_User);  // recursion
 		if (rim)
 			return rim;
 	}
@@ -987,21 +987,21 @@ void W_ImageAddTX(int lump, const char *name, bool hires)
 {
 	if (hires)
 	{
-		const image_c *rim = do_Lookup(real_textures, name, -2);
+		const image_c *rim = W_ImageDoLookup(real_textures, name, -2);
 		if (rim && rim->source_type != IMSRC_User)
 		{
 			AddImage_Smart(name, IMSRC_TX_HI, lump, real_textures, rim);
 			return;
 		}
 
-		rim = do_Lookup(real_flats, name, -2);
+		rim = W_ImageDoLookup(real_flats, name, -2);
 		if (rim && rim->source_type != IMSRC_User)
 		{
 			AddImage_Smart(name, IMSRC_TX_HI, lump, real_flats, rim);
 			return;
 		}
 
-		rim = do_Lookup(real_sprites, name, -2);
+		rim = W_ImageDoLookup(real_sprites, name, -2);
 		if (rim && rim->source_type != IMSRC_User)
 		{
 			AddImage_Smart(name, IMSRC_TX_HI, lump, real_sprites, rim);
@@ -1377,7 +1377,7 @@ static const image_c *BackupTexture(const char *tex_name, int flags)
 	// backup plan: try a flat with the same name
 	if (! (flags & ILF_Exact))
 	{
-		rim = do_Lookup(real_flats, tex_name);
+		rim = W_ImageDoLookup(real_flats, tex_name);
 		if (rim)
 			return rim;
 	}
@@ -1429,7 +1429,7 @@ static const image_c *BackupFlat(const char *flat_name, int flags)
 	// backup plan 2: Texture with the same name ?
 	if (! (flags & ILF_Exact))
 	{
-		rim = do_Lookup(real_textures, flat_name);
+		rim = W_ImageDoLookup(real_textures, flat_name);
 		if (rim)
 			return rim;
 	}
@@ -1461,11 +1461,11 @@ static const image_c *BackupGraphic(const char *gfx_name, int flags)
 	// backup plan 1: look for sprites and heretic-background
 	if ((flags & (ILF_Exact | ILF_Font)) == 0)
 	{
-		rim = do_Lookup(real_graphics, gfx_name, IMSRC_Raw320x200);
+		rim = W_ImageDoLookup(real_graphics, gfx_name, IMSRC_Raw320x200);
 		if (rim)
 			return rim;
   
-		rim = do_Lookup(real_sprites, gfx_name);
+		rim = W_ImageDoLookup(real_sprites, gfx_name);
 		if (rim)
 			return rim;
 	}
@@ -1542,23 +1542,23 @@ const image_c *W_ImageLookup(const char *name, image_namespace_e type, int flags
 
 	if (type == INS_Texture)
 	{
-		rim = do_Lookup(real_textures, name);
+		rim = W_ImageDoLookup(real_textures, name);
 		return rim ? rim : BackupTexture(name, flags);
 	}
 	if (type == INS_Flat)
 	{
-		rim = do_Lookup(real_flats, name);
+		rim = W_ImageDoLookup(real_flats, name);
 		return rim ? rim : BackupFlat(name, flags);
 	}
 	if (type == INS_Sprite)
 	{
-		rim = do_Lookup(real_sprites, name);
+		rim = W_ImageDoLookup(real_sprites, name);
 		return rim ? rim : BackupSprite(name, flags);
 	}
 
 	/* INS_Graphic */
 
-	rim = do_Lookup(real_graphics, name);
+	rim = W_ImageDoLookup(real_graphics, name);
 	return rim ? rim : BackupGraphic(name, flags);
 }
 
@@ -1817,7 +1817,7 @@ void W_ImagePreCache(const image_c *image)
 
 		alt_name[2] = (alt_name[2] == '1') ? '2' : '1';
 
-		image_c *alt = do_Lookup(real_textures, alt_name.c_str());
+		image_c *alt = W_ImageDoLookup(real_textures, alt_name.c_str());
 
 		if (alt) W_ImageCache(alt, false);
 	}

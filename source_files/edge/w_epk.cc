@@ -43,7 +43,7 @@
 
 #include "miniz.h"
 
-static std::string image_dirs[5] = {"flats", "graphics", "skins", "sprites", "textures"};
+static std::string image_dirs[4] = {"flats", "graphics", "skins", "textures"};
 
 class pack_entry_c
 {
@@ -861,6 +861,75 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 
 			if (add_it)
 				DDF_AddRawColourmap(stem.c_str(), pack->EntryLength(d, i), entry.packpath.c_str());
+		}
+	}
+}
+
+void Pack_ProcessHiresSubstitutions(pack_file_c *pack, int pack_index)
+{
+	int d = pack->FindDir("hires");
+
+	if (d < 0) return;
+
+	for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+	{
+		pack_entry_c& entry = pack->dirs[d].entries[i];
+
+		// split filename in stem + extension
+		std::string stem = epi::PATH_GetBasename(UTFSTR(entry.name)).u8string();
+		std::string ext  = epi::PATH_GetExtension(UTFSTR(entry.name)).u8string();
+
+		epi::str_lower(ext);
+
+		if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" || ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
+		{
+			std::string texname;
+
+			epi::STR_TextureNameFromFilename(texname, stem);
+
+			// See if a bare lump with the same name comes later
+			if (W_CheckFileNumForName(texname.c_str()) > pack_index)
+				continue;;
+
+			I_Debugf("- Adding Hires substitute from EPK: %s\n", entry.packpath.c_str());
+
+			const image_c *rim = W_ImageDoLookup(real_textures, texname.c_str(), -2);
+			if (rim && rim->source_type != IMSRC_User)
+			{
+				AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_textures, rim);
+				continue;
+			}
+
+			rim = W_ImageDoLookup(real_flats, texname.c_str(), -2);
+			if (rim && rim->source_type != IMSRC_User)
+			{
+				AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_flats, rim);
+				continue;
+			}
+
+			rim = W_ImageDoLookup(real_sprites, texname.c_str(), -2);
+			if (rim && rim->source_type != IMSRC_User)
+			{
+				AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_sprites, rim);
+				continue;
+			}
+
+			// we do it this way to force the original graphic to be loaded
+			rim = W_ImageLookup(texname.c_str(), INS_Graphic, ILF_Exact|ILF_Null);
+
+			if (rim && rim->source_type != IMSRC_User)
+			{
+				AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_graphics, rim);
+				continue;
+			}
+
+			I_Warning("HIRES replacement '%s' has no counterpart.\n", texname.c_str());
+
+			AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_textures);
+		}
+		else
+		{
+			I_Warning("Unknown image type in EPK: %s\n", entry.name.c_str());
 		}
 	}
 }

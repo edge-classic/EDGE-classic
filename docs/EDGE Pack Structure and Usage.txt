@@ -39,6 +39,10 @@ lumps, certain locations are enforced:
 /colormaps - Location for raw COLORMAP files; no enforced file extension but usually .cmp or .lmp.
 /flats, /graphics, /textures, and /sprites - Location for supported image files, extension must match file type 
                                              (.lmp is assumed to be a Doom format graphic).
+/hires - Location for higher-resolution image files intended to inherit scaling and (in the case of sprites) offsets from the
+         images they are replacing. This is analagous to the HI_START/HI_END WAD namespace that some ports support. If there is
+         no image for which an item in this folder would be a replacement, it will be loaded as if it came from the /textures
+         directory. Extension must match file type.
 /skins - Location for MD2/MD3 model skin images with supported filetype; must be placed here instead of /sprites to avoid being treated
          as a sprite frame with rotation.
 /sounds - Location for supported audio files intended to be used as sound effects. Extension must match file type

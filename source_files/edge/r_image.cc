@@ -360,7 +360,9 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
 			rim->name = name;
 
 			rim->source_type = IMSRC_Raw320x200;
-			Z_StrNCpy(rim->source.flat.packfile_name, packfile_name, 63);
+			int pn_len = strlen(packfile_name);
+			rim->source.flat.packfile_name = (char *)calloc(pn_len+1, 1);
+			Z_StrNCpy(rim->source.flat.packfile_name, packfile_name, pn_len);
 			//rim->source_palette = W_GetPaletteForLump(lump);
 			rim->source_palette = -1;
 			return rim;
@@ -420,7 +422,9 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
 	}
 
 	rim->source_type = type;
-	Z_StrNCpy(rim->source.graphic.packfile_name, packfile_name, 63);
+	int pn_len = strlen(packfile_name);
+	rim->source.graphic.packfile_name = (char *)calloc(pn_len+1, 1);
+	Z_StrNCpy(rim->source.graphic.packfile_name, packfile_name, pn_len);
 	rim->source.graphic.is_patch = is_patch;
 	rim->source.graphic.user_defined = false; // This should only get set to true with DDFIMAGE specified DOOM format images
 	//rim->source_palette = W_GetPaletteForLump(lump);

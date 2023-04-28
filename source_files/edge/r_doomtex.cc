@@ -331,7 +331,7 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 	{
 		epi::file_c *f;
 
-		if (packfile_name[0])
+		if (packfile_name)
 			f = W_OpenPackFile(packfile_name);
 		else
 			f = W_OpenLump(lump);
@@ -369,7 +369,7 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 	const patch_t *realpatch = nullptr;
 	int realsize = 0;
 	
-	if (packfile_name[0] != NULL)
+	if (packfile_name)
 	{
 		epi::file_c *f = W_OpenPackFile(packfile_name);
 		if (f)

@@ -128,11 +128,11 @@ public:
 		// case IMSRC_Graphic:
 		// case IMSRC_Sprite:
 		// case IMSRC_TX_HI:
-		struct { int lump; char packfile_name[64]; bool is_patch; bool user_defined; } graphic;
+		struct { int lump; char *packfile_name; bool is_patch; bool user_defined; } graphic;
 
 		// case IMSRC_Flat:
 		// case IMSRC_Raw320x200:
-		struct { int lump; char packfile_name[64]; } flat;
+		struct { int lump; char *packfile_name; } flat;
 
 		// case IMSRC_Texture:
 		struct { struct texturedef_s *tdef; } texture;

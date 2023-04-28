@@ -460,7 +460,7 @@ static void FillSpriteFramesUser()
 			// const override
 			image_c *change_img = (image_c *)images[L];
 			epi::file_c *offset_check = nullptr;
-			if (images[L]->source.graphic.packfile_name[0])
+			if (images[L]->source.graphic.packfile_name)
 				offset_check = W_OpenPackFile(images[L]->source.graphic.packfile_name);
 			else
 				offset_check = W_OpenLump(images[L]->source.graphic.lump);

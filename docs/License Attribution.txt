@@ -21,7 +21,7 @@ YMFMIDI library - Copyright (c) 2021-2022 Devin Acker
 Mod4Play library - Copyright (c) 2022 Olav Sørensen
 
 minivorbis library - Copyright (c) 2020 Eduardo Bart
-		     Copyright (c) 2002-2020 Xiph.org Foundation
+		     		 Copyright (c) 2002-2020 Xiph.org Foundation
 
 ===========================================================================================
 CC 1.0 Universal License
@@ -58,8 +58,8 @@ GPL2 License
 "Adplug" instrument bank - Copyright (C) 1999, 2000, 2001 Simon Peter, et al.
 
 AJBSP - Copyright (c) 2000-2023 Andrew Apted, et al
-	 Copyright (c) 1994-1998 Colin Reed
-	 Copyright (c) 1997-1998 Lee Killough
+	 	Copyright (c) 1994-1998 Colin Reed
+	 	Copyright (c) 1997-1998 Lee Killough
 
 COAL - Copyright (c) 2009-2023 Andrew Apted, et al
        Copyright (c) 1996-1997 Id Software, Inc.
@@ -81,9 +81,9 @@ Game Music Emu - Copyright (c) 2003-2009 Shay Green
 SuperFastHash - Copyright (c) 2004-2010 Paul Hsieh
 
 XMIDI library - Copyright (c) 2015-2022 Vitaly Novichkov
-	        Copyright (c) 2015-2016 WildMIDI Developers
-		Copyright (c) 2014 Bret Curtis
-		Copyright (c) 2001 Ryan Nunn
+	        	Copyright (c) 2015-2016 WildMIDI Developers
+				Copyright (c) 2014 Bret Curtis
+				Copyright (c) 2001 Ryan Nunn
 
 ===========================================================================================
 MIT License
@@ -94,12 +94,12 @@ MIT License
 BW_Midi_Sequencer library - Copyright (c) 2015-2022 Vitaly Novichkov
 
 gl4es library - Copyright (c) 2016-2018 Sebastien Chevalier
-		Copyright (c) 2013-2016 Ryan Hileman
+				Copyright (c) 2013-2016 Ryan Hileman
 
 glad library - Copyright (c) 2013-2022 David Herberth
 
 miniz library - Copyright (c) 2013-2014 RAD Game Tools and Valve Software
-		Copyright (c) 2010-2014 Rich Geldreich and Tenacious Software LLC
+				Copyright (c) 2010-2014 Rich Geldreich and Tenacious Software LLC
 
 PNPOLY algorithm - Copyright (c) 1970-2003 Wm. Randolph Franklin
 

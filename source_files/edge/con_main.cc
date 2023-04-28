@@ -42,6 +42,7 @@
 
 #define MAX_CON_ARGS  64
 
+static std::string readme_names[5] = {"readme","readme.txt", "readme.1st", "read.me","readme.md"};
 
 typedef struct
 {
@@ -116,9 +117,18 @@ int CMD_Readme(char **argv, int argc)
 {
 	epi::file_c *readme_file = nullptr;
 
-	for (int i = data_files.size() - 1; i > 0; i--)
+	// Check well known readme filenames
+	for (auto name : readme_names)
 	{
-		if (data_files[i]->pack)
+		readme_file = W_OpenPackFile(name);
+		if (readme_file) break;
+	}
+
+	if (!readme_file)
+	{
+		// Check for the existence of a .txt file whose name matches a WAD or pack
+		// in the load order
+		for (int i = data_files.size() - 1; i > 0; i--)
 		{
 			std::filesystem::path readme_check = epi::PATH_GetFilename(data_files[i]->name);
 			readme_check.replace_extension(".txt");

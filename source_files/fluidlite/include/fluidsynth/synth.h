@@ -416,10 +416,10 @@ enum fluid_interp {
   /* no interpolation: Fastest, but questionable audio quality */
   FLUID_INTERP_NONE = 0,
   /* Straight-line interpolation: A bit slower, reasonable audio quality */
+  /* Default. */
   FLUID_INTERP_LINEAR = 1,
-  /* Fourth-order interpolation: Requires 50 % of the whole DSP processing time, good quality 
-   * Default. */
-  FLUID_INTERP_DEFAULT = 4,
+  FLUID_INTERP_DEFAULT = 1,
+  /* Fourth-order interpolation: Requires 50 % of the whole DSP processing time, good quality */
   FLUID_INTERP_4THORDER = 4,
   FLUID_INTERP_7THORDER = 7,
   FLUID_INTERP_HIGHEST=7

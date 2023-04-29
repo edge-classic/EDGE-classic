@@ -290,29 +290,33 @@ void font_c::LoadFontTTF()
 		if (ref.glyph_index == 0)
 			I_Error("LoadFontTTF: No suitable characters in font %s.\n", def->name.c_str());
 
-		ref.packed_char = new stbtt_packedchar;
-		ref.char_quad = new stbtt_aligned_quad;
+		ttf_atlas = new stbtt_pack_range;
+		ttf_atlas->first_unicode_codepoint_in_range = 0;
+		ttf_atlas->array_of_unicode_codepoints = (int *)cp437_unicode_values;
+		ttf_atlas->font_size = 48.0f;
+		ttf_atlas->num_chars = 256;
+		ttf_atlas->chardata_for_range = new stbtt_packedchar[256];
 
 		if (def->default_size == 0.0)
 			def->default_size = 7.0f;
 
 		ttf_kern_scale = stbtt_ScaleForPixelHeight(ttf_info, def->default_size);
 
-		unsigned char *temp_bitmap = new unsigned char [64*64];
+		unsigned char *temp_bitmap = new unsigned char [1024*1024];
 
 		stbtt_pack_context *spc = new stbtt_pack_context;
-		stbtt_PackBegin(spc, temp_bitmap, 64, 64, 0, 1, NULL);
+		stbtt_PackBegin(spc, temp_bitmap, 1024, 1024, 0, 1, NULL);
 		stbtt_PackSetOversampling(spc, 1, 1);
-		stbtt_PackFontRange(spc, ttf_buffer, 0, 48, cp437_unicode_values[static_cast<u8_t>(ch)], 1, ref.packed_char);
+		stbtt_PackFontRanges(spc, ttf_buffer, 0, ttf_atlas, 1);
 		stbtt_PackEnd(spc);
-		glGenTextures(1, &ref.tex_id);
-		glBindTexture(GL_TEXTURE_2D, ref.tex_id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64,64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
+		glGenTextures(1, &ttf_tex_id);
+		glBindTexture(GL_TEXTURE_2D, ttf_tex_id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 1024, 1024, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glGenTextures(1, &ref.smoothed_tex_id);
-		glBindTexture(GL_TEXTURE_2D, ref.smoothed_tex_id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64,64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
+		glGenTextures(1, &ttf_smoothed_tex_id);
+		glBindTexture(GL_TEXTURE_2D, ttf_smoothed_tex_id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 1024, 1024, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		delete[] temp_bitmap;
@@ -321,7 +325,8 @@ void font_c::LoadFontTTF()
 		float ascent = 0.0f;
 		float descent = 0.0f;
 		float linegap = 0.0f;
-		stbtt_GetPackedQuad(ref.packed_char, 64, 64, 0, &x, &y, ref.char_quad, 0);
+		ref.char_quad = new stbtt_aligned_quad;
+		stbtt_GetPackedQuad(ttf_atlas->chardata_for_range, 1024, 1024, static_cast<u8_t>(ch), &x, &y, ref.char_quad, 0);
 		stbtt_GetScaledFontVMetrics(ttf_buffer, 0, 48, &ascent, &descent, &linegap);
 		ref.width = (ref.char_quad->x1 - ref.char_quad->x0) * (def->default_size / 48.0);
 		ref.height = (ref.char_quad->y1 - ref.char_quad->y0) * (def->default_size / 48.0);
@@ -468,28 +473,10 @@ float font_c::CharWidth(char ch)
 		else
 		{
 			ttf_char_t character;
-			character.packed_char = new stbtt_packedchar;
 			character.char_quad = new stbtt_aligned_quad;
-			unsigned char *temp_bitmap = new unsigned char [64 * 64];
-			stbtt_pack_context *spc = new stbtt_pack_context;
-			stbtt_PackBegin(spc, temp_bitmap, 64, 64, 0, 1, NULL);
-			stbtt_PackSetOversampling(spc, 1, 1);
-			stbtt_PackFontRange(spc, ttf_buffer, 0, 48, cp437_unicode_values[static_cast<u8_t>(ch)], 1, character.packed_char);
-			stbtt_PackEnd(spc);
-			glGenTextures(1, &character.tex_id);
-			glBindTexture(GL_TEXTURE_2D, character.tex_id);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64,64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glGenTextures(1, &character.smoothed_tex_id);
-			glBindTexture(GL_TEXTURE_2D, character.smoothed_tex_id);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64,64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			delete[] temp_bitmap;
 			float x = 0.0f;
 			float y = 0.0f;
-			stbtt_GetPackedQuad(character.packed_char, 64, 64, 0, &x, &y, character.char_quad, 0);
+			stbtt_GetPackedQuad(ttf_atlas->chardata_for_range, 1024, 1024, static_cast<u8_t>(ch), &x, &y, character.char_quad, 0);
 			if (ch == ' ')
 				character.width = ttf_char_width * 3 / 5;
 			else
@@ -566,28 +553,10 @@ int font_c::GetGlyphIndex(char ch)
 		else
 		{
 			ttf_char_t character;
-			character.packed_char = new stbtt_packedchar;
 			character.char_quad = new stbtt_aligned_quad;
-			unsigned char *temp_bitmap = new unsigned char [64 * 64];
-			stbtt_pack_context *spc = new stbtt_pack_context;
-			stbtt_PackBegin(spc, temp_bitmap, 64, 64, 0, 1, NULL);
-			stbtt_PackSetOversampling(spc, 1, 1);
-			stbtt_PackFontRange(spc, ttf_buffer, 0, 48, cp437_unicode_values[static_cast<u8_t>(ch)], 1, character.packed_char);
-			stbtt_PackEnd(spc);
-			glGenTextures(1, &character.tex_id);
-			glBindTexture(GL_TEXTURE_2D, character.tex_id);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64,64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glGenTextures(1, &character.smoothed_tex_id);
-			glBindTexture(GL_TEXTURE_2D, character.smoothed_tex_id);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64,64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			delete[] temp_bitmap;
 			float x = 0.0f;
 			float y = 0.0f;
-			stbtt_GetPackedQuad(character.packed_char, 64, 64, 0, &x, &y, character.char_quad, 0);
+			stbtt_GetPackedQuad(ttf_atlas->chardata_for_range, 1024, 1024, static_cast<u8_t>(ch), &x, &y, character.char_quad, 0);
 			if (ch == ' ')
 				character.width = ttf_char_width * 3 / 5;
 			else

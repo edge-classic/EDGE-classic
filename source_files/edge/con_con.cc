@@ -649,9 +649,9 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 		glEnable(GL_TEXTURE_2D);
 		if ((var_smoothing && con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ON_DEMAND) ||
 			con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ALWAYS)
-			glBindTexture(GL_TEXTURE_2D, con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).smoothed_tex_id);
+			glBindTexture(GL_TEXTURE_2D, con_font->ttf_smoothed_tex_id);
 		else
-			glBindTexture(GL_TEXTURE_2D, con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).tex_id);
+			glBindTexture(GL_TEXTURE_2D, con_font->ttf_tex_id);
 		glBegin(GL_POLYGON);
 		glTexCoord2f(q->s0,q->t0); glVertex2f(x + x_adjust,y - y_adjust);
         glTexCoord2f(q->s1,q->t0); glVertex2f(x + x_adjust + width,y - y_adjust);

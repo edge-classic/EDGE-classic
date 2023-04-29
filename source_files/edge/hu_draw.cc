@@ -424,9 +424,9 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 		glEnable(GL_TEXTURE_2D);
 		if ((var_smoothing && cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ON_DEMAND) ||
 			cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ALWAYS)
-			glBindTexture(GL_TEXTURE_2D, cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).smoothed_tex_id);
+			glBindTexture(GL_TEXTURE_2D, cur_font->ttf_smoothed_tex_id);
 		else
-			glBindTexture(GL_TEXTURE_2D, cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).tex_id);
+			glBindTexture(GL_TEXTURE_2D, cur_font->ttf_tex_id);
 		glColor4f(r, g, b, alpha);
 		glBegin(GL_QUADS);
 		glTexCoord2f(tx1,ty2); glVertex2f(hx1,hy1);

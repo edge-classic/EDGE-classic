@@ -65,11 +65,8 @@ const int cp437_unicode_values[256] =
 typedef struct
 {
 	float width, height;
-	unsigned int tex_id;
-	unsigned int smoothed_tex_id;
 	int glyph_index; // For faster kerning table lookups
 	float y_shift;
-	stbtt_packedchar *packed_char;
 	stbtt_aligned_quad *char_quad;
 }
 ttf_char_t;
@@ -142,6 +139,9 @@ public:
 	float ttf_ref_height;
 	byte *ttf_buffer;
 	stbtt_fontinfo *ttf_info;
+	stbtt_pack_range *ttf_atlas;
+	unsigned int ttf_tex_id;
+	unsigned int ttf_smoothed_tex_id;
 	int ttf_char_width;
 	int ttf_char_height;
 	std::unordered_map<int, ttf_char_t> ttf_glyph_map;

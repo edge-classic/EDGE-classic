@@ -76,7 +76,6 @@
 bool force_directx = false;
 bool force_waveout = false;
 
-unsigned short save_screenshot[160][100];
 bool save_screenshot_valid = false;
 
 bool var_pc_speaker_mode = false;

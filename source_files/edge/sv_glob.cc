@@ -329,9 +329,6 @@ void SV_FreeGLOB(saveglobals_t *globs)
 	SV_FreeString(globs->description);
 	SV_FreeString(globs->desc_date);
 
-	if (globs->view_pixels)
-		delete[] globs->view_pixels;
-
 	if (globs->wad_names)
 		delete[] globs->wad_names;
 
@@ -404,18 +401,6 @@ static bool GlobReadWADS(saveglobals_t *glob)
 	return true;
 }
 
-static bool GlobReadVIEW(saveglobals_t *glob)
-{
-	if (! SV_PushReadChunk("View"))
-		return false;
-
-	//!!! IMPLEMENT THIS
-
-	SV_PopReadChunk();
-	return true;
-}
-
-
 saveglobals_t *SV_LoadGLOB(void)
 {
 	char marker[6];
@@ -449,11 +434,6 @@ saveglobals_t *SV_LoadGLOB(void)
 		if (strcmp(marker, "Wads") == 0)
 		{
 			GlobReadWADS(globs);
-			continue;
-		}
-		if (strcmp(marker, "View") == 0)
-		{
-			GlobReadVIEW(globs);
 			continue;
 		}
 
@@ -515,33 +495,6 @@ static void GlobWriteWADS(saveglobals_t *globs)
 	SV_PopWriteChunk();
 }
 
-static void GlobWriteVIEW(saveglobals_t *globs)
-{
-	int x, y;
-
-	if (! globs->view_pixels)
-		return;
-
-	SYS_ASSERT(globs->view_width  > 0);
-	SYS_ASSERT(globs->view_height > 0);
-
-	SV_PushWriteChunk("View");
-
-	SV_PutInt(globs->view_width);
-	SV_PutInt(globs->view_height);
-
-	for (y=0; y < globs->view_height; y++)
-	{
-		for (x=0; x < globs->view_width; x++)
-		{
-			SV_PutShort(globs->view_pixels[y * globs->view_width + x]);
-		}
-	}
-
-	SV_PopWriteChunk();
-}
-
-
 void SV_SaveGLOB(saveglobals_t *globs)
 {
 	cur_globs = globs;
@@ -550,7 +503,6 @@ void SV_SaveGLOB(saveglobals_t *globs)
 
 	GlobWriteVARIs(globs);
 	GlobWriteWADS(globs);
-	GlobWriteVIEW(globs);
 
 	// all done
 	SV_PopWriteChunk();

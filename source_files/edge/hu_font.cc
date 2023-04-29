@@ -416,7 +416,7 @@ const image_c *font_c::CharImage(char ch) const
 	{
 		if (ttf_glyph_map.find(static_cast<u8_t>(ch)) != ttf_glyph_map.end())
 			// Create or return faux backup image
-			return W_ImageLookup("TTFDUMMY", INS_Graphic, ILF_Font);
+			return W_ImageLookup("TTF_DUMMY_IMAGE", INS_Graphic, ILF_Font);
 		else
 			return NULL;
 	}

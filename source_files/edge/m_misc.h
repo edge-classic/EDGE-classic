@@ -68,7 +68,6 @@ epi::file_c *M_OpenComposedEPIFile(std::filesystem::path dir, std::filesystem::p
 void M_WarnError(const char *error,...) GCCATTR((format(printf, 1, 2)));
 void M_DebugError(const char *error,...) GCCATTR((format(printf, 1, 2)));
 
-extern unsigned short save_screenshot[160][100];
 extern bool save_screenshot_valid;
 
 extern int  display_desync;

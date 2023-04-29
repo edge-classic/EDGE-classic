@@ -1369,8 +1369,6 @@ static void AddSingleCmdLineFile(std::filesystem::path name, bool ignore_unknown
 	if (ext == ".edm")
 		I_Error("Demos are not supported\n");
 
-	// no need to check for GWA (shouldn't be added manually)
-
 	filekind_e kind;
 
 	if (ext == ".wad")

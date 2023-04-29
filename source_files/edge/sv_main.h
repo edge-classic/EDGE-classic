@@ -299,11 +299,6 @@ typedef struct
 	crc_check_t ddfmobj;
 	crc_check_t ddfweap;
 
-	// [VIEW] info.  Unused if view_pixels is NULL.
-	unsigned short *view_pixels;
-	int view_width;
-	int view_height;
-
 	// [WADS] info
 	int wad_num;
 	const char ** wad_names;

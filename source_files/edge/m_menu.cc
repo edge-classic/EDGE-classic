@@ -601,20 +601,6 @@ void M_ReadSaveStrings(void)
 		ex_slots[i].netgame = globs->netgame;
 
 		SV_FreeGLOB(globs);
-    
-#if 0
-		// handle screenshot
-		if (globs->view_pixels)
-		{
-			int x, y;
-      
-			for (y=0; y < 100; y++)
-				for (x=0; x < 160; x++)
-				{
-					save_screenshot[x][y] = SV_GetShort();
-				}
-		}
-#endif
 	}
 
 	// fix up descriptions

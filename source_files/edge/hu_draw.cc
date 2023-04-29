@@ -417,7 +417,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 		do_whiten = true;
 	}
 
-	if (epi::strcmp(image->name, "TTFDUMMY") == 0)
+	if (epi::strcmp(image->name, "TTF_DUMMY_IMAGE") == 0)
 	{
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -875,7 +875,7 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 	float w, h;
 	float tx1, tx2, ty1, ty2;
 
-	if (epi::strcmp(img->name, "TTFDUMMY") == 0)
+	if (epi::strcmp(img->name, "TTF_DUMMY_IMAGE") == 0)
 	{
 		stbtt_aligned_quad *q = cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).char_quad;
 		y = top_y + (cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).y_shift * (size > 0 ? (size / cur_font->def->default_size) : 1.0) * sc_y);

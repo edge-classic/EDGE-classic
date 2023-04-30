@@ -73,7 +73,7 @@
 #include "w_wad.h"
 #include "w_texture.h"
 
-#include "umapinfo.h" //Lobo 2022
+#include "p_umapinfo.h" //Lobo 2022
 
 class wad_file_c
 {
@@ -1183,28 +1183,33 @@ void W_ReadUMAPINFOLumps(void)
 	
 	L_WriteDebug("parsing UMAPINFO lump\n");
 
-	int length;
-	const unsigned char * lump = (const unsigned char *)W_LoadLump(p, &length);
-	ParseUMapInfo(lump, W_LumpLength(p), I_Error);
+	Parse_UMAPINFO(W_LoadString(p));
 
 	unsigned int i;
 	for(i = 0; i < Maps.mapcount; i++)
 	{
-		mapdef_c *temp_level = mapdefs.Lookup(M_Strupr(Maps.maps[i].mapname));
+		std::string mapname = Maps.maps[i].mapname;
+		epi::str_upper(mapname);
+		mapdef_c *temp_level = mapdefs.Lookup(mapname.c_str());
 		if (!temp_level)
 		{
 			temp_level = new mapdef_c;
-			temp_level->name = M_Strupr(Maps.maps[i].mapname);
-			temp_level->lump = M_Strupr(Maps.maps[i].mapname);
-
+			temp_level->name = mapname;
+			temp_level->lump = mapname;
 			mapdefs.Insert(temp_level);
 		}
 
 		if(Maps.maps[i].levelpic[0])
-			temp_level->namegraphic = M_Strupr(Maps.maps[i].levelpic);
+		{
+			temp_level->namegraphic = Maps.maps[i].levelpic;
+			epi::str_upper(temp_level->namegraphic);
+		}
 
-		if(Maps.maps[i].skytexture[0])	
-			temp_level->sky = M_Strupr(Maps.maps[i].skytexture);
+		if(Maps.maps[i].skytexture[0])
+		{
+			temp_level->sky = Maps.maps[i].skytexture;
+			epi::str_upper(temp_level->sky);
+		}
 
 		if(Maps.maps[i].levelname)
         {
@@ -1235,8 +1240,11 @@ void W_ReadUMAPINFOLumps(void)
 			}
 		}	
 		
-		if(Maps.maps[i].nextmap[0])	
-			temp_level->nextmapname = M_Strupr(Maps.maps[i].nextmap);
+		if(Maps.maps[i].nextmap[0])
+		{
+			temp_level->nextmapname = Maps.maps[i].nextmap;
+			epi::str_upper(temp_level->nextmapname);
+		}
 
 /*
 		if(Maps.maps[i].interbackdrop[0])
@@ -1304,20 +1312,23 @@ void W_ReadUMAPINFOLumps(void)
 			{
 				const image_c *rim;
 
-				rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Flat, ILF_Null);
+				std::string ibd_lookup = Maps.maps[i].interbackdrop;
+				epi::str_upper(ibd_lookup);
+
+				rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
 
 				if (! rim) //no flat
 				{
-					rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Graphic, ILF_Null);
+					rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
 					
 					if (! rim) // no graphic
 						temp_level->f_end.text_flat = "FLOOR4_8"; //should not happen
 					else //background is a graphic
-						temp_level->f_end.text_back = M_Strupr(Maps.maps[i].interbackdrop);
+						temp_level->f_end.text_back = ibd_lookup;
 				}
 				else //background is a flat
 				{
-					temp_level->f_end.text_flat = M_Strupr(Maps.maps[i].interbackdrop);
+					temp_level->f_end.text_flat = ibd_lookup;
 				}
 			}
 		}	
@@ -1345,7 +1356,8 @@ void W_ReadUMAPINFOLumps(void)
 
 		if(Maps.maps[i].nextsecret[0])
 		{
-			temp_level->secretmapname = M_Strupr(Maps.maps[i].nextsecret);
+			temp_level->secretmapname = Maps.maps[i].nextsecret;
+			epi::str_upper(temp_level->secretmapname);
 			if (Maps.maps[i].intertextsecret)
 			{
 				
@@ -1378,12 +1390,14 @@ void W_ReadUMAPINFOLumps(void)
 					conflict_level->f_pre.text_flat.clear();
 				}
 				
-				mapdef_c *secret_level = mapdefs.Lookup(M_Strupr(Maps.maps[i].nextsecret));
+				mapdef_c *secret_level = mapdefs.Lookup(temp_level->secretmapname.c_str());
 				if (!secret_level)
 				{
 					secret_level = new mapdef_c;
-					secret_level->name = M_Strupr(Maps.maps[i].nextsecret);
-					secret_level->lump = M_Strupr(Maps.maps[i].nextsecret);
+					secret_level->name = Maps.maps[i].nextsecret;
+					epi::str_upper(secret_level->name);
+					secret_level->lump = Maps.maps[i].nextsecret;
+					epi::str_upper(secret_level->lump);
 					mapdefs.Insert(secret_level);
 				}
 				std::string temp_ref = epi::STR_Format("%sPRETEXT", secret_level->name.c_str());
@@ -1399,21 +1413,23 @@ void W_ReadUMAPINFOLumps(void)
 					if(Maps.maps[i].interbackdrop[0])
 					{
 						const image_c *rim;
+						std::string ibd_lookup = Maps.maps[i].interbackdrop;
+						epi::str_upper(ibd_lookup);
 
-						rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Flat, ILF_Null);
+						rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
 
 						if (! rim) //no flat
 						{
-							rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Graphic, ILF_Null);
+							rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
 							
 							if (! rim) // no graphic
 								temp_level->f_end.text_flat = "FLOOR4_8"; //should not happen
 							else //background is a graphic
-								temp_level->f_end.text_back = M_Strupr(Maps.maps[i].interbackdrop);
+								temp_level->f_end.text_back = ibd_lookup;
 						}
 						else //background is a flat
 						{
-							temp_level->f_end.text_flat = M_Strupr(Maps.maps[i].interbackdrop);
+							temp_level->f_end.text_flat = ibd_lookup;
 						}
 					}
 				}
@@ -1427,39 +1443,47 @@ void W_ReadUMAPINFOLumps(void)
 					if(Maps.maps[i].interbackdrop[0])
 					{
 						const image_c *rim;
+						std::string ibd_lookup = Maps.maps[i].interbackdrop;
+						epi::str_upper(ibd_lookup);
 
-						rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Flat, ILF_Null);
+						rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
 
 						if (! rim) //no flat
 						{
-							rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Graphic, ILF_Null);
+							rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
 							
 							if (! rim) // no graphic
 								secret_level->f_pre.text_flat = "FLOOR4_8"; //should not happen
 							else //background is a graphic
-								secret_level->f_pre.text_back = M_Strupr(Maps.maps[i].interbackdrop);
+								secret_level->f_pre.text_back = ibd_lookup;
 						}
 						else //background is a flat
 						{
-							secret_level->f_pre.text_flat = M_Strupr(Maps.maps[i].interbackdrop);
+							secret_level->f_pre.text_flat = ibd_lookup;
 						}
 					}
 				}
 				
 			}
 		}
-			
-		
+				
 		if(Maps.maps[i].exitpic[0])
-			temp_level->leavingbggraphic = M_Strupr(Maps.maps[i].exitpic);
+		{
+			temp_level->leavingbggraphic = Maps.maps[i].exitpic;
+			epi::str_upper(temp_level->leavingbggraphic);
+		}
 
 		if(Maps.maps[i].enterpic[0])
-			temp_level->enteringbggraphic = M_Strupr(Maps.maps[i].enterpic);
+		{
+			temp_level->enteringbggraphic = Maps.maps[i].enterpic;
+			epi::str_upper(temp_level->enteringbggraphic);
+		}
 
 		if(Maps.maps[i].endpic[0])
 		{
 			temp_level->nextmapname.clear();
-			temp_level->f_end.pics.push_back(M_Strupr(Maps.maps[i].endpic));
+			temp_level->f_end.pics.push_back(Maps.maps[i].endpic);
+			epi::str_upper(temp_level->f_end.pics.back());
 			temp_level->f_end.picwait = 350000; //1000 seconds
 		}
 
@@ -1484,6 +1508,8 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->partime = Maps.maps[i].partime;
 		
 	}
+
+	FreeMapList();
 }
 
 

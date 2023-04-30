@@ -55,6 +55,7 @@ set (EDGE_SOURCE_FILES
   p_user.cc
   p_forces.cc
   p_telept.cc
+  p_umapinfo.cc
   p_weapon.cc
   rad_act.cc
   rad_pars.cc
@@ -112,8 +113,6 @@ set (EDGE_SOURCE_FILES
   vm_coal.cc
   vm_hud.cc
   vm_player.cc
-  scanner.cc
-  umapinfo.cc
 )
 
 if (EMSCRIPTEN)

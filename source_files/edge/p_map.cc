@@ -2621,9 +2621,14 @@ static bool PIT_RadiusAttack(mobj_t * thing, void *data)
 	float dx, dy, dz;
 	float dist;
 
+	/* 2023/05/01 - Disabled this upon discovering that DEHACKED explosions weren't damaging themeselves in 
+	   			    DBP58. I could not find another source port at all where the bomb spot mobj itself would be immune
+					to its own damage. We already have flags for explosion immunity so this can still be mitigated
+	   			    if the situation requires it. - Dasho */
+
 	// ignore the bomb spot itself
-	if (thing == bomb_I.spot)
-		return true;
+	//if (thing == bomb_I.spot)
+		//return true;
 
 	if (! (thing->flags & MF_SHOOTABLE))
 		return true;

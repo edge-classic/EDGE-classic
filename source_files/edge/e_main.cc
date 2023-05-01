@@ -959,8 +959,8 @@ void InitDirectories(void)
 	}
 	else
     {
-		if (epi::FS_IsDir(epi::PATH_Join(game_dir, UTFSTR("edge-defs"))))
-			epkfile = epi::PATH_Join(game_dir, UTFSTR("edge-defs"));
+		if (epi::FS_IsDir(epi::PATH_Join(game_dir, UTFSTR("edge_defs"))))
+			epkfile = epi::PATH_Join(game_dir, UTFSTR("edge_defs"));
 		else
         	epkfile = epi::PATH_Join(game_dir, UTFSTR("edge-defs.epk"));
 	}
@@ -1264,11 +1264,11 @@ static void IdentifyVersion(void)
 static void Add_Base(void) 
 {
 	if (epi::case_cmp("CUSTOM", iwad_base) == 0)
-		return; // Custom standalone EDGE IWADs should already contain their necessary resources and definitions - Dasho
+		return; // Standalone EDGE IWADs/EPKs should already contain their necessary resources and definitions - Dasho
 	std::filesystem::path base_path = epi::PATH_Join(game_dir, UTFSTR("edge_base"));
 	std::string base_wad = iwad_base;
-	std::transform(base_wad.begin(), base_wad.end(), base_wad.begin(), ::tolower);
-	base_path = epi::PATH_Join(base_path, UTFSTR(base_wad.append("_base")));
+	epi::str_lower(base_wad);
+	base_path = epi::PATH_Join(base_path, UTFSTR(base_wad));
 	if (epi::FS_IsDir(base_path))
 		W_AddFilename(base_path, FLKIND_EFolder);
 	else if (epi::FS_Access(base_path.replace_extension(".epk"), epi::file_c::ACCESS_READ)) 

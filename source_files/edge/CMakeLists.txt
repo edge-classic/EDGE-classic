@@ -193,6 +193,89 @@ target_compile_options(edge-classic PRIVATE
   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
 )
 
+#Assemble EPKs
+if (BUILD_EPKS)
+  add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/edge-defs.epk" --format=zip "."
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_defs"
+    )
+  add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/edge_base/blasphemer.epk" --format=zip "."
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_base/blasphemer"
+    )
+  add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/edge_base/doom.epk" --format=zip "."
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_base/doom"
+    )
+  add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/edge_base/doom1.epk" --format=zip "."
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_base/doom1"
+    )
+  add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/edge_base/doom2.epk" --format=zip "."
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_base/doom2"
+    )
+  add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/edge_base/freedoom1.epk" --format=zip "."
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_base/freedoom1"
+    )
+  add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/edge_base/freedoom2.epk" --format=zip "."
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_base/freedoom2"
+    )
+  add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/edge_base/hacx.epk" --format=zip "."
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_base/hacx"
+    )
+  add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/edge_base/harmony.epk" --format=zip "."
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_base/harmony"
+    )
+  add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/edge_base/heretic.epk" --format=zip "."
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_base/heretic"
+    )
+  add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/edge_base/plutonia.epk" --format=zip "."
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_base/plutonia"
+    )
+  add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/edge_base/rekkr.epk" --format=zip "."
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_base/rekkr"
+    )
+  add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/edge_base/tnt.epk" --format=zip "."
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_base/tnt"
+    )
+endif()
+  
+
 if (NOT EMSCRIPTEN)
   
   set (DEST_DIR "${CMAKE_SOURCE_DIR}")
@@ -226,7 +309,7 @@ else()
   COMMAND python ${EMPACKAGER} ${DEST_DIR}/edge-classic.data --preload 
     ${CMAKE_SOURCE_DIR}/web/preload@/ 
     ${CMAKE_SOURCE_DIR}/edge_base@/edge_base
-    ${CMAKE_SOURCE_DIR}/edge-defs.wad@/edge-defs.wad
+    ${CMAKE_SOURCE_DIR}/edge_defs@/edge_defs
     ${CMAKE_SOURCE_DIR}/soundfont@/soundfont
     --js-output=${DEST_DIR}/edge-classic-data.js 
     --use-preload-cache

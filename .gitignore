@@ -17,6 +17,10 @@ debug.txt
 edge-classic.cfg
 edge-classic-portable.cfg
 
+#EPKs
+edge-defs.epk
+/edge_base/*.epk
+
 # EDGE game folders
 /screenshot
 /savegame

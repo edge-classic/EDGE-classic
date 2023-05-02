@@ -139,7 +139,7 @@ set (EDGE_LINK_LIBRARIES
   ymfmidi
 )
 
-if (MSVC OR MINGW OR MSYS OR WIN32_CLANG)
+if (WIN32)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} w32_res.rc)
   set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} wsock32)
 endif()
@@ -149,7 +149,7 @@ add_executable(
   ${EDGE_SOURCE_FILES}
 )
 
-if(MSVC OR MSYS OR MINGW OR WIN32_CLANG)
+if(WIN32)
   target_compile_definitions(edge-classic PRIVATE WIN32)
 else()
   target_compile_definitions(edge-classic PRIVATE UNIX)
@@ -319,44 +319,47 @@ else()
 
 endif()
 
-# Copy appropriate SDL2.dll to local install directory when built with MSVC
-if(MSVC)
-  if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
+if (WIN32)
+  # Copy appropriate SDL2.dll to local install directory when built with MSVC
+  if(MSVC)
+    if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
+      add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/source_files/sdl2/lib/x64/SDL2.dll"
+        "${DEST_DIR}"
+    )
+    else ()
+      add_custom_command(
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/source_files/sdl2/lib/x86/SDL2.dll"
+        "${DEST_DIR}"
+    )
+    endif ()
+  # Copy appropriate SDL2.dll to local install directory when built with MinGW
+  elseif(MinGW)
+    if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
     add_custom_command(
-	TARGET edge-classic
-	POST_BUILD
-	COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/source_files/sdl2/lib/x64/SDL2.dll"
-			"${DEST_DIR}"
-	)
-  else ()
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy "/mingw64/bin/SDL2.dll"
+        "${DEST_DIR}"
+    )
+    else ()
     add_custom_command(
-	TARGET edge-classic
-	POST_BUILD
-	COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/source_files/sdl2/lib/x86/SDL2.dll"
-			"${DEST_DIR}"
-	)
-  endif ()
-# Copy appropriate SDL2.dll to local install directory when built with MSYS2
-elseif(MSYS)
-	if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-	add_custom_command(
-	TARGET edge-classic
-	POST_BUILD
-	COMMAND "${CMAKE_COMMAND}" -E copy "/mingw64/bin/SDL2.dll"
-			"${DEST_DIR}"
-	)
-	else ()
-	add_custom_command(
-	TARGET edge-classic
-	POST_BUILD
-	COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/SDL2.dll"
-			"${DEST_DIR}"
-		COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libgcc_s_dw2-1.dll"
-			"${DEST_DIR}"
-		COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libstdc++-6.dll"
-			"${DEST_DIR}"
-		COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libwinpthread-1.dll"
-			"${DEST_DIR}"
-	)
-	endif ()
+    TARGET edge-classic
+    POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/SDL2.dll"
+        "${DEST_DIR}"
+      COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libgcc_s_dw2-1.dll"
+        "${DEST_DIR}"
+      COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libstdc++-6.dll"
+        "${DEST_DIR}"
+      COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libwinpthread-1.dll"
+        "${DEST_DIR}"
+    )
+    endif ()
+  endif()
+
 endif()

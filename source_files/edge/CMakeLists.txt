@@ -2,7 +2,7 @@
 # edge
 ##########################################
 
-set (EDGE_SOURCE_FILES  
+set (EDGE_SOURCE_FILES
   i_ctrl.cc
   i_video.cc
   i_sound.cc
@@ -139,7 +139,7 @@ set (EDGE_LINK_LIBRARIES
   ymfmidi
 )
 
-if (MSVC OR MINGW OR MSYS OR WIN32_CLANG)
+if (WIN32)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} w32_res.rc)
   set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} wsock32)
 endif()
@@ -149,7 +149,7 @@ add_executable(
   ${EDGE_SOURCE_FILES}
 )
 
-if(MSVC OR MSYS OR MINGW OR WIN32_CLANG)
+if(WIN32)
   target_compile_definitions(edge-classic PRIVATE WIN32)
 else()
   target_compile_definitions(edge-classic PRIVATE UNIX)
@@ -158,7 +158,7 @@ endif()
 if (NOT EDGE_GL_ES2)
   target_include_directories(edge-classic PRIVATE ../glad/include/glad)
 	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} glad ${OPENGL_LIBRARIES})
-else()	
+else()
   target_include_directories(edge-classic PRIVATE ../gl4es/include ../gl4es/include/GL)
 	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} gl4es)
 endif()
@@ -274,89 +274,58 @@ if (BUILD_EPKS)
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_base/tnt"
     )
 endif()
-  
+
+set(COPY_FILES "")
 
 if (NOT EMSCRIPTEN)
-  
-  set (DEST_DIR "${CMAKE_SOURCE_DIR}")
 
-  # Copies executable to local install directory after build
-  add_custom_command(
-  TARGET edge-classic
-  POST_BUILD
-  COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:edge-classic>"
-      "${DEST_DIR}"
-  )
+  set (DEST_DIR "${CMAKE_SOURCE_DIR}")
+  list(APPEND COPY_FILES "$<TARGET_FILE:edge-classic>")
+
 else()
+
   set (SOURCE_DIR "${CMAKE_SOURCE_DIR}/build/source_files/edge")
   set (DEST_DIR "${CMAKE_SOURCE_DIR}/web/site")
 
   target_link_options(edge-classic PRIVATE "--pre-js=${DEST_DIR}/edge-classic-data.js")
-  
-  add_custom_command(
-  TARGET edge-classic
-  POST_BUILD
-  COMMAND "${CMAKE_COMMAND}" -E copy 
-      "${SOURCE_DIR}/edge-classic.js"
-      "${SOURCE_DIR}/edge-classic.wasm"
-      "${SOURCE_DIR}/edge-classic.wasm.map"      
-      "${DEST_DIR}"
-  )
-  
+
+  list(APPEND COPY_FILES "${SOURCE_DIR}/edge-classic.js" "${SOURCE_DIR}/edge-classic.wasm" "${SOURCE_DIR}/edge-classic.wasm.map")
+
   add_custom_command(
   TARGET edge-classic
   PRE_BUILD
-  COMMAND python ${EMPACKAGER} ${DEST_DIR}/edge-classic.data --preload 
-    ${CMAKE_SOURCE_DIR}/web/preload@/ 
+  COMMAND python ${EMPACKAGER} ${DEST_DIR}/edge-classic.data --preload
+    ${CMAKE_SOURCE_DIR}/web/preload@/
     ${CMAKE_SOURCE_DIR}/edge_base@/edge_base
     ${CMAKE_SOURCE_DIR}/edge_defs@/edge_defs
     ${CMAKE_SOURCE_DIR}/soundfont@/soundfont
-    --js-output=${DEST_DIR}/edge-classic-data.js 
+    --js-output=${DEST_DIR}/edge-classic-data.js
     --use-preload-cache
     --no-node
     --lz4
-  )  
+  )
 
 endif()
 
-# Copy appropriate SDL2.dll to local install directory when built with MSVC
-if(MSVC)
-  if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-    add_custom_command(
-	TARGET edge-classic
-	POST_BUILD
-	COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/source_files/sdl2/lib/x64/SDL2.dll"
-			"${DEST_DIR}"
-	)
-  else ()
-    add_custom_command(
-	TARGET edge-classic
-	POST_BUILD
-	COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/source_files/sdl2/lib/x86/SDL2.dll"
-			"${DEST_DIR}"
-	)
-  endif ()
-# Copy appropriate SDL2.dll to local install directory when built with MSYS2
-elseif(MSYS)
-	if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-	add_custom_command(
-	TARGET edge-classic
-	POST_BUILD
-	COMMAND "${CMAKE_COMMAND}" -E copy "/mingw64/bin/SDL2.dll"
-			"${DEST_DIR}"
-	)
-	else ()
-	add_custom_command(
-	TARGET edge-classic
-	POST_BUILD
-	COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/SDL2.dll"
-			"${DEST_DIR}"
-		COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libgcc_s_dw2-1.dll"
-			"${DEST_DIR}"
-		COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libstdc++-6.dll"
-			"${DEST_DIR}"
-		COMMAND "${CMAKE_COMMAND}" -E copy "/mingw32/bin/libwinpthread-1.dll"
-			"${DEST_DIR}"
-	)
-	endif ()
+if (WIN32)
+  # Copy appropriate SDL2.dll to local install directory when built with MSVC/Clang
+  if(MSVC OR WIN32_CLANG)
+    if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
+      list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/source_files/sdl2/lib/x64/SDL2.dll")
+    else ()
+      list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/source_files/sdl2/lib/x86/SDL2.dll")
+    endif ()
+  # Copy appropriate SDL2.dll to local install directory when built with GNU/MinGW
+  else()
+    if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
+      list(APPEND COPY_FILES "/mingw64/bin/SDL2.dll")
+    else ()
+      list(APPEND COPY_FILES "/mingw32/bin/SDL2.dll" "/mingw32/bin/libgcc_s_dw2-1.dll" "/mingw32/bin/libstdc++-6.dll" "/mingw32/bin/libwinpthread-1.dll")
+    endif()
+  endif()
 endif()
+
+if (COPY_FILES)
+  add_custom_command( TARGET edge-classic POST_BUILD COMMAND_EXPAND_LISTS COMMAND ${CMAKE_COMMAND} -E copy_if_different ${COPY_FILES} ${DEST_DIR})
+endif()
+

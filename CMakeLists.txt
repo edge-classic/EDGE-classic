@@ -57,13 +57,9 @@ else()
 endif()
 
 
-if (MSVC OR MINGW OR MSYS OR WIN32_CLANG)
+if (WIN32)
   set(CMAKE_MODULE_PATH cmake)
-  if(MSVC OR MINGW OR WIN32_CLANG)
-    set(SDL2_DIR "${CMAKE_SOURCE_DIR}/source_files/sdl2")
-  else()
-    set(CMAKE_EXE_LINKER_FLAGS "-static -mwindows")
-  endif()
+  set(SDL2_DIR "${CMAKE_SOURCE_DIR}/source_files/sdl2")
 endif()
 
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64" AND APPLE)

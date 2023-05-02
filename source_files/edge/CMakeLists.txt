@@ -326,6 +326,6 @@ if (WIN32)
 endif()
 
 if (COPY_FILES)
-  add_custom_command( TARGET edge-classic POST_BUILD COMMAND_EXPAND_LISTS COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${COPY_FILES}" "${DEST_DIR}")
+  add_custom_command( TARGET edge-classic POST_BUILD COMMAND_EXPAND_LISTS COMMAND ${CMAKE_COMMAND} -E copy_if_different ${COPY_FILES} ${DEST_DIR})
 endif()
 

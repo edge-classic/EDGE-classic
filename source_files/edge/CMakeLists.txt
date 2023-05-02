@@ -325,8 +325,7 @@ if (WIN32)
   endif()
 endif()
 
-foreach( src_file ${COPY_FILES})
-    add_custom_command( TARGET edge-classic POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${src_file}" "${DEST_DIR}")
-endforeach( src_file )
+if (COPY_FILES)
+  add_custom_command( TARGET edge-classic POST_BUILD COMMAND_EXPAND_LISTS COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${COPY_FILES}" "${DEST_DIR}")
+endif()
 

@@ -66,7 +66,7 @@ jobs:
             cmake:p
             SDL2:p
       - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -G "MSYS Makefiles" #-G"Ninja"
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -G"MSYS Makefiles"
       - name: Build
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v3
@@ -103,7 +103,7 @@ jobs:
             cmake:p
             SDL2:p
       - name: Configure CMake GLES2
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DEDGE_GL_ES2=ON -G"Ninja"
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DEDGE_GL_ES2=ON -G"MSYS Makefiles"
       - name: Build GLES2
         run: cmake --build build --config ${{env.BUILD_TYPE}}
 

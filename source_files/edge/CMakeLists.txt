@@ -320,8 +320,8 @@ else()
 endif()
 
 if (WIN32)
-  # Copy appropriate SDL2.dll to local install directory when built with MSVC
-  if(MSVC)
+  # Copy appropriate SDL2.dll to local install directory when built with MSVC/Clang
+  if(MSVC OR WIN32_CLANG)
     if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
       add_custom_command(
     TARGET edge-classic
@@ -337,8 +337,8 @@ if (WIN32)
         "${DEST_DIR}"
     )
     endif ()
-  # Copy appropriate SDL2.dll to local install directory when built with MinGW
-  elseif(MinGW)
+  # Copy appropriate SDL2.dll to local install directory when built with GNU/MinGW
+  else()
     if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
     add_custom_command(
     TARGET edge-classic

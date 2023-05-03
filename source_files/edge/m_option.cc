@@ -487,7 +487,7 @@ static optmenuitem_t analogueoptions[] =
 	{OPT_Switch,   "Sixth Axis",         Axis, 13, &joy_axis[5], NULL, NULL},
 
 	{OPT_Plain,    "",                   NULL, 0,  NULL, NULL, NULL},
-	{OPT_Slider,   "Turning Speed",      NULL, 12, &var_turnspeed,    NULL, NULL},
+	{OPT_FracSlider, "Turning Speed",  NULL, 0, &turnspeed.f, M_UpdateCVARFromFloat, NULL, &turnspeed, 0.10f, 0.10f, 3.0f},
 	{OPT_Slider,   "MLook Speed",        NULL, 12, &var_mlookspeed,   NULL, NULL},
 	{OPT_Slider,   "Forward Move Speed", NULL, 8,  &var_forwardspeed, NULL, NULL},
 	{OPT_Slider,   "Side Move Speed",    NULL, 8,  &var_sidespeed,    NULL, NULL},
@@ -1560,7 +1560,7 @@ bool M_OptResponder(event_t * ev, int ch)
 				{
 					float *val_ptr = (float*)curr_item->switchvar;
 
-					*val_ptr = *val_ptr - (fmodf(*val_ptr, curr_item->increment));
+					*val_ptr = *val_ptr - (remainderf(*val_ptr, curr_item->increment));
 
 					if (*val_ptr > curr_item->min)
 					{
@@ -1661,7 +1661,7 @@ bool M_OptResponder(event_t * ev, int ch)
 				{
 					float *val_ptr = (float*)curr_item->switchvar;
 
-					*val_ptr = *val_ptr - (fmodf(*val_ptr, curr_item->increment));
+					*val_ptr = *val_ptr - (remainderf(*val_ptr, curr_item->increment));
 
 					if (*val_ptr < curr_item->max)
 					{

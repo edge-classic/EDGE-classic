@@ -150,7 +150,6 @@ static default_t defaults[] =
     {CFGT_Int,      "mouse_axis_y",      &mouse_yaxis,  CFGDEF_MOUSE_YAXIS},
 
     // -ACB- 1998/09/06 Two-stage turning & Speed controls added
-    {CFGT_Int,      "var_turnspeed",     &var_turnspeed,    CFGDEF_TURNSPEED},
     {CFGT_Int,      "var_mlookspeed",    &var_mlookspeed,   CFGDEF_MLOOKSPEED},
     {CFGT_Int,      "var_forwardspeed",  &var_forwardspeed, CFGDEF_FORWARDMOVESPEED},
     {CFGT_Int,      "var_sidespeed",     &var_sidespeed,    CFGDEF_SIDEMOVESPEED},

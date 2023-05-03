@@ -59,7 +59,7 @@ extern int joy_axis[6];
 //                   horzmovement control, vertmovement control
 //                   strafemovediv;
 //
-extern int var_turnspeed;
+extern cvar_c turnspeed;
 extern int var_mlookspeed;
 extern int var_forwardspeed;
 extern int var_sidespeed;

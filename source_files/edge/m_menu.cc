@@ -2332,13 +2332,14 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
 {
 	float basex = x;
 	int step = (8 / div);
-	float i = 0.0f;
+	float scale_step = 50.0f / ((max-min) / increment);
+
 	// Capture actual value first since it will be aligned to the slider increment
 	std::string actual_val = epi::STR_Format("%0.2f", thermDot);	
 
 	thermDot = CLAMP(min, thermDot, max);
 
-	thermDot = thermDot - (fmodf(thermDot, increment));
+	thermDot = thermDot - remainderf(thermDot, increment);
 
 	style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
 
@@ -2353,30 +2354,31 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
 			slider_color = V_GetFontColor(colmap);
 
 		HUD_ThinBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
-			x+(((max-min)/increment)*(step * increment)), y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
+			x+50.0f, y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
 		HUD_SolidBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
-			x+(((thermDot-min)/increment)*(step * increment)), y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
-		HL_WriteText(opt_style, styledef_c::T_ALT, x+(((max-min)/increment)*(step * increment)) + step, y, actual_val.c_str());
+			x+(((thermDot-min)/increment)*scale_step), y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
+		HL_WriteText(opt_style, styledef_c::T_ALT, x+50.0f + step, y, actual_val.c_str());
 	}
 	else
 	{
 		// Note: the (step+1) here is for compatibility with the original
 		// code.  It seems required to make the thermo bar tile properly.
 
+		int i=0;
+		float scale_step = 50.0f / ((max-min) / increment);
+
 		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_l)/div, therm_l, 0.0, 0.0);
 
-		for (i=min, x += step; i < max; i+=increment, x += (step*increment))
+		for (i, x += step; i < (50/step); i++, x += step)
 		{
 			HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_m)/div, therm_m, 0.0, 0.0);
 		}
 
 		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_r)/div, therm_r, 0.0, 0.0);
 
-		x = basex + thermDot * step-1;
+		HUD_StretchImage(basex + ((thermDot-min)/increment) * scale_step-1, y, step+1, IM_HEIGHT(therm_o)/div, therm_o, 0.0, 0.0);
 
-		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_o)/div, therm_o, 0.0, 0.0);
-
-		HL_WriteText(opt_style, styledef_c::T_ALT, basex+(((max-min)/increment)*(step * increment)) + (step*2+2), y, actual_val.c_str());
+		HL_WriteText(opt_style, styledef_c::T_ALT, basex+(((max-min)/increment)*scale_step) + (step*2+2), y, actual_val.c_str());
 	}
 }
 

@@ -155,8 +155,9 @@ DEF_CVAR(debug_joyaxis, "0", 0)
 DEF_CVAR(mouse_xsens, "10.0", CVAR_ARCHIVE)
 DEF_CVAR(mouse_ysens, "10.0", CVAR_ARCHIVE)
 
+DEF_CVAR(turnspeed, "1.0", CVAR_ARCHIVE)
+
 // Speed controls
-int var_turnspeed;
 int var_mlookspeed;
 int var_forwardspeed;
 int var_sidespeed;
@@ -360,7 +361,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 	{
 		float turn = angleturn[t_speed]/(r_doubleframes.d ? 2 : 1) * joy_forces[AXIS_TURN];
 		
-		turn *= speed_factors[var_turnspeed];
+		turn *= turnspeed.f;
 
 		// -ACB- 1998/09/06 Angle Turn Speed Control
 		turn += angleturn[t_speed] * ball_deltas[AXIS_TURN] / 64.0;

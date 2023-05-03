@@ -67,6 +67,8 @@
 
 #include "i_sdlinc.h"
 
+#include <cmath>
+
 // Menu navigation stuff
 int key_menu_open;
 int key_menu_up;
@@ -2288,23 +2290,23 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
 {
 	int i, basex = x;
 	int step = (8 / div);
-	int pos = 254;
 
 	style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
 
-	// If using an IMAGE or TRUETYPE type font for the menu, use symbols for the slider instead
+	// If using an IMAGE or TRUETYPE type font for the menu, use a COALHUDs-style bar for the slider instead
 	if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image || opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
 	{
-		// Quick solid box code if a background is desired for the slider in the future
-		// HUD_SolidBox(x, y, x+(thermWidth*step), y+opt_style->fonts[styledef_c::T_ALT]->im_char_height, RGB_MAKE(100,100,100));
-		for (i=0; i < thermDot; i++, x += step)
-		{
-			HL_WriteText(opt_style, styledef_c::T_ALT, x, y, (const char *)&pos);
-		}
-		for (i=1; i < thermWidth - thermDot; i++, x += step)
-		{
-			HL_WriteText(opt_style, styledef_c::T_ALT, x, y-2, "-", 1.5);
-		}
+		rgbcol_t slider_color = RGB_MAKE(255,255,255);
+
+		const colourmap_c *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
+
+		if (colmap)
+			slider_color = V_GetFontColor(colmap);
+
+		HUD_ThinBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
+			x+(thermWidth*step)-step, y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
+		HUD_SolidBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
+			x+(thermDot*step), y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
 	}
 	else
 	{
@@ -2328,28 +2330,30 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
 
 void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, float min, float max)
 {
-	int basex = x;
+	float basex = x;
 	int step = (8 / div);
-	int pos = 254;
 	float i = 0.0f;
 
 	thermDot = CLAMP(min, thermDot, max);
 
+	thermDot = thermDot - (std::fmodf(thermDot, increment));
+
 	style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
 
-	// If using an IMAGE or TRUETYPE type font for the menu, use symbols for the slider instead
+	// If using an IMAGE or TRUETYPE type font for the menu, use a COALHUDs-style bar for the slider instead
 	if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image || opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
 	{
-		// Quick solid box code if a background is desired for the slider in the future
-		// HUD_SolidBox(x, y, x+(thermWidth*step), y+opt_style->fonts[styledef_c::T_ALT]->im_char_height, RGB_MAKE(100,100,100));
-		for (i=min; i < thermDot; i+=increment, x += step)
-		{
-			HL_WriteText(opt_style, styledef_c::T_ALT, x, y, (const char *)&pos);
-		}
-		for (i=thermDot; i < max; i+=increment, x += step)
-		{
-			HL_WriteText(opt_style, styledef_c::T_ALT, x, y-2, "-", 1.5);
-		}
+		rgbcol_t slider_color = RGB_MAKE(255,255,255);
+
+		const colourmap_c *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
+
+		if (colmap)
+			slider_color = V_GetFontColor(colmap);
+
+		HUD_ThinBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
+			x+(((max-min)/increment)*(step * increment)), y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
+		HUD_SolidBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
+			x+(((thermDot-min)/increment)*(step * increment)), y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
 	}
 	else
 	{
@@ -2358,7 +2362,7 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
 
 		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_l)/div, therm_l, 0.0, 0.0);
 
-		for (i=min, x += step; i < max; i+=increment, x += step)
+		for (i=min, x += step; i < max; i+=increment, x += (step*increment))
 		{
 			HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_m)/div, therm_m, 0.0, 0.0);
 		}

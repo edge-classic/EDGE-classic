@@ -474,8 +474,8 @@ static optmenuitem_t analogueoptions[] =
 {
 	{OPT_Switch,   "Mouse X Axis",       Axis, 11, &mouse_xaxis, NULL, NULL},
 	{OPT_Switch,   "Mouse Y Axis",       Axis, 11, &mouse_yaxis, NULL, NULL},
-	{OPT_FracSlider,   "X Sensitivity",      NULL, 0, &mouse_xsens.f, M_UpdateCVARFromFloat, NULL, &mouse_xsens, 1.0f, 1.0f, 15.0f},
-	{OPT_FracSlider,   "Y Sensitivity",      NULL, 0, &mouse_ysens.f, M_UpdateCVARFromFloat, NULL, &mouse_ysens, 1.0f, 1.0f, 15.0f},
+	{OPT_FracSlider,   "X Sensitivity",      NULL, 0, &mouse_xsens.f, M_UpdateCVARFromFloat, NULL, &mouse_xsens, 0.25f, 1.0f, 15.0f},
+	{OPT_FracSlider,   "Y Sensitivity",      NULL, 0, &mouse_ysens.f, M_UpdateCVARFromFloat, NULL, &mouse_ysens, 0.25f, 1.0f, 15.0f},
 	{OPT_Plain,    "",                   NULL, 0,  NULL, NULL, NULL},
 
 	{OPT_Switch,   "Joystick Device", JoyDevs, 7,  &joystick_device, NULL, NULL},
@@ -1560,6 +1560,8 @@ bool M_OptResponder(event_t * ev, int ch)
 				{
 					float *val_ptr = (float*)curr_item->switchvar;
 
+					*val_ptr = *val_ptr - (std::fmodf(*val_ptr, curr_item->increment));
+
 					if (*val_ptr > curr_item->min)
 					{
 						*val_ptr = *val_ptr - curr_item->increment;
@@ -1658,6 +1660,8 @@ bool M_OptResponder(event_t * ev, int ch)
 				case OPT_FracSlider:
 				{
 					float *val_ptr = (float*)curr_item->switchvar;
+
+					*val_ptr = *val_ptr - (std::fmodf(*val_ptr, curr_item->increment));
 
 					if (*val_ptr < curr_item->max)
 					{

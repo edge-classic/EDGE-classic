@@ -2333,6 +2333,8 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
 	float basex = x;
 	int step = (8 / div);
 	float i = 0.0f;
+	// Capture actual value first since it will be aligned to the slider increment
+	std::string actual_val = epi::STR_Format("%0.2f", thermDot);	
 
 	thermDot = CLAMP(min, thermDot, max);
 
@@ -2354,6 +2356,7 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
 			x+(((max-min)/increment)*(step * increment)), y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
 		HUD_SolidBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
 			x+(((thermDot-min)/increment)*(step * increment)), y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
+		HL_WriteText(opt_style, styledef_c::T_ALT, x+(((max-min)/increment)*(step * increment)) + step, y, actual_val.c_str());
 	}
 	else
 	{
@@ -2372,6 +2375,8 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
 		x = basex + thermDot * step-1;
 
 		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_o)/div, therm_o, 0.0, 0.0);
+
+		HL_WriteText(opt_style, styledef_c::T_ALT, basex+(((max-min)/increment)*(step * increment)) + (step*2+2), y, actual_val.c_str());
 	}
 }
 

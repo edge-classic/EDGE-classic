@@ -134,9 +134,6 @@ static int mlookheld;  // for accelerative mlooking
 int mouse_xaxis;
 int mouse_yaxis;
 
-int mouse_xsens;
-int mouse_ysens;
-
 int joy_axis[6] = { 0, 0, 0, 0, 0, 0 };
 
 static int joy_last_raw[6];
@@ -155,21 +152,15 @@ DEF_CVAR(in_stageturn, "1", CVAR_ARCHIVE)
 DEF_CVAR(debug_mouse,   "0", 0)
 DEF_CVAR(debug_joyaxis, "0", 0)
 
+DEF_CVAR(mouse_xsens, "10.0", CVAR_ARCHIVE)
+DEF_CVAR(mouse_ysens, "10.0", CVAR_ARCHIVE)
+
 // Speed controls
 int var_turnspeed;
 int var_mlookspeed;
 int var_forwardspeed;
 int var_sidespeed;
 int var_flyspeed;
-
-
-static float sensitivities[16] =
-{
-	0.10, 0.25, 0.35, 0.50,
-	0.75, 1.00, 1.56, 2.21,
-	3.13, 4.42, 6.26, 8.84,
-	12.5, 17.7, 25.0, 35.4
-};
 
 static float speed_factors[12] =
 {
@@ -591,8 +582,8 @@ bool INP_Responder(event_t * ev)
 			if ((mouse_xaxis+1) & 1) dx = -dx;
 			if ((mouse_yaxis+1) & 1) dy = -dy;
 
-			dx *= sensitivities[mouse_xsens];
-			dy *= sensitivities[mouse_ysens];
+			dx *= mouse_xsens.f;
+			dy *= mouse_ysens.f;
 
 			if (debug_mouse.d)
 				I_Printf("Mouse %+04d %+04d --> %+7.2f %+7.2f\n",

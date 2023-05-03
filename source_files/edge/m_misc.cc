@@ -148,8 +148,6 @@ static default_t defaults[] =
     //                 analogue binding added
     {CFGT_Int,      "mouse_axis_x",      &mouse_xaxis,  CFGDEF_MOUSE_XAXIS},
     {CFGT_Int,      "mouse_axis_y",      &mouse_yaxis,  CFGDEF_MOUSE_YAXIS},
-    {CFGT_Int,      "mouse_sens_x",      &mouse_xsens,  CFGDEF_MOUSESENSITIVITY},
-    {CFGT_Int,      "mouse_sens_y",      &mouse_ysens,  CFGDEF_MOUSESENSITIVITY},
 
     // -ACB- 1998/09/06 Two-stage turning & Speed controls added
     {CFGT_Int,      "var_turnspeed",     &var_turnspeed,    CFGDEF_TURNSPEED},
@@ -326,7 +324,7 @@ static void SetToBaseValue(default_t *def)
 	}
 }
 
-void M_ResetDefaults(int _dummy)
+void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar)
 {
 	
 	for (int i = 0; i < numdefaults; i++)

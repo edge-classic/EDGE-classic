@@ -54,7 +54,7 @@ typedef struct
 }
 default_t;
 
-void M_ResetDefaults(int _dummy);
+void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar = nullptr);
 void M_LoadDefaults(void);
 void M_LoadBranding(void);
 void M_SaveDefaults(void);

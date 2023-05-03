@@ -1560,7 +1560,7 @@ bool M_OptResponder(event_t * ev, int ch)
 				{
 					float *val_ptr = (float*)curr_item->switchvar;
 
-					*val_ptr = *val_ptr - (std::fmodf(*val_ptr, curr_item->increment));
+					*val_ptr = *val_ptr - (fmodf(*val_ptr, curr_item->increment));
 
 					if (*val_ptr > curr_item->min)
 					{
@@ -1661,7 +1661,7 @@ bool M_OptResponder(event_t * ev, int ch)
 				{
 					float *val_ptr = (float*)curr_item->switchvar;
 
-					*val_ptr = *val_ptr - (std::fmodf(*val_ptr, curr_item->increment));
+					*val_ptr = *val_ptr - (fmodf(*val_ptr, curr_item->increment));
 
 					if (*val_ptr < curr_item->max)
 					{

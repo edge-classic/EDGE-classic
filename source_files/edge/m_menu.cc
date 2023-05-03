@@ -2336,7 +2336,7 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
 
 	thermDot = CLAMP(min, thermDot, max);
 
-	thermDot = thermDot - (std::fmodf(thermDot, increment));
+	thermDot = thermDot - (fmodf(thermDot, increment));
 
 	style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
 

@@ -120,6 +120,8 @@ gl_colour = #FFBBBB;
 [TEXT_PURPLE]
 gl_colour = #FF33FF;
 
+
+
 // ----- Player Colour Remaps ---------------
 
 [PLAYER_GREEN]
@@ -282,6 +284,8 @@ gl_colour = #777777;
 [ALLBRIGHT]
 gl_colour = #777777;
 
+[TEXT_MENU_GREY]
+gl_colour = #654848;
  
  
  

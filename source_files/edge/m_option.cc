@@ -487,11 +487,11 @@ static optmenuitem_t analogueoptions[] =
 	{OPT_Switch,   "Sixth Axis",         Axis, 13, &joy_axis[5], NULL, NULL},
 
 	{OPT_Plain,    "",                   NULL, 0,  NULL, NULL, NULL},
-	{OPT_FracSlider, "Turning Speed",  NULL, 0, &turnspeed.f, M_UpdateCVARFromFloat, NULL, &turnspeed, 0.10f, 0.10f, 3.0f},
-	{OPT_Slider,   "MLook Speed",        NULL, 12, &var_mlookspeed,   NULL, NULL},
-	{OPT_Slider,   "Forward Move Speed", NULL, 8,  &var_forwardspeed, NULL, NULL},
-	{OPT_Slider,   "Side Move Speed",    NULL, 8,  &var_sidespeed,    NULL, NULL},
-	{OPT_Slider,   "Trigger Sensitivity",    NULL, 7,  &var_triggerthreshold,    NULL, NULL},
+	{OPT_FracSlider, "Turning Speed",  NULL, 0, &turnspeed.f,  M_UpdateCVARFromFloat, NULL, &turnspeed, 0.10f, 0.10f, 3.0f},
+	{OPT_FracSlider, "Vertical Look Speed",    NULL, 0, &vlookspeed.f, M_UpdateCVARFromFloat, NULL, &vlookspeed, 0.10f, 0.10f, 3.0f},
+	{OPT_FracSlider, "Forward Move Speed",    NULL, 0, &forwardspeed.f, M_UpdateCVARFromFloat, NULL, &forwardspeed, 0.10f, 0.10f, 3.0f},
+	{OPT_FracSlider, "Side Move Speed",    NULL, 0, &sidespeed.f, M_UpdateCVARFromFloat, NULL, &sidespeed, 0.10f, 0.10f, 3.0f},
+	{OPT_FracSlider, "Trigger Sensitivity",    NULL, 0, &triggerthreshold.d, M_UpdateCVARFromInt, NULL, &triggerthreshold, 1000, -30000, 30000},
 };
 
 static menuinfo_t analogue_optmenu = 

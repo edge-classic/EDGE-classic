@@ -59,10 +59,6 @@
 // Controls (Analogue)
 #define CFGDEF_MOUSE_XAXIS      (2*AXIS_TURN-1)
 #define CFGDEF_MOUSE_YAXIS      (2*AXIS_MLOOK-1)
-#define CFGDEF_MLOOKSPEED       (7)
-#define CFGDEF_FORWARDMOVESPEED (7)
-#define CFGDEF_SIDEMOVESPEED    (7)
-#define CFGDEF_TRIGGERTHRESHOLD (3)
 
 #define CFGDEF_JOY_XAXIS        (2*AXIS_TURN-1)
 #define CFGDEF_JOY_YAXIS        (2*AXIS_FORWARD)

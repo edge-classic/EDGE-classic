@@ -60,10 +60,10 @@ extern int joy_axis[6];
 //                   strafemovediv;
 //
 extern cvar_c turnspeed;
-extern int var_mlookspeed;
-extern int var_forwardspeed;
-extern int var_sidespeed;
-extern int var_flyspeed;
+extern cvar_c vlookspeed;
+extern cvar_c forwardspeed;
+extern cvar_c sidespeed;
+extern cvar_c flyspeed;
 
 
 /* keyboard stuff */

@@ -155,21 +155,12 @@ DEF_CVAR(debug_joyaxis, "0", 0)
 DEF_CVAR(mouse_xsens, "10.0", CVAR_ARCHIVE)
 DEF_CVAR(mouse_ysens, "10.0", CVAR_ARCHIVE)
 
-DEF_CVAR(turnspeed, "1.0", CVAR_ARCHIVE)
-
 // Speed controls
-int var_mlookspeed;
-int var_forwardspeed;
-int var_sidespeed;
-int var_flyspeed;
-
-static float speed_factors[12] =
-{
-	0.15, 0.25, 0.33, 0.42,
-	0.50, 0.66, 0.83, 1.00,
-	1.50, 2.00, 2.80, 4.00
-};
-
+DEF_CVAR(turnspeed, "1.0", CVAR_ARCHIVE)
+DEF_CVAR(vlookspeed, "1.0", CVAR_ARCHIVE)
+DEF_CVAR(forwardspeed, "1.0", CVAR_ARCHIVE)
+DEF_CVAR(sidespeed, "1.0", CVAR_ARCHIVE)
+DEF_CVAR(flyspeed, "1.0", CVAR_ARCHIVE)
 
 float JoyAxisFromRaw(int raw)
 {
@@ -374,7 +365,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 		// -ACB- 1998/07/02 Use VertAngle for Look/up down.
 		float mlook = mlookturn[m_speed] * joy_forces[AXIS_MLOOK];
 
-		mlook *= speed_factors[var_mlookspeed];
+		mlook *= vlookspeed.f;
 
 		mlook += mlookturn[m_speed] * ball_deltas[AXIS_MLOOK] / 64.0;
 
@@ -385,7 +376,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 	{
 		float forward = forwardmove[speed] * joy_forces[AXIS_FORWARD];
 
-		forward *= speed_factors[var_forwardspeed];
+		forward *= forwardspeed.f;
 
 		// -ACB- 1998/09/06 Forward Move Speed Control
 		forward += forwardmove[speed] * ball_deltas[AXIS_FORWARD] / 64.0;
@@ -402,7 +393,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 		if (strafe)
 			side += sidemove[speed] * joy_forces[AXIS_TURN];
 
-		side *= speed_factors[var_sidespeed];
+		side *= sidespeed.f;
 
 		// -ACB- 1998/09/06 Side Move Speed Control
 		side += sidemove[speed] * ball_deltas[AXIS_STRAFE] / 64.0;
@@ -419,7 +410,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 	{
 		float upward = upwardmove[speed] * joy_forces[AXIS_FLY];
 
-		upward *= speed_factors[var_flyspeed];
+		upward *= flyspeed.f;
 
 		upward += upwardmove[speed] * ball_deltas[AXIS_FLY] / 64.0;
 

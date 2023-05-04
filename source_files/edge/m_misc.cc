@@ -149,13 +149,6 @@ static default_t defaults[] =
     {CFGT_Int,      "mouse_axis_x",      &mouse_xaxis,  CFGDEF_MOUSE_XAXIS},
     {CFGT_Int,      "mouse_axis_y",      &mouse_yaxis,  CFGDEF_MOUSE_YAXIS},
 
-    // -ACB- 1998/09/06 Two-stage turning & Speed controls added
-    {CFGT_Int,      "var_mlookspeed",    &var_mlookspeed,   CFGDEF_MLOOKSPEED},
-    {CFGT_Int,      "var_forwardspeed",  &var_forwardspeed, CFGDEF_FORWARDMOVESPEED},
-    {CFGT_Int,      "var_sidespeed",     &var_sidespeed,    CFGDEF_SIDEMOVESPEED},
-    {CFGT_Int,      "var_flyspeed",      &var_flyspeed,     CFGDEF_SIDEMOVESPEED},
-	{CFGT_Int, 		"var_triggerthreshold", &var_triggerthreshold, CFGDEF_TRIGGERTHRESHOLD},
-
     {CFGT_Int,      "joystick_device",   &joystick_device, 1},
     {CFGT_Int,      "joy_axis1",         &joy_axis[0],    7},
     {CFGT_Int,      "joy_axis2",         &joy_axis[1],    6},

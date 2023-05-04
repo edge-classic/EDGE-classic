@@ -62,6 +62,21 @@ std::string DDF_SanitizeName(const std::string& s)
 	return out;
 }
 
+// Until unicode is truly implemented, restrict characters to extended ASCII
+std::string DDF_SanitizePrintString(const std::string& s)
+{
+	std::string out;
+
+	for (size_t i = 0 ; i < s.size() ; i++)
+	{
+		if ((int)s[i] > 255 || (int)s[i] < 0)
+			continue;
+
+		out.push_back(s[i]);
+	}
+
+	return out;
+}
 
 class lang_choice_c
 {
@@ -85,7 +100,9 @@ public:
 		// ensure ref name is uppercase, with no spaces
 		std::string ref = DDF_SanitizeName(refname);
 
-		refs[ref] = value;
+		std::string val = DDF_SanitizePrintString(value);
+
+		refs[ref] = val;
 	}
 };
 

@@ -78,8 +78,7 @@ static std::list<epi::sound_data_c *> playing_qbufs;
 
 static mix_channel_c *queue_chan;
 
-
-int sfx_volume = 0;
+DEF_CVAR(sfx_volume, "0.15", CVAR_ARCHIVE)
 
 static bool sfxpaused = false;
 
@@ -88,18 +87,6 @@ float listen_x;
 float listen_y;
 float listen_z;
 angle_t listen_angle;
-
-// -AJA- 2005/02/26: table to convert slider position to GAIN.
-//       Curve was hand-crafted to give useful distinctions of
-//       volume levels at the quiet end.  Entry zero always
-//       means total silence (in the table for completeness).
-float slider_to_gain[SND_SLIDER_NUM] =
-{
-	0.00000, 0.00200, 0.00400, 0.00800, 0.01600,
-	0.03196, 0.05620, 0.08886, 0.12894, 0.17584,
-	0.22855, 0.28459, 0.34761, 0.41788, 0.49553,
-	0.58075, 0.67369, 0.77451, 0.88329, 1.00000
-};
 
 // FIXME: extern == hack
 extern int dev_freq;
@@ -160,7 +147,7 @@ void mix_channel_c::ComputeVolume()
 
 	float MAX_VOL = (1 << (16 - SAFE_BITS)) - 3;
 
-	MAX_VOL = (boss ? MAX_VOL : MAX_VOL / dist) * slider_to_gain[sfx_volume];
+	MAX_VOL = (boss ? MAX_VOL : MAX_VOL / dist) * sfx_volume.f;
 
 	if (def)
 		MAX_VOL *= PERCENT_2_FLOAT(def->volume);
@@ -181,7 +168,7 @@ void mix_channel_c::ComputeMusicVolume()
 {
 	float MAX_VOL = (1 << (16 - SAFE_BITS)) - 3;
 
- 	MAX_VOL = MAX_VOL * slider_to_gain[mus_volume];
+ 	MAX_VOL = MAX_VOL * mus_volume.f;
 
 	volume_L = (int) MAX_VOL;
 	volume_R = (int) MAX_VOL;

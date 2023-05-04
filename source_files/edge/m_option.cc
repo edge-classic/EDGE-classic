@@ -142,7 +142,6 @@ extern cvar_c g_bobbing;
 extern cvar_c v_secbright;
 extern cvar_c v_gamma;
 
-static int menu_crosscolor;
 static int monitor_size;
 
 extern int joystick_device;
@@ -171,7 +170,6 @@ static void M_ChangeAutoAim(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeFastparm(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeRespawn(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangePassMissile(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeCrossColor(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeBobbing(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeBlood(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeMLook(int keypressed, cvar_c *cvar = nullptr);
@@ -182,7 +180,6 @@ static void M_ChangeMonitorSize(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeKicking(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeWeaponSwitch(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeMipMap(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeDLights(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangePCSpeakerMode(int keypressed, cvar_c *cvar = nullptr);
 
 // -ES- 1998/08/20 Added resolution options
@@ -403,12 +400,12 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Switch,  "Framerate Target", "35 FPS/70 FPS", 2, &r_doubleframes.d, M_UpdateCVARFromInt, NULL, &r_doubleframes},
 	{OPT_Switch,  "Smoothing",         YesNo, 2, &var_smoothing, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "H.Q.2x Scaling", Hq2xMode, 4, &hq2x_scaling, M_ChangeMipMap, NULL},
-	{OPT_Switch,  "Dynamic Lighting", DLMode, 2, &use_dlights, M_ChangeDLights, NULL},
+	{OPT_Switch,  "Dynamic Lighting", DLMode, 2, &use_dlights, NULL, NULL},
 	{OPT_Switch,  "Detail Level",   Details,  3, &detail_level, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Mipmapping",     MipMaps,  3, &var_mipmapping, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Overlay",  		VidOverlays, 6, &r_overlay.d, M_UpdateCVARFromInt, NULL, &r_overlay},
 	{OPT_Switch,  "Crosshair",       CrossH, 10, &r_crosshair.d, M_UpdateCVARFromInt, NULL, &r_crosshair},
-	{OPT_Switch,  "Crosshair Color", CrosshairColor,  8, &menu_crosscolor, M_ChangeCrossColor, NULL},
+	{OPT_Switch,  "Crosshair Color", CrosshairColor,  8, &r_crosscolor.d, M_UpdateCVARFromInt, NULL, &r_crosscolor},
 	{OPT_FracSlider,  "Crosshair Size",  NULL,  0,  &r_crosssize.f, M_UpdateCVARFromFloat, NULL, &r_crosssize, 1.0f, 2.0f, 64.0f},
 	{OPT_Boolean, "Map Rotation",    YesNo,   2, &rotatemap, NULL, NULL},
 	{OPT_Switch,  "Teleport Flash",  YesNo,   2, &telept_flash, NULL, NULL},
@@ -503,8 +500,8 @@ static menuinfo_t analogue_optmenu =
 //
 static optmenuitem_t soundoptions[] =
 {
-	{OPT_Slider,  "Sound Volume", NULL, SND_SLIDER_NUM, &sfx_volume, M_ChangeSfxVol, NULL},
-	{OPT_Slider,  "Music Volume", NULL, SND_SLIDER_NUM, &mus_volume, M_ChangeMusVol, NULL},
+	{OPT_FracSlider,  "Sound Volume", NULL, 0, &sfx_volume.f, M_ChangeSfxVol, NULL, &sfx_volume, 0.05f, 0.0f, 1.0f},
+	{OPT_FracSlider,  "Music Volume", NULL, 0, &mus_volume.f, M_ChangeMusVol, NULL, &mus_volume, 0.05f, 0.0f, 1.0f},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
@@ -532,8 +529,8 @@ static menuinfo_t sound_optmenu =
 //
 static optmenuitem_t f4soundoptions[] =
 {
-	{OPT_Slider,  "Sound Volume", NULL, SND_SLIDER_NUM, &sfx_volume, M_ChangeSfxVol, NULL},
-	{OPT_Slider,  "Music Volume", NULL, SND_SLIDER_NUM, &mus_volume, M_ChangeMusVol, NULL},
+	{OPT_FracSlider,  "Sound Volume", NULL, 0, &sfx_volume.f, M_ChangeSfxVol, NULL, &sfx_volume, 0.05f, 0.0f, 1.0f},
+	{OPT_FracSlider,  "Music Volume", NULL, 0, &mus_volume.f, M_ChangeMusVol, NULL, &mus_volume, 0.05f, 0.0f, 1.0f},
 };
 
 static menuinfo_t f4sound_optmenu = 
@@ -2020,16 +2017,6 @@ static void M_ChangeWeaponSwitch(int keypressed, cvar_c *cvar)
 	level_flags.weapon_switch = global_flags.weapon_switch;
 }
 
-static void M_ChangeDLights(int keypressed, cvar_c *cvar)
-{
-	/* nothing to do */
-}
-
-static void M_ChangeCrossColor(int keypressed, cvar_c *cvar)
-{
-	r_crosscolor = menu_crosscolor;
-}
-
 static void M_ChangePCSpeakerMode(int keypressed, cvar_c *cvar)
 {
 	// Clear SFX cache and restart music
@@ -2275,8 +2262,6 @@ void M_Options(int choice)
 {
 	option_menuon = 1;
 	fkey_menu = (choice == 1);
-	// hack
-	menu_crosscolor = CLAMP(0, r_crosscolor.d, 7);
 }
 
 

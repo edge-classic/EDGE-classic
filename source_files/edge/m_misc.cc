@@ -56,7 +56,6 @@
 #include "p_spec.h"
 #include "r_gldefs.h"
 #include "s_blit.h"
-#include "s_music.h"  // mus_volume
 #include "s_sound.h"
 #include "am_map.h"
 #include "r_colormap.h"
@@ -98,8 +97,6 @@ static default_t defaults[] =
     {CFGT_Boolean,	"directx",			 &force_directx,  0},
     {CFGT_Boolean,	"waveout",			 &force_waveout,  0},
  
-    {CFGT_Int,      "sfx_volume",        &sfx_volume,     CFGDEF_SOUND_VOLUME},
-    {CFGT_Int,      "music_volume",      &mus_volume,     CFGDEF_MUSIC_VOLUME},
     {CFGT_Int,      "sound_stereo",      &var_sound_stereo, CFGDEF_SOUND_STEREO},
     {CFGT_Boolean,	"pc_speaker_mode",	 &var_pc_speaker_mode,  0},
     {CFGT_Int,		"midi_player",		 &var_midi_player,   0},

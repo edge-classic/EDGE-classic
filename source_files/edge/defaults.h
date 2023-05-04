@@ -68,8 +68,6 @@
 #define CFGDEF_SHOWMESSAGES     (1)
 
 // Sound and Music
-#define CFGDEF_SOUND_VOLUME     (8)
-#define CFGDEF_MUSIC_VOLUME     (8)
 #define CFGDEF_SOUND_STEREO     (1)  // Stereo
 #define CFGDEF_MIX_CHANNELS     (2)  // 32 channels
 

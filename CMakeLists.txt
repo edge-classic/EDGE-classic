@@ -16,6 +16,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 option(EDGE_GL_ES2 "Enable GLES2 Rendering Backend" OFF)
 option(EDGE_SANITIZE "Enable code sanitizing (Clang/GCC) " OFF)
 
+include("cmake/EDGEClassic.cmake")  
+
 if (WIN32)
   if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(WIN32_CLANG true)

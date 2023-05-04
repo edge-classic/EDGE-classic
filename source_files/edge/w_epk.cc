@@ -684,7 +684,7 @@ static void ProcessCoalAPIInPack(pack_file_c *pack)
 		for (int entry=0; entry < pack->dirs[dir].entries.size(); entry++)
 		{
 			pack_entry_c& ent = pack->dirs[dir].entries[entry];
-			if (epi::PATH_GetFilename(ent.name) == "COAL_API.EC")
+			if (epi::PATH_GetFilename(ent.name) == "COAL_API.EC" || epi::PATH_GetBasename(ent.name) == "COALAPI")
 			{
 				int length = -1;
 				const byte *raw_data = pack->LoadEntry(dir, entry, length);
@@ -715,7 +715,7 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
 		for (int entry=0; entry < pack->dirs[dir].entries.size(); entry++)
 		{
 			pack_entry_c& ent = pack->dirs[dir].entries[entry];
-			if (epi::PATH_GetFilename(ent.name) == "COAL_HUD.EC")
+			if (epi::PATH_GetFilename(ent.name) == "COAL_HUD.EC" || epi::PATH_GetBasename(ent.name) == "COALHUDS")
 			{
 				int length = -1;
 				const byte *raw_data = pack->LoadEntry(dir, entry, length);

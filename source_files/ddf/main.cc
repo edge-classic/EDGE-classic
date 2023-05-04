@@ -2207,10 +2207,11 @@ ddf_type_e DDF_FilenameToType(const std::filesystem::path& path)
 #else
 	low_name = epi::PATH_GetFilename(path).string();
 #endif
-	epi::str_lower(low_name);
+	epi::str_lower(low_name); // Do we need this if doing case_cmp? - Dasho
 
 	for (size_t i = 0 ; i < DDF_NUM_TYPES ; i++)
-		if (epi::case_cmp(epi::to_u8string(low_name).c_str(), ddf_readers[i].pack_name) == 0)
+		if (epi::case_cmp(epi::to_u8string(low_name), ddf_readers[i].pack_name) == 0 ||
+			epi::case_cmp(epi::PATH_GetBasename(low_name).u8string(), ddf_readers[i].lump_name) == 0)
 			return ddf_readers[i].type;
 
 	return DDF_UNKNOWN;

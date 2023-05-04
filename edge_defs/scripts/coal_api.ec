@@ -213,6 +213,14 @@ module hud
 	function draw_num2(x, y, w, num, optional size) = native
 
 	function draw_number(x, y, len, num, align_right, optional size) = native
+	
+	//wrapper function to shut up any 2.x mod
+	function draw_num(x : float, y : float, len : float, num : float) =
+	{
+		draw_number(x, y, len, num, 0) //not sure if align_right value should be 0 or 1
+	}
+
+	
 	function game_paused() : float = native
 	function erraticism_active() : float = native
 	function time_stop_active() : float = native
@@ -402,6 +410,14 @@ module player
 	function is_zoomed()     : float = native
 	
 	function weapon_state(name : string, state : string) :float = native
+	
+	
+	//dummy function just to shut up any 2.x mod
+	function get_side_move () : float =
+	{ 
+		return 0
+	}
+	
 	
 }
 

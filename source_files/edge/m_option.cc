@@ -142,9 +142,7 @@ extern cvar_c g_bobbing;
 extern cvar_c v_secbright;
 extern cvar_c v_gamma;
 
-static int menu_crosshair;
 static int menu_crosscolor;
-static int menu_crosssize;
 static int monitor_size;
 
 extern int joystick_device;
@@ -173,9 +171,7 @@ static void M_ChangeAutoAim(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeFastparm(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeRespawn(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangePassMissile(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeCrossHair(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeCrossColor(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeCrossSize(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeBobbing(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeBlood(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeMLook(int keypressed, cvar_c *cvar = nullptr);
@@ -402,7 +398,7 @@ static menuinfo_t main_optmenu =
 
 static optmenuitem_t vidoptions[] =
 {
-	{OPT_Slider,  "Gamma Adjustment",    NULL,  21,  &v_gamma.d, M_UpdateCVARFromInt, NULL, &v_gamma},
+	{OPT_FracSlider,  "Gamma Adjustment",    NULL,  0,  &v_gamma.f, M_UpdateCVARFromFloat, NULL, &v_gamma, 0.10f, -1.0f, 1.0f},
 	{OPT_Switch,  "Sector Brightness",    SecBrights,  11,  &v_secbright.d, M_UpdateCVARFromInt, NULL, &v_secbright},
 	{OPT_Switch,  "Framerate Target", "35 FPS/70 FPS", 2, &r_doubleframes.d, M_UpdateCVARFromInt, NULL, &r_doubleframes},
 	{OPT_Switch,  "Smoothing",         YesNo, 2, &var_smoothing, M_ChangeMipMap, NULL},
@@ -411,9 +407,9 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Switch,  "Detail Level",   Details,  3, &detail_level, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Mipmapping",     MipMaps,  3, &var_mipmapping, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Overlay",  		VidOverlays, 6, &r_overlay.d, M_UpdateCVARFromInt, NULL, &r_overlay},
-	{OPT_Switch,  "Crosshair",       CrossH, 10, &menu_crosshair, M_ChangeCrossHair, NULL},
+	{OPT_Switch,  "Crosshair",       CrossH, 10, &r_crosshair.d, M_UpdateCVARFromInt, NULL, &r_crosshair},
 	{OPT_Switch,  "Crosshair Color", CrosshairColor,  8, &menu_crosscolor, M_ChangeCrossColor, NULL},
-	{OPT_Slider,  "Crosshair Size",    NULL,  6,  &menu_crosssize, M_ChangeCrossSize, NULL},
+	{OPT_FracSlider,  "Crosshair Size",  NULL,  0,  &r_crosssize.f, M_UpdateCVARFromFloat, NULL, &r_crosssize, 1.0f, 2.0f, 64.0f},
 	{OPT_Boolean, "Map Rotation",    YesNo,   2, &rotatemap, NULL, NULL},
 	{OPT_Switch,  "Teleport Flash",  YesNo,   2, &telept_flash, NULL, NULL},
 	{OPT_Switch,  "Invulnerability", Invuls, NUM_INVULFX,  &var_invul_fx, NULL, NULL},
@@ -2029,19 +2025,9 @@ static void M_ChangeDLights(int keypressed, cvar_c *cvar)
 	/* nothing to do */
 }
 
-static void M_ChangeCrossHair(int keypressed, cvar_c *cvar)
-{
-	r_crosshair = menu_crosshair;
-}
-
 static void M_ChangeCrossColor(int keypressed, cvar_c *cvar)
 {
 	r_crosscolor = menu_crosscolor;
-}
-
-static void M_ChangeCrossSize(int keypressed, cvar_c *cvar)
-{
-	r_crosssize = 8 + (menu_crosssize * 8);
 }
 
 static void M_ChangePCSpeakerMode(int keypressed, cvar_c *cvar)
@@ -2290,9 +2276,7 @@ void M_Options(int choice)
 	option_menuon = 1;
 	fkey_menu = (choice == 1);
 	// hack
-	menu_crosshair = CLAMP(0, r_crosshair.d, 9);
 	menu_crosscolor = CLAMP(0, r_crosscolor.d, 7);
-	menu_crosssize = CLAMP(0, (r_crosssize.d / 8 - 1), 5);
 }
 
 

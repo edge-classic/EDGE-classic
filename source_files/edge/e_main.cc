@@ -274,18 +274,18 @@ public:
 					SCREENHEIGHT / IM_HEIGHT(overlay));
 		}
 
-	if (v_gamma.d < 10)
+	if (v_gamma.f < 0)
 	{
-		int col = (1.0f - (0.1f * (10 - v_gamma.d))) * 255;
+		int col = (1.0f + v_gamma.f) * 255;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ZERO, GL_SRC_COLOR);
 		HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, RGB_MAKE(col, col, col));
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDisable(GL_BLEND);
 	}
-	else if (v_gamma.d > 10)
+	else if (v_gamma.f > 0)
 	{
-		int col = (0.1f * -(10 - v_gamma.d)) * 255;
+		int col = v_gamma.f * 255;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_DST_COLOR, GL_ONE);
 		HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, RGB_MAKE(col, col, col));
@@ -675,18 +675,18 @@ void E_Display(void)
 				SCREENHEIGHT / IM_HEIGHT(overlay));
 	}
 
-	if (v_gamma.d < 10)
+	if (v_gamma.f < 0)
 	{
-		int col = (1.0f - (0.1f * (10 - v_gamma.d))) * 255;
+		int col = (1.0f + v_gamma.f) * 255;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ZERO, GL_SRC_COLOR);
 		HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, RGB_MAKE(col, col, col));
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDisable(GL_BLEND);
 	}
-	else if (v_gamma.d > 10)
+	else if (v_gamma.f > 0)
 	{
-		int col = (0.1f * -(10 - v_gamma.d)) * 255;
+		int col = v_gamma.f * 255;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_DST_COLOR, GL_ONE);
 		HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, RGB_MAKE(col, col, col));

@@ -758,7 +758,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 				for (size_t j = 0; j < imagedefs.GetSize(); j++)
 				{
 					imagedef_c *img = imagedefs[j];
-					if (img->type == IMGDT_Lump && img->info == texname && 
+					if (img->type == IMGDT_Lump && epi::case_cmp(img->info, texname) == 0 && 
 						W_CheckFileNumForName(texname.c_str()) < pack_index)
 					{
 						img->type = IMGDT_Package;
@@ -805,7 +805,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 				// Assume that same stem name is meant to replace an identically named lump entry
 				if (!sfx->lump_name.empty())
 				{
-					if (epi::PATH_GetBasename(entry.name).u8string() == sfx->lump_name && 
+					if (epi::case_cmp(epi::PATH_GetBasename(entry.name).u8string(),sfx->lump_name) == 0 && 
 						W_CheckFileNumForName(sfx->lump_name.c_str()) < pack_index)
 					{
 						sfx->pack_name = entry.packpath;
@@ -826,7 +826,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 				pl_entry_c *song = playlist[j];
 				if (epi::PATH_GetExtension(song->info).empty())
 				{
-					if (song->infotype == MUSINF_LUMP && epi::PATH_GetBasename(entry.name).u8string() == song->info &&
+					if (song->infotype == MUSINF_LUMP && epi::case_cmp(epi::PATH_GetBasename(entry.name).u8string(),song->info) == 0 &&
 						W_CheckFileNumForName(song->info.c_str()) < pack_index)
 					{
 						song->info = entry.packpath;
@@ -850,7 +850,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 			for (int j = 0; j < colourmaps.GetSize(); j++)
 			{
 				colourmap_c *colm = colourmaps[j];
-				if (!colm->lump_name.empty() && colm->lump_name == epi::PATH_GetBasename(entry.name).u8string() &&
+				if (!colm->lump_name.empty() && epi::case_cmp(colm->lump_name, epi::PATH_GetBasename(entry.name).u8string()) == 0 &&
 					W_CheckFileNumForName(colm->lump_name.c_str()) < pack_index)
 				{
 					colm->lump_name.clear();
@@ -1048,7 +1048,7 @@ std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack)
 				for (size_t j = 0; j < imagedefs.GetSize(); j++)
 				{
 					imagedef_c *img = imagedefs[j];
-					if (img->name == texname)
+					if (epi::case_cmp(img->name, texname) == 0)
 						continue;
 				}
 

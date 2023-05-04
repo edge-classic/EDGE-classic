@@ -592,8 +592,8 @@ static optmenuitem_t playoptions[] =
 	{OPT_Boolean, "Erraticism",   YesNo, 2, 
      &g_erraticism.d, M_UpdateCVARFromInt, "Time only advances when you move or fire", &g_erraticism},
 
-	{OPT_Slider,  "Gravity",            NULL, 20, 
-     &global_flags.menu_grav, NULL, "Gravity"},
+	{OPT_FracSlider,  "Gravity",            NULL, 0, 
+     &g_gravity.f, M_UpdateCVARFromFloat, "Gravity", &g_gravity, 0.10f, 0.0f, 2.0f},
 
     {OPT_Boolean, "Respawn Enemies",            YesNo, 2, 
      &global_flags.respawn, M_ChangeRespawn, NULL},
@@ -622,8 +622,8 @@ static optmenuitem_t perfoptions[] =
 {
 	{OPT_Boolean, "Draw Distance Culling", YesNo, 2, 
      &r_culling.d, M_UpdateCVARFromInt, NULL, &r_culling},
-	{OPT_Switch, "Maximum Draw Distance", "2000/3000/4000/5000/6000/7000/8000", 7, 
-     &r_culldist.d, M_UpdateCVARFromInt, "Only effective when Draw Distance Culling is On", &r_culldist},
+	{OPT_FracSlider, "Maximum Draw Distance", NULL, 0, 
+     &r_culldist.f, M_UpdateCVARFromFloat, "Only effective when Draw Distance Culling is On", &r_culldist, 200.0f, 1000.0f, 8000.0f},
 	{OPT_Switch, "Outdoor Culling Fog Color", "Match Sky/White/Grey/Black", 4, 
      &r_cullfog.d, M_UpdateCVARFromInt, "Only effective when Draw Distance Culling is On", &r_cullfog},
 	{OPT_Boolean, "Slow Thinkers Over Distance", YesNo, 2, 

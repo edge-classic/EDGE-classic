@@ -163,7 +163,7 @@ gameflags_t default_gameflags =
 	false,  // item respawn
 
 	false,  // true 3d gameplay
-	MENU_GRAV_NORMAL, // gravity
+	GRAVITY, // gravity
 	false,  // more blood
 
 	true,   // jump

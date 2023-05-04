@@ -117,7 +117,6 @@ static default_t defaults[] =
     {CFGT_Boolean,  "itemrespawn",       &global_flags.itemrespawn, CFGDEF_ITEMRESPAWN},
     {CFGT_Boolean,  "respawn",           &global_flags.respawn, CFGDEF_RESPAWN},
     {CFGT_Boolean,  "fastparm",          &global_flags.fastparm, CFGDEF_FASTPARM},
-    {CFGT_Int,      "grav",              &global_flags.menu_grav, CFGDEF_MENU_GRAV},
     {CFGT_Boolean,  "true3dgameplay",    &global_flags.true3dgameplay, CFGDEF_TRUE3DGAMEPLAY},
     {CFGT_Enum,     "autoaim",           &global_flags.autoaim, CFGDEF_AUTOAIM},
     {CFGT_Int,      "doom_fading",       &doom_fading,    CFGDEF_DOOM_FADING},

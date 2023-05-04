@@ -393,7 +393,7 @@ void I_StartFrame(void)
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	if (r_culling.d)
-		r_farclip.f = 1500.0f + (r_culldist.d * 1000.0f);
+		r_farclip.f = r_culldist.f;
 	else
 		r_farclip.f = 64000.0;
 }

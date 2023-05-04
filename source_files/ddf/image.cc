@@ -247,7 +247,8 @@ static void ImageParseLump(const char *spec)
 		if (DDF_CompareName(keyword, "PNG") == 0  ||
 		    DDF_CompareName(keyword, "TGA") == 0  ||
 		    DDF_CompareName(keyword, "JPG") == 0  ||
-		    DDF_CompareName(keyword, "JPEG") == 0)
+		    DDF_CompareName(keyword, "JPEG") == 0 ||
+			DDF_CompareName(keyword, "EXT") == 0) // 2.x used this for auto-detection of regular images, but we do this regardless of the extension
 		{
 			dynamic_image->format = LIF_STANDARD;
 		}
@@ -453,7 +454,7 @@ void imagedef_c::Default()
 
 	scale  = 1.0f;
 	aspect = 1.0f;
-	fix_trans = FIXTRN_None;
+	fix_trans = FIXTRN_Blacken;
 	is_font = false;
 	hue_rotation = 0;
 }

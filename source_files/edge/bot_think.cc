@@ -44,12 +44,11 @@
 #define DEBUG  0
 
 
-// this ranges from 0 (EASY) to 2 (HARD)
-// TODO: re-implement skill levels
-DEF_CVAR(bot_skill, "1", CVAR_ARCHIVE)
+// this ranges from 0 (VERY EASY) to 4 (VERY HARD)
+DEF_CVAR(bot_skill, "2", CVAR_ARCHIVE)
 
 
-#define MOVE_SPEED  25
+#define MOVE_SPEED  20
 
 
 //----------------------------------------------------------------------------
@@ -556,14 +555,14 @@ void bot_t::SelectWeapon()
 
 void bot_t::MoveToward(const position_c& pos)
 {
-	cmd.speed = MOVE_SPEED + (10 * bot_skill.d);
+	cmd.speed = MOVE_SPEED + (6.25 * bot_skill.d);
 	cmd.direction = R_PointToAngle(pl->mo->x, pl->mo->y, pos.x, pos.y);
 }
 
 
 void bot_t::WalkToward(const position_c& pos)
 {
-	cmd.speed = (MOVE_SPEED + (10 * bot_skill.d)) * 0.5;
+	cmd.speed = (MOVE_SPEED + (3.125 * bot_skill.d));
 	cmd.direction = R_PointToAngle(pl->mo->x, pl->mo->y, pos.x, pos.y);
 }
 
@@ -586,12 +585,12 @@ void bot_t::TurnToward(angle_t want_angle, float want_slope, bool fast)
 
 	float diff = want_slope - M_Tan(pl->mo->vertangle);
 
-	if (fabs(diff) < (fast ? (0.04 + (0.04 * bot_skill.f)) : 0.04))
+	if (fabs(diff) < (fast ? (0.04 + (0.02 * bot_skill.f)) : 0.04))
 		look_slope = want_slope;
 	else if (diff < 0)
-		look_slope -= fast ? (0.03 + (0.03 * bot_skill.f)) : 0.03;
+		look_slope -= fast ? (0.03 + (0.015 * bot_skill.f)) : 0.03;
 	else
-		look_slope += fast ? (0.03 + (0.03 * bot_skill.f)) : 0.03;
+		look_slope += fast ? (0.03 + (0.015 * bot_skill.f)) : 0.03;
 }
 
 
@@ -664,7 +663,7 @@ void bot_t::RetreatFrom(const mobj_t *enemy)
 
 void bot_t::Strafe(bool right)
 {
-	cmd.speed     = MOVE_SPEED + (10 * bot_skill.d);
+	cmd.speed     = MOVE_SPEED + (6.25 * bot_skill.d);
 	cmd.direction = pl->mo->angle + (right ? ANG270 : ANG90);
 }
 
@@ -722,7 +721,7 @@ void bot_t::StrafeAroundEnemy()
 		else
 			strafe_dir = (r & 16) ? -1 : +1;
 
-		u8_t wait = 40 - (bot_skill.d * 10);
+		u8_t wait = 60 - (bot_skill.d * 10);
 
 		strafe_time = wait + r % wait;
 		return;
@@ -764,7 +763,7 @@ void bot_t::ShootTarget()
 	float acc_dist = std::max(enemy_dist, 32.0f);
 	float adjust   = acc_dist / 32.0f;
 
-	if (delta > (angle_t)(ANG90 / adjust / (11 - (5 * bot_skill.d))))
+	if (delta > (angle_t)(ANG90 / adjust / (11 - (2.5 * bot_skill.d))))
 		return;
 
 	if (sl_diff > (8.0f / adjust))

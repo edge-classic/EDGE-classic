@@ -54,9 +54,11 @@ BotCoop="Co-Op";
 BotOldDM="Deathmatch (Old)";
 BotNewDM="Deathmatch (New)";
 
-BotLow="Low";
-BotMedium="Medium";
-BotHigh="High";
+BotDifficulty1="Very Easy";
+BotDifficulty2="Easy";
+BotDifficulty3="Medium";
+BotDifficulty4="Hard";
+BotDifficulty5="Very Hard";
 
 DevelopmentMode="Development Mode is enabled.\n";
 PressKey="Press A Key";

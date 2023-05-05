@@ -286,9 +286,11 @@ static const char *GetBotSkillName(int sk)
 {
 	switch (sk)
 	{
-		case 0: return language["BotLow"];
-		case 1: return language["BotMedium"];
-		case 2: return language["BotHigh"];
+		case 0: return language["BotDifficulty1"];
+		case 1: return language["BotDifficulty2"];
+		case 2: return language["BotDifficulty3"];
+		case 3: return language["BotDifficulty4"];
+		case 4: return language["BotDifficulty5"];
 
 		default: return "????";
 	}
@@ -478,7 +480,7 @@ static void HostChangeOption(int opt, int key)
 
 		case 5: // Bot Skill
 			bot_skill = bot_skill.d + dir;
-			bot_skill = CLAMP(0, bot_skill.d, 2);
+			bot_skill = CLAMP(0, bot_skill.d, 4);
 
 			break;
 
@@ -550,9 +552,9 @@ void M_DrawHostMenu(void)
 */
 	int CenterX;
 	CenterX = 160;
-	CenterX -= (ng_host_style->fonts[styledef_c::T_HEADER]->StringWidth("Bot Game Settings") * ng_host_style->def->text[styledef_c::T_HEADER].scale) / 2;
+	CenterX -= (ng_host_style->fonts[styledef_c::T_HEADER]->StringWidth("Bot Match Settings") * ng_host_style->def->text[styledef_c::T_HEADER].scale) / 2;
 
-	HL_WriteText(ng_host_style,styledef_c::T_HEADER, CenterX, 25, "Bot Game Settings");
+	HL_WriteText(ng_host_style,styledef_c::T_HEADER, CenterX, 25, "Bot Match Settings");
 
 	//HL_WriteText(ng_host_style,styledef_c::T_HEADER, 160 - (ng_host_style->fonts[styledef_c::T_HEADER]->StringWidth("Bot Game Settings") / 2), 25, "Bot Game Settings");
 
@@ -561,38 +563,38 @@ void M_DrawHostMenu(void)
 	int y = 40;
 	int idx = 0;
 
-	if (ng_params->map->episode->description != "")
-		DrawKeyword(idx, ng_host_style, y, "EPISODE", language[ng_params->map->episode->description.c_str()]);
+	if (!ng_params->map->episode->description.empty())
+		DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map->episode->description.c_str()]);
 	else
-		DrawKeyword(idx, ng_host_style, y, "EPISODE", language[ng_params->map->episode_name.c_str()]);
+		DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map->episode_name.c_str()]);
 
 	y += 10; idx++;
 
-	DrawKeyword(idx, ng_host_style, y, "LEVEL", ng_params->map->name.c_str());
+	DrawKeyword(idx, ng_host_style, y, "Level", ng_params->map->name.c_str());
 	y += 18; idx++;
 
-	DrawKeyword(idx, ng_host_style, y, "MODE", GetModeName(ng_params->deathmatch));
+	DrawKeyword(idx, ng_host_style, y, "Mode", GetModeName(ng_params->deathmatch));
 	y += 10; idx++;
 
-	DrawKeyword(idx, ng_host_style, y, "SKILL", GetSkillName(ng_params->skill));
+	DrawKeyword(idx, ng_host_style, y, "Skill", GetSkillName(ng_params->skill));
 	y += 10; idx++;
 
-	DrawKeyword(idx, ng_host_style, y, "BOTS",
+	DrawKeyword(idx, ng_host_style, y, "Bots",
 			LocalPrintf(buffer, sizeof(buffer), "%d", host_want_bots));
 	y += 10; idx++;
 
-	int skill = CLAMP(0, bot_skill.d, 2);
-	DrawKeyword(idx, ng_host_style, y, "BOT SKILL", GetBotSkillName(skill));
+	int skill = CLAMP(0, bot_skill.d, 4);
+	DrawKeyword(idx, ng_host_style, y, "Bot Skill", GetBotSkillName(skill));
 	y += 18; idx++;
 
 
-	DrawKeyword(idx, ng_host_style, y, "MONSTERS", ng_params->flags->nomonsters ? "OFF" : ng_params->flags->fastparm ? "FAST" : "ON");
+	DrawKeyword(idx, ng_host_style, y, "Monsters", ng_params->flags->nomonsters ? "OFF" : ng_params->flags->fastparm ? "FAST" : "ON");
 	y += 10; idx++;
 
-	DrawKeyword(idx, ng_host_style, y, "ITEM RESPAWN", ng_params->flags->itemrespawn ? "ON" : "OFF");
+	DrawKeyword(idx, ng_host_style, y, "Item Respawn", ng_params->flags->itemrespawn ? "ON" : "OFF");
 	y += 10; idx++;
 
-	DrawKeyword(idx, ng_host_style, y, "TEAM DAMAGE", ng_params->flags->team_damage ? "ON" : "OFF");
+	DrawKeyword(idx, ng_host_style, y, "Team Damage", ng_params->flags->team_damage ? "ON" : "OFF");
 	y += 22; idx++;
 
 	CenterX = 160;

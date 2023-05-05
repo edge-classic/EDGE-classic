@@ -377,7 +377,7 @@ static optmenuitem_t mainoptions[] =
 	{OPT_Function, "Language",          NULL,  0, NULL, M_ChangeLanguage, NULL},
 	{OPT_Switch,   "Messages",          YesNo, 2, &showMessages, NULL, "Messages"},
 	{OPT_Plain,    "",                  NULL,  0, NULL, NULL, NULL},
-	{OPT_Function, "Advanced Start",    NULL,  0, NULL, M_HostNetGame, NULL},
+	{OPT_Function, "Start Bot Match",    		NULL,  0, NULL, M_HostNetGame, NULL},
 	{OPT_Plain,    "",                  NULL,  0, NULL, NULL, NULL},
 	{OPT_Function, "Reset to Defaults", NULL,  0, NULL, M_ResetDefaults, NULL}
 };
@@ -895,7 +895,7 @@ void M_OptCheckNetgame(void)
 	}
 	else
 	{
-		strcpy(mainoptions[HOSTNET_POS+0].name, "Advanced Start");
+		strcpy(mainoptions[HOSTNET_POS+0].name, "Start Bot Match");
 		mainoptions[HOSTNET_POS+0].routine = &M_HostNetGame;
 		mainoptions[HOSTNET_POS+0].help = NULL;
 

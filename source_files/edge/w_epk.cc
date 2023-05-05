@@ -315,6 +315,11 @@ void ProcessSubDir(pack_file_c *pack, const std::string& fullpath)
 	{
 		if (! fsd[i].is_dir)
 		{
+			if (epi::PATH_GetExtension(fsd[i].name).empty())
+			{
+				I_Warning("%s has no extension. Bare filenames are not supported for mounted directories.\n", fsd[i].name.u8string().c_str());
+				continue;
+			}
 			std::string filename = epi::PATH_GetFilename(fsd[i].name).u8string();
 			epi::str_upper(filename);
 			std::string packpath = fsd[i].name.lexically_relative(pack->parent->name).u8string();
@@ -347,6 +352,11 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 		}
 		else
 		{
+			if (epi::PATH_GetExtension(fsd[i].name).empty())
+			{
+				I_Warning("%s has no extension. Bare filenames are not supported for mounted directories.\n", fsd[i].name.u8string().c_str());
+				continue;
+			}
 			std::string filename = epi::PATH_GetFilename(fsd[i].name).u8string();
 			epi::str_upper(filename);
 			std::string packpath = fsd[i].name.lexically_relative(df->name).u8string();
@@ -424,6 +434,12 @@ static pack_file_c * ProcessZip(data_file_c *df)
 		char filename[1024];
 
 		mz_zip_reader_get_filename(pack->arch, idx, filename, sizeof(filename));
+
+		if (epi::PATH_GetExtension(filename).empty())
+		{
+			I_Warning("%s has no extension. Bare EPK filenames are not supported.\n", filename);
+			continue;
+		}
 
 		std::string packpath = filename;
 
@@ -889,7 +905,7 @@ void Pack_ProcessHiresSubstitutions(pack_file_c *pack, int pack_index)
 
 			// See if a bare lump with the same name comes later
 			if (W_CheckFileNumForName(texname.c_str()) > pack_index)
-				continue;;
+				continue;
 
 			I_Debugf("- Adding Hires substitute from EPK: %s\n", entry.packpath.c_str());
 
@@ -942,6 +958,10 @@ bool Pack_FindFile(pack_file_c *pack, const std::string& name)
 	if (epi::PATH_IsAbsolute(name))
 		return false;
 
+	// do not accept filenames without extensions
+	if (epi::PATH_GetExtension(name).empty())
+		return false;
+
 	std::string open_stem = epi::PATH_GetBasename(name).u8string();
 	epi::str_upper(open_stem);
 
@@ -966,6 +986,10 @@ epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name)
 	// disallow absolute names
 	if (epi::PATH_IsAbsolute(name))
 		return NULL;
+
+	// do not accept filenames without extensions
+	if (epi::PATH_GetExtension(name).empty())
+		return false;
 
 	std::string open_stem = epi::PATH_GetBasename(name).u8string();
 	epi::str_upper(open_stem);

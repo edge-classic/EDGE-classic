@@ -42,7 +42,7 @@
 
 #define MAX_CON_ARGS  64
 
-static std::string readme_names[5] = {"readme","readme.txt", "readme.1st", "read.me","readme.md"};
+static std::string readme_names[4] = {"readme.txt", "readme.1st", "read.me","readme.md"};
 
 typedef struct
 {

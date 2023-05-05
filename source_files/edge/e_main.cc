@@ -728,7 +728,7 @@ static void E_TitleDrawer(void)
 	}	
 	else
 	{
-		HUD_SolidBox(0, 0, 320, 200, RGB_MAKE(64,64,64));
+		HUD_SolidBox(0, 0, 320, 200, RGB_MAKE(0,0,0));
 	}
 }
 

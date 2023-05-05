@@ -30,6 +30,14 @@ Zip-compressed archives with the following extensions are recognized and loaded 
 .zip - The default format for files from the /idgames archive, this should also be easily loaded by most editing tools.
 
 =======================================
+Supported Filenames
+=======================================
+
+Filenames within a pack can be of arbitrary length (subject to normal operating system/zip archive limitations), but must have a file extension
+in order to prevent being potentially confused with a lump name during loading routines. A warning message will be produced in
+the console and logfile if a filename without an extension is encountered, and it will not be added to the pack directory listing.
+
+=======================================
 Standard Folder and File References
 =======================================
 

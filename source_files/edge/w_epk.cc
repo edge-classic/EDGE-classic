@@ -989,7 +989,7 @@ epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name)
 
 	// do not accept filenames without extensions
 	if (epi::PATH_GetExtension(name).empty())
-		return false;
+		return NULL;
 
 	std::string open_stem = epi::PATH_GetBasename(name).u8string();
 	epi::str_upper(open_stem);

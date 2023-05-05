@@ -49,8 +49,8 @@ bool INP_Responder(event_t * ev);
 extern int mouse_xaxis;
 extern int mouse_yaxis;
 
-extern int mouse_xsens;
-extern int mouse_ysens;
+extern cvar_c mouse_xsens;
+extern cvar_c mouse_ysens;
 
 extern int joy_axis[6];
 //
@@ -59,11 +59,11 @@ extern int joy_axis[6];
 //                   horzmovement control, vertmovement control
 //                   strafemovediv;
 //
-extern int var_turnspeed;
-extern int var_mlookspeed;
-extern int var_forwardspeed;
-extern int var_sidespeed;
-extern int var_flyspeed;
+extern cvar_c turnspeed;
+extern cvar_c vlookspeed;
+extern cvar_c forwardspeed;
+extern cvar_c sidespeed;
+extern cvar_c flyspeed;
 
 
 /* keyboard stuff */

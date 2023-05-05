@@ -35,7 +35,7 @@ int graphics_shutdown = 0;
 
 DEF_CVAR(in_grab, "1", CVAR_ARCHIVE)
 DEF_CVAR(v_sync,  "0", CVAR_ARCHIVE)
-DEF_CVAR(v_gamma, "10", CVAR_ARCHIVE)
+DEF_CVAR(v_gamma, "0", CVAR_ARCHIVE)
 
 // this is the Monitor Size setting, really an aspect ratio.
 // it defaults to 16:9, as that is the most common monitor size nowadays.
@@ -393,7 +393,7 @@ void I_StartFrame(void)
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	if (r_culling.d)
-		r_farclip.f = 1500.0f + (r_culldist.d * 1000.0f);
+		r_farclip.f = r_culldist.f;
 	else
 		r_farclip.f = 64000.0;
 }

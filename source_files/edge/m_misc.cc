@@ -56,7 +56,6 @@
 #include "p_spec.h"
 #include "r_gldefs.h"
 #include "s_blit.h"
-#include "s_music.h"  // mus_volume
 #include "s_sound.h"
 #include "am_map.h"
 #include "r_colormap.h"
@@ -98,8 +97,6 @@ static default_t defaults[] =
     {CFGT_Boolean,	"directx",			 &force_directx,  0},
     {CFGT_Boolean,	"waveout",			 &force_waveout,  0},
  
-    {CFGT_Int,      "sfx_volume",        &sfx_volume,     CFGDEF_SOUND_VOLUME},
-    {CFGT_Int,      "music_volume",      &mus_volume,     CFGDEF_MUSIC_VOLUME},
     {CFGT_Int,      "sound_stereo",      &var_sound_stereo, CFGDEF_SOUND_STEREO},
     {CFGT_Boolean,	"pc_speaker_mode",	 &var_pc_speaker_mode,  0},
     {CFGT_Int,		"midi_player",		 &var_midi_player,   0},
@@ -120,7 +117,6 @@ static default_t defaults[] =
     {CFGT_Boolean,  "itemrespawn",       &global_flags.itemrespawn, CFGDEF_ITEMRESPAWN},
     {CFGT_Boolean,  "respawn",           &global_flags.respawn, CFGDEF_RESPAWN},
     {CFGT_Boolean,  "fastparm",          &global_flags.fastparm, CFGDEF_FASTPARM},
-    {CFGT_Int,      "grav",              &global_flags.menu_grav, CFGDEF_MENU_GRAV},
     {CFGT_Boolean,  "true3dgameplay",    &global_flags.true3dgameplay, CFGDEF_TRUE3DGAMEPLAY},
     {CFGT_Enum,     "autoaim",           &global_flags.autoaim, CFGDEF_AUTOAIM},
     {CFGT_Int,      "doom_fading",       &doom_fading,    CFGDEF_DOOM_FADING},
@@ -148,16 +144,6 @@ static default_t defaults[] =
     //                 analogue binding added
     {CFGT_Int,      "mouse_axis_x",      &mouse_xaxis,  CFGDEF_MOUSE_XAXIS},
     {CFGT_Int,      "mouse_axis_y",      &mouse_yaxis,  CFGDEF_MOUSE_YAXIS},
-    {CFGT_Int,      "mouse_sens_x",      &mouse_xsens,  CFGDEF_MOUSESENSITIVITY},
-    {CFGT_Int,      "mouse_sens_y",      &mouse_ysens,  CFGDEF_MOUSESENSITIVITY},
-
-    // -ACB- 1998/09/06 Two-stage turning & Speed controls added
-    {CFGT_Int,      "var_turnspeed",     &var_turnspeed,    CFGDEF_TURNSPEED},
-    {CFGT_Int,      "var_mlookspeed",    &var_mlookspeed,   CFGDEF_MLOOKSPEED},
-    {CFGT_Int,      "var_forwardspeed",  &var_forwardspeed, CFGDEF_FORWARDMOVESPEED},
-    {CFGT_Int,      "var_sidespeed",     &var_sidespeed,    CFGDEF_SIDEMOVESPEED},
-    {CFGT_Int,      "var_flyspeed",      &var_flyspeed,     CFGDEF_SIDEMOVESPEED},
-	{CFGT_Int, 		"var_triggerthreshold", &var_triggerthreshold, CFGDEF_TRIGGERTHRESHOLD},
 
     {CFGT_Int,      "joystick_device",   &joystick_device, 1},
     {CFGT_Int,      "joy_axis1",         &joy_axis[0],    7},
@@ -326,7 +312,7 @@ static void SetToBaseValue(default_t *def)
 	}
 }
 
-void M_ResetDefaults(int _dummy)
+void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar)
 {
 	
 	for (int i = 0; i < numdefaults; i++)

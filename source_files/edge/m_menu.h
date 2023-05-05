@@ -101,10 +101,12 @@ void M_StartMessage(const char *string, void (* routine)(int response),
 void M_StartMessageInput(const char *string, 
     void (* routine)(const char *response));
 
-void M_EndGame(int choice);
+void M_EndGame(int choice, cvar_c *cvar = nullptr);
 void M_QuitEDGE(int choice);
 void M_ImmediateQuit(void);
 void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div);
+void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div,
+    float min, float max);
 void M_ClearMenus(void);
 
 #endif // __M_MENU__

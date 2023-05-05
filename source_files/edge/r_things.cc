@@ -68,7 +68,7 @@ extern bool erraticism_active;
 
 DEF_CVAR(r_crosshair,   "0",   CVAR_ARCHIVE)  // shape
 DEF_CVAR(r_crosscolor,  "0",   CVAR_ARCHIVE)  // 0 .. 7
-DEF_CVAR(r_crosssize,   "16",  CVAR_ARCHIVE)  // pixels on a 320x200 screen
+DEF_CVAR(r_crosssize,   "16.0",  CVAR_ARCHIVE)  // pixels on a 320x200 screen
 DEF_CVAR(r_crossbright, "1.0", CVAR_ARCHIVE)  // 1.0 is normal
 
 

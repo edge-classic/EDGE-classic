@@ -59,12 +59,6 @@
 // Controls (Analogue)
 #define CFGDEF_MOUSE_XAXIS      (2*AXIS_TURN-1)
 #define CFGDEF_MOUSE_YAXIS      (2*AXIS_MLOOK-1)
-#define CFGDEF_MOUSESENSITIVITY (10)
-#define CFGDEF_TURNSPEED        (7)   // == 1.0 (the maximum)
-#define CFGDEF_MLOOKSPEED       (7)
-#define CFGDEF_FORWARDMOVESPEED (7)
-#define CFGDEF_SIDEMOVESPEED    (7)
-#define CFGDEF_TRIGGERTHRESHOLD (3)
 
 #define CFGDEF_JOY_XAXIS        (2*AXIS_TURN-1)
 #define CFGDEF_JOY_YAXIS        (2*AXIS_FORWARD)
@@ -74,8 +68,6 @@
 #define CFGDEF_SHOWMESSAGES     (1)
 
 // Sound and Music
-#define CFGDEF_SOUND_VOLUME     (8)
-#define CFGDEF_MUSIC_VOLUME     (8)
 #define CFGDEF_SOUND_STEREO     (1)  // Stereo
 #define CFGDEF_MIX_CHANNELS     (2)  // 32 channels
 
@@ -109,7 +101,6 @@
 #define CFGDEF_HAVE_EXTRA       (1)
 #define CFGDEF_TRUE3DGAMEPLAY   (1)
 #define CFGDEF_PASS_MISSILE     (1)
-#define CFGDEF_MENU_GRAV        (MENU_GRAV_NORMAL)
 #define CFGDEF_RES_RESPAWN      (1)       // Resurrect Mode 
 #define CFGDEF_ITEMRESPAWN      (0)
 #define CFGDEF_FASTPARM         (0)

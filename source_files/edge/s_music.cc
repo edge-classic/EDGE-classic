@@ -50,7 +50,7 @@
 extern bool var_pc_speaker_mode;
 
 // music slider value
-int mus_volume;
+DEF_CVAR(mus_volume, "0.15", CVAR_ARCHIVE)
 
 bool nomusic = false;
 
@@ -90,7 +90,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	float volume = slider_to_gain[mus_volume];
+	float volume = mus_volume.f;
 
 	// open the file or lump, and read it into memory
 	epi::file_c *F;
@@ -292,7 +292,7 @@ void S_MusicTicker(void)
 void S_ChangeMusicVolume(void)
 {
 	if (music_player)
-		music_player->Volume(slider_to_gain[mus_volume]);
+		music_player->Volume(mus_volume.f);
 }
 
 

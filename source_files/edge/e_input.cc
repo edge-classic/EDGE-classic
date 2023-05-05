@@ -134,9 +134,6 @@ static int mlookheld;  // for accelerative mlooking
 int mouse_xaxis;
 int mouse_yaxis;
 
-int mouse_xsens;
-int mouse_ysens;
-
 int joy_axis[6] = { 0, 0, 0, 0, 0, 0 };
 
 static int joy_last_raw[6];
@@ -155,29 +152,15 @@ DEF_CVAR(in_stageturn, "1", CVAR_ARCHIVE)
 DEF_CVAR(debug_mouse,   "0", 0)
 DEF_CVAR(debug_joyaxis, "0", 0)
 
+DEF_CVAR(mouse_xsens, "10.0", CVAR_ARCHIVE)
+DEF_CVAR(mouse_ysens, "10.0", CVAR_ARCHIVE)
+
 // Speed controls
-int var_turnspeed;
-int var_mlookspeed;
-int var_forwardspeed;
-int var_sidespeed;
-int var_flyspeed;
-
-
-static float sensitivities[16] =
-{
-	0.10, 0.25, 0.35, 0.50,
-	0.75, 1.00, 1.56, 2.21,
-	3.13, 4.42, 6.26, 8.84,
-	12.5, 17.7, 25.0, 35.4
-};
-
-static float speed_factors[12] =
-{
-	0.15, 0.25, 0.33, 0.42,
-	0.50, 0.66, 0.83, 1.00,
-	1.50, 2.00, 2.80, 4.00
-};
-
+DEF_CVAR(turnspeed, "1.0", CVAR_ARCHIVE)
+DEF_CVAR(vlookspeed, "1.0", CVAR_ARCHIVE)
+DEF_CVAR(forwardspeed, "1.0", CVAR_ARCHIVE)
+DEF_CVAR(sidespeed, "1.0", CVAR_ARCHIVE)
+DEF_CVAR(flyspeed, "1.0", CVAR_ARCHIVE)
 
 float JoyAxisFromRaw(int raw)
 {
@@ -369,7 +352,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 	{
 		float turn = angleturn[t_speed]/(r_doubleframes.d ? 2 : 1) * joy_forces[AXIS_TURN];
 		
-		turn *= speed_factors[var_turnspeed];
+		turn *= turnspeed.f;
 
 		// -ACB- 1998/09/06 Angle Turn Speed Control
 		turn += angleturn[t_speed] * ball_deltas[AXIS_TURN] / 64.0;
@@ -382,7 +365,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 		// -ACB- 1998/07/02 Use VertAngle for Look/up down.
 		float mlook = mlookturn[m_speed] * joy_forces[AXIS_MLOOK];
 
-		mlook *= speed_factors[var_mlookspeed];
+		mlook *= vlookspeed.f;
 
 		mlook += mlookturn[m_speed] * ball_deltas[AXIS_MLOOK] / 64.0;
 
@@ -393,7 +376,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 	{
 		float forward = forwardmove[speed] * joy_forces[AXIS_FORWARD];
 
-		forward *= speed_factors[var_forwardspeed];
+		forward *= forwardspeed.f;
 
 		// -ACB- 1998/09/06 Forward Move Speed Control
 		forward += forwardmove[speed] * ball_deltas[AXIS_FORWARD] / 64.0;
@@ -410,7 +393,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 		if (strafe)
 			side += sidemove[speed] * joy_forces[AXIS_TURN];
 
-		side *= speed_factors[var_sidespeed];
+		side *= sidespeed.f;
 
 		// -ACB- 1998/09/06 Side Move Speed Control
 		side += sidemove[speed] * ball_deltas[AXIS_STRAFE] / 64.0;
@@ -427,7 +410,7 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 	{
 		float upward = upwardmove[speed] * joy_forces[AXIS_FLY];
 
-		upward *= speed_factors[var_flyspeed];
+		upward *= flyspeed.f;
 
 		upward += upwardmove[speed] * ball_deltas[AXIS_FLY] / 64.0;
 
@@ -591,8 +574,8 @@ bool INP_Responder(event_t * ev)
 			if ((mouse_xaxis+1) & 1) dx = -dx;
 			if ((mouse_yaxis+1) & 1) dy = -dy;
 
-			dx *= sensitivities[mouse_xsens];
-			dy *= sensitivities[mouse_ysens];
+			dx *= mouse_xsens.f;
+			dy *= mouse_ysens.f;
 
 			if (debug_mouse.d)
 				I_Printf("Mouse %+04d %+04d --> %+7.2f %+7.2f\n",

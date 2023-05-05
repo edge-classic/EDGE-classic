@@ -78,6 +78,7 @@ public:
 	void ComputeMusicVolume();
 };
 
+extern cvar_c sfx_volume;
 
 extern mix_channel_c *mix_chan[];
 extern int num_chan;

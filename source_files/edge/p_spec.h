@@ -35,9 +35,6 @@
 #include "r_defs.h"
 #include "r_image.h"
 
-#define MENU_GRAV_NORMAL  8
-
-
 typedef struct light_s
 {
 	// type of light effect

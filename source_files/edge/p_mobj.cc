@@ -78,6 +78,8 @@ extern cvar_c g_mbf21compat;
 
 DEF_CVAR(g_cullthinkers, "0", CVAR_ARCHIVE)
 
+DEF_CVAR(g_gravity, "1.0", CVAR_ARCHIVE)
+
 // List of all objects in map.
 mobj_t *mobjlisthead;
 
@@ -1058,7 +1060,8 @@ static void P_ZMovement(mobj_t * mo, const region_properties_t *props, bool extr
 	// -KM- 1998/11/25 Gravity is now not precalculated so that
 	//  menu changes affect instantly.
 	float gravity = props->gravity / 8.0f * 
-		(float)level_flags.menu_grav / (float)MENU_GRAV_NORMAL;
+		(float)level_flags.menu_grav / GRAVITY
+		* g_gravity.f; // New global gravity menu item
 
 	// check for smooth step up
 	if (mo->player && mo->player->mo == mo && mo->z < mo->floorz)

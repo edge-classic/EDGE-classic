@@ -67,6 +67,8 @@
 
 #include "i_sdlinc.h"
 
+#include <cmath>
+
 // Menu navigation stuff
 int key_menu_open;
 int key_menu_up;
@@ -285,7 +287,7 @@ extern void M_F4SoundOptions(int choice);
 static void M_LoadSavePage(int choice);
 static void M_ReadThis(int choice);
 static void M_ReadThis2(int choice);
-void M_EndGame(int choice);
+void M_EndGame(int choice, cvar_c *cvar);
 
 static void M_ChangeMessages(int choice);
 
@@ -2110,7 +2112,7 @@ static void EndGameResponse(int ch)
 	M_ClearMenus();
 }
 
-void M_EndGame(int choice)
+void M_EndGame(int choice, cvar_c *cvar)
 {
 	if (gamestate != GS_LEVEL)
 	{
@@ -2288,23 +2290,23 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
 {
 	int i, basex = x;
 	int step = (8 / div);
-	int pos = 254;
 
 	style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
 
-	// If using an IMAGE or TRUETYPE type font for the menu, use symbols for the slider instead
+	// If using an IMAGE or TRUETYPE type font for the menu, use a COALHUDs-style bar for the slider instead
 	if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image || opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
 	{
-		// Quick solid box code if a background is desired for the slider in the future
-		// HUD_SolidBox(x, y, x+(thermWidth*step), y+opt_style->fonts[styledef_c::T_ALT]->im_char_height, RGB_MAKE(100,100,100));
-		for (i=0; i < thermDot; i++, x += step)
-		{
-			HL_WriteText(opt_style, styledef_c::T_ALT, x, y, (const char *)&pos);
-		}
-		for (i=1; i < thermWidth - thermDot; i++, x += step)
-		{
-			HL_WriteText(opt_style, styledef_c::T_ALT, x, y-2, "-", 1.5);
-		}
+		rgbcol_t slider_color = RGB_MAKE(255,255,255);
+
+		const colourmap_c *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
+
+		if (colmap)
+			slider_color = V_GetFontColor(colmap);
+
+		HUD_ThinBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
+			x+(thermWidth*step)-step, y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
+		HUD_SolidBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
+			x+(thermDot*step), y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
 	}
 	else
 	{
@@ -2323,6 +2325,60 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
 		x = basex + step + thermDot * step;
 
 		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_o)/div, therm_o, 0.0, 0.0);
+	}
+}
+
+void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, float min, float max)
+{
+	float basex = x;
+	int step = (8 / div);
+	float scale_step = 50.0f / ((max-min) / increment);
+
+	// Capture actual value first since it will be aligned to the slider increment
+	std::string actual_val = epi::STR_Format("%0.2f", thermDot);	
+
+	thermDot = CLAMP(min, thermDot, max);
+
+	thermDot = thermDot - remainderf(thermDot, increment);
+
+	style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
+
+	// If using an IMAGE or TRUETYPE type font for the menu, use a COALHUDs-style bar for the slider instead
+	if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image || opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
+	{
+		rgbcol_t slider_color = RGB_MAKE(255,255,255);
+
+		const colourmap_c *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
+
+		if (colmap)
+			slider_color = V_GetFontColor(colmap);
+
+		HUD_ThinBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
+			x+50.0f, y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
+		HUD_SolidBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
+			x+(((thermDot-min)/increment)*scale_step), y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
+		HL_WriteText(opt_style, styledef_c::T_ALT, x+50.0f + step, y, actual_val.c_str());
+	}
+	else
+	{
+		// Note: the (step+1) here is for compatibility with the original
+		// code.  It seems required to make the thermo bar tile properly.
+
+		int i=0;
+		float scale_step = 50.0f / ((max-min) / increment);
+
+		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_l)/div, therm_l, 0.0, 0.0);
+
+		for (i, x += step; i < (50/step); i++, x += step)
+		{
+			HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_m)/div, therm_m, 0.0, 0.0);
+		}
+
+		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_r)/div, therm_r, 0.0, 0.0);
+
+		HUD_StretchImage(basex + ((thermDot-min)/increment) * scale_step-1, y, step+1, IM_HEIGHT(therm_o)/div, therm_o, 0.0, 0.0);
+
+		HL_WriteText(opt_style, styledef_c::T_ALT, basex+(((max-min)/increment)*scale_step) + (step*2+2), y, actual_val.c_str());
 	}
 }
 

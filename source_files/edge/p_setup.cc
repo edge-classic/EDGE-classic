@@ -214,7 +214,7 @@ static void CheckDoom2Map05Bug(byte *data, int length)
 
 static void LoadVertexes(int lump)
 {
-	const void *data;
+	const byte *data;
 	int i;
 	const raw_vertex_t *ml;
 	vec2_t *li;
@@ -320,7 +320,7 @@ static void GroupSectorTags(sector_t * dest, sector_t * seclist, int numsecs)
 
 static void LoadSectors(int lump)
 {
-	const void *data;
+	const byte *data;
 	int i;
 	const raw_sector_t *ms;
 	sector_t *ss;
@@ -596,7 +596,7 @@ static void LoadThings(int lump)
 	int options, typenum;
 	int i;
 
-	const void *data;
+	const byte *data;
 	const raw_thing_t *mt;
 	const mobjtype_c *objtype;
 
@@ -700,7 +700,7 @@ static void LoadHexenThings(int lump)
 	int tag;
 	int i;
 
-	const void *data;
+	const byte *data;
 	const raw_hexen_thing_t *mt;
 	const mobjtype_c *objtype;
 
@@ -844,7 +844,7 @@ static void LoadLineDefs(int lump)
 
 	temp_line_sides = new int[numlines * 2];
 
-	const void *data = W_LoadLump(lump);
+	const byte *data = W_LoadLump(lump);
 	mapline_CRC.AddBlock((const byte*)data, W_LumpLength(lump));
 
 	line_t *ld = lines;
@@ -921,7 +921,7 @@ static void LoadHexenLineDefs(int lump)
 
 	temp_line_sides = new int[numlines * 2];
 
-	const void *data = W_LoadLump(lump);
+	const byte *data = W_LoadLump(lump);
 	mapline_CRC.AddBlock((const byte*)data, W_LumpLength(lump));
 
 	line_t *ld = lines;
@@ -2208,7 +2208,7 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd,
 static void LoadSideDefs(int lump)
 {
 	int i;
-	const void *data;
+	const byte *data;
 	const raw_sidedef_t *msd;
 	side_t *sd;
 

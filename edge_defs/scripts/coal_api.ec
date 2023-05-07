@@ -418,6 +418,7 @@ module player
 		return 0
 	}
 	
+	function sector_light()      : float = native
 	
 }
 

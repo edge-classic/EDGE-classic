@@ -1505,6 +1505,13 @@ static void PL_query_weapon(coal::vm_c *vm, int argc)
 	
 }
 
+// player.sector_light()
+// Lobo: May 2023
+static void PL_sector_light(coal::vm_c *vm, int argc)
+{
+	vm->ReturnFloat(ui_player_who->mo->subsector->sector->props.lightlevel);
+}
+
 //------------------------------------------------------------------------
 
 
@@ -1594,6 +1601,8 @@ void VM_RegisterPlaysim()
 	ui_vm->AddNativeFunction("player.is_zoomed",        PL_is_zoomed);
 
 	ui_vm->AddNativeFunction("player.weapon_state",      PL_weapon_state);
+
+	ui_vm->AddNativeFunction("player.sector_light",      PL_sector_light);
 
 }
 

@@ -104,6 +104,9 @@ New Features
   - HEADER.xxxx and TITLE.xxxx commands now affect graphics like "Choose Skill"
   - ENTRY_ALIGNMENT=CENTER now properly centers items
   
++ COALHUDS: new command
+  - player.sector_light(): Returns the light level of the sector the player is currently in.
+
   
 
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)

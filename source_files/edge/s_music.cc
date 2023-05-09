@@ -99,7 +99,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 	{
 		case MUSINF_FILE:
 		{
-			std::filesystem::path fn = M_ComposeFileName(game_dir, UTFSTR(play->info));
+			std::filesystem::path fn = M_ComposeFileName(app_dir, UTFSTR(play->info));
 
 			F = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 			if (! F)

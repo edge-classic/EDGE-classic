@@ -42,7 +42,7 @@
 #include "s_mp3.h"
 #include "s_wav.h"
 
-#include "dm_state.h"  // game_dir
+#include "dm_state.h"  // app_dir
 #include "m_argv.h"
 #include "m_misc.h"
 #include "m_random.h"
@@ -147,7 +147,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 		{
 			F = W_OpenPackFile(def->pc_speaker_sound);
 			if (!F)
-				F = epi::FS_Open(M_ComposeFileName(game_dir, UTFSTR(def->pc_speaker_sound)),
+				F = epi::FS_Open(M_ComposeFileName(app_dir, UTFSTR(def->pc_speaker_sound)),
 					epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 			if (!F)
 			{
@@ -185,8 +185,8 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 		else if (def->file_name != "")
 		{
 			std::filesystem::path fn;
-			// Why is this composed with the game dir? - Dasho
-			fn = M_ComposeFileName(game_dir, UTFSTR(def->file_name));
+			// Why is this composed with the app dir? - Dasho
+			fn = M_ComposeFileName(app_dir, UTFSTR(def->file_name));
 			F = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 			if (! F)
 			{

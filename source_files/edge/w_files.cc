@@ -105,7 +105,6 @@ size_t W_AddPending(std::filesystem::path file, filekind_e kind)
 // TODO tidy this
 extern void ProcessFixersForWad(data_file_c *df);
 extern void ProcessWad(data_file_c *df, size_t file_index);
-extern void ProcessPackage(data_file_c *df, size_t file_index);
 
 extern std::filesystem::path W_BuildNodesForWad(data_file_c *df);
 
@@ -210,14 +209,15 @@ void ProcessFile(data_file_c *df)
 
 		ProcessWad(df, file_index);
 	}
-	else if (df->kind == FLKIND_PackWAD)
+	else if (df->kind == FLKIND_PackWAD || df->kind == FLKIND_IPackWAD)
 	{
-		SYS_ASSERT(df->file); // This should already be handled by the epk processing
+		SYS_ASSERT(df->file); // This should already be handled by the pack processing
 		ProcessWad(df, file_index);
 	}
-	else if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
+	else if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK
+		|| df->kind == FLKIND_IPK || df->kind == FLKIND_IFolder)
 	{
-		ProcessPackage(df, file_index);
+		Pack_ProcessAll(df, file_index);
 	}
 	else if (df->kind == FLKIND_DDF)
 	{
@@ -272,7 +272,7 @@ void W_BuildNodes(void)
 	{
 		data_file_c *df = data_files[i];
 
-		if (df->kind == FLKIND_IWad || df->kind == FLKIND_PWad || df->kind == FLKIND_PackWAD)
+		if (df->kind == FLKIND_IWad || df->kind == FLKIND_PWad || df->kind == FLKIND_PackWAD || df->kind == FLKIND_IPackWAD)
 		{
 			std::filesystem::path xwa_filename = W_BuildNodesForWad(df);
 
@@ -292,7 +292,8 @@ int W_CheckPackForName(const std::string& name)
 	for (int i = (int)data_files.size() - 1 ; i >= 0 ; i--)
 	{
 		data_file_c *df = data_files[i];
-		if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
+		if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK
+			|| df->kind == FLKIND_IFolder || df->kind == FLKIND_IPK)
 		{
 			if (Pack_FindFile(df->pack, name))
 				return i;
@@ -309,7 +310,8 @@ epi::file_c * W_OpenPackFile(const std::string& name)
 	for (int i = (int)data_files.size() - 1 ; i >= 0 ; i--)
 	{
 		data_file_c *df = data_files[i];
-		if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
+		if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK
+			|| df->kind == FLKIND_IFolder || df->kind == FLKIND_IPK)
 		{
 			epi::file_c *F = Pack_OpenFile(df->pack, name);
 			if (F != NULL)
@@ -335,7 +337,8 @@ byte *W_OpenPackOrLumpInMemory(const std::string& name, const std::vector<std::s
 		if (i > lump_df)
 		{
 			data_file_c *df = data_files[i];
-			if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
+			if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK
+				|| df->kind == FLKIND_IFolder || df->kind == FLKIND_IPK)
 			{
 				epi::file_c *F = Pack_OpenMatch(df->pack, name, extensions);
 				if (F != NULL)
@@ -378,10 +381,14 @@ static const char *FileKindString(filekind_e kind)
 		case FLKIND_EWad:    return "edge";
 		case FLKIND_EEPK:    return "edge";
 		case FLKIND_XWad:    return "xwa";
+		case FLKIND_PackWAD: return "pwad";
+		case FLKIND_IPackWAD: return "iwad";
 
 		case FLKIND_Folder:  return "DIR";
 		case FLKIND_EFolder: return "edge";
+		case FLKIND_IFolder: return "DIR";
 		case FLKIND_EPK:     return "epk";
+		case FLKIND_IPK:	 return "epk";
 
 		case FLKIND_DDF:     return "ddf";
 		case FLKIND_RTS:     return "rts";

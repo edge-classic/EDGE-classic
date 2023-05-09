@@ -89,7 +89,7 @@ bool S_StartupFluid(void)
 	if (!cvar_good)
 	{
 		I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
-		s_soundfont = epi::PATH_Join(epi::PATH_Join(game_dir, UTFSTR("soundfont")), UTFSTR("default.sf2")).generic_u8string();
+		s_soundfont = epi::PATH_Join(epi::PATH_Join(app_dir, UTFSTR("soundfont")), UTFSTR("default.sf2")).generic_u8string();
 	}
 
 	edge_fluid_settings = new_fluid_settings();
@@ -103,11 +103,11 @@ bool S_StartupFluid(void)
 	fluid_synth_set_sample_rate(edge_fluid, dev_freq);
 	fluid_synth_set_gain(edge_fluid, s_fluidgain.f);
 	
-	if (fluid_synth_sfload(edge_fluid, var_pc_speaker_mode ? epi::PATH_Join(epi::PATH_Join(game_dir, UTFSTR("soundfont")), UTFSTR("bonkers_for_bits.sf2")).generic_u8string().c_str() :
+	if (fluid_synth_sfload(edge_fluid, var_pc_speaker_mode ? epi::PATH_Join(epi::PATH_Join(app_dir, UTFSTR("soundfont")), UTFSTR("bonkers_for_bits.sf2")).generic_u8string().c_str() :
 		s_soundfont.c_str(), 1) == -1)
 	{
 		I_Warning("FluidLite: Could not load requested soundfont %s! Falling back to default soundfont!\n", s_soundfont.c_str());
-		if (fluid_synth_sfload(edge_fluid, epi::PATH_Join(epi::PATH_Join(game_dir, UTFSTR("soundfont")), UTFSTR("default.sf2")).generic_u8string().c_str(), 1) == -1) 
+		if (fluid_synth_sfload(edge_fluid, epi::PATH_Join(epi::PATH_Join(app_dir, UTFSTR("soundfont")), UTFSTR("default.sf2")).generic_u8string().c_str(), 1) == -1) 
 		{
 			I_Warning("Could not load any soundfont! Ensure that default.sf2 is present in the soundfont directory!\n");
 			delete_fluid_synth(edge_fluid);

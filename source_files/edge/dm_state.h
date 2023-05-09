@@ -109,10 +109,10 @@ extern int gametic;
 extern std::filesystem::path cfgfile;
 extern std::filesystem::path brandingfile;
 
-extern std::string iwad_base;
+extern std::string game_base;
 
 extern std::filesystem::path cache_dir;
-extern std::filesystem::path game_dir;
+extern std::filesystem::path app_dir;
 extern std::filesystem::path home_dir;
 extern std::filesystem::path save_dir;
 extern std::filesystem::path shot_dir;

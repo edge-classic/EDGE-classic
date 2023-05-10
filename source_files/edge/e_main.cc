@@ -1118,6 +1118,8 @@ static void IdentifyVersion(void)
 				}
 			}
         }
+		else
+			goto foundindoomwadpath;
 
 		// If we get here, try .epk and error out if we still can't access what was passed to us
 		iwad_file.replace_extension(UTFSTR(".epk"));
@@ -1145,7 +1147,7 @@ static void IdentifyVersion(void)
 
 		foundindoomwadpath:
 
-		if (epi::PATH_GetExtension(iwad_file) == UTFSTR(".wad"))
+		if (epi::case_cmp(epi::PATH_GetExtension(iwad_file).u8string(), epi::to_u8string(UTFSTR(".wad"))) == 0)
 		{
 			epi::file_c *game_test = epi::FS_Open(iwad_file, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 			game_base = W_CheckForUniqueLumps(game_test, nullptr);

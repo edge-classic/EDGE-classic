@@ -47,6 +47,8 @@ bool var_obituaries = true;
 
 extern cvar_c g_mbf21compat;
 
+extern cvar_c player_dm_dr;
+
 typedef struct
 {
 	benefit_t *list;  // full list of benefits
@@ -1341,6 +1343,21 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 			if (damage > 0.1f && BITSET_EMPTY == (inflictor->currentattack->attack_class & ~arm_info->resistance))
 			{
 				damage = MAX(0.1f, damage * arm_info->resist_multiply);
+			}
+		}
+
+		// Bot Deathmatch Damange Resistance check
+		if (DEATHMATCH() && !player->isBot() && source && source->player && source->player->isBot())
+		{
+			if (player_dm_dr.d < 9)
+			{
+				float mul = 1.90f - (player_dm_dr.d * 0.10f);
+				damage *= mul;
+			}
+			else if (player_dm_dr.d > 9)
+			{
+				float mul = 0.10f + ((18 - player_dm_dr.d) * 0.10f);
+				damage = MAX(0.1f, damage * mul);
 			}
 		}
 

@@ -80,7 +80,7 @@ static int hosting_port;
 
 static int host_want_bots;
 
-#define HOST_OPTIONS  10
+#define HOST_OPTIONS  11
 #define JOIN_OPTIONS  4
 
 
@@ -94,6 +94,7 @@ static int join_connect_timer;
 
 static void ListAccept(void);
 
+DEF_CVAR(player_dm_dr, "9", CVAR_ARCHIVE)
 
 #if (0 == 1)
 static void CreateHostWelcome(welcome_proto_t *we)
@@ -296,17 +297,33 @@ static const char *GetBotSkillName(int sk)
 	}
 }
 
-static const char *LocalPrintf(char *buf, int max_len, const char *str, ...)
+static const char *GetPlayerDamResName(int res)
 {
-	va_list argptr;
+	switch (res)
+	{
+		case 0: return "-90%";
+		case 1: return "-80%";
+		case 2: return "-70%";
+		case 3: return "-60%";
+		case 4: return "-50%";
+		case 5: return "-40%";
+		case 6: return "-30%";
+		case 7: return "-20%";
+		case 8: return "-10%";
+		case 9: return "Normal";
+		case 10: return "+10%";
+		case 11: return "+20%";
+		case 12: return "+30%";
+		case 13: return "+40%";
+		case 14: return "+50%";
+		case 15: return "+60%";
+		case 16: return "+70%";
+		case 17: return "+80%";
+		case 18: return "+90%";
 
-	va_start (argptr, str);
-	vsnprintf (buf, max_len, str, argptr);
-	va_end (argptr);
-
-	return buf;
+		default: return "????";
+	}
 }
-
 
 //----------------------------------------------------------------------------
 
@@ -484,7 +501,13 @@ static void HostChangeOption(int opt, int key)
 
 			break;
 
-		case 6: // Monsters
+		case 6:
+			player_dm_dr = player_dm_dr.d + dir;
+			player_dm_dr = CLAMP(0, player_dm_dr.d, 18);
+
+			break;
+
+		case 7: // Monsters
 			if (ng_params->flags->fastparm)
 			{
 				ng_params->flags->fastparm   = false;
@@ -500,11 +523,11 @@ static void HostChangeOption(int opt, int key)
 				
 			break;
 
-		case 7: // Item-Respawn
+		case 8: // Item-Respawn
 			ng_params->flags->itemrespawn = ! ng_params->flags->itemrespawn;
 			break;
 			
-		case 8: // Team-Damage
+		case 9: // Team-Damage
 			ng_params->flags->team_damage = ! ng_params->flags->team_damage;
 			break;
 
@@ -530,35 +553,12 @@ void M_DrawHostMenu(void)
 	SYS_ASSERT(ng_host_style);
 
 	ng_host_style->DrawBackground();
-/*
-	if (ng_host_style->bg_image)
-	{
-		float old_alpha = HUD_GetAlpha();
-		HUD_SetAlpha(ng_host_style->def->bg.translucency);
-		if (ng_host_style->def->special == 0)
-			HUD_StretchImage(-90, 0, 500, 200, ng_host_style->bg_image, 0.0, 0.0);
-		else
-			HUD_TileImage(-90, 0, 500, 200, ng_host_style->bg_image, 0.0, 0.0);
-		HUD_SetAlpha(old_alpha);
-	}
-	else
-	{
-		float old_alpha = HUD_GetAlpha();
-		HUD_SetAlpha(ng_host_style->def->bg.translucency);
-		HUD_SolidBox(-90, 0, 500, 200, ng_host_style->def->bg.colour != RGB_NO_VALUE ?
-			ng_host_style->def->bg.colour : T_BLACK);
-		HUD_SetAlpha(old_alpha);
-	}
-*/
+
 	int CenterX;
 	CenterX = 160;
 	CenterX -= (ng_host_style->fonts[styledef_c::T_HEADER]->StringWidth("Bot Match Settings") * ng_host_style->def->text[styledef_c::T_HEADER].scale) / 2;
 
 	HL_WriteText(ng_host_style,styledef_c::T_HEADER, CenterX, 25, "Bot Match Settings");
-
-	//HL_WriteText(ng_host_style,styledef_c::T_HEADER, 160 - (ng_host_style->fonts[styledef_c::T_HEADER]->StringWidth("Bot Game Settings") / 2), 25, "Bot Game Settings");
-
-	char buffer[200];
 
 	int y = 40;
 	int idx = 0;
@@ -580,13 +580,20 @@ void M_DrawHostMenu(void)
 	y += 10; idx++;
 
 	DrawKeyword(idx, ng_host_style, y, "Bots",
-			LocalPrintf(buffer, sizeof(buffer), "%d", host_want_bots));
+			epi::STR_Format("%d", host_want_bots).c_str());
 	y += 10; idx++;
 
 	int skill = CLAMP(0, bot_skill.d, 4);
 	DrawKeyword(idx, ng_host_style, y, "Bot Skill", GetBotSkillName(skill));
-	y += 18; idx++;
+	y += 10; idx++;
 
+	int dm_damage_resistance = CLAMP(0, player_dm_dr.d, 18);
+	DrawKeyword(idx, ng_host_style, y, "Player Damage Resistance", GetPlayerDamResName(dm_damage_resistance));
+	y += 8; idx++;
+
+	int x = 150 - (ng_host_style->fonts[styledef_c::T_TEXT]->StringWidth("(Deathmatch Only)") * ng_host_style->def->text[styledef_c::T_TEXT].scale);
+	HL_WriteText(ng_host_style, idx-1 == host_pos ? 2 : 0, x, y, "(Deathmatch Only)");
+	y += 10;
 
 	DrawKeyword(idx, ng_host_style, y, "Monsters", ng_params->flags->nomonsters ? "OFF" : ng_params->flags->fastparm ? "FAST" : "ON");
 	y += 10; idx++;
@@ -729,21 +736,17 @@ void M_DrawJoinMenu(void)
 
 	HL_WriteText(ng_join_style,2, 80, 10, "JOIN NET GAME");
 
-	char buffer[200];
-
 	if (join_connect_timer > 0)
 	{
 		HL_WriteText(ng_join_style,3,  30, 160, "Connecting to Host...");
 		HL_WriteText(ng_join_style,1, 240, 160,
-				LocalPrintf(buffer, sizeof(buffer), "%d",
-					(join_connect_timer+TICRATE-1) / TICRATE));
+				epi::STR_Format("%d", (join_connect_timer+TICRATE-1) / TICRATE).c_str());
 	}
 	else if (join_discover_timer > 0)
 	{
 		HL_WriteText(ng_join_style,3,  30, 160, "Looking for Host on LAN...");
 		HL_WriteText(ng_join_style,1, 240, 160,
-				LocalPrintf(buffer, sizeof(buffer), "%d",
-					(join_discover_timer+TICRATE-1) / TICRATE));
+				epi::STR_Format("%d", (join_discover_timer+TICRATE-1) / TICRATE).c_str());
 	}
 
 	int y = 30;
@@ -754,7 +757,7 @@ void M_DrawJoinMenu(void)
 	y += 10; idx++;
 
 	DrawKeyword(idx, ng_join_style, y, "HOST PORT",
-			LocalPrintf(buffer, sizeof(buffer), "%d", joining_port));
+			epi::STR_Format("%d", joining_port).c_str());
 	y += 20; idx++;
 
 	// FIXME....
@@ -834,8 +837,6 @@ void M_DrawPlayerList(void)
 
 	HL_WriteText(ng_list_style,2, 80, 10, "PLAYER LIST");
 
-	char buffer[200];
-
 	int y = 30;
 	int i;
 
@@ -864,13 +865,13 @@ void M_DrawPlayerList(void)
 		}
 
 		HL_WriteText(ng_list_style, (flags & PFL_Network)?0:3, 20, y,
-					 LocalPrintf(buffer, sizeof(buffer), "PLAYER_%d", humans));
+					epi::STR_Format("PLAYER %d", humans).c_str());
 		
 		HL_WriteText(ng_list_style, 1, 100, y,
 				ng_params->nodes[i] ? ng_params->nodes[i]->remote.TempString(false) : "Local");
 
 		HL_WriteText(ng_list_style, (flags & PFL_Network)?0:3, 200, y,
-					 LocalPrintf(buffer, sizeof(buffer), "%d BOTS", bots_here));
+					epi::STR_Format("%d BOTS", bots_here).c_str());
 		y += 10;
 	}
 

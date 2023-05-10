@@ -40,9 +40,12 @@ typedef enum
 
 	FLKIND_Folder,    // a folder somewhere
 	FLKIND_EFolder,   // edge folder, priority loading
-	FLKIND_EPK,       // epk (zip) package
+	FLKIND_EPK,       // edge package (.epk)
 	FLKIND_EEPK,	  // edge epks, priority loading (same extension as epk)
 	FLKIND_PackWAD,   // WADs within pack files; should only be used for maps
+	FLKIND_IPK,       // standalone game EPK (same extension as epk)
+	FLKIND_IFolder,   // standalone game folder
+	FLKIND_IPackWAD,  // IWADs within pack files :/
 
 	FLKIND_DDF,       // .ddf or .ldf file
 	FLKIND_RTS,       // .rts script  file

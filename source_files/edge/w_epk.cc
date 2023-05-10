@@ -1102,7 +1102,8 @@ static void ProcessWADsInPack(pack_file_c *pack)
 				byte *raw_pack_wad = pack_wad->LoadIntoMemory();
 				epi::mem_file_c *pack_wad_mem = new epi::mem_file_c(raw_pack_wad, pack_wad->GetLength(), true);
 				delete[] raw_pack_wad; // copied on pack_wad_mem creation
-				data_file_c *pack_wad_df = new data_file_c(entry.name, FLKIND_PackWAD);
+				data_file_c *pack_wad_df = new data_file_c(entry.name, (pack->parent->kind == FLKIND_IFolder ||
+					pack->parent->kind == FLKIND_IPK) ? FLKIND_IPackWAD: FLKIND_PackWAD);
 				pack_wad_df->name = entry.name;
 				pack_wad_df->file = pack_wad_mem;
 				ProcessFile(pack_wad_df);
@@ -1113,9 +1114,53 @@ static void ProcessWADsInPack(pack_file_c *pack)
 	}
 }
 
-void ProcessPackage(data_file_c *df, size_t file_index)
+void Pack_PopulateOnly(data_file_c *df)
 {
-	if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder)
+	if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_IFolder)
+		df->pack = ProcessFolder(df);
+	else
+		df->pack = ProcessZip(df);
+
+	df->pack->SortEntries();
+}
+
+std::string Pack_CheckForIWADs(data_file_c *df, int *score)
+{
+	std::string check_base = "";
+	int check_score = 0;
+	pack_file_c *pack = df->pack;
+	for (size_t d = 0; d < pack->dirs.size(); d++)
+	{
+		for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
+		{
+			pack_entry_c& entry = pack->dirs[d].entries[i];
+
+			if (!entry.HasExtension(".wad")) continue;
+
+			epi::file_c *pack_wad = Pack_OpenFile(pack, entry.packpath);
+
+			if (pack_wad)
+			{
+				int test_score = 0;
+				std::string test_base = W_CheckForUniqueLumps(pack_wad, &test_score);
+				if (test_score > check_score)
+				{
+					check_score = test_score;
+					check_base = test_base;
+				}
+			}
+
+			delete pack_wad;
+		}
+	}
+	if (score)
+		*score = check_score;
+	return check_base;
+}
+
+void Pack_ProcessAll(data_file_c *df, size_t file_index)
+{
+	if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_IFolder)
 		df->pack = ProcessFolder(df);
 	else
 		df->pack = ProcessZip(df);

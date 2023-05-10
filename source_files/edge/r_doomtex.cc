@@ -482,7 +482,7 @@ epi::file_c *OpenUserFileOrLump(imagedef_c *def)
 	switch (def->type)
 	{
 		case IMGDT_File:
-			// -AJA- 2005/01/15: filenames in DDF relative to GAMEDIR
+			// -AJA- 2005/01/15: filenames in DDF relative to APPDIR
 			return M_OpenComposedEPIFile(game_dir.c_str(), def->info.c_str());
 
 		case IMGDT_Package:

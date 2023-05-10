@@ -314,11 +314,15 @@ static style_c *opt_def_style;
 
 static void M_ChangeMusVol(int keypressed, cvar_c *cvar)
 {
+	SYS_ASSERT(cvar);
+	cvar->operator=(cvar->f);
 	S_ChangeMusicVolume();
 }
 
 static void M_ChangeSfxVol(int keypressed, cvar_c *cvar)
 {
+	SYS_ASSERT(cvar);
+	cvar->operator=(cvar->f);
 	S_ChangeSoundVolume();
 }
 

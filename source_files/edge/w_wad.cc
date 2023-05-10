@@ -75,6 +75,43 @@
 
 #include "p_umapinfo.h" //Lobo 2022
 
+typedef struct
+{
+	// used to determine IWAD priority if no -iwad parameter provided 
+	// and multiple IWADs are detected in various paths
+	u8_t score;
+
+	// game_base to set if this IWAD is used
+	const std::string base;
+
+	// (usually) unique lumps to check for in a potential IWAD
+	const std::string unique_lumps[2];
+}
+game_check_t;
+
+// Combination of unique lumps needed to best identify an IWAD
+static const std::vector<game_check_t> game_checker =
+{
+	{
+		{ 15,  "CUSTOM",    {"EDGEIWAD", "EDGEIWAD"} },
+		{ 1,  "BLASPHEMER", {"BLASPHEM", "E1M1"}     },
+		{ 7,  "FREEDOOM1",  {"FREEDOOM", "E1M1"}     },
+		{ 12, "FREEDOOM2",  {"FREEDOOM", "MAP01"}    },
+		{ 5,  "REKKR",      {"REKCREDS", "E1M1"}     },
+		{ 4,  "HACX",       {"HACX-R",   "MAP01"}    },
+		{ 3,  "HARMONY",    {"0HAWK01",  "MAP01"}    },
+		{ 2,  "HERETIC",    {"MUS_E1M1", "E1M1"}     },
+		{ 10, "PLUTONIA",   {"CAMO1",    "MAP01"}    },
+		{ 11, "TNT",        {"REDTNT2",  "MAP01"}    },
+		{ 9,  "DOOM",       {"BFGGA0",   "E2M1"}     },
+		{ 8,  "DOOM",       {"DMENUPIC", "M_MULTI"}  }, // BFG Edition
+		{ 6,  "DOOM1",      {"SHOTA0",   "E1M1"}     },
+		{ 14, "DOOM2",      {"BFGGA0",   "MAP01"}    },
+		{ 13, "DOOM2",   	{"DMENUPIC", "MAP33"}    }, // BFG Edition
+		//{ 0, "STRIFE",    {"VELLOGO",  "RGELOGO"}  }// Dev/internal use - Definitely nowhwere near playable
+	}
+};
+
 class wad_file_c
 {
 public:
@@ -823,77 +860,86 @@ static void CheckForLevel(wad_file_c *wad, int lump, const char *name,
 	}
 }
 
-bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char *lumpname2)
+std::string W_CheckForUniqueLumps(epi::file_c *file, int *score)
 {
 	int length;
-	bool lump1_found = false;
-	bool lump2_found = false;
-
 	raw_wad_header_t header;
 
-	if (file == NULL)
+	if (!file)
 	{
 		I_Warning("W_CheckForUniqueLumps: Received null file_c pointer!\n");
-		return false;
+		return "";
 	}
 
 	// WAD file
 	// TODO: handle Read failure
     file->Read(&header, sizeof(raw_wad_header_t));
-
- 	// Do not require IWAD header if loading Harmony, REKKR, BFG Edition WADs or a custom standalone IWAD
-	if (epi::prefix_cmp(header.identification, "IWAD") != 0 &&
-		epi::case_cmp(lumpname1, "DMENUPIC") != 0 &&
-		epi::case_cmp(lumpname1, "REKCREDS") != 0 && 
-		epi::case_cmp(lumpname1, "0HAWK01" ) != 0 &&
-		epi::case_cmp(lumpname1, "EDGEIWAD") != 0)
-	{
-		file->Seek(0, epi::file_c::SEEKPOINT_START);
-		return false;
-	}
-
 	header.num_entries = EPI_LE_S32(header.num_entries);
 	header.dir_start   = EPI_LE_S32(header.dir_start);
-
 	length = header.num_entries * sizeof(raw_wad_entry_t);
-
     raw_wad_entry_t *raw_info = new raw_wad_entry_t[header.num_entries];
-
     file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
-	// TODO: handle Read failure
     file->Read(raw_info, length);
 
-	unsigned int i;
-	for (i=0 ; i < header.num_entries ; i++)
+	for (auto check : game_checker)
 	{
-		raw_wad_entry_t& entry = raw_info[i];
-
-		if (strncmp(lumpname1, entry.name, strlen(lumpname1) < 8 ? strlen(lumpname1) : 8) == 0)
+		// Do not require IWAD header if loading Harmony, REKKR, BFG Edition WADs or a custom standalone IWAD
+		if (epi::prefix_cmp(header.identification, "IWAD") != 0 &&
+			epi::case_cmp(check.unique_lumps[0], "DMENUPIC") != 0 &&
+			epi::case_cmp(check.unique_lumps[0], "REKCREDS") != 0 && 
+			epi::case_cmp(check.unique_lumps[0], "0HAWK01" ) != 0 &&
+			epi::case_cmp(check.unique_lumps[0], "EDGEGAME") != 0)
 		{
-			// EDGEIWAD is the only wad needed for custom standalones
-			if (epi::case_cmp(lumpname1, "EDGEIWAD") == 0)
-			{
-				delete[] raw_info;
-				file->Seek(0, epi::file_c::SEEKPOINT_START);
-				return true;
-			}
-			else
-				lump1_found = true;
+			continue;
 		}
-		if (strncmp(lumpname2, entry.name, strlen(lumpname2) < 8 ? strlen(lumpname2) : 8) == 0)
-			lump2_found = true;
+
+		bool lump1_found = false;
+		bool lump2_found = false;
+
+		for (size_t i=0 ; i < header.num_entries ; i++)
+		{
+			raw_wad_entry_t& entry = raw_info[i];
+
+			if (epi::strncmp(check.unique_lumps[0], entry.name, check.unique_lumps[0].size() < 8 ? check.unique_lumps[0].size() : 8) == 0)
+			{
+				// EDGEGAME is the only lump needed for custom standalones
+				if (epi::case_cmp(check.unique_lumps[0], "EDGEGAME") == 0)
+				{
+					delete[] raw_info;
+					file->Seek(0, epi::file_c::SEEKPOINT_START);
+					if (score)
+						*score = check.score;
+					return check.base;
+				}
+				else
+					lump1_found = true;
+			}
+			if (epi::strncmp(check.unique_lumps[1], entry.name, check.unique_lumps[1].size() < 8 ? check.unique_lumps[1].size() : 8) == 0)
+				lump2_found = true;
+		}
+
+		if (lump1_found && lump2_found)
+		{
+			delete[] raw_info;
+			file->Seek(0, epi::file_c::SEEKPOINT_START);
+			if (score)
+				*score = check.score;
+			return check.base;
+		}
 	}
 
 	delete[] raw_info;
 	file->Seek(0, epi::file_c::SEEKPOINT_START);
-	return (lump1_found && lump2_found);
+	if (score)
+		*score = 0;
+	return "";
 }
 
 
 void ProcessFixersForWad(data_file_c *df)
 {
 	// Special handling for Doom 2 BFG Edition
-	if (df->kind == FLKIND_IWad)
+	if (df->kind == FLKIND_IWad || df->kind == FLKIND_IPackWAD)
 	{
 		if (W_CheckNumForName("MAP33") > -1 && W_CheckNumForName("DMENUPIC") > -1)
 		{
@@ -1092,7 +1138,8 @@ void ProcessWad(data_file_c *df, size_t file_index)
 		raw_wad_entry_t& entry = raw_info[i];
 
 		bool allow_ddf = (df->kind == FLKIND_EWad || (df->kind == FLKIND_IWad && 
-			epi::strcmp(iwad_base, "CUSTOM") == 0) || df->kind == FLKIND_PWad || df->kind == FLKIND_PackWAD);
+			epi::strcmp(game_base, "CUSTOM") == 0) || df->kind == FLKIND_PWad || df->kind == FLKIND_PackWAD
+			|| df->kind == FLKIND_IPK || df->kind == FLKIND_IFolder);
 
 		AddLump(df, entry.name, EPI_LE_S32(entry.pos), EPI_LE_S32(entry.size),
 				(int)file_index, allow_ddf);
@@ -2346,7 +2393,8 @@ bool W_IsLumpInAnyWad(const char *name)
 		for (int i = 0 ; i < (int)data_files.size() - 1 ; i++)
 		{
 			data_file_c *df = data_files[i];
-			if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK)
+			if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK || df->kind == FLKIND_EEPK
+				|| df->kind == FLKIND_IFolder || df->kind == FLKIND_IPK)
 			{
 				if (Pack_FindStem(df->pack, name))
 				{

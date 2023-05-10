@@ -2365,7 +2365,6 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
 		// code.  It seems required to make the thermo bar tile properly.
 
 		int i=0;
-		float scale_step = 50.0f / ((max-min) / increment);
 
 		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_l)/div, therm_l, 0.0, 0.0);
 

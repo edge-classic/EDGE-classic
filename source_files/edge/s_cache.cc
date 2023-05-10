@@ -185,7 +185,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 		else if (def->file_name != "")
 		{
 			std::filesystem::path fn;
-			// Why is this composed with the game dir? - Dasho
+			// Why is this composed with the app dir? - Dasho
 			fn = M_ComposeFileName(game_dir, UTFSTR(def->file_name));
 			F = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 			if (! F)

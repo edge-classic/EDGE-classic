@@ -137,6 +137,16 @@ int CMD_Readme(char **argv, int argc)
 		}
 	}
 
+	// Check for an EDGEGAME lump or file and print (if it has text; these aren't required to)
+	if (!readme_file)
+	{
+		// Datafile at index 1 should always be either the IWAD or standalone EPK
+		if (data_files[1]->wad)
+			readme_file = W_OpenLump("EDGEGAME");
+		else
+			readme_file = W_OpenPackFile("EDGEGAME.txt");
+	}
+
 	if (!readme_file)
 	{
 		CON_Printf("No readme text files found in current load order!\n");

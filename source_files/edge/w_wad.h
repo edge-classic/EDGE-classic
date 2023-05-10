@@ -88,7 +88,7 @@ bool W_IsLumpInPwad(const char *name);
 
 bool W_IsLumpInAnyWad(const char *name);
 
-bool W_CheckForUniqueLumps(epi::file_c *file, const char *lumpname1, const char *lumpname2);
+std::string W_CheckForUniqueLumps(epi::file_c *file, int *score);
 
 void W_CheckWADFixes(void);
 

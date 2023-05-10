@@ -164,7 +164,7 @@ std::filesystem::path epkfile;
 std::string game_base;
 
 std::filesystem::path cache_dir;
-std::filesystem::path app_dir;
+std::filesystem::path game_dir;
 std::filesystem::path home_dir;
 std::filesystem::path save_dir;
 std::filesystem::path shot_dir;
@@ -841,17 +841,17 @@ void InitDirectories(void)
 	// Note: This might need adjusting for Apple
 	std::filesystem::path s = UTFSTR(SDL_GetBasePath());
 
-	app_dir = s;
-	s = argv::Value("app");
+	game_dir = s;
+	s = argv::Value("game");
 	if (!s.empty())
-		app_dir = s;
+		game_dir = s;
 
-	brandingfile = epi::PATH_Join(app_dir, UTFSTR(EDGEBRANDINGFILE));
+	brandingfile = epi::PATH_Join(game_dir, UTFSTR(EDGEBRANDINGFILE));
 
 	M_LoadBranding();
 
 	// add parameter file "appdir/parms" if it exists.
-	std::filesystem::path parms = epi::PATH_Join(app_dir, UTFSTR("parms"));
+	std::filesystem::path parms = epi::PATH_Join(game_dir, UTFSTR("parms"));
 
 	if (epi::FS_Access(parms, epi::file_c::ACCESS_READ))
 	{
@@ -867,9 +867,9 @@ void InitDirectories(void)
 	}
 	else
     {
-		cfgfile = epi::PATH_Join(app_dir, UTFSTR(configfilename.s));
+		cfgfile = epi::PATH_Join(game_dir, UTFSTR(configfilename.s));
 		if (epi::FS_Access(cfgfile, epi::file_c::ACCESS_READ) || argv::Find("portable") > 0)
-			home_dir = app_dir;
+			home_dir = game_dir;
 		else
         	cfgfile.clear();
 	}
@@ -922,10 +922,10 @@ void InitDirectories(void)
 	}
 	else
     {
-		if (epi::FS_IsDir(epi::PATH_Join(app_dir, UTFSTR("edge_defs"))))
-			epkfile = epi::PATH_Join(app_dir, UTFSTR("edge_defs"));
+		if (epi::FS_IsDir(epi::PATH_Join(game_dir, UTFSTR("edge_defs"))))
+			epkfile = epi::PATH_Join(game_dir, UTFSTR("edge_defs"));
 		else
-        	epkfile = epi::PATH_Join(app_dir, UTFSTR("edge-defs.epk"));
+        	epkfile = epi::PATH_Join(game_dir, UTFSTR("edge-defs.epk"));
 	}
 
 	// cache directory
@@ -1025,33 +1025,33 @@ static void IdentifyVersion(void)
 	I_Debugf("- Identify Version\n");
 
 	// Check -iwad (or -game) parameter, find out if it is the IWADs directory
-    std::filesystem::path game_par;
-    std::filesystem::path game_file;
-    std::filesystem::path game_dir;
-	std::vector<std::filesystem::path> game_dir_vector;
+    std::filesystem::path iwad_par;
+    std::filesystem::path iwad_file;
+    std::filesystem::path iwad_dir;
+	std::vector<std::filesystem::path> iwad_dir_vector;
 
 	std::filesystem::path s = argv::Value("iwad");
 
-    game_par = s;
+    iwad_par = s;
 
-	if (game_par.empty())
+	if (iwad_par.empty())
 	{
 		s = argv::Value("game");
-		game_par = s;
+		iwad_par = s;
 	}
 
-    if (!game_par.empty())
+    if (!iwad_par.empty())
     {
 		// Treat directories passed via -iwad or -game as a pack file and check accordingly
-        if (epi::FS_IsDir(game_par))
+        if (epi::FS_IsDir(iwad_par))
         {
-			game_base = CheckPackForGameFiles(game_par, FLKIND_IFolder, nullptr);
+			game_base = CheckPackForGameFiles(iwad_par, FLKIND_IFolder, nullptr);
             if (game_base.empty())
 				I_Error("Folder %s passed via -iwad or -game parameter, but no IWAD or EDGEGAME file detected!\n",
-					game_par.u8string().c_str());
+					iwad_par.u8string().c_str());
 			else
 			{
-				W_AddFilename(game_par, FLKIND_IFolder);
+				W_AddFilename(iwad_par, FLKIND_IFolder);
 				return;
 			}
         }
@@ -1063,11 +1063,11 @@ static void IdentifyVersion(void)
         s = UTFSTR(getenv("DOOMWADDIR"));
 
     if (!s.empty() && epi::FS_IsDir(s))
-        game_dir_vector.push_back(s);
+        iwad_dir_vector.push_back(s);
 
     // Should the IWAD directory not be set by now, then we
     // use our standby option of the current directory.
-    if (game_dir.empty()) game_dir = UTFSTR("."); // should this be hardcoded to the app or home directory instead? - Dasho
+    if (iwad_dir.empty()) iwad_dir = UTFSTR("."); // should this be hardcoded to the app or home directory instead? - Dasho
 
 	// Add DOOMWADPATH directories if they exist
 	s.clear();
@@ -1080,18 +1080,18 @@ static void IdentifyVersion(void)
 #else
 		for (auto dir : epi::STR_SepStringVector(s.string(), ':'))
 #endif	
-			game_dir_vector.push_back(dir);
+			iwad_dir_vector.push_back(dir);
 	}
 
     // Should the IWAD Parameter not be empty then it means
     // that one was given which is not a directory. Therefore
     // we assume it to be a name
-    if (!game_par.empty())
+    if (!iwad_par.empty())
     {
-        std::filesystem::path fn = game_par;
+        std::filesystem::path fn = iwad_par;
         
         // Is it missing the extension?
-        if (epi::PATH_GetExtension(game_par).empty())
+        if (epi::PATH_GetExtension(iwad_par).empty())
         {
             fn.replace_extension(UTFSTR(".wad")); // We will still be checking EPKs if needed; but by the numbers .wad is a good initial search
         }
@@ -1100,47 +1100,47 @@ static void IdentifyVersion(void)
         std::filesystem::path dir = epi::PATH_GetDir(fn);
         if (dir.empty())
 #ifdef _WIN32
-            game_file = epi::PATH_Join(game_dir, fn.u32string());
+            iwad_file = epi::PATH_Join(iwad_dir, fn.u32string());
 #else
-			game_file = epi::PATH_Join(game_dir, fn.string());
+			iwad_file = epi::PATH_Join(iwad_dir, fn.string());
 #endif
         else
-            game_file = fn;
+            iwad_file = fn;
 
-        if (!epi::FS_Access(game_file, epi::file_c::ACCESS_READ))
+        if (!epi::FS_Access(iwad_file, epi::file_c::ACCESS_READ))
         {
 			// Check DOOMWADPATH directories if present
-			if (!game_dir_vector.empty())
+			if (!iwad_dir_vector.empty())
 			{
-				for (size_t i=0; i < game_dir_vector.size(); i++)
+				for (size_t i=0; i < iwad_dir_vector.size(); i++)
 				{
 #ifdef _WIN32
-					game_file = epi::PATH_Join(game_dir_vector[i], fn.u32string());
+					iwad_file = epi::PATH_Join(iwad_dir_vector[i], fn.u32string());
 #else
-					game_file = epi::PATH_Join(game_dir_vector[i], fn.string());
+					iwad_file = epi::PATH_Join(iwad_dir_vector[i], fn.string());
 #endif
-					if (epi::FS_Access(game_file, epi::file_c::ACCESS_READ))
+					if (epi::FS_Access(iwad_file, epi::file_c::ACCESS_READ))
 						goto foundindoomwadpath;
 				}
 			}
         }
 
 		// If we get here, try .epk and error out if we still can't access what was passed to us
-		game_file.replace_extension(UTFSTR(".epk"));
+		iwad_file.replace_extension(UTFSTR(".epk"));
 
-		if (!epi::FS_Access(game_file, epi::file_c::ACCESS_READ))
+		if (!epi::FS_Access(iwad_file, epi::file_c::ACCESS_READ))
         {
 			// Check DOOMWADPATH directories if present
-			if (!game_dir_vector.empty())
+			if (!iwad_dir_vector.empty())
 			{
-				for (size_t i=0; i < game_dir_vector.size(); i++)
+				for (size_t i=0; i < iwad_dir_vector.size(); i++)
 				{
 #ifdef _WIN32
-					game_file = epi::PATH_Join(game_dir_vector[i], fn.u32string());
+					iwad_file = epi::PATH_Join(iwad_dir_vector[i], fn.u32string());
 #else
-					game_file = epi::PATH_Join(game_dir_vector[i], fn.string());
+					iwad_file = epi::PATH_Join(iwad_dir_vector[i], fn.string());
 #endif
-					if (epi::FS_Access(game_file, epi::file_c::ACCESS_READ))
+					if (epi::FS_Access(iwad_file, epi::file_c::ACCESS_READ))
 						goto foundindoomwadpath;
 				}
 				I_Error("IdentifyVersion: Unable to access specified '%s'", fn.u8string().c_str());
@@ -1151,21 +1151,21 @@ static void IdentifyVersion(void)
 
 		foundindoomwadpath:
 
-		if (epi::PATH_GetExtension(game_file) == UTFSTR(".wad"))
+		if (epi::PATH_GetExtension(iwad_file) == UTFSTR(".wad"))
 		{
-			epi::file_c *game_test = epi::FS_Open(game_file, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+			epi::file_c *game_test = epi::FS_Open(iwad_file, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 			game_base = W_CheckForUniqueLumps(game_test, nullptr);
 			delete game_test;
 			if (!game_base.empty())
-				W_AddFilename(game_file, FLKIND_IWad);
+				W_AddFilename(iwad_file, FLKIND_IWad);
 			else
 				I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.u8string().c_str());
 		}
 		else
 		{
-			game_base = CheckPackForGameFiles(game_file, FLKIND_IPK, nullptr);
+			game_base = CheckPackForGameFiles(iwad_file, FLKIND_IPK, nullptr);
 			if (!game_base.empty())
-				W_AddFilename(game_file, FLKIND_IPK);
+				W_AddFilename(iwad_file, FLKIND_IPK);
 			else
 				I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.u8string().c_str());
 		}
@@ -1181,7 +1181,7 @@ static void IdentifyVersion(void)
 
         int max = 1;
 
-        if (game_dir.compare(app_dir) != 0) 
+        if (iwad_dir.compare(game_dir) != 0) 
         {
             // IWAD directory & game directory differ 
             // therefore do a second loop which will
@@ -1191,7 +1191,7 @@ static void IdentifyVersion(void)
 
 		for (int i = 0; i < max; i++)
 		{
-			location = (i == 0 ? game_dir : app_dir);
+			location = (i == 0 ? iwad_dir : game_dir);
 
 			//
 			// go through the available *.wad files, attempting IWAD
@@ -1252,11 +1252,11 @@ static void IdentifyVersion(void)
 
 		// Separate check for DOOMWADPATH stuff if it exists - didn't want to mess with the existing stuff above
 
-		if (!game_dir_vector.empty())
+		if (!iwad_dir_vector.empty())
 		{
-			for (size_t i=0; i < game_dir_vector.size(); i++)
+			for (size_t i=0; i < iwad_dir_vector.size(); i++)
 			{
-				location = game_dir_vector[i].c_str();
+				location = iwad_dir_vector[i].c_str();
 
 				std::vector<epi::dir_entry_c> fsd;
 
@@ -1323,7 +1323,7 @@ static void Add_Base(void)
 {
 	if (epi::case_cmp("CUSTOM", game_base) == 0)
 		return; // Standalone EDGE IWADs/EPKs should already contain their necessary resources and definitions - Dasho
-	std::filesystem::path base_path = epi::PATH_Join(app_dir, UTFSTR("edge_base"));
+	std::filesystem::path base_path = epi::PATH_Join(game_dir, UTFSTR("edge_base"));
 	std::string base_wad = game_base;
 	epi::str_lower(base_wad);
 	base_path = epi::PATH_Join(base_path, UTFSTR(base_wad));
@@ -1446,7 +1446,7 @@ static void AddSingleCmdLineFile(std::filesystem::path name, bool ignore_unknown
 		return;
 	}
 
-	std::filesystem::path filename = M_ComposeFileName(app_dir, name);
+	std::filesystem::path filename = M_ComposeFileName(game_dir, name);
 	W_AddFilename(filename, kind);
 }
 
@@ -1498,7 +1498,7 @@ static void AddCommandLineFiles(void)
 				I_Error("Illegal filename for -script: %s\n", epi::to_u8string(argv::list[p]).c_str());
 			}
 
-			std::filesystem::path filename = M_ComposeFileName(app_dir, argv::list[p]);
+			std::filesystem::path filename = M_ComposeFileName(game_dir, argv::list[p]);
 			W_AddFilename(filename, FLKIND_RTS);
 		}
 
@@ -1527,7 +1527,7 @@ static void AddCommandLineFiles(void)
 				I_Error("Illegal filename for -deh: %s\n", epi::to_u8string(argv::list[p]).c_str());
 			}
 
-			std::filesystem::path filename = M_ComposeFileName(app_dir, argv::list[p]);
+			std::filesystem::path filename = M_ComposeFileName(game_dir, argv::list[p]);
 			W_AddFilename(filename, FLKIND_Deh);
 		}
 
@@ -1544,7 +1544,7 @@ static void AddCommandLineFiles(void)
 		// go until end of parms or another '-' preceded parm
 		if (!argv::IsOption(p))
 		{
-			std::filesystem::path dirname = M_ComposeFileName(app_dir, argv::list[p]);
+			std::filesystem::path dirname = M_ComposeFileName(game_dir, argv::list[p]);
 			W_AddFilename(dirname, FLKIND_Folder);
 		}
 
@@ -1557,7 +1557,7 @@ static void AddCommandLineFiles(void)
 
 	if (!ps.empty())
 	{
-		std::filesystem::path filename = M_ComposeFileName(app_dir, ps);
+		std::filesystem::path filename = M_ComposeFileName(game_dir, ps);
 		W_AddFilename(filename.c_str(), FLKIND_Folder);
 	}
 }
@@ -1565,7 +1565,7 @@ static void AddCommandLineFiles(void)
 static void Add_Autoload(void) {
 	
 	std::vector<epi::dir_entry_c> fsd;
-	std::filesystem::path folder = epi::PATH_Join(app_dir, UTFSTR("autoload"));
+	std::filesystem::path folder = epi::PATH_Join(game_dir, UTFSTR("autoload"));
 
 	if (!FS_ReadDir(fsd, folder, UTFSTR("*.*")))
 	{

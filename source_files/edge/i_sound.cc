@@ -66,7 +66,7 @@ static bool audio_is_locked = false;
 
 std::vector<std::filesystem::path> available_soundfonts;
 std::vector<std::filesystem::path> available_genmidis;
-extern std::filesystem::path app_dir;
+extern std::filesystem::path game_dir;
 extern std::filesystem::path home_dir;
 extern cvar_c s_soundfont;
 
@@ -270,7 +270,7 @@ void I_StartupMusic(void)
 {
 	// Check for soundfonts and instrument banks
 	std::vector<epi::dir_entry_c> sfd;
-	std::filesystem::path soundfont_dir = epi::PATH_Join(app_dir, UTFSTR("soundfont"));
+	std::filesystem::path soundfont_dir = epi::PATH_Join(game_dir, UTFSTR("soundfont"));
 
 	// Always add the default/internal GENMIDI lump choice
 	available_genmidis.push_back(UTFSTR("GENMIDI"));

@@ -1034,12 +1034,6 @@ static void IdentifyVersion(void)
 
     iwad_par = s;
 
-	if (iwad_par.empty())
-	{
-		s = argv::Value("game");
-		iwad_par = s;
-	}
-
     if (!iwad_par.empty())
     {
 		// Treat directories passed via -iwad or -game as a pack file and check accordingly

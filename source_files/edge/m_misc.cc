@@ -324,6 +324,8 @@ void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar)
 		SetToBaseValue(defaults + i);
 	}
 
+	CON_ResetAllVars();
+
 	done_first_init = true;
 }
 

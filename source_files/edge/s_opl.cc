@@ -344,8 +344,6 @@ public:
 		if (status != PLAYING)
 			return;
 
-		edge_opl->reset();
-
 		status = PAUSED;
 	}
 

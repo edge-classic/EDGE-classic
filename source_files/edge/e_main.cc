@@ -1024,7 +1024,7 @@ static void IdentifyVersion(void)
 
 	I_Debugf("- Identify Version\n");
 
-	// Check -iwad (or -game) parameter, find out if it is the IWADs directory
+	// Check -iwad parameter, find out if it is the IWADs directory
     std::filesystem::path iwad_par;
     std::filesystem::path iwad_file;
     std::filesystem::path iwad_dir;
@@ -1036,12 +1036,12 @@ static void IdentifyVersion(void)
 
     if (!iwad_par.empty())
     {
-		// Treat directories passed via -iwad or -game as a pack file and check accordingly
+		// Treat directories passed via -iwad as a pack file and check accordingly
         if (epi::FS_IsDir(iwad_par))
         {
 			game_base = CheckPackForGameFiles(iwad_par, FLKIND_IFolder, nullptr);
             if (game_base.empty())
-				I_Error("Folder %s passed via -iwad or -game parameter, but no IWAD or EDGEGAME file detected!\n",
+				I_Error("Folder %s passed via -iwad parameter, but no IWAD or EDGEGAME file detected!\n",
 					iwad_par.u8string().c_str());
 			else
 			{
@@ -1061,7 +1061,7 @@ static void IdentifyVersion(void)
 
     // Should the IWAD directory not be set by now, then we
     // use our standby option of the current directory.
-    if (iwad_dir.empty()) iwad_dir = UTFSTR("."); // should this be hardcoded to the app or home directory instead? - Dasho
+    if (iwad_dir.empty()) iwad_dir = UTFSTR("."); // should this be hardcoded to the game or home directory instead? - Dasho
 
 	// Add DOOMWADPATH directories if they exist
 	s.clear();

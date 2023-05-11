@@ -925,7 +925,8 @@ static bool G_SaveGameToFile(std::filesystem::path filename, const char *descrip
 
 	// --- fill in global structure ---
 
-	globs->game  = SV_DupString(game_base.c_str());
+	//globs->game  = SV_DupString(game_base.c_str());
+	globs->game  = SV_DupString(currmap->episode_name.c_str());
 	globs->level = SV_DupString(currmap->name.c_str());
 	globs->flags = level_flags;
 	globs->hub_tag = curr_hub_tag;

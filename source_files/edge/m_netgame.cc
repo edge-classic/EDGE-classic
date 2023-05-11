@@ -541,6 +541,8 @@ static void HostAccept(void)
 	// create local player and bots
 	ng_params->SinglePlayer(host_want_bots);
 
+	ng_params->level_skip = true;
+
 	netgame_menuon = 3;
 
 #if 1

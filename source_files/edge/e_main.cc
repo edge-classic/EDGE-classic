@@ -1832,7 +1832,8 @@ static void E_InitialState(void)
 	newgame_params_c params;
 
 	params.skill = warp_skill;	
-	params.deathmatch = warp_deathmatch;	
+	params.deathmatch = warp_deathmatch;
+	params.level_skip = true;
 
 	if (warp_map.length() > 0)
 		params.map = G_LookupMap(warp_map.c_str());

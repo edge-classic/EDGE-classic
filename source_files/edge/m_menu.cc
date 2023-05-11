@@ -949,8 +949,6 @@ void M_DrawLoad(void)
 	rgbcol_t col = V_GetFontColor(style->def->text[styledef_c::T_TEXT].colmap);
 	HUD_ThinBox(TempX - 5,TempY - 5, TempX + 175,  TempY + 115, col);
 
-	TempY += 1;
-
 	//2. draw the save games
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
@@ -961,7 +959,7 @@ void M_DrawLoad(void)
 				fontType = styledef_c::T_SELECTED;
 		}
 
-		LineHeight = style->fonts[fontType]->NominalHeight() + 2; // * txtscale
+		LineHeight = style->fonts[fontType]->NominalHeight(); // * txtscale
 
 		if (fontType == styledef_c::T_SELECTED)
 		{
@@ -969,7 +967,7 @@ void M_DrawLoad(void)
 			float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift; // * txtscale;
 			
 			HUD_SetAlpha(0.33f);
-			HUD_SolidBox(TempX - 3, TempY - 5 + y_shift, TempX + 173, TempY + LineHeight + y_shift, col);
+			HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
 			HUD_SetAlpha(old_alpha);
 		}
 		HL_WriteText(style, fontType, TempX, 
@@ -1285,8 +1283,6 @@ void M_DrawSave(void)
 	rgbcol_t col = V_GetFontColor(style->def->text[styledef_c::T_TEXT].colmap);
 	HUD_ThinBox(TempX - 5,TempY - 5, TempX + 175,  TempY + 115, col);
 
-	TempY += 1;
-
 	//2. draw the save games
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
@@ -1297,7 +1293,7 @@ void M_DrawSave(void)
 				fontType = styledef_c::T_SELECTED;
 		}
 		
-		LineHeight = style->fonts[fontType]->NominalHeight() + 2; // * txtscale
+		LineHeight = style->fonts[fontType]->NominalHeight(); // * txtscale
 
 		if (fontType == styledef_c::T_SELECTED)
 		{
@@ -1305,7 +1301,7 @@ void M_DrawSave(void)
 			float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift; // * txtscale;
 			
 			HUD_SetAlpha(0.33f);
-			HUD_SolidBox(TempX - 3, TempY - 5 + y_shift, TempX + 173, TempY + LineHeight + y_shift, col);
+			HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
 			HUD_SetAlpha(old_alpha);
 		}
 

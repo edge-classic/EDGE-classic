@@ -828,16 +828,17 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 	}
 	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
 
-	int BottomY = 0;
+	/*int BottomY = 0;
 	BottomY = style->def->text[styledef_c::T_HELP].y_offset;
 	BottomY += style->def->entry_spacing;
-	BottomY += 114;
+	BottomY += 114;*/
 
 	if (info->save_imdata && info->save_texid)
 	{
 		y += 20;
-		BottomY -= y;
-		HUD_StretchFromImageData(x - 3, y, 72 * ((float)info->save_imdata->used_w/info->save_imdata->used_h), BottomY, info->save_imdata, info->save_texid, OPAC_Solid);
+		//BottomY -= y;
+		HUD_StretchFromImageData(x - 3, y, 95, (style->def->text[styledef_c::T_HELP].y_offset+style->def->entry_spacing+114)-y, 
+			info->save_imdata, info->save_texid, OPAC_Solid);
 	}
 }
 

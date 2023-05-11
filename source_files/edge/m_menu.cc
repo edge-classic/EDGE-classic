@@ -30,6 +30,8 @@
 
 #include "i_defs.h"
 
+#include "filesystem.h"
+#include "image_funcs.h"
 #include "str_util.h"
 
 #include "main.h"
@@ -94,6 +96,8 @@ int key_gamma_toggle;
 extern bool E_MatchesKey(int keyvar, int key);
 
 extern cvar_c v_secbright;
+
+extern unsigned int R_UploadTexture(epi::image_data_c *img, int flags, int max_pix);
 
 //
 // defaulted values
@@ -200,6 +204,10 @@ typedef struct slot_extra_info_s
 	// Useful for drawing skull/cursor and possible other calculations
 	float y;
 	float width;
+
+	epi::image_data_c *save_imdata = nullptr;
+	unsigned int save_texid = 0;
+	int save_impage = 0;
 }
 slot_extra_info_t;
 
@@ -603,6 +611,40 @@ void M_ReadSaveStrings(void)
 		ex_slots[i].netgame = globs->netgame;
 
 		SV_FreeGLOB(globs);
+
+		fn.replace_extension(".replace");
+		if (std::filesystem::exists(fn))
+		{
+			delete ex_slots[i].save_imdata;
+			ex_slots[i].save_texid = 0;
+			ex_slots[i].save_impage = -1;
+			epi::FS_Delete(fn);
+		}
+
+		// Save screenshot
+		fn.replace_extension(".jpg");
+
+		if (std::filesystem::exists(fn) && (!ex_slots[i].save_imdata || save_page != ex_slots[i].save_impage))
+		{
+			epi::file_c *svimg_file = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+			if (svimg_file)
+			{
+				ex_slots[i].save_imdata = epi::Image_Load(svimg_file);
+				if (ex_slots[i].save_imdata)
+				{
+					ex_slots[i].save_texid = R_UploadTexture(ex_slots[i].save_imdata, 2, (1<<30));
+					ex_slots[i].save_impage = save_page;
+					delete svimg_file;
+				}
+				else
+				{
+					I_Warning("Error reading savegame screenshot %s!\n", fn.u8string().c_str());
+					ex_slots[i].save_texid = 0; // just in case
+					ex_slots[i].save_impage = -1;
+					delete svimg_file;
+				}
+			}
+		}
 	}
 
 	// fix up descriptions
@@ -843,6 +885,12 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 		default: strcat(mbuffer, language["MenuDifficulty5"]); break;
 	}
 	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
+
+	if (info->save_imdata && info->save_texid)
+	{
+		y += 20;
+		HUD_StretchFromImageData(x-5, y, 75 * ((float)info->save_imdata->used_w/info->save_imdata->used_h), 75, info->save_imdata, info->save_texid, OPAC_Solid);
+	}
 
 /*
 	y += LineHeight + (LineHeight/2);

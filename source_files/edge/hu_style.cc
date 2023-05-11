@@ -175,8 +175,6 @@ style_c* style_container_c::Lookup(styledef_c *def)
 //
 // HL_WriteText
 //
-// Compatibility crud...
-//
 void HL_WriteText(style_c *style, int text_type, int x, int y, const char *str, float scale)
 {
 	HUD_SetFont(style->fonts[text_type]);

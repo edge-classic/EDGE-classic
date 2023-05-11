@@ -508,14 +508,6 @@ void M_ScreenShot(bool show_msg)
 
 void M_MakeSaveScreenShot(void)
 {
-#if 0 /// FIXME:
-	// byte* buffer = new byte[SCREENWIDTH*SCREENHEIGHT*4];
-	// glReadBuffer(GL_FRONT);
-	// glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	// glReadPixels(0, 0, SCREENWIDTH, SCREENHEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buffer);
-	// ...
-	// delete [] buffer;
-#endif
 
 const char *extension = "jpg";
 
@@ -527,18 +519,6 @@ epi::FS_Delete(filename);
 
 epi::image_data_c *img = new epi::image_data_c(SCREENWIDTH, SCREENHEIGHT, 3);
 
-/*
-	epi::file_c* file = FS_Open(filename, epi::file_c::ACCESS_READ);
-	if (!file)
-	{
-	I_Warning("Couldn't open image %s for reading.\n", filename.u8string().c_str());
-	return;
-	}
-	else
-	{
-	epi::image_data_c *tempimg = epi::Image_Load(file);
-	}
-*/
 RGL_ReadScreen(0, 0, SCREENWIDTH, SCREENHEIGHT, img->PixelAt(0,0));
 
 // ReadScreen produces a bottom-up image, need to invert it
@@ -554,6 +534,11 @@ else
 
 delete img;
 
+filename.replace_extension(".replace");
+
+epi::file_c *replace_touch = epi::FS_Open(filename, epi::file_c::ACCESS_WRITE);
+
+delete replace_touch;
 
 }
 

@@ -31,6 +31,8 @@
 // We are referring to patches.
 #include "hu_font.h"
 
+#include "image_data.h"
+
 
 // X coordinates of left and right edges of screen.
 // updated by calls to HUD_SetCoordSys() or HUD_Reset().
@@ -103,6 +105,8 @@ void HUD_StretchImageNoOffset(float x, float y, float w, float h, const image_c 
 void HUD_TileImage(float x, float y, float w, float h, const image_c *image,
 				   float offset_x = 0.0f, float offset_y = 0.0f);
 
+// Functions for when we want to draw without having an image_c
+void HUD_StretchFromImageData(float x, float y, float w, float h, const epi::image_data_c *img, unsigned int tex_id, image_opacity_e opacity);
 
 extern int hudtic;
 

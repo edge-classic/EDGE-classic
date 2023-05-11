@@ -566,6 +566,82 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 	glAlphaFunc(GL_GREATER, 0);
 }
 
+void HUD_RawFromTexID(float hx1, float hy1, float hx2, float hy2,
+                  unsigned int tex_id, image_opacity_e opacity,
+				  float tx1, float ty1, float tx2, float ty2,
+				  float alpha)
+{
+	int x1 = I_ROUND(hx1);
+	int y1 = I_ROUND(hy1);
+	int x2 = I_ROUND(hx2+0.25f);
+	int y2 = I_ROUND(hy2+0.25f);
+
+	if (x1 >= x2 || y1 >= y2)
+		return;
+	
+	if (x2 < 0 || x1 > SCREENWIDTH ||
+		y2 < 0 || y1 > SCREENHEIGHT)
+		return;
+
+	float r = 1.0f, g = 1.0f, b = 1.0f;
+
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, tex_id);
+ 
+	if (alpha >= 0.99f && opacity == OPAC_Solid)
+		glDisable(GL_ALPHA_TEST);
+	else
+	{
+		glEnable(GL_ALPHA_TEST);
+
+		if (! (alpha < 0.11f || opacity == OPAC_Complex))
+			glAlphaFunc(GL_GREATER, alpha * 0.66f);
+	}
+
+	if (opacity == OPAC_Complex || alpha < 0.99f)
+		glEnable(GL_BLEND);
+
+	glColor4f(r, g, b, alpha);
+
+	glBegin(GL_QUADS);
+
+	glTexCoord2f(tx1, ty1);
+	glVertex2i(x1, y1);
+
+	glTexCoord2f(tx2, ty1); 
+	glVertex2i(x2, y1);
+
+	glTexCoord2f(tx2, ty2);
+	glVertex2i(x2, y2);
+
+	glTexCoord2f(tx1, ty2);
+	glVertex2i(x1, y2);
+
+	glEnd();
+
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_BLEND);
+
+	glAlphaFunc(GL_GREATER, 0);
+}
+
+void HUD_StretchFromImageData(float x, float y, float w, float h, const epi::image_data_c *img, unsigned int tex_id, image_opacity_e opacity)
+{
+	if (cur_x_align >= 0)
+		x -= w / (cur_x_align == 0 ? 2.0f : 1.0f);
+
+	if (cur_y_align >= 0)
+		y -= h / (cur_y_align == 0 ? 2.0f : 1.0f);
+
+	float x1 = COORD_X(x);
+	float x2 = COORD_X(x+w);
+
+	float y1 = COORD_Y(y+h);
+	float y2 = COORD_Y(y);
+
+	HUD_RawFromTexID(x1, y1, x2, y2, tex_id, opacity, 0, 0, (float)img->used_w/img->width, (float)img->used_h/img->height, cur_alpha);
+}
 
 void HUD_StretchImage(float x, float y, float w, float h, const image_c *img, float sx, float sy, const colourmap_c *colmap)
 {

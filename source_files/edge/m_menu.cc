@@ -720,88 +720,18 @@ int CenterMenuText(style_c *style, int text_type, const char *str)
 	return CenterX;
 }
 
-//the old one
-/*static void M_DrawSaveLoadCommon_old(int row, int row2, style_c *style, float LineHeight)
+// AuxStringReplaceAll("Our_String", std::string("_"), std::string(" "));
+//
+std::string LoboStringReplaceAll(std::string str, const std::string& from, const std::string& to) 
 {
-	int y = LoadDef.y + LineHeight * row;
-
-	slot_extra_info_t *info;
-
-	char mbuffer[200];
-
-	sprintf(mbuffer, "PAGE %d", save_page + 1);
-
-
-	// -KM-  1998/06/25 This could quite possibly be replaced by some graphics...
-	if (save_page > 0)
-		HL_WriteText(style, styledef_c::T_TITLE, LoadDef.x - 4 + style->def->text[styledef_c::T_TITLE].x_offset, 
-			y + style->def->text[styledef_c::T_TITLE].y_offset, "< PREV");
-
-	HL_WriteText(style, styledef_c::T_TITLE, LoadDef.x + 94 - style->fonts[styledef_c::T_TITLE]->StringWidth(mbuffer) / 2 + 
-		style->def->text[styledef_c::T_TITLE].x_offset, y + style->def->text[styledef_c::T_TITLE].y_offset, mbuffer);
-
-	if (save_page < SAVE_PAGES-1)
-		HL_WriteText(style, styledef_c::T_TITLE, LoadDef.x + 192 - style->fonts[styledef_c::T_TITLE]->StringWidth("NEXT >") +
-		style->def->text[styledef_c::T_TITLE].x_offset, y + style->def->text[styledef_c::T_TITLE].y_offset, "NEXT >");
- 
-	info = ex_slots + itemOn;
-	SYS_ASSERT(0 <= itemOn && itemOn < SAVE_SLOTS);
-
-	if (saveStringEnter || info->empty || info->corrupt)
-		return;
-
-	// show some info about the savegame
-
-	y = LoadDef.y + LineHeight * (row2 + 1);
-
-	mbuffer[0] = 0;
-
-	strcat(mbuffer, info->timestr);
-
-	HL_WriteText(style, styledef_c::T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer) + style->def->text[styledef_c::T_HELP].x_offset, 
-		y + style->def->text[styledef_c::T_HELP].y_offset, mbuffer);
-
-	y -= LineHeight;
-    
-	mbuffer[0] = 0;
-
-	switch (info->skill)
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) 
 	{
-		case 0: strcat(mbuffer, language["MenuDifficulty1"]); break;
-		case 1: strcat(mbuffer, language["MenuDifficulty2"]); break;
-		case 2: strcat(mbuffer, language["MenuDifficulty3"]); break;
-		case 3: strcat(mbuffer, language["MenuDifficulty4"]); break;
-		default: strcat(mbuffer, language["MenuDifficulty5"]); break;
-	}
-
-	HL_WriteText(style, style->def->T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer) + style->def->text[styledef_c::T_HELP].x_offset, 
-		y + style->def->text[styledef_c::T_HELP].y_offset, mbuffer);
-
-	y -= LineHeight;
-  
-	mbuffer[0] = 0;
-
-	// FIXME: use Language entries
-	switch (info->netgame)
-	{
-		case 0: strcat(mbuffer, "SP MODE"); break;
-		case 1: strcat(mbuffer, "COOP MODE"); break;
-		default: strcat(mbuffer, "DM MODE"); break;
-	}
-  
-	HL_WriteText(style, styledef_c::T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer) + style->def->text[styledef_c::T_HELP].x_offset, 
-		y + style->def->text[styledef_c::T_HELP].y_offset, mbuffer);
-
-	y -= LineHeight;
-  
-	mbuffer[0] = 0;
-
-	strcat(mbuffer, info->mapname);
-
-	HL_WriteText(style, styledef_c::T_HELP, 310 - style->fonts[styledef_c::T_HELP]->StringWidth(mbuffer) + style->def->text[styledef_c::T_HELP].x_offset, 
-		y + style->def->text[styledef_c::T_HELP].y_offset, mbuffer);
-}*/
-
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+    return str;
+}
 
 static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHeight)
 {
@@ -858,7 +788,8 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 
 	const colourmap_c *colmap = style->def->text[styledef_c::T_HELP].colmap;
 	rgbcol_t col = V_GetFontColor(colmap);
-	HUD_ThinBox(x - 5, y - 5, x + 95, y + 50, col);
+	//HUD_ThinBox(x - 5, y - 5, x + 95, y + 50, col);
+	HUD_ThinBox(x - 5, y - 5, x + 95, y + 115, col);
 
 	if (saveStringEnter || info->empty || info->corrupt)
 		return;
@@ -869,9 +800,14 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 
 	y += LineHeight + (LineHeight/2);
 	y += style->def->entry_spacing;
-	mbuffer[0] = 0;
-	strcat(mbuffer, info->gamename);
-	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
+
+	//mbuffer[0] = 0;
+	//strcat(mbuffer, info->gamename);
+	std::string temp_string;
+	temp_string.clear();
+	temp_string.assign(info->gamename);
+	temp_string = LoboStringReplaceAll(temp_string, std::string("_"), std::string(" "));
+	HL_WriteText(style, styledef_c::T_HELP, x, y, temp_string.c_str());
 
 	y += LineHeight + (LineHeight/2);
 	y += style->def->entry_spacing;
@@ -892,10 +828,16 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 	}
 	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
 
+	int BottomY = 0;
+	BottomY = style->def->text[styledef_c::T_HELP].y_offset;
+	BottomY += style->def->entry_spacing;
+	BottomY += 114;
+
 	if (info->save_imdata && info->save_texid)
 	{
 		y += 20;
-		HUD_StretchFromImageData(x-5, y, 75 * ((float)info->save_imdata->used_w/info->save_imdata->used_h), 75, info->save_imdata, info->save_texid, OPAC_Solid);
+		BottomY -= y;
+		HUD_StretchFromImageData(x - 3, y, 72 * ((float)info->save_imdata->used_w/info->save_imdata->used_h), BottomY, info->save_imdata, info->save_texid, OPAC_Solid);
 	}
 }
 
@@ -983,6 +925,7 @@ void M_DrawLoad(void)
 //
 // 1998/07/10 KM Savegame slots increased
 //
+/*
 void M_DrawLoad_old(void)
 {
 	const image_c *L = W_ImageLookup("M_LSLEFT");
@@ -1201,6 +1144,7 @@ void M_DrawLoad_old(void)
 
 	M_DrawSaveLoadCommon(i, i+1, load_style, LineHeight);
 }
+*/
 
 //
 // User wants to load this game
@@ -1339,6 +1283,7 @@ void M_DrawSave(void)
 //
 // 98-7-10 KM Savegame slots increased
 //
+/*
 void M_DrawSave_old(void)
 {
 	const image_c *L = W_ImageLookup("M_LSLEFT");
@@ -1600,6 +1545,7 @@ void M_DrawSave_old(void)
 
 	M_DrawSaveLoadCommon(i, i+1, save_style, LineHeight);
 }
+*/
 
 //
 // M_Responder calls this when user is finished

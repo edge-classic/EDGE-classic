@@ -200,7 +200,6 @@ typedef struct slot_extra_info_s
   
 	int skill;
 	int netgame;
-	bool has_view;
 
 	// Useful for drawing skull/cursor and possible other calculations
 	float y;
@@ -559,7 +558,6 @@ void M_ReadSaveStrings(void)
 
 		ex_slots[i].skill = -1;
 		ex_slots[i].netgame = -1;
-		ex_slots[i].has_view = false;
 
 		ex_slots[i].desc[0] = 0;
 		ex_slots[i].timestr[0] = 0;
@@ -872,13 +870,13 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 	y += LineHeight + (LineHeight/2);
 	y += style->def->entry_spacing;
 	mbuffer[0] = 0;
-	strcat(mbuffer, info->mapname);
+	strcat(mbuffer, info->gamename);
 	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
 
 	y += LineHeight + (LineHeight/2);
 	y += style->def->entry_spacing;
 	mbuffer[0] = 0;
-	strcat(mbuffer, info->gamename);
+	strcat(mbuffer, info->mapname);
 	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
 
 	y += LineHeight + (LineHeight/2);
@@ -899,20 +897,6 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 		y += 20;
 		HUD_StretchFromImageData(x-5, y, 75 * ((float)info->save_imdata->used_w/info->save_imdata->used_h), 75, info->save_imdata, info->save_texid, OPAC_Solid);
 	}
-
-/*
-	y += LineHeight + (LineHeight/2);
-	mbuffer[0] = 0;
-	// FIXME: use Language entries
-	switch (info->netgame)
-	{
-		case 0: strcat(mbuffer, "SP MODE"); break;
-		case 1: strcat(mbuffer, "COOP MODE"); break;
-		default: strcat(mbuffer, "DM MODE"); break;
-	}
-	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
-*/
-	
 }
 
 //the new one
@@ -949,26 +933,6 @@ void M_DrawLoad(void)
 
 	HL_WriteText(style, fontType, TempX, TempY, language["MainLoadGame"]);
 
-/*
-	const colourmap_c *colmap = style->def->text[fontType].colmap;
-	if (custom_MenuMain == false) //text-based
-	{
-		TempX = CenterMenuText(style, fontType, language["MainLoadGame"]);
-		TempY = 5;
-		TempY += style->def->text[fontType].y_offset;
-
-		HL_WriteText(style, fontType, TempX, TempY, language["MainLoadGame"]);
-	}
-	else //graphic based
-	{
-		TempX = CenterMenuImage2(style, fontType, menu_loadg);
-		TempY = 5;
-		TempY += style->def->text[fontType].y_offset;
-
-		HUD_StretchImage(TempX, TempY,
-				IM_WIDTH(menu_loadg) * txtscale, IM_HEIGHT(menu_loadg) * txtscale,menu_loadg,0.0,0.0,colmap);
-	}
-*/
 	HUD_SetAlpha(old_alpha);
 
 	TempX = 0;
@@ -985,6 +949,8 @@ void M_DrawLoad(void)
 	rgbcol_t col = V_GetFontColor(style->def->text[styledef_c::T_TEXT].colmap);
 	HUD_ThinBox(TempX - 5,TempY - 5, TempX + 175,  TempY + 115, col);
 
+	TempY += 1;
+
 	//2. draw the save games
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
@@ -995,7 +961,7 @@ void M_DrawLoad(void)
 				fontType = styledef_c::T_SELECTED;
 		}
 
-		LineHeight = style->fonts[fontType]->NominalHeight(); // * txtscale
+		LineHeight = style->fonts[fontType]->NominalHeight() + 2; // * txtscale
 
 		if (fontType == styledef_c::T_SELECTED)
 		{
@@ -1003,7 +969,7 @@ void M_DrawLoad(void)
 			float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift; // * txtscale;
 			
 			HUD_SetAlpha(0.33f);
-			HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
+			HUD_SolidBox(TempX - 3, TempY - 5 + y_shift, TempX + 173, TempY + LineHeight + y_shift, col);
 			HUD_SetAlpha(old_alpha);
 		}
 		HL_WriteText(style, fontType, TempX, 
@@ -1319,6 +1285,8 @@ void M_DrawSave(void)
 	rgbcol_t col = V_GetFontColor(style->def->text[styledef_c::T_TEXT].colmap);
 	HUD_ThinBox(TempX - 5,TempY - 5, TempX + 175,  TempY + 115, col);
 
+	TempY += 1;
+
 	//2. draw the save games
 	for (i = 0; i < SAVE_SLOTS; i++)
 	{
@@ -1329,7 +1297,7 @@ void M_DrawSave(void)
 				fontType = styledef_c::T_SELECTED;
 		}
 		
-		LineHeight = style->fonts[fontType]->NominalHeight(); // * txtscale
+		LineHeight = style->fonts[fontType]->NominalHeight() + 2; // * txtscale
 
 		if (fontType == styledef_c::T_SELECTED)
 		{
@@ -1337,7 +1305,7 @@ void M_DrawSave(void)
 			float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift; // * txtscale;
 			
 			HUD_SetAlpha(0.33f);
-			HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
+			HUD_SolidBox(TempX - 3, TempY - 5 + y_shift, TempX + 173, TempY + LineHeight + y_shift, col);
 			HUD_SetAlpha(old_alpha);
 		}
 
@@ -1369,15 +1337,6 @@ void M_DrawSave(void)
 		TempY += style->def->entry_spacing;
 	}
 
-/*
-	col = V_GetFontColor(style->def->text[styledef_c::T_HELP].colmap);
-	int ScreenshotX =style->def->text[styledef_c::T_HELP].x_offset - 5;
-	int ScreenshotY =style->def->text[styledef_c::T_HELP].y_offset;
-	ScreenshotY += 55;
-	HUD_ThinBox(ScreenshotX, ScreenshotY, ScreenshotX + 100, ScreenshotY + 60, col);
-	HUD_RenderWorld(ScreenshotX + 5, ScreenshotY + 5, 
-		90,  50, players[0]->mo, 0);
-*/
 	M_DrawSaveLoadCommon(i, i+1, save_style, LineHeight);
 }
 

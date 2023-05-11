@@ -29,6 +29,7 @@
 //
 
 #include "i_defs.h"
+#include "i_defs_gl.h"
 
 #include "filesystem.h"
 #include "image_funcs.h"
@@ -616,8 +617,11 @@ void M_ReadSaveStrings(void)
 		if (std::filesystem::exists(fn))
 		{
 			delete ex_slots[i].save_imdata;
+			ex_slots[i].save_imdata = nullptr;
+			if (ex_slots[i].save_texid)
+				glDeleteTextures(1, &ex_slots[i].save_texid);
 			ex_slots[i].save_texid = 0;
-			ex_slots[i].save_impage = -1;
+			ex_slots[i].save_impage = save_page;
 			epi::FS_Delete(fn);
 		}
 
@@ -626,6 +630,9 @@ void M_ReadSaveStrings(void)
 
 		if (std::filesystem::exists(fn) && (!ex_slots[i].save_imdata || save_page != ex_slots[i].save_impage))
 		{
+			delete ex_slots[i].save_imdata;
+			if (ex_slots[i].save_texid)
+				glDeleteTextures(1, &ex_slots[i].save_texid);
 			epi::file_c *svimg_file = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 			if (svimg_file)
 			{
@@ -639,8 +646,9 @@ void M_ReadSaveStrings(void)
 				else
 				{
 					I_Warning("Error reading savegame screenshot %s!\n", fn.u8string().c_str());
+					ex_slots[i].save_imdata = nullptr;
 					ex_slots[i].save_texid = 0; // just in case
-					ex_slots[i].save_impage = -1;
+					ex_slots[i].save_impage = save_page;
 					delete svimg_file;
 				}
 			}

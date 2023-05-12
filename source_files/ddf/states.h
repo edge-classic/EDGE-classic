@@ -68,6 +68,8 @@ typedef struct state_s
 	// parameter for routine, or NULL
 	void *action_par;
 
+	int rts_tag_type;
+
 	// next state ref.  S_NULL means "remove me"
 	int nextstate;
 

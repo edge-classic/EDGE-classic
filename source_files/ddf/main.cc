@@ -1827,33 +1827,6 @@ const char *DDF_MainDecodeList(const char *info, char divider, bool simple)
 	return NULL;
 }
 
-int DDF_RADStringHash(const char *s)
-{
-	int r = 0;
-	int c;
-
-	while (*s)
-	{
-		r *= 36;
-		if (*s >= 'a' && *s <= 'z')
-			c = *s - 'a';
-		else if (*s >= 'A' && *s <= 'Z')
-			c = *s - 'A';
-		else if (*s >= '0' && *s <= '9')
-			c = *s - '0' + 'Z' - 'A' + 1;
-		else
-			c = *s;
-		r += c % 36;
-		s++;
-	}
-
-	if (r < 0)
-		r = -r;
-
-	return r;
-}
-
-
 // DDF OBJECTS
 
 

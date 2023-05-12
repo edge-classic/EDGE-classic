@@ -117,7 +117,7 @@ void P_ActEnableRadTrig(mobj_t * mo)
 
 	int *value = (int *) mo->state->action_par;
 
-	RAD_EnableByTag(mo, value[0], false, RTS_TAG_NUMBER);
+	RAD_EnableByTag(mo, value[0], false, (s_tagtype_e)mo->state->rts_tag_type);
 }
 
 void P_ActDisableRadTrig(mobj_t * mo)
@@ -127,7 +127,7 @@ void P_ActDisableRadTrig(mobj_t * mo)
 
 	int *value = (int *) mo->state->action_par;
 	
-	RAD_EnableByTag(mo, value[0], true, RTS_TAG_NUMBER);
+	RAD_EnableByTag(mo, value[0], true, (s_tagtype_e)mo->state->rts_tag_type);
 }
 
 //

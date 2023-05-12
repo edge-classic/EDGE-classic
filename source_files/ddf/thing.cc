@@ -1980,9 +1980,15 @@ static void DDF_MobjStateGetRADTrigger(const char *arg, state_t * cur_state)
 
 	// Is the value an integer?
 	if (length != count)
-		*val_ptr = DDF_RADStringHash(arg);
+	{
+		*val_ptr = epi::STR_Hash32(arg);
+		cur_state->rts_tag_type = 1;
+	}
 	else
+	{
 		*val_ptr = atoi(arg);
+		cur_state->rts_tag_type = 0;
+	}
 
 	cur_state->action_par = val_ptr;
 }

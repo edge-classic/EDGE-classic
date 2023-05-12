@@ -153,8 +153,6 @@ void DDF_BoomClearGenTypes(void);
 linetype_c *DDF_BoomGetGenLine(int number);
 sectortype_c *DDF_BoomGetGenSector(int number);
 
-int DDF_RADStringHash(const char *s); // Identical to RAD_StringHashFunc
-
 ddf_type_e DDF_LumpToType(const std::string& name);
 ddf_type_e DDF_FilenameToType(const std::filesystem::path& path);
 

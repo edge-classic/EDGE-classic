@@ -35,6 +35,7 @@ static const state_t template_state =
 	NULL,       // label
 	NULL,       // routine
 	NULL,       // parameter
+	0,          // rts_tag_type
 
 	0,          // next state ref
 	-1          // jump state ref

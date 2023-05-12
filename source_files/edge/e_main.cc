@@ -889,8 +889,13 @@ void InitDirectories(void)
 			s = UTFSTR(getenv("HOME"));
         if (!s.empty())
         {
-            home_dir = epi::PATH_Join(s, UTFSTR(appname.c_str())); 
-
+#ifdef __linux__
+			std::string temp_home = ".";
+			temp_home.append(appname.s);
+			home_dir = epi::PATH_Join(s, UTFSTR(temp_home));
+#else
+            home_dir = epi::PATH_Join(s, UTFSTR(appname.c_str()));
+#endif
 			if (! epi::FS_IsDir(home_dir))
 			{
                 epi::FS_MakeDir(home_dir);
@@ -1927,11 +1932,6 @@ void E_Idle(void)
 //
 void E_Tick(void)
 {
-	// -ES- 1998/09/11 It's a good idea to frequently check the heap
-#ifdef DEVELOPERS
-	//Z_CheckHeap();
-#endif
-
 	G_BigStuff();
 
 	// Update display, next frame, with current state.

@@ -30,8 +30,6 @@
 
 extern int netgame_menuon;  // 1 = HOST, 2 = JOIN, 3 = PLAYERS
 
-extern cvar_c player_dr_dm; // Player Damage Resistance (Bot Deathmatch Only)
-
 void M_NetGameInit(void);
 void M_NetGameDrawer(void);
 void M_NetGameTicker(void);

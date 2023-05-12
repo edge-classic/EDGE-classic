@@ -2561,7 +2561,7 @@ bool M_Responder(event_t * ev)
 				}
 				else
 				{
-					std::string default_name = epi::STR_Format("SAVE-%d", save_slot+1);
+					std::string default_name = epi::STR_Format("SAVE-%d", save_page * SAVE_SLOTS + save_slot + 1);
 					for (; (size_t) saveCharIndex < default_name.size(); saveCharIndex++)
 					{
 						ex_slots[save_slot].desc[saveCharIndex] = default_name[saveCharIndex];

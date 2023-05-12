@@ -132,13 +132,13 @@ double M_PointToSegDistance(vec2_t seg_a, vec2_t seg_b, vec2_t point)
 	{
         double y = point.y - seg_b.y;
         double x = point.x - seg_b.x;
-        return std::sqrt(x * x + y * y);
+        return sqrt(x * x + y * y);
     }
     else if (ab_ap < 0) 
 	{
         double y = point.y - seg_a.y;
         double x = point.x - seg_a.x;
-        return std::sqrt(x * x + y * y);
+        return sqrt(x * x + y * y);
     }
     else 
 	{
@@ -146,8 +146,8 @@ double M_PointToSegDistance(vec2_t seg_a, vec2_t seg_b, vec2_t point)
         double y1 = seg_ab.y;
         double x2 = seg_ap.x;
         double y2 = seg_ap.y;
-        double mod = std::sqrt(x1 * x1 + y1 * y1);
-        return std::abs(x1 * y2 - y1 * x2) / mod;
+        double mod = sqrt(x1 * x1 + y1 * y1);
+        return abs(x1 * y2 - y1 * x2) / mod;
     }
 }
 

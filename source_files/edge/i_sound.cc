@@ -300,28 +300,31 @@ void I_StartupMusic(void)
 		}
 	}
 
-	// Check home_dir soundfont folder as well; create it if it doesn't exist (home_dir only)
-	sfd.clear();
-	soundfont_dir = epi::PATH_Join(home_dir, UTFSTR("soundfont"));
-	if (!epi::FS_IsDir(soundfont_dir))
-		epi::FS_MakeDir(soundfont_dir);
+	if (home_dir != game_dir)
+	{
+		// Check home_dir soundfont folder as well; create it if it doesn't exist (home_dir only)
+		sfd.clear();
+		soundfont_dir = epi::PATH_Join(home_dir, UTFSTR("soundfont"));
+		if (!epi::FS_IsDir(soundfont_dir))
+			epi::FS_MakeDir(soundfont_dir);
 
-	if (!FS_ReadDir(sfd, soundfont_dir, UTFSTR("*.*")))
-	{
-		I_Warning("I_StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
-	}
-	else
-	{
-		for (size_t i = 0 ; i < sfd.size() ; i++) 
+		if (!FS_ReadDir(sfd, soundfont_dir, UTFSTR("*.*")))
 		{
-			if(!sfd[i].is_dir)
+			I_Warning("I_StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
+		}
+		else
+		{
+			for (size_t i = 0 ; i < sfd.size() ; i++) 
 			{
-				std::string ext = epi::PATH_GetExtension(sfd[i].name).u8string();
-				epi::str_lower(ext);
-				if (ext == ".sf2" || ext == ".sf3")
-					available_soundfonts.push_back(sfd[i].name.generic_u8string());
-				else if (ext == ".op2" || ext == ".wopl" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
-					available_genmidis.push_back(sfd[i].name.generic_u8string());
+				if(!sfd[i].is_dir)
+				{
+					std::string ext = epi::PATH_GetExtension(sfd[i].name).u8string();
+					epi::str_lower(ext);
+					if (ext == ".sf2" || ext == ".sf3")
+						available_soundfonts.push_back(sfd[i].name.generic_u8string());
+					else if (ext == ".op2" || ext == ".wopl" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
+						available_genmidis.push_back(sfd[i].name.generic_u8string());
+				}
 			}
 		}
 	}

@@ -2,7 +2,7 @@
 //  COAL Play Simulation Interface
 //------------------------------------------------------------------------
 //
-//  Copyright (c) 2006-2022  The EDGE Team.
+//  Copyright (c) 2006-2023  The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -954,6 +954,7 @@ static void PL_hurt_angle(coal::vm_c *vm, int argc)
 }
 
 
+
 // player.kills()
 // Lobo: November 2021
 static void PL_kills(coal::vm_c *vm, int argc)
@@ -961,12 +962,14 @@ static void PL_kills(coal::vm_c *vm, int argc)
 	vm->ReturnFloat(ui_player_who->killcount);
 }
 
+
 // player.secrets()
 // Lobo: November 2021
 static void PL_secrets(coal::vm_c *vm, int argc)
 {
 	vm->ReturnFloat(ui_player_who->secretcount);
 }
+
 
 // player.items()
 // Lobo: November 2021
@@ -983,12 +986,14 @@ static void PL_map_enemies(coal::vm_c *vm, int argc)
 	vm->ReturnFloat(wi_stats.kills);
 }
 
+
 // player.map_secrets()
 // Lobo: November 2021
 static void PL_map_secrets(coal::vm_c *vm, int argc)
 {
 	vm->ReturnFloat(wi_stats.secret);
 }
+
 
 // player.map_items()
 // Lobo: November 2021
@@ -1025,12 +1030,14 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
 	}
 }
 
+
 // player.sector_tag()
 // Lobo: November 2021
 static void PL_sector_tag(coal::vm_c *vm, int argc)
 {
 	vm->ReturnFloat(ui_player_who->mo->subsector->sector->tag);
 }
+
 
 // player.play_footstep(flat name)
 // Dasho: January 2022
@@ -1054,6 +1061,7 @@ static void PL_play_footstep(coal::vm_c *vm, int argc)
 		S_StartFX(current_flatdef->footstep);
 	}
 }
+
 
 // player.use_inventory(type)
 //
@@ -1114,7 +1122,6 @@ std::string AuxStringReplaceAll(std::string str, const std::string& from, const 
     }
     return str;
 }
-
 
 
 // GetMobjBenefits(mobj);
@@ -1188,6 +1195,7 @@ std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits=false)
 	return temp_string;
 }
 
+
 // GetQueryInfoFromMobj(mobj, whatinfo)
 //
 std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
@@ -1248,8 +1256,8 @@ std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
 		return("");
 
 	return(temp_string.c_str());
-	
 }
+
 
 // GetQueryInfoFromWeapon(mobj, whatinfo, [secattackinfo])
 //
@@ -1339,8 +1347,8 @@ std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secattackinfo
 		return("");
 
 	return(temp_string.c_str());
-	
 }
+
 
 // player.query_object(maxdistance,whatinfo)
 //
@@ -1387,6 +1395,7 @@ static void PL_query_object(coal::vm_c *vm, int argc)
 	
 }
 
+
 // mapobject.query_tagged(thing tag, whatinfo)
 //
 static void MO_query_tagged(coal::vm_c *vm, int argc)
@@ -1422,8 +1431,8 @@ static void MO_query_tagged(coal::vm_c *vm, int argc)
 		vm->ReturnString("");
 	else
 		vm->ReturnString(temp_value.c_str());
-	
 }
+
 
 // mapobject.count(thing type/id)
 //
@@ -1451,6 +1460,7 @@ static void MO_count(coal::vm_c *vm, int argc)
 	
 	vm->ReturnFloat(thingcount);
 }
+
 
 // player.query_weapon(maxdistance,whatinfo,[SecAttack])
 //
@@ -1502,14 +1512,95 @@ static void PL_query_weapon(coal::vm_c *vm, int argc)
 		vm->ReturnString("");
 	else
 		vm->ReturnString(temp_string.c_str());
-	
 }
+
 
 // player.sector_light()
 // Lobo: May 2023
 static void PL_sector_light(coal::vm_c *vm, int argc)
 {
 	vm->ReturnFloat(ui_player_who->mo->subsector->sector->props.lightlevel);
+}
+
+
+// player.sector_floor_height()
+// Lobo: May 2023
+static void PL_sector_floor_height(coal::vm_c *vm, int argc)
+{
+	// If no 3D floors, just return the current sector floor height
+	if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
+	{
+		vm->ReturnFloat(ui_player_who->mo->subsector->sector->f_h);
+	}
+	else
+	{
+		// Start from the lowest exfloor and check if the player is standing on it, 
+		//  then return the control sector floor height
+		float CurrentFloor = 0;
+		float player_floor_height = ui_player_who->mo->floorz;
+		extrafloor_t *floor_checker = ui_player_who->mo->subsector->sector->bottom_ef;
+		for (extrafloor_t *ef = floor_checker; ef; ef=ef->higher)
+		{
+			if (CurrentFloor > ef->top_h)
+			{
+				vm->ReturnFloat(ef->top_h);
+				return;
+			}
+
+			if (player_floor_height + 1 > ef->top_h)
+			{
+				CurrentFloor = ef->top_h;
+			}
+		}
+		vm->ReturnFloat(CurrentFloor);
+	}
+}
+
+
+// player.sector_ceiling_height()
+// Lobo: May 2023
+static void PL_sector_ceiling_height(coal::vm_c *vm, int argc)
+{
+	// If no 3D floors, just return the current sector ceiling height
+	if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
+	{
+		vm->ReturnFloat(ui_player_who->mo->subsector->sector->c_h);
+	}
+	else
+	{
+		// Start from the lowest exfloor and check if the player is standing on it,
+		//   then return the control sector ceiling height
+		float HighestCeiling = 0;
+		float player_floor_height = ui_player_who->mo->floorz;
+		extrafloor_t *floor_checker = ui_player_who->mo->subsector->sector->bottom_ef;
+		for (extrafloor_t *ef = floor_checker; ef; ef=ef->higher)
+		{
+			if (player_floor_height + 1 > ef->top_h)
+			{
+				HighestCeiling = ef->top_h;
+			}
+			if (HighestCeiling < ef->top_h)
+			{
+				vm->ReturnFloat(ef->bottom_h);
+				return;
+			}
+		}
+		// Fallback if nothing else satisfies these conditions
+		vm->ReturnFloat(ui_player_who->mo->subsector->sector->c_h);
+	}
+}
+
+
+// player.is_outside()
+// Lobo: May 2023
+static void PL_is_outside(coal::vm_c *vm, int argc)
+{
+	// Doesn't account for extrafloors by design. Reasoning is that usually
+	//  extrafloors will be platforms, not roofs...
+	if (ui_player_who->mo->subsector->sector->ceil.image != skyflatimage) //is it outdoors?
+		vm->ReturnFloat(0);
+	else
+		vm->ReturnFloat(1);
 }
 
 //------------------------------------------------------------------------
@@ -1568,7 +1659,6 @@ void VM_RegisterPlaysim()
     ui_vm->AddNativeFunction("player.hurt_dir",        PL_hurt_dir);
     ui_vm->AddNativeFunction("player.hurt_angle",      PL_hurt_angle);
 
-	// Lobo: November 2021
 	ui_vm->AddNativeFunction("player.kills",      PL_kills);
 	ui_vm->AddNativeFunction("player.secrets",      PL_secrets);
 	ui_vm->AddNativeFunction("player.items",      PL_items);
@@ -1578,7 +1668,6 @@ void VM_RegisterPlaysim()
 	ui_vm->AddNativeFunction("player.floor_flat",      PL_floor_flat);
 	ui_vm->AddNativeFunction("player.sector_tag",      PL_sector_tag);
 
-	// Dasho: December 2021
 	ui_vm->AddNativeFunction("player.play_footstep", PL_play_footstep);
 
 	ui_vm->AddNativeFunction("player.use_inventory",        PL_use_inventory);
@@ -1591,18 +1680,18 @@ void VM_RegisterPlaysim()
     ui_vm->AddNativeFunction("player.counter_max",     PL_counter_max);
 	ui_vm->AddNativeFunction("player.set_counter",     PL_set_counter);
 
-	//Lobo: October 2022
 	ui_vm->AddNativeFunction("player.query_object",     PL_query_object);
 	ui_vm->AddNativeFunction("player.query_weapon",     PL_query_weapon);
-
 	ui_vm->AddNativeFunction("mapobject.query_tagged",     MO_query_tagged);
     ui_vm->AddNativeFunction("mapobject.count",     MO_count);
 
 	ui_vm->AddNativeFunction("player.is_zoomed",        PL_is_zoomed);
-
 	ui_vm->AddNativeFunction("player.weapon_state",      PL_weapon_state);
 
 	ui_vm->AddNativeFunction("player.sector_light",      PL_sector_light);
+	ui_vm->AddNativeFunction("player.sector_floor_height",      PL_sector_floor_height);
+	ui_vm->AddNativeFunction("player.sector_ceiling_height",      PL_sector_ceiling_height);
+	ui_vm->AddNativeFunction("player.is_outside",      PL_is_outside);
 
 }
 

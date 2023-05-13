@@ -104,8 +104,11 @@ New Features
   - HEADER.xxxx and TITLE.xxxx commands now affect graphics like "Choose Skill"
   - ENTRY_ALIGNMENT=CENTER now properly centers items
   
-+ COALHUDS: new command
++ COALHUDS: new commands
   - player.sector_light(): Returns the light level of the sector the player is currently in.
+  - player.sector_floor_height(): Returns floor height of the sector the player is currently in.
+  - player.sector_ceiling_height(): Returns ceiling height of the sector the player is currently in.
+  - player.is_outside(): Returns 1 if the ceiling of the sector the player is currently in is Sky.
 
   
 

@@ -419,6 +419,9 @@ module player
 	}
 	
 	function sector_light()      : float = native
+	function sector_floor_height()      : float = native
+	function sector_ceiling_height()      : float = native
+	function is_outside()      : float = native
 	
 }
 

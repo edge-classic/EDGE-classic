@@ -32,9 +32,9 @@
 static cvar_c * all_cvars = NULL;
 
 
-cvar_c::cvar_c(const char *_name, const char *_def, int _flags) :
+cvar_c::cvar_c(const char *_name, const char *_def, int _flags, float _min, float _max) :
 	d(), f(), s(_def),
-	name(_name), def(_def), flags(_flags),
+	name(_name), def(_def), flags(_flags), min(_min), max(_max),
 	modified(0)
 {
 	ParseString();
@@ -51,9 +51,18 @@ cvar_c::~cvar_c()
 
 cvar_c& cvar_c::operator= (int value)
 {
-	d = value;
-	f = value;
-	FmtInt(value);
+	if (value < min || value > max)
+	{
+		I_Warning("Value %d exceeds lower/upper limits for %s!\n", value, name);
+		s = def;
+		ParseString();
+	}
+	else
+	{
+		d = value;
+		f = value;
+		FmtInt(value);
+	}
 
 	modified++;
 	return *this;
@@ -61,9 +70,18 @@ cvar_c& cvar_c::operator= (int value)
 
 cvar_c& cvar_c::operator= (float value)
 {
-	d = I_ROUND(value);
-	f = value;
-	FmtFloat(value);
+	if (value < min || value > max)
+	{
+		I_Warning("Value %g exceeds lower/upper limits for %s!\n", value, name);
+		s = def;
+		ParseString();
+	}
+	else
+	{
+		d = I_ROUND(value);
+		f = value;
+		FmtFloat(value);
+	}
 
 	modified++;
 	return *this;
@@ -121,6 +139,13 @@ void cvar_c::ParseString()
 {
 	d = atoi(s.c_str());
 	f = atof(s.c_str());
+	if (f < min || f > max)
+	{
+		I_Warning("Value %g exceeds lower/upper limits for %s!\n", f, name);
+		s = def;
+		d = atoi(s.c_str());
+		f = atof(s.c_str());
+	}
 }
 
 

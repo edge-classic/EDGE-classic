@@ -21,10 +21,10 @@
 
 #include <vector>
 #include <string>
-
+#include <limits>
 
 #define DEF_CVAR(name, value, flags)  cvar_c name(#name, value, flags);
-
+#define DEF_CVAR_CLAMPED(name, value, flags, min, max) cvar_c name(#name, value, flags, min, max);
 
 class cvar_c
 {
@@ -43,6 +43,9 @@ public:
 	// a combination of CVAR_XXX bits
 	int flags;
 
+	float min;
+	float max;
+
 	// link in list
 	cvar_c * next;
 
@@ -52,7 +55,8 @@ private:
 	int modified;
 
 public:
-	cvar_c(const char *_name, const char *_def, int _flags = 0);
+	cvar_c(const char *_name, const char *_def, int _flags = 0, 
+		float _min = std::numeric_limits<float>::lowest(), float _max = std::numeric_limits<float>::max() );
 
 	~cvar_c();
 

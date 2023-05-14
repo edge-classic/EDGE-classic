@@ -35,7 +35,7 @@ int graphics_shutdown = 0;
 
 DEF_CVAR(in_grab, "1", CVAR_ARCHIVE)
 DEF_CVAR(v_sync,  "0", CVAR_ARCHIVE)
-DEF_CVAR(v_gamma, "0", CVAR_ARCHIVE)
+DEF_CVAR_CLAMPED(v_gamma, "0", CVAR_ARCHIVE, -1.0, 1.0)
 
 // this is the Monitor Size setting, really an aspect ratio.
 // it defaults to 16:9, as that is the most common monitor size nowadays.

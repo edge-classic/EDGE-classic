@@ -40,7 +40,7 @@ int glmax_tex_units;
 DEF_CVAR(r_nearclip, "4",      CVAR_ARCHIVE)
 DEF_CVAR(r_farclip,  "64000",  CVAR_ARCHIVE)
 DEF_CVAR(r_culling, "0", CVAR_ARCHIVE)
-DEF_CVAR(r_culldist, "3000", CVAR_ARCHIVE)
+DEF_CVAR_CLAMPED(r_culldist, "3000", CVAR_ARCHIVE, 1000.0f, 16000.0f)
 DEF_CVAR(r_cullfog, "0", CVAR_ARCHIVE)
 
 DEF_CVAR(r_fogofwar, "0", CVAR_ARCHIVE)

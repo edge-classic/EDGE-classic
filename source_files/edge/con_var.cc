@@ -53,7 +53,7 @@ cvar_c& cvar_c::operator= (int value)
 {
 	if (value < min || value > max)
 	{
-		I_Warning("Value %d exceeds lower/upper limits for %s!\n", value, name);
+		I_Warning("Value %d exceeds lower/upper limits for %s! Resetting to default value!\n", value, name);
 		s = def;
 		ParseString();
 	}
@@ -72,7 +72,7 @@ cvar_c& cvar_c::operator= (float value)
 {
 	if (value < min || value > max)
 	{
-		I_Warning("Value %g exceeds lower/upper limits for %s!\n", value, name);
+		I_Warning("Value %g exceeds lower/upper limits for %s! Resetting to default value!\n", value, name);
 		s = def;
 		ParseString();
 	}
@@ -141,7 +141,7 @@ void cvar_c::ParseString()
 	f = atof(s.c_str());
 	if (f < min || f > max)
 	{
-		I_Warning("Value %g exceeds lower/upper limits for %s!\n", f, name);
+		I_Warning("Value %g exceeds lower/upper limits for %s! Resetting to default value!\n", f, name);
 		s = def;
 		d = atoi(s.c_str());
 		f = atof(s.c_str());

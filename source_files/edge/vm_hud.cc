@@ -328,6 +328,7 @@ static void HD_gradient_box(coal::vm_c *vm, int argc)
 }
 
 
+
 // hud.draw_image(x, y, name, [noOffset])
 // if we specify noOffset then it ignores 
 // X and Y offsets from doom or images.ddf
@@ -944,6 +945,44 @@ static void HD_rts_isactive(coal::vm_c *vm, int argc)
 	}
 }
 
+// hud.get_image_width(name)
+//
+static void HD_get_image_width(coal::vm_c *vm, int argc)
+{
+	(void) argc;
+	const char *name = vm->AccessParamString(0);
+
+	const image_c *img = W_ImageLookup(name, INS_Graphic);
+	
+	if (img)
+	{
+		vm->ReturnFloat(HUD_GetImageWidth(img));
+	}
+	else
+	{
+		vm->ReturnFloat(0);
+	}
+}
+
+// hud.get_image_height(name)
+//
+static void HD_get_image_height(coal::vm_c *vm, int argc)
+{
+	(void) argc;
+	const char *name = vm->AccessParamString(0);
+
+	const image_c *img = W_ImageLookup(name, INS_Graphic);
+	
+	if (img)
+	{
+		vm->ReturnFloat(HUD_GetImageHeight(img));
+	}
+	else
+	{
+		vm->ReturnFloat(0);
+	}
+}
+
 //------------------------------------------------------------------------
 // HUD Functions
 //------------------------------------------------------------------------
@@ -1009,6 +1048,9 @@ void VM_RegisterHUD()
 
 	ui_vm->AddNativeFunction("hud.rts_enable",        HD_rts_enable);
 	ui_vm->AddNativeFunction("hud.rts_isactive",      HD_rts_isactive);
+
+	ui_vm->AddNativeFunction("hud.get_image_width",      HD_get_image_width);
+	ui_vm->AddNativeFunction("hud.get_image_height",      HD_get_image_height);
 }
 
 void VM_NewGame(void)

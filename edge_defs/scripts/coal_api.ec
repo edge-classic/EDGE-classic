@@ -256,6 +256,9 @@ module hud
 	function rts_enable(tag : string) = native
 	function rts_isactive(tag : string)    : float = native
 	
+	function get_image_width(image : string)    : float = native
+	function get_image_height(image : string)    : float = native
+	
 }
 
 

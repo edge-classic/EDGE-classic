@@ -719,6 +719,16 @@ void HUD_DrawImageTitleWS(const image_c *title_image)
 	HUD_StretchImage(CenterX, 0, TempWidth, TempHeight, title_image, 0.0, 0.0);
 }
 
+float HUD_GetImageWidth(const image_c *img)
+{
+    return(IM_WIDTH(img)  * cur_scale);
+}
+
+float HUD_GetImageHeight(const image_c *img)
+{
+    return(IM_HEIGHT(img) * cur_scale);
+}
+
 void HUD_DrawImage(float x, float y, const image_c *img, const colourmap_c *colmap)
 {
 	float w = IM_WIDTH(img)  * cur_scale;

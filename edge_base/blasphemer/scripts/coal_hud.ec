@@ -30,12 +30,12 @@ function heretic_life_gem() =
 	//Godmode cheat active
 	if (player.power_left(player.INVULN) == 0 && player.has_power(player.INVULN)) 
 	{
-		hud.draw_image(16, 167, "GOD1", 1)
-		hud.draw_image(288, 167, "GOD2", 1)
+		hud.draw_image(16, 167, "GOD1")
+		hud.draw_image(288, 167, "GOD2")
 	}
 
-	hud.draw_image(0, 190, "LTFACE", 1)
-	hud.draw_image(293, 190, "RTFACE", 1)
+	hud.draw_image(0, 190, "LTFACE")
+	hud.draw_image(276, 190, "RTFACE")
 }
 
 
@@ -55,13 +55,20 @@ function heretic_status_bar() =
 	hud.draw_image(-53, 158, "STBARL") // Widescreen border
     hud.draw_image(320, 158, "STBARR") // Widescreen border
 	
+	var centerOffsetX : float
+	var tempwidth : float
+	
+	tempwidth = hud.get_image_width("BARBACK")
+	centerOffsetX = tempwidth / 2;
+	
 	//order is important because some of them overlap
-	hud.draw_image(0, 158, "BARBACK")
+	//hud.draw_image(0, 158, "BARBACK")
+	hud.draw_image(  160 - centerOffsetX, 158, "BARBACK")
 	hud.draw_image(34, 160, "LIFEBAR")
 	hud.draw_image(-1, 190, "CHAINBAC")	
 	hud.draw_image(0, 190, "CHAIN")	
 	hud.draw_image(0, 190, "LTFACE")
-	hud.draw_image(293, 190, "RTFACE", 1)
+	hud.draw_image(276, 190, "RTFACE")
 	hud.draw_image(0, 148, "LTFCTOP")
 	hud.draw_image(290, 148, "RTFCTOP")
 	

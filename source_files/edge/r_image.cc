@@ -687,8 +687,8 @@ static image_c *AddImage_DOOM(imagedef_c *def, bool user_defined = false)
 		return NULL;
 	}
 
-	rim->offset_x = def->x_offset;
-	rim->offset_y = def->y_offset;
+	rim->offset_x += def->x_offset;
+	rim->offset_y += def->y_offset;
 
 	rim->scale_x = def->scale * def->aspect;
 	rim->scale_y = def->scale;

@@ -132,6 +132,9 @@ void HUD_RenderAutomap(float x, float y, float w, float h, mobj_t *focus, int fl
 
 void HUD_GetCastPosition(float *x, float *y, float *scale_x, float *scale_y);
 
+float HUD_GetImageWidth(const image_c *img);
+float HUD_GetImageHeight(const image_c *img);
+
 #endif /* __HUD_DRAW_H__ */
 
 //--- editor settings ---

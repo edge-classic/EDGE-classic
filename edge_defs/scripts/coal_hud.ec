@@ -216,8 +216,7 @@ function doom_little_ammo() =
 
 function doom_status_bar() =
 {
-    hud.draw_image(  0, 168, "STBAR")
-	
+	//Draw our extenders first, just in case the statusbar is already widescreen
 	if (!hud.custom_stbar)
 	{
 		hud.draw_image(  -83, 168, "STBARL") // Widescreen border
@@ -225,10 +224,18 @@ function doom_status_bar() =
 	}
 	else
 	{
-		
 		hud.solid_box(-83, 168, 83, 32, custom_stbar_average_color)
 		hud.solid_box(320, 168, 83, 32, custom_stbar_average_color)
 	}
+	
+	var centerOffsetX : float
+	var tempwidth : float
+	
+	tempwidth = hud.get_image_width("STBAR")
+	centerOffsetX = tempwidth / 2;
+	
+	//hud.draw_image(  0, 168, "STBAR")
+	hud.draw_image(  160 - centerOffsetX, 168, "STBAR")
 	
     hud.draw_image( 90, 171, "STTPRCNT")
     hud.draw_image(221, 171, "STTPRCNT")
@@ -267,8 +274,8 @@ function doom_status_bar() =
 
 function doom_status_bar2() =
 {
-    hud.draw_image(  0, 168, "STBAR")
-	
+   
+    //Draw our extenders first, just in case the statusbar is already widescreen
 	hud.draw_image(  -83, 168, "STBARL") // Widescreen border
 	hud.draw_image(  320, 168, "STBARR") // Widescreen border
 	if (hud.custom_stbar)
@@ -278,6 +285,15 @@ function doom_status_bar2() =
 		hud.solid_box(320, 168, 83, 32, custom_stbar_average_color)
 		hud.set_alpha(1.0) //**Alters Transparency of HUD Elements**
 	}
+	
+	var centerOffsetX : float
+	var tempwidth : float
+	
+	tempwidth = hud.get_image_width("STBAR")
+	centerOffsetX = tempwidth / 2;
+	
+	//hud.draw_image(  0, 168, "STBAR")
+	hud.draw_image(  160 - centerOffsetX, 168, "STBAR")
 	
     hud.draw_image( 90, 171, "STTPRCNT")
     hud.draw_image(221, 171, "STTPRCNT")

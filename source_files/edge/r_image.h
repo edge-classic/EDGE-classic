@@ -128,7 +128,7 @@ public:
 		// case IMSRC_Graphic:
 		// case IMSRC_Sprite:
 		// case IMSRC_TX_HI:
-		struct { int lump; char *packfile_name; bool is_patch; bool user_defined; } graphic;
+		struct { int lump; char *packfile_name; bool is_patch; bool user_defined; image_special_e special; } graphic;
 
 		// case IMSRC_Flat:
 		// case IMSRC_Raw320x200:

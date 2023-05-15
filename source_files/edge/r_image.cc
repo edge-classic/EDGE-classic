@@ -697,8 +697,13 @@ static image_c *AddImage_DOOM(imagedef_c *def, bool user_defined = false)
 
 	rim->hue_rotation = def->hue_rotation;
 
+	rim->source.graphic.special = IMGSP_None;
+
 	if (user_defined)
+	{
 		rim->source.graphic.user_defined = true;
+		rim->source.graphic.special = def->special;
+	}
 
 	if (def->special & IMGSP_Crosshair)
 	{
@@ -1223,6 +1228,21 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 		if (rim->source.user.def->special & IMGSP_Smooth)
 			smooth = true;
 		else if (rim->source.user.def->special & IMGSP_NoSmooth)
+			smooth = false;
+	}
+	else if (rim->source_type == IMSRC_Graphic && rim->source.graphic.user_defined)
+	{
+		if (rim->source.graphic.special & IMGSP_Clamp)
+			clamp = true;
+
+		if (rim->source.graphic.special & IMGSP_Mip)
+			mip = true;
+		else if (rim->source.graphic.special & IMGSP_NoMip)
+			mip = false;
+
+		if (rim->source.graphic.special & IMGSP_Smooth)
+			smooth = true;
+		else if (rim->source.graphic.special & IMGSP_NoSmooth)
 			smooth = false;
 	}
 

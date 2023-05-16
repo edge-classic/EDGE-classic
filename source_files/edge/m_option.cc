@@ -214,7 +214,7 @@ static char Details[]   = "Low/Medium/High";
 static char Hq2xMode[]  = "Off/UI Only/UI & Sprites/All";
 static char Invuls[]    = "Simple/Textured";
 static char MonitSiz[]  = "5:4/4:3/3:2/16:10/16:9/21:9";
-static char VidOverlays[]  = "None/Lines 1x/Lines 2x/Checkered/Vertical/Grill";
+static char VidOverlays[]  = "None/Lines 1x/Lines 2x/Vertical 1x/Vertical 2x/Grill 1x/Grill 2x";
 
 // for CVar enums
 const char WIPE_EnumStr[] = "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors";
@@ -407,7 +407,7 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Switch,  "Dynamic Lighting", DLMode, 2, &use_dlights, NULL, NULL},
 	{OPT_Switch,  "Detail Level",   Details,  3, &detail_level, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Mipmapping",     MipMaps,  3, &var_mipmapping, M_ChangeMipMap, NULL},
-	{OPT_Switch,  "Overlay",  		VidOverlays, 6, &r_overlay.d, M_UpdateCVARFromInt, NULL, &r_overlay},
+	{OPT_Switch,  "Overlay",  		VidOverlays, 7, &r_overlay.d, M_UpdateCVARFromInt, NULL, &r_overlay},
 	{OPT_Switch,  "Crosshair",       CrossH, 10, &r_crosshair.d, M_UpdateCVARFromInt, NULL, &r_crosshair},
 	{OPT_Switch,  "Crosshair Color", CrosshairColor,  8, &r_crosscolor.d, M_UpdateCVARFromInt, NULL, &r_crosscolor},
 	{OPT_FracSlider,  "Crosshair Size",  NULL,  0,  &r_crosssize.f, M_UpdateCVARFromFloat, NULL, &r_crosssize, 1.0f, 2.0f, 64.0f},

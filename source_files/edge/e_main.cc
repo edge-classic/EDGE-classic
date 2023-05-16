@@ -181,7 +181,7 @@ DEF_CVAR(orgname, "EDGE Team", 0)
 DEF_CVAR(appname, "EDGE-Classic", 0)
 DEF_CVAR(homepage, "https://edge-classic.github.io", 0)
 
-DEF_CVAR(r_overlay, "0", CVAR_ARCHIVE)
+DEF_CVAR_CLAMPED(r_overlay, "0", CVAR_ARCHIVE, 0, 6)
 
 DEF_CVAR(g_aggression, "0", CVAR_ARCHIVE)
 

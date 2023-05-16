@@ -83,11 +83,12 @@ static float margin_YMUL;
 std::vector<std::string> hud_overlays = 
 {
 	"",
-	"ECSCNLN1",
-	"ECSCNLN2",
-	"ECSCNLN3",
-	"ECSCNLN4",
-	"ECSCNLN5",
+	"OVERLAY_LINES_1X",
+	"OVERLAY_LINES_2X",
+	"OVERLAY_VERTICAL_1X",
+	"OVERLAY_VERTICAL_2X",
+	"OVERLAY_GRILL_1X",
+	"OVERLAY_GRILL_2X",
 };
 
 static inline float COORD_X(float x)

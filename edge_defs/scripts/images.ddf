@@ -7,6 +7,23 @@
 
 #VERSION 1.30
 
+[GFX:OVERLAY_LINES_1X]
+IMAGE_DATA=PACK:"graphics/overlays/overlay_lines_1x.png";
+
+[GFX:OVERLAY_LINES_2X]
+IMAGE_DATA=PACK:"graphics/overlays/overlay_lines_2x.png";
+
+[GFX:OVERLAY_VERTICAL_1X]
+IMAGE_DATA=PACK:"graphics/overlays/overlay_vertical_1x.png";
+
+[GFX:OVERLAY_VERTICAL_2X]
+IMAGE_DATA=PACK:"graphics/overlays/overlay_vertical_2x.png";
+
+[GFX:OVERLAY_GRILL_1X]
+IMAGE_DATA=PACK:"graphics/overlays/overlay_grill_1x.png";
+
+[GFX:OVERLAY_GRILL_2X]
+IMAGE_DATA=PACK:"graphics/overlays/overlay_grill_2x.png";
 
 [gfx:MESSGBOX]
 IMAGE_DATA=COLOUR:#000000;

@@ -1666,7 +1666,7 @@ int W_CheckNumForName(const char *name)
 
 	if (strlen(name) > 8)
 	{
-		I_Warning("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
+		I_Debugf("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
 		return -1;
 	}
 
@@ -1697,7 +1697,7 @@ int W_CheckFileNumForName(const char *name)
 
 	if (strlen(name) > 8)
 	{
-		I_Warning("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
+		I_Debugf("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
 		return -1;
 	}
 
@@ -1725,7 +1725,7 @@ int W_CheckNumForName_GFX(const char *name)
 
 	if (strlen(name) > 8)
 	{
-		I_Warning("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
+		I_Debugf("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
 		return -1;
 	}
 

@@ -63,7 +63,7 @@ function heretic_status_bar() =
 	
 	//order is important because some of them overlap
 	//hud.draw_image(0, 158, "BARBACK")
-	hud.draw_image(  160 - centerOffsetX, 158, "BARBACK")
+	hud.draw_image(  160 - centerOffsetX, 158, "BARBACK",1)
 	hud.draw_image(34, 160, "LIFEBAR")
 	hud.draw_image(-1, 190, "CHAINBAC")	
 	hud.draw_image(0, 190, "CHAIN")	

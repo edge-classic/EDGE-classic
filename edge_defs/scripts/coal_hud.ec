@@ -235,7 +235,7 @@ function doom_status_bar() =
 	centerOffsetX = tempwidth / 2;
 	
 	//hud.draw_image(  0, 168, "STBAR")
-	hud.draw_image(  160 - centerOffsetX, 168, "STBAR")
+	hud.draw_image(  160 - centerOffsetX, 168, "STBAR",1)
 	
     hud.draw_image( 90, 171, "STTPRCNT")
     hud.draw_image(221, 171, "STTPRCNT")

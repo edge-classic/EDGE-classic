@@ -497,7 +497,7 @@ function doom_automap() =
     if (strings.len(hud.map_author()) > 0)
     {
         hud.draw_text(0, 200 - 32 - 20, hud.map_title())
-        hud.draw_text(0, 200 - 32 - 10, " By: " + hud.map_author())
+        hud.draw_text(0, 200 - 32 - 10, " Author: " + hud.map_author())
     }
     else
     {

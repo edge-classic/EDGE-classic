@@ -160,6 +160,15 @@ static void HD_map_title(coal::vm_c *vm, int argc)
 	vm->ReturnString(w_map_title.c_str());
 }
 
+// hud.map_author()
+//
+static void HD_map_author(coal::vm_c *vm, int argc)
+{
+	(void) argc;
+
+	vm->ReturnString(currmap->author.c_str());
+}
+
 
 // hud.which_hud()
 //
@@ -994,6 +1003,7 @@ void VM_RegisterHUD()
     ui_vm->AddNativeFunction("hud.game_name",       HD_game_name);
     ui_vm->AddNativeFunction("hud.map_name",  	    HD_map_name);
     ui_vm->AddNativeFunction("hud.map_title",  	    HD_map_title);
+	ui_vm->AddNativeFunction("hud.map_author",  	HD_map_author);
 
     ui_vm->AddNativeFunction("hud.which_hud",  	    HD_which_hud);
     ui_vm->AddNativeFunction("hud.check_automap",  	HD_check_automap);

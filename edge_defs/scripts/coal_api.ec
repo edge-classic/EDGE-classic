@@ -183,6 +183,7 @@ module hud
 	function game_name() : string = native
 	function map_name()  : string = native
 	function map_title() : string = native
+	function map_author() : string = native
 	
 	function which_hud() : float = native
 	function check_automap() : float = native

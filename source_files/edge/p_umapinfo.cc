@@ -301,6 +301,7 @@ static void FreeMap(MapEntry *mape)
 	if (mape->intertext) free(mape->intertext);
 	if (mape->intertextsecret) free(mape->intertextsecret);
 	if (mape->bossactions) free(mape->bossactions);
+	if (mape->authorname) free(mape->authorname);
 	mape->mapname = NULL;
 }
 
@@ -579,6 +580,12 @@ static void ParseUMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 					val->bossactions[val->numbossactions - 1].tag = tag;
 				}
 			}
+		}
+		else if (epi::case_cmp(key, "author") == 0)
+		{
+			if (val->authorname) free(val->authorname);
+			val->authorname = (char *)calloc(value.size()+1, sizeof(char));
+			Z_StrNCpy(val->authorname, value.c_str(), value.size());
 		}
 	}
 	// Some fallback handling
@@ -900,6 +907,12 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 		else if (epi::case_cmp(key, "par") == 0)
 		{
 			val->partime = 35 * epi::LEX_Int(value);
+		}
+		else if (epi::case_cmp(key, "author") == 0)
+		{
+			if (val->authorname) free(val->authorname);
+			val->authorname = (char *)calloc(value.size()+1, sizeof(char));
+			Z_StrNCpy(val->authorname, value.c_str(), value.size());
 		}
 	}
 	// Some fallback handling

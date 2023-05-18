@@ -71,6 +71,7 @@ static const commandlist_t level_commands[] =
 
 	DF("LUMPNAME", lump, DDF_MainGetLumpName),
 	DF("DESCRIPTION", description, DDF_MainGetString),
+	DF("AUTHOR", author, DDF_MainGetString),
 	DF("NAME_GRAPHIC", namegraphic, DDF_MainGetLumpName),
 	DF("SKY_TEXTURE", sky, DDF_MainGetLumpName),
 	DF("MUSIC_ENTRY", music, DDF_MainGetNumeric),
@@ -414,6 +415,7 @@ void mapdef_c::CopyDetail(mapdef_c &src)
   	lump = src.lump;
    	sky = src.sky;
    	surround = src.surround;
+	author = src.author;
    	
    	music = src.music;
 	partime = src.partime;
@@ -443,6 +445,7 @@ void mapdef_c::Default()
   	lump.clear();
    	sky.clear();
    	surround.clear();
+	author.clear();
    	
    	music = 0;
 	partime = 0;

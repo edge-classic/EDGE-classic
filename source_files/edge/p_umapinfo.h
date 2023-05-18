@@ -40,6 +40,7 @@ struct MapEntry
 	char *label;
 	char *intertext;
 	char *intertextsecret;
+	char *authorname;
 	char levelpic[9];
 	char nextmap[9];
 	char nextsecret[9];

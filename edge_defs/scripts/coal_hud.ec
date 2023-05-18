@@ -494,7 +494,15 @@ function doom_automap() =
     hud.text_font("DOOM")
     hud.text_color(hud.GREEN)
     
-    hud.draw_text(0, 200 - 32 - 10, hud.map_title())
+    if (strings.len(hud.map_author()) > 0)
+    {
+        hud.draw_text(0, 200 - 32 - 20, hud.map_title())
+        hud.draw_text(0, 200 - 32 - 10, " By: " + hud.map_author())
+    }
+    else
+    {
+        hud.draw_text(0, 200 - 32 - 10, hud.map_title())
+    }
     
     hud.set_scale(0.75)
     hud.draw_text(10, 20, "Kills:    " + player.kills() + "/" + player.map_enemies())

@@ -1277,6 +1277,11 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->description = temp_ref;
         }
 
+		if(Maps.maps[i].authorname)
+        {
+			temp_level->author = Maps.maps[i].authorname;
+        }
+
 		if(Maps.maps[i].music[0])
 		{
 			int val = 0;

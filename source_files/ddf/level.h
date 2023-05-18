@@ -167,6 +167,9 @@ public:
 	map_finaledef_c f_pre;
 	map_finaledef_c f_end;
 
+	// optional *MAPINFO field
+	std::string author;
+
 private:
 	// disable copy construct and assignment operator
 	explicit mapdef_c(mapdef_c &rhs) { (void) rhs; }

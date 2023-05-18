@@ -11,6 +11,7 @@
 
 [ENGLISH]
 
+MusicPrefix="MUS_";
 MainNewGame="New Game";
 MainOptions="Options";
 MainLoadGame="Load Game";

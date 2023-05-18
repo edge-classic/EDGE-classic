@@ -64,6 +64,7 @@ public:
 
 	// this is for UMAPINFO strings
 	void AddOrReplace(const char *ref, const char *value);
+	const char *GetRefOrNull(const char *refname);
 
 	// private (except for code in language.cc)
 	lang_choice_c * AddChoice(const char *name);

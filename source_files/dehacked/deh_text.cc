@@ -649,6 +649,15 @@ void TextStr::WriteTextString(const langinfo_t *info)
 	WAD::Printf("\";\n");
 }
 
+const char *TextStr::GetLDFForBex(const char *bex_name)
+{
+    for (auto entry : lang_list)
+    {
+        if (entry.deh_name && StrCaseCmp(entry.deh_name, bex_name) == 0)
+            return entry.ldf_name;
+    }
+    return nullptr;
+}
 
 void TextStr::ConvertLDF(void)
 {

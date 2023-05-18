@@ -1225,13 +1225,24 @@ void W_ReadUMAPINFOLumps(void)
 {
 	int p;
 	p = W_CheckNumForName("UMAPINFO");
-	if (p == -1) //no UMAPINFO
+	if (p > -1)
+	{
+		L_WriteDebug("parsing UMAPINFO lump\n");
+		Parse_UMAPINFO(W_LoadString(p));
+	}
+	if (p == -1)
+	{
+		p = W_CheckNumForName("ZMAPINFO");
+		if (p > -1)
+		{
+			I_Warning("No UMAPINFO found; falling back to ZMAPINFO. Some features may not work as intended!\n");
+			Parse_ZMAPINFO(W_LoadString(p));
+		}
+	}
+
+	if (p == -1) //no *MAPINFO found
 		return;
 	
-	L_WriteDebug("parsing UMAPINFO lump\n");
-
-	Parse_UMAPINFO(W_LoadString(p));
-
 	unsigned int i;
 	for(i = 0; i < Maps.mapcount; i++)
 	{

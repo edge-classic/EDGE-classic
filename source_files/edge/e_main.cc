@@ -1712,6 +1712,7 @@ static void E_Startup(void)
 	V_InitPalette();
 
 	DDF_CleanUp();
+	SetLanguage();
 	W_ReadUMAPINFOLumps();
 
 	W_InitFlats();
@@ -1725,7 +1726,6 @@ static void E_Startup(void)
 	SpecialWadVerify();
 	W_BuildNodes();
 	M_InitMiscConVars();
-	SetLanguage();
 	ShowNotice();
 
 	SV_MainInit();

@@ -29,6 +29,8 @@ namespace TextStr
 
 	void AlterCheat(const char * new_val);
 
+	const char *GetLDFForBex(const char *bex_name);
+
 	void ConvertLDF(void);
 }
 

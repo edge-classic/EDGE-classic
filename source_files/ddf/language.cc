@@ -223,6 +223,47 @@ void language_c::AddOrReplace(const char *ref, const char *value)
 	umap->AddEntry(ref, value);
 }
 
+const char *language_c::GetRefOrNull(const char *refname)
+{
+	if (!refname)
+		return nullptr;
+
+	if (current < 0 || current >= (int)choices.size())
+		return nullptr;
+
+	// ensure ref name is uppercase, with no spaces
+	std::string ref = DDF_SanitizeName(refname);
+
+	if (umap != NULL)
+	{
+		if (umap->HasEntry(ref))
+		{
+			const std::string& value = umap->refs[ref];
+			return value.c_str();
+		}
+	}
+
+	if (choices[current]->HasEntry(ref))
+	{
+		const std::string& value = choices[current]->refs[ref];
+		return value.c_str();
+	}
+
+	// fallback, look through other language definitions...
+
+	for (size_t i = 0 ; i < choices.size() ; i++)
+	{
+		if (choices[i]->HasEntry(ref))
+		{
+			const std::string& value = choices[i]->refs[ref];
+			return value.c_str();
+		}
+	}
+
+	// not found!
+	return nullptr;
+}
+
 
 void language_c::Clear()
 {

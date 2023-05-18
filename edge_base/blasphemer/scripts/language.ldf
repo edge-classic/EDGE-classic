@@ -11,6 +11,7 @@
 
 [ENGLISH]
 
+MusicPrefix="MUS_";
 MenuDifficulty1="Whimpering Craven";
 MenuDifficulty2="Still a Novice";
 MenuDifficulty3="Experienced Warrior";

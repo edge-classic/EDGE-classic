@@ -746,11 +746,13 @@ void image_data_c::FillMarginY(int actual_h)
 	}
 }
 
-void image_data_c::RotateHue(int rotation)
+void image_data_c::SetHSV(int rotation, int saturation, int value)
 {
 	SYS_ASSERT(bpp >= 3);
 
 	rotation = CLAMP(-1800, rotation, 1800);
+	saturation = CLAMP(-1, saturation, 255);
+	value = CLAMP(-1, value, 255);
 
 	for (int y = 0; y < height; y++)
 	for (int x = 0; x < width;  x++)
@@ -761,7 +763,14 @@ void image_data_c::RotateHue(int rotation)
 
 		hsv_col_c hue(col);
 
-		hue.Rotate(rotation);
+		if (rotation)
+			hue.Rotate(rotation);
+
+		if (saturation > -1)
+			hue.SetSaturation(saturation);
+
+		if (value > -1)
+			hue.SetValue(value);
 
 		col = hue.GetRGBA();
 

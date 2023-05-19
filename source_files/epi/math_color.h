@@ -134,6 +134,8 @@ public:
 
 	hsv_col_c& ClampSet(int nh, int ns, int nv);
 	hsv_col_c& Rotate(int delta);  // usable range: -1800 to +1800
+	hsv_col_c& SetSaturation(int sat);
+	hsv_col_c& SetValue(int val);
 
 	hsv_col_c& operator= (const hsv_col_c& rhs);
 
@@ -424,6 +426,20 @@ inline hsv_col_c& hsv_col_c::Rotate(int delta)
 	int bam = int(h + delta) * 372827;
 	 
 	h = short((bam & 0x7FFFFFF) / 372827);
+
+	return *this;
+}
+
+inline hsv_col_c& hsv_col_c::SetSaturation(int sat)
+{
+	s = sat;
+
+	return *this;
+}
+
+inline hsv_col_c& hsv_col_c::SetValue(int val)
+{
+	v = val;
 
 	return *this;
 }

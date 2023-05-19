@@ -145,8 +145,8 @@ public:
 	void FillMarginX(int actual_w);
 	void FillMarginY(int actual_h);
 
-	// Rotate the hue of the image, i.e. hopefully automagical "palette swaps"
-	void RotateHue(int rotation);
+	// Change various HSV color values if needed
+	void SetHSV(int rotation, int saturation, int value);
 };
 
 } // namespace epi

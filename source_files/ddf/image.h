@@ -123,7 +123,9 @@ public:
 	// RENDERING specifics:
 	float scale, aspect;
 
-	int hue_rotation;
+	int hsv_rotation;
+	int hsv_saturation;
+	int hsv_value;
 
 private:
 	// disable copy construct and assignment operator

@@ -113,7 +113,9 @@ public:
 
 	bool grayscale = false;
 
-	int hue_rotation = 0;
+	int hsv_rotation = 0;
+	int hsv_saturation = -1;
+	int hsv_value = -1;
 
 //!!!!!! private:
 

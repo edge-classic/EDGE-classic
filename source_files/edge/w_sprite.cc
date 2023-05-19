@@ -58,7 +58,7 @@ class spritedef_c
 {
 public:
 	// four letter sprite name (e.g. "TROO").
-	char name[6];
+	std::string name;
   
     // total number of frames.  Zero for missing sprites.
 	int numframes;
@@ -67,9 +67,9 @@ public:
 	spriteframe_c *frames;
 
 public:
-	spritedef_c(const char *_name) : numframes(0), frames(NULL)
+	spritedef_c(std::string _name) : numframes(0), frames(NULL)
 	{
-		strcpy(name, _name);
+		name = _name;
 	}
 
 	~spritedef_c()
@@ -314,44 +314,36 @@ static void FillSpriteFrames(int file)
 
 		int S = 0, L = 0;
 
-		while (S < sprite_map_len && L < lumpnum)
+		for (S; S < sprite_map_len; S++)
 		{
-			const char *sprname  = sprite_map[S]->name;
-			size_t spr_len = strlen(sprname);
-			const char *lumpname = W_GetLumpName((*lumps)[L]);
-
-			if (strlen(lumpname) != spr_len+2 && strlen(lumpname) != spr_len+4)
+			std::string sprname  = sprite_map[S]->name;
+			size_t spr_len = sprname.size();
+			for (L; L < lumpnum; L++)
 			{
-				I_Warning("Sprite name %s has illegal length.\n", lumpname);
-				L++; continue;
+				const char *lumpname = W_GetLumpName((*lumps)[L]);
+
+				if (strlen(lumpname) != spr_len+2 && strlen(lumpname) != spr_len+4)
+				{
+					continue;
+				}
+
+				// ignore model skins
+				if (strlen(lumpname) == spr_len+4 &&
+					lumpname[spr_len] == 'S' && lumpname[spr_len+1] == 'K' && lumpname[spr_len+2] == 'N')
+				{
+					continue;
+				}
+
+				if (epi::strncmp(sprname, lumpname, spr_len) != 0)
+					continue;
+
+				// we have a match
+				InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, spr_len, 0);
+
+				if (strlen(lumpname) == spr_len+4)
+					InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, spr_len+2, 1);
 			}
-
-			// ignore model skins
-			if (strlen(lumpname) == spr_len+4 &&
-				lumpname[spr_len] == 'S' && lumpname[spr_len+1] == 'K' && lumpname[spr_len+2] == 'N')
-			{
-				L++; continue;
-			}
-
-			int comp = strncmp(sprname, lumpname, spr_len);
-
-			if (comp < 0)  // S < L
-			{
-				S++; continue;
-			}
-			else if (comp > 0)  // S > L
-			{
-				L++; continue;
-			}
-
-			// we have a match
-			InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, spr_len, 0);
-
-			if (strlen(lumpname) == spr_len+4)
-				InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, spr_len+2, 1);
-
-			L++;
-
+			L = 0;
 		}
 	}
 	else if (data_files[file]->pack)
@@ -363,44 +355,37 @@ static void FillSpriteFrames(int file)
 
 			int S = 0, L = 0;
 
-			while (S < sprite_map_len && L < packsprites.size())
+			for (S; S < sprite_map_len; S++)
 			{
-				const char *sprname  = sprite_map[S]->name;
-				size_t spr_len = strlen(sprname);
-				std::string spritebase;
-				epi::STR_TextureNameFromFilename(spritebase, epi::PATH_GetBasename(packsprites[L]).u8string());
-
-				if (spritebase.size() != spr_len+2 && spritebase.size() != spr_len+4)
+				std::string sprname  = sprite_map[S]->name;
+				size_t spr_len = sprname.size();
+				for (L; L < packsprites.size(); L++)
 				{
-					I_Warning("Sprite name %s has illegal length.\n", spritebase.c_str());
-					L++; continue;
+					std::string spritebase;
+					epi::STR_TextureNameFromFilename(spritebase, epi::PATH_GetBasename(packsprites[L]).u8string());
+
+					if (spritebase.size() != spr_len+2 && spritebase.size() != spr_len+4)
+					{
+						continue;
+					}
+
+					// ignore model skins
+					if (spritebase.size() == spr_len+4 &&
+						spritebase[spr_len] == 'S' && spritebase[spr_len+1] == 'K' && spritebase[spr_len+2] == 'N')
+					{
+						continue;
+					}
+
+					if (epi::strncmp(sprname, spritebase, spr_len) != 0)
+						continue;
+
+					// we have a match
+					InstallSpritePack(sprite_map[S], data_files[file]->pack, spritebase, packsprites[L], spr_len, 0);
+
+					if (spritebase.size() == spr_len+4)
+						InstallSpritePack(sprite_map[S], data_files[file]->pack, spritebase, packsprites[L], spr_len+2, 1);
 				}
-
-				// ignore model skins
-				if (spritebase.size() == spr_len+4 &&
-					spritebase[spr_len] == 'S' && spritebase[spr_len+1] == 'K' && spritebase[spr_len+2] == 'N')
-				{
-					L++; continue;
-				}
-
-				int comp = strncmp(sprname, spritebase.c_str(), spr_len);
-
-				if (comp < 0)  // S < L
-				{
-					S++; continue;
-				}
-				else if (comp > 0)  // S > L
-				{
-					L++; continue;
-				}
-
-				// we have a match
-				InstallSpritePack(sprite_map[S], data_files[file]->pack, spritebase, packsprites[L], spr_len, 0);
-
-				if (spritebase.size() == spr_len+4)
-					InstallSpritePack(sprite_map[S], data_files[file]->pack, spritebase, packsprites[L], spr_len+2, 1);
-
-				L++;
+				L = 0;
 			}
 		}
 	}
@@ -423,81 +408,73 @@ static void FillSpriteFramesUser()
 
 	int S = 0, L = 0;
 
-	while (S < sprite_map_len && L < img_num)
+	for (S; S < sprite_map_len; S++)
 	{
-		const char *sprname  = sprite_map[S]->name;
-		size_t spr_len = strlen(sprname);
-		const char *img_name = W_ImageGetName(images[L]);
-
-		if (strlen(img_name) != spr_len+2 && strlen(img_name) != spr_len+4)
+		std::string sprname  = sprite_map[S]->name;
+		size_t spr_len = sprname.size();
+		for (L; L < img_num; L++)
 		{
-			I_Warning("Sprite name %s (IMAGES.DDF) has illegal length.\n", img_name);
-			L++; continue;
-		}
+			const char *img_name = W_ImageGetName(images[L]);
 
-		// ignore model skins
-		if (strlen(img_name) == spr_len+4 && 
-			img_name[spr_len] == 'S' && img_name[spr_len+1] == 'K' && img_name[spr_len+2] == 'N')
-		{
-			L++; continue;
-		}
-
-		int comp = strncmp(sprname, img_name, spr_len);
-
-		if (comp < 0)  // S < L
-		{
-			S++; continue;
-		}
-		else if (comp > 0)  // S > L
-		{
-			L++; continue;
-		}
-
-		// Fix offsets if Doom formatted
-		// Not sure if this is the 'proper' place to do this yet - Dasho
-		if (images[L]->source.graphic.is_patch)
-		{
-			// const override
-			image_c *change_img = (image_c *)images[L];
-			epi::file_c *offset_check = nullptr;
-			if (images[L]->source.graphic.packfile_name)
-				offset_check = W_OpenPackFile(images[L]->source.graphic.packfile_name);
-			else
-				offset_check = W_OpenLump(images[L]->source.graphic.lump);
-			
-			if (!offset_check)
-				I_Error("FillSpriteFramesUser: Error loading %s!\n", images[L]->name.c_str());
-
-			byte header[32];
-			memset(header, 255, sizeof(header));
-			offset_check->Read(header, sizeof(header));
-			delete offset_check;
-
-			const patch_t *pat = (patch_t *) header;
-			change_img->offset_x = EPI_LE_S16(pat->leftoffset);
-			change_img->offset_y = EPI_LE_S16(pat->topoffset);
-			// adjust sprite offsets so that (0,0) is normal
-			if (sprite_map[S]->HasWeapon())
+			if (strlen(img_name) != spr_len+2 && strlen(img_name) != spr_len+4)
 			{
-				change_img->offset_x += (320.0f / 2.0f - change_img->actual_w / 2.0f);  // loss of accuracy
-				change_img->offset_y += (200.0f - 32.0f - change_img->actual_h);
+				continue;
 			}
-			else
+
+			// ignore model skins
+			if (strlen(img_name) == spr_len+4 && 
+				img_name[spr_len] == 'S' && img_name[spr_len+1] == 'K' && img_name[spr_len+2] == 'N')
 			{
-				//rim->offset_x -= rim->actual_w / 2;   // loss of accuracy
-				change_img->offset_x -= ((float)change_img->actual_w) / 2.0f; //Lobo 2023: dancing eye fix
-				change_img->offset_y -= change_img->actual_h;
+				continue;
 			}
+
+			if (epi::strncmp(sprname, img_name, spr_len) != 0)
+				continue;
+
+			// Fix offsets if Doom formatted
+			// Not sure if this is the 'proper' place to do this yet - Dasho
+			if (images[L]->source.graphic.is_patch)
+			{
+				// const override
+				image_c *change_img = (image_c *)images[L];
+				epi::file_c *offset_check = nullptr;
+				if (images[L]->source.graphic.packfile_name)
+					offset_check = W_OpenPackFile(images[L]->source.graphic.packfile_name);
+				else
+					offset_check = W_OpenLump(images[L]->source.graphic.lump);
+				
+				if (!offset_check)
+					I_Error("FillSpriteFramesUser: Error loading %s!\n", images[L]->name.c_str());
+
+				byte header[32];
+				memset(header, 255, sizeof(header));
+				offset_check->Read(header, sizeof(header));
+				delete offset_check;
+
+				const patch_t *pat = (patch_t *) header;
+				change_img->offset_x = EPI_LE_S16(pat->leftoffset);
+				change_img->offset_y = EPI_LE_S16(pat->topoffset);
+				// adjust sprite offsets so that (0,0) is normal
+				if (sprite_map[S]->HasWeapon())
+				{
+					change_img->offset_x += (320.0f / 2.0f - change_img->actual_w / 2.0f);  // loss of accuracy
+					change_img->offset_y += (200.0f - 32.0f - change_img->actual_h);
+				}
+				else
+				{
+					//rim->offset_x -= rim->actual_w / 2;   // loss of accuracy
+					change_img->offset_x -= ((float)change_img->actual_w) / 2.0f; //Lobo 2023: dancing eye fix
+					change_img->offset_y -= change_img->actual_h;
+				}
+			}
+
+			// we have a match
+			InstallSpriteImage(sprite_map[S], images[L], img_name, spr_len, 0);
+
+			if (strlen(img_name) == spr_len+4)
+				InstallSpriteImage(sprite_map[S], images[L], img_name, spr_len+2, 1);
 		}
-
-		// we have a match
-		InstallSpriteImage(sprite_map[S], images[L], img_name, spr_len, 0);
-
-		if (strlen(img_name) == spr_len+4)
-			InstallSpriteImage(sprite_map[S], images[L], img_name, spr_len+2, 1);
-
-		L++;
-
+		L = 0;
 	}
 
 	delete[] images;
@@ -539,7 +516,7 @@ static void MarkCompletedFrames(void)
 			if (rot_count < frame->rots)
 			{
 				I_Warning("Sprite %s:%c is missing rotations (%d of %d).\n",
-					def->name, frame_ch, frame->rots - rot_count, frame->rots);
+					def->name.c_str(), frame_ch, frame->rots - rot_count, frame->rots);
 					
 				//try to fix cases where some dumbass used A1 instead of A0
 				if (rot_count == 1 && !frame->is_weapon) 
@@ -565,12 +542,12 @@ static void CheckSpriteFrames(spritedef_c *def)
 	for (int i = 0; i < def->numframes; i++)
 		if (! def->frames[i].finished)
 		{
-			I_Debugf("Frame %d/%d in sprite %s is not finished\n", 1+i, def->numframes, def->name);
+			I_Debugf("Frame %d/%d in sprite %s is not finished\n", 1+i, def->numframes, def->name.c_str());
 			missing++;
 		}
 
 	if (missing > 0 && missing < def->numframes)
-		I_Warning("Missing %d frames in sprite: %s\n", missing, def->name);
+		I_Warning("Missing %d frames in sprite: %s\n", missing, def->name.c_str());
 
 	// free some memory for completely missing sprites
 	if (missing == def->numframes)
@@ -611,9 +588,9 @@ void W_InitSprites(void)
 
 	for (int i=1; i < numsprites; i++)
 	{
-		const char *name = ddf_sprite_names[i].c_str();
+		std::string name = ddf_sprite_names[i];
 
-		SYS_ASSERT(strlen(name) == 4);
+		//SYS_ASSERT(strlen(name) == 4);
 
 		sprites[i] = new spritedef_c(name);
 	}
@@ -675,7 +652,7 @@ void W_InitSprites(void)
 	for (int n=0; n < sprite_map_len; n++)
 		sprite_map[n] = sprites[n + 1];
 
-#define CMP(a, b)  (strcmp(a->name, b->name) < 0)
+#define CMP(a, b)  (epi::strcmp(a->name, b->name) < 0)
 	QSORT(spritedef_c *, sprite_map, sprite_map_len, CUTOFF);
 #undef CMP
 
@@ -717,9 +694,7 @@ bool W_CheckSpritesExist(const state_group_t& group)
 			if (states[i].sprite == SPR_NULL)
 				continue;
 
-			//if (sprites[states[i].sprite]->numframes > 0) // Changed frames to numframes, hope it doesn't break - Dasho
-			//if (sprites[states[i].sprite]->frames > 0) //   It broke MD2 weapons ;) - Lobo
-			if (sprites[states[i].sprite]->frames) //   It broke MSYS :( - Dasho
+			if (sprites[states[i].sprite]->frames)
 				return true;	
 
 			// -AJA- only check one per group.  It _should_ check them all,

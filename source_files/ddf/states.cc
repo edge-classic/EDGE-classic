@@ -409,10 +409,6 @@ void DDF_StateReadState(const char *info, const char *label,
 	if (stateinfo[1].empty() || stateinfo[2].empty() || stateinfo[3].empty())
 		DDF_Error("Bad state frame, missing fields: %s\n", info);
   
-	// Test allowing 5 character sprites for voxel use - Dasho
-	if (strlen(stateinfo[0].c_str()) > 5 || strlen(stateinfo[0].c_str()) < 4) 
-		DDF_Error("DDF_MainLoadStates: Sprite names must be 4 or 5 "
-				  "characters long '%s'.\n", stateinfo[0].c_str());
 
 	//--------------------------------------------------
 	//--------------SPRITE INDEX HANDLING---------------

@@ -49,7 +49,9 @@ static const commandlist_t image_commands[] =
 	DDF_FIELD("ASPECT",     aspect,   DDF_MainGetFloat),
 	DDF_FIELD("FIX_TRANS",  fix_trans, DDF_ImageGetFixTrans),
 	DDF_FIELD("IS_FONT",  is_font, DDF_MainGetBoolean),
-	DDF_FIELD("ROTATE_HUE",  hue_rotation, DDF_MainGetNumeric),
+	DDF_FIELD("ROTATE_HUE",  hsv_rotation, DDF_MainGetNumeric),
+	DDF_FIELD("SATURATION",  hsv_saturation, DDF_MainGetNumeric),
+	DDF_FIELD("BRIGHTNESS",  hsv_value, DDF_MainGetNumeric),
 
 	DDF_CMD_END
 };
@@ -435,7 +437,9 @@ void imagedef_c::CopyDetail(const imagedef_c &src)
 	aspect   = src.aspect;
 	fix_trans = src.fix_trans;
 	is_font = src.is_font;
-	hue_rotation = src.hue_rotation;
+	hsv_rotation = src.hsv_rotation;
+	hsv_saturation = src.hsv_saturation;
+	hsv_value = src.hsv_value;
 }
 
 void imagedef_c::Default()
@@ -456,7 +460,9 @@ void imagedef_c::Default()
 	aspect = 1.0f;
 	fix_trans = FIXTRN_Blacken;
 	is_font = false;
-	hue_rotation = 0;
+	hsv_rotation = 0;
+	hsv_saturation = -1;
+	hsv_value = -1;
 }
 
 

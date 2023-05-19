@@ -695,7 +695,9 @@ static image_c *AddImage_DOOM(imagedef_c *def, bool user_defined = false)
 
 	rim->is_font = def->is_font;
 
-	rim->hue_rotation = def->hue_rotation;
+	rim->hsv_rotation = def->hsv_rotation;
+	rim->hsv_saturation = def->hsv_saturation;
+	rim->hsv_value = def->hsv_value;
 
 	rim->source.graphic.special = IMGSP_None;
 
@@ -825,7 +827,9 @@ static image_c *AddImageUser(imagedef_c *def)
 
 	rim->is_font = def->is_font;
 
-	rim->hue_rotation = def->hue_rotation;
+	rim->hsv_rotation = def->hsv_rotation;
+	rim->hsv_saturation = def->hsv_saturation;
+	rim->hsv_value = def->hsv_value;
 
 	if (def->special & IMGSP_Crosshair)
 	{
@@ -1321,8 +1325,8 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 			R_PaletteRemapRGBA(tmp_img, what_palette, (const byte *) &playpal_data[0]);
 	}
 
-	if (rim->hue_rotation)
-		tmp_img->RotateHue(rim->hue_rotation);
+	if (rim->hsv_rotation || rim->hsv_saturation > -1 || rim->hsv_value > -1)
+		tmp_img->SetHSV(rim->hsv_rotation, rim->hsv_saturation, rim->hsv_value);
 	
 	if (do_whiten)
 		tmp_img->Whiten();

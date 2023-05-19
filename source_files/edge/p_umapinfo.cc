@@ -665,6 +665,365 @@ void Parse_UMAPINFO(const std::string& buffer)
 
 // -----------------------------------------------
 //
+// Parses a complete MAPINFO/RMAPINFO entry
+//
+// -----------------------------------------------
+
+static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
+{
+	for (;;)
+	{
+		if (lex.MatchKeep("map"))
+			break;
+
+		std::string key;
+		std::string value;
+
+		epi::token_kind_e tok = lex.Next(key);
+
+		if (tok == epi::TOK_EOF)
+			break;
+
+		if (tok != epi::TOK_Ident)
+			I_Error("Malformed MAPINFO lump: missing key\n");
+
+		int key_line = lex.LastLine();
+
+		lex.MatchKeep("linecheck"); // doesn't matter, just need to update LastLine
+
+		if (key_line != lex.LastLine()) // key-only value, parse if supported and move on
+		{
+			if (epi::case_cmp(key, "nointermission") == 0)
+				val->nointermission = true;
+			continue;
+		}
+
+		tok = lex.Next(value);
+
+		if (tok == epi::TOK_ERROR)
+			I_Error("Malformed MAPINFO lump: missing value\n");
+
+		if (tok == epi::TOK_EOF)
+			break;
+
+		if (epi::case_cmp(key, "next") == 0)
+		{
+			Z_Clear(val->nextmap, char, 9);
+			if (epi::case_cmp(value, "endpic") == 0)
+			{
+				Z_Clear(val->endpic, char, 9);
+				int nextmap_line = lex.LastLine();
+				tok = lex.Next(value);
+				if (lex.LastLine() != nextmap_line)
+					I_Error("MAPINFO: Missing lump for \"endpic\"!\n");
+				else if (value.size() > 8)
+					I_Error("MAPINFO: Name for \"endpic\" lump over 8 characters!\n");
+				else
+					Z_StrNCpy(val->endpic, value.data(), 8);
+			}
+			else if (epi::case_cmp(value, "endgame1") == 0 || epi::case_cmp(value, "endgame2") == 0 ||
+				epi::case_cmp(value, "endgamew") == 0 || epi::case_cmp(value, "endgame4") == 0 ||
+				epi::case_cmp(value, "enddemon") == 0 || epi::case_cmp(value, "endtitle") == 0)
+			{
+				val->endgame = true;
+			}
+			else if (epi::case_cmp(value, "endgamec") == 0)
+				val->docast = true;
+			else if (epi::case_cmp(value, "endgame3") == 0)
+				val->dobunny = true;
+			else if (epi::case_cmp(value, "endgames") == 0 || epi::case_cmp(value, "endchess") == 0)
+				I_Error("MAPINFO: Hexen/Strife ending sequence referenced!\n");
+			else if (epi::case_cmp(value, "endgame") == 0)
+			{
+				val->endgame = true;
+				if (lex.Match("{"))
+				{
+					for (;;)
+					{
+						if (lex.Match("}"))
+							break;
+						std::string next_key;
+						std::string next_value;
+						epi::token_kind_e next_tok = lex.Next(next_key);
+						if (next_tok == epi::TOK_EOF)
+							I_Error("Malformed MAPINFO lump: unclosed block\n");
+						if (next_tok != epi::TOK_Ident)
+							I_Error("Malformed MAPINFO lump: missing key\n");
+						if (epi::case_cmp(next_key, "cast") == 0)
+						{
+							val->docast = true;
+							continue;
+						}
+						if (epi::case_cmp(next_key, "pic") == 0)
+						{
+							next_tok = lex.Next(next_value);
+							if (next_tok == epi::TOK_EOF || next_tok == epi::TOK_ERROR || next_value == "}")
+								I_Error("Malformed MAPINFO lump: missing value\n");
+							Z_Clear(val->endpic, char, 9);
+							if (next_value.size() > 8)
+								I_Error("MAPINFO: Name for \"endpic\" lump over 8 characters!\n");
+							Z_StrNCpy(val->endpic, next_value.data(), 8);
+						}
+						else
+							continue;
+					}
+				}
+			}
+			else
+			{
+				if (value.size() > 8)
+					I_Error("MAPINFO: Mapname for \"next\" over 8 characters!\n");
+				Z_StrNCpy(val->nextmap, value.data(), 8);
+			}
+		}
+		else if (epi::case_cmp(key, "secretnext") == 0)
+		{
+			Z_Clear(val->nextsecret, char, 9);
+			// We will only actually use a map lumpname, if present, but consume and ignore
+			// the various end* options for secretnext since they don't seem to have
+			// a UMAPINFO equivalent
+			if (epi::case_cmp(value, "endpic") == 0)
+			{
+				int nextmap_line = lex.LastLine();
+				tok = lex.Next(value);
+				if (lex.LastLine() != nextmap_line)
+					I_Error("MAPINFO: Missing lump for \"endpic\"!\n");
+			}
+			else if (epi::case_cmp(value, "endgame1") == 0 || epi::case_cmp(value, "endgame2") == 0 ||
+				epi::case_cmp(value, "endgamew") == 0 || epi::case_cmp(value, "endgame4") == 0 ||
+				epi::case_cmp(value, "enddemon") == 0 || epi::case_cmp(value, "endtitle") == 0)
+			{
+				// nothing needed
+			}
+			else if (epi::case_cmp(value, "endgamec") == 0)
+			{
+				// nothing needed
+			}
+			else if (epi::case_cmp(value, "endgame3") == 0)
+			{
+				// nothing needed
+			}
+			else if (epi::case_cmp(value, "endgames") == 0 || epi::case_cmp(value, "endchess") == 0)
+				I_Error("MAPINFO: Hexen/Strife ending sequence referenced!\n");
+			else if (epi::case_cmp(value, "endgame") == 0)
+			{
+				if (lex.Match("{"))
+				{
+					for (;;)
+					{
+						if (lex.Match("}"))
+							break;
+						tok = lex.Next(value);
+						if (tok == epi::TOK_EOF || tok == epi::TOK_ERROR)
+							I_Error("Malformed MAPINFO lump: missing closing bracket!\n");
+					}
+				}
+			}
+			else
+			{
+				if (value.size() > 8)
+					I_Error("MAPINFO: Mapname for \"secretnext\" over 8 characters!\n");
+				Z_StrNCpy(val->nextsecret, value.data(), 8);
+			}
+		}
+		else if (epi::case_cmp(key, "titlepatch") == 0)
+		{
+			Z_Clear(val->levelpic, char, 9);
+			if (value.size() > 8)
+				I_Error("ZMAPINFO: Image name for \"titlepatch\" over 8 characters!\n");
+			Z_StrNCpy(val->levelpic, value.data(), 8);
+		}
+		else if (epi::case_cmp(key, "sky1") == 0)
+		{
+			Z_Clear(val->skytexture, char, 9);
+			if (value.size() > 8)
+				I_Error("MAPINFO: Image name for \"sky1\" over 8 characters!\n");
+			Z_StrNCpy(val->skytexture, value.data(), 8);
+			tok = lex.Next(value); // consume but ignore scrollspeed
+			if (tok != epi::TOK_Number)
+				I_Error("MAPINFO: No scrollspeed given for \"sky1\"!\n");
+		}
+		else if (epi::case_cmp(key, "sky2") == 0)
+		{
+			tok = lex.Next(value); // consume but ignore scrollspeed
+			if (tok != epi::TOK_Number)
+				I_Error("MAPINFO: No scrollspeed given for \"sky2\"!\n");
+		}
+		else if (epi::case_cmp(key, "music") == 0)
+		{
+			Z_Clear(val->music, char, 9);
+			if (epi::strncmp(value, "$MUSIC_", 7) == 0)
+			{
+				std::string music_sub = language["MusicPrefix"];
+				music_sub.append(value.substr(7));
+				if (music_sub.size() > 8)
+					I_Error("MAPINFO: Song name for \"music\" over 8 characters!\n");
+				Z_StrNCpy(val->music, music_sub.data(), 8);
+			}
+			else if (value.size() > 8)
+				I_Error("MAPINFO: Song name for \"music\" over 8 characters!\n");
+			else
+				Z_StrNCpy(val->music, value.data(), 8);
+		}
+		else if (epi::case_cmp(key, "exitpic") == 0)
+		{
+			Z_Clear(val->exitpic, char, 9);
+			if (value[0] == '$')
+			{
+				// Do nothing; this references intermission script lump stuff
+			}
+			else if (value.size() > 8)
+				I_Error("MAPINFO: Mapname for \"exitpic\" over 8 characters!\n");
+			else
+				Z_StrNCpy(val->exitpic, value.data(), 8);
+		}
+		else if (epi::case_cmp(key, "enterpic") == 0)
+		{
+			Z_Clear(val->enterpic, char, 9);
+			if (value[0] == '$')
+			{
+				// Do nothing; this references intermission script lump stuff
+			}
+			else if (value.size() > 8)
+				I_Error("MAPINFO: Mapname for \"exitpic\" over 8 characters!\n");
+			else
+				Z_StrNCpy(val->enterpic, value.data(), 8);
+		}
+		else if (epi::case_cmp(key, "par") == 0)
+		{
+			val->partime = 35 * epi::LEX_Int(value);
+		}
+		else if (epi::case_cmp(key, "specialaction") == 0)
+		{
+			int skip_line = lex.LastLine();
+			for (;;)
+			{
+				lex.MatchKeep("linecheck");
+				if (lex.LastLine() == skip_line)
+					tok = lex.Next(value);
+				else
+					break;
+			}
+		}
+		else if (epi::case_cmp(key, "author") == 0)
+		{
+			if (val->authorname) free(val->authorname);
+			val->authorname = (char *)calloc(value.size()+1, sizeof(char));
+			Z_StrNCpy(val->authorname, value.c_str(), value.size());
+		}
+	}
+	// Some fallback handling
+	if (!val->nextsecret[0])
+	{
+		if (val->nextmap[0])
+			Z_StrNCpy(val->nextsecret, val->nextmap, 8);
+	}
+	if (!val->enterpic[0])
+	{
+		for(size_t i = 0; i < Maps.mapcount; i++)
+		{
+			if (!strcmp(val->mapname, Maps.maps[i].nextmap))
+			{
+				if (Maps.maps[i].exitpic[0])
+					Z_StrNCpy(val->enterpic, Maps.maps[i].exitpic, 8);
+				break;
+			}
+		}
+	}
+}
+
+// -----------------------------------------------
+//
+// Parses a complete MAPINFO/RMAPINFO lump
+//
+// -----------------------------------------------
+
+void Parse_MAPINFO(const std::string& buffer)
+{
+	epi::lexer_c lex(buffer);
+
+	for (;;)
+	{
+		std::string section;
+		epi::token_kind_e tok = lex.Next(section);
+
+		if (tok == epi::TOK_EOF)
+			break;
+
+		// skip default/cluster/etc; we just want map entries
+		if (epi::case_cmp(section, "map") != 0)
+			continue;
+
+		tok = lex.Next(section);
+
+		if (tok != epi::TOK_Ident)
+			I_Error("MAPINFO: No mapname for map entry!\n");
+
+		unsigned int i = 0;
+		MapEntry parsed = { 0 };
+		parsed.mapname = (char *)calloc(section.size()+1, sizeof(char));
+		Z_StrNCpy(parsed.mapname, section.data(), section.size());
+
+		tok = lex.Next(section);
+
+		if (epi::case_cmp(section, "lookup") == 0)
+		{
+			tok = lex.Next(section);
+			if (tok != epi::TOK_String)
+				I_Error("Malformed MAPINFO lump: missing lookup string for for %s!\n", parsed.mapname);
+			else
+			{
+				const char *ldf_check = language.GetRefOrNull(Deh_Edge::TextStr::GetLDFForBex(section.c_str()));
+				if (ldf_check)
+				{
+					parsed.levelname = (char *)calloc(strlen(ldf_check)+1, sizeof(char));
+					Z_StrNCpy(parsed.levelname, ldf_check, strlen(ldf_check));
+				}
+			}
+		}
+		else if (tok == epi::TOK_String)
+		{
+			if (section[0] == '$')
+			{
+				const char *ldf_check = language.GetRefOrNull(Deh_Edge::TextStr::GetLDFForBex(section.substr(1).c_str()));
+				if (ldf_check)
+				{
+					parsed.levelname = (char *)calloc(strlen(ldf_check)+1, sizeof(char));
+					Z_StrNCpy(parsed.levelname, ldf_check, strlen(ldf_check));
+				}
+			}
+			else
+			{
+				parsed.levelname = (char *)calloc(section.size()+1, sizeof(char));
+				Z_StrNCpy(parsed.levelname, section.data(), section.size());
+			}
+		}
+		else
+			I_Error("Malformed MAPINFO lump: missing mapname for %s!\n", parsed.mapname);
+
+		ParseMAPINFOEntry(lex, &parsed);
+		// Does this map entry already exist? If yes, replace it.
+		for (i = 0; i < Maps.mapcount; i++)
+		{
+			if (epi::case_cmp(parsed.mapname, Maps.maps[i].mapname) == 0)
+			{
+				FreeMap(&Maps.maps[i]);
+				Maps.maps[i] = parsed;
+				break;
+			}
+		}
+		// Not found so create a new one.
+		if (i == Maps.mapcount)
+		{
+			Maps.mapcount++;
+			Maps.maps = (MapEntry*)realloc(Maps.maps, sizeof(MapEntry)*Maps.mapcount);
+			Maps.maps[Maps.mapcount-1] = parsed;
+		}
+	}
+}
+
+// -----------------------------------------------
+//
 // Parses a complete ZMAPINFO entry
 //
 // -----------------------------------------------

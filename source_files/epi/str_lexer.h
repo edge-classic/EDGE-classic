@@ -54,6 +54,9 @@ public:
 	// returned and the position is unchanged.
 	bool Match(const char *s);
 
+	// as above, but the token is never consumed
+	bool MatchKeep(const char *s);
+
 	// give the line number for the last token returned by Next() or
 	// the token implicitly checked by Match().  can be used to show
 	// where in the file an error occurred.

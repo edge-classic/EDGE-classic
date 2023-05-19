@@ -1643,10 +1643,6 @@ fluid_synth_program_change(fluid_synth_t* synth, int chan, int prognum)
       preset = fluid_synth_find_preset(synth, DRUM_INST_BANK, 0);
       subst_prog = 0;
     }
-
-    if (preset)
-      FLUID_LOG(FLUID_WARN, "Instrument not found on channel %d [bank=%d prog=%d], substituted [bank=%d prog=%d]",
-		chan, banknum, prognum, subst_bank, subst_prog);
   }
 
   sfont_id = preset? fluid_sfont_get_id(preset->sfont) : 0;

@@ -111,7 +111,7 @@ bool Lump_c::Seek(int offset)
 }
 
 
-bool Lump_c::Read(void *data, int len)
+bool Lump_c::Read(void *data, size_t len)
 {
 	SYS_ASSERT(data && len > 0);
 

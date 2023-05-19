@@ -93,6 +93,44 @@ bool lexer_c::Match(const char *s)
 	return true;
 }
 
+bool lexer_c::MatchKeep(const char *s)
+{
+	SYS_ASSERT(s);
+	SYS_ASSERT(s[0]);
+
+	bool is_keyword = std::isalnum(s[0]);
+
+	SkipToNext();
+
+	size_t ofs = 0;
+
+	for (; *s != 0 ; s++, ofs++)
+	{
+		if (pos + ofs >= data.size())
+			return false;
+
+		unsigned char A = (unsigned char) data[pos + ofs];
+		unsigned char B = (unsigned char) s[0];
+
+		// don't change a char when high-bit is set (for UTF-8)
+		if (A < 128) A = std::tolower(A);
+		if (B < 128) B = std::tolower(B);
+
+		if (A != B)
+			return false;
+	}
+
+	// for a keyword, require a non-alphanumeric char after it.
+	if (is_keyword && pos+ofs < data.size())
+	{
+		unsigned char ch = (unsigned char) data[pos+ofs];
+
+		if (std::isalnum(ch) || ch >= 128)
+			return false;
+	}
+
+	return true;
+}
 
 int lexer_c::LastLine()
 {

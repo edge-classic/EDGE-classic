@@ -73,7 +73,7 @@ public:
 	bool Seek(int offset);
 
 	// read some data from the lump, returning true if OK.
-	bool Read(void *data, int len);
+	bool Read(void *data, size_t len);
 
 	// read a line of text, returns true if OK, false on EOF
 	bool GetLine(char *buffer, size_t buf_size);

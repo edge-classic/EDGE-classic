@@ -1232,6 +1232,15 @@ void W_ReadUMAPINFOLumps(void)
 	}
 	if (p == -1)
 	{
+		p = W_CheckNumForName("DMAPINFO");
+		if (p > -1)
+		{
+			I_Warning("No UMAPINFO found; falling back to DMAPINFO. Some features may not work as intended!\n");
+			Parse_DMAPINFO(W_LoadString(p));
+		}
+	}
+	if (p == -1)
+	{
 		p = W_CheckNumForName("MAPINFO");
 		if (p > -1)
 		{

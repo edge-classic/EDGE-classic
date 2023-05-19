@@ -665,6 +665,149 @@ void Parse_UMAPINFO(const std::string& buffer)
 
 // -----------------------------------------------
 //
+// Parses a complete DMAPINFO entry
+//
+// -----------------------------------------------
+
+static void ParseDMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
+{
+	for (;;)
+	{
+		if (lex.Match("}"))
+			break;
+
+		std::string key;
+		std::string value;
+
+		epi::token_kind_e tok = lex.Next(key);
+
+		if (tok == epi::TOK_EOF)
+			I_Error("Malformed DMAPINFO lump: unclosed block\n");
+
+		if (tok != epi::TOK_Ident)
+			I_Error("Malformed DMAPINFO lump: missing key\n");
+
+		// Need to read the spec and see which standalone keys have a UMAPINFO equivalent
+		if (! lex.Match("="))
+			continue;
+
+		tok = lex.Next(value);
+
+		if (tok == epi::TOK_EOF || tok == epi::TOK_ERROR || value == "}")
+			I_Error("Malformed DMAPINFO lump: missing value\n");
+
+		if (epi::case_cmp(key, "next") == 0)
+		{
+			Z_Clear(val->nextmap, char, 9);
+			if (value.size() > 8)
+				I_Error("DMAPINFO: Mapname for \"next\" over 8 characters!\n");
+			Z_StrNCpy(val->nextmap, value.data(), 8);
+		}
+		else if (epi::case_cmp(key, "secretnext") == 0)
+		{
+			Z_Clear(val->nextsecret, char, 9);
+			if (value.size() > 8)
+				I_Error("DMAPINFO: Mapname for \"secretnext\" over 8 characters!\n");
+			Z_StrNCpy(val->nextsecret, value.data(), 8);
+		}
+		else if (epi::case_cmp(key, "sky1") == 0)
+		{
+			Z_Clear(val->skytexture, char, 9);
+			if (value.size() > 8)
+				I_Error("DMAPINFO: Image name for sky over 8 characters!\n");
+			Z_StrNCpy(val->skytexture, value.data(), 8);
+			if (lex.Match(","))
+				tok = lex.Next(value); // consume but ignore sky scrolling speed
+		}
+		else if (epi::case_cmp(key, "music") == 0)
+		{
+			Z_Clear(val->music, char, 9);
+			if (value.size() > 8)
+				I_Error("DMAPINFO: Song name for \"music\" over 8 characters!\n");
+			else
+				Z_StrNCpy(val->music, value.data(), 8);
+		}
+		else if (epi::case_cmp(key, "par") == 0)
+		{
+			val->partime = 35 * epi::LEX_Int(value);
+		}
+	}
+	// Some fallback handling
+	if (!val->nextsecret[0])
+	{
+		if (val->nextmap[0])
+			Z_StrNCpy(val->nextsecret, val->nextmap, 8);
+	}
+}
+
+// -----------------------------------------------
+//
+// Parses a complete DMAPINFO lump
+//
+// -----------------------------------------------
+
+void Parse_DMAPINFO(const std::string& buffer)
+{
+	epi::lexer_c lex(buffer);
+
+	for (;;)
+	{
+		std::string section;
+		epi::token_kind_e tok = lex.Next(section);
+
+		if (tok == epi::TOK_EOF)
+			break;
+
+		// skip default/cluster/etc; we just want map entries
+		if (epi::case_cmp(section, "map") != 0)
+			continue;
+
+		tok = lex.Next(section);
+
+		if (tok != epi::TOK_Ident)
+			I_Error("DMAPINFO: No mapname for map entry!\n");
+
+		unsigned int i = 0;
+		MapEntry parsed = { 0 };
+		parsed.mapname = (char *)calloc(section.size()+1, sizeof(char));
+		Z_StrNCpy(parsed.mapname, section.data(), section.size());
+
+		tok = lex.Next(section);
+
+		if (tok == epi::TOK_String)
+		{
+			parsed.levelname = (char *)calloc(section.size()+1, sizeof(char));
+			Z_StrNCpy(parsed.levelname, section.data(), section.size());
+		}
+		else
+			I_Error("Malformed DMAPINFO lump: missing mapname for %s!\n", parsed.mapname);
+
+		if (! lex.Match("{"))
+			I_Error("Malformed DMAPINFO lump: missing '{'\n");
+
+		ParseDMAPINFOEntry(lex, &parsed);
+		// Does this map entry already exist? If yes, replace it.
+		for (i = 0; i < Maps.mapcount; i++)
+		{
+			if (epi::case_cmp(parsed.mapname, Maps.maps[i].mapname) == 0)
+			{
+				FreeMap(&Maps.maps[i]);
+				Maps.maps[i] = parsed;
+				break;
+			}
+		}
+		// Not found so create a new one.
+		if (i == Maps.mapcount)
+		{
+			Maps.mapcount++;
+			Maps.maps = (MapEntry*)realloc(Maps.maps, sizeof(MapEntry)*Maps.mapcount);
+			Maps.maps[Maps.mapcount-1] = parsed;
+		}
+	}
+}
+
+// -----------------------------------------------
+//
 // Parses a complete MAPINFO/RMAPINFO entry
 //
 // -----------------------------------------------

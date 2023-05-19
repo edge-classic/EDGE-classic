@@ -816,6 +816,9 @@ static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 {
 	for (;;)
 	{
+		if (lex.Match("}"))
+			break;
+
 		if (lex.MatchKeep("map"))
 			break;
 
@@ -840,6 +843,8 @@ static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 				val->nointermission = true;
 			continue;
 		}
+
+		lex.Match("="); // optional
 
 		tok = lex.Next(value);
 
@@ -1143,6 +1148,8 @@ void Parse_MAPINFO(const std::string& buffer)
 		}
 		else
 			I_Error("Malformed MAPINFO lump: missing mapname for %s!\n", parsed.mapname);
+
+		lex.Match("{"); // apparently these can optionally be in MAPINFO?
 
 		ParseMAPINFOEntry(lex, &parsed);
 		// Does this map entry already exist? If yes, replace it.

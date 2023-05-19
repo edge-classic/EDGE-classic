@@ -155,7 +155,11 @@ static void PL_health(coal::vm_c *vm, int argc)
 {
 	float h = ui_player_who->health * 100 / ui_player_who->mo->info->spawnhealth;
 
-	vm->ReturnFloat(floor(h + 0.99));
+	if (h < 98)
+		h += 0.99f;
+	
+	vm->ReturnFloat(floor(h));
+	
 }
 
 

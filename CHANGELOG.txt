@@ -20,6 +20,11 @@ Bugs fixed
 
 + Fixed -deathmatch startup parameter not being respected
 
++ Fixed incorrect positioning of widescreen status bars
+
++ Fixed health being picked up when player health was being shown as 100%
+
+
 
 General Improvements
 --------------------
@@ -109,6 +114,8 @@ New Features
   - player.sector_floor_height(): Returns floor height of the sector the player is currently in.
   - player.sector_ceiling_height(): Returns ceiling height of the sector the player is currently in.
   - player.is_outside(): Returns 1 if the ceiling of the sector the player is currently in is Sky.
+  - hud.get_image_width(image : string): Returns width of an image.
+  - hud.get_image_height(image : string): Returns height of an image.
 
   
 

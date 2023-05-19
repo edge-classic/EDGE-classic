@@ -1,6 +1,6 @@
-https://github.com/dashodanger/EDGE-classic
+https://github.com/edge-classic/EDGE-classic
 
-Current as of: March 2023
+Current as of: May 2023
 
 CHANGELOG for EDGE-Classic 1.34 (since EDGE-Classic 1.33)
 ====================================
@@ -16,14 +16,43 @@ Bugs fixed
 
 + Fixed CVAR value strings with spaces not being processed as intended
 
-+ Migrated cfg file parser to EPI::Lex, fixing a potential buffer overflow in the previous method
++ Migrated config file parser to EPI::Lex, fixing a potential buffer overflow in the previous method
 
 + Fixed -deathmatch startup parameter not being respected
+
++ Fixed intermissions being played when starting a deathmatch or using the -warp parameter on startup
 
 + Fixed incorrect positioning of widescreen status bars
 
 + Fixed health being picked up when player health was being shown as 100%
 
++ More fixes for Boom scroller behavior and physics under various circumstances
+
++ Backported upstream AJBSP memory leak and integer overflow fixes
+
++ Fixed offsets and DDFIMAGE specials for user-defined Doom formatted images not being preserved
+
++ Fixed offsets for various liquid splash images
+
++ Fixed BFG Edition IWADs not being recognized as valid
+
++ Fixed console CTD caused by non-printable characters being accepted from DDFLANG
+
++ Fixed (remote) possibility of numeric RTS script tag and hashed string RTS script tag values colliding
+
++ Fixed non-hostile jackalope in REKKR having flipped sprites
+
++ Fixed REKKR projectile attacks not having smoke puffs when appropriate
+
++ Fixed non-player hitscan attacks failing to activate linetypes 24, 46, and 47
+  - This caused a softlock on REKKR E1M9 as certain doors/walls that relied on a 
+    hitscan-firing dummy would never be activated
+
++ Fixed explosion sources not being able to damage themselves
+  - This led to a softlock on DBP58 MAP10 as a wall of continuous explosions created
+    by Dehacked-modified things would never be removed
+
++ Fix accidentally clearing of OPL registers when the 'Pause' key was used
 
 
 General Improvements
@@ -60,6 +89,31 @@ General Improvements
 + Stats screen item layout improved so that long map names are not truncated or overlapping level score/stats
 
 + Bot Skill will now affect bot movement speed, strafing frequency, turn speed, and angle/confidence required to fire on target
+  - Two additional skill levels added; Very Easy and Very Hard
+
++ UMAPINFO: Added support for "author" parameter from the UMAPINFO 2.2 spec
+  - AUTHOR parameter also added to LEVELS.DDF
+  - If a map author value is present, this will be displayed in the automap view by default
+
++ UMAPINFO: Will fallback to other types of MAPINFO lumps if UMAPINFO is not present
+  - The following lumps will be attempted in the order listed, stopping and using the first one found:
+    - DMAPINFO
+    - RMAPINFO
+    - MAPINFO
+    - ZMAPINFO
+  - Only fields that are present in the UMAPINFO spec will be parsed from fallback lumps
+    - A warning message will be printed to the log and console to inform the user that a fallback lump has been used
+
++ All option menu sliders and associated CVARs converted to use floating point values to reduce confusion and offer more options for precision
+  - CVARs can still be manually set outside of the specified slider limits unless otherwise clamped
+
++ 'dogs' command support for non-Doom IWADs improved
+  - Heretic and Blasphemer will summon chickens
+  - REKKR will use an arctic version of the MBF dog
+
++ Fluidlite parameters adjusted to fix pitch issues with various soundfonts
+  - s_fluidgain CVAR also added to allow manual control over gain level
+
 
 New Features
 ------------
@@ -108,7 +162,11 @@ New Features
   - COLOURMAP now works with menu items
   - HEADER.xxxx and TITLE.xxxx commands now affect graphics like "Choose Skill"
   - ENTRY_ALIGNMENT=CENTER now properly centers items
-  
+
++ IMAGES.DDF: Added new SATURATION and BRIGHTNESS commands
+  - Valid ranges for both are 0-255
+  - Will affect HSV Saturation and Value color components for the specified image
+
 + COALHUDS: new commands
   - player.sector_light(): Returns the light level of the sector the player is currently in.
   - player.sector_floor_height(): Returns floor height of the sector the player is currently in.
@@ -116,8 +174,26 @@ New Features
   - player.is_outside(): Returns 1 if the ceiling of the sector the player is currently in is Sky.
   - hud.get_image_width(image : string): Returns width of an image.
   - hud.get_image_height(image : string): Returns height of an image.
+  - hud.map_author(): Returns the map author name, if not null
 
-  
++ Load/Save Menu Rewrite
+  - Will now use a dedicated and unified DDFSTYLE entry for both menus
+  - Restored savegame screenshot functionality
+
++ Implemented WAD-in-Archive support
+  - Zip-compressed archives with the extensions .epk, .pk3, and .zip are supported
+  - Added support to AJBSP for building nodes against an in-memory WAD
+
++ Implemented EPK/Folder Mount system
+  - EPKs can contain images, scripts, WADs and other resources (similar to PK3, PKE, and the like from other source ports)
+  - Folders and EPKs are treated identically as far as loading and file/folder layout requirements
+  - Flexible structure and file naming conventions; details can be found in the "docs/EDGE Pack Strucutres and Usage.txt" file
+  - Note: Filenames without extensions that are in an EPK or mounted folder will be ignored
+
++ Console: New 'readme' command
+  - Will search for either a text file with a traditional readme name (readme.txt, readme.1st, etc)
+  - If none found, will look for a text file with the same name as a WAD or archive file in the load order
+    (this is a common practice for /idgames releases)
 
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)
 ====================================

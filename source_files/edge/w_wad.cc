@@ -1241,18 +1241,18 @@ void W_ReadUMAPINFOLumps(void)
 	}
 	if (p == -1)
 	{
-		p = W_CheckNumForName("MAPINFO");
+		p = W_CheckNumForName("RMAPINFO");
 		if (p > -1)
 		{
-			I_Warning("No UMAPINFO found; falling back to MAPINFO. Some features may not work as intended!\n");
+			I_Warning("No UMAPINFO found; falling back to RMAPINFO. Some features may not work as intended!\n");
 			Parse_MAPINFO(W_LoadString(p));
 		}
 		else
 		{
-			p = W_CheckNumForName("RMAPINFO");
+			p = W_CheckNumForName("MAPINFO");
 			if (p > -1)
 			{
-				I_Warning("No UMAPINFO found; falling back to RMAPINFO. Some features may not work as intended!\n");
+				I_Warning("No UMAPINFO found; falling back to MAPINFO. Some features may not work as intended!\n");
 				Parse_MAPINFO(W_LoadString(p));
 			}
 		}

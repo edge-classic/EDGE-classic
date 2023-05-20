@@ -26,6 +26,8 @@ Bugs fixed
 
 + Fixed health being picked up when player health was being shown as 100%
 
++ Fixed armour being picked up when player armour was being shown as 100%
+
 + More fixes for Boom scroller behavior and physics under various circumstances
 
 + Backported upstream AJBSP memory leak and integer overflow fixes

@@ -173,8 +173,14 @@ static void PL_armor(coal::vm_c *vm, int argc)
 		I_Error("player.armor: bad armor index: %d\n", kind);
 	
 	kind--;
+	//vm->ReturnFloat(floor(ui_player_who->armours[kind] + 0.99));
 
-	vm->ReturnFloat(floor(ui_player_who->armours[kind] + 0.99));
+	float a = ui_player_who->armours[kind];
+	if (a < 98)
+		a += 0.99f;
+
+	vm->ReturnFloat(floor(a));
+	
 }
 
 
@@ -182,7 +188,13 @@ static void PL_armor(coal::vm_c *vm, int argc)
 //
 static void PL_total_armor(coal::vm_c *vm, int argc)
 {
-	vm->ReturnFloat(floor(ui_player_who->totalarmour + 0.99));
+	//vm->ReturnFloat(floor(ui_player_who->totalarmour + 0.99));
+
+	float a = ui_player_who->totalarmour;
+	if (a < 98)
+		a += 0.99f;
+
+	vm->ReturnFloat(floor(a));
 }
 
 

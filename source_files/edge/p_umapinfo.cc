@@ -880,6 +880,7 @@ static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			if (epi::case_cmp(value, "endpic") == 0)
 			{
 				Z_Clear(val->endpic, char, 9);
+				lex.Match(","); // optional
 				int nextmap_line = lex.LastLine();
 				tok = lex.Next(value);
 				if (lex.LastLine() != nextmap_line)
@@ -949,10 +950,7 @@ static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			// a UMAPINFO equivalent
 			if (epi::case_cmp(value, "endpic") == 0)
 			{
-				int nextmap_line = lex.LastLine();
-				tok = lex.Next(value);
-				if (lex.LastLine() != nextmap_line)
-					I_Error("MAPINFO: Missing lump for \"endpic\"!\n");
+				SkipToNextLine(lex, tok, value);
 			}
 			else if (epi::case_cmp(value, "endgame1") == 0 || epi::case_cmp(value, "endgame2") == 0 ||
 				epi::case_cmp(value, "endgamew") == 0 || epi::case_cmp(value, "endgame4") == 0 ||
@@ -1293,10 +1291,7 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			// a UMAPINFO equivalent
 			if (epi::case_cmp(value, "endpic") == 0)
 			{
-				if (!lex.Match(","))
-					I_Error("Malformed ZMAPINFO lump: \"endpic\" specified without lump!\n");
-				else
-					tok = lex.Next(value);
+				SkipToNextLine(lex, tok, value);
 			}
 			else if (epi::case_cmp(value, "endgame1") == 0 || epi::case_cmp(value, "endgame2") == 0 ||
 				epi::case_cmp(value, "endgamew") == 0 || epi::case_cmp(value, "endgame4") == 0 ||

@@ -318,6 +318,23 @@ void FreeMapList()
 	Maps.mapcount = 0;
 }
 
+static void SkipToNextLine(epi::lexer_c& lex, epi::token_kind_e& tok, std::string& value)
+{
+	int skip_line = lex.LastLine();
+	for (;;)
+	{
+		lex.MatchKeep("linecheck");
+		if (lex.LastLine() == skip_line)
+		{
+			tok = lex.Next(value);
+			if (tok == epi::TOK_EOF)
+				break;
+		}
+		else
+			break;
+	}
+}
+
 // -----------------------------------------------
 //
 // Parses a complete UMAPINFO entry
@@ -716,8 +733,7 @@ static void ParseDMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			if (value.size() > 8)
 				I_Error("DMAPINFO: Image name for sky over 8 characters!\n");
 			Z_StrNCpy(val->skytexture, value.data(), 8);
-			if (lex.Match(","))
-				tok = lex.Next(value); // consume but ignore sky scrolling speed
+			SkipToNextLine(lex, tok, value);
 		}
 		else if (epi::case_cmp(key, "music") == 0)
 		{
@@ -730,6 +746,10 @@ static void ParseDMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 		else if (epi::case_cmp(key, "par") == 0)
 		{
 			val->partime = 35 * epi::LEX_Int(value);
+		}
+		else
+		{
+			SkipToNextLine(lex, tok, value);
 		}
 	}
 	// Some fallback handling
@@ -880,7 +900,7 @@ static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			else if (epi::case_cmp(value, "endgame3") == 0)
 				val->dobunny = true;
 			else if (epi::case_cmp(value, "endgames") == 0 || epi::case_cmp(value, "endchess") == 0)
-				I_Error("MAPINFO: Hexen/Strife ending sequence referenced!\n");
+				I_Warning("MAPINFO: Hexen/Strife ending sequence referenced!\n");
 			else if (epi::case_cmp(value, "endgame") == 0)
 			{
 				val->endgame = true;
@@ -952,7 +972,7 @@ static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 				// nothing needed
 			}
 			else if (epi::case_cmp(value, "endgames") == 0 || epi::case_cmp(value, "endchess") == 0)
-				I_Error("MAPINFO: Hexen/Strife ending sequence referenced!\n");
+				I_Warning("MAPINFO: Hexen/Strife ending sequence referenced!\n");
 			else if (epi::case_cmp(value, "endgame") == 0)
 			{
 				if (lex.Match("{"))
@@ -978,7 +998,7 @@ static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 		{
 			Z_Clear(val->levelpic, char, 9);
 			if (value.size() > 8)
-				I_Error("ZMAPINFO: Image name for \"titlepatch\" over 8 characters!\n");
+				I_Error("MAPINFO: Image name for \"titlepatch\" over 8 characters!\n");
 			Z_StrNCpy(val->levelpic, value.data(), 8);
 		}
 		else if (epi::case_cmp(key, "sky1") == 0)
@@ -987,15 +1007,7 @@ static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			if (value.size() > 8)
 				I_Error("MAPINFO: Image name for \"sky1\" over 8 characters!\n");
 			Z_StrNCpy(val->skytexture, value.data(), 8);
-			tok = lex.Next(value); // consume but ignore scrollspeed
-			if (tok != epi::TOK_Number)
-				I_Error("MAPINFO: No scrollspeed given for \"sky1\"!\n");
-		}
-		else if (epi::case_cmp(key, "sky2") == 0)
-		{
-			tok = lex.Next(value); // consume but ignore scrollspeed
-			if (tok != epi::TOK_Number)
-				I_Error("MAPINFO: No scrollspeed given for \"sky2\"!\n");
+			SkipToNextLine(lex, tok, value);
 		}
 		else if (epi::case_cmp(key, "music") == 0)
 		{
@@ -1041,23 +1053,15 @@ static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 		{
 			val->partime = 35 * epi::LEX_Int(value);
 		}
-		else if (epi::case_cmp(key, "specialaction") == 0)
-		{
-			int skip_line = lex.LastLine();
-			for (;;)
-			{
-				lex.MatchKeep("linecheck");
-				if (lex.LastLine() == skip_line)
-					tok = lex.Next(value);
-				else
-					break;
-			}
-		}
 		else if (epi::case_cmp(key, "author") == 0)
 		{
 			if (val->authorname) free(val->authorname);
 			val->authorname = (char *)calloc(value.size()+1, sizeof(char));
 			Z_StrNCpy(val->authorname, value.c_str(), value.size());
+		}
+		else
+		{
+			SkipToNextLine(lex, tok, value);
 		}
 	}
 	// Some fallback handling
@@ -1235,20 +1239,15 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			}
 			else if (epi::case_cmp(value, "endsequence") == 0)
 			{
-				if (!lex.Match(","))
-					I_Error("Malformed ZMAPINFO lump: \"endsequence\" specified without intermission!\n");
-				else
-				{
-					tok = lex.Next(value); // We do nothing with this
-					val->endgame = true;
-				}
+				val->endgame = true;
+				SkipToNextLine(lex, tok, value);
 			}
 			else if (epi::case_cmp(value, "endgamec") == 0)
 				val->docast = true;
 			else if (epi::case_cmp(value, "endgame3") == 0)
 				val->dobunny = true;
 			else if (epi::case_cmp(value, "endgames") == 0 || epi::case_cmp(value, "endchess") == 0)
-				I_Error("ZMAPINFO: Hexen/Strife ending sequence referenced!\n");
+				I_Warning("ZMAPINFO: Hexen/Strife ending sequence referenced!\n");
 			else if (epi::case_cmp(value, "endgame") == 0)
 			{
 				val->endgame = true;
@@ -1310,10 +1309,7 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			}
 			else if (epi::case_cmp(value, "endsequence") == 0)
 			{
-				if (!lex.Match(","))
-					I_Error("Malformed ZMAPINFO lump: \"endsequence\" specified without intermission!\n");
-				else
-					tok = lex.Next(value); // We do nothing with this
+				SkipToNextLine(lex, tok, value);
 			}
 			else if (epi::case_cmp(value, "endgamec") == 0)
 			{
@@ -1324,7 +1320,7 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 				// nothing needed
 			}
 			else if (epi::case_cmp(value, "endgames") == 0 || epi::case_cmp(value, "endchess") == 0)
-				I_Error("ZMAPINFO: Hexen/Strife ending sequence referenced!\n");
+				I_Warning("ZMAPINFO: Hexen/Strife ending sequence referenced!\n");
 			else if (epi::case_cmp(value, "endgame") == 0)
 			{
 				if (lex.Match("{"))
@@ -1361,8 +1357,7 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			if (value.size() > 8)
 				I_Error("ZMAPINFO: Image name for \"titlepatch\" over 8 characters!\n");
 			Z_StrNCpy(val->levelpic, value.data(), 8);
-			if (lex.Match(","))
-				tok = lex.Next(value); // consume but ignore "hideauthorname" option
+			SkipToNextLine(lex, tok, value);
 		}
 		else if (epi::case_cmp(key, "sky1") == 0 || epi::case_cmp(key, "skybox") == 0)
 		{
@@ -1370,8 +1365,7 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			if (value.size() > 8)
 				I_Error("ZMAPINFO: Image name for sky over 8 characters!\n");
 			Z_StrNCpy(val->skytexture, value.data(), 8);
-			if (lex.Match(","))
-				tok = lex.Next(value); // consume but ignore sky scrolling speed
+			SkipToNextLine(lex, tok, value);
 		}
 		else if (epi::case_cmp(key, "music") == 0)
 		{
@@ -1422,6 +1416,10 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			if (val->authorname) free(val->authorname);
 			val->authorname = (char *)calloc(value.size()+1, sizeof(char));
 			Z_StrNCpy(val->authorname, value.c_str(), value.size());
+		}
+		else
+		{
+			SkipToNextLine(lex, tok, value);
 		}
 	}
 	// Some fallback handling

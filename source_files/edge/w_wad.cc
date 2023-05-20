@@ -1227,6 +1227,8 @@ void W_ReadUMAPINFOLumps(void)
 	p = W_CheckNumForName("UMAPINFO");
 	if (p > -1)
 	{
+		if (W_CheckFileNumForName("UMAPINFO") == W_CheckFileNumForName("DDFLEVL"))
+			return;
 		L_WriteDebug("parsing UMAPINFO lump\n");
 		Parse_UMAPINFO(W_LoadString(p));
 	}
@@ -1235,6 +1237,8 @@ void W_ReadUMAPINFOLumps(void)
 		p = W_CheckNumForName("DMAPINFO");
 		if (p > -1)
 		{
+			if (W_CheckFileNumForName("DMAPINFO") == W_CheckFileNumForName("DDFLEVL"))
+				return;
 			I_Warning("No UMAPINFO found; falling back to DMAPINFO. Some features may not work as intended!\n");
 			Parse_DMAPINFO(W_LoadString(p));
 		}
@@ -1244,6 +1248,8 @@ void W_ReadUMAPINFOLumps(void)
 		p = W_CheckNumForName("RMAPINFO");
 		if (p > -1)
 		{
+			if (W_CheckFileNumForName("RMAPINFO") == W_CheckFileNumForName("DDFLEVL"))
+				return;
 			I_Warning("No UMAPINFO found; falling back to RMAPINFO. Some features may not work as intended!\n");
 			Parse_MAPINFO(W_LoadString(p));
 		}
@@ -1252,6 +1258,8 @@ void W_ReadUMAPINFOLumps(void)
 			p = W_CheckNumForName("MAPINFO");
 			if (p > -1)
 			{
+				if (W_CheckFileNumForName("MAPINFO") == W_CheckFileNumForName("DDFLEVL"))
+					return;
 				I_Warning("No UMAPINFO found; falling back to MAPINFO. Some features may not work as intended!\n");
 				Parse_MAPINFO(W_LoadString(p));
 			}
@@ -1262,6 +1270,8 @@ void W_ReadUMAPINFOLumps(void)
 		p = W_CheckNumForName("ZMAPINFO");
 		if (p > -1)
 		{
+			if (W_CheckFileNumForName("ZMAPINFO") == W_CheckFileNumForName("DDFLEVL"))
+				return;
 			I_Warning("No UMAPINFO found; falling back to ZMAPINFO. Some features may not work as intended!\n");
 			Parse_ZMAPINFO(W_LoadString(p));
 		}

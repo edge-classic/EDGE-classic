@@ -22,7 +22,7 @@ Bugs fixed
 
 + Fixed intermissions being played when starting a deathmatch or using the -warp parameter on startup
 
-+ Fixed incorrect positioning of widescreen status bars
++ Fixed incorrect positioning of some widescreen status bars
 
 + Fixed health being picked up when player health was being shown as 100%
 
@@ -125,7 +125,8 @@ New Features
 
 + UDMF:
   - Vertex slope support: Must define "zfloor" or "zceiling" for a vertex.
-  - Applies effects to any triangular sector or rectangular sectors that fulfill the following conditions:
+  - Applies effects to any triangular sector
+  - Applies effects to rectangular sectors that fulfill the following conditions:
     - Only two out of the four vertices utilize zfloor/zceiling values
     - The two vertices must be part of the same line segment
     - The zfloor value must be identical between the two vertices for a floor slope

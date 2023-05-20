@@ -52,7 +52,7 @@ Bugs fixed
   - This led to a softlock on DBP58 MAP10 as a wall of continuous explosions created
     by Dehacked-modified things would never be removed
 
-+ Fix accidentally clearing of OPL registers when the 'Pause' key was used
++ Fixed accidental clearing of OPL registers when the 'Pause' key was used
 
 
 General Improvements
@@ -112,7 +112,7 @@ General Improvements
   - REKKR will use an arctic version of the MBF dog
 
 + Fluidlite parameters adjusted to fix pitch issues with various soundfonts
-  - s_fluidgain CVAR also added to allow manual control over gain level
+  - s_fluidgain CVAR also added to allow manual control over gain (clamped in the 0.0-2.0 range)
 
 
 New Features
@@ -194,6 +194,12 @@ New Features
   - Will search for either a text file with a traditional readme name (readme.txt, readme.1st, etc)
   - If none found, will look for a text file with the same name as a WAD or archive file in the load order
     (this is a common practice for /idgames releases)
+
++ Bot Deathmatch: New "Player Damage Resistance" option
+  - Found in the Bot Match Settings Menu before starting a match
+  - Offers a flat damage resistance adjustable from -90% to +90%
+  - Only affects damage whose source is an enemy bot; sources such as
+    environmental hazards and self-inflicted damage will bypass this setting
 
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)
 ====================================

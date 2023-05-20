@@ -910,27 +910,24 @@ static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 					{
 						if (lex.Match("}"))
 							break;
-						std::string next_key;
-						std::string next_value;
-						epi::token_kind_e next_tok = lex.Next(next_key);
-						if (next_tok == epi::TOK_EOF)
+						tok = lex.Next(key);
+						if (tok == epi::TOK_EOF)
 							I_Error("Malformed MAPINFO lump: unclosed block\n");
-						if (next_tok != epi::TOK_Ident)
-							I_Error("Malformed MAPINFO lump: missing key\n");
-						if (epi::case_cmp(next_key, "cast") == 0)
+						if (epi::case_cmp(key, "cast") == 0)
 						{
 							val->docast = true;
 							continue;
 						}
-						if (epi::case_cmp(next_key, "pic") == 0)
+						if (epi::case_cmp(key, "pic") == 0)
 						{
-							next_tok = lex.Next(next_value);
-							if (next_tok == epi::TOK_EOF || next_tok == epi::TOK_ERROR || next_value == "}")
+							lex.Match("="); // optional
+							tok = lex.Next(value);
+							if (tok == epi::TOK_EOF || tok == epi::TOK_ERROR || value == "}")
 								I_Error("Malformed MAPINFO lump: missing value\n");
 							Z_Clear(val->endpic, char, 9);
-							if (next_value.size() > 8)
+							if (value.size() > 8)
 								I_Error("MAPINFO: Name for \"endpic\" lump over 8 characters!\n");
-							Z_StrNCpy(val->endpic, next_value.data(), 8);
+							Z_StrNCpy(val->endpic, value.data(), 8);
 						}
 						else
 							continue;
@@ -1257,27 +1254,27 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 					{
 						if (lex.Match("}"))
 							break;
-						std::string next_key;
-						std::string next_value;
-						epi::token_kind_e next_tok = lex.Next(next_key);
-						if (next_tok == epi::TOK_EOF)
+						tok = lex.Next(key);
+						if (tok == epi::TOK_EOF)
 							I_Error("Malformed ZMAPINFO lump: unclosed block\n");
-						if (next_tok != epi::TOK_Ident)
-							I_Error("Malformed ZMAPINFO lump: missing key\n");
-						if (! lex.Match("="))
-							I_Error("Malformed ZMAPINFO lump: missing '='\n");
-						next_tok = lex.Next(next_value);
-						if (next_tok == epi::TOK_EOF || next_tok == epi::TOK_ERROR || next_value == "}")
-							I_Error("Malformed ZMAPINFO lump: missing value\n");
-						if (epi::case_cmp(next_key, "pic") == 0)
+						if (epi::case_cmp(key, "cast") == 0)
 						{
-							Z_Clear(val->endpic, char, 9);
-							if (next_value.size() > 8)
-								I_Error("ZMAPINFO: Name for \"endpic\" lump over 8 characters!\n");
-							Z_StrNCpy(val->endpic, next_value.data(), 8);
-						}
-						else if (epi::case_cmp(next_key, "cast") == 0)
 							val->docast = true;
+							continue;
+						}
+						if (epi::case_cmp(key, "pic") == 0)
+						{
+							lex.Match("="); // optional
+							tok = lex.Next(value);
+							if (tok == epi::TOK_EOF || tok == epi::TOK_ERROR || value == "}")
+								I_Error("Malformed ZMAPINFO lump: missing value\n");
+							Z_Clear(val->endpic, char, 9);
+							if (value.size() > 8)
+								I_Error("ZMAPINFO: Name for \"endpic\" lump over 8 characters!\n");
+							Z_StrNCpy(val->endpic, value.data(), 8);
+						}
+						else
+							continue;
 					}
 				}
 			}
@@ -1329,18 +1326,9 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 					{
 						if (lex.Match("}"))
 							break;
-						std::string next_key;
-						std::string next_value;
-						epi::token_kind_e next_tok = lex.Next(next_key);
-						if (next_tok == epi::TOK_EOF)
-							I_Error("Malformed ZMAPINFO lump: unclosed block\n");
-						if (next_tok != epi::TOK_Ident)
-							I_Error("Malformed ZMAPINFO lump: missing key\n");
-						if (! lex.Match("="))
-							I_Error("Malformed ZMAPINFO lump: missing '='\n");
-						next_tok = lex.Next(next_value);
-						if (next_tok == epi::TOK_EOF || next_tok == epi::TOK_ERROR || next_value == "}")
-							I_Error("Malformed ZMAPINFO lump: missing value\n");
+						tok = lex.Next(value);
+						if (tok == epi::TOK_EOF || tok == epi::TOK_ERROR)
+							I_Error("Malformed MAPINFO lump: missing closing bracket!\n");
 					}
 				}
 			}

@@ -270,11 +270,6 @@ void Adler32_AddBlock(u32_t *crc, const u8_t *data, int length)
 	*crc = (s2 << 16) | s1;
 }
 
-void Adler32_Finish(u32_t *crc)
-{
-	/* nothing to do */
-}
-
 } // namespace ajbsp
 
 //--- editor settings ---

@@ -785,20 +785,23 @@ static inline int VanillaSegAngle(const seg_t *seg)
 #define UDMF_SIDEDEF  4
 #define UDMF_LINEDEF  5
 
-void ParseThingField(thing_t *thing, const std::string& key, epi::token_kind_e kind, const std::string& value)
+void ParseThingField(thing_t *thing, const std::string& key, const std::string& value)
 {
+	// Do we need more precision than an int for things? I think this would only be
+	// an issue if/when polyobjects happen, as I think other thing types are ignored - Dasho
+
 	if (key == "x")
-		thing->x = epi::LEX_Double(value);
+		thing->x = I_ROUND(epi::LEX_Double(value));
 
 	if (key == "y")
-		thing->y = epi::LEX_Double(value);
+		thing->y = I_ROUND(epi::LEX_Double(value));
 
 	if (key == "type")
-		thing->type = epi::LEX_Double(value);
+		thing->type = epi::LEX_Int(value);
 }
 
 
-void ParseVertexField(vertex_t *vertex, const std::string& key, epi::token_kind_e kind, const std::string& value)
+void ParseVertexField(vertex_t *vertex, const std::string& key, const std::string& value)
 {
 	if (key == "x")
 		vertex->x = epi::LEX_Double(value);
@@ -808,13 +811,7 @@ void ParseVertexField(vertex_t *vertex, const std::string& key, epi::token_kind_
 }
 
 
-void ParseSectorField(sector_t *sector, const std::string& key, epi::token_kind_e kind, const std::string& value)
-{
-	// nothing actually needed
-}
-
-
-void ParseSidedefField(sidedef_t *side, const std::string& key, epi::token_kind_e kind, const std::string& value)
+void ParseSidedefField(sidedef_t *side, const std::string& key, const std::string& value)
 {
 	if (key == "sector")
 	{
@@ -828,7 +825,7 @@ void ParseSidedefField(sidedef_t *side, const std::string& key, epi::token_kind_
 }
 
 
-void ParseLinedefField(linedef_t *line, const std::string& key, epi::token_kind_e kind, const std::string& value)
+void ParseLinedefField(linedef_t *line, const std::string& key, const std::string& value)
 {
 	if (key == "v1")
 		line->start = SafeLookupVertex(epi::LEX_Int(value));
@@ -911,12 +908,12 @@ void ParseUDMF_Block(epi::lexer_c& lex, int cur_type)
 
 		switch (cur_type)
 		{
-			case UDMF_VERTEX:  ParseVertexField (vertex, key, tok, value); break;
-			case UDMF_THING:   ParseThingField  (thing,  key, tok, value); break;
-			case UDMF_SECTOR:  ParseSectorField (sector, key, tok, value); break;
-			case UDMF_SIDEDEF: ParseSidedefField(side,   key, tok, value); break;
-			case UDMF_LINEDEF: ParseLinedefField(line,   key, tok, value); break;
+			case UDMF_VERTEX:  ParseVertexField (vertex, key, value); break;
+			case UDMF_THING:   ParseThingField  (thing,  key, value); break;
+			case UDMF_SIDEDEF: ParseSidedefField(side,   key, value); break;
+			case UDMF_LINEDEF: ParseLinedefField(line,   key, value); break;
 
+			case UDMF_SECTOR:
 			default: /* just skip it */ break;
 		}
 	}
@@ -1037,10 +1034,8 @@ static const u8_t *lev_v2_magic = (u8_t *) "gNd2";
 static const u8_t *lev_v5_magic = (u8_t *) "gNd5";
 
 
-void MarkOverflow(int flags)
+void MarkOverflow()
 {
-	// flags are ignored
-
 	lev_overflows = true;
 }
 
@@ -1082,7 +1077,7 @@ void PutVertices(const char *name, int do_gl)
 	if (! do_gl && count > 65534)
 	{
 		Failure("Number of vertices has overflowed.\n");
-		MarkOverflow(LIMIT_VERTEXES);
+		MarkOverflow();
 	}
 }
 
@@ -1188,7 +1183,7 @@ void PutSegs()
 	if (num_segs > 65534)
 	{
 		Failure("Number of segs has overflowed.\n");
-		MarkOverflow(LIMIT_SEGS);
+		MarkOverflow();
 	}
 }
 
@@ -1304,7 +1299,7 @@ void PutSubsecs(const char *name, int do_gl)
 	if (num_subsecs > 32767)
 	{
 		Failure("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
-		MarkOverflow(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
+		MarkOverflow();
 	}
 
 	lump->Finish();
@@ -1472,7 +1467,7 @@ void PutNodes(const char *name, int do_v5, node_t *root)
 	if (!do_v5 && node_cur_index > 32767)
 	{
 		Failure("Number of nodes has overflowed.\n");
-		MarkOverflow(LIMIT_NODES);
+		MarkOverflow();
 	}
 }
 
@@ -1482,19 +1477,19 @@ void CheckLimits()
 	if (num_sectors > 65534)
 	{
 		Failure("Map has too many sectors.\n");
-		MarkOverflow(LIMIT_SECTORS);
+		MarkOverflow();
 	}
 
 	if (num_sidedefs > 65534)
 	{
 		Failure("Map has too many sidedefs.\n");
-		MarkOverflow(LIMIT_SIDEDEFS);
+		MarkOverflow();
 	}
 
 	if (num_linedefs > 65534)
 	{
 		Failure("Map has too many linedefs.\n");
-		MarkOverflow(LIMIT_LINEDEFS);
+		MarkOverflow();
 	}
 
 	if (cur_info->gl_nodes && !cur_info->force_v5)
@@ -1950,8 +1945,6 @@ static u32_t CalcGLChecksum(void)
 		Adler32_AddBlock(&crc, data, lump->Length());
 		delete[] data;
 	}
-
-	Adler32_Finish(&crc);
 
 	return crc;
 }

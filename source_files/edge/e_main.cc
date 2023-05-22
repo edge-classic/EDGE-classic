@@ -881,40 +881,17 @@ void InitDirectories(void)
 			home_dir = s;
 	}
 
-	// Get the Home Directory from environment if set
-    if (home_dir.empty())
-    {
-		s.clear();
-		if (getenv("HOME"))
-			s = UTFSTR(getenv("HOME"));
-        if (!s.empty())
-        {
-#ifdef __linux__
-			std::string temp_home = ".";
-			temp_home.append(appname.s);
-			home_dir = epi::PATH_Join(s, UTFSTR(temp_home));
-#else
-            home_dir = epi::PATH_Join(s, UTFSTR(appname.c_str()));
-#endif
-			if (! epi::FS_IsDir(home_dir))
-			{
-                epi::FS_MakeDir(home_dir);
-
-                // Check whether the directory was created
-                if (! epi::FS_IsDir(home_dir))
-                    home_dir.clear();
-			}
-        }
-    }
-
 #ifdef _WIN32
     if (home_dir.empty()) home_dir = UTFSTR(SDL_GetPrefPath(nullptr, appname.c_str()));
 #else
 	if (home_dir.empty()) home_dir = UTFSTR(SDL_GetPrefPath(orgname.c_str(), appname.c_str()));
 #endif
 
-	if (! epi::FS_IsDir(home_dir))
-        epi::FS_MakeDir(home_dir);
+	if (!epi::FS_IsDir(home_dir))
+	{
+        if (!epi::FS_MakeDir(home_dir))
+			I_Error("InitDirectories: Could not create directory at %s!\n", home_dir.u8string().c_str());
+	}
 
 	if (cfgfile.empty())
 		cfgfile = epi::PATH_Join(home_dir, UTFSTR(configfilename.s));

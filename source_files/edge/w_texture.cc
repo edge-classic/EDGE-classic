@@ -81,13 +81,17 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 
 	int *patchlookup = new int[nummappatches+1];
 
+	std::vector<std::string> patch_names;
+
+	patch_names.resize(nummappatches);
+
 	for (i = 0; i < nummappatches; i++)
 	{
-		char name[16];
+		patch_names[i].resize(9);
 
-		Z_StrNCpy(name, (const char*)(name_p + i * 8), 8);
+		Z_StrNCpy(patch_names[i].data(), (const char*)(name_p + i * 8), 8);
 
-		patchlookup[i] = W_CheckNumForTexPatch(name);
+		patchlookup[i] = W_CheckNumForTexPatch(patch_names[i].c_str());
 	}
 
 	delete[] names;
@@ -197,7 +201,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 			if (patch->patch == -1)
 			{
 				I_Warning("Missing patch '%.8s' in texture \'%.8s\'\n",
-						  name_p + pname*8, texture->name);
+						  patch_names[pname].c_str(), texture->name);
 
 				// mark texture as a dud
 				texture->patchcount = 0;
@@ -207,6 +211,8 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 	}
 
 	// free stuff
+	patch_names.clear();
+
 	delete[] maptex1;
 
 	if (maptex2)

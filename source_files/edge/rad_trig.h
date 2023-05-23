@@ -39,6 +39,9 @@ void RAD_SpawnTriggers(const char *map_name);
 void RAD_ClearTriggers(void);
 void RAD_GroupTriggerTags(rad_trigger_t *trig);
 
+// For UMAPINFO bossaction "clear" directive
+void RAD_ClearWUDsByMap(const std::string& mapname);
+
 void RAD_RunTriggers(void);
 void RAD_Ticker(void);
 void RAD_Drawer(void);

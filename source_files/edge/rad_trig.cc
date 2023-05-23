@@ -334,6 +334,26 @@ rts_state_t * RAD_FindStateByLabel(rad_script_t *scr, char *label)
 	return NULL;
 }
 
+void RAD_ClearWUDsByMap(const std::string& mapname)
+{
+	for (rad_script_t *scr=r_scripts; scr; scr=scr->next)
+	{
+		if (epi::case_cmp(scr->mapid, mapname) == 0)
+		{
+			for (rts_state_t *state=scr->first_state; state; state=state->next)
+			{
+				if (state->action == RAD_ActWaitUntilDead)
+				{
+					s_wait_until_dead_t *wud = (s_wait_until_dead_t *)state->param;
+					wud->tag = 0;
+					for (int n=0; n < 10; n++)
+						delete wud->mon_names[n];
+				}
+			}
+		}
+	}
+}
+
 //
 // Looks for all current triggers with the given tag number, and
 // either enables them or disables them (based on `disable').

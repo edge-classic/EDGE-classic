@@ -1608,8 +1608,13 @@ void W_ReadUMAPINFOLumps(void)
 		if(Maps.maps[i].partime > 0)
 			temp_level->partime = Maps.maps[i].partime;
 		
-		if(Maps.maps[i].bossactions && Maps.maps[i].numbossactions >= 1)
+		if (Maps.maps[i].numbossactions == -1) // "clear" directive
+			RAD_ClearWUDsByMap(Maps.maps[i].mapname);
+		else if(Maps.maps[i].bossactions && Maps.maps[i].numbossactions >= 1)
 		{
+			// The UMAPINFO spec seems to suggest that any custom actions should
+			// invalidate previous death triggers for the map in question
+			RAD_ClearWUDsByMap(Maps.maps[i].mapname);
 			std::string ba_rts = "// UMAPINFO SCRIPTS\n\n";
 			for (int a = 0; a < Maps.maps[i].numbossactions; a++)
 			{
@@ -1655,7 +1660,6 @@ void W_ReadUMAPINFOLumps(void)
 				}
 			}
 		}
-
 	}
 
 	FreeMapList();

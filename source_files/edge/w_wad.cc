@@ -2085,6 +2085,18 @@ std::vector<int> * W_GetSpriteList(int file)
 	return NULL;
 }
 
+std::vector<int> * W_GetPatchList(int file)
+{
+	SYS_ASSERT(0 <= file && file < (int)data_files.size());
+
+	data_file_c *df = data_files[file];
+	wad_file_c *wad = df->wad;
+
+	if (wad != NULL)
+		return &wad->patch_lumps;
+
+	return NULL;
+}
 
 int W_GetFileForLump(int lump)
 {

@@ -75,6 +75,7 @@ int W_GetPaletteForLump(int lump);
 int W_FindFlatSequence(const char *start, const char *end, int *s_offset, int *e_offset);
 std::vector<int> * W_GetFlatList  (int file);
 std::vector<int> * W_GetSpriteList(int file);
+std::vector<int> * W_GetPatchList(int file);
 void W_GetTextureLumps(int file, wadtex_resource_c *res);
 void W_ProcessTX_HI(void);
 int W_GetFileForLump(int lump);
@@ -89,8 +90,6 @@ bool W_IsLumpInPwad(const char *name);
 bool W_IsLumpInAnyWad(const char *name);
 
 std::string W_CheckForUniqueLumps(epi::file_c *file, int *score);
-
-void W_CheckWADFixes(void);
 
 void W_BuildNodes(void);
 void W_ReadUMAPINFOLumps(void);

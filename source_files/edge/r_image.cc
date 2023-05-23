@@ -1402,12 +1402,34 @@ static const image_c *BackupTexture(const char *tex_name, int flags)
 {
 	const image_c *rim;
 
-	// backup plan: try a flat with the same name
 	if (! (flags & ILF_Exact))
 	{
+		// backup plan: try a flat with the same name
 		rim = W_ImageDoLookup(real_flats, tex_name);
 		if (rim)
 			return rim;
+
+		// backup backup plan: try a graphic with the same name
+		rim = W_ImageDoLookup(real_graphics, tex_name);
+		if (rim)
+			return rim;
+
+		// backup backup backup plan: see if it's a graphic in the P/PP_START P/PP_END namespace
+		// and make/return an image if valid
+		int checkfile = W_CheckFileNumForName(tex_name);
+		int checklump =  W_CheckNumForName(tex_name);
+		if (checkfile > -1 && checklump > -1)
+		{
+			for (auto patch_lump : *W_GetPatchList(checkfile))
+			{
+				if (patch_lump == checklump)
+				{
+					rim = AddImage_Smart(tex_name, IMSRC_Graphic, patch_lump, real_graphics);
+					if (rim)
+						return rim;
+				}
+			}
+		}	
 	}
 
 	if (flags & ILF_Null)

@@ -586,7 +586,6 @@ static void ParseUMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 					SkipToNextLine(lex, tok, value);
 				else
 				{
-					I_Printf("BOSS ACTION FOR : %d\n", actor_num);
 					if (!lex.Match(","))
 						I_Error("UMAPINFO: \"bossaction\" key missing line special!\n");
 					lex.Next(value);

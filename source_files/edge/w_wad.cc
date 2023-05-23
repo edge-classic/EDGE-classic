@@ -73,6 +73,7 @@
 #include "w_wad.h"
 #include "w_texture.h"
 
+#include "rad_trig.h"
 #include "p_umapinfo.h" //Lobo 2022
 
 typedef struct
@@ -1607,6 +1608,28 @@ void W_ReadUMAPINFOLumps(void)
 		if(Maps.maps[i].partime > 0)
 			temp_level->partime = Maps.maps[i].partime;
 		
+		if(Maps.maps[i].bossactions && Maps.maps[i].numbossactions >= 1)
+		{
+			std::string ba_rts = "// UMAPINFO SCRIPTS\n\n";
+			for (int a = 0; a < Maps.maps[i].numbossactions; a++)
+			{
+				for (int m = 0; m < mobjtypes.GetSize(); m++)
+				{
+					if (mobjtypes[m]->number == Maps.maps[i].bossactions[a].type)
+					{
+						ba_rts.append(epi::STR_Format("START_MAP %s\n", Maps.maps[i].mapname));
+						ba_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
+						ba_rts.append(epi::STR_Format("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
+						ba_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE %d %d\n", Maps.maps[i].bossactions[a].special,
+							Maps.maps[i].bossactions[a].tag));
+						ba_rts.append("  END_RADIUS_TRIGGER\n");
+						ba_rts.append("END_MAP\n\n");	
+					}
+				}
+			}
+			RAD_ReadScript(ba_rts, "UMAPINFO");
+		}
+
 		// If a TEMPEPI gamedef had to be created, grab some details from the 
 		// first valid gamedef iterating through gamedefs in reverse order
 		if (temp_level->episode_name == "TEMPEPI")
@@ -1625,6 +1648,8 @@ void W_ReadUMAPINFOLumps(void)
 						temp_level->episode->titlepics = gamedefs[g]->titlepics;
 						temp_level->episode->titletics = gamedefs[g]->titletics;
 						temp_level->episode->percent = gamedefs[g]->percent;
+						temp_level->episode->done = gamedefs[g]->done;
+						temp_level->episode->accel_snd = gamedefs[g]->accel_snd;
 						break;
 					}
 				}

@@ -1781,32 +1781,35 @@ void WI_Drawer(void)
 	else
 	{
 		//HUD_StretchImage(0, 0, 320, 200, bg_image);
-		if (tile_bg)
-			HUD_TileImage(-240, 0, 820, 200, bg_image); //Lobo: Widescreen support
-		else
-			HUD_DrawImageTitleWS(bg_image); //Lobo: Widescreen support
-
-		for (int i = 0; i < worldint.numanims; i++)
+		if (bg_image)
 		{
-			wi_anim_c *a = &worldint.anims[i];
-
-			if (a->frameon == -1)
-				continue;
-
-			wi_frame_c *f = NULL;
-
-			if (a->info->type == wi_animdef_c::WI_LEVEL)
-			{
-				if (!wi_stats.next)
-					f = NULL;
-				else if (!strcmp(wi_stats.next->name.c_str(), a->info->level.c_str()))
-					f = &a->frames[a->frameon];
-			}
+			if (tile_bg)
+				HUD_TileImage(-240, 0, 820, 200, bg_image); //Lobo: Widescreen support
 			else
-				f = &a->frames[a->frameon];
+				HUD_DrawImageTitleWS(bg_image); //Lobo: Widescreen support
 
-			if (f)
-				HUD_DrawImage(f->info->x, f->info->y, f->image);
+			for (int i = 0; i < worldint.numanims; i++)
+			{
+				wi_anim_c *a = &worldint.anims[i];
+
+				if (a->frameon == -1)
+					continue;
+
+				wi_frame_c *f = NULL;
+
+				if (a->info->type == wi_animdef_c::WI_LEVEL)
+				{
+					if (!wi_stats.next)
+						f = NULL;
+					else if (!strcmp(wi_stats.next->name.c_str(), a->info->level.c_str()))
+						f = &a->frames[a->frameon];
+				}
+				else
+					f = &a->frames[a->frameon];
+
+				if (f)
+					HUD_DrawImage(f->info->x, f->info->y, f->image);
+			}
 		}
 	}
 

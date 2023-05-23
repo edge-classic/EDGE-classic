@@ -1607,6 +1607,30 @@ void W_ReadUMAPINFOLumps(void)
 		if(Maps.maps[i].partime > 0)
 			temp_level->partime = Maps.maps[i].partime;
 		
+		// If a TEMPEPI gamedef had to be created, grab some details from the 
+		// first valid gamedef iterating through gamedefs in reverse order
+		if (temp_level->episode_name == "TEMPEPI")
+		{
+			for (int g=gamedefs.GetSize()-1; g >= 0; g--)
+			{
+				if (gamedefs[g]->name != "TEMPEPI" && epi::strncmp(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
+				{
+					if (atoi(gamedefs[g]->firstmap.substr(3).c_str()) > atoi(temp_level->name.substr(3).c_str()))
+						continue;
+					else
+					{
+						temp_level->episode->background = gamedefs[g]->background;
+						temp_level->episode->music = gamedefs[g]->music;
+						temp_level->episode->titlemusic = gamedefs[g]->titlemusic;
+						temp_level->episode->titlepics = gamedefs[g]->titlepics;
+						temp_level->episode->titletics = gamedefs[g]->titletics;
+						temp_level->episode->percent = gamedefs[g]->percent;
+						break;
+					}
+				}
+			}
+		}
+
 	}
 
 	FreeMapList();

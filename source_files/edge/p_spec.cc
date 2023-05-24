@@ -634,6 +634,7 @@ static void P_LineEffect(line_t *target, line_t *source,
 							anim.permanent = true;
 					}
 				}
+				anim.last_height = anim.scroll_sec_ref->orig_height;
 			}
 		}
 		lineanims.push_back(anim);
@@ -700,6 +701,7 @@ static void P_LineEffect(line_t *target, line_t *source,
 								anim.permanent = true;
 						}
 					}
+					anim.last_height = anim.scroll_sec_ref->orig_height;
 				}
 			}
 			lineanims.push_back(anim);
@@ -824,6 +826,7 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 							anim.permanent = true;
 					}
 				}
+				anim.last_height = anim.scroll_sec_ref->orig_height;
 			}
 		}
 		secanims.push_back(anim);
@@ -2044,186 +2047,50 @@ void P_UpdateSpecials(bool extra_tic)
 
 			if (special_ref->line_effect & LINEFX_VectorScroll)
 			{
-				if (special_ref->scroll_type & ScrollType_Displace)
+				float tdx = lineanims[i].dynamic_dx;
+				float tdy = lineanims[i].dynamic_dy;
+				float heightref = special_ref->scroll_type & ScrollType_Displace ? lineanims[i].last_height : sec_ref->orig_height;
+				float sy = tdy * ((sec_ref->f_h + sec_ref->c_h) - heightref);
+				float sx = tdx * ((sec_ref->f_h + sec_ref->c_h) - heightref);
+				if (r_doubleframes.d && special_ref->scroll_type & ScrollType_Displace)
 				{
-					float tdx = lineanims[i].dynamic_dx;
-					float tdy = lineanims[i].dynamic_dy;
-					if (sec_ref->floor_move && sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
+					sy *= 2;
+					sx *= 2;
+				}
+				if (ld->side[0])
+				{
+					if (ld->side[0]->top.image)
 					{
-						float speed = sec_ref->floor_move->speed;
-						int dir = sec_ref->floor_move->direction;
-						float sx = speed * tdx * dir;
-						float sy = speed * tdy * dir;
-						if (ld->side[0])
-						{
-							if (ld->side[0]->top.image)
-							{
-								ld->side[0]->top.net_scroll.x += sx;
-								ld->side[0]->top.net_scroll.y += sy;
-							}
-							if (ld->side[0]->middle.image)
-							{
-								ld->side[0]->middle.net_scroll.x += sx;
-								ld->side[0]->middle.net_scroll.y += sy;
-							}
-							if (ld->side[0]->bottom.image)
-							{
-								ld->side[0]->bottom.net_scroll.x += sx;
-								ld->side[0]->bottom.net_scroll.y += sy;
-							}
-						}
-						if (ld->side[1])
-						{
-							if (ld->side[1]->top.image)
-							{
-								ld->side[1]->top.net_scroll.x += sx;
-								ld->side[1]->top.net_scroll.y += sy;
-							}
-							if (ld->side[1]->middle.image)
-							{
-								ld->side[1]->middle.net_scroll.x += sx;
-								ld->side[1]->middle.net_scroll.y += sy;
-							}
-							if (ld->side[1]->bottom.image)
-							{
-								ld->side[1]->bottom.net_scroll.x += sx;
-								ld->side[1]->bottom.net_scroll.y += sy;
-							}
-						}
+						ld->side[0]->top.net_scroll.x += sx;
+						ld->side[0]->top.net_scroll.y += sy;
 					}
-					if (sec_ref->ceil_move && sec_ref->ceil_move->sector->c_h != sec_ref->ceil_move->startheight)
+					if (ld->side[0]->middle.image)
 					{
-						float speed = sec_ref->ceil_move->speed;
-						int dir = sec_ref->ceil_move->direction;
-						float sx = speed * tdx * dir;
-						float sy = speed * tdy * dir;
-						if (ld->side[0])
-						{
-							if (ld->side[0]->top.image)
-							{
-								ld->side[0]->top.net_scroll.x += sx;
-								ld->side[0]->top.net_scroll.y += sy;
-							}
-							if (ld->side[0]->middle.image)
-							{
-								ld->side[0]->middle.net_scroll.x += sx;
-								ld->side[0]->middle.net_scroll.y += sy;
-							}
-							if (ld->side[0]->bottom.image)
-							{
-								ld->side[0]->bottom.net_scroll.x += sx;
-								ld->side[0]->bottom.net_scroll.y += sy;
-							}
-						}
-						if (ld->side[1])
-						{
-							if (ld->side[1]->top.image)
-							{
-								ld->side[1]->top.net_scroll.x += sx;
-								ld->side[1]->top.net_scroll.y += sy;
-							}
-							if (ld->side[1]->middle.image)
-							{
-								ld->side[1]->middle.net_scroll.x += sx;
-								ld->side[1]->middle.net_scroll.y += sy;
-							}
-							if (ld->side[1]->bottom.image)
-							{
-								ld->side[1]->bottom.net_scroll.x += sx;
-								ld->side[1]->bottom.net_scroll.y += sy;
-							}
-						}
+						ld->side[0]->middle.net_scroll.x += sx;
+						ld->side[0]->middle.net_scroll.y += sy;
+					}
+					if (ld->side[0]->bottom.image)
+					{
+						ld->side[0]->bottom.net_scroll.x += sx;
+						ld->side[0]->bottom.net_scroll.y += sy;
 					}
 				}
-				if (special_ref->scroll_type & ScrollType_Accel)
+				if (ld->side[1])
 				{
-					float tdx = lineanims[i].dynamic_dx;
-					float tdy = lineanims[i].dynamic_dy;
-					if (sec_ref->floor_move && sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
+					if (ld->side[1]->top.image)
 					{
-						float dist = (sec_ref->floor_move->destheight < sec_ref->floor_move->startheight ? 
-							std::abs(sec_ref->floor_move->startheight - sec_ref->f_h) : -std::abs(sec_ref->floor_move->startheight - sec_ref->f_h));
-						float sx = tdx * dist;
-						float sy = tdy * dist;
-						if (ld->side[0])
-						{
-							if (ld->side[0]->top.image)
-							{
-								ld->side[0]->top.net_scroll.x -= sx;
-								ld->side[0]->top.net_scroll.y -= sy;
-							}
-							if (ld->side[0]->middle.image)
-							{
-								ld->side[0]->middle.net_scroll.x -= sx;
-								ld->side[0]->middle.net_scroll.y -= sy;
-							}
-							if (ld->side[0]->bottom.image)
-							{
-								ld->side[0]->bottom.net_scroll.x -= sx;
-								ld->side[0]->bottom.net_scroll.y -= sy;
-							}
-						}
-						if (ld->side[1])
-						{
-							if (ld->side[1]->top.image)
-							{
-								ld->side[1]->top.net_scroll.x -= sx;
-								ld->side[1]->top.net_scroll.y -= sy;
-							}
-							if (ld->side[1]->middle.image)
-							{
-								ld->side[1]->middle.net_scroll.x -= sx;
-								ld->side[1]->middle.net_scroll.y -= sy;
-							}
-							if (ld->side[1]->bottom.image)
-							{
-								ld->side[1]->bottom.net_scroll.x -= sx;
-								ld->side[1]->bottom.net_scroll.y -= sy;
-							}
-						}	
+						ld->side[1]->top.net_scroll.x += sx;
+						ld->side[1]->top.net_scroll.y += sy;
 					}
-					if (sec_ref->ceil_move && sec_ref->ceil_move->sector->c_h != sec_ref->ceil_move->startheight)
+					if (ld->side[1]->middle.image)
 					{
-						float dist = (sec_ref->ceil_move->destheight < sec_ref->ceil_move->startheight ? 
-							std::abs(sec_ref->ceil_move->startheight - sec_ref->c_h) : -std::abs(sec_ref->ceil_move->startheight - sec_ref->c_h));
-						float sx = tdx * dist;
-						float sy = tdy * dist;
-						if (ld->side[0])
-						{
-							if (ld->side[0]->top.image)
-							{
-								ld->side[0]->top.net_scroll.x -= sx;
-								ld->side[0]->top.net_scroll.y -= sy;
-							}
-							if (ld->side[0]->middle.image)
-							{
-								ld->side[0]->middle.net_scroll.x -= sx;
-								ld->side[0]->middle.net_scroll.y -= sy;
-							}
-							if (ld->side[0]->bottom.image)
-							{
-								ld->side[0]->bottom.net_scroll.x -= sx;
-								ld->side[0]->bottom.net_scroll.y -= sy;
-							}
-						}
-						if (ld->side[1])
-						{
-							if (ld->side[1]->top.image)
-							{
-								ld->side[1]->top.net_scroll.x -= sx;
-								ld->side[1]->top.net_scroll.y -= sy;
-							}
-							if (ld->side[1]->middle.image)
-							{
-								ld->side[1]->middle.net_scroll.x -= sx;
-								ld->side[1]->middle.net_scroll.y -= sy;
-							}
-							if (ld->side[1]->bottom.image)
-							{
-								ld->side[1]->bottom.net_scroll.x -= sx;
-								ld->side[1]->bottom.net_scroll.y -= sy;
-							}
-						}	
+						ld->side[1]->middle.net_scroll.x += sx;
+						ld->side[1]->middle.net_scroll.y += sy;
+					}
+					if (ld->side[1]->bottom.image)
+					{
+						ld->side[1]->bottom.net_scroll.x += sx;
+						ld->side[1]->bottom.net_scroll.y += sy;
 					}
 				}
 			}
@@ -2231,113 +2098,34 @@ void P_UpdateSpecials(bool extra_tic)
 			{
 				float x_speed = lineanims[i].side0_xoffspeed;
 				float y_speed = lineanims[i].side0_yoffspeed;
-				if (special_ref->scroll_type & ScrollType_Displace)
+				float heightref = special_ref->scroll_type & ScrollType_Displace ? lineanims[i].last_height : sec_ref->orig_height;
+				float sy = x_speed * ((sec_ref->f_h + sec_ref->c_h) - heightref);
+				float sx = y_speed * ((sec_ref->f_h + sec_ref->c_h) - heightref);
+				if (r_doubleframes.d && special_ref->scroll_type & ScrollType_Displace)
 				{
-					if (sec_ref->floor_move && sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
+					sy *= 2;
+					sx *= 2;
+				}
+				if (ld->side[0])
+				{
+					if (ld->side[0]->top.image)
 					{
-						float speed = sec_ref->floor_move->speed;
-						int dir = sec_ref->floor_move->direction;
-						float sx = speed * x_speed * dir;
-						float sy = speed * y_speed * dir;
-						if (ld->side[0])
-						{
-							if (ld->side[0]->top.image)
-							{
-								ld->side[0]->top.net_scroll.x += sx;
-								ld->side[0]->top.net_scroll.y += sy;
-							}
-							if (ld->side[0]->middle.image)
-							{
-								ld->side[0]->middle.net_scroll.x += sx;
-								ld->side[0]->middle.net_scroll.y += sy;
-							}
-							if (ld->side[0]->bottom.image)
-							{
-								ld->side[0]->bottom.net_scroll.x += sx;
-								ld->side[0]->bottom.net_scroll.y += sy;
-							}
-						}
+						ld->side[0]->top.net_scroll.x += sx;
+						ld->side[0]->top.net_scroll.y += sy;
 					}
-					if (sec_ref->ceil_move && sec_ref->ceil_move->sector->c_h != sec_ref->ceil_move->startheight)
+					if (ld->side[0]->middle.image)
 					{
-						float speed = sec_ref->ceil_move->speed;
-						int dir = sec_ref->ceil_move->direction;
-						float sx = speed * x_speed * dir;
-						float sy = speed * y_speed * dir;
-						if (ld->side[0])
-						{
-							if (ld->side[0]->top.image)
-							{
-								ld->side[0]->top.net_scroll.x += sx;
-								ld->side[0]->top.net_scroll.y += sy;
-							}
-							if (ld->side[0]->middle.image)
-							{
-								ld->side[0]->middle.net_scroll.x += sx;
-								ld->side[0]->middle.net_scroll.y += sy;
-							}
-							if (ld->side[0]->bottom.image)
-							{
-								ld->side[0]->bottom.net_scroll.x += sx;
-								ld->side[0]->bottom.net_scroll.y += sy;
-							}
-						}
+						ld->side[0]->middle.net_scroll.x += sx;
+						ld->side[0]->middle.net_scroll.y += sy;
+					}
+					if (ld->side[0]->bottom.image)
+					{
+						ld->side[0]->bottom.net_scroll.x += sx;
+						ld->side[0]->bottom.net_scroll.y += sy;
 					}
 				}
-				if (special_ref->scroll_type & ScrollType_Accel)
-				{
-					if (sec_ref->floor_move && sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
-					{
-						float dist = (sec_ref->floor_move->destheight < sec_ref->floor_move->startheight ? 
-							std::abs(sec_ref->floor_move->startheight - sec_ref->f_h) : -std::abs(sec_ref->floor_move->startheight - sec_ref->f_h));
-						float sx = x_speed * dist;
-						float sy = y_speed * dist;
-						if (ld->side[0])
-						{
-							if (ld->side[0]->top.image)
-							{
-								ld->side[0]->top.net_scroll.x += sx;
-								ld->side[0]->top.net_scroll.y += sy;
-							}
-							if (ld->side[0]->middle.image)
-							{
-								ld->side[0]->middle.net_scroll.x += sx;
-								ld->side[0]->middle.net_scroll.y += sy;
-							}
-							if (ld->side[0]->bottom.image)
-							{
-								ld->side[0]->bottom.net_scroll.x += sx;
-								ld->side[0]->bottom.net_scroll.y += sy;
-							}
-						}	
-					}
-					if (sec_ref->ceil_move && sec_ref->ceil_move->sector->c_h != sec_ref->ceil_move->startheight)
-					{
-						float dist = (sec_ref->ceil_move->destheight < sec_ref->ceil_move->startheight ? 
-							std::abs(sec_ref->ceil_move->startheight - sec_ref->c_h) : -std::abs(sec_ref->ceil_move->startheight - sec_ref->c_h));
-						float sx = x_speed * dist;
-						float sy = y_speed * dist;
-						if (ld->side[0])
-						{
-							if (ld->side[0]->top.image)
-							{
-								ld->side[0]->top.net_scroll.x += sx;
-								ld->side[0]->top.net_scroll.y += sy;
-							}
-							if (ld->side[0]->middle.image)
-							{
-								ld->side[0]->middle.net_scroll.x += sx;
-								ld->side[0]->middle.net_scroll.y += sy;
-							}
-							if (ld->side[0]->bottom.image)
-							{
-								ld->side[0]->bottom.net_scroll.x += sx;
-								ld->side[0]->bottom.net_scroll.y += sy;
-							}
-						}
-					}
-				}				
 			}
+			lineanims[i].last_height = sec_ref->f_h + sec_ref->c_h;
 		}
 	}
 
@@ -2501,109 +2289,36 @@ void P_UpdateSpecials(bool extra_tic)
 			const linetype_c *special_ref = secanims[i].scroll_special_ref;
 			line_s *line_ref = secanims[i].scroll_line_ref;
 
-			if (!sec_ref || !special_ref || !line_ref)
+			if (!sec_ref || !special_ref || !line_ref || 
+				!(special_ref->scroll_type & ScrollType_Displace || special_ref->scroll_type & ScrollType_Accel))
 				continue;
 
-			if (special_ref->scroll_type & ScrollType_Displace)
+			float heightref = special_ref->scroll_type & ScrollType_Displace ? secanims[i].last_height : sec_ref->orig_height;
+			float sy = line_ref->length / 32.0f * line_ref->dy / line_ref->length * 
+				((sec_ref->f_h + sec_ref->c_h) - heightref);
+			float sx = line_ref->length / 32.0f * line_ref->dx / line_ref->length * 
+				((sec_ref->f_h + sec_ref->c_h) - heightref);
+			if (r_doubleframes.d && special_ref->scroll_type & ScrollType_Displace)
 			{
-				float ratio = line_ref->length / 32.0f;
-				float sdx = -(line_ref->dx / line_ref->length);
-				float sdy = -(line_ref->dy / line_ref->length);
-				if (sec_ref->floor_move)
-				{
-					float speed = sec_ref->floor_move->speed;
-					int dir = sec_ref->floor_move->direction;
-					float sy = speed * ratio * sdy * dir;
-					float sx = speed * ratio * sdx * dir;
-					if (special_ref->sector_effect & SECTFX_PushThings)
-					{
-						sec->props.net_push.y += line_ref->dy / 32.0f * BOOM_CARRY_FACTOR * speed * dir;
-						sec->props.net_push.x += line_ref->dx / 32.0f * BOOM_CARRY_FACTOR * speed * dir;
-					}
-					if (special_ref->sector_effect & SECTFX_ScrollFloor)
-					{
-						sec->floor.net_scroll.y += sy;
-						sec->floor.net_scroll.x += sx;
-					}
-					if (special_ref->sector_effect & SECTFX_ScrollCeiling)
-					{
-						sec->ceil.net_scroll.y += sy;
-						sec->ceil.net_scroll.x += sx;
-					}
-				}
-				if (sec_ref->ceil_move)
-				{
-					float speed = sec_ref->ceil_move->speed;
-					int dir = sec_ref->ceil_move->direction;
-					float sy = speed * ratio * sdy * dir;
-					float sx = speed * ratio * sdx * dir;
-					if (special_ref->sector_effect & SECTFX_PushThings)
-					{
-						sec->props.net_push.y += line_ref->dy / 32.0f * BOOM_CARRY_FACTOR * speed * dir;
-						sec->props.net_push.x += line_ref->dx / 32.0f * BOOM_CARRY_FACTOR * speed * dir;
-					}
-					if (special_ref->sector_effect & SECTFX_ScrollFloor)
-					{
-						sec->floor.net_scroll.y += sy;
-						sec->floor.net_scroll.x += sx;
-					}
-					if (special_ref->sector_effect & SECTFX_ScrollCeiling)
-					{
-						sec->ceil.net_scroll.y += sy;
-						sec->ceil.net_scroll.x += sx;
-					}
-				}
+				sy *= 2;
+				sx *= 2;
 			}
-			if (special_ref->scroll_type & ScrollType_Accel)
+			if (special_ref->sector_effect & SECTFX_PushThings)
 			{
-				float ratio = line_ref->length / 32.0f;
-				float sdx = line_ref->dx / line_ref->length;
-				float sdy = line_ref->dy / line_ref->length;
-				if (sec_ref->floor_move && sec_ref->floor_move->sector->f_h != sec_ref->floor_move->startheight)
-				{
-					float dist = (sec_ref->floor_move->destheight < sec_ref->floor_move->startheight ? 
-						std::abs(sec_ref->floor_move->startheight - sec_ref->f_h) : -std::abs(sec_ref->floor_move->startheight - sec_ref->f_h));
-					float sy = ratio * sdy * dist;
-					float sx = ratio * sdx * dist;
-					if (special_ref->sector_effect & SECTFX_PushThings)
-					{
-						sec->props.net_push.y -= BOOM_CARRY_FACTOR * sy; 
-						sec->props.net_push.x -= BOOM_CARRY_FACTOR * sx; 
-					}
-					if (special_ref->sector_effect & SECTFX_ScrollFloor)
-					{
-						sec->floor.net_scroll.y += sy;
-						sec->floor.net_scroll.x += sx;
-					}
-					if (special_ref->sector_effect & SECTFX_ScrollCeiling)
-					{
-						sec->ceil.net_scroll.y += sy;
-						sec->ceil.net_scroll.x += sx;
-					}	
-				}
-				if (sec_ref->ceil_move)
-				{
-					float dist = (sec_ref->ceil_move->destheight < sec_ref->ceil_move->startheight ? 
-						std::abs(sec_ref->ceil_move->startheight - sec_ref->c_h) : -std::abs(sec_ref->ceil_move->startheight - sec_ref->c_h));
-					float sy = ratio * sdy * dist;
-					float sx = ratio * sdx * dist;
-					if (special_ref->sector_effect & SECTFX_PushThings)
-					{
-						sec->props.net_push.y -= BOOM_CARRY_FACTOR * sy; 
-						sec->props.net_push.x -= BOOM_CARRY_FACTOR * sx; 
-					}
-					if (special_ref->sector_effect & SECTFX_ScrollFloor)
-					{
-						sec->floor.net_scroll.y += sy;
-						sec->floor.net_scroll.x += sx;
-					}
-					if (special_ref->sector_effect & SECTFX_ScrollCeiling)
-					{
-						sec->ceil.net_scroll.y += sy;
-						sec->ceil.net_scroll.x += sx;
-					}	
-				}
+				sec->props.net_push.y += BOOM_CARRY_FACTOR * sy;
+				sec->props.net_push.x += BOOM_CARRY_FACTOR * sx;
 			}
+			if (special_ref->sector_effect & SECTFX_ScrollFloor)
+			{
+				sec->floor.net_scroll.y -= sy;
+				sec->floor.net_scroll.x -= sx;
+			}
+			if (special_ref->sector_effect & SECTFX_ScrollCeiling)
+			{
+				sec->ceil.net_scroll.y -= sy;
+				sec->ceil.net_scroll.x -= sx;
+			}
+			secanims[i].last_height = sec_ref->f_h + sec_ref->c_h;
 		}
 	}
 
@@ -2855,6 +2570,8 @@ void P_SpawnSpecials2(int autotag)
 			anim.floor_scroll.x -= dx * secSpecial->f.scroll_speed / 32.0f;
 			anim.floor_scroll.y -= dy * secSpecial->f.scroll_speed / 32.0f;
 
+			anim.last_height = sector->orig_height;
+
 			secanims.push_back(anim);
 
 			P_AddSpecialSector(sector);
@@ -2869,6 +2586,8 @@ void P_SpawnSpecials2(int autotag)
 
 			anim.ceil_scroll.x -= dx * secSpecial->c.scroll_speed / 32.0f;
 			anim.ceil_scroll.y -= dy * secSpecial->c.scroll_speed / 32.0f;
+
+			anim.last_height = sector->orig_height;
 
 			secanims.push_back(anim);
 

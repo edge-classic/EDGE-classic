@@ -364,6 +364,8 @@ static void LoadSectors(int lump)
             ss->c_h = (ms->floor_h == ms->ceil_h) ? 0 : 128.0f;
         }
 
+		ss->orig_height = (ss->f_h + ss->c_h);
+
 		ss->floor.translucency = VISIBLE;
 		ss->floor.x_mat.x = 1;  ss->floor.x_mat.y = 0;
 		ss->floor.y_mat.x = 0;  ss->floor.y_mat.y = 1;
@@ -1527,6 +1529,8 @@ static void LoadUDMFSectors()
 				ss->f_h = 0;
 				ss->c_h = (fz == cz) ? 0 : 128.0f;
 			}
+
+			ss->orig_height = (ss->f_h + ss->c_h);
 
 			ss->floor.translucency = VISIBLE;
 			ss->floor.x_mat.x = 1;  ss->floor.x_mat.y = 0;

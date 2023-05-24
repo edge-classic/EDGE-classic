@@ -336,8 +336,9 @@ typedef struct sector_s
 	// -AJA- 2000/03/30: Keep a list of child subsectors.
 	struct subsector_s *subsectors;
 
-	// Test for dynamic scroll/push/offset
+	// For dynamic scroll/push/offset
 	bool old_stored = false;
+	float orig_height;
 
 	// Boom door lighting stuff
 	int min_neighbor_light;
@@ -570,6 +571,7 @@ typedef struct secanim_s
 	vec2_t ceil_scroll = {0,0};
 	vec3_t push = {0,0,0};
 	bool permanent = false;
+	float last_height = 0.0f;
 }
 secanim_t;
 
@@ -588,6 +590,7 @@ typedef struct lineanim_s
 	float dynamic_dx = 0.0;
 	float dynamic_dy = 0.0;
 	bool permanent = false;
+	float last_height = 0.0f;
 }
 lineanim_t;
 

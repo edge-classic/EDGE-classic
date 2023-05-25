@@ -500,8 +500,9 @@ static void ParseUMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			std::string it_builder = value;
 			while (lex.Match(","))
 			{
+				it_builder.append("\n");
 				lex.Next(value);
-				it_builder.append(value).append("\n");
+				it_builder.append(value);
 			}
 			if (val->intertext) free(val->intertext);
 			val->intertext = (char *)calloc(it_builder.size()+1, sizeof(char));
@@ -512,8 +513,9 @@ static void ParseUMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			std::string it_builder = value;
 			while (lex.Match(","))
 			{
+				it_builder.append("\n");
 				lex.Next(value);
-				it_builder.append(value).append("\n");
+				it_builder.append(value);
 			}
 			if (val->intertextsecret) free(val->intertextsecret);
 			val->intertextsecret = (char *)calloc(it_builder.size()+1, sizeof(char));

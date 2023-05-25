@@ -1583,6 +1583,7 @@ void W_ReadUMAPINFOLumps(void)
 		if(Maps.maps[i].endpic[0])
 		{
 			temp_level->nextmapname.clear();
+			temp_level->f_end.pics.clear();
 			temp_level->f_end.pics.push_back(Maps.maps[i].endpic);
 			epi::str_upper(temp_level->f_end.pics.back());
 			temp_level->f_end.picwait = 350000; //1000 seconds

@@ -267,14 +267,14 @@ public:
 
 		return *this;
 	}  // usable range: -1800 to +1800
-	inline hsv_col_c& hsv_col_c::SetSaturation(int sat)
+	inline hsv_col_c& SetSaturation(int sat)
 	{
 		s = sat;
 
 		return *this;
 	}
 
-	inline hsv_col_c& hsv_col_c::SetValue(int val)
+	inline hsv_col_c& SetValue(int val)
 	{
 		v = val;
 

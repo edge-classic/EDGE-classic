@@ -21,8 +21,6 @@
 
 #include "local.h"
 
-#include "m_option.h" // For splash_screen check - Dasho
-
 #undef  DF
 #define DF  DDF_FIELD
 
@@ -292,19 +290,8 @@ static void DDF_GameGetMap(const char *info, void *storage)
 
 static void DDF_GameGetPic(const char *info, void *storage)
 {
-	if (splash_screen)
-	{
-		dynamic_gamedef->titlepics.push_back(info);
-	}
-	else
-	{
-		if (strcmp(info, "EDGECRED") != 0)
-		{
-			dynamic_gamedef->titlepics.push_back(info);
-		}
-	}
+	dynamic_gamedef->titlepics.push_back(info);
 }
-
 
 static specflags_t lighting_names[] =
 {

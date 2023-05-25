@@ -121,7 +121,6 @@ static default_t defaults[] =
     {CFGT_Enum,     "autoaim",           &global_flags.autoaim, CFGDEF_AUTOAIM},
     {CFGT_Int,      "doom_fading",       &doom_fading,    CFGDEF_DOOM_FADING},
     {CFGT_Boolean,  "shootthru_scenery", &global_flags.pass_missile, CFGDEF_PASS_MISSILE},
-	{CFGT_Boolean,  "splash_screen",     &splash_screen, true},
 	{CFGT_Int,  "swirling_flats",     &swirling_flats, 0},
 
 	{CFGT_Boolean,  "pistol_starts",             &pistol_starts, 0},

@@ -1401,13 +1401,19 @@ void W_ReadUMAPINFOLumps(void)
 				conflict_level->f_pre.text_flat.clear();
 			}
 			
-
-			std::string temp_ref = epi::STR_Format("%sINTERTEXT", Maps.maps[i].mapname);
-            std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].intertext);
-            language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
-			temp_level->f_end.text = temp_ref;
-			temp_level->f_end.picwait = 350; //10 seconds
-
+			if (epi::case_cmp(Maps.maps[i].intertext, "clear") == 0)
+			{
+				temp_level->f_end.text.clear();
+				temp_level->f_end.text_flat.clear();
+			}
+			else
+			{
+				std::string temp_ref = epi::STR_Format("%sINTERTEXT", Maps.maps[i].mapname);
+				std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].intertext);
+				language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
+				temp_level->f_end.text = temp_ref;
+				temp_level->f_end.picwait = 350; //10 seconds
+			}
 
 			if(Maps.maps[i].interbackdrop[0])
 			{
@@ -1501,70 +1507,78 @@ void W_ReadUMAPINFOLumps(void)
 					epi::str_upper(secret_level->lump);
 					mapdefs.Insert(secret_level);
 				}
-				std::string temp_ref = epi::STR_Format("%sPRETEXT", secret_level->name.c_str());
-            	std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].intertextsecret);
-            	language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
 
-				//hack for shitty dbp shennanigans :/
-				if (temp_level->nextmapname == temp_level->secretmapname)
+				if (epi::case_cmp(Maps.maps[i].intertextsecret, "clear") == 0)
 				{
-					temp_level->f_end.text = temp_ref;
-					temp_level->f_end.picwait = 700; //20 seconds
-
-					if(Maps.maps[i].interbackdrop[0])
-					{
-						const image_c *rim;
-						std::string ibd_lookup = Maps.maps[i].interbackdrop;
-						epi::str_upper(ibd_lookup);
-
-						rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
-
-						if (! rim) //no flat
-						{
-							rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
-							
-							if (! rim) // no graphic
-								temp_level->f_end.text_flat = "FLOOR4_8"; //should not happen
-							else //background is a graphic
-								temp_level->f_end.text_back = ibd_lookup;
-						}
-						else //background is a flat
-						{
-							temp_level->f_end.text_flat = ibd_lookup;
-						}
-					}
+					secret_level->f_pre.text.clear();
+					secret_level->f_pre.text_flat.clear();
 				}
 				else
 				{
-					secret_level->f_pre.text = temp_ref;
-					secret_level->f_pre.picwait = 700; //20 seconds
-					if (temp_level->f_end.music)
-						secret_level->f_pre.music=temp_level->f_end.music;
+					std::string temp_ref = epi::STR_Format("%sPRETEXT", secret_level->name.c_str());
+					std::string temp_value = epi::STR_Format(" %s ",Maps.maps[i].intertextsecret);
+					language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
 
-					if(Maps.maps[i].interbackdrop[0])
+					//hack for shitty dbp shennanigans :/
+					if (temp_level->nextmapname == temp_level->secretmapname)
 					{
-						const image_c *rim;
-						std::string ibd_lookup = Maps.maps[i].interbackdrop;
-						epi::str_upper(ibd_lookup);
+						temp_level->f_end.text = temp_ref;
+						temp_level->f_end.picwait = 700; //20 seconds
 
-						rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
+						if(Maps.maps[i].interbackdrop[0])
+						{
+							const image_c *rim;
+							std::string ibd_lookup = Maps.maps[i].interbackdrop;
+							epi::str_upper(ibd_lookup);
 
-						if (! rim) //no flat
-						{
-							rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
-							
-							if (! rim) // no graphic
-								secret_level->f_pre.text_flat = "FLOOR4_8"; //should not happen
-							else //background is a graphic
-								secret_level->f_pre.text_back = ibd_lookup;
-						}
-						else //background is a flat
-						{
-							secret_level->f_pre.text_flat = ibd_lookup;
+							rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
+
+							if (! rim) //no flat
+							{
+								rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
+								
+								if (! rim) // no graphic
+									temp_level->f_end.text_flat = "FLOOR4_8"; //should not happen
+								else //background is a graphic
+									temp_level->f_end.text_back = ibd_lookup;
+							}
+							else //background is a flat
+							{
+								temp_level->f_end.text_flat = ibd_lookup;
+							}
 						}
 					}
-				}
-				
+					else
+					{
+						secret_level->f_pre.text = temp_ref;
+						secret_level->f_pre.picwait = 700; //20 seconds
+						if (temp_level->f_end.music)
+							secret_level->f_pre.music=temp_level->f_end.music;
+
+						if(Maps.maps[i].interbackdrop[0])
+						{
+							const image_c *rim;
+							std::string ibd_lookup = Maps.maps[i].interbackdrop;
+							epi::str_upper(ibd_lookup);
+
+							rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
+
+							if (! rim) //no flat
+							{
+								rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
+								
+								if (! rim) // no graphic
+									secret_level->f_pre.text_flat = "FLOOR4_8"; //should not happen
+								else //background is a graphic
+									secret_level->f_pre.text_back = ibd_lookup;
+							}
+							else //background is a flat
+							{
+								secret_level->f_pre.text_flat = ibd_lookup;
+							}
+						}
+					}
+				}				
 			}
 		}
 				

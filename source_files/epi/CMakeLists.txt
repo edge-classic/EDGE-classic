@@ -14,6 +14,7 @@ add_library(
   image_funcs.cc
   math_angle.cc
   math_bbox.cc
+  math_color.cc
   math_crc.cc
   math_md5.cc
   math_vector.cc

@@ -1586,7 +1586,7 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->f_end.pics.clear();
 			temp_level->f_end.pics.push_back(Maps.maps[i].endpic);
 			epi::str_upper(temp_level->f_end.pics.back());
-			temp_level->f_end.picwait = 350000; //1000 seconds
+			temp_level->f_end.picwait = INT_MAX; // Stay on endpic for now
 		}
 
 		if(Maps.maps[i].dobunny)

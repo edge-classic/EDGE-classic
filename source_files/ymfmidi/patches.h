@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <string>
 #include <unordered_map>
+#include <cstdint>
 
 // one carrier/modulator pair in a patch, out of a possible two
 struct PatchVoice

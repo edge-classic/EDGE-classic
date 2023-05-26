@@ -141,6 +141,7 @@ extern cvar_c v_sync;
 extern cvar_c g_bobbing;
 extern cvar_c v_secbright;
 extern cvar_c v_gamma;
+extern cvar_c r_titlescaling;
 
 static int monitor_size;
 
@@ -212,6 +213,7 @@ static char AAim[]      = "Off/On/Mlook";
 static char MipMaps[]   = "None/Good/Best";
 static char Details[]   = "Low/Medium/High";
 static char Hq2xMode[]  = "Off/UI Only/UI & Sprites/All";
+static char TitleScaleMode[]  = "Normal/Zoom/Stretch/Fill Border";
 static char Invuls[]    = "Simple/Textured";
 static char MonitSiz[]  = "5:4/4:3/3:2/16:10/16:9/21:9";
 static char VidOverlays[]  = "None/Lines 1x/Lines 2x/Vertical 1x/Vertical 2x/Grill 1x/Grill 2x";
@@ -402,6 +404,7 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Switch,  "Framerate Target", "35 FPS/70 FPS", 2, &r_doubleframes.d, M_UpdateCVARFromInt, NULL, &r_doubleframes},
 	{OPT_Switch,  "Smoothing",         YesNo, 2, &var_smoothing, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "H.Q.2x Scaling", Hq2xMode, 4, &hq2x_scaling, M_ChangeMipMap, NULL},
+	{OPT_Switch,  "Title/Intermission Scaling", TitleScaleMode, 4, &r_titlescaling.d, M_UpdateCVARFromInt, NULL, &r_titlescaling},
 	{OPT_Switch,  "Dynamic Lighting", DLMode, 2, &use_dlights, NULL, NULL},
 	{OPT_Switch,  "Detail Level",   Details,  3, &detail_level, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Mipmapping",     MipMaps,  3, &var_mipmapping, M_ChangeMipMap, NULL},

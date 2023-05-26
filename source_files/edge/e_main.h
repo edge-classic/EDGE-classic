@@ -60,6 +60,8 @@ extern bool custom_MenuMain;
 extern bool custom_MenuEpisode;
 extern bool custom_MenuDifficulty;
 
+extern cvar_c r_titlescaling;
+
 #endif // __E_MAIN__
 
 //--- editor settings ---

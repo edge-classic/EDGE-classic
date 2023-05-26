@@ -50,6 +50,7 @@ extern int con_cursor;
 extern font_c *endoom_font;
 extern cvar_c r_overlay;
 extern cvar_c r_doubleframes;
+extern cvar_c r_titlescaling;
 
 static font_c *default_font;
 
@@ -706,9 +707,21 @@ void HUD_DrawImageTitleWS(const image_c *title_image)
 	float CenterX = 0;
 
 	//1. Calculate scaling to apply.
-	TempScale = 200;
-	TempScale /= title_image->actual_h;
-	//TempWidth = title_image->actual_w * TempScale;
+
+	if (r_titlescaling.d == 1) // Prserve aspect ratio; scale until vertical and horizontal screen space is filled ("Zoom")
+	{
+		TempScale = hud_x_right-hud_x_left;
+		TempScale /= title_image->actual_w;
+		//TempWidth = title_image->actual_w * TempScale;
+		while (title_image->actual_h * TempScale < 200)
+			TempScale *= 1.01f;
+	}
+	else // Clamp to 200 height; preserve aspect ratio ("Normal")
+	{
+		TempScale = 200;
+		TempScale /= title_image->actual_h;
+	}
+	
 	TempWidth = IM_WIDTH(title_image) * TempScale; //respect ASPECT in images.ddf at least
 	TempHeight = title_image->actual_h * TempScale;
 	
@@ -717,7 +730,7 @@ void HUD_DrawImageTitleWS(const image_c *title_image)
 	CenterX -= TempWidth / 2;
 
 	//3. Draw it.
-	HUD_StretchImage(CenterX, 0, TempWidth, TempHeight, title_image, 0.0, 0.0);
+	HUD_StretchImage(CenterX, -0.1f, TempWidth, TempHeight+0.1f, title_image, 0.0, 0.0);
 }
 
 float HUD_GetImageWidth(const image_c *img)

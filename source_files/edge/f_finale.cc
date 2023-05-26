@@ -382,8 +382,14 @@ static void TextWrite(void)
 		}
 		else
 		{
-			//Lobo: if it's a normal graphic, no tile and center it
-			HUD_DrawImageTitleWS(finale_textback); //Lobo: Widescreen support
+			if (r_titlescaling.d == 2) // Stretch
+				HUD_StretchImage(hud_x_left, 0, hud_x_right-hud_x_left, 200, finale_textback, 0, 0);
+			else
+			{
+				if (r_titlescaling.d == 3) // Fill Border
+					HUD_StretchImage(-320, -200, 960, 600, finale_textback, 0, 0);
+				HUD_DrawImageTitleWS(finale_textback);
+			}
 		}
 
 		// reset coordinate system
@@ -712,8 +718,6 @@ static void CastSkip(void)
 static void CastDrawer(void)
 {
 	float TempScale = 1.0;
-	//const image_c *image = W_ImageLookup("BOSSBACK");
-	//HUD_DrawImageTitleWS(image); //Lobo: Widescreen support
 
 	const image_c *image;
 
@@ -724,7 +728,14 @@ static void CastDrawer(void)
 	else
 	{
 		image = W_ImageLookup("BOSSBACK");
-		HUD_DrawImageTitleWS(image); //Lobo: Widescreen support
+		if (r_titlescaling.d == 2) // Stretch
+			HUD_StretchImage(hud_x_left, 0, hud_x_right-hud_x_left, 200, image, 0, 0);
+		else
+		{
+			if (r_titlescaling.d == 3) // Fill Border
+				HUD_StretchImage(-320, -200, 960, 600, image, 0, 0);
+			HUD_DrawImageTitleWS(image);
+		}
 	}
 	
 	HUD_SetAlignment(0, -1);
@@ -908,9 +919,14 @@ void F_Drawer(void)
 		case f_pic:
 			{
 				const image_c *image = W_ImageLookup(finale->pics[picnum].c_str());
-
-				HUD_DrawImageTitleWS(image); //Lobo: Widescreen support
-				//HUD_StretchImage(0, 0, 320, 200, image);
+				if (r_titlescaling.d == 2) // Stretch
+					HUD_StretchImage(hud_x_left, 0, hud_x_right-hud_x_left, 200, image, 0, 0);
+				else
+				{
+					if (r_titlescaling.d == 3) // Fill Border
+						HUD_StretchImage(-320, -200, 960, 600, image, 0, 0);
+					HUD_DrawImageTitleWS(image);
+				}
 			}
 			break;
 

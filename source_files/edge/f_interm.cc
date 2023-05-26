@@ -420,7 +420,16 @@ static void DrawLevelFinished(void)
 		if (tile_leaving_bg)
 			HUD_TileImage(-240, 0, 820, 200, leaving_bg_image);
 		else
-			HUD_DrawImageTitleWS(leaving_bg_image); //Lobo: Widescreen support
+		{
+			if (r_titlescaling.d == 2) // Stretch
+				HUD_StretchImage(hud_x_left, 0, hud_x_right-hud_x_left, 200, leaving_bg_image, 0, 0);
+			else
+			{
+				if (r_titlescaling.d == 3) // Fill Border
+					HUD_StretchImage(-320, -200, 960, 600, leaving_bg_image, 0, 0);
+				HUD_DrawImageTitleWS(leaving_bg_image);
+			}
+		}
 	}
 
 	float y = WI_TITLEY;
@@ -542,7 +551,16 @@ static void DrawEnteringLevel(void)
 		if (tile_entering_bg)
 			HUD_TileImage(-240, 0, 820, 200, entering_bg_image);
 		else
-			HUD_DrawImageTitleWS(entering_bg_image); //Lobo: Widescreen support
+		{
+			if (r_titlescaling.d == 2) // Stretch
+				HUD_StretchImage(hud_x_left, 0, hud_x_right-hud_x_left, 200, entering_bg_image, 0, 0);
+			else
+			{
+				if (r_titlescaling.d == 3) // Fill Border
+					HUD_StretchImage(-320, -200, 960, 600, entering_bg_image, 0, 0);
+				HUD_DrawImageTitleWS(entering_bg_image);
+			}
+		}
 	}
 
 	float y = WI_TITLEY;
@@ -1786,7 +1804,16 @@ void WI_Drawer(void)
 			if (tile_bg)
 				HUD_TileImage(-240, 0, 820, 200, bg_image); //Lobo: Widescreen support
 			else
-				HUD_DrawImageTitleWS(bg_image); //Lobo: Widescreen support
+			{
+				if (r_titlescaling.d == 2) // Stretch
+					HUD_StretchImage(hud_x_left, 0, hud_x_right-hud_x_left, 200, bg_image, 0, 0);
+				else
+				{
+					if (r_titlescaling.d == 3) // Fill Border
+						HUD_StretchImage(-320, -200, 960, 600, bg_image, 0, 0);
+					HUD_DrawImageTitleWS(bg_image);
+				}
+			}
 
 			for (int i = 0; i < worldint.numanims; i++)
 			{

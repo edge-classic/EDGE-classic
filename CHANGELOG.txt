@@ -56,6 +56,9 @@ Bugs fixed
 
 + Fixed accidental clearing of OPL registers when the 'Pause' key was used
 
++ Added address sanitizing support and fixed a number of leaks and other memory issues
+
++ Fixed all warnings under MSVC compiler 
 
 General Improvements
 --------------------
@@ -119,9 +122,7 @@ General Improvements
 
 New Features
 ------------
-+ Added WebGL platform support
-
-+ Added GLES2 rendering backend using GL4ES (https://github.com/ptitSeb/gl4es) 
++ Added WebGL platform support (https://edge-classic.github.io/play.html)
 
 + UDMF:
   - Vertex slope support: Must define "zfloor" or "zceiling" for a vertex.
@@ -133,7 +134,10 @@ New Features
     - The zceiling value must be identical between the two vertices for a ceiling slope
     - The floor and ceiling slope for a rectangular sector can use different vertices as long
       as they fulfill the other conditions
-	  
+
++ Added GLES2 rendering backend using GL4ES (https://github.com/ptitSeb/gl4es) 
+  - Supports rendering with Direct3D, Vulkan, and Metal using ANGLE
+
 + WEAPONS.DDF: 10 new action commands. Behave identically as the things.ddf actions of the same name
   - ZOOM
   - SET_INVULNERABLE

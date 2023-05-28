@@ -101,6 +101,48 @@ namespace epi
 			| (x << 24);
 	}
 
+	// Get LE/BE values from pointer regardless of buffer alignment
+	inline u16_t GetU16LE( const u8_t* p)
+	{
+		return  EPI_LE_U16(p[1] << 8 | p[0]);
+	}
+
+	inline s16_t GetS16LE( const u8_t* p)
+	{
+		return (s16_t) GetU16LE(p);
+	}
+
+	inline u32_t GetU32LE( const u8_t* p )
+	{
+		return  EPI_LE_U32(p[3] << 24 | p[2] << 16 | p[1] <<  8 | p[0]);
+	}
+
+	inline s32_t GetS32LE( const u8_t* p )
+	{
+		return (s32_t) GetU32LE(p);
+	}
+
+	inline u16_t GetU16BE( const u8_t* p)
+	{
+		return  EPI_BE_U16(p[0] << 8 | p[1]);
+	}
+
+	inline s16_t GetS16BE( const u8_t* p)
+	{
+		return (s16_t) GetU16BE(p);
+	}
+
+	inline u32_t GetU32BE( const u8_t* p )
+	{
+		return  EPI_BE_U32(p[0] << 24 | p[1] << 16 | p[2] <<  8 | p[3]);
+	}
+
+	inline s32_t GetS32BE( const u8_t* p )
+	{
+		return (s32_t) GetU32BE(p);
+	}
+
+
 } // namespace epi
 
 #endif  /* __EPI_ENDIAN_H__ */

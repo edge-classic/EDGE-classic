@@ -43,6 +43,7 @@
 #include "flat.h"
 
 #include "image_data.h"
+#include "image_blur.h"
 #include "image_hq2x.h"
 #include "image_funcs.h"
 #include "path.h"
@@ -268,6 +269,38 @@ image_c::~image_c()
   /* TODO: image_c destructor */
 }
 
+void W_ImageStoreBlurred(const image_c *image, float sigma)
+{
+	// const override
+	image_c *img = (image_c *)image;
+	if (!img->blurred_version)
+	{
+		img->blurred_version = new image_c;
+		img->blurred_version->name = std::string(img->name).append("_BLURRED");
+		img->blurred_version->actual_h = img->actual_h;
+		img->blurred_version->actual_w = img->actual_w;
+		img->blurred_version->is_empty = img->is_empty;
+		img->blurred_version->is_font = img->is_font;
+		img->blurred_version->liquid_type = img->liquid_type;
+		img->blurred_version->offset_x = img->offset_x;
+		img->blurred_version->offset_y = img->offset_y;
+		img->blurred_version->opacity = img->opacity;
+		img->blurred_version->ratio_h = img->ratio_h;
+		img->blurred_version->ratio_w = img->ratio_w;
+		img->blurred_version->scale_x = img->scale_x;
+		img->blurred_version->scale_y = img->scale_y;
+		img->blurred_version->source = img->source;
+		img->blurred_version->source_palette = img->source_palette;
+		img->blurred_version->source_type = img->source_type;
+		img->blurred_version->total_h = img->total_h;
+		img->blurred_version->total_w = img->total_w;
+		img->blurred_version->anim.cur = img->blurred_version;
+		img->blurred_version->anim.next = NULL;
+		img->blurred_version->anim.count = 0;
+		img->blurred_version->anim.speed = 0;
+		img->blurred_version->blur_sigma = sigma;
+	}
+}
 
 static image_c *NewImage(int width, int height, int opacity = OPAC_Unknown)
 {
@@ -698,6 +731,7 @@ static image_c *AddImage_DOOM(imagedef_c *def, bool user_defined = false)
 	rim->hsv_rotation = def->hsv_rotation;
 	rim->hsv_saturation = def->hsv_saturation;
 	rim->hsv_value = def->hsv_value;
+	rim->blur_sigma = def->blur_factor;
 
 	rim->source.graphic.special = IMGSP_None;
 
@@ -830,6 +864,7 @@ static image_c *AddImageUser(imagedef_c *def)
 	rim->hsv_rotation = def->hsv_rotation;
 	rim->hsv_saturation = def->hsv_saturation;
 	rim->hsv_value = def->hsv_value;
+	rim->blur_sigma = def->blur_factor;
 
 	if (def->special & IMGSP_Crosshair)
 	{
@@ -1160,7 +1195,8 @@ static bool IM_ShouldSmooth(image_c *rim)
    	if (epi::prefix_case_cmp(rim->name, "SKY") == 0)
 		return true;
 
-	// TODO: more smooth options
+	if (rim->blur_sigma > 0.0f)
+		return true;
 
 	return var_smoothing ? true : false;
 }
@@ -1297,6 +1333,13 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 			rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
 		}
 
+		if (rim->blur_sigma > 0.0f)
+		{
+			epi::image_data_c *blurred_img = epi::Blur::Blur(scaled_img, rim->blur_sigma);
+			delete scaled_img;
+			scaled_img = blurred_img;
+		}
+
 		delete tmp_img;
 		tmp_img = scaled_img;
 	}
@@ -1311,6 +1354,13 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 			rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
 		}
 
+		if (rim->blur_sigma > 0.0f)
+		{
+			epi::image_data_c *blurred_img = epi::Blur::Blur(rgb_img, rim->blur_sigma);
+			delete rgb_img;
+			rgb_img = blurred_img;
+		}
+
 		delete tmp_img;
 		tmp_img = rgb_img;
 	}
@@ -1320,6 +1370,12 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 		{
 			tmp_img->RemoveBackground();
 			rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
+		}
+		if (rim->blur_sigma > 0.0f)
+		{
+			epi::image_data_c *blurred_img = epi::Blur::Blur(tmp_img, rim->blur_sigma);
+			delete tmp_img;
+			tmp_img = blurred_img;
 		}
 		if (trans != NULL)
 			R_PaletteRemapRGBA(tmp_img, what_palette, (const byte *) &playpal_data[0]);

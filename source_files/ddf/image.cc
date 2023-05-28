@@ -52,6 +52,7 @@ static const commandlist_t image_commands[] =
 	DDF_FIELD("ROTATE_HUE",  hsv_rotation, DDF_MainGetNumeric),
 	DDF_FIELD("SATURATION",  hsv_saturation, DDF_MainGetNumeric),
 	DDF_FIELD("BRIGHTNESS",  hsv_value, DDF_MainGetNumeric),
+	DDF_FIELD("BLUR_FACTOR", blur_factor, DDF_MainGetFloat),
 
 	DDF_CMD_END
 };
@@ -440,6 +441,7 @@ void imagedef_c::CopyDetail(const imagedef_c &src)
 	hsv_rotation = src.hsv_rotation;
 	hsv_saturation = src.hsv_saturation;
 	hsv_value = src.hsv_value;
+	blur_factor = src.blur_factor;
 }
 
 void imagedef_c::Default()
@@ -463,6 +465,7 @@ void imagedef_c::Default()
 	hsv_rotation = 0;
 	hsv_saturation = -1;
 	hsv_value = -1;
+	blur_factor = 0.0f;
 }
 
 

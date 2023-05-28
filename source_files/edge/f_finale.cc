@@ -387,7 +387,11 @@ static void TextWrite(void)
 			else
 			{
 				if (r_titlescaling.d == 3) // Fill Border
-					HUD_StretchImage(-320, -200, 960, 600, finale_textback, 0, 0);
+				{
+					if (!finale_textback->blurred_version)
+						W_ImageStoreBlurred(finale_textback, 0.75f);
+					HUD_StretchImage(-320, -200, 960, 600, finale_textback->blurred_version, 0, 0);
+				}
 				HUD_DrawImageTitleWS(finale_textback);
 			}
 		}
@@ -733,7 +737,11 @@ static void CastDrawer(void)
 		else
 		{
 			if (r_titlescaling.d == 3) // Fill Border
-				HUD_StretchImage(-320, -200, 960, 600, image, 0, 0);
+			{
+				if (!image->blurred_version)
+						W_ImageStoreBlurred(image, 0.75f);
+				HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
+			}
 			HUD_DrawImageTitleWS(image);
 		}
 	}
@@ -924,7 +932,11 @@ void F_Drawer(void)
 				else
 				{
 					if (r_titlescaling.d == 3) // Fill Border
-						HUD_StretchImage(-320, -200, 960, 600, image, 0, 0);
+					{
+						if (!image->blurred_version)
+							W_ImageStoreBlurred(image, 0.75f);
+						HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
+					}
 					HUD_DrawImageTitleWS(image);
 				}
 			}

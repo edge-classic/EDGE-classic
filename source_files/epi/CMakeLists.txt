@@ -10,6 +10,7 @@ add_library(
   file_memory.cc
   filesystem.cc
   image_data.cc
+  image_blur.cc
   image_hq2x.cc
   image_funcs.cc
   math_angle.cc

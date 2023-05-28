@@ -127,6 +127,9 @@ public:
 	int hsv_saturation;
 	int hsv_value;
 
+	// Gaussian blurring
+	float blur_factor;
+
 private:
 	// disable copy construct and assignment operator
 	explicit imagedef_c(imagedef_c &rhs) { (void) rhs; }

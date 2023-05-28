@@ -117,6 +117,10 @@ public:
 	int hsv_saturation = -1;
 	int hsv_value = -1;
 
+	// blurring test
+	image_c *blurred_version = nullptr;
+	float blur_sigma = 0.0f;
+
 //!!!!!! private:
 
 	// --- information about where this image came from ---
@@ -177,8 +181,6 @@ public:
 public:
 	 image_c();
 	~image_c();
-
-	/* TODO: add methods here... */
 };
 
 
@@ -277,6 +279,10 @@ const image_c ** W_ImageGetUserSprites(int *count);
 
 // internal routines -- only needed by rgl_wipe.c
 int W_MakeValidSize(int value);
+
+// Store a duplicate version of the image_c with smoothing forced
+// (this may expand to accommodate proper blur algorithms)
+void W_ImageStoreBlurred(const image_c *image, float sigma);
 
 typedef enum
 {

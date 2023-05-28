@@ -223,7 +223,11 @@ public:
 			else
 			{
 				if (r_titlescaling.d == 3) // Fill Border
-					HUD_StretchImage(-320, -200, 960, 600, loading_image, 0, 0);
+				{
+					if (!loading_image->blurred_version)
+						W_ImageStoreBlurred(loading_image, 0.75f);
+					HUD_StretchImage(-320, -200, 960, 600, loading_image->blurred_version, 0, 0);
+				}
 				HUD_DrawImageTitleWS(loading_image);
 			}
 			HUD_SolidBox(25, 25, 295, 175, RGB_MAKE(0, 0, 0));
@@ -697,11 +701,15 @@ static void E_TitleDrawer(void)
 	if (title_image)
 	{
 		if (r_titlescaling.d == 2) // Stretch
-				HUD_StretchImage(hud_x_left, 0, hud_x_right-hud_x_left, 200, title_image, 0, 0);
+			HUD_StretchImage(hud_x_left, 0, hud_x_right-hud_x_left, 200, title_image, 0, 0);
 		else
 		{
 			if (r_titlescaling.d == 3) // Fill Border
-				HUD_StretchImage(-320, -200, 960, 600, title_image, 0, 0);
+			{
+				if (!title_image->blurred_version)
+					W_ImageStoreBlurred(title_image, 0.75f);
+				HUD_StretchImage(-320, -200, 960, 600, title_image->blurred_version, 0, 0);
+			}
 			HUD_DrawImageTitleWS(title_image);
 		}
 	}	

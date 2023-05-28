@@ -23,8 +23,8 @@ struct block_c
 {
 	int used;
 
-// Prevent SIGBUS errors on ARM32
-#ifdef __arm__
+// Prevent SIGBUS errors on ARM32 and heap alignment issues with emscripten
+#if defined( __arm__) || defined(EMSCRIPTEN)
 	double data[4096];
 #else
 	char data[4096];

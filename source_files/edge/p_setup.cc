@@ -1120,7 +1120,7 @@ static void LoadXGL3Nodes(int lumpnum)
 		td = &xgldata[4];
 
 	// after signature, 1st u32 is number of original vertexes - should be <= numvertexes
-	int oVerts = EPI_LE_U32(*(uint32_t*)td);
+	int oVerts = epi::GetU32LE(td);
 	td += 4;
 	if (oVerts > numvertexes)
 	{
@@ -1129,7 +1129,7 @@ static void LoadXGL3Nodes(int lumpnum)
 	}
 
 	// 2nd u32 is the number of extra vertexes added by ajbsp
-	int nVerts = EPI_LE_U32(*(uint32_t*)td);
+	int nVerts = epi::GetU32LE(td);
 	td += 4;
 	I_Debugf("LoadXGL3Nodes: Orig Verts = %d, New Verts = %d, Map Verts = %d\n", oVerts, nVerts, numvertexes);
 
@@ -1141,14 +1141,14 @@ static void LoadXGL3Nodes(int lumpnum)
 	for (i=0; i<nVerts; i++, vv++)
 	{
 		// convert signed 16.16 fixed point to float
-		vv->x = (float)EPI_LE_S32(*(int *)td) / 65536.0f;
+		vv->x = (float)epi::GetS32LE(td) / 65536.0f;
 		td += 4;
-		vv->y = (float)EPI_LE_S32(*(int *)td) / 65536.0f;
+		vv->y = (float)epi::GetS32LE(td) / 65536.0f;
 		td += 4;
 	}
 
 	// new vertexes is followed by the subsectors
-	numsubsectors = EPI_LE_S32(*(int *)td);
+	numsubsectors = epi::GetS32LE(td);
 	td += 4;
 	if (numsubsectors <= 0)
 	{
@@ -1164,14 +1164,14 @@ static void LoadXGL3Nodes(int lumpnum)
 	int xglSegs = 0;
 	for (i=0; i<numsubsectors; i++)
 	{
-		int countsegs = EPI_LE_S32(*(int*)td);
+		int countsegs = epi::GetS32LE(td);
 		td += 4;
 		ss_temp[i] = countsegs;
 		xglSegs += countsegs;
 	}
 
 	// subsectors are followed by the segs
-	numsegs = EPI_LE_S32(*(int *)td);
+	numsegs = epi::GetS32LE(td);
 	td += 4;
 	if (numsegs != xglSegs)
 	{
@@ -1189,11 +1189,11 @@ static void LoadXGL3Nodes(int lumpnum)
 		unsigned int v1num;
 		int slinedef, partner, side;
 
-		v1num = EPI_LE_U32(*(uint32_t*)td);
+		v1num = epi::GetU32LE(td);
 		td += 4;
-		partner = EPI_LE_S32(*(int32_t*)td);
+		partner = epi::GetS32LE(td);
 		td += 4;
-		slinedef = EPI_LE_S32(*(int32_t*)td);
+		slinedef = epi::GetS32LE(td);
 		td += 4;
 		side = (int)(*td);
 		td += 1;
@@ -1279,7 +1279,7 @@ static void LoadXGL3Nodes(int lumpnum)
 	I_Debugf("LoadXGL3Nodes: Read GL nodes\n");
 	// finally, read the nodes
 	// NOTE: no nodes is okay (a basic single sector map). -AJA-
-	numnodes = EPI_LE_U32(*(uint32_t*)td);
+	numnodes = epi::GetU32LE(td);
 	td += 4;
 	I_Debugf("LoadXGL3Nodes: Num nodes = %d\n", numnodes);
 
@@ -1289,48 +1289,27 @@ static void LoadXGL3Nodes(int lumpnum)
 
 	for (i=0; i<numnodes; i++, nd++)
 	{
-	// To imitate Andrew's feelings about stuff like this, this is a filthy HACK for ARM32 and is 
-	// in no way a decent solution, but it works - Dasho
-#ifdef __arm__
-		int td_int = EPI_LE_S32(*(int*)td);
-		std::string arm_nonsense = epi::STR_Format("%d", td_int);
-		nd->div.x  = (float)td_int / 65536.0f;
+		nd->div.x  = (float) epi::GetS32LE(td) / 65536.0f;
 		td += 4;
-		td_int = EPI_LE_S32(*(int*)td);
-		arm_nonsense = epi::STR_Format("%d", td_int);
-		nd->div.y  = (float)td_int / 65536.0f;
+		nd->div.y  = (float) epi::GetS32LE(td) / 65536.0f;
 		td += 4;
-		td_int = EPI_LE_S32(*(int*)td);
-		arm_nonsense = epi::STR_Format("%d", td_int);
-		nd->div.dx = (float)td_int / 65536.0f;
+		nd->div.dx = (float) epi::GetS32LE(td) / 65536.0f;
 		td += 4;
-		td_int = EPI_LE_S32(*(int*)td);
-		arm_nonsense = epi::STR_Format("%d", td_int);
-		nd->div.dy = (float)td_int / 65536.0f;
+		nd->div.dy = (float) epi::GetS32LE(td) / 65536.0f;
 		td += 4;
-#else
-		nd->div.x  = (float)EPI_LE_S32(*(int*)td) / 65536.0f;
-		td += 4;
-		nd->div.y  = (float)EPI_LE_S32(*(int*)td) / 65536.0f;
-		td += 4;
-		nd->div.dx = (float)EPI_LE_S32(*(int*)td) / 65536.0f;
-		td += 4;
-		nd->div.dy = (float)EPI_LE_S32(*(int*)td) / 65536.0f;
-		td += 4;
-#endif
 
 		nd->div_len = R_PointToDist(0, 0, nd->div.dx, nd->div.dy);
 
 		for (int j=0; j<2; j++)
 			for (int k=0; k<4; k++)
 			{
-				nd->bbox[j][k] = (float)EPI_LE_S16(*(int16_t*)td);
+				nd->bbox[j][k] = (float)epi::GetS16LE(td);
 				td += 2;
 			}
 
 		for (int j=0; j<2; j++)
 		{
-			nd->children[j] = EPI_LE_U32(*(uint32_t*)td);
+			nd->children[j] = epi::GetU32LE(td);
 			td += 4;
 
 			// update bbox pointers in subsector

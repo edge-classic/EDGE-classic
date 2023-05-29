@@ -224,9 +224,12 @@ public:
 			{
 				if (r_titlescaling.d == 3) // Fill Border
 				{
-					if (!loading_image->blurred_version)
-						W_ImageStoreBlurred(loading_image, 0.75f);
-					HUD_StretchImage(-320, -200, 960, 600, loading_image->blurred_version, 0, 0);
+					if ((float)loading_image->actual_w/loading_image->actual_h < (float)SCREENWIDTH/SCREENHEIGHT)
+					{
+						if (!loading_image->blurred_version)
+							W_ImageStoreBlurred(loading_image, 0.75f);
+						HUD_StretchImage(-320, -200, 960, 600, loading_image->blurred_version, 0, 0);
+					}
 				}
 				HUD_DrawImageTitleWS(loading_image);
 			}
@@ -706,9 +709,12 @@ static void E_TitleDrawer(void)
 		{
 			if (r_titlescaling.d == 3) // Fill Border
 			{
-				if (!title_image->blurred_version)
-					W_ImageStoreBlurred(title_image, 0.75f);
-				HUD_StretchImage(-320, -200, 960, 600, title_image->blurred_version, 0, 0);
+				if ((float)title_image->actual_w/title_image->actual_h < (float)SCREENWIDTH/SCREENHEIGHT)
+				{
+					if (!title_image->blurred_version)
+						W_ImageStoreBlurred(title_image, 0.75f);
+					HUD_StretchImage(-320, -200, 960, 600, title_image->blurred_version, 0, 0);
+				}
 			}
 			HUD_DrawImageTitleWS(title_image);
 		}

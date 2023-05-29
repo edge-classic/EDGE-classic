@@ -246,8 +246,7 @@ void I_StartupGraphics(void)
     borderless_mode.height = info.h;
     borderless_mode.depth = SDL_BITSPERPIXEL(info.format);
 
-	// -ACB- 2000/03/16 Test for possible windowed resolutions
-	// -AJA- TODO see if SDL2 can give us a definitive list, rather than this silliness
+	// Add anything from our window res list that is less that native resolution
 	for (int i = 0; possible_modes[i].w != -1; i++)
 	{
 		scrmode_c mode;

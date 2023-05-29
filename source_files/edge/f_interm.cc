@@ -427,9 +427,12 @@ static void DrawLevelFinished(void)
 			{
 				if (r_titlescaling.d == 3) // Fill Border
 				{
-					if (!leaving_bg_image->blurred_version)
-						W_ImageStoreBlurred(leaving_bg_image, 0.75f);
-					HUD_StretchImage(-320, -200, 960, 600, leaving_bg_image->blurred_version, 0, 0);
+					if ((float)leaving_bg_image->actual_w/leaving_bg_image->actual_h < (float)SCREENWIDTH/SCREENHEIGHT)
+					{
+						if (!leaving_bg_image->blurred_version)
+							W_ImageStoreBlurred(leaving_bg_image, 0.75f);
+						HUD_StretchImage(-320, -200, 960, 600, leaving_bg_image->blurred_version, 0, 0);
+					}
 				}
 				HUD_DrawImageTitleWS(leaving_bg_image);
 			}
@@ -562,9 +565,12 @@ static void DrawEnteringLevel(void)
 			{
 				if (r_titlescaling.d == 3) // Fill Border
 				{
-					if (!entering_bg_image->blurred_version)
-						W_ImageStoreBlurred(entering_bg_image, 0.75f);
-					HUD_StretchImage(-320, -200, 960, 600, entering_bg_image->blurred_version, 0, 0);
+					if ((float)entering_bg_image->actual_w/entering_bg_image->actual_h < (float)SCREENWIDTH/SCREENHEIGHT)
+					{
+						if (!entering_bg_image->blurred_version)
+							W_ImageStoreBlurred(entering_bg_image, 0.75f);
+						HUD_StretchImage(-320, -200, 960, 600, entering_bg_image->blurred_version, 0, 0);
+					}
 				}
 				HUD_DrawImageTitleWS(entering_bg_image);
 			}
@@ -1819,9 +1825,12 @@ void WI_Drawer(void)
 				{
 					if (r_titlescaling.d == 3) // Fill Border
 					{
-						if (!bg_image->blurred_version)
-							W_ImageStoreBlurred(bg_image, 0.75f);
-						HUD_StretchImage(-320, -200, 960, 600, bg_image->blurred_version, 0, 0);
+						if ((float)bg_image->actual_w/bg_image->actual_h < (float)SCREENWIDTH/SCREENHEIGHT)
+						{
+							if (!bg_image->blurred_version)
+								W_ImageStoreBlurred(bg_image, 0.75f);
+							HUD_StretchImage(-320, -200, 960, 600, bg_image->blurred_version, 0, 0);
+						}
 					}
 					HUD_DrawImageTitleWS(bg_image);
 				}

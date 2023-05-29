@@ -178,11 +178,9 @@ image_data_c *Blur(image_data_c *img, float sigma)
 
 	image_data_c *result = new image_data_c(w, h, c);
 
-    int boxes[3];
-    std_to_box(boxes, sigma, 3);
-    box_blur_rgb(img->pixels, result->pixels, w, h, c, boxes[0]);
-    box_blur_rgb(result->pixels, img->pixels, w, h, c, boxes[1]);
-    box_blur_rgb(img->pixels, result->pixels, w, h, c, boxes[2]);
+    int box;
+    std_to_box(&box, sigma, 1);
+    box_blur_rgb(img->pixels, result->pixels, w, h, c, box);
 
 	return result;
 }

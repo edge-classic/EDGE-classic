@@ -388,9 +388,12 @@ static void TextWrite(void)
 			{
 				if (r_titlescaling.d == 3) // Fill Border
 				{
-					if (!finale_textback->blurred_version)
-						W_ImageStoreBlurred(finale_textback, 0.75f);
-					HUD_StretchImage(-320, -200, 960, 600, finale_textback->blurred_version, 0, 0);
+					if ((float)finale_textback->actual_w/finale_textback->actual_h < (float)SCREENWIDTH/SCREENHEIGHT)
+					{
+						if (!finale_textback->blurred_version)
+							W_ImageStoreBlurred(finale_textback, 0.75f);
+						HUD_StretchImage(-320, -200, 960, 600, finale_textback->blurred_version, 0, 0);
+					}
 				}
 				HUD_DrawImageTitleWS(finale_textback);
 			}
@@ -738,9 +741,12 @@ static void CastDrawer(void)
 		{
 			if (r_titlescaling.d == 3) // Fill Border
 			{
-				if (!image->blurred_version)
-						W_ImageStoreBlurred(image, 0.75f);
-				HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
+				if ((float)image->actual_w/image->actual_h < (float)SCREENWIDTH/SCREENHEIGHT)
+				{
+					if (!image->blurred_version)
+							W_ImageStoreBlurred(image, 0.75f);
+					HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
+				}
 			}
 			HUD_DrawImageTitleWS(image);
 		}
@@ -933,9 +939,12 @@ void F_Drawer(void)
 				{
 					if (r_titlescaling.d == 3) // Fill Border
 					{
-						if (!image->blurred_version)
-							W_ImageStoreBlurred(image, 0.75f);
-						HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
+						if ((float)image->actual_w/image->actual_h < (float)SCREENWIDTH/SCREENHEIGHT)
+						{
+							if (!image->blurred_version)
+								W_ImageStoreBlurred(image, 0.75f);
+							HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
+						}
 					}
 					HUD_DrawImageTitleWS(image);
 				}

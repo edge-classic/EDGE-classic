@@ -5,121 +5,6 @@ Current as of: May 2023
 CHANGELOG for EDGE-Classic 1.34 (since EDGE-Classic 1.33)
 ====================================
 
-Bugs fixed
-----------
-+ Fixed incorrect height for Doom 2 Thing 53.
-
-+ Fixed autoload folder items paths being prepended with the autoload folder path itself
-  (cleanup from prior method of using PATH_Join)
-  
-+ COAL player.query_weapon() would not return ZOOM FACTOR in some cases.
-
-+ Fixed CVAR value strings with spaces not being processed as intended
-
-+ Migrated config file parser to EPI::Lex, fixing a potential buffer overflow in the previous method
-
-+ Fixed -deathmatch startup parameter not being respected
-
-+ Fixed intermissions being played when starting a deathmatch or using the -warp parameter on startup
-
-+ Fixed incorrect positioning of some widescreen status bars
-
-+ Fixed health being picked up when player health was being shown as 100%
-
-+ Fixed armour being picked up when player armour was being shown as 100%
-
-+ More fixes for Boom scroller behavior and physics under various circumstances
-
-+ Backported upstream AJBSP memory leak and integer overflow fixes
-
-+ Fixed offsets and DDFIMAGE specials for user-defined Doom formatted images not being preserved
-
-+ Fixed offsets for various liquid splash images
-
-+ Fixed BFG Edition IWADs not being recognized as valid
-
-+ Fixed console CTD caused by non-printable characters being accepted from DDFLANG
-
-+ Fixed (remote) possibility of numeric RTS script tag and hashed string RTS script tag values colliding
-
-+ Fixed non-hostile jackalope in REKKR having flipped sprites
-
-+ Fixed REKKR projectile attacks not having smoke puffs when appropriate
-
-+ Fixed non-player hitscan attacks failing to activate linetypes 24, 46, and 47
-  - This caused a softlock on REKKR E1M9 as certain doors/walls that relied on a 
-    hitscan-firing dummy would never be activated
-
-+ Fixed explosion sources not being able to damage themselves
-  - This led to a softlock on DBP58 MAP10 as a wall of continuous explosions created
-    by Dehacked-modified things would never be removed
-
-+ Fixed accidental clearing of OPL registers when the 'Pause' key was used
-
-+ Added address sanitizing support and fixed a number of leaks and other memory issues
-
-+ Fixed all warnings under MSVC compiler 
-
-General Improvements
---------------------
-+ Changed AJBSP to open loaded IWADs/PWADs in read mode as an additional means of ensuring original file
-  integrity (was previously set to open in append mode despite not writing nodes to the original files)
-
-+ Added 'udmf_strict' CVAR (off by default until "Edge" namespace is finalized) to control whether or not loading a UDMF map with an unsupported namespace will generate an error.
-
-+ Draw Distance Culling will no longer prevent the skybox from being drawn; maximum distance is now adjustable in the Performance Options menu
-
-+ Draw Distance Culling's BSP culling math has been reworked and offers far better FPS savings versus the previous method in applicable environments
-
-+ COAL:
-  - Color and Hue averaging functions have been reworked to allow for a specific portion of an image to be sampled. Function definitions are now as follows:
-    - hud.get_average_color(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
-    - hud.get_lightest_color(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
-    - hud.get_darkest_color(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
-    - hud.get_average_hue(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
-
-+ WEAPONS.DDF:
-  - Y_ADJUST parameter will now affect weapons that use models instead of sprites
-
-+ THINGS.DDF:
-  - FALLPAIN_SOUND will now account for whether or not the player is invulnerable to damage at the time of the fall
-
-+ New directories, logfiles, etc, will now be written to an appropriate location in the user's home directory by default (AppData, etc, depending on OS). Portable
-  usage is covered in "New Features"
-
-+ "PC Speaker Mode" Sound Option no longer requires a restart to toggle; when On it will always use Fluidlite + the Bonkers for Bits soundfont when playing MIDI music
-
-+ For the RTS REPLACE_WEAPON command and the WEAPONS.DDF BECOME() action: If current ammo is bigger than the new clip size, reduce current ammo to new clip size.
-
-+ Stats screen item layout improved so that long map names are not truncated or overlapping level score/stats
-
-+ Bot Skill will now affect bot movement speed, strafing frequency, turn speed, and angle/confidence required to fire on target
-  - Two additional skill levels added; Very Easy and Very Hard
-
-+ UMAPINFO: Added support for "author" parameter from the UMAPINFO 2.2 spec
-  - AUTHOR parameter also added to LEVELS.DDF
-  - If a map author value is present, this will be displayed in the automap view by default
-
-+ UMAPINFO: Will fallback to other types of MAPINFO lumps if UMAPINFO is not present
-  - The following lumps will be attempted in the order listed, stopping and using the first one found:
-    - DMAPINFO
-    - RMAPINFO
-    - MAPINFO
-    - ZMAPINFO
-  - Only fields that are present in the UMAPINFO spec will be parsed from fallback lumps
-    - A warning message will be printed to the log and console to inform the user that a fallback lump has been used
-
-+ All option menu sliders and associated CVARs converted to use floating point values to reduce confusion and offer more options for precision
-  - CVARs can still be manually set outside of the specified slider limits unless otherwise clamped
-
-+ 'dogs' command support for non-Doom IWADs improved
-  - Heretic and Blasphemer will summon chickens
-  - REKKR will use an arctic version of the MBF dog
-
-+ Fluidlite parameters adjusted to fix pitch issues with various soundfonts
-  - s_fluidgain CVAR also added to allow manual control over gain (clamped in the 0.0-2.0 range)
-
-
 New Features
 ------------
 + Added WebGL platform support (https://edge-classic.github.io/play.html)
@@ -201,12 +86,139 @@ New Features
   - Will search for either a text file with a traditional readme name (readme.txt, readme.1st, etc)
   - If none found, will look for a text file with the same name as a WAD or archive file in the load order
     (this is a common practice for /idgames releases)
+  - If there is still nothing found, will look for WADINFO or README lumps
 
 + Bot Deathmatch: New "Player Damage Resistance" option
   - Found in the Bot Match Settings Menu before starting a match
   - Offers a flat damage resistance adjustable from -90% to +90%
   - Only affects damage whose source is an enemy bot; sources such as
     environmental hazards and self-inflicted damage will bypass this setting
+
++ New Scaling Options for Title/Intermission/Finale Assets
+  - Normal: Will draw assets at their original resolution and ratio
+  - Zoom: Will preserve ratio but scale image until both horizontal and vertical space are filled
+    - Top of image is pinned to top of screen in order to have the best chance of perserving title screen text
+  - Stretch: Will stretch image to fill horizontal and vertical space without regards to the original image ratio
+  - Fill Border: Will fill space not occupied by the original image with a zoomed in, gaussian-blurred version of the same image
+    - This is similar to the border fill for "portrait" style videos
+
+General Improvements
+--------------------
++ Changed AJBSP to open loaded IWADs/PWADs in read mode as an additional means of ensuring original file
+  integrity (was previously set to open in append mode despite not writing nodes to the original files)
+
++ Added 'udmf_strict' CVAR (off by default until "Edge" namespace is finalized) to control whether or not loading a UDMF map with an unsupported namespace will generate an error.
+
++ Draw Distance Culling will no longer prevent the skybox from being drawn; maximum distance is now adjustable in the Performance Options menu
+
++ Draw Distance Culling's BSP culling math has been reworked and offers far better FPS savings versus the previous method in applicable environments
+
++ COAL:
+  - Color and Hue averaging functions have been reworked to allow for a specific portion of an image to be sampled. Function definitions are now as follows:
+    - hud.get_average_color(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
+    - hud.get_lightest_color(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
+    - hud.get_darkest_color(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
+    - hud.get_average_hue(image : string, optional from_x, optional to_x, optional from_y, optional to_y)
+
++ WEAPONS.DDF:
+  - Y_ADJUST parameter will now affect weapons that use models instead of sprites
+
++ THINGS.DDF:
+  - FALLPAIN_SOUND will now account for whether or not the player is invulnerable to damage at the time of the fall
+
++ New directories, logfiles, etc, will now be written to an appropriate location in the user's home directory by default (AppData, etc, depending on OS). Portable
+  usage is covered in "New Features"
+
++ "PC Speaker Mode" Sound Option no longer requires a restart to toggle; when On it will always use Fluidlite + the Bonkers for Bits soundfont when playing MIDI music
+
++ For the RTS REPLACE_WEAPON command and the WEAPONS.DDF BECOME() action: If current ammo is bigger than the new clip size, reduce current ammo to new clip size.
+
++ Stats screen item layout improved so that long map names are not truncated or overlapping level score/stats
+
++ Bot Skill will now affect bot movement speed, strafing frequency, turn speed, and angle/confidence required to fire on target
+  - Two additional skill levels added; Very Easy and Very Hard
+
++ UMAPINFO: Added support for "author" parameter from the UMAPINFO 2.2 spec
+  - AUTHOR parameter also added to LEVELS.DDF
+  - If a map author value is present, this will be displayed in the automap view by default
+
++ UMAPINFO: Added support for Boss Actions, including the "clear" directive
+
++ UMAPINFO: Will fallback to other types of MAPINFO lumps if UMAPINFO is not present
+  - The following lumps will be attempted in the order listed, stopping and using the first one found:
+    - DMAPINFO
+    - RMAPINFO
+    - MAPINFO
+    - ZMAPINFO
+  - Only fields that are present in the UMAPINFO spec will be parsed from fallback lumps
+    - A warning message will be printed to the log and console to inform the user that a fallback lump has been used
+
++ All option menu sliders and associated CVARs converted to use floating point values to reduce confusion and offer more options for precision
+  - CVARs can still be manually set outside of the specified slider limits unless otherwise clamped
+
++ 'dogs' command support for non-Doom IWADs improved
+  - Heretic and Blasphemer will summon chickens
+  - REKKR will use an arctic version of the MBF dog
+
++ Fluidlite parameters adjusted to fix pitch issues with various soundfonts
+  - s_fluidgain CVAR also added to allow manual control over gain (clamped in the 0.0-2.0 range)
+
+
+Bugs fixed
+----------
++ Fixed incorrect height for Doom 2 Thing 53.
+
++ Fixed autoload folder items paths being prepended with the autoload folder path itself
+  (cleanup from prior method of using PATH_Join)
+  
++ COAL player.query_weapon() would not return ZOOM FACTOR in some cases.
+
++ Fixed CVAR value strings with spaces not being processed as intended
+
++ Migrated config file parser to EPI::Lex, fixing a potential buffer overflow in the previous method
+
++ Fixed -deathmatch startup parameter not being respected
+
++ Fixed intermissions being played when starting a deathmatch or using the -warp parameter on startup
+
++ Fixed incorrect positioning of some widescreen status bars
+
++ Fixed health being picked up when player health was being shown as 100%
+
++ Fixed armour being picked up when player armour was being shown as 100%
+
++ More fixes for Boom scroller behavior and physics under various circumstances
+
++ Backported upstream AJBSP memory leak and integer overflow fixes
+
++ Fixed offsets and DDFIMAGE specials for user-defined Doom formatted images not being preserved
+
++ Fixed offsets for various liquid splash images
+
++ Fixed BFG Edition IWADs not being recognized as valid
+
++ Fixed console CTD caused by non-printable characters being accepted from DDFLANG
+
++ Fixed (remote) possibility of numeric RTS script tag and hashed string RTS script tag values colliding
+
++ Fixed non-hostile jackalope in REKKR having flipped sprites
+
++ Fixed REKKR projectile attacks not having smoke puffs when appropriate
+
++ Fixed non-player hitscan attacks failing to activate linetypes 24, 46, and 47
+  - This caused a softlock on REKKR E1M9 as certain doors/walls that relied on a 
+    hitscan-firing dummy would never be activated
+
++ Fixed explosion sources not being able to damage themselves
+  - This led to a softlock on DBP58 MAP10 as a wall of continuous explosions created
+    by Dehacked-modified things would never be removed
+
++ Fixed accidental clearing of OPL registers when the 'Pause' key was used
+
++ Added address sanitizing support and fixed a number of leaks and other memory issues
+
++ Fixed all warnings under MSVC compiler 
+
 
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)
 ====================================

@@ -25,6 +25,7 @@
 
 #include "i_defs.h"
 
+#include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "m_random.h"
@@ -284,10 +285,6 @@ bool EV_Teleport(line_t* line, int tag, mobj_t* thing,
         // don't move for a bit
         thing->reactiontime = def->delay;
 
-        // -ES- 1998/10/29 Start the fading
-        if (telept_effect && player == players[displayplayer])
-            R_StartFading(0, (def->delay * 5) / 2);
-
         thing->mom.x = thing->mom.y = thing->mom.z = 0;
 
 		player->actual_speed = 0;
@@ -336,8 +333,11 @@ bool EV_Teleport(line_t* line, int tag, mobj_t* thing,
             if (fog->info->chase_state)
                 P_SetMobjStateDeferred(fog, fog->info->chase_state, 0);
 
-            if (player == players[displayplayer] && !telept_flash)
+            if (player == players[displayplayer] && reduce_flash)
+            {
                 fog->vis_target = fog->visibility = INVISIBLE;
+                CON_ImportantMessageLDF("Teleporting...");
+            }
         }
     }
 

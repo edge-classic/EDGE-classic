@@ -148,10 +148,7 @@ extern bool png_scrshots;
 
 extern int screen_hud;
 
-// -ES- 1999/08/15 Added teleport effects
-extern int telept_effect;
-extern int telept_flash;
-extern int telept_reverse;
+extern int reduce_flash;
 
 typedef enum
 {

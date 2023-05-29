@@ -1567,8 +1567,20 @@ void A_SFXWeapon3(mobj_t * mo)
 // These three routines make a flash of light when a weapon fires.
 //
 void A_Light0(mobj_t * mo) { mo->player->extralight = 0; }
-void A_Light1(mobj_t * mo) { mo->player->extralight = 1; }
-void A_Light2(mobj_t * mo) { mo->player->extralight = 2; }
+void A_Light1(mobj_t * mo) 
+{ 
+	if (!reduce_flash) 
+		mo->player->extralight = 1;
+	else
+		mo->player->extralight = 0;
+}
+void A_Light2(mobj_t * mo) 
+{ 
+	if (!reduce_flash) 
+		mo->player->extralight = 2;
+	else
+		mo->player->extralight = 0;
+}
 
 
 void A_WeaponJump(mobj_t * mo)

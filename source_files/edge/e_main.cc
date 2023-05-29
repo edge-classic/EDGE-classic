@@ -534,7 +534,6 @@ static void M_DisplayPause(void)
 
 
 wipetype_e wipe_method = WIPE_Melt;
-int wipe_reverse = 0;
 
 static bool need_wipe = false;
 
@@ -632,7 +631,7 @@ void E_Display(void)
 		need_wipe = false;
 		wipe_gl_active = true;
 
-		RGL_InitWipe(wipe_reverse, wipe_method);
+		RGL_InitWipe(wipe_method);
 	}
 
 	if (paused)

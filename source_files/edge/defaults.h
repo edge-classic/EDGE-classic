@@ -83,12 +83,8 @@
 #define CFGDEF_MAP_OVERLAY      (0)
 #define CFGDEF_ROTATEMAP        (0)
 #define CFGDEF_INVUL_FX         (1)  // TEXTURED
-#define CFGDEF_TELEPT_FLASH     (1)
 #define CFGDEF_WIPE_METHOD      (1)
 #define CFGDEF_PNG_SCRSHOTS     (1)
-#define CFGDEF_TELEPT_EFFECT    (0)
-#define CFGDEF_TELEPT_REVERSE   (0)
-#define CFGDEF_WIPE_REVERSE     (0)
 
 // Gameplay Options
 #define CFGDEF_AUTOAIM          (0)

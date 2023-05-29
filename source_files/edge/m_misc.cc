@@ -106,12 +106,9 @@ static default_t defaults[] =
     {CFGT_Int,      "show_messages",     &showMessages,   CFGDEF_SHOWMESSAGES},
 
     // -ES- 1998/11/28 Save fade settings
-    {CFGT_Enum,     "telept_effect",     &telept_effect,  CFGDEF_TELEPT_EFFECT},
-    {CFGT_Int,      "telept_reverse",    &telept_reverse, CFGDEF_TELEPT_REVERSE},
-    {CFGT_Int,      "telept_flash",      &telept_flash,   CFGDEF_TELEPT_FLASH},
+    {CFGT_Int,      "reduce_flash",      &reduce_flash,   0},
     {CFGT_Int,      "invuln_fx",         &var_invul_fx,   CFGDEF_INVUL_FX},
     {CFGT_Enum,     "wipe_method",       &wipe_method,    CFGDEF_WIPE_METHOD},
-    {CFGT_Int,      "wipe_reverse",      &wipe_reverse,   CFGDEF_WIPE_REVERSE},
     {CFGT_Boolean,  "rotatemap",         &rotatemap,      CFGDEF_ROTATEMAP},
     {CFGT_Boolean,  "respawnsetting",    &global_flags.res_respawn, CFGDEF_RES_RESPAWN},
     {CFGT_Boolean,  "itemrespawn",       &global_flags.itemrespawn, CFGDEF_ITEMRESPAWN},
@@ -121,7 +118,7 @@ static default_t defaults[] =
     {CFGT_Enum,     "autoaim",           &global_flags.autoaim, CFGDEF_AUTOAIM},
     {CFGT_Int,      "doom_fading",       &doom_fading,    CFGDEF_DOOM_FADING},
     {CFGT_Boolean,  "shootthru_scenery", &global_flags.pass_missile, CFGDEF_PASS_MISSILE},
-	{CFGT_Int,  "swirling_flats",     &swirling_flats, 0},
+	{CFGT_Int,  	"swirling_flats",     &swirling_flats, 0},
 
 	{CFGT_Boolean,  "pistol_starts",             &pistol_starts, 0},
     // -KM- 1998/07/21 Save the blood setting

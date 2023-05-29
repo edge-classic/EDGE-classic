@@ -108,8 +108,6 @@ void R_Shutdown(void);
 // -ES- 1998/09/11 Added these prototypes.
 void R_SetViewSize(int blocks);
 
-void R_StartFading(int start, int range);
-
 #endif /* __R_MAIN_H__ */
 
 //--- editor settings ---

@@ -62,12 +62,11 @@ typedef enum
 wipetype_e;
 
 extern wipetype_e wipe_method;
-extern int wipe_reverse;
 
 // for enum cvars
 extern const char WIPE_EnumStr[];
 
-void RGL_InitWipe(int reverse, wipetype_e effect);
+void RGL_InitWipe(wipetype_e effect);
 void RGL_StopWipe(void);
 bool RGL_DoWipe(void);
 

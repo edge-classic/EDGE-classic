@@ -40,7 +40,6 @@
 extern cvar_c r_doubleframes;
 
 // we're limited to one wipe at a time...
-static int cur_wipe_reverse = 0;
 static wipetype_e cur_wipe_effect = WIPE_None;
 
 static int cur_wipe_progress;
@@ -145,9 +144,8 @@ static void RGL_Update_Melt(int tics)
 }
 
 
-void RGL_InitWipe(int reverse, wipetype_e effect)
+void RGL_InitWipe(wipetype_e effect)
 {
-	cur_wipe_reverse  = reverse;
 	cur_wipe_effect   = effect;
 
 	cur_wipe_progress =  0;

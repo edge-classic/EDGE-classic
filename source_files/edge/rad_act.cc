@@ -1151,7 +1151,6 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
     int waitAbit = 30;
 
 	p->mo->reactiontime = waitAbit;
-	R_StartFading(0, (waitAbit * 5) / 2);
 
 	//3. Do our teleport fog effect
 	float x = point->x;

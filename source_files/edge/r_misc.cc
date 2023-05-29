@@ -91,12 +91,7 @@ mobj_t *background_camera_mo = NULL;
 angle_t viewanglebaseoffset;
 angle_t viewangleoffset;
 
-int telept_starttic;
-int telept_active = 0;
-
-int telept_effect = 0;
-int telept_flash = 1;
-int telept_reverse = 0;
+int reduce_flash = 0;
 
 int var_invul_fx;
 
@@ -264,15 +259,6 @@ region_properties_t *R_PointGetProps(subsector_t *sub, float z)
 	// extrafloors were exhausted, must be top area
 	return sub->sector->p;
 }
-
-void R_StartFading(int start, int range)
-{
-	(void) range;
-
-	telept_active = true;
-	telept_starttic = start + leveltime;
-}
-
 
 //----------------------------------------------------------------------------
 

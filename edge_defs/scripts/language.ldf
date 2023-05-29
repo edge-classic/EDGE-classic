@@ -35,6 +35,7 @@ MenuMouse="Mouse / Controller";
 MenuSound="Sound Options";
 MenuGameplay="Gameplay Options";
 MenuPerformance="Performance Options";
+MenuAccessibility="Accessibility Options";
 MenuBinding="Key Bindings";
 
 MenuSkill="Choose skill level:";

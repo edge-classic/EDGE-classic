@@ -154,6 +154,7 @@ static void M_KeyboardOptions(int keypressed, cvar_c *cvar = nullptr);
 static void M_VideoOptions(int keypressed, cvar_c *cvar = nullptr);
 static void M_GameplayOptions(int keypressed, cvar_c *cvar = nullptr);
 static void M_PerformanceOptions(int keypressed, cvar_c *cvar = nullptr);
+static void M_AccessibilityOptions(int keypressed, cvar_c *cvar = nullptr);
 static void M_AnalogueOptions(int keypressed, cvar_c *cvar = nullptr);
 static void M_SoundOptions(int keypressed, cvar_c *cvar = nullptr);
 
@@ -207,7 +208,6 @@ static char CrossH[]    = "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Do
 static char Respw[]     = "Teleport/Resurrect";  // monster respawning
 static char Axis[]      = "Off/+Turn/-Turn/+MLook/-MLook/+Forward/-Forward/+Strafe/-Strafe/+Fly/-Fly/Left Trigger/Right Trigger";
 static char JoyDevs[]   = "None/1/2/3/4/5/6";
-static char DLMode[]    = "Off/On";
 static char JpgPng[]    = "JPEG/PNG";  // basic on/off
 static char AAim[]      = "Off/On/Mlook";
 static char MipMaps[]   = "None/Good/Best";
@@ -362,8 +362,8 @@ static int M_GetCurrentSwitchValue(optmenuitem_t *item)
 //
 //  MAIN MENU
 //
-#define LANGUAGE_POS  9
-#define HOSTNET_POS   12
+#define LANGUAGE_POS  10
+#define HOSTNET_POS   13
 
 static optmenuitem_t mainoptions[] =
 {
@@ -371,6 +371,7 @@ static optmenuitem_t mainoptions[] =
 	{OPT_Function, "Mouse / Controller",  NULL,  0, NULL, M_AnalogueOptions, "AnalogueOptions"},
 	{OPT_Function, "Gameplay Options",  NULL,  0, NULL, M_GameplayOptions, "GameplayOptions"},
 	{OPT_Function, "Performance Options",  NULL,  0, NULL, M_PerformanceOptions, "PerformanceOptions"},
+	{OPT_Function, "Accessibility Options",  NULL,  0, NULL, M_AccessibilityOptions, "AccessibilityOptions"},
 	{OPT_Plain,    "",                  NULL,  0, NULL, NULL, NULL},
 	{OPT_Function, "Sound Options",     NULL,  0, NULL, M_SoundOptions, "SoundOptions"},
 	{OPT_Function, "Video Options",     NULL,  0, NULL, M_VideoOptions, "VideoOptions"},
@@ -405,7 +406,7 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Switch,  "Smoothing",         YesNo, 2, &var_smoothing, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "H.Q.2x Scaling", Hq2xMode, 4, &hq2x_scaling, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Title/Intermission Scaling", TitleScaleMode, 4, &r_titlescaling.d, M_UpdateCVARFromInt, NULL, &r_titlescaling},
-	{OPT_Switch,  "Dynamic Lighting", DLMode, 2, &use_dlights, NULL, NULL},
+	{OPT_Switch,  "Dynamic Lighting", YesNo, 2, &use_dlights, NULL, NULL},
 	{OPT_Switch,  "Detail Level",   Details,  3, &detail_level, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Mipmapping",     MipMaps,  3, &var_mipmapping, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Overlay",  		VidOverlays, 7, &r_overlay.d, M_UpdateCVARFromInt, NULL, &r_overlay},
@@ -413,22 +414,12 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Switch,  "Crosshair Color", CrosshairColor,  8, &r_crosscolor.d, M_UpdateCVARFromInt, NULL, &r_crosscolor},
 	{OPT_FracSlider,  "Crosshair Size",  NULL,  0,  &r_crosssize.f, M_UpdateCVARFromFloat, NULL, &r_crosssize, 1.0f, 2.0f, 64.0f},
 	{OPT_Boolean, "Map Rotation",    YesNo,   2, &rotatemap, NULL, NULL},
-	{OPT_Switch,  "Teleport Flash",  YesNo,   2, &telept_flash, NULL, NULL},
 	{OPT_Switch,  "Invulnerability", Invuls, NUM_INVULFX,  &var_invul_fx, NULL, NULL},
 #ifndef EDGE_WEB
 	{OPT_Switch,  "Wipe method",     WIPE_EnumStr, WIPE_NUMWIPES, &wipe_method, NULL, NULL},
 #endif
 	{OPT_Boolean, "Screenshot Format", JpgPng, 2, &png_scrshots, NULL, NULL},
-	{OPT_Switch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax",   4, &swirling_flats, NULL, NULL}
-	
-
-#if 0  // TEMPORARILY DISABLED (we need an `Advanced Options' menu)
-	{OPT_Switch,  "Teleportation effect", WIPE_EnumStr, WIPE_NUMWIPES, 
-                                              &telept_effect, NULL, NULL},
-
-    {OPT_Switch,  "Reverse effect", YesNo, 2, &telept_reverse, NULL, NULL},
-    {OPT_Switch,  "Reversed wipe",  YesNo, 2, &wipe_reverse, NULL, NULL},
-#endif
+	{OPT_Switch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax",   4, &swirling_flats, NULL, NULL},
 };
 
 static menuinfo_t video_optmenu = 
@@ -557,9 +548,6 @@ static optmenuitem_t playoptions[] =
 	{OPT_Boolean, "Pistol Starts",         YesNo, 2, 
      &pistol_starts, NULL, NULL},
 
-	{OPT_Switch,  "Bobbing", "Full/Head Only/Weapon Only/None", 4, 
-     &g_bobbing.d, M_ChangeBobbing, NULL},
-
 	{OPT_Boolean, "Mouse Look",         YesNo, 2, 
      &global_flags.mlook, M_ChangeMLook, NULL},
 
@@ -640,6 +628,22 @@ static menuinfo_t perf_optmenu =
 {
 	perfoptions, sizeof(perfoptions) / sizeof(optmenuitem_t),
 	&opt_def_style, 160, 46, "M_PRFOPT", NULL, 0, "", language["MenuPerformance"]
+};
+
+//
+//  ACCESSIBILITY OPTIONS
+//
+//
+static optmenuitem_t accessibilityoptions[] =
+{
+	{OPT_Switch,  "View Bobbing", "Full/Head Only/Weapon Only/None", 4, &g_bobbing.d, M_ChangeBobbing, "Can help with motion sickness"},
+	{OPT_Switch,  "Reduce Flashing",  YesNo,   2, &reduce_flash, NULL, "Can help with epilepsy or sight-related issues"},
+};
+
+static menuinfo_t accessibility_optmenu = 
+{
+	accessibilityoptions, sizeof(accessibilityoptions) / sizeof(optmenuitem_t),
+	&opt_def_style, 160, 46, "M_ACCOPT", NULL, 0, "", language["MenuAccessibility"]
 };
 
 //
@@ -937,6 +941,7 @@ void M_OptMenuInit()
 	f4sound_optmenu.name=language["MenuSound"];
 	gameplay_optmenu.name=language["MenuGameplay"];
 	perf_optmenu.name=language["MenuPerformance"];
+	accessibility_optmenu.name=language["MenuAccessibility"];
 	movement_optmenu.name=language["MenuBinding"];
 	attack_optmenu.name=language["MenuBinding"];
 	otherkey_optmenu.name=language["MenuBinding"];
@@ -1797,6 +1802,20 @@ static void M_PerformanceOptions(int keypressed, cvar_c *cvar)
 		return;
 
 	curr_menu = &perf_optmenu;
+	curr_item = curr_menu->items + curr_menu->pos;
+}
+
+//
+// M_AccessibilityOptions
+//
+static void M_AccessibilityOptions(int keypressed, cvar_c *cvar)
+{
+	// not allowed in netgames (changing most of these options would
+	// break synchronisation with the other machines).
+	if (netgame)
+		return;
+
+	curr_menu = &accessibility_optmenu;
 	curr_item = curr_menu->items + curr_menu->pos;
 }
 

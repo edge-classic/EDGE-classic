@@ -180,6 +180,9 @@ cheatseq_t cheat_amap = {0, 0};
 static bool stopped = true;
 
 bool rotatemap = false;
+bool am_keydoorblink = false;
+
+extern cvar_c r_doubleframes;
 
 extern style_c *automap_style;  // FIXME: put in header
 
@@ -566,6 +569,13 @@ static void DrawMLineDoor(mline_t * ml, rgbcol_t rgb)
 	if (hide_lines)
 		return;
 
+/*
+	//Lobo 2023: Make keyed doors blink
+	int hide_key_door;
+	hide_key_door = am_keydoorblink && (gametic & 16);
+	if (hide_key_door)
+		return;
+*/
 	float x1 = CXMTOF(ml->a.x, 0);
 	float y1 = CYMTOF(ml->a.y, 0);
 
@@ -575,7 +585,20 @@ static void DrawMLineDoor(mline_t * ml, rgbcol_t rgb)
 	float dx = XMTOF(- m_cx);
 	float dy = YMTOF(- m_cy);
 
-	HUD_SolidLine(x1, y1, x2, y2, rgb, 3.5, true, dx, dy);
+    float linewidth = 3.5f;
+
+	//Lobo 2023: Make keyed doors blink
+	if (am_keydoorblink) 
+	{
+		linewidth = gametic % (32 * (r_doubleframes.d ? 2 : 1));
+
+		if (linewidth >= 16)
+			linewidth = 2.0 + (linewidth * 0.1f);
+		else
+			linewidth = 2.0 - (linewidth * 0.1f);
+	}
+		
+	HUD_SolidLine(x1, y1, x2, y2, rgb, linewidth, true, dx, dy);
 }
 
 //

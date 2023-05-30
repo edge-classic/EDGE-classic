@@ -389,6 +389,8 @@ static void SetGlobalVars(void)
 	argv::CheckBooleanParm("weaponswitch", &global_flags.weapon_switch, false);
 	argv::CheckBooleanParm("autoload", &autoquickload, false);
 
+	argv::CheckBooleanParm("am_keydoorblink", &am_keydoorblink, false);
+
 	if (argv::Find("infight") > 0)
 		g_aggression = 1;
 

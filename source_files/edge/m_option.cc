@@ -636,9 +636,9 @@ static menuinfo_t perf_optmenu =
 //
 static optmenuitem_t accessibilityoptions[] =
 {
-	{OPT_Switch,  "View Bobbing", "Full/Head Only/Weapon Only/None", 4, &g_bobbing.d, M_ChangeBobbing, "Can help with motion sickness"},
-	{OPT_Switch,  "Reduce Flashing",  YesNo,   2, &reduce_flash, NULL, "Can help with epilepsy or sight-related issues"},
-	{OPT_Boolean, "Automap: Keyed doors pulse",    YesNo,   2, &am_keydoorblink, NULL, "Can help locate doors more easily"},
+	{OPT_Switch,  "View Bobbing", "Full/Head Only/Weapon Only/None", 4, &g_bobbing.d, M_ChangeBobbing, "May help with motion sickness"},
+	{OPT_Switch,  "Reduce Flashing",  YesNo,   2, &reduce_flash, NULL, "May help with epilepsy or photosensitivity"},
+	{OPT_Boolean, "Automap: Keyed Doors Pulse",    YesNo,   2, &am_keydoorblink, NULL, "Can help locate doors more easily"},
 };
 
 static menuinfo_t accessibility_optmenu = 

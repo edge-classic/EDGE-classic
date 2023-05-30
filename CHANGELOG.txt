@@ -102,6 +102,13 @@ New Features
   - Fill Border: Will fill space not occupied by the original image with a zoomed in, gaussian-blurred version of the same image
     - This is similar to the border fill for "portrait" style videos
 
++ New Option Menu: Accessibility Options
+  - Current Items:
+    - View Bobbing - This is the already existing "Bobbing" option that has been moved from Gameplay Options
+    - Reduce Flash - Provides an alternate means of displaying teleport fog and palette/colormap effects (invuln, pain, etc). The various
+      GunFlash actions also add no additional sector light with this enabled.
+    - Automap: Keyed Doors Pulse - Makes locating locked doors on the automap easier
+
 General Improvements
 --------------------
 + Changed AJBSP to open loaded IWADs/PWADs in read mode as an additional means of ensuring original file

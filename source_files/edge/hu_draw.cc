@@ -63,6 +63,8 @@ bool hud_thick_liquid = false;
 float hud_x_left;
 float hud_x_right;
 float hud_x_mid;
+float hud_visible_top;
+float hud_visible_bottom;
 
 float hud_y_top;
 float hud_y_bottom;
@@ -871,7 +873,7 @@ void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col,
 }
 
 
-void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col)
+void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col, float thickness)
 {
 	std::swap(y1, y2);
 
@@ -885,22 +887,22 @@ void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col)
 
 	glBegin(GL_QUADS);
 	glVertex2f(x1,   y1); glVertex2f(x1,   y2);
-	glVertex2f(x1+2, y2); glVertex2f(x1+2, y1);
+	glVertex2f(x1+2+thickness, y2); glVertex2f(x1+2+thickness, y1);
 	glEnd();
 
 	glBegin(GL_QUADS);
-	glVertex2f(x2-2, y1); glVertex2f(x2-2, y2);
+	glVertex2f(x2-2-thickness, y1); glVertex2f(x2-2-thickness, y2);
 	glVertex2f(x2,   y2); glVertex2f(x2,   y1);
 	glEnd();
 
 	glBegin(GL_QUADS);
-	glVertex2f(x1+2, y1);   glVertex2f(x1+2, y1+2);
-	glVertex2f(x2-2, y1+2); glVertex2f(x2-2, y1);
+	glVertex2f(x1+2+thickness, y1);   glVertex2f(x1+2+thickness, y1+2+thickness);
+	glVertex2f(x2-2-thickness, y1+2+thickness); glVertex2f(x2-2-thickness, y1);
 	glEnd();
 
 	glBegin(GL_QUADS);
-	glVertex2f(x1+2,  y2-2); glVertex2f(x1+2, y2);
-	glVertex2f(x2-2,  y2);   glVertex2f(x2-2, y2-2);
+	glVertex2f(x1+2+thickness,  y2-2-thickness); glVertex2f(x1+2+thickness, y2);
+	glVertex2f(x2-2-thickness,  y2);   glVertex2f(x2-2-thickness, y2-2-thickness);
 	glEnd();
 
 	glDisable(GL_BLEND);
@@ -1257,6 +1259,9 @@ void HUD_DrawQuitScreen()
 void HUD_RenderWorld(float x, float y, float w, float h, mobj_t *camera, int flags)
 {
 	HUD_PushScissor(x, y, x+w, y+h, (flags & 1) == 0);
+
+	hud_visible_bottom = y+h;
+	hud_visible_top = 200 - hud_visible_bottom;
 
 	int *xy = scissor_stack[sci_stack_top-1];
 

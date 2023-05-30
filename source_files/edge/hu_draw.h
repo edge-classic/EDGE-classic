@@ -39,6 +39,8 @@
 extern float hud_x_left;
 extern float hud_x_right;
 extern float hud_x_mid;
+extern float hud_visible_top;
+extern float hud_visible_bottom;
 extern std::vector<std::string> hud_overlays;
 
 
@@ -89,7 +91,7 @@ void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col,
 
 
 // Draw a thin outline of a box.
-void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col);
+void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col, float thickness = 0.0f);
 
 // Like HUD_SolidBox but the colors of each corner (TL, BL, TR, BR) can
 // be specified individually.

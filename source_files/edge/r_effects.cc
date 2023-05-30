@@ -21,6 +21,7 @@
 
 #include "dm_state.h"
 #include "e_player.h"
+#include "hu_draw.h" // HUD_* functions
 #include "m_misc.h"
 #include "r_misc.h"
 #include "r_colormap.h"
@@ -49,7 +50,7 @@ static inline float EffectStrength(player_t *player)
 	if (player->effect_left >= EFFECT_MAX_TIME)
 		return 1.0f;
 
-	if (r_fadepower.d)
+	if (r_fadepower.d || reduce_flash)
 	{
 		return player->effect_left / (float)EFFECT_MAX_TIME;
 	}
@@ -76,9 +77,9 @@ void RGL_RainbowEffect(player_t *player)
 	float s = EffectStrength(player);
 
 	if (s > 0 && player->powers[PW_Invulnerable] > 0 &&
-		(player->effect_left & 8))
+		(player->effect_left & 8) && !reduce_flash)
 	{
-		if (var_invul_fx == INVULFX_Textured)
+		if (var_invul_fx == INVULFX_Textured && !reduce_flash)
 		{
 			ren_fx_colmap = player->effect_colourmap;
 		}
@@ -164,40 +165,44 @@ void RGL_ColourmapEffect(player_t *player)
 	float s = EffectStrength(player);
 
 	if (s > 0 && player->powers[PW_Invulnerable] > 0 &&
-	    player->effect_colourmap && (player->effect_left & 8))
+	    player->effect_colourmap && (player->effect_left & 8 || reduce_flash))
 	{
-		if (var_invul_fx == INVULFX_Textured)
+		if (var_invul_fx == INVULFX_Textured && !reduce_flash)
 			return;
-
-		float r, g, b;
-
-		V_GetColmapRGB(player->effect_colourmap, &r, &g, &b);
-
-		r = 1.0f; // MAX(0.5f, r) * (s + 1.0f) / 2.0f;
-		g = b = r;
-
-		glColor4f(r, g, b, 0.0f);
 
 		glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
 
-		glEnable(GL_BLEND);
-  
-		glBegin(GL_QUADS);
+		if (!reduce_flash)
+		{
+			glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
 
-		x1 = viewwindow_x;
-		x2 = viewwindow_x + viewwindow_w;
+			glEnable(GL_BLEND);
+	
+			glBegin(GL_QUADS);
 
-		y1 = viewwindow_y + viewwindow_h;
-		y2 = viewwindow_y;
+			x1 = viewwindow_x;
+			x2 = viewwindow_x + viewwindow_w;
 
-		glVertex2i(x1, y1);
-		glVertex2i(x2, y1);
-		glVertex2i(x2, y2);
-		glVertex2i(x1, y2);
+			y1 = viewwindow_y + viewwindow_h;
+			y2 = viewwindow_y;
 
-		glEnd();
-  
-		glDisable(GL_BLEND);
+			glVertex2i(x1, y1);
+			glVertex2i(x2, y1);
+			glVertex2i(x2, y2);
+			glVertex2i(x1, y2);
+
+			glEnd();
+	
+			glDisable(GL_BLEND);
+		}
+		else
+		{
+			float old_alpha = HUD_GetAlpha();
+			HUD_SetAlpha(0.0f);
+			s = MAX(0.5f, s);
+			HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom, RGB_MAKE(I_ROUND(s*255),I_ROUND(s*255),I_ROUND(s*255)), 25.0f);
+			HUD_SetAlpha(old_alpha);
+		}
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 }
@@ -213,7 +218,7 @@ void RGL_PaletteEffect(player_t *player)
 
 	float s = EffectStrength(player);
 
-	std::vector<GLfloat> effect_colors;
+	float old_alpha = HUD_GetAlpha();
 
 	if (s > 0 && player->powers[PW_Invulnerable] > 0 &&
 	    player->effect_colourmap && (player->effect_left & 8))
@@ -225,7 +230,13 @@ void RGL_PaletteEffect(player_t *player)
 	{
 		float r, g, b;
 		V_GetColmapRGB(player->effect_colourmap, &r, &g, &b);
-		glColor4f(r, g, b, 0.20f * s);
+		if (!reduce_flash)
+			glColor4f(r, g, b, 0.20f * s);
+		else
+		{
+			HUD_SetAlpha(0.20f * s);
+			HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom, RGB_MAKE(I_ROUND(r*255),I_ROUND(g*255),I_ROUND(b*255)), 25.0f);
+		}
 	}
 	else
 	{
@@ -238,24 +249,36 @@ void RGL_PaletteEffect(player_t *player)
 	  
 		rgb_max = MIN(200, rgb_max);
 
-		glColor4f((float) rgb_data[0] / (float) rgb_max,
-				  (float) rgb_data[1] / (float) rgb_max,
-				  (float) rgb_data[2] / (float) rgb_max,
-			      (float) rgb_max / 255.0f);
+		if (!reduce_flash)
+			glColor4f((float) rgb_data[0] / (float) rgb_max,
+					(float) rgb_data[1] / (float) rgb_max,
+					(float) rgb_data[2] / (float) rgb_max,
+					(float) rgb_max / 255.0f);
+		else
+		{
+			HUD_SetAlpha((float) rgb_max / 255.0f);
+			HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom, RGB_MAKE(I_ROUND((float)rgb_data[0]/rgb_max*255),
+				I_ROUND((float)rgb_data[1]/rgb_max*255),I_ROUND((float)rgb_data[2]/rgb_max*255)), 25.0f);
+		}
 	}
 
-	glEnable(GL_BLEND);
+	HUD_SetAlpha(old_alpha);
 
-	glBegin(GL_QUADS);
+	if (!reduce_flash)
+	{
+		glEnable(GL_BLEND);
 
-	glVertex2i(0, SCREENHEIGHT);
-	glVertex2i(SCREENWIDTH, SCREENHEIGHT);
-	glVertex2i(SCREENWIDTH, 0);
-	glVertex2i(0, 0);
+		glBegin(GL_QUADS);
 
-	glEnd();
-  
-	glDisable(GL_BLEND);
+		glVertex2i(0, SCREENHEIGHT);
+		glVertex2i(SCREENWIDTH, SCREENHEIGHT);
+		glVertex2i(SCREENWIDTH, 0);
+		glVertex2i(0, 0);
+
+		glEnd();
+	
+		glDisable(GL_BLEND);
+	}
 }
 
 

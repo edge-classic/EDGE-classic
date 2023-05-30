@@ -121,7 +121,9 @@ static default_t defaults[] =
 	{CFGT_Int,  	"swirling_flats",     &swirling_flats, 0},
 
 	{CFGT_Boolean,  "pistol_starts",             &pistol_starts, 0},
-    // -KM- 1998/07/21 Save the blood setting
+	{CFGT_Boolean,  "am_keydoorblink",         &am_keydoorblink,      CFGDEF_AM_KEYDOORBLINK},
+    
+	// -KM- 1998/07/21 Save the blood setting
     {CFGT_Boolean,  "blood",             &global_flags.more_blood, CFGDEF_MORE_BLOOD},
     {CFGT_Boolean,  "extra",             &global_flags.have_extra, CFGDEF_HAVE_EXTRA},
     {CFGT_Boolean,  "weaponkick",        &global_flags.kicking, CFGDEF_KICKING},

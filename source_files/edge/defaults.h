@@ -102,6 +102,8 @@
 #define CFGDEF_FASTPARM         (0)
 #define CFGDEF_RESPAWN          (0)
 
+#define CFGDEF_AM_KEYDOORBLINK        (1)
+
 #endif /* __CFGDEF_SETTINGS__ */
 
 //--- editor settings ---

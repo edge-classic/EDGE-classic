@@ -94,12 +94,18 @@ static void DoLight(light_t * light)
 			// Dark
 			if (M_RandomTest(type->chance))
 			{
-				light->sector->props.lightlevel = light->minlight;
+				if (reduce_flash)
+					light->sector->props.lightlevel = (light->maxlight+light->minlight)/2;
+				else
+					light->sector->props.lightlevel = light->minlight;
 				light->count = type->darktime;
 			}
 			else
 			{
-				light->sector->props.lightlevel = light->maxlight;
+				if (reduce_flash)
+					light->sector->props.lightlevel = (light->maxlight+light->minlight)/2;
+				else
+					light->sector->props.lightlevel = light->maxlight;
 				light->count = type->brighttime;
 			}
 			break;
@@ -109,13 +115,19 @@ static void DoLight(light_t * light)
 			if (light->sector->props.lightlevel == light->maxlight)
 			{
 				// Go dark
-				light->sector->props.lightlevel = light->minlight;
+				if (reduce_flash)
+					light->sector->props.lightlevel = (light->maxlight+light->minlight)/2;
+				else
+					light->sector->props.lightlevel = light->minlight;
 				light->count = type->darktime;
 			}
 			else
 			{
 				// Go Bright
-				light->sector->props.lightlevel = light->maxlight;
+				if (reduce_flash)
+					light->sector->props.lightlevel = (light->maxlight+light->minlight)/2;
+				else
+					light->sector->props.lightlevel = light->maxlight;
 				light->count = type->brighttime;
 			}
 			break;
@@ -160,12 +172,18 @@ static void DoLight(light_t * light)
 
 			if (light->sector->props.lightlevel - amount < light->minlight)
 			{
-				light->sector->props.lightlevel = light->minlight;
+				if (reduce_flash)
+					light->sector->props.lightlevel = (light->maxlight+light->minlight)/2;
+				else
+					light->sector->props.lightlevel = light->minlight;
 				light->count = type->darktime;
 			}
 			else
 			{
-				light->sector->props.lightlevel = light->maxlight - amount;
+				if (reduce_flash)
+					light->sector->props.lightlevel = (light->maxlight+light->minlight)/2;
+				else
+					light->sector->props.lightlevel = light->maxlight - amount;
 				light->count = type->brighttime;
 			}
 		}

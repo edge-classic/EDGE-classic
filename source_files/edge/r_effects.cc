@@ -221,7 +221,7 @@ void RGL_PaletteEffect(player_t *player)
 	float old_alpha = HUD_GetAlpha();
 
 	if (s > 0 && player->powers[PW_Invulnerable] > 0 &&
-	    player->effect_colourmap && (player->effect_left & 8))
+	    player->effect_colourmap && (player->effect_left & 8 || reduce_flash))
 	{
 		return;
 	}

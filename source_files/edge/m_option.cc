@@ -1097,7 +1097,7 @@ void M_OptDrawer()
 				M_DrawFracThermo(225, curry+deltay*(j+1),
 							  (float)joy,
 							  1, 2, -32768.0f,
-							  32737.0f);
+							  32737.0f, false);
 			}
 		}
 

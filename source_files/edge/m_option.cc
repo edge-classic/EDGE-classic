@@ -1090,14 +1090,13 @@ void M_OptDrawer()
 		
 		if (curr_menu == &analogue_optmenu && curr_menu->items[i].switchvar == &joystick_device)
 		{
-			HL_WriteText(style, styledef_c::T_TEXT, 225, curry, "Axis Test");
+			// This should place everything to the right of the widest menu entry
+			int draw_x = (curr_menu->menu_center) + 20 + style->fonts[styledef_c::T_TEXT]->StringWidth("Right Trigger");
+			HL_WriteText(style, styledef_c::T_TEXT, draw_x, curry, "Axis Test");
 			for (int j = 0; j < 6; j++)
 			{
 				int joy = I_JoyGetAxis(j);
-				M_DrawFracThermo(225, curry+deltay*(j+1),
-							  (float)joy,
-							  1, 2, -32768.0f,
-							  32737.0f, false);
+				M_DrawFracThermo(draw_x, curry+deltay*(j+1), (float)joy, 1, 2, -32768.0f, 32737.0f, false);
 			}
 		}
 

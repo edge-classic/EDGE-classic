@@ -2334,7 +2334,7 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
 
 		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_r)/div, therm_r, 0.0, 0.0);
 
-		HUD_StretchImage(basex + ((thermDot-min)/increment) * scale_step-1, y, step+1, IM_HEIGHT(therm_o)/div, therm_o, 0.0, 0.0);
+		HUD_StretchImage(basex + ((thermDot-min)/increment) * scale_step+1, y, step+1, IM_HEIGHT(therm_o)/div, therm_o, 0.0, 0.0);
 
 		if (draw_value)
 			HL_WriteText(opt_style, styledef_c::T_ALT, basex+(((max-min)/increment)*scale_step) + (step*2+2), y, actual_val.c_str());

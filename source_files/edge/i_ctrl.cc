@@ -667,17 +667,36 @@ void I_StartupJoystick(void)
 
 	if (joystick_device > 0)
 		I_OpenJoystick(joystick_device);
+	else
+	{
+		joystick_device = 1; // Automatically set to first detected joystick
+		I_OpenJoystick(joystick_device);
+	}
 }
 
 
 void CheckJoystickChanged(void)
 {
+	num_joys = SDL_NumJoysticks();
+
+	if (num_joys == 0)
+	{
+		if (joy_info)
+		{
+			SDL_JoystickClose(joy_info);
+			joy_info = NULL;
+		}
+		joystick_device = 0;
+		cur_joy = 0;
+		return;
+	}
+
 	int new_joy = joystick_device;
 
 	if (joystick_device < 0 || joystick_device > num_joys)
 		new_joy = 0;
 
-	if (new_joy == cur_joy)
+	if (new_joy == cur_joy && cur_joy > 0)
 		return;
 
 	if (joy_info)
@@ -691,6 +710,12 @@ void CheckJoystickChanged(void)
 
 	if (new_joy > 0)
 	{
+		I_OpenJoystick(new_joy);
+	}
+	else
+	{
+		new_joy = 1;
+		joystick_device = 1;
 		I_OpenJoystick(new_joy);
 	}
 }

@@ -278,6 +278,9 @@ typedef struct optmenuitem_s
 	float increment;
 	float min;
 	float max;
+
+	// Formatting string (only used for fracsliders atm)
+	std::string fmt_string = "";
 }
 optmenuitem_t;
 
@@ -405,7 +408,7 @@ static menuinfo_t main_optmenu =
 
 static optmenuitem_t vidoptions[] =
 {
-	{OPT_FracSlider,  "Gamma Adjustment",    NULL,  0,  &v_gamma.f, M_UpdateCVARFromFloat, NULL, &v_gamma, 0.10f, -1.0f, 1.0f},
+	{OPT_FracSlider,  "Gamma Adjustment",    NULL,  0,  &v_gamma.f, M_UpdateCVARFromFloat, NULL, &v_gamma, 0.10f, -1.0f, 1.0f, "%0.2f"},
 	{OPT_Switch,  "Sector Brightness",    SecBrights,  11,  &v_secbright.d, M_UpdateCVARFromInt, NULL, &v_secbright},
 	{OPT_Switch,  "Framerate Target", "35 FPS/70 FPS", 2, &r_doubleframes.d, M_UpdateCVARFromInt, NULL, &r_doubleframes},
 	{OPT_Switch,  "Smoothing",         YesNo, 2, &var_smoothing, M_ChangeMipMap, NULL},
@@ -417,7 +420,7 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Switch,  "Overlay",  		VidOverlays, 7, &r_overlay.d, M_UpdateCVARFromInt, NULL, &r_overlay},
 	{OPT_Switch,  "Crosshair",       CrossH, 10, &r_crosshair.d, M_UpdateCVARFromInt, NULL, &r_crosshair},
 	{OPT_Switch,  "Crosshair Color", CrosshairColor,  8, &r_crosscolor.d, M_UpdateCVARFromInt, NULL, &r_crosscolor},
-	{OPT_FracSlider,  "Crosshair Size",  NULL,  0,  &r_crosssize.f, M_UpdateCVARFromFloat, NULL, &r_crosssize, 1.0f, 2.0f, 64.0f},
+	{OPT_FracSlider,  "Crosshair Size",  NULL,  0,  &r_crosssize.f, M_UpdateCVARFromFloat, NULL, &r_crosssize, 1.0f, 2.0f, 64.0f, "%g Pixels"},
 	{OPT_Boolean, "Map Rotation",    YesNo,   2, &rotatemap, NULL, NULL},
 	{OPT_Switch,  "Invulnerability", Invuls, NUM_INVULFX,  &var_invul_fx, NULL, NULL},
 #ifndef EDGE_WEB
@@ -468,27 +471,27 @@ static optmenuitem_t analogueoptions[] =
 	{OPT_Plain,      "",                   NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,     "Mouse X Axis",       Axis, 11, &mouse_xaxis, NULL, NULL},
 	{OPT_Switch,     "Mouse Y Axis",       Axis, 11, &mouse_yaxis, NULL, NULL},
-	{OPT_FracSlider, "X Sensitivity",      NULL, 0, &mouse_xsens.f, M_UpdateCVARFromFloat, NULL, &mouse_xsens, 0.25f, 1.0f, 15.0f},
-	{OPT_FracSlider, "Y Sensitivity",      NULL, 0, &mouse_ysens.f, M_UpdateCVARFromFloat, NULL, &mouse_ysens, 0.25f, 1.0f, 15.0f},
+	{OPT_FracSlider, "X Sensitivity",      NULL, 0, &mouse_xsens.f, M_UpdateCVARFromFloat, NULL, &mouse_xsens, 0.25f, 1.0f, 15.0f, "%0.2f"},
+	{OPT_FracSlider, "Y Sensitivity",      NULL, 0, &mouse_ysens.f, M_UpdateCVARFromFloat, NULL, &mouse_ysens, 0.25f, 1.0f, 15.0f, "%0.2f"},
 	{OPT_Plain,      "",                   NULL, 0,  NULL, NULL, NULL},
 
 	{OPT_Switch,     "Joystick Device", JoyDevs, 7,  &joystick_device, NULL, NULL},
 	{OPT_Switch,     "First Axis",         Axis, 13, &joy_axis[0], NULL, NULL},
-	{OPT_FracSlider, "First Axis Deadzone", NULL, 0, &joy_dead0.f, M_UpdateCVARFromFloat, NULL, &joy_dead0, 0.01f, 0.0f, 0.99f},
+	{OPT_FracSlider, "First Axis Deadzone", NULL, 0, &joy_dead0.f, M_UpdateCVARFromFloat, NULL, &joy_dead0, 0.01f, 0.0f, 0.99f, "%0.2f"},
 	{OPT_Switch,     "Second Axis",        Axis, 13, &joy_axis[1], NULL, NULL},
-	{OPT_FracSlider, "Second Axis Deadzone", NULL, 0, &joy_dead1.f, M_UpdateCVARFromFloat, NULL, &joy_dead1, 0.01f, 0.0f, 0.99f},
+	{OPT_FracSlider, "Second Axis Deadzone", NULL, 0, &joy_dead1.f, M_UpdateCVARFromFloat, NULL, &joy_dead1, 0.01f, 0.0f, 0.99f, "%0.2f"},
 	{OPT_Switch,     "Third Axis",         Axis, 13, &joy_axis[2], NULL, NULL},
-	{OPT_FracSlider, "Third Axis Deadzone", NULL, 0, &joy_dead2.f, M_UpdateCVARFromFloat, NULL, &joy_dead2, 0.01f, 0.0f, 0.99f},
+	{OPT_FracSlider, "Third Axis Deadzone", NULL, 0, &joy_dead2.f, M_UpdateCVARFromFloat, NULL, &joy_dead2, 0.01f, 0.0f, 0.99f, "%0.2f"},
 	{OPT_Switch,     "Fourth Axis",        Axis, 13, &joy_axis[3], NULL, NULL},
-	{OPT_FracSlider, "Fourth Axis Deadzone", NULL, 0, &joy_dead3.f,M_UpdateCVARFromFloat, NULL, &joy_dead3, 0.01f, 0.0f, 0.99f},
+	{OPT_FracSlider, "Fourth Axis Deadzone", NULL, 0, &joy_dead3.f,M_UpdateCVARFromFloat, NULL, &joy_dead3, 0.01f, 0.0f, 0.99f, "%0.2f"},
 	{OPT_Switch,     "Fifth Axis",         Axis, 13, &joy_axis[4], NULL, NULL},
-	{OPT_FracSlider, "Fifth Axis Deadzone", NULL, 0, &joy_dead4.f, M_UpdateCVARFromFloat, NULL, &joy_dead4, 0.01f, 0.0f, 0.99f},
+	{OPT_FracSlider, "Fifth Axis Deadzone", NULL, 0, &joy_dead4.f, M_UpdateCVARFromFloat, NULL, &joy_dead4, 0.01f, 0.0f, 0.99f, "%0.2f"},
 	{OPT_Switch,     "Sixth Axis",         Axis, 13, &joy_axis[5], NULL, NULL},
-	{OPT_FracSlider, "Sixth Axis Deadzone", NULL, 0, &joy_dead5.f, M_UpdateCVARFromFloat, NULL, &joy_dead5, 0.01f, 0.0f, 0.99f},
-	{OPT_FracSlider, "Turning Speed",  NULL, 0, &turnspeed.f,  M_UpdateCVARFromFloat, NULL, &turnspeed, 0.10f, 0.10f, 3.0f},
-	{OPT_FracSlider, "Vertical Look Speed",    NULL, 0, &vlookspeed.f, M_UpdateCVARFromFloat, NULL, &vlookspeed, 0.10f, 0.10f, 3.0f},
-	{OPT_FracSlider, "Forward Move Speed",    NULL, 0, &forwardspeed.f, M_UpdateCVARFromFloat, NULL, &forwardspeed, 0.10f, 0.10f, 3.0f},
-	{OPT_FracSlider, "Side Move Speed",    NULL, 0, &sidespeed.f, M_UpdateCVARFromFloat, NULL, &sidespeed, 0.10f, 0.10f, 3.0f},
+	{OPT_FracSlider, "Sixth Axis Deadzone", NULL, 0, &joy_dead5.f, M_UpdateCVARFromFloat, NULL, &joy_dead5, 0.01f, 0.0f, 0.99f, "%0.2f"},
+	{OPT_FracSlider, "Turning Speed",  NULL, 0, &turnspeed.f,  M_UpdateCVARFromFloat, NULL, &turnspeed, 0.10f, 0.10f, 3.0f, "%0.2f"},
+	{OPT_FracSlider, "Vertical Look Speed",    NULL, 0, &vlookspeed.f, M_UpdateCVARFromFloat, NULL, &vlookspeed, 0.10f, 0.10f, 3.0f, "%0.2f"},
+	{OPT_FracSlider, "Forward Move Speed",    NULL, 0, &forwardspeed.f, M_UpdateCVARFromFloat, NULL, &forwardspeed, 0.10f, 0.10f, 3.0f, "%0.2f"},
+	{OPT_FracSlider, "Side Move Speed",    NULL, 0, &sidespeed.f, M_UpdateCVARFromFloat, NULL, &sidespeed, 0.10f, 0.10f, 3.0f, "%0.2f"},
 };
 
 static menuinfo_t analogue_optmenu = 
@@ -504,8 +507,8 @@ static menuinfo_t analogue_optmenu =
 //
 static optmenuitem_t soundoptions[] =
 {
-	{OPT_FracSlider,  "Sound Volume", NULL, 0, &sfx_volume.f, M_ChangeSfxVol, NULL, &sfx_volume, 0.05f, 0.0f, 1.0f},
-	{OPT_FracSlider,  "Music Volume", NULL, 0, &mus_volume.f, M_ChangeMusVol, NULL, &mus_volume, 0.05f, 0.0f, 1.0f},
+	{OPT_FracSlider,  "Sound Volume", NULL, 0, &sfx_volume.f, M_ChangeSfxVol, NULL, &sfx_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
+	{OPT_FracSlider,  "Music Volume", NULL, 0, &mus_volume.f, M_ChangeMusVol, NULL, &mus_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
@@ -533,8 +536,8 @@ static menuinfo_t sound_optmenu =
 //
 static optmenuitem_t f4soundoptions[] =
 {
-	{OPT_FracSlider,  "Sound Volume", NULL, 0, &sfx_volume.f, M_ChangeSfxVol, NULL, &sfx_volume, 0.05f, 0.0f, 1.0f},
-	{OPT_FracSlider,  "Music Volume", NULL, 0, &mus_volume.f, M_ChangeMusVol, NULL, &mus_volume, 0.05f, 0.0f, 1.0f},
+	{OPT_FracSlider,  "Sound Volume", NULL, 0, &sfx_volume.f, M_ChangeSfxVol, NULL, &sfx_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
+	{OPT_FracSlider,  "Music Volume", NULL, 0, &mus_volume.f, M_ChangeMusVol, NULL, &mus_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
 };
 
 static menuinfo_t f4sound_optmenu = 
@@ -594,7 +597,7 @@ static optmenuitem_t playoptions[] =
      &g_erraticism.d, M_UpdateCVARFromInt, "Time only advances when you move or fire", &g_erraticism},
 
 	{OPT_FracSlider,  "Gravity",            NULL, 0, 
-     &g_gravity.f, M_UpdateCVARFromFloat, "Gravity", &g_gravity, 0.10f, 0.0f, 2.0f},
+     &g_gravity.f, M_UpdateCVARFromFloat, "Gravity", &g_gravity, 0.10f, 0.0f, 2.0f, "%gx"},
 
     {OPT_Boolean, "Respawn Enemies",            YesNo, 2, 
      &global_flags.respawn, M_ChangeRespawn, NULL},
@@ -624,7 +627,7 @@ static optmenuitem_t perfoptions[] =
 	{OPT_Boolean, "Draw Distance Culling", YesNo, 2, 
      &r_culling.d, M_UpdateCVARFromInt, NULL, &r_culling},
 	{OPT_FracSlider, "Maximum Draw Distance", NULL, 0, 
-     &r_culldist.f, M_UpdateCVARFromFloat, "Only effective when Draw Distance Culling is On", &r_culldist, 200.0f, 1000.0f, 8000.0f},
+     &r_culldist.f, M_UpdateCVARFromFloat, "Only effective when Draw Distance Culling is On", &r_culldist, 200.0f, 1000.0f, 8000.0f, "%g Units"},
 	{OPT_Switch, "Outdoor Culling Fog Color", "Match Sky/White/Grey/Black", 4, 
      &r_cullfog.d, M_UpdateCVARFromInt, "Only effective when Draw Distance Culling is On", &r_cullfog},
 	{OPT_Boolean, "Slow Thinkers Over Distance", YesNo, 2, 
@@ -1105,7 +1108,7 @@ void M_OptDrawer()
 			for (int j = 0; j < 6; j++)
 			{
 				int joy = I_JoyGetAxis(j);
-				M_DrawFracThermo(draw_x, curry+(deltay*(j+1))+(deltay*j), (float)joy, 1, 2, -32768.0f, 32737.0f, false);
+				M_DrawFracThermo(draw_x, curry+(deltay*(j+1))+(deltay*j), (float)joy, 1, 2, -32768.0f, 32737.0f, "");
 			}
 		}
 
@@ -1190,7 +1193,7 @@ void M_OptDrawer()
 				M_DrawFracThermo(curr_menu->menu_center + 15, curry,
 							  *(float*)curr_menu->items[i].switchvar,
 							  curr_menu->items[i].increment, 2, curr_menu->items[i].min,
-							  curr_menu->items[i].max);
+							  curr_menu->items[i].max, curr_menu->items[i].fmt_string);
               
 				break;
 			}

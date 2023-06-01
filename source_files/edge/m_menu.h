@@ -106,7 +106,7 @@ void M_QuitEDGE(int choice);
 void M_ImmediateQuit(void);
 void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div);
 void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div,
-    float min, float max, bool draw_value = true);
+    float min, float max, std::string fmt_string);
 void M_ClearMenus(void);
 
 #endif // __M_MENU__

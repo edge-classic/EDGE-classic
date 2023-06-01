@@ -1091,38 +1091,14 @@ void M_OptDrawer()
 		if (curr_menu == &analogue_optmenu && curr_menu->items[i].switchvar == &joystick_device)
 		{
 			HL_WriteText(style, styledef_c::T_TEXT, 225, curry, "Axis Test");
-			std::string axis = "None";
 			for (int j = 0; j < 6; j++)
 			{
 				int joy = I_JoyGetAxis(j);
-				if (abs(joy) < 0x8000 && abs(joy) > 5000)
-				{
-					switch (j)
-					{
-						case 0:
-							axis = "First";
-							break;
-						case 1:
-							axis = "Second";
-							break;
-						case 2:
-							axis = "Third";
-							break;
-						case 3:
-							axis = "Fourth";
-							break;
-						case 4:
-							axis = "Fifth";
-							break;
-						case 5:
-							axis = "Sixth";
-							break;
-						default:
-							break;
-					}
-				}
+				M_DrawFracThermo(225, curry+deltay*(j+1),
+							  (float)joy,
+							  1, 2, -32768.0f,
+							  32737.0f);
 			}
-			HL_WriteText(style, styledef_c::T_ALT, 225 + (style->fonts[0]->StringWidth("AXIS TEST") / 2) - (style->fonts[0]->StringWidth(axis.c_str()) / 2), curry + deltay, axis.c_str());
 		}
 
 		// Draw current soundfont

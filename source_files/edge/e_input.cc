@@ -261,19 +261,17 @@ static void UpdateForces(void)
 	for (int k = 0; k < 6; k++)
 		joy_forces[k] = 0;
 
-	// ---Keyboard---
+	// ---Joystick---
+	for (int j = 0; j < 6; j++)
+		UpdateJoyAxis(j);
 
+	// ---Keyboard---
 	AddKeyForce(AXIS_TURN,    key_right,  key_left);
 	AddKeyForce(AXIS_MLOOK,   key_lookup, key_lookdown);
 	AddKeyForce(AXIS_FORWARD, key_up,     key_down);
 	// -MH- 1998/08/18 Fly down
 	AddKeyForce(AXIS_FLY,     key_flyup,  key_flydown);
 	AddKeyForce(AXIS_STRAFE,  key_straferight, key_strafeleft);
-
-	// ---Joystick---
-
-	for (int j = 0; j < 6; j++)
-		UpdateJoyAxis(j);
 }
 
 #if 0  // UNUSED ???

@@ -1076,6 +1076,7 @@ public:
 	// FIXME!!! Move to a more appropriate location
 	const mobjtype_c *LookupCastMember(int castpos);
 	const mobjtype_c *LookupPlayer(int playernum);
+	const mobjtype_c *LookupDoorKey(int theKey);
 };
 
 

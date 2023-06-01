@@ -2805,5 +2805,50 @@ const mobjtype_c* mobjtype_container_c::LookupPlayer(int playernum)
 	return NULL; /* NOT REACHED */
 }
 
+const mobjtype_c* mobjtype_container_c::LookupDoorKey(int theKey)
+{
+	// Find a key thing (needed by automap code).
+
+	epi::array_iterator_c it;
+
+/*
+	//run through the key flags to get the benefit name
+
+	std::string KeyName;
+	KeyName.clear();
+
+	for (int k = 0; keytype_names[k].name; k++)
+	{
+		if (keytype_names[k].flags == theKey)
+		{
+			std::string temp_ref = epi::STR_Format("%s", keytype_names[k].name);
+			KeyName = temp_ref;
+			break;
+		}
+	}
+*/
+
+	for (it = GetTailIterator(); it.IsValid(); it--)
+	{
+		mobjtype_c *m = ITERATOR_TO_TYPE(it, mobjtype_c*);
+		
+		benefit_t *list;
+		list = m->pickup_benefits;
+		for (; list != NULL; list=list->next)
+		{
+			if(list->type == BENEFIT_Key)
+			{
+				if (list->sub.type==theKey)
+				{
+					return m;
+				}
+			}
+		}
+	}
+
+	I_Error("Missing DDF entry for key %d\n", theKey);
+	return NULL; /* NOT REACHED */
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

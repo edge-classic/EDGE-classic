@@ -58,8 +58,6 @@ static int joy_num_balls;
 
 Uint8 last_hat; // Track last dpad input
 
-DEF_CVAR(triggerthreshold, "0", CVAR_ARCHIVE)
-
 // Track trigger state to avoid pushing multiple unnecessary trigger events
 bool right_trigger_pulled = false;
 bool left_trigger_pulled = false;
@@ -403,10 +401,12 @@ void HandleJoystickTriggerEvent(SDL_Event * ev)
 
 	event_t event;
 
+	int thresh = I_ROUND(*joy_deads[current_axis]*32767.0f);
+
 	if (joy_axis[current_axis] == AXIS_LEFT_TRIGGER) 
 	{
 		event.value.key.sym = KEYD_TRIGGER_LEFT;
-		if (ev->jaxis.value < -triggerthreshold.d)
+		if (ev->jaxis.value+32768 < thresh)
 		{
 			if (!left_trigger_pulled) return;
 			event.type = ev_keyup;
@@ -422,7 +422,7 @@ void HandleJoystickTriggerEvent(SDL_Event * ev)
 	else
 	{
 		event.value.key.sym = KEYD_TRIGGER_RIGHT;
-		if (ev->jaxis.value < -triggerthreshold.d)
+		if (ev->jaxis.value+32768 < thresh)
 		{
 			if (!right_trigger_pulled) return;
 			event.type = ev_keyup;

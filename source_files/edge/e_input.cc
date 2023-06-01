@@ -136,15 +136,29 @@ int mouse_yaxis;
 
 int joy_axis[6] = { 0, 0, 0, 0, 0, 0 };
 
+#define JOY_PEAK 32767.0f/32768.0f
+
 static int joy_last_raw[6];
 
 // The last one is ignored (AXIS_DISABLE)
 static float ball_deltas[6] = {0, 0, 0, 0, 0, 0};
 static float  joy_forces[6] = {0, 0, 0, 0, 0, 0};
 
-DEF_CVAR(joy_dead,   "0.15", CVAR_ARCHIVE)
-DEF_CVAR(joy_peak,   "0.95", CVAR_ARCHIVE)
-DEF_CVAR(joy_tuning, "1.00", CVAR_ARCHIVE)
+DEF_CVAR_CLAMPED(joy_dead0,   "0.30", CVAR_ARCHIVE, 0.0f, 0.99f)
+DEF_CVAR_CLAMPED(joy_dead1,   "0.30", CVAR_ARCHIVE, 0.0f, 0.99f)
+DEF_CVAR_CLAMPED(joy_dead2,   "0.30", CVAR_ARCHIVE, 0.0f, 0.99f)
+DEF_CVAR_CLAMPED(joy_dead3,   "0.30", CVAR_ARCHIVE, 0.0f, 0.99f)
+DEF_CVAR_CLAMPED(joy_dead4,   "0.30", CVAR_ARCHIVE, 0.0f, 0.99f)
+DEF_CVAR_CLAMPED(joy_dead5,   "0.30", CVAR_ARCHIVE, 0.0f, 0.99f)
+float *joy_deads[6] = 
+{ 
+	&joy_dead0.f, 
+	&joy_dead1.f, 
+	&joy_dead2.f, 
+	&joy_dead3.f,
+	&joy_dead4.f, 
+	&joy_dead5.f, 
+};
 
 DEF_CVAR(in_running,   "0", CVAR_ARCHIVE)
 DEF_CVAR(in_stageturn, "1", CVAR_ARCHIVE)
@@ -162,32 +176,19 @@ DEF_CVAR(forwardspeed, "1.0", CVAR_ARCHIVE)
 DEF_CVAR(sidespeed, "1.0", CVAR_ARCHIVE)
 DEF_CVAR(flyspeed, "1.0", CVAR_ARCHIVE)
 
-float JoyAxisFromRaw(int raw)
+static float JoyAxisFromRaw(int raw, float dead)
 {
 	SYS_ASSERT(abs(raw) <= 32768);
 
 	float v = raw / 32768.0f;
 	
-	if (fabs(v) <= joy_dead.f + 0.01)
+	if (fabs(v) < dead)
 		return 0;
 
-	if (fabs(v) >= joy_peak.f - 0.01)
+	if (fabs(v) >= JOY_PEAK)
 		return (v < 0) ? -1.0f : +1.0f;
 
-	SYS_ASSERT(joy_peak.f > joy_dead.f);
-
-	float t = CLAMP(0.2f, joy_tuning.f, 5.0f);
-
-	if (v >= 0)
-	{
-		v = (v - joy_dead.f) / (joy_peak.f - joy_dead.f);
-		return pow(v, 1.0f / t);
-	}
-	else
-	{
-		v = (-v - joy_dead.f) / (joy_peak.f - joy_dead.f);
-		return - pow(v, 1.0f / t);
-	}
+	return v;
 }
 
 static void UpdateJoyAxis(int n)
@@ -203,20 +204,18 @@ static void UpdateJoyAxis(int n)
 	// cooked value = average of last two raw samples
 	int cooked = (raw + old) >> 1;
 
-	float force = JoyAxisFromRaw(cooked);
+	float force = JoyAxisFromRaw(cooked, *joy_deads[n]);
 
 	// perform inversion
 	if ((joy_axis[n]+1) & 1)
 		force = -force;
 
 	if (debug_joyaxis.d == n+1)
-	{
 		I_Printf("Axis%d : raw %+05d --> %+7.3f\n", n+1, raw, force);
-	}
 
 	int axis = (joy_axis[n]+1) >> 1;
 
-	joy_forces[axis] += force;
+	joy_forces[axis] = force;
 }
 
 

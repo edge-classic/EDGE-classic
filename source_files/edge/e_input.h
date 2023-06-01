@@ -53,6 +53,7 @@ extern cvar_c mouse_xsens;
 extern cvar_c mouse_ysens;
 
 extern int joy_axis[6];
+extern float *joy_deads[6];
 //
 // -ACB- 1998/09/06 Analogue binding:
 //                   Two stage turning, angleturn control

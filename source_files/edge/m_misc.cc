@@ -65,8 +65,6 @@
 #include "r_wipe.h"
 #include "version.h"
 
-#include "i_ctrl.h"
-
 #include "defaults.h"
 
 //

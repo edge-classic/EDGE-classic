@@ -89,7 +89,6 @@
 #include "hu_draw.h"
 #include "hu_stuff.h"
 #include "hu_style.h"
-#include "i_ctrl.h"
 #include "m_menu.h"
 #include "m_misc.h"
 #include "m_netgame.h"
@@ -112,8 +111,6 @@
 #include "s_opl.h"
 #include "s_fluid.h"
 #include "s_fmm.h"
-
-#include "i_ctrl.h"
 
 #include "defaults.h"
 
@@ -146,6 +143,14 @@ extern cvar_c r_titlescaling;
 static int monitor_size;
 
 extern int joystick_device;
+extern cvar_c joy_dead0;
+extern cvar_c joy_dead1;
+extern cvar_c joy_dead2;
+extern cvar_c joy_dead3;
+extern cvar_c joy_dead4;
+extern cvar_c joy_dead5;
+
+extern int I_JoyGetAxis(int n);
 
 extern int entry_playing;
 
@@ -460,32 +465,36 @@ static menuinfo_t res_optmenu =
 
 static optmenuitem_t analogueoptions[] =
 {
-	{OPT_Switch,   "Mouse X Axis",       Axis, 11, &mouse_xaxis, NULL, NULL},
-	{OPT_Switch,   "Mouse Y Axis",       Axis, 11, &mouse_yaxis, NULL, NULL},
-	{OPT_FracSlider,   "X Sensitivity",      NULL, 0, &mouse_xsens.f, M_UpdateCVARFromFloat, NULL, &mouse_xsens, 0.25f, 1.0f, 15.0f},
-	{OPT_FracSlider,   "Y Sensitivity",      NULL, 0, &mouse_ysens.f, M_UpdateCVARFromFloat, NULL, &mouse_ysens, 0.25f, 1.0f, 15.0f},
-	{OPT_Plain,    "",                   NULL, 0,  NULL, NULL, NULL},
+	{OPT_Plain,      "",                   NULL, 0,  NULL, NULL, NULL},
+	{OPT_Switch,     "Mouse X Axis",       Axis, 11, &mouse_xaxis, NULL, NULL},
+	{OPT_Switch,     "Mouse Y Axis",       Axis, 11, &mouse_yaxis, NULL, NULL},
+	{OPT_FracSlider, "X Sensitivity",      NULL, 0, &mouse_xsens.f, M_UpdateCVARFromFloat, NULL, &mouse_xsens, 0.25f, 1.0f, 15.0f},
+	{OPT_FracSlider, "Y Sensitivity",      NULL, 0, &mouse_ysens.f, M_UpdateCVARFromFloat, NULL, &mouse_ysens, 0.25f, 1.0f, 15.0f},
+	{OPT_Plain,      "",                   NULL, 0,  NULL, NULL, NULL},
 
-	{OPT_Switch,   "Joystick Device", JoyDevs, 7,  &joystick_device, NULL, NULL},
-	{OPT_Switch,   "First Axis",         Axis, 13, &joy_axis[0], NULL, NULL},
-	{OPT_Switch,   "Second Axis",        Axis, 13, &joy_axis[1], NULL, NULL},
-	{OPT_Switch,   "Third Axis",         Axis, 13, &joy_axis[2], NULL, NULL},
-	{OPT_Switch,   "Fourth Axis",        Axis, 13, &joy_axis[3], NULL, NULL},
-	{OPT_Switch,   "Fifth Axis",         Axis, 13, &joy_axis[4], NULL, NULL},
-	{OPT_Switch,   "Sixth Axis",         Axis, 13, &joy_axis[5], NULL, NULL},
-
-	{OPT_Plain,    "",                   NULL, 0,  NULL, NULL, NULL},
+	{OPT_Switch,     "Joystick Device", JoyDevs, 7,  &joystick_device, NULL, NULL},
+	{OPT_Switch,     "First Axis",         Axis, 13, &joy_axis[0], NULL, NULL},
+	{OPT_FracSlider, "First Axis Deadzone", NULL, 0, &joy_dead0.f, M_UpdateCVARFromFloat, NULL, &joy_dead0, 0.01f, 0.0f, 0.99f},
+	{OPT_Switch,     "Second Axis",        Axis, 13, &joy_axis[1], NULL, NULL},
+	{OPT_FracSlider, "Second Axis Deadzone", NULL, 0, &joy_dead1.f, M_UpdateCVARFromFloat, NULL, &joy_dead1, 0.01f, 0.0f, 0.99f},
+	{OPT_Switch,     "Third Axis",         Axis, 13, &joy_axis[2], NULL, NULL},
+	{OPT_FracSlider, "Third Axis Deadzone", NULL, 0, &joy_dead2.f, M_UpdateCVARFromFloat, NULL, &joy_dead2, 0.01f, 0.0f, 0.99f},
+	{OPT_Switch,     "Fourth Axis",        Axis, 13, &joy_axis[3], NULL, NULL},
+	{OPT_FracSlider, "Fourth Axis Deadzone", NULL, 0, &joy_dead3.f,M_UpdateCVARFromFloat, NULL, &joy_dead3, 0.01f, 0.0f, 0.99f},
+	{OPT_Switch,     "Fifth Axis",         Axis, 13, &joy_axis[4], NULL, NULL},
+	{OPT_FracSlider, "Fifth Axis Deadzone", NULL, 0, &joy_dead4.f, M_UpdateCVARFromFloat, NULL, &joy_dead4, 0.01f, 0.0f, 0.99f},
+	{OPT_Switch,     "Sixth Axis",         Axis, 13, &joy_axis[5], NULL, NULL},
+	{OPT_FracSlider, "Sixth Axis Deadzone", NULL, 0, &joy_dead5.f, M_UpdateCVARFromFloat, NULL, &joy_dead5, 0.01f, 0.0f, 0.99f},
 	{OPT_FracSlider, "Turning Speed",  NULL, 0, &turnspeed.f,  M_UpdateCVARFromFloat, NULL, &turnspeed, 0.10f, 0.10f, 3.0f},
 	{OPT_FracSlider, "Vertical Look Speed",    NULL, 0, &vlookspeed.f, M_UpdateCVARFromFloat, NULL, &vlookspeed, 0.10f, 0.10f, 3.0f},
 	{OPT_FracSlider, "Forward Move Speed",    NULL, 0, &forwardspeed.f, M_UpdateCVARFromFloat, NULL, &forwardspeed, 0.10f, 0.10f, 3.0f},
 	{OPT_FracSlider, "Side Move Speed",    NULL, 0, &sidespeed.f, M_UpdateCVARFromFloat, NULL, &sidespeed, 0.10f, 0.10f, 3.0f},
-	{OPT_FracSlider, "Trigger Sensitivity",    NULL, 0, &triggerthreshold.d, M_UpdateCVARFromInt, NULL, &triggerthreshold, 1000, -30000, 30000},
 };
 
 static menuinfo_t analogue_optmenu = 
 {
 	analogueoptions, sizeof(analogueoptions) / sizeof(optmenuitem_t),
-	&opt_def_style, 150, 75, "M_MSETTL", NULL, 0, "", language["MenuMouse"]
+	&opt_def_style, 150, 75, "M_MSETTL", NULL, 1, "", language["MenuMouse"]
 };
 
 //
@@ -1091,12 +1100,12 @@ void M_OptDrawer()
 		if (curr_menu == &analogue_optmenu && curr_menu->items[i].switchvar == &joystick_device)
 		{
 			// This should place everything to the right of the widest menu entry
-			int draw_x = (curr_menu->menu_center) + 20 + style->fonts[styledef_c::T_TEXT]->StringWidth("Right Trigger");
+			int draw_x = (curr_menu->menu_center) + 90 + style->fonts[styledef_c::T_TEXT]->StringWidth("1.00");
 			HL_WriteText(style, styledef_c::T_TEXT, draw_x, curry, "Axis Test");
 			for (int j = 0; j < 6; j++)
 			{
 				int joy = I_JoyGetAxis(j);
-				M_DrawFracThermo(draw_x, curry+deltay*(j+1), (float)joy, 1, 2, -32768.0f, 32737.0f, false);
+				M_DrawFracThermo(draw_x, curry+(deltay*(j+1))+(deltay*j), (float)joy, 1, 2, -32768.0f, 32737.0f, false);
 			}
 		}
 

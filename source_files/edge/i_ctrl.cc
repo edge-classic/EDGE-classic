@@ -639,6 +639,7 @@ void I_OpenJoystick(int index)
 void I_StartupJoystick(void)
 {
 	cur_joy = 0;
+	joystick_device = 0;
 
 	if (argv::Find("nojoy") > 0)
 	{
@@ -660,13 +661,8 @@ void I_StartupJoystick(void)
 
 	I_Printf("I_StartupControl: %d joysticks found.\n", num_joys);
 
-	joystick_device = CLAMP(0, joystick_device, num_joys);
-
 	if (num_joys == 0)
 		return;
-
-	if (joystick_device > 0)
-		I_OpenJoystick(joystick_device);
 	else
 	{
 		joystick_device = 1; // Automatically set to first detected joystick
@@ -677,15 +673,19 @@ void I_StartupJoystick(void)
 
 void CheckJoystickChanged(void)
 {
-	num_joys = SDL_NumJoysticks();
+	int new_num_joys = SDL_NumJoysticks();
 
-	if (num_joys == 0)
+	if (new_num_joys == num_joys && cur_joy == joystick_device)
+		return;
+
+	if (new_num_joys == 0)
 	{
 		if (joy_info)
 		{
 			SDL_JoystickClose(joy_info);
 			joy_info = NULL;
 		}
+		num_joys = 0;
 		joystick_device = 0;
 		cur_joy = 0;
 		return;
@@ -693,8 +693,11 @@ void CheckJoystickChanged(void)
 
 	int new_joy = joystick_device;
 
-	if (joystick_device < 0 || joystick_device > num_joys)
+	if (joystick_device < 0 || joystick_device > new_num_joys)
+	{
+		joystick_device = 0;
 		new_joy = 0;
+	}
 
 	if (new_joy == cur_joy && cur_joy > 0)
 		return;
@@ -710,14 +713,18 @@ void CheckJoystickChanged(void)
 
 	if (new_joy > 0)
 	{
+		num_joys = new_num_joys;
+		joystick_device = new_joy;
+		I_OpenJoystick(new_joy);
+	}
+	else if (num_joys == 0 && new_num_joys > 0)
+	{
+		num_joys = new_num_joys;
+		joystick_device = new_joy = 1;
 		I_OpenJoystick(new_joy);
 	}
 	else
-	{
-		new_joy = 1;
-		joystick_device = 1;
-		I_OpenJoystick(new_joy);
-	}
+		num_joys = new_num_joys;
 }
 
 
@@ -751,6 +758,11 @@ void I_ControlGetEvents(void)
 
 void I_ShutdownControl(void)
 {
+	if (joy_info)
+	{
+		SDL_JoystickClose(joy_info);
+		joy_info = NULL;
+	}
 }
 
 

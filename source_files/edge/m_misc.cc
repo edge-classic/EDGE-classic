@@ -83,8 +83,6 @@ int var_mix_channels = 0;
 static int edge_version;
 static bool done_first_init = false;
 
-extern int joystick_device;
-
 static default_t defaults[] =
 {
     {CFGT_Int,		"edge_version",		 &edge_version,	  0},
@@ -141,7 +139,6 @@ static default_t defaults[] =
     {CFGT_Int,      "mouse_axis_x",      &mouse_xaxis,  CFGDEF_MOUSE_XAXIS},
     {CFGT_Int,      "mouse_axis_y",      &mouse_yaxis,  CFGDEF_MOUSE_YAXIS},
 
-    {CFGT_Int,      "joystick_device",   &joystick_device, 1},
     {CFGT_Int,      "joy_axis1",         &joy_axis[0],    7},
     {CFGT_Int,      "joy_axis2",         &joy_axis[1],    6},
     {CFGT_Int,      "joy_axis3",         &joy_axis[2],    1},

@@ -402,11 +402,13 @@ void HandleJoystickTriggerEvent(SDL_Event * ev)
 	event_t event;
 
 	int thresh = I_ROUND(*joy_deads[current_axis]*32767.0f);
+	int jaxis = ev->jaxis.value;
+	if (jaxis < 0) jaxis += 32768;
 
 	if (joy_axis[current_axis] == AXIS_LEFT_TRIGGER) 
 	{
 		event.value.key.sym = KEYD_TRIGGER_LEFT;
-		if (ev->jaxis.value+32768 < thresh)
+		if (jaxis < thresh)
 		{
 			if (!left_trigger_pulled) return;
 			event.type = ev_keyup;
@@ -422,7 +424,7 @@ void HandleJoystickTriggerEvent(SDL_Event * ev)
 	else
 	{
 		event.value.key.sym = KEYD_TRIGGER_RIGHT;
-		if (ev->jaxis.value+32768 < thresh)
+		if (jaxis < thresh)
 		{
 			if (!right_trigger_pulled) return;
 			event.type = ev_keyup;

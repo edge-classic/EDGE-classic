@@ -74,6 +74,7 @@
 //
 
 #include "i_defs.h"
+#include "i_sdlinc.h"
 
 #include "font.h"
 #include "path.h"
@@ -1104,11 +1105,26 @@ void M_OptDrawer()
 		{
 			// This should place everything to the right of the widest menu entry
 			int draw_x = (curr_menu->menu_center) + 90 + style->fonts[styledef_c::T_TEXT]->StringWidth("1.00");
-			HL_WriteText(style, styledef_c::T_TEXT, draw_x, curry, "Axis Test");
 			for (int j = 0; j < 6; j++)
 			{
 				int joy = I_JoyGetAxis(j);
-				M_DrawFracThermo(draw_x, curry+(deltay*(j+1))+(deltay*j), (float)joy, 1, 2, -32768.0f, 32737.0f, "");
+				int thresh = I_ROUND(*joy_deads[j]*32767.0f);
+				// Not perfect, but with the raw SDL_Joystick interface we can't really 'detect' whether an axis is
+				// actually a trigger; the defaults should usually get this right, though
+				if (joy_axis[j] == AXIS_LEFT_TRIGGER || joy_axis[j] == AXIS_RIGHT_TRIGGER)
+				{
+					if (joy + (joy < 0 ? 32768 : 0) >= thresh)
+						M_DrawFracThermo(draw_x, curry+(deltay*(j+1))+(deltay*j), (float)joy, 1, 2, -32768.0f, 32737.0f, "");
+					else
+						M_DrawFracThermo(draw_x, curry+(deltay*(j+1))+(deltay*j), -32768.0f, 1, 2, -32768.0f, 32737.0f, "");
+				}
+				else
+				{
+					if (abs(joy) > thresh)
+						M_DrawFracThermo(draw_x, curry+(deltay*(j+1))+(deltay*j), (float)joy, 1, 2, -32768.0f, 32737.0f, "");
+					else
+						M_DrawFracThermo(draw_x, curry+(deltay*(j+1))+(deltay*j), 0.0f, 1, 2, -32768.0f, 32737.0f, "");
+				}
 			}
 		}
 
@@ -1150,6 +1166,26 @@ void M_OptDrawer()
 			case OPT_Boolean:
 			case OPT_Switch:
 			{
+				if (curr_menu == &analogue_optmenu && curr_menu->items[i].switchvar == &joystick_device)
+				{
+					if (joystick_device == 0)
+					{
+						sprintf(tempstring, "None");
+						HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, tempstring);
+						break;
+					}
+					else
+					{
+						const char *joyname = SDL_JoystickNameForIndex(joystick_device-1);
+						if (joyname)
+						{
+							sprintf(tempstring, epi::STR_Format("%.19s...", joyname).c_str());
+							HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, tempstring);
+							break;
+						}
+					}
+				}
+
 				k = 0;
 				for (int j = 0; j < M_GetCurrentSwitchValue(&curr_menu->items[i]); j++)
 				{

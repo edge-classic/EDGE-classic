@@ -638,6 +638,121 @@ static mline_t player_dagger[] =
 
 #define NUMPLYRDGGRLINES (sizeof(player_dagger)/sizeof(mline_t))
 
+static void DrawLineCharacter(mline_t *lineguy, int lineguylines, 
+							  float radius, angle_t angle,
+							  rgbcol_t rgb, float x, float y)
+{
+	float cx, cy;
+
+	GetRotatedCoords(x, y, cx, cy);
+
+	cx = CXMTOF(cx, m_cx);
+	cy = CYMTOF(cy, m_cy);
+
+	if (radius < FTOM(2))
+		radius = FTOM(2);
+
+	angle = GetRotatedAngle(angle);
+
+	for (int i = 0 ; i < lineguylines ; i++)
+	{
+		float ax = lineguy[i].a.x;
+		float ay = lineguy[i].a.y;
+
+		if (angle)
+			Rotate(ax, ay, angle);
+
+		float bx = lineguy[i].b.x;
+		float by = lineguy[i].b.y;
+
+		if (angle)
+			Rotate(bx, by, angle);
+
+		ax = ax * XMTOF(radius);
+		ay = ay * YMTOF(radius);
+		bx = bx * XMTOF(radius);
+		by = by * YMTOF(radius);
+
+		HUD_SolidLine(cx+ax, cy-ay, cx+bx, cy-by, rgb);
+	}
+}
+
+
+// Aux2StringReplaceAll("Our_String", std::string("_"), std::string(" "));
+//
+std::string Aux2StringReplaceAll(std::string str, const std::string& from, const std::string& to) 
+{
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) 
+	{
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+    return str;
+}
+
+
+//Lobo 2023: draw some key info in the middle of a line
+static void DrawKeyOnLine(mline_t * ml, int theKey, rgbcol_t rgb = T_WHITE)
+{
+	if (hide_lines)
+		return;
+
+	if (!am_keydoorblink) //Only if we have blinking turned on
+		return;
+
+	static const mobjtype_c *TheObject;
+	std::string CleanName;
+	CleanName.clear();
+
+	if (theKey == KF_STRICTLY_ALL)
+	{
+		CleanName = "All keys";
+	}
+	else
+	{
+		TheObject = mobjtypes.LookupDoorKey(theKey);
+		CleanName = Aux2StringReplaceAll(TheObject->name, std::string("_"), std::string(" "));
+	}
+		
+// *********************
+// Draw Text description
+	//Calculate midpoint
+	float midx = (ml->a.x + ml->b.x) / 2;
+	float midy = (ml->a.y + ml->b.y) / 2;
+
+	//Translate map coords to hud coords
+	float x1 = CXMTOF(midx, m_cx);
+	float y1 = CYMTOF(midy, m_cy);
+
+	font_c *am_font = automap_style->fonts[0];
+
+	HUD_SetFont(am_font);
+	HUD_SetAlignment(0, 0); // centre the characters
+	HUD_SetTextColor(rgb);
+	float TextSize = 0.4f * m_scale;
+	if (m_scale > 5.0f) //only draw the text if we're zoomed in?
+		HUD_DrawText(x1, y1, CleanName.c_str(), TextSize);
+
+	HUD_SetFont();
+	HUD_SetTextColor();
+	HUD_SetAlignment();
+
+/*
+// *********************
+// Draw Graphical description	
+	float x2 = ml->a.x;
+	float y2 = ml->a.y;
+
+	DrawLineCharacter(door_key, NUMDOORKEYLINES, 
+				5, ANG90,
+				RGB_MAKE(0,0,255), x2, y2);
+*/
+
+	return;
+}
+
+
 //
 // Draws flat (floor/ceiling tile) aligned grid lines.
 //
@@ -784,27 +899,44 @@ static void AM_WalkSeg(seg_t *seg)
 				{
 					if(line->special->keys & KF_STRICTLY_ALL)
 					{
-						DrawMLineDoor(&l, RGB_MAKE(255,0,255)); //purple
+						DrawMLineDoor(&l, T_PURPLE); //purple
+						DrawKeyOnLine(&l, KF_STRICTLY_ALL);
 					}
 					else if(line->special->keys & KF_BlueCard || line->special->keys & KF_BlueSkull)
 					{
-						DrawMLineDoor(&l, RGB_MAKE(0,0,255)); //blue
+						DrawMLineDoor(&l, T_BLUE); //blue
+						if(line->special->keys & KF_BlueCard)
+							DrawKeyOnLine(&l, KF_BlueCard);
+						else
+							DrawKeyOnLine(&l, KF_BlueSkull);
 					}
 					else if(line->special->keys & KF_YellowCard || line->special->keys & KF_YellowSkull)
 					{
-						DrawMLineDoor(&l, RGB_MAKE(255,255,0)); //yellow
+						DrawMLineDoor(&l, T_YELLOW); //yellow
+						if(line->special->keys & KF_YellowCard)
+							DrawKeyOnLine(&l, KF_YellowCard);
+						else
+							DrawKeyOnLine(&l, KF_YellowSkull);
 					}
 					else if(line->special->keys & KF_RedCard || line->special->keys & KF_RedSkull)
 					{
-						DrawMLineDoor(&l, RGB_MAKE(255,0,0)); //red
+						DrawMLineDoor(&l, T_RED); //red
+						if(line->special->keys & KF_RedCard)
+							DrawKeyOnLine(&l, KF_RedCard);
+						else
+							DrawKeyOnLine(&l, KF_RedSkull);
 					}
 					else if(line->special->keys & KF_GreenCard || line->special->keys & KF_GreenSkull)
 					{
-						DrawMLineDoor(&l, RGB_MAKE(0,255,0)); //green
+						DrawMLineDoor(&l, T_GREEN); //green
+						if(line->special->keys & KF_GreenCard)
+							DrawKeyOnLine(&l, KF_GreenCard);
+						else
+							DrawKeyOnLine(&l, KF_GreenSkull);
 					}
 					else
 					{
-						DrawMLineDoor(&l, RGB_MAKE(255,0,255)); //purple
+						DrawMLineDoor(&l, T_PURPLE); //purple
 					}
 					return;
 				}
@@ -857,44 +989,6 @@ static void AM_WalkSeg(seg_t *seg)
 }
 
 
-static void DrawLineCharacter(mline_t *lineguy, int lineguylines, 
-							  float radius, angle_t angle,
-							  rgbcol_t rgb, float x, float y)
-{
-	float cx, cy;
-
-	GetRotatedCoords(x, y, cx, cy);
-
-	cx = CXMTOF(cx, m_cx);
-	cy = CYMTOF(cy, m_cy);
-
-	if (radius < FTOM(2))
-		radius = FTOM(2);
-
-	angle = GetRotatedAngle(angle);
-
-	for (int i = 0 ; i < lineguylines ; i++)
-	{
-		float ax = lineguy[i].a.x;
-		float ay = lineguy[i].a.y;
-
-		if (angle)
-			Rotate(ax, ay, angle);
-
-		float bx = lineguy[i].b.x;
-		float by = lineguy[i].b.y;
-
-		if (angle)
-			Rotate(bx, by, angle);
-
-		ax = ax * XMTOF(radius);
-		ay = ay * YMTOF(radius);
-		bx = bx * XMTOF(radius);
-		by = by * YMTOF(radius);
-
-		HUD_SolidLine(cx+ax, cy-ay, cx+bx, cy-by, rgb);
-	}
-}
 
 
 #if (DEBUG_COLLIDE == 1)

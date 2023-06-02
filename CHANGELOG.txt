@@ -107,7 +107,8 @@ New Features
     - View Bobbing - This is the already existing "Bobbing" option that has been moved from Gameplay Options
     - Reduce Flash - Provides an alternate means of displaying teleport fog and palette/colormap effects (invuln, pain, etc). The various
       GunFlash actions also add no additional sector light with this enabled.
-    - Automap: Keyed Doors Pulse - Makes locating locked doors on the automap easier
+    - Automap: Keyed Doors Pulse - Makes locating locked doors on the automap easier. Will also show the name of the required key.
+
 
 General Improvements
 --------------------
@@ -169,6 +170,9 @@ General Improvements
 
 + Fluidlite parameters adjusted to fix pitch issues with various soundfonts
   - s_fluidgain CVAR also added to allow manual control over gain (clamped in the 0.0-2.0 range)
+  
++ Automap now shows a dagger symbol for the player for Heretic and Blasphemer.
+
 
 
 Bugs fixed

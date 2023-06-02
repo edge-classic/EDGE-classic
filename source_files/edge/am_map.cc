@@ -601,6 +601,43 @@ static void DrawMLineDoor(mline_t * ml, rgbcol_t rgb)
 	HUD_SolidLine(x1, y1, x2, y2, rgb, linewidth, true, dx, dy);
 }
 
+static mline_t door_key[] =
+{
+	{{-2, 0}, {-1.7, -0.5}},
+	{{-1.7, -0.5}, {-1.5, -0.7}},
+	{{-1.5, -0.7}, {-0.8, -0.5}},
+	{{-0.8, -0.5}, {-0.6, 0}},
+	{{-0.6, 0}, {-0.8, 0.5}},
+	{{-1.5, 0.7}, {-0.8, 0.5}},
+	{{-1.7, 0.5}, {-1.5, 0.7}},
+	{{-2, 0}, {-1.7, 0.5}},
+	{{-0.6, 0}, {2, 0}},
+	{{1.7, 0}, {1.7, -1}},
+	{{1.5, 0}, {1.5, -1}},
+	{{1.3, 0}, {1.3, -1}}
+};
+
+#define NUMDOORKEYLINES (sizeof(door_key)/sizeof(mline_t))
+
+
+static mline_t player_dagger[] =
+{
+	{{-0.75f, 0.0f}, {0.0f, 0.0f}},   // center line
+
+	{{-0.75f, 0.125f}, {1.0f,  0.0f}},  // blade
+	{{-0.75f, -0.125f}, {1.0f, 0.0f}},
+
+	{{-0.75, -0.25}, {-0.75, 0.25 }}, // crosspiece
+	{{-0.875, -0.25}, {-0.875, 0.25 }},
+	{{-0.875, -0.25}, {-0.75, -0.25}}, //crosspiece connectors
+	{{-0.875, 0.25}, {-0.75, 0.25}},
+	{{-1.125, 0.125}, {-1.125, -0.125 }}, //pommel
+	{{-1.125, 0.125}, {-0.875, 0.125 }},
+	{{-1.125, -0.125}, {-0.875, -0.125}}
+};
+
+#define NUMPLYRDGGRLINES (sizeof(player_dagger)/sizeof(mline_t))
+
 //
 // Draws flat (floor/ceiling tile) aligned grid lines.
 //
@@ -973,15 +1010,29 @@ static void AM_DrawPlayer(mobj_t *mo)
 
 	if (!netgame)
 	{
-		if (cheating)
-			DrawLineCharacter(cheat_player_arrow, NUMCHEATPLYRLINES, 
+		if (epi::case_cmp("HERETIC", game_base) == 0)
+		{
+			DrawLineCharacter(player_dagger, NUMPLYRDGGRLINES, 
 				mo->radius, mo->angle,
 				am_colors[AMCOL_Player], mo->x, mo->y);
+		}
+		else if (epi::case_cmp("BLASPHEMER", game_base) == 0)
+		{
+			DrawLineCharacter(player_dagger, NUMPLYRDGGRLINES, 
+				mo->radius, mo->angle,
+				am_colors[AMCOL_Player], mo->x, mo->y);
+		}
 		else
-			DrawLineCharacter(player_arrow, NUMPLYRLINES, 
-				mo->radius, mo->angle,
-				am_colors[AMCOL_Player], mo->x, mo->y);
-
+		{
+			if (cheating)
+				DrawLineCharacter(cheat_player_arrow, NUMCHEATPLYRLINES, 
+					mo->radius, mo->angle,
+					am_colors[AMCOL_Player], mo->x, mo->y);
+			else
+				DrawLineCharacter(player_arrow, NUMPLYRLINES,  
+					mo->radius, mo->angle,
+					am_colors[AMCOL_Player], mo->x, mo->y);
+		}
 		return;
 	}
 

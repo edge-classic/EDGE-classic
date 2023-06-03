@@ -1049,7 +1049,7 @@ void M_OptDrawer()
 
 
 	//now, draw all the menuitems
-	deltay = 1 + font_h;
+	deltay = 1 + font_h + style->def->entry_spacing;
 
 	curry = menutop + 25;
 

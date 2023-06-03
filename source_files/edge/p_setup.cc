@@ -58,10 +58,6 @@
 #include "w_texture.h"
 #include "w_wad.h"
 
-#ifdef __arm__
-  #include "str_util.h"
-#endif
-
 #include "miniz.h" // ZGL3 nodes
 
 // debugging aide:

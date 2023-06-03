@@ -564,47 +564,49 @@ void M_DrawHostMenu(void)
 
 	int y = 40;
 	int idx = 0;
+	int deltay = 2 + (ng_host_style->fonts[styledef_c::T_TEXT]->NominalHeight() *
+		ng_host_style->def->text[styledef_c::T_TEXT].scale) + ng_host_style->def->entry_spacing;
 
 	if (!ng_params->map->episode->description.empty())
 		DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map->episode->description.c_str()]);
 	else
 		DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map->episode_name.c_str()]);
 
-	y += 10; idx++;
+	y += deltay; idx++;
 
 	DrawKeyword(idx, ng_host_style, y, "Level", ng_params->map->name.c_str());
-	y += 18; idx++;
+	y += deltay + (deltay/2); idx++;
 
 	DrawKeyword(idx, ng_host_style, y, "Mode", GetModeName(ng_params->deathmatch));
-	y += 10; idx++;
+	y += deltay; idx++;
 
 	DrawKeyword(idx, ng_host_style, y, "Skill", GetSkillName(ng_params->skill));
-	y += 10; idx++;
+	y += deltay; idx++;
 
 	DrawKeyword(idx, ng_host_style, y, "Bots",
 			epi::STR_Format("%d", host_want_bots).c_str());
-	y += 10; idx++;
+	y += deltay; idx++;
 
 	int skill = CLAMP(0, bot_skill.d, 4);
 	DrawKeyword(idx, ng_host_style, y, "Bot Skill", GetBotSkillName(skill));
-	y += 10; idx++;
+	y += deltay; idx++;
 
 	int dm_damage_resistance = CLAMP(0, player_dm_dr.d, 18);
 	DrawKeyword(idx, ng_host_style, y, "Player Damage Resistance", GetPlayerDamResName(dm_damage_resistance));
-	y += 8; idx++;
+	y += deltay; idx++;
 
 	int x = 150 - (ng_host_style->fonts[styledef_c::T_TEXT]->StringWidth("(Deathmatch Only)") * ng_host_style->def->text[styledef_c::T_TEXT].scale);
 	HL_WriteText(ng_host_style, idx-1 == host_pos ? 2 : 0, x, y, "(Deathmatch Only)");
-	y += 10;
+	y += deltay;
 
 	DrawKeyword(idx, ng_host_style, y, "Monsters", ng_params->flags->nomonsters ? "OFF" : ng_params->flags->fastparm ? "FAST" : "ON");
-	y += 10; idx++;
+	y += deltay; idx++;
 
 	DrawKeyword(idx, ng_host_style, y, "Item Respawn", ng_params->flags->itemrespawn ? "ON" : "OFF");
-	y += 10; idx++;
+	y += deltay; idx++;
 
 	DrawKeyword(idx, ng_host_style, y, "Team Damage", ng_params->flags->team_damage ? "ON" : "OFF");
-	y += 22; idx++;
+	y += (deltay*2); idx++;
 
 	CenterX = 160;
 	CenterX -= (ng_host_style->fonts[styledef_c::T_TEXT]->StringWidth("Start") * ng_host_style->def->text[styledef_c::T_TEXT].scale) / 2;

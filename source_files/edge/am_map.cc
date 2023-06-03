@@ -181,6 +181,7 @@ static bool stopped = true;
 
 bool rotatemap = false;
 bool am_keydoorblink = false;
+bool am_keydoortext = false;
 
 extern cvar_c r_doubleframes;
 
@@ -698,7 +699,7 @@ static void DrawKeyOnLine(mline_t * ml, int theKey, rgbcol_t rgb = T_WHITE)
 	if (hide_lines)
 		return;
 
-	if (!am_keydoorblink) //Only if we have blinking turned on
+	if (!am_keydoortext) //Only if we have Keyed Doors Named turned on
 		return;
 
 	static const mobjtype_c *TheObject;

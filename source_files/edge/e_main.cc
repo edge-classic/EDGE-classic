@@ -390,6 +390,7 @@ static void SetGlobalVars(void)
 	argv::CheckBooleanParm("autoload", &autoquickload, false);
 
 	argv::CheckBooleanParm("am_keydoorblink", &am_keydoorblink, false);
+	argv::CheckBooleanParm("am_keydoortext", &am_keydoortext, false);
 
 	if (argv::Find("infight") > 0)
 		g_aggression = 1;

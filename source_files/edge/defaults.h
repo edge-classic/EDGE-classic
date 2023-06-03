@@ -103,6 +103,7 @@
 #define CFGDEF_RESPAWN          (0)
 
 #define CFGDEF_AM_KEYDOORBLINK        (1)
+#define CFGDEF_AM_KEYDOORTEXT        (0)
 
 #endif /* __CFGDEF_SETTINGS__ */
 

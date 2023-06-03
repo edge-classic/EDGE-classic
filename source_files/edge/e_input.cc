@@ -144,12 +144,12 @@ static int joy_last_raw[6];
 static float ball_deltas[6] = {0, 0, 0, 0, 0, 0};
 static float  joy_forces[6] = {0, 0, 0, 0, 0, 0};
 
-DEF_CVAR_CLAMPED(joy_dead0,   "0.30", CVAR_ARCHIVE, 0.0f, 0.99f)
-DEF_CVAR_CLAMPED(joy_dead1,   "0.30", CVAR_ARCHIVE, 0.0f, 0.99f)
-DEF_CVAR_CLAMPED(joy_dead2,   "0.30", CVAR_ARCHIVE, 0.0f, 0.99f)
-DEF_CVAR_CLAMPED(joy_dead3,   "0.30", CVAR_ARCHIVE, 0.0f, 0.99f)
-DEF_CVAR_CLAMPED(joy_dead4,   "0.30", CVAR_ARCHIVE, 0.0f, 0.99f)
-DEF_CVAR_CLAMPED(joy_dead5,   "0.30", CVAR_ARCHIVE, 0.0f, 0.99f)
+DEF_CVAR_CLAMPED(joy_dead0,   "0.30", CVAR_ARCHIVE, 0.01f, 0.99f)
+DEF_CVAR_CLAMPED(joy_dead1,   "0.30", CVAR_ARCHIVE, 0.01f, 0.99f)
+DEF_CVAR_CLAMPED(joy_dead2,   "0.30", CVAR_ARCHIVE, 0.01f, 0.99f)
+DEF_CVAR_CLAMPED(joy_dead3,   "0.30", CVAR_ARCHIVE, 0.01f, 0.99f)
+DEF_CVAR_CLAMPED(joy_dead4,   "0.30", CVAR_ARCHIVE, 0.01f, 0.99f)
+DEF_CVAR_CLAMPED(joy_dead5,   "0.30", CVAR_ARCHIVE, 0.01f, 0.99f)
 float *joy_deads[6] = 
 { 
 	&joy_dead0.f, 

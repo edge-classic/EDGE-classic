@@ -1113,7 +1113,8 @@ void M_OptDrawer()
 				// actually a trigger; the defaults should usually get this right, though
 				if (joy_axis[j] == AXIS_LEFT_TRIGGER || joy_axis[j] == AXIS_RIGHT_TRIGGER)
 				{
-					if (joy + (joy < 0 ? 32768 : 0) >= thresh)
+					thresh = -32768 + (thresh*2);
+					if (joy >= thresh)
 						M_DrawFracThermo(draw_x, curry+(deltay*(j+1))+(deltay*j), (float)joy, 1, 2, -32768.0f, 32737.0f, "");
 					else
 						M_DrawFracThermo(draw_x, curry+(deltay*(j+1))+(deltay*j), -32768.0f, 1, 2, -32768.0f, 32737.0f, "");

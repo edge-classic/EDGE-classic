@@ -693,12 +693,12 @@ void P_CalcFullProperties(const mobj_t *mo, region_properties_t *new_p)
 
 	//new_p->push.x = new_p->push.y = new_p->push.z = 0; // Original calcs - Dasho
 
-	// 2023.05.31 - Test some preservation of push values when transitioning sectors
+	// 2023.05.31 - Test preservation of push values when transitioning sectors
 	// In particular, this seems to fix AAA MAP07's exit voodoo scroller, which would
 	// otherwise become stuck on the narrow section that is not a pusher - Dasho
-	new_p->push.x = (mo->props->push.x + sector->props.push.x)/2;
-	new_p->push.y = (mo->props->push.y + sector->props.push.y)/2;
-	new_p->push.z = (mo->props->push.z + sector->props.push.z)/2;
+	new_p->push.x = mo->props->push.x + sector->props.push.x;
+	new_p->push.y = mo->props->push.y + sector->props.push.y;
+	new_p->push.z = mo->props->push.z + sector->props.push.z;
 
 	new_p->type = 0;  // these shouldn't be used
 	new_p->special = NULL;

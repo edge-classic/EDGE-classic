@@ -35,6 +35,7 @@
 extern bool automapactive;
 extern bool rotatemap;
 extern bool am_keydoorblink;
+extern bool am_keydoortext;
 
 //
 // Automap drawing structs

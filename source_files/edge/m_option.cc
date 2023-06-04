@@ -652,6 +652,7 @@ static optmenuitem_t accessibilityoptions[] =
 	{OPT_Switch,  "View Bobbing", "Full/Head Only/Weapon Only/None", 4, &g_bobbing.d, M_ChangeBobbing, "May help with motion sickness"},
 	{OPT_Switch,  "Reduce Flashing",  YesNo,   2, &reduce_flash, NULL, "May help with epilepsy or photosensitivity"},
 	{OPT_Boolean, "Automap: Keyed Doors Pulse",    YesNo,   2, &am_keydoorblink, NULL, "Can help locate doors more easily"},
+	{OPT_Boolean, "Automap: Keyed Doors Named",    YesNo,   2, &am_keydoortext, NULL, "Required key shown visually"},
 };
 
 static menuinfo_t accessibility_optmenu = 

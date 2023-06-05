@@ -49,7 +49,7 @@ int joystick_device;  // choice in menu, 0 for none
 
 static int num_joys;
 static int cur_joy;  // 0 for none
-static SDL_Joystick *joy_info;
+SDL_Joystick *joy_info;
 
 static int joy_num_axes;
 static int joy_num_buttons;
@@ -402,7 +402,10 @@ void HandleJoystickTriggerEvent(SDL_Event * ev)
 	event_t event;
 
 	int thresh = I_ROUND(*joy_deads[current_axis]*32767.0f);
-	thresh = -32768 + (thresh * 2);
+
+	// This does make an assumption that an analog trigger's initial state is the max negative value
+	if (SDL_JoystickGetAxisInitialState(joy_info, current_axis, nullptr))
+		thresh = -32768 + (thresh * 2);
 
 	if (joy_axis[current_axis] == AXIS_LEFT_TRIGGER) 
 	{

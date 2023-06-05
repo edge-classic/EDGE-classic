@@ -151,6 +151,7 @@ extern cvar_c joy_dead3;
 extern cvar_c joy_dead4;
 extern cvar_c joy_dead5;
 
+extern SDL_Joystick *joy_info; 
 extern int I_JoyGetAxis(int n);
 
 extern int entry_playing;
@@ -1110,9 +1111,7 @@ void M_OptDrawer()
 			{
 				int joy = I_JoyGetAxis(j);
 				int thresh = I_ROUND(*joy_deads[j]*32767.0f);
-				// Not perfect, but with the raw SDL_Joystick interface we can't really 'detect' whether an axis is
-				// actually a trigger; the defaults should usually get this right, though
-				if (joy_axis[j] == AXIS_LEFT_TRIGGER || joy_axis[j] == AXIS_RIGHT_TRIGGER)
+				if (joy_info && SDL_JoystickGetAxisInitialState(joy_info, j, nullptr)) // Assume any axis with an initial state is an analog trigger
 				{
 					thresh = -32768 + (thresh*2);
 					if (joy >= thresh)

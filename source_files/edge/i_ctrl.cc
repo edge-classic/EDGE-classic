@@ -402,15 +402,19 @@ void HandleJoystickTriggerEvent(SDL_Event * ev)
 	event_t event;
 
 	int thresh = I_ROUND(*joy_deads[current_axis]*32767.0f);
+	int input = ev->jaxis.value;
+	s16_t initial = 0;
 
-	// This does make an assumption that an analog trigger's initial state is the max negative value
-	if (SDL_JoystickGetAxisInitialState(joy_info, current_axis, nullptr))
+	// This does make an assumption that an analog trigger's initial state is going to be larger than any reasonable deadzone
+	if (SDL_JoystickGetAxisInitialState(joy_info, current_axis, &initial) && abs(initial) > thresh)
 		thresh = -32768 + (thresh * 2);
+	else
+		input = abs(input);
 
 	if (joy_axis[current_axis] == AXIS_LEFT_TRIGGER) 
 	{
 		event.value.key.sym = KEYD_TRIGGER_LEFT;
-		if (ev->jaxis.value < thresh)
+		if (input < thresh)
 		{
 			if (!left_trigger_pulled) return;
 			event.type = ev_keyup;
@@ -426,7 +430,7 @@ void HandleJoystickTriggerEvent(SDL_Event * ev)
 	else
 	{
 		event.value.key.sym = KEYD_TRIGGER_RIGHT;
-		if (ev->jaxis.value < thresh)
+		if (input < thresh)
 		{
 			if (!right_trigger_pulled) return;
 			event.type = ev_keyup;

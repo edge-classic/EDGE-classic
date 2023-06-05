@@ -1111,7 +1111,8 @@ void M_OptDrawer()
 			{
 				int joy = I_JoyGetAxis(j);
 				int thresh = I_ROUND(*joy_deads[j]*32767.0f);
-				if (joy_info && SDL_JoystickGetAxisInitialState(joy_info, j, nullptr)) // Assume any axis with an initial state is an analog trigger
+				s16_t initial = 0;
+				if (joy_info && SDL_JoystickGetAxisInitialState(joy_info, j, &initial) && abs(initial) > thresh) // Assume any axis with an initial state is an analog trigger
 				{
 					thresh = -32768 + (thresh*2);
 					if (joy >= thresh)

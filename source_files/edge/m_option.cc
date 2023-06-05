@@ -213,7 +213,7 @@ static void InitMonitorSize();
 static char YesNo[]     = "Off/On";  // basic on/off
 static char CrossH[]    = "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double";
 static char Respw[]     = "Teleport/Resurrect";  // monster respawning
-static char Axis[]      = "Off/+Turn/-Turn/+MLook/-MLook/+Forward/-Forward/+Strafe/-Strafe/+Fly/-Fly/Left Trigger/Right Trigger";
+static char Axis[]      = "Off/Turn/Turn (Reversed)/Look (Inverted)/Look/Walk (Reversed)/Walk/Strafe/Strafe (Reversed)/Fly (Inverted)/Fly/Left Trigger/Right Trigger";
 static char JoyDevs[]   = "None/1/2/3/4/5/6";
 static char JpgPng[]    = "JPEG/PNG";  // basic on/off
 static char AAim[]      = "Off/On/Mlook";

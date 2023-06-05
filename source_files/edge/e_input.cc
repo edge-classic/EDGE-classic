@@ -49,6 +49,7 @@ extern int I_JoyGetAxis(int n);
 
 extern cvar_c r_doubleframes;
 
+extern SDL_Joystick *joy_info;
 
 //
 // EVENT HANDLING
@@ -203,6 +204,11 @@ static void UpdateJoyAxis(int n)
 
 	// cooked value = average of last two raw samples
 	int cooked = (raw + old) >> 1;
+
+	s16_t initial = 0;
+	// Adjust axis input if an analog trigger is being used
+	if (SDL_JoystickGetAxisInitialState(joy_info, n, &initial) && abs((float)initial/32780.0f) > *joy_deads[n])
+		cooked = (cooked+32768) / 2;
 
 	float force = JoyAxisFromRaw(cooked, *joy_deads[n]);
 

@@ -213,7 +213,8 @@ static void InitMonitorSize();
 static char YesNo[]     = "Off/On";  // basic on/off
 static char CrossH[]    = "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double";
 static char Respw[]     = "Teleport/Resurrect";  // monster respawning
-static char Axis[]      = "Off/Turn/Turn (Reversed)/Look (Inverted)/Look/Walk (Reversed)/Walk/Strafe/Strafe (Reversed)/Fly (Inverted)/Fly/Left Trigger/Right Trigger";
+static char MouseAxis[]    = "Off/Turn/Turn (Reversed)/Look/Look (Inverted)/Walk/Walk (Reversed)/Strafe/Strafe (Reversed)/Fly/Fly (Inverted)";
+static char JoyAxis[]      = "Off/Turn/Turn (Reversed)/Look (Inverted)/Look/Walk (Reversed)/Walk/Strafe/Strafe (Reversed)/Fly (Inverted)/Fly/Left Trigger/Right Trigger";
 static char JoyDevs[]   = "None/1/2/3/4/5/6";
 static char JpgPng[]    = "JPEG/PNG";  // basic on/off
 static char AAim[]      = "Off/On/Mlook";
@@ -471,24 +472,24 @@ static menuinfo_t res_optmenu =
 static optmenuitem_t analogueoptions[] =
 {
 	{OPT_Plain,      "",                   NULL, 0,  NULL, NULL, NULL},
-	{OPT_Switch,     "Mouse X Axis",       Axis, 11, &mouse_xaxis, NULL, NULL},
-	{OPT_Switch,     "Mouse Y Axis",       Axis, 11, &mouse_yaxis, NULL, NULL},
+	{OPT_Switch,     "Mouse X Axis",       MouseAxis, 11, &mouse_xaxis, NULL, NULL},
+	{OPT_Switch,     "Mouse Y Axis",       MouseAxis, 11, &mouse_yaxis, NULL, NULL},
 	{OPT_FracSlider, "X Sensitivity",      NULL, 0, &mouse_xsens.f, M_UpdateCVARFromFloat, NULL, &mouse_xsens, 0.25f, 1.0f, 15.0f, "%0.2f"},
 	{OPT_FracSlider, "Y Sensitivity",      NULL, 0, &mouse_ysens.f, M_UpdateCVARFromFloat, NULL, &mouse_ysens, 0.25f, 1.0f, 15.0f, "%0.2f"},
 	{OPT_Plain,      "",                   NULL, 0,  NULL, NULL, NULL},
 
 	{OPT_Switch,     "Joystick Device", JoyDevs, 7,  &joystick_device, NULL, NULL},
-	{OPT_Switch,     "First Axis",         Axis, 13, &joy_axis[0], NULL, NULL},
+	{OPT_Switch,     "First Axis",         JoyAxis, 13, &joy_axis[0], NULL, NULL},
 	{OPT_FracSlider, "First Axis Deadzone", NULL, 0, &joy_dead0.f, M_UpdateCVARFromFloat, NULL, &joy_dead0, 0.01f, 0.0f, 0.99f, "%0.2f"},
-	{OPT_Switch,     "Second Axis",        Axis, 13, &joy_axis[1], NULL, NULL},
+	{OPT_Switch,     "Second Axis",        JoyAxis, 13, &joy_axis[1], NULL, NULL},
 	{OPT_FracSlider, "Second Axis Deadzone", NULL, 0, &joy_dead1.f, M_UpdateCVARFromFloat, NULL, &joy_dead1, 0.01f, 0.0f, 0.99f, "%0.2f"},
-	{OPT_Switch,     "Third Axis",         Axis, 13, &joy_axis[2], NULL, NULL},
+	{OPT_Switch,     "Third Axis",         JoyAxis, 13, &joy_axis[2], NULL, NULL},
 	{OPT_FracSlider, "Third Axis Deadzone", NULL, 0, &joy_dead2.f, M_UpdateCVARFromFloat, NULL, &joy_dead2, 0.01f, 0.0f, 0.99f, "%0.2f"},
-	{OPT_Switch,     "Fourth Axis",        Axis, 13, &joy_axis[3], NULL, NULL},
+	{OPT_Switch,     "Fourth Axis",        JoyAxis, 13, &joy_axis[3], NULL, NULL},
 	{OPT_FracSlider, "Fourth Axis Deadzone", NULL, 0, &joy_dead3.f,M_UpdateCVARFromFloat, NULL, &joy_dead3, 0.01f, 0.0f, 0.99f, "%0.2f"},
-	{OPT_Switch,     "Fifth Axis",         Axis, 13, &joy_axis[4], NULL, NULL},
+	{OPT_Switch,     "Fifth Axis",         JoyAxis, 13, &joy_axis[4], NULL, NULL},
 	{OPT_FracSlider, "Fifth Axis Deadzone", NULL, 0, &joy_dead4.f, M_UpdateCVARFromFloat, NULL, &joy_dead4, 0.01f, 0.0f, 0.99f, "%0.2f"},
-	{OPT_Switch,     "Sixth Axis",         Axis, 13, &joy_axis[5], NULL, NULL},
+	{OPT_Switch,     "Sixth Axis",         JoyAxis, 13, &joy_axis[5], NULL, NULL},
 	{OPT_FracSlider, "Sixth Axis Deadzone", NULL, 0, &joy_dead5.f, M_UpdateCVARFromFloat, NULL, &joy_dead5, 0.01f, 0.0f, 0.99f, "%0.2f"},
 	{OPT_FracSlider, "Turning Speed",  NULL, 0, &turnspeed.f,  M_UpdateCVARFromFloat, NULL, &turnspeed, 0.10f, 0.10f, 3.0f, "%0.2f"},
 	{OPT_FracSlider, "Vertical Look Speed",    NULL, 0, &vlookspeed.f, M_UpdateCVARFromFloat, NULL, &vlookspeed, 0.10f, 0.10f, 3.0f, "%0.2f"},

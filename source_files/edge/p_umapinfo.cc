@@ -800,7 +800,7 @@ void Parse_DMAPINFO(const std::string& buffer)
 
 		tok = lex.Next(section);
 
-		if (tok != epi::TOK_Ident)
+		if (tok != epi::TOK_String)
 			I_Error("DMAPINFO: No mapname for map entry!\n");
 
 		unsigned int i = 0;

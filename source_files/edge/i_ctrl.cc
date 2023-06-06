@@ -405,8 +405,7 @@ void HandleJoystickTriggerEvent(SDL_Event * ev)
 	int input = ev->jaxis.value;
 	s16_t initial = 0;
 
-	// This does make an assumption that an analog trigger's initial state is going to be larger than any reasonable deadzone
-	if (SDL_JoystickGetAxisInitialState(joy_info, current_axis, &initial) && abs(initial) > thresh)
+	if (SDL_JoystickGetAxisInitialState(joy_info, current_axis, &initial) && initial == -32768)
 		thresh = -32768 + (thresh * 2);
 	else
 		input = abs(input);

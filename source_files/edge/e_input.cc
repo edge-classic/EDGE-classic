@@ -207,7 +207,7 @@ static void UpdateJoyAxis(int n)
 
 	s16_t initial = 0;
 	// Adjust axis input if an analog trigger is being used
-	if (SDL_JoystickGetAxisInitialState(joy_info, n, &initial) && abs((float)initial/32780.0f) > *joy_deads[n])
+	if (SDL_JoystickGetAxisInitialState(joy_info, n, &initial) && initial == -32768)
 		cooked = (cooked+32768) / 2;
 
 	float force = JoyAxisFromRaw(cooked, *joy_deads[n]);

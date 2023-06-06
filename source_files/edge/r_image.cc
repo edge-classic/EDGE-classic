@@ -1191,10 +1191,6 @@ static bool IM_ShouldMipmap(image_c *rim)
 
 static bool IM_ShouldSmooth(image_c *rim)
 {
-   	// the "SKY" check here is a hack...
-   	if (epi::prefix_case_cmp(rim->name, "SKY") == 0)
-		return true;
-
 	if (rim->blur_sigma > 0.0f)
 		return true;
 

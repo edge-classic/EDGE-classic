@@ -314,7 +314,7 @@ void HandleMouseWheelEvent(SDL_Event * ev)
 void HandleJoystickButtonEvent(SDL_Event * ev)
 {
 	// ignore other joysticks;
-	if ((int)ev->jbutton.which != cur_joy-1)
+	if (ev->jbutton.which != SDL_JoystickGetDeviceInstanceID(cur_joy-1))
 		return;
 
 	event_t event;
@@ -337,7 +337,7 @@ void HandleJoystickButtonEvent(SDL_Event * ev)
 void HandleJoystickHatEvent(SDL_Event * ev)
 {
 	// ignore other joysticks;
-	if ((int)ev->jhat.which != cur_joy-1)
+	if (ev->jhat.which != SDL_JoystickGetDeviceInstanceID(cur_joy-1))
 		return;
 
 	Uint8 hat = SDL_JoystickGetHat(joy_info, 0); // Assuming that modern gamepads will only have one 'hat', that being the dpad - Dasho
@@ -391,7 +391,7 @@ void HandleJoystickHatEvent(SDL_Event * ev)
 void HandleJoystickTriggerEvent(SDL_Event * ev)
 {
 	// ignore other joysticks
-	if ((int)ev->jaxis.which != cur_joy-1)
+	if (ev->jaxis.which != SDL_JoystickGetDeviceInstanceID(cur_joy-1))
 		return;
 
 	Uint8 current_axis = ev->jaxis.axis;

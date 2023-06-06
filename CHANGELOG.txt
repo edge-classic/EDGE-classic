@@ -1,6 +1,6 @@
 https://github.com/edge-classic/EDGE-classic
 
-Current as of: May 2023
+Current as of: June 2023
 
 CHANGELOG for EDGE-Classic 1.34 (since EDGE-Classic 1.33)
 ====================================
@@ -83,7 +83,7 @@ New Features
   - Note: Filenames without extensions that are in an EPK or mounted folder will be ignored
 
 + Console: New 'readme' command
-  - Will search for either a text file with a traditional readme name (readme.txt, readme.1st, etc)
+  - Will search for a text file with a traditional readme name (readme.txt, readme.1st, etc)
   - If none found, will look for a text file with the same name as a WAD or archive file in the load order
     (this is a common practice for /idgames releases)
   - If there is still nothing found, will look for WADINFO or README lumps
@@ -105,9 +105,13 @@ New Features
 + New Option Menu: Accessibility Options
   - Current Items:
     - View Bobbing - This is the already existing "Bobbing" option that has been moved from Gameplay Options
-    - Reduce Flash - Provides an alternate means of displaying teleport fog and palette/colormap effects (invuln, pain, etc). The various
-      GunFlash actions also add no additional sector light with this enabled.
-    - Automap: Keyed Doors Pulse - Makes locating locked doors on the automap easier. Will also show the name of the required key.
+    - Reduce Flash 
+      - Provides an alternate means of displaying teleport fog and palette/colormap effects (invuln, pain, etc).
+      - GunFlash actions add no additional sector light with this enabled.
+      - Strobing, blinking, and 'fire flicker' light effects are replaced with giving the sector and average light level between
+        the highest and lowest neighboring light levels.
+    - Automap: Keyed Doors Pulse - Makes locating locked doors on the automap easier.
+    - Automap: Keyed Doors Named - Displays name of required key for a locked door to help colorblind users.
 
 
 General Improvements
@@ -150,16 +154,26 @@ General Improvements
   - AUTHOR parameter also added to LEVELS.DDF
   - If a map author value is present, this will be displayed in the automap view by default
 
-+ UMAPINFO: Added support for Boss Actions, including the "clear" directive
-
 + UMAPINFO: Will fallback to other types of MAPINFO lumps if UMAPINFO is not present
   - The following lumps will be attempted in the order listed, stopping and using the first one found:
     - DMAPINFO
     - RMAPINFO
     - MAPINFO
     - ZMAPINFO
-  - Only fields that are present in the UMAPINFO spec will be parsed from fallback lumps
-    - A warning message will be printed to the log and console to inform the user that a fallback lump has been used
+    - Only fields that are present in the UMAPINFO spec will be parsed from fallback lumps
+      - A warning message will be printed to the log and console to inform the user that a fallback lump has been used
+
++ UMAPINFO: Added support for Boss Actions, including the "clear" directive
+  - The 'map07special', 'baronspecial', 'cyberdemonspecial', and 'spidermastermindspecial' from R/Z/MAPINFO are treated as Boss Actions
+    - Only hardcoded actions (exitlevel, opendoor, lowerfloor, and killmonsters) are supported
+    - Unlike UMAPINFO, these specials will not clear existing death triggers from the map in question
+
++ Improved Controller Support
+  - Joystick input precision is greatly improved
+  - Deadzones can now be adjusted on a per-axis basis
+  - Improved Axis Test will now show real-time values for all axes in order to better identify/tune them
+  - If only one controller is present, the program will automatically select it for use instead
+    of requiring the joystick index to be changed
 
 + All option menu sliders and associated CVARs converted to use floating point values to reduce confusion and offer more options for precision
   - CVARs can still be manually set outside of the specified slider limits unless otherwise clamped
@@ -171,6 +185,8 @@ General Improvements
 + Fluidlite parameters adjusted to fix pitch issues with various soundfonts
   - s_fluidgain CVAR also added to allow manual control over gain (clamped in the 0.0-2.0 range)
   
++ FMMIDI default main volume increased to better match Fluidlite/YMFM
+
 + Automap now shows a dagger symbol for the player for Heretic and Blasphemer.
 
 

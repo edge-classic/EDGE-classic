@@ -718,7 +718,11 @@ static void ParseDMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 
 		// Need to read the spec and see which standalone keys have a UMAPINFO equivalent
 		if (! lex.Match("="))
+		{
+			if (epi::case_cmp(key, "map07special") == 0)
+				val->map07special = true;
 			continue;
+		}
 
 		tok = lex.Next(value);
 
@@ -758,10 +762,6 @@ static void ParseDMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 		else if (epi::case_cmp(key, "par") == 0)
 		{
 			val->partime = 35 * epi::LEX_Int(value);
-		}
-		else if (epi::case_cmp(key, "map07special") == 0)
-		{
-			val->map07special = true;
 		}
 		else
 		{
@@ -877,6 +877,29 @@ static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 		{
 			if (epi::case_cmp(key, "nointermission") == 0)
 				val->nointermission = true;
+			else if (epi::case_cmp(key, "map07special") == 0)
+			{
+				val->map07special = true;
+			}
+			else if (epi::case_cmp(key, "baronspecial") == 0)
+			{
+				val->baronspecial = true;
+			}
+			else if (epi::case_cmp(key, "cyberdemonspecial") == 0)
+			{
+				val->cyberdemonspecial = true;
+			}
+			else if (epi::case_cmp(key, "spidermastermindspecial") == 0)
+			{
+				val->spidermastermindspecial = true;
+			}
+			else if (epi::prefix_case_cmp(key, "specialaction_") == 0)
+			{
+				// Only one specialaction_* should be used at a time
+				if (val->specialaction) free(val->specialaction);
+				val->specialaction = (char *)calloc(key.size()+1, sizeof(char));
+				Z_StrNCpy(val->specialaction, key.c_str(), key.size());
+			}
 			continue;
 		}
 
@@ -1070,29 +1093,6 @@ static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			val->authorname = (char *)calloc(value.size()+1, sizeof(char));
 			Z_StrNCpy(val->authorname, value.c_str(), value.size());
 		}
-		else if (epi::case_cmp(key, "map07special") == 0)
-		{
-			val->map07special = true;
-		}
-		else if (epi::case_cmp(key, "baronspecial") == 0)
-		{
-			val->baronspecial = true;
-		}
-		else if (epi::case_cmp(key, "cyberdemonspecial") == 0)
-		{
-			val->cyberdemonspecial = true;
-		}
-		else if (epi::case_cmp(key, "spidermastermindspecial") == 0)
-		{
-			val->spidermastermindspecial = true;
-		}
-		else if (epi::prefix_case_cmp(key, "specialaction_") == 0)
-		{
-			// Only one specialaction_* should be used at a time
-			if (val->specialaction) free(val->specialaction);
-			val->specialaction = (char *)calloc(key.size()+1, sizeof(char));
-			Z_StrNCpy(val->specialaction, key.c_str(), key.size());
-		}
 		else
 		{
 			SkipToNextLine(lex, tok, value);
@@ -1241,6 +1241,29 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 				val->nointermission = true;
 			else if (epi::case_cmp(key, "intermission") == 0)
 				val->nointermission = false;
+			else if (epi::case_cmp(key, "map07special") == 0)
+			{
+				val->map07special = true;
+			}
+			else if (epi::case_cmp(key, "baronspecial") == 0)
+			{
+				val->baronspecial = true;
+			}
+			else if (epi::case_cmp(key, "cyberdemonspecial") == 0)
+			{
+				val->cyberdemonspecial = true;
+			}
+			else if (epi::case_cmp(key, "spidermastermindspecial") == 0)
+			{
+				val->spidermastermindspecial = true;
+			}
+			else if (epi::prefix_case_cmp(key, "specialaction_") == 0)
+			{
+				// Only one specialaction_* should be used at a time
+				if (val->specialaction) free(val->specialaction);
+				val->specialaction = (char *)calloc(key.size()+1, sizeof(char));
+				Z_StrNCpy(val->specialaction, key.c_str(), key.size());
+			}
 			continue;
 		}
 
@@ -1438,29 +1461,6 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			if (val->authorname) free(val->authorname);
 			val->authorname = (char *)calloc(value.size()+1, sizeof(char));
 			Z_StrNCpy(val->authorname, value.c_str(), value.size());
-		}
-		else if (epi::case_cmp(key, "map07special") == 0)
-		{
-			val->map07special = true;
-		}
-		else if (epi::case_cmp(key, "baronspecial") == 0)
-		{
-			val->baronspecial = true;
-		}
-		else if (epi::case_cmp(key, "cyberdemonspecial") == 0)
-		{
-			val->cyberdemonspecial = true;
-		}
-		else if (epi::case_cmp(key, "spidermastermindspecial") == 0)
-		{
-			val->spidermastermindspecial = true;
-		}
-		else if (epi::prefix_case_cmp(key, "specialaction_") == 0)
-		{
-			// Only one specialaction_* should be used at a time
-			if (val->specialaction) free(val->specialaction);
-			val->specialaction = (char *)calloc(key.size()+1, sizeof(char));
-			Z_StrNCpy(val->specialaction, key.c_str(), key.size());
 		}
 		else
 		{

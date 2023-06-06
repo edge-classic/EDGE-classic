@@ -1650,6 +1650,167 @@ void W_ReadUMAPINFOLumps(void)
 			RAD_ReadScript(ba_rts, "UMAPINFO");
 		}
 
+		// Explicit "map07special" that some MAPINFO types use; this seems to be in addition to anything that might already exist
+		if (Maps.maps[i].map07special)
+		{
+			std::string m7_rts = "// MAPINFO SCRIPTS\n\n";
+			m7_rts.append(epi::STR_Format("START_MAP %s\n", Maps.maps[i].mapname));
+			for (int m = 0; m < mobjtypes.GetSize(); m++)
+			{
+				if (mobjtypes[m]->number == 67)
+				{
+					m7_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
+					m7_rts.append(epi::STR_Format("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
+					m7_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 38 666\n"));
+					m7_rts.append("  END_RADIUS_TRIGGER\n");
+				}
+				else if (mobjtypes[m]->number == 68)
+				{
+					m7_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
+					m7_rts.append(epi::STR_Format("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
+					m7_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 30 667\n"));
+					m7_rts.append("  END_RADIUS_TRIGGER\n");
+				}
+			}
+			m7_rts.append("END_MAP\n\n");
+			RAD_ReadScript(m7_rts, "MAPINFO");
+		}
+
+		// Various BossAction equivalents from MAPINFO/ZMAPINFO
+		// This is done as if/else if because only one should be present at any given time according to the spec
+		if (Maps.maps[i].baronspecial)
+		{
+			if (Maps.maps[i].specialaction) // This must be present; there is no assumption that the original IWAD actions are used
+			{
+				std::string spc_rts = "// MAPINFO SCRIPTS\n\n";
+				spc_rts.append(epi::STR_Format("START_MAP %s\n", Maps.maps[i].mapname));
+				spc_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
+				for (int m = 0; m < mobjtypes.GetSize(); m++)
+				{
+					if (mobjtypes[m]->number == 3003)
+					{
+						spc_rts.append(epi::STR_Format("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
+						if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_exitlevel") == 0)
+						{
+							spc_rts.append(epi::STR_Format("    EXIT_LEVEL 5\n"));
+							spc_rts.append("  END_RADIUS_TRIGGER\n");
+							spc_rts.append("END_MAP\n\n");
+						}
+						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_opendoor") == 0)
+						{
+							spc_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 109 666\n"));
+							spc_rts.append("  END_RADIUS_TRIGGER\n");
+							spc_rts.append("END_MAP\n\n");
+						}
+						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_lowerfloor") == 0)
+						{
+							spc_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 219 666\n"));
+							spc_rts.append("  END_RADIUS_TRIGGER\n");
+							spc_rts.append("END_MAP\n\n");
+						}
+						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_killmonsters") == 0)
+						{
+							spc_rts.append(epi::STR_Format("    DAMAGE_MONSTERS ANY 999999\n"));
+							spc_rts.append("  END_RADIUS_TRIGGER\n");
+							spc_rts.append("END_MAP\n\n");
+						}
+						else // unknown special action
+							spc_rts.clear();
+					}
+				}
+				if (!spc_rts.empty())
+					RAD_ReadScript(spc_rts, "MAPINFO");
+			}
+		}
+		else if (Maps.maps[i].cyberdemonspecial)
+		{
+			if (Maps.maps[i].specialaction) // This must be present; there is no assumption that the original IWAD actions are used
+			{
+				std::string spc_rts = "// MAPINFO SCRIPTS\n\n";
+				spc_rts.append(epi::STR_Format("START_MAP %s\n", Maps.maps[i].mapname));
+				spc_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
+				for (int m = 0; m < mobjtypes.GetSize(); m++)
+				{
+					if (mobjtypes[m]->number == 16)
+					{
+						spc_rts.append(epi::STR_Format("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
+						if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_exitlevel") == 0)
+						{
+							spc_rts.append(epi::STR_Format("    EXIT_LEVEL 5\n"));
+							spc_rts.append("  END_RADIUS_TRIGGER\n");
+							spc_rts.append("END_MAP\n\n");
+						}
+						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_opendoor") == 0)
+						{
+							spc_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 109 666\n"));
+							spc_rts.append("  END_RADIUS_TRIGGER\n");
+							spc_rts.append("END_MAP\n\n");
+						}
+						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_lowerfloor") == 0)
+						{
+							spc_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 219 666\n"));
+							spc_rts.append("  END_RADIUS_TRIGGER\n");
+							spc_rts.append("END_MAP\n\n");
+						}
+						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_killmonsters") == 0)
+						{
+							spc_rts.append(epi::STR_Format("    DAMAGE_MONSTERS ANY 999999\n"));
+							spc_rts.append("  END_RADIUS_TRIGGER\n");
+							spc_rts.append("END_MAP\n\n");
+						}
+						else // unknown special action
+							spc_rts.clear();
+					}
+				}
+				if (!spc_rts.empty())
+					RAD_ReadScript(spc_rts, "MAPINFO");
+			}
+		}
+		else if (Maps.maps[i].spidermastermindspecial)
+		{
+			if (Maps.maps[i].specialaction) // This must be present; there is no assumption that the original IWAD actions are used
+			{
+				std::string spc_rts = "// MAPINFO SCRIPTS\n\n";
+				spc_rts.append(epi::STR_Format("START_MAP %s\n", Maps.maps[i].mapname));
+				spc_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
+				for (int m = 0; m < mobjtypes.GetSize(); m++)
+				{
+					if (mobjtypes[m]->number == 7)
+					{
+						spc_rts.append(epi::STR_Format("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
+						if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_exitlevel") == 0)
+						{
+							spc_rts.append(epi::STR_Format("    EXIT_LEVEL 5\n"));
+							spc_rts.append("  END_RADIUS_TRIGGER\n");
+							spc_rts.append("END_MAP\n\n");
+						}
+						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_opendoor") == 0)
+						{
+							spc_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 109 666\n"));
+							spc_rts.append("  END_RADIUS_TRIGGER\n");
+							spc_rts.append("END_MAP\n\n");
+						}
+						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_lowerfloor") == 0)
+						{
+							spc_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 219 666\n"));
+							spc_rts.append("  END_RADIUS_TRIGGER\n");
+							spc_rts.append("END_MAP\n\n");
+						}
+						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_killmonsters") == 0)
+						{
+							spc_rts.append(epi::STR_Format("    DAMAGE_MONSTERS ANY 999999\n"));
+							spc_rts.append("  END_RADIUS_TRIGGER\n");
+							spc_rts.append("END_MAP\n\n");
+						}
+						else // unknown special action
+							spc_rts.clear();
+					}
+				}
+				if (!spc_rts.empty())
+					RAD_ReadScript(spc_rts, "MAPINFO");
+			}
+		}
+
 		// If a TEMPEPI gamedef had to be created, grab some details from the 
 		// first valid gamedef iterating through gamedefs in reverse order
 		if (temp_level->episode_name == "TEMPEPI")

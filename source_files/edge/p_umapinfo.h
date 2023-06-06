@@ -57,6 +57,11 @@ struct MapEntry
 	int docast;
 	int dobunny;
 	int endgame;
+	bool map07special = false;
+	bool baronspecial = false;
+	bool cyberdemonspecial = false;
+	bool spidermastermindspecial = false;
+	char *specialaction;
 
 	unsigned int propertycount;
 	struct MapProperty *properties;

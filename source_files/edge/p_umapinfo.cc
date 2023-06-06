@@ -759,6 +759,10 @@ static void ParseDMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 		{
 			val->partime = 35 * epi::LEX_Int(value);
 		}
+		else if (epi::case_cmp(key, "map07special") == 0)
+		{
+			val->map07special = true;
+		}
 		else
 		{
 			SkipToNextLine(lex, tok, value);
@@ -1065,6 +1069,29 @@ static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			if (val->authorname) free(val->authorname);
 			val->authorname = (char *)calloc(value.size()+1, sizeof(char));
 			Z_StrNCpy(val->authorname, value.c_str(), value.size());
+		}
+		else if (epi::case_cmp(key, "map07special") == 0)
+		{
+			val->map07special = true;
+		}
+		else if (epi::case_cmp(key, "baronspecial") == 0)
+		{
+			val->baronspecial = true;
+		}
+		else if (epi::case_cmp(key, "cyberdemonspecial") == 0)
+		{
+			val->cyberdemonspecial = true;
+		}
+		else if (epi::case_cmp(key, "spidermastermindspecial") == 0)
+		{
+			val->spidermastermindspecial = true;
+		}
+		else if (epi::prefix_case_cmp(key, "specialaction_") == 0)
+		{
+			// Only one specialaction_* should be used at a time
+			if (val->specialaction) free(val->specialaction);
+			val->specialaction = (char *)calloc(key.size()+1, sizeof(char));
+			Z_StrNCpy(val->specialaction, key.c_str(), key.size());
 		}
 		else
 		{
@@ -1411,6 +1438,29 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			if (val->authorname) free(val->authorname);
 			val->authorname = (char *)calloc(value.size()+1, sizeof(char));
 			Z_StrNCpy(val->authorname, value.c_str(), value.size());
+		}
+		else if (epi::case_cmp(key, "map07special") == 0)
+		{
+			val->map07special = true;
+		}
+		else if (epi::case_cmp(key, "baronspecial") == 0)
+		{
+			val->baronspecial = true;
+		}
+		else if (epi::case_cmp(key, "cyberdemonspecial") == 0)
+		{
+			val->cyberdemonspecial = true;
+		}
+		else if (epi::case_cmp(key, "spidermastermindspecial") == 0)
+		{
+			val->spidermastermindspecial = true;
+		}
+		else if (epi::prefix_case_cmp(key, "specialaction_") == 0)
+		{
+			// Only one specialaction_* should be used at a time
+			if (val->specialaction) free(val->specialaction);
+			val->specialaction = (char *)calloc(key.size()+1, sizeof(char));
+			Z_StrNCpy(val->specialaction, key.c_str(), key.size());
 		}
 		else
 		{

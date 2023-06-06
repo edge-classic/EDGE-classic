@@ -1025,19 +1025,22 @@ epi::file_c * Pack_OpenMatch(pack_file_c *pack, const std::string& name, const s
 	if (extensions.empty())
 		return NULL;
 
-	std::filesystem::path open_stem = name;
+	std::string open_stem = name;
+	epi::str_upper(open_stem);
 
 	// quick file stem check to see if it's present at all
-	if (!Pack_FindStem(pack, name))
+	if (!Pack_FindStem(pack, open_stem))
 		return NULL;
 
-	auto results = pack->search_files.equal_range(name);
+	std::filesystem::path stem_match = open_stem;
+
+	auto results = pack->search_files.equal_range(open_stem);
 	for (auto file = results.first; file != results.second; ++file)
 	{
 		for (auto ext : extensions)
 		{
-			open_stem.replace_extension(ext);
-			if (open_stem.u8string() == epi::PATH_GetFilename(file->second))
+			stem_match.replace_extension(ext);
+			if (epi::case_cmp(stem_match.u8string(),epi::PATH_GetFilename(file->second).u8string()) == 0)
 				return pack->OpenFileByName(file->second);
 		}
 	}

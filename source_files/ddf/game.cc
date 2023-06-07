@@ -800,7 +800,7 @@ void gamedef_c::Default()
 	titletics = TICRATE * 4;
 
 	special_music = 0;
-	lighting = LMODEL_Doom;
+	lighting = LMODEL_Doomish;
 	description.clear();
 }
 

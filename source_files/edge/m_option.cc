@@ -140,6 +140,7 @@ extern cvar_c g_bobbing;
 extern cvar_c v_secbright;
 extern cvar_c v_gamma;
 extern cvar_c r_titlescaling;
+extern cvar_c r_forceflatlighting;
 
 static int monitor_size;
 
@@ -413,6 +414,7 @@ static optmenuitem_t vidoptions[] =
 {
 	{OPT_FracSlider,  "Gamma Adjustment",    NULL,  0,  &v_gamma.f, M_UpdateCVARFromFloat, NULL, &v_gamma, 0.10f, -1.0f, 1.0f, "%0.2f"},
 	{OPT_Switch,  "Sector Brightness",    SecBrights,  11,  &v_secbright.d, M_UpdateCVARFromInt, NULL, &v_secbright},
+	{OPT_Boolean, "Lighting Mode",    "Indexed/Flat",  2,  &r_forceflatlighting.d, M_UpdateCVARFromInt, NULL, &r_forceflatlighting},
 	{OPT_Switch,  "Framerate Target", "35 FPS/70 FPS", 2, &r_doubleframes.d, M_UpdateCVARFromInt, NULL, &r_doubleframes},
 	{OPT_Switch,  "Smoothing",         YesNo, 2, &var_smoothing, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "H.Q.2x Scaling", Hq2xMode, 4, &hq2x_scaling, M_ChangeMipMap, NULL},

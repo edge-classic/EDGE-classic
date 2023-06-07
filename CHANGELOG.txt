@@ -246,6 +246,8 @@ Bugs fixed
 
 + Fixed all warnings under MSVC compiler 
 
++ DEHACKED: some intermission texts were being truncated. Bumped up character limit
+
 
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)
 ====================================

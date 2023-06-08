@@ -931,7 +931,7 @@ static void P_XYMovement(mobj_t * mo, const region_properties_t *props, bool ext
 				mo->player && mo->player->mo == mo &&
 				mo->player->wet_feet && !mo->player->swimming &&
 				mo->player->jumpwait == 0 &&
-				mo->z > mo->floorz + 0.5f)
+				mo->z > mo->floorz + 0.5f && mo->mom.z >= 0.0f)
 			{
 				float ground_h;
 

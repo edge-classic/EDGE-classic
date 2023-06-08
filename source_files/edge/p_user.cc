@@ -222,7 +222,7 @@ I_Debugf("Jump:%d bob_z:%1.2f  z:%1.2f  height:%1.2f delta:%1.2f --> viewz:%1.3f
 
 void P_PlayerJump(player_t *pl, float dz, int wait)
 {
-	pl->mo->mom.z += pl->mo->info->jumpheight / (r_doubleframes.d ? 1.25f : 1.4f);
+	pl->mo->mom.z += dz;
 
 	if (pl->jumpwait < wait)
 		pl->jumpwait = wait;

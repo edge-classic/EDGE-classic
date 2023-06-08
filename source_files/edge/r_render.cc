@@ -962,8 +962,13 @@ static void DrawWallPart(drawfloor_t *dfloor,
 
 	(void) opaque;
 
-	if (! props)
-		props = surf->override_p ? surf->override_p : dfloor->props;
+	//if (! props)
+	//	props = surf->override_p ? surf->override_p : dfloor->props;
+	if (surf->override_p)
+        props = surf->override_p;
+
+    if (! props)
+        props = dfloor->props;
 
 	float trans = surf->translucency;
 

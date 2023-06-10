@@ -4436,6 +4436,19 @@ GLASS=TRUE;
 //EFFECT_OBJECT="EDGE_DEBRIS_GENERATOR";
 
 
+//1. Dummy sector with desired brightness.
+//2. Tag one of the lines and give it this type.
+//3. Any other lines with the same tag will use this brightness 
+// even if the rest of the sector is pitch black.
+[850] // Bright wall 
+TYPE=PUSH;
+AUTO=TRUE;
+ACTIVATORS=PLAYER;
+LINE_EFFECT=LIGHT_WALL;
+LINE_PARTS=LEFT,RIGHT;
+
+
+
 [1024] // Scroll tagged walls by sidedef offsets (MBF21)
 TYPE=PUSH;
 ACTIVATORS=PLAYER;

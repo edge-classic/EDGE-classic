@@ -952,7 +952,7 @@ static void P_XYMovement(mobj_t * mo, const region_properties_t *props, bool ext
 				if (mo->z < ground_h - 20.5f &&
 				    mo->z > ground_h - mo->height * 1.4)
 				{
-					P_PlayerJump(mo->player, 60, 2 * TICRATE);
+					P_PlayerJump(mo->player, mo->info->jumpheight, 2 * TICRATE);
 				}
 			}
 

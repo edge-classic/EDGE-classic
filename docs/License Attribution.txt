@@ -93,6 +93,10 @@ MIT License
 
 BW_Midi_Sequencer library - Copyright (c) 2015-2022 Vitaly Novichkov
 
+"C++ implementation of a fast Gaussian blur algorithm by Ivan Kutskir - Integer Version"
+	- Copyright (C) 2017 Basile Fraboni
+	- Copyright (C) 2014 Ivan Kutskir
+
 gl4es library - Copyright (c) 2016-2018 Sebastien Chevalier
 				Copyright (c) 2013-2016 Ryan Hileman
 
@@ -116,6 +120,8 @@ Fraction.hpp - Bisqwit
 dr_wav and dr_flac libraries - David Reid
 
 stb_image, stb_image_write, stb_rect_pack and stb_truetype libraries - Sean Barrett
+
+"Unicode Processing with C++0x" Conversion Classes - Andrew Choi
 
 ===========================================================================================
 WidePix License

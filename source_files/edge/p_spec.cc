@@ -630,7 +630,7 @@ static void P_LineEffect(line_t *target, line_t *source,
 				{
 					if (lines[i].tag == source->frontsector->tag)
 					{
-						if (lines[i].special->count == 1)
+						if (!lines[i].special || lines[i].special->count == 1)
 							anim.permanent = true;
 					}
 				}
@@ -697,7 +697,7 @@ static void P_LineEffect(line_t *target, line_t *source,
 					{
 						if (lines[i].tag == source->frontsector->tag)
 						{
-							if (lines[i].special->count == 1)
+							if (!lines[i].special || lines[i].special->count == 1)
 								anim.permanent = true;
 						}
 					}
@@ -822,7 +822,7 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 				{
 					if (lines[i].tag == source->frontsector->tag)
 					{
-						if (lines[i].special->count == 1)
+						if (!lines[i].special || lines[i].special->count == 1)
 							anim.permanent = true;
 					}
 				}

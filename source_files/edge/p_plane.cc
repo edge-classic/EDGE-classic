@@ -334,14 +334,20 @@ static bool MovePlane(plane_move_t *plane)
                                    MIN(plane->startheight, plane->destheight),
                                    plane->is_ceiling ? plane->crush : 0);
 
-			MakeMovingSound(&plane->sfxstarted, plane->type->sfxdown,
-                            &plane->sector->sfx_origin);
+            if (plane->destheight != plane->startheight)
+            {
+                MakeMovingSound(&plane->sfxstarted, plane->type->sfxdown,
+                                &plane->sector->sfx_origin);
+            }
 
             if (res == RES_PastDest)
             {
-                S_StartFX(plane->type->sfxstop, 
-                               SNCAT_Level,
-                               &plane->sector->sfx_origin);
+                if (plane->destheight != plane->startheight)
+                {
+                    S_StartFX(plane->type->sfxstop, 
+                                SNCAT_Level,
+                                &plane->sector->sfx_origin);
+                }
 
                 plane->speed = plane->type->speed_up;
 
@@ -443,14 +449,20 @@ static bool MovePlane(plane_move_t *plane)
                                    MAX(plane->startheight, plane->destheight),
                                    plane->is_ceiling ? 0 : plane->crush);
 
-			MakeMovingSound(&plane->sfxstarted, plane->type->sfxup,
-                            &plane->sector->sfx_origin);
+            if (plane->destheight != plane->startheight)
+            {
+                MakeMovingSound(&plane->sfxstarted, plane->type->sfxup,
+                                &plane->sector->sfx_origin);
+            }
 
             if (res == RES_PastDest)
             {
-                S_StartFX(plane->type->sfxstop, 
-                               SNCAT_Level,
-                               &plane->sector->sfx_origin);
+                if (plane->destheight != plane->startheight)
+                {
+                    S_StartFX(plane->type->sfxstop, 
+                                SNCAT_Level,
+                                &plane->sector->sfx_origin);
+                }
 
                 if (plane->newspecial != -1)
                 {
@@ -523,7 +535,11 @@ static sector_t *P_GSS(sector_t * sec, float dest, bool forc)
     int secnum = sec - sectors;
     sector_t *sector;
 
-    for (i = sec->linecount-1; i; i--)
+    // 2023.06.10 - Reversed the order of iteration because it was returning 
+    // the greatest numbered linedef for applicable surrounding sectors instead
+    // of the least.
+
+    for (i = 0; i < sec->linecount-1; i++)
     {
         if (P_TwoSided(secnum, i))
         {
@@ -551,7 +567,7 @@ static sector_t *P_GSS(sector_t * sec, float dest, bool forc)
         }
     }
 
-    for (i = sec->linecount; i--;)
+    for (i = 0; i < sec->linecount-1; i++)
     {
         if (P_TwoSided(secnum, i))
         {
@@ -675,14 +691,21 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
     }
     else
     {
-        delete plane;
+        // 2023.06.10 - Allow plane to activate and run even if at dest height
+        // to preserve texture/type changes that were intended
+
+        /*delete plane;
 
         if (def->is_ceiling)
             sector->ceil_move = NULL;
         else
             sector->floor_move = NULL;
 
-        return NULL;
+        return NULL;*/
+
+        plane->direction = (def->is_ceiling ? DIRECTION_DOWN : DIRECTION_UP);
+        plane->destheight = dest;
+        plane->startheight = start;
     }
 
     plane->tag = sector->tag;
@@ -696,7 +719,7 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
     // -ACB- 10/01/2001 Trigger starting sfx
 // UNNEEDED    sound::StopLoopingFX(&sector->sfx_origin);
 
-    if (def->sfxstart)
+    if (def->sfxstart && plane->destheight != plane->startheight)
     {
         S_StartFX(def->sfxstart, SNCAT_Level, &sector->sfx_origin);
     }
@@ -709,10 +732,27 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
                                        def->is_ceiling);
         if (model)
         {
-            plane->new_image = SECPIC(model, def->is_ceiling, NULL);
-
-            plane->newspecial = model->props.special ?
-                model->props.special->number : 0;
+            if (def->tex.size() == 1) // Only '-'; do both (default)
+            {
+                plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                plane->newspecial = model->props.special ?
+                    model->props.special->number : 0;
+            }
+            else if (epi::case_cmp(def->tex.substr(1), "changezero") == 0)
+            {
+                plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                plane->newspecial = 0;
+            }
+            else if (epi::case_cmp(def->tex.substr(1), "changetexonly") == 0)
+            {
+                plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+            }
+            else // Unknown directive after '-'; just do default
+            {
+                plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                plane->newspecial = model->props.special ?
+                    model->props.special->number : 0;
+            }
         }
 
         if (plane->direction == (def->is_ceiling ? DIRECTION_DOWN : DIRECTION_UP))
@@ -738,9 +778,27 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
 
         if (model)
         {
-            plane->new_image = SECPIC(model, def->is_ceiling, NULL);
-            plane->newspecial = model->props.special ?
-                model->props.special->number : 0;
+            if (def->tex.size() == 1) // Only '+'; do both (default)
+            {
+                plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                plane->newspecial = model->props.special ?
+                    model->props.special->number : 0;
+            }
+            else if (epi::case_cmp(def->tex.substr(1), "changezero") == 0)
+            {
+                plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                plane->newspecial = 0;
+            }
+            else if (epi::case_cmp(def->tex.substr(1), "changetexonly") == 0)
+            {
+                plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+            }
+            else  // Unknown directive after '+'; just do default
+            {
+                plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                plane->newspecial = model->props.special ?
+                    model->props.special->number : 0;
+            }
 
             if (plane->direction == (def->is_ceiling ? DIRECTION_DOWN : DIRECTION_UP))
             {

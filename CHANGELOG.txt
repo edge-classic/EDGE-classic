@@ -138,6 +138,10 @@ General Improvements
 + THINGS.DDF:
   - FALLPAIN_SOUND will now account for whether or not the player is invulnerable to damage at the time of the fall
 
++ LINES.DDF:
+  - The special values '+' and '-' for the FLOOR.TEXTURE and CEIL.TEXTURE parameters can now be appended with either "changezero" or
+    "changetexonly" to correspond to the Boom Tx and Tx0 generalized types
+
 + New directories, logfiles, etc, will now be written to an appropriate location in the user's home directory by default (AppData, etc, depending on OS). Portable
   usage is covered in "New Features"
 
@@ -247,6 +251,10 @@ Bugs fixed
 + Fixed all warnings under MSVC compiler 
 
 + DEHACKED: some intermission texts were being truncated. Bumped up character limit
+
++ Fixed exit velocity not using intended values when leaving swimmable water
+
++ Fixed floor/ceiling texture/type changer behavior
 
 
 CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)

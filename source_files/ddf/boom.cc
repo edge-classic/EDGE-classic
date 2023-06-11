@@ -323,7 +323,16 @@ static void MakeBoomFloor(linetype_c *line, int number)
 	// handle change + model (pretty dodgy this bit)
 	if (change > 0)
 	{
-		line->f.tex = model ? "+" : "-";
+		line->f.tex = model ? "-" : "+";
+
+		// Default behavior is to change both tex and type, and this is
+		// fine with the non-generalized types, so append one of these
+		// if applicable. We will check this when setting up the map - Dasho
+
+		if (change == 1) // Change tex, zero out type
+			line->f.tex.append("changezero");
+		else if (change == 2) // Texture only; type unaltered
+			line->f.tex.append("changetexonly");
 	}
 }
 
@@ -402,7 +411,16 @@ static void MakeBoomCeiling(linetype_c *line, int number)
 	// handle change + model (this logic is pretty dodgy)
 	if (change > 0)
 	{
-		line->c.tex = model ? "+" : "-";
+		line->c.tex = model ? "-" : "+";
+
+		// Default behavior is to change both tex and type, and this is
+		// fine with the non-generalized types, so append one of these
+		// if applicable. We will check this when setting up the map - Dasho
+
+		if (change == 1) // Change tex, zero out type
+			line->c.tex.append("changezero");
+		else if (change == 2) // Texture only; type unaltered
+			line->c.tex.append("changetexonly");
 	}
 }
 

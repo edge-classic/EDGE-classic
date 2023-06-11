@@ -49,8 +49,6 @@
 #define FIRST_CHUNK_OFS  16L
 
 
-int savegame_version = 0;
-
 static int last_error = 0;
 
 
@@ -197,20 +195,12 @@ bool SV_VerifyHeader(int *version)
 	SV_GetByte();
 	SV_GetByte();
 
+	// We don't do anything with version anymore, but still consume it
 	(*version) = SV_GetInt();
-
-	savegame_version = (*version);
 
 	if (last_error)
 	{
 		I_Warning("LOADGAME: Bad header in savegame file\n");
-		return false;
-	}
-
-	if (savegame_version < 0x10001)
-	{
-		I_Printf("LOADGAME: Savegame is too old (0x%05x < 0x%05x)\n",
-		         savegame_version, 0x10001);
 		return false;
 	}
 
@@ -502,8 +492,6 @@ bool SV_OpenWriteFile(std::filesystem::path filename, int version)
 
 	chunk_stack_size = 0;
 	last_error = 0;
-
-	savegame_version = version;
 
 	current_crc.Reset();
 

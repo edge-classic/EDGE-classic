@@ -215,7 +215,8 @@ void CON_ResetAllVars()
 {
 	for (cvar_c *var = all_cvars ; var != NULL ; var = var->next)
 	{
-		*var = var->def;
+		if (!(var->flags & CVAR_NO_RESET))
+			*var = var->def;
 	}
 }
 

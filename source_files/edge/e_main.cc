@@ -172,14 +172,14 @@ std::filesystem::path shot_dir;
 // not using DEF_CVAR here since var name != cvar name
 cvar_c m_language("language", "ENGLISH", CVAR_ARCHIVE);
 
-DEF_CVAR(logfilename, "edge-classic.log", 0)
-DEF_CVAR(configfilename, "edge-classic.cfg", 0)
-DEF_CVAR(debugfilename, "debug.txt", 0)
-DEF_CVAR(windowtitle, "EDGE-Classic", 0)
-DEF_CVAR(versionstring, "1.33", 0)
-DEF_CVAR(orgname, "EDGE Team", 0)
-DEF_CVAR(appname, "EDGE-Classic", 0)
-DEF_CVAR(homepage, "https://edge-classic.github.io", 0)
+DEF_CVAR(logfilename, "edge-classic.log", CVAR_NO_RESET)
+DEF_CVAR(configfilename, "edge-classic.cfg", CVAR_NO_RESET)
+DEF_CVAR(debugfilename, "debug.txt", CVAR_NO_RESET)
+DEF_CVAR(windowtitle, "EDGE-Classic", CVAR_NO_RESET)
+DEF_CVAR(edgeversion, "1.34", CVAR_NO_RESET)
+DEF_CVAR(orgname, "EDGE Team", CVAR_NO_RESET)
+DEF_CVAR(appname, "EDGE-Classic", CVAR_NO_RESET)
+DEF_CVAR(homepage, "https://edge-classic.github.io", CVAR_NO_RESET)
 
 DEF_CVAR_CLAMPED(r_overlay, "0", CVAR_ARCHIVE, 0, 6)
 
@@ -466,17 +466,19 @@ static void SpecialWadVerify(void)
 
 	delete data;
 
-	I_Printf("EDGE-DEFS.EPK version %1.2f found.\n", epk_ver / 100.0);
+	float real_ver = epk_ver / 100.0;
 
-	if (epk_ver < EDGE_EPK_VERSION)
+	I_Printf("EDGE-DEFS.EPK version %1.2f found.\n", real_ver);
+
+	if (real_ver < edgeversion.f)
 	{
-		I_Error("EDGE-DEFS.EPK is an older version (expected %1.2f)\n",
-		          EDGE_EPK_VERSION / 100.0);
+		I_Error("EDGE-DEFS.EPK is an older version (got %1.2f, expected %1.2f)\n",
+		         real_ver, edgeversion.f);
 	}
-	else if (epk_ver > EDGE_EPK_VERSION)
+	else if (real_ver > edgeversion.f)
 	{
-		I_Warning("EDGE-DEFS.EPK is a newer version (expected %1.2f)\n",
-		          EDGE_EPK_VERSION / 100.0);
+		I_Warning("EDGE-DEFS.EPK is a newer version (got %1.2f, expected %1.2f)\n",
+		          real_ver, edgeversion.f);
 	}
 }
 
@@ -1380,10 +1382,8 @@ static void ShowDateAndVersion(void)
 	I_Debugf("[Log file created at %s]\n\n", timebuf);
 	I_Debugf("[Debug file created at %s]\n\n", timebuf);
 
-	// 23-6-98 KM Changed to hex to allow versions such as 0.65a etc
-	I_Printf("%s v%s compiled on " __DATE__ " at " __TIME__ "\n", appname.c_str(), versionstring.c_str());
+	I_Printf("%s v%s compiled on " __DATE__ " at " __TIME__ "\n", appname.c_str(), edgeversion.c_str());
 	I_Printf("%s homepage is at %s\n", appname.c_str(), homepage.c_str());
-	//I_Printf("EDGE-Classic is based on DOOM by id Software http://www.idsoftware.com/\n");
 
 	I_Printf("Executable path: '%s'\n", exe_path.u8string().c_str());
 
@@ -1679,17 +1679,17 @@ static void E_Startup(void)
 {
 	CON_InitConsole();
 
-	// Version check ?
-	if (argv::Find("version") > 0)
-	{
-		// -AJA- using I_Error here, since I_Printf crashes this early on
-		I_Error("\n%s version is %s\n", appname.c_str(), versionstring.c_str());
-	}
-
 	// -AJA- 2000/02/02: initialise global gameflags to defaults
 	global_flags = default_gameflags;
 
 	InitDirectories();
+
+	// Version check ?
+	if (argv::Find("version") > 0)
+	{
+		// -AJA- using I_Error here, since I_Printf crashes this early on
+		I_Error("\n%s version is %s\n", appname.c_str(), edgeversion.c_str());
+	}
 
 	SetupLogAndDebugFiles();
 
@@ -1897,7 +1897,7 @@ void E_Main(int argc, const char **argv)
 		E_InitialState();
 
 		CON_MessageColor(RGB_MAKE(255,255,0));
-		I_Printf("%s v%s initialisation complete.\n", appname.c_str(), versionstring.c_str());
+		I_Printf("%s v%s initialisation complete.\n", appname.c_str(), edgeversion.c_str());
 
 		I_Debugf("- Entering game loop...\n");
 

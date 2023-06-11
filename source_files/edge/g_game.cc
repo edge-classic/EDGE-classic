@@ -911,7 +911,7 @@ static bool G_SaveGameToFile(std::filesystem::path filename, const char *descrip
 
 	epi::FS_Delete(filename);
 
-	if (! SV_OpenWriteFile(filename, (EDGEVERHEX << 8) | EDGEPATCH))
+	if (! SV_OpenWriteFile(filename, 0xEC))
 	{
 		I_Printf("Unable to create savegame file: %s\n", filename.u8string().c_str());
 		return false; /* NOT REACHED */

@@ -269,7 +269,7 @@ void I_StartupGraphics(void)
 static bool I_CreateWindow(scrmode_c *mode)
 {
 	std::string temp_title = windowtitle.s;
-	temp_title.append(" ").append(versionstring.s);
+	temp_title.append(" ").append(edgeversion.s);
 
 #if EDGE_WEB
 	int resizeable = SDL_WINDOW_RESIZABLE;

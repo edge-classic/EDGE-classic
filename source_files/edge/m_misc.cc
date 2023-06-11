@@ -80,12 +80,10 @@ int var_midi_player    = 0;
 int var_sound_stereo = 0;
 int var_mix_channels = 0;
 
-static int edge_version;
 static bool done_first_init = false;
 
 static default_t defaults[] =
 {
-    {CFGT_Int,		"edge_version",		 &edge_version,	  0},
     {CFGT_Int,		"screenwidth",		 &SCREENWIDTH,	  CFGDEF_SCREENWIDTH},
     {CFGT_Int,		"screenheight",		 &SCREENHEIGHT,	  CFGDEF_SCREENHEIGHT},
     {CFGT_Int,		"screendepth",		 &SCREENBITS,	  CFGDEF_SCREENBITS},
@@ -248,8 +246,6 @@ static int numdefaults = sizeof(defaults) / sizeof(defaults[0]);
 
 void M_SaveDefaults(void)
 {
-	edge_version = EDGEVER;
-
 	// -ACB- 1999/09/24 idiot proof checking as required by MSVC
 	SYS_ASSERT(! cfgfile.empty());
 

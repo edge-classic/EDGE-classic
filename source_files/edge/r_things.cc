@@ -180,7 +180,7 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 	}
 
 	//Lobo: no sense having the zoom crosshair fuzzy
-	if (which == ps_weapon && viewiszoomed)
+	if (which == ps_weapon && viewiszoomed && player->weapons[player->ready_wp].info->zoom_state > 0)
 	{
 		is_fuzzy = false;
 		trans = 1.0f;
@@ -483,60 +483,62 @@ void RGL_DrawWeaponSprites(player_t * p)
 
 		weapondef_c *w = p->weapons[p->ready_wp].info;
 
-		if (w->zoom_state <= 0)
+		// 2023.06.13 - If zoom state missing but weapon can zoom, allow the regular
+		// psprite drawing routines to occur (old EDGE behavior)
+		if (w->zoom_state > 0)
+		{
+			RGL_DrawPSprite(psp, ps_weapon, p, view_props,
+				states + w->zoom_state);
 			return;
+		}
+	}
 
-		RGL_DrawPSprite(psp, ps_weapon, p, view_props,
-						states + w->zoom_state);
+	// add all active psprites
+	// Note: order is significant
+
+	//Lobo 2022:
+	//Allow changing the order of weapon sprite 
+	//rendering so that FLASH states are
+	//drawn in front of the WEAPON states
+	bool FlashFirst = false;
+	if (p->ready_wp >= 0)
+	{
+		FlashFirst = p->weapons[p->ready_wp].info->render_invert;
+	}
+	
+	if (FlashFirst == false)
+	{
+		for (int i = 0; i < NUMPSPRITES; i++) // normal
+		{
+			pspdef_t *psp = &p->psprites[i];
+
+			if ((p->ready_wp < 0) || (psp->state == S_NULL))
+				continue;
+
+			RGL_DrawPSprite(psp, i, p, view_props, psp->state);
+		}
 	}
 	else
 	{
-		// add all active psprites
-		// Note: order is significant
-
-		//Lobo 2022:
-		//Allow changing the order of weapon sprite 
-		//rendering so that FLASH states are
-		//drawn in front of the WEAPON states
-		bool FlashFirst = false;
-		if (p->ready_wp >= 0)
+		for (int i = NUMPSPRITES - 1; i >= 0; i--) //go backwards
 		{
-			FlashFirst = p->weapons[p->ready_wp].info->render_invert;
-		}
-		
-		if (FlashFirst == false)
-		{
-			for (int i = 0; i < NUMPSPRITES; i++) // normal
-			{
-				pspdef_t *psp = &p->psprites[i];
+			pspdef_t *psp = &p->psprites[i];
 
-				if ((p->ready_wp < 0) || (psp->state == S_NULL))
-					continue;
+			if ((p->ready_wp < 0) || (psp->state == S_NULL))
+				continue;
 
-				RGL_DrawPSprite(psp, i, p, view_props, psp->state);
-			}
-		}
-		else
-		{
-			for (int i = NUMPSPRITES - 1; i >= 0; i--) //go backwards
-			{
-				pspdef_t *psp = &p->psprites[i];
-
-				if ((p->ready_wp < 0) || (psp->state == S_NULL))
-					continue;
-
-				RGL_DrawPSprite(psp, i, p, view_props, psp->state);
-			}	
-		}
+			RGL_DrawPSprite(psp, i, p, view_props, psp->state);
+		}	
 	}
 }
 
 
 void RGL_DrawCrosshair(player_t * p)
 {
-	if (viewiszoomed)
+	if (viewiszoomed && p->weapons[p->ready_wp].info->zoom_state > 0)
 	{
-		// Hmmm, should we draw 'zoom_state' here??
+		// Only skip crosshair if there is a dedicated zoom state, which
+		// should be providing its own
 		return;
 	}
 	else
@@ -554,7 +556,7 @@ void RGL_DrawCrosshair(player_t * p)
 
 void RGL_DrawWeaponModel(player_t * p)
 {
-	if (viewiszoomed)
+	if (viewiszoomed && p->weapons[p->ready_wp].info->zoom_state > 0)
 		return;
 
 	pspdef_t *psp = &p->psprites[ps_weapon];

@@ -1,0 +1,22 @@
+https://github.com/edge-classic/EDGE-classic
+
+
+
+CHANGELOG for EDGE-Classic 1.31 (since EDGE-Classic 1.3)
+====================================
+
+Bugs fixed
+----------
++ Changing Aspect ratio was not respected in some circumstances.
++ Fixed sound volume slider not being respected in some cases
++ Fixed aspect ratio of psprites when HUD.render_world doesn't use the entire screen height
++ Fixed secret sector discovery completely clearing the sector special afterwards (this broke
+  generalized sector specials).
++ Doom2 Map05 bug fixed.
+
+General Improvements
+--------------------
++ W1/WR lines, unknown linetypes and scrolling linedefs without any activation method will have the BOOM passuse flag added
+  upon map load
+
+

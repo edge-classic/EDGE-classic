@@ -1,0 +1,211 @@
+https://github.com/edge-classic/EDGE-classic
+
+
+
+CHANGELOG for EDGE-Classic 1.2 (since EDGE-Classic 1.1)
+====================================
+
+Bugs fixed
+----------
++ Fixed bug preventing Backspace from clearing the top keybind entry in a menu without another key being pressed first
++ Fixed occasional crash when loading a save game containing 3D floors
++ Fixed Load_DOOM sound loading function trying to allocate memory for empty/stub sounds
++ Fixed ALWAYS_LOUD things.ddf special not working with non-enemy mobjs
++ Fixed SFX loaders treating all sounds as Mono regardless of original sound format
++ Fixed pressing the Use key to respawn activating linedefs when the player comes back to life
++ Fixed player possibly getting stuck in slider doors if attempting to cross through while they are closing
++ Fixed PWAD PLAYPAL lumps not properly being applied to images
++ Fixed being able to pick up items while completely still (for instance, voodoo doll spawn on top of an item would immediately
+  give the player said item upon starting the level)
++ Fixed voodoo doll spawn points telefragging other objects (could result in instakill upon entering level)
++ Fixed DEH_EDGE giving wrong weapon priorities to the rocket launcher and plasma rifle
++ Fixed FORCE_AIM attacks being affected by visibility modifiers
++ Fixed BERSERK_MULTIPLY not being applied to projectiles
++ Fixed ZOOM_FOV = 0 in DDFWEAP not disabling zoom for a weapon
++ Fixed erroneous missing sprite rotations when loading sprites from multiple sources
++ Fixed possible CTD when a malformed lump name is looked up
++ Fixed font recoloring appearing incorrect with non-Doom IWADs or certain PWADs that have their own COLORMAP/PLAYPAL lumps
++ Fixed occasional appearance of blank episode in episode selection menu with certain PWADs
++ Fixed SFX with SINGULAR+PRECIOUS flags being cutoff when another SINGULAR SFX in the same category is played
++ Fixed failure to detect binary-format maps with only the bare minimum number of required lumps
++ Fixed rare issue where some PNGs with transparency were detected as solid images
++ Fixed map position ("You Are Here") graphics being hidden by a custom Entering image
++ Fixed AddImageGraphic function trying to process TGA images as Doom format
++ Fixed ON_DEATH RTS scripts triggering when the condition uses a monster that was never in the map to begin with
+
+General Improvements
+--------------------
++ DEHEXTRA Support
++ COAL/C++ Interop: 
+  -new_game(), load_game(), save_game(), and end_level() hooks added for more flexibility
++ COAL VM:
+  -GetFloat, GetString and GetVector added to retrieve COAL variable values from the C++ side
+  -SetFloat, SetString and SetVector added to set COAL variables from the C++ side
+  -Function parameters can now be declared optional; all required parameters must be defined first
++ Original RNG LUT for M_Random/P_Random replaced with improved quality generators from the C++ stdlib
++ Crosshair color and size can now be changed via the Video Options menu
++ Pre-level story text/intermission will now be skipped when using the IDCLEV/level warp cheat
++ Mouse wheel up/down will now page through option menus that have Prev/Next pages (like the keybindings/Load Game menus)
++ Improved changing resolutions while in fullscreen mode
++ DDF and RTS now use a consistent INVENTORY## naming scheme for inventory items and scripts
++ COALHUDS:
+  -player.use_inventory now only needs the inventory item number passed to it
++ Module Music:
+  -libxmp-lite music player replaced with libmodplug, providing far better performance and load times,
+   with all of the following formats now supported:
+   MOD, S3M, XM, IT, 669, AMF (both of them), AMS, DBM, DMF, DSM, FAR,
+   MDL, MED, MTM, OKT, PTM, STM, ULT, UMX, MT2, PSM
++ Vertical offset scrolling will now work with midmask textures. Midmaskers without vertical scrolling
+  will remain clamped per the existing implementation
++ Freedoom Phase 1 and 2 have their own base WAD, which provides corrected text and menu graphics
++ Added capturing of console content (if active) in screenshots
++ Number of available AMMO and INVENTORY types increased to 99
++ Widescreen ratio resolutions added to windowed resolution list
++ DOOMWADPATH environment variable now supported
++ AJBSP updated to produce only XGL3 nodes compatible with both binary/UDMF map formats
+  - XGL3 node writing adapted from Eureka codebase with vertex comparison improvements from ketmar/k8vavoom
+  - XGL3 node loading functions adapted from EDGE 2.x
++ GWA file will always be built, regardless of a WAD having internal GL lumps
+  - This prevents crashes with malformed/orphaned GL lumps in a WAD
++ IWADs are now detected by combinations of unique lumps instead of simple filenames
++ Improved handling of PWADs with custom status bars that aren't widescreen
++ Improved height clipping for non-blocking map objects
++ New graphical startup sequence
++ Axis Test added to Mouse/Joystick control options menu to assist in mapping thumbsticks/analog triggers
++ Widescreen status bar extenders added for Freedoom 1/2, Heretic, and Blasphemer
++ Alternate liquid animations now apply when relevant graphics are used in HUD drawing functions (intermissions, etc)
++ Console dir/ls commands with just a mask for a parameter will search the current directory instead of requiring an explicit directory path
++ IDCLEV/warp will now work with non-standard map names
++ Slider options in the Option menu will be drawn with font symbols if an IMAGE DDFFONT type is in use (patch fonts will use the existing slider graphics)
++ Console will automatically scroll back to the bottom/input line after inputting a command
++ Level stat screens will how fallback to HUD fonts if certain images are missing ("Kills", "Items", etc)
++ DDFSTYLE: AUTOMAP background images/colors will now be used when drawing the automap if defined
+
+New Features
+------------
++ DP* sound lumps (PC speaker sounds) in the DOOM IWADs are now usable via DDFSFX
+
++ "PC Speaker Mode" option added to Sound Options menu. Only specific SFX will be used, and
+  the MIDI player will switch to an appropriate soundfont
+  -Imitation PC Speaker sounds added for Blasphemer, Heretic, and HacX
+
++ "Pistol Starts" option added to Gameplay Options menu (default Off). Will force player to default state upon
+  starting a new level. Works with all supported IWADs
+
++ COALHUDS: new commands/variables
+  -player.rts_enable_tagged(name): Will execute RTS script with matching tag, if one exists
+  -hud.scroll_image(x, y, name, sx, sy, [noOffset]): will scroll an image in horizontal and/or vertical directions
+  -hud.get_average_color(name): Will return an RGB vector with the average color of the named image lump
+  -hud.get_average_top_border_color(name): Will return an RGB vector with the average top border color of the named image lump
+  -hud.get_average_bottom_border_color(name): Will return an RGB vector with the average bottom border color of the named image lump
+  -hud.get_lightest_color(name): Will return an RGB vector with the lightest color of the named image lump
+  -hud.get_darkest_color(name): Will return an RGB vector with the darkest color of the named image lump
+  -hud.get_average_hue(name): Will return an RGB vector with the average hue of the named image lump
+  -hud.universal_y_adjust variable: Will apply a Y_ADJUST of this value to all weapon sprites
+  
++ COALHUDS: modified commands
+  -hud.draw_image(x, y, name, [noOffset]) has a new optional [noOffset] parameter which if set to 1, will ignore any X or Y offsets the image may have, both doom style and any defined in images.ddf
+  -hud.stretch_image(x, y, w, h, name, [noOffset]) has a new optional [noOffset] parameter which if set to 1, will ignore any X or Y offsets the image may have, both doom style and any defined in images.ddf
+  -hud.draw_text(x, y, str, [size]) has a new optional [size] argument to set the font size in pixels i.e. 16
+  -hud.draw_num2(x, y, len, num, [size]) has a new optional [size] argument to set the font size in pixels i.e. 16
+  -hud.draw_number(x, y, len, num, align_right, [size]) has a new optional [size] argument to set the font size in pixels i.e. 16
+  
++ FONTS.DDF
+  -New font type: IMAGE; an image with a 16x16 ASCII character layout with either a transparent or solid color background
+  --Examples can be found at https://bmf.php5.cz/, https://dwarffortresswiki.org/index.php/Tileset_repository, and other sites that use spritesheet or bitmap fonts
+  --Images can also be generated from TrueType fonts using https://lucide.github.io/Font-Atlas-Generator/
+  --Required parameter: "IMAGE = <string>", which should refer to a DDFIMAGE definition of the image in question
+  --Optional parameter: "SPACING = <int>", accepts positive or negative values to have fine-grain control over horizontal spacing of letters
+
++ IMAGES.DDF
+  -New special: "IS_FONT = <bool>", needed when using an image in conjunction with the new IMAGE DDFFONT type. Will automatically set the background to transparent
+   (if it isn't already), as well as apply the required mip/clamping flags to the texture
+  -IMAGE_DATA command: 'DOOM' format can now be specified in addition to the already existing PNG/JPG/TGA formats
+
++ WEAPONS.DDF
+  -Command: RENDER_INVERT=TRUE which will cause this weapon to render the sprites in reverse order
+   i.e. Crosshair, flash, weapon. Mainly useful for not having to "cut out" the shape of the weapon
+   muzzle from flash sprites. Also good for MD2 models so that the flash sprites are obscured
+   by the weapon model
+  -Command: Y_ADJUST=<number> which will offset the weapon sprites in Y
+  (negative numbers move it down, positive numbers move it up). Mainly for Heretic compatibility
+  -State Action: BECOME(<weapon name>,<state:frame>) Similar to the things.ddf action of the same 
+   name.<state:frame> is optional
+  -Command: ZOOM_FACTOR=<float> which will function as a traditional zoom magnification factor (1.5, 2.0, etc)
+   and will be preferred over ZOOM_FOV if both are present
+  -Command: NO_CHEAT=<bool> will prevent the weapon from being given to the player when using idkfa/idfa style cheats
+
++ SFX.DDF
+  -Command: PC_SPEAKER_LUMP = <lumpname>; optional, specifies an alternate lump to use when in PC Speaker Mode
+
++ STYLES.DDF
+  -PRE and END level texts now use style defined in entry [INTERLEVEL_TEXT] 
+  
++ LEVELS.DDF
+  -Command: LEAVING_BACKGROUND = <graphic>
+  -Command: ENTERING_BACKGROUND = <graphic>  
+  which can be used to override the intermission background defined in games.ddf on a per level basis.
+  
++ THINGS.DDF
+  -New SPECIAL: NO_TRIGGER_LINES which is similar to the same SPECIAL in attacks.ddf. Monsters flagged with 
+   this special cannot activate special lines i.e. doors etc.
+  -New SPECIAL: SHOVEABLE. If we push up against this thing then we can move it around. Mainly for
+   Heretics pods.
+  -New SPECIAL: NO_SPLASH. This thing causes no effects (i.e water splashes) on a floor defined in DDFFLAT as having an IMPACT_OBJECT  
+  -KILL_BENEFIT: Will grant player benefits if they kill the mobj in question (does not apply when using KILLALL or similar cheats)
+  -New ACTION: PLAYSOUND_BOSS(sfx) which will play the sound at full volume regardless of ALWAYS_LOUD flag
+
++ RTS: new commands
+  -REPLACE_WEAPON <OldWeapon> <NewWeapon> which will replace one weapon with another instantly(no up/down states run) 
+   if the player has it. It doesn't matter if we have the old one currently selected or not. Mainly for Heretic compatibility
+  -WEAPON_EVENT <weapon> <label> which is similar to THING_EVENT: If we have the weapon we 
+   insta-switch to it and go to the STATE we indicated
+   
++ New Benefit Type: COUNTER01-COUNTER99. The idea behind this is to be able to store arbitrary values across savegames, for things
+  like LIVES, SCORE, EXPERIENCE etc. To reflect this (and for convenience) the first 4 COUNTERS can be referenced like this:
+	LIVES or COUNTER01
+	SCORE or COUNTER02
+	MONEY or COUNTER03
+	EXPERIENCE or COUNTER04
+  In DDF COUNTERs are usable as PICKUP_BENEFIT options; syntax is the same as giving ammo
+  In RTS COUNTERs are usable for various commands; syntax is the same as for ammo i.e. ON_CONDITION COUNTER01(3)
+  In COAL: 
+	+ player.counter(counter_num) returns the value of the COUNTER
+	+ player.set_counter(counter_num, value) allows us to change a COUNTER value
+
++ Partial UMAPINFO support
+  - The following UMAPINFO keys are recognized:
+  -- levelpic
+  -- skytexture
+  -- levelname
+  -- music
+  -- nextmap
+  -- nextsecret
+  -- exitpic
+  -- enterpic
+  -- endpic
+  -- dobunny
+  -- docast
+  -- endgame
+  -- interbackdrop
+  -- intermusic
+  -- intertextsecret
+  -- partime
+
++ UDMF 1.1 Support
+  - TEXTMAP parser adapted from EDGE 2.x
+  - The following UDMF namespaces are currently supported:
+  -- Doom
+  -- Heretic
+  -- ZDoomTranslated  
+  
++ Heretic/Blasphemer support: vastly improved. Now 100% completeable from start to finish.
+
++ Console: clear/cls commands added to clear the current set of console lines (this does not clear the command history)
+
++ ENDOOM Support
+  - Use the new `endoom` command in the console
+  - Supports foreground/background colors and blinking
+  - Supports ENDOOM, ENDTEXT, and ENDBOOM lumps
+
+

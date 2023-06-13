@@ -1,0 +1,86 @@
+https://github.com/edge-classic/EDGE-classic
+
+
+CHANGELOG for EDGE-Classic 1.33 (since EDGE-Classic 1.32)
+====================================
+
+Bugs fixed
+----------
++ Fixed 1.32 secret sector fix not being preserved in save games; i.e. the same secret would increment the
+  secret counter when re-loading the game
++ Fixed jitter in Evil Eye and other animations
++ Fixed sprite frame overrides in DDFIMAGE not applying if they were Doom formatted images
++ Fixed SDL sound device frequency being allowed to be set far above intended values if OS doesn't report the ability
+  to use 48kHz sample rate
++ Fixed Boom tagged line effects also applying the effect to the control linedef (when a tag was present)
++ Fixed Boom vector linedef scroll directions for angles other than 0/45/90
++ Fixed Boom displacement scrollers not returning back to their exact original position
++ Fixed Boom scrollers tied to permanently moving sectors (i.e., Door Open and Stay Open) being ineffective
++ Fixed inanimate objects adhering to monster dropoff limits when being carried over a drop
++ Fixed overzealous oofing when falling or bumping into a ceiling
++ Doom2 Map05 bug fixed properly this time ;)
++ Fixed some new DDFSTYLE additions (entry and cursor alignment, etc) not working as intended with the Episode Select menu
++ Clip size was not being updated with RTS ReplaceWeapon and DDF weapon BECOME()
++ Fixed items with the HOVER flag still hovering when time is stopped
++ Fixed HUD and other non-game world animations unintentionally freezing during time stop
++ Fixed ENDOOM bytes that happen to match the value of a newline character being intepreted as newline characters
+
+
+General Improvements
+--------------------
++ Improved model and unit rendering to thrash the GL state a bit less
+
++ DDFSTYLE text styles can now have their own individual X_OFFSET and Y_OFFSET values,
+  giving more flexibility for menu item placement i.e. TITLE.Y_OFFSET or TEXT.Y_OFFSET etc
+  
++ Changed how LOSE_BENEFIT HEALTH is handled in RTS. Now it will simply subtract from current health and not
+  behave like DAMAGE_PLAYER(which reduces armour, causes pain states, respects immunity/resistence/invulnerable/immortal etc).
+
++ "Crosshair Size" option in Video Options menu will now apply to both the standard crosshair and custom weapon crosshair states
+  (previously this only affected standard crosshairs)
+  
++ Monsters resurrected by Archviles will no longer count as kills.
+
++ Replaced WebSID SID backend with cRSID for easier compilation and better performance
+
++ Things no longer constantly trigger splashes when walking on a flat defined as LIQUID (and having an IMPACT_OBJECT defined). 
+  They will only cause a splash when they step down onto the flat.
+
++ Unsupported BEX INCLUDE directive for Dehacked downgraded from a program-ending error to a warning with an appropriate console/log message.
+
++ Migrated from libXMP to Mod4Play (custom library) for portability/performance
+  - Only the "Big 4" tracker formats are supported now (IT/S3M/XM/MOD)
+
++ Upgraded to AJBSP 1.04
+
++ Added support for ZGL3 compressed lumps to AJBSP and EDGE-Classic's node loading routines to conserve cache folder space. ZGL3 will now
+  be the default node format.
+
++ Replaced Gamma options with Sector Brightness for better results without affecting other windows on the same display
+
+
+New Features
+------------
++ Added support for MDL (Quake 1) model format
+
++ Added support for KVX and KV6 voxel model formats
+
++ Ported MD3 model support from EDGE 1.32 codebase
+
++ DDFTHING:
+  - New command: FALLPAIN_SOUND, which is the sfx to be played when the player is hurt from a big fall
+  - New command: MODEL_ROTATE = <integer>, which for MDL/MD2/MD3/Voxels will rotate all vertices' x/y coordinates by the
+    given (positive or negative) number of degrees. Used to correct imported models whose rotations are wrong. Default is 0.
+
++ DDFIMAGE:
+  - New command: ROTATE_HUE = <integer>, will rotate the hue of the given image while keeping other values the same. Valid range is -1800
+    to 1800, with a default of 0.
+
++ COAL:
+  - C++ Interop: Can now retrieve and set individual vector elements with the VM_GetVectorX/Y/Z and VM_SetVectorX/Y/Z functions
+  - COALHUDS: Can now access individual vector elements with .x, .y, or .z
+
++ Transition from GWA to XWA cache file format
+  - Improved organization of AJBSP-generated XGL/ZGL lumps
+  - Legacy GWA files will be purged from cache directory on startup
+

@@ -1,0 +1,94 @@
+https://github.com/edge-classic/EDGE-classic
+
+
+CHANGELOG for EDGE-Classic 1.1 (since EDGE-Classic 1.0)
+====================================
+
+Bugs fixed
+----------
++ Longstanding SWIM sector special bug fixed. EDGE would continue 
+  flagging the player as being in a SWIM sector even after leaving it. 
+  Happens if SWIM special is used without AIRLESS(underwater) also. 
+  Most noticeable side effect was being unable to jump/crouch and bizarre momentum/speed
++ Downgraded errors for incorrect 3D extrafloors to warnings instead. 
++ E3M4 crusher bug fixed.
+
+General Improvements
+--------------------
++ RTS Scripts can now use either a number or a string for their TAGs.
+
++ Replaced libpng, libjpeg and image_tga.cc with stb_image.
+
++ Replaced zlib with miniz.
+
++ Consolidated some EPI filesystem functions so that platform-specific source files aren't required.
+
++ Compilation now works with MSVC Build Tools. SDL2 development headers/libs included for this purpose.
+
++ Player Crouch height reduced to 28, same as other ports.
+
++ Bumped up the number of sound channels: minimum 32, maximum 96.
+
+
+New Features
+------------
++ Added inventory system
+  + Controls: Inventory Previous, Inventory Use, and Inventory Next can now be bound to keys
+  + DDF: INV01-INV25 are usable as PICKUP_BENEFIT options; syntax is the same as giving ammo
+  + RTS: INV01-INV25 are usable for various commands; syntax is the same as for ammo i.e. ON_CONDITION INV01(3)
+  + COAL: player.inventory_events(): event-based handling for keys based on Inventory Previous, Inventory Use, and Inventory Next bindings
+  + COAL/RTS:  player.use_inventory(): will call RTS script of appropriate tag when inventory item is used; naming convention for inventory script tags is INVENTORY1 - INVENTORY25
+
++ Heretic COALHUDS updated with game-approriate inventory display
+
++ Added 'autoload' folder which is scanned for valid file types on startup. Sub-folders can fine tune what is loaded for specific IWADs.
+
++ Added "Animated Liquid Type" to Video Options menu; choices are "Vanilla", "SMMU", "SMMU + Swirl", and "Parallax"
+
++ FLATS.DDF (wad lump "DDFFLAT") which can be used to associate certain sounds, objects etc. with specific flats.
+  - Command: LIQUID="THIN" or "THICK" can be added to a flat definition. Currently affects swirl/dynamic liquid parameters.
+  - Command: IMPACT_OBJECT=<thing> where <thing> is an entry in THINGS.DDF. When the flat is shot, the <thing> will be spawned at the impact point (e.g. for splashes from water).
+  - Command: FOOTSTEP = <sound> where <sound> is an entry in SFX.DDF. Can be used via COALHUDS to make appropriate sfx when moving across this flat.
+
++ LINES.DDF
+  - New command: EFFECT_OBJECT=<thing> where <thing> is an entry in THINGS.DDF. When the line is activated, the <thing> will be spawned in the center of the line (e.g. for sparks from a switch). If the line is of type SHOOT then we spawn the object at the spot where the shot impacts instead.(e.g. a flesh wall that spurts blood when shot).
+  - New command: GLASS=TRUE which causes this line type to (a)be blocking and (b)will apply the LINE_EFFECT= specials BLOCK_SHOTS and BLOCK_SIGHT if specified.
+    Once the line is activated(normally via SHOOT) then (1) line will be set to unblocking, (2)BLOCK_SHOTS and BLOCK_SIGHT will be removed, (3) the mid-texture will be removed. 
+    If combined with EFFECT_OBJECT then you can spawn shards of broken glass when the line "breaks" for example. NOTE: GLASS=TRUE should be used with COUNT=1.
+  - New command: BROKEN_TEXTURE=<texture> which, when combined with GLASS=TRUE, will replace the mid-texture with this one instead of just removing it i.e. for shooting out a vent and replacing it with a broken vent.
+
++ COALHUDS: new commands
+  -player.play_footstep(flatname) checks FLATS.DDF for corresponding entry and plays the sfx associated with this flat.
+  -hud.screen_aspect() returns the current screen aspect e.g. 1.0, 1.333 etc.
+  -hud.AM_HIDELINES for hud.automap_option() which hides all geometry on the automap.
+
++ RTS: new commands
+  -SWITCH_WEAPON <weapon> which will force a switch to this <weapon> if the player has it.
+  -TELEPORT_TO_START which will simply teleport the player back to player 1 start.
+  
++ THINGS.DDF
+  -Crouching now triggers CROUCH states for the player when used with CHECK_ACTIVITY.
+  -Added player crouch spites to edge-defs.wad.
+
++ New XMP-based music player; MOD/S3M/IT/XM Tracker format songs are now supported.
+
++ New Game Music Emu-based music player; AY, GBS, GYM, HES, NSF, SAP, SPC, VGM format songs are now supported.
+
++ New WebSID-based music player; Commodore-64 SID format songs are now supported.
+
++ Main menu UI by default is now text based and uses strings from language.ddf and colouring/fonts defined in styles.ddf.
+  If a pwad contains custom menu graphics then they will be used instead.
+  
++ New names and DDF definitions for our menu sfx so we don't have to share the same names as normal doom sfx.
+  
++ 2 new custom fonts included in edge-defs.wad for use with our new dynamic menu: Verdana-style font and Doom-style.
+
++ MBF sky transfer linetypes 271 and 272 partially supported via new line Effect "SKY_TRANSFER".
+
++ Dynamic Reverb option in Sound Menu. Will attempt to reverberate all sounds based on room size and being indoor/outdoors
+
++ SECTORS.DDF
+  -Can add specials VACUUM_SFX, SUBMERGED_SFX, and REVERB_SFX to affect sounds while in that sector
+  -REVERB_SFX has additional required parameters: REVERB_TYPE="REVERB" or "ECHO", REVERB_DELAY=(any number), and REVERB_RATIO=(0-100)
+
+

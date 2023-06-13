@@ -1,0 +1,134 @@
+https://github.com/edge-classic/EDGE-classic
+
+
+
+
+CHANGELOG for EDGE-Classic Preview 1 (since forking from EDGE 1.35)
+====================================
+
+Bugs fixed
+----------
+- TuttiFrutti effect. When the texture was shorter than the wall it was being applied to, the blank space was either filled with black or left invisible causing all sorts of graphical anomalies. Backported from EDGE 2.x branch.
+
+- OUCH face on the hud was using incorrect damage value.
+
+- Face on hud never looked left because random number was never > 1.
+
+- Linetypes [268](Monster-only Silent Teleport W1 (Boom)) and [269](Monster-only Silent Teleport WR (Boom)) were incorrectly set as PUSH instead of WALK.
+
+- Sliding doors activated by monsters now make the appropriate SFX.
+
+- Crash-to-desktop bug when using WEAKNESS class finally fixed.
+
+- Black screen after endgame: backported from 2.x branch.
+
+- oof sfx behaviour now closer to original doom.
+
+General Improvements
+--------------------
++ Added more ammotypes:  Now we have from AMMO01 to AMMO24.
+
++ Ignore COAL bobbing commands "cam.set_vert_bob" and "cam.set_roll_bob"
+
++ Improved HUD: 
+  -Added widescreen status bar courtesy of CeeJay. 
+  -Revamped Overlay hud.
+  -Removed AIRBAR graphics from edge.wad and rewrote the coal function to not use them.
+  -Splash footsteps sfx when walking on liquid flats.
+
++ Lines.ddf
+  -Edited all Slider doors to use BDOPN sfx.
+  
++ Removed #VERSION check for both DDF and RTS. 
+
++ Made single option RTS MENUs respond to KEYD_JOY4 button.
+
++ Reduced Arachnotron width by 1. (Even though technically it is 64, this avoids issue with some pwads).
+
++ Reduced the lighting on several enemy attacks.
+
++ Default monitor ratio is set to 16:9 instead of 4:3 to accommodate most modern monitors.
+
++ Dynamic lighting, HQ2x, and Smoothing are now on by default to better highlight some of EDGE's rendering features.
+
++ Sliding doors now show on the Automap. 
+
++ Quietly ignore music lumps which aren't MIDI/OGG/MP3 instead of erroring out to Desktop.
+
++ Reduced the red tint while using the berserk power up.
+
++ M_SKULL1 menu cursor now uses DDFANIM (instead of being hardcoded to 2 frames). 
+
++ Much improved Doom skyboxes from https://forum.zdoom.org/viewtopic.php?f=46&t=53873&hilit=doom+skyboxes
+
+New Features
+------------
++ THINGS.DDF: 
+  -FALLING_SOUND for the player when they fall long distances. Backported from EDGE 2.x branch.
+  -SECRET_SOUND entry for the player which plays when he enters a sector marked SECRET. Backported from EDGE 2.x branch. DSSECRET SFX from K8vavoom.
+  -New SPECIAL flag: IMMORTAL. This thing never recieves damage from any attacks, but will go into pain states etc as usual.
+
++ WEAPONS.DDF: new DJNE weapon action for more robust weapon reloading. Backported from EDGE 2.x branch.
+Used just like JUMP(state_name:frame,xx%), but decrements the reload quantity for the specified attack and jumps if it's not zero. The jump chance is now interpreted as the attack specifier: 0% is the primary attack ammo, and non-zero percent is the secondary attack ammo.
+ 
++ Lines.ddf
+  -Edited all Slider doors to use BDOPN sfx.
+  -Added Hub Exit switches: [2000] to [2039]
+  -Added Transparent Thick Extrafloors (for glass effect): [600]Most transparent to [603]Least transparent
+
++ Sectors.ddf
+  -Added 2 new sector types: [50](Airless/Vacuum) and [65](Low Gravity)
+ 
++ Things.ddf
+  -Added several dynamic light sources:
+  [WHITE_LIGHT_FLOOR:7044] 
+  [YELLOW_LIGHT_FLOOR:7045]
+  [RED_LIGHT_FLOOR:7046]
+  [BLUE_LIGHT_FLOOR:7047]
+  [GREEN_LIGHT_FLOOR:7048]
+  [ORANGE_LIGHT_FLOOR:7049]
+     and
+  [WHITE_LIGHT_CEILING:7054]
+  [YELLOW_LIGHT_CEILING:7055]
+  [RED_LIGHT_CEILING:7056]
+  [BLUE_LIGHT_CEILING:7057]
+  [GREEN_LIGHT_CEILING:7058]
+  [ORANGE_LIGHT_CEILING:7059]
+  -Added the relevant entries for FALLING_SOUND and SECRET_SOUND to player thing.
+
++ Styles.ddf
+  -TITLE.COLOURMAP, TITLE.SCALE and TITLE.FONT will now affect the Title in an RTS MENU (via the MENU_STYLE RTS command).
+  -TEXT.COLOURMAP, TEXT.SCALE and TEXT.FONT will now affect the Options in an RTS MENU (via the MENU_STYLE RTS command).
+  -BACKGROUND images are now centered and obey scaling defined either in styles.ddf or images.ddf.
+  
++ RTS
+  - Text TIPs now accept a 4th parameter (like TIP_GRAPHICs) which is the scaling to apply.
+  - PLAYSOUND_BOSSMAN: sfx location now set on player.
+  - New Command "EXIT_GAME": exits out of the map and back to the main title screen.
+
++ New MIDI Player
+  - Timidity has been replaced by TinySoundfont, with support for *.sf2 soundfont files instead of GUS patch sets
+  - A Roland Sound Canvas style default soundfont by Nando Florestan has been included (http://dev.nando.audio/pages/soundfonts.html).
+Users with existing soundfonts can replace soundfont/default.sf2 with their own font if desired (must be named default.sf2; selector may be built in the future).
+  - TinySoundfont is now the default music player for both Linux and Window builds. 
+
++ MP3 Music Support
+
++ Titlescreen and intermission are now Widescreen compatible with https://forum.zdoom.org/viewtopic.php?f=46&t=67843
+
++ COALHUDS: 11 new commands
+  player.kills() returns how many enemies killed on the current map.
+  player.secrets() returns how many secrets discovered on current map.
+  player.items() returns how many items picked up on the current map.
+  player.map_enemies() returns total enemies on current map.
+  player.map_secrets() returns total number of secrets on current map.
+  player.map_items() returns total items on current map.
+  player.floor_flat() returns the floor flat of the current sector we are in.
+  player.sector_tag() returns the tag of the current sector we are in.
+  hud.draw_number(x, y, len, num, align_right). hud.draw_num2() always 
+    starts drawing the numbers from right-to-left. This new function 
+    allows left-to right if we pass 0 for the align_right parameter, 
+    or the usual draw_num2() right-to-left if we pass 1.
+  math.random2() returns a random number between 0 and 10.
+  hud.game_paused() returns 1 if the game is currently paused or 
+    on the title menu screen.

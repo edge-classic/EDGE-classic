@@ -1,6 +1,6 @@
 
 =======================================
-EDGE Pack Structure and Usage (Draft)
+EDGE Pack Structure and Usage
 =======================================
 
 by The EDGE Team.  April 2023.
@@ -69,7 +69,7 @@ Palettes should be named "PLAYPAL.pal", and can reside anywhere in a pack althou
 avoid having it treated as a raw colormap file.
 
 WADs within a pack will also be processed and do not need to reside in any particular location. That being said, any WAD within a pack
-will be considered to come 'after' the pack itself for load order purposes. To avoid the confusion that this may cause, it is recommend to 
+will be considered to come 'after' the pack itself for load order purposes. To avoid the confusion that this may cause, it is recommended to 
 only store maps and their associated lumps within pack WADs. The alternative to this would be to store ALL in-game resources within a pack WAD, 
 with documentation and other miscellany outside of it.
 

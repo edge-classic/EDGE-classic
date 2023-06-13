@@ -1,0 +1,225 @@
+https://github.com/edge-classic/EDGE-classic
+
+
+
+CHANGELOG for EDGE-Classic 1.3 (since EDGE-Classic 1.21)
+====================================
+
+Bugs fixed
+----------
++ Fixed CHANGE_TEX SKY not working with skyboxes
++ Fixed alignment of flats when both ALIGN and SCALE are used
++ Doom episode 1 intermission screen animation speed was wrong
++ Single sector maps no longer give a nodebuilder error
++ Fixed a bug displaying tall patches with a non-zero Y Offset
++ Several old DEHACKED issues fixed (original AliensTC for example)
++ Conflicts between Doom graphics and PNGs causing errors are now 
+  fixed (the infamous "Error occurred scanning image: xxx")
++ Do not apply invisibility effect to a zoomed weapon
++ Fixed IDCLEV mistakenly identifying non-marker lumps as valid map markers
++ Fixed crash involving items without a map spawnpoint being added to the
+  Deathmatch item respawn queue
++ Fixed incorrect parsing of keypad (10-key) scancodes
++ Fixed main menu cursor scaling/placement when all menu item images are empty
+  (i.e., background image alone is used as the "menu")
++ Fixed weapons with animated ready states having jittery swaying/bobbing
++ Fixed Boom generalized ceilings using their sector's floors for movement targets
++ Fixed monsters being able to activate W1/WR lines at the edge of a dropoff that
+  is too high for them to descend
++ Fixed Boom Set Friction lines with very short line lengths being ineffective
+
+
+General Improvements
+--------------------
++ Replaced TinySoundFont with FluidLite, supporting a wider range of MIDI events and effects
++ Live soundfont (FluidLite)/instrument bank (OPL) selector
++ DEH_EDGE cleanup and improvements
++ Improved screen resolution and aspect modes
++ New Harmony base WAD assets
++ Auto-detect music type for DDFPLAY (with one exception: IMF, as detailed under New Features)
++ No longer need to press Up/JUMP or Down/CROUCH key to navigate ladders: Just mlook + forward is enough.
++ Tags assigned to map things are now supported
++ Allow multiple WAIT_UNTIL_DEAD scripts to trigger for the same object
++ Improved handling of in-game messages
++ ENDOOM screen now integrated into quit dialog (unless custom background image is defined in STYLES.DDF)
++ Added libYMFM for improved VGM music handling and format support; disabled Game Music Emu VGM support
++ Replaced Modplug with XMP (non-lite version) for module tracker music for better compatibility
+  - Formats requiring prior depacking are still not supported
++ Multiple DDFANIM entries can now reference the same images (the entries themselves must still have unique names
+  to prevent conflicts)
++ Borderless Fullscreen mode added to the Set Resolution menu; list of Windowed resolutions updated to accommodate
+  displays up to 4K
++ Improved support for filepaths and program arguments with non-ASCII characters
+
+
+New Features
+------------
+
++ New Video Options menu item: Framerate Target
+  - Can cycle between 35/70 FPS
+  - Default framerate target is now 70 FPS
+
++ New Video Options menu item: Overlay
+  - Can cycle through various pseudo-CRT/scanline effects
+  - Current options: None, Lines 1X, Lines 2X, Checkered, Vertical, and Grill
+
++ New Gameplay Options menu item: MBF21 Map compatibility
+  - Can toggle to enable/disable MBF21 line and sector types/flags/specials
+  - Default is "Off"
+
++ New Gameplay Options menu item: Bobbing
+  - Controls if view/weapon are bobbed while moving
+  - Options are "Full", "Head Only", "Weapon Only", "None"
+  - Default is "Full"
+
++ New Gameplay Options menu item: Erraticism
+  - Time will only advance when the player moves or fires ("SuperHot")
+  - Player's momentum will be preserved if in mid-air/jumping, 
+    otherwise it will be lost when the movement keys are released
+  - Can hold the Use key to advance time without having to move or fire
+    (helpful when waiting for lifts, etc)
+
++ New Performance Options menu
+  - Current options
+    - Reduce Draw Distance: Will cull rendering at a set distance
+    - Slow Thinkers Over Distance: Helps alleviate performance hit from extreme
+      monster/missile counts. Not recommended for normal gameplay
+    - Dynamic Light Limit: Set maximum number of dynamic lights to render at once
+
++ Vastly improved Deathbot navigation and combat
+
++ New console command: showmaps
+  - Will show the warp name and level description for accessible maps
+
++ New console variable: r_forceflatlighting
+  - When set to 1, will use a flat lighting formula versus Doom's traditional distance-based light banding calculations
+  - Overrides any lighting settings in an episode's DDFGAME definition
+  - Default is 0, "traditional" Doom behavior
+
++ Support OPL emulated playback of MUS and MIDI music lumps via YMFM.
+  - Can use GENMIDI lumps (Default) or external instrument bank files
+  - *.wopl, *.op2, *.opl, *.ad, and *.tmb external banks supported
+  - External banks must be placed in the /soundfont directory prior to startup
+
++ Support OPNA emulated playback of MUS and MIDI lumps via FMMIDI
+
++ New music formats supported: FLAC, VGZ (compressed VGM), IMF, XMI/RMI/GMF/EA MIDI Formats
+  - IMF songs must have a playlist entry type of 'IMF280', 'IMF560', or 'IMF700' to correctly
+    set the song's playback rate
+
++ SF3 formatted soundfonts are now supported in addition to SF2
+  - Loading times for SF3 fonts are typically longer due to the need for decompression
+
++ DSDHACKED support.
+
++ FONTS.DDF
+  - New font type: TRUETYPE ("TYPE = TRUETYPE;", as opposed to IMAGE or PATCH)
+    - Required parameters:
+      - TTF = <string>, TTF/OTF file or lump
+    - Optional parameters:
+      - TTF_DEFAULT_SIZE = <int>, default (scaled to HUD) rendering size for this font. If not provided,
+        a default value of 7 will be used.
+      - TTF_SMOOTHING = "ALWAYS", "NEVER", or "ON_DEMAND". Affects behavior of the font when the Smoothing
+        option in the Video Options menu is adjusted. Defaults to "ON_DEMAND".
+
++ STYLES.DDF
+  - New property: ENTRY_ALIGNMENT = <string>, accepts "LEFT", "CENTER", or "RIGHT" to set text/image alignment for menu item names
+  - New CURSOR customization options:
+    - CURSOR.POSITION = <string>, accepts "LEFT", "CENTER", "RIGHT", or "BOTH" to determine cursor position relative to menu item. 
+      "BOTH" will drawn the cursor in both LEFT/RIGHT positions. Defaults to "LEFT".
+    - CURSOR.BORDER = <bool>, only has an effect when the cursor position is set to CENTER. Will scale up to the dimensions of the tallest
+      menu item. Good for highlights/frames/border style cursors
+    - CURSOR.TRANSLUCENCY = <percentage>, controls cursor image translucency
+    - CURSOR.IMAGE = <string>, image to use instead of the default for this menu's cursor
+    - CURSOR.STRING = <string>, if present, will use these characters from the style's font as the cursor instead of an image
+    - CURSOR.SCALING = <bool>, will set whether or not the cursor scales proportionally to menu item heights. Defaults to true.
+  
++ THINGS.DDF
+  - New property: SIGHT_DISTANCE=<number> which is how far a thing can see in map units.
+  - New property: HEAR_DISTANCE=<number> which is how far a thing can hear the player in map units.
+  - 3 new actions: 
+    - JUMP_LIQUID(state:frame,xx%) similar to the normal jump action except that it will only trigger if
+      the thing is in contact with a floor flat indicated as LIQUID in DDFFLATS.
+    - JUMP_SKY(state:frame,xx%) similar to the normal jump action except that it will only trigger if
+      the thing is in an outdoor sector i.e. ceiling is sky.
+	- NOISE_ALERT will cause nearby monsters to be alerted. Add it to a monsters death states so his
+	  final groan will warn nearby monsters to expect trouble ;)
+  - New pickup benefit: POWERUP_TIMESTOP
+    - Player can move and fire normally
+    - Projectiles will remain at the point at which they were fired until time resumes; hitscan or melee 
+      attacks will damage an enemy but they won't react/"die" until time resumes
+    - Switches/doors/lifts can be activated during time stop, but will not move until time resumes
+
++ LINES.DDF
+  - New LINE_EFFECT: TAGGED_OFFSET_SCROLL
+    - Matches MBF21 behavior; all lines with the same tag will use this line's offsets for offset scrolling
+    - Target lines can still use their own offsets for texture alignment
+    - Scrolling speed is divided by 8 for fine tuning 
+  - New property: SCROLL_TYPE = DISPLACE or ACCEL
+    - Affects the PUSH_THINGS, SCROLL_FLOOR, SCROLL_CEILING, VECTOR_SCROLL, and TAGGED_OFFSET_SCROLL specials
+    - Matches Boom/MBF21 behavior (see https://github.com/kraflab/mbf21/blob/master/docs/spec.md under 'Linedef Types' for reference if needed)
+  - Improved GLASS=TRUE functionality: LINE_PARTS= can now be used to define what the "broken" mid-texture will be.
+    LINE_PARTS accepts the following arguments: LEFT_LOWER, LEFT_UPPER, RIGHT_LOWER, RIGHT_UPPER. 
+	(back of linedef is right, front of linedef is left).
+  - Added 4 new BREAKABLE wall line types (similar behaviour to glass): 
+    [835] Breakable: when shot, midtex will change to back lower texture
+    [836] Breakable: when shot, midtex will change to back upper texture
+    [837] Breakable: when shot, midtex will change to front lower texture
+    [838] Breakable: when shot, midtex will change to front upper texture
+
++ IMAGES.DDF
+  - New SPECIAL: FORCE_PRECACHE
+    - Will force image to be precached on startup regardless of other settings
+  - New SPECIAL: GRAYSCALE
+    - Will force image (for this definition) to be in grayscale even if the original lump/file isn't
+
++ REKKR added as a recognized IWAD
+
++ COALHUDS: new commands
+  -mapobject.count(thingID): returns number of objects of this type on the map
+  -player.query_object(MaxDistance, WhatInfo): returns information about the currently targetted thing.
+   MaxDistance is the limit to how far we can query an object. 
+   WhatInfo is a number from 1 to 5 and can be: 
+	1 (NAME)
+	2 (CURRENT_HEALTH)
+	3 (SPAWN_HEALTH)
+	4 (PICKUP_BENEFIT)
+	5 (KILL_BENEFIT)
+  -mapobject.query_tagged(ThingMapTag, WhatInfo): returns information about the thing with the tag we specified. WhatInfo is the same as player.query_object()
+  -player.query_weapon(MaxDistance, Whatinfo, [secAttackInfo]): returns information about the currently targetted weapon.
+   MaxDistance is the limit to how far we can query an object.  
+   Using the optional [secAttackInfo] we can get information about the weapons secondary attack. 
+   WhatInfo and SecAttackInfo are a number from 1 to 9 and can be: 
+    1 (NAME)
+    2 (ZOOM FACTOR)
+    3 (AMMOTYPE)
+    4 (AMMOPERSHOT)
+    5 (CLIPSIZE)
+    6 (DAMAGE Nominal)
+    7 (DAMAGE Max)
+    8 (RANGE)
+    9 (AUTOMATIC)
+  -hud.erraticism_active() and hud.time_stop_active(): Check Time Stop/Erraticism state from within COALHUDS
+
++ No longer necessary to specify an image type in DDFIMAGE i.e. "IMAGE_DATA=LUMP:FOOBAR;" is now permitted.
+
++ Improved Boom Support
+  - Line 254 vector scrolling will use the appropriate direction instead of only scrolling vertically
+  - Implemented Lines 245-249: Displace scroll/push
+  - Implemented Lines 214-218: Accel scroll/push
+  - Improved Line 242 compatibility (colormaps/invisible platforms/etc)
+  - Implemented light level changes for tagged manual door sectors
+  - Implemented BEX-specific keycard/skull strings
+  - Implemented OB_* DEHACKED string replacements (not strictly BEX, but Freedoom 1/2 use them)
+
++ Improved MBF Support
+  - Implemented A_Mushroom
+  - MBF Dog is back! Rocking new sprites and sounds, credits to gzdoom(original sprites: Nash Muhandes, original sfx: Kinsie)
+    New CVAR: dogs <number> which will spawn 1-3 friendly helper dogs at coop spawn points.
+
++ Initial MBF21 Support
+  - Implemented Lines 1024-1026: Tagged offset scrolling (Normal/Displace/Accel)
+  - Implemented "Block land monsters" and "Block players" linedef flags
+  - Implemented "Alternate damage mode" and "Kill grounded monsters" sector types
+
+

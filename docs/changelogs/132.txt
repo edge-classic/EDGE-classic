@@ -1,0 +1,37 @@
+https://github.com/edge-classic/EDGE-classic
+
+
+
+CHANGELOG for EDGE-Classic 1.32 (since EDGE-Classic 1.31)
+====================================
+
+Bugs fixed
+----------
++ A recently introduced bug which caused the Secrets Found % to not increment after finding the first one.
++ player.use_inventory() consuming item without running the associated script if the script was already running
++ Changed hardcoded finish/par time widths to prevent custom fonts from being clipped at 4:3 resolutions
++ "Read This!" menu item missing for Doom.
+
+General Improvements
+--------------------
++ DDFSTYLE: Menu items that are images instead of fonts will now also apply the font colormap setting in that menu's
+  style entry (if defined)
+
++ DDFSTYLE: CURSOR.FORCE_OFFSETS=<boolean> - When set to true, will honor cursor image's offsets even if they cause misalignment with
+  menu entries. Default value is false
+
++ Added simplified R_PointToAngle and angle calculation constants from usernameAK (backported from EDGE 2.x)
+
++ Added some rearranged sky and unit drawing functions from dpjudas (backported from EDGE 2.x)
+
+New Features
+------------
++ COALHUDS: new commands
+  -hud.rts_isactive(tag): Returns 1 if the script "tag" is currently enabled, 0 if disabled.
+  -hud.rts_enable(name): Will execute RTS script with matching tag, if one exists. This replaces previous COAL command "player.rts_enable_tagged(name)" which should be considered deprecated.
+
++ DDFSTYLE: new text style - SELECTED
+  - Uses all parameters that regular style font entries use (SELECTED.FONT, SELECTED.SCALE, etc)
+  - Will only apply to the currently selected/highlighted menu item
+  - If not defined, will fall back to previous behavior for backwards compatibility
+

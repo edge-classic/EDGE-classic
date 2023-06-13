@@ -1,0 +1,84 @@
+https://github.com/edge-classic/EDGE-classic
+
+
+
+CHANGELOG for EDGE-Classic 1.0 (since EDGE-Classic Preview 1)
+====================================
+
+Bugs fixed
+----------
+- Apple compilation now works, thanks to testing and PRs from atsb/Gibbon
+
+- Dropping the console with a movement key held down would preserve that movement while in the console. Now toggling the console properly drops (movement) input
+
+- Games with only one selectable episode will now skip episode selection and proceed directly to the skill choice menu. This prevents the "Hell on Earth" episode from appearing when it is not appropriate
+
+- Fixed bug with valid skybox texture references being deleted when cycling between real and pseudo-skyboxes
+
+- Downgraded textures without patches from being an error (ending the program) to a warning
+
+- Fixed occasional bug where attempting to bind a key would map it to the wrong command
+
+- Fixed bug where canceling out of an RTS Menu would instead select the first option; now it should exit with no result
+
+- Fixed player being allowed to attempt to load a game from an empty slot
+
+- Fixed inheritance for DDFWEAP
+
+- Sloped sectors underneath an extrafloor will now actually use their slope instead of 0 (fix backported from EDGE 2.x)
+
+
+General Improvements
+--------------------
++ Creating a new Save Game with a blank name will now generate a default name (gamepad users can now create new saves without a keyboard)
+
++ "Found Secret" message now uses DDFLANG.
+
++ Berserk colour tint is no longer hardcoded and can be modified via DDFCOLM.
+
++ Merged CeeJay's LINES DDF with ours to create the ULTIMATE LINES DDF ;)
+
++ Replaced GLBSP with AJBSP as EDGE-Classic's internal nodebuilder
+
++ doom_ddf folder content merged into edge.wad and the folder removed. The past is the future...again ;)
+
++ Migrated from SDL1 to SDL2 for longevity and potential new features
+
++ Allow for FRONT/BACK to be recognized as RIGHT/LEFT textures in the RTS CHANGE_TEX function to suit modder preferences
+
++ Added missing graphics for Harmony and HacX option menus (Sound, Mouse, Gameplay, etc.) so that they don't use the fallback/incorrectly
+paletted Doom menu graphics
+
++ Improved joystick/gamepad handling; added ability to map dpad (hat) buttons and analog triggers to actions
+
++ Added "Menu Navigation" option in Controls to bind Menu Open/Up/Down/Left/Right/Select/Cancel
+
++ Added cursor to navigate RTS menus and select options in addition to using the number keys.
+
++ Added ability to remap functions previously hardcoded to the function keys (Quicksave, Quickload, etc)
+
+
+New Features
+------------
++ MP3 Sound Effects Support
+
++ ATTACKS.DDF:
+  -New attack type: DOUBLE_SPAWNER to mimic the pain elemental in Doom64.
+
++ THINGS.DDF: 
+  -New SPECIAL flag: FLOOR_CLIP. This things sprites will always stick to the floor in the case that it's too tall for the sector it's in.
+
++ More game IWADs supported: HACX, Herectic, Harmony, Blasphemer
+  -HACX: Full support. Includes bug fixes and widescreen support by CeeJay. Some graphics credited to HACX 2 team.
+  -Harmony: Full support. May be some (hopefully) minor differences.
+  -Heretic: Partial support. Item inventory not implemented in the base engine yet.
+  -Blasphemer: Rudimentary support; less thorough compared to Heretic, but IWAD will now be recognized and launch.
+
++ Experimental floor offset: any linetype that uses the SPECIALs "ALIGN FLOOR" or "ALIGN CEILING", if the line has texture offsets applied then EDGE will use those to offset the floor flat.
+
++ COALHUDS: New command
+  strings.find(s,TextToFind): will find a sub-string at ANY position. Returns position it was found at or -1 if not found.
+
++ Added water splash sfx to EDGEs default SWIM sectors.
+
+

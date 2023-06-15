@@ -8,16 +8,22 @@ CHANGELOG for EDGE-Classic 1.35 (since EDGE-Classic 1.34)
 
 New Features
 ------------
-
+- ATTACKS.DDF: New attack type - DUALATTACK
+  - Can execute two independent attack definitions with a single state
+  - New parameters (only required when using DUALATTACK):
+    - DUALATTACK1=<string> - First dual attack definition
+    - DUALATTACK2=<string> - Second dual attack definition
+  - DUALATTACK1/2 must both be present, even if referring to the same attack
+  - A dual attack can execute other dual attacks, but cannot reference itself 
 
 
 General Improvements
 --------------------
-
+- Weapons with the ability to zoom but without a ZOOM state defined will still draw the regular psprite and crosshair while zoomed
 
 
 Bugs fixed
 ----------
-
+- BOOM linetypes 143, 144, 148 and 149 fixed to use the correct Tx0/Tx changer type
 
 

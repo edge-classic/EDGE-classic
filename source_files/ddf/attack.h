@@ -48,6 +48,7 @@ typedef enum
 	ATK_SKULLFLY,
 	ATK_SMARTPROJECTILE,
 	ATK_SPRAY,
+	ATK_DUALATTACK, // Dasho 2023: Execute two independent atkdefs with one command
 	NUMATKCLASS
 }
 attackstyle_e;
@@ -131,6 +132,10 @@ public:
 	// DDF_AttackCleanUp() has been called.  Can be NULL.
 	const mobjtype_c *puff;
 	std::string puff_ref;
+
+	// For DUALATTACK type only
+	atkdef_c *dualattack1;
+	atkdef_c *dualattack2;
 
 private:
 	// disable copy construct and assignment operator

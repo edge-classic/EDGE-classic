@@ -3813,29 +3813,95 @@ void P_PlayerAttack(mobj_t * p_obj, const atkdef_c * attack)
 
 	p_obj->currentattack = attack;
 
-	float range = (attack->range > 0) ? attack->range : MISSILERANGE;
-
-	// see which target is to be aimed at
-	mobj_t *target = P_MapTargetAutoAim(p_obj, p_obj->angle, range, 
-				 (attack->flags & AF_ForceAim) ? true : false);
-
-	mobj_t *old_target = p_obj->target;
-
-	p_obj->SetTarget(target);
-
-	if (attack->flags & AF_FaceTarget)
+	if (attack->attackstyle != ATK_DUALATTACK)
 	{
-		if (attack->flags & AF_ForceAim)
-			P_ForceFaceTarget(p_obj);
-		else
-			P_ActFaceTarget(p_obj);
+		float range = (attack->range > 0) ? attack->range : MISSILERANGE;
+
+		// see which target is to be aimed at
+		mobj_t *target = P_MapTargetAutoAim(p_obj, p_obj->angle, range, 
+					(attack->flags & AF_ForceAim) ? true : false);
+
+		mobj_t *old_target = p_obj->target;
+
+		p_obj->SetTarget(target);
+
+		if (attack->flags & AF_FaceTarget)
+		{
+			if (attack->flags & AF_ForceAim)
+				P_ForceFaceTarget(p_obj);
+			else
+				P_ActFaceTarget(p_obj);
+		}
+
+		P_DoAttack(p_obj);
+		// restore the previous target for bots
+		if (p_obj->player && (p_obj->player->playerflags & PFL_Bot))
+			p_obj->SetTarget(old_target);
 	}
+	else
+	{
+		SYS_ASSERT(attack->dualattack1 && attack->dualattack2);
 
-	P_DoAttack(p_obj);
+		if (attack->dualattack1->attackstyle == ATK_DUALATTACK)
+			P_PlayerAttack(p_obj, attack->dualattack1);
+		else
+		{
+			p_obj->currentattack = attack->dualattack1;
 
-	// restore the previous target for bots
-	if (p_obj->player && (p_obj->player->playerflags & PFL_Bot))
-		p_obj->SetTarget(old_target);
+			float range = (p_obj->currentattack->range > 0) ? p_obj->currentattack->range : MISSILERANGE;
+
+			// see which target is to be aimed at
+			mobj_t *target = P_MapTargetAutoAim(p_obj, p_obj->angle, range, 
+						(p_obj->currentattack->flags & AF_ForceAim) ? true : false);
+
+			mobj_t *old_target = p_obj->target;
+
+			p_obj->SetTarget(target);
+
+			if (p_obj->currentattack->flags & AF_FaceTarget)
+			{
+				if (p_obj->currentattack->flags & AF_ForceAim)
+					P_ForceFaceTarget(p_obj);
+				else
+					P_ActFaceTarget(p_obj);
+			}
+
+			P_DoAttack(p_obj);
+			// restore the previous target for bots
+			if (p_obj->player && (p_obj->player->playerflags & PFL_Bot))
+				p_obj->SetTarget(old_target);
+		}
+
+		if (attack->dualattack2->attackstyle == ATK_DUALATTACK)
+			P_PlayerAttack(p_obj, attack->dualattack2);
+		else
+		{
+			p_obj->currentattack = attack->dualattack2;
+
+			float range = (p_obj->currentattack->range > 0) ? p_obj->currentattack->range : MISSILERANGE;
+
+			// see which target is to be aimed at
+			mobj_t *target = P_MapTargetAutoAim(p_obj, p_obj->angle, range, 
+						(p_obj->currentattack->flags & AF_ForceAim) ? true : false);
+
+			mobj_t *old_target = p_obj->target;
+
+			p_obj->SetTarget(target);
+
+			if (p_obj->currentattack->flags & AF_FaceTarget)
+			{
+				if (p_obj->currentattack->flags & AF_ForceAim)
+					P_ForceFaceTarget(p_obj);
+				else
+					P_ActFaceTarget(p_obj);
+			}
+
+			P_DoAttack(p_obj);
+			// restore the previous target for bots
+			if (p_obj->player && (p_obj->player->playerflags & PFL_Bot))
+				p_obj->SetTarget(old_target);
+		}
+	}
 }
 
 

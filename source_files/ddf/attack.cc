@@ -105,6 +105,9 @@ static const commandlist_t attack_commands[] =
 	DF("SPAWN_LIMIT", spawn_limit, DDF_MainGetNumeric),
 	DF("PUFF", puff_ref, DDF_MainGetString),
 	DF("ATTACK_CLASS", attack_class, DDF_MainGetBitSet),
+	DF("DUALATTACK1", dualattack1, DDF_MainRefAttack),
+	DF("DUALATTACK2", dualattack2, DDF_MainRefAttack),
+
 
 	// -AJA- backward compatibility cruft...
 	DF("DAMAGE", damage.nominal, DDF_MainGetFloat),
@@ -283,6 +286,19 @@ static void AttackFinishEntry(void)
 		DDF_WarnError("Bad DAMAGE.VAL value %f in DDF.\n", dynamic_atk->damage.nominal);
 	}
 
+	// check ATK_DUALATTACK to make sure both attacks are defined
+	if (dynamic_atk->attackstyle == ATK_DUALATTACK)
+	{
+		if (!dynamic_atk->dualattack1 || !dynamic_atk->dualattack2)
+		{
+			DDF_Error("DUALATTACK %s missing one or both dual attack definitions!\n", dynamic_atk->name.c_str());
+		}
+		if (dynamic_atk->dualattack1->name == dynamic_atk->name || dynamic_atk->dualattack2->name == dynamic_atk->name)
+		{
+			DDF_Error("DUALATTACK %s is referencing itself!\n", dynamic_atk->name.c_str());
+		}
+	}
+
 	// compute an attack class, if none specified
 	if (dynamic_atk->attack_class == BITSET_EMPTY)
 	{
@@ -435,7 +451,8 @@ static const char *attack_class[NUMATKCLASS] =
     "SHOOTTOSPOT",
     "SKULLFLY",
     "SMARTPROJECTILE",
-    "SPRAY"
+    "SPRAY",
+	"DUALATTACK"
 };
 
 static void DDF_AtkGetType(const char *info, void *storage)
@@ -530,6 +547,8 @@ void atkdef_c::CopyDetail(atkdef_c &src)
 	spawn_limit = src.spawn_limit;
 	puff = src.puff;
 	puff_ref = src.puff_ref;
+	dualattack1 = src.dualattack1;
+	dualattack2 = src.dualattack2;
 }
 
 //
@@ -568,6 +587,8 @@ void atkdef_c::Default()
 	spawn_limit = 0;  // unlimited
 	puff = NULL;
 	puff_ref.clear();
+	dualattack1 = NULL;
+	dualattack2 = NULL;
 }
 
 

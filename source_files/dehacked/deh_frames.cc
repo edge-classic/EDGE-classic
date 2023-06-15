@@ -220,7 +220,7 @@ const actioninfo_t action_info[NUMACTIONS_MBF] =
 	{ "A_LineEffect",   AF_SPECIAL, "", NULL, NULL },
 
 	{ "A_FireOldBFG",   0,  "W:SHOOT", "R:INTERNAL_FIRE_OLD_BFG", NULL },
-	{ "A_BetaSkullAttack", AF_UNIMPL, "NOTHING", NULL, NULL },
+	{ "A_BetaSkullAttack", 0, "RANGE_ATTACK", "R:INTERNAL_BETA_LOST_SOUL_ATTACK", NULL },
 };
 
 

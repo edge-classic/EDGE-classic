@@ -49,6 +49,7 @@ typedef enum
 	ATK_SMARTPROJECTILE,
 	ATK_SPRAY,
 	ATK_DUALATTACK, // Dasho 2023: Execute two independent atkdefs with one command
+	ATK_PSYCHIC, // Dasho 2023: Beta Lost Soul attack
 	NUMATKCLASS
 }
 attackstyle_e;

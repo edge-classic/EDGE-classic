@@ -298,6 +298,13 @@ static void AttackFinishEntry(void)
 			DDF_Error("DUALATTACK %s is referencing itself!\n", dynamic_atk->name.c_str());
 		}
 	}
+	// Create a minimal mobj for psychic attacks for their tracker
+	else if (dynamic_atk->attackstyle == ATK_PSYCHIC && !dynamic_mobj)
+	{
+		dynamic_mobj = CreateAtkMobj(dynamic_atk->name.c_str());
+		dynamic_mobj->radius = 1;
+		dynamic_atk->atk_mobj = dynamic_mobj;
+	}
 
 	// compute an attack class, if none specified
 	if (dynamic_atk->attack_class == BITSET_EMPTY)
@@ -452,7 +459,8 @@ static const char *attack_class[NUMATKCLASS] =
     "SKULLFLY",
     "SMARTPROJECTILE",
     "SPRAY",
-	"DUALATTACK"
+	"DUALATTACK",
+	"PSYCHIC"
 };
 
 static void DDF_AtkGetType(const char *info, void *storage)

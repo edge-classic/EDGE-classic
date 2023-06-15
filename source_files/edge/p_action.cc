@@ -2170,6 +2170,52 @@ void P_ActEffectTracker(mobj_t * object)
 				   &tracker->info->explode_damage, false);
 }
 
+//
+// P_ActPsychicEffect
+//
+// Same as above, but with a single non-explosive damage instance and no lifting of the target
+//
+void P_ActPsychicEffect(mobj_t * object)
+{
+	mobj_t *tracker;
+	mobj_t *target;
+	const atkdef_c *attack;
+	angle_t angle;
+	float damage;
+
+	if (!object->target || !object->currentattack)
+		return;
+
+	attack = object->currentattack;
+	target = object->target;
+
+	if (attack->flags & AF_FaceTarget)
+		P_ActFaceTarget(object);
+
+	if (attack->flags & AF_NeedSight)
+	{
+		if (!P_CheckSight(object, target))
+			return;
+	}
+
+	if (attack->sound)
+		S_StartFX(attack->sound, P_MobjGetSfxCategory(object), object);
+
+	angle = object->angle;
+	tracker = object->tracer;
+
+	DAMAGE_COMPUTE(damage, &attack->damage);
+
+	if (damage)
+		P_DamageMobj(target, object, object, damage, &attack->damage);
+#ifdef DEVELOPERS
+	else
+		L_WriteDebug("%s + %s attack has zero damage\n",
+					 object->info->name.c_str(), 
+					 tracker->info->name.c_str());
+#endif
+}
+
 //-----------------------------------------------------------------
 //--------------------BOSS HANDLING PROCEDURES---------------------
 //-----------------------------------------------------------------
@@ -2753,6 +2799,13 @@ static void P_DoAttack(mobj_t * object)
 		case ATK_TRACKER:
 		{
 			LaunchTracker(object);
+			break;
+		}
+
+		case ATK_PSYCHIC:
+		{
+			LaunchTracker(object);
+			P_ActPsychicEffect(object);
 			break;
 		}
 

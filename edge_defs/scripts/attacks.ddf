@@ -931,7 +931,7 @@ STATES(DEATH)=MISL:B:0:BRIGHT:TRANS_FADE(10%),
               #REMOVE;
  
 // These are named INTERNAL_ to try to avoid conflicting with existing mods
-// They are the default attack used by the A_FireOldBFG pointer
+// They are the default attacks used by the A_FireOldBFG and A_BetaSkullAttack pointers
 
 [INTERNAL_BETA_BFG_1]
 ATTACKTYPE=PROJECTILE;
@@ -1005,6 +1005,12 @@ STATES(DEATH)=PLS2:C:0:LIT88:DLIGHT_FADE(0),
 ATTACKTYPE=DUALATTACK;
 DUALATTACK1=INTERNAL_BETA_BFG_1;
 DUALATTACK2=INTERNAL_BETA_BFG_2;
+
+[INTERNAL_BETA_LOST_SOUL_ATTACK]
+ATTACKTYPE=PSYCHIC;
+DAMAGE.VAL=3;
+DAMAGE.MAX=24;
+ATTACK_SPECIAL=NEED_SIGHT,FACE_TARGET;
  
  
  

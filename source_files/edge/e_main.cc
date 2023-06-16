@@ -1017,10 +1017,6 @@ static std::string CheckPackForGameFiles(std::filesystem::path check_pack, filek
 		delete check_pack_df;
 		return check_base;
 	}
-	delete check_pack_df;
-	if (check_score)
-		*check_score = 0;
-	return "";
 }
 
 //

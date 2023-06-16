@@ -137,6 +137,9 @@ extern cvar_c g_cullthinkers;
 extern cvar_c r_maxdlights;
 extern cvar_c v_sync;
 extern cvar_c g_bobbing;
+
+//extern cvar_c am_keydoortext;
+
 extern cvar_c v_secbright;
 extern cvar_c v_gamma;
 extern cvar_c r_titlescaling;
@@ -654,7 +657,7 @@ static optmenuitem_t accessibilityoptions[] =
 	{OPT_Switch,  "View Bobbing", "Full/Head Only/Weapon Only/None", 4, &g_bobbing.d, M_ChangeBobbing, "May help with motion sickness"},
 	{OPT_Switch,  "Reduce Flashing",  YesNo,   2, &reduce_flash, NULL, "May help with epilepsy or photosensitivity"},
 	{OPT_Boolean, "Automap: Keyed Doors Pulse",    YesNo,   2, &am_keydoorblink, NULL, "Can help locate doors more easily"},
-	{OPT_Boolean, "Automap: Keyed Doors Named",    YesNo,   2, &am_keydoortext, NULL, "Required key shown visually"},
+	{OPT_Switch, "Automap: Keyed Doors Named", "Nothing/Text/Graphic", 3, &am_keydoortext.d, M_UpdateCVARFromInt, "Required key shown visually",&am_keydoortext},
 };
 
 static menuinfo_t accessibility_optmenu = 

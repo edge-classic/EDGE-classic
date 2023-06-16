@@ -116,7 +116,6 @@ static default_t defaults[] =
 
 	{CFGT_Boolean,  "pistol_starts",             &pistol_starts, 0},
 	{CFGT_Boolean,  "am_keydoorblink",         &am_keydoorblink,      CFGDEF_AM_KEYDOORBLINK},
-    {CFGT_Boolean,  "am_keydoortext",         &am_keydoortext,      CFGDEF_AM_KEYDOORTEXT},
 
 	// -KM- 1998/07/21 Save the blood setting
     {CFGT_Boolean,  "blood",             &global_flags.more_blood, CFGDEF_MORE_BLOOD},

@@ -181,7 +181,8 @@ static bool stopped = true;
 
 bool rotatemap = false;
 bool am_keydoorblink = false;
-bool am_keydoortext = false;
+DEF_CVAR(am_keydoortext, "0", CVAR_ARCHIVE)
+
 
 extern cvar_c r_doubleframes;
 
@@ -693,13 +694,14 @@ std::string Aux2StringReplaceAll(std::string str, const std::string& from, const
 }
 
 
+
 //Lobo 2023: draw some key info in the middle of a line
 static void DrawKeyOnLine(mline_t * ml, int theKey, rgbcol_t rgb = T_WHITE)
 {
 	if (hide_lines)
 		return;
 
-	if (!am_keydoortext) //Only if we have Keyed Doors Named turned on
+	if (am_keydoortext.d == 0) //Only if we have Keyed Doors Named turned on
 		return;
 
 	static const mobjtype_c *TheObject;
@@ -716,8 +718,8 @@ static void DrawKeyOnLine(mline_t * ml, int theKey, rgbcol_t rgb = T_WHITE)
 		CleanName = Aux2StringReplaceAll(TheObject->name, std::string("_"), std::string(" "));
 	}
 		
-// *********************
-// Draw Text description
+	// *********************
+	// Draw Text description
 	//Calculate midpoint
 	float midx = (ml->a.x + ml->b.x) / 2;
 	float midy = (ml->a.y + ml->b.y) / 2;
@@ -733,8 +735,27 @@ static void DrawKeyOnLine(mline_t * ml, int theKey, rgbcol_t rgb = T_WHITE)
 	HUD_SetTextColor(rgb);
 	float TextSize = 0.4f * m_scale;
 	if (m_scale > 5.0f) //only draw the text if we're zoomed in?
-		HUD_DrawText(x1, y1, CleanName.c_str(), TextSize);
+	{
+		if(am_keydoortext.d == 1)
+		{
+			HUD_DrawText(x1, y1, CleanName.c_str(), TextSize);
+		}
+		else if(am_keydoortext.d > 1)
+		{
+			if(TheObject)
+			{
+				static state_t *idlestate;
+				idlestate = &states[TheObject->idle_state];
+				bool flip;
+				const image_c *img = R2_GetOtherSprite(idlestate->sprite, idlestate->frame, &flip);
 
+				if (epi::case_cmp("DUMMY_SPRITE", img->name) != 0)
+					HUD_DrawImageNoOffset(x1, y1, img);
+					//HUD_StretchImage(x1, y1, 16, 16, img, 0.0, 0.0);
+			}
+		}
+	}
+	
 	HUD_SetFont();
 	HUD_SetTextColor();
 	HUD_SetAlignment();

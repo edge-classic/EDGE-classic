@@ -301,8 +301,6 @@ typedef struct menuinfo_s
 
 	// title information
 	int title_x;
-	char title_name[10];
-	const image_c *title_image;
 
 	// current position
 	int pos;
@@ -402,7 +400,7 @@ static optmenuitem_t mainoptions[] =
 static menuinfo_t main_optmenu = 
 {
 	mainoptions, sizeof(mainoptions) / sizeof(optmenuitem_t), 
-	&opt_def_style, 164, 108, "M_OPTTTL", NULL, 0, "", language["MenuOptions"]
+	&opt_def_style, 164, 108, 0, "", language["MenuOptions"]
 };
 
 //
@@ -438,7 +436,7 @@ static optmenuitem_t vidoptions[] =
 static menuinfo_t video_optmenu = 
 {
 	vidoptions, sizeof(vidoptions) / sizeof(optmenuitem_t),
-	&opt_def_style, 150, 77, "M_VIDEO", NULL, 0, "", language["MenuVideo"]
+	&opt_def_style, 150, 77, 0, "", language["MenuVideo"]
 };
 
 //
@@ -460,7 +458,7 @@ static optmenuitem_t resoptions[] =
 static menuinfo_t res_optmenu = 
 {
 	resoptions, sizeof(resoptions) / sizeof(optmenuitem_t),
-	&opt_def_style, 150, 77, "M_SETRES", NULL, 3, "", language["MenuResolution"]
+	&opt_def_style, 150, 77, 3, "", language["MenuResolution"]
 };
 
 //
@@ -502,7 +500,7 @@ static optmenuitem_t analogueoptions[] =
 static menuinfo_t analogue_optmenu = 
 {
 	analogueoptions, sizeof(analogueoptions) / sizeof(optmenuitem_t),
-	&opt_def_style, 150, 75, "M_MSETTL", NULL, 1, "", language["MenuMouse"]
+	&opt_def_style, 150, 75, 1, "", language["MenuMouse"]
 };
 
 //
@@ -532,7 +530,7 @@ static optmenuitem_t soundoptions[] =
 static menuinfo_t sound_optmenu = 
 {
 	soundoptions, sizeof(soundoptions) / sizeof(optmenuitem_t),
-	&opt_def_style, 150, 75, "M_SFXOPT", NULL, 0, "", language["MenuSound"]
+	&opt_def_style, 150, 75, 0, "", language["MenuSound"]
 };
 
 //
@@ -548,7 +546,7 @@ static optmenuitem_t f4soundoptions[] =
 static menuinfo_t f4sound_optmenu = 
 {
 	f4soundoptions, sizeof(f4soundoptions) / sizeof(optmenuitem_t),
-	&opt_def_style, 150, 75, "M_SFXOPT", NULL, 0, "", language["MenuSound"]
+	&opt_def_style, 150, 75, 0, "", language["MenuSound"]
 };
 
 //
@@ -620,7 +618,7 @@ static optmenuitem_t playoptions[] =
 static menuinfo_t gameplay_optmenu = 
 {
 	playoptions, sizeof(playoptions) / sizeof(optmenuitem_t),
-	&opt_def_style, 160, 46, "M_GAMEPL", NULL, 0, "", language["MenuGameplay"]
+	&opt_def_style, 160, 46, 0, "", language["MenuGameplay"]
 };
 
 //
@@ -644,7 +642,7 @@ static optmenuitem_t perfoptions[] =
 static menuinfo_t perf_optmenu = 
 {
 	perfoptions, sizeof(perfoptions) / sizeof(optmenuitem_t),
-	&opt_def_style, 160, 46, "M_PRFOPT", NULL, 0, "", language["MenuPerformance"]
+	&opt_def_style, 160, 46, 0, "", language["MenuPerformance"]
 };
 
 //
@@ -662,7 +660,7 @@ static optmenuitem_t accessibilityoptions[] =
 static menuinfo_t accessibility_optmenu = 
 {
 	accessibilityoptions, sizeof(accessibilityoptions) / sizeof(optmenuitem_t),
-	&opt_def_style, 160, 46, "M_ACCOPT", NULL, 0, "", language["MenuAccessibility"]
+	&opt_def_style, 160, 46, 0, "", language["MenuAccessibility"]
 };
 
 //
@@ -689,8 +687,7 @@ static optmenuitem_t move_keyconfig[] =
 static menuinfo_t movement_optmenu = 
 {
 	move_keyconfig, sizeof(move_keyconfig) / sizeof(optmenuitem_t),
-	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Movement", language["MenuBinding"]
+	&opt_def_style, 140, 98, 0,	"Movement", language["MenuBinding"]
 };
 
 //
@@ -717,8 +714,7 @@ static optmenuitem_t attack_keyconfig[] =
 static menuinfo_t attack_optmenu = 
 {
 	attack_keyconfig, sizeof(attack_keyconfig) / sizeof(optmenuitem_t),
-	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Attack / Look", language["MenuBinding"]
+	&opt_def_style, 140, 98, 0,	"Attack / Look", language["MenuBinding"]
 };
 
 //
@@ -744,8 +740,7 @@ static optmenuitem_t other_keyconfig[] =
 static menuinfo_t otherkey_optmenu = 
 {
 	other_keyconfig, sizeof(other_keyconfig) / sizeof(optmenuitem_t),
-	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Other Keys", language["MenuBinding"]
+	&opt_def_style, 140, 98, 0,	"Other Keys", language["MenuBinding"]
 };
 
 //
@@ -769,8 +764,7 @@ static optmenuitem_t weapon_keyconfig[] =
 static menuinfo_t weapon_optmenu = 
 {
 	weapon_keyconfig, sizeof(weapon_keyconfig) / sizeof(optmenuitem_t),
-	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Weapon Keys", language["MenuBinding"]
+	&opt_def_style, 140, 98, 0,	"Weapon Keys", language["MenuBinding"]
 };
 
 //
@@ -794,8 +788,7 @@ static optmenuitem_t automap_keyconfig[] =
 static menuinfo_t automap_optmenu = 
 {
 	automap_keyconfig, sizeof(automap_keyconfig) / sizeof(optmenuitem_t),
-	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Automap Keys", language["MenuBinding"]
+	&opt_def_style, 140, 98, 0,	"Automap Keys", language["MenuBinding"]
 };
 
 //
@@ -817,8 +810,7 @@ static optmenuitem_t menu_nav_keyconfig[] =
 static menuinfo_t menu_nav_optmenu = 
 {
 	menu_nav_keyconfig, sizeof(menu_nav_keyconfig) / sizeof(optmenuitem_t),
-	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Menu Navigation", language["MenuBinding"]
+	&opt_def_style, 140, 98, 0,	"Menu Navigation", language["MenuBinding"]
 };
 
 //
@@ -834,8 +826,7 @@ static optmenuitem_t menu_nav_inventory[] =
 static menuinfo_t inventory_optmenu = 
 {
 	menu_nav_inventory, sizeof(menu_nav_inventory) / sizeof(optmenuitem_t),
-	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Inventory", language["MenuBinding"]
+	&opt_def_style, 140, 98, 0,	"Inventory", language["MenuBinding"]
 };
 
 //
@@ -855,8 +846,7 @@ static optmenuitem_t program_keyconfig1[] =
 static menuinfo_t program_optmenu1 = 
 {
 	program_keyconfig1, sizeof(program_keyconfig1) / sizeof(optmenuitem_t),
-	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Program (1/2)", language["MenuBinding"]
+	&opt_def_style, 140, 98, 0,	"Program (1/2)", language["MenuBinding"]
 };
 
 //
@@ -876,8 +866,7 @@ static optmenuitem_t program_keyconfig2[] =
 static menuinfo_t program_optmenu2 = 
 {
 	program_keyconfig2, sizeof(program_keyconfig2) / sizeof(optmenuitem_t),
-	&opt_def_style, 140, 98, "M_CONTRL", NULL, 0,
-	"Program (2/2)", language["MenuBinding"]
+	&opt_def_style, 140, 98, 0,	"Program (2/2)", language["MenuBinding"]
 };
 
 /*
@@ -1018,28 +1007,12 @@ void M_OptDrawer()
 	font_h *=TEXTscale;
 	menutop = font_h / 2;
 
-	const image_c *image;
-
-	if (! curr_menu->title_image) 
-		curr_menu->title_image = W_ImageLookup(curr_menu->title_name);
-
-	image = curr_menu->title_image;
-
 	CenterX = 160;
 	CenterX -= (style->fonts[fontType]->StringWidth(curr_menu->name) * 1.5) / 2;
 	
 	//Lobo 2022
-	bool custom_optionmenu = false;
-	if (custom_optionmenu==false) 
-	{
-		HL_WriteText(style,fontType, CenterX, menutop, curr_menu->name,1.5);
-	} 
-	else
-	{		
-		const colourmap_c *colmap = style->def->text[fontType].colmap;
-		HUD_DrawImage(curr_menu->title_x, menutop, image, colmap);
-	}
-
+	HL_WriteText(style,fontType, CenterX, menutop, curr_menu->name,1.5);
+	
 	fontType=styledef_c::T_TEXT;
 	TEXTscale=style->def->text[fontType].scale;
 	font_h = style->fonts[fontType]->NominalHeight();

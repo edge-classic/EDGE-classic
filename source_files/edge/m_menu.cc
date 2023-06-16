@@ -3753,10 +3753,7 @@ void M_Init(void)
 	I_Debugf("custom_MenuEpisode =%d \n",custom_MenuEpisode);
 	I_Debugf("custom_MenuDifficulty =%d \n",custom_MenuDifficulty);
 
-	if (W_IsLumpInAnyWad("M_HTIC"))
-		menu_doom = W_ImageLookup("M_HTIC");
-	else
-		menu_doom = W_ImageLookup("M_DOOM");
+	menu_doom = W_ImageLookup("M_DOOM");
 
 	// Here we could catch other version dependencies,
 	//  like HELP1/2, and four episodes.

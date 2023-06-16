@@ -110,6 +110,16 @@ typedef enum
 }
 automap_state_e;
 
+typedef enum
+{
+    AMARW_DOOM,
+    AMARW_HERETIC,
+    AMARW_NUMTYPES
+}
+automap_arrow_e;
+
+void AM_SetArrow(automap_arrow_e type);
+
 void AM_GetState(int *state, float *zoom);
 void AM_SetState(int  state, float  zoom);
 

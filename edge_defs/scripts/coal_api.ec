@@ -179,6 +179,9 @@ module hud
 	constant AM_MISSILE  = 12
 	constant AM_SCENERY  = 13
 
+	constant AM_ARROW_DOOM = 0
+	constant AM_ARROW_HERETIC = 1
+
 	function game_mode() : string = native
 	function game_name() : string = native
 	function map_name()  : string = native
@@ -200,6 +203,7 @@ module hud
 	function automap_color(which, color : vector) = native
 	function automap_option(which, value) = native
 	function automap_zoom(zoom) = native
+	function automap_player_arrow(type) = native
 	
 	function solid_box(x, y, w, h, color : vector) = native
 	function solid_line(x1, y1, x2, y2, color : vector) = native

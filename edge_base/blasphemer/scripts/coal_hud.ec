@@ -534,6 +534,29 @@ function handle_tome_of_power() =
 	
 }
 
+// Startup stuff
+function new_game() =
+{
+	if (hud.custom_stbar)
+	{
+		custom_stbar_average_color = hud.get_average_color("STBAR")
+		custom_stbar_darkest_color = hud.get_darkest_color("STBAR")
+		custom_stbar_lightest_color = hud.get_lightest_color("STBAR")
+	}
+	hud.automap_player_arrow(hud.AM_ARROW_HERETIC)
+}
+
+function load_game() =
+{
+	if (hud.custom_stbar)
+	{
+		custom_stbar_average_color = hud.get_average_color("STBAR")
+		custom_stbar_darkest_color = hud.get_darkest_color("STBAR")
+		custom_stbar_lightest_color = hud.get_lightest_color("STBAR")
+	}
+	hud.automap_player_arrow(hud.AM_ARROW_HERETIC)
+}
+
 //**                    **
 //**   Tome of power    **
 //**                    **

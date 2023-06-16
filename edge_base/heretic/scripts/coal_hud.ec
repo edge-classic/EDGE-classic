@@ -7,6 +7,29 @@
 
 //var inventory_handler : vector // First value is inventory left, second is inventory use, third is inventory next
 
+// Startup stuff
+function new_game() =
+{
+	if (hud.custom_stbar)
+	{
+		custom_stbar_average_color = hud.get_average_color("STBAR")
+		custom_stbar_darkest_color = hud.get_darkest_color("STBAR")
+		custom_stbar_lightest_color = hud.get_lightest_color("STBAR")
+	}
+	hud.automap_player_arrow(hud.AM_ARROW_HERETIC)
+}
+
+function load_game() =
+{
+	if (hud.custom_stbar)
+	{
+		custom_stbar_average_color = hud.get_average_color("STBAR")
+		custom_stbar_darkest_color = hud.get_darkest_color("STBAR")
+		custom_stbar_lightest_color = hud.get_lightest_color("STBAR")
+	}
+	hud.automap_player_arrow(hud.AM_ARROW_HERETIC)
+}
+
 function heretic_life_gem() =
 {
 	var TopX = 25

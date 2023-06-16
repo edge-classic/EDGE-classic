@@ -179,6 +179,8 @@ cheatseq_t cheat_amap = {0, 0};
 
 static bool stopped = true;
 
+static automap_arrow_e current_arrowtype = AMARW_DOOM;
+
 bool rotatemap = false;
 bool am_keydoorblink = false;
 DEF_CVAR(am_keydoortext, "0", CVAR_ARCHIVE)
@@ -264,6 +266,11 @@ static void ClearMarks(void)
 	markpointnum = 0;
 }
 
+void AM_SetArrow(automap_arrow_e type)
+{
+	if (type >= AMARW_DOOM && type < AMARW_NUMTYPES)
+		current_arrowtype = type;
+}
 
 void AM_InitLevel(void)
 {
@@ -1126,28 +1133,24 @@ static void AM_DrawPlayer(mobj_t *mo)
 
 	if (!netgame)
 	{
-		if (epi::case_cmp("HERETIC", game_base) == 0)
+		switch (current_arrowtype)
 		{
-			DrawLineCharacter(player_dagger, NUMPLYRDGGRLINES, 
+			case AMARW_HERETIC:
+				DrawLineCharacter(player_dagger, NUMPLYRDGGRLINES, 
 				mo->radius, mo->angle,
 				am_colors[AMCOL_Player], mo->x, mo->y);
-		}
-		else if (epi::case_cmp("BLASPHEMER", game_base) == 0)
-		{
-			DrawLineCharacter(player_dagger, NUMPLYRDGGRLINES, 
-				mo->radius, mo->angle,
-				am_colors[AMCOL_Player], mo->x, mo->y);
-		}
-		else
-		{
-			if (cheating)
-				DrawLineCharacter(cheat_player_arrow, NUMCHEATPLYRLINES, 
-					mo->radius, mo->angle,
-					am_colors[AMCOL_Player], mo->x, mo->y);
-			else
-				DrawLineCharacter(player_arrow, NUMPLYRLINES,  
-					mo->radius, mo->angle,
-					am_colors[AMCOL_Player], mo->x, mo->y);
+				break;
+			case AMARW_DOOM:
+			default:
+				if (cheating)
+					DrawLineCharacter(cheat_player_arrow, NUMCHEATPLYRLINES, 
+						mo->radius, mo->angle,
+						am_colors[AMCOL_Player], mo->x, mo->y);
+				else
+					DrawLineCharacter(player_arrow, NUMPLYRLINES,  
+						mo->radius, mo->angle,
+						am_colors[AMCOL_Player], mo->x, mo->y);
+				break;
 		}
 		return;
 	}

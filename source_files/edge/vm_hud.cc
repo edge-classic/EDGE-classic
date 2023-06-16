@@ -718,6 +718,17 @@ static void HD_automap_zoom(coal::vm_c *vm, int argc)
 	ui_hud_automap_zoom = CLAMP(0.2f, zoom, 100.0f);
 }
 
+// hud.automap_player_arrow(type)
+//
+static void HD_automap_player_arrow(coal::vm_c *vm, int argc)
+{
+	(void) argc;
+
+	int arrow = (int) *vm->AccessParam(0);
+
+	AM_SetArrow((automap_arrow_e)arrow);
+}
+
 
 // hud.set_render_who(index)
 //
@@ -1021,6 +1032,7 @@ void VM_RegisterHUD()
     ui_vm->AddNativeFunction("hud.automap_color",   HD_automap_color);
     ui_vm->AddNativeFunction("hud.automap_option",  HD_automap_option);
     ui_vm->AddNativeFunction("hud.automap_zoom",    HD_automap_zoom);
+	ui_vm->AddNativeFunction("hud.automap_player_arrow", HD_automap_player_arrow);
 
 	// drawing functions
     ui_vm->AddNativeFunction("hud.solid_box",       HD_solid_box);

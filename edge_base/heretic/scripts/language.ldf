@@ -16,7 +16,7 @@ MainNewGame="New Game";
 MainOptions="Options";
 MainLoadGame="Load Game";
 MainSaveGame="Save Game";
-MainReadThis="Read This!";
+MainReadThis="Read This";
 MainQuitGame="Quit Game";
 
 MenuDifficulty1="THOU NEEDETH A WET-NURSE";

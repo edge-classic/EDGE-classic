@@ -1608,9 +1608,9 @@ void Things::HandleDropItem(const mobjinfo_t *info, int mt_num)
 
 	// Not sure if there's any restrictions on DEHEXTRA dropped items other
 	// than not dropping a player
-	if (info->dropped_item > MT_PLAYER)
+	if (info->dropped_item - 1 > MT_PLAYER)
 	{
-		item = GetMobjName(info->dropped_item);
+		item = GetMobjName(info->dropped_item - 1);
 		if (!item) return;
 	}
 	else

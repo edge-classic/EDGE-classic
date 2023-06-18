@@ -94,21 +94,22 @@ game_check_t;
 static const std::vector<game_check_t> game_checker =
 {
 	{
-		{ 15,  "CUSTOM",    {"EDGEIWAD", "EDGEIWAD"} },
+		{ 16,  "CUSTOM",    {"EDGEIWAD", "EDGEIWAD"} },
 		{ 1,  "BLASPHEMER", {"BLASPHEM", "E1M1"}     },
-		{ 7,  "FREEDOOM1",  {"FREEDOOM", "E1M1"}     },
-		{ 12, "FREEDOOM2",  {"FREEDOOM", "MAP01"}    },
-		{ 5,  "REKKR",      {"REKCREDS", "E1M1"}     },
-		{ 4,  "HACX",       {"HACX-R",   "MAP01"}    },
-		{ 3,  "HARMONY",    {"0HAWK01",  "MAP01"}    },
+		{ 8,  "FREEDOOM1",  {"FREEDOOM", "E1M1"}     },
+		{ 13, "FREEDOOM2",  {"FREEDOOM", "MAP01"}    },
+		{ 6,  "REKKR",      {"REKCREDS", "E1M1"}     },
+		{ 5,  "HACX",       {"HACX-R",   "MAP01"}    },
+		{ 4,  "HARMONY",    {"0HAWK01",  "MAP01"}    },
+		{ 3,  "CHEX",    	{"ENDOOM",   "_DEUTEX_"} }, // Original Chex Quest, NOT CQ3
 		{ 2,  "HERETIC",    {"MUS_E1M1", "E1M1"}     },
-		{ 10, "PLUTONIA",   {"CAMO1",    "MAP01"}    },
-		{ 11, "TNT",        {"REDTNT2",  "MAP01"}    },
-		{ 9,  "DOOM",       {"BFGGA0",   "E2M1"}     },
-		{ 8,  "DOOM",       {"DMENUPIC", "M_MULTI"}  }, // BFG Edition
-		{ 6,  "DOOM1",      {"SHOTA0",   "E1M1"}     },
-		{ 14, "DOOM2",      {"BFGGA0",   "MAP01"}    },
-		{ 13, "DOOM2",   	{"DMENUPIC", "MAP33"}    }, // BFG Edition
+		{ 11, "PLUTONIA",   {"CAMO1",    "MAP01"}    },
+		{ 12, "TNT",        {"REDTNT2",  "MAP01"}    },
+		{ 10,  "DOOM",      {"BFGGA0",   "E2M1"}     },
+		{ 9,  "DOOM",       {"DMENUPIC", "M_MULTI"}  }, // BFG Edition
+		{ 7,  "DOOM1",      {"SHOTA0",   "E1M1"}     },
+		{ 15, "DOOM2",      {"BFGGA0",   "MAP01"}    },
+		{ 14, "DOOM2",   	{"DMENUPIC", "MAP33"}    }, // BFG Edition
 		//{ 0, "STRIFE",    {"VELLOGO",  "RGELOGO"}  }// Dev/internal use - Definitely nowhwere near playable
 	}
 };
@@ -884,12 +885,13 @@ std::string W_CheckForUniqueLumps(epi::file_c *file, int *score)
 
 	for (auto check : game_checker)
 	{
-		// Do not require IWAD header if loading Harmony, REKKR, BFG Edition WADs or a custom standalone IWAD
+		// Do not require IWAD header if loading Harmony, REKKR, BFG Edition WADs, Chex Quest or a custom standalone IWAD
 		if (epi::prefix_cmp(header.identification, "IWAD") != 0 &&
 			epi::case_cmp(check.unique_lumps[0], "DMENUPIC") != 0 &&
 			epi::case_cmp(check.unique_lumps[0], "REKCREDS") != 0 && 
 			epi::case_cmp(check.unique_lumps[0], "0HAWK01" ) != 0 &&
-			epi::case_cmp(check.unique_lumps[0], "EDGEGAME") != 0)
+			epi::case_cmp(check.unique_lumps[0], "EDGEGAME") != 0 &&
+			epi::case_cmp(check.unique_lumps[0], "ENDOOM") != 0)
 		{
 			continue;
 		}
@@ -911,6 +913,20 @@ std::string W_CheckForUniqueLumps(epi::file_c *file, int *score)
 					if (score)
 						*score = check.score;
 					return check.base;
+				}
+				// Either really smart or really dumb Chex Quest detection method
+				else if (epi::case_cmp(check.unique_lumps[0], "ENDOOM") == 0)
+				{
+					SYS_ASSERT(entry.size == 4000);
+					file->Seek(entry.pos, epi::file_c::SEEKPOINT_START);
+					byte *endoom = new byte[entry.size];
+					file->Read(endoom, entry.size);
+					if (endoom[1026] == 'c' && endoom[1028] == 'h' && endoom[1030] == 'e' && endoom[1032] == 'x'
+					&& endoom[1034] == 'q' && endoom[1036] == 'u' && endoom[1038] == 'e' && endoom[1040] == 's' && endoom[1042] == 't')
+					{
+						lump1_found = true;
+					}
+					delete[] endoom;
 				}
 				else
 					lump1_found = true;

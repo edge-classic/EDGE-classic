@@ -20,6 +20,8 @@ New Features
     - Instant ranged direct damage attack
     - Will not cause infighting
 
+- Chex Quest 1 supported as an IWAD
+
 
 General Improvements
 --------------------

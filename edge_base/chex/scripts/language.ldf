@@ -1,0 +1,161 @@
+<LANGUAGES>
+
+[ENGLISH]
+
+MenuSkill="Choose Difficulty:";
+MenuDifficulty1="Easy Does It";
+MenuDifficulty2="Not So Sticky";
+MenuDifficulty3="Gobs of Goo";
+MenuDifficulty4="Extreme Ooze";
+MenuDifficulty5="Super Slimey!";
+
+M_EPI1_Desc = "Chex Quest";
+
+// Converted from Dehacked
+EndGameCheck = "are you sure you want to end the quest?\n"
+  "\n"
+  "press y or n.";
+GotArmourHelmet = "Picked up slime repellent.";
+GotArmour = "Picked up the Chex(R) Armor.";
+GotBackpack = "Picked up a Zorchpak!";
+GotBFG = "You got the LAZ Device!";
+GotBlueCard = "Picked up a blue key.";
+GotCellPack = "Picked up a phasing zorcher pack.";
+GotCell = "Picked up a phasing zorcher recharge.";
+GotChainGun = "You got the Rapid Zorcher!";
+GotChainSaw = "You got the Super Bootspork!";
+GotClipBox = "Picked up a mini zorch pack.";
+GotClip = "Picked up a mini zorch recharge.";
+GotHealthPotion = "Picked up a glass of water.";
+GotRocketLauncher = "You got the Zorch Propulsor!";
+GotMedi = "Picked up a bowl of vegetables.";
+GotMediNeed = "Picked up some needed vegetables!";
+GotMegaArmour = "Picked up the Super Chex(R) Armor!";
+GotPlasmaGun = "You got the Phasing Zorcher!";
+GotRedCard = "Picked up a red key.";
+GotRocketBox = "Picked up a zorch propulsor pack.";
+GotRocket = "Picked up a zorch propulsor recharge.";
+GotShellBox = "Picked up a large zorcher pack.";
+GotShells = "Picked up a large zorcher recharge.";
+GotDoubleBarrel = "You got the Super Large Zorcher!";
+GotShotgun = "You got the Large Zorcher!";
+GotStim = "Picked up a bowl of fruit.";
+GotSuit = "Slimeproof Suit";
+GotSoul = "Supercharge Breakfast!";
+GotYellowCard = "Picked up a yellow key.";
+DefaultCHATMACRO1 = "I'm ready to zorch!";
+DefaultCHATMACRO2 = "I'm feeling great!";
+DefaultCHATMACRO3 = "I'm getting pretty gooed up!";
+DefaultCHATMACRO4 = "Somebody help me!";
+DefaultCHATMACRO5 = "Go back to your own dimension!";
+DefaultCHATMACRO6 = "Stop that Flemoid";
+DefaultCHATMACRO7 = "I think I'm lost!";
+DefaultCHATMACRO8 = "I'll get you out of this gunk.";
+TALKTOSELF1 = "I'm feeling great.";
+TALKTOSELF2 = "I think I'm lost";
+TALKTOSELF3 = "Oh No...";
+TALKTOSELF4 = "Gotta break free.";
+TALKTOSELF5 = "Hurry!";
+NoLoadInNetGame = "you can't do load while in a net quest!\n"
+  "\n"
+  "press a key.";
+EndNetGame = "you can't end a netquest!\n"
+  "\n"
+  "press a key.";
+NewNetGame = "you can't start a new quest\n"
+  "while in a network quest.\n"
+  "\n"
+  "press a key.";
+NightmareCheck = "Careful, this will be tough.\n"
+  "Do you wish to continue?\n"
+  "\n"
+  "press y or n.";
+NoQLoadInNetGame = "you can't quickload during a netquest!\n"
+  "\n"
+  "press a key.";
+QuickLoad = "do you want to quickload the quest named\n"
+  "\n"
+  "'%s'?\n"
+  "\n"
+  "press y or n.";
+QuickSaveOver = "quicksave over your quest named\n"
+  "\n"
+  "'%s'?\n"
+  "\n"
+  "press y or n.";
+ChoppersNote = "... Eat Chex(R)!";
+GodModeOFF = "Invincible Mode Off";
+GodModeON = "Invincible Mode On";
+AmmoAdded = "Zorch Added";
+VeryHappyAmmo = "Super Zorch Added";
+E1M1Desc = "E1M1: Landing Zone";
+E1M2Desc = "E1M2: Storage Facility";
+E1M3Desc = "E1M3: Experimental Lab";
+E1M4Desc = "E1M4: Arboretum";
+E1M5Desc = "E1M5: Caverns of Bazoik";
+Episode1Text = "Mission accomplished.\n"
+  "\n"
+  "Are you prepared for the next mission?\n"
+  "\n"
+  "\n"
+  "\n"
+  "\n"
+  "\n"
+  "\n"
+  "Press the escape key to continue...\n"
+  "";
+Episode2Text = "You've done it!";
+Episode3Text = "Wonderful Job!";
+Episode4Text = "Fantastic";
+Level7Text = "Great!";
+Level12Text = "Way to go!";
+Level21Text = "Thanks for the help!";
+EndGameText = "Great!\n"
+  "";
+Level31Text = "Fabulous!";
+Level32Text = "CONGRATULATIONS!\n"
+  "";
+TntLevel7Text = "There's more to come...";
+TntLevel12Text = "Keep up the good work!";
+TntLevel21Text = "Get ready!.";
+TntEndGameText = "Be Proud.";
+TntLevel31Text = "Wow!";
+TntLevel32Text = "Great.";
+PlutLevel7Text = "Nicely done!";
+PlutLevel12Text = "Nice Job!";
+PlutLevel21Text = "Well done!";
+PlutEndGameText = "Eat Chex(R)!";
+PlutLevel31Text = "Are you ready?";
+PlutLevel32Text = "Were you ready?";
+Title1 = "                         Chex(R) Quest Startup                        ";
+Title3 = "                         Chex(R) Quest                           ";
+Notice = "";
+Notice = "";
+Notice = "";
+QuitMsg = "Don't give up now...do \n"
+  "you still wish to quit?";
+Shareware = "this is Chex(R) Quest. look for\n"
+  "\n"
+  "future levels at www.chexquest.com.\n"
+  "\n"
+  "press a key.";
+ZombiemanName = "FLEMOIDUS COMMONUS";
+ShotgunGuyName = "FLEMOIDUS BIPEDICUS";
+DemonName = "FLEMOIDUS BIPEDICUS WITH ARMOR";
+BaronOfHellName = "THE FLEMBRANE";
+
+idbehold5 = "digitalcafe";
+idbehold3 = "marybregi";
+idbehold6 = "joshuastorms";
+idbehold4 = "allen";
+idbehold2 = "deanhyers";
+idbehold1 = "andrewbenson";
+idchoppers = "joelkoenigs";
+idclev = "leesnyder";
+idclip = "charlesjacobi";
+iddqd = "davidbrus";
+iddt = "sherrill";
+idfa = "mikekoenigs";
+idkfa = "scottholman";
+idmypos = "kimhyers";
+idspispopd = "charlesjacobi";

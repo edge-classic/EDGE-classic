@@ -21,12 +21,19 @@ New Features
     - Will not cause infighting
 
 - Chex Quest 1 supported as an IWAD
+  - Chex Quest 2 support as a PWAD for Chex Quest 1
 
 
 General Improvements
 --------------------
 - Weapons with the ability to zoom but without a ZOOM state defined will still draw the regular psprite and crosshair while zoomed
 - Implemented remaining MBF code pointers (A_FireOldBFG, A_BetaSkullAttack)
+- Implemented new DEHEXTRA Thing fields:
+  - Gib health
+  - Dropped item
+  - Pickup width
+  - Projectile pass height
+  - Fullbright
 
 
 Bugs fixed

@@ -1022,6 +1022,12 @@ public:
 	float sight_distance; // lobo 2022: How far this thing can see
 	float hear_distance; // lobo 2022: How far this thing can hear
 
+	// DEHEXTRA
+	float gib_health;
+	float pickup_width;
+	float projectile_pass_height;
+	bool force_fullbright;
+
 	// MBF 21
 	int infight_group;
 	int proj_group;

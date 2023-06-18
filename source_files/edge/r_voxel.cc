@@ -587,7 +587,7 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 		data.im_right = md->im_right;
 		data.im_top   = md->im_top;
 
-		abstract_shader_c *shader = R_GetColormapShader(props, mo->state->bright);
+		abstract_shader_c *shader = R_GetColormapShader(props, mo->info->force_fullbright ? 255 : mo->state->bright);
 
 		ShadeNormals(shader, &data, true);
 

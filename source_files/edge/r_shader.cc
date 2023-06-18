@@ -262,7 +262,7 @@ public:
 			rgbcol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL),
 					WhatColor(DL));
 
-			float L = mo->state->bright / 255.0;
+			float L = (mo->info->force_fullbright ? 255 : mo->state->bright) / 255.0;
 
 			if (new_col != RGB_MAKE(0,0,0) && L > 1/256.0)
 			{
@@ -309,7 +309,7 @@ public:
 
 		float L = 0.6 - 0.7 * (dx*nx + dy*ny + dz*nz);
 
-		L *= mo->state->bright / 255.0;
+		L *= (mo->info->force_fullbright ? 255 : mo->state->bright) / 255.0;
 
 		for (int DL = 0; DL < 2; DL++)
 		{
@@ -345,7 +345,7 @@ public:
 
 			rgbcol_t col = WhatColor(DL);
 
-			float L = mo->state->bright / 255.0;
+			float L = (mo->info->force_fullbright ? 255 : mo->state->bright) / 255.0;
 
 			float R = L * RGB_RED(col) / 255.0;
 			float G = L * RGB_GRN(col) / 255.0;
@@ -466,7 +466,7 @@ public:
 			rgbcol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL),
 					WhatColor(DL));
 
-			float L = mo->state->bright / 255.0;
+			float L = (mo->info->force_fullbright ? 255 : mo->state->bright) / 255.0;
 
 			if (new_col != RGB_MAKE(0,0,0) && L > 1/256.0)
 			{
@@ -506,7 +506,7 @@ public:
 
 		float L = 0.6 - 0.7 * (dz*nz);
 
-		L *= mo->state->bright / 255.0;
+		L *= (mo->info->force_fullbright ? 255 : mo->state->bright) / 255.0;
 
 		for (int DL = 0; DL < 2; DL++)
 		{
@@ -544,7 +544,7 @@ public:
 
 			rgbcol_t col = WhatColor(DL);
 
-			float L = mo->state->bright / 255.0;
+			float L = (mo->info->force_fullbright ? 255 : mo->state->bright) / 255.0;
 
 			float R = L * RGB_RED(col) / 255.0;
 			float G = L * RGB_GRN(col) / 255.0;
@@ -624,7 +624,7 @@ public:
 
 		float L = exp(-5.44 * dist * dist);
 
-		L = L * mo->state->bright / 255.0;
+		L = L * (mo->info->force_fullbright ? 255 : mo->state->bright) / 255.0;
 
 		if (L > 1/256.0)
 		{

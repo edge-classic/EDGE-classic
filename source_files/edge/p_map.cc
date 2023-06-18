@@ -808,7 +808,13 @@ static bool PIT_CheckRelThing(mobj_t * thing, void *data)
 	if (0 == (thing->flags & (MF_SOLID | MF_SPECIAL | MF_SHOOTABLE | MF_TOUCHY)))
 		return true;
 
-	blockdist = thing->radius + tm_I.mover->radius;
+	blockdist = tm_I.mover->radius;
+
+	if ((thing->flags & MF_SPECIAL) && thing->info->pickup_width > 0)
+		blockdist += thing->info->pickup_width; // The DEHEXTRA field is called "Pickup width" but looking at Doom Retro's
+												// code this appears to act as a radius
+	else
+		blockdist += thing->radius;
 
 	// Check that we didn't hit it
 	if (fabs(thing->x - tm_I.x) >= blockdist || fabs(thing->y - tm_I.y) >= blockdist)
@@ -875,8 +881,16 @@ static bool PIT_CheckRelThing(mobj_t * thing, void *data)
 	if (tm_I.flags & MF_MISSILE)
 	{
 		// see if it went over / under
-		if (tm_I.z > thing->z + thing->height)
-			return true;  // overhead
+		if (thing->info->projectile_pass_height > 0)
+		{
+			if (tm_I.z > thing->z + thing->info->projectile_pass_height)
+				return true; // overhead
+		}
+		else
+		{
+			if (tm_I.z > thing->z + thing->height)
+				return true;  // overhead
+		}
 
 		if (tm_I.z + tm_I.mover->height < thing->z)
 			return true;  // underneath

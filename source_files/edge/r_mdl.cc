@@ -808,7 +808,7 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 		data.im_right = (float)md->skin_width / (float)W_MakeValidSize(md->skin_width);
 		data.im_top   = (float)md->skin_height / (float)W_MakeValidSize(md->skin_height);
 
-		abstract_shader_c *shader = R_GetColormapShader(props, mo->state->bright);
+		abstract_shader_c *shader = R_GetColormapShader(props, mo->info->force_fullbright ? 255 : mo->state->bright);
 
 		ShadeNormals(shader, &data, true);
 

@@ -1606,16 +1606,26 @@ void Things::HandleDropItem(const mobjinfo_t *info, int mt_num)
 {
 	const char *item = NULL;
 
-	switch (mt_num)
+	// Not sure if there's any restrictions on DEHEXTRA dropped items other
+	// than not dropping a player
+	if (info->dropped_item > MT_PLAYER)
 	{
-		case MT_WOLFSS:
-		case MT_POSSESSED: item = "CLIP"; break;
+		item = GetMobjName(info->dropped_item);
+		if (!item) return;
+	}
+	else
+	{
+		switch (mt_num)
+		{
+			case MT_WOLFSS:
+			case MT_POSSESSED: item = "CLIP"; break;
 
-		case MT_SHOTGUY:   item = "SHOTGUN"; break;
-		case MT_CHAINGUY:  item = "CHAINGUN"; break;
+			case MT_SHOTGUY:   item = "SHOTGUN"; break;
+			case MT_CHAINGUY:  item = "CHAINGUN"; break;
 
-		default:
-			return;
+			default:
+				return;
+		}
 	}
 
 	assert(item);
@@ -1836,6 +1846,11 @@ namespace Things
 		{ "Rip sound",          FIELD_OFS(rip_sound),     FT_SOUND },
 		{ "Fast speed",         FIELD_OFS(fast_speed),    FT_NONEG },
 		{ "Melee range",        FIELD_OFS(melee_range),   FT_NONEG },
+		{ "Gib health",       	FIELD_OFS(gib_health),    FT_ANY },
+		{ "Dropped item",       FIELD_OFS(dropped_item),  FT_GTEQ1 },
+		{ "Pickup width",       FIELD_OFS(pickup_width),    FT_NONEG },
+		{ "Projectile pass height", FIELD_OFS(projectile_pass_height), FT_NONEG },
+		{ "Fullbright", 		FIELD_OFS(fullbright), FT_NONEG },
 		{ "Respawn frame",      FIELD_OFS(raisestate),    FT_FRAME },
 
 		{ NULL, 0, FT_ANY }   // End sentinel

@@ -1374,7 +1374,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
 	if (! is_fuzzy)
 	{
-		abstract_shader_c *shader = R_GetColormapShader(dthing->props, mo->state->bright);
+		abstract_shader_c *shader = R_GetColormapShader(dthing->props, mo->info->force_fullbright ? 255 : mo->state->bright);
 
 		for (int v=0; v < 4; v++)
 		{

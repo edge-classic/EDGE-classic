@@ -1045,7 +1045,12 @@ void P_KillMobj(mobj_t * source, mobj_t * target, const damage_c *damtype,
 	}
 
 	statenum_t state = S_NULL;
-	bool overkill = (target->health < -target->info->spawnhealth);
+	bool overkill = false;
+	
+	if (target->info->gib_health < 0 && target->health < target->info->gib_health)
+		overkill = true;
+	else if (target->health < -target->info->spawnhealth)
+		overkill = true;
 
 	if (weak_spot)
 	{

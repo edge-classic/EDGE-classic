@@ -70,6 +70,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -105,6 +110,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_POSS_RAISE1		// raisestate
 	},
 
@@ -140,6 +150,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_SPOS_RAISE1		// raisestate
 	},
 
@@ -175,6 +190,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -210,6 +230,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -245,6 +270,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_SKEL_RAISE1		// raisestate
 	},
 
@@ -280,6 +310,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -315,6 +350,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -350,6 +390,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_FATT_RAISE1		// raisestate
 	},
 
@@ -385,6 +430,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -420,6 +470,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_CPOS_RAISE1		// raisestate
 	},
 
@@ -455,6 +510,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_TROO_RAISE1		// raisestate
 	},
 
@@ -490,6 +550,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_SARG_RAISE1		// raisestate
 	},
 
@@ -525,6 +590,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_SARG_RAISE1		// raisestate
 	},
 
@@ -560,6 +630,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_HEAD_RAISE1		// raisestate
 	},
 
@@ -595,6 +670,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_BOSS_RAISE1		// raisestate
 	},
 
@@ -630,6 +710,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -665,6 +750,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_BOS2_RAISE1		// raisestate
 	},
 
@@ -700,6 +790,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -735,6 +830,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -770,6 +870,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_BSPI_RAISE1		// raisestate
 	},
 
@@ -805,6 +910,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -840,6 +950,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_PAIN_RAISE1		// raisestate
 	},
 
@@ -875,6 +990,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_SSWV_RAISE1		// raisestate
 	},
 
@@ -910,6 +1030,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -945,6 +1070,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -980,6 +1110,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1015,6 +1150,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1050,6 +1190,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1085,6 +1230,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1120,6 +1270,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1155,6 +1310,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1190,6 +1350,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1225,6 +1390,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1260,6 +1430,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1295,6 +1470,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1330,6 +1510,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1365,6 +1550,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1400,6 +1590,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1435,6 +1630,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1470,6 +1670,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1505,6 +1710,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1540,6 +1750,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1575,6 +1790,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1610,6 +1830,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1645,6 +1870,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1680,6 +1910,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1715,6 +1950,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1750,6 +1990,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1785,6 +2030,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1820,6 +2070,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1855,6 +2110,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1890,6 +2150,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1925,6 +2190,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1960,6 +2230,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -1995,6 +2270,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2030,6 +2310,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2065,6 +2350,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2100,6 +2390,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2135,6 +2430,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2170,6 +2470,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2205,6 +2510,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2240,6 +2550,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2275,6 +2590,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2310,6 +2630,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2345,6 +2670,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2380,6 +2710,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2415,6 +2750,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2450,6 +2790,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2485,6 +2830,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2520,6 +2870,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2555,6 +2910,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2590,6 +2950,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2625,6 +2990,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2660,6 +3030,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2695,6 +3070,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2730,6 +3110,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2765,6 +3150,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2800,6 +3190,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2835,6 +3230,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2870,6 +3270,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2905,6 +3310,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2940,6 +3350,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -2975,6 +3390,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3010,6 +3430,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3045,6 +3470,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3080,6 +3510,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3115,6 +3550,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3150,6 +3590,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3185,6 +3630,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3220,6 +3670,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3255,6 +3710,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3290,6 +3750,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3325,6 +3790,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3360,6 +3830,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3395,6 +3870,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3430,6 +3910,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3465,6 +3950,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3500,6 +3990,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3535,6 +4030,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3570,6 +4070,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3605,6 +4110,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3640,6 +4150,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3675,6 +4190,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3710,6 +4230,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3745,6 +4270,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3780,6 +4310,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3815,6 +4350,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3850,6 +4390,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3885,6 +4430,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3920,6 +4470,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3955,6 +4510,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -3990,6 +4550,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4025,6 +4590,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4060,6 +4630,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4095,6 +4670,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4130,6 +4710,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4165,6 +4750,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4200,6 +4790,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4235,6 +4830,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4270,6 +4870,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4305,6 +4910,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4340,6 +4950,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4375,6 +4990,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4410,6 +5030,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4445,6 +5070,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4480,6 +5110,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4515,6 +5150,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4550,6 +5190,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4585,6 +5230,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4620,6 +5270,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4655,6 +5310,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4690,6 +5350,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4725,6 +5390,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4760,6 +5430,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4795,6 +5470,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4830,6 +5510,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL		// raisestate
 	},
 
@@ -4867,6 +5552,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL          // raisestate
 	},
 
@@ -4902,6 +5592,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL          // raisestate
 	},
 
@@ -4939,6 +5634,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_DOGS_RAISE1   // raisestate
 	},
 
@@ -4974,6 +5674,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL   // raisestate
 	},
 
@@ -5009,6 +5714,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL   // raisestate
 	},
 
@@ -5044,6 +5754,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL   // raisestate
 	},
 
@@ -5079,6 +5794,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL   // raisestate
 	},
 
@@ -5114,6 +5834,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL   // raisestate
 	},
 
@@ -5149,6 +5874,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		sfx_None, // Rip sound
 		0, // Fast speed
 		0, // Melee range
+		0, // Gib health
+		0, // Dropped item
+		0, // Pickup width
+		0, // Projectile pass height
+		0, // Fullbright
 		S_NULL   // raisestate
 	},
 };
@@ -5186,6 +5916,11 @@ mobjinfo_t brain_explode_mobj =
 	sfx_None, // Rip sound
 	0, // Fast speed
 	0, // Melee range
+	0, // Gib health
+	0, // Dropped item
+	0, // Pickup width
+	0, // Projectile pass height
+	0, // Fullbright
 	S_NULL		// raisestate
 };
 

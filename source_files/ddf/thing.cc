@@ -2380,6 +2380,11 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	sight_distance = src.sight_distance;
 	hear_distance = src.hear_distance;
 
+	gib_health = src.gib_health;
+	pickup_width = src.pickup_width;
+	projectile_pass_height = src.projectile_pass_height;
+	force_fullbright = src.force_fullbright;
+
 	infight_group = src.infight_group;
 	proj_group = src.proj_group;
 	splash_group = src.splash_group;
@@ -2520,6 +2525,11 @@ void mobjtype_c::Default()
 	respawneffect_ref.clear();
 	spitspot = NULL;
 	spitspot_ref.clear();
+
+	gib_health = 0;
+	pickup_width = 0;
+	projectile_pass_height = 0;
+	force_fullbright = false;
 
 	sight_distance = -1;
 	hear_distance = -1;

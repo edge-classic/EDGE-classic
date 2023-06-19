@@ -78,6 +78,7 @@ namespace Frames
 
 	const char * attack_slot[3];
 	int act_flags;
+	bool force_fullbright = false;
 
 	// forward decls
 	const state_t * NewStateElseOld(int st_num);
@@ -1078,7 +1079,7 @@ void Frames::OutputState(char group, int cur, bool do_action)
 		WAD::Printf("    %s:%c:0:%s:MAKEDEAD,  // %s\n",
 			Sprites::GetSprite(st->sprite),
 			'A' + ((int) st->frame & 31),
-			(st->frame >= 32768) ? "BRIGHT" : "NORMAL",
+			(st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL",
 			(action == A_PainDie) ? "A_PainDie" : "A_KeenDie");
 	}
 
@@ -1087,7 +1088,7 @@ void Frames::OutputState(char group, int cur, bool do_action)
 		WAD::Printf("    %s:%c:0:%s:FACE_TARGET,\n",
 			Sprites::GetSprite(st->sprite),
 			'A' + ((int) st->frame & 31),
-			(st->frame >= 32768) ? "BRIGHT" : "NORMAL");
+			(st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
 	}
 
 	// special handling for Mancubus attacks...
@@ -1098,13 +1099,13 @@ void Frames::OutputState(char group, int cur, bool do_action)
 			WAD::Printf("    %s:%c:0:%s:RESET_SPREADER,\n",
 				Sprites::GetSprite(st->sprite),
 				'A' + ((int) st->frame & 31),
-				(st->frame >= 32768) ? "BRIGHT" : "NORMAL");
+				(st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
 		}
 
 		WAD::Printf("    %s:%c:0:%s:%s,  // A_FatAttack\n",
 			Sprites::GetSprite(st->sprite),
 			'A' + ((int) st->frame & 31),
-			(st->frame >= 32768) ? "BRIGHT" : "NORMAL", act_name);
+			(st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name);
 	}
 
 	int tics = (int) st->tics;
@@ -1118,7 +1119,7 @@ void Frames::OutputState(char group, int cur, bool do_action)
 	WAD::Printf("    %s:%c:%d:%s:%s",
 		Sprites::GetSprite(st->sprite),
 		'A' + ((int) st->frame & 31), tics,
-		(st->frame >= 32768) ? "BRIGHT" : "NORMAL", act_name);
+		(st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name);
 
 	if (action != A_NULL && weap_act == ! IS_WEAPON(group))
 		return;

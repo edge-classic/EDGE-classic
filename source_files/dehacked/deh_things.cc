@@ -193,6 +193,9 @@ namespace Attacks
 	{
 		Frames::ResetGroups();
 
+		if (info->fullbright)
+			Frames::force_fullbright = true;
+
 		// special cases...
 
 		if (mt_num == MT_SPAWNSHOT)
@@ -212,13 +215,17 @@ namespace Attacks
 				PrintWarn("Brain cube is missing spawn/fire states.\n");
 
 			if (count == 0)
+			{
+				Frames::force_fullbright = false;
 				return;
+			}
 
 			Frames::SpreadGroups();
 
 			Frames::OutputGroup('S');
 			Frames::OutputGroup('D');
 
+			Frames::force_fullbright = false;
 			return;
 		}
 
@@ -233,6 +240,7 @@ namespace Attacks
 		if (count == 0)
 		{
 			PrintWarn("Attack [%s] has no states.\n", Things::GetMobjName(mt_num) + 1);
+			Frames::force_fullbright = false;
 			return;
 		}
 
@@ -241,6 +249,9 @@ namespace Attacks
 		Frames::OutputGroup('S');
 		Frames::OutputGroup('E');
 		Frames::OutputGroup('D');
+
+		// reset fullbright
+		Frames::force_fullbright = false;
 	}
 
 
@@ -1703,6 +1714,15 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player,
 	else if (info->painchance > 0)
 		WAD::Printf("PAINCHANCE = %1.1f%%;\n",
 			(float)info->painchance * 100.0 / 256.0);
+
+	if (info->gib_health != 0)
+		WAD::Printf("GIB_HEALTH = %1.1f;\n", F_FIXED(info->gib_health));
+
+	if (info->pickup_width != 0)
+		WAD::Printf("PICKUP_WIDTH = %1.1f;\n", F_FIXED(info->pickup_width));
+
+	if (info->projectile_pass_height != 0)
+		WAD::Printf("PROJECTILE_PASS_HEIGHT = %1.1f;\n", F_FIXED(info->projectile_pass_height));
 
 	if (mt_num == MT_BOSSSPIT)
 		WAD::Printf("SPIT_SPOT = BRAIN_SPAWNSPOT;\n");

@@ -206,6 +206,11 @@ const commandlist_t thing_commands[] =
 	DF("SIGHT_DISTANCE", sight_distance, DDF_MainGetFloat), //Lobo 2022
 	DF("HEAR_DISTANCE", hear_distance, DDF_MainGetFloat), //Lobo 2022
 
+	// DEHEXTRA
+	DF("GIB_HEALTH", gib_health, DDF_MainGetFloat),
+	DF("PICKUP_WIDTH", pickup_width, DDF_MainGetFloat),
+	DF("PROJECTILE_PASS_HEIGHT", projectile_pass_height, DDF_MainGetFloat),
+
 	DF("INFIGHTING_GROUP", infight_group, DDF_MainGetNumeric),
 	DF("PROJECTILE_GROUP", proj_group, DDF_MainGetNumeric),
 	DF("SPLASH_GROUP", splash_group, DDF_MainGetNumeric),

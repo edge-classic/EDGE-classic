@@ -1026,7 +1026,6 @@ public:
 	float gib_health;
 	float pickup_width;
 	float projectile_pass_height;
-	bool force_fullbright;
 
 	// MBF 21
 	int infight_group;

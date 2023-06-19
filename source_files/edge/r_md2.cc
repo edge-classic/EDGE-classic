@@ -1121,7 +1121,7 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 		data.im_top   = IM_TOP(skin_img);
 
 
-		abstract_shader_c *shader = R_GetColormapShader(props, mo->info->force_fullbright ? 255 : mo->state->bright);
+		abstract_shader_c *shader = R_GetColormapShader(props, mo->state->bright);
 
 		ShadeNormals(shader, &data, true);
 

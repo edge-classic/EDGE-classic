@@ -857,7 +857,7 @@ void P_DynamicLightIterator(float x1, float y1, float z1,
 			SYS_ASSERT(mo->state);
 
 			// skip "off" lights
-			if (!mo->info->force_fullbright && (mo->state->bright <= 0 || mo->dlight.r <= 0))
+			if (mo->state->bright <= 0 || mo->dlight.r <= 0)
 				continue;
 
 			if (r_culling.d && R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f)
@@ -903,7 +903,7 @@ void P_SectorGlowIterator(sector_t *sec,
 		SYS_ASSERT(mo->state);
 
 		// skip "off" lights
-		if (!mo->info->force_fullbright && (mo->state->bright <= 0 || mo->dlight.r <= 0))
+		if (mo->state->bright <= 0 || mo->dlight.r <= 0)
 			continue;
 
 		if (r_culling.d && R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f)

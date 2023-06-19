@@ -2383,7 +2383,6 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	gib_health = src.gib_health;
 	pickup_width = src.pickup_width;
 	projectile_pass_height = src.projectile_pass_height;
-	force_fullbright = src.force_fullbright;
 
 	infight_group = src.infight_group;
 	proj_group = src.proj_group;
@@ -2529,7 +2528,6 @@ void mobjtype_c::Default()
 	gib_health = 0;
 	pickup_width = 0;
 	projectile_pass_height = 0;
-	force_fullbright = false;
 
 	sight_distance = -1;
 	hear_distance = -1;

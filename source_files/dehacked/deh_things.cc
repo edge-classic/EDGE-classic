@@ -1617,9 +1617,11 @@ void Things::HandleDropItem(const mobjinfo_t *info, int mt_num)
 {
 	const char *item = NULL;
 
-	// Not sure if there's any restrictions on DEHEXTRA dropped items other
-	// than not dropping a player
-	if (info->dropped_item - 1 > MT_PLAYER)
+	if (info->dropped_item == 0)
+	{
+		return; // I think '0' is used to clear out normal drops
+	}
+	else if (info->dropped_item - 1 > MT_PLAYER)
 	{
 		item = GetMobjName(info->dropped_item - 1);
 		if (!item) return;
@@ -1867,7 +1869,7 @@ namespace Things
 		{ "Fast speed",         FIELD_OFS(fast_speed),    FT_NONEG },
 		{ "Melee range",        FIELD_OFS(melee_range),   FT_NONEG },
 		{ "Gib health",       	FIELD_OFS(gib_health),    FT_ANY },
-		{ "Dropped item",       FIELD_OFS(dropped_item),  FT_GTEQ1 },
+		{ "Dropped item",       FIELD_OFS(dropped_item),  FT_NONEG },
 		{ "Pickup width",       FIELD_OFS(pickup_width),    FT_NONEG },
 		{ "Projectile pass height", FIELD_OFS(projectile_pass_height), FT_NONEG },
 		{ "Fullbright", 		FIELD_OFS(fullbright), FT_NONEG },

@@ -71,7 +71,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -111,7 +111,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -151,7 +151,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -191,7 +191,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -231,7 +231,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -271,7 +271,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -311,7 +311,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -351,7 +351,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -391,7 +391,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -431,7 +431,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -471,7 +471,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -511,7 +511,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -551,7 +551,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -591,7 +591,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -631,7 +631,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -671,7 +671,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -711,7 +711,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -751,7 +751,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -791,7 +791,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -831,7 +831,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -871,7 +871,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -911,7 +911,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -951,7 +951,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -991,7 +991,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1031,7 +1031,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1071,7 +1071,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1111,7 +1111,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1151,7 +1151,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1191,7 +1191,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1231,7 +1231,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1271,7 +1271,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1311,7 +1311,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1351,7 +1351,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1391,7 +1391,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1431,7 +1431,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1471,7 +1471,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1511,7 +1511,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1551,7 +1551,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1591,7 +1591,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1631,7 +1631,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1671,7 +1671,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1711,7 +1711,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1751,7 +1751,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1791,7 +1791,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1831,7 +1831,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1871,7 +1871,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1911,7 +1911,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1951,7 +1951,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -1991,7 +1991,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2031,7 +2031,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2071,7 +2071,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2111,7 +2111,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2151,7 +2151,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2191,7 +2191,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2231,7 +2231,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2271,7 +2271,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2311,7 +2311,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2351,7 +2351,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2391,7 +2391,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2431,7 +2431,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2471,7 +2471,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2511,7 +2511,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2551,7 +2551,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2591,7 +2591,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2631,7 +2631,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2671,7 +2671,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2711,7 +2711,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2751,7 +2751,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2791,7 +2791,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2831,7 +2831,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2871,7 +2871,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2911,7 +2911,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2951,7 +2951,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -2991,7 +2991,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3031,7 +3031,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3071,7 +3071,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3111,7 +3111,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3151,7 +3151,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3191,7 +3191,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3231,7 +3231,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3271,7 +3271,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3311,7 +3311,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3351,7 +3351,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3391,7 +3391,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3431,7 +3431,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3471,7 +3471,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3511,7 +3511,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3551,7 +3551,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3591,7 +3591,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3631,7 +3631,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3671,7 +3671,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3711,7 +3711,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3751,7 +3751,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3791,7 +3791,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3831,7 +3831,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3871,7 +3871,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3911,7 +3911,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3951,7 +3951,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -3991,7 +3991,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4031,7 +4031,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4071,7 +4071,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4111,7 +4111,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4151,7 +4151,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4191,7 +4191,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4231,7 +4231,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4271,7 +4271,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4311,7 +4311,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4351,7 +4351,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4391,7 +4391,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4431,7 +4431,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4471,7 +4471,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4511,7 +4511,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4551,7 +4551,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4591,7 +4591,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4631,7 +4631,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4671,7 +4671,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4711,7 +4711,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4751,7 +4751,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4791,7 +4791,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4831,7 +4831,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4871,7 +4871,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4911,7 +4911,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4951,7 +4951,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -4991,7 +4991,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5031,7 +5031,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5071,7 +5071,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5111,7 +5111,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5151,7 +5151,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5191,7 +5191,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5231,7 +5231,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5271,7 +5271,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5311,7 +5311,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5351,7 +5351,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5391,7 +5391,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5431,7 +5431,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5471,7 +5471,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5511,7 +5511,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5553,7 +5553,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5593,7 +5593,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5635,7 +5635,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5675,7 +5675,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5715,7 +5715,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5755,7 +5755,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5795,7 +5795,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5835,7 +5835,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5875,7 +5875,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT] =
 		0, // Fast speed
 		0, // Melee range
 		0, // Gib health
-		0, // Dropped item
+		-1, // Dropped item
 		0, // Pickup width
 		0, // Projectile pass height
 		0, // Fullbright
@@ -5917,7 +5917,7 @@ mobjinfo_t brain_explode_mobj =
 	0, // Fast speed
 	0, // Melee range
 	0, // Gib health
-	0, // Dropped item
+	-1, // Dropped item
 	0, // Pickup width
 	0, // Projectile pass height
 	0, // Fullbright

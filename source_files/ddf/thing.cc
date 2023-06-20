@@ -208,8 +208,6 @@ const commandlist_t thing_commands[] =
 
 	// DEHEXTRA
 	DF("GIB_HEALTH", gib_health, DDF_MainGetFloat),
-	DF("PICKUP_WIDTH", pickup_width, DDF_MainGetFloat),
-	DF("PROJECTILE_PASS_HEIGHT", projectile_pass_height, DDF_MainGetFloat),
 
 	DF("INFIGHTING_GROUP", infight_group, DDF_MainGetNumeric),
 	DF("PROJECTILE_GROUP", proj_group, DDF_MainGetNumeric),
@@ -2386,8 +2384,6 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	hear_distance = src.hear_distance;
 
 	gib_health = src.gib_health;
-	pickup_width = src.pickup_width;
-	projectile_pass_height = src.projectile_pass_height;
 
 	infight_group = src.infight_group;
 	proj_group = src.proj_group;
@@ -2531,8 +2527,6 @@ void mobjtype_c::Default()
 	spitspot_ref.clear();
 
 	gib_health = 0;
-	pickup_width = 0;
-	projectile_pass_height = 0;
 
 	sight_distance = -1;
 	hear_distance = -1;

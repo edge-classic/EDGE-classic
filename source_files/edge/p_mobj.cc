@@ -2192,11 +2192,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
 	mobj->x = x;
 	mobj->y = y;
 	mobj->radius = info->radius;
-	// Not sure why Doom Retro makes an exception for Commander Keen or if this is worth doing
-	if (z == ONCEILINGZ && mobj->info->projectile_pass_height > 0 && mobj->info->name != "COMMANDER_KEEN")
-		mobj->height = mobj->info->projectile_pass_height;
-	else
-		mobj->height = info->height;
+	mobj->height = info->height;
 	mobj->flags = info->flags;
 	mobj->health = info->spawnhealth;
 	mobj->speed = info->speed;

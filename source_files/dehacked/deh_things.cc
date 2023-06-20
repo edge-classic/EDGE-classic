@@ -1694,8 +1694,15 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player,
 	else
 		WAD::Printf("[%s:%d]\n", ddf_name, info->doomednum);
 
-	WAD::Printf("RADIUS = %1.1f;\n", F_FIXED(info->radius));
-	WAD::Printf("HEIGHT = %1.1f;\n", F_FIXED(info->height));
+	if (info->pickup_width != 0)
+		WAD::Printf("RADIUS = %1.1f;\n", F_FIXED(info->pickup_width));
+	else
+		WAD::Printf("RADIUS = %1.1f;\n", F_FIXED(info->radius));
+
+	if (info->projectile_pass_height != 0)
+		WAD::Printf("HEIGHT = %1.1f;\n", F_FIXED(info->projectile_pass_height));
+	else
+		WAD::Printf("HEIGHT = %1.1f;\n", F_FIXED(info->height));
 
 	if (info->spawnhealth != 1000)
 		WAD::Printf("SPAWNHEALTH = %d;\n", info->spawnhealth);
@@ -1718,13 +1725,7 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player,
 			(float)info->painchance * 100.0 / 256.0);
 
 	if (info->gib_health != 0)
-		WAD::Printf("GIB_HEALTH = %1.1f;\n", F_FIXED(info->gib_health));
-
-	if (info->pickup_width != 0)
-		WAD::Printf("PICKUP_WIDTH = %1.1f;\n", F_FIXED(info->pickup_width));
-
-	if (info->projectile_pass_height != 0)
-		WAD::Printf("PROJECTILE_PASS_HEIGHT = %1.1f;\n", F_FIXED(info->projectile_pass_height));
+		WAD::Printf("GIB_HEALTH = %d;\n", info->gib_health);
 
 	if (mt_num == MT_BOSSSPIT)
 		WAD::Printf("SPIT_SPOT = BRAIN_SPAWNSPOT;\n");

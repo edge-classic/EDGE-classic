@@ -1024,8 +1024,6 @@ public:
 
 	// DEHEXTRA
 	float gib_health;
-	float pickup_width;
-	float projectile_pass_height;
 
 	// MBF 21
 	int infight_group;

@@ -578,13 +578,6 @@ static void DrawMLineDoor(mline_t * ml, rgbcol_t rgb)
 	if (hide_lines)
 		return;
 
-/*
-	//Lobo 2023: Make keyed doors blink
-	int hide_key_door;
-	hide_key_door = am_keydoorblink && (gametic & 16);
-	if (hide_key_door)
-		return;
-*/
 	float x1 = CXMTOF(ml->a.x, 0);
 	float y1 = CYMTOF(ml->a.y, 0);
 
@@ -596,7 +589,7 @@ static void DrawMLineDoor(mline_t * ml, rgbcol_t rgb)
 
     float linewidth = 3.5f;
 
-	//Lobo 2023: Make keyed doors blink
+	//Lobo 2023: Make keyed doors pulse
 	if (am_keydoorblink) 
 	{
 		linewidth = gametic % (32 * (r_doubleframes.d ? 2 : 1));

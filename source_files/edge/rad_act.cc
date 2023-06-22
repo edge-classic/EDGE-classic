@@ -1324,5 +1324,119 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
 	RAD_SetPspriteDeferred(p,ps_weapon,state); //refresh the sprite
 }
 
+
+void P_ActReplace(struct mobj_s *mo, const mobjtype_c *newThing)
+{
+
+	// DO THE DEED !!
+
+	P_UnsetThingPosition(mo);
+	{
+		mo->info = newThing;
+
+		mo->radius = mo->info->radius;
+		mo->height = mo->info->height;
+		// MBF21: Use explicit Fast speed if provided
+		if (mo->info->fast_speed > -1)
+			mo->speed  = level_flags.fastparm ? mo->info->fast_speed : mo->info->speed;
+		else
+			mo->speed  = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
+
+		mo->health        = mo->info->spawnhealth; // always top up health to full
+		mo->flags         = mo->info->flags;
+		mo->extendedflags = mo->info->extendedflags;
+		mo->hyperflags    = mo->info->hyperflags;
+
+		mo->vis_target    = PERCENT_2_FLOAT(mo->info->translucency);
+		mo->currentattack = NULL;
+		mo->model_skin    = mo->info->model_skin;
+		mo->model_last_frame = -1;
+
+		// handle dynamic lights
+		{
+			const dlight_info_c *dinfo = &mo->info->dlight[0];
+
+			if (dinfo->type != DLITE_None)
+			{
+				mo->dlight.target = dinfo->radius;
+				mo->dlight.color  = dinfo->colour;
+				
+				// make renderer re-create shader info
+				if (mo->dlight.shader)
+				{
+					// FIXME: delete mo->dlight.shader;
+					mo->dlight.shader = NULL;
+				}
+			}
+		}
+	}
+	P_SetThingPosition(mo);
+
+	statenum_t state = P_MobjFindLabel(mo, "IDLE"); //nothing fancy, always default to idle
+	if (state == S_NULL)
+		I_Error("RTS REPLACE_THING: frame '%s' in [%s] not found!\n",
+				"IDLE", mo->info->name.c_str());
+
+	P_SetMobjStateDeferred(mo, state, 0);
+}
+
+
+// Replace one thing with another.
+void RAD_ActReplaceThing(rad_trigger_t *R, void *param)
+{
+	s_thing_replace_t *thingarg = (s_thing_replace_t *) param;
+
+	const mobjtype_c *oldThing = NULL;
+	const mobjtype_c *newThing = NULL;
+
+	//Prioritize number lookup. It's faster and more permissive
+	if(thingarg->old_thing_type > -1)
+		oldThing = mobjtypes.Lookup(thingarg->old_thing_type);
+	else
+		oldThing = mobjtypes.Lookup(thingarg->old_thing_name);
+	
+	if(thingarg->new_thing_type > -1)
+		newThing = mobjtypes.Lookup(thingarg->new_thing_type);
+	else
+		newThing = mobjtypes.Lookup(thingarg->new_thing_name);
+
+	//Will only get this far if the previous lookups were for numbers and failed
+	if(!oldThing) 
+	{
+		if(thingarg->old_thing_type > -1)
+			I_Error("RTS: No such old thing %d for REPLACE_THING.\n",thingarg->old_thing_type);
+		else //never get this far
+			I_Error("RTS: No such old thing '%s' for REPLACE_THING.\n",thingarg->old_thing_name);
+	}
+	if(!newThing) 
+	{
+		if(thingarg->new_thing_type > -1)
+			I_Error("RTS: No such new thing %d for REPLACE_THING.\n",thingarg->new_thing_type);
+		else //never get this far
+			I_Error("RTS: No such new thing '%s' for REPLACE_THING.\n",thingarg->new_thing_name);
+	}
+
+	// scan the mobj list
+	// FIXME: optimise for fixed-sized triggers
+
+	mobj_t *mo;
+	mobj_t *next;
+
+	for (mo = mobjlisthead; mo != NULL; mo = next)
+	{
+		next = mo->next;
+
+		if (oldThing && mo->info != oldThing)
+			continue;
+
+
+		if (! RAD_WithinRadius(mo, R->info))
+			continue;
+
+		P_ActReplace(mo,newThing);
+	}
+		 
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

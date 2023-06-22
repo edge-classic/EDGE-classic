@@ -8,7 +8,7 @@ CHANGELOG for EDGE-Classic 1.35 (since EDGE-Classic 1.34)
 
 New Features
 ------------
-- ATTACKS.DDF
++ ATTACKS.DDF
   - New attack type - DUALATTACK
     - Can execute two independent attack definitions with a single state
     - New parameters (only required when using DUALATTACK):
@@ -20,9 +20,18 @@ New Features
     - Instant ranged direct damage attack
     - Will not cause infighting
 
-- Chex Quest 1 supported as an IWAD
++ Chex Quest 1 supported as an IWAD
   - Chex Quest 2 support as a PWAD for Chex Quest 1
-
+  
++ RTS 
+  - New command: REPLACE_THING <oldThing> <newThing>, which will replace all oldThings on the current map with newThings.
+    Will be mainly used at map start and it is substituting the thing, not transforming it. For randomizer scripts.
+	
++ THINGS.DDF
+  - New state action: UNBECOME, which will return a thing to it's original type if it has suffered a BECOME() previously.
+   If it has not been BECOMEd previously then nothing will happen.
+  
+  
 
 General Improvements
 --------------------

@@ -299,6 +299,8 @@ const actioncode_t thing_actions[] =
 	{"JUMP_SKY",          P_ActJumpSky, DDF_StateGetJump},
 	//{"JUMP_STUCK",        P_ActJumpStuck, DDF_StateGetJump},
 	{"BECOME",            P_ActBecome, DDF_StateGetBecome},
+	{"UNBECOME",          P_ActUnBecome, NULL},
+
 	{"EXPLODE",           P_ActExplode, NULL},
 	{"ACTIVATE_LINETYPE", P_ActActivateLineType, DDF_StateGetIntPair},
 	{"RTS_ENABLE_TAGGED", P_ActEnableRadTrig,  DDF_MobjStateGetRADTrigger},

@@ -48,5 +48,6 @@ General Improvements
 Bugs fixed
 ----------
 - BOOM linetypes 143, 144, 148 and 149 fixed to use the correct Tx0/Tx changer type
-
-
+- Removed 'WALL' as a recognized glow type in DDFTHING to prevent potential blockmap issues
+  - This references unused code and thus had unpredictable results
+- Removed ability for multiple glow types to be assigned to a DDFTHING definition

@@ -403,12 +403,9 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
 
 	// -AJA- 1999/09/11: Support for supplying Z value.
 
-	// 2023.06.21 TEST - This may have been a red herring; now that the glow type assignment
-	// bug is fixed, this may not be necessary - Dasho 
-
 	// Catch to prevent RTS sector glows with a z value messing up the blockmap - Dasho
-	//if (minfo->glow_type != GLOW_None)
-		//t->z = ONFLOORZ;
+	if (minfo->glow_type != GLOW_None)
+		t->z = ONFLOORZ;
 
 	if (t->spawn_effect)
 	{

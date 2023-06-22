@@ -1884,23 +1884,16 @@ void DDF_MobjGetPlayer(const char *info, void *storage)
 		DDF_Warning("Player number '%d' will not work.", *dest);
 }
 
-
-static const specflags_t glow_type_names[] =
-{
-	{"FLOOR",   GLOW_Floor,   0},
-	{"CEILING", GLOW_Ceiling, 0},
-	{"WALL",    GLOW_Wall,    0},
-
-	{NULL, 0, 0}
-};
-
 static void DDF_MobjGetGlowType(const char *info, void *storage)
 {
-	if (CHKF_Positive != DDF_MainCheckSpecialFlag(info,
-		glow_type_names, (int *) storage, false, false))
-	{
-		DDF_WarnError("DDF_MobjGetGlowType: Unknown glow type: %s\n", info);
-	}
+	glow_sector_type_e *glow = (glow_sector_type_e *)storage;
+
+	if (epi::case_cmp(info, "FLOOR") == 0)
+		*glow = GLOW_Floor;
+	else if (epi::case_cmp(info, "CEILING") == 0)
+		*glow = GLOW_Ceiling;
+	else
+		*glow = GLOW_None;
 }
 
 

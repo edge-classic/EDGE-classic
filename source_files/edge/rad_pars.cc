@@ -2137,6 +2137,34 @@ static void RAD_ParseWeaponEvent(param_set_t& pars)
 	AddStateToScript(this_rad, 0, RAD_ActWeaponEvent, tev);
 }
 
+
+// Replace one thing with another.
+static void RAD_ParseReplaceThing(param_set_t& pars)
+{
+	// ReplaceThing <OldThingName> <NewThingName>
+
+	s_thing_replace_t *thingarg = new s_thing_replace_t;
+
+
+	// get old monster name
+	if (isdigit(pars[1][0]))
+	{
+		RAD_CheckForInt(pars[1], &thingarg->old_thing_type);
+	}
+	else
+		thingarg->old_thing_name = Z_StrDup(pars[1]);
+
+	// get new monster name
+	if (isdigit(pars[2][0]))
+	{
+		RAD_CheckForInt(pars[2], &thingarg->new_thing_type);
+	}
+	else
+		thingarg->new_thing_name = Z_StrDup(pars[2]);
+
+	AddStateToScript(this_rad, 0, RAD_ActReplaceThing, thingarg);
+}
+
 //  PARSER TABLE
 
 static const rts_parser_t radtrig_parsers[] =
@@ -2226,6 +2254,7 @@ static const rts_parser_t radtrig_parsers[] =
 	{2, "TELEPORT_TO_START", 1,1, RAD_ParseTeleportToStart},
 	{2, "REPLACE_WEAPON", 3,3, RAD_ParseReplaceWeapon},
 	{2, "WEAPON_EVENT", 3,3, RAD_ParseWeaponEvent},
+	{2, "REPLACE_THING", 3,3, RAD_ParseReplaceThing},
 
 	// old crud
 	{2, "SECTORV", 4,4, RAD_ParseMoveSector},

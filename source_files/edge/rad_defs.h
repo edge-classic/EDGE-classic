@@ -419,6 +419,15 @@ typedef struct s_weapon_replace_s
 }
 s_weapon_replace_t;
 
+typedef struct s_thing_replace_s
+{
+	const char *old_thing_name = nullptr;
+	const char *new_thing_name = nullptr;
+	int old_thing_type = -1;
+	int new_thing_type = -1;
+}
+s_thing_replace_t;
+
 
 // A single RTS action, not unlike the ones for DDF things.
 //

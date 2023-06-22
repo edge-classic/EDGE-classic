@@ -380,6 +380,9 @@ public:
 	void SetRealSource(mobj_t *ref);
 
 	void ClearStaleRefs();
+
+	const mobjtype_c *preBecome = nullptr;
+
 };
 
 // Item-in-Respawn-que Structure -ACB- 1998/07/30

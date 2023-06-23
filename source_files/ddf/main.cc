@@ -170,8 +170,39 @@ void DDF_Warning(const char *err, ...)
 		I_Printf("  with line contents: %s\n", 
 				  cur_ddf_linedata.c_str());
 	}
+}
 
-///	I_Printf("\n");
+void DDF_Debug(const char *err, ...)
+{
+	va_list argptr;
+	char buffer[1024];
+
+	if (no_warnings)
+		return;
+
+	va_start(argptr, err);
+	vsprintf(buffer, err, argptr);
+	va_end(argptr);
+
+	I_Debugf("%s", buffer);
+
+	if (!cur_ddf_filename.empty())
+	{
+		I_Debugf("  problem occurred near line %d of %s\n", 
+				  cur_ddf_line_num, cur_ddf_filename.c_str());
+	}
+
+	if (!cur_ddf_entryname.empty())
+	{
+		I_Debugf("  problem occurred in entry: %s\n", 
+				  cur_ddf_entryname.c_str());
+	}
+	
+	if (!cur_ddf_linedata.empty())
+	{
+		I_Debugf("  with line contents: %s\n", 
+				  cur_ddf_linedata.c_str());
+	}
 }
 
 void DDF_WarnError(const char *err, ...)
@@ -1186,7 +1217,7 @@ void DDF_MainGetLumpName(const char *info, void *storage)
 	std::string *LN = (std::string *)storage;
 
 	if (strlen(info) > 8)
-		DDF_Warning("Name %s too long for a lump; this is acceptable if referring to a pack file or other special value.\n", info);
+		DDF_Debug("Name %s too long for a lump; this is acceptable if referring to a pack file or other special value.\n", info);
 
 	(*LN) = info;
 }

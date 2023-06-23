@@ -961,10 +961,10 @@ void ProcessFixersForWad(data_file_c *df)
 		if (W_CheckNumForName("MAP33") > -1 && W_CheckNumForName("DMENUPIC") > -1)
 		{
 			std::filesystem::path fix_path = epi::PATH_Join(game_dir, UTFSTR("edge_fixes"));
-			fix_path = epi::PATH_Join(fix_path, UTFSTR("doom2_bfg.wad"));
+			fix_path = epi::PATH_Join(fix_path, UTFSTR("doom2_bfg.epk"));
 			if (epi::FS_Access(fix_path, epi::file_c::ACCESS_READ))
 			{
-				W_AddPending(fix_path, FLKIND_PWad);
+				W_AddPending(fix_path, FLKIND_EPK);
 
 				I_Printf("WADFIXES: Applying fixes for Doom 2 BFG Edition\n");
 			}
@@ -986,10 +986,10 @@ void ProcessFixersForWad(data_file_c *df)
 		if (epi::case_cmp(fix_checker, fixdefs[i]->md5_string) == 0)
 		{
 			std::filesystem::path fix_path = epi::PATH_Join(game_dir, UTFSTR("edge_fixes"));
-			fix_path = epi::PATH_Join(fix_path, UTFSTR(fix_checker.append(".wad")));
+			fix_path = epi::PATH_Join(fix_path, UTFSTR(fix_checker.append(".epk")));
 			if (epi::FS_Access(fix_path, epi::file_c::ACCESS_READ))
 			{
-				W_AddPending(fix_path, FLKIND_PWad);
+				W_AddPending(fix_path, FLKIND_EPK);
 
 				I_Printf("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name.c_str());
 			}

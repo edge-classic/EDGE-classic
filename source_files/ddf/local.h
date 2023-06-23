@@ -195,6 +195,7 @@ extern std::string cur_ddf_entryname;
 extern std::string cur_ddf_linedata;
 
 void DDF_Error    (const char *err, ...) GCCATTR((format (printf,1,2)));
+void DDF_Debug  (const char *err, ...) GCCATTR((format (printf,1,2)));
 void DDF_Warning  (const char *err, ...) GCCATTR((format (printf,1,2)));
 void DDF_WarnError(const char *err, ...) GCCATTR((format (printf,1,2)));
 

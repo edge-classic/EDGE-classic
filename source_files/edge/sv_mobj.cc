@@ -87,6 +87,8 @@ static savefield_t sv_fields_mobj[] =
 	SF(health, "health", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
 	SF(speed, "speed", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
 	SF(fuse, "fuse", 1, SVT_INT, SR_GetInt, SR_PutInt),
+	SF(morphtimeout, "morphtimeout", 1, SVT_INT, SR_GetInt, SR_PutInt),
+	SF(preBecome, "preBecome", 1, SVT_STRING, SR_MobjGetType, SR_MobjPutType),
 	SF(info, "info", 1, SVT_STRING, SR_MobjGetType, SR_MobjPutType),
 	SF(state, "state", 1, SVT_STRING, SR_MobjGetState, SR_MobjPutState),
 	SF(next_state, "next_state", 1, SVT_STRING, SR_MobjGetState, SR_MobjPutState),

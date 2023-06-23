@@ -868,6 +868,7 @@ public:
 	int raise_state;
 	int res_state;
 	int meander_state;
+	int morph_state;
 	int bounce_state;
 	int touch_state;
 	int gib_state;
@@ -1020,6 +1021,8 @@ public:
 
 	float sight_distance; // lobo 2022: How far this thing can see
 	float hear_distance; // lobo 2022: How far this thing can hear
+
+	int morphtimeout; // lobo 2023: Go to MORPH states when times up
 
 	// DEHEXTRA
 	float gib_health;

@@ -3784,7 +3784,6 @@ void P_ActClearInvuln(struct mobj_s *mo)
 	mo->hyperflags &= ~HF_INVULNERABLE;
 }
 
-
 void P_ActBecome(struct mobj_s *mo)
 {
 	if (!mo->state || !mo->state->action_par)
@@ -3808,6 +3807,8 @@ void P_ActBecome(struct mobj_s *mo)
 	P_UnsetThingPosition(mo);
 	{
 		mo->info = become->info;
+
+		mo->morphtimeout = mo->info->morphtimeout;
 
 		mo->radius = mo->info->radius;
 		mo->height = mo->info->height;
@@ -3877,6 +3878,8 @@ void P_ActUnBecome(struct mobj_s *mo)
 	{
 		mo->info = preBecome;
 
+		mo->morphtimeout = mo->info->morphtimeout;
+
 		mo->radius = mo->info->radius;
 		mo->height = mo->info->height;
 		// MBF21: Use explicit Fast speed if provided
@@ -3923,6 +3926,152 @@ void P_ActUnBecome(struct mobj_s *mo)
 
 	P_SetMobjStateDeferred(mo, state, 0);
 }
+
+//Same as P_ActBecome, but health is set to max
+void P_ActMorph(struct mobj_s *mo)
+{
+	if (!mo->state || !mo->state->action_par)
+	{
+		I_Error("MORPH action used in [%s] without arguments!\n",
+				mo->info->name.c_str());
+		return; /* NOT REACHED */
+	}
+
+	act_morph_info_t *morph = (act_morph_info_t *) mo->state->action_par;
+
+	if (! morph->info)
+	{
+		morph->info = mobjtypes.Lookup(morph->info_ref.c_str());
+		SYS_ASSERT(morph->info);  // lookup should be OK (fatal error if not found)
+	}
+
+	// DO THE DEED !!
+	mo->preBecome = mo->info; //store what we used to be
+
+	P_UnsetThingPosition(mo);
+	{
+		mo->info = morph->info;
+		mo->health = mo->info->spawnhealth; // Set health to full again
+
+		mo->morphtimeout = mo->info->morphtimeout;
+
+		mo->radius = mo->info->radius;
+		mo->height = mo->info->height;
+		// MBF21: Use explicit Fast speed if provided
+		if (mo->info->fast_speed > -1)
+			mo->speed  = level_flags.fastparm ? mo->info->fast_speed : mo->info->speed;
+		else
+			mo->speed  = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
+
+		mo->flags         = mo->info->flags;
+		mo->extendedflags = mo->info->extendedflags;
+		mo->hyperflags    = mo->info->hyperflags;
+
+		mo->vis_target    = PERCENT_2_FLOAT(mo->info->translucency);
+		mo->currentattack = NULL;
+		mo->model_skin    = mo->info->model_skin;
+		mo->model_last_frame = -1;
+
+		// handle dynamic lights
+		{
+			const dlight_info_c *dinfo = &mo->info->dlight[0];
+
+			if (dinfo->type != DLITE_None)
+			{
+				mo->dlight.target = dinfo->radius;
+				mo->dlight.color  = dinfo->colour;
+				
+				// make renderer re-create shader info
+				if (mo->dlight.shader)
+				{
+					// FIXME: delete mo->dlight.shader;
+					mo->dlight.shader = NULL;
+				}
+			}
+		}
+	}
+	P_SetThingPosition(mo);
+
+	statenum_t state = P_MobjFindLabel(mo, morph->start.label.c_str());
+	if (state == S_NULL)
+		I_Error("MORPH action: frame '%s' in [%s] not found!\n",
+				morph->start.label.c_str(), mo->info->name.c_str());
+
+	state += morph->start.offset;
+
+	P_SetMobjStateDeferred(mo, state, 0);
+}
+
+//Same as P_ActUnBecome, but health is set to max
+void P_ActUnMorph(struct mobj_s *mo)
+{
+
+	if (! mo->preBecome)
+	{
+		return;
+	}
+
+	const mobjtype_c *preBecome = nullptr;
+	preBecome = mo->preBecome;
+
+	// DO THE DEED !!
+	mo->preBecome = nullptr; //remove old reference
+
+	P_UnsetThingPosition(mo);
+	{
+		mo->info = preBecome;
+
+		mo->health = mo->info->spawnhealth; //Set health to max again
+
+		mo->morphtimeout = mo->info->morphtimeout;
+
+		mo->radius = mo->info->radius;
+		mo->height = mo->info->height;
+		// MBF21: Use explicit Fast speed if provided
+		if (mo->info->fast_speed > -1)
+			mo->speed  = level_flags.fastparm ? mo->info->fast_speed : mo->info->speed;
+		else
+			mo->speed  = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
+
+		// Note: health is not changed
+
+		mo->flags         = mo->info->flags;
+		mo->extendedflags = mo->info->extendedflags;
+		mo->hyperflags    = mo->info->hyperflags;
+
+		mo->vis_target    = PERCENT_2_FLOAT(mo->info->translucency);
+		mo->currentattack = NULL;
+		mo->model_skin    = mo->info->model_skin;
+		mo->model_last_frame = -1;
+
+		// handle dynamic lights
+		{
+			const dlight_info_c *dinfo = &mo->info->dlight[0];
+
+			if (dinfo->type != DLITE_None)
+			{
+				mo->dlight.target = dinfo->radius;
+				mo->dlight.color  = dinfo->colour;
+				
+				// make renderer re-create shader info
+				if (mo->dlight.shader)
+				{
+					// FIXME: delete mo->dlight.shader;
+					mo->dlight.shader = NULL;
+				}
+			}
+		}
+	}
+	P_SetThingPosition(mo);
+
+	statenum_t state = P_MobjFindLabel(mo, "IDLE");
+	if (state == S_NULL)
+		I_Error("UNMORPH action: frame '%s' in [%s] not found!\n",
+				"IDLE", mo->info->name.c_str());
+
+	P_SetMobjStateDeferred(mo, state, 0);
+}
+
 
 // -AJA- 1999/08/08: New attack flag FORCEAIM, which fixes chainsaw.
 //

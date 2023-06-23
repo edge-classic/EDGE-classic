@@ -29,7 +29,12 @@ New Features
 	
 + THINGS.DDF
   - New state action: UNBECOME, which will return a thing to it's original type if it has suffered a BECOME() previously.
-   If it has not been BECOMEd previously then nothing will happen.
+    If it has not been BECOMEd previously then nothing will happen.
+  - New state action: MORPH: identical behaviour to BECOME, except HEALTH is filled up.
+  - New state action: UNMORPH, which will return a thing to it's original type if it has suffered a MORPH() previously.
+    If it has not been MORPHed previously then nothing will happen.
+  - New command: MORPH_TIMEOUT: when this timer is reached, the thing will go to a "MORPH" state if it has one defined.
+    If it has no "MORPH" state then the thing is simply removed.
   
   
 

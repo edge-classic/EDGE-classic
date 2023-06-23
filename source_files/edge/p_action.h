@@ -168,6 +168,10 @@ void P_ActJumpSky(struct mobj_s *mo);
 //void P_ActJumpStuck(struct mobj_s *mo);
 void P_ActBecome(struct mobj_s *mo);
 void P_ActUnBecome(struct mobj_s *mo);
+
+void P_ActMorph(struct mobj_s *mo);
+void P_ActUnMorph(struct mobj_s *mo);
+
 void P_ActSetInvuln(struct mobj_s *mo);
 void P_ActClearInvuln(struct mobj_s *mo);
 

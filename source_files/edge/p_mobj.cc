@@ -1477,6 +1477,16 @@ static void P_MobjThinker(mobj_t * mobj, bool extra_tic)
 		if (mobj->isRemoved()) return;
 	}
 
+	// When morphtimeout is reached, we go to "MORPH" state if we
+	//  have one. If there is no MORPH state then the mobj is removed
+	if (mobj->health > 0 && mobj->morphtimeout >= 0)
+	{
+		if (!--mobj->morphtimeout)
+			P_SetMobjState(mobj, mobj->info->morph_state);
+
+		if (mobj->isRemoved()) return;
+	}
+
 	if (mobj->tics < 0)
 	{
 		// check for nightmare respawn
@@ -1775,6 +1785,7 @@ void P_RemoveMobj(mobj_t *mo)
 	//       legally stored and restored from savegames.
 
 	mo->fuse = TICRATE * 5;
+	//mo->morphtimeout = TICRATE * 5; //maybe we need this?
 }
 
 
@@ -1847,6 +1858,13 @@ void P_RunMobjThinkers(bool extra_tic)
 				RemoveMobjFromList(mo);
 				DeleteMobj(mo);
 			}
+			
+			//Lobo 2023: don't know if I need to do this?
+			if (mo->morphtimeout > 0)
+			{
+				mo->morphtimeout--;
+			}
+
 			continue;
 		}
 
@@ -2201,6 +2219,8 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
 	mobj->model_skin = info->model_skin;
 	mobj->model_last_frame = -1;
 	mobj->wud_tags.clear();
+
+	mobj->morphtimeout = info->morphtimeout;
 
 	if (level_flags.fastparm)
 	{

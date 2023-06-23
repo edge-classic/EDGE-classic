@@ -98,6 +98,20 @@ public:
 }
 act_become_info_t;
 
+// Info for the MORPH action
+typedef struct act_morph_info_s
+{
+	const mobjtype_c *info;
+	std::string info_ref;
+
+	label_offset_c start;
+
+public:
+	 act_morph_info_s();
+	~act_morph_info_s();
+}
+act_morph_info_t;
+
 // Info for the weapon BECOME action
 typedef struct wep_become_info_s
 {

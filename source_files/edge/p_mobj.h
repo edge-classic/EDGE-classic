@@ -227,6 +227,9 @@ struct mobj_s : public position_c
 	float speed = 0;
 	int fuse = 0;
 
+	// When this times out we go to "MORPH" state
+	int morphtimeout = 0;
+
 	// Thing's health level
 	float health = 0;
 
@@ -381,7 +384,8 @@ public:
 
 	void ClearStaleRefs();
 
-	const mobjtype_c *preBecome = nullptr;
+	// Stores what this mobj was before being MORPHed/BECOMEing
+	const mobjtype_c *preBecome = nullptr; 
 
 };
 

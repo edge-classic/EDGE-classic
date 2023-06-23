@@ -206,6 +206,8 @@ const commandlist_t thing_commands[] =
 	DF("SIGHT_DISTANCE", sight_distance, DDF_MainGetFloat), //Lobo 2022
 	DF("HEAR_DISTANCE", hear_distance, DDF_MainGetFloat), //Lobo 2022
 
+	DF("MORPH_TIMEOUT", morphtimeout, DDF_MainGetTime), //Lobo 2023
+
 	// DEHEXTRA
 	DF("GIB_HEALTH", gib_health, DDF_MainGetFloat),
 
@@ -236,6 +238,7 @@ const state_starter_t thing_starters[] =
 	DDF_STATE("RESPAWN",   "IDLE",    raise_state),
 	DDF_STATE("RESURRECT", "IDLE",    res_state),
 	DDF_STATE("MEANDER",   "MEANDER", meander_state),
+	DDF_STATE("MORPH",     "MORPH",   morph_state),
 	DDF_STATE("BOUNCE",    "IDLE",    bounce_state),
 	DDF_STATE("TOUCH",     "IDLE",    touch_state),
 	DDF_STATE("RELOAD",    "IDLE",    reload_state),
@@ -300,6 +303,8 @@ const actioncode_t thing_actions[] =
 	//{"JUMP_STUCK",        P_ActJumpStuck, DDF_StateGetJump},
 	{"BECOME",            P_ActBecome, DDF_StateGetBecome},
 	{"UNBECOME",          P_ActUnBecome, NULL},
+	{"MORPH",             P_ActMorph, DDF_StateGetMorph}, //same as BECOME but resets health
+	{"UNMORPH",           P_ActUnMorph, NULL}, //same as UNBECOME but resets health
 
 	{"EXPLODE",           P_ActExplode, NULL},
 	{"ACTIVATE_LINETYPE", P_ActActivateLineType, DDF_StateGetIntPair},
@@ -2241,6 +2246,7 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
     raise_state = src.raise_state; 
     res_state = src.res_state; 
     meander_state = src.meander_state; 
+	morph_state = src.morph_state; 
     bounce_state = src.bounce_state; 
     touch_state = src.touch_state; 
     reload_state = src.reload_state; 
@@ -2378,6 +2384,8 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	sight_distance = src.sight_distance;
 	hear_distance = src.hear_distance;
 
+	morphtimeout = src.morphtimeout; 
+
 	gib_health = src.gib_health;
 
 	infight_group = src.infight_group;
@@ -2403,6 +2411,7 @@ void mobjtype_c::Default()
     raise_state = 0;
     res_state = 0;
     meander_state = 0;
+	morph_state = 0;
     bounce_state = 0;
     touch_state = 0;
     reload_state = 0;
@@ -2525,6 +2534,9 @@ void mobjtype_c::Default()
 
 	sight_distance = -1;
 	hear_distance = -1;
+
+	morphtimeout = 0; 
+
 	infight_group = -2;
 	proj_group = -2;
 	splash_group = -2;

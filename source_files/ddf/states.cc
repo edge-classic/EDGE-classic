@@ -835,6 +835,75 @@ void DDF_StateGetFrame(const char *arg, state_t * cur_state)
 }
 
 
+act_morph_info_s::act_morph_info_s() :
+	info(NULL), info_ref(), start()
+{ }
+
+act_morph_info_s::~act_morph_info_s()
+{ }
+
+void DDF_StateGetMorph(const char *arg, state_t * cur_state)
+{
+	// MORPH(typename)
+	// MORPH(typename,label)
+  
+	if (!arg || !arg[0])
+		return;
+
+	act_morph_info_t *morph = new act_morph_info_t;
+
+	morph->start.label = "IDLE";
+
+	const char *s = strchr(arg, ',');
+
+	// get type name
+	char buffer[80];
+
+	int len = s ? (s - arg) : strlen(arg);
+
+	if (len == 0)
+		DDF_Error("DDF_StateGetMorph: missing type name!\n");
+
+	if (len > 75)
+		DDF_Error("DDF_StateGetMorph: type name too long!\n");
+
+	for (len=0; *arg && (*arg != ':') && (*arg != ','); len++, arg++)
+		buffer[len] = *arg;
+
+	buffer[len] = 0;
+
+	morph->info_ref = buffer;
+
+	
+	// get start label (if present)
+	if (s)
+	{
+		s++;
+
+		len = strlen(s);
+
+		if (len == 0)
+			DDF_Error("DDF_StateGetMorph: missing label!\n");
+
+		if (len > 75)
+			DDF_Error("DDF_StateGetMorph: label too long!\n");
+
+		for (len=0; *s && (*s != ':') && (*s != ','); len++, s++)
+			buffer[len] = *s;
+
+		buffer[len] = 0;
+
+		morph->start.label = buffer;
+
+		if (*s == ':')
+			morph->start.offset = MAX(0, atoi(s+1) - 1);
+
+	}
+
+	cur_state->action_par = morph;
+}
+
+
 act_become_info_s::act_become_info_s() :
 	info(NULL), info_ref(), start()
 { }

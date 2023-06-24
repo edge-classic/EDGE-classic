@@ -47,8 +47,6 @@
 #include "w_files.h"
 #include "w_wad.h"
 
-extern bool var_pc_speaker_mode;
-
 // music slider value
 DEF_CVAR(mus_volume, "0.15", CVAR_ARCHIVE)
 
@@ -59,6 +57,7 @@ static abstract_music_c *music_player;
 
 int  entry_playing = -1;
 static bool entry_looped;
+bool var_pc_speaker_mode = false;
 
 
 void S_ChangeMusic(int entrynum, bool loop)
@@ -229,7 +228,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 		case epi::FMT_MUS:
 		case epi::FMT_WAV: // RIFF MIDI has the same header as WAV
 			delete F;
-			if (var_midi_player == 0 || var_pc_speaker_mode)
+			if (var_midi_player == 0)
 			{
 				music_player = S_PlayPrime(data, length, volume, loop);
 			}

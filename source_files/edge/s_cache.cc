@@ -53,6 +53,7 @@
 
 
 extern int dev_freq;
+extern bool var_pc_speaker_mode;
 
 
 static std::vector<epi::sound_data_c *> fx_cache;

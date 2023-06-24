@@ -435,7 +435,7 @@ void oggplayer_c::Stop()
 
 void oggplayer_c::Ticker()
 {
-	while (status == PLAYING)
+	while (status == PLAYING && !var_pc_speaker_mode)
 	{
 		epi::sound_data_c *buf = S_QueueGetFreeBuffer(OGGV_NUM_SAMPLES,
 				(is_stereo && dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);

@@ -239,7 +239,7 @@ void gmeplayer_c::Stop()
 
 void gmeplayer_c::Ticker()
 {
-	while (status == PLAYING)
+	while (status == PLAYING && !var_pc_speaker_mode)
 	{
 		epi::sound_data_c *buf = S_QueueGetFreeBuffer(GME_BUFFER, 
 				(dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);

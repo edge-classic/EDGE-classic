@@ -238,7 +238,7 @@ void flacplayer_c::Stop()
 
 void flacplayer_c::Ticker()
 {
-	while (status == PLAYING)
+	while (status == PLAYING && !var_pc_speaker_mode)
 	{
 		epi::sound_data_c *buf = S_QueueGetFreeBuffer(FLAC_FRAMES, 
 				(dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);

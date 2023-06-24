@@ -261,7 +261,7 @@ void mp3player_c::Stop()
 
 void mp3player_c::Ticker()
 {
-	while (status == PLAYING)
+	while (status == PLAYING && !var_pc_speaker_mode)
 	{
 		epi::sound_data_c *buf = S_QueueGetFreeBuffer(MINIMP3_IO_SIZE, 
 				(is_stereo && dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);

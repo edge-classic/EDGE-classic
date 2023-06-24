@@ -50,6 +50,11 @@ General Improvements
   - Fullbright
 - Fluidlite replaced with Primesynth for soundfont MIDI synthesis
   - SF3 support has been dropped
+- PC Speaker Mode will now disable music while active to prevent non-MIDI formats from playing
+  - "Bonkers for Bits" soundfont has been removed
+- "microGM" soundfont added as a more SNES-like option
+  - "16 Bit Game Station" soundfont has been removed
+- "ChipFreak" chiptune/8-bit inspired soundfont added
 
 
 Bugs fixed

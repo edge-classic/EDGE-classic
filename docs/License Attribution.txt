@@ -47,7 +47,7 @@ REKKR (various assets) - Copyright (c) 2021 Mockingbird Softworks
 CC-BY-SA-4.0 International License
 ===========================================================================================
 
-"Bonkers for Bits" soundfont - Copyright (c) Marcel J. Therrien
+"ChipFreak" soundfont - Copyright (c) Jayvee Enaguas
 
 "DMXOPL" and "DMXPOL3" instrument banks - Copyright (c) ConSiGno
 
@@ -86,8 +86,6 @@ XMIDI library - Copyright (c) 2015-2022 Vitaly Novichkov
 ===========================================================================================
 MIT License
 ===========================================================================================
-
-"16-Bit Game Station" soundfont - Copyright (c) 2022 Yingchun Soul
 
 BW_Midi_Sequencer library - Copyright (c) 2015-2022 Vitaly Novichkov
 
@@ -134,6 +132,12 @@ WTF License
 ===========================================================================================
 
 crsid library - Copyright (c) 2022 Hermit (Mihaly Horvath)
+
+===========================================================================================
+WTFPL License
+===========================================================================================
+
+"microGM" soundfont - Copyright (c) 2022 michael (https://musical-artifacts.com/artifacts/2529)
 
 ===========================================================================================
 zlib License

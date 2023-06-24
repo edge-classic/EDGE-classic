@@ -75,7 +75,7 @@ bool force_waveout = false;
 
 bool save_screenshot_valid = false;
 
-bool var_pc_speaker_mode = false;
+extern bool var_pc_speaker_mode;
 int var_midi_player    = 0;
 int var_sound_stereo = 0;
 int var_mix_channels = 0;

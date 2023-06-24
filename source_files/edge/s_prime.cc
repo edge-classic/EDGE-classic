@@ -38,7 +38,6 @@ typedef struct BW_MidiRtInterface PrimeInterface;
 
 #define PRIME_NUM_SAMPLES  2048
 
-extern bool var_pc_speaker_mode;
 extern bool dev_stereo;
 extern int  dev_freq; 
 
@@ -83,8 +82,7 @@ bool S_StartupPrime(void)
 
 	edge_synth = new primesynth::Synthesizer;
 	edge_synth->setVolume(s_primegain.f);
-	edge_synth->loadSoundFont(var_pc_speaker_mode ? epi::PATH_Join(epi::PATH_Join(game_dir, UTFSTR("soundfont")), 
-		UTFSTR("bonkers_for_bits.sf2")).generic_u8string() : s_soundfont.s);
+	edge_synth->loadSoundFont(s_soundfont.s);
 
 	// Primesynth should throw an exception if the soundfont loading fails, so I guess we're good if we get here
 	return true; // OK!
@@ -313,7 +311,7 @@ public:
 			edge_synth->setVolume(s_primegain.f);
 		}
 
-		while (status == PLAYING)
+		while (status == PLAYING && !var_pc_speaker_mode)
 		{
 			epi::sound_data_c *buf = S_QueueGetFreeBuffer(PRIME_NUM_SAMPLES, 
 					dev_stereo ? epi::SBUF_Interleaved : epi::SBUF_Mono);

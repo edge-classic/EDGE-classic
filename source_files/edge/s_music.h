@@ -49,6 +49,7 @@ public:
 
 extern cvar_c mus_volume;
 extern int entry_playing;
+extern bool var_pc_speaker_mode;
 
 /* FUNCTIONS */
 

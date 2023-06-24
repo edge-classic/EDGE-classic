@@ -1,4 +1,5 @@
 #include "synthesizer.h"
+#include <stdexcept>
 
 namespace primesynth {
 Synthesizer::Synthesizer(double outputRate, std::size_t numChannels)

@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 namespace primesynth {
 // 64 bit fixed-point number

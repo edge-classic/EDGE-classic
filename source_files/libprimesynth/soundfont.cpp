@@ -2,6 +2,7 @@
 #include "soundfont.h"
 #include <fstream>
 #include <cmath>
+#include <climits>
 
 namespace primesynth {
 std::string achToString(const char ach[20]) {

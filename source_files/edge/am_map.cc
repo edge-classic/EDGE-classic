@@ -746,12 +746,15 @@ static void DrawKeyOnLine(mline_t * ml, int theKey, rgbcol_t rgb = T_WHITE)
 			{
 				static state_t *idlestate;
 				idlestate = &states[TheObject->idle_state];
-				bool flip;
-				const image_c *img = R2_GetOtherSprite(idlestate->sprite, idlestate->frame, &flip);
+				if (! (idlestate->flags & SFF_Model)) //Can't handle 3d models...yet
+				{
+					bool flip;
+					const image_c *img = R2_GetOtherSprite(idlestate->sprite, idlestate->frame, &flip);
 
-				if (epi::case_cmp("DUMMY_SPRITE", img->name) != 0)
-					HUD_DrawImageNoOffset(x1, y1, img);
-					//HUD_StretchImage(x1, y1, 16, 16, img, 0.0, 0.0);
+					if (epi::case_cmp("DUMMY_SPRITE", img->name) != 0)
+						HUD_DrawImageNoOffset(x1, y1, img);
+						//HUD_StretchImage(x1, y1, 16, 16, img, 0.0, 0.0);
+				}
 			}
 		}
 	}

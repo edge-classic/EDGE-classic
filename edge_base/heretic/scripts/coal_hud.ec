@@ -536,7 +536,7 @@ function handle_tome_of_power() =
 			hud.rts_enable("SWITCH_TOMED_MACE")
 		}
 		
-		hud.stretch_image(305, 20, 20, 20, "SPINBK0")
+		hud.stretch_image(305, 20, 20, 20, "SPINBK0",1)
 	}
 	
 	if (player.has_power(player.BERSERK) < 1 && TomeActivated == 1)
@@ -599,7 +599,7 @@ function draw_all() =
 	InventoryScreenMultiItem()
 	
     if (player.has_power(player.JET_PACK))//wings
-    	hud.stretch_image(280, 20, 20, 20, "SPFLY0")
+    	hud.stretch_image(280, 20, 20, 20, "SPFLY0",1)
 	
 	
 	handle_tome_of_power() //our special routine

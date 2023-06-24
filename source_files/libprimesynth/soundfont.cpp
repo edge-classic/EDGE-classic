@@ -1,12 +1,19 @@
 #include "conversion.h"
 #include "soundfont.h"
 #include <fstream>
-#include <string.h>
 #include <cmath>
 
 namespace primesynth {
 std::string achToString(const char ach[20]) {
-    return {ach, strnlen_s(ach, 20)};
+    std::string achstr;
+    for (std::size_t pos = 0; pos < 20; pos++) {
+        if (ach[pos]) {
+            achstr.push_back(ach[pos]);
+        } else {
+            break;
+        }
+    }
+    return achstr;
 }
 
 Sample::Sample(const sf::Sample& sample, const std::vector<std::int16_t>& sampleBuffer)

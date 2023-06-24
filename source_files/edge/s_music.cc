@@ -35,7 +35,7 @@
 #include "s_music.h"
 #include "s_ogg.h"
 #include "s_mp3.h"
-#include "s_fluid.h"
+#include "s_prime.h"
 #include "s_gme.h"
 #include "s_m4p.h"
 #include "s_opl.h"
@@ -231,7 +231,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 			delete F;
 			if (var_midi_player == 0 || var_pc_speaker_mode)
 			{
-				music_player = S_PlayFluid(data, length, volume, loop);
+				music_player = S_PlayPrime(data, length, volume, loop);
 			}
 			else if (var_midi_player == 1)
 			{

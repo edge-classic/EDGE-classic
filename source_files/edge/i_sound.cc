@@ -41,7 +41,7 @@
 #include "s_cache.h"
 #include "s_blit.h"
 #include "s_opl.h"
-#include "s_fluid.h"
+#include "s_prime.h"
 #include "w_wad.h"
 
 // If true, sound system is off/not working. Changed to false if sound init ok.
@@ -290,7 +290,7 @@ void I_StartupMusic(void)
 			{
 				std::string ext = epi::PATH_GetExtension(sfd[i].name).u8string();
 				epi::str_lower(ext);
-				if (ext == ".sf2" || ext == ".sf3")
+				if (ext == ".sf2")
 				{
 					available_soundfonts.push_back(sfd[i].name.generic_u8string());
 				}
@@ -320,7 +320,7 @@ void I_StartupMusic(void)
 				{
 					std::string ext = epi::PATH_GetExtension(sfd[i].name).u8string();
 					epi::str_lower(ext);
-					if (ext == ".sf2" || ext == ".sf3")
+					if (ext == ".sf2")
 						available_soundfonts.push_back(sfd[i].name.generic_u8string());
 					else if (ext == ".op2" || ext == ".wopl" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
 						available_genmidis.push_back(sfd[i].name.generic_u8string());
@@ -329,10 +329,10 @@ void I_StartupMusic(void)
 		}
 	}
 
-	// Startup both FluidLite and OPL, as some formats require OPL now (IMF, possibly CMF/DRO/etc in the future)
+	// Startup both Primesynth and OPL, as some formats require OPL now (IMF, possibly CMF/DRO/etc in the future)
 
-	if (!S_StartupFluid())
-		fluid_disabled = true;
+	if (!S_StartupPrime())
+		prime_disabled = true;
 
 	if (!S_StartupOPL())
 		opl_disabled = true;

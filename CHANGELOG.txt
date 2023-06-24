@@ -48,6 +48,8 @@ General Improvements
   - Pickup width
   - Projectile pass height
   - Fullbright
+- Fluidlite replaced with Primesynth for soundfont MIDI synthesis
+  - SF3 support has been dropped
 
 
 Bugs fixed

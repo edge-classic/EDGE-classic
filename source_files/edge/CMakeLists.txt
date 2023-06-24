@@ -85,7 +85,7 @@ set (EDGE_SOURCE_FILES
   s_mp3.cc
   s_music.cc
   s_ogg.cc
-  s_fluid.cc
+  s_prime.cc
   s_gme.cc
   s_m4p.cc
   s_opl.cc
@@ -131,11 +131,11 @@ set (EDGE_LINK_LIBRARIES
   crsid
   ec_voxelib
   fmmidi
-  fluidlite
   gme
+  libprimesynth
+  libymfm
   m4p
   miniz
-  libymfm
   ymfmidi
 )
 
@@ -172,9 +172,9 @@ target_include_directories(edge-classic PRIVATE ../dehacked)
 target_include_directories(edge-classic PRIVATE ../dr_libs)
 target_include_directories(edge-classic PRIVATE ../ec_voxelib)
 target_include_directories(edge-classic PRIVATE ../epi)
-target_include_directories(edge-classic PRIVATE ../fluidlite/include)
 target_include_directories(edge-classic PRIVATE ../fmmidi)
 target_include_directories(edge-classic PRIVATE ../libgme/gme)
+target_include_directories(edge-classic PRIVATE ../libprimesynth)
 target_include_directories(edge-classic PRIVATE ../libymfm)
 target_include_directories(edge-classic PRIVATE ../m4p)
 target_include_directories(edge-classic PRIVATE ../minimp3)

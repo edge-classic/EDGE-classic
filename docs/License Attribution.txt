@@ -74,8 +74,6 @@ EDGE-Classic - Copyright (c) 1999-2023 The EDGE Team
 
 EPI library - Copyright (c) 2002-2023 The EDGE Team
 
-Fluidlite library - Copyright (c) 2016 Robin Lobel
-
 Game Music Emu - Copyright (c) 2003-2009 Shay Green
 
 SuperFastHash - Copyright (c) 2004-2010 Paul Hsieh
@@ -106,6 +104,8 @@ miniz library - Copyright (c) 2013-2014 RAD Game Tools and Valve Software
 				Copyright (c) 2010-2014 Rich Geldreich and Tenacious Software LLC
 
 PNPOLY algorithm - Copyright (c) 1970-2003 Wm. Randolph Franklin
+
+Primesynth library - Copyright (c) 2018 mosm
 
 "WadSmoosh" instrument bank - Copyright (c) 2016-2020 JP LeBreton
 

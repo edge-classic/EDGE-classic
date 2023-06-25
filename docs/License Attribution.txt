@@ -49,7 +49,7 @@ CC-BY-SA-4.0 International License
 
 "ChipFreak" soundfont - Copyright (c) Jayvee Enaguas
 
-"DMXOPL" and "DMXPOL3" instrument banks - Copyright (c) ConSiGno
+"DMXOPL" and "DMXOPL3" instrument banks - Copyright (c) ConSiGno
 
 ===========================================================================================
 GPL2 License

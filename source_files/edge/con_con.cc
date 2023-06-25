@@ -72,6 +72,8 @@ static rgbcol_t current_color;
 
 extern void E_ProgressMessage(const char *message);
 
+extern cvar_c v_pixelaspect;
+
 #define T_GREY176  RGB_MAKE(176,176,176)
  
 // TODO: console var
@@ -639,7 +641,7 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 
 	if (con_font->def->type == FNTYP_TrueType)
 	{
-		float width = (con_font->CharWidth(ch) - con_font->spacing) * FNSZ_ratio;
+		float width = (con_font->CharWidth(ch) - con_font->spacing) * FNSZ_ratio / v_pixelaspect.f;
 		float x_adjust = (XMUL - width) / 2;
 		float y_adjust = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).y_shift * FNSZ_ratio;
 		float height = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).height * FNSZ_ratio;

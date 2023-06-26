@@ -90,6 +90,9 @@ bool thick_liquid = false;
 float view_x_slope;
 float view_y_slope;
 
+float liquid_z_bob = 1.0f;
+float wave_now; // value for doing wave table lookups
+
 // -ES- 1999/03/20 Different right & left side clip angles, for asymmetric FOVs.
 angle_t clip_left, clip_right;
 angle_t clip_scope;
@@ -625,21 +628,16 @@ wall_plane_data_t;
 // Adapted from Quake 3 GPL release - Dasho
 static void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos, bool doing_plane )
 {
-	float now;
-	float phase = 0;
-	float frequency = thick_liquid ? 0.75 : 1.0;
 	float amplitude = 0.05;
-
-	now = ( phase + leveltime / 100.0f * frequency );
+	float now = wave_now * (thick_liquid ? 0.5 : 1.0);
 
 	if (doing_plane)
-		pos->z = pos->z + 1.0f + r_sintable[(int)((pos->z * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ];
+		pos->z += liquid_z_bob;
 
 	if (swirl_pass == -1) return; // SWIRL_SMMU doesn't need anything else
 
 	if (swirling_flats == SWIRL_PARALLAX)
 	{
-		frequency *= 2;
 		if (thick_liquid)
 		{
 			if (swirl_pass == 1)
@@ -3241,6 +3239,10 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 {
 	float fov = CLAMP(5, r_fov.f, 175);
 
+	// Update bobbing values
+	wave_now = leveltime / 100.0f;
+	liquid_z_bob = 1.0f + r_sintable[(int)((1.0/128 * 0.125 + wave_now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ];
+
 	view_x_slope = tan(fov * M_PI / 360.0);
 
 	if (full_height)
@@ -3272,7 +3274,12 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 	viewangle = mo->angle;
 
 	if (mo->player)
-		viewz += mo->player->viewz;
+	{
+		if (mo->subsector->sector->floor.image->liquid_type > LIQ_None)
+			viewz += (mo->player->viewz * 7 / 10);
+		else
+			viewz += mo->player->viewz;
+	}
 	else
 		viewz += mo->height * 9 / 10;
 

@@ -102,7 +102,12 @@ static float GetHoverDZ(mobj_t *mo)
 	phase ^= (angle_t)(phase << 19);
 	phase += (angle_t)(leveltime << (ANGLEBITS-6));
 
-	mo->phase = M_Sin(phase) * 4.0f;
+	mo->phase = M_Sin(phase);
+
+	if (mo->hyperflags & HF_HOVER)
+		mo->phase *= 4.0f;
+	else
+		mo->phase -= (mo->height * 0.2f);
 
 	return mo->phase;
 }
@@ -1007,7 +1012,8 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 
 	float hover_dz = 0;
 
-	if (mo->hyperflags & HF_HOVER)
+	if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) &&
+		mo->subsector->sector->floor.image->liquid_type > LIQ_None))
 		hover_dz = GetHoverDZ(mo);
 
 	bool spr_flip = false;
@@ -1060,7 +1066,8 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 				break;
 		}
 
-		if (mo->hyperflags & HF_HOVER)
+		if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) &&
+			mo->subsector->sector->floor.image->liquid_type > LIQ_None))
 		{
 			gzt += hover_dz;
 			gzb += hover_dz;
@@ -1075,7 +1082,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 	{
 		y_clipping = YCLIP_Never;
 	}
-	else if (mo->hyperflags & HF_FLOORCLIP) //Lobo: new FLOOR_CLIP flag
+	else if (mo->hyperflags & HF_FLOORCLIP || mo->subsector->sector->floor.image->liquid_type > LIQ_None) //Lobo: new FLOOR_CLIP flag
 	{
 		// do nothing? just skip the other elseifs below
 		y_clipping = YCLIP_Hard;

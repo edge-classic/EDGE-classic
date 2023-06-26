@@ -626,13 +626,16 @@ wall_plane_data_t;
 }*/
 
 // Adapted from Quake 3 GPL release - Dasho
-static void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos, bool doing_plane )
+static void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos, bool doing_plane, float min_z = 0.0f, float max_z = 0.0f )
 {
 	float amplitude = 0.05;
 	float now = wave_now * (thick_liquid ? 0.5 : 1.0);
 
 	if (doing_plane)
-		pos->z += liquid_z_bob;
+	{
+		pos->z = pos->z + liquid_z_bob;
+		pos->z = CLAMP(min_z, pos->z, max_z);
+	}
 
 	if (swirl_pass == -1) return; // SWIRL_SMMU doesn't need anything else
 
@@ -764,6 +767,10 @@ typedef struct
 
 	vec3_t normal;
 
+	// Min/Max values for liquid bobbing
+	float min_z = 0.0f;
+	float max_z = 0.0f;
+
 	slope_plane_t *slope;
 }
 plane_coord_data_t;
@@ -797,7 +804,7 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	texc->y = rx * data->y_mat.x + ry * data->y_mat.y;
 
 	if (swirl_pass != 0)
-		CalcTurbulentTexCoords(texc, pos, true);
+		CalcTurbulentTexCoords(texc, pos, true, data->min_z, data->max_z);
 
 	*lit_pos = *pos;
 }
@@ -2580,6 +2587,20 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 			swirl_pass = 1;
 		else if (swirling_flats == SWIRL_SMMU)
 			swirl_pass = -1;
+	}
+
+	if (surf->image->liquid_type > LIQ_None)
+	{
+		if (face_dir > 0)
+		{
+			data.min_z = cur_sub->sector->f_h;
+			data.max_z = P_FindSurroundingHeight((heightref_e)(REF_Surrounding|REF_NEXT), cur_sub->sector);
+		}
+		else
+		{
+			data.min_z = P_FindSurroundingHeight((heightref_e)(REF_Surrounding|REF_CEILING|REF_NEXT|REF_HIGHEST), cur_sub->sector);
+			data.max_z = cur_sub->sector->c_h;
+		}
 	}
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props);

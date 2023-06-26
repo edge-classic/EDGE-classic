@@ -606,7 +606,7 @@ typedef struct wall_plane_data_s
 wall_plane_data_t;
 
 // Adapted from Quake 3 GPL release - Dasho (not used yet, but might be for future effects)
-void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
+/*static void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
 {
 	float timeScale = gametic / (r_doubleframes.d ? 200.0f : 100.0f);
 	float adjustedScrollS, adjustedScrollT;
@@ -620,17 +620,22 @@ void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
 
 	texc->x += adjustedScrollS;
 	texc->y += adjustedScrollT;
-}
+}*/
 
 // Adapted from Quake 3 GPL release - Dasho
-void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
+static void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos, bool doing_plane )
 {
 	float now;
 	float phase = 0;
-	float frequency = thick_liquid ? 0.5 : 1.0;
+	float frequency = thick_liquid ? 0.75 : 1.0;
 	float amplitude = 0.05;
 
 	now = ( phase + leveltime / 100.0f * frequency );
+
+	if (doing_plane)
+		pos->z = pos->z + 1.0f + r_sintable[(int)((pos->z * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ];
+
+	if (swirl_pass == -1) return; // SWIRL_SMMU doesn't need anything else
 
 	if (swirling_flats == SWIRL_PARALLAX)
 	{
@@ -734,7 +739,7 @@ static void WallCoordFunc(void *d, int v_idx,
 	texc->y = data->ty0 + pos->z * data->ty_mul;
 
 	if (swirl_pass > 0)
-		CalcTurbulentTexCoords(texc, pos);
+		CalcTurbulentTexCoords(texc, pos, false);
 
 	*lit_pos = *pos;
 }
@@ -769,7 +774,7 @@ static void PlaneCoordFunc(void *d, int v_idx,
 		vec3_t *pos, float *rgb, vec2_t *texc,
 		vec3_t *normal, vec3_t *lit_pos)
 {
-	const plane_coord_data_t *data = (plane_coord_data_t *)d;
+	plane_coord_data_t *data = (plane_coord_data_t *)d;
 
 	*pos    = data->vert[v_idx];
 	*normal = data->normal;
@@ -793,8 +798,8 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	texc->x = rx * data->x_mat.x + ry * data->x_mat.y;
 	texc->y = rx * data->y_mat.x + ry * data->y_mat.y;
 
-	if (swirl_pass > 0)
-		CalcTurbulentTexCoords(texc, pos);
+	if (swirl_pass != 0)
+		CalcTurbulentTexCoords(texc, pos, true);
 
 	*lit_pos = *pos;
 }
@@ -1153,7 +1158,7 @@ static void DrawWallPart(drawfloor_t *dfloor,
 			trans, &data.pass, data.blending, data.mid_masked,
 			&data, WallCoordFunc);
 
-	if (surf->image->liquid_type > LIQ_None && swirling_flats == SWIRL_PARALLAX) // Kept as an example for future effects
+	if (surf->image->liquid_type > LIQ_None && swirling_flats == SWIRL_PARALLAX)
 	{
 		data.tx0 = surf->offset.x + 25;
 		data.ty0 = surf->offset.y + 25;
@@ -2571,8 +2576,13 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	else
 		thick_liquid = false;
 
-	if (surf->image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
-		swirl_pass = 1;
+	if (surf->image->liquid_type > LIQ_None)
+	{
+		if (swirling_flats > SWIRL_SMMU)
+			swirl_pass = 1;
+		else if (swirling_flats == SWIRL_SMMU)
+			swirl_pass = -1;
+	}
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
 	

@@ -180,10 +180,8 @@ void S_ChangeMusic(int entrynum, bool loop)
 	switch (fmt)
 	{
 		case epi::FMT_OGG:
-			// rewind the file
-			F->Seek(0, epi::file_c::SEEKPOINT_START);
-			delete[] data;
-			music_player = S_PlayOGGMusic(F, volume, loop);
+			delete F;
+			music_player = S_PlayOGGMusic(data, length, volume, loop);
 			break;
 
 		case epi::FMT_MP3:

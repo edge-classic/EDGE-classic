@@ -46,6 +46,13 @@
 
 extern bool dev_stereo;  // FIXME: encapsulation
 
+struct datalump_t
+{
+	const byte *data;
+
+	size_t pos;
+	size_t size;
+};
 
 class oggplayer_c : public abstract_music_c
 {
@@ -64,15 +71,14 @@ private:
 	bool looping;
 	bool is_stereo;
 
-	epi::file_c *ogg_file;
-
+	datalump_t *ogg_lump = nullptr;
 	OggVorbis_File ogg_stream;
-	vorbis_info *vorbis_inf;
+	vorbis_info *vorbis_inf = nullptr;
 
 	s16_t *mono_buffer;
 
 public:
-	bool OpenFile(epi::file_c *file);
+	bool OpenMemory(byte *data, int length);
 
 	virtual void Close(void);
 
@@ -98,14 +104,6 @@ private:
 //
 // oggplayer memory operations
 //
-
-struct datalump_t
-{
-	const byte *data;
-
-	size_t pos;
-	size_t size;
-};
 
 size_t oggplayer_memread(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
@@ -161,54 +159,10 @@ long oggplayer_memtell(void *datasource)
 	return d->pos;
 }
 
-
-//----------------------------------------------------------------------------
-//
-// oggplayer epi::file operations
-//
-
-size_t oggplayer_epi_read(void *ptr, size_t size, size_t nmemb, void *datasource)
-{
-	epi::file_c *file = (epi::file_c *)datasource;
-
-	return file->Read(ptr, (unsigned int) (size * nmemb));
-}
-
-int oggplayer_epi_seek(void *datasource, ogg_int64_t offset, int whence)
-{
-	epi::file_c *file = (epi::file_c *)datasource;
-
-	switch (whence)
-	{
-		case SEEK_SET: whence = epi::file_c::SEEKPOINT_START;   break;
-		case SEEK_CUR: whence = epi::file_c::SEEKPOINT_CURRENT; break;
-		case SEEK_END: whence = epi::file_c::SEEKPOINT_END;     break;
-	}
-
-	return file->Seek((int)offset, whence) ? 0 : -1;
-}
-
-int oggplayer_epi_close(void *datasource)
-{
-	// we don't close the epi::file_c here
-
-	return 0;  // ok
-}
-
-long oggplayer_epi_tell(void *datasource)
-{
-	epi::file_c *file = (epi::file_c *)datasource;
-
-	return (long) file->GetPosition();
-}
-
-
 //----------------------------------------------------------------------------
 
 oggplayer_c::oggplayer_c() : status(NOT_LOADED), vorbis_inf(NULL)
 {
-	ogg_file = NULL;
-
 	mono_buffer = new s16_t[OGGV_NUM_SAMPLES * 2];
 }
 
@@ -294,7 +248,7 @@ bool oggplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
         int got_size = ov_read(&ogg_stream, (char *)data_buf,
 				(OGGV_NUM_SAMPLES - samples) * (is_stereo ? 2 : 1) * sizeof(s16_t),
 				ogg_endian, sizeof(s16_t), 1 /* signed data */,
-				&section);
+				&section, 0.3f);
 
 		if (got_size == OV_HOLE)  // ignore corruption
 			continue;
@@ -339,35 +293,36 @@ void oggplayer_c::Volume(float gain)
 }
 
 
-bool oggplayer_c::OpenFile(epi::file_c * file)
+bool oggplayer_c::OpenMemory(byte *data, int length)
 {
-	SYS_ASSERT(file);
-
 	if (status != NOT_LOADED)
 		Close();
 
-	ogg_file = file;
+	ogg_lump = new datalump_t;
 
-	// set up callbacks for reading from the EPI file
+	ogg_lump->data = data;
+	ogg_lump->size = length;
+	ogg_lump->pos  = 0;
+
 	ov_callbacks CB;
 
-	CB.read_func  = oggplayer_epi_read;
-	CB.seek_func  = oggplayer_epi_seek;
-	CB.close_func = oggplayer_epi_close;
-	CB.tell_func  = oggplayer_epi_tell;
+	CB.read_func  = oggplayer_memread;
+	CB.seek_func  = oggplayer_memseek;
+	CB.close_func = oggplayer_memclose;
+	CB.tell_func  = oggplayer_memtell;
 
-    int result = ov_open_callbacks((void*)ogg_file, &ogg_stream, NULL, 0, CB);
+    int result = ov_open_callbacks((void*)ogg_lump, &ogg_stream, NULL, 0, CB);
 
     if (result < 0)
     {
-        oggplayer_epi_close((void *) ogg_file);
-
-		std::string err_msg("[oggplayer_c::OpenFile] Failed: ");
+		std::string err_msg("[oggplayer_c::OpenMemory] Failed: ");
 
 		err_msg += GetError(result);
-
-		I_Error("%s\n", err_msg.c_str());
-		return false; /* NOT REACHED */
+		I_Warning("%s\n", err_msg.c_str());
+		ov_clear(&ogg_stream);
+		ogg_lump->data = nullptr; // this is deleted after the function returns false
+		delete ogg_lump;
+		return false;
     }
 
 	PostOpenInit();
@@ -385,8 +340,12 @@ void oggplayer_c::Close()
 
 	ov_clear(&ogg_stream);
 
-	delete ogg_file;
-	ogg_file = NULL;
+	delete vorbis_inf;
+	vorbis_inf = nullptr;
+
+	delete[] ogg_lump->data;
+	delete ogg_lump;
+	ogg_lump = nullptr;
 
 	status = NOT_LOADED;
 }
@@ -459,12 +418,13 @@ void oggplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayOGGMusic(epi::file_c *file, float volume, bool looping)
+abstract_music_c * S_PlayOGGMusic(byte *data, int length, float volume, bool looping)
 {
 	oggplayer_c *player = new oggplayer_c();
 
-	if (! player->OpenFile(file))
+	if (! player->OpenMemory(data, length))
 	{
+		delete[] data;
 		delete player;
 		return NULL;
 	}
@@ -498,10 +458,6 @@ bool S_LoadOGGSound(epi::sound_data_c *buf, const byte *data, int length)
     if (result < 0)
     {
 		I_Warning("Failed to load OGG sound (corrupt ogg?) error=%d\n", result);
-
-		// Only time we have to kill this since OGG will deal with
-		// the handle when ov_open_callbacks() succeeds
-        oggplayer_memclose((void*) &ogg_lump);
 
 		return false;
     }

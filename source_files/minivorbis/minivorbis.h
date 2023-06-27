@@ -841,9 +841,9 @@ extern long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,int samples,
                           int *bitstream);
 extern long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
                           int bigendianp,int word,int sgned,int *bitstream,
-                          void (*filter)(float **pcm,long channels,long samples,void *filter_param),void *filter_param);
+                          void (*filter)(float **pcm,long channels,long samples,void *filter_param),void *filter_param, float gain);
 extern long ov_read(OggVorbis_File *vf,char *buffer,int length,
-                    int bigendianp,int word,int sgned,int *bitstream);
+                    int bigendianp,int word,int sgned,int *bitstream, float gain = 1.0f);
 extern int ov_crosslap(OggVorbis_File *vf1,OggVorbis_File *vf2);
 
 extern int ov_halfrate(OggVorbis_File *vf,int flag);
@@ -21264,7 +21264,7 @@ static int host_is_big_endian() {
 
 long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
                     int bigendianp,int word,int sgned,int *bitstream,
-                    void (*filter)(float **pcm,long channels,long samples,void *filter_param),void *filter_param){
+                    void (*filter)(float **pcm,long channels,long samples,void *filter_param),void *filter_param,float gain){
   int i,j;
   int host_endian = host_is_big_endian();
   int hs;
@@ -21318,7 +21318,7 @@ long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
         vorbis_fpu_setround(&fpu);
         for(j=0;j<samples;j++)
           for(i=0;i<channels;i++){
-            val=vorbis_ftoi(pcm[i][j]*128.f);
+            val=vorbis_ftoi(pcm[i][j]*128.f*gain);
             if(val>127)val=127;
             else if(val<-128)val=-128;
             *buffer++=val+off;
@@ -21335,7 +21335,7 @@ long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
               float *src=pcm[i];
               short *dest=((short *)buffer)+i;
               for(j=0;j<samples;j++) {
-                val=vorbis_ftoi(src[j]*32768.f);
+                val=vorbis_ftoi(src[j]*32768.f*gain);
                 if(val>32767)val=32767;
                 else if(val<-32768)val=-32768;
                 *dest=val;
@@ -21351,7 +21351,7 @@ long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
               float *src=pcm[i];
               short *dest=((short *)buffer)+i;
               for(j=0;j<samples;j++) {
-                val=vorbis_ftoi(src[j]*32768.f);
+                val=vorbis_ftoi(src[j]*32768.f*gain);
                 if(val>32767)val=32767;
                 else if(val<-32768)val=-32768;
                 *dest=val+off;
@@ -21366,7 +21366,7 @@ long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
           vorbis_fpu_setround(&fpu);
           for(j=0;j<samples;j++)
             for(i=0;i<channels;i++){
-              val=vorbis_ftoi(pcm[i][j]*32768.f);
+              val=vorbis_ftoi(pcm[i][j]*32768.f*gain);
               if(val>32767)val=32767;
               else if(val<-32768)val=-32768;
               val+=off;
@@ -21380,7 +21380,7 @@ long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
           vorbis_fpu_setround(&fpu);
           for(j=0;j<samples;j++)
             for(i=0;i<channels;i++){
-              val=vorbis_ftoi(pcm[i][j]*32768.f);
+              val=vorbis_ftoi(pcm[i][j]*32768.f*gain);
               if(val>32767)val=32767;
               else if(val<-32768)val=-32768;
               val+=off;
@@ -21404,8 +21404,8 @@ long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
 }
 
 long ov_read(OggVorbis_File *vf,char *buffer,int length,
-             int bigendianp,int word,int sgned,int *bitstream){
-  return ov_read_filter(vf, buffer, length, bigendianp, word, sgned, bitstream, NULL, NULL);
+             int bigendianp,int word,int sgned,int *bitstream, float gain){
+  return ov_read_filter(vf, buffer, length, bigendianp, word, sgned, bitstream, NULL, NULL, gain);
 }
 
 /* input values: pcm_channels) a float vector per channel of output

@@ -175,7 +175,7 @@ void S_ChangeMusic(int entrynum, bool loop)
 		}
 	}
 
-	// NOTE: the players that take `data` are responsible to free it
+	// NOTE: players are responsible for freeing 'data'
 
 	switch (fmt)
 	{
@@ -185,10 +185,8 @@ void S_ChangeMusic(int entrynum, bool loop)
 			break;
 
 		case epi::FMT_MP3:
-			// rewind the file
-			F->Seek(0, epi::file_c::SEEKPOINT_START);
-			delete data;
-			music_player = S_PlayMP3Music(F, volume, loop);
+			delete F;
+			music_player = S_PlayMP3Music(data, length, volume, loop);
 			break;
 
 		case epi::FMT_FLAC:

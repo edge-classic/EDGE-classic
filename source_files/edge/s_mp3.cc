@@ -32,9 +32,9 @@
 #include "s_mp3.h"
 #include "w_wad.h"
 
-#define MINIMP3_ONLY_MP3
-#define MINIMP3_IMPLEMENTATION
-#include "minimp3_ex.h"
+#define DR_MP3_NO_STDIO
+#define DR_MP3_IMPLEMENTATION
+#include "dr_mp3.h"
 
 extern bool dev_stereo;  // FIXME: encapsulation
 
@@ -55,13 +55,13 @@ private:
 	bool looping;
 	bool is_stereo;
 
-	mp3dec_ex_t mp3_track;
-	mp3dec_io_t io;
+	byte *mp3_data = nullptr;
+	drmp3 *mp3_dec = nullptr;
 
 	s16_t *mono_buffer;
 
 public:
-	bool OpenFile(epi::file_c *file);
+	bool OpenMemory(byte *data, int length);
 
 	virtual void Close(void);
 
@@ -84,7 +84,7 @@ private:
 
 mp3player_c::mp3player_c() : status(NOT_LOADED)
 {
-	mono_buffer = new s16_t[MINIMP3_IO_SIZE * 2];
+	mono_buffer = new s16_t[DRMP3_MAX_SAMPLES_PER_FRAME * 2];
 }
 
 mp3player_c::~mp3player_c()
@@ -97,7 +97,7 @@ mp3player_c::~mp3player_c()
 
 void mp3player_c::PostOpenInit()
 {
-    if (mp3_track.info.channels == 1) {
+    if (mp3_dec->channels == 1) {
         is_stereo = false;
 	} else {
         is_stereo = true;
@@ -129,14 +129,13 @@ bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	else
 		data_buf = buf->data_L;
 
-	int got_size = mp3dec_ex_read(&mp3_track, data_buf, MINIMP3_IO_SIZE * 2);
+	int got_size = drmp3_read_pcm_frames_s16(mp3_dec, DRMP3_MAX_SAMPLES_PER_FRAME, data_buf);
 
-	if (got_size == 0)  /* EOF */
+	if (mp3_dec->atEnd)  /* EOF */
 	{
 		if (! looping)
 			return false;
-		mp3dec_ex_seek(&mp3_track, 0);
-		buf->Free();
+		mp3_dec->memory.currentReadPos = 0;
 		return true;
 	}
 
@@ -145,8 +144,6 @@ bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
 		I_Debugf("[mp3player_c::StreamIntoBuffer] Failed\n");
 		return false;
 	}
-
-	got_size /= (is_stereo ? 2 : 1);
 
 	buf->length = got_size;
 
@@ -164,39 +161,26 @@ void mp3player_c::Volume(float gain)
 }
 
 
-static size_t mp3player_epi_read(void *buf, size_t size, void *user_data)
+bool mp3player_c::OpenMemory(byte *data, int length)
 {
-	epi::file_c *file = (epi::file_c *)user_data;
-
-	return file->Read(buf, (unsigned int)size);
-}
-
-
-static int mp3player_epi_seek(uint64_t position, void *user_data)
-{
-	epi::file_c *file = (epi::file_c *)user_data;
-
-	return file->Seek((int)position, epi::file_c::SEEKPOINT_START) ? 0 : -1;
-}
-
-
-bool mp3player_c::OpenFile(epi::file_c *file)
-{
-	SYS_ASSERT(file);
-
 	if (status != NOT_LOADED)
 		Close();
 
-	io.read = &mp3player_epi_read;
-	io.seek = &mp3player_epi_seek;
-	io.read_data = (void *) file;
-	io.seek_data = (void *) file;
+	mp3_dec = new drmp3;
 
-    if (mp3dec_ex_open_cb(&mp3_track, &io, MP3D_SEEK_TO_SAMPLE) != 0)
+    if (!drmp3_init_memory(mp3_dec, data, length, nullptr))
     {
 		I_Warning("mp3player_c: Could not open MP3 file.\n");
+		delete mp3_dec;
 		return false;
     }
+
+	if (mp3_dec->channels > 2)
+	{
+		I_Warning("mp3player_c: MP3 has too many channels: %d\n", mp3_dec->channels);
+		drmp3_uninit(mp3_dec);
+		return false;
+	}
 
 	PostOpenInit();
 	return true;
@@ -212,7 +196,12 @@ void mp3player_c::Close()
 	if (status != STOPPED)
 		Stop();
 
-	mp3dec_ex_close(&mp3_track);
+	drmp3_uninit(mp3_dec);
+	delete mp3_dec;
+	mp3_dec = nullptr;
+
+	delete[] mp3_data;
+	mp3_data = nullptr;
 
 	status = NOT_LOADED;
 }
@@ -263,7 +252,7 @@ void mp3player_c::Ticker()
 {
 	while (status == PLAYING && !var_pc_speaker_mode)
 	{
-		epi::sound_data_c *buf = S_QueueGetFreeBuffer(MINIMP3_IO_SIZE, 
+		epi::sound_data_c *buf = S_QueueGetFreeBuffer(DRMP3_MAX_SAMPLES_PER_FRAME, 
 				(is_stereo && dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 
 		if (! buf)
@@ -272,7 +261,7 @@ void mp3player_c::Ticker()
 		if (StreamIntoBuffer(buf))
 		{
 			if (buf->length > 0)
-				S_QueueAddBuffer(buf, mp3_track.info.hz);
+				S_QueueAddBuffer(buf, mp3_dec->sampleRate);
 			else
 				S_QueueReturnBuffer(buf);
 		}
@@ -288,12 +277,13 @@ void mp3player_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayMP3Music(epi::file_c *file, float volume, bool looping)
+abstract_music_c * S_PlayMP3Music(byte *data, int length, float volume, bool looping)
 {
 	mp3player_c *player = new mp3player_c();
 
-	if (! player->OpenFile(file))
+	if (! player->OpenMemory(data, length))
 	{
+		delete[] data;
 		delete player;
 		return NULL;
 	}
@@ -307,50 +297,41 @@ abstract_music_c * S_PlayMP3Music(epi::file_c *file, float volume, bool looping)
 
 bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length)
 {
-	mp3dec_t mp3_sound;
-	mp3dec_file_info_t sound_info;
+	drmp3_config info;
 
-    if (mp3dec_load_buf(&mp3_sound, data, length, &sound_info, NULL, NULL) != 0)
+	buf->Free(); // In case something's already there
+
+	buf->data_L = drmp3_open_memory_and_read_pcm_frames_s16(data, length, &info, nullptr, nullptr);
+
+    if (!buf->data_L)
     {
 		I_Warning("Failed to load MP3 sound (corrupt mp3?)\n");
-
 		return false;
     }
 
+	if (info.channels > 2)
+	{
+		I_Warning("MP3 SFX Loader: too many channels: %d\n", info.channels);
+		buf->Free();
+		return false;
+	}
+
 	I_Debugf("MP3 SFX Loader: freq %d Hz, %d channels\n",
-			 sound_info.hz, sound_info.channels);
+		info.sampleRate, info.channels);
 
-	if (sound_info.channels > 2)
+	buf->freq = info.sampleRate;
+	if (info.channels == 2)
 	{
-		I_Warning("MP3 SFX Loader: too many channels: %d\n", sound_info.channels);
-
-		free(sound_info.buffer);
-
-		return false;
+		buf->mode = epi::SBUF_Interleaved;
+		buf->data_R = nullptr;
+	}
+	else
+	{
+		buf->mode = epi::SBUF_Mono;
+		buf->data_R = buf->data_L;
 	}
 
-	if (sound_info.samples <= 0) // I think the initial loading would fail if this were the case, but just as a sanity check - Dasho
-	{
-		I_Error("MP3 SFX Loader: no samples!\n");
-		return false;
-	}
-
-	bool is_stereo = (sound_info.channels > 1);
-
-	buf->freq = sound_info.hz;
-
-	epi::sound_gather_c gather;
-
-	s16_t *buffer = gather.MakeChunk(sound_info.samples, is_stereo);
-
-	memcpy(buffer, sound_info.buffer, sound_info.samples * (is_stereo ? 2 : 1) * sizeof(s16_t));
-
-	gather.CommitChunk(sound_info.samples);
-
-	if (! gather.Finalise(buf, is_stereo))
-		I_Error("MP3 SFX Loader: no samples!\n");
-
-	free(sound_info.buffer);
+	delete[] data;
 
 	return true;
 }

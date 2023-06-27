@@ -27,8 +27,6 @@ minivorbis library - Copyright (c) 2020 Eduardo Bart
 CC 1.0 Universal License
 ===========================================================================================
 
-minimp3 library - lieff
-
 "ProtoSquare!" soundfont - Yingchun Soul
 
 ===========================================================================================
@@ -115,7 +113,7 @@ Fraction.hpp - Bisqwit
 
 "GMGSx" soundfont (renamed to default.sf2) - Kenneth Rundt
 
-dr_wav and dr_flac libraries - David Reid
+dr_wav, dr_mp3, and dr_flac libraries - David Reid
 
 stb_image, stb_image_write, stb_rect_pack and stb_truetype libraries - Sean Barrett
 

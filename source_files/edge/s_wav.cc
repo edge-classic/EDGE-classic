@@ -209,34 +209,28 @@ bool S_LoadWAVSound(epi::sound_data_c *buf, byte *data, int length, bool pc_spea
 	if (pc_speaker)
 		data = Convert_PCSpeaker(data, &length);
 
-	if (!drwav_init_memory(&wav, data, length, NULL))
+	if (!drwav_init_memory(&wav, data, length, nullptr))
 	{
 		I_Warning("Failed to load WAV sound (corrupt wav?)\n");
-	
 		return false;
 	}
-
-
-	I_Debugf("WAV SFX Loader: freq %d Hz, %d channels\n",
-			 wav.sampleRate, wav.channels);
 
 	if (wav.channels > 2)
 	{
 		I_Warning("WAV SFX Loader: too many channels: %d\n", wav.channels);
-
 		drwav_uninit(&wav);
-
 		return false;
 	}
 
 	if (wav.totalPCMFrameCount <= 0) // I think the initial loading would fail if this were the case, but just as a sanity check - Dasho
 	{
 		I_Warning("WAV SFX Loader: no samples!\n");
-
 		drwav_uninit(&wav);
-
 		return false;
 	}
+
+	I_Debugf("WAV SFX Loader: freq %d Hz, %d channels\n",
+			 wav.sampleRate, wav.channels);
 
 	bool is_stereo = (wav.channels > 1);
 

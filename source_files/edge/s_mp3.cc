@@ -135,7 +135,7 @@ bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	{
 		if (! looping)
 			return false;
-		mp3_dec->memory.currentReadPos = 0;
+		drmp3_seek_to_pcm_frame(mp3_dec, 0);
 		return true;
 	}
 
@@ -297,41 +297,47 @@ abstract_music_c * S_PlayMP3Music(byte *data, int length, float volume, bool loo
 
 bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length)
 {
-	drmp3_config info;
+	drmp3 mp3;
 
-	buf->Free(); // In case something's already there
-
-	buf->data_L = drmp3_open_memory_and_read_pcm_frames_s16(data, length, &info, nullptr, nullptr);
-
-    if (!buf->data_L)
-    {
+	if (!drmp3_init_memory(&mp3, data, length, nullptr))
+	{
 		I_Warning("Failed to load MP3 sound (corrupt mp3?)\n");
 		return false;
-    }
+	}
 
-	if (info.channels > 2)
+	if (mp3.channels > 2)
 	{
-		I_Warning("MP3 SFX Loader: too many channels: %d\n", info.channels);
-		buf->Free();
+		I_Warning("MP3 SFX Loader: too many channels: %d\n", mp3.channels);
+		drmp3_uninit(&mp3);
+		return false;
+	}
+
+	drmp3_uint64 framecount = drmp3_get_pcm_frame_count(&mp3);
+
+	if (framecount <= 0) // I think the initial loading would fail if this were the case, but just as a sanity check - Dasho
+	{
+		I_Warning("MP3 SFX Loader: no samples!\n");
+		drmp3_uninit(&mp3);
 		return false;
 	}
 
 	I_Debugf("MP3 SFX Loader: freq %d Hz, %d channels\n",
-		info.sampleRate, info.channels);
+		mp3.sampleRate, mp3.channels);
 
-	buf->freq = info.sampleRate;
-	if (info.channels == 2)
-	{
-		buf->mode = epi::SBUF_Interleaved;
-		buf->data_R = nullptr;
-	}
-	else
-	{
-		buf->mode = epi::SBUF_Mono;
-		buf->data_R = buf->data_L;
-	}
+	bool is_stereo = (mp3.channels > 1);
 
-	delete[] data;
+	buf->freq = mp3.sampleRate;
+
+	epi::sound_gather_c gather;
+
+	s16_t *buffer = gather.MakeChunk(framecount, is_stereo);
+
+	gather.CommitChunk(drmp3_read_pcm_frames_s16(&mp3, framecount, buffer));
+
+	if (! gather.Finalise(buf, is_stereo))
+		I_Warning("MP3 SFX Loader: no samples!\n");
+
+	drmp3_uninit(&mp3);
 
 	return true;
 }

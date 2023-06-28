@@ -4,7 +4,7 @@
 namespace primesynth {
 class Synthesizer {
 public:
-    Synthesizer(double outputRate = 48000, std::size_t numChannels = 16);
+    Synthesizer(double outputRate = 44100, std::size_t numChannels = 16);
 
     void render_float(float *buffer, std::size_t samples);
     void render_s16(std::int16_t *buffer, std::size_t samples);

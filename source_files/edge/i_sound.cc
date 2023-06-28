@@ -148,7 +148,7 @@ void I_StartupSound(void)
 		return;
 	}
 
-	int want_freq = 48000;
+	int want_freq = 44100;
 	bool want_stereo = (var_sound_stereo >= 1);
 
 	std::string p = epi::to_u8string(argv::Value("freq"));

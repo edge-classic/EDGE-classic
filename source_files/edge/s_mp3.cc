@@ -129,7 +129,7 @@ bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	else
 		data_buf = buf->data_L;
 
-	int got_size = drmp3_read_pcm_frames_s16(mp3_dec, DRMP3_MAX_SAMPLES_PER_FRAME, data_buf);
+	int got_size = drmp3_read_pcm_frames_s16(mp3_dec, DRMP3_MAX_SAMPLES_PER_FRAME, data_buf, 2);
 
 	if (mp3_dec->atEnd)  /* EOF */
 	{

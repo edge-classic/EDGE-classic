@@ -3653,7 +3653,7 @@ static drmp3_uint64 drmp3_read_pcm_frames_raw(drmp3* pMP3, drmp3_uint64 framesTo
             DRMP3_COPY_MEMORY(pFramesOutS16, pFramesInS16, sizeof(drmp3_int16) * framesToConsume * pMP3->channels);
             if (gain > 0) {
                 for (unsigned i = 0; i < framesToConsume * pMP3->channels; i++) {
-                    pFramesOutS16[i] >>= 2;
+                    pFramesOutS16[i] >>= gain;
                 }
             }
         #endif

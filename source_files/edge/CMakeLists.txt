@@ -93,7 +93,6 @@ set (EDGE_SOURCE_FILES
   s_vgm.cc
   s_wav.cc
   s_flac.cc
-  s_fmm.cc
   sv_chunk.cc
   sv_glob.cc
   sv_level.cc
@@ -130,7 +129,6 @@ set (EDGE_LINK_LIBRARIES
   ${SDL2_LIBRARIES}
   crsid
   ec_voxelib
-  fmmidi
   gme
   libprimesynth
   libymfm
@@ -172,7 +170,6 @@ target_include_directories(edge-classic PRIVATE ../dehacked)
 target_include_directories(edge-classic PRIVATE ../dr_libs)
 target_include_directories(edge-classic PRIVATE ../ec_voxelib)
 target_include_directories(edge-classic PRIVATE ../epi)
-target_include_directories(edge-classic PRIVATE ../fmmidi)
 target_include_directories(edge-classic PRIVATE ../libgme/gme)
 target_include_directories(edge-classic PRIVATE ../libprimesynth)
 target_include_directories(edge-classic PRIVATE ../libymfm)

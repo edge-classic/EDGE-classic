@@ -340,9 +340,6 @@ void oggplayer_c::Close()
 
 	ov_clear(&ogg_stream);
 
-	delete vorbis_inf;
-	vorbis_inf = nullptr;
-
 	delete[] ogg_lump->data;
 	delete ogg_lump;
 	ogg_lump = nullptr;

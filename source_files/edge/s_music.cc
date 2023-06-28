@@ -42,7 +42,6 @@
 #include "s_sid.h"
 #include "s_vgm.h"
 #include "s_flac.h"
-#include "s_fmm.h"
 #include "m_misc.h"
 #include "w_files.h"
 #include "w_wad.h"
@@ -228,13 +227,9 @@ void S_ChangeMusic(int entrynum, bool loop)
 			{
 				music_player = S_PlayPrime(data, length, volume, loop);
 			}
-			else if (var_midi_player == 1)
-			{
-				music_player = S_PlayOPL(data, length, volume, loop, play->type);
-			}
 			else
 			{
-				music_player = S_PlayFMM(data, length, volume, loop);
+				music_player = S_PlayOPL(data, length, volume, loop, play->type);
 			}
 			break;
 

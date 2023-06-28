@@ -38,7 +38,7 @@ New Features
   
   
 
-General Improvements
+General Improvements/Changes
 --------------------
 - Weapons with the ability to zoom but without a ZOOM state defined will still draw the regular psprite and crosshair while zoomed
 - Implemented remaining MBF code pointers (A_FireOldBFG, A_BetaSkullAttack)
@@ -55,6 +55,7 @@ General Improvements
 - "microGM" soundfont added as a more SNES-like option
   - "16 Bit Game Station" soundfont has been removed
 - "ChipFreak" chiptune/8-bit inspired soundfont added
+- FMMIDI player has been removed in favor of adding OPL3/SF2 files that cover the same general sound
 
 
 Bugs fixed

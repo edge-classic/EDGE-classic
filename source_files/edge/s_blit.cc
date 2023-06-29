@@ -66,6 +66,7 @@ bool ddf_reverb = false;
 int ddf_reverb_type = 0;
 int ddf_reverb_ratio = 0;
 int ddf_reverb_delay = 0;
+float mus_player_gain = 1.0f;
 
 static int *mix_buffer;
 static int mix_buf_len;
@@ -168,7 +169,8 @@ void mix_channel_c::ComputeMusicVolume()
 {
 	float MAX_VOL = (1 << (16 - SAFE_BITS)) - 3;
 
- 	MAX_VOL = MAX_VOL * mus_volume.f;
+ 	MAX_VOL = MAX_VOL * mus_volume.f * mus_player_gain; // This last one is an internal value and won't exceed 1.0,
+														// so MAX_VOL should be consistent
 
 	volume_L = (int) MAX_VOL;
 	volume_R = (int) MAX_VOL;

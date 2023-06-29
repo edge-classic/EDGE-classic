@@ -247,7 +247,7 @@ bool oggplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
         int got_size = ov_read(&ogg_stream, (char *)data_buf,
 				(OGGV_NUM_SAMPLES - samples) * (is_stereo ? 2 : 1) * sizeof(s16_t),
 				ogg_endian, sizeof(s16_t), 1 /* signed data */,
-				&section, 0.3f);
+				&section);
 
 		if (got_size == OV_HOLE)  // ignore corruption
 			continue;
@@ -335,6 +335,9 @@ void oggplayer_c::Close()
 	delete ogg_lump;
 	ogg_lump = nullptr;
 
+	// Reset player gain
+	mus_player_gain = 1.0f;
+
 	status = NOT_LOADED;
 }
 
@@ -363,6 +366,9 @@ void oggplayer_c::Play(bool loop)
 
 	status = PLAYING;
 	looping = loop;
+
+	// Set individual player gain
+	mus_player_gain = 0.3f;
 
 	// Load up initial buffer data
 	Ticker();

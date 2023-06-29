@@ -183,6 +183,9 @@ void flacplayer_c::Close()
 	drflac_close(flac_track);
 	delete[] flac_data;
 
+	// reset player gain
+	mus_player_gain = 1.0f;
+
 	status = NOT_LOADED;
 }
 
@@ -211,6 +214,9 @@ void flacplayer_c::Play(bool loop)
 
 	status = PLAYING;
 	looping = loop;
+
+	// Set individual player type gain
+	mus_player_gain = 0.3f;
 
 	// Load up initial buffer data
 	Ticker();

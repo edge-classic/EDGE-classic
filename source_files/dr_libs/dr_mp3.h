@@ -437,7 +437,7 @@ Reads PCM frames as interleaved signed 16-bit integer PCM.
 
 Note that framesToRead specifies the number of PCM frames to read, _not_ the number of MP3 frames.
 */
-DRMP3_API drmp3_uint64 drmp3_read_pcm_frames_s16(drmp3* pMP3, drmp3_uint64 framesToRead, drmp3_int16* pBufferOut, uint8_t gain = 0);
+DRMP3_API drmp3_uint64 drmp3_read_pcm_frames_s16(drmp3* pMP3, drmp3_uint64 framesToRead, drmp3_int16* pBufferOut);
 
 /*
 Seeks to a specific frame.
@@ -3631,7 +3631,7 @@ static void drmp3_s16_to_f32(float* dst, const drmp3_int16* src, drmp3_uint64 sa
 #endif
 
 
-static drmp3_uint64 drmp3_read_pcm_frames_raw(drmp3* pMP3, drmp3_uint64 framesToRead, void* pBufferOut, uint8_t gain = 0)
+static drmp3_uint64 drmp3_read_pcm_frames_raw(drmp3* pMP3, drmp3_uint64 framesToRead, void* pBufferOut)
 {
     drmp3_uint64 totalFramesRead = 0;
 
@@ -3651,11 +3651,6 @@ static drmp3_uint64 drmp3_read_pcm_frames_raw(drmp3* pMP3, drmp3_uint64 framesTo
             drmp3_int16* pFramesOutS16 = (drmp3_int16*)DRMP3_OFFSET_PTR(pBufferOut,          sizeof(drmp3_int16) * totalFramesRead                   * pMP3->channels);
             drmp3_int16* pFramesInS16  = (drmp3_int16*)DRMP3_OFFSET_PTR(&pMP3->pcmFrames[0], sizeof(drmp3_int16) * pMP3->pcmFramesConsumedInMP3Frame * pMP3->mp3FrameChannels);
             DRMP3_COPY_MEMORY(pFramesOutS16, pFramesInS16, sizeof(drmp3_int16) * framesToConsume * pMP3->channels);
-            if (gain > 0) {
-                for (unsigned i = 0; i < framesToConsume * pMP3->channels; i++) {
-                    pFramesOutS16[i] >>= gain;
-                }
-            }
         #endif
         }
 
@@ -3721,7 +3716,7 @@ DRMP3_API drmp3_uint64 drmp3_read_pcm_frames_f32(drmp3* pMP3, drmp3_uint64 frame
 #endif
 }
 
-DRMP3_API drmp3_uint64 drmp3_read_pcm_frames_s16(drmp3* pMP3, drmp3_uint64 framesToRead, drmp3_int16* pBufferOut, uint8_t gain)
+DRMP3_API drmp3_uint64 drmp3_read_pcm_frames_s16(drmp3* pMP3, drmp3_uint64 framesToRead, drmp3_int16* pBufferOut)
 {
     if (pMP3 == NULL || pMP3->onRead == NULL) {
         return 0;
@@ -3729,7 +3724,7 @@ DRMP3_API drmp3_uint64 drmp3_read_pcm_frames_s16(drmp3* pMP3, drmp3_uint64 frame
 
 #if !defined(DR_MP3_FLOAT_OUTPUT)
     /* Fast path. No conversion required. */
-    return drmp3_read_pcm_frames_raw(pMP3, framesToRead, pBufferOut, gain);
+    return drmp3_read_pcm_frames_raw(pMP3, framesToRead, pBufferOut);
 #else
     /* Slow path. Convert from f32 to s16. */
     {

@@ -128,7 +128,7 @@ bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	else
 		data_buf = buf->data_L;
 
-	int got_size = drmp3_read_pcm_frames_s16(mp3_dec, DRMP3_MAX_SAMPLES_PER_FRAME, data_buf, 2);
+	int got_size = drmp3_read_pcm_frames_s16(mp3_dec, DRMP3_MAX_SAMPLES_PER_FRAME, data_buf);
 
 	if (got_size == 0)  /* EOF */
 	{
@@ -194,6 +194,9 @@ void mp3player_c::Close()
 	delete[] mp3_data;
 	mp3_data = nullptr;
 
+	// reset player gain
+	mus_player_gain = 1.0f;
+
 	status = NOT_LOADED;
 }
 
@@ -222,6 +225,9 @@ void mp3player_c::Play(bool loop)
 
 	status = PLAYING;
 	looping = loop;
+
+	// Set individual player type gain
+	mus_player_gain = 0.3f;
 
 	// Load up initial buffer data
 	Ticker();

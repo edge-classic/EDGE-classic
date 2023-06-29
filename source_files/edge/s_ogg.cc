@@ -89,7 +89,6 @@ public:
 	virtual void Resume(void);
 
 	virtual void Ticker(void);
-	virtual void Volume(float gain);
 
 private:
 	const char *GetError(int code);
@@ -285,14 +284,6 @@ bool oggplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
     return (samples > 0);
 }
 
-
-void oggplayer_c::Volume(float gain)
-{
-	// not needed, music volume is handled in s_blit.cc
-	// (see mix_channel_c::ComputeMusicVolume).
-}
-
-
 bool oggplayer_c::OpenMemory(byte *data, int length)
 {
 	if (status != NOT_LOADED)
@@ -415,7 +406,7 @@ void oggplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayOGGMusic(byte *data, int length, float volume, bool looping)
+abstract_music_c * S_PlayOGGMusic(byte *data, int length, bool looping)
 {
 	oggplayer_c *player = new oggplayer_c();
 
@@ -426,7 +417,6 @@ abstract_music_c * S_PlayOGGMusic(byte *data, int length, float volume, bool loo
 		return NULL;
 	}
 
-	player->Volume(volume);
 	player->Play(looping);
 
 	return player;

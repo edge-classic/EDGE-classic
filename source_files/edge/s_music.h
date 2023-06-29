@@ -42,7 +42,6 @@ public:
 	virtual void Resume(void) = 0;
 
 	virtual void Ticker(void) = 0;
-	virtual void Volume(float gain) = 0;
 };
 
 /* VARIABLES */
@@ -58,8 +57,6 @@ void S_ResumeMusic(void);
 void S_PauseMusic(void);
 void S_StopMusic(void);
 void S_MusicTicker(void);
-
-void S_ChangeMusicVolume(void);
 
 #endif /* __S_MUSIC_H__ */
 

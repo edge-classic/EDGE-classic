@@ -72,7 +72,6 @@ public:
 	virtual void Resume(void);
 
 	virtual void Ticker(void);
-	virtual void Volume(float gain);
 
 private:
 	void PostOpenInit(void);
@@ -152,14 +151,6 @@ bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
 
     return (true);
 }
-
-
-void mp3player_c::Volume(float gain)
-{
-	// not needed, music volume is handled in s_blit.cc
-	// (see mix_channel_c::ComputeMusicVolume).
-}
-
 
 bool mp3player_c::OpenMemory(byte *data, int length)
 {
@@ -277,7 +268,7 @@ void mp3player_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayMP3Music(byte *data, int length, float volume, bool looping)
+abstract_music_c * S_PlayMP3Music(byte *data, int length, bool looping)
 {
 	mp3player_c *player = new mp3player_c();
 
@@ -288,7 +279,6 @@ abstract_music_c * S_PlayMP3Music(byte *data, int length, float volume, bool loo
 		return NULL;
 	}
 
-	player->Volume(volume);
 	player->Play(looping);
 
 	return player;

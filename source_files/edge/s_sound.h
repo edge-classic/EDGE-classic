@@ -103,7 +103,6 @@ void S_PauseAudioDevice();
 
 void S_SoundTicker(void);
 
-void S_ChangeSoundVolume(void);
 void S_ChangeChannelNum(void);
 
 void S_PrecacheSounds(void);

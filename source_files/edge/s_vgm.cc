@@ -75,7 +75,6 @@ public:
 	virtual void Resume(void);
 
 	virtual void Ticker(void);
-	virtual void Volume(float gain);
 
 	void PostOpenInit(void);
 
@@ -153,13 +152,6 @@ bool vgmplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	}
 
     return (true);
-}
-
-
-void vgmplayer_c::Volume(float gain)
-{
-	// not needed, music volume is handled in s_blit.cc
-	// (see mix_channel_c::ComputeMusicVolume).
 }
 
 bool vgmplayer_c::OpenMemory(byte *data, int length)
@@ -316,7 +308,7 @@ void vgmplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayVGMMusic(byte *data, int length, float volume, bool looping)
+abstract_music_c * S_PlayVGMMusic(byte *data, int length, bool looping)
 {
 	vgmplayer_c *player = new vgmplayer_c();
 
@@ -330,7 +322,6 @@ abstract_music_c * S_PlayVGMMusic(byte *data, int length, float volume, bool loo
 	// we retain a copy of the VGM data, so can free it here
 	delete[] data;
 
-	player->Volume(volume);
 	player->Play(looping);
 
 	return player;

@@ -69,7 +69,6 @@ public:
 	virtual void Resume(void);
 
 	virtual void Ticker(void);
-	virtual void Volume(float gain);
 
 private:
 
@@ -134,14 +133,6 @@ bool sidplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 
     return true;
 }
-
-
-void sidplayer_c::Volume(float gain)
-{
-	// not needed, music volume is handled in s_blit.cc
-	// (see mix_channel_c::ComputeMusicVolume).
-}
-
 
 bool sidplayer_c::OpenMemory(byte *data, int length)
 {
@@ -258,7 +249,7 @@ void sidplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlaySIDMusic(byte *data, int length, float volume, bool looping)
+abstract_music_c * S_PlaySIDMusic(byte *data, int length, bool looping)
 {
 	sidplayer_c *player = new sidplayer_c();
 
@@ -272,7 +263,6 @@ abstract_music_c * S_PlaySIDMusic(byte *data, int length, float volume, bool loo
 	// cRSID retains the data after initializing the track
 	delete[] data;
 
-	player->Volume(volume);
 	player->Play(looping);
 
 	return player;

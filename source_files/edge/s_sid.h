@@ -25,7 +25,7 @@
 
 /* FUNCTIONS */
 
-abstract_music_c * S_PlaySIDMusic(byte *data, int length, float volume, bool looping);
+abstract_music_c * S_PlaySIDMusic(byte *data, int length, bool looping);
 
 #endif  /* __SIDPLAYER_H__ */
 

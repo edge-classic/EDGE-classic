@@ -25,7 +25,7 @@
 
 /* FUNCTIONS */
 
-abstract_music_c * S_PlayFLACMusic(byte *data, int length, float volume, bool looping);
+abstract_music_c * S_PlayFLACMusic(byte *data, int length, bool looping);
 
 #endif  /* __VGMPLAYER_H__ */
 

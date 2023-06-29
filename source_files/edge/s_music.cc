@@ -88,8 +88,6 @@ void S_ChangeMusic(int entrynum, bool loop)
 		return;
 	}
 
-	float volume = mus_volume.f;
-
 	// open the file or lump, and read it into memory
 	epi::file_c *F;
 
@@ -180,43 +178,43 @@ void S_ChangeMusic(int entrynum, bool loop)
 	{
 		case epi::FMT_OGG:
 			delete F;
-			music_player = S_PlayOGGMusic(data, length, volume, loop);
+			music_player = S_PlayOGGMusic(data, length, loop);
 			break;
 
 		case epi::FMT_MP3:
 			delete F;
-			music_player = S_PlayMP3Music(data, length, volume, loop);
+			music_player = S_PlayMP3Music(data, length, loop);
 			break;
 
 		case epi::FMT_FLAC:
 			delete F;
-			music_player = S_PlayFLACMusic(data, length, volume, loop);
+			music_player = S_PlayFLACMusic(data, length, loop);
 			break;
 
 		case epi::FMT_M4P:
 			delete F;
-			music_player = S_PlayM4PMusic(data, length, volume, loop);
+			music_player = S_PlayM4PMusic(data, length, loop);
 			break;
 
 		case epi::FMT_GME:
 			delete F;
-			music_player = S_PlayGMEMusic(data, length, volume, loop);
+			music_player = S_PlayGMEMusic(data, length, loop);
 			break;
 
 		case epi::FMT_VGM:
 			delete F;
-			music_player = S_PlayVGMMusic(data, length, volume, loop);
+			music_player = S_PlayVGMMusic(data, length, loop);
 			break;
 
 		case epi::FMT_SID:
 			delete F;
-			music_player = S_PlaySIDMusic(data, length, volume, loop);
+			music_player = S_PlaySIDMusic(data, length, loop);
 			break;
 
 		// IMF writes raw OPL registers, so must use the OPL player unconditionally
 		case epi::FMT_IMF:
 			delete F;
-			music_player = S_PlayOPL(data, length, volume, loop, play->type);
+			music_player = S_PlayOPL(data, length, loop, play->type);
 			break;
 
 		case epi::FMT_MIDI:
@@ -225,11 +223,11 @@ void S_ChangeMusic(int entrynum, bool loop)
 			delete F;
 			if (var_midi_player == 0)
 			{
-				music_player = S_PlayPrime(data, length, volume, loop);
+				music_player = S_PlayPrime(data, length, loop);
 			}
 			else
 			{
-				music_player = S_PlayOPL(data, length, volume, loop, play->type);
+				music_player = S_PlayOPL(data, length, loop, play->type);
 			}
 			break;
 
@@ -277,14 +275,5 @@ void S_MusicTicker(void)
 	if (music_player)
 		music_player->Ticker();
 }
-
-
-void S_ChangeMusicVolume(void)
-{
-	if (music_player)
-		music_player->Volume(mus_volume.f);
-}
-
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

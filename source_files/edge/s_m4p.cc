@@ -66,7 +66,6 @@ public:
 	virtual void Resume(void);
 
 	virtual void Ticker(void);
-	virtual void Volume(float gain);
 
 private:
 
@@ -147,14 +146,6 @@ bool m4pplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 
     return true;
 }
-
-
-void m4pplayer_c::Volume(float gain)
-{
-	// not needed, music volume is handled in s_blit.cc
-	// (see mix_channel_c::ComputeMusicVolume).
-}
-
 
 bool m4pplayer_c::OpenMemory(byte *data, int length)
 {
@@ -265,7 +256,7 @@ void m4pplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayM4PMusic(byte *data, int length, float volume, bool looping)
+abstract_music_c * S_PlayM4PMusic(byte *data, int length, bool looping)
 {
 	m4pplayer_c *player = new m4pplayer_c();
 
@@ -278,7 +269,6 @@ abstract_music_c * S_PlayM4PMusic(byte *data, int length, float volume, bool loo
 
 	delete[] data;
 
-	player->Volume(volume);
 	player->Play(looping);
 
 	return player;

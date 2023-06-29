@@ -626,12 +626,6 @@ void S_UpdateSounds(position_c *listener, angle_t angle)
 		queue_chan->ComputeMusicVolume();
 }
 
-
-void S_ChangeSoundVolume(void)
-{
-	/* nothing to do */
-}
-
 void S_PauseSound(void)
 {
 	sfxpaused = true;

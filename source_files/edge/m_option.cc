@@ -324,20 +324,6 @@ static int keyscan;
 
 static style_c *opt_def_style;
 
-static void M_ChangeMusVol(int keypressed, cvar_c *cvar)
-{
-	SYS_ASSERT(cvar);
-	cvar->operator=(cvar->f);
-	S_ChangeMusicVolume();
-}
-
-static void M_ChangeSfxVol(int keypressed, cvar_c *cvar)
-{
-	SYS_ASSERT(cvar);
-	cvar->operator=(cvar->f);
-	S_ChangeSoundVolume();
-}
-
 static void M_ChangeMixChan(int keypressed, cvar_c *cvar)
 {
 	S_ChangeChannelNum();
@@ -512,8 +498,8 @@ static menuinfo_t analogue_optmenu =
 //
 static optmenuitem_t soundoptions[] =
 {
-	{OPT_FracSlider,  "Sound Volume", NULL, 0, &sfx_volume.f, M_ChangeSfxVol, NULL, &sfx_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
-	{OPT_FracSlider,  "Music Volume", NULL, 0, &mus_volume.f, M_ChangeMusVol, NULL, &mus_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
+	{OPT_FracSlider,  "Sound Volume", NULL, 0, &sfx_volume.f, M_UpdateCVARFromFloat, NULL, &sfx_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
+	{OPT_FracSlider,  "Music Volume", NULL, 0, &mus_volume.f, M_UpdateCVARFromFloat, NULL, &mus_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
@@ -541,8 +527,8 @@ static menuinfo_t sound_optmenu =
 //
 static optmenuitem_t f4soundoptions[] =
 {
-	{OPT_FracSlider,  "Sound Volume", NULL, 0, &sfx_volume.f, M_ChangeSfxVol, NULL, &sfx_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
-	{OPT_FracSlider,  "Music Volume", NULL, 0, &mus_volume.f, M_ChangeMusVol, NULL, &mus_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
+	{OPT_FracSlider,  "Sound Volume", NULL, 0, &sfx_volume.f, M_UpdateCVARFromFloat, NULL, &sfx_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
+	{OPT_FracSlider,  "Music Volume", NULL, 0, &mus_volume.f, M_UpdateCVARFromFloat, NULL, &mus_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
 };
 
 static menuinfo_t f4sound_optmenu = 

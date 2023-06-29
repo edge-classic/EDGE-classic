@@ -75,7 +75,6 @@ public:
 	virtual void Resume(void);
 
 	virtual void Ticker(void);
-	virtual void Volume(float gain);
 
 	void PostOpenInit(void);
 
@@ -151,13 +150,6 @@ bool flacplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	}
 
     return (true);
-}
-
-
-void flacplayer_c::Volume(float gain)
-{
-	// not needed, music volume is handled in s_blit.cc
-	// (see mix_channel_c::ComputeMusicVolume).
 }
 
 bool flacplayer_c::OpenMemory(byte *data, int length)
@@ -269,7 +261,7 @@ void flacplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayFLACMusic(byte *data, int length, float volume, bool looping)
+abstract_music_c * S_PlayFLACMusic(byte *data, int length, bool looping)
 {
 	flacplayer_c *player = new flacplayer_c();
 
@@ -282,7 +274,6 @@ abstract_music_c * S_PlayFLACMusic(byte *data, int length, float volume, bool lo
 
 	// data is freed when Close() is called on the player; must be retained until then
 
-	player->Volume(volume);
 	player->Play(looping);
 
 	return player;

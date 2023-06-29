@@ -379,12 +379,6 @@ public:
 		}
 	}
 
-	void Volume(float gain)
-	{
-		// not needed, music volume is handled in s_blit.cc
-		// (see mix_channel_c::ComputeMusicVolume).
-	}
-
 private:
 	bool StreamIntoBuffer(epi::sound_data_c *buf)
 	{
@@ -419,7 +413,7 @@ private:
 	}
 };
 
-abstract_music_c * S_PlayOPL(byte *data, int length, float volume, bool loop, int type)
+abstract_music_c * S_PlayOPL(byte *data, int length, bool loop, int type)
 {
 
 	if (opl_disabled)
@@ -471,7 +465,6 @@ abstract_music_c * S_PlayOPL(byte *data, int length, float volume, bool loop, in
 
 	delete[] data;
 
-	player->Volume(volume);
 	player->Play(loop);
 
 	return player;

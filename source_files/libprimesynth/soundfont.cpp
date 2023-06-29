@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cmath>
 #include <climits>
+#include <stdexcept>
 
 namespace primesynth {
 std::string achToString(const char ach[20]) {
@@ -27,16 +28,19 @@ Sample::Sample(const sf::Sample& sample, const std::vector<std::int16_t>& sample
       key(sample.originalKey),
       correction(sample.correction),
       buffer(sampleBuffer) {
-    if (start < end) {
-        int sampleMax = 0;
         // if SoundFont file is comformant to specification, generators do not extend sample range beyond start and end
-        for (std::size_t i = start; i < end; ++i) {
-            sampleMax = std::max(sampleMax, std::abs(sampleBuffer.at(i)));
+        if (start >= sampleBuffer.size() || end >= sampleBuffer.size()) {
+            throw std::runtime_error("Malformed SoundFont! (generator extends sample range beyond end)\n");
         }
-        minAtten = conv::amplitudeToAttenuation(static_cast<double>(sampleMax) / INT16_MAX);
-    } else {
-        minAtten = INFINITY;
-    }
+        if (start < end) {
+            int sampleMax = 0;
+            for (std::size_t i = start; i < end; ++i) {
+                sampleMax = std::max(sampleMax, std::abs(sampleBuffer.at(i)));
+            }
+            minAtten = conv::amplitudeToAttenuation(static_cast<double>(sampleMax) / INT16_MAX);
+        } else {
+            minAtten = INFINITY;
+        }
 }
 
 static const std::array<std::int16_t, NUM_GENERATORS> DEFAULT_GENERATOR_VALUES = {

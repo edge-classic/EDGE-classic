@@ -77,7 +77,7 @@ bool S_StartupPrime(void)
 	if (!cvar_good)
 	{
 		I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
-		s_soundfont = epi::PATH_Join(epi::PATH_Join(game_dir, UTFSTR("soundfont")), UTFSTR("default.sf2")).generic_u8string();
+		s_soundfont = epi::PATH_Join(epi::PATH_Join(game_dir, UTFSTR("soundfont")), UTFSTR("Default.sf2")).generic_u8string();
 	}
 
 	edge_synth = new primesynth::Synthesizer;

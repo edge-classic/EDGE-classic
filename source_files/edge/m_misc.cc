@@ -75,6 +75,7 @@ bool force_waveout = false;
 
 bool save_screenshot_valid = false;
 
+extern cvar_c s_soundfont;
 extern bool var_pc_speaker_mode;
 int var_midi_player    = 0;
 int var_sound_stereo = 0;
@@ -314,6 +315,10 @@ void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar)
 	}
 
 	CON_ResetAllVars();
+
+	// Set default SF2 location in s_soundfont CVAR
+	// We can't store this as a CVAR default since it is path-dependent
+	s_soundfont = epi::PATH_Join(epi::PATH_Join(game_dir, UTFSTR("soundfont")), UTFSTR("Default.sf2")).generic_u8string();
 
 	done_first_init = true;
 }

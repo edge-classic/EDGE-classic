@@ -2589,7 +2589,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 			swirl_pass = -1;
 	}
 
-	if (surf->image->liquid_type > LIQ_None)
+	if (surf->image->liquid_type > LIQ_None && !cur_sub->sector->exfloor_used && !cur_sub->sector->heightsec)
 	{
 		if (face_dir > 0)
 		{
@@ -2598,9 +2598,14 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 		}
 		else
 		{
-			data.min_z = P_FindSurroundingHeight((heightref_e)(REF_Surrounding|REF_CEILING|REF_NEXT|REF_HIGHEST), cur_sub->sector);
-			data.max_z = cur_sub->sector->c_h;
+			data.min_z = cur_sub->sector->f_h;
+			data.max_z = P_FindSurroundingHeight((heightref_e)(REF_Surrounding|REF_NEXT), cur_sub->sector);
 		}
+	}
+	else
+	{
+		data.min_z = data.vert[0].z;
+		data.max_z = data.vert[0].z;
 	}
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
@@ -3296,7 +3301,8 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 
 	if (mo->player)
 	{
-		if (mo->subsector->sector->floor.image->liquid_type > LIQ_None)
+		if (mo->subsector->sector->floor.image->liquid_type > LIQ_None && 
+			!mo->subsector->sector->exfloor_used && !mo->subsector->sector->heightsec)
 			viewz += (mo->player->viewz * 7 / 10);
 		else
 			viewz += mo->player->viewz;

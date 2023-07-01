@@ -1178,7 +1178,8 @@ static void RGL_DrawModel(drawthing_t *dthing)
 
 	MIR_Height(z);
 
-	if (mo->hyperflags & HF_HOVER)
+	if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) &&
+		mo->subsector->sector->floor.image->liquid_type > LIQ_None && mo->z == mo->subsector->sector->f_h))
 		z += GetHoverDZ(mo);
 
 	int last_frame = mo->state->frame;

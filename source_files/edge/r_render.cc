@@ -90,7 +90,6 @@ bool thick_liquid = false;
 float view_x_slope;
 float view_y_slope;
 
-float liquid_z_bob = 1.0f;
 float wave_now; // value for doing wave table lookups
 
 // -ES- 1999/03/20 Different right & left side clip angles, for asymmetric FOVs.
@@ -626,18 +625,10 @@ wall_plane_data_t;
 }*/
 
 // Adapted from Quake 3 GPL release - Dasho
-static void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos, bool doing_plane, float min_z = 0.0f, float max_z = 0.0f )
+static void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 {
 	float amplitude = 0.05;
 	float now = wave_now * (thick_liquid ? 0.5 : 1.0);
-
-	if (doing_plane)
-	{
-		pos->z = pos->z + liquid_z_bob;
-		pos->z = CLAMP(min_z, pos->z, max_z);
-	}
-
-	if (swirl_pass == -1) return; // SWIRL_SMMU doesn't need anything else
 
 	if (swirling_flats == SWIRL_PARALLAX)
 	{
@@ -740,7 +731,7 @@ static void WallCoordFunc(void *d, int v_idx,
 	texc->y = data->ty0 + pos->z * data->ty_mul;
 
 	if (swirl_pass > 0)
-		CalcTurbulentTexCoords(texc, pos, false);
+		CalcTurbulentTexCoords(texc, pos);
 
 	*lit_pos = *pos;
 }
@@ -803,8 +794,8 @@ static void PlaneCoordFunc(void *d, int v_idx,
 	texc->x = rx * data->x_mat.x + ry * data->x_mat.y;
 	texc->y = rx * data->y_mat.x + ry * data->y_mat.y;
 
-	if (swirl_pass != 0)
-		CalcTurbulentTexCoords(texc, pos, true, data->min_z, data->max_z);
+	if (swirl_pass > 0)
+		CalcTurbulentTexCoords(texc, pos);
 
 	*lit_pos = *pos;
 }
@@ -2581,32 +2572,8 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	else
 		thick_liquid = false;
 
-	if (surf->image->liquid_type > LIQ_None)
-	{
-		if (swirling_flats > SWIRL_SMMU)
+	if (surf->image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
 			swirl_pass = 1;
-		else if (swirling_flats == SWIRL_SMMU)
-			swirl_pass = -1;
-	}
-
-	if (surf->image->liquid_type > LIQ_None && !cur_sub->sector->exfloor_used && !cur_sub->sector->heightsec)
-	{
-		if (face_dir > 0)
-		{
-			data.min_z = cur_sub->sector->f_h;
-			data.max_z = P_FindSurroundingHeight((heightref_e)(REF_Surrounding|REF_NEXT), cur_sub->sector);
-		}
-		else
-		{
-			data.min_z = cur_sub->sector->f_h;
-			data.max_z = P_FindSurroundingHeight((heightref_e)(REF_Surrounding|REF_NEXT), cur_sub->sector);
-		}
-	}
-	else
-	{
-		data.min_z = data.vert[0].z;
-		data.max_z = data.vert[0].z;
-	}
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
 	
@@ -3265,9 +3232,7 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 {
 	float fov = CLAMP(5, r_fov.f, 175);
 
-	// Update bobbing values
 	wave_now = leveltime / 100.0f;
-	liquid_z_bob = 1.0f + r_sintable[(int)((1.0/128 * 0.125 + wave_now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ];
 
 	view_x_slope = tan(fov * M_PI / 360.0);
 

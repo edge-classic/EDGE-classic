@@ -3265,15 +3265,7 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 	viewangle = mo->angle;
 
 	if (mo->player)
-	{
-		if (mo->subsector->sector->floor.image->liquid_type > LIQ_None && 
-			!mo->subsector->sector->exfloor_used && !mo->subsector->sector->heightsec &&
-			mo->z == mo->subsector->sector->f_h)
-		{
-			mo->player->deltaviewheight = -4.0f;
-		}
-			viewz += mo->player->viewz;
-	}
+		viewz += mo->player->viewz;
 	else
 		viewz += mo->height * 9 / 10;
 

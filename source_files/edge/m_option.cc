@@ -875,7 +875,7 @@ static menuinfo_t * all_key_menus[NUM_KEY_MENUS] =
 	&program_optmenu2
 };
 
-static char keystring1[] = "Enter to change, Backspace to Clear";
+static char keystring1[] = "Enter to change, Backspace to clear";
 static char keystring2[] = "Press a key for this action";
 
 //

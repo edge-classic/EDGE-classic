@@ -653,25 +653,26 @@ OptMouseLook="Mouse Look";
 OptMapToggle="Map Toggle";
 OptMultiplayTalk="Multiplay Talk";
 
-Controls="Setup Standard Doom Controls";
+Controls="Setup standard and extended controls";
 Controls2="Setup Extended EDGE Controls";
-VideoOptions="Setup Translucency, Resolutions, etc...";
-SoundOptions="Setup Volume, Frequency, Stereo, etc...";
-GameplayOptions="Setup Respawn, Gravity, 3D Options etc...";
+VideoOptions="Setup smoothing, gamma, etc...";
+SoundOptions="Setup volume, MIDI player, stereo, etc...";
+AccessibilityOptions="Adjust options to address various concerns";
+GameplayOptions="Setup respawn, gravity, 3D options etc...";
 PerformanceOptions="Tweak visuals or gameplay for extra performance";
-AnalogueOptions="Setup mouse and joystick options";
+AnalogueOptions="Setup mouse and gamepad options";
 SwapStereo="Swap the left and right sound channels";
 Messages="Show informational messages";
 CDOptions="CD Audio Config: Off/On/Atmosphere";
 ResetEDGE="Resets all configs to EDGE Extended mode";
 ResetDoom="Resets all configs to be like original DOOM";
-NeedRestart="This is applied when EDGE is restarted";
+NeedRestart="This is applied when EDGE-Classic is restarted";
 
 Gravity="Changes the global gravity setting";
 Blood="Enables extra gore mode...";
 True3d="Enables jumping over things, flight etc...";
 
-ChangeRes="Sets Screen resolution, hicolour mode";
+ChangeRes="Setup screen resolution, VSync, aspect ratio...";
 
 QuitMsg1="Please don't leave, there's more\ndemons to toast!";
 QuitMsg2="Let's beat it -- this is turning\ninto a bloodbath!";

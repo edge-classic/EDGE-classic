@@ -278,7 +278,6 @@ mobj_t *P_AimLineAttack(mobj_t * t1, angle_t angle, float distance, float *slope
 void P_UpdateMultipleFloors(sector_t * sector);
 bool P_CheckSolidSectorMove(sector_t *sec, bool is_ceiling, float dh);
 bool P_SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush = 10, bool nocarething = false);
-void P_ChangeThingSize(mobj_t *mo);
 bool P_CheckAbsPosition(mobj_t * thing, float x, float y, float z);
 bool P_CheckSight(mobj_t * src, mobj_t * dest);
 bool P_CheckSightToPoint(mobj_t * src, float x, float y, float z);

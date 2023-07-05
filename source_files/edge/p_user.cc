@@ -430,10 +430,6 @@ static void MovePlayer(player_t * player, bool extra_tic)
 		if (mo->height > mo->info->crouchheight)
 		{
 			mo->height = MAX(mo->height - 2.0f / (r_doubleframes.d ? 2.0 : 1.0), mo->info->crouchheight);
-
-			// update any things near the player
-			P_ChangeThingSize(mo);
-
 			mo->player->deltaviewheight = -1.0f;
 		}
 	}
@@ -447,10 +443,6 @@ static void MovePlayer(player_t * player, bool extra_tic)
 			if ((mo->flags & MF_NOCLIP) || mo->z+ new_height <= mo->ceilingz)
 			{
 				mo->height = new_height;
-
-				// update any things near the player
-				P_ChangeThingSize(mo);
-
 				mo->player->deltaviewheight = 1.0f;
 			}
 		}

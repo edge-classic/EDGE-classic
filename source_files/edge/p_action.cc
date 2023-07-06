@@ -1119,9 +1119,13 @@ static mobj_t *DoLaunchProjectile(mobj_t * source, float tx, float ty, float tz,
 	float projy = source->y;
 	float projz = source->z + attack->height * source->height / source->info->height;
 
-	// Test for projectiles coming from a player in a 'flat' liquid - Dasho
+	// Test for projectiles coming from a source in a 'flat' liquid - Dasho
 	if (source->player)
 		projz += (source->player->viewz - source->player->std_viewheight);
+	else if (source->subsector->sector->floor.image->liquid_type > LIQ_None && 
+		!source->subsector->sector->exfloor_used && !source->subsector->sector->heightsec &&
+		source->z == source->subsector->sector->f_h)
+		projz -= (source->height * 0.2f);
 
 	angle_t angle = source->angle;
 
@@ -1195,6 +1199,11 @@ static mobj_t *DoLaunchProjectile(mobj_t * source, float tx, float ty, float tz,
 				angle += (angle_t)(P_RandomNegPos() * 64 * (VISIBLE - target->visibility));
 		}
 	}
+
+	if (target && target->subsector->sector->floor.image->liquid_type > LIQ_None && 
+		!target->subsector->sector->exfloor_used && !target->subsector->sector->heightsec &&
+		target->z == target->subsector->sector->f_h)
+		tz -= (target->height * 0.2f);
 
 	// Calculate slope
 	float slope = P_ApproxSlope(tx - projx, ty - projy, tz - projz);

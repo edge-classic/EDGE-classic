@@ -106,8 +106,6 @@ static float GetHoverDZ(mobj_t *mo)
 
 	if (mo->hyperflags & HF_HOVER)
 		mo->phase *= 4.0f;
-	else
-		mo->phase -= (mo->height * 0.2f);
 
 	return mo->phase;
 }
@@ -1010,11 +1008,16 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 	if (tz >= MINZ && fabs(tx) / 32 > tz)
 		return;
 
+	bool on_flat_water = (mo->subsector->sector->floor.image->liquid_type > LIQ_None && !mo->subsector->sector->exfloor_used &&
+		!mo->subsector->sector->heightsec && mo->z == mo->subsector->sector->f_h);
+
 	float hover_dz = 0;
 
-	if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) &&
-		mo->subsector->sector->floor.image->liquid_type > LIQ_None && mo->z == mo->subsector->sector->f_h))
+	if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) && on_flat_water))
 		hover_dz = GetHoverDZ(mo);
+
+	if (on_flat_water)
+		hover_dz -= (mo->height * 0.2f);
 
 	bool spr_flip = false;
 	const image_c *image = NULL;
@@ -1066,8 +1069,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 				break;
 		}
 
-		if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) &&
-			mo->subsector->sector->floor.image->liquid_type > LIQ_None && mo->z == mo->subsector->sector->f_h))
+		if (mo->hyperflags & HF_HOVER || on_flat_water)
 		{
 			gzt += hover_dz;
 			gzb += hover_dz;
@@ -1083,7 +1085,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 		y_clipping = YCLIP_Never;
 	}
 	//Lobo: new FLOOR_CLIP flag
-	else if (mo->hyperflags & HF_FLOORCLIP || (mo->subsector->sector->floor.image->liquid_type > LIQ_None && mo->z == mo->subsector->sector->f_h))
+	else if (mo->hyperflags & HF_FLOORCLIP || on_flat_water)
 	{
 		// do nothing? just skip the other elseifs below
 		y_clipping = YCLIP_Hard;
@@ -1173,13 +1175,17 @@ static void RGL_DrawModel(drawthing_t *dthing)
 		skin_img = W_ImageForDummySkin();
 	}
 
-
 	float z = dthing->mz;
 
 	MIR_Height(z);
 
-	if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) &&
-		mo->subsector->sector->floor.image->liquid_type > LIQ_None && mo->z == mo->subsector->sector->f_h))
+	bool on_flat_water = (mo->subsector->sector->floor.image->liquid_type > LIQ_None && !mo->subsector->sector->exfloor_used &&
+			!mo->subsector->sector->heightsec && mo->z == mo->subsector->sector->f_h);
+
+	if (on_flat_water)
+		z -= mo->height * 0.2f;
+
+	if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) && on_flat_water))
 		z += GetHoverDZ(mo);
 
 	int last_frame = mo->state->frame;

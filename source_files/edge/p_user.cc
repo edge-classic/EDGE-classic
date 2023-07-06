@@ -119,6 +119,13 @@ static void CalcHeight(player_t * player, bool extra_tic)
 
 	player->std_viewheight = player->mo->height * PERCENT_2_FLOAT(player->mo->info->viewheight);
 
+	if (player->mo->subsector->sector->floor.image->liquid_type > LIQ_None && 
+		!player->mo->subsector->sector->exfloor_used && !player->mo->subsector->sector->heightsec &&
+		onground)
+	{
+		player->deltaviewheight = MAX(player->deltaviewheight - 1.0f, -1.0f);
+	}
+
 	// calculate the walking / running height adjustment.
 
 	float bob_z = 0;
@@ -155,10 +162,15 @@ static void CalcHeight(player_t * player, bool extra_tic)
 			player->viewheight = player->std_viewheight;
 			player->deltaviewheight = 0;
 		}
+		else if (!(player->mo->extendedflags & EF_CROUCHING) && player->viewheight < player->std_viewheight * 0.7)
+		{
+			player->viewheight = player->std_viewheight * 0.7;
+			if (player->deltaviewheight <= 0)
+				player->deltaviewheight = 0.01f;
+		}
 		else if (player->viewheight < player->std_viewheight / 2)
 		{
 			player->viewheight = player->std_viewheight / 2;
-
 			if (player->deltaviewheight <= 0)
 				player->deltaviewheight = 0.01f;
 		}

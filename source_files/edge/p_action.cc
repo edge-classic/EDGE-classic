@@ -1119,6 +1119,10 @@ static mobj_t *DoLaunchProjectile(mobj_t * source, float tx, float ty, float tz,
 	float projy = source->y;
 	float projz = source->z + attack->height * source->height / source->info->height;
 
+	// Test for projectiles coming from a player in a 'flat' liquid - Dasho
+	if (source->player)
+		projz += (source->player->viewz - source->player->std_viewheight);
+
 	angle_t angle = source->angle;
 
 	projx += attack->xoffset * M_Cos(angle + ANG90);

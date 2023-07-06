@@ -1,6 +1,10 @@
 #include "synthesizer.h"
 #include <stdexcept>
 
+// Used when dealing with soundfonts that are missing some expected default presets
+static bool no_drums = false;
+static bool no_piano = false;
+
 namespace primesynth {
 Synthesizer::Synthesizer(double outputRate, std::size_t numChannels)
     : volume_(1.0), midiStd_(midi::Standard::GM), defaultMIDIStd_(midi::Standard::GM), stdFixed_(false) {
@@ -10,6 +14,9 @@ Synthesizer::Synthesizer(double outputRate, std::size_t numChannels)
     for (std::size_t i = 0; i < numChannels; ++i) {
         channels_.emplace_back(std::make_unique<Channel>(outputRate));
     }
+
+    no_drums = false;
+    no_piano = false;
 }
 
 void Synthesizer::render_float(float *buffer, size_t samples) {
@@ -110,7 +117,9 @@ std::shared_ptr<const Preset> Synthesizer::findPreset(std::uint16_t bank, std::u
             // fall back to GM percussion
             return findPreset(bank, 0);
         } else {
-            throw std::runtime_error("failed to find preset 128:0 (GM Percussion)");
+            //throw std::runtime_error("failed to find preset 128:0 (GM Percussion)");
+            no_drums = true;
+            return nullptr;
         }
     } else if (bank != 0) {
         // fall back to GM bank
@@ -120,7 +129,9 @@ std::shared_ptr<const Preset> Synthesizer::findPreset(std::uint16_t bank, std::u
         return findPreset(0, 0);
     } else {
         // Piano not found, there is no more fallback
-        throw std::runtime_error("failed to find preset 0:0 (GM Acoustic Grand Piano)");
+        //throw std::runtime_error("failed to find preset 0:0 (GM Acoustic Grand Piano)");
+        no_piano = true;
+        return nullptr;
     }
 }
 
@@ -134,8 +145,32 @@ void Synthesizer::processChannelMessage(midi::MessageStatus event, std::uint8_t 
         break;
     case midi::MessageStatus::NoteOn:
         if (!channel->hasPreset()) {
-            channel->setPreset(chan == midi::PERCUSSION_CHANNEL ? findPreset(PERCUSSION_BANK, 0)
-                                                                     : findPreset(0, 0));
+            if (chan == midi::PERCUSSION_CHANNEL)
+            {
+                if (!no_drums)
+                {
+                    channel->setPreset(findPreset(PERCUSSION_BANK, 0));
+                    if (!no_drums)
+                        channel->noteOn(param1, param2);
+                    else
+                        return;
+                }
+                else
+                    return;
+            }
+            else
+            {
+                if (!no_piano)
+                {
+                    channel->setPreset(findPreset(0, 0));
+                    if (!no_piano)
+                        channel->noteOn(param1, param2);
+                    else
+                        return;
+                }
+                else
+                    return;
+            }
         }
         channel->noteOn(param1, param2);
         break;

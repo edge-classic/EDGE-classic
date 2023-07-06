@@ -1,7 +1,6 @@
 #pragma once
 #include "midi.h"
 #include "voice.h"
-#include <mutex>
 
 namespace primesynth {
 class Channel {
@@ -35,7 +34,6 @@ private:
     double fineTuning_, coarseTuning_;
     std::vector<std::unique_ptr<Voice>> voices_;
     std::size_t currentNoteID_;
-    std::mutex mutex_;
 
     std::uint16_t getSelectedRPN() const;
 

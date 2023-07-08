@@ -917,11 +917,14 @@ static void P_XYMovement(mobj_t * mo, const region_properties_t *props, bool ext
 					P_ShootSpecialLine(blockline, 
 						PointOnLineSide(mo->x, mo->y, blockline), mo->source);
 					
-					if (tempspecial->effectobject && tempspecial->type == line_shootable)
+					if(tempspecial->type == line_shootable)
 					{
-						DebrisThing = tempspecial->effectobject;
 						P_UnblockLineEffectDebris(blockline, tempspecial);
-						P_SpawnBlood(mo->x, mo->y, mo->z, 0, mo->angle + ANG180, DebrisThing);
+						if (tempspecial->effectobject)
+						{
+							DebrisThing = tempspecial->effectobject;
+							P_SpawnBlood(mo->x, mo->y, mo->z, 0, mo->angle + ANG180, DebrisThing);
+						}
 					}
 				}
 			}

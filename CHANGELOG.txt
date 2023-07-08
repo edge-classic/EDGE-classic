@@ -64,3 +64,5 @@ Bugs fixed
 - Removed 'WALL' as a recognized glow type in DDFTHING to prevent potential blockmap issues
   - This references unused code and thus had unpredictable results
 - Removed ability for multiple glow types to be assigned to a DDFTHING definition
+- GLASS lines were not working with projectiles if no EFFECT_OBJECT was defined.
+

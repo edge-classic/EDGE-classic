@@ -107,6 +107,10 @@ static sfx_t * sfx_jpflow;
 static void CalcHeight(player_t * player, bool extra_tic)
 {
 	bool onground = player->mo->z <= player->mo->floorz;
+	float sink_mult = 0;
+	flatdef_c *current_flatdef = flatdefs.Find(player->mo->subsector->sector->floor.image->name.c_str());
+	if (current_flatdef)
+		sink_mult = current_flatdef->sink_view;
 
 	if (g_erraticism.d && leveltime > 0 && (!player->cmd.forwardmove && !player->cmd.sidemove) && 
 		((player->mo->height == player->mo->info->height || player->mo->height == player->mo->info->crouchheight) && player->deltaviewheight == 0))
@@ -119,7 +123,7 @@ static void CalcHeight(player_t * player, bool extra_tic)
 
 	player->std_viewheight = player->mo->height * PERCENT_2_FLOAT(player->mo->info->viewheight);
 
-	if (player->mo->subsector->sector->floor.image->liquid_type > LIQ_None && 
+	if (sink_mult > 0 && 
 		!player->mo->subsector->sector->exfloor_used && !player->mo->subsector->sector->heightsec &&
 		onground)
 	{
@@ -162,17 +166,24 @@ static void CalcHeight(player_t * player, bool extra_tic)
 			player->viewheight = player->std_viewheight;
 			player->deltaviewheight = 0;
 		}
-		else if (!(player->mo->extendedflags & EF_CROUCHING) && player->viewheight < player->std_viewheight * 0.7)
+		else if (sink_mult > 0 && !(player->mo->extendedflags & EF_CROUCHING) && 
+			player->viewheight < player->std_viewheight * sink_mult)
 		{
-			player->viewheight = player->std_viewheight * 0.7;
+			player->viewheight = player->std_viewheight * sink_mult;
 			if (player->deltaviewheight <= 0)
 				player->deltaviewheight = 0.01f;
 		}
-		else if (player->viewheight < player->std_viewheight / 2)
+		else
 		{
-			player->viewheight = player->std_viewheight / 2;
-			if (player->deltaviewheight <= 0)
-				player->deltaviewheight = 0.01f;
+			float thresh = player->std_viewheight / 2;
+			if (sink_mult > 0)
+				thresh = MIN(thresh, player->std_viewheight * sink_mult);
+			if (player->viewheight < thresh)
+			{
+				player->viewheight = thresh;
+				if (player->deltaviewheight <= 0)
+					player->deltaviewheight = 0.01f;
+			}
 		}
 
 		if (player->deltaviewheight != 0)

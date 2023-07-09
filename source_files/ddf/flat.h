@@ -49,6 +49,9 @@ public:
 	const mobjtype_c *glowobject;
 	std::string glowobject_ref;
 
+	percent_t sink_view;
+	percent_t bob_factor;
+
 private:
 	// disable copy construct and assignment operator
 	explicit flatdef_c(flatdef_c &rhs) { (void) rhs; }

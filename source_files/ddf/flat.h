@@ -49,8 +49,8 @@ public:
 	const mobjtype_c *glowobject;
 	std::string glowobject_ref;
 
-	percent_t sink_view;
-	percent_t bob_factor;
+	percent_t sink_depth;
+	percent_t bob_depth;
 
 private:
 	// disable copy construct and assignment operator

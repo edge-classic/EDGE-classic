@@ -35,8 +35,8 @@ static const commandlist_t flat_commands[] =
 	DDF_FIELD("SPLASH", splash, DDF_MainGetLumpName),
 	DDF_FIELD("IMPACT_OBJECT", impactobject_ref, DDF_MainGetString),
 	DDF_FIELD("GLOW_OBJECT", glowobject_ref, DDF_MainGetString),
-	DDF_FIELD("VIEW_HEIGHT", sink_view, DDF_MainGetPercent),
-	DDF_FIELD("BOB_AMOUNT", bob_factor, DDF_MainGetPercent),
+	DDF_FIELD("SINK_DEPTH", sink_depth, DDF_MainGetPercent),
+	DDF_FIELD("BOB_DEPTH", bob_depth, DDF_MainGetPercent),
 
 	DDF_CMD_END
 };
@@ -214,8 +214,8 @@ void flatdef_c::CopyDetail(flatdef_c &src)
 	impactobject_ref = src.impactobject_ref;
 	glowobject = src.glowobject;	
 	glowobject_ref = src.glowobject_ref;
-	sink_view = src.sink_view;
-	bob_factor = src.bob_factor;
+	sink_depth = src.sink_depth;
+	bob_depth = src.bob_depth;
 }
 
 //
@@ -230,8 +230,8 @@ void flatdef_c::Default()
 	impactobject_ref.clear();
 	glowobject = NULL;	
 	glowobject_ref.clear();
-	sink_view = PERCENT_MAKE(0);
-	bob_factor = PERCENT_MAKE(0);
+	sink_depth = PERCENT_MAKE(0);
+	bob_depth = PERCENT_MAKE(0);
 }
 
 

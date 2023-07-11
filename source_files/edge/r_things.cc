@@ -92,7 +92,7 @@ static const image_c *crosshair_image;
 static int crosshair_which;
 
 
-static float GetHoverDZ(mobj_t *mo)
+static float GetHoverDZ(mobj_t *mo, float bob_mult = 0)
 {
 	if (time_stop_active || erraticism_active)
 		return mo->phase;
@@ -106,6 +106,8 @@ static float GetHoverDZ(mobj_t *mo)
 
 	if (mo->hyperflags & HF_HOVER)
 		mo->phase *= 4.0f;
+	else if (bob_mult > 0)
+		mo->phase *= (mo->height * bob_mult);
 
 	return mo->phase;
 }
@@ -1008,16 +1010,23 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 	if (tz >= MINZ && fabs(tx) / 32 > tz)
 		return;
 
-	bool on_flat_water = (mo->subsector->sector->floor.image->liquid_type > LIQ_None && !mo->subsector->sector->exfloor_used &&
-		!mo->subsector->sector->heightsec && mo->z == mo->subsector->sector->f_h);
+	float sink_mult = 0;
+	float bob_mult = 0;
+	flatdef_c *current_flatdef = flatdefs.Find(mo->subsector->sector->floor.image->name.c_str());
+	if (current_flatdef && !mo->subsector->sector->exfloor_used && !mo->subsector->sector->heightsec &&
+		mo->z == mo->subsector->sector->f_h)
+	{
+		sink_mult = current_flatdef->sink_depth;
+		bob_mult = current_flatdef->bob_depth;
+	}
 
 	float hover_dz = 0;
 
-	if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) && on_flat_water))
-		hover_dz = GetHoverDZ(mo);
+	if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) && bob_mult > 0))
+		hover_dz = GetHoverDZ(mo, bob_mult);
 
-	if (on_flat_water)
-		hover_dz -= (mo->height * 0.2f);
+	if (sink_mult > 0)
+		hover_dz -= (mo->height * sink_mult);
 
 	bool spr_flip = false;
 	const image_c *image = NULL;
@@ -1069,7 +1078,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 				break;
 		}
 
-		if (mo->hyperflags & HF_HOVER || on_flat_water)
+		if (mo->hyperflags & HF_HOVER || (sink_mult > 0 || bob_mult > 0))
 		{
 			gzt += hover_dz;
 			gzb += hover_dz;
@@ -1085,7 +1094,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 		y_clipping = YCLIP_Never;
 	}
 	//Lobo: new FLOOR_CLIP flag
-	else if (mo->hyperflags & HF_FLOORCLIP || on_flat_water)
+	else if (mo->hyperflags & HF_FLOORCLIP || sink_mult > 0)
 	{
 		// do nothing? just skip the other elseifs below
 		y_clipping = YCLIP_Hard;
@@ -1179,14 +1188,21 @@ static void RGL_DrawModel(drawthing_t *dthing)
 
 	MIR_Height(z);
 
-	bool on_flat_water = (mo->subsector->sector->floor.image->liquid_type > LIQ_None && !mo->subsector->sector->exfloor_used &&
-			!mo->subsector->sector->heightsec && mo->z == mo->subsector->sector->f_h);
+	float sink_mult = 0;
+	float bob_mult = 0;
+	flatdef_c *current_flatdef = flatdefs.Find(mo->subsector->sector->floor.image->name.c_str());
+	if (current_flatdef && !mo->subsector->sector->exfloor_used && !mo->subsector->sector->heightsec &&
+		mo->z == mo->subsector->sector->f_h)
+	{
+		sink_mult = current_flatdef->sink_depth;
+		bob_mult = current_flatdef->bob_depth;
+	}
 
-	if (on_flat_water)
-		z -= mo->height * 0.2f;
+	if (sink_mult > 0)
+		z -= mo->height * sink_mult;
 
-	if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) && on_flat_water))
-		z += GetHoverDZ(mo);
+	if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) && bob_mult > 0))
+		z += GetHoverDZ(mo, bob_mult);
 
 	int last_frame = mo->state->frame;
 	float lerp = 0.0;

@@ -81,6 +81,9 @@ static const commandlist_t sect_commands[] =
 	DF("REVERB RATIO", reverb_ratio, DDF_MainGetFloat),
 	DF("REVERB DELAY", reverb_delay, DDF_MainGetFloat),
 
+	DF("FLOOR_BOB", floor_bob, DDF_MainGetFloat),
+	DF("CEILING_BOB", ceiling_bob, DDF_MainGetFloat),
+
 	DDF_CMD_END
 };
 
@@ -510,6 +513,9 @@ void sectortype_c::CopyDetail(sectortype_c &src)
 	reverb_type = src.reverb_type;
 	reverb_ratio = src.reverb_ratio;
 	reverb_delay = src.reverb_delay;
+
+	floor_bob = src.floor_bob;
+	ceiling_bob = src.ceiling_bob;
 }
 
 //
@@ -548,6 +554,9 @@ void sectortype_c::Default()
 	reverb_type = "NONE";
 	reverb_delay = 0;
 	reverb_ratio = 0;
+
+	floor_bob = 0.0f;
+	ceiling_bob = 0.0f;
 }
 
 

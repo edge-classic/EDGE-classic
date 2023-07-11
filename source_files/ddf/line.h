@@ -962,6 +962,9 @@ public:
 	float reverb_ratio;
 	float reverb_delay;
 
+	float floor_bob;
+	float ceiling_bob;
+
 private:
 	// disable copy construct and assignment operator
 	explicit sectortype_c(sectortype_c &rhs) { (void) rhs; }

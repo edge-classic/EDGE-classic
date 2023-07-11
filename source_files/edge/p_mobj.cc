@@ -1861,12 +1861,6 @@ void P_RunMobjThinkers(bool extra_tic)
 				RemoveMobjFromList(mo);
 				DeleteMobj(mo);
 			}
-			
-			//Lobo 2023: don't know if I need to do this?
-			if (mo->morphtimeout > 0)
-			{
-				mo->morphtimeout--;
-			}
 
 			continue;
 		}

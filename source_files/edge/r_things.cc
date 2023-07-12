@@ -107,7 +107,7 @@ static float GetHoverDZ(mobj_t *mo, float bob_mult = 0)
 	if (mo->hyperflags & HF_HOVER)
 		mo->phase *= 4.0f;
 	else if (bob_mult > 0)
-		mo->phase *= (mo->height * bob_mult);
+		mo->phase *= (mo->height * 0.5 * bob_mult);
 
 	return mo->phase;
 }
@@ -1026,7 +1026,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 		hover_dz = GetHoverDZ(mo, bob_mult);
 
 	if (sink_mult > 0)
-		hover_dz -= (mo->height * sink_mult);
+		hover_dz -= (mo->height * 0.5 * sink_mult);
 
 	bool spr_flip = false;
 	const image_c *image = NULL;
@@ -1199,7 +1199,7 @@ static void RGL_DrawModel(drawthing_t *dthing)
 	}
 
 	if (sink_mult > 0)
-		z -= mo->height * sink_mult;
+		z -= mo->height * 0.5 * sink_mult;
 
 	if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) && bob_mult > 0))
 		z += GetHoverDZ(mo, bob_mult);

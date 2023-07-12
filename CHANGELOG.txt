@@ -1,32 +1,45 @@
 https://github.com/edge-classic/EDGE-classic
 
-Current as of: June 2023
+Current as of: July 2023
 
-CHANGELOG for EDGE-Classic 1.35 (since EDGE-Classic 1.34)
+CHANGELOG for EDGE-Classic 1.34.1 (since EDGE-Classic 1.34)
 ====================================
 
 
 New Features
 ------------
 + ATTACKS.DDF
-  - New attack type - DUALATTACK
+  - New attack type: DUALATTACK
     - Can execute two independent attack definitions with a single state
     - New parameters (only required when using DUALATTACK):
       - DUALATTACK1=<string> - First dual attack definition
       - DUALATTACK2=<string> - Second dual attack definition
     - DUALATTACK1/2 must both be present, even if referring to the same attack
     - A dual attack can execute other dual attacks, but cannot reference itself
-  - New attack type - PSYCHIC
+  - New attack type: PSYCHIC
     - Instant ranged direct damage attack
     - Will not cause infighting
 
 + Chex Quest 1 supported as an IWAD
-  - Chex Quest 2 support as a PWAD for Chex Quest 1
-  
+  - Chex Quest 2 supported as a PWAD for Chex Quest 1
+
++ FLATS.DDF
+  - New command: SINK_DEPTH=<percentage>
+    - Will drop player's view height by the given percentage when standing on the flat in question
+    - Will also clip sprites on this flat and sink them by a roughly equivalent amount
+    - Does not apply when the sector is using 3D floors, swimmable/deep water, or similar effects
+  - New command: BOB_DEPTH=<percentage>
+    - Corpses and items will bob up and down while resting on the flat in question
+    - Does not apply when the sector is using 3D floors, swimmable/deep water, or similar effects
+
 + RTS 
   - New command: REPLACE_THING <oldThing> <newThing>, which will replace all oldThings on the current map with newThings.
     Will be mainly used at map start and it is substituting the thing, not transforming it. For randomizer scripts.
-	
+
++ SECTORS.DDF
+  - New commands: FLOOR_BOB/CEILING_BOB=<amount>
+    - Surface will rise and fall rhythmically in a wave pattern, with peak values governed by the value passed to it
+
 + THINGS.DDF
   - New state action: UNBECOME, which will return a thing to it's original type if it has suffered a BECOME() previously.
     If it has not been BECOMEd previously then nothing will happen.
@@ -50,6 +63,7 @@ General Improvements/Changes
   - Fullbright
 - Fluidlite replaced with Primesynth for soundfont MIDI synthesis
   - SF3 support has been dropped
+  - The s_fluidgain CVAR has been renamed to s_primegain but otherwise functions identically
 - PC Speaker Mode will now disable music while active to prevent non-MIDI formats from playing
   - "Bonkers for Bits" soundfont has been removed
 - "microGM" soundfont added as a more SNES-like option
@@ -65,4 +79,6 @@ Bugs fixed
   - This references unused code and thus had unpredictable results
 - Removed ability for multiple glow types to be assigned to a DDFTHING definition
 - GLASS lines were not working with projectiles if no EFFECT_OBJECT was defined.
-
+- Fixed some self-referencing sectors not being setup properly
+- Fixed TrueType fonts having improper widths on fullscreen resolutions that have a different
+  aspect ratio than the display's native ratio

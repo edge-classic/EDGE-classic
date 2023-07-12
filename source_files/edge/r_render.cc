@@ -1418,6 +1418,18 @@ static void DrawTile(seg_t *seg, drawfloor_t *dfloor,
 	tex_x1 += x_offset;
 	tex_x2 += x_offset;
 
+	if (seg->sidedef->sector->props.special && seg->sidedef->sector->props.special->floor_bob > 0)
+	{
+		lz1 -= seg->sidedef->sector->props.special->floor_bob;
+		rz1 -= seg->sidedef->sector->props.special->floor_bob;
+	}
+
+	if (seg->sidedef->sector->props.special && seg->sidedef->sector->props.special->ceiling_bob > 0)
+	{
+		lz2 += seg->sidedef->sector->props.special->ceiling_bob;
+		rz2 += seg->sidedef->sector->props.special->ceiling_bob;
+	}
+
 	DrawWallPart(dfloor,
 		x1,y1, lz1,lz2,
 		x2,y2, rz1,rz2, tex_top_h,

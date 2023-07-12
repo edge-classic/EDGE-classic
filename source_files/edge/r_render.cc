@@ -1164,12 +1164,16 @@ static void DrawWallPart(drawfloor_t *dfloor,
 		data.tx0 = surf->offset.x + 25;
 		data.ty0 = surf->offset.y + 25;
 		swirl_pass = 2;
+		int old_blend = data.blending;
+		float old_dt = data.trans;
 		data.blending = BL_Masked | BL_Alpha;
 		data.trans = 0.33f;
 		trans = 0.33f;
 		cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 					trans, &data.pass, data.blending, false,
 					&data, WallCoordFunc);
+		data.blending = old_blend;
+		data.trans = old_dt;
 	}
 
 	if (use_dlights && ren_extralight < 250)
@@ -2611,12 +2615,16 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 		data.tx0 = surf->offset.x + 25;
 		data.ty0 = surf->offset.y + 25;
 		swirl_pass = 2;
+		int old_blend = data.blending;
+		float old_dt = data.trans;
 		data.blending = BL_Masked | BL_Alpha;
 		data.trans = 0.33f;
 		trans = 0.33f;
 		cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 					trans, &data.pass, data.blending, false,
 					&data, PlaneCoordFunc);
+		data.blending = old_blend;
+		data.trans = old_dt;
 	}
 
 	if (use_dlights && ren_extralight < 250)

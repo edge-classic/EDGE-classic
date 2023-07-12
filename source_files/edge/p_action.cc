@@ -1124,8 +1124,8 @@ static mobj_t *DoLaunchProjectile(mobj_t * source, float tx, float ty, float tz,
 		projz += (source->player->viewz - source->player->std_viewheight);
 	else if (current_flatdef && current_flatdef->sink_depth > 0 && 
 		!source->subsector->sector->exfloor_used && !source->subsector->sector->heightsec &&
-		source->z == source->subsector->sector->f_h)
-		projz -= (source->height * current_flatdef->sink_depth);
+		abs(source->z - source->subsector->sector->f_h) < 1)
+		projz -= (source->height * 0.5 * current_flatdef->sink_depth);
 
 	angle_t angle = source->angle;
 
@@ -1203,8 +1203,8 @@ static mobj_t *DoLaunchProjectile(mobj_t * source, float tx, float ty, float tz,
 
 		if (current_flatdef && current_flatdef->sink_depth > 0 && 
 			!target->subsector->sector->exfloor_used && !target->subsector->sector->heightsec &&
-			target->z == target->subsector->sector->f_h)
-			tz -= (target->height * current_flatdef->sink_depth);
+			abs(target->z - target->subsector->sector->f_h) < 1)
+			tz -= (target->height * 0.5 * current_flatdef->sink_depth);
 	}
 
 	// Calculate slope

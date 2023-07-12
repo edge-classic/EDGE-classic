@@ -1014,7 +1014,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 	float bob_mult = 0;
 	flatdef_c *current_flatdef = flatdefs.Find(mo->subsector->sector->floor.image->name.c_str());
 	if (current_flatdef && !mo->subsector->sector->exfloor_used && !mo->subsector->sector->heightsec &&
-		mo->z == mo->subsector->sector->f_h)
+		abs(mo->z - mo->subsector->sector->f_h) < 1)
 	{
 		sink_mult = current_flatdef->sink_depth;
 		bob_mult = current_flatdef->bob_depth;
@@ -1089,7 +1089,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 	// fix for sprites that sit wrongly into the floor/ceiling
 	int y_clipping = YCLIP_Soft;
 
-	if (is_model || (mo->flags & MF_FUZZY) || (mo->hyperflags & HF_HOVER))
+	if (is_model || (mo->flags & MF_FUZZY) || (mo->hyperflags & HF_HOVER) && sink_mult == 0)
 	{
 		y_clipping = YCLIP_Never;
 	}
@@ -1192,7 +1192,7 @@ static void RGL_DrawModel(drawthing_t *dthing)
 	float bob_mult = 0;
 	flatdef_c *current_flatdef = flatdefs.Find(mo->subsector->sector->floor.image->name.c_str());
 	if (current_flatdef && !mo->subsector->sector->exfloor_used && !mo->subsector->sector->heightsec &&
-		mo->z == mo->subsector->sector->f_h)
+		abs(mo->z - mo->subsector->sector->f_h) < 1)
 	{
 		sink_mult = current_flatdef->sink_depth;
 		bob_mult = current_flatdef->bob_depth;

@@ -59,6 +59,8 @@
 #define DOOM_YSLOPE       (0.525)
 #define DOOM_YSLOPE_FULL  (0.625)
 
+#define WAVETABLE_INCREMENT 0.0009765625
+
 // #define DEBUG_GREET_NEIGHBOUR
 
 
@@ -91,6 +93,7 @@ float view_x_slope;
 float view_y_slope;
 
 float wave_now; // value for doing wave table lookups
+float plane_z_bob; // for floor/ceiling bob DDFSECT stuff
 
 // -ES- 1999/03/20 Different right & left side clip angles, for asymmetric FOVs.
 angle_t clip_left, clip_right;
@@ -636,14 +639,14 @@ static void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 		{
 			if (swirl_pass == 1)
 			{
-				texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z) * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
-				texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
+				texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z) * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				texc->y = texc->y + r_sintable[(int)((pos->y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
 			}
 			else
 			{
 				amplitude = 0;
-				texc->x = texc->x - r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
-				texc->y = texc->y - r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				texc->x = texc->x - r_sintable[(int)(((pos->x + pos->z)* WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				texc->y = texc->y - r_sintable[(int)((pos->y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
 			}
 		}
 		else
@@ -651,21 +654,21 @@ static void CalcTurbulentTexCoords( vec2_t *texc, vec3_t *pos )
 			if (swirl_pass == 1)
 			{
 				amplitude = 0.025;
-				texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z) * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
-				texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
+				texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z) * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				texc->y = texc->y + r_sintable[(int)((pos->y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
 			}
 			else
 			{
 				amplitude = 0.015;
-				texc->x = texc->x - r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
-				texc->y = texc->y - r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				texc->x = texc->x - r_sintable[(int)(((pos->x + pos->z)* WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+				texc->y = texc->y - r_sintable[(int)((pos->y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
 			}
 		}
 	}
 	else
 	{
-		texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z)* 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
-		texc->y = texc->y + r_sintable[(int)((pos->y * 1.0/128 * 0.125 + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
+		texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z)* WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+		texc->y = texc->y + r_sintable[(int)((pos->y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ] * amplitude;
 	}
 }
 
@@ -758,9 +761,8 @@ typedef struct
 
 	vec3_t normal;
 
-	// Min/Max values for liquid bobbing
-	float min_z = 0.0f;
-	float max_z = 0.0f;
+	// multiplier for plane_z_bob
+	float bob_amount = 0;
 
 	slope_plane_t *slope;
 }
@@ -796,6 +798,9 @@ static void PlaneCoordFunc(void *d, int v_idx,
 
 	if (swirl_pass > 0)
 		CalcTurbulentTexCoords(texc, pos);
+
+	if (data->bob_amount > 0)
+		pos->z += (plane_z_bob * data->bob_amount);
 
 	*lit_pos = *pos;
 }
@@ -2567,6 +2572,14 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	data.trans = trans;
 	data.slope = slope;
 
+	if (cur_sub->sector->props.special)
+	{
+		if (face_dir > 0)
+			data.bob_amount = cur_sub->sector->props.special->floor_bob;
+		else	
+			data.bob_amount = cur_sub->sector->props.special->ceiling_bob;
+	}
+
 	if (surf->image->liquid_type == LIQ_Thick)
 		thick_liquid = true;
 	else
@@ -3233,6 +3246,7 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 	float fov = CLAMP(5, r_fov.f, 175);
 
 	wave_now = leveltime / 100.0f;
+	plane_z_bob = r_sintable[(int)((WAVETABLE_INCREMENT + wave_now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ];
 
 	view_x_slope = tan(fov * M_PI / 360.0);
 

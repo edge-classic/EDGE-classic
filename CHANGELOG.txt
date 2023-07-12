@@ -82,3 +82,5 @@ Bugs fixed
 - Fixed some self-referencing sectors not being setup properly
 - Fixed TrueType fonts having improper widths on fullscreen resolutions that have a different
   aspect ratio than the display's native ratio
+- Fixed sector glows and dynamic lights being too dim when lighting a surface that is using
+  parallax swirling

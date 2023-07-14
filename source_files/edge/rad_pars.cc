@@ -460,7 +460,11 @@ static void AddStateToScript(rad_script_t *R, int tics,
 //
 static void ClearOneScript(rad_script_t *scr)
 {
-	delete scr->mapid;
+	if (scr->mapid)
+	{
+		Z_StrFree(scr->mapid);
+		scr->mapid = nullptr;
+	}
 
 	while (scr->boss_trig)
 	{

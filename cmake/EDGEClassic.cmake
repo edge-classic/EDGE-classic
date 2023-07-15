@@ -15,6 +15,7 @@ add_custom_command(
 # game/mod packs
 set (EPK_BASE_SOURCE    
     "edge_base/blasphemer"
+    "edge_base/chex"
     "edge_base/doom"
     "edge_base/doom1"
     "edge_base/doom2"

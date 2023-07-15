@@ -61,14 +61,14 @@ An optional texture pack to enhance the experience can be found [here.](https://
 
 - UDMF map support
 - DEHEXTRA compatibility
-- A soundfont-capable MIDI player (SF2 and SF3 support)
-- OPL emulation with external OP2 instrument support
+- A soundfont-capable MIDI player (SF2 support)
+- OPL emulation with external OP2/WOPL/AIL/TMB instrument support
 - Support for MP3 music and sound effects
-- UMAPINFO compatibility (almost complete)
+- UMAPINFO compatibility
 - Migration from SDL1 to SDL2 (longevity and potential new features)
 - Improved support for gamepads
 - Expanded DDF, RTS, and COAL features
-- Full support for both HacX 1.2 and Harmony IWADs
+- Full support for the Chex Quest 1, HacX 1.2, Harmony and REKKR IWADs
 - Greatly improved Heretic/Blasphemer IWAD compatibility
 - Enhanced support for the Freedoom 1/2 IWADs
 - Widescreen statusbar, intermission, and title screens
@@ -79,7 +79,7 @@ An optional texture pack to enhance the experience can be found [here.](https://
 - Many more music formats (module/tracker music as well as FLAC, AY, GBS, GYM, HES, NSF, SAP, SPC, VGM and even C64 SID)
 - Optional Dynamic Sound Reverb
 - Optional Pistol Start feature
-- Support for image/spritesheet fonts
+- Support for image/spritesheet and TrueType fonts
 - A load of longstanding bugs fixed (see full changelog)
 
 Bugfixes and detailed changes can be found in CHANGELOG.txt
@@ -96,6 +96,7 @@ Bugfixes and detailed changes can be found in CHANGELOG.txt
 
 - The Ultimate Doom/Doom 1/Freedoom Phase 1
 - Doom 2/Freedoom Phase 2
+- Chex Quest 1
 - Heretic/Blasphemer
 - HacX 1.2
 - Harmony

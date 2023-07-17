@@ -1145,12 +1145,12 @@ static void DrawWallPart(drawfloor_t *dfloor,
 	data.trans = trans;
 	data.mid_masked = mid_masked;
 
-	if (surf->image->liquid_type == LIQ_Thick)
+	if (surf->image && surf->image->liquid_type == LIQ_Thick)
 		thick_liquid = true;
 	else
 		thick_liquid = false;
 
-	if (surf->image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
+	if (surf->image && surf->image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
 		swirl_pass = 1;
 
 	abstract_shader_c *cmap_shader = R_GetColormapShader(props, lit_adjust);
@@ -1159,7 +1159,7 @@ static void DrawWallPart(drawfloor_t *dfloor,
 			trans, &data.pass, data.blending, data.mid_masked,
 			&data, WallCoordFunc);
 
-	if (surf->image->liquid_type > LIQ_None && swirling_flats == SWIRL_PARALLAX)
+	if (surf->image && surf->image->liquid_type > LIQ_None && swirling_flats == SWIRL_PARALLAX)
 	{
 		data.tx0 = surf->offset.x + 25;
 		data.ty0 = surf->offset.y + 25;

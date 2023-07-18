@@ -409,6 +409,43 @@ static void AdjustScaleParts(side_t *side, bool left,
 	}
 }
 
+static void AdjustStretchParts(side_t *side, bool left,
+		scroll_part_e parts, float linelength)
+{
+	if (! side)
+		return;
+
+	float factor = 0;
+
+	if (parts == SCPT_None)
+		parts = (scroll_part_e)(SCPT_LEFT | SCPT_RIGHT);
+
+	if (parts & (left ? SCPT_LeftUpper : SCPT_RightUpper))
+	{
+		if(side->top.image)
+			factor = IM_WIDTH(side->top.image) / linelength;
+
+		side->top.x_mat.x *= factor;
+		side->top.y_mat.y *= factor;
+	}
+	if (parts & (left ? SCPT_LeftMiddle : SCPT_RightMiddle))
+	{
+		if(side->middle.image)
+			factor = IM_WIDTH(side->middle.image) / linelength;
+
+		side->middle.x_mat.x *= factor;
+		side->middle.y_mat.y *= factor;
+	}
+	if (parts & (left ? SCPT_LeftLower : SCPT_RightLower))
+	{
+		if(side->bottom.image)
+			factor = IM_WIDTH(side->bottom.image) / linelength;
+
+		side->bottom.x_mat.x *= factor;
+		side->bottom.y_mat.y *= factor;
+	}
+}
+
 static void AdjustSkewParts(side_t *side, bool left,
 		scroll_part_e parts, float skew)
 {
@@ -733,8 +770,10 @@ static void P_LineEffect(line_t *target, line_t *source,
 	// experimental: scale wall texture(s) by line length
 	if (special->line_effect & LINEFX_Scale)
 	{
-		AdjustScaleParts(target->side[0], 0, special->line_parts, factor);
-		AdjustScaleParts(target->side[1], 1, special->line_parts, factor);
+		//AdjustScaleParts(target->side[0], 0, special->line_parts, factor);
+		//AdjustScaleParts(target->side[1], 1, special->line_parts, factor);
+		AdjustStretchParts(target->side[0], 0, special->line_parts, length);
+		AdjustStretchParts(target->side[1], 1, special->line_parts, length);
 	}
 
 	// experimental: skew wall texture(s) by sidedef Y offset

@@ -45,6 +45,7 @@
 // FIXME: have a proper API
 extern abstract_shader_c *MakeDLightShader(mobj_t *mo);
 extern abstract_shader_c *MakePlaneGlow(mobj_t *mo);
+extern abstract_shader_c *MakeWallGlow(line_t *line, mobj_t *mo);
 
 
 #define MAXRADIUS  128.0
@@ -920,7 +921,30 @@ void P_SectorGlowIterator(sector_t *sec,
 		
 		// create shader if necessary
 		if (! mo->dlight.shader)
-			  mo->dlight.shader = MakePlaneGlow(mo);
+		{
+			if (mo->info->glow_type == GLOW_Wall)
+			{
+				line_t *glow_wall = nullptr;
+				// Use first line that the dlight mobj touches
+				// Ideally it is only touching one line
+				for (size_t i = 0; i < sec->linecount; i++)
+				{
+					if (P_ThingOnLineSide(mo, sec->lines[i]) == -1)
+					{
+						glow_wall = sec->lines[i];
+						break;
+					}
+				}
+				if (glow_wall)
+				{
+					mo->dlight.shader = MakeWallGlow(glow_wall, mo);
+				}
+				else
+					continue;
+			}
+			else
+				mo->dlight.shader = MakePlaneGlow(mo);
+		}
 
 //		mo->dlight.shader->CheckReset();
 

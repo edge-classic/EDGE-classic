@@ -594,22 +594,56 @@ abstract_shader_c *MakePlaneGlow(mobj_t *mo)
 //  WALL GLOWS
 //----------------------------------------------------------------------------
 
-#if 0  // POSSIBLE FUTURE FEATURE
-
 class wall_glow_c : public abstract_shader_c
 {
 private:
 	line_t *ld;
 	mobj_t *mo;
 
-	float nx, ny; // normal
+	float norm_x, norm_y; // normal
+
+	light_image_c *lim[2];
+
+	inline float Dist(float x, float y)
+	{
+		return (ld->v1->x - x) * norm_x + (ld->v1->y - y) * norm_y;
+	}
+
+	inline void TexCoord(vec2_t *texc, float r,
+		const sector_t *sec, const vec3_t *lit_pos, const vec3_t *normal)
+	{
+		texc->x = 0.5;
+		texc->y = 0.5 + Dist(lit_pos->x, lit_pos->y) / r / 2.0;
+	}
+
+	inline float WhatRadius(int DL)
+	{
+		if (DL == 0)
+			return mo->dlight.r * MIR_XYScale();
+
+		return mo->info->dlight[1].radius * mo->dlight.r /
+			   mo->info->dlight[0].radius * MIR_XYScale();
+	}
+
+	inline rgbcol_t WhatColor(int DL)
+	{
+		return (DL == 0) ? mo->dlight.color : mo->info->dlight[1].colour;
+	}
+
+	inline dlight_type_e WhatType(int DL)
+	{
+		return mo->info->dlight[DL].type;
+	}
 
 public:
 	wall_glow_c(line_t *_wall, mobj_t *_glower) :
 		ld(_wall), mo(_glower)
 	{
-		nx = (ld->v1->y - ld->v2->y) / ld->length;
-		ny = (ld->v2->x - ld->v1->x) / ld->length;
+		norm_x = (ld->v1->y - ld->v2->y) / ld->length;
+		norm_y = (ld->v2->x - ld->v1->x) / ld->length;
+		// Note: these are shared, we must not delete them
+		lim[0] = GetLightImage(mo->info, 0);
+		lim[1] = GetLightImage(mo->info, 1);
 	}
 
 	virtual ~wall_glow_c()
@@ -618,32 +652,97 @@ public:
 
 	virtual void Sample(multi_color_c *col, float x, float y, float z)
 	{
-		// FIXME: assumes standard DLIGHT image
+		float dist = Dist(x, y);
 
-		float dist = (ld->v1->x - x) * nx + (ld->v1->y - y) * ny;
-
-		float L = exp(-5.44 * dist * dist);
-
-		L = L * (mo->info->force_fullbright ? 255 : mo->state->bright) / 255.0;
-
-		if (L > 1/256.0)
+		for (int DL = 0; DL < 2; DL++)
 		{
-			if (mo->info->dlight[0].type == DLITE_Add)
-				col->add_Give(mo->dlight.color, L); 
-			else
-				col->mod_Give(mo->dlight.color, L); 
+			if (WhatType(DL) == DLITE_None)
+				break;
+
+			rgbcol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL),
+					WhatColor(DL));
+
+			float L = exp(-5.44 * dist * dist);
+
+			L = L * mo->state->bright / 255.0;
+
+			if (new_col != RGB_MAKE(0,0,0) && L > 1/256.0)
+			{
+				if (WhatType(DL) == DLITE_Add)
+					col->add_Give(new_col, L); 
+				else
+					col->mod_Give(new_col, L); 
+			}
 		}
+	}
+
+	virtual void Corner(multi_color_c *col, float nx, float ny, float nz,
+			            struct mobj_s *mod_pos, bool is_weapon = false)
+	{
+		/* TODO */
 	}
 
 	virtual void WorldMix(GLuint shape, int num_vert,
 		GLuint tex, float alpha, int *pass_var, int blending,
-		void *data, shader_coord_func_t func)
+		bool masked, void *data, shader_coord_func_t func)
 	{
-		/* TODO */
+		const sector_t *sec = mo->subsector->sector;
+
+		for (int DL = 0; DL < 2; DL++)
+		{
+			if (detail_level == 0 && DL > 0)
+				continue;
+
+			if (WhatType(DL) == DLITE_None)
+				break;
+
+			bool is_additive = (WhatType(DL) == DLITE_Add);
+
+			rgbcol_t col = WhatColor(DL);
+
+			float L = mo->state->bright / 255.0;
+
+			float R = L * RGB_RED(col) / 255.0;
+			float G = L * RGB_GRN(col) / 255.0;
+			float B = L * RGB_BLU(col) / 255.0;
+
+
+			local_gl_vert_t *glvert = RGL_BeginUnit(shape, num_vert,
+						(is_additive && masked) ? ENV_SKIP_RGB :
+						 is_additive ? ENV_NONE : GL_MODULATE,
+						(is_additive && !masked) ? 0 : tex,
+						GL_MODULATE, lim[DL]->tex_id(),
+						*pass_var, blending);
+			
+			for (int v_idx=0; v_idx < num_vert; v_idx++)
+			{
+				local_gl_vert_t *dest = glvert + v_idx;
+
+				vec3_t lit_pos;
+
+				(*func)(data, v_idx, &dest->pos, dest->rgba,
+						&dest->texc[0], &dest->normal, &lit_pos);
+
+				TexCoord(&dest->texc[1], WhatRadius(DL), sec,
+						 &lit_pos, &dest->normal);
+
+				dest->rgba[0] = R;
+				dest->rgba[1] = G;
+				dest->rgba[2] = B;
+				dest->rgba[3] = alpha;
+			}
+
+			RGL_EndUnit(num_vert);
+
+			(*pass_var) += 1;
+		}
 	}
 };
 
-#endif
+abstract_shader_c *MakeWallGlow(line_t *wall, mobj_t *mo)
+{
+	return new wall_glow_c(wall, mo);
+}
 
 
 //----------------------------------------------------------------------------

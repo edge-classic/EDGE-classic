@@ -150,30 +150,6 @@ void RGL_FinishUnits(void)
 }
 
 
-static inline void myActiveTexture(GLuint id)
-{
-#ifndef EDGE_GL_ES2	
-	if (GLAD_GL_VERSION_1_3)
-		glActiveTexture(id);
-	else /* GLEW_ARB_multitexture */
-		glActiveTextureARB(id);
-#else
-	glActiveTexture(id);
-#endif
-}
-
-static inline void myMultiTexCoord2f(GLuint id, GLfloat s, GLfloat t)
-{
-#ifndef EDGE_GL_ES2		
-	if (GLAD_GL_VERSION_1_3)
-		glMultiTexCoord2f(id, s, t);
-	else /* GLEW_ARB_multitexture */
-		glMultiTexCoord2fARB(id, s, t);
-#else
-	glMultiTexCoord2f(id, s, t);
-#endif
-}
-
 //
 // RGL_BeginUnit
 //
@@ -303,22 +279,15 @@ static inline void RGL_SendRawVector(const local_gl_vert_t *V)
 	if (r_colormaterial.d || ! r_colorlighting.d)
 		glColor4fv(V->rgba);
 	else
-	{
-		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, V->rgba);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, V->rgba);
-	}
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, V->rgba);
 
-	myMultiTexCoord2f(GL_TEXTURE0, V->texc[0].x, V->texc[0].y);
-	myMultiTexCoord2f(GL_TEXTURE1, V->texc[1].x, V->texc[1].y);
+	glMultiTexCoord2fv(GL_TEXTURE0, reinterpret_cast<const GLfloat *>(&V->texc[0]));
+	glMultiTexCoord2fv(GL_TEXTURE1, reinterpret_cast<const GLfloat *>(&V->texc[1]));
 
-	glNormal3f(V->normal.x, V->normal.y, V->normal.z);
-
-	// I don't think we need glEdgeFlag anymore; from what I've read this only
-	// matters if we switch glPolygonMode away from GL_FILL - Dasho
-	//glEdgeFlag(V->edge);
+	glNormal3fv(reinterpret_cast<const GLfloat *>(&V->normal));
 
 	// vertex must be last
-	glVertex3f(V->pos.x, V->pos.y, V->pos.z);
+	glVertex3fv(reinterpret_cast<const GLfloat *>(&V->pos));
 }
 
 static GLuint current_shape = 0;
@@ -545,7 +514,7 @@ void RGL_DrawUnits(void)
 			if (active_tex[t] != unit->tex[t] || active_env[t] != unit->env[t])
 			{
 				RGL_BatchShape(0);
-				myActiveTexture(GL_TEXTURE0 + t);
+				glActiveTexture(GL_TEXTURE0 + t);
 			}
 
 			if (r_fogofwar.d || r_culling.d)
@@ -653,7 +622,7 @@ void RGL_DrawUnits(void)
 
 	for (int t=1; t >=0; t--)
 	{
-		myActiveTexture(GL_TEXTURE0 + t);
+		glActiveTexture(GL_TEXTURE0 + t);
 
 		if (active_env[t] >= CUSTOM_ENV_BEGIN &&
 			active_env[t] <= CUSTOM_ENV_END)

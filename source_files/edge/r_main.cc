@@ -45,47 +45,6 @@ DEF_CVAR(r_cullfog, "0", CVAR_ARCHIVE)
 
 DEF_CVAR(r_fogofwar, "0", CVAR_ARCHIVE)
 
-typedef enum
-{
-	PFT_LIGHTING   = (1 << 0),
-	PFT_COLOR_MAT  = (1 << 1),
-	PFT_SKY        = (1 << 2),
-	PFT_MULTI_TEX  = (1 << 3),
-}
-problematic_feature_e;
-
-typedef struct
-{
-	// these are substrings that may be matched anywhere
-	const char *renderer;
-	const char *vendor;
-	const char *version;
-
-	// problematic features to force on or off (bitmasks)
-	int disable;
-	int enable;
-}
-driver_bug_t;
-
-static const driver_bug_t driver_bugs[] =
-{
-	{ "Radeon",   NULL, NULL, PFT_LIGHTING | PFT_COLOR_MAT, 0 },
-	{ "RADEON",   NULL, NULL, PFT_LIGHTING | PFT_COLOR_MAT, 0 },
-
-//	{ "R200",     NULL, "Mesa 6.4", PFT_VERTEX_ARRAY, 0 },
-//	{ "R200",     NULL, "Mesa 6.5", PFT_VERTEX_ARRAY, 0 },
-//	{ "Intel",    NULL, "Mesa 6.5", PFT_VERTEX_ARRAY, 0 },
-
-	{ "TNT2",     NULL, NULL, PFT_COLOR_MAT, 0 },
-
-	{ "Velocity", NULL, NULL, PFT_COLOR_MAT | PFT_SKY, 0 },
-	{ "Voodoo3",  NULL, NULL, PFT_SKY | PFT_MULTI_TEX, 0 },
-};
-
-#define NUM_DRIVER_BUGS  (sizeof(driver_bugs) / sizeof(driver_bug_t))
-
-
-
 //
 // RGL_SetupMatrices2D
 //
@@ -218,75 +177,16 @@ void RGL_CheckExtensions(void)
 
 #ifndef EDGE_GL_ES2
 
-
-
 	// Check for various extensions
 
-	if (GLAD_GL_VERSION_1_5 || GLAD_GL_ARB_vertex_buffer_object)
-	{ /* OK */ }
-	else
-		I_Error("OpenGL driver does not support Vertex Buffer Objects.\n");
+	// We only use VBOs on the GLES2/Web path for now
+	//if (GLAD_GL_VERSION_1_5 || GLAD_GL_ARB_vertex_buffer_object)
+	//{ /* OK */ }
+	//else
+	//	I_Error("OpenGL driver does not support Vertex Buffer Objects.\n");
 
-	// I added this to glad but not sure if we'll use it - Dasho
-	/*if (GLAD_GL_ARB_shading_language_100)
-	{  }
-	else
-		I_Error("OpenGL driver does not support shaders.\n");*/
-
-	if (GLAD_GL_VERSION_1_3 || GLAD_GL_ARB_multitexture)
-	{ /* OK */ }
-	else
-		I_Error("OpenGL driver does not support Multitexturing.\n");
-
-	if (GLAD_GL_VERSION_1_3 ||
-		GLAD_GL_ARB_texture_env_combine ||
-		GLAD_GL_EXT_texture_env_combine)
-	{ /* OK */ }
-	else
-	{
-		I_Warning("OpenGL driver does not support COMBINE.\n");
-		r_dumbcombine = 1;
-	}
-
-	if (GLAD_GL_VERSION_1_2 ||
-		GLAD_GL_SGIS_texture_edge_clamp)
-	{ /* OK */ }
-	else
-	{
-		I_Warning("OpenGL driver does not support Edge-Clamp.\n");
-		r_dumbclamp = 1;
-	}
-
-
-	// --- Detect buggy drivers, enable workarounds ---
-	
-	for (int j = 0; j < (int)NUM_DRIVER_BUGS; j++)
-	{
-		const driver_bug_t *bug = &driver_bugs[j];
-
-		if (bug->renderer && !strstr(glstr_renderer.c_str(), bug->renderer))
-			continue;
-
-		if (bug->vendor && !strstr(glstr_vendor.c_str(), bug->vendor))
-			continue;
-
-		if (bug->version && !strstr(glstr_version.c_str(), bug->version))
-			continue;
-
-		I_Printf("OpenGL: Enabling workarounds for %s.\n",
-				bug->renderer ? bug->renderer :
-				bug->vendor   ? bug->vendor : "the Axis of Evil");
-
-		if (bug->disable & PFT_LIGHTING)  r_colorlighting = 0;
-		if (bug->disable & PFT_COLOR_MAT) r_colormaterial = 0;
-		if (bug->disable & PFT_SKY)       r_dumbsky = 1;
-		if (bug->disable & PFT_MULTI_TEX) r_dumbmulti = 1;
-
-		if (bug->enable & PFT_LIGHTING)   r_colorlighting = 1;
-		if (bug->enable & PFT_COLOR_MAT)  r_colormaterial = 1;
-		if (bug->enable & PFT_SKY)        r_dumbsky = 0;
-		if (bug->enable & PFT_MULTI_TEX)  r_dumbmulti = 0;
-	}
+	if (!GLAD_GL_VERSION_1_3)
+		I_Error("OpenGL supported version below minimum! (Requires OpenGL 1.3).\n");
 
 #endif
 
@@ -311,11 +211,6 @@ void RGL_SoftInit(void)
 #ifndef EDGE_GL_ES2
 	glDisable(GL_POLYGON_SMOOTH);
 #endif
-
-	if (var_dithering)
-		glEnable(GL_DITHER);
-	else
-		glDisable(GL_DITHER);
 
 	glEnable(GL_NORMALIZE);
 

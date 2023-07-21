@@ -233,7 +233,6 @@ void W_ImageMakeSaveString(const image_c *image, char *type, char *namebuf);
 
 extern int  var_mipmapping;
 extern int  var_smoothing;
-extern bool var_dithering;
 extern int  hq2x_scaling;
 
 typedef enum

@@ -71,8 +71,6 @@ void M_DebugError(const char *error,...) GCCATTR((format(printf, 1, 2)));
 extern bool save_screenshot_valid;
 
 extern int  display_desync;
-extern bool force_directx;
-extern bool force_waveout;
 
 extern bool var_obituaries;
 

@@ -74,7 +74,6 @@
 // Video Options
 #define CFGDEF_USE_SMOOTHING    (1)
 #define CFGDEF_USE_DLIGHTS      (1)
-#define CFGDEF_DOOM_FADING      (1)
 #define CFGDEF_DETAIL_LEVEL     (2)
 #define CFGDEF_USE_MIPMAPPING   (2)
 #define CFGDEF_HQ2X_SCALING     (3)

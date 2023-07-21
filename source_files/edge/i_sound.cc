@@ -112,26 +112,13 @@ void I_StartupSound(void)
 {
 	if (nosound) return;
 
-	if (argv::Find("waveout") > 0)
-		force_waveout = true;
-
-	if (argv::Find("dsound") > 0 || argv::Find("nowaveout") > 0)
-		force_waveout = false;
-
 	std::string driver = epi::to_u8string(argv::Value("audiodriver"));
 
 	if (driver.empty())
 		driver = SDL_getenv("SDL_AUDIODRIVER") ? SDL_getenv("SDL_AUDIODRIVER") : "";
 
 	if (driver.empty())
-	{
 		driver = "default";
-
-#ifdef WIN32
-		if (force_waveout)
-			driver = "waveout";
-#endif
-	}
 
 	if (epi::case_cmp(driver, "default") != 0)
 	{

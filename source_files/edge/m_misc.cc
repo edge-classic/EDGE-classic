@@ -70,9 +70,6 @@
 //
 // DEFAULTS
 //
-bool force_directx = false;
-bool force_waveout = false;
-
 bool save_screenshot_valid = false;
 
 extern cvar_c s_soundfont;
@@ -89,8 +86,6 @@ static default_t defaults[] =
     {CFGT_Int,		"screenheight",		 &SCREENHEIGHT,	  CFGDEF_SCREENHEIGHT},
     {CFGT_Int,		"screendepth",		 &SCREENBITS,	  CFGDEF_SCREENBITS},
     {CFGT_Int,	    "displaymode",		 &DISPLAYMODE,	  CFGDEF_DISPLAYMODE},
-    {CFGT_Boolean,	"directx",			 &force_directx,  0},
-    {CFGT_Boolean,	"waveout",			 &force_waveout,  0},
  
     {CFGT_Int,      "sound_stereo",      &var_sound_stereo, CFGDEF_SOUND_STEREO},
     {CFGT_Boolean,	"pc_speaker_mode",	 &var_pc_speaker_mode,  0},
@@ -111,7 +106,6 @@ static default_t defaults[] =
     {CFGT_Boolean,  "fastparm",          &global_flags.fastparm, CFGDEF_FASTPARM},
     {CFGT_Boolean,  "true3dgameplay",    &global_flags.true3dgameplay, CFGDEF_TRUE3DGAMEPLAY},
     {CFGT_Enum,     "autoaim",           &global_flags.autoaim, CFGDEF_AUTOAIM},
-    {CFGT_Int,      "doom_fading",       &doom_fading,    CFGDEF_DOOM_FADING},
     {CFGT_Boolean,  "shootthru_scenery", &global_flags.pass_missile, CFGDEF_PASS_MISSILE},
 	{CFGT_Int,  	"swirling_flats",     &swirling_flats, 0},
 
@@ -128,7 +122,6 @@ static default_t defaults[] =
     {CFGT_Boolean,  "crouching",         &global_flags.crouch, CFGDEF_CROUCH},
     {CFGT_Int,      "mipmapping",        &var_mipmapping, CFGDEF_USE_MIPMAPPING},
     {CFGT_Int,      "smoothing",         &var_smoothing,  CFGDEF_USE_SMOOTHING},
-    {CFGT_Boolean,  "dither",            &var_dithering, 0},
     {CFGT_Int,      "dlights",           &use_dlights,    CFGDEF_USE_DLIGHTS},
     {CFGT_Int,      "detail_level",      &detail_level,   CFGDEF_DETAIL_LEVEL},
 	{CFGT_Int,      "hq2x_scaling",      &hq2x_scaling,   CFGDEF_HQ2X_SCALING},

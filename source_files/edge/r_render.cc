@@ -83,8 +83,6 @@ int use_dlights = 0;
 
 std::unordered_set<abstract_shader_c *> seen_dlights;
 
-int doom_fading = 1;
-
 int swirl_pass = 0;
 bool thick_liquid = false;
 

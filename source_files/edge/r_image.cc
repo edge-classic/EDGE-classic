@@ -195,8 +195,6 @@ int var_mipmapping = 1;
 
 int var_smoothing  = 1;
 
-bool var_dithering = false;
-
 int hq2x_scaling = 1;
 
 
@@ -1966,8 +1964,6 @@ bool W_InitImages(void)
 		var_mipmapping = 1;
 	else if (argv::Find("trilinear") > 0)
 		var_mipmapping = 2;
-
-	argv::CheckBooleanParm("dither", &var_dithering, false);
 
 	W_CreateDummyImages();
 

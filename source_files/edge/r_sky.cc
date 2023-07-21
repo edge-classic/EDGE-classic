@@ -383,10 +383,7 @@ void RGL_DrawSkyBox(void)
 	if (r_colormaterial.d || ! r_colorlighting.d)
 		glColor4fv(col);
 	else
-	{
-		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, col);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, col);
-	}
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, col);
 
 	// top
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_Top]);
@@ -487,10 +484,7 @@ void RGL_DrawSkyOriginal(void)
 	if (r_colormaterial.d || ! r_colorlighting.d)
 		glColor4fv(white);
 	else
-	{
-		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, white);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, white);
-	}
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
 
 	GLuint tex_id = W_ImageCache(sky_image, false, ren_fx_colmap);
 

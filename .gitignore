@@ -5,7 +5,7 @@ cache/
 
 # Main program/DLLs
 /edge
-edge-classic.exe
+*.exe
 edge-classic
 edge-classic.data
 edge-classic-data.js

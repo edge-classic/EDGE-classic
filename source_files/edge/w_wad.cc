@@ -94,7 +94,7 @@ game_check_t;
 static const std::vector<game_check_t> game_checker =
 {
 	{
-		{ 16,  "CUSTOM",    {"EDGEIWAD", "EDGEIWAD"} },
+		{ 16,  "CUSTOM",    {"EDGEGAME", "EDGEGAME"} },
 		{ 1,  "BLASPHEMER", {"BLASPHEM", "E1M1"}     },
 		{ 8,  "FREEDOOM1",  {"FREEDOOM", "E1M1"}     },
 		{ 13, "FREEDOOM2",  {"FREEDOOM", "MAP01"}    },

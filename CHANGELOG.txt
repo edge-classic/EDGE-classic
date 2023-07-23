@@ -8,15 +8,18 @@ CHANGELOG for EDGE-Classic 1.35 (since EDGE-Classic 1.34.1)
 
 New Features
 ------------
-
-  
   
 
 General Improvements/Changes
 --------------------
-
+- DDFTHING: Implemented WALL Glow Type
+  - Same parameters as other glow types
+  - Will only work on one linedef per glow mobj
+    - Glow mobj must be touching the desired wall/linedef to be effective
 
 
 Bugs fixed
 ----------
-
+- Weapon Kick will now work when Mouselook is disabled
+- Fixed CTD involving liquid swirl checks when debug_hom is set to 1
+- 

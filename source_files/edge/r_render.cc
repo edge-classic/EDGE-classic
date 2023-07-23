@@ -3307,10 +3307,10 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 
 	if (mo->player)
 	{
-		viewvertangle += M_ATan(mo->player->kick_offset);
-
 		if (! level_flags.mlook)
 			viewvertangle = 0;
+
+		viewvertangle += M_ATan(mo->player->kick_offset);
 
 		// No heads above the ceiling
 		if (viewz > mo->player->mo->ceilingz - 2)

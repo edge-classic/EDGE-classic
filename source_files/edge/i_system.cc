@@ -89,9 +89,9 @@ void I_Error(const char *error,...)
 		fflush(debugfile);
 	}
 
-	I_SystemShutdown();
-
 	I_MessageBox(msgbuf, "EDGE-Classic Error");
+
+	I_SystemShutdown();
 
 	I_CloseProgram(EXIT_FAILURE);
 }

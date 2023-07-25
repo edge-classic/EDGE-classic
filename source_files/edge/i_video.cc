@@ -152,10 +152,14 @@ void I_DeterminePixelAspect()
 
 void I_StartupGraphics(void)
 {
-	std::string driver = epi::to_u8string(argv::Value("videodriver"));
+	std::string driver = argv::Value("videodriver");
 
 	if (driver.empty())
+#ifdef _WIN32
+		driver = env::Value("SDL_VIDEODRIVER");
+#else
 		driver = SDL_getenv("SDL_VIDEODRIVER") ? SDL_getenv("SDL_VIDEODRIVER") : "";
+#endif
 
 	if (driver.empty())
 		driver = "default";

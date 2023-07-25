@@ -242,7 +242,7 @@ void M_SaveDefaults(void)
 	// -ACB- 1999/09/24 idiot proof checking as required by MSVC
 	SYS_ASSERT(! cfgfile.empty());
 
-	FILE *f = EPIFOPEN(cfgfile, "w");
+	FILE *f = EPIFOPEN(cfgfile, "wb");
 	if (!f)
 	{
 		I_Warning("Couldn't open config file %s for writing.", cfgfile.u8string().c_str());
@@ -311,7 +311,7 @@ void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar)
 
 	// Set default SF2 location in s_soundfont CVAR
 	// We can't store this as a CVAR default since it is path-dependent
-	s_soundfont = epi::PATH_Join(epi::PATH_Join(game_dir, UTFSTR("soundfont")), UTFSTR("Default.sf2")).generic_u8string();
+	s_soundfont = epi::PATH_Join(epi::PATH_Join(game_dir, "soundfont"), "Default.sf2").generic_string();
 
 	done_first_init = true;
 }
@@ -458,7 +458,7 @@ void M_ScreenShot(bool show_msg)
 	{
 		std::string base(epi::STR_Format("shot%02d.%s", i, extension));
 
-		fn = epi::PATH_Join(shot_dir, UTFSTR(base));
+		fn = epi::PATH_Join(shot_dir, base);
 
 		if (! epi::FS_Access(fn, epi::file_c::ACCESS_READ))
 		{
@@ -500,7 +500,7 @@ const char *extension = "jpg";
 
 std::filesystem::path filename;
 std::string temp(epi::STR_Format("%s/%s.%s", "current", "head", extension));
-filename= epi::PATH_Join(save_dir, UTFSTR(temp));
+filename= epi::PATH_Join(save_dir, temp);
 
 epi::FS_Delete(filename);
 

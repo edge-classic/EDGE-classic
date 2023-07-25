@@ -2449,7 +2449,7 @@ void P_SpawnSpecials1(void)
 		levelTimeCount = 20 * 60 * TICRATE;
 	}
 
-	std::string s = epi::to_u8string(argv::Value("timer"));
+	std::string s = argv::Value("timer");
 
 	if (!s.empty() && DEATHMATCH())
 	{

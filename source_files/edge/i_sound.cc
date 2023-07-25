@@ -112,10 +112,14 @@ void I_StartupSound(void)
 {
 	if (nosound) return;
 
-	std::string driver = epi::to_u8string(argv::Value("audiodriver"));
+	std::string driver = argv::Value("audiodriver");
 
 	if (driver.empty())
+#ifdef _WIN32
+		driver = env::Value("SDL_AUDIODRIVER");
+#else
 		driver = SDL_getenv("SDL_AUDIODRIVER") ? SDL_getenv("SDL_AUDIODRIVER") : "";
+#endif
 
 	if (driver.empty())
 		driver = "default";
@@ -138,7 +142,7 @@ void I_StartupSound(void)
 	int want_freq = 44100;
 	bool want_stereo = (var_sound_stereo >= 1);
 
-	std::string p = epi::to_u8string(argv::Value("freq"));
+	std::string p = argv::Value("freq");
 
 	if (!p.empty())
 		want_freq = atoi(p.c_str());
@@ -257,15 +261,15 @@ void I_StartupMusic(void)
 {
 	// Check for soundfonts and instrument banks
 	std::vector<epi::dir_entry_c> sfd;
-	std::filesystem::path soundfont_dir = epi::PATH_Join(game_dir, UTFSTR("soundfont"));
+	std::filesystem::path soundfont_dir = epi::PATH_Join(game_dir, "soundfont");
 
 	// Always add the default/internal GENMIDI lump choice
-	available_genmidis.push_back(UTFSTR("GENMIDI"));
+	available_genmidis.push_back("GENMIDI");
 	// Set default SF2 location in CVAR if needed
 	if (s_soundfont.s.empty())
-		s_soundfont = epi::PATH_Join(soundfont_dir, UTFSTR("Default.sf2")).generic_u8string();
+		s_soundfont = epi::PATH_Join(soundfont_dir, "Default.sf2").generic_u8string();
 
-	if (!FS_ReadDir(sfd, soundfont_dir, UTFSTR("*.*")))
+	if (!FS_ReadDir(sfd, soundfont_dir, "*.*"))
 	{
 		I_Warning("I_StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
 	}
@@ -275,14 +279,14 @@ void I_StartupMusic(void)
 		{
 			if(!sfd[i].is_dir)
 			{
-				std::string ext = epi::PATH_GetExtension(sfd[i].name).u8string();
+				std::string ext = epi::PATH_GetExtension(sfd[i].name).string();
 				epi::str_lower(ext);
 				if (ext == ".sf2")
 				{
-					available_soundfonts.push_back(sfd[i].name.generic_u8string());
+					available_soundfonts.push_back(sfd[i].name);
 				}
 				else if (ext == ".op2" || ext == ".wopl" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
-					available_genmidis.push_back(sfd[i].name.generic_u8string());
+					available_genmidis.push_back(sfd[i].name);
 			}
 		}
 	}
@@ -291,11 +295,11 @@ void I_StartupMusic(void)
 	{
 		// Check home_dir soundfont folder as well; create it if it doesn't exist (home_dir only)
 		sfd.clear();
-		soundfont_dir = epi::PATH_Join(home_dir, UTFSTR("soundfont"));
+		soundfont_dir = epi::PATH_Join(home_dir, "soundfont");
 		if (!epi::FS_IsDir(soundfont_dir))
 			epi::FS_MakeDir(soundfont_dir);
 
-		if (!FS_ReadDir(sfd, soundfont_dir, UTFSTR("*.*")))
+		if (!FS_ReadDir(sfd, soundfont_dir, "*.*"))
 		{
 			I_Warning("I_StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
 		}
@@ -305,12 +309,12 @@ void I_StartupMusic(void)
 			{
 				if(!sfd[i].is_dir)
 				{
-					std::string ext = epi::PATH_GetExtension(sfd[i].name).u8string();
+					std::string ext = epi::PATH_GetExtension(sfd[i].name).string();
 					epi::str_lower(ext);
 					if (ext == ".sf2")
-						available_soundfonts.push_back(sfd[i].name.generic_u8string());
+						available_soundfonts.push_back(sfd[i].name);
 					else if (ext == ".op2" || ext == ".wopl" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
-						available_genmidis.push_back(sfd[i].name.generic_u8string());
+						available_genmidis.push_back(sfd[i].name);
 				}
 			}
 		}

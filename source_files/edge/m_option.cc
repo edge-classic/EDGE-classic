@@ -1097,14 +1097,14 @@ void M_OptDrawer()
 		// Draw current soundfont
 		if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeSoundfont)
 		{
-			HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, epi::PATH_GetBasename(UTFSTR(s_soundfont.s)).u8string().c_str());
+			HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, epi::PATH_GetBasename(s_soundfont.s).u8string().c_str());
 		}
 
 		// Draw current GENMIDI
 		if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeGENMIDI)
 		{
 			HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, 
-				s_genmidi.s.empty() ? "default" : epi::PATH_GetBasename(UTFSTR(s_genmidi.s)).u8string().c_str());
+				s_genmidi.s.empty() ? "default" : epi::PATH_GetBasename(s_genmidi.s).u8string().c_str());
 		}
 
 		// -ACB- 1998/07/15 Menu Cursor is colour indexed.
@@ -2107,7 +2107,7 @@ static void M_ChangeSoundfont(int keypressed, cvar_c *cvar)
 	if (sf_pos < 0)
 	{
 		I_Warning("M_ChangeSoundfont: Could not read list of available soundfonts. Falling back to default!\n");
-		s_soundfont = epi::PATH_Join(game_dir, UTFSTR("soundfont/Default.sf2")).generic_u8string();
+		s_soundfont = epi::PATH_Join(game_dir, "soundfont/Default.sf2").generic_u8string();
 		return;
 	}
 

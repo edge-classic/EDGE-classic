@@ -135,7 +135,7 @@ sound_format_e Sound_DetectFormat(byte *data, int song_len)
 
 sound_format_e Sound_FilenameToFormat(const std::filesystem::path& filename)
 {
-	std::string ext = epi::PATH_GetExtension(filename).u8string();
+	std::string ext = epi::PATH_GetExtension(filename).string();
 
 	str_lower(ext);
 

@@ -69,7 +69,7 @@ int CMD_Exec(char **argv, int argc)
 		return 1;
 	}
 
-	FILE *script = EPIFOPEN(std::filesystem::path(UTFSTR(argv[1])), "rb");
+	FILE *script = EPIFOPEN(std::filesystem::path(argv[1]), "rb");
 	if (!script)
 	{
 		CON_Printf("Unable to open file: %s\n", argv[1]);
@@ -98,7 +98,7 @@ int CMD_Type(char **argv, int argc)
 		return 2;
 	}
 
-	script = EPIFOPEN(std::filesystem::path(UTFSTR(argv[1])), "r");
+	script = EPIFOPEN(std::filesystem::path(argv[1]), "r");
 	if (!script)
 	{
 		CON_Printf("Unable to open \'%s\'!\n", argv[1]);
@@ -132,7 +132,7 @@ int CMD_Readme(char **argv, int argc)
 		{
 			std::filesystem::path readme_check = epi::PATH_GetFilename(data_files[i]->name);
 			readme_check.replace_extension(".txt");
-			readme_file = W_OpenPackFile(readme_check.u8string());
+			readme_file = W_OpenPackFile(readme_check.string());
 			if (readme_file) break;
 		}
 	}
@@ -180,24 +180,20 @@ int CMD_Readme(char **argv, int argc)
 
 int CMD_Dir(char **argv, int argc)
 {
-	std::filesystem::path path = UTFSTR(".");
-#ifdef _WIN32
-	std::u32string mask = UTFSTR("*.*");
-#else
+	std::filesystem::path path = ".";
 	std::string mask = "*.*";
-#endif
 
 	if (argc >= 2)
 	{
 		// Assume a leading * is the beginning of a mask for the current dir
 		if (argv[1][0] == '*')
-			mask = UTFSTR(argv[1]);
+			mask = argv[1];
 		else
-			path = UTFSTR(argv[1]);
+			path = argv[1];
 	}
 
 	if (argc >= 3)
-		mask = UTFSTR(argv[2]);
+		mask = argv[2];
 
 	std::vector<epi::dir_entry_c> fsd;
 
@@ -213,7 +209,7 @@ int CMD_Dir(char **argv, int argc)
 		return 0;
 	}
 
-	I_Printf("Directory contents for %s matching %s\n", epi::PATH_GetDir(fsd[0].name).u8string().c_str(), epi::to_u8string(mask).c_str());
+	I_Printf("Directory contents for %s matching %s\n", epi::PATH_GetDir(fsd[0].name).u8string().c_str(), mask.c_str());
 
 	for (size_t i = 0 ; i < fsd.size() ; i++)
 	{
@@ -524,7 +520,7 @@ static int GetArgs(const char *line, char **argv, int max_argc)
 
 	for (;;)
 	{
-		while (isspace(*line))
+		while (isspace(*line, std::locale(".UTF8"))) // Might need an alternate method, hopefully every has UTF8 locales installed - Dasho
 			line++;
 
 		if (! *line)
@@ -545,7 +541,7 @@ static int GetArgs(const char *line, char **argv, int max_argc)
 		}
 		else
 		{
-			while (*line && !isspace(*line))
+			while (*line && !isspace(*line, std::locale(".UTF8")))
 				line++;
 		}
 
@@ -663,7 +659,12 @@ void CON_TryCommand(const char *cmd)
 	if (var != NULL)
 	{
 		if (argc <= 1)
-			I_Printf("%s \"%s\"\n", argv[0], var->c_str());
+		{
+			if (var->flags & CVAR_PATH)
+				I_Printf("%s \"%s\"\n", argv[0], std::filesystem::u8path(var->s).generic_u8string().c_str());
+			else
+				I_Printf("%s \"%s\"\n", argv[0], var->c_str());
+		}
 		else if (argc-1 >= 2) // Assume string with spaces; concat args into one string and try it
 		{
 			std::string concatter = argv[1];
@@ -672,12 +673,20 @@ void CON_TryCommand(const char *cmd)
 				// preserve spaces in original string
 				concatter.append(" ").append(argv[i]);
 			}
-			*var = concatter.c_str();
+			if (var->flags & CVAR_PATH)
+				*var = std::filesystem::u8path(concatter).generic_u8string().c_str();
+			else
+				*var = concatter.c_str();
 		}
 		else if ((var->flags & CVAR_ROM) != 0)
 			I_Printf("The cvar '%s' is read only.\n", var->name);
 		else
-			*var = argv[1];
+		{
+			if (var->flags & CVAR_PATH)
+				*var = std::filesystem::u8path(argv[1]).generic_u8string().c_str();
+			else
+				*var = argv[1];
+		}
 
 		KillArgs(argv, argc);
 		return;

@@ -2197,25 +2197,16 @@ ddf_type_e DDF_LumpToType(const std::string& name)
 
 ddf_type_e DDF_FilenameToType(const std::filesystem::path& path)
 {
-#ifdef _WIN32
-	std::u32string low_name = epi::PATH_GetExtension(path).u32string();
-#else
-	std::string low_name = epi::PATH_GetExtension(path).string();
-#endif
-	epi::str_lower(low_name);
+	std::filesystem::path check = epi::PATH_GetExtension(path);
 
-	if (low_name == UTFSTR(".rts"))
+	if (epi::case_cmp(check.u8string(), ".rts") == 0)
 		return DDF_RadScript;
-#ifdef _WIN32
-	low_name = epi::PATH_GetFilename(path).u32string();
-#else
-	low_name = epi::PATH_GetFilename(path).string();
-#endif
-	epi::str_lower(low_name); // Do we need this if doing case_cmp? - Dasho
+
+	check = epi::PATH_GetFilename(path);
 
 	for (size_t i = 0 ; i < DDF_NUM_TYPES ; i++)
-		if (epi::case_cmp(epi::to_u8string(low_name), ddf_readers[i].pack_name) == 0 ||
-			epi::case_cmp(epi::PATH_GetBasename(low_name).u8string(), ddf_readers[i].lump_name) == 0)
+		if (epi::case_cmp(check.u8string(), ddf_readers[i].pack_name) == 0 ||
+			epi::case_cmp(epi::PATH_GetBasename(check).u8string(), ddf_readers[i].lump_name) == 0)
 			return ddf_readers[i].type;
 
 	return DDF_UNKNOWN;

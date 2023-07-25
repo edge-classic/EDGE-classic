@@ -113,7 +113,7 @@ bool AJ_BuildNodes(data_file_c *df, std::filesystem::path outname)
 
 	if (df->kind == FLKIND_PackWAD)
 	{
-		mem_wad = W_OpenPackFile(df->name.u8string());
+		mem_wad = W_OpenPackFile(df->name.string());
 		raw_length = mem_wad->GetLength();
 		raw_wad = mem_wad->LoadIntoMemory();
 		ajbsp::OpenMem(df->name, raw_wad, raw_length);

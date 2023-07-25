@@ -23,28 +23,17 @@
 #include <vector>
 #include <locale>
 
-#ifdef _WIN32
-#define UTFSTR(x) epi::to_u32string(x)
-#else
-#define UTFSTR(x) (x)
-#endif
-
 namespace epi
 {
 
 void str_lower(std::string& s);
 void str_upper(std::string& s);
-void str_lower(std::u32string& s);
-void str_upper(std::u32string& s);
 
 void STR_TextureNameFromFilename(std::string& buf, const std::string& stem);
 
 std::string STR_Format(const char *fmt, ...) GCCATTR((format(printf, 1, 2)));
 
 std::vector<std::string> STR_SepStringVector(std::string str, char separator);
-#ifdef _WIN32
-std::vector<std::u32string> STR_SepStringVector(std::u32string str, char32_t separator);
-#endif
 
 uint32_t STR_Hash32(std::string str_to_hash);
 

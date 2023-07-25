@@ -148,7 +148,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 		{
 			F = W_OpenPackFile(def->pc_speaker_sound);
 			if (!F)
-				F = epi::FS_Open(M_ComposeFileName(game_dir, UTFSTR(def->pc_speaker_sound)),
+				F = epi::FS_Open(M_ComposeFileName(game_dir, def->pc_speaker_sound),
 					epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 			if (!F)
 			{
@@ -187,7 +187,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 		{
 			std::filesystem::path fn;
 			// Why is this composed with the app dir? - Dasho
-			fn = M_ComposeFileName(game_dir, UTFSTR(def->file_name));
+			fn = M_ComposeFileName(game_dir,def->file_name);
 			F = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 			if (! F)
 			{

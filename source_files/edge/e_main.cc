@@ -300,7 +300,7 @@ static void SetGlobalVars(void)
 	else if (argv::Find("windowed") > 0)
 		DISPLAYMODE = 0;
 
-	s = epi::to_u8string(argv::Value("width"));
+	s = argv::Value("width");
 	if (!s.empty())
 	{
 		if (DISPLAYMODE == 2)
@@ -309,7 +309,7 @@ static void SetGlobalVars(void)
 			SCREENWIDTH = atoi(s.c_str());
 	}
 
-	s = epi::to_u8string(argv::Value("height"));
+	s = argv::Value("height");
 	if (!s.empty())
 	{
 		if (DISPLAYMODE == 2)
@@ -323,16 +323,16 @@ static void SetGlobalVars(void)
 	{
 		if (DISPLAYMODE == 2)
 			I_Warning("Current display mode set to borderless fullscreen. Provided resolution of %dx%d will be ignored!\n", 
-				atoi(epi::to_u8string(argv::list[p+1]).c_str()), atoi(epi::to_u8string(argv::list[p+2]).c_str()));
+				atoi(argv::list[p+1].c_str()), atoi(argv::list[p+2].c_str()));
 		else
 		{
-			SCREENWIDTH  = atoi(epi::to_u8string(argv::list[p+1]).c_str());
-			SCREENHEIGHT = atoi(epi::to_u8string(argv::list[p+2]).c_str());
+			SCREENWIDTH  = atoi(argv::list[p+1].c_str());
+			SCREENHEIGHT = atoi(argv::list[p+2].c_str());
 		}
 	}
 
 	// Bits per pixel check....
-	s = epi::to_u8string(argv::Value("bpp"));
+	s = argv::Value("bpp");
 	if (!s.empty())
 	{
 		SCREENBITS = atoi(s.c_str());
@@ -357,13 +357,13 @@ static void SetGlobalVars(void)
 	if (p > 0)
 	{
 		if (p + 1 < argv::list.size() && !argv::IsOption(p+1))
-			sprite_kludge = atoi(epi::to_u8string(argv::list[p+1]).c_str());
+			sprite_kludge = atoi(argv::list[p+1].c_str());
 
 		if (!sprite_kludge)
 			sprite_kludge = 1;
 	}
 
-	s = epi::to_u8string(argv::Value("screenshot"));
+	s = argv::Value("screenshot");
 	if (!s.empty())
 	{
 		screenshot_rate = atoi(s.c_str());
@@ -427,7 +427,7 @@ static void SetGlobalVars(void)
 //
 void SetLanguage(void)
 {
-	std::string want_lang = epi::to_u8string(argv::Value("lang"));
+	std::string want_lang = argv::Value("lang");
 	if (!want_lang.empty())
 		m_language = want_lang;
 
@@ -872,19 +872,19 @@ void InitDirectories(void)
 	// Get the App Directory from parameter.
 	
 	// Note: This might need adjusting for Apple
-	std::filesystem::path s = UTFSTR(SDL_GetBasePath());
+	std::filesystem::path s = std::filesystem::u8path(SDL_GetBasePath());
 
 	game_dir = s;
-	s = argv::Value("game");
+	s = std::filesystem::u8path(argv::Value("game"));
 	if (!s.empty())
 		game_dir = s;
 
-	brandingfile = epi::PATH_Join(game_dir, UTFSTR(EDGEBRANDINGFILE));
+	brandingfile = epi::PATH_Join(game_dir, EDGEBRANDINGFILE);
 
 	M_LoadBranding();
 
 	// add parameter file "appdir/parms" if it exists.
-	std::filesystem::path parms = epi::PATH_Join(game_dir, UTFSTR("parms"));
+	std::filesystem::path parms = epi::PATH_Join(game_dir, "parms");
 
 	if (epi::FS_Access(parms, epi::file_c::ACCESS_READ))
 	{
@@ -893,14 +893,14 @@ void InitDirectories(void)
 	}
 
 	// config file - check for portable config
-	s = argv::Value("config");
+	s = std::filesystem::u8path(argv::Value("config"));
 	if (!s.empty())
 	{
 		cfgfile = s;
 	}
 	else
     {
-		cfgfile = epi::PATH_Join(game_dir, UTFSTR(configfilename.s));
+		cfgfile = epi::PATH_Join(game_dir, configfilename.s);
 		if (epi::FS_Access(cfgfile, epi::file_c::ACCESS_READ) || argv::Find("portable") > 0)
 			home_dir = game_dir;
 		else
@@ -909,15 +909,15 @@ void InitDirectories(void)
 
 	if (home_dir.empty())
 	{
-		s = argv::Value("home");
+		s = std::filesystem::u8path(argv::Value("home"));
 		if (!s.empty())
 			home_dir = s;
 	}
 
 #ifdef _WIN32
-    if (home_dir.empty()) home_dir = UTFSTR(SDL_GetPrefPath(nullptr, appname.c_str()));
+    if (home_dir.empty()) home_dir = std::filesystem::u8path(SDL_GetPrefPath(nullptr, appname.c_str()));
 #else
-	if (home_dir.empty()) home_dir = UTFSTR(SDL_GetPrefPath(orgname.c_str(), appname.c_str()));
+	if (home_dir.empty()) home_dir = std::filesystem::u8path(SDL_GetPrefPath(orgname.c_str(), appname.c_str()));
 #endif
 
 	if (!epi::FS_IsDir(home_dir))
@@ -927,37 +927,37 @@ void InitDirectories(void)
 	}
 
 	if (cfgfile.empty())
-		cfgfile = epi::PATH_Join(home_dir, UTFSTR(configfilename.s));
+		cfgfile = epi::PATH_Join(home_dir, configfilename.s);
 
 	// edge-defs.epk file
-	s = argv::Value("defs");
+	s = std::filesystem::u8path(argv::Value("defs"));
 	if (!s.empty())
 	{
 		epkfile = s;
 	}
 	else
     {
-		if (epi::FS_IsDir(epi::PATH_Join(game_dir, UTFSTR("edge_defs"))))
-			epkfile = epi::PATH_Join(game_dir, UTFSTR("edge_defs"));
+		if (epi::FS_IsDir(epi::PATH_Join(game_dir, "edge_defs")))
+			epkfile = epi::PATH_Join(game_dir, "edge_defs");
 		else
-        	epkfile = epi::PATH_Join(game_dir, UTFSTR("edge-defs.epk"));
+        	epkfile = epi::PATH_Join(game_dir, "edge-defs.epk");
 	}
 
 	// cache directory
-    cache_dir = epi::PATH_Join(home_dir, UTFSTR(CACHEDIR));
+    cache_dir = epi::PATH_Join(home_dir, CACHEDIR);
 
     if (! epi::FS_IsDir(cache_dir))
         epi::FS_MakeDir(cache_dir);
 
 	// savegame directory
-    save_dir = epi::PATH_Join(home_dir, UTFSTR(SAVEGAMEDIR));
+    save_dir = epi::PATH_Join(home_dir, SAVEGAMEDIR);
 	
     if (! epi::FS_IsDir(save_dir)) epi::FS_MakeDir(save_dir);
 
 	SV_ClearSlot("current");
 
 	// screenshot directory
-    shot_dir = epi::PATH_Join(home_dir, UTFSTR(SCRNSHOTDIR));
+    shot_dir = epi::PATH_Join(home_dir, SCRNSHOTDIR);
 
     if (!epi::FS_IsDir(shot_dir))
         epi::FS_MakeDir(shot_dir);
@@ -971,7 +971,7 @@ static void PurgeCache(void)
 
 	std::vector<epi::dir_entry_c> fsd;
 
-	if (!FS_ReadDir(fsd, cache_dir, UTFSTR("*.*")))
+	if (!FS_ReadDir(fsd, cache_dir, "*.*"))
 	{
 		I_Error("PurgeCache: Failed to read '%s' directory!\n", cache_dir.u8string().c_str());
 	}
@@ -981,11 +981,11 @@ static void PurgeCache(void)
 		{
 			if(!fsd[i].is_dir)
 			{
-				if (fsd[i].name.extension().compare(UTFSTR(".gwa")) == 0)
+				if (fsd[i].name.extension().compare(".gwa") == 0)
 					epi::FS_Delete(fsd[i].name);
-				else if (fsd[i].name.extension().compare(UTFSTR(".hwa")) == 0)
+				else if (fsd[i].name.extension().compare(".hwa") == 0)
 					epi::FS_Delete(fsd[i].name);
-				else if (fsd[i].name.extension().compare(UTFSTR(".xwa")) == 0)
+				else if (fsd[i].name.extension().compare(".xwa") == 0)
 				{
 					if(std::filesystem::last_write_time(fsd[i].name) < expiry)
 					{
@@ -1064,27 +1064,31 @@ static void IdentifyVersion(void)
 
     // If we haven't yet set the IWAD directory, then we check
     // the DOOMWADDIR environment variable
+#ifdef _WIN32
+	s = env::Value("DOOMWADDIR");
+#else
 	if (getenv("DOOMWADDIR"))
-        s = UTFSTR(getenv("DOOMWADDIR"));
+        s = getenv("DOOMWADDIR");
+#endif
 
     if (!s.empty() && epi::FS_IsDir(s))
         iwad_dir_vector.push_back(s);
 
     // Should the IWAD directory not be set by now, then we
     // use our standby option of the current directory.
-    if (iwad_dir.empty()) iwad_dir = UTFSTR("."); // should this be hardcoded to the game or home directory instead? - Dasho
+    if (iwad_dir.empty()) iwad_dir = "."; // should this be hardcoded to the game or home directory instead? - Dasho
 
 	// Add DOOMWADPATH directories if they exist
 	s.clear();
+#ifdef _WIN32
+	s = env::Value("DOOMWADPATH");
+#else
 	if (getenv("DOOMWADPATH"))
-		s = UTFSTR(getenv("DOOMWADPATH"));
+		s = getenv("DOOMWADPATH");
+#endif
 	if (!s.empty())
 	{
-#ifdef _WIN32
-        for (auto dir : epi::STR_SepStringVector(s.u32string(), ';'))
-#else
 		for (auto dir : epi::STR_SepStringVector(s.string(), ':'))
-#endif	
 			iwad_dir_vector.push_back(dir);
 	}
 
@@ -1098,17 +1102,13 @@ static void IdentifyVersion(void)
         // Is it missing the extension?
         if (epi::PATH_GetExtension(iwad_par).empty())
         {
-            fn.replace_extension(UTFSTR(".wad")); // We will still be checking EPKs if needed; but by the numbers .wad is a good initial search
+            fn.replace_extension(".wad"); // We will still be checking EPKs if needed; but by the numbers .wad is a good initial search
         }
 
         // If no directory given use the IWAD directory
         std::filesystem::path dir = epi::PATH_GetDir(fn);
         if (dir.empty())
-#ifdef _WIN32
-            iwad_file = epi::PATH_Join(iwad_dir, fn.u32string());
-#else
 			iwad_file = epi::PATH_Join(iwad_dir, fn.string());
-#endif
         else
             iwad_file = fn;
 
@@ -1119,11 +1119,7 @@ static void IdentifyVersion(void)
 			{
 				for (size_t i=0; i < iwad_dir_vector.size(); i++)
 				{
-#ifdef _WIN32
-					iwad_file = epi::PATH_Join(iwad_dir_vector[i], fn.u32string());
-#else
 					iwad_file = epi::PATH_Join(iwad_dir_vector[i], fn.string());
-#endif
 					if (epi::FS_Access(iwad_file, epi::file_c::ACCESS_READ))
 						goto foundindoomwadpath;
 				}
@@ -1133,7 +1129,7 @@ static void IdentifyVersion(void)
 			goto foundindoomwadpath;
 
 		// If we get here, try .epk and error out if we still can't access what was passed to us
-		iwad_file.replace_extension(UTFSTR(".epk"));
+		iwad_file.replace_extension(".epk");
 
 		if (!epi::FS_Access(iwad_file, epi::file_c::ACCESS_READ))
         {
@@ -1142,11 +1138,7 @@ static void IdentifyVersion(void)
 			{
 				for (size_t i=0; i < iwad_dir_vector.size(); i++)
 				{
-#ifdef _WIN32
-					iwad_file = epi::PATH_Join(iwad_dir_vector[i], fn.u32string());
-#else
 					iwad_file = epi::PATH_Join(iwad_dir_vector[i], fn.string());
-#endif
 					if (epi::FS_Access(iwad_file, epi::file_c::ACCESS_READ))
 						goto foundindoomwadpath;
 				}
@@ -1158,7 +1150,7 @@ static void IdentifyVersion(void)
 
 		foundindoomwadpath:
 
-		if (epi::case_cmp(epi::PATH_GetExtension(iwad_file).u8string(), epi::to_u8string(UTFSTR(".wad"))) == 0)
+		if (epi::case_cmp(epi::PATH_GetExtension(iwad_file).string(), ".wad") == 0)
 		{
 			epi::file_c *game_test = epi::FS_Open(iwad_file, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 			game_base = W_CheckForUniqueLumps(game_test, nullptr);
@@ -1209,7 +1201,7 @@ static void IdentifyVersion(void)
 			//
 			std::vector<epi::dir_entry_c> fsd;
 
-			if (!FS_ReadDir(fsd, location, UTFSTR("*.wad")))
+			if (!FS_ReadDir(fsd, location, "*.wad"))
 			{
 				I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location.u8string().c_str());
 			}
@@ -1233,7 +1225,7 @@ static void IdentifyVersion(void)
 					}
 				}
 			}
-			if (!FS_ReadDir(fsd, location, UTFSTR("*.epk")))
+			if (!FS_ReadDir(fsd, location, "*.epk"))
 			{
 				I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location.u8string().c_str());
 			}
@@ -1267,7 +1259,7 @@ static void IdentifyVersion(void)
 
 				std::vector<epi::dir_entry_c> fsd;
 
-				if (!FS_ReadDir(fsd, location, UTFSTR("*.wad")))
+				if (!FS_ReadDir(fsd, location, "*.wad"))
 				{
 					I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location.u8string().c_str());
 				}
@@ -1291,7 +1283,7 @@ static void IdentifyVersion(void)
 						}
 					}
 				}
-				if (!FS_ReadDir(fsd, location, UTFSTR("*.epk")))
+				if (!FS_ReadDir(fsd, location, "*.epk"))
 				{
 					I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location.u8string().c_str());
 				}
@@ -1330,10 +1322,10 @@ static void Add_Base(void)
 {
 	if (epi::case_cmp("CUSTOM", game_base) == 0)
 		return; // Standalone EDGE IWADs/EPKs should already contain their necessary resources and definitions - Dasho
-	std::filesystem::path base_path = epi::PATH_Join(game_dir, UTFSTR("edge_base"));
+	std::filesystem::path base_path = epi::PATH_Join(game_dir, "edge_base");
 	std::string base_wad = game_base;
 	epi::str_lower(base_wad);
-	base_path = epi::PATH_Join(base_path, UTFSTR(base_wad));
+	base_path = epi::PATH_Join(base_path, base_wad);
 	if (epi::FS_IsDir(base_path))
 		W_AddFilename(base_path, FLKIND_EFolder);
 	else if (epi::FS_Access(base_path.replace_extension(".epk"), epi::file_c::ACCESS_READ)) 
@@ -1352,7 +1344,7 @@ static void CheckTurbo(void)
 	if (p > 0)
 	{
 		if (p + 1 < argv::list.size() && !argv::IsOption(p+1))
-			turbo_scale = atoi(epi::to_u8string(argv::list[p+1]).c_str());
+			turbo_scale = atoi(argv::list[p+1].c_str());
 		else
 			turbo_scale = 200;
 
@@ -1390,8 +1382,8 @@ static void SetupLogAndDebugFiles(void)
 	// -AJA- 2003/11/08 The log file gets all CON_Printfs, I_Printfs,
 	//                  I_Warnings and I_Errors.
 
-	std::filesystem::path log_fn  (epi::PATH_Join(home_dir, UTFSTR(logfilename.s)));
-	std::filesystem::path debug_fn(epi::PATH_Join(home_dir, UTFSTR(debugfilename.s)));
+	std::filesystem::path log_fn  (epi::PATH_Join(home_dir, logfilename.s));
+	std::filesystem::path debug_fn(epi::PATH_Join(home_dir, debugfilename.s));
 
 	logfile = NULL;
 	debugfile = NULL;
@@ -1425,7 +1417,7 @@ static void SetupLogAndDebugFiles(void)
 
 static void AddSingleCmdLineFile(std::filesystem::path name, bool ignore_unknown)
 {
-	std::string ext = epi::PATH_GetExtension(name).u8string();
+	std::string ext = epi::PATH_GetExtension(name).string();
 
 	epi::str_lower(ext);
 
@@ -1470,7 +1462,7 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("file");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(epi::to_u8string(argv::list[p]), "-file") == 0))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-file") == 0))
 	{
 		// the parms after p are wadfile/lump names,
 		// go until end of parms or another '-' preceded parm
@@ -1484,13 +1476,13 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("script");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(epi::to_u8string(argv::list[p]), "-script") == 0))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-script") == 0))
 	{
 		// the parms after p are script filenames,
 		// go until end of parms or another '-' preceded parm
 		if (!argv::IsOption(p))
 		{
-			std::string ext = epi::PATH_GetExtension(argv::list[p]).u8string();
+			std::string ext = epi::PATH_GetExtension(argv::list[p]).string();
 			// sanity check...
 			if (epi::case_cmp(ext, ".wad") == 0 || 
 				epi::case_cmp(ext, ".pk3") == 0 ||
@@ -1500,7 +1492,7 @@ static void AddCommandLineFiles(void)
 				epi::case_cmp(ext, ".deh") == 0 ||
 				epi::case_cmp(ext, ".bex") == 0)
 			{
-				I_Error("Illegal filename for -script: %s\n", epi::to_u8string(argv::list[p]).c_str());
+				I_Error("Illegal filename for -script: %s\n", argv::list[p].c_str());
 			}
 
 			std::filesystem::path filename = M_ComposeFileName(game_dir, argv::list[p]);
@@ -1514,13 +1506,13 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("deh");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(epi::to_u8string(argv::list[p]), "-deh") == 0))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-deh") == 0))
 	{
 		// the parms after p are Dehacked/BEX filenames,
 		// go until end of parms or another '-' preceded parm
 		if (!argv::IsOption(p))
 		{
-			std::string ext = epi::PATH_GetExtension(argv::list[p]).u8string();
+			std::string ext = epi::PATH_GetExtension(argv::list[p]).string();
 			// sanity check...
 			if (epi::case_cmp(ext, ".wad") == 0 ||
 				epi::case_cmp(ext, ".epk") == 0 ||
@@ -1529,7 +1521,7 @@ static void AddCommandLineFiles(void)
 				epi::case_cmp(ext, ".ddf") == 0 ||
 				epi::case_cmp(ext, ".rts") == 0)
 			{
-				I_Error("Illegal filename for -deh: %s\n", epi::to_u8string(argv::list[p]).c_str());
+				I_Error("Illegal filename for -deh: %s\n", argv::list[p].c_str());
 			}
 
 			std::filesystem::path filename = M_ComposeFileName(game_dir, argv::list[p]);
@@ -1543,7 +1535,7 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("dir");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(epi::to_u8string(argv::list[p]),"-dir") == 0))
+	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p],"-dir") == 0))
 	{
 		// the parms after p are directory names,
 		// go until end of parms or another '-' preceded parm
@@ -1563,16 +1555,16 @@ static void AddCommandLineFiles(void)
 	if (!ps.empty())
 	{
 		std::filesystem::path filename = M_ComposeFileName(game_dir, ps);
-		W_AddFilename(filename.c_str(), FLKIND_Folder);
+		W_AddFilename(filename, FLKIND_Folder);
 	}
 }
 
 static void Add_Autoload(void) {
 	
 	std::vector<epi::dir_entry_c> fsd;
-	std::filesystem::path folder = epi::PATH_Join(game_dir, UTFSTR("autoload"));
+	std::filesystem::path folder = epi::PATH_Join(game_dir, "autoload");
 
-	if (!FS_ReadDir(fsd, folder, UTFSTR("*.*")))
+	if (!FS_ReadDir(fsd, folder, "*.*"))
 	{
 		I_Warning("Failed to read %s directory!\n", folder.u8string().c_str());
 	}
@@ -1586,9 +1578,9 @@ static void Add_Autoload(void) {
 	}
 	fsd.clear();
 	std::string lowercase_base = game_base;
-	std::transform(lowercase_base.begin(), lowercase_base.end(), lowercase_base.begin(), ::tolower);
-	folder = epi::PATH_Join(folder, UTFSTR(lowercase_base));
-	if (!FS_ReadDir(fsd, folder, UTFSTR("*.*")))
+	epi::str_lower(lowercase_base);
+	folder = epi::PATH_Join(folder, lowercase_base);
+	if (!FS_ReadDir(fsd, folder, "*.*"))
 	{
 		I_Warning("Failed to read %s directory!\n", folder.u8string().c_str());
 	}
@@ -1603,11 +1595,11 @@ static void Add_Autoload(void) {
 	fsd.clear();
 
 	// Check if autoload folder stuff is in home_dir as well, make the folder/subfolder if they don't exist (in home_dir only)
-	folder = epi::PATH_Join(home_dir, UTFSTR("autoload"));
+	folder = epi::PATH_Join(home_dir, "autoload");
 	if (!epi::FS_IsDir(folder))
 		epi::FS_MakeDir(folder);
 
-	if (!FS_ReadDir(fsd, folder, UTFSTR("*.*")))
+	if (!FS_ReadDir(fsd, folder, "*.*"))
 	{
 		I_Warning("Failed to read %s directory!\n", folder.u8string().c_str());
 	}
@@ -1620,10 +1612,10 @@ static void Add_Autoload(void) {
 		}
 	}
 	fsd.clear();
-	folder = epi::PATH_Join(folder, UTFSTR(lowercase_base));
+	folder = epi::PATH_Join(folder, lowercase_base);
 	if (!epi::FS_IsDir(folder))
 		epi::FS_MakeDir(folder);
-	if (!FS_ReadDir(fsd, folder, UTFSTR("*.*")))
+	if (!FS_ReadDir(fsd, folder, "*.*"))
 	{
 		I_Warning("Failed to read %s directory!\n", folder.u8string().c_str());
 	}
@@ -1762,11 +1754,7 @@ static void E_InitialState(void)
 {
 	I_Debugf("- Setting up Initial State...\n");
 
-#ifdef _WIN32
-	std::u32string ps;
-#else
 	std::string ps;
-#endif
 
 	// do loadgames first, as they contain all of the
 	// necessary state already (in the savegame).
@@ -1780,7 +1768,7 @@ static void E_InitialState(void)
 	ps = argv::Value("loadgame");
 	if (!ps.empty())
 	{
-		G_DeferredLoadGame(atoi(epi::to_u8string(ps).c_str()));
+		G_DeferredLoadGame(atoi(ps.c_str()));
 		return;
 	}
 
@@ -1795,13 +1783,13 @@ static void E_InitialState(void)
 
 	ps = argv::Value("bots");
 	if (!ps.empty())
-		bots = atoi(epi::to_u8string(ps).c_str());
+		bots = atoi(ps.c_str());
 
 	ps = argv::Value("warp");
 	if (!ps.empty())
 	{
 		warp = true;
-		warp_map = epi::to_u8string(ps);
+		warp_map = ps;
 	}
 
 	// -KM- 1999/01/29 Use correct skill: 1 is easiest, not 0
@@ -1809,7 +1797,7 @@ static void E_InitialState(void)
 	if (!ps.empty())
 	{
 		warp = true;
-		warp_skill = (skill_t)(atoi(epi::to_u8string(ps).c_str()) - 1);
+		warp_skill = (skill_t)(atoi(ps.c_str()) - 1);
 	}
 
 	// deathmatch check...
@@ -1819,7 +1807,7 @@ static void E_InitialState(void)
 		warp_deathmatch = 1;
 
 		if (pp + 1 < argv::list.size() && !argv::IsOption(pp+1))
-			warp_deathmatch = MAX(1, atoi(epi::to_u8string(argv::list[pp+1]).c_str()));
+			warp_deathmatch = MAX(1, atoi(argv::list[pp+1].c_str()));
 
 		warp = true;
 	}
@@ -1884,6 +1872,10 @@ void E_Main(int argc, const char **argv)
 	// Implemented here - since we need to bring the memory manager up first
 	// -ACB- 2004/05/31
 	argv::Init(argc, argv);
+
+#ifdef _WIN32
+	env::Init();
+#endif
 
 	try
 	{

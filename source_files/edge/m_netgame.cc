@@ -941,7 +941,7 @@ void M_NetGameInit(void)
 	def = styledefs.Lookup("NET PLAYER LIST");
 	ng_list_style = def ? hu_styles.Lookup(def) : ng_default;
 
-	std::string str = epi::to_u8string(argv::Value("connect"));
+	std::string str = argv::Value("connect");
 
 	if (!str.empty())
 	{

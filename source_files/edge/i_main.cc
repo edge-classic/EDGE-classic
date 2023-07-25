@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	if (SDL_Init(0) < 0)
 		I_Error("Couldn't init SDL!!\n%s\n", SDL_GetError());
 
-	exe_path = UTFSTR(SDL_GetBasePath());
+	exe_path = std::filesystem::u8path(SDL_GetBasePath());
 
 #ifdef _WIN32
 	// -AJA- change current dir to match executable

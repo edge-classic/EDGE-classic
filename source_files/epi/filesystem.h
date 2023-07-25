@@ -53,13 +53,8 @@ bool FS_SetCurrDir(std::filesystem::path dir);
 bool FS_IsDir(std::filesystem::path dir);
 bool FS_MakeDir(std::filesystem::path dir);
 bool FS_RemoveDir(const char *dir);
-#ifdef _WIN32
-bool FS_ReadDir(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::u32string mask);
-bool FS_ReadDirRecursive(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::u32string mask);
-#else
 bool FS_ReadDir(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::string mask);
 bool FS_ReadDirRecursive(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::string mask);
-#endif
 // File Functions
 bool FS_Access(std::filesystem::path name, unsigned int flags);
 file_c *FS_Open(std::filesystem::path name, unsigned int flags);

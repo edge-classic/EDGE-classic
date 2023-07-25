@@ -24,14 +24,14 @@
 #include <string>
 #include <vector>
 #include <filesystem>
-
-namespace argv {
-
 #ifdef _WIN32
-extern std::vector<std::u32string> list;
-#else
-extern std::vector<std::string> list;
+#include <unordered_map>
 #endif
+
+namespace argv 
+{
+
+extern std::vector<std::string> list;
 
 void Init(int argc, const char *const *argv);
 
@@ -39,11 +39,7 @@ void Init(int argc, const char *const *argv);
 int Find(std::string longName, int *numParams = nullptr);
 
 //  Same as above, but return the value of position + 1 if valid, else an empty string
-#ifdef _WIN32
-std::u32string Value(std::string longName, int *numParams = nullptr);
-#else
 std::string Value(std::string longName, int *numParams = nullptr);
-#endif
 
 void CheckBooleanParm(std::string parm, bool *boolval, bool reverse);
 void CheckBooleanCVar(std::string parm, cvar_c *var, bool reverse);
@@ -55,6 +51,20 @@ void DebugDumpArgs(void);
 bool IsOption(int index);
 
 }  // namespace argv
+
+#ifdef _WIN32
+namespace env 
+{
+
+extern std::unordered_map<std::string, std::string> list;
+
+void Init(void);
+
+//  Same as above, but return the value of position + 1 if valid, else an empty string
+std::string Value(std::string key);
+
+}  // namespace env
+#endif
 
 #endif /* __LIB_ARGV_H__ */
 

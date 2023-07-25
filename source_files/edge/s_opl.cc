@@ -49,7 +49,7 @@ extern int  dev_freq;
 
 bool opl_disabled = false;
 
-DEF_CVAR(s_genmidi, "GENMIDI", CVAR_ARCHIVE)
+DEF_CVAR(s_genmidi, "GENMIDI", (CVAR_ARCHIVE|CVAR_PATH))
 
 extern std::vector<std::filesystem::path> available_genmidis;
 
@@ -97,7 +97,7 @@ bool S_StartupOPL(void)
 	}
 	else
 	{
-		F = epi::FS_Open(UTFSTR(s_genmidi.s), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+		F = epi::FS_Open(std::filesystem::u8path(s_genmidi.s), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
 		if (! F)
 		{
 			I_Warning("S_StartupOPL: Error opening GENMIDI!\n");

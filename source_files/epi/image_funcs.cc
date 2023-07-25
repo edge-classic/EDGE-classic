@@ -123,7 +123,7 @@ image_format_e Image_DetectFormat(byte *header, int header_len, int file_size)
 
 image_format_e Image_FilenameToFormat(const std::filesystem::path& filename)
 {
-	std::string ext = epi::PATH_GetExtension(filename).u8string();
+	std::string ext = epi::PATH_GetExtension(filename).string();
 
 	str_lower(ext);
 
@@ -226,7 +226,7 @@ bool JPEG_Save(std::filesystem::path fn, image_data_c *img)
 	SYS_ASSERT(img->bpp == 3);
 
 	// zero means failure here
-	int result = stbi_write_jpg(fn.u8string().c_str(), img->used_w, img->used_h, img->bpp, img->pixels, 95);
+	int result = stbi_write_jpg(fn.string().c_str(), img->used_w, img->used_h, img->bpp, img->pixels, 95);
 
 	return result != 0;
 }
@@ -236,7 +236,7 @@ bool PNG_Save(std::filesystem::path fn, image_data_c *img)
 	SYS_ASSERT(img->bpp >= 3);
 
 	// zero means failure here
-	int result = stbi_write_png(fn.u8string().c_str(), img->used_w, img->used_h, img->bpp, img->pixels, 0);
+	int result = stbi_write_png(fn.string().c_str(), img->used_w, img->used_h, img->bpp, img->pixels, 0);
 
 	return result != 0;
 }

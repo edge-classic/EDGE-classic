@@ -95,6 +95,7 @@ enum
 	CVAR_CHEAT      = (1 << 1),  // disabled in multi-player games
 	CVAR_NO_RESET   = (1 << 2),  // do not reset to default
 	CVAR_ROM        = (1 << 3),  // read-only
+	CVAR_PATH       = (1 << 4),  // value should be used as an std::filesystem::path
 };
 
 

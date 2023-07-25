@@ -141,7 +141,7 @@ static void W_ExternalDDF(data_file_c *df)
 {
 	ddf_type_e type = DDF_FilenameToType(df->name);
 
-	std::string bare_name = epi::PATH_GetFilename(df->name).u8string();
+	std::string bare_name = epi::PATH_GetFilename(df->name).string();
 
 	if (type == DDF_UNKNOWN)
 		I_Error("Unknown DDF filename: %s\n", bare_name.c_str());
@@ -161,7 +161,7 @@ static void W_ExternalDDF(data_file_c *df)
 	std::string data(raw_data);
 	delete[] raw_data;
 
-	DDF_AddFile(type, data, df->name.u8string());
+	DDF_AddFile(type, data, df->name.string());
 }
 
 
@@ -182,7 +182,7 @@ static void W_ExternalRTS(data_file_c *df)
 	std::string data(raw_data);
 	delete[] raw_data;
 
-	DDF_AddFile(DDF_RadScript, data, df->name.u8string());
+	DDF_AddFile(DDF_RadScript, data, df->name.string());
 }
 
 
@@ -234,7 +234,7 @@ void ProcessFile(data_file_c *df)
 		// handle stand-alone DeHackEd patches
 		I_Printf("Converting DEH file: %s\n", df->name.u8string().c_str());
 
-		DEH_ConvertFile(df->name.u8string());
+		DEH_ConvertFile(df->name.string());
 	}
 
 	// handle fixer-uppers   [ TODO support it for EPK files too ]

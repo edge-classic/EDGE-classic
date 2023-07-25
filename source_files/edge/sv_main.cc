@@ -493,12 +493,12 @@ std::filesystem::path SV_FileName(const char *slot_name, const char *map_name)
 {
     std::string temp(epi::STR_Format("%s/%s.%s", slot_name, map_name, SAVEGAMEEXT));
 
-	return epi::PATH_Join(save_dir, UTFSTR(temp));
+	return epi::PATH_Join(save_dir, temp);
 }
 
 std::filesystem::path SV_DirName(const char *slot_name)
 {
-	return epi::PATH_Join(save_dir, UTFSTR(slot_name));
+	return epi::PATH_Join(save_dir, slot_name);
 }
 
 void SV_ClearSlot(const char *slot_name)
@@ -510,7 +510,7 @@ void SV_ClearSlot(const char *slot_name)
 
 	std::vector<epi::dir_entry_c> fsd;
 
-	if (! FS_ReadDir(fsd, full_dir, UTFSTR("*.*")))
+	if (! FS_ReadDir(fsd, full_dir, "*.*"))
 	{
 		I_Debugf("Failed to read directory: %s\n", full_dir.u8string().c_str());
 		return;
@@ -522,11 +522,7 @@ void SV_ClearSlot(const char *slot_name)
 	{
 		if (fsd[i].is_dir)
 			continue;
-#ifdef _WIN32
-		std::filesystem::path cur_file = epi::PATH_Join(full_dir, epi::PATH_GetFilename(fsd[i].name).u32string());
-#else
 		std::filesystem::path cur_file = epi::PATH_Join(full_dir, epi::PATH_GetFilename(fsd[i].name).string());
-#endif
 		I_Debugf("  Deleting %s\n", cur_file.u8string().c_str());
 
 		epi::FS_Delete(cur_file);
@@ -540,7 +536,7 @@ void SV_CopySlot(const char *src_name, const char *dest_name)
 
 	std::vector<epi::dir_entry_c> fsd;
 
-	if (! FS_ReadDir(fsd, src_dir, UTFSTR("*.*")))
+	if (! FS_ReadDir(fsd, src_dir, "*.*"))
 	{
 		I_Error("SV_CopySlot: failed to read dir: %s\n", src_dir.u8string().c_str());
 		return;

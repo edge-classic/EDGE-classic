@@ -973,7 +973,7 @@ const image_c *W_ImageCreatePackSprite(std::string packname, pack_file_c *pack, 
 {
 	SYS_ASSERT(pack);
 
-	image_c *rim = AddImage_SmartPack(epi::PATH_GetBasename(packname).u8string().c_str(), 
+	image_c *rim = AddImage_SmartPack(epi::PATH_GetBasename(packname).string().c_str(), 
 		IMSRC_Sprite, packname.c_str(), real_sprites);
 	if (! rim)
 		return NULL;

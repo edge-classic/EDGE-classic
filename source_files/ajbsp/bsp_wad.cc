@@ -244,12 +244,12 @@ Wad_file * Wad_file::Open(std::filesystem::path filename, char mode)
 	if (mode == 'w')
 		return Create(filename, mode);
 
-	FileMessage("Opening WAD file: %s\n", filename.string().c_str());
+	FileMessage("Opening WAD file: %s\n", filename.u8string().c_str());
 
 	FILE *fp = NULL;
 
 retry:
-	fp = fopen(filename.u8string().c_str(), (mode == 'r' ? "rb" : "r+b"));
+	fp = fopen(filename.string().c_str(), (mode == 'r' ? "rb" : "r+b")); // Switch to EPIFOPEN? - Dasho
 
 	if (! fp)
 	{
@@ -296,13 +296,13 @@ Wad_file * Wad_file::OpenMem(std::filesystem::path filename, byte *raw_wad, int 
 {
 	SYS_ASSERT(raw_wad);
 
-	FileMessage("Opening WAD from memory: %s\n", filename.string().c_str());
+	FileMessage("Opening WAD from memory: %s\n", filename.u8string().c_str());
 
 	epi::mem_file_c *mem_fp = new epi::mem_file_c(raw_wad, raw_length, false); // maybe true?
 
 	if (!mem_fp)
 	{
-		FileMessage("Open memfile failed: %s\n", filename.string().c_str());
+		FileMessage("Open memfile failed: %s\n", filename.u8string().c_str());
 		return NULL;
 	}
 
@@ -326,7 +326,7 @@ Wad_file * Wad_file::Create(std::filesystem::path filename, char mode)
 {
 	FileMessage("Creating new WAD file: %s\n", filename.u8string().c_str());
 
-	FILE *fp = fopen(filename.u8string().c_str(), "w+b");
+	FILE *fp = fopen(filename.string().c_str(), "w+b");
 	if (! fp)
 		return NULL;
 

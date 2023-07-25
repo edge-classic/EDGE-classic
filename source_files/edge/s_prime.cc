@@ -45,7 +45,7 @@ bool prime_disabled = false;
 
 primesynth::Synthesizer *edge_synth = nullptr;
 
-DEF_CVAR(s_soundfont, "", CVAR_ARCHIVE)
+DEF_CVAR(s_soundfont, "", (CVAR_ARCHIVE|CVAR_PATH))
 
 DEF_CVAR(s_primegain, "0.4", CVAR_ARCHIVE)
 
@@ -71,18 +71,21 @@ bool S_StartupPrime(void)
 	for (int i=0; i < available_soundfonts.size(); i++)
 	{
 		if(epi::case_cmp(s_soundfont.s, available_soundfonts.at(i).generic_u8string()) == 0)
+		{
 			cvar_good = true;
+			break;
+		}
 	}
 
 	if (!cvar_good)
 	{
 		I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
-		s_soundfont = epi::PATH_Join(epi::PATH_Join(game_dir, UTFSTR("soundfont")), UTFSTR("Default.sf2")).generic_u8string();
+		s_soundfont = epi::PATH_Join(epi::PATH_Join(game_dir, "soundfont"), "Default.sf2").generic_u8string();
 	}
 
 	edge_synth = new primesynth::Synthesizer;
 	edge_synth->setVolume(s_primegain.f);
-	edge_synth->loadSoundFont(s_soundfont.s);
+	edge_synth->loadSoundFont(std::filesystem::u8path(s_soundfont.s).generic_string());
 
 	// Primesynth should throw an exception if the soundfont loading fails, so I guess we're good if we get here
 	return true; // OK!

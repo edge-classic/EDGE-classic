@@ -21,31 +21,18 @@
 
 #include "superfasthash.h"
 
+#include <algorithm>
+
 namespace epi
 {
 
 void str_lower(std::string& s)
 {
-	for (size_t i = 0 ; i < s.size() ; i++)
-		s[i] = std::tolower(s[i]);
+	std::transform(s.begin(), s.end(), s.begin(), ::tolower);
 }
 void str_upper(std::string& s)
 {
-	for (size_t i = 0 ; i < s.size() ; i++)
-		s[i] = std::toupper(s[i]);
-}
-
-void str_lower(std::u32string& s)
-{
-	std::string temp = epi::to_u8string(s);
-	epi::str_lower(temp);
-	s = epi::to_u32string(temp);
-}
-void str_upper(std::u32string& s)
-{
-	std::string temp = epi::to_u8string(s);
-	epi::str_upper(temp);
-	s = epi::to_u32string(temp);
+	std::transform(s.begin(), s.end(), s.begin(), ::toupper);
 }
 
 void STR_TextureNameFromFilename(std::string& buf, const std::string& stem)
@@ -116,24 +103,6 @@ std::vector<std::string> STR_SepStringVector(std::string str, char separator)
 	}
 	return vec;
 }
-
-#ifdef _WIN32
-std::vector<std::u32string> STR_SepStringVector(std::u32string str, char32_t separator)
-{
-	std::vector<std::u32string> vec;
-	std::u32string::size_type oldpos = 0;
-	std::u32string::size_type pos = 0;
-	while (pos != std::u32string::npos) {
-		pos = str.find(separator, oldpos);
-		std::u32string sub_string = str.substr(oldpos, (pos == std::string::npos ? str.size() : pos) - oldpos);
-		if (!sub_string.empty())
-			vec.push_back(sub_string);
-		if (pos != std::string::npos)
-			oldpos = pos + 1;
-	}
-	return vec;
-}
-#endif
 
 uint32_t STR_Hash32(std::string str_to_hash)
 {

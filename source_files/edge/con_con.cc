@@ -631,9 +631,6 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 	if (x + FNSZ < 0)
 		return;
 
-	if (!std::isprint(cp437_unicode_values[static_cast<u8_t>(ch)]))
-		return;
-
 	float alpha = 1.0f;
 
 	glColor4f(RGB_RED(col)/255.0f, RGB_GRN(col)/255.0f, 
@@ -643,9 +640,9 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 	{
 		float width = (con_font->CharWidth(ch) - con_font->spacing) * FNSZ_ratio / v_pixelaspect.f;
 		float x_adjust = (XMUL - width) / 2;
-		float y_adjust = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).y_shift * FNSZ_ratio;
-		float height = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).height * FNSZ_ratio;
-		stbtt_aligned_quad *q = con_font->ttf_glyph_map.at(cp437_unicode_values[static_cast<u8_t>(ch)]).char_quad;
+		float y_adjust = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).y_shift * FNSZ_ratio;
+		float height = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).height * FNSZ_ratio;
+		stbtt_aligned_quad *q = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).char_quad;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_TEXTURE_2D);

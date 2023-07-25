@@ -22,11 +22,14 @@
 #include "m_argv.h"
 #include "str_util.h"
 #include "filesystem.h"
-
 #ifdef _WIN32
-std::vector<std::u32string> argv::list;
-#else
+#include <shellapi.h>
+#include <processenv.h>
+#endif
+
 std::vector<std::string> argv::list;
+#ifdef _WIN32
+std::unordered_map<std::string, std::string> env::list;
 #endif
 
 // this one is here to avoid infinite recursion of param files.
@@ -47,69 +50,114 @@ static added_parm_t *added_parms;
 // NOTE: doesn't merge multiple uses of an option, hence
 //       using ArgvFind() will only return the first usage.
 //
-void argv::Init(const int argc, const char *const *argv) {
+#ifdef _WIN32
+void argv::Init(const int argc, const char *const *argv) 
+{
+	(void)argc;
+	(void)argv;
+
+	int win_argc = 0;
+	size_t i;
+	wchar_t **win_argv = CommandLineToArgvW(GetCommandLineW(), &win_argc);
+
+	if (!win_argv)
+		I_Error("argv::Init: Could not retrieve command line arguments!\n");
+
+    list.reserve(win_argc);
+    SYS_ASSERT(argv::list.size() >= 0);
+
+	std::vector<std::string> argv_block;
+
+    for (i = 0; i < win_argc; i++) 
+	{
+        SYS_ASSERT(win_argv[i] != nullptr);
+		std::u16string arg = reinterpret_cast<char16_t *>(win_argv[i]);
+		argv_block.push_back(epi::to_u8string(arg));
+    }
+
+	LocalFree(win_argv);
+
+	for (i = 0; i < argv_block.size(); i++)
+	{
+		// Just place argv[0] as is
+        if (i == 0)
+        {
+            list.emplace_back(argv_block[i]);
+            continue;
+        }
+
+        if (argv_block[i][0] == '@')
+        {  // add it as a response file
+            ApplyResponseFile(&argv_block[i][1]);
+            continue;
+        }
+
+        list.emplace_back(argv_block[i]);
+	}
+}
+#else
+void argv::Init(const int argc, const char *const *argv) 
+{
     list.reserve(argc);
     SYS_ASSERT(argv::list.size() >= 0);
 
-    for (int i = 0; i < argc; i++) {
+    for (int i = 0; i < argc; i++) 
+	{
         SYS_ASSERT(argv[i] != nullptr);
 
 #ifdef __APPLE__
         // ignore MacOS X rubbish
-        if (argv[i] == "-psn") {
+        if (argv[i] == "-psn")
             continue;
-        }
 #endif
         // Just place argv[0] as is
         if (i == 0)
         {
-            list.emplace_back(UTFSTR(argv[i]));
+            list.emplace_back(argv[i]);
             continue;
         }
 
         if (argv[i][0] == '@')
         {  // add it as a response file
-            ApplyResponseFile(UTFSTR(&argv[i][1]));
+            ApplyResponseFile(&argv[i][1]);
             continue;
         }
 
-        list.emplace_back(UTFSTR(argv[i]));
+        list.emplace_back(argv[i]);
     }
 }
+#endif
 
-int argv::Find(std::string longName, int *numParams) {
+int argv::Find(std::string longName, int *numParams) 
+{
     SYS_ASSERT(!longName.empty());
 
-    if (numParams) {
+    if (numParams) 
         *numParams = 0;
-    }
 
     size_t p = 0;
 
-    for (; p < list.size(); ++p) {
-        if (!IsOption(p)) {
+    for (; p < list.size(); ++p) 
+	{
+        if (!IsOption(p))
             continue;
-        }
 
-        const std::string &str = epi::to_u8string(list[p]);
+        const std::string &str = list[p];
 
         if (epi::case_cmp(longName,
-                std::string{&str[1], (str.size() - 1)}) == 0) {
+                std::string{&str[1], (str.size() - 1)}) == 0)
             break;
-        }
     }
 
-    if (p == list.size()) {
-        // NOT FOUND
+    if (p == list.size())
         return -1;
-    }
 
-    if (numParams) {
+    if (numParams) 
+	{
         size_t q = p + 1;
 
-        while (q < list.size() && !IsOption(q)) {
+        while (q < list.size() && !IsOption(q))
             ++q;
-        }
 
         *numParams = q - p - 1;
     }
@@ -117,22 +165,19 @@ int argv::Find(std::string longName, int *numParams) {
     return p;
 }
 
-#ifdef _WIN32
-std::u32string argv::Value(std::string longName, int *numParams) {
-#else
-std::string argv::Value(std::string longName, int *numParams) {
-#endif
+std::string argv::Value(std::string longName, int *numParams) 
+{
     SYS_ASSERT(!longName.empty());
 
-    int pos = Find(epi::to_u8string(longName), numParams);
+    int pos = Find(longName, numParams);
 
     if (pos <= 0)
-        return UTFSTR("");
+        return "";
 
     if (pos + 1 < list.size() && !IsOption(pos+1))
         return list[pos+1];
     else
-        return UTFSTR("");
+        return "";
 }
 
 // Sets boolean variable to true if parm (prefixed with `-') is
@@ -238,8 +283,7 @@ void argv::ApplyResponseFile(std::filesystem::path name)
 
 	for (; EOF != ParseOneFilename(f, buf);)
     {
-		// we must use strdup: Z_Init might not have been called
-        list.push_back(UTFSTR(strdup(buf)));
+        list.push_back(strdup(buf));
     }
 
 	// unlink from list
@@ -261,13 +305,73 @@ void argv::DebugDumpArgs(void)
 		if (i>0 && i+1 < list.size() && !IsOption(i+1))
 			pair_it_up = true;
 
-		I_Printf("  %s %s\n", epi::to_u8string(list[i]).c_str(), pair_it_up ? epi::to_u8string(list[i+1]).c_str() : "");
+		I_Printf("  %s %s\n", list[i].c_str(), pair_it_up ? list[i+1].c_str() : "");
 
 		i += pair_it_up ? 2 : 1;
 	}
 }
 
-bool argv::IsOption(const int index) { return epi::to_u8string(list.at(index))[0] == '-'; }
+bool argv::IsOption(const int index) { return list.at(index)[0] == '-'; }
+
+#ifdef _WIN32
+//
+// EnvInit
+//
+// Initialise environment variable list. The strings are copied.
+//
+//
+void env::Init() 
+{
+
+	wchar_t *win_env = GetEnvironmentStringsW();
+
+	if (!win_env)
+		I_Error("env::Init: Could not retrieve environment variables!\n");
+
+	std::vector<std::string> block_vars;
+	std::u16string raw_var;
+
+	wchar_t *orig_env = win_env; // For cleanup
+
+	for (; win_env; win_env++)
+	{
+		if (*win_env == '\0')
+		{
+			if (win_env+1 != nullptr && *(win_env+1) == '\0')
+				break;
+			else
+			{
+				block_vars.push_back(epi::to_u8string(raw_var));
+				raw_var.clear();
+			}
+		}
+		else
+			raw_var.push_back(*reinterpret_cast<char16_t *>(win_env));
+	}
+
+	FreeEnvironmentStringsW(orig_env);
+
+	for (auto var : block_vars)
+	{
+		std::vector<std::string> kv = epi::STR_SepStringVector(var, '=');
+		if (kv.size() < 2) // Sanity check
+			continue;
+		else
+			list.try_emplace(kv[0], kv[1]);
+	}
+
+}
+
+std::string env::Value(std::string key) 
+{
+	for (auto var : list)
+	{
+		if (epi::case_cmp(key, var.first) == 0)
+			return var.second;
+	}
+	return "";
+}
+#endif
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

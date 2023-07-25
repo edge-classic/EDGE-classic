@@ -396,7 +396,7 @@ static void MixQueues(int pairs)
 {
 	mix_channel_c *chan = queue_chan;
 
-	if (! chan || chan->state != CHAN_Playing)
+	if (! chan || ! chan->data || chan->state != CHAN_Playing)
 		return;
 
 	if (chan->volume_L == 0 && chan->volume_R == 0)

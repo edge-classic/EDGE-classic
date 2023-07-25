@@ -103,11 +103,7 @@ bool FS_RemoveDir(const char *dir)
 }
 
 
-#ifdef _WIN32
-bool FS_ReadDir(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::u32string mask)
-#else
 bool FS_ReadDir(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::string mask)
-#endif
 {
 	if (dir.empty() || !std::filesystem::exists(dir) || mask.empty())
 		return false;
@@ -119,8 +115,8 @@ bool FS_ReadDir(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::s
 
 	for (auto const& entry : std::filesystem::directory_iterator{dir})
 	{
-		if (epi::case_cmp(mask_ext.u8string(), ".*") != 0 &&
-			epi::case_cmp(mask_ext.u8string(), entry.path().extension().u8string()) != 0)
+		if (epi::case_cmp(mask_ext.string(), ".*") != 0 &&
+			epi::case_cmp(mask_ext.string(), entry.path().extension().string()) != 0)
 			continue;
 
 		bool is_dir = entry.is_directory();
@@ -132,11 +128,7 @@ bool FS_ReadDir(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::s
 	return true;
 }
 
-#ifdef _WIN32
-bool FS_ReadDirRecursive(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::u32string mask)
-#else
 bool FS_ReadDirRecursive(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::string mask)
-#endif
 {
 	if (dir.empty() || !std::filesystem::exists(dir) || mask.empty())
 		return false;
@@ -148,8 +140,8 @@ bool FS_ReadDirRecursive(std::vector<dir_entry_c>& fsd, std::filesystem::path di
 
 	for (auto const& entry : std::filesystem::recursive_directory_iterator{dir})
 	{
-		if (epi::case_cmp(mask_ext.u8string(), ".*") != 0 &&
-			epi::case_cmp(mask_ext.u8string(), entry.path().extension().u8string()) != 0)
+		if (epi::case_cmp(mask_ext.string(), ".*") != 0 &&
+			epi::case_cmp(mask_ext.string(), entry.path().extension().string()) != 0)
 			continue;
 
 		bool is_dir = entry.is_directory();

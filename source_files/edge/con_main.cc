@@ -520,7 +520,7 @@ static int GetArgs(const char *line, char **argv, int max_argc)
 
 	for (;;)
 	{
-		while (isspace(*line, std::locale(".UTF8"))) // Might need an alternate method, hopefully every has UTF8 locales installed - Dasho
+		while (isspace(*(u8_t*)line))
 			line++;
 
 		if (! *line)
@@ -541,7 +541,7 @@ static int GetArgs(const char *line, char **argv, int max_argc)
 		}
 		else
 		{
-			while (*line && !isspace(*line, std::locale(".UTF8")))
+			while (*line && !isspace(*(u8_t*)line))
 				line++;
 		}
 

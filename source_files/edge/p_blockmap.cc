@@ -45,7 +45,7 @@
 // FIXME: have a proper API
 extern abstract_shader_c *MakeDLightShader(mobj_t *mo);
 extern abstract_shader_c *MakePlaneGlow(mobj_t *mo);
-extern abstract_shader_c *MakeWallGlow(line_t *line, mobj_t *mo);
+extern abstract_shader_c *MakeWallGlow(mobj_t *mo);
 
 
 #define MAXRADIUS  128.0
@@ -924,23 +924,32 @@ void P_SectorGlowIterator(sector_t *sec,
 		{
 			if (mo->info->glow_type == GLOW_Wall)
 			{
-				line_t *glow_wall = nullptr;
-				// Use first line that the dlight mobj touches
-				// Ideally it is only touching one line
-				for (size_t i = 0; i < sec->linecount; i++)
+				if (mo->dlight.bad_wall_glow)
+					continue;
+				else if (!mo->dlight.glow_wall)
 				{
-					if (P_ThingOnLineSide(mo, sec->lines[i]) == -1)
+					// Use first line that the dlight mobj touches
+					// Ideally it is only touching one line
+					for (size_t i = 0; i < sec->linecount; i++)
 					{
-						glow_wall = sec->lines[i];
-						break;
+						if (P_ThingOnLineSide(mo, sec->lines[i]) == -1)
+						{
+							mo->dlight.glow_wall = sec->lines[i];
+							break;
+						}
+					}
+					if (mo->dlight.glow_wall)
+					{
+						mo->dlight.shader = MakeWallGlow(mo);
+					}
+					else // skip useless repeated checks
+					{
+						mo->dlight.bad_wall_glow = true;
+						continue;
 					}
 				}
-				if (glow_wall)
-				{
-					mo->dlight.shader = MakeWallGlow(glow_wall, mo);
-				}
 				else
-					continue;
+					mo->dlight.shader = MakeWallGlow(mo);
 			}
 			else
 				mo->dlight.shader = MakePlaneGlow(mo);

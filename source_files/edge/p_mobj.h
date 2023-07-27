@@ -50,6 +50,7 @@ struct region_properties_s;
 struct state_s;
 struct subsector_s;
 struct touch_node_s;
+struct line_s;
 
 extern std::unordered_set<const mobjtype_c *> seen_monsters;
 
@@ -182,6 +183,8 @@ typedef struct dlight_state_s
 	rgbcol_t color;
 ///--- const image_c *image;
 	abstract_shader_c *shader;
+	line_s *glow_wall = nullptr;
+	bool bad_wall_glow = false;
 }
 dlight_state_t;
 

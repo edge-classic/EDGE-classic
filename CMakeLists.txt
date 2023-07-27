@@ -46,7 +46,7 @@ if (MSVC)
   # or Build Tools install in your PATH variable, or copy the appropriate DLL to the program
   # folder before launching. The paths and filenames can vary based on your setup,
   # but, as an example, for a 64-bit Debug build using MSVC 2022 Build Tools, the path would be
-  # C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.36.32532\bin\Hostx64\x64
+  # C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\<version number>\bin\Hostx64\x64
   # and the file would be clang_rt.asan_dbg_dynamic-x86_64.dll
   if (EDGE_SANITIZE AND MSVC_VERSION GREATER_EQUAL 1929)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address")

@@ -1089,7 +1089,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 	// fix for sprites that sit wrongly into the floor/ceiling
 	int y_clipping = YCLIP_Soft;
 
-	if (is_model || (mo->flags & MF_FUZZY) || (mo->hyperflags & HF_HOVER) && sink_mult == 0)
+	if (is_model || (mo->flags & MF_FUZZY) || ((mo->hyperflags & HF_HOVER) && sink_mult == 0))
 	{
 		y_clipping = YCLIP_Never;
 	}

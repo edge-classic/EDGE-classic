@@ -636,9 +636,11 @@ private:
 	}
 
 public:
-	wall_glow_c(line_t *_wall, mobj_t *_glower) :
-		ld(_wall), mo(_glower)
+	wall_glow_c(mobj_t *_glower) :
+		mo(_glower)
 	{
+		SYS_ASSERT(mo->dlight.glow_wall);
+		ld = mo->dlight.glow_wall;
 		norm_x = (ld->v1->y - ld->v2->y) / ld->length;
 		norm_y = (ld->v2->x - ld->v1->x) / ld->length;
 		// Note: these are shared, we must not delete them
@@ -739,9 +741,9 @@ public:
 	}
 };
 
-abstract_shader_c *MakeWallGlow(line_t *wall, mobj_t *mo)
+abstract_shader_c *MakeWallGlow(mobj_t *mo)
 {
-	return new wall_glow_c(wall, mo);
+	return new wall_glow_c(mo);
 }
 
 

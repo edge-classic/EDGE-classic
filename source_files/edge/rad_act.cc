@@ -1330,7 +1330,7 @@ void P_ActReplace(struct mobj_s *mo, const mobjtype_c *newThing)
 
 	// DO THE DEED !!
 
-	P_UnsetThingPosition(mo);
+	//P_UnsetThingPosition(mo);
 	{
 		mo->info = newThing;
 
@@ -1370,7 +1370,7 @@ void P_ActReplace(struct mobj_s *mo, const mobjtype_c *newThing)
 			}
 		}
 	}
-	P_SetThingPosition(mo);
+	//P_SetThingPosition(mo);
 
 	statenum_t state = P_MobjFindLabel(mo, "IDLE"); //nothing fancy, always default to idle
 	if (state == S_NULL)

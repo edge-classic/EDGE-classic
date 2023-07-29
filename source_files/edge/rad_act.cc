@@ -1343,7 +1343,15 @@ void P_ActReplace(struct mobj_s *mo, const mobjtype_c *newThing)
 			mo->speed  = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
 
 		mo->health        = mo->info->spawnhealth; // always top up health to full
-		mo->flags         = mo->info->flags;
+		
+		if (mo->flags & MF_AMBUSH) //preserve map editor AMBUSH flag
+		{
+			mo->flags         = mo->info->flags;
+			mo->flags |= MF_AMBUSH;
+		}
+		else
+			mo->flags         = mo->info->flags;
+
 		mo->extendedflags = mo->info->extendedflags;
 		mo->hyperflags    = mo->info->hyperflags;
 

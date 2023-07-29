@@ -3822,9 +3822,10 @@ void P_ActBecome(struct mobj_s *mo)
 	P_UnsetThingPosition(mo);
 	{
 		mo->info = become->info;
-
+		
 		mo->morphtimeout = mo->info->morphtimeout;
 
+		// Note: health is not changed
 		mo->radius = mo->info->radius;
 		mo->height = mo->info->height;
 		// MBF21: Use explicit Fast speed if provided
@@ -3833,9 +3834,14 @@ void P_ActBecome(struct mobj_s *mo)
 		else
 			mo->speed  = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
 
-		// Note: health is not changed
+		if (mo->flags & MF_AMBUSH) //preserve map editor AMBUSH flag
+		{
+			mo->flags         = mo->info->flags;
+			mo->flags |= MF_AMBUSH;
+		}
+		else
+			mo->flags         = mo->info->flags;
 
-		mo->flags         = mo->info->flags;
 		mo->extendedflags = mo->info->extendedflags;
 		mo->hyperflags    = mo->info->hyperflags;
 
@@ -3904,8 +3910,14 @@ void P_ActUnBecome(struct mobj_s *mo)
 			mo->speed  = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
 
 		// Note: health is not changed
+		if (mo->flags & MF_AMBUSH) //preserve map editor AMBUSH flag
+		{
+			mo->flags         = mo->info->flags;
+			mo->flags |= MF_AMBUSH;
+		}
+		else
+			mo->flags         = mo->info->flags;
 
-		mo->flags         = mo->info->flags;
 		mo->extendedflags = mo->info->extendedflags;
 		mo->hyperflags    = mo->info->hyperflags;
 
@@ -3978,7 +3990,14 @@ void P_ActMorph(struct mobj_s *mo)
 		else
 			mo->speed  = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
 
-		mo->flags         = mo->info->flags;
+		if (mo->flags & MF_AMBUSH) //preserve map editor AMBUSH flag
+		{
+			mo->flags         = mo->info->flags;
+			mo->flags |= MF_AMBUSH;
+		}
+		else
+			mo->flags         = mo->info->flags;
+
 		mo->extendedflags = mo->info->extendedflags;
 		mo->hyperflags    = mo->info->hyperflags;
 
@@ -4050,7 +4069,14 @@ void P_ActUnMorph(struct mobj_s *mo)
 
 		// Note: health is not changed
 
-		mo->flags         = mo->info->flags;
+		if (mo->flags & MF_AMBUSH) //preserve map editor AMBUSH flag
+		{
+			mo->flags         = mo->info->flags;
+			mo->flags |= MF_AMBUSH;
+		}
+		else
+			mo->flags         = mo->info->flags;
+			
 		mo->extendedflags = mo->info->extendedflags;
 		mo->hyperflags    = mo->info->hyperflags;
 

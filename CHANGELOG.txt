@@ -22,4 +22,8 @@ Bugs fixed
 ----------
 - Weapon Kick will now work when Mouselook is disabled
 - Fixed CTD involving liquid swirl checks when debug_hom is set to 1
-- 
+- Old pre-EC legacy issue: map AMBUSH flag was being lost if mobj was being replaced during 
+  gameplay via BECOME. Was also now affecting new EC commands 
+  i.e. UNBECOME/MORPH/UNMORPH ddf commands or REPLACE_THING rts command.
+  
+  

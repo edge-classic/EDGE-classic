@@ -394,9 +394,11 @@ static specflags_t reference_types[] =
 	// Note that LOSURROUNDINGFLOOR has the REF_INCLUDE flag, but the
 	// others do not.  It's there to maintain backwards compatibility.
 	// 
+	// 2023.07.31 - Testing removal of REF_INCLUDE from LOSURROUNDING FLOOR
+	// to test DBP59 line shenanigans
 	{"LOSURROUNDINGCEILING", REF_Surrounding + REF_CEILING, false},
 	{"HISURROUNDINGCEILING", REF_Surrounding + REF_CEILING + REF_HIGHEST, false},
-	{"LOSURROUNDINGFLOOR", REF_Surrounding + REF_INCLUDE, false},
+	{"LOSURROUNDINGFLOOR", REF_Surrounding, false},
 	{"HISURROUNDINGFLOOR", REF_Surrounding + REF_HIGHEST, false},
 
 	// Note that REF_HIGHEST is used for the NextLowest types, and

@@ -168,7 +168,7 @@ void I_StartupSound(void)
 	if (mydev.format != AUDIO_S16SYS)
 	{
 		I_Printf("I_StartupSound: unsupported format: %d\n", mydev.format);
-		SDL_CloseAudio();
+		SDL_CloseAudioDevice(mydev_id);
 		nosound = true;
 		return;
 	}
@@ -176,7 +176,7 @@ void I_StartupSound(void)
 	if (mydev.channels >= 3)
 	{
 		I_Printf("I_StartupSound: unsupported channel num: %d\n", mydev.channels);
-		SDL_CloseAudio();
+		SDL_CloseAudioDevice(mydev_id);
 
 		nosound = true;
 		return;
@@ -223,7 +223,7 @@ void I_ShutdownSound(void)
 
 	nosound = true;
 
-	SDL_CloseAudio();
+	SDL_CloseAudioDevice(mydev_id);
 }
 
 
@@ -244,7 +244,7 @@ void I_LockAudio(void)
 		I_Error("I_LockAudio: called twice without unlock!\n");
 	}
 
-	SDL_LockAudio();
+	SDL_LockAudioDevice(mydev_id);
 	audio_is_locked = true;
 }
 
@@ -252,7 +252,7 @@ void I_UnlockAudio(void)
 {
 	if (audio_is_locked)
 	{
-		SDL_UnlockAudio();
+		SDL_UnlockAudioDevice(mydev_id);
 		audio_is_locked = false;
 	}
 }

@@ -283,7 +283,27 @@ void argv::ApplyResponseFile(std::filesystem::path name)
 
 	for (; EOF != ParseOneFilename(f, buf);)
     {
+#ifdef _WIN32
+		// Can't really guarantee that a response file will have a certain encoding,
+		// so try to detect paths in the response file and make them UTF-8
+		std::filesystem::path path_check = buf;
+		if (std::filesystem::exists(path_check))
+		{
+			list.push_back(path_check.u8string());
+		}
+		else
+		{
+			path_check = std::filesystem::u8path(buf);
+			if (std::filesystem::exists(path_check))
+			{
+				list.push_back(path_check.u8string());
+			}
+			else
+				list.push_back(strdup(buf));
+		}
+#else
         list.push_back(strdup(buf));
+#endif
     }
 
 	// unlink from list

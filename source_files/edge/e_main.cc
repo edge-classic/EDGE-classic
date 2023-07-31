@@ -1455,7 +1455,7 @@ static void AddCommandLineFiles(void)
 
 	for (p = 1; p < argv::list.size() && !argv::IsOption(p); p++)
 	{
-		AddSingleCmdLineFile(argv::list[p], false);
+		AddSingleCmdLineFile(std::filesystem::u8path(argv::list[p]), false);
 	}
 
 	// next handle the -file option (we allow multiple uses)
@@ -1467,7 +1467,7 @@ static void AddCommandLineFiles(void)
 		// the parms after p are wadfile/lump names,
 		// go until end of parms or another '-' preceded parm
 		if (!argv::IsOption(p))
-			AddSingleCmdLineFile(argv::list[p], false);
+			AddSingleCmdLineFile(std::filesystem::u8path(argv::list[p]), false);
 
 		p++;
 	}

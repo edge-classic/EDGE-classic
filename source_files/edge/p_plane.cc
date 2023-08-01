@@ -691,21 +691,103 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
     }
     else
     {
-        // 2023.06.10 - Allow plane to activate and run even if at dest height
-        // to preserve texture/type changes that were intended
+        // 2023.08.01 - If already at dest height, run the
+        // texture/type changes that were intended
 
-        /*delete plane;
+        // change to surrounding
+        if (def->tex != "" && def->tex[0] == '-')
+        {
+            model = P_GetSectorSurrounding(sector, 
+                                        plane->destheight, 
+                                        def->is_ceiling);
+            if (model)
+            {
+                if (def->tex.size() == 1) // Only '-'; do both (default)
+                {
+                    plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                    plane->newspecial = model->props.special ?
+                        model->props.special->number : 0;
+                }
+                else if (epi::case_cmp(def->tex.substr(1), "changezero") == 0)
+                {
+                    plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                    plane->newspecial = 0;
+                }
+                else if (epi::case_cmp(def->tex.substr(1), "changetexonly") == 0)
+                {
+                    plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                }
+                else // Unknown directive after '-'; just do default
+                {
+                    plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                    plane->newspecial = model->props.special ?
+                        model->props.special->number : 0;
+                }
+            }
+            SECPIC(sector, def->is_ceiling, plane->new_image);
+            if (plane->newspecial != -1)
+            {
+                P_SectorChangeSpecial(sector, plane->newspecial);
+            }
+        }
+        else if (def->tex != "" && def->tex[0] == '+')
+        {
+            if (model)
+            {
+                if (SECPIC(model,  def->is_ceiling, NULL) == 
+                    SECPIC(sector, def->is_ceiling, NULL))
+                {
+                    model = P_GetSectorSurrounding(model, plane->destheight,
+                                                def->is_ceiling);
+                }
+            }
+
+            if (model)
+            {
+                if (def->tex.size() == 1) // Only '+'; do both (default)
+                {
+                    plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                    plane->newspecial = model->props.special ?
+                        model->props.special->number : 0;
+                }
+                else if (epi::case_cmp(def->tex.substr(1), "changezero") == 0)
+                {
+                    plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                    plane->newspecial = 0;
+                }
+                else if (epi::case_cmp(def->tex.substr(1), "changetexonly") == 0)
+                {
+                    plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                }
+                else  // Unknown directive after '+'; just do default
+                {
+                    plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                    plane->newspecial = model->props.special ?
+                        model->props.special->number : 0;
+                }
+
+                SECPIC(sector, def->is_ceiling, plane->new_image);
+
+                if (plane->newspecial != -1)
+                {
+                    P_SectorChangeSpecial(sector, plane->newspecial);
+                }
+            }
+        }
+        else if (def->tex != "")
+        {
+            plane->new_image = W_ImageLookup(def->tex.c_str(), INS_Flat);
+            SECPIC(sector, def->is_ceiling, plane->new_image);
+        }
 
         if (def->is_ceiling)
             sector->ceil_move = NULL;
         else
             sector->floor_move = NULL;
 
-        return NULL;*/
+        plane->new_image = W_ImageLookup("TEXSWITCH_DUMMY", INS_Graphic);
 
-        plane->direction = (def->is_ceiling ? DIRECTION_DOWN : DIRECTION_UP);
-        plane->destheight = dest;
-        plane->startheight = start;
+        return plane;
     }
 
     plane->tag = sector->tag;
@@ -963,8 +1045,15 @@ bool EV_DoPlane(sector_t * sec, const movplanedef_c * def, sector_t * model)
             return false;
     }
 
-    // Do Floor action
-    return P_SetupSectorAction(sec, def, model) ? true : false;
+    // Do sector action
+    plane_move_t *secaction = P_SetupSectorAction(sec, def, model);
+    if (secaction && secaction->new_image->name == "TEXSWITCH_DUMMY")
+    {
+        delete secaction;
+        return true;
+    }
+    else
+        return secaction ? true : false;
 }
 
 

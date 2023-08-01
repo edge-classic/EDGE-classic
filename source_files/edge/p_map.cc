@@ -52,6 +52,7 @@
 #define RAISE_RADIUS  32
 
 DEF_CVAR(g_mbf21compat, "0", CVAR_ARCHIVE)
+DEF_CVAR(g_gore, "1", CVAR_ARCHIVE)
 
 extern cvar_c g_mbf21compat;
 
@@ -2209,7 +2210,7 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 	// Spawn bullet puffs or blood spots,
 	// depending on target type.
 
-	bool use_blood = (mo->flags & MF_SHOOTABLE) && !(mo->flags & MF_NOBLOOD);
+	bool use_blood = (mo->flags & MF_SHOOTABLE) && !(mo->flags & MF_NOBLOOD) && g_gore.d;
 
 	if (mo->flags & MF_SHOOTABLE)
 	{

@@ -46,7 +46,7 @@
 bool var_obituaries = true;
 
 extern cvar_c g_mbf21compat;
-
+extern cvar_c g_gore;
 extern cvar_c player_dm_dr;
 
 typedef struct
@@ -1078,6 +1078,14 @@ void P_KillMobj(mobj_t * source, mobj_t * target, const damage_c *damtype,
 
 	if (state == S_NULL)
 		state = target->info->death_state;
+
+	if (!g_gore.d)
+	{
+		state = S_NULL;
+		mobj_t *fog = P_MobjCreateObject(target->x, target->y, target->z, mobjtypes.Lookup("TELEPORT_FLASH"));
+		if (fog && fog->info->chase_state)
+			P_SetMobjStateDeferred(fog, fog->info->chase_state, 0);
+	}
 
 	if (target->hyperflags & HF_DEHACKED_COMPAT)
 	{

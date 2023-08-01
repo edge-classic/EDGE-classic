@@ -956,6 +956,8 @@ void P_KillMobj(mobj_t * source, mobj_t * target, const damage_c *damtype,
 		target->player = NULL;
 	}
 
+	bool nofog = (target->flags & MF_SPECIAL);
+
 	target->flags &= ~(MF_SPECIAL | MF_SHOOTABLE | MF_FLOAT | 
 		MF_SKULLFLY | MF_TOUCHY);
 	target->extendedflags &= ~(EF_BOUNCE | EF_USABLE | EF_CLIMBABLE);
@@ -1082,9 +1084,12 @@ void P_KillMobj(mobj_t * source, mobj_t * target, const damage_c *damtype,
 	if (!g_gore.d)
 	{
 		state = S_NULL;
-		mobj_t *fog = P_MobjCreateObject(target->x, target->y, target->z, mobjtypes.Lookup("TELEPORT_FLASH"));
-		if (fog && fog->info->chase_state)
-			P_SetMobjStateDeferred(fog, fog->info->chase_state, 0);
+		if (!nofog)
+		{
+			mobj_t *fog = P_MobjCreateObject(target->x, target->y, target->z, mobjtypes.Lookup("TELEPORT_FLASH"));
+			if (fog && fog->info->chase_state)
+				P_SetMobjStateDeferred(fog, fog->info->chase_state, 0);
+		}
 	}
 
 	if (target->hyperflags & HF_DEHACKED_COMPAT)

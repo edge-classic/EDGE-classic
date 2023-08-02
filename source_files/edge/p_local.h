@@ -229,19 +229,6 @@ exfloor_fit_e P_ExtraFloorFits(sector_t *sec, float z1, float z2);
 // P_MAP
 //
 
-typedef enum
-{
-	// sector move is completely OK
-	CHKMOV_Ok = 0,
-
-	// sector move would crush something, but OK
-	CHKMOV_Crush = 1,
-
-	// sector can't move (solid floor or uncrushable thing)
-	CHKMOV_Nope = 2
-}
-check_sec_move_e;
-
 // --> Line list class
 class linelist_c : public epi::array_c
 {

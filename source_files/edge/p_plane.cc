@@ -723,11 +723,11 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
                     plane->newspecial = model->props.special ?
                         model->props.special->number : 0;
                 }
-            }
-            SECPIC(sector, def->is_ceiling, plane->new_image);
-            if (plane->newspecial != -1)
-            {
-                P_SectorChangeSpecial(sector, plane->newspecial);
+                SECPIC(sector, def->is_ceiling, plane->new_image);
+                if (plane->newspecial != -1)
+                {
+                    P_SectorChangeSpecial(sector, plane->newspecial);
+                }
             }
         }
         else if (def->tex != "" && def->tex[0] == '+')
@@ -785,7 +785,7 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
         else
             sector->floor_move = NULL;
 
-        plane->new_image = W_ImageLookup("TEXSWITCH_DUMMY", INS_Graphic);
+        plane->nukeme = true;
 
         return plane;
     }
@@ -837,7 +837,7 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
             }
         }
 
-        if (plane->direction == (def->is_ceiling ? DIRECTION_DOWN : DIRECTION_UP))
+        if (model && plane->direction == (def->is_ceiling ? DIRECTION_DOWN : DIRECTION_UP))
         {
             SECPIC(sector, def->is_ceiling, plane->new_image);
             if (plane->newspecial != -1)
@@ -1047,7 +1047,7 @@ bool EV_DoPlane(sector_t * sec, const movplanedef_c * def, sector_t * model)
 
     // Do sector action
     plane_move_t *secaction = P_SetupSectorAction(sec, def, model);
-    if (secaction && secaction->new_image->name == "TEXSWITCH_DUMMY")
+    if (secaction && secaction->nukeme)
     {
         delete secaction;
         return true;

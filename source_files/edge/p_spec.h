@@ -114,6 +114,8 @@ typedef struct plane_move_s
 
 	int newspecial;
 	const image_c *new_image;
+
+	bool nukeme = false; // for changers already at their dest height
 }
 plane_move_t;
 

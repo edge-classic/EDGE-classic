@@ -717,7 +717,8 @@ static void BlurCentre(epi::image_data_c& img)
 
 		int size = 16 + min_pos*2;  // range: 1.00 to 4.99 (times 16)
 
-		int d_size = (size | 15) / 16;
+		static int d_size;
+		d_size = (size | 15) / 16;
 
 		// compute average over the box
 		int r = 0;

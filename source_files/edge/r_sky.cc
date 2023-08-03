@@ -704,6 +704,10 @@ static void BlurCentre(epi::image_data_c& img)
 
 	memcpy(orig.pixels, img.pixels, orig.width*orig.height*3);
 
+#if (_MSC_VER > 1929)
+		I_Warning("Using BlurCentre() workaround for MSVC2022! Revert this as soon as it is fixed upstream!\n");
+#endif
+
 	for (int y = 1+img.height/4; y < img.height*3/4; y++)
 	for (int x = 1+img.width /4; x < img.width *3/4; x++)
 	{
@@ -717,8 +721,12 @@ static void BlurCentre(epi::image_data_c& img)
 
 		int size = 16 + min_pos*2;  // range: 1.00 to 4.99 (times 16)
 
+#if (_MSC_VER > 1929)
 		static int d_size;
 		d_size = (size | 15) / 16;
+#else
+		int d_size = (size | 15) / 16;
+#endif
 
 		// compute average over the box
 		int r = 0;

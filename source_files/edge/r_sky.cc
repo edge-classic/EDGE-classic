@@ -37,8 +37,6 @@
 #include "r_texgl.h"
 #include "w_wad.h"
 
-#define DEBUG  0
-
 const image_c *sky_image;
 
 bool custom_sky_box;
@@ -245,21 +243,42 @@ void DeleteSkyTextures(void)
 
 static void RGL_SetupSkyMatrices(void)
 {
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
+	if (custom_sky_box)
+	{
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
 
-	glLoadIdentity();
-	glFrustum(-view_x_slope * r_nearclip.f, view_x_slope * r_nearclip.f,
-			  -view_y_slope * r_nearclip.f, view_y_slope * r_nearclip.f,
-			  r_nearclip.f, r_farclip.f * 2.0);
+		glLoadIdentity();
+		glFrustum(-view_x_slope * r_nearclip.f, view_x_slope * r_nearclip.f,
+				-view_y_slope * r_nearclip.f, view_y_slope * r_nearclip.f,
+				r_nearclip.f, r_farclip.f);
 
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
 
-	glRotatef(270.0f - ANG_2_FLOAT(viewvertangle), 1.0f, 0.0f, 0.0f);
-	glRotatef(90.0f  - ANG_2_FLOAT(viewangle), 0.0f, 0.0f, 1.0f);
-	glTranslatef(0.0f, 0.0f, -(r_farclip.f / 2 * 0.15)); // Draw center below horizon a little
+		glLoadIdentity();
+		
+		glRotatef(270.0f - ANG_2_FLOAT(viewvertangle), 1.0f, 0.0f, 0.0f);
+		glRotatef(90.0f  - ANG_2_FLOAT(viewangle), 0.0f, 0.0f, 1.0f);
+	}
+	else
+	{
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+
+		glLoadIdentity();
+		glFrustum(-view_x_slope * r_nearclip.f, view_x_slope * r_nearclip.f,
+				-view_y_slope * r_nearclip.f, view_y_slope * r_nearclip.f,
+				r_nearclip.f, r_farclip.f * 2.0);
+
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+
+		glRotatef(270.0f - ANG_2_FLOAT(viewvertangle), 1.0f, 0.0f, 0.0f);
+		glRotatef(90.0f  - ANG_2_FLOAT(viewangle), 0.0f, 0.0f, 1.0f);
+		glTranslatef(0.0f, 0.0f, -(r_farclip.f / 2 * 0.15)); // Draw center below horizon a little
+	}
 }
 
 
@@ -396,7 +415,7 @@ static void renderSkySlice(float top, float bottom, float atop, float abottom, f
 	glEnd();
 }
 
-void RGL_DrawSkyCylinder(void)
+static void RGL_DrawSkyCylinder(void)
 {
 	GLuint sky = W_ImageCache(sky_image, false, ren_fx_colmap);
 
@@ -450,47 +469,13 @@ void RGL_DrawSkyCylinder(void)
 	RGL_RevertSkyMatrices();
 }
 
-void RGL_FinishSky(void)
-{
-	glEnd(); // End glBegin(GL_TRIANGLES) from RGL_BeginSky
-
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-
-	if (! need_to_draw_sky)
-		return;
-
-	// draw sky picture, but DON'T affect the depth buffering
-
-	glDepthMask(GL_FALSE);
-
-	if (r_culling.d)
-		glDisable(GL_DEPTH_TEST);
-
-	if (! r_dumbsky.d)
-		glDepthFunc(GL_GREATER);
-
-	RGL_DrawSkyCylinder();
-
-	if (r_culling.d)
-		glEnable(GL_DEPTH_TEST);
-
-	glDepthFunc(GL_LEQUAL);
-	glDepthMask(GL_TRUE);
-
-	glDisable(GL_TEXTURE_2D);
-
-#if 0
-	// clear buffer (EXPERIMENTAL) -- causes render problems: ceilings
-	// you shouldn't be able to see (MAP05, MAP12).
-	glClear(GL_DEPTH_BUFFER_BIT);
-#endif
-}
-
-/*void RGL_DrawSkyBox(void)
+static void RGL_DrawSkyBox(void)
 {
 	float dist = r_farclip.f / 2.0f;
 
 	int SK = RGL_UpdateSkyBoxTextures();
+
+	SYS_ASSERT(SK >= 0);
 
 	RGL_SetupSkyMatrices();
 
@@ -609,7 +594,7 @@ void RGL_FinishSky(void)
 }
 
 
-void RGL_DrawSkyOriginal(void)
+/*void RGL_DrawSkyOriginal(void)
 {
 	RGL_SetupSkyMatrices2D();
 
@@ -672,6 +657,44 @@ I_Printf("[%i] --> %1.2f  tx %1.4f\n", i, ANG_2_FLOAT(ang), tx);
 	RGL_RevertSkyMatrices();
 }*/
 
+void RGL_FinishSky(void)
+{
+	glEnd(); // End glBegin(GL_TRIANGLES) from RGL_BeginSky
+
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+	if (! need_to_draw_sky)
+		return;
+
+	// draw sky picture, but DON'T affect the depth buffering
+
+	glDepthMask(GL_FALSE);
+
+	if (r_culling.d)
+		glDisable(GL_DEPTH_TEST);
+
+	if (! r_dumbsky.d)
+		glDepthFunc(GL_GREATER);
+
+	if (custom_sky_box)
+		RGL_DrawSkyBox();
+	else
+		RGL_DrawSkyCylinder();
+
+	if (r_culling.d)
+		glEnable(GL_DEPTH_TEST);
+
+	glDepthFunc(GL_LEQUAL);
+	glDepthMask(GL_TRUE);
+
+	glDisable(GL_TEXTURE_2D);
+
+#if 0
+	// clear buffer (EXPERIMENTAL) -- causes render problems: ceilings
+	// you shouldn't be able to see (MAP05, MAP12).
+	glClear(GL_DEPTH_BUFFER_BIT);
+#endif
+}
 
 void RGL_DrawSkyPlane(subsector_t *sub, float h)
 {
@@ -1081,7 +1104,7 @@ int RGL_UpdateSkyBoxTextures(void)
 		//I_Printf("Skybox turned OFF\n");
 	}
 	
-	// Set sky color for culling fog - Dasho
+	// Set colors for culling fog and faux skybox caps - Dasho
 	const byte *what_palette = (const byte *) &playpal_data[0];
 	if (sky_image->source_palette >= 0)
 		what_palette = (const byte *) W_LoadLump(sky_image->source_palette);
@@ -1113,11 +1136,16 @@ int RGL_UpdateSkyBoxTextures(void)
 
 		return SK;
 	}
-
+	else
+	{
+		info->face_size = 256;
+		custom_sky_box = false;
+		return -1;
+	}
 
 	// Create pseudo sky box
 
-	info->face_size = 256;
+	/*info->face_size = 256;
 
 	custom_sky_box = false;
 
@@ -1163,7 +1191,7 @@ int RGL_UpdateSkyBoxTextures(void)
 	if (what_pal_cached)
 		delete[] what_pal;
 
-	return SK;
+	return SK;*/
 }
 
 

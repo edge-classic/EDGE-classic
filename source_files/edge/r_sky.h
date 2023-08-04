@@ -35,6 +35,8 @@ extern const image_c *sky_image;
 // true when a custom sky box is present
 extern bool custom_sky_box;
 
+extern bool need_to_draw_sky;
+
 typedef enum
 {
 	WSKY_North = 0,

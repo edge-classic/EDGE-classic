@@ -35,6 +35,7 @@
 #include "r_image.h"
 #include "r_texgl.h"
 #include "r_shader.h"
+#include "r_sky.h"
 
 #include "r_colormap.h"
 
@@ -62,7 +63,6 @@ DEF_CVAR(r_dumbclamp,     DUMB_CLAMP, 0)
 extern cvar_c r_culling;
 extern cvar_c r_cullfog;
 extern cvar_c r_fogofwar;
-extern bool need_to_draw_sky;
 
 // a single unit (polygon, quad, etc) to pass to the GL
 typedef struct local_gl_unit_s

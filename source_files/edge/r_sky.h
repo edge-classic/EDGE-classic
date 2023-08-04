@@ -48,8 +48,6 @@ sky_box_face_e;
 
 void R_ComputeSkyHeights(void);
 
-void RGL_SetupSkyMatrices(void);
-void RGL_RevertSkyMatrices(void);
 void RGL_BeginSky(void);
 void RGL_FinishSky(void);
 

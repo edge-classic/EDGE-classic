@@ -279,7 +279,7 @@ static void RGL_SetupSkyMatrices(void)
 }*/
 
 
-void RGL_RevertSkyMatrices(void)
+static void RGL_RevertSkyMatrices(void)
 {
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();

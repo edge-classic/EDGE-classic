@@ -48,6 +48,8 @@ extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
 
 extern cvar_c r_culling;
 
+static GLfloat sky_cap_color[4];
+
 typedef struct sec_sky_ring_s
 {
 	// which group of connected skies (0 if none)
@@ -241,7 +243,7 @@ void DeleteSkyTextures(void)
 }
 
 
-static void RGL_SetupSkyMatrices(float dist)
+static void RGL_SetupSkyMatrices(void)
 {
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -249,19 +251,19 @@ static void RGL_SetupSkyMatrices(float dist)
 	glLoadIdentity();
 	glFrustum(-view_x_slope * r_nearclip.f, view_x_slope * r_nearclip.f,
 			  -view_y_slope * r_nearclip.f, view_y_slope * r_nearclip.f,
-			  r_nearclip.f, r_farclip.f);
+			  r_nearclip.f, r_farclip.f * 2.0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-
 	glLoadIdentity();
-	
+
 	glRotatef(270.0f - ANG_2_FLOAT(viewvertangle), 1.0f, 0.0f, 0.0f);
 	glRotatef(90.0f  - ANG_2_FLOAT(viewangle), 0.0f, 0.0f, 1.0f);
+	glTranslatef(0.0f, 0.0f, -(r_farclip.f / 2 * 0.15)); // Draw center below horizon a little
 }
 
 
-static void RGL_SetupSkyMatrices2D(void)
+/*static void RGL_SetupSkyMatrices2D(void)
 {
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -274,7 +276,7 @@ static void RGL_SetupSkyMatrices2D(void)
 	glPushMatrix();
 
 	glLoadIdentity();
-}
+}*/
 
 
 void RGL_RevertSkyMatrices(void)
@@ -295,9 +297,6 @@ void RGL_BeginSky(void)
 	glDisable(GL_TEXTURE_2D);
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	// I don't think we need glEdgeFlag anymore; from what I've read this only
-	// matters if we switch glPolygonMode away from GL_FILL - Dasho
-	//glEdgeFlag(GL_TRUE);
 
 	// Draw the entire sky using only one glBegin/glEnd clause.
 	// glEnd is called in RGL_FinishSky and this code assumes that only
@@ -305,6 +304,151 @@ void RGL_BeginSky(void)
 	glBegin(GL_TRIANGLES);
 }
 
+static vec2_t sky_circle_[32];
+
+static void buildSkyCircle()
+{
+	double rot = 0;
+	for (auto& pos : sky_circle_)
+	{
+		pos.Set(sin(rot), -cos(rot));
+		rot -= (3.1415926535897932384626433832795 * 2) / 32.0;
+	}
+}
+
+// -----------------------------------------------------------------------------
+// Renders a cylindrical 'slice' of the sky between [top] and [bottom] on the z
+// axis
+// -----------------------------------------------------------------------------
+static void renderSkySlice(float top, float bottom, float atop, float abottom, float dist, float tx, float ty)
+{
+	float tc_x  = 0.0f;
+	float tc_y1 = (top + 1.0f) * (ty * 0.5f);
+	float tc_y2 = (bottom + 1.0f) * (ty * 0.5f);
+
+	if (bottom < -0.5f)
+	{
+		tc_y1 = -tc_y1;
+		tc_y2 = -tc_y2;
+	}
+
+	glBegin(GL_QUADS);
+
+	// Go through circular points
+	for (unsigned a = 0; a < 31; a++)
+	{
+		// Top
+		glColor4f(1.0f, 1.0f, 1.0f, atop);
+		glTexCoord2f(tc_x + tx, tc_y1);
+		glVertex3f(
+			(sky_circle_[a + 1].x * dist),
+			- (sky_circle_[a + 1].y * dist),
+			(top * dist));
+		glTexCoord2f(tc_x, tc_y1);
+		glVertex3f(
+			(sky_circle_[a].x * dist),
+			- (sky_circle_[a].y * dist),
+			(top * dist));
+
+		// Bottom
+		glColor4f(1.0f, 1.0f, 1.0f, abottom);
+		glTexCoord2f(tc_x, tc_y2);
+		glVertex3f(
+			(sky_circle_[a].x * dist),
+			- (sky_circle_[a].y * dist),
+			(bottom * dist));
+		glTexCoord2f(tc_x + tx, tc_y2);
+		glVertex3f(
+			(sky_circle_[a + 1].x * dist),
+			- (sky_circle_[a + 1].y * dist),
+			(bottom * dist));
+
+		tc_x += tx;
+	}
+
+	// Link last point -> first
+	// Top
+	glColor4f(1.0f, 1.0f, 1.0f, atop);
+	glTexCoord2f(tc_x + tx, tc_y1);
+	glVertex3f(
+		(sky_circle_[0].x * dist),
+		- (sky_circle_[0].y * dist),
+		(top * dist));
+	glTexCoord2f(tc_x, tc_y1);
+	glVertex3f(
+		(sky_circle_[31].x * dist),
+		- (sky_circle_[31].y * dist),
+		(top * dist));
+
+	// Bottom
+	glColor4f(1.0f, 1.0f, 1.0f, abottom);
+	glTexCoord2f(tc_x, tc_y2);
+	glVertex3f(
+		(sky_circle_[31].x * dist),
+		- (sky_circle_[31].y * dist),
+		(bottom * dist));
+	glTexCoord2f(tc_x + tx, tc_y2);
+	glVertex3f(
+		(sky_circle_[0].x * dist),
+		- (sky_circle_[0].y * dist),
+		(bottom * dist));
+
+	glEnd();
+}
+
+void RGL_DrawSkyCylinder(void)
+{
+	GLuint sky = W_ImageCache(sky_image, false, ren_fx_colmap);
+
+	// Center skybox a bit below the camera view
+	RGL_SetupSkyMatrices();
+
+	glDisable(GL_TEXTURE_2D);
+
+	// Render top cap
+	float dist = r_farclip.f / 2.0;
+	float cap_dist = dist * 1.5; // Ensure the caps extend beyond the cylindrical projection
+	glColor4f(sky_cap_color[0],sky_cap_color[1],sky_cap_color[2],1.0);
+	glBegin(GL_QUADS);
+	glVertex3f(-cap_dist, -cap_dist, dist);
+	glVertex3f(-cap_dist, cap_dist, dist);
+	glVertex3f(cap_dist, cap_dist, dist);
+	glVertex3f(cap_dist, -cap_dist, dist);
+	glEnd();
+
+	// Render bottom cap
+	glBegin(GL_QUADS);
+	glVertex3f(-cap_dist, -cap_dist, -dist);
+	glVertex3f(-cap_dist, cap_dist, -dist);
+	glVertex3f(cap_dist, cap_dist, -dist);
+	glVertex3f(cap_dist, -cap_dist, -dist);
+	glEnd();
+
+	// Render skybox sides
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, sky);
+
+	// Check for odd sky sizes
+	float tx = 0.125f;
+	float ty = 2.0f;
+	if (IM_WIDTH(sky_image) > 256)
+		tx = 0.125f / ((float)IM_WIDTH(sky_image) / 256.0f);
+	if (IM_HEIGHT(sky_image) > 128)
+		ty = (float)IM_HEIGHT(sky_image) / 128;
+
+	glEnable(GL_ALPHA_TEST);
+	glEnable(GL_BLEND);
+
+	renderSkySlice(1.0f, 0.9f, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
+	renderSkySlice(0.9f, 0.0f, 1.0f, 1.0f, dist, tx, ty);  // Top Solid
+	renderSkySlice(0.0f, -0.9f, 1.0f, 1.0f, dist, tx, ty);  // Bottom Solid (Mirror)
+	renderSkySlice(-0.9f, -1.0f, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade (Mirror)
+
+	glDisable(GL_BLEND);
+	glDisable(GL_ALPHA_TEST);
+
+	RGL_RevertSkyMatrices();
+}
 
 void RGL_FinishSky(void)
 {
@@ -317,24 +461,15 @@ void RGL_FinishSky(void)
 
 	// draw sky picture, but DON'T affect the depth buffering
 
-	glEnable(GL_TEXTURE_2D);
-
 	glDepthMask(GL_FALSE);
 
 	if (r_culling.d)
 		glDisable(GL_DEPTH_TEST);
 
-	if (level_flags.mlook || custom_sky_box)
-	{
-		if (! r_dumbsky.d)
-			glDepthFunc(GL_GREATER);
+	if (! r_dumbsky.d)
+		glDepthFunc(GL_GREATER);
 
-		RGL_DrawSkyBox();
-	}
-	else
-	{
-		RGL_DrawSkyOriginal();
-	}
+	RGL_DrawSkyCylinder();
 
 	if (r_culling.d)
 		glEnable(GL_DEPTH_TEST);
@@ -351,14 +486,13 @@ void RGL_FinishSky(void)
 #endif
 }
 
-
-void RGL_DrawSkyBox(void)
+/*void RGL_DrawSkyBox(void)
 {
 	float dist = r_farclip.f / 2.0f;
 
 	int SK = RGL_UpdateSkyBoxTextures();
 
-	RGL_SetupSkyMatrices(dist);
+	RGL_SetupSkyMatrices();
 
 	float v0 = 0.0f;
 	float v1 = 1.0f;
@@ -536,7 +670,7 @@ I_Printf("[%i] --> %1.2f  tx %1.4f\n", i, ANG_2_FLOAT(ang), tx);
 	glDisable(GL_TEXTURE_2D);
 
 	RGL_RevertSkyMatrices();
-}
+}*/
 
 
 void RGL_DrawSkyPlane(subsector_t *sub, float h)
@@ -957,6 +1091,10 @@ int RGL_UpdateSkyBoxTextures(void)
 	cull_fog_color[0] = (float)temp_rgb[0] / 255.0f;
 	cull_fog_color[1] = (float)temp_rgb[1] / 255.0f;
 	cull_fog_color[2] = (float)temp_rgb[2] / 255.0f;
+	tmp_img_data->AverageColor(temp_rgb, 0, sky_image->actual_w, sky_image->actual_h * 3/4, sky_image->actual_h);
+	sky_cap_color[0] = (float)temp_rgb[0] / 255.0f;
+	sky_cap_color[1] = (float)temp_rgb[1] / 255.0f;
+	sky_cap_color[2] = (float)temp_rgb[2] / 255.0f;
 	delete tmp_img_data;
 	delete[] temp_rgb;
 
@@ -1031,7 +1169,7 @@ int RGL_UpdateSkyBoxTextures(void)
 
 void RGL_PreCacheSky(void)
 {
-	// TODO
+	buildSkyCircle();
 }
 
 //--- editor settings ---

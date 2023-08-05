@@ -446,6 +446,8 @@ static void RGL_DrawSkyCylinder(void)
 	// Render skybox sides
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, sky);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	// Check for odd sky sizes
 	float tx = 0.125f;
@@ -458,10 +460,10 @@ static void RGL_DrawSkyCylinder(void)
 	glEnable(GL_ALPHA_TEST);
 	glEnable(GL_BLEND);
 
-	renderSkySlice(1.0f, 0.9f, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
-	renderSkySlice(0.9f, 0.0f, 1.0f, 1.0f, dist, tx, ty);  // Top Solid
-	renderSkySlice(0.0f, -0.9f, 1.0f, 1.0f, dist, tx, ty);  // Bottom Solid (Mirror)
-	renderSkySlice(-0.9f, -1.0f, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade (Mirror)
+	renderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
+	renderSkySlice(0.75f, 0.0f, 1.0f, 1.0f, dist, tx, ty);  // Top Solid
+	renderSkySlice(0.0f, -0.75f, 1.0f, 1.0f, dist, tx, ty);  // Bottom Solid (Mirror)
+	renderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade (Mirror)
 
 	glDisable(GL_BLEND);
 	glDisable(GL_ALPHA_TEST);

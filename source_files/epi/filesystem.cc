@@ -156,10 +156,14 @@ bool FS_ReadDirRecursive(std::vector<dir_entry_c>& fsd, std::filesystem::path di
 	return true;
 }
 
-void FS_OpenDir(const std::filesystem::path& src)
+bool FS_OpenDir(const std::filesystem::path& src)
 {
 #ifdef _WIN32	
 	ShellExecuteW(NULL, L"open", src.wstring().c_str(), NULL, NULL, SW_SHOWDEFAULT);
+	return true;
+#else
+	I_Warning("FS_OpenDir is not supported on this platform, yet"\n");
+	return false;
 #endif
 }
 

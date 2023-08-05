@@ -60,7 +60,7 @@ bool FS_Access(std::filesystem::path name, unsigned int flags);
 file_c *FS_Open(std::filesystem::path name, unsigned int flags);
 
 // Opens a directory in explorer, finder, etc
-void FS_OpenDir(const std::filesystem::path& src);
+bool FS_OpenDir(const std::filesystem::path& src);
 
 // NOTE: there's no FS_Close() function, just delete the object.
 

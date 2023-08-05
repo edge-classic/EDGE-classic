@@ -17,9 +17,12 @@
 //----------------------------------------------------------------------------
 
 #include "epi.h"
-
 #include "file.h"
 #include "filesystem.h"
+
+#ifdef _WIN32
+#include <shellapi.h>
+#endif
 
 #define MAX_MODE_CHARS  32
 
@@ -151,6 +154,17 @@ bool FS_ReadDirRecursive(std::vector<dir_entry_c>& fsd, std::filesystem::path di
 	}
 
 	return true;
+}
+
+bool FS_OpenDir(const std::filesystem::path& src)
+{
+#ifdef _WIN32	
+	ShellExecuteW(NULL, L"open", src.wstring().c_str(), NULL, NULL, SW_SHOWDEFAULT);
+	return true;
+#else
+	I_Warning("FS_OpenDir is not supported on this platform, yet\n");
+	return false;
+#endif
 }
 
 bool FS_Copy(std::filesystem::path src, std::filesystem::path dest)

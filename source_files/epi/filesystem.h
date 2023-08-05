@@ -59,6 +59,9 @@ bool FS_ReadDirRecursive(std::vector<dir_entry_c>& fsd, std::filesystem::path di
 bool FS_Access(std::filesystem::path name, unsigned int flags);
 file_c *FS_Open(std::filesystem::path name, unsigned int flags);
 
+// Opens a directory in explorer, finder, etc
+bool FS_OpenDir(const std::filesystem::path& src);
+
 // NOTE: there's no FS_Close() function, just delete the object.
 
 bool FS_Copy(std::filesystem::path src, std::filesystem::path dest);

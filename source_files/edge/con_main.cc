@@ -28,7 +28,7 @@
 
 #include "con_main.h"
 #include "con_var.h"
-
+#include "dm_state.h"
 #include "e_input.h"
 #include "g_game.h"
 #include "m_menu.h"
@@ -37,6 +37,7 @@
 #include "w_files.h"
 #include "w_wad.h"
 #include "version.h"
+#include "filesystem.h"
 
 #include <sstream>
 
@@ -322,6 +323,12 @@ int CMD_ShowFiles(char **argv, int argc)
 	return 0;
 }
 
+int CMD_OpenHome(char **argv, int argc)
+{	
+	epi::FS_OpenDir(home_dir);
+	return 0;
+}
+
 int CMD_ShowLumps(char **argv, int argc)
 {
 	int for_file = -1;  // all files
@@ -585,6 +592,7 @@ const con_cmd_t builtin_commands[] =
 	{ "playsound",      CMD_PlaySound },
 //	{ "resetkeys",      CMD_ResetKeys },
 	{ "readme",      	CMD_Readme },
+	{ "openhome",      	CMD_OpenHome },
 	{ "resetvars",      CMD_ResetVars },
 	{ "showfiles",      CMD_ShowFiles },
   	{ "showjoysticks",  CMD_ShowJoysticks },

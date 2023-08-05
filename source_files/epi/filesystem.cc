@@ -162,7 +162,7 @@ bool FS_OpenDir(const std::filesystem::path& src)
 	ShellExecuteW(NULL, L"open", src.wstring().c_str(), NULL, NULL, SW_SHOWDEFAULT);
 	return true;
 #else
-	I_Warning("FS_OpenDir is not supported on this platform, yet"\n");
+	I_Warning("FS_OpenDir is not supported on this platform, yet\n");
 	return false;
 #endif
 }

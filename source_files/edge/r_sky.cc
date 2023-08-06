@@ -187,7 +187,6 @@ void R_ComputeSkyHeights(void)
 
 bool need_to_draw_sky = false;
 
-
 typedef struct
 {
 	const image_c *base_sky;
@@ -242,7 +241,6 @@ void DeleteSkyTextures(void)
 	}
 }
 
-
 static void RGL_SetupSkyMatrices(void)
 {
 	if (custom_sky_box)
@@ -286,23 +284,6 @@ static void RGL_SetupSkyMatrices(void)
 	}
 }
 
-
-/*static void RGL_SetupSkyMatrices2D(void)
-{
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-
-	glLoadIdentity();
-	glOrtho(0.0f, (float)SCREENWIDTH, 
-			0.0f, (float)SCREENHEIGHT, -1.0f, 1.0f);
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-
-	glLoadIdentity();
-}*/
-
-
 static void RGL_RevertSkyMatrices(void)
 {
 	glMatrixMode(GL_PROJECTION);
@@ -328,12 +309,16 @@ void RGL_BeginSky(void)
 	glBegin(GL_TRIANGLES);
 }
 
-static vec2_t sky_circle_[32];
+// The following cylindrical sky-drawing routines are adapted from SLADE's 3D Renderer
+// (https://github.com/sirjuddington/SLADE/blob/master/src/MapEditor/Renderer/MapRenderer3D.cpp)
+// with additional modes and other tweaks
+
+static vec2_t sky_circle[32];
 
 static void buildSkyCircle()
 {
 	double rot = 0;
-	for (auto& pos : sky_circle_)
+	for (auto& pos : sky_circle)
 	{
 		pos.Set(sin(rot), -cos(rot));
 		rot -= (3.1415926535897932384626433832795 * 2) / 32.0;
@@ -365,26 +350,26 @@ static void renderSkySlice(float top, float bottom, float atop, float abottom, f
 		glColor4f(1.0f, 1.0f, 1.0f, atop);
 		glTexCoord2f(tc_x + tx, tc_y1);
 		glVertex3f(
-			(sky_circle_[a + 1].x * dist),
-			- (sky_circle_[a + 1].y * dist),
+			(sky_circle[a + 1].x * dist),
+			- (sky_circle[a + 1].y * dist),
 			(top * dist));
 		glTexCoord2f(tc_x, tc_y1);
 		glVertex3f(
-			(sky_circle_[a].x * dist),
-			- (sky_circle_[a].y * dist),
+			(sky_circle[a].x * dist),
+			- (sky_circle[a].y * dist),
 			(top * dist));
 
 		// Bottom
 		glColor4f(1.0f, 1.0f, 1.0f, abottom);
 		glTexCoord2f(tc_x, tc_y2);
 		glVertex3f(
-			(sky_circle_[a].x * dist),
-			- (sky_circle_[a].y * dist),
+			(sky_circle[a].x * dist),
+			- (sky_circle[a].y * dist),
 			(bottom * dist));
 		glTexCoord2f(tc_x + tx, tc_y2);
 		glVertex3f(
-			(sky_circle_[a + 1].x * dist),
-			- (sky_circle_[a + 1].y * dist),
+			(sky_circle[a + 1].x * dist),
+			- (sky_circle[a + 1].y * dist),
 			(bottom * dist));
 
 		tc_x += tx;
@@ -395,26 +380,26 @@ static void renderSkySlice(float top, float bottom, float atop, float abottom, f
 	glColor4f(1.0f, 1.0f, 1.0f, atop);
 	glTexCoord2f(tc_x + tx, tc_y1);
 	glVertex3f(
-		(sky_circle_[0].x * dist),
-		- (sky_circle_[0].y * dist),
+		(sky_circle[0].x * dist),
+		- (sky_circle[0].y * dist),
 		(top * dist));
 	glTexCoord2f(tc_x, tc_y1);
 	glVertex3f(
-		(sky_circle_[31].x * dist),
-		- (sky_circle_[31].y * dist),
+		(sky_circle[31].x * dist),
+		- (sky_circle[31].y * dist),
 		(top * dist));
 
 	// Bottom
 	glColor4f(1.0f, 1.0f, 1.0f, abottom);
 	glTexCoord2f(tc_x, tc_y2);
 	glVertex3f(
-		(sky_circle_[31].x * dist),
-		- (sky_circle_[31].y * dist),
+		(sky_circle[31].x * dist),
+		- (sky_circle[31].y * dist),
 		(bottom * dist));
 	glTexCoord2f(tc_x + tx, tc_y2);
 	glVertex3f(
-		(sky_circle_[0].x * dist),
-		- (sky_circle_[0].y * dist),
+		(sky_circle[0].x * dist),
+		- (sky_circle[0].y * dist),
 		(bottom * dist));
 
 	glEnd();
@@ -636,70 +621,6 @@ static void RGL_DrawSkyBox(void)
 	RGL_RevertSkyMatrices();
 }
 
-
-/*void RGL_DrawSkyOriginal(void)
-{
-	RGL_SetupSkyMatrices2D();
-
-	float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-	if (r_colormaterial.d || ! r_colorlighting.d)
-		glColor4fv(white);
-	else
-		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
-
-	GLuint tex_id = W_ImageCache(sky_image, false, ren_fx_colmap);
-
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, tex_id);
- 	#ifdef APPLE_SILICON
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	#endif
-
-	glBegin(GL_QUAD_STRIP);
-
-	// FIXME for widescreen
-	float FIELDOFVIEW = CLAMP(5, r_fov.f, 175);
-
-	float focal_len = tan(FIELDOFVIEW * M_PI / 360.0);
-	float centerxfrac = SCREENWIDTH / 2.0f;
-
-	float ty1 = 200.0f / 128.0f;
-	float ty2 = 0;
-
-	for (int i = 0; i <= 32; i++)
-	{
-		int sx = i * SCREENWIDTH / 32;
-
-		// use formula from original Doom code
-		angle_t ang = ANG180 + M_ATan((1.0f - sx / centerxfrac) * focal_len);
-
-		// some mucking about here to prevent wrap-around
-		float tx = (((viewangle >> 2) + (ang >> 2) + (ANG180 >> 2)) >> 20);
-
-		if ((IM_WIDTH(sky_image) / IM_HEIGHT(sky_image)) < 2.28f)
-			tx = tx / 256.0f;
-		else
-			tx = tx / 1024.0f;
-
-#if 0  // DEBUGGING
-I_Printf("[%i] --> %1.2f  tx %1.4f\n", i, ANG_2_FLOAT(ang), tx);
-#endif
-		glTexCoord2f(tx, 1.0f - ty1);
-		glVertex2i(sx, 0);
-
-		glTexCoord2f(tx, 1.0f - ty2); 
-		glVertex2i(sx, SCREENHEIGHT);
- 	}
-
-	glEnd();
-
-	glDisable(GL_TEXTURE_2D);
-
-	RGL_RevertSkyMatrices();
-}*/
-
 void RGL_FinishSky(void)
 {
 	glEnd(); // End glBegin(GL_TRIANGLES) from RGL_BeginSky
@@ -731,12 +652,6 @@ void RGL_FinishSky(void)
 	glDepthMask(GL_TRUE);
 
 	glDisable(GL_TEXTURE_2D);
-
-#if 0
-	// clear buffer (EXPERIMENTAL) -- causes render problems: ceilings
-	// you shouldn't be able to see (MAP05, MAP12).
-	glClear(GL_DEPTH_BUFFER_BIT);
-#endif
 }
 
 void RGL_DrawSkyPlane(subsector_t *sub, float h)
@@ -817,296 +732,6 @@ void RGL_DrawSkyWall(seg_t *seg, float h1, float h2)
 
 //----------------------------------------------------------------------------
 
-
-#define PIXEL_RED(pix)  (what_palette[pix*3 + 0])
-#define PIXEL_GRN(pix)  (what_palette[pix*3 + 1])
-#define PIXEL_BLU(pix)  (what_palette[pix*3 + 2])
-
-
-static bool SkyIsNarrow(const image_c *sky)
-{
-	// check the aspect of the image
-	return (IM_WIDTH(sky) / IM_HEIGHT(sky)) < 2.28f;
-}
-
-
-static void CalcSkyCoord(int px, int py, int pw, int ph, int face,
-		bool narrow, float *tx, float *ty)
-{
-	// the 0.5 here ensures we never hit exactly zero
-	float ax = ((float)px + 0.5f) / (float)pw * 2.0f - 1.0f;
-	float ay = ((float)py + 0.5f) / (float)ph * 2.0f - 1.0f;
-
-	float sx, sy, sz;
-
-	switch (face)
-	{
-		case WSKY_North:
-			sx = ax; sy = 1.0f; sz = ay; break;
-
-		case WSKY_South:
-			sx = -ax; sy = -1.0f; sz = ay; break;
-
-		case WSKY_East:
-			sx = 1.0f; sy = -ax; sz = ay; break;
-
-		case WSKY_West:
-			sx = -1.0f; sy = ax; sz = ay; break;
-
-		case WSKY_Top:
-			sx = ax; sy = -ay; sz = 1.0f; break;
-
-		case WSKY_Bottom:
-			sx = ax; sy = ay; sz = -1.0f; break;
-
-		default:
-			I_Error("CalcSkyCoord: INTERNAL ERROR (lost face)\n");
-			sx = sy = sz = 0;
-			break; /* NOT REACHED */
-	}
-
-	float len2 = sqrt((sx) * (sx) + (sy) * (sy));
-
-	angle_t H = ANG0  + R_PointToAngle(0, 0, sx, sy);
-	angle_t V = ANG90 - R_PointToAngle(0, 0, len2, sz);
-
-	if (narrow)
-		*tx = (float)(H >> 1) / (float)(1 << 30);
-	else
-		*tx = (float)(H >> 2) / (float)(1 << 30);
-
-	// want yy to range from 0.0 (top) to 2.0 (bottom)
-	float yy = (float)(V) / (float)ANG90;
-
-	// this lowers the effective centre of the pseudo skybox to
-	// match the DOOM sky, which is 128 pixels on a 200 pixel high
-	// screen (so it dips 28 pixels below the horizon).
-	yy = yy / 1.15f;
-
-	// mirror it (vertically)
-	if (yy > 1.0f) yy = 2.0f - yy;
-
-	*ty = 1.0f - pow(yy, 2.2);
-}
-
-
-static void BlurCentre(epi::image_data_c& img)
-{
-	// Blurs the center of the image (the top face of the
-	// pseudo sky box).  The amount of blur is different at
-	// different places: from none at all at the edges upto
-	// maximum blur in the middle.
-
-	SYS_ASSERT(img.bpp == 3);
-
-	// create a copy to work from (as we cannot blur in-place)
-	epi::image_data_c orig(img.width, img.height, 3);
-
-	memcpy(orig.pixels, img.pixels, orig.width*orig.height*3);
-
-#if (_MSC_VER > 1929)
-		I_Warning("Using BlurCentre() workaround for MSVC2022! Revert this as soon as it is fixed upstream!\n");
-#endif
-
-	for (int y = 1+img.height/4; y < img.height*3/4; y++)
-	for (int x = 1+img.width /4; x < img.width *3/4; x++)
-	{
-		int x_pos = 31 - ABS(x - img.width /2) * 127 / img.width;
-		int y_pos = 31 - ABS(y - img.height/2) * 127 / img.height;
-
-		// SYS_ASSERT(0 <= x_pos && x_pos <= 31);
-		// SYS_ASSERT(0 <= y_pos && y_pos <= 31);
-
-		int min_pos = MIN(x_pos, y_pos);
-
-		int size = 16 + min_pos*2;  // range: 1.00 to 4.99 (times 16)
-
-#if (_MSC_VER > 1929)
-		static int d_size;
-		d_size = (size | 15) / 16;
-#else
-		int d_size = (size | 15) / 16;
-#endif
-
-		// compute average over the box
-		int r = 0;
-		int g = 0;
-		int b = 0;
-		int total = 0;
-
-		for (int dy = -d_size; dy <= +d_size; dy++)
-		for (int dx = -d_size; dx <= +d_size; dx++)
-		{
-			u8_t *src = orig.PixelAt(x+dx, y+dy);
-
-			int qty = ( (ABS(dx) < d_size) ? 16 : (size & 15) ) *
-			          ( (ABS(dy) < d_size) ? 16 : (size & 15) );
-
-			total += qty;
-
-			r += src[0] * qty;
-			g += src[1] * qty;
-			b += src[2] * qty;
-		}
-
-		SYS_ASSERT(total > 0);
-
-		u8_t *dest = img.PixelAt(x, y);
-
-		dest[0] = r / total;
-		dest[1] = g / total;
-		dest[2] = b / total;
-	}
-}
-
-static GLuint BuildFace(const epi::image_data_c *sky, int face,
-				  	    fake_skybox_t *info, const byte *what_palette)
-			
-{
-	int img_size = info->face_size;
-
-	epi::image_data_c img(img_size, img_size, 3);
-
-
-	bool narrow = SkyIsNarrow(info->base_sky);
-
-	const byte *src = sky->pixels;
-
-	int sky_w = sky->width;
-	int sky_h = sky->height;
-
-	for (int y=0; y < img_size; y++)
-	{
-		u8_t *dest = img.PixelAt(0, y);
-
-		for (int x=0; x < img_size; x++, dest += 3)
-		{
-			float tx, ty;
-
-			CalcSkyCoord(x, y, img_size, img_size, face, narrow, &tx, &ty);
-
-			// Bilinear Filtering
-
-			int TX = (int)(tx * sky_w * 16);
-			int TY = (int)(ty * sky_h * 16);
-
-			// negative values shouldn't occur, but just in case...
-			TX = (TX + sky_w * 64) % (sky_w * 16);
-			TY = (TY + sky_h * 64) % (sky_h * 16);
-
-			// SYS_ASSERT(TX >= 0 && TY >= 0);
-
-			int FX = TX % 16; TX >>= 4;
-			int FY = TY % 16; TY >>= 4;
-
-			// SYS_ASSERT(TX < sky_w && TY < sky_h);
-
-
-			int TX2 = (TX + 1) % sky_w;
-			int TY2 = (TY < sky_h-1) ? (TY+1) : TY;
-
-			byte rA, rB, rC, rD;
-			byte gA, gB, gC, gD;
-			byte bA, bB, bC, bD;
-
-			switch (sky->bpp)
-			{
-				case 1:
-				{
-					byte src_A = src[TY  * sky_w + TX];
-					byte src_B = src[TY  * sky_w + TX2];
-					byte src_C = src[TY2 * sky_w + TX];
-					byte src_D = src[TY2 * sky_w + TX2];
-
-					rA = PIXEL_RED(src_A); rB = PIXEL_RED(src_B);
-					rC = PIXEL_RED(src_C); rD = PIXEL_RED(src_D);
-
-					gA = PIXEL_GRN(src_A); gB = PIXEL_GRN(src_B);
-					gC = PIXEL_GRN(src_C); gD = PIXEL_GRN(src_D);
-
-					bA = PIXEL_BLU(src_A); bB = PIXEL_BLU(src_B);
-					bC = PIXEL_BLU(src_C); bD = PIXEL_BLU(src_D);
-				}
-				break;
-
-				case 3:
-				{
-					rA = src[(TY * sky_w + TX) * 3 + 0];
-					gA = src[(TY * sky_w + TX) * 3 + 1];
-					bA = src[(TY * sky_w + TX) * 3 + 2];
-
-					rB = src[(TY * sky_w + TX2) * 3 + 0];
-					gB = src[(TY * sky_w + TX2) * 3 + 1];
-					bB = src[(TY * sky_w + TX2) * 3 + 2];
-
-					rC = src[(TY2 * sky_w + TX) * 3 + 0];
-					gC = src[(TY2 * sky_w + TX) * 3 + 1];
-					bC = src[(TY2 * sky_w + TX) * 3 + 2];
-
-					rD = src[(TY2 * sky_w + TX2) * 3 + 0];
-					gD = src[(TY2 * sky_w + TX2) * 3 + 1];
-					bD = src[(TY2 * sky_w + TX2) * 3 + 2];
-				}
-				break;
-
-				case 4:
-				{
-					rA = src[(TY * sky_w + TX) * 4 + 0];
-					gA = src[(TY * sky_w + TX) * 4 + 1];
-					bA = src[(TY * sky_w + TX) * 4 + 2];
-
-					rB = src[(TY * sky_w + TX2) * 4 + 0];
-					gB = src[(TY * sky_w + TX2) * 4 + 1];
-					bB = src[(TY * sky_w + TX2) * 4 + 2];
-
-					rC = src[(TY2 * sky_w + TX) * 4 + 0];
-					gC = src[(TY2 * sky_w + TX) * 4 + 1];
-					bC = src[(TY2 * sky_w + TX) * 4 + 2];
-
-					rD = src[(TY2 * sky_w + TX2) * 4 + 0];
-					gD = src[(TY2 * sky_w + TX2) * 4 + 1];
-					bD = src[(TY2 * sky_w + TX2) * 4 + 2];
-				}
-				break;
-
-				default:  // remove compiler warning
-					rA = rB = rC = rD = 0;
-					gA = gB = gC = gD = 0;
-					bA = bB = bC = bD = 0;
-					break;
-			}
-
-			int r = (int)rA * (FX^15) * (FY^15) +
-					(int)rB * (FX   ) * (FY^15) +
-					(int)rC * (FX^15) * (FY   ) +
-					(int)rD * (FX   ) * (FY   );
-
-			int g = (int)gA * (FX^15) * (FY^15) +
-					(int)gB * (FX   ) * (FY^15) +
-					(int)gC * (FX^15) * (FY   ) +
-					(int)gD * (FX   ) * (FY   );
-
-			int b = (int)bA * (FX^15) * (FY^15) +
-					(int)bB * (FX   ) * (FY^15) +
-					(int)bC * (FX^15) * (FY   ) +
-					(int)bD * (FX   ) * (FY   );
-
-			dest[0] = r / 225;
-			dest[1] = g / 225;
-			dest[2] = b / 225;
-		}
-	}
-
-	// make the top surface look less bad
-	if (face == WSKY_Top)
-	{
-		BlurCentre(img);
-	}
-
-	return R_UploadTexture(&img, UPL_Smooth|UPL_Clamp);
-}
-
-
 static const char *UserSkyFaceName(const char *base, int face)
 {
 	static char buffer[64];
@@ -1115,7 +740,6 @@ static const char *UserSkyFaceName(const char *base, int face)
 	sprintf(buffer, "%s_%c", base, letters[face]);
 	return buffer;
 }
-
 
 int RGL_UpdateSkyBoxTextures(void)
 {
@@ -1185,56 +809,6 @@ int RGL_UpdateSkyBoxTextures(void)
 		custom_sky_box = false;
 		return -1;
 	}
-
-	// Create pseudo sky box
-
-	/*info->face_size = 256;
-
-	custom_sky_box = false;
-
-	
-	// Intentional Const Override
-	const epi::image_data_c *block = ReadAsEpiBlock((image_c*)sky_image);
-	SYS_ASSERT(block);
-
-	// get correct palette
-	const byte *what_pal = (const byte *) &playpal_data[0];
-	bool what_pal_cached = false;
-
-	static byte trans_pal[256*3];
-
-	if (ren_fx_colmap)
-	{
-		R_TranslatePalette(trans_pal, what_pal, ren_fx_colmap);
-		what_pal = trans_pal;
-	}
-	else if (sky_image->source_palette >= 0)
-	{
-		what_pal = (const byte *) W_LoadLump(sky_image->source_palette);
-		what_pal_cached = true;
-	}
-
-	//DeleteSkyTexGroup(SK); // Commented out to see if this fixes the skybox switching issue without bugs - Dasho
-
-	info->tex[WSKY_North]  = BuildFace(block, WSKY_North,  info, what_pal);
-	info->tex[WSKY_East]   = BuildFace(block, WSKY_East,   info, what_pal);
-	info->tex[WSKY_Top]    = BuildFace(block, WSKY_Top,    info, what_pal);
-	info->tex[WSKY_Bottom] = BuildFace(block, WSKY_Bottom, info, what_pal);
-
-	// optimisation: can share side textures when narrow
-
-	info->tex[WSKY_South] = SkyIsNarrow(sky_image) ? info->tex[WSKY_North] :
-						 BuildFace(block, WSKY_South, info, what_pal );
-
-	info->tex[WSKY_West]  = SkyIsNarrow(sky_image) ? info->tex[WSKY_East] :
-						 BuildFace(block, WSKY_West, info, what_pal );
-
-	delete block;
-
-	if (what_pal_cached)
-		delete[] what_pal;
-
-	return SK;*/
 }
 
 

@@ -72,6 +72,8 @@ EPI library - Copyright (c) 2002-2023 The EDGE Team
 
 Game Music Emu - Copyright (c) 2003-2009 Shay Green
 
+SLADE (IMF->WAV conversion and sky drawing routines) - Copyright (c) 2008 - 2023 Simon Judd
+
 SuperFastHash - Copyright (c) 2004-2010 Paul Hsieh
 
 XMIDI library - Copyright (c) 2015-2022 Vitaly Novichkov

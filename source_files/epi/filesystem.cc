@@ -19,10 +19,7 @@
 #include "epi.h"
 #include "file.h"
 #include "filesystem.h"
-
-#ifdef _WIN32
-#include <shellapi.h>
-#endif
+#include "epi_sdl.h"
 
 #define MAX_MODE_CHARS  32
 
@@ -158,13 +155,14 @@ bool FS_ReadDirRecursive(std::vector<dir_entry_c>& fsd, std::filesystem::path di
 
 bool FS_OpenDir(const std::filesystem::path& src)
 {
-#ifdef _WIN32	
-	ShellExecuteW(NULL, L"open", src.wstring().c_str(), NULL, NULL, SW_SHOWDEFAULT);
+	// A result of 0 is 'success', but that only means SDL was able to launch some kind of process
+	// to attempt to handle the path. -1 is the only result that is guaranteed to be an 'error'
+	if (SDL_OpenURL(STR_Format("file:///%s", src.u8string().c_str()).c_str()) == -1)
+	{
+		I_Warning("FS_OpenDir failed to open requested path %s\nError: %s\n", src.u8string().c_str(), SDL_GetError());
+		return false;
+	}
 	return true;
-#else
-	I_Warning("FS_OpenDir is not supported on this platform, yet\n");
-	return false;
-#endif
 }
 
 bool FS_Copy(std::filesystem::path src, std::filesystem::path dest)

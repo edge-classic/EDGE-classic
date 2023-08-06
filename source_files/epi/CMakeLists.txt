@@ -33,6 +33,9 @@ target_include_directories(edge_epi PRIVATE ../stb)
 target_include_directories(edge_epi PRIVATE ../libgme/gme)
 target_include_directories(edge_epi PRIVATE ../m4p)
 target_include_directories(edge_epi PRIVATE ../superfasthash)
+if(MSVC OR WIN32_CLANG)
+  target_include_directories(edge_epi PRIVATE ../sdl2/include)
+endif()
 
 target_compile_options(edge_epi PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/W4>

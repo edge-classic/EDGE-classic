@@ -48,6 +48,8 @@ extern cvar_c r_culling;
 
 static GLfloat sky_cap_color[4];
 
+DEF_CVAR(r_skystretch, "0", CVAR_ARCHIVE);
+
 typedef struct sec_sky_ring_s
 {
 	// which group of connected skies (0 if none)
@@ -277,7 +279,10 @@ static void RGL_SetupSkyMatrices(void)
 
 		glRotatef(270.0f - ANG_2_FLOAT(viewvertangle), 1.0f, 0.0f, 0.0f);
 		glRotatef(90.0f  - ANG_2_FLOAT(viewangle), 0.0f, 0.0f, 1.0f);
-		glTranslatef(0.0f, 0.0f, -(r_farclip.f / 2 * 0.15)); // Draw center below horizon a little
+		if (r_skystretch.d == 2) // Stretch
+			glTranslatef(0.0f, 0.0f, (r_farclip.f / 2 * 0.15)); // Draw center above horizon a little
+		else
+			glTranslatef(0.0f, 0.0f, -(r_farclip.f / 2 * 0.15)); // Draw center below horizon a little
 	}
 }
 
@@ -345,7 +350,7 @@ static void renderSkySlice(float top, float bottom, float atop, float abottom, f
 	float tc_y1 = (top + 1.0f) * (ty * 0.5f);
 	float tc_y2 = (bottom + 1.0f) * (ty * 0.5f);
 
-	if (bottom < -0.5f)
+	if (r_skystretch.d == 0 && bottom < -0.5f)
 	{
 		tc_y1 = -tc_y1;
 		tc_y2 = -tc_y2;
@@ -424,26 +429,36 @@ static void RGL_DrawSkyCylinder(void)
 
 	glDisable(GL_TEXTURE_2D);
 
-	// Render top cap
 	float dist = r_farclip.f / 2.0;
 	float cap_dist = dist * 1.5; // Ensure the caps extend beyond the cylindrical projection
+		// Calculate some stuff based on sky height
 	float sky_h_ratio = 1.0f;
-	if (IM_HEIGHT(sky_image) > 128)
+	if (IM_HEIGHT(sky_image) > 128 && r_skystretch.d < 2)
 		sky_h_ratio = (float)IM_HEIGHT(sky_image) / 256;
+	else if (r_skystretch.d == 3)
+		sky_h_ratio *= 0.5f;
+	float cap_z = dist * sky_h_ratio;
+	float solid_sky_h = sky_h_ratio * 0.75f;
+
+	// Render top cap
 	glColor4f(sky_cap_color[0],sky_cap_color[1],sky_cap_color[2],1.0);
 	glBegin(GL_QUADS);
-	glVertex3f(-cap_dist, -cap_dist, dist * sky_h_ratio);
-	glVertex3f(-cap_dist, cap_dist, dist * sky_h_ratio);
-	glVertex3f(cap_dist, cap_dist, dist * sky_h_ratio);
-	glVertex3f(cap_dist, -cap_dist, dist * sky_h_ratio);
+	glVertex3f(-cap_dist, -cap_dist, cap_z);
+	glVertex3f(-cap_dist, cap_dist, cap_z);
+	glVertex3f(cap_dist, cap_dist, cap_z);
+	glVertex3f(cap_dist, -cap_dist, cap_z);
 	glEnd();
 
 	// Render bottom cap
+	if (r_skystretch.d > 0)
+		glColor4f(cull_fog_color[0],cull_fog_color[1],cull_fog_color[2],1.0);
 	glBegin(GL_QUADS);
-	glVertex3f(-cap_dist, -cap_dist, -dist * sky_h_ratio);
-	glVertex3f(-cap_dist, cap_dist, -dist * sky_h_ratio);
-	glVertex3f(cap_dist, cap_dist, -dist * sky_h_ratio);
-	glVertex3f(cap_dist, -cap_dist, -dist * sky_h_ratio);
+	if (r_skystretch.d == 3)
+		cap_z = 0;
+	glVertex3f(-cap_dist, -cap_dist, -cap_z);
+	glVertex3f(-cap_dist, cap_dist, -cap_z);
+	glVertex3f(cap_dist, cap_dist, -cap_z);
+	glVertex3f(cap_dist, -cap_dist, -cap_z);
 	glEnd();
 
 	// Render skybox sides
@@ -461,10 +476,35 @@ static void RGL_DrawSkyCylinder(void)
 	glEnable(GL_ALPHA_TEST);
 	glEnable(GL_BLEND);
 
-	renderSkySlice(sky_h_ratio, sky_h_ratio * 0.75f, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
-	renderSkySlice(sky_h_ratio * 0.75f, 0.0f, 1.0f, 1.0f, dist, tx, ty);  // Top Solid
-	renderSkySlice(0.0f, -sky_h_ratio * 0.75f, 1.0f, 1.0f, dist, tx, ty);  // Bottom Solid (Mirror)
-	renderSkySlice(-sky_h_ratio * 0.75f, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade (Mirror)
+	if (r_skystretch.d == 0) // Mirror
+	{
+		renderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
+		renderSkySlice(solid_sky_h, 0.0f, 1.0f, 1.0f, dist, tx, ty);  // Top Solid
+		renderSkySlice(0.0f, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty);  // Bottom Solid
+		renderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade
+	}
+	else if (r_skystretch.d == 1) // Repeat
+	{
+		renderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
+		renderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty);  // Middle Solid
+		renderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade
+	}
+	else if (r_skystretch.d == 2) // Stretch
+	{
+		if (IM_HEIGHT(sky_image) > 128)
+			ty = ((float)IM_HEIGHT(sky_image) / 256.0f);
+		else
+			ty = 1.0f;
+		renderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
+		renderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty);  // Middle Solid
+		renderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade
+	}
+	else // Original
+	{
+		renderSkySlice(1.0f, 0.9f, 0.0f, 1.0f, dist/2, tx, ty);   // Top Fade
+		renderSkySlice(0.9f, 0.1f, 1.0f, 1.0f, dist/2, tx, ty);  // Middle Solid
+		renderSkySlice(0.1f, 0.0f, 1.0f, 0.0f, dist/2, tx, ty);   // Bottom Fade
+	}
 
 	glDisable(GL_BLEND);
 	glDisable(GL_ALPHA_TEST);

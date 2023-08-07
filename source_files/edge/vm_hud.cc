@@ -1082,7 +1082,11 @@ void VM_NewGame(void)
 
 void VM_LoadGame(void)
 {
-    VM_CallFunction(ui_vm, "load_game");
+    // Need to set these to prevent NULL references if using any player.xxx in the load_level hook
+	ui_hud_who    = players[displayplayer];
+	ui_player_who = players[displayplayer];
+	
+	VM_CallFunction(ui_vm, "load_game");
 }
 
 void VM_SaveGame(void)
@@ -1092,7 +1096,7 @@ void VM_SaveGame(void)
 
 void VM_BeginLevel(void)
 {
-	// Need to set these to prevent NULL references if using PL_setcounter in the begin_level hook
+	// Need to set these to prevent NULL references if using player.xxx in the begin_level hook
 	ui_hud_who    = players[displayplayer];
 	ui_player_who = players[displayplayer];
     VM_CallFunction(ui_vm, "begin_level");

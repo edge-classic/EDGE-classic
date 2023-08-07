@@ -48,7 +48,7 @@ extern cvar_c r_culling;
 
 static GLfloat sky_cap_color[4];
 
-DEF_CVAR(r_skystretch, "0", CVAR_ARCHIVE);
+DEF_CVAR_CLAMPED(r_skystretch, "0", CVAR_ARCHIVE, 0, 3);
 
 typedef struct sec_sky_ring_s
 {
@@ -417,13 +417,19 @@ static void RGL_DrawSkyCylinder(void)
 	float dist = r_farclip.f / 2.0;
 	float cap_dist = dist * 1.5; // Ensure the caps extend beyond the cylindrical projection
 		// Calculate some stuff based on sky height
-	float sky_h_ratio = 1.0f;
-	if (IM_HEIGHT(sky_image) > 128 && r_skystretch.d < 2)
+	float sky_h_ratio;
+	float solid_sky_h;
+	if (IM_HEIGHT(sky_image) > 128 && r_skystretch.d != 2)
 		sky_h_ratio = (float)IM_HEIGHT(sky_image) / 256;
 	else if (r_skystretch.d == 3)
-		sky_h_ratio *= 0.5f;
+		sky_h_ratio = 0.5f;
+	else
+		sky_h_ratio = 1.0f;
+	if (r_skystretch.d == 3)
+		solid_sky_h = sky_h_ratio * 0.9f;
+	else
+		solid_sky_h = sky_h_ratio * 0.75f;
 	float cap_z = dist * sky_h_ratio;
-	float solid_sky_h = sky_h_ratio * 0.75f;
 
 	// Render top cap
 	glColor4f(sky_cap_color[0],sky_cap_color[1],sky_cap_color[2],1.0);
@@ -463,32 +469,67 @@ static void RGL_DrawSkyCylinder(void)
 
 	if (r_skystretch.d == 0) // Mirror
 	{
-		renderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
-		renderSkySlice(solid_sky_h, 0.0f, 1.0f, 1.0f, dist, tx, ty);  // Top Solid
-		renderSkySlice(0.0f, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty);  // Bottom Solid
-		renderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade
+		if (IM_HEIGHT(sky_image) > 128)
+		{
+			renderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
+			renderSkySlice(solid_sky_h, 0.0f, 1.0f, 1.0f, dist, tx, ty);  // Top Solid
+			renderSkySlice(0.0f, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty);  // Bottom Solid
+			renderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade
+		}
+		else
+		{
+			renderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
+			renderSkySlice(0.75f, 0.0f, 1.0f, 1.0f, dist, tx, ty);  // Top Solid
+			renderSkySlice(0.0f, -0.75f, 1.0f, 1.0f, dist, tx, ty);  // Bottom Solid
+			renderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade
+		}
 	}
 	else if (r_skystretch.d == 1) // Repeat
 	{
-		renderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
-		renderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty);  // Middle Solid
-		renderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade
+		if (IM_HEIGHT(sky_image) > 128)
+		{
+			renderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
+			renderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty);  // Middle Solid
+			renderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade
+		}
+		else
+		{
+			renderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
+			renderSkySlice(0.75f, -0.75f, 1.0f, 1.0f, dist, tx, ty);  // Middle Solid
+			renderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade
+		}
 	}
 	else if (r_skystretch.d == 2) // Stretch
 	{
 		if (IM_HEIGHT(sky_image) > 128)
+		{
 			ty = ((float)IM_HEIGHT(sky_image) / 256.0f);
+			renderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
+			renderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty);  // Middle Solid
+			renderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade
+		}
 		else
+		{
 			ty = 1.0f;
-		renderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
-		renderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty);  // Middle Solid
-		renderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade
+			renderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty);   // Top Fade
+			renderSkySlice(0.75f, -0.75f, 1.0f, 1.0f, dist, tx, ty);  // Middle Solid
+			renderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade
+		}
 	}
 	else // Original
 	{
-		renderSkySlice(1.0f, 0.9f, 0.0f, 1.0f, dist/2, tx, ty);   // Top Fade
-		renderSkySlice(0.9f, 0.1f, 1.0f, 1.0f, dist/2, tx, ty);  // Middle Solid
-		renderSkySlice(0.1f, 0.0f, 1.0f, 0.0f, dist/2, tx, ty);   // Bottom Fade
+		if (IM_HEIGHT(sky_image) > 128)
+		{
+			renderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist/2, tx, ty);   // Top Fade
+			renderSkySlice(solid_sky_h, sky_h_ratio - solid_sky_h, 1.0f, 1.0f, dist/2, tx, ty);  // Middle Solid
+			renderSkySlice(sky_h_ratio - solid_sky_h, 0.0f, 1.0f, 0.0f, dist/2, tx, ty);   // Bottom Fade
+		}
+		else
+		{
+			renderSkySlice(1.0f, 0.9f, 0.0f, 1.0f, dist/2, tx, ty);   // Top Fade
+			renderSkySlice(0.9f, 0.1f, 1.0f, 1.0f, dist/2, tx, ty);  // Middle Solid
+			renderSkySlice(0.1f, 0.0f, 1.0f, 0.0f, dist/2, tx, ty);   // Bottom Fade
+		}
 	}
 
 	glDisable(GL_BLEND);

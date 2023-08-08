@@ -715,6 +715,8 @@ static void DrawKeyOnLine(mline_t * ml, int theKey, rgbcol_t rgb = T_WHITE)
 	else
 	{
 		TheObject = mobjtypes.LookupDoorKey(theKey);
+		if(!TheObject)
+			return; //Very rare, only zombiesTC hits this so far
 		CleanName = Aux2StringReplaceAll(TheObject->name, std::string("_"), std::string(" "));
 	}
 		

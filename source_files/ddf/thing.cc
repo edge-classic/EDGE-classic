@@ -2862,8 +2862,8 @@ const mobjtype_c* mobjtype_container_c::LookupDoorKey(int theKey)
 		}
 	}
 
-	I_Error("Missing DDF entry for key %d\n", theKey);
-	return NULL; /* NOT REACHED */
+	I_Warning("Missing DDF entry for key %d\n", theKey);
+	return NULL;
 }
 
 //--- editor settings ---

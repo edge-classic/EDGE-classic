@@ -715,6 +715,8 @@ static void DrawKeyOnLine(mline_t * ml, int theKey, rgbcol_t rgb = T_WHITE)
 	else
 	{
 		TheObject = mobjtypes.LookupDoorKey(theKey);
+		if(!TheObject)
+			return; //Very rare, only zombiesTC hits this so far
 		CleanName = Aux2StringReplaceAll(TheObject->name, std::string("_"), std::string(" "));
 	}
 		
@@ -930,7 +932,12 @@ static void AM_WalkSeg(seg_t *seg)
 					else if(line->special->keys & KF_BlueCard || line->special->keys & KF_BlueSkull)
 					{
 						DrawMLineDoor(&l, T_BLUE); //blue
-						if(line->special->keys & KF_BlueCard)
+						if(line->special->keys & (KF_BlueSkull | KF_BlueCard))
+						{
+							DrawKeyOnLine(&l, KF_BlueCard);
+							DrawKeyOnLine(&l, KF_BlueSkull);
+						}
+						else if(line->special->keys & KF_BlueCard)
 							DrawKeyOnLine(&l, KF_BlueCard);
 						else
 							DrawKeyOnLine(&l, KF_BlueSkull);
@@ -938,7 +945,12 @@ static void AM_WalkSeg(seg_t *seg)
 					else if(line->special->keys & KF_YellowCard || line->special->keys & KF_YellowSkull)
 					{
 						DrawMLineDoor(&l, T_YELLOW); //yellow
-						if(line->special->keys & KF_YellowCard)
+						if(line->special->keys & (KF_YellowSkull | KF_YellowCard))
+						{
+							DrawKeyOnLine(&l, KF_YellowCard);
+							DrawKeyOnLine(&l, KF_YellowSkull);
+						}
+						else if(line->special->keys & KF_YellowCard)
 							DrawKeyOnLine(&l, KF_YellowCard);
 						else
 							DrawKeyOnLine(&l, KF_YellowSkull);
@@ -946,7 +958,12 @@ static void AM_WalkSeg(seg_t *seg)
 					else if(line->special->keys & KF_RedCard || line->special->keys & KF_RedSkull)
 					{
 						DrawMLineDoor(&l, T_RED); //red
-						if(line->special->keys & KF_RedCard)
+						if(line->special->keys & (KF_RedSkull | KF_RedCard))
+						{
+							DrawKeyOnLine(&l, KF_RedCard);
+							DrawKeyOnLine(&l, KF_RedSkull);
+						}
+						else if(line->special->keys & KF_RedCard)
 							DrawKeyOnLine(&l, KF_RedCard);
 						else
 							DrawKeyOnLine(&l, KF_RedSkull);
@@ -954,7 +971,12 @@ static void AM_WalkSeg(seg_t *seg)
 					else if(line->special->keys & KF_GreenCard || line->special->keys & KF_GreenSkull)
 					{
 						DrawMLineDoor(&l, T_GREEN); //green
-						if(line->special->keys & KF_GreenCard)
+						if(line->special->keys & (KF_GreenSkull | KF_GreenCard))
+						{
+							DrawKeyOnLine(&l, KF_GreenCard);
+							DrawKeyOnLine(&l, KF_GreenSkull);
+						}
+						else if(line->special->keys & KF_GreenCard)
 							DrawKeyOnLine(&l, KF_GreenCard);
 						else
 							DrawKeyOnLine(&l, KF_GreenSkull);

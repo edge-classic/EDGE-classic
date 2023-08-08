@@ -30,6 +30,7 @@
 
 static void DDF_LevelGetSpecials(const char *info);
 static void DDF_LevelGetPic(const char *info, void *storage);
+static void DDF_LevelGetSkyStretch(const char *info, void *storage);
 static void DDF_LevelGetWistyle(const char *info, void *storage);
 
 mapdef_container_c mapdefs;
@@ -74,6 +75,7 @@ static const commandlist_t level_commands[] =
 	DF("AUTHOR", author, DDF_MainGetString),
 	DF("NAME_GRAPHIC", namegraphic, DDF_MainGetLumpName),
 	DF("SKY_TEXTURE", sky, DDF_MainGetLumpName),
+	DF("SKY_STRETCH", forced_skystretch, DDF_LevelGetSkyStretch),
 	DF("MUSIC_ENTRY", music, DDF_MainGetNumeric),
 	DF("SURROUND_FLAT", surround, DDF_MainGetLumpName),
 	DF("NEXT_MAP", nextmapname, DDF_MainGetLumpName),
@@ -99,8 +101,6 @@ static specflags_t map_specials[] =
     {"FAST_MONSTERS", MPF_FastParm, 0},
     {"RESURRECT_RESPAWN", MPF_ResRespawn, 0},
     {"TELEPORT_RESPAWN", MPF_ResRespawn, 1},
-    {"STRETCH_SKY", MPF_StretchSky, 0},
-    {"NORMAL_SKY", MPF_StretchSky, 1},
     {"TRUE3D", MPF_True3D, 0},
     {"ENEMY_STOMP", MPF_Stomp, 0},
     {"MORE_BLOOD", MPF_MoreBlood, 0},
@@ -111,11 +111,8 @@ static specflags_t map_specials[] =
     {"EXTRAS", MPF_Extras, 0},
     {"RESET_PLAYER", MPF_ResetPlayer, 0},
     {"LIMIT_ZOOM", MPF_LimitZoom, 0},
-    {"SHADOWS", MPF_Shadows, 0},
-    {"HALOS", MPF_Halos, 0},
     {"CROUCHING", MPF_Crouching, 0},
     {"WEAPON_KICK", MPF_Kicking, 0},
-    {"BOOM_COMPAT", MPF_BoomCompat, 0},  // old flag, does nothing anymore
 
     {NULL, 0, 0}
 };
@@ -312,6 +309,21 @@ void DDF_LevelGetSpecials(const char *info)
 	}
 }
 
+void DDF_LevelGetSkyStretch(const char *info, void *storage)
+{
+	skystretch_e *stretch = (skystretch_e *)storage;
+
+	if (epi::case_cmp(info, "MIRROR") == 0)
+		*stretch = SKS_Mirror;
+	else if (epi::case_cmp(info, "REPEAT") == 0)
+		*stretch = SKS_Repeat;
+	else if (epi::case_cmp(info, "STRETCH") == 0)
+		*stretch = SKS_Stretch;
+	else if (epi::case_cmp(info, "VANILLA") == 0)
+		*stretch = SKS_Vanilla;
+	else // Unknown
+		*stretch = SKS_Unset;
+}
 
 static specflags_t wistyle_names[] =
 {
@@ -436,6 +448,8 @@ void mapdef_c::CopyDetail(mapdef_c &src)
 
 	f_pre = src.f_pre;
 	f_end = src.f_end;
+
+	forced_skystretch = src.forced_skystretch;
 }
 
 void mapdef_c::Default()
@@ -468,6 +482,8 @@ void mapdef_c::Default()
 
 	f_pre.Default();
 	f_end.Default();
+
+	forced_skystretch = SKS_Unset;
 }
 
 

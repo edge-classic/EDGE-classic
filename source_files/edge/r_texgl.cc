@@ -64,39 +64,40 @@ int W_MakeValidSize(int value)
 epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src,
 									 const byte *palette, int opacity)
 {
-	int bpp = (opacity == OPAC_Solid) ? 3 : 4;
-
-	epi::image_data_c *dest = new epi::image_data_c(src->width, src->height, bpp);	
-
-	dest->used_w = src->used_w;
-	dest->used_h = src->used_h;
-
-	for (int y=0; y < src->height; y++)
-	for (int x=0; x < src->width;  x++)
+	if (src->bpp == 1)
 	{
-		byte src_pix = src->PixelAt(x, y)[0];
-
-		byte *dest_pix = dest->PixelAt(x, y);
-
-		if (src_pix == TRANS_PIXEL)
+		int bpp = (opacity == OPAC_Solid) ? 3 : 4;
+		epi::image_data_c *dest = new epi::image_data_c(src->width, src->height, bpp);	
+		dest->used_w = src->used_w;
+		dest->used_h = src->used_h;
+		for (int y=0; y < src->height; y++)
+		for (int x=0; x < src->width;  x++)
 		{
-			dest_pix[0] = dest_pix[1] = dest_pix[2] = 0;
-			
-			if (bpp == 4)
-				dest_pix[3] = 0;
-		}
-		else
-		{
-			dest_pix[0] = palette[src_pix*3 + 0];
-			dest_pix[1] = palette[src_pix*3 + 1];
-			dest_pix[2] = palette[src_pix*3 + 2];
+			byte src_pix = src->PixelAt(x, y)[0];
 
-			if (bpp == 4)
-				dest_pix[3] = 255;
+			byte *dest_pix = dest->PixelAt(x, y);
+
+			if (src_pix == TRANS_PIXEL)
+			{
+				dest_pix[0] = dest_pix[1] = dest_pix[2] = 0;
+				
+				if (bpp == 4)
+					dest_pix[3] = 0;
+			}
+			else
+			{
+				dest_pix[0] = palette[src_pix*3 + 0];
+				dest_pix[1] = palette[src_pix*3 + 1];
+				dest_pix[2] = palette[src_pix*3 + 2];
+
+				if (bpp == 4)
+					dest_pix[3] = 255;
+			}
 		}
+		return dest;
 	}
-
-	return dest;
+	else
+		return src;
 }
 
 

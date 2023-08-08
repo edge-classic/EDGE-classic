@@ -530,17 +530,12 @@ void image_data_c::AverageColor(u8_t *rgb, int from_x, int to_x, int from_y, int
 	SYS_ASSERT(used_w * used_h <= 2048 * 2048);
 
 	std::unordered_map<unsigned int, unsigned int> seen_colors;
-	std::vector<unsigned int>most_colors;
 
 	// Sanity checking; at a minimum sample a 1x1 portion of the image
 	from_x = CLAMP(0, from_x, width-1);
 	to_x = CLAMP(1, to_x, width);
 	from_y = CLAMP(0, from_y, height-1);
 	to_y = CLAMP(1, to_y, height);
-
-	int r_sum = 0;
-	int g_sum = 0;
-	int b_sum = 0;
 
 	for (int y = from_y; y < to_y; y++)
 	{
@@ -559,30 +554,25 @@ void image_data_c::AverageColor(u8_t *rgb, int from_x, int to_x, int from_y, int
 	}
 
 	unsigned int highest_count = 0;
+	unsigned int average_color = 0;
 	for (auto color : seen_colors)
 	{
 		if (color.second > highest_count)
 			highest_count = color.second;
 	}
 
+	// If multiple colors were seen "the most", just use the last one spotted
 	for (auto color : seen_colors)
 	{
 		if (color.second == highest_count)
 		{
-			most_colors.push_back(color.first);
+			average_color = color.first;
 		}
 	}
 
-	for (auto color : most_colors)
-	{
-		r_sum += RGB_RED(color);
-		g_sum += RGB_GRN(color);
-		b_sum += RGB_BLU(color);
-	}
-
-	rgb[0] = r_sum / most_colors.size();
-	rgb[1] = g_sum / most_colors.size();
-	rgb[2] = b_sum / most_colors.size();
+	rgb[0] = RGB_RED(average_color);
+	rgb[1] = RGB_GRN(average_color);
+	rgb[2] = RGB_BLU(average_color);
 }
 
 void image_data_c::LightestColor(u8_t *rgb, int from_x, int to_x, int from_y, int to_y)

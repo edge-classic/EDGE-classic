@@ -691,8 +691,6 @@ static pack_file_c * ProcessVWAD(data_file_c *df)
 
 		std::string packpath = vwad_get_file_name(pack->varch, idx);
 
-		I_Printf("PATH: %s\n", packpath.c_str());
-
 		if (epi::PATH_GetExtension(packpath).empty())
 		{
 			I_Warning("%s has no extension. Bare VWAD filenames are not supported.\n", filename);
@@ -724,7 +722,6 @@ static pack_file_c * ProcessVWAD(data_file_c *df)
 		}
 		std::string add_name = basename;
 		epi::str_upper(add_name);
-		I_Printf("ADD NAME: %s\n", add_name.c_str());
 		pack->dirs[dir_idx].AddEntry(epi::PATH_GetFilename(add_name).string(), "", packpath, 0, idx);
 		pack->search_files.insert({epi::PATH_GetBasename(add_name).string(), packpath});
 	}

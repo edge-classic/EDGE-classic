@@ -29,6 +29,13 @@ Zip-compressed archives with the following extensions are recognized and loaded 
 
 .zip - The default format for files from the /idgames archive, this should also be easily loaded by most editing tools.
 
+VWAD-formatted archives with the following extensions are also recognized and loaded:
+
+.vwad - The extension for the initial implementation of the VWAD format by Ketmar Dark, author of the k8vavoom source
+        port. Offers high-quality compression, fast seek on compressed files, archive comments, intra-archive file tagging,
+        and the ability to digitally sign archives. The downside is that, being a nascent format, editing tools have not
+        yet added native support for it.
+
 =======================================
 Supported Filenames
 =======================================

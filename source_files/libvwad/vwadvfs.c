@@ -32,8 +32,7 @@ extern "C" {
 #ifdef _MSC_VER
 # define CC25519_INLINE  __forceinline
 #else
-/* dunno, let's hope this works */
-# define CC25519_INLINE  inline
+# define CC25519_INLINE  inline __attribute__((always_inline))
 #endif
 
 
@@ -48,7 +47,7 @@ extern "C" {
 #else
 # define vwad__builtin_expect  __builtin_expect
 # define vwad__builtin_trap    __builtin_trap
-# define vwad_packed_struct  __attribute__((packed))
+# define vwad_packed_struct    __attribute__((packed))
 # define vwad_push_pack
 # define vwad_pop_pack
 #endif
@@ -2231,7 +2230,7 @@ vwad_handle *vwad_open_archive (vwad_iostream *strm, unsigned flags, vwad_memman
     logf(ERROR, "vwad_open_archive: cannot allocate memory for unpacked directory");
     return NULL;
   }
-  put_u32((char*)unpkdir + dhdr.upkdirsize, 0);
+  put_u32((char *)unpkdir + dhdr.upkdirsize, 0);
 
   void *pkdir = xalloc(mman, dhdr.pkdirsize);
   if (!pkdir) {

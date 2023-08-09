@@ -65,6 +65,7 @@ DDF library - Copyright (c) 1999-2023 The EDGE Team
 DEHACKED library (formerly DEH_EDGE) - Copyright (c) 2004-2023 The EDGE Team
 
 EC_VOXELIB library - Copyright (c) 2022-2023 The EDGE Team
+					 Copyright (c) 2022 Ketmar Dark
 
 EDGE-Classic - Copyright (c) 1999-2023 The EDGE Team
 
@@ -136,6 +137,8 @@ WTFPL License
 ===========================================================================================
 
 "microGM" soundfont - Copyright (c) 2022 michael (https://musical-artifacts.com/artifacts/2529)
+
+libvwad library - Copyright (c) 2023 Ketmar Dark
 
 ===========================================================================================
 zlib License

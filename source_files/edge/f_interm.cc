@@ -952,9 +952,6 @@ static void UpdateShowNextLoc(void)
 
 static void DrawShowNextLoc(void)
 {
-	if (wi_stats.next)
-		DrawEnteringLevel();
-
 	int i;
 
 	for (i = 0; i < worldint.nummappos; i++)
@@ -966,6 +963,9 @@ static void DrawShowNextLoc(void)
 			if (snl_pointeron && !strcmp(wi_stats.next->name.c_str(), worldint.mappos[i].info->name.c_str()))
 				DrawOnLnode(&worldint.mappos[i], yah);
 	}
+
+	if (wi_stats.next)
+		DrawEnteringLevel();
 }
 
 static void DrawNoState(void)

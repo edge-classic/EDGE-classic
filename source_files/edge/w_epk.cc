@@ -738,7 +738,7 @@ private:
 	pack_file_c * pack;
 
 	vwad_fidx vwad_idx;
-	vwad_fd vwad_fd = -1;
+	vwad_fd vwad_filedesc = -1;
 
 	int length = 0;
 	int pos    = 0;
@@ -750,13 +750,13 @@ public:
 		length = vwad_get_file_size(pack->varch, vwad_idx);
 		SYS_ASSERT(length >= 0);
 		// grab "handle" for future functions
-		vwad_fd = vwad_fopen(pack->varch, vwad_idx);
-		SYS_ASSERT(vwad_fd >= 0);
+		vwad_filedesc = vwad_fopen(pack->varch, vwad_idx);
+		SYS_ASSERT(vwad_filedesc >= 0);
 	}
 
 	~vwad_file_c()
 	{
-		vwad_fclose(pack->varch, vwad_fd);
+		vwad_fclose(pack->varch, vwad_filedesc);
 	}
 
 	int GetLength()
@@ -778,7 +778,7 @@ public:
 		if (count > length - pos)
 			count = length - pos;
 
-		int got = vwad_read(pack->varch, vwad_fd, dest, count);
+		int got = vwad_read(pack->varch, vwad_filedesc, dest, count);
 
 		SYS_ASSERT(got >= 0);
 
@@ -827,14 +827,14 @@ public:
 		if (want_pos == pos)
 			return true;
 
-		if (vwad_seek(pack->varch, vwad_fd, want_pos) == 0)
+		if (vwad_seek(pack->varch, vwad_filedesc, want_pos) == 0)
 		{
 			pos = want_pos;
 			return true;
 		}
 		else
 		{
-			pos = vwad_tell(pack->varch, vwad_fd);
+			pos = vwad_tell(pack->varch, vwad_filedesc);
 			return false;
 		}
 	}

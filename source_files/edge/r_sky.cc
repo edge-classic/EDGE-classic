@@ -436,7 +436,7 @@ static void RGL_DrawSkyCylinder(void)
 	else
 		sky_h_ratio = 1.0f;
 	if (current_sky_stretch == SKS_Vanilla)
-		solid_sky_h = sky_h_ratio * 0.9f;
+		solid_sky_h = sky_h_ratio * 0.98f;
 	else
 		solid_sky_h = sky_h_ratio * 0.75f;
 	float cap_z = dist * sky_h_ratio;
@@ -536,9 +536,10 @@ static void RGL_DrawSkyCylinder(void)
 		}
 		else
 		{
-			renderSkySlice(1.0f, 0.9f, 0.0f, 1.0f, dist/2, tx, ty);   // Top Fade
-			renderSkySlice(0.9f, 0.1f, 1.0f, 1.0f, dist/2, tx, ty);  // Middle Solid
-			renderSkySlice(0.1f, 0.0f, 1.0f, 0.0f, dist/2, tx, ty);   // Bottom Fade
+			ty *= 1.5f;
+			renderSkySlice(1.0f, 0.98f, 0.0f, 1.0f, dist/3, tx, ty);   // Top Fade
+			renderSkySlice(0.98f, 0.35f, 1.0f, 1.0f, dist/3, tx, ty);  // Middle Solid
+			renderSkySlice(0.35f, 0.33f, 1.0f, 0.0f, dist/3, tx, ty);   // Bottom Fade
 		}
 	}
 

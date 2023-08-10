@@ -272,7 +272,7 @@ static void RGL_SetupSkyMatrices(void)
 		glLoadIdentity();
 		glFrustum(-view_x_slope * r_nearclip.f, view_x_slope * r_nearclip.f,
 				-view_y_slope * r_nearclip.f, view_y_slope * r_nearclip.f,
-				r_nearclip.f, r_farclip.f * 2.0);
+				r_nearclip.f, r_farclip.f * 4.0);
 
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
@@ -281,9 +281,9 @@ static void RGL_SetupSkyMatrices(void)
 		glRotatef(270.0f - ANG_2_FLOAT(viewvertangle), 1.0f, 0.0f, 0.0f);
 		glRotatef(90.0f  - ANG_2_FLOAT(viewangle), 0.0f, 0.0f, 1.0f);
 		if (current_sky_stretch == SKS_Stretch)
-			glTranslatef(0.0f, 0.0f, (r_farclip.f / 2 * 0.15)); // Draw center above horizon a little
+			glTranslatef(0.0f, 0.0f, (r_farclip.f * 2 * 0.15)); // Draw center above horizon a little
 		else
-			glTranslatef(0.0f, 0.0f, -(r_farclip.f / 2 * 0.15)); // Draw center below horizon a little
+			glTranslatef(0.0f, 0.0f, -(r_farclip.f * 2 * 0.15)); // Draw center below horizon a little
 	}
 }
 
@@ -424,8 +424,8 @@ static void RGL_DrawSkyCylinder(void)
 
 	glDisable(GL_TEXTURE_2D);
 
-	float dist = r_farclip.f / 2.0;
-	float cap_dist = dist * 1.5; // Ensure the caps extend beyond the cylindrical projection
+	float dist = r_farclip.f * 2.0f;
+	float cap_dist = dist * 2.0f; // Ensure the caps extend beyond the cylindrical projection
 		// Calculate some stuff based on sky height
 	float sky_h_ratio;
 	float solid_sky_h;

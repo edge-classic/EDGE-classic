@@ -222,11 +222,6 @@ public:
 	// length lines has occurred.
 	int index;
 
-public:
-	double MinX() const
-	{
-		return std::min(start->x, end->x);
-	}
 };
 
 

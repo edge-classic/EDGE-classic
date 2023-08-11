@@ -136,6 +136,7 @@ extern cvar_c g_cullthinkers;
 extern cvar_c r_maxdlights;
 extern cvar_c v_sync;
 extern cvar_c g_bobbing;
+extern cvar_c g_gore;
 
 //extern cvar_c am_keydoortext;
 
@@ -184,7 +185,7 @@ static void M_ChangeFastparm(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeRespawn(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangePassMissile(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeBobbing(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeBlood(int keypressed, cvar_c *cvar = nullptr);
+//static void M_ChangeBlood(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeMLook(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeJumping(int keypressed, cvar_c *cvar = nullptr);
 static void M_ChangeCrouching(int keypressed, cvar_c *cvar = nullptr);
@@ -575,8 +576,8 @@ static optmenuitem_t playoptions[] =
 	{OPT_Boolean, "Obituary Messages",  YesNo, 2, 
      &var_obituaries, NULL, NULL},
 
-	{OPT_Boolean, "More Blood",         YesNo, 2, 
-     &global_flags.more_blood, M_ChangeBlood, "Blood"},
+	{OPT_Switch, "Blood Level",         "Normal/Extra/None", 3, 
+     &g_gore.d, M_UpdateCVARFromInt, "Blood", &g_gore},
 
 	{OPT_Boolean, "Extras",             YesNo, 2, 
      &global_flags.have_extra, M_ChangeExtra, NULL},
@@ -952,7 +953,7 @@ void M_OptMenuInit()
 	program_optmenu2.name=language["MenuBinding"];
 
 	// Restore the config setting.
-	M_ChangeBlood(-1);
+	//M_ChangeBlood(-1);
 }
 
 
@@ -1879,13 +1880,13 @@ static void M_ChangeMonitorSize(int key, cvar_c *cvar)
 // -KM- 1998/07/21 Change blood to a bool
 // -ACB- 1998/08/09 Check map setting allows this
 //
-static void M_ChangeBlood(int keypressed, cvar_c *cvar)
+/*static void M_ChangeBlood(int keypressed, cvar_c *cvar)
 {
 	if (currmap && ((currmap->force_on | currmap->force_off) & MPF_MoreBlood))
 		return;
 
 	level_flags.more_blood = global_flags.more_blood;
-}
+}*/
 
 static void M_ChangeMLook(int keypressed, cvar_c *cvar)
 {

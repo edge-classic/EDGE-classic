@@ -51,8 +51,19 @@
 
 #define RAISE_RADIUS  32
 
+static void gore_cb(cvar_c *self)
+{
+	if (self->d == 2) // No blood
+		return;
+
+	if (currmap && ((currmap->force_on | currmap->force_off) & MPF_MoreBlood))
+		return;
+
+	level_flags.more_blood = global_flags.more_blood = self->d;
+}
+
 DEF_CVAR(g_mbf21compat, "0", CVAR_ARCHIVE)
-DEF_CVAR(g_gore, "1", CVAR_ARCHIVE)
+DEF_CVAR_CB(g_gore, "1", CVAR_ARCHIVE, gore_cb)
 
 extern cvar_c g_mbf21compat;
 
@@ -2210,7 +2221,7 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 	// Spawn bullet puffs or blood spots,
 	// depending on target type.
 
-	bool use_blood = (mo->flags & MF_SHOOTABLE) && !(mo->flags & MF_NOBLOOD) && g_gore.d;
+	bool use_blood = (mo->flags & MF_SHOOTABLE) && !(mo->flags & MF_NOBLOOD) && (g_gore.d < 2);
 
 	if (mo->flags & MF_SHOOTABLE)
 	{

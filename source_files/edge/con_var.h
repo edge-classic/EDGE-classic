@@ -25,6 +25,7 @@
 
 #define DEF_CVAR(name, value, flags)  cvar_c name(#name, value, flags);
 #define DEF_CVAR_CLAMPED(name, value, flags, min, max) cvar_c name(#name, value, flags, min, max);
+#define DEF_CVAR_CB(name, value, flags, cb) cvar_c name(#name, value, flags, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), cb);
 
 class cvar_c
 {
@@ -33,6 +34,7 @@ public:
 	int d;
 	float f;
 	std::string s;
+	typedef void (*cvar_callback)(cvar_c *self);
 
 	// name of variable
 	const char *name;
@@ -49,6 +51,8 @@ public:
 	// link in list
 	cvar_c * next;
 
+	cvar_callback cvar_cb;
+
 private:
 	// this is incremented each time a value is set.
 	// (Note: whether the value is different is not checked)
@@ -56,7 +60,8 @@ private:
 
 public:
 	cvar_c(const char *_name, const char *_def, int _flags = 0, 
-		float _min = std::numeric_limits<float>::lowest(), float _max = std::numeric_limits<float>::max() );
+		float _min = std::numeric_limits<float>::lowest(), float _max = std::numeric_limits<float>::max(),
+		cvar_callback _cb = nullptr );
 
 	~cvar_c();
 

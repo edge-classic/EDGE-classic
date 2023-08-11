@@ -32,10 +32,10 @@
 static cvar_c * all_cvars = NULL;
 
 
-cvar_c::cvar_c(const char *_name, const char *_def, int _flags, float _min, float _max) :
+cvar_c::cvar_c(const char *_name, const char *_def, int _flags, float _min, float _max, cvar_callback _cb) :
 	d(), f(), s(_def),
 	name(_name), def(_def), flags(_flags), min(_min), max(_max),
-	modified(0)
+	modified(0), cvar_cb(_cb)
 {
 	ParseString();
 
@@ -64,6 +64,7 @@ cvar_c& cvar_c::operator= (int value)
 		FmtInt(value);
 	}
 
+	if (cvar_cb) { cvar_cb(this); }		
 	modified++;
 	return *this;
 }
@@ -83,6 +84,7 @@ cvar_c& cvar_c::operator= (float value)
 		FmtFloat(value);
 	}
 
+	if (cvar_cb) { cvar_cb(this); }	
 	modified++;
 	return *this;
 }
@@ -92,6 +94,7 @@ cvar_c& cvar_c::operator= (const char *value)
 	s = value;
 	ParseString();
 
+	if (cvar_cb) { cvar_cb(this); }	
 	modified++;
 	return *this;
 }
@@ -101,6 +104,7 @@ cvar_c& cvar_c::operator= (std::string value)
 	s = value;
 	ParseString();
 
+	if (cvar_cb) { cvar_cb(this); }	
 	modified++;
 	return *this;
 }

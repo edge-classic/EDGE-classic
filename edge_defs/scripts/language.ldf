@@ -669,7 +669,7 @@ ResetDoom="Resets all configs to be like original DOOM";
 NeedRestart="This is applied when EDGE-Classic is restarted";
 
 Gravity="Changes the global gravity setting";
-Blood="Enables extra gore mode...";
+Blood="Controls amount of blood and gore";
 True3d="Enables jumping over things, flight etc...";
 
 ChangeRes="Setup screen resolution, VSync, aspect ratio...";

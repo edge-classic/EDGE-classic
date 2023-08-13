@@ -364,6 +364,11 @@ void SV_MobjFinaliseElems(void)
 		if (mo->below_mo)   mo->below_mo->refcount++;
 
 		// sanity checks
+
+		// Lobo fix for RTS ONDEATH actions not working
+		// when loading a game
+		if (seen_monsters.count(mo->info) == 0)
+			seen_monsters.insert(mo->info);
 	}
 }
 

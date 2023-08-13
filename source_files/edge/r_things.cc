@@ -998,7 +998,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 	float tz = tr_x * viewcos + tr_y * viewsin;
 
 	// thing is behind view plane?
-	if (clip_scope != ANG180 && tz <= 0 && !is_model)
+	if (clip_scope != ANG180 && tz <= 0)// && !is_model)
 		return;
 
 	float tx = tr_x * viewsin - tr_y * viewcos;

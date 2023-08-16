@@ -2764,7 +2764,8 @@ static bool PIT_ChangeSector(mobj_t * thing, bool widening)
 		if (thing->info->gib_state && !(thing->extendedflags & EF_GIBBED))
 		{
 			thing->extendedflags |= EF_GIBBED;
-			P_SetMobjStateDeferred(thing, thing->info->gib_state, 0);
+			//P_SetMobjStateDeferred(thing, thing->info->gib_state, 0);
+			P_SetMobjState(thing, thing->info->gib_state);
 		}
 
 		if (thing->player)

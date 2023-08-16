@@ -441,12 +441,18 @@ static void RGL_DrawSkyCylinder(void)
 		solid_sky_h = sky_h_ratio * 0.75f;
 	float cap_z = dist * sky_h_ratio;
 
-	if (!r_culling.d && current_fog_rgb != RGB_NO_VALUE)
+	if (!r_culling.d && view_props->fog_color != RGB_NO_VALUE)
 	{
-		glClearColor(current_fog_color[0],current_fog_color[1],current_fog_color[2],current_fog_color[3]);
+		rgbcol_t frgb = view_props->fog_color;
+		GLfloat fc[4];
+		fc[0] = (float)RGB_RED(frgb)/255.0f;
+		fc[1] = (float)RGB_GRN(frgb)/255.0f; 
+		fc[2] = (float)RGB_BLU(frgb)/255.0f;
+		fc[3] = 1.0f;
+		glClearColor(fc[0],fc[1],fc[2],fc[3]);
 		glFogi(GL_FOG_MODE, GL_EXP);
-		glFogfv(GL_FOG_COLOR, current_fog_color);
-		glFogf(GL_FOG_DENSITY, std::log1p(current_fog_density * 0.005f));
+		glFogfv(GL_FOG_COLOR, fc);
+		glFogf(GL_FOG_DENSITY, std::log1p(view_props->fog_density * 0.005f));
 		glEnable(GL_FOG);
 	}
 
@@ -595,12 +601,18 @@ static void RGL_DrawSkyBox(void)
 	else
 		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, col);
 
-	if (!r_culling.d && current_fog_rgb != RGB_NO_VALUE)
+	if (!r_culling.d && view_props->fog_color != RGB_NO_VALUE)
 	{
-		glClearColor(current_fog_color[0],current_fog_color[1],current_fog_color[2],current_fog_color[3]);
+		rgbcol_t frgb = view_props->fog_color;
+		GLfloat fc[4];
+		fc[0] = (float)RGB_RED(frgb)/255.0f;
+		fc[1] = (float)RGB_GRN(frgb)/255.0f; 
+		fc[2] = (float)RGB_BLU(frgb)/255.0f;
+		fc[3] = 1.0f;
+		glClearColor(fc[0],fc[1],fc[2],fc[3]);
 		glFogi(GL_FOG_MODE, GL_EXP);
-		glFogfv(GL_FOG_COLOR, current_fog_color);
-		glFogf(GL_FOG_DENSITY, std::log1p(current_fog_density * 0.01f));
+		glFogfv(GL_FOG_COLOR, fc);
+		glFogf(GL_FOG_DENSITY, std::log1p(view_props->fog_density * 0.01f));
 		glEnable(GL_FOG);
 	}
 

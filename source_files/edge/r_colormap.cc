@@ -660,10 +660,13 @@ private:
 
 	rgbcol_t whites[32];
 
+	rgbcol_t fog_color;
+	float fog_density;
+
 public:
 	colormap_shader_c(const colourmap_c *CM) : colmap(CM),
 		light_lev(255), fade_tex(0),
-		simple_cmap(true), lt_model(LMODEL_Doom)
+		simple_cmap(true), lt_model(LMODEL_Doom), fog_color(RGB_NO_VALUE), fog_density(0)
 	{ }
 
 	virtual ~colormap_shader_c()
@@ -739,7 +742,7 @@ public:
 		local_gl_vert_t * glvert = RGL_BeginUnit(shape, num_vert,
 				GL_MODULATE, tex,
 				(simple_cmap || r_dumbmulti.d) ? GL_MODULATE : GL_DECAL,
-				fade_tex, *pass_var, blending);
+				fade_tex, *pass_var, blending, fog_color, fog_density);
 
 		for (int v_idx=0; v_idx < num_vert; v_idx++)
 		{
@@ -904,6 +907,12 @@ public:
 	{
 		light_lev = _level;
 	}
+
+	void SetFog(rgbcol_t _fog_color, float _fog_density)
+	{
+		fog_color = _fog_color;
+		fog_density = _fog_density;
+	}
 };
 
 
@@ -949,6 +958,8 @@ abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props,
 	lit_Nom = CLAMP(0, lit_Nom, 255);
 
 	shader->SetLight(lit_Nom);
+
+	shader->SetFog(props->fog_color, props->fog_density);
 
 	return shader;
 }

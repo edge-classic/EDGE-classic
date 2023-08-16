@@ -87,7 +87,8 @@ edge_environment_e;
 local_gl_vert_t *RGL_BeginUnit(GLuint shape, int max_vert, 
 		                       GLuint env1, GLuint tex1,
 							   GLuint env2, GLuint tex2,
-							   int pass, int blending);
+							   int pass, int blending, 
+							   rgbcol_t fog_color = RGB_NO_VALUE, float fog_density = 0);
 void RGL_EndUnit(int actual_vert);
 
 

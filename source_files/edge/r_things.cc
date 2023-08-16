@@ -350,7 +350,8 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 		local_gl_vert_t * glvert = RGL_BeginUnit(GL_POLYGON, 4,
 				 is_additive ? ENV_SKIP_RGB : GL_MODULATE, tex_id,
 				 is_fuzzy ? GL_MODULATE : ENV_NONE, fuzz_tex,
-				 pass, blending);
+				 pass, blending, pass > 0 ? RGB_NO_VALUE: player->mo->subsector->sector->props.fog_color,
+				 player->mo->subsector->sector->props.fog_density);
 
 		for (int v_idx=0; v_idx < 4; v_idx++)
 		{
@@ -1459,7 +1460,8 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 		local_gl_vert_t * glvert = RGL_BeginUnit(GL_POLYGON, 4,
 				 is_additive ? ENV_SKIP_RGB : GL_MODULATE, tex_id,
 				 is_fuzzy ? GL_MODULATE : ENV_NONE, fuzz_tex,
-				 pass, blending);
+				 pass, blending, pass > 0 ? RGB_NO_VALUE : dthing->mo->subsector->sector->props.fog_color,
+				 dthing->mo->subsector->sector->props.fog_density);
 
 		for (int v_idx=0; v_idx < 4; v_idx++)
 		{

@@ -83,6 +83,9 @@ typedef struct local_gl_unit_s
 
 	// range of local vertices
 	int first, count;
+
+	rgbcol_t fog_color = RGB_NO_VALUE;
+	float fog_density = 0;
 }
 local_gl_unit_t;
 
@@ -165,7 +168,8 @@ void RGL_FinishUnits(void)
 local_gl_vert_t *RGL_BeginUnit(GLuint shape, int max_vert, 
 		                       GLuint env1, GLuint tex1,
 							   GLuint env2, GLuint tex2,
-							   int pass, int blending)
+							   int pass, int blending,
+							   rgbcol_t fog_color, float fog_density)
 {
 	local_gl_unit_t *unit;
 
@@ -194,6 +198,9 @@ local_gl_vert_t *RGL_BeginUnit(GLuint shape, int max_vert,
 	unit->pass     = pass;
 	unit->blending = blending;
 	unit->first    = cur_vert;  // count set later
+
+	unit->fog_color = fog_color;
+	unit->fog_density = fog_density;
 
 	return local_verts + cur_vert;
 }
@@ -393,14 +400,6 @@ void RGL_DrawUnits(void)
 		glFogf(GL_FOG_END, r_farclip.f - 250.0f);
 		glEnable(GL_FOG);
 	}
-	else if (current_fog_rgb != RGB_NO_VALUE)
-	{
-		glClearColor(current_fog_color[0], current_fog_color[1], current_fog_color[2], 1.0f);
-		glFogi(GL_FOG_MODE, GL_EXP);
-		glFogfv(GL_FOG_COLOR, current_fog_color);
-		glFogf(GL_FOG_DENSITY, std::log1p(current_fog_density));
-		glEnable(GL_FOG);
-	}
 
 	for (int j=0; j < cur_unit; j++)
 	{
@@ -409,6 +408,23 @@ void RGL_DrawUnits(void)
 		SYS_ASSERT(unit->count > 0);
 
 		// detect changes in texture/alpha/blending state
+
+		if (!r_culling.d && unit->fog_color != RGB_NO_VALUE)
+		{
+			rgbcol_t frgb = unit->fog_color;
+			GLfloat fc[4];
+			fc[0] = (float)RGB_RED(frgb)/255.0f;
+			fc[1] = (float)RGB_GRN(frgb)/255.0f; 
+			fc[2] = (float)RGB_BLU(frgb)/255.0f;
+			fc[3] = 1.0f;
+			glClearColor(fc[0], fc[1], fc[2], 1.0f);
+			glFogi(GL_FOG_MODE, GL_EXP);
+			glFogfv(GL_FOG_COLOR, fc);
+			glFogf(GL_FOG_DENSITY, std::log1p(unit->fog_density));
+			glEnable(GL_FOG);
+		}
+		else if (!r_culling.d)
+			glDisable(GL_FOG);
 
 		if (active_pass != unit->pass)
 		{
@@ -606,8 +622,7 @@ void RGL_DrawUnits(void)
 		glDisable(GL_TEXTURE_2D);
 	}
 
-	if (r_culling.d || current_fog_rgb != RGB_NO_VALUE)
-		glDisable(GL_FOG);
+	glDisable(GL_FOG);
 
 	glDepthMask(GL_TRUE);
 	glCullFace(GL_BACK);

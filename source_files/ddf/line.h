@@ -965,6 +965,9 @@ public:
 	float floor_bob;
 	float ceiling_bob;
 
+	rgbcol_t fog_color;
+	float fog_density;
+
 private:
 	// disable copy construct and assignment operator
 	explicit sectortype_c(sectortype_c &rhs) { (void) rhs; }

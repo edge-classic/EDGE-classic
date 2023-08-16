@@ -43,8 +43,6 @@ DEF_CVAR(r_culling, "0", CVAR_ARCHIVE)
 DEF_CVAR_CLAMPED(r_culldist, "3000", CVAR_ARCHIVE, 1000.0f, 16000.0f)
 DEF_CVAR(r_cullfog, "0", CVAR_ARCHIVE)
 
-DEF_CVAR(r_fogofwar, "0", CVAR_ARCHIVE)
-
 //
 // RGL_SetupMatrices2D
 //
@@ -222,7 +220,7 @@ void RGL_SoftInit(void)
 	glCullFace(GL_BACK);
 	glDisable(GL_CULL_FACE);
 
-	glHint(GL_FOG_HINT, GL_FASTEST);
+	glHint(GL_FOG_HINT, GL_NICEST);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 }
 

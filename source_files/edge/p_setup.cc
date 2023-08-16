@@ -404,6 +404,12 @@ static void LoadSectors(int lump)
 		ss->props.viscosity = VISCOSITY;
 		ss->props.drag      = DRAG;
 
+		if (ss->props.special && ss->props.special->fog_color != RGB_NO_VALUE)
+		{
+			ss->props.fog_color = ss->props.special->fog_color;
+			ss->props.fog_density = 0.01f * ss->props.special->fog_density;
+		}
+
 		ss->p = &ss->props;
 
 		ss->sound_player = -1;
@@ -1451,6 +1457,8 @@ static void LoadUDMFSectors()
 		{
 			float cz = 0.0f, fz = 0.0f;
 			int light = 160, type = 0, tag = 0;
+			rgbcol_t fog_color = RGB_NO_VALUE;
+			int fog_density = 0;
 			char floor_tex[10];
 			char ceil_tex[10];
 			strcpy(floor_tex, "-");
@@ -1495,6 +1503,10 @@ static void LoadUDMFSectors()
 					type = epi::LEX_Int(value);
 				else if (key == "id")
 					tag = epi::LEX_Int(value);
+				else if (key == "fadecolor")
+					fog_color = epi::LEX_Int(value);
+				else if (key == "fogdensity")
+					fog_density = CLAMP(0, epi::LEX_Int(value), 100);
 			}
 			sector_t *ss = sectors + cur_sector;
 			ss->f_h = fz;
@@ -1546,6 +1558,18 @@ static void LoadUDMFSectors()
 			ss->props.friction  = FRICTION;
 			ss->props.viscosity = VISCOSITY;
 			ss->props.drag      = DRAG;
+
+			// Allow UDMF sector fog information to override DDFSECT types
+			if (fog_color != RGB_NO_VALUE)
+			{
+				ss->props.fog_color = fog_color;
+				ss->props.fog_density = 0.0001f * fog_density;
+			}
+			else if (ss->props.special && ss->props.special->fog_color != RGB_NO_VALUE)
+			{
+				ss->props.fog_color = ss->props.special->fog_color;
+				ss->props.fog_density = 0.01f * ss->props.special->fog_density;
+			}
 
 			ss->p = &ss->props;
 

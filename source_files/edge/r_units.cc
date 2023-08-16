@@ -62,7 +62,6 @@ DEF_CVAR(r_dumbclamp,     DUMB_CLAMP, 0)
 
 extern cvar_c r_culling;
 extern cvar_c r_cullfog;
-extern cvar_c r_fogofwar;
 
 // a single unit (polygon, quad, etc) to pass to the GL
 typedef struct local_gl_unit_s
@@ -98,6 +97,9 @@ static int cur_unit;
 
 static bool batch_sort;
 
+rgbcol_t current_fog_rgb = RGB_NO_VALUE;
+GLfloat current_fog_color[4];
+float current_fog_density = 0;
 GLfloat cull_fog_color[4];
 
 //
@@ -343,89 +345,60 @@ void RGL_DrawUnits(void)
 
 	glPolygonOffset(0, 0);
 
-	if (r_fogofwar.d || r_culling.d)
+	if (r_culling.d)
 	{
-		GLfloat fogColor[4];
-		if (!r_culling.d)
+		GLfloat fogColor[3];
+		if (need_to_draw_sky)
 		{
-			if (r_fogofwar.d == 1)
+			switch (r_cullfog.d)
 			{
-				fogColor[0] = 0.0f;
-				fogColor[1] = 0.0f;
-				fogColor[2] = 0.0f;
-			}
-			else
-			{
-				fogColor[0] = 0.5f;
-				fogColor[1] = 0.5f;
-				fogColor[2] = 0.5f;
+				case 0:
+					fogColor[0] = cull_fog_color[0];
+					fogColor[1] = cull_fog_color[1];
+					fogColor[2] = cull_fog_color[2];
+					break;
+				case 1:
+					// Not pure white, but 1.0f felt like a little much - Dasho
+					fogColor[0] = 0.75f;
+					fogColor[1] = 0.75f;
+					fogColor[2] = 0.75f;
+					break;
+				case 2:
+					fogColor[0] = 0.25f;
+					fogColor[1] = 0.25f;
+					fogColor[2] = 0.25f;
+					break;
+				case 3:
+					fogColor[0] = 0;
+					fogColor[1] = 0;
+					fogColor[2] = 0;
+					break;
+				default:
+					fogColor[0] = cull_fog_color[0];
+					fogColor[1] = cull_fog_color[1];
+					fogColor[2] = cull_fog_color[2];
+					break;
 			}
 		}
 		else
 		{
-			if (need_to_draw_sky)
-			{
-				switch (r_cullfog.d)
-				{
-					case 0:
-						fogColor[0] = cull_fog_color[0];
-						fogColor[1] = cull_fog_color[1];
-						fogColor[2] = cull_fog_color[2];
-						break;
-					case 1:
-						// Not pure white, but 1.0f felt like a little much - Dasho
-						fogColor[0] = 0.75f;
-						fogColor[1] = 0.75f;
-						fogColor[2] = 0.75f;
-						break;
-					case 2:
-						fogColor[0] = 0.25f;
-						fogColor[1] = 0.25f;
-						fogColor[2] = 0.25f;;
-						break;
-					case 3:
-						fogColor[0] = 0;
-						fogColor[1] = 0;
-						fogColor[2] = 0;
-						break;
-					default:
-						fogColor[0] = cull_fog_color[0];
-						fogColor[1] = cull_fog_color[1];
-						fogColor[2] = cull_fog_color[2];
-						break;
-				}
-			}
-			else
-			{
-				fogColor[0] = 0;
-				fogColor[1] = 0;
-				fogColor[2] = 0;
-			}
+			fogColor[0] = 0;
+			fogColor[1] = 0;
+			fogColor[2] = 0;
 		}
-
-		//Lobo: prep for when we read it from DDF
-		//V_GetColmapRGB(level->colourmap, &r, &g, &b);
-
-		/*GLfloat fogColor[4];
-		fogColor[0] = r;
-		fogColor[1] = g;
-		fogColor[2] = b;
-		fogColor[3] = 1.0f;*/
-
-		glClearColor(fogColor[0],fogColor[1],fogColor[2],fogColor[3]);
-
+		glClearColor(fogColor[0],fogColor[1],fogColor[2],1.0f);
 		glFogi(GL_FOG_MODE, GL_LINEAR);
 		glFogfv(GL_FOG_COLOR, fogColor);
-		if (r_culling.d)
-		{
-			glFogf(GL_FOG_START, r_farclip.f - 750.0f);
-			glFogf(GL_FOG_END, r_farclip.f - 250.0f);
-		}
-		else
-		{
-			glFogf(GL_FOG_START, 2.0f);
-			glFogf(GL_FOG_END, 1000.0f);
-		}
+		glFogf(GL_FOG_START, r_farclip.f - 750.0f);
+		glFogf(GL_FOG_END, r_farclip.f - 250.0f);
+		glEnable(GL_FOG);
+	}
+	else if (current_fog_rgb != RGB_NO_VALUE)
+	{
+		glClearColor(current_fog_color[0], current_fog_color[1], current_fog_color[2], 1.0f);
+		glFogi(GL_FOG_MODE, GL_EXP);
+		glFogfv(GL_FOG_COLOR, current_fog_color);
+		glFogf(GL_FOG_DENSITY, std::log1p(current_fog_density));
 		glEnable(GL_FOG);
 	}
 
@@ -517,12 +490,12 @@ void RGL_DrawUnits(void)
 				glActiveTexture(GL_TEXTURE0 + t);
 			}
 
-			if (r_fogofwar.d || r_culling.d)
+			if (r_culling.d || current_fog_rgb != RGB_NO_VALUE)
 			{ 
 				if (unit->pass > 0)
-				{
 					glDisable(GL_FOG);
-				}
+				else
+					glEnable(GL_FOG);
 			}
 
 			if (active_tex[t] != unit->tex[t])
@@ -633,7 +606,7 @@ void RGL_DrawUnits(void)
 		glDisable(GL_TEXTURE_2D);
 	}
 
-	if (r_fogofwar.d || r_culling.d)
+	if (r_culling.d || current_fog_rgb != RGB_NO_VALUE)
 		glDisable(GL_FOG);
 
 	glDepthMask(GL_TRUE);

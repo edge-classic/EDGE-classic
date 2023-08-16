@@ -3305,6 +3305,18 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 	viewvertangle = mo->vertangle;
 	view_props = R_PointGetProps(viewsubsector, viewz);
 
+	if (view_props && view_props->fog_color != RGB_NO_VALUE)
+	{
+		current_fog_rgb = view_props->fog_color;
+		current_fog_density = view_props->fog_density;
+		current_fog_color[0] = (float)RGB_RED(current_fog_rgb)/255.0f;
+		current_fog_color[1] = (float)RGB_GRN(current_fog_rgb)/255.0f; 
+		current_fog_color[2] = (float)RGB_BLU(current_fog_rgb)/255.0f;
+		current_fog_color[3] = 1.0f;
+	}
+	else
+		current_fog_rgb = RGB_NO_VALUE;
+
 	if (mo->player)
 	{
 		if (! level_flags.mlook)

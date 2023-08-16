@@ -38,6 +38,9 @@ typedef struct local_gl_vert_s
 }
 local_gl_vert_t;
 
+extern rgbcol_t current_fog_rgb;
+extern GLfloat current_fog_color[4];
+extern float current_fog_density;
 extern GLfloat cull_fog_color[4];
 
 void RGL_InitUnits(void);

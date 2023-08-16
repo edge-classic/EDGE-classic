@@ -84,6 +84,9 @@ static const commandlist_t sect_commands[] =
 	DF("FLOOR_BOB", floor_bob, DDF_MainGetFloat),
 	DF("CEILING_BOB", ceiling_bob, DDF_MainGetFloat),
 
+	DF("FOG_COLOR", fog_color, DDF_MainGetRGB),
+	DF("FOG_DENSITY", fog_density, DDF_MainGetPercent),
+
 	DDF_CMD_END
 };
 
@@ -516,6 +519,9 @@ void sectortype_c::CopyDetail(sectortype_c &src)
 
 	floor_bob = src.floor_bob;
 	ceiling_bob = src.ceiling_bob;
+
+	fog_color = src.fog_color;
+	fog_density = src.fog_density;
 }
 
 //
@@ -557,6 +563,9 @@ void sectortype_c::Default()
 
 	floor_bob = 0.0f;
 	ceiling_bob = 0.0f;
+
+	fog_color = RGB_NO_VALUE;
+	fog_density = 0;
 }
 
 

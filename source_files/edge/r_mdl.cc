@@ -49,7 +49,6 @@
 extern float P_ApproxDistance(float dx, float dy, float dz);
 
 extern cvar_c r_culling;
-extern cvar_c r_fogofwar;
 
 /*============== MDL FORMAT DEFINITIONS ====================*/
 
@@ -916,11 +915,15 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 			glAlphaFunc(GL_GREATER, trans * 0.66f);
 		}
 
-		if (r_fogofwar.d || r_culling.d)
+		if (r_culling.d || props->fog_color != RGB_NO_VALUE)
 		{ 
 			if (pass > 0)
 			{
 				glDisable(GL_FOG);
+			}
+			else
+			{
+				glEnable(GL_FOG);
 			}
 		}
 

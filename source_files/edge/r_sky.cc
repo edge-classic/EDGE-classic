@@ -47,7 +47,7 @@ extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
 
 extern cvar_c r_culling;
 
-static GLfloat sky_cap_color[4];
+static GLfloat sky_cap_color[3];
 
 static skystretch_e current_sky_stretch = SKS_Unset;
 
@@ -441,6 +441,15 @@ static void RGL_DrawSkyCylinder(void)
 		solid_sky_h = sky_h_ratio * 0.75f;
 	float cap_z = dist * sky_h_ratio;
 
+	if (!r_culling.d && current_fog_rgb != RGB_NO_VALUE)
+	{
+		glClearColor(current_fog_color[0],current_fog_color[1],current_fog_color[2],current_fog_color[3]);
+		glFogi(GL_FOG_MODE, GL_EXP);
+		glFogfv(GL_FOG_COLOR, current_fog_color);
+		glFogf(GL_FOG_DENSITY, std::log1p(current_fog_density * 0.005f));
+		glEnable(GL_FOG);
+	}
+
 	// Render top cap
 	glColor4f(sky_cap_color[0],sky_cap_color[1],sky_cap_color[2],1.0);
 	glBegin(GL_QUADS);
@@ -545,6 +554,8 @@ static void RGL_DrawSkyCylinder(void)
 
 	glDisable(GL_BLEND);
 	glDisable(GL_ALPHA_TEST);
+	if (!r_culling.d && current_fog_rgb != RGB_NO_VALUE)
+		glDisable(GL_FOG);
 
 	RGL_RevertSkyMatrices();
 }
@@ -583,6 +594,15 @@ static void RGL_DrawSkyBox(void)
 		glColor4fv(col);
 	else
 		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, col);
+
+	if (!r_culling.d && current_fog_rgb != RGB_NO_VALUE)
+	{
+		glClearColor(current_fog_color[0],current_fog_color[1],current_fog_color[2],current_fog_color[3]);
+		glFogi(GL_FOG_MODE, GL_EXP);
+		glFogfv(GL_FOG_COLOR, current_fog_color);
+		glFogf(GL_FOG_DENSITY, std::log1p(current_fog_density * 0.01f));
+		glEnable(GL_FOG);
+	}
 
 	// top
 	glBindTexture(GL_TEXTURE_2D, fake_box[SK].tex[WSKY_Top]);
@@ -669,6 +689,8 @@ static void RGL_DrawSkyBox(void)
 	glEnd();
 
 	glDisable(GL_TEXTURE_2D);
+	if (!r_culling.d && current_fog_rgb != RGB_NO_VALUE)
+		glDisable(GL_FOG);
 
 	RGL_RevertSkyMatrices();
 }
@@ -833,6 +855,7 @@ int RGL_UpdateSkyBoxTextures(void)
 	cull_fog_color[0] = (float)temp_rgb[0] / 255.0f;
 	cull_fog_color[1] = (float)temp_rgb[1] / 255.0f;
 	cull_fog_color[2] = (float)temp_rgb[2] / 255.0f;
+	cull_fog_color[3] = 1.0f;
 	tmp_img_data->AverageColor(temp_rgb, 0, sky_image->actual_w, sky_image->actual_h * 3/4, sky_image->actual_h);
 	sky_cap_color[0] = (float)temp_rgb[0] / 255.0f;
 	sky_cap_color[1] = (float)temp_rgb[1] / 255.0f;

@@ -1192,7 +1192,7 @@ static mobj_t *DoLaunchProjectile(mobj_t * source, float tx, float ty, float tz,
 
 		if (! (attack->flags & AF_Player))
 		{
-			if (target->flags & MF_FUZZY)
+			if (target->flags & MF_FUZZY && !source->player)
 				angle += P_RandomNegPos() << (ANGLEBITS - 12);
 
 			if (target->visibility < VISIBLE)

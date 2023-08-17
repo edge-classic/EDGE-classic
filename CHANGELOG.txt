@@ -22,6 +22,7 @@ General Improvements/Changes
 
 - Gameplay option "Blood" can be set to "None"
 - For standalone games, EDGEIWAD has been changed to EDGEGAME
+- Auto-aim now targets "fuzzy" monsters i.e. Specters
  
 
 Bugs fixed

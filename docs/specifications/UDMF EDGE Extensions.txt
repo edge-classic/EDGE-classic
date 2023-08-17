@@ -1,5 +1,5 @@
 ===============================================================================
-Universal Doom Map Format EDGE extensions DRAFT - 2023.02.27
+Universal Doom Map Format EDGE extensions DRAFT - 2023.08.17
 
     Copyright (c) 2023 The EDGE Team.
     Permission is granted to copy, distribute and/or modify this document
@@ -84,7 +84,13 @@ Note: All <bool> fields default to false unless mentioned otherwise.
 
    sector
    {
-      No changes.
+      fadecolor = <integer>;    // Fog color for this sector, in 0xRRGGBB format. Default (no fog) is 0x000000.
+
+      fogdensity = <integer>;   // Fog density for this sector. EDGE makes an effort to map the GZDoom values recognized
+                                // by map editors (0-510) in the following manner:
+                                // - Values of 0-1 are equivalent to a 20% FOG_DENSITY in SECTORS.DDF
+                                // - The remaining values (2-510) are roughly mapped to the 0-100% FOG_DENSITY scale in SECTORS.DDF;
+                                //   for example, a value of 5 would be roughly 1% while 510 would be 100%
    }
 
    thing
@@ -96,6 +102,7 @@ Note: All <bool> fields default to false unless mentioned otherwise.
 =======================================
 Changelog
 =======================================
+2023.08.18 - Addition of fadecolor/fogdensity sector fields
 2023.02.27 - Initial draft; addition of zfloor/zceiling vertex fields
 
 

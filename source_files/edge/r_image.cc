@@ -1678,6 +1678,20 @@ const image_c *W_ImageForHOMDetect(void)
 	return dummy_hom[(framecount & 0x10) ? 1 : 0];
 }
 
+const image_c *W_ImageForFogWall(rgbcol_t fog_color)
+{
+	std::string fogname = epi::STR_Format("FOGWALL_%d", fog_color);
+	image_c *fogwall = (image_c *)W_ImageLookup(fogname.c_str(), INS_Graphic, ILF_Null);
+	if (fogwall)
+		return fogwall;
+	imagedef_c *fogdef = new imagedef_c;
+	fogdef->colour = fog_color;
+	fogdef->name = fogname;
+	fogdef->type = IMGDT_Colour;
+	fogdef->belong = INS_Graphic;
+	fogwall = AddImageUser(fogdef);
+	return fogwall;
+}
 
 const image_c *W_ImageParseSaveString(char type, const char *name)
 {

@@ -762,7 +762,8 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 	local_gl_vert_t * glvert = RGL_BeginUnit(
 			 GL_TRIANGLES, md->num_tris * 3,
 			 data.is_additive ? ENV_SKIP_RGB : GL_MODULATE, skin_tex,
-			 ENV_NONE, 0, pass, blending);
+			 ENV_NONE, 0, pass, blending, pass > 0 ? RGB_NO_VALUE : mo->subsector->sector->props.fog_color,
+				 mo->subsector->sector->props.fog_density);
 
 		for (int i = 0; i < md->num_tris; i++)
 		{

@@ -167,6 +167,9 @@ typedef struct surface_s
 
 	// this only used for BOOM deep water (linetype 242)
 	const colourmap_c *boom_colmap;
+
+	// used for fog boundaries if needed
+	bool fogwall = false;
 }
 surface_t;
 

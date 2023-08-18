@@ -1370,17 +1370,7 @@ static void DrawTile(seg_t *seg, drawfloor_t *dfloor,
 	const image_c *image = surf->image;
 
 	if (! image)
-	{
-		if (seg->sidedef->sector->props.fog_color != RGB_NO_VALUE)
-		{
-			image_c *fw = (image_c *)W_ImageForFogWall(seg->sidedef->sector->props.fog_color);
-			fw->opacity = OPAC_Complex;
-			image = fw;
-			surf->translucency = seg->sidedef->sector->props.fog_density * 100;
-		}
-		else
-			image = W_ImageForHOMDetect();
-	}
+		image = W_ImageForHOMDetect();
 
 	float tex_top_h = tex_z + surf->offset.y;
 	float x_offset  = surf->offset.x;
@@ -1514,12 +1504,14 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 	{
 		if (sec->props.fog_color != RGB_NO_VALUE)
 		{
-			//if (!other || other->props.fog_color != sec->props.fog_color)
-			AddWallTile(seg, dfloor,
-				&sd->middle, slope_fh, slope_ch, 
-				(ld->flags & MLF_LowerUnpegged) ? 
-				sec->f_h + IM_HEIGHT_SAFE(sd->middle.image) : sec->c_h,
-				0, f_min, c_max);
+			if (other && other->props.fog_color != sec->props.fog_color)
+			{
+				image_c *fw = (image_c *)W_ImageForFogWall(seg->sidedef->sector->props.fog_color);
+				fw->opacity = OPAC_Complex;
+				sd->middle.image = fw;
+				sd->middle.translucency = seg->sidedef->sector->props.fog_density * 100;
+				sd->middle.fogwall = true;
+			}
 		}
 	}
 
@@ -1654,7 +1646,12 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 
 		float f2, c2;
 
-		if (ld->flags & MLF_LowerUnpegged)
+		if (sd->middle.fogwall)
+		{
+			f2 = f1;
+			c2 = c1;
+		}
+		else if (ld->flags & MLF_LowerUnpegged)
 		{
 			f2 = f1 + sd->midmask_offset;
 			c2 = f2 + IM_HEIGHT(sd->middle.image);

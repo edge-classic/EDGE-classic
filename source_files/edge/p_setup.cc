@@ -1457,7 +1457,7 @@ static void LoadUDMFSectors()
 		{
 			float cz = 0.0f, fz = 0.0f;
 			int light = 160, type = 0, tag = 0;
-			rgbcol_t fog_color = RGB_NO_VALUE;
+			rgbcol_t fog_color = 0;
 			int fog_density = 0;
 			char floor_tex[10];
 			char ceil_tex[10];

@@ -1571,7 +1571,7 @@ static void LoadUDMFSectors()
 				if (fog_density < 2)
 					ss->props.fog_density = 0.002f;
 				else
-					ss->props.fog_density = 0.01f * ((float)fog_density / 510.0f);
+					ss->props.fog_density = 0.005f * ((float)fog_density / 510.0f);
 			}
 			else if (ss->props.special && ss->props.special->fog_color != RGB_NO_VALUE)
 			{

@@ -292,9 +292,10 @@ typedef struct s_fogsector_s
 	bool leave_color = false;
 	bool leave_density = false;
 
-	rgbcol_t color = RGB_NO_VALUE;
+	rgbcol_t rgb_color;
+	const char *colmap_color = nullptr;
 
-	float density = 0;
+	float density;
 }
 s_fogsector_t;
 

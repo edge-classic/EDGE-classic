@@ -1902,12 +1902,8 @@ static void RAD_ParseLightSector(param_set_t& pars)
 
 static void RAD_ParseFogSector(param_set_t& pars)
 {
-	// FogSector <tag> <color (#RRGGBB)> <density (%)>
-	// FogSector <tag> <color (#RRGGBB)> <density (0-100%)> ABSOLUTE
-	// FogSector <tag> <color (#RRGGBB)>
-	// FogSector <tag> <density (%)>
-	// FogSector <tag> <density (0-100%)> ABSOLUTE
-	// FogSector <tag> CLEAR
+	// FogSector <tag> <color or #RRGGBB or SAME or CLEAR> <density(%) or SAME or CLEAR>
+	// FogSector <tag> <color or #RRGGBB or SAME or CLEAR> <density(0-100%) or SAME or CLEAR> ABSOLUTE
 
 	s_fogsector_t *secf;
 
@@ -1918,55 +1914,45 @@ static void RAD_ParseFogSector(param_set_t& pars)
 	if (secf->tag == 0)
 		RAD_Error("%s: Invalid tag number: %d\n", pars[0], secf->tag);
 
-	if (pars.size() == 3)
+	if (pars.size() == 4) // color + relative density change
 	{
-		if (DDF_CompareName(pars[2], "CLEAR") == 0)
-		{
-			secf->relative = false;
-			// Default s_fogsector_t values will zero out the sector's fog
-			AddStateToScript(this_rad, 0, RAD_ActFogSector, secf);
-			return;
-		}
-		else if (epi::prefix_case_cmp(pars[2], "#") == 0) // Just change color
-		{
-			RAD_CheckForRGB(pars[2], &secf->color);
+		if (DDF_CompareName(pars[2], "SAME") == 0)
+			secf->leave_color = true;
+		else if (DDF_CompareName(pars[2], "CLEAR") == 0)
+			secf->rgb_color = RGB_NO_VALUE;
+		else if (*pars[2] == '#')
+			RAD_CheckForRGB(pars[2], &secf->rgb_color);
+		else
+			secf->colmap_color = Z_StrDup(pars[2]);
+		if (DDF_CompareName(pars[3], "SAME") == 0)
 			secf->leave_density = true;
-			AddStateToScript(this_rad, 0, RAD_ActFogSector, secf);
-			return;
-		}
-		else // Just change relative density
+		else if (DDF_CompareName(pars[3], "CLEAR") == 0)
 		{
-			RAD_CheckForPercentAny(pars[2], &secf->density);
-			secf->leave_color = true;
-			AddStateToScript(this_rad, 0, RAD_ActFogSector, secf);
-			return;
-		}
-	}
-	else if (pars.size() == 4)
-	{
-		if (DDF_CompareName(pars[3], "ABSOLUTE") == 0) // Absolute density change
-		{
-			RAD_CheckForPercent(pars[2], &secf->density);
 			secf->relative = false;
-			secf->leave_color = true;
-			AddStateToScript(this_rad, 0, RAD_ActFogSector, secf);
-			return;
+			secf->density = 0;
 		}
-		else // color + relative density change
-		{
-			RAD_CheckForRGB(pars[2], &secf->color);
+		else
 			RAD_CheckForPercentAny(pars[3], &secf->density);
-			AddStateToScript(this_rad, 0, RAD_ActFogSector, secf);
-			return;
-		}
+		AddStateToScript(this_rad, 0, RAD_ActFogSector, secf);
 	}
 	else if (DDF_CompareName(pars[4], "ABSOLUTE") == 0) // color + absolute density change
 	{
-		RAD_CheckForRGB(pars[2], &secf->color);
-		RAD_CheckForPercent(pars[3], &secf->density);
 		secf->relative = false;
+		if (DDF_CompareName(pars[2], "SAME") == 0)
+			secf->leave_color = true;
+		else if (DDF_CompareName(pars[2], "CLEAR") == 0)
+			secf->rgb_color = RGB_NO_VALUE;
+		else if (*pars[2] == '#')
+			RAD_CheckForRGB(pars[2], &secf->rgb_color);
+		else
+			secf->colmap_color = Z_StrDup(pars[2]);
+		if (DDF_CompareName(pars[3], "SAME") == 0)
+			secf->leave_density = true;
+		else if (DDF_CompareName(pars[3], "CLEAR") == 0)
+			secf->density = 0;
+		else
+			RAD_CheckForPercent(pars[3], &secf->density);
 		AddStateToScript(this_rad, 0, RAD_ActFogSector, secf);
-		return;
 	}
 	else // shouldn't get here
 		RAD_Error("%s: Malformed FOG_SECTOR command\n");
@@ -2327,7 +2313,7 @@ static const rts_parser_t radtrig_parsers[] =
 	{2, "HUB_EXIT", 3,3, RAD_ParseHubExit},
 	{2, "MOVE_SECTOR", 4,5, RAD_ParseMoveSector},
 	{2, "LIGHT_SECTOR", 3,4, RAD_ParseLightSector},
-	{2, "FOG_SECTOR", 3,5, RAD_ParseFogSector},
+	{2, "FOG_SECTOR", 4,5, RAD_ParseFogSector},
 	{2, "ENABLE_SCRIPT",  2,2, RAD_ParseEnableScript},
 	{2, "DISABLE_SCRIPT", 2,2, RAD_ParseEnableScript},
 	{2, "ENABLE_TAGGED",  2,2, RAD_ParseEnableTagged},

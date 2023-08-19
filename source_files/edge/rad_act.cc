@@ -885,6 +885,34 @@ void RAD_ActLightSector(rad_trigger_t *R, void *param)
 	}
 }
 
+void RAD_ActFogSector(rad_trigger_t *R, void *param)
+{
+	s_fogsector_t *t = (s_fogsector_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag == t->tag)
+		{
+			sectors[i].props.fog_color = t->color;
+			sectors[i].props.fog_density = 0.01f * t->density;
+			for (int j = 0; j < sectors[i].linecount; j++)
+			{
+				for (int k = 0; k < 2; k++)
+				{
+					side_t *side_check = sectors[i].lines[j]->side[k];
+					if (side_check && side_check->middle.fogwall)
+					{
+						side_check->middle.image = nullptr; // will be rebuilt with proper color later
+															// don't delete the image in case other fogwalls use the same color
+					}
+				}
+			}
+		}
+	}
+}
+
+
 void RAD_ActEnableScript(rad_trigger_t *R, void *param)
 {
 	s_enabler_t *t = (s_enabler_t *) param;

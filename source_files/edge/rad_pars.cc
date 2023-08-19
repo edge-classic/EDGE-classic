@@ -189,6 +189,27 @@ static void RAD_CheckForInt(const char *value, int *retvalue)
 	*retvalue = atoi(value);
 }
 
+static void RAD_CheckForRGB(const char *value, rgbcol_t *retvalue)
+{
+	if (strlen(value) != 7)
+		RAD_Error("Parameter '%s' is a malformed RGB value.\n", value);
+
+	// Require leading '#' to match DDF syntax
+	if (*value != '#')
+		RAD_Error("Parameter '%s' is a malformed RGB value.\n", value);
+
+	// Same as DDF's RGB fetching
+	int r,g,b;
+	if (sscanf(value, " #%2x%2x%2x ", &r, &g, &b) != 3)
+		RAD_Error("Bad RGB colour value: %s\n", value);
+
+	*retvalue = (r << 16) | (g << 8) | b;
+
+	// silently change if matches the "none specified" value
+	if (*retvalue == RGB_NO_VALUE)
+		*retvalue ^= RGB_MAKE(1,1,1);
+}
+
 static void RAD_CheckForFloat(const char *value, float *retvalue)
 {
 	if (strchr(value, '%'))
@@ -1879,6 +1900,25 @@ static void RAD_ParseLightSector(param_set_t& pars)
 	AddStateToScript(this_rad, 0, RAD_ActLightSector, secl);
 }
 
+static void RAD_ParseFogSector(param_set_t& pars)
+{
+	// FogSector <tag> <color (RRGGBB)> <density (0-100%)>
+
+	s_fogsector_t *secf;
+
+	secf = new s_fogsector_t;
+
+	RAD_CheckForInt(pars[1], &secf->tag);
+	RAD_CheckForRGB(pars[2], &secf->color);
+	RAD_CheckForPercent(pars[3], &secf->density);
+
+	if (secf->tag == 0)
+		RAD_Error("%s: Invalid tag number: %d\n", pars[0], secf->tag);
+
+	AddStateToScript(this_rad, 0, RAD_ActFogSector, secf);
+}
+
+
 static void RAD_ParseActivateLinetype(param_set_t& pars)
 {
 	// Activate_LineType <linetype> <tag>
@@ -2233,6 +2273,7 @@ static const rts_parser_t radtrig_parsers[] =
 	{2, "HUB_EXIT", 3,3, RAD_ParseHubExit},
 	{2, "MOVE_SECTOR", 4,5, RAD_ParseMoveSector},
 	{2, "LIGHT_SECTOR", 3,4, RAD_ParseLightSector},
+	{2, "FOG_SECTOR", 4,4, RAD_ParseFogSector},
 	{2, "ENABLE_SCRIPT",  2,2, RAD_ParseEnableScript},
 	{2, "DISABLE_SCRIPT", 2,2, RAD_ParseEnableScript},
 	{2, "ENABLE_TAGGED",  2,2, RAD_ParseEnableTagged},

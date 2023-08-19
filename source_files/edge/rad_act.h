@@ -34,6 +34,7 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param);
 
 void RAD_ActMoveSector(rad_trigger_t *R, void *param);
 void RAD_ActLightSector(rad_trigger_t *R, void *param);
+void RAD_ActFogSector(rad_trigger_t *R, void *param);
 void RAD_ActEnableScript(rad_trigger_t *R, void *param);
 void RAD_ActActivateLinetype(rad_trigger_t *R, void *param);
 void RAD_ActUnblockLines(rad_trigger_t *R, void *param);

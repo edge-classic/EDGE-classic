@@ -279,6 +279,17 @@ typedef struct s_lightsector_s
 }
 s_lightsector_t;
 
+//Sector Fog change
+typedef struct s_fogsector_s
+{
+	// tag to apply to
+	int tag = 0;
+
+	rgbcol_t color = RGB_NO_VALUE;
+
+	float density = 0;
+}
+s_fogsector_t;
 
 // Enable/Disable
 typedef struct s_enabler_s

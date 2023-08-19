@@ -894,8 +894,15 @@ void RAD_ActFogSector(rad_trigger_t *R, void *param)
 	{
 		if (sectors[i].tag == t->tag)
 		{
-			sectors[i].props.fog_color = t->color;
-			sectors[i].props.fog_density = 0.01f * t->density;
+			if (!t->leave_color)
+				sectors[i].props.fog_color = t->color;
+			if (!t->leave_density)
+			{
+				if (t->relative)
+					sectors[i].props.fog_density += (sectors[i].props.fog_density * t->density);
+				else
+					sectors[i].props.fog_density = 0.01f * t->density;
+			}
 			for (int j = 0; j < sectors[i].linecount; j++)
 			{
 				for (int k = 0; k < 2; k++)

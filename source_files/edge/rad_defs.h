@@ -285,6 +285,13 @@ typedef struct s_fogsector_s
 	// tag to apply to
 	int tag = 0;
 
+	// when true, add the value to current density.  Otherwise set it.
+	bool relative = true;
+
+	// when true, leave color or density untouched regardless of this struct's values
+	bool leave_color = false;
+	bool leave_density = false;
+
 	rgbcol_t color = RGB_NO_VALUE;
 
 	float density = 0;

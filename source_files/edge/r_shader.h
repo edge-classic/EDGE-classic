@@ -64,18 +64,39 @@ public:
 	{
 		if (qty > 100) qty = 100;
 
-		mod_R += (int)(RGB_RED(rgb) * qty);
-		mod_G += (int)(RGB_GRN(rgb) * qty);
-		mod_B += (int)(RGB_BLU(rgb) * qty);
+		int new_R = mod_R + (int)(RGB_RED(rgb) * qty);
+		int new_G = mod_G + (int)(RGB_GRN(rgb) * qty);
+		int new_B = mod_B + (int)(RGB_BLU(rgb) * qty);
+
+		if (new_R > 255 || new_G > 255 || new_B > 255)
+		{
+			return;
+		}
+		else
+		{
+			mod_R = new_R;
+			mod_G = new_G;
+			mod_B = new_B;
+		}
 	}
 
 	void add_Give(rgbcol_t rgb, float qty)
 	{
 		if (qty > 100) qty = 100;
+		int new_R = add_R + (int)(RGB_RED(rgb) * qty);
+		int new_G = add_G + (int)(RGB_GRN(rgb) * qty);
+		int new_B = add_B + (int)(RGB_BLU(rgb) * qty);
 
-		add_R += (int)(RGB_RED(rgb) * qty);
-		add_G += (int)(RGB_GRN(rgb) * qty);
-		add_B += (int)(RGB_BLU(rgb) * qty);
+		if (new_R > 255 || new_G > 255 || new_B > 255)
+		{
+			return;
+		}
+		else
+		{
+			add_R = new_R;
+			add_G = new_G;
+			add_B = new_B;
+		}
 	}
 };
 

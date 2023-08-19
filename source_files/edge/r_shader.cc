@@ -357,7 +357,8 @@ public:
 						 is_additive ? ENV_NONE : GL_MODULATE,
 						(is_additive && !masked) ? 0 : tex,
 						GL_MODULATE, lim[DL]->tex_id(),
-						*pass_var, blending);
+						*pass_var, blending, *pass_var > 0 ? RGB_NO_VALUE : mo->subsector->sector->props.fog_color,
+						mo->subsector->sector->props.fog_density);
 
 			for (int v_idx=0; v_idx < num_vert; v_idx++)
 			{
@@ -556,7 +557,8 @@ public:
 						 is_additive ? ENV_NONE : GL_MODULATE,
 						(is_additive && !masked) ? 0 : tex,
 						GL_MODULATE, lim[DL]->tex_id(),
-						*pass_var, blending);
+						*pass_var, blending, *pass_var > 0 ? RGB_NO_VALUE : mo->subsector->sector->props.fog_color,
+						mo->subsector->sector->props.fog_density);
 			
 			for (int v_idx=0; v_idx < num_vert; v_idx++)
 			{
@@ -714,7 +716,8 @@ public:
 						 is_additive ? ENV_NONE : GL_MODULATE,
 						(is_additive && !masked) ? 0 : tex,
 						GL_MODULATE, lim[DL]->tex_id(),
-						*pass_var, blending);
+						*pass_var, blending, *pass_var > 0 ? RGB_NO_VALUE : mo->subsector->sector->props.fog_color,
+						mo->subsector->sector->props.fog_density);
 			
 			for (int v_idx=0; v_idx < num_vert; v_idx++)
 			{

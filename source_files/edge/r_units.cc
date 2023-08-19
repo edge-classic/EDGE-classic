@@ -506,7 +506,7 @@ void RGL_DrawUnits(void)
 				glActiveTexture(GL_TEXTURE0 + t);
 			}
 
-			if (r_culling.d || current_fog_rgb != RGB_NO_VALUE)
+			if (r_culling.d)
 			{ 
 				if (unit->pass > 0)
 					glDisable(GL_FOG);

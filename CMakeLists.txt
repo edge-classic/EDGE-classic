@@ -13,7 +13,7 @@ project(
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-option(EDGE_GL_ES2 "Enable GLES2 Rendering Backend" OFF)
+option(EDGE_GL_ES2 "Enable GLES2 Rendering Backend" ON)
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 
 include("cmake/EDGEClassic.cmake")  

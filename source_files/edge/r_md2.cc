@@ -47,6 +47,8 @@
 extern float P_ApproxDistance(float dx, float dy, float dz);
 
 extern cvar_c r_culling;
+extern cvar_c r_cullfog;
+extern bool need_to_draw_sky;
 
 // #define DEBUG_MD2_LOAD  1
 
@@ -1148,6 +1150,71 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 
 #ifdef EDGE_GL_ES2
 	glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
+	unsigned int frgb = mo->subsector->sector->props.fog_color;
+	float fog_density = mo->subsector->sector->props.fog_density;
+	if (!r_culling.d && frgb != RGB_NO_VALUE)
+	{
+		GLfloat fc[4];
+		fc[0] = (float)RGB_RED(frgb)/255.0f;
+		fc[1] = (float)RGB_GRN(frgb)/255.0f; 
+		fc[2] = (float)RGB_BLU(frgb)/255.0f;
+		fc[3] = 1.0f;
+		glClearColor(fc[0], fc[1], fc[2], 1.0f);
+		glFogi(GL_FOG_MODE, GL_EXP);
+		glFogfv(GL_FOG_COLOR, fc);
+		glFogf(GL_FOG_DENSITY, std::log1p(fog_density));
+		glEnable(GL_FOG);
+	}
+	else if (r_culling.d)
+	{
+		GLfloat fogColor[3];
+		if (need_to_draw_sky)
+		{
+			switch (r_cullfog.d)
+			{
+				case 0:
+					fogColor[0] = cull_fog_color[0];
+					fogColor[1] = cull_fog_color[1];
+					fogColor[2] = cull_fog_color[2];
+					break;
+				case 1:
+					// Not pure white, but 1.0f felt like a little much - Dasho
+					fogColor[0] = 0.75f;
+					fogColor[1] = 0.75f;
+					fogColor[2] = 0.75f;
+					break;
+				case 2:
+					fogColor[0] = 0.25f;
+					fogColor[1] = 0.25f;
+					fogColor[2] = 0.25f;
+					break;
+				case 3:
+					fogColor[0] = 0;
+					fogColor[1] = 0;
+					fogColor[2] = 0;
+					break;
+				default:
+					fogColor[0] = cull_fog_color[0];
+					fogColor[1] = cull_fog_color[1];
+					fogColor[2] = cull_fog_color[2];
+					break;
+			}
+		}
+		else
+		{
+			fogColor[0] = 0;
+			fogColor[1] = 0;
+			fogColor[2] = 0;
+		}
+		glClearColor(fogColor[0],fogColor[1],fogColor[2],1.0f);
+		glFogi(GL_FOG_MODE, GL_LINEAR);
+		glFogfv(GL_FOG_COLOR, fogColor);
+		glFogf(GL_FOG_START, r_farclip.f - 750.0f);
+		glFogf(GL_FOG_END, r_farclip.f - 250.0f);
+		glEnable(GL_FOG);
+	}
+	else
+		glDisable(GL_FOG);
 #endif
 
 	for (int pass = 0; pass < num_pass; pass++)
@@ -1156,6 +1223,9 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 		{
 			blending &= ~BL_Alpha;
 			blending |=  BL_Add;
+#ifdef EDGE_GL_ES2
+			glDisable(GL_FOG);
+#endif
 		}
 
 		data.is_additive = (pass > 0 && pass == num_pass-1);
@@ -1228,18 +1298,6 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 		{
 			// NOTE: assumes alpha is constant over whole model
 			glAlphaFunc(GL_GREATER, trans * 0.66f);
-		}
-
-		if (r_culling.d || props->fog_color != RGB_NO_VALUE)
-		{ 
-			if (pass > 0)
-			{
-				glDisable(GL_FOG);
-			}
-			else
-			{
-				glEnable(GL_FOG);
-			}
 		}
 
 		glActiveTexture(GL_TEXTURE1);

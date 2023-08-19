@@ -235,7 +235,7 @@ vxl_model_c *VXL_LoadModel(epi::file_c *f, const char *name)
 
 	epi::image_data_c *tmp_img = new epi::image_data_c(md->skin_width, md->skin_height, 4);
 	tmp_img->pixels = (u8_t *)glvmesh.img.ptr();
-	md->skin_id = R_UploadTexture(tmp_img, UPL_MipMap | UPL_Smooth);
+	md->skin_id = R_UploadTexture(tmp_img, UPL_MipMap);
 	tmp_img->pixels = nullptr;
 	delete tmp_img; // pixels are cleaned up later with glvmesh closure
 

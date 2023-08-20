@@ -189,27 +189,6 @@ static void RAD_CheckForInt(const char *value, int *retvalue)
 	*retvalue = atoi(value);
 }
 
-static void RAD_CheckForRGB(const char *value, rgbcol_t *retvalue)
-{
-	if (strlen(value) != 7)
-		RAD_Error("Parameter '%s' is a malformed RGB value.\n", value);
-
-	// Require leading '#' to match DDF syntax
-	if (*value != '#')
-		RAD_Error("Parameter '%s' is a malformed RGB value.\n", value);
-
-	// Same as DDF's RGB fetching
-	int r,g,b;
-	if (sscanf(value, " #%2x%2x%2x ", &r, &g, &b) != 3)
-		RAD_Error("Bad RGB colour value: %s\n", value);
-
-	*retvalue = (r << 16) | (g << 8) | b;
-
-	// silently change if matches the "none specified" value
-	if (*retvalue == RGB_NO_VALUE)
-		*retvalue ^= RGB_MAKE(1,1,1);
-}
-
 static void RAD_CheckForFloat(const char *value, float *retvalue)
 {
 	if (strchr(value, '%'))
@@ -260,7 +239,7 @@ static void RAD_CheckForPercentAny(const char *info, void *storage)
 
 	// just check that the string is valid
 	Z_StrNCpy(s, info, 100);
-	for (p = s; isdigit(*p) || *p == '.'; p++)
+	for (p = s; isdigit(*p) || *p == '-' || *p == '.'; p++)
 	{ /* nothing here */ }
 
 	// the number must be followed by %
@@ -1902,8 +1881,8 @@ static void RAD_ParseLightSector(param_set_t& pars)
 
 static void RAD_ParseFogSector(param_set_t& pars)
 {
-	// FogSector <tag> <color or #RRGGBB or SAME or CLEAR> <density(%) or SAME or CLEAR>
-	// FogSector <tag> <color or #RRGGBB or SAME or CLEAR> <density(0-100%) or SAME or CLEAR> ABSOLUTE
+	// FogSector <tag> <color or SAME or CLEAR> <density(%) or SAME or CLEAR>
+	// FogSector <tag> <color or SAME or CLEAR> <density(0-100%) or SAME or CLEAR> ABSOLUTE
 
 	s_fogsector_t *secf;
 
@@ -1919,9 +1898,7 @@ static void RAD_ParseFogSector(param_set_t& pars)
 		if (DDF_CompareName(pars[2], "SAME") == 0)
 			secf->leave_color = true;
 		else if (DDF_CompareName(pars[2], "CLEAR") == 0)
-			secf->rgb_color = RGB_NO_VALUE;
-		else if (*pars[2] == '#')
-			RAD_CheckForRGB(pars[2], &secf->rgb_color);
+		{ /* nothing - we will use null pointer to denote clearing fog later */ }
 		else
 			secf->colmap_color = Z_StrDup(pars[2]);
 		if (DDF_CompareName(pars[3], "SAME") == 0)
@@ -1941,9 +1918,7 @@ static void RAD_ParseFogSector(param_set_t& pars)
 		if (DDF_CompareName(pars[2], "SAME") == 0)
 			secf->leave_color = true;
 		else if (DDF_CompareName(pars[2], "CLEAR") == 0)
-			secf->rgb_color = RGB_NO_VALUE;
-		else if (*pars[2] == '#')
-			RAD_CheckForRGB(pars[2], &secf->rgb_color);
+		{ /* nothing - we will use null pointer to denote clearing fog later */ }
 		else
 			secf->colmap_color = Z_StrDup(pars[2]);
 		if (DDF_CompareName(pars[3], "SAME") == 0)

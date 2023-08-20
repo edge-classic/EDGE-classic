@@ -898,8 +898,8 @@ void RAD_ActFogSector(rad_trigger_t *R, void *param)
 			{
 				if (t->colmap_color)
 					sectors[i].props.fog_color = V_ParseFontColor(t->colmap_color);
-				else
-					sectors[i].props.fog_color = t->rgb_color;
+				else // should only happen with a CLEAR directive
+					sectors[i].props.fog_color = RGB_NO_VALUE;
 			}
 			if (!t->leave_density)
 			{

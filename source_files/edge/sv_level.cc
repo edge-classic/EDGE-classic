@@ -728,6 +728,10 @@ void SR_LevelPutSurface(void *storage, int index, void *extra)
 {
 	surface_t *src = (surface_t *)storage + index;
 
+	// force fogwall recreation when loading a save
+	if (src->fogwall)
+		src->image = nullptr;
+
 	SV_SaveStruct(src, &sv_struct_surface);
 }
 

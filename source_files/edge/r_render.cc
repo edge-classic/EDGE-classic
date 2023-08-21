@@ -1517,20 +1517,35 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 		}
 	}
 	rgbcol_t other_fc = (other ? other->props.fog_color : RGB_NO_VALUE);
+	float other_fd = (other ? other->props.fog_density : RGB_NO_VALUE);
 	if (other_fc == RGB_NO_VALUE)
 	{
 		if (other)
 		{
 			if (IS_SKY(other->ceil))
+			{
 				other_fc = currmap->outdoor_fog_color;
+				other_fd = currmap->outdoor_fog_density;
+			}
 			else
+			{
 				other_fc = currmap->indoor_fog_color;
+				other_fd = currmap->indoor_fog_density;
+			}
 		}
 	}
 
 	if (!sd->middle.image)
 	{
-		if (sec_fc != RGB_NO_VALUE && sec_fc != other_fc)
+		if (sec_fc == RGB_NO_VALUE && other_fc != RGB_NO_VALUE)
+		{
+			image_c *fw = (image_c *)W_ImageForFogWall(other_fc);
+			fw->opacity = OPAC_Complex;
+			sd->middle.image = fw;
+			sd->middle.translucency = other_fd * 100;
+			sd->middle.fogwall = true;
+		}
+		else if (sec_fc != RGB_NO_VALUE && other_fc != sec_fc)
 		{
 			image_c *fw = (image_c *)W_ImageForFogWall(sec_fc);
 			fw->opacity = OPAC_Complex;

@@ -409,6 +409,11 @@ static void LoadSectors(int lump)
 			ss->props.fog_color = ss->props.special->fog_color;
 			ss->props.fog_density = 0.01f * ss->props.special->fog_density;
 		}
+		else
+		{
+			ss->props.fog_color = RGB_NO_VALUE;
+			ss->props.fog_density = 0;
+		}
 
 		ss->p = &ss->props;
 
@@ -1577,6 +1582,11 @@ static void LoadUDMFSectors()
 			{
 				ss->props.fog_color = ss->props.special->fog_color;
 				ss->props.fog_density = 0.01f * ss->props.special->fog_density;
+			}
+			else
+			{
+				ss->props.fog_color = RGB_NO_VALUE;
+				ss->props.fog_density = 0;
 			}
 
 			ss->p = &ss->props;

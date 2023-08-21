@@ -31,6 +31,8 @@
 
 #include "ec_voxelib.h"
 
+#include "dm_state.h" // IS_SKY
+#include "g_game.h" // currmap
 #include "r_voxel.h"
 #include "r_gldefs.h"
 #include "r_colormap.h"
@@ -613,16 +615,31 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 	int num_pass = data.is_fuzzy  ? 1 :
 		           data.is_weapon ? (3 + detail_level) :
 					                (2 + detail_level*2);
+
+	rgbcol_t fc_to_use = mo->subsector->sector->props.fog_color;
+	float fd_to_use = mo->subsector->sector->props.fog_density;
+	// check for DDFLEVL fog
+	if (fc_to_use == RGB_NO_VALUE)
+	{
+		if (IS_SKY(mo->subsector->sector->ceil))
+		{
+			fc_to_use = currmap->outdoor_fog_color;
+			fd_to_use = 0.01f * currmap->outdoor_fog_density;
+		}
+		else
+		{
+			fc_to_use = currmap->indoor_fog_color;
+			fd_to_use = 0.01f * currmap->indoor_fog_density;
+		}
+	}
 #ifdef EDGE_GL_ES2
 	glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
-	unsigned int frgb = mo->subsector->sector->props.fog_color;
-	float fog_density = mo->subsector->sector->props.fog_density;
-	if (!r_culling.d && frgb != RGB_NO_VALUE)
+	if (!r_culling.d && fc_to_use != RGB_NO_VALUE)
 	{
 		GLfloat fc[4];
-		fc[0] = (float)RGB_RED(frgb)/255.0f;
-		fc[1] = (float)RGB_GRN(frgb)/255.0f; 
-		fc[2] = (float)RGB_BLU(frgb)/255.0f;
+		fc[0] = (float)RGB_RED(fc_to_use)/255.0f;
+		fc[1] = (float)RGB_GRN(fc_to_use)/255.0f; 
+		fc[2] = (float)RGB_BLU(fc_to_use)/255.0f;
 		fc[3] = 1.0f;
 		glClearColor(fc[0], fc[1], fc[2], 1.0f);
 		glFogi(GL_FOG_MODE, GL_EXP);
@@ -820,8 +837,8 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 	local_gl_vert_t * glvert = RGL_BeginUnit(
 			 GL_TRIANGLES, md->num_tris * 3,
 			 data.is_additive ? ENV_SKIP_RGB : GL_MODULATE, skin_tex,
-			 ENV_NONE, 0, pass, blending, pass > 0 ? RGB_NO_VALUE : mo->subsector->sector->props.fog_color,
-				 mo->subsector->sector->props.fog_density);
+			 ENV_NONE, 0, pass, blending, pass > 0 ? RGB_NO_VALUE : fc_to_use,
+				 fd_to_use);
 
 		for (int i = 0; i < md->num_tris; i++)
 		{

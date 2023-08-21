@@ -86,6 +86,10 @@ static const commandlist_t level_commands[] =
 	DF("STATS", wistyle, DDF_LevelGetWistyle),
 	DF("LEAVING_BACKGROUND", leavingbggraphic, DDF_MainGetLumpName),
 	DF("ENTERING_BACKGROUND", enteringbggraphic, DDF_MainGetLumpName),
+	DF("INDOOR_FOG_COLOR", indoor_fog_color, DDF_MainGetRGB),
+	DF("INDOOR_FOG_DENSITY", indoor_fog_density, DDF_MainGetPercent),
+	DF("OUTDOOR_FOG_COLOR", outdoor_fog_color, DDF_MainGetRGB),
+	DF("OUTDOOR_FOG_DENSITY", outdoor_fog_density, DDF_MainGetPercent),
 
 	DDF_CMD_END
 };
@@ -450,6 +454,11 @@ void mapdef_c::CopyDetail(mapdef_c &src)
 	f_end = src.f_end;
 
 	forced_skystretch = src.forced_skystretch;
+
+	indoor_fog_color = src.indoor_fog_color;
+	indoor_fog_density = src.indoor_fog_density;
+	outdoor_fog_color = src.outdoor_fog_color;
+	outdoor_fog_density = src.outdoor_fog_density;
 }
 
 void mapdef_c::Default()
@@ -484,6 +493,11 @@ void mapdef_c::Default()
 	f_end.Default();
 
 	forced_skystretch = SKS_Unset;
+
+	indoor_fog_color = RGB_NO_VALUE;
+	indoor_fog_density = 0;
+	outdoor_fog_color = RGB_NO_VALUE;
+	outdoor_fog_density = 0;
 }
 
 

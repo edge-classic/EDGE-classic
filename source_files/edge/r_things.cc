@@ -35,6 +35,7 @@
 #include "dm_data.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "g_game.h" //currmap
 #include "p_local.h"
 #include "r_colormap.h"
 #include "r_defs.h"
@@ -289,7 +290,7 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 
 	if (! is_fuzzy)
 	{
-		abstract_shader_c *shader = R_GetColormapShader(props, state->bright);
+		abstract_shader_c *shader = R_GetColormapShader(props, state->bright, player->mo->subsector->sector);
 
 		shader->Sample(data.col + 0, data.lit_pos.x, data.lit_pos.y, data.lit_pos.z);
 
@@ -324,6 +325,23 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 
 	int num_pass = is_fuzzy ? 1 : (4 + detail_level * 2);
 
+	rgbcol_t fc_to_use = player->mo->subsector->sector->props.fog_color;
+	float fd_to_use = player->mo->subsector->sector->props.fog_density;
+	// check for DDFLEVL fog
+	if (fc_to_use == RGB_NO_VALUE)
+	{
+		if (IS_SKY(player->mo->subsector->sector->ceil))
+		{
+			fc_to_use = currmap->outdoor_fog_color;
+			fd_to_use = 0.01f * currmap->outdoor_fog_density;
+		}
+		else
+		{
+			fc_to_use = currmap->indoor_fog_color;
+			fd_to_use = 0.01f * currmap->indoor_fog_density;
+		}
+	}
+
 	for (int pass = 0; pass < num_pass; pass++)
 	{
 		if (pass == 1)
@@ -350,8 +368,8 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 		local_gl_vert_t * glvert = RGL_BeginUnit(GL_POLYGON, 4,
 				 is_additive ? ENV_SKIP_RGB : GL_MODULATE, tex_id,
 				 is_fuzzy ? GL_MODULATE : ENV_NONE, fuzz_tex,
-				 pass, blending, pass > 0 ? RGB_NO_VALUE: player->mo->subsector->sector->props.fog_color,
-				 player->mo->subsector->sector->props.fog_density);
+				 pass, blending, pass > 0 ? RGB_NO_VALUE: fc_to_use,
+				 fd_to_use);
 
 		for (int v_idx=0; v_idx < 4; v_idx++)
 		{
@@ -1406,7 +1424,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
 	if (! is_fuzzy)
 	{
-		abstract_shader_c *shader = R_GetColormapShader(dthing->props, mo->state->bright);
+		abstract_shader_c *shader = R_GetColormapShader(dthing->props, mo->state->bright, mo->subsector->sector);
 
 		for (int v=0; v < 4; v++)
 		{
@@ -1434,6 +1452,23 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
 	int num_pass = is_fuzzy ? 1 : (3 + detail_level * 2);
 
+	rgbcol_t fc_to_use = dthing->mo->subsector->sector->props.fog_color;
+	float fd_to_use = dthing->mo->subsector->sector->props.fog_density;
+	// check for DDFLEVL fog
+	if (fc_to_use == RGB_NO_VALUE)
+	{
+		if (IS_SKY(mo->subsector->sector->ceil))
+		{
+			fc_to_use = currmap->outdoor_fog_color;
+			fd_to_use = 0.01f * currmap->outdoor_fog_density;
+		}
+		else
+		{
+			fc_to_use = currmap->indoor_fog_color;
+			fd_to_use = 0.01f * currmap->indoor_fog_density;
+		}
+	}
+
 	for (int pass = 0; pass < num_pass; pass++)
 	{
 		if (pass == 1)
@@ -1460,8 +1495,8 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 		local_gl_vert_t * glvert = RGL_BeginUnit(GL_POLYGON, 4,
 				 is_additive ? ENV_SKIP_RGB : GL_MODULATE, tex_id,
 				 is_fuzzy ? GL_MODULATE : ENV_NONE, fuzz_tex,
-				 pass, blending, pass > 0 ? RGB_NO_VALUE : dthing->mo->subsector->sector->props.fog_color,
-				 dthing->mo->subsector->sector->props.fog_density);
+				 pass, blending, pass > 0 ? RGB_NO_VALUE : fc_to_use,
+				 fd_to_use);
 
 		for (int v_idx=0; v_idx < 4; v_idx++)
 		{

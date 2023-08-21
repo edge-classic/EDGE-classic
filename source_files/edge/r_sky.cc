@@ -441,18 +441,26 @@ static void RGL_DrawSkyCylinder(void)
 		solid_sky_h = sky_h_ratio * 0.75f;
 	float cap_z = dist * sky_h_ratio;
 
-	if (!r_culling.d && view_props->fog_color != RGB_NO_VALUE)
+	rgbcol_t fc_to_use = currmap->outdoor_fog_color;
+	float fd_to_use = 0.01f * currmap->outdoor_fog_density;
+	// check for sector fog
+	if (fc_to_use == RGB_NO_VALUE)
 	{
-		rgbcol_t frgb = view_props->fog_color;
+		fc_to_use = view_props->fog_color;
+		fd_to_use = view_props->fog_density;
+	}
+
+	if (!r_culling.d && fc_to_use != RGB_NO_VALUE)
+	{
 		GLfloat fc[4];
-		fc[0] = (float)RGB_RED(frgb)/255.0f;
-		fc[1] = (float)RGB_GRN(frgb)/255.0f; 
-		fc[2] = (float)RGB_BLU(frgb)/255.0f;
+		fc[0] = (float)RGB_RED(fc_to_use)/255.0f;
+		fc[1] = (float)RGB_GRN(fc_to_use)/255.0f; 
+		fc[2] = (float)RGB_BLU(fc_to_use)/255.0f;
 		fc[3] = 1.0f;
 		glClearColor(fc[0],fc[1],fc[2],fc[3]);
 		glFogi(GL_FOG_MODE, GL_EXP);
 		glFogfv(GL_FOG_COLOR, fc);
-		glFogf(GL_FOG_DENSITY, std::log1p(view_props->fog_density * 0.005f));
+		glFogf(GL_FOG_DENSITY, std::log1p(fd_to_use * 0.005f));
 		glEnable(GL_FOG);
 	}
 
@@ -601,18 +609,26 @@ static void RGL_DrawSkyBox(void)
 	else
 		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, col);
 
-	if (!r_culling.d && view_props->fog_color != RGB_NO_VALUE)
+	rgbcol_t fc_to_use = currmap->outdoor_fog_color;
+	float fd_to_use = 0.01f * currmap->outdoor_fog_density;
+	// check for sector fog
+	if (fc_to_use == RGB_NO_VALUE)
 	{
-		rgbcol_t frgb = view_props->fog_color;
+		fc_to_use = view_props->fog_color;
+		fd_to_use = view_props->fog_density;
+	}
+
+	if (!r_culling.d && fc_to_use != RGB_NO_VALUE)
+	{
 		GLfloat fc[4];
-		fc[0] = (float)RGB_RED(frgb)/255.0f;
-		fc[1] = (float)RGB_GRN(frgb)/255.0f; 
-		fc[2] = (float)RGB_BLU(frgb)/255.0f;
+		fc[0] = (float)RGB_RED(fc_to_use)/255.0f;
+		fc[1] = (float)RGB_GRN(fc_to_use)/255.0f; 
+		fc[2] = (float)RGB_BLU(fc_to_use)/255.0f;
 		fc[3] = 1.0f;
 		glClearColor(fc[0],fc[1],fc[2],fc[3]);
 		glFogi(GL_FOG_MODE, GL_EXP);
 		glFogfv(GL_FOG_COLOR, fc);
-		glFogf(GL_FOG_DENSITY, std::log1p(view_props->fog_density * 0.01f));
+		glFogf(GL_FOG_DENSITY, std::log1p(fd_to_use * 0.01f));
 		glEnable(GL_FOG);
 	}
 

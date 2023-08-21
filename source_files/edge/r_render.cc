@@ -1151,7 +1151,7 @@ static void DrawWallPart(drawfloor_t *dfloor,
 	if (surf->image && surf->image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
 		swirl_pass = 1;
 
-	abstract_shader_c *cmap_shader = R_GetColormapShader(props, lit_adjust);
+	abstract_shader_c *cmap_shader = R_GetColormapShader(props, lit_adjust, cur_sub->sector);
 
 	cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 			trans, &data.pass, data.blending, data.mid_masked,
@@ -1950,7 +1950,7 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor,
 	data.dh = dh;
 
 
-	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
+	abstract_shader_c *cmap_shader = R_GetColormapShader(props, 0, cur_sub->sector);
 
 	data.v_count = (piece_col+1) * 2;
 
@@ -2623,7 +2623,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	if (surf->image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
 			swirl_pass = 1;
 
-	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
+	abstract_shader_c *cmap_shader = R_GetColormapShader(props, 0, cur_sub->sector);
 	
 	cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 			trans, &data.pass, data.blending, false /* masked */,

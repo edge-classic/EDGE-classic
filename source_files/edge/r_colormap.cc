@@ -663,10 +663,14 @@ private:
 	rgbcol_t fog_color;
 	float fog_density;
 
+	// for DDFLEVL fog checks
+	sector_t *sec;
+
 public:
 	colormap_shader_c(const colourmap_c *CM) : colmap(CM),
 		light_lev(255), fade_tex(0),
-		simple_cmap(true), lt_model(LMODEL_Doom), fog_color(RGB_NO_VALUE), fog_density(0)
+		simple_cmap(true), lt_model(LMODEL_Doom), fog_color(RGB_NO_VALUE), fog_density(0),
+		sec(nullptr)
 	{ }
 
 	virtual ~colormap_shader_c()
@@ -739,10 +743,27 @@ public:
 		GLuint tex, float alpha, int *pass_var, int blending,
 		bool masked, void *data, shader_coord_func_t func)
 	{
+		rgbcol_t fc_to_use = fog_color;
+		float fd_to_use = fog_density;
+		// check for DDFLEVL fog
+		if (fc_to_use == RGB_NO_VALUE)
+		{
+			if (IS_SKY(sec->ceil))
+			{
+				fc_to_use = currmap->outdoor_fog_color;
+				fd_to_use = 0.01f * currmap->outdoor_fog_density;
+			}
+			else
+			{
+				fc_to_use = currmap->indoor_fog_color;
+				fd_to_use = 0.01f * currmap->indoor_fog_density;
+			}
+		}
+
 		local_gl_vert_t * glvert = RGL_BeginUnit(shape, num_vert,
 				GL_MODULATE, tex,
 				(simple_cmap || r_dumbmulti.d) ? GL_MODULATE : GL_DECAL,
-				fade_tex, *pass_var, blending, fog_color, fog_density);
+				fade_tex, *pass_var, blending, fc_to_use, fd_to_use);
 
 		for (int v_idx=0; v_idx < num_vert; v_idx++)
 		{
@@ -913,6 +934,11 @@ public:
 		fog_color = _fog_color;
 		fog_density = _fog_density;
 	}
+
+	void SetSector(sector_t *_sec)
+	{
+		sec = _sec;
+	}
 };
 
 
@@ -920,7 +946,7 @@ static colormap_shader_c *std_cmap_shader;
 
 
 abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props,
-		int light_add)
+		int light_add, sector_t *sec)
 {
 	if (! std_cmap_shader)
 		std_cmap_shader = new colormap_shader_c(NULL);
@@ -960,6 +986,8 @@ abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props,
 	shader->SetLight(lit_Nom);
 
 	shader->SetFog(props->fog_color, props->fog_density);
+
+	shader->SetSector(sec);
 
 	return shader;
 }

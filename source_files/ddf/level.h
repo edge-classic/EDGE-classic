@@ -179,6 +179,11 @@ public:
 	// sky stretch override
 	skystretch_e forced_skystretch;
 
+	rgbcol_t indoor_fog_color;
+	float indoor_fog_density;
+	rgbcol_t outdoor_fog_color;
+	float outdoor_fog_density;
+
 private:
 	// disable copy construct and assignment operator
 	explicit mapdef_c(mapdef_c &rhs) { (void) rhs; }

@@ -1535,7 +1535,10 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 		}
 	}
 
-	if (!sd->middle.image)
+	if (sd->middle.fogwall && r_culling.d)
+		sd->middle.image = nullptr; // Don't delete image in case culling is toggled again
+
+	if (!sd->middle.image && !r_culling.d)
 	{
 		if (sec_fc == RGB_NO_VALUE && other_fc != RGB_NO_VALUE)
 		{

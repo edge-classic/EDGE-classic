@@ -333,6 +333,9 @@ void RGL_DrawUnits(void)
 	int active_pass = 0;
 	int active_blending = 0;
 
+	rgbcol_t active_fog_rgb = RGB_NO_VALUE;
+	float active_fog_density = 0;
+
 	for (int i=0; i < cur_unit; i++)
 		local_unit_map[i] = & local_units[i];
 
@@ -400,6 +403,8 @@ void RGL_DrawUnits(void)
 		glFogf(GL_FOG_END, r_farclip.f - 250.0f);
 		glEnable(GL_FOG);
 	}
+	else
+		glFogi(GL_FOG_MODE, GL_EXP); // if needed
 
 	for (int j=0; j < cur_unit; j++)
 	{
@@ -411,16 +416,22 @@ void RGL_DrawUnits(void)
 
 		if (!r_culling.d && unit->fog_color != RGB_NO_VALUE)
 		{
-			rgbcol_t frgb = unit->fog_color;
-			GLfloat fc[4];
-			fc[0] = (float)RGB_RED(frgb)/255.0f;
-			fc[1] = (float)RGB_GRN(frgb)/255.0f; 
-			fc[2] = (float)RGB_BLU(frgb)/255.0f;
-			fc[3] = 1.0f;
-			glClearColor(fc[0], fc[1], fc[2], 1.0f);
-			glFogi(GL_FOG_MODE, GL_EXP);
-			glFogfv(GL_FOG_COLOR, fc);
-			glFogf(GL_FOG_DENSITY, std::log1p(unit->fog_density));
+			if (unit->fog_color != active_fog_rgb)
+			{
+				active_fog_rgb = unit->fog_color;
+				GLfloat fc[4];
+				fc[0] = (float)RGB_RED(active_fog_rgb)/255.0f;
+				fc[1] = (float)RGB_GRN(active_fog_rgb)/255.0f; 
+				fc[2] = (float)RGB_BLU(active_fog_rgb)/255.0f;
+				fc[3] = 1.0f;
+				glClearColor(fc[0], fc[1], fc[2], 1.0f);
+				glFogfv(GL_FOG_COLOR, fc);
+			}
+			if (unit->fog_density != active_fog_density)
+			{
+				active_fog_density = unit->fog_density;
+				glFogf(GL_FOG_DENSITY, std::log1p(active_fog_density));
+			}
 			glEnable(GL_FOG);
 		}
 		else if (!r_culling.d)

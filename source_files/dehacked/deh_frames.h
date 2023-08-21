@@ -1,12 +1,18 @@
 //------------------------------------------------------------------------
 //  FRAME Handling
 //------------------------------------------------------------------------
-// 
-//  DEH_EDGE  Copyright (C) 2004-2005  The EDGE Team
-// 
-//  This program is under the GNU General Public License.
-//  It comes WITHOUT ANY WARRANTY of any kind.
-//  See COPYING.txt for the full details.
+//
+//  DEH_EDGE  Copyright (C) 2004-2023  The EDGE Team
+//
+//  This program is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU General Public License
+//  as published by the Free Software Foundation; either version 3
+//  of the License, or (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License (in COPYING.txt) for more details.
 //
 //------------------------------------------------------------------------
 

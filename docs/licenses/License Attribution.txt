@@ -48,7 +48,7 @@ CC-BY-SA-4.0 International License
 "DMXOPL" and "DMXOPL3" instrument banks - Copyright (c) ConSiGno
 
 ===========================================================================================
-GPL2 License
+GPL3 License
 ===========================================================================================
 
 "Adplug" instrument bank - Copyright (C) 1999, 2000, 2001 Simon Peter, et al.
@@ -57,12 +57,13 @@ AJBSP - Copyright (c) 2000-2023 Andrew Apted, et al
 	 	Copyright (c) 1994-1998 Colin Reed
 	 	Copyright (c) 1997-1998 Lee Killough
 
-COAL - Copyright (c) 2009-2023 Andrew Apted, et al
+COAL - Copyright (c) 2021-2023 The EDGE Team
+	   Copyright (c) 2009-2021 Andrew Apted, et al
        Copyright (c) 1996-1997 Id Software, Inc.
 
 DDF library - Copyright (c) 1999-2023 The EDGE Team
 
-DEHACKED library (formerly DEH_EDGE) - Copyright (c) 2004-2023 The EDGE Team
+DEH_EDGE library - Copyright (c) 2004-2023 The EDGE Team
 
 EC_VOXELIB library - Copyright (c) 2022-2023 The EDGE Team
 					 Copyright (c) 2022 Ketmar Dark

@@ -2,12 +2,13 @@
 //  COAL EXECUTION ENGINE
 //----------------------------------------------------------------------
 // 
-//  Copyright (C)      2009  Andrew Apted
+//  Copyright (C) 2021-2023  The EDGE Team
+//  Copyright (C) 2009-2021  Andrew Apted
 //  Copyright (C) 1996-1997  Id Software, Inc.
 //
 //  Coal is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as
-//  published by the Free Software Foundation; either version 2
+//  published by the Free Software Foundation; either version 3
 //  of the License, or (at your option) any later version.
 //
 //  Coal is distributed in the hope that it will be useful, but

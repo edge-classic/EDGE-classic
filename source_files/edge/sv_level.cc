@@ -268,6 +268,8 @@ static savefield_t sv_fields_regprops[] =
 	SF(push, "push", 1, SVT_VEC3, SR_GetVec3, SR_PutVec3),
 	SF(net_push, "net_push", 1, SVT_VEC3, SR_GetVec3, SR_PutVec3),
 	SF(old_push, "old_push", 1, SVT_VEC3, SR_GetVec3, SR_PutVec3),
+	SF(fog_color, "fog_color", 1, SVT_INT, SR_GetInt, SR_PutInt),
+	SF(fog_density, "fog_density", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
 
 	SVFIELD_END
 };

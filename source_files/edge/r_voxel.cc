@@ -644,7 +644,7 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 		glClearColor(fc[0], fc[1], fc[2], 1.0f);
 		glFogi(GL_FOG_MODE, GL_EXP);
 		glFogfv(GL_FOG_COLOR, fc);
-		glFogf(GL_FOG_DENSITY, std::log1p(fog_density));
+		glFogf(GL_FOG_DENSITY, std::log1p(fd_to_use));
 		glEnable(GL_FOG);
 	}
 	else if (r_culling.d)

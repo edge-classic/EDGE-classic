@@ -1151,7 +1151,7 @@ static void DrawWallPart(drawfloor_t *dfloor,
 	if (surf->image && surf->image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
 		swirl_pass = 1;
 
-	abstract_shader_c *cmap_shader = R_GetColormapShader(props, lit_adjust);
+	abstract_shader_c *cmap_shader = R_GetColormapShader(props, lit_adjust, cur_sub->sector);
 
 	cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 			trans, &data.pass, data.blending, data.mid_masked,
@@ -1500,9 +1500,68 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 	if (sec->heightsec != nullptr)
 		slope_fh = std::min(slope_fh, sec->heightsec->f_h);
 
+	rgbcol_t sec_fc = sec->props.fog_color;
+	float sec_fd = sec->props.fog_density;
+	// check for DDFLEVL fog
+	if (sec_fc == RGB_NO_VALUE)
+	{
+		if (IS_SKY(seg->sidedef->sector->ceil))
+		{
+			sec_fc = currmap->outdoor_fog_color;
+			sec_fd = 0.01f * currmap->outdoor_fog_density;
+		}
+		else
+		{
+			sec_fc = currmap->indoor_fog_color;
+			sec_fc = 0.01f * currmap->indoor_fog_density;
+		}
+	}
+	rgbcol_t other_fc = (other ? other->props.fog_color : RGB_NO_VALUE);
+	float other_fd = (other ? other->props.fog_density : RGB_NO_VALUE);
+	if (other_fc == RGB_NO_VALUE)
+	{
+		if (other)
+		{
+			if (IS_SKY(other->ceil))
+			{
+				other_fc = currmap->outdoor_fog_color;
+				other_fd = currmap->outdoor_fog_density;
+			}
+			else
+			{
+				other_fc = currmap->indoor_fog_color;
+				other_fd = currmap->indoor_fog_density;
+			}
+		}
+	}
+
+	if (sd->middle.fogwall && r_culling.d)
+		sd->middle.image = nullptr; // Don't delete image in case culling is toggled again
+
+	if (!sd->middle.image && !r_culling.d)
+	{
+		if (sec_fc == RGB_NO_VALUE && other_fc != RGB_NO_VALUE)
+		{
+			image_c *fw = (image_c *)W_ImageForFogWall(other_fc);
+			fw->opacity = OPAC_Complex;
+			sd->middle.image = fw;
+			sd->middle.translucency = other_fd * 100;
+			sd->middle.fogwall = true;
+		}
+		else if (sec_fc != RGB_NO_VALUE && other_fc != sec_fc)
+		{
+			image_c *fw = (image_c *)W_ImageForFogWall(sec_fc);
+			fw->opacity = OPAC_Complex;
+			sd->middle.image = fw;
+			sd->middle.translucency = sec_fd * 100;
+			sd->middle.fogwall = true;
+		}
+	}
+
 	if (! other)
 	{
-		if (! sd->middle.image && ! debug_hom.d)
+		if (! sd->middle.image && ! debug_hom.d &&
+			sec_fc != RGB_NO_VALUE)
 			return;
 
 		AddWallTile(seg, dfloor,
@@ -1630,7 +1689,12 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 
 		float f2, c2;
 
-		if (ld->flags & MLF_LowerUnpegged)
+		if (sd->middle.fogwall)
+		{
+			f2 = f1;
+			c2 = c1;
+		}
+		else if (ld->flags & MLF_LowerUnpegged)
 		{
 			f2 = f1 + sd->midmask_offset;
 			c2 = f2 + IM_HEIGHT(sd->middle.image);
@@ -1929,7 +1993,7 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor,
 	data.dh = dh;
 
 
-	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
+	abstract_shader_c *cmap_shader = R_GetColormapShader(props, 0, cur_sub->sector);
 
 	data.v_count = (piece_col+1) * 2;
 
@@ -2602,7 +2666,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	if (surf->image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
 			swirl_pass = 1;
 
-	abstract_shader_c *cmap_shader = R_GetColormapShader(props);
+	abstract_shader_c *cmap_shader = R_GetColormapShader(props, 0, cur_sub->sector);
 	
 	cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id,
 			trans, &data.pass, data.blending, false /* masked */,

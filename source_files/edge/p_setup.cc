@@ -404,6 +404,17 @@ static void LoadSectors(int lump)
 		ss->props.viscosity = VISCOSITY;
 		ss->props.drag      = DRAG;
 
+		if (ss->props.special && ss->props.special->fog_color != RGB_NO_VALUE)
+		{
+			ss->props.fog_color = ss->props.special->fog_color;
+			ss->props.fog_density = 0.01f * ss->props.special->fog_density;
+		}
+		else
+		{
+			ss->props.fog_color = RGB_NO_VALUE;
+			ss->props.fog_density = 0;
+		}
+
 		ss->p = &ss->props;
 
 		ss->sound_player = -1;
@@ -1451,6 +1462,8 @@ static void LoadUDMFSectors()
 		{
 			float cz = 0.0f, fz = 0.0f;
 			int light = 160, type = 0, tag = 0;
+			rgbcol_t fog_color = 0;
+			int fog_density = 0;
 			char floor_tex[10];
 			char ceil_tex[10];
 			strcpy(floor_tex, "-");
@@ -1495,6 +1508,10 @@ static void LoadUDMFSectors()
 					type = epi::LEX_Int(value);
 				else if (key == "id")
 					tag = epi::LEX_Int(value);
+				else if (key == "fadecolor")
+					fog_color = epi::LEX_Int(value);
+				else if (key == "fogdensity")
+					fog_density = CLAMP(0, epi::LEX_Int(value), 510);
 			}
 			sector_t *ss = sectors + cur_sector;
 			ss->f_h = fz;
@@ -1546,6 +1563,31 @@ static void LoadUDMFSectors()
 			ss->props.friction  = FRICTION;
 			ss->props.viscosity = VISCOSITY;
 			ss->props.drag      = DRAG;
+
+			// Allow UDMF sector fog information to override DDFSECT types
+			if (fog_color != 0) // All black is the established UDMF "no fog" color
+			{
+				// Prevent UDMF-specified fog color from having our internal 'no value'...uh...value
+				if (fog_color == RGB_NO_VALUE)
+					fog_color ^= RGB_MAKE(1,1,1);
+				ss->props.fog_color = fog_color;
+				// Best-effort match for GZDoom's fogdensity values so that UDB, etc
+				// give predictable results
+				if (fog_density < 2)
+					ss->props.fog_density = 0.002f;
+				else
+					ss->props.fog_density = 0.005f * ((float)fog_density / 510.0f);
+			}
+			else if (ss->props.special && ss->props.special->fog_color != RGB_NO_VALUE)
+			{
+				ss->props.fog_color = ss->props.special->fog_color;
+				ss->props.fog_density = 0.01f * ss->props.special->fog_density;
+			}
+			else
+			{
+				ss->props.fog_color = RGB_NO_VALUE;
+				ss->props.fog_density = 0;
+			}
 
 			ss->p = &ss->props;
 

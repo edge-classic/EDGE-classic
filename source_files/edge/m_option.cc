@@ -620,7 +620,7 @@ static menuinfo_t gameplay_optmenu =
 static optmenuitem_t perfoptions[] =
 {
 	{OPT_Boolean, "Draw Distance Culling", YesNo, 2, 
-     &r_culling.d, M_UpdateCVARFromInt, NULL, &r_culling},
+     &r_culling.d, M_UpdateCVARFromInt, "Sector/Level Fog will be disabled when this is On", &r_culling},
 	{OPT_FracSlider, "Maximum Draw Distance", NULL, 0, 
      &r_culldist.f, M_UpdateCVARFromFloat, "Only effective when Draw Distance Culling is On", &r_culldist, 200.0f, 1000.0f, 8000.0f, "%g Units"},
 	{OPT_Switch, "Outdoor Culling Fog Color", "Match Sky/White/Grey/Black", 4, 

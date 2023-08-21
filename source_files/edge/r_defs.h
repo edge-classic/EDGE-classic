@@ -124,6 +124,10 @@ typedef struct region_properties_s
 	vec3_t net_push = {0,0,0};
 
 	vec3_t old_push = {0,0,0};
+
+	// sector fog
+	rgbcol_t fog_color = RGB_NO_VALUE;
+	float fog_density = 0;
 }
 region_properties_t;
 
@@ -163,6 +167,9 @@ typedef struct surface_s
 
 	// this only used for BOOM deep water (linetype 242)
 	const colourmap_c *boom_colmap;
+
+	// used for fog boundaries if needed
+	bool fogwall = false;
 }
 surface_t;
 

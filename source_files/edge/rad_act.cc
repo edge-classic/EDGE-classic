@@ -885,6 +885,49 @@ void RAD_ActLightSector(rad_trigger_t *R, void *param)
 	}
 }
 
+void RAD_ActFogSector(rad_trigger_t *R, void *param)
+{
+	s_fogsector_t *t = (s_fogsector_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag == t->tag)
+		{
+			if (!t->leave_color)
+			{
+				if (t->colmap_color)
+					sectors[i].props.fog_color = V_ParseFontColor(t->colmap_color);
+				else // should only happen with a CLEAR directive
+					sectors[i].props.fog_color = RGB_NO_VALUE;
+			}
+			if (!t->leave_density)
+			{
+				if (t->relative)
+				{
+					sectors[i].props.fog_density += (0.01f * t->density);
+					sectors[i].props.fog_density = CLAMP(0, sectors[i].props.fog_density, 0.01f);
+				}
+				else
+					sectors[i].props.fog_density = 0.01f * t->density;
+			}
+			for (int j = 0; j < sectors[i].linecount; j++)
+			{
+				for (int k = 0; k < 2; k++)
+				{
+					side_t *side_check = sectors[i].lines[j]->side[k];
+					if (side_check && side_check->middle.fogwall)
+					{
+						side_check->middle.image = nullptr; // will be rebuilt with proper color later
+															// don't delete the image in case other fogwalls use the same color
+					}
+				}
+			}
+		}
+	}
+}
+
+
 void RAD_ActEnableScript(rad_trigger_t *R, void *param)
 {
 	s_enabler_t *t = (s_enabler_t *) param;

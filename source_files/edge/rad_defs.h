@@ -279,6 +279,24 @@ typedef struct s_lightsector_s
 }
 s_lightsector_t;
 
+//Sector Fog change
+typedef struct s_fogsector_s
+{
+	// tag to apply to
+	int tag = 0;
+
+	// when true, add the value to current density.  Otherwise set it.
+	bool relative = true;
+
+	// when true, leave color or density untouched regardless of this struct's values
+	bool leave_color = false;
+	bool leave_density = false;
+
+	const char *colmap_color = nullptr;
+
+	float density;
+}
+s_fogsector_t;
 
 // Enable/Disable
 typedef struct s_enabler_s

@@ -38,6 +38,9 @@ typedef struct local_gl_vert_s
 }
 local_gl_vert_t;
 
+extern rgbcol_t current_fog_rgb;
+extern GLfloat current_fog_color[4];
+extern float current_fog_density;
 extern GLfloat cull_fog_color[4];
 
 void RGL_InitUnits(void);
@@ -84,7 +87,8 @@ edge_environment_e;
 local_gl_vert_t *RGL_BeginUnit(GLuint shape, int max_vert, 
 		                       GLuint env1, GLuint tex1,
 							   GLuint env2, GLuint tex2,
-							   int pass, int blending);
+							   int pass, int blending, 
+							   rgbcol_t fog_color = RGB_NO_VALUE, float fog_density = 0);
 void RGL_EndUnit(int actual_vert);
 
 

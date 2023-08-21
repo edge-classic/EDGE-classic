@@ -239,7 +239,7 @@ static void RAD_CheckForPercentAny(const char *info, void *storage)
 
 	// just check that the string is valid
 	Z_StrNCpy(s, info, 100);
-	for (p = s; isdigit(*p) || *p == '.'; p++)
+	for (p = s; isdigit(*p) || *p == '-' || *p == '.'; p++)
 	{ /* nothing here */ }
 
 	// the number must be followed by %
@@ -1879,6 +1879,61 @@ static void RAD_ParseLightSector(param_set_t& pars)
 	AddStateToScript(this_rad, 0, RAD_ActLightSector, secl);
 }
 
+static void RAD_ParseFogSector(param_set_t& pars)
+{
+	// FogSector <tag> <color or SAME or CLEAR> <density(%) or SAME or CLEAR>
+	// FogSector <tag> <color or SAME or CLEAR> <density(0-100%) or SAME or CLEAR> ABSOLUTE
+
+	s_fogsector_t *secf;
+
+	secf = new s_fogsector_t;
+
+	RAD_CheckForInt(pars[1], &secf->tag);
+
+	if (secf->tag == 0)
+		RAD_Error("%s: Invalid tag number: %d\n", pars[0], secf->tag);
+
+	if (pars.size() == 4) // color + relative density change
+	{
+		if (DDF_CompareName(pars[2], "SAME") == 0)
+			secf->leave_color = true;
+		else if (DDF_CompareName(pars[2], "CLEAR") == 0)
+		{ /* nothing - we will use null pointer to denote clearing fog later */ }
+		else
+			secf->colmap_color = Z_StrDup(pars[2]);
+		if (DDF_CompareName(pars[3], "SAME") == 0)
+			secf->leave_density = true;
+		else if (DDF_CompareName(pars[3], "CLEAR") == 0)
+		{
+			secf->relative = false;
+			secf->density = 0;
+		}
+		else
+			RAD_CheckForPercentAny(pars[3], &secf->density);
+		AddStateToScript(this_rad, 0, RAD_ActFogSector, secf);
+	}
+	else if (DDF_CompareName(pars[4], "ABSOLUTE") == 0) // color + absolute density change
+	{
+		secf->relative = false;
+		if (DDF_CompareName(pars[2], "SAME") == 0)
+			secf->leave_color = true;
+		else if (DDF_CompareName(pars[2], "CLEAR") == 0)
+		{ /* nothing - we will use null pointer to denote clearing fog later */ }
+		else
+			secf->colmap_color = Z_StrDup(pars[2]);
+		if (DDF_CompareName(pars[3], "SAME") == 0)
+			secf->leave_density = true;
+		else if (DDF_CompareName(pars[3], "CLEAR") == 0)
+			secf->density = 0;
+		else
+			RAD_CheckForPercent(pars[3], &secf->density);
+		AddStateToScript(this_rad, 0, RAD_ActFogSector, secf);
+	}
+	else // shouldn't get here
+		RAD_Error("%s: Malformed FOG_SECTOR command\n");
+}
+
+
 static void RAD_ParseActivateLinetype(param_set_t& pars)
 {
 	// Activate_LineType <linetype> <tag>
@@ -2233,6 +2288,7 @@ static const rts_parser_t radtrig_parsers[] =
 	{2, "HUB_EXIT", 3,3, RAD_ParseHubExit},
 	{2, "MOVE_SECTOR", 4,5, RAD_ParseMoveSector},
 	{2, "LIGHT_SECTOR", 3,4, RAD_ParseLightSector},
+	{2, "FOG_SECTOR", 4,5, RAD_ParseFogSector},
 	{2, "ENABLE_SCRIPT",  2,2, RAD_ParseEnableScript},
 	{2, "DISABLE_SCRIPT", 2,2, RAD_ParseEnableScript},
 	{2, "ENABLE_TAGGED",  2,2, RAD_ParseEnableTagged},

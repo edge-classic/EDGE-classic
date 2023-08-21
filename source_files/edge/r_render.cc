@@ -1500,25 +1500,50 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 	if (sec->heightsec != nullptr)
 		slope_fh = std::min(slope_fh, sec->heightsec->f_h);
 
+	rgbcol_t sec_fc = sec->props.fog_color;
+	float sec_fd = sec->props.fog_density;
+	// check for DDFLEVL fog
+	if (sec_fc == RGB_NO_VALUE)
+	{
+		if (IS_SKY(seg->sidedef->sector->ceil))
+		{
+			sec_fc = currmap->outdoor_fog_color;
+			sec_fd = 0.01f * currmap->outdoor_fog_density;
+		}
+		else
+		{
+			sec_fc = currmap->indoor_fog_color;
+			sec_fc = 0.01f * currmap->indoor_fog_density;
+		}
+	}
+	rgbcol_t other_fc = (other ? other->props.fog_color : RGB_NO_VALUE);
+	if (other_fc == RGB_NO_VALUE)
+	{
+		if (other)
+		{
+			if (IS_SKY(other->ceil))
+				other_fc = currmap->outdoor_fog_color;
+			else
+				other_fc = currmap->indoor_fog_color;
+		}
+	}
+
 	if (!sd->middle.image)
 	{
-		if (sec->props.fog_color != RGB_NO_VALUE)
+		if (sec_fc != RGB_NO_VALUE && sec_fc != other_fc)
 		{
-			if (other && other->props.fog_color != sec->props.fog_color)
-			{
-				image_c *fw = (image_c *)W_ImageForFogWall(seg->sidedef->sector->props.fog_color);
-				fw->opacity = OPAC_Complex;
-				sd->middle.image = fw;
-				sd->middle.translucency = seg->sidedef->sector->props.fog_density * 100;
-				sd->middle.fogwall = true;
-			}
+			image_c *fw = (image_c *)W_ImageForFogWall(sec_fc);
+			fw->opacity = OPAC_Complex;
+			sd->middle.image = fw;
+			sd->middle.translucency = sec_fd * 100;
+			sd->middle.fogwall = true;
 		}
 	}
 
 	if (! other)
 	{
 		if (! sd->middle.image && ! debug_hom.d &&
-			sec->props.fog_color != RGB_NO_VALUE)
+			sec_fc != RGB_NO_VALUE)
 			return;
 
 		AddWallTile(seg, dfloor,

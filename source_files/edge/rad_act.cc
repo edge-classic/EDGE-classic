@@ -906,7 +906,10 @@ void RAD_ActFogSector(rad_trigger_t *R, void *param)
 				if (t->relative)
 				{
 					sectors[i].props.fog_density += (0.01f * t->density);
-					sectors[i].props.fog_density = CLAMP(0, sectors[i].props.fog_density, 0.01f);
+					if (sectors[i].props.fog_density < 0.0001f)
+						sectors[i].props.fog_density = 0;
+					if (sectors[i].props.fog_density > 0.01f)
+						sectors[i].props.fog_density = 0.01f;
 				}
 				else
 					sectors[i].props.fog_density = 0.01f * t->density;

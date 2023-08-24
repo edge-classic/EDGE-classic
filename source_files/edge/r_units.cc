@@ -432,7 +432,10 @@ void RGL_DrawUnits(void)
 				active_fog_density = unit->fog_density;
 				glFogf(GL_FOG_DENSITY, std::log1p(active_fog_density));
 			}
-			glEnable(GL_FOG);
+			if (active_fog_density > 0.00009f)
+				glEnable(GL_FOG);
+			else
+				glDisable(GL_FOG);
 		}
 		else if (!r_culling.d)
 			glDisable(GL_FOG);

@@ -30,7 +30,8 @@
 //**      ###   ##    ##   ###    ##  ##   ##  ##  ##       ##
 //**       #    ##    ##    #      ####     ####   ##       ##
 //**
-//**  Copyright (C) 2022 Ketmar Dark
+//**  Copyright (C) 2022-2023 Ketmar Dark
+//**  Version 1.01
 //**
 //**  This program is free software: you can redistribute it and/or modify
 //**  it under the terms of the GNU General Public License as published by
@@ -288,9 +289,8 @@ public:
   //inline void reserve (int maxsize) { if (maxsize > ArrSize) return resize(maxsize); }
 
   template<bool DoResize=true, bool DoReserve=false> void setLength (int NewNum) {
-    vassert(NewNum >= 0);    
-    bool doResize = DoResize; // silence constant in conditional warning
-    if (doResize || NewNum > ArrSize) {
+    vassert(NewNum >= 0);
+    if (DoResize || NewNum > ArrSize) {
       resize(NewNum+(DoReserve ? NewNum*3/8+(NewNum < 64 ? 64 : 0) : 0));
     }
     vassert(ArrSize >= NewNum);
@@ -601,7 +601,7 @@ private:
   int imgWidth, imgHeight;
   VoxLibArray<Rect> rects;
 
-  const uint32_t BadRect = 0xffffffff;
+  enum { BadRect = 0xffffffffU };
 
   // node id or BadRect
   uint32_t findBestFit (int w, int h);
@@ -1255,7 +1255,7 @@ struct VoxByteStream {
   // seek to the given byte
   // guaranteed to always seek forward
   // should return `false` on error
-  // note that the caller may ask to seek outside the stread
+  // note that the caller may ask to seek outside of the stream
   // in this case, return `false`
   bool (*seek) (uint32_t ofs, VoxByteStream *strm);
 
@@ -1305,13 +1305,19 @@ VoxFmt vox_detectFormat (const uint8_t bytes[4]);
 // WARNING! does no format detection checks!
 // `defpal` is the default palette in `r, g, b` triplets
 // palette colors should be in [0..255] range
-bool vox_loadKVX (VoxByteStream &strm, VoxelData &vox, const uint8_t defpal[768]);
-bool vox_loadKV6 (VoxByteStream &strm, VoxelData &vox);
-bool vox_loadVxl (VoxByteStream &strm, VoxelData &vox);
+// if `sign` is not `NULL`, first 4 bytes of the stream were already read and checked
+bool vox_loadKVX (VoxByteStream &strm, VoxelData &vox, const uint8_t defpal[768],
+                  const uint8_t sign[4]=NULL);
+bool vox_loadKV6 (VoxByteStream &strm, VoxelData &vox, const uint8_t sign[4]=NULL);
+bool vox_loadVxl (VoxByteStream &strm, VoxelData &vox, const uint8_t sign[4]=NULL);
 // raw voxel cube with dimensions
-bool vox_loadVox (VoxByteStream &strm, VoxelData &vox, const uint8_t defpal[768]);
+bool vox_loadVox (VoxByteStream &strm, VoxelData &vox, const uint8_t defpal[768],
+                  const uint8_t sign[4]=NULL);
 // Magica Voxel (only first model)
-bool vox_loadMagica (VoxByteStream &strm, VoxelData &vox);
+bool vox_loadMagica (VoxByteStream &strm, VoxelData &vox, const uint8_t sign[4]=NULL);
+
+// this tries to detect model format
+bool vox_loadModel (VoxByteStream &strm, VoxelData &vox, const uint8_t defpal[768]);
 
 
 #endif

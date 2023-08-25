@@ -174,18 +174,8 @@ void RGL_CheckExtensions(void)
 	}
 
 #ifndef EDGE_GL_ES2
-
-	// Check for various extensions
-
-	// We only use VBOs on the GLES2/Web path for now
-	//if (GLAD_GL_VERSION_1_5 || GLAD_GL_ARB_vertex_buffer_object)
-	//{ /* OK */ }
-	//else
-	//	I_Error("OpenGL driver does not support Vertex Buffer Objects.\n");
-
-	if (!GLAD_GL_VERSION_1_3)
-		I_Error("OpenGL supported version below minimum! (Requires OpenGL 1.3).\n");
-
+	if (!GLAD_GL_VERSION_1_5)
+		I_Error("OpenGL supported version below minimum! (Requires OpenGL 1.5).\n");
 #endif
 
 }

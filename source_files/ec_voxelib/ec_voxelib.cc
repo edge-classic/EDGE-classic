@@ -30,7 +30,7 @@
 //**      ###   ##    ##   ###    ##  ##   ##  ##  ##       ##
 //**       #    ##    ##    #      ####     ####   ##       ##
 //**
-//**  Copyright (C) 2022 Ketmar Dark
+//**  Copyright (C) 2023 Ketmar Dark
 //**
 //**  This program is free software: you can redistribute it and/or modify
 //**  it under the terms of the GNU General Public License as published by
@@ -621,6 +621,8 @@ void VoxelData::setSize (uint32_t xs, uint32_t ys, uint32_t zs) {
 //
 //==========================================================================
 void VoxelData::removeVoxel (int x, int y, int z) {
+  if (x < 0 || y < 0 || z < 0) return;
+  if ((uint32_t)x >= xsize || (uint32_t)y >= ysize || (uint32_t)z >= zsize) return;
   uint32_t dofs = getDOfs(x, y);
   uint32_t prevdofs = 0;
   while (dofs) {
@@ -1181,11 +1183,11 @@ uint32_t VoxelDataSmall::queryVox (int x, int y, int z) {
       return *dv;
     } else {
       dptr -= 4;
-      const uint16_t curZ = *dptr;
-      vassert(curZ < z);
+      const uint16_t cz = *dptr;
+      vassert(cz < z);
       if ((uint16_t)z >= dptr[1]) return 0; // no such voxel
       const uint32_t *dv = (const uint32_t *)(((const uint8_t *)dptr)+dptr[2]);
-      return *(dv+z-curZ);
+      return *(dv+z-cz);
     }
   } else {
     // perform binary search
@@ -1953,7 +1955,7 @@ void GLVoxelMesh::clear () {
   so i simply created a bitmap that tells if there is any vertex
   at the given grid coords, and then walk over the edge, checking
   the bitmap, and adding the vertices. this is easy too, because
-  all vertices are parallel to one of the coordinate axes. so no
+  all vertices are parallel to one of the coordinate axes; so no
   complex math required at all.
 
   another somewhat complex piece of code is triangle fan creator.
@@ -1971,7 +1973,7 @@ void GLVoxelMesh::clear () {
 
   fourth: no above conditions are satisfied.
   this is the most complex case: to create a fan without degenerate triangles,
-  we have to add a vertex in the center of the quad, and used it as a start of
+  we have to add a vertex in the center of the quad, and use it as a start of
   a triangle fan.
 
   note that we can always convert our triangle fans into triangle soup, so i
@@ -2122,12 +2124,14 @@ void GLVoxelMesh::fixEdgeNew (uint32_t eidx) {
   float gxyz[3];
   for (uint32_t f = 0; f < 3; ++f) gxyz[f] = vertices[edge.v0].get(f);
   const float step = (edge.dir < 0.0f ? -1.0f : +1.0f);
-  gxyz[edge.axis] += step;
-  while (gxyz[edge.axis] != edge.chi) {
-    if (hasVertexAt(gxyz[0], gxyz[1], gxyz[2])) {
-      fixEdgeWithVert(edge, gxyz[edge.axis]);
-    }
+  if (fabs(gxyz[edge.axis]-edge.chi) > 0.00001f) {
     gxyz[edge.axis] += step;
+    while (fabs(gxyz[edge.axis]-edge.chi) > 0.00001f) {
+      if (hasVertexAt(gxyz[0], gxyz[1], gxyz[2])) {
+        fixEdgeWithVert(edge, gxyz[edge.axis]);
+      }
+      gxyz[edge.axis] += step;
+    }
   }
 }
 
@@ -2512,10 +2516,14 @@ void GLVoxelMesh::create (VoxelMesh &vox, bool tjfix, uint32_t BreakIndex) {
   }
 
   if (tjfix) {
-    fixTJunctions();
-    if (voxlib_verbose) {
-      vox_logf(VoxLibMsg_Normal, "OpenGL: with fixed t-junctions: %s tris",
-               vox_comatoze(countTris()));
+    if (vertices.length() > 4 &&
+        (vmax[0]-vmin[0] > 1 || vmax[1]-vmin[1] > 1 || vmax[2]-vmin[2] > 1))
+    {
+      fixTJunctions();
+      if (voxlib_verbose) {
+        vox_logf(VoxLibMsg_Normal, "OpenGL: with fixed t-junctions: %s tris",
+                 vox_comatoze(countTris()));
+      }
     }
   }
 
@@ -2635,23 +2643,6 @@ static inline bool readBuf (VoxByteStream &strm, void *buf, uint32_t len, uint32
 }
 
 
-//==========================================================================
-//
-//  vox_detectFormat
-//
-//  detect voxel file format by the first 4 file bytes
-//  KVX format has no signature, so it cannot be reliably detected
-//
-//==========================================================================
-VoxFmt vox_detectFormat (const uint8_t bytes[4]) {
-  if (!bytes) return VoxFmt_Unknown;
-  if (memcmp(bytes, "Kvxl", 4) == 0) return VoxFmt_KV6;
-  if (memcmp(bytes, "VOX ", 4) == 0) return VoxFmt_Magica;
-  if (memcmp(bytes, "\x00\x20\x07\x09", 4) == 0) return VoxFmt_Vxl;
-  return VoxFmt_Unknown;
-}
-
-
 #define CHECK_STRM()  \
   if (!strm.readBuf || !strm.seek || !strm.totalSize) return false; \
   uint32_t cpos = 0; \
@@ -2663,7 +2654,9 @@ VoxFmt vox_detectFormat (const uint8_t bytes[4]) {
 //  vox_loadKVX
 //
 //==========================================================================
-bool vox_loadKVX (VoxByteStream &strm, VoxelData &vox, const uint8_t defpal[768]) {
+bool vox_loadKVX (VoxByteStream &strm, VoxelData &vox, const uint8_t defpal[768],
+                  const uint8_t sign[4])
+{
   CHECK_STRM();
 
   if (tsize < 28 || tsize > 0x00ffffffU) {
@@ -2671,7 +2664,12 @@ bool vox_loadKVX (VoxByteStream &strm, VoxelData &vox, const uint8_t defpal[768]
     return false;
   }
 
-  uint32_t fsize = readULong(strm, &cpos);
+  uint32_t fsize;
+  if (sign == NULL) {
+    fsize = readULong(strm, &cpos);
+  } else {
+    memcpy(&fsize, (const void *)sign, 4);
+  }
   if (WASERR() || fsize < 4*6 || fsize > 0x00ffffffU || fsize > tsize) {
     vox_logf(VoxLibMsg_Error, "invalid voxel data (kvx) (fsize=%u)", fsize);
     return false;
@@ -2794,7 +2792,7 @@ bool vox_loadKVX (VoxByteStream &strm, VoxelData &vox, const uint8_t defpal[768]
 //  vox_loadKV6
 //
 //==========================================================================
-bool vox_loadKV6 (VoxByteStream &strm, VoxelData &vox) {
+bool vox_loadKV6 (VoxByteStream &strm, VoxelData &vox, const uint8_t bsign[4]) {
   struct KVox {
     uint32_t rgb;
     uint16_t z;
@@ -2809,7 +2807,12 @@ bool vox_loadKV6 (VoxByteStream &strm, VoxelData &vox) {
     return false;
   }
 
-  uint32_t sign = readULong(strm, &cpos); CHECKERR();
+  uint32_t sign;
+  if (bsign == NULL) {
+    sign = readULong(strm, &cpos); CHECKERR();
+  } else {
+    memcpy(&sign, (const void *)bsign, 4);
+  }
   if (sign != 0x6c78764bU) {
     vox_logf(VoxLibMsg_Error, "invalid voxel data signature (kv6)");
     return false;
@@ -2843,7 +2846,7 @@ bool vox_loadKV6 (VoxByteStream &strm, VoxelData &vox) {
     uint8_t r8 = readUByte(strm, &cpos); CHECKERR();
     uint8_t g8 = readUByte(strm, &cpos); CHECKERR();
     uint8_t b8 = readUByte(strm, &cpos); CHECKERR();
-    kv.rgb = b8|(g8<<8)|(r8<<16);
+    kv.rgb = r8|(g8<<8)|(b8<<16);
     uint8_t dummy = readUByte(strm, &cpos); CHECKERR(); // always 128; ignore
     (void)dummy;
     uint8_t zlo = readUByte(strm, &cpos); CHECKERR();
@@ -2908,7 +2911,9 @@ bool vox_loadKV6 (VoxByteStream &strm, VoxelData &vox) {
 //  vox_loadVox
 //
 //==========================================================================
-bool vox_loadVox (VoxByteStream &strm, VoxelData &vox, const uint8_t defpal[768]) {
+bool vox_loadVox (VoxByteStream &strm, VoxelData &vox, const uint8_t defpal[768],
+                  const uint8_t sign[4])
+{
   CHECK_STRM();
 
   if (tsize < 16 || tsize > 0x03ffffffU) {
@@ -2916,7 +2921,12 @@ bool vox_loadVox (VoxByteStream &strm, VoxelData &vox, const uint8_t defpal[768]
     return false;
   }
 
-  int32_t xsiz = readILong(strm, &cpos); CHECKERR();
+  int32_t xsiz;
+  if (sign == NULL) {
+    xsiz = readILong(strm, &cpos); CHECKERR();
+  } else {
+    memcpy(&xsiz, (const void *)sign, 4);
+  }
   int32_t ysiz = readILong(strm, &cpos); CHECKERR();
   int32_t zsiz = readILong(strm, &cpos); CHECKERR();
   if (voxlib_verbose) vox_logf(VoxLibMsg_Normal, "voxel size: %dx%dx%d", xsiz, ysiz, zsiz);
@@ -2985,7 +2995,7 @@ bool vox_loadVox (VoxByteStream &strm, VoxelData &vox, const uint8_t defpal[768]
 //  vox_loadVxl
 //
 //==========================================================================
-bool vox_loadVxl (VoxByteStream &strm, VoxelData &vox) {
+bool vox_loadVxl (VoxByteStream &strm, VoxelData &vox, const uint8_t bsign[4]) {
   CHECK_STRM();
 
   if (tsize < 32 || tsize > 0x00ffffffU) {
@@ -2993,7 +3003,12 @@ bool vox_loadVxl (VoxByteStream &strm, VoxelData &vox) {
     return false;
   }
 
-  uint32_t sign = readULong(strm, &cpos); CHECKERR();
+  uint32_t sign;
+  if (bsign == NULL) {
+    sign = readULong(strm, &cpos); CHECKERR();
+  } else {
+    memcpy(&sign, (const void *)bsign, 4);
+  }
   if (sign != 0x09072000U) {
     vox_logf(VoxLibMsg_Error, "invalid voxel data signature (vxl)");
     return false;
@@ -3093,7 +3108,7 @@ bool vox_loadVxl (VoxByteStream &strm, VoxelData &vox) {
 //  Magica Voxel (only first model)
 //
 //==========================================================================
-bool vox_loadMagica (VoxByteStream &strm, VoxelData &vox) {
+bool vox_loadMagica (VoxByteStream &strm, VoxelData &vox, const uint8_t bsign[4]) {
   struct XYZI {
     uint8_t x;
     uint8_t y;
@@ -3110,7 +3125,12 @@ bool vox_loadMagica (VoxByteStream &strm, VoxelData &vox) {
   }
 
   // check signature
-  uint32_t sign = readULong(strm, &cpos); CHECKERR();
+  uint32_t sign;
+  if (bsign == NULL) {
+    sign = readULong(strm, &cpos); CHECKERR();
+  } else {
+    memcpy(&sign, (const void *)bsign, 4);
+  }
   if (sign != 0x20584f56U) {
     vox_logf(VoxLibMsg_Error, "invalid magica signature (0x%08x)", sign);
     return false;
@@ -3316,4 +3336,59 @@ bool vox_loadMagica (VoxByteStream &strm, VoxelData &vox) {
   vox.cz = pz;
 
   return true;
+}
+
+
+//==========================================================================
+//
+//  vox_detectFormat
+//
+//  detect voxel file format by the first 4 file bytes
+//  KVX format has no signature, so it cannot be reliably detected
+//
+//==========================================================================
+VoxFmt vox_detectFormat (const uint8_t bytes[4]) {
+  if (!bytes) return VoxFmt_Unknown;
+  if (memcmp(bytes, "Kvxl", 4) == 0) return VoxFmt_KV6;
+  if (memcmp(bytes, "VOX ", 4) == 0) return VoxFmt_Magica;
+  if (memcmp(bytes, "\x00\x20\x07\x09", 4) == 0) return VoxFmt_Vxl;
+  return VoxFmt_Unknown;
+}
+
+
+//==========================================================================
+//
+//  vox_loadModel
+//
+//  this tries to detect model format
+//
+//==========================================================================
+bool vox_loadModel (VoxByteStream &strm, VoxelData &vox, const uint8_t defpal[768]) {
+  uint8_t sign[4];
+  if (!strm.readBuf || !strm.seek || !strm.totalSize) return false;
+  const uint32_t tsize = strm.totalSize(&strm);
+  if (tsize < 8) return false;
+  if (!strm.readBuf(sign, 4, &strm)) return false;
+  const VoxFmt fmt = vox_detectFormat(sign);
+  bool ok = false;
+  switch (fmt) {
+    case VoxFmt_Unknown: // assume KVX
+      vox_logf(VoxLibMsg_Debug, "loading KVX...");
+      ok = vox_loadKVX(strm, vox, defpal, sign);
+      break;
+    case VoxFmt_KV6:
+      vox_logf(VoxLibMsg_Debug, "loading KV6...");
+      ok = vox_loadKV6(strm, vox, sign);
+      break;
+    case VoxFmt_Magica:
+      vox_logf(VoxLibMsg_Debug, "loading Magica...");
+      ok = vox_loadMagica(strm, vox, sign);
+      break;
+    case VoxFmt_Vxl:
+      vox_logf(VoxLibMsg_Error, "cannot load voxel model in VXL format");
+      break;
+    default:
+      break;
+  }
+  return ok;
 }

@@ -121,16 +121,19 @@ public:
 
 	const char *name;
 
-	GLuint vbo; // One VBO updated with lerping info
+	GLuint vbo;
+
+	local_gl_vert_t *gl_verts;
 
 public:
 	vxl_model_c(int _nframe, int _npoint, int _ntris) :
 		num_points(_npoint), num_tris(_ntris), 
-		verts_per_frame(0), vbo(0)
+		verts_per_frame(0), vbo(0), gl_verts(nullptr)
 	{
 		frame = new vxl_frame_c;
 		points = new vxl_point_c[num_points];
 		tris = new vxl_triangle_c[num_tris];
+		gl_verts = new local_gl_vert_t[num_points];
 	}
 
 	~vxl_model_c()
@@ -159,6 +162,7 @@ vxl_model_c *VXL_LoadModel(epi::file_c *f, const char *name)
 	u8_t *vox_data = f->LoadIntoMemory();
 
 	VoxMemByteStream mst;
+	VoxelData vox;
     VoxByteStream *xst = vox_InitMemoryStream(&mst, vox_data, f->GetLength());
 
 	uint8_t defpal[768];
@@ -169,26 +173,7 @@ vxl_model_c *VXL_LoadModel(epi::file_c *f, const char *name)
       defpal[cidx*3+2] = playpal_data[0][cidx][2];
     }
 
-	VoxelData vox;
-    const VoxFmt vfmt = vox_detectFormat((const uint8_t *)vox_data);
-    bool ok = false;
-    switch (vfmt) {
-      case VoxFmt_Unknown: // assume KVX
-        I_Printf("VXL_LoadModel: loading KVX...\n");
-        ok = vox_loadKVX(*xst, vox, defpal);
-        break;
-      case VoxFmt_KV6:
-        I_Printf("VXL_LoadModel: Loading KV6...\n");
-        ok = vox_loadKV6(*xst, vox);
-        break;
-      case VoxFmt_Vxl:
-        I_Error("VXL_LoadModel: Cannot load voxel model in VXL format!");
-		return nullptr; // not reached
-        break;
-      default:
-        break;
-    }
-    if (!ok) 
+    if (!vox_loadModel(*xst, vox, defpal)) 
 	{
 		I_Error("VXL_LoadModel: Failed to load voxel model!\n");
 		return nullptr; // not reached
@@ -196,7 +181,7 @@ vxl_model_c *VXL_LoadModel(epi::file_c *f, const char *name)
 
 	bool doHollowFill = true;
     bool fixTJunctions = false;
-    const uint32_t BreakIndex = 65535;
+    const uint32_t BreakIndex = 123456789;
     int optLevel = 4;
 
 	vox.optimise(doHollowFill);
@@ -281,13 +266,11 @@ vxl_model_c *VXL_LoadModel(epi::file_c *f, const char *name)
 
 	glvmesh.clear();
 	voxel_verts.clear();
-#ifdef EDGE_GL_ES2
 	glGenBuffers(1, &md->vbo);
 	if (md->vbo == 0)
 		I_Error("VXL_LoadModel: Failed to bind VBO!\n");
 	glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
-	glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), NULL, GL_STREAM_DRAW);
-#endif
+	glBufferData(GL_ARRAY_BUFFER, md->num_points * sizeof(local_gl_vert_t), NULL, GL_STREAM_DRAW);
 	return md;
 }
 
@@ -632,8 +615,6 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 			fd_to_use = 0.01f * currmap->indoor_fog_density;
 		}
 	}
-#ifdef EDGE_GL_ES2
-	glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
 	if (!r_culling.d && fc_to_use != RGB_NO_VALUE)
 	{
 		GLfloat fc[4];
@@ -697,16 +678,13 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 	}
 	else
 		glDisable(GL_FOG);
-#endif
 	for (int pass = 0; pass < num_pass; pass++)
 	{
 		if (pass == 1)
 		{
 			blending &= ~BL_Alpha;
 			blending |=  BL_Add;
-#ifdef EDGE_GL_ES2
 			glDisable(GL_FOG);
-#endif
 		}
 
 		data.is_additive = (pass > 0 && pass == num_pass-1);
@@ -722,7 +700,6 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 			if (MDL_MulticolMaxRGB(&data, true) <= 0)
 				continue;
 		}
-#ifdef EDGE_GL_ES2
 		GLuint model_env = data.is_additive ? ENV_SKIP_RGB : GL_MODULATE;
 
 		glPolygonOffset(0, -pass);
@@ -798,7 +775,7 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 				r_dumbclamp.d ? GL_CLAMP : GL_CLAMP_TO_EDGE);
 		}
 
-		local_gl_vert_t *start = (local_gl_vert_t *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+		local_gl_vert_t *start = md->gl_verts;
 
 		for (int i = 0; i < md->num_tris; i++)
 		{
@@ -815,9 +792,9 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 			}
 		}
 
-		glUnmapBuffer(GL_ARRAY_BUFFER);
-
-		// setup pointers to client state
+		// setup client state
+		glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
+		glBufferData(GL_ARRAY_BUFFER, md->num_points * sizeof(local_gl_vert_t), md->gl_verts, GL_STREAM_DRAW);
 		glVertexPointer(3, GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, pos.x)));
 		glColorPointer (4, GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, rgba)));
 		glNormalPointer(GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, normal.x)));
@@ -833,32 +810,7 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 		// restore the clamping mode
 		if (old_clamp != 789)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, old_clamp);
-#else
-	local_gl_vert_t * glvert = RGL_BeginUnit(
-			 GL_TRIANGLES, md->num_tris * 3,
-			 data.is_additive ? ENV_SKIP_RGB : GL_MODULATE, skin_tex,
-			 ENV_NONE, 0, pass, blending, pass > 0 ? RGB_NO_VALUE : fc_to_use,
-				 fd_to_use);
-
-		for (int i = 0; i < md->num_tris; i++)
-		{
-			data.tri = & md->tris[i];
-
-			for (int v_idx=0; v_idx < 3; v_idx++)
-			{
-				local_gl_vert_t *dest = glvert + (i*3) + v_idx;
-
-				ModelCoordFunc(&data, v_idx, &dest->pos, dest->rgba,
-						&dest->texc[0], &dest->normal);
-
-				dest->rgba[3] = trans;
-			}
-		}
-
-		RGL_EndUnit(md->num_tris * 3);
-#endif
 	}
-#ifdef EDGE_GL_ES2
 	glPolygonOffset(0, 0);
 
 	glDisable(GL_TEXTURE_2D);
@@ -872,7 +824,6 @@ void VXL_RenderModel(vxl_model_c *md, bool is_weapon,
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
-#endif
 }
 
 

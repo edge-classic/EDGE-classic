@@ -2,39 +2,87 @@ https://github.com/edge-classic/EDGE-classic
 
 Current as of: August 2023
 
-CHANGELOG for EDGE-Classic 1.35 (since EDGE-Classic 1.34.1)
+CHANGELOG for EDGE-Classic 1.34.2 (since EDGE-Classic 1.34.1)
 ====================================
 
 
 New Features
 ------------
-- New "g_gore" CVAR: disable blood and death animations
-- New skydrawing options for non-skyboxes
-- New console command "openhome": will open the folder where EC is storing it's home data.
-+ WEAPONS.DDF
-  - New command: IGNORE_CROSSHAIR_SCALING = <boolean>
+- "Extra Blood" under Gameplay Options renamed to "Blood Level" and "None" added to 
+  the list of choices
+  - Setting to None will disable blood splats, death and overkill states; enemies
+    will instead teleport out of existence on death (similar to Chex Quest)
+- "Sky Scaling" added to Video Options menu, replacing the previous methods of drawing
+  non-skybox skies. The following choices are available:
+  - Mirror: Will invert the sky texture at the horizon, scaled to account for vertical mouselook.
+  - Repeat: Will repeat the sky texture at the horizon, scaled to account for vertical mouselook.
+  - Stretch: Will stretch from top to bottom to avoid texture repeat, scaled to account for vertical
+    mouselook. Does not preserve the original width/height ratio of the image.
+  - Vanilla: Will draw the sky texture once, but does not scale or otherwise account for vertical mouselook.
+  - For all options, the top and bottom of the faux skybox will have an appropriately color-matched cap.
+  - The Vanilla option will be forced when mouselook is disabled.
+  - Sky stretching for a level can be overridden via the new DDFLEVEL SKY_STRETCH special, using
+    the names above.
+- New console command "openhome": will open the folder where EC is storing its home data
+  - In portable mode, this will open the directory where the executable is located
+- WEAPONS.DDF
+  - New command: IGNORE_CROSSHAIR_SCALING = \<boolean\>
     - If this weapon has custom crosshair sprites, they will not be affected by Video menu option "Crosshair Size".
+- Added support for the vWAD format as a recognized archive for pack file usage
+  - Description of vWAD specification can be found at the top of https://github.com/edge-classic/EDGE-classic/blob/master/source_files/libvwad/vwadvfs.h
+- Implemented sector and level-wide fog options
+  - DDFSECT Implementation
+    - FOG_COLOR = \<color\>; Sets the sector's fog color to the RGB value of the provided colormap entry
+    - FOG_DENSITY = \<0-100%\>; Sets the sector's fog density based on the provided percentage
+  - UDMF Implementation
+    - fadecolor = \<0xRRGGBB\>; Sets the sector's fog color to the hexadecimal RGB value provided
+    - fogdensity = \<0-1020\>; Sets the sector's fog density according to GZDoom's usage of this parameter
+      - Map editors may cap this value to 510; see docs/specifications/UDMF EDGE Extensions.txt for more details
+  - RTS Sector Fog Commands
+    - FOG_SECTOR \<tag\> \<color or SAME or CLEAR\> \<density(0-100%) or SAME or CLEAR\> ABSOLUTE
+      - Color and density params match those in DDFSECT
+      - SAME preserves the existing value; CLEAR sets it to the default (no fog) values
+      - ABSOLUTE is an optional parameter; if absent then the density is changed relative to the existing fog density of the sector
+        - Negative percentages are only allowed when performing relative density changes
+  - DDFLEVL Implementation
+    - INDOOR_FOG_COLOR = \<color\>; Sets the fog color for all indoor sectors to the RGB value of the provided colormap entry
+    - INDOOR_FOG_DENSITY = \<0-100%\>; Sets the fog density for all indoor sectors to the provided percentage
+    - OUTDOOR_FOG_COLOR = \<color\>; Sets the fog color for all outdoor sectors to the RGB value of the provided colormap entry
+    - OUTDOOR_FOG_DENSITY = \<0-100%\>; Sets the fog density for all outdoor sectors to the provided percentage
 
 
 General Improvements/Changes
 --------------------
-- DDFTHING: Implemented WALL Glow Type
+- DDFTHING: Implemented previously referenced WALL Glow Type
   - Same parameters as other glow types
   - Will only work on one linedef per glow mobj
     - Glow mobj must be touching the desired wall/linedef to be effective
-
-- Gameplay option "Blood" can be set to "None"
-- For standalone games, EDGEIWAD has been changed to EDGEGAME
+- For standalone games, EDGEIWAD has been changed to EDGEGAME to account for the fact that
+  a pack file may be used intsead of a WAD to distribute a game
 - Auto-aim now targets "fuzzy" monsters i.e. Specters
+- Improved Unicode path support for international locales
+- Models will no longer be drawn if completely behind the view plane, reducing rendering overhead
+- Voxel skins are now always uploaded with GL_NEAREST scaling instead of GL_LINEAR to preserve their intended look
+- Plane movers are now disabled for sectors which have vertex slopes (this is not supported and caused very interesting results)
  
 
 Bugs fixed
 ----------
-- Weapon Kick will now work when Mouselook is disabled
+- Migrated all model rendering to use VBOs regardless of rendering path (GL vs. GLES), fixing CTDs when
+  the number of vertices for a model exceeded the size of the gl vertex array used by the unit rendering system
+- Reverted to AJBSP 1.03's DetectOverlapping* methods to fix a situation where overlapping linedefs facing
+  opposite directions would result in neither of them being rendered
+- Fixed the PalettisedtoRGB function accepting PNG/JPG/TGA images and treating them as palettised.
+- Fixed plane movers having unpredictable functionality when using a repeatable trigger type and
+  already being at their destination height
+- Migrated away from legacy SDL1 functions for interacting with sound devices, fixing possible
+  race conditions when the device was not being locked or unlocked at the expected time
+- Fixed weapon kick not working when mouselook was disabled
 - Fixed CTD involving liquid swirl checks when debug_hom is set to 1
-- Old pre-EC legacy issue: map AMBUSH flag was being lost if mobj was being replaced during 
+- Fixed pre-EC legacy issue: map AMBUSH flag was being lost if mobj was being replaced during 
   gameplay via BECOME
-- RTS scripts using ON_DEATH conditions would not work from a load game.
-- Automap key display shows Boom style locks
-- Change draw order of "Entering" and "you are here" intermission graphics 
-- Old pre-EC legacy issue: crushed monsters never entered their GIB states 
+- Fixed RTS scripts using ON_DEATH conditions not working from a loaded game
+- Fixed automap key display not showing Boom style locks
+- Changed draw order of "Entering" and "You Are Here" intermission graphics to prevent the
+  next level name from being obscured
+- Fixed pre-EC legacy issue: crushed monsters never entered their GIB states 

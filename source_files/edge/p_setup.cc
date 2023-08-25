@@ -1511,7 +1511,7 @@ static void LoadUDMFSectors()
 				else if (key == "fadecolor")
 					fog_color = epi::LEX_Int(value);
 				else if (key == "fogdensity")
-					fog_density = CLAMP(0, epi::LEX_Int(value), 510);
+					fog_density = CLAMP(0, epi::LEX_Int(value), 1020);
 			}
 			sector_t *ss = sectors + cur_sector;
 			ss->f_h = fz;
@@ -1576,7 +1576,7 @@ static void LoadUDMFSectors()
 				if (fog_density < 2)
 					ss->props.fog_density = 0.002f;
 				else
-					ss->props.fog_density = 0.005f * ((float)fog_density / 510.0f);
+					ss->props.fog_density = 0.01f * ((float)fog_density / 1020.0f);
 			}
 			else if (ss->props.special && ss->props.special->fog_color != RGB_NO_VALUE)
 			{

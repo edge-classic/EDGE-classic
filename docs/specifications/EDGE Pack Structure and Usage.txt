@@ -3,7 +3,7 @@
 EDGE Pack Structure and Usage
 =======================================
 
-by The EDGE Team.  April 2023.
+by The EDGE Team.  August 2023.
 
 =======================================
 Introduction

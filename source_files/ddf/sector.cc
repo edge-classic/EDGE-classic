@@ -22,6 +22,7 @@
 
 #include "local.h"
 
+#include "colormap.h"
 #include "line.h"
 
 #undef  DF
@@ -84,7 +85,7 @@ static const commandlist_t sect_commands[] =
 	DF("FLOOR_BOB", floor_bob, DDF_MainGetFloat),
 	DF("CEILING_BOB", ceiling_bob, DDF_MainGetFloat),
 
-	DF("FOG_COLOR", fog_color, DDF_MainGetRGB),
+	DF("FOG_COLOR", fog_cmap, DDF_MainGetColourmap),
 	DF("FOG_DENSITY", fog_density, DDF_MainGetPercent),
 
 	DDF_CMD_END
@@ -178,7 +179,8 @@ static void SectorParseField(const char *field, const char *contents,
 //
 static void SectorFinishEntry(void)
 {
-	// TODO: check stuff
+	if (dynamic_sector->fog_cmap)
+		dynamic_sector->fog_color = dynamic_sector->fog_cmap->gl_colour;
 }
 
 //
@@ -520,6 +522,7 @@ void sectortype_c::CopyDetail(sectortype_c &src)
 	floor_bob = src.floor_bob;
 	ceiling_bob = src.ceiling_bob;
 
+	fog_cmap = src.fog_cmap;
 	fog_color = src.fog_color;
 	fog_density = src.fog_density;
 }
@@ -564,6 +567,7 @@ void sectortype_c::Default()
 	floor_bob = 0.0f;
 	ceiling_bob = 0.0f;
 
+	fog_cmap = nullptr;
 	fog_color = RGB_NO_VALUE;
 	fog_density = 0;
 }

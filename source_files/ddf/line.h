@@ -965,6 +965,7 @@ public:
 	float floor_bob;
 	float ceiling_bob;
 
+	colourmap_c *fog_cmap;
 	rgbcol_t fog_color;
 	float fog_density;
 

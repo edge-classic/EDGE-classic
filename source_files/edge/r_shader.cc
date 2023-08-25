@@ -658,6 +658,10 @@ public:
 	{
 		float dist = Dist(x, y);
 
+		float L = std::log1p(dist);
+
+		L *= mo->state->bright / 255.0;
+
 		for (int DL = 0; DL < 2; DL++)
 		{
 			if (WhatType(DL) == DLITE_None)
@@ -665,10 +669,6 @@ public:
 
 			rgbcol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL),
 					WhatColor(DL));
-
-			float L = exp(-5.44 * dist * dist);
-
-			L = L * mo->state->bright / 255.0;
 
 			if (new_col != RGB_MAKE(0,0,0) && L > 1/256.0)
 			{
@@ -683,7 +683,28 @@ public:
 	virtual void Corner(multi_color_c *col, float nx, float ny, float nz,
 			            struct mobj_s *mod_pos, bool is_weapon = false)
 	{
-		/* TODO */
+		float dist = Dist(mod_pos->x, mod_pos->y);
+
+		float L = std::log1p(dist);
+
+		L *= mo->state->bright / 255.0;
+
+		for (int DL = 0; DL < 2; DL++)
+		{
+			if (WhatType(DL) == DLITE_None)
+				break;
+
+			rgbcol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL),
+					WhatColor(DL));
+
+			if (new_col != RGB_MAKE(0,0,0) && L > 1/256.0)
+			{
+				if (WhatType(DL) == DLITE_Add)
+					col->add_Give(new_col, L); 
+				else
+					col->mod_Give(new_col, L); 
+			}
+		}
 	}
 
 	virtual void WorldMix(GLuint shape, int num_vert,

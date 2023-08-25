@@ -189,17 +189,20 @@ public:
 
 	std::vector<u32_t> skin_ids;
 
-	GLuint vbo; // One VBO updated with lerping info
+	GLuint vbo;
+
+	local_gl_vert_t *gl_verts;
 
 public:
 	mdl_model_c(int _nframe, int _npoint, int _ntris, int _swidth, int _sheight) :
 		num_frames(_nframe), num_points(_npoint),
 		num_tris(_ntris), skin_width(_swidth),
-		skin_height(_sheight), verts_per_frame(0), vbo(0)
+		skin_height(_sheight), verts_per_frame(0), vbo(0), gl_verts(nullptr)
 	{
 		frames = new mdl_frame_c[num_frames];
 		points = new mdl_point_c[num_points];
 		tris = new mdl_triangle_c[num_tris];
+		gl_verts = new local_gl_vert_t[num_tris * 3];
 	}
 
 	~mdl_model_c()
@@ -435,13 +438,11 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
 	delete[] texcoords;
 	delete[] tris;
 	delete[] frames;
-#ifdef EDGE_GL_ES2
 	glGenBuffers(1, &md->vbo);
 	if (md->vbo == 0)
 		I_Error("MDL_LoadModel: Failed to bind VBO!\n");
 	glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
 	glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), NULL, GL_STREAM_DRAW);
-#endif
 	return md;
 }
 
@@ -853,8 +854,6 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 			fd_to_use = 0.01f * currmap->indoor_fog_density;
 		}
 	}
-#ifdef EDGE_GL_ES2
-	glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
 	if (!r_culling.d && fc_to_use != RGB_NO_VALUE)
 	{
 		GLfloat fc[4];
@@ -918,7 +917,6 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 	}
 	else
 		glDisable(GL_FOG);
-#endif
 
 	for (int pass = 0; pass < num_pass; pass++)
 	{
@@ -926,9 +924,7 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 		{
 			blending &= ~BL_Alpha;
 			blending |=  BL_Add;
-#ifdef EDGE_GL_ES2
 			glDisable(GL_FOG);
-#endif
 		}
 
 		data.is_additive = (pass > 0 && pass == num_pass-1);
@@ -944,7 +940,6 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 			if (MDL_MulticolMaxRGB(&data, true) <= 0)
 				continue;
 		}
-#ifdef EDGE_GL_ES2
 		GLuint model_env = data.is_additive ? ENV_SKIP_RGB : GL_MODULATE;
 
 		glPolygonOffset(0, -pass);
@@ -1020,7 +1015,7 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 				r_dumbclamp.d ? GL_CLAMP : GL_CLAMP_TO_EDGE);
 		}
 
-		local_gl_vert_t *start = (local_gl_vert_t *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+		local_gl_vert_t *start = md->gl_verts;
 
 		for (int i = 0; i < md->num_tris; i++)
 		{
@@ -1037,9 +1032,9 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 			}
 		}
 
-		glUnmapBuffer(GL_ARRAY_BUFFER);
-
-		// setup pointers to client state
+		// setup client state
+		glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
+		glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), md->gl_verts, GL_STREAM_DRAW);
 		glVertexPointer(3, GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, pos.x)));
 		glColorPointer (4, GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, rgba)));
 		glNormalPointer(GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, normal.x)));
@@ -1055,32 +1050,7 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 		// restore the clamping mode
 		if (old_clamp != 789)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, old_clamp);
-#else
-	local_gl_vert_t * glvert = RGL_BeginUnit(
-			 GL_TRIANGLES, md->num_tris * 3,
-			 data.is_additive ? ENV_SKIP_RGB : GL_MODULATE, skin_tex,
-			 ENV_NONE, 0, pass, blending, pass > 0 ? RGB_NO_VALUE : fc_to_use,
-				 fd_to_use);
-
-		for (int i = 0; i < md->num_tris; i++)
-		{
-			data.strip = & md->tris[i];
-
-			for (int v_idx=0; v_idx < 3; v_idx++)
-			{
-				local_gl_vert_t *dest = glvert + (i*3) + v_idx;
-
-				ModelCoordFunc(&data, v_idx, &dest->pos, dest->rgba,
-						&dest->texc[0], &dest->normal);
-
-				dest->rgba[3] = trans;
-			}
-		}
-
-		RGL_EndUnit(md->num_tris * 3);
-#endif
 	}
-#ifdef EDGE_GL_ES2
 	glPolygonOffset(0, 0);
 
 	glDisable(GL_TEXTURE_2D);
@@ -1094,7 +1064,6 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
-#endif
 }
 
 

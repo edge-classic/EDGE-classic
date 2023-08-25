@@ -179,9 +179,7 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 
 	if (which == ps_crosshair)
 	{
-		if (player->weapons[player->ready_wp].info->specials[0] & WPSP_IgnoreCrosshairScaling)
-			ratio = 1.0f;
-		else
+		if (!player->weapons[player->ready_wp].info->ignore_crosshair_scaling)
 			ratio = r_crosssize.f / w;
 			
 		w *= ratio;

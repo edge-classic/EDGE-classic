@@ -50,7 +50,6 @@ typedef enum
 
 	// MBF21 flags:
 	WPSP_NoAutoFire = (1 << 12), // Do not fire if switched to while trigger is held
-	WPSP_IgnoreCrosshairScaling = (1 << 13), // menu option Crosshair scalng not applied
 }
 weapon_flag_e;
 
@@ -177,6 +176,9 @@ public:
 	
 	//Lobo 2022: sprite Y offset, mainly for Heretic weapons
 	float y_adjust;
+
+	//Lobo 2023:  Video menu option "Crosshair size" is ignored for this weapons custom crosshair
+	bool ignore_crosshair_scaling;
 
 public:
 	inline int KeyPri(int idx) const  // next/prev order value

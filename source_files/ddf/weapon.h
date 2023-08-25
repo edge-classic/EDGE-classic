@@ -50,6 +50,7 @@ typedef enum
 
 	// MBF21 flags:
 	WPSP_NoAutoFire = (1 << 12), // Do not fire if switched to while trigger is held
+	WPSP_IgnoreCrosshairScaling = (1 << 13), // menu option Crosshair scalng not applied
 }
 weapon_flag_e;
 

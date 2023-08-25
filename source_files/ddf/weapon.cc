@@ -103,6 +103,7 @@ static const commandlist_t weapon_commands[] =
 	
 	DF("RENDER_INVERT", render_invert, DDF_MainGetBoolean),
 	DF("Y_ADJUST", y_adjust, DDF_MainGetFloat),
+	DF("IGNORE_CROSSHAIR_SCALING", ignore_crosshair_scaling, DDF_MainGetBoolean),
 
 	DDF_CMD_END
 };
@@ -786,6 +787,7 @@ void weapondef_c::CopyDetail(weapondef_c &src)
 	
 	render_invert = src.render_invert;
 	y_adjust = src.y_adjust;
+	ignore_crosshair_scaling = src.ignore_crosshair_scaling;
 }
 
 //
@@ -864,6 +866,7 @@ void weapondef_c::Default(void)
 	
 	render_invert = false;
 	y_adjust = 0.0f;
+	ignore_crosshair_scaling = false;
 }
 
 

@@ -177,6 +177,9 @@ public:
 	//Lobo 2022: sprite Y offset, mainly for Heretic weapons
 	float y_adjust;
 
+	//Lobo 2023:  Video menu option "Crosshair size" is ignored for this weapons custom crosshair
+	bool ignore_crosshair_scaling;
+
 public:
 	inline int KeyPri(int idx) const  // next/prev order value
 	{

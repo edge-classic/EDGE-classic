@@ -11,6 +11,9 @@ New Features
 - New "g_gore" CVAR: disable blood and death animations
 - New skydrawing options for non-skyboxes
 - New console command "openhome": will open the folder where EC is storing it's home data.
++ WEAPONS.DDF
+  - New command: IGNORE_CROSSHAIR_SCALING = <boolean>
+    - If this weapon has custom crosshair sprites, they will not be affected by Video menu option "Crosshair Size".
 
 
 General Improvements/Changes

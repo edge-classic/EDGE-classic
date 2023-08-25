@@ -19,6 +19,7 @@
 // Level Setup and Parser Code
 //
 
+#include "colormap.h"
 #include "local.h"
 #include "level.h"
 
@@ -86,9 +87,9 @@ static const commandlist_t level_commands[] =
 	DF("STATS", wistyle, DDF_LevelGetWistyle),
 	DF("LEAVING_BACKGROUND", leavingbggraphic, DDF_MainGetLumpName),
 	DF("ENTERING_BACKGROUND", enteringbggraphic, DDF_MainGetLumpName),
-	DF("INDOOR_FOG_COLOR", indoor_fog_color, DDF_MainGetRGB),
+	DF("INDOOR_FOG_COLOR", indoor_fog_cmap, DDF_MainGetColourmap),
 	DF("INDOOR_FOG_DENSITY", indoor_fog_density, DDF_MainGetPercent),
-	DF("OUTDOOR_FOG_COLOR", outdoor_fog_color, DDF_MainGetRGB),
+	DF("OUTDOOR_FOG_COLOR", outdoor_fog_cmap, DDF_MainGetColourmap),
 	DF("OUTDOOR_FOG_DENSITY", outdoor_fog_density, DDF_MainGetPercent),
 
 	DDF_CMD_END
@@ -208,7 +209,11 @@ static void LevelFinishEntry(void)
 	if (dynamic_level->episode_name.empty())
 		DDF_Error("Level entry must have an EPISODE name!\n");
 
-	// TODO: check more stuff here...
+	if (dynamic_level->indoor_fog_cmap)
+		dynamic_level->indoor_fog_color = dynamic_level->indoor_fog_cmap->gl_colour;
+
+	if (dynamic_level->outdoor_fog_cmap)
+		dynamic_level->outdoor_fog_color = dynamic_level->outdoor_fog_cmap->gl_colour;
 }
 
 
@@ -455,8 +460,10 @@ void mapdef_c::CopyDetail(mapdef_c &src)
 
 	forced_skystretch = src.forced_skystretch;
 
+	indoor_fog_cmap = src.indoor_fog_cmap;
 	indoor_fog_color = src.indoor_fog_color;
 	indoor_fog_density = src.indoor_fog_density;
+	outdoor_fog_cmap = src.outdoor_fog_cmap;
 	outdoor_fog_color = src.outdoor_fog_color;
 	outdoor_fog_density = src.outdoor_fog_density;
 }
@@ -494,8 +501,10 @@ void mapdef_c::Default()
 
 	forced_skystretch = SKS_Unset;
 
+	indoor_fog_cmap = nullptr;
 	indoor_fog_color = RGB_NO_VALUE;
 	indoor_fog_density = 0;
+	outdoor_fog_cmap = nullptr;
 	outdoor_fog_color = RGB_NO_VALUE;
 	outdoor_fog_density = 0;
 }

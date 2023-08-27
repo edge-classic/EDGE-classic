@@ -784,13 +784,15 @@ static float TimeWidth(int t, bool drawText = false)
 	
 	if(drawText == true)
 	{
+		float txtscale =wi_sp_style->def->text[styledef_c::T_ALT].scale;
+
 		if (t > 3599)
 		{
-			return wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth("Sucks");
+			return wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth("Sucks") * txtscale;
 		}
 		else
 		{
-			return wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str());
+			return wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str()) * txtscale;
 		}
 	}
 	else

@@ -2005,8 +2005,7 @@ void P_SpawnBlood(float x, float y, float z, float damage,
 
 flatdef_c* P_IsThingOnLiquidFloor(mobj_t * thing)
 {
-    flatdef_c *current_flatdef;
-	current_flatdef = NULL;
+    flatdef_c *current_flatdef = nullptr;
 
 	// If no 3D floors, just return the flat
     if (thing->subsector->sector->exfloor_used == 0)
@@ -2033,16 +2032,7 @@ flatdef_c* P_IsThingOnLiquidFloor(mobj_t * thing)
 		//	current_flatdef = flatdefs.Find(thing->subsector->sector->floor.image->name); // Fallback if nothing else satisfies these conditions
     }
 	
-	
-	
-	if (current_flatdef)
-		return current_flatdef;
-	
-	//if (current_flatdef->impactobject) //now check if it is has a splash object
-	//	return current_flatdef;
-	
-	return NULL;
-	
+	return current_flatdef;
 }
 
 //---------------------------------------------------------------------------
@@ -2061,7 +2051,9 @@ bool P_HitLiquidFloor(mobj_t * thing)
 		return false;
 
 	// don't splash if landing on the edge above water/lava/etc....
-	if (thing->floorz != thing->subsector->sector->f_h)
+	if (thing->subsector->sector->floor_vertex_slope && thing->z > thing->floorz)
+		return false;
+	else if (thing->floorz != thing->subsector->sector->f_h)
 		return false;
 
 	flatdef_c *current_flatdef = P_IsThingOnLiquidFloor(thing);

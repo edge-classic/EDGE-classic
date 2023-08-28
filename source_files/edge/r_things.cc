@@ -30,7 +30,6 @@
 
 #include "image_data.h"
 #include "image_funcs.h"
-#include "math_color.h"
 #include "str_util.h"
 
 #include "dm_data.h"
@@ -393,20 +392,9 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 			}
 			else if (! is_additive)
 			{
-				if (fc_to_use != RGB_NO_VALUE)
-				{
-					epi::color_c mixme(data.col[v_idx].mod_R, data.col[v_idx].mod_G, data.col[v_idx].mod_B);
-					mixme = mixme.Mix(epi::color_c(fc_to_use), I_ROUND(255.0f * (fd_to_use * 100)));
-					dest->rgba[0] = mixme.r / 255.0;
-					dest->rgba[1] = mixme.g / 255.0;
-					dest->rgba[2] = mixme.b / 255.0;
-				}
-				else
-				{
-					dest->rgba[0] = data.col[v_idx].mod_R / 255.0;
-					dest->rgba[1] = data.col[v_idx].mod_G / 255.0;
-					dest->rgba[2] = data.col[v_idx].mod_B / 255.0;
-				}
+				dest->rgba[0] = data.col[v_idx].mod_R / 255.0;
+				dest->rgba[1] = data.col[v_idx].mod_G / 255.0;
+				dest->rgba[2] = data.col[v_idx].mod_B / 255.0;
 
 				data.col[v_idx].mod_R -= 256;
 				data.col[v_idx].mod_G -= 256;
@@ -414,20 +402,9 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 			}
 			else
 			{
-				if (fc_to_use != RGB_NO_VALUE)
-				{
-					epi::color_c mixme(data.col[v_idx].add_R, data.col[v_idx].add_G, data.col[v_idx].add_B);
-					mixme = mixme.Mix(epi::color_c(fc_to_use), I_ROUND(255.0f * (fd_to_use * 100)));
-					dest->rgba[0] = mixme.r / 255.0;
-					dest->rgba[1] = mixme.g / 255.0;
-					dest->rgba[2] = mixme.b / 255.0;
-				}
-				else
-				{
-					dest->rgba[0] = data.col[v_idx].add_R / 255.0;
-					dest->rgba[1] = data.col[v_idx].add_G / 255.0;
-					dest->rgba[2] = data.col[v_idx].add_B / 255.0;
-				}
+				dest->rgba[0] = data.col[v_idx].add_R / 255.0;
+				dest->rgba[1] = data.col[v_idx].add_G / 255.0;
+				dest->rgba[2] = data.col[v_idx].add_B / 255.0;
 			}
 
 			dest->rgba[3] = trans;

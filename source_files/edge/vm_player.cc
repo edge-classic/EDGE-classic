@@ -218,13 +218,11 @@ static void PL_under_water(coal::vm_c *vm, int argc)
 //
 static void PL_on_ground(coal::vm_c *vm, int argc)
 {
-	//vm->ReturnFloat((ui_player_who->mo->z <= ui_player_who->mo->floorz) ? 1 : 0);
-
 	// not a 3D floor?
 	if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
 	{
 		// on the edge above water/lava/etc? Handles edge walker case
-		if (ui_player_who->mo->floorz != ui_player_who->mo->subsector->sector->f_h)
+		if (ui_player_who->mo->floorz != ui_player_who->mo->subsector->sector->f_h && !ui_player_who->mo->subsector->sector->floor_vertex_slope)
 			vm->ReturnFloat(0);
 		else
 		{
@@ -242,10 +240,6 @@ static void PL_on_ground(coal::vm_c *vm, int argc)
 		else
 			vm->ReturnFloat(0);
 	}
-
-
-	
-
 }
 
 

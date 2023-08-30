@@ -51,8 +51,17 @@ class image_c;
 // Your plain vanilla vertex.
 // Note: transformed values not buffered locally, like some
 // DOOM-alikes ("wt", "WebView") did.
-//
-typedef vec2_t vertex_t;
+// Dasho: Made new struct type to hold extra info
+typedef struct vertex_s
+{
+	float x, y, zf, zc;
+
+	void Set(float _x, float _y, float _zf, float _zc)
+	{
+		x = _x; y = _y; zf = _zf; zc = _zc;
+	}
+}
+vertex_t;
 
 // Forward of LineDefs, for Sectors.
 struct line_s;
@@ -399,8 +408,8 @@ vertex_seclist_t;
 typedef struct line_s
 {
 	// Vertices, from v1 to v2.
-	vec2_t *v1;
-	vec2_t *v2;
+	vertex_t *v1;
+	vertex_t *v2;
 
 	// Precalculated v2 - v1 for side checking.
 	float dx;
@@ -495,8 +504,8 @@ subsector_t;
 //
 typedef struct seg_s
 {
-	vec2_t *v1;
-	vec2_t *v2;
+	vertex_t *v1;
+	vertex_t *v2;
 
 	angle_t angle;
 

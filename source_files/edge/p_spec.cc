@@ -624,7 +624,6 @@ static void P_LineEffect(line_t *target, line_t *source,
 		const linetype_c *special)
 {
 	float length = R_PointToDist(0, 0, source->dx, source->dy);
-   	float factor = 64.0 / length;
 
 	if ((special->line_effect & LINEFX_Translucency) && (target->flags & MLF_TwoSided))
 	{
@@ -1100,7 +1099,7 @@ static slope_plane_t * DetailSlope_BoundIt(line_t *ld, sector_t *sec, float dz1,
 	{
 		for (int vert = 0; vert < 2; vert++)
 		{
-			vec2_t *V = (vert == 0) ? sec->lines[k]->v1 : sec->lines[k]->v2;
+			vertex_t *V = (vert == 0) ? sec->lines[k]->v1 : sec->lines[k]->v2;
 
 			float dist = nx * (V->x - ld->v1->x) +
 			             ny * (V->y - ld->v1->y);

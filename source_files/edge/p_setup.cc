@@ -80,11 +80,10 @@ DEF_CVAR(udmf_strict, "0", CVAR_ARCHIVE)
 // Store VERTEXES, LINEDEFS, SIDEDEFS, etc.
 //
 int numvertexes;
-vec2_t *vertexes = nullptr;
-vec2_t *zvertexes = nullptr;
+vertex_t *vertexes = nullptr;
 
 int num_gl_vertexes;
-vec2_t *gl_vertexes;
+vertex_t *gl_vertexes;
 
 int numsegs;
 seg_t *segs;
@@ -213,7 +212,7 @@ static void LoadVertexes(int lump)
 	const byte *data;
 	int i;
 	const raw_vertex_t *ml;
-	vec2_t *li;
+	vertex_t *li;
 
 	if (! W_VerifyLumpName(lump, "VERTEXES"))
 		I_Error("Bad WAD: level %s missing VERTEXES.\n", 
@@ -227,7 +226,7 @@ static void LoadVertexes(int lump)
 		I_Error("Bad WAD: level %s contains 0 vertexes.\n", 
 				currmap->lump.c_str());
 
-	vertexes = new vec2_t[numvertexes];
+	vertexes = new vertex_t[numvertexes];
 
 	// Load data into cache.
 	data = W_LoadLump(lump);
@@ -241,6 +240,8 @@ static void LoadVertexes(int lump)
 	{
 		li->x = EPI_LE_S16(ml->x);
 		li->y = EPI_LE_S16(ml->y);
+		li->zf = -40000.0f;
+		li->zc = 40000.0f;
 	}
 
 	// Free buffer memory.
@@ -764,8 +765,8 @@ static void LoadHexenThings(int lump)
 
 static inline void ComputeLinedefData(line_t *ld, int side0, int side1)
 {
-	vec2_t *v1 = ld->v1;
-	vec2_t *v2 = ld->v2;
+	vertex_t *v1 = ld->v1;
+	vertex_t *v2 = ld->v2;
 
 	ld->dx = v2->x - v1->x;
 	ld->dy = v2->y - v1->y;
@@ -1142,11 +1143,11 @@ static void LoadXGL3Nodes(int lumpnum)
 	td += 4;
 	I_Debugf("LoadXGL3Nodes: Orig Verts = %d, New Verts = %d, Map Verts = %d\n", oVerts, nVerts, numvertexes);
 
-	gl_vertexes = new vec2_t[nVerts];
+	gl_vertexes = new vertex_t[nVerts];
 	num_gl_vertexes = nVerts;
 
 	// fill in new vertexes
-	vec2_t *vv = gl_vertexes;
+	vertex_t *vv = gl_vertexes;
 	for (i=0; i<nVerts; i++, vv++)
 	{
 		// convert signed 16.16 fixed point to float
@@ -1154,6 +1155,8 @@ static void LoadXGL3Nodes(int lumpnum)
 		td += 4;
 		vv->y = (float)epi::GetS32LE(td) / 65536.0f;
 		td += 4;
+		vv->zf = -40000.0f;
+		vv->zc = 40000.0f;
 	}
 
 	// new vertexes is followed by the subsectors
@@ -1409,8 +1412,7 @@ static void LoadUDMFVertexes()
 				else if (key == "zceiling")
 					zc = epi::LEX_Double(value);
 			}
-			vertexes[cur_vertex].Set(x, y);
-			zvertexes[cur_vertex].Set(zf, zc);
+			vertexes[cur_vertex].Set(x, y, zf, zc);
 			cur_vertex++;
 		}
 		else // consume other blocks
@@ -2137,8 +2139,7 @@ static void LoadUDMFCounts()
 	}
 
 	// initialize arrays
-	vertexes = new vec2_t[numvertexes];
-	zvertexes = new vec2_t[numvertexes];
+	vertexes = new vertex_t[numvertexes];
 	sectors = new sector_t[numsectors];
 	Z_Clear(sectors, sector_t, numsectors);
 	lines = new line_t[numlines];
@@ -2618,7 +2619,7 @@ static void DoBlockMap()
 
 	for (int i=1; i < numvertexes; i++)
 	{
-		vec2_t *v = vertexes + i;
+		vertex_t *v = vertexes + i;
 
 		min_x = MIN((int)v->x, min_x);
 		min_y = MIN((int)v->y, min_y);
@@ -2703,42 +2704,38 @@ void GroupLines(void)
 		// Allow vertex slope if a triangular sector or a rectangular
 		// sector in which two adjacent verts have an identical z-height
 		// and the other two have it unset
-		if (sector->linecount == 3 && zvertexes)
+		if (sector->linecount == 3 && udmf_level)
 		{
 			for (j=0; j < 3; j++)
 			{
-				vec2_t *vert = sector->lines[j]->v1;
+				vertex_t *vert = sector->lines[j]->v1;
 				bool add_it = true;
 				for (auto v : sector->floor_z_verts)
 					if (v.x == vert->x && v.y == vert->y) add_it = false;
 				if (add_it)
 				{
-					int vi = vert - vertexes;
-					if (vi >= 0 && vi < numvertexes && zvertexes)
+					if (vert->zf < 32767.0f && vert->zf > -32768.0f)
 					{
-						if (zvertexes[vi].x < 32767.0f && zvertexes[vi].x > -32768.0f)
-						{
-							sector->floor_vertex_slope = true;
-							sector->floor_z_verts.push_back({vert->x,vert->y,zvertexes[vi].x});
-							if (zvertexes[vi].x > sector->floor_vs_hilo.x)
-								sector->floor_vs_hilo.x = zvertexes[vi].x;
-							if (zvertexes[vi].x < sector->floor_vs_hilo.y)
-								sector->floor_vs_hilo.y = zvertexes[vi].x;
-						}
-						else
-							sector->floor_z_verts.push_back({vert->x,vert->y,sector->f_h});
-						if (zvertexes[vi].y < 32767.0f && zvertexes[vi].y > -32768.0f)
-						{
-							sector->ceil_vertex_slope = true;
-							sector->ceil_z_verts.push_back({vert->x,vert->y,zvertexes[vi].y});
-							if (zvertexes[vi].y > sector->ceil_vs_hilo.x)
-								sector->ceil_vs_hilo.x = zvertexes[vi].y;
-							if (zvertexes[vi].y < sector->ceil_vs_hilo.y)
-								sector->ceil_vs_hilo.y = zvertexes[vi].y;
-						}
-						else
-							sector->ceil_z_verts.push_back({vert->x,vert->y,sector->c_h});
+						sector->floor_vertex_slope = true;
+						sector->floor_z_verts.push_back({vert->x,vert->y,vert->zf});
+						if (vert->zf > sector->floor_vs_hilo.x)
+							sector->floor_vs_hilo.x = vert->zf;
+						if (vert->zf < sector->floor_vs_hilo.y)
+							sector->floor_vs_hilo.y = vert->zf;
 					}
+					else
+						sector->floor_z_verts.push_back({vert->x,vert->y,sector->f_h});
+					if (vert->zc < 32767.0f && vert->zc > -32768.0f)
+					{
+						sector->ceil_vertex_slope = true;
+						sector->ceil_z_verts.push_back({vert->x,vert->y,vert->zc});
+						if (vert->zc > sector->ceil_vs_hilo.x)
+							sector->ceil_vs_hilo.x = vert->zc;
+						if (vert->zc < sector->ceil_vs_hilo.y)
+							sector->ceil_vs_hilo.y = vert->zc;
+					}
+					else
+						sector->ceil_z_verts.push_back({vert->x,vert->y,sector->c_h});
 				}
 				vert = sector->lines[j]->v2;
 				add_it = true;
@@ -2746,32 +2743,28 @@ void GroupLines(void)
 					if (v.x == vert->x && v.y == vert->y) add_it = false;
 				if (add_it)
 				{
-					int vi = vert - vertexes;
-					if (vi >= 0 && vi < numvertexes && zvertexes)
+					if (vert->zf < 32767.0f && vert->zf > -32768.0f)
 					{
-						if (zvertexes[vi].x < 32767.0f && zvertexes[vi].x > -32768.0f)
-						{
-							sector->floor_vertex_slope = true;
-							sector->floor_z_verts.push_back({vert->x,vert->y,zvertexes[vi].x});
-							if (zvertexes[vi].x > sector->floor_vs_hilo.x)
-								sector->floor_vs_hilo.x = zvertexes[vi].x;
-							if (zvertexes[vi].x < sector->floor_vs_hilo.y)
-								sector->floor_vs_hilo.y = zvertexes[vi].x;
-						}
-						else
-							sector->floor_z_verts.push_back({vert->x,vert->y,sector->f_h});
-						if (zvertexes[vi].y < 32767.0f && zvertexes[vi].y > -32768.0f)
-						{
-							sector->ceil_vertex_slope = true;
-							sector->ceil_z_verts.push_back({vert->x,vert->y,zvertexes[vi].y});
-							if (zvertexes[vi].y > sector->ceil_vs_hilo.x)
-								sector->ceil_vs_hilo.x = zvertexes[vi].y;
-							if (zvertexes[vi].y < sector->ceil_vs_hilo.y)
-								sector->ceil_vs_hilo.y = zvertexes[vi].y;
-						}
-						else
-							sector->ceil_z_verts.push_back({vert->x,vert->y,sector->c_h});
+						sector->floor_vertex_slope = true;
+						sector->floor_z_verts.push_back({vert->x,vert->y,vert->zf});
+						if (vert->zf > sector->floor_vs_hilo.x)
+							sector->floor_vs_hilo.x = vert->zf;
+						if (vert->zf < sector->floor_vs_hilo.y)
+							sector->floor_vs_hilo.y = vert->zf;
 					}
+					else
+						sector->floor_z_verts.push_back({vert->x,vert->y,sector->f_h});
+					if (vert->zc < 32767.0f && vert->zc > -32768.0f)
+					{
+						sector->ceil_vertex_slope = true;
+						sector->ceil_z_verts.push_back({vert->x,vert->y,vert->zc});
+						if (vert->zc > sector->ceil_vs_hilo.x)
+							sector->ceil_vs_hilo.x = vert->zc;
+						if (vert->zc < sector->ceil_vs_hilo.y)
+							sector->ceil_vs_hilo.y = vert->zc;
+					}
+					else
+						sector->ceil_z_verts.push_back({vert->x,vert->y,sector->c_h});
 				}
 			}
 			if (!sector->floor_vertex_slope)
@@ -2797,77 +2790,75 @@ void GroupLines(void)
 					sector->ceil_vs_hilo.x = sector->c_h;
 			}
 		}
-		if (sector->linecount == 4 && zvertexes)
+		if (sector->linecount == 4 && udmf_level)
 		{
 			int floor_z_lines = 0;
 			int ceil_z_lines = 0;
 			for (j=0; j < 4; j++)
 			{
-				vec2_t *vert = sector->lines[j]->v1;
-				vec2_t *vert2 = sector->lines[j]->v2;
+				vertex_t *vert = sector->lines[j]->v1;
+				vertex_t *vert2 = sector->lines[j]->v2;
 				bool add_it_v1 = true;
 				bool add_it_v2 = true;
 				for (auto v : sector->floor_z_verts)
 					if (v.x == vert->x && v.y == vert->y) add_it_v1 = false;
 				for (auto v : sector->floor_z_verts)
 					if (v.x == vert2->x && v.y == vert2->y) add_it_v2 = false;
-				int vi = vert - vertexes;
-				int vi2 = vert2 - vertexes;
 				if (add_it_v1)
 				{
-					if (zvertexes[vi].x < 32767.0f && zvertexes[vi].x > -32768.0f)
+					if (vert->zf < 32767.0f && vert->zf > -32768.0f)
 					{
-						sector->floor_z_verts.push_back({vert->x,vert->y,zvertexes[vi].x});
-						if (zvertexes[vi].x > sector->floor_vs_hilo.x)
-							sector->floor_vs_hilo.x = zvertexes[vi].x;
-						if (zvertexes[vi].x < sector->floor_vs_hilo.y)
-							sector->floor_vs_hilo.y = zvertexes[vi].x;
+						sector->floor_z_verts.push_back({vert->x,vert->y,vert->zf});
+						if (vert->zf > sector->floor_vs_hilo.x)
+							sector->floor_vs_hilo.x = vert->zf;
+						if (vert->zf < sector->floor_vs_hilo.y)
+							sector->floor_vs_hilo.y = vert->zf;
 					}
 					else
 						sector->floor_z_verts.push_back({vert->x,vert->y,sector->f_h});
-					if (zvertexes[vi].y < 32767.0f && zvertexes[vi].y > -32768.0f)
+					if (vert->zc < 32767.0f && vert->zc > -32768.0f)
 					{
-						sector->ceil_z_verts.push_back({vert->x,vert->y,zvertexes[vi].y});
-						if (zvertexes[vi].y > sector->ceil_vs_hilo.x)
-							sector->ceil_vs_hilo.x = zvertexes[vi].y;
-						if (zvertexes[vi].y < sector->ceil_vs_hilo.y)
-							sector->ceil_vs_hilo.y = zvertexes[vi].y;
+						sector->ceil_z_verts.push_back({vert->x,vert->y,vert->zc});
+						if (vert->zc > sector->ceil_vs_hilo.x)
+							sector->ceil_vs_hilo.x = vert->zc;
+						if (vert->zc < sector->ceil_vs_hilo.y)
+							sector->ceil_vs_hilo.y = vert->zc;
 					}
 					else
 						sector->ceil_z_verts.push_back({vert->x,vert->y,sector->c_h});
 				}
 				if (add_it_v2)
 				{
-					if (zvertexes[vi2].x < 32767.0f && zvertexes[vi2].x > -32768.0f)
+					if (vert2->zf < 32767.0f && vert2->zf > -32768.0f)
 					{
-						sector->floor_z_verts.push_back({vert2->x,vert2->y,zvertexes[vi2].x});
-						if (zvertexes[vi2].x > sector->floor_vs_hilo.x)
-							sector->floor_vs_hilo.x = zvertexes[vi2].x;
-						if (zvertexes[vi2].x < sector->floor_vs_hilo.y)
-							sector->floor_vs_hilo.y = zvertexes[vi2].x;
+						sector->floor_z_verts.push_back({vert2->x,vert2->y,vert2->zf});
+						if (vert2->zf > sector->floor_vs_hilo.x)
+							sector->floor_vs_hilo.x = vert2->zf;
+						if (vert2->zf < sector->floor_vs_hilo.y)
+							sector->floor_vs_hilo.y = vert2->zf;
 					}
 					else
 						sector->floor_z_verts.push_back({vert2->x,vert2->y,sector->f_h});
-					if (zvertexes[vi2].y < 32767.0f && zvertexes[vi2].y > -32768.0f)
+					if (vert2->zc < 32767.0f && vert2->zc > -32768.0f)
 					{
-						sector->ceil_z_verts.push_back({vert2->x,vert2->y,zvertexes[vi2].y});
-						if (zvertexes[vi2].y > sector->ceil_vs_hilo.x)
-							sector->ceil_vs_hilo.x = zvertexes[vi2].y;
-						if (zvertexes[vi2].y < sector->ceil_vs_hilo.y)
-							sector->ceil_vs_hilo.y = zvertexes[vi2].y;
+						sector->ceil_z_verts.push_back({vert2->x,vert2->y,vert2->zc});
+						if (vert2->zc > sector->ceil_vs_hilo.x)
+							sector->ceil_vs_hilo.x = vert2->zc;
+						if (vert2->zc < sector->ceil_vs_hilo.y)
+							sector->ceil_vs_hilo.y = vert2->zc;
 					}
 					else
 						sector->ceil_z_verts.push_back({vert2->x,vert2->y,sector->c_h});
 				}
-				if ((zvertexes[vi].x < 32767.0f && zvertexes[vi].x > -32768.0f) && 
-					(zvertexes[vi2].x < 32767.0f && zvertexes[vi2].x > -32768.0f) &&
-					zvertexes[vi].x == zvertexes[vi2].x)
+				if ((vert->zf < 32767.0f && vert->zf > -32768.0f) && 
+					(vert2->zf < 32767.0f && vert2->zf > -32768.0f) &&
+					vert->zf == vert2->zf)
 				{
 					floor_z_lines++;
 				}
-				if ((zvertexes[vi].y < 32767.0f && zvertexes[vi].y > -32768.0f) && 
-					(zvertexes[vi2].y < 32767.0f && zvertexes[vi2].y > -32768.0f) &&
-					zvertexes[vi].y == zvertexes[vi2].y)
+				if ((vert->zc < 32767.0f && vert->zc > -32768.0f) && 
+					(vert2->zc < 32767.0f && vert2->zc > -32768.0f) &&
+					vert->zc == vert2->zc)
 				{
 					ceil_z_lines++;
 				}
@@ -3097,11 +3088,6 @@ void ShutdownLevel(void)
 	delete[] segs;         segs = NULL;
 	delete[] nodes;        nodes = NULL;
 	delete[] vertexes;     vertexes = NULL;
-	if (zvertexes)
-	{
-		delete[] zvertexes;    
-		zvertexes = NULL;
-	}
 	delete[] sides;        sides = NULL;
 	delete[] lines;        lines = NULL;
 	delete[] sectors;      sectors = NULL;

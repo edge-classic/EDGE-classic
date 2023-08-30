@@ -1578,8 +1578,8 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 	{
 		if (!sec->floor_vertex_slope && other->floor_vertex_slope)
 		{
-			float zv1 = zvertexes[seg->v1 - vertexes].x;
-			float zv2 = zvertexes[seg->v2 - vertexes].x;
+			float zv1 = seg->v1->zf;
+			float zv2 = seg->v2->zf;
 			if (mirror_sub)
 				std::swap(zv1, zv2);
 			AddWallTile2(seg, dfloor,
@@ -1589,8 +1589,8 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 		}
 		else if (sec->floor_vertex_slope && !other->floor_vertex_slope)
 		{
-			float zv1 = zvertexes[seg->v1 - vertexes].x;
-			float zv2 = zvertexes[seg->v2 - vertexes].x;
+			float zv1 = seg->v1->zf;
+			float zv2 = seg->v2->zf;
 			if (mirror_sub)
 				std::swap(zv1, zv2);
 			AddWallTile2(seg, dfloor,
@@ -1635,8 +1635,8 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 	{
 		if (!sec->ceil_vertex_slope && other->ceil_vertex_slope)
 		{
-			float zv1 = zvertexes[seg->v1 - vertexes].y;
-			float zv2 = zvertexes[seg->v2 - vertexes].y;
+			float zv1 = seg->v1->zc;
+			float zv2 = seg->v2->zc;
 			if (mirror_sub)
 				std::swap(zv1, zv2);
 			AddWallTile2(seg, dfloor,
@@ -1646,8 +1646,8 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 		}
 		else if (sec->ceil_vertex_slope && !other->ceil_vertex_slope)
 		{
-			float zv1 = zvertexes[seg->v1 - vertexes].y;
-			float zv2 = zvertexes[seg->v2 - vertexes].y;
+			float zv1 = seg->v1->zc;
+			float zv2 = seg->v2->zc;
 			if (mirror_sub)
 				std::swap(zv1, zv2);
 			AddWallTile2(seg, dfloor,
@@ -2577,7 +2577,6 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 			float x = seg->v1->x;
 			float y = seg->v1->y;
 			float z = h;
-			int vi = seg->v1 - vertexes;
 
 			// must do this before mirror adjustment
 			M_AddToBox(v_bbox, x, y);
@@ -2585,17 +2584,15 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 			if (cur_sub->sector->floor_vertex_slope && face_dir > 0)
 			{
 				// floor - check vertex heights
-				if (vi >= 0 && vi < numvertexes && zvertexes)
-					if (zvertexes[vi].x < 32767.0f && zvertexes[vi].x > -32768.0f)
-						z = zvertexes[vi].x;
+				if (seg->v1->zf < 32767.0f && seg->v1->zf > -32768.0f)
+					z = seg->v1->zf;
 			}
 
 			if (cur_sub->sector->ceil_vertex_slope && face_dir < 0)
 			{
 				// ceiling - check vertex heights
-				if (vi >= 0 && vi < numvertexes && zvertexes)
-					if (zvertexes[vi].y < 32767.0f && zvertexes[vi].y > -32768.0f)
-						z = zvertexes[vi].y;
+				if (seg->v1->zc < 32767.0f && seg->v1->zc > -32768.0f)
+					z = seg->v1->zc;
 			}
 
 			if (slope)

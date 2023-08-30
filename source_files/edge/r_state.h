@@ -35,11 +35,10 @@
 // Lookup tables for map data.
 //
 extern int numvertexes;
-extern vec2_t *vertexes;
-extern vec2_t *zvertexes;
+extern vertex_t *vertexes;
 
 extern int num_gl_vertexes;
-extern vec2_t *gl_vertexes;
+extern vertex_t *gl_vertexes;
 
 extern int numsegs;
 extern seg_t *segs;

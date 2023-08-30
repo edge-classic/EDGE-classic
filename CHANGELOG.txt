@@ -68,6 +68,7 @@ General Improvements/Changes
 
 Bugs fixed
 ----------
+- Fixed potential CTD involving AJBSP split segs when they are part of a sector containing a UDMF vertex slope
 - Migrated all model rendering to use VBOs regardless of rendering path (GL vs. GLES), fixing CTDs when
   the number of vertices for a model exceeded the size of the gl vertex array used by the unit rendering system
 - Reverted to AJBSP 1.03's DetectOverlapping* methods to fix a situation where overlapping linedefs facing

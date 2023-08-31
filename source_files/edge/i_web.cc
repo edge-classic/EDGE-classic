@@ -157,7 +157,7 @@ void EMSCRIPTEN_KEEPALIVE I_WebMain(int argc, const char **argv)
 	if (SDL_Init(0) < 0)
 		I_Error("Couldn't init SDL!!\n%s\n", SDL_GetError());
 
-	exe_path = UTFSTR(SDL_GetBasePath());
+	exe_path = std::filesystem::u8path(SDL_GetBasePath());
 
 	E_Main(argc, argv);
 

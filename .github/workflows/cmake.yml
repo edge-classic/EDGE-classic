@@ -114,7 +114,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}" --preset msvc
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} --preset msvc
       - name: Build
         run: cmake --build build --config ${{env.BUILD_TYPE}} --preset msvc
       - uses: actions/upload-artifact@v3

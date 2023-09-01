@@ -13,110 +13,15 @@ env:
   RETENTION_DAYS: 30
 
 jobs:
-  build-linux:
-    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
-    # You can convert this to a matrix build if you need cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libsdl2-dev
-
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-
-    - name: Build
-      # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
-    - uses: actions/upload-artifact@v3
-      with:
-        name: edge-classic-linux
-        path: |
-          ${{github.workspace}}/autoload
-          ${{github.workspace}}/edge_base
-          ${{github.workspace}}/edge_defs
-          ${{github.workspace}}/edge_fixes
-          ${{github.workspace}}/soundfont
-          ${{github.workspace}}/edge-classic
-        retention-days: ${{env.RETENTION_DAYS}}
-  build-msys:
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup MSYS2
-        uses: msys2/setup-msys2@v2
-        with:
-          update: false
-          msystem: mingw32
-          install: >-
-            git
-            make
-            ninja
-          pacboy: >-
-            toolchain:p
-            cmake:p
-            SDL2:p
-      - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -G"MSYS Makefiles"
-      - name: Build
-        run: cmake --build build --config ${{env.BUILD_TYPE}}
-      - uses: actions/upload-artifact@v3
-        with:
-          name: edge-classic-msys2
-          path: |
-            autoload
-            edge_base
-            edge_defs
-            edge_fixes
-            soundfont
-            edge-classic.exe
-            *.dll
-          retention-days: ${{env.RETENTION_DAYS}}
-
-  build-msys-es2:
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup MSYS2
-        uses: msys2/setup-msys2@v2
-        with:
-          update: false
-          msystem: mingw32
-          install: >-
-            git
-            make
-            ninja
-          pacboy: >-
-            toolchain:p
-            cmake:p
-            SDL2:p
-      - name: Configure CMake GLES2
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DEDGE_GL_ES2=ON -G"MSYS Makefiles"
-      - name: Build GLES2
-        run: cmake --build build --config ${{env.BUILD_TYPE}}
 
   build-msvc:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
       - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G"Visual Studio 17 2022"
       - name: Build
-        run: cmake --build build --config ${{env.BUILD_TYPE}}
+        run: cd build && cmake .. --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v3
         with:
           name: edge-classic-msvc
@@ -130,35 +35,3 @@ jobs:
             *.dll
           retention-days: ${{env.RETENTION_DAYS}}
 
-  build-macos:
-    runs-on: macos-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Install dependencies
-      run: |
-        brew install sdl2
-        cp ${{github.workspace}}/cmake/i_sdlinc_macos_ci.h ${{github.workspace}}/source_files/edge/i_sdlinc.h
-        cp ${{github.workspace}}/cmake/epi_sdl_macos_ci.h ${{github.workspace}}/source_files/epi/epi_sdl.h
-
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-
-    - name: Build
-      # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
-    - uses: actions/upload-artifact@v3
-      with:
-        name: edge-classic-macos
-        path: |
-          ${{github.workspace}}/autoload
-          ${{github.workspace}}/edge_base
-          ${{github.workspace}}/edge_defs
-          ${{github.workspace}}/edge_fixes
-          ${{github.workspace}}/soundfont
-          ${{github.workspace}}/edge-classic
-        retention-days: ${{env.RETENTION_DAYS}}

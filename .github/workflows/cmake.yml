@@ -9,8 +9,11 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  # The number of days to retain artifacts
+  RETENTION_DAYS: 30
 
 jobs:
+
   build-linux:
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
     # You can convert this to a matrix build if you need cross-platform coverage.
@@ -44,7 +47,8 @@ jobs:
           ${{github.workspace}}/edge_fixes
           ${{github.workspace}}/soundfont
           ${{github.workspace}}/edge-classic
-        retention-days: 2
+        retention-days: ${{env.RETENTION_DAYS}}
+
   build-msys:
     runs-on: windows-latest
     defaults:
@@ -67,7 +71,7 @@ jobs:
             SDL2:p
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -G"MSYS Makefiles"
-      - name: Build
+      - name: Build MSVC
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v3
         with:
@@ -80,32 +84,49 @@ jobs:
             soundfont
             edge-classic.exe
             *.dll
-          retention-days: 2
+          retention-days: ${{env.RETENTION_DAYS}}
 
-  build-msys-es2:
+  build-msvc:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup MSYS2
-        uses: msys2/setup-msys2@v2
-        with:
-          update: false
-          msystem: mingw32
-          install: >-
-            git
-            make
-            ninja
-          pacboy: >-
-            toolchain:p
-            cmake:p
-            SDL2:p
-      - name: Configure CMake GLES2
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DEDGE_GL_ES2=ON -G"MSYS Makefiles"
-      - name: Build GLES2
+      - uses: actions/checkout@v3
+      - name: Configure CMake MSVC
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G"Visual Studio 17 2022"
+      - name: Build MSVC
         run: cmake --build build --config ${{env.BUILD_TYPE}}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: edge-classic-msvc
+          path: |
+            autoload
+            edge_base
+            edge_defs
+            edge_fixes
+            soundfont
+            edge-classic.exe
+            *.dll
+          retention-days: ${{env.RETENTION_DAYS}}
+
+  build-msvc-es2:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure CMake MSVC ES2
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEDGE_GL_ES2=ON -G"Visual Studio 17 2022"
+      - name: Build MSVC GLES2
+        run: cmake --build build --config ${{env.BUILD_TYPE}}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: edge-classic-msvc
+          path: |
+            autoload
+            edge_base
+            edge_defs
+            edge_fixes
+            soundfont
+            edge-classic.exe
+            *.dll
+          retention-days: ${{env.RETENTION_DAYS}}
 
   build-macos:
     runs-on: macos-latest
@@ -138,4 +159,4 @@ jobs:
           ${{github.workspace}}/edge_fixes
           ${{github.workspace}}/soundfont
           ${{github.workspace}}/edge-classic
-        retention-days: 2
+        retention-days: ${{env.RETENTION_DAYS}}

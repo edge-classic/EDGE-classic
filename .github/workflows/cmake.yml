@@ -86,13 +86,13 @@ jobs:
             *.dll
           retention-days: ${{env.RETENTION_DAYS}}
 
-  build-msvc-es2:
+  build-msvc:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Configure CMake
-        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEDGE_GL_ES2=ON -G"Visual Studio 17 2022"
-      - name: Build MSVC GLES2
+      - name: Configure CMake MSVC
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G"Visual Studio 17 2022"
+      - name: Build MSVC
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v3
         with:
@@ -107,13 +107,13 @@ jobs:
             *.dll
           retention-days: ${{env.RETENTION_DAYS}}
 
-  build-msvc:
+  build-msvc-es2:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Configure CMake
-        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G"Visual Studio 17 2022"
-      - name: Build
+      - name: Configure CMake MSVC ES2
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEDGE_GL_ES2=ON -G"Visual Studio 17 2022"
+      - name: Build MSVC GLES2
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v3
         with:

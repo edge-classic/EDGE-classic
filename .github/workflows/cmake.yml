@@ -9,6 +9,8 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  # The number of days to retain artifacts
+  RETENTION_DAYS: 30
 
 jobs:
   build-linux:
@@ -44,7 +46,7 @@ jobs:
           ${{github.workspace}}/edge_fixes
           ${{github.workspace}}/soundfont
           ${{github.workspace}}/edge-classic
-        retention-days: 2
+        retention-days: ${{env.RETENTION_DAYS}}
   build-msys:
     runs-on: windows-latest
     defaults:
@@ -80,7 +82,7 @@ jobs:
             soundfont
             edge-classic.exe
             *.dll
-          retention-days: 2
+          retention-days: ${{env.RETENTION_DAYS}}
 
   build-msys-es2:
     runs-on: windows-latest
@@ -106,6 +108,27 @@ jobs:
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DEDGE_GL_ES2=ON -G"MSYS Makefiles"
       - name: Build GLES2
         run: cmake --build build --config ${{env.BUILD_TYPE}}
+
+  build-msvc:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}" --preset msvc
+      - name: Build
+        run: cmake --build build --config ${{env.BUILD_TYPE}} --preset msvc
+      - uses: actions/upload-artifact@v3
+        with:
+          name: edge-classic-msvc
+          path: |
+            autoload
+            edge_base
+            edge_defs
+            edge_fixes
+            soundfont
+            edge-classic.exe
+            *.dll
+          retention-days: ${{env.RETENTION_DAYS}}
 
   build-macos:
     runs-on: macos-latest
@@ -138,4 +161,4 @@ jobs:
           ${{github.workspace}}/edge_fixes
           ${{github.workspace}}/soundfont
           ${{github.workspace}}/edge-classic
-        retention-days: 2
+        retention-days: ${{env.RETENTION_DAYS}}

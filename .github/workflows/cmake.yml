@@ -21,7 +21,7 @@ jobs:
       - name: Configure CMake
         run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G"Visual Studio 17 2022"
       - name: Build
-        run: cd build && cmake .. --config ${{env.BUILD_TYPE}}
+        run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v3
         with:
           name: edge-classic-msvc

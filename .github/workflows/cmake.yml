@@ -114,9 +114,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} --preset msvc
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
       - name: Build
-        run: cmake --build build --config ${{env.BUILD_TYPE}} --preset msvc
+        run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v3
         with:
           name: edge-classic-msvc

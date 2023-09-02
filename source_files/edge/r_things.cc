@@ -28,6 +28,7 @@
 
 #include <math.h>
 
+#include "math_color.h"
 #include "image_data.h"
 #include "image_funcs.h"
 #include "str_util.h"
@@ -290,11 +291,44 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 		trans = 1.0f;
 	}
 
+	rgbcol_t fc_to_use = player->mo->subsector->sector->props.fog_color;
+	float fd_to_use = player->mo->subsector->sector->props.fog_density;
+	// check for DDFLEVL fog
+	if (fc_to_use == RGB_NO_VALUE)
+	{
+		if (IS_SKY(player->mo->subsector->sector->ceil))
+		{
+			fc_to_use = currmap->outdoor_fog_color;
+			fd_to_use = 0.01f * currmap->outdoor_fog_density;
+		}
+		else
+		{
+			fc_to_use = currmap->indoor_fog_color;
+			fd_to_use = 0.01f * currmap->indoor_fog_density;
+		}
+	}
+
+
 	if (! is_fuzzy)
 	{
 		abstract_shader_c *shader = R_GetColormapShader(props, state->bright, player->mo->subsector->sector);
 
 		shader->Sample(data.col + 0, data.lit_pos.x, data.lit_pos.y, data.lit_pos.z);
+
+		if (fc_to_use != RGB_NO_VALUE)
+		{
+			int mix_factor = I_ROUND(255.0f * (fd_to_use * 75));
+			epi::color_c mixmemod(data.col[0].mod_R, data.col[0].mod_G, data.col[0].mod_B);
+			mixmemod = mixmemod.Mix(epi::color_c(fc_to_use), mix_factor);
+			data.col[0].mod_R = mixmemod.r;
+			data.col[0].mod_G = mixmemod.g;
+			data.col[0].mod_B = mixmemod.b;
+			epi::color_c mixmeadd(data.col[0].add_R, data.col[0].add_G, data.col[0].add_B);
+			mixmeadd = mixmeadd.Mix(epi::color_c(fc_to_use), mix_factor);
+			data.col[0].add_R = mixmeadd.r;
+			data.col[0].add_G = mixmeadd.g;
+			data.col[0].add_B = mixmeadd.b;
+		}
 
 		if (use_dlights && ren_extralight < 250)
 		{
@@ -326,23 +360,6 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 	RGL_StartUnits(false);
 
 	int num_pass = is_fuzzy ? 1 : (4 + detail_level * 2);
-
-	rgbcol_t fc_to_use = player->mo->subsector->sector->props.fog_color;
-	float fd_to_use = player->mo->subsector->sector->props.fog_density;
-	// check for DDFLEVL fog
-	if (fc_to_use == RGB_NO_VALUE)
-	{
-		if (IS_SKY(player->mo->subsector->sector->ceil))
-		{
-			fc_to_use = currmap->outdoor_fog_color;
-			fd_to_use = 0.01f * currmap->outdoor_fog_density;
-		}
-		else
-		{
-			fc_to_use = currmap->indoor_fog_color;
-			fd_to_use = 0.01f * currmap->indoor_fog_density;
-		}
-	}
 
 	for (int pass = 0; pass < num_pass; pass++)
 	{

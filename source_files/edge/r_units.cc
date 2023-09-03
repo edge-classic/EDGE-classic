@@ -39,6 +39,8 @@
 
 #include "r_colormap.h"
 
+#include "AlmostEquals.h"
+
 // TODO review if these should be archived
 DEF_CVAR(r_colorlighting, "1", 0)
 DEF_CVAR(r_colormaterial, "1", 0)
@@ -427,7 +429,7 @@ void RGL_DrawUnits(void)
 				glClearColor(fc[0], fc[1], fc[2], 1.0f);
 				glFogfv(GL_FOG_COLOR, fc);
 			}
-			if (unit->fog_density != active_fog_density)
+			if (!AlmostEquals(unit->fog_density, active_fog_density))
 			{
 				active_fog_density = unit->fog_density;
 				glFogf(GL_FOG_DENSITY, std::log1p(active_fog_density));

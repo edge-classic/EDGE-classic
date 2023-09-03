@@ -39,6 +39,8 @@
 #include <algorithm>
 #include <forward_list>
 
+#include "AlmostEquals.h"
+
 extern mobj_t * P_FindTeleportMan(int tag, const mobjtype_c *info);
 extern line_t * p_FindTeleportLine(int tag, line_t *original);
 
@@ -542,7 +544,7 @@ static void NAV_TryOpenArea(int idx, int parent, float cost)
 		area.parent = parent;
 		area.G      = cost;
 
-		if (area.H == 0)
+		if (AlmostEquals(area.H, 0.0f))
 			area.H = NAV_EstimateH(&subsectors[idx]);
 	}
 }

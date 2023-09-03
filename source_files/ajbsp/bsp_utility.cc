@@ -235,7 +235,7 @@ double ComputeAngle(double dx, double dy)
 {
 	double angle;
 
-	if (dx == 0)
+	if (AlmostEquals(dx, 0.0))
 		return (dy > 0) ? 90.0 : 270.0;
 
 	angle = atan2((double) dy, (double) dx) * 180.0 / M_PI;

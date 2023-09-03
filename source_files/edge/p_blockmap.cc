@@ -41,6 +41,7 @@
 #include "r_shader.h"
 #include "r_state.h"
 
+#include "AlmostEquals.h"
 
 // FIXME: have a proper API
 extern abstract_shader_c *MakeDLightShader(mobj_t *mo);
@@ -979,7 +980,7 @@ float P_InterceptVector(divline_t * v2, divline_t * v1)
 
 	float den = (v1->dy * v2->dx) - (v1->dx * v2->dy);
 
-	if (den == 0)
+	if (AlmostEquals(den, 0.0f))
 		return 0;  // parallel
 
 	float num = (v1->x - v2->x) * v1->dy + (v2->y - v1->y) * v1->dx;
@@ -1139,10 +1140,10 @@ bool P_PathTraverse(float x1, float y1, float x2, float y2, int flags,
 	intercepts.clear();
 
 	// don't side exactly on a line
-	if (fmod(x1 - bmap_orgx, BLOCKMAP_UNIT) == 0)
+	if (AlmostEquals(fmod(x1 - bmap_orgx, BLOCKMAP_UNIT), 0.0))
 		x1 += 0.1f;
 
-	if (fmod(y1 - bmap_orgy, BLOCKMAP_UNIT) == 0)
+	if (AlmostEquals(fmod(y1 - bmap_orgy, BLOCKMAP_UNIT), 0.0))
 		y1 += 0.1f;
 
 	trace.x = x1;

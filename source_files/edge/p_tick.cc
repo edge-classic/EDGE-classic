@@ -39,6 +39,8 @@
 #include "p_spec.h"
 #include "rad_trig.h"
 
+#include "AlmostEquals.h"
+
 int leveltime;
 
 bool fast_forward_active;
@@ -58,7 +60,7 @@ void P_Ticker(bool extra_tic)
 
 	// pause if in menu and at least one tic has been run
 	if (!netgame && (menuactive || rts_menuactive) &&
-		players[consoleplayer]->viewz != FLO_UNUSED)
+		!AlmostEquals(players[consoleplayer]->viewz, FLO_UNUSED))
 	{
 		return;
 	}

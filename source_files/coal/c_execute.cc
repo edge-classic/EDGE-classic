@@ -38,6 +38,7 @@
 
 #include <vector>
 
+#include "AlmostEquals.h"
 
 namespace coal
 {
@@ -153,7 +154,7 @@ double * real_vm_c::AccessParam(int p)
 	if (p >= functions[exec.func]->parm_num)
 		RunError("PR_Parameter: p=%d out of range\n", p);
 
-	if (exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]] == -FLT_MAX)
+	if (AlmostEquals(exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]], static_cast<double>(-FLT_MAX)))
 		return NULL;
 	else
 		return &exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]];
@@ -257,7 +258,7 @@ int real_vm_c::STR_ConcatFloat(const char * s, double f)
 {
 	char buffer[100];
 
-	if (f == (int)f)
+	if (AlmostEquals(f, round(f)))
 	{
 		sprintf(buffer, "%1.0f", f);
 	}
@@ -273,7 +274,8 @@ int real_vm_c::STR_ConcatVector(const char * s, double *v)
 {
 	char buffer[200];
 
-	if (v[0] == (int)v[0] && v[1] == (int)v[1] && v[2] == (int)v[2])
+	if (AlmostEquals(v[0], round(v[0])) && AlmostEquals(v[1], round(v[1])) && 
+		AlmostEquals(v[2], round(v[2])))
 	{
 		sprintf(buffer, "'%1.0f %1.0f %1.0f'", v[0], v[1], v[2]);
 	}
@@ -577,13 +579,13 @@ void real_vm_c::DoExecute(int fnum)
 				break;
 
 			case OP_DIV_F:
-				if (*b == 0)
+				if (AlmostEquals(*b, 0.0))
 					RunError("Division by zero");
 				*c = *a / *b;
 				break;
 
 			case OP_DIV_V:
-				if (*b == 0)
+				if (AlmostEquals(*b, 0.0))
 					RunError("Division by zero");
 				c[0] = a[0] / *b;
 				c[1] = a[1] / *b;
@@ -591,7 +593,7 @@ void real_vm_c::DoExecute(int fnum)
 				break;
 
 			case OP_MOD_F:
-				if (*b == 0)
+				if (AlmostEquals(*b, 0.0))
 					RunError("Division by zero");
 				else
 				{
@@ -619,25 +621,25 @@ void real_vm_c::DoExecute(int fnum)
 
 			case OP_EQ_F:
 			case OP_EQ_FNC:
-				*c = *a == *b;
+				*c = AlmostEquals(*a, *b);
 				break;
 			case OP_EQ_V:
-				*c = (a[0] == b[0]) && (a[1] == b[1]) && (a[2] == b[2]);
+				*c = (AlmostEquals(a[0], b[0])) && (AlmostEquals(a[1], b[1])) && (AlmostEquals(a[2], b[2]));
 				break;
 			case OP_EQ_S:
-				*c = (*a == *b) ? 1 :
+				*c = (AlmostEquals(*a, *b)) ? 1 :
 					!strcmp(REF_STRING((int)*a), REF_STRING((int)*b));
 				break;
 
 			case OP_NE_F:
 			case OP_NE_FNC:
-				*c = *a != *b;
+				*c = !AlmostEquals(*a, *b);
 				break;
 			case OP_NE_V:
-				*c = (a[0] != b[0]) || (a[1] != b[1]) || (a[2] != b[2]);
+				*c = (!AlmostEquals(a[0], b[0])) || (!AlmostEquals(a[1], b[1])) || (!AlmostEquals(a[2], b[2]));
 				break;
 			case OP_NE_S:
-				*c = (*a == *b) ? 0 :
+				*c = (AlmostEquals(*a, *b)) ? 0 :
 					!! strcmp(REF_STRING((int)*a), REF_STRING((int)*b));
 				break;
 

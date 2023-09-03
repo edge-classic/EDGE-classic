@@ -51,6 +51,8 @@
 
 #include "str_util.h"
 
+#include "AlmostEquals.h"
+
 static style_c *rts_tip_style;
 
 // current tip slots
@@ -670,7 +672,7 @@ void RAD_ActPlaySound(rad_trigger_t *R, void *param)
     R->sfx_origin.x = ambient->x;
     R->sfx_origin.y = ambient->y;
 
-	if (ambient->z == ONFLOORZ)
+	if (AlmostEquals(ambient->z, ONFLOORZ))
 		R->sfx_origin.z = R_PointInSubsector(ambient->x, ambient->y)->sector->f_h;
 	else
 		R->sfx_origin.z = ambient->z;

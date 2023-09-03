@@ -33,6 +33,8 @@
 #include "r_state.h"
 #include "s_sound.h"
 
+#include "AlmostEquals.h"
+
 #include <algorithm>
 
 #define BOOM_CARRY_FACTOR 0.09375f
@@ -334,7 +336,7 @@ static bool MovePlane(plane_move_t *plane)
                                    MIN(plane->startheight, plane->destheight),
                                    plane->is_ceiling ? plane->crush : 0);
 
-            if (plane->destheight != plane->startheight)
+            if (!AlmostEquals(plane->destheight, plane->startheight))
             {
                 MakeMovingSound(&plane->sfxstarted, plane->type->sfxdown,
                                 &plane->sector->sfx_origin);
@@ -342,7 +344,7 @@ static bool MovePlane(plane_move_t *plane)
 
             if (res == RES_PastDest)
             {
-                if (plane->destheight != plane->startheight)
+                if (!AlmostEquals(plane->destheight, plane->startheight))
                 {
                     S_StartFX(plane->type->sfxstop, 
                                 SNCAT_Level,
@@ -368,7 +370,7 @@ static bool MovePlane(plane_move_t *plane)
                         break;
 
                     case mov_MoveWaitReturn:
-                        if (HEIGHT(plane->sector, plane->is_ceiling) == plane->startheight)
+                        if (AlmostEquals(HEIGHT(plane->sector, plane->is_ceiling), plane->startheight))
                         {
                             return true; // REMOVE ME
                         }
@@ -416,7 +418,7 @@ static bool MovePlane(plane_move_t *plane)
                 int dir;
                 float dest;
 
-                if (HEIGHT(plane->sector, plane->is_ceiling) == plane->destheight)
+                if (AlmostEquals(HEIGHT(plane->sector, plane->is_ceiling), plane->destheight))
                     dest = plane->startheight;
                 else
                     dest = plane->destheight;
@@ -449,7 +451,7 @@ static bool MovePlane(plane_move_t *plane)
                                    MAX(plane->startheight, plane->destheight),
                                    plane->is_ceiling ? 0 : plane->crush);
 
-            if (plane->destheight != plane->startheight)
+            if (!AlmostEquals(plane->destheight, plane->startheight))
             {
                 MakeMovingSound(&plane->sfxstarted, plane->type->sfxup,
                                 &plane->sector->sfx_origin);
@@ -457,7 +459,7 @@ static bool MovePlane(plane_move_t *plane)
 
             if (res == RES_PastDest)
             {
-                if (plane->destheight != plane->startheight)
+                if (!AlmostEquals(plane->destheight, plane->startheight))
                 {
                     S_StartFX(plane->type->sfxstop, 
                                 SNCAT_Level,
@@ -481,7 +483,7 @@ static bool MovePlane(plane_move_t *plane)
                         break;
 
                     case mov_MoveWaitReturn:
-                        if (HEIGHT(plane->sector, plane->is_ceiling) == plane->startheight)
+                        if (AlmostEquals(HEIGHT(plane->sector, plane->is_ceiling), plane->startheight))
                         {
                             return true; // REMOVE ME
                         }
@@ -548,7 +550,7 @@ static sector_t *P_GSS(sector_t * sec, float dest, bool forc)
                 sector = P_GetSector(secnum, i, 1);
 
                 if (SECPIC(sector, forc, NULL) != SECPIC(sec, forc, NULL)
-                    && HEIGHT(sector, forc) == dest)
+                    && AlmostEquals(HEIGHT(sector, forc), dest))
                 {
                     return sector;
                 }
@@ -559,7 +561,7 @@ static sector_t *P_GSS(sector_t * sec, float dest, bool forc)
                 sector = P_GetSector(secnum, i, 0);
         
                 if (SECPIC(sector, forc, NULL) != SECPIC(sec, forc, NULL)
-                    && HEIGHT(sector, forc) == dest)
+                    && AlmostEquals(HEIGHT(sector, forc), dest))
                 {
                     return sector;
                 }
@@ -685,7 +687,7 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
         plane->destheight = dest;
         plane->startheight = start;
     }
-    else if (start != dest)
+    else if (!AlmostEquals(start, dest))
     {
         P_SetupPlaneDirection(plane, def, start, dest);
     }
@@ -801,7 +803,7 @@ static plane_move_t *P_SetupSectorAction(sector_t * sector,
     // -ACB- 10/01/2001 Trigger starting sfx
 // UNNEEDED    sound::StopLoopingFX(&sector->sfx_origin);
 
-    if (def->sfxstart && plane->destheight != plane->startheight)
+    if (def->sfxstart && !AlmostEquals(plane->destheight, plane->startheight))
     {
         S_StartFX(def->sfxstart, SNCAT_Level, &sector->sfx_origin);
     }

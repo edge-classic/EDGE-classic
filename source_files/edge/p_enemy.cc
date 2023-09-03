@@ -42,6 +42,8 @@
 
 #include <float.h>
 
+#include "AlmostEquals.h"
+
 dirtype_e opposite[] =
 {
 	DI_WEST,
@@ -122,7 +124,7 @@ static void RecursiveSound(sector_t * sec, int soundblocks, int player)
 	{
 		if(nd->mo != NULL)
 		{
-			if(nd->mo->info->hear_distance != -1) //if we have hear_distance set
+			if (!AlmostEquals(nd->mo->info->hear_distance, -1.0f)) //if we have hear_distance set
 			{
 				float distance;
 				distance = P_ApproxDistance(players[player]->mo->x - nd->mo->x, players[player]->mo->y - nd->mo->y);

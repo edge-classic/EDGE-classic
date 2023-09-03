@@ -21,6 +21,7 @@
 #ifndef __AJBSP_BSP_H__
 #define __AJBSP_BSP_H__
 
+#include "AlmostEquals.h"
 #include <filesystem>
 
 #define AJBSP_VERSION  "1.04"

@@ -45,6 +45,8 @@
 #include <float.h>
 #include <math.h>
 
+#include "AlmostEquals.h"
+
 #define DEBUG_TRUEBSP  0
 #define DEBUG_COLLIDE  0
 
@@ -857,10 +859,10 @@ static bool CheckSimiliarRegions(sector_t *front, sector_t *back)
 
 	while (F && B)
 	{
-		if (F->top_h != B->top_h)
+		if (!AlmostEquals(F->top_h, B->top_h))
 			return false;
 
-		if (F->bottom_h != B->bottom_h)
+		if (!AlmostEquals(F->bottom_h, B->bottom_h))
 			return false;
 
 		F = F->higher;
@@ -996,7 +998,7 @@ static void AM_WalkSeg(seg_t *seg)
 				else
 					DrawMLine(&l, am_colors[AMCOL_Wall]);
 			}
-			else if (back->f_h != front->f_h)
+			else if (!AlmostEquals(back->f_h, front->f_h))
 			{
 				float diff = fabs(back->f_h - front->f_h);
 
@@ -1006,7 +1008,7 @@ static void AM_WalkSeg(seg_t *seg)
 				else
 					DrawMLine(&l, am_colors[AMCOL_Step]);
 			}
-			else if (back->c_h != front->c_h)
+			else if (!AlmostEquals(back->c_h, front->c_h))
 			{
 				// ceiling level change
 				DrawMLine(&l, am_colors[AMCOL_Ceil]);
@@ -1028,7 +1030,7 @@ static void AM_WalkSeg(seg_t *seg)
 			}
 		}
 	}
-	else if (f_focus->player && (show_allmap || f_focus->player->powers[PW_AllMap] != 0))
+	else if (f_focus->player && (show_allmap || !AlmostEquals(f_focus->player->powers[PW_AllMap], 0.0f)))
 	{
 		if (! (line->flags & MLF_DontDraw))
 			DrawMLine(&l, am_colors[AMCOL_Allmap]);
@@ -1320,7 +1322,7 @@ static void DrawMarks(void)
 		
 	for (int i = 0; i < AM_NUMMARKPOINTS; i++)
 	{
-		if (markpoints[i].x == NO_MARK_X)
+		if (AlmostEquals(markpoints[i].x, static_cast<float>(NO_MARK_X)))
 			continue;
 
 		float mx, my;

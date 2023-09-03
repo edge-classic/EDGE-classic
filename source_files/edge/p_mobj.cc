@@ -67,6 +67,8 @@
 
 #include "arrays.h"
 
+#include "AlmostEquals.h"
+
 #include <list>
 
 #define LADDER_FRICTION  0.5f
@@ -316,7 +318,7 @@ static bool CorpseShouldSlide(mobj_t * mo)
 
 	P_ComputeThingGap(mo, mo->subsector->sector, mo->z, &floor, &ceil, f_slope_z, c_slope_z);
 
-	return (mo->floorz != floor);
+	return (!AlmostEquals(mo->floorz, floor));
 }
 
 //
@@ -1376,7 +1378,7 @@ static void P_MobjThinker(mobj_t * mobj, bool extra_tic)
 		}
 
 		// handle SKULLFLY attacks
-		if ((mobj->flags & MF_SKULLFLY) && mobj->mom.x == 0 && mobj->mom.y == 0)
+		if ((mobj->flags & MF_SKULLFLY) && AlmostEquals(mobj->mom.x, 0.0f) && AlmostEquals(mobj->mom.y, 0.0f))
 		{
 			// the skull slammed into something
 			mobj->flags &= ~MF_SKULLFLY;
@@ -1449,18 +1451,18 @@ static void P_MobjThinker(mobj_t * mobj, bool extra_tic)
 	{
 		if (do_extra && mobj->subsector->sector->floor_vertex_slope)
 		{
-			if (mobj->old_z == mobj->old_floorz)
+			if (AlmostEquals(mobj->old_z, mobj->old_floorz))
 				mobj->on_slope = true;
 		}	
 
-		if (mobj->mom.x != 0 || mobj->mom.y != 0 || mobj->player)
+		if (!AlmostEquals(mobj->mom.x, 0.0f) || !AlmostEquals(mobj->mom.y, 0.0f) || mobj->player)
 		{
 			P_XYMovement(mobj, props, extra_tic);
 
 			if (mobj->isRemoved()) return;
 		}
 
-		if ((mobj->z != mobj->floorz) || mobj->mom.z != 0) //  || mobj->ride_em)
+		if ((!AlmostEquals(mobj->z, mobj->floorz)) || !AlmostEquals(mobj->mom.z, 0.0f)) //  || mobj->ride_em)
 		{
 			P_ZMovement(mobj, props, extra_tic);
 
@@ -2020,12 +2022,12 @@ flatdef_c* P_IsThingOnLiquidFloor(mobj_t * thing)
 		extrafloor_t *liquid_checker = thing->subsector->sector->bottom_liq;
 		for (extrafloor_t *ef = floor_checker; ef; ef=ef->higher)
 		{
-			if (player_floor_height == ef->top_h)
+			if (AlmostEquals(player_floor_height, ef->top_h))
 				current_flatdef = flatdefs.Find(ef->ef_line->frontsector->floor.image->name.c_str());
 		}
 		for (extrafloor_t *ef = liquid_checker; ef; ef=ef->higher)
 		{
-			if (player_floor_height == ef->top_h)
+			if (AlmostEquals(player_floor_height, ef->top_h))
 				current_flatdef = flatdefs.Find(ef->ef_line->frontsector->floor.image->name.c_str());
 		}
 		//if (!current_flatdef)
@@ -2053,7 +2055,7 @@ bool P_HitLiquidFloor(mobj_t * thing)
 	// don't splash if landing on the edge above water/lava/etc....
 	if (thing->subsector->sector->floor_vertex_slope && thing->z > thing->floorz)
 		return false;
-	else if (thing->floorz != thing->subsector->sector->f_h)
+	else if (!AlmostEquals(thing->floorz, thing->subsector->sector->f_h))
 		return false;
 
 	flatdef_c *current_flatdef = P_IsThingOnLiquidFloor(thing);

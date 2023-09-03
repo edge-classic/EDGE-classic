@@ -46,6 +46,7 @@
 #include "flat.h" // DDFFLAT - Dasho
 #include "s_sound.h" // play_footstep() - Dasho
 
+#include "AlmostEquals.h"
 
 extern coal::vm_c *ui_vm;
 
@@ -222,7 +223,7 @@ static void PL_on_ground(coal::vm_c *vm, int argc)
 	if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
 	{
 		// on the edge above water/lava/etc? Handles edge walker case
-		if (ui_player_who->mo->floorz != ui_player_who->mo->subsector->sector->f_h && !ui_player_who->mo->subsector->sector->floor_vertex_slope)
+		if (!AlmostEquals(ui_player_who->mo->floorz, ui_player_who->mo->subsector->sector->f_h) && !ui_player_who->mo->subsector->sector->floor_vertex_slope)
 			vm->ReturnFloat(0);
 		else
 		{

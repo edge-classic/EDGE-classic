@@ -46,6 +46,8 @@
 #include "r_modes.h"
 #include "r_units.h"
 
+#include "AlmostEquals.h"
+
 DEF_CVAR(r_fov, "90", CVAR_ARCHIVE)
 
 int viewwindow_x;
@@ -116,7 +118,7 @@ angle_t R_PointToAngle(float x1, float y1, float x, float y)
 	x -= x1;
 	y -= y1;
 
-	return (x == 0) && (y == 0) ? 0 : FLOAT_2_ANG(atan2(y, x) * (180 / M_PI));
+	return (AlmostEquals(x, 0.0f) && AlmostEquals(y, 0.0f)) ? 0 : FLOAT_2_ANG(atan2(y, x) * (180 / M_PI));
 }
 
 

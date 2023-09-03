@@ -14,6 +14,7 @@ add_library(edge_ajbsp
 	bsp_wad.cc
 )
 
+target_include_directories(edge_ajbsp PRIVATE ../almostequals)
 target_include_directories(edge_ajbsp PRIVATE ../epi)
 target_include_directories(edge_ajbsp PRIVATE ../miniz)
 

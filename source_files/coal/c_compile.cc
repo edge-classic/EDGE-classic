@@ -39,6 +39,7 @@
 
 #include "coal.h"
 
+#include "AlmostEquals.h"
 
 namespace coal
 {
@@ -752,14 +753,14 @@ def_t * real_vm_c::FindLiteral()
 		}
 		else if (comp.literal_type == &type_float)
 		{
-			if (G_FLOAT(cn->ofs) == comp.literal_value[0])
+			if (AlmostEquals(G_FLOAT(cn->ofs), comp.literal_value[0]))
 				return cn;
 		}
 		else if	(comp.literal_type == &type_vector)
 		{
-			if (G_FLOAT(cn->ofs)   == comp.literal_value[0] &&
-				G_FLOAT(cn->ofs+1) == comp.literal_value[1] &&
-				G_FLOAT(cn->ofs+2) == comp.literal_value[2])
+			if (AlmostEquals(G_FLOAT(cn->ofs), comp.literal_value[0]) &&
+				AlmostEquals(G_FLOAT(cn->ofs+1), comp.literal_value[1]) &&
+				AlmostEquals(G_FLOAT(cn->ofs+2), comp.literal_value[2]))
 			{
 				return cn;
 			}

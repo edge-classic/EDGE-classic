@@ -44,6 +44,8 @@
 
 #include "coal.h" // for coal::vm_c
 
+#include "AlmostEquals.h"
+
 extern cvar_c r_doubleframes;
 
 extern coal::vm_c *ui_vm;
@@ -114,8 +116,8 @@ static void CalcHeight(player_t * player, bool extra_tic)
 		sink_mult -= current_flatdef->sink_depth;
 	
 	if (g_erraticism.d && leveltime > 0 && (!player->cmd.forwardmove && !player->cmd.sidemove) && 
-		((player->mo->height == player->mo->info->height || player->mo->height == player->mo->info->crouchheight) && (player->deltaviewheight == 0 ||
-		sink_mult < 1.0f)))
+		((AlmostEquals(player->mo->height, player->mo->info->height) || AlmostEquals(player->mo->height, player->mo->info->crouchheight)) && 
+		(AlmostEquals(player->deltaviewheight, 0.0f) || sink_mult < 1.0f)))
 		return;
 
 	if (player->mo->height < (player->mo->info->height + player->mo->info->crouchheight) / 2.0f)
@@ -184,7 +186,7 @@ static void CalcHeight(player_t * player, bool extra_tic)
 			}
 		}
 
-		if (player->deltaviewheight != 0)
+		if (!AlmostEquals(player->deltaviewheight, 0.0f))
 		{
 			// use a weird number to minimise chance of hitting
 			// zero when deltaviewheight goes neg -> positive.
@@ -811,7 +813,8 @@ bool P_PlayerThink(player_t * player, bool extra_tic)
 			sinking = true;
 		if (cmd->forwardmove == 0 && cmd->sidemove == 0 && !player->swimming && cmd->upwardmove <= 0 &&
 			!(cmd->buttons & (BT_ATTACK | BT_USE | BT_CHANGE | EBT_SECONDATK | EBT_RELOAD | EBT_ACTION1 | EBT_ACTION2 | EBT_INVUSE)) && 
-			((player->mo->height == player->mo->info->height || player->mo->height == player->mo->info->crouchheight) && (player->deltaviewheight == 0 || sinking)))
+			((AlmostEquals(player->mo->height, player->mo->info->height) || AlmostEquals(player->mo->height, player->mo->info->crouchheight)) && 
+			(AlmostEquals(player->deltaviewheight, 0.0f) || sinking)))
 		{
 			should_think = false;
 			if (!player->mo->mom.z)

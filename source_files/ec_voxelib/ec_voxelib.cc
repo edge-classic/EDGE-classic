@@ -49,6 +49,8 @@
 #include <stdarg.h>
 #include <math.h>
 
+#include "AlmostEquals.h"
+
 //#define VOXELIB_CHECK_INVARIANTS
 
 
@@ -2047,24 +2049,24 @@ void GLVoxelMesh::createEdges () {
       e.morefirst = -1;
       e.v0 = indices[f+vx0];
       e.v1 = indices[f+vx1];
-      if (vertices[e.v0].x != vertices[e.v1].x) {
-        vassert(vertices[e.v0].y == vertices[e.v1].y);
-        vassert(vertices[e.v0].z == vertices[e.v1].z);
+      if (!AlmostEquals(vertices[e.v0].x, vertices[e.v1].x)) {
+        vassert(AlmostEquals(vertices[e.v0].y, vertices[e.v1].y));
+        vassert(AlmostEquals(vertices[e.v0].z, vertices[e.v1].z));
         e.axis = AXIS_X;
-      } else if (vertices[e.v0].y != vertices[e.v1].y) {
-        vassert(vertices[e.v0].x == vertices[e.v1].x);
-        vassert(vertices[e.v0].z == vertices[e.v1].z);
+      } else if (!AlmostEquals(vertices[e.v0].y, vertices[e.v1].y)) {
+        vassert(AlmostEquals(vertices[e.v0].x, vertices[e.v1].x));
+        vassert(AlmostEquals(vertices[e.v0].z, vertices[e.v1].z));
         e.axis = AXIS_Y;
       } else {
-        vassert(vertices[e.v0].x == vertices[e.v1].x);
-        vassert(vertices[e.v0].y == vertices[e.v1].y);
-        vassert(vertices[e.v0].z != vertices[e.v1].z);
+        vassert(AlmostEquals(vertices[e.v0].x, vertices[e.v1].x));
+        vassert(AlmostEquals(vertices[e.v0].y, vertices[e.v1].y));
+        vassert(!AlmostEquals(vertices[e.v0].z, vertices[e.v1].z));
         e.axis = AXIS_Z;
       }
       e.clo = vertices[e.v0].get(e.axis);
       e.chi = vertices[e.v1].get(e.axis);
       e.dir = e.chi-e.clo;
-      if (unitquad) unitquad = (e.dir == +1.0f || e.dir == -1.0f);
+      if (unitquad) unitquad = (AlmostEquals(e.dir, +1.0f) || AlmostEquals(e.dir, -1.0f));
     }
     // "unit quads" can be ignored, they aren't interesting
     // also, each quad always have at least one "unit edge"
@@ -2119,7 +2121,7 @@ void GLVoxelMesh::fixEdgeWithVert (VoxEdge &edge, float crd) {
 //==========================================================================
 void GLVoxelMesh::fixEdgeNew (uint32_t eidx) {
   VoxEdge &edge = edges[eidx];
-  if (edge.dir == +1.0f || edge.dir == -1.0f) return; // and here
+  if (AlmostEquals(edge.dir, +1.0f) || AlmostEquals(edge.dir, -1.0f)) return; // and here
   // check grid by the edge axis
   float gxyz[3];
   for (uint32_t f = 0; f < 3; ++f) gxyz[f] = vertices[edge.v0].get(f);
@@ -2266,9 +2268,9 @@ void GLVoxelMesh::rebuildEdges () {
         cy += vy;
         cz += vz;
         if (eic) {
-          xequal = xequal && (prevx == vx);
-          yequal = yequal && (prevy == vy);
-          zequal = zequal && (prevz == vz);
+          xequal = xequal && (AlmostEquals(prevx, vx));
+          yequal = yequal && (AlmostEquals(prevy, vy));
+          zequal = zequal && (AlmostEquals(prevz, vz));
         }
         prevx = vx;
         prevy = vy;

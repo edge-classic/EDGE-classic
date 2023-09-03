@@ -29,6 +29,7 @@ add_library(
   str_util.cc
 )
 
+target_include_directories(edge_epi PRIVATE ../almostequals)
 target_include_directories(edge_epi PRIVATE ../stb)
 target_include_directories(edge_epi PRIVATE ../libgme/gme)
 target_include_directories(edge_epi PRIVATE ../m4p)

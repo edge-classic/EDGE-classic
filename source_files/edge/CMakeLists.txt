@@ -162,7 +162,7 @@ else()
 	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} gl4es)
 endif()
 
-
+target_include_directories(edge-classic PRIVATE ../almostequals)
 target_include_directories(edge-classic PRIVATE ../ajbsp)
 target_include_directories(edge-classic PRIVATE ../coal)
 target_include_directories(edge-classic PRIVATE ../crsid)

@@ -50,6 +50,8 @@
 
 #include "r_sky.h" //Lobo 2022: added for our Sky Transfer special
 
+#include "AlmostEquals.h"
+
 #define BOOM_CARRY_FACTOR 0.09375f
 
 extern cvar_c r_doubleframes;
@@ -1543,7 +1545,7 @@ static bool P_ActivateSpecialLine(line_t * line,
 		}
 	}
 
-	if (special->gravity != FLO_UNUSED && tag > 0)
+	if (!AlmostEquals(special->gravity, FLO_UNUSED) && tag > 0)
 	{
 		for (tsec = P_FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
 		{
@@ -1552,7 +1554,7 @@ static bool P_ActivateSpecialLine(line_t * line,
 		}
 	}
 
-	if (special->friction != FLO_UNUSED && tag > 0)
+	if (!AlmostEquals(special->friction, FLO_UNUSED) && tag > 0)
 	{
 		for (tsec = P_FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
 		{
@@ -1561,7 +1563,7 @@ static bool P_ActivateSpecialLine(line_t * line,
 		}
 	}
 
-	if (special->viscosity != FLO_UNUSED && tag > 0)
+	if (!AlmostEquals(special->viscosity, FLO_UNUSED) && tag > 0)
 	{
 		for (tsec = P_FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
 		{
@@ -1570,7 +1572,7 @@ static bool P_ActivateSpecialLine(line_t * line,
 		}
 	}
 
-	if (special->drag != FLO_UNUSED && tag > 0)
+	if (!AlmostEquals(special->drag, FLO_UNUSED) && tag > 0)
 	{
 		for (tsec = P_FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
 		{

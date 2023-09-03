@@ -681,7 +681,7 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 	vert->x = start->x;
 	vert->y = start->x;
 
-	if (dlen == 0)
+	if (AlmostEquals(dlen, 0.0))
 		BugError("NewVertexDegenerate: bad delta!\n");
 
 	dx /= dlen;

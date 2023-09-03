@@ -213,7 +213,7 @@ inline void ComputeIntersection(seg_t *seg, seg_t *part,
 		double perp_c, double perp_d, double *x, double *y)
 {
 	// horizontal partition against vertical seg
-	if (part->pdy == 0 && seg->pdx == 0)
+	if (AlmostEquals(part->pdy, 0.0) && AlmostEquals(seg->pdx, 0.0))
 	{
 		*x = seg->psx;
 		*y = part->psy;
@@ -221,7 +221,7 @@ inline void ComputeIntersection(seg_t *seg, seg_t *part,
 	}
 
 	// vertical partition against horizontal seg
-	if (part->pdx == 0 && seg->pdy == 0)
+	if (AlmostEquals(part->pdx, 0.0) && AlmostEquals(seg->pdy, 0.0))
 	{
 		*x = part->psx;
 		*y = seg->psy;
@@ -231,12 +231,12 @@ inline void ComputeIntersection(seg_t *seg, seg_t *part,
 	// 0 = start, 1 = end
 	double ds = perp_c / (perp_c - perp_d);
 
-	if (seg->pdx == 0)
+	if (AlmostEquals(seg->pdx, 0.0))
 		*x = seg->psx;
 	else
 		*x = seg->psx + (seg->pdx * ds);
 
-	if (seg->pdy == 0)
+	if (AlmostEquals(seg->pdy, 0.0))
 		*y = seg->psy;
 	else
 		*y = seg->psy + (seg->pdy * ds);
@@ -536,7 +536,7 @@ double EvalPartition(quadtree_c *tree, seg_t *part, double best_cost)
 	//       partition lines that lie either purely horizontally or
 	//       purely vertically.
 
-	if (part->pdx != 0 && part->pdy != 0)
+	if (!AlmostEquals(part->pdx, 0.0) && !AlmostEquals(part->pdy, 0.0))
 		info.cost += 25.0;
 
 	return info.cost;
@@ -552,7 +552,7 @@ void EvaluateFastWorker(quadtree_c *tree,
 		if (part->linedef == NULL)
 			continue;
 
-		if (part->pdy == 0)
+		if (AlmostEquals(part->pdy, 0.0))
 		{
 			// horizontal seg
 			if (! *best_H)
@@ -568,7 +568,7 @@ void EvaluateFastWorker(quadtree_c *tree,
 					*best_H = part;
 			}
 		}
-		else if (part->pdx == 0)
+		else if (AlmostEquals(part->pdx, 0.0))
 		{
 			// vertical seg
 			if (! *best_V)
@@ -1154,7 +1154,7 @@ int quadtree_c::OnLineSide(const seg_t *part) const
 	int p1, p2;
 
 	// handle simple cases (vertical & horizontal lines)
-	if (part->pdx == 0)
+	if (AlmostEquals(part->pdx, 0.0))
 	{
 		p1 = (tx1 > part->psx) ? +1 : -1;
 		p2 = (tx2 > part->psx) ? +1 : -1;
@@ -1165,7 +1165,7 @@ int quadtree_c::OnLineSide(const seg_t *part) const
 			p2 = -p2;
 		}
 	}
-	else if (part->pdy == 0)
+	else if (AlmostEquals(part->pdy, 0.0))
 	{
 		p1 = (ty1 < part->psy) ? +1 : -1;
 		p2 = (ty2 < part->psy) ? +1 : -1;

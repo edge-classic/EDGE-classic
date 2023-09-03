@@ -50,6 +50,8 @@
 #include "p_spec.h"
 #include "r_state.h"
 
+#include "AlmostEquals.h"
+
 //
 // P_ApproxDistance
 //
@@ -96,12 +98,12 @@ void P_ComputeIntersection(divline_t *div,
 		float x1, float y1, float x2, float y2,
 		float *ix, float *iy)
 {
-	if (div->dx == 0)
+	if (AlmostEquals(div->dx, 0.0f))
 	{
 		*ix = div->x;
 		*iy = y1 + (y2 - y1) * (div->x - x1) / (x2 - x1);
 	}
-	else if (div->dy == 0)
+	else if (AlmostEquals(div->dy, 0.0f))
 	{
 		*iy = div->y;
 		*ix = x1 + (x2 - x1) * (div->y - y1) / (y2 - y1);
@@ -129,10 +131,10 @@ int P_PointOnDivlineSide(float x, float y, divline_t *div)
 	float dx, dy;
 	float left, right;
 
-	if (div->dx == 0)
+	if (AlmostEquals(div->dx, 0.0f))
 		return ((x <= div->x) ^ (div->dy > 0)) ? 0 : 1;
 
-	if (div->dy == 0)
+	if (AlmostEquals(div->dy, 0.0f))
 		return ((y <= div->y) ^ (div->dx < 0)) ? 0 : 1;
 
 	dx = x - div->x;
@@ -167,7 +169,7 @@ int P_PointOnDivlineThick(float x, float y, divline_t *div,
 	float dx, dy;
 	float left, right;
 
-	if (div->dx == 0)
+	if (AlmostEquals(div->dx, 0.0f))
 	{
 		if (fabs(x - div->x) <= thickness)
 			return 2;
@@ -175,7 +177,7 @@ int P_PointOnDivlineThick(float x, float y, divline_t *div,
 		return ((x < div->x) ^ (div->dy > 0)) ? 0 : 1;
 	}
 
-	if (div->dy == 0)
+	if (AlmostEquals(div->dy, 0.0f))
 	{
 		if (fabs(y - div->y) <= thickness)
 			return 2;
@@ -264,7 +266,7 @@ int P_BoxOnDivLineSide(const float * tmbox, divline_t *div)
 	int p1 = 0;
 	int p2 = 0;
 
-	if (div->dy == 0)
+	if (AlmostEquals(div->dy, 0.0f))
 	{
 		p1 = tmbox[BOXTOP] > div->y;
 		p2 = tmbox[BOXBOTTOM] > div->y;
@@ -275,7 +277,7 @@ int P_BoxOnDivLineSide(const float * tmbox, divline_t *div)
 			p2 ^= 1;
 		}
 	}
-	else if (div->dx == 0)
+	else if (AlmostEquals(div->dx, 0.0f))
 	{
 		p1 = tmbox[BOXRIGHT] < div->x;
 		p2 = tmbox[BOXLEFT] < div->x;
@@ -582,10 +584,10 @@ float P_ComputeThingGap(mobj_t * thing, sector_t * sec, float z,
 
 	temp_num = GAP_Construct(temp_gaps, sec, thing, f_slope_z, c_slope_z);
 
-	if (z == ONFLOORZ)
+	if (AlmostEquals(z, ONFLOORZ))
 		z = sec->f_h;
 
-	if (z == ONCEILINGZ)
+	if (AlmostEquals(z, ONCEILINGZ))
 		z = sec->c_h - thing->height;
 
 	temp_num = P_FindThingGap(temp_gaps, temp_num, z, z + thing->height);

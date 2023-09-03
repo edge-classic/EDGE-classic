@@ -41,6 +41,8 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
+#include "AlmostEquals.h"
+
 #define DEBUG  0
 
 
@@ -100,7 +102,7 @@ bool bot_t::CanGetArmour(const benefit_t *be, int extendedflags) const
 	if (amount > slack)
 		amount = slack;
 
-	return ! (amount == 0 && upgrade == 0);
+	return ! (AlmostEquals(amount, 0.0f) && AlmostEquals(upgrade, 0.0f));
 }
 
 
@@ -1125,7 +1127,8 @@ void bot_t::FinishGetItem()
 		return;
 
 	// otherwise we were roaming about, so re-establish path
-	if (! (roam_goal.x == 0 && roam_goal.y == 0 && roam_goal.z == 0))
+	if (! (AlmostEquals(roam_goal.x, 0.0f) && AlmostEquals(roam_goal.y, 0.0f) && 
+		AlmostEquals(roam_goal.z, 0.0f)))
 	{
 		path = NAV_FindPath(pl->mo, &roam_goal, 0);
 

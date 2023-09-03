@@ -55,6 +55,8 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
+#include "AlmostEquals.h"
+
 extern flatdef_c* P_IsThingOnLiquidFloor(mobj_t * thing);
 
 static int AttackSfxCat(const mobj_t *mo)
@@ -990,7 +992,7 @@ void P_ActDamageExplosion(mobj_t * object)
 
 	// -AJA- 2004/09/27: new EXPLODE_RADIUS command (overrides normal calc)
 	float radius = object->info->explode_radius;
-	if (radius == 0) radius = damage;
+	if (AlmostEquals(radius, 0.0f)) radius = damage;
 
 	P_RadiusAttack(object, object->source, radius, damage,
 				   &object->info->explode_damage, false);
@@ -1016,7 +1018,7 @@ void P_ActThrust(mobj_t * object)
 #endif
 
 	float radius = object->info->explode_radius;
-	if (radius == 0) radius = damage;
+	if (AlmostEquals(radius, 0.0f)) radius = damage;
 
 	P_RadiusAttack(object, object->source, radius, damage,
 				   &object->info->explode_damage, true);
@@ -2179,7 +2181,7 @@ void P_ActEffectTracker(mobj_t * object)
 	DAMAGE_COMPUTE(damage, &tracker->info->explode_damage);
 
 	float radius = object->info->explode_radius;
-	if (radius == 0) radius = damage;
+	if (AlmostEquals(radius, 0.0f)) radius = damage;
 
 	P_RadiusAttack(tracker, object, radius, damage,
 				   &tracker->info->explode_damage, false);

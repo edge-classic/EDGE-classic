@@ -36,6 +36,8 @@
 #include "rad_trig.h"
 #include "s_sound.h"
 
+#include "AlmostEquals.h"
+
 #define BONUS_ADD    6
 #define BONUS_LIMIT  100
 
@@ -431,7 +433,7 @@ static void GiveArmour(pickup_info_t *pu, benefit_t *be)
 
 	if (pu->lose_em)
 	{
-		if (pu->player->armours[a_class] == 0)
+		if (AlmostEquals(pu->player->armours[a_class], 0.0f))
 			return;
 
 		pu->player->armours[a_class] -= be->amount;
@@ -482,7 +484,7 @@ static void GiveArmour(pickup_info_t *pu, benefit_t *be)
 		SYS_ASSERT(amount  >= 0);
 		SYS_ASSERT(upgrade >= 0);
 
-		if (amount == 0 && upgrade == 0)
+		if (AlmostEquals(amount, 0.0f) && AlmostEquals(upgrade, 0.0f))
 			return;
 	}
 
@@ -563,7 +565,7 @@ static void GivePower(pickup_info_t *pu, benefit_t *be)
 
 	if (pu->lose_em)
 	{
-		if (pu->player->powers[be->sub.type] == 0)
+		if (AlmostEquals(pu->player->powers[be->sub.type], 0.0f))
 			return;
 
 		pu->player->powers[be->sub.type] -= duration;
@@ -752,7 +754,7 @@ void P_TouchSpecialThing(mobj_t * special, mobj_t * toucher)
 		return;
 
 	// VOODOO DOLLS: Do not pick up the item if completely still
-	if (toucher->is_voodoo && toucher->mom.x == 0 && toucher->mom.y == 0 && toucher->mom.z == 0)
+	if (toucher->is_voodoo && AlmostEquals(toucher->mom.x, 0.0f) && AlmostEquals(toucher->mom.y, 0.0f) && AlmostEquals(toucher->mom.z, 0.0f))
 		return;
 
 	// -KM- 1998/09/27 Sounds.ddf
@@ -1153,7 +1155,7 @@ void P_ThrustMobj(mobj_t * target, mobj_t * inflictor, float thrust)
 	angle_t angle = R_PointToAngle(0, 0, dx, dy);
 
 	// -ACB- 2000/03/11 Div-by-zero check...
-	SYS_ASSERT(0 != target->info->mass);
+	SYS_ASSERT(!AlmostEquals(target->info->mass, 0.0f));
 
 	float push = 12.0f * thrust / target->info->mass;
 
@@ -1205,7 +1207,7 @@ void P_PushMobj(mobj_t * target, mobj_t * inflictor, float thrust)
 	angle_t angle = R_PointToAngle(0, 0, dx, dy);
 
 	// -ACB- 2000/03/11 Div-by-zero check...
-	SYS_ASSERT(0 != target->info->mass);
+	SYS_ASSERT(!AlmostEquals(target->info->mass, 0.0f));
 
 	float push = 12.0f * thrust / target->info->mass;
 

@@ -49,6 +49,8 @@
 #include "p_local.h"
 #include "s_sound.h"
 
+#include "AlmostEquals.h"
+
 #define RAISE_RADIUS  32
 
 static void gore_cb(cvar_c *self)
@@ -310,7 +312,7 @@ static bool PIT_CheckAbsLine(line_t * ld, void *data)
 	for (int i = 0; i < ld->gap_num; i++)
 	{
 		// -AJA- FIXME: this ONFLOORZ stuff is a DIRTY HACK!
-		if (tm_I.z == ONFLOORZ || tm_I.z == ONCEILINGZ)
+		if (AlmostEquals(tm_I.z, ONFLOORZ) || AlmostEquals(tm_I.z, ONCEILINGZ))
 		{
 			if (tm_I.mover->height <= (ld->gaps[i].c - ld->gaps[i].f))
 				return true;
@@ -344,7 +346,7 @@ static bool PIT_CheckAbsThing(mobj_t * thing, void *data)
 		return true;  // no we missed this thing
 
 	// -AJA- FIXME: this ONFLOORZ stuff is a DIRTY HACK!
-	if (tm_I.z != ONFLOORZ && tm_I.z != ONCEILINGZ)
+	if (!AlmostEquals(tm_I.z, ONFLOORZ) && !AlmostEquals(tm_I.z, ONCEILINGZ))
 	{
 		// -KM- 1998/9/19 True 3d gameplay checks.
 		if ((tm_I.flags & MF_MISSILE) || level_flags.true3dgameplay)
@@ -499,7 +501,7 @@ static bool PIT_CheckRelLine(line_t * ld, void *data)
 	}
 
 	// -AJA- for players, disable stepping up onto a lowering sector
-	if (tm_I.mover->player && ld->frontsector->f_h != ld->backsector->f_h)
+	if (tm_I.mover->player && !AlmostEquals(ld->frontsector->f_h, ld->backsector->f_h))
 	{
 		if ( (tm_I.mover->z < ld->frontsector->f_h &&
 			  P_SectorIsLowering(ld->frontsector))
@@ -552,13 +554,13 @@ static bool PIT_CheckRelLine(line_t * ld, void *data)
 		f2 = ld->backsector->f_h;
 		c2 = ld->backsector->c_h;
 
-		if (c1 != c2 && IS_SKY(ld->frontsector->ceil) &&
+		if (!AlmostEquals(c1, c2) && IS_SKY(ld->frontsector->ceil) &&
 			IS_SKY(ld->backsector->ceil) && tm_I.z > MIN(c1, c2))
 		{
 			mobj_hit_sky = true;
 		}
 
-		if (f1 != f2 && IS_SKY(ld->frontsector->floor) &&
+		if (!AlmostEquals(f1, f2) && IS_SKY(ld->frontsector->floor) &&
 			IS_SKY(ld->backsector->floor) &&
 			tm_I.z+tm_I.mover->height < MAX(f1, f2))
 		{
@@ -1390,7 +1392,7 @@ void P_SlideMove(mobj_t * mo, float x, float y)
 			PT_ADDLINES, PTR_SlideTraverse);
 
 		// move up to the wall
-		if (bestslidefrac == 1.0001f)
+		if (AlmostEquals(bestslidefrac, 1.0001f))
 		{
 			// the move must have hit the middle, so stairstep
 			break;  // goto stairstep
@@ -1459,7 +1461,7 @@ static bool PTR_AimTraverse(intercept_t * in, void *dataptr)
 		//
 		// -AJA- 1999/07/19: Gaps are now kept in line_t.
 
-		if (ld->frontsector->f_h != ld->backsector->f_h)
+		if (!AlmostEquals(ld->frontsector->f_h, ld->backsector->f_h))
 		{
 			float maxfloor = MAX(ld->frontsector->f_h, ld->backsector->f_h);
 			float slope = (maxfloor - aim_I.start_z) / dist;
@@ -1468,7 +1470,7 @@ static bool PTR_AimTraverse(intercept_t * in, void *dataptr)
 				aim_I.bottomslope = slope;
 		}
 
-		if (ld->frontsector->c_h != ld->backsector->c_h)
+		if (!AlmostEquals(ld->frontsector->c_h, ld->backsector->c_h))
 		{
 			float minceil = MIN(ld->frontsector->c_h, ld->backsector->c_h);
 			float slope = (minceil - aim_I.start_z) / dist;
@@ -1551,7 +1553,7 @@ static bool PTR_AimTraverse2(intercept_t * in, void *dataptr)
 		//
 		// -AJA- 1999/07/19: Gaps are now kept in line_t.
 
-		if (ld->frontsector->f_h != ld->backsector->f_h)
+		if (!AlmostEquals(ld->frontsector->f_h, ld->backsector->f_h))
 		{
 			float maxfloor = MAX(ld->frontsector->f_h, ld->backsector->f_h);
 			float slope = (maxfloor - aim_I.start_z) / dist;
@@ -1560,7 +1562,7 @@ static bool PTR_AimTraverse2(intercept_t * in, void *dataptr)
 				aim_I.bottomslope = slope;
 		}
 
-		if (ld->frontsector->c_h != ld->backsector->c_h)
+		if (!AlmostEquals(ld->frontsector->c_h, ld->backsector->c_h))
 		{
 			float minceil = MIN(ld->frontsector->c_h, ld->backsector->c_h);
 			float slope = (minceil - aim_I.start_z) / dist;
@@ -1632,7 +1634,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
 	/* Returns true if successfully passed gap */
 
 	// perfectly horizontal shots cannot hit planes
-	if (shoot_I.slope == 0 && (!sec_check || (!sec_check->floor_vertex_slope && !sec_check->ceil_vertex_slope)))
+	if (AlmostEquals(shoot_I.slope, 0.0f) && (!sec_check || (!sec_check->floor_vertex_slope && !sec_check->ceil_vertex_slope)))
 		return true;
 
 	if (sec_check && sec_check->floor_vertex_slope)
@@ -1644,20 +1646,20 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
 			vec3_t tri_v2 = {0,0,0};
 			for (auto v : sec_check->floor_z_verts)
 			{
-				if (ld->v1->x == v.x && ld->v1->y == v.y)
+				if (AlmostEquals(ld->v1->x, v.x) && AlmostEquals(ld->v1->y, v.y))
 				{
 					tri_v1.x = v.x;
 					tri_v1.y = v.y;
 					tri_v1.z = v.z;
 				}
-				else if (ld->v2->x == v.x && ld->v2->y == v.y)
+				else if (AlmostEquals(ld->v2->x, v.x) && AlmostEquals(ld->v2->y, v.y))
 				{
 					tri_v2.x = v.x;
 					tri_v2.y = v.y;
 					tri_v2.z = v.z;
 				}
 			}
-			if (tri_v1.z == tri_v2.z && CLAMP(MIN(sec_check->f_h, tri_v1.z), z, MAX(sec_check->f_h, tri_v1.z)) == z) // Hitting rectangular side; no fancier check needed
+			if (AlmostEquals(tri_v1.z, tri_v2.z) && AlmostEquals(CLAMP(MIN(sec_check->f_h, tri_v1.z), z, MAX(sec_check->f_h, tri_v1.z)), z)) // Hitting rectangular side; no fancier check needed
 			{
 				if (shoot_I.puff)
 				{
@@ -1706,20 +1708,20 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
 			vec3_t tri_v2 = {0,0,0};
 			for (auto v : sec_check->ceil_z_verts)
 			{
-				if (ld->v1->x == v.x && ld->v1->y == v.y)
+				if (AlmostEquals(ld->v1->x, v.x) && AlmostEquals(ld->v1->y, v.y))
 				{
 					tri_v1.x = v.x;
 					tri_v1.y = v.y;
 					tri_v1.z = v.z;
 				}
-				else if (ld->v2->x == v.x && ld->v2->y == v.y)
+				else if (AlmostEquals(ld->v2->x, v.x) && AlmostEquals(ld->v2->y, v.y))
 				{
 					tri_v2.x = v.x;
 					tri_v2.y = v.y;
 					tri_v2.z = v.z;
 				}
 			}
-			if (tri_v1.z == tri_v2.z && CLAMP(MIN(sec_check->c_h, tri_v1.z), z, MAX(sec_check->c_h, tri_v1.z)) == z) // Hitting rectangular side; no fancier check needed
+			if (AlmostEquals(tri_v1.z, tri_v2.z) && AlmostEquals(CLAMP(MIN(sec_check->c_h, tri_v1.z), z, MAX(sec_check->c_h, tri_v1.z)), z)) // Hitting rectangular side; no fancier check needed
 			{
 				if (shoot_I.puff)
 				{
@@ -2870,7 +2872,7 @@ bool P_CheckSolidSectorMove(sector_t *sec, bool is_ceiling,
 {
 	extrafloor_t *ef;
 
-	if (dh == 0)
+	if (AlmostEquals(dh, 0.0f))
 		return true;
 
 	//
@@ -2891,7 +2893,7 @@ bool P_CheckSolidSectorMove(sector_t *sec, bool is_ceiling,
 
 
 	// Test fix for Doom 1 E3M4 crusher bug - Dasho
-	if (is_ceiling && dh < 0 && sec->c_h == sec->f_h)
+	if (is_ceiling && dh < 0 && AlmostEquals(sec->c_h, sec->f_h))
 	{
 		if (sec->ceil_move)
 			sec->ceil_move->destheight = sec->f_h - dh;
@@ -2988,7 +2990,7 @@ bool P_SolidSectorMove(sector_t *sec, bool is_ceiling,
 {
 	extrafloor_t *ef;
 
-	if (dh == 0)
+	if (AlmostEquals(dh, 0.0f))
 		return false;
 
 	nofit = false;

@@ -48,6 +48,8 @@
 #include "p_local.h"
 #include "r_state.h"
 
+#include "AlmostEquals.h"
+
 #define DEBUG_SIGHT  0
 
 
@@ -233,7 +235,7 @@ static bool CrossSubsector(subsector_t *sub)
 				continue;
 		}
 
-		if (front->f_h != back->f_h)
+		if (!AlmostEquals(front->f_h, back->f_h))
 		{
 			float openbottom = MAX(ld->frontsector->f_h, ld->backsector->f_h);
 			slope = (openbottom - sight_I.src_z) / frac;
@@ -241,7 +243,7 @@ static bool CrossSubsector(subsector_t *sub)
 				sight_I.bottom_slope = slope;
 		}
 
-		if (front->c_h != back->c_h)
+		if (!AlmostEquals(front->c_h, back->c_h))
 		{
 			float opentop = MIN(ld->frontsector->c_h, ld->backsector->c_h);
 			slope = (opentop - sight_I.src_z) / frac;

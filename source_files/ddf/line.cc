@@ -33,6 +33,8 @@
 
 #include "str_util.h"
 
+#include "AlmostEquals.h"
+
 #include <limits.h>
 
 #undef  DF
@@ -435,14 +437,14 @@ static void LinedefFinishEntry(void)
 		}
 	}
 
-	if (dynamic_line->friction != FLO_UNUSED && dynamic_line->friction < 0.05f)
+	if (!AlmostEquals(dynamic_line->friction, FLO_UNUSED) && dynamic_line->friction < 0.05f)
 	{
 		DDF_WarnError("Friction value too low (%1.2f), it would prevent "
 			"all movement.\n", dynamic_line->friction);
 		dynamic_line->friction = 0.05f;
 	}
 
-	if (dynamic_line->viscosity != FLO_UNUSED && dynamic_line->viscosity > 0.95f)
+	if (!AlmostEquals(dynamic_line->viscosity, FLO_UNUSED) && dynamic_line->viscosity > 0.95f)
 	{
 		DDF_WarnError("Viscosity value too high (%1.2f), it would prevent "
 			"all movement.\n", dynamic_line->viscosity);

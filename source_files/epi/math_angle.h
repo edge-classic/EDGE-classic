@@ -19,6 +19,8 @@
 #ifndef __EPI_ANGLE_CLASS__
 #define __EPI_ANGLE_CLASS__
 
+#include "AlmostEquals.h"
+
 namespace epi
 {
 
@@ -138,7 +140,7 @@ inline angle_c angle_c::FromRadians(double rad)
 
 inline angle_c angle_c::FromVector(float x, float y)
 {
-	if (x == 0)
+	if (AlmostEquals(x, 0.0f))
 		return (y >= 0) ? Ang90() : Ang270();
 
 	double rad = atan2((double) y, (double) x);

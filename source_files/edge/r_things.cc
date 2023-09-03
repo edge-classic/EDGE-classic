@@ -59,6 +59,8 @@
 
 #include "coal.h"
 
+#include "AlmostEquals.h"
+
 extern coal::vm_c *ui_vm;
 
 extern double VM_GetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name);
@@ -1127,7 +1129,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 	// fix for sprites that sit wrongly into the floor/ceiling
 	int y_clipping = YCLIP_Soft;
 
-	if (is_model || (mo->flags & MF_FUZZY) || ((mo->hyperflags & HF_HOVER) && sink_mult == 0))
+	if (is_model || (mo->flags & MF_FUZZY) || ((mo->hyperflags & HF_HOVER) && AlmostEquals(sink_mult, 0.0f)))
 	{
 		y_clipping = YCLIP_Never;
 	}

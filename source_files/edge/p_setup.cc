@@ -60,6 +60,8 @@
 
 #include "miniz.h" // ZGL3 nodes
 
+#include "AlmostEquals.h"
+
 // debugging aide:
 #define FORCE_LOCATION  0
 #define FORCE_LOC_X     12766
@@ -771,9 +773,9 @@ static inline void ComputeLinedefData(line_t *ld, int side0, int side1)
 	ld->dx = v2->x - v1->x;
 	ld->dy = v2->y - v1->y;
 
-	if (ld->dx == 0)
+	if (AlmostEquals(ld->dx, 0.0f))
 		ld->slopetype = ST_VERTICAL;
-	else if (ld->dy == 0)
+	else if (AlmostEquals(ld->dy, 0.0f))
 		ld->slopetype = ST_HORIZONTAL;
 	else if (ld->dy / ld->dx > 0)
 		ld->slopetype = ST_POSITIVE;
@@ -1523,7 +1525,7 @@ static void LoadUDMFSectors()
 			if (m_goobers.d)
 			{
 				ss->f_h = 0;
-				ss->c_h = (fz == cz) ? 0 : 128.0f;
+				ss->c_h = (AlmostEquals(fz, cz)) ? 0 : 128.0f;
 			}
 
 			ss->orig_height = (ss->f_h + ss->c_h);
@@ -2711,7 +2713,7 @@ void GroupLines(void)
 				vertex_t *vert = sector->lines[j]->v1;
 				bool add_it = true;
 				for (auto v : sector->floor_z_verts)
-					if (v.x == vert->x && v.y == vert->y) add_it = false;
+					if (AlmostEquals(v.x, vert->x) && AlmostEquals(v.y, vert->y)) add_it = false;
 				if (add_it)
 				{
 					if (vert->zf < 32767.0f && vert->zf > -32768.0f)
@@ -2740,7 +2742,7 @@ void GroupLines(void)
 				vert = sector->lines[j]->v2;
 				add_it = true;
 				for (auto v : sector->floor_z_verts)
-					if (v.x == vert->x && v.y == vert->y) add_it = false;
+					if (AlmostEquals(v.x, vert->x) && AlmostEquals(v.y, vert->y)) add_it = false;
 				if (add_it)
 				{
 					if (vert->zf < 32767.0f && vert->zf > -32768.0f)
@@ -2801,9 +2803,9 @@ void GroupLines(void)
 				bool add_it_v1 = true;
 				bool add_it_v2 = true;
 				for (auto v : sector->floor_z_verts)
-					if (v.x == vert->x && v.y == vert->y) add_it_v1 = false;
+					if (AlmostEquals(v.x, vert->x) && AlmostEquals(v.y, vert->y)) add_it_v1 = false;
 				for (auto v : sector->floor_z_verts)
-					if (v.x == vert2->x && v.y == vert2->y) add_it_v2 = false;
+					if (AlmostEquals(v.x, vert2->x) && AlmostEquals(v.y, vert2->y)) add_it_v2 = false;
 				if (add_it_v1)
 				{
 					if (vert->zf < 32767.0f && vert->zf > -32768.0f)
@@ -2852,13 +2854,13 @@ void GroupLines(void)
 				}
 				if ((vert->zf < 32767.0f && vert->zf > -32768.0f) && 
 					(vert2->zf < 32767.0f && vert2->zf > -32768.0f) &&
-					vert->zf == vert2->zf)
+					AlmostEquals(vert->zf, vert2->zf))
 				{
 					floor_z_lines++;
 				}
 				if ((vert->zc < 32767.0f && vert->zc > -32768.0f) && 
 					(vert2->zc < 32767.0f && vert2->zc > -32768.0f) &&
-					vert->zc == vert2->zc)
+					AlmostEquals(vert->zc, vert2->zc))
 				{
 					ceil_z_lines++;
 				}

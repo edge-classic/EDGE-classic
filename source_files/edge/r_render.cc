@@ -50,6 +50,7 @@
 
 #include "n_network.h"  // N_NetUpdate
 
+#include "AlmostEquals.h"
 
 #define DEBUG  0
 
@@ -1011,9 +1012,9 @@ static void DrawWallPart(drawfloor_t *dfloor,
 	// do the N/S/W/E bizzo...
 	if (!r_forceflatlighting.d && currmap->episode->lighting == LMODEL_Doom && props->lightlevel > 0)
 	{
-		if (cur_seg->v1->y == cur_seg->v2->y)
+		if (AlmostEquals(cur_seg->v1->y, cur_seg->v2->y))
 			lit_adjust -= 16;
-		else if (cur_seg->v1->x == cur_seg->v2->x)
+		else if (AlmostEquals(cur_seg->v1->x, cur_seg->v2->x))
 			lit_adjust += 16;
 	}
 
@@ -1114,7 +1115,7 @@ static void DrawWallPart(drawfloor_t *dfloor,
 		blending |= BL_Alpha;
 
 	// -AJA- 2006-06-22: fix for midmask wrapping bug
-	if (mid_masked && (!cur_seg->linedef->special || cur_seg->linedef->special->s_yspeed == 0)) // Allow vertical scroller midmasks - Dasho
+	if (mid_masked && (!cur_seg->linedef->special || AlmostEquals(cur_seg->linedef->special->s_yspeed, 0.0f))) // Allow vertical scroller midmasks - Dasho
 		blending |= BL_ClampY;
 
 	wall_coord_data_t data;

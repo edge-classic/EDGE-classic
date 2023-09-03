@@ -660,12 +660,140 @@ SPECIAL=WHOLE_REGION;
 USE_COLOURMAP=GREY;
 SPECIAL=WHOLE_REGION;  
  
+
+[4480] // EDGE fog: White 5%
+FOG_COLOR = FOG_WHITE;
+FOG_DENSITY = 5%;
  
+[4481] // EDGE fog: White 10%
+FOG_COLOR = FOG_WHITE;
+FOG_DENSITY = 10%; 
+
+[4482] // EDGE fog: White 15%
+FOG_COLOR = FOG_WHITE;
+FOG_DENSITY = 15%;
+
+[4483] // EDGE fog: White 20%
+FOG_COLOR = FOG_WHITE;
+FOG_DENSITY = 20%;
+
+[4484] // EDGE fog: White 25%
+FOG_COLOR = FOG_WHITE;
+FOG_DENSITY = 25%;
+
+[4485] // EDGE fog: White 30%
+FOG_COLOR = FOG_WHITE;
+FOG_DENSITY = 30%;
+
+[4486] // EDGE fog: White 35%
+FOG_COLOR = FOG_WHITE;
+FOG_DENSITY = 35%;
+
+[4487] // EDGE fog: White 40%
+FOG_COLOR = FOG_WHITE;
+FOG_DENSITY = 40%;
+
+[4488] // EDGE fog: White 45%
+FOG_COLOR = FOG_WHITE;
+FOG_DENSITY = 45%;
+
+[4489] // EDGE fog: White 50%
+FOG_COLOR = FOG_WHITE;
+FOG_DENSITY = 50%;
+
+[4490] // EDGE fog: Green 5%
+FOG_COLOR = FOG_GREEN;
+FOG_DENSITY = 5%;
  
+[4491] // EDGE fog: Green 10%
+FOG_COLOR = FOG_GREEN;
+FOG_DENSITY = 10%; 
+
+[4492] // EDGE fog: Green 15%
+FOG_COLOR = FOG_GREEN;
+FOG_DENSITY = 15%;
+
+[4493] // EDGE fog: Green 20%
+FOG_COLOR = FOG_GREEN;
+FOG_DENSITY = 20%;
+
+[4494] // EDGE fog: Green 25%
+FOG_COLOR = FOG_GREEN;
+FOG_DENSITY = 25%;
+
+[4495] // EDGE fog: Green 30%
+FOG_COLOR = FOG_GREEN;
+FOG_DENSITY = 30%;
+
+[4496] // EDGE fog: Green 35%
+FOG_COLOR = FOG_GREEN;
+FOG_DENSITY = 35%;
+
+[4497] // EDGE fog: Green 40%
+FOG_COLOR = FOG_GREEN;
+FOG_DENSITY = 40%;
+
+[4498] // EDGE fog: Green 45%
+FOG_COLOR = FOG_GREEN;
+FOG_DENSITY = 45%;
+
+[4499] // EDGE fog: Green 50%
+FOG_COLOR = FOG_GREEN;
+FOG_DENSITY = 50%;
+
+
+[4500] // EDGE fog: Red 5%
+FOG_COLOR = FOG_RED;
+FOG_DENSITY = 5%;
  
+[4501] // EDGE fog: Red 10%
+FOG_COLOR = FOG_RED;
+FOG_DENSITY = 10%; 
+
+[4502] // EDGE fog: Red 15%
+FOG_COLOR = FOG_RED;
+FOG_DENSITY = 15%;
+
+[4503] // EDGE fog: Red 20%
+FOG_COLOR = FOG_RED;
+FOG_DENSITY = 20%;
+
+[4504] // EDGE fog: Red 25%
+FOG_COLOR = FOG_RED;
+FOG_DENSITY = 25%;
+
+[4505] // EDGE fog: Red 30%
+FOG_COLOR = FOG_RED;
+FOG_DENSITY = 30%;
+
+[4506] // EDGE fog: Red 35%
+FOG_COLOR = FOG_RED;
+FOG_DENSITY = 35%;
+
+[4507] // EDGE fog: Red 40%
+FOG_COLOR = FOG_RED;
+FOG_DENSITY = 40%;
+
+[4508] // EDGE fog: Red 45%
+FOG_COLOR = FOG_RED;
+FOG_DENSITY = 45%;
+
+[4509] // EDGE fog: Red 50%
+FOG_COLOR = FOG_RED;
+FOG_DENSITY = 50%; 
  
- 
- 
+[4530] // EDGE Friction: Slippy
+FRICTION=0.97;    // (default 0.9) Affects movement speed while on the floor. Lower the number, harder to move. Less than 0.05 impedes movement
+//VISCOSITY=0.7; // (default 0.0) Affects movement speed even in the air. Higher the number, harder to move. Greater than 0.95 impedes all movement
+
+[4531] // EDGE Friction: Very Slippy
+FRICTION=1.0;
+
+[4532] // EDGE Friction: Sticky
+FRICTION=0.7;
+
+[4533] // EDGE Friction: Very Sticky
+FRICTION=0.4;
  
  
  

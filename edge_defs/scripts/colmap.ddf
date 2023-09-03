@@ -7,6 +7,26 @@
 
 #VERSION 1.30
 
+[FOG_BLUE]
+GL_COLOUR = #0000D9;
+
+[FOG_GREEN]
+GL_COLOUR = #006619;
+
+[FOG_RED]
+GL_COLOUR = #B30000;
+
+[FOG_YELLOW]
+GL_COLOUR = #D9D900;
+
+[FOG_PURPLE]
+GL_COLOUR = #6C00D9;
+
+[FOG_WHITE]
+GL_COLOUR = #CACACA;
+
+
+
 [BERSERK]
 gl_colour = #FF7979; //red
 //gl_colour = #7171FF; //blue

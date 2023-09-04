@@ -137,7 +137,8 @@ typedef enum
 	// Monster grows (in)visible at certain times.
 	MF_STEALTH = (1 << 26),
 
-	// NO LONGER USED (1 << 27), // was: JUSTPICKEDUP
+	// For projectiles: keep momentum of projectile source
+	MF_PRESERVEMOMENTUM = (1 << 27),
 
 	// Object reacts to being touched (often violently :->)
 	MF_TOUCHY = (1 << 28),

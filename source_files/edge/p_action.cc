@@ -1227,6 +1227,12 @@ static mobj_t *DoLaunchProjectile(mobj_t * source, float tx, float ty, float tz,
 	}
 
 	P_SetMobjDirAndSpeed(projectile, angle, slope, projectile->speed);
+	if (projectile->flags & MF_PRESERVEMOMENTUM)
+	{
+		projectile->mom.x += source->mom.x;
+		projectile->mom.y += source->mom.y;
+		projectile->mom.z += source->mom.z;
+	}
 	CheckMissileSpawn(projectile);
 
 	return projectile;

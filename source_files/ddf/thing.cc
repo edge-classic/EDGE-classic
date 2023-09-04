@@ -1675,6 +1675,7 @@ static const specflags_t normal_specials[] =
 	{"DROPPED", MF_DROPPED, 0},
 	{"CORPSE", MF_CORPSE, 0},
 	{"STEALTH", MF_STEALTH, 0},
+	{"PRESERVE_MOMENTUM", MF_PRESERVEMOMENTUM, 0},
 	{"DEATHMATCH", MF_NOTDMATCH, 1},
 	{"TOUCHY", MF_TOUCHY, 0},
 	{NULL, 0, 0}

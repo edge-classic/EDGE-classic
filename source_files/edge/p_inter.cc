@@ -1500,7 +1500,7 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 		source->health = MIN(source->health + qty, source->info->spawnhealth);
 
 		if (source->player)
-			source->player->health = source->health;
+			source->player->health = MIN(source->player->health + qty, source->info->spawnhealth);
 	}
 
 	if (target->health <= 0)

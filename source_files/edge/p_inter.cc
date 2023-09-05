@@ -1480,7 +1480,12 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 	if (player)
 	{
 		// mirror mobj health here for Dave
-		player->health = MAX(0, target->health);
+		// player->health = MAX(0, target->health);
+
+		// Dasho 2023.09.05: The above behavior caused inconsistencies when multiple
+		// voodoo dolls were present in a level (i.e., heavily damaging one and then
+		// lightly damaging another one that was previously at full health would "heal" the player)
+		player->health = MAX(0, player->health - damage);
 	}
 
 	// -AJA- 2007/11/06: vampire mode!

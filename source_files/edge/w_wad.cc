@@ -1392,29 +1392,41 @@ void W_ReadUMAPINFOLumps(void)
 			{
 				//Clear out some of our defaults on certain maps
 				mapdef_c *conflict_level = mapdefs.Lookup("MAP07");
-				conflict_level->f_pre.text.clear();
-				conflict_level->f_pre.text_flat.clear();
+				if (conflict_level)
+				{
+					conflict_level->f_pre.text.clear();
+					conflict_level->f_pre.text_flat.clear();
+				}
 			}
 			if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP21")) 
 			{
 				//Clear out some of our defaults on certain maps
 				mapdef_c *conflict_level = mapdefs.Lookup("MAP21");
-				conflict_level->f_pre.text.clear();
-				conflict_level->f_pre.text_flat.clear();
+				if (conflict_level)
+				{
+					conflict_level->f_pre.text.clear();
+					conflict_level->f_pre.text_flat.clear();
+				}
 			}
 			if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP31")) 
 			{
 				//Clear out some of our defaults on certain maps
 				mapdef_c *conflict_level = mapdefs.Lookup("MAP31");
-				conflict_level->f_pre.text.clear();
-				conflict_level->f_pre.text_flat.clear();
+				if (conflict_level)
+				{
+					conflict_level->f_pre.text.clear();
+					conflict_level->f_pre.text_flat.clear();
+				}
 			}
 			if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP32")) 
 			{
 				//Clear out some of our defaults on certain maps
 				mapdef_c *conflict_level = mapdefs.Lookup("MAP32");
-				conflict_level->f_pre.text.clear();
-				conflict_level->f_pre.text_flat.clear();
+				if (conflict_level)
+				{
+					conflict_level->f_pre.text.clear();
+					conflict_level->f_pre.text_flat.clear();
+				}
 			}
 			
 			if (epi::case_cmp(Maps.maps[i].intertext, "clear") == 0)

@@ -74,7 +74,7 @@ EDGE-Classic - Copyright (c) 1999-2023 The EDGE Team
 
 EPI library - Copyright (c) 2002-2023 The EDGE Team
 
-Game Music Emu - Copyright (c) 2003-2009 Shay Green
+libvgm library - Copyright (c) 2015-2023 ValleyBell, et al
 
 SLADE (IMF->WAV conversion and sky drawing routines) - Copyright (c) 2008 - 2023 Simon Judd
 

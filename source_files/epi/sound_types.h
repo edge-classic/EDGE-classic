@@ -32,7 +32,6 @@ typedef enum
 	FMT_OGG,
 	FMT_MP3,
 	FMT_M4P,
-	FMT_GME,
 	FMT_SID,
 	FMT_VGM,
 	FMT_MUS,

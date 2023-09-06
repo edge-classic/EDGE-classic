@@ -3,9 +3,8 @@
 ##########################################
 
 add_library(ymfmidi
+  ymfm_opl.cpp
   patches.cpp
   patchnames.cpp
   ymf_player.cpp
 )
-
-target_include_directories(ymfmidi PRIVATE ../libymfm)

@@ -86,7 +86,6 @@ set (EDGE_SOURCE_FILES
   s_music.cc
   s_ogg.cc
   s_prime.cc
-  s_gme.cc
   s_m4p.cc
   s_opl.cc
   s_sid.cc
@@ -129,10 +128,9 @@ set (EDGE_LINK_LIBRARIES
   ${SDL2_LIBRARIES}
   crsid
   ec_voxelib
-  gme
   libprimesynth
+  libvgm
   libvwad
-  libymfm
   m4p
   miniz
   ymfmidi
@@ -171,10 +169,9 @@ target_include_directories(edge-classic PRIVATE ../dehacked)
 target_include_directories(edge-classic PRIVATE ../dr_libs)
 target_include_directories(edge-classic PRIVATE ../ec_voxelib)
 target_include_directories(edge-classic PRIVATE ../epi)
-target_include_directories(edge-classic PRIVATE ../libgme/gme)
 target_include_directories(edge-classic PRIVATE ../libprimesynth)
+target_include_directories(edge-classic PRIVATE ../libvgm)
 target_include_directories(edge-classic PRIVATE ../libvwad)
-target_include_directories(edge-classic PRIVATE ../libymfm)
 target_include_directories(edge-classic PRIVATE ../m4p)
 target_include_directories(edge-classic PRIVATE ../minivorbis)
 target_include_directories(edge-classic PRIVATE ../miniz)

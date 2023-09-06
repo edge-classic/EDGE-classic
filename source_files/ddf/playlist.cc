@@ -31,9 +31,9 @@ pl_entry_container_c playlist;
 //
 static void DDF_MusicParseInfo(const char *info)
 {
-	static const char *const musstrtype[] = { "UNKNOWN", "CD", "MIDI", "MUS", "OGG", "MP3", "GME", "SID", "FLAC", 
+	static const char *const musstrtype[] = { "UNKNOWN", "MIDI", "MUS", "OGG", "MP3", "SID", "FLAC", 
 		"M4P", "VGM", "IMF280", "IMF560", "IMF700", NULL };
-	static const char *const musinftype[] = { "UNKNOWN", "TRACK", "LUMP", "FILE", "PACK", NULL };
+	static const char *const musinftype[] = { "UNKNOWN", "LUMP", "FILE", "PACK", NULL };
 
 	char charbuff[256];
 	int pos,i;
@@ -73,7 +73,7 @@ static void DDF_MusicParseInfo(const char *info)
 		else
 		{
 			dynamic_plentry->infotype = (musicinftype_e)i;
-			// Remained is the string reference: filename/lumpname/track-number
+			// Remained is the string reference: filename/lumpname
 			pos++;
 			dynamic_plentry->info = &info[pos];
 			return;
@@ -111,7 +111,7 @@ static void DDF_MusicParseInfo(const char *info)
 	else
 		dynamic_plentry->infotype = (musicinftype_e)i; // technically speaking this is proper
 
-	// Remained is the string reference: filename/lumpname/track-number
+	// Remained is the string reference: filename/lumpname
 	pos++;
 	dynamic_plentry->info = &info[pos];
 

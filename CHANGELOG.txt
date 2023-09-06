@@ -1,6 +1,6 @@
 https://github.com/edge-classic/EDGE-classic
 
-Current as of: August 2023
+Current as of: September 2023
 
 CHANGELOG for EDGE-Classic 1.34.2 (since EDGE-Classic 1.34.1)
 ====================================
@@ -56,6 +56,10 @@ New Features
 
 General Improvements/Changes
 --------------------
+- Migrated to VGMPlay's libvgm from Game Music Emu
+  - Support for AY, GBS, GYM, HES, NSF, SAP, and SPC filetypes has been removed
+  - VGM support has been expanded to include all chipsets and systems supported by VGMPlay, with the
+    exception of the WonderSwan
 - DDFTHING: Implemented previously referenced WALL Glow Type
   - Same parameters as other glow types
   - Will only work on one linedef per glow mobj

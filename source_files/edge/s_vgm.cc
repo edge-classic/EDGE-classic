@@ -32,9 +32,12 @@
 #include "s_vgm.h"
 #include "w_wad.h"
 
-#include "ymfm_interface.h"
+// libvgm
+#include "player/vgmplayer.hpp"
+#include "player/playera.hpp"
+#include "util/MemoryLoader.h"
 
-#define VGM_BUFFER 65536 // Apparently up to this many samples can be generated in one instruction cycle
+#define VGM_BUFFER 1024
 
 extern bool dev_stereo;  // FIXME: encapsulation
 extern int  dev_freq;
@@ -56,13 +59,11 @@ private:
 
 	s16_t *mono_buffer;
 
-	int64_t vgm_cur_pos;
+	PlayerA *vgm_player = nullptr;
+	PlayerBase *vgm_engine = nullptr;
+	DATA_LOADER *vgm_loader = nullptr;
 
 public:
-
-	uint32_t vgm_track_begin;
-	uint32_t vgm_data_start;
-	std::vector<uint8_t> vgm_buffer;
 
 	bool OpenMemory(byte *data, int length);
 
@@ -101,8 +102,10 @@ vgmplayer_c::~vgmplayer_c()
 
 void vgmplayer_c::PostOpenInit()
 {   
-	// Loaded, but not playing
-
+	// Despite name, does not actually start playing
+	vgm_player->Start();
+	VGMPlayer* vgmplay = dynamic_cast<VGMPlayer*>(vgm_engine);
+    vgm_player->SetLoopCount(vgmplay->GetModifiedLoopCount(2));
 	status = STOPPED;
 }
 
@@ -122,32 +125,23 @@ bool vgmplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 {
 	s16_t *data_buf;
 
-	bool song_done = false;
-
 	if (!dev_stereo)
 		data_buf = mono_buffer;
 	else
 		data_buf = buf->data_L;
 
-	int32_t samples = ymfm_generate_batch(vgm_buffer, &vgm_data_start, &vgm_cur_pos, dev_freq, data_buf);
+	uint32_t samples = vgm_player->Render(VGM_BUFFER * 4, data_buf);
 
-	if (samples == -1)
-		song_done = true;
-
-	buf->length = samples < 2 ? 0 : samples; // Not sure about this yet
+	buf->length = samples / 4;
 
 	if (!dev_stereo)
 		ConvertToMono(buf->data_L, mono_buffer, buf->length);
 
-	if (song_done)  /* EOF */
+	if (samples <= 0)  // EOF ?
 	{
 		if (! looping)
 			return false;
-		vgm_data_start = vgm_track_begin;
-		vgm_cur_pos = 0;
-		// Gotta be a better way to restart the track
-		ymfm_delete_chips();
-		ymfm_parse_header(vgm_buffer);
+		vgm_player->Reset();
 		return true;
 	}
 
@@ -158,12 +152,11 @@ bool vgmplayer_c::OpenMemory(byte *data, int length)
 {
 	SYS_ASSERT(data);
 
-	vgm_buffer.resize(length);
+	std::vector<uint8_t> vgm_buffer(length);
 	std::copy(data, data+length, vgm_buffer.data());
 
 	// Decompress if VGZ
-	if (vgm_buffer.size() >= 10 && vgm_buffer[0] == 0x1f && 
-		vgm_buffer[1] == 0x8b && vgm_buffer[2] == 0x08)
+	if (vgm_buffer.size() >= 10 && vgm_buffer[0] == 0x1f && vgm_buffer[1] == 0x8b)
 	{
 		// copy the raw data to a new buffer
 		std::vector<uint8_t> compressed = vgm_buffer;
@@ -198,18 +191,38 @@ bool vgmplayer_c::OpenMemory(byte *data, int length)
 		delete vgz;
 	}
 
-	if (vgm_buffer.size() < 64 || vgm_buffer[0] != 'V' || vgm_buffer[1] != 'g' || 
-		vgm_buffer[2] != 'm' || vgm_buffer[3] != ' ')
+	vgm_player = new PlayerA;
+
+	vgm_engine = new VGMPlayer;
+
+	vgm_player->RegisterPlayerEngine(vgm_engine);
+
+	vgm_player->SetOutputSettings(dev_freq, 2, 16, VGM_BUFFER);
+
+	vgm_loader = MemoryLoader_Init(vgm_buffer.data(), vgm_buffer.size());
+
+	if (!vgm_loader)
 	{
-		I_Debugf("[vgmplayer_c::S_PlayVGMMusic] Invalid VGM file loaded!\n");
+		I_Debugf("[vgmplayer_c::S_PlayVGMMusic] Failed to init loader!\n");
+		delete vgm_player;
 		return false;
 	}
 
-	vgm_track_begin = ymfm_parse_header(vgm_buffer);
-
-	if (vgm_track_begin == 0)
+	// initial sanity check
+	DataLoader_SetPreloadBytes(vgm_loader,0x100);
+	if (DataLoader_Load(vgm_loader))
 	{
-		I_Debugf("[vgmplayer_c::S_PlayVGMMusic] No compatible chips for VGM file!\n");
+		I_Debugf("[vgmplayer_c::S_PlayVGMMusic] Failed to init loader!\n");
+		DataLoader_Deinit(vgm_loader);
+		delete vgm_player;
+		return false;
+	}
+
+	if (vgm_player->LoadFile(vgm_loader))
+	{
+		I_Debugf("[vgmplayer_c::S_PlayVGMMusic] Failed to load track!\n");
+		DataLoader_Deinit(vgm_loader);
+		delete vgm_player;
 		return false;
 	}
 
@@ -226,7 +239,8 @@ void vgmplayer_c::Close()
 	if (status != STOPPED)
 		Stop();
 		
-	ymfm_delete_chips();
+	DataLoader_Deinit(vgm_loader);
+	delete vgm_player; //
 
 	status = NOT_LOADED;
 }
@@ -256,8 +270,9 @@ void vgmplayer_c::Play(bool loop)
 
 	status = PLAYING;
 	looping = loop;
-	vgm_data_start = vgm_track_begin;
-	vgm_cur_pos = 0;
+
+	// Set individual player type gain
+	mus_player_gain = 0.4f;
 
 	// Load up initial buffer data
 	Ticker();
@@ -269,7 +284,12 @@ void vgmplayer_c::Stop()
 	if (status != PLAYING && status != PAUSED)
 		return;
 
+	vgm_player->Stop();
+
 	S_QueueStop();
+
+	// Reset gain
+	mus_player_gain = 1.0f;
 
 	status = STOPPED;
 }

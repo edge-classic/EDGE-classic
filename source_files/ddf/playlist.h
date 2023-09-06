@@ -34,12 +34,10 @@
 typedef enum
 {
 	MUS_UNKNOWN   = 0,
-	MUS_CD,
 	MUS_MIDI,
 	MUS_MUS,
 	MUS_OGG,
 	MUS_MP3,
-	MUS_GME,
 	MUS_SID,
 	MUS_FLAC,
 	MUS_M4P,
@@ -54,11 +52,10 @@ musictype_t;
 typedef enum
 {
 	MUSINF_UNKNOWN   = 0,
-	MUSINF_TRACK     = 1,
-	MUSINF_LUMP      = 2,
-	MUSINF_FILE      = 3,
-	MUSINF_PACKAGE   = 4,
-	ENDOFMUSINFTYPES = 5
+	MUSINF_LUMP      = 1,
+	MUSINF_FILE      = 2,
+	MUSINF_PACKAGE   = 3,
+	ENDOFMUSINFTYPES = 4
 }
 musicinftype_e;
 

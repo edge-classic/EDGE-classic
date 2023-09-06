@@ -36,7 +36,6 @@
 #include "s_ogg.h"
 #include "s_mp3.h"
 #include "s_prime.h"
-#include "s_gme.h"
 #include "s_m4p.h"
 #include "s_opl.h"
 #include "s_sid.h"
@@ -194,11 +193,6 @@ void S_ChangeMusic(int entrynum, bool loop)
 		case epi::FMT_M4P:
 			delete F;
 			music_player = S_PlayM4PMusic(data, length, loop);
-			break;
-
-		case epi::FMT_GME:
-			delete F;
-			music_player = S_PlayGMEMusic(data, length, loop);
 			break;
 
 		case epi::FMT_VGM:

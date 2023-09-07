@@ -52,6 +52,7 @@ New Features
     - INDOOR_FOG_DENSITY = \<0-100%\>; Sets the fog density for all indoor sectors to the provided percentage
     - OUTDOOR_FOG_COLOR = \<color\>; Sets the fog color for all outdoor sectors to the RGB value of the provided colormap entry
     - OUTDOOR_FOG_DENSITY = \<0-100%\>; Sets the fog density for all outdoor sectors to the provided percentage
+- COALHUDS: Added hud.rts_disable function; same syntax as hud.rts_enable
 
 
 General Improvements/Changes

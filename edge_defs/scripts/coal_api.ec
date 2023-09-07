@@ -259,6 +259,7 @@ module hud
 	function get_average_hue(image : string, optional from_x, optional to_x, optional from_y, optional to_y) : vector = native
 	
 	function rts_enable(tag : string) = native
+	function rts_disable(tag : string) = native
 	function rts_isactive(tag : string)    : float = native
 	
 	function get_image_width(image : string)    : float = native

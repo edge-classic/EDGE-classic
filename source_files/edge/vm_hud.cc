@@ -948,6 +948,18 @@ static void HD_rts_enable(coal::vm_c *vm, int argc)
 		RAD_EnableByTag(NULL, name.c_str(), false);
 }
 
+// hud.rts_disable(tag)
+//
+static void HD_rts_disable(coal::vm_c *vm, int argc)
+{
+	(void) argc;
+
+	std::string name = vm->AccessParamString(0);
+
+	if (!name.empty())
+		RAD_EnableByTag(NULL, name.c_str(), true);
+}
+
 // hud.rts_isactive(tag)
 //
 static void HD_rts_isactive(coal::vm_c *vm, int argc)
@@ -1069,6 +1081,7 @@ void VM_RegisterHUD()
 	ui_vm->AddNativeFunction("hud.get_average_hue",      HD_get_average_hue);
 
 	ui_vm->AddNativeFunction("hud.rts_enable",        HD_rts_enable);
+	ui_vm->AddNativeFunction("hud.rts_disable",        HD_rts_disable);
 	ui_vm->AddNativeFunction("hud.rts_isactive",      HD_rts_isactive);
 
 	ui_vm->AddNativeFunction("hud.get_image_width",      HD_get_image_width);

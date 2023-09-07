@@ -228,13 +228,6 @@ if (WIN32)
     else ()
       list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/source_files/sdl2/lib/x86/SDL2.dll")
     endif ()
-  # Copy appropriate SDL2.dll to local install directory when built with GNU/MinGW
-  else()
-    if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-      list(APPEND COPY_FILES "/mingw64/bin/SDL2.dll")
-    else ()
-      list(APPEND COPY_FILES "/mingw32/bin/SDL2.dll" "/mingw32/bin/libgcc_s_dw2-1.dll" "/mingw32/bin/libstdc++-6.dll" "/mingw32/bin/libwinpthread-1.dll")
-    endif()
   endif()
 endif()
 

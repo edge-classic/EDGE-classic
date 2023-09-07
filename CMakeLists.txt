@@ -36,11 +36,8 @@ if (MSVC)
   cmake_host_system_information(RESULT LOGICAL_CORES QUERY NUMBER_OF_LOGICAL_CORES)
   math(EXPR COMPILE_CORES "${LOGICAL_CORES} - 1")
 
-  #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:fast /MP${COMPILE_CORES}")
-  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs /MP${COMPILE_CORES}")
-
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:fast")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:fast /MP${COMPILE_CORES}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs /MP${COMPILE_CORES}")
 
   # Disable some very noisy warnings from the MSVC build
   # CRT security and POSIX deprecation warnings

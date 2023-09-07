@@ -105,7 +105,8 @@ void vgmplayer_c::PostOpenInit()
 	// Despite name, does not actually start playing
 	vgm_player->Start();
 	VGMPlayer* vgmplay = dynamic_cast<VGMPlayer*>(vgm_engine);
-    vgm_player->SetLoopCount(vgmplay->GetModifiedLoopCount(2));
+	// Set to loop once and let EC handle restarts
+    vgm_player->SetLoopCount(vgmplay->GetModifiedLoopCount(1));
 	status = STOPPED;
 }
 
@@ -137,7 +138,7 @@ bool vgmplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	if (!dev_stereo)
 		ConvertToMono(buf->data_L, mono_buffer, buf->length);
 
-	if (samples <= 0)  // EOF ?
+	if (vgm_player->GetState() & PLAYSTATE_END)
 	{
 		if (! looping)
 			return false;

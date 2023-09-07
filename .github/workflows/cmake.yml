@@ -49,49 +49,12 @@ jobs:
           ${{github.workspace}}/edge-classic
         retention-days: ${{env.RETENTION_DAYS}}
 
-  build-msys:
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup MSYS2
-        uses: msys2/setup-msys2@v2
-        with:
-          update: false
-          msystem: mingw32
-          install: >-
-            git
-            make
-            ninja
-          pacboy: >-
-            toolchain:p
-            cmake:p
-            SDL2:p
-      - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -G"MSYS Makefiles"
-      - name: Build MSVC
-        run: cmake --build build --config ${{env.BUILD_TYPE}}
-      - uses: actions/upload-artifact@v3
-        with:
-          name: edge-classic-msys2
-          path: |
-            autoload
-            edge_base
-            edge_defs
-            edge_fixes
-            soundfont
-            edge-classic.exe
-            *.dll
-          retention-days: ${{env.RETENTION_DAYS}}
-
   build-msvc:
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - uses: actions/checkout@v3
       - name: Configure CMake MSVC
-        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G"Visual Studio 17 2022"
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G"Visual Studio 16 2019"
       - name: Build MSVC
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v3
@@ -108,11 +71,11 @@ jobs:
           retention-days: ${{env.RETENTION_DAYS}}
 
   build-msvc-es2:
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - uses: actions/checkout@v3
       - name: Configure CMake MSVC ES2
-        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEDGE_GL_ES2=ON -G"Visual Studio 17 2022"
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEDGE_GL_ES2=ON -G"Visual Studio 16 2019"
       - name: Build MSVC GLES2
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v3

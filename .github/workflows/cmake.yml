@@ -87,11 +87,11 @@ jobs:
           retention-days: ${{env.RETENTION_DAYS}}
 
   build-msvc:
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - uses: actions/checkout@v3
       - name: Configure CMake MSVC
-        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G"Visual Studio 17 2022"
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G"Visual Studio 16 2019"
       - name: Build MSVC
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v3
@@ -108,11 +108,11 @@ jobs:
           retention-days: ${{env.RETENTION_DAYS}}
 
   build-msvc-es2:
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - uses: actions/checkout@v3
       - name: Configure CMake MSVC ES2
-        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEDGE_GL_ES2=ON -G"Visual Studio 17 2022"
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEDGE_GL_ES2=ON -G"Visual Studio 16 2019"
       - name: Build MSVC GLES2
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v3

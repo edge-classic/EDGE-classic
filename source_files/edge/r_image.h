@@ -232,7 +232,6 @@ void W_ImageMakeSaveString(const image_c *image, char *type, char *namebuf);
 //  IMAGE USAGE
 //
 
-extern int  var_mipmapping;
 extern int  var_smoothing;
 extern int  hq2x_scaling;
 

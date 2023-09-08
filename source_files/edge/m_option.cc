@@ -406,12 +406,10 @@ static optmenuitem_t vidoptions[] =
 	{OPT_Boolean, "Lighting Mode",    "Indexed/Flat",  2,  &r_forceflatlighting.d, M_UpdateCVARFromInt, NULL, &r_forceflatlighting},
 	{OPT_Switch,  "Framerate Target", "35 FPS/70 FPS", 2, &r_doubleframes.d, M_UpdateCVARFromInt, NULL, &r_doubleframes},
 	{OPT_Switch,  "Smoothing",         YesNo, 2, &var_smoothing, M_ChangeMipMap, NULL},
-	{OPT_Switch,  "H.Q.2x Scaling", Hq2xMode, 4, &hq2x_scaling, M_ChangeMipMap, NULL},
+	{OPT_Switch,  "Upscale Textures", Hq2xMode, 4, &hq2x_scaling, M_ChangeMipMap, "Only affects paletted (Doom format) textures"},
 	{OPT_Switch,  "Title/Intermission Scaling", TitleScaleMode, 4, &r_titlescaling.d, M_UpdateCVARFromInt, NULL, &r_titlescaling},
 	{OPT_Switch,  "Sky Scaling", SkyScaleMode, 4, &r_skystretch.d, M_UpdateCVARFromInt, "Vanilla will be forced when Mouselook is Off", &r_skystretch},
 	{OPT_Switch,  "Dynamic Lighting", YesNo, 2, &use_dlights, NULL, NULL},
-	{OPT_Switch,  "Detail Level",   Details,  3, &detail_level, M_ChangeMipMap, NULL},
-	{OPT_Switch,  "Mipmapping",     MipMaps,  3, &var_mipmapping, M_ChangeMipMap, NULL},
 	{OPT_Switch,  "Overlay",  		VidOverlays, 7, &r_overlay.d, M_UpdateCVARFromInt, NULL, &r_overlay},
 	{OPT_Switch,  "Crosshair",       CrossH, 10, &r_crosshair.d, M_UpdateCVARFromInt, NULL, &r_crosshair},
 	{OPT_Switch,  "Crosshair Color", CrosshairColor,  8, &r_crosscolor.d, M_UpdateCVARFromInt, NULL, &r_crosscolor},
@@ -619,6 +617,7 @@ static menuinfo_t gameplay_optmenu =
 //
 static optmenuitem_t perfoptions[] =
 {
+	{OPT_Switch,  "Detail Level",   Details,  3, &detail_level, M_ChangeMipMap, NULL},
 	{OPT_Boolean, "Draw Distance Culling", YesNo, 2, 
      &r_culling.d, M_UpdateCVARFromInt, "Sector/Level Fog will be disabled when this is On", &r_culling},
 	{OPT_FracSlider, "Maximum Draw Distance", NULL, 0, 

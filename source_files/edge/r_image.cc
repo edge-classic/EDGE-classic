@@ -189,10 +189,6 @@ static void do_DebugDump(real_image_container_c& bucket)
 }
 #endif
 
-// mipmapping enabled ?
-// 0 off, 1 bilinear, 2 trilinear
-int var_mipmapping = 1;
-
 int var_smoothing  = 1;
 
 int hq2x_scaling = 1;
@@ -1234,10 +1230,12 @@ static bool IM_ShouldHQ2X(image_c *rim)
 
 static int IM_PixelLimit(image_c *rim)
 {
-	if (IM_ShouldMipmap(rim))
-		return 65536 * (1 << (2 * detail_level));
-
-	return (1 << 24);
+	if (detail_level == 0)
+		return (1 << 18);
+	else if (detail_level == 1)
+		return (1 << 20);
+	else
+		return (1 << 22);
 }
 
 
@@ -1971,13 +1969,6 @@ bool W_InitImages(void)
 		var_smoothing = 0;
 	else if (argv::Find("smoothing") > 0)
 		var_smoothing = 1;
-
-	if (argv::Find("nomipmap") > 0)
-		var_mipmapping = 0;
-	else if (argv::Find("mipmap") > 0)
-		var_mipmapping = 1;
-	else if (argv::Find("trilinear") > 0)
-		var_mipmapping = 2;
 
 	W_CreateDummyImages();
 

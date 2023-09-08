@@ -1145,9 +1145,7 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 
 	/* draw the model */
 
-	int num_pass = data.is_fuzzy  ? 1 :
-		           data.is_weapon ? (3 + detail_level) :
-					                (2 + detail_level*2);
+	int num_pass = data.is_fuzzy  ? 1 : (detail_level > 0 ? 4 : 3);
 
 	rgbcol_t fc_to_use = mo->subsector->sector->props.fog_color;
 	float fd_to_use = mo->subsector->sector->props.fog_density;
@@ -1253,8 +1251,6 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 				continue;
 		}
 
-		GLuint model_env = data.is_additive ? ENV_SKIP_RGB : GL_MODULATE;
-
 		glPolygonOffset(0, -pass);
 
 		if (blending & (BL_Masked | BL_Less))
@@ -1316,7 +1312,18 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, skin_tex);
 
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, model_env);
+		if (data.is_additive)
+		{
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_REPLACE);
+			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_PREVIOUS);
+		}
+		else
+		{
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_TEXTURE);
+		}
 
 		GLint old_clamp = 789;
 

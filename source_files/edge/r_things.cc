@@ -361,7 +361,7 @@ static void RGL_DrawPSprite(pspdef_t * psp, int which,
 
 	RGL_StartUnits(false);
 
-	int num_pass = is_fuzzy ? 1 : (4 + detail_level * 2);
+	int num_pass = is_fuzzy  ? 1 : (detail_level > 0 ? 4 : 3);
 
 	for (int pass = 0; pass < num_pass; pass++)
 	{
@@ -1471,7 +1471,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
 	/* draw the sprite */
 
-	int num_pass = is_fuzzy ? 1 : (3 + detail_level * 2);
+	int num_pass = is_fuzzy  ? 1 : (detail_level > 0 ? 4 : 3);
 
 	rgbcol_t fc_to_use = dthing->mo->subsector->sector->props.fog_color;
 	float fd_to_use = dthing->mo->subsector->sector->props.fog_density;

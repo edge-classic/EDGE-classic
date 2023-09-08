@@ -153,7 +153,7 @@ GLuint R_UploadTexture(epi::image_data_c *img, int flags, int max_pix)
 					smooth ? GL_LINEAR : GL_NEAREST);
 
 	// minification mode
-	int mip_level = CLAMP(0, var_mipmapping, 2);
+	int mip_level = CLAMP(0, detail_level, 2);
 
 	// special logic for mid-masked textures.  The UPL_Thresh flag
 	// guarantees that each texture level has simple alpha (0 or 255),
@@ -193,7 +193,7 @@ GLuint R_UploadTexture(epi::image_data_c *img, int flags, int max_pix)
 					 GL_UNSIGNED_BYTE, img->PixelAt(0,0));
 
 		// stop if mipmapping disabled or we have reached the end
-		if (nomip || !var_mipmapping || (new_w == 1 && new_h == 1))
+		if (nomip || !detail_level || (new_w == 1 && new_h == 1))
 			break;
 
 		new_w = MAX(1, new_w / 2);

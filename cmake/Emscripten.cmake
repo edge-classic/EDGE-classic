@@ -20,7 +20,8 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   # Add -sSAFE_HEAP=1 or -sSAFE_HEAP=2 to test heap and alignment, though slows things down a lot
   set(EDGE_EMSC_LINKER_FLAGS "${EDGE_EMSC_LINKER_FLAGS} -sASSERTIONS=1")
 else()
-  set(EDGE_EMSC_COMMON_FLAGS "${EDGE_EMSC_COMMON_FLAGS} -flto")
+  #note disabled -flto due to https://github.com/emscripten-core/emscripten/issues/19781
+  #set(EDGE_EMSC_COMMON_FLAGS "${EDGE_EMSC_COMMON_FLAGS} -flto")
   set(EDGE_EMSC_COMPILER_FLAGS "${EDGE_EMSC_COMPILER_FLAGS} -O3")
   set(EDGE_EMSC_LINKER_FLAGS "${EDGE_EMSC_LINKER_FLAGS} -sASYNCIFY=1")
 endif()

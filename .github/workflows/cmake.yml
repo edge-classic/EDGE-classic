@@ -26,6 +26,15 @@ jobs:
     - name: Configure CMake        
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE="${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
 
+    - name: Setup Preloads
+      run: git clone https://github.com/pbdot/pack_files ${{github.workspace}}/web_pack_files && copy web_pack_files\freedoomindows\*.wad ${{github.workspace}}\web\preload\
+
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
   
+    - uses: actions/upload-artifact@v3
+      with:
+        name: edge-classic-web
+        path: |
+          ${{github.workspace}}/web/site
+        retention-days: ${{env.RETENTION_DAYS}}

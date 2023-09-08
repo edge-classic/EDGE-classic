@@ -8,6 +8,8 @@ miniz library (gzip support) - Copyright (c) 2015 Wojciech Adam Koszek
 BSD 3-Clause License
 ===========================================================================================
 
+ANGLE (Almost Native Graphics Layer Engine) - Copyright (c) 2018 Google Inc. and ANGLE Project Authors
+
 AlmostEquals Google Test Framework Component - Copyright (c) 2005 Google, Inc.
 
 Blasphemer (various assets) - Copyright (c) 2021 Contributors to the Blasphemer project

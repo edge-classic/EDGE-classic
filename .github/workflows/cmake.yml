@@ -78,9 +78,11 @@ jobs:
         run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEDGE_GL_ES2=ON -G"Visual Studio 16 2019"
       - name: Build MSVC GLES2
         run: cmake --build build --config ${{env.BUILD_TYPE}}
+      - name: Clone and copy ANGLE binaries
+        run: git clone https://github.com/edge-classic/angle-binaries && copy angle-binaries\Windows\*.dll .\
       - uses: actions/upload-artifact@v3
         with:
-          name: edge-classic-msvc
+          name: edge-classic-msvc-es2
           path: |
             autoload
             edge_base

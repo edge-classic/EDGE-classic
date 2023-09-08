@@ -82,7 +82,7 @@ jobs:
         run: git clone https://github.com/edge-classic/angle-binaries && copy angle-binaries\Windows\*.dll .\
       - uses: actions/upload-artifact@v3
         with:
-          name: edge-classic-msvc
+          name: edge-classic-msvc-es2
           path: |
             autoload
             edge_base

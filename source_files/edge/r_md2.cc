@@ -1145,7 +1145,7 @@ I_Debugf("Render model: bad frame %d\n", frame1);
 
 	/* draw the model */
 
-	int num_pass = data.is_fuzzy  ? 1 : 3 + detail_level;
+	int num_pass = data.is_fuzzy  ? 1 : (detail_level > 0 ? 4 : 3);
 
 	rgbcol_t fc_to_use = mo->subsector->sector->props.fog_color;
 	float fd_to_use = mo->subsector->sector->props.fog_density;

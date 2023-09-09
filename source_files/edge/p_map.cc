@@ -2763,7 +2763,7 @@ static bool PIT_ChangeSector(mobj_t * thing, bool widening)
 	// crunch bodies to giblets
 	if (thing->health <= 0)
 	{
-		if (thing->info->gib_state && !(thing->extendedflags & EF_GIBBED))
+		if (thing->info->gib_state && !(thing->extendedflags & EF_GIBBED) && g_gore.d < 2)
 		{
 			thing->extendedflags |= EF_GIBBED;
 			//P_SetMobjStateDeferred(thing, thing->info->gib_state, 0);
@@ -2803,11 +2803,14 @@ static bool PIT_ChangeSector(mobj_t * thing, bool widening)
 		P_DamageMobj(thing, NULL, NULL, crush_damage, NULL);
 
 		// spray blood in a random direction
-		mo = P_MobjCreateObject(thing->x, thing->y, MO_MIDZ(thing),
-			thing->info->blood);
+		if (g_gore.d < 2)
+		{
+			mo = P_MobjCreateObject(thing->x, thing->y, MO_MIDZ(thing),
+				thing->info->blood);
 
-		mo->mom.x = (float)(M_Random() - 128) / 4.0f;
-		mo->mom.y = (float)(M_Random() - 128) / 4.0f;
+			mo->mom.x = (float)(M_Random() - 128) / 4.0f;
+			mo->mom.y = (float)(M_Random() - 128) / 4.0f;
+		}
 	}
 
 	// keep checking (crush other things) 

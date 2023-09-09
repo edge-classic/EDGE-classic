@@ -1083,7 +1083,7 @@ void P_KillMobj(mobj_t * source, mobj_t * target, const damage_c *damtype,
 	if (state == S_NULL)
 		state = target->info->death_state;
 
-	if (g_gore.d == 2)
+	if (g_gore.d == 2 && (target->flags & MF_COUNTKILL)) // Hopefully the only things with blood/gore are monsters and not "barrels", etc
 	{
 		state = S_NULL;
 		if (!nofog)

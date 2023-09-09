@@ -389,7 +389,7 @@ module player
 	function sector_tag()      : float = native
 	function use_inventory(type)    : float = native
 	
-	function play_footstep(flat : string) = native
+	function play_footstep(flat : string) : float = native
 	function inventory(type)    : float = native
 	function inventorymax(type) : float = native
 	function rts_enable_tagged(name : string) = native

@@ -1052,13 +1052,13 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 
 	float sink_mult = 0;
 	float bob_mult = 0;
-	flatdef_c *current_flatdef = flatdefs.Find(mo->subsector->sector->floor.image->name.c_str());
+	/*flatdef_c *current_flatdef = flatdefs.Find(mo->subsector->sector->floor.image->name.c_str());
 	if (current_flatdef && !mo->subsector->sector->exfloor_used && !mo->subsector->sector->heightsec &&
 		abs(mo->z - mo->subsector->sector->f_h) < 1)
 	{
 		sink_mult = current_flatdef->sink_depth;
 		bob_mult = current_flatdef->bob_depth;
-	}
+	}*/
 
 	float hover_dz = 0;
 

@@ -1062,14 +1062,22 @@ static void PL_play_footstep(coal::vm_c *vm, int argc)
 	flatdef_c *current_flatdef = flatdefs.Find(flat);
 
 	if (!current_flatdef)
+	{
+		vm->ReturnFloat(0);
 		return;
+	}
+		
 	
 	if (!current_flatdef->footstep)
+	{
+		vm->ReturnFloat(0);
 		return;
+	}
 	else
 	{
 		// Probably need to add check to see if the sfx is valid - Dasho
 		S_StartFX(current_flatdef->footstep);
+		vm->ReturnFloat(1);
 	}
 }
 

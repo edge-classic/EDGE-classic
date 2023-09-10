@@ -27,6 +27,8 @@
 
 #include "image_data.h"
 
+#include "dm_state.h"
+#include "e_player.h"
 #include "m_argv.h"
 #include "r_gldefs.h"
 #include "r_units.h"
@@ -360,7 +362,7 @@ void RGL_DrawUnits(void)
 	if (r_culling.d)
 	{
 		GLfloat fogColor[3];
-		if (need_to_draw_sky)
+		if (IS_SKY(players[consoleplayer]->mo->subsector->sector->ceil))
 		{
 			switch (r_cullfog.d)
 			{

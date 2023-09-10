@@ -359,6 +359,9 @@ typedef struct sector_s
 	// Boom door lighting stuff
 	int min_neighbor_light;
 	int max_neighbor_light;
+
+	float bob_depth = 0.0f;
+	float sink_depth = 0.0f;
 }
 sector_t;
 

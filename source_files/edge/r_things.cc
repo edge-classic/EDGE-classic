@@ -1052,13 +1052,13 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 
 	float sink_mult = 0;
 	float bob_mult = 0;
-	/*flatdef_c *current_flatdef = flatdefs.Find(mo->subsector->sector->floor.image->name.c_str());
-	if (current_flatdef && !mo->subsector->sector->exfloor_used && !mo->subsector->sector->heightsec &&
-		abs(mo->z - mo->subsector->sector->f_h) < 1)
+	sector_t *cur_sec = mo->subsector->sector;
+	if (!cur_sec->exfloor_used && !cur_sec->heightsec &&
+		abs(mo->z - cur_sec->f_h) < 1)
 	{
-		sink_mult = current_flatdef->sink_depth;
-		bob_mult = current_flatdef->bob_depth;
-	}*/
+		sink_mult = cur_sec->sink_depth;
+		bob_mult = cur_sec->bob_depth;
+	}
 
 	float hover_dz = 0;
 
@@ -1230,12 +1230,12 @@ static void RGL_DrawModel(drawthing_t *dthing)
 
 	float sink_mult = 0;
 	float bob_mult = 0;
-	flatdef_c *current_flatdef = flatdefs.Find(mo->subsector->sector->floor.image->name.c_str());
-	if (current_flatdef && !mo->subsector->sector->exfloor_used && !mo->subsector->sector->heightsec &&
-		abs(mo->z - mo->subsector->sector->f_h) < 1)
+	sector_t *cur_sec = mo->subsector->sector;
+	if (!cur_sec->exfloor_used && !cur_sec->heightsec &&
+		abs(mo->z - cur_sec->f_h) < 1)
 	{
-		sink_mult = current_flatdef->sink_depth;
-		bob_mult = current_flatdef->bob_depth;
+		sink_mult = cur_sec->sink_depth;
+		bob_mult = cur_sec->bob_depth;
 	}
 
 	if (sink_mult > 0)

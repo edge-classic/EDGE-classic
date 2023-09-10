@@ -374,6 +374,16 @@ static void LoadSectors(int lump)
 		Z_StrNCpy(buffer, ms->floor_tex, 8);
 		ss->floor.image = W_ImageLookup(buffer, INS_Flat);
 
+		if (ss->floor.image)
+		{
+			flatdef_c *current_flatdef = flatdefs.Find(ss->floor.image->name.c_str());
+			if (current_flatdef)
+			{
+				ss->bob_depth = current_flatdef->bob_depth;
+				ss->sink_depth = current_flatdef->sink_depth;
+			}
+		}
+
 		Z_StrNCpy(buffer, ms->ceil_tex, 8);
 		ss->ceil.image = W_ImageLookup(buffer, INS_Flat);
 
@@ -1537,6 +1547,17 @@ static void LoadUDMFSectors()
 			ss->ceil = ss->floor;
 
 			ss->floor.image = W_ImageLookup(floor_tex, INS_Flat);
+
+			if (ss->floor.image)
+			{
+				flatdef_c *current_flatdef = flatdefs.Find(ss->floor.image->name.c_str());
+				if (current_flatdef)
+				{
+					ss->bob_depth = current_flatdef->bob_depth;
+					ss->sink_depth = current_flatdef->sink_depth;
+				}
+			}
+
 			ss->ceil.image = W_ImageLookup(ceil_tex, INS_Flat);
 
 			if (! ss->floor.image)

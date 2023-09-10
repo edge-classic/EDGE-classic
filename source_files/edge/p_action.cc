@@ -1120,14 +1120,14 @@ static mobj_t *DoLaunchProjectile(mobj_t * source, float tx, float ty, float tz,
 	float projx = source->x;
 	float projy = source->y;
 	float projz = source->z + attack->height * source->height / source->info->height;
-	flatdef_c *current_flatdef = flatdefs.Find(source->subsector->sector->floor.image->name.c_str());
+	sector_t *cur_source_sec = source->subsector->sector;
 
 	if (source->player)
 		projz += (source->player->viewz - source->player->std_viewheight);
-	else if (current_flatdef && current_flatdef->sink_depth > 0 && 
-		!source->subsector->sector->exfloor_used && !source->subsector->sector->heightsec &&
-		abs(source->z - source->subsector->sector->f_h) < 1)
-		projz -= (source->height * 0.5 * current_flatdef->sink_depth);
+	else if (cur_source_sec->sink_depth > 0 && 
+		!cur_source_sec->exfloor_used && !cur_source_sec->heightsec &&
+		abs(source->z - cur_source_sec->f_h) < 1)
+		projz -= (source->height * 0.5 * cur_source_sec->sink_depth);
 
 	angle_t angle = source->angle;
 
@@ -1201,12 +1201,12 @@ static mobj_t *DoLaunchProjectile(mobj_t * source, float tx, float ty, float tz,
 				angle += (angle_t)(P_RandomNegPos() * 64 * (VISIBLE - target->visibility));
 		}
 
-		current_flatdef = flatdefs.Find(target->subsector->sector->floor.image->name.c_str());
+		sector_t *cur_target_sec = target->subsector->sector;
 
-		if (current_flatdef && current_flatdef->sink_depth > 0 && 
-			!target->subsector->sector->exfloor_used && !target->subsector->sector->heightsec &&
-			abs(target->z - target->subsector->sector->f_h) < 1)
-			tz -= (target->height * 0.5 * current_flatdef->sink_depth);
+		if (cur_target_sec->sink_depth > 0 && 
+			!cur_target_sec->exfloor_used && !cur_target_sec->heightsec &&
+			abs(target->z - cur_target_sec->f_h) < 1)
+			tz -= (target->height * 0.5 * cur_target_sec->sink_depth);
 	}
 
 	// Calculate slope

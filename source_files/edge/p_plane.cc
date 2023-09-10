@@ -84,7 +84,26 @@ static const image_c * SECPIC(sector_t * sec, bool is_ceiling,
         if (is_ceiling) 
             sec->ceil.image = new_image;
         else
+        {
             sec->floor.image = new_image;
+            if (new_image)
+            {
+                flatdef_c *current_flatdef = flatdefs.Find(new_image->name.c_str());
+                if (current_flatdef)
+                {
+                    sec->bob_depth = current_flatdef->bob_depth;
+                    sec->sink_depth = current_flatdef->sink_depth;
+                }
+                else
+                sec->bob_depth = 0;
+                sec->sink_depth = 0;
+            }
+            else
+            {
+                sec->bob_depth = 0;
+                sec->sink_depth = 0;
+            }
+        }
 
 		if (new_image == skyflatimage)
 			R_ComputeSkyHeights();
@@ -1210,6 +1229,24 @@ bool EV_DoDonut(sector_t * s1, sfx_t *sfx[4])
         {
             sec->destheight = s3->f_h;
             s2->floor.image = sec->new_image = s3->floor.image;
+
+            if (s2->floor.image)
+            {
+                flatdef_c *current_flatdef = flatdefs.Find(s2->floor.image->name.c_str());
+                if (current_flatdef)
+                {
+                    s2->bob_depth = current_flatdef->bob_depth;
+                    s2->sink_depth = current_flatdef->sink_depth;
+                }
+                else
+                s2->bob_depth = 0;
+                s2->sink_depth = 0;
+            }
+            else
+            {
+                s2->bob_depth = 0;
+                s2->sink_depth = 0;
+            }
 
             /// s2->props.special = s3->props.special;
 			P_SectorChangeSpecial(s2, s3->props.type);

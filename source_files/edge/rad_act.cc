@@ -704,7 +704,7 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
 {
 	s_changetex_t *ctex = (s_changetex_t *) param;
 
-	const image_c *image;
+	const image_c *image = nullptr;
 
 	SYS_ASSERT(param);
 
@@ -752,7 +752,27 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
 			}
 
 			if (ctex->what == CHTEX_Floor)
+			{
 				tsec->floor.image = image;
+				// update sink/bob depth
+				if (image)
+				{
+					flatdef_c *current_flatdef = flatdefs.Find(image->name.c_str());
+					if (current_flatdef)
+					{
+						tsec->bob_depth = current_flatdef->bob_depth;
+						tsec->sink_depth = current_flatdef->sink_depth;
+					}
+					else
+					tsec->bob_depth = 0;
+					tsec->sink_depth = 0;
+				}
+				else
+				{
+					tsec->bob_depth = 0;
+					tsec->sink_depth = 0;
+				}
+			}
 			else
 				tsec->ceil.image = image;
 

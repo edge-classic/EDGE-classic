@@ -1880,12 +1880,8 @@ static inline void PlayerInProperties(player_t *player,
 	{
 		player->cheats &= ~CF_GODMODE;
 
-		if (player->health <= special->damage.nominal)
+		if (player->health < (player->mo->info->spawnhealth * 0.11f))
 		{
-            S_StartFX(player->mo->info->deathsound,
-                           P_MobjGetSfxCategory(player->mo),
-                           player->mo);
-
 			// -KM- 1998/12/16 We don't want to alter the special type,
 			//   modify the sector's attributes instead.
 			props->special = NULL;

@@ -31,6 +31,7 @@
 
 #include "dm_state.h"
 #include "e_input.h"
+#include "g_game.h"
 #include "m_random.h"
 #include "n_network.h"
 #include "bot_think.h"
@@ -785,6 +786,17 @@ bool P_PlayerThink(player_t * player, bool extra_tic)
 	if (player->playerstate == PST_DEAD)
 	{
 		DeathThink(player, extra_tic);
+		if (player->mo->props->special && player->mo->props->special->e_exit != EXIT_None)
+		{
+			exittype_e do_exit = player->mo->props->special->e_exit;
+
+			player->mo->subsector->sector->props.special = NULL;
+
+			if (do_exit == EXIT_Secret)
+				G_SecretExitLevel(1);
+			else
+				G_ExitLevel(1);
+		}
 		return true;
 	}
 

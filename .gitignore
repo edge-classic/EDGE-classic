@@ -3,6 +3,9 @@
 cache/
 /.vscode/settings.json
 
+# MacOS
+.DS_Store
+
 # Main program/DLLs
 /edge
 *.exe

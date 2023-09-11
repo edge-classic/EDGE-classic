@@ -13,7 +13,7 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": []
-        },         
+        },
         {
             "name": "(gdb) Launch",
             "type": "cppdbg",
@@ -37,6 +37,18 @@
                     "ignoreFailures": true
                 }
             ]
-        }
-   ]
+        },
+        {
+            "name": "(lldb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/edge-classic",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb"
+        },
+    ]
 }

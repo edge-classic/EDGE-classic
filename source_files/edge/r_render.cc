@@ -2314,12 +2314,7 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 	// only 1 sided walls affect the 1D occlusion buffer
 
 	if (seg->linedef->blocked)
-	{
-		// Check if this is a Line 242 "window" (I think) - Dasho
-		if ((!(seg->frontsector && seg->frontsector->heightsec && seg->frontsector->heightsec_side) &&
-			!(seg->backsector && seg->backsector->heightsec && seg->backsector->heightsec_side)))
 		RGL_1DOcclusionSet(angle_R, angle_L);
-	}
 
 	// --- handle sky (using the depth buffer) ---
 

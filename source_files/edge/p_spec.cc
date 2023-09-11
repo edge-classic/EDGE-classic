@@ -971,17 +971,29 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 			target->f_h = source->frontsector->f_h;
 			for (int i = 0; i < target->linecount; i++)
 			{
-				if (target->lines[i]->side[1] && target->lines[i]->side[0]->middle.image && target->lines[i]->side[1]->middle.image &&
-					target->lines[i]->side[0]->middle.image == target->lines[i]->side[1]->middle.image)
+				if (target->lines[i]->side[1])
 				{
-					target->lines[i]->side[0]->midmask_offset = 0;
-					target->lines[i]->side[1]->midmask_offset = 0;
-					for (seg_t *seg = target->subsectors->segs; seg != nullptr; seg = seg->sub_next)
+					target->lines[i]->blocked = false;
+					if (target->lines[i]->side[0]->middle.image && target->lines[i]->side[1]->middle.image &&
+						target->lines[i]->side[0]->middle.image == target->lines[i]->side[1]->middle.image)
 					{
-						if (seg->linedef == target->lines[i])
-							seg->linedef->flags |= MLF_LowerUnpegged;
+						target->lines[i]->side[0]->midmask_offset = 0;
+						target->lines[i]->side[1]->midmask_offset = 0;
+						for (seg_t *seg = target->subsectors->segs; seg != nullptr; seg = seg->sub_next)
+						{
+							if (seg->linedef == target->lines[i])
+								seg->linedef->flags |= MLF_LowerUnpegged;
+						}
 					}
 				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < target->linecount; i++)
+			{
+				if (target->lines[i]->side[1])
+					target->lines[i]->blocked = false;
 			}
 		}
 	}
@@ -1165,6 +1177,8 @@ static void DetailSlope_Floor(line_t *ld)
 		return;
 	}
 
+	ld->blocked = false;
+
 	// limit height difference to no more than player step
 	z1 = MAX(z1, z2 - 24.0);
 
@@ -1200,6 +1214,8 @@ static void DetailSlope_Ceiling(line_t *ld)
 		I_Warning("Detail slope in sector #%d disabled: ceiling already sloped!\n", (int)(sec - sectors));
 		return;
 	}
+
+	ld->blocked = false;
 
 #if 0
 	// limit height difference to no more than this

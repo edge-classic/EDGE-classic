@@ -374,6 +374,8 @@ struct mobj_s : public position_c
 
 	bool slopesighthit = false;
 
+	int teleport_tic = 0;
+
 public:
 	bool isRemoved() const;
 

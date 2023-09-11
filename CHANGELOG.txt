@@ -98,6 +98,7 @@ Bugs fixed
 - Changed draw order of "Entering" and "You Are Here" intermission graphics to prevent the
   next level name from being obscured
 - Fixed pre-EC legacy issue: crushed monsters never entered their GIB states
-- Fixed pre-EC legacy issue: Cyberdeom was missing a frame in death states 
+- Fixed pre-EC legacy issue: Cyberdeom was missing a frame in death states
+- Fixed pre-EC legacy issue: Things were visible while changing positions via teleportation
 
 

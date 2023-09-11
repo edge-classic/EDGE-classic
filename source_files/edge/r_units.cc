@@ -345,43 +345,34 @@ void RGL_DrawUnits(void)
 	if (r_culling.d)
 	{
 		GLfloat fogColor[3];
-		if (IS_SKY(players[consoleplayer]->mo->subsector->sector->ceil))
+		switch (r_cullfog.d)
 		{
-			switch (r_cullfog.d)
-			{
-				case 0:
-					fogColor[0] = cull_fog_color[0];
-					fogColor[1] = cull_fog_color[1];
-					fogColor[2] = cull_fog_color[2];
-					break;
-				case 1:
-					// Not pure white, but 1.0f felt like a little much - Dasho
-					fogColor[0] = 0.75f;
-					fogColor[1] = 0.75f;
-					fogColor[2] = 0.75f;
-					break;
-				case 2:
-					fogColor[0] = 0.25f;
-					fogColor[1] = 0.25f;
-					fogColor[2] = 0.25f;
-					break;
-				case 3:
-					fogColor[0] = 0;
-					fogColor[1] = 0;
-					fogColor[2] = 0;
-					break;
-				default:
-					fogColor[0] = cull_fog_color[0];
-					fogColor[1] = cull_fog_color[1];
-					fogColor[2] = cull_fog_color[2];
-					break;
-			}
-		}
-		else
-		{
-			fogColor[0] = 0;
-			fogColor[1] = 0;
-			fogColor[2] = 0;
+			case 0:
+				fogColor[0] = cull_fog_color[0];
+				fogColor[1] = cull_fog_color[1];
+				fogColor[2] = cull_fog_color[2];
+				break;
+			case 1:
+				// Not pure white, but 1.0f felt like a little much - Dasho
+				fogColor[0] = 0.75f;
+				fogColor[1] = 0.75f;
+				fogColor[2] = 0.75f;
+				break;
+			case 2:
+				fogColor[0] = 0.25f;
+				fogColor[1] = 0.25f;
+				fogColor[2] = 0.25f;
+				break;
+			case 3:
+				fogColor[0] = 0;
+				fogColor[1] = 0;
+				fogColor[2] = 0;
+				break;
+			default:
+				fogColor[0] = cull_fog_color[0];
+				fogColor[1] = cull_fog_color[1];
+				fogColor[2] = cull_fog_color[2];
+				break;
 		}
 		glClearColor(fogColor[0],fogColor[1],fogColor[2],1.0f);
 		glFogi(GL_FOG_MODE, GL_LINEAR);

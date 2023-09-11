@@ -59,8 +59,8 @@ DEF_CVAR(r_dumbcombine,   "0", 0)
 DEF_CVAR(r_dumbclamp,     DUMB_CLAMP, 0)
 
 
-#define MAX_L_VERT  4096 * 24
-#define MAX_L_UNIT  (MAX_L_VERT / 3)
+#define MAX_L_VERT  65545
+#define MAX_L_UNIT  1024
 
 #define DUMMY_CLAMP  789
 
@@ -303,23 +303,6 @@ static inline void RGL_SendRawVector(const local_gl_vert_t *V)
 	glVertex3fv(reinterpret_cast<const GLfloat *>(&V->pos));
 }
 
-static GLuint current_shape = 0;
-
-// Only open/close a glBegin/glEnd if needed
-void RGL_BatchShape(GLuint shape)
-{
-	if (current_shape == shape)
-		return;
-
-	if (current_shape != 0)
-		glEnd();
-
-	current_shape = shape;
-
-	if (current_shape != 0)
-		glBegin(shape);
-}
-
 //
 // RGL_DrawUnits
 //
@@ -448,13 +431,11 @@ void RGL_DrawUnits(void)
 		{
 			active_pass = unit->pass;
 
-			RGL_BatchShape(0);
 			glPolygonOffset(0, -active_pass);
 		}
 
 		if ((active_blending ^ unit->blending) & (BL_Masked | BL_Less))
 		{
-			RGL_BatchShape(0);
 			if (unit->blending & BL_Less)
 			{
 				// glAlphaFunc is updated below, because the alpha
@@ -473,7 +454,6 @@ void RGL_DrawUnits(void)
 
 		if ((active_blending ^ unit->blending) & (BL_Alpha | BL_Add))
 		{
-			RGL_BatchShape(0);
 			if (unit->blending & BL_Add)
 			{
 				glEnable(GL_BLEND);
@@ -490,7 +470,6 @@ void RGL_DrawUnits(void)
 
 		if ((active_blending ^ unit->blending) & BL_CULL_BOTH)
 		{
-			RGL_BatchShape(0);
 			if (unit->blending & BL_CULL_BOTH)
 			{
 				glEnable(GL_CULL_FACE);
@@ -502,7 +481,6 @@ void RGL_DrawUnits(void)
 
 		if ((active_blending ^ unit->blending) & BL_NoZBuf)
 		{
-			RGL_BatchShape(0);
 			glDepthMask((unit->blending & BL_NoZBuf) ? GL_FALSE : GL_TRUE);
 		}
 
@@ -512,7 +490,6 @@ void RGL_DrawUnits(void)
 		{
 			// NOTE: assumes alpha is constant over whole polygon
 			float a = local_verts[unit->first].rgba[3];
-			RGL_BatchShape(0);
 			glAlphaFunc(GL_GREATER, a * 0.66f);
 		}
 
@@ -520,7 +497,6 @@ void RGL_DrawUnits(void)
 		{
 			if (active_tex[t] != unit->tex[t] || active_env[t] != unit->env[t])
 			{
-				RGL_BatchShape(0);
 				glActiveTexture(GL_TEXTURE0 + t);
 			}
 
@@ -569,58 +545,25 @@ void RGL_DrawUnits(void)
 
 		if ((active_blending & BL_ClampY) && active_tex[0] != 0)
 		{
-			RGL_BatchShape(0);
 			glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &old_clamp);
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
 				r_dumbclamp.d ? GL_CLAMP : GL_CLAMP_TO_EDGE);
 		}
 
-		// Simplify things into triangles as that allows us to keep a single glBegin open for longer
-		if (unit->shape == GL_POLYGON || unit->shape == GL_TRIANGLE_FAN)
+		glBegin(unit->shape);
+
+		for (int v_idx=0; v_idx < unit->count; v_idx++)
 		{
-			RGL_BatchShape(GL_TRIANGLES);
-			for (int v_idx = 2; v_idx < unit->count; v_idx++)
-			{
-				RGL_SendRawVector(local_verts + unit->first);
-				RGL_SendRawVector(local_verts + unit->first + v_idx - 1);
-				RGL_SendRawVector(local_verts + unit->first + v_idx);
-			}
+			RGL_SendRawVector(local_verts + unit->first + v_idx);
 		}
-		else if (unit->shape == GL_QUADS)
-		{
-			RGL_BatchShape(GL_TRIANGLES);
-			for (int v_idx = 0; v_idx + 3 < unit->count; v_idx += 4)
-			{
-				RGL_SendRawVector(local_verts + unit->first + v_idx);
-				RGL_SendRawVector(local_verts + unit->first + v_idx + 1);
-				RGL_SendRawVector(local_verts + unit->first + v_idx + 2);
-				RGL_SendRawVector(local_verts + unit->first + v_idx);
-				RGL_SendRawVector(local_verts + unit->first + v_idx + 2);
-				RGL_SendRawVector(local_verts + unit->first + v_idx + 3);
-			}
-		}
-		else
-		{
-			RGL_BatchShape(unit->shape);
-			for (int v_idx = 0; v_idx < unit->count; v_idx++)
-			{
-				RGL_SendRawVector(local_verts + unit->first + v_idx);
-			}
-		}
-		
-		if (unit->shape != GL_TRIANGLES && unit->shape != GL_LINES && unit->shape != GL_QUADS)
-			RGL_BatchShape(0);
+
+		glEnd();	
 
 		// restore the clamping mode
 		if (old_clamp != DUMMY_CLAMP)
-		{
-			RGL_BatchShape(0);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, old_clamp);
-		}
 	}
-
-	RGL_BatchShape(0);
 
 	// all done
 	cur_vert = cur_unit = 0;

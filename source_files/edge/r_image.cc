@@ -383,24 +383,27 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
 		// check for Heretic/Hexen images, which are raw 320x200
 		if (packfile_len == 320*200 && type == IMSRC_Graphic)
 		{
-			image_c *rim = NewImage(320, 200, OPAC_Solid);
-			rim->name = name;
-
-			rim->source_type = IMSRC_Raw320x200;
-			int pn_len = strlen(packfile_name);
-			rim->source.flat.packfile_name = (char *)calloc(pn_len+1, 1);
-			Z_StrNCpy(rim->source.flat.packfile_name, packfile_name, pn_len);
-			//rim->source_palette = W_GetPaletteForLump(lump);
-			rim->source_palette = -1;
-			return rim;
+			width = 320;
+			height = 200;
+			solid = true;
+			type = IMSRC_Raw320x200;
 		}
-
-		if (packfile_len == 64*64 || packfile_len == 64*65 || packfile_len == 64*128)
-			I_Warning("Graphic '%s' seems to be a flat.\n", name);
+		// check for AUTOPAGE images, which are raw 320x158
+		else if (packfile_len == 320*158 && type == IMSRC_Graphic)
+		{
+			width = 320;
+			height = 158;
+			solid = true;
+			type = IMSRC_Raw320x200;
+		}
 		else
-			I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
-
-		return NULL;
+		{
+			if (packfile_len == 64*64 || packfile_len == 64*65 || packfile_len == 64*128)
+				I_Warning("Graphic '%s' seems to be a flat.\n", name);
+			else
+				I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
+			return nullptr;
+		}
 	}
 	else if (fmt == epi::FMT_DOOM)
 	{
@@ -517,21 +520,27 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump,
 		// check for Heretic/Hexen images, which are raw 320x200
 		if (lump_len == 320*200 && type == IMSRC_Graphic)
 		{
-			image_c *rim = NewImage(320, 200, OPAC_Solid);
-			rim->name = name;
-
-			rim->source_type = IMSRC_Raw320x200;
-			rim->source.flat.lump = lump;
-			rim->source_palette = W_GetPaletteForLump(lump);
-			return rim;
+			width = 320;
+			height = 200;
+			solid = true;
+			type = IMSRC_Raw320x200;
 		}
-
-		if (lump_len == 64*64 || lump_len == 64*65 || lump_len == 64*128)
-			I_Warning("Graphic '%s' seems to be a flat.\n", name);
+		// check for AUTOPAGE images, which are raw 320x158
+		else if (lump_len == 320*158 && type == IMSRC_Graphic)
+		{
+			width = 320;
+			height = 158;
+			solid = true;
+			type = IMSRC_Raw320x200;
+		}
 		else
-			I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
-
-		return NULL;
+		{
+			if (lump_len == 64*64 || lump_len == 64*65 || lump_len == 64*128)
+				I_Warning("Graphic '%s' seems to be a flat.\n", name);
+			else
+				I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
+			return nullptr;
+		}
 	}
 	else if (fmt == epi::FMT_DOOM)
 	{

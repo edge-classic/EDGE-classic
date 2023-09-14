@@ -1775,15 +1775,6 @@ static void LoadUDMFSideDefs()
 			sd->middle.boom_colmap = colourmaps.Lookup(middle_tex);
 			sd->bottom.boom_colmap = colourmaps.Lookup(bottom_tex);
 
-			// Dasho - Not sure if this is right. The binary map loader sets this if the side is part of
-			// a two-sided linedef, but I don't see a quick or easy way to determine that at this point
-			// in the UDMF loader
-			if (sd->middle.image && sd->middle.image->opacity > OPAC_Solid)
-			{
-				sd->midmask_offset = sd->middle.offset.y;
-				sd->middle.offset.y = 0;
-			}
-
 			if (sd->top.image && fabs(sd->top.offset.y) > IM_HEIGHT(sd->top.image))
 				sd->top.offset.y = fmodf(sd->top.offset.y, IM_HEIGHT(sd->top.image));
 

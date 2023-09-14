@@ -396,13 +396,18 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
 			solid = true;
 			type = IMSRC_Raw320x200;
 		}
+		// check for flats
+		else if ((packfile_len == 64*64 || packfile_len == 64*65 || packfile_len == 64*128) && type == IMSRC_Graphic)
+		{
+			width = 64;
+			height = 64;
+			solid = true;
+			type = IMSRC_Flat;
+		}
 		else
 		{
-			if (packfile_len == 64*64 || packfile_len == 64*65 || packfile_len == 64*128)
-				I_Warning("Graphic '%s' seems to be a flat.\n", name);
-			else
-				I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
-			return nullptr;
+			I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
+				return nullptr;
 		}
 	}
 	else if (fmt == epi::FMT_DOOM)
@@ -533,13 +538,18 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump,
 			solid = true;
 			type = IMSRC_Raw320x200;
 		}
+		// check for flats
+		else if ((lump_len == 64*64 || lump_len == 64*65 || lump_len == 64*128) && type == IMSRC_Graphic)
+		{
+			width = 64;
+			height = 64;
+			solid = true;
+			type = IMSRC_Flat;
+		}
 		else
 		{
-			if (lump_len == 64*64 || lump_len == 64*65 || lump_len == 64*128)
-				I_Warning("Graphic '%s' seems to be a flat.\n", name);
-			else
-				I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
-			return nullptr;
+			I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
+				return nullptr;
 		}
 	}
 	else if (fmt == epi::FMT_DOOM)

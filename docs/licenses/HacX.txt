@@ -1,0 +1,132 @@
+Software License Agreement for the use of HacX. 
+
+     This file was created by Rich Johnston. Permission to distribute this
+Software has been granted by Banjo Software to Rich Johnston (aka Nostromo).
+Written permission is on record and may be viewed upon request.  This
+permission extends ONLY to Rich Johnston and can not be extended to any
+other individual, business or entity without the written consent of Banjo
+Software or Rich Johnston.
+
+     I, Rich Johnston, do hereby allow all files produced by Banjo Software
+to be distributed freely. By continuing the installation of these files, by
+loading or running these files, by placing or copying these files onto your
+computer hard drive, or by distributing these files, you are agreeing to be
+bound by the terms of this Agreement.  If you do not agree to the terms of
+this Agreement, promptly delete these files and deny distribution of these
+files.
+
+Software Agreement
+------------------
+
+     1. This file (known as Legal.txt) and the credits file (known as
+Credits.txt) must accompanying all distribution of these files.
+
+     2. Grant of License.  Banjo grants to you the right to use these files.
+You are allowed to make WAD files and/or modify the files to be used in
+conjuntion with the games DOOM II (copyright, Id Software, Inc.) and Hacx
+(copyright, Banjo Software, Inc.). They may NOT be used with any other
+commercial software. However, they may be used with Non-commercial software.
+
+     3. Commercial Use is Prohibited: These files are being distributed as
+ROYALTY FREE. Under no circumstances shall anyone, be permitted, allowed or
+authorized to commercially exploit these files, or any data comprising the
+files (whether modified by you or otherwise) without written consent from
+Banjo.  Neither you nor anyone at your direction shall do the following acts
+with regard to these files, either in whole or part:
+
+          a.  Rent the files;
+
+          b.  Sell the files;
+
+          c.  Lease the files;
+
+          d.  Offer the files on a pay-per-play basis; or
+
+          e.  In any manner and through any medium whatsoever commercially
+              exploit the files or use the files for any commercial purpose.
+
+     4. Copyright.  These files are owned by Banjo and is protected by
+United States copyright laws and international treaty provisions.  You must
+treat these files like any other copyrighted material. You agree to use your
+best efforts to see that any user of these files licensed hereunder complies
+with this Agreement.
+
+Any questions or comments should be directed to
+
+Rich Johnston
+Nostromo
+Caretaker of Banjo Software files
+Nostromo@DrNostromo.com
+http://www.drnostromo.com
+
+CREDITS
+
+1.2:
+
+Programming: 
+Art: Ken Scott, Perry "Bow" Bowman, Thomas Moeller, Gerald Swanson, Stefan C. Scandizzo, Ronald C. Ray, Greg Schomo, Jeff Rubin, Erick Gravel, Zack Quarles
+Biz: Randy Lee
+Design: John Herndon, Stephen Watson, Rich Johnston, Anthony Czerwonka, Marc A. Pullen, Ryan Rapsys, Adam Williamson, Andrew Gate, Iikka Keranen, Michal Mesko, Mike Reed
+Story: Holt Satterfield
+Sound: Ricardo Augstroze Barijan, Scott Evans
+Music: Jim Lynch, Ellsworth Hall, Mark Van Natta
+Special Thanks: Blake Wilfong, Xaser Acheron, Blzut3
+
+
+
+2.0:
+
+Xaser Acheron:
+- Project Lead
+- Mapping (MAP16)
+
+Rich "Nostromo" Johnston
+- Official Hacx Consultant guy
+
+Braden "Blzut3" Obrzut:
+- Co-Lead
+- ZDoom Support
+- Map Tweaks (MAP01, MAP11)
+
+Chris Kaplan:
+- Mapping (MAP19)
+
+James "Quasar" Haley:
+- Eternity support
+
+Aleksander "Cage" Kowalczyk:
+- Widescreen-friendly weapon graphics (Reznator, Uzi, Cryogun, Antigun)
+- Texture Art (city, cyberspace, many improvements)
+- New Palette ;)
+
+Pawel "NMN" Zarcynski [sp?]
+- Enemy art (GENIE)
+
+Paul "NeuralStunner" Lawrence
+- Sounds (Replicant, various ambience)
+- Antigun edits
+
+JustinC
+- Graphics (Player sprites, Uzi gloves)
+
+Maniac
+- Mapping (HACXDM02)
+
+Cpt. Toenail
+- Mapping (HACXDM01, MAP01)
+
+Grymmoire
+- Mapping (MAP01, MAP25)
+
+JoeyTD
+- Uzi edits
+
+Mike12
+- Graphics (Side-angled Uzi / Dual Uzis)
+
+DavidPH
+- Tools Development (DeuHacx)
+
+
+Testing:
+Michael Mancuso, James Paddock

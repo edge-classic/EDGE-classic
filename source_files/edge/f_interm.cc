@@ -539,6 +539,42 @@ static void DrawLevelFinished(void)
 
 }
 
+static void DrawOnLnode(wi_mappos_c* mappos, const image_c * images[2])
+{
+	int i;
+
+	// -AJA- this is used to select between Left and Right pointing
+	// arrows (WIURH0 and WIURH1).  Smells like a massive HACK.
+
+	for (i=0; i < 2; i++)
+	{
+		if (images[i] == NULL)
+			continue;
+
+		float left = mappos->info->x - IM_OFFSETX(images[i]);
+		float top  = mappos->info->y - IM_OFFSETY(images[i]);
+
+		float right  = left + IM_WIDTH(images[i]);
+		float bottom = top + IM_HEIGHT(images[i]);
+
+		if (left >= 0 && right < 320 && top >= 0 && bottom < 200)
+		{
+			/* this one fits on the screen */
+			break;
+		}
+	}
+
+	if (i < 2)
+	{
+		HUD_DrawImage(mappos->info->x, mappos->info->y, images[i]);
+	}
+	else
+	{
+		L_WriteDebug("Could not place patch on level '%s'\n", 
+		  mappos->info->name.c_str());
+	}
+}
+
 // Draws "Entering <LevelName>"
 static void DrawEnteringLevel(void)
 {
@@ -603,6 +639,15 @@ static void DrawEnteringLevel(void)
 		HL_WriteText(style,t_type,160, y, language["IntermissionEntering"]);
 	}
 	HUD_SetAlignment(-1, -1);//set it back to usual
+
+	for (int i = 0; i < worldint.nummappos; i++)
+	{
+		if (worldint.mappos[i].done)
+			DrawOnLnode(&worldint.mappos[i], splat);
+
+		if (snl_pointeron && !strcmp(wi_stats.next->name.c_str(), worldint.mappos[i].info->name.c_str()))
+			DrawOnLnode(&worldint.mappos[i], yah);
+	}
 
 	// ttf_ref_yshift is important for TTF fonts.
 	float y_shift = style->fonts[t_type]->ttf_ref_yshift; // * txtscale;
@@ -673,42 +718,6 @@ static void DrawEnteringLevel(void)
 	}
 	HUD_SetAlignment(-1, -1);//set it back to usual
 
-}
-
-static void DrawOnLnode(wi_mappos_c* mappos, const image_c * images[2])
-{
-	int i;
-
-	// -AJA- this is used to select between Left and Right pointing
-	// arrows (WIURH0 and WIURH1).  Smells like a massive HACK.
-
-	for (i=0; i < 2; i++)
-	{
-		if (images[i] == NULL)
-			continue;
-
-		float left = mappos->info->x - IM_OFFSETX(images[i]);
-		float top  = mappos->info->y - IM_OFFSETY(images[i]);
-
-		float right  = left + IM_WIDTH(images[i]);
-		float bottom = top + IM_HEIGHT(images[i]);
-
-		if (left >= 0 && right < 320 && top >= 0 && bottom < 200)
-		{
-			/* this one fits on the screen */
-			break;
-		}
-	}
-
-	if (i < 2)
-	{
-		HUD_DrawImage(mappos->info->x, mappos->info->y, images[i]);
-	}
-	else
-	{
-		L_WriteDebug("Could not place patch on level '%s'\n", 
-		  mappos->info->name.c_str());
-	}
 }
 
 static float PercentWidth(std::string &s)
@@ -954,20 +963,19 @@ static void UpdateShowNextLoc(void)
 
 static void DrawShowNextLoc(void)
 {
-	int i;
-
-	for (i = 0; i < worldint.nummappos; i++)
-	{
-		if (worldint.mappos[i].done)
-			DrawOnLnode(&worldint.mappos[i], splat);
-
-		if (wi_stats.next)
-			if (snl_pointeron && !strcmp(wi_stats.next->name.c_str(), worldint.mappos[i].info->name.c_str()))
-				DrawOnLnode(&worldint.mappos[i], yah);
-	}
-
 	if (wi_stats.next)
 		DrawEnteringLevel();
+	else
+	{
+		for (int i = 0; i < worldint.nummappos; i++)
+		{
+			if (worldint.mappos[i].done)
+				DrawOnLnode(&worldint.mappos[i], splat);
+
+			if (snl_pointeron && !strcmp(wi_stats.next->name.c_str(), worldint.mappos[i].info->name.c_str()))
+				DrawOnLnode(&worldint.mappos[i], yah);
+		}
+	}
 }
 
 static void DrawNoState(void)

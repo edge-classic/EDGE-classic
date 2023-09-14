@@ -1674,7 +1674,9 @@ static void LoadUDMFSideDefs()
 		if (section == "sidedef")
 		{
 			nummapsides++;
-			float x = 0, y = 0;
+			int x = 0, y = 0;
+			float lowx = 0.0f, midx = 0.0f, highx = 0.0f;
+			float lowy = 0.0f, midy = 0.0f, highy= 0.0f;
 			int sec_num = 0;
 			char top_tex[10];
 			char bottom_tex[10];
@@ -1709,9 +1711,21 @@ static void LoadUDMFSideDefs()
 					I_Error("Malformed TEXTMAP lump: missing ';'\n");
 
 				if (key == "offsetx")
-					x = epi::LEX_Double(value);
+					x = epi::LEX_Int(value);
 				else if (key == "offsety")
-					y = epi::LEX_Double(value);
+					y = epi::LEX_Int(value);
+				else if (key == "offsetx_bottom")
+					lowx = epi::LEX_Double(value);
+				else if (key == "offsetx_mid")
+					midx = epi::LEX_Double(value);
+				else if (key == "offsetx_top")
+					highx = epi::LEX_Double(value);
+				else if (key == "offsety_bottom")
+					lowy = epi::LEX_Double(value);
+				else if (key == "offsety_mid")
+					midy = epi::LEX_Double(value);
+				else if (key == "offsety_top")
+					highy = epi::LEX_Double(value);
 				else if (key == "texturetop")
 					Z_StrNCpy(top_tex, value.c_str(), 8);
 				else if (key == "texturebottom")
@@ -1749,10 +1763,35 @@ static void LoadUDMFSideDefs()
 			sd->middle.image = W_ImageLookup(middle_tex, INS_Texture);
 			sd->bottom.image = W_ImageLookup(bottom_tex, INS_Texture);
 
+			sd->bottom.offset.x += lowx;
+			sd->middle.offset.x += midx;
+			sd->top.offset.x += highx;
+			sd->bottom.offset.y += lowy;
+			sd->middle.offset.y += midy;
+			sd->top.offset.y += highy;
+
 			// handle BOOM colourmaps with [242] linetype
 			sd->top   .boom_colmap = colourmaps.Lookup(top_tex);
 			sd->middle.boom_colmap = colourmaps.Lookup(middle_tex);
 			sd->bottom.boom_colmap = colourmaps.Lookup(bottom_tex);
+
+			// Dasho - Not sure if this is right. The binary map loader sets this if the side is part of
+			// a two-sided linedef, but I don't see a quick or easy way to determine that at this point
+			// in the UDMF loader
+			if (sd->middle.image && sd->middle.image->opacity > OPAC_Solid)
+			{
+				sd->midmask_offset = sd->middle.offset.y;
+				sd->middle.offset.y = 0;
+			}
+
+			if (sd->top.image && fabs(sd->top.offset.y) > IM_HEIGHT(sd->top.image))
+				sd->top.offset.y = fmodf(sd->top.offset.y, IM_HEIGHT(sd->top.image));
+
+			if (sd->middle.image && fabs(sd->middle.offset.y) > IM_HEIGHT(sd->middle.image))
+				sd->middle.offset.y = fmodf(sd->middle.offset.y, IM_HEIGHT(sd->middle.image));
+
+			if (sd->bottom.image && fabs(sd->bottom.offset.y) > IM_HEIGHT(sd->bottom.image))
+				sd->bottom.offset.y = fmodf(sd->bottom.offset.y, IM_HEIGHT(sd->bottom.image));
 		}
 		else // consume other blocks
 		{

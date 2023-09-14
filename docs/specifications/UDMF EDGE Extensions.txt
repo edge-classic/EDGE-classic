@@ -1,5 +1,5 @@
 ===============================================================================
-Universal Doom Map Format EDGE extensions DRAFT - 2023.08.25
+Universal Doom Map Format EDGE extensions DRAFT - 2023.09.14
 
     Copyright (c) 2023 The EDGE Team.
     Permission is granted to copy, distribute and/or modify this document
@@ -56,20 +56,16 @@ Note: All <bool> fields default to false unless mentioned otherwise.
       zfloor = <float>;         // Floor height at this vertex. 
                                 // Default should be a value beyond the minimum/maximum height limit of the engine.
                                 // EDGE-Classic uses -40000.0.
-                                // Effective in any triangular sector or rectangular sectors that fulfill the following
-                                // conditions:
-                                // - Only two out of the four vertices utilize zfloor values
-                                // - The two vertices must be part of the same line segment
-                                // - The zfloor value must be identical between the two vertices
-
       zceiling = <float>;       // Ceiling height at this vertex.
                                 // Default should be a value beyond the minimum/maximum height limit of the engine.
                                 // EDGE-Classic uses 40000.0.
-                                // Effective in any triangular sector or rectangular sectors that fulfill the following
-                                // conditions:
-                                // - Only two out of the four vertices utilize zceiling values
+                                // zfloor/zceiling are effective in any triangular sector, or rectangular sectors
+                                // that fulfill the following conditions:
+                                // - Only two out of the four vertices utilize zfloor/zceiling values
                                 // - The two vertices must be part of the same line segment
-                                // - The zceiling value must be identical between the two vertices
+                                // - The zfloor/zceiling value must be identical between the two vertices
+                                // - The zfloor/zceiling vertices for a rectangular sector can be different but must
+                                //   otherwise adhere to the rules above
    }    
 
    linedef
@@ -79,13 +75,19 @@ Note: All <bool> fields default to false unless mentioned otherwise.
 
    sidedef
    {
-      No changes.
+      offsetx_top = <float>;    // X offset for upper texture, Default = 0.0.
+      offsety_top = <float>;    // y offset for upper texture, Default = 0.0.
+      offsetx_mid = <float>;    // X offset for mid texture, Default = 0.0.
+      offsety_mid = <float>;    // y offset for mid texture, Default = 0.0.
+      offsetx_bottom = <float>; // X offset for lower texture, Default = 0.0.
+      offsety_bottom = <float>; // y offset for lower texture, Default = 0.0.
+                                // When global texture offsets are used they will
+                                // be added on top of these values.
    }
 
    sector
    {
       fadecolor = <integer>;    // Fog color for this sector, in 0xRRGGBB format. Default (no fog) is 0x000000.
-
       fogdensity = <integer>;   // Fog density for this sector. EDGE makes an effort to map the GZDoom values recognized
                                 // by map editors (0-510) in the following manner:
                                 // - Values of 0-1 are equivalent to a 20% FOG_DENSITY in SECTORS.DDF
@@ -105,6 +107,7 @@ Note: All <bool> fields default to false unless mentioned otherwise.
 =======================================
 Changelog
 =======================================
+2023.09.14 - Updated sidedef section with offset* parameters
 2023.08.25 - Updated fogdensity scaling documentation
 2023.08.18 - Addition of fadecolor/fogdensity sector fields
 2023.02.27 - Initial draft; addition of zfloor/zceiling vertex fields

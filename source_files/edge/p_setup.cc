@@ -1677,6 +1677,8 @@ static void LoadUDMFSideDefs()
 			int x = 0, y = 0;
 			float lowx = 0.0f, midx = 0.0f, highx = 0.0f;
 			float lowy = 0.0f, midy = 0.0f, highy= 0.0f;
+			float low_scx = 1.0f, mid_scx = 1.0f, high_scx = 1.0f;
+			float low_scy = 1.0f, mid_scy = 1.0f, high_scy = 1.0f;
 			int sec_num = 0;
 			char top_tex[10];
 			char bottom_tex[10];
@@ -1726,6 +1728,18 @@ static void LoadUDMFSideDefs()
 					midy = epi::LEX_Double(value);
 				else if (key == "offsety_top")
 					highy = epi::LEX_Double(value);
+				else if (key == "scalex_bottom")
+					low_scx = epi::LEX_Double(value);
+				else if (key == "scalex_mid")
+					mid_scx = epi::LEX_Double(value);
+				else if (key == "scalex_top")
+					high_scx = epi::LEX_Double(value);
+				else if (key == "scaley_bottom")
+					low_scy = epi::LEX_Double(value);
+				else if (key == "scaley_mid")
+					mid_scy = epi::LEX_Double(value);
+				else if (key == "scaley_top")
+					high_scy = epi::LEX_Double(value);
 				else if (key == "texturetop")
 					Z_StrNCpy(top_tex, value.c_str(), 8);
 				else if (key == "texturebottom")
@@ -1763,12 +1777,21 @@ static void LoadUDMFSideDefs()
 			sd->middle.image = W_ImageLookup(middle_tex, INS_Texture);
 			sd->bottom.image = W_ImageLookup(bottom_tex, INS_Texture);
 
+			// granular offsets
 			sd->bottom.offset.x += lowx;
 			sd->middle.offset.x += midx;
 			sd->top.offset.x += highx;
 			sd->bottom.offset.y += lowy;
 			sd->middle.offset.y += midy;
 			sd->top.offset.y += highy;
+
+			// granular scaling
+			sd->bottom.x_mat.x = low_scx;
+			sd->middle.x_mat.x = mid_scx;
+			sd->top.x_mat.x = high_scx;
+			sd->bottom.y_mat.y = low_scy;
+			sd->middle.y_mat.y = mid_scy;
+			sd->top.y_mat.y = high_scy;
 
 			// handle BOOM colourmaps with [242] linetype
 			sd->top   .boom_colmap = colourmaps.Lookup(top_tex);

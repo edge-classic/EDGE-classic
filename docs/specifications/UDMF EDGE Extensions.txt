@@ -75,6 +75,13 @@ Note: All <bool> fields default to false unless mentioned otherwise.
 
    sidedef
    {
+      scalex_top = <float>;     // X scale for upper texture, Default = 1.0.
+      scaley_top = <float>;     // Y scale for upper texture, Default = 1.0.
+      scalex_mid = <float>;     // X scale for mid texture, Default = 1.0.
+      scaley_mid = <float>;     // Y scale for mid texture, Default = 1.0.
+      scalex_bottom = <float>;  // X scale for lower texture, Default = 1.0.
+      scaley_bottom = <float>;  // Y scale for lower texture, Default = 1.0.
+
       offsetx_top = <float>;    // X offset for upper texture, Default = 0.0.
       offsety_top = <float>;    // y offset for upper texture, Default = 0.0.
       offsetx_mid = <float>;    // X offset for mid texture, Default = 0.0.
@@ -107,7 +114,7 @@ Note: All <bool> fields default to false unless mentioned otherwise.
 =======================================
 Changelog
 =======================================
-2023.09.14 - Updated sidedef section with offset* parameters
+2023.09.14 - Updated sidedef section with granular scaling and offset parameters
 2023.08.25 - Updated fogdensity scaling documentation
 2023.08.18 - Addition of fadecolor/fogdensity sector fields
 2023.02.27 - Initial draft; addition of zfloor/zceiling vertex fields

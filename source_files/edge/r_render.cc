@@ -1568,7 +1568,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 		AddWallTile(seg, dfloor,
 			&sd->middle, slope_fh, slope_ch, 
 			(ld->flags & MLF_LowerUnpegged) ? 
-			sec->f_h + IM_HEIGHT_SAFE(sd->middle.image) : sec->c_h,
+			sec->f_h + (IM_HEIGHT_SAFE(sd->middle.image) / sd->middle.y_mat.y) : sec->c_h,
 			0, f_min, c_max);
 		return;
 	}
@@ -1698,12 +1698,12 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 		else if (ld->flags & MLF_LowerUnpegged)
 		{
 			f2 = f1 + sd->midmask_offset;
-			c2 = f2 + IM_HEIGHT(sd->middle.image);
+			c2 = f2 + (IM_HEIGHT(sd->middle.image) / sd->middle.y_mat.y);
 		}
 		else
 		{
 			c2 = c1 + sd->midmask_offset;
-			f2 = c2 - IM_HEIGHT(sd->middle.image);
+			f2 = c2 - (IM_HEIGHT(sd->middle.image) / sd->middle.y_mat.y);
 		}
 
 		tex_z = c2;
@@ -1784,7 +1784,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 				continue;
 
 			tex_z = (C->ef_line->flags & MLF_LowerUnpegged) ?
-				C->bottom_h + IM_HEIGHT_SAFE(surf->image) : C->top_h;
+				C->bottom_h + (IM_HEIGHT_SAFE(surf->image) / surf->y_mat.y) : C->top_h;
 
 			AddWallTile(seg, dfloor, surf, C->bottom_h, C->top_h,
 						tex_z, flags, f_min, c_max);

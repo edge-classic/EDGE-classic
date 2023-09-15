@@ -481,7 +481,7 @@ static void UnknownThingWarning(int type, float x, float y)
 }
 
 
-static void SpawnMapThing(const mobjtype_c *info,
+static mobj_t *SpawnMapThing(const mobjtype_c *info,
 						  float x, float y, float z,
 						  sector_t *sec, angle_t angle,
 						  int options, int tag)
@@ -502,7 +502,7 @@ static void SpawnMapThing(const mobjtype_c *info,
 	if (info->playernum < 0)
 	{
 		G_AddDeathmatchStart(point);
-		return;
+		return nullptr;
 	}
 
 	// check for players specially -jc-
@@ -517,7 +517,7 @@ static void SpawnMapThing(const mobjtype_c *info,
 			point.tag = sec->tag;
 
 			G_AddHubStart(point);
-			return;
+			return nullptr;
 		}
 
 		// -AJA- 2004/12/30: for duplicate players, the LAST one must
@@ -533,25 +533,25 @@ static void SpawnMapThing(const mobjtype_c *info,
 			// overwrite one in the Coop list with new location
 			memcpy(prev, &point, sizeof(point));
 		}
-		return;
+		return nullptr;
 	}
 
 	// check for apropriate skill level
 	// -ES- 1999/04/13 Implemented Kester's Bugfix.
 	// -AJA- 1999/10/21: Reworked again.
 	if (SP_MATCH() && (options & MTF_NOT_SINGLE))
-		return;
+		return nullptr;
 
 	// Disable deathmatch weapons for vanilla coop...should probably be in the Gameplay Options menu - Dasho
 	if (COOP_MATCH() && (options & MTF_NOT_SINGLE))
-		return;
+		return nullptr;
 
 	// -AJA- 1999/09/22: Boom compatibility flags.
 	if (COOP_MATCH() && (options & MTF_NOT_COOP))
-		return;
+		return nullptr;
 
 	if (DEATHMATCH() && (options & MTF_NOT_DM))
-		return;
+		return nullptr;
 
 	int bit;
 
@@ -563,19 +563,19 @@ static void SpawnMapThing(const mobjtype_c *info,
 		bit = 1 << (gameskill - 1);
 
 	if ((options & bit) == 0)
-		return;
+		return nullptr;
 
 	// don't spawn keycards in deathmatch
 	if (DEATHMATCH() && (info->flags & MF_NOTDMATCH))
-		return;
+		return nullptr;
 
 	// don't spawn any monsters if -nomonsters
 	if (level_flags.nomonsters && (info->extendedflags & EF_MONSTER))
-		return;
+		return nullptr;
 
 	// -AJA- 1999/10/07: don't spawn extra things if -noextra.
 	if (!level_flags.have_extra && (info->extendedflags & EF_EXTRA))
-		return;
+		return nullptr;
 
 	// spawn it now !
 	// Use MobjCreateObject -ACB- 1998/08/06
@@ -608,7 +608,8 @@ static void SpawnMapThing(const mobjtype_c *info,
 	//Lobo 2022: added tagged mobj support ;)
 	if (tag > 0)
 		mo->tag = tag;
-		
+
+	return mo;
 }
 
 static void LoadThings(int lump)
@@ -2005,6 +2006,10 @@ static void LoadUDMFLineDefs()
 					flags |= (epi::LEX_Boolean(value) ? MLF_Mapped : 0);
 				else if (key == "passuse")
 					flags |= (epi::LEX_Boolean(value) ? MLF_PassThru : 0);
+				else if (key == "blockplayers")
+					flags |= (epi::LEX_Boolean(value) ? MLF_BlockPlayers : 0);
+				else if (key == "blocksight")
+					flags |= (epi::LEX_Boolean(value) ? MLF_SightBlock : 0);
 			}
 			line_t *ld = lines + cur_line;
 
@@ -2098,6 +2103,7 @@ static void LoadUDMFThings()
 			int options = MTF_NOT_SINGLE | MTF_NOT_DM | MTF_NOT_COOP;
 			int typenum = -1;
 			int tag = 0;
+			float healthfac = 1.0f;
 			const mobjtype_c *objtype;
 			for (;;)
 			{
@@ -2157,6 +2163,8 @@ static void LoadUDMFThings()
 					options &= (epi::LEX_Boolean(value) ? ~MTF_NOT_COOP : options);
 				else if (key == "friend")
 					options |= (epi::LEX_Boolean(value) ? MTF_FRIEND : 0);
+				else if (key == "health")
+					healthfac = epi::LEX_Double(value);
 			}
 			objtype = mobjtypes.Lookup(typenum);
 
@@ -2175,7 +2183,31 @@ static void LoadUDMFThings()
 			else
 				z += sec->f_h;
 
-			SpawnMapThing(objtype, x, y, z, sec, angle, options, tag);
+			mobj_t *udmf_thing = SpawnMapThing(objtype, x, y, z, sec, angle, options, tag);
+
+			// check for UDMF-specific thing stuff
+			if (udmf_thing)
+			{
+				if (!AlmostEquals(healthfac, 1.0f))
+				{
+					// don't alter the 'true' mobj type, but we need to track
+					// spawnhealth for this particular thing if it is resurrected/etc
+					mobjtype_c *adhoc_info = new mobjtype_c;
+					adhoc_info->CopyDetail(const_cast<mobjtype_c &>(*udmf_thing->info));
+					if (healthfac < 0)
+					{
+						adhoc_info->spawnhealth = fabs(healthfac);
+						udmf_thing->health = fabs(healthfac);
+					}
+					else
+					{
+						adhoc_info->spawnhealth *= healthfac;
+						udmf_thing->health *= healthfac;
+					}
+					udmf_thing->info = adhoc_info;
+				}
+			}
+
 			mapthing_NUM++;
 		}
 		else // consume other blocks

@@ -70,7 +70,8 @@ Note: All <bool> fields default to false unless mentioned otherwise.
 
    linedef
    {
-      No changes.
+      blockplayers = <bool>;    // Line blocks players' movement.
+      blocksight = <bool>;      // Line blocks monster line of sight
    }
 
    sidedef
@@ -121,14 +122,18 @@ Note: All <bool> fields default to false unless mentioned otherwise.
 
    thing
    {
-      No changes.
+      health = <float>;          // Set per-thing health. Positive values are treated as a multiplier for the thing's default health.
+                                 // Negative values are converted to a positive value and then treated as redefining the thing's default health.
+                                 // For example, a thing which would normally have 100 health would have 200 health if this parameter was set to 2.
+                                 // On the other hand, it would only have 2 health if this parameter was set to -2.
+                                 // Default = 1.
    }
 
 
 =======================================
 Changelog
 =======================================
-2023.09.14 - Updated sidedef and sector sections
+2023.09.14 - Updated sidedef, sector, linedef and thing sections
 2023.08.25 - Updated fogdensity scaling documentation
 2023.08.18 - Addition of fadecolor/fogdensity sector fields
 2023.02.27 - Initial draft; addition of zfloor/zceiling vertex fields

@@ -1474,7 +1474,10 @@ static void LoadUDMFSectors()
 
 		if (section == "sector")
 		{
-			float cz = 0.0f, fz = 0.0f;
+			int cz = 0, fz = 0;
+			float fx = 0.0f, fy = 0.0f, cx = 0.0f, cy = 0.0f;
+			float fx_sc = 1.0f, fy_sc = 1.0f, cx_sc = 1.0f, cy_sc = 1.0f;
+			float gravfactor = 1.0f;
 			int light = 160, type = 0, tag = 0;
 			rgbcol_t fog_color = 0;
 			int fog_density = 0;
@@ -1509,9 +1512,9 @@ static void LoadUDMFSectors()
 					I_Error("Malformed TEXTMAP lump: missing ';'\n");
 
 				if (key == "heightfloor")
-					fz = epi::LEX_Double(value);
+					fz = epi::LEX_Int(value);
 				else if (key == "heightceiling")
-					cz = epi::LEX_Double(value);
+					cz = epi::LEX_Int(value);
 				else if (key == "texturefloor")
 					Z_StrNCpy(floor_tex, value.c_str(), 8);
 				else if (key == "textureceiling")
@@ -1526,6 +1529,24 @@ static void LoadUDMFSectors()
 					fog_color = epi::LEX_Int(value);
 				else if (key == "fogdensity")
 					fog_density = CLAMP(0, epi::LEX_Int(value), 1020);
+				else if (key == "xpanningfloor")
+					fx = epi::LEX_Double(value);
+				else if (key == "ypanningfloor")
+					fy = epi::LEX_Double(value);
+				else if (key == "xpanningceiling")
+					cx = epi::LEX_Double(value);
+				else if (key == "ypanningceiling")
+					cy = epi::LEX_Double(value);
+				else if (key == "xscalefloor")
+					fx_sc = epi::LEX_Double(value);
+				else if (key == "yscalefloor")
+					fy_sc = epi::LEX_Double(value);
+				else if (key == "xscaleceiling")
+					cx_sc = epi::LEX_Double(value);
+				else if (key == "yscaleceiling")
+					cy_sc = epi::LEX_Double(value);
+				else if (key == "gravity")
+					gravfactor = epi::LEX_Double(value);
 			}
 			sector_t *ss = sectors + cur_sector;
 			ss->f_h = fz;
@@ -1545,6 +1566,18 @@ static void LoadUDMFSectors()
 			ss->floor.y_mat.x = 0;  ss->floor.y_mat.y = 1;
 
 			ss->ceil = ss->floor;
+
+			// granular offsets
+			ss->floor.offset.x += fx;
+			ss->floor.offset.y += fy;
+			ss->ceil.offset.x += fx;
+			ss->ceil.offset.y += fy;
+
+			// granular scaling
+			ss->floor.x_mat.x = fx_sc;
+			ss->floor.y_mat.y = fy_sc;
+			ss->ceil.x_mat.x = cx_sc;
+			ss->ceil.y_mat.y = cy_sc;
 
 			ss->floor.image = W_ImageLookup(floor_tex, INS_Flat);
 
@@ -1584,7 +1617,7 @@ static void LoadUDMFSectors()
 
 			ss->props.colourmap = NULL;
 
-			ss->props.gravity   = GRAVITY;
+			ss->props.gravity   = GRAVITY * gravfactor;
 			ss->props.friction  = FRICTION;
 			ss->props.viscosity = VISCOSITY;
 			ss->props.drag      = DRAG;

@@ -94,15 +94,29 @@ Note: All <bool> fields default to false unless mentioned otherwise.
 
    sector
    {
-      fadecolor = <integer>;    // Fog color for this sector, in 0xRRGGBB format. Default (no fog) is 0x000000.
-      fogdensity = <integer>;   // Fog density for this sector. EDGE makes an effort to map the GZDoom values recognized
-                                // by map editors (0-510) in the following manner:
-                                // - Values of 0-1 are equivalent to a 20% FOG_DENSITY in SECTORS.DDF
-                                // - The remaining values (2-510) are roughly mapped to the 0-50% FOG_DENSITY scale in SECTORS.DDF;
-                                //   for example, a value of 5 would be roughly 1% while 510 would be 50%
-                                // - EDGE additionally supports fogdensity values of 510-1020, which would be equivalent to the 50-100% SECTORS.DDF
-                                //   FOG_DENSITY scale, but map editors may clamp this value to 510. Switching editors, manually editing
-                                //   the map's TEXTMAP, or using a DDF sector fog special instead may be necessary in these cases.
+      xpanningfloor = <float>;   // X texture offset of floor texture, Default = 0.0.
+      ypanningfloor = <float>;   // Y texture offset of floor texture, Default = 0.0.
+      xpanningceiling = <float>; // X texture offset of ceiling texture, Default = 0.0.
+      ypanningceiling = <float>; // Y texture offset of ceiling texture, Default = 0.0.
+
+      xscalefloor = <float>;     // X texture scale of floor texture, Default = 1.0.
+      yscalefloor = <float>;     // Y texture scale of floor texture, Default = 1.0.
+      xscaleceiling = <float>;   // X texture scale of ceiling texture, Default = 1.0.
+      yscaleceiling = <float>;   // Y texture scale of ceiling texture, Default = 1.0.
+
+      gravity = <float>;         // Sector's gravity. Default is 1.0.
+                                 // For EDGE, this is treated as a multiplier against the internal default gravity of 8.0,
+                                 // i.e. gravity = 0.5 would be equivalent to a gravity of 4.0
+
+      fadecolor = <integer>;     // Fog color for this sector, in 0xRRGGBB format. Default (no fog) is 0x000000.
+      fogdensity = <integer>;    // Fog density for this sector. EDGE makes an effort to map the GZDoom values recognized
+                                 // by map editors (0-510) in the following manner:
+                                 // - Values of 0-1 are equivalent to a 20% FOG_DENSITY in SECTORS.DDF
+                                 // - The remaining values (2-510) are roughly mapped to the 0-50% FOG_DENSITY scale in SECTORS.DDF;
+                                 //   for example, a value of 5 would be roughly 1% while 510 would be 50%
+                                 // - EDGE additionally supports fogdensity values of 510-1020, which would be equivalent to the 50-100% SECTORS.DDF
+                                 //   FOG_DENSITY scale, but map editors may clamp this value to 510. Switching editors, manually editing
+                                 //   the map's TEXTMAP, or using a DDF sector fog special instead may be necessary in these cases.
    }
 
    thing
@@ -114,7 +128,7 @@ Note: All <bool> fields default to false unless mentioned otherwise.
 =======================================
 Changelog
 =======================================
-2023.09.14 - Updated sidedef section with granular scaling and offset parameters
+2023.09.14 - Updated sidedef and sector sections
 2023.08.25 - Updated fogdensity scaling documentation
 2023.08.18 - Addition of fadecolor/fogdensity sector fields
 2023.02.27 - Initial draft; addition of zfloor/zceiling vertex fields

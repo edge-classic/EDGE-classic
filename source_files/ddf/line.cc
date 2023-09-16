@@ -915,6 +915,8 @@ static specflags_t line_effect_names[] =
 	{"TAGGED_OFFSET_SCROLL", LINEFX_TaggedOffsetScroll,    0}, // MBF21
 	{"BLOCK_LAND_MONSTERS",  LINEFX_BlockGroundedMonsters, 0}, // MBF21
 	{"BLOCK_PLAYERS",        LINEFX_BlockPlayers,          0}, // MBF21
+	{"STRETCH_TEX_WIDTH",    LINEFX_StretchWidth,                 0}, //Lobo 2023
+	{"STRETCH_TEX_HEIGHT",   LINEFX_StretchHeight,                 0}, //Lobo 2023
 	{NULL, 0, 0}
 };
 

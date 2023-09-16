@@ -57,13 +57,57 @@ New Features
   - New LINE_EFFECT: STRETCH_TEX_WIDTH. Will stretch the width of a texture to match the lines length.
   - New LINE_EFFECT: STRETCH_TEX_HEIGHT. Will stretch the height of a texture to match the lines length.
     Basically allows autoscaling a texture to perfectly fit an arbitrary-length line.
-
 - New Line types added:
-
+	[835] Breakable wall, (midtex to back lower): when this line is shot, the midtex will be swapped with back lower tex
+	[836] Breakable wall, (midtex to back upper):  ...same as previous but swapped with back upper
+	[837] Breakable wall, (midtex to front lower): ...same as previous but swapped with front lower
+	[838] Breakable wall, (midtex to front upper): ...same as previous but swapped with front upper
+	[850] Light Wall: transfers the brightness of this wall to any other tagged lines
+	[855] Autoscale textures width to line length
+	[856] Autoscale textures height to line length
+	[857] Autoscale textures width and height to line length
 - New Sector types added:
-
+	[4480] EDGE fog: White 5%
+	[4481] EDGE fog: White 10%
+	[4482] EDGE fog: White 15%
+	[4483] EDGE fog: White 20%
+	[4484] EDGE fog: White 25%
+	[4485] EDGE fog: White 30%
+	[4486] EDGE fog: White 35%
+	[4487] EDGE fog: White 40%
+	[4488] EDGE fog: White 45%
+	[4489] EDGE fog: White 50%
+	[4490] EDGE fog: Green 5%
+	[4491] EDGE fog: Green 10%
+	[4492] EDGE fog: Green 15%
+	[4493] EDGE fog: Green 20%
+	[4494] EDGE fog: Green 25%
+	[4495] EDGE fog: Green 30%
+	[4496] EDGE fog: Green 35%
+	[4497] EDGE fog: Green 40%
+	[4498] EDGE fog: Green 45%
+	[4499] EDGE fog: Green 50%
+	[4500] EDGE fog: Red 5%
+	[4501] EDGE fog: Red 10%
+	[4502] EDGE fog: Red 15%
+	[4503] EDGE fog: Red 20%
+	[4504] EDGE fog: Red 25%
+	[4505] EDGE fog: Red 30%
+	[4506] EDGE fog: Red 35%
+	[4507] EDGE fog: Red 40%
+	[4508] EDGE fog: Red 45%
+	[4509] EDGE fog: Red 50% 
+	[4530] EDGE Friction: Slippy
+	[4531] EDGE Friction: Very Slippy
+	[4532] EDGE Friction: Sticky
+	[4533] EDGE Friction: Very Sticky
 - New Thing types added:
-	
+	[NUKAGE_GLOW_WALL:7070] : causes any wall in contact with it to glow green
+	[LAVA_GLOW_WALL:7071]   : same as previous but glows red
+	[WATER_GLOW_WALL:7072]  : same as previous but glows blue
+	[WHITE_GLOW_WALL:7073]  : same as previous but glows white
+  
+
 
 General Improvements/Changes
 --------------------

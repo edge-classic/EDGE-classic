@@ -412,7 +412,7 @@ static void AdjustScaleParts(side_t *side, bool left,
 }
 
 static void AdjustStretchParts(side_t *side, bool left,
-		scroll_part_e parts, float linelength)
+		scroll_part_e parts, float linelength, bool widthOnly)
 {
 	if (! side)
 		return;
@@ -427,24 +427,33 @@ static void AdjustStretchParts(side_t *side, bool left,
 		if(side->top.image)
 			factor = IM_WIDTH(side->top.image) / linelength;
 
-		side->top.x_mat.x *= factor;
-		side->top.y_mat.y *= factor;
+		if (widthOnly)
+			side->top.x_mat.x *= factor;
+		
+		if (!widthOnly)
+			side->top.y_mat.y *= factor;
 	}
 	if (parts & (left ? SCPT_LeftMiddle : SCPT_RightMiddle))
 	{
 		if(side->middle.image)
 			factor = IM_WIDTH(side->middle.image) / linelength;
 
-		side->middle.x_mat.x *= factor;
-		side->middle.y_mat.y *= factor;
+		if (widthOnly)
+			side->middle.x_mat.x *= factor;
+
+		if (!widthOnly)
+			side->middle.y_mat.y *= factor;
 	}
 	if (parts & (left ? SCPT_LeftLower : SCPT_RightLower))
 	{
 		if(side->bottom.image)
 			factor = IM_WIDTH(side->bottom.image) / linelength;
 
-		side->bottom.x_mat.x *= factor;
-		side->bottom.y_mat.y *= factor;
+		if (widthOnly)
+			side->bottom.x_mat.x *= factor;
+			
+		if (!widthOnly)
+			side->bottom.y_mat.y *= factor;
 	}
 }
 
@@ -626,6 +635,7 @@ static void P_LineEffect(line_t *target, line_t *source,
 		const linetype_c *special)
 {
 	float length = R_PointToDist(0, 0, source->dx, source->dy);
+	float factor = 64.0 / length;
 
 	if ((special->line_effect & LINEFX_Translucency) && (target->flags & MLF_TwoSided))
 	{
@@ -771,10 +781,8 @@ static void P_LineEffect(line_t *target, line_t *source,
 	// experimental: scale wall texture(s) by line length
 	if (special->line_effect & LINEFX_Scale)
 	{
-		//AdjustScaleParts(target->side[0], 0, special->line_parts, factor);
-		//AdjustScaleParts(target->side[1], 1, special->line_parts, factor);
-		AdjustStretchParts(target->side[0], 0, special->line_parts, length);
-		AdjustStretchParts(target->side[1], 1, special->line_parts, length);
+		AdjustScaleParts(target->side[0], 0, special->line_parts, factor);
+		AdjustScaleParts(target->side[1], 1, special->line_parts, factor);
 	}
 
 	// experimental: skew wall texture(s) by sidedef Y offset
@@ -807,6 +815,21 @@ static void P_LineEffect(line_t *target, line_t *source,
 		if(source->side[0]->top.image)
 			sky_image = W_ImageLookup(source->side[0]->top.image->name.c_str(), INS_Texture);
 	}
+
+	// experimental: stretch wall texture(s) by line length
+	if (special->line_effect & LINEFX_StretchWidth)
+	{
+		AdjustStretchParts(target->side[0], 0, special->line_parts, length, true);
+		AdjustStretchParts(target->side[1], 1, special->line_parts, length, true);
+	}
+
+	// experimental: stretch wall texture(s) by line length
+	if (special->line_effect & LINEFX_StretchHeight)
+	{
+		AdjustStretchParts(target->side[0], 0, special->line_parts, length, false);
+		AdjustStretchParts(target->side[1], 1, special->line_parts, length, false);
+	}
+
 }
 
 //

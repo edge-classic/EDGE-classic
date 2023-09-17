@@ -592,6 +592,9 @@ typedef enum
 
 	// block players (MBF21)
 	LINEFX_BlockPlayers = (1 << 12),
+
+	LINEFX_StretchWidth = (1 << 13),  //stretch the texture horizontally to line length
+	LINEFX_StretchHeight = (1 << 14), //stretch the texture vertically to line length
 }
 line_effect_type_e;
 

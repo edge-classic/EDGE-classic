@@ -2214,7 +2214,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
 
 	if (level_flags.fastparm)
 	{
-		// MBF21: Use explicit Fast speed value if provided
+		// Use explicit Fast speed value if provided
 		if (info->fast_speed > -1)
 			mobj->speed = info->fast_speed;
 		else

@@ -54,6 +54,7 @@
 #include "rad_trig.h"
 #include "s_sound.h"
 #include "w_wad.h"
+#include "f_interm.h" // wi_stats
 
 #include "AlmostEquals.h"
 
@@ -2334,6 +2335,10 @@ static void ObjectSpawning(mobj_t * parent, angle_t angle)
 	// Blocking line detected between object and spawnpoint?
 	if (P_MapCheckBlockingLine(parent, child))
 	{
+		if (child->flags & MF_COUNTKILL)
+			wi_stats.kills--;
+		if (child->flags & MF_COUNTITEM)
+			wi_stats.items--;
 		// -KM- 1999/01/31 Explode objects over remove them.
 		// -AJA- 2000/02/01: Remove now the default.
 		if (attack->flags & AF_KillFailedSpawn)
@@ -2350,6 +2355,10 @@ static void ObjectSpawning(mobj_t * parent, angle_t angle)
 	// If the object cannot move from its position, remove it or kill it.
 	if (!P_TryMove(child, child->x, child->y))
 	{
+		if (child->flags & MF_COUNTKILL)
+			wi_stats.kills--;
+		if (child->flags & MF_COUNTITEM)
+			wi_stats.items--;
 		if (attack->flags & AF_KillFailedSpawn)
 			P_KillMobj(parent, child, NULL);
 		else

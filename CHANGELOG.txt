@@ -156,5 +156,6 @@ Bugs fixed
 - Fixed pre-EC legacy issue: Things were visible while changing positions via teleportation
 - Fixed pre-EC legacy issue: Death from other means than the actual sector damage in a "death exit" sector would not
   properly exit the level
+- Fixed failed object spawns from a SPAWNER-type attack still counting toward the total amount of kills/items in a level
 
 

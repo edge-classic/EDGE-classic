@@ -880,6 +880,11 @@ static void LoadLineDefs(int lump)
 		ld->v1 = &vertexes[EPI_LE_U16(mld->start)];
 		ld->v2 = &vertexes[EPI_LE_U16(mld->end)];
 
+		// Check for BoomClear flag bit and clear applicable specials
+		// (PassThru may still be intentionally readded further down)
+		if (ld->flags & MLF_ClearBoom)
+			ld->flags &= ~(MLF_PassThru | MLF_BlockGrounded | MLF_BlockPlayers);
+
 		ld->special = P_LookupLineType(MAX(0, EPI_LE_S16(mld->special)));
 
 		if (ld->special && ld->special->type == line_walkable)

@@ -76,7 +76,6 @@
 #define DEBUG_MOBJ  0
 
 extern cvar_c r_doubleframes;
-extern cvar_c g_mbf21compat;
 
 DEF_CVAR(g_cullthinkers, "0", CVAR_ARCHIVE)
 
@@ -1434,8 +1433,8 @@ static void P_MobjThinker(mobj_t * mobj, bool extra_tic)
 			}
 		}
 
-		// MBF21 - Only damage grounded monsters (not players)
-		if (props->special && props->special->damage.grounded_monsters && g_mbf21compat.d && mobj->z <= mobj->floorz + 1.0f)
+		// Only damage grounded monsters (not players)
+		if (props->special && props->special->damage.grounded_monsters && mobj->z <= mobj->floorz + 1.0f)
 		{
 			P_DamageMobj(mobj, NULL, NULL, 5.0, &props->special->damage, false);
 		}

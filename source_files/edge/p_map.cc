@@ -64,10 +64,7 @@ static void gore_cb(cvar_c *self)
 	level_flags.more_blood = global_flags.more_blood = self->d;
 }
 
-DEF_CVAR(g_mbf21compat, "0", CVAR_ARCHIVE)
 DEF_CVAR_CB(g_gore, "1", CVAR_ARCHIVE, gore_cb)
-
-extern cvar_c g_mbf21compat;
 
 // Forward declaration for ShootCheckGap
 static bool PTR_ShootTraverse(intercept_t * in, void *dataptr);
@@ -285,15 +282,15 @@ static bool PIT_CheckAbsLine(line_t * ld, void *data)
 		if (ld->flags & MLF_Blocking)
 			return false;
 
-		// MBF21: block players ?
-		if (tm_I.mover->player && g_mbf21compat.d && ((ld->flags & MLF_BlockPlayers) ||
+		// block players ?
+		if (tm_I.mover->player && ((ld->flags & MLF_BlockPlayers) ||
 			(ld->special && (ld->special->line_effect & LINEFX_BlockPlayers))))
 		{
 			return false;
 		}
 
-		// MBF21: block grounded monsters ?
-		if ((tm_I.extflags & EF_MONSTER) && g_mbf21compat.d &&
+		// block grounded monsters ?
+		if ((tm_I.extflags & EF_MONSTER) &&
 			((ld->flags & MLF_BlockGrounded) || (ld->special && (ld->special->line_effect & LINEFX_BlockGroundedMonsters))) 
 			&& (tm_I.mover->z <= tm_I.mover->floorz + 1.0f))
 		{
@@ -492,8 +489,8 @@ static bool PIT_CheckRelLine(line_t * ld, void *data)
 		if ((ld->flags & MLF_Blocking) ||
 			((ld->flags & MLF_BlockMonsters) &&
 			(tm_I.extflags & EF_MONSTER)) ||
-			(g_mbf21compat.d && (ld->flags & MLF_BlockGrounded) && (tm_I.extflags & EF_MONSTER) && (tm_I.mover->z <= tm_I.mover->floorz + 1.0f)) ||
-			(g_mbf21compat.d && (ld->flags & MLF_BlockPlayers) && (tm_I.mover->player)))
+			(((ld->special && (ld->special->line_effect & LINEFX_BlockGroundedMonsters)) || (ld->flags & MLF_BlockGrounded)) && (tm_I.extflags & EF_MONSTER) && (tm_I.mover->z <= tm_I.mover->floorz + 1.0f)) ||
+			(((ld->special && (ld->special->line_effect & LINEFX_BlockPlayers)) || (ld->flags & MLF_BlockPlayers)) && (tm_I.mover->player)))
 		{
 			blockline = ld;
 			return false;

@@ -116,6 +116,10 @@ typedef enum
 	//       be pushed simultaneously.
 	MLF_PassThru = 0x0200,
 
+	// Clear extended line flags (BOOM or later spec); needed to repair mapping/editor errors
+	// with historical maps (i.e., E2M7)
+	MLF_ClearBoom = 0x0800,
+
 	// MBF21
 	MLF_BlockGrounded = 0x1000,
 	MLF_BlockPlayers = 0x2000,

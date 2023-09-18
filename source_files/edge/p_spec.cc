@@ -55,7 +55,6 @@
 #define BOOM_CARRY_FACTOR 0.09375f
 
 extern cvar_c r_doubleframes;
-extern cvar_c g_mbf21compat;
 
 // Level exit timer
 bool levelTimer;
@@ -1882,7 +1881,7 @@ static inline void PlayerInProperties(player_t *player,
 			return;
 	}
 
-	if (player->powers[PW_AcidSuit] && (!g_mbf21compat.d || !special->damage.bypass_all))
+	if (player->powers[PW_AcidSuit] && !special->damage.bypass_all)
 		factor = 0;
 
 	if (r_doubleframes.d && extra_tic)

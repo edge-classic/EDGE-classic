@@ -47,7 +47,6 @@
 
 bool var_obituaries = true;
 
-extern cvar_c g_mbf21compat;
 extern cvar_c g_gore;
 extern cvar_c player_dm_dr;
 
@@ -1320,19 +1319,20 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 	{
 		int i;
 
-		// MBF21 - Don't damage player if sector type should only affect grounded monsters
-		if (damtype && damtype->grounded_monsters && g_mbf21compat.d)
+		// Don't damage player if sector type should only affect grounded monsters
+		if (damtype && damtype->grounded_monsters)
 			return;
 
 		// ignore damage in GOD mode, or with INVUL powerup
 		if ((player->cheats & CF_GODMODE) || player->powers[PW_Invulnerable] > 0)
 		{
-			if (! (damtype && damtype->bypass_all && g_mbf21compat.d))
+			if (! (damtype && damtype->bypass_all))
 				return;
 		}
 
-		// MBF21 - Only damage if not wearing a radsuit (also if not invul, but the above check should theoretically cover that already)
-		if (damtype && damtype->if_naked && (!g_mbf21compat.d || player->powers[PW_AcidSuit] > 0))
+		// Only damage if "if_naked" type and not wearing a radsuit (also if not invul, but the above check should theoretically cover that already)
+		// Dasho: I plane on making this a bit more robust, but this should suffice for at least MBF21 for now
+		if (damtype && damtype->if_naked && player->powers[PW_AcidSuit] > 0)
 			return;
 
 		// take half damage in trainer mode
@@ -1442,14 +1442,9 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 
 		player->attacker = source;
 
-		// MBF21 instakill sectors
+		// instakill sectors
 		if (damtype && damtype->instakill)
-		{
-			if (g_mbf21compat.d)
-				damage = target->player->health + 1;
-			else
-				return;
-		}
+			damage = target->player->health + 1;
 
 		// add damage after armour / invuln detection
 		if (damage > 0)
@@ -1464,14 +1459,9 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 	}
 	else
 	{
-		// MBF21 instakill sectors
+		// instakill sectors
 		if (damtype && damtype->instakill)
-		{
-			if (g_mbf21compat.d)
-				damage = target->health + 1;
-			else
-				return;
-		}
+			damage = target->health + 1;
 	}
 
 	// do the damage

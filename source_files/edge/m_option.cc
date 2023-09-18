@@ -128,7 +128,6 @@ extern cvar_c s_soundfont;
 extern cvar_c r_overlay;
 extern cvar_c g_erraticism;
 extern cvar_c r_doubleframes;
-extern cvar_c g_mbf21compat;
 extern cvar_c r_culling;
 extern cvar_c r_culldist;
 extern cvar_c r_cullfog;
@@ -547,9 +546,6 @@ static menuinfo_t f4sound_optmenu =
 //
 static optmenuitem_t playoptions[] =
 {
-	{OPT_Boolean, "MBF21 Map Compatibility", YesNo, 2, 
-     &g_mbf21compat.d, M_UpdateCVARFromInt, "Toggle support for MBF21 lines and sectors", &g_mbf21compat},
-
 	{OPT_Boolean, "Pistol Starts",         YesNo, 2, 
      &pistol_starts, NULL, NULL},
 

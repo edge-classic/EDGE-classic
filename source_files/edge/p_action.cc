@@ -2342,7 +2342,11 @@ static void ObjectSpawning(mobj_t * parent, angle_t angle)
 		// -KM- 1999/01/31 Explode objects over remove them.
 		// -AJA- 2000/02/01: Remove now the default.
 		if (attack->flags & AF_KillFailedSpawn)
+		{
 			P_KillMobj(parent, child, NULL);
+			if (child->flags & MF_COUNTKILL)
+				players[consoleplayer]->killcount--;
+		}
 		else
 			P_RemoveMobj(child);
 
@@ -2360,7 +2364,11 @@ static void ObjectSpawning(mobj_t * parent, angle_t angle)
 		if (child->flags & MF_COUNTITEM)
 			wi_stats.items--;
 		if (attack->flags & AF_KillFailedSpawn)
+		{
 			P_KillMobj(parent, child, NULL);
+			if (child->flags & MF_COUNTKILL)
+				players[consoleplayer]->killcount--;
+		}
 		else
 			P_RemoveMobj(child);
 

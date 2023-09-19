@@ -130,7 +130,6 @@ set (EDGE_LINK_LIBRARIES
   ec_voxelib
   libprimesynth
   libvgm
-  libvwad
   m4p
   miniz
   ymfmidi
@@ -171,7 +170,6 @@ target_include_directories(edge-classic PRIVATE ../ec_voxelib)
 target_include_directories(edge-classic PRIVATE ../epi)
 target_include_directories(edge-classic PRIVATE ../libprimesynth)
 target_include_directories(edge-classic PRIVATE ../libvgm)
-target_include_directories(edge-classic PRIVATE ../libvwad)
 target_include_directories(edge-classic PRIVATE ../m4p)
 target_include_directories(edge-classic PRIVATE ../minivorbis)
 target_include_directories(edge-classic PRIVATE ../miniz)

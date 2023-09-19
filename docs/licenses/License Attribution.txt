@@ -149,8 +149,6 @@ WTFPL License
 
 "microGM" soundfont - Copyright (c) 2022 michael (https://musical-artifacts.com/artifacts/2529)
 
-libvwad library - Copyright (c) 2023 Ketmar Dark
-
 ===========================================================================================
 zlib License
 ===========================================================================================

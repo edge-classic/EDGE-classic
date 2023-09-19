@@ -44,9 +44,6 @@
 // ZIP support
 #include "miniz.h"
 
-// VWAD support
-#include "vwadvfs.h"
-
 static std::string image_dirs[5] = {"flats", "graphics", "skins", "textures", "sprites"};
 
 class pack_entry_c
@@ -64,11 +61,8 @@ public:
 	// only for ZIP: the index into the archive.
 	mz_uint zip_idx;
 
-	// only for VWAD: the index into the archive.
-	vwad_fidx vwad_idx;
-
-	pack_entry_c(const std::string& _name, const std::string& _path, const std::string& _ppath, mz_uint _idx, vwad_fidx _vidx) :
-		name(_name), fullpath(_path), packpath(_ppath), zip_idx(_idx), vwad_idx(_vidx)
+	pack_entry_c(const std::string& _name, const std::string& _path, const std::string& _ppath, mz_uint _idx) :
+		name(_name), fullpath(_path), packpath(_ppath), zip_idx(_idx)
 	{ }
 
 	~pack_entry_c()
@@ -101,14 +95,14 @@ public:
 
 	void SortEntries();
 
-	size_t AddEntry(const std::string& _name, const std::string& _path, const std::string& _ppath, mz_uint _idx, vwad_fidx _vidx)
+	size_t AddEntry(const std::string& _name, const std::string& _path, const std::string& _ppath, mz_uint _idx)
 	{
 		// check if already there
 		for (size_t i = 0 ; i < entries.size() ; i++)
 			if (entries[i] == _name)
 				return i;
 
-		entries.push_back(pack_entry_c(_name, _path, _ppath, _idx, _vidx));
+		entries.push_back(pack_entry_c(_name, _path, _ppath, _idx));
 		return entries.size() - 1;
 	}
 
@@ -134,7 +128,6 @@ public:
 	data_file_c *parent;
 
 	bool is_folder;
-	bool is_zip;
 
 	// first entry here is always the top-level (with no name).
 	// everything else is from a second-level directory.
@@ -147,18 +140,14 @@ public:
 
 	mz_zip_archive *arch;
 
-	vwad_handle *varch;
-
 public:
-	pack_file_c(data_file_c *_par, bool _folder, bool _zip) : parent(_par), is_folder(_folder), is_zip(_zip), dirs(), arch(NULL), varch(NULL)
+	pack_file_c(data_file_c *_par, bool _folder, bool _zip) : parent(_par), is_folder(_folder), dirs(), arch(NULL)
 	{ }
 
 	~pack_file_c()
 	{
 		if (arch != NULL)
 			delete arch;
-		if (varch != NULL)
-			vwad_close_archive(&varch);
 	}
 
 	size_t AddDir(const std::string& name)
@@ -188,20 +177,16 @@ public:
 	{
 		if (is_folder)
 			return OpenEntry_Folder(dir, index);
-		else if (is_zip)
-			return OpenEntry_Zip(dir, index);
 		else
-			return OpenEntry_VWAD(dir, index);
+			return OpenEntry_Zip(dir, index);
 	}
 
 	epi::file_c * OpenFileByName(const std::string& name)
 	{
 		if (is_folder)
 			return OpenFile_Folder(name);
-		else if (is_zip)
-			return OpenFile_Zip(name);
 		else
-			return OpenFile_VWAD(name);
+			return OpenFile_Zip(name);
 	}
 
 	int EntryLength(size_t dir, size_t index)
@@ -243,11 +228,9 @@ public:
 private:
 	epi::file_c * OpenEntry_Folder(size_t dir, size_t index);
 	epi::file_c * OpenEntry_Zip   (size_t dir, size_t index);
-	epi::file_c * OpenEntry_VWAD   (size_t dir, size_t index);
 
 	epi::file_c * OpenFile_Folder(const std::string& name);
 	epi::file_c * OpenFile_Zip   (const std::string& name);
-	epi::file_c * OpenFile_VWAD   (const std::string& name);
 };
 
 int Pack_FindStem(pack_file_c *pack, const std::string& name)
@@ -341,7 +324,7 @@ void ProcessSubDir(pack_file_c *pack, const std::string& fullpath)
 			std::string filename = epi::PATH_GetFilename(fsd[i].name).string();
 			epi::str_upper(filename);
 			std::string packpath = fsd[i].name.lexically_relative(pack->parent->name).string();
-			pack->dirs[d].AddEntry(filename, fsd[i].name.string(), packpath, 0, 0);
+			pack->dirs[d].AddEntry(filename, fsd[i].name.string(), packpath, 0);
 			pack->search_files.insert({epi::PATH_GetBasename(filename).string(), packpath});
 		}
 	}
@@ -378,7 +361,7 @@ static pack_file_c * ProcessFolder(data_file_c *df)
 			std::string filename = epi::PATH_GetFilename(fsd[i].name).string();
 			epi::str_upper(filename);
 			std::string packpath = fsd[i].name.lexically_relative(df->name).string();
-			pack->dirs[0].AddEntry(filename, fsd[i].name.string(), packpath, 0, 0);
+			pack->dirs[0].AddEntry(filename, fsd[i].name.string(), packpath, 0);
 			pack->search_files.insert({epi::PATH_GetBasename(filename).string(), packpath});
 		}
 	}
@@ -484,7 +467,7 @@ static pack_file_c * ProcessZip(data_file_c *df)
 		}
 		std::string add_name = basename;
 		epi::str_upper(add_name);
-		pack->dirs[dir_idx].AddEntry(epi::PATH_GetFilename(add_name).string(), "", packpath, idx, 0);
+		pack->dirs[dir_idx].AddEntry(epi::PATH_GetFilename(add_name).string(), "", packpath, idx);
 		pack->search_files.insert({epi::PATH_GetBasename(add_name).string(), packpath});
 	}
 
@@ -641,217 +624,6 @@ epi::file_c * pack_file_c::OpenFile_Zip(const std::string& name)
 		return NULL;
 
 	epk_file_c *F = new epk_file_c(this, (mz_uint)idx);
-	return F;
-}
-
-//----------------------------------------------------------------------------
-//  VWAD READING
-//----------------------------------------------------------------------------
-
-static int ioseek (vwad_iostream *strm, int pos) {
-  SYS_ASSERT(pos >= 0);
-  FILE *fl = (FILE *)strm->udata;
-  SYS_ASSERT(fl != nullptr);
-  if (fseek(fl, pos, SEEK_SET) != 0) return -1;
-  return 0;
-}
-
-static int ioread (vwad_iostream *strm, void *buf, int bufsize) {
-  SYS_ASSERT(bufsize > 0);
-  FILE *fl = (FILE *)strm->udata;
-  SYS_ASSERT(fl != nullptr);
-  if (fread(buf, bufsize, 1, fl) != 1) return -1;
-  return 0;
-}
-
-static pack_file_c * ProcessVWAD(data_file_c *df)
-{
-	pack_file_c *pack = new pack_file_c(df, false, false);
-
-	vwad_iostream *strm = (vwad_iostream *)calloc(1, sizeof(vwad_iostream));
-	strm->udata = EPIFOPEN(df->name, "rb");
-	strm->seek = ioseek;
-	strm->read = ioread;
-
-	pack->varch = vwad_open_archive(strm, VWAD_OPEN_DEFAULT, nullptr);
-
-	if (!pack->varch)
-		I_Error("Failed reading VWAD: %s\n", df->name.u8string().c_str());
-
-	// create the top-level directory
-	pack->AddDir("");
-
-	vwad_fidx total = vwad_get_archive_file_count(pack->varch); // Accounts for 0-index
-
-	for (vwad_fidx idx = 0 ; idx < total ; idx++)
-	{
-		// get the filename
-		char filename[1024];
-		memset(filename, 0, 1024);
-
-		std::string packpath = vwad_get_file_name(pack->varch, idx);
-
-		if (epi::PATH_GetExtension(packpath).empty())
-		{
-			I_Warning("%s has no extension. Bare VWAD filenames are not supported.\n", filename);
-			continue;
-		}
-
-		memcpy(filename, packpath.c_str(), packpath.size());
-
-		// decode into DIR + FILE
-		char *p = filename;
-		while (*p != 0 && *p != '/' && *p != '\\')
-			p++;
-
-		if (p == filename)
-			continue;
-
-		size_t dir_idx  = 0;
-		char * basename = filename;
-
-		if (*p != 0)
-		{
-			*p++ = 0;
-
-			basename = p;
-			if (basename[0] == 0)
-				continue;
-
-			dir_idx = pack->AddDir(filename);
-		}
-		std::string add_name = basename;
-		epi::str_upper(add_name);
-		pack->dirs[dir_idx].AddEntry(epi::PATH_GetFilename(add_name).string(), "", packpath, 0, idx);
-		pack->search_files.insert({epi::PATH_GetBasename(add_name).string(), packpath});
-	}
-
-	return pack;
-}
-
-class vwad_file_c : public epi::file_c
-{
-private:
-	pack_file_c * pack;
-
-	vwad_fidx vwad_idx;
-	vwad_fd vwad_filedesc = -1;
-
-	int length = 0;
-	int pos    = 0;
-
-public:
-	vwad_file_c(pack_file_c *_pack, vwad_fidx _idx) : pack(_pack), vwad_idx(_idx)
-	{
-		// determine length
-		length = vwad_get_file_size(pack->varch, vwad_idx);
-		SYS_ASSERT(length >= 0);
-		// grab "handle" for future functions
-		vwad_filedesc = vwad_fopen(pack->varch, vwad_idx);
-		SYS_ASSERT(vwad_filedesc >= 0);
-	}
-
-	~vwad_file_c()
-	{
-		vwad_fclose(pack->varch, vwad_filedesc);
-	}
-
-	int GetLength()
-	{
-		return length;
-	}
-
-	int GetPosition()
-	{
-		return pos;
-	}
-
-	unsigned int Read(void *dest, unsigned int count)
-	{
-		if (pos >= length)
-			return 0;
-
-		// never read more than what GetLength() reports
-		if (count > length - pos)
-			count = length - pos;
-
-		int got = vwad_read(pack->varch, vwad_filedesc, dest, count);
-
-		SYS_ASSERT(got >= 0);
-
-		pos += got;
-
-		return got;
-	}
-
-	unsigned int Write(const void *src, unsigned int count)
-	{
-		// not implemented
-		return count;
-	}
-
-	bool Seek(int offset, int seekpoint)
-	{
-		int want_pos = pos;
-
-		if (seekpoint == epi::file_c::SEEKPOINT_START) want_pos = 0;
-		if (seekpoint == epi::file_c::SEEKPOINT_END)   want_pos = length;
-
-		if (offset < 0)
-		{
-			offset = -offset;
-			if (offset >= want_pos)
-				want_pos = 0;
-			else
-				want_pos -= offset;
-		}
-		else
-		{
-			want_pos += offset;
-		}
-
-		// cannot go beyond the end (except TO very end)
-		if (want_pos > length)
-			return false;
-
-		if (want_pos == length)
-		{
-			pos = length;
-			return true;
-		}
-
-		// trivial success when already there
-		if (want_pos == pos)
-			return true;
-
-		if (vwad_seek(pack->varch, vwad_filedesc, want_pos) == 0)
-		{
-			pos = want_pos;
-			return true;
-		}
-		else
-		{
-			pos = vwad_tell(pack->varch, vwad_filedesc);
-			return false;
-		}
-	}
-};
-
-epi::file_c * pack_file_c::OpenEntry_VWAD(size_t dir, size_t index)
-{
-	vwad_file_c *F = new vwad_file_c(this, dirs[dir].entries[index].vwad_idx);
-	return F;
-}
-
-
-epi::file_c * pack_file_c::OpenFile_VWAD(const std::string& name)
-{
-	// this ignores case by default
-	int idx = vwad_find_file(this->varch, name.c_str());
-	if (idx < 0)
-		return NULL;
-
-	vwad_file_c *F = new vwad_file_c(this, idx);
 	return F;
 }
 
@@ -1348,19 +1120,7 @@ void Pack_PopulateOnly(data_file_c *df)
 	if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_IFolder)
 		df->pack = ProcessFolder(df);
 	else
-	{
-		SYS_ASSERT(std::filesystem::file_size(df->name) > 4);
-		FILE* df_fp = EPIFOPEN(df->name, "rb");
-		SYS_ASSERT(df_fp);
-		byte vwad_check[4];
-		fread(vwad_check, 4, 1, df_fp);
-		fclose(df_fp);
-		if (vwad_check[0] == 'V' && vwad_check[1] == 'W' && 
-			vwad_check[2] == 'A' && vwad_check[3] == 'D')
-			df->pack = ProcessVWAD(df);
-		else
-			df->pack = ProcessZip(df);
-	}
+		df->pack = ProcessZip(df);
 
 	df->pack->SortEntries();
 }
@@ -1404,19 +1164,7 @@ void Pack_ProcessAll(data_file_c *df, size_t file_index)
 	if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_IFolder)
 		df->pack = ProcessFolder(df);
 	else
-	{
-		SYS_ASSERT(std::filesystem::file_size(df->name) > 4);
-		FILE* df_fp = EPIFOPEN(df->name, "rb");
-		SYS_ASSERT(df_fp);
-		byte vwad_check[4];
-		fread(vwad_check, 4, 1, df_fp);
-		fclose(df_fp);
-		if (vwad_check[0] == 'V' && vwad_check[1] == 'W' && 
-			vwad_check[2] == 'A' && vwad_check[3] == 'D')
-			df->pack = ProcessVWAD(df);
-		else
-			df->pack = ProcessZip(df);
-	}
+		df->pack = ProcessZip(df);
 
 	df->pack->SortEntries();
 

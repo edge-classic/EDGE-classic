@@ -10,7 +10,7 @@ New Features
 ------------
 - "Extra Blood" under Gameplay Options renamed to "Blood Level" and "None" added to 
   the list of choices
-  - Setting to None will disable blood splats, death and overkill states; enemies
+  - Setting to None will disable blood splats, crush/death/overkill states; enemies
     will instead teleport out of existence on death (similar to Chex Quest)
 - "Sky Scaling" added to Video Options menu, replacing the previous methods of drawing
   non-skybox skies. The following choices are available:
@@ -31,8 +31,6 @@ New Features
 - WEAPONS.DDF
   - New command: IGNORE_CROSSHAIR_SCALING = \<boolean\>
     - If this weapon has custom crosshair sprites, they will not be affected by Video menu option "Crosshair Size".
-- Added support for the vWAD format as a recognized archive for pack file usage
-  - Description of vWAD specification can be found at the top of https://github.com/edge-classic/EDGE-classic/blob/master/source_files/libvwad/vwadvfs.h
 - Implemented sector and level-wide fog options
   - DDFSECT Implementation
     - FOG_COLOR = \<color\>; Sets the sector's fog color to the RGB value of the provided colormap entry
@@ -106,6 +104,12 @@ New Features
 	[LAVA_GLOW_WALL:7071]   : same as previous but glows red
 	[WATER_GLOW_WALL:7072]  : same as previous but glows blue
 	[WHITE_GLOW_WALL:7073]  : same as previous but glows white
+- UDMF: The following fields have been added to the "edge" namespace:
+  - linedefs - blockplayers, blocksight
+  - sidedefs - scalex_top/mid/bottom, scaley_top/mid/bottom, offsetx_top/mid/bottom, offsety_top/mid/bottom
+  - sectors - xpanningfloor/ceiling, ypanningfloor/ceiling, xscalefloor/ceiling, yscalefloor/ceiling, gravity,
+              fadecolor, fogdensity
+  - things - health, alpha, scalex, scaley, scale
   
 
 
@@ -164,5 +168,4 @@ Bugs fixed
 - Fixed failed object spawns from a SPAWNER-type attack still counting toward the total amount of kills/items in a level
 - Fixed Heretic AUTOPAGE lumps not being recognized as valid raw format images
 - Fixed animation in Chex Quest 1 intermission screens
-- Fixed detail slopes next to one-sided lindef walls interfering with occlusion testing at certain view angles
-
+- Fixed detail slopes next to one-sided linedef walls interfering with occlusion testing at certain view angles

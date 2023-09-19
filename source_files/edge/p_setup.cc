@@ -2109,7 +2109,10 @@ static void LoadUDMFThings()
 			int typenum = -1;
 			int tag = 0;
 			float healthfac = 1.0f;
+			float alpha = 1.0f;
+			float scale = 0.0f, scalex = 0.0f, scaley = 0.0f;
 			const mobjtype_c *objtype;
+			bool new_thing = false;
 			for (;;)
 			{
 				if (lex.Match("}"))
@@ -2169,7 +2172,27 @@ static void LoadUDMFThings()
 				else if (key == "friend")
 					options |= (epi::LEX_Boolean(value) ? MTF_FRIEND : 0);
 				else if (key == "health")
+				{
 					healthfac = epi::LEX_Double(value);
+					new_thing = true;
+				}
+				else if (key == "alpha")
+					alpha = epi::LEX_Double(value);
+				else if (key == "scale")
+				{
+					scale = epi::LEX_Double(value);
+					new_thing = true;
+				}
+				else if (key == "scalex")
+				{
+					scalex = epi::LEX_Double(value);
+					new_thing = true;
+				}
+				else if (key == "scaley")
+				{
+					scaley = epi::LEX_Double(value);
+					new_thing = true;
+				}
 			}
 			objtype = mobjtypes.Lookup(typenum);
 
@@ -2193,21 +2216,35 @@ static void LoadUDMFThings()
 			// check for UDMF-specific thing stuff
 			if (udmf_thing)
 			{
-				if (!AlmostEquals(healthfac, 1.0f))
+				udmf_thing->vis_target = alpha;
+				// Process all changes that would require a derived thing mobjtype at once
+				if (new_thing)
 				{
-					// don't alter the 'true' mobj type, but we need to track
-					// spawnhealth for this particular thing if it is resurrected/etc
 					mobjtype_c *adhoc_info = new mobjtype_c;
 					adhoc_info->CopyDetail(const_cast<mobjtype_c &>(*udmf_thing->info));
-					if (healthfac < 0)
+					adhoc_info->adhoc = true;
+					if (!AlmostEquals(healthfac, 1.0f))
 					{
-						adhoc_info->spawnhealth = fabs(healthfac);
-						udmf_thing->health = fabs(healthfac);
+						if (healthfac < 0)
+						{
+							adhoc_info->spawnhealth = fabs(healthfac);
+							udmf_thing->health = fabs(healthfac);
+						}
+						else
+						{
+							adhoc_info->spawnhealth *= healthfac;
+							udmf_thing->health *= healthfac;
+						}
 					}
-					else
+					// Treat 'scale' and 'scalex/scaley' as one or the other; don't try to juggle both
+					if (!AlmostEquals(scale, 0.0f))
+						adhoc_info->scale = adhoc_info->model_scale = scale;
+					else if (!AlmostEquals(scalex, 0.0f) || !AlmostEquals(scaley, 0.0f))
 					{
-						adhoc_info->spawnhealth *= healthfac;
-						udmf_thing->health *= healthfac;
+						float sx = AlmostEquals(scalex, 0.0f) ? 1.0f : scalex;
+						float sy = AlmostEquals(scaley, 0.0f) ? 1.0f : scaley;
+						adhoc_info->scale = adhoc_info->model_scale = sy;
+						adhoc_info->aspect = adhoc_info->model_aspect = (sx / sy);
 					}
 					udmf_thing->info = adhoc_info;
 				}

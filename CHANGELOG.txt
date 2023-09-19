@@ -127,6 +127,11 @@ General Improvements/Changes
 - Models will no longer be drawn if completely behind the view plane, reducing rendering overhead
 - Voxel skins are now always uploaded with GL_NEAREST scaling instead of GL_LINEAR to preserve their intended look
 - Plane movers are now disabled for sectors which have vertex slopes (this is not supported and caused very interesting results)
+- MBF21 Lines and Sectors are now unconditionally on
+  - "MBF21 Compatibility" removed from Gameplay Options menu
+  - Reserved linedef bit 11 flag from PrBoom/Eternity implemented to fix Doom E2M7 and other maps that previously required
+    the MBF21 toggle to fix
+- DDFIMAGE: Flats can now be used in GRAPHIC image type definitions
  
 
 Bugs fixed
@@ -157,5 +162,7 @@ Bugs fixed
 - Fixed pre-EC legacy issue: Death from other means than the actual sector damage in a "death exit" sector would not
   properly exit the level
 - Fixed failed object spawns from a SPAWNER-type attack still counting toward the total amount of kills/items in a level
-
+- Fixed Heretic AUTOPAGE lumps not being recognized as valid raw format images
+- Fixed animation in Chex Quest 1 intermission screens
+- Fixed detail slopes next to one-sided lindef walls interfering with occlusion testing at certain view angles
 

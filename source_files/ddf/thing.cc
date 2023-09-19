@@ -2396,6 +2396,7 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
 	splash_group = src.splash_group;
 	fast_speed = src.fast_speed;
 	melee_range = src.melee_range;
+	adhoc = src.adhoc;
 }
 
 
@@ -2545,6 +2546,8 @@ void mobjtype_c::Default()
 	splash_group = -2;
 	fast_speed = -1;
 	melee_range = -1;
+
+	adhoc = false;
 }
 
 void mobjtype_c::DLightCompatibility(void)

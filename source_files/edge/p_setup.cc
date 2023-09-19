@@ -2238,13 +2238,23 @@ static void LoadUDMFThings()
 					}
 					// Treat 'scale' and 'scalex/scaley' as one or the other; don't try to juggle both
 					if (!AlmostEquals(scale, 0.0f))
+					{
 						adhoc_info->scale = adhoc_info->model_scale = scale;
+						adhoc_info->height *= scale;
+						adhoc_info->radius *= scale;
+						udmf_thing->height *= scale;
+						udmf_thing->radius *= scale;
+					}
 					else if (!AlmostEquals(scalex, 0.0f) || !AlmostEquals(scaley, 0.0f))
 					{
 						float sx = AlmostEquals(scalex, 0.0f) ? 1.0f : scalex;
 						float sy = AlmostEquals(scaley, 0.0f) ? 1.0f : scaley;
 						adhoc_info->scale = adhoc_info->model_scale = sy;
 						adhoc_info->aspect = adhoc_info->model_aspect = (sx / sy);
+						adhoc_info->height *= sy;
+						adhoc_info->radius *= sx;
+						udmf_thing->height *= sy;
+						udmf_thing->radius *= sx;
 					}
 					udmf_thing->info = adhoc_info;
 				}

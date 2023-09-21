@@ -1977,7 +1977,18 @@ static void SprayAttack(mobj_t * mo)
 			damage *= attack->berserk_mul;
 
 		if (damage)
-			P_DamageMobj(target, NULL, mo->source, damage, &attack->damage);
+		{
+			// hacky, but prevents messing with P_DamageMobj
+			if (attack->flags & AF_Vampire)
+			{
+				int old_hf = mo->source->hyperflags;
+				mo->source->hyperflags |= HF_VAMPIRE;
+				P_DamageMobj(target, NULL, mo->source, damage, &attack->damage);
+				mo->source->hyperflags = old_hf;
+			}
+			else
+				P_DamageMobj(target, NULL, mo->source, damage, &attack->damage);
+		}
 	}
 }
 

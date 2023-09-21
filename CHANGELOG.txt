@@ -169,3 +169,4 @@ Bugs fixed
 - Fixed Heretic AUTOPAGE lumps not being recognized as valid raw format images
 - Fixed animation in Chex Quest 1 intermission screens
 - Fixed detail slopes next to one-sided linedef walls interfering with occlusion testing at certain view angles
+- Fixed VAMPIRE attack special not working with SPRAY attack type

@@ -2297,9 +2297,9 @@ static void LoadUDMFCounts()
 
 			if (udmf_strict.d)
 			{
-				if (section != "doom" && section != "heretic" && section != "edge" && section != "zdoomtranslated")
+				if (section != "doom" && section != "heretic" && section != "edge-classic" && section != "zdoomtranslated")
 				{
-					I_Warning("UDMF: %s uses unsupported namespace \"%s\"!\nSupported namespaces are \"doom\", \"heretic\", \"edge\", or \"zdoomtranslated\"!\n",
+					I_Warning("UDMF: %s uses unsupported namespace \"%s\"!\nSupported namespaces are \"doom\", \"heretic\", \"edge-classic\", or \"zdoomtranslated\"!\n",
 						currmap->lump.c_str(), section.c_str());
 				}
 			}

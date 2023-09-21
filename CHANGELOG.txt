@@ -170,3 +170,4 @@ Bugs fixed
 - Fixed animation in Chex Quest 1 intermission screens
 - Fixed detail slopes next to one-sided linedef walls interfering with occlusion testing at certain view angles
 - Fixed VAMPIRE attack special not working with SPRAY attack type
+- Fixed several missing or erroneous Heretic/Blasphemer sector types

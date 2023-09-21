@@ -1945,6 +1945,11 @@ static void SprayAttack(mobj_t * mo)
 		return;
 
 	float range = (attack->range > 0) ? attack->range : MISSILERANGE;
+	int old_hf = mo->source->hyperflags;
+
+	// hacky, but prevents messing with P_DamageMobj
+	if (attack->flags & AF_Vampire)
+		mo->source->hyperflags |= HF_VAMPIRE;
 
 	// offset angles from its attack angle
 	for (int i = 0; i < 40; i++)
@@ -1977,19 +1982,10 @@ static void SprayAttack(mobj_t * mo)
 			damage *= attack->berserk_mul;
 
 		if (damage)
-		{
-			// hacky, but prevents messing with P_DamageMobj
-			if (attack->flags & AF_Vampire)
-			{
-				int old_hf = mo->source->hyperflags;
-				mo->source->hyperflags |= HF_VAMPIRE;
-				P_DamageMobj(target, NULL, mo->source, damage, &attack->damage);
-				mo->source->hyperflags = old_hf;
-			}
-			else
-				P_DamageMobj(target, NULL, mo->source, damage, &attack->damage);
-		}
+			P_DamageMobj(target, NULL, mo->source, damage, &attack->damage);
 	}
+
+	mo->source->hyperflags = old_hf;
 }
 
 static void DoMeleeAttack(mobj_t * mo)

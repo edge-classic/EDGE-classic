@@ -781,6 +781,46 @@ FOG_DENSITY = 45%;
 [4509] // EDGE fog: Red 50%
 FOG_COLOR = FOG_RED;
 FOG_DENSITY = 50%; 
+
+[4510] // EDGE fog: Blue 5%
+FOG_COLOR = FOG_BLUE;
+FOG_DENSITY = 5%;
+ 
+[4511] // EDGE fog: Blue 10%
+FOG_COLOR = FOG_BLUE;
+FOG_DENSITY = 10%; 
+
+[4512] // EDGE fog: Blue 15%
+FOG_COLOR = FOG_BLUE;
+FOG_DENSITY = 15%;
+
+[4513] // EDGE fog: Blue 20%
+FOG_COLOR = FOG_BLUE;
+FOG_DENSITY = 20%;
+
+[4514] // EDGE fog: Blue 25%
+FOG_COLOR = FOG_BLUE;
+FOG_DENSITY = 25%;
+
+[4515] // EDGE fog: Blue 30%
+FOG_COLOR = FOG_BLUE;
+FOG_DENSITY = 30%;
+
+[4516] // EDGE fog: Blue 35%
+FOG_COLOR = FOG_BLUE;
+FOG_DENSITY = 35%;
+
+[4517] // EDGE fog: Blue 40%
+FOG_COLOR = FOG_BLUE;
+FOG_DENSITY = 40%;
+
+[4518] // EDGE fog: Blue 45%
+FOG_COLOR = FOG_BLUE;
+FOG_DENSITY = 45%;
+
+[4519] // EDGE fog: Blue 50%
+FOG_COLOR = FOG_BLUE;
+FOG_DENSITY = 50%; 
  
 [4530] // EDGE Friction: Slippy
 FRICTION=0.97;    // (default 0.9) Affects movement speed while on the floor. Lower the number, harder to move. Less than 0.05 impedes movement

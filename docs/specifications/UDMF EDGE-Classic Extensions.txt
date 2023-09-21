@@ -1,5 +1,5 @@
 ===============================================================================
-Universal Doom Map Format EDGE extensions DRAFT - 2023.09.18
+Universal Doom Map Format EDGE-Classic extensions DRAFT - 2023.09.18
 
     Copyright (c) 2023 The EDGE Team.
     Permission is granted to copy, distribute and/or modify this document
@@ -9,7 +9,7 @@ Universal Doom Map Format EDGE extensions DRAFT - 2023.09.18
     
 ===============================================================================
 
-This document discusses only the additions EDGE makes to the UDMF 
+This document discusses only the additions EDGE-Classic makes to the UDMF 
 specification.
 
 =======================================
@@ -26,9 +26,9 @@ II. Implementation Semantics
 II.C : Implementation Dependence
 
 
-EDGE supports the "Doom" and "Heretic" namespaces defined in the base specification and adds one new
+EDGE-Classic supports the "Doom" and "Heretic" namespaces defined in the base specification and adds one new
 one:
-    "EDGE"
+    "EDGE-Classic"
 
 In addition, the following namespace extensions from other source ports are supported:
     "ZDoomTranslated"
@@ -36,19 +36,19 @@ In addition, the following namespace extensions from other source ports are supp
 The only difference between these two namespaces is how line, thing and sector
 specials are handled:
 
-'EDGE' uses Doom-type specials extended with additional fields and parameters not
+'EDGE-Classic' uses Doom-type specials extended with additional fields and parameters not
 possible in the binary map format to complement the existing specials defined by its
 DDF and RTS content definition and scripting languages.
 
 'ZDoomTranslated' uses Doom-type specials. Specials in these maps that are not already
-defined by EDGE will produce a message in the log but will not prevent a map from being loaded.
+defined by EDGE-Classic will produce a message in the log but will not prevent a map from being loaded.
 
 
 =======================================
 III. Standardized Fields
 =======================================
 
-In addition to the standard fields, EDGE defines the following:
+In addition to the standard fields, EDGE-Classic defines the following:
 Note: All <bool> fields default to false unless mentioned otherwise.
 
    vertex
@@ -106,16 +106,16 @@ Note: All <bool> fields default to false unless mentioned otherwise.
       yscaleceiling = <float>;   // Y texture scale of ceiling texture, Default = 1.0.
 
       gravity = <float>;         // Sector's gravity. Default is 1.0.
-                                 // For EDGE, this is treated as a multiplier against the internal default gravity of 8.0,
+                                 // For EDGE-Classic, this is treated as a multiplier against the internal default gravity of 8.0,
                                  // i.e. gravity = 0.5 would be equivalent to a gravity of 4.0
 
       fadecolor = <integer>;     // Fog color for this sector, in 0xRRGGBB format. Default (no fog) is 0x000000.
-      fogdensity = <integer>;    // Fog density for this sector. EDGE makes an effort to map the GZDoom values recognized
+      fogdensity = <integer>;    // Fog density for this sector. EDGE-Classic makes an effort to map the ZDoom values recognized
                                  // by map editors (0-510) in the following manner:
                                  // - Values of 0-1 are equivalent to a 20% FOG_DENSITY in SECTORS.DDF
                                  // - The remaining values (2-510) are roughly mapped to the 0-50% FOG_DENSITY scale in SECTORS.DDF;
                                  //   for example, a value of 5 would be roughly 1% while 510 would be 50%
-                                 // - EDGE additionally supports fogdensity values of 510-1020, which would be equivalent to the 50-100% SECTORS.DDF
+                                 // - EDGE-Classic additionally supports fogdensity values of 510-1020, which would be equivalent to the 50-100% SECTORS.DDF
                                  //   FOG_DENSITY scale, but map editors may clamp this value to 510. Switching editors, manually editing
                                  //   the map's TEXTMAP, or using a DDF sector fog special instead may be necessary in these cases.
    }

@@ -1,6 +1,6 @@
 
 =======================================
-EDGE Pack Structure and Usage
+EDGE-Classic Pack Structure and Usage
 =======================================
 
 by The EDGE Team.  August 2023.

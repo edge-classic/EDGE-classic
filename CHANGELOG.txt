@@ -96,15 +96,15 @@ New Features
 	[4508] EDGE fog: Red 45%
 	[4509] EDGE fog: Red 50%
   [4510] EDGE fog: Blue 5%
-	[4511] EDGE fog: Red 10%
-	[4512] EDGE fog: Red 15%
-	[4513] EDGE fog: Red 20%
-	[4514] EDGE fog: Red 25%
-	[4515] EDGE fog: Red 30%
-	[4516] EDGE fog: Red 35%
-	[4517] EDGE fog: Red 40%
-	[4518] EDGE fog: Red 45%
-	[4519] EDGE fog: Red 50% 
+	[4511] EDGE fog: Blue 10%
+	[4512] EDGE fog: Blue 15%
+	[4513] EDGE fog: Blue 20%
+	[4514] EDGE fog: Blue 25%
+	[4515] EDGE fog: Blue 30%
+	[4516] EDGE fog: Blue 35%
+	[4517] EDGE fog: Blue 40%
+	[4518] EDGE fog: Blue 45%
+	[4519] EDGE fog: Blue 50% 
 	[4530] EDGE Friction: Slippy
 	[4531] EDGE Friction: Very Slippy
 	[4532] EDGE Friction: Sticky
@@ -114,7 +114,7 @@ New Features
 	[LAVA_GLOW_WALL:7071]   : same as previous but glows red
 	[WATER_GLOW_WALL:7072]  : same as previous but glows blue
 	[WHITE_GLOW_WALL:7073]  : same as previous but glows white
-- UDMF: The following fields have been added to the "edge" namespace:
+- UDMF: The following fields have been added to the "edge-classic" namespace:
   - linedefs: blockplayers, blocksight
   - sidedefs: scalex_top/mid/bottom, scaley_top/mid/bottom, offsetx_top/mid/bottom, offsety_top/mid/bottom
   - sectors: xpanningfloor/ceiling, ypanningfloor/ceiling, xscalefloor/ceiling, yscalefloor/ceiling, gravity,

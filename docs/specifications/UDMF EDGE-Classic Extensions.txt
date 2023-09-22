@@ -1,5 +1,5 @@
 ===============================================================================
-Universal Doom Map Format EDGE-Classic extensions DRAFT - 2023.09.18
+Universal Doom Map Format EDGE-Classic extensions v1.0 - 2023.09.22
 
     Copyright (c) 2023 The EDGE Team.
     Permission is granted to copy, distribute and/or modify this document
@@ -134,12 +134,15 @@ Note: All <bool> fields default to false unless mentioned otherwise.
       scalex = <float>;         // Horizontal scaling on thing. Default = 0 (ignored).
       scaley = <float>;         // Vertical scaling on thing. Default = 0 (ignored).
       scale = <float>;          // Vertical and horizontal scaling on thing. Default = 0 (ignored).
+                                // Note: It is recommended to use either scale or scalex/scaley, but not both, on the same thing. If both are present
+                                // for a thing, scale will be used instead of scalex/scaley.
    }
 
 
 =======================================
 Changelog
 =======================================
+2023.09.22 - Set version to 1.0, added notes to thing scaling comments
 2023.09.18 - Addition of alpha, scale, scalex and scaley thing fields
 2023.09.14 - Updated sidedef, sector, linedef and thing sections
 2023.08.25 - Updated fogdensity scaling documentation

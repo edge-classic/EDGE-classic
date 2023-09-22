@@ -25,7 +25,7 @@
 #define STBI_ONLY_PNG
 #define STBI_ONLY_TGA
 #define STBI_ONLY_JPEG
-
+#define STBI_NO_STDIO // only loading from file_c memory blocks, not directly from file
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 

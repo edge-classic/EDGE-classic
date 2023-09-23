@@ -87,7 +87,7 @@ Bugfixes and detailed changes can be found in CHANGELOG.txt
 # Currently Supported Platforms
 
 - Windows 32/64-bit (x86 architecture), XP or later
-- [Web Browsers](https://edge-classic.github.io/play.html)
+- [Web Browsers](https://edge-classic.github.io/play.html) (Desktop browsers are supported, mobile browsers require future touch and gamepad input work)
 - Linux 32/64-bit (x86 and ARM architecture - ARM tested with Raspberry Pi OS on a Pi 4B)
 - BSD 32/64-bit (x86 and ARM64 architecture - tested with FreeBSD 13.1; ARM64 tested on a Pi 4B but not recommended unless proper video acceleration is available
                  as playable framerates are too difficult to achieve otherwise)

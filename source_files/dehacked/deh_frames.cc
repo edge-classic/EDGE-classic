@@ -469,8 +469,27 @@ const state_t * Frames::NewStateElseOld(int st_num)
 		return NULL;
 
 	if (st_num < (int)new_states.size())
+	{
 		if (new_states[st_num] != NULL)
 			return new_states[st_num];
+	}
+	else if (Patch::doom_ver == 21) // DSDehacked stuff has to exist I guess - Dasho
+	{
+		size_t to_add = st_num + 1 - new_states.size();
+		for (size_t i = 0; i < to_add; i++)
+		{
+			state_t * entry = new state_t;
+			// these defaults follow the DSDehacked specs
+			entry->sprite = SPR_TNT1;
+			entry->frame  = 0;
+			entry->tics   = -1;
+			entry->action = A_NULL;
+			entry->nextstate = st_num;
+			entry->argptr = 0;
+			new_states.push_back(entry);
+		}
+		return new_states[st_num];
+	}
 
 	if (st_num < NUMSTATES_MBF)
 		return &states_orig[st_num];

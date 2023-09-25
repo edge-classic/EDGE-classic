@@ -1,0 +1,183 @@
+https://github.com/edge-classic/EDGE-classic
+
+Current as of: September 2023
+
+CHANGELOG for EDGE-Classic 1.35 (since EDGE-Classic 1.34.1)
+====================================
+
+
+New Features
+------------
+- "Extra Blood" under Gameplay Options renamed to "Blood Level" and "None" added to 
+  the list of choices
+  - Setting to None will disable blood splats, crush/death/overkill states; enemies
+    will instead teleport out of existence on death (similar to Chex Quest)
+- "Sky Scaling" added to Video Options menu, replacing the previous methods of drawing
+  non-skybox skies. The following choices are available:
+  - Mirror: Will invert the sky texture at the horizon, scaled to account for vertical mouselook.
+  - Repeat: Will repeat the sky texture at the horizon, scaled to account for vertical mouselook.
+  - Stretch: Will stretch from top to bottom to avoid texture repeat, scaled to account for vertical
+    mouselook. Does not preserve the original width/height ratio of the image.
+  - Vanilla: Will draw the sky texture once, but does not scale or otherwise account for vertical mouselook.
+  - For all options, the top and bottom of the faux skybox will have an appropriately color-matched cap.
+  - The Vanilla option will be forced when mouselook is disabled.
+  - Sky stretching for a level can be overridden via the new DDFLEVEL SKY_STRETCH special, using
+    the names above.
+- New console command "openhome": will open the folder where EC is storing its home data
+  - In portable mode, this will open the directory where the executable is located
+- ATTACKS.DDF
+  - New PROJECTILE_SPECIAL flag: PRESERVE_MOMENTUM
+    - Will add the x/y/z momentum of the projectile attack source to the newly created projectile
+- WEAPONS.DDF
+  - New command: IGNORE_CROSSHAIR_SCALING = \<boolean\>
+    - If this weapon has custom crosshair sprites, they will not be affected by Video menu option "Crosshair Size".
+- Implemented sector and level-wide fog options
+  - DDFSECT Implementation
+    - FOG_COLOR = \<color\>; Sets the sector's fog color to the RGB value of the provided colormap entry
+    - FOG_DENSITY = \<0-100%\>; Sets the sector's fog density based on the provided percentage
+  - UDMF Implementation
+    - fadecolor = \<0xRRGGBB\>; Sets the sector's fog color to the hexadecimal RGB value provided
+    - fogdensity = \<0-1020\>; Sets the sector's fog density according to GZDoom's usage of this parameter
+      - Map editors may cap this value to 510; see docs/specifications/UDMF EDGE Extensions.txt for more details
+  - RTS Sector Fog Commands
+    - FOG_SECTOR \<tag\> \<color or SAME or CLEAR\> \<density(0-100%) or SAME or CLEAR\> ABSOLUTE
+      - Color and density params match those in DDFSECT
+      - SAME preserves the existing value; CLEAR sets it to the default (no fog) values
+      - ABSOLUTE is an optional parameter; if absent then the density is changed relative to the existing fog density of the sector
+        - Negative percentages are only allowed when performing relative density changes
+  - DDFLEVL Implementation
+    - INDOOR_FOG_COLOR = \<color\>; Sets the fog color for all indoor sectors to the RGB value of the provided colormap entry
+    - INDOOR_FOG_DENSITY = \<0-100%\>; Sets the fog density for all indoor sectors to the provided percentage
+    - OUTDOOR_FOG_COLOR = \<color\>; Sets the fog color for all outdoor sectors to the RGB value of the provided colormap entry
+    - OUTDOOR_FOG_DENSITY = \<0-100%\>; Sets the fog density for all outdoor sectors to the provided percentage
+- COALHUDS: Added hud.rts_disable() function; same syntax as hud.rts_enable()
+- LINES.DDF
+  - New LINE_EFFECT: STRETCH_TEX_WIDTH. Will stretch the width of a texture to match the lines length.
+  - New LINE_EFFECT: STRETCH_TEX_HEIGHT. Will stretch the height of a texture to match the lines length.
+    Basically allows autoscaling a texture to perfectly fit an arbitrary-length line.
+- New Line types added:
+	[835] Breakable wall, (midtex to back lower): when this line is shot, the midtex will be swapped with back lower tex
+	[836] Breakable wall, (midtex to back upper):  ...same as previous but swapped with back upper
+	[837] Breakable wall, (midtex to front lower): ...same as previous but swapped with front lower
+	[838] Breakable wall, (midtex to front upper): ...same as previous but swapped with front upper
+	[850] Light Wall: transfers the brightness of this wall to any other tagged lines
+	[855] Autoscale textures width to line length
+	[856] Autoscale textures height to line length
+	[857] Autoscale textures width and height to line length
+- New Sector types added:
+	[4480] EDGE fog: White 5%
+	[4481] EDGE fog: White 10%
+	[4482] EDGE fog: White 15%
+	[4483] EDGE fog: White 20%
+	[4484] EDGE fog: White 25%
+	[4485] EDGE fog: White 30%
+	[4486] EDGE fog: White 35%
+	[4487] EDGE fog: White 40%
+	[4488] EDGE fog: White 45%
+	[4489] EDGE fog: White 50%
+	[4490] EDGE fog: Green 5%
+	[4491] EDGE fog: Green 10%
+	[4492] EDGE fog: Green 15%
+	[4493] EDGE fog: Green 20%
+	[4494] EDGE fog: Green 25%
+	[4495] EDGE fog: Green 30%
+	[4496] EDGE fog: Green 35%
+	[4497] EDGE fog: Green 40%
+	[4498] EDGE fog: Green 45%
+	[4499] EDGE fog: Green 50%
+	[4500] EDGE fog: Red 5%
+	[4501] EDGE fog: Red 10%
+	[4502] EDGE fog: Red 15%
+	[4503] EDGE fog: Red 20%
+	[4504] EDGE fog: Red 25%
+	[4505] EDGE fog: Red 30%
+	[4506] EDGE fog: Red 35%
+	[4507] EDGE fog: Red 40%
+	[4508] EDGE fog: Red 45%
+	[4509] EDGE fog: Red 50%
+  [4510] EDGE fog: Blue 5%
+	[4511] EDGE fog: Blue 10%
+	[4512] EDGE fog: Blue 15%
+	[4513] EDGE fog: Blue 20%
+	[4514] EDGE fog: Blue 25%
+	[4515] EDGE fog: Blue 30%
+	[4516] EDGE fog: Blue 35%
+	[4517] EDGE fog: Blue 40%
+	[4518] EDGE fog: Blue 45%
+	[4519] EDGE fog: Blue 50% 
+	[4530] EDGE Friction: Slippy
+	[4531] EDGE Friction: Very Slippy
+	[4532] EDGE Friction: Sticky
+	[4533] EDGE Friction: Very Sticky
+- New Thing types added:
+	[NUKAGE_GLOW_WALL:7070] : causes any wall in contact with it to glow green
+	[LAVA_GLOW_WALL:7071]   : same as previous but glows red
+	[WATER_GLOW_WALL:7072]  : same as previous but glows blue
+	[WHITE_GLOW_WALL:7073]  : same as previous but glows white
+- UDMF: The following fields have been added to the "edge-classic" namespace:
+  - linedefs: blockplayers, blocksight
+  - sidedefs: scalex_top/mid/bottom, scaley_top/mid/bottom, offsetx_top/mid/bottom, offsety_top/mid/bottom
+  - sectors: xpanningfloor/ceiling, ypanningfloor/ceiling, xscalefloor/ceiling, yscalefloor/ceiling, gravity,
+              fadecolor, fogdensity
+  - things: health, alpha, scalex, scaley, scale
+  
+
+
+General Improvements/Changes
+--------------------
+- Migrated to VGMPlay's libvgm from Game Music Emu
+  - Support for AY, GBS, GYM, HES, NSF, SAP, and SPC filetypes has been removed
+  - VGM support has been expanded to include all chipsets and systems supported by VGMPlay, with the
+    exception of the WonderSwan
+- DDFTHING: Implemented previously referenced WALL Glow Type
+  - Same parameters as other glow types
+  - Will only work on one linedef per glow mobj
+    - Glow mobj must be touching the desired wall/linedef to be effective
+- For standalone games, EDGEIWAD has been changed to EDGEGAME to account for the fact that
+  a pack file may be used intsead of a WAD to distribute a game
+- Auto-aim now targets "fuzzy" monsters i.e. Specters
+- Improved Unicode path support for international locales
+- DSSECRET lumps from PWADs (if present) will now override the built-in DSSECRET.ogg pack file
+- Models will no longer be drawn if completely behind the view plane, reducing rendering overhead
+- Voxel skins are now always uploaded with GL_NEAREST scaling instead of GL_LINEAR to preserve their intended look
+- Plane movers are now disabled for sectors which have vertex slopes (this is not supported and caused very interesting results)
+- MBF21 Lines and Sectors are now unconditionally on
+  - "MBF21 Compatibility" removed from Gameplay Options menu
+  - Reserved linedef bit 11 flag from PrBoom/Eternity implemented to fix Doom E2M7 and other maps that previously required
+    the MBF21 toggle to fix
+- DDFIMAGE: Flats can now be used in GRAPHIC image type definitions
+ 
+
+Bugs fixed
+----------
+- Fixed player health changes tied to voodoo doll damage and "Zombie Player" state not being achievable
+- Fixed potential CTD when reading in *MAPINFO lumps
+- Fixed potential CTD involving AJBSP split segs when they are part of a sector containing a UDMF vertex slope
+- Migrated all model rendering to use VBOs regardless of rendering path (GL vs. GLES), fixing CTDs when
+  the number of vertices for a model exceeded the size of the gl vertex array used by the unit rendering system
+- Reverted to AJBSP 1.03's DetectOverlapping* methods to fix a situation where overlapping linedefs facing
+  opposite directions would result in neither of them being rendered
+- Fixed the PalettisedtoRGB function accepting PNG/JPG/TGA images and treating them as palettised.
+- Fixed plane movers having unpredictable functionality when using a repeatable trigger type and
+  already being at their destination height
+- Migrated away from legacy SDL1 functions for interacting with sound devices, fixing possible
+  race conditions when the device was not being locked or unlocked at the expected time
+- Fixed weapon kick not working when mouselook was disabled
+- Fixed CTD involving liquid swirl checks when debug_hom is set to 1
+- Fixed pre-EC legacy issue: map AMBUSH flag was being lost if mobj was being replaced during 
+  gameplay via BECOME
+- Fixed RTS scripts using ON_DEATH conditions not working from a loaded game
+- Fixed automap key display not showing Boom style locks
+- Changed draw order of "Entering" and "You Are Here" intermission graphics to prevent the
+  next level name from being obscured
+- Fixed pre-EC legacy issue: crushed monsters never entered their GIB states
+- Fixed pre-EC legacy issue: Cyberdemon was missing a frame in death states
+- Fixed pre-EC legacy issue: Things were visible while changing positions via teleportation
+- Fixed pre-EC legacy issue: Death from other means than the actual sector damage in a "death exit" sector would not
+  properly exit the level
+- Fixed failed object spawns from a SPAWNER-type attack still counting toward the total amount of kills/items in a level
+- Fixed Heretic AUTOPAGE lumps not being recognized as valid raw format images
+- Fixed animation in Chex Quest 1 intermission screens
+- Fixed detail slopes next to one-sided linedef walls interfering with occlusion testing at certain view angles
+- Fixed VAMPIRE attack special not working with SPRAY attack type
+- Fixed several missing or erroneous Heretic/Blasphemer sector types

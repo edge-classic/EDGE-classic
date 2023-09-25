@@ -29,6 +29,7 @@ namespace Patch
 
 	extern int active_obj;
 	extern int patch_fmt;
+	extern int doom_ver;
 
 	dehret_e Load(input_buffer_c *buf);
 }

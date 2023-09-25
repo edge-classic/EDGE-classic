@@ -60,34 +60,6 @@ extern cvar_c r_farclip;
 extern cvar_c r_culling;
 extern cvar_c r_culldist;
 
-// Possible Windowed Modes
-// These reflect 4:3 and 16:9 historical and current standards
-// Should cover up to ~4K monitors
-static struct { int w, h; } possible_modes[] =
-{
-	{  320, 240  }, // 4:3 Quarter VGA
-	{  400, 300  }, // 4:3 Quarter SVGA
-	{  640, 360  }, // 16:9 Ninth HD
-	{  640, 480  }, // 4:3 VGA
-	{  800, 600  }, // 4:3 SVGA
-	{  960, 540  }, // 16:9 Quarter HD
-	{ 1024, 768  }, // 4:3 XGA
-	{ 1152, 864  }, // 4:3 XGA+
-	{ 1280, 720  }, // 16:9 HD
-	{ 1280, 960  }, // 4:3 Super XGA-
-	{ 1400, 1050 }, // 4:3 Super XGA+
-	{ 1600, 900  }, // 16:9 HD+
-	{ 1600, 1200 }, // 4:3 Ultra XGA
-	{ 1920, 1080 }, // 16:9 Full HD
-	{ 2048, 1152 }, // 16:9 Quad WXGA
-	{ 2048, 1536 }, // 4:3 Quad XGA
-	{ 2560, 1440 }, // 16:9 Quad HD
-	{ 2800, 2100 }, // 4:3 Quad SXGA+
-
-	{  -1,  -1   }
-};
-
-
 void I_GrabCursor(bool enable)
 {
 
@@ -228,6 +200,13 @@ void I_StartupGraphics(void)
 		    test_mode.depth == 24 || test_mode.depth == 32)
 		{
 			R_AddResolution(&test_mode);
+
+			if (test_mode.width < v_desktop_width.d && test_mode.height < v_desktop_height.d)
+			{
+				scrmode_c win_mode = test_mode;
+				win_mode.display_mode = win_mode.SCR_WINDOW;
+				R_AddResolution(&win_mode);
+			}
 		}
 	}
 
@@ -236,22 +215,6 @@ void I_StartupGraphics(void)
     borderless_mode.width = info.w;
     borderless_mode.height = info.h;
     borderless_mode.depth = SDL_BITSPERPIXEL(info.format);
-
-	// Add anything from our window res list that is less that native resolution
-	for (int i = 0; possible_modes[i].w != -1; i++)
-	{
-		scrmode_c mode;
-
-		if (possible_modes[i].w >= v_desktop_width.d || possible_modes[i].h >= v_desktop_height.d)
-			continue;
-
-		mode.width = possible_modes[i].w;
-		mode.height = possible_modes[i].h;
-		mode.depth  = SDL_BITSPERPIXEL(info.format);
-		mode.display_mode   = mode.SCR_WINDOW;
-
-		R_AddResolution(&mode);
-	}
 
 	I_Printf("I_StartupGraphics: initialisation OK\n");
 }

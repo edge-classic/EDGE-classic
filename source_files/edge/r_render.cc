@@ -3323,12 +3323,20 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 	wave_now = leveltime / 100.0f;
 	plane_z_bob = r_sintable[(int)((WAVETABLE_INCREMENT + wave_now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK) ];
 
-	view_x_slope = tan(fov * M_PI / 360.0);
+	view_x_slope = tan(90.0f * M_PI / 360.0);
 
 	if (full_height)
 		view_y_slope = DOOM_YSLOPE_FULL;
 	else
 		view_y_slope = DOOM_YSLOPE;
+
+	if (!AlmostEquals(fov, 90.0f))
+	{
+		float new_slope = tan(fov * M_PI / 360.0);
+
+		view_y_slope *= new_slope / view_x_slope;
+		view_x_slope  = new_slope;
+	}
 
 	viewiszoomed = false;
 

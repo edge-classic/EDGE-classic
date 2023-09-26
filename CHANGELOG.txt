@@ -12,8 +12,9 @@ New Features
 
 General Improvements/Changes
 --------------------
- 
+- Windowed Mode resolution list will now dynamically populate based off of available display information instead of using presets
 
 Bugs fixed
 ----------
 - Fixed assertion failure when referencing DSDehacked frames past the last frame explicitly defined in the [CODEPTR] section
+- Fixed viewpoint modified by the r_fov CVAR not changing the vertical view slope appropriately

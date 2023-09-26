@@ -70,7 +70,7 @@ typedef struct
 pickup_info_t;
 
 
-bool P_CheckForBenefit(benefit_t *list, int kind)
+static bool P_CheckForBenefit(benefit_t *list, int kind)
 {
 	for (benefit_t *be = list; be != NULL; be = be->next)
 	{
@@ -593,7 +593,7 @@ static void GivePower(pickup_info_t *pu, benefit_t *be)
 	pu->got_it = true;
 }
 
-void DoGiveBenefitList(pickup_info_t *pu)
+static void DoGiveBenefitList(pickup_info_t *pu)
 {
 	// handle weapons first, since this affects ammo handling
 
@@ -663,6 +663,89 @@ void DoGiveBenefitList(pickup_info_t *pu)
 				break;
 		}
 	}
+}
+
+//
+// P_HasBenefitInList
+//
+// Check if the player has at least one of the benefits in the provided list.
+// Returns true if any of them are present for the player, but does not otherwise
+// return any information about which benefits matched or what their amounts are.
+//
+bool P_HasBenefitInList(player_t *player, benefit_t *list)
+{
+	SYS_ASSERT(player && list);
+	for (benefit_t *be = list; be; be = be->next)
+	{
+		switch (be->type)
+		{
+			case BENEFIT_None:
+				break;
+
+			case BENEFIT_Weapon:
+				for (int i=0; i < MAXWEAPONS; i++)
+				{
+					weapondef_c *cur_info = player->weapons[i].info;
+					if (cur_info == be->sub.weap)
+						return true;
+				}
+				break;
+
+			case BENEFIT_Ammo:
+				if (player->ammo[be->sub.type].num > be->amount)
+					return true;
+				break;
+
+			case BENEFIT_AmmoLimit:
+				if (player->ammo[be->sub.type].max > be->amount)
+					return true;
+				break;
+
+			case BENEFIT_Key:
+				if (player->cards & (keys_e)be->sub.type)
+					return true;
+				break;
+
+			case BENEFIT_Health:
+				if (player->health > be->amount)
+					return true;
+				break;
+
+			case BENEFIT_Armour:
+				if (player->armours[be->sub.type] > be->amount)
+					return true;
+				break;
+
+			case BENEFIT_Powerup:
+				if (!AlmostEquals(player->powers[be->sub.type], 0.0f))
+					return true;
+				break;
+
+			case BENEFIT_Inventory:
+				if (player->inventory[be->sub.type].num > be->amount)
+					return true;
+				break;
+
+			case BENEFIT_InventoryLimit:
+				if (player->inventory[be->sub.type].max > be->amount)
+					return true;
+				break;
+
+			case BENEFIT_Counter:
+				if (player->counters[be->sub.type].num > be->amount)
+					return true;
+				break;
+
+			case BENEFIT_CounterLimit:
+				if (player->counters[be->sub.type].max > be->amount)
+					return true;
+				break;
+
+			default:
+				break;
+		}
+	}
+	return false;	
 }
 
 //
@@ -1320,20 +1403,29 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 		int i;
 
 		// Don't damage player if sector type should only affect grounded monsters
+		// Note: flesh this out be be more versatile - Dasho
 		if (damtype && damtype->grounded_monsters)
 			return;
 
 		// ignore damage in GOD mode, or with INVUL powerup
 		if ((player->cheats & CF_GODMODE) || player->powers[PW_Invulnerable] > 0)
 		{
-			if (! (damtype && damtype->bypass_all))
+			if (!damtype)
+				return;
+			else if (!damtype->bypass_all && !damtype->damage_if)
 				return;
 		}
 
-		// Only damage if "if_naked" type and not wearing a radsuit (also if not invul, but the above check should theoretically cover that already)
-		// Dasho: I plane on making this a bit more robust, but this should suffice for at least MBF21 for now
-		if (damtype && damtype->if_naked && player->powers[PW_AcidSuit] > 0)
-			return;
+		// Check for DAMAGE_UNLESS/DAMAGE_IF DDF specials
+		if (damtype->damage_unless || damtype->damage_if)
+		{
+			bool unless_damage = (damtype->damage_unless != nullptr);
+			bool if_damage = false;
+			if (damtype->damage_unless && P_HasBenefitInList(player, damtype->damage_unless)) unless_damage = false;
+			if (damtype->damage_if && P_HasBenefitInList(player, damtype->damage_if)) if_damage = true;
+			if (!unless_damage && !if_damage && !damtype->bypass_all) 
+				return;
+		}
 
 		// take half damage in trainer mode
 		if (gameskill == sk_baby)

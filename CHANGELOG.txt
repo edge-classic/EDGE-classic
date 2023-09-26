@@ -7,12 +7,17 @@ CHANGELOG for EDGE-Classic 1.36 (since EDGE-Classic 1.35)
 
 
 New Features
-------------  
+------------
+- ATTACKS.DDF: DAMAGE_UNLESS_BENEFIT and DAMAGE_IF_BENEFIT subcommands Added
+  - Can be used anywhere that DAMAGE is used (sectors, attacks, etc)
+  - DAMAGE_UNLESS_BENEFIT: Player will take damage unless they have at least one of the benefits listed
+  - DAMAGE_IF_BENEFIT: Player will take damage if they have at least one of the benefits listed
 
 
 General Improvements/Changes
 --------------------
 - Windowed Mode resolution list will now dynamically populate based off of available display information instead of using presets
+
 
 Bugs fixed
 ----------

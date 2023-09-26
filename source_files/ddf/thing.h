@@ -748,12 +748,14 @@ public:
 
 	// Apply damange unconditionally
 	bool bypass_all;
-	// Instantly kill the player (MBF21)
+	// Damage is always health+1 with no resistances applied
 	bool instakill;
-	// Only apply damage if player has no rad suit or invulnerability status (MBF21)
-	bool if_naked;
-	// Apply to all players (MBF21)
+	// Apply to all players
 	bool all_players;
+	// Apply damage unless one of these benefits is in effect
+	benefit_t *damage_unless;
+	// Apply damage if one of these benefits is in effect
+	benefit_t *damage_if;
 	// Apply to (grounded) monsters instead (MBF21)
 	bool grounded_monsters;
 };

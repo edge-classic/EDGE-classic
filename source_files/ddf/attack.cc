@@ -53,7 +53,8 @@ const commandlist_t damage_commands[] =
 
 	DF("BYPASS_ALL", bypass_all, DDF_MainGetBoolean),
 	DF("INSTAKILL", instakill, DDF_MainGetBoolean),
-	DF("APPLY_IF_NAKED", if_naked, DDF_MainGetBoolean),
+	DF("DAMAGE_UNLESS_BENEFIT", damage_unless, DDF_MobjGetBenefit),
+	DF("DAMAGE_IF_BENEFIT", damage_if, DDF_MobjGetBenefit),
 	DF("ALL_PLAYERS", all_players, DDF_MainGetBoolean), // Doesn't do anything (yet)
 	DF("GROUNDED_MONSTERS_ONLY", grounded_monsters, DDF_MainGetBoolean),
 

@@ -1881,7 +1881,17 @@ static inline void PlayerInProperties(player_t *player,
 			return;
 	}
 
-	if (player->powers[PW_AcidSuit] && !special->damage.bypass_all)
+	// Check for DAMAGE_UNLESS/DAMAGE_IF DDF specials
+	if (special->damage.damage_unless || special->damage.damage_if)
+	{
+		bool unless_damage = (special->damage.damage_unless != nullptr);
+		bool if_damage = false;
+		if (special->damage.damage_unless && P_HasBenefitInList(player, special->damage.damage_unless)) unless_damage = false;
+		if (special->damage.damage_if && P_HasBenefitInList(player, special->damage.damage_if)) if_damage = true;
+		if (!unless_damage && !if_damage && !special->damage.bypass_all) 
+			factor = 0;
+	}
+	else if (player->powers[PW_AcidSuit] && !special->damage.bypass_all)
 		factor = 0;
 
 	if (r_doubleframes.d && extra_tic)
@@ -1892,7 +1902,7 @@ static inline void PlayerInProperties(player_t *player,
 	{
 		DAMAGE_COMPUTE(damage, &special->damage);
 
-		if (damage)
+		if (damage || special->damage.instakill)
 			P_DamageMobj(player->mo, NULL, NULL, damage * factor,
 					&special->damage);
 	}

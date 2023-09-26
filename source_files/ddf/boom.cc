@@ -157,10 +157,15 @@ void DDF_BoomMakeGenSector(sectortype_c *sec, int number)
 		switch ((number >> 5) & 0x3)
 		{
 			case 0: // Kill player if no radsuit or invul status
-				sec->damage.nominal = 5;
 				sec->damage.delay = 0;
 				sec->damage.instakill = true;
-				sec->damage.if_naked = true;
+				sec->damage.damage_unless = new benefit_t;
+				sec->damage.damage_unless->type = BENEFIT_Powerup;
+				sec->damage.damage_unless->sub.type = PW_AcidSuit;
+				sec->damage.damage_unless->next = new benefit_t;
+				sec->damage.damage_unless->next->type = BENEFIT_Powerup;
+				sec->damage.damage_unless->next->sub.type = PW_Invulnerable;
+				sec->damage.damage_unless->next->next = nullptr;
 				break;
 
 			case 1: // Kill player

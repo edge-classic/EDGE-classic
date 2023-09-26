@@ -305,6 +305,7 @@ void P_TelefragMobj(mobj_t * target, mobj_t * inflictor,
 void P_KillMobj(mobj_t * source, mobj_t * target,
 		const damage_c * damtype = NULL, bool weak_spot = false);
 bool P_GiveBenefitList(player_t *player, mobj_t *special, benefit_t *list, bool lose_em);
+bool P_HasBenefitInList(player_t *player, benefit_t *list);
 
 //
 // P_SPEC

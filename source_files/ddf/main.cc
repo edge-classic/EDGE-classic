@@ -1916,7 +1916,16 @@ void damage_c::Copy(damage_c &src)
 
 	bypass_all = src.bypass_all;
 	instakill = src.instakill;
-	if_naked = src.if_naked;
+	if (src.damage_unless)
+	{
+		damage_unless = new benefit_t;
+		*damage_unless = *src.damage_unless;
+	}
+	if (src.damage_if)
+	{
+		damage_if = new benefit_t;
+		*damage_if = *src.damage_if;
+	}
 	grounded_monsters = src.grounded_monsters;
 	all_players = src.all_players;
 
@@ -1941,7 +1950,8 @@ void damage_c::Default(damage_c::default_e def)
 			no_armour = true;
 			bypass_all = false;
 			instakill = false;
-			if_naked = false;
+			damage_unless = nullptr;
+			damage_if = nullptr;
 			grounded_monsters = false;
 			all_players = false;
 			break;
@@ -1956,7 +1966,8 @@ void damage_c::Default(damage_c::default_e def)
 			no_armour = false;
 			bypass_all = false;
 			instakill = false;
-			if_naked = false;
+			damage_unless = nullptr;
+			damage_if = nullptr;
 			grounded_monsters = false;
 			all_players = false;
 			break;
@@ -1973,7 +1984,8 @@ void damage_c::Default(damage_c::default_e def)
 			no_armour = false;
 			bypass_all = false;
 			instakill = false;
-			if_naked = false;
+			damage_unless = nullptr;
+			damage_if = nullptr;
 			grounded_monsters = false;
 			all_players = false;
 			break;

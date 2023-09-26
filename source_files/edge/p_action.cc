@@ -1499,7 +1499,7 @@ int P_MissileContact(mobj_t * object, mobj_t * target)
 	{
 		// Berserk handling
 		if (source->player && object->currentattack &&
-			source->player->powers[PW_Berserk] != 0.0f)
+			!AlmostEquals(source->player->powers[PW_Berserk], 0.0f))
 		{
 			damage *= object->currentattack->berserk_mul;
 		}
@@ -1927,7 +1927,7 @@ static void ShotAttack(mobj_t * mo)
 		float damage;
 		DAMAGE_COMPUTE(damage, &attack->damage);
 
-		if (mo->player && mo->player->powers[PW_Berserk] != 0.0f)
+		if (mo->player && !AlmostEquals(mo->player->powers[PW_Berserk], 0.0f))
 			damage *= attack->berserk_mul;
 
 		P_LineAttack(mo, angle, range, slope, damage,
@@ -1978,7 +1978,7 @@ static void SprayAttack(mobj_t * mo)
 		float damage;
 		DAMAGE_COMPUTE(damage, &attack->damage);
 
-		if (mo->player && mo->player->powers[PW_Berserk] != 0.0f)
+		if (mo->player && !AlmostEquals(mo->player->powers[PW_Berserk], 0.0f))
 			damage *= attack->berserk_mul;
 
 		if (damage)
@@ -1999,7 +1999,7 @@ static void DoMeleeAttack(mobj_t * mo)
 
 	// -KM- 1998/11/25 Berserk ability
 	// -ACB- 2004/02/04 Only zero is off
-	if (mo->player && mo->player->powers[PW_Berserk] != 0.0f)
+	if (mo->player && !AlmostEquals(mo->player->powers[PW_Berserk], 0.0f))
 		damage *= attack->berserk_mul;
 
 	// -KM- 1998/12/21 Use Line attack so bullet puffs are spawned.

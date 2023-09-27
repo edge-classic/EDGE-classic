@@ -21,5 +21,6 @@ General Improvements/Changes
 
 Bugs fixed
 ----------
+- Legacy bugfix: Boom generalized sector types were not preserved when saving/loading levels with said sectors
 - Fixed assertion failure when referencing DSDehacked frames past the last frame explicitly defined in the [CODEPTR] section
 - Fixed viewpoint modified by the r_fov CVAR not changing the vertical view slope appropriately

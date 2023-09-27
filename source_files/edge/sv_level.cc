@@ -79,7 +79,6 @@ bool SR_LineGetSpecial(void *storage, int index, void *extra);
 bool SR_SectorGetSpecial(void *storage, int index, void *extra);
 bool SR_SectorGetProps(void *storage, int index, void *extra);
 bool SR_SectorGetPropRef(void *storage, int index, void *extra);
-bool SR_SectorGetGenMove(void *storage, int index, void *extra);
 
 void SR_LevelPutImage(void *storage, int index, void *extra);
 void SR_LevelPutColmap(void *storage, int index, void *extra);
@@ -89,7 +88,6 @@ void SR_LinePutSpecial(void *storage, int index, void *extra);
 void SR_SectorPutSpecial(void *storage, int index, void *extra);
 void SR_SectorPutProps(void *storage, int index, void *extra);
 void SR_SectorPutPropRef(void *storage, int index, void *extra);
-void SR_SectorPutGenMove(void *storage, int index, void *extra);
 
 bool SR_SideGetSide(void *storage, int index, void *extra);
 void SR_SidePutSide(void *storage, int index, void *extra);

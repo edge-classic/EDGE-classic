@@ -216,6 +216,8 @@ sectortype_c *DDF_BoomGetGenSector(int number)
 		sec = new sectortype_c;
 		sec->Default();
 		
+		sec->number = number;
+
 		DDF_BoomMakeGenSector(sec, number);
 		
 		gensectortypes.Insert(sec);

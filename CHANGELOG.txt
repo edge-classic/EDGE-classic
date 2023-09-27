@@ -17,6 +17,7 @@ New Features
 General Improvements/Changes
 --------------------
 - Windowed Mode resolution list will now dynamically populate based off of available display information instead of using presets
+- Video Options crosshair selection will not be shown when switching to/from weapons that have DDF custom crosshairs
 
 
 Bugs fixed
@@ -24,3 +25,4 @@ Bugs fixed
 - Legacy bugfix: Boom generalized sector types were not preserved when saving/loading levels with said sectors
 - Fixed assertion failure when referencing DSDehacked frames past the last frame explicitly defined in the [CODEPTR] section
 - Fixed viewpoint modified by the r_fov CVAR not changing the vertical view slope appropriately
+- Fixed region properties not working properly with a vertex sloped floor that rises above its sector's original floor height

@@ -274,7 +274,7 @@ static void GotoDownState(player_t *p)
 	int newstate = info->down_state;
 
 	P_SetPspriteDeferred(p, ps_weapon, newstate);
-	P_SetPsprite(p, ps_crosshair, S_NULL);
+	P_SetPsprite(p, ps_crosshair, info->crosshair);
 }
 
 static void GotoReadyState(player_t *p)
@@ -449,7 +449,7 @@ static void P_BringUpWeapon(player_t * p)
 
 	P_SetPspriteDeferred(p, ps_weapon, info->up_state);
 	P_SetPsprite(p, ps_flash,  S_NULL);
-	P_SetPsprite(p, ps_crosshair, S_NULL);
+	P_SetPsprite(p, ps_crosshair, info->crosshair);
 
 	p->refire = info->refire_inacc ? 0 : 1;
 }

@@ -1953,6 +1953,7 @@ void P_PlayerInSpecialSector(player_t * player, sector_t * sec, bool should_chok
 {
 	extrafloor_t *S, *L, *C;
 	float floor_h;
+	float ceil_h;
 
 	float bz = player->mo->z;
 	float tz = player->mo->z + player->mo->height;
@@ -1968,6 +1969,7 @@ void P_PlayerInSpecialSector(player_t * player, sector_t * sec, bool should_chok
 
 	// traverse extrafloor list
 	floor_h = sec->f_h;
+	ceil_h = sec->c_h;
 
 	S = sec->bottom_ef;
 	L = sec->bottom_liq;
@@ -1994,7 +1996,13 @@ void P_PlayerInSpecialSector(player_t * player, sector_t * sec, bool should_chok
 		floor_h = C->top_h;
 	}
 
-	PlayerInProperties(player, bz, tz, floor_h, sec->c_h, sec->p, &swim_special, should_choke);
+	if (sec->floor_vertex_slope)
+		floor_h = player->mo->floorz;
+
+	if (sec->ceil_vertex_slope)
+		ceil_h = player->mo->ceilingz;
+
+	PlayerInProperties(player, bz, tz, floor_h, ceil_h, sec->p, &swim_special, should_choke);
 
 	// breathing support: handle gasping when leaving the water
 	if (was_underwater && !player->underwater)

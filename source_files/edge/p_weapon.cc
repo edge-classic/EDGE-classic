@@ -146,26 +146,29 @@ bool P_CheckWeaponSprite(weapondef_c *info)
 
 static bool ButtonDown(player_t *p, int ATK)
 {
+
 /*
 	if (ATK == 0)
 		return (p->cmd.buttons & BT_ATTACK);
 	else
 		return (p->cmd.extbuttons & EBT_SECONDATK);
+
 */
-	u16_t tempbuttons;
+
+	u16_t tempbuttons = 0;
 	switch(ATK)
 	{
 		case 0:
 			tempbuttons = p->cmd.buttons & BT_ATTACK;
 			break;
 		case 1:
-			tempbuttons = p->cmd.buttons & EBT_SECONDATK;
+			tempbuttons = p->cmd.extbuttons & EBT_SECONDATK;
 			break;
 		case 2:
-			tempbuttons = p->cmd.buttons & EBT_THIRDATK;
+			tempbuttons = p->cmd.extbuttons & EBT_THIRDATK;
 			break;
 		case 3:
-			tempbuttons = p->cmd.buttons & EBT_FOURTHATK;
+			tempbuttons = p->cmd.extbuttons & EBT_FOURTHATK;
 			break;
 		default:
 			//should never happen
@@ -173,6 +176,7 @@ static bool ButtonDown(player_t *p, int ATK)
 	}
 
 	return tempbuttons;
+	
 }
 
 static bool WeaponCanFire(player_t *p, int idx, int ATK)

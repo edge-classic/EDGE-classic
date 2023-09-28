@@ -1417,7 +1417,7 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 		}
 
 		// Check for DAMAGE_UNLESS/DAMAGE_IF DDF specials
-		if (damtype->damage_unless || damtype->damage_if)
+		if (damtype && (damtype->damage_unless || damtype->damage_if))
 		{
 			bool unless_damage = (damtype->damage_unless != nullptr);
 			bool if_damage = false;

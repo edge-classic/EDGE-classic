@@ -71,6 +71,20 @@ void A_NoFireReturnSA(struct mobj_s *mo);
 void A_CheckReloadSA(struct mobj_s *mo);
 void A_GunFlashSA(struct mobj_s *mo);
 
+void A_WeaponShootTA(struct mobj_s *mo);
+void A_ReFireTA(struct mobj_s *mo);
+void A_NoFireTA(struct mobj_s *mo);
+void A_NoFireReturnTA(struct mobj_s *mo);
+void A_CheckReloadTA(struct mobj_s *mo);
+void A_GunFlashTA(struct mobj_s *mo);
+
+void A_WeaponShootFA(struct mobj_s *mo);
+void A_ReFireFA(struct mobj_s *mo);
+void A_NoFireFA(struct mobj_s *mo);
+void A_NoFireReturnFA(struct mobj_s *mo);
+void A_CheckReloadFA(struct mobj_s *mo);
+void A_GunFlashFA(struct mobj_s *mo);
+
 void A_WeaponZoom(struct mobj_s *mo);
 void A_SetInvuln(struct mobj_s *mo);
 void A_ClearInvuln(struct mobj_s *mo);

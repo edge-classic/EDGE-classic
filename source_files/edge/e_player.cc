@@ -221,6 +221,8 @@ void player_s::Reborn()
 
 	remember_atk[0] = -1;
 	remember_atk[1] = -1;
+	remember_atk[2] = -1;
+	remember_atk[3] = -1;
 	weapon_last_frame = -1;
 }
 

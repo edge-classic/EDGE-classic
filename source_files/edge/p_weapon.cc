@@ -146,10 +146,33 @@ bool P_CheckWeaponSprite(weapondef_c *info)
 
 static bool ButtonDown(player_t *p, int ATK)
 {
+/*
 	if (ATK == 0)
 		return (p->cmd.buttons & BT_ATTACK);
 	else
 		return (p->cmd.extbuttons & EBT_SECONDATK);
+*/
+	u16_t tempbuttons;
+	switch(ATK)
+	{
+		case 0:
+			tempbuttons = p->cmd.buttons & BT_ATTACK;
+			break;
+		case 1:
+			tempbuttons = p->cmd.buttons & EBT_SECONDATK;
+			break;
+		case 2:
+			tempbuttons = p->cmd.buttons & EBT_THIRDATK;
+			break;
+		case 3:
+			tempbuttons = p->cmd.buttons & EBT_FOURTHATK;
+			break;
+		default:
+			//should never happen
+			break;
+	}
+
+	return tempbuttons;
 }
 
 static bool WeaponCanFire(player_t *p, int idx, int ATK)
@@ -359,6 +382,14 @@ static void GotoReloadState(player_t *p, int ATK)
 	if (ATK == 1 && ! info->reload_state[ATK])
 		ATK = 0;
 
+	// third attack will fall-back to using normal reload states.
+	if (ATK == 2 && ! info->reload_state[ATK])
+		ATK = 0;
+
+	// fourth attack will fall-back to using normal reload states.
+	if (ATK == 3 && ! info->reload_state[ATK])
+		ATK = 0;
+
 	if (info->reload_state[ATK])
 	{
 		P_SetPspriteDeferred(p, ps_weapon, info->reload_state[ATK]);
@@ -411,6 +442,8 @@ static void P_BringUpWeapon(player_t * p)
 
 	p->remember_atk[0] = -1;
 	p->remember_atk[1] = -1;
+	p->remember_atk[2] = -1;
+	p->remember_atk[3] = -1;
 	p->idlewait = 0;
 	p->weapon_last_frame = -1;
 
@@ -418,6 +451,8 @@ static void P_BringUpWeapon(player_t * p)
 	{
 		p->attackdown[0] = false;
 		p->attackdown[1] = false;
+		p->attackdown[2] = false;
+		p->attackdown[3] = false;
 
 		P_SetPsprite(p, ps_weapon, S_NULL);
 		P_SetPsprite(p, ps_flash, S_NULL);
@@ -694,7 +729,9 @@ void P_TrySwitchNewWeapon(player_t *p, int new_weap, ammotype_e new_ammo)
 
 	if (! level_flags.weapon_switch && p->ready_wp != WPSEL_None &&
 		(WeaponCouldAutoFire(p, p->ready_wp, 0) ||
-		 WeaponCouldAutoFire(p, p->ready_wp, 1)))
+		 WeaponCouldAutoFire(p, p->ready_wp, 1) ||
+		 WeaponCouldAutoFire(p, p->ready_wp, 2) ||
+		 WeaponCouldAutoFire(p, p->ready_wp, 3)))
 	{
 		return;
 	}
@@ -738,7 +775,7 @@ bool P_TryFillNewWeapon(player_t *p, int idx, ammotype_e ammo, int *qty)
 
 	weapondef_c *info = p->weapons[idx].info;
 
-	for (int ATK = 0; ATK < 2; ATK++)
+	for (int ATK = 0; ATK < 4; ATK++)
 	{
 		if (! info->attack_state[ATK])
 			continue;
@@ -772,7 +809,7 @@ void P_FillWeapon(player_t *p, int slot)
 {
 	weapondef_c *info = p->weapons[slot].info;
 
-	for (int ATK = 0; ATK < 2; ATK++)
+	for (int ATK = 0; ATK < 4; ATK++)
 	{
 		if (! info->attack_state[ATK])
 			continue;
@@ -796,6 +833,8 @@ void P_DropWeapon(player_t * p)
 
 	p->remember_atk[0] = -1;
 	p->remember_atk[1] = -1;
+	p->remember_atk[2] = -1;
+	p->remember_atk[3] = -1;
 
 	if (p->ready_wp != WPSEL_None)
 		GotoDownState(p);
@@ -975,10 +1014,12 @@ void A_WeaponReady(mobj_t * mo)
 
 	bool fire_0 = ButtonDown(p, 0);
 	bool fire_1 = ButtonDown(p, 1);
+	bool fire_2 = ButtonDown(p, 2);
+	bool fire_3 = ButtonDown(p, 3);
 
-	if (fire_0 != fire_1)
+	if (fire_0 != fire_1) // lobo: what do do with 3rd and 4th attacks?
 	{
-		for (int ATK = 0; ATK < 2; ATK++)
+		for (int ATK = 0; ATK < 4; ATK++)
 		{
 			if (! ButtonDown(p, ATK))
 				continue;
@@ -1005,6 +1046,8 @@ void A_WeaponReady(mobj_t * mo)
 	// reset memory of held buttons (must be done right here)
 	if (! fire_0) p->attackdown[0] = false;
 	if (! fire_1) p->attackdown[1] = false;
+	if (! fire_2) p->attackdown[2] = false;
+	if (! fire_3) p->attackdown[3] = false;
 
 	// give that weapon a polish, soldier!
 	if (info->idle_state && p->idlewait >= info->idle_wait)
@@ -1022,9 +1065,9 @@ void A_WeaponReady(mobj_t * mo)
 	}
 
 	// handle manual reload and fresh-ammo reload
-	if (! fire_0 && ! fire_1)
+	if (! fire_0 && ! fire_1 && ! fire_2 && ! fire_3)
 	{
-		for (int ATK = 0; ATK < 2; ATK++)
+		for (int ATK = 0; ATK < 4; ATK++)
 		{
 			if (! info->attack_state[ATK])
 				continue;
@@ -1120,6 +1163,8 @@ static void DoReFire(mobj_t * mo, int ATK)
 
 void A_ReFire  (mobj_t * mo) { DoReFire(mo, 0); }
 void A_ReFireSA(mobj_t * mo) { DoReFire(mo, 1); }
+void A_ReFireTA(mobj_t * mo) { DoReFire(mo, 2); }
+void A_ReFireFA(mobj_t * mo) { DoReFire(mo, 3); }
 
 //
 // A_NoFire
@@ -1172,8 +1217,12 @@ static void DoNoFire(mobj_t * mo, int ATK, bool does_return)
 
 void A_NoFire  (mobj_t * mo)       { DoNoFire(mo, 0, false); }
 void A_NoFireSA(mobj_t * mo)       { DoNoFire(mo, 1, false); }
+void A_NoFireTA(mobj_t * mo)       { DoNoFire(mo, 2, false); }
+void A_NoFireFA(mobj_t * mo)       { DoNoFire(mo, 3, false); }
 void A_NoFireReturn  (mobj_t * mo) { DoNoFire(mo, 0, true);  }
 void A_NoFireReturnSA(mobj_t * mo) { DoNoFire(mo, 1, true);  }
+void A_NoFireReturnTA(mobj_t * mo) { DoNoFire(mo, 2, true);  }
+void A_NoFireReturnFA(mobj_t * mo) { DoNoFire(mo, 3, true);  }
 
 
 void A_WeaponKick(mobj_t * mo)
@@ -1229,6 +1278,8 @@ static void DoCheckReload(mobj_t * mo, int ATK)
 
 void A_CheckReload  (mobj_t * mo) { DoCheckReload(mo, 0); }
 void A_CheckReloadSA(mobj_t * mo) { DoCheckReload(mo, 1); }
+void A_CheckReloadTA(mobj_t * mo) { DoCheckReload(mo, 2); }
+void A_CheckReloadFA(mobj_t * mo) { DoCheckReload(mo, 3); }
 
 
 void A_Lower(mobj_t * mo)
@@ -1391,6 +1442,8 @@ static void DoGunFlash(mobj_t * mo, int ATK)
 
 void A_GunFlash  (mobj_t * mo) { DoGunFlash(mo, 0); }
 void A_GunFlashSA(mobj_t * mo) { DoGunFlash(mo, 1); }
+void A_GunFlashTA(mobj_t * mo) { DoGunFlash(mo, 2); }
+void A_GunFlashFA(mobj_t * mo) { DoGunFlash(mo, 3); }
 
 
 static void DoWeaponShoot(mobj_t * mo, int ATK)
@@ -1409,7 +1462,7 @@ static void DoWeaponShoot(mobj_t * mo, int ATK)
 
 	if (! attack)
 		I_Error("Weapon [%s] missing attack for %s action.\n",
-			info->name.c_str(), ATK ? "SECSHOOT" : "SHOOT");
+			info->name.c_str(), ATK ? "XXXSHOOT" : "SHOOT");
 
 	// Some do not need ammunition anyway.
 	// Return if current ammunition sufficient.
@@ -1489,6 +1542,8 @@ static void DoWeaponShoot(mobj_t * mo, int ATK)
 
 void A_WeaponShoot  (mobj_t * mo) { DoWeaponShoot(mo, 0); }
 void A_WeaponShootSA(mobj_t * mo) { DoWeaponShoot(mo, 1); }
+void A_WeaponShootTA(mobj_t * mo) { DoWeaponShoot(mo, 2); }
+void A_WeaponShootFA(mobj_t * mo) { DoWeaponShoot(mo, 3); }
 
 
 //
@@ -1611,6 +1666,8 @@ void A_WeaponJump(mobj_t * mo)
 	}
 }
 
+
+//Lobo: what the hell is this function for?
 void A_WeaponDJNE(mobj_t * mo)
 {
 	player_t *p = mo->player;
@@ -1631,7 +1688,8 @@ void A_WeaponDJNE(mobj_t * mo)
 
 	SYS_ASSERT(jump->chance >= 0);
 	SYS_ASSERT(jump->chance <= 1);
-	int ATK = jump->chance > 0 ? 1 : 0;
+
+	int ATK = jump->chance > 0 ? 1 : 0; // Lobo: fixme for 3rd and 4th attack?
 
 	if (--p->weapons[p->ready_wp].reload_count[ATK] > 0)
 	{
@@ -1735,7 +1793,7 @@ void P_FixWeaponClip(player_t *p, int slot)
 {
 	weapondef_c *info = p->weapons[slot].info;
 
-	for (int ATK = 0; ATK < 2; ATK++)
+	for (int ATK = 0; ATK < 4; ATK++)
 	{
 		if (! info->attack_state[ATK])
 			continue;

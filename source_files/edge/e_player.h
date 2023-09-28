@@ -247,7 +247,7 @@ typedef struct player_s
 	playercounter_t counters[NUMCOUNTER];
 
 	// True if button down last tic.
-	bool attackdown[2];
+	bool attackdown[4];
 	bool usedown;
 	bool actiondown[2];
 
@@ -322,7 +322,7 @@ typedef struct player_s
 	// -AJA- 1999/08/10: This field is the state number which is
 	// remembered for WEAPON_NOFIRE_RETURN when the player lets go of
 	// the button.  Holds -1 if not fired or after changing weapons.
-	int remember_atk[2];
+	int remember_atk[4];
 
 	// last frame for weapon models
 	int weapon_last_frame;

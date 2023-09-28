@@ -186,6 +186,8 @@ static savefield_t sv_fields_playerweapon[] =
 	SF(flags, "flags", 1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(clip_size[0], "clip_size",    1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(clip_size[1], "sa_clip_size", 1, SVT_INT, SR_GetInt, SR_PutInt),
+	SF(clip_size[2], "ta_clip_size",    1, SVT_INT, SR_GetInt, SR_PutInt),
+	SF(clip_size[3], "fa_clip_size", 1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(model_skin, "model_skin", 1, SVT_INT, SR_GetInt, SR_PutInt),
 
 	SVFIELD_END
@@ -427,6 +429,8 @@ void SV_PlayerCreateElems(int num_elems)
 
 		p->remember_atk[0] = -1;
 		p->remember_atk[1] = -1;
+		p->remember_atk[2] = -1;
+		p->remember_atk[3] = -1;
 		p->weapon_last_frame = -1;
 
 		for (int j=0; j < NUMPSPRITES; j++)

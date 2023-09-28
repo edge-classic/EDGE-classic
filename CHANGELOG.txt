@@ -12,13 +12,15 @@ New Features
   - Can be used anywhere that DAMAGE is used (sectors, attacks, etc)
   - DAMAGE_UNLESS_BENEFIT: Player will take damage unless they have at least one of the benefits listed
   - DAMAGE_IF_BENEFIT: Player will take damage if they have at least one of the benefits listed
+  
+-WEAPONS.DDF: Can now define a 3RD and 4TH attack. 
 
 
 General Improvements/Changes
 --------------------
 - Windowed Mode resolution list will now dynamically populate based off of available display information instead of using presets
 - Video Options crosshair selection will not be shown when switching to/from weapons that have DDF custom crosshairs
-
+- Slightly re-organized the Key binding menu to accomodate the new 3rd and 4th attacks. 
 
 Bugs fixed
 ----------

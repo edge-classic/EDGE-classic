@@ -687,21 +687,33 @@ static optmenuitem_t attack_keyconfig[] =
 {
 	{OPT_KeyConfig, "Primary Attack",   NULL, 0, &key_fire, NULL, NULL},
 	{OPT_KeyConfig, "Secondary Attack", NULL, 0, &key_secondatk, NULL, NULL},
+	{OPT_KeyConfig, "Third Attack",   NULL, 0, &key_thirdatk, NULL, NULL},
+	{OPT_KeyConfig, "Fourth Attack", NULL, 0, &key_fourthatk, NULL, NULL},
 	{OPT_KeyConfig, "Next Weapon",      NULL, 0, &key_nextweapon, NULL, NULL},
 	{OPT_KeyConfig, "Previous Weapon",  NULL, 0, &key_prevweapon, NULL, NULL},
 	{OPT_KeyConfig, "Weapon Reload",    NULL, 0, &key_reload, NULL, NULL},
 	{OPT_Plain,     "",                 NULL, 0, NULL, NULL, NULL},
-	{OPT_KeyConfig, "Look Up",          NULL, 0, &key_lookup, NULL, NULL},
-	{OPT_KeyConfig, "Look Down",        NULL, 0, &key_lookdown, NULL, NULL},
-	{OPT_KeyConfig, "Center View",      NULL, 0, &key_lookcenter, NULL, NULL},
-	{OPT_KeyConfig, "Mouse Look",       NULL, 0, &key_mlook, NULL, NULL},
 	{OPT_KeyConfig, "Zoom in/out",      NULL, 0, &key_zoom, NULL, NULL},
 };
 
 static menuinfo_t attack_optmenu = 
 {
 	attack_keyconfig, sizeof(attack_keyconfig) / sizeof(optmenuitem_t),
-	&opt_def_style, 140, 98, 0,	"Attack / Look", language["MenuBinding"]
+	&opt_def_style, 140, 98, 0,	"Attack", language["MenuBinding"]
+};
+
+static optmenuitem_t look_keyconfig[] =
+{
+	{OPT_KeyConfig, "Look Up",          NULL, 0, &key_lookup, NULL, NULL},
+	{OPT_KeyConfig, "Look Down",        NULL, 0, &key_lookdown, NULL, NULL},
+	{OPT_KeyConfig, "Center View",      NULL, 0, &key_lookcenter, NULL, NULL},
+	{OPT_KeyConfig, "Mouse Look",       NULL, 0, &key_mlook, NULL, NULL},
+};
+
+static menuinfo_t look_optmenu = 
+{
+	look_keyconfig, sizeof(look_keyconfig) / sizeof(optmenuitem_t),
+	&opt_def_style, 140, 98, 0,	"Look", language["MenuBinding"]
 };
 
 //
@@ -716,8 +728,6 @@ static optmenuitem_t other_keyconfig[] =
 	{OPT_KeyConfig, "180 degree turn",  NULL, 0, &key_180, NULL, NULL},
 	{OPT_Plain,     "",                 NULL, 0, NULL, NULL, NULL},
 	{OPT_KeyConfig, "Map Toggle",       NULL, 0, &key_map, NULL, NULL},
-	{OPT_KeyConfig, "Console",          NULL, 0, &key_console, NULL, NULL},
-	{OPT_KeyConfig, "Pause",            NULL, 0, &key_pause, NULL, NULL},
 	{OPT_KeyConfig, "Action 1",         NULL, 0, &key_action1, NULL, NULL},
 	{OPT_KeyConfig, "Action 2",         NULL, 0, &key_action2, NULL, NULL},
 
@@ -822,6 +832,8 @@ static menuinfo_t inventory_optmenu =
 static optmenuitem_t program_keyconfig1[] =
 {
 	{OPT_KeyConfig, "Screenshot",   NULL, 0, &key_screenshot, NULL, NULL},
+	{OPT_KeyConfig, "Console",          NULL, 0, &key_console, NULL, NULL},
+	{OPT_KeyConfig, "Pause",            NULL, 0, &key_pause, NULL, NULL},
 	{OPT_KeyConfig, "Save Game",         NULL, 0, &key_save_game, NULL, NULL},
 	{OPT_KeyConfig, "Load Game",           NULL, 0, &key_load_game, NULL, NULL},
 	{OPT_Plain,     "",                 NULL, 0, NULL, NULL, NULL},
@@ -859,12 +871,13 @@ static menuinfo_t program_optmenu2 =
 /*
  * ALL KEYBOARD MENUS
  */
-#define NUM_KEY_MENUS  9
+#define NUM_KEY_MENUS  10
 
 static menuinfo_t * all_key_menus[NUM_KEY_MENUS] =
 {
 	&movement_optmenu,
 	&attack_optmenu,
+	&look_optmenu,
 	&otherkey_optmenu,
 	&weapon_optmenu,
 	&automap_optmenu,
@@ -939,6 +952,7 @@ void M_OptMenuInit()
 	accessibility_optmenu.name=language["MenuAccessibility"];
 	movement_optmenu.name=language["MenuBinding"];
 	attack_optmenu.name=language["MenuBinding"];
+	look_optmenu.name=language["MenuBinding"];
 	otherkey_optmenu.name=language["MenuBinding"];
 	weapon_optmenu.name=language["MenuBinding"];
 	automap_optmenu.name=language["MenuBinding"];

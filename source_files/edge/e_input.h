@@ -127,6 +127,10 @@ extern int key_inv_prev;
 extern int key_inv_use;
 extern int key_inv_next;
 
+extern int key_thirdatk;
+extern int key_fourthatk;
+
+
 #endif  /* __E_INPUT_H__ */
 
 //--- editor settings ---

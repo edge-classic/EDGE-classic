@@ -113,7 +113,9 @@ typedef enum
 
 	EBT_INVPREV = 256,
 	EBT_INVUSE  = 512,
-	EBT_INVNEXT = 1024
+	EBT_INVNEXT = 1024,
+	EBT_THIRDATK = 2048,
+	EBT_FOURTHATK = 4096
 }
 extbuttoncode_e;
 

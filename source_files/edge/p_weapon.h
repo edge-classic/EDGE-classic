@@ -88,10 +88,10 @@ typedef struct
 	int flags;
 
 	// current clip sizes
-	int clip_size[2];
+	int clip_size[4];
 	
 	// reload clip counts
-	int reload_count[2];
+	int reload_count[4];
 
 	int model_skin;
 }

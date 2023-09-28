@@ -107,6 +107,9 @@ int key_inv_prev;
 int key_inv_use;
 int key_inv_next;
 
+int key_thirdatk;
+int key_fourthatk;
+
 #define MAXPLMOVE  (forwardmove[1])
 
 static int forwardmove[2] = {25, 50};
@@ -433,6 +436,12 @@ void E_BuildTiccmd(ticcmd_t * cmd)
 
 	if (E_IsKeyPressed(key_secondatk))
 		cmd->extbuttons |= EBT_SECONDATK;
+	
+	if (E_IsKeyPressed(key_thirdatk))
+		cmd->extbuttons |= EBT_THIRDATK;
+
+	if (E_IsKeyPressed(key_fourthatk))
+		cmd->extbuttons |= EBT_FOURTHATK;
 
 	if (E_IsKeyPressed(key_reload))
 		cmd->extbuttons |= EBT_RELOAD;

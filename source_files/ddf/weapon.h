@@ -68,12 +68,12 @@ public:
 	// Weapon's name, etc...
 	std::string name;
 
-	atkdef_c *attack[2];	// Attack type used.
+	atkdef_c *attack[4];	// Attack type used.
   
-	ammotype_e ammo[2];		// Type of ammo this weapon uses.
-	int ammopershot[2];		// Ammo used per shot.
-	int clip_size[2];		// Amount of shots in a clip (if <= 1, non-clip weapon)
-	bool autofire[2];		// If true, this is an automatic else it's semiauto 
+	ammotype_e ammo[4];		// Type of ammo this weapon uses.
+	int ammopershot[4];		// Ammo used per shot.
+	int clip_size[4];		// Amount of shots in a clip (if <= 1, non-clip weapon)
+	bool autofire[4];		// If true, this is an automatic else it's semiauto 
 
 	float kick;				// Amount of kick this weapon gives
   
@@ -86,11 +86,11 @@ public:
 	int empty_state;        // State when weapon is empty.  Usually zero
 	int idle_state;			// State to use when polishing weapon
 
-	int attack_state[2];	// State showing the weapon 'firing'
-	int reload_state[2];	// State showing the weapon being reloaded
-	int discard_state[2];	// State showing the weapon discarding a clip
-	int warmup_state[2];	// State showing the weapon warming up
-	int flash_state[2];		// State showing the muzzle flash
+	int attack_state[4];	// State showing the weapon 'firing'
+	int reload_state[4];	// State showing the weapon being reloaded
+	int discard_state[4];	// State showing the weapon discarding a clip
+	int warmup_state[4];	// State showing the weapon warming up
+	int flash_state[4];		// State showing the muzzle flash
 
 	int crosshair;			// Crosshair states
 	int zoom_state;			// State showing viewfinder when zoomed.  Can be zero
@@ -137,7 +137,7 @@ public:
 	int bind_key;
   
 	// -AJA- 2000/01/12: weapon special flags
-	weapon_flag_e specials[2];
+	weapon_flag_e specials[4];
 
 	// -AJA- 2000/03/18: when > 0, this weapon can zoom
 	int zoom_fov;

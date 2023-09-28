@@ -65,6 +65,27 @@ static const commandlist_t weapon_commands[] =
 	DF("SEC_ATTACK", attack[1], DDF_MainRefAttack),
 	DF("SEC_SPECIAL", specials[1], DDF_WGetSpecialFlags),
 
+	DF("2ND_AMMOTYPE", ammo[1], DDF_WGetAmmo),
+	DF("2ND_AMMOPERSHOT", ammopershot[1], DDF_MainGetNumeric),
+	DF("2ND_CLIPSIZE", clip_size[1], DDF_MainGetNumeric),
+	DF("2ND_AUTOMATIC", autofire[1], DDF_MainGetBoolean),
+	DF("2ND_ATTACK", attack[1], DDF_MainRefAttack),
+	DF("2ND_SPECIAL", specials[1], DDF_WGetSpecialFlags),
+	
+	DF("3RD_AMMOTYPE", ammo[2], DDF_WGetAmmo),
+	DF("3RD_AMMOPERSHOT", ammopershot[2], DDF_MainGetNumeric),
+	DF("3RD_CLIPSIZE", clip_size[2], DDF_MainGetNumeric),
+	DF("3RD_AUTOMATIC", autofire[2], DDF_MainGetBoolean),
+	DF("3RD_ATTACK", attack[2], DDF_MainRefAttack),
+	DF("3RD_SPECIAL", specials[2], DDF_WGetSpecialFlags),
+
+	DF("4TH_AMMOTYPE", ammo[3], DDF_WGetAmmo),
+	DF("4TH_AMMOPERSHOT", ammopershot[3], DDF_MainGetNumeric),
+	DF("4TH_CLIPSIZE", clip_size[3], DDF_MainGetNumeric),
+	DF("4TH_AUTOMATIC", autofire[3], DDF_MainGetBoolean),
+	DF("4TH_ATTACK", attack[3], DDF_MainRefAttack),
+	DF("4TH_SPECIAL", specials[3], DDF_WGetSpecialFlags),
+
 	DF("EJECT_ATTACK", eject_attack, DDF_MainRefAttack),
 	DF("FREE", autogive, DDF_MainGetBoolean),
 	DF("BINDKEY", bind_key, DDF_MainGetNumeric),
@@ -131,6 +152,24 @@ static const state_starter_t weapon_starters[] =
 	DDF_STATE("SECWARMUP", "SECATTACK", warmup_state[1]),
 	DDF_STATE("SECFLASH",  "REMOVE",    flash_state[1]),
 
+	DDF_STATE("2NDATTACK", "READY",     attack_state[1]),
+	DDF_STATE("2NDRELOAD", "READY",     reload_state[1]),
+	DDF_STATE("2NDDISCARD","READY",     discard_state[1]),
+	DDF_STATE("2NDWARMUP", "2NDATTACK", warmup_state[1]),
+	DDF_STATE("2NDFLASH",  "REMOVE",    flash_state[1]),
+
+	DDF_STATE("3RDATTACK", "READY",     attack_state[2]),
+	DDF_STATE("3RDRELOAD", "READY",     reload_state[2]),
+	DDF_STATE("3RDDISCARD","READY",     discard_state[2]),
+	DDF_STATE("3RDWARMUP", "3RDATTACK", warmup_state[2]),
+	DDF_STATE("3RDFLASH",  "REMOVE",    flash_state[2]),
+
+	DDF_STATE("4THATTACK", "READY",     attack_state[3]),
+	DDF_STATE("4THRELOAD", "READY",     reload_state[3]),
+	DDF_STATE("4THDISCARD","READY",     discard_state[3]),
+	DDF_STATE("4THWARMUP", "4THATTACK", warmup_state[3]),
+	DDF_STATE("4THFLASH",  "REMOVE",    flash_state[3]),
+
 	DDF_STATE_END
 };
 
@@ -178,9 +217,30 @@ static const actioncode_t weapon_actions[] =
 	{"SEC_NOFIRE_RETURN", A_NoFireReturnSA, NULL},
 	{"SEC_CHECKRELOAD",   A_CheckReloadSA, NULL},
 
+	{"2ND_SHOOT",         A_WeaponShootSA, DDF_StateGetAttack},
+	{"2ND_REFIRE",        A_ReFireSA, NULL},
+	{"2ND_NOFIRE",        A_NoFireSA, NULL},
+	{"2ND_NOFIRE_RETURN", A_NoFireReturnSA, NULL},
+	{"2ND_CHECKRELOAD",   A_CheckReloadSA, NULL},
+
+	{"3RD_SHOOT",         A_WeaponShootTA, DDF_StateGetAttack},
+	{"3RD_REFIRE",        A_ReFireTA, NULL},
+	{"3RD_NOFIRE",        A_NoFireTA, NULL},
+	{"3RD_NOFIRE_RETURN", A_NoFireReturnTA, NULL},
+	{"3RD_CHECKRELOAD",   A_CheckReloadTA, NULL},
+
+	{"4TH_SHOOT",         A_WeaponShootFA, DDF_StateGetAttack},
+	{"4TH_REFIRE",        A_ReFireFA, NULL},
+	{"4TH_NOFIRE",        A_NoFireFA, NULL},
+	{"4TH_NOFIRE_RETURN", A_NoFireReturnFA, NULL},
+	{"4TH_CHECKRELOAD",   A_CheckReloadFA, NULL},
+
 	// flash-related actions
 	{"FLASH",             A_GunFlash, NULL},
 	{"SEC_FLASH",         A_GunFlashSA, NULL},
+	{"2ND_FLASH",         A_GunFlashSA, NULL},
+	{"3RD_FLASH",         A_GunFlashTA, NULL},
+	{"4TH_FLASH",         A_GunFlashFA, NULL},
 	{"LIGHT0",            A_Light0, NULL},
 	{"LIGHT1",            A_Light1, NULL},
 	{"LIGHT2",            A_Light2, NULL},
@@ -415,12 +475,12 @@ static void WeaponFinishEntry(void)
 	// check stuff...
 	int ATK;
 
-	for (ATK = 0; ATK < 2; ATK++)
+	for (ATK = 0; ATK < 4; ATK++)
 	{
 		if (dynamic_weapon->ammopershot[ATK] < 0)
 		{
 			DDF_WarnError("Bad %sAMMOPERSHOT value for weapon: %d\n",
-					ATK ? "SEC_" : "", dynamic_weapon->ammopershot[ATK]);
+					ATK ? "XXX_" : "", dynamic_weapon->ammopershot[ATK]);
 			dynamic_weapon->ammopershot[ATK] = 0;
 		}
 
@@ -431,7 +491,7 @@ static void WeaponFinishEntry(void)
 		if (dynamic_weapon->clip_size[ATK] < 0)
 		{
 			DDF_WarnError("Bad %sCLIPSIZE value for weapon: %d\n",
-					ATK ? "SEC_" : "", dynamic_weapon->clip_size[ATK]);
+					ATK ? "XXX_" : "", dynamic_weapon->clip_size[ATK]);
 			dynamic_weapon->clip_size[ATK] = 0;
 		}
 
@@ -441,8 +501,8 @@ static void WeaponFinishEntry(void)
 			 (dynamic_weapon->clip_size[ATK] % dynamic_weapon->ammopershot[ATK] != 0)))
 		{
 			DDF_WarnError("%sAMMOPERSHOT=%d incompatible with %sCLIPSIZE=%d\n",
-				ATK ? "SEC_" : "", dynamic_weapon->ammopershot[ATK],
-				ATK ? "SEC_" : "", dynamic_weapon->clip_size[ATK]);
+				ATK ? "XXX_" : "", dynamic_weapon->ammopershot[ATK],
+				ATK ? "XXX_" : "", dynamic_weapon->clip_size[ATK]);
 			dynamic_weapon->ammopershot[ATK] = 1;
 		}
 
@@ -451,7 +511,7 @@ static void WeaponFinishEntry(void)
 			! (dynamic_weapon->specials[ATK] & WPSP_Partial))
 		{
 			DDF_Error("Cannot use %sDISCARD states with NO_PARTIAL special.\n",
-				ATK ? "SEC_" : "");
+				ATK ? "XXX_" : "");
 		}
 	}
 
@@ -460,8 +520,8 @@ static void WeaponFinishEntry(void)
 		if (dynamic_weapon->clip_size[0] == 0)
 			DDF_Error("SHARED_CLIP requires a clip weapon (missing CLIPSIZE)\n");
 
-		if (dynamic_weapon->attack_state[1] == 0)
-			DDF_Error("SHARED_CLIP used without secondary attack states.\n");
+		if (dynamic_weapon->attack_state[1] == 0 && dynamic_weapon->attack_state[2] == 0 && dynamic_weapon->attack_state[3] == 0)
+			DDF_Error("SHARED_CLIP used without 2nd 3rd or 4th attack states.\n");
 
 		if (dynamic_weapon->ammo[1] != AM_NoAmmo ||
 			dynamic_weapon->ammopershot[1] != 0 ||
@@ -469,6 +529,21 @@ static void WeaponFinishEntry(void)
 		{
 			DDF_Error("SHARED_CLIP cannot be used with SEC_AMMO or SEC_CLIPSIZE commands.\n");
 		}
+
+		if (dynamic_weapon->ammo[2] != AM_NoAmmo ||
+			dynamic_weapon->ammopershot[2] != 0 ||
+			dynamic_weapon->clip_size[2] != 0)
+		{
+			DDF_Error("SHARED_CLIP cannot be used with 3RD_AMMO or 3RD_CLIPSIZE commands.\n");
+		}
+
+		if (dynamic_weapon->ammo[3] != AM_NoAmmo ||
+			dynamic_weapon->ammopershot[3] != 0 ||
+			dynamic_weapon->clip_size[3] != 0)
+		{
+			DDF_Error("SHARED_CLIP cannot be used with 4TH_AMMO or 4TH_CLIPSIZE commands.\n");
+		}
+
 	}
 
 	if (dynamic_weapon->model_skin < 0 || dynamic_weapon->model_skin > 9)
@@ -717,7 +792,7 @@ void weapondef_c::CopyDetail(weapondef_c &src)
 	for (unsigned int i = 0; i < src.state_grp.size(); i++)
 		state_grp.push_back(src.state_grp[i]);
 
-	for (int ATK = 0; ATK < 2; ATK++)
+	for (int ATK = 0; ATK < 4; ATK++)
 	{
 		attack[ATK] = src.attack[ATK];
 		ammo[ATK]   = src.ammo[ATK];
@@ -797,7 +872,7 @@ void weapondef_c::Default(void)
 {
 	state_grp.clear();
 
-	for (int ATK = 0; ATK < 2; ATK++)
+	for (int ATK = 0; ATK < 4; ATK++)
 	{
 		attack[ATK] = NULL;
 		ammo[ATK]   = AM_NoAmmo;
@@ -814,6 +889,9 @@ void weapondef_c::Default(void)
 
 	specials[0] = DEFAULT_WPSP;
 	specials[1] = (weapon_flag_e)(DEFAULT_WPSP & ~WPSP_SwitchAway);
+	specials[2] = (weapon_flag_e)(DEFAULT_WPSP & ~WPSP_SwitchAway);
+	specials[3] = (weapon_flag_e)(DEFAULT_WPSP & ~WPSP_SwitchAway);
+
 
 	kick = 0.0f;
 

@@ -1021,7 +1021,8 @@ void A_WeaponReady(mobj_t * mo)
 	bool fire_2 = ButtonDown(p, 2);
 	bool fire_3 = ButtonDown(p, 3);
 
-	if (fire_0 != fire_1) // lobo: what do do with 3rd and 4th attacks?
+	//if (fire_0 != fire_1)
+	if (fire_0 || fire_1  || fire_2  || fire_3) 
 	{
 		for (int ATK = 0; ATK < 4; ATK++)
 		{

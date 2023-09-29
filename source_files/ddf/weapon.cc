@@ -527,21 +527,21 @@ static void WeaponFinishEntry(void)
 			dynamic_weapon->ammopershot[1] != 0 ||
 			dynamic_weapon->clip_size[1] != 0)
 		{
-			DDF_Error("SHARED_CLIP cannot be used with SEC_AMMO or SEC_CLIPSIZE commands.\n");
+			DDF_Error("SHARED_CLIP cannot be used with SEC_AMMO or SEC_AMMOPERSHOT or SEC_CLIPSIZE commands.\n");
 		}
 
 		if (dynamic_weapon->ammo[2] != AM_NoAmmo ||
 			dynamic_weapon->ammopershot[2] != 0 ||
 			dynamic_weapon->clip_size[2] != 0)
 		{
-			DDF_Error("SHARED_CLIP cannot be used with 3RD_AMMO or 3RD_CLIPSIZE commands.\n");
+			DDF_Error("SHARED_CLIP cannot be used with 3RD_AMMO or 3RD_AMMOPERSHOT or 3RD_CLIPSIZE commands.\n");
 		}
 
 		if (dynamic_weapon->ammo[3] != AM_NoAmmo ||
 			dynamic_weapon->ammopershot[3] != 0 ||
 			dynamic_weapon->clip_size[3] != 0)
 		{
-			DDF_Error("SHARED_CLIP cannot be used with 4TH_AMMO or 4TH_CLIPSIZE commands.\n");
+			DDF_Error("SHARED_CLIP cannot be used with 4TH_AMMO or 4TH_AMMOPERSHOT or 4TH_CLIPSIZE commands.\n");
 		}
 
 	}

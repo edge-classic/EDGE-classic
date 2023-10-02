@@ -1,0 +1,32 @@
+// 
+//    EDGE FLAT.DDF -redefine or add new flat properties.
+//    For documentation, see https://edge-classic.github.io/
+//
+
+<FLATS>
+
+#VERSION 1.30
+
+[NUKAGE1]
+FOOTSTEP = "";
+LIQUID = "";
+
+[NUKAGE2]
+FOOTSTEP = "";
+LIQUID = "";
+
+[NUKAGE3]
+FOOTSTEP = "";
+LIQUID = "";
+
+[BLOOD1]
+FOOTSTEP = "";
+LIQUID = "";
+
+[BLOOD2]
+FOOTSTEP = "";
+LIQUID = "";
+
+[BLOOD3]
+FOOTSTEP = "";
+LIQUID = "";

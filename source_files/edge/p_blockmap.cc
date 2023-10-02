@@ -699,6 +699,9 @@ void P_SetThingPosition(mobj_t * mo)
 		mo->dlprev = NULL;
 		mo->dlnext = sec->glow_things;
 
+		if (sec->glow_things)
+			sec->glow_things->dlprev = mo;
+
 		sec->glow_things = mo;
 	}
 }

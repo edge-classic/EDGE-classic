@@ -853,7 +853,7 @@ namespace Things
 			// tokens should be non-empty
 			assert(token[0] != 0);
 
-			if (isdigit(token[0]))
+			if (isdigit(token[0]) || token[0] == '-')
 			{
 				int flags;
 

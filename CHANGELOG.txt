@@ -10,8 +10,8 @@ New Features
 ------------
 - ATTACKS.DDF: DAMAGE_UNLESS_BENEFIT and DAMAGE_IF_BENEFIT subcommands Added
   - Can be used anywhere that DAMAGE is used (sectors, attacks, etc)
-  - DAMAGE_UNLESS_BENEFIT: Player will take damage unless they have at least one of the benefits listed
-  - DAMAGE_IF_BENEFIT: Player will take damage if they have at least one of the benefits listed
+  - DAMAGE.DAMAGE_UNLESS_BENEFIT: Player will take damage unless they have at least one of the benefits listed
+  - DAMAGE.DAMAGE_IF_BENEFIT: Player will take damage if they have at least one of the benefits listed
   
 -WEAPONS.DDF: Can now define a 3RD and 4TH attack. 
 
@@ -28,3 +28,4 @@ Bugs fixed
 - Fixed assertion failure when referencing DSDehacked frames past the last frame explicitly defined in the [CODEPTR] section
 - Fixed viewpoint modified by the r_fov CVAR not changing the vertical view slope appropriately
 - Fixed region properties not working properly with a vertex sloped floor that rises above its sector's original floor height
+- Fixed occasional sector glow thing link/unlink errors

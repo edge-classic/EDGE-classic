@@ -495,7 +495,6 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 	WAD::Printf("\n");
 
 	Things::HandleFlags(info, mt_num, 0);
-	Things::HandleMBF21Flags(info, mt_num, 0);
 
 	if (Frames::attack_slot[0] || Frames::attack_slot[1] ||
 	    Frames::attack_slot[2])
@@ -1043,6 +1042,15 @@ namespace Things
 			AddOneFlag(info, extflaglist[i].conv, got_a_flag);
 		}
 
+		for (i = 0; mbf21flag_list[i].bex != NULL; i++)
+		{
+			if (0 == (cur_f & mbf21flag_list[i].flag))
+				continue;
+
+			if (mbf21flag_list[i].conv != NULL)
+				AddOneFlag(info, mbf21flag_list[i].conv, got_a_flag);
+		}
+
 		if (force_disloyal)
 			AddOneFlag(info, extflaglist[0].conv, got_a_flag);
 
@@ -1073,27 +1081,6 @@ namespace Things
 		{
 			WAD::Printf("SIDE = 16777215;\n");
 		}
-	}
-
-	void HandleMBF21Flags(const mobjinfo_t *info, int mt_num, int player)
-	{
-		int i;
-		int cur_f = info->mbf21_flags;
-		bool got_a_flag = false;
-
-		for (i = 0; mbf21flag_list[i].bex != NULL; i++)
-		{
-			if (0 == (cur_f & mbf21flag_list[i].flag))
-				continue;
-
-			if (mbf21flag_list[i].conv != NULL)
-				AddOneFlag(info, mbf21flag_list[i].conv, got_a_flag);
-		}
-
-		AddOneFlag(info, "MBF21_COMPAT", got_a_flag);
-
-		if (got_a_flag)
-			WAD::Printf(";\n");
 	}
 
 	void FixHeights()
@@ -1740,7 +1727,6 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player,
 	WAD::Printf("\n");
 
 	HandleFlags(info, mt_num, player);
-	HandleMBF21Flags(info, mt_num, player);
 	HandleAttacks(info, mt_num);
 
 	if (Frames::act_flags & AF_EXPLODE)

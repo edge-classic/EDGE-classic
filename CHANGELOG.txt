@@ -8,12 +8,29 @@ CHANGELOG for EDGE-Classic 1.36 (since EDGE-Classic 1.35)
 
 New Features
 ------------
-- ATTACKS.DDF: DAMAGE_UNLESS_BENEFIT and DAMAGE_IF_BENEFIT subcommands Added
+- ATTACKS.DDF: DAMAGE_UNLESS_BENEFIT and DAMAGE_IF_BENEFIT subcommands added
   - Can be used anywhere that DAMAGE is used (sectors, attacks, etc)
   - DAMAGE.DAMAGE_UNLESS_BENEFIT: Player will take damage unless they have at least one of the benefits listed
   - DAMAGE.DAMAGE_IF_BENEFIT: Player will take damage if they have at least one of the benefits listed
   
--WEAPONS.DDF: Can now define a 3RD and 4TH attack. 
+- WEAPONS.DDF: Can now define a 3RD and 4TH attack. Equivalent DDF syntax to SEC_xxx used for second attack
+	 DDF Fields: 
+	 - 3RD_ATTACK, 3RD_AMMOTYPE, 3RD_AMMOPERSHOT, 3RD_CLIPSIZE, 3RD_AUTOMATIC, 3RD_SPECIAL
+	 - 4TH_ATTACK, 4TH_AMMOTYPE, 4TH_AMMOPERSHOT, 4TH_CLIPSIZE, 4TH_AUTOMATIC, 4TH_SPECIAL
+	 
+	 DDF States:
+	 - 3RD_ATTACK, 3RD_RELOAD, 3RD_DISCARD, 3RD_WARMUP, 3RD_FLASH
+	 - 4TH_ATTACK, 4TH_RELOAD, 4TH_DISCARD, 4TH_WARMUP, 4TH_FLASH
+	 
+	 DDF Actions:
+	 - 3RD_SHOOT, 3RD_REFIRE, 3RD_NOFIRE, 3RD_NOFIRE_RETURN, 3RD_CHECKRELOAD, 3RD_FLASH
+	 - 4TH_SHOOT, 4TH_REFIRE, 4TH_NOFIRE, 4TH_NOFIRE_RETURN, 4TH_CHECKRELOAD, 4TH_FLASH
+	 
+	For consistency, all the old SEC_xxx ddf commands can also be used with 2ND_xxx instead 
+	  i.e. 2ND_AMMOTYPE can replace SEC_AMMOTYPE
+
+- ATTACKS.DDF: Attack special "PLAYER_ATTACK" makes attack behave as if originating from the 
+  player, even if it's an indirect secondary attack i.e. the player gets his VAMPIRE health and KillBenefits.
 
 
 General Improvements/Changes

@@ -1195,7 +1195,7 @@ static mobj_t *DoLaunchProjectile(mobj_t * source, float tx, float ty, float tz,
 
 		if (! (attack->flags & AF_Player))
 		{
-			if (target->flags & MF_FUZZY && !source->player)
+			if (target->flags & MF_FUZZY)
 				angle += P_RandomNegPos() << (ANGLEBITS - 12);
 
 			if (target->visibility < VISIBLE)
@@ -1945,11 +1945,6 @@ static void SprayAttack(mobj_t * mo)
 		return;
 
 	float range = (attack->range > 0) ? attack->range : MISSILERANGE;
-	int old_hf = mo->source->hyperflags;
-
-	// hacky, but prevents messing with P_DamageMobj
-	if (attack->flags & AF_Vampire)
-		mo->source->hyperflags |= HF_VAMPIRE;
 
 	// offset angles from its attack angle
 	for (int i = 0; i < 40; i++)
@@ -1985,7 +1980,6 @@ static void SprayAttack(mobj_t * mo)
 			P_DamageMobj(target, NULL, mo->source, damage, &attack->damage);
 	}
 
-	mo->source->hyperflags = old_hf;
 }
 
 static void DoMeleeAttack(mobj_t * mo)

@@ -1570,6 +1570,23 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 		player->health = MAX(0, player->health - damage);
 	}
 
+
+//Lobo 2023: Handle attack flagged with the "PLAYER_ATTACK" special.
+// This attack will always be treated as originating from the player, even if it's an indirect secondary attack.
+// This way the player gets his VAMPIRE health and KillBenefits.
+if(inflictor && inflictor->currentattack &&
+		  (inflictor->currentattack->flags & AF_Player))
+{
+	player_t *CurrentPlayer;
+	CurrentPlayer = players[consoleplayer];
+
+	source = CurrentPlayer->mo;
+
+	if (source && source->isRemoved()) //Sanity check?
+		source = NULL;
+}
+
+
 	// -AJA- 2007/11/06: vampire mode!
 	if (source && source != target &&
 		source->health < source->info->spawnhealth &&

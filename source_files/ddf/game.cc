@@ -755,6 +755,7 @@ void gamedef_c::CopyDetail(gamedef_c &src)
 	nextmap = src.nextmap;
 	accel_snd = src.accel_snd;
 	frag_snd = src.frag_snd;
+	no_skill_menu = src.no_skill_menu;
 
 	firstmap = src.firstmap;
 	namegraphic = src.namegraphic;

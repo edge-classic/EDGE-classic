@@ -32,6 +32,13 @@ New Features
 - ATTACKS.DDF: Attack special "PLAYER_ATTACK" makes attack behave as if originating from the 
   player, even if it's an indirect secondary attack i.e. the player gets his VAMPIRE health and KillBenefits.
 
+- GAMES.DDF: "NO_SKILL_MENU" boolean command added (Courtesy of akaAgar - https://github.com/edge-classic/EDGE-classic/pull/577)
+  - If true, will skip difficulty menu and start selected episode at skill 2 ("Hurt Me Plenty" for Doom)
+  - Intent is for mapsets that have a Quake-style initial skill-select level or where the author may not implement/want
+    to present skill levels
+  - Default value is false
+
+
 
 General Improvements/Changes
 --------------------
@@ -39,6 +46,9 @@ General Improvements/Changes
 - Video Options crosshair selection will not be shown when switching to/from weapons that have DDF custom crosshairs
 - Slightly re-organized the Key binding menu to accomodate the new 3rd and 4th attacks.
 - Implemented 'episode' UMAPINFO key; EDGE-Classic now fully supports the UMAPINFO spec, Revision 2.2
+  - ZMAPINFO/MAPINFO episode definitions will now be parsed as well
+- ZMAPINFO/MAPINFO will now respect the 'noskillmenu' episode definition key
+  - Leverages the new NO_SKILL_MENU DDFGAME command mentioned above
 
 Bugs fixed
 ----------

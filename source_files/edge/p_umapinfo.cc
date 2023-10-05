@@ -1220,7 +1220,11 @@ void Parse_MAPINFO(const std::string& buffer)
 				lex.MatchKeep("linecheck"); // doesn't matter, just need to update LastLine
 
 				if (key_line != lex.LastLine()) // key-only value, parse if supported and move on
+				{
+					if (epi::case_cmp(key, "noskillmenu") == 0)
+						new_epi->no_skill_menu = true;
 					continue;
+				}
 
 				lex.Match("="); // optional
 
@@ -1707,7 +1711,11 @@ void Parse_ZMAPINFO(const std::string& buffer)
 				lex.MatchKeep("linecheck"); // doesn't matter, just need to update LastLine
 
 				if (key_line != lex.LastLine()) // key-only value, parse if supported and move on
+				{
+					if (epi::case_cmp(key, "noskillmenu") == 0)
+						new_epi->no_skill_menu = true;
 					continue;
+				}
 
 				lex.Match("="); // optional
 

@@ -362,6 +362,7 @@ static menu_t MainDef =
 // -KM- 1998/12/16 This is generated dynamically.
 //
 static menuitem_t *EpisodeMenu = NULL;
+static bool *EpisodeMenuSkipSkill = NULL;
 
 static menuitem_t DefaultEpiMenu =
 {
@@ -1322,6 +1323,7 @@ static void CreateEpisodeMenu(void)
 		I_Error("No defined episodes !\n");
 
 	EpisodeMenu = new menuitem_t[gamedefs.GetSize()];
+	EpisodeMenuSkipSkill = new bool[gamedefs.GetSize()];
 
 	int e = 0;
 	epi::array_iterator_c it;
@@ -1341,6 +1343,7 @@ static void CreateEpisodeMenu(void)
 		EpisodeMenu[e].select_func = M_Episode;
 		EpisodeMenu[e].image = NULL;
 		EpisodeMenu[e].alpha_key = '1' + e;
+		EpisodeMenuSkipSkill[e] = g->no_skill_menu;
 
 		Z_StrNCpy(EpisodeMenu[e].patch_name, g->namegraphic.c_str(), 8);
 		EpisodeMenu[e].patch_name[8] = 0;
@@ -1547,7 +1550,10 @@ void M_ChooseSkill(int choice)
 void M_Episode(int choice)
 {
 	chosen_epi = choice;
-	M_SetupNextMenu(&SkillDef);
+	if (EpisodeMenuSkipSkill[chosen_epi])
+		DoStartLevel((skill_t)2);
+	else
+		M_SetupNextMenu(&SkillDef);
 }
 
 //

@@ -210,9 +210,10 @@ void V_SetPalette(int type, float amount)
 
 	switch (type)
 	{
-	case PALETTE_PAIN:
-		palette = (int)(PAIN_PALS + amount * NUM_PAIN_PALS);
-		break;
+		// Pain color fading is now handled differently in V_IndexColourToRGB
+		// case PALETTE_PAIN:
+		// palette = (int)(PAIN_PALS + amount * NUM_PAIN_PALS);
+		// break;
 
 	case PALETTE_BONUS:
 		palette = (int)(BONUS_PALS + amount * NUM_BONUS_PALS);
@@ -549,11 +550,20 @@ void V_ColourNewFrame(void)
 // Returns an RGB value from an index value - used the current
 // palette.  The byte pointer is assumed to point a 3-byte array.
 //
-void V_IndexColourToRGB(int indexcol, byte *returncol)
+void V_IndexColourToRGB(int indexcol, byte *returncol, float damageAmount)
 {
-	returncol[0] = playpal_data[cur_palette][indexcol][0];
-	returncol[1] = playpal_data[cur_palette][indexcol][1];
-	returncol[2] = playpal_data[cur_palette][indexcol][2];
+	if ((cur_palette == PALETTE_NORMAL) || (cur_palette == PALETTE_PAIN))
+	{
+		returncol[0] = (byte)MAX(0, MIN(255, damageAmount * 2.5));
+		returncol[1] = 0;
+		returncol[2] = 0;
+	}
+	else
+	{
+		returncol[0] = playpal_data[cur_palette][indexcol][0];
+		returncol[1] = playpal_data[cur_palette][indexcol][1];
+		returncol[2] = playpal_data[cur_palette][indexcol][2];
+	}
 }
 
 rgbcol_t V_LookupColour(int col)

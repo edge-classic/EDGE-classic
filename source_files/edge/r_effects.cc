@@ -240,7 +240,7 @@ void RGL_PaletteEffect(player_t *player)
 	}
 	else
 	{
-		V_IndexColourToRGB(pal_black, rgb_data);
+		V_IndexColourToRGB(pal_black, rgb_data, player->damagecount);
 
 		int rgb_max = MAX(rgb_data[0], MAX(rgb_data[1], rgb_data[2]));
 

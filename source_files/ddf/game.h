@@ -192,6 +192,7 @@ public:
 	std::string bg_camera;
 
 	int music;
+	bool no_skill_menu;
 	struct sfx_s *percent;
 	struct sfx_s *done;
 	struct sfx_s *endmap;

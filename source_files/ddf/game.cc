@@ -60,6 +60,7 @@ static const commandlist_t gamedef_commands[] =
 	DF("SPECIAL_MUSIC", special_music, DDF_MainGetNumeric),
 	DF("LIGHTING", lighting, DDF_GameGetLighting),
 	DF("DESCRIPTION", description, DDF_MainGetString),
+	DF("NO_SKILL_MENU", no_skill_menu, DDF_MainGetBoolean),
 
 	DDF_CMD_END
 };
@@ -754,6 +755,7 @@ void gamedef_c::CopyDetail(gamedef_c &src)
 	nextmap = src.nextmap;
 	accel_snd = src.accel_snd;
 	frag_snd = src.frag_snd;
+	no_skill_menu = src.no_skill_menu;
 
 	firstmap = src.firstmap;
 	namegraphic = src.namegraphic;
@@ -783,6 +785,7 @@ void gamedef_c::Default()
 
 	bg_camera.clear();
 	music = 0;
+	no_skill_menu = false;
 
 	percent = sfx_None;
 	done = sfx_None;

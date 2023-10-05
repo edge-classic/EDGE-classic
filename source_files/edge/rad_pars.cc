@@ -1879,6 +1879,23 @@ static void RAD_ParseLightSector(param_set_t& pars)
 	AddStateToScript(this_rad, 0, RAD_ActLightSector, secl);
 }
 
+static void RAD_ParseChangeSectorType(param_set_t& pars)
+{
+	// ChangeSectorType <tag> <newType>
+
+	s_sectortypechanger_s *sect;
+
+	sect = new s_sectortypechanger_s;
+
+	RAD_CheckForInt(pars[1], &sect->tag);
+	RAD_CheckForInt(pars[2], &sect->typenum);
+
+	if (sect->tag == 0)
+		RAD_Error("%s: Invalid tag number: %d\n", pars[0], sect->tag);
+
+	AddStateToScript(this_rad, 0, RAD_ActChangeSectorType, sect);
+}
+
 static void RAD_ParseFogSector(param_set_t& pars)
 {
 	// FogSector <tag> <color or SAME or CLEAR> <density(%) or SAME or CLEAR>
@@ -2315,6 +2332,7 @@ static const rts_parser_t radtrig_parsers[] =
 	{2, "REPLACE_WEAPON", 3,3, RAD_ParseReplaceWeapon},
 	{2, "WEAPON_EVENT", 3,3, RAD_ParseWeaponEvent},
 	{2, "REPLACE_THING", 3,3, RAD_ParseReplaceThing},
+	{2, "CHANGE_SECTOR_TYPE", 3,3, RAD_ParseChangeSectorType},
 
 	// old crud
 	{2, "SECTORV", 4,4, RAD_ParseMoveSector},

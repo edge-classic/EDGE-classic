@@ -323,6 +323,16 @@ typedef struct s_lineactivator_s
 }
 s_lineactivator_t;
 
+// ChangeSectorType
+typedef struct s_sectortypechanger_s
+{
+	// sector type
+	int typenum = 0;
+
+	// sector tag
+	int tag = 0;
+}
+s_sectortypechanger_t;
 
 // UnblockLines
 typedef struct s_lineunblocker_s

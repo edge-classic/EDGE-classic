@@ -903,6 +903,30 @@ void RAD_ActLightSector(rad_trigger_t *R, void *param)
 	}
 }
 
+void RAD_ActChangeSectorType(rad_trigger_t *R, void *param)
+{
+	s_sectortypechanger_t *t = (s_sectortypechanger_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		P_SectorChangeSpecial(sectors + i, t->typenum);
+
+		if (sectors[i].props.special && sectors[i].props.special->fog_color != RGB_NO_VALUE)
+		{
+			sectors[i].props.fog_color = sectors[i].props.special->fog_color;
+			sectors[i].props.fog_density = 0.01f * sectors[i].props.special->fog_density;
+		}
+
+		if (sectors[i].props.special && sectors[i].props.special->use_colourmap)
+		{
+			sectors[i].props.colourmap = sectors[i].props.special->use_colourmap;
+		}
+	}
+}
+
 void RAD_ActFogSector(rad_trigger_t *R, void *param)
 {
 	s_fogsector_t *t = (s_fogsector_t *) param;

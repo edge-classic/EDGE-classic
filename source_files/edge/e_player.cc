@@ -599,6 +599,9 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 		switch (cond->cond_type)
 		{
 			case COND_Health:
+				if (cond->exact)
+					return (mo->health == cond->amount);
+				
 				temp = (mo->health >= cond->amount);
 
 				if ((!cond->negate && !temp) || (cond->negate && temp))
@@ -609,6 +612,14 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 			case COND_Armour:
 				if (!p)
 					return false;
+
+				if (cond->exact)
+				{
+					if (cond->sub.type == ARMOUR_Total)
+						return (p->totalarmour == i_amount);
+					else
+						return (p->armours[cond->sub.type] == i_amount);
+				}
 
 				if (cond->sub.type == ARMOUR_Total)
 					temp = (p->totalarmour >= i_amount);
@@ -656,6 +667,9 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 				if (!p)
 					return false;
 
+				if (cond->exact)
+					return (p->powers[cond->sub.type] == cond->amount);
+
 				temp = (p->powers[cond->sub.type] > cond->amount);
 
 				if ((!cond->negate && !temp) || (cond->negate && temp))
@@ -666,6 +680,9 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 			case COND_Ammo:
 				if (!p)
 					return false;
+
+				if (cond->exact)
+					return (p->ammo[cond->sub.type].num == i_amount);
 
 				temp = (p->ammo[cond->sub.type].num >= i_amount);
 
@@ -678,6 +695,9 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 				if (!p)
 					return false;
 
+				if (cond->exact)
+					return (p->inventory[cond->sub.type].num == i_amount);
+
 				temp = (p->inventory[cond->sub.type].num >= i_amount);
 
 				if ((!cond->negate && !temp) || (cond->negate && temp))
@@ -688,6 +708,9 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 			case COND_Counter:
 				if (!p)
 					return false;
+
+				if (cond->exact)
+					return (p->counters[cond->sub.type].num == i_amount);
 
 				temp = (p->counters[cond->sub.type].num >= i_amount);
 

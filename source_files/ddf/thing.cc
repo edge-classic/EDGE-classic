@@ -2164,6 +2164,7 @@ bool DDF_MainParseCondition(const char *info, condition_check_t *cond)
 	const char *pos;
 
 	cond->negate = false;
+	cond->exact = false;
 	cond->cond_type = COND_NONE;
 	cond->amount = 1;
 
@@ -2198,6 +2199,12 @@ bool DDF_MainParseCondition(const char *info, condition_check_t *cond)
 	{
 		cond->negate = true;
 		t_off = 4;
+	}
+
+	if (epi::prefix_case_cmp(typebuf, "EXACT_") == 0)
+	{
+		cond->exact = true;
+		t_off = 6;
 	}
 
 	if (ConditionTryAmmo(typebuf + t_off, sub_buf, cond) ||

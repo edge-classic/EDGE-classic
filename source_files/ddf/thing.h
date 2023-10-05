@@ -644,6 +644,9 @@ typedef struct condition_check_s
 	// negate the condition
 	bool negate = false;
 
+	// condition is looking for an exact value (not "greater than" or "smaller than")
+	bool exact = false;
+
 	// condition typing. -ACB- 2003/05/15: Made an integer to hold condition_check_type_e enumeration
 	int cond_type = 0;
 

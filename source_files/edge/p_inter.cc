@@ -1541,6 +1541,12 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 		// add damage after armour / invuln detection
 		if (damage > 0)
 		{
+			// Change damage color if new inflicted damage is greater than current processed damage
+			if (damage >= player->damagecount)
+			{
+				player->last_damage_colour = damtype->damage_flash_colour;
+			}
+
 			player->damagecount += (int)MAX(damage, DAMAGE_ADD_MIN);
 			player->damage_pain += damage;
 		}

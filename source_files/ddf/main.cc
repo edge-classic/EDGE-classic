@@ -1913,6 +1913,7 @@ void damage_c::Copy(damage_c &src)
 	overkill = src.overkill;
 	
 	no_armour = src.no_armour;
+	damage_flash_colour = src.damage_flash_colour;
 
 	bypass_all = src.bypass_all;
 	instakill = src.instakill;
@@ -1953,6 +1954,7 @@ void damage_c::Default(damage_c::default_e def)
 			damage_unless = nullptr;
 			damage_if = nullptr;
 			grounded_monsters = false;
+			damage_flash_colour = T_RED;
 			all_players = false;
 			break;
 		}
@@ -1969,6 +1971,7 @@ void damage_c::Default(damage_c::default_e def)
 			damage_unless = nullptr;
 			damage_if = nullptr;
 			grounded_monsters = false;
+			damage_flash_colour = T_RED;
 			all_players = false;
 			break;
 		}
@@ -1987,6 +1990,7 @@ void damage_c::Default(damage_c::default_e def)
 			damage_unless = nullptr;
 			damage_if = nullptr;
 			grounded_monsters = false;
+			damage_flash_colour = T_RED;
 			all_players = false;
 			break;
 		}

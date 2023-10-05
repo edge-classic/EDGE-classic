@@ -550,13 +550,17 @@ void V_ColourNewFrame(void)
 // Returns an RGB value from an index value - used the current
 // palette.  The byte pointer is assumed to point a 3-byte array.
 //
-void V_IndexColourToRGB(int indexcol, byte *returncol, float damageAmount)
+void V_IndexColourToRGB(int indexcol, byte *returncol, rgbcol_t last_damage_colour, float damageAmount)
 {
 	if ((cur_palette == PALETTE_NORMAL) || (cur_palette == PALETTE_PAIN))
 	{
-		returncol[0] = (byte)MAX(0, MIN(255, damageAmount * 2.5));
-		returncol[1] = 0;
-		returncol[2] = 0;
+		float r = (float)RGB_RED(last_damage_colour) / 255.0;
+		float g = (float)RGB_GRN(last_damage_colour) / 255.0;
+		float b = (float)RGB_BLU(last_damage_colour) / 255.0;
+
+		returncol[0] = (byte)MAX(0, MIN(255, r * damageAmount * 2.5));
+		returncol[1] = (byte)MAX(0, MIN(255, g * damageAmount * 2.5));
+		returncol[2] = (byte)MAX(0, MIN(255, b * damageAmount * 2.5));
 	}
 	else
 	{

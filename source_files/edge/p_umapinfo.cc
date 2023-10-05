@@ -438,44 +438,14 @@ static void ParseUMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 		else if (epi::case_cmp(key, "endcast") == 0)
 		{
 			val->docast = epi::LEX_Boolean(value);
-			/*if (val->docast)
-			{
-				Z_Clear(val->endpic, char, 9);
-				strcpy(val->endpic, "$CAST");
-			}
-			else
-			{
-				Z_Clear(val->endpic, char, 9);
-				val->endpic[0] = '-';
-			}*/
 		}
 		else if (epi::case_cmp(key, "endbunny") == 0)
 		{
 			val->dobunny = epi::LEX_Boolean(value);
-			/*if (val->dobunny)
-			{
-				Z_Clear(val->endpic, char, 9);
-				strcpy(val->endpic, "$BUNNY");
-			}
-			else
-			{
-				Z_Clear(val->endpic, char, 9);
-				val->endpic[0] = '-';
-			}*/
 		}
 		else if (epi::case_cmp(key, "endgame") == 0)
 		{
 			val->endgame = epi::LEX_Boolean(value);
-			/*if (val->endgame)
-			{
-				Z_Clear(val->endpic, char, 9);
-				strcpy(val->endpic, "!");
-			}
-			else
-			{
-				Z_Clear(val->endpic, char, 9);
-				val->endpic[0] = '-';
-			}*/
 		}
 		else if (epi::case_cmp(key, "exitpic") == 0)
 		{
@@ -1189,16 +1159,15 @@ void Parse_MAPINFO(const std::string& buffer)
 				}
 			}
 			if (!um_template)
-				I_Error("UMAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
+				I_Error("MAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
 			gamedef_c *new_epi = new gamedef_c;
 			new_epi->CopyDetail(*um_template);
 			char lumpname[9] = {0};
-			std::string alttext;
 			tok = lex.Next(section);
 			if (tok != epi::TOK_Ident)
 				I_Error("MAPINFO: No first map name for custom episode!\n");
 			new_epi->firstmap = section;
-			new_epi->name = epi::STR_Format("UMAPINFO_%s\n", section.c_str()); // Internal
+			new_epi->name = epi::STR_Format("MAPINFO_%s\n", section.c_str()); // Internal
 			lex.Match("{"); // optional?
 			for (;;)
 			{
@@ -1634,7 +1603,123 @@ void Parse_ZMAPINFO(const std::string& buffer)
 		if (tok == epi::TOK_EOF)
 			break;
 
-		// skip default/cluster/etc; we just want map entries
+		// handle episode entries here instead of in ParseZMAPINFOEntry since they don't define actual maps
+		if (epi::case_cmp(section, "clearepisodes") == 0)
+		{
+			// I'm hoping this always comes before episode definitions :/
+			for (int i = gamedefs.GetSize()-1; i > 0; i--)
+			{
+				if (!gamedefs[i]->firstmap.empty())
+					gamedefs.RemoveObject(i);
+			}
+			continue;
+		}
+		if (epi::case_cmp(section, "episode") == 0)
+		{
+			// Create a new episode from game-specific UMAPINFO template data
+			gamedef_c *um_template = nullptr;
+			for (int i = 0; i < gamedefs.GetSize(); i++)
+			{
+				if (epi::case_cmp(gamedefs[i]->name, "UMAPINFO_TEMPLATE") == 0)
+				{
+					um_template = gamedefs[i];
+					break;
+				}
+			}
+			if (!um_template)
+				I_Error("ZMAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
+			gamedef_c *new_epi = new gamedef_c;
+			new_epi->CopyDetail(*um_template);
+			char lumpname[9] = {0};
+			tok = lex.Next(section);
+			if (tok != epi::TOK_Ident)
+				I_Error("ZMAPINFO: No first map name for custom episode!\n");
+			if (section == "&wt@01")
+				I_Error("ZMAPINFO: Warptrans 1 (\"&wt@01\") not supported for episode map names!\n");
+			new_epi->firstmap = section;
+			new_epi->name = epi::STR_Format("ZMAPINFO_%s\n", section.c_str()); // Internal
+			if (lex.Match("teaser"))
+			{
+				tok = lex.Next(section);
+				if (tok != epi::TOK_Ident)
+					I_Error("ZMAPINFO: No teaser map name given in episode defintion!\n");
+			}
+			if (! lex.Match("{"))
+				I_Error("Malformed ZMAPINFO lump: missing '{'\n");
+			for (;;)
+			{
+				if (lex.Match("}"))
+					break;
+
+				std::string key;
+				std::string value;
+
+				tok = lex.Next(key);
+
+				if (tok == epi::TOK_EOF)
+					break;
+
+				if (tok != epi::TOK_Ident)
+					I_Error("Malformed ZMAPINFO lump: missing key\n");
+
+				int key_line = lex.LastLine();
+
+				lex.MatchKeep("linecheck"); // doesn't matter, just need to update LastLine
+
+				if (key_line != lex.LastLine()) // key-only value, parse if supported and move on
+					continue;
+
+				lex.Match("="); // optional
+
+				tok = lex.Next(value);
+
+				if (tok == epi::TOK_ERROR)
+					I_Error("Malformed ZMAPINFO lump: missing value\n");
+
+				if (tok == epi::TOK_EOF)
+					break;
+
+				if (epi::case_cmp(key, "picname") == 0)
+				{
+					if (value.size() > 8)
+						I_Error("ZMAPINFO: Piclump for \"picname\" over 8 characters!\n");
+					Z_StrNCpy(lumpname, value.data(), 8);
+					new_epi->namegraphic = lumpname;
+				}
+				else if (epi::case_cmp(key, "name") == 0)
+				{
+					if (value[0] == '$')
+					{
+						const char *ldf_check = language.GetRefOrNull(Deh_Edge::TextStr::GetLDFForBex(value.substr(1).c_str()));
+						if (ldf_check)
+							new_epi->description = ldf_check;
+					}
+					else
+						new_epi->description = value;
+				}
+				else if (epi::case_cmp(key, "lookup") == 0)
+				{
+					const char *ldf_check = language.GetRefOrNull(Deh_Edge::TextStr::GetLDFForBex(value.c_str()));
+					if (ldf_check)
+						new_epi->description = ldf_check;
+				}
+				else if (epi::case_cmp(key, "intro") == 0)
+				{
+					if (! lex.Match("{"))
+						I_Error("Malformed ZMAPINFO lump: missing '{'\n");
+					for (;;)
+					{
+						if (lex.Match("}"))
+							break;
+						tok = lex.Next(key);
+					}
+				}
+			}
+			gamedefs.Insert(new_epi);
+			continue;
+		}
+
+		// skip everything that isn't a map at this point
 		if (epi::case_cmp(section, "map") != 0)
 			continue;
 

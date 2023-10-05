@@ -906,23 +906,33 @@ void RAD_ActLightSector(rad_trigger_t *R, void *param)
 void RAD_ActChangeSectorType(rad_trigger_t *R, void *param)
 {
 	s_sectortypechanger_t *t = (s_sectortypechanger_t *) param;
-	int i;
 
-	for (i=0; i < numsectors; i++)
+	for (int i = 0; i < numsectors; i++)
 	{
 		if (sectors[i].tag != t->tag) continue;
 
 		P_SectorChangeSpecial(sectors + i, t->typenum);
 
+		// Copies colourmap to the sector IF the new sector type uses a special colourmap
+		if (sectors[i].props.special && sectors[i].props.special->use_colourmap)
+			sectors[i].props.colourmap = sectors[i].props.special->use_colourmap;
+
+		// Copies fog to the sector IF the new sector type is foggy
 		if (sectors[i].props.special && sectors[i].props.special->fog_color != RGB_NO_VALUE)
 		{
 			sectors[i].props.fog_color = sectors[i].props.special->fog_color;
 			sectors[i].props.fog_density = 0.01f * sectors[i].props.special->fog_density;
-		}
 
-		if (sectors[i].props.special && sectors[i].props.special->use_colourmap)
-		{
-			sectors[i].props.colourmap = sectors[i].props.special->use_colourmap;
+			// Invalidate "faux walls" that reflect the fog color and density of the adjacent sector. Copied from RAD_ActFogSector.
+			for (int j = 0; j < sectors[i].linecount; j++)
+			{
+				for (int k = 0; k < 2; k++)
+				{
+					side_t *side_check = sectors[i].lines[j]->side[k];
+					if (side_check && side_check->middle.fogwall)
+						side_check->middle.image = nullptr;
+				}
+			}
 		}
 	}
 }

@@ -27,6 +27,9 @@
 #include "str_lexer.h"
 #include "p_umapinfo.h"
 #include "deh_text.h"
+
+#include "game.h"
+
 #include <unordered_map> // ZDoom Actor Name <-> Doomednum lookups
 
 MapList Maps;
@@ -539,13 +542,34 @@ static void ParseUMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 		{
 			if (epi::case_cmp(value, "clear") == 0)
 			{
-				//M_ClearEpisodes();
+				// This should leave the initial [EDGE] episode and nothing else
+				// Since 'clear' is supposed to come before any custom definitions
+				// this should not clear out any UMAPINFO-defined episodes
+				for (int i = gamedefs.GetSize()-1; i > 0; i--)
+				{
+					if (!gamedefs[i]->firstmap.empty())
+						gamedefs.RemoveObject(i);
+				}
 			}
 			else
 			{
+				// Create a new episode from game-specific UMAPINFO template data
+				gamedef_c *um_template = nullptr;
+				for (int i = 0; i < gamedefs.GetSize(); i++)
+				{
+					if (epi::case_cmp(gamedefs[i]->name, "UMAPINFO_TEMPLATE") == 0)
+					{
+						um_template = gamedefs[i];
+						break;
+					}
+				}
+				if (!um_template)
+					I_Error("UMAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
+				gamedef_c *new_epi = new gamedef_c;
+				new_epi->CopyDetail(*um_template);
 				char lumpname[9] = {0};
 				std::string alttext;
-				std::string epikey;
+				std::string epikey; // Do we use this?
 				if (value.size() > 8)
 					I_Error("UMAPINFO: Mapname for \"enterpic\" over 8 characters!\n");
 				Z_StrNCpy(lumpname, value.data(), 8);
@@ -555,7 +579,10 @@ static void ParseUMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 					if (lex.Match(","))
 						lex.Next(epikey);
 				}
-				//M_AddEpisode(val->mapname, lumpname, alttext.c_str(), epikey.c_str());
+				new_epi->namegraphic = lumpname;
+				new_epi->description = alttext;
+				new_epi->firstmap = val->mapname;
+				gamedefs.Insert(new_epi);
 			}
 		}
 		else if (epi::case_cmp(key, "bossaction") == 0)

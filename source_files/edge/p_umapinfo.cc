@@ -524,20 +524,35 @@ static void ParseUMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			}
 			else
 			{
-				// Create a new episode from game-specific UMAPINFO template data
-				gamedef_c *um_template = nullptr;
+				gamedef_c *new_epi = nullptr;
+				// Check for episode to replace
 				for (int i = 0; i < gamedefs.GetSize(); i++)
 				{
-					if (epi::case_cmp(gamedefs[i]->name, "UMAPINFO_TEMPLATE") == 0)
+					if (epi::case_cmp(gamedefs[i]->firstmap, val->mapname) == 0)
 					{
-						um_template = gamedefs[i];
+						new_epi = gamedefs[i];
 						break;
 					}
 				}
-				if (!um_template)
-					I_Error("UMAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
-				gamedef_c *new_epi = new gamedef_c;
-				new_epi->CopyDetail(*um_template);
+				if (!new_epi)
+				{
+					// Create a new episode from game-specific UMAPINFO template data
+					gamedef_c *um_template = nullptr;
+					for (int i = 0; i < gamedefs.GetSize(); i++)
+					{
+						if (epi::case_cmp(gamedefs[i]->name, "UMAPINFO_TEMPLATE") == 0)
+						{
+							um_template = gamedefs[i];
+							break;
+						}
+					}
+					if (!um_template)
+						I_Error("UMAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
+					new_epi = new gamedef_c;
+					new_epi->CopyDetail(*um_template);
+					new_epi->firstmap = val->mapname;
+					gamedefs.Insert(new_epi);
+				}
 				char lumpname[9] = {0};
 				std::string alttext;
 				std::string epikey; // Do we use this?
@@ -552,9 +567,7 @@ static void ParseUMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 				}
 				new_epi->namegraphic = lumpname;
 				new_epi->description = alttext;
-				new_epi->firstmap = val->mapname;
 				new_epi->name = epi::STR_Format("UMAPINFO_%s\n", val->mapname); // Internal
-				gamedefs.Insert(new_epi);
 			}
 		}
 		else if (epi::case_cmp(key, "bossaction") == 0)
@@ -1148,25 +1161,39 @@ void Parse_MAPINFO(const std::string& buffer)
 		}
 		if (epi::case_cmp(section, "episode") == 0)
 		{
-			// Create a new episode from game-specific UMAPINFO template data
-			gamedef_c *um_template = nullptr;
-			for (int i = 0; i < gamedefs.GetSize(); i++)
-			{
-				if (epi::case_cmp(gamedefs[i]->name, "UMAPINFO_TEMPLATE") == 0)
-				{
-					um_template = gamedefs[i];
-					break;
-				}
-			}
-			if (!um_template)
-				I_Error("MAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
-			gamedef_c *new_epi = new gamedef_c;
-			new_epi->CopyDetail(*um_template);
-			char lumpname[9] = {0};
 			tok = lex.Next(section);
 			if (tok != epi::TOK_Ident)
 				I_Error("MAPINFO: No first map name for custom episode!\n");
-			new_epi->firstmap = section;
+			gamedef_c *new_epi = nullptr;
+			// Check for episode to replace
+			for (int i = 0; i < gamedefs.GetSize(); i++)
+			{
+				if (epi::case_cmp(gamedefs[i]->firstmap, section.c_str()) == 0)
+				{
+					new_epi = gamedefs[i];
+					break;
+				}
+			}
+			if (!new_epi)
+			{
+				// Create a new episode from game-specific UMAPINFO template data
+				gamedef_c *um_template = nullptr;
+				for (int i = 0; i < gamedefs.GetSize(); i++)
+				{
+					if (epi::case_cmp(gamedefs[i]->name, "UMAPINFO_TEMPLATE") == 0)
+					{
+						um_template = gamedefs[i];
+						break;
+					}
+				}
+				if (!um_template)
+					I_Error("MAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
+				new_epi = new gamedef_c;
+				new_epi->CopyDetail(*um_template);
+				new_epi->firstmap = section;
+				gamedefs.Insert(new_epi);
+			}
+			char lumpname[9] = {0};
 			new_epi->name = epi::STR_Format("MAPINFO_%s\n", section.c_str()); // Internal
 			lex.Match("{"); // optional?
 			for (;;)
@@ -1230,7 +1257,6 @@ void Parse_MAPINFO(const std::string& buffer)
 						new_epi->description = ldf_check;
 				}
 			}
-			gamedefs.Insert(new_epi);
 			continue;
 		}
 
@@ -1616,27 +1642,41 @@ void Parse_ZMAPINFO(const std::string& buffer)
 		}
 		if (epi::case_cmp(section, "episode") == 0)
 		{
-			// Create a new episode from game-specific UMAPINFO template data
-			gamedef_c *um_template = nullptr;
-			for (int i = 0; i < gamedefs.GetSize(); i++)
-			{
-				if (epi::case_cmp(gamedefs[i]->name, "UMAPINFO_TEMPLATE") == 0)
-				{
-					um_template = gamedefs[i];
-					break;
-				}
-			}
-			if (!um_template)
-				I_Error("ZMAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
-			gamedef_c *new_epi = new gamedef_c;
-			new_epi->CopyDetail(*um_template);
-			char lumpname[9] = {0};
 			tok = lex.Next(section);
 			if (tok != epi::TOK_Ident)
 				I_Error("ZMAPINFO: No first map name for custom episode!\n");
 			if (section == "&wt@01")
 				I_Error("ZMAPINFO: Warptrans 1 (\"&wt@01\") not supported for episode map names!\n");
-			new_epi->firstmap = section;
+			gamedef_c *new_epi = nullptr;
+			// Check for episode to replace
+			for (int i = 0; i < gamedefs.GetSize(); i++)
+			{
+				if (epi::case_cmp(gamedefs[i]->firstmap, section.c_str()) == 0)
+				{
+					new_epi = gamedefs[i];
+					break;
+				}
+			}
+			if (!new_epi)
+			{
+				// Create a new episode from game-specific UMAPINFO template data
+				gamedef_c *um_template = nullptr;
+				for (int i = 0; i < gamedefs.GetSize(); i++)
+				{
+					if (epi::case_cmp(gamedefs[i]->name, "UMAPINFO_TEMPLATE") == 0)
+					{
+						um_template = gamedefs[i];
+						break;
+					}
+				}
+				if (!um_template)
+					I_Error("ZMAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
+				new_epi = new gamedef_c;
+				new_epi->CopyDetail(*um_template);
+				new_epi->firstmap = section;
+				gamedefs.Insert(new_epi);
+			}
+			char lumpname[9] = {0};
 			new_epi->name = epi::STR_Format("ZMAPINFO_%s\n", section.c_str()); // Internal
 			if (lex.Match("teaser"))
 			{
@@ -1715,7 +1755,6 @@ void Parse_ZMAPINFO(const std::string& buffer)
 					}
 				}
 			}
-			gamedefs.Insert(new_epi);
 			continue;
 		}
 

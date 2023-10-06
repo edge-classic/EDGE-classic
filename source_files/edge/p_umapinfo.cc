@@ -1385,6 +1385,10 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 			{
 				val->spidermastermindspecial = true;
 			}
+			else if (epi::case_cmp(key, "resetinventory") == 0)
+			{
+				val->resetplayer = true;
+			}
 			else if (epi::prefix_case_cmp(key, "specialaction_") == 0)
 			{
 				// Only one specialaction_* should be used at a time

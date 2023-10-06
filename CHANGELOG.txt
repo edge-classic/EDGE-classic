@@ -38,6 +38,8 @@ New Features
     to present skill levels
   - Default value is false
 
+- RSCRIPT: "EXACT_" prefix added for ON_CONDITION checks (Courtesy of akaAgar - https://github.com/edge-classic/EDGE-classic/pull/578)
+  - Allows check for the exact value of a benefit/etc, versus the default of greater-than-or-equal
 
 
 General Improvements/Changes
@@ -46,9 +48,10 @@ General Improvements/Changes
 - Video Options crosshair selection will not be shown when switching to/from weapons that have DDF custom crosshairs
 - Slightly re-organized the Key binding menu to accomodate the new 3rd and 4th attacks.
 - Implemented 'episode' UMAPINFO key; EDGE-Classic now fully supports the UMAPINFO spec, Revision 2.2
-  - ZMAPINFO/MAPINFO episode definitions will now be parsed as well
-- ZMAPINFO/MAPINFO will now respect the 'noskillmenu' episode definition key
-  - Leverages the new NO_SKILL_MENU DDFGAME command mentioned above
+- ZMAPINFO/MAPINFO parsing updates:
+  - Episode definitions and the 'clearepisodes' directive will now be respected
+  - ZMAPINFO 'ResetInventory' level definition key will result in the RESET_PLAYER DDFLEVL command being applied
+
 
 Bugs fixed
 ----------

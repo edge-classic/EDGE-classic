@@ -1648,6 +1648,11 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->nextmapname.clear();
 		}
 
+		if(Maps.maps[i].resetplayer)
+		{
+			temp_level->force_on |= MPF_ResetPlayer;
+		}
+
 		if(Maps.maps[i].partime > 0)
 			temp_level->partime = Maps.maps[i].partime;
 		

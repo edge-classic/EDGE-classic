@@ -672,7 +672,7 @@ void GetLinedefs()
 		s16_t tag   = LE_S16(raw.tag);
 
 		line->two_sided   = (flags & MLF_TwoSided) != 0;
-		line->is_precious = (tag >= 900 && tag < 1000);
+		line->is_precious = (tag >= 900 && tag < 1000); // Why is this the case? Need to investigate - Dasho
 
 		line->right = SafeLookupSidedef(LE_U16(raw.right));
 		line->left  = SafeLookupSidedef(LE_U16(raw.left));
@@ -682,6 +682,8 @@ void GetLinedefs()
 
 		line->self_ref = (line->left && line->right &&
 				(line->left->sector == line->right->sector));
+
+		if (line->self_ref) line->is_precious = true;
 	}
 }
 
@@ -744,6 +746,8 @@ void GetLinedefsHexen()
 
 		line->self_ref = (line->left && line->right &&
 				(line->left->sector == line->right->sector));
+
+		if (line->self_ref) line->is_precious = true;
 	}
 }
 
@@ -930,6 +934,8 @@ void ParseUDMF_Block(epi::lexer_c& lex, int cur_type)
 
 		line->self_ref = (line->left && line->right &&
 				(line->left->sector == line->right->sector));
+
+		if (line->self_ref) line->is_precious = true;
 	}
 }
 

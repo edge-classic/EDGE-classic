@@ -60,3 +60,4 @@ Bugs fixed
 - Fixed viewpoint modified by the r_fov CVAR not changing the vertical view slope appropriately
 - Fixed region properties not working properly with a vertex sloped floor that rises above its sector's original floor height
 - Fixed occasional sector glow thing link/unlink errors
+- Fixed AJBSP using self-referencing linedefs that were perfectly vertical or horizontal for partitioning

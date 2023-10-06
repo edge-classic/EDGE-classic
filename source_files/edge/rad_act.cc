@@ -913,25 +913,46 @@ void RAD_ActChangeSectorType(rad_trigger_t *R, void *param)
 
 		P_SectorChangeSpecial(sectors + i, t->typenum);
 
-		// Copies colourmap to the sector IF the new sector type uses a special colourmap
-		if (sectors[i].props.special && sectors[i].props.special->use_colourmap)
-			sectors[i].props.colourmap = sectors[i].props.special->use_colourmap;
-
-		// Copies fog to the sector IF the new sector type is foggy
-		if (sectors[i].props.special && sectors[i].props.special->fog_color != RGB_NO_VALUE)
+		if (sectors[i].props.special)
 		{
-			sectors[i].props.fog_color = sectors[i].props.special->fog_color;
-			sectors[i].props.fog_density = 0.01f * sectors[i].props.special->fog_density;
+			// Copies colourmap to the sector IF the new sector type uses a special colourmap
+			if (sectors[i].props.special->use_colourmap)
+				sectors[i].props.colourmap = sectors[i].props.special->use_colourmap;
 
-			// Invalidate "faux walls" that reflect the fog color and density of the adjacent sector. Copied from RAD_ActFogSector.
-			for (int j = 0; j < sectors[i].linecount; j++)
+			// Copies fog to the sector IF the new sector type is foggy
+			if (sectors[i].props.special->fog_color != RGB_NO_VALUE)
 			{
-				for (int k = 0; k < 2; k++)
+				sectors[i].props.fog_color = sectors[i].props.special->fog_color;
+				sectors[i].props.fog_density = 0.01f * sectors[i].props.special->fog_density;
+
+				// Invalidate "faux walls" that reflect the fog color and density of the adjacent sector. Copied from RAD_ActFogSector.
+				for (int j = 0; j < sectors[i].linecount; j++)
 				{
-					side_t *side_check = sectors[i].lines[j]->side[k];
-					if (side_check && side_check->middle.fogwall)
-						side_check->middle.image = nullptr;
+					for (int k = 0; k < 2; k++)
+					{
+						side_t *side_check = sectors[i].lines[j]->side[k];
+						if (side_check && side_check->middle.fogwall)
+							side_check->middle.image = nullptr;
+					}
 				}
+			}
+
+			if (sectors[i].props.special->drag != 0)
+				sectors[i].props.drag = sectors[i].props.special->drag;
+
+			if (sectors[i].props.special->friction != 0)
+				sectors[i].props.friction = sectors[i].props.special->friction;
+
+			if (sectors[i].props.special->gravity != GRAVITY)
+				sectors[i].props.gravity = sectors[i].props.special->gravity;
+
+			if (sectors[i].props.special->push_speed > 0 || sectors[i].props.special->push_zspeed > 0)
+			{
+				float mul = sectors[i].props.special->push_speed / 100.0f;
+
+				sectors[i].props.push.x += M_Cos(sectors[i].props.special->push_angle) * mul;
+				sectors[i].props.push.y += M_Sin(sectors[i].props.special->push_angle) * mul;
+				sectors[i].props.push.z += sectors[i].props.special->push_zspeed / 100.0f;
 			}
 		}
 	}

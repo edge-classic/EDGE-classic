@@ -749,6 +749,9 @@ public:
 	// armour -- and vice versa.
 	bool no_armour;
 
+	// Color of the flash when player is hit by this damage type
+	rgbcol_t damage_flash_colour;
+
 	// Apply damange unconditionally
 	bool bypass_all;
 	// Damage is always health+1 with no resistances applied

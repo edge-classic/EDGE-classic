@@ -40,7 +40,7 @@ void V_InitPalette(void);
 void V_InitColour(void);
 
 // -ACB- 1999/10/11 Gets an RGB colour from the current palette
-void V_IndexColourToRGB(int indexcol, byte *returncol);
+void V_IndexColourToRGB(int indexcol, byte *returncol, rgbcol_t last_damage_colour, float damageAmount);
 
 rgbcol_t V_LookupColour(int col);
 

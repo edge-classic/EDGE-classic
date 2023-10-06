@@ -278,6 +278,9 @@ typedef struct player_s
 	// how much damage was done (used for status bar)
 	float damage_pain;
 
+	// damage flash colour of last damage type inflicted
+	rgbcol_t last_damage_colour;
+
 	// So gun flashes light up the screen.
 	int extralight;
 	bool flash;

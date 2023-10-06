@@ -57,6 +57,7 @@ const commandlist_t damage_commands[] =
 	DF("DAMAGE_IF_BENEFIT", damage_if, DDF_MobjGetBenefit),
 	DF("ALL_PLAYERS", all_players, DDF_MainGetBoolean), // Doesn't do anything (yet)
 	DF("GROUNDED_MONSTERS_ONLY", grounded_monsters, DDF_MainGetBoolean),
+	DF("FLASH_COLOUR", damage_flash_colour, DDF_MainGetRGB),
 
 	DF("OBITUARY",    obituary, DDF_MainGetString),
 	DF("PAIN_STATE",  pain,     DDF_AtkGetLabel),

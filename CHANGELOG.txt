@@ -19,8 +19,6 @@ New Features
     - Allows a custom color to be used as the pain effect when a player is hit by this damage type
     - Can be used to emulate effects like Hexen's cold/poison damage
 
-  https://github.com/edge-classic/EDGE-classic/pull/576
-  
 - WEAPONS.DDF: Can now define a 3RD and 4TH attack. Equivalent DDF syntax to SEC_xxx used for second attack
 	 DDF Fields: 
 	 - 3RD_ATTACK, 3RD_AMMOTYPE, 3RD_AMMOPERSHOT, 3RD_CLIPSIZE, 3RD_AUTOMATIC, 3RD_SPECIAL

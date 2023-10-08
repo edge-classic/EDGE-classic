@@ -1544,7 +1544,10 @@ void P_DamageMobj(mobj_t * target, mobj_t * inflictor, mobj_t * source,
 			// Change damage color if new inflicted damage is greater than current processed damage
 			if (damage >= player->damagecount)
 			{
-				player->last_damage_colour = damtype->damage_flash_colour;
+				if (damtype)
+					player->last_damage_colour = damtype->damage_flash_colour;
+				else
+					player->last_damage_colour = T_RED;
 			}
 
 			player->damagecount += (int)MAX(damage, DAMAGE_ADD_MIN);

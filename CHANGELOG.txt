@@ -44,6 +44,10 @@ New Features
 
 General Improvements/Changes
 --------------------
+- Detection/functionality for mikoportals implemented
+  - Voodoo dolls that fall onto a floor at exactly -32768 will preserve their X/Y/Z momentum and be moved to their sector's ceiling
+    - Friction and drag ("air friction") will not be applied to voodoo dolls in this situation
+  - Regular players and things will adhere to normal physics
 - Windowed Mode resolution list will now dynamically populate based off of available display information instead of using presets
 - Video Options crosshair selection will not be shown when switching to/from weapons that have DDF custom crosshairs
 - Slightly re-organized the Key binding menu to accomodate the new 3rd and 4th attacks.

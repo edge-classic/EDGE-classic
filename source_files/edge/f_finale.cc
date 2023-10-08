@@ -932,7 +932,7 @@ void F_Drawer(void)
 
 		case f_pic:
 			{
-				const image_c *image = W_ImageLookup(finale->pics[picnum].c_str());
+				const image_c *image = W_ImageLookup(finale->pics[MIN(picnum, finale->pics.size()-1)].c_str());
 				if (r_titlescaling.d == 2) // Stretch
 					HUD_StretchImage(hud_x_left, 0, hud_x_right-hud_x_left, 200, image, 0, 0);
 				else

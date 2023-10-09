@@ -403,7 +403,15 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
 		mobj->side = ~0;
 
 	// Don't get stuck spawned in things: telefrag them.
-	P_TeleportMove(mobj, mobj->x, mobj->y, mobj->z);
+
+	/* Dasho 2023.10.09 - Ran into a map where having the player stuck inside 
+	a thing next to it with a sufficiently large radius was an intentional
+	mechanic (The All-Ghosts Forest). Telefragging in this scenario seems
+	to diverge from reasonably 'correct' behavior compared to ports with good vanilla/Boom 
+	compat, so I'm commenting this out. I had to do this previously for voodoo dolls 
+	because it would break certain maps. */
+
+	// P_TeleportMove(mobj, mobj->x, mobj->y, mobj->z);
 
 	if (COOP_MATCH() && ! level_flags.team_damage)
 		mobj->hyperflags |= HF_SIDEIMMUNE;

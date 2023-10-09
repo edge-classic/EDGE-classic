@@ -1610,10 +1610,6 @@ static void DeleteMobj(mobj_t * mo)
 	mo->next = (mobj_t *) -1;
 	mo->prev = (mobj_t *) -1;
 
-	// delete one-off mobjtypes made via UDMF map parsing
-	if (mo->info->adhoc)
-		delete mo->info;
-
 	delete mo;
 }
 

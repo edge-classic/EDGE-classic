@@ -31,6 +31,7 @@
 #include "endianess.h"
 #include "math_crc.h"
 #include "str_lexer.h"
+#include "str_util.h"
 
 #include "main.h"
 #include "colormap.h"
@@ -81,6 +82,10 @@ DEF_CVAR(udmf_strict, "0", CVAR_ARCHIVE)
 // MAP related Lookup tables.
 // Store VERTEXES, LINEDEFS, SIDEDEFS, etc.
 //
+
+// Stores pointers to ad-hoc/derived classes that need to be cleaned up on ending a level
+static std::vector<void *> level_adhocs;
+
 int numvertexes;
 vertex_t *vertexes = nullptr;
 
@@ -1486,6 +1491,7 @@ static void LoadUDMFSectors()
 			float gravfactor = 1.0f;
 			int light = 160, type = 0, tag = 0;
 			rgbcol_t fog_color = 0;
+			rgbcol_t light_color = T_WHITE;
 			int fog_density = 0;
 			char floor_tex[10];
 			char ceil_tex[10];
@@ -1531,6 +1537,8 @@ static void LoadUDMFSectors()
 					type = epi::LEX_Int(value);
 				else if (key == "id")
 					tag = epi::LEX_Int(value);
+				else if (key == "lightcolor")
+					light_color = epi::LEX_Int(value);
 				else if (key == "fadecolor")
 					fog_color = epi::LEX_Int(value);
 				else if (key == "fogdensity")
@@ -1628,7 +1636,7 @@ static void LoadUDMFSectors()
 			ss->props.viscosity = VISCOSITY;
 			ss->props.drag      = DRAG;
 
-			// Allow UDMF sector fog information to override DDFSECT types
+			// Allow UDMF sector light/fog information to override DDFSECT types
 			if (fog_color != 0) // All black is the established UDMF "no fog" color
 			{
 				// Prevent UDMF-specified fog color from having our internal 'no value'...uh...value
@@ -1651,6 +1659,38 @@ static void LoadUDMFSectors()
 			{
 				ss->props.fog_color = RGB_NO_VALUE;
 				ss->props.fog_density = 0;
+			}
+			if (light_color != T_WHITE)
+			{
+				
+				if (light_color == RGB_NO_VALUE)
+					light_color ^= RGB_MAKE(1,1,1);
+				// If sector special includes colormap, make an ad-hoc version without that
+				if (ss->props.special && ss->props.special->use_colourmap)
+				{
+					sectortype_c *adhoc = new sectortype_c;
+					adhoc->CopyDetail(const_cast<sectortype_c &>(*ss->props.special));
+					adhoc->use_colourmap = nullptr;
+					ss->props.special = adhoc;
+					level_adhocs.push_back(adhoc);
+				}
+				// Make colourmap if necessary
+				for (int i = 0; i < colourmaps.GetSize(); i++)
+				{
+					if (colourmaps[i]->gl_colour != RGB_NO_VALUE && colourmaps[i]->gl_colour == light_color)
+					{
+						ss->props.colourmap = colourmaps[i];
+						break;
+					}
+				}
+				if (!ss->props.colourmap || ss->props.colourmap->gl_colour != light_color)
+				{
+					colourmap_c *ad_hoc = new colourmap_c;
+					ad_hoc->name = epi::STR_Format("UDMF_%d", light_color); // Internal
+					ad_hoc->gl_colour = light_color;
+					ss->props.colourmap = ad_hoc;
+					colourmaps.Insert(ad_hoc);
+				}
 			}
 
 			ss->p = &ss->props;
@@ -2222,7 +2262,6 @@ static void LoadUDMFThings()
 				{
 					mobjtype_c *adhoc_info = new mobjtype_c;
 					adhoc_info->CopyDetail(const_cast<mobjtype_c &>(*udmf_thing->info));
-					adhoc_info->adhoc = true;
 					if (!AlmostEquals(healthfac, 1.0f))
 					{
 						if (healthfac < 0)
@@ -2257,6 +2296,7 @@ static void LoadUDMFThings()
 						udmf_thing->radius *= sx;
 					}
 					udmf_thing->info = adhoc_info;
+					level_adhocs.push_back(adhoc_info);
 				}
 			}
 
@@ -3295,6 +3335,8 @@ void ShutdownLevel(void)
 	P_DestroyBlockMap();	
 
 	P_RemoveAllMobjs(false);
+
+	for (auto adhoc : level_adhocs) delete adhoc; level_adhocs.clear();
 }
 
 

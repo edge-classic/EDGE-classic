@@ -1,5 +1,5 @@
 ===============================================================================
-Universal Doom Map Format EDGE-Classic extensions v1.0 - 2023.09.22
+Universal Doom Map Format EDGE-Classic extensions v1.0 - 2023.10.08
 
     Copyright (c) 2023 The EDGE Team.
     Permission is granted to copy, distribute and/or modify this document
@@ -108,6 +108,10 @@ Note: All <bool> fields default to false unless mentioned otherwise.
       gravity = <float>;         // Sector's gravity. Default is 1.0.
                                  // For EDGE-Classic, this is treated as a multiplier against the internal default gravity of 8.0,
                                  // i.e. gravity = 0.5 would be equivalent to a gravity of 4.0
+
+      lightcolor = <integer>;    // Light color for this sector, in 0xRRGGBB format. Default (no change to lighting) is 0xFFFFFF
+                                 // For EDGE-Classic, this will leverage the USE_COLOURMAP DDFSECT special, replacing any
+                                 // previously defined colourmap for the sector if present
 
       fadecolor = <integer>;     // Fog color for this sector, in 0xRRGGBB format. Default (no fog) is 0x000000.
       fogdensity = <integer>;    // Fog density for this sector. EDGE-Classic makes an effort to map the ZDoom values recognized

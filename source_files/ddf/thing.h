@@ -1044,9 +1044,6 @@ public:
 	int fast_speed;
 	int melee_range;
 
-	// cleanup flag for UDMF-derived ad-hoc mobjtypes
-	bool adhoc;
-
 public:
 	mobjtype_c();
 	~mobjtype_c();

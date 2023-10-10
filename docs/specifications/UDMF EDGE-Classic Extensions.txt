@@ -105,6 +105,9 @@ Note: All <bool> fields default to false unless mentioned otherwise.
       xscaleceiling = <float>;   // X texture scale of ceiling texture, Default = 1.0.
       yscaleceiling = <float>;   // Y texture scale of ceiling texture, Default = 1.0.
 
+      rotationfloor = <float>;   // Rotation of floor texture in degrees, Default = 0.0.
+      rotationceiling = <float>; // Rotation of ceiling texture in degrees, Default = 0.0.
+
       gravity = <float>;         // Sector's gravity. Default is 1.0.
                                  // For EDGE-Classic, this is treated as a multiplier against the internal default gravity of 8.0,
                                  // i.e. gravity = 0.5 would be equivalent to a gravity of 4.0

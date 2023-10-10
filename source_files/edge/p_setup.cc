@@ -1488,6 +1488,7 @@ static void LoadUDMFSectors()
 			int cz = 0, fz = 0;
 			float fx = 0.0f, fy = 0.0f, cx = 0.0f, cy = 0.0f;
 			float fx_sc = 1.0f, fy_sc = 1.0f, cx_sc = 1.0f, cy_sc = 1.0f;
+			float rf = 0.0f, rc = 0.0f;
 			float gravfactor = 1.0f;
 			int light = 160, type = 0, tag = 0;
 			rgbcol_t fog_color = 0;
@@ -1559,6 +1560,10 @@ static void LoadUDMFSectors()
 					cx_sc = epi::LEX_Double(value);
 				else if (key == "yscaleceiling")
 					cy_sc = epi::LEX_Double(value);
+				else if (key == "rotationfloor")
+					rf = epi::LEX_Double(value);
+				else if (key == "rotationceiling")
+					rc = epi::LEX_Double(value);
 				else if (key == "gravity")
 					gravfactor = epi::LEX_Double(value);
 			}
@@ -1587,11 +1592,18 @@ static void LoadUDMFSectors()
 			ss->ceil.offset.x += fx;
 			ss->ceil.offset.y += fy;
 
+			// rotations
+			if (!AlmostEquals(rf, 0.0f))
+				M_Angle2Matrix(FLOAT_2_ANG(rf), &ss->floor.x_mat, &ss->floor.y_mat);
+
+			if (!AlmostEquals(rc, 0.0f))
+				M_Angle2Matrix(FLOAT_2_ANG(rc), &ss->ceil.x_mat, &ss->ceil.y_mat);
+				
 			// granular scaling
-			ss->floor.x_mat.x = fx_sc;
-			ss->floor.y_mat.y = fy_sc;
-			ss->ceil.x_mat.x = cx_sc;
-			ss->ceil.y_mat.y = cy_sc;
+			ss->floor.x_mat.x *= fx_sc;
+			ss->floor.y_mat.y *= fy_sc;
+			ss->ceil.x_mat.x *= cx_sc;
+			ss->ceil.y_mat.y *= cy_sc;
 
 			ss->floor.image = W_ImageLookup(floor_tex, INS_Flat);
 

@@ -764,6 +764,8 @@ typedef struct
 	float bob_amount = 0;
 
 	slope_plane_t *slope;
+
+	angle_t rotation = 0;
 }
 plane_coord_data_t;
 
@@ -789,11 +791,16 @@ static void PlaneCoordFunc(void *d, int v_idx,
 		rgb[2] = data->B;		
 	}
 
-	float rx = (data->tx0 + pos->x) / data->image_w;
-	float ry = (data->ty0 + pos->y) / data->image_h;
+	vec2_t rxy = {(data->tx0 + pos->x), (data->ty0 + pos->y)};
 
-	texc->x = rx * data->x_mat.x + ry * data->x_mat.y;
-	texc->y = rx * data->y_mat.x + ry * data->y_mat.y;
+	if (data->rotation)
+		M_Vec2Rotate(rxy, data->rotation);
+
+	rxy.x /= data->image_w;
+	rxy.y /= data->image_h;
+
+	texc->x = rxy.x * data->x_mat.x + rxy.y * data->x_mat.y;
+	texc->y = rxy.x * data->y_mat.x + rxy.y * data->y_mat.y;
 
 	if (swirl_pass > 0)
 		CalcTurbulentTexCoords(texc, pos);
@@ -2642,6 +2649,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	data.blending = blending;
 	data.trans = trans;
 	data.slope = slope;
+	data.rotation = surf->rotation;
 
 	if (cur_sub->sector->props.special)
 	{

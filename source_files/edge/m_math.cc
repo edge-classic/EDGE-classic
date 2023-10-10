@@ -166,5 +166,17 @@ int M_PointInTri(vec2_t v1, vec2_t v2, vec2_t v3, vec2_t test)
 	return c;
 }
 
+void M_Vec2Rotate(vec2_t &vec, const angle_t &ang)
+{
+	float s = M_Sin(ang);
+	float c = M_Cos(ang);
+
+	float ox = vec.x;
+	float oy = vec.y;
+
+	vec.x = ox * c - oy * s;
+	vec.y = oy * c + ox * s;
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

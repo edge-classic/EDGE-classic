@@ -84,6 +84,7 @@ float M_Cos(angle_t ang)    GCCATTR((const));
 float M_Sin(angle_t ang)    GCCATTR((const));
 void M_Angle2Matrix(angle_t ang, vec2_t *x, vec2_t *y);
 int M_PointInTri(vec2_t v1, vec2_t v2, vec2_t v3, vec2_t test);
+void M_Vec2Rotate(vec2_t &vec, const angle_t &ang);
 
 
 #endif //__M_MATH_H__

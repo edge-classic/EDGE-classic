@@ -1594,16 +1594,16 @@ static void LoadUDMFSectors()
 
 			// rotations
 			if (!AlmostEquals(rf, 0.0f))
-				M_Angle2Matrix(FLOAT_2_ANG(rf), &ss->floor.x_mat, &ss->floor.y_mat);
+				ss->floor.rotation = FLOAT_2_ANG(rf);
 
 			if (!AlmostEquals(rc, 0.0f))
-				M_Angle2Matrix(FLOAT_2_ANG(rc), &ss->ceil.x_mat, &ss->ceil.y_mat);
+				ss->ceil.rotation = FLOAT_2_ANG(rc);
 				
 			// granular scaling
-			ss->floor.x_mat.x *= fx_sc;
-			ss->floor.y_mat.y *= fy_sc;
-			ss->ceil.x_mat.x *= cx_sc;
-			ss->ceil.y_mat.y *= cy_sc;
+			ss->floor.x_mat.x = fx_sc;
+			ss->floor.y_mat.y = fy_sc;
+			ss->ceil.x_mat.x = cx_sc;
+			ss->ceil.y_mat.y = cy_sc;
 
 			ss->floor.image = W_ImageLookup(floor_tex, INS_Flat);
 

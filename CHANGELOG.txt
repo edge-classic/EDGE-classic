@@ -68,3 +68,4 @@ Bugs fixed
 - Fixed region properties not working properly with a vertex sloped floor that rises above its sector's original floor height
 - Fixed occasional sector glow thing link/unlink errors
 - Fixed AJBSP using self-referencing linedefs that were perfectly vertical or horizontal for partitioning
+- Fixed floor/ceiling rotation not working when using images that have a different width and height

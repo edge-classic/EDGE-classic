@@ -944,7 +944,7 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 			target->floor.offset.x += source->side[0]->bottom.offset.x;
 			target->floor.offset.y += source->side[0]->bottom.offset.y;
 		}
-		M_Angle2Matrix(angle, &target->floor.x_mat, &target->floor.y_mat);
+		target->floor.rotation = angle;
 	}
 	if (special->sector_effect & SECTFX_AlignCeiling)
 	{
@@ -955,7 +955,7 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 			target->ceil.offset.x += source->side[0]->bottom.offset.x;
 			target->ceil.offset.y += source->side[0]->bottom.offset.y;
 		}
-		M_Angle2Matrix(angle, &target->ceil.x_mat, &target->ceil.y_mat);
+		target->ceil.rotation = angle;
 	}
 
 	// set texture scale

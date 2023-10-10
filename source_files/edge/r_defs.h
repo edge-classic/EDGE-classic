@@ -163,6 +163,7 @@ typedef struct surface_s
 	// texturing matrix (usually identity)
 	vec2_t x_mat;
 	vec2_t y_mat;
+	angle_t rotation = 0;
 
 	// current offset and scrolling deltas (world coords)
 	vec2_t offset;

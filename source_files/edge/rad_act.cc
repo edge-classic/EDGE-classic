@@ -903,6 +903,7 @@ void RAD_ActLightSector(rad_trigger_t *R, void *param)
 	}
 }
 
+
 void RAD_ActFogSector(rad_trigger_t *R, void *param)
 {
 	s_fogsector_t *t = (s_fogsector_t *) param;
@@ -1508,6 +1509,113 @@ void RAD_ActReplaceThing(rad_trigger_t *R, void *param)
 		P_ActReplace(mo,newThing);
 	}
 		 
+}
+
+void RAD_ActAirlessSector(rad_trigger_t *R, void *param)
+{
+	s_airlesssector_t *t = (s_airlesssector_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		sectortype_c *originalSpecial = P_LookupSectorType(sectors[i].props.type);
+
+		sectors[i].props.special = new sectortype_c;
+		if (originalSpecial != NULL)
+			sectors[i].props.special->CopyDetail(*originalSpecial);
+
+		if (t->enable)
+			sectors[i].props.special->special_flags = (sector_flag_e)((int)sectors[i].props.special->special_flags | (int)SECSP_AirLess);
+		else
+			sectors[i].props.special->special_flags = (sector_flag_e)((int)sectors[i].props.special->special_flags & ~(int)SECSP_AirLess);
+	}
+}
+
+void RAD_ActDamageSector(rad_trigger_t *R, void *param)
+{
+	s_sectortypecopy_t *t = (s_sectortypecopy_t *) param;
+	int i;
+
+	sectortype_c *specialTemplate = P_LookupSectorType(t->sourceSpecialType);
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		sectortype_c *originalSpecial = P_LookupSectorType(sectors[i].props.type);
+
+		sectors[i].props.special = new sectortype_c;
+		if (originalSpecial != NULL)
+			sectors[i].props.special->CopyDetail(*originalSpecial);
+
+		sectors[i].props.special->damage = specialTemplate->damage;
+	}
+}
+
+void RAD_ActGravitySector(rad_trigger_t *R, void *param)
+{
+	s_floatsector_t *t = (s_floatsector_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		if (t->relative)
+			sectors[i].props.gravity += t->amount * GRAVITY;
+		else
+			sectors[i].props.gravity = t->amount * GRAVITY;
+	}
+}
+
+void RAD_ActDragSector(rad_trigger_t *R, void *param)
+{
+	s_floatsector_t *t = (s_floatsector_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		if (t->relative)
+			sectors[i].props.drag += t->amount;
+		else
+			sectors[i].props.drag = t->amount;
+	}
+}
+
+void RAD_ActFrictionSector(rad_trigger_t *R, void *param)
+{
+	s_floatsector_t *t = (s_floatsector_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		if (t->relative)
+			sectors[i].props.friction += t->amount;
+		else
+			sectors[i].props.friction = t->amount;
+	}
+}
+
+void RAD_ActViscositySector(rad_trigger_t *R, void *param)
+{
+	s_floatsector_t *t = (s_floatsector_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		if (t->relative)
+			sectors[i].props.viscosity += t->amount;
+		else
+			sectors[i].props.viscosity = t->amount;
+	}
 }
 
 //--- editor settings ---

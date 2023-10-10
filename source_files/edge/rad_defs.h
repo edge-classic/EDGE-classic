@@ -298,6 +298,42 @@ typedef struct s_fogsector_s
 }
 s_fogsector_t;
 
+// Sector airless change
+typedef struct s_airlesssector_s
+{
+	// sector tag
+	int tag = 0;
+
+	// should the airless flag be set?
+	bool enable = true;
+}
+s_airlesssector_t;
+
+// Sector parameter changed by copying from another sector type
+typedef struct s_sectortypecopy_s
+{
+	// sector tag
+	int tag = 0;
+
+	// source special type to copy from
+	int sourceSpecialType = 0;
+}
+s_sectortypecopy_t;
+
+// Sector value change using a relative or absolute float parameter (used for drag, friction, gravity and viscosity)
+typedef struct s_floatsector_t
+{
+	// sector tag
+	int tag = 0;
+
+	// float amount
+	float amount = 0;
+
+	// is the change relative?
+	bool relative = true;
+}
+s_frictionsector_t;
+
 // Enable/Disable
 typedef struct s_enabler_s
 {

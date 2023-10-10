@@ -840,7 +840,7 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 		return;
 
 	float length  = R_PointToDist( 0, 0,  source->dx,  source->dy);
-	angle_t angle = R_PointToAngle(0, 0, -source->dx, -source->dy);
+	angle_t angle = ANG360 - R_PointToAngle(0, 0, -source->dx, -source->dy);
 	bool is_vert  = fabs(source->dy) > fabs(source->dx);
 
 	if (special->sector_effect & SECTFX_LightFloor)

@@ -324,7 +324,7 @@ typedef struct s_sectortypecopy_s
 s_sectortypecopy_t;
 
 // Sector value change using a relative or absolute float parameter (used for drag, friction, gravity and viscosity)
-typedef struct s_floatsector_t
+typedef struct s_floatsector_s
 {
 	// sector tag
 	int tag = 0;
@@ -335,7 +335,21 @@ typedef struct s_floatsector_t
 	// is the change relative?
 	bool relative = true;
 }
-s_frictionsector_t;
+s_floatsector_t;
+
+// Sector push angle/speed change
+typedef struct s_pushsector_s
+{
+	// sector tag
+	int tag = 0;
+
+	// push angle or speed
+	float amount = 0;
+
+	// is the change relative?
+	bool relative = true;
+}
+s_pushsector_t;
 
 // Enable/Disable
 typedef struct s_enabler_s

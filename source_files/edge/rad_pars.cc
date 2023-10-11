@@ -2360,6 +2360,58 @@ static void RAD_ParseGravitySector(param_set_t& pars)
 	AddStateToScript(this_rad, 0, RAD_ActGravitySector, secf);
 }
 
+static void RAD_ParsePushAngleSector(param_set_t& pars)
+{
+	// PushAngleSector <tag> <angle>
+	// PushAngleSector <tag> <angle> ABSOLUTE
+
+	s_pushsector_t *secp;
+	secp = new s_pushsector_t;
+	
+	RAD_CheckForInt(pars[1], &secp->tag);
+
+	if (secp->tag == 0)
+		RAD_Error("%s: Invalid tag number: %d\n", pars[0], secp->tag);
+
+	RAD_CheckForFloat(pars[2], &secp->amount);
+
+	if (pars.size() >= 4)
+	{
+		if (DDF_CompareName(pars[3], "ABSOLUTE") == 0)
+			secp->relative = false;
+		else
+			RAD_WarnError("%s: expected 'ABSOLUTE' but got '%s'.\n", pars[0], pars[3]);
+	}
+
+	AddStateToScript(this_rad, 0, RAD_ActPushAngleSector, secp);
+}
+
+static void RAD_ParsePushSpeedSector(param_set_t& pars)
+{
+	// PushSpeedSector <tag> <speed>
+	// PushSpeedSector <tag> <speed> ABSOLUTE
+
+	s_pushsector_t *secp;
+	secp = new s_pushsector_t;
+	
+	RAD_CheckForInt(pars[1], &secp->tag);
+
+	if (secp->tag == 0)
+		RAD_Error("%s: Invalid tag number: %d\n", pars[0], secp->tag);
+
+	RAD_CheckForFloat(pars[2], &secp->amount);
+
+	if (pars.size() >= 4)
+	{
+		if (DDF_CompareName(pars[3], "ABSOLUTE") == 0)
+			secp->relative = false;
+		else
+			RAD_WarnError("%s: expected 'ABSOLUTE' but got '%s'.\n", pars[0], pars[3]);
+	}
+
+	AddStateToScript(this_rad, 0, RAD_ActPushSpeedSector, secp);
+}
+
 static void RAD_ParseViscositySector(param_set_t& pars)
 {
 	// ViscositySector <tag> <factor>
@@ -2482,6 +2534,8 @@ static const rts_parser_t radtrig_parsers[] =
 	{2, "FLAG_SECTOR", 4,4, RAD_ParseFlagSector},
 	{2, "FRICTION_SECTOR", 3,4, RAD_ParseFrictionSector},
 	{2, "GRAVITY_SECTOR", 3,4, RAD_ParseGravitySector},
+	{2, "PUSH_ANGLE_SECTOR", 3,4, RAD_ParsePushAngleSector},
+	{2, "PUSH_SPEED_SECTOR", 3,4, RAD_ParsePushSpeedSector},
 	{2, "VISCOSITY_SECTOR", 3,4, RAD_ParseViscositySector},
 
 	// old crud

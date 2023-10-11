@@ -68,6 +68,8 @@ void RAD_ActDragSector(rad_trigger_t *R, void *param);
 void RAD_ActFlagSector(rad_trigger_t *R, void *param);
 void RAD_ActFrictionSector(rad_trigger_t *R, void *param);
 void RAD_ActGravitySector(rad_trigger_t *R, void *param);
+void RAD_ActPushAngleSector(rad_trigger_t *R, void *param);
+void RAD_ActPushSpeedSector(rad_trigger_t *R, void *param);
 void RAD_ActViscositySector(rad_trigger_t *R, void *param);
 
 #endif  /*__RAD_ACT_H__*/

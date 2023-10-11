@@ -701,8 +701,7 @@ void image_data_c::Swirl(int leveltime, int thickness)
 			u8_t *src = pixels + (y1 * width + x1) * bpp;
 			u8_t *dest = new_pixels + (y * width + x) * bpp;
 
-			for (int i = 0; i < bpp; i++)
-				*dest++ = *src++;
+			memcpy(dest, src, bpp);
 		}
 	}
 	delete[] pixels;

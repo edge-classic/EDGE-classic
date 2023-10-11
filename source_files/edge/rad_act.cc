@@ -1545,6 +1545,8 @@ void RAD_ActDamageSector(rad_trigger_t *R, void *param)
 	int i;
 
 	sectortype_c *specialTemplate = P_LookupSectorType(t->sourceSpecialType);
+	if (specialTemplate == NULL)
+		specialTemplate = new sectortype_c;
 
 	for (i=0; i < numsectors; i++)
 	{

@@ -2276,7 +2276,7 @@ static void RAD_ParseDamageSector(param_set_t& pars)
 
 	RAD_CheckForInt(pars[2], &sect->sourceSpecialType);
 
-	if (P_LookupSectorType(sect->sourceSpecialType) == NULL)
+	if ((sect->sourceSpecialType != 0 ) && (P_LookupSectorType(sect->sourceSpecialType) == NULL))
 		RAD_Error("%s: Invalid special sector type: %d\n", pars[0], sect->sourceSpecialType);
 
 	AddStateToScript(this_rad, 0, RAD_ActDamageSector, sect);

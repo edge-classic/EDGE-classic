@@ -2224,21 +2224,42 @@ static void RAD_ParseReplaceThing(param_set_t& pars)
 	AddStateToScript(this_rad, 0, RAD_ActReplaceThing, thingarg);
 }
 
-static void RAD_ParseAirlessSector(param_set_t& pars)
+static void RAD_ParseFlagSector(param_set_t& pars)
 {
-	// AirlessSector <tag> <TRUE or FALSE>
+	// FlagSector <tag> <FLAG> <TRUE or FALSE>
 
-	s_airlesssector_t *seca;
-	seca = new s_airlesssector_t;
+	s_flagsector_t *secf;
+	secf = new s_flagsector_t;
 
-	RAD_CheckForInt(pars[1], &seca->tag);
+	RAD_CheckForInt(pars[1], &secf->tag);
 
-	if (seca->tag == 0)
-		RAD_Error("%s: Invalid tag number: %d\n", pars[0], seca->tag);
+	if (secf->tag == 0)
+		RAD_Error("%s: Invalid tag number: %d\n", pars[0], secf->tag);
 
-	seca->enable = CheckForBoolean(pars[2]);
+	if (DDF_CompareName(pars[2], "AIRLESS") == 0)
+		secf->flag = SECSP_AirLess;
+	else if (DDF_CompareName(pars[2], "PROPORTIONAL") == 0)
+		secf->flag = SECSP_Proportional;
+	else if (DDF_CompareName(pars[2], "PUSH_ALL") == 0)
+		secf->flag = SECSP_PushAll;
+	else if (DDF_CompareName(pars[2], "PUSH_CONSTANT") == 0)
+		secf->flag = SECSP_PushConstant;
+	else if (DDF_CompareName(pars[2], "REVERB_SFX") == 0)
+		secf->flag = SECSP_ReverbSFX;
+	else if (DDF_CompareName(pars[2], "SUBMERGED_SFX") == 0)
+		secf->flag = SECSP_SubmergedSFX;
+	else if (DDF_CompareName(pars[2], "SWIMMING") == 0)
+		secf->flag = SECSP_Swimming;
+	else if (DDF_CompareName(pars[2], "VACUUM_SFX") == 0)
+		secf->flag = SECSP_VacuumSFX;
+	else if (DDF_CompareName(pars[2], "WHOLE_REGION") == 0)
+		secf->flag = SECSP_WholeRegion;
+	else
+		RAD_Error("%s: Invalid special sector flag: %s\n", pars[0], pars[2]);
 
-	AddStateToScript(this_rad, 0, RAD_ActAirlessSector, seca);
+	secf->enable = CheckForBoolean(pars[3]);
+
+	AddStateToScript(this_rad, 0, RAD_ActFlagSector, secf);
 }
 
 static void RAD_ParseDamageSector(param_set_t& pars)
@@ -2456,9 +2477,9 @@ static const rts_parser_t radtrig_parsers[] =
 	{2, "REPLACE_WEAPON", 3,3, RAD_ParseReplaceWeapon},
 	{2, "WEAPON_EVENT", 3,3, RAD_ParseWeaponEvent},
 	{2, "REPLACE_THING", 3,3, RAD_ParseReplaceThing},
-	{2, "AIRLESS_SECTOR", 3,3, RAD_ParseAirlessSector},
 	{2, "DAMAGE_SECTOR", 3,3, RAD_ParseDamageSector},
 	{2, "DRAG_SECTOR", 3,4, RAD_ParseDragSector},
+	{2, "FLAG_SECTOR", 4,4, RAD_ParseFlagSector},
 	{2, "FRICTION_SECTOR", 3,4, RAD_ParseFrictionSector},
 	{2, "GRAVITY_SECTOR", 3,4, RAD_ParseGravitySector},
 	{2, "VISCOSITY_SECTOR", 3,4, RAD_ParseViscositySector},

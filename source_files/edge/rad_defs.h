@@ -298,16 +298,19 @@ typedef struct s_fogsector_s
 }
 s_fogsector_t;
 
-// Sector airless change
-typedef struct s_airlesssector_s
+// Sector special flag change
+typedef struct s_flagsector_s
 {
 	// sector tag
 	int tag = 0;
 
-	// should the airless flag be set?
+	// special flag to set/unset
+	sector_flag_e flag = SECSP_None;
+
+	// should the flag be set?
 	bool enable = true;
 }
-s_airlesssector_t;
+s_flagsector_t;
 
 // Sector parameter changed by copying from another sector type
 typedef struct s_sectortypecopy_s

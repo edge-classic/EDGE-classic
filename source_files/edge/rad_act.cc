@@ -1511,25 +1511,29 @@ void RAD_ActReplaceThing(rad_trigger_t *R, void *param)
 		 
 }
 
-void RAD_ActAirlessSector(rad_trigger_t *R, void *param)
+void RAD_ActFlagSector(rad_trigger_t *R, void *param)
 {
-	s_airlesssector_t *t = (s_airlesssector_t *) param;
+	s_flagsector_t *t = (s_flagsector_t *) param;
 	int i;
 
 	for (i=0; i < numsectors; i++)
 	{
 		if (sectors[i].tag != t->tag) continue;
 
-		sectortype_c *originalSpecial = P_LookupSectorType(sectors[i].props.type);
-
-		sectors[i].props.special = new sectortype_c;
-		if (originalSpecial != NULL)
-			sectors[i].props.special->CopyDetail(*originalSpecial);
+		if (sectors[i].props.special == NULL)
+			sectors[i].props.special = new sectortype_c;
+		else
+		{
+			// Duplicate special so original special type is not modified
+			sectortype_c *specialCopy = new sectortype_c;
+			specialCopy->CopyDetail(*sectors[i].props.special);
+			sectors[i].props.special = specialCopy;
+		}
 
 		if (t->enable)
-			sectors[i].props.special->special_flags = (sector_flag_e)((int)sectors[i].props.special->special_flags | (int)SECSP_AirLess);
+			sectors[i].props.special->special_flags = (sector_flag_e)((int)sectors[i].props.special->special_flags | (int)t->flag);
 		else
-			sectors[i].props.special->special_flags = (sector_flag_e)((int)sectors[i].props.special->special_flags & ~(int)SECSP_AirLess);
+			sectors[i].props.special->special_flags = (sector_flag_e)((int)sectors[i].props.special->special_flags & ~(int)t->flag);
 	}
 }
 
@@ -1544,11 +1548,15 @@ void RAD_ActDamageSector(rad_trigger_t *R, void *param)
 	{
 		if (sectors[i].tag != t->tag) continue;
 
-		sectortype_c *originalSpecial = P_LookupSectorType(sectors[i].props.type);
-
-		sectors[i].props.special = new sectortype_c;
-		if (originalSpecial != NULL)
-			sectors[i].props.special->CopyDetail(*originalSpecial);
+		if (sectors[i].props.special == NULL)
+			sectors[i].props.special = new sectortype_c;
+		else
+		{
+			// Duplicate special so original special type is not modified
+			sectortype_c *specialCopy = new sectortype_c;
+			specialCopy->CopyDetail(*sectors[i].props.special);
+			sectors[i].props.special = specialCopy;
+		}
 
 		sectors[i].props.special->damage = specialTemplate->damage;
 	}

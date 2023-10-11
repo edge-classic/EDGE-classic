@@ -118,7 +118,7 @@ private:
 
 	void updateMIDI();
 
-	void runOneSample();
+	void runSamples(unsigned count);
 
 	void write(uint16_t addr, uint8_t data);
 	
@@ -133,6 +133,9 @@ private:
 
 	// determine whether this patch should be configured as 4op
 	bool useFourOp(const OPLPatch *patch) const;
+
+	// determine which operator(s) to scale based on the current operator settings
+	std::pair<bool, bool> activeCarriers(const OPLVoice& voice) const;
 
 	// update a property of all currently playing voices on a MIDI channel
 	void updateChannelVoices(uint8_t channel, void(OPLPlayer::*func)(OPLVoice&));
@@ -162,10 +165,10 @@ private:
 	// if we need to clock one of the OPLs between register writes, save the resulting sample
 	std::queue<ymfm::ymf262::output_data> m_sampleFIFO;
 	
-	// filter settings/state
-	double m_filterFreq, m_filterCoef;
-	int32_t m_lastIn[2] = {0}, m_lastOut[2] = {0};
-	float m_lastInF[2] = {0}, m_lastOutF[2] = {0};
+	// recursive highpass filter to remove/reduce DC offset
+	double m_hpFilterFreq, m_hpFilterCoef;
+	int32_t m_hpLastIn[2] = {0}, m_hpLastOut[2] = {0};
+	float m_hpLastInF[2] = {0}, m_hpLastOutF[2] = {0};
 	
 	MIDIChannel m_channels[16];
 	std::vector<OPLVoice> m_voices;

@@ -21,8 +21,8 @@ OPLPlayer::OPLPlayer(int frequency) : ymfm::ymfm_interface()
 	m_opl3 = new ymfm::ymf262(*this);
 	m_output.clear();
 	
-	m_filterFreq = 5.0; // 5Hz default to reduce DC offset
-	setSampleRate(frequency); // setup both sample step and filter coefficient
+	m_hpFilterFreq = 5.0; // 5Hz default to reduce DC offset
+	setSampleRate(frequency); // setup both sample step and filter coefficients
 	setGain(1.0);
 	
 	reset();
@@ -41,31 +41,29 @@ void OPLPlayer::setSampleRate(uint32_t rate)
 	m_sampleStep = (double)rate / rateOPL;
 	m_sampleRate = rate;
 	
-	setFilter(m_filterFreq);
+	setFilter(m_hpFilterFreq);
 }
 
 // ----------------------------------------------------------------------------
 void OPLPlayer::setGain(double gain)
 {
 	m_sampleGain = gain;
-	m_sampleScale = 32768.0 / gain;
 }
 
 // ----------------------------------------------------------------------------
 void OPLPlayer::setFilter(double cutoff)
 {
-	m_filterFreq = cutoff;
+	m_hpFilterFreq = cutoff;
 	
-	if (m_filterFreq <= 0.0)
+	if (m_hpFilterFreq <= 0.0)
 	{
-		m_filterCoef = 1.0;
+		m_hpFilterCoef = 1.0;
 	}
 	else
 	{
 		static const double pi = 3.14159265358979323846;
-		m_filterCoef = 1.0 / ((2 * pi * cutoff) / m_sampleRate + 1);
+		m_hpFilterCoef = 1.0 / ((2 * pi * cutoff) / m_sampleRate + 1);
 	}
-//	printf("sample rate = %u / cutoff %f Hz / filter coef %f\n", m_sampleRate, cutoff, m_filterCoef);
 }
 
 // ----------------------------------------------------------------------------
@@ -83,18 +81,18 @@ void OPLPlayer::generate(float *data, unsigned numSamples)
 		{
 			updateMIDI();
 
-			data[samp]   += m_output.data[0] / m_sampleScale;
-			data[samp+1] += m_output.data[1] / m_sampleScale;
+			data[samp]   = m_output.data[0] / 32767.0;
+			data[samp+1] = m_output.data[1] / 32767.0;
 				
-			if (m_filterCoef < 1.0)
+			if (m_hpFilterCoef < 1.0)
 			{
 				for (int i = 0; i < 2; i++)
 				{
-					float lastIn = m_lastInF[i];
-					m_lastInF[i] = data[samp+i];
+					const float lastIn = m_hpLastInF[i];
+					m_hpLastInF[i] = data[samp+i];
 						
-					m_lastOutF[i] = m_filterCoef * (m_lastOutF[i] + data[samp+i] - lastIn);
-					data[samp+i] = m_lastOutF[i];
+					m_hpLastOutF[i] = m_hpFilterCoef * (m_hpLastOutF[i] + data[samp+i] - lastIn);
+					data[samp+i] = m_hpLastOutF[i];
 				}
 			}
 				
@@ -110,26 +108,21 @@ void OPLPlayer::generate(int16_t *data, unsigned numSamples)
 	while (samp < numSamples * 2)
 	{
 		updateMIDI();
-
-		int32_t samples[2] = {0};
-			
-		samples[0] += (int32_t)m_output.data[0] * m_sampleGain;
-		samples[1] += (int32_t)m_output.data[1] * m_sampleGain;
-				
-		if (m_filterCoef < 1.0)
+		
+		if (m_hpFilterCoef < 1.0)
 		{
 			for (int i = 0; i < 2; i++)
 			{
-				const int32_t lastIn = m_lastIn[i];
-				m_lastIn[i] = samples[i];
+				const int32_t lastIn = m_hpLastIn[i];
+				m_hpLastIn[i] = m_output.data[i];
 						
-				m_lastOut[i] = m_filterCoef * (m_lastOut[i] + samples[i] - lastIn);
-				samples[i] = m_lastOut[i];
+				m_hpLastOut[i] = m_hpFilterCoef * (m_hpLastOut[i] + m_output.data[i] - lastIn);
+				m_output.data[i] = m_hpLastOut[i];
 			}
 		}
 
-		data[samp] = ymfm::clamp(samples[0], -32768, 32767);
-		data[samp+1] = ymfm::clamp(samples[1], -32768, 32767);
+		data[samp]   = ymfm::clamp(m_output.data[0], -32768, 32767);
+		data[samp+1] = ymfm::clamp(m_output.data[1], -32768, 32767);
 
 		samp += 2;
 	}
@@ -212,13 +205,18 @@ void OPLPlayer::enableOPL3()
 }
 
 // ----------------------------------------------------------------------------
-void OPLPlayer::runOneSample()
+void OPLPlayer::runSamples(unsigned count)
 {
 	// clock one sample after changing the 4op state before writing other registers
 	// so that ymfm can reassign operators to channels, etc
-	ymfm::ymf262::output_data output;
-	m_opl3->generate(&output);
-	m_sampleFIFO.push(output);
+	// add some delay between register writes where needed
+	// (i.e. when forcing a voice off, changing 4op flags, etc.)
+	while (count--)
+	{
+		ymfm::ymf262::output_data output;
+		m_opl3->generate(&output);
+		m_sampleFIFO.push(output);
+	}
 }
 
 // ----------------------------------------------------------------------------
@@ -249,12 +247,16 @@ OPLVoice* OPLPlayer::findVoice(uint8_t channel, const OPLPatch *patch, uint8_t n
 	
 		if (!voice.on && !voice.justChanged)
 		{
-			if (voice.channel->num == channel && voice.note == note)
+			if (voice.channel->num == channel && voice.note == note && voice.duration < UINT_MAX)
 			{
-				// found an old voice that was using the same note and patch - use it again
-				return &voice;
+				// found an old voice that was using the same note and patch
+				// don't immediately use it, but make it a high priority candidate for later
+				// (to help avoid pop/click artifacts when retriggering a recently off note)
+				silenceVoice(voice);
+				if (useFourOp(voice.patch) && voice.fourOpOther)
+					silenceVoice(*voice.fourOpOther);
 			}
-			if (voice.duration > duration)
+			else if (voice.duration > duration)
 			{
 				found = &voice;
 				duration = voice.duration;
@@ -264,15 +266,14 @@ OPLVoice* OPLPlayer::findVoice(uint8_t channel, const OPLPatch *patch, uint8_t n
 	
 	if (found) return found;
 	// if we didn't find one yet, just try to find an old one
-	// using the same channel and/or patch, even if it should still be playing.
+	// using the same patch, even if it should still be playing.
 	
 	for (auto& voice : m_voices)
 	{
 		if (useFourOp(patch) && !voice.fourOpPrimary)
 			continue;
 		
-		if ((voice.channel->num == channel || voice.patch == patch)
-		    && voice.duration > duration)
+		if (voice.patch == patch && voice.duration > duration)
 		{
 			found = &voice;
 			duration = voice.duration;
@@ -349,6 +350,46 @@ bool OPLPlayer::useFourOp(const OPLPatch *patch) const
 }
 
 // ----------------------------------------------------------------------------
+std::pair<bool, bool> OPLPlayer::activeCarriers(const OPLVoice& voice) const
+{
+	bool scale[2] = {0};
+	const auto patchVoice = voice.patchVoice;
+
+	if (!patchVoice)
+	{
+		scale[0] = scale[1] = false;
+	}
+	else if (!useFourOp(voice.patch))
+	{
+		// 2op FM (0): scale op 2 only
+		// 2op AM (1): scale op 1 and 2
+		scale[0] = (patchVoice->conn & 1);
+		scale[1] = true;
+	}
+	else if (voice.fourOpPrimary)
+	{
+		// 4op FM+FM (0, 0): don't scale op 1 or 2
+		// 4op AM+FM (1, 0): scale op 1 only
+		// 4op FM+AM (0, 1): scale op 2 only
+		// 4op AM+AM (1, 1): scale op 1 only
+		scale[0] = (voice.patch->voice[0].conn & 1);
+		scale[1] = (voice.patch->voice[1].conn & 1) && !scale[0];
+	}
+	else
+	{
+		// 4op FM+FM (0, 0): scale op 4 only
+		// 4op AM+FM (1, 0): scale op 4 only
+		// 4op FM+AM (0, 1): scale op 4 only
+		// 4op AM+AM (1, 1): scale op 3 and 4
+		scale[0] = (voice.patch->voice[0].conn & 1)
+		        && (voice.patch->voice[1].conn & 1);
+		scale[1] = true;
+	}
+
+	return std::make_pair(scale[0], scale[1]);
+}
+
+// ----------------------------------------------------------------------------
 void OPLPlayer::updateChannelVoices(uint8_t channel, void(OPLPlayer::*func)(OPLVoice&))
 {
 	for (auto& voice : m_voices)
@@ -396,22 +437,29 @@ void OPLPlayer::updatePatch(OPLVoice& voice, const OPLPatch *newPatch, uint8_t n
 			}
 			
 			write(REG_4OP, enable);
-			runOneSample();
 		}
-		
+
+		// kill an existing voice, then send the chip far enough forward in time to let the envelope die off
+		// (ROTT: fixes nasty reverse cymbal noises in spray.mid
+		//        without disrupting note timing too much for the staccato drums in fanfare2.mid)
+		silenceVoice(voice);
+		runSamples(48);
+
 		// 0x20: vibrato, sustain, multiplier
 		write(REG_OP_MODE + voice.op,     patchVoice.op_mode[0]);
 		write(REG_OP_MODE + voice.op + 3, patchVoice.op_mode[1]);
 		// 0x60: attack/decay
 		write(REG_OP_AD + voice.op,     patchVoice.op_ad[0]);
 		write(REG_OP_AD + voice.op + 3, patchVoice.op_ad[1]);
-		// 0x80: sustain/release
-		write(REG_OP_SR + voice.op,     patchVoice.op_sr[0]);
-		write(REG_OP_SR + voice.op + 3, patchVoice.op_sr[1]);
 		// 0xe0: waveform
 		write(REG_OP_WAVEFORM + voice.op,     patchVoice.op_wave[0]);
 		write(REG_OP_WAVEFORM + voice.op + 3, patchVoice.op_wave[1]);
 	}
+
+	// 0x80: sustain/release
+	// update even for the same patch in case silenceVoice was called from somewhere else on this voice
+	write(REG_OP_SR + voice.op,     patchVoice.op_sr[0]);
+	write(REG_OP_SR + voice.op + 3, patchVoice.op_sr[1]);
 }
 
 // ----------------------------------------------------------------------------
@@ -428,48 +476,20 @@ void OPLPlayer::updateVolume(OPLVoice& voice)
 
 	if (!voice.patch || !voice.channel) return;
 	
-	auto patchVoice = voice.patchVoice;
-
 	uint8_t atten = opl_volume_map[(voice.velocity * voice.channel->volume) >> 10];
 	uint8_t level;
-	bool scale[2] = {0};
-	
-	// determine which operator(s) to scale based on the current operator settings
-	if (!useFourOp(voice.patch))
-	{
-		// 2op FM (0): scale op 2 only
-		// 2op AM (1): scale op 1 and 2
-		scale[0] = (patchVoice->conn & 1);
-		scale[1] = true;
-	}
-	else if (voice.fourOpPrimary)
-	{
-		// 4op FM+FM (0, 0): don't scale op 1 or 2
-		// 4op AM+FM (1, 0): scale op 1 only
-		// 4op FM+AM (0, 1): scale op 2 only
-		// 4op AM+AM (1, 1): scale op 1 only
-		scale[0] = (voice.patch->voice[0].conn & 1);
-		scale[1] = (voice.patch->voice[1].conn & 1) && !scale[0];
-	}
-	else
-	{
-		// 4op FM+FM (0, 0): scale op 4 only
-		// 4op AM+FM (1, 0): scale op 4 only
-		// 4op FM+AM (0, 1): scale op 4 only
-		// 4op AM+AM (1, 1): scale op 3 and 4
-		scale[0] = (voice.patch->voice[0].conn & 1)
-		        && (voice.patch->voice[1].conn & 1);
-		scale[1] = true;
-	}
-	
+
+	const auto patchVoice = voice.patchVoice;
+	const auto scale = activeCarriers(voice);
+
 	// 0x40: key scale / volume
-	if (scale[0])
+	if (scale.first)
 		level = std::min(0x3f, patchVoice->op_level[0] + atten);
 	else
 		level = patchVoice->op_level[0];
 	write(REG_OP_LEVEL + voice.op,     level | patchVoice->op_ksr[0]);
 	
-	if (scale[1])
+	if (scale.second)
 		level = std::min(0x3f, patchVoice->op_level[1] + atten);
 	else
 		level = patchVoice->op_level[1];
@@ -534,19 +554,13 @@ void OPLPlayer::updateFrequency(OPLVoice& voice)
 // ----------------------------------------------------------------------------
 void OPLPlayer::silenceVoice(OPLVoice& voice)
 {
-	voice.channel    = nullptr;
-	voice.patch      = nullptr;
-	voice.patchVoice = nullptr;
-	
 	voice.on = false;
 	voice.justChanged = true;
 	voice.duration = UINT_MAX;
-	
-	write(REG_OP_LEVEL + voice.op,     0xff);
-	write(REG_OP_LEVEL + voice.op + 3, 0xff);
-	write(REG_VOICE_FREQL + voice.num, 0x00);
-	write(REG_VOICE_FREQH + voice.num, 0x00);
-	write(REG_VOICE_CNT + voice.num,   0x00);
+
+	write(REG_OP_SR + voice.op,     0xff);
+	write(REG_OP_SR + voice.op + 3, 0xff);
+	write(REG_VOICE_FREQH + voice.num, voice.freq >> 8);
 }
 
 // ----------------------------------------------------------------------------
@@ -559,9 +573,8 @@ void OPLPlayer::midiNoteOn(uint8_t channel, uint8_t note, uint8_t velocity)
 	if (findVoice(channel, note, true))
 		return;
 	
-	midiNoteOff(channel, note);
 	if (!velocity)
-		return;
+		return midiNoteOff(channel, note);
 	
 //	printf("midiNoteOn: chn %u, note %u\n", channel, note);
 	const OPLPatch *newPatch = findPatch(channel, note);
@@ -577,22 +590,16 @@ void OPLPlayer::midiNoteOn(uint8_t channel, uint8_t note, uint8_t velocity)
 		else
 			voice = findVoice(channel, newPatch, note);
 		if (!voice) continue; // ??
-		
-		if (voice->on)
-		{
-			silenceVoice(*voice);
-			runOneSample();
-		}
-		
+
+		updatePatch(*voice, newPatch, i);
+
 		// update the note parameters for this voice
 		voice->channel = &m_channels[channel & 15];
 		voice->on = voice->justChanged = true;
 		voice->note = note;
 		voice->velocity = ymfm::clamp((int)velocity + newPatch->velocity, 0, 127);
-		// for dual 2op, set the second voice's duration to 1 so it can get dropped if we need it to
-		voice->duration = newPatch->dualTwoOp ? i : 0;
+		voice->duration = 0;
 		
-		updatePatch(*voice, newPatch, i);
 		updateVolume(*voice);
 		updatePanning(*voice);
 		
@@ -600,12 +607,10 @@ void OPLPlayer::midiNoteOn(uint8_t channel, uint8_t note, uint8_t velocity)
 		if (!useFourOp(newPatch))
 		{
 			updateFrequency(*voice);
-			runOneSample();
 		}
 		else if (i > 0)
 		{
 			updateFrequency(*voice->fourOpOther);
-			runOneSample();
 		}
 	}
 }
@@ -623,7 +628,6 @@ void OPLPlayer::midiNoteOff(uint8_t channel, uint8_t note)
 		voice->on = false;
 
 		write(REG_VOICE_FREQH + voice->num, voice->freq >> 8);
-		runOneSample();
 	}
 }
 
@@ -757,7 +761,7 @@ void OPLPlayer::midiSysEx(const uint8_t *data, uint32_t length)
 void OPLPlayer::midiRawOPL(uint16_t addr, uint8_t data)
 {
 	write(addr, data);
-	runOneSample();
+	runSamples(1);
 }
 
 // ----------------------------------------------------------------------------

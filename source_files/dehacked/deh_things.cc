@@ -1042,6 +1042,8 @@ namespace Things
 			AddOneFlag(info, extflaglist[i].conv, got_a_flag);
 		}
 
+		cur_f = info->mbf21_flags;
+
 		for (i = 0; mbf21flag_list[i].bex != NULL; i++)
 		{
 			if (0 == (cur_f & mbf21flag_list[i].flag))
@@ -1050,6 +1052,8 @@ namespace Things
 			if (mbf21flag_list[i].conv != NULL)
 				AddOneFlag(info, mbf21flag_list[i].conv, got_a_flag);
 		}
+
+		cur_f = info->flags;
 
 		if (force_disloyal)
 			AddOneFlag(info, extflaglist[0].conv, got_a_flag);

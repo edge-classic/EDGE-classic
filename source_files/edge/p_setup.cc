@@ -25,7 +25,6 @@
 
 #include "i_defs.h"
 
-#include <vector>
 #include <map>
 
 #include "endianess.h"
@@ -84,7 +83,7 @@ DEF_CVAR(udmf_strict, "0", CVAR_ARCHIVE)
 //
 
 // Stores pointers to ad-hoc/derived classes that need to be cleaned up on ending a level
-static std::vector<void *> level_adhocs;
+std::vector<void *> level_adhocs;
 
 int numvertexes;
 vertex_t *vertexes = nullptr;

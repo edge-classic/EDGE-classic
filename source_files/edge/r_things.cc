@@ -1016,11 +1016,8 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 		return;
 
 	// ignore things that are mid-teleport
-	if (mo->teleport_tic > 0)
-	{
-		if (--mo->teleport_tic > 0)
-			return;
-	}
+	if (mo->teleport_tic-- > 0)
+		return;
 
 	bool is_model = (mo->state->flags & SFF_Model) ? true:false;
 

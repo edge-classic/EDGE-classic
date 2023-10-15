@@ -98,6 +98,9 @@ EmptySlot="Empty Slot";
 
 GotArmour="Picked up the armor.";
 GotMegaArmour="Picked up the megaarmor!";
+GotPurpleArmour="Picked up the purple armor!";
+GotYellowArmour="Picked up the yellow armor!";
+GotRedArmour="Picked up the red armor!";
 
 GotHealthPotion="Picked up a health bonus.";
 GotArmourHelmet="Picked up an armour bonus.";

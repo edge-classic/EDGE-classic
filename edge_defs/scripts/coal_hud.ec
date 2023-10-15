@@ -213,21 +213,8 @@ function doom_little_ammo() =
     hud.draw_num2(314, 191, 3, player.ammomax(4))
 }
 
-
-function doom_status_bar() =
+function doom_status_bar_common() =
 {
-	//Draw our extenders first, just in case the statusbar is already widescreen
-	if (!hud.custom_stbar)
-	{
-		hud.draw_image(  -83, 168, "STBARL") // Widescreen border
-		hud.draw_image(  320, 168, "STBARR") // Widescreen border
-	}
-	else
-	{
-		hud.solid_box(-83, 168, 83, 32, custom_stbar_average_color)
-		hud.solid_box(320, 168, 83, 32, custom_stbar_average_color)
-	}
-	
 	var centerOffsetX : float
 	var tempwidth : float
 	
@@ -270,11 +257,33 @@ function doom_status_bar() =
     doom_key(239, 191, 3, 7, "STKEYS2", "STKEYS5", "STKEYS8")
 
     doom_little_ammo()
+	
+	hud.set_alpha(1.0) //**Alters Transparency of HUD Elements**
+
 }
 
+//This one adds plain extenders of the average colour
+function doom_status_bar() =
+{
+	//Draw our extenders first, just in case the statusbar is already widescreen
+	if (!hud.custom_stbar)
+	{
+		hud.draw_image(  -83, 168, "STBARL") // Widescreen border
+		hud.draw_image(  320, 168, "STBARR") // Widescreen border
+	}
+	else
+	{
+		hud.solid_box(-83, 168, 83, 32, custom_stbar_average_color)
+		hud.solid_box(320, 168, 83, 32, custom_stbar_average_color)
+	}
+	
+	doom_status_bar_common()
+	
+}
+
+//This one adds textured extenders of the average colour
 function doom_status_bar2() =
 {
-   
     //Draw our extenders first, just in case the statusbar is already widescreen
 	hud.draw_image(  -83, 168, "STBARL") // Widescreen border
 	hud.draw_image(  320, 168, "STBARR") // Widescreen border
@@ -286,104 +295,58 @@ function doom_status_bar2() =
 		hud.set_alpha(1.0) //**Alters Transparency of HUD Elements**
 	}
 	
-	var centerOffsetX : float
-	var tempwidth : float
-	
-	tempwidth = hud.get_image_width("STBAR")
-	centerOffsetX = tempwidth / 2;
-	
-	//hud.draw_image(  0, 168, "STBAR")
-	hud.draw_image(  160 - centerOffsetX, 168, "STBAR")
-	
-    hud.draw_image( 90, 171, "STTPRCNT")
-    hud.draw_image(221, 171, "STTPRCNT")
-
-    hud.text_font("BIG_DIGIT")
-
-    hud.draw_num2( 44, 171, 3, player.main_ammo(1) )
-    hud.draw_num2( 90, 171, 3, player.health()     )
-    hud.draw_num2(221, 171, 3, player.total_armor())
-
-    if (hud.game_mode() == "dm")
-    {
-        hud.draw_num2(138, 171, 2, player.frags())
-    }
-    else
-    {
-        hud.draw_image(104, 168, "STARMS")
-
-        doom_weapon_icon(2, 111, 172, "STGNUM2", "STYSNUM2")
-        doom_weapon_icon(3, 123, 172, "STGNUM3", "STYSNUM3")
-        doom_weapon_icon(4, 135, 172, "STGNUM4", "STYSNUM4")
-
-        doom_weapon_icon(5, 111, 182, "STGNUM5", "STYSNUM5")
-        doom_weapon_icon(6, 123, 182, "STGNUM6", "STYSNUM6")
-        doom_weapon_icon(7, 135, 182, "STGNUM7", "STYSNUM7")
-    }
-
-    doomguy_face(144, 169)
-
-    doom_key(239, 171, 1, 5, "STKEYS0", "STKEYS3", "STKEYS6")
-    doom_key(239, 181, 2, 6, "STKEYS1", "STKEYS4", "STKEYS7")
-    doom_key(239, 191, 3, 7, "STKEYS2", "STKEYS5", "STKEYS8")
-
-    doom_little_ammo()
-    hud.set_alpha(1.0) //**Alters Transparency of HUD Elements**
-}
-
-
-function doom_overlay_status() = 
-{
-    hud.text_font("BIG_DIGIT")
-
-    hud.draw_num2(100, 171, 3, player.health())
-
-    hud.text_color(hud.YELLOW)
-    hud.draw_num2( 44, 171, 3, player.main_ammo(1))
-
-    if (player.total_armor() > 100)
-        hud.text_color(hud.BLUE)
-    else
-        hud.text_color(hud.GREEN)
-
-    hud.draw_num2(242, 171, 3, player.total_armor())
-
-    doom_key(256, 171, 1, 5, "STKEYS0", "STKEYS3", "STKEYS6")
-    doom_key(256, 181, 2, 6, "STKEYS1", "STKEYS4", "STKEYS7")
-    doom_key(256, 191, 3, 7, "STKEYS2", "STKEYS5", "STKEYS8")
-
-    doom_little_ammo()
+	doom_status_bar_common()
 }
 
 
 function new_overlay_status() = 
  {
 	var RelX
+	var AbsY
+	var YOffset
 	
 	
 	RelX = hud.x_left + (hud.x_right - hud.x_left) * 0.17
+	AbsY = 166
+	YOffset = 8
 	
+	if (player.has_key(4)) //green card
+		hud.draw_image(  RelX, AbsY, "STKEYS9")	
+		
+	AbsY = AbsY + YOffset		
 	if (player.has_key(1))
-		hud.draw_image(  RelX, 165, "STKEYS0")
-
+		hud.draw_image(  RelX, AbsY, "STKEYS0")
+		
+	AbsY = AbsY + YOffset
 	if (player.has_key(2))
-		hud.draw_image(  RelX, 175, "STKEYS1")
-
+		hud.draw_image(  RelX, AbsY, "STKEYS1")
+		
+	AbsY = AbsY + YOffset
 	if (player.has_key(3))
-		hud.draw_image(  RelX, 185, "STKEYS2")
-
+		hud.draw_image(  RelX, AbsY, "STKEYS2")
+		
 	
+		
 	RelX = hud.x_left + (hud.x_right - hud.x_left) * 0.20
+	AbsY = 166
+	YOffset = 8
 	
+	if (player.has_key(8)) //green skull
+		hud.draw_image(  RelX, AbsY, "STKEYSA")
+		
+	AbsY = AbsY + YOffset		
 	if (player.has_key(5))
-		hud.draw_image(  RelX, 165, "STKEYS3")
-
+		hud.draw_image(  RelX, AbsY, "STKEYS3")
+	
+	AbsY = AbsY + YOffset
 	if (player.has_key(6))
-		hud.draw_image(  RelX, 175, "STKEYS4")
-
+		hud.draw_image(  RelX, AbsY, "STKEYS4")
+	
+	AbsY = AbsY + YOffset
 	if (player.has_key(7))
-		hud.draw_image(  RelX, 185, "STKEYS5")
-
+		hud.draw_image(  RelX, AbsY, "STKEYS5")
+	
+		
 
     hud.set_alpha(0.9) //**Alters Transparency of HUD Elements**
     hud.text_font("BIG_DIGIT")
@@ -495,10 +458,7 @@ function doom_automap() =
 	{
 		new_overlay_status()
 	}
-//	else
-//	{
-//		//new_overlay_status()
-//	}
+
 
     hud.text_font("DOOM")
     hud.text_color(hud.GREEN)

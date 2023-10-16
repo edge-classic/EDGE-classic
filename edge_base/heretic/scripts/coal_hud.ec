@@ -119,7 +119,7 @@ function heretic_status_bar() =
 	}
 	
 	//hud.stretch_image_nooffsets(x, y, w, h, name)
-	//Ammo picture
+	//Ammo picture for normal weapons
 	if (player.cur_weapon() == "ELF_WAND")
 		hud.stretch_image(AmmoGfx_X, AmmoGfx_Y, AmmoGfx_W, AmmoGfx_H, "INAMGLD", 1)
 	
@@ -137,7 +137,25 @@ function heretic_status_bar() =
 	
 	if (player.cur_weapon() == "MACE")
 		hud.stretch_image(AmmoGfx_X, AmmoGfx_Y, AmmoGfx_W, AmmoGfx_H, "INAMLOB", 1)
-			
+	
+	//Ammo picture for tomed weapons
+	if (player.cur_weapon() == "ELF_WAND_TOMED")
+		hud.stretch_image(AmmoGfx_X, AmmoGfx_Y, AmmoGfx_W, AmmoGfx_H, "INAMGLD", 1)
+	
+	if (player.cur_weapon() == "CROSSBOW_TOMED")
+		hud.stretch_image(AmmoGfx_X - 4, AmmoGfx_Y + 5, AmmoGfx_W + 5, AmmoGfx_H - 10, "INAMBOW", 1)
+	
+	if (player.cur_weapon() == "DRAGON_CLAW_TOMED")
+		hud.stretch_image(AmmoGfx_X, AmmoGfx_Y, AmmoGfx_W, AmmoGfx_H, "INAMBST", 1)
+	
+	if (player.cur_weapon() == "PHOENIX_ROD_TOMED")
+		hud.stretch_image(AmmoGfx_X, AmmoGfx_Y, AmmoGfx_W, AmmoGfx_H, "INAMPNX", 1)
+	
+	if (player.cur_weapon() == "HELLSTAFF_TOMED")
+		hud.stretch_image(AmmoGfx_X, AmmoGfx_Y, AmmoGfx_W, AmmoGfx_H, "INAMRAM", 1)
+	
+	if (player.cur_weapon() == "MACE_TOMED")
+		hud.stretch_image(AmmoGfx_X, AmmoGfx_Y, AmmoGfx_W, AmmoGfx_H, "INAMLOB", 1)
 }
 
 function heretic_overlay_status() = 
@@ -494,7 +512,6 @@ function InventoryScreenMultiItem() =
 		ShowMulti = 0
 		return
 	}
-	
 }	
 	
 //**                    **
@@ -536,7 +553,7 @@ function handle_tome_of_power() =
 			hud.rts_enable("SWITCH_TOMED_MACE")
 		}
 		
-		hud.stretch_image(305, 20, 20, 20, "SPINBK0",1)
+		hud.stretch_image(290, 5, 20, 20, "SPINBK0",1)
 	}
 	
 	if (player.has_power(player.BERSERK) < 1 && TomeActivated == 1)
@@ -599,7 +616,7 @@ function draw_all() =
 	InventoryScreenMultiItem()
 	
     if (player.has_power(player.JET_PACK))//wings
-    	hud.stretch_image(280, 20, 20, 20, "SPFLY0",1)
+    	hud.stretch_image(10, 5, 20, 20, "SPFLY0",1)
 	
 	
 	handle_tome_of_power() //our special routine

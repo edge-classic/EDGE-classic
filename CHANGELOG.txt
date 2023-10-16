@@ -58,6 +58,7 @@ General Improvements/Changes
 - ZMAPINFO/MAPINFO parsing updates:
   - Episode definitions and the 'clearepisodes' directive will now be respected
   - ZMAPINFO 'ResetInventory' level definition key will result in the RESET_PLAYER DDFLEVL command being applied
+- Heretic: numerous improvements and tweaks courtesy of DW user Macro (https://github.com/Macro914/EDGE-Classic-Scripting-Patches)
 
 
 Bugs fixed

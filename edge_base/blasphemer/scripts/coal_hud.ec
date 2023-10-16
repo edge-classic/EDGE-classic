@@ -7,6 +7,29 @@
 
 //var inventory_handler : vector // First value is inventory left, second is inventory use, third is inventory next
 
+// Startup stuff
+function new_game() =
+{
+	if (hud.custom_stbar)
+	{
+		custom_stbar_average_color = hud.get_average_color("STBAR")
+		custom_stbar_darkest_color = hud.get_darkest_color("STBAR")
+		custom_stbar_lightest_color = hud.get_lightest_color("STBAR")
+	}
+	hud.automap_player_arrow(hud.AM_ARROW_HERETIC)
+}
+
+function load_game() =
+{
+	if (hud.custom_stbar)
+	{
+		custom_stbar_average_color = hud.get_average_color("STBAR")
+		custom_stbar_darkest_color = hud.get_darkest_color("STBAR")
+		custom_stbar_lightest_color = hud.get_lightest_color("STBAR")
+	}
+	hud.automap_player_arrow(hud.AM_ARROW_HERETIC)
+}
+
 function heretic_life_gem() =
 {
 	var TopX = 25
@@ -49,17 +72,19 @@ function heretic_status_bar() =
 	var AmmoGfx_W = 13
 	var AmmoGfx_H = 13
 	
-	//hud.stretch_image(x, y, w, h, name)
-	hud.stretch_image( -128, 158, 75, 42, "STBARL") // Widescreen border
-    hud.stretch_image(372, 158, 75, 42, "STBARR") // Widescreen border
-	hud.draw_image(-53, 158, "STBARL") // Widescreen border
-    hud.draw_image(320, 158, "STBARR") // Widescreen border
-	
 	var centerOffsetX : float
 	var tempwidth : float
 	
 	tempwidth = hud.get_image_width("BARBACK")
 	centerOffsetX = tempwidth / 2;
+	
+	
+	
+	//hud.stretch_image(x, y, w, h, name)
+	hud.stretch_image( -128, 158, 75, 42, "STBARL") // Widescreen border
+    hud.stretch_image(372, 158, 75, 42, "STBARR") // Widescreen border
+	hud.draw_image(-53, 158, "STBARL") // Widescreen border
+    hud.draw_image(320, 158, "STBARR") // Widescreen border
 	
 	//order is important because some of them overlap
 	//hud.draw_image(0, 158, "BARBACK")
@@ -98,7 +123,7 @@ function heretic_status_bar() =
 	}
 	
 	//hud.stretch_image(x, y, w, h, name)
-	//Ammo picture
+	//Ammo picture for normal weapons
 	if (player.cur_weapon() == "ELF_WAND")
 		hud.stretch_image(AmmoGfx_X, AmmoGfx_Y, AmmoGfx_W, AmmoGfx_H, "INAMGLD", 1)
 	
@@ -117,6 +142,24 @@ function heretic_status_bar() =
 	if (player.cur_weapon() == "MACE")
 		hud.stretch_image(AmmoGfx_X, AmmoGfx_Y, AmmoGfx_W, AmmoGfx_H, "INAMLOB", 1)
 			
+	//Ammo picture for tomed weapons
+	if (player.cur_weapon() == "ELF_WAND_TOMED")
+		hud.stretch_image(AmmoGfx_X, AmmoGfx_Y, AmmoGfx_W, AmmoGfx_H, "INAMGLD", 1)
+	
+	if (player.cur_weapon() == "CROSSBOW_TOMED")
+		hud.stretch_image(AmmoGfx_X - 4, AmmoGfx_Y + 5, AmmoGfx_W + 5, AmmoGfx_H - 10, "INAMBOW", 1)
+	
+	if (player.cur_weapon() == "DRAGON_CLAW_TOMED")
+		hud.stretch_image(AmmoGfx_X, AmmoGfx_Y, AmmoGfx_W, AmmoGfx_H, "INAMBST", 1)
+	
+	if (player.cur_weapon() == "PHOENIX_ROD_TOMED")
+		hud.stretch_image(AmmoGfx_X, AmmoGfx_Y, AmmoGfx_W, AmmoGfx_H, "INAMPNX", 1)
+	
+	if (player.cur_weapon() == "HELLSTAFF_TOMED")
+		hud.stretch_image(AmmoGfx_X, AmmoGfx_Y, AmmoGfx_W, AmmoGfx_H, "INAMRAM", 1)
+	
+	if (player.cur_weapon() == "MACE_TOMED")
+		hud.stretch_image(AmmoGfx_X, AmmoGfx_Y, AmmoGfx_W, AmmoGfx_H, "INAMLOB", 1)
 }
 
 function heretic_overlay_status() = 
@@ -515,7 +558,7 @@ function handle_tome_of_power() =
 			hud.rts_enable("SWITCH_TOMED_MACE")
 		}
 		
-		hud.stretch_image(305, 20, 20, 20, "SPINBK0",1)
+		hud.stretch_image(290, 5, 20, 20, "SPINBK0",1)
 	}
 	
 	if (player.has_power(player.BERSERK) < 1 && TomeActivated == 1)
@@ -532,29 +575,6 @@ function handle_tome_of_power() =
 		hud.rts_enable("SWITCH_MACE")
 	}
 	
-}
-
-// Startup stuff
-function new_game() =
-{
-	if (hud.custom_stbar)
-	{
-		custom_stbar_average_color = hud.get_average_color("STBAR")
-		custom_stbar_darkest_color = hud.get_darkest_color("STBAR")
-		custom_stbar_lightest_color = hud.get_lightest_color("STBAR")
-	}
-	hud.automap_player_arrow(hud.AM_ARROW_HERETIC)
-}
-
-function load_game() =
-{
-	if (hud.custom_stbar)
-	{
-		custom_stbar_average_color = hud.get_average_color("STBAR")
-		custom_stbar_darkest_color = hud.get_darkest_color("STBAR")
-		custom_stbar_lightest_color = hud.get_lightest_color("STBAR")
-	}
-	hud.automap_player_arrow(hud.AM_ARROW_HERETIC)
 }
 
 //**                    **
@@ -596,13 +616,12 @@ function draw_all() =
 		hud.render_world(0, 0, 320, 200)
 	} 
 	
-	
 	//inventory_handler = player.inventory_events()
 	InventoryScreenOneItem()
 	InventoryScreenMultiItem()
 	
     if (player.has_power(player.JET_PACK))//wings
-    	hud.stretch_image(280, 20, 20, 20, "SPFLY0", 1)
+    	hud.stretch_image(10, 5, 20, 20, "SPFLY0",1)
 	
 	
 	handle_tome_of_power() //our special routine

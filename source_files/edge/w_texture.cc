@@ -33,6 +33,8 @@
 #include "w_texture.h"
 #include "w_wad.h"
 
+extern std::string game_base;
+
 class texture_set_c
 {
 public:
@@ -221,6 +223,167 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 	delete[] patchlookup;
 }
 
+static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
+{
+	int i;
+	int maxoff;
+	int maxoff2;
+	int numtextures1;
+	int numtextures2;
+
+	const int *maptex;
+	const int *maptex1;
+	const int *maptex2;
+	const int *directory;
+
+	// Load the patch names from pnames.lmp.
+	const char *names = (const char*)W_LoadLump(WT->pnames);
+	int nummappatches = EPI_LE_S32(*((const int *)names));  // Eww...
+
+	const char *name_p = names + 4;
+
+	int *patchlookup = new int[nummappatches+1];
+
+	std::vector<std::string> patch_names;
+
+	patch_names.resize(nummappatches);
+
+	for (i = 0; i < nummappatches; i++)
+	{
+		patch_names[i].resize(9);
+
+		Z_StrNCpy(patch_names[i].data(), (const char*)(name_p + i * 8), 8);
+
+		patchlookup[i] = W_CheckNumForTexPatch(patch_names[i].c_str());
+	}
+
+	delete[] names;
+
+	//
+	// Load the map texture definitions from textures.lmp.
+	//
+	// The data is contained in one or two lumps:
+	//   TEXTURE1 for shareware
+	//   TEXTURE2 for commercial.
+	//
+	maptex = maptex1 = (const int*)W_LoadLump(WT->texture1);
+	numtextures1 = EPI_LE_S32(*maptex);
+	maxoff = W_LumpLength(WT->texture1);
+	directory = maptex + 1;
+
+	if (WT->texture2 != -1)
+	{
+		maptex2 = (const int*)W_LoadLump(WT->texture2);
+		numtextures2 = EPI_LE_S32(*maptex2);
+		maxoff2 = W_LumpLength(WT->texture2);
+	}
+	else
+	{
+		maptex2 = NULL;
+		numtextures2 = 0;
+		maxoff2 = 0;
+	}
+
+	texture_set_c *cur_set = new texture_set_c(numtextures1 + numtextures2);
+
+	tex_sets.push_back(cur_set);
+
+	for (i = 0; i < cur_set->num_tex; i++, directory++)
+	{
+		if (i == numtextures1)
+		{
+			// Start looking in second texture file.
+			maptex = maptex2;
+			maxoff = maxoff2;
+			directory = maptex + 1;
+		}
+
+		int offset = EPI_LE_S32(*directory);
+		if (offset < 0 || offset > maxoff)
+			I_Error("W_InitTextures: bad texture directory");
+
+		const raw_strife_texture_t *mtexture =
+			(const raw_strife_texture_t *) ((const byte *) maptex + offset);
+
+		// -ES- 2000/02/10 Texture must have patches.
+		int patchcount = EPI_LE_S16(mtexture->patch_count);
+		
+		//Lobo 2021: Changed this to a warning. Allows us to run several DBPs
+		// which have this issue
+		if (!patchcount)
+		{
+			I_Warning("W_InitTextures: Texture '%.8s' has no patches\n", mtexture->name);
+			//I_Error("W_InitTextures: Texture '%.8s' has no patches", mtexture->name);
+			patchcount = 0; //mark it as a dud
+		} 
+
+		int width = EPI_LE_S16(mtexture->width);
+		if (width == 0)
+			I_Error("W_InitTextures: Texture '%.8s' has zero width", mtexture->name);
+
+		// -ES- Allocate texture, patches and columnlump/ofs in one big chunk
+		int base_size = sizeof(texturedef_t) + sizeof(texpatch_t) * (patchcount - 1);
+
+		texturedef_t * texture = (texturedef_t *) std::malloc(base_size + width * (sizeof(byte) + sizeof(short)));
+		cur_set->textures[i] = texture;
+
+		byte *base = (byte *)texture + base_size;
+
+		texture->columnofs = (unsigned short *)base;
+
+		texture->width = width;
+		texture->height = EPI_LE_S16(mtexture->height);
+		texture->scale_x = mtexture->scale_x;
+		texture->scale_y = mtexture->scale_y;
+		texture->file = file;
+		texture->palette_lump = WT->palette;
+		texture->patchcount = patchcount;
+
+		Z_StrNCpy(texture->name, mtexture->name, 8);
+		for (size_t j=0;j<strlen(texture->name);j++) {
+			texture->name[j] = toupper(texture->name[j]);
+		}
+
+		const raw_strife_patchdef_t *mpatch = &mtexture->patches[0];
+		texpatch_t *patch = &texture->patches[0];
+
+		bool is_sky = (epi::prefix_case_cmp(texture->name, "SKY") == 0);
+
+		for (int k = 0; k < texture->patchcount; k++, mpatch++, patch++)
+		{
+			int pname = EPI_LE_S16(mpatch->pname);
+
+			patch->originx = EPI_LE_S16(mpatch->x_origin);
+			patch->originy = EPI_LE_S16(mpatch->y_origin);
+			patch->patch   = patchlookup[pname];
+
+			// work-around for strange Y offset in SKY1 of DOOM 1 
+			if (is_sky && patch->originy < 0)
+				patch->originy = 0;
+
+			if (patch->patch == -1)
+			{
+				I_Warning("Missing patch '%.8s' in texture \'%.8s\'\n",
+						  patch_names[pname].c_str(), texture->name);
+
+				// mark texture as a dud
+				texture->patchcount = 0;
+				break;
+			}
+		}
+	}
+
+	// free stuff
+	patch_names.clear();
+
+	delete[] maptex1;
+
+	if (maptex2)
+		delete[] maptex2;
+	
+	delete[] patchlookup;
+}
+
 //
 // W_InitTextures
 //
@@ -262,7 +425,10 @@ void W_InitTextures(void)
 		if (WT.texture1 < 0)
 			continue;
 
-		InstallTextureLumps(file, &WT);
+		if (game_base == "STRIFE")
+			InstallTextureLumpsStrife(file, &WT);
+		else
+			InstallTextureLumps(file, &WT);
 	}
 
 	if (tex_sets.empty())

@@ -1763,6 +1763,8 @@ void CON_PrintEndoom()
 	if (!data)
 		data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
 	if (!data)
+		data = W_OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
+	if (!data)
 	{
 		CON_Printf("CON_PrintEndoom: No ENDOOM screen found!\n");
 		return;
@@ -1799,6 +1801,8 @@ void CON_CreateQuitScreen()
 		data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
 	if (!data)
 		data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
+	if (!data)
+		data = W_OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
 	if (!data)
 	{
 		CON_Printf("No ENDOOM screen found for this WAD!\n");

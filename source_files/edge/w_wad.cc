@@ -94,23 +94,23 @@ game_check_t;
 static const std::vector<game_check_t> game_checker =
 {
 	{
-		{ 16,  "CUSTOM",    {"EDGEGAME", "EDGEGAME"} },
-		{ 1,  "BLASPHEMER", {"BLASPHEM", "E1M1"}     },
-		{ 8,  "FREEDOOM1",  {"FREEDOOM", "E1M1"}     },
-		{ 13, "FREEDOOM2",  {"FREEDOOM", "MAP01"}    },
-		{ 6,  "REKKR",      {"REKCREDS", "E1M1"}     },
-		{ 5,  "HACX",       {"HACX-R",   "MAP01"}    },
-		{ 4,  "HARMONY",    {"0HAWK01",  "MAP01"}    },
-		{ 3,  "CHEX",    	{"ENDOOM",   "_DEUTEX_"} }, // Original Chex Quest, NOT CQ3
-		{ 2,  "HERETIC",    {"MUS_E1M1", "E1M1"}     },
-		{ 11, "PLUTONIA",   {"CAMO1",    "MAP01"}    },
-		{ 12, "TNT",        {"REDTNT2",  "MAP01"}    },
-		{ 10,  "DOOM",      {"BFGGA0",   "E2M1"}     },
-		{ 9,  "DOOM",       {"DMENUPIC", "M_MULTI"}  }, // BFG Edition
-		{ 7,  "DOOM1",      {"SHOTA0",   "E1M1"}     },
-		{ 15, "DOOM2",      {"BFGGA0",   "MAP01"}    },
-		{ 14, "DOOM2",   	{"DMENUPIC", "MAP33"}    }, // BFG Edition
-		//{ 0, "STRIFE",    {"VELLOGO",  "RGELOGO"}  }// Dev/internal use - Definitely nowhwere near playable
+		{ 17, "CUSTOM",     {"EDGEGAME", "EDGEGAME"} },
+		{ 2,  "BLASPHEMER", {"BLASPHEM", "E1M1"}     },
+		{ 9,  "FREEDOOM1",  {"FREEDOOM", "E1M1"}     },
+		{ 14, "FREEDOOM2",  {"FREEDOOM", "MAP01"}    },
+		{ 7,  "REKKR",      {"REKCREDS", "E1M1"}     },
+		{ 6,  "HACX",       {"HACX-R",   "MAP01"}    },
+		{ 5,  "HARMONY",    {"0HAWK01",  "MAP01"}    },
+		{ 4,  "CHEX",    	{"ENDOOM",   "_DEUTEX_"} }, // Original Chex Quest, NOT CQ3
+		{ 3,  "HERETIC",    {"MUS_E1M1", "E1M1"}     },
+		{ 12, "PLUTONIA",   {"CAMO1",    "MAP01"}    },
+		{ 13, "TNT",        {"REDTNT2",  "MAP01"}    },
+		{ 11, "DOOM",       {"BFGGA0",   "E2M1"}     },
+		{ 10, "DOOM",       {"DMENUPIC", "M_MULTI"}  }, // BFG Edition
+		{ 8,  "DOOM1",      {"SHOTA0",   "E1M1"}     },
+		{ 16, "DOOM2",      {"BFGGA0",   "MAP01"}    },
+		{ 15, "DOOM2",   	{"DMENUPIC", "MAP33"}    }, // BFG Edition
+		{ 1,  "STRIFE",     {"VELLOGO",  "RGELOGO"}  }  // Dev/internal use - Definitely nowhwere near playable
 	}
 };
 

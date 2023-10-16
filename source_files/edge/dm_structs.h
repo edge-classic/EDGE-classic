@@ -254,6 +254,15 @@ typedef struct
 }
 raw_patchdef_t;
 
+typedef struct
+{
+	s16_t x_origin;
+	s16_t y_origin;
+
+	u16_t pname;    // index into PNAMES
+}
+raw_strife_patchdef_t;
+
 
 // Texture definition.
 //
@@ -276,6 +285,22 @@ typedef struct
 	raw_patchdef_t patches[1];
 }
 raw_texture_t;
+
+typedef struct
+{
+	char name[8];
+
+	u16_t flags;    // these from ZDoom (NOT USED in vanilla)
+	u8_t  scale_x;  //
+	u8_t  scale_y;  //
+
+	u16_t width;
+	u16_t height;
+	u16_t patch_count;
+
+	raw_strife_patchdef_t patches[1];
+}
+raw_strife_texture_t;
 
 #endif /* __DM_STRUCTS_H__ */
 

@@ -69,3 +69,5 @@ Bugs fixed
 - Fixed occasional sector glow thing link/unlink errors
 - Fixed AJBSP using self-referencing linedefs that were perfectly vertical or horizontal for partitioning
 - Fixed floor/ceiling rotation not working when using images that have a different width and height
+- Fixed MODEL_ROTATE not being applied to attacks
+

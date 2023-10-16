@@ -800,6 +800,16 @@ void ThingParseField(const char *field, const char *contents,
 		return;
 	}
 
+	// handle the "MODEL_ROTATE" command
+	if (DDF_CompareName(field, "MODEL_ROTATE") == 0)
+	{
+		if (DDF_MainParseField(thing_commands, field, contents, (byte *)dynamic_mobj))
+		{
+			dynamic_mobj->model_rotate *= ANG1; //apply the rotation
+			return;
+		}
+	}
+
 	if (DDF_MainParseField(thing_commands, field, contents, (byte *)dynamic_mobj))
 		return;
 
@@ -886,8 +896,6 @@ static void ThingFinishEntry(void)
 
 		dlight_radius_warnings++;
 	}
-
-	dynamic_mobj->model_rotate *= ANG1;
 
 	// FIXME: check more stuff
 

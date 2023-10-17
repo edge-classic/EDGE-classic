@@ -19,7 +19,6 @@ add_library(
   math_crc.cc
   math_md5.cc
   math_vector.cc
-  mus_2_midi.cc
   path.cc
   sound_data.cc
   sound_gather.cc

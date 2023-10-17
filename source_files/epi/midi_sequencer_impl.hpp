@@ -79,7 +79,7 @@ __inline int c99_snprintf(char *outBuf, size_t size, const char *format, ...)
 #endif
 
 #ifndef BWMIDI_DISABLE_MUS_SUPPORT
-#include "mus_2_midi.h"
+#include "cvt_mus2mid.hpp"
 #endif // MUS
 
 #ifndef BWMIDI_DISABLE_XMI_SUPPORT
@@ -2805,13 +2805,14 @@ bool BW_MidiSequencer::parseMUS(epi::mem_file_c *mfr)
     mfr = nullptr;
 
     uint8_t *mid = NULL;
-    int mid_len = 0;
-    bool m2mret = Mus2Midi::Convert(mus, mus_len,
-                                  &mid, &mid_len, Mus2Midi::DOOM_DIVIS, true);
+    uint32_t mid_len = 0;
+    int m2mret = Convert_mus2midi(mus, static_cast<uint32_t>(mus_len),
+                                    &mid, &mid_len, 0);
+
     if(mus)
         free(mus);
 
-    if(!m2mret)
+    if(m2mret < 0)
     {
         m_errorString = "Invalid MUS/DMX data format!";
         if (mid)

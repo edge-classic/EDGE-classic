@@ -123,7 +123,7 @@ struct actioninfo_t
 };
 
 
-const actioninfo_t action_info[NUMACTIONS_MBF] =
+const actioninfo_t action_info[NUMACTIONS_MBF21] =
 {
 	{ "A_NULL",         0,          "NOTHING", NULL, NULL },
 
@@ -222,6 +222,9 @@ const actioninfo_t action_info[NUMACTIONS_MBF] =
 
 	{ "A_FireOldBFG",   0,  "W:SHOOT", "R:INTERNAL_FIRE_OLD_BFG", NULL },
 	{ "A_BetaSkullAttack", 0, "RANGE_ATTACK", "R:INTERNAL_BETA_LOST_SOUL_ATTACK", NULL },
+
+	// MBF21 actions...
+	{ "A_RefireTo",   AF_SPECIAL, "", NULL, NULL }
 };
 
 
@@ -753,7 +756,7 @@ bool Frames::CheckWeaponFlash(int first)
 
 		int act = st->action;
 
-		assert(0 <= act && act < NUMACTIONS_MBF);
+		assert(0 <= act && act < NUMACTIONS_MBF21);
 
 		if (action_info[act].act_flags & AF_FLASH)
 			return true;
@@ -1029,6 +1032,25 @@ void Frames::SpecialAction(char *act_name, const state_t *st)
 			}
 			break;
 
+		case A_RefireTo:
+			{
+				int next = ReadArg(st, 0);  // state
+				int perc = ReadArg(st, 1);  // noammocheck
+
+				if (next <= 0 || NewStateElseOld(next) == NULL)
+				{
+					strcpy(act_name, "NOTHING");
+				}
+				else
+				{
+					perc = perc * 100 / 256;
+					if (perc != 0)   perc = -1; // We use the negative percentage in A_RefireTo to denote skipping the ammo check (or will)
+
+					sprintf(act_name, "REFIRE_TO(%s,%d%%)", RedirectorName(next), perc);
+				}
+			}
+			break;
+
 		default:
 			InternalError("Bad special action %d\n", st->action);
 	}
@@ -1045,7 +1067,7 @@ void Frames::OutputState(char group, int cur, bool do_action)
 
 	int action = do_action ? st->action : A_NULL;
 
-	assert(action >= 0 && action < NUMACTIONS_MBF);
+	assert(action >= 0 && action < NUMACTIONS_MBF21);
 
 	const char *bex_name = action_info[action].bex_name;
 
@@ -1382,7 +1404,7 @@ void Frames::AlterBexCodePtr(const char * new_action)
 
 	int action;
 
-	for (action = 0 ; action < NUMACTIONS_MBF ; action++)
+	for (action = 0 ; action < NUMACTIONS_MBF21 ; action++)
 	{
 		// use +2 here to ignore the "A_" prefix
 		if (StrCaseCmp(action_info[action].bex_name + 2, new_action) == 0)

@@ -119,7 +119,12 @@ typedef enum
 	A_FireOldBFG,
 	A_BetaSkullAttack,
 
-	NUMACTIONS_MBF
+	NUMACTIONS_MBF, // Keep this around in case we need to delineate - Dasho
+
+	// MBF21 actions:
+	A_RefireTo = NUMACTIONS_MBF,
+
+	NUMACTIONS_MBF21
 }
 action_e;
 

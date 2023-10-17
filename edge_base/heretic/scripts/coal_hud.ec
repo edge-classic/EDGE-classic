@@ -597,7 +597,7 @@ function draw_all() =
 
 	if (which == 0)
 	{	
-		hud.universal_y_adjust = -12
+		hud.universal_y_adjust = 0
 		hud.render_world(0, 0, 320, 200 - 32)
 		heretic_status_bar()
     	heretic_life_gem()

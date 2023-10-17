@@ -112,7 +112,7 @@ int case_cmp(const std::string& A, const std::string& B)
 
 int case_cmp_n(const char *A, const char *B, size_t n)
 {
-	SYS_ASSERT(A && B && strlen(A) > n && strlen(B) > n);
+	SYS_ASSERT(A && B);
 	return epi::case_cmp(std::string(A).substr(0, n), std::string(B).substr(0, n));
 }
 

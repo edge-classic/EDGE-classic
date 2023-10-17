@@ -34,6 +34,10 @@ New Features
 	 
 	For consistency, all the old SEC_xxx ddf commands can also be used with 2ND_xxx instead 
 	  i.e. 2ND_AMMOTYPE can replace SEC_AMMOTYPE
+  
+  - REFIRE_TO state added
+    - Uses same syntax as JUMP, but uses refiring instead of % chance as the test condition
+    - SEC/2ND_REFIRE_TO, 3RD_REFIRE_TO, and 4TH_REFIRE_TO also supported
 
 - GAMES.DDF: "NO_SKILL_MENU" boolean command added (Courtesy of akaAgar - https://github.com/edge-classic/EDGE-classic/pull/577)
   - If true, will skip difficulty menu and start selected episode at skill 2 ("Hurt Me Plenty" for Doom)

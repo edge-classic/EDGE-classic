@@ -1172,6 +1172,61 @@ void A_ReFireTA(mobj_t * mo) { DoReFire(mo, 2); }
 void A_ReFireFA(mobj_t * mo) { DoReFire(mo, 3); }
 
 //
+// A_ReFireTo
+//
+// The player can re-fire the weapon without lowering it entirely.
+// Unlike A_ReFire, this can re-fire to an arbitrary state
+//
+static void DoReFireTo(mobj_t * mo, int ATK)
+{
+	player_t *p = mo->player;
+	pspdef_t *psp = &p->psprites[p->action_psp];
+
+	if (p->pending_wp >= 0 || p->health <= 0)
+	{
+		GotoDownState(p);
+		return;
+	}
+
+	if (psp->state->jumpstate == S_NULL)
+		return;  // show warning ??
+
+	weapondef_c *info = p->weapons[p->ready_wp].info;
+
+	p->remember_atk[ATK] = -1;
+
+	// check for fire
+	// (if a weaponchange is pending, let it go through instead)
+
+	if (ButtonDown(p, ATK))
+	{
+		// -KM- 1999/01/31 Check for semiautomatic weapons.
+		if (!p->attackdown[ATK] || info->autofire[ATK])
+		{
+			p->refire++;
+			p->flash = false;
+
+			if (WeaponCanFire(p, p->ready_wp, ATK))
+				P_SetPspriteDeferred(p, ps_weapon, psp->state->jumpstate);
+				// do the crosshair too?
+			else
+				SwitchAway(p, ATK, info->specials[ATK] & WPSP_Trigger);
+			return;
+		}
+	}
+
+	p->refire = info->refire_inacc ? 0 : 1;
+
+	if (! WeaponCouldAutoFire(p, p->ready_wp, ATK))
+		SwitchAway(p, ATK, 0);
+}
+
+void A_ReFireTo  (mobj_t * mo) { DoReFireTo(mo, 0); }
+void A_ReFireToSA(mobj_t * mo) { DoReFireTo(mo, 1); }
+void A_ReFireToTA(mobj_t * mo) { DoReFireTo(mo, 2); }
+void A_ReFireToFA(mobj_t * mo) { DoReFireTo(mo, 3); }
+
+//
 // A_NoFire
 //
 // If the player is still holding the fire button, continue, otherwise

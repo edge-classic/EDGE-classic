@@ -42,6 +42,7 @@ void A_WeaponDJNE(struct mobj_s *mo);
 void A_Lower(struct mobj_s *mo);
 void A_Raise(struct mobj_s *mo);
 void A_ReFire(struct mobj_s *mo);
+void A_ReFireTo(struct mobj_s *mo);
 void A_NoFire(struct mobj_s *mo);
 void A_NoFireReturn(struct mobj_s *mo);
 void A_CheckReload(struct mobj_s *mo);
@@ -66,6 +67,7 @@ void A_WeaponBecome(struct mobj_s *mo);
 
 void A_WeaponShootSA(struct mobj_s *mo);
 void A_ReFireSA(struct mobj_s *mo);
+void A_ReFireToSA(struct mobj_s *mo);
 void A_NoFireSA(struct mobj_s *mo);
 void A_NoFireReturnSA(struct mobj_s *mo);
 void A_CheckReloadSA(struct mobj_s *mo);
@@ -73,6 +75,7 @@ void A_GunFlashSA(struct mobj_s *mo);
 
 void A_WeaponShootTA(struct mobj_s *mo);
 void A_ReFireTA(struct mobj_s *mo);
+void A_ReFireToTA(struct mobj_s *mo);
 void A_NoFireTA(struct mobj_s *mo);
 void A_NoFireReturnTA(struct mobj_s *mo);
 void A_CheckReloadTA(struct mobj_s *mo);
@@ -80,6 +83,7 @@ void A_GunFlashTA(struct mobj_s *mo);
 
 void A_WeaponShootFA(struct mobj_s *mo);
 void A_ReFireFA(struct mobj_s *mo);
+void A_ReFireToFA(struct mobj_s *mo);
 void A_NoFireFA(struct mobj_s *mo);
 void A_NoFireReturnFA(struct mobj_s *mo);
 void A_CheckReloadFA(struct mobj_s *mo);

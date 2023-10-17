@@ -130,6 +130,7 @@ static savefield_t sv_fields_mobj[] =
 	SF(dlight.color, "dlight_color", 1, SVT_RGBCOL, SR_GetRGB, SR_PutRGB),
 	SF(shot_count, "shot_count", 1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(lastheard, "lastheard", 1, SVT_INT, SR_GetInt, SR_PutInt),
+	SF(is_voodoo, "is_voodoo", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
 	// NOT HERE:
 	//   subsector & region: these are regenerated.
 	//   next,prev,snext,sprev,bnext,bprev: links are regenerated.

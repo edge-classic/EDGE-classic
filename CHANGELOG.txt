@@ -75,4 +75,5 @@ Bugs fixed
 - Fixed AJBSP using self-referencing linedefs that were perfectly vertical or horizontal for partitioning
 - Fixed floor/ceiling rotation not working when using images that have a different width and height
 - Fixed MODEL_ROTATE not being applied to attacks
+- Fixed savegames not preserving the 'is_voodoo' convenience boolean for mobjs, causing issues when loading a game that had them present
 

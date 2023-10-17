@@ -692,18 +692,7 @@ void P_CalcFullProperties(const mobj_t *mo, region_properties_t *new_p)
 	new_p->viscosity = 0;
 	new_p->drag = 0;
 
-	new_p->push.x = new_p->push.y = new_p->push.z = 0; // Original calcs - Dasho
-
-	// 2023.05.31 - Test preservation of some push value when transitioning sectors
-	// In particular, this seems to fix AAA MAP07's exit voodoo scroller, which would
-	// otherwise become stuck on the narrow section that is not a pusher - Dasho
-	// 2023.06.08 - Test only doing this for voodoo dolls
-	if (mo->is_voodoo)
-	{
-		new_p->push.x = (mo->props->push.x + sector->props.push.x) / 2;
-		new_p->push.y = (mo->props->push.y + sector->props.push.y) / 2;
-		new_p->push.z = (mo->props->push.z + sector->props.push.z) / 2;
-	}
+	new_p->push.x = new_p->push.y = new_p->push.z = 0;
 
 	new_p->type = 0;  // these shouldn't be used
 	new_p->special = NULL;
@@ -1412,8 +1401,21 @@ static void P_MobjThinker(mobj_t * mobj, bool extra_tic)
 
 		if (!extra_tic || !r_doubleframes.d)
 		{
-			mobj->mom.x += player_props.push.x;
-			mobj->mom.y += player_props.push.y;
+			// Dasho 2023.10.17 - This is a small gamble, but I think it's safe to assume
+			// that for EC the only time a voodoo would be on such a sector is a Boom scroller.
+			// This sets the voodoo to move at the same speed as the scroller and I think is a
+			// 'better' solution for stuff like AAA MAP07 than my previous attempt using
+			// push preservation when transitioning sectors
+			if (mobj->is_voodoo)
+			{
+				mobj->mom.x += (player_props.push.x / BOOM_CARRY_FACTOR);
+				mobj->mom.y += (player_props.push.y / BOOM_CARRY_FACTOR);
+			}
+			else
+			{
+				mobj->mom.x += player_props.push.x;
+				mobj->mom.y += player_props.push.y;
+			}
 			mobj->mom.z += player_props.push.z;
 		}
 

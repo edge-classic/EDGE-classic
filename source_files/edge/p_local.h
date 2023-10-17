@@ -40,6 +40,8 @@
 #define DEATHVIEWHEIGHT  6.0f
 #define CROUCH_SLOWDOWN  0.5f
 
+#define BOOM_CARRY_FACTOR 0.09375f
+
 #define MLOOK_LIMIT    FLOAT_2_ANG(75.0f)
 
 #define MAXMOVE      (200.0f)

@@ -52,8 +52,6 @@
 
 #include "AlmostEquals.h"
 
-#define BOOM_CARRY_FACTOR 0.09375f
-
 extern cvar_c r_doubleframes;
 
 // Level exit timer

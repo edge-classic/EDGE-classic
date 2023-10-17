@@ -1058,7 +1058,7 @@ static void ParseMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 		else if (epi::case_cmp(key, "music") == 0)
 		{
 			Z_Clear(val->music, char, 9);
-			if (epi::strncmp(value, "$MUSIC_", 7) == 0)
+			if (epi::case_cmp_n(value, "$MUSIC_", 7) == 0)
 			{
 				std::string music_sub = language["MusicPrefix"];
 				music_sub.append(value.substr(7));
@@ -1547,7 +1547,7 @@ static void ParseZMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 		else if (epi::case_cmp(key, "music") == 0)
 		{
 			Z_Clear(val->music, char, 9);
-			if (epi::strncmp(value, "$MUSIC_", 7) == 0)
+			if (epi::case_cmp_n(value, "$MUSIC_", 7) == 0)
 			{
 				std::string music_sub = language["MusicPrefix"];
 				music_sub.append(value.substr(7));

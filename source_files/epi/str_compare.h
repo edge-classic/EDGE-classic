@@ -44,6 +44,11 @@ int case_cmp(const char *A, const std::string& B);
 int case_cmp(const std::string& A, const char *B);
 int case_cmp(const std::string& A, const std::string& B);
 
+int case_cmp_n(const char *A, const char *B, size_t n);
+int case_cmp_n(const char *A, const std::string& B, size_t n);
+int case_cmp_n(const std::string& A, const char *B, size_t n);
+int case_cmp_n(const std::string& A, const std::string& B, size_t n);
+
 int prefix_cmp(const char *A, const char *B);
 int prefix_cmp(const char *A, const std::string& B);
 int prefix_cmp(const std::string& A, const char *B);

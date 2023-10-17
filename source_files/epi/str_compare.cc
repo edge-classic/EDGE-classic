@@ -110,6 +110,29 @@ int case_cmp(const std::string& A, const std::string& B)
 
 //----------------------------------------------------------------------------
 
+int case_cmp_n(const char *A, const char *B, size_t n)
+{
+	SYS_ASSERT(A && B && strlen(A) > n && strlen(B) > n);
+	return epi::case_cmp(std::string(A).substr(0, n), std::string(B).substr(0, n));
+}
+
+int case_cmp_n(const char *A, const std::string& B, size_t n)
+{
+	return epi::case_cmp_n(A, B.c_str(), n);
+}
+
+int case_cmp_n(const std::string& A, const char *B, size_t n)
+{
+	return epi::case_cmp_n(A.c_str(), B, n);
+}
+
+int case_cmp_n(const std::string& A, const std::string& B, size_t n)
+{
+	return epi::case_cmp_n(A.c_str(), B.c_str(), n);
+}
+
+//----------------------------------------------------------------------------
+
 int prefix_cmp(const char *A, const char *B)
 {
 	SYS_ASSERT(A && B);

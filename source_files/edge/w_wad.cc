@@ -1850,7 +1850,7 @@ void W_ReadUMAPINFOLumps(void)
 		{
 			for (int g=gamedefs.GetSize()-1; g >= 0; g--)
 			{
-				if (gamedefs[g]->name != "TEMPEPI" && epi::strncmp(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
+				if (gamedefs[g]->name != "TEMPEPI" && epi::case_cmp_n(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
 				{
 					if (atoi(gamedefs[g]->firstmap.substr(3).c_str()) > atoi(temp_level->name.substr(3).c_str()))
 						continue;
@@ -1868,6 +1868,38 @@ void W_ReadUMAPINFOLumps(void)
 					}
 				}
 			}
+		}
+		else // Validate episode entry to make sure it wasn't renamed or removed
+		{
+			bool good_epi = false;
+			for (int g = 0; g < gamedefs.GetSize(); g++)
+			{
+				if (temp_level->episode_name == gamedefs[g]->name)
+				{
+					good_epi = true;
+					break;
+				}
+			}
+			if (!good_epi) // Find a suitable episode
+			{
+				for (int g=gamedefs.GetSize()-1; g >= 0; g--)
+				{
+					if (epi::case_cmp_n(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
+					{
+						if (atoi(gamedefs[g]->firstmap.substr(3).c_str()) > atoi(temp_level->name.substr(3).c_str()))
+							continue;
+						else
+						{
+							temp_level->episode = gamedefs[g];
+							temp_level->episode_name = gamedefs[g]->name;
+							good_epi = true;
+							break;
+						}
+					}
+				}
+			}
+			if (!good_epi)
+				I_Error("MAPINFO: No valid episode found for level %s\n", temp_level->name.c_str());
 		}
 	}
 

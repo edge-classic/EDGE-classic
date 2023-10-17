@@ -37,8 +37,6 @@
 
 #include <algorithm>
 
-#define BOOM_CARRY_FACTOR 0.09375f
-
 typedef enum
 {
     RES_Ok,

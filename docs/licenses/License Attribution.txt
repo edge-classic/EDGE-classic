@@ -55,7 +55,8 @@ CC-BY-SA-4.0 International License
 GPL3 License
 ===========================================================================================
 
-"Adplug" instrument bank - Copyright (C) 1999, 2000, 2001 Simon Peter, et al.
+"Apogee" instrument bank -  Melodic instruments Copyright (C) 1994-1995 Apogee Software, Ltd.
+							Percussion instruments Copyright (C) 1999, 2000, 2001 Simon Peter, et al.
 
 AJBSP - Copyright (c) 2000-2023 Andrew Apted, et al
 	 	Copyright (c) 1994-1998 Colin Reed
@@ -114,8 +115,6 @@ miniz library - Copyright (c) 2013-2014 RAD Game Tools and Valve Software
 PNPOLY algorithm - Copyright (c) 1970-2003 Wm. Randolph Franklin
 
 Primesynth library - Copyright (c) 2018 mosm
-
-"WadSmoosh" instrument bank - Copyright (c) 2016-2020 JP LeBreton
 
 ===========================================================================================
 Public Domain

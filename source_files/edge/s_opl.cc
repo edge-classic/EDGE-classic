@@ -88,7 +88,7 @@ bool S_StartupOPL(void)
 
 	if (s_genmidi.s == "GENMIDI")
 	{
-		data = W_OpenPackOrLumpInMemory("GENMIDI", {".op2", ".wopl"}, &length);
+		data = W_OpenPackOrLumpInMemory("GENMIDI", {".op2"}, &length);
 		if (!data)
 		{
 			I_Debugf("no GENMIDI lump !\n");

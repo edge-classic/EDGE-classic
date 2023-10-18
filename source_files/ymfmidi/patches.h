@@ -40,7 +40,6 @@ struct OPLPatch
 
 private:
 	// individual format loaders
-	static bool loadWOPL(OPLPatchSet& patches, const uint8_t *data, size_t size);
 	static bool loadOP2(OPLPatchSet& patches, const uint8_t *data, size_t size);
 	static bool loadAIL(OPLPatchSet& patches, const uint8_t *data, size_t size);
 	static bool loadTMB(OPLPatchSet& patches, const uint8_t *data, size_t size);

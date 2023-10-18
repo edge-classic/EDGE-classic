@@ -504,7 +504,7 @@ static optmenuitem_t soundoptions[] =
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,  "Stereo",       StereoNess, 3,  &var_sound_stereo, NULL, "NeedRestart"},
 	{OPT_Plain,   "",             NULL, 0,  NULL, NULL, NULL},
-	{OPT_Switch,  "MIDI Player",  "Primesynth (Soundfont)/YMFM (OPL3)", 2,  &var_midi_player, M_ChangeMIDIPlayer, NULL},
+	{OPT_Switch,  "MIDI Player",  "Primesynth/YMFM", 2,  &var_midi_player, M_ChangeMIDIPlayer, NULL},
 	{OPT_Function, "Primesynth Soundfont", NULL,  0, NULL, M_ChangeSoundfont, NULL},
 	{OPT_Function, "YMFM Instrument Bank", NULL,  0, NULL, M_ChangeGENMIDI, NULL},
 	{OPT_Boolean, "PC Speaker Mode", YesNo, 2,  &var_pc_speaker_mode, M_ChangePCSpeakerMode, "Music will be Off while this is enabled"},

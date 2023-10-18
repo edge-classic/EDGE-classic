@@ -62,7 +62,7 @@ An optional texture pack to enhance the experience can be found [here.](https://
 - UDMF map support
 - DEHEXTRA compatibility
 - A soundfont-capable MIDI player (SF2 support)
-- OPL emulation with external OP2/WOPL/AIL/TMB instrument support
+- OPL emulation with external OP2/AIL/TMB instrument support
 - Support for MP3 music and sound effects
 - UMAPINFO compatibility
 - Migration from SDL1 to SDL2 (longevity and potential new features)

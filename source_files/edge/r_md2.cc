@@ -1000,6 +1000,10 @@ static inline void ModelCoordFunc(model_coord_data_t *data,
 		rgb[1] = col->add_G / 255.0;
 		rgb[2] = col->add_B / 255.0;
 	}
+
+	rgb[0] *= ren_red_mul;
+	rgb[1] *= ren_grn_mul;
+	rgb[2] *= ren_blu_mul;
 }
 
 

@@ -8,3 +8,5 @@
 // For Heretics's invulnerability power-up you get a gold tinted screen instead of the monochrome white
 [ALLWHITE]
 gl_colour=#B0B000; 
+
+[BERSERK]

@@ -19,22 +19,19 @@ New Features
     - Allows a custom color to be used as the pain effect when a player is hit by this damage type
     - Can be used to emulate effects like Hexen's cold/poison damage
 
-- WEAPONS.DDF: Can now define a 3RD and 4TH attack. Equivalent DDF syntax to SEC_xxx used for second attack
-	 DDF Fields: 
-	 - 3RD_ATTACK, 3RD_AMMOTYPE, 3RD_AMMOPERSHOT, 3RD_CLIPSIZE, 3RD_AUTOMATIC, 3RD_SPECIAL
-	 - 4TH_ATTACK, 4TH_AMMOTYPE, 4TH_AMMOPERSHOT, 4TH_CLIPSIZE, 4TH_AUTOMATIC, 4TH_SPECIAL
-	 
-	 DDF States:
-	 - 3RD_ATTACK, 3RD_RELOAD, 3RD_DISCARD, 3RD_WARMUP, 3RD_FLASH
-	 - 4TH_ATTACK, 4TH_RELOAD, 4TH_DISCARD, 4TH_WARMUP, 4TH_FLASH
-	 
-	 DDF Actions:
-	 - 3RD_SHOOT, 3RD_REFIRE, 3RD_NOFIRE, 3RD_NOFIRE_RETURN, 3RD_CHECKRELOAD, 3RD_FLASH
-	 - 4TH_SHOOT, 4TH_REFIRE, 4TH_NOFIRE, 4TH_NOFIRE_RETURN, 4TH_CHECKRELOAD, 4TH_FLASH
-	 
-	For consistency, all the old SEC_xxx ddf commands can also be used with 2ND_xxx instead 
-	  i.e. 2ND_AMMOTYPE can replace SEC_AMMOTYPE
-  
+- WEAPONS.DDF: 
+  - Can now define a 3RD and 4TH attack. Equivalent DDF syntax to SEC_xxx used for second attack
+    - DDF Fields: 
+      - 3RD_ATTACK, 3RD_AMMOTYPE, 3RD_AMMOPERSHOT, 3RD_CLIPSIZE, 3RD_AUTOMATIC, 3RD_SPECIAL
+      - 4TH_ATTACK, 4TH_AMMOTYPE, 4TH_AMMOPERSHOT, 4TH_CLIPSIZE, 4TH_AUTOMATIC, 4TH_SPECIAL
+    - DDF States:
+      - 3RD_ATTACK, 3RD_RELOAD, 3RD_DISCARD, 3RD_WARMUP, 3RD_FLASH
+      - 4TH_ATTACK, 4TH_RELOAD, 4TH_DISCARD, 4TH_WARMUP, 4TH_FLASH
+    - DDF Actions:
+      - 3RD_SHOOT, 3RD_REFIRE, 3RD_NOFIRE, 3RD_NOFIRE_RETURN, 3RD_CHECKRELOAD, 3RD_FLASH
+      - 4TH_SHOOT, 4TH_REFIRE, 4TH_NOFIRE, 4TH_NOFIRE_RETURN, 4TH_CHECKRELOAD, 4TH_FLASH
+    - For consistency, all the old SEC_xxx ddf commands can also be used with 2ND_xxx instead 
+      - i.e. 2ND_AMMOTYPE can replace SEC_AMMOTYPE
   - REFIRE_TO state added
     - Uses same syntax as JUMP, but uses refiring instead of % chance as the test condition
     - SEC/2ND_REFIRE_TO, 3RD_REFIRE_TO, and 4TH_REFIRE_TO also supported
@@ -68,6 +65,10 @@ General Improvements/Changes
   - Removed "AdPlug", "WadSmoosh", and "DMXOPL3" instrument banks
   - Replaced "DMXOPL" instrument bank with one tailored to vanilla/single OPL3 chip limits
   - Removed ability to load WOPL instrument banks as it was only partially implemented
+- COLMAP.DDF: Colormap entries with no gl_colour, lump, or pack file defined will no longer throw an error
+  - New behavior is to remove all existing colormap entries with the same name
+    - Intent is to be able to define a colormap as "nothing", even if prior entries had a definition
+  - Colormap entries later in the load/parsing order with the same name will still be added
 
 
 Bugs fixed

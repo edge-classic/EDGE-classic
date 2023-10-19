@@ -128,7 +128,16 @@ static void ColmapFinishEntry(void)
 		dynamic_colmap->pack_name.empty() &&
 		dynamic_colmap->gl_colour == RGB_NO_VALUE)
 	{
-		DDF_Error("Colourmap entry missing LUMP, PACK or GL_COLOUR.\n");
+		DDF_WarnError("Colourmap entry missing LUMP, PACK or GL_COLOUR.\n");
+		// We are now assuming that the intent is to remove all
+		// colmaps with this name (i.e., "null" it), as the only way to get here
+		// is to create an empty entry or use gl_colour=NONE; - Dasho
+		std::string doomed_name = dynamic_colmap->name;
+		for (int i=colourmaps.GetSize()-1; i > 0; i--)
+		{
+			if (colourmaps[i]->name == doomed_name)
+				colourmaps.RemoveObject(i);
+		}
 	}
 }
 

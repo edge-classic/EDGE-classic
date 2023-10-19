@@ -3876,6 +3876,8 @@ void P_ActBecome(struct mobj_s *mo)
 		mo->model_skin    = mo->info->model_skin;
 		mo->model_last_frame = -1;
 
+		mo->painchance    = PERCENT_2_FLOAT(mo->info->painchance);
+
 		// handle dynamic lights
 		{
 			const dlight_info_c *dinfo = &mo->info->dlight[0];
@@ -3951,6 +3953,8 @@ void P_ActUnBecome(struct mobj_s *mo)
 		mo->currentattack = NULL;
 		mo->model_skin    = mo->info->model_skin;
 		mo->model_last_frame = -1;
+
+		mo->painchance    = PERCENT_2_FLOAT(mo->info->painchance);
 
 		// handle dynamic lights
 		{
@@ -4032,6 +4036,8 @@ void P_ActMorph(struct mobj_s *mo)
 		mo->model_skin    = mo->info->model_skin;
 		mo->model_last_frame = -1;
 
+		mo->painchance    = PERCENT_2_FLOAT(mo->info->painchance);
+
 		// handle dynamic lights
 		{
 			const dlight_info_c *dinfo = &mo->info->dlight[0];
@@ -4110,6 +4116,8 @@ void P_ActUnMorph(struct mobj_s *mo)
 		mo->currentattack = NULL;
 		mo->model_skin    = mo->info->model_skin;
 		mo->model_last_frame = -1;
+
+		mo->painchance    = PERCENT_2_FLOAT(mo->info->painchance);
 
 		// handle dynamic lights
 		{
@@ -4277,6 +4285,21 @@ void P_ActMushroom(struct mobj_s *mo)
 				continue;
 		}
 	}
+}
+
+void P_ActPainChanceSet(mobj_t * mo)
+{
+	float value = 0;
+
+	const state_t *st = mo->state;
+
+	if (st && st->action_par)
+	{
+		value = ((percent_t *)st->action_par)[0];
+		value = MAX(0.0f, MIN(1.0f, value));
+	}
+	mo->painchance = value;
+
 }
 
 

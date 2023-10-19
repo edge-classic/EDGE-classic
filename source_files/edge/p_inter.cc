@@ -1221,6 +1221,10 @@ void P_ThrustMobj(mobj_t * target, mobj_t * inflictor, float thrust)
 	if (target->hyperflags & HF_INVULNERABLE)
 		return;
 
+	//check for lead feet ;)
+	if (target->hyperflags & HF_IMMOVABLE)
+		return;
+
 	if (inflictor && inflictor->currentattack && BITSET_EMPTY ==
 		(inflictor->currentattack->attack_class & ~target->info->immunity))
 	{
@@ -1629,7 +1633,8 @@ if(inflictor && inflictor->currentattack &&
 			 (inflictor->currentattack->attack_class & ~target->info->resistance))
 		pain_chance = target->info->resist_painchance;
 	else
-		pain_chance = target->info->painchance;
+		pain_chance = target->painchance; //Lobo 2023: use dynamic painchance
+		//pain_chance = target->info->painchance;
 
 	if (pain_chance > 0 && P_RandomTest(pain_chance))
 	{

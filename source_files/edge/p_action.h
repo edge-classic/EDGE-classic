@@ -193,6 +193,8 @@ void P_ActUnMorph(struct mobj_s *mo);
 void P_ActSetInvuln(struct mobj_s *mo);
 void P_ActClearInvuln(struct mobj_s *mo);
 
+void P_ActPainChanceSet(struct mobj_s *mo);
+
 // Movement actions
 void P_ActFaceDir(struct mobj_s *mo);
 void P_ActTurnDir(struct mobj_s *mo);

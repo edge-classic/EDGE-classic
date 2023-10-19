@@ -45,6 +45,14 @@ New Features
 - RSCRIPT: "EXACT_" prefix added for ON_CONDITION checks (Courtesy of akaAgar - https://github.com/edge-classic/EDGE-classic/pull/578)
   - Allows check for the exact value of a benefit/etc, versus the default of greater-than-or-equal
 
+- THINGS.DDF: 
+  - New Action command: SET_PAINCHANCE(percentage) which will dynamically change a monsters painchance.
+    Possible usage: if we do SET_PAINCHANCE(0%) at the start of a lengthy PAIN state, this will make sure the 
+	whole animation is played out and won't be interrupted by another shot which would normally make us 
+	re-start the pain animation again. Remember to set it back to normal at the end of the lengthy animation.
+  - New Special flag: IMMOVABLE which will make this thing be unaffected by thrust from attack impacts 
+    irrespective of whether it has a small MASS or a very large one.
+
 
 General Improvements/Changes
 --------------------
@@ -83,3 +91,4 @@ Bugs fixed
 - Fixed MODEL_ROTATE not being applied to attacks
 - Fixed savegames not preserving the 'is_voodoo' convenience boolean for mobjs, causing issues when loading a game that had them present
 - Fixed berserk and other powerup effects not modifying model colors accordingly (bug introduced by transition to VBOs for model rendering)
+

@@ -318,6 +318,7 @@ const actioncode_t thing_actions[] =
 	{"PATH_FOLLOW",       P_ActPathFollow, NULL},
 	{"SET_INVULNERABLE",  P_ActSetInvuln,   NULL},
 	{"CLEAR_INVULNERABLE",P_ActClearInvuln, NULL},
+	{"SET_PAINCHANCE",    P_ActPainChanceSet, DDF_StateGetPercent},
 
 	{"DROPITEM",          P_ActDropItem, DDF_StateGetMobj},
 	{"SPAWN",             P_ActSpawn,    DDF_StateGetMobj},
@@ -1738,6 +1739,7 @@ static specflags_t hyper_specials[] =
 	{"SHOVEABLE", HF_SHOVEABLE, 0}, //Lobo: can be pushed
 	{"SPLASH", HF_NOSPLASH, 1}, //Lobo: causes no splash on liquids
 	{"DEHACKED_COMPAT", HF_DEHACKED_COMPAT, 0},
+	{"IMMOVABLE", HF_IMMOVABLE, 0},
 	{NULL, 0, 0}
 };
 

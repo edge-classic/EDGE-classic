@@ -313,6 +313,10 @@ typedef enum
 
 	// -AJA- 2022/10/04: used by DEH_EDGE to workaround issues
 	HF_DEHACKED_COMPAT = (1 << 21),
+
+	// -Lobo- 2023/10/19: this thing will not be affected by thrust forces
+	HF_IMMOVABLE = (1 << 22),
+	
 }
 mobjhyperflag_t;
 

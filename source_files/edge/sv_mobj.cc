@@ -111,6 +111,7 @@ static savefield_t sv_fields_mobj[] =
 	SF(origheight, "origheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
 	SF(visibility, "visibility", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
 	SF(vis_target, "vis_target", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+	SF(painchance, "painchance", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
 	SF(vertangle, "vertangle", 1, SVT_FLOAT, SR_GetAngleFromSlope, SR_PutAngleToSlope),
 	SF(spreadcount, "spreadcount", 1, SVT_INT, SR_GetInt, SR_PutInt),
 	SF(currentattack, "currentattack", 1, SVT_STRING, SR_MobjGetAttack, SR_MobjPutAttack),

@@ -459,6 +459,8 @@ static void ResurrectRespawn(mobj_t * mobj)
 	mobj->visibility = PERCENT_2_FLOAT(info->translucency);
 	mobj->movecount = 0;  // -ACB- 1998/08/03 Don't head off in any direction
 
+	mobj->painchance = PERCENT_2_FLOAT(info->painchance);
+
 	mobj->SetSource(NULL);
 	mobj->SetTarget(NULL);
 
@@ -2222,6 +2224,8 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
 	mobj->model_skin = info->model_skin;
 	mobj->model_last_frame = -1;
 	mobj->wud_tags.clear();
+
+	mobj->painchance = PERCENT_2_FLOAT(info->painchance);
 
 	mobj->morphtimeout = info->morphtimeout;
 

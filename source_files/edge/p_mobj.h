@@ -285,6 +285,8 @@ struct mobj_s : public position_c
 	float visibility = 0;
 	float vis_target = 0;
 
+	float painchance = 0;
+
 	// current attack to be made
 	const atkdef_c *currentattack = nullptr;
 
@@ -375,6 +377,7 @@ struct mobj_s : public position_c
 	bool slopesighthit = false;
 
 	int teleport_tic = 0;
+
 
 public:
 	bool isRemoved() const;

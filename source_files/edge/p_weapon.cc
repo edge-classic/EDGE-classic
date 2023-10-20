@@ -1441,6 +1441,9 @@ void A_TargetJump(mobj_t * mo)
 	if (psp->state->jumpstate == S_NULL)
 		return;  // show warning ?? error ???
 
+	if (p->ready_wp == WPSEL_None)
+		return;
+
 	atkdef_c *attack = p->weapons[p->ready_wp].info->attack[0];
 
 	if (! attack)
@@ -1461,6 +1464,9 @@ void A_FriendJump(mobj_t * mo)
 
 	if (psp->state->jumpstate == S_NULL)
 		return;  // show warning ?? error ???
+
+	if (p->ready_wp == WPSEL_None)
+		return;
 
 	atkdef_c *attack = p->weapons[p->ready_wp].info->attack[0];
 

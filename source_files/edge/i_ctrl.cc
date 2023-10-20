@@ -31,7 +31,6 @@
 
 #undef DEBUG_KB
 
-
 // FIXME: Combine all these SDL bool vars into an int/enum'd flags structure
 
 extern cvar_c r_doubleframes;
@@ -42,14 +41,14 @@ bool eat_mouse_motion = true;
 
 DEF_CVAR(in_keypad, "1", CVAR_ARCHIVE)
 
-
 bool nojoy;  // what a wowser, joysticks completely disabled
 
 int joystick_device;  // choice in menu, 0 for none
 
 static int num_joys;
 static int cur_joy;  // 0 for none
-SDL_Joystick *joy_info;
+SDL_Joystick *joy_info = nullptr;
+SDL_GameController *gamepad_info = nullptr;
 
 static int joy_num_axes;
 static int joy_num_buttons;
@@ -628,7 +627,16 @@ void I_OpenJoystick(int index)
 
 	cur_joy = index;
 
-	const char *name = SDL_JoystickName(joy_info);
+	gamepad_info = SDL_GameControllerOpen(cur_joy-1);
+	if (! gamepad_info)
+	{
+		I_Printf("Unable to open joystick %s as a gamepad!\n", SDL_JoystickName(joy_info));
+		SDL_JoystickClose(joy_info);
+		joy_info = nullptr;
+		return;
+	}
+
+	const char *name = SDL_GameControllerName(gamepad_info);
 	if (! name)
 		name = "(UNKNOWN)";
 
@@ -637,9 +645,35 @@ void I_OpenJoystick(int index)
 	joy_num_hats    = SDL_JoystickNumHats(joy_info);
 	joy_num_balls   = SDL_JoystickNumBalls(joy_info);
 
-	I_Printf("Opened joystick %d : %s\n", cur_joy, name);
-	I_Printf("Axes:%d buttons:%d hats:%d balls:%d\n",
-			 joy_num_axes, joy_num_buttons, joy_num_hats, joy_num_balls);
+	// These might replace the above variables as gamepad support evolves,
+	// but for now just use them to print counts
+	int gp_num_joysticks = 0;
+	int gp_num_triggers = 0;
+	int gp_num_buttons = 0;
+
+	if (SDL_GameControllerHasAxis(gamepad_info, SDL_CONTROLLER_AXIS_LEFTX) && 
+		SDL_GameControllerHasAxis(gamepad_info, SDL_CONTROLLER_AXIS_LEFTY))
+		gp_num_joysticks++;
+	if (SDL_GameControllerHasAxis(gamepad_info, SDL_CONTROLLER_AXIS_RIGHTX) && 
+		SDL_GameControllerHasAxis(gamepad_info, SDL_CONTROLLER_AXIS_RIGHTY))
+		gp_num_joysticks++;
+	if (SDL_GameControllerHasAxis(gamepad_info, SDL_CONTROLLER_AXIS_TRIGGERLEFT))
+		gp_num_triggers++;
+	if (SDL_GameControllerHasAxis(gamepad_info, SDL_CONTROLLER_AXIS_TRIGGERRIGHT))
+		gp_num_triggers++;
+	for (int i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++)
+	{
+		if (SDL_GameControllerHasButton(gamepad_info, static_cast<SDL_GameControllerButton>(i)))
+			gp_num_buttons++;			
+	}
+
+	I_Printf("Opened gamepad %d : %s\n", cur_joy, name);
+	I_Printf("Sticks:%d Triggers: %d Buttons: %d\n",
+			 gp_num_joysticks, gp_num_triggers, gp_num_buttons);
+	I_Printf("Rumble:%s Trigger Rumble: %s LED: %s\n",
+			 SDL_GameControllerHasRumble(gamepad_info) ? "Yes" : "No",
+			 SDL_GameControllerHasRumbleTriggers(gamepad_info) ? "Yes" : "No",
+			 SDL_GameControllerHasLED(gamepad_info) ? "Yes" : "No");
 }
 
 
@@ -666,7 +700,7 @@ void I_StartupJoystick(void)
 
 	num_joys = SDL_NumJoysticks();
 
-	I_Printf("I_StartupControl: %d joysticks found.\n", num_joys);
+	I_Printf("I_StartupControl: %d gamepads found.\n", num_joys);
 
 	if (num_joys == 0)
 		return;
@@ -687,10 +721,15 @@ void CheckJoystickChanged(void)
 
 	if (new_num_joys == 0)
 	{
+		if (gamepad_info)
+		{
+			SDL_GameControllerClose(gamepad_info);
+			gamepad_info = nullptr;
+		}
 		if (joy_info)
 		{
 			SDL_JoystickClose(joy_info);
-			joy_info = NULL;
+			joy_info = nullptr;
 		}
 		num_joys = 0;
 		joystick_device = 0;
@@ -711,8 +750,14 @@ void CheckJoystickChanged(void)
 
 	if (joy_info)
 	{
+		if (gamepad_info)
+		{
+			SDL_GameControllerClose(gamepad_info);
+			gamepad_info = nullptr;
+		}
+
 		SDL_JoystickClose(joy_info);
-		joy_info = NULL;
+		joy_info = nullptr;
 
 		I_Printf("Closed joystick %d\n", cur_joy);
 		cur_joy = 0;
@@ -765,10 +810,15 @@ void I_ControlGetEvents(void)
 
 void I_ShutdownControl(void)
 {
+	if (gamepad_info)
+	{
+		SDL_GameControllerClose(gamepad_info);
+		gamepad_info = nullptr;
+	}
 	if (joy_info)
 	{
 		SDL_JoystickClose(joy_info);
-		joy_info = NULL;
+		joy_info = nullptr;
 	}
 }
 

@@ -91,4 +91,5 @@ Bugs fixed
 - Fixed MODEL_ROTATE not being applied to attacks
 - Fixed savegames not preserving the 'is_voodoo' convenience boolean for mobjs, causing issues when loading a game that had them present
 - Fixed berserk and other powerup effects not modifying model colors accordingly (bug introduced by transition to VBOs for model rendering)
+- Fixed crash if player dies while TARGET_JUMP or FRIEND_JUMP weapon specials are active
 

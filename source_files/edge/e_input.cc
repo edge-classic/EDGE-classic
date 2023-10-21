@@ -138,11 +138,11 @@ static int mlookheld;  // for accelerative mlooking
 int mouse_xaxis;
 int mouse_yaxis;
 
-int joy_axis[6] = { 0, 0, 0, 0, 0, 0 };
+int joy_axis[4] = { 0, 0, 0, 0 };
 
 #define JOY_PEAK 32767.0f/32768.0f
 
-static int joy_last_raw[6];
+static int joy_last_raw[4];
 
 // The last one is ignored (AXIS_DISABLE)
 static float ball_deltas[6] = {0, 0, 0, 0, 0, 0};
@@ -197,7 +197,7 @@ static float JoyAxisFromRaw(int raw, float dead)
 
 static void UpdateJoyAxis(int n)
 {
-	if (joy_axis[n] == AXIS_DISABLE || joy_axis[n] == AXIS_LEFT_TRIGGER || joy_axis[n] == AXIS_RIGHT_TRIGGER)
+	if (joy_axis[n] == AXIS_DISABLE)
 		return;
 
 	int raw = I_JoyGetAxis(n);
@@ -207,11 +207,6 @@ static void UpdateJoyAxis(int n)
 
 	// cooked value = average of last two raw samples
 	int cooked = (raw + old) >> 1;
-
-	s16_t initial = 0;
-	// Adjust axis input if an analog trigger is being used
-	if (SDL_JoystickGetAxisInitialState(joy_info, n, &initial) && initial == -32768)
-		cooked = (cooked+32768) / 2;
 
 	float force = JoyAxisFromRaw(cooked, *joy_deads[n]);
 
@@ -271,7 +266,7 @@ static void UpdateForces(void)
 		joy_forces[k] = 0;
 
 	// ---Joystick---
-	for (int j = 0; j < 6; j++)
+	for (int j = 0; j < 4; j++)
 		UpdateJoyAxis(j);
 
 	// ---Keyboard---
@@ -799,28 +794,28 @@ static specialkey_t special_keys[] =
     { KEYD_WHEEL_UP, "Wheel Up" },
     { KEYD_WHEEL_DN, "Wheel Down" },
 
-	// joystick buttons
-    { KEYD_JOY1,  "Joy1" },
-    { KEYD_JOY2,  "Joy2" },
-    { KEYD_JOY3,  "Joy3" },
-    { KEYD_JOY4,  "Joy4" },
-    { KEYD_JOY5,  "Joy5" },
-    { KEYD_JOY6,  "Joy6" },
-    { KEYD_JOY7,  "Joy7" },
-    { KEYD_JOY8,  "Joy8" },
-    { KEYD_JOY9,  "Joy9" },
-    { KEYD_JOY10, "Joy10" },
-    { KEYD_JOY11, "Joy11" },
-    { KEYD_JOY12, "Joy12" },
-    { KEYD_JOY13, "Joy13" },
-    { KEYD_JOY14, "Joy14" },
-    { KEYD_JOY15, "Joy15" },
-
-	// gamepad buttons/axes
-    { KEYD_DPAD_UP, "Dpad Up" },
-    { KEYD_DPAD_DOWN, "Dpad Down" },
-    { KEYD_DPAD_LEFT, "Dpad Left" },
-    { KEYD_DPAD_RIGHT, "Dpad Right" },
+	// gamepad buttons
+    { KEYD_GP_A,  "A Button" },
+    { KEYD_GP_B,  "B Button" },
+    { KEYD_GP_X,  "X Button" },
+    { KEYD_GP_Y,  "Y Button" },
+    { KEYD_GP_BACK, "Back Button" },
+    { KEYD_GP_GUIDE, "Guide Button" }, // ???
+    { KEYD_GP_START, "Start Button" },
+    { KEYD_GP_LSTICK, "Left Stick" },
+    { KEYD_GP_RSTICK, "Right Stick" },
+    { KEYD_GP_LSHLD, "Left Shoulder" },
+    { KEYD_GP_RSHLD, "Right Shoulder" },
+    { KEYD_GP_UP, "DPad Up" },
+    { KEYD_GP_DOWN, "DPad Down" },
+    { KEYD_GP_LEFT, "DPad Left" },
+    { KEYD_GP_RIGHT, "DPad Right" },
+	{ KEYD_GP_MISC1, "Misc1 Button" }, // ???
+	{ KEYD_GP_PADDLE1, "Paddle 1" },
+	{ KEYD_GP_PADDLE2, "Paddle 2" },
+	{ KEYD_GP_PADDLE3, "Paddle 3" },
+	{ KEYD_GP_PADDLE4, "Paddle 4" },
+	{ KEYD_GP_TOUCHPAD, "Touchpad" },
 	{ KEYD_TRIGGER_LEFT, "Left Trigger" },
 	{ KEYD_TRIGGER_RIGHT, "Right Trigger" },
 

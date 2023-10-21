@@ -51,9 +51,6 @@ SDL_Joystick *joy_info = nullptr;
 SDL_GameController *gamepad_info = nullptr;
 SDL_JoystickID gamepad_inst = -1;
 
-static int joy_num_axes;
-static int joy_num_buttons;
-
 // Track trigger state to avoid pushing multiple unnecessary trigger events
 bool right_trigger_pulled = false;
 bool left_trigger_pulled = false;
@@ -321,31 +318,10 @@ static void HandleGamepadButtonEvent(SDL_Event * ev)
 	else 
 		return;
 
-	if (ev->cbutton.button > 14)
+	if (ev->cbutton.button >= SDL_CONTROLLER_BUTTON_MAX) // How would this happen? - Dasho
 		return;
 
-	switch (ev->cbutton.button)
-	{
-		case SDL_CONTROLLER_BUTTON_DPAD_UP:
-			event.value.key.sym = KEYD_DPAD_UP;
-			break;
-
-		case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-			event.value.key.sym = KEYD_DPAD_DOWN;
-			break;
-
-		case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-			event.value.key.sym = KEYD_DPAD_LEFT;
-			break;
-
-		case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-			event.value.key.sym = KEYD_DPAD_RIGHT;
-			break;
-
-		default:
-			event.value.key.sym = KEYD_JOY1 + ev->cbutton.button;
-			break;
-	}
+	event.value.key.sym = KEYD_GP_A + ev->cbutton.button;
 
 	E_PostEvent(&event);
 }
@@ -358,15 +334,15 @@ static void HandleGamepadTriggerEvent(SDL_Event * ev)
 
 	Uint8 current_axis = ev->caxis.axis;
 
-	// ignore axes not bound to left/right trigger
-	if ((joy_axis[current_axis] != AXIS_LEFT_TRIGGER) && (joy_axis[current_axis] != AXIS_RIGHT_TRIGGER)) return;
+	// ignore non-trigger axes
+	if (current_axis != SDL_CONTROLLER_AXIS_TRIGGERLEFT && current_axis != SDL_CONTROLLER_AXIS_TRIGGERRIGHT) return;
 
 	event_t event;
 
 	int thresh = I_ROUND(*joy_deads[current_axis]*32767.0f);
 	int input = ev->caxis.value;
 
-	if (joy_axis[current_axis] == AXIS_LEFT_TRIGGER) 
+	if (current_axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT) 
 	{
 		event.value.key.sym = KEYD_TRIGGER_LEFT;
 		if (input < thresh)
@@ -424,13 +400,10 @@ void HandleMouseMotionEvent(SDL_Event * ev)
 
 int I_JoyGetAxis(int n)  // n begins at 0
 {
-	if (nojoy || !joy_info)
+	if (nojoy || !joy_info || !gamepad_info)
 		return 0;
 
-	if (n < joy_num_axes)
-		return SDL_JoystickGetAxis(joy_info, n);
-
-	return 0;
+	return SDL_GameControllerGetAxis(gamepad_info, static_cast<SDL_GameControllerAxis>(n));
 }
 
 static void I_OpenJoystick(int index)
@@ -462,11 +435,6 @@ static void I_OpenJoystick(int index)
 	if (! name)
 		name = "(UNKNOWN)";
 
-	joy_num_axes    = SDL_JoystickNumAxes(joy_info);
-	joy_num_buttons = SDL_JoystickNumButtons(joy_info);
-
-	// These might replace the above variables as gamepad support evolves,
-	// but for now just use them to print counts
 	int gp_num_joysticks = 0;
 	int gp_num_triggers = 0;
 	int gp_num_buttons = 0;
@@ -644,6 +612,7 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 		case SDL_CONTROLLERDEVICEADDED:
 		case SDL_CONTROLLERDEVICEREMOVED:
 			CheckJoystickChanged();
+			break;
 
 		default:
 			break; // Don't care
@@ -674,6 +643,7 @@ void InactiveEventProcess(SDL_Event *sdl_ev)
 		case SDL_CONTROLLERDEVICEADDED:
 		case SDL_CONTROLLERDEVICEREMOVED:
 			CheckJoystickChanged();
+			break;
 
 		default:
 			break; // Don't care

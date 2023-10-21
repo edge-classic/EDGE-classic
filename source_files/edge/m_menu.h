@@ -30,15 +30,6 @@
 
 struct sfx_s;
   
-// Menu navigation stuff
-extern int key_menu_open;
-extern int key_menu_up;
-extern int key_menu_down;
-extern int key_menu_left;
-extern int key_menu_right;
-extern int key_menu_select;
-extern int key_menu_cancel;
-
 // Program stuff
 extern int key_screenshot;
 extern int key_save_game;

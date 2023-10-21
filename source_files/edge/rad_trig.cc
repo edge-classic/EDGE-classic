@@ -219,40 +219,22 @@ public:
 
 	int CheckKey(int key)
 	{
-
-		if (E_MatchesKey(key_menu_up, key))
-		{
-			key = KEYD_MENU_UP;
-		}
-		if (E_MatchesKey(key_menu_down, key))
-		{
-			key = KEYD_MENU_DOWN;
-		}
-		if (E_MatchesKey(key_menu_select, key) || E_MatchesKey(key_use, key))
-		{
-			key = KEYD_MENU_SELECT;
-		}
-		if (E_MatchesKey(key_menu_cancel, key))
-		{
-			key = KEYD_MENU_CANCEL;
-		}
-
-		if (key == KEYD_DOWNARROW || key == KEYD_DPAD_DOWN || key == KEYD_MENU_DOWN || key == KEYD_WHEEL_DN)
+		if (key == KEYD_DOWNARROW || key == KEYD_GP_DOWN || key == KEYD_WHEEL_DN)
 			ChoiceDown();
 
-		if (key == KEYD_UPARROW || key == KEYD_DPAD_UP || key == KEYD_MENU_UP || key == KEYD_WHEEL_UP)
+		if (key == KEYD_UPARROW || key == KEYD_GP_UP || key == KEYD_WHEEL_UP)
 			ChoiceUp();
 
 		if ('a' <= key && key <= 'z')
 			key = toupper(key);
 
-		if (key == 'Q' || key == 'X' || key == KEYD_MENU_CANCEL || key == KEYD_MOUSE2 || key == KEYD_MOUSE3)
+		if (key == 'Q' || key == 'X' || key == KEYD_GP_B || key == KEYD_MOUSE2 || key == KEYD_MOUSE3)
 			return 0;
 
 		if ('1' <= key && key <= ('0' + NumChoices()))
 			return key - '0';
 
-		if (key == KEYD_SPACE || key == KEYD_ENTER || key == 'Y' || key == KEYD_MENU_SELECT || key == KEYD_MOUSE1) //LOBO: added a controller button
+		if (key == KEYD_SPACE || key == KEYD_ENTER || key == 'Y' || key == KEYD_GP_A || key == KEYD_MOUSE1 || E_MatchesKey(key_use, key))
 			return current_choice + 1;
 
 		return -1;  /* invalid */

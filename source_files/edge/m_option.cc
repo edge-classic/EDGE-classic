@@ -460,26 +460,23 @@ static menuinfo_t res_optmenu =
 
 static optmenuitem_t analogueoptions[] =
 {
-	{OPT_Plain,      "",                   NULL, 0,  NULL, NULL, NULL},
 	{OPT_Switch,     "Mouse X Axis",       MouseAxis, 11, &mouse_xaxis, NULL, NULL},
 	{OPT_Switch,     "Mouse Y Axis",       MouseAxis, 11, &mouse_yaxis, NULL, NULL},
 	{OPT_FracSlider, "X Sensitivity",      NULL, 0, &mouse_xsens.f, M_UpdateCVARFromFloat, NULL, &mouse_xsens, 0.25f, 1.0f, 15.0f, "%0.2f"},
 	{OPT_FracSlider, "Y Sensitivity",      NULL, 0, &mouse_ysens.f, M_UpdateCVARFromFloat, NULL, &mouse_ysens, 0.25f, 1.0f, 15.0f, "%0.2f"},
 	{OPT_Plain,      "",                   NULL, 0,  NULL, NULL, NULL},
-
-	{OPT_Switch,     "Joystick Device", JoyDevs, 7,  &joystick_device, NULL, NULL},
-	{OPT_Switch,     "First Axis",         JoyAxis, 13, &joy_axis[0], NULL, NULL},
-	{OPT_FracSlider, "First Axis Deadzone", NULL, 0, &joy_dead0.f, M_UpdateCVARFromFloat, NULL, &joy_dead0, 0.01f, 0.0f, 0.99f, "%0.2f"},
-	{OPT_Switch,     "Second Axis",        JoyAxis, 13, &joy_axis[1], NULL, NULL},
-	{OPT_FracSlider, "Second Axis Deadzone", NULL, 0, &joy_dead1.f, M_UpdateCVARFromFloat, NULL, &joy_dead1, 0.01f, 0.0f, 0.99f, "%0.2f"},
-	{OPT_Switch,     "Third Axis",         JoyAxis, 13, &joy_axis[2], NULL, NULL},
-	{OPT_FracSlider, "Third Axis Deadzone", NULL, 0, &joy_dead2.f, M_UpdateCVARFromFloat, NULL, &joy_dead2, 0.01f, 0.0f, 0.99f, "%0.2f"},
-	{OPT_Switch,     "Fourth Axis",        JoyAxis, 13, &joy_axis[3], NULL, NULL},
-	{OPT_FracSlider, "Fourth Axis Deadzone", NULL, 0, &joy_dead3.f,M_UpdateCVARFromFloat, NULL, &joy_dead3, 0.01f, 0.0f, 0.99f, "%0.2f"},
-	{OPT_Switch,     "Fifth Axis",         JoyAxis, 13, &joy_axis[4], NULL, NULL},
-	{OPT_FracSlider, "Fifth Axis Deadzone", NULL, 0, &joy_dead4.f, M_UpdateCVARFromFloat, NULL, &joy_dead4, 0.01f, 0.0f, 0.99f, "%0.2f"},
-	{OPT_Switch,     "Sixth Axis",         JoyAxis, 13, &joy_axis[5], NULL, NULL},
-	{OPT_FracSlider, "Sixth Axis Deadzone", NULL, 0, &joy_dead5.f, M_UpdateCVARFromFloat, NULL, &joy_dead5, 0.01f, 0.0f, 0.99f, "%0.2f"},
+	{OPT_Switch,     "Gamepad", JoyDevs, 7,  &joystick_device, NULL, NULL},
+	{OPT_Switch,     "Left Stick X",         JoyAxis, 13, &joy_axis[0], NULL, NULL},
+	{OPT_Switch,     "Left Stick Y",        JoyAxis, 13, &joy_axis[1], NULL, NULL},
+	{OPT_Switch,     "Right Stick X",         JoyAxis, 13, &joy_axis[2], NULL, NULL},
+	{OPT_Switch,     "Right Stick Y",        JoyAxis, 13, &joy_axis[3], NULL, NULL},
+	{OPT_FracSlider, "Left X Deadzone", NULL, 0, &joy_dead0.f, M_UpdateCVARFromFloat, NULL, &joy_dead0, 0.01f, 0.0f, 0.99f, "%0.2f"},
+	{OPT_FracSlider, "Left Y Deadzone", NULL, 0, &joy_dead1.f, M_UpdateCVARFromFloat, NULL, &joy_dead1, 0.01f, 0.0f, 0.99f, "%0.2f"},
+	{OPT_FracSlider, "Right X Deadzone", NULL, 0, &joy_dead2.f, M_UpdateCVARFromFloat, NULL, &joy_dead2, 0.01f, 0.0f, 0.99f, "%0.2f"},
+	{OPT_FracSlider, "Right Y Deadzone", NULL, 0, &joy_dead3.f,M_UpdateCVARFromFloat, NULL, &joy_dead3, 0.01f, 0.0f, 0.99f, "%0.2f"},
+	{OPT_FracSlider, "Left Trigger Deadzone", NULL, 0, &joy_dead4.f, M_UpdateCVARFromFloat, NULL, &joy_dead4, 0.01f, 0.0f, 0.99f, "%0.2f"},
+	{OPT_FracSlider, "Right Trigger Deadzone", NULL, 0, &joy_dead5.f, M_UpdateCVARFromFloat, NULL, &joy_dead5, 0.01f, 0.0f, 0.99f, "%0.2f"},
+	{OPT_Plain,      "",                   NULL, 0,  NULL, NULL, NULL},
 	{OPT_FracSlider, "Turning Speed",  NULL, 0, &turnspeed.f,  M_UpdateCVARFromFloat, NULL, &turnspeed, 0.10f, 0.10f, 3.0f, "%0.2f"},
 	{OPT_FracSlider, "Vertical Look Speed",    NULL, 0, &vlookspeed.f, M_UpdateCVARFromFloat, NULL, &vlookspeed, 0.10f, 0.10f, 3.0f, "%0.2f"},
 	{OPT_FracSlider, "Forward Move Speed",    NULL, 0, &forwardspeed.f, M_UpdateCVARFromFloat, NULL, &forwardspeed, 0.10f, 0.10f, 3.0f, "%0.2f"},
@@ -789,31 +786,9 @@ static menuinfo_t automap_optmenu =
 };
 
 //
-//  KEY CONFIG : MENU NAVIGATION
-//
-static optmenuitem_t menu_nav_keyconfig[] =
-{
-	{OPT_KeyConfig, "Open/Close Menu",   NULL, 0, &key_menu_open, NULL, NULL},
-	{OPT_Plain,     "",                 NULL, 0, NULL, NULL, NULL},
-	{OPT_KeyConfig, "Menu Up",         NULL, 0, &key_menu_up, NULL, NULL},
-	{OPT_KeyConfig, "Menu Down",           NULL, 0, &key_menu_down, NULL, NULL},
-	{OPT_KeyConfig, "Menu Left",              NULL, 0, &key_menu_left, NULL, NULL},
-	{OPT_KeyConfig, "Menu Right",   NULL, 0, &key_menu_right, NULL, NULL},
-	{OPT_Plain,     "",                 NULL, 0, NULL, NULL, NULL},
-	{OPT_KeyConfig, "Select Option",       NULL, 0, &key_menu_select, NULL, NULL},
-	{OPT_KeyConfig, "Back/Cancel",          NULL, 0, &key_menu_cancel, NULL, NULL},
-};
-
-static menuinfo_t menu_nav_optmenu = 
-{
-	menu_nav_keyconfig, sizeof(menu_nav_keyconfig) / sizeof(optmenuitem_t),
-	&opt_def_style, 140, 98, 0,	"Menu Navigation", language["MenuBinding"]
-};
-
-//
 //  KEY CONFIG : INVENTORY
 //
-static optmenuitem_t menu_nav_inventory[] =
+static optmenuitem_t inventory_keyconfig[] =
 {
 	{OPT_KeyConfig, "Previous Item",   NULL, 0, &key_inv_prev, NULL, NULL},
 	{OPT_KeyConfig, "Use Item",         NULL, 0, &key_inv_use, NULL, NULL},
@@ -822,7 +797,7 @@ static optmenuitem_t menu_nav_inventory[] =
 
 static menuinfo_t inventory_optmenu = 
 {
-	menu_nav_inventory, sizeof(menu_nav_inventory) / sizeof(optmenuitem_t),
+	inventory_keyconfig, sizeof(inventory_keyconfig) / sizeof(optmenuitem_t),
 	&opt_def_style, 140, 98, 0,	"Inventory", language["MenuBinding"]
 };
 
@@ -871,7 +846,7 @@ static menuinfo_t program_optmenu2 =
 /*
  * ALL KEYBOARD MENUS
  */
-#define NUM_KEY_MENUS  10
+#define NUM_KEY_MENUS  9
 
 static menuinfo_t * all_key_menus[NUM_KEY_MENUS] =
 {
@@ -881,7 +856,6 @@ static menuinfo_t * all_key_menus[NUM_KEY_MENUS] =
 	&otherkey_optmenu,
 	&weapon_optmenu,
 	&automap_optmenu,
-	&menu_nav_optmenu,
 	&inventory_optmenu,
 	&program_optmenu1,
 	&program_optmenu2
@@ -956,7 +930,6 @@ void M_OptMenuInit()
 	otherkey_optmenu.name=language["MenuBinding"];
 	weapon_optmenu.name=language["MenuBinding"];
 	automap_optmenu.name=language["MenuBinding"];
-	menu_nav_optmenu.name=language["MenuBinding"];
 	inventory_optmenu.name=language["MenuBinding"];
 	program_optmenu1.name=language["MenuBinding"];
 	program_optmenu2.name=language["MenuBinding"];
@@ -1080,33 +1053,6 @@ void M_OptDrawer()
 					 (style->fonts[is_selected ? styledef_c::T_TITLE : styledef_c::T_TEXT]->StringWidth(curr_menu->items[i].name) * TEXTscale),
 					 curry, curr_menu->items[i].name);
 		
-		if (curr_menu == &analogue_optmenu && curr_menu->items[i].switchvar == &joystick_device)
-		{
-			// This should place everything to the right of the widest menu entry
-			int draw_x = (curr_menu->menu_center) + 90 + style->fonts[styledef_c::T_TEXT]->StringWidth("1.00");
-			for (int j = 0; j < 6; j++)
-			{
-				int joy = I_JoyGetAxis(j);
-				int thresh = I_ROUND(*joy_deads[j]*32767.0f);
-				s16_t initial = 0;
-				if (joy_info && SDL_JoystickGetAxisInitialState(joy_info, j, &initial) && initial == -32768)
-				{
-					thresh = -32768 + (thresh*2);
-					if (joy >= thresh)
-						M_DrawFracThermo(draw_x, curry+(deltay*(j+1))+(deltay*j), (float)joy, 1, 2, -32768.0f, 32737.0f, "");
-					else
-						M_DrawFracThermo(draw_x, curry+(deltay*(j+1))+(deltay*j), -32768.0f, 1, 2, -32768.0f, 32737.0f, "");
-				}
-				else
-				{
-					if (abs(joy) > thresh)
-						M_DrawFracThermo(draw_x, curry+(deltay*(j+1))+(deltay*j), (float)joy, 1, 2, -32768.0f, 32737.0f, "");
-					else
-						M_DrawFracThermo(draw_x, curry+(deltay*(j+1))+(deltay*j), 0.0f, 1, 2, -32768.0f, 32737.0f, "");
-				}
-			}
-		}
-
 		// Draw current soundfont
 		if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeSoundfont)
 		{
@@ -1339,7 +1285,7 @@ bool M_OptResponder(event_t * ev, int ch)
 
 		keyscan = 0;
 
-		if (ch == KEYD_ESCAPE || ch == KEYD_MENU_CANCEL)
+		if (ch == KEYD_ESCAPE || ch == KEYD_GP_B)
 			return true;
      
 		blah = (int*)(curr_item->switchvar);
@@ -1376,8 +1322,7 @@ bool M_OptResponder(event_t * ev, int ch)
 		}
 
 		case KEYD_DOWNARROW:
-		case KEYD_DPAD_DOWN:
-		case KEYD_MENU_DOWN:
+		case KEYD_GP_DOWN:
 		{
 			do
 			{
@@ -1432,8 +1377,7 @@ bool M_OptResponder(event_t * ev, int ch)
 		}
 
 		case KEYD_UPARROW:
-		case KEYD_DPAD_UP:
-		case KEYD_MENU_UP:
+		case KEYD_GP_UP:
 		{
 			do
 			{
@@ -1488,8 +1432,7 @@ bool M_OptResponder(event_t * ev, int ch)
 		}
 
 		case KEYD_LEFTARROW:
-		case KEYD_DPAD_LEFT:
-		case KEYD_MENU_LEFT:
+		case KEYD_GP_LEFT:
 		{
 			if (curr_menu->key_page[0])
 			{
@@ -1586,8 +1529,7 @@ bool M_OptResponder(event_t * ev, int ch)
 		}
 
 		case KEYD_RIGHTARROW:
-		case KEYD_DPAD_RIGHT:
-		case KEYD_MENU_RIGHT:
+		case KEYD_GP_RIGHT:
 			if (curr_menu->key_page[0])
 			{
 				KeyMenu_Next();
@@ -1598,7 +1540,7 @@ bool M_OptResponder(event_t * ev, int ch)
      
 		case KEYD_ENTER:
 		case KEYD_MOUSE1:
-		case KEYD_MENU_SELECT:
+		case KEYD_GP_A:
 		{
 			switch (curr_item->type)
 			{
@@ -1695,7 +1637,7 @@ bool M_OptResponder(event_t * ev, int ch)
 		case KEYD_ESCAPE:
 		case KEYD_MOUSE2:
 		case KEYD_MOUSE3:
-		case KEYD_MENU_CANCEL:
+		case KEYD_GP_B:
 		{
 			if (curr_menu == &f4sound_optmenu)
 			{
@@ -2058,7 +2000,7 @@ static void M_ChangePCSpeakerMode(int keypressed, cvar_c *cvar)
 //
 static void M_ChangeLanguage(int keypressed, cvar_c *cvar)
 {
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_GP_LEFT)
 	{
 		int idx, max;
 		
@@ -2070,7 +2012,7 @@ static void M_ChangeLanguage(int keypressed, cvar_c *cvar)
 			
 		language.Select(idx);
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_GP_RIGHT)
 	{
 		int idx, max;
 		
@@ -2124,14 +2066,14 @@ static void M_ChangeSoundfont(int keypressed, cvar_c *cvar)
 		return;
 	}
 
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_GP_LEFT)
 	{
 		if (sf_pos - 1 >= 0)
 			sf_pos--;
 		else
 			sf_pos = available_soundfonts.size() - 1;
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_GP_RIGHT)
 	{
 		if (sf_pos + 1 >= (int)available_soundfonts.size())
 			sf_pos = 0;
@@ -2167,14 +2109,14 @@ static void M_ChangeGENMIDI(int keypressed, cvar_c *cvar)
 		return;
 	}
 
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_GP_LEFT)
 	{
 		if (op2_pos - 1 >= 0)
 			op2_pos--;
 		else
 			op2_pos = available_genmidis.size() - 1;
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_GP_RIGHT)
 	{
 		if (op2_pos + 1 >= (int)available_genmidis.size())
 			op2_pos = 0;
@@ -2194,11 +2136,11 @@ static void M_ChangeGENMIDI(int keypressed, cvar_c *cvar)
 //
 static void M_ChangeResSize(int keypressed, cvar_c *cvar)
 {
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_GP_LEFT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Size, -1);
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_GP_RIGHT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_Size, +1);
 	}
@@ -2211,11 +2153,11 @@ static void M_ChangeResSize(int keypressed, cvar_c *cvar)
 //
 static void M_ChangeResFull(int keypressed, cvar_c *cvar)
 {
-	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_DPAD_LEFT || keypressed == KEYD_MENU_LEFT)
+	if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_GP_LEFT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_DisplayMode, -1);
 	}
-	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_DPAD_RIGHT || keypressed == KEYD_MENU_RIGHT)
+	else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_GP_RIGHT)
 	{
 		R_IncrementResolution(&new_scrmode, RESINC_DisplayMode, +1);
 	}

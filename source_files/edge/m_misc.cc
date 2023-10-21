@@ -134,8 +134,6 @@ static default_t defaults[] =
     {CFGT_Int,      "joy_axis2",         &joy_axis[1],    6},
     {CFGT_Int,      "joy_axis3",         &joy_axis[2],    1},
     {CFGT_Int,      "joy_axis4",         &joy_axis[3],    4},
-    {CFGT_Int,      "joy_axis5",         &joy_axis[4],    AXIS_DISABLE},
-    {CFGT_Int,      "joy_axis6",         &joy_axis[5],    AXIS_DISABLE},
 
     {CFGT_Int,      "screen_hud",        &screen_hud,     CFGDEF_SCREEN_HUD},
     {CFGT_Int,      "save_page",         &save_page, 0},
@@ -209,14 +207,6 @@ static default_t defaults[] =
 	{CFGT_Key,      "key_am_grid",       &key_am_grid,    'g'},
 	{CFGT_Key,      "key_am_mark",       &key_am_mark,    'm'},
 	{CFGT_Key,      "key_am_clear",      &key_am_clear,   'c'},
-
-	{CFGT_Key,      "key_menu_open",      &key_menu_open,   0},
-	{CFGT_Key,      "key_menu_up",      &key_menu_up,   0},
-	{CFGT_Key,      "key_menu_down",      &key_menu_down,  0},
-	{CFGT_Key,      "key_menu_left",      &key_menu_left,   0},
-	{CFGT_Key,      "key_menu_right",      &key_menu_right,   0},
-	{CFGT_Key,      "key_menu_select",      &key_menu_select,   0},
-	{CFGT_Key,      "key_menu_cancel",      &key_menu_cancel,   0},
 
 	{CFGT_Key,      "key_inv_prev",      &key_inv_prev,   0},
 	{CFGT_Key,      "key_inv_use",      &key_inv_use,   0},

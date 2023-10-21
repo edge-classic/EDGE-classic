@@ -328,7 +328,7 @@ static void HandleGamepadButtonEvent(SDL_Event * ev)
 
 static void HandleGamepadTriggerEvent(SDL_Event * ev)
 {
-	// ignore other joysticks
+	// ignore other gamepads
 	if (ev->caxis.which != gamepad_inst)
 		return;
 
@@ -456,13 +456,13 @@ static void I_OpenJoystick(int index)
 	}
 
 	I_Printf("Opened gamepad %d : %s\n", cur_joy, name);
-	I_Printf("Sticks:%d Triggers: %d Buttons: %d\n",
-			 gp_num_joysticks, gp_num_triggers, gp_num_buttons);
+	I_Printf("Sticks:%d Triggers: %d Buttons: %d Touchpads: %d\n",
+			 gp_num_joysticks, gp_num_triggers, gp_num_buttons,
+			 SDL_GameControllerGetNumTouchpads(gamepad_info));
 	I_Printf("Rumble:%s Trigger Rumble: %s LED: %s\n",
 			 SDL_GameControllerHasRumble(gamepad_info) ? "Yes" : "No",
 			 SDL_GameControllerHasRumbleTriggers(gamepad_info) ? "Yes" : "No",
 			 SDL_GameControllerHasLED(gamepad_info) ? "Yes" : "No");
-	I_Printf("Touchpads: %d\n", SDL_GameControllerGetNumTouchpads(gamepad_info));
 }
 
 static void CheckJoystickChanged(void)
@@ -706,7 +706,7 @@ void I_StartupJoystick(void)
 		return;
 	else
 	{
-		joystick_device = 1; // Automatically set to first detected joystick
+		joystick_device = 1; // Automatically set to first detected gamepad
 		I_OpenJoystick(joystick_device);
 	}
 }

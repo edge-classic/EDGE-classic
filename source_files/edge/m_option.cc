@@ -465,7 +465,7 @@ static optmenuitem_t analogueoptions[] =
 	{OPT_FracSlider, "X Sensitivity",      NULL, 0, &mouse_xsens.f, M_UpdateCVARFromFloat, NULL, &mouse_xsens, 0.25f, 1.0f, 15.0f, "%0.2f"},
 	{OPT_FracSlider, "Y Sensitivity",      NULL, 0, &mouse_ysens.f, M_UpdateCVARFromFloat, NULL, &mouse_ysens, 0.25f, 1.0f, 15.0f, "%0.2f"},
 	{OPT_Plain,      "",                   NULL, 0,  NULL, NULL, NULL},
-	{OPT_Switch,     "Gamepad", JoyDevs, 7,  &joystick_device, NULL, NULL},
+	{OPT_Switch,     "Gamepad", JoyDevs, 5,  &joystick_device, NULL, NULL},
 	{OPT_Switch,     "Left Stick X",         JoyAxis, 13, &joy_axis[0], NULL, NULL},
 	{OPT_Switch,     "Left Stick Y",        JoyAxis, 13, &joy_axis[1], NULL, NULL},
 	{OPT_Switch,     "Right Stick X",         JoyAxis, 13, &joy_axis[2], NULL, NULL},
@@ -1095,8 +1095,7 @@ void M_OptDrawer()
 				{
 					if (joystick_device == 0)
 					{
-						sprintf(tempstring, "None");
-						HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, tempstring);
+						HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, "None");
 						break;
 					}
 					else
@@ -1104,8 +1103,14 @@ void M_OptDrawer()
 						const char *joyname = SDL_JoystickNameForIndex(joystick_device-1);
 						if (joyname)
 						{
-							sprintf(tempstring, epi::STR_Format("%.19s...", joyname).c_str());
-							HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, tempstring);
+							HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, 
+								epi::STR_Format("%d - %s", joystick_device, joyname).c_str());
+							break;
+						}
+						else
+						{
+							HL_WriteText(style,styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, 
+								epi::STR_Format("%d - Not Connected", joystick_device).c_str());
 							break;
 						}
 					}

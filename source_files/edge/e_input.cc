@@ -49,8 +49,6 @@ extern int I_JoyGetAxis(int n);
 
 extern cvar_c r_doubleframes;
 
-extern SDL_Joystick *joy_info;
-
 //
 // EVENT HANDLING
 //

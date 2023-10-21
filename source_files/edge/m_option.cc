@@ -861,7 +861,7 @@ static menuinfo_t * all_key_menus[NUM_KEY_MENUS] =
 	&program_optmenu2
 };
 
-static char keystring1[] = "Enter to change, Backspace to clear";
+static char keystring1[] = "Enter/A Button to change, Backspace/Back Button to clear";
 static char keystring2[] = "Press a key for this action";
 
 //
@@ -1285,7 +1285,9 @@ bool M_OptResponder(event_t * ev, int ch)
 
 		keyscan = 0;
 
-		if (ch == KEYD_ESCAPE || ch == KEYD_GP_B)
+		// Eat the gamepad's "Start" button here to keep the user from
+		// binding their menu opening key to an action
+		if (ch == KEYD_ESCAPE || ch == KEYD_GP_START)
 			return true;
      
 		blah = (int*)(curr_item->switchvar);
@@ -1315,6 +1317,7 @@ bool M_OptResponder(event_t * ev, int ch)
 	switch (ch)
 	{
 		case KEYD_BACKSPACE:
+		case KEYD_GP_BACK:
 		{
 			if (curr_item->type == OPT_KeyConfig)
 				*(int*)(curr_item->switchvar) = 0;

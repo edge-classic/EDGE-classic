@@ -462,6 +462,7 @@ static void I_OpenJoystick(int index)
 			 SDL_GameControllerHasRumble(gamepad_info) ? "Yes" : "No",
 			 SDL_GameControllerHasRumbleTriggers(gamepad_info) ? "Yes" : "No",
 			 SDL_GameControllerHasLED(gamepad_info) ? "Yes" : "No");
+	I_Printf("Touchpads: %d\n", SDL_GameControllerGetNumTouchpads(gamepad_info));
 }
 
 static void CheckJoystickChanged(void)

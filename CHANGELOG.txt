@@ -78,6 +78,8 @@ General Improvements/Changes
   - New behavior is to remove all existing colormap entries with the same name
     - Intent is to be able to define a colormap as "nothing", even if prior entries had a definition
   - Colormap entries later in the load/parsing order with the same name will still be added
+- Improved level warp cheat behavior with custom mapnames
+  - Previous behavior was to only match a numerical entry with maps named either MAPXX or EXMX
 
 
 Bugs fixed

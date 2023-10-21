@@ -1282,25 +1282,33 @@ mapdef_c *G_LookupMap(const char *refname)
 		(!refname[1] || isdigit(refname[1])))
 	{
 		int num = atoi(refname);
-		char new_ref[20];
+		// first try map names ending in ## (single digit treated as 0#)
+		std::string map_check = epi::STR_Format("%02d", num);
+		for (int i = mapdefs.GetSize() - 1; i >= 0; i--)
+		{
+			if (mapdefs[i]->name.size() >= 2)
+			{
+				if (epi::strcmp(map_check, mapdefs[i]->name.substr(mapdefs[i]->name.size() - 2)) == 0 &&
+					G_MapExists(mapdefs[i]) && mapdefs[i]->episode)
+					return mapdefs[i];
+			}
+		}
 
-		// try MAP## first
-		sprintf(new_ref, "MAP%02d", num);
-
-		m = mapdefs.Lookup(new_ref);
-		if (m && G_MapExists(m))
-			return m;
-
-		// otherwise try E#M#
+		// otherwise try X#X# (episodic) style names
 		if (1 <= num && num <= 9) num = num + 10;
-		sprintf(new_ref, "E%dM%d", num/10, num%10);
-
-		m = mapdefs.Lookup(new_ref);
-		if (m && G_MapExists(m))
-			return m;
+		map_check = epi::STR_Format("E%dM%d", num/10, num%10);
+		for (int i = mapdefs.GetSize() - 1; i >= 0; i--)
+		{
+			if (mapdefs[i]->name.size() == 4)
+			{
+				if (mapdefs[i]->name[1] == map_check[1] && mapdefs[i]->name[3] == map_check[3] &&
+					G_MapExists(mapdefs[i]) && mapdefs[i]->episode)
+					return mapdefs[i];
+			}
+		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 //--- editor settings ---

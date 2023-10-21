@@ -208,9 +208,9 @@ static default_t defaults[] =
 	{CFGT_Key,      "key_am_mark",       &key_am_mark,    'm'},
 	{CFGT_Key,      "key_am_clear",      &key_am_clear,   'c'},
 
-	{CFGT_Key,      "key_inv_prev",      &key_inv_prev,   0},
-	{CFGT_Key,      "key_inv_use",      &key_inv_use,   0},
-	{CFGT_Key,      "key_inv_next",      &key_inv_next,   0},
+	{CFGT_Key,      "key_inv_prev",      &key_inv_prev,   CFGDEF_KEY_PREVINV},
+	{CFGT_Key,      "key_inv_use",      &key_inv_use,   CFGDEF_KEY_USEINV},
+	{CFGT_Key,      "key_inv_next",      &key_inv_next,   CFGDEF_KEY_NEXTINV},
 
 	{CFGT_Key,      "key_screenshot",      &key_screenshot,   KEYD_F1},
 	{CFGT_Key,      "key_save_game",      &key_save_game,   KEYD_F2},

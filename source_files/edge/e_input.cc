@@ -162,7 +162,7 @@ float *joy_deads[6] =
 	&joy_dead5.f, 
 };
 
-DEF_CVAR(in_running,   "0", CVAR_ARCHIVE)
+DEF_CVAR(in_running,   "1", CVAR_ARCHIVE)
 DEF_CVAR(in_stageturn, "1", CVAR_ARCHIVE)
 
 DEF_CVAR(debug_mouse,   "0", 0)

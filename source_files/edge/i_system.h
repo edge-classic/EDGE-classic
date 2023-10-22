@@ -113,9 +113,6 @@ void I_StartupControl(void);
 // the E_PostEvent() function.
 void I_ControlGetEvents(void);
 
-// Something for calibrating a joystick -- not currently used.
-void I_CalibrateJoystick(int ch);
-
 // Shuts down all control devices.  This is the opposite of
 // I_StartupControl().  Should be called from I_SystemShutdown(), the
 // main code never calls this function.

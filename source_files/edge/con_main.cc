@@ -58,8 +58,7 @@ con_cmd_t;
 extern const con_cmd_t builtin_commands[];
 
 extern void M_ChangeLevelCheat(const char *string);
-extern void I_ShowJoysticks(void);
-extern void M_QuitFinally(void);
+extern void I_ShowGamepads(void);
 
 
 int CMD_Exec(char **argv, int argc)
@@ -447,12 +446,12 @@ int CMD_ShowKeys(char **argv, int argc)
 	return 0;
 }
 
-int CMD_ShowJoysticks(char **argv, int argc)
+int CMD_ShowGamepads(char **argv, int argc)
 {
 	(void) argv;
 	(void) argc;
 	
-	I_ShowJoysticks();
+	I_ShowGamepads();
 	return 0;
 }
 
@@ -590,13 +589,11 @@ const con_cmd_t builtin_commands[] =
 	{ "map",            CMD_Map },
 	{ "warp",           CMD_Map },  // compatibility
 	{ "playsound",      CMD_PlaySound },
-//	{ "resetkeys",      CMD_ResetKeys },
 	{ "readme",      	CMD_Readme },
 	{ "openhome",      	CMD_OpenHome },
 	{ "resetvars",      CMD_ResetVars },
 	{ "showfiles",      CMD_ShowFiles },
-  	{ "showjoysticks",  CMD_ShowJoysticks },
-//	{ "showkeys",       CMD_ShowKeys },
+  	{ "showgamepads",   CMD_ShowGamepads },
 	{ "showlumps",      CMD_ShowLumps },
 	{ "showcmds",       CMD_ShowCmds },
 	{ "showmaps",       CMD_ShowMaps },

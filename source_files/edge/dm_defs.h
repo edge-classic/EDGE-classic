@@ -209,38 +209,29 @@ gameflags_t;
 #define KEYD_WHEEL_UP   (0x10e)
 #define KEYD_WHEEL_DN   (0x10f)
 
-#define KEYD_JOY1       (0x110+1)
-#define KEYD_JOY2       (0x110+2)
-#define KEYD_JOY3       (0x110+3)
-#define KEYD_JOY4       (0x110+4)
-#define KEYD_JOY5       (0x110+5)
-#define KEYD_JOY6       (0x110+6)
-#define KEYD_JOY7       (0x110+7)
-#define KEYD_JOY8       (0x110+8)
-#define KEYD_JOY9       (0x110+9)
-#define KEYD_JOY10      (0x110+10)
-#define KEYD_JOY11      (0x110+11)
-#define KEYD_JOY12      (0x110+12)
-#define KEYD_JOY13      (0x110+13)
-#define KEYD_JOY14      (0x110+14)
-#define KEYD_JOY15      (0x110+15)
-
-#define KEYD_DPAD_UP	(0x110+16)
-#define KEYD_DPAD_DOWN	(0x110+17)
-#define KEYD_DPAD_LEFT	(0x110+18)
-#define KEYD_DPAD_RIGHT	(0x110+19)
-
-#define KEYD_TRIGGER_LEFT (0x110+20)
-#define KEYD_TRIGGER_RIGHT (0x110+21)
-
-// Pseudo-keycodes for menu navigation - Dasho
-#define KEYD_MENU_OPEN (0x110+22)
-#define KEYD_MENU_UP (0x110+23)
-#define KEYD_MENU_DOWN (0x110+24)
-#define KEYD_MENU_LEFT (0x110+25)
-#define KEYD_MENU_RIGHT (0x110+26)
-#define KEYD_MENU_SELECT (0x110+27)
-#define KEYD_MENU_CANCEL (0x110+28)
+#define KEYD_GP_A  		 (0x110+1)
+#define KEYD_GP_B  		 (0x110+2)
+#define KEYD_GP_X  		 (0x110+3)
+#define KEYD_GP_Y  		 (0x110+4)
+#define KEYD_GP_BACK     (0x110+5)
+#define KEYD_GP_GUIDE    (0x110+6)
+#define KEYD_GP_START    (0x110+7)
+#define KEYD_GP_LSTICK   (0x110+8)
+#define KEYD_GP_RSTICK   (0x110+9)
+#define KEYD_GP_LSHLD    (0x110+10)
+#define KEYD_GP_RSHLD    (0x110+11)
+#define KEYD_GP_UP		 (0x110+12)
+#define KEYD_GP_DOWN	 (0x110+13)
+#define KEYD_GP_LEFT	 (0x110+14)
+#define KEYD_GP_RIGHT	 (0x110+15)
+#define KEYD_GP_MISC1    (0x110+12)
+#define KEYD_GP_PADDLE1  (0x110+13)
+#define KEYD_GP_PADDLE2  (0x110+14)
+#define KEYD_GP_PADDLE3  (0x110+15)
+#define KEYD_GP_PADDLE4  (0x110+16)
+#define KEYD_GP_TOUCHPAD (0x110+17)
+#define KEYD_TRIGGER_LEFT (0x110+18)
+#define KEYD_TRIGGER_RIGHT (0x110+19)
 
 // Pseudo-keycodes for program functions - Dasho
 #define KEYD_SCREENSHOT (0x110+29)
@@ -262,10 +253,6 @@ gameflags_t;
 #define AXIS_FORWARD     3
 #define AXIS_STRAFE      4
 #define AXIS_FLY         5  // includes SWIM up/down
-
-// Since I can't guarantee which axes are the analog triggers; give the user the ability to designate this - Dasho
-#define AXIS_LEFT_TRIGGER 11
-#define AXIS_RIGHT_TRIGGER 12
 
 #endif // __DEFINITIONS__
 

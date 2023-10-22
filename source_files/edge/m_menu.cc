@@ -72,15 +72,6 @@
 
 #include <cmath>
 
-// Menu navigation stuff
-int key_menu_open;
-int key_menu_up;
-int key_menu_down;
-int key_menu_left;
-int key_menu_right;
-int key_menu_select;
-int key_menu_cancel;
-
 // Program stuff
 int key_screenshot;
 int key_save_game;
@@ -1130,7 +1121,7 @@ void M_SaveGame(int choice)
 
 static void QuickSaveResponse(int ch)
 {
-	if (ch == 'y' || ch == KEYD_MENU_SELECT || ch == KEYD_MOUSE1)
+	if (ch == 'y' || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
 	{
 		M_DoSave(quickSavePage, quickSaveSlot);
 		S_StartFX(sfx_swtchx);
@@ -1166,7 +1157,7 @@ void M_QuickSave(void)
 
 static void QuickLoadResponse(int ch)
 {
-	if (ch == 'y' || ch == KEYD_MENU_SELECT || ch == KEYD_MOUSE1)
+	if (ch == 'y' || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
 	{
 		int tempsavepage = save_page;
 
@@ -1530,7 +1521,7 @@ static void DoStartLevel(skill_t skill)
 
 static void VerifyNightmare(int ch)
 {
-	if (ch != 'y' && ch != KEYD_MENU_SELECT && ch != KEYD_MOUSE1)
+	if (ch != 'y' && ch != KEYD_GP_A && ch != KEYD_MOUSE1)
 		return;
 
 	DoStartLevel(sk_nightmare);
@@ -1574,7 +1565,7 @@ void M_ChangeMessages(int choice)
 
 static void EndGameResponse(int ch)
 {
-	if (ch != 'y' && ch != KEYD_MENU_SELECT && ch != KEYD_MOUSE1)
+	if (ch != 'y' && ch != KEYD_GP_A && ch != KEYD_MOUSE1)
 		return;
 
 	G_DeferredEndGame();
@@ -1624,7 +1615,7 @@ void M_FinishReadThis(int choice)
 //
 static void QuitResponse(int ch)
 {
-	if (ch != 'y' && ch != KEYD_MENU_SELECT && ch != KEYD_MOUSE1)
+	if (ch != 'y' && ch != KEYD_GP_A && ch != KEYD_MOUSE1)
 		return;
 		
 	if (!netgame)
@@ -1922,36 +1913,6 @@ bool M_Responder(event_t * ev)
 
 	SDL_Keymod mod = SDL_GetModState();
 
-	// Produce psuedo keycodes from menu navigation buttons bound in the options menu
-	if (E_MatchesKey(key_menu_open, ch))
-	{
-		ch = KEYD_MENU_OPEN;
-	}
-	else if (E_MatchesKey(key_menu_up, ch))
-	{
-		ch = KEYD_MENU_UP;
-	}
-	else if (E_MatchesKey(key_menu_down, ch))
-	{
-		ch = KEYD_MENU_DOWN;
-	}
-	else if (E_MatchesKey(key_menu_left, ch))
-	{
-		ch = KEYD_MENU_LEFT;
-	}
-	else if (E_MatchesKey(key_menu_right, ch))
-	{
-		ch = KEYD_MENU_RIGHT;
-	}
-	else if (E_MatchesKey(key_menu_select, ch))
-	{
-		ch = KEYD_MENU_SELECT;
-	}
-	else if (E_MatchesKey(key_menu_cancel, ch))
-	{
-		ch = KEYD_MENU_CANCEL;
-	}
-
 	// -ACB- 1999/10/11 F1 is responsible for print screen at any time
 	if (ch == KEYD_F1 || ch == KEYD_PRTSCR)
 	{
@@ -1964,7 +1925,7 @@ bool M_Responder(event_t * ev)
 	if (msg_mode == 1)
 	{
 		if (msg_needsinput == true &&
-			!(ch == ' ' || ch == 'n' || ch == 'y' || ch == KEYD_ESCAPE || ch == KEYD_MENU_CANCEL || ch == KEYD_MENU_SELECT || ch == KEYD_MOUSE1 || ch == KEYD_MOUSE2 || ch == KEYD_MOUSE3))
+			!(ch == ' ' || ch == 'n' || ch == 'y' || ch == KEYD_ESCAPE || ch == KEYD_GP_B || ch == KEYD_GP_A || ch == KEYD_MOUSE1 || ch == KEYD_MOUSE2 || ch == KEYD_MOUSE3))
 			return false;
 
 		msg_mode = 0;
@@ -1979,7 +1940,7 @@ bool M_Responder(event_t * ev)
 	}
 	else if (msg_mode == 2)
 	{		
-		if (ch == KEYD_ENTER || ch == KEYD_MENU_SELECT || ch == KEYD_MOUSE1)
+		if (ch == KEYD_ENTER || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
 		{
 			menuactive = msg_lastmenu?true:false;
 			msg_mode = 0;
@@ -1994,7 +1955,7 @@ bool M_Responder(event_t * ev)
 			return true;
 		}
 
-		if (ch == KEYD_ESCAPE || ch == KEYD_MENU_CANCEL || ch == KEYD_MOUSE2 || ch == KEYD_MOUSE3)
+		if (ch == KEYD_ESCAPE || ch == KEYD_GP_B || ch == KEYD_MOUSE2 || ch == KEYD_MOUSE3)
 		{
 			menuactive = msg_lastmenu?true:false;
 			msg_mode = 0;
@@ -2059,7 +2020,7 @@ bool M_Responder(event_t * ev)
 				break;
 
 			case KEYD_ESCAPE:
-			case KEYD_MENU_CANCEL:
+			case KEYD_GP_B:
 			case KEYD_MOUSE2:
 			case KEYD_MOUSE3:
 				saveStringEnter = 0;
@@ -2067,7 +2028,7 @@ bool M_Responder(event_t * ev)
 				break;
 
 			case KEYD_ENTER:
-			case KEYD_MENU_SELECT:
+			case KEYD_GP_A:
 			case KEYD_MOUSE1:
 				saveStringEnter = 0;
 				if (ex_slots[save_slot].desc[0])
@@ -2278,7 +2239,7 @@ bool M_Responder(event_t * ev)
 		}
 
 		// Pop-up menu?
-		if (ch == KEYD_ESCAPE || ch == KEYD_MENU_OPEN)
+		if (ch == KEYD_ESCAPE || ch == KEYD_GP_START)
 		{
 			M_StartControlPanel();
 			S_StartFX(sfx_swtchn);
@@ -2340,8 +2301,7 @@ bool M_Responder(event_t * ev)
 			return true;
 		
 		case KEYD_DOWNARROW:
-		case KEYD_DPAD_DOWN:
-		case KEYD_MENU_DOWN:
+		case KEYD_GP_DOWN:
 			do
 			{
 				if (itemOn + 1 > currentMenu->numitems - 1)
@@ -2354,8 +2314,7 @@ bool M_Responder(event_t * ev)
 			return true;
 
 		case KEYD_UPARROW:
-		case KEYD_DPAD_UP:
-		case KEYD_MENU_UP:
+		case KEYD_GP_UP:
 			do
 			{
 				if (itemOn == 0)
@@ -2369,8 +2328,7 @@ bool M_Responder(event_t * ev)
 
 		case KEYD_PGUP:
 		case KEYD_LEFTARROW:
-		case KEYD_DPAD_LEFT:
-		case KEYD_MENU_LEFT:
+		case KEYD_GP_LEFT:
 			if (currentMenu->menuitems[itemOn].select_func &&
 				currentMenu->menuitems[itemOn].status == 2)
 			{
@@ -2382,8 +2340,7 @@ bool M_Responder(event_t * ev)
 
 		case KEYD_PGDN:
 		case KEYD_RIGHTARROW:
-		case KEYD_DPAD_RIGHT:
-		case KEYD_MENU_RIGHT:
+		case KEYD_GP_RIGHT:
 			if (currentMenu->menuitems[itemOn].select_func &&
 				currentMenu->menuitems[itemOn].status == 2)
 			{
@@ -2395,7 +2352,7 @@ bool M_Responder(event_t * ev)
 
 		case KEYD_ENTER:
 		case KEYD_MOUSE1:
-		case KEYD_MENU_SELECT:
+		case KEYD_GP_A:
 			if (currentMenu->menuitems[itemOn].select_func &&
 				currentMenu->menuitems[itemOn].status)
 			{
@@ -2408,14 +2365,14 @@ bool M_Responder(event_t * ev)
 		case KEYD_ESCAPE:
 		case KEYD_MOUSE2:
 		case KEYD_MOUSE3:
-		case KEYD_MENU_OPEN:
+		case KEYD_GP_START:
 			currentMenu->lastOn = itemOn;
 			M_ClearMenus();
 			S_StartFX(sfx_swtchx);
 			return true;
 
 		case KEYD_BACKSPACE:
-		case KEYD_MENU_CANCEL:
+		case KEYD_GP_B:
 			currentMenu->lastOn = itemOn;
 			if (currentMenu->prevMenu)
 			{

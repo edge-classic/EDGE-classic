@@ -52,7 +52,7 @@ extern int mouse_yaxis;
 extern cvar_c mouse_xsens;
 extern cvar_c mouse_ysens;
 
-extern int joy_axis[6];
+extern int joy_axis[4];
 extern float *joy_deads[6];
 //
 // -ACB- 1998/09/06 Analogue binding:

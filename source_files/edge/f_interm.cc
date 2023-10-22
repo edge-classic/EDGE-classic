@@ -972,7 +972,7 @@ static void DrawShowNextLoc(void)
 			if (worldint.mappos[i].done)
 				DrawOnLnode(&worldint.mappos[i], splat);
 
-			if (snl_pointeron && !strcmp(wi_stats.next->name.c_str(), worldint.mappos[i].info->name.c_str()))
+			if (snl_pointeron && wi_stats.next && !strcmp(wi_stats.next->name.c_str(), worldint.mappos[i].info->name.c_str()))
 				DrawOnLnode(&worldint.mappos[i], yah);
 		}
 	}

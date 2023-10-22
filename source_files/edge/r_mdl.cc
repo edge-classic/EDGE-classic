@@ -427,7 +427,14 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
 			good_V->normal_idx = raw_V->light_normal;
 
 			SYS_ASSERT(good_V->normal_idx >= 0);
-			SYS_ASSERT(good_V->normal_idx < MD_NUM_NORMALS);
+			//SYS_ASSERT(good_V->normal_idx < MD_NUM_NORMALS);
+			// Dasho: Maybe try to salvage bad MDL models?
+			if (good_V->normal_idx >= MD_NUM_NORMALS)
+			{
+				I_Debugf("Vert %d of Frame %d has an invalid normal index: %d\n",
+					v, i, good_V->normal_idx);
+				good_V->normal_idx = (good_V->normal_idx % MD_NUM_NORMALS);
+			}
 
 			which_normals[good_V->normal_idx] = 1;
 		}

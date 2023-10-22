@@ -1,6 +1,6 @@
 https://github.com/edge-classic/EDGE-classic
 
-Current as of: September 2023
+Current as of: October 2023
 
 CHANGELOG for EDGE-Classic 1.36 (since EDGE-Classic 1.35)
 ====================================
@@ -47,9 +47,9 @@ New Features
 
 - THINGS.DDF: 
   - New Action command: SET_PAINCHANCE(percentage) which will dynamically change a monsters painchance.
-    Possible usage: if we do SET_PAINCHANCE(0%) at the start of a lengthy PAIN state, this will make sure the 
-	whole animation is played out and won't be interrupted by another shot which would normally make us 
-	re-start the pain animation again. Remember to set it back to normal at the end of the lengthy animation.
+    - Possible usage: if we do SET_PAINCHANCE(0%) at the start of a lengthy PAIN state, this will make sure the 
+	    whole animation is played out and won't be interrupted by another shot which would normally make us 
+	    re-start the pain animation again. Remember to set it back to normal at the end of the lengthy animation.
   - New Special flag: IMMOVABLE which will make this thing be unaffected by thrust from attack impacts 
     irrespective of whether it has a small MASS or a very large one.
 

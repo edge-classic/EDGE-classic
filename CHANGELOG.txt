@@ -80,6 +80,12 @@ General Improvements/Changes
   - Colormap entries later in the load/parsing order with the same name will still be added
 - Improved level warp cheat behavior with custom mapnames
   - Previous behavior was to only match a numerical entry with maps named either MAPXX or EXMX
+- Improved handling of gamepads
+  - Automatic detection of analog triggers
+  - User-friendly button names in menus ("A Button" versus "Joy 1", etc)
+  - Menus can now be navigated via gamepad without needing to set explicit bindings
+    - "Menu Navigation" section removed from Key Bindings menu
+  - Added default bindings for gamepads
 
 
 Bugs fixed

@@ -53,6 +53,8 @@ New Features
   - New Special flag: IMMOVABLE which will make this thing be unaffected by thrust from attack impacts 
     irrespective of whether it has a small MASS or a very large one.
 
+- UDMF:
+  - Sectors: Support added for the `lightcolor`, `rotationfloor`, and `rotationceiling` keys
 
 General Improvements/Changes
 --------------------
@@ -86,6 +88,8 @@ General Improvements/Changes
   - Menus can now be navigated via gamepad without needing to set explicit bindings
     - "Menu Navigation" section removed from Key Bindings menu
   - Added default bindings for gamepads
+- Added configuration files for use with Doom Builder.X, Ultimate Doom Builder, and Eureka
+  - Can be located in the /docs/mapping directory
 
 
 Bugs fixed

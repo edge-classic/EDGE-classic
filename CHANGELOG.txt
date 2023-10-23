@@ -32,7 +32,7 @@ New Features
       - 4TH_SHOOT, 4TH_REFIRE, 4TH_NOFIRE, 4TH_NOFIRE_RETURN, 4TH_CHECKRELOAD, 4TH_FLASH
     - For consistency, all the old SEC_xxx ddf commands can also be used with 2ND_xxx instead 
       - i.e. 2ND_AMMOTYPE can replace SEC_AMMOTYPE
-  - REFIRE_TO state added
+  - REFIRE_TO frame command added
     - Uses same syntax as JUMP, but uses refiring instead of % chance as the test condition
     - SEC/2ND_REFIRE_TO, 3RD_REFIRE_TO, and 4TH_REFIRE_TO also supported
 
@@ -101,4 +101,3 @@ Bugs fixed
 - Fixed savegames not preserving the 'is_voodoo' convenience boolean for mobjs, causing issues when loading a game that had them present
 - Fixed berserk and other powerup effects not modifying model colors accordingly (bug introduced by transition to VBOs for model rendering)
 - Fixed crash if player dies while TARGET_JUMP or FRIEND_JUMP weapon specials are active
-

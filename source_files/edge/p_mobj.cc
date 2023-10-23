@@ -915,7 +915,8 @@ static void P_XYMovement(mobj_t * mo, const region_properties_t *props, bool ext
 						if (tempspecial->effectobject)
 						{
 							DebrisThing = tempspecial->effectobject;
-							P_SpawnBlood(mo->x, mo->y, mo->z, 0, mo->angle + ANG180, DebrisThing);
+							//P_SpawnBlood(mo->x, mo->y, mo->z, 0, mo->angle + ANG180, DebrisThing);
+							P_SpawnDebris(mo->x, mo->y, mo->z, 0, mo->angle + ANG180, DebrisThing);
 						}
 					}
 				}
@@ -1915,6 +1916,37 @@ void P_RunMobjThinkers(bool extra_tic)
 //
 // GAME SPAWN FUNCTIONS
 //
+
+//
+// P_SpawnDebris
+//
+void P_SpawnDebris(float x, float y, float z, float damage,
+				  angle_t angle, const mobjtype_c * debris)
+{
+	mobj_t *th;
+
+	//angle += ANG180;
+	angle += (angle_t) (P_RandomNegPos() * (int)(ANG1 / 2));
+
+	z += (float)(P_RandomNegPos() / 64.0f);
+
+	th = P_MobjCreateObject(x, y, z, debris);
+
+	P_SetMobjDirAndSpeed(th, angle, 2.0f, 0.25f);
+
+	th->tics -= P_Random() & 3;
+
+	if (th->tics < 1)
+		th->tics = 1;
+/*
+	if (damage <= 12 && th->state && th->next_state)
+		P_SetMobjState(th, th->next_state - states);
+
+	if (damage <= 8 && th->state && th->next_state)
+		P_SetMobjState(th, th->next_state - states);
+*/	
+}
+
 
 //
 // P_SpawnSplash

@@ -2168,8 +2168,8 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 
 			if (info && tempspecial->type == line_shootable)
 			{
-				//P_SpawnPuff(x, y, z, info, shoot_I.angle + ANG180);
-				P_SpawnBlood(x, y, z, 0, shoot_I.angle + ANG180, info);
+				//P_SpawnBlood(x, y, z, 0, shoot_I.angle + ANG180, info);
+				P_SpawnDebris(x, y, z, 0, shoot_I.angle + ANG180, info);
 			}
 			P_UnblockLineEffectDebris(ld, tempspecial);
 		}

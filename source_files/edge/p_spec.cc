@@ -611,9 +611,9 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const linetype_c *special)
 	//move slightly forward to spawn the debris
 	midx += dx + info->radius;
 	midy += dy + info->radius;
-	//P_MobjCreateObject(midx, midy, midz, info);
 
-	P_SpawnBlood(midx, midy, midz, 0, 0 + ANG180, info);
+	//P_SpawnBlood(midx, midy, midz, 0, 0 + ANG180, info);
+	P_SpawnDebris(midx, midy, midz, 0, 0 + ANG180, info);
 
 	midx = (TheLine->v1->x + TheLine->v2->x) / 2;
 	midy = (TheLine->v1->y + TheLine->v2->y) / 2;
@@ -621,8 +621,9 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const linetype_c *special)
 	//move slightly backward to spawn the debris
 	midx -= dx + info->radius;
 	midy -= dy + info->radius;
-	//P_MobjCreateObject(midx, midy, midz, info);	
-	P_SpawnBlood(midx, midy, midz, 0, 0 + ANG180, info);
+	
+	//P_SpawnBlood(midx, midy, midz, 0, 0 + ANG180, info);
+	P_SpawnDebris(midx, midy, midz, 0, 0 + ANG180, info);
 }
 
 //

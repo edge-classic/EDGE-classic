@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE MOD4PLAY Music Player (HEADER)
+//  EDGE RAD Music Player (HEADER)
 //----------------------------------------------------------------------------
 // 
 //  Copyright (c) 2023 - The EDGE Team.
@@ -16,8 +16,8 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __M4P_PLAYER_H__
-#define __M4P_PLAYER_H__
+#ifndef __RAD_PLAYER_H__
+#define __RAD_PLAYER_H__
 
 #include "i_defs.h"
 
@@ -25,9 +25,9 @@
 
 /* FUNCTIONS */
 
-abstract_music_c * S_PlayM4PMusic(byte *data, int length, bool looping);
+abstract_music_c * S_PlayRADMusic(byte *data, int length, bool looping);
 
-#endif  /* __M4P_PLAYER_H__ */
+#endif  /* __RAD_PLAYER_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

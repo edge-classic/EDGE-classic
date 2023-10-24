@@ -39,8 +39,8 @@
 #include "s_m4p.h"
 #include "s_opl.h"
 #include "s_sid.h"
-#include "s_vgm.h"
 #include "s_flac.h"
+#include "s_rad.h"
 #include "m_misc.h"
 #include "w_files.h"
 #include "w_wad.h"
@@ -195,9 +195,9 @@ void S_ChangeMusic(int entrynum, bool loop)
 			music_player = S_PlayM4PMusic(data, length, loop);
 			break;
 
-		case epi::FMT_VGM:
+		case epi::FMT_RAD:
 			delete F;
-			music_player = S_PlayVGMMusic(data, length, loop);
+			music_player = S_PlayRADMusic(data, length, loop);
 			break;
 
 		case epi::FMT_SID:

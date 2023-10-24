@@ -1,8 +1,11 @@
 ##########################################
-# miniz
+# libRAD
 ##########################################
 
 add_library(
-  miniz
-  miniz.c 
-  )
+  libRAD
+  opal.cpp
+  radplay.cpp
+  patches.cpp
+  radmidi.cpp
+)

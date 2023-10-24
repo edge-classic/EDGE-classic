@@ -1,0 +1,107 @@
+https://github.com/edge-classic/EDGE-classic
+
+Current as of: October 2023
+
+CHANGELOG for EDGE-Classic 1.36 (since EDGE-Classic 1.35)
+====================================
+
+
+New Features
+------------
+- ATTACKS.DDF: 
+  - DAMAGE_UNLESS_BENEFIT and DAMAGE_IF_BENEFIT subcommands added
+    - Can be used anywhere that DAMAGE is used (sectors, attacks, etc)
+    - DAMAGE.DAMAGE_UNLESS_BENEFIT: Player will take damage unless they have at least one of the benefits listed
+    - DAMAGE.DAMAGE_IF_BENEFIT: Player will take damage if they have at least one of the benefits listed
+  - Attack special "PLAYER_ATTACK" makes attack behave as if originating from the player, even if 
+    it's an indirect secondary attack i.e. the player gets his VAMPIRE health and KillBenefits.
+  - DAMAGE.FLASH_COLOUR field added (Courtesy of akaAgar - https://github.com/edge-classic/EDGE-classic/pull/576)
+    - Allows a custom color to be used as the pain effect when a player is hit by this damage type
+    - Can be used to emulate effects like Hexen's cold/poison damage
+
+- WEAPONS.DDF: 
+  - Can now define a 3RD and 4TH attack. Equivalent DDF syntax to SEC_xxx used for second attack
+    - DDF Fields: 
+      - 3RD_ATTACK, 3RD_AMMOTYPE, 3RD_AMMOPERSHOT, 3RD_CLIPSIZE, 3RD_AUTOMATIC, 3RD_SPECIAL
+      - 4TH_ATTACK, 4TH_AMMOTYPE, 4TH_AMMOPERSHOT, 4TH_CLIPSIZE, 4TH_AUTOMATIC, 4TH_SPECIAL
+    - DDF States:
+      - 3RD_ATTACK, 3RD_RELOAD, 3RD_DISCARD, 3RD_WARMUP, 3RD_FLASH
+      - 4TH_ATTACK, 4TH_RELOAD, 4TH_DISCARD, 4TH_WARMUP, 4TH_FLASH
+    - DDF Actions:
+      - 3RD_SHOOT, 3RD_REFIRE, 3RD_NOFIRE, 3RD_NOFIRE_RETURN, 3RD_CHECKRELOAD, 3RD_FLASH
+      - 4TH_SHOOT, 4TH_REFIRE, 4TH_NOFIRE, 4TH_NOFIRE_RETURN, 4TH_CHECKRELOAD, 4TH_FLASH
+    - For consistency, all the old SEC_xxx ddf commands can also be used with 2ND_xxx instead 
+      - i.e. 2ND_AMMOTYPE can replace SEC_AMMOTYPE
+  - REFIRE_TO frame command added
+    - Uses same syntax as JUMP, but uses refiring instead of % chance as the test condition
+    - SEC/2ND_REFIRE_TO, 3RD_REFIRE_TO, and 4TH_REFIRE_TO also supported
+
+- GAMES.DDF: "NO_SKILL_MENU" boolean command added (Courtesy of akaAgar - https://github.com/edge-classic/EDGE-classic/pull/577)
+  - If true, will skip difficulty menu and start selected episode at skill 2 ("Hurt Me Plenty" for Doom)
+  - Intent is for mapsets that have a Quake-style initial skill-select level or where the author may not implement/want
+    to present skill levels
+  - Default value is false
+
+- RSCRIPT: "EXACT_" prefix added for ON_CONDITION checks (Courtesy of akaAgar - https://github.com/edge-classic/EDGE-classic/pull/578)
+  - Allows check for the exact value of a benefit/etc, versus the default of greater-than-or-equal
+
+- THINGS.DDF: 
+  - New Action command: SET_PAINCHANCE(percentage) which will dynamically change a monsters painchance.
+    - Possible usage: if we do SET_PAINCHANCE(0%) at the start of a lengthy PAIN state, this will make sure the 
+	    whole animation is played out and won't be interrupted by another shot which would normally make us 
+	    re-start the pain animation again. Remember to set it back to normal at the end of the lengthy animation.
+  - New Special flag: IMMOVABLE which will make this thing be unaffected by thrust from attack impacts 
+    irrespective of whether it has a small MASS or a very large one.
+
+- UDMF:
+  - Sectors: Support added for the `lightcolor`, `rotationfloor`, and `rotationceiling` keys
+
+General Improvements/Changes
+--------------------
+- Detection/functionality for mikoportals implemented
+  - Voodoo dolls that fall onto a floor at exactly -32768 will preserve their X/Y/Z momentum and be moved to their sector's ceiling
+    - Friction and drag ("air friction") will not be applied to voodoo dolls in this situation
+  - Regular players and things will adhere to normal physics
+- Windowed Mode resolution list will now dynamically populate based off of available display information instead of using presets
+- Video Options crosshair selection will not be shown when switching to/from weapons that have DDF custom crosshairs
+- Slightly re-organized the Key binding menu to accomodate the new 3rd and 4th attacks.
+- Implemented 'episode' UMAPINFO key; EDGE-Classic now fully supports the UMAPINFO spec, Revision 2.2
+- ZMAPINFO/MAPINFO parsing updates:
+  - Episode definitions and the 'clearepisodes' directive will now be respected
+  - ZMAPINFO 'ResetInventory' level definition key will result in the RESET_PLAYER DDFLEVL command being applied
+- Heretic: numerous improvements and tweaks courtesy of DW user Macro (https://github.com/Macro914/EDGE-Classic-Scripting-Patches)
+- Heretic: improved Mace attack courtesy of CeeJay
+- YMFM:
+  - Added "Apogee" instrument bank, based on Apogee Sound System and AdPlug instruments
+  - Removed "AdPlug", "WadSmoosh", and "DMXOPL3" instrument banks
+  - Replaced "DMXOPL" instrument bank with one tailored to vanilla/single OPL3 chip limits
+  - Removed ability to load WOPL instrument banks as it was only partially implemented
+- COLMAP.DDF: Colormap entries with no gl_colour, lump, or pack file defined will no longer throw an error
+  - New behavior is to remove all existing colormap entries with the same name
+    - Intent is to be able to define a colormap as "nothing", even if prior entries had a definition
+  - Colormap entries later in the load/parsing order with the same name will still be added
+- Improved level warp cheat behavior with custom mapnames
+  - Previous behavior was to only match a numerical entry with maps named either MAPXX or EXMX
+- Improved handling of gamepads
+  - Automatic detection of analog triggers
+  - User-friendly button names in menus ("A Button" versus "Joy 1", etc)
+  - Menus can now be navigated via gamepad without needing to set explicit bindings
+    - "Menu Navigation" section removed from Key Bindings menu
+  - Added default bindings for gamepads
+- Added configuration files for use with Doom Builder.X, Ultimate Doom Builder, and Eureka
+  - Can be located in the /docs/mapping directory
+
+
+Bugs fixed
+----------
+- Legacy bugfix: Boom generalized sector types were not preserved when saving/loading levels with said sectors
+- Fixed assertion failure when referencing DSDehacked frames past the last frame explicitly defined in the [CODEPTR] section
+- Fixed viewpoint modified by the r_fov CVAR not changing the vertical view slope appropriately
+- Fixed region properties not working properly with a vertex sloped floor that rises above its sector's original floor height
+- Fixed occasional sector glow thing link/unlink errors
+- Fixed AJBSP using self-referencing linedefs that were perfectly vertical or horizontal for partitioning
+- Fixed floor/ceiling rotation not working when using images that have a different width and height
+- Fixed MODEL_ROTATE not being applied to attacks
+- Fixed savegames not preserving the 'is_voodoo' convenience boolean for mobjs, causing issues when loading a game that had them present
+- Fixed berserk and other powerup effects not modifying model colors accordingly (bug introduced by transition to VBOs for model rendering)
+- Fixed crash if player dies while TARGET_JUMP or FRIEND_JUMP weapon specials are active

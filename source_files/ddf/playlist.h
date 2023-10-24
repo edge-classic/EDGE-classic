@@ -41,7 +41,7 @@ typedef enum
 	MUS_SID,
 	MUS_FLAC,
 	MUS_M4P,
-	MUS_VGM,
+	MUS_RAD,
 	MUS_IMF280,
 	MUS_IMF560,
 	MUS_IMF700,

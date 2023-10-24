@@ -16,9 +16,7 @@ Blasphemer (various assets) - Copyright (c) 2021 Contributors to the Blasphemer 
 
 Freedoom (various assets) - Copyright (c) 2001-2019 Contributors to the Freedoom project
 
-YMFM library - Copyright (c) 2021 Aaron Giles
-
-YMFMIDI library - Copyright (c) 2021-2022 Devin Acker
+libRAD MIDI interface (adapted from YMFMIDI) - Copyright (c) 2021-2023 Devin Acker
 
 Mod4Play library - Copyright (c) 2022 Olav Sørensen
 
@@ -77,8 +75,6 @@ EDGE-Classic - Copyright (c) 1999-2023 The EDGE Team
 
 EPI library - Copyright (c) 2002-2023 The EDGE Team
 
-libvgm library - Copyright (c) 2015-2023 ValleyBell, et al
-
 SLADE (IMF->WAV conversion and sky drawing routines) - Copyright (c) 2008 - 2023 Simon Judd
 
 SuperFastHash - Copyright (c) 2004-2010 Paul Hsieh
@@ -120,11 +116,13 @@ Primesynth library - Copyright (c) 2018 mosm
 Public Domain
 ===========================================================================================
 
+dr_wav, dr_mp3, and dr_flac libraries - David Reid
+
 Fraction.hpp - Bisqwit
 
 "GMGSx" soundfont (renamed to default.sf2) - Kenneth Rundt
 
-dr_wav, dr_mp3, and dr_flac libraries - David Reid
+libRAD (Reality Adlib Tracker 2) - Reality Productions
 
 stb_image, stb_image_write, stb_rect_pack and stb_truetype libraries - Sean Barrett
 

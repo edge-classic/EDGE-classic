@@ -27,7 +27,7 @@
 
 abstract_music_c * S_PlayFLACMusic(byte *data, int length, bool looping);
 
-#endif  /* __VGMPLAYER_H__ */
+#endif  /* __FLACPLAYER_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

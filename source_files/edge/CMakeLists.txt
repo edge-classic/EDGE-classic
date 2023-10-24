@@ -88,8 +88,8 @@ set (EDGE_SOURCE_FILES
   s_prime.cc
   s_m4p.cc
   s_opl.cc
+  s_rad.cc
   s_sid.cc
-  s_vgm.cc
   s_wav.cc
   s_flac.cc
   sv_chunk.cc
@@ -129,10 +129,9 @@ set (EDGE_LINK_LIBRARIES
   crsid
   ec_voxelib
   libprimesynth
-  libvgm
+  libRAD
   m4p
   miniz
-  ymfmidi
 )
 
 if (WIN32)
@@ -169,12 +168,11 @@ target_include_directories(edge-classic PRIVATE ../dr_libs)
 target_include_directories(edge-classic PRIVATE ../ec_voxelib)
 target_include_directories(edge-classic PRIVATE ../epi)
 target_include_directories(edge-classic PRIVATE ../libprimesynth)
-target_include_directories(edge-classic PRIVATE ../libvgm)
+target_include_directories(edge-classic PRIVATE ../libRAD)
 target_include_directories(edge-classic PRIVATE ../m4p)
 target_include_directories(edge-classic PRIVATE ../minivorbis)
 target_include_directories(edge-classic PRIVATE ../miniz)
 target_include_directories(edge-classic PRIVATE ../stb)
-target_include_directories(edge-classic PRIVATE ../ymfmidi)
 if(MSVC OR WIN32_CLANG)
   target_include_directories(edge-classic PRIVATE ../sdl2/include)
 endif()

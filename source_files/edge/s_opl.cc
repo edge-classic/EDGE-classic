@@ -38,7 +38,7 @@
 typedef struct BW_MidiRtInterface OPLInterface;
 #include "midi_sequencer_impl.hpp"
 
-#include "ymf_player.h"
+#include "radmidi.h"
 
 OPLPlayer *edge_opl = nullptr;
 
@@ -448,12 +448,6 @@ abstract_music_c * S_PlayOPL(byte *data, int length, bool loop, int type)
 			rate = 0;
 			break;
 	}
-
-	// Ensure OPL register is set correctly for song type
-	if (rate > 0)
-		edge_opl->disableOPL3();
-	else
-		edge_opl->enableOPL3();
 
 	if (!player->LoadTrack(data, length, rate)) //Lobo: quietly log it instead of completely exiting EDGE
 	{

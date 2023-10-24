@@ -41,8 +41,17 @@ int m4p_TestFromData(uint8_t *Data, uint32_t DataLen)
 	}
 	if (DataLen >= 17)
 	{
-		if (strncmp(Data, "Extended Module:", 16) == 0)
-			return FORMAT_XM_MOD;
+		bool is_xm_mod = true;
+		const char *hdrtxt = "Extended Module:";
+		for (int i = 0; i < 16; i++)
+		{
+			if (Data[i] != *hdrtxt++)
+			{
+				is_xm_mod = false;
+				break;
+			}
+		}
+		if (is_xm_mod) return FORMAT_XM_MOD;
 	}
 	if (DataLen >= 1084)
 	{

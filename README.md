@@ -76,7 +76,7 @@ An optional texture pack to enhance the experience can be found [here.](https://
 - Inventory system
 - Autoload folder
 - New Liquid animation (SMMU, SMMU+Swirl and Parallax)
-- Many more music formats (module/tracker music as well as FLAC, most VGM supported chipsets and even C64 SID)
+- Many more music formats (OGG, FLAC, IT/S3M/XM/MOD/RAD Tracker music and even C64 SID!)
 - Optional Dynamic Sound Reverb
 - Optional Pistol Start feature
 - Support for image/spritesheet and TrueType fonts

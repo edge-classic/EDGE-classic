@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE MOD4PLAY Music Player
+//  EDGE RAD Music Player
 //----------------------------------------------------------------------------
 // 
 //  Copyright (c) 2023 - The EDGE Team.
@@ -30,18 +30,23 @@
 #include "s_music.h"
 #include "w_wad.h"
 
-#include "m4p.h"
-
-#define M4P_BUFFER 4096
+#include "opal.h"
+#include "radplay.h"
 
 extern bool dev_stereo;  // FIXME: encapsulation
 extern int  dev_freq;
 
-class m4pplayer_c : public abstract_music_c
+#define RAD_BLOCK_SIZE    4096
+
+// Works better with the RAD code if these are 'global'
+Opal *edge_opal = nullptr;
+RADPlayer *edge_rad = nullptr;
+
+class radplayer_c : public abstract_music_c
 {
 public:
-	 m4pplayer_c();
-	~m4pplayer_c();
+	 radplayer_c();
+	~radplayer_c();
 private:
 
 	enum status_e
@@ -53,6 +58,11 @@ private:
 	bool looping;
 
 	s16_t *mono_buffer;
+
+	int samp_count;
+	int samp_update;
+	int samp_rate;
+	byte *tune;
 
 public:
 	bool OpenMemory(byte *data, int length);
@@ -77,12 +87,12 @@ private:
 
 //----------------------------------------------------------------------------
 
-m4pplayer_c::m4pplayer_c() : status(NOT_LOADED)
+radplayer_c::radplayer_c() : status(NOT_LOADED), tune(nullptr)
 {
-	mono_buffer = new s16_t[M4P_BUFFER * 2];
+	mono_buffer = new s16_t[RAD_BLOCK_SIZE * 2];
 }
 
-m4pplayer_c::~m4pplayer_c()
+radplayer_c::~radplayer_c()
 {
 	Close();
 
@@ -90,8 +100,10 @@ m4pplayer_c::~m4pplayer_c()
 		delete[] mono_buffer;
 }
 
-void m4pplayer_c::PostOpenInit()
+void radplayer_c::PostOpenInit()
 {   
+	samp_count = 0;
+	samp_update = dev_freq / samp_rate;
 	// Loaded, but not playing
 	status = STOPPED;
 }
@@ -108,20 +120,31 @@ static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
 	}
 }
 
-bool m4pplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
+bool radplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 {
 	s16_t *data_buf;
 
 	bool song_done = false;
+	int samples = 0;
 
 	if (!dev_stereo)
 		data_buf = mono_buffer;
 	else
 		data_buf = buf->data_L;
 
-	m4p_GenerateSamples(data_buf, M4P_BUFFER / sizeof(s16_t));
+	for (int i = 0; i < RAD_BLOCK_SIZE; i+=2)
+	{
+		edge_opal->Sample(data_buf+i, data_buf+i+1);
+		samples++;
+		samp_count++;
+		if (samp_count >= samp_update)
+		{
+			samp_count = 0;
+			song_done = edge_rad->Update();
+		}
+	}
 
-	buf->length = M4P_BUFFER / 2;
+	buf->length = samples;
 
 	if (!dev_stereo)
 		ConvertToMono(buf->data_L, mono_buffer, buf->length);
@@ -130,30 +153,50 @@ bool m4pplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 	{
 		if (! looping)
 			return false;
-		m4p_Stop();
-		m4p_PlaySong();
 		return true;
 	}
 
     return true;
 }
 
-bool m4pplayer_c::OpenMemory(byte *data, int length)
+bool radplayer_c::OpenMemory(byte *data, int length)
 {
 	SYS_ASSERT(data);
 
-	if (!m4p_LoadFromData(data, length, dev_freq, M4P_BUFFER))
+	const char *err = RADValidate(data, length);
+
+	if (err)
 	{
-		I_Warning("M4P: failure to load song!\n");
+		I_Warning("RAD: Cannot play tune: %s\n", err);
 		return false;
 	}
+
+	edge_opal = new Opal(dev_freq);
+	edge_rad = new RADPlayer;
+	edge_rad->Init(data,  [](void *arg, uint16_t reg_num, uint8_t val) {
+        edge_opal->Port(reg_num, val); }, 0);
+
+	samp_rate = edge_rad->GetHertz();
+
+	if (samp_rate <= 0)
+	{
+		I_Warning("RAD: failure to load song!\n");
+		delete edge_rad;
+		edge_rad = nullptr;
+		delete edge_opal;
+		edge_opal = nullptr;
+		return false;
+	}
+
+	// The player needs to free this afterwards
+	tune = data;
 
 	PostOpenInit();
 	return true;
 }
 
 
-void m4pplayer_c::Close()
+void radplayer_c::Close()
 {
 	if (status == NOT_LOADED)
 		return;
@@ -162,14 +205,17 @@ void m4pplayer_c::Close()
 	if (status != STOPPED)
 		Stop();
 		
-	m4p_Close();
-	m4p_FreeSong();
+	delete edge_rad;
+	edge_rad = nullptr;
+	delete edge_opal;
+	edge_opal = nullptr;
+	delete[] tune;
 
 	status = NOT_LOADED;
 }
 
 
-void m4pplayer_c::Pause()
+void radplayer_c::Pause()
 {
 	if (status != PLAYING)
 		return;
@@ -178,7 +224,7 @@ void m4pplayer_c::Pause()
 }
 
 
-void m4pplayer_c::Resume()
+void radplayer_c::Resume()
 {
 	if (status != PAUSED)
 		return;
@@ -187,38 +233,36 @@ void m4pplayer_c::Resume()
 }
 
 
-void m4pplayer_c::Play(bool loop)
+void radplayer_c::Play(bool loop)
 {
     if (status != NOT_LOADED && status != STOPPED) return;
 
 	status = PLAYING;
 	looping = loop;
 
-	m4p_PlaySong();
-
 	// Load up initial buffer data
 	Ticker();
 }
 
 
-void m4pplayer_c::Stop()
+void radplayer_c::Stop()
 {
 	if (status != PLAYING && status != PAUSED)
 		return;
 
 	S_QueueStop();
 
-	m4p_Stop();
+	edge_rad->Stop();
 
 	status = STOPPED;
 }
 
 
-void m4pplayer_c::Ticker()
+void radplayer_c::Ticker()
 {
 	while (status == PLAYING && !var_pc_speaker_mode)
 	{
-		epi::sound_data_c *buf = S_QueueGetFreeBuffer(M4P_BUFFER, 
+		epi::sound_data_c *buf = S_QueueGetFreeBuffer(RAD_BLOCK_SIZE, 
 				(dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 
 		if (! buf)
@@ -247,9 +291,9 @@ void m4pplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayM4PMusic(byte *data, int length, bool looping)
+abstract_music_c * S_PlayRADMusic(byte *data, int length, bool looping)
 {
-	m4pplayer_c *player = new m4pplayer_c();
+	radplayer_c *player = new radplayer_c();
 
 	if (! player->OpenMemory(data, length))
 	{
@@ -257,8 +301,6 @@ abstract_music_c * S_PlayM4PMusic(byte *data, int length, bool looping)
 		delete player;
 		return NULL;
 	}
-
-	delete[] data;
 
 	player->Play(looping);
 

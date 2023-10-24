@@ -92,14 +92,22 @@ sound_format_e Sound_DetectFormat(byte *data, int song_len)
 			return FMT_MIDI;
 	}
 
-	// Assume gzip format is VGZ and will be handled
-	// by the VGM library
-	if ((data[0] == 0x1f && data[1] == 0x8b) || (data[0] == 'V' && data[1] == 'g' &&
-		data[2] == 'm'  && data[3] == ' '))
+	// Reality Adlib Tracker 2
+    if (song_len > 16)
 	{
-		return FMT_VGM;
+		bool is_rad = true;
+		const char *hdrtxt = "RAD by REALiTY!!";
+		for (int i = 0; i < 16; i++)
+		{
+			if (data[i] != *hdrtxt++)
+			{
+				is_rad = false;
+				break;
+			}
+		}
+		if (is_rad) return FMT_RAD;
 	}
-
+	
 	// Moving on to more specialized or less reliable detections
 
 	if (m4p_TestFromData(data, song_len))
@@ -158,8 +166,8 @@ sound_format_e Sound_FilenameToFormat(const std::filesystem::path& filename)
 	if (ext == ".mod" || ext == ".s3m" || ext == ".xm" || ext == ".it")
 		return FMT_M4P;
 
-	if (ext == ".vgm" || ext == ".vgz")
-		return FMT_VGM;
+	if (ext == ".rad")
+		return FMT_RAD;
 
 	// Not sure if these will ever be encountered in the wild, but according to the VGMPF Wiki
 	// they are valid DMX file extensions

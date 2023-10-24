@@ -33,7 +33,7 @@ typedef enum
 	FMT_MP3,
 	FMT_M4P,
 	FMT_SID,
-	FMT_VGM,
+	FMT_RAD,
 	FMT_MUS,
 	FMT_MIDI,
 	FMT_IMF, // Used with DDFPLAY; not in auto-detection

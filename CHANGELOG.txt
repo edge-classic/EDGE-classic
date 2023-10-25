@@ -20,3 +20,4 @@ General Improvements/Changes
 
 Bugs fixed
 ----------
+- Fixed UMAPINFO entries with no sky defined and past the range of stock levels causing a CTD

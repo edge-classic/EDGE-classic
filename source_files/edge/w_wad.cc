@@ -1901,6 +1901,28 @@ void W_ReadUMAPINFOLumps(void)
 			if (!good_epi)
 				I_Error("MAPINFO: No valid episode found for level %s\n", temp_level->name.c_str());
 		}
+		// Validate that important things aren't null/empty (right now it's just the sky until I catch something else - Dasho)
+		if (temp_level->sky.empty())
+		{
+			// Search for first prior mapdef with a sky and fill it in
+			size_t entry = mapdefs.GetSize() - 1;
+			for (entry; entry > 0; entry--)
+			{
+				if (mapdefs[entry] == temp_level)
+					break;
+			}
+			entry--;
+			for (entry; entry > 0; entry--)
+			{
+				if (!mapdefs[entry]->sky.empty())
+				{
+					temp_level->sky = mapdefs[entry]->sky;
+					break;
+				}
+			}
+			if (temp_level->sky.empty())
+				I_Error("MAPINFO: No sky defined for %s!\n", temp_level->name.c_str());
+		}
 	}
 
 	FreeMapList();

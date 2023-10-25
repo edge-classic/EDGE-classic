@@ -1363,29 +1363,6 @@ void W_ReadUMAPINFOLumps(void)
 			epi::str_upper(temp_level->nextmapname);
 		}
 
-/*
-		if(Maps.maps[i].interbackdrop[0])
-		{
-			const image_c *rim;
-
-			rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Flat, ILF_Null);
-
-			if (! rim) //no flat
-			{
-				rim = W_ImageLookup(M_Strupr(Maps.maps[i].interbackdrop), INS_Graphic, ILF_Null);
-				
-				if (! rim) // no graphic
-					temp_level->f_end.text_flat.Set("FLOOR4_8"); //should not happen
-				else //background is a graphic
-					temp_level->f_end.text_back.Set(M_Strupr(Maps.maps[i].interbackdrop));
-			}
-			else //background is a flat
-			{
-				temp_level->f_end.text_flat.Set(M_Strupr(Maps.maps[i].interbackdrop));
-			}
-		}
-*/			
-
 		if(Maps.maps[i].intertext)
 		{
 			if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP07")) 
@@ -1901,7 +1878,7 @@ void W_ReadUMAPINFOLumps(void)
 			if (!good_epi)
 				I_Error("MAPINFO: No valid episode found for level %s\n", temp_level->name.c_str());
 		}
-		// Validate that important things aren't null/empty (right now it's just the sky until I catch something else - Dasho)
+		// Validate important things
 		if (temp_level->sky.empty())
 		{
 			// Search for first prior mapdef with a sky and fill it in
@@ -1922,6 +1899,16 @@ void W_ReadUMAPINFOLumps(void)
 			}
 			if (temp_level->sky.empty())
 				I_Error("MAPINFO: No sky defined for %s!\n", temp_level->name.c_str());
+		}
+		// Clear pre_text for this map if it is an episode's starting map
+		for (int g=gamedefs.GetSize()-1; g >= 0; g--)
+		{
+			if (epi::case_cmp(gamedefs[g]->firstmap, temp_level->name) == 0)
+			{
+				temp_level->f_pre.text.clear();
+				temp_level->f_pre.text_flat.clear();
+				break;
+			}
 		}
 	}
 

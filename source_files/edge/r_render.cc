@@ -1568,8 +1568,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 
 	if (! other)
 	{
-		if (! sd->middle.image && ! debug_hom.d &&
-			sec_fc != RGB_NO_VALUE)
+		if (! sd->middle.image && ! debug_hom.d)
 			return;
 
 		AddWallTile(seg, dfloor,

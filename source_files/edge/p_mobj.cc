@@ -915,8 +915,7 @@ static void P_XYMovement(mobj_t * mo, const region_properties_t *props, bool ext
 						if (tempspecial->effectobject)
 						{
 							DebrisThing = tempspecial->effectobject;
-							//P_SpawnBlood(mo->x, mo->y, mo->z, 0, mo->angle + ANG180, DebrisThing);
-							P_SpawnDebris(mo->x, mo->y, mo->z, 0, mo->angle + ANG180, DebrisThing);
+							P_SpawnDebris(mo->x, mo->y, mo->z, mo->angle + ANG180, DebrisThing);
 						}
 					}
 				}
@@ -1920,64 +1919,23 @@ void P_RunMobjThinkers(bool extra_tic)
 //
 // P_SpawnDebris
 //
-void P_SpawnDebris(float x, float y, float z, float damage,
+void P_SpawnDebris(float x, float y, float z,
 				  angle_t angle, const mobjtype_c * debris)
 {
+	//if (!level_flags.have_extra && (splash->extendedflags & EF_EXTRA)) return;
+	//if (! (splash->extendedflags & EF_EXTRA)) return; //Optional extra
 	mobj_t *th;
 
-	//angle += ANG180;
-	angle += (angle_t) (P_RandomNegPos() * (int)(ANG1 / 2));
-
-	z += (float)(P_RandomNegPos() / 64.0f);
-
 	th = P_MobjCreateObject(x, y, z, debris);
-
 	P_SetMobjDirAndSpeed(th, angle, 2.0f, 0.25f);
 
 	th->tics -= P_Random() & 3;
 
 	if (th->tics < 1)
 		th->tics = 1;
-/*
-	if (damage <= 12 && th->state && th->next_state)
-		P_SetMobjState(th, th->next_state - states);
 
-	if (damage <= 8 && th->state && th->next_state)
-		P_SetMobjState(th, th->next_state - states);
-*/	
 }
 
-
-//
-// P_SpawnSplash
-//
-void P_SpawnSplash(float x, float y, float z, const mobjtype_c * splash, angle_t angle)
-{
-	if (!level_flags.have_extra && (splash->extendedflags & EF_EXTRA))
-		return;
-	
-	if (! (splash->extendedflags & EF_EXTRA)) return; //Optional extra
-
-	mobj_t *th;
-
-	z += (float) P_RandomNegPos() / 16.0f;
-
-	// -ACB- 1998/08/06 Specials table for non-negotiables....
-	th = P_MobjCreateObject(x, y, z, splash);
-
-	// -AJA- 1999/07/14: DDF-itised.
-	//th->mom.z = splash->float_speed;
-	angle += (angle_t) (M_RandomNegPos() * (int)(ANG1 / 2));
-
-	P_SetMobjDirAndSpeed(th, angle, 2.0f, 0.25f);
-
-	//th->angle = angle;
-
-	th->tics -= M_Random() & 3;
-
-	if (th->tics < 1)
-		th->tics = 1;
-}
 
 //
 // P_SpawnPuff
@@ -2110,8 +2068,10 @@ bool P_HitLiquidFloor(mobj_t * thing)
 	{
 		if(current_flatdef->impactobject)
 		{
-			int tempRandom = M_RandomNegPos() % 8;
-			P_SpawnSplash(thing->x + tempRandom, thing->y + tempRandom, thing->z + tempRandom, current_flatdef->impactobject, thing->angle);
+			angle_t angle = thing->angle;
+			angle += (angle_t) (P_RandomNegPos() * (int)(ANG1 / 2));
+
+			P_SpawnDebris(thing->x, thing->y, thing->z, angle, current_flatdef->impactobject);
 		
 			S_StartFX(current_flatdef->footstep, P_MobjGetSfxCategory(thing), thing);
 		}

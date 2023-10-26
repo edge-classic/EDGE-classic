@@ -2180,17 +2180,17 @@ static void M_OptionSetResolution(int keypressed, cvar_c *cvar)
 	{
 		if (new_scrmode.display_mode > scrmode_c::SCR_WINDOW)
 		{
-			toggle_full_mode.depth = new_scrmode.depth;
-			toggle_full_mode.height = new_scrmode.height;
-			toggle_full_mode.width = new_scrmode.width;
-			toggle_full_mode.display_mode = new_scrmode.display_mode;
+			tf_screendepth = new_scrmode.depth;
+			tf_screenheight = new_scrmode.height;
+			tf_screenwidth = new_scrmode.width;
+			tf_displaymode = new_scrmode.display_mode;
 		}
 		else
 		{
-			toggle_win_mode.depth = new_scrmode.depth;
-			toggle_win_mode.height = new_scrmode.height;
-			toggle_win_mode.width = new_scrmode.width;
-			toggle_win_mode.display_mode = new_scrmode.display_mode;
+			tw_screendepth = new_scrmode.depth;
+			tw_screenheight = new_scrmode.height;
+			tw_screenwidth = new_scrmode.width;
+			tw_displaymode = new_scrmode.display_mode;
 		}
 		R_SoftInitResolution();
 	}

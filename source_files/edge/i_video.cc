@@ -210,17 +210,20 @@ void I_StartupGraphics(void)
 		}
 	}
 
-	// Set the default window toggle mode to the largest non-native res
-	for (int i = 0; i < screen_modes.size(); i++)
+	// If needed, set the default window toggle mode to the largest non-native res
+	if (tw_displaymode.d == scrmode_c::SCR_INVALID)
 	{
-		scrmode_c *check = screen_modes[i];
-		if (check->display_mode == scrmode_c::SCR_WINDOW)
+		for (int i = 0; i < screen_modes.size(); i++)
 		{
-			toggle_win_mode.display_mode = scrmode_c::SCR_WINDOW;
-			toggle_win_mode.height = check->height;
-			toggle_win_mode.width = check->width;
-			toggle_win_mode.depth = check->depth;
-			break;
+			scrmode_c *check = screen_modes[i];
+			if (check->display_mode == scrmode_c::SCR_WINDOW)
+			{
+				tw_displaymode = scrmode_c::SCR_WINDOW;
+				tw_screenheight = check->height;
+				tw_screenwidth = check->width;
+				tw_screendepth = check->depth;
+				break;
+			}
 		}
 	}
 
@@ -230,11 +233,14 @@ void I_StartupGraphics(void)
     borderless_mode.height = info.h;
     borderless_mode.depth = SDL_BITSPERPIXEL(info.format);
 
-	// Also make the default fullscreen toggle mode borderless
-	toggle_full_mode.display_mode = scrmode_c::SCR_BORDERLESS;
-    toggle_full_mode.width = info.w;
-    toggle_full_mode.height = info.h;
-    toggle_full_mode.depth = SDL_BITSPERPIXEL(info.format);
+	// If needed, also make the default fullscreen toggle mode borderless
+	if (tf_displaymode.d == scrmode_c::SCR_INVALID)
+	{
+		tf_displaymode = scrmode_c::SCR_BORDERLESS;
+		tf_screenwidth = info.w;
+		tf_screenheight = info.h;
+		tf_screendepth = (int)SDL_BITSPERPIXEL(info.format);
+	}
 
 	I_Printf("I_StartupGraphics: initialisation OK\n");
 }
@@ -266,24 +272,24 @@ static bool I_CreateWindow(scrmode_c *mode)
 
 	if (mode->display_mode == scrmode_c::SCR_WINDOW)
 	{
-		toggle_win_mode.depth = mode->depth;
-		toggle_win_mode.height = mode->height;
-		toggle_win_mode.width = mode->width;
-		toggle_win_mode.display_mode = scrmode_c::SCR_WINDOW;
+		tw_screendepth = mode->depth;
+		tw_screenheight = mode->height;
+		tw_screenwidth = mode->width;
+		tw_displaymode = scrmode_c::SCR_WINDOW;
 	}
 	else if (mode->display_mode == scrmode_c::SCR_FULLSCREEN)
 	{
-		toggle_full_mode.depth = mode->depth;
-		toggle_full_mode.height = mode->height;
-		toggle_full_mode.width = mode->width;
-		toggle_full_mode.display_mode = scrmode_c::SCR_FULLSCREEN;
+		tf_screendepth = mode->depth;
+		tf_screenheight = mode->height;
+		tf_screenwidth = mode->width;
+		tf_displaymode = scrmode_c::SCR_FULLSCREEN;
 	}
 	else
 	{
-		toggle_full_mode.depth = borderless_mode.depth;
-		toggle_full_mode.height = borderless_mode.height;
-		toggle_full_mode.width = borderless_mode.width;
-		toggle_full_mode.display_mode = scrmode_c::SCR_BORDERLESS;
+		tf_screendepth = borderless_mode.depth;
+		tf_screenheight = borderless_mode.height;
+		tf_screenwidth = borderless_mode.width;
+		tf_displaymode = scrmode_c::SCR_BORDERLESS;
 	}
 
 	if (SDL_GL_CreateContext(my_vis) == NULL)

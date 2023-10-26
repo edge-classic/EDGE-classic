@@ -48,8 +48,14 @@ int SCREENBITS;
 int DISPLAYMODE;
 
 scrmode_c borderless_mode;
-scrmode_c toggle_full_mode;
-scrmode_c toggle_win_mode;
+DEF_CVAR(tf_screenwidth, "0", CVAR_ARCHIVE)
+DEF_CVAR(tf_screenheight, "0", CVAR_ARCHIVE)
+DEF_CVAR(tf_screendepth, "0", CVAR_ARCHIVE)
+DEF_CVAR(tf_displaymode, "-1", CVAR_ARCHIVE)
+DEF_CVAR(tw_screenwidth, "0", CVAR_ARCHIVE)
+DEF_CVAR(tw_screenheight, "0", CVAR_ARCHIVE)
+DEF_CVAR(tw_screendepth, "0", CVAR_ARCHIVE)
+DEF_CVAR(tw_displaymode, "-1", CVAR_ARCHIVE)
 
 std::vector<scrmode_c *> screen_modes;
 
@@ -224,10 +230,23 @@ bool R_IncrementResolution(scrmode_c *mode, int what, int dir)
 
 void R_ToggleFullscreen(void)
 {
+	scrmode_c toggle;
 	if (DISPLAYMODE > scrmode_c::SCR_WINDOW)
-		R_ChangeResolution(&toggle_win_mode);
+	{
+		toggle.depth = tw_screendepth.d;
+		toggle.height = tw_screenheight.d;
+		toggle.width = tw_screenwidth.d;
+		toggle.display_mode = scrmode_c::SCR_WINDOW;
+		R_ChangeResolution(&toggle);
+	}
 	else
-		R_ChangeResolution(&toggle_full_mode);
+	{
+		toggle.depth = tf_screendepth.d;
+		toggle.height = tf_screenheight.d;
+		toggle.width = tf_screenwidth.d;
+		toggle.display_mode = tf_displaymode.d;
+		R_ChangeResolution(&toggle);
+	}
 	R_SoftInitResolution();
 }
 

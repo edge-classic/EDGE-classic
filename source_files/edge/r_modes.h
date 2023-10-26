@@ -48,6 +48,7 @@ public:
 
 	enum
 	{
+		SCR_INVALID = -1,
 		SCR_WINDOW,
 		SCR_FULLSCREEN,
 		SCR_BORDERLESS
@@ -77,9 +78,16 @@ extern int SCREENHEIGHT;
 extern int SCREENBITS;
 extern int DISPLAYMODE;
 extern scrmode_c borderless_mode;
-extern scrmode_c toggle_full_mode;
-extern scrmode_c toggle_win_mode;
 extern std::vector<scrmode_c *> screen_modes;
+// CVARs related to Alt+Enter toggling
+extern cvar_c tf_screenwidth;
+extern cvar_c tf_screenheight;
+extern cvar_c tf_screendepth;
+extern cvar_c tf_displaymode;
+extern cvar_c tw_screenwidth;
+extern cvar_c tw_screenheight;
+extern cvar_c tw_screendepth;
+extern cvar_c tw_displaymode;
 
 // Exported Func
 bool R_DepthIsEquivalent(int depth1, int depth2);

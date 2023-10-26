@@ -605,7 +605,8 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 			break;
 
 		case SDL_MOUSEWHEEL:
-			HandleMouseWheelEvent(sdl_ev);
+			if (!need_mouse_recapture)
+				HandleMouseWheelEvent(sdl_ev);
 			break;
 		
 		case SDL_CONTROLLERBUTTONDOWN:

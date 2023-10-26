@@ -1249,52 +1249,7 @@ void W_ReadUMAPINFOLumps(void)
 		L_WriteDebug("parsing UMAPINFO lump\n");
 		Parse_UMAPINFO(W_LoadString(p));
 	}
-	if (p == -1)
-	{
-		p = W_CheckNumForName("DMAPINFO");
-		if (p > -1)
-		{
-			if (W_CheckFileNumForName("DMAPINFO") == W_CheckFileNumForName("DDFLEVL"))
-				return;
-			I_Warning("No UMAPINFO found; falling back to DMAPINFO. Some features may not work as intended!\n");
-			Parse_DMAPINFO(W_LoadString(p));
-		}
-	}
-	if (p == -1)
-	{
-		p = W_CheckNumForName("RMAPINFO");
-		if (p > -1)
-		{
-			if (W_CheckFileNumForName("RMAPINFO") == W_CheckFileNumForName("DDFLEVL"))
-				return;
-			I_Warning("No UMAPINFO found; falling back to RMAPINFO. Some features may not work as intended!\n");
-			Parse_MAPINFO(W_LoadString(p));
-		}
-		else
-		{
-			p = W_CheckNumForName("MAPINFO");
-			if (p > -1)
-			{
-				if (W_CheckFileNumForName("MAPINFO") == W_CheckFileNumForName("DDFLEVL"))
-					return;
-				I_Warning("No UMAPINFO found; falling back to MAPINFO. Some features may not work as intended!\n");
-				Parse_MAPINFO(W_LoadString(p));
-			}
-		}
-	}
-	if (p == -1)
-	{
-		p = W_CheckNumForName("ZMAPINFO");
-		if (p > -1)
-		{
-			if (W_CheckFileNumForName("ZMAPINFO") == W_CheckFileNumForName("DDFLEVL"))
-				return;
-			I_Warning("No UMAPINFO found; falling back to ZMAPINFO. Some features may not work as intended!\n");
-			Parse_ZMAPINFO(W_LoadString(p));
-		}
-	}
-
-	if (p == -1) //no *MAPINFO found
+	if (p == -1) //no UMAPINFO found
 		return;
 	
 	unsigned int i;
@@ -1302,6 +1257,28 @@ void W_ReadUMAPINFOLumps(void)
 	{
 		std::string mapname = Maps.maps[i].mapname;
 		epi::str_upper(mapname);
+		// Check that the name adheres to either EXMX or MAPXX format per the standard
+		if (epi::prefix_case_cmp(mapname, "MAP") == 0)
+		{
+			for (auto c : mapname.substr(3))
+			{
+				if (!isdigit(c))
+					I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
+			}
+		}
+		else if (mapname.size() > 3 && mapname[0] == 'E' && mapname[2] == 'M')
+		{
+				if (!isdigit(mapname[1]))
+					I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
+				for (auto c : mapname.substr(3))
+				{
+					if (!isdigit(c))
+						I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
+				}
+		}
+		else
+			I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
+
 		mapdef_c *temp_level = mapdefs.Lookup(mapname.c_str());
 		if (!temp_level)
 		{
@@ -1625,11 +1602,6 @@ void W_ReadUMAPINFOLumps(void)
 			temp_level->nextmapname.clear();
 		}
 
-		if(Maps.maps[i].resetplayer)
-		{
-			temp_level->force_on |= MPF_ResetPlayer;
-		}
-
 		if(Maps.maps[i].partime > 0)
 			temp_level->partime = Maps.maps[i].partime;
 		
@@ -1658,167 +1630,6 @@ void W_ReadUMAPINFOLumps(void)
 				}
 			}
 			RAD_ReadScript(ba_rts, "UMAPINFO");
-		}
-
-		// Explicit "map07special" that some MAPINFO types use; this seems to be in addition to anything that might already exist
-		if (Maps.maps[i].map07special)
-		{
-			std::string m7_rts = "// MAPINFO SCRIPTS\n\n";
-			m7_rts.append(epi::STR_Format("START_MAP %s\n", Maps.maps[i].mapname));
-			for (int m = 0; m < mobjtypes.GetSize(); m++)
-			{
-				if (mobjtypes[m]->number == 67)
-				{
-					m7_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
-					m7_rts.append(epi::STR_Format("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
-					m7_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 38 666\n"));
-					m7_rts.append("  END_RADIUS_TRIGGER\n");
-				}
-				else if (mobjtypes[m]->number == 68)
-				{
-					m7_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
-					m7_rts.append(epi::STR_Format("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
-					m7_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 30 667\n"));
-					m7_rts.append("  END_RADIUS_TRIGGER\n");
-				}
-			}
-			m7_rts.append("END_MAP\n\n");
-			RAD_ReadScript(m7_rts, "MAPINFO");
-		}
-
-		// Various BossAction equivalents from MAPINFO/ZMAPINFO
-		// This is done as if/else if because only one should be present at any given time according to the spec
-		if (Maps.maps[i].baronspecial)
-		{
-			if (Maps.maps[i].specialaction) // This must be present; there is no assumption that the original IWAD actions are used
-			{
-				std::string spc_rts = "// MAPINFO SCRIPTS\n\n";
-				spc_rts.append(epi::STR_Format("START_MAP %s\n", Maps.maps[i].mapname));
-				spc_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
-				for (int m = 0; m < mobjtypes.GetSize(); m++)
-				{
-					if (mobjtypes[m]->number == 3003)
-					{
-						spc_rts.append(epi::STR_Format("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
-						if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_exitlevel") == 0)
-						{
-							spc_rts.append(epi::STR_Format("    EXIT_LEVEL 5\n"));
-							spc_rts.append("  END_RADIUS_TRIGGER\n");
-							spc_rts.append("END_MAP\n\n");
-						}
-						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_opendoor") == 0)
-						{
-							spc_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 109 666\n"));
-							spc_rts.append("  END_RADIUS_TRIGGER\n");
-							spc_rts.append("END_MAP\n\n");
-						}
-						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_lowerfloor") == 0)
-						{
-							spc_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 219 666\n"));
-							spc_rts.append("  END_RADIUS_TRIGGER\n");
-							spc_rts.append("END_MAP\n\n");
-						}
-						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_killmonsters") == 0)
-						{
-							spc_rts.append(epi::STR_Format("    DAMAGE_MONSTERS ANY 999999\n"));
-							spc_rts.append("  END_RADIUS_TRIGGER\n");
-							spc_rts.append("END_MAP\n\n");
-						}
-						else // unknown special action
-							spc_rts.clear();
-					}
-				}
-				if (!spc_rts.empty())
-					RAD_ReadScript(spc_rts, "MAPINFO");
-			}
-		}
-		else if (Maps.maps[i].cyberdemonspecial)
-		{
-			if (Maps.maps[i].specialaction) // This must be present; there is no assumption that the original IWAD actions are used
-			{
-				std::string spc_rts = "// MAPINFO SCRIPTS\n\n";
-				spc_rts.append(epi::STR_Format("START_MAP %s\n", Maps.maps[i].mapname));
-				spc_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
-				for (int m = 0; m < mobjtypes.GetSize(); m++)
-				{
-					if (mobjtypes[m]->number == 16)
-					{
-						spc_rts.append(epi::STR_Format("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
-						if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_exitlevel") == 0)
-						{
-							spc_rts.append(epi::STR_Format("    EXIT_LEVEL 5\n"));
-							spc_rts.append("  END_RADIUS_TRIGGER\n");
-							spc_rts.append("END_MAP\n\n");
-						}
-						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_opendoor") == 0)
-						{
-							spc_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 109 666\n"));
-							spc_rts.append("  END_RADIUS_TRIGGER\n");
-							spc_rts.append("END_MAP\n\n");
-						}
-						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_lowerfloor") == 0)
-						{
-							spc_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 219 666\n"));
-							spc_rts.append("  END_RADIUS_TRIGGER\n");
-							spc_rts.append("END_MAP\n\n");
-						}
-						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_killmonsters") == 0)
-						{
-							spc_rts.append(epi::STR_Format("    DAMAGE_MONSTERS ANY 999999\n"));
-							spc_rts.append("  END_RADIUS_TRIGGER\n");
-							spc_rts.append("END_MAP\n\n");
-						}
-						else // unknown special action
-							spc_rts.clear();
-					}
-				}
-				if (!spc_rts.empty())
-					RAD_ReadScript(spc_rts, "MAPINFO");
-			}
-		}
-		else if (Maps.maps[i].spidermastermindspecial)
-		{
-			if (Maps.maps[i].specialaction) // This must be present; there is no assumption that the original IWAD actions are used
-			{
-				std::string spc_rts = "// MAPINFO SCRIPTS\n\n";
-				spc_rts.append(epi::STR_Format("START_MAP %s\n", Maps.maps[i].mapname));
-				spc_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
-				for (int m = 0; m < mobjtypes.GetSize(); m++)
-				{
-					if (mobjtypes[m]->number == 7)
-					{
-						spc_rts.append(epi::STR_Format("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
-						if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_exitlevel") == 0)
-						{
-							spc_rts.append(epi::STR_Format("    EXIT_LEVEL 5\n"));
-							spc_rts.append("  END_RADIUS_TRIGGER\n");
-							spc_rts.append("END_MAP\n\n");
-						}
-						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_opendoor") == 0)
-						{
-							spc_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 109 666\n"));
-							spc_rts.append("  END_RADIUS_TRIGGER\n");
-							spc_rts.append("END_MAP\n\n");
-						}
-						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_lowerfloor") == 0)
-						{
-							spc_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE 219 666\n"));
-							spc_rts.append("  END_RADIUS_TRIGGER\n");
-							spc_rts.append("END_MAP\n\n");
-						}
-						else if (epi::case_cmp(Maps.maps[i].specialaction, "specialaction_killmonsters") == 0)
-						{
-							spc_rts.append(epi::STR_Format("    DAMAGE_MONSTERS ANY 999999\n"));
-							spc_rts.append("  END_RADIUS_TRIGGER\n");
-							spc_rts.append("END_MAP\n\n");
-						}
-						else // unknown special action
-							spc_rts.clear();
-					}
-				}
-				if (!spc_rts.empty())
-					RAD_ReadScript(spc_rts, "MAPINFO");
-			}
 		}
 
 		// If a TEMPEPI gamedef had to be created, grab some details from the 
@@ -1876,29 +1687,33 @@ void W_ReadUMAPINFOLumps(void)
 				}
 			}
 			if (!good_epi)
-				I_Error("MAPINFO: No valid episode found for level %s\n", temp_level->name.c_str());
+				I_Error("UMAPINFO: No valid episode found for level %s\n", temp_level->name.c_str());
 		}
 		// Validate important things
 		if (temp_level->sky.empty())
 		{
-			// Search for first prior mapdef with a sky and fill it in
-			size_t entry = mapdefs.GetSize() - 1;
-			for (entry; entry > 0; entry--)
+			if (epi::prefix_case_cmp(temp_level->name, "MAP") == 0)
 			{
-				if (mapdefs[entry] == temp_level)
-					break;
+				int levnum = atoi(temp_level->name.substr(3).c_str());
+				if (levnum < 12)
+					temp_level->sky = "SKY1";
+				else if (levnum < 21)
+					temp_level->sky = "SKY2";
+				else
+					temp_level->sky = "SKY3";
 			}
-			entry--;
-			for (entry; entry > 0; entry--)
+			else
 			{
-				if (!mapdefs[entry]->sky.empty())
-				{
-					temp_level->sky = mapdefs[entry]->sky;
-					break;
-				}
+				int epnum = atoi(temp_level->name.substr(1,1).c_str());
+				if (epnum == 1)
+					temp_level->sky = "SKY1";
+				else if (epnum == 2)
+					temp_level->sky = "SKY2";
+				else if (epnum == 3)
+					temp_level->sky = "SKY3";
+				else
+					temp_level->sky = "SKY4";
 			}
-			if (temp_level->sky.empty())
-				I_Error("MAPINFO: No sky defined for %s!\n", temp_level->name.c_str());
 		}
 		// Clear pre_text for this map if it is an episode's starting map
 		for (int g=gamedefs.GetSize()-1; g >= 0; g--)

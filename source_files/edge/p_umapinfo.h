@@ -57,11 +57,6 @@ struct MapEntry
 	int docast;
 	int dobunny;
 	int endgame;
-	bool resetplayer = false;
-	bool map07special = false;
-	bool baronspecial = false;
-	bool cyberdemonspecial = false;
-	bool spidermastermindspecial = false;
 	char *specialaction;
 
 	struct BossAction *bossactions;
@@ -76,9 +71,6 @@ struct MapList
 extern struct MapList Maps;
 
 void Parse_UMAPINFO(const std::string& buffer);
-void Parse_DMAPINFO(const std::string& buffer);
-void Parse_MAPINFO(const std::string& buffer);
-void Parse_ZMAPINFO(const std::string& buffer);
 
 void FreeMapList();
 

@@ -89,7 +89,6 @@ void W_ShowFiles();
 
 void W_ProcessMultipleFiles();
 size_t W_AddPending(std::filesystem::path file, filekind_e kind);
-int W_CheckDDFLumpName(const char *name);
 void ProcessFile(data_file_c *df);
 
 epi::file_c * W_OpenPackFile(const std::string& name);

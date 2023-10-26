@@ -1,10 +1,4 @@
 ===========================================================================================
-BSD 2-Clause License
-===========================================================================================
-
-miniz library (gzip support) - Copyright (c) 2015 Wojciech Adam Koszek
-
-===========================================================================================
 BSD 3-Clause License
 ===========================================================================================
 
@@ -121,7 +115,7 @@ dr_wav, dr_mp3, and dr_flac libraries - David Reid
 
 Fraction.hpp - Bisqwit
 
-"GMGSx" soundfont (renamed to default.sf2) - Kenneth Rundt
+"GMGSx" soundfont (renamed to Default.sf2) - Kenneth Rundt
 
 libRAD (Reality Adlib Tracker 2) - Reality Productions
 

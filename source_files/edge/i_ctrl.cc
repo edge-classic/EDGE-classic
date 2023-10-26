@@ -598,6 +598,7 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 			{
 				I_GrabCursor(true);
 				need_mouse_recapture = false;
+				break;
 			}
 			HandleMouseButtonEvent(sdl_ev);
 #endif

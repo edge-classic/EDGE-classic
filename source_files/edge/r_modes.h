@@ -77,13 +77,15 @@ extern int SCREENHEIGHT;
 extern int SCREENBITS;
 extern int DISPLAYMODE;
 extern scrmode_c borderless_mode;
+extern scrmode_c toggle_full_mode;
+extern scrmode_c toggle_win_mode;
+extern std::vector<scrmode_c *> screen_modes;
 
 // Exported Func
 bool R_DepthIsEquivalent(int depth1, int depth2);
 
 void R_AddResolution(scrmode_c *mode);
 void R_DumpResList(void);
-scrmode_c *R_FindResolution(int w, int h, int depth, bool full);
 
 typedef enum
 {
@@ -98,6 +100,8 @@ bool R_IncrementResolution(scrmode_c *mode, int what, int dir);
 // either the size, depth or fullscreen/windowed mode.  Returns
 // true on succses.  If no such resolution exists (whether or
 // not the given mode exists) then false is returned.
+
+void R_ToggleFullscreen(void);
 
 void R_InitialResolution(void);
 bool R_ChangeResolution(scrmode_c *mode); 

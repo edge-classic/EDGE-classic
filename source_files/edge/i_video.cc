@@ -191,7 +191,7 @@ void I_StartupGraphics(void)
 		test_mode.width  = possible_mode.w;
 		test_mode.height = possible_mode.h;
 		test_mode.depth  = SDL_BITSPERPIXEL(possible_mode.format);
-		test_mode.display_mode = test_mode.SCR_FULLSCREEN;
+		test_mode.display_mode = scrmode_c::SCR_FULLSCREEN;
 
 		if ((test_mode.width & 15) != 0)
 			continue;
@@ -204,17 +204,37 @@ void I_StartupGraphics(void)
 			if (test_mode.width < v_desktop_width.d && test_mode.height < v_desktop_height.d)
 			{
 				scrmode_c win_mode = test_mode;
-				win_mode.display_mode = win_mode.SCR_WINDOW;
+				win_mode.display_mode = scrmode_c::SCR_WINDOW;
 				R_AddResolution(&win_mode);
 			}
 		}
 	}
 
+	// Set the default window toggle mode to the largest non-native res
+	for (int i = 0; i < screen_modes.size(); i++)
+	{
+		scrmode_c *check = screen_modes[i];
+		if (check->display_mode == scrmode_c::SCR_WINDOW)
+		{
+			toggle_win_mode.display_mode = scrmode_c::SCR_WINDOW;
+			toggle_win_mode.height = check->height;
+			toggle_win_mode.width = check->width;
+			toggle_win_mode.depth = check->depth;
+			break;
+		}
+	}
+
 	// Fill in borderless mode scrmode with the native display info
-    borderless_mode.display_mode = borderless_mode.SCR_BORDERLESS;
+    borderless_mode.display_mode = scrmode_c::SCR_BORDERLESS;
     borderless_mode.width = info.w;
     borderless_mode.height = info.h;
     borderless_mode.depth = SDL_BITSPERPIXEL(info.format);
+
+	// Also make the default fullscreen toggle mode borderless
+	toggle_full_mode.display_mode = scrmode_c::SCR_BORDERLESS;
+    toggle_full_mode.width = info.w;
+    toggle_full_mode.height = info.h;
+    toggle_full_mode.depth = SDL_BITSPERPIXEL(info.format);
 
 	I_Printf("I_StartupGraphics: initialisation OK\n");
 }
@@ -232,8 +252,8 @@ static bool I_CreateWindow(scrmode_c *mode)
 #endif	
 
 	my_vis = SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
-		SDL_WINDOW_OPENGL | (mode->display_mode == mode->SCR_BORDERLESS ? (SDL_WINDOW_FULLSCREEN_DESKTOP) :
-		(mode->display_mode == mode->SCR_FULLSCREEN ? SDL_WINDOW_FULLSCREEN : 0)) | resizeable);
+		SDL_WINDOW_OPENGL | (mode->display_mode == scrmode_c::SCR_BORDERLESS ? (SDL_WINDOW_FULLSCREEN_DESKTOP) :
+		(mode->display_mode == scrmode_c::SCR_FULLSCREEN ? SDL_WINDOW_FULLSCREEN : 0)) | resizeable);
 
 	if (my_vis == NULL)
 	{
@@ -241,11 +261,29 @@ static bool I_CreateWindow(scrmode_c *mode)
 		return false;
 	}
 
-	if (mode->display_mode == mode->SCR_BORDERLESS)
-	{
+	if (mode->display_mode == scrmode_c::SCR_BORDERLESS)
 		SDL_GetWindowSize(my_vis, &borderless_mode.width, &borderless_mode.height);
-		//-- display_W = borderless_mode.width;
-		//-- display_H = borderless_mode.height;
+
+	if (mode->display_mode == scrmode_c::SCR_WINDOW)
+	{
+		toggle_win_mode.depth = mode->depth;
+		toggle_win_mode.height = mode->height;
+		toggle_win_mode.width = mode->width;
+		toggle_win_mode.display_mode = scrmode_c::SCR_WINDOW;
+	}
+	else if (mode->display_mode == scrmode_c::SCR_FULLSCREEN)
+	{
+		toggle_full_mode.depth = mode->depth;
+		toggle_full_mode.height = mode->height;
+		toggle_full_mode.width = mode->width;
+		toggle_full_mode.display_mode = scrmode_c::SCR_FULLSCREEN;
+	}
+	else
+	{
+		toggle_full_mode.depth = borderless_mode.depth;
+		toggle_full_mode.height = borderless_mode.height;
+		toggle_full_mode.width = borderless_mode.width;
+		toggle_full_mode.display_mode = scrmode_c::SCR_BORDERLESS;
 	}
 
 	if (SDL_GL_CreateContext(my_vis) == NULL)
@@ -277,8 +315,8 @@ bool I_SetScreenSize(scrmode_c *mode)
 
 	I_Printf("I_SetScreenSize: trying %dx%d %dbpp (%s)\n",
 			 mode->width, mode->height, mode->depth,
-			 mode->display_mode == mode->SCR_BORDERLESS ? "borderless" : 
-			 (mode->display_mode == mode->SCR_FULLSCREEN ? "fullscreen" : "windowed"));
+			 mode->display_mode == scrmode_c::SCR_BORDERLESS ? "borderless" : 
+			 (mode->display_mode == scrmode_c::SCR_FULLSCREEN ? "fullscreen" : "windowed"));
 
 	if (my_vis == NULL)
 	{
@@ -287,17 +325,15 @@ bool I_SetScreenSize(scrmode_c *mode)
 			return false;
 		}
 	}
-	else if (mode->display_mode == mode->SCR_BORDERLESS) 
+	else if (mode->display_mode == scrmode_c::SCR_BORDERLESS) 
 	{
 		SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN_DESKTOP);
 		SDL_GetWindowSize(my_vis, &borderless_mode.width, &borderless_mode.height);
-		//-- display_W = borderless_mode.width;
-		//-- display_H = borderless_mode.height;
 
 		I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n",
 			mode->width, mode->height, mode->depth);
 	}
-	else if (mode->display_mode == mode->SCR_FULLSCREEN)
+	else if (mode->display_mode == scrmode_c::SCR_FULLSCREEN)
 	{
 		SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN);
 		SDL_DisplayMode *new_mode = new SDL_DisplayMode;

@@ -47,6 +47,7 @@ int joystick_device;  // choice in menu, 0 for none
 
 static int num_joys;
 static int cur_joy;  // 0 for none
+static bool need_mouse_recapture = false;
 SDL_Joystick *joy_info = nullptr;
 SDL_GameController *gamepad_info = nullptr;
 SDL_JoystickID gamepad_inst = -1;
@@ -242,6 +243,23 @@ void HandleKeyEvent(SDL_Event* ev)
         alt_is_down = false;
 		return;
     }
+
+#ifndef EDGE_WEB // Not sure if this is desired on the web build
+    if (event.value.key.sym == KEYD_ENTER && alt_is_down)
+    {
+#ifdef DEBUG_KB
+		L_WriteDebug("   HandleKey: ALT-ENTER\n");
+#endif
+        alt_is_down = false;
+		R_ToggleFullscreen();
+		if (DISPLAYMODE == scrmode_c::SCR_WINDOW)
+		{
+			I_GrabCursor(false);
+			need_mouse_recapture = true;
+		}
+		return; 
+    }
+#endif
 
 	if (event.value.key.sym == KEYD_LALT)
 		alt_is_down = (event.type == ev_keydown);
@@ -576,6 +594,11 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 			if (SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE)
 				HandleMouseButtonEvent(sdl_ev);
 #else
+			if (need_mouse_recapture)
+			{
+				I_GrabCursor(true);
+				need_mouse_recapture = false;
+			}
 			HandleMouseButtonEvent(sdl_ev);
 #endif
 			break;
@@ -600,8 +623,8 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 				eat_mouse_motion = false; // One motion needs to be discarded
 				break;
 			}
-
-			HandleMouseMotionEvent(sdl_ev);
+			if (!need_mouse_recapture)
+				HandleMouseMotionEvent(sdl_ev);
 			break;
 		
 		case SDL_QUIT:

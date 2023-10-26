@@ -16,6 +16,8 @@ General Improvements/Changes
   - RAD-format modules (version 2) are now supported in addition to regular OPL MUS/MIDI/IMF playback
 - libVGM removed
   - gzip component of miniz also removed (was only used to decompress VGZ files)
+- Alt+Enter will toggle between fullscreen and windowed modes
+  - If toggling into windowed mode, the cursor will be released
 
 
 Bugs fixed

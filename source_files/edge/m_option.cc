@@ -435,7 +435,7 @@ static optmenuitem_t resoptions[] =
 {
 	{OPT_Plain,    "",          NULL, 0, NULL, NULL, NULL},
 	{OPT_Switch,  "V-Sync", "Off/Standard/Adaptive", 3, &v_sync.d, M_UpdateCVARFromInt, "Will fallback to Standard if Adaptive is not supported", &v_sync},
-	{OPT_Switch,  "Aspect Ratio",  MonitSiz,  6, &monitor_size, M_ChangeMonitorSize, "Only applies to Fullscreen/Borderless Fullscreen Modes"},
+	{OPT_Switch,  "Aspect Ratio",  MonitSiz,  6, &monitor_size, M_ChangeMonitorSize, "Only applies to Fullscreen Modes"},
 	{OPT_Function, "New Mode",  NULL, 0, NULL, M_ChangeResFull, NULL},
 	{OPT_Function, "New Resolution",  NULL, 0, NULL, M_ChangeResSize, NULL},
 	{OPT_Function, "Apply Mode/Resolution", NULL, 0, NULL, M_OptionSetResolution, NULL},
@@ -1198,7 +1198,7 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
 	y += (dy*3);
 
 	sprintf(tempstring, "%s", new_scrmode.display_mode == 2 ? "Borderless Fullscreen" :
-		(new_scrmode.display_mode == new_scrmode.SCR_FULLSCREEN ? "Fullscreen" : "Windowed"));
+		(new_scrmode.display_mode == scrmode_c::SCR_FULLSCREEN ? "Exclusive Fullscreen" : "Windowed"));
 	HL_WriteText(style,styledef_c::T_ALT, centrex+15, y, tempstring);
 
 	if (new_scrmode.display_mode < 2)
@@ -1219,7 +1219,7 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
 	if (DISPLAYMODE == 2)
 		sprintf(tempstring, "%s", "Borderless Fullscreen");
 	else
-		sprintf(tempstring, "%d x %d %s", SCREENWIDTH, SCREENHEIGHT, DISPLAYMODE == 1 ? "Fullscreen" : "Windowed");
+		sprintf(tempstring, "%d x %d %s", SCREENWIDTH, SCREENHEIGHT, DISPLAYMODE == 1 ? "Exclusive Fullscreen" : "Windowed");
 
 	HL_WriteText(style,styledef_c::T_ALT, 160 - (style->fonts[1]->StringWidth(tempstring) / 2), y, tempstring);
 }
@@ -2178,6 +2178,20 @@ static void M_OptionSetResolution(int keypressed, cvar_c *cvar)
 {
 	if (R_ChangeResolution(&new_scrmode))
 	{
+		if (new_scrmode.display_mode > scrmode_c::SCR_WINDOW)
+		{
+			toggle_full_mode.depth = new_scrmode.depth;
+			toggle_full_mode.height = new_scrmode.height;
+			toggle_full_mode.width = new_scrmode.width;
+			toggle_full_mode.display_mode = new_scrmode.display_mode;
+		}
+		else
+		{
+			toggle_win_mode.depth = new_scrmode.depth;
+			toggle_win_mode.height = new_scrmode.height;
+			toggle_win_mode.width = new_scrmode.width;
+			toggle_win_mode.display_mode = new_scrmode.display_mode;
+		}
 		R_SoftInitResolution();
 	}
 	else

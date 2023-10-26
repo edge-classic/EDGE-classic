@@ -48,8 +48,10 @@ int SCREENBITS;
 int DISPLAYMODE;
 
 scrmode_c borderless_mode;
+scrmode_c toggle_full_mode;
+scrmode_c toggle_win_mode;
 
-static std::vector<scrmode_c *> screen_modes;
+std::vector<scrmode_c *> screen_modes;
 
 bool R_DepthIsEquivalent(int depth1, int depth2)
 {
@@ -71,7 +73,7 @@ static int SizeDiff(int w1, int h1, int w2, int h2)
 }
 
 
-scrmode_c *R_FindResolution(int w, int h, int depth, int display_mode)
+static scrmode_c *R_FindResolution(int w, int h, int depth, int display_mode)
 {
 	for (int i = 0; i < (int)screen_modes.size(); i++)
 	{
@@ -220,6 +222,14 @@ bool R_IncrementResolution(scrmode_c *mode, int what, int dir)
 	return false;
 }
 
+void R_ToggleFullscreen(void)
+{
+	if (DISPLAYMODE > scrmode_c::SCR_WINDOW)
+		R_ChangeResolution(&toggle_win_mode);
+	else
+		R_ChangeResolution(&toggle_full_mode);
+	R_SoftInitResolution();
+}
 
 //----------------------------------------------------------------------------
 

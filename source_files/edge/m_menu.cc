@@ -898,7 +898,7 @@ void M_DrawLoad(void)
 		if (fontType == styledef_c::T_SELECTED)
 		{
 			// ttf_ref_yshift is important for TTF fonts.
-			float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift; // * txtscale;
+			float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift[current_font_size]; // * txtscale;
 			
 			HUD_SetAlpha(0.33f);
 			HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
@@ -1009,7 +1009,7 @@ void M_DrawSave(void)
 		if (fontType == styledef_c::T_SELECTED)
 		{
 			// ttf_ref_yshift is important for TTF fonts.
-			float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift; // * txtscale;
+			float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift[current_font_size]; // * txtscale;
 			
 			HUD_SetAlpha(0.33f);
 			HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
@@ -1765,9 +1765,9 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
 		if (colmap)
 			slider_color = V_GetFontColor(colmap);
 
-		HUD_ThinBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
+		HUD_ThinBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size] : 0), 
 			x+(thermWidth*step)-step, y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
-		HUD_SolidBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
+		HUD_SolidBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size] : 0), 
 			x+(thermDot*step), y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
 	}
 	else
@@ -1815,9 +1815,9 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
 		if (colmap)
 			slider_color = V_GetFontColor(colmap);
 
-		HUD_ThinBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
+		HUD_ThinBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size] : 0), 
 			x+50.0f, y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
-		HUD_SolidBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift : 0), 
+		HUD_SolidBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size] : 0), 
 			x+(((thermDot-min)/increment)*scale_step), y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
 		if (!actual_val.empty())
 			HL_WriteText(opt_style, styledef_c::T_ALT, x+50.0f + step, y, actual_val.c_str());
@@ -2622,8 +2622,8 @@ void M_DrawCursor(style_c *style, bool graphical_item)
 		{
 			if (style->fonts[styledef_c::T_TEXT]->def->type == FNTYP_TrueType)
 			{
-				ShortestLine = style->fonts[styledef_c::T_TEXT]->ttf_ref_height * txtscale;
-				y_shift = style->fonts[styledef_c::T_TEXT]->ttf_ref_yshift * txtscale;
+				ShortestLine = style->fonts[styledef_c::T_TEXT]->ttf_ref_height[current_font_size] * txtscale;
+				y_shift = style->fonts[styledef_c::T_TEXT]->ttf_ref_yshift[current_font_size] * txtscale;
 			}
 		}	
 		TempScale = ShortestLine / IM_HEIGHT(cursor);

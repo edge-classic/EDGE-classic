@@ -64,10 +64,11 @@ const int cp437_unicode_values[256] =
 
 typedef struct
 {
-	float width, height;
+	float width[3];
+	float height[3];
 	int glyph_index; // For faster kerning table lookups
-	float y_shift;
-	stbtt_aligned_quad *char_quad;
+	float y_shift[3];
+	stbtt_aligned_quad *char_quad[3];
 }
 ttf_char_t;
 
@@ -133,17 +134,18 @@ public:
 	float *individual_char_ratios;
 	float im_mono_width;
 
-	// For TRUETYPE type
-	float ttf_kern_scale;
-	float ttf_ref_yshift;
-	float ttf_ref_height;
-	byte *ttf_buffer;
+	// For TRUETYPE type, 3 sizes
+	float ttf_kern_scale[3];
+	float ttf_ref_yshift[3];
+	float ttf_ref_height[3];
+	stbtt_pack_range *ttf_atlas[3];
+	unsigned int ttf_tex_id[3];
+	unsigned int ttf_smoothed_tex_id[3];
+	int ttf_char_width[3];
+	int ttf_char_height[3];
+	// Only need one of these
 	stbtt_fontinfo *ttf_info;
-	stbtt_pack_range *ttf_atlas;
-	unsigned int ttf_tex_id;
-	unsigned int ttf_smoothed_tex_id;
-	int ttf_char_width;
-	int ttf_char_height;
+	byte *ttf_buffer;
 	std::unordered_map<int, ttf_char_t> ttf_glyph_map;
 
 private:
@@ -172,6 +174,8 @@ public:
 };
 
 extern font_container_c hu_fonts;
+
+extern int current_font_size;
 
 #endif  // __HU_FONT__
 

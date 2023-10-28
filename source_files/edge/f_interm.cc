@@ -516,7 +516,7 @@ static void DrawLevelFinished(void)
 		t_type = styledef_c::T_TEXT;
 	
 	// ttf_ref_yshift is important for TTF fonts.
-	float y_shift = style->fonts[t_type]->ttf_ref_yshift; // * txtscale;
+	float y_shift = style->fonts[t_type]->ttf_ref_yshift[current_font_size]; // * txtscale;
 
 	y = y + h1;
 	y += y_shift;
@@ -650,7 +650,7 @@ static void DrawEnteringLevel(void)
 	}
 
 	// ttf_ref_yshift is important for TTF fonts.
-	float y_shift = style->fonts[t_type]->ttf_ref_yshift; // * txtscale;
+	float y_shift = style->fonts[t_type]->ttf_ref_yshift[current_font_size]; // * txtscale;
 
 	y = y + h1;
 	y += y_shift;

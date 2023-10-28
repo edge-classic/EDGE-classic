@@ -428,9 +428,9 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
 		glEnable(GL_TEXTURE_2D);
 		if ((var_smoothing && cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ON_DEMAND) ||
 			cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ALWAYS)
-			glBindTexture(GL_TEXTURE_2D, cur_font->ttf_smoothed_tex_id);
+			glBindTexture(GL_TEXTURE_2D, cur_font->ttf_smoothed_tex_id[current_font_size]);
 		else
-			glBindTexture(GL_TEXTURE_2D, cur_font->ttf_tex_id);
+			glBindTexture(GL_TEXTURE_2D, cur_font->ttf_tex_id[current_font_size]);
 		glColor4f(r, g, b, alpha);
 		glBegin(GL_QUADS);
 		glTexCoord2f(tx1,ty2); glVertex2f(hx1,hy1);
@@ -979,10 +979,10 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 
 	if (epi::strcmp(img->name, "TTF_DUMMY_IMAGE") == 0)
 	{
-		stbtt_aligned_quad *q = cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).char_quad;
-		y = top_y + (cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).y_shift * (size > 0 ? (size / cur_font->def->default_size) : 1.0) * sc_y);
+		stbtt_aligned_quad *q = cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).char_quad[current_font_size];
+		y = top_y + (cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).y_shift[current_font_size] * (size > 0 ? (size / cur_font->def->default_size) : 1.0) * sc_y);
 		w = ((size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->default_size)) : cur_font->CharWidth(ch)) - cur_font->spacing) * sc_x;
-		h = (cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).height * (size > 0 ? (size / cur_font->def->default_size) : 1.0)) * sc_y;
+		h = (cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).height[current_font_size] * (size > 0 ? (size / cur_font->def->default_size) : 1.0)) * sc_y;
 		tx1 = q->s0;
 		ty1 = q->t0;
 		tx2 = q->s1;
@@ -1158,7 +1158,7 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 				if (str[i+1])
 				{
 					total_w += stbtt_GetGlyphKernAdvance(cur_font->ttf_info, cur_font->GetGlyphIndex(str[i]), 
-						cur_font->GetGlyphIndex(str[i+1])) * cur_font->ttf_kern_scale * factor * cur_scale;
+						cur_font->GetGlyphIndex(str[i+1])) * cur_font->ttf_kern_scale[current_font_size] * factor * cur_scale;
 				}
 			}
 			else if (cur_font->def->type == FNTYP_Image)
@@ -1191,7 +1191,7 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 				if (str[k+1])
 				{
 						cx += stbtt_GetGlyphKernAdvance(cur_font->ttf_info, cur_font->GetGlyphIndex(str[k]), 
-							cur_font->GetGlyphIndex(str[k+1])) * cur_font->ttf_kern_scale * factor * cur_scale;
+							cur_font->GetGlyphIndex(str[k+1])) * cur_font->ttf_kern_scale[current_font_size] * factor * cur_scale;
 				}
 			}
 			else if (cur_font->def->type == FNTYP_Image)

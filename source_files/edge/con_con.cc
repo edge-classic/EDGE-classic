@@ -574,7 +574,7 @@ static void CalcSizes()
 		FNSZ = 11;
 		FNSZ_ratio = FNSZ / con_font->def->default_size;
 		if (con_font->def->type == FNTYP_TrueType)
-			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * FNSZ_ratio);
+			XMUL = I_ROUND((con_font->ttf_char_width[current_font_size] + con_font->spacing) * FNSZ_ratio);
 		else
 			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 	}
@@ -583,7 +583,7 @@ static void CalcSizes()
 		FNSZ = 13;
 		FNSZ_ratio = FNSZ / con_font->def->default_size;
 		if (con_font->def->type == FNTYP_TrueType)
-			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * FNSZ_ratio);
+			XMUL = I_ROUND((con_font->ttf_char_width[current_font_size] + con_font->spacing) * FNSZ_ratio);
 		else
 			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 	}
@@ -592,7 +592,7 @@ static void CalcSizes()
 		FNSZ = 16;
 		FNSZ_ratio = FNSZ / con_font->def->default_size;
 		if (con_font->def->type == FNTYP_TrueType)
-			XMUL = I_ROUND((con_font->ttf_char_width + con_font->spacing) * FNSZ_ratio);
+			XMUL = I_ROUND((con_font->ttf_char_width[current_font_size] + con_font->spacing) * FNSZ_ratio);
 		else
 			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 	}
@@ -640,17 +640,17 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 	{
 		float width = (con_font->CharWidth(ch) - con_font->spacing) * FNSZ_ratio / v_pixelaspect.f;
 		float x_adjust = (XMUL - width) / 2;
-		float y_adjust = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).y_shift * FNSZ_ratio;
-		float height = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).height * FNSZ_ratio;
-		stbtt_aligned_quad *q = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).char_quad;
+		float y_adjust = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).y_shift[current_font_size] * FNSZ_ratio;
+		float height = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).height[current_font_size] * FNSZ_ratio;
+		stbtt_aligned_quad *q = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).char_quad[current_font_size];
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_TEXTURE_2D);
 		if ((var_smoothing && con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ON_DEMAND) ||
 			con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ALWAYS)
-			glBindTexture(GL_TEXTURE_2D, con_font->ttf_smoothed_tex_id);
+			glBindTexture(GL_TEXTURE_2D, con_font->ttf_smoothed_tex_id[current_font_size]);
 		else
-			glBindTexture(GL_TEXTURE_2D, con_font->ttf_tex_id);
+			glBindTexture(GL_TEXTURE_2D, con_font->ttf_tex_id[current_font_size]);
 		glBegin(GL_POLYGON);
 		glTexCoord2f(q->s0,q->t0); glVertex2f(x + x_adjust,y - y_adjust);
         glTexCoord2f(q->s1,q->t0); glVertex2f(x + x_adjust + width,y - y_adjust);

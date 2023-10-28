@@ -31,6 +31,7 @@
 #include <vector>
 #include <algorithm>
 
+#include "hu_font.h" // current_font_size
 #include "r_modes.h"
 #include "r_gldefs.h"
 #include "r_colormap.h"
@@ -259,6 +260,13 @@ void R_SoftInitResolution(void)
 
 	RGL_NewScreenSize(SCREENWIDTH, SCREENHEIGHT, SCREENBITS);
 
+	if (SCREENWIDTH < 720)
+        current_font_size = 0;
+    else if (SCREENWIDTH < 1440)
+        current_font_size = 1;
+    else
+        current_font_size = 2;
+
 	// -ES- 1999/08/29 Fixes the garbage palettes, and the blank 16-bit console
 	V_SetPalette(PALETTE_NORMAL, 0);
 	V_ColourNewFrame();
@@ -288,6 +296,13 @@ static bool DoExecuteChangeResolution(scrmode_c *mode)
 	SCREENHEIGHT = mode->height;
 	SCREENBITS   = mode->depth;
 	DISPLAYMODE  = mode->display_mode;
+
+	if (SCREENWIDTH < 720)
+        current_font_size = 0;
+    else if (SCREENWIDTH < 1440)
+        current_font_size = 1;
+    else
+        current_font_size = 2;
 
 	I_DeterminePixelAspect();
 

@@ -45,6 +45,10 @@ extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
 // all the fonts that's fit to print
 font_container_c hu_fonts;
 
+int current_font_size;
+
+static const int res_font_sizes[3] = {12, 24, 48};
+static const int res_font_bitmap_sizes[3] = {512, 1024, 2048};
 
 font_c::font_c(fontdef_c *_def) : def(_def)
 {
@@ -55,11 +59,11 @@ font_c::font_c(fontdef_c *_def) : def(_def)
 	p_cache.missing = nullptr;
 
 	font_image = nullptr;
-	ttf_buffer = nullptr;
 	ttf_info = nullptr;
-	ttf_kern_scale = 0;
-	ttf_ref_yshift = 0;
-	ttf_ref_height = 0;
+	ttf_buffer = nullptr;
+	Z_Clear(ttf_kern_scale, float, 3);
+	Z_Clear(ttf_ref_yshift, float, 3);
+	Z_Clear(ttf_ref_height, float, 3);
 }
 
 font_c::~font_c()
@@ -290,51 +294,54 @@ void font_c::LoadFontTTF()
 		if (ref.glyph_index == 0)
 			I_Error("LoadFontTTF: No suitable characters in font %s.\n", def->name.c_str());
 
-		ttf_atlas = new stbtt_pack_range;
-		ttf_atlas->first_unicode_codepoint_in_range = 0;
-		ttf_atlas->array_of_unicode_codepoints = (int *)cp437_unicode_values;
-		ttf_atlas->font_size = 48.0f;
-		ttf_atlas->num_chars = 256;
-		ttf_atlas->chardata_for_range = new stbtt_packedchar[256];
+		for (int i = 0; i < 3; i++)
+		{
+			ttf_atlas[i] = new stbtt_pack_range;
+			ttf_atlas[i]->first_unicode_codepoint_in_range = 0;
+			ttf_atlas[i]->array_of_unicode_codepoints = (int *)cp437_unicode_values;
+			ttf_atlas[i]->font_size = res_font_sizes[i];
+			ttf_atlas[i]->num_chars = 256;
+			ttf_atlas[i]->chardata_for_range = new stbtt_packedchar[256];
 
-		if (def->default_size == 0.0)
-			def->default_size = 7.0f;
+			if (def->default_size == 0.0)
+				def->default_size = 7.0f;
 
-		ttf_kern_scale = stbtt_ScaleForPixelHeight(ttf_info, def->default_size);
+			ttf_kern_scale[i] = stbtt_ScaleForPixelHeight(ttf_info, def->default_size);
 
-		unsigned char *temp_bitmap = new unsigned char [1024*1024];
+			unsigned char *temp_bitmap = new unsigned char [res_font_bitmap_sizes[i]*res_font_bitmap_sizes[i]];
 
-		stbtt_pack_context *spc = new stbtt_pack_context;
-		stbtt_PackBegin(spc, temp_bitmap, 1024, 1024, 0, 1, NULL);
-		stbtt_PackSetOversampling(spc, 1, 1);
-		stbtt_PackFontRanges(spc, ttf_buffer, 0, ttf_atlas, 1);
-		stbtt_PackEnd(spc);
-		glGenTextures(1, &ttf_tex_id);
-		glBindTexture(GL_TEXTURE_2D, ttf_tex_id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 1024, 1024, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glGenTextures(1, &ttf_smoothed_tex_id);
-		glBindTexture(GL_TEXTURE_2D, ttf_smoothed_tex_id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 1024, 1024, 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		delete[] temp_bitmap;
-		float x = 0.0f;
-		float y = 0.0f;
-		float ascent = 0.0f;
-		float descent = 0.0f;
-		float linegap = 0.0f;
-		ref.char_quad = new stbtt_aligned_quad;
-		stbtt_GetPackedQuad(ttf_atlas->chardata_for_range, 1024, 1024, static_cast<u8_t>(ch), &x, &y, ref.char_quad, 0);
-		stbtt_GetScaledFontVMetrics(ttf_buffer, 0, 48, &ascent, &descent, &linegap);
-		ref.width = (ref.char_quad->x1 - ref.char_quad->x0) * (def->default_size / 48.0);
-		ref.height = (ref.char_quad->y1 - ref.char_quad->y0) * (def->default_size / 48.0);
-		ttf_char_width = ref.width;
-		ttf_char_height = (ascent - descent) * (def->default_size / 48.0);
-		ref.y_shift = (ttf_char_height - ref.height) + (ref.char_quad->y1 * (def->default_size / 48.0));
-		ttf_ref_yshift = ref.y_shift;
-		ttf_ref_height = ref.height;
+			stbtt_pack_context *spc = new stbtt_pack_context;
+			stbtt_PackBegin(spc, temp_bitmap, res_font_bitmap_sizes[i], res_font_bitmap_sizes[i], 0, 1, NULL);
+			stbtt_PackSetOversampling(spc, 2, 2);
+			stbtt_PackFontRanges(spc, ttf_buffer, 0, ttf_atlas[i], 1);
+			stbtt_PackEnd(spc);
+			glGenTextures(1, &ttf_tex_id[i]);
+			glBindTexture(GL_TEXTURE_2D, ttf_tex_id[i]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, res_font_bitmap_sizes[i], res_font_bitmap_sizes[i], 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glGenTextures(1, &ttf_smoothed_tex_id[i]);
+			glBindTexture(GL_TEXTURE_2D, ttf_smoothed_tex_id[i]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, res_font_bitmap_sizes[i], res_font_bitmap_sizes[i], 0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			delete[] temp_bitmap;
+			float x = 0.0f;
+			float y = 0.0f;
+			float ascent = 0.0f;
+			float descent = 0.0f;
+			float linegap = 0.0f;
+			ref.char_quad[i] = new stbtt_aligned_quad;
+			stbtt_GetPackedQuad(ttf_atlas[i]->chardata_for_range, res_font_bitmap_sizes[i], res_font_bitmap_sizes[i], static_cast<u8_t>(ch), &x, &y, ref.char_quad[i], 0);
+			stbtt_GetScaledFontVMetrics(ttf_buffer, 0, res_font_sizes[i], &ascent, &descent, &linegap);
+			ref.width[i] = (ref.char_quad[i]->x1 - ref.char_quad[i]->x0) * (def->default_size / res_font_sizes[i]);
+			ref.height[i] = (ref.char_quad[i]->y1 - ref.char_quad[i]->y0) * (def->default_size / res_font_sizes[i]);
+			ttf_char_width[i] = ref.width[i];
+			ttf_char_height[i] = (ascent - descent) * (def->default_size / res_font_sizes[i]);
+			ref.y_shift[i] = (ttf_char_height[i] - ref.height[i]) + (ref.char_quad[i]->y1 * (def->default_size / res_font_sizes[i]));
+			ttf_ref_yshift[i] = ref.y_shift[i];
+			ttf_ref_height[i] = ref.height[i];
+		}
 		ttf_glyph_map.try_emplace(static_cast<u8_t>(ch), ref);
 		spacing = def->spacing + 0.5; // + 0.5 for at least a minimal buffer between letters by default
 	}
@@ -372,7 +379,7 @@ float font_c::NominalWidth() const
 		return p_cache.width + spacing;
 
 	if (def->type == FNTYP_TrueType)
-		return ttf_char_width + spacing;
+		return ttf_char_width[current_font_size] + spacing;
 
 	I_Error("font_c::NominalWidth : unknown FONT type %d\n", def->type);
 	return 1; /* NOT REACHED */
@@ -387,7 +394,7 @@ float font_c::NominalHeight() const
 		return p_cache.height;
 
 	if (def->type == FNTYP_TrueType)
-		return ttf_char_height;
+		return ttf_char_height[current_font_size];
 
 	I_Error("font_c::NominalHeight : unknown FONT type %d\n", def->type);
 	return 1; /* NOT REACHED */
@@ -467,25 +474,26 @@ float font_c::CharWidth(char ch)
 	{
 		auto find_glyph = ttf_glyph_map.find(static_cast<u8_t>(ch));
 		if (find_glyph != ttf_glyph_map.end())
-		{
-			return (find_glyph->second.width + spacing) * v_pixelaspect.f;
-		}
+			return (find_glyph->second.width[current_font_size] + spacing) * v_pixelaspect.f;
 		else
 		{
 			ttf_char_t character;
-			character.char_quad = new stbtt_aligned_quad;
-			float x = 0.0f;
-			float y = 0.0f;
-			stbtt_GetPackedQuad(ttf_atlas->chardata_for_range, 1024, 1024, static_cast<u8_t>(ch), &x, &y, character.char_quad, 0);
-			if (ch == ' ')
-				character.width = ttf_char_width * 3 / 5;
-			else
-				character.width = (character.char_quad->x1 - character.char_quad->x0) * (def->default_size / 48.0);
-			character.height = (character.char_quad->y1 - character.char_quad->y0) * (def->default_size / 48.0);
-			character.y_shift = (ttf_char_height - character.height) + (character.char_quad->y1 * (def->default_size / 48.0));
+			for (int i = 0; i < 3; i++)
+			{
+				character.char_quad[i] = new stbtt_aligned_quad;
+				float x = 0.0f;
+				float y = 0.0f;
+				stbtt_GetPackedQuad(ttf_atlas[i]->chardata_for_range, res_font_bitmap_sizes[i], res_font_bitmap_sizes[i], static_cast<u8_t>(ch), &x, &y, character.char_quad[i], 0);
+				if (ch == ' ')
+					character.width[i] = ttf_char_width[i] * 3 / 5;
+				else
+					character.width[i] = (character.char_quad[i]->x1 - character.char_quad[i]->x0) * (def->default_size / res_font_sizes[i]);
+				character.height[i] = (character.char_quad[i]->y1 - character.char_quad[i]->y0) * (def->default_size / res_font_sizes[i]);
+				character.y_shift[i] = (ttf_char_height[i] - character.height[i]) + (character.char_quad[i]->y1 * (def->default_size / res_font_sizes[i]));
+			}
 			character.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<u8_t>(ch)]);
 			ttf_glyph_map.try_emplace(static_cast<u8_t>(ch), character);
-			return (character.width + spacing) * v_pixelaspect.f;
+			return (character.width[current_font_size] + spacing) * v_pixelaspect.f;
 		}
 	}
 
@@ -547,22 +555,23 @@ int font_c::GetGlyphIndex(char ch)
 
 		auto find_glyph = ttf_glyph_map.find(static_cast<u8_t>(ch));
 		if (find_glyph != ttf_glyph_map.end())
-		{
 			return find_glyph->second.glyph_index;
-		}
 		else
 		{
 			ttf_char_t character;
-			character.char_quad = new stbtt_aligned_quad;
-			float x = 0.0f;
-			float y = 0.0f;
-			stbtt_GetPackedQuad(ttf_atlas->chardata_for_range, 1024, 1024, static_cast<u8_t>(ch), &x, &y, character.char_quad, 0);
-			if (ch == ' ')
-				character.width = ttf_char_width * 3 / 5;
-			else
-				character.width = (character.char_quad->x1 - character.char_quad->x0) * (def->default_size / 48.0);
-			character.height = (character.char_quad->y1 - character.char_quad->y0) * (def->default_size / 48.0);
-			character.y_shift = (ttf_char_height - character.height) + (character.char_quad->y1 * (def->default_size / 48.0));
+			for (int i = 0; i < 3; i++)
+			{
+				character.char_quad[i] = new stbtt_aligned_quad;
+				float x = 0.0f;
+				float y = 0.0f;
+				stbtt_GetPackedQuad(ttf_atlas[i]->chardata_for_range, res_font_bitmap_sizes[i], res_font_bitmap_sizes[i], static_cast<u8_t>(ch), &x, &y, character.char_quad[i], 0);
+				if (ch == ' ')
+					character.width[i] = ttf_char_width[i] * 3 / 5;
+				else
+					character.width[i] = (character.char_quad[i]->x1 - character.char_quad[i]->x0) * (def->default_size / res_font_sizes[i]);
+				character.height[i] = (character.char_quad[i]->y1 - character.char_quad[i]->y0) * (def->default_size / res_font_sizes[i]);
+				character.y_shift[i] = (ttf_char_height[i] - character.height[i]) + (character.char_quad[i]->y1 * (def->default_size / res_font_sizes[i]));
+			}
 			character.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<u8_t>(ch)]);
 			ttf_glyph_map.try_emplace(static_cast<u8_t>(ch), character);
 			return character.glyph_index;
@@ -585,7 +594,7 @@ float font_c::StringWidth(const char *str)
 	{
 		w += CharWidth(width_checker[i]);
 		if (def->type == FNTYP_TrueType && i+1 < width_checker.size())
-			w += stbtt_GetGlyphKernAdvance(ttf_info, GetGlyphIndex(width_checker[i]), GetGlyphIndex(width_checker[i+1])) * ttf_kern_scale;
+			w += stbtt_GetGlyphKernAdvance(ttf_info, GetGlyphIndex(width_checker[i]), GetGlyphIndex(width_checker[i+1])) * ttf_kern_scale[current_font_size];
 	}
 
 	return w;

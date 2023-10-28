@@ -19,6 +19,7 @@ General Improvements/Changes
 - Alt+Enter will toggle between fullscreen and windowed modes
   - If toggling into windowed mode, the cursor will be released
 - Z/R/D/MAPINFO parsing removed in order to focus on better validating UMAPINFO and adherence to its standards
+- Improved scaling and sampling quality of TrueType fonts at varying resolutions
 
 
 Bugs fixed

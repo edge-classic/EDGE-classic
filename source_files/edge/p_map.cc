@@ -1880,7 +1880,10 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
 		{ 
 			if (current_flatdef->impactobject)
 			{
-				P_SpawnSplash(x, y, z, current_flatdef->impactobject, shoot_I.angle + ANG180);
+				angle_t angle = shoot_I.angle + ANG180;
+				angle += (angle_t) (P_RandomNegPos() * (int)(ANG1 / 2));
+
+				P_SpawnDebris(x, y, z, angle, current_flatdef->impactobject);
 				// don't go any farther
 				return false;
 			}
@@ -2168,8 +2171,7 @@ static bool PTR_ShootTraverse(intercept_t * in, void *dataptr)
 
 			if (info && tempspecial->type == line_shootable)
 			{
-				//P_SpawnBlood(x, y, z, 0, shoot_I.angle + ANG180, info);
-				P_SpawnDebris(x, y, z, 0, shoot_I.angle + ANG180, info);
+				P_SpawnDebris(x, y, z, shoot_I.angle + ANG180, info);
 			}
 			P_UnblockLineEffectDebris(ld, tempspecial);
 		}

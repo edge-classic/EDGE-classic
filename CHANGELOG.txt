@@ -12,6 +12,8 @@ New Features
 
 General Improvements/Changes
 --------------------
+- "GMGSx" (Default.sf2) and "microGM" soundfonts removed for licensing issues
+  - "2MGM" soundfont added as new Default.sf2
 - YMFM OPL emulator replaced with Opal from Reality Adlib Tracker
   - RAD-format modules (version 2) are now supported in addition to regular OPL MUS/MIDI/IMF playback
 - libVGM removed

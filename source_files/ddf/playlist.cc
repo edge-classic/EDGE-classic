@@ -107,7 +107,7 @@ static void DDF_MusicParseInfo(const char *info)
 		i++;
 
 	if (i==ENDOFMUSINFTYPES)
-		DDF_Error("DDF_MusicParseInfo: Unknown music info: '%s'\n", charbuff);
+		DDF_Warning("DDF_MusicParseInfo: Unknown music info: '%s'\n", charbuff);
 	else
 		dynamic_plentry->infotype = (musicinftype_e)i; // technically speaking this is proper
 

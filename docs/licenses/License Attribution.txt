@@ -24,6 +24,8 @@ minivorbis library - Copyright (c) 2020 Eduardo Bart
 CC 1.0 Universal License
 ===========================================================================================
 
+"2MGM" soundfont (renamed to Default.sf2) - Yingchun Soul
+
 "ProtoSquare!" soundfont - Yingchun Soul
 
 ===========================================================================================
@@ -115,8 +117,6 @@ dr_wav, dr_mp3, and dr_flac libraries - David Reid
 
 Fraction.hpp - Bisqwit
 
-"GMGSx" soundfont (renamed to Default.sf2) - Kenneth Rundt
-
 libRAD (Reality Adlib Tracker 2) - Reality Productions
 
 stb_image, stb_image_write, stb_rect_pack and stb_truetype libraries - Sean Barrett
@@ -134,12 +134,6 @@ WTF License
 ===========================================================================================
 
 crsid library - Copyright (c) 2022 Hermit (Mihaly Horvath)
-
-===========================================================================================
-WTFPL License
-===========================================================================================
-
-"microGM" soundfont - Copyright (c) 2022 michael (https://musical-artifacts.com/artifacts/2529)
 
 ===========================================================================================
 zlib License

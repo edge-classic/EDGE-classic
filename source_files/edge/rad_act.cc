@@ -55,6 +55,8 @@
 
 static style_c *rts_tip_style;
 
+extern cvar_c r_doubleframes;
+
 // current tip slots
 drawtip_t tip_slots[MAXTIPSLOT];
 
@@ -903,6 +905,7 @@ void RAD_ActLightSector(rad_trigger_t *R, void *param)
 	}
 }
 
+
 void RAD_ActFogSector(rad_trigger_t *R, void *param)
 {
 	s_fogsector_t *t = (s_fogsector_t *) param;
@@ -1508,6 +1511,185 @@ void RAD_ActReplaceThing(rad_trigger_t *R, void *param)
 		P_ActReplace(mo,newThing);
 	}
 		 
+}
+
+void RAD_ActFlagSector(rad_trigger_t *R, void *param)
+{
+	s_flagsector_t *t = (s_flagsector_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		if (sectors[i].props.special == NULL)
+			sectors[i].props.special = new sectortype_c;
+		else
+		{
+			// Duplicate special so original special type is not modified
+			sectortype_c *specialCopy = new sectortype_c;
+			specialCopy->CopyDetail(*sectors[i].props.special);
+			sectors[i].props.special = specialCopy;
+		}
+
+		if (t->enable)
+			sectors[i].props.special->special_flags = (sector_flag_e)((int)sectors[i].props.special->special_flags | (int)t->flag);
+		else
+			sectors[i].props.special->special_flags = (sector_flag_e)((int)sectors[i].props.special->special_flags & ~(int)t->flag);
+	}
+}
+
+void RAD_ActDamageSector(rad_trigger_t *R, void *param)
+{
+	s_sectortypecopy_t *t = (s_sectortypecopy_t *) param;
+	int i;
+
+	sectortype_c *specialTemplate = P_LookupSectorType(t->sourceSpecialType);
+	if (specialTemplate == NULL)
+		specialTemplate = new sectortype_c;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		if (sectors[i].props.special == NULL)
+			sectors[i].props.special = new sectortype_c;
+		else
+		{
+			// Duplicate special so original special type is not modified
+			sectortype_c *specialCopy = new sectortype_c;
+			specialCopy->CopyDetail(*sectors[i].props.special);
+			sectors[i].props.special = specialCopy;
+		}
+
+		sectors[i].props.special->damage = specialTemplate->damage;
+	}
+}
+
+void RAD_ActGravitySector(rad_trigger_t *R, void *param)
+{
+	s_floatsector_t *t = (s_floatsector_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		if (t->relative)
+			sectors[i].props.gravity += t->amount * GRAVITY;
+		else
+			sectors[i].props.gravity = t->amount * GRAVITY;
+	}
+}
+
+void RAD_ActDragSector(rad_trigger_t *R, void *param)
+{
+	s_floatsector_t *t = (s_floatsector_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		if (t->relative)
+			sectors[i].props.drag += t->amount;
+		else
+			sectors[i].props.drag = t->amount;
+	}
+}
+
+void RAD_ActFrictionSector(rad_trigger_t *R, void *param)
+{
+	s_floatsector_t *t = (s_floatsector_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		if (t->relative)
+			sectors[i].props.friction += t->amount;
+		else
+			sectors[i].props.friction = t->amount;
+	}
+}
+
+void RAD_ActViscositySector(rad_trigger_t *R, void *param)
+{
+	s_floatsector_t *t = (s_floatsector_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		if (t->relative)
+			sectors[i].props.viscosity += t->amount;
+		else
+			sectors[i].props.viscosity = t->amount;
+	}
+}
+
+void RAD_ActPushAngleSector(rad_trigger_t *R, void *param)
+{
+	s_pushsector_t *t = (s_pushsector_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		if (sectors[i].props.special == NULL)
+			sectors[i].props.special = new sectortype_c;
+		else
+		{
+			// Duplicate special so original special type is not modified
+			sectortype_c *specialCopy = new sectortype_c;
+			specialCopy->CopyDetail(*sectors[i].props.special);
+			sectors[i].props.special = specialCopy;
+		}
+
+		if (t->relative)
+			sectors[i].props.special->push_angle += FLOAT_2_ANG(t->amount);
+		else
+			sectors[i].props.special->push_angle = FLOAT_2_ANG(t->amount);
+
+		float mul = sectors[i].props.special->push_speed / 100.0f;
+		sectors[i].props.push.x = M_Cos(sectors[i].props.special->push_angle) * mul;
+		sectors[i].props.push.y = M_Sin(sectors[i].props.special->push_angle) * mul;
+		sectors[i].props.push.z = sectors[i].props.special->push_zspeed / (r_doubleframes.d ? 89.2f : 100.0f);
+	}
+}
+
+void RAD_ActPushSpeedSector(rad_trigger_t *R, void *param)
+{
+	s_pushsector_t *t = (s_pushsector_t *) param;
+	int i;
+
+	for (i=0; i < numsectors; i++)
+	{
+		if (sectors[i].tag != t->tag) continue;
+
+		if (sectors[i].props.special == NULL)
+			sectors[i].props.special = new sectortype_c;
+		else
+		{
+			// Duplicate special so original special type is not modified
+			sectortype_c *specialCopy = new sectortype_c;
+			specialCopy->CopyDetail(*sectors[i].props.special);
+			sectors[i].props.special = specialCopy;
+		}
+
+		if (t->relative)
+			sectors[i].props.special->push_speed += t->amount;
+		else
+			sectors[i].props.special->push_speed = t->amount;
+
+		float mul = sectors[i].props.special->push_speed / 100.0f;
+		sectors[i].props.push.x = M_Cos(sectors[i].props.special->push_angle) * mul;
+		sectors[i].props.push.y = M_Sin(sectors[i].props.special->push_angle) * mul;
+		sectors[i].props.push.z = sectors[i].props.special->push_zspeed / (r_doubleframes.d ? 89.2f : 100.0f);
+	}
 }
 
 //--- editor settings ---

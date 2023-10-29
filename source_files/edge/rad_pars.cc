@@ -2224,6 +2224,220 @@ static void RAD_ParseReplaceThing(param_set_t& pars)
 	AddStateToScript(this_rad, 0, RAD_ActReplaceThing, thingarg);
 }
 
+static void RAD_ParseFlagSector(param_set_t& pars)
+{
+	// FlagSector <tag> <FLAG> <TRUE or FALSE>
+
+	s_flagsector_t *secf;
+	secf = new s_flagsector_t;
+
+	RAD_CheckForInt(pars[1], &secf->tag);
+
+	if (secf->tag == 0)
+		RAD_Error("%s: Invalid tag number: %d\n", pars[0], secf->tag);
+
+	if (DDF_CompareName(pars[2], "AIRLESS") == 0)
+		secf->flag = SECSP_AirLess;
+	else if (DDF_CompareName(pars[2], "PROPORTIONAL") == 0)
+		secf->flag = SECSP_Proportional;
+	else if (DDF_CompareName(pars[2], "PUSH_ALL") == 0)
+		secf->flag = SECSP_PushAll;
+	else if (DDF_CompareName(pars[2], "PUSH_CONSTANT") == 0)
+		secf->flag = SECSP_PushConstant;
+	else if (DDF_CompareName(pars[2], "REVERB_SFX") == 0)
+		secf->flag = SECSP_ReverbSFX;
+	else if (DDF_CompareName(pars[2], "SUBMERGED_SFX") == 0)
+		secf->flag = SECSP_SubmergedSFX;
+	else if (DDF_CompareName(pars[2], "SWIMMING") == 0)
+		secf->flag = SECSP_Swimming;
+	else if (DDF_CompareName(pars[2], "VACUUM_SFX") == 0)
+		secf->flag = SECSP_VacuumSFX;
+	else if (DDF_CompareName(pars[2], "WHOLE_REGION") == 0)
+		secf->flag = SECSP_WholeRegion;
+	else
+		RAD_Error("%s: Invalid special sector flag: %s\n", pars[0], pars[2]);
+
+	secf->enable = CheckForBoolean(pars[3]);
+
+	AddStateToScript(this_rad, 0, RAD_ActFlagSector, secf);
+}
+
+static void RAD_ParseDamageSector(param_set_t& pars)
+{
+	// DamageSector <tag> <sourceSpecialType>
+
+	s_sectortypecopy_t *sect;
+	sect = new s_sectortypecopy_t;
+
+	RAD_CheckForInt(pars[1], &sect->tag);
+
+	if (sect->tag == 0)
+		RAD_Error("%s: Invalid tag number: %d\n", pars[0], sect->tag);
+
+	RAD_CheckForInt(pars[2], &sect->sourceSpecialType);
+
+	if ((sect->sourceSpecialType != 0 ) && (P_LookupSectorType(sect->sourceSpecialType) == NULL))
+		RAD_Error("%s: Invalid special sector type: %d\n", pars[0], sect->sourceSpecialType);
+
+	AddStateToScript(this_rad, 0, RAD_ActDamageSector, sect);
+}
+
+static void RAD_ParseDragSector(param_set_t& pars)
+{
+	// DragSector <tag> <factor>
+	// DragSector <tag> <factor> ABSOLUTE
+
+	s_floatsector_t *secf;
+	secf = new s_floatsector_t;
+	
+	RAD_CheckForInt(pars[1], &secf->tag);
+
+	if (secf->tag == 0)
+		RAD_Error("%s: Invalid tag number: %d\n", pars[0], secf->tag);
+
+	RAD_CheckForFloat(pars[2], &secf->amount);
+
+	if (pars.size() >= 4)
+	{
+		if (DDF_CompareName(pars[3], "ABSOLUTE") == 0)
+			secf->relative = false;
+		else
+			RAD_WarnError("%s: expected 'ABSOLUTE' but got '%s'.\n", pars[0], pars[3]);
+	}
+
+	AddStateToScript(this_rad, 0, RAD_ActDragSector, secf);
+}
+
+static void RAD_ParseFrictionSector(param_set_t& pars)
+{
+	// FrictionSector <tag> <factor>
+	// FrictionSector <tag> <factor> ABSOLUTE
+
+	s_floatsector_t *secf;
+	secf = new s_floatsector_t;
+	
+	RAD_CheckForInt(pars[1], &secf->tag);
+
+	if (secf->tag == 0)
+		RAD_Error("%s: Invalid tag number: %d\n", pars[0], secf->tag);
+
+	RAD_CheckForFloat(pars[2], &secf->amount);
+
+	if (pars.size() >= 4)
+	{
+		if (DDF_CompareName(pars[3], "ABSOLUTE") == 0)
+			secf->relative = false;
+		else
+			RAD_WarnError("%s: expected 'ABSOLUTE' but got '%s'.\n", pars[0], pars[3]);
+	}
+
+	AddStateToScript(this_rad, 0, RAD_ActFrictionSector, secf);
+}
+
+static void RAD_ParseGravitySector(param_set_t& pars)
+{
+	// GravitySector <tag> <factor>
+	// GravitySector <tag> <factor> ABSOLUTE
+
+	s_floatsector_t *secf;
+	secf = new s_floatsector_t;
+	
+	RAD_CheckForInt(pars[1], &secf->tag);
+
+	if (secf->tag == 0)
+		RAD_Error("%s: Invalid tag number: %d\n", pars[0], secf->tag);
+
+	RAD_CheckForFloat(pars[2], &secf->amount);
+
+	if (pars.size() >= 4)
+	{
+		if (DDF_CompareName(pars[3], "ABSOLUTE") == 0)
+			secf->relative = false;
+		else
+			RAD_WarnError("%s: expected 'ABSOLUTE' but got '%s'.\n", pars[0], pars[3]);
+	}
+
+	AddStateToScript(this_rad, 0, RAD_ActGravitySector, secf);
+}
+
+static void RAD_ParsePushAngleSector(param_set_t& pars)
+{
+	// PushAngleSector <tag> <angle>
+	// PushAngleSector <tag> <angle> ABSOLUTE
+
+	s_pushsector_t *secp;
+	secp = new s_pushsector_t;
+	
+	RAD_CheckForInt(pars[1], &secp->tag);
+
+	if (secp->tag == 0)
+		RAD_Error("%s: Invalid tag number: %d\n", pars[0], secp->tag);
+
+	RAD_CheckForFloat(pars[2], &secp->amount);
+
+	if (pars.size() >= 4)
+	{
+		if (DDF_CompareName(pars[3], "ABSOLUTE") == 0)
+			secp->relative = false;
+		else
+			RAD_WarnError("%s: expected 'ABSOLUTE' but got '%s'.\n", pars[0], pars[3]);
+	}
+
+	AddStateToScript(this_rad, 0, RAD_ActPushAngleSector, secp);
+}
+
+static void RAD_ParsePushSpeedSector(param_set_t& pars)
+{
+	// PushSpeedSector <tag> <speed>
+	// PushSpeedSector <tag> <speed> ABSOLUTE
+
+	s_pushsector_t *secp;
+	secp = new s_pushsector_t;
+	
+	RAD_CheckForInt(pars[1], &secp->tag);
+
+	if (secp->tag == 0)
+		RAD_Error("%s: Invalid tag number: %d\n", pars[0], secp->tag);
+
+	RAD_CheckForFloat(pars[2], &secp->amount);
+
+	if (pars.size() >= 4)
+	{
+		if (DDF_CompareName(pars[3], "ABSOLUTE") == 0)
+			secp->relative = false;
+		else
+			RAD_WarnError("%s: expected 'ABSOLUTE' but got '%s'.\n", pars[0], pars[3]);
+	}
+
+	AddStateToScript(this_rad, 0, RAD_ActPushSpeedSector, secp);
+}
+
+static void RAD_ParseViscositySector(param_set_t& pars)
+{
+	// ViscositySector <tag> <factor>
+	// ViscositySector <tag> <factor> ABSOLUTE
+
+	s_floatsector_t *secf;
+	secf = new s_floatsector_t;
+	
+	RAD_CheckForInt(pars[1], &secf->tag);
+
+	if (secf->tag == 0)
+		RAD_Error("%s: Invalid tag number: %d\n", pars[0], secf->tag);
+
+	RAD_CheckForFloat(pars[2], &secf->amount);
+
+	if (pars.size() >= 4)
+	{
+		if (DDF_CompareName(pars[3], "ABSOLUTE") == 0)
+			secf->relative = false;
+		else
+			RAD_WarnError("%s: expected 'ABSOLUTE' but got '%s'.\n", pars[0], pars[3]);
+	}
+
+	AddStateToScript(this_rad, 0, RAD_ActViscositySector, secf);
+}
+
 //  PARSER TABLE
 
 static const rts_parser_t radtrig_parsers[] =
@@ -2315,6 +2529,14 @@ static const rts_parser_t radtrig_parsers[] =
 	{2, "REPLACE_WEAPON", 3,3, RAD_ParseReplaceWeapon},
 	{2, "WEAPON_EVENT", 3,3, RAD_ParseWeaponEvent},
 	{2, "REPLACE_THING", 3,3, RAD_ParseReplaceThing},
+	{2, "DAMAGE_SECTOR", 3,3, RAD_ParseDamageSector},
+	{2, "DRAG_SECTOR", 3,4, RAD_ParseDragSector},
+	{2, "FLAG_SECTOR", 4,4, RAD_ParseFlagSector},
+	{2, "FRICTION_SECTOR", 3,4, RAD_ParseFrictionSector},
+	{2, "GRAVITY_SECTOR", 3,4, RAD_ParseGravitySector},
+	{2, "PUSH_ANGLE_SECTOR", 3,4, RAD_ParsePushAngleSector},
+	{2, "PUSH_SPEED_SECTOR", 3,4, RAD_ParsePushSpeedSector},
+	{2, "VISCOSITY_SECTOR", 3,4, RAD_ParseViscositySector},
 
 	// old crud
 	{2, "SECTORV", 4,4, RAD_ParseMoveSector},

@@ -13,7 +13,7 @@ Freedoom (various assets) - Copyright (c) 2001-2019 Contributors to the Freedoom
 "FDDMX" instrument bank - Copyright (c) 2023 Contributors to the Freedoom project
 						  Copyright (c) ConSiGno ("DMXOPL" instrument bank which formed the basis for FDDMX)
 
-libRAD MIDI interface (adapted from YMFMIDI) - Copyright (c) 2021-2023 Devin Acker
+libRAD (patches.cpp/radmidi.cpp, adapted from YMFMIDI) - Copyright (c) 2021-2023 Devin Acker
 
 Mod4Play library - Copyright (c) 2022 Olav Sørensen
 
@@ -23,8 +23,6 @@ minivorbis library - Copyright (c) 2020 Eduardo Bart
 ===========================================================================================
 CC 1.0 Universal License
 ===========================================================================================
-
-"2MGM" soundfont (renamed to Default.sf2) - Yingchun Soul
 
 "ProtoSquare!" soundfont - Yingchun Soul
 
@@ -91,6 +89,8 @@ HacX 1.2/2.0 (various assets) - Copyright (c) 1997-2012 Banjo Software, et al
 MIT License
 ===========================================================================================
 
+"16-Bit Game Station" soundfont - Copyright (c) 2022 Yingchun Soul
+
 BW_Midi_Sequencer library - Copyright (c) 2015-2022 Vitaly Novichkov
 
 "C++ implementation of a fast Gaussian blur algorithm by Ivan Kutskir - Integer Version"
@@ -117,11 +117,22 @@ dr_wav, dr_mp3, and dr_flac libraries - David Reid
 
 Fraction.hpp - Bisqwit
 
-libRAD (Reality Adlib Tracker 2) - Reality Productions
+libRAD (opal.cpp/radplay.cpp) - Reality Productions
+
+"sf_GMbank" soundfont (renamed to Default.sf2) - The Csound Developers
 
 stb_image, stb_image_write, stb_rect_pack and stb_truetype libraries - Sean Barrett
 
 "Unicode Processing with C++0x" Conversion Classes - Andrew Choi
+
+===========================================================================================
+SIL Open Font License
+===========================================================================================
+
+Fira Code (renamed to ECFONT02.ttf) - Copyright 2014-2020 The Fira Code Project Authors
+
+Russo One (renamed to ECFONT01.ttf) - Copyright (c) 2011-2012, Jovanny Lemonad,
+									  with Reserved Font Name "Russo"
 
 ===========================================================================================
 WidePix License

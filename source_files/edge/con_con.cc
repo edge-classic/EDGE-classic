@@ -569,31 +569,25 @@ static float FNSZ_ratio;
 static void CalcSizes()
 {
 	// Would it be preferable to store the reduced sizes in the font_c class? Hmm
-	if (SCREENWIDTH <= 400)
+	if (SCREENWIDTH < 720)
 	{
-		FNSZ = 11;
+		FNSZ = 14;
 		FNSZ_ratio = FNSZ / con_font->def->default_size;
-		if (con_font->def->type == FNTYP_TrueType)
-			XMUL = I_ROUND((con_font->ttf_char_width[current_font_size] + con_font->spacing) * FNSZ_ratio);
-		else
+		if (con_font->def->type == FNTYP_Image)
 			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 	}
-	else if (SCREENWIDTH < 640)
+	else if (SCREENWIDTH < 1440)
 	{
-		FNSZ = 13;
+		FNSZ = 18;
 		FNSZ_ratio = FNSZ / con_font->def->default_size;
-		if (con_font->def->type == FNTYP_TrueType)
-			XMUL = I_ROUND((con_font->ttf_char_width[current_font_size] + con_font->spacing) * FNSZ_ratio);
-		else
+		if (con_font->def->type == FNTYP_Image)
 			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 	}
 	else
 	{
-		FNSZ = 16;
+		FNSZ = 24;
 		FNSZ_ratio = FNSZ / con_font->def->default_size;
-		if (con_font->def->type == FNTYP_TrueType)
-			XMUL = I_ROUND((con_font->ttf_char_width[current_font_size] + con_font->spacing) * FNSZ_ratio);
-		else
+		if (con_font->def->type == FNTYP_Image)
 			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 	}
 }
@@ -638,27 +632,19 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 
 	if (con_font->def->type == FNTYP_TrueType)
 	{
-		float width = (con_font->CharWidth(ch) - con_font->spacing) * FNSZ_ratio / v_pixelaspect.f;
+		float chwidth = con_font->CharWidth(ch);
+		XMUL = I_ROUND(chwidth * FNSZ_ratio / v_pixelaspect.f);
+		float width = (chwidth - con_font->spacing) * FNSZ_ratio / v_pixelaspect.f;
 		float x_adjust = (XMUL - width) / 2;
 		float y_adjust = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).y_shift[current_font_size] * FNSZ_ratio;
 		float height = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).height[current_font_size] * FNSZ_ratio;
 		stbtt_aligned_quad *q = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).char_quad[current_font_size];
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_TEXTURE_2D);
-		if ((var_smoothing && con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ON_DEMAND) ||
-			con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ALWAYS)
-			glBindTexture(GL_TEXTURE_2D, con_font->ttf_smoothed_tex_id[current_font_size]);
-		else
-			glBindTexture(GL_TEXTURE_2D, con_font->ttf_tex_id[current_font_size]);
 		glBegin(GL_POLYGON);
 		glTexCoord2f(q->s0,q->t0); glVertex2f(x + x_adjust,y - y_adjust);
         glTexCoord2f(q->s1,q->t0); glVertex2f(x + x_adjust + width,y - y_adjust);
         glTexCoord2f(q->s1,q->t1); glVertex2f(x + x_adjust + width,y - y_adjust - height);
         glTexCoord2f(q->s0,q->t1); glVertex2f(x + x_adjust,y - y_adjust - height);
 		glEnd();
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_BLEND);
 		return;
 	}
 
@@ -763,6 +749,17 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 		glEnable(GL_ALPHA_TEST);
 		glAlphaFunc(GL_GREATER, 0);
 	}
+	else if (con_font->def->type == FNTYP_TrueType)
+	{
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_TEXTURE_2D);
+		if ((var_smoothing && con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ON_DEMAND) ||
+			con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ALWAYS)
+			glBindTexture(GL_TEXTURE_2D, con_font->ttf_smoothed_tex_id[current_font_size]);
+		else
+			glBindTexture(GL_TEXTURE_2D, con_font->ttf_tex_id[current_font_size]);
+	}
 
 	bool draw_cursor = false;
 
@@ -776,6 +773,15 @@ static void DrawText(int x, int y, const char *s, rgbcol_t col)
 	for (; *s; s++, pos++)
 	{
 		DrawChar(x, y, *s, col);
+
+		if (con_font->def->type == FNTYP_TrueType)
+		{
+			if (s+1)
+			{
+				x += (float)stbtt_GetGlyphKernAdvance(con_font->ttf_info, con_font->GetGlyphIndex(*s), 
+					con_font->GetGlyphIndex(*(s+1))) * con_font->ttf_kern_scale[current_font_size] * FNSZ_ratio / v_pixelaspect.f;
+			}
+		}
 
 		if (pos == input_pos && draw_cursor)
 		{

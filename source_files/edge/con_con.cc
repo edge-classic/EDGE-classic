@@ -568,28 +568,14 @@ static float FNSZ_ratio;
 
 static void CalcSizes()
 {
-	// Would it be preferable to store the reduced sizes in the font_c class? Hmm
-	if (SCREENWIDTH < 720)
-	{
-		FNSZ = 14;
-		FNSZ_ratio = FNSZ / con_font->def->default_size;
-		if (con_font->def->type == FNTYP_Image)
-			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
-	}
-	else if (SCREENWIDTH < 1440)
-	{
-		FNSZ = 18;
-		FNSZ_ratio = FNSZ / con_font->def->default_size;
-		if (con_font->def->type == FNTYP_Image)
-			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
-	}
+	if (SCREENWIDTH < 1024)
+		FNSZ = 16;
 	else
-	{
 		FNSZ = 24;
-		FNSZ_ratio = FNSZ / con_font->def->default_size;
-		if (con_font->def->type == FNTYP_Image)
-			XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
-	}
+
+	FNSZ_ratio = FNSZ / con_font->def->default_size;
+	if (con_font->def->type == FNTYP_Image)
+		XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 }
 
 
@@ -674,7 +660,7 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
 
 }
 
-static void DrawEndoomChar(int x, int y, char ch, rgbcol_t col, rgbcol_t col2, bool blink, GLuint tex_id)
+static void DrawEndoomChar(float x, float y, char ch, rgbcol_t col, rgbcol_t col2, bool blink, GLuint tex_id, int enwidth)
 {
 	if (x + FNSZ < 0)
 		return;
@@ -688,14 +674,13 @@ static void DrawEndoomChar(int x, int y, char ch, rgbcol_t col, rgbcol_t col2, b
 
 	glBegin(GL_QUADS);
 
-	// Tweak x to prevent overlap of subsequent letters; may need to make this a bit more smart down the line
-	glVertex2i(x + 4, y);
+	glVertex2i(x-(enwidth/2), y);
 
-	glVertex2i(x + 4, y + FNSZ);
+	glVertex2i(x-(enwidth/2), y + FNSZ);
 
-	glVertex2i(x + FNSZ - 3, y + FNSZ);
+	glVertex2i(x+(enwidth/2), y + FNSZ);
 
-	glVertex2i(x + FNSZ - 3, y);
+	glVertex2i(x+(enwidth/2), y);
 
 	glEnd();
 
@@ -719,16 +704,16 @@ static void DrawEndoomChar(int x, int y, char ch, rgbcol_t col, rgbcol_t col2, b
 	glBegin(GL_POLYGON);
 
 	glTexCoord2f(tx1, ty1);
-	glVertex2i(x, y);
+	glVertex2i(x - enwidth, y);
 
 	glTexCoord2f(tx1, ty2); 
-	glVertex2i(x, y + FNSZ);
+	glVertex2i(x - enwidth, y + FNSZ);
 
 	glTexCoord2f(tx2, ty2);
-	glVertex2i(x + FNSZ, y + FNSZ);
+	glVertex2i(x + enwidth, y + FNSZ);
 
 	glTexCoord2f(tx2, ty1);
-	glVertex2i(x + FNSZ, y);
+	glVertex2i(x + enwidth, y);
 
 	glEnd();
 
@@ -809,6 +794,8 @@ static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
 	// Always whiten the font when used with console output
 	GLuint tex_id = W_ImageCache(endoom_font->font_image, true, (const colourmap_c *)0, true);
 
+	int enwidth = I_ROUND((float)endoom_font->im_mono_width * ((float)FNSZ/endoom_font->im_mono_width) / 2);
+
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex_id);
  
@@ -821,9 +808,9 @@ static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
 		byte info = endoom_line->endoom_bytes.at(i);
 
 		DrawEndoomChar(x, y, endoom_line->line.at(i), endoom_colors[info & 15],
-			endoom_colors[(info >> 4) & 7], info & 128, tex_id);
+			endoom_colors[(info >> 4) & 7], info & 128, tex_id, enwidth);
 
-		x += FNSZ + I_ROUND(endoom_font->spacing);
+		x += enwidth;
 
 		if (x >= SCREENWIDTH)
 			break;

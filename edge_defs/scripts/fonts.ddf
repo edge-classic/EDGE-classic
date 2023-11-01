@@ -15,7 +15,6 @@ TTF_SMOOTHING = "ALWAYS";
 [ENDFONT] //font used for the ENDOOM lump
 TYPE=IMAGE;
 IMAGE="ENDFONT";
-SPACING = -8;
 
 [EDGE3] //font used for the options menus
 TYPE=TRUETYPE;

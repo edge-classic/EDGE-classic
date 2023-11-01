@@ -131,6 +131,9 @@ SIL Open Font License
 
 Fira Code (renamed to ECFONT02.ttf) - Copyright 2014-2020 The Fira Code Project Authors
 
+Nova Cut (renamed to ECFONT03.ttf) - Copyright (c) 2011, wmk69,
+									 with Reserved Font Name NovaCut
+
 Russo One (renamed to ECFONT01.ttf) - Copyright (c) 2011-2012, Jovanny Lemonad,
 									  with Reserved Font Name "Russo"
 

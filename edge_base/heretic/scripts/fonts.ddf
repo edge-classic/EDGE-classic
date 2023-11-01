@@ -7,6 +7,10 @@
 
 #VERSION 1.30
 
+[EDGE3] //font used for the options menus
+TYPE=TRUETYPE;
+TTF="ECFONT03.ttf";
+TTF_SMOOTHING = "ALWAYS";
 
 [DOOM]
 TYPE=PATCH;

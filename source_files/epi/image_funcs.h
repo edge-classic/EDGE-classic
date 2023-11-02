@@ -22,6 +22,7 @@
 #include "file.h"
 #include "image_data.h"
 #include <filesystem>
+#include <array>
 
 namespace epi
 {
@@ -37,6 +38,19 @@ typedef enum
 }
 image_format_e;
 
+class image_atlas_c
+{
+	public:
+		image_data_c *data;
+		unsigned int texid;
+		unsigned int smoothed_texid;
+		std::vector<std::array<int, 4>> rects; // x,y,width,height
+
+	public:
+	image_atlas_c(int _w, int _h);
+	~image_atlas_c();
+};
+
 // determine image format from the first 32 bytes (or so) of the file.
 // the file_size is the total size of the file or lump, and helps to
 // distinguish DOOM patch format from other things.
@@ -50,6 +64,12 @@ image_format_e Image_FilenameToFormat(const std::filesystem::path& filename);
 // or RGBA (never paletted).  The image size (width and height) will be
 // rounded to the next power-of-two.
 image_data_c *Image_Load(file_c *f);
+
+// given a collection of loaded images, pack and return the image data
+// for an atlas containing all of them. Does not assume that the incoming
+// data pointers should be deleted/freed. Images at a BPP of 3 will be
+// converted to BPP 4 with 255 for their pixel alpha values.
+image_atlas_c *Image_Pack(const std::vector<image_data_c *> &im_pack_data);
 
 // reads the principle information from the image header.
 // (should be much faster than loading the whole image).

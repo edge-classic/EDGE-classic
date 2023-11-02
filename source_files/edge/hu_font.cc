@@ -22,6 +22,7 @@
 #include "main.h"
 #include "font.h"
 #include "image_data.h"
+#include "image_funcs.h"
 
 #include "dm_defs.h"
 #include "dm_state.h"
@@ -29,12 +30,11 @@
 #include "r_local.h"
 #include "r_colormap.h"
 #include "r_draw.h"
+#include "r_texgl.h"
 #include "r_modes.h"
 #include "r_image.h"
 #include "w_files.h"
 #include "w_wad.h"
-#define STB_RECT_PACK_IMPLEMENTATION
-#include "stb_rect_pack.h"
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 
@@ -176,6 +176,35 @@ void font_c::LoadPatches()
 		p_cache.ratio = IM_WIDTH(Nom) / IM_HEIGHT(Nom);
 	}
 	spacing = def->spacing;
+
+	// Atlas Test
+	/*std::vector<epi::image_data_c *> patch_data;
+	for (int i = 0; i < total; i++)
+	{
+		if (!p_cache.images[i]) continue;
+		epi::image_data_c *patch_img = nullptr;
+		epi::image_data_c *tmp_img = ReadAsEpiBlock(const_cast<image_c *>(p_cache.images[i]));
+		if (tmp_img->bpp == 1)
+		{
+			epi::image_data_c *rgb_img = R_PalettisedToRGB(tmp_img, (const byte *) &playpal_data[0], p_cache.images[i]->opacity);
+			delete tmp_img;
+			patch_img = rgb_img;
+		}
+		else
+			patch_img = tmp_img;
+		patch_data.push_back(patch_img);
+	}
+	epi::image_atlas_c *atlas_test = epi::Image_Pack(patch_data);
+	if (atlas_test)
+	{
+		std::filesystem::path atlas_png = home_dir;
+		atlas_png.append("atlas.png");
+		if (std::filesystem::exists(atlas_png))
+			std::filesystem::remove(atlas_png);
+		epi::PNG_Save(atlas_png, atlas_test->data);
+	}
+	for (int i = 0; i < patch_data.size(); i++)
+		delete patch_data[i];*/
 }
 
 void font_c::LoadFontImage()

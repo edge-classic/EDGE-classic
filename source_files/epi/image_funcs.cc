@@ -22,6 +22,9 @@
 #include "path.h"
 #include "str_util.h"
 
+#define STB_RECT_PACK_IMPLEMENTATION
+#include "stb_rect_pack.h"
+
 #define STBI_ONLY_PNG
 #define STBI_ONLY_TGA
 #define STBI_ONLY_JPEG
@@ -34,6 +37,19 @@
 
 namespace epi
 {
+
+image_atlas_c::image_atlas_c(int _w, int _h)
+{
+	data = new image_data_c(_w, _h, 4);
+	texid = smoothed_texid = 0;
+}
+
+image_atlas_c::~image_atlas_c()
+{
+	delete[] data;
+	data = nullptr;
+	texid = smoothed_texid = 0;
+}
 
 image_format_e Image_DetectFormat(byte *header, int header_len, int file_size)
 {
@@ -205,6 +221,62 @@ image_data_c *Image_Load(file_c *f)
 	return img;
 }
 
+image_atlas_c *Image_Pack(const std::vector<image_data_c *> &im_pack_data)
+{
+	stbrp_node nodes[4096]; // Max OpenGL texture width we allow
+	std::vector<stbrp_rect> rects;
+	rects.resize(im_pack_data.size());
+	// These should only grow up to the minimum coverage, which is hopefully less than
+	// the 4096 since stb_rect_pack indicates the number of nodes should be higher
+	// than the actual width for best results
+	int atlas_w = 1;
+	int atlas_h = 1;
+	for (size_t i = 0; i < im_pack_data.size(); i++)
+	{
+		SYS_ASSERT(im_pack_data[i]->bpp >= 3);
+		if (im_pack_data[i]->bpp == 3)
+			im_pack_data[i]->SetAlpha(255);
+		rects[i].id = i; // uh
+		rects[i].w = im_pack_data[i]->width;
+		rects[i].h = im_pack_data[i]->height;
+		if (rects[i].w > atlas_w)
+			atlas_w = 1; while (atlas_w < (int)rects[i].w)  atlas_w <<= 1;
+		if (rects[i].h > atlas_h)
+			atlas_h = 1; while (atlas_h < (int)rects[i].h)  atlas_h <<= 1;
+	}
+	if (atlas_h < atlas_w)
+		atlas_h = atlas_w;
+	stbrp_context ctx;
+  	stbrp_init_target(&ctx, atlas_w, atlas_h, nodes, 4096);
+	int packres = stbrp_pack_rects(&ctx, rects.data(), rects.size());
+	while (packres != 1)
+	{
+		atlas_w *= 2;
+		if (atlas_h < atlas_w)
+			atlas_h = atlas_w;
+		if (atlas_w > 4096 || atlas_h > 4096)
+			I_Error("Image_Pack: Atlas exceeds maximum OpenGL allowed texture size (4096x4096)!");
+		stbrp_init_target(&ctx, atlas_w, atlas_h, nodes, 4096);
+		packres = stbrp_pack_rects(&ctx, rects.data(), rects.size());
+	}
+	image_atlas_c *atlas = new image_atlas_c(atlas_w, atlas_h);
+	// fill atlas image_data_c
+	for (size_t i = 0; i < im_pack_data.size(); i++)
+	{
+		int rect_x = rects[i].x;
+		int rect_y = rects[i].y;
+		for (size_t x = 0; x < im_pack_data[i]->width; x++)
+		{
+			for (size_t y = 0; y < im_pack_data[i]->height; y++)
+			{
+				memcpy(atlas->data->PixelAt(rect_x + x, rect_y + y), im_pack_data[i]->PixelAt(x, y), 4);
+			}
+		}
+		atlas->rects.push_back(std::array<int, 4>{{rect_x, rect_y, rects[i].w, rects[i].h}});
+	}
+	atlas->data->Invert();
+	return atlas;
+}
 
 bool Image_GetInfo(file_c *f, int *width, int *height, int *bpp)
 {

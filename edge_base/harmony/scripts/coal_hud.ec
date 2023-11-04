@@ -83,25 +83,25 @@ function new_overlay_status() =
 	
 	RelX = hud.x_left + (hud.x_right - hud.x_left) * 0.95
 	
-    //if (player.cur_weapon() == "PISTOL")
-    //hud.stretch_image(RelX, 181, 13, 11, "CLIPA0", 1)
+    if (player.cur_weapon() == "PISTOL")
+    hud.stretch_image(RelX, 181, 13, 11, "CLIPA0", 1)
 
-    if (player.cur_weapon() == "SHOTGUN")
+    else if (player.cur_weapon() == "SHOTGUN")
     hud.stretch_image(RelX, 181, 15, 11, "SHELA0", 1)
 
-    if (player.cur_weapon() == "SUPERSHOTGUN")
+    else if (player.cur_weapon() == "SUPERSHOTGUN")
     hud.stretch_image(RelX, 181, 15, 11, "SHELA0", 1)
 
-    if (player.cur_weapon() == "CHAINGUN")
+    else if (player.cur_weapon() == "CHAINGUN")
 	hud.stretch_image(RelX, 181, 13, 11, "CLIPA0", 1)
 
-    if (player.cur_weapon() == "ROCKET_LAUNCHER")
+    else if (player.cur_weapon() == "ROCKET_LAUNCHER")
 	hud.stretch_image(RelX, 181, 9, 11, "ROCKA0", 1)
 
-    if (player.cur_weapon() == "PLASMA_RIFLE")
+    else if (player.cur_weapon() == "PLASMA_RIFLE")
  	hud.stretch_image(RelX, 181, 13, 11, "CELLA0", 1)
 
-    if (player.cur_weapon() == "BFG9000")
+    else if (player.cur_weapon() == "BFG9000")
 	hud.stretch_image(RelX, 181, 9, 11, "ROCKA0", 1)
 	
 	hud.text_font("DOOM")
@@ -121,12 +121,12 @@ function draw_all() =
         return
     }
 	
-    // there are four standard HUDs:
-	// the first two have different styles for the widescreen status bar extenders
-	// the third is the fullscreen hud
-	// the fourth is "hudless", i.e. you can only see your weapon
+    // there are three standard HUDs:
+	// the first uses the built-in widescreen status bar
+	// the second is the fullscreen hud
+	// the third is "hudless", i.e. you can only see your weapon
 	
-    var which = hud.which_hud() % 4
+    var which = hud.which_hud() % 3
 
 	if (which == 0)
 	{
@@ -135,12 +135,6 @@ function draw_all() =
 		doom_status_bar()
 	}
 	else if (which == 1)
-	{
-		hud.universal_y_adjust = -16
-		hud.render_world(0, 0, 320, 200 - 32)
-		doom_status_bar2()
-	}
-	else if (which == 2)
 	{
 		hud.universal_y_adjust = 0
 		hud.render_world(0, 0, 320, 200)

@@ -868,8 +868,7 @@ void ParseLinedefField(linedef_t *line, const std::string& key, const std::strin
 void ParseUDMF_Block(epi::lexer_c& lex, int cur_type)
 {
 	vertex_t  * vertex = NULL;
-	thing_t   * thing  = NULL;
-	sector_t  * sector = NULL;
+	thing_t   * thing  = NULL;	
 	sidedef_t * side   = NULL;
 	linedef_t * line   = NULL;
 
@@ -877,7 +876,7 @@ void ParseUDMF_Block(epi::lexer_c& lex, int cur_type)
 	{
 		case UDMF_VERTEX:  vertex = NewVertex();  break;
 		case UDMF_THING:   thing  = NewThing();   break;
-		case UDMF_SECTOR:  sector = NewSector();  break;
+		case UDMF_SECTOR:  NewSector();  break;
 		case UDMF_SIDEDEF: side   = NewSidedef(); break;
 		case UDMF_LINEDEF: line   = NewLinedef(); break;
 		default: break;

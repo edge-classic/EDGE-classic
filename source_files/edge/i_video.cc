@@ -213,7 +213,7 @@ void I_StartupGraphics(void)
 	// If needed, set the default window toggle mode to the largest non-native res
 	if (tw_displaymode.d == scrmode_c::SCR_INVALID)
 	{
-		for (int i = 0; i < screen_modes.size(); i++)
+		for (size_t i = 0; i < screen_modes.size(); i++)
 		{
 			scrmode_c *check = screen_modes[i];
 			if (check->display_mode == scrmode_c::SCR_WINDOW)

@@ -1485,7 +1485,7 @@ static void LoadUDMFSectors()
 		if (section == "sector")
 		{
 			int cz = 0, fz = 0;
-			float fx = 0.0f, fy = 0.0f, cx = 0.0f, cy = 0.0f;
+			float fx = 0.0f, fy = 0.0f;
 			float fx_sc = 1.0f, fy_sc = 1.0f, cx_sc = 1.0f, cy_sc = 1.0f;
 			float rf = 0.0f, rc = 0.0f;
 			float gravfactor = 1.0f;
@@ -1548,9 +1548,13 @@ static void LoadUDMFSectors()
 				else if (key == "ypanningfloor")
 					fy = epi::LEX_Double(value);
 				else if (key == "xpanningceiling")
-					cx = epi::LEX_Double(value);
+				{
+					//cx = epi::LEX_Double(value);
+				}
 				else if (key == "ypanningceiling")
-					cy = epi::LEX_Double(value);
+				{
+					//cy = epi::LEX_Double(value);
+				}					
 				else if (key == "xscalefloor")
 					fx_sc = epi::LEX_Double(value);
 				else if (key == "yscalefloor")
@@ -3347,7 +3351,10 @@ void ShutdownLevel(void)
 
 	P_RemoveAllMobjs(false);
 
-	for (auto adhoc : level_adhocs) delete adhoc; level_adhocs.clear();
+	for (auto adhoc : level_adhocs) 
+		delete adhoc; 
+		
+	level_adhocs.clear();
 }
 
 

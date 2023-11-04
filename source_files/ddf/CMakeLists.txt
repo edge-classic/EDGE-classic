@@ -32,6 +32,6 @@ target_include_directories(edge_ddf PRIVATE ../edge)
 target_include_directories(edge_ddf PRIVATE ../epi)
 
 target_compile_options(edge_ddf PRIVATE
-  $<$<CXX_COMPILER_ID:MSVC>:/W4>
-  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
+  $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNINGS}>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:${EDGE_WARNINGS}>
 )

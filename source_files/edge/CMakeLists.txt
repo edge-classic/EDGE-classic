@@ -158,21 +158,21 @@ else()
 	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} gl4es)
 endif()
 
-target_include_directories(edge-classic PRIVATE ../almostequals)
+target_include_directories(edge-classic SYSTEM PRIVATE ../almostequals)
 target_include_directories(edge-classic PRIVATE ../ajbsp)
 target_include_directories(edge-classic PRIVATE ../coal)
-target_include_directories(edge-classic PRIVATE ../crsid)
+target_include_directories(edge-classic SYSTEM PRIVATE ../crsid)
 target_include_directories(edge-classic PRIVATE ../ddf)
 target_include_directories(edge-classic PRIVATE ../dehacked)
-target_include_directories(edge-classic PRIVATE ../dr_libs)
+target_include_directories(edge-classic SYSTEM PRIVATE ../dr_libs)
 target_include_directories(edge-classic PRIVATE ../ec_voxelib)
 target_include_directories(edge-classic PRIVATE ../epi)
-target_include_directories(edge-classic PRIVATE ../libprimesynth)
-target_include_directories(edge-classic PRIVATE ../libRAD)
-target_include_directories(edge-classic PRIVATE ../m4p)
-target_include_directories(edge-classic PRIVATE ../minivorbis)
-target_include_directories(edge-classic PRIVATE ../miniz)
-target_include_directories(edge-classic PRIVATE ../stb)
+target_include_directories(edge-classic SYSTEM PRIVATE ../libprimesynth)
+target_include_directories(edge-classic SYSTEM PRIVATE ../libRAD)
+target_include_directories(edge-classic SYSTEM PRIVATE ../m4p)
+target_include_directories(edge-classic SYSTEM PRIVATE ../minivorbis)
+target_include_directories(edge-classic SYSTEM PRIVATE ../miniz)
+target_include_directories(edge-classic SYSTEM PRIVATE ../stb)
 if(MSVC OR WIN32_CLANG)
   target_include_directories(edge-classic PRIVATE ../sdl2/include)
 endif()
@@ -180,8 +180,8 @@ endif()
 target_link_libraries(edge-classic PRIVATE ${EDGE_LINK_LIBRARIES})
 
 target_compile_options(edge-classic PRIVATE
-  $<$<CXX_COMPILER_ID:MSVC>:/W4>
-  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
+  $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNINGS}>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:${EDGE_WARNINGS}>
 )
 
 set(COPY_FILES "")

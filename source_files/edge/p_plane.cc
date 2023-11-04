@@ -1067,7 +1067,7 @@ bool EV_DoPlane(sector_t * sec, const movplanedef_c * def, sector_t * model)
     // Do sector action
     if (sec->floor_vertex_slope || sec->ceil_vertex_slope)
     {
-        I_Warning("Plane movers are not supported for vertex slopes! (Sector %d)\n", sec - sectors);
+        I_Warning("Plane movers are not supported for vertex slopes! (Sector %u)\n", int(sec - sectors));
         return false;
     }
     plane_move_t *secaction = P_SetupSectorAction(sec, def, model);

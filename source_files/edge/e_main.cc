@@ -319,7 +319,7 @@ static void SetGlobalVars(void)
 	}
 
 	p = argv::Find("res");
-	if (p > 0 && p + 2 < argv::list.size() && !argv::IsOption(p+1) && !argv::IsOption(p+2))
+	if (p > 0 && p + 2 < int(argv::list.size()) && !argv::IsOption(p+1) && !argv::IsOption(p+2))
 	{
 		if (DISPLAYMODE == 2)
 			I_Warning("Current display mode set to borderless fullscreen. Provided resolution of %dx%d will be ignored!\n", 
@@ -356,7 +356,7 @@ static void SetGlobalVars(void)
 	p = argv::Find("spritekludge");
 	if (p > 0)
 	{
-		if (p + 1 < argv::list.size() && !argv::IsOption(p+1))
+		if (p + 1 < int(argv::list.size()) && !argv::IsOption(p+1))
 			sprite_kludge = atoi(argv::list[p+1].c_str());
 
 		if (!sprite_kludge)
@@ -1343,7 +1343,7 @@ static void CheckTurbo(void)
 
 	if (p > 0)
 	{
-		if (p + 1 < argv::list.size() && !argv::IsOption(p+1))
+		if (p + 1 < int(argv::list.size()) && !argv::IsOption(p+1))
 			turbo_scale = atoi(argv::list[p+1].c_str());
 		else
 			turbo_scale = 200;
@@ -1453,7 +1453,7 @@ static void AddCommandLineFiles(void)
 
 	int p;
 
-	for (p = 1; p < argv::list.size() && !argv::IsOption(p); p++)
+	for (p = 1; p < int(argv::list.size()) && !argv::IsOption(p); p++)
 	{
 		AddSingleCmdLineFile(std::filesystem::u8path(argv::list[p]), false);
 	}
@@ -1462,7 +1462,7 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("file");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-file") == 0))
+	while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-file") == 0))
 	{
 		// the parms after p are wadfile/lump names,
 		// go until end of parms or another '-' preceded parm
@@ -1476,7 +1476,7 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("script");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-script") == 0))
+	while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-script") == 0))
 	{
 		// the parms after p are script filenames,
 		// go until end of parms or another '-' preceded parm
@@ -1507,7 +1507,7 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("deh");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-deh") == 0))
+	while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-deh") == 0))
 	{
 		// the parms after p are Dehacked/BEX filenames,
 		// go until end of parms or another '-' preceded parm
@@ -1537,7 +1537,7 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("dir");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p],"-dir") == 0))
+	while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::strcmp(argv::list[p],"-dir") == 0))
 	{
 		// the parms after p are directory names,
 		// go until end of parms or another '-' preceded parm
@@ -1808,7 +1808,7 @@ static void E_InitialState(void)
 	{
 		warp_deathmatch = 1;
 
-		if (pp + 1 < argv::list.size() && !argv::IsOption(pp+1))
+		if (pp + 1 < int(argv::list.size()) && !argv::IsOption(pp+1))
 			warp_deathmatch = MAX(1, atoi(argv::list[pp+1].c_str()));
 
 		warp = true;

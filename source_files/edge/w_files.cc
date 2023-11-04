@@ -363,7 +363,7 @@ byte *W_OpenPackOrLumpInMemory(const std::string& name, const std::vector<std::s
 
 void W_DoPackSubstitutions()
 {
-	for (int i=0; i < data_files.size(); i++)
+	for (size_t i=0; i < data_files.size(); i++)
 	{
 		if (data_files[i]->pack)
 			Pack_ProcessSubstitutions(data_files[i]->pack, i);

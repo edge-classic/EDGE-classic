@@ -477,7 +477,7 @@ static void P_BringUpWeapon(player_t * p)
 
 	if (p->zoom_fov > 0)
 	{
-		if (info->zoom_fov < ANG_MAX)
+		if (info->zoom_fov < int(ANG_MAX))
 			p->zoom_fov = info->zoom_fov;
 		else
 			p->zoom_fov = 0;
@@ -1940,7 +1940,7 @@ void A_WeaponZoom(mobj_t * mo)
 		if (! (p->ready_wp < 0 || p->pending_wp >= 0))
 			fov =p->weapons[p->ready_wp].info->zoom_fov;
 	
-		if (fov == ANG_MAX)
+		if (fov == int(ANG_MAX))
 			fov = 0;
 	}
 

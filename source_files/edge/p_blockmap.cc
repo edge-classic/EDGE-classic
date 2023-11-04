@@ -882,7 +882,7 @@ void P_DynamicLightIterator(float x1, float y1, float z1,
 
 			if (r_maxdlights.d > 0 && seen_dlights.count(mo->dlight.shader) == 0)
 			{
-				if (seen_dlights.size() >= r_maxdlights.d * 20)
+				if ((int)seen_dlights.size() >= r_maxdlights.d * 20)
 					continue;
 				else
 				{
@@ -934,7 +934,7 @@ void P_SectorGlowIterator(sector_t *sec,
 				{
 					// Use first line that the dlight mobj touches
 					// Ideally it is only touching one line
-					for (size_t i = 0; i < sec->linecount; i++)
+					for (int i = 0; i < sec->linecount; i++)
 					{
 						if (P_ThingOnLineSide(mo, sec->lines[i]) == -1)
 						{

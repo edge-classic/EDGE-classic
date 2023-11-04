@@ -240,9 +240,15 @@ image_atlas_c *Image_Pack(const std::vector<image_data_c *> &im_pack_data)
 		rects[i].w = im_pack_data[i]->width;
 		rects[i].h = im_pack_data[i]->height;
 		if (rects[i].w > atlas_w)
-			atlas_w = 1; while (atlas_w < (int)rects[i].w)  atlas_w <<= 1;
+		{
+			atlas_w = 1; 
+			while (atlas_w < (int)rects[i].w)  atlas_w <<= 1;
+		}
 		if (rects[i].h > atlas_h)
-			atlas_h = 1; while (atlas_h < (int)rects[i].h)  atlas_h <<= 1;
+		{
+			atlas_h = 1; 
+			while (atlas_h < (int)rects[i].h)  atlas_h <<= 1;
+		}			
 	}
 	if (atlas_h < atlas_w)
 		atlas_h = atlas_w;
@@ -265,9 +271,9 @@ image_atlas_c *Image_Pack(const std::vector<image_data_c *> &im_pack_data)
 	{
 		int rect_x = rects[i].x;
 		int rect_y = rects[i].y;
-		for (size_t x = 0; x < im_pack_data[i]->width; x++)
+		for (short x = 0; x < im_pack_data[i]->width; x++)
 		{
-			for (size_t y = 0; y < im_pack_data[i]->height; y++)
+			for (short y = 0; y < im_pack_data[i]->height; y++)
 			{
 				memcpy(atlas->data->PixelAt(rect_x + x, rect_y + y), im_pack_data[i]->PixelAt(x, y), 4);
 			}

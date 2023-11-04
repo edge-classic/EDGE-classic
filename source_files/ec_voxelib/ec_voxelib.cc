@@ -1887,30 +1887,21 @@ void VoxelMesh::createFrom (VoxelData &vox, int optlevel) {
 
 //==========================================================================
 //
-//  normNegZero
-//
-//==========================================================================
-static inline void normNegZero (float *f) {
-  if (*f == 0.0f) memset((void *)f, 0, sizeof(*f));
-}
-
-
-//==========================================================================
-//
 //  GLVoxelMesh::appendVertex
 //
 //==========================================================================
 uint32_t GLVoxelMesh::appendVertex (VVoxVertexEx &gv) {
   ++totaladded;
   // normalize negative zeroes
-  normNegZero(&gv.x);
-  normNegZero(&gv.y);
-  normNegZero(&gv.z);
-  normNegZero(&gv.s);
-  normNegZero(&gv.t);
-  normNegZero(&gv.nx);
-  normNegZero(&gv.ny);
-  normNegZero(&gv.nz);
+  if (AlmostEquals(gv.x, 0.0f)) gv.x = 0.0f;
+  if (AlmostEquals(gv.y, 0.0f)) gv.y = 0.0f;
+  if (AlmostEquals(gv.z, 0.0f)) gv.z = 0.0f;
+  if (AlmostEquals(gv.s, 0.0f)) gv.s = 0.0f;
+  if (AlmostEquals(gv.t, 0.0f)) gv.t = 0.0f;
+  if (AlmostEquals(gv.nx, 0.0f)) gv.nx = 0.0f;
+  if (AlmostEquals(gv.ny, 0.0f)) gv.ny = 0.0f;
+  if (AlmostEquals(gv.nz, 0.0f)) gv.nz = 0.0f;
+  
   // check hashtable
   auto vp = vertcache.get(gv);
   if (vp) return *vp;

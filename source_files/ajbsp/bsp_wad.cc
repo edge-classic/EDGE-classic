@@ -148,7 +148,7 @@ bool Lump_c::GetLine(char *buffer, size_t buf_size)
 		if (parent->mem_fp)
 		{
 			mem_pos = parent->mem_fp->Read(dest, 1);
-			*dest++;
+			dest++;
 		}
 		else
 			*dest++ = fgetc(parent->fp);

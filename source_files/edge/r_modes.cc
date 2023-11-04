@@ -106,7 +106,7 @@ static scrmode_c *R_FindResolution(int w, int h, int depth, int display_mode)
 //
 void R_AddResolution(scrmode_c *mode)
 {
-    scrmode_c *exist = R_FindResolution(mode->width, mode->height,
+	scrmode_c *exist = R_FindResolution(mode->width, mode->height,
 							mode->depth, mode->display_mode);
 	if (exist)
 	{
@@ -127,7 +127,7 @@ void R_AddResolution(scrmode_c *mode)
 
 void R_DumpResList(void)
 {
-    I_Printf("Available Resolutions:\n");
+	I_Printf("Available Resolutions:\n");
 
 	for (int i = 0; i < (int)screen_modes.size(); i++)
 	{
@@ -136,8 +136,8 @@ void R_DumpResList(void)
 		if (i > 0 && (i % 3) == 0)
 			I_Printf("\n");
 
-        I_Printf("  %4dx%4d @ %02d %s", 
-                 cur->width, cur->height, cur->depth, cur->display_mode == cur->SCR_BORDERLESS ?
+		I_Printf("  %4dx%4d @ %02d %s", 
+				 cur->width, cur->height, cur->depth, cur->display_mode == cur->SCR_BORDERLESS ?
 				 "BL" : (cur->display_mode == cur->SCR_FULLSCREEN ? "FS " : "win"));
 	}
 
@@ -261,11 +261,11 @@ void R_SoftInitResolution(void)
 	RGL_NewScreenSize(SCREENWIDTH, SCREENHEIGHT, SCREENBITS);
 
 	if (SCREENWIDTH < 720)
-        current_font_size = 0;
-    else if (SCREENWIDTH < 1440)
-        current_font_size = 1;
-    else
-        current_font_size = 2;
+		current_font_size = 0;
+	else if (SCREENWIDTH < 1440)
+		current_font_size = 1;
+	else
+		current_font_size = 2;
 
 	// -ES- 1999/08/29 Fixes the garbage palettes, and the blank 16-bit console
 	V_SetPalette(PALETTE_NORMAL, 0);
@@ -298,11 +298,11 @@ static bool DoExecuteChangeResolution(scrmode_c *mode)
 	DISPLAYMODE  = mode->display_mode;
 
 	if (SCREENWIDTH < 720)
-        current_font_size = 0;
-    else if (SCREENWIDTH < 1440)
-        current_font_size = 1;
-    else
-        current_font_size = 2;
+		current_font_size = 0;
+	else if (SCREENWIDTH < 1440)
+		current_font_size = 1;
+	else
+		current_font_size = 2;
 
 	I_DeterminePixelAspect();
 
@@ -369,7 +369,7 @@ void R_InitialResolution(void)
 	mode.depth  = SCREENBITS;
 	mode.display_mode   = DISPLAYMODE;
 
-    if (DoExecuteChangeResolution(&mode))
+	if (DoExecuteChangeResolution(&mode))
 	{
 		// this mode worked, make sure it's in the list
 		R_AddResolution(&mode);
@@ -390,7 +390,7 @@ void R_InitialResolution(void)
 			return;
 	}
 
-    // FOOBAR!
+	// FOOBAR!
 	I_Error("Unable to set any resolutions!");
 }
 

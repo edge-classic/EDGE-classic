@@ -1451,9 +1451,9 @@ static void AddCommandLineFiles(void)
 {
 	// first handle "loose" files (arguments before the first option)
 
-	size_t p;
+	int p;
 
-	for (p = 1; p < argv::list.size() && !argv::IsOption(p); p++)
+	for (p = 1; p < int(argv::list.size()) && !argv::IsOption(p); p++)
 	{
 		AddSingleCmdLineFile(std::filesystem::u8path(argv::list[p]), false);
 	}
@@ -1462,7 +1462,7 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("file");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-file") == 0))
+	while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-file") == 0))
 	{
 		// the parms after p are wadfile/lump names,
 		// go until end of parms or another '-' preceded parm
@@ -1476,7 +1476,7 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("script");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-script") == 0))
+	while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-script") == 0))
 	{
 		// the parms after p are script filenames,
 		// go until end of parms or another '-' preceded parm
@@ -1507,7 +1507,7 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("deh");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-deh") == 0))
+	while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-deh") == 0))
 	{
 		// the parms after p are Dehacked/BEX filenames,
 		// go until end of parms or another '-' preceded parm
@@ -1537,7 +1537,7 @@ static void AddCommandLineFiles(void)
 
 	p = argv::Find("dir");
 
-	while (p > 0 && p < argv::list.size() && (!argv::IsOption(p) || epi::strcmp(argv::list[p],"-dir") == 0))
+	while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::strcmp(argv::list[p],"-dir") == 0))
 	{
 		// the parms after p are directory names,
 		// go until end of parms or another '-' preceded parm

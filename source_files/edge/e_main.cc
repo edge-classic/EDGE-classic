@@ -289,7 +289,7 @@ void E_ProgressMessage(const char *message)
 //
 static void SetGlobalVars(void)
 {
-	int p;
+	size_t p;
 	std::string s;
 
 	// Screen Resolution Check...
@@ -1339,7 +1339,7 @@ static void CheckTurbo(void)
 {
 	int turbo_scale = 100;
 
-	int p = argv::Find("turbo");
+	size_t p = argv::Find("turbo");
 
 	if (p > 0)
 	{
@@ -1451,7 +1451,7 @@ static void AddCommandLineFiles(void)
 {
 	// first handle "loose" files (arguments before the first option)
 
-	int p;
+	size_t p;
 
 	for (p = 1; p < argv::list.size() && !argv::IsOption(p); p++)
 	{
@@ -1803,7 +1803,7 @@ static void E_InitialState(void)
 	}
 
 	// deathmatch check...
-	int pp = argv::Find("deathmatch");
+	size_t pp = argv::Find("deathmatch");
 	if (pp > 0)
 	{
 		warp_deathmatch = 1;

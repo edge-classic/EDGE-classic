@@ -605,6 +605,7 @@ static void DrawMLineDoor(mline_t * ml, rgbcol_t rgb)
 	HUD_SolidLine(x1, y1, x2, y2, rgb, linewidth, true, dx, dy);
 }
 
+/*
 static mline_t door_key[] =
 {
 	{{-2, 0}, {-1.7, -0.5}},
@@ -622,7 +623,7 @@ static mline_t door_key[] =
 };
 
 #define NUMDOORKEYLINES (sizeof(door_key)/sizeof(mline_t))
-
+*/
 
 static mline_t player_dagger[] =
 {

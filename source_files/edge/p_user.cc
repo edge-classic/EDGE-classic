@@ -482,7 +482,7 @@ static void MovePlayer(player_t * player, bool extra_tic)
 			if (! (player->ready_wp < 0 || player->pending_wp >= 0))
 				fov =player->weapons[player->ready_wp].info->zoom_fov;
 		
-			if (fov == ANG_MAX)
+			if (fov == int(ANG_MAX))
 				fov = 0;
 		}
 

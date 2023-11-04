@@ -838,7 +838,6 @@ void M_DrawLoad(void)
 {
 	int i;
 	int fontType;
-	float txtscale = 1.0;
 	float LineHeight;
 	int TempX = 0;
 	int TempY = 0;
@@ -855,9 +854,6 @@ void M_DrawLoad(void)
 	else
 		fontType=styledef_c::T_HEADER;
 
-	if (style->def->text[fontType].scale)
-		txtscale=style->def->text[fontType].scale;
-
 	HUD_SetAlpha(style->def->text[fontType].translucency);
 
 	//1. Draw the header i.e. "Load Game"
@@ -873,8 +869,6 @@ void M_DrawLoad(void)
 	TempY = 0; 
 
 	fontType=styledef_c::T_TEXT;
-	if (style->def->text[fontType].scale)
-		txtscale=style->def->text[fontType].scale;
 
 	TempX += style->def->text[styledef_c::T_TEXT].x_offset;
 	TempY += style->def->text[styledef_c::T_TEXT].y_offset;
@@ -1621,8 +1615,8 @@ static void QuitResponse(int ch)
 	if (!netgame)
 	{
 		int numsounds = 0;
-		char refname[16];
-		char sound[16];
+		char refname[64];
+		char sound[64];
 		int i, start;
 
 		// Count the quit messages
@@ -1831,7 +1825,7 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
 
 		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_l)/div, therm_l, 0.0, 0.0);
 
-		for (i, x += step; i < (50/step); i++, x += step)
+		for (x += step; i < (50/step); i++, x += step)
 		{
 			HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_m)/div, therm_m, 0.0, 0.0);
 		}
@@ -2907,7 +2901,6 @@ void M_DrawItems(style_c *style, bool graphical_item)
 	{
 		ShortestLine = 10000.0f;
 		TallestLine = 0.0f;
-		bool backdrop_menu = false;
 		for (i = 0; i < max; i++)
 		{
 			if (! currentMenu->menuitems[i].patch_name[0])
@@ -2946,7 +2939,6 @@ void M_DrawItems(style_c *style, bool graphical_item)
 		}
 		if (ShortestLine == 10000.0f && TallestLine == 0.0f)
 		{
-			backdrop_menu = true;
 			ShortestLine = 20.0f;
 			TallestLine = 20.0f;
 			WidestLine = 121.0f;

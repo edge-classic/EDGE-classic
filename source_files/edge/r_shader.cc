@@ -350,8 +350,8 @@ public:
 
 
 			local_gl_vert_t *glvert = RGL_BeginUnit(shape, num_vert,
-						(is_additive && masked) ? ENV_SKIP_RGB :
-						 is_additive ? ENV_NONE : GL_MODULATE,
+						(is_additive && masked) ? (GLuint) ENV_SKIP_RGB :
+						 is_additive ? (GLuint) ENV_NONE : GL_MODULATE,
 						(is_additive && !masked) ? 0 : tex,
 						GL_MODULATE, lim[DL]->tex_id(),
 						*pass_var, blending, *pass_var > 0 ? RGB_NO_VALUE : mo->subsector->sector->props.fog_color,
@@ -547,8 +547,8 @@ public:
 
 
 			local_gl_vert_t *glvert = RGL_BeginUnit(shape, num_vert,
-						(is_additive && masked) ? ENV_SKIP_RGB :
-						 is_additive ? ENV_NONE : GL_MODULATE,
+						(is_additive && masked) ? (GLuint) ENV_SKIP_RGB :
+						 is_additive ? (GLuint) ENV_NONE : GL_MODULATE,
 						(is_additive && !masked) ? 0 : tex,
 						GL_MODULATE, lim[DL]->tex_id(),
 						*pass_var, blending, *pass_var > 0 ? RGB_NO_VALUE : mo->subsector->sector->props.fog_color,
@@ -724,8 +724,8 @@ public:
 
 
 			local_gl_vert_t *glvert = RGL_BeginUnit(shape, num_vert,
-						(is_additive && masked) ? ENV_SKIP_RGB :
-						 is_additive ? ENV_NONE : GL_MODULATE,
+						(is_additive && masked) ? (GLuint) ENV_SKIP_RGB :
+						 is_additive ? (GLuint) ENV_NONE : GL_MODULATE,
 						(is_additive && !masked) ? 0 : tex,
 						GL_MODULATE, lim[DL]->tex_id(),
 						*pass_var, blending, *pass_var > 0 ? RGB_NO_VALUE : mo->subsector->sector->props.fog_color,

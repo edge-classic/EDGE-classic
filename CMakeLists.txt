@@ -47,6 +47,9 @@ if (MSVC)
   # Unreferenced formal parameter, and there are many of these
   add_definitions("/wd4100")
 
+  # warning level for edge specific source files 
+  set (EDGE_WARNINGS "/W4")
+
   # To use the sanitizer with MSVC, you will need to either have your Visual Studio
   # or Build Tools install in your PATH variable, or copy the appropriate DLL to the program
   # folder before launching. The paths and filenames can vary based on your setup,
@@ -64,11 +67,16 @@ if (MSVC)
 
   set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS")
 else()
+
   if (WIN32_CLANG)
     add_definitions("-D_CRT_SECURE_NO_WARNINGS")
   endif()
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing -Wall")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing -Wall")
+
+  # warning level for edge specific source files 
+  set (EDGE_WARNINGS -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-stringop-truncation -Wno-stringop-overflow)
+
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
   if (EDGE_SANITIZE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")

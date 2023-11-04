@@ -2426,7 +2426,7 @@ bool BW_MidiSequencer::parseIMF(epi::mem_file_c *mfr, uint16_t rate)
     if(imfEnd == 0) // IMF Type 0 with unlimited file length
         imfEnd = mfr->GetLength();
 
-    while(mfr->GetPosition() < imfEnd)
+    while(mfr->GetPosition() < (int) imfEnd)
     {
         if(mfr->Read(imfRaw, 4) != 4)
             break;

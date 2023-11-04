@@ -314,11 +314,11 @@ static void FillSpriteFrames(int file)
 
 		int S = 0, L = 0;
 
-		for (S; S < sprite_map_len; S++)
+		for (; S < sprite_map_len; S++)
 		{
 			std::string sprname  = sprite_map[S]->name;
 			size_t spr_len = sprname.size();
-			for (L; L < lumpnum; L++)
+			for (; L < lumpnum; L++)
 			{
 				const char *lumpname = W_GetLumpName((*lumps)[L]);
 
@@ -353,13 +353,13 @@ static void FillSpriteFrames(int file)
 		{
 			std::sort(packsprites.begin(), packsprites.end());
 
-			int S = 0, L = 0;
+			size_t S = 0, L = 0;
 
-			for (S; S < sprite_map_len; S++)
+			for (; S < (size_t) sprite_map_len; S++)
 			{
 				std::string sprname  = sprite_map[S]->name;
 				size_t spr_len = sprname.size();
-				for (L; L < packsprites.size(); L++)
+				for (; L < packsprites.size(); L++)
 				{
 					std::string spritebase;
 					epi::STR_TextureNameFromFilename(spritebase, epi::PATH_GetBasename(packsprites[L]).string());
@@ -408,11 +408,11 @@ static void FillSpriteFramesUser()
 
 	int S = 0, L = 0;
 
-	for (S; S < sprite_map_len; S++)
+	for (; S < sprite_map_len; S++)
 	{
 		std::string sprname  = sprite_map[S]->name;
 		size_t spr_len = sprname.size();
-		for (L; L < img_num; L++)
+		for (; L < img_num; L++)
 		{
 			const char *img_name = W_ImageGetName(images[L]);
 

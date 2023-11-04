@@ -65,6 +65,9 @@ std::string DDF_SanitizeName(const std::string& s)
 // Until unicode is truly implemented, restrict characters to extended ASCII
 std::string DDF_SanitizePrintString(const std::string& s)
 {
+	return std::string(s);
+	// This is always true and warns as std::string is char
+	/*
 	std::string out;
 
 	for (size_t i = 0 ; i < s.size() ; i++)
@@ -76,6 +79,7 @@ std::string DDF_SanitizePrintString(const std::string& s)
 	}
 
 	return out;
+	*/
 }
 
 class lang_choice_c

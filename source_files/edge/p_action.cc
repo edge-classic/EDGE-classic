@@ -2202,10 +2202,8 @@ void P_ActEffectTracker(mobj_t * object)
 //
 void P_ActPsychicEffect(mobj_t * object)
 {
-	mobj_t *tracker;
 	mobj_t *target;
 	const atkdef_c *attack;
-	angle_t angle;
 	float damage;
 
 	if (!object->target || !object->currentattack)
@@ -2225,9 +2223,6 @@ void P_ActPsychicEffect(mobj_t * object)
 
 	if (attack->sound)
 		S_StartFX(attack->sound, P_MobjGetSfxCategory(object), object);
-
-	angle = object->angle;
-	tracker = object->tracer;
 
 	DAMAGE_COMPUTE(damage, &attack->damage);
 

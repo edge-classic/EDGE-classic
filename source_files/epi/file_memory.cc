@@ -73,7 +73,7 @@ mem_file_c::~mem_file_c()
 unsigned int mem_file_c::Read(void *dest, unsigned int size)
 {
 	SYS_ASSERT(dest);
-	SYS_ASSERT(size >= 0);
+	SYS_ASSERT((int)size >= 0);
 		
 	unsigned int avail = length - pos;
 

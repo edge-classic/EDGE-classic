@@ -1497,14 +1497,11 @@ int real_vm_c::GLOB_FunctionBody(def_t *func_def, type_t *type, const char *func
 	//
 	// create the parmeters as locals
 	//
-	def_t *defs[MAX_PARMS];
 
 	for (int i=0 ; i < type->parm_num ; i++)
 	{
 		if (FindDef(type->parm_types[i], comp.parm_names[i], comp.scope))
 			CompileError("parameter %s redeclared\n", comp.parm_names[i]);
-
-		defs[i] = DeclareDef(type->parm_types[i], comp.parm_names[i], comp.scope);
 	}
 
 	int code = EmitCode(OP_NULL);
@@ -1906,7 +1903,11 @@ real_vm_c::real_vm_c() :
 {
 	// string #0 must be the empty string
 	int ofs = string_mem.alloc(2);
-	assert(ofs == 0);
+	if (ofs != 0)
+	{
+		RunError("string #0 must be the empty string\n");
+	}
+	
 	strcpy((char *)string_mem.deref(0), "");
 
 
@@ -1919,8 +1920,10 @@ real_vm_c::real_vm_c() :
 
 	// statement #0 is never used
 	ofs = EmitCode(OP_RET);
-	assert(ofs == 0);
-
+	if (ofs != 0)
+	{
+		RunError("statement #0 is never used\n");
+	}
 
 	// global #0 is never used (equivalent to NULL)
 	// global #1-#3 are reserved for function return values

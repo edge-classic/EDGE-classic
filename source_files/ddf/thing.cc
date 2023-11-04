@@ -1097,7 +1097,7 @@ static bool BenefitTryCounterLimit(const char *name, benefit_t *be,
 									 int num_vals)
 {
 	char namebuf[200];
-	int len = strlen(name);
+	size_t len = strlen(name);
 
 	// check for ".LIMIT" prefix
 	if (len < 7 || DDF_CompareName(name+len-6, ".LIMIT") != 0)
@@ -1225,7 +1225,7 @@ static bool BenefitTryAmmoLimit(const char *name, benefit_t *be,
 									 int num_vals)
 {
 	char namebuf[200];
-	int len = strlen(name);
+	size_t len = strlen(name);
 
 	// check for ".LIMIT" prefix
 

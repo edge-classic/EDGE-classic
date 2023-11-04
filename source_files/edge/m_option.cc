@@ -222,7 +222,6 @@ static char JoyAxis[]      = "Off/Turn/Turn (Reversed)/Look (Inverted)/Look/Walk
 static char JoyDevs[]   = "None/1/2/3/4/5/6";
 static char JpgPng[]    = "JPEG/PNG";  // basic on/off
 static char AAim[]      = "Off/On/Mlook";
-static char MipMaps[]   = "None/Good/Best";
 static char Details[]   = "Low/Medium/High";
 static char Hq2xMode[]  = "Off/UI Only/UI & Sprites/All";
 static char TitleScaleMode[]  = "Normal/Zoom/Stretch/Fill Border";

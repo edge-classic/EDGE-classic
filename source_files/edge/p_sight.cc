@@ -272,7 +272,7 @@ static bool CrossSubsector(subsector_t *sub)
 //
 static bool CheckSightBSP(unsigned int bspnum)
 {
-	SYS_ASSERT(bspnum >= 0);
+	SYS_ASSERT((int)bspnum >= 0);
 
 	while (! (bspnum & NF_V5_SUBSECTOR))
 	{
@@ -307,7 +307,7 @@ static bool CheckSightBSP(unsigned int bspnum)
 
 	bspnum &= ~NF_V5_SUBSECTOR;
 
-	SYS_ASSERT(0 <= bspnum && int(bspnum) < numsubsectors);
+	SYS_ASSERT(0 <= int(bspnum) && int(bspnum) < numsubsectors);
 
 	{
 		subsector_t *sub = subsectors + bspnum;

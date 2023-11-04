@@ -961,9 +961,9 @@ wall_tile_flag_e;
 
 
 static void DrawWallPart(drawfloor_t *dfloor,
-		                 float x1, float y1, float lz1, float lz2,
+						 float x1, float y1, float lz1, float lz2,
 						 float x2, float y2, float rz1, float rz2,
-		                 float tex_top_h, surface_t *surf,
+						 float tex_top_h, surface_t *surf,
 						 const image_c *image,
 						 bool mid_masked, bool opaque,
    						 float tex_x1, float tex_x2,
@@ -977,10 +977,10 @@ static void DrawWallPart(drawfloor_t *dfloor,
 	//if (! props)
 	//	props = surf->override_p ? surf->override_p : dfloor->props;
 	if (surf->override_p)
-        props = surf->override_p;
+		props = surf->override_p;
 
-    if (! props)
-        props = dfloor->props;
+	if (! props)
+		props = dfloor->props;
 
 	float trans = surf->translucency;
 
@@ -1192,7 +1192,7 @@ static void DrawWallPart(drawfloor_t *dfloor,
 							   DLIT_Wall, &data);
 
 		P_SectorGlowIterator(cur_seg->frontsector,
-				             v_bbox[BOXLEFT],  v_bbox[BOXBOTTOM], bottom,
+							 v_bbox[BOXLEFT],  v_bbox[BOXBOTTOM], bottom,
 							 v_bbox[BOXRIGHT], v_bbox[BOXTOP],    top,
 							 GLOWLIT_Wall, &data);
 	}
@@ -1201,8 +1201,8 @@ static void DrawWallPart(drawfloor_t *dfloor,
 }
 
 static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f,
-						    float tex_top_h, surface_t *surf,
-						    bool opaque, float x_offset)
+							float tex_top_h, surface_t *surf,
+							bool opaque, float x_offset)
 {
 
 	/* smov may be NULL */
@@ -1305,14 +1305,14 @@ static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f,
 		e_tex += x_offset;
 
 		DrawWallPart(dfloor, x1,y1,f,c, x2,y2,f,c, tex_top_h,
-		             surf, surf->image, true, opaque, s_tex, e_tex);
+					 surf, surf->image, true, opaque, s_tex, e_tex);
 	}
 }
 
 // Mirror the texture on the back of the line
 static void DrawGlass(drawfloor_t *dfloor, float c, float f,
-						    float tex_top_h, surface_t *surf,
-						    bool opaque, float x_offset)
+							float tex_top_h, surface_t *surf,
+							bool opaque, float x_offset)
 {
 
 	line_t *ld = cur_seg->linedef;
@@ -1370,8 +1370,8 @@ static void DrawGlass(drawfloor_t *dfloor, float c, float f,
 }
 
 static void DrawTile(seg_t *seg, drawfloor_t *dfloor,
-                    float lz1, float lz2, float rz1, float rz2,
-                    float tex_z, int flags, surface_t *surf)
+					float lz1, float lz2, float rz1, float rz2,
+					float tex_z, int flags, surface_t *surf)
 {
 	// tex_z = texturing top, in world coordinates
 
@@ -1451,7 +1451,7 @@ static void DrawTile(seg_t *seg, drawfloor_t *dfloor,
 
 static inline void AddWallTile( seg_t *seg, drawfloor_t *dfloor,
  							   surface_t *surf,
-                               float z1, float z2,
+							   float z1, float z2,
 							   float tex_z, int flags,
 							   float f_min, float c_max)
 {
@@ -1465,9 +1465,9 @@ static inline void AddWallTile( seg_t *seg, drawfloor_t *dfloor,
 }
 
 static inline void AddWallTile2( seg_t *seg, drawfloor_t *dfloor,
-                                surface_t *surf,
-                                float lz1, float lz2, float rz1, float rz2,
-							    float tex_z, int flags)
+								surface_t *surf,
+								float lz1, float lz2, float rz1, float rz2,
+								float tex_z, int flags)
 {
 	DrawTile(seg, dfloor, lz1,lz2, rz1,rz2, tex_z, flags, surf);
 }
@@ -1926,7 +1926,7 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor,
 
 	// ignore fake 3D bridges (Batman MAP03)
 	if (cur_seg->linedef &&
-	    cur_seg->linedef->frontsector == cur_seg->linedef->backsector)
+		cur_seg->linedef->frontsector == cur_seg->linedef->backsector)
 		return;
 
 	const region_properties_t *props = surf->override_p ?
@@ -2055,7 +2055,7 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor,
 //		I_Debugf("Flood BBox size: %1.0f x %1.0f\n", lx2-lx1, ly2-ly1);
 
 		P_DynamicLightIterator(lx1,ly1,data.plane_h, lx2,ly2,data.plane_h,
-				               DLIT_Flood, &data);
+							   DLIT_Flood, &data);
 	}
 }
 
@@ -2692,12 +2692,12 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h,
 	if (use_dlights && ren_extralight < 250)
 	{
 		P_DynamicLightIterator(v_bbox[BOXLEFT],  v_bbox[BOXBOTTOM], h,
-				               v_bbox[BOXRIGHT], v_bbox[BOXTOP],    h,
+							   v_bbox[BOXRIGHT], v_bbox[BOXTOP],    h,
 							   DLIT_Plane, &data);
 
 		P_SectorGlowIterator(cur_sub->sector,
-				             v_bbox[BOXLEFT],  v_bbox[BOXBOTTOM], h,
-				             v_bbox[BOXRIGHT], v_bbox[BOXTOP],    h,
+							 v_bbox[BOXLEFT],  v_bbox[BOXBOTTOM], h,
+							 v_bbox[BOXRIGHT], v_bbox[BOXTOP],    h,
 							 GLOWLIT_Plane, &data);
 	}
 
@@ -3454,7 +3454,7 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 
 
 void R_Render(int x, int y, int w, int h, mobj_t *camera,
-              bool full_height, float expand_w)
+			  bool full_height, float expand_w)
 {
 	viewwindow_x = x;
 	viewwindow_y = y;

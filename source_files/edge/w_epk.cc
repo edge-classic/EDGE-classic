@@ -414,7 +414,7 @@ static pack_file_c * ProcessZip(data_file_c *df)
 			case MZ_ZIP_FILE_READ_FAILED:
 			case MZ_ZIP_FILE_SEEK_FAILED:
 				I_Error("Failed to open EPK file: %s\n", df->name.u8string().c_str());
-
+				break;	
 			default:
 				I_Error("Not a EPK file (or is corrupted): %s\n", df->name.u8string().c_str());
 		}
@@ -639,9 +639,9 @@ static void ProcessDDFInPack(pack_file_c *pack)
 	if (bare_filename.empty())
 		bare_filename = df->name.string();
 
-	for (int dir=0; dir < pack->dirs.size(); dir++)
+	for (size_t dir=0; dir < pack->dirs.size(); dir++)
 	{
-		for (int entry=0; entry < pack->dirs[dir].entries.size(); entry++)
+		for (size_t entry=0; entry < pack->dirs[dir].entries.size(); entry++)
 		{
 			pack_entry_c& ent = pack->dirs[dir].entries[entry];
 
@@ -693,9 +693,9 @@ static void ProcessCoalAPIInPack(pack_file_c *pack)
 	source += " in ";
 	source += bare_filename;
 
-	for (int dir=0; dir < pack->dirs.size(); dir++)
+	for (size_t dir=0; dir < pack->dirs.size(); dir++)
 	{
-		for (int entry=0; entry < pack->dirs[dir].entries.size(); entry++)
+		for (size_t entry=0; entry < pack->dirs[dir].entries.size(); entry++)
 		{
 			pack_entry_c& ent = pack->dirs[dir].entries[entry];
 			if (epi::PATH_GetFilename(ent.name) == "COAL_API.EC" || epi::PATH_GetBasename(ent.name) == "COALAPI")
@@ -724,9 +724,9 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
 	source += " in ";
 	source += bare_filename;
 
-	for (int dir=0; dir < pack->dirs.size(); dir++)
+	for (size_t dir=0; dir < pack->dirs.size(); dir++)
 	{
-		for (int entry=0; entry < pack->dirs[dir].entries.size(); entry++)
+		for (size_t entry=0; entry < pack->dirs[dir].entries.size(); entry++)
 		{
 			pack_entry_c& ent = pack->dirs[dir].entries[entry];
 			if (epi::PATH_GetFilename(ent.name) == "COAL_HUD.EC" || epi::PATH_GetBasename(ent.name) == "COALHUDS")
@@ -769,7 +769,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 				bool add_it = true;
 
 				// Check DDFIMAGE definitions to see if this is replacing a lump type def
-				for (size_t j = 0; j < imagedefs.GetSize(); j++)
+				for (int j = 0; j < imagedefs.GetSize(); j++)
 				{
 					imagedef_c *img = imagedefs[j];
 					if (img->type == IMGDT_Lump && epi::case_cmp(img->info, texname) == 0 && 
@@ -813,7 +813,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 		for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
 		{
 			pack_entry_c& entry = pack->dirs[d].entries[i];
-			for (size_t j = 0; j < sfxdefs.GetSize(); j++)
+			for (int j = 0; j < sfxdefs.GetSize(); j++)
 			{
 				sfxdef_c *sfx = sfxdefs[j];
 				// Assume that same stem name is meant to replace an identically named lump entry
@@ -835,7 +835,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 		for (size_t i = 0 ; i < pack->dirs[d].entries.size() ; i++)
 		{
 			pack_entry_c& entry = pack->dirs[d].entries[i];
-			for (size_t j = 0; j < playlist.GetSize(); j++)
+			for (int j = 0; j < playlist.GetSize(); j++)
 			{
 				pl_entry_c *song = playlist[j];
 				if (epi::PATH_GetExtension(song->info).empty())
@@ -1070,7 +1070,7 @@ std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack)
 				epi::STR_TextureNameFromFilename(texname, stem);
 
 				// Don't add things already defined in DDFIMAGE
-				for (size_t j = 0; j < imagedefs.GetSize(); j++)
+				for (int j = 0; j < imagedefs.GetSize(); j++)
 				{
 					imagedef_c *img = imagedefs[j];
 					if (epi::case_cmp(img->name, texname) == 0)

@@ -98,8 +98,8 @@ void argv::Init(const int argc, const char *const *argv)
 #else
 void argv::Init(const int argc, const char *const *argv) 
 {
-    list.reserve(argc);
-    SYS_ASSERT(argv::list.size() >= 0);
+	SYS_ASSERT(argc >= 0);
+    list.reserve(argc);    
 
     for (int i = 0; i < argc; i++) 
 	{
@@ -169,7 +169,7 @@ std::string argv::Value(std::string longName, int *numParams)
 {
     SYS_ASSERT(!longName.empty());
 
-    int pos = Find(longName, numParams);
+    size_t pos = Find(longName, numParams);
 
     if (pos <= 0)
         return "";
@@ -316,7 +316,7 @@ void argv::DebugDumpArgs(void)
 {
 	I_Printf("Command-line Options:\n");
 
-	int i = 0;
+	size_t i = 0;
 
 	while (i < list.size())
 	{

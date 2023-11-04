@@ -289,7 +289,7 @@ void E_ProgressMessage(const char *message)
 //
 static void SetGlobalVars(void)
 {
-	size_t p;
+	int p;
 	std::string s;
 
 	// Screen Resolution Check...
@@ -319,7 +319,7 @@ static void SetGlobalVars(void)
 	}
 
 	p = argv::Find("res");
-	if (p > 0 && p + 2 < argv::list.size() && !argv::IsOption(p+1) && !argv::IsOption(p+2))
+	if (p > 0 && p + 2 < int(argv::list.size()) && !argv::IsOption(p+1) && !argv::IsOption(p+2))
 	{
 		if (DISPLAYMODE == 2)
 			I_Warning("Current display mode set to borderless fullscreen. Provided resolution of %dx%d will be ignored!\n", 
@@ -356,7 +356,7 @@ static void SetGlobalVars(void)
 	p = argv::Find("spritekludge");
 	if (p > 0)
 	{
-		if (p + 1 < argv::list.size() && !argv::IsOption(p+1))
+		if (p + 1 < int(argv::list.size()) && !argv::IsOption(p+1))
 			sprite_kludge = atoi(argv::list[p+1].c_str());
 
 		if (!sprite_kludge)
@@ -1339,11 +1339,11 @@ static void CheckTurbo(void)
 {
 	int turbo_scale = 100;
 
-	size_t p = argv::Find("turbo");
+	int p = argv::Find("turbo");
 
 	if (p > 0)
 	{
-		if (p + 1 < argv::list.size() && !argv::IsOption(p+1))
+		if (p + 1 < int(argv::list.size()) && !argv::IsOption(p+1))
 			turbo_scale = atoi(argv::list[p+1].c_str());
 		else
 			turbo_scale = 200;
@@ -1803,12 +1803,12 @@ static void E_InitialState(void)
 	}
 
 	// deathmatch check...
-	size_t pp = argv::Find("deathmatch");
+	int pp = argv::Find("deathmatch");
 	if (pp > 0)
 	{
 		warp_deathmatch = 1;
 
-		if (pp + 1 < argv::list.size() && !argv::IsOption(pp+1))
+		if (pp + 1 < int(argv::list.size()) && !argv::IsOption(pp+1))
 			warp_deathmatch = MAX(1, atoi(argv::list[pp+1].c_str()));
 
 		warp = true;

@@ -185,7 +185,11 @@ void R_InitShaderTables()
 //
 void R_Init(void)
 {
-	I_Printf("%s", language["RefreshDaemon"]);
+	if (language["RefreshDaemon"])
+		I_Printf("%s", language["RefreshDaemon"]);
+	else
+		I_Printf("Unknown Refresh Daemon");
+	
 	R_InitShaderTables();
 
 	framecount = 0;

@@ -1502,6 +1502,8 @@ int real_vm_c::GLOB_FunctionBody(def_t *func_def, type_t *type, const char *func
 	{
 		if (FindDef(type->parm_types[i], comp.parm_names[i], comp.scope))
 			CompileError("parameter %s redeclared\n", comp.parm_names[i]);
+
+		DeclareDef(type->parm_types[i], comp.parm_names[i], comp.scope);			
 	}
 
 	int code = EmitCode(OP_NULL);

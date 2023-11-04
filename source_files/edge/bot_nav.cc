@@ -846,8 +846,6 @@ static void NAV_EnemiesInSubsector(const subsector_t *sub, bot_t *bot, float rad
 
 static void NAV_EnemiesInNode(unsigned int bspnum, bot_t *bot, float radius, mobj_t*& best_mo, float& best_score)
 {
-	SYS_ASSERT(((int)bspnum) >= 0);
-
 	if (bspnum & NF_V5_SUBSECTOR)
 	{
 		bspnum &= ~NF_V5_SUBSECTOR;

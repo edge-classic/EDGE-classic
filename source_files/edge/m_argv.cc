@@ -169,12 +169,12 @@ std::string argv::Value(std::string longName, int *numParams)
 {
     SYS_ASSERT(!longName.empty());
 
-    size_t pos = Find(longName, numParams);
+    int pos = Find(longName, numParams);
 
     if (pos <= 0)
         return "";
 
-    if (pos + 1 < list.size() && !IsOption(pos+1))
+    if (pos + 1 < int(list.size()) && !IsOption(pos+1))
         return list[pos+1];
     else
         return "";
@@ -316,13 +316,13 @@ void argv::DebugDumpArgs(void)
 {
 	I_Printf("Command-line Options:\n");
 
-	size_t i = 0;
+	int i = 0;
 
-	while (i < list.size())
+	while (i < int(list.size()))
 	{
 		bool pair_it_up = false;
 
-		if (i>0 && i+1 < list.size() && !IsOption(i+1))
+		if (i>0 && i+1 < int(list.size()) && !IsOption(i+1))
 			pair_it_up = true;
 
 		I_Printf("  %s %s\n", list[i].c_str(), pair_it_up ? list[i+1].c_str() : "");

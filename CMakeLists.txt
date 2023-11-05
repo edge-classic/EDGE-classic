@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 option(EDGE_GL_ES2 "Enable GLES2 Rendering Backend" OFF)
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 
-include("cmake/EDGEClassic.cmake")  
+include("cmake/EDGEClassic.cmake")
 
 if (WIN32)
   if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -34,9 +34,7 @@ if (MSVC)
 
   # get the number of logical cores for parallel build
   cmake_host_system_information(RESULT LOGICAL_CORES QUERY NUMBER_OF_LOGICAL_CORES)
-  math(EXPR COMPILE_CORES "${LOGICAL_CORES} - 1")
-
-  set (EDGE_LIBRARY_DIR ${CMAKE_SOURCE_DIR}/libraries)
+  math(EXPR COMPILE_CORES "${LOGICAL_CORES} - 1")  
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:fast /MP${COMPILE_CORES}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs /MP${COMPILE_CORES}")

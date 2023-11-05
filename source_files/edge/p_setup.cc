@@ -83,7 +83,8 @@ DEF_CVAR(udmf_strict, "0", CVAR_ARCHIVE)
 //
 
 // Stores pointers to ad-hoc/derived classes that need to be cleaned up on ending a level
-std::vector<void *> level_adhocs;
+std::vector<sectortype_c *> adhoc_sectors;
+std::vector<mobjtype_c *> adhoc_things;
 
 int numvertexes;
 vertex_t *vertexes = nullptr;
@@ -1687,7 +1688,7 @@ static void LoadUDMFSectors()
 					adhoc->CopyDetail(const_cast<sectortype_c &>(*ss->props.special));
 					adhoc->use_colourmap = nullptr;
 					ss->props.special = adhoc;
-					level_adhocs.push_back(adhoc);
+					adhoc_sectors.push_back(adhoc);
 				}
 				// Make colourmap if necessary
 				for (int i = 0; i < colourmaps.GetSize(); i++)
@@ -2311,7 +2312,7 @@ static void LoadUDMFThings()
 						udmf_thing->radius *= sx;
 					}
 					udmf_thing->info = adhoc_info;
-					level_adhocs.push_back(adhoc_info);
+					adhoc_things.push_back(adhoc_info);
 				}
 			}
 
@@ -3351,10 +3352,13 @@ void ShutdownLevel(void)
 
 	P_RemoveAllMobjs(false);
 
-	for (auto adhoc : level_adhocs) 
+	for (auto adhoc : adhoc_sectors) 
 		delete adhoc; 
-		
-	level_adhocs.clear();
+	adhoc_sectors.clear();
+
+	for (auto adhoc : adhoc_things) 
+		delete adhoc; 
+	adhoc_things.clear();
 }
 
 

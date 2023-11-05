@@ -30,13 +30,9 @@
 
 #include "math_crc.h"
 
-#include <vector>
-
 extern epi::crc32_c mapsector_CRC;
 extern epi::crc32_c mapline_CRC;
 extern epi::crc32_c mapthing_CRC;
-
-extern std::vector<void *> level_adhocs;
 
 extern int mapthing_NUM;
 

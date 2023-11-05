@@ -9,7 +9,7 @@ add_library(
   c_memory.cc
 )
 
-target_include_directories(edge_coal PRIVATE ../almostequals)
+target_include_directories(edge_coal PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
 
 target_compile_options(edge_coal PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNINGS}>

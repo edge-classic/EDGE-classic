@@ -1,0 +1,4 @@
+# Disabled at root, see file in source_files for EDGE-Classic specific formatting rules
+DisableFormat: true
+
+# to format EDGE source files on windows run this in source_files: for /r %t in (*.cpp *.h *.cc *.hpp) do clang-format -i -style=file "%t"

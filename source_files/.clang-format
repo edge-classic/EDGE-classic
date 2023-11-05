@@ -1,0 +1,7 @@
+BasedOnStyle: Microsoft
+AlignConsecutiveAssignments: true
+AlignConsecutiveBitFields: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveMacros: true
+AlignTrailingComments: true
+SortIncludes: false

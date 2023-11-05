@@ -1,0 +1,5 @@
+root = true
+
+[source_files/**/*.{cc,h,cpp,hpp}]
+indent_style = space
+indent_size = 4

@@ -9,8 +9,6 @@
 ##################################################
 # Investigate: High Priority
 ##################################################
-leak:MDL_LoadModel
-leak:DetailSlope_BoundIt
 leak:gl4es_glCreateProgram
 
 ##################################################

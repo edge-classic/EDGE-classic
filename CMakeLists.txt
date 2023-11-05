@@ -57,8 +57,8 @@ if (MSVC)
   # C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\<version number>\bin\Hostx64\x64
   # and the file would be clang_rt.asan_dbg_dynamic-x86_64.dll
   if (EDGE_SANITIZE AND MSVC_VERSION GREATER_EQUAL 1929)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address -fno-omit-frame-pointer")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address -fno-omit-frame-pointer")
   endif()
 
   if (WIN32_CLANG)
@@ -79,8 +79,8 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
   if (EDGE_SANITIZE)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
     set(CMAKE_EXE_LINKER_FLAGS "-fsanitize=address -static-libasan")
   endif()
 

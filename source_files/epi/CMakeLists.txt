@@ -28,13 +28,13 @@ add_library(
   str_util.cc
 )
 
-target_include_directories(edge_epi PRIVATE ../almostequals)
-target_include_directories(edge_epi PRIVATE ../stb)
-target_include_directories(edge_epi PRIVATE ../libgme/gme)
-target_include_directories(edge_epi PRIVATE ../m4p)
-target_include_directories(edge_epi PRIVATE ../superfasthash)
+target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
+target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/stb)
+target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/libgme/gme)
+target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/m4p)
+target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/superfasthash)
 if(MSVC OR WIN32_CLANG)
-  target_include_directories(edge_epi PRIVATE ../sdl2/include)
+  target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/include)
 endif()
 
 target_compile_options(edge_epi PRIVATE

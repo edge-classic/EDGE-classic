@@ -7,7 +7,7 @@ add_library(
   ec_voxelib.cc
 )
 
-target_include_directories(ec_voxelib PRIVATE ../almostequals)
+target_include_directories(ec_voxelib PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
 
 target_compile_options(ec_voxelib PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNINGS}>

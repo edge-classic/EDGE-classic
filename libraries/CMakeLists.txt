@@ -1,0 +1,11 @@
+
+add_subdirectory(crsid)
+if (NOT EDGE_GL_ES2)
+  add_subdirectory(glad)
+else()
+  add_subdirectory(gl4es)
+endif()
+add_subdirectory(libprimesynth)
+add_subdirectory(libRAD)
+add_subdirectory(m4p)
+add_subdirectory(miniz)

@@ -100,7 +100,7 @@ static const std::vector<game_check_t> game_checker =
 		{ 14, "FREEDOOM2",  {"FREEDOOM", "MAP01"}    },
 		{ 7,  "REKKR",      {"REKCREDS", "E1M1"}     },
 		{ 6,  "HACX",       {"HACX-R",   "MAP01"}    },
-		{ 5,  "HARMONY",    {"ENDOOM",  "0HAWK01"}   }, // Harmony Re-Release
+		{ 5,  "HARMONY",    {"0HAWK01",  "MAP01"}    },
 		{ 4,  "CHEX",    	{"ENDOOM",   "_DEUTEX_"} }, // Original Chex Quest, NOT CQ3
 		{ 3,  "HERETIC",    {"MUS_E1M1", "E1M1"}     },
 		{ 12, "PLUTONIA",   {"CAMO1",    "MAP01"}    },
@@ -889,6 +889,7 @@ std::string W_CheckForUniqueLumps(epi::file_c *file, int *score)
 		if (epi::prefix_cmp(header.identification, "IWAD") != 0 &&
 			epi::case_cmp(check.unique_lumps[0], "DMENUPIC") != 0 &&
 			epi::case_cmp(check.unique_lumps[0], "REKCREDS") != 0 && 
+			epi::case_cmp(check.unique_lumps[0], "0HAWK01" ) != 0 &&
 			epi::case_cmp(check.unique_lumps[0], "EDGEGAME") != 0 &&
 			epi::case_cmp(check.unique_lumps[0], "ENDOOM") != 0)
 		{
@@ -913,17 +914,15 @@ std::string W_CheckForUniqueLumps(epi::file_c *file, int *score)
 						*score = check.score;
 					return check.base;
 				}
-				// Either really smart or really dumb Chex Quest/Harmony detection method
+				// Either really smart or really dumb Chex Quest detection method
 				else if (epi::case_cmp(check.unique_lumps[0], "ENDOOM") == 0)
 				{
 					SYS_ASSERT(entry.size == 4000);
 					file->Seek(entry.pos, epi::file_c::SEEKPOINT_START);
 					byte *endoom = new byte[entry.size];
 					file->Read(endoom, entry.size);
-					if ((endoom[1026] == 'c' && endoom[1028] == 'h' && endoom[1030] == 'e' && endoom[1032] == 'x'
-						&& endoom[1034] == 'q' && endoom[1036] == 'u' && endoom[1038] == 'e' && endoom[1040] == 's' && endoom[1042] == 't') ||
-						(endoom[3840] == 'R' && endoom[3842] == 'a' && endoom[3844] == 'b' && endoom[3846] == 'o'
-						&& endoom[3848] == 't' && endoom[3850] == 'i' && endoom[3852] == 'k'))
+					if (endoom[1026] == 'c' && endoom[1028] == 'h' && endoom[1030] == 'e' && endoom[1032] == 'x'
+					&& endoom[1034] == 'q' && endoom[1036] == 'u' && endoom[1038] == 'e' && endoom[1040] == 's' && endoom[1042] == 't')
 					{
 						lump1_found = true;
 					}

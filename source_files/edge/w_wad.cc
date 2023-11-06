@@ -100,7 +100,7 @@ static const std::vector<game_check_t> game_checker =
 		{ 14, "FREEDOOM2",  {"FREEDOOM", "MAP01"}    },
 		{ 7,  "REKKR",      {"REKCREDS", "E1M1"}     },
 		{ 6,  "HACX",       {"HACX-R",   "MAP01"}    },
-		{ 5,  "HARMONY",    {"0HAWK01",  "MAP01"}    },
+		{ 5,  "HARMONY",    {"0HAWK01",  "DBIGFONT"} }, // Only the original, not Harmony-Compatible, should have DBIGFONT
 		{ 4,  "CHEX",    	{"ENDOOM",   "_DEUTEX_"} }, // Original Chex Quest, NOT CQ3
 		{ 3,  "HERETIC",    {"MUS_E1M1", "E1M1"}     },
 		{ 12, "PLUTONIA",   {"CAMO1",    "MAP01"}    },

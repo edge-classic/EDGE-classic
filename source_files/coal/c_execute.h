@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 //  COAL EXECUTION ENGINE
 //----------------------------------------------------------------------
-// 
+//
 //  Copyright (C) 2021-2023  The EDGE Team
 //  Copyright (C) 2009-2021  Andrew Apted
 //  Copyright (C) 1996-1997  Id Software, Inc.
@@ -21,35 +21,33 @@
 #ifndef __COAL_EXECUTION_STUFF_H__
 #define __COAL_EXECUTION_STUFF_H__
 
-
-#define	MAX_CALL_STACK		96
-#define	MAX_LOCAL_STACK		2048
+#define MAX_CALL_STACK  96
+#define MAX_LOCAL_STACK 2048
 
 struct call_stack_c
 {
-	int s;
-	int func;
+    int s;
+    int func;
 };
-
 
 class execution_c
 {
-public:
-	// code pointer
-	int s;
-	int func;
+  public:
+    // code pointer
+    int s;
+    int func;
 
-	bool tracing;
+    bool tracing;
 
-	double stack[MAX_LOCAL_STACK];
-	int stack_depth;
+    double stack[MAX_LOCAL_STACK];
+    int    stack_depth;
 
-	call_stack_c call_stack[MAX_CALL_STACK+1];
-	int call_depth;
+    call_stack_c call_stack[MAX_CALL_STACK + 1];
+    int          call_depth;
 
-public:
-	 execution_c();
-	~execution_c();
+  public:
+    execution_c();
+    ~execution_c();
 };
 
 #endif /* __COAL_EXECUTION_STUFF_H__ */

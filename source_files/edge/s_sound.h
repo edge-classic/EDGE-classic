@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Sound FX Handling Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -32,7 +32,7 @@ struct mobj_s;
 struct sfx_s;
 
 // for the sliders
-#define SND_SLIDER_NUM  20
+#define SND_SLIDER_NUM 20
 
 extern float slider_to_gain[SND_SLIDER_NUM];
 
@@ -53,38 +53,35 @@ extern float slider_to_gain[SND_SLIDER_NUM];
 //
 typedef enum
 {
-	SNCAT_UI = 0,     // for the user interface (menus, tips)
-	SNCAT_Player,     // for console player (pain, death, pickup)
-	SNCAT_Weapon,     // for console player's weapon
-	SNCAT_Opponent,   // for all other players (DM or COOP)
-	SNCAT_Monster,    // for all monster sounds
-	SNCAT_Object,     // for all objects (esp. projectiles)
-	SNCAT_Level,      // for doors, lifts and map scripts
+    SNCAT_UI = 0,   // for the user interface (menus, tips)
+    SNCAT_Player,   // for console player (pain, death, pickup)
+    SNCAT_Weapon,   // for console player's weapon
+    SNCAT_Opponent, // for all other players (DM or COOP)
+    SNCAT_Monster,  // for all monster sounds
+    SNCAT_Object,   // for all objects (esp. projectiles)
+    SNCAT_Level,    // for doors, lifts and map scripts
 
-	SNCAT_NUMTYPES
-}
-sound_category_e;
-
+    SNCAT_NUMTYPES
+} sound_category_e;
 
 /* FX Flags */
 typedef enum
 {
-	FX_NORMAL = 0,
+    FX_NORMAL = 0,
 
-	// monster bosses: sound is not diminished by distance
-	FX_Boss = (1 << 1),
-	
-	// only play one instance of this sound at this location.
-	FX_Single = (1 << 2),
+    // monster bosses: sound is not diminished by distance
+    FX_Boss = (1 << 1),
 
-	// combine with FX_Single: the already playing sound is
-	// allowed to continue and the new sound it dropped.
-	// Without this flag: the playing sound is cut off.
-	// (has no effect without FX_Single).
-	FX_Precious = (1 << 3),
+    // only play one instance of this sound at this location.
+    FX_Single = (1 << 2),
 
-}
-fx_flag_e;
+    // combine with FX_Single: the already playing sound is
+    // allowed to continue and the new sound it dropped.
+    // Without this flag: the playing sound is cut off.
+    // (has no effect without FX_Single).
+    FX_Precious = (1 << 3),
+
+} fx_flag_e;
 
 // Init/Shutdown
 void S_Init(void);

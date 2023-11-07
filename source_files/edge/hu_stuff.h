@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Head Up Display
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -35,15 +35,15 @@ extern int showMessages;
 // Globally visible constants.
 //
 
-#define HU_BROADCAST	5
+#define HU_BROADCAST 5
 
-#define HU_MSGX		0
-#define HU_MSGY		0
-#define HU_MSGWIDTH	64  // in characters
-#define HU_MSGHEIGHT	1  // in lines
+#define HU_MSGX      0
+#define HU_MSGY      0
+#define HU_MSGWIDTH  64 // in characters
+#define HU_MSGHEIGHT 1  // in lines
 
-#define HU_MSGTIMEOUT	(4*TICRATE)
-#define HU_IMPMSGTIMEOUT	(2*TICRATE) // how long the "found a secret" message is displayed
+#define HU_MSGTIMEOUT    (4 * TICRATE)
+#define HU_IMPMSGTIMEOUT (2 * TICRATE) // how long the "found a secret" message is displayed
 
 #define HU_IS_PRINTABLE(c) ((c) >= 32 && (c) <= 126)
 
@@ -56,7 +56,7 @@ extern bool chat_on;
 void HU_Init(void);
 void HU_Start(void);
 
-bool HU_Responder(event_t * ev);
+bool HU_Responder(event_t *ev);
 
 void HU_StartMessage(const char *msg);
 void HU_StartImportantMessage(const char *msg);

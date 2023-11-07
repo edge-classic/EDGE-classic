@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE RNG
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -29,16 +29,16 @@
 #include "types.h"
 
 void M_Random_Init(void);
-int M_Random(void);
-int M_RandomNegPos(void);
-int P_Random(void);
-int C_Random(void);
-int P_RandomNegPos(void);
+int  M_Random(void);
+int  M_RandomNegPos(void);
+int  P_Random(void);
+int  C_Random(void);
+int  P_RandomNegPos(void);
 bool M_RandomTest(percent_t chance);
 bool P_RandomTest(percent_t chance);
 
 // Savegame support
-int P_ReadRandomState(void);
+int  P_ReadRandomState(void);
 void P_WriteRandomState(int value);
 
 #endif // __M_RANDOM__

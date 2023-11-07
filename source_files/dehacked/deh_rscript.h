@@ -24,14 +24,14 @@ namespace Deh_Edge
 
 namespace Rscript
 {
-	void Init();
-	void Shutdown();
+void Init();
+void Shutdown();
 
-	void MarkKeenDie(int mt_num);
+void MarkKeenDie(int mt_num);
 
-	void ConvertRAD();
-}
+void ConvertRAD();
+} // namespace Rscript
 
-}  // Deh_Edge
+} // namespace Deh_Edge
 
 #endif /* __DEH_RSCRIPT_HDR__ */

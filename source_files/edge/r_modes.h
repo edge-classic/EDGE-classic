@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Resolution Handling
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -34,50 +34,52 @@
 #include "arrays.h"
 
 // Macros
-#define FROM_320(x)  ((x) * SCREENWIDTH  / 320)
-#define FROM_200(y)  ((y) * SCREENHEIGHT / 200)
+#define FROM_320(x) ((x) * SCREENWIDTH / 320)
+#define FROM_200(y) ((y) * SCREENHEIGHT / 200)
 
 // Screen mode information
 class scrmode_c
 {
-public:
-	int width;
-	int height;
-	int depth;
-	int display_mode;
+  public:
+    int width;
+    int height;
+    int depth;
+    int display_mode;
 
-	enum
-	{
-		SCR_INVALID = -1,
-		SCR_WINDOW,
-		SCR_FULLSCREEN,
-		SCR_BORDERLESS
-	};
+    enum
+    {
+        SCR_INVALID = -1,
+        SCR_WINDOW,
+        SCR_FULLSCREEN,
+        SCR_BORDERLESS
+    };
 
-public:
-	scrmode_c() : width(0), height(0), depth(0), display_mode(SCR_WINDOW)
-	{ }
-		
-	scrmode_c(int _w, int _h, int _depth, int _display_mode) :
-		width(_w), height(_h), depth(_depth), display_mode(_display_mode)
-	{ }
-	
-	scrmode_c(const scrmode_c& other) :
-		width(other.width), height(other.height),
-		depth(other.depth), display_mode(other.display_mode)
-	{ }
+  public:
+    scrmode_c() : width(0), height(0), depth(0), display_mode(SCR_WINDOW)
+    {
+    }
 
-	~scrmode_c()
-	{ }
+    scrmode_c(int _w, int _h, int _depth, int _display_mode)
+        : width(_w), height(_h), depth(_depth), display_mode(_display_mode)
+    {
+    }
+
+    scrmode_c(const scrmode_c &other)
+        : width(other.width), height(other.height), depth(other.depth), display_mode(other.display_mode)
+    {
+    }
+
+    ~scrmode_c()
+    {
+    }
 };
 
-
 // Exported Vars
-extern int SCREENWIDTH;
-extern int SCREENHEIGHT;
-extern int SCREENBITS;
-extern int DISPLAYMODE;
-extern scrmode_c borderless_mode;
+extern int                      SCREENWIDTH;
+extern int                      SCREENHEIGHT;
+extern int                      SCREENBITS;
+extern int                      DISPLAYMODE;
+extern scrmode_c                borderless_mode;
 extern std::vector<scrmode_c *> screen_modes;
 // CVARs related to Alt+Enter toggling
 extern cvar_c tf_screenwidth;
@@ -97,10 +99,9 @@ void R_DumpResList(void);
 
 typedef enum
 {
-	RESINC_Size = 0,
-	RESINC_DisplayMode,
-}
-increment_res_e;
+    RESINC_Size = 0,
+    RESINC_DisplayMode,
+} increment_res_e;
 
 bool R_IncrementResolution(scrmode_c *mode, int what, int dir);
 // update the given screen mode with the next highest (dir=1)
@@ -112,7 +113,7 @@ bool R_IncrementResolution(scrmode_c *mode, int what, int dir);
 void R_ToggleFullscreen(void);
 
 void R_InitialResolution(void);
-bool R_ChangeResolution(scrmode_c *mode); 
+bool R_ChangeResolution(scrmode_c *mode);
 
 void R_SoftInitResolution(void);
 

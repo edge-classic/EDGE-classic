@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Model Management
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -25,26 +25,24 @@ class md2_model_c;
 class mdl_model_c;
 class vxl_model_c;
 
-
-#define MAX_MODEL_SKINS  10
+#define MAX_MODEL_SKINS 10
 
 class modeldef_c
 {
-public:
-	// four letter model name (e.g. "TROO").
-	char name[6];
+  public:
+    // four letter model name (e.g. "TROO").
+    char name[6];
 
-	md2_model_c *md2_model;
-	mdl_model_c *mdl_model;
-	vxl_model_c *vxl_model;
+    md2_model_c *md2_model;
+    mdl_model_c *mdl_model;
+    vxl_model_c *vxl_model;
 
-	const image_c *skins[MAX_MODEL_SKINS];
+    const image_c *skins[MAX_MODEL_SKINS];
 
-public:
-	 modeldef_c(const char *_prefix);
-	~modeldef_c();
+  public:
+    modeldef_c(const char *_prefix);
+    ~modeldef_c();
 };
-
 
 /* Functions */
 

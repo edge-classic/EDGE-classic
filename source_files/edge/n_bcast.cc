@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Networking : Broadcast Links
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -22,7 +22,7 @@
 //
 //----------------------------------------------------------------------------
 
-#if 0  // DISABLED
+#if 0 // DISABLED
 
 #include "i_defs.h"
 #include "i_net.h"
@@ -155,7 +155,7 @@ int N_BroadcastRecv(net_address_c *remote, byte *buffer, int max_len)
 	return actual; //OK
 }
 
-#endif  // DISABLED
+#endif // DISABLED
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

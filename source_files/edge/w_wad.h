@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE WAD Support Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -30,18 +30,18 @@
 
 #include "file.h"
 
-
 class wadtex_resource_c
 {
-public:
-	wadtex_resource_c() : palette(-1), pnames(-1), texture1(-1), texture2(-1)
-	{ }
+  public:
+    wadtex_resource_c() : palette(-1), pnames(-1), texture1(-1), texture2(-1)
+    {
+    }
 
-	// lump numbers, or -1 if nonexistent
-	int palette;
-	int pnames;
-	int texture1;
-	int texture2;
+    // lump numbers, or -1 if nonexistent
+    int palette;
+    int pnames;
+    int texture1;
+    int texture2;
 };
 
 int W_CheckNumForName(const char *name);
@@ -53,7 +53,6 @@ int W_CheckNumForName_XGL(const char *name);
 int W_CheckNumForName_MAP(const char *name);
 int W_CheckNumForTexPatch(const char *name);
 
-
 int W_GetNumForName(const char *name);
 
 int W_LumpLength(int lump);
@@ -64,25 +63,25 @@ byte *W_LoadLump(const char *name, int *length = NULL);
 std::string W_LoadString(int lump);
 std::string W_LoadString(const char *name);
 
-bool W_VerifyLump(int lump);
-bool W_VerifyLumpName(int lump, const char *name);
+bool        W_VerifyLump(int lump);
+bool        W_VerifyLumpName(int lump, const char *name);
 const char *W_GetLumpName(int lump);
 
 epi::file_c *W_OpenLump(int lump);
 epi::file_c *W_OpenLump(const char *name);
 
-int W_GetPaletteForLump(int lump);
-int W_FindFlatSequence(const char *start, const char *end, int *s_offset, int *e_offset);
-std::vector<int> * W_GetFlatList  (int file);
-std::vector<int> * W_GetSpriteList(int file);
-std::vector<int> * W_GetPatchList(int file);
-void W_GetTextureLumps(int file, wadtex_resource_c *res);
-void W_ProcessTX_HI(void);
-int W_GetFileForLump(int lump);
-void W_ShowLumps(int for_file, const char *match);
+int               W_GetPaletteForLump(int lump);
+int               W_FindFlatSequence(const char *start, const char *end, int *s_offset, int *e_offset);
+std::vector<int> *W_GetFlatList(int file);
+std::vector<int> *W_GetSpriteList(int file);
+std::vector<int> *W_GetPatchList(int file);
+void              W_GetTextureLumps(int file, wadtex_resource_c *res);
+void              W_ProcessTX_HI(void);
+int               W_GetFileForLump(int lump);
+void              W_ShowLumps(int for_file, const char *match);
 
-//auxiliary functions to help us deal with when to use skyboxes
-int W_LoboFindSkyImage(int for_file, const char *match);
+// auxiliary functions to help us deal with when to use skyboxes
+int  W_LoboFindSkyImage(int for_file, const char *match);
 bool W_LoboDisableSkybox(const char *ActualSky);
 
 bool W_IsLumpInPwad(const char *name);

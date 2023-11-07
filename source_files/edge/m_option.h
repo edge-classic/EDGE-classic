@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Option Menu (header)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -33,7 +33,7 @@ extern int option_menuon;
 void M_OptMenuInit(void);
 void M_OptDrawer(void);
 void M_OptTicker(void);
-bool M_OptResponder(event_t * ev, int ch);
+bool M_OptResponder(event_t *ev, int ch);
 void M_OptCheckNetgame(void);
 
 #endif // __M_OPTION__

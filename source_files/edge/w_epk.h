@@ -28,15 +28,15 @@ class data_file_c;
 
 class pack_file_c;
 
-epi::file_c * Pack_OpenFile(pack_file_c *pack, const std::string& name);
+epi::file_c *Pack_OpenFile(pack_file_c *pack, const std::string &name);
 
-epi::file_c * Pack_OpenMatch(pack_file_c *pack, const std::string& name, const std::vector<std::string>& extensions);
+epi::file_c *Pack_OpenMatch(pack_file_c *pack, const std::string &name, const std::vector<std::string> &extensions);
 
 // Equivalent to W_IsLumpInPwad....doesn't care or check filetype itself
-int Pack_FindStem(pack_file_c *pack, const std::string& name);
+int Pack_FindStem(pack_file_c *pack, const std::string &name);
 
 // Checks if exact filename is found in a pack; used to help load order determination
-bool Pack_FindFile(pack_file_c *pack, const std::string& name);
+bool Pack_FindFile(pack_file_c *pack, const std::string &name);
 
 // Check images/sound/etc that may override WAD-oriented lumps or definitions
 void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index);

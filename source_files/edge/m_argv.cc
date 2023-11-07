@@ -35,10 +35,9 @@ std::unordered_map<std::string, std::string> env::list;
 // this one is here to avoid infinite recursion of param files.
 typedef struct added_parm_s
 {
-	std::filesystem::path name;
-	struct added_parm_s *next;
-}
-added_parm_t;
+    std::filesystem::path name;
+    struct added_parm_s  *next;
+} added_parm_t;
 
 static added_parm_t *added_parms;
 
@@ -51,35 +50,35 @@ static added_parm_t *added_parms;
 //       using ArgvFind() will only return the first usage.
 //
 #ifdef _WIN32
-void argv::Init(const int argc, const char *const *argv) 
+void argv::Init(const int argc, const char *const *argv)
 {
-	(void)argc;
-	(void)argv;
+    (void)argc;
+    (void)argv;
 
-	int win_argc = 0;
-	size_t i;
-	wchar_t **win_argv = CommandLineToArgvW(GetCommandLineW(), &win_argc);
+    int       win_argc = 0;
+    size_t    i;
+    wchar_t **win_argv = CommandLineToArgvW(GetCommandLineW(), &win_argc);
 
-	if (!win_argv)
-		I_Error("argv::Init: Could not retrieve command line arguments!\n");
+    if (!win_argv)
+        I_Error("argv::Init: Could not retrieve command line arguments!\n");
 
     list.reserve(win_argc);
     SYS_ASSERT(argv::list.size() >= 0);
 
-	std::vector<std::string> argv_block;
+    std::vector<std::string> argv_block;
 
-    for (i = 0; i < win_argc; i++) 
-	{
+    for (i = 0; i < win_argc; i++)
+    {
         SYS_ASSERT(win_argv[i] != nullptr);
-		std::u16string arg = reinterpret_cast<char16_t *>(win_argv[i]);
-		argv_block.push_back(epi::to_u8string(arg));
+        std::u16string arg = reinterpret_cast<char16_t *>(win_argv[i]);
+        argv_block.push_back(epi::to_u8string(arg));
     }
 
-	LocalFree(win_argv);
+    LocalFree(win_argv);
 
-	for (i = 0; i < argv_block.size(); i++)
-	{
-		// Just place argv[0] as is
+    for (i = 0; i < argv_block.size(); i++)
+    {
+        // Just place argv[0] as is
         if (i == 0)
         {
             list.emplace_back(argv_block[i]);
@@ -87,22 +86,22 @@ void argv::Init(const int argc, const char *const *argv)
         }
 
         if (argv_block[i][0] == '@')
-        {  // add it as a response file
+        { // add it as a response file
             ApplyResponseFile(&argv_block[i][1]);
             continue;
         }
 
         list.emplace_back(argv_block[i]);
-	}
+    }
 }
 #else
-void argv::Init(const int argc, const char *const *argv) 
+void argv::Init(const int argc, const char *const *argv)
 {
-	SYS_ASSERT(argc >= 0);
-    list.reserve(argc);    
+    SYS_ASSERT(argc >= 0);
+    list.reserve(argc);
 
-    for (int i = 0; i < argc; i++) 
-	{
+    for (int i = 0; i < argc; i++)
+    {
         SYS_ASSERT(argv[i] != nullptr);
 
 #ifdef __APPLE__
@@ -118,7 +117,7 @@ void argv::Init(const int argc, const char *const *argv)
         }
 
         if (argv[i][0] == '@')
-        {  // add it as a response file
+        { // add it as a response file
             ApplyResponseFile(&argv[i][1]);
             continue;
         }
@@ -128,32 +127,31 @@ void argv::Init(const int argc, const char *const *argv)
 }
 #endif
 
-int argv::Find(std::string longName, int *numParams) 
+int argv::Find(std::string longName, int *numParams)
 {
     SYS_ASSERT(!longName.empty());
 
-    if (numParams) 
+    if (numParams)
         *numParams = 0;
 
     size_t p = 0;
 
-    for (; p < list.size(); ++p) 
-	{
+    for (; p < list.size(); ++p)
+    {
         if (!IsOption(p))
             continue;
 
         const std::string &str = list[p];
 
-        if (epi::case_cmp(longName,
-                std::string{&str[1], (str.size() - 1)}) == 0)
+        if (epi::case_cmp(longName, std::string{&str[1], (str.size() - 1)}) == 0)
             break;
     }
 
     if (p == list.size())
         return -1;
 
-    if (numParams) 
-	{
+    if (numParams)
+    {
         size_t q = p + 1;
 
         while (q < list.size() && !IsOption(q))
@@ -165,7 +163,7 @@ int argv::Find(std::string longName, int *numParams)
     return p;
 }
 
-std::string argv::Value(std::string longName, int *numParams) 
+std::string argv::Value(std::string longName, int *numParams)
 {
     SYS_ASSERT(!longName.empty());
 
@@ -174,8 +172,8 @@ std::string argv::Value(std::string longName, int *numParams)
     if (pos <= 0)
         return "";
 
-    if (pos + 1 < int(list.size()) && !IsOption(pos+1))
-        return list[pos+1];
+    if (pos + 1 < int(list.size()) && !IsOption(pos + 1))
+        return list[pos + 1];
     else
         return "";
 }
@@ -186,73 +184,72 @@ std::string argv::Value(std::string longName, int *numParams)
 //
 void argv::CheckBooleanParm(std::string parm, bool *boolval, bool reverse)
 {
-	if (Find(parm) > 0)
-	{
-		*boolval = ! reverse;
-		return;
-	}
+    if (Find(parm) > 0)
+    {
+        *boolval = !reverse;
+        return;
+    }
 
-	if (Find(epi::STR_Format("no%s", parm.c_str())) > 0)
-	{
-		*boolval = reverse;
-		return;
-	}
+    if (Find(epi::STR_Format("no%s", parm.c_str())) > 0)
+    {
+        *boolval = reverse;
+        return;
+    }
 }
 
 void argv::CheckBooleanCVar(std::string parm, cvar_c *var, bool reverse)
 {
-	if (Find(parm) > 0)
-	{
-		*var = (reverse ? 0 : 1);
-		return;
-	}
+    if (Find(parm) > 0)
+    {
+        *var = (reverse ? 0 : 1);
+        return;
+    }
 
-	if (Find(epi::STR_Format("no%s", parm.c_str())) > 0)
-	{
-		*var = (reverse ? 1 : 0);
-		return;
-	}
+    if (Find(epi::STR_Format("no%s", parm.c_str())) > 0)
+    {
+        *var = (reverse ? 1 : 0);
+        return;
+    }
 }
 
 static int ParseOneFilename(FILE *fp, char *buf)
 {
-	// -AJA- 2004/08/30: added this routine, in order to handle
-	// filenames with spaces (which must be double-quoted).
+    // -AJA- 2004/08/30: added this routine, in order to handle
+    // filenames with spaces (which must be double-quoted).
 
-	int ch;
+    int ch;
 
-	// skip whitespace
-	do
-	{
-		ch = fgetc(fp);
+    // skip whitespace
+    do
+    {
+        ch = fgetc(fp);
 
-		if (ch == EOF)
-			return EOF;
-	}
-	while (isspace(ch));
+        if (ch == EOF)
+            return EOF;
+    } while (isspace(ch));
 
-	bool quoting = false;
+    bool quoting = false;
 
-	for (;;)
-	{
-		if (ch == '"')
-		{
-			quoting = ! quoting;
-			ch = fgetc(fp);
-			continue;
-		}
+    for (;;)
+    {
+        if (ch == '"')
+        {
+            quoting = !quoting;
+            ch      = fgetc(fp);
+            continue;
+        }
 
-		if (ch == EOF || (isspace(ch) && ! quoting))
-			break;
+        if (ch == EOF || (isspace(ch) && !quoting))
+            break;
 
-		*buf++ = ch;
+        *buf++ = ch;
 
-		ch = fgetc(fp);
-	}
+        ch = fgetc(fp);
+    }
 
-	*buf++ = 0;
+    *buf++ = 0;
 
-	return 0;
+    return 0;
 }
 
 //
@@ -260,78 +257,81 @@ static int ParseOneFilename(FILE *fp, char *buf)
 //
 void argv::ApplyResponseFile(std::filesystem::path name)
 {
-	char buf[1024];
-	FILE *f;
-	added_parm_t this_parm;
-	added_parm_t *p;
+    char          buf[1024];
+    FILE         *f;
+    added_parm_t  this_parm;
+    added_parm_t *p;
 
-	// check if the file has already been added
-	for (p = added_parms; p; p = p->next)
-	{
-		if (p->name.compare(name) == 0)
-			return;
-	}
+    // check if the file has already been added
+    for (p = added_parms; p; p = p->next)
+    {
+        if (p->name.compare(name) == 0)
+            return;
+    }
 
-	// mark that this file has been added
-	this_parm.name = name;
-	p = this_parm.next = added_parms;
+    // mark that this file has been added
+    this_parm.name = name;
+    p = this_parm.next = added_parms;
 
-	// add arguments from the given file
-	f = EPIFOPEN(name, "rb");
-	if (!f)
-		I_Error("Couldn't open \"%s\" for reading!", name.u8string().c_str());
+    // add arguments from the given file
+    f = EPIFOPEN(name, "rb");
+    if (!f)
+        I_Error("Couldn't open \"%s\" for reading!", name.u8string().c_str());
 
-	for (; EOF != ParseOneFilename(f, buf);)
+    for (; EOF != ParseOneFilename(f, buf);)
     {
 #ifdef _WIN32
-		// Can't really guarantee that a response file will have a certain encoding,
-		// so try to detect paths in the response file and make them UTF-8
-		std::filesystem::path path_check = buf;
-		if (std::filesystem::exists(path_check))
-		{
-			list.push_back(path_check.u8string());
-		}
-		else
-		{
-			path_check = std::filesystem::u8path(buf);
-			if (std::filesystem::exists(path_check))
-			{
-				list.push_back(path_check.u8string());
-			}
-			else
-				list.push_back(strdup(buf));
-		}
+        // Can't really guarantee that a response file will have a certain encoding,
+        // so try to detect paths in the response file and make them UTF-8
+        std::filesystem::path path_check = buf;
+        if (std::filesystem::exists(path_check))
+        {
+            list.push_back(path_check.u8string());
+        }
+        else
+        {
+            path_check = std::filesystem::u8path(buf);
+            if (std::filesystem::exists(path_check))
+            {
+                list.push_back(path_check.u8string());
+            }
+            else
+                list.push_back(strdup(buf));
+        }
 #else
         list.push_back(strdup(buf));
 #endif
     }
 
-	// unlink from list
-	added_parms = p;
+    // unlink from list
+    added_parms = p;
 
-	fclose(f);
+    fclose(f);
 }
 
 void argv::DebugDumpArgs(void)
 {
-	I_Printf("Command-line Options:\n");
+    I_Printf("Command-line Options:\n");
 
-	int i = 0;
+    int i = 0;
 
-	while (i < int(list.size()))
-	{
-		bool pair_it_up = false;
+    while (i < int(list.size()))
+    {
+        bool pair_it_up = false;
 
-		if (i>0 && i+1 < int(list.size()) && !IsOption(i+1))
-			pair_it_up = true;
+        if (i > 0 && i + 1 < int(list.size()) && !IsOption(i + 1))
+            pair_it_up = true;
 
-		I_Printf("  %s %s\n", list[i].c_str(), pair_it_up ? list[i+1].c_str() : "");
+        I_Printf("  %s %s\n", list[i].c_str(), pair_it_up ? list[i + 1].c_str() : "");
 
-		i += pair_it_up ? 2 : 1;
-	}
+        i += pair_it_up ? 2 : 1;
+    }
 }
 
-bool argv::IsOption(const int index) { return list.at(index)[0] == '-'; }
+bool argv::IsOption(const int index)
+{
+    return list.at(index)[0] == '-';
+}
 
 #ifdef _WIN32
 //
@@ -340,56 +340,55 @@ bool argv::IsOption(const int index) { return list.at(index)[0] == '-'; }
 // Initialise environment variable list. The strings are copied.
 //
 //
-void env::Init() 
+void env::Init()
 {
 
-	wchar_t *win_env = GetEnvironmentStringsW();
+    wchar_t *win_env = GetEnvironmentStringsW();
 
-	if (!win_env)
-		I_Error("env::Init: Could not retrieve environment variables!\n");
+    if (!win_env)
+        I_Error("env::Init: Could not retrieve environment variables!\n");
 
-	std::vector<std::string> block_vars;
-	std::u16string raw_var;
+    std::vector<std::string> block_vars;
+    std::u16string           raw_var;
 
-	wchar_t *orig_env = win_env; // For cleanup
+    wchar_t *orig_env = win_env; // For cleanup
 
-	for (; win_env; win_env++)
-	{
-		if (*win_env == '\0')
-		{
-			if (win_env+1 != nullptr && *(win_env+1) == '\0')
-				break;
-			else
-			{
-				block_vars.push_back(epi::to_u8string(raw_var));
-				raw_var.clear();
-			}
-		}
-		else
-			raw_var.push_back(*reinterpret_cast<char16_t *>(win_env));
-	}
+    for (; win_env; win_env++)
+    {
+        if (*win_env == '\0')
+        {
+            if (win_env + 1 != nullptr && *(win_env + 1) == '\0')
+                break;
+            else
+            {
+                block_vars.push_back(epi::to_u8string(raw_var));
+                raw_var.clear();
+            }
+        }
+        else
+            raw_var.push_back(*reinterpret_cast<char16_t *>(win_env));
+    }
 
-	FreeEnvironmentStringsW(orig_env);
+    FreeEnvironmentStringsW(orig_env);
 
-	for (auto var : block_vars)
-	{
-		std::vector<std::string> kv = epi::STR_SepStringVector(var, '=');
-		if (kv.size() < 2) // Sanity check
-			continue;
-		else
-			list.try_emplace(kv[0], kv[1]);
-	}
-
+    for (auto var : block_vars)
+    {
+        std::vector<std::string> kv = epi::STR_SepStringVector(var, '=');
+        if (kv.size() < 2) // Sanity check
+            continue;
+        else
+            list.try_emplace(kv[0], kv[1]);
+    }
 }
 
-std::string env::Value(std::string key) 
+std::string env::Value(std::string key)
 {
-	for (auto var : list)
-	{
-		if (epi::case_cmp(key, var.first) == 0)
-			return var.second;
-	}
-	return "";
+    for (auto var : list)
+    {
+        if (epi::case_cmp(key, var.first) == 0)
+            return var.second;
+    }
+    return "";
 }
 #endif
 

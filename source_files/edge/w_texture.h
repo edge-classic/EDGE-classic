@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Rendering Data Handling Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -44,21 +44,18 @@ const byte *W_GetColumn(int col, const cached_tex_t *t);
 // Standard cache functions. Call W_CacheTextureNum when you first need
 // the lump, and release it with DoneWithTexture.
 const cached_tex_t *W_CacheTextureNum(int texnum);
-void W_DoneWithTexture(const cached_tex_t *t);
+void                W_DoneWithTexture(const cached_tex_t *t);
 
 void W_PreCacheTextureNum(int texnum);
-
 
 // Called by P_Ticker for switches and animations,
 // returns the texture number for the texture name.
 int W_TextureNumForName(const char *name);
 int W_CheckTextureNumForName(const char *name);
 
-void W_InitTextures(void);
-int W_FindTextureSequence(const char *start, const char *end,
-    int *s_offset, int *e_offset);
+void        W_InitTextures(void);
+int         W_FindTextureSequence(const char *start, const char *end, int *s_offset, int *e_offset);
 const char *W_TextureNameInSet(int set, int offset);
-  
 
 //
 // Graphics:
@@ -79,11 +76,10 @@ const char *W_TextureNameInSet(int set, int offset);
 //
 typedef struct
 {
-	int originx;
-	int originy;
-	int patch;  // lump number
-}
-texpatch_t;
+    int originx;
+    int originy;
+    int patch; // lump number
+} texpatch_t;
 
 //
 // A texturedef_t describes a rectangular texture, which is composed of
@@ -91,29 +87,28 @@ texpatch_t;
 //
 typedef struct texturedef_s
 {
-	// Keep name for switch changing, etc.  Zero terminated.
-	char name[10];
+    // Keep name for switch changing, etc.  Zero terminated.
+    char name[10];
 
-	short width;
-	short height;
+    short width;
+    short height;
 
-	// scaling, where 8 is normal and higher is _smaller_
-	byte scale_x;
-	byte scale_y;
+    // scaling, where 8 is normal and higher is _smaller_
+    byte scale_x;
+    byte scale_y;
 
-	// which WAD file this texture came from
-	short file;
+    // which WAD file this texture came from
+    short file;
 
-	int palette_lump;
+    int palette_lump;
 
-	unsigned short *columnofs;
+    unsigned short *columnofs;
 
-	// All the patches[patchcount] are drawn back to front into the
-	// cached texture.
-	short patchcount;
-	texpatch_t patches[1];
-}
-texturedef_t;
+    // All the patches[patchcount] are drawn back to front into the
+    // cached texture.
+    short      patchcount;
+    texpatch_t patches[1];
+} texturedef_t;
 
 #endif // __W_TEXTURE__
 

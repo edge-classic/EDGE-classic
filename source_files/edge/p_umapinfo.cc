@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE UMAPINFO Parsing Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2023 The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -41,8 +41,7 @@ MapList Maps;
 //
 //==========================================================================
 
-static std::unordered_map<const char *, int> ActorNames =
-{
+static std::unordered_map<const char *, int> ActorNames = {
     {"DoomPlayer", -1},
     {"ZombieMan", 3004},
     {"ShotgunGuy", 9},
@@ -180,7 +179,7 @@ static std::unordered_map<const char *, int> ActorNames =
     {"ColonGibs", 79},
     {"SmallBloodPool", 80},
     {"BrainStem", 81},
-	//Boom/MBF additions
+    // Boom/MBF additions
     {"PointPusher", 5001},
     {"PointPuller", 5002},
     {"MBFHelperDog", 888},
@@ -189,13 +188,13 @@ static std::unordered_map<const char *, int> ActorNames =
     {"EvilSceptre", -1},
     {"UnholyBible", -1},
     {"MusicChanger", -1}, // Doomednums 14101-14165, but I don't think we need this
-	// I'm guessing below here
+                          // I'm guessing below here
     {"Deh_Actor_145", 145},
     {"Deh_Actor_146", 146},
     {"Deh_Actor_147", 147},
     {"Deh_Actor_148", 148},
     {"Deh_Actor_149", 149},
-	// DEHEXTRA Actors start here
+    // DEHEXTRA Actors start here
     {"Deh_Actor_150", 150}, // Extra thing 0
     {"Deh_Actor_151", 151}, // Extra thing 1
     {"Deh_Actor_152", 152}, // Extra thing 2
@@ -300,44 +299,51 @@ static std::unordered_map<const char *, int> ActorNames =
 
 static void FreeMap(MapEntry *mape)
 {
-	if (mape->mapname) free(mape->mapname);
-	if (mape->levelname) free(mape->levelname);
-	if (mape->label) free(mape->label);
-	if (mape->intertext) free(mape->intertext);
-	if (mape->intertextsecret) free(mape->intertextsecret);
-	if (mape->bossactions) free(mape->bossactions);
-	if (mape->authorname) free(mape->authorname);
-	mape->mapname = NULL;
+    if (mape->mapname)
+        free(mape->mapname);
+    if (mape->levelname)
+        free(mape->levelname);
+    if (mape->label)
+        free(mape->label);
+    if (mape->intertext)
+        free(mape->intertext);
+    if (mape->intertextsecret)
+        free(mape->intertextsecret);
+    if (mape->bossactions)
+        free(mape->bossactions);
+    if (mape->authorname)
+        free(mape->authorname);
+    mape->mapname = NULL;
 }
 
 void FreeMapList()
 {
-	unsigned i;
-	
-	for(i = 0; i < Maps.mapcount; i++)
-	{
-		FreeMap(&Maps.maps[i]);
-	}
-	free(Maps.maps);
-	Maps.maps = NULL;
-	Maps.mapcount = 0;
+    unsigned i;
+
+    for (i = 0; i < Maps.mapcount; i++)
+    {
+        FreeMap(&Maps.maps[i]);
+    }
+    free(Maps.maps);
+    Maps.maps     = NULL;
+    Maps.mapcount = 0;
 }
 
-static void SkipToNextLine(epi::lexer_c& lex, epi::token_kind_e& tok, std::string& value)
+static void SkipToNextLine(epi::lexer_c &lex, epi::token_kind_e &tok, std::string &value)
 {
-	int skip_line = lex.LastLine();
-	for (;;)
-	{
-		lex.MatchKeep("linecheck");
-		if (lex.LastLine() == skip_line)
-		{
-			tok = lex.Next(value);
-			if (tok == epi::TOK_EOF)
-				break;
-		}
-		else
-			break;
-	}
+    int skip_line = lex.LastLine();
+    for (;;)
+    {
+        lex.MatchKeep("linecheck");
+        if (lex.LastLine() == skip_line)
+        {
+            tok = lex.Next(value);
+            if (tok == epi::TOK_EOF)
+                break;
+        }
+        else
+            break;
+    }
 }
 
 // -----------------------------------------------
@@ -346,307 +352,315 @@ static void SkipToNextLine(epi::lexer_c& lex, epi::token_kind_e& tok, std::strin
 //
 // -----------------------------------------------
 
-static void ParseUMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
+static void ParseUMAPINFOEntry(epi::lexer_c &lex, MapEntry *val)
 {
-	for (;;)
-	{
-		if (lex.Match("}"))
-			break;
+    for (;;)
+    {
+        if (lex.Match("}"))
+            break;
 
-		std::string key;
-		std::string value;
+        std::string key;
+        std::string value;
 
-		epi::token_kind_e tok = lex.Next(key);
+        epi::token_kind_e tok = lex.Next(key);
 
-		if (tok == epi::TOK_EOF)
-			I_Error("Malformed UMAPINFO lump: unclosed block\n");
+        if (tok == epi::TOK_EOF)
+            I_Error("Malformed UMAPINFO lump: unclosed block\n");
 
-		if (tok != epi::TOK_Ident)
-			I_Error("Malformed UMAPINFO lump: missing key\n");
+        if (tok != epi::TOK_Ident)
+            I_Error("Malformed UMAPINFO lump: missing key\n");
 
-		if (! lex.Match("="))
-			I_Error("Malformed UMAPINFO lump: missing '='\n");
+        if (!lex.Match("="))
+            I_Error("Malformed UMAPINFO lump: missing '='\n");
 
-		tok = lex.Next(value);
+        tok = lex.Next(value);
 
-		if (tok == epi::TOK_EOF || tok == epi::TOK_ERROR || value == "}")
-			I_Error("Malformed UMAPINFO lump: missing value\n");
+        if (tok == epi::TOK_EOF || tok == epi::TOK_ERROR || value == "}")
+            I_Error("Malformed UMAPINFO lump: missing value\n");
 
-		if (epi::case_cmp(key, "levelname") == 0)
-		{
-			if (val->levelname) free(val->levelname);
-			val->levelname = (char *)calloc(value.size()+1, sizeof(char));
-			Z_StrNCpy(val->levelname, value.c_str(), value.size());
-		}
-		else if (epi::case_cmp(key, "label") == 0)
-		{
-			if (epi::case_cmp(value, "clear") == 0)
-			{
-				if (val->label)	free(val->label);
-				val->label = (char *)calloc(2, sizeof(char));
-				val->label[0] = '-';
-			}
-			else
-			{
-				if (val->label)	free(val->label);
-				val->label = (char *)calloc(value.size()+1, sizeof(char));
-				Z_StrNCpy(val->label, value.c_str(), value.size());
-			}
-		}
-		else if (epi::case_cmp(key, "next") == 0)
-		{
-			Z_Clear(val->nextmap, char, 9);
-			if (value.size() > 8)
-				I_Error("UMAPINFO: Mapname for \"next\" over 8 characters!\n");
-			Z_StrNCpy(val->nextmap, value.data(), 8);
-		}
-		else if (epi::case_cmp(key, "nextsecret") == 0)
-		{
-			Z_Clear(val->nextsecret, char, 9);
-			if (value.size() > 8)
-				I_Error("UMAPINFO: Mapname for \"nextsecret\" over 8 characters!\n");
-			Z_StrNCpy(val->nextsecret, value.data(), 8);
-		}
-		else if (epi::case_cmp(key, "levelpic") == 0)
-		{
-			Z_Clear(val->levelpic, char, 9);
-			if (value.size() > 8)
-				I_Error("UMAPINFO: Entry for \"levelpic\" over 8 characters!\n");
-			Z_StrNCpy(val->levelpic, value.data(), 8);
-		}
-		else if (epi::case_cmp(key, "skytexture") == 0)
-		{
-			Z_Clear(val->skytexture, char, 9);
-			if (value.size() > 8)
-				I_Error("UMAPINFO: Entry for \"skytexture\" over 8 characters!\n");
-			Z_StrNCpy(val->skytexture, value.data(), 8);
-		}
-		else if (epi::case_cmp(key, "music") == 0)
-		{
-			Z_Clear(val->music, char, 9);
-			if (value.size() > 8)
-				I_Error("UMAPINFO: Entry for \"music\" over 8 characters!\n");
-			Z_StrNCpy(val->music, value.data(), 8);
-		}
-		else if (epi::case_cmp(key, "endpic") == 0)
-		{
-			Z_Clear(val->endpic, char, 9);
-			if (value.size() > 8)
-				I_Error("UMAPINFO: Entry for \"endpic\" over 8 characters!\n");
-			Z_StrNCpy(val->endpic, value.data(), 8);
-		}
-		else if (epi::case_cmp(key, "endcast") == 0)
-		{
-			val->docast = epi::LEX_Boolean(value);
-		}
-		else if (epi::case_cmp(key, "endbunny") == 0)
-		{
-			val->dobunny = epi::LEX_Boolean(value);
-		}
-		else if (epi::case_cmp(key, "endgame") == 0)
-		{
-			val->endgame = epi::LEX_Boolean(value);
-		}
-		else if (epi::case_cmp(key, "exitpic") == 0)
-		{
-			Z_Clear(val->exitpic, char, 9);
-			if (value.size() > 8)
-				I_Error("UMAPINFO: Entry for \"exitpic\" over 8 characters!\n");
-			Z_StrNCpy(val->exitpic, value.data(), 8);
-		}
-		else if (epi::case_cmp(key, "enterpic") == 0)
-		{
-			Z_Clear(val->enterpic, char, 9);
-			if (value.size() > 8)
-				I_Error("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
-			Z_StrNCpy(val->enterpic, value.data(), 8);
-		}
-		else if (epi::case_cmp(key, "nointermission") == 0)
-		{
-			val->nointermission = epi::LEX_Boolean(value);
-		}
-		else if (epi::case_cmp(key, "partime") == 0)
-		{
-			val->partime = 35 * epi::LEX_Int(value);
-		}
-		else if (epi::case_cmp(key, "intertext") == 0)
-		{
-			std::string it_builder = value;
-			while (lex.Match(","))
-			{
-				it_builder.append("\n");
-				lex.Next(value);
-				it_builder.append(value);
-			}
-			if (val->intertext) free(val->intertext);
-			val->intertext = (char *)calloc(it_builder.size()+1, sizeof(char));
-			Z_StrNCpy(val->intertext, it_builder.c_str(), it_builder.size());
-		}
-		else if (epi::case_cmp(key, "intertextsecret") == 0)
-		{
-			std::string it_builder = value;
-			while (lex.Match(","))
-			{
-				it_builder.append("\n");
-				lex.Next(value);
-				it_builder.append(value);
-			}
-			if (val->intertextsecret) free(val->intertextsecret);
-			val->intertextsecret = (char *)calloc(it_builder.size()+1, sizeof(char));
-			Z_StrNCpy(val->intertextsecret, it_builder.c_str(), it_builder.size());
-		}
-		else if (epi::case_cmp(key, "interbackdrop") == 0)
-		{
-			Z_Clear(val->interbackdrop, char, 9);
-			if (value.size() > 8)
-				I_Error("UMAPINFO: Entry for \"interbackdrop\" over 8 characters!\n");
-			Z_StrNCpy(val->interbackdrop, value.data(), 8);
-		}
-		else if (epi::case_cmp(key, "intermusic") == 0)
-		{
-			Z_Clear(val->intermusic, char, 9);
-			if (value.size() > 8)
-				I_Error("UMAPINFO: Entry for \"intermusic\" over 8 characters!\n");
-			Z_StrNCpy(val->intermusic, value.data(), 8);
-		}
-		else if (epi::case_cmp(key, "episode") == 0)
-		{
-			if (epi::case_cmp(value, "clear") == 0)
-			{
-				// This should leave the initial [EDGE] episode and nothing else
-				// Since 'clear' is supposed to come before any custom definitions
-				// this should not clear out any UMAPINFO-defined episodes
-				for (int i = gamedefs.GetSize()-1; i > 0; i--)
-				{
-					if (!gamedefs[i]->firstmap.empty())
-						gamedefs.RemoveObject(i);
-				}
-			}
-			else
-			{
-				gamedef_c *new_epi = nullptr;
-				// Check for episode to replace
-				for (int i = 0; i < gamedefs.GetSize(); i++)
-				{
-					if (epi::case_cmp(gamedefs[i]->firstmap, val->mapname) == 0)
-					{
-						new_epi = gamedefs[i];
-						break;
-					}
-				}
-				if (!new_epi)
-				{
-					// Create a new episode from game-specific UMAPINFO template data
-					gamedef_c *um_template = nullptr;
-					for (int i = 0; i < gamedefs.GetSize(); i++)
-					{
-						if (epi::case_cmp(gamedefs[i]->name, "UMAPINFO_TEMPLATE") == 0)
-						{
-							um_template = gamedefs[i];
-							break;
-						}
-					}
-					if (!um_template)
-						I_Error("UMAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
-					new_epi = new gamedef_c;
-					new_epi->CopyDetail(*um_template);
-					new_epi->firstmap = val->mapname;
-					gamedefs.Insert(new_epi);
-				}
-				char lumpname[9] = {0};
-				std::string alttext;
-				std::string epikey; // Do we use this?
-				if (value.size() > 8)
-					I_Error("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
-				Z_StrNCpy(lumpname, value.data(), 8);
-				if (lex.Match(","))
-				{
-					lex.Next(alttext);
-					if (lex.Match(","))
-						lex.Next(epikey);
-				}
-				new_epi->namegraphic = lumpname;
-				new_epi->description = alttext;
-				new_epi->name = epi::STR_Format("UMAPINFO_%s\n", val->mapname); // Internal
-			}
-		}
-		else if (epi::case_cmp(key, "bossaction") == 0)
-		{
-			int special = 0;
-			int tag = 0;
-			if (epi::case_cmp(value, "clear") == 0)
-			{
-				special = tag = -1;
-				if (val->bossactions) free(val->bossactions);
-				val->bossactions = NULL;
-				val->numbossactions = -1;
-			}
-			else
-			{
-				int actor_num = -1;
-				bool found_actor = false;
-				for (auto actor : ActorNames)
-				{
-					if (epi::case_cmp(actor.first, value.c_str()) == 0)
-					{
-						found_actor = true;
-						actor_num = actor.second;
-						break;
-					}
-				}
-				if (!found_actor)
-					I_Error("UMAPINFO: Unknown thing type %s\n", value.c_str());
-				if (actor_num == -1)
-					SkipToNextLine(lex, tok, value);
-				else
-				{
-					if (!lex.Match(","))
-						I_Error("UMAPINFO: \"bossaction\" key missing line special!\n");
-					lex.Next(value);
-					special = epi::LEX_Int(value);
-					if (!lex.Match(","))
-						I_Error("UMAPINFO: \"bossaction\" key missing tag!\n");
-					lex.Next(value);
-					tag = epi::LEX_Int(value);
-					if (tag != 0 || special == 11 || special == 51 || special == 52 || special == 124)
-					{
-						if (val->numbossactions == -1) 
-							val->numbossactions = 1;
-						else
-							val->numbossactions++;
-						val->bossactions = (struct BossAction *)realloc(val->bossactions, sizeof(struct BossAction) * val->numbossactions);
-						val->bossactions[val->numbossactions - 1].type = actor_num;
-						val->bossactions[val->numbossactions - 1].special = special;
-						val->bossactions[val->numbossactions - 1].tag = tag;
-					}
-				}
-			}
-		}
-		else if (epi::case_cmp(key, "author") == 0)
-		{
-			if (val->authorname) free(val->authorname);
-			val->authorname = (char *)calloc(value.size()+1, sizeof(char));
-			Z_StrNCpy(val->authorname, value.c_str(), value.size());
-		}
-	}
-	// Some fallback handling
-	if (!val->nextsecret[0])
-	{
-		if (val->nextmap[0])
-			Z_StrNCpy(val->nextsecret, val->nextmap, 8);
-	}
-	if (!val->enterpic[0])
-	{
-		for(size_t i = 0; i < Maps.mapcount; i++)
-		{
-			if (!strcmp(val->mapname, Maps.maps[i].nextmap))
-			{
-				if (Maps.maps[i].exitpic[0])
-					Z_StrNCpy(val->enterpic, Maps.maps[i].exitpic, 8);
-				break;
-			}
-		}
-	}
+        if (epi::case_cmp(key, "levelname") == 0)
+        {
+            if (val->levelname)
+                free(val->levelname);
+            val->levelname = (char *)calloc(value.size() + 1, sizeof(char));
+            Z_StrNCpy(val->levelname, value.c_str(), value.size());
+        }
+        else if (epi::case_cmp(key, "label") == 0)
+        {
+            if (epi::case_cmp(value, "clear") == 0)
+            {
+                if (val->label)
+                    free(val->label);
+                val->label    = (char *)calloc(2, sizeof(char));
+                val->label[0] = '-';
+            }
+            else
+            {
+                if (val->label)
+                    free(val->label);
+                val->label = (char *)calloc(value.size() + 1, sizeof(char));
+                Z_StrNCpy(val->label, value.c_str(), value.size());
+            }
+        }
+        else if (epi::case_cmp(key, "next") == 0)
+        {
+            Z_Clear(val->nextmap, char, 9);
+            if (value.size() > 8)
+                I_Error("UMAPINFO: Mapname for \"next\" over 8 characters!\n");
+            Z_StrNCpy(val->nextmap, value.data(), 8);
+        }
+        else if (epi::case_cmp(key, "nextsecret") == 0)
+        {
+            Z_Clear(val->nextsecret, char, 9);
+            if (value.size() > 8)
+                I_Error("UMAPINFO: Mapname for \"nextsecret\" over 8 characters!\n");
+            Z_StrNCpy(val->nextsecret, value.data(), 8);
+        }
+        else if (epi::case_cmp(key, "levelpic") == 0)
+        {
+            Z_Clear(val->levelpic, char, 9);
+            if (value.size() > 8)
+                I_Error("UMAPINFO: Entry for \"levelpic\" over 8 characters!\n");
+            Z_StrNCpy(val->levelpic, value.data(), 8);
+        }
+        else if (epi::case_cmp(key, "skytexture") == 0)
+        {
+            Z_Clear(val->skytexture, char, 9);
+            if (value.size() > 8)
+                I_Error("UMAPINFO: Entry for \"skytexture\" over 8 characters!\n");
+            Z_StrNCpy(val->skytexture, value.data(), 8);
+        }
+        else if (epi::case_cmp(key, "music") == 0)
+        {
+            Z_Clear(val->music, char, 9);
+            if (value.size() > 8)
+                I_Error("UMAPINFO: Entry for \"music\" over 8 characters!\n");
+            Z_StrNCpy(val->music, value.data(), 8);
+        }
+        else if (epi::case_cmp(key, "endpic") == 0)
+        {
+            Z_Clear(val->endpic, char, 9);
+            if (value.size() > 8)
+                I_Error("UMAPINFO: Entry for \"endpic\" over 8 characters!\n");
+            Z_StrNCpy(val->endpic, value.data(), 8);
+        }
+        else if (epi::case_cmp(key, "endcast") == 0)
+        {
+            val->docast = epi::LEX_Boolean(value);
+        }
+        else if (epi::case_cmp(key, "endbunny") == 0)
+        {
+            val->dobunny = epi::LEX_Boolean(value);
+        }
+        else if (epi::case_cmp(key, "endgame") == 0)
+        {
+            val->endgame = epi::LEX_Boolean(value);
+        }
+        else if (epi::case_cmp(key, "exitpic") == 0)
+        {
+            Z_Clear(val->exitpic, char, 9);
+            if (value.size() > 8)
+                I_Error("UMAPINFO: Entry for \"exitpic\" over 8 characters!\n");
+            Z_StrNCpy(val->exitpic, value.data(), 8);
+        }
+        else if (epi::case_cmp(key, "enterpic") == 0)
+        {
+            Z_Clear(val->enterpic, char, 9);
+            if (value.size() > 8)
+                I_Error("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
+            Z_StrNCpy(val->enterpic, value.data(), 8);
+        }
+        else if (epi::case_cmp(key, "nointermission") == 0)
+        {
+            val->nointermission = epi::LEX_Boolean(value);
+        }
+        else if (epi::case_cmp(key, "partime") == 0)
+        {
+            val->partime = 35 * epi::LEX_Int(value);
+        }
+        else if (epi::case_cmp(key, "intertext") == 0)
+        {
+            std::string it_builder = value;
+            while (lex.Match(","))
+            {
+                it_builder.append("\n");
+                lex.Next(value);
+                it_builder.append(value);
+            }
+            if (val->intertext)
+                free(val->intertext);
+            val->intertext = (char *)calloc(it_builder.size() + 1, sizeof(char));
+            Z_StrNCpy(val->intertext, it_builder.c_str(), it_builder.size());
+        }
+        else if (epi::case_cmp(key, "intertextsecret") == 0)
+        {
+            std::string it_builder = value;
+            while (lex.Match(","))
+            {
+                it_builder.append("\n");
+                lex.Next(value);
+                it_builder.append(value);
+            }
+            if (val->intertextsecret)
+                free(val->intertextsecret);
+            val->intertextsecret = (char *)calloc(it_builder.size() + 1, sizeof(char));
+            Z_StrNCpy(val->intertextsecret, it_builder.c_str(), it_builder.size());
+        }
+        else if (epi::case_cmp(key, "interbackdrop") == 0)
+        {
+            Z_Clear(val->interbackdrop, char, 9);
+            if (value.size() > 8)
+                I_Error("UMAPINFO: Entry for \"interbackdrop\" over 8 characters!\n");
+            Z_StrNCpy(val->interbackdrop, value.data(), 8);
+        }
+        else if (epi::case_cmp(key, "intermusic") == 0)
+        {
+            Z_Clear(val->intermusic, char, 9);
+            if (value.size() > 8)
+                I_Error("UMAPINFO: Entry for \"intermusic\" over 8 characters!\n");
+            Z_StrNCpy(val->intermusic, value.data(), 8);
+        }
+        else if (epi::case_cmp(key, "episode") == 0)
+        {
+            if (epi::case_cmp(value, "clear") == 0)
+            {
+                // This should leave the initial [EDGE] episode and nothing else
+                // Since 'clear' is supposed to come before any custom definitions
+                // this should not clear out any UMAPINFO-defined episodes
+                for (int i = gamedefs.GetSize() - 1; i > 0; i--)
+                {
+                    if (!gamedefs[i]->firstmap.empty())
+                        gamedefs.RemoveObject(i);
+                }
+            }
+            else
+            {
+                gamedef_c *new_epi = nullptr;
+                // Check for episode to replace
+                for (int i = 0; i < gamedefs.GetSize(); i++)
+                {
+                    if (epi::case_cmp(gamedefs[i]->firstmap, val->mapname) == 0)
+                    {
+                        new_epi = gamedefs[i];
+                        break;
+                    }
+                }
+                if (!new_epi)
+                {
+                    // Create a new episode from game-specific UMAPINFO template data
+                    gamedef_c *um_template = nullptr;
+                    for (int i = 0; i < gamedefs.GetSize(); i++)
+                    {
+                        if (epi::case_cmp(gamedefs[i]->name, "UMAPINFO_TEMPLATE") == 0)
+                        {
+                            um_template = gamedefs[i];
+                            break;
+                        }
+                    }
+                    if (!um_template)
+                        I_Error("UMAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
+                    new_epi = new gamedef_c;
+                    new_epi->CopyDetail(*um_template);
+                    new_epi->firstmap = val->mapname;
+                    gamedefs.Insert(new_epi);
+                }
+                char        lumpname[9] = {0};
+                std::string alttext;
+                std::string epikey; // Do we use this?
+                if (value.size() > 8)
+                    I_Error("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
+                Z_StrNCpy(lumpname, value.data(), 8);
+                if (lex.Match(","))
+                {
+                    lex.Next(alttext);
+                    if (lex.Match(","))
+                        lex.Next(epikey);
+                }
+                new_epi->namegraphic = lumpname;
+                new_epi->description = alttext;
+                new_epi->name        = epi::STR_Format("UMAPINFO_%s\n", val->mapname); // Internal
+            }
+        }
+        else if (epi::case_cmp(key, "bossaction") == 0)
+        {
+            int special = 0;
+            int tag     = 0;
+            if (epi::case_cmp(value, "clear") == 0)
+            {
+                special = tag = -1;
+                if (val->bossactions)
+                    free(val->bossactions);
+                val->bossactions    = NULL;
+                val->numbossactions = -1;
+            }
+            else
+            {
+                int  actor_num   = -1;
+                bool found_actor = false;
+                for (auto actor : ActorNames)
+                {
+                    if (epi::case_cmp(actor.first, value.c_str()) == 0)
+                    {
+                        found_actor = true;
+                        actor_num   = actor.second;
+                        break;
+                    }
+                }
+                if (!found_actor)
+                    I_Error("UMAPINFO: Unknown thing type %s\n", value.c_str());
+                if (actor_num == -1)
+                    SkipToNextLine(lex, tok, value);
+                else
+                {
+                    if (!lex.Match(","))
+                        I_Error("UMAPINFO: \"bossaction\" key missing line special!\n");
+                    lex.Next(value);
+                    special = epi::LEX_Int(value);
+                    if (!lex.Match(","))
+                        I_Error("UMAPINFO: \"bossaction\" key missing tag!\n");
+                    lex.Next(value);
+                    tag = epi::LEX_Int(value);
+                    if (tag != 0 || special == 11 || special == 51 || special == 52 || special == 124)
+                    {
+                        if (val->numbossactions == -1)
+                            val->numbossactions = 1;
+                        else
+                            val->numbossactions++;
+                        val->bossactions = (struct BossAction *)realloc(val->bossactions, sizeof(struct BossAction) *
+                                                                                              val->numbossactions);
+                        val->bossactions[val->numbossactions - 1].type    = actor_num;
+                        val->bossactions[val->numbossactions - 1].special = special;
+                        val->bossactions[val->numbossactions - 1].tag     = tag;
+                    }
+                }
+            }
+        }
+        else if (epi::case_cmp(key, "author") == 0)
+        {
+            if (val->authorname)
+                free(val->authorname);
+            val->authorname = (char *)calloc(value.size() + 1, sizeof(char));
+            Z_StrNCpy(val->authorname, value.c_str(), value.size());
+        }
+    }
+    // Some fallback handling
+    if (!val->nextsecret[0])
+    {
+        if (val->nextmap[0])
+            Z_StrNCpy(val->nextsecret, val->nextmap, 8);
+    }
+    if (!val->enterpic[0])
+    {
+        for (size_t i = 0; i < Maps.mapcount; i++)
+        {
+            if (!strcmp(val->mapname, Maps.maps[i].nextmap))
+            {
+                if (Maps.maps[i].exitpic[0])
+                    Z_StrNCpy(val->enterpic, Maps.maps[i].exitpic, 8);
+                break;
+            }
+        }
+    }
 }
 
 // -----------------------------------------------
@@ -655,51 +669,51 @@ static void ParseUMAPINFOEntry(epi::lexer_c& lex, MapEntry *val)
 //
 // -----------------------------------------------
 
-void Parse_UMAPINFO(const std::string& buffer)
+void Parse_UMAPINFO(const std::string &buffer)
 {
-	epi::lexer_c lex(buffer);
+    epi::lexer_c lex(buffer);
 
-	for (;;)
-	{
-		std::string section;
-		epi::token_kind_e tok = lex.Next(section);
+    for (;;)
+    {
+        std::string       section;
+        epi::token_kind_e tok = lex.Next(section);
 
-		if (tok == epi::TOK_EOF)
-			break;
+        if (tok == epi::TOK_EOF)
+            break;
 
-		if (tok != epi::TOK_Ident || epi::case_cmp(section, "MAP") != 0)
-			I_Error("Malformed UMAPINFO lump.\n");
+        if (tok != epi::TOK_Ident || epi::case_cmp(section, "MAP") != 0)
+            I_Error("Malformed UMAPINFO lump.\n");
 
-		tok = lex.Next(section);
+        tok = lex.Next(section);
 
-		if (tok != epi::TOK_Ident)
-			I_Error("UMAPINFO: No mapname for map entry!\n");
+        if (tok != epi::TOK_Ident)
+            I_Error("UMAPINFO: No mapname for map entry!\n");
 
-		unsigned int i = 0;
-		MapEntry parsed = { 0 };
-		parsed.mapname = (char *)calloc(section.size()+1, sizeof(char));
-		Z_StrNCpy(parsed.mapname, section.data(), section.size());
+        unsigned int i      = 0;
+        MapEntry     parsed = {0};
+        parsed.mapname      = (char *)calloc(section.size() + 1, sizeof(char));
+        Z_StrNCpy(parsed.mapname, section.data(), section.size());
 
-		if (! lex.Match("{"))
-			I_Error("Malformed UMAPINFO lump: missing '{'\n");
+        if (!lex.Match("{"))
+            I_Error("Malformed UMAPINFO lump: missing '{'\n");
 
-		ParseUMAPINFOEntry(lex, &parsed);
-		// Does this map entry already exist? If yes, replace it.
-		for (i = 0; i < Maps.mapcount; i++)
-		{
-			if (epi::case_cmp(parsed.mapname, Maps.maps[i].mapname) == 0)
-			{
-				FreeMap(&Maps.maps[i]);
-				Maps.maps[i] = parsed;
-				break;
-			}
-		}
-		// Not found so create a new one.
-		if (i == Maps.mapcount)
-		{
-			Maps.mapcount++;
-			Maps.maps = (MapEntry*)realloc(Maps.maps, sizeof(MapEntry)*Maps.mapcount);
-			Maps.maps[Maps.mapcount-1] = parsed;
-		}
-	}
+        ParseUMAPINFOEntry(lex, &parsed);
+        // Does this map entry already exist? If yes, replace it.
+        for (i = 0; i < Maps.mapcount; i++)
+        {
+            if (epi::case_cmp(parsed.mapname, Maps.maps[i].mapname) == 0)
+            {
+                FreeMap(&Maps.maps[i]);
+                Maps.maps[i] = parsed;
+                break;
+            }
+        }
+        // Not found so create a new one.
+        if (i == Maps.mapcount)
+        {
+            Maps.mapcount++;
+            Maps.maps                    = (MapEntry *)realloc(Maps.maps, sizeof(MapEntry) * Maps.mapcount);
+            Maps.maps[Maps.mapcount - 1] = parsed;
+        }
+    }
 }

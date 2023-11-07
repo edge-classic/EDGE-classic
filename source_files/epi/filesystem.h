@@ -24,9 +24,9 @@
 #include "str_util.h"
 
 #ifdef _WIN32
-#define EPIFOPEN(name,mode) _wfopen(name.c_str(), (const wchar_t *)epi::to_u16string(mode).c_str())
+#define EPIFOPEN(name, mode) _wfopen(name.c_str(), (const wchar_t *)epi::to_u16string(mode).c_str())
 #else
-#define EPIFOPEN(name,mode) std::fopen(name.c_str(), mode)
+#define EPIFOPEN(name, mode) std::fopen(name.c_str(), mode)
 #endif
 
 namespace epi
@@ -35,32 +35,30 @@ namespace epi
 // Forward declarations
 class file_c;
 
-
 // A Filesystem directory entry
 class dir_entry_c
 {
-public:
-	std::filesystem::path name;
-	size_t size      = 0;
-	bool is_dir      = false;
+  public:
+    std::filesystem::path name;
+    size_t                size   = 0;
+    bool                  is_dir = false;
 };
-
 
 // Directory Functions
 std::filesystem::path FS_GetCurrDir();
-bool FS_SetCurrDir(std::filesystem::path dir);
+bool                  FS_SetCurrDir(std::filesystem::path dir);
 
 bool FS_IsDir(std::filesystem::path dir);
 bool FS_MakeDir(std::filesystem::path dir);
 bool FS_RemoveDir(const char *dir);
-bool FS_ReadDir(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::string mask);
-bool FS_ReadDirRecursive(std::vector<dir_entry_c>& fsd, std::filesystem::path dir, std::string mask);
+bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::filesystem::path dir, std::string mask);
+bool FS_ReadDirRecursive(std::vector<dir_entry_c> &fsd, std::filesystem::path dir, std::string mask);
 // File Functions
-bool FS_Access(std::filesystem::path name, unsigned int flags);
+bool    FS_Access(std::filesystem::path name, unsigned int flags);
 file_c *FS_Open(std::filesystem::path name, unsigned int flags);
 
 // Opens a directory in explorer, finder, etc
-bool FS_OpenDir(const std::filesystem::path& src);
+bool FS_OpenDir(const std::filesystem::path &src);
 
 // NOTE: there's no FS_Close() function, just delete the object.
 

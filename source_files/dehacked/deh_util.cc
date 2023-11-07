@@ -37,7 +37,6 @@
 #include "deh_system.h"
 #include "deh_util.h"
 
-
 namespace Deh_Edge
 {
 
@@ -46,14 +45,14 @@ namespace Deh_Edge
 //
 int StrCaseCmp(const char *A, const char *B)
 {
-	for (; *A || *B; A++, B++)
-	{
-		// this test also catches end-of-string conditions
-		if (toupper(*A) != toupper(*B))
-			return (toupper(*A) - toupper(*B));
-	}
+    for (; *A || *B; A++, B++)
+    {
+        // this test also catches end-of-string conditions
+        if (toupper(*A) != toupper(*B))
+            return (toupper(*A) - toupper(*B));
+    }
 
-	return 0;
+    return 0;
 }
 
 //
@@ -65,14 +64,14 @@ int StrCaseCmp(const char *A, const char *B)
 //
 int StrCaseCmpPartial(const char *A, const char *B)
 {
-	for (; *B; A++, B++)
-	{
-		// this test also catches end-of-string conditions
-		if (toupper(*A) != toupper(*B))
-			return (toupper(*A) - toupper(*B));
-	}
+    for (; *B; A++, B++)
+    {
+        // this test also catches end-of-string conditions
+        if (toupper(*A) != toupper(*B))
+            return (toupper(*A) - toupper(*B));
+    }
 
-	return 0;
+    return 0;
 }
 
 //
@@ -80,12 +79,12 @@ int StrCaseCmpPartial(const char *A, const char *B)
 //
 void StrMaxCopy(char *dest, const char *src, int max)
 {
-	for (; *src && max > 0; max--)
-	{
-		*dest++ = *src++;
-	}
+    for (; *src && max > 0; max--)
+    {
+        *dest++ = *src++;
+    }
 
-	*dest = 0;
+    *dest = 0;
 }
 
 //
@@ -93,18 +92,18 @@ void StrMaxCopy(char *dest, const char *src, int max)
 //
 const char *StrUpper(const char *name)
 {
-	static char up_buf[512];
+    static char up_buf[512];
 
-	assert(strlen(name) < sizeof(up_buf) - 1);
+    assert(strlen(name) < sizeof(up_buf) - 1);
 
-	char *dest = up_buf;
+    char *dest = up_buf;
 
-	while (*name)
-		*dest++ = toupper(*name++);
+    while (*name)
+        *dest++ = toupper(*name++);
 
-	*dest = 0;
+    *dest = 0;
 
-	return up_buf;
+    return up_buf;
 }
 
 //
@@ -112,22 +111,22 @@ const char *StrUpper(const char *name)
 //
 const char *StrSanitize(const char *name)
 {
-	static char clean_buf[512];
+    static char clean_buf[512];
 
-	assert(strlen(name) < sizeof(clean_buf) - 1);
+    assert(strlen(name) < sizeof(clean_buf) - 1);
 
-	char *dest = clean_buf;
+    char *dest = clean_buf;
 
-	while (*name)
-	{
-		char ch = *name++;
-		if (isalnum(ch) || ch == '_')
-			*dest++ = ch;
-	}
+    while (*name)
+    {
+        char ch = *name++;
+        if (isalnum(ch) || ch == '_')
+            *dest++ = ch;
+    }
 
-	*dest = 0;
+    *dest = 0;
 
-	return clean_buf;
+    return clean_buf;
 }
 
 //
@@ -135,12 +134,12 @@ const char *StrSanitize(const char *name)
 //
 char *StringNew(int length)
 {
-	char *s = (char *) calloc(length, 1);
+    char *s = (char *)calloc(length, 1);
 
-	if (! s)
-		FatalError("Out of memory (%d bytes for string)\n", length);
-	
-	return s;
+    if (!s)
+        FatalError("Out of memory (%d bytes for string)\n", length);
+
+    return s;
 }
 
 //
@@ -148,12 +147,12 @@ char *StringNew(int length)
 //
 char *StringDup(const char *orig)
 {
-	char *s = strdup(orig);
+    char *s = strdup(orig);
 
-	if (! s)
-		FatalError("Out of memory (copy string)\n");
-	
-	return s;
+    if (!s)
+        FatalError("Out of memory (copy string)\n");
+
+    return s;
 }
 
-}  // Deh_Edge
+} // namespace Deh_Edge

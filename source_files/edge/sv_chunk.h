@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE New SaveGame Handling (Chunks)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -32,7 +32,7 @@
 #include "i_defs.h"
 #include "p_local.h"
 
-#define DATA_END_MARKER  "ENDE"
+#define DATA_END_MARKER "ENDE"
 
 void SV_ChunkInit(void);
 void SV_ChunkShutdown(void);
@@ -52,7 +52,7 @@ bool SV_VerifyContents(void);
 
 bool SV_PushReadChunk(const char *id);
 bool SV_PopReadChunk(void);
-int SV_RemainingChunkSize(void);
+int  SV_RemainingChunkSize(void);
 bool SV_SkipReadChunk(const char *id);
 
 unsigned char  SV_GetByte(void);
@@ -60,11 +60,11 @@ unsigned short SV_GetShort(void);
 unsigned int   SV_GetInt(void);
 
 angle_t SV_GetAngle(void);
-float SV_GetFloat(void);
+float   SV_GetFloat(void);
 
 const char *SV_GetString(void);
 const char *SV_DupString(const char *old);
-void SV_FreeString(const char *str);
+void        SV_FreeString(const char *str);
 
 bool SV_GetMarker(char id[5]);
 

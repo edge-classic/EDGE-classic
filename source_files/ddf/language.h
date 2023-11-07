@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Language Definitions
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -31,48 +31,54 @@ class lang_choice_c;
 
 class language_c
 {
-public:
-	language_c();
-	~language_c();
+  public:
+    language_c();
+    ~language_c();
 
-private:
-	std::vector<lang_choice_c *> choices;
+  private:
+    std::vector<lang_choice_c *> choices;
 
-	// UMAPINFO strings
-	lang_choice_c *umap;
+    // UMAPINFO strings
+    lang_choice_c *umap;
 
-	// the current language choice
-	int current;
+    // the current language choice
+    int current;
 
-public:
-	void Clear();
-	
-	int GetChoiceCount() { return (int)choices.size(); }
-	int GetChoice() { return current; }
-	
-	const char *GetName(int idx = -1);
-	bool IsValidRef(const char *refname);
+  public:
+    void Clear();
 
-	bool Select(const char *name);
-	bool Select(int idx);
+    int GetChoiceCount()
+    {
+        return (int)choices.size();
+    }
+    int GetChoice()
+    {
+        return current;
+    }
 
-	const char* operator[](const char *refname);
-	const char* operator[](const std::string& refname)
-	{
-		return (*this)[refname.c_str()];
-	}
+    const char *GetName(int idx = -1);
+    bool        IsValidRef(const char *refname);
 
-	// this is for UMAPINFO strings
-	void AddOrReplace(const char *ref, const char *value);
-	const char *GetRefOrNull(const char *refname);
+    bool Select(const char *name);
+    bool Select(int idx);
 
-	// private (except for code in language.cc)
-	lang_choice_c * AddChoice(const char *name);
+    const char *operator[](const char *refname);
+    const char *operator[](const std::string &refname)
+    {
+        return (*this)[refname.c_str()];
+    }
+
+    // this is for UMAPINFO strings
+    void        AddOrReplace(const char *ref, const char *value);
+    const char *GetRefOrNull(const char *refname);
+
+    // private (except for code in language.cc)
+    lang_choice_c *AddChoice(const char *name);
 };
 
-extern language_c language;   // -ACB- 2004/06/27 Implemented
+extern language_c language; // -ACB- 2004/06/27 Implemented
 
-void DDF_ReadLangs(const std::string& data);
+void DDF_ReadLangs(const std::string &data);
 
 #endif /* __DDF_LANG_H__ */
 

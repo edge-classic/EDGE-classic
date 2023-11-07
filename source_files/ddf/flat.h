@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Data Definition File Codes (Flat properties)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2022-2023 The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -26,61 +26,81 @@
 
 class flatdef_c
 {
-public:
-	flatdef_c();
-	~flatdef_c() {};
+  public:
+    flatdef_c();
+    ~flatdef_c(){};
 
-public:
-	void Default(void);
-	void CopyDetail(flatdef_c &src);
+  public:
+    void Default(void);
+    void CopyDetail(flatdef_c &src);
 
-	// Member vars....
-	std::string name;
-	
-	std::string liquid; // Values are "THIN" and "THICK" - determines swirl and shader params - Dasho
+    // Member vars....
+    std::string name;
 
-	struct sfx_s *footstep;
-	std::string splash;
-	//Lobo: item to spawn (or NULL).  The mobjdef pointer is only valid after
-	// DDF_flatCleanUp() has been called.
-	const mobjtype_c *impactobject;
-	std::string impactobject_ref;
+    std::string liquid; // Values are "THIN" and "THICK" - determines swirl and shader params - Dasho
 
-	const mobjtype_c *glowobject;
-	std::string glowobject_ref;
+    struct sfx_s *footstep;
+    std::string   splash;
+    // Lobo: item to spawn (or NULL).  The mobjdef pointer is only valid after
+    //  DDF_flatCleanUp() has been called.
+    const mobjtype_c *impactobject;
+    std::string       impactobject_ref;
 
-	percent_t sink_depth;
-	percent_t bob_depth;
+    const mobjtype_c *glowobject;
+    std::string       glowobject_ref;
 
-private:
-	// disable copy construct and assignment operator
-	explicit flatdef_c(flatdef_c &rhs) { (void) rhs; }
-	flatdef_c& operator=(flatdef_c &rhs) { (void) rhs; return *this; }
+    percent_t sink_depth;
+    percent_t bob_depth;
+
+  private:
+    // disable copy construct and assignment operator
+    explicit flatdef_c(flatdef_c &rhs)
+    {
+        (void)rhs;
+    }
+    flatdef_c &operator=(flatdef_c &rhs)
+    {
+        (void)rhs;
+        return *this;
+    }
 };
-
 
 // Our flatdefs container
-class flatdef_container_c : public epi::array_c 
+class flatdef_container_c : public epi::array_c
 {
-public:
-	flatdef_container_c() : epi::array_c(sizeof(flatdef_c*)) {}
-	~flatdef_container_c() { Clear(); } 
+  public:
+    flatdef_container_c() : epi::array_c(sizeof(flatdef_c *))
+    {
+    }
+    ~flatdef_container_c()
+    {
+        Clear();
+    }
 
-private:
-	void CleanupObject(void *obj);
+  private:
+    void CleanupObject(void *obj);
 
-public:
-	flatdef_c* Find(const char *name);
-	int GetSize() {	return array_entries; } 
-	int Insert(flatdef_c *sw) { return InsertObject((void*)&sw); }
-	flatdef_c* operator[](int idx) { return *(flatdef_c**)FetchObject(idx); } 
+  public:
+    flatdef_c *Find(const char *name);
+    int        GetSize()
+    {
+        return array_entries;
+    }
+    int Insert(flatdef_c *sw)
+    {
+        return InsertObject((void *)&sw);
+    }
+    flatdef_c *operator[](int idx)
+    {
+        return *(flatdef_c **)FetchObject(idx);
+    }
 };
 
-extern flatdef_container_c flatdefs; 	// -DASHO- 2022 Implemented
+extern flatdef_container_c flatdefs; // -DASHO- 2022 Implemented
 
-void DDF_ReadFlat(const std::string& data);
+void DDF_ReadFlat(const std::string &data);
 
-#endif  /*__DDF_FLAT_H__*/
+#endif /*__DDF_FLAT_H__*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Main Menu Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -29,7 +29,7 @@
 #include "e_event.h"
 
 struct sfx_s;
-  
+
 // Program stuff
 extern int key_screenshot;
 extern int key_save_game;
@@ -44,14 +44,14 @@ extern int key_quit_edge;
 extern int key_gamma_toggle;
 
 // the so-called "bastard sfx" used for the menus
-extern struct sfx_s * sfx_swtchn;
-extern struct sfx_s * sfx_tink;
-extern struct sfx_s * sfx_radio;
-extern struct sfx_s * sfx_oof;
-extern struct sfx_s * sfx_pstop;
-extern struct sfx_s * sfx_stnmov;
-extern struct sfx_s * sfx_pistol;
-extern struct sfx_s * sfx_swtchx;
+extern struct sfx_s *sfx_swtchn;
+extern struct sfx_s *sfx_tink;
+extern struct sfx_s *sfx_radio;
+extern struct sfx_s *sfx_oof;
+extern struct sfx_s *sfx_pstop;
+extern struct sfx_s *sfx_stnmov;
+extern struct sfx_s *sfx_pistol;
+extern struct sfx_s *sfx_swtchx;
 
 //
 // MENUS
@@ -61,7 +61,7 @@ extern struct sfx_s * sfx_swtchx;
 // Even when the menu is not displayed,
 // this can resize the view and change game parameters.
 // Does all the real work of the menu interaction.
-bool M_Responder(event_t * ev);
+bool M_Responder(event_t *ev);
 
 // Called by main loop,
 // only used for menu (skull cursor) animation.
@@ -80,8 +80,7 @@ void M_Init(void);
 void M_StartControlPanel(void);
 
 // 25-6-98 KM
-void M_StartMessage(const char *string, void (* routine)(int response), 
-    bool input);
+void M_StartMessage(const char *string, void (*routine)(int response), bool input);
 
 // -KM- 1998/07/21
 // String will be printed as a prompt.
@@ -89,15 +88,14 @@ void M_StartMessage(const char *string, void (* routine)(int response),
 // and will be called with the input returned
 // or NULL if user pressed escape.
 
-void M_StartMessageInput(const char *string, 
-    void (* routine)(const char *response));
+void M_StartMessageInput(const char *string, void (*routine)(const char *response));
 
 void M_EndGame(int choice, cvar_c *cvar = nullptr);
 void M_QuitEDGE(int choice);
 void M_ImmediateQuit(void);
 void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div);
-void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div,
-    float min, float max, std::string fmt_string);
+void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, float min, float max,
+                      std::string fmt_string);
 void M_ClearMenus(void);
 
 #endif // __M_MENU__

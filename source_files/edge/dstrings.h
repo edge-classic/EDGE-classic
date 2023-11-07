@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Strings
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -27,19 +27,19 @@
 #define __DOOM_STRINGS__
 
 // Misc. other strings.
-#define REQUIREDEPK    "edge-defs"
+#define REQUIREDEPK      "edge-defs"
 #define EDGEBRANDINGFILE "branding.cfg"
 
-#define SAVEGAMEBASE   "save"
-#define SAVEGAMEEXT    "esg"
-#define SAVEGAMEMODE   0755
+#define SAVEGAMEBASE "save"
+#define SAVEGAMEEXT  "esg"
+#define SAVEGAMEMODE 0755
 
-#define CACHEDIR       "cache"
-#define SAVEGAMEDIR    "savegame"
-#define SCRNSHOTDIR    "screenshot"
+#define CACHEDIR    "cache"
+#define SAVEGAMEDIR "savegame"
+#define SCRNSHOTDIR "screenshot"
 
-#define HUBDIR         "hubs"
-#define HUBBASE        "hub"
+#define HUBDIR  "hubs"
+#define HUBBASE "hub"
 
 #endif // __DOOM_STRINGS__
 

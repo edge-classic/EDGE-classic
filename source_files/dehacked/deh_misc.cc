@@ -46,175 +46,170 @@ namespace Deh_Edge
 
 namespace Misc
 {
-	int init_ammo;
-	int max_armour;
-	int max_health;
+int init_ammo;
+int max_armour;
+int max_health;
 
-	int green_armour_class;
-	int blue_armour_class;
-	int bfg_cells_per_shot;
+int green_armour_class;
+int blue_armour_class;
+int bfg_cells_per_shot;
 
-	int soul_health;
-	int soul_limit;
-	int mega_health;
+int soul_health;
+int soul_limit;
+int mega_health;
 
-	int monster_infight;
-}
-
+int monster_infight;
+} // namespace Misc
 
 struct miscinfo_t
 {
-	const char *deh_name;
-	int minimum;
-	int *var;
-	const int *affected_mobjs;
+    const char *deh_name;
+    int         minimum;
+    int        *var;
+    const int  *affected_mobjs;
 };
-
 
 namespace Misc
 {
-	// mobjtypes which are affected by a setting
-	const int init_ammo_mobj  [] = { MT_PLAYER, -1 };
-	const int max_heal_mobj   [] = { MT_MISC2,  -1 };
-	const int max_arm_mobj    [] = { MT_MISC0, MT_MISC1, MT_MISC3, MT_MEGA, -1 };
-	const int green_class_mobj[] = { MT_MISC0,  -1 };
-	const int blue_class_mobj [] = { MT_MISC1,  -1 };
-	const int soulsphere_mobj [] = { MT_MISC12, -1 };
-	const int megasphere_mobj [] = { MT_MEGA,   -1 };
+// mobjtypes which are affected by a setting
+const int init_ammo_mobj[]   = {MT_PLAYER, -1};
+const int max_heal_mobj[]    = {MT_MISC2, -1};
+const int max_arm_mobj[]     = {MT_MISC0, MT_MISC1, MT_MISC3, MT_MEGA, -1};
+const int green_class_mobj[] = {MT_MISC0, -1};
+const int blue_class_mobj[]  = {MT_MISC1, -1};
+const int soulsphere_mobj[]  = {MT_MISC12, -1};
+const int megasphere_mobj[]  = {MT_MEGA, -1};
 
-	const miscinfo_t misc_info[] =
-	{
-		{ "Initial Bullets",   0, &init_ammo, init_ammo_mobj },
-		{ "Max Health",        1, &max_health, max_heal_mobj },
-		{ "Max Armor",         1, &max_armour, max_arm_mobj },
-		{ "Green Armor Class", 0, &green_armour_class, green_class_mobj },
-		{ "Blue Armor Class",  0, &blue_armour_class,  blue_class_mobj },
-		{ "Max Soulsphere",    1, &soul_limit,  soulsphere_mobj },
-		{ "Soulsphere Health", 1, &soul_health, soulsphere_mobj },
-		{ "Megasphere Health", 1, &mega_health, megasphere_mobj },
+const miscinfo_t misc_info[] = {
+    {"Initial Bullets", 0, &init_ammo, init_ammo_mobj},
+    {"Max Health", 1, &max_health, max_heal_mobj},
+    {"Max Armor", 1, &max_armour, max_arm_mobj},
+    {"Green Armor Class", 0, &green_armour_class, green_class_mobj},
+    {"Blue Armor Class", 0, &blue_armour_class, blue_class_mobj},
+    {"Max Soulsphere", 1, &soul_limit, soulsphere_mobj},
+    {"Soulsphere Health", 1, &soul_health, soulsphere_mobj},
+    {"Megasphere Health", 1, &mega_health, megasphere_mobj},
 
-		{ "God Mode Health",   0, NULL, NULL },
-		{ "IDFA Armor",        0, NULL, NULL },
-		{ "IDFA Armor Class",  0, NULL, NULL },
-		{ "IDKFA Armor",       0, NULL, NULL },
-		{ "IDKFA Armor Class", 0, NULL, NULL },
+    {"God Mode Health", 0, NULL, NULL},
+    {"IDFA Armor", 0, NULL, NULL},
+    {"IDFA Armor Class", 0, NULL, NULL},
+    {"IDKFA Armor", 0, NULL, NULL},
+    {"IDKFA Armor Class", 0, NULL, NULL},
 
-		{ NULL, 0, NULL, 0 }  // End sentinel
-	};
-}
-
+    {NULL, 0, NULL, 0} // End sentinel
+};
+} // namespace Misc
 
 void Misc::Init()
 {
-    init_ammo   = 50;
-    max_armour  = 200;
-    max_health  = 200;
+    init_ammo  = 50;
+    max_armour = 200;
+    max_health = 200;
 
     green_armour_class = 1;
     blue_armour_class  = 2;
     bfg_cells_per_shot = 40;
 
-    soul_health  = 200;
-    soul_limit   = 200;
-    mega_health  = 200;
+    soul_health = 200;
+    soul_limit  = 200;
+    mega_health = 200;
 
     monster_infight = 202;
 }
 
-
 void Misc::Shutdown()
-{ }
-
+{
+}
 
 void Misc::AlterMisc(int new_val)
 {
-	const char *misc_name = Patch::line_buf;
+    const char *misc_name = Patch::line_buf;
 
-	// --- special cases ---
+    // --- special cases ---
 
-	if (StrCaseCmp(misc_name, "Initial Health") == 0)
-	{
-		if (new_val < 1)
-		{
-			PrintWarn("Bad value '%d' for MISC field: %s\n", new_val, misc_name);
-			return;
-		}
+    if (StrCaseCmp(misc_name, "Initial Health") == 0)
+    {
+        if (new_val < 1)
+        {
+            PrintWarn("Bad value '%d' for MISC field: %s\n", new_val, misc_name);
+            return;
+        }
 
-		Things::SetPlayerHealth(new_val);
-		return;
-	}
+        Things::SetPlayerHealth(new_val);
+        return;
+    }
 
-	if (StrCaseCmp(misc_name, "BFG Cells/Shot") == 0)
-	{
-		if (new_val < 1)
-		{
-			PrintWarn("Bad value '%d' for MISC field: %s\n", new_val, misc_name);
-			return;
-		}
+    if (StrCaseCmp(misc_name, "BFG Cells/Shot") == 0)
+    {
+        if (new_val < 1)
+        {
+            PrintWarn("Bad value '%d' for MISC field: %s\n", new_val, misc_name);
+            return;
+        }
 
-		bfg_cells_per_shot = new_val;
+        bfg_cells_per_shot = new_val;
 
-		Weapons::MarkWeapon(wp_bfg);
-		return;
-	}
+        Weapons::MarkWeapon(wp_bfg);
+        return;
+    }
 
-	if (StrCaseCmp(misc_name, "Monsters Infight") == 0)
-	{
-		if (new_val != 202 && new_val != 221)
-		{
-			PrintWarn("Bad value '%d' for MISC field: %s\n", new_val, misc_name);
-			return;
-		}
+    if (StrCaseCmp(misc_name, "Monsters Infight") == 0)
+    {
+        if (new_val != 202 && new_val != 221)
+        {
+            PrintWarn("Bad value '%d' for MISC field: %s\n", new_val, misc_name);
+            return;
+        }
 
-		monster_infight = new_val;
+        monster_infight = new_val;
 
-		if (monster_infight == 221)
-			Things::MarkAllMonsters();
+        if (monster_infight == 221)
+            Things::MarkAllMonsters();
 
-		return;
-	}
-	
-	// --- normal variables ---
+        return;
+    }
 
-	int j;
+    // --- normal variables ---
 
-	for (j = 0; misc_info[j].deh_name; j++)
-	{
-		if (StrCaseCmp(misc_name, misc_info[j].deh_name) == 0)
-			break;
-	}
+    int j;
 
-	const miscinfo_t *info = misc_info + j;
+    for (j = 0; misc_info[j].deh_name; j++)
+    {
+        if (StrCaseCmp(misc_name, misc_info[j].deh_name) == 0)
+            break;
+    }
 
-	if (! info->deh_name)
-	{
-		PrintWarn("UNKNOWN MISC FIELD: %s\n", misc_name);
-		return;
-	}
+    const miscinfo_t *info = misc_info + j;
 
-	if (! info->var)
-	{
-		PrintWarn("Ignoring MISC field: %s\n", misc_name);
-		return;
-	}
+    if (!info->deh_name)
+    {
+        PrintWarn("UNKNOWN MISC FIELD: %s\n", misc_name);
+        return;
+    }
 
-	if (new_val < info->minimum)  // mainly here to disallow negative values
-	{
-		PrintWarn("Bad value '%d' for MISC field: %s\n", new_val, misc_name);
-		new_val = info->minimum;
-	}
+    if (!info->var)
+    {
+        PrintWarn("Ignoring MISC field: %s\n", misc_name);
+        return;
+    }
 
-	*(info->var) = new_val;
+    if (new_val < info->minimum) // mainly here to disallow negative values
+    {
+        PrintWarn("Bad value '%d' for MISC field: %s\n", new_val, misc_name);
+        new_val = info->minimum;
+    }
 
-	// mark mobjs that have been modified
+    *(info->var) = new_val;
 
-	const int *affect = info->affected_mobjs;
-	assert(affect);
+    // mark mobjs that have been modified
 
-	for (; *affect >= 0; affect++)
-	{
-		Things::MarkThing(*affect);
-	}
+    const int *affect = info->affected_mobjs;
+    assert(affect);
+
+    for (; *affect >= 0; affect++)
+    {
+        Things::MarkThing(*affect);
+    }
 }
 
-}  // Deh_Edge
+} // namespace Deh_Edge

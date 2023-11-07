@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE OGG Music Player (HEADER)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2004-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -27,11 +27,11 @@
 
 /* FUNCTIONS */
 
-abstract_music_c * S_PlayOGGMusic(byte *data, int length, bool looping);
+abstract_music_c *S_PlayOGGMusic(byte *data, int length, bool looping);
 
 bool S_LoadOGGSound(epi::sound_data_c *buf, const byte *data, int length);
 
-#endif  /* __OGGPLAYER_H__ */
+#endif /* __OGGPLAYER_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Console Main
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -19,7 +19,6 @@
 #ifndef __CON_MAIN_GUI_H
 #define __CON_MAIN_GUI_H
 
-
 // The console 'application' functions.
 // Adds the console to the gui.
 void CON_Start(void);
@@ -28,7 +27,7 @@ void CON_Start(void);
 void CON_Ticker(void);
 
 // Responder obeys events.
-bool CON_Responder(event_t * ev);
+bool CON_Responder(event_t *ev);
 
 // Drawer. Draws the console.
 void CON_Drawer(void);

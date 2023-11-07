@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE New SaveGame Handling (Main)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -40,13 +40,11 @@
 #include "sv_main.h"
 #include "w_wad.h"
 
-
 savestruct_t *sv_known_structs;
 savearray_t  *sv_known_arrays;
 
 // the current element of an array being read/written
 void *sv_current_elem;
-
 
 // sv_mobj.c
 extern savestruct_t sv_struct_mobj;
@@ -94,7 +92,6 @@ extern savearray_t sv_array_drawtip;
 extern savearray_t sv_array_plane_move;
 extern savearray_t sv_array_slider_move;
 
-
 //----------------------------------------------------------------------------
 //
 //  GET ROUTINES
@@ -102,77 +99,77 @@ extern savearray_t sv_array_slider_move;
 
 bool SR_GetByte(void *storage, int index, void *extra)
 {
-	(void) extra;
+    (void)extra;
 
-	((unsigned char *)storage)[index] = SV_GetByte();
-	return true;
+    ((unsigned char *)storage)[index] = SV_GetByte();
+    return true;
 }
 
 bool SR_GetShort(void *storage, int index, void *extra)
 {
-	(void) extra;
+    (void)extra;
 
-	((unsigned short *)storage)[index] = SV_GetShort();
-	return true;
+    ((unsigned short *)storage)[index] = SV_GetShort();
+    return true;
 }
 
 bool SR_GetInt(void *storage, int index, void *extra)
 {
-	(void) extra;
+    (void)extra;
 
-	((unsigned int *)storage)[index] = SV_GetInt();
-	return true;
+    ((unsigned int *)storage)[index] = SV_GetInt();
+    return true;
 }
 
 bool SR_GetAngle(void *storage, int index, void *extra)
 {
-	(void) extra;
+    (void)extra;
 
-	((angle_t *)storage)[index] = SV_GetAngle();
-	return true;
+    ((angle_t *)storage)[index] = SV_GetAngle();
+    return true;
 }
 
 bool SR_GetFloat(void *storage, int index, void *extra)
 {
-	(void) extra;
+    (void)extra;
 
-	((float *)storage)[index] = SV_GetFloat();
-	return true;
+    ((float *)storage)[index] = SV_GetFloat();
+    return true;
 }
 
 bool SR_GetBoolean(void *storage, int index, void *extra)
 {
-	(void) extra;
+    (void)extra;
 
-	((bool *)storage)[index] = SV_GetInt() ? true : false;
-	return true;
+    ((bool *)storage)[index] = SV_GetInt() ? true : false;
+    return true;
 }
 
 bool SR_GetVec2(void *storage, int index, void *extra)
 {
-	(void) extra;
+    (void)extra;
 
-	((vec2_t *)storage)[index].x = SV_GetFloat();
-	((vec2_t *)storage)[index].y = SV_GetFloat();
-	return true;
+    ((vec2_t *)storage)[index].x = SV_GetFloat();
+    ((vec2_t *)storage)[index].y = SV_GetFloat();
+    return true;
 }
 
 bool SR_GetVec3(void *storage, int index, void *extra)
 {
-	(void) extra;
+    (void)extra;
 
-	((vec3_t *)storage)[index].x = SV_GetFloat();
-	((vec3_t *)storage)[index].y = SV_GetFloat();
-	((vec3_t *)storage)[index].z = SV_GetFloat();
-	return true;
+    ((vec3_t *)storage)[index].x = SV_GetFloat();
+    ((vec3_t *)storage)[index].y = SV_GetFloat();
+    ((vec3_t *)storage)[index].z = SV_GetFloat();
+    return true;
 }
 
 bool SR_GetFloatFromInt(void *storage, int index, void *extra)
 {
-	(void) extra;
+    (void)extra;
 
-	((float *)storage)[index] = (float)SV_GetInt();
-	return true;
+    ((float *)storage)[index] = (float)SV_GetInt();
+    return true;
 }
 
 //
@@ -182,12 +179,11 @@ bool SR_GetFloatFromInt(void *storage, int index, void *extra)
 //
 bool SR_GetAngleFromSlope(void *storage, int index, void *extra)
 {
-	(void) extra;
-	
-	((angle_t *)storage)[index] = M_ATan(SV_GetFloat());
-	return true;
-}
+    (void)extra;
 
+    ((angle_t *)storage)[index] = M_ATan(SV_GetFloat());
+    return true;
+}
 
 //----------------------------------------------------------------------------
 //
@@ -196,56 +192,55 @@ bool SR_GetAngleFromSlope(void *storage, int index, void *extra)
 
 void SR_PutByte(void *storage, int index, void *extra)
 {
-	SV_PutByte(((unsigned char *)storage)[index]);
+    SV_PutByte(((unsigned char *)storage)[index]);
 }
 
 void SR_PutShort(void *storage, int index, void *extra)
 {
-	SV_PutShort(((unsigned short *)storage)[index]);
+    SV_PutShort(((unsigned short *)storage)[index]);
 }
 
 void SR_PutInt(void *storage, int index, void *extra)
 {
-	SV_PutInt(((unsigned int *)storage)[index]);
+    SV_PutInt(((unsigned int *)storage)[index]);
 }
 
 void SR_PutAngle(void *storage, int index, void *extra)
 {
-	SV_PutAngle(((angle_t *)storage)[index]);
+    SV_PutAngle(((angle_t *)storage)[index]);
 }
 
 void SR_PutFloat(void *storage, int index, void *extra)
 {
-	SV_PutFloat(((float *)storage)[index]);
+    SV_PutFloat(((float *)storage)[index]);
 }
 
 void SR_PutBoolean(void *storage, int index, void *extra)
 {
-	SV_PutInt(((bool *)storage)[index] ? 1 : 0);
+    SV_PutInt(((bool *)storage)[index] ? 1 : 0);
 }
 
 void SR_PutVec2(void *storage, int index, void *extra)
 {
-	SV_PutFloat(((vec2_t *)storage)[index].x);
-	SV_PutFloat(((vec2_t *)storage)[index].y);
+    SV_PutFloat(((vec2_t *)storage)[index].x);
+    SV_PutFloat(((vec2_t *)storage)[index].y);
 }
 
 void SR_PutVec3(void *storage, int index, void *extra)
 {
-	SV_PutFloat(((vec3_t *)storage)[index].x);
-	SV_PutFloat(((vec3_t *)storage)[index].y);
-	SV_PutFloat(((vec3_t *)storage)[index].z);
+    SV_PutFloat(((vec3_t *)storage)[index].x);
+    SV_PutFloat(((vec3_t *)storage)[index].y);
+    SV_PutFloat(((vec3_t *)storage)[index].z);
 }
 
 void SR_PutAngleToSlope(void *storage, int index, void *extra)
 {
-	angle_t val = ((angle_t *)storage)[index];
+    angle_t val = ((angle_t *)storage)[index];
 
-	SYS_ASSERT(val < ANG90 || val > ANG270);
+    SYS_ASSERT(val < ANG90 || val > ANG270);
 
-	SV_PutFloat(M_Tan(val));
+    SV_PutFloat(M_Tan(val));
 }
-
 
 //----------------------------------------------------------------------------
 //
@@ -254,93 +249,92 @@ void SR_PutAngleToSlope(void *storage, int index, void *extra)
 
 static void AddKnownStruct(savestruct_t *S)
 {
-	S->next = sv_known_structs;
-	sv_known_structs = S;
+    S->next          = sv_known_structs;
+    sv_known_structs = S;
 }
 
 static void AddKnownArray(savearray_t *A)
 {
-	A->next = sv_known_arrays;
-	sv_known_arrays = A;
+    A->next         = sv_known_arrays;
+    sv_known_arrays = A;
 }
-
 
 void SV_MainInit(void)
 {
-	// One-time initialisation.  Sets up lists of known structures
-	// and arrays.
+    // One-time initialisation.  Sets up lists of known structures
+    // and arrays.
 
-	SV_ChunkInit();
+    SV_ChunkInit();
 
-	// sv_mobj.c
-	AddKnownStruct(&sv_struct_mobj);
-	AddKnownStruct(&sv_struct_spawnpoint);
-	AddKnownStruct(&sv_struct_iteminque);
+    // sv_mobj.c
+    AddKnownStruct(&sv_struct_mobj);
+    AddKnownStruct(&sv_struct_spawnpoint);
+    AddKnownStruct(&sv_struct_iteminque);
 
-	AddKnownArray(&sv_array_mobj);
-	AddKnownArray(&sv_array_iteminque);
+    AddKnownArray(&sv_array_mobj);
+    AddKnownArray(&sv_array_iteminque);
 
-	// sv_play.c
-	AddKnownStruct(&sv_struct_player);
-	AddKnownStruct(&sv_struct_playerweapon);
-	AddKnownStruct(&sv_struct_playerammo);
-	AddKnownStruct(&sv_struct_playerinv);
-	AddKnownStruct(&sv_struct_playercounter);
-	AddKnownStruct(&sv_struct_psprite);
+    // sv_play.c
+    AddKnownStruct(&sv_struct_player);
+    AddKnownStruct(&sv_struct_playerweapon);
+    AddKnownStruct(&sv_struct_playerammo);
+    AddKnownStruct(&sv_struct_playerinv);
+    AddKnownStruct(&sv_struct_playercounter);
+    AddKnownStruct(&sv_struct_psprite);
 
-	AddKnownArray(&sv_array_player);
+    AddKnownArray(&sv_array_player);
 
-	// sv_level.c
-	AddKnownStruct(&sv_struct_surface);
-	AddKnownStruct(&sv_struct_side);
-	AddKnownStruct(&sv_struct_line);
-	AddKnownStruct(&sv_struct_regprops);
-	AddKnownStruct(&sv_struct_exfloor);
-	AddKnownStruct(&sv_struct_sector);
+    // sv_level.c
+    AddKnownStruct(&sv_struct_surface);
+    AddKnownStruct(&sv_struct_side);
+    AddKnownStruct(&sv_struct_line);
+    AddKnownStruct(&sv_struct_regprops);
+    AddKnownStruct(&sv_struct_exfloor);
+    AddKnownStruct(&sv_struct_sector);
 
-	AddKnownArray(&sv_array_side);
-	AddKnownArray(&sv_array_line);
-	AddKnownArray(&sv_array_exfloor);
-	AddKnownArray(&sv_array_sector);
+    AddKnownArray(&sv_array_side);
+    AddKnownArray(&sv_array_line);
+    AddKnownArray(&sv_array_exfloor);
+    AddKnownArray(&sv_array_sector);
 
-	// sv_misc.c
-	AddKnownStruct(&sv_struct_button);
-	AddKnownStruct(&sv_struct_light);
-	AddKnownStruct(&sv_struct_trigger);
-	AddKnownStruct(&sv_struct_drawtip);
-	AddKnownStruct(&sv_struct_plane_move);
-	AddKnownStruct(&sv_struct_slider_move);
+    // sv_misc.c
+    AddKnownStruct(&sv_struct_button);
+    AddKnownStruct(&sv_struct_light);
+    AddKnownStruct(&sv_struct_trigger);
+    AddKnownStruct(&sv_struct_drawtip);
+    AddKnownStruct(&sv_struct_plane_move);
+    AddKnownStruct(&sv_struct_slider_move);
 
-	AddKnownArray(&sv_array_button);
-	AddKnownArray(&sv_array_light);
-	AddKnownArray(&sv_array_trigger);
-	AddKnownArray(&sv_array_drawtip);
-	AddKnownArray(&sv_array_plane_move);
-	AddKnownArray(&sv_array_slider_move);
+    AddKnownArray(&sv_array_button);
+    AddKnownArray(&sv_array_light);
+    AddKnownArray(&sv_array_trigger);
+    AddKnownArray(&sv_array_drawtip);
+    AddKnownArray(&sv_array_plane_move);
+    AddKnownArray(&sv_array_slider_move);
 }
 
 savestruct_t *SV_MainLookupStruct(const char *name)
 {
-	savestruct_t *cur;
+    savestruct_t *cur;
 
-	for (cur=sv_known_structs; cur; cur=cur->next)
-		if (strcmp(cur->struct_name, name) == 0)
-			return cur;
+    for (cur = sv_known_structs; cur; cur = cur->next)
+        if (strcmp(cur->struct_name, name) == 0)
+            return cur;
 
-	// not found
-	return NULL;
+    // not found
+    return NULL;
 }
 
 savearray_t *SV_MainLookupArray(const char *name)
 {
-	savearray_t *cur;
+    savearray_t *cur;
 
-	for (cur=sv_known_arrays; cur; cur=cur->next)
-		if (strcmp(cur->array_name, name) == 0)
-			return cur;
+    for (cur = sv_known_arrays; cur; cur = cur->next)
+        if (strcmp(cur->array_name, name) == 0)
+            return cur;
 
-	// not found
-	return NULL;
+    // not found
+    return NULL;
 }
 
 //----------------------------------------------------------------------------
@@ -460,108 +454,107 @@ void SV_MainTestPrimitives(void)
 	SV_CloseReadFile();
 }
 
-#endif  // TEST CODE
-
+#endif // TEST CODE
 
 //----------------------------------------------------------------------------
 
 const char *SV_SlotName(int slot)
 {
-	SYS_ASSERT(slot < 1000);
+    SYS_ASSERT(slot < 1000);
 
-	static char buffer[256];
+    static char buffer[256];
 
-	sprintf(buffer, "slot%03d", slot);
+    sprintf(buffer, "slot%03d", slot);
 
-	return buffer;
+    return buffer;
 }
 
 const char *SV_MapName(const mapdef_c *map)
 {
-	// ensure the name is LOWER CASE
-	static char buffer[256];
+    // ensure the name is LOWER CASE
+    static char buffer[256];
 
-	strcpy(buffer, map->name.c_str());
+    strcpy(buffer, map->name.c_str());
 
-	for (char *pos = buffer; *pos; pos++)
-		*pos = tolower(*pos);
+    for (char *pos = buffer; *pos; pos++)
+        *pos = tolower(*pos);
 
-	return buffer;
+    return buffer;
 }
 
 std::filesystem::path SV_FileName(const char *slot_name, const char *map_name)
 {
     std::string temp(epi::STR_Format("%s/%s.%s", slot_name, map_name, SAVEGAMEEXT));
 
-	return epi::PATH_Join(save_dir, temp);
+    return epi::PATH_Join(save_dir, temp);
 }
 
 std::filesystem::path SV_DirName(const char *slot_name)
 {
-	return epi::PATH_Join(save_dir, slot_name);
+    return epi::PATH_Join(save_dir, slot_name);
 }
 
 void SV_ClearSlot(const char *slot_name)
 {
-	std::filesystem::path full_dir = SV_DirName(slot_name);
+    std::filesystem::path full_dir = SV_DirName(slot_name);
 
-	// make sure the directory exists
-	epi::FS_MakeDir(full_dir);
+    // make sure the directory exists
+    epi::FS_MakeDir(full_dir);
 
-	std::vector<epi::dir_entry_c> fsd;
+    std::vector<epi::dir_entry_c> fsd;
 
-	if (! FS_ReadDir(fsd, full_dir, "*.*"))
-	{
-		I_Debugf("Failed to read directory: %s\n", full_dir.u8string().c_str());
-		return;
-	}
+    if (!FS_ReadDir(fsd, full_dir, "*.*"))
+    {
+        I_Debugf("Failed to read directory: %s\n", full_dir.u8string().c_str());
+        return;
+    }
 
-	I_Debugf("SV_ClearSlot: removing %d files\n", (int)fsd.size());
+    I_Debugf("SV_ClearSlot: removing %d files\n", (int)fsd.size());
 
-	for (size_t i = 0 ; i < fsd.size() ; i++)
-	{
-		if (fsd[i].is_dir)
-			continue;
-		std::filesystem::path cur_file = epi::PATH_Join(full_dir, epi::PATH_GetFilename(fsd[i].name).string());
-		I_Debugf("  Deleting %s\n", cur_file.u8string().c_str());
+    for (size_t i = 0; i < fsd.size(); i++)
+    {
+        if (fsd[i].is_dir)
+            continue;
+        std::filesystem::path cur_file = epi::PATH_Join(full_dir, epi::PATH_GetFilename(fsd[i].name).string());
+        I_Debugf("  Deleting %s\n", cur_file.u8string().c_str());
 
-		epi::FS_Delete(cur_file);
-	}
+        epi::FS_Delete(cur_file);
+    }
 }
 
 void SV_CopySlot(const char *src_name, const char *dest_name)
 {
-	std::filesystem::path src_dir  = SV_DirName(src_name);
-	std::filesystem::path dest_dir = SV_DirName(dest_name);
+    std::filesystem::path src_dir  = SV_DirName(src_name);
+    std::filesystem::path dest_dir = SV_DirName(dest_name);
 
-	std::vector<epi::dir_entry_c> fsd;
+    std::vector<epi::dir_entry_c> fsd;
 
-	if (! FS_ReadDir(fsd, src_dir, "*.*"))
-	{
-		I_Error("SV_CopySlot: failed to read dir: %s\n", src_dir.u8string().c_str());
-		return;
-	}
+    if (!FS_ReadDir(fsd, src_dir, "*.*"))
+    {
+        I_Error("SV_CopySlot: failed to read dir: %s\n", src_dir.u8string().c_str());
+        return;
+    }
 
-	I_Debugf("SV_CopySlot: copying %d files\n", (int)fsd.size());
+    I_Debugf("SV_CopySlot: copying %d files\n", (int)fsd.size());
 
-	for (size_t i = 0 ; i < fsd.size() ; i++)
-	{
-		if (fsd[i].is_dir)
-			continue;
+    for (size_t i = 0; i < fsd.size(); i++)
+    {
+        if (fsd[i].is_dir)
+            continue;
 #ifdef _WIN32
-		std::filesystem::path src_file  = epi::PATH_Join( src_dir, epi::PATH_GetFilename(fsd[i].name).u32string());
-		std::filesystem::path dest_file = epi::PATH_Join(dest_dir,epi::PATH_GetFilename(fsd[i].name).u32string());
+        std::filesystem::path src_file  = epi::PATH_Join(src_dir, epi::PATH_GetFilename(fsd[i].name).u32string());
+        std::filesystem::path dest_file = epi::PATH_Join(dest_dir, epi::PATH_GetFilename(fsd[i].name).u32string());
 #else
-		std::filesystem::path src_file  = epi::PATH_Join( src_dir, epi::PATH_GetFilename(fsd[i].name).string());
-		std::filesystem::path dest_file = epi::PATH_Join(dest_dir,epi::PATH_GetFilename(fsd[i].name).string());
+        std::filesystem::path src_file  = epi::PATH_Join(src_dir, epi::PATH_GetFilename(fsd[i].name).string());
+        std::filesystem::path dest_file = epi::PATH_Join(dest_dir, epi::PATH_GetFilename(fsd[i].name).string());
 #endif
 
-		I_Debugf("  Copying %s --> %s\n", src_file.u8string().c_str(), dest_file.u8string().c_str());
- 
-		if (! epi::FS_Copy(src_file, dest_file))
-			I_Error("SV_CopySlot: failed to copy '%s' to '%s'\n",
-			        src_file.u8string().c_str(), dest_file.u8string().c_str());
-	}
+        I_Debugf("  Copying %s --> %s\n", src_file.u8string().c_str(), dest_file.u8string().c_str());
+
+        if (!epi::FS_Copy(src_file, dest_file))
+            I_Error("SV_CopySlot: failed to copy '%s' to '%s'\n", src_file.u8string().c_str(),
+                    dest_file.u8string().c_str());
+    }
 }
 
 //--- editor settings ---

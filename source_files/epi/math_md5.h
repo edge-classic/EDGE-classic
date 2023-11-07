@@ -33,52 +33,55 @@ namespace epi
 
 class md5hash_c
 {
-	/* sealed */
+    /* sealed */
 
-public:
-	byte hash[16];
+  public:
+    byte hash[16];
 
-	md5hash_c();
-	md5hash_c(const byte *message, unsigned int len);
+    md5hash_c();
+    md5hash_c(const byte *message, unsigned int len);
 
-	~md5hash_c()
-  { }
+    ~md5hash_c()
+    {
+    }
 
-	void Compute(const byte *message, unsigned int len);
+    void Compute(const byte *message, unsigned int len);
 
-private:
-	// a class used while computing the MD5 sum.
-	// Not actually used with a member variable.
+  private:
+    // a class used while computing the MD5 sum.
+    // Not actually used with a member variable.
 
-  class packhash_c
-  {
-	public:
-		u32_t pack[4];
+    class packhash_c
+    {
+      public:
+        u32_t pack[4];
 
-		packhash_c();
-		~packhash_c() { }
+        packhash_c();
+        ~packhash_c()
+        {
+        }
 
-		void Transform(const u32_t extra[16]);
-		void TransformBytes(const byte chunk[64]);
-		void Encode(byte *hash);
-  };
+        void Transform(const u32_t extra[16]);
+        void TransformBytes(const byte chunk[64]);
+        void Encode(byte *hash);
+    };
 };
 
 } // namespace epi
 
 //------------------------------------------------------------------------
-//  
+//
 //  DEBUG STUFF
 //
 
 #ifdef DEBUG_EPI
 namespace debugepi
 {
-	void TestMd5Hash();
+void TestMd5Hash();
 };
-#endif  // DEBUG_EPI
+#endif // DEBUG_EPI
 
-#endif  /* __EPI_MD5_H__ */
+#endif /* __EPI_MD5_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

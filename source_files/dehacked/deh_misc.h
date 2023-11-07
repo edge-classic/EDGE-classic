@@ -24,31 +24,31 @@ namespace Deh_Edge
 
 namespace Misc
 {
-	extern int init_ammo;
-	/* NOTE: initial health is set in mobjinfo[MT_PLAYER] */
+extern int init_ammo;
+/* NOTE: initial health is set in mobjinfo[MT_PLAYER] */
 
-	extern int max_armour;
-	extern int max_health;
+extern int max_armour;
+extern int max_health;
 
-	extern int green_armour_class;
-	extern int blue_armour_class;
-	extern int bfg_cells_per_shot;
+extern int green_armour_class;
+extern int blue_armour_class;
+extern int bfg_cells_per_shot;
 
-	extern int soul_health;
-	extern int soul_limit;
-	extern int mega_health;  // and limit
+extern int soul_health;
+extern int soul_limit;
+extern int mega_health; // and limit
 
-	extern int monster_infight;
+extern int monster_infight;
 
-	// NOTE: we don't support changing the amounts given by cheats
-	//       (God Mode Health, IDKFA Armor, etc).
+// NOTE: we don't support changing the amounts given by cheats
+//       (God Mode Health, IDKFA Armor, etc).
 
-	void Init();
-	void Shutdown();
+void Init();
+void Shutdown();
 
-	void AlterMisc(int new_val);
-}
+void AlterMisc(int new_val);
+} // namespace Misc
 
-}  // Deh_Edge
+} // namespace Deh_Edge
 
 #endif /* __DEH_MISC_HDR__ */

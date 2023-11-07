@@ -26,302 +26,425 @@ namespace epi
 
 class color_c
 {
-public:
-	// sealed class with value semantics (i.e. pass it around whole,
-	// rather than use pointers or references).
-	//
-	// r is red, g is green, b is blue, a is alpha. 
-	// 
-	// Color components range from 0 to 255.  Alpha is like OpenGL: 0 is
-	// totally transparent, and 255 is totally solid/opaque.
+  public:
+    // sealed class with value semantics (i.e. pass it around whole,
+    // rather than use pointers or references).
+    //
+    // r is red, g is green, b is blue, a is alpha.
+    //
+    // Color components range from 0 to 255.  Alpha is like OpenGL: 0 is
+    // totally transparent, and 255 is totally solid/opaque.
 
-	byte r, g, b, a;
+    byte r, g, b, a;
 
-	color_c() : r(0), g(0), b(0), a(255) { }
+    color_c() : r(0), g(0), b(0), a(255)
+    {
+    }
 
-	color_c(byte nr, byte ng, byte nb, byte na = 255) : 
-		r(nr), g(ng), b(nb), a(na) { }
-	
-	color_c(const color_c& rhs) :
-		r(rhs.r), g(rhs.g), b(rhs.b), a(rhs.a) { }
+    color_c(byte nr, byte ng, byte nb, byte na = 255) : r(nr), g(ng), b(nb), a(na)
+    {
+    }
 
-	color_c(int packed) :  // Note: no alpha field
-		r((packed >> 16) & 0xFF), g((packed >> 8) & 0xFF), b(packed & 0xFF),
-		a(255) { }
+    color_c(const color_c &rhs) : r(rhs.r), g(rhs.g), b(rhs.b), a(rhs.a)
+    {
+    }
 
-	inline int GetPacked() const { return (int(r) << 16) | (int(g) << 8) | int(b); } // Note: no alpha field
+    color_c(int packed)
+        : // Note: no alpha field
+          r((packed >> 16) & 0xFF), g((packed >> 8) & 0xFF), b(packed & 0xFF), a(255)
+    {
+    }
 
-	inline color_c& operator= (const color_c& rhs) { r = rhs.r; g = rhs.g; b = rhs.b; a = rhs.a; return *this; }
+    inline int GetPacked() const
+    {
+        return (int(r) << 16) | (int(g) << 8) | int(b);
+    } // Note: no alpha field
 
-	inline bool operator== (const color_c& rhs) const { return (r == rhs.r) && (g == rhs.g) && (b == rhs.b) && (a == rhs.a); }
-	inline bool operator!= (const color_c& rhs) const { return (r != rhs.r) || (g != rhs.g) || (b != rhs.b) || (a != rhs.a); }
+    inline color_c &operator=(const color_c &rhs)
+    {
+        r = rhs.r;
+        g = rhs.g;
+        b = rhs.b;
+        a = rhs.a;
+        return *this;
+    }
 
-	inline color_c& ClampSet(int _r, int _g, int _b, int _a = 255) 
-	{
-		r = byte(MAX(0, MIN(255, _r)));
-		g = byte(MAX(0, MIN(255, _g)));
-		b = byte(MAX(0, MIN(255, _b)));
-		a = byte(MAX(0, MIN(255, _a)));
-		return *this;
-	}
-	// set the color value, clamping the given components.
+    inline bool operator==(const color_c &rhs) const
+    {
+        return (r == rhs.r) && (g == rhs.g) && (b == rhs.b) && (a == rhs.a);
+    }
+    inline bool operator!=(const color_c &rhs) const
+    {
+        return (r != rhs.r) || (g != rhs.g) || (b != rhs.b) || (a != rhs.a);
+    }
 
-	inline int Dist(const color_c& other) const
-	{
-		int dr = int(r) - int(other.r);
-		int dg = int(g) - int(other.g);
-		int db = int(b) - int(other.b);
+    inline color_c &ClampSet(int _r, int _g, int _b, int _a = 255)
+    {
+        r = byte(MAX(0, MIN(255, _r)));
+        g = byte(MAX(0, MIN(255, _g)));
+        b = byte(MAX(0, MIN(255, _b)));
+        a = byte(MAX(0, MIN(255, _a)));
+        return *this;
+    }
+    // set the color value, clamping the given components.
 
-		return (dr * dr) + (dg * dg) + (db * db);
-	}
+    inline int Dist(const color_c &other) const
+    {
+        int dr = int(r) - int(other.r);
+        int dg = int(g) - int(other.g);
+        int db = int(b) - int(other.b);
 
-	inline int DistAlpha(const color_c& other) const
-	{
-		int dr = int(r) - int(other.r);
-		int dg = int(g) - int(other.g);
-		int db = int(b) - int(other.b);
-		int da = int(a) - int(other.a);
+        return (dr * dr) + (dg * dg) + (db * db);
+    }
 
-		return (dr * dr) + (dg * dg) + (db * db) + (da * da);
-	}
-	// compute distance between the two colors.  Returns 0 for an exact
-	// match, and higher values for bigger differences.  First version
-	// ignores alpha, second version includes it.
+    inline int DistAlpha(const color_c &other) const
+    {
+        int dr = int(r) - int(other.r);
+        int dg = int(g) - int(other.g);
+        int db = int(b) - int(other.b);
+        int da = int(a) - int(other.a);
 
-	inline color_c  Mix(const color_c& other, int qty = 128) const
-	{
-		int nr = int(r) * (255 - qty) + int(other.r) * qty;
-		int ng = int(g) * (255 - qty) + int(other.g) * qty;
-		int nb = int(b) * (255 - qty) + int(other.b) * qty;
-		int na = int(a) * (255 - qty) + int(other.a) * qty;
+        return (dr * dr) + (dg * dg) + (db * db) + (da * da);
+    }
+    // compute distance between the two colors.  Returns 0 for an exact
+    // match, and higher values for bigger differences.  First version
+    // ignores alpha, second version includes it.
 
-		return color_c(byte(nr / 255), byte(ng / 255),
-						byte(nb / 255), byte(na / 255));
-	}
+    inline color_c Mix(const color_c &other, int qty = 128) const
+    {
+        int nr = int(r) * (255 - qty) + int(other.r) * qty;
+        int ng = int(g) * (255 - qty) + int(other.g) * qty;
+        int nb = int(b) * (255 - qty) + int(other.b) * qty;
+        int na = int(a) * (255 - qty) + int(other.a) * qty;
 
-	inline color_c& MixThis(const color_c& other, int qty = 128)
-	{
-		int nr = int(r) * (255 - qty) + int(other.r) * qty;
-		int ng = int(g) * (255 - qty) + int(other.g) * qty;
-		int nb = int(b) * (255 - qty) + int(other.b) * qty;
-		int na = int(a) * (255 - qty) + int(other.a) * qty;
+        return color_c(byte(nr / 255), byte(ng / 255), byte(nb / 255), byte(na / 255));
+    }
 
-		r = byte(nr / 255); g = byte(ng / 255);
-		b = byte(nb / 255); a = byte(na / 255);
+    inline color_c &MixThis(const color_c &other, int qty = 128)
+    {
+        int nr = int(r) * (255 - qty) + int(other.r) * qty;
+        int ng = int(g) * (255 - qty) + int(other.g) * qty;
+        int nb = int(b) * (255 - qty) + int(other.b) * qty;
+        int na = int(a) * (255 - qty) + int(other.a) * qty;
 
-		return *this;
-	}
-	// mixes this color with the other color.  Qty is how much of the
-	// other color to mix in (from 0 to 255, where 0 is none of it, and
-	// 255 is all of it).  Alpha is also mixed (same as the others).
+        r = byte(nr / 255);
+        g = byte(ng / 255);
+        b = byte(nb / 255);
+        a = byte(na / 255);
 
-	inline color_c  Blend(const color_c& other) const
-	{
-		int qty = other.a;
-		int nr = int(r) * (255 - qty) + int(other.r) * qty;
-		int ng = int(g) * (255 - qty) + int(other.g) * qty;
-		int nb = int(b) * (255 - qty) + int(other.b) * qty;
+        return *this;
+    }
+    // mixes this color with the other color.  Qty is how much of the
+    // other color to mix in (from 0 to 255, where 0 is none of it, and
+    // 255 is all of it).  Alpha is also mixed (same as the others).
 
-		return color_c(byte(nr / 255), byte(ng / 255), byte(nb / 255), a);
-	}
+    inline color_c Blend(const color_c &other) const
+    {
+        int qty = other.a;
+        int nr  = int(r) * (255 - qty) + int(other.r) * qty;
+        int ng  = int(g) * (255 - qty) + int(other.g) * qty;
+        int nb  = int(b) * (255 - qty) + int(other.b) * qty;
 
-	inline color_c& BlendThis(const color_c& other)
-	{
-		int qty = other.a;
-		int nr = int(r) * (255 - qty) + int(other.r) * qty;
-		int ng = int(g) * (255 - qty) + int(other.g) * qty;
-		int nb = int(b) * (255 - qty) + int(other.b) * qty;
+        return color_c(byte(nr / 255), byte(ng / 255), byte(nb / 255), a);
+    }
 
-		r = byte(nr / 255); g = byte(ng / 255); b = byte(nb / 255);
+    inline color_c &BlendThis(const color_c &other)
+    {
+        int qty = other.a;
+        int nr  = int(r) * (255 - qty) + int(other.r) * qty;
+        int ng  = int(g) * (255 - qty) + int(other.g) * qty;
+        int nb  = int(b) * (255 - qty) + int(other.b) * qty;
 
-		return *this;
-	}
-	// blend this color with the other color, using the other color's
-	// alpha (where 0 means no change, and 255 will make the result the
-	// same as the other color).  The alpha remains unchanged.
+        r = byte(nr / 255);
+        g = byte(ng / 255);
+        b = byte(nb / 255);
 
-	inline color_c  Solidify(const color_c& other) const
-	{
-		int qty = a;
-		int nr = int(r) * qty + int(other.r) * (255 - qty);
-		int ng = int(g) * qty + int(other.g) * (255 - qty);
-		int nb = int(b) * qty + int(other.b) * (255 - qty);
+        return *this;
+    }
+    // blend this color with the other color, using the other color's
+    // alpha (where 0 means no change, and 255 will make the result the
+    // same as the other color).  The alpha remains unchanged.
 
-		return color_c(byte(nr / 255), byte(ng / 255), byte(nb / 255), 255);
-	}
-	inline color_c& SolidifyThis(const color_c& other)
-	{
-		int qty = a;
-		int nr = int(r) * qty + int(other.r) * (255 - qty);
-		int ng = int(g) * qty + int(other.g) * (255 - qty);
-		int nb = int(b) * qty + int(other.b) * (255 - qty);
+    inline color_c Solidify(const color_c &other) const
+    {
+        int qty = a;
+        int nr  = int(r) * qty + int(other.r) * (255 - qty);
+        int ng  = int(g) * qty + int(other.g) * (255 - qty);
+        int nb  = int(b) * qty + int(other.b) * (255 - qty);
 
-		r = byte(nr / 255); g = byte(ng / 255); b = byte(nb / 255); a = 255;
+        return color_c(byte(nr / 255), byte(ng / 255), byte(nb / 255), 255);
+    }
+    inline color_c &SolidifyThis(const color_c &other)
+    {
+        int qty = a;
+        int nr  = int(r) * qty + int(other.r) * (255 - qty);
+        int ng  = int(g) * qty + int(other.g) * (255 - qty);
+        int nb  = int(b) * qty + int(other.b) * (255 - qty);
 
-		return *this;
-	}
-	// solidify this color by mixing in the other color using the
-	// alpha here.  The other color's alpha is ignored.  The resulting
-	// alpha will be 255.
+        r = byte(nr / 255);
+        g = byte(ng / 255);
+        b = byte(nb / 255);
+        a = 255;
 
-	inline color_c Hue() const
-	{
-		int maxval = MAX(r, MAX(g, b));
-		// prevent division by zero (black --> black)
-		if (maxval == 0)
-			return color_c(0, 0, 0);
+        return *this;
+    }
+    // solidify this color by mixing in the other color using the
+    // alpha here.  The other color's alpha is ignored.  The resulting
+    // alpha will be 255.
 
-		return color_c(int(r) * 255 / maxval, int(g) * 255 / maxval,
-						int(b) * 255 / maxval);
-	}
-	inline color_c& HueThis()
-	{
-		int maxval = MAX(r, MAX(g, b));
-		// prevent division by zero (black --> black)
-		if (maxval == 0)
-		{
-			r = g = b = 0;
-		}
-		else
-		{
-			r = int(r) * 255 / maxval;
-			g = int(g) * 255 / maxval;
-			b = int(b) * 255 / maxval;
-		}
-		a = 255;
+    inline color_c Hue() const
+    {
+        int maxval = MAX(r, MAX(g, b));
+        // prevent division by zero (black --> black)
+        if (maxval == 0)
+            return color_c(0, 0, 0);
 
-		return *this;
-	}
-	// compute the color's "hue", which for pure black (0,0,0) is just
-	// black, and for everything else is the color made as bright as
-	// possible (e.g. dark grey becomes white, and dark blue becomes
-	// bright blue).  The alpha will be solid (255).
+        return color_c(int(r) * 255 / maxval, int(g) * 255 / maxval, int(b) * 255 / maxval);
+    }
+    inline color_c &HueThis()
+    {
+        int maxval = MAX(r, MAX(g, b));
+        // prevent division by zero (black --> black)
+        if (maxval == 0)
+        {
+            r = g = b = 0;
+        }
+        else
+        {
+            r = int(r) * 255 / maxval;
+            g = int(g) * 255 / maxval;
+            b = int(b) * 255 / maxval;
+        }
+        a = 255;
 
-	inline float Intensity() const
-	{
-		float r2 = r / 255.0;
-		float g2 = g / 255.0;
-		float b2 = b / 255.0;
+        return *this;
+    }
+    // compute the color's "hue", which for pure black (0,0,0) is just
+    // black, and for everything else is the color made as bright as
+    // possible (e.g. dark grey becomes white, and dark blue becomes
+    // bright blue).  The alpha will be solid (255).
 
-		return sqrt(r2 * r2 * 0.30 + g2 * g2 * 0.50 + b2 * b2 * 0.20);
-	}
-	// compute the intensity, from 0.0 (darkest) to 1.0 (lightest).
-	// Uses sqrt(), so can be slow.  Ignores alpha.
+    inline float Intensity() const
+    {
+        float r2 = r / 255.0;
+        float g2 = g / 255.0;
+        float b2 = b / 255.0;
 
-	inline int RoughIntensity() const
-	{
-		return (int(r) * 3 + int(g) * 5 + int(b) * 2) / 10;
-	}
-	// a faster but crappier intensity function.
+        return sqrt(r2 * r2 * 0.30 + g2 * g2 * 0.50 + b2 * b2 * 0.20);
+    }
+    // compute the intensity, from 0.0 (darkest) to 1.0 (lightest).
+    // Uses sqrt(), so can be slow.  Ignores alpha.
 
-	/* some useful constants */
-	static inline color_c Black()     { return color_c(0, 0, 0); }
-	static inline color_c Blue()      { return color_c(0, 0, 255); }
-	static inline color_c LightBlue() { return color_c(128, 128, 255); }
-	static inline color_c Cyan()      { return color_c(0, 255, 255); }
-	static inline color_c Green()     { return color_c(0, 255, 0); }
-	static inline color_c Red()       { return color_c(255, 0, 0); }
-	static inline color_c Purple()    { return color_c(255, 0, 255); }
-	static inline color_c Yellow()    { return color_c(255, 255, 0); }
-	static inline color_c White()     { return color_c(255, 255, 255); }
+    inline int RoughIntensity() const
+    {
+        return (int(r) * 3 + int(g) * 5 + int(b) * 2) / 10;
+    }
+    // a faster but crappier intensity function.
 
-	static inline color_c Grey()      { return color_c(128, 128, 128); }
-	static inline color_c DarkGrey()  { return color_c(64, 64, 64); }
-	static inline color_c LightGrey() { return color_c(192, 192, 192); }
-	static inline color_c Orange()    { return color_c(255, 128, 0); }
-	static inline color_c NoValue()   { return color_c(1, 254, 254); }
+    /* some useful constants */
+    static inline color_c Black()
+    {
+        return color_c(0, 0, 0);
+    }
+    static inline color_c Blue()
+    {
+        return color_c(0, 0, 255);
+    }
+    static inline color_c LightBlue()
+    {
+        return color_c(128, 128, 255);
+    }
+    static inline color_c Cyan()
+    {
+        return color_c(0, 255, 255);
+    }
+    static inline color_c Green()
+    {
+        return color_c(0, 255, 0);
+    }
+    static inline color_c Red()
+    {
+        return color_c(255, 0, 0);
+    }
+    static inline color_c Purple()
+    {
+        return color_c(255, 0, 255);
+    }
+    static inline color_c Yellow()
+    {
+        return color_c(255, 255, 0);
+    }
+    static inline color_c White()
+    {
+        return color_c(255, 255, 255);
+    }
+
+    static inline color_c Grey()
+    {
+        return color_c(128, 128, 128);
+    }
+    static inline color_c DarkGrey()
+    {
+        return color_c(64, 64, 64);
+    }
+    static inline color_c LightGrey()
+    {
+        return color_c(192, 192, 192);
+    }
+    static inline color_c Orange()
+    {
+        return color_c(255, 128, 0);
+    }
+    static inline color_c NoValue()
+    {
+        return color_c(1, 254, 254);
+    }
 };
-
 
 class hsv_col_c
 {
-public:
-   // sealed, value semantics.
-   //
-   // h is hue (angle from 0 to 359: 0 = RED, 120 = GREEN, 240 = BLUE).
-   // s is saturation (0 to 255: 0 = White, 255 = Pure color).
-   // v is value (0 to 255: 0 = Darkest, 255 = Brightest).
+  public:
+    // sealed, value semantics.
+    //
+    // h is hue (angle from 0 to 359: 0 = RED, 120 = GREEN, 240 = BLUE).
+    // s is saturation (0 to 255: 0 = White, 255 = Pure color).
+    // v is value (0 to 255: 0 = Darkest, 255 = Brightest).
 
-	short h; byte s, v;
+    short h;
+    byte  s, v;
 
-	hsv_col_c() : h(0), s(0), v(0) { }
-	hsv_col_c(short nh, short ns, short nv) : h(nh), s(ns), v(nv) { }
-	hsv_col_c(const hsv_col_c& rhs) : h(rhs.h), s(rhs.s), v(rhs.v) { }
-	hsv_col_c(const color_c& col);  // conversion from RGBA
+    hsv_col_c() : h(0), s(0), v(0)
+    {
+    }
+    hsv_col_c(short nh, short ns, short nv) : h(nh), s(ns), v(nv)
+    {
+    }
+    hsv_col_c(const hsv_col_c &rhs) : h(rhs.h), s(rhs.s), v(rhs.v)
+    {
+    }
+    hsv_col_c(const color_c &col); // conversion from RGBA
 
-	color_c GetRGBA() const;  // conversion to RGBA
+    color_c GetRGBA() const; // conversion to RGBA
 
-	inline hsv_col_c& ClampSet(int nh, int ns, int nv)
-	{
-		h = byte(MAX(0, MIN(359, nh)));
-		s = byte(MAX(0, MIN(255, ns)));
-		v = byte(MAX(0, MIN(255, nv)));
+    inline hsv_col_c &ClampSet(int nh, int ns, int nv)
+    {
+        h = byte(MAX(0, MIN(359, nh)));
+        s = byte(MAX(0, MIN(255, ns)));
+        v = byte(MAX(0, MIN(255, nv)));
 
-		return *this;
-	}
-	inline hsv_col_c& Rotate(int delta)
-	{
-		int bam = int(h + delta) * 372827;
-		
-		h = short((bam & 0x7FFFFFF) / 372827);
+        return *this;
+    }
+    inline hsv_col_c &Rotate(int delta)
+    {
+        int bam = int(h + delta) * 372827;
 
-		return *this;
-	}  // usable range: -1800 to +1800
-	inline hsv_col_c& SetSaturation(int sat)
-	{
-		s = sat;
+        h = short((bam & 0x7FFFFFF) / 372827);
 
-		return *this;
-	}
+        return *this;
+    } // usable range: -1800 to +1800
+    inline hsv_col_c &SetSaturation(int sat)
+    {
+        s = sat;
 
-	inline hsv_col_c& SetValue(int val)
-	{
-		v = val;
+        return *this;
+    }
 
-		return *this;
-	}
-	inline hsv_col_c& operator= (const hsv_col_c& rhs) { h = rhs.h; s = rhs.s; v = rhs.v; return *this; }
+    inline hsv_col_c &SetValue(int val)
+    {
+        v = val;
 
-	inline bool operator== (const hsv_col_c& rhs) const { return (h == rhs.h) && (s == rhs.s) && (v == rhs.v); }
-	inline bool operator!= (const hsv_col_c& rhs) const { return (h != rhs.h) || (s != rhs.s) || (v != rhs.v); }
+        return *this;
+    }
+    inline hsv_col_c &operator=(const hsv_col_c &rhs)
+    {
+        h = rhs.h;
+        s = rhs.s;
+        v = rhs.v;
+        return *this;
+    }
 
-	inline int Dist(const hsv_col_c& other) const
-	{
-		int dh = int(h) - int(other.h);
-		int ds = int(s) - int(other.s);
-		int dv = int(v) - int(other.v);
+    inline bool operator==(const hsv_col_c &rhs) const
+    {
+        return (h == rhs.h) && (s == rhs.s) && (v == rhs.v);
+    }
+    inline bool operator!=(const hsv_col_c &rhs) const
+    {
+        return (h != rhs.h) || (s != rhs.s) || (v != rhs.v);
+    }
 
-		if (dh > 180)
-			dh -= 360;
-		else if (dh < -180)
-			dh += 360;
+    inline int Dist(const hsv_col_c &other) const
+    {
+        int dh = int(h) - int(other.h);
+        int ds = int(s) - int(other.s);
+        int dv = int(v) - int(other.v);
 
-		// weightings in favour of hue first, value second
-		return dh * dh * 5 + dv * dv * 3 + ds * ds * 2;
-	}
-	// compute distance between the two colors.  Returns 0 for an exact
-	// match, and higher values for bigger differences.  This method may
-	// produce different results than if you use color_c::Dist().
+        if (dh > 180)
+            dh -= 360;
+        else if (dh < -180)
+            dh += 360;
 
-	/* some useful constants */
-	static inline hsv_col_c Black()     { return hsv_col_c(0, 0, 0); }
-	static inline hsv_col_c DarkGrey()  { return hsv_col_c(0, 0, 64); }
-	static inline hsv_col_c Grey()      { return hsv_col_c(0, 0, 128); }
-	static inline hsv_col_c LightGrey() { return hsv_col_c(0, 0, 192); }
-	static inline hsv_col_c White()     { return hsv_col_c(0, 0, 255); }
+        // weightings in favour of hue first, value second
+        return dh * dh * 5 + dv * dv * 3 + ds * ds * 2;
+    }
+    // compute distance between the two colors.  Returns 0 for an exact
+    // match, and higher values for bigger differences.  This method may
+    // produce different results than if you use color_c::Dist().
 
-	static inline hsv_col_c Red()       { return hsv_col_c(0,   255, 255); }
-	static inline hsv_col_c Purple()    { return hsv_col_c(300, 255, 255); }
-	static inline hsv_col_c Blue()      { return hsv_col_c(240, 255, 255); }
-	static inline hsv_col_c Cyan()      { return hsv_col_c(180, 255, 255); }
-	static inline hsv_col_c Green()     { return hsv_col_c(120, 255, 255); }
-	static inline hsv_col_c Yellow()    { return hsv_col_c(60,  255, 255); }
-	static inline hsv_col_c Orange()    { return hsv_col_c(30,  255, 255); }
+    /* some useful constants */
+    static inline hsv_col_c Black()
+    {
+        return hsv_col_c(0, 0, 0);
+    }
+    static inline hsv_col_c DarkGrey()
+    {
+        return hsv_col_c(0, 0, 64);
+    }
+    static inline hsv_col_c Grey()
+    {
+        return hsv_col_c(0, 0, 128);
+    }
+    static inline hsv_col_c LightGrey()
+    {
+        return hsv_col_c(0, 0, 192);
+    }
+    static inline hsv_col_c White()
+    {
+        return hsv_col_c(0, 0, 255);
+    }
+
+    static inline hsv_col_c Red()
+    {
+        return hsv_col_c(0, 255, 255);
+    }
+    static inline hsv_col_c Purple()
+    {
+        return hsv_col_c(300, 255, 255);
+    }
+    static inline hsv_col_c Blue()
+    {
+        return hsv_col_c(240, 255, 255);
+    }
+    static inline hsv_col_c Cyan()
+    {
+        return hsv_col_c(180, 255, 255);
+    }
+    static inline hsv_col_c Green()
+    {
+        return hsv_col_c(120, 255, 255);
+    }
+    static inline hsv_col_c Yellow()
+    {
+        return hsv_col_c(60, 255, 255);
+    }
+    static inline hsv_col_c Orange()
+    {
+        return hsv_col_c(30, 255, 255);
+    }
 };
 
-}  // namespace epi
+} // namespace epi
 
-#endif  /* __EPI_MATH_COLOR_H__ */
+#endif /* __EPI_MATH_COLOR_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

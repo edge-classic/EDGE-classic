@@ -26,19 +26,25 @@ namespace epi
 
 class mem_file_c : public file_c
 {
-private:
-	byte *data;
+  private:
+    byte *data;
 
-	int length;
-	int pos;
-	bool copied;
+    int  length;
+    int  pos;
+    bool copied;
 
-public:
-     mem_file_c(const byte *_block, int _len, bool copy_it = true);
+  public:
+    mem_file_c(const byte *_block, int _len, bool copy_it = true);
     ~mem_file_c();
 
-    int GetLength()   { return length; }
-    int GetPosition() { return pos; }
+    int GetLength()
+    {
+        return length;
+    }
+    int GetPosition()
+    {
+        return pos;
+    }
 
     unsigned int Read(void *dest, unsigned int size);
     unsigned int Write(const void *src, unsigned int size);

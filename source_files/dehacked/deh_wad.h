@@ -26,13 +26,13 @@ namespace Deh_Edge
 
 namespace WAD
 {
-	extern ddf_collection_c * dest_container;
+extern ddf_collection_c *dest_container;
 
-	void NewLump(ddf_type_e type);
+void NewLump(ddf_type_e type);
 
-	void Printf(const char *str, ...) GCCATTR((format (printf,1,2)));
-}
+void Printf(const char *str, ...) GCCATTR((format(printf, 1, 2)));
+} // namespace WAD
 
-}  // Deh_Edge
+} // namespace Deh_Edge
 
 #endif /* __DEH_WAD_HDR__ */

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Sky Handling Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -26,9 +26,8 @@
 #ifndef __R_SKY__
 #define __R_SKY__
 
-
 // The sky map is 256*4 wide (10 bits), and angles have 32 bits
-#define ANGLETOSKYSHIFT  (32 - 10)
+#define ANGLETOSKYSHIFT (32 - 10)
 
 extern const image_c *sky_image;
 
@@ -39,14 +38,13 @@ extern bool need_to_draw_sky;
 
 typedef enum
 {
-	WSKY_North = 0,
-	WSKY_East,
-	WSKY_South,
-	WSKY_West,
-	WSKY_Top,
-	WSKY_Bottom
-}
-sky_box_face_e;
+    WSKY_North = 0,
+    WSKY_East,
+    WSKY_South,
+    WSKY_West,
+    WSKY_Top,
+    WSKY_Bottom
+} sky_box_face_e;
 
 void R_ComputeSkyHeights(void);
 
@@ -58,7 +56,6 @@ void RGL_DrawSkyWall(seg_t *seg, float h1, float h2);
 
 int  RGL_UpdateSkyBoxTextures(void);
 void RGL_PreCacheSky(void);
-
 
 #endif /* __R_SKY__ */
 

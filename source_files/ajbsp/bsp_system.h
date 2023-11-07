@@ -19,7 +19,6 @@
 #ifndef __AJBSP_SYSTEM_H__
 #define __AJBSP_SYSTEM_H__
 
-
 /*
  *  Windows support
  */
@@ -27,11 +26,10 @@
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-  #ifndef WIN32
-  #define WIN32
-  #endif
+#ifndef WIN32
+#define WIN32
 #endif
-
+#endif
 
 /*
  *  Standard headers
@@ -61,7 +59,6 @@
 #undef min
 #undef max
 
-
 // sized types
 
 typedef int8_t  s8_t;
@@ -76,23 +73,20 @@ typedef uint64_t u64_t;
 
 typedef u8_t byte;
 
-
 // misc constants
 
-#define MSG_BUF_LEN  1024
-
+#define MSG_BUF_LEN 1024
 
 // basic macros
 
-#undef  NULL
-#define NULL  nullptr
+#undef NULL
+#define NULL nullptr
 
-#undef  M_PI
-#define M_PI  3.14159265358979323846
+#undef M_PI
+#define M_PI 3.14159265358979323846
 
-#undef  I_ROUND
-#define I_ROUND(x)  ((int) round(x))
-
+#undef I_ROUND
+#define I_ROUND(x) ((int)round(x))
 
 //
 // The packed attribute forces structures to be packed into the minimum
@@ -109,45 +103,47 @@ typedef u8_t byte;
 #define PACKEDATTR
 #endif
 
-
 // endianness
 
 #if defined(__GNUC__) || defined(__clang__)
-#define __Swap16  __builtin_bswap16
-#define __Swap32  __builtin_bswap32
-#define __Swap64  __builtin_bswap64
+#define __Swap16 __builtin_bswap16
+#define __Swap32 __builtin_bswap32
+#define __Swap64 __builtin_bswap64
 
 #elif defined(_MSC_VER)
-#define __Swap16  _byteswap_ushort
-#define __Swap32  _byteswap_ulong
-#define __Swap64  _byteswap_uint64
+#define __Swap16 _byteswap_ushort
+#define __Swap32 _byteswap_ulong
+#define __Swap64 _byteswap_uint64
 
 #else
-static inline uint16_t __Swap16(uint16_t n) {
-	uint16_t a;
-	a  = (n & 0xFF) << 8;
-	a |= (n >> 8) & 0xFF;
-	return a;
+static inline uint16_t __Swap16(uint16_t n)
+{
+    uint16_t a;
+    a = (n & 0xFF) << 8;
+    a |= (n >> 8) & 0xFF;
+    return a;
 }
-static inline uint32_t __Swap32(uint32_t n) {
-	uint32_t a;
-	a  = (n & 0xFFU)   << 24;
-	a |= (n & 0xFF00U) << 8;
-	a |= (n >>  8) & 0xFF00U;
-	a |= (n >> 24) & 0xFFU;
-	return a;
+static inline uint32_t __Swap32(uint32_t n)
+{
+    uint32_t a;
+    a = (n & 0xFFU) << 24;
+    a |= (n & 0xFF00U) << 8;
+    a |= (n >> 8) & 0xFF00U;
+    a |= (n >> 24) & 0xFFU;
+    return a;
 }
-static inline uint64_t __Swap64(uint64_t n) {
-	uint64_t a;
-	a  = (n & 0xFFULL)       << 56;
-	a |= (n & 0xFF00ULL)     << 40;
-	a |= (n & 0xFF0000ULL)   << 24;
-	a |= (n & 0xFF000000ULL) << 8;
-	a |= (n >>  8) & 0xFF000000ULL;
-	a |= (n >> 24) & 0xFF0000ULL;
-	a |= (n >> 40) & 0xFF00ULL;
-	a |= (n >> 56) & 0xFFULL;
-	return a;
+static inline uint64_t __Swap64(uint64_t n)
+{
+    uint64_t a;
+    a = (n & 0xFFULL) << 56;
+    a |= (n & 0xFF00ULL) << 40;
+    a |= (n & 0xFF0000ULL) << 24;
+    a |= (n & 0xFF000000ULL) << 8;
+    a |= (n >> 8) & 0xFF000000ULL;
+    a |= (n >> 24) & 0xFF0000ULL;
+    a |= (n >> 40) & 0xFF00ULL;
+    a |= (n >> 56) & 0xFFULL;
+    return a;
 }
 #endif
 
@@ -155,32 +151,31 @@ static inline uint64_t __Swap64(uint64_t n) {
 // WISH: some preprocessor checks to detect a big-endian cpu.
 
 #ifdef BIG_ENDIAN_CPU
-#define LE_U16(x)  __Swap16(x)
-#define LE_U32(x)  __Swap32(x)
-#define LE_U64(x)  __Swap64(x)
-#define BE_U16(x)  ((u16_t)(x))
-#define BE_U32(x)  ((u32_t)(x))
-#define BE_U64(x)  ((u64_t)(x))
+#define LE_U16(x) __Swap16(x)
+#define LE_U32(x) __Swap32(x)
+#define LE_U64(x) __Swap64(x)
+#define BE_U16(x) ((u16_t)(x))
+#define BE_U32(x) ((u32_t)(x))
+#define BE_U64(x) ((u64_t)(x))
 #else
-#define LE_U16(x)  ((u16_t)(x))
-#define LE_U32(x)  ((u32_t)(x))
-#define LE_U64(x)  ((u64_t)(x))
-#define BE_U16(x)  __Swap16(x)
-#define BE_U32(x)  __Swap32(x)
-#define BE_U64(x)  __Swap64(x)
+#define LE_U16(x) ((u16_t)(x))
+#define LE_U32(x) ((u32_t)(x))
+#define LE_U64(x) ((u64_t)(x))
+#define BE_U16(x) __Swap16(x)
+#define BE_U32(x) __Swap32(x)
+#define BE_U64(x) __Swap64(x)
 #endif
 
 // signed versions of the above
-#define LE_S16(x)  ((s16_t) LE_U16((u16_t) (x)))
-#define LE_S32(x)  ((s32_t) LE_U32((u32_t) (x)))
-#define LE_S64(x)  ((s64_t) LE_U64((u64_t) (x)))
+#define LE_S16(x) ((s16_t)LE_U16((u16_t)(x)))
+#define LE_S32(x) ((s32_t)LE_U32((u32_t)(x)))
+#define LE_S64(x) ((s64_t)LE_U64((u64_t)(x)))
 
-#define BE_S16(x)  ((s16_t) BE_U16((u16_t) (x)))
-#define BE_S32(x)  ((s32_t) BE_U32((u32_t) (x)))
-#define BE_S64(x)  ((s64_t) BE_U64((u64_t) (x)))
+#define BE_S16(x) ((s16_t)BE_U16((u16_t)(x)))
+#define BE_S32(x) ((s32_t)BE_U32((u32_t)(x)))
+#define BE_S64(x) ((s64_t)BE_U64((u64_t)(x)))
 
-
-#endif  /* __AJBSP_SYSTEM_H__ */
+#endif /* __AJBSP_SYSTEM_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

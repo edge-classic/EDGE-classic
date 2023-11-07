@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE OpenGL Rendering (Definitions)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -36,30 +36,29 @@
 
 typedef enum
 {
-  // no wiping
-  WIPE_None,
-  // weird screen melt
-  WIPE_Melt,
-  // cross-fading
-  WIPE_Crossfade,
-  // pixel fading
-  WIPE_Pixelfade,
+    // no wiping
+    WIPE_None,
+    // weird screen melt
+    WIPE_Melt,
+    // cross-fading
+    WIPE_Crossfade,
+    // pixel fading
+    WIPE_Pixelfade,
 
-  // new screen simply scrolls in from the given side of the screen
-  // (or if reversed, the old one scrolls out to the given side)
-  WIPE_Top,
-  WIPE_Bottom,
-  WIPE_Left,
-  WIPE_Right,
+    // new screen simply scrolls in from the given side of the screen
+    // (or if reversed, the old one scrolls out to the given side)
+    WIPE_Top,
+    WIPE_Bottom,
+    WIPE_Left,
+    WIPE_Right,
 
-  WIPE_Spooky,
+    WIPE_Spooky,
 
-  // Opens like doors
-  WIPE_Doors,
+    // Opens like doors
+    WIPE_Doors,
 
-  WIPE_NUMWIPES
-}
-wipetype_e;
+    WIPE_NUMWIPES
+} wipetype_e;
 
 extern wipetype_e wipe_method;
 
@@ -70,7 +69,7 @@ void RGL_InitWipe(wipetype_e effect);
 void RGL_StopWipe(void);
 bool RGL_DoWipe(void);
 
-#endif  // __R_WIPE__
+#endif // __R_WIPE__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

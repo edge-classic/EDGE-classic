@@ -25,34 +25,49 @@
 
 namespace epi
 {
-	class crc32_c
-	{
-		/* sealed */
-	
-	public:
-		u32_t crc;
-	
-		crc32_c()  { Reset(); }
-		crc32_c(const crc32_c &rhs) { crc = rhs.crc; }
-		~crc32_c() { }
-	
-		crc32_c& operator= (const crc32_c &rhs) { crc = rhs.crc; return *this; }
+class crc32_c
+{
+    /* sealed */
 
-		crc32_c& operator+= (byte value);
-		crc32_c& operator+= (s32_t value);
-		crc32_c& operator+= (u32_t value);				
-		crc32_c& operator+= (float value);
+  public:
+    u32_t crc;
 
-//		bool operator== (const crc32_c &rhs) const { return crc == rhs.crc; }
-//		bool operator!= (const crc32_c &rhs) const { return crc != rhs.crc; }
-	
-		crc32_c& AddBlock(const byte *data, int len);
-		crc32_c& AddCStr(const char *str);
-		
-		void Reset(void) { crc = 1; }
-	};
+    crc32_c()
+    {
+        Reset();
+    }
+    crc32_c(const crc32_c &rhs)
+    {
+        crc = rhs.crc;
+    }
+    ~crc32_c()
+    {
+    }
+
+    crc32_c &operator=(const crc32_c &rhs)
+    {
+        crc = rhs.crc;
+        return *this;
+    }
+
+    crc32_c &operator+=(byte value);
+    crc32_c &operator+=(s32_t value);
+    crc32_c &operator+=(u32_t value);
+    crc32_c &operator+=(float value);
+
+    //		bool operator== (const crc32_c &rhs) const { return crc == rhs.crc; }
+    //		bool operator!= (const crc32_c &rhs) const { return crc != rhs.crc; }
+
+    crc32_c &AddBlock(const byte *data, int len);
+    crc32_c &AddCStr(const char *str);
+
+    void Reset(void)
+    {
+        crc = 1;
+    }
 };
-#endif  /* __EPI_CRC_H__ */
+};     // namespace epi
+#endif /* __EPI_CRC_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

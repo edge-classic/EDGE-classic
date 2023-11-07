@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 //  COAL MEMORY BLOCKS
 //----------------------------------------------------------------------
-// 
+//
 //  Copyright (C) 2021-2023  The EDGE Team
 //  Copyright (C) 2009-2021  Andrew Apted
 //
@@ -22,70 +22,73 @@
 
 struct block_c
 {
-	int used;
+    int used;
 
 // Prevent SIGBUS errors on ARM32 and heap alignment issues with emscripten
-#if defined( __arm__) || defined(EMSCRIPTEN)
-	double data[4096];
+#if defined(__arm__) || defined(EMSCRIPTEN)
+    double data[4096];
 #else
-	char data[4096];
+    char data[4096];
 #endif
 
-public:
-	 block_c() : used(0) { }
-	~block_c() { }
+  public:
+    block_c() : used(0)
+    {
+    }
+    ~block_c()
+    {
+    }
 };
 
 struct bgroup_c
 {
-	int pos;
+    int pos;
 
-	block_c *blocks[256];
+    block_c *blocks[256];
 
-public:
-	 bgroup_c();
-	~bgroup_c();
+  public:
+    bgroup_c();
+    ~bgroup_c();
 
-	int try_alloc(int len);
+    int try_alloc(int len);
 
-	void reset();
+    void reset();
 
-	int usedMemory() const;
-	int totalMemory() const;
+    int usedMemory() const;
+    int totalMemory() const;
 };
-
 
 struct bmaster_c
 {
-	int pos;
+    int pos;
 
-	bgroup_c *groups[256];
+    bgroup_c *groups[256];
 
-public:
-	 bmaster_c();
-	~bmaster_c();
+  public:
+    bmaster_c();
+    ~bmaster_c();
 
-	int alloc(int len);
+    int alloc(int len);
 
-	inline void *deref(int index) const
-	{
-		bgroup_c *grp = groups[index >> 20];
-		index &= ((1 << 20) - 1);
+    inline void *deref(int index) const
+    {
+        bgroup_c *grp = groups[index >> 20];
+        index &= ((1 << 20) - 1);
 
-		block_c *blk = grp->blocks[index >> 12];
-		index &= ((1 << 12) - 1);
+        block_c *blk = grp->blocks[index >> 12];
+        index &= ((1 << 12) - 1);
 
-		return blk->data + index;
-	}
+        return blk->data + index;
+    }
 
-	// forget all the previously stored items.  May not actually
-	// free any memory.
-	void reset();
+    // forget all the previously stored items.  May not actually
+    // free any memory.
+    void reset();
 
-	// compute the total amount of memory used.  The second form
-	// includes all the extra/free/wasted space.
-	int usedMemory() const;
-	int totalMemory() const;
+    // compute the total amount of memory used.  The second form
+    // includes all the extra/free/wasted space.
+    int usedMemory() const;
+    int totalMemory() const;
 };
 
 #endif /* __COAL_MEMORY_STUFF_H__ */

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Main Header
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -46,10 +46,9 @@ void E_ProgressMessage(const char *message);
 
 typedef enum
 {
-	APP_STATE_ACTIVE       = 0x1,
-	APP_STATE_PENDING_QUIT = 0x2
-}
-app_state_flags_e;
+    APP_STATE_ACTIVE       = 0x1,
+    APP_STATE_PENDING_QUIT = 0x2
+} app_state_flags_e;
 
 extern int app_state;
 

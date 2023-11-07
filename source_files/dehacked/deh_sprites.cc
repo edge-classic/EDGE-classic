@@ -42,182 +42,157 @@
 #include "deh_util.h"
 #include "deh_wad.h"
 
-
 namespace Deh_Edge
 {
 
-const char * sprnames_orig[NUMSPRITES_DEHEXTRA] =
-{
-	"TROO", "SHTG", "PUNG", "PISG", "PISF", "SHTF", "SHT2", "CHGG",
-	"CHGF", "MISG", "MISF", "SAWG", "PLSG", "PLSF", "BFGG", "BFGF",
-	"BLUD", "PUFF", "BAL1", "BAL2", "PLSS", "PLSE", "MISL", "BFS1",
-	"BFE1", "BFE2", "TFOG", "IFOG", "PLAY", "POSS", "SPOS", "VILE",
-	"FIRE", "FATB", "FBXP", "SKEL", "MANF", "FATT", "CPOS", "SARG",
-	"HEAD", "BAL7", "BOSS", "BOS2", "SKUL", "SPID", "BSPI", "APLS",
-	"APBX", "CYBR", "PAIN", "SSWV", "KEEN", "BBRN", "BOSF", "ARM1",
-	"ARM2", "BAR1", "BEXP", "FCAN", "BON1", "BON2", "BKEY", "RKEY",
-	"YKEY", "BSKU", "RSKU", "YSKU", "STIM", "MEDI", "SOUL", "PINV",
-	"PSTR", "PINS", "MEGA", "SUIT", "PMAP", "PVIS", "CLIP", "AMMO",
-	"ROCK", "BROK", "CELL", "CELP", "SHEL", "SBOX", "BPAK", "BFUG",
-	"MGUN", "CSAW", "LAUN", "PLAS", "SHOT", "SGN2", "COLU", "SMT2",
-	"GOR1", "POL2", "POL5", "POL4", "POL3", "POL1", "POL6", "GOR2",
-	"GOR3", "GOR4", "GOR5", "SMIT", "COL1", "COL2", "COL3", "COL4",
-	"CAND", "CBRA", "COL6", "TRE1", "TRE2", "ELEC", "CEYE", "FSKU",
-	"COL5", "TBLU", "TGRN", "TRED", "SMBT", "SMGT", "SMRT", "HDB1",
-	"HDB2", "HDB3", "HDB4", "HDB5", "HDB6", "POB1", "POB2", "BRS1",
-	"TLMP", "TLP2",
+const char *sprnames_orig[NUMSPRITES_DEHEXTRA] = {
+    "TROO", "SHTG", "PUNG", "PISG", "PISF", "SHTF", "SHT2", "CHGG", "CHGF", "MISG", "MISF", "SAWG", "PLSG", "PLSF",
+    "BFGG", "BFGF", "BLUD", "PUFF", "BAL1", "BAL2", "PLSS", "PLSE", "MISL", "BFS1", "BFE1", "BFE2", "TFOG", "IFOG",
+    "PLAY", "POSS", "SPOS", "VILE", "FIRE", "FATB", "FBXP", "SKEL", "MANF", "FATT", "CPOS", "SARG", "HEAD", "BAL7",
+    "BOSS", "BOS2", "SKUL", "SPID", "BSPI", "APLS", "APBX", "CYBR", "PAIN", "SSWV", "KEEN", "BBRN", "BOSF", "ARM1",
+    "ARM2", "BAR1", "BEXP", "FCAN", "BON1", "BON2", "BKEY", "RKEY", "YKEY", "BSKU", "RSKU", "YSKU", "STIM", "MEDI",
+    "SOUL", "PINV", "PSTR", "PINS", "MEGA", "SUIT", "PMAP", "PVIS", "CLIP", "AMMO", "ROCK", "BROK", "CELL", "CELP",
+    "SHEL", "SBOX", "BPAK", "BFUG", "MGUN", "CSAW", "LAUN", "PLAS", "SHOT", "SGN2", "COLU", "SMT2", "GOR1", "POL2",
+    "POL5", "POL4", "POL3", "POL1", "POL6", "GOR2", "GOR3", "GOR4", "GOR5", "SMIT", "COL1", "COL2", "COL3", "COL4",
+    "CAND", "CBRA", "COL6", "TRE1", "TRE2", "ELEC", "CEYE", "FSKU", "COL5", "TBLU", "TGRN", "TRED", "SMBT", "SMGT",
+    "SMRT", "HDB1", "HDB2", "HDB3", "HDB4", "HDB5", "HDB6", "POB1", "POB2", "BRS1", "TLMP", "TLP2",
 
-	// BOOM/MBF/Doom Retro:
-	"TNT1", "DOGS", "PLS1", "PLS2", "BON3", "BON4", "BLD2",
+    // BOOM/MBF/Doom Retro:
+    "TNT1", "DOGS", "PLS1", "PLS2", "BON3", "BON4", "BLD2",
 
-	// DEHEXTRA sprites:
-	"SP00", "SP01", "SP02", "SP03", "SP04", "SP05", "SP06", "SP07", "SP08", "SP09",
-	"SP10", "SP11", "SP12", "SP13", "SP14", "SP15", "SP16", "SP17", "SP18", "SP19",
-	"SP20", "SP21", "SP22", "SP23", "SP24", "SP25", "SP26", "SP27", "SP28", "SP29",
-	"SP30", "SP31", "SP32", "SP33", "SP34", "SP35", "SP36", "SP37", "SP38", "SP39",
-	"SP40", "SP41", "SP42", "SP43", "SP44", "SP45", "SP46", "SP47", "SP48", "SP49",
-	"SP50", "SP51", "SP52", "SP53", "SP54", "SP55", "SP56", "SP57", "SP58", "SP59",
-	"SP60", "SP61", "SP62", "SP63", "SP64", "SP65", "SP66", "SP67", "SP68", "SP69",
-	"SP70", "SP71", "SP72", "SP73", "SP74", "SP75", "SP76", "SP77", "SP78", "SP79",
-	"SP80", "SP81", "SP82", "SP83", "SP84", "SP85", "SP86", "SP87", "SP88", "SP89",
-	"SP90", "SP91", "SP92", "SP93", "SP94", "SP95", "SP96", "SP97", "SP98", "SP99"
-};
-
+    // DEHEXTRA sprites:
+    "SP00", "SP01", "SP02", "SP03", "SP04", "SP05", "SP06", "SP07", "SP08", "SP09", "SP10", "SP11", "SP12", "SP13",
+    "SP14", "SP15", "SP16", "SP17", "SP18", "SP19", "SP20", "SP21", "SP22", "SP23", "SP24", "SP25", "SP26", "SP27",
+    "SP28", "SP29", "SP30", "SP31", "SP32", "SP33", "SP34", "SP35", "SP36", "SP37", "SP38", "SP39", "SP40", "SP41",
+    "SP42", "SP43", "SP44", "SP45", "SP46", "SP47", "SP48", "SP49", "SP50", "SP51", "SP52", "SP53", "SP54", "SP55",
+    "SP56", "SP57", "SP58", "SP59", "SP60", "SP61", "SP62", "SP63", "SP64", "SP65", "SP66", "SP67", "SP68", "SP69",
+    "SP70", "SP71", "SP72", "SP73", "SP74", "SP75", "SP76", "SP77", "SP78", "SP79", "SP80", "SP81", "SP82", "SP83",
+    "SP84", "SP85", "SP86", "SP87", "SP88", "SP89", "SP90", "SP91", "SP92", "SP93", "SP94", "SP95", "SP96", "SP97",
+    "SP98", "SP99"};
 
 // elements here can be "" for unmodified names
 std::vector<std::string> sprnames;
-
 
 //------------------------------------------------------------------------
 
 namespace Sprites
 {
-	void MarkEntry(int num);
+void MarkEntry(int num);
 }
-
 
 void Sprites::Init()
 {
-	sprnames.clear();
+    sprnames.clear();
 }
-
 
 void Sprites::Shutdown()
 {
-	sprnames.clear();
+    sprnames.clear();
 }
-
 
 void Sprites::MarkEntry(int num)
 {
-	// fill any missing slots with "", including the one we want.
-	while ((int)sprnames.size() < num+1)
-		sprnames.push_back("");
+    // fill any missing slots with "", including the one we want.
+    while ((int)sprnames.size() < num + 1)
+        sprnames.push_back("");
 
-	// for the modified sprite, copy the original name
-	if (sprnames[num].empty())
-		sprnames[num] = GetOriginalName(num);
+    // for the modified sprite, copy the original name
+    if (sprnames[num].empty())
+        sprnames[num] = GetOriginalName(num);
 }
-
 
 void Sprites::SpriteDependencies()
 {
-	for (size_t i = 0 ; i < sprnames.size() ; i++)
-	{
-		if (sprnames[i] != "" && sprnames[i] != GetOriginalName(i))
-		{
-			Frames::MarkStatesWithSprite((int) i);
-		}
-	}
+    for (size_t i = 0; i < sprnames.size(); i++)
+    {
+        if (sprnames[i] != "" && sprnames[i] != GetOriginalName(i))
+        {
+            Frames::MarkStatesWithSprite((int)i);
+        }
+    }
 }
-
 
 bool Sprites::ReplaceSprite(const char *before, const char *after)
 {
-	assert(strlen(before) == 4);
-	assert(strlen(after)  == 4);
+    assert(strlen(before) == 4);
+    assert(strlen(after) == 4);
 
-	for (int i = 0 ; i < NUMSPRITES_DEHEXTRA ; i++)
-	{
-		if (StrCaseCmp(before, sprnames_orig[i]) == 0)
-		{
-			MarkEntry(i);
+    for (int i = 0; i < NUMSPRITES_DEHEXTRA; i++)
+    {
+        if (StrCaseCmp(before, sprnames_orig[i]) == 0)
+        {
+            MarkEntry(i);
 
-			sprnames[i] = after;
-			return true;
-		}
-	}
+            sprnames[i] = after;
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }
-
 
 void Sprites::AlterBexSprite(const char *new_val)
 {
-	const char *old_val = Patch::line_buf;
+    const char *old_val = Patch::line_buf;
 
-	if (strlen(new_val) != 4)
-	{
-		PrintWarn("Bad length for sprite name '%s'.\n", new_val);
-		return;
-	}
+    if (strlen(new_val) != 4)
+    {
+        PrintWarn("Bad length for sprite name '%s'.\n", new_val);
+        return;
+    }
 
-	// for DSDehacked, support a numeric target
-	if (isdigit(old_val[0]))
-	{
-		int num = atoi(old_val);
-		if (num < 0 || num > 32767)
-		{
-			PrintWarn("Line %d: illegal sprite entry '%s'.\n",
-				Patch::line_num, old_val);
-		}
-		else
-		{
-			MarkEntry(num);
-			sprnames[num] = new_val;
-		}
-		return;
-	}
+    // for DSDehacked, support a numeric target
+    if (isdigit(old_val[0]))
+    {
+        int num = atoi(old_val);
+        if (num < 0 || num > 32767)
+        {
+            PrintWarn("Line %d: illegal sprite entry '%s'.\n", Patch::line_num, old_val);
+        }
+        else
+        {
+            MarkEntry(num);
+            sprnames[num] = new_val;
+        }
+        return;
+    }
 
-	if (strlen(old_val) != 4)
-	{
-		PrintWarn("Bad length for sprite name '%s'.\n", old_val);
-		return;
-	}
+    if (strlen(old_val) != 4)
+    {
+        PrintWarn("Bad length for sprite name '%s'.\n", old_val);
+        return;
+    }
 
-	if (! ReplaceSprite(old_val, new_val))
-		PrintWarn("Line %d: unknown sprite name '%s'.\n",
-			Patch::line_num, old_val);
+    if (!ReplaceSprite(old_val, new_val))
+        PrintWarn("Line %d: unknown sprite name '%s'.\n", Patch::line_num, old_val);
 }
 
-
-const char * Sprites::GetSprite(int spr_num)
+const char *Sprites::GetSprite(int spr_num)
 {
-	if (spr_num < 0 || spr_num > 32767)
-		return "XXXX";
+    if (spr_num < 0 || spr_num > 32767)
+        return "XXXX";
 
-	const char *name = "";
+    const char *name = "";
 
-	if (spr_num < (int)sprnames.size())
-		name = sprnames[spr_num].c_str();
+    if (spr_num < (int)sprnames.size())
+        name = sprnames[spr_num].c_str();
 
-	if (strlen(name) == 0)
-		name = GetOriginalName(spr_num);
+    if (strlen(name) == 0)
+        name = GetOriginalName(spr_num);
 
-	// Boom support: TNT1 is an invisible sprite
-	if (StrCaseCmp(name, "TNT1") == 0)
-		return "NULL";
+    // Boom support: TNT1 is an invisible sprite
+    if (StrCaseCmp(name, "TNT1") == 0)
+        return "NULL";
 
-	return name;
+    return name;
 }
 
-
-const char * Sprites::GetOriginalName(int spr_num)
+const char *Sprites::GetOriginalName(int spr_num)
 {
-	if (spr_num < NUMSPRITES_DEHEXTRA)
-		return sprnames_orig[spr_num];
+    if (spr_num < NUMSPRITES_DEHEXTRA)
+        return sprnames_orig[spr_num];
 
-	return "NULL";
+    return "NULL";
 }
 
-}  // Deh_Edge
+} // namespace Deh_Edge

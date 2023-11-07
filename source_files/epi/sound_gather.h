@@ -28,47 +28,46 @@ namespace epi
 
 // private stuff
 class gather_chunk_c;
-	
 
 class sound_gather_c
 {
-private:
-	std::vector<gather_chunk_c *> chunks;
+  private:
+    std::vector<gather_chunk_c *> chunks;
 
-	int total_samples;
+    int total_samples;
 
-	gather_chunk_c *request;
+    gather_chunk_c *request;
 
-public:
-	 sound_gather_c();
-	~sound_gather_c();
+  public:
+    sound_gather_c();
+    ~sound_gather_c();
 
-	s16_t * MakeChunk(int max_samples, bool _stereo);
-	// prepare to add a chunk of sound samples.  Returns a buffer
-	// containing the number of samples (* 2 for stereo) which the
-	// user can fill up.
+    s16_t *MakeChunk(int max_samples, bool _stereo);
+    // prepare to add a chunk of sound samples.  Returns a buffer
+    // containing the number of samples (* 2 for stereo) which the
+    // user can fill up.
 
-	void CommitChunk(int actual_samples);
-	// add the current chunk to the stored sound data.
-	// The number of samples may be less than the size requested
-	// by the MakeChunk() call.  Passing zero for 'actual_samples'
-	// is equivalent to callng the DiscardChunk() method.
+    void CommitChunk(int actual_samples);
+    // add the current chunk to the stored sound data.
+    // The number of samples may be less than the size requested
+    // by the MakeChunk() call.  Passing zero for 'actual_samples'
+    // is equivalent to callng the DiscardChunk() method.
 
-	void DiscardChunk();
-	// get rid of current chunk (because it wasn't needed, e.g.
-	// the sound file you were reading hit EOF).
+    void DiscardChunk();
+    // get rid of current chunk (because it wasn't needed, e.g.
+    // the sound file you were reading hit EOF).
 
-	bool Finalise(sound_data_c *buf, bool want_stereo);
-	// take all the stored sound data and transfer it to the
-	// sound_data_c object, making it all contiguous, and
-	// converting from/to stereoness where needed.
-	//
-	// Returns false (failure) if total samples was zero,
-	// otherwise returns true (success).
+    bool Finalise(sound_data_c *buf, bool want_stereo);
+    // take all the stored sound data and transfer it to the
+    // sound_data_c object, making it all contiguous, and
+    // converting from/to stereoness where needed.
+    //
+    // Returns false (failure) if total samples was zero,
+    // otherwise returns true (success).
 
-private:
-	void TransferMono  (gather_chunk_c *chunk, sound_data_c *buf, int pos);
-	void TransferStereo(gather_chunk_c *chunk, sound_data_c *buf, int pos);
+  private:
+    void TransferMono(gather_chunk_c *chunk, sound_data_c *buf, int pos);
+    void TransferStereo(gather_chunk_c *chunk, sound_data_c *buf, int pos);
 };
 
 } // namespace epi

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Main Menu Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -100,33 +100,33 @@ int showMessages;
 
 extern cvar_c m_language;
 
-int screen_hud;  // has default
+int screen_hud; // has default
 
 static std::string msg_string;
-static int msg_lastmenu;
-static int msg_mode;
+static int         msg_lastmenu;
+static int         msg_mode;
 
-static std::string input_string;		
+static std::string input_string;
 
 bool menuactive;
 
 // timed message = no input from user
 static bool msg_needsinput;
 
-static void (* message_key_routine)(int response) = NULL;
-static void (* message_input_routine)(const char *response) = NULL;
+static void (*message_key_routine)(int response)           = NULL;
+static void (*message_input_routine)(const char *response) = NULL;
 
 static int chosen_epi;
 
 // SOUNDS
-sfx_t * sfx_swtchn;
-sfx_t * sfx_tink;
-sfx_t * sfx_radio;
-sfx_t * sfx_oof;
-sfx_t * sfx_pstop;
-sfx_t * sfx_stnmov;
-sfx_t * sfx_pistol;
-sfx_t * sfx_swtchx;
+sfx_t *sfx_swtchn;
+sfx_t *sfx_tink;
+sfx_t *sfx_radio;
+sfx_t *sfx_oof;
+sfx_t *sfx_pstop;
+sfx_t *sfx_stnmov;
+sfx_t *sfx_pistol;
+sfx_t *sfx_swtchx;
 //
 //  IMAGES USED
 //
@@ -142,7 +142,7 @@ static const image_c *menu_doom;
 static const image_c *menu_newgame;
 static const image_c *menu_skill;
 static const image_c *menu_episode;
-static image_c *menu_skull[2];
+static image_c       *menu_skull[2];
 static const image_c *menu_readthis[2];
 
 static style_c *menu_def_style;
@@ -156,10 +156,10 @@ static style_c *exit_style;
 //
 //  SAVE STUFF
 //
-#define SAVESTRINGSIZE 	24
+#define SAVESTRINGSIZE 24
 
-#define SAVE_SLOTS  8
-#define SAVE_PAGES  100  // more would be rather unwieldy
+#define SAVE_SLOTS 8
+#define SAVE_PAGES 100 // more would be rather unwieldy
 
 // -1 = no quicksave slot picked!
 int quickSaveSlot;
@@ -180,27 +180,26 @@ static char saveOldString[SAVESTRINGSIZE];
 
 typedef struct slot_extra_info_s
 {
-	bool empty;
-	bool corrupt;
+    bool empty;
+    bool corrupt;
 
-	char desc[SAVESTRINGSIZE];
-	char timestr[32];
-  
-	char mapname[10];
-	char gamename[32];
-  
-	int skill;
-	int netgame;
+    char desc[SAVESTRINGSIZE];
+    char timestr[32];
 
-	// Useful for drawing skull/cursor and possible other calculations
-	float y;
-	float width;
+    char mapname[10];
+    char gamename[32];
 
-	epi::image_data_c *save_imdata = nullptr;
-	unsigned int save_texid = 0;
-	int save_impage = 0;
-}
-slot_extra_info_t;
+    int skill;
+    int netgame;
+
+    // Useful for drawing skull/cursor and possible other calculations
+    float y;
+    float width;
+
+    epi::image_data_c *save_imdata = nullptr;
+    unsigned int       save_texid  = 0;
+    int                save_impage = 0;
+} slot_extra_info_t;
 
 static slot_extra_info_t ex_slots[SAVE_SLOTS];
 
@@ -209,61 +208,58 @@ static slot_extra_info_t ex_slots[SAVE_SLOTS];
 #define SLIDERLEFT  -1
 #define SLIDERRIGHT -2
 
-
 //
 // MENU TYPEDEFS
 //
 typedef struct menuitem_s
 {
-	// 0 = no cursor here, 1 = ok, 2 = arrows ok
-	int status = 0;
+    // 0 = no cursor here, 1 = ok, 2 = arrows ok
+    int status = 0;
 
-  	// image for menu entry
-	char patch_name[10] = {0};
-	const image_c *image = nullptr;
+    // image for menu entry
+    char           patch_name[10] = {0};
+    const image_c *image          = nullptr;
 
-  	// choice = menu item #.
-  	// if status = 2, choice can be SLIDERLEFT or SLIDERRIGHT
-	void (* select_func)(int choice) = nullptr;
+    // choice = menu item #.
+    // if status = 2, choice can be SLIDERLEFT or SLIDERRIGHT
+    void (*select_func)(int choice) = nullptr;
 
-	// hotkey in menu
-	char alpha_key = 0;
+    // hotkey in menu
+    char alpha_key = 0;
 
-	// Printed name test
-	const char *name = nullptr;
+    // Printed name test
+    const char *name = nullptr;
 
-	// Useful for drawing skull/cursor and possible other calculations
-	int x = 0;
-	int y = 0;
-	float height = -1;
-	float width = -1;
-}
-menuitem_t;
+    // Useful for drawing skull/cursor and possible other calculations
+    int   x      = 0;
+    int   y      = 0;
+    float height = -1;
+    float width  = -1;
+} menuitem_t;
 
 typedef struct menu_s
 {
-	// # of menu items
-	int numitems;
+    // # of menu items
+    int numitems;
 
-  // previous menu
-	struct menu_s *prevMenu;
+    // previous menu
+    struct menu_s *prevMenu;
 
-	// menu items
-	menuitem_t *menuitems;
+    // menu items
+    menuitem_t *menuitems;
 
-	// style variable
-	style_c **style_var;
+    // style variable
+    style_c **style_var;
 
-	// draw routine
-	void (* draw_func)(void);
+    // draw routine
+    void (*draw_func)(void);
 
-	// x,y of menu
-	int x, y;
+    // x,y of menu
+    int x, y;
 
-	// last item user was on in menu
-	int lastOn;
-}
-menu_t;
+    // last item user was on in menu
+    int lastOn;
+} menu_t;
 
 // menu item skull is on
 static int itemOn;
@@ -286,7 +282,7 @@ extern void M_F4SoundOptions(int choice);
 static void M_LoadSavePage(int choice);
 static void M_ReadThis(int choice);
 static void M_ReadThis2(int choice);
-void M_EndGame(int choice, cvar_c *cvar);
+void        M_EndGame(int choice, cvar_c *cvar);
 
 static void M_ChangeMessages(int choice);
 
@@ -305,9 +301,9 @@ static void M_DrawEpisode(void);
 static void M_DrawLoad(void);
 static void M_DrawSave(void);
 
-static void M_SetupNextMenu(menu_t * menudef);
-void M_ClearMenus(void);
-void M_StartControlPanel(void);
+static void M_SetupNextMenu(menu_t *menudef);
+void        M_ClearMenus(void);
+void        M_StartControlPanel(void);
 // static void M_StopMessage(void);
 
 //
@@ -315,85 +311,66 @@ void M_StartControlPanel(void);
 //
 typedef enum
 {
-	newgame = 0,
-	options,
-	loadgame,
-	savegame,
-	readthis,
-	quitdoom,
-	main_end
-}
-main_e;
+    newgame = 0,
+    options,
+    loadgame,
+    savegame,
+    readthis,
+    quitdoom,
+    main_end
+} main_e;
 
-static menuitem_t MainMenu[] =
-{
-	{1, "M_NGAME",   NULL, M_NewGame, 'n', language["MainNewGame"]},
-	{1, "M_OPTION",  NULL, M_Options, 'o', language["MainOptions"]},
-	{1, "M_LOADG",   NULL, M_LoadGame, 'l', language["MainLoadGame"]},
-	{1, "M_SAVEG",   NULL, M_SaveGame, 's', language["MainSaveGame"]},
-	// Another hickup with Special edition.
-	{1, "M_RDTHIS",  NULL, M_ReadThis, 'r', language["MainReadThis"]},
-	{1, "M_QUITG",   NULL, M_QuitEDGE, 'q', language["MainQuitGame"]}
-};
+static menuitem_t MainMenu[] = {{1, "M_NGAME", NULL, M_NewGame, 'n', language["MainNewGame"]},
+                                {1, "M_OPTION", NULL, M_Options, 'o', language["MainOptions"]},
+                                {1, "M_LOADG", NULL, M_LoadGame, 'l', language["MainLoadGame"]},
+                                {1, "M_SAVEG", NULL, M_SaveGame, 's', language["MainSaveGame"]},
+                                // Another hickup with Special edition.
+                                {1, "M_RDTHIS", NULL, M_ReadThis, 'r', language["MainReadThis"]},
+                                {1, "M_QUITG", NULL, M_QuitEDGE, 'q', language["MainQuitGame"]}};
 
-static menu_t MainDef =
-{
-	main_end,
-	NULL,
-	MainMenu,
-	&main_menu_style,
-	M_DrawMainMenu,
-	94, 64,
-	0
-};
+static menu_t MainDef = {main_end, NULL, MainMenu, &main_menu_style, M_DrawMainMenu, 94, 64, 0};
 
 //
 // EPISODE SELECT
 //
 // -KM- 1998/12/16 This is generated dynamically.
 //
-static menuitem_t *EpisodeMenu = NULL;
-static bool *EpisodeMenuSkipSkill = NULL;
+static menuitem_t *EpisodeMenu          = NULL;
+static bool       *EpisodeMenuSkipSkill = NULL;
 
-static menuitem_t DefaultEpiMenu =
-{
-	1,  // status
-	"Working",  // name
-	NULL,  // image
-	NULL,  // select_func
-	'w',  // alphakey
-	"DEFAULT"
+static menuitem_t DefaultEpiMenu = {1,         // status
+                                    "Working", // name
+                                    NULL,      // image
+                                    NULL,      // select_func
+                                    'w',       // alphakey
+                                    "DEFAULT"};
+
+static menu_t EpiDef = {
+    0,               // ep_end,  // # of menu items
+    &MainDef,        // previous menu
+    &DefaultEpiMenu, // menuitem_t ->
+    &episode_style,
+    M_DrawEpisode, // drawing routine ->
+    48,
+    63, // x,y
+    0   // lastOn
 };
 
-static menu_t EpiDef =
-{
-	0,  //ep_end,  // # of menu items
-	&MainDef,  // previous menu
-	&DefaultEpiMenu,  // menuitem_t ->
-	&episode_style,
-	M_DrawEpisode,  // drawing routine ->
-	48, 63,  // x,y
-	0  // lastOn
-};
+static menuitem_t SkillMenu[] = {{1, "M_JKILL", NULL, M_ChooseSkill, 'p', language["MenuDifficulty1"]},
+                                 {1, "M_ROUGH", NULL, M_ChooseSkill, 'r', language["MenuDifficulty2"]},
+                                 {1, "M_HURT", NULL, M_ChooseSkill, 'h', language["MenuDifficulty3"]},
+                                 {1, "M_ULTRA", NULL, M_ChooseSkill, 'u', language["MenuDifficulty4"]},
+                                 {1, "M_NMARE", NULL, M_ChooseSkill, 'n', language["MenuDifficulty5"]}};
 
-static menuitem_t SkillMenu[] =
-{
-	{1, "M_JKILL", NULL, M_ChooseSkill, 'p', language["MenuDifficulty1"]},
-	{1, "M_ROUGH", NULL, M_ChooseSkill, 'r', language["MenuDifficulty2"]},
-	{1, "M_HURT",  NULL, M_ChooseSkill, 'h', language["MenuDifficulty3"]},
-	{1, "M_ULTRA", NULL, M_ChooseSkill, 'u', language["MenuDifficulty4"]},
-	{1, "M_NMARE", NULL, M_ChooseSkill, 'n', language["MenuDifficulty5"]}
-};
-
-static menu_t SkillDef =
-{
-	sk_numtypes,  // # of menu items
-	&EpiDef,  // previous menu
-	SkillMenu,  // menuitem_t ->
-	&skill_style,
-	M_DrawNewGame,  // drawing routine ->
-	48, 63,  // x,y
-	sk_medium  // lastOn
+static menu_t SkillDef = {
+    sk_numtypes, // # of menu items
+    &EpiDef,     // previous menu
+    SkillMenu,   // menuitem_t ->
+    &skill_style,
+    M_DrawNewGame, // drawing routine ->
+    48,
+    63,       // x,y
+    sk_medium // lastOn
 };
 
 //
@@ -401,134 +378,89 @@ static menu_t SkillDef =
 //
 typedef enum
 {
-	endgame,
-	messages,
-	scrnsize,
-	option_empty1,
-	mousesens,
-	option_empty2,
-	soundvol,
-	opt_end
-}
-options_e;
+    endgame,
+    messages,
+    scrnsize,
+    option_empty1,
+    mousesens,
+    option_empty2,
+    soundvol,
+    opt_end
+} options_e;
 
 //
 // Read This! MENU 1 & 2
 //
 
-static menuitem_t ReadMenu1[] =
-{
-	{1, "", NULL, M_ReadThis2, 0}
-};
+static menuitem_t ReadMenu1[] = {{1, "", NULL, M_ReadThis2, 0}};
 
-static menu_t ReadDef1 =
-{
-	1,
-	&MainDef,
-	ReadMenu1,
-	&menu_def_style,  // FIXME: maybe have READ_1 and READ_2 styles ??
-	M_DrawReadThis1,
-	1000, 1000,
-	0
-};
+static menu_t ReadDef1 = {1,
+                          &MainDef,
+                          ReadMenu1,
+                          &menu_def_style, // FIXME: maybe have READ_1 and READ_2 styles ??
+                          M_DrawReadThis1,
+                          1000,
+                          1000,
+                          0};
 
-static menuitem_t ReadMenu2[] =
-{
-	{1, "", NULL, M_FinishReadThis, 0}
-};
+static menuitem_t ReadMenu2[] = {{1, "", NULL, M_FinishReadThis, 0}};
 
-static menu_t ReadDef2 =
-{
-	1,
-	&ReadDef1,
-	ReadMenu2,
-	&menu_def_style,  // FIXME: maybe have READ_1 and READ_2 styles ??
-	M_DrawReadThis2,
-	1000, 1000,
-	0
-};
+static menu_t ReadDef2 = {1,
+                          &ReadDef1,
+                          ReadMenu2,
+                          &menu_def_style, // FIXME: maybe have READ_1 and READ_2 styles ??
+                          M_DrawReadThis2,
+                          1000,
+                          1000,
+                          0};
 
 //
 // LOAD GAME MENU
 //
 // Note: upto 10 slots per page
 //
-static menuitem_t LoadingMenu[] =
-{
-	{2, "", NULL, M_LoadSelect, '1'},
-	{2, "", NULL, M_LoadSelect, '2'},
-	{2, "", NULL, M_LoadSelect, '3'},
-	{2, "", NULL, M_LoadSelect, '4'},
-	{2, "", NULL, M_LoadSelect, '5'},
-	{2, "", NULL, M_LoadSelect, '6'},
-	{2, "", NULL, M_LoadSelect, '7'},
-	{2, "", NULL, M_LoadSelect, '8'},
-	{2, "", NULL, M_LoadSelect, '9'},
-	{2, "", NULL, M_LoadSelect, '0'}
-};
+static menuitem_t LoadingMenu[] = {{2, "", NULL, M_LoadSelect, '1'}, {2, "", NULL, M_LoadSelect, '2'},
+                                   {2, "", NULL, M_LoadSelect, '3'}, {2, "", NULL, M_LoadSelect, '4'},
+                                   {2, "", NULL, M_LoadSelect, '5'}, {2, "", NULL, M_LoadSelect, '6'},
+                                   {2, "", NULL, M_LoadSelect, '7'}, {2, "", NULL, M_LoadSelect, '8'},
+                                   {2, "", NULL, M_LoadSelect, '9'}, {2, "", NULL, M_LoadSelect, '0'}};
 
-static menu_t LoadDef =
-{
-	SAVE_SLOTS,
-	&MainDef,
-	LoadingMenu,
-	&load_style,
-	M_DrawLoad,
-	30, 42,
-	0
-};
+static menu_t LoadDef = {SAVE_SLOTS, &MainDef, LoadingMenu, &load_style, M_DrawLoad, 30, 42, 0};
 
 //
 // SAVE GAME MENU
 //
-static menuitem_t SavingMenu[] =
-{
-	{2, "", NULL, M_SaveSelect, '1'},
-	{2, "", NULL, M_SaveSelect, '2'},
-	{2, "", NULL, M_SaveSelect, '3'},
-	{2, "", NULL, M_SaveSelect, '4'},
-	{2, "", NULL, M_SaveSelect, '5'},
-	{2, "", NULL, M_SaveSelect, '6'},
-	{2, "", NULL, M_SaveSelect, '7'},
-	{2, "", NULL, M_SaveSelect, '8'},
-	{2, "", NULL, M_SaveSelect, '9'},
-	{2, "", NULL, M_SaveSelect, '0'}
-};
+static menuitem_t SavingMenu[] = {{2, "", NULL, M_SaveSelect, '1'}, {2, "", NULL, M_SaveSelect, '2'},
+                                  {2, "", NULL, M_SaveSelect, '3'}, {2, "", NULL, M_SaveSelect, '4'},
+                                  {2, "", NULL, M_SaveSelect, '5'}, {2, "", NULL, M_SaveSelect, '6'},
+                                  {2, "", NULL, M_SaveSelect, '7'}, {2, "", NULL, M_SaveSelect, '8'},
+                                  {2, "", NULL, M_SaveSelect, '9'}, {2, "", NULL, M_SaveSelect, '0'}};
 
-static menu_t SaveDef =
-{
-	SAVE_SLOTS,
-	&MainDef,
-	SavingMenu,
-	&save_style,
-	M_DrawSave,
-	30, 42,
-	0
-};
+static menu_t SaveDef = {SAVE_SLOTS, &MainDef, SavingMenu, &save_style, M_DrawSave, 30, 42, 0};
 
 // 98-7-10 KM Chooses the page of savegames to view
 void M_LoadSavePage(int choice)
 {
-	switch (choice)
-	{
-		case SLIDERLEFT:
-			// -AJA- could use `OOF' sound...
-			if (save_page == 0)
-				return;
+    switch (choice)
+    {
+    case SLIDERLEFT:
+        // -AJA- could use `OOF' sound...
+        if (save_page == 0)
+            return;
 
-			save_page--;
-			break;
-      
-		case SLIDERRIGHT:
-			if (save_page >= SAVE_PAGES-1)
-				return;
+        save_page--;
+        break;
 
-			save_page++;
-			break;
-	}
+    case SLIDERRIGHT:
+        if (save_page >= SAVE_PAGES - 1)
+            return;
 
-	S_StartFX(sfx_swtchn);
-	M_ReadSaveStrings();
+        save_page++;
+        break;
+    }
+
+    S_StartFX(sfx_swtchn);
+    M_ReadSaveStrings();
 }
 
 //
@@ -538,136 +470,134 @@ void M_LoadSavePage(int choice)
 //
 void M_ReadSaveStrings(void)
 {
-	int i, version;
-  
-	saveglobals_t *globs;
+    int i, version;
 
-	for (i=0; i < SAVE_SLOTS; i++)
-	{
-		ex_slots[i].empty = false;
-		ex_slots[i].corrupt = true;
+    saveglobals_t *globs;
 
-		ex_slots[i].skill = -1;
-		ex_slots[i].netgame = -1;
+    for (i = 0; i < SAVE_SLOTS; i++)
+    {
+        ex_slots[i].empty   = false;
+        ex_slots[i].corrupt = true;
 
-		ex_slots[i].desc[0] = 0;
-		ex_slots[i].timestr[0] = 0;
-		ex_slots[i].mapname[0] = 0;
-		ex_slots[i].gamename[0] = 0;
-    
-		int slot = save_page * SAVE_SLOTS + i;
-		std::filesystem::path fn(SV_FileName(SV_SlotName(slot), "head"));
+        ex_slots[i].skill   = -1;
+        ex_slots[i].netgame = -1;
 
-		if (! SV_OpenReadFile(fn))
-		{
-			ex_slots[i].empty = true;
-			ex_slots[i].corrupt = false;
-			continue;
-		}
+        ex_slots[i].desc[0]     = 0;
+        ex_slots[i].timestr[0]  = 0;
+        ex_slots[i].mapname[0]  = 0;
+        ex_slots[i].gamename[0] = 0;
 
-		if (! SV_VerifyHeader(&version))
-		{
-			SV_CloseReadFile();
-			continue;
-		}
+        int                   slot = save_page * SAVE_SLOTS + i;
+        std::filesystem::path fn(SV_FileName(SV_SlotName(slot), "head"));
 
-		globs = SV_LoadGLOB();
+        if (!SV_OpenReadFile(fn))
+        {
+            ex_slots[i].empty   = true;
+            ex_slots[i].corrupt = false;
+            continue;
+        }
 
-		// close file now -- we only need the globals
-		SV_CloseReadFile();
+        if (!SV_VerifyHeader(&version))
+        {
+            SV_CloseReadFile();
+            continue;
+        }
 
-		if (! globs)
-			continue;
+        globs = SV_LoadGLOB();
 
-		// --- pull info from global structure ---
+        // close file now -- we only need the globals
+        SV_CloseReadFile();
 
-		if (!globs->game || !globs->level || !globs->description)
-		{
-			SV_FreeGLOB(globs);
-			continue;
-		}
+        if (!globs)
+            continue;
 
-		ex_slots[i].corrupt = false;
+        // --- pull info from global structure ---
 
-		Z_StrNCpy(ex_slots[i].gamename, globs->game,  32-1);
-		Z_StrNCpy(ex_slots[i].mapname,  globs->level, 10-1);
+        if (!globs->game || !globs->level || !globs->description)
+        {
+            SV_FreeGLOB(globs);
+            continue;
+        }
 
-		Z_StrNCpy(ex_slots[i].desc, globs->description, SAVESTRINGSIZE-1);
+        ex_slots[i].corrupt = false;
 
-		if (globs->desc_date)
-			Z_StrNCpy(ex_slots[i].timestr, globs->desc_date, 32-1);
+        Z_StrNCpy(ex_slots[i].gamename, globs->game, 32 - 1);
+        Z_StrNCpy(ex_slots[i].mapname, globs->level, 10 - 1);
 
-		ex_slots[i].skill   = globs->skill;
-		ex_slots[i].netgame = globs->netgame;
+        Z_StrNCpy(ex_slots[i].desc, globs->description, SAVESTRINGSIZE - 1);
 
-		SV_FreeGLOB(globs);
+        if (globs->desc_date)
+            Z_StrNCpy(ex_slots[i].timestr, globs->desc_date, 32 - 1);
 
-		fn.replace_extension(".replace");
-		if (std::filesystem::exists(fn))
-		{
-			delete ex_slots[i].save_imdata;
-			ex_slots[i].save_imdata = nullptr;
-			if (ex_slots[i].save_texid)
-				glDeleteTextures(1, &ex_slots[i].save_texid);
-			ex_slots[i].save_texid = 0;
-			ex_slots[i].save_impage = save_page;
-			epi::FS_Delete(fn);
-		}
+        ex_slots[i].skill   = globs->skill;
+        ex_slots[i].netgame = globs->netgame;
 
-		// Save screenshot
-		fn.replace_extension(".jpg");
+        SV_FreeGLOB(globs);
 
-		if (std::filesystem::exists(fn) && (!ex_slots[i].save_imdata || save_page != ex_slots[i].save_impage))
-		{
-			delete ex_slots[i].save_imdata;
-			if (ex_slots[i].save_texid)
-				glDeleteTextures(1, &ex_slots[i].save_texid);
-			epi::file_c *svimg_file = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-			if (svimg_file)
-			{
-				ex_slots[i].save_imdata = epi::Image_Load(svimg_file);
-				if (ex_slots[i].save_imdata)
-				{
-					ex_slots[i].save_texid = R_UploadTexture(ex_slots[i].save_imdata, 2, (1<<30));
-					ex_slots[i].save_impage = save_page;
-					delete svimg_file;
-				}
-				else
-				{
-					I_Warning("Error reading savegame screenshot %s!\n", fn.u8string().c_str());
-					ex_slots[i].save_imdata = nullptr;
-					ex_slots[i].save_texid = 0; // just in case
-					ex_slots[i].save_impage = save_page;
-					delete svimg_file;
-				}
-			}
-		}
-	}
+        fn.replace_extension(".replace");
+        if (std::filesystem::exists(fn))
+        {
+            delete ex_slots[i].save_imdata;
+            ex_slots[i].save_imdata = nullptr;
+            if (ex_slots[i].save_texid)
+                glDeleteTextures(1, &ex_slots[i].save_texid);
+            ex_slots[i].save_texid  = 0;
+            ex_slots[i].save_impage = save_page;
+            epi::FS_Delete(fn);
+        }
 
-	// fix up descriptions
-	for (i=0; i < SAVE_SLOTS; i++)
-	{
-		if (ex_slots[i].corrupt)
-		{
-			strncpy(ex_slots[i].desc, language["Corrupt_Slot"],
-					SAVESTRINGSIZE - 1);
-			continue;
-		}
-		else if (ex_slots[i].empty)
-		{
-			strncpy(ex_slots[i].desc, language["EmptySlot"],
-					SAVESTRINGSIZE - 1);
-			continue;
-		}
-	}
+        // Save screenshot
+        fn.replace_extension(".jpg");
+
+        if (std::filesystem::exists(fn) && (!ex_slots[i].save_imdata || save_page != ex_slots[i].save_impage))
+        {
+            delete ex_slots[i].save_imdata;
+            if (ex_slots[i].save_texid)
+                glDeleteTextures(1, &ex_slots[i].save_texid);
+            epi::file_c *svimg_file = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+            if (svimg_file)
+            {
+                ex_slots[i].save_imdata = epi::Image_Load(svimg_file);
+                if (ex_slots[i].save_imdata)
+                {
+                    ex_slots[i].save_texid  = R_UploadTexture(ex_slots[i].save_imdata, 2, (1 << 30));
+                    ex_slots[i].save_impage = save_page;
+                    delete svimg_file;
+                }
+                else
+                {
+                    I_Warning("Error reading savegame screenshot %s!\n", fn.u8string().c_str());
+                    ex_slots[i].save_imdata = nullptr;
+                    ex_slots[i].save_texid  = 0; // just in case
+                    ex_slots[i].save_impage = save_page;
+                    delete svimg_file;
+                }
+            }
+        }
+    }
+
+    // fix up descriptions
+    for (i = 0; i < SAVE_SLOTS; i++)
+    {
+        if (ex_slots[i].corrupt)
+        {
+            strncpy(ex_slots[i].desc, language["Corrupt_Slot"], SAVESTRINGSIZE - 1);
+            continue;
+        }
+        else if (ex_slots[i].empty)
+        {
+            strncpy(ex_slots[i].desc, language["EmptySlot"], SAVESTRINGSIZE - 1);
+            continue;
+        }
+    }
 }
 
 int CenterMenuImage(const image_c *img)
 {
-	float CenterX = 160;
-	CenterX -= IM_WIDTH(img) / 2;
+    float CenterX = 160;
+    CenterX -= IM_WIDTH(img) / 2;
 
-	return CenterX;
+    return CenterX;
 }
 
 //
@@ -675,49 +605,49 @@ int CenterMenuImage(const image_c *img)
 // styles.ddf
 int CenterMenuImage2(style_c *style, int text_type, const image_c *img)
 {
-	float CenterX = 160;
-	float txtscale = 1.0;
-	float gfxWidth = 0;
+    float CenterX  = 160;
+    float txtscale = 1.0;
+    float gfxWidth = 0;
 
-	if(style->def->text[text_type].scale)
-	{
-		txtscale = style->def->text[text_type].scale;
-	}
+    if (style->def->text[text_type].scale)
+    {
+        txtscale = style->def->text[text_type].scale;
+    }
 
-	gfxWidth = IM_WIDTH(img) * txtscale;
-	CenterX -= gfxWidth / 2;
-	CenterX += style->def->text[text_type].x_offset;
+    gfxWidth = IM_WIDTH(img) * txtscale;
+    CenterX -= gfxWidth / 2;
+    CenterX += style->def->text[text_type].x_offset;
 
-	return CenterX;
+    return CenterX;
 }
 
 int CenterMenuText(style_c *style, int text_type, const char *str)
 {
-	float CenterX = 160;
-	float txtscale = 1.0;
-	float txtWidth = 0;
+    float CenterX  = 160;
+    float txtscale = 1.0;
+    float txtWidth = 0;
 
-	if(style->def->text[text_type].scale)
-	{
-		txtscale = style->def->text[text_type].scale;
-	}
-	txtWidth = style->fonts[text_type]->StringWidth(str) * txtscale;
-	CenterX -= txtWidth / 2;
-	CenterX += style->def->text[text_type].x_offset;
+    if (style->def->text[text_type].scale)
+    {
+        txtscale = style->def->text[text_type].scale;
+    }
+    txtWidth = style->fonts[text_type]->StringWidth(str) * txtscale;
+    CenterX -= txtWidth / 2;
+    CenterX += style->def->text[text_type].x_offset;
 
-	// Should we also add "style->def->x_offset" here too?
-	// CenterX += style->def->x_offset;
+    // Should we also add "style->def->x_offset" here too?
+    // CenterX += style->def->x_offset;
 
-	return CenterX;
+    return CenterX;
 }
 
 // AuxStringReplaceAll("Our_String", std::string("_"), std::string(" "));
 //
-std::string LoboStringReplaceAll(std::string str, const std::string& from, const std::string& to) 
+std::string LoboStringReplaceAll(std::string str, const std::string &from, const std::string &to)
 {
     size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != std::string::npos) 
-	{
+    while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+    {
         str.replace(start_pos, from.length(), to);
         start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
     }
@@ -726,185 +656,194 @@ std::string LoboStringReplaceAll(std::string str, const std::string& from, const
 
 static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHeight)
 {
-	int y = 0; //LoadDef.y + LineHeight * row;
-	int x = 0;
-	float txtscale = 1.0;
+    int   y        = 0; // LoadDef.y + LineHeight * row;
+    int   x        = 0;
+    float txtscale = 1.0;
 
-	//TITLE.FONT="EDGE3"; // next page text
-	//TEXT.FONT="EDGE3"; // save name & slot
-	//ALT.FONT="EDGE3";  // when we edit the save name
-	//HELP.FONT="EDGE3"; // save info text
+    // TITLE.FONT="EDGE3"; // next page text
+    // TEXT.FONT="EDGE3"; // save name & slot
+    // ALT.FONT="EDGE3";  // when we edit the save name
+    // HELP.FONT="EDGE3"; // save info text
 
-	y = style->def->text[styledef_c::T_TITLE].y_offset;
-	y += style->def->entry_spacing;
-	x = style->def->text[styledef_c::T_TITLE].x_offset;
-	slot_extra_info_t *info;
+    y = style->def->text[styledef_c::T_TITLE].y_offset;
+    y += style->def->entry_spacing;
+    x = style->def->text[styledef_c::T_TITLE].x_offset;
+    slot_extra_info_t *info;
 
-	char mbuffer[200];
+    char mbuffer[200];
 
-	sprintf(mbuffer, "PAGE %d", save_page + 1);
+    sprintf(mbuffer, "PAGE %d", save_page + 1);
 
-	
-	if (style->def->text[styledef_c::T_TITLE].scale)
-		txtscale=style->def->text[styledef_c::T_TITLE].scale;
+    if (style->def->text[styledef_c::T_TITLE].scale)
+        txtscale = style->def->text[styledef_c::T_TITLE].scale;
 
-	if (save_page > 0)
-		HL_WriteText(style, styledef_c::T_TITLE, x - 4, y, "< PREV");
+    if (save_page > 0)
+        HL_WriteText(style, styledef_c::T_TITLE, x - 4, y, "< PREV");
 
-	x += style->fonts[styledef_c::T_TITLE]->StringWidth("< PREV") * txtscale;
-	x += 30;
+    x += style->fonts[styledef_c::T_TITLE]->StringWidth("< PREV") * txtscale;
+    x += 30;
 
-	HL_WriteText(style, styledef_c::T_TITLE, x, y, mbuffer);
+    HL_WriteText(style, styledef_c::T_TITLE, x, y, mbuffer);
 
-	x += style->fonts[styledef_c::T_TITLE]->StringWidth(mbuffer) * txtscale;
-	x += 30;
+    x += style->fonts[styledef_c::T_TITLE]->StringWidth(mbuffer) * txtscale;
+    x += 30;
 
-	if (save_page < SAVE_PAGES-1)
-		HL_WriteText(style, styledef_c::T_TITLE, x, y, "NEXT >");
- 
-	info = ex_slots + itemOn;
-	SYS_ASSERT(0 <= itemOn && itemOn < SAVE_SLOTS);
+    if (save_page < SAVE_PAGES - 1)
+        HL_WriteText(style, styledef_c::T_TITLE, x, y, "NEXT >");
 
-	// show some info about the savegame
+    info = ex_slots + itemOn;
+    SYS_ASSERT(0 <= itemOn && itemOn < SAVE_SLOTS);
 
-	//y = LoadDef.y + LineHeight * (row2 + 1);
-	y = style->def->text[styledef_c::T_HELP].y_offset;
-	y += style->def->entry_spacing;
-	x = style->def->text[styledef_c::T_HELP].x_offset;
+    // show some info about the savegame
 
-	if (style->def->text[styledef_c::T_HELP].scale)
-		txtscale=style->def->text[styledef_c::T_HELP].scale;
+    // y = LoadDef.y + LineHeight * (row2 + 1);
+    y = style->def->text[styledef_c::T_HELP].y_offset;
+    y += style->def->entry_spacing;
+    x = style->def->text[styledef_c::T_HELP].x_offset;
 
-	LineHeight = style->fonts[styledef_c::T_HELP]->NominalHeight() * txtscale;
+    if (style->def->text[styledef_c::T_HELP].scale)
+        txtscale = style->def->text[styledef_c::T_HELP].scale;
 
-	const colourmap_c *colmap = style->def->text[styledef_c::T_HELP].colmap;
-	rgbcol_t col = V_GetFontColor(colmap);
-	//HUD_ThinBox(x - 5, y - 5, x + 95, y + 50, col);
-	HUD_ThinBox(x - 5, y - 5, x + 95, y + 115, col);
+    LineHeight = style->fonts[styledef_c::T_HELP]->NominalHeight() * txtscale;
 
-	if (saveStringEnter || info->empty || info->corrupt)
-		return;
+    const colourmap_c *colmap = style->def->text[styledef_c::T_HELP].colmap;
+    rgbcol_t           col    = V_GetFontColor(colmap);
+    // HUD_ThinBox(x - 5, y - 5, x + 95, y + 50, col);
+    HUD_ThinBox(x - 5, y - 5, x + 95, y + 115, col);
 
-	mbuffer[0] = 0;
-	strcat(mbuffer, info->timestr);
-	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
+    if (saveStringEnter || info->empty || info->corrupt)
+        return;
 
-	y += LineHeight + (LineHeight/2);
-	y += style->def->entry_spacing;
+    mbuffer[0] = 0;
+    strcat(mbuffer, info->timestr);
+    HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
 
-	//mbuffer[0] = 0;
-	//strcat(mbuffer, info->gamename);
-	std::string temp_string;
-	temp_string.clear();
-	temp_string.assign(info->gamename);
-	temp_string = LoboStringReplaceAll(temp_string, std::string("_"), std::string(" "));
-	HL_WriteText(style, styledef_c::T_HELP, x, y, temp_string.c_str());
+    y += LineHeight + (LineHeight / 2);
+    y += style->def->entry_spacing;
 
-	y += LineHeight + (LineHeight/2);
-	y += style->def->entry_spacing;
-	mbuffer[0] = 0;
-	strcat(mbuffer, info->mapname);
-	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
+    // mbuffer[0] = 0;
+    // strcat(mbuffer, info->gamename);
+    std::string temp_string;
+    temp_string.clear();
+    temp_string.assign(info->gamename);
+    temp_string = LoboStringReplaceAll(temp_string, std::string("_"), std::string(" "));
+    HL_WriteText(style, styledef_c::T_HELP, x, y, temp_string.c_str());
 
-	y += LineHeight + (LineHeight/2);
-	y += style->def->entry_spacing;
-	mbuffer[0] = 0;
-	switch (info->skill)
-	{
-		case 0: strcat(mbuffer, language["MenuDifficulty1"]); break;
-		case 1: strcat(mbuffer, language["MenuDifficulty2"]); break;
-		case 2: strcat(mbuffer, language["MenuDifficulty3"]); break;
-		case 3: strcat(mbuffer, language["MenuDifficulty4"]); break;
-		default: strcat(mbuffer, language["MenuDifficulty5"]); break;
-	}
-	HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
+    y += LineHeight + (LineHeight / 2);
+    y += style->def->entry_spacing;
+    mbuffer[0] = 0;
+    strcat(mbuffer, info->mapname);
+    HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
 
-	/*int BottomY = 0;
-	BottomY = style->def->text[styledef_c::T_HELP].y_offset;
-	BottomY += style->def->entry_spacing;
-	BottomY += 114;*/
+    y += LineHeight + (LineHeight / 2);
+    y += style->def->entry_spacing;
+    mbuffer[0] = 0;
+    switch (info->skill)
+    {
+    case 0:
+        strcat(mbuffer, language["MenuDifficulty1"]);
+        break;
+    case 1:
+        strcat(mbuffer, language["MenuDifficulty2"]);
+        break;
+    case 2:
+        strcat(mbuffer, language["MenuDifficulty3"]);
+        break;
+    case 3:
+        strcat(mbuffer, language["MenuDifficulty4"]);
+        break;
+    default:
+        strcat(mbuffer, language["MenuDifficulty5"]);
+        break;
+    }
+    HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
 
-	if (info->save_imdata && info->save_texid)
-	{
-		y += 20;
-		//BottomY -= y;
-		HUD_StretchFromImageData(x - 3, y, 95, (style->def->text[styledef_c::T_HELP].y_offset+style->def->entry_spacing+114)-y, 
-			info->save_imdata, info->save_texid, OPAC_Solid);
-	}
+    /*int BottomY = 0;
+    BottomY = style->def->text[styledef_c::T_HELP].y_offset;
+    BottomY += style->def->entry_spacing;
+    BottomY += 114;*/
+
+    if (info->save_imdata && info->save_texid)
+    {
+        y += 20;
+        // BottomY -= y;
+        HUD_StretchFromImageData(x - 3, y, 95,
+                                 (style->def->text[styledef_c::T_HELP].y_offset + style->def->entry_spacing + 114) - y,
+                                 info->save_imdata, info->save_texid, OPAC_Solid);
+    }
 }
 
-//the new one
+// the new one
 void M_DrawLoad(void)
 {
-	int i;
-	int fontType;
-	float LineHeight;
-	int TempX = 0;
-	int TempY = 0;
+    int   i;
+    int   fontType;
+    float LineHeight;
+    int   TempX = 0;
+    int   TempY = 0;
 
-	float old_alpha = HUD_GetAlpha();
+    float old_alpha = HUD_GetAlpha();
 
-	style_c *style = LoadDef.style_var[0];
+    style_c *style = LoadDef.style_var[0];
 
-	SYS_ASSERT(style);
-	style->DrawBackground();
+    SYS_ASSERT(style);
+    style->DrawBackground();
 
-	if (! style->fonts[styledef_c::T_HEADER])
-		fontType=styledef_c::T_TEXT;
-	else
-		fontType=styledef_c::T_HEADER;
+    if (!style->fonts[styledef_c::T_HEADER])
+        fontType = styledef_c::T_TEXT;
+    else
+        fontType = styledef_c::T_HEADER;
 
-	HUD_SetAlpha(style->def->text[fontType].translucency);
+    HUD_SetAlpha(style->def->text[fontType].translucency);
 
-	//1. Draw the header i.e. "Load Game"
-	TempX = CenterMenuText(style, fontType, language["MainLoadGame"]);
-	TempY = 5;
-	TempY += style->def->text[fontType].y_offset;
+    // 1. Draw the header i.e. "Load Game"
+    TempX = CenterMenuText(style, fontType, language["MainLoadGame"]);
+    TempY = 5;
+    TempY += style->def->text[fontType].y_offset;
 
-	HL_WriteText(style, fontType, TempX, TempY, language["MainLoadGame"]);
+    HL_WriteText(style, fontType, TempX, TempY, language["MainLoadGame"]);
 
-	HUD_SetAlpha(old_alpha);
+    HUD_SetAlpha(old_alpha);
 
-	TempX = 0;
-	TempY = 0; 
+    TempX = 0;
+    TempY = 0;
 
-	fontType=styledef_c::T_TEXT;
+    fontType = styledef_c::T_TEXT;
 
-	TempX += style->def->text[styledef_c::T_TEXT].x_offset;
-	TempY += style->def->text[styledef_c::T_TEXT].y_offset;
-	TempY += style->def->entry_spacing;
+    TempX += style->def->text[styledef_c::T_TEXT].x_offset;
+    TempY += style->def->text[styledef_c::T_TEXT].y_offset;
+    TempY += style->def->entry_spacing;
 
-	rgbcol_t col = V_GetFontColor(style->def->text[styledef_c::T_TEXT].colmap);
-	HUD_ThinBox(TempX - 5,TempY - 5, TempX + 175,  TempY + 115, col);
+    rgbcol_t col = V_GetFontColor(style->def->text[styledef_c::T_TEXT].colmap);
+    HUD_ThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
 
-	//2. draw the save games
-	for (i = 0; i < SAVE_SLOTS; i++)
-	{
-		fontType = styledef_c::T_TEXT;
-		if (i == itemOn)
-		{
-			if (style->def->text[styledef_c::T_SELECTED].font)
-				fontType = styledef_c::T_SELECTED;
-		}
+    // 2. draw the save games
+    for (i = 0; i < SAVE_SLOTS; i++)
+    {
+        fontType = styledef_c::T_TEXT;
+        if (i == itemOn)
+        {
+            if (style->def->text[styledef_c::T_SELECTED].font)
+                fontType = styledef_c::T_SELECTED;
+        }
 
-		LineHeight = style->fonts[fontType]->NominalHeight(); // * txtscale
+        LineHeight = style->fonts[fontType]->NominalHeight(); // * txtscale
 
-		if (fontType == styledef_c::T_SELECTED)
-		{
-			// ttf_ref_yshift is important for TTF fonts.
-			float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift[current_font_size]; // * txtscale;
-			
-			HUD_SetAlpha(0.33f);
-			HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
-			HUD_SetAlpha(old_alpha);
-		}
-		HL_WriteText(style, fontType, TempX, 
-				TempY - (LineHeight / 2), ex_slots[i].desc);
-		TempY += LineHeight + (LineHeight/2);
-		TempY += style->def->entry_spacing;
-	}
+        if (fontType == styledef_c::T_SELECTED)
+        {
+            // ttf_ref_yshift is important for TTF fonts.
+            float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift[current_font_size]; // * txtscale;
 
-	M_DrawSaveLoadCommon(i, i+1, load_style, LineHeight);
+            HUD_SetAlpha(0.33f);
+            HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
+            HUD_SetAlpha(old_alpha);
+        }
+        HL_WriteText(style, fontType, TempX, TempY - (LineHeight / 2), ex_slots[i].desc);
+        TempY += LineHeight + (LineHeight / 2);
+        TempY += style->def->entry_spacing;
+    }
+
+    M_DrawSaveLoadCommon(i, i + 1, load_style, LineHeight);
 }
 
 //
@@ -914,14 +853,14 @@ void M_DrawLoad(void)
 //
 void M_LoadSelect(int choice)
 {
-	if (choice < 0 || ex_slots[choice].empty)
-	{
-		M_LoadSavePage(choice);
-		return;
-	}
+    if (choice < 0 || ex_slots[choice].empty)
+    {
+        M_LoadSavePage(choice);
+        return;
+    }
 
-	G_DeferredLoadGame(save_page * SAVE_SLOTS + choice);
-	M_ClearMenus();
+    G_DeferredLoadGame(save_page * SAVE_SLOTS + choice);
+    M_ClearMenus();
 }
 
 //
@@ -929,116 +868,111 @@ void M_LoadSelect(int choice)
 //
 void M_LoadGame(int choice)
 {
-	if (netgame)
-	{
-		M_StartMessage(language["NoLoadInNetGame"], NULL, false);
-		return;
-	}
+    if (netgame)
+    {
+        M_StartMessage(language["NoLoadInNetGame"], NULL, false);
+        return;
+    }
 
-	M_SetupNextMenu(&LoadDef);
-	M_ReadSaveStrings();
+    M_SetupNextMenu(&LoadDef);
+    M_ReadSaveStrings();
 }
 
-
-
-
-//the new one
+// the new one
 void M_DrawSave(void)
 {
-	int i;
-	int fontType;
-	float txtscale = 1.0;
-	float LineHeight;
-	int TempX = 0;
-	int TempY = 0;
+    int   i;
+    int   fontType;
+    float txtscale = 1.0;
+    float LineHeight;
+    int   TempX = 0;
+    int   TempY = 0;
 
-	float old_alpha = HUD_GetAlpha();
+    float old_alpha = HUD_GetAlpha();
 
-	style_c *style = SaveDef.style_var[0];
+    style_c *style = SaveDef.style_var[0];
 
-	SYS_ASSERT(style);
-	style->DrawBackground();
+    SYS_ASSERT(style);
+    style->DrawBackground();
 
-	if (! style->fonts[styledef_c::T_HEADER])
-		fontType=styledef_c::T_TEXT;
-	else
-		fontType=styledef_c::T_HEADER;
+    if (!style->fonts[styledef_c::T_HEADER])
+        fontType = styledef_c::T_TEXT;
+    else
+        fontType = styledef_c::T_HEADER;
 
-	if (style->def->text[fontType].scale)
-		txtscale=style->def->text[fontType].scale;
+    if (style->def->text[fontType].scale)
+        txtscale = style->def->text[fontType].scale;
 
-	HUD_SetAlpha(style->def->text[fontType].translucency);
+    HUD_SetAlpha(style->def->text[fontType].translucency);
 
-	//1. Draw the header i.e. "Load Game"
-	TempX = CenterMenuText(style, fontType, language["MainSaveGame"]);
-	TempY = 5;
-	TempY += style->def->text[fontType].y_offset;
+    // 1. Draw the header i.e. "Load Game"
+    TempX = CenterMenuText(style, fontType, language["MainSaveGame"]);
+    TempY = 5;
+    TempY += style->def->text[fontType].y_offset;
 
-	HL_WriteText(style, fontType, TempX, TempY, language["MainSaveGame"]);
+    HL_WriteText(style, fontType, TempX, TempY, language["MainSaveGame"]);
 
-	HUD_SetAlpha(old_alpha);
+    HUD_SetAlpha(old_alpha);
 
-	TempX = 0;
-	TempY = 0; 
-	TempX += style->def->text[styledef_c::T_TEXT].x_offset;
-	TempY += style->def->text[styledef_c::T_TEXT].y_offset;
-	TempY += style->def->entry_spacing;
-	fontType=styledef_c::T_TEXT;
-	
-	rgbcol_t col = V_GetFontColor(style->def->text[styledef_c::T_TEXT].colmap);
-	HUD_ThinBox(TempX - 5,TempY - 5, TempX + 175,  TempY + 115, col);
+    TempX = 0;
+    TempY = 0;
+    TempX += style->def->text[styledef_c::T_TEXT].x_offset;
+    TempY += style->def->text[styledef_c::T_TEXT].y_offset;
+    TempY += style->def->entry_spacing;
+    fontType = styledef_c::T_TEXT;
 
-	//2. draw the save games
-	for (i = 0; i < SAVE_SLOTS; i++)
-	{
-		fontType = styledef_c::T_TEXT;
-		if (i == itemOn)
-		{
-			if (style->def->text[styledef_c::T_SELECTED].font)
-				fontType = styledef_c::T_SELECTED;
-		}
-		
-		LineHeight = style->fonts[fontType]->NominalHeight(); // * txtscale
+    rgbcol_t col = V_GetFontColor(style->def->text[styledef_c::T_TEXT].colmap);
+    HUD_ThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
 
-		if (fontType == styledef_c::T_SELECTED)
-		{
-			// ttf_ref_yshift is important for TTF fonts.
-			float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift[current_font_size]; // * txtscale;
-			
-			HUD_SetAlpha(0.33f);
-			HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
-			HUD_SetAlpha(old_alpha);
-		}
+    // 2. draw the save games
+    for (i = 0; i < SAVE_SLOTS; i++)
+    {
+        fontType = styledef_c::T_TEXT;
+        if (i == itemOn)
+        {
+            if (style->def->text[styledef_c::T_SELECTED].font)
+                fontType = styledef_c::T_SELECTED;
+        }
 
-		int len = 0;
-		bool entering_save = false;
-		if (saveStringEnter && i == save_slot)
-		{
-			entering_save = true;
-			if (! style->fonts[styledef_c::T_ALT])
-				fontType=styledef_c::T_TEXT;
-			else
-				fontType=styledef_c::T_ALT;
+        LineHeight = style->fonts[fontType]->NominalHeight(); // * txtscale
 
-			if (style->def->text[fontType].scale)
-				txtscale=style->def->text[fontType].scale;
-			len = style->fonts[fontType]->StringWidth(ex_slots[save_slot].desc) * txtscale;
-		}
+        if (fontType == styledef_c::T_SELECTED)
+        {
+            // ttf_ref_yshift is important for TTF fonts.
+            float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift[current_font_size]; // * txtscale;
 
-		HL_WriteText(style, fontType, TempX, 
-				TempY - (LineHeight / 2), ex_slots[i].desc);
-		
-		if (entering_save)
-		{
-			HL_WriteText(style, fontType, TempX + len, 
-				TempY - (LineHeight / 2), "_");
-		}
+            HUD_SetAlpha(0.33f);
+            HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
+            HUD_SetAlpha(old_alpha);
+        }
 
-		TempY += LineHeight + (LineHeight/2);
-		TempY += style->def->entry_spacing;
-	}
+        int  len           = 0;
+        bool entering_save = false;
+        if (saveStringEnter && i == save_slot)
+        {
+            entering_save = true;
+            if (!style->fonts[styledef_c::T_ALT])
+                fontType = styledef_c::T_TEXT;
+            else
+                fontType = styledef_c::T_ALT;
 
-	M_DrawSaveLoadCommon(i, i+1, save_style, LineHeight);
+            if (style->def->text[fontType].scale)
+                txtscale = style->def->text[fontType].scale;
+            len = style->fonts[fontType]->StringWidth(ex_slots[save_slot].desc) * txtscale;
+        }
+
+        HL_WriteText(style, fontType, TempX, TempY - (LineHeight / 2), ex_slots[i].desc);
+
+        if (entering_save)
+        {
+            HL_WriteText(style, fontType, TempX + len, TempY - (LineHeight / 2), "_");
+        }
+
+        TempY += LineHeight + (LineHeight / 2);
+        TempY += style->def->entry_spacing;
+    }
+
+    M_DrawSaveLoadCommon(i, i + 1, save_style, LineHeight);
 }
 
 //
@@ -1048,17 +982,17 @@ void M_DrawSave(void)
 //
 static void M_DoSave(int page, int slot)
 {
-	G_DeferredSaveGame(page * SAVE_SLOTS + slot, ex_slots[slot].desc);
-	M_ClearMenus();
+    G_DeferredSaveGame(page * SAVE_SLOTS + slot, ex_slots[slot].desc);
+    M_ClearMenus();
 
-	// PICK QUICKSAVE SLOT YET?
-	if (quickSaveSlot == -2)
-	{
-		quickSavePage = page;
-		quickSaveSlot = slot;
-	}
+    // PICK QUICKSAVE SLOT YET?
+    if (quickSaveSlot == -2)
+    {
+        quickSavePage = page;
+        quickSaveSlot = slot;
+    }
 
-	LoadDef.lastOn = SaveDef.lastOn;
+    LoadDef.lastOn = SaveDef.lastOn;
 }
 
 //
@@ -1066,22 +1000,22 @@ static void M_DoSave(int page, int slot)
 //
 void M_SaveSelect(int choice)
 {
-	if (choice < 0)
-	{
-		M_LoadSavePage(choice);
-		return;
-	}
+    if (choice < 0)
+    {
+        M_LoadSavePage(choice);
+        return;
+    }
 
-	// we are going to be intercepting all chars
-	saveStringEnter = 1;
+    // we are going to be intercepting all chars
+    saveStringEnter = 1;
 
-	save_slot = choice;
-	strcpy(saveOldString, ex_slots[choice].desc);
+    save_slot = choice;
+    strcpy(saveOldString, ex_slots[choice].desc);
 
-	if (ex_slots[choice].empty)
-		ex_slots[choice].desc[0] = 0;
+    if (ex_slots[choice].empty)
+        ex_slots[choice].desc[0] = 0;
 
-	saveCharIndex = strlen(ex_slots[choice].desc);
+    saveCharIndex = strlen(ex_slots[choice].desc);
 }
 
 //
@@ -1089,24 +1023,24 @@ void M_SaveSelect(int choice)
 //
 void M_SaveGame(int choice)
 {
-	if (gamestate != GS_LEVEL)
-	{
-		M_StartMessage(language["SaveWhenNotPlaying"], NULL, false);
-		return;
-	}
+    if (gamestate != GS_LEVEL)
+    {
+        M_StartMessage(language["SaveWhenNotPlaying"], NULL, false);
+        return;
+    }
 
-	// -AJA- big cop-out here (add RTS menu stuff to savegame ?)
-	if (rts_menuactive)
-	{
-		M_StartMessage("You can't save during an RTS menu.\n\npress a key.", NULL, false);
-		return;
-	}
+    // -AJA- big cop-out here (add RTS menu stuff to savegame ?)
+    if (rts_menuactive)
+    {
+        M_StartMessage("You can't save during an RTS menu.\n\npress a key.", NULL, false);
+        return;
+    }
 
-	M_ReadSaveStrings();
-	M_SetupNextMenu(&SaveDef);
+    M_ReadSaveStrings();
+    M_SetupNextMenu(&SaveDef);
 
-	need_save_screenshot = true;
-	save_screenshot_valid = false;
+    need_save_screenshot  = true;
+    save_screenshot_valid = false;
 }
 
 //
@@ -1115,72 +1049,70 @@ void M_SaveGame(int choice)
 
 static void QuickSaveResponse(int ch)
 {
-	if (ch == 'y' || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
-	{
-		M_DoSave(quickSavePage, quickSaveSlot);
-		S_StartFX(sfx_swtchx);
-	}
+    if (ch == 'y' || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
+    {
+        M_DoSave(quickSavePage, quickSaveSlot);
+        S_StartFX(sfx_swtchx);
+    }
 }
 
 void M_QuickSave(void)
 {
-	if (gamestate != GS_LEVEL)
-	{
-		S_StartFX(sfx_oof);
-		return;
-	}
+    if (gamestate != GS_LEVEL)
+    {
+        S_StartFX(sfx_oof);
+        return;
+    }
 
-	if (quickSaveSlot < 0)
-	{
-		M_StartControlPanel();
-		M_ReadSaveStrings();
-		M_SetupNextMenu(&SaveDef);
+    if (quickSaveSlot < 0)
+    {
+        M_StartControlPanel();
+        M_ReadSaveStrings();
+        M_SetupNextMenu(&SaveDef);
 
-		need_save_screenshot = true;
-		save_screenshot_valid = false;
+        need_save_screenshot  = true;
+        save_screenshot_valid = false;
 
-		quickSaveSlot = -2;  // means to pick a slot now
-		return;
-	}
-	
-	std::string s(epi::STR_Format(language["QuickSaveOver"],
-				  ex_slots[quickSaveSlot].desc));
+        quickSaveSlot = -2; // means to pick a slot now
+        return;
+    }
 
-	M_StartMessage(s.c_str(), QuickSaveResponse, true);
+    std::string s(epi::STR_Format(language["QuickSaveOver"], ex_slots[quickSaveSlot].desc));
+
+    M_StartMessage(s.c_str(), QuickSaveResponse, true);
 }
 
 static void QuickLoadResponse(int ch)
 {
-	if (ch == 'y' || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
-	{
-		int tempsavepage = save_page;
+    if (ch == 'y' || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
+    {
+        int tempsavepage = save_page;
 
-		save_page = quickSavePage;
-		M_LoadSelect(quickSaveSlot);
+        save_page = quickSavePage;
+        M_LoadSelect(quickSaveSlot);
 
-		save_page = tempsavepage;
-		S_StartFX(sfx_swtchx);
-	}
+        save_page = tempsavepage;
+        S_StartFX(sfx_swtchx);
+    }
 }
 
 void M_QuickLoad(void)
 {
-	if (netgame)
-	{
-		M_StartMessage(language["NoQLoadInNet"], NULL, false);
-		return;
-	}
+    if (netgame)
+    {
+        M_StartMessage(language["NoQLoadInNet"], NULL, false);
+        return;
+    }
 
-	if (quickSaveSlot < 0)
-	{
-		M_StartMessage(language["NoQuickSaveSlot"], NULL, false);
-		return;
-	}
+    if (quickSaveSlot < 0)
+    {
+        M_StartMessage(language["NoQuickSaveSlot"], NULL, false);
+        return;
+    }
 
-	std::string s(epi::STR_Format(language["QuickLoad"],
-					ex_slots[quickSaveSlot].desc));
+    std::string s(epi::STR_Format(language["QuickLoad"], ex_slots[quickSaveSlot].desc));
 
-	M_StartMessage(s.c_str(), QuickLoadResponse, true);
+    M_StartMessage(s.c_str(), QuickLoadResponse, true);
 }
 
 //
@@ -1189,7 +1121,7 @@ void M_QuickLoad(void)
 //
 void M_DrawReadThis1(void)
 {
-	HUD_DrawImageTitleWS(menu_readthis[0]);
+    HUD_DrawImageTitleWS(menu_readthis[0]);
 }
 
 //
@@ -1197,104 +1129,102 @@ void M_DrawReadThis1(void)
 //
 void M_DrawReadThis2(void)
 {
-	HUD_DrawImageTitleWS(menu_readthis[1]);
+    HUD_DrawImageTitleWS(menu_readthis[1]);
 }
-
-
 
 void M_DrawMainMenu(void)
 {
-	float CenterX = 0;
-	if (menu_doom->offset_x != 0.0f) //Only auto-center if no Xoffset 
-		CenterX = MainDef.x; //cannot get away from the damn hardcoded value
-	else
-		CenterX = CenterMenuImage(menu_doom);
+    float CenterX = 0;
+    if (menu_doom->offset_x != 0.0f) // Only auto-center if no Xoffset
+        CenterX = MainDef.x;         // cannot get away from the damn hardcoded value
+    else
+        CenterX = CenterMenuImage(menu_doom);
 
-	HUD_DrawImage(CenterX, 2, menu_doom);
+    HUD_DrawImage(CenterX, 2, menu_doom);
 }
 
 void M_DrawNewGame(void)
 {
-	int fontType;
-	int x = 54;
-	float txtscale = 1.0f;
+    int   fontType;
+    int   x        = 54;
+    float txtscale = 1.0f;
 
-	style_c *style = skill_style;
+    style_c *style = skill_style;
 
-	if (! style->fonts[styledef_c::T_HEADER])
-		fontType = styledef_c::T_TITLE;
-	else
-		fontType = styledef_c::T_HEADER;
+    if (!style->fonts[styledef_c::T_HEADER])
+        fontType = styledef_c::T_TITLE;
+    else
+        fontType = styledef_c::T_HEADER;
 
-	if (style->def->text[fontType].scale)
-		txtscale = style->def->text[fontType].scale;
-	else
-		txtscale = 1.0f;
+    if (style->def->text[fontType].scale)
+        txtscale = style->def->text[fontType].scale;
+    else
+        txtscale = 1.0f;
 
-	float old_alpha = HUD_GetAlpha();
+    float old_alpha = HUD_GetAlpha();
 
-	HUD_SetAlpha(style->def->text[fontType].translucency);
+    HUD_SetAlpha(style->def->text[fontType].translucency);
 
-	if (custom_MenuDifficulty==false)
-	{
-		if (style->def->entry_alignment == style->def->C_CENTER)
-			x = CenterMenuText(style, fontType, language["MainNewGame"]);
-		else
-			x = 94;
-		HL_WriteText(style, fontType, x + style->def->text[fontType].x_offset, 
-			14 + style->def->text[fontType].y_offset, language["MainNewGame"]);
+    if (custom_MenuDifficulty == false)
+    {
+        if (style->def->entry_alignment == style->def->C_CENTER)
+            x = CenterMenuText(style, fontType, language["MainNewGame"]);
+        else
+            x = 94;
+        HL_WriteText(style, fontType, x + style->def->text[fontType].x_offset, 14 + style->def->text[fontType].y_offset,
+                     language["MainNewGame"]);
 
-		HUD_SetAlpha(old_alpha);
-		fontType = styledef_c::T_TITLE;
-		HUD_SetAlpha(style->def->text[fontType].translucency);
+        HUD_SetAlpha(old_alpha);
+        fontType = styledef_c::T_TITLE;
+        HUD_SetAlpha(style->def->text[fontType].translucency);
 
-		if (style->def->entry_alignment == style->def->C_CENTER)
-			x = CenterMenuText(style, fontType, language["MenuSkill"]);
-		else
-			x = 54;
+        if (style->def->entry_alignment == style->def->C_CENTER)
+            x = CenterMenuText(style, fontType, language["MenuSkill"]);
+        else
+            x = 54;
 
-		HL_WriteText(style, fontType, x + style->def->text[fontType].x_offset, 
-			38 + style->def->text[fontType].y_offset, language["MenuSkill"]);
-	}
-	else
-	{
-		const colourmap_c *colmap = style->def->text[fontType].colmap;
-		if (menu_newgame->offset_x != 0.0f) //Only auto-center if no Xoffset 
-			x = MainDef.x; //cannot get away from the damn hardcoded value
-		else
-			x = CenterMenuImage2(style, fontType, menu_newgame);
-		
-		HUD_StretchImage(x, 14 + style->def->text[fontType].y_offset,
-				IM_WIDTH(menu_newgame) * txtscale, IM_HEIGHT(menu_newgame) * txtscale,menu_newgame,0.0,0.0,colmap);
+        HL_WriteText(style, fontType, x + style->def->text[fontType].x_offset, 38 + style->def->text[fontType].y_offset,
+                     language["MenuSkill"]);
+    }
+    else
+    {
+        const colourmap_c *colmap = style->def->text[fontType].colmap;
+        if (menu_newgame->offset_x != 0.0f) // Only auto-center if no Xoffset
+            x = MainDef.x;                  // cannot get away from the damn hardcoded value
+        else
+            x = CenterMenuImage2(style, fontType, menu_newgame);
 
-		//HUD_DrawImage(x + style->def->text[fontType].x_offset, 
-		//	14 + style->def->text[fontType].y_offset, menu_newgame, colmap);
+        HUD_StretchImage(x, 14 + style->def->text[fontType].y_offset, IM_WIDTH(menu_newgame) * txtscale,
+                         IM_HEIGHT(menu_newgame) * txtscale, menu_newgame, 0.0, 0.0, colmap);
 
-		HUD_SetAlpha(old_alpha);
-		fontType = styledef_c::T_TITLE;
-		HUD_SetAlpha(style->def->text[fontType].translucency);
+        // HUD_DrawImage(x + style->def->text[fontType].x_offset,
+        //	14 + style->def->text[fontType].y_offset, menu_newgame, colmap);
 
-		if (style->def->text[fontType].scale)
-			txtscale = style->def->text[fontType].scale;
-		else
-			txtscale = 1.0f;
+        HUD_SetAlpha(old_alpha);
+        fontType = styledef_c::T_TITLE;
+        HUD_SetAlpha(style->def->text[fontType].translucency);
 
-		x = 54;
-		if (style->def->entry_alignment == style->def->C_CENTER)
-		{
-			if (menu_skill->offset_x != 0.0f) //Only auto-center if no Xoffset 
-				x = 54; //cannot get away from the damn hardcoded value
-			else
-				x = CenterMenuImage2(style, fontType, menu_skill);
-		}
-		colmap = style->def->text[fontType].colmap;
-		HUD_StretchImage(x, 38 + style->def->text[fontType].y_offset,
-				IM_WIDTH(menu_skill) * txtscale, IM_HEIGHT(menu_skill) * txtscale,menu_skill,0.0,0.0,colmap);
+        if (style->def->text[fontType].scale)
+            txtscale = style->def->text[fontType].scale;
+        else
+            txtscale = 1.0f;
 
-		//HUD_DrawImage(x + style->def->text[fontType].x_offset, 
-		//	38 + style->def->text[fontType].y_offset, menu_skill, colmap);
-	}
-	HUD_SetAlpha(old_alpha);
+        x = 54;
+        if (style->def->entry_alignment == style->def->C_CENTER)
+        {
+            if (menu_skill->offset_x != 0.0f) // Only auto-center if no Xoffset
+                x = 54;                       // cannot get away from the damn hardcoded value
+            else
+                x = CenterMenuImage2(style, fontType, menu_skill);
+        }
+        colmap = style->def->text[fontType].colmap;
+        HUD_StretchImage(x, 38 + style->def->text[fontType].y_offset, IM_WIDTH(menu_skill) * txtscale,
+                         IM_HEIGHT(menu_skill) * txtscale, menu_skill, 0.0, 0.0, colmap);
+
+        // HUD_DrawImage(x + style->def->text[fontType].x_offset,
+        //	38 + style->def->text[fontType].y_offset, menu_skill, colmap);
+    }
+    HUD_SetAlpha(old_alpha);
 }
 
 //
@@ -1304,241 +1234,238 @@ void M_DrawNewGame(void)
 // -KM- 1998/12/16 Generates EpiDef menu dynamically.
 static void CreateEpisodeMenu(void)
 {
-	if (gamedefs.GetSize() == 0)
-		I_Error("No defined episodes !\n");
+    if (gamedefs.GetSize() == 0)
+        I_Error("No defined episodes !\n");
 
-	EpisodeMenu = new menuitem_t[gamedefs.GetSize()];
-	EpisodeMenuSkipSkill = new bool[gamedefs.GetSize()];
+    EpisodeMenu          = new menuitem_t[gamedefs.GetSize()];
+    EpisodeMenuSkipSkill = new bool[gamedefs.GetSize()];
 
-	int e = 0;
-	epi::array_iterator_c it;
+    int                   e = 0;
+    epi::array_iterator_c it;
 
-	for (it = gamedefs.GetBaseIterator(); it.IsValid(); it++)
-	{
-		gamedef_c *g = ITERATOR_TO_TYPE(it, gamedef_c*);
-		if (! g) continue;
+    for (it = gamedefs.GetBaseIterator(); it.IsValid(); it++)
+    {
+        gamedef_c *g = ITERATOR_TO_TYPE(it, gamedef_c *);
+        if (!g)
+            continue;
 
-		if (g->firstmap.empty())
-			continue;
+        if (g->firstmap.empty())
+            continue;
 
-		if (W_CheckNumForName(g->firstmap.c_str()) == -1)
-			continue;
+        if (W_CheckNumForName(g->firstmap.c_str()) == -1)
+            continue;
 
-		EpisodeMenu[e].status = 1;
-		EpisodeMenu[e].select_func = M_Episode;
-		EpisodeMenu[e].image = NULL;
-		EpisodeMenu[e].alpha_key = '1' + e;
-		EpisodeMenuSkipSkill[e] = g->no_skill_menu;
+        EpisodeMenu[e].status      = 1;
+        EpisodeMenu[e].select_func = M_Episode;
+        EpisodeMenu[e].image       = NULL;
+        EpisodeMenu[e].alpha_key   = '1' + e;
+        EpisodeMenuSkipSkill[e]    = g->no_skill_menu;
 
-		Z_StrNCpy(EpisodeMenu[e].patch_name, g->namegraphic.c_str(), 8);
-		EpisodeMenu[e].patch_name[8] = 0;
-		
-		if (g->description != "")
-		{
-			EpisodeMenu[e].name = language[g->description];
-		}
-		else
-		{
-			EpisodeMenu[e].name = g->name.c_str();
-		}
+        Z_StrNCpy(EpisodeMenu[e].patch_name, g->namegraphic.c_str(), 8);
+        EpisodeMenu[e].patch_name[8] = 0;
 
-		if (EpisodeMenu[e].patch_name[0])
-		{
-			if (! EpisodeMenu[e].image)
-				EpisodeMenu[e].image = W_ImageLookup(EpisodeMenu[e].patch_name);
-		}
+        if (g->description != "")
+        {
+            EpisodeMenu[e].name = language[g->description];
+        }
+        else
+        {
+            EpisodeMenu[e].name = g->name.c_str();
+        }
 
-		e++;
-	}
+        if (EpisodeMenu[e].patch_name[0])
+        {
+            if (!EpisodeMenu[e].image)
+                EpisodeMenu[e].image = W_ImageLookup(EpisodeMenu[e].patch_name);
+        }
 
-	if (e == 0)
-		I_Error("No available episodes !\n");
+        e++;
+    }
 
-	EpiDef.numitems  = e;
-	EpiDef.menuitems = EpisodeMenu;
+    if (e == 0)
+        I_Error("No available episodes !\n");
+
+    EpiDef.numitems  = e;
+    EpiDef.menuitems = EpisodeMenu;
 }
 
 void M_NewGame(int choice)
 {
-	if (netgame)
-	{
-		M_StartMessage(language["NewNetGame"], NULL, false);
-		return;
-	}
+    if (netgame)
+    {
+        M_StartMessage(language["NewNetGame"], NULL, false);
+        return;
+    }
 
-	if (!EpisodeMenu)
-		CreateEpisodeMenu();
+    if (!EpisodeMenu)
+        CreateEpisodeMenu();
 
-	if (EpiDef.numitems == 1)
-	{
-		M_Episode(0);
-	}
-	else
-		M_SetupNextMenu(&EpiDef);
+    if (EpiDef.numitems == 1)
+    {
+        M_Episode(0);
+    }
+    else
+        M_SetupNextMenu(&EpiDef);
 }
-
 
 void M_DrawEpisode(void)
 {
-	int fontType;
-	int x = 54;
-	float txtscale = 1.0f;
+    int   fontType;
+    int   x        = 54;
+    float txtscale = 1.0f;
 
-	style_c *style = episode_style;
+    style_c *style = episode_style;
 
-	if (! style->fonts[styledef_c::T_HEADER])
-		fontType=styledef_c::T_TITLE;
-	else
-		fontType=styledef_c::T_HEADER;
+    if (!style->fonts[styledef_c::T_HEADER])
+        fontType = styledef_c::T_TITLE;
+    else
+        fontType = styledef_c::T_HEADER;
 
-	if (style->def->text[fontType].scale)
-		txtscale = style->def->text[fontType].scale;
+    if (style->def->text[fontType].scale)
+        txtscale = style->def->text[fontType].scale;
 
-	float old_alpha = HUD_GetAlpha();
-	HUD_SetAlpha(style->def->text[fontType].translucency);
+    float old_alpha = HUD_GetAlpha();
+    HUD_SetAlpha(style->def->text[fontType].translucency);
 
-	if (custom_MenuEpisode==false)
-	{
-		if (style->def->entry_alignment == style->def->C_CENTER)
-			x = CenterMenuText(style,fontType, language["MenuWhichEpisode"]);
+    if (custom_MenuEpisode == false)
+    {
+        if (style->def->entry_alignment == style->def->C_CENTER)
+            x = CenterMenuText(style, fontType, language["MenuWhichEpisode"]);
 
-		HL_WriteText(style, fontType, x + style->def->text[fontType].x_offset, 
-			38 + style->def->text[fontType].y_offset, language["MenuWhichEpisode"]);
-	}
-	else
-	{
-		if (style->def->entry_alignment == style->def->C_CENTER)
-		{
-			if (menu_episode->offset_x != 0.0f) //Only auto-center if no Xoffset 
-				x = 54; //cannot get away from the damn hardcoded value
-			else
-				x = CenterMenuImage2(style, fontType, menu_episode);
-		}
+        HL_WriteText(style, fontType, x + style->def->text[fontType].x_offset, 38 + style->def->text[fontType].y_offset,
+                     language["MenuWhichEpisode"]);
+    }
+    else
+    {
+        if (style->def->entry_alignment == style->def->C_CENTER)
+        {
+            if (menu_episode->offset_x != 0.0f) // Only auto-center if no Xoffset
+                x = 54;                         // cannot get away from the damn hardcoded value
+            else
+                x = CenterMenuImage2(style, fontType, menu_episode);
+        }
 
-		const colourmap_c *colmap = style->def->text[fontType].colmap;
-		HUD_StretchImage(x, 38 + style->def->text[fontType].y_offset,
-				IM_WIDTH(menu_episode) * txtscale, IM_HEIGHT(menu_episode) * txtscale,menu_episode,0.0,0.0,colmap);
+        const colourmap_c *colmap = style->def->text[fontType].colmap;
+        HUD_StretchImage(x, 38 + style->def->text[fontType].y_offset, IM_WIDTH(menu_episode) * txtscale,
+                         IM_HEIGHT(menu_episode) * txtscale, menu_episode, 0.0, 0.0, colmap);
 
-		//HUD_DrawImage(x + episode_style->def->text[fontType].x_offset, 
-		//	38 + episode_style->def->text[fontType].y_offset, menu_episode, colmap);
-	}
+        // HUD_DrawImage(x + episode_style->def->text[fontType].x_offset,
+        //	38 + episode_style->def->text[fontType].y_offset, menu_episode, colmap);
+    }
 
-	HUD_SetAlpha(old_alpha);
+    HUD_SetAlpha(old_alpha);
 }
 
 static void ReallyDoStartLevel(skill_t skill, gamedef_c *g)
 {
-	newgame_params_c params;
+    newgame_params_c params;
 
-	params.skill = skill;
-	params.deathmatch = 0;
+    params.skill      = skill;
+    params.deathmatch = 0;
 
-	params.random_seed = I_PureRandom();
+    params.random_seed = I_PureRandom();
 
-	params.SinglePlayer(0);
+    params.SinglePlayer(0);
 
-	params.map = G_LookupMap(g->firstmap.c_str());
+    params.map = G_LookupMap(g->firstmap.c_str());
 
-	if (! params.map)
-	{
-		// 23-6-98 KM Fixed this.
-		M_SetupNextMenu(&EpiDef);
-		M_StartMessage(language["EpisodeNonExist"], NULL, false);
-		return;
-	}
+    if (!params.map)
+    {
+        // 23-6-98 KM Fixed this.
+        M_SetupNextMenu(&EpiDef);
+        M_StartMessage(language["EpisodeNonExist"], NULL, false);
+        return;
+    }
 
-	SYS_ASSERT(G_MapExists(params.map));
-	SYS_ASSERT(params.map->episode);
+    SYS_ASSERT(G_MapExists(params.map));
+    SYS_ASSERT(params.map->episode);
 
-	G_DeferredNewGame(params);
+    G_DeferredNewGame(params);
 
-	M_ClearMenus();
+    M_ClearMenus();
 }
 
 static void DoStartLevel(skill_t skill)
 {
-	// -KM- 1998/12/17 Clear the intermission.
-	WI_Clear();
-  
-	// find episode
-	gamedef_c *g = NULL;
-	epi::array_iterator_c it;
+    // -KM- 1998/12/17 Clear the intermission.
+    WI_Clear();
 
-	std::string chosen_episode = epi::STR_Format("%s",EpisodeMenu[chosen_epi].name);
+    // find episode
+    gamedef_c            *g = NULL;
+    epi::array_iterator_c it;
 
-	for (it = gamedefs.GetBaseIterator(); it.IsValid(); it++) 
-	{ 
-		g = ITERATOR_TO_TYPE(it, gamedef_c*);
+    std::string chosen_episode = epi::STR_Format("%s", EpisodeMenu[chosen_epi].name);
 
-		//Lobo 2022: lets use text instead of M_EPIxx graphic
-		if (g->description != "") 
-		{
-			std::string gamedef_episode = epi::STR_Format("%s",language[g->description.c_str()]);
-			if (DDF_CompareName(gamedef_episode.c_str(), chosen_episode.c_str()) == 0)
-				break;		
-		}
-		else
-		{	
-			if (DDF_CompareName(g->name.c_str(), chosen_episode.c_str()) == 0)
-				break;
-		}
-		
-		/*
-		if (!strcmp(g->namegraphic.c_str(), EpisodeMenu[chosen_epi].patch_name))
-		{
-			break;
-		}
-		*/
-	}
+    for (it = gamedefs.GetBaseIterator(); it.IsValid(); it++)
+    {
+        g = ITERATOR_TO_TYPE(it, gamedef_c *);
 
-	// Sanity checking...
-	if (! g)
-	{
-		I_Warning("Internal Error: no episode for '%s'.\n",
-			chosen_episode.c_str());
-		M_ClearMenus();
-		return;
-	}
+        // Lobo 2022: lets use text instead of M_EPIxx graphic
+        if (g->description != "")
+        {
+            std::string gamedef_episode = epi::STR_Format("%s", language[g->description.c_str()]);
+            if (DDF_CompareName(gamedef_episode.c_str(), chosen_episode.c_str()) == 0)
+                break;
+        }
+        else
+        {
+            if (DDF_CompareName(g->name.c_str(), chosen_episode.c_str()) == 0)
+                break;
+        }
 
-	const mapdef_c * map = G_LookupMap(g->firstmap.c_str());
-	if (! map)
-	{
-		I_Warning("Cannot find map for '%s' (episode %s)\n",
-			g->firstmap.c_str(),
-			chosen_episode.c_str());
-		M_ClearMenus();
-		return;
-	}
+        /*
+        if (!strcmp(g->namegraphic.c_str(), EpisodeMenu[chosen_epi].patch_name))
+        {
+            break;
+        }
+        */
+    }
 
-	ReallyDoStartLevel(skill, g);
+    // Sanity checking...
+    if (!g)
+    {
+        I_Warning("Internal Error: no episode for '%s'.\n", chosen_episode.c_str());
+        M_ClearMenus();
+        return;
+    }
+
+    const mapdef_c *map = G_LookupMap(g->firstmap.c_str());
+    if (!map)
+    {
+        I_Warning("Cannot find map for '%s' (episode %s)\n", g->firstmap.c_str(), chosen_episode.c_str());
+        M_ClearMenus();
+        return;
+    }
+
+    ReallyDoStartLevel(skill, g);
 }
 
 static void VerifyNightmare(int ch)
 {
-	if (ch != 'y' && ch != KEYD_GP_A && ch != KEYD_MOUSE1)
-		return;
+    if (ch != 'y' && ch != KEYD_GP_A && ch != KEYD_MOUSE1)
+        return;
 
-	DoStartLevel(sk_nightmare);
+    DoStartLevel(sk_nightmare);
 }
 
 void M_ChooseSkill(int choice)
 {
-	if (choice == sk_nightmare)
-	{
-		M_StartMessage(language["NightMareCheck"], VerifyNightmare, true);
-		return;
-	}
-	
-	DoStartLevel((skill_t)choice);
+    if (choice == sk_nightmare)
+    {
+        M_StartMessage(language["NightMareCheck"], VerifyNightmare, true);
+        return;
+    }
+
+    DoStartLevel((skill_t)choice);
 }
 
 void M_Episode(int choice)
 {
-	chosen_epi = choice;
-	if (EpisodeMenuSkipSkill[chosen_epi])
-		DoStartLevel((skill_t)2);
-	else
-		M_SetupNextMenu(&SkillDef);
+    chosen_epi = choice;
+    if (EpisodeMenuSkipSkill[chosen_epi])
+        DoStartLevel((skill_t)2);
+    else
+        M_SetupNextMenu(&SkillDef);
 }
 
 //
@@ -1546,61 +1473,61 @@ void M_Episode(int choice)
 //
 void M_ChangeMessages(int choice)
 {
-	// warning: unused parameter `int choice'
-	(void) choice;
+    // warning: unused parameter `int choice'
+    (void)choice;
 
-	showMessages = 1 - showMessages;
+    showMessages = 1 - showMessages;
 
-	if (showMessages)
-		CON_Printf("%s\n", language["MessagesOn"]);
-	else
-		CON_Printf("%s\n", language["MessagesOff"]);
+    if (showMessages)
+        CON_Printf("%s\n", language["MessagesOn"]);
+    else
+        CON_Printf("%s\n", language["MessagesOff"]);
 }
 
 static void EndGameResponse(int ch)
 {
-	if (ch != 'y' && ch != KEYD_GP_A && ch != KEYD_MOUSE1)
-		return;
+    if (ch != 'y' && ch != KEYD_GP_A && ch != KEYD_MOUSE1)
+        return;
 
-	G_DeferredEndGame();
+    G_DeferredEndGame();
 
-	currentMenu->lastOn = itemOn;
-	M_ClearMenus();
+    currentMenu->lastOn = itemOn;
+    M_ClearMenus();
 }
 
 void M_EndGame(int choice, cvar_c *cvar)
 {
-	if (gamestate != GS_LEVEL)
-	{
-		S_StartFX(sfx_oof);
-		return;
-	}
+    if (gamestate != GS_LEVEL)
+    {
+        S_StartFX(sfx_oof);
+        return;
+    }
 
-	option_menuon  = 0;
-	netgame_menuon = 0;
+    option_menuon  = 0;
+    netgame_menuon = 0;
 
-	if (netgame)
-	{
-		M_StartMessage(language["EndNetGame"], NULL, false);
-		return;
-	}
+    if (netgame)
+    {
+        M_StartMessage(language["EndNetGame"], NULL, false);
+        return;
+    }
 
-	M_StartMessage(language["EndGameCheck"], EndGameResponse, true);
+    M_StartMessage(language["EndGameCheck"], EndGameResponse, true);
 }
 
 void M_ReadThis(int choice)
 {
-	M_SetupNextMenu(&ReadDef1);
+    M_SetupNextMenu(&ReadDef1);
 }
 
 void M_ReadThis2(int choice)
 {
-	M_SetupNextMenu(&ReadDef2);
+    M_SetupNextMenu(&ReadDef2);
 }
 
 void M_FinishReadThis(int choice)
 {
-	M_SetupNextMenu(&MainDef);
+    M_SetupNextMenu(&MainDef);
 }
 
 //
@@ -1609,58 +1536,56 @@ void M_FinishReadThis(int choice)
 //
 static void QuitResponse(int ch)
 {
-	if (ch != 'y' && ch != KEYD_GP_A && ch != KEYD_MOUSE1)
-		return;
-		
-	if (!netgame)
-	{
-		int numsounds = 0;
-		char refname[64];
-		char sound[64];
-		int i, start;
+    if (ch != 'y' && ch != KEYD_GP_A && ch != KEYD_MOUSE1)
+        return;
 
-		// Count the quit messages
-		do
-		{
-			sprintf(refname, "QuitSnd%d", numsounds + 1);
-			if (language.IsValidRef(refname))
-				numsounds++;
-			else
-				break;
-		}
-		while (true);
+    if (!netgame)
+    {
+        int  numsounds = 0;
+        char refname[64];
+        char sound[64];
+        int  i, start;
 
-		if (numsounds)
-		{
-			// cycle through all the quit sounds, until one of them exists
-			// (some of the default quit sounds do not exist in DOOM 1)
-			start = i = M_Random() % numsounds;
-			do
-			{
-				sprintf(refname, "QuitSnd%d", i + 1);
-				sprintf(sound, "DS%s", language[refname]);
-				if (W_CheckNumForName(sound) != -1)
-				{
-					S_StartFX(sfxdefs.GetEffect(language[refname]));
-					break;
-				}
-				i = (i + 1) % numsounds;
-			}
-			while (i != start);
-		}
-	}
+        // Count the quit messages
+        do
+        {
+            sprintf(refname, "QuitSnd%d", numsounds + 1);
+            if (language.IsValidRef(refname))
+                numsounds++;
+            else
+                break;
+        } while (true);
 
-	// -ACB- 1999/09/20 New exit code order
-	// Write the default config file first
-	I_Printf("Saving system defaults...\n");
-	M_SaveDefaults();
+        if (numsounds)
+        {
+            // cycle through all the quit sounds, until one of them exists
+            // (some of the default quit sounds do not exist in DOOM 1)
+            start = i = M_Random() % numsounds;
+            do
+            {
+                sprintf(refname, "QuitSnd%d", i + 1);
+                sprintf(sound, "DS%s", language[refname]);
+                if (W_CheckNumForName(sound) != -1)
+                {
+                    S_StartFX(sfxdefs.GetEffect(language[refname]));
+                    break;
+                }
+                i = (i + 1) % numsounds;
+            } while (i != start);
+        }
+    }
 
-	I_Printf("Exiting...\n");
+    // -ACB- 1999/09/20 New exit code order
+    // Write the default config file first
+    I_Printf("Saving system defaults...\n");
+    M_SaveDefaults();
 
-	E_EngineShutdown();
-	I_SystemShutdown();
+    I_Printf("Exiting...\n");
 
-	I_CloseProgram(EXIT_SUCCESS);
+    E_EngineShutdown();
+    I_SystemShutdown();
+
+    I_CloseProgram(EXIT_SUCCESS);
 }
 
 //
@@ -1678,44 +1603,43 @@ static void QuitResponse(int ch)
 void M_QuitEDGE(int choice)
 {
 #if EDGE_WEB
-	I_Printf("Quit ignored on web platform\n");
-	return;
-#endif	
+    I_Printf("Quit ignored on web platform\n");
+    return;
+#endif
 
-	char ref[64];
+    char ref[64];
 
-	std::string msg;
+    std::string msg;
 
-	int num_quitmessages = 0;
+    int num_quitmessages = 0;
 
-	// Count the quit messages
-	do
-	{
-		num_quitmessages++;
+    // Count the quit messages
+    do
+    {
+        num_quitmessages++;
 
-		sprintf(ref, "QUITMSG%d", num_quitmessages);
-	}
-	while (language.IsValidRef(ref));
+        sprintf(ref, "QUITMSG%d", num_quitmessages);
+    } while (language.IsValidRef(ref));
 
-	// we stopped at one higher than the last
-	num_quitmessages--;
+    // we stopped at one higher than the last
+    num_quitmessages--;
 
-	// -ACB- 2004/08/14 Allow fallback to just the "PressToQuit" message
-	if (num_quitmessages > 0)
-	{
-		// Pick one at random
-		sprintf(ref, "QUITMSG%d", 1 + (M_Random() % num_quitmessages));
+    // -ACB- 2004/08/14 Allow fallback to just the "PressToQuit" message
+    if (num_quitmessages > 0)
+    {
+        // Pick one at random
+        sprintf(ref, "QUITMSG%d", 1 + (M_Random() % num_quitmessages));
 
-		// Construct the quit message in full
-		msg = epi::STR_Format("%s\n\n%s", language[ref], language["PressToQuit"]);
-	}
-	else
-	{
-		msg = std::string(language["PressToQuit"]);
-	}
+        // Construct the quit message in full
+        msg = epi::STR_Format("%s\n\n%s", language[ref], language["PressToQuit"]);
+    }
+    else
+    {
+        msg = std::string(language["PressToQuit"]);
+    }
 
-	// Trigger the message
-	M_StartMessage(msg.c_str(), QuitResponse, true);
+    // Trigger the message
+    M_StartMessage(msg.c_str(), QuitResponse, true);
 }
 
 // Accessible from console's 'quit now' command
@@ -1723,19 +1647,19 @@ void M_ImmediateQuit()
 {
 
 #if EDGE_WEB
-	I_Printf("Quit ignored on web platform\n");
-	return;
-#endif	
+    I_Printf("Quit ignored on web platform\n");
+    return;
+#endif
 
-	I_Printf("Saving system defaults...\n");
-	M_SaveDefaults();
+    I_Printf("Saving system defaults...\n");
+    M_SaveDefaults();
 
-	I_Printf("Exiting...\n");
+    I_Printf("Exiting...\n");
 
-	E_EngineShutdown();
-	I_SystemShutdown();
+    E_EngineShutdown();
+    I_SystemShutdown();
 
-	I_CloseProgram(EXIT_SUCCESS);
+    I_CloseProgram(EXIT_SUCCESS);
 }
 
 //----------------------------------------------------------------------------
@@ -1744,137 +1668,154 @@ void M_ImmediateQuit()
 
 void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
 {
-	int i, basex = x;
-	int step = (8 / div);
+    int i, basex = x;
+    int step = (8 / div);
 
-	style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
+    style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
 
-	// If using an IMAGE or TRUETYPE type font for the menu, use a COALHUDs-style bar for the slider instead
-	if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image || opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
-	{
-		rgbcol_t slider_color = RGB_MAKE(255,255,255);
+    // If using an IMAGE or TRUETYPE type font for the menu, use a COALHUDs-style bar for the slider instead
+    if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image ||
+        opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
+    {
+        rgbcol_t slider_color = RGB_MAKE(255, 255, 255);
 
-		const colourmap_c *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
+        const colourmap_c *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
 
-		if (colmap)
-			slider_color = V_GetFontColor(colmap);
+        if (colmap)
+            slider_color = V_GetFontColor(colmap);
 
-		HUD_ThinBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size] : 0), 
-			x+(thermWidth*step)-step, y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
-		HUD_SolidBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size] : 0), 
-			x+(thermDot*step), y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
-	}
-	else
-	{
-		// Note: the (step+1) here is for compatibility with the original
-		// code.  It seems required to make the thermo bar tile properly.
+        HUD_ThinBox(x,
+                    y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType
+                             ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]
+                             : 0),
+                    x + (thermWidth * step) - step, y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight(),
+                    slider_color);
+        HUD_SolidBox(x,
+                     y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType
+                              ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]
+                              : 0),
+                     x + (thermDot * step), y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
+    }
+    else
+    {
+        // Note: the (step+1) here is for compatibility with the original
+        // code.  It seems required to make the thermo bar tile properly.
 
-		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_l)/div, therm_l, 0.0, 0.0);
+        HUD_StretchImage(x, y, step + 1, IM_HEIGHT(therm_l) / div, therm_l, 0.0, 0.0);
 
-		for (i=0, x += step; i < thermWidth; i++, x += step)
-		{
-			HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_m)/div, therm_m, 0.0, 0.0);
-		}
+        for (i = 0, x += step; i < thermWidth; i++, x += step)
+        {
+            HUD_StretchImage(x, y, step + 1, IM_HEIGHT(therm_m) / div, therm_m, 0.0, 0.0);
+        }
 
-		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_r)/div, therm_r, 0.0, 0.0);
+        HUD_StretchImage(x, y, step + 1, IM_HEIGHT(therm_r) / div, therm_r, 0.0, 0.0);
 
-		x = basex + step + thermDot * step;
+        x = basex + step + thermDot * step;
 
-		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_o)/div, therm_o, 0.0, 0.0);
-	}
+        HUD_StretchImage(x, y, step + 1, IM_HEIGHT(therm_o) / div, therm_o, 0.0, 0.0);
+    }
 }
 
-void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, float min, float max, std::string fmt_string)
+void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, float min, float max,
+                      std::string fmt_string)
 {
-	float basex = x;
-	int step = (8 / div);
-	float scale_step = 50.0f / ((max-min) / increment);
+    float basex      = x;
+    int   step       = (8 / div);
+    float scale_step = 50.0f / ((max - min) / increment);
 
-	// Capture actual value first since it will be aligned to the slider increment
-	std::string actual_val = fmt_string.empty() ? "" : epi::STR_Format(fmt_string.c_str(), thermDot);	
+    // Capture actual value first since it will be aligned to the slider increment
+    std::string actual_val = fmt_string.empty() ? "" : epi::STR_Format(fmt_string.c_str(), thermDot);
 
-	thermDot = CLAMP(min, thermDot, max);
+    thermDot = CLAMP(min, thermDot, max);
 
-	thermDot = thermDot - remainderf(thermDot, increment);
+    thermDot = thermDot - remainderf(thermDot, increment);
 
-	style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
+    style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
 
-	// If using an IMAGE or TRUETYPE type font for the menu, use a COALHUDs-style bar for the slider instead
-	if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image || opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
-	{
-		rgbcol_t slider_color = RGB_MAKE(255,255,255);
+    // If using an IMAGE or TRUETYPE type font for the menu, use a COALHUDs-style bar for the slider instead
+    if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image ||
+        opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
+    {
+        rgbcol_t slider_color = RGB_MAKE(255, 255, 255);
 
-		const colourmap_c *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
+        const colourmap_c *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
 
-		if (colmap)
-			slider_color = V_GetFontColor(colmap);
+        if (colmap)
+            slider_color = V_GetFontColor(colmap);
 
-		HUD_ThinBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size] : 0), 
-			x+50.0f, y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
-		HUD_SolidBox(x, y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size] : 0), 
-			x+(((thermDot-min)/increment)*scale_step), y+opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
-		if (!actual_val.empty())
-			HL_WriteText(opt_style, styledef_c::T_ALT, x+50.0f + step, y, actual_val.c_str());
-	}
-	else
-	{
-		// Note: the (step+1) here is for compatibility with the original
-		// code.  It seems required to make the thermo bar tile properly.
+        HUD_ThinBox(x,
+                    y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType
+                             ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]
+                             : 0),
+                    x + 50.0f, y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
+        HUD_SolidBox(x,
+                     y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType
+                              ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]
+                              : 0),
+                     x + (((thermDot - min) / increment) * scale_step),
+                     y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
+        if (!actual_val.empty())
+            HL_WriteText(opt_style, styledef_c::T_ALT, x + 50.0f + step, y, actual_val.c_str());
+    }
+    else
+    {
+        // Note: the (step+1) here is for compatibility with the original
+        // code.  It seems required to make the thermo bar tile properly.
 
-		int i=0;
+        int i = 0;
 
-		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_l)/div, therm_l, 0.0, 0.0);
+        HUD_StretchImage(x, y, step + 1, IM_HEIGHT(therm_l) / div, therm_l, 0.0, 0.0);
 
-		for (x += step; i < (50/step); i++, x += step)
-		{
-			HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_m)/div, therm_m, 0.0, 0.0);
-		}
+        for (x += step; i < (50 / step); i++, x += step)
+        {
+            HUD_StretchImage(x, y, step + 1, IM_HEIGHT(therm_m) / div, therm_m, 0.0, 0.0);
+        }
 
-		HUD_StretchImage(x, y, step+1, IM_HEIGHT(therm_r)/div, therm_r, 0.0, 0.0);
+        HUD_StretchImage(x, y, step + 1, IM_HEIGHT(therm_r) / div, therm_r, 0.0, 0.0);
 
-		HUD_StretchImage(basex + ((thermDot-min)/increment) * scale_step+1, y, step+1, IM_HEIGHT(therm_o)/div, therm_o, 0.0, 0.0);
+        HUD_StretchImage(basex + ((thermDot - min) / increment) * scale_step + 1, y, step + 1, IM_HEIGHT(therm_o) / div,
+                         therm_o, 0.0, 0.0);
 
-		if (!actual_val.empty())
-			HL_WriteText(opt_style, styledef_c::T_ALT, basex+(((max-min)/increment)*scale_step) + (step*2+2), y, actual_val.c_str());
-	}
+        if (!actual_val.empty())
+            HL_WriteText(opt_style, styledef_c::T_ALT,
+                         basex + (((max - min) / increment) * scale_step) + (step * 2 + 2), y, actual_val.c_str());
+    }
 }
 
-void M_StartMessage(const char *string, void (* routine)(int response), 
-					bool input)
+void M_StartMessage(const char *string, void (*routine)(int response), bool input)
 {
-	msg_lastmenu = menuactive;
-	msg_mode = 1;
-	msg_string = std::string(string);
-	message_key_routine = routine;
-	message_input_routine = NULL;
-	msg_needsinput = input;
-	menuactive = true;
-	CON_SetVisible(vs_notvisible);
-	return;
+    msg_lastmenu          = menuactive;
+    msg_mode              = 1;
+    msg_string            = std::string(string);
+    message_key_routine   = routine;
+    message_input_routine = NULL;
+    msg_needsinput        = input;
+    menuactive            = true;
+    CON_SetVisible(vs_notvisible);
+    return;
 }
 
 //
 // -KM- 1998/07/21 Call M_StartMesageInput to start a message that needs a
 //                 string input. (You can convert it to a number if you want to.)
-//                 
+//
 // string:  The prompt.
 //
 // routine: Format is void routine(char *s)  Routine will be called
 //          with a pointer to the input in s.  s will be NULL if the user
 //          pressed ESCAPE to cancel the input.
 //
-void M_StartMessageInput(const char *string,
-						 void (* routine)(const char *response))
+void M_StartMessageInput(const char *string, void (*routine)(const char *response))
 {
-	msg_lastmenu = menuactive;
-	msg_mode = 2;
-	msg_string = std::string(string);
-	message_input_routine = routine;
-	message_key_routine = NULL;
-	msg_needsinput = true;
-	menuactive = true;
-	CON_SetVisible(vs_notvisible);
-	return;
+    msg_lastmenu          = menuactive;
+    msg_mode              = 2;
+    msg_string            = std::string(string);
+    message_input_routine = routine;
+    message_key_routine   = NULL;
+    msg_needsinput        = true;
+    menuactive            = true;
+    CON_SetVisible(vs_notvisible);
+    return;
 }
 
 #if 0
@@ -1896,653 +1837,633 @@ void M_StopMessage(void)
 //
 // -KM- 1998/09/01 Analogue binding, and hat support
 //
-bool M_Responder(event_t * ev)
+bool M_Responder(event_t *ev)
 {
-	int i;
-
-	if (ev->type != ev_keydown)
-		return false;
-
-	int ch = ev->value.key.sym;
-
-	SDL_Keymod mod = SDL_GetModState();
-
-	// -ACB- 1999/10/11 F1 is responsible for print screen at any time
-	if (ch == KEYD_F1 || ch == KEYD_PRTSCR)
-	{
-		G_DeferredScreenShot();
-		return true;
-	}
-
-	// Take care of any messages that need input
-	// -KM- 1998/07/21 Message Input
-	if (msg_mode == 1)
-	{
-		if (msg_needsinput == true &&
-			!(ch == ' ' || ch == 'n' || ch == 'y' || ch == KEYD_ESCAPE || ch == KEYD_GP_B || ch == KEYD_GP_A || ch == KEYD_MOUSE1 || ch == KEYD_MOUSE2 || ch == KEYD_MOUSE3))
-			return false;
-
-		msg_mode = 0;
-		// -KM- 1998/07/31 Moved this up here to fix bugs.
-		menuactive = msg_lastmenu?true:false;
-
-		if (message_key_routine)
-			(* message_key_routine)(ch);
-
-		S_StartFX(sfx_swtchx);
-		return true;
-	}
-	else if (msg_mode == 2)
-	{		
-		if (ch == KEYD_ENTER || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
-		{
-			menuactive = msg_lastmenu?true:false;
-			msg_mode = 0;
-
-			if (message_input_routine)
-				(* message_input_routine)(input_string.c_str());
-
-			input_string.clear();
-			
-			M_ClearMenus();
-			S_StartFX(sfx_swtchx);
-			return true;
-		}
-
-		if (ch == KEYD_ESCAPE || ch == KEYD_GP_B || ch == KEYD_MOUSE2 || ch == KEYD_MOUSE3)
-		{
-			menuactive = msg_lastmenu?true:false;
-			msg_mode = 0;
-      
-			if (message_input_routine)
-				(* message_input_routine)(NULL);
-
-			input_string.clear();
-			
-			M_ClearMenus();
-			S_StartFX(sfx_swtchx);
-			return true;
-		}
-
-		if ((ch == KEYD_BACKSPACE || ch == KEYD_DELETE) && !input_string.empty())
-		{
-			std::string s = input_string.c_str();
-
-			if (input_string != "")
-			{
-				input_string.resize(input_string.size() - 1);
-			}
-
-			return true;
-		}
-		
-		if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
-			ch = toupper(ch);
-		if (ch == '-')
-			ch = '_';
-			
-		if (ch >= 32 && ch <= 126)  // FIXME: international characters ??
-		{
-			// Set the input_string only if fits
-			if (input_string.size() < 64)
-			{
-				input_string += ch;
-			}
-		}
-
-		return true;
-	}
-
-	// new options menu on - use that responder
-	if (option_menuon)
-		return M_OptResponder(ev, ch);
-
-	if (netgame_menuon)
-		return M_NetGameResponder(ev, ch);
-
-	// Save Game string input
-	if (saveStringEnter)
-	{
-		switch (ch)
-		{
-			case KEYD_BACKSPACE:
-				if (saveCharIndex > 0)
-				{
-					saveCharIndex--;
-					ex_slots[save_slot].desc[saveCharIndex] = 0;
-				}
-				break;
-
-			case KEYD_ESCAPE:
-			case KEYD_GP_B:
-			case KEYD_MOUSE2:
-			case KEYD_MOUSE3:
-				saveStringEnter = 0;
-				strcpy(ex_slots[save_slot].desc, saveOldString);
-				break;
-
-			case KEYD_ENTER:
-			case KEYD_GP_A:
-			case KEYD_MOUSE1:
-				saveStringEnter = 0;
-				if (ex_slots[save_slot].desc[0])
-				{
-					M_DoSave(save_page, save_slot);
-				}
-				else
-				{
-					std::string default_name = epi::STR_Format("SAVE-%d", save_page * SAVE_SLOTS + save_slot + 1);
-					for (; (size_t) saveCharIndex < default_name.size(); saveCharIndex++)
-					{
-						ex_slots[save_slot].desc[saveCharIndex] = default_name[saveCharIndex];
-					}
-					ex_slots[save_slot].desc[saveCharIndex] = 0;
-					M_DoSave(save_page, save_slot);
-				}
-				break;
-
-			default:
-				if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
-					ch = toupper(ch);
-				SYS_ASSERT(save_style);
-				if (ch >= 32 && ch <= 127 &&
-					saveCharIndex < SAVESTRINGSIZE - 1 &&
-					save_style->fonts[1]->StringWidth(ex_slots[save_slot].desc) <
-					(SAVESTRINGSIZE - 2) * 8)
-				{
-					ex_slots[save_slot].desc[saveCharIndex++] = ch;
-					ex_slots[save_slot].desc[saveCharIndex] = 0;
-				}
-				break;
-		}
-		return true;
-	}
-
-	// F-Keys
-	if (!menuactive)
-	{
-
-		if (E_MatchesKey(key_screenshot, ch))
-		{
-			ch = KEYD_SCREENSHOT;
-		}
-		if (E_MatchesKey(key_save_game, ch))
-		{
-			ch = KEYD_SAVEGAME;
-		}
-		if (E_MatchesKey(key_load_game, ch))
-		{
-			ch = KEYD_LOADGAME;
-		}
-		if (E_MatchesKey(key_sound_controls, ch))
-		{
-			ch = KEYD_SOUNDCONTROLS;
-		}
-		if (E_MatchesKey(key_options_menu, ch))
-		{
-			ch = KEYD_OPTIONSMENU;
-		}
-		if (E_MatchesKey(key_quick_save, ch))
-		{
-			ch = KEYD_QUICKSAVE;
-		}
-		if (E_MatchesKey(key_end_game, ch))
-		{
-			ch = KEYD_ENDGAME;
-		}
-		if (E_MatchesKey(key_message_toggle, ch))
-		{
-			ch = KEYD_MESSAGETOGGLE;
-		}
-		if (E_MatchesKey(key_quick_load, ch))
-		{
-			ch = KEYD_QUICKLOAD;
-		}
-		if (E_MatchesKey(key_quit_edge, ch))
-		{
-			ch = KEYD_QUITEDGE;
-		}
-		if (E_MatchesKey(key_gamma_toggle, ch))
-		{
-			ch = KEYD_GAMMATOGGLE;
-		}
-
-		switch (ch)
-		{
-			case KEYD_MINUS:  // Screen size down
-
-				if (automapactive || chat_on)
-					return false;
-
-				screen_hud = (screen_hud - 1 + NUMHUD) % NUMHUD;
-
-				S_StartFX(sfx_stnmov);
-				return true;
-
-			case KEYD_EQUALS:  // Screen size up
-
-				if (automapactive || chat_on)
-					return false;
-
-				screen_hud = (screen_hud + 1) % NUMHUD;
-
-				S_StartFX(sfx_stnmov);
-				return true;
-
-			case KEYD_SAVEGAME:  // Save
-
-				M_StartControlPanel();
-				S_StartFX(sfx_swtchn);
-				M_SaveGame(0);
-				return true;
-
-			case KEYD_LOADGAME:  // Load
-
-				M_StartControlPanel();
-				S_StartFX(sfx_swtchn);
-				M_LoadGame(0);
-				return true;
-
-			case KEYD_SOUNDCONTROLS:  // Sound Volume
-
-				S_StartFX(sfx_swtchn);
-				M_StartControlPanel();
-				M_F4SoundOptions(0);
-				return true;
-
-			case KEYD_OPTIONSMENU:  // Detail toggle, now loads options menu
-				// -KM- 1998/07/31 F5 now loads options menu, detail is obsolete.
-
-				S_StartFX(sfx_swtchn);
-				M_StartControlPanel();
-				M_Options(1);
-				return true;
-
-			case KEYD_QUICKSAVE:  // Quicksave
-
-				S_StartFX(sfx_swtchn);
-				M_QuickSave();
-				return true;
-
-			case KEYD_ENDGAME:  // End game
-
-				S_StartFX(sfx_swtchn);
-				M_EndGame(0);
-				return true;
-
-			case KEYD_MESSAGETOGGLE:  // Toggle messages
-
-				M_ChangeMessages(0);
-				S_StartFX(sfx_swtchn);
-				return true;
-
-			case KEYD_QUICKLOAD:  // Quickload
-
-				S_StartFX(sfx_swtchn);
-				M_QuickLoad();
-				return true;
-
-			case KEYD_QUITEDGE:  // Quit DOOM
-
-				S_StartFX(sfx_swtchn);
-				M_QuitEDGE(0);
-				return true;
-
-			case KEYD_GAMMATOGGLE:  // gamma toggle
-
-				v_secbright.d++;
-				if (v_secbright.d > 10)
-					v_secbright.d = 0;
-
-				v_secbright = v_secbright.d;
-
-				std::string msg = "Sector Brightness "; // TODO: Make language entry - Dasho
-
-				switch(v_secbright.d)
-				{
-					case 0:
-					case 1:
-					case 2:
-					case 3:
-					case 4:
-					  msg.append("-");
-					  msg.append(std::to_string((5 - v_secbright.d) * 10));
-					  break;
-					case 5:
-					  msg.append("Default");  
-					  break;
-					case 6:
-					case 7:
-					case 8:
-					case 9:
-					case 10:
-					  msg.append("+");
-					  msg.append(std::to_string((5 - v_secbright.d) * -10));
-					  break;
-					default:
-						msg.clear();
-						break;
-				}
-				
-				if (!msg.empty())
-					CON_PlayerMessage(consoleplayer, "%s", msg.c_str());
-
-				// -AJA- 1999/07/03: removed PLAYPAL reference.
-				return true;
-
-		}
-
-		// Pop-up menu?
-		if (ch == KEYD_ESCAPE || ch == KEYD_GP_START)
-		{
-			M_StartControlPanel();
-			S_StartFX(sfx_swtchn);
-			return true;
-		}
-		return false;
-	}
-
-	// Keys usable within menu
-	switch (ch)
-	{
-
-		case KEYD_WHEEL_DN:
-			do
-			{
-				if (itemOn + 1 > currentMenu->numitems - 1)
-				{
-					if (currentMenu->menuitems[itemOn].select_func &&
-						currentMenu->menuitems[itemOn].status == 2)
-					{
-						S_StartFX(sfx_stnmov);
-						// 98-7-10 KM Use new defines
-						(* currentMenu->menuitems[itemOn].select_func)(SLIDERRIGHT);
-						itemOn = 0;
-						return true;
-					}
-					else
-						itemOn = 0;
-				}
-				else
-					itemOn++;
-				S_StartFX(sfx_pstop);
-			}
-			while (currentMenu->menuitems[itemOn].status == -1);
-			return true;
-
-		case KEYD_WHEEL_UP:
-			do
-			{
-				if (itemOn == 0)
-				{
-					if (currentMenu->menuitems[itemOn].select_func &&
-						currentMenu->menuitems[itemOn].status == 2)
-					{
-						S_StartFX(sfx_stnmov);
-						// 98-7-10 KM Use new defines
-						(* currentMenu->menuitems[itemOn].select_func)(SLIDERLEFT);
-						itemOn = currentMenu->numitems - 1;
-						return true;
-					}
-					else
-						itemOn = currentMenu->numitems - 1;
-				}
-				else
-					itemOn--;
-				S_StartFX(sfx_pstop);
-			}
-			while (currentMenu->menuitems[itemOn].status == -1);
-			return true;
-		
-		case KEYD_DOWNARROW:
-		case KEYD_GP_DOWN:
-			do
-			{
-				if (itemOn + 1 > currentMenu->numitems - 1)
-					itemOn = 0;
-				else
-					itemOn++;
-				S_StartFX(sfx_pstop);
-			}
-			while (currentMenu->menuitems[itemOn].status == -1);
-			return true;
-
-		case KEYD_UPARROW:
-		case KEYD_GP_UP:
-			do
-			{
-				if (itemOn == 0)
-					itemOn = currentMenu->numitems - 1;
-				else
-					itemOn--;
-				S_StartFX(sfx_pstop);
-			}
-			while (currentMenu->menuitems[itemOn].status == -1);
-			return true;
-
-		case KEYD_PGUP:
-		case KEYD_LEFTARROW:
-		case KEYD_GP_LEFT:
-			if (currentMenu->menuitems[itemOn].select_func &&
-				currentMenu->menuitems[itemOn].status == 2)
-			{
-				S_StartFX(sfx_stnmov);
-				// 98-7-10 KM Use new defines
-				(* currentMenu->menuitems[itemOn].select_func)(SLIDERLEFT);
-			}
-			return true;
-
-		case KEYD_PGDN:
-		case KEYD_RIGHTARROW:
-		case KEYD_GP_RIGHT:
-			if (currentMenu->menuitems[itemOn].select_func &&
-				currentMenu->menuitems[itemOn].status == 2)
-			{
-				S_StartFX(sfx_stnmov);
-				// 98-7-10 KM Use new defines
-				(* currentMenu->menuitems[itemOn].select_func)(SLIDERRIGHT);
-			}
-			return true;
-
-		case KEYD_ENTER:
-		case KEYD_MOUSE1:
-		case KEYD_GP_A:
-			if (currentMenu->menuitems[itemOn].select_func &&
-				currentMenu->menuitems[itemOn].status)
-			{
-				currentMenu->lastOn = itemOn;
-				(* currentMenu->menuitems[itemOn].select_func)(itemOn);
-				S_StartFX(sfx_pistol);
-			}
-			return true;
-
-		case KEYD_ESCAPE:
-		case KEYD_MOUSE2:
-		case KEYD_MOUSE3:
-		case KEYD_GP_START:
-			currentMenu->lastOn = itemOn;
-			M_ClearMenus();
-			S_StartFX(sfx_swtchx);
-			return true;
-
-		case KEYD_BACKSPACE:
-		case KEYD_GP_B:
-			currentMenu->lastOn = itemOn;
-			if (currentMenu->prevMenu)
-			{
-				currentMenu = currentMenu->prevMenu;
-				itemOn = currentMenu->lastOn;
-				S_StartFX(sfx_swtchn);
-			}
-			return true;
-
-		default:
-			for (i = itemOn + 1; i < currentMenu->numitems; i++)
-				if (currentMenu->menuitems[i].alpha_key == ch)
-				{
-					itemOn = i;
-					S_StartFX(sfx_pstop);
-					return true;
-				}
-			for (i = 0; i <= itemOn; i++)
-				if (currentMenu->menuitems[i].alpha_key == ch)
-				{
-					itemOn = i;
-					S_StartFX(sfx_pstop);
-					return true;
-				}
-			break;
-
-	}
-
-	return false;
+    int i;
+
+    if (ev->type != ev_keydown)
+        return false;
+
+    int ch = ev->value.key.sym;
+
+    SDL_Keymod mod = SDL_GetModState();
+
+    // -ACB- 1999/10/11 F1 is responsible for print screen at any time
+    if (ch == KEYD_F1 || ch == KEYD_PRTSCR)
+    {
+        G_DeferredScreenShot();
+        return true;
+    }
+
+    // Take care of any messages that need input
+    // -KM- 1998/07/21 Message Input
+    if (msg_mode == 1)
+    {
+        if (msg_needsinput == true && !(ch == ' ' || ch == 'n' || ch == 'y' || ch == KEYD_ESCAPE || ch == KEYD_GP_B ||
+                                        ch == KEYD_GP_A || ch == KEYD_MOUSE1 || ch == KEYD_MOUSE2 || ch == KEYD_MOUSE3))
+            return false;
+
+        msg_mode = 0;
+        // -KM- 1998/07/31 Moved this up here to fix bugs.
+        menuactive = msg_lastmenu ? true : false;
+
+        if (message_key_routine)
+            (*message_key_routine)(ch);
+
+        S_StartFX(sfx_swtchx);
+        return true;
+    }
+    else if (msg_mode == 2)
+    {
+        if (ch == KEYD_ENTER || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
+        {
+            menuactive = msg_lastmenu ? true : false;
+            msg_mode   = 0;
+
+            if (message_input_routine)
+                (*message_input_routine)(input_string.c_str());
+
+            input_string.clear();
+
+            M_ClearMenus();
+            S_StartFX(sfx_swtchx);
+            return true;
+        }
+
+        if (ch == KEYD_ESCAPE || ch == KEYD_GP_B || ch == KEYD_MOUSE2 || ch == KEYD_MOUSE3)
+        {
+            menuactive = msg_lastmenu ? true : false;
+            msg_mode   = 0;
+
+            if (message_input_routine)
+                (*message_input_routine)(NULL);
+
+            input_string.clear();
+
+            M_ClearMenus();
+            S_StartFX(sfx_swtchx);
+            return true;
+        }
+
+        if ((ch == KEYD_BACKSPACE || ch == KEYD_DELETE) && !input_string.empty())
+        {
+            std::string s = input_string.c_str();
+
+            if (input_string != "")
+            {
+                input_string.resize(input_string.size() - 1);
+            }
+
+            return true;
+        }
+
+        if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
+            ch = toupper(ch);
+        if (ch == '-')
+            ch = '_';
+
+        if (ch >= 32 && ch <= 126) // FIXME: international characters ??
+        {
+            // Set the input_string only if fits
+            if (input_string.size() < 64)
+            {
+                input_string += ch;
+            }
+        }
+
+        return true;
+    }
+
+    // new options menu on - use that responder
+    if (option_menuon)
+        return M_OptResponder(ev, ch);
+
+    if (netgame_menuon)
+        return M_NetGameResponder(ev, ch);
+
+    // Save Game string input
+    if (saveStringEnter)
+    {
+        switch (ch)
+        {
+        case KEYD_BACKSPACE:
+            if (saveCharIndex > 0)
+            {
+                saveCharIndex--;
+                ex_slots[save_slot].desc[saveCharIndex] = 0;
+            }
+            break;
+
+        case KEYD_ESCAPE:
+        case KEYD_GP_B:
+        case KEYD_MOUSE2:
+        case KEYD_MOUSE3:
+            saveStringEnter = 0;
+            strcpy(ex_slots[save_slot].desc, saveOldString);
+            break;
+
+        case KEYD_ENTER:
+        case KEYD_GP_A:
+        case KEYD_MOUSE1:
+            saveStringEnter = 0;
+            if (ex_slots[save_slot].desc[0])
+            {
+                M_DoSave(save_page, save_slot);
+            }
+            else
+            {
+                std::string default_name = epi::STR_Format("SAVE-%d", save_page * SAVE_SLOTS + save_slot + 1);
+                for (; (size_t)saveCharIndex < default_name.size(); saveCharIndex++)
+                {
+                    ex_slots[save_slot].desc[saveCharIndex] = default_name[saveCharIndex];
+                }
+                ex_slots[save_slot].desc[saveCharIndex] = 0;
+                M_DoSave(save_page, save_slot);
+            }
+            break;
+
+        default:
+            if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
+                ch = toupper(ch);
+            SYS_ASSERT(save_style);
+            if (ch >= 32 && ch <= 127 && saveCharIndex < SAVESTRINGSIZE - 1 &&
+                save_style->fonts[1]->StringWidth(ex_slots[save_slot].desc) < (SAVESTRINGSIZE - 2) * 8)
+            {
+                ex_slots[save_slot].desc[saveCharIndex++] = ch;
+                ex_slots[save_slot].desc[saveCharIndex]   = 0;
+            }
+            break;
+        }
+        return true;
+    }
+
+    // F-Keys
+    if (!menuactive)
+    {
+
+        if (E_MatchesKey(key_screenshot, ch))
+        {
+            ch = KEYD_SCREENSHOT;
+        }
+        if (E_MatchesKey(key_save_game, ch))
+        {
+            ch = KEYD_SAVEGAME;
+        }
+        if (E_MatchesKey(key_load_game, ch))
+        {
+            ch = KEYD_LOADGAME;
+        }
+        if (E_MatchesKey(key_sound_controls, ch))
+        {
+            ch = KEYD_SOUNDCONTROLS;
+        }
+        if (E_MatchesKey(key_options_menu, ch))
+        {
+            ch = KEYD_OPTIONSMENU;
+        }
+        if (E_MatchesKey(key_quick_save, ch))
+        {
+            ch = KEYD_QUICKSAVE;
+        }
+        if (E_MatchesKey(key_end_game, ch))
+        {
+            ch = KEYD_ENDGAME;
+        }
+        if (E_MatchesKey(key_message_toggle, ch))
+        {
+            ch = KEYD_MESSAGETOGGLE;
+        }
+        if (E_MatchesKey(key_quick_load, ch))
+        {
+            ch = KEYD_QUICKLOAD;
+        }
+        if (E_MatchesKey(key_quit_edge, ch))
+        {
+            ch = KEYD_QUITEDGE;
+        }
+        if (E_MatchesKey(key_gamma_toggle, ch))
+        {
+            ch = KEYD_GAMMATOGGLE;
+        }
+
+        switch (ch)
+        {
+        case KEYD_MINUS: // Screen size down
+
+            if (automapactive || chat_on)
+                return false;
+
+            screen_hud = (screen_hud - 1 + NUMHUD) % NUMHUD;
+
+            S_StartFX(sfx_stnmov);
+            return true;
+
+        case KEYD_EQUALS: // Screen size up
+
+            if (automapactive || chat_on)
+                return false;
+
+            screen_hud = (screen_hud + 1) % NUMHUD;
+
+            S_StartFX(sfx_stnmov);
+            return true;
+
+        case KEYD_SAVEGAME: // Save
+
+            M_StartControlPanel();
+            S_StartFX(sfx_swtchn);
+            M_SaveGame(0);
+            return true;
+
+        case KEYD_LOADGAME: // Load
+
+            M_StartControlPanel();
+            S_StartFX(sfx_swtchn);
+            M_LoadGame(0);
+            return true;
+
+        case KEYD_SOUNDCONTROLS: // Sound Volume
+
+            S_StartFX(sfx_swtchn);
+            M_StartControlPanel();
+            M_F4SoundOptions(0);
+            return true;
+
+        case KEYD_OPTIONSMENU: // Detail toggle, now loads options menu
+            // -KM- 1998/07/31 F5 now loads options menu, detail is obsolete.
+
+            S_StartFX(sfx_swtchn);
+            M_StartControlPanel();
+            M_Options(1);
+            return true;
+
+        case KEYD_QUICKSAVE: // Quicksave
+
+            S_StartFX(sfx_swtchn);
+            M_QuickSave();
+            return true;
+
+        case KEYD_ENDGAME: // End game
+
+            S_StartFX(sfx_swtchn);
+            M_EndGame(0);
+            return true;
+
+        case KEYD_MESSAGETOGGLE: // Toggle messages
+
+            M_ChangeMessages(0);
+            S_StartFX(sfx_swtchn);
+            return true;
+
+        case KEYD_QUICKLOAD: // Quickload
+
+            S_StartFX(sfx_swtchn);
+            M_QuickLoad();
+            return true;
+
+        case KEYD_QUITEDGE: // Quit DOOM
+
+            S_StartFX(sfx_swtchn);
+            M_QuitEDGE(0);
+            return true;
+
+        case KEYD_GAMMATOGGLE: // gamma toggle
+
+            v_secbright.d++;
+            if (v_secbright.d > 10)
+                v_secbright.d = 0;
+
+            v_secbright = v_secbright.d;
+
+            std::string msg = "Sector Brightness "; // TODO: Make language entry - Dasho
+
+            switch (v_secbright.d)
+            {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                msg.append("-");
+                msg.append(std::to_string((5 - v_secbright.d) * 10));
+                break;
+            case 5:
+                msg.append("Default");
+                break;
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+                msg.append("+");
+                msg.append(std::to_string((5 - v_secbright.d) * -10));
+                break;
+            default:
+                msg.clear();
+                break;
+            }
+
+            if (!msg.empty())
+                CON_PlayerMessage(consoleplayer, "%s", msg.c_str());
+
+            // -AJA- 1999/07/03: removed PLAYPAL reference.
+            return true;
+        }
+
+        // Pop-up menu?
+        if (ch == KEYD_ESCAPE || ch == KEYD_GP_START)
+        {
+            M_StartControlPanel();
+            S_StartFX(sfx_swtchn);
+            return true;
+        }
+        return false;
+    }
+
+    // Keys usable within menu
+    switch (ch)
+    {
+
+    case KEYD_WHEEL_DN:
+        do
+        {
+            if (itemOn + 1 > currentMenu->numitems - 1)
+            {
+                if (currentMenu->menuitems[itemOn].select_func && currentMenu->menuitems[itemOn].status == 2)
+                {
+                    S_StartFX(sfx_stnmov);
+                    // 98-7-10 KM Use new defines
+                    (*currentMenu->menuitems[itemOn].select_func)(SLIDERRIGHT);
+                    itemOn = 0;
+                    return true;
+                }
+                else
+                    itemOn = 0;
+            }
+            else
+                itemOn++;
+            S_StartFX(sfx_pstop);
+        } while (currentMenu->menuitems[itemOn].status == -1);
+        return true;
+
+    case KEYD_WHEEL_UP:
+        do
+        {
+            if (itemOn == 0)
+            {
+                if (currentMenu->menuitems[itemOn].select_func && currentMenu->menuitems[itemOn].status == 2)
+                {
+                    S_StartFX(sfx_stnmov);
+                    // 98-7-10 KM Use new defines
+                    (*currentMenu->menuitems[itemOn].select_func)(SLIDERLEFT);
+                    itemOn = currentMenu->numitems - 1;
+                    return true;
+                }
+                else
+                    itemOn = currentMenu->numitems - 1;
+            }
+            else
+                itemOn--;
+            S_StartFX(sfx_pstop);
+        } while (currentMenu->menuitems[itemOn].status == -1);
+        return true;
+
+    case KEYD_DOWNARROW:
+    case KEYD_GP_DOWN:
+        do
+        {
+            if (itemOn + 1 > currentMenu->numitems - 1)
+                itemOn = 0;
+            else
+                itemOn++;
+            S_StartFX(sfx_pstop);
+        } while (currentMenu->menuitems[itemOn].status == -1);
+        return true;
+
+    case KEYD_UPARROW:
+    case KEYD_GP_UP:
+        do
+        {
+            if (itemOn == 0)
+                itemOn = currentMenu->numitems - 1;
+            else
+                itemOn--;
+            S_StartFX(sfx_pstop);
+        } while (currentMenu->menuitems[itemOn].status == -1);
+        return true;
+
+    case KEYD_PGUP:
+    case KEYD_LEFTARROW:
+    case KEYD_GP_LEFT:
+        if (currentMenu->menuitems[itemOn].select_func && currentMenu->menuitems[itemOn].status == 2)
+        {
+            S_StartFX(sfx_stnmov);
+            // 98-7-10 KM Use new defines
+            (*currentMenu->menuitems[itemOn].select_func)(SLIDERLEFT);
+        }
+        return true;
+
+    case KEYD_PGDN:
+    case KEYD_RIGHTARROW:
+    case KEYD_GP_RIGHT:
+        if (currentMenu->menuitems[itemOn].select_func && currentMenu->menuitems[itemOn].status == 2)
+        {
+            S_StartFX(sfx_stnmov);
+            // 98-7-10 KM Use new defines
+            (*currentMenu->menuitems[itemOn].select_func)(SLIDERRIGHT);
+        }
+        return true;
+
+    case KEYD_ENTER:
+    case KEYD_MOUSE1:
+    case KEYD_GP_A:
+        if (currentMenu->menuitems[itemOn].select_func && currentMenu->menuitems[itemOn].status)
+        {
+            currentMenu->lastOn = itemOn;
+            (*currentMenu->menuitems[itemOn].select_func)(itemOn);
+            S_StartFX(sfx_pistol);
+        }
+        return true;
+
+    case KEYD_ESCAPE:
+    case KEYD_MOUSE2:
+    case KEYD_MOUSE3:
+    case KEYD_GP_START:
+        currentMenu->lastOn = itemOn;
+        M_ClearMenus();
+        S_StartFX(sfx_swtchx);
+        return true;
+
+    case KEYD_BACKSPACE:
+    case KEYD_GP_B:
+        currentMenu->lastOn = itemOn;
+        if (currentMenu->prevMenu)
+        {
+            currentMenu = currentMenu->prevMenu;
+            itemOn      = currentMenu->lastOn;
+            S_StartFX(sfx_swtchn);
+        }
+        return true;
+
+    default:
+        for (i = itemOn + 1; i < currentMenu->numitems; i++)
+            if (currentMenu->menuitems[i].alpha_key == ch)
+            {
+                itemOn = i;
+                S_StartFX(sfx_pstop);
+                return true;
+            }
+        for (i = 0; i <= itemOn; i++)
+            if (currentMenu->menuitems[i].alpha_key == ch)
+            {
+                itemOn = i;
+                S_StartFX(sfx_pstop);
+                return true;
+            }
+        break;
+    }
+
+    return false;
 }
-
 
 void M_StartControlPanel(void)
 {
-	// intro might call this repeatedly
-	if (menuactive)
-		return;
+    // intro might call this repeatedly
+    if (menuactive)
+        return;
 
-	menuactive = true;
-	CON_SetVisible(vs_notvisible);
+    menuactive = true;
+    CON_SetVisible(vs_notvisible);
 
-	currentMenu = &MainDef;  // JDC
-	itemOn = currentMenu->lastOn;  // JDC
+    currentMenu = &MainDef;            // JDC
+    itemOn      = currentMenu->lastOn; // JDC
 
-	M_OptCheckNetgame();
+    M_OptCheckNetgame();
 }
 
-
-static int FindChar(std::string& str, char ch, int pos)
+static int FindChar(std::string &str, char ch, int pos)
 {
-	SYS_ASSERT(pos <= (int)str.size());
+    SYS_ASSERT(pos <= (int)str.size());
 
-	const char *scan = strchr(str.c_str() + pos, ch);
+    const char *scan = strchr(str.c_str() + pos, ch);
 
-	if (! scan)
-		return -1;
+    if (!scan)
+        return -1;
 
-	return (int)(scan - str.c_str());
+    return (int)(scan - str.c_str());
 }
 
-
-static std::string GetMiddle(std::string& str, int pos, int len)
+static std::string GetMiddle(std::string &str, int pos, int len)
 {
-	SYS_ASSERT(pos >= 0 && len >= 0);
-	SYS_ASSERT(pos + len <= (int)str.size());
+    SYS_ASSERT(pos >= 0 && len >= 0);
+    SYS_ASSERT(pos + len <= (int)str.size());
 
-	if (len == 0)
-		return std::string();
+    if (len == 0)
+        return std::string();
 
-	return std::string(str.c_str() + pos, len);
+    return std::string(str.c_str() + pos, len);
 }
-
 
 static void DrawMessage(void)
 {
 
-	if (message_key_routine == QuitResponse && !exit_style->bg_image) // Respect dialog styles with custom backgrounds
-	{
-		I_StartFrame(); // To clear and ensure solid black background regardless of style
-		
-		if (exit_style->def->text[styledef_c::T_TEXT].colmap)
-		{
-			HUD_SetTextColor(V_GetFontColor(exit_style->def->text[styledef_c::T_TEXT].colmap));
-		}
-		
-		if(exit_style->fonts[styledef_c::T_TEXT])
-		{
-			HUD_SetFont(exit_style->fonts[styledef_c::T_TEXT]);
-		}
-		HUD_SetScale(exit_style->def->text[styledef_c::T_TEXT].scale);
+    if (message_key_routine == QuitResponse && !exit_style->bg_image) // Respect dialog styles with custom backgrounds
+    {
+        I_StartFrame(); // To clear and ensure solid black background regardless of style
 
-		HUD_DrawQuitScreen();
-		return;
-	}
+        if (exit_style->def->text[styledef_c::T_TEXT].colmap)
+        {
+            HUD_SetTextColor(V_GetFontColor(exit_style->def->text[styledef_c::T_TEXT].colmap));
+        }
 
-	//short x; // Seems unused for now - Dasho
-	short y;
+        if (exit_style->fonts[styledef_c::T_TEXT])
+        {
+            HUD_SetFont(exit_style->fonts[styledef_c::T_TEXT]);
+        }
+        HUD_SetScale(exit_style->def->text[styledef_c::T_TEXT].scale);
 
-	SYS_ASSERT(exit_style);
+        HUD_DrawQuitScreen();
+        return;
+    }
 
-	exit_style->DrawBackground();
+    // short x; // Seems unused for now - Dasho
+    short y;
 
-	// FIXME: HU code should support center justification: this
-	// would remove the code duplication below...
+    SYS_ASSERT(exit_style);
 
-	std::string msg(msg_string);
+    exit_style->DrawBackground();
 
-	std::string input(input_string);
+    // FIXME: HU code should support center justification: this
+    // would remove the code duplication below...
 
-	if (msg_mode == 2)
-		input += "_";
-	
-	// Calc required height
+    std::string msg(msg_string);
 
-	std::string s = msg + input;
+    std::string input(input_string);
 
-	y = 100 - (exit_style->fonts[styledef_c::T_TEXT]->StringLines(s.c_str()) *
-		exit_style->fonts[styledef_c::T_TEXT]->NominalHeight()/ 2);
+    if (msg_mode == 2)
+        input += "_";
 
-	if (!msg.empty())
-	{
-		int oldpos = 0;
-		int pos;
+    // Calc required height
 
-		do
-		{
-			pos = FindChar(msg, '\n', oldpos);
+    std::string s = msg + input;
 
-			if (pos < 0)
-				s = std::string(msg, oldpos);
-			else
-				s = GetMiddle(msg, oldpos, pos-oldpos);
-		
-			if (s.size() > 0)
-			{
-				HUD_SetAlignment(0, -1);//center it
-				HL_WriteText(exit_style, styledef_c::T_TEXT, 160, y, s.c_str());
-				HUD_SetAlignment(-1, -1);//set it back to usual
-			}
-			
-			y += exit_style->fonts[styledef_c::T_TEXT]->NominalHeight();
+    y = 100 - (exit_style->fonts[styledef_c::T_TEXT]->StringLines(s.c_str()) *
+               exit_style->fonts[styledef_c::T_TEXT]->NominalHeight() / 2);
 
-			oldpos = pos + 1;
-		}
-		while (pos >= 0 && oldpos < (int)msg.size());
-	}
+    if (!msg.empty())
+    {
+        int oldpos = 0;
+        int pos;
 
-	if (! input.empty())
-	{
-		int oldpos = 0;
-		int pos;
+        do
+        {
+            pos = FindChar(msg, '\n', oldpos);
 
-		do
-		{
-			pos = FindChar(input, '\n', oldpos);
+            if (pos < 0)
+                s = std::string(msg, oldpos);
+            else
+                s = GetMiddle(msg, oldpos, pos - oldpos);
 
-			if (pos < 0)
-				s = std::string(input, oldpos);
-			else
-				s = GetMiddle(input, oldpos, pos-oldpos);
-		
-			if (s.size() > 0)
-			{
-				HUD_SetAlignment(0, -1);//center it
-				HL_WriteText(exit_style, styledef_c::T_TEXT, 160, y, s.c_str());
-				HUD_SetAlignment(-1, -1);//set it back to usual
-			}
-			
-			y += exit_style->fonts[0]->NominalHeight();
+            if (s.size() > 0)
+            {
+                HUD_SetAlignment(0, -1); // center it
+                HL_WriteText(exit_style, styledef_c::T_TEXT, 160, y, s.c_str());
+                HUD_SetAlignment(-1, -1); // set it back to usual
+            }
 
-			oldpos = pos + 1;
-		}
-		while (pos >= 0 && oldpos < (int)input.size());
-	}
+            y += exit_style->fonts[styledef_c::T_TEXT]->NominalHeight();
+
+            oldpos = pos + 1;
+        } while (pos >= 0 && oldpos < (int)msg.size());
+    }
+
+    if (!input.empty())
+    {
+        int oldpos = 0;
+        int pos;
+
+        do
+        {
+            pos = FindChar(input, '\n', oldpos);
+
+            if (pos < 0)
+                s = std::string(input, oldpos);
+            else
+                s = GetMiddle(input, oldpos, pos - oldpos);
+
+            if (s.size() > 0)
+            {
+                HUD_SetAlignment(0, -1); // center it
+                HL_WriteText(exit_style, styledef_c::T_TEXT, 160, y, s.c_str());
+                HUD_SetAlignment(-1, -1); // set it back to usual
+            }
+
+            y += exit_style->fonts[0]->NominalHeight();
+
+            oldpos = pos + 1;
+        } while (pos >= 0 && oldpos < (int)input.size());
+    }
 }
-
 
 float ShortestLine;
 float TallestLine;
@@ -2552,297 +2473,295 @@ float WidestLine;
 //
 void M_DrawCursor(style_c *style, bool graphical_item)
 {
-	float txtscale = 1.0;
-	bool graphical_cursor = false;
-	float TempScale = 0;
-	float TempWidth = 0;
-	float TempSpacer = 0;
-	float y_shift = 0;
-	int txtWidth = 0;
-	short old_offset_x = 0;
-	short old_offset_y = 0;
-	short TempX = 0;
-	short TempY = 0;
-	
-	float old_alpha = HUD_GetAlpha();
+    float txtscale         = 1.0;
+    bool  graphical_cursor = false;
+    float TempScale        = 0;
+    float TempWidth        = 0;
+    float TempSpacer       = 0;
+    float y_shift          = 0;
+    int   txtWidth         = 0;
+    short old_offset_x     = 0;
+    short old_offset_y     = 0;
+    short TempX            = 0;
+    short TempY            = 0;
 
-	if (style->def->text[styledef_c::T_TEXT].scale)
-		txtscale=style->def->text[styledef_c::T_TEXT].scale;
+    float old_alpha = HUD_GetAlpha();
 
-	//const colourmap_c *colmap = style->def->text[styledef_c::T_TEXT].colmap; // Should we allow a colmap for the cursor?
-	const colourmap_c *colmap = NULL;
-					
-	//-------------------------------------------------------------
-	// 1. First up, do we want a graphical cursor or a text one?
-	//-------------------------------------------------------------
-	image_c *cursor;
-	if (style->def->cursor.cursor_string != "")
-		cursor = NULL;
-	else if (style->def->cursor.alt_cursor != "")
-		cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor.c_str());
-	else
-		cursor = menu_skull[0];
+    if (style->def->text[styledef_c::T_TEXT].scale)
+        txtscale = style->def->text[styledef_c::T_TEXT].scale;
 
-	if (cursor) //we're using a graphic for the cursor
-		graphical_cursor = true;
+    // const colourmap_c *colmap = style->def->text[styledef_c::T_TEXT].colmap; // Should we allow a colmap for the
+    // cursor?
+    const colourmap_c *colmap = NULL;
 
-	HUD_SetAlpha(style->def->cursor.translucency);
-	
-	//-------------------------------------------------------------
-	// 2. Start drawing our cursor. We have to check if the 
-	// current menu item is graphical or text to do the calcs.
-	//-------------------------------------------------------------
-	// graphical_item==false //We're going text-based menu items
-	// graphical_item==true //We're going graphic-based menu items
-	if (graphical_cursor == false) //We're going text-based cursor
-	{
-		TempWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(style->def->cursor.cursor_string.c_str()) * txtscale;
-		TempSpacer = style->fonts[styledef_c::T_TEXT]->CharWidth(style->def->cursor.cursor_string[0]) * txtscale * 0.2;
-	}
-	else //We're going graphical cursor
-	{		
-		old_offset_x = cursor->offset_x;
-		old_offset_y = cursor->offset_y;
-		cursor->offset_x = 0;
-		cursor->offset_y = 0;
-		
-		if (style->def->cursor.force_offsets)
-		{
-			cursor->offset_x += old_offset_x;
-			cursor->offset_y += old_offset_y;
-		}
-		
-		if (graphical_item == false)
-		{
-			if (style->fonts[styledef_c::T_TEXT]->def->type == FNTYP_TrueType)
-			{
-				ShortestLine = style->fonts[styledef_c::T_TEXT]->ttf_ref_height[current_font_size] * txtscale;
-				y_shift = style->fonts[styledef_c::T_TEXT]->ttf_ref_yshift[current_font_size] * txtscale;
-			}
-		}	
-		TempScale = ShortestLine / IM_HEIGHT(cursor);
-		TempWidth = IM_WIDTH(cursor) * TempScale;
-		if (!style->def->cursor.scaling)
-		{
-			currentMenu->menuitems[itemOn].y -= (IM_HEIGHT(cursor) - ShortestLine) / 2;
-			ShortestLine = IM_HEIGHT(cursor);
-			TempWidth = IM_WIDTH(cursor);
-		}
-		
-	}
-	
-	TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
-	if (style->def->cursor.position == style->def->C_BOTH)
-	{
-		if (style->def->entry_alignment == style->def->C_RIGHT)
-		{
-			//Left cursor
-			if(graphical_item == false)
-				txtWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
-			else
-				txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
-			
-			TempX = currentMenu->menuitems[itemOn].x + WidestLine - TempSpacer;
-			TempX -= txtWidth; 
-			TempX -= TempWidth;
-			
-			TempY = currentMenu->menuitems[itemOn].y + y_shift;
-			if (graphical_item == true)
-			{
-				TempX -= (currentMenu->menuitems[itemOn].image->offset_x * txtscale) * 2;
-				TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
-			}
-			if (graphical_cursor == true)	
-			{
-				TempX -= (cursor->offset_x * txtscale);
-				TempY -= (cursor->offset_y * txtscale);
-			}	
+    //-------------------------------------------------------------
+    // 1. First up, do we want a graphical cursor or a text one?
+    //-------------------------------------------------------------
+    image_c *cursor;
+    if (style->def->cursor.cursor_string != "")
+        cursor = NULL;
+    else if (style->def->cursor.alt_cursor != "")
+        cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor.c_str());
+    else
+        cursor = menu_skull[0];
 
-			if (graphical_cursor == true)
-			{
-				HUD_StretchImage(TempX,TempY,TempWidth,ShortestLine,cursor, 0.0, 0.0,colmap);
-			}
-			else
-				HL_WriteText(style,styledef_c::T_TEXT, TempX, 
-				TempY, style->def->cursor.cursor_string.c_str());
-			
-			//Right cursor
-			TempX = currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer;
-			
-			TempY = currentMenu->menuitems[itemOn].y + y_shift;
-			if (graphical_item == true)
-			{
-				TempX -= (currentMenu->menuitems[itemOn].image->offset_x * txtscale) * 2;
-				TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
-			}
-			if (graphical_cursor == true)	
-			{
-				TempX -= (cursor->offset_x * txtscale);
-				TempY -= (cursor->offset_y * txtscale);
-			}	
+    if (cursor) // we're using a graphic for the cursor
+        graphical_cursor = true;
 
-			if (graphical_cursor == true)
-			{
-				HUD_StretchImage(TempX,TempY,TempWidth,ShortestLine,cursor, 0.0, 0.0,colmap);
-			}
-			else
-				HL_WriteText(style,styledef_c::T_TEXT, TempX, 
-				TempY, style->def->cursor.cursor_string.c_str());
-		}
-		else
-		{
-			//Left cursor
-			TempX = currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer;
-			TempY = currentMenu->menuitems[itemOn].y + y_shift;
+    HUD_SetAlpha(style->def->cursor.translucency);
 
-			if (graphical_item == true)
-			{
-				TempX -= (currentMenu->menuitems[itemOn].image->offset_x * txtscale) * 2;
-				TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
-			}
-			if (graphical_cursor == true)	
-			{
-				TempX -= (cursor->offset_x * txtscale);
-				TempY -= (cursor->offset_y * txtscale);
-			}	
-			
-			if (graphical_cursor == true)
-			{
-				HUD_StretchImage(TempX,TempY,TempWidth,ShortestLine,cursor, 0.0, 0.0,colmap);
-			}
-			else
-				HL_WriteText(style,styledef_c::T_TEXT, TempX, 
-				TempY, style->def->cursor.cursor_string.c_str());
-			
-			//Right cursor
-			if (graphical_item == false)
-				txtWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
-			else
-				txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
-			
-			TempX = currentMenu->menuitems[itemOn].x + txtWidth + TempSpacer;
-			TempY = currentMenu->menuitems[itemOn].y + y_shift;
-			if (graphical_item == true)
-			{
-				TempX -= (currentMenu->menuitems[itemOn].image->offset_x * txtscale) * 2;
-				TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
-			}
-			if (graphical_cursor == true)	
-			{
-				TempX -= (cursor->offset_x * txtscale);
-				TempY -= (cursor->offset_y * txtscale);
-			}	
-			if (graphical_cursor == true)
-			{
-				HUD_StretchImage(TempX,TempY,TempWidth,ShortestLine,cursor, 0.0, 0.0,colmap);
-			}
-			else
-				HL_WriteText(style,styledef_c::T_TEXT, TempX, 
-				TempY, style->def->cursor.cursor_string.c_str());
-		}
-	}
-	else if (style->def->cursor.position == style->def->C_CENTER)
-	{
-		TempX = 0;
+    //-------------------------------------------------------------
+    // 2. Start drawing our cursor. We have to check if the
+    // current menu item is graphical or text to do the calcs.
+    //-------------------------------------------------------------
+    // graphical_item==false //We're going text-based menu items
+    // graphical_item==true //We're going graphic-based menu items
+    if (graphical_cursor == false) // We're going text-based cursor
+    {
+        TempWidth  = style->fonts[styledef_c::T_TEXT]->StringWidth(style->def->cursor.cursor_string.c_str()) * txtscale;
+        TempSpacer = style->fonts[styledef_c::T_TEXT]->CharWidth(style->def->cursor.cursor_string[0]) * txtscale * 0.2;
+    }
+    else // We're going graphical cursor
+    {
+        old_offset_x     = cursor->offset_x;
+        old_offset_y     = cursor->offset_y;
+        cursor->offset_x = 0;
+        cursor->offset_y = 0;
 
-		if (graphical_cursor == true)
-		{	
-			TempX = CenterMenuImage2(style, styledef_c::T_TEXT,cursor);// + TempSpacer;
-			TempY = currentMenu->menuitems[itemOn].y + y_shift;
-			if (graphical_item == true)
-			{
-				TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
-			}
-			TempX -= (cursor->offset_x * txtscale);
-			TempY -= (cursor->offset_y * txtscale);
+        if (style->def->cursor.force_offsets)
+        {
+            cursor->offset_x += old_offset_x;
+            cursor->offset_y += old_offset_y;
+        }
 
-			if (style->def->cursor.border)
-				HUD_StretchImage(currentMenu->menuitems[itemOn].x,TempY,WidestLine,TallestLine,cursor, 0.0, 0.0,colmap);
-			else
-				HUD_StretchImage(TempX,TempY,TempWidth,ShortestLine,cursor, 0.0, 0.0,colmap);
-		}
-		else
-		{
-			TempX = CenterMenuText(style, styledef_c::T_TEXT,style->def->cursor.cursor_string.c_str());// + TempSpacer;
-			TempY = currentMenu->menuitems[itemOn].y + y_shift;
-			if (graphical_item == true)
-			{
-				TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
-			}
-			HL_WriteText(style,styledef_c::T_TEXT, TempX, 
-			TempY, style->def->cursor.cursor_string.c_str());
-		}
-	}
-	else if (style->def->cursor.position == style->def->C_RIGHT)
-	{
-		TempX = 0;
-		
-		if (style->def->entry_alignment == style->def->C_CENTER)
-		{
-			if (graphical_item == false)
-				txtWidth = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
-			else
-				txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
-			
-			TempX = currentMenu->menuitems[itemOn].x + txtWidth + TempSpacer;
-		}
-		else
-			TempX = currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer;
-		
-		TempY = currentMenu->menuitems[itemOn].y + y_shift;
-		if (graphical_item == true)
-		{
-			TempX -= (currentMenu->menuitems[itemOn].image->offset_x * txtscale) * 2;
-			TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
-		}
-		if (graphical_cursor == true)	
-		{
-			TempX -= (cursor->offset_x * txtscale);
-			TempY -= (cursor->offset_y * txtscale);
-		}	
+        if (graphical_item == false)
+        {
+            if (style->fonts[styledef_c::T_TEXT]->def->type == FNTYP_TrueType)
+            {
+                ShortestLine = style->fonts[styledef_c::T_TEXT]->ttf_ref_height[current_font_size] * txtscale;
+                y_shift      = style->fonts[styledef_c::T_TEXT]->ttf_ref_yshift[current_font_size] * txtscale;
+            }
+        }
+        TempScale = ShortestLine / IM_HEIGHT(cursor);
+        TempWidth = IM_WIDTH(cursor) * TempScale;
+        if (!style->def->cursor.scaling)
+        {
+            currentMenu->menuitems[itemOn].y -= (IM_HEIGHT(cursor) - ShortestLine) / 2;
+            ShortestLine = IM_HEIGHT(cursor);
+            TempWidth    = IM_WIDTH(cursor);
+        }
+    }
 
-		if (graphical_cursor == true)
-		{
-			HUD_StretchImage(TempX,TempY,TempWidth,ShortestLine,cursor, 0.0, 0.0,colmap);
-		}
-		else
-			HL_WriteText(style,styledef_c::T_TEXT, TempX, 
-			TempY, style->def->cursor.cursor_string.c_str());
-	}
-	else
-	{
-		TempX = currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer;
-		TempY = currentMenu->menuitems[itemOn].y + y_shift;
-		if (graphical_item == true)
-		{
-			TempX -= (currentMenu->menuitems[itemOn].image->offset_x * txtscale) * 2;
-			TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
-		}
-		if (graphical_cursor == true)	
-		{
-			TempX -= (cursor->offset_x * txtscale);
-			TempY -= (cursor->offset_y * txtscale);
-		}	
-		if (graphical_cursor == true)
-		{
-			HUD_StretchImage(TempX,TempY,TempWidth,ShortestLine,cursor, 0.0, 0.0,colmap);
-			/*
-			char mbuffer[200];
-			sprintf(mbuffer, "CX%d MX%d", TempX, currentMenu->menuitems[itemOn].x);
-			HL_WriteText(style,styledef_c::T_TEXT, 10, 185, mbuffer, 0.7f);
-			*/
-		}
-		else
-			HL_WriteText(style,styledef_c::T_TEXT, TempX, 
-			TempY, style->def->cursor.cursor_string.c_str());
-	}
+    TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
+    if (style->def->cursor.position == style->def->C_BOTH)
+    {
+        if (style->def->entry_alignment == style->def->C_RIGHT)
+        {
+            // Left cursor
+            if (graphical_item == false)
+                txtWidth =
+                    style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
+            else
+                txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
 
-	if (graphical_cursor == true)
-	{	
-		cursor->offset_x = old_offset_x;
-		cursor->offset_y = old_offset_y;
-	}
-	HUD_SetAlpha(old_alpha);
+            TempX = currentMenu->menuitems[itemOn].x + WidestLine - TempSpacer;
+            TempX -= txtWidth;
+            TempX -= TempWidth;
+
+            TempY = currentMenu->menuitems[itemOn].y + y_shift;
+            if (graphical_item == true)
+            {
+                TempX -= (currentMenu->menuitems[itemOn].image->offset_x * txtscale) * 2;
+                TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
+            }
+            if (graphical_cursor == true)
+            {
+                TempX -= (cursor->offset_x * txtscale);
+                TempY -= (cursor->offset_y * txtscale);
+            }
+
+            if (graphical_cursor == true)
+            {
+                HUD_StretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+            }
+            else
+                HL_WriteText(style, styledef_c::T_TEXT, TempX, TempY, style->def->cursor.cursor_string.c_str());
+
+            // Right cursor
+            TempX = currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer;
+
+            TempY = currentMenu->menuitems[itemOn].y + y_shift;
+            if (graphical_item == true)
+            {
+                TempX -= (currentMenu->menuitems[itemOn].image->offset_x * txtscale) * 2;
+                TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
+            }
+            if (graphical_cursor == true)
+            {
+                TempX -= (cursor->offset_x * txtscale);
+                TempY -= (cursor->offset_y * txtscale);
+            }
+
+            if (graphical_cursor == true)
+            {
+                HUD_StretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+            }
+            else
+                HL_WriteText(style, styledef_c::T_TEXT, TempX, TempY, style->def->cursor.cursor_string.c_str());
+        }
+        else
+        {
+            // Left cursor
+            TempX = currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer;
+            TempY = currentMenu->menuitems[itemOn].y + y_shift;
+
+            if (graphical_item == true)
+            {
+                TempX -= (currentMenu->menuitems[itemOn].image->offset_x * txtscale) * 2;
+                TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
+            }
+            if (graphical_cursor == true)
+            {
+                TempX -= (cursor->offset_x * txtscale);
+                TempY -= (cursor->offset_y * txtscale);
+            }
+
+            if (graphical_cursor == true)
+            {
+                HUD_StretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+            }
+            else
+                HL_WriteText(style, styledef_c::T_TEXT, TempX, TempY, style->def->cursor.cursor_string.c_str());
+
+            // Right cursor
+            if (graphical_item == false)
+                txtWidth =
+                    style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
+            else
+                txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
+
+            TempX = currentMenu->menuitems[itemOn].x + txtWidth + TempSpacer;
+            TempY = currentMenu->menuitems[itemOn].y + y_shift;
+            if (graphical_item == true)
+            {
+                TempX -= (currentMenu->menuitems[itemOn].image->offset_x * txtscale) * 2;
+                TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
+            }
+            if (graphical_cursor == true)
+            {
+                TempX -= (cursor->offset_x * txtscale);
+                TempY -= (cursor->offset_y * txtscale);
+            }
+            if (graphical_cursor == true)
+            {
+                HUD_StretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+            }
+            else
+                HL_WriteText(style, styledef_c::T_TEXT, TempX, TempY, style->def->cursor.cursor_string.c_str());
+        }
+    }
+    else if (style->def->cursor.position == style->def->C_CENTER)
+    {
+        TempX = 0;
+
+        if (graphical_cursor == true)
+        {
+            TempX = CenterMenuImage2(style, styledef_c::T_TEXT, cursor); // + TempSpacer;
+            TempY = currentMenu->menuitems[itemOn].y + y_shift;
+            if (graphical_item == true)
+            {
+                TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
+            }
+            TempX -= (cursor->offset_x * txtscale);
+            TempY -= (cursor->offset_y * txtscale);
+
+            if (style->def->cursor.border)
+                HUD_StretchImage(currentMenu->menuitems[itemOn].x, TempY, WidestLine, TallestLine, cursor, 0.0, 0.0,
+                                 colmap);
+            else
+                HUD_StretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+        }
+        else
+        {
+            TempX =
+                CenterMenuText(style, styledef_c::T_TEXT, style->def->cursor.cursor_string.c_str()); // + TempSpacer;
+            TempY = currentMenu->menuitems[itemOn].y + y_shift;
+            if (graphical_item == true)
+            {
+                TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
+            }
+            HL_WriteText(style, styledef_c::T_TEXT, TempX, TempY, style->def->cursor.cursor_string.c_str());
+        }
+    }
+    else if (style->def->cursor.position == style->def->C_RIGHT)
+    {
+        TempX = 0;
+
+        if (style->def->entry_alignment == style->def->C_CENTER)
+        {
+            if (graphical_item == false)
+                txtWidth =
+                    style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
+            else
+                txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
+
+            TempX = currentMenu->menuitems[itemOn].x + txtWidth + TempSpacer;
+        }
+        else
+            TempX = currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer;
+
+        TempY = currentMenu->menuitems[itemOn].y + y_shift;
+        if (graphical_item == true)
+        {
+            TempX -= (currentMenu->menuitems[itemOn].image->offset_x * txtscale) * 2;
+            TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
+        }
+        if (graphical_cursor == true)
+        {
+            TempX -= (cursor->offset_x * txtscale);
+            TempY -= (cursor->offset_y * txtscale);
+        }
+
+        if (graphical_cursor == true)
+        {
+            HUD_StretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+        }
+        else
+            HL_WriteText(style, styledef_c::T_TEXT, TempX, TempY, style->def->cursor.cursor_string.c_str());
+    }
+    else
+    {
+        TempX = currentMenu->menuitems[itemOn].x - TempWidth - TempSpacer;
+        TempY = currentMenu->menuitems[itemOn].y + y_shift;
+        if (graphical_item == true)
+        {
+            TempX -= (currentMenu->menuitems[itemOn].image->offset_x * txtscale) * 2;
+            TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
+        }
+        if (graphical_cursor == true)
+        {
+            TempX -= (cursor->offset_x * txtscale);
+            TempY -= (cursor->offset_y * txtscale);
+        }
+        if (graphical_cursor == true)
+        {
+            HUD_StretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+            /*
+            char mbuffer[200];
+            sprintf(mbuffer, "CX%d MX%d", TempX, currentMenu->menuitems[itemOn].x);
+            HL_WriteText(style,styledef_c::T_TEXT, 10, 185, mbuffer, 0.7f);
+            */
+        }
+        else
+            HL_WriteText(style, styledef_c::T_TEXT, TempX, TempY, style->def->cursor.cursor_string.c_str());
+    }
+
+    if (graphical_cursor == true)
+    {
+        cursor->offset_x = old_offset_x;
+        cursor->offset_y = old_offset_y;
+    }
+    HUD_SetAlpha(old_alpha);
 }
 
 //
@@ -2850,158 +2769,157 @@ void M_DrawCursor(style_c *style, bool graphical_item)
 //
 void M_DrawItems(style_c *style, bool graphical_item)
 {
-	short x, y;
-	int i;
-	int j;
-	int max;
+    short x, y;
+    int   i;
+    int   j;
+    int   max;
 
-	float txtscale = 1.0;
-	short TempX = 0;
-	
-	ShortestLine = 0.0f;
-	TallestLine = 0.0f;
-	WidestLine = 0.0f;
+    float txtscale = 1.0;
+    short TempX    = 0;
 
-	x = currentMenu->x;
-	y = currentMenu->y;
-	
-	max = currentMenu->numitems;
-	
-	float old_alpha = HUD_GetAlpha();
-	
-	if(style->def->text[styledef_c::T_TEXT].scale)
-		txtscale=style->def->text[styledef_c::T_TEXT].scale;
+    ShortestLine = 0.0f;
+    TallestLine  = 0.0f;
+    WidestLine   = 0.0f;
 
+    x = currentMenu->x;
+    y = currentMenu->y;
 
-	//---------------------------------------------------
-	// 1. For each menu item calculate x, width, height
-	//---------------------------------------------------
-	if (graphical_item == false) //We're going text-based menu items
-	{
-		ShortestLine = txtscale * style->fonts[styledef_c::T_TEXT]->NominalHeight();
-		TallestLine = txtscale * style->fonts[styledef_c::T_TEXT]->NominalHeight();
-		for (i = 0; i < max; i++)
-		{
-			currentMenu->menuitems[i].height = ShortestLine;
-			if (style->def->entry_alignment == style->def->C_CENTER)
-				currentMenu->menuitems[i].x = CenterMenuText(style, styledef_c::T_TEXT, currentMenu->menuitems[i].name);
-			else
-				currentMenu->menuitems[i].x = x + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
-			
-			currentMenu->menuitems[i].y = y + style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
-			if (currentMenu->menuitems[i].width < 0)
-				currentMenu->menuitems[i].width = style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[i].name) * txtscale;
-			if (currentMenu->menuitems[i].width > WidestLine) 
-				WidestLine = currentMenu->menuitems[i].width;
-			
-			y += currentMenu->menuitems[i].height + 1 + style->def->entry_spacing;
-		}
-	}
-	else
-	{
-		ShortestLine = 10000.0f;
-		TallestLine = 0.0f;
-		for (i = 0; i < max; i++)
-		{
-			if (! currentMenu->menuitems[i].patch_name[0])
-				continue;
-			if (! currentMenu->menuitems[i].image)
-				currentMenu->menuitems[i].image = W_ImageLookup(currentMenu->menuitems[i].patch_name);
-		
-			const image_c *image = currentMenu->menuitems[i].image;
+    max = currentMenu->numitems;
 
-			currentMenu->menuitems[i].height = IM_HEIGHT(image) * txtscale;
-			currentMenu->menuitems[i].width = IM_WIDTH(image) * txtscale;
+    float old_alpha = HUD_GetAlpha();
 
-			if (!image->is_empty)
-			{
-				if (currentMenu->menuitems[i].height < ShortestLine) 
-					ShortestLine = currentMenu->menuitems[i].height;
-				if (currentMenu->menuitems[i].height > TallestLine) 
-					TallestLine = currentMenu->menuitems[i].height;
-				if (currentMenu->menuitems[i].width > WidestLine) 
-					WidestLine = currentMenu->menuitems[i].width;
+    if (style->def->text[styledef_c::T_TEXT].scale)
+        txtscale = style->def->text[styledef_c::T_TEXT].scale;
 
-				if (style->def->entry_alignment == style->def->C_CENTER)
-					currentMenu->menuitems[i].x = CenterMenuImage2(style, styledef_c::T_TEXT, image);
-				else
-					currentMenu->menuitems[i].x = x + (image->offset_x * txtscale) + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
+    //---------------------------------------------------
+    // 1. For each menu item calculate x, width, height
+    //---------------------------------------------------
+    if (graphical_item == false) // We're going text-based menu items
+    {
+        ShortestLine = txtscale * style->fonts[styledef_c::T_TEXT]->NominalHeight();
+        TallestLine  = txtscale * style->fonts[styledef_c::T_TEXT]->NominalHeight();
+        for (i = 0; i < max; i++)
+        {
+            currentMenu->menuitems[i].height = ShortestLine;
+            if (style->def->entry_alignment == style->def->C_CENTER)
+                currentMenu->menuitems[i].x = CenterMenuText(style, styledef_c::T_TEXT, currentMenu->menuitems[i].name);
+            else
+                currentMenu->menuitems[i].x = x + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
 
-				currentMenu->menuitems[i].y = y - image->offset_y + style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
-				y += currentMenu->menuitems[i].height + style->def->entry_spacing;
-			}
-			else
-			{
-				currentMenu->menuitems[i].x = x;
-				currentMenu->menuitems[i].y = y;
-				y += 15 + style->def->entry_spacing;
-			}
-		}
-		if (ShortestLine == 10000.0f && TallestLine == 0.0f)
-		{
-			ShortestLine = 20.0f;
-			TallestLine = 20.0f;
-			WidestLine = 121.0f;
-			HUD_SetAlpha(old_alpha);
-			//We have empty menu items so don't draw anything...
-			return; 
-		}
-	}
+            currentMenu->menuitems[i].y = y + style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
+            if (currentMenu->menuitems[i].width < 0)
+                currentMenu->menuitems[i].width =
+                    style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[i].name) * txtscale;
+            if (currentMenu->menuitems[i].width > WidestLine)
+                WidestLine = currentMenu->menuitems[i].width;
 
-	int textstyle = styledef_c::T_TEXT;
-	
-	//---------------------------------------------------
-	// 2. Draw each menu item
-	//---------------------------------------------------
-	for (j = 0; j < max; j++)
-	{
-		//int textstyle = i == itemOn ? (style->def->text[styledef_c::T_SELECTED].font ? styledef_c::T_SELECTED : styledef_c::T_TEXT) : 
-		//		styledef_c::T_TEXT;
+            y += currentMenu->menuitems[i].height + 1 + style->def->entry_spacing;
+        }
+    }
+    else
+    {
+        ShortestLine = 10000.0f;
+        TallestLine  = 0.0f;
+        for (i = 0; i < max; i++)
+        {
+            if (!currentMenu->menuitems[i].patch_name[0])
+                continue;
+            if (!currentMenu->menuitems[i].image)
+                currentMenu->menuitems[i].image = W_ImageLookup(currentMenu->menuitems[i].patch_name);
 
-		textstyle = styledef_c::T_TEXT;
-		if (j == itemOn)
-		{
-			if (style->def->text[styledef_c::T_SELECTED].font)
-				textstyle = styledef_c::T_SELECTED;
-		}
-		
-		HUD_SetAlpha(style->def->text[textstyle].translucency);
+            const image_c *image = currentMenu->menuitems[i].image;
 
-		if (style->def->entry_alignment == style->def->C_RIGHT)
-			TempX = currentMenu->menuitems[j].x + WidestLine - currentMenu->menuitems[j].width;
-		else
-			TempX = currentMenu->menuitems[j].x;
+            currentMenu->menuitems[i].height = IM_HEIGHT(image) * txtscale;
+            currentMenu->menuitems[i].width  = IM_WIDTH(image) * txtscale;
 
-		if (graphical_item == false) //We're going text-based menu items
-		{
-			HL_WriteText(style, textstyle, TempX, 
-				currentMenu->menuitems[j].y, currentMenu->menuitems[j].name);
-		}
-		else //We're going graphical menu items
-		{
-			//const colourmap_c *colmap = i == itemOn ? style->def->text[styledef_c::T_SELECTED].colmap : 
-			//		style->def->text[styledef_c::T_TEXT].colmap;
+            if (!image->is_empty)
+            {
+                if (currentMenu->menuitems[i].height < ShortestLine)
+                    ShortestLine = currentMenu->menuitems[i].height;
+                if (currentMenu->menuitems[i].height > TallestLine)
+                    TallestLine = currentMenu->menuitems[i].height;
+                if (currentMenu->menuitems[i].width > WidestLine)
+                    WidestLine = currentMenu->menuitems[i].width;
 
-			textstyle = styledef_c::T_TEXT;
-			if (j == itemOn)
-			{
-				if (style->def->text[styledef_c::T_SELECTED].colmap)
-					textstyle = styledef_c::T_SELECTED;
-			}
+                if (style->def->entry_alignment == style->def->C_CENTER)
+                    currentMenu->menuitems[i].x = CenterMenuImage2(style, styledef_c::T_TEXT, image);
+                else
+                    currentMenu->menuitems[i].x = x + (image->offset_x * txtscale) + style->def->x_offset +
+                                                  style->def->text[styledef_c::T_TEXT].x_offset;
 
-			const colourmap_c *colmap = style->def->text[textstyle].colmap;
-			//colourmap_c *colmap = NULL;
+                currentMenu->menuitems[i].y =
+                    y - image->offset_y + style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
+                y += currentMenu->menuitems[i].height + style->def->entry_spacing;
+            }
+            else
+            {
+                currentMenu->menuitems[i].x = x;
+                currentMenu->menuitems[i].y = y;
+                y += 15 + style->def->entry_spacing;
+            }
+        }
+        if (ShortestLine == 10000.0f && TallestLine == 0.0f)
+        {
+            ShortestLine = 20.0f;
+            TallestLine  = 20.0f;
+            WidestLine   = 121.0f;
+            HUD_SetAlpha(old_alpha);
+            // We have empty menu items so don't draw anything...
+            return;
+        }
+    }
 
-			//HUD_StretchImage() will apply image.offset_x again so subtract it first
-			TempX -= (currentMenu->menuitems[j].image->offset_x * txtscale);
-			HUD_StretchImage(TempX, currentMenu->menuitems[j].y,
-				currentMenu->menuitems[j].width,currentMenu->menuitems[j].height,currentMenu->menuitems[j].image, 0.0, 0.0, colmap);
-		}
-		HUD_SetAlpha(old_alpha);
-		
-	}
-	HUD_SetAlpha(old_alpha);
-	
+    int textstyle = styledef_c::T_TEXT;
+
+    //---------------------------------------------------
+    // 2. Draw each menu item
+    //---------------------------------------------------
+    for (j = 0; j < max; j++)
+    {
+        // int textstyle = i == itemOn ? (style->def->text[styledef_c::T_SELECTED].font ? styledef_c::T_SELECTED :
+        // styledef_c::T_TEXT) : 		styledef_c::T_TEXT;
+
+        textstyle = styledef_c::T_TEXT;
+        if (j == itemOn)
+        {
+            if (style->def->text[styledef_c::T_SELECTED].font)
+                textstyle = styledef_c::T_SELECTED;
+        }
+
+        HUD_SetAlpha(style->def->text[textstyle].translucency);
+
+        if (style->def->entry_alignment == style->def->C_RIGHT)
+            TempX = currentMenu->menuitems[j].x + WidestLine - currentMenu->menuitems[j].width;
+        else
+            TempX = currentMenu->menuitems[j].x;
+
+        if (graphical_item == false) // We're going text-based menu items
+        {
+            HL_WriteText(style, textstyle, TempX, currentMenu->menuitems[j].y, currentMenu->menuitems[j].name);
+        }
+        else // We're going graphical menu items
+        {
+            // const colourmap_c *colmap = i == itemOn ? style->def->text[styledef_c::T_SELECTED].colmap :
+            //		style->def->text[styledef_c::T_TEXT].colmap;
+
+            textstyle = styledef_c::T_TEXT;
+            if (j == itemOn)
+            {
+                if (style->def->text[styledef_c::T_SELECTED].colmap)
+                    textstyle = styledef_c::T_SELECTED;
+            }
+
+            const colourmap_c *colmap = style->def->text[textstyle].colmap;
+            // colourmap_c *colmap = NULL;
+
+            // HUD_StretchImage() will apply image.offset_x again so subtract it first
+            TempX -= (currentMenu->menuitems[j].image->offset_x * txtscale);
+            HUD_StretchImage(TempX, currentMenu->menuitems[j].y, currentMenu->menuitems[j].width,
+                             currentMenu->menuitems[j].height, currentMenu->menuitems[j].image, 0.0, 0.0, colmap);
+        }
+        HUD_SetAlpha(old_alpha);
+    }
+    HUD_SetAlpha(old_alpha);
 }
 
 //
@@ -3010,257 +2928,256 @@ void M_DrawItems(style_c *style, bool graphical_item)
 //
 void M_Drawer(void)
 {
-	if (!menuactive)
-		return;
+    if (!menuactive)
+        return;
 
-	// Horiz. & Vertically center string and print it.
-	if (msg_mode)
-	{
-		DrawMessage();
-		return;
-	}
+    // Horiz. & Vertically center string and print it.
+    if (msg_mode)
+    {
+        DrawMessage();
+        return;
+    }
 
-	// new options menu enable, use that drawer instead
-	if (option_menuon)
-	{
-		M_OptDrawer();
-		return;
-	}
+    // new options menu enable, use that drawer instead
+    if (option_menuon)
+    {
+        M_OptDrawer();
+        return;
+    }
 
-	if (netgame_menuon)
-	{
-		M_NetGameDrawer();
-		return;
-	}
-	
-	//Lobo 2022: Check if we're going to use text-based menus
-	//or the users (custom)graphics
-	bool custom_menu = false;
-	if ((currentMenu->draw_func == M_DrawMainMenu) && (custom_MenuMain == true)) 
-		custom_menu=true;
+    if (netgame_menuon)
+    {
+        M_NetGameDrawer();
+        return;
+    }
 
-	if ((currentMenu->draw_func == M_DrawNewGame) && (custom_MenuDifficulty == true)) 
-		custom_menu=true;
+    // Lobo 2022: Check if we're going to use text-based menus
+    // or the users (custom)graphics
+    bool custom_menu = false;
+    if ((currentMenu->draw_func == M_DrawMainMenu) && (custom_MenuMain == true))
+        custom_menu = true;
 
-	if (currentMenu->draw_func == M_DrawEpisode && custom_MenuEpisode == true) 
-		custom_menu=true;
+    if ((currentMenu->draw_func == M_DrawNewGame) && (custom_MenuDifficulty == true))
+        custom_menu = true;
 
-	style_c *style = currentMenu->style_var[0];
-	SYS_ASSERT(style);
+    if (currentMenu->draw_func == M_DrawEpisode && custom_MenuEpisode == true)
+        custom_menu = true;
 
-	style->DrawBackground();
+    style_c *style = currentMenu->style_var[0];
+    SYS_ASSERT(style);
 
-	// call Draw routine
-	if (currentMenu->draw_func)
-		(* currentMenu->draw_func)();
+    style->DrawBackground();
 
-	// custom_menu==false //We're going text-based menu items
-	// custom_menu==true //We're going graphic-based menu items
-	M_DrawItems(style, custom_menu);
-	
-	if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
-	{
-		// custom_menu==false //We're going text-based menu items
-		// custom_menu==true //We're going graphic-based menu items
-		M_DrawCursor(style, custom_menu);
-	}
+    // call Draw routine
+    if (currentMenu->draw_func)
+        (*currentMenu->draw_func)();
 
+    // custom_menu==false //We're going text-based menu items
+    // custom_menu==true //We're going graphic-based menu items
+    M_DrawItems(style, custom_menu);
+
+    if (!(currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave))
+    {
+        // custom_menu==false //We're going text-based menu items
+        // custom_menu==true //We're going graphic-based menu items
+        M_DrawCursor(style, custom_menu);
+    }
 }
-
 
 void M_ClearMenus(void)
 {
-	// -AJA- 2007/12/24: save user changes ASAP (in case of crash)
-	if (menuactive)
-	{
-		M_SaveDefaults();
-	}
+    // -AJA- 2007/12/24: save user changes ASAP (in case of crash)
+    if (menuactive)
+    {
+        M_SaveDefaults();
+    }
 
-	menuactive = false;
-	save_screenshot_valid = false;
-	option_menuon = 0;
+    menuactive            = false;
+    save_screenshot_valid = false;
+    option_menuon         = 0;
 }
 
-void M_SetupNextMenu(menu_t * menudef)
+void M_SetupNextMenu(menu_t *menudef)
 {
-	currentMenu = menudef;
-	itemOn = currentMenu->lastOn;
+    currentMenu = menudef;
+    itemOn      = currentMenu->lastOn;
 }
 
 void M_Ticker(void)
 {
-	// update language if it changed
-	if (m_language.CheckModified())
-		if (! language.Select(m_language.c_str()))
-			I_Printf("Unknown language: %s\n", m_language.c_str());
+    // update language if it changed
+    if (m_language.CheckModified())
+        if (!language.Select(m_language.c_str()))
+            I_Printf("Unknown language: %s\n", m_language.c_str());
 
-	if (option_menuon)
-	{
-		M_OptTicker();
-		return;
-	}
+    if (option_menuon)
+    {
+        M_OptTicker();
+        return;
+    }
 
-	if (netgame_menuon)
-	{
-		M_NetGameTicker();
-		return;
-	}
+    if (netgame_menuon)
+    {
+        M_NetGameTicker();
+        return;
+    }
 }
 
 void M_Init(void)
 {
-	E_ProgressMessage(language["MiscInfo"]);
+    E_ProgressMessage(language["MiscInfo"]);
 
-	currentMenu = &MainDef;
-	menuactive = false;
-	itemOn = currentMenu->lastOn;
-	msg_mode = 0;
-	msg_string.clear();
-	msg_lastmenu = menuactive;
-	quickSaveSlot = -1;
+    currentMenu = &MainDef;
+    menuactive  = false;
+    itemOn      = currentMenu->lastOn;
+    msg_mode    = 0;
+    msg_string.clear();
+    msg_lastmenu  = menuactive;
+    quickSaveSlot = -1;
 
-	// lookup styles
-	styledef_c *def;
+    // lookup styles
+    styledef_c *def;
 
-	def = styledefs.Lookup("MENU");
-	if (! def) def = default_style;
-	menu_def_style = hu_styles.Lookup(def);
+    def = styledefs.Lookup("MENU");
+    if (!def)
+        def = default_style;
+    menu_def_style = hu_styles.Lookup(def);
 
-	def = styledefs.Lookup("MAIN MENU");
-	main_menu_style = def ? hu_styles.Lookup(def) : menu_def_style;
+    def             = styledefs.Lookup("MAIN MENU");
+    main_menu_style = def ? hu_styles.Lookup(def) : menu_def_style;
 
-	def = styledefs.Lookup("CHOOSE EPISODE");
-	episode_style = def ? hu_styles.Lookup(def) : menu_def_style;
+    def           = styledefs.Lookup("CHOOSE EPISODE");
+    episode_style = def ? hu_styles.Lookup(def) : menu_def_style;
 
-	def = styledefs.Lookup("CHOOSE SKILL");
-	skill_style = def ? hu_styles.Lookup(def) : menu_def_style;
+    def         = styledefs.Lookup("CHOOSE SKILL");
+    skill_style = def ? hu_styles.Lookup(def) : menu_def_style;
 
-	def = styledefs.Lookup("LOAD SAVE MENU");
-	load_style = def ? hu_styles.Lookup(def) : menu_def_style;
+    def        = styledefs.Lookup("LOAD SAVE MENU");
+    load_style = def ? hu_styles.Lookup(def) : menu_def_style;
 
-	def = styledefs.Lookup("LOAD SAVE MENU");
-	save_style = def ? hu_styles.Lookup(def) : menu_def_style;
+    def        = styledefs.Lookup("LOAD SAVE MENU");
+    save_style = def ? hu_styles.Lookup(def) : menu_def_style;
 
-	def = styledefs.Lookup("EXIT_SCREEN");
-	exit_style = def ? hu_styles.Lookup(def) : menu_def_style;
+    def        = styledefs.Lookup("EXIT_SCREEN");
+    exit_style = def ? hu_styles.Lookup(def) : menu_def_style;
 
-	def = styledefs.Lookup("OPTIONS");
-	if (! def) def = default_style;
+    def = styledefs.Lookup("OPTIONS");
+    if (!def)
+        def = default_style;
 
-	language.Select(m_language.c_str());
+    language.Select(m_language.c_str());
 
-	//Lobo 2022: load our ddflang stuff
-	MainMenu[newgame].name = language["MainNewGame"];
-	MainMenu[options].name = language["MainOptions"];
-	MainMenu[loadgame].name = language["MainLoadGame"];
-	MainMenu[savegame].name = language["MainSaveGame"];
-	MainMenu[readthis].name = language["MainReadThis"];
-	MainMenu[quitdoom].name = language["MainQuitGame"];
-	
-	SkillMenu[0].name = language["MenuDifficulty1"];
-	SkillMenu[1].name = language["MenuDifficulty2"];
-	SkillMenu[2].name = language["MenuDifficulty3"];
-	SkillMenu[3].name = language["MenuDifficulty4"];
-	SkillMenu[4].name = language["MenuDifficulty5"];
+    // Lobo 2022: load our ddflang stuff
+    MainMenu[newgame].name  = language["MainNewGame"];
+    MainMenu[options].name  = language["MainOptions"];
+    MainMenu[loadgame].name = language["MainLoadGame"];
+    MainMenu[savegame].name = language["MainSaveGame"];
+    MainMenu[readthis].name = language["MainReadThis"];
+    MainMenu[quitdoom].name = language["MainQuitGame"];
 
-	// lookup required images
-	therm_l = W_ImageLookup("M_THERML");
-	therm_m = W_ImageLookup("M_THERMM");
-	therm_r = W_ImageLookup("M_THERMR");
-	therm_o = W_ImageLookup("M_THERMO");
+    SkillMenu[0].name = language["MenuDifficulty1"];
+    SkillMenu[1].name = language["MenuDifficulty2"];
+    SkillMenu[2].name = language["MenuDifficulty3"];
+    SkillMenu[3].name = language["MenuDifficulty4"];
+    SkillMenu[4].name = language["MenuDifficulty5"];
 
-	menu_loadg    = W_ImageLookup("M_LOADG");
-	menu_saveg    = W_ImageLookup("M_SAVEG");
-	menu_svol     = W_ImageLookup("M_SVOL");
-	menu_newgame  = W_ImageLookup("M_NEWG");
-	menu_skill    = W_ImageLookup("M_SKILL");
-	menu_episode  = W_ImageLookup("M_EPISOD");
-	menu_skull[0] = (image_c *)W_ImageLookup("M_SKULL1");
-	menu_skull[1] = (image_c *)W_ImageLookup("M_SKULL2");
-	
-	//Check for custom menu graphics in pwads:
-	//If we have them then use them instead of our 
-	// text-based ones.
-	if (W_IsLumpInPwad("M_NEWG"))
-		custom_MenuMain=true;
+    // lookup required images
+    therm_l = W_ImageLookup("M_THERML");
+    therm_m = W_ImageLookup("M_THERMM");
+    therm_r = W_ImageLookup("M_THERMR");
+    therm_o = W_ImageLookup("M_THERMO");
 
-	if (W_IsLumpInPwad("M_LOADG"))
-		custom_MenuMain=true;
+    menu_loadg    = W_ImageLookup("M_LOADG");
+    menu_saveg    = W_ImageLookup("M_SAVEG");
+    menu_svol     = W_ImageLookup("M_SVOL");
+    menu_newgame  = W_ImageLookup("M_NEWG");
+    menu_skill    = W_ImageLookup("M_SKILL");
+    menu_episode  = W_ImageLookup("M_EPISOD");
+    menu_skull[0] = (image_c *)W_ImageLookup("M_SKULL1");
+    menu_skull[1] = (image_c *)W_ImageLookup("M_SKULL2");
 
-	if (W_IsLumpInPwad("M_SAVEG"))
-		custom_MenuMain=true;
+    // Check for custom menu graphics in pwads:
+    // If we have them then use them instead of our
+    //  text-based ones.
+    if (W_IsLumpInPwad("M_NEWG"))
+        custom_MenuMain = true;
 
-	if (W_IsLumpInPwad("M_EPISOD"))
-		custom_MenuEpisode=true;
+    if (W_IsLumpInPwad("M_LOADG"))
+        custom_MenuMain = true;
 
-	if (W_IsLumpInPwad("M_EPI1"))
-		custom_MenuEpisode=true;
-	
-	if (W_IsLumpInPwad("M_EPI2"))
-		custom_MenuEpisode=true;
+    if (W_IsLumpInPwad("M_SAVEG"))
+        custom_MenuMain = true;
 
-	if (W_IsLumpInPwad("M_EPI3"))
-		custom_MenuEpisode=true;
-	
-	if (W_IsLumpInPwad("M_EPI4"))
-		custom_MenuEpisode=true;
-	
-	if (W_IsLumpInPwad("M_JKILL"))
-		custom_MenuDifficulty=true;
-	
-	if (W_IsLumpInPwad("M_NMARE"))
-		custom_MenuDifficulty=true;
-	
-	I_Debugf("custom_MenuMain =%d \n",custom_MenuMain);
-	I_Debugf("custom_MenuEpisode =%d \n",custom_MenuEpisode);
-	I_Debugf("custom_MenuDifficulty =%d \n",custom_MenuDifficulty);
+    if (W_IsLumpInPwad("M_EPISOD"))
+        custom_MenuEpisode = true;
 
-	menu_doom = W_ImageLookup("M_DOOM");
+    if (W_IsLumpInPwad("M_EPI1"))
+        custom_MenuEpisode = true;
 
-	// Here we could catch other version dependencies,
-	//  like HELP1/2, and four episodes.
-	//    if (W_CheckNumForName("M_EPI4") < 0)
-	//      EpiDef.numitems -= 2;
-	//    else if (W_CheckNumForName("M_EPI5") < 0)
-	//      EpiDef.numitems--;
+    if (W_IsLumpInPwad("M_EPI2"))
+        custom_MenuEpisode = true;
 
-	if (W_IsLumpInAnyWad("HELP")) //doom2
+    if (W_IsLumpInPwad("M_EPI3"))
+        custom_MenuEpisode = true;
+
+    if (W_IsLumpInPwad("M_EPI4"))
+        custom_MenuEpisode = true;
+
+    if (W_IsLumpInPwad("M_JKILL"))
+        custom_MenuDifficulty = true;
+
+    if (W_IsLumpInPwad("M_NMARE"))
+        custom_MenuDifficulty = true;
+
+    I_Debugf("custom_MenuMain =%d \n", custom_MenuMain);
+    I_Debugf("custom_MenuEpisode =%d \n", custom_MenuEpisode);
+    I_Debugf("custom_MenuDifficulty =%d \n", custom_MenuDifficulty);
+
+    menu_doom = W_ImageLookup("M_DOOM");
+
+    // Here we could catch other version dependencies,
+    //  like HELP1/2, and four episodes.
+    //    if (W_CheckNumForName("M_EPI4") < 0)
+    //      EpiDef.numitems -= 2;
+    //    else if (W_CheckNumForName("M_EPI5") < 0)
+    //      EpiDef.numitems--;
+
+    if (W_IsLumpInAnyWad("HELP")) // doom2
     {
-        menu_readthis[0] = W_ImageLookup("HELP");
-        menu_readthis[1] = W_ImageLookup("CREDIT"); //Unnecessary since we won't see it anyway...
+        menu_readthis[0]   = W_ImageLookup("HELP");
+        menu_readthis[1]   = W_ImageLookup("CREDIT"); // Unnecessary since we won't see it anyway...
         MainMenu[readthis] = MainMenu[quitdoom];
         MainDef.numitems--;
         MainDef.y += 8; // FIXME
-        SkillDef.prevMenu = &MainDef;
-        ReadDef1.draw_func = M_DrawReadThis1;
-        ReadDef1.x = 330;
-        ReadDef1.y = 165;
+        SkillDef.prevMenu        = &MainDef;
+        ReadDef1.draw_func       = M_DrawReadThis1;
+        ReadDef1.x               = 330;
+        ReadDef1.y               = 165;
         ReadMenu1[0].select_func = M_FinishReadThis;
     }
-    else //doom or shareware doom
+    else // doom or shareware doom
     {
         menu_readthis[0] = W_ImageLookup("HELP1");
         if (W_IsLumpInAnyWad("HELP2"))
-            menu_readthis[1] = W_ImageLookup("HELP2"); //Shareware doom
+            menu_readthis[1] = W_ImageLookup("HELP2"); // Shareware doom
         else
-            menu_readthis[1] = W_ImageLookup("CREDIT"); //Full doom
+            menu_readthis[1] = W_ImageLookup("CREDIT"); // Full doom
     }
 
- 	//Lobo 2022: Use new sfx definitions so we don't have to share names with
-	//normal doom sfx.
- 	sfx_swtchn = sfxdefs.GetEffect("MENU_IN"); //Enter Menu
- 	sfx_tink   = sfxdefs.GetEffect("TINK"); //unused
- 	sfx_radio  = sfxdefs.GetEffect("RADIO"); //unused
- 	sfx_oof    = sfxdefs.GetEffect("MENU_INV"); //invalid choice
- 	sfx_pstop  = sfxdefs.GetEffect("MENU_MOV"); //moving cursor in a menu
- 	sfx_stnmov = sfxdefs.GetEffect("MENU_SLD"); //slider move
- 	sfx_pistol = sfxdefs.GetEffect("MENU_SEL"); //select in menu
- 	sfx_swtchx = sfxdefs.GetEffect("MENU_OUT"); //cancel/exit menu
+    // Lobo 2022: Use new sfx definitions so we don't have to share names with
+    // normal doom sfx.
+    sfx_swtchn = sfxdefs.GetEffect("MENU_IN");  // Enter Menu
+    sfx_tink   = sfxdefs.GetEffect("TINK");     // unused
+    sfx_radio  = sfxdefs.GetEffect("RADIO");    // unused
+    sfx_oof    = sfxdefs.GetEffect("MENU_INV"); // invalid choice
+    sfx_pstop  = sfxdefs.GetEffect("MENU_MOV"); // moving cursor in a menu
+    sfx_stnmov = sfxdefs.GetEffect("MENU_SLD"); // slider move
+    sfx_pistol = sfxdefs.GetEffect("MENU_SEL"); // select in menu
+    sfx_swtchx = sfxdefs.GetEffect("MENU_OUT"); // cancel/exit menu
 
-	M_OptMenuInit();
-	M_NetGameInit();
+    M_OptMenuInit();
+    M_NetGameInit();
 }
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

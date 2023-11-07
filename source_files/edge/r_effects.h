@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE OpenGL Rendering (Screen effects)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -29,42 +29,39 @@
 #include "e_player.h"
 #include "r_image.h"
 
-
 class screen_effect_def_c;
-
 
 class screen_fx_slot_c
 {
-public:
-	screen_fx_slot_c();
-	~screen_fx_slot_c() { }
+  public:
+    screen_fx_slot_c();
+    ~screen_fx_slot_c()
+    {
+    }
 
-	const screen_effect_def_c *def;
+    const screen_effect_def_c *def;
 
-	bool active;
+    bool active;
 
-	// number of powerup this is linked to, or -1 if none
-	int power_link;
-	
-	// tics remaining (not used if linked)
-	int time;
+    // number of powerup this is linked to, or -1 if none
+    int power_link;
+
+    // tics remaining (not used if linked)
+    int time;
 };
-
 
 void RGL_RainbowEffect(player_t *player);
 void RGL_ColourmapEffect(player_t *player);
 void RGL_PaletteEffect(player_t *player);
 
-
 //
 //  FUZZY Emulation
 //
 
-extern const image_c * fuzz_image;
+extern const image_c *fuzz_image;
 
 void FUZZ_Update(void);
 void FUZZ_Adjust(vec2_t *tc, mobj_t *mo);
-
 
 #endif /* __RGL_FX_H__ */
 

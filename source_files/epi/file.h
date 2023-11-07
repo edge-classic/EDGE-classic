@@ -17,7 +17,7 @@
 //----------------------------------------------------------------------------
 
 #ifndef __EPI_FILE_CLASS__
-#define __EPI_FILE_CLASS__ 
+#define __EPI_FILE_CLASS__
 
 #include <limits.h>
 
@@ -27,7 +27,7 @@ namespace epi
 // base class of the EDGE Platform Inferface File
 class file_c
 {
-public:
+  public:
     // Access Types
     enum access_e
     {
@@ -37,54 +37,55 @@ public:
         ACCESS_BINARY = 0x8
     };
 
-	// Seek reference points
+    // Seek reference points
     enum seek_e
-	{
-		SEEKPOINT_START,
-		SEEKPOINT_CURRENT,
-		SEEKPOINT_END,
-		SEEKPOINT_NUMTYPES
-	};
+    {
+        SEEKPOINT_START,
+        SEEKPOINT_CURRENT,
+        SEEKPOINT_END,
+        SEEKPOINT_NUMTYPES
+    };
 
-protected:
+  protected:
+  public:
+    file_c()
+    {
+    }
+    virtual ~file_c()
+    {
+    }
 
-public:
-	file_c() {}
-	virtual ~file_c() {}
+    virtual int GetLength()   = 0;
+    virtual int GetPosition() = 0;
 
-	virtual int GetLength() = 0;
-	virtual int GetPosition() = 0;
+    virtual unsigned int Read(void *dest, unsigned int size)       = 0;
+    virtual unsigned int Write(const void *src, unsigned int size) = 0;
 
-	virtual unsigned int Read(void *dest, unsigned int size) = 0;
-	virtual unsigned int Write(const void *src, unsigned int size) = 0;
+    virtual bool Seek(int offset, int seekpoint) = 0;
 
-	virtual bool Seek(int offset, int seekpoint) = 0;
+  public:
+    // load the file into memory, reading from the current
+    // position, and reading no more than the 'max_size'
+    // parameter (in bytes).  An extra NUL byte is appended
+    // to the result buffer.  Returns NULL on failure.
+    // The returned buffer must be freed with delete[].
+    byte *LoadIntoMemory(int max_size = INT_MAX);
 
-public:
-	// load the file into memory, reading from the current
-	// position, and reading no more than the 'max_size'
-	// parameter (in bytes).  An extra NUL byte is appended
-	// to the result buffer.  Returns NULL on failure.
-	// The returned buffer must be freed with delete[].
-	byte *LoadIntoMemory(int max_size = INT_MAX);
-
-	// Reads the file as text
-	std::string ReadText();
-
+    // Reads the file as text
+    std::string ReadText();
 };
 
-
 // standard File class using ANSI C functions
-class ansi_file_c: public file_c
+class ansi_file_c : public file_c
 {
-private:
+  private:
     FILE *fp;
 
-public:
+  public:
     ansi_file_c(FILE *_filep);
     ~ansi_file_c();
 
-public:
+  public:
     int GetLength();
     int GetPosition();
 
@@ -96,7 +97,7 @@ public:
 
 // utility function:
 bool FS_FlagsToAnsiMode(int flags, char *mode);
-	
+
 } // namespace epi
 
 #endif /* __EPI_FILE_CLASS__ */

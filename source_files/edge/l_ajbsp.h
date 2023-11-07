@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE<->AJBSP Bridging code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -31,7 +31,7 @@
 
 bool AJ_BuildNodes(data_file_c *df, std::filesystem::path outname);
 
-#endif  // __L_AJBSP__
+#endif // __L_AJBSP__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Video Context
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -30,11 +30,9 @@
 #include "r_image.h"
 
 // Move to somewhere appropriate later -ACB- 2004/08/19
-void RGL_DrawImage(float x, float y, float w, float h, const image_c *image,
-				   float tx1, float ty1, float tx2, float ty2,
-				   const colourmap_c *textmap = NULL, float alpha = 1.0f,
-				   const colourmap_c *palremap = NULL);
- 
+void RGL_DrawImage(float x, float y, float w, float h, const image_c *image, float tx1, float ty1, float tx2, float ty2,
+                   const colourmap_c *textmap = NULL, float alpha = 1.0f, const colourmap_c *palremap = NULL);
+
 void RGL_ReadScreen(int x, int y, int w, int h, byte *rgb_buffer);
 
 // This routine should inform the lower level system(s) that the
@@ -42,7 +40,6 @@ void RGL_ReadScreen(int x, int y, int w, int h, byte *rgb_buffer);
 // called before any rendering has occurred (e.g. just before
 // I_StartFrame).
 void RGL_NewScreenSize(int width, int height, int bits);
-
 
 #endif /* __R_DRAW_H__ */
 

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE DEH Interface
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -26,9 +26,9 @@
 #ifndef __L_DEH__
 #define __L_DEH__
 
-void DEH_Convert(const byte *data, int length, const std::string& source);
+void DEH_Convert(const byte *data, int length, const std::string &source);
 
-#endif  // __L_DEH__
+#endif // __L_DEH__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Game Handling Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -31,28 +31,26 @@
 #include "e_event.h"
 #include "e_player.h"
 
-
 extern bool pistol_starts;
 
 extern int random_seed;
 
-extern int exittime;  // for savegame code
+extern int exittime; // for savegame code
 
 extern int key_show_players;
 
 // -KM- 1998/11/25 Added support for finales before levels
 typedef enum
 {
-	ga_nothing = 0,
-	ga_newgame,
-	ga_loadlevel,
-	ga_loadgame,
-	ga_savegame,
-	ga_intermission,
-	ga_finale,
-	ga_endgame
-}
-gameaction_e;
+    ga_nothing = 0,
+    ga_newgame,
+    ga_loadlevel,
+    ga_loadgame,
+    ga_savegame,
+    ga_intermission,
+    ga_finale,
+    ga_endgame
+} gameaction_e;
 
 extern gameaction_e gameaction;
 
@@ -60,45 +58,43 @@ extern gameaction_e gameaction;
 //    ga_newgame     : defer_params
 //    ga_loadgame    : defer_load_slot
 //    ga_savegame    : defer_save_slot, defer_save_desc
-// 
+//
 //    ga_loadlevel   : currmap, players, gameskill+dm+level_flags ETC
 //    ga_intermission: currmap, nextmap, players, wi_stats ETC
 //    ga_finale      : nextmap, players
 
-
 class newgame_params_c
 {
-public:
-	skill_t skill;
-	int deathmatch;
+  public:
+    skill_t skill;
+    int     deathmatch;
 
-	const mapdef_c *map;
-	// gamedef_c is implied (== map->episode)
+    const mapdef_c *map;
+    // gamedef_c is implied (== map->episode)
 
-	int random_seed;
-	int total_players;
+    int random_seed;
+    int total_players;
 
-	playerflag_e players[MAXPLAYERS];
-	net_node_c *nodes[MAXPLAYERS];
+    playerflag_e players[MAXPLAYERS];
+    net_node_c  *nodes[MAXPLAYERS];
 
-	gameflags_t *flags;  // can be NULL
+    gameflags_t *flags; // can be NULL
 
-	bool level_skip = false;
+    bool level_skip = false;
 
-public:
-	newgame_params_c();
-	newgame_params_c(const newgame_params_c& src);
-	~newgame_params_c();
+  public:
+    newgame_params_c();
+    newgame_params_c(const newgame_params_c &src);
+    ~newgame_params_c();
 
-public:
-	/* methods */
+  public:
+    /* methods */
 
-	void SinglePlayer(int num_bots = 0);
-	// setup for single player (no netgame) and possibly some bots.
+    void SinglePlayer(int num_bots = 0);
+    // setup for single player (no netgame) and possibly some bots.
 
-	void CopyFlags(const gameflags_t *F);
+    void CopyFlags(const gameflags_t *F);
 };
-
 
 //
 // Called by the Startup code & M_Responder; A normal game
@@ -107,7 +103,7 @@ public:
 //
 // -ACB- 1998/08/10 New DDF Structure, Use map reference name.
 //
-void G_DeferredNewGame(newgame_params_c& params);
+void G_DeferredNewGame(newgame_params_c &params);
 
 // Can be called by the startup code or M_Responder,
 // calls P_SetupLevel or W_EnterWorld.
@@ -127,19 +123,19 @@ void G_ExitToHub(int map_number, int tag);
 
 void G_BigStuff(void);
 void G_Ticker(void);
-bool G_Responder(event_t * ev);
+bool G_Responder(event_t *ev);
 
 bool G_CheckWhenAppear(when_appear_e appear);
 
-extern const mapdef_c* currmap;
-extern const mapdef_c* nextmap;
+extern const mapdef_c *currmap;
+extern const mapdef_c *nextmap;
 
-mapdef_c* G_LookupMap(const char *refname);
+mapdef_c *G_LookupMap(const char *refname);
 
 void G_DoLoadLevel(void);
 void G_SpawnInitialPlayers(void); //
 
-#endif  /* __G_GAME__ */
+#endif /* __G_GAME__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

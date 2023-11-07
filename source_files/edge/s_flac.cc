@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE FLAC Music Player
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2022-2023 - The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -31,258 +31,252 @@
 #include "s_flac.h"
 #include "w_wad.h"
 
-#define DR_FLAC_NO_CRC 1
+#define DR_FLAC_NO_CRC      1
 #define DR_FLAC_NO_WIN32_IO 1
 #define DR_FLAC_IMPLEMENTATION
 #include "dr_flac.h"
 
 #define FLAC_FRAMES 4096
 
-extern bool dev_stereo;  // FIXME: encapsulation
+extern bool dev_stereo; // FIXME: encapsulation
 extern int  dev_freq;
 
 class flacplayer_c : public abstract_music_c
 {
-public:
-	 flacplayer_c();
-	~flacplayer_c();
-private:
+  public:
+    flacplayer_c();
+    ~flacplayer_c();
 
-	enum status_e
-	{
-		NOT_LOADED, PLAYING, PAUSED, STOPPED
-	};
-	
-	int status;
-	bool looping;
+  private:
+    enum status_e
+    {
+        NOT_LOADED,
+        PLAYING,
+        PAUSED,
+        STOPPED
+    };
 
-	drflac *flac_track; // I had to make it rhyme
+    int  status;
+    bool looping;
 
-	byte *flac_data; // Passed in from s_music; must be deleted on close
+    drflac *flac_track; // I had to make it rhyme
 
-	s16_t *mono_buffer;
+    byte *flac_data; // Passed in from s_music; must be deleted on close
 
-public:
+    s16_t *mono_buffer;
 
-	bool OpenMemory(byte *data, int length);
+  public:
+    bool OpenMemory(byte *data, int length);
 
-	virtual void Close(void);
+    virtual void Close(void);
 
-	virtual void Play(bool loop);
-	virtual void Stop(void);
+    virtual void Play(bool loop);
+    virtual void Stop(void);
 
-	virtual void Pause(void);
-	virtual void Resume(void);
+    virtual void Pause(void);
+    virtual void Resume(void);
 
-	virtual void Ticker(void);
+    virtual void Ticker(void);
 
-	void PostOpenInit(void);
+    void PostOpenInit(void);
 
-private:
-
-	bool StreamIntoBuffer(epi::sound_data_c *buf);
-	
+  private:
+    bool StreamIntoBuffer(epi::sound_data_c *buf);
 };
 
 //----------------------------------------------------------------------------
 
 flacplayer_c::flacplayer_c() : status(NOT_LOADED)
 {
-	mono_buffer = new s16_t[FLAC_FRAMES * 2];
+    mono_buffer = new s16_t[FLAC_FRAMES * 2];
 }
 
 flacplayer_c::~flacplayer_c()
 {
-	Close();
+    Close();
 
-	if (mono_buffer)
-		delete[] mono_buffer;
+    if (mono_buffer)
+        delete[] mono_buffer;
 }
 
 void flacplayer_c::PostOpenInit()
-{   
-	// Loaded, but not playing
+{
+    // Loaded, but not playing
 
-	status = STOPPED;
+    status = STOPPED;
 }
-
 
 static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
 {
-	const s16_t *s_end = src + len*2;
+    const s16_t *s_end = src + len * 2;
 
-	for (; src < s_end; src += 2)
-	{
-		// compute average of samples
-		*dest++ = ( (int)src[0] + (int)src[1] ) >> 1;
-	}
+    for (; src < s_end; src += 2)
+    {
+        // compute average of samples
+        *dest++ = ((int)src[0] + (int)src[1]) >> 1;
+    }
 }
 
 bool flacplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 {
-	s16_t *data_buf;
+    s16_t *data_buf;
 
-	bool song_done = false;
+    bool song_done = false;
 
-	if (!dev_stereo)
-		data_buf = mono_buffer;
-	else
-		data_buf = buf->data_L;
+    if (!dev_stereo)
+        data_buf = mono_buffer;
+    else
+        data_buf = buf->data_L;
 
-	drflac_uint64 frames = drflac_read_pcm_frames_s16(flac_track, FLAC_FRAMES, data_buf);
+    drflac_uint64 frames = drflac_read_pcm_frames_s16(flac_track, FLAC_FRAMES, data_buf);
 
-	if (frames < FLAC_FRAMES)
-		song_done = true;
+    if (frames < FLAC_FRAMES)
+        song_done = true;
 
-	buf->length = frames;
+    buf->length = frames;
 
-	buf->freq = flac_track->sampleRate;
+    buf->freq = flac_track->sampleRate;
 
-	if (!dev_stereo)
-		ConvertToMono(buf->data_L, mono_buffer, buf->length);
+    if (!dev_stereo)
+        ConvertToMono(buf->data_L, mono_buffer, buf->length);
 
-	if (song_done)  /* EOF */
-	{
-		if (! looping)
-			return false;
-		drflac_seek_to_pcm_frame(flac_track, 0);
-		return true;
-	}
+    if (song_done) /* EOF */
+    {
+        if (!looping)
+            return false;
+        drflac_seek_to_pcm_frame(flac_track, 0);
+        return true;
+    }
 
     return (true);
 }
 
 bool flacplayer_c::OpenMemory(byte *data, int length)
 {
-	SYS_ASSERT(data);
+    SYS_ASSERT(data);
 
-	flac_track = drflac_open_memory(data, length, nullptr);
+    flac_track = drflac_open_memory(data, length, nullptr);
 
-	if (!flac_track)
-	{
-		I_Warning("S_PlayFLACMusic: Error opening song!\n");
-		return false;
-	}
+    if (!flac_track)
+    {
+        I_Warning("S_PlayFLACMusic: Error opening song!\n");
+        return false;
+    }
 
-	// data is only released when the player is closed
-	flac_data = data;
+    // data is only released when the player is closed
+    flac_data = data;
 
-	PostOpenInit();
-	return true;
+    PostOpenInit();
+    return true;
 }
 
 void flacplayer_c::Close()
 {
-	if (status == NOT_LOADED)
-		return;
+    if (status == NOT_LOADED)
+        return;
 
-	// Stop playback
-	if (status != STOPPED)
-		Stop();
-		
-	drflac_close(flac_track);
-	delete[] flac_data;
+    // Stop playback
+    if (status != STOPPED)
+        Stop();
 
-	// reset player gain
-	mus_player_gain = 1.0f;
+    drflac_close(flac_track);
+    delete[] flac_data;
 
-	status = NOT_LOADED;
+    // reset player gain
+    mus_player_gain = 1.0f;
+
+    status = NOT_LOADED;
 }
-
 
 void flacplayer_c::Pause()
 {
-	if (status != PLAYING)
-		return;
+    if (status != PLAYING)
+        return;
 
-	status = PAUSED;
+    status = PAUSED;
 }
-
 
 void flacplayer_c::Resume()
 {
-	if (status != PAUSED)
-		return;
+    if (status != PAUSED)
+        return;
 
-	status = PLAYING;
+    status = PLAYING;
 }
-
 
 void flacplayer_c::Play(bool loop)
 {
-    if (status != NOT_LOADED && status != STOPPED) return;
+    if (status != NOT_LOADED && status != STOPPED)
+        return;
 
-	status = PLAYING;
-	looping = loop;
+    status  = PLAYING;
+    looping = loop;
 
-	// Set individual player type gain
-	mus_player_gain = 0.3f;
+    // Set individual player type gain
+    mus_player_gain = 0.3f;
 
-	// Load up initial buffer data
-	Ticker();
+    // Load up initial buffer data
+    Ticker();
 }
-
 
 void flacplayer_c::Stop()
 {
-	if (status != PLAYING && status != PAUSED)
-		return;
+    if (status != PLAYING && status != PAUSED)
+        return;
 
-	S_QueueStop();
+    S_QueueStop();
 
-	status = STOPPED;
+    status = STOPPED;
 }
-
 
 void flacplayer_c::Ticker()
 {
-	while (status == PLAYING && !var_pc_speaker_mode)
-	{
-		epi::sound_data_c *buf = S_QueueGetFreeBuffer(FLAC_FRAMES, 
-				(dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
+    while (status == PLAYING && !var_pc_speaker_mode)
+    {
+        epi::sound_data_c *buf =
+            S_QueueGetFreeBuffer(FLAC_FRAMES, (dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 
-		if (! buf)
-			break;
+        if (!buf)
+            break;
 
-		if (StreamIntoBuffer(buf))
-		{
-			if (buf->length > 0)
-			{
-				S_QueueAddBuffer(buf, buf->freq);
-			}
-			else
-			{
-				S_QueueReturnBuffer(buf);
-			}
-		}
-		else
-		{
-			// finished playing
-			S_QueueReturnBuffer(buf);
-			Stop();
-		}
-	}
+        if (StreamIntoBuffer(buf))
+        {
+            if (buf->length > 0)
+            {
+                S_QueueAddBuffer(buf, buf->freq);
+            }
+            else
+            {
+                S_QueueReturnBuffer(buf);
+            }
+        }
+        else
+        {
+            // finished playing
+            S_QueueReturnBuffer(buf);
+            Stop();
+        }
+    }
 }
-
 
 //----------------------------------------------------------------------------
 
-abstract_music_c * S_PlayFLACMusic(byte *data, int length, bool looping)
+abstract_music_c *S_PlayFLACMusic(byte *data, int length, bool looping)
 {
-	flacplayer_c *player = new flacplayer_c();
+    flacplayer_c *player = new flacplayer_c();
 
-	if (! player->OpenMemory(data, length))
-	{
-		delete[] data;
-		delete player;
-		return nullptr;
-	}
+    if (!player->OpenMemory(data, length))
+    {
+        delete[] data;
+        delete player;
+        return nullptr;
+    }
 
-	// data is freed when Close() is called on the player; must be retained until then
+    // data is freed when Close() is called on the player; must be retained until then
 
-	player->Play(looping);
+    player->Play(looping);
 
-	return player;
+    return player;
 }
 
 //--- editor settings ---

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Refresh internal state variables
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -34,34 +34,34 @@
 //
 // Lookup tables for map data.
 //
-extern int numvertexes;
+extern int       numvertexes;
 extern vertex_t *vertexes;
 
-extern int num_gl_vertexes;
+extern int       num_gl_vertexes;
 extern vertex_t *gl_vertexes;
 
-extern int numsegs;
+extern int    numsegs;
 extern seg_t *segs;
 
-extern int numsectors;
+extern int       numsectors;
 extern sector_t *sectors;
 
-extern int numsubsectors;
+extern int          numsubsectors;
 extern subsector_t *subsectors;
 
-extern int numextrafloors;
+extern int           numextrafloors;
 extern extrafloor_t *extrafloors;
-     
-extern int numnodes;
+
+extern int     numnodes;
 extern node_t *nodes;
 
-extern int numlines;
+extern int     numlines;
 extern line_t *lines;
 
-extern int numsides;
+extern int     numsides;
 extern side_t *sides;
 
-extern int numvertgaps;
+extern int     numvertgaps;
 extern vgap_t *vertgaps;
 
 //

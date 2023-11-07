@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 //  COAL EXECUTION ENGINE
 //----------------------------------------------------------------------
-// 
+//
 //  Copyright (C) 2021-2023  The EDGE Team
 //  Copyright (C) 2009-2021  Andrew Apted
 //  Copyright (C) 1996-1997  Id Software, Inc.
@@ -46,170 +46,160 @@ namespace coal
 #include "c_local.h"
 #include "c_execute.h"
 
+#define MAX_RUNAWAY (1000 * 1000)
 
-#define MAX_RUNAWAY  (1000*1000)
+#define MAX_PRINTMSG 1024
 
-#define MAX_PRINTMSG  1024
-
-
-execution_c::execution_c() :
-	s(0), func(0), tracing(false),
-	stack_depth(0), call_depth(0)
-{ }
+execution_c::execution_c() : s(0), func(0), tracing(false), stack_depth(0), call_depth(0)
+{
+}
 
 execution_c::~execution_c()
-{ }
-
+{
+}
 
 void real_vm_c::default_printer(const char *msg, ...)
 {
-	// does nothing
+    // does nothing
 }
 
 void real_vm_c::default_aborter(const char *msg, ...)
 {
-	exit(66);
+    exit(66);
 }
-
 
 int real_vm_c::GetNativeFunc(const char *name, const char *module)
 {
-	char buffer[256];
+    char buffer[256];
 
-	if (module)
-		sprintf(buffer, "%s.%s", module, name);
-	else
-		strcpy(buffer, name);
+    if (module)
+        sprintf(buffer, "%s.%s", module, name);
+    else
+        strcpy(buffer, name);
 
-	for (int i = 0; i < (int)native_funcs.size(); i++)
-		if (strcmp(native_funcs[i]->name, buffer) == 0)
-			return i;
-	
-	return -1;  // NOT FOUND
+    for (int i = 0; i < (int)native_funcs.size(); i++)
+        if (strcmp(native_funcs[i]->name, buffer) == 0)
+            return i;
+
+    return -1; // NOT FOUND
 }
 
 void real_vm_c::AddNativeFunction(const char *name, native_func_t func)
 {
-	// already registered?
-	int prev = GetNativeFunc(name, NULL);
+    // already registered?
+    int prev = GetNativeFunc(name, NULL);
 
-	if (prev >= 0)
-	{
-		native_funcs[prev]->func = func;
-		return;
-	}
+    if (prev >= 0)
+    {
+        native_funcs[prev]->func = func;
+        return;
+    }
 
-	reg_native_func_t *reg = new reg_native_func_t;
+    reg_native_func_t *reg = new reg_native_func_t;
 
-	reg->name = strdup(name);
-	reg->func = func;
+    reg->name = strdup(name);
+    reg->func = func;
 
-	native_funcs.push_back(reg);
+    native_funcs.push_back(reg);
 }
-
 
 void real_vm_c::SetTrace(bool enable)
 {
-	exec.tracing = enable;
+    exec.tracing = enable;
 }
-
 
 int real_vm_c::FindFunction(const char *func_name)
 {
-	for (int i = (int)functions.size()-1; i >= 1; i--)
-	{
-		function_t *f = functions[i];
+    for (int i = (int)functions.size() - 1; i >= 1; i--)
+    {
+        function_t *f = functions[i];
 
-		if (strcmp(f->name, func_name) == 0)
-			return i;
-	}
+        if (strcmp(f->name, func_name) == 0)
+            return i;
+    }
 
-	return vm_c::NOT_FOUND;
+    return vm_c::NOT_FOUND;
 }
 
 int real_vm_c::FindVariable(const char *var_name)
 {
-	// FIXME
+    // FIXME
 
-	return vm_c::NOT_FOUND;
+    return vm_c::NOT_FOUND;
 }
 
 // returns an offset from the string heap
-int	real_vm_c::InternaliseString(const char *new_s)
+int real_vm_c::InternaliseString(const char *new_s)
 {
-	if (new_s[0] == 0)
-		return 0;
+    if (new_s[0] == 0)
+        return 0;
 
-	int ofs = string_mem.alloc(strlen(new_s) + 1);
-	strcpy((char *)string_mem.deref(ofs), new_s);
+    int ofs = string_mem.alloc(strlen(new_s) + 1);
+    strcpy((char *)string_mem.deref(ofs), new_s);
 
-	return ofs;
+    return ofs;
 }
 
-
-double * real_vm_c::AccessParam(int p)
+double *real_vm_c::AccessParam(int p)
 {
-	assert(exec.func);
+    assert(exec.func);
 
-	if (p >= functions[exec.func]->parm_num)
-		RunError("PR_Parameter: p=%d out of range\n", p);
+    if (p >= functions[exec.func]->parm_num)
+        RunError("PR_Parameter: p=%d out of range\n", p);
 
-	if (AlmostEquals(exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]], static_cast<double>(-FLT_MAX)))
-		return NULL;
-	else
-		return &exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]];
+    if (AlmostEquals(exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]], static_cast<double>(-FLT_MAX)))
+        return NULL;
+    else
+        return &exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]];
 }
 
-
-const char * real_vm_c::AccessParamString(int p)
+const char *real_vm_c::AccessParamString(int p)
 {
-	double *d = AccessParam(p);
+    double *d = AccessParam(p);
 
-	if (d)
-		return REF_STRING((int) *d);
-	else
-		return NULL;
+    if (d)
+        return REF_STRING((int)*d);
+    else
+        return NULL;
 }
-
 
 void real_vm_c::ReturnFloat(double f)
 {
-	G_FLOAT(OFS_RETURN*8) = f;
+    G_FLOAT(OFS_RETURN * 8) = f;
 }
 
 void real_vm_c::ReturnVector(double *v)
 {
-	double *c = G_VECTOR(OFS_RETURN*8);
+    double *c = G_VECTOR(OFS_RETURN * 8);
 
-	c[0] = v[0];
-	c[1] = v[1];
-	c[2] = v[2];
+    c[0] = v[0];
+    c[1] = v[1];
+    c[2] = v[2];
 }
 
 void real_vm_c::ReturnString(const char *s, int len)
 {
-	// TODO: turn this code into a utility function
+    // TODO: turn this code into a utility function
 
-	if (len < 0)
-		len = strlen(s);
+    if (len < 0)
+        len = strlen(s);
 
-	if (len == 0)
-	{
-		G_FLOAT(OFS_RETURN*8) = 0;
-	}
-	else
-	{
-		int index = temp_strings.alloc(len + 1);
+    if (len == 0)
+    {
+        G_FLOAT(OFS_RETURN * 8) = 0;
+    }
+    else
+    {
+        int index = temp_strings.alloc(len + 1);
 
-		char *s3  = (char *) temp_strings.deref(index);
+        char *s3 = (char *)temp_strings.deref(index);
 
-		memcpy(s3, s, (size_t)len);
-		s3[len] = 0;
+        memcpy(s3, s, (size_t)len);
+        s3[len] = 0;
 
-		G_FLOAT(OFS_RETURN*8) = -(1 + index);
-	}
+        G_FLOAT(OFS_RETURN * 8) = -(1 + index);
+    }
 }
-
 
 //
 // Aborts the currently executing functions
@@ -217,7 +207,7 @@ void real_vm_c::ReturnString(const char *s, int len)
 void real_vm_c::RunError(const char *error, ...)
 {
     va_list argptr;
-    char buffer[MAX_PRINTMSG];
+    char    buffer[MAX_PRINTMSG];
 
     va_start(argptr, error);
     vsnprintf(buffer, sizeof(buffer), error, argptr);
@@ -225,68 +215,64 @@ void real_vm_c::RunError(const char *error, ...)
 
     printer("ERROR: %s\n", buffer);
 
-	if (exec.call_depth > 0)
-		StackTrace();
+    if (exec.call_depth > 0)
+        StackTrace();
 
     /* clear the stack so SV/Host_Error can shutdown functions */
     exec.call_depth = 0;
 
-//  raise(11);
+    //  raise(11);
     throw exec_error_x();
 }
 
-
-int real_vm_c::STR_Concat(const char * s1, const char * s2)
+int real_vm_c::STR_Concat(const char *s1, const char *s2)
 {
-	int len1 = strlen(s1);
-	int len2 = strlen(s2);
+    int len1 = strlen(s1);
+    int len2 = strlen(s2);
 
-	if (len1 == 0 && len2 == 0)
-		return 0;
+    if (len1 == 0 && len2 == 0)
+        return 0;
 
-	int index = temp_strings.alloc(len1 + len2 + 1);
-	char *s3  = (char *) temp_strings.deref(index);
+    int   index = temp_strings.alloc(len1 + len2 + 1);
+    char *s3    = (char *)temp_strings.deref(index);
 
-	strcpy(s3, s1);
-	strcpy(s3 + len1, s2);
+    strcpy(s3, s1);
+    strcpy(s3 + len1, s2);
 
-	return -(1 + index);
-
+    return -(1 + index);
 }
 
-int real_vm_c::STR_ConcatFloat(const char * s, double f)
+int real_vm_c::STR_ConcatFloat(const char *s, double f)
 {
-	char buffer[100];
+    char buffer[100];
 
-	if (AlmostEquals(f, round(f)))
-	{
-		sprintf(buffer, "%1.0f", f);
-	}
-	else
-	{
-		sprintf(buffer, "%8.6f", f);
-	}
+    if (AlmostEquals(f, round(f)))
+    {
+        sprintf(buffer, "%1.0f", f);
+    }
+    else
+    {
+        sprintf(buffer, "%8.6f", f);
+    }
 
-	return STR_Concat(s, buffer);
+    return STR_Concat(s, buffer);
 }
 
-int real_vm_c::STR_ConcatVector(const char * s, double *v)
+int real_vm_c::STR_ConcatVector(const char *s, double *v)
 {
-	char buffer[200];
+    char buffer[200];
 
-	if (AlmostEquals(v[0], round(v[0])) && AlmostEquals(v[1], round(v[1])) && 
-		AlmostEquals(v[2], round(v[2])))
-	{
-		sprintf(buffer, "'%1.0f %1.0f %1.0f'", v[0], v[1], v[2]);
-	}
-	else
-	{
-		sprintf(buffer, "'%6.4f %6.4f %6.4f'", v[0], v[1], v[2]);
-	}
+    if (AlmostEquals(v[0], round(v[0])) && AlmostEquals(v[1], round(v[1])) && AlmostEquals(v[2], round(v[2])))
+    {
+        sprintf(buffer, "'%1.0f %1.0f %1.0f'", v[0], v[1], v[2]);
+    }
+    else
+    {
+        sprintf(buffer, "'%6.4f %6.4f %6.4f'", v[0], v[1], v[2]);
+    }
 
-	return STR_Concat(s, buffer);
+    return STR_Concat(s, buffer);
 }
-
 
 //================================================================
 //  EXECUTION ENGINE
@@ -294,474 +280,412 @@ int real_vm_c::STR_ConcatVector(const char * s, double *v)
 
 void real_vm_c::EnterFunction(int func)
 {
-	assert(func > 0);
+    assert(func > 0);
 
-	function_t *new_f = functions[func];
+    function_t *new_f = functions[func];
 
-	// NOTE: the saved 's' value points to the instruction _after_ OP_CALL
+    // NOTE: the saved 's' value points to the instruction _after_ OP_CALL
 
     exec.call_stack[exec.call_depth].s    = exec.s;
     exec.call_stack[exec.call_depth].func = exec.func;
 
     exec.call_depth++;
-	if (exec.call_depth >= MAX_CALL_STACK)
-		RunError("stack overflow");
+    if (exec.call_depth >= MAX_CALL_STACK)
+        RunError("stack overflow");
 
-	if (exec.func)
-		exec.stack_depth += functions[exec.func]->locals_end;
+    if (exec.func)
+        exec.stack_depth += functions[exec.func]->locals_end;
 
-	if (exec.stack_depth + new_f->locals_end >= MAX_LOCAL_STACK)
-		RunError("PR_ExecuteProgram: locals stack overflow\n");
+    if (exec.stack_depth + new_f->locals_end >= MAX_LOCAL_STACK)
+        RunError("PR_ExecuteProgram: locals stack overflow\n");
 
-	exec.s    = new_f->first_statement;
-	exec.func = func;
+    exec.s    = new_f->first_statement;
+    exec.func = func;
 }
-
 
 void real_vm_c::LeaveFunction()
 {
-	if (exec.call_depth <= 0)
-		RunError("stack underflow");
+    if (exec.call_depth <= 0)
+        RunError("stack underflow");
 
-	exec.call_depth--;
+    exec.call_depth--;
 
-	exec.s    = exec.call_stack[exec.call_depth].s;
-	exec.func = exec.call_stack[exec.call_depth].func;
+    exec.s    = exec.call_stack[exec.call_depth].s;
+    exec.func = exec.call_stack[exec.call_depth].func;
 
-	if (exec.func)
-		exec.stack_depth -= functions[exec.func]->locals_end;
+    if (exec.func)
+        exec.stack_depth -= functions[exec.func]->locals_end;
 }
-
 
 void real_vm_c::EnterNative(int func, int argc)
 {
-	function_t *newf = functions[func];
+    function_t *newf = functions[func];
 
-	int n = -(newf->first_statement + 1);
-	assert(n < (int)native_funcs.size());
+    int n = -(newf->first_statement + 1);
+    assert(n < (int)native_funcs.size());
 
-	exec.stack_depth += functions[exec.func]->locals_end;
-	{
-		int old_func = exec.func;
-		{
-			exec.func = func;
-			native_funcs[n]->func (this, argc);
-		}
-		exec.func = old_func;
-	}
-	exec.stack_depth -= functions[exec.func]->locals_end;
+    exec.stack_depth += functions[exec.func]->locals_end;
+    {
+        int old_func = exec.func;
+        {
+            exec.func = func;
+            native_funcs[n]->func(this, argc);
+        }
+        exec.func = old_func;
+    }
+    exec.stack_depth -= functions[exec.func]->locals_end;
 }
 
-
-#define Operand(a)  (   \
-	((a) > 0) ? REF_GLOBAL(a) :   \
-    ((a) < 0) ? &exec.stack[exec.stack_depth - ((a) + 1)] :   \
-	NULL)
-
+#define Operand(a) (((a) > 0) ? REF_GLOBAL(a) : ((a) < 0) ? &exec.stack[exec.stack_depth - ((a) + 1)] : NULL)
 
 void real_vm_c::DoExecute(int fnum)
 {
-	function_t *f = functions[fnum];
+    function_t *f = functions[fnum];
 
-	int runaway = MAX_RUNAWAY;
+    int runaway = MAX_RUNAWAY;
 
-	// make a stack frame
-	int exitdepth = exec.call_depth;
+    // make a stack frame
+    int exitdepth = exec.call_depth;
 
-	EnterFunction(fnum);
+    EnterFunction(fnum);
 
-	for (;;)
-	{
-		statement_t *st = REF_OP(exec.s);
+    for (;;)
+    {
+        statement_t *st = REF_OP(exec.s);
 
-		if (exec.tracing)
-			PrintStatement(f, exec.s);
+        if (exec.tracing)
+            PrintStatement(f, exec.s);
 
-		if (!--runaway)
-			RunError("runaway loop error");
+        if (!--runaway)
+            RunError("runaway loop error");
 
-		// move code pointer to next statement
-		exec.s += sizeof(statement_t);
+        // move code pointer to next statement
+        exec.s += sizeof(statement_t);
 
-		// handle exotic operations here (ones which store special
-		// values in the a / b / c fields of statement_t).
+        // handle exotic operations here (ones which store special
+        // values in the a / b / c fields of statement_t).
 
-		if (st->op < OP_MOVE_F) switch (st->op)
-		{
-			case OP_NULL:
-				// no operation
-				continue;
+        if (st->op < OP_MOVE_F)
+            switch (st->op)
+            {
+            case OP_NULL:
+                // no operation
+                continue;
 
-			case OP_CALL:
-			{
-				double * a = Operand(st->a);
+            case OP_CALL: {
+                double *a = Operand(st->a);
 
-				int fnum_call = (int)*a;
-				if (fnum_call <= 0)
-					RunError("NULL function");
+                int fnum_call = (int)*a;
+                if (fnum_call <= 0)
+                    RunError("NULL function");
 
-				function_t *newf = functions[fnum_call];
+                function_t *newf = functions[fnum_call];
 
-				/* negative statements are built in functions */
-				if (newf->first_statement < 0)
-					EnterNative(fnum_call, st->b);
-				else
-					EnterFunction(fnum_call);
-				continue;
-			}
+                /* negative statements are built in functions */
+                if (newf->first_statement < 0)
+                    EnterNative(fnum_call, st->b);
+                else
+                    EnterFunction(fnum_call);
+                continue;
+            }
 
-			case OP_RET:
-			{
-				LeaveFunction();
+            case OP_RET: {
+                LeaveFunction();
 
-				// all done?
-				if (exec.call_depth == exitdepth)
-					return;
+                // all done?
+                if (exec.call_depth == exitdepth)
+                    return;
 
-				continue;
-			}
+                continue;
+            }
 
-			case OP_PARM_NULL:
-			{
-				double *a = &exec.stack[exec.stack_depth + functions[exec.func]->locals_end + st->b];
+            case OP_PARM_NULL: {
+                double *a = &exec.stack[exec.stack_depth + functions[exec.func]->locals_end + st->b];
 
-				*a = -FLT_MAX; // Trying to pick a reliable but very unlikely value for a parameter - Dasho
-				continue;
-			}
+                *a = -FLT_MAX; // Trying to pick a reliable but very unlikely value for a parameter - Dasho
+                continue;
+            }
 
-			case OP_PARM_F:
-			{
-				double *a = Operand(st->a);
-				double *b = &exec.stack[exec.stack_depth + functions[exec.func]->locals_end + st->b];
+            case OP_PARM_F: {
+                double *a = Operand(st->a);
+                double *b = &exec.stack[exec.stack_depth + functions[exec.func]->locals_end + st->b];
 
-				*b = *a;
-				continue;
-			}
+                *b = *a;
+                continue;
+            }
 
-			case OP_PARM_V:
-			{
-				double *a = Operand(st->a);
-				double *b = &exec.stack[exec.stack_depth + functions[exec.func]->locals_end + st->b];
+            case OP_PARM_V: {
+                double *a = Operand(st->a);
+                double *b = &exec.stack[exec.stack_depth + functions[exec.func]->locals_end + st->b];
 
-				b[0] = a[0];
-				b[1] = a[1];
-				b[2] = a[2];
-				continue;
-			}
+                b[0] = a[0];
+                b[1] = a[1];
+                b[2] = a[2];
+                continue;
+            }
 
-			case OP_IFNOT:
-			{
-				if (! Operand(st->a)[0])
-					exec.s = st->b;
-				continue;
-			}
+            case OP_IFNOT: {
+                if (!Operand(st->a)[0])
+                    exec.s = st->b;
+                continue;
+            }
 
-			case OP_IF:
-			{
-				if (Operand(st->a)[0])
-					exec.s = st->b;
-				continue;
-			}
+            case OP_IF: {
+                if (Operand(st->a)[0])
+                    exec.s = st->b;
+                continue;
+            }
 
-			case OP_GOTO:
-				exec.s = st->b;
-				continue;
+            case OP_GOTO:
+                exec.s = st->b;
+                continue;
 
-			case OP_ERROR:
-				RunError("Assertion failed @ %s:%d\n",
-				         REF_STRING(st->a), st->b);
-				break; /* NOT REACHED */
+            case OP_ERROR:
+                RunError("Assertion failed @ %s:%d\n", REF_STRING(st->a), st->b);
+                break; /* NOT REACHED */
 
-			default:
-				RunError("Bad opcode %i", st->op);
-		}
+            default:
+                RunError("Bad opcode %i", st->op);
+            }
 
-		// handle mathematical ops here
+        // handle mathematical ops here
 
-		double * a = Operand(st->a);
-		double * b = Operand(st->b);
-		double * c = Operand(st->c);
+        double *a = Operand(st->a);
+        double *b = Operand(st->b);
+        double *c = Operand(st->c);
 
-		switch (st->op)
-		{
-			case OP_MOVE_F:
-			case OP_MOVE_FNC:	// pointers
-				*b = *a;
-				break;
+        switch (st->op)
+        {
+        case OP_MOVE_F:
+        case OP_MOVE_FNC: // pointers
+            *b = *a;
+            break;
 
-			case OP_MOVE_S:
-				// temp strings must be internalised when assigned
-				// to a global variable.
-				if (*a < 0 && st->b > OFS_RETURN*8)
-					*b = InternaliseString(REF_STRING((int)*a));
-				else
-					*b = *a;
-				break;
+        case OP_MOVE_S:
+            // temp strings must be internalised when assigned
+            // to a global variable.
+            if (*a < 0 && st->b > OFS_RETURN * 8)
+                *b = InternaliseString(REF_STRING((int)*a));
+            else
+                *b = *a;
+            break;
 
-			case OP_MOVE_V:
-				b[0] = a[0];
-				b[1] = a[1];
-				b[2] = a[2];
-				break;
+        case OP_MOVE_V:
+            b[0] = a[0];
+            b[1] = a[1];
+            b[2] = a[2];
+            break;
 
-			case OP_NOT_F:
-			case OP_NOT_FNC:
-				*c = !*a;
-				break;
-			case OP_NOT_V:
-				*c = !a[0] && !a[1] && !a[2];
-				break;
-			case OP_NOT_S:
-				*c = !*a;
-				break;
+        case OP_NOT_F:
+        case OP_NOT_FNC:
+            *c = !*a;
+            break;
+        case OP_NOT_V:
+            *c = !a[0] && !a[1] && !a[2];
+            break;
+        case OP_NOT_S:
+            *c = !*a;
+            break;
 
-			case OP_INC:
-				*c = *a + 1;
-				break;
-			case OP_DEC:
-				*c = *a - 1;
-				break;
+        case OP_INC:
+            *c = *a + 1;
+            break;
+        case OP_DEC:
+            *c = *a - 1;
+            break;
 
-			case OP_ADD_F:
-				*c = *a + *b;
-				break;
+        case OP_ADD_F:
+            *c = *a + *b;
+            break;
 
-			case OP_ADD_V:
-				c[0] = a[0] + b[0];
-				c[1] = a[1] + b[1];
-				c[2] = a[2] + b[2];
-				break;
+        case OP_ADD_V:
+            c[0] = a[0] + b[0];
+            c[1] = a[1] + b[1];
+            c[2] = a[2] + b[2];
+            break;
 
-			case OP_ADD_S:
-				*c = STR_Concat(REF_STRING((int)*a), REF_STRING((int)*b));
-				// temp strings must be internalised when assigned
-				// to a global variable.
-				if (st->c > OFS_RETURN*8)
-					*c = InternaliseString(REF_STRING((int)*c));
-				break;
+        case OP_ADD_S:
+            *c = STR_Concat(REF_STRING((int)*a), REF_STRING((int)*b));
+            // temp strings must be internalised when assigned
+            // to a global variable.
+            if (st->c > OFS_RETURN * 8)
+                *c = InternaliseString(REF_STRING((int)*c));
+            break;
 
-			case OP_ADD_SF:
-				*c = STR_ConcatFloat(REF_STRING((int)*a), *b);
-				if (st->c > OFS_RETURN*8)
-					*c = InternaliseString(REF_STRING((int)*c));
-				break;
+        case OP_ADD_SF:
+            *c = STR_ConcatFloat(REF_STRING((int)*a), *b);
+            if (st->c > OFS_RETURN * 8)
+                *c = InternaliseString(REF_STRING((int)*c));
+            break;
 
-			case OP_ADD_SV:
-				*c = STR_ConcatVector(REF_STRING((int)*a), b);
-				if (st->c > OFS_RETURN*8)
-					*c = InternaliseString(REF_STRING((int)*c));
-				break;
+        case OP_ADD_SV:
+            *c = STR_ConcatVector(REF_STRING((int)*a), b);
+            if (st->c > OFS_RETURN * 8)
+                *c = InternaliseString(REF_STRING((int)*c));
+            break;
 
-			case OP_SUB_F:
-				*c = *a - *b;
-				break;
-			case OP_SUB_V:
-				c[0] = a[0] - b[0];
-				c[1] = a[1] - b[1];
-				c[2] = a[2] - b[2];
-				break;
+        case OP_SUB_F:
+            *c = *a - *b;
+            break;
+        case OP_SUB_V:
+            c[0] = a[0] - b[0];
+            c[1] = a[1] - b[1];
+            c[2] = a[2] - b[2];
+            break;
 
-			case OP_MUL_F:
-				*c = *a * *b;
-				break;
-			case OP_MUL_V:
-				*c = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-				break;
-			case OP_MUL_FV:
-				c[0] = a[0] * b[0];
-				c[1] = a[0] * b[1];
-				c[2] = a[0] * b[2];
-				break;
-			case OP_MUL_VF:
-				c[0] = b[0] * a[0];
-				c[1] = b[0] * a[1];
-				c[2] = b[0] * a[2];
-				break;
+        case OP_MUL_F:
+            *c = *a * *b;
+            break;
+        case OP_MUL_V:
+            *c = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+            break;
+        case OP_MUL_FV:
+            c[0] = a[0] * b[0];
+            c[1] = a[0] * b[1];
+            c[2] = a[0] * b[2];
+            break;
+        case OP_MUL_VF:
+            c[0] = b[0] * a[0];
+            c[1] = b[0] * a[1];
+            c[2] = b[0] * a[2];
+            break;
 
-			case OP_DIV_F:
-				if (AlmostEquals(*b, 0.0))
-					RunError("Division by zero");
-				*c = *a / *b;
-				break;
+        case OP_DIV_F:
+            if (AlmostEquals(*b, 0.0))
+                RunError("Division by zero");
+            *c = *a / *b;
+            break;
 
-			case OP_DIV_V:
-				if (AlmostEquals(*b, 0.0))
-					RunError("Division by zero");
-				c[0] = a[0] / *b;
-				c[1] = a[1] / *b;
-				c[2] = a[2] / *b;
-				break;
+        case OP_DIV_V:
+            if (AlmostEquals(*b, 0.0))
+                RunError("Division by zero");
+            c[0] = a[0] / *b;
+            c[1] = a[1] / *b;
+            c[2] = a[2] / *b;
+            break;
 
-			case OP_MOD_F:
-				if (AlmostEquals(*b, 0.0))
-					RunError("Division by zero");
-				else
-				{
-					float d = floorf(*a / *b);
-					*c = *a - d * (*b);
-				}
-				break;
+        case OP_MOD_F:
+            if (AlmostEquals(*b, 0.0))
+                RunError("Division by zero");
+            else
+            {
+                float d = floorf(*a / *b);
+                *c      = *a - d * (*b);
+            }
+            break;
 
-			case OP_POWER_F:
-				*c = powf(*a, *b);
-				break;
+        case OP_POWER_F:
+            *c = powf(*a, *b);
+            break;
 
-			case OP_GE:
-				*c = *a >= *b;
-				break;
-			case OP_LE:
-				*c = *a <= *b;
-				break;
-			case OP_GT:
-				*c = *a > *b;
-				break;
-			case OP_LT:
-				*c = *a < *b;
-				break;
+        case OP_GE:
+            *c = *a >= *b;
+            break;
+        case OP_LE:
+            *c = *a <= *b;
+            break;
+        case OP_GT:
+            *c = *a > *b;
+            break;
+        case OP_LT:
+            *c = *a < *b;
+            break;
 
-			case OP_EQ_F:
-			case OP_EQ_FNC:
-				*c = AlmostEquals(*a, *b);
-				break;
-			case OP_EQ_V:
-				*c = (AlmostEquals(a[0], b[0])) && (AlmostEquals(a[1], b[1])) && (AlmostEquals(a[2], b[2]));
-				break;
-			case OP_EQ_S:
-				*c = (AlmostEquals(*a, *b)) ? 1 :
-					!strcmp(REF_STRING((int)*a), REF_STRING((int)*b));
-				break;
+        case OP_EQ_F:
+        case OP_EQ_FNC:
+            *c = AlmostEquals(*a, *b);
+            break;
+        case OP_EQ_V:
+            *c = (AlmostEquals(a[0], b[0])) && (AlmostEquals(a[1], b[1])) && (AlmostEquals(a[2], b[2]));
+            break;
+        case OP_EQ_S:
+            *c = (AlmostEquals(*a, *b)) ? 1 : !strcmp(REF_STRING((int)*a), REF_STRING((int)*b));
+            break;
 
-			case OP_NE_F:
-			case OP_NE_FNC:
-				*c = !AlmostEquals(*a, *b);
-				break;
-			case OP_NE_V:
-				*c = (!AlmostEquals(a[0], b[0])) || (!AlmostEquals(a[1], b[1])) || (!AlmostEquals(a[2], b[2]));
-				break;
-			case OP_NE_S:
-				*c = (AlmostEquals(*a, *b)) ? 0 :
-					!! strcmp(REF_STRING((int)*a), REF_STRING((int)*b));
-				break;
+        case OP_NE_F:
+        case OP_NE_FNC:
+            *c = !AlmostEquals(*a, *b);
+            break;
+        case OP_NE_V:
+            *c = (!AlmostEquals(a[0], b[0])) || (!AlmostEquals(a[1], b[1])) || (!AlmostEquals(a[2], b[2]));
+            break;
+        case OP_NE_S:
+            *c = (AlmostEquals(*a, *b)) ? 0 : !!strcmp(REF_STRING((int)*a), REF_STRING((int)*b));
+            break;
 
-			case OP_AND:
-				*c = *a && *b;
-				break;
-			case OP_OR:
-				*c = *a || *b;
-				break;
+        case OP_AND:
+            *c = *a && *b;
+            break;
+        case OP_OR:
+            *c = *a || *b;
+            break;
 
-			case OP_BITAND:
-				*c = (int)*a & (int)*b;
-				break;
-			case OP_BITOR:
-				*c = (int)*a | (int)*b;
-				break;
+        case OP_BITAND:
+            *c = (int)*a & (int)*b;
+            break;
+        case OP_BITOR:
+            *c = (int)*a | (int)*b;
+            break;
 
-			default:
-				RunError("Bad opcode %i", st->op);
-		}
-	}
+        default:
+            RunError("Bad opcode %i", st->op);
+        }
+    }
 }
 
 int real_vm_c::Execute(int func_id)
 {
-	// re-use the temporary string space
-	temp_strings.reset();
+    // re-use the temporary string space
+    temp_strings.reset();
 
-	try
-	{
-		if (func_id < 1 || func_id >= (int)functions.size())
-		{
-			RunError("vm_c::Execute: NULL function");
-		}
+    try
+    {
+        if (func_id < 1 || func_id >= (int)functions.size())
+        {
+            RunError("vm_c::Execute: NULL function");
+        }
 
-		DoExecute(func_id);
-	}
-	catch (exec_error_x err)
-	{
-		return 9;
-	}
+        DoExecute(func_id);
+    }
+    catch (exec_error_x err)
+    {
+        return 9;
+    }
 
-	// printer("TEMP_STRINGs: %d / %d\n", temp_strings.usedMemory(), temp_strings.totalMemory());
+    // printer("TEMP_STRINGs: %d / %d\n", temp_strings.usedMemory(), temp_strings.totalMemory());
 
-	return 0;
+    return 0;
 }
-
 
 //=================================================================
 //  DEBUGGING STUFF
 //=================================================================
 
-const char * opcode_names[] =
-{
-	"NULL",
-	"CALL",
-	"RET",
-	"PARM_F",
-	"PARM_V",
-	"IF",
-	"IFNOT",
-	"GOTO",
-	"ERROR",
+const char *opcode_names[] = {
+    "NULL",   "CALL",   "RET",    "PARM_F",   "PARM_V", "IF",    "IFNOT", "GOTO",   "ERROR",
 
-	"MOVE_F",
-	"MOVE_V",
-	"MOVE_S",
-	"MOVE_FNC",
+    "MOVE_F", "MOVE_V", "MOVE_S", "MOVE_FNC",
 
-	"NOT_F",
-	"NOT_V",
-	"NOT_S",
-	"NOT_FNC",
+    "NOT_F",  "NOT_V",  "NOT_S",  "NOT_FNC",
 
-	"INC",
-	"DEC",
+    "INC",    "DEC",
 
-	"POWER", 
-	"MUL_F",
-	"MUL_V",
-	"MUL_FV",
-	"MUL_VF",
-	"DIV_F",
-	"DIV_V",
-	"MOD_F",
+    "POWER",  "MUL_F",  "MUL_V",  "MUL_FV",   "MUL_VF", "DIV_F", "DIV_V", "MOD_F",
 
-	"ADD_F",
-	"ADD_V",
-	"ADD_S",
-	"ADD_SF",
-	"ADD_SV",
-	"SUB_F",
-	"SUB_V",
+    "ADD_F",  "ADD_V",  "ADD_S",  "ADD_SF",   "ADD_SV", "SUB_F", "SUB_V",
 
-	"EQ_F",
-	"EQ_V",
-	"EQ_S",
-	"EQ_FNC",
-	"NE_F",
-	"NE_V",
-	"NE_S",
-	"NE_FNC",
-	"LE",
-	"GE",
-	"LT",
-	"GT",
+    "EQ_F",   "EQ_V",   "EQ_S",   "EQ_FNC",   "NE_F",   "NE_V",  "NE_S",  "NE_FNC", "LE",    "GE", "LT", "GT",
 
-	"AND",
-	"OR",
-	"BITAND",
-	"BITOR",
+    "AND",    "OR",     "BITAND", "BITOR",
 };
-
 
 static const char *OpcodeName(short op)
 {
-	if (op < 0 || op >= NUM_OPERATIONS)
-		return "???";
+    if (op < 0 || op >= NUM_OPERATIONS)
+        return "???";
 
-	return opcode_names[op];
+    return opcode_names[op];
 }
-
 
 //
 // Returns a string suitable for printing (no newlines, max 60 chars length)
@@ -857,144 +781,140 @@ char *Debug_ValueString(etype_t type, double *val)
 }
 #endif
 
-
 void real_vm_c::StackTrace()
 {
-	printer("Stack Trace:\n");
+    printer("Stack Trace:\n");
 
-	exec.call_stack[exec.call_depth].func = exec.func;
-	exec.call_stack[exec.call_depth].s    = exec.s;
+    exec.call_stack[exec.call_depth].func = exec.func;
+    exec.call_stack[exec.call_depth].s    = exec.s;
 
-	for (int i = exec.call_depth; i >= 1; i--)
-	{
-		int back = (exec.call_depth - i) + 1;
+    for (int i = exec.call_depth; i >= 1; i--)
+    {
+        int back = (exec.call_depth - i) + 1;
 
-		function_t * f = functions[exec.call_stack[i].func];
+        function_t *f = functions[exec.call_stack[i].func];
 
-		statement_t *st = REF_OP(exec.call_stack[i].s);
+        statement_t *st = REF_OP(exec.call_stack[i].s);
 
-		if (f)
-			printer("%-2d %s() at %s:%d\n", back, f->name, f->source_file, f->source_line + st->line);
-		else
-			printer("%-2d ????\n", back);
-	}
+        if (f)
+            printer("%-2d %s() at %s:%d\n", back, f->name, f->source_file, f->source_line + st->line);
+        else
+            printer("%-2d ????\n", back);
+    }
 
-	printer("\n");
+    printer("\n");
 }
 
-
-const char * real_vm_c::RegString(statement_t *st, int who)
+const char *real_vm_c::RegString(statement_t *st, int who)
 {
-	static char buffer[100];
+    static char buffer[100];
 
-	int val = (who == 1) ? st->a : (who == 2) ? st->b : st->c;
+    int val = (who == 1) ? st->a : (who == 2) ? st->b : st->c;
 
-	if (val == OFS_RETURN*8)
-		return "result";
+    if (val == OFS_RETURN * 8)
+        return "result";
 
-	if (val == OFS_DEFAULT*8)
-		return "default";
+    if (val == OFS_DEFAULT * 8)
+        return "default";
 
-	sprintf(buffer, "%s[%d]", (val < 0) ? "stack" : "glob", abs(val));
-	return buffer;
+    sprintf(buffer, "%s[%d]", (val < 0) ? "stack" : "glob", abs(val));
+    return buffer;
 }
 
 void real_vm_c::PrintStatement(function_t *f, int s)
 {
-	statement_t *st = REF_OP(s);
+    statement_t *st = REF_OP(s);
 
-	const char *op_name = OpcodeName(st->op);
+    const char *op_name = OpcodeName(st->op);
 
-	printer("  %06x: %-9s ", s, op_name);
+    printer("  %06x: %-9s ", s, op_name);
 
-	switch (st->op)
-	{
-		case OP_NULL:
-		case OP_RET:
-		case OP_ERROR:
-			break;
-	
-		case OP_MOVE_F:
-		case OP_MOVE_S:
-		case OP_MOVE_FNC:	// pointers
-		case OP_MOVE_V:
-			printer("%s ",    RegString(st, 1));
-			printer("-> %s",  RegString(st, 2));
-			break;
+    switch (st->op)
+    {
+    case OP_NULL:
+    case OP_RET:
+    case OP_ERROR:
+        break;
 
-		case OP_IFNOT:
-		case OP_IF:
-			printer("%s %08x", RegString(st, 1), st->b);
-			break;
+    case OP_MOVE_F:
+    case OP_MOVE_S:
+    case OP_MOVE_FNC: // pointers
+    case OP_MOVE_V:
+        printer("%s ", RegString(st, 1));
+        printer("-> %s", RegString(st, 2));
+        break;
 
-		case OP_GOTO:
-			printer("%08x", st->b);
-			// TODO
-			break;
+    case OP_IFNOT:
+    case OP_IF:
+        printer("%s %08x", RegString(st, 1), st->b);
+        break;
 
-		case OP_CALL:
-			printer("%s (%d) ", RegString(st, 1), st->b);
+    case OP_GOTO:
+        printer("%08x", st->b);
+        // TODO
+        break;
 
-			if (! st->c)
-				printer(" ");
-			else
-				printer("-> %s",   RegString(st, 3));
-			break;
+    case OP_CALL:
+        printer("%s (%d) ", RegString(st, 1), st->b);
 
-		case OP_PARM_F:
-		case OP_PARM_V:
-			printer("%s -> future[%d]", RegString(st, 1), st->b);
-			break;
+        if (!st->c)
+            printer(" ");
+        else
+            printer("-> %s", RegString(st, 3));
+        break;
 
-		case OP_NOT_F:
-		case OP_NOT_FNC:
-		case OP_NOT_V:
-		case OP_NOT_S:
-			printer("%s ",    RegString(st, 1));
-			printer("-> %s",  RegString(st, 3));
-			break;
+    case OP_PARM_F:
+    case OP_PARM_V:
+        printer("%s -> future[%d]", RegString(st, 1), st->b);
+        break;
 
-		default:
-			printer("%s + ",  RegString(st, 1));
-			printer("%s ",    RegString(st, 2));
-			printer("-> %s",  RegString(st, 3));
-			break;
-	}
+    case OP_NOT_F:
+    case OP_NOT_FNC:
+    case OP_NOT_V:
+    case OP_NOT_S:
+        printer("%s ", RegString(st, 1));
+        printer("-> %s", RegString(st, 3));
+        break;
 
-	printer("\n");
+    default:
+        printer("%s + ", RegString(st, 1));
+        printer("%s ", RegString(st, 2));
+        printer("-> %s", RegString(st, 3));
+        break;
+    }
+
+    printer("\n");
 }
-
 
 void real_vm_c::ASM_DumpFunction(function_t *f)
 {
-	printer("Function %s()\n", f->name);
+    printer("Function %s()\n", f->name);
 
-	if (f->first_statement < 0)
-	{
-		printer("  native #%d\n\n", - f->first_statement);
-		return;
-	}
+    if (f->first_statement < 0)
+    {
+        printer("  native #%d\n\n", -f->first_statement);
+        return;
+    }
 
-	for (int s = f->first_statement; s <= f->last_statement; s += sizeof(statement_t))
-	{
-		PrintStatement(f, s);
-	}
+    for (int s = f->first_statement; s <= f->last_statement; s += sizeof(statement_t))
+    {
+        PrintStatement(f, s);
+    }
 
-	printer("\n");
+    printer("\n");
 }
 
 void real_vm_c::ASM_DumpAll()
 {
-	for (int i = 1; i < (int)functions.size(); i++)
-	{
-		function_t *f = functions[i];
+    for (int i = 1; i < (int)functions.size(); i++)
+    {
+        function_t *f = functions[i];
 
-		ASM_DumpFunction(f);
-	}
+        ASM_DumpFunction(f);
+    }
 }
 
-
-}  // namespace coal
+} // namespace coal
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -1,9 +1,9 @@
 //------------------------------------------------------------------------
 //  BLUR: Fast Gaussian Blurring
 //------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -15,14 +15,14 @@
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
-//  Based on "C++ implementation of a fast Gaussian blur algorithm by 
+//  Based on "C++ implementation of a fast Gaussian blur algorithm by
 //    Ivan Kutskir - Integer Version"
-// 
+//
 //  Copyright (C) 2017 Basile Fraboni
 //  Copyright (C) 2014 Ivan Kutskir
 //  All Rights Reserved
 //  You may use, distribute and modify this code under the
-//  terms of the MIT license. For further details please refer 
+//  terms of the MIT license. For further details please refer
 //  to : https://mit-license.org/
 //
 //------------------------------------------------------------------------
@@ -34,16 +34,16 @@
 
 namespace epi
 {
-	namespace Blur
-	{
-		/* ------ Functions ------------------------------------- */
+namespace Blur
+{
+/* ------ Functions ------------------------------------- */
 
-		image_data_c *Blur(image_data_c *img, float sigma);
-	}
+image_data_c *Blur(image_data_c *img, float sigma);
+} // namespace Blur
 
-}  // namespace epi
+} // namespace epi
 
-#endif  /* __EPI_IMAGE_BLUR_H__ */
+#endif /* __EPI_IMAGE_BLUR_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

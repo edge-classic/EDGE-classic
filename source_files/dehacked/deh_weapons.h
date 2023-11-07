@@ -27,35 +27,34 @@ namespace Deh_Edge
 //
 typedef enum
 {
-	// Doesn't thrust things
-	MBF21_NOTHRUST = 1,
+    // Doesn't thrust things
+    MBF21_NOTHRUST = 1,
 
-	// Weapon is silent
-	MBF21_SILENT = 2,
+    // Weapon is silent
+    MBF21_SILENT = 2,
 
-	// Weapon won't autofire when swapped to
-	MBF21_NOAUTOFIRE = 4,
+    // Weapon won't autofire when swapped to
+    MBF21_NOAUTOFIRE = 4,
 
-	// Monsters consider it a melee weapon (currently unused)
-	MBF21_FLEEMELEE = 8,
+    // Monsters consider it a melee weapon (currently unused)
+    MBF21_FLEEMELEE = 8,
 
-	// Can be switched away from when ammo is picked up
-	MBF21_AUTOSWITCHFROM = 16,
+    // Can be switched away from when ammo is picked up
+    MBF21_AUTOSWITCHFROM = 16,
 
-	// Cannot be switched to when ammo is picked up
-	MBF21_NOAUTOSWITCHTO = 32,
-}
-weapmbf21flag_t;
+    // Cannot be switched to when ammo is picked up
+    MBF21_NOAUTOSWITCHTO = 32,
+} weapmbf21flag_t;
 
 // Weapon info: sprite frames, ammunition use.
 typedef struct
 {
-	const char *ddf_name;
+    const char *ddf_name;
 
     int ammo, ammo_per_shot;
-	int bind_key, priority;
-	
-	const char *flags;
+    int bind_key, priority;
+
+    const char *flags;
 
     int upstate;
     int downstate;
@@ -63,8 +62,7 @@ typedef struct
     int atkstate;
     int flashstate;
     int mbf21_flags;
-}
-weaponinfo_t;
+} weaponinfo_t;
 
 // The defined weapons...
 typedef enum
@@ -78,26 +76,24 @@ typedef enum
     wp_bfg,
     wp_chainsaw,
     wp_supershotgun,
-                                                                                            
+
     NUMWEAPONS
-}
-weapontype_e;
+} weapontype_e;
 
 extern weaponinfo_t weapon_info[NUMWEAPONS];
 
-
 namespace Weapons
 {
-	void Init();
-	void Shutdown();
+void Init();
+void Shutdown();
 
-	void MarkWeapon(int wp_num);
+void MarkWeapon(int wp_num);
 
-	void AlterWeapon(int new_val);
+void AlterWeapon(int new_val);
 
-	void ConvertWEAP(void);
-}
+void ConvertWEAP(void);
+} // namespace Weapons
 
-}  // Deh_Edge
+} // namespace Deh_Edge
 
 #endif /* __DEH_WEAPONS_HDR__ */

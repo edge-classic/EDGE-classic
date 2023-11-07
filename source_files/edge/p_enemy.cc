@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Creature Action Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -44,26 +44,10 @@
 
 #include "AlmostEquals.h"
 
-dirtype_e opposite[] =
-{
-	DI_WEST,
-	DI_SOUTHWEST,
-	DI_SOUTH,
-	DI_SOUTHEAST,
-	DI_EAST,
-	DI_NORTHEAST,
-	DI_NORTH,
-	DI_NORTHWEST,
-	DI_NODIR
-};
+dirtype_e opposite[] = {DI_WEST,      DI_SOUTHWEST, DI_SOUTH,     DI_SOUTHEAST, DI_EAST,
+                        DI_NORTHEAST, DI_NORTH,     DI_NORTHWEST, DI_NODIR};
 
-dirtype_e diags[] =
-{
-	DI_NORTHWEST,
-	DI_NORTHEAST,
-	DI_SOUTHWEST,
-	DI_SOUTHEAST
-};
+dirtype_e diags[] = {DI_NORTHWEST, DI_NORTHEAST, DI_SOUTHWEST, DI_SOUTHEAST};
 
 // sqrt(2) / 2: The diagonal speed of creatures
 #define SQ2 0.7071067812f
@@ -87,220 +71,214 @@ float yspeed[8] = {0.0f, SQ2, 1.0f, SQ2, 0.0f, -SQ2, -1.0f, -SQ2};
 // Recursively traverse adjacent sectors,
 // sound blocking lines cut off traversal.
 //
-static void RecursiveSound(sector_t * sec, int soundblocks, int player)
+static void RecursiveSound(sector_t *sec, int soundblocks, int player)
 {
-	int i;
-	line_t *check;
-	sector_t *other;
+    int       i;
+    line_t   *check;
+    sector_t *other;
 
-	// has the sound flooded this sector
-	if (sec->validcount == validcount && sec->soundtraversed <= (soundblocks + 1))
-		return;
+    // has the sound flooded this sector
+    if (sec->validcount == validcount && sec->soundtraversed <= (soundblocks + 1))
+        return;
 
-	// wake up all monsters in this sector
-	sec->validcount = validcount;
-	sec->soundtraversed = soundblocks + 1;
-	sec->sound_player = player;
+    // wake up all monsters in this sector
+    sec->validcount     = validcount;
+    sec->soundtraversed = soundblocks + 1;
+    sec->sound_player   = player;
 
-/*
-	for (mobj_t *mo = sec->subsectors->thinglist; mo != NULL; mo = mo->snext)
-	{
-		mo->lastheard=player;
-	}
-
-
-	mobj_t *mo;
-	int index = 0;
-	for (mo=sec->subsectors->thinglist; mo; mo=mo->snext, index++)
-	{
-		if(mo != NULL && !mo->player)
-			mo->lastheard=player;
-	}
-*/
-
-	// Set any nearby monsters to have heard the player
-	touch_node_t *nd;
-	for (nd = sec->touch_things; nd; nd = nd->sec_next)
-	{
-		if(nd->mo != NULL)
-		{
-			if (!AlmostEquals(nd->mo->info->hear_distance, -1.0f)) //if we have hear_distance set
-			{
-				float distance;
-				distance = P_ApproxDistance(players[player]->mo->x - nd->mo->x, players[player]->mo->y - nd->mo->y);
-				distance = P_ApproxDistance(players[player]->mo->z - nd->mo->z, distance);
-				if (distance < nd->mo->info->hear_distance)
-				{
-					nd->mo->lastheard=player;
-				}
-			}
-			else ///by default he heard
-			{
-				nd->mo->lastheard=player;
-			}
-		}	
-	}
+    /*
+        for (mobj_t *mo = sec->subsectors->thinglist; mo != NULL; mo = mo->snext)
+        {
+            mo->lastheard=player;
+        }
 
 
-	for (i = 0; i < sec->linecount; i++)
-	{
-		check = sec->lines[i];
+        mobj_t *mo;
+        int index = 0;
+        for (mo=sec->subsectors->thinglist; mo; mo=mo->snext, index++)
+        {
+            if(mo != NULL && !mo->player)
+                mo->lastheard=player;
+        }
+    */
 
-		if (!(check->flags & MLF_TwoSided))
-			continue;
+    // Set any nearby monsters to have heard the player
+    touch_node_t *nd;
+    for (nd = sec->touch_things; nd; nd = nd->sec_next)
+    {
+        if (nd->mo != NULL)
+        {
+            if (!AlmostEquals(nd->mo->info->hear_distance, -1.0f)) // if we have hear_distance set
+            {
+                float distance;
+                distance = P_ApproxDistance(players[player]->mo->x - nd->mo->x, players[player]->mo->y - nd->mo->y);
+                distance = P_ApproxDistance(players[player]->mo->z - nd->mo->z, distance);
+                if (distance < nd->mo->info->hear_distance)
+                {
+                    nd->mo->lastheard = player;
+                }
+            }
+            else /// by default he heard
+            {
+                nd->mo->lastheard = player;
+            }
+        }
+    }
 
-		// -AJA- 1999/07/19: Gaps are now stored in line_t.
-		if (check->gap_num == 0)
-			continue;  // closed door
+    for (i = 0; i < sec->linecount; i++)
+    {
+        check = sec->lines[i];
 
-		// -AJA- 2001/11/11: handle closed Sliding doors
-		if (check->slide_door && ! check->slide_door->s.see_through &&
-			! check->slider_move)
-		{
-			continue;
-		}
+        if (!(check->flags & MLF_TwoSided))
+            continue;
 
-		if (check->frontsector == sec)
-			other = check->backsector;
-		else
-			other = check->frontsector;
+        // -AJA- 1999/07/19: Gaps are now stored in line_t.
+        if (check->gap_num == 0)
+            continue; // closed door
 
-		if (check->flags & MLF_SoundBlock)
-		{
-			if (!soundblocks)
-				RecursiveSound(other, 1, player);
-		}
-		else
-		{
-			RecursiveSound(other, soundblocks, player);
-		}
-	}
+        // -AJA- 2001/11/11: handle closed Sliding doors
+        if (check->slide_door && !check->slide_door->s.see_through && !check->slider_move)
+        {
+            continue;
+        }
+
+        if (check->frontsector == sec)
+            other = check->backsector;
+        else
+            other = check->frontsector;
+
+        if (check->flags & MLF_SoundBlock)
+        {
+            if (!soundblocks)
+                RecursiveSound(other, 1, player);
+        }
+        else
+        {
+            RecursiveSound(other, soundblocks, player);
+        }
+    }
 }
 
 void P_NoiseAlert(player_t *p)
 {
-	validcount++;
+    validcount++;
 
-	RecursiveSound(p->mo->subsector->sector, 0, p->pnum);
+    RecursiveSound(p->mo->subsector->sector, 0, p->pnum);
 }
 
-
-// Called by new NOISE_ALERT ddf action 
-void P_ActNoiseAlert(mobj_t * actor)
+// Called by new NOISE_ALERT ddf action
+void P_ActNoiseAlert(mobj_t *actor)
 {
-	validcount++;
+    validcount++;
 
-	int WhatPlayer = 0;
+    int WhatPlayer = 0;
 
-	if (actor->lastheard !=-1)
-		WhatPlayer = actor->lastheard;
+    if (actor->lastheard != -1)
+        WhatPlayer = actor->lastheard;
 
-	RecursiveSound(actor->subsector->sector, 0, WhatPlayer);
+    RecursiveSound(actor->subsector->sector, 0, WhatPlayer);
 }
-
 
 //
 // Move in the current direction,
 // returns false if the move is blocked.
 //
-bool P_Move(mobj_t * actor, bool path)
+bool P_Move(mobj_t *actor, bool path)
 {
-	vec3_t orig_pos;
-	
-	orig_pos.Set(actor->x, actor->y, actor->z);
+    vec3_t orig_pos;
 
-	float tryx;
-	float tryy;
+    orig_pos.Set(actor->x, actor->y, actor->z);
 
-	if (path)
-	{
-		tryx = actor->x + actor->speed * M_Cos(actor->angle);
-		tryy = actor->y + actor->speed * M_Sin(actor->angle);
-	}
-	else
-	{
-		if (actor->movedir == DI_NODIR)
-			return false;
+    float tryx;
+    float tryy;
 
-		if ((unsigned)actor->movedir >= 8)
-			I_Error("Weird actor->movedir!");
+    if (path)
+    {
+        tryx = actor->x + actor->speed * M_Cos(actor->angle);
+        tryy = actor->y + actor->speed * M_Sin(actor->angle);
+    }
+    else
+    {
+        if (actor->movedir == DI_NODIR)
+            return false;
 
-		tryx = actor->x + actor->speed * xspeed[actor->movedir];
-		tryy = actor->y + actor->speed * yspeed[actor->movedir];
-	}
+        if ((unsigned)actor->movedir >= 8)
+            I_Error("Weird actor->movedir!");
 
-	if (! P_TryMove(actor, tryx, tryy))
-	{
-		epi::array_iterator_c it;
-		line_t* ld;
-		
-		// open any specials
-		if (actor->flags & MF_FLOAT && floatok)
-		{
-			// must adjust height
-			if (actor->z < float_destz)
-				actor->z += actor->info->float_speed;
-			else
-				actor->z -= actor->info->float_speed;
+        tryx = actor->x + actor->speed * xspeed[actor->movedir];
+        tryy = actor->y + actor->speed * yspeed[actor->movedir];
+    }
 
-			actor->flags |= MF_INFLOAT;
-			// FIXME: position interpolation
-			return true;
-		}
+    if (!P_TryMove(actor, tryx, tryy))
+    {
+        epi::array_iterator_c it;
+        line_t               *ld;
 
-		if (spechit.GetSize() == 0)
-			return false;
+        // open any specials
+        if (actor->flags & MF_FLOAT && floatok)
+        {
+            // must adjust height
+            if (actor->z < float_destz)
+                actor->z += actor->info->float_speed;
+            else
+                actor->z -= actor->info->float_speed;
 
-		actor->movedir = DI_NODIR;
+            actor->flags |= MF_INFLOAT;
+            // FIXME: position interpolation
+            return true;
+        }
 
-		// -AJA- 1999/09/10: As Lee Killough points out, this is where
-		//       monsters can get stuck in doortracks.  We follow Lee's
-		//       method: return true 90% of the time if the blocking line
-		//       was the one activated, or false 90% of the time if there
-		//       was some other line activated.
+        if (spechit.GetSize() == 0)
+            return false;
 
-		bool any_used = false;
-		bool block_used = false;
-					
-		for (it=spechit.GetTailIterator(); it.IsValid(); it--)
-		{
-			ld = ITERATOR_TO_TYPE(it, line_t*);
-			if (P_UseSpecialLine(actor, ld, 0, -FLT_MAX, FLT_MAX))
-			{
-				any_used = true;
+        actor->movedir = DI_NODIR;
 
-				if (ld == blockline)
-					block_used = true;
-			}
-		}
-		
-		return any_used && (P_Random() < 230 ? block_used : !block_used);
-	}
+        // -AJA- 1999/09/10: As Lee Killough points out, this is where
+        //       monsters can get stuck in doortracks.  We follow Lee's
+        //       method: return true 90% of the time if the blocking line
+        //       was the one activated, or false 90% of the time if there
+        //       was some other line activated.
 
-	actor->flags &= ~MF_INFLOAT;
+        bool any_used   = false;
+        bool block_used = false;
 
-	if (!(actor->flags & MF_FLOAT) &&
-		!(actor->extendedflags & EF_GRAVFALL))
-		{
-			if (actor->z > actor->floorz)
-			{
-				actor->z = actor->floorz;
-				P_HitLiquidFloor(actor);
-			}
-			else
-				actor->z = actor->floorz;
-		}
-	// -AJA- 2008/01/16: position interpolation
-	if ((actor->state->flags & SFF_Model) ||
-		(actor->flags & MF_FLOAT))
-	{
-		actor->lerp_num = CLAMP(2, actor->state->tics, 10);
-		actor->lerp_pos = 1;
+        for (it = spechit.GetTailIterator(); it.IsValid(); it--)
+        {
+            ld = ITERATOR_TO_TYPE(it, line_t *);
+            if (P_UseSpecialLine(actor, ld, 0, -FLT_MAX, FLT_MAX))
+            {
+                any_used = true;
 
-		actor->lerp_from = orig_pos;
-	}
+                if (ld == blockline)
+                    block_used = true;
+            }
+        }
 
-	return true;
+        return any_used && (P_Random() < 230 ? block_used : !block_used);
+    }
+
+    actor->flags &= ~MF_INFLOAT;
+
+    if (!(actor->flags & MF_FLOAT) && !(actor->extendedflags & EF_GRAVFALL))
+    {
+        if (actor->z > actor->floorz)
+        {
+            actor->z = actor->floorz;
+            P_HitLiquidFloor(actor);
+        }
+        else
+            actor->z = actor->floorz;
+    }
+    // -AJA- 2008/01/16: position interpolation
+    if ((actor->state->flags & SFF_Model) || (actor->flags & MF_FLOAT))
+    {
+        actor->lerp_num = CLAMP(2, actor->state->tics, 10);
+        actor->lerp_pos = 1;
+
+        actor->lerp_from = orig_pos;
+    }
+
+    return true;
 }
 
 //
@@ -313,165 +291,165 @@ bool P_Move(mobj_t * actor, bool path)
 // If a door is in the way,
 // an OpenDoor call is made to start it opening.
 //
-static bool TryWalk(mobj_t * actor)
+static bool TryWalk(mobj_t *actor)
 {
-	if (!P_Move(actor, false))
-		return false;
+    if (!P_Move(actor, false))
+        return false;
 
-	actor->movecount = P_Random() & 15;
+    actor->movecount = P_Random() & 15;
 
-	return true;
+    return true;
 }
 
 // -ACB- 1998/09/06 actor is now an object; different movement choices.
-void P_NewChaseDir(mobj_t * object)
+void P_NewChaseDir(mobj_t *object)
 {
-	float deltax;
-	float deltay;
-	dirtype_e tdir;
+    float     deltax;
+    float     deltay;
+    dirtype_e tdir;
 
-	dirtype_e d[3];
-	dirtype_e olddir;
-	dirtype_e turnaround;
+    dirtype_e d[3];
+    dirtype_e olddir;
+    dirtype_e turnaround;
 
-	olddir = object->movedir;
-	turnaround = opposite[olddir];
+    olddir     = object->movedir;
+    turnaround = opposite[olddir];
 
-	//
-	// Movement choice: Previously this was calculation to find
-	// the distance between object and target: if the object had
-	// no target, a fatal error was returned. However it is now
-	// possible to have movement without a target. if the object
-	// has a target, go for that; else if it has a supporting
-	// object aim to go within supporting distance of that; the
-	// remaining option is to walk aimlessly: the target destination
-	// is always 128 in the old movement direction, think
-	// of it like the donkey and the carrot sketch: the donkey will
-	// move towards the carrot, but since the carrot is always a
-	// set distance away from the donkey, the rather stupid mammal
-	// will spend eternity trying to get the carrot and will walk
-	// forever.
-	//
-	// -ACB- 1998/09/06
+    //
+    // Movement choice: Previously this was calculation to find
+    // the distance between object and target: if the object had
+    // no target, a fatal error was returned. However it is now
+    // possible to have movement without a target. if the object
+    // has a target, go for that; else if it has a supporting
+    // object aim to go within supporting distance of that; the
+    // remaining option is to walk aimlessly: the target destination
+    // is always 128 in the old movement direction, think
+    // of it like the donkey and the carrot sketch: the donkey will
+    // move towards the carrot, but since the carrot is always a
+    // set distance away from the donkey, the rather stupid mammal
+    // will spend eternity trying to get the carrot and will walk
+    // forever.
+    //
+    // -ACB- 1998/09/06
 
-	if (object->target)
-	{
-		deltax = object->target->x - object->x;
-		deltay = object->target->y - object->y;
-	}
-	else if (object->supportobj)
-	{
-		// not too close
-		deltax = (object->supportobj->x - object->x) - (object->supportobj->radius * 4);
-		deltay = (object->supportobj->y - object->y) - (object->supportobj->radius * 4);
-	}
-	else
-	{
-		deltax = 128 * xspeed[olddir];
-		deltay = 128 * yspeed[olddir];
-	}
+    if (object->target)
+    {
+        deltax = object->target->x - object->x;
+        deltay = object->target->y - object->y;
+    }
+    else if (object->supportobj)
+    {
+        // not too close
+        deltax = (object->supportobj->x - object->x) - (object->supportobj->radius * 4);
+        deltay = (object->supportobj->y - object->y) - (object->supportobj->radius * 4);
+    }
+    else
+    {
+        deltax = 128 * xspeed[olddir];
+        deltay = 128 * yspeed[olddir];
+    }
 
-	if (deltax > 10)
-		d[1] = DI_EAST;
-	else if (deltax < -10)
-		d[1] = DI_WEST;
-	else
-		d[1] = DI_NODIR;
+    if (deltax > 10)
+        d[1] = DI_EAST;
+    else if (deltax < -10)
+        d[1] = DI_WEST;
+    else
+        d[1] = DI_NODIR;
 
-	if (deltay < -10)
-		d[2] = DI_SOUTH;
-	else if (deltay > 10)
-		d[2] = DI_NORTH;
-	else
-		d[2] = DI_NODIR;
+    if (deltay < -10)
+        d[2] = DI_SOUTH;
+    else if (deltay > 10)
+        d[2] = DI_NORTH;
+    else
+        d[2] = DI_NODIR;
 
-	// try direct route
-	if (d[1] != DI_NODIR && d[2] != DI_NODIR)
-	{
-		object->movedir = diags[((deltay < 0) << 1) + (deltax > 0)];
-		if (object->movedir != turnaround && TryWalk(object))
-			return;
-	}
+    // try direct route
+    if (d[1] != DI_NODIR && d[2] != DI_NODIR)
+    {
+        object->movedir = diags[((deltay < 0) << 1) + (deltax > 0)];
+        if (object->movedir != turnaround && TryWalk(object))
+            return;
+    }
 
-	// try other directions
-	if (P_Random() > 200 || fabs(deltay) > fabs(deltax))
-	{
-		tdir = d[1];
-		d[1] = d[2];
-		d[2] = tdir;
-	}
+    // try other directions
+    if (P_Random() > 200 || fabs(deltay) > fabs(deltax))
+    {
+        tdir = d[1];
+        d[1] = d[2];
+        d[2] = tdir;
+    }
 
-	if (d[1] == turnaround)
-		d[1] = DI_NODIR;
+    if (d[1] == turnaround)
+        d[1] = DI_NODIR;
 
-	if (d[2] == turnaround)
-		d[2] = DI_NODIR;
+    if (d[2] == turnaround)
+        d[2] = DI_NODIR;
 
-	if (d[1] != DI_NODIR)
-	{
-		object->movedir = d[1];
-		if (TryWalk(object))
-		{
-			// either moved forward or attacked
-			return;
-		}
-	}
+    if (d[1] != DI_NODIR)
+    {
+        object->movedir = d[1];
+        if (TryWalk(object))
+        {
+            // either moved forward or attacked
+            return;
+        }
+    }
 
-	if (d[2] != DI_NODIR)
-	{
-		object->movedir = d[2];
+    if (d[2] != DI_NODIR)
+    {
+        object->movedir = d[2];
 
-		if (TryWalk(object))
-			return;
-	}
+        if (TryWalk(object))
+            return;
+    }
 
-	// there is no direct path to the player,
-	// so pick another direction.
-	if (olddir != DI_NODIR)
-	{
-		object->movedir = olddir;
+    // there is no direct path to the player,
+    // so pick another direction.
+    if (olddir != DI_NODIR)
+    {
+        object->movedir = olddir;
 
-		if (TryWalk(object))
-			return;
-	}
+        if (TryWalk(object))
+            return;
+    }
 
-	// randomly determine direction of search
-	if (P_Random() & 1)
-	{
-		for (tdir = DI_EAST; tdir <= DI_SOUTHEAST; tdir = (dirtype_e)((int)tdir+1))
-		{
-			if (tdir != turnaround)
-			{
-				object->movedir = tdir;
+    // randomly determine direction of search
+    if (P_Random() & 1)
+    {
+        for (tdir = DI_EAST; tdir <= DI_SOUTHEAST; tdir = (dirtype_e)((int)tdir + 1))
+        {
+            if (tdir != turnaround)
+            {
+                object->movedir = tdir;
 
-				if (TryWalk(object))
-					return;
-			}
-		}
-	}
-	else
-	{
-		for (tdir = DI_SOUTHEAST; tdir != (dirtype_e)(DI_EAST - 1); tdir = (dirtype_e)((int)tdir-1))
-		{
-			if (tdir != turnaround)
-			{
-				object->movedir = tdir;
+                if (TryWalk(object))
+                    return;
+            }
+        }
+    }
+    else
+    {
+        for (tdir = DI_SOUTHEAST; tdir != (dirtype_e)(DI_EAST - 1); tdir = (dirtype_e)((int)tdir - 1))
+        {
+            if (tdir != turnaround)
+            {
+                object->movedir = tdir;
 
-				if (TryWalk(object))
-					return;
-			}
-		}
-	}
+                if (TryWalk(object))
+                    return;
+            }
+        }
+    }
 
-	if (turnaround != DI_NODIR)
-	{
-		object->movedir = turnaround;
-		if (TryWalk(object))
-			return;
-	}
+    if (turnaround != DI_NODIR)
+    {
+        object->movedir = turnaround;
+        if (TryWalk(object))
+            return;
+    }
 
-	// cannot move
-	object->movedir = DI_NODIR;
+    // cannot move
+    object->movedir = DI_NODIR;
 }
 
 //
@@ -480,244 +458,237 @@ void P_NewChaseDir(mobj_t * object)
 //
 // Returns true if a player is targeted.
 //
-bool P_LookForPlayers(mobj_t * actor, angle_t range)
+bool P_LookForPlayers(mobj_t *actor, angle_t range)
 {
-	int c;
-	int stop;
-	player_t *player;
-	angle_t an;
-	float dist;
+    int       c;
+    int       stop;
+    player_t *player;
+    angle_t   an;
+    float     dist;
 
-	c = 0;
-	stop = (actor->lastlook - 1 + MAXPLAYERS) % MAXPLAYERS;
+    c    = 0;
+    stop = (actor->lastlook - 1 + MAXPLAYERS) % MAXPLAYERS;
 
-	for (; actor->lastlook != stop; actor->lastlook = (actor->lastlook + 1) % MAXPLAYERS)
-	{
-		player = players[actor->lastlook];
+    for (; actor->lastlook != stop; actor->lastlook = (actor->lastlook + 1) % MAXPLAYERS)
+    {
+        player = players[actor->lastlook];
 
-		if (!player)
-			continue;
+        if (!player)
+            continue;
 
-		SYS_ASSERT(player->mo);
+        SYS_ASSERT(player->mo);
 
-		// done looking ?
-		if (c++ >= 2)
-			break;
+        // done looking ?
+        if (c++ >= 2)
+            break;
 
-		// dead ?
-		if (player->health <= 0)
-			continue;
+        // dead ?
+        if (player->health <= 0)
+            continue;
 
-		// on the same team ?
-		if ((actor->side & player->mo->side) != 0)
-			continue;
+        // on the same team ?
+        if ((actor->side & player->mo->side) != 0)
+            continue;
 
-		if (range < ANG180)
-		{
-			an = R_PointToAngle(actor->x, actor->y, player->mo->x,
-				player->mo->y) - actor->angle;
+        if (range < ANG180)
+        {
+            an = R_PointToAngle(actor->x, actor->y, player->mo->x, player->mo->y) - actor->angle;
 
-			if (range <= an && an <= (range * -1))
-			{
-				// behind back.
-				// if real close, react anyway
-				dist = P_ApproxDistance(player->mo->x - actor->x,
-					player->mo->y - actor->y);
+            if (range <= an && an <= (range * -1))
+            {
+                // behind back.
+                // if real close, react anyway
+                dist = P_ApproxDistance(player->mo->x - actor->x, player->mo->y - actor->y);
 
-				if (dist > MELEERANGE)
-					continue;
-			}
-		}
+                if (dist > MELEERANGE)
+                    continue;
+            }
+        }
 
-		// out of sight ?
-		if (!P_CheckSight(actor, player->mo))
-			continue;
+        // out of sight ?
+        if (!P_CheckSight(actor, player->mo))
+            continue;
 
-		actor->SetTarget(player->mo);
-		return true;
-	}
+        actor->SetTarget(player->mo);
+        return true;
+    }
 
-	return false;
+    return false;
 }
-
 
 //
 //   BOSS-BRAIN HANDLING
 //
 
-mobj_t * P_LookForShootSpot(const mobjtype_c *spot_type)
+mobj_t *P_LookForShootSpot(const mobjtype_c *spot_type)
 {
-	// -AJA- 2022: changed this to find all spots matching the wanted type,
-	//             and return a random one.  Since brain spits occur seldomly
-	//             (every few seconds), there is little need to pre-find them.
+    // -AJA- 2022: changed this to find all spots matching the wanted type,
+    //             and return a random one.  Since brain spits occur seldomly
+    //             (every few seconds), there is little need to pre-find them.
 
-	std::vector<mobj_t *> spots;
+    std::vector<mobj_t *> spots;
 
-	for (mobj_t *cur = mobjlisthead ; cur != NULL ; cur=cur->next)
-		if (cur->info == spot_type && ! cur->isRemoved())
-			spots.push_back(cur);
+    for (mobj_t *cur = mobjlisthead; cur != NULL; cur = cur->next)
+        if (cur->info == spot_type && !cur->isRemoved())
+            spots.push_back(cur);
 
-	if (spots.empty())
-		return NULL;
+    if (spots.empty())
+        return NULL;
 
-	int idx = C_Random() % (int)spots.size();
+    int idx = C_Random() % (int)spots.size();
 
-	return spots[idx];
+    return spots[idx];
 }
-
 
 static void SpawnDeathMissile(mobj_t *source, float x, float y, float z)
 {
-	const mobjtype_c *info;
-	mobj_t *th;
+    const mobjtype_c *info;
+    mobj_t           *th;
 
-	info = mobjtypes.Lookup("BRAIN_DEATH_MISSILE");
+    info = mobjtypes.Lookup("BRAIN_DEATH_MISSILE");
 
-	th = P_MobjCreateObject(x, y, z, info);
-	if (th->info->seesound)
-		S_StartFX(th->info->seesound, P_MobjGetSfxCategory(th), th);
+    th = P_MobjCreateObject(x, y, z, info);
+    if (th->info->seesound)
+        S_StartFX(th->info->seesound, P_MobjGetSfxCategory(th), th);
 
-	th->SetRealSource(source);
+    th->SetRealSource(source);
 
-	th->mom.x = (x - source->x) / 50.0f;
-	th->mom.y = -0.25f;
-	th->mom.z = (z - source->z) / 50.0f;
+    th->mom.x = (x - source->x) / 50.0f;
+    th->mom.y = -0.25f;
+    th->mom.z = (z - source->z) / 50.0f;
 
-	th->tics -= M_Random() & 7;
+    th->tics -= M_Random() & 7;
 
-	if (th->tics < 1)
-		th->tics = 1;
+    if (th->tics < 1)
+        th->tics = 1;
 }
 
-void P_ActBrainScream(mobj_t * bossbrain)
+void P_ActBrainScream(mobj_t *bossbrain)
 {
-	// The brain and his pain...
+    // The brain and his pain...
 
-	float x, y, z;
-	float min_x, max_x;
+    float x, y, z;
+    float min_x, max_x;
 
-	min_x = bossbrain->x - 280.0f;
-	max_x = bossbrain->x + 280.0f;
+    min_x = bossbrain->x - 280.0f;
+    max_x = bossbrain->x + 280.0f;
 
-	for (x = min_x; x < max_x; x += 4)
-	{
-		y = bossbrain->y - 320.0f;
-		z = bossbrain->z + (P_Random() - 180.0f) * 2.0f;
+    for (x = min_x; x < max_x; x += 4)
+    {
+        y = bossbrain->y - 320.0f;
+        z = bossbrain->z + (P_Random() - 180.0f) * 2.0f;
 
-		SpawnDeathMissile(bossbrain, x, y, z);
-	}
+        SpawnDeathMissile(bossbrain, x, y, z);
+    }
 
-	if (bossbrain->info->deathsound)
-		S_StartFX(bossbrain->info->deathsound, P_MobjGetSfxCategory(bossbrain), bossbrain);
+    if (bossbrain->info->deathsound)
+        S_StartFX(bossbrain->info->deathsound, P_MobjGetSfxCategory(bossbrain), bossbrain);
 }
 
-void P_ActBrainMissileExplode(mobj_t * mo)
+void P_ActBrainMissileExplode(mobj_t *mo)
 {
-	float x, y, z;
+    float x, y, z;
 
-	if (! mo->source)
-		return;
+    if (!mo->source)
+        return;
 
-	x = mo->source->x + (P_Random() - 128.0f) * 4.0f;
-	y = mo->source->y - 320.0f;
-	z = mo->source->z + (P_Random() - 180.0f) * 2.0f;
+    x = mo->source->x + (P_Random() - 128.0f) * 4.0f;
+    y = mo->source->y - 320.0f;
+    z = mo->source->z + (P_Random() - 180.0f) * 2.0f;
 
-	SpawnDeathMissile(mo->source, x, y, z);
+    SpawnDeathMissile(mo->source, x, y, z);
 }
 
-void P_ActBrainDie(mobj_t * bossbrain)
+void P_ActBrainDie(mobj_t *bossbrain)
 {
-	G_ExitLevel(TICRATE);
+    G_ExitLevel(TICRATE);
 }
 
-void P_ActBrainSpit(mobj_t * shooter)
+void P_ActBrainSpit(mobj_t *shooter)
 {
-	static int easy = 0;
+    static int easy = 0;
 
-	// when skill is easy, only fire every second cube.
+    // when skill is easy, only fire every second cube.
 
-	easy ^= 1;
+    easy ^= 1;
 
-	if (gameskill <= sk_easy && (!easy))
-		return;
+    if (gameskill <= sk_easy && (!easy))
+        return;
 
-	// shoot out a cube
-	P_ActRangeAttack(shooter);
+    // shoot out a cube
+    P_ActRangeAttack(shooter);
 }
 
-
-void P_ActCubeSpawn(mobj_t * cube)
+void P_ActCubeSpawn(mobj_t *cube)
 {
-	mobj_t *targ;
-	mobj_t *newmobj;
-	const mobjtype_c *type;
-	int r;
+    mobj_t           *targ;
+    mobj_t           *newmobj;
+    const mobjtype_c *type;
+    int               r;
 
-	targ = cube->target;
+    targ = cube->target;
 
-	// -AJA- 2007/07/28: workaround for DeHackEd patches using S_SPAWNFIRE
-	if (!targ || !cube->currentattack ||
-		cube->currentattack->attackstyle != ATK_SHOOTTOSPOT)
-		return;
-	
-	// Randomly select monster to spawn.
-	r = P_Random();
+    // -AJA- 2007/07/28: workaround for DeHackEd patches using S_SPAWNFIRE
+    if (!targ || !cube->currentattack || cube->currentattack->attackstyle != ATK_SHOOTTOSPOT)
+        return;
 
-	// Probability distribution (kind of :)),
-	// decreasing likelihood.
-	if (r < 50)
-		type = mobjtypes.Lookup("IMP");
-	else if (r < 90)
-		type = mobjtypes.Lookup("DEMON");
-	else if (r < 120)
-		type = mobjtypes.Lookup("SPECTRE");
-	else if (r < 130)
-		type = mobjtypes.Lookup("PAIN_ELEMENTAL");
-	else if (r < 160)
-		type = mobjtypes.Lookup("CACODEMON");
-	else if (r < 162)
-		type = mobjtypes.Lookup("ARCHVILE");
-	else if (r < 172)
-		type = mobjtypes.Lookup("REVENANT");
-	else if (r < 192)
-		type = mobjtypes.Lookup("ARACHNOTRON");
-	else if (r < 222)
-		type = mobjtypes.Lookup("MANCUBUS");
-	else if (r < 246)
-		type = mobjtypes.Lookup("HELL_KNIGHT");
-	else
-		type = mobjtypes.Lookup("BARON_OF_HELL");
+    // Randomly select monster to spawn.
+    r = P_Random();
 
-	newmobj = P_MobjCreateObject(targ->x, targ->y, targ->z, type);
+    // Probability distribution (kind of :)),
+    // decreasing likelihood.
+    if (r < 50)
+        type = mobjtypes.Lookup("IMP");
+    else if (r < 90)
+        type = mobjtypes.Lookup("DEMON");
+    else if (r < 120)
+        type = mobjtypes.Lookup("SPECTRE");
+    else if (r < 130)
+        type = mobjtypes.Lookup("PAIN_ELEMENTAL");
+    else if (r < 160)
+        type = mobjtypes.Lookup("CACODEMON");
+    else if (r < 162)
+        type = mobjtypes.Lookup("ARCHVILE");
+    else if (r < 172)
+        type = mobjtypes.Lookup("REVENANT");
+    else if (r < 192)
+        type = mobjtypes.Lookup("ARACHNOTRON");
+    else if (r < 222)
+        type = mobjtypes.Lookup("MANCUBUS");
+    else if (r < 246)
+        type = mobjtypes.Lookup("HELL_KNIGHT");
+    else
+        type = mobjtypes.Lookup("BARON_OF_HELL");
 
-	if (P_LookForPlayers(newmobj, ANG180))
-	{
-		if (newmobj->info->chase_state)
-			P_SetMobjState(newmobj, newmobj->info->chase_state);
-		else
-			P_SetMobjState(newmobj, newmobj->info->spawn_state);
-	}
+    newmobj = P_MobjCreateObject(targ->x, targ->y, targ->z, type);
 
-	// telefrag anything in this spot
-	P_TeleportMove(newmobj, newmobj->x, newmobj->y, newmobj->z);
+    if (P_LookForPlayers(newmobj, ANG180))
+    {
+        if (newmobj->info->chase_state)
+            P_SetMobjState(newmobj, newmobj->info->chase_state);
+        else
+            P_SetMobjState(newmobj, newmobj->info->spawn_state);
+    }
+
+    // telefrag anything in this spot
+    P_TeleportMove(newmobj, newmobj->x, newmobj->y, newmobj->z);
 }
 
-void P_ActPlayerScream(mobj_t * mo)
+void P_ActPlayerScream(mobj_t *mo)
 {
-	sfx_t *sound;
+    sfx_t *sound;
 
-	sound = mo->info->deathsound;
+    sound = mo->info->deathsound;
 
-	if ((mo->health < -50) && (W_IsLumpInAnyWad("DSPDIEHI")))
-	{
-		// if the player dies and unclipped health is < -50%...
+    if ((mo->health < -50) && (W_IsLumpInAnyWad("DSPDIEHI")))
+    {
+        // if the player dies and unclipped health is < -50%...
 
-		sound = sfxdefs.GetEffect("PDIEHI");
-	}
+        sound = sfxdefs.GetEffect("PDIEHI");
+    }
 
-	S_StartFX(sound, P_MobjGetSfxCategory(mo), mo);
+    S_StartFX(sound, P_MobjGetSfxCategory(mo), mo);
 }
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

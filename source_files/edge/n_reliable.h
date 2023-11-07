@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Networking : Reliable Links
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -23,16 +23,15 @@
 
 class net_node_c
 {
-public:
-	SOCKET sock;
+  public:
+    SOCKET sock;
 
-	net_address_c remote;
+    net_address_c remote;
 
-public:
-	 net_node_c();
-	~net_node_c();
+  public:
+    net_node_c();
+    ~net_node_c();
 };
-
 
 bool N_StartupReliableLink(int port);
 // (HOST ONLY)
@@ -46,7 +45,7 @@ void N_ShutdownReliableLink(void);
 // (they should all be closed before calling this), and any
 // buffered data will be discarded.
 
-net_node_c * N_AcceptReliableConn(void);
+net_node_c *N_AcceptReliableConn(void);
 // (HOST ONLY)
 // Check to see if any clients have (requested to) connect, and
 // allow them to connect.  This function should be called
@@ -55,7 +54,7 @@ net_node_c * N_AcceptReliableConn(void);
 // When successful, returns a new node.
 // Returns NULL if not successful.
 
-net_node_c * N_OpenReliableLink(const net_address_c *remote);
+net_node_c *N_OpenReliableLink(const net_address_c *remote);
 // (CLIENT ONLY)
 // Open a link to the Host at the given address and port.
 //

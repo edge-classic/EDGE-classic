@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  Radius Trigger action defs
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -64,8 +64,7 @@ void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param);
 void RAD_ActWeaponEvent(rad_trigger_t *R, void *param);
 void RAD_ActReplaceThing(rad_trigger_t *R, void *param);
 
-
-#endif  /*__RAD_ACT_H__*/
+#endif /*__RAD_ACT_H__*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Primesynth Music Player
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2023 The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -27,7 +27,7 @@ bool S_StartupPrime(void);
 
 void S_RestartPrime(void);
 
-abstract_music_c * S_PlayPrime(byte *data, int length, bool loop);
+abstract_music_c *S_PlayPrime(byte *data, int length, bool loop);
 
 #endif /* __S_PRIME_H__ */
 

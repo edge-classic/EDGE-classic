@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Video Context
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -33,23 +33,21 @@
 
 #include "image_data.h"
 
-
 // X coordinates of left and right edges of screen.
 // updated by calls to HUD_SetCoordSys() or HUD_Reset().
-extern float hud_x_left;
-extern float hud_x_right;
-extern float hud_x_mid;
-extern float hud_visible_top;
-extern float hud_visible_bottom;
+extern float                    hud_x_left;
+extern float                    hud_x_right;
+extern float                    hud_x_mid;
+extern float                    hud_visible_top;
+extern float                    hud_visible_bottom;
 extern std::vector<std::string> hud_overlays;
-
 
 void HUD_SetCoordSys(int width, int height);
 
-void HUD_SetFont(font_c *font = NULL);
-void HUD_SetScale(float scale = 1.0f);
-void HUD_SetTextColor(rgbcol_t color = RGB_NO_VALUE);
-void HUD_SetAlpha(float alpha = 1.0f);
+void  HUD_SetFont(font_c *font = NULL);
+void  HUD_SetScale(float scale = 1.0f);
+void  HUD_SetTextColor(rgbcol_t color = RGB_NO_VALUE);
+void  HUD_SetAlpha(float alpha = 1.0f);
 float HUD_GetAlpha(void);
 
 // xa is -1 for left, 0 for centred, +1 for right
@@ -59,25 +57,20 @@ void HUD_SetAlignment(int xa = -1, int ya = -1);
 // resets the coord sys to 320x200, and resets all properties
 void HUD_Reset();
 
-
 void HL_Init(void);
 
 void HUD_FrameSetup(void);
 
-
 // manage the current clip rectangle.  The first push enables the
 // scissor test, subsequent pushes merely shrink the area, and the
 // last pop disables the scissor test.
-void HUD_PushScissor(float x1, float y1, float x2, float y2, bool expand=false);
+void HUD_PushScissor(float x1, float y1, float x2, float y2, bool expand = false);
 void HUD_PopScissor();
 
+void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *image, float tx1, float ty1, float tx2,
+                  float ty2, float alpha = 1.0f, rgbcol_t text_col = RGB_NO_VALUE, const colourmap_c *palremap = NULL,
+                  float sx = 0.0, float sy = 0.0, char ch = -1);
 
-void HUD_RawImage(float hx1, float hy1, float hx2, float hy2,
-                  const image_c *image, 
-				  float tx1, float ty1, float tx2, float ty2,
-				  float alpha = 1.0f, rgbcol_t text_col = RGB_NO_VALUE,
-				  const colourmap_c *palremap = NULL, float sx = 0.0, float sy = 0.0, char ch = -1);
- 
 // Draw a solid colour box (possibly translucent) in the given
 // rectangle.
 void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col);
@@ -86,9 +79,8 @@ void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col);
 // end points.  Coordinates are inclusive.  Drawing will be clipped
 // to the current scissor rectangle.  The dx/dy fields are used by
 // the automap code to reduce the wobblies.
-void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col,
-                   float thickness=1, bool smooth=true, float dx=0, float dy=0);
-
+void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col, float thickness = 1, bool smooth = true,
+                   float dx = 0, float dy = 0);
 
 // Draw a thin outline of a box.
 void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col, float thickness = 0.0f);
@@ -102,13 +94,15 @@ void HUD_DrawImageNoOffset(float x, float y, const image_c *image);
 void HUD_ScrollImage(float x, float y, const image_c *image, float sx, float sy);
 void HUD_ScrollImageNoOffset(float x, float y, const image_c *image, float sx, float sy);
 void HUD_DrawImageTitleWS(const image_c *image);
-void HUD_StretchImage(float x, float y, float w, float h, const image_c *image, float sx, float sy, const colourmap_c *colmap = nullptr);
+void HUD_StretchImage(float x, float y, float w, float h, const image_c *image, float sx, float sy,
+                      const colourmap_c *colmap = nullptr);
 void HUD_StretchImageNoOffset(float x, float y, float w, float h, const image_c *image, float sx, float sy);
-void HUD_TileImage(float x, float y, float w, float h, const image_c *image,
-				   float offset_x = 0.0f, float offset_y = 0.0f);
+void HUD_TileImage(float x, float y, float w, float h, const image_c *image, float offset_x = 0.0f,
+                   float offset_y = 0.0f);
 
 // Functions for when we want to draw without having an image_c
-void HUD_StretchFromImageData(float x, float y, float w, float h, const epi::image_data_c *img, unsigned int tex_id, image_opacity_e opacity);
+void HUD_StretchFromImageData(float x, float y, float w, float h, const epi::image_data_c *img, unsigned int tex_id,
+                              image_opacity_e opacity);
 
 extern int hudtic;
 

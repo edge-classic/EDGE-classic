@@ -26,7 +26,6 @@ namespace epi
 
 // *** Path Manipulation Functions ***
 
-
 // Returns the basename (filename minus extension) if it exists
 std::filesystem::path PATH_GetBasename(std::filesystem::path path);
 
@@ -40,14 +39,13 @@ std::filesystem::path PATH_GetExtension(std::filesystem::path path);
 std::filesystem::path PATH_GetFilename(std::filesystem::path path);
 
 // Returns true if the given is an absolute path
-bool PATH_IsAbsolute(std::filesystem:: path);
+bool PATH_IsAbsolute(std::filesystem::path);
 
 // Join two paths together
 std::filesystem::path PATH_Join(std::filesystem::path lhs, std::string rhs);
 #ifdef _WIN32
 std::filesystem::path PATH_Join(std::filesystem::path lhs, std::u32string rhs);
 #endif
-
 
 } // namespace epi
 

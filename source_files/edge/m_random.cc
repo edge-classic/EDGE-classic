@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE RNG
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -27,20 +27,20 @@
 #include "m_random.h"
 #include <random>
 
-std::ranlux24_base m_rand;
-std::ranlux24_base p_rand;
+std::ranlux24_base                            m_rand;
+std::ranlux24_base                            p_rand;
 std::uniform_int_distribution<unsigned short> rand_roll(0, 255);
 std::uniform_int_distribution<unsigned short> coal_roll(0, 0xFFFF);
 
 static int p_index = 0;
-static int p_step = 1;
+static int p_step  = 1;
 
 void M_Random_Init(void)
 {
     m_rand.seed(I_GetMicros());
 }
 
-// 
+//
 // M_Random
 //
 // Returns a number from 0 to 255.
@@ -51,10 +51,10 @@ void M_Random_Init(void)
 //
 int M_Random(void)
 {
-	return rand_roll(m_rand);
+    return rand_roll(m_rand);
 }
 
-// 
+//
 // M_RandomNegPos
 //
 // Returns a number between -255 and 255, but skewed so that values near
@@ -66,13 +66,13 @@ int M_Random(void)
 //
 int M_RandomNegPos(void)
 {
-	int r1 = M_Random();
-	int r2 = M_Random();
+    int r1 = M_Random();
+    int r2 = M_Random();
 
-	return r1 - r2;
+    return r1 - r2;
 }
 
-// 
+//
 // P_Random
 //
 // Returns a number from 0 to 255.
@@ -83,28 +83,28 @@ int M_RandomNegPos(void)
 //
 int P_Random(void)
 {
-	p_index += p_step;
-	p_index &= 0xff;
+    p_index += p_step;
+    p_index &= 0xff;
 
-	if (p_index == 0)
-		p_step += (47 * 2);
+    if (p_index == 0)
+        p_step += (47 * 2);
 
     p_rand.seed(p_index + p_step);
 
     return rand_roll(p_rand);
 }
 
-// 
+//
 // C_Random
 //
 // Returns a number from 0 to 65535 for COALAPI usage
 //
 int C_Random(void)
 {
-	return coal_roll(m_rand);
+    return coal_roll(m_rand);
 }
 
-// 
+//
 // P_RandomNegPos
 //
 // Returns a number between -255 and 255, but skewed so that values near
@@ -116,10 +116,10 @@ int C_Random(void)
 //
 int P_RandomNegPos(void)
 {
-	int r1 = P_Random();
-	int r2 = P_Random();
+    int r1 = P_Random();
+    int r2 = P_Random();
 
-	return r1 - r2;
+    return r1 - r2;
 }
 
 //
@@ -127,9 +127,7 @@ int P_RandomNegPos(void)
 //
 bool M_RandomTest(percent_t chance)
 {
-    return (chance <= 0) ? false :
-           (chance >= 1) ? true :
-           (M_Random()/255.0f < chance) ? true : false;
+    return (chance <= 0) ? false : (chance >= 1) ? true : (M_Random() / 255.0f < chance) ? true : false;
 }
 
 //
@@ -137,9 +135,7 @@ bool M_RandomTest(percent_t chance)
 //
 bool P_RandomTest(percent_t chance)
 {
-    return (chance <= 0) ? false :
-           (chance >= 1) ? true :
-           (P_Random()/255.0f < chance) ? true : false;
+    return (chance <= 0) ? false : (chance >= 1) ? true : (P_Random() / 255.0f < chance) ? true : false;
 }
 
 //
@@ -149,7 +145,7 @@ bool P_RandomTest(percent_t chance)
 //
 int P_ReadRandomState(void)
 {
-	return (p_index & 0xff) | ((p_step & 0xff) << 8);
+    return (p_index & 0xff) | ((p_step & 0xff) << 8);
 }
 
 //
@@ -157,10 +153,9 @@ int P_ReadRandomState(void)
 //
 void P_WriteRandomState(int value)
 {
-	p_index = (value & 0xff);
-	p_step  = 1 + ((value >> 8) & 0xfe);
+    p_index = (value & 0xff);
+    p_step  = 1 + ((value >> 8) & 0xfe);
 }
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -51,99 +51,115 @@
 #include "deh_util.h"
 #include "deh_weapons.h"
 
-
 namespace Deh_Edge
 {
 
 bool Field_ValidateValue(const fieldreference_t *ref, int new_val)
 {
-	if (ref->field_type == FT_ANY || ref->field_type == FT_BITS)
-		return true;
+    if (ref->field_type == FT_ANY || ref->field_type == FT_BITS)
+        return true;
 
-	if (new_val < 0 || (new_val == 0 && ref->field_type == FT_GTEQ1))
-	{
-		PrintWarn("Line %d: bad value '%d' for %s\n",
-			Patch::line_num, new_val, ref->deh_name);
-		return false;
-	}
+    if (new_val < 0 || (new_val == 0 && ref->field_type == FT_GTEQ1))
+    {
+        PrintWarn("Line %d: bad value '%d' for %s\n", Patch::line_num, new_val, ref->deh_name);
+        return false;
+    }
 
-	if (ref->field_type == FT_NONEG || ref->field_type == FT_GTEQ1)
-		return true;
+    if (ref->field_type == FT_NONEG || ref->field_type == FT_GTEQ1)
+        return true;
 
-	if (ref->field_type == FT_SUBSPR)  // ignore the bright bit
-		new_val &= ~32768;
+    if (ref->field_type == FT_SUBSPR) // ignore the bright bit
+        new_val &= ~32768;
 
-	int min_obj = 0;
-	int max_obj = 0;
+    int min_obj = 0;
+    int max_obj = 0;
 
-	if (Patch::patch_fmt <= 5)
-	{
-		switch (ref->field_type)
-		{
-			case FT_AMMO:   max_obj = NUMAMMO    - 1; break;
-			case FT_FRAME:  max_obj = NUMSTATES  - 1; break;
-			case FT_SOUND:  max_obj = NUMSFX     - 1; break;
-			case FT_SPRITE: max_obj = NUMSPRITES - 1; break;
-			case FT_SUBSPR: max_obj = 31; break;
+    if (Patch::patch_fmt <= 5)
+    {
+        switch (ref->field_type)
+        {
+        case FT_AMMO:
+            max_obj = NUMAMMO - 1;
+            break;
+        case FT_FRAME:
+            max_obj = NUMSTATES - 1;
+            break;
+        case FT_SOUND:
+            max_obj = NUMSFX - 1;
+            break;
+        case FT_SPRITE:
+            max_obj = NUMSPRITES - 1;
+            break;
+        case FT_SUBSPR:
+            max_obj = 31;
+            break;
 
-			default:
-				InternalError("Bad field type %d\n", ref->field_type);
-		}
-	}
-	else  /* patch_fmt == 6, allow BOOM/MBF stuff */
-	{
-		switch (ref->field_type)
-		{
-			case FT_AMMO:   max_obj = NUMAMMO - 1; break;
-			case FT_SUBSPR: max_obj = 31; break;
+        default:
+            InternalError("Bad field type %d\n", ref->field_type);
+        }
+    }
+    else /* patch_fmt == 6, allow BOOM/MBF stuff */
+    {
+        switch (ref->field_type)
+        {
+        case FT_AMMO:
+            max_obj = NUMAMMO - 1;
+            break;
+        case FT_SUBSPR:
+            max_obj = 31;
+            break;
 
-			// for DSDehacked, allow very high values
-			case FT_FRAME:  max_obj = 32767; break;
-			case FT_SPRITE: max_obj = 32767; break;
-			case FT_SOUND:  max_obj = 32767; break;
+        // for DSDehacked, allow very high values
+        case FT_FRAME:
+            max_obj = 32767;
+            break;
+        case FT_SPRITE:
+            max_obj = 32767;
+            break;
+        case FT_SOUND:
+            max_obj = 32767;
+            break;
 
-			default:
-				InternalError("Bad field type %d\n", ref->field_type);
-		}
-	}
+        default:
+            InternalError("Bad field type %d\n", ref->field_type);
+        }
+    }
 
-	if (new_val < min_obj || new_val > max_obj)
-	{
-		PrintWarn("Line %d: bad value '%d' for %s\n",
-			Patch::line_num, new_val, ref->deh_name);
+    if (new_val < min_obj || new_val > max_obj)
+    {
+        PrintWarn("Line %d: bad value '%d' for %s\n", Patch::line_num, new_val, ref->deh_name);
 
-		return false;
-	}
+        return false;
+    }
 
-	return true;
+    return true;
 }
-
 
 bool Field_Alter(const fieldreference_t *refs, const char *deh_field, int *object, int new_value)
 {
-	for (; refs->deh_name ; refs++)
-	{
-		if (StrCaseCmp(refs->deh_name, deh_field) != 0)
-			continue;
+    for (; refs->deh_name; refs++)
+    {
+        if (StrCaseCmp(refs->deh_name, deh_field) != 0)
+            continue;
 
-		// found it...
+        // found it...
 
-		if (Field_ValidateValue(refs, new_value))
-		{
-			// prevent BOOM/MBF specific flags from being set using
-			// numeric notation.  Only settable via AA+BB+CC notation.
-			if (refs->field_type == FT_BITS)
-				new_value &= ~ ALL_BEX_FLAGS;
+        if (Field_ValidateValue(refs, new_value))
+        {
+            // prevent BOOM/MBF specific flags from being set using
+            // numeric notation.  Only settable via AA+BB+CC notation.
+            if (refs->field_type == FT_BITS)
+                new_value &= ~ALL_BEX_FLAGS;
 
-			// Yup, we play a bit dirty here
-			int *field = (int *)((char *)object + refs->offset);
-			*field = new_value;
-		}
+            // Yup, we play a bit dirty here
+            int *field = (int *)((char *)object + refs->offset);
+            *field     = new_value;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
-}  // Deh_Edge
+} // namespace Deh_Edge

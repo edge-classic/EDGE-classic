@@ -19,31 +19,31 @@
 #include "epi.h"
 #include "math_vector.h"
 
-#define SMALL_DIST  0.01f
+#define SMALL_DIST 0.01f
 
 namespace epi
 {
 
 float ivec_c::Length() const
 {
-	return sqrtf(x * x + y * y);
+    return sqrtf(x * x + y * y);
 }
 
 //------------------------------------------------------------------------
 
 float vec2_c::Length() const
 {
-	return sqrtf(x * x + y * y);
+    return sqrtf(x * x + y * y);
 }
 
-float vec2_c::PerpDist(const vec2_c& point) const
+float vec2_c::PerpDist(const vec2_c &point) const
 {
-	return (point.x * y - point.y * x) / sqrtf(x * x + y * y);
+    return (point.x * y - point.y * x) / sqrtf(x * x + y * y);
 }
 
-float vec2_c::AlongDist(const vec2_c& point) const
+float vec2_c::AlongDist(const vec2_c &point) const
 {
-	// same as the dot-product with length adjustment
+    // same as the dot-product with length adjustment
     return (point.x * x + point.y * y) / sqrtf(x * x + y * y);
 }
 
@@ -51,50 +51,47 @@ float vec2_c::AlongDist(const vec2_c& point) const
 
 float vec3_c::Length() const
 {
-	return sqrtf(x * x + y * y + z * z);
+    return sqrtf(x * x + y * y + z * z);
 }
 
 float vec3_c::Slope() const
 {
-	float dist = sqrtf(x * x + y * y);
+    float dist = sqrtf(x * x + y * y);
 
-	// kludge to prevent division by zero
-	if (dist < SMALL_DIST)
-		dist = SMALL_DIST;
+    // kludge to prevent division by zero
+    if (dist < SMALL_DIST)
+        dist = SMALL_DIST;
 
-	return z / dist;
+    return z / dist;
 }
 
 float vec3_c::ApproxSlope() const
 {
-	float ax = ABS(x);
-	float ay = ABS(y);
+    float ax = ABS(x);
+    float ay = ABS(y);
 
-	// approximate distance
-	float dist = (ax > ay) ? (ax + ay / 2) : (ay + ax / 2);
+    // approximate distance
+    float dist = (ax > ay) ? (ax + ay / 2) : (ay + ax / 2);
 
-	// kludge to prevent division by zero
-	if (dist < SMALL_DIST)
-		dist = SMALL_DIST;
+    // kludge to prevent division by zero
+    if (dist < SMALL_DIST)
+        dist = SMALL_DIST;
 
-	return z / dist;
+    return z / dist;
 }
 
-float vec3_c::AlongDist(const vec3_c& point) const
+float vec3_c::AlongDist(const vec3_c &point) const
 {
-	// same as the dot-product with length adjustment
-	return (*this * point) / Length();
+    // same as the dot-product with length adjustment
+    return (*this * point) / Length();
 }
 
-vec3_c vec3_c::Cross(const vec3_c& rhs) const
+vec3_c vec3_c::Cross(const vec3_c &rhs) const
 {
-	return vec3_c(y * rhs.z - z * rhs.y,
-	              z * rhs.x - x * rhs.z,
-	              x * rhs.y - y * rhs.x);
+    return vec3_c(y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x);
 }
 
-}  // namespace epi
-
+} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Rendering Definitions Header
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -41,7 +41,6 @@
 
 class image_c;
 
-
 //
 // INTERNAL MAP TYPES
 //  used by play and refresh
@@ -54,21 +53,22 @@ class image_c;
 // Dasho: Made new struct type to hold extra info
 typedef struct vertex_s
 {
-	float x, y, zf, zc;
+    float x, y, zf, zc;
 
-	void Set(float _x, float _y, float _zf, float _zc)
-	{
-		x = _x; y = _y; zf = _zf; zc = _zc;
-	}
-}
-vertex_t;
+    void Set(float _x, float _y, float _zf, float _zc)
+    {
+        x  = _x;
+        y  = _y;
+        zf = _zf;
+        zc = _zc;
+    }
+} vertex_t;
 
 // Forward of LineDefs, for Sectors.
 struct line_s;
 struct side_s;
 struct subsector_s;
 struct region_properties_s;
-
 
 //
 // Touch Node
@@ -85,7 +85,7 @@ struct region_properties_s;
 // part is that we only need to unlink the node from the sector list
 // (and relink) if the sector in that node is different.  Thus saving
 // work for the common case where the sector(s) don't change.
-// 
+//
 // CAVEAT: this means that very little should be done in between
 // P_UnsetThingPos and P_SetThingPos calls, ideally just load some new
 // x/y position.  Avoid especially anything that scans the sector
@@ -93,16 +93,14 @@ struct region_properties_s;
 //
 typedef struct touch_node_s
 {
-	struct mobj_s *mo = nullptr;
-	struct touch_node_s *mo_next = nullptr;
-	struct touch_node_s *mo_prev = nullptr;
+    struct mobj_s       *mo      = nullptr;
+    struct touch_node_s *mo_next = nullptr;
+    struct touch_node_s *mo_prev = nullptr;
 
-	struct sector_s *sec = nullptr;
-	struct touch_node_s *sec_next = nullptr;
-	struct touch_node_s *sec_prev = nullptr;
-}
-touch_node_t;
-
+    struct sector_s     *sec      = nullptr;
+    struct touch_node_s *sec_next = nullptr;
+    struct touch_node_s *sec_prev = nullptr;
+} touch_node_t;
 
 //
 // Region Properties
@@ -111,34 +109,33 @@ touch_node_t;
 //
 typedef struct region_properties_s
 {
-	// rendering related
-	int lightlevel;
+    // rendering related
+    int lightlevel;
 
-	const colourmap_c *colourmap;  // can be NULL
+    const colourmap_c *colourmap; // can be NULL
 
-	// special type (e.g. damaging)
-	int type;
-	const sectortype_c *special;
-	bool secret_found = false;
+    // special type (e.g. damaging)
+    int                 type;
+    const sectortype_c *special;
+    bool                secret_found = false;
 
-	// -KM- 1998/10/29 Added gravity + friction
-	float gravity;
-	float friction;
-	float viscosity;
-	float drag;
+    // -KM- 1998/10/29 Added gravity + friction
+    float gravity;
+    float friction;
+    float viscosity;
+    float drag;
 
     // pushing sector information (normally all zero)
-	vec3_t push;
+    vec3_t push;
 
-	vec3_t net_push = {0,0,0};
+    vec3_t net_push = {0, 0, 0};
 
-	vec3_t old_push = {0,0,0};
+    vec3_t old_push = {0, 0, 0};
 
-	// sector fog
-	rgbcol_t fog_color = RGB_NO_VALUE;
-	float fog_density = 0;
-}
-region_properties_t;
+    // sector fog
+    rgbcol_t fog_color   = RGB_NO_VALUE;
+    float    fog_density = 0;
+} region_properties_t;
 
 //
 // Surface
@@ -153,35 +150,34 @@ region_properties_t;
 //
 //   tx = wx * x_mat.x + wy * x_mat.y
 //   ty = wx * y_mat.x + wy * y_mat.y
-// 
+//
 typedef struct surface_s
 {
-	const image_c *image;
+    const image_c *image;
 
-	float translucency;
+    float translucency;
 
-	// texturing matrix (usually identity)
-	vec2_t x_mat;
-	vec2_t y_mat;
-	angle_t rotation = 0;
+    // texturing matrix (usually identity)
+    vec2_t  x_mat;
+    vec2_t  y_mat;
+    angle_t rotation = 0;
 
-	// current offset and scrolling deltas (world coords)
-	vec2_t offset;
-	vec2_t scroll;
+    // current offset and scrolling deltas (world coords)
+    vec2_t offset;
+    vec2_t scroll;
 
-	vec2_t net_scroll = {0,0};
-	vec2_t old_scroll = {0,0};
+    vec2_t net_scroll = {0, 0};
+    vec2_t old_scroll = {0, 0};
 
-	// lighting override (as in BOOM).  Usually NULL.
-	region_properties_t *override_p;
+    // lighting override (as in BOOM).  Usually NULL.
+    region_properties_t *override_p;
 
-	// this only used for BOOM deep water (linetype 242)
-	const colourmap_c *boom_colmap;
+    // this only used for BOOM deep water (linetype 242)
+    const colourmap_c *boom_colmap;
 
-	// used for fog boundaries if needed
-	bool fogwall = false;
-}
-surface_t;
+    // used for fog boundaries if needed
+    bool fogwall = false;
+} surface_t;
 
 //
 // ExtraFloor
@@ -192,218 +188,209 @@ surface_t;
 //
 typedef struct extrafloor_s
 {
-	// links in chain.  These are sorted by increasing heights, using
-	// bottom_h as the reference.  This is important, especially when a
-	// liquid extrafloor overlaps a solid one: using this rule, the
-	// liquid region will be higher than the solid one.
-	struct extrafloor_s *higher;
-	struct extrafloor_s *lower;
+    // links in chain.  These are sorted by increasing heights, using
+    // bottom_h as the reference.  This is important, especially when a
+    // liquid extrafloor overlaps a solid one: using this rule, the
+    // liquid region will be higher than the solid one.
+    struct extrafloor_s *higher;
+    struct extrafloor_s *lower;
 
-	struct sector_s *sector;
+    struct sector_s *sector;
 
-	// top and bottom heights of the extrafloor.  For non-THICK
-	// extrafloors, these are the same.  These are generally the same as
-	// in the dummy sector, EXCEPT during the process of moving the
-	// extrafloor.
-	float top_h, bottom_h;
+    // top and bottom heights of the extrafloor.  For non-THICK
+    // extrafloors, these are the same.  These are generally the same as
+    // in the dummy sector, EXCEPT during the process of moving the
+    // extrafloor.
+    float top_h, bottom_h;
 
-	// top/bottom surfaces of the extrafloor
-	surface_t *top;
-	surface_t *bottom;
+    // top/bottom surfaces of the extrafloor
+    surface_t *top;
+    surface_t *bottom;
 
-	// properties used for stuff below us
-	region_properties_t *p;
+    // properties used for stuff below us
+    region_properties_t *p;
 
-	// type of extrafloor this is.  Only NULL for unused extrafloors.
-	// This value is cached pointer to ef_line->special->ef.
-	const extrafloordef_c *ef_info;
+    // type of extrafloor this is.  Only NULL for unused extrafloors.
+    // This value is cached pointer to ef_line->special->ef.
+    const extrafloordef_c *ef_info;
 
-	// extrafloor linedef (frontsector == control sector).  Only NULL
-	// for unused extrafloors.
-	struct line_s *ef_line;
+    // extrafloor linedef (frontsector == control sector).  Only NULL
+    // for unused extrafloors.
+    struct line_s *ef_line;
 
-	// link in dummy sector's controlling list
-	struct extrafloor_s *ctrl_next;
-}
-extrafloor_t;
+    // link in dummy sector's controlling list
+    struct extrafloor_s *ctrl_next;
+} extrafloor_t;
 
 // Vertical gap between a floor & a ceiling.
-// -AJA- 1999/07/19. 
+// -AJA- 1999/07/19.
 //
 typedef struct
 {
-	float f;  // floor
-	float c;  // ceiling
-}
-vgap_t;
+    float f; // floor
+    float c; // ceiling
+} vgap_t;
 
 typedef struct slope_plane_s
 {
-	// Note: z coords are relative to the floor/ceiling height
-	float x1, y1, dz1;
-	float x2, y2, dz2;
-}
-slope_plane_t;
-
+    // Note: z coords are relative to the floor/ceiling height
+    float x1, y1, dz1;
+    float x2, y2, dz2;
+} slope_plane_t;
 
 //
 // The SECTORS record, at runtime.
 //
 typedef struct sector_s
 {
-	// floor and ceiling heights
-	float f_h, c_h;
+    // floor and ceiling heights
+    float f_h, c_h;
 
-	surface_t floor, ceil;
+    surface_t floor, ceil;
 
-	region_properties_t props;
+    region_properties_t props;
 
-	int tag;
+    int tag;
 
-	// set of extrafloors (in the global `extrafloors' array) that this
-	// sector can use.  At load time we can deduce the maximum number
-	// needed for extrafloors, even if they dynamically come and go.
-	//
-	short exfloor_max;
-	short exfloor_used;
-	extrafloor_t *exfloor_first;
+    // set of extrafloors (in the global `extrafloors' array) that this
+    // sector can use.  At load time we can deduce the maximum number
+    // needed for extrafloors, even if they dynamically come and go.
+    //
+    short         exfloor_max;
+    short         exfloor_used;
+    extrafloor_t *exfloor_first;
 
-	// -AJA- 2001/07/11: New multiple extrafloor code.
-	//
-	// Now the FLOORS ARE IMPLIED.  Unlike before, the floor below an
-	// extrafloor is NOT stored in each extrafloor_t -- you must scan
-	// down to find them, and use the sector's floor if you hit NULL.
-	extrafloor_t *bottom_ef;
-	extrafloor_t *top_ef;
+    // -AJA- 2001/07/11: New multiple extrafloor code.
+    //
+    // Now the FLOORS ARE IMPLIED.  Unlike before, the floor below an
+    // extrafloor is NOT stored in each extrafloor_t -- you must scan
+    // down to find them, and use the sector's floor if you hit NULL.
+    extrafloor_t *bottom_ef;
+    extrafloor_t *top_ef;
 
-	// Liquid extrafloors are now kept in a separate list.  For many
-	// purposes (especially moving sectors) they otherwise just get in
-	// the way.
-	extrafloor_t *bottom_liq;
-	extrafloor_t *top_liq;
+    // Liquid extrafloors are now kept in a separate list.  For many
+    // purposes (especially moving sectors) they otherwise just get in
+    // the way.
+    extrafloor_t *bottom_liq;
+    extrafloor_t *top_liq;
 
-	// properties that are active for this sector (top-most extrafloor).
-	// This may be different than the sector's actual properties (the
-	// "props" field) due to flooders.
-	region_properties_t *p;
- 
-	// slope information, normally NULL
-	slope_plane_t *f_slope;
-	slope_plane_t *c_slope;
+    // properties that are active for this sector (top-most extrafloor).
+    // This may be different than the sector's actual properties (the
+    // "props" field) due to flooders.
+    region_properties_t *p;
 
-	// UDMF vertex slope stuff
-	bool floor_vertex_slope = false;
-	bool ceil_vertex_slope = false;
-	std::vector<vec3_t> floor_z_verts;
-	std::vector<vec3_t> ceil_z_verts;
-	vec3_t floor_vs_normal;
-	vec3_t ceil_vs_normal;
-	vec2_t floor_vs_hilo = {-40000,40000};
-	vec2_t ceil_vs_hilo = {-40000,40000};
+    // slope information, normally NULL
+    slope_plane_t *f_slope;
+    slope_plane_t *c_slope;
 
-	// linked list of extrafloors that this sector controls.  NULL means
-	// that this sector is not a controller.
-	extrafloor_t *control_floors;
- 
-	// killough 3/7/98: support flat heights drawn at another sector's heights
-	struct sector_s *heightsec;
-	struct side_s   *heightsec_side;
+    // UDMF vertex slope stuff
+    bool                floor_vertex_slope = false;
+    bool                ceil_vertex_slope  = false;
+    std::vector<vec3_t> floor_z_verts;
+    std::vector<vec3_t> ceil_z_verts;
+    vec3_t              floor_vs_normal;
+    vec3_t              ceil_vs_normal;
+    vec2_t              floor_vs_hilo = {-40000, 40000};
+    vec2_t              ceil_vs_hilo  = {-40000, 40000};
 
-	// movement thinkers, for quick look-up
-	struct plane_move_s *floor_move;
-	struct plane_move_s *ceil_move;
+    // linked list of extrafloors that this sector controls.  NULL means
+    // that this sector is not a controller.
+    extrafloor_t *control_floors;
 
-	// 0 = untraversed, 1,2 = sndlines-1
-	int soundtraversed;
+    // killough 3/7/98: support flat heights drawn at another sector's heights
+    struct sector_s *heightsec;
+    struct side_s   *heightsec_side;
 
-	// player# that made a sound (starting at 0), or -1
-	int sound_player;
+    // movement thinkers, for quick look-up
+    struct plane_move_s *floor_move;
+    struct plane_move_s *ceil_move;
 
-	// origin for any sounds played by the sector
-	position_c sfx_origin;
+    // 0 = untraversed, 1,2 = sndlines-1
+    int soundtraversed;
 
-	int linecount;
-	struct line_s **lines;  // [linecount] size
+    // player# that made a sound (starting at 0), or -1
+    int sound_player;
 
-	// touch list: objects in or touching this sector
-	touch_node_t *touch_things;
-    
-	// list of sector glow things (linked via dlnext/dlprev)
-	mobj_t *glow_things;
-	
-	// sky height for GL renderer
-	float sky_h;
- 
-	// keep track of vertical sight gaps within the sector.  This is
-	// just a much more convenient form of the info in the extrafloor
-	// list.
-	// 
-	short max_gaps;
-	short sight_gap_num;
+    // origin for any sounds played by the sector
+    position_c sfx_origin;
 
-	vgap_t *sight_gaps;
+    int             linecount;
+    struct line_s **lines; // [linecount] size
+
+    // touch list: objects in or touching this sector
+    touch_node_t *touch_things;
+
+    // list of sector glow things (linked via dlnext/dlprev)
+    mobj_t *glow_things;
+
+    // sky height for GL renderer
+    float sky_h;
+
+    // keep track of vertical sight gaps within the sector.  This is
+    // just a much more convenient form of the info in the extrafloor
+    // list.
+    //
+    short max_gaps;
+    short sight_gap_num;
+
+    vgap_t *sight_gaps;
 
     // if == validcount, already checked
-	int validcount;
+    int validcount;
 
-	// -AJA- 1999/07/29: Keep sectors with same tag in a list.
-	struct sector_s *tag_next;
-	struct sector_s *tag_prev;
+    // -AJA- 1999/07/29: Keep sectors with same tag in a list.
+    struct sector_s *tag_next;
+    struct sector_s *tag_prev;
 
-	// -AJA- 2000/03/30: Keep a list of child subsectors.
-	struct subsector_s *subsectors;
+    // -AJA- 2000/03/30: Keep a list of child subsectors.
+    struct subsector_s *subsectors;
 
-	// For dynamic scroll/push/offset
-	bool old_stored = false;
-	float orig_height;
+    // For dynamic scroll/push/offset
+    bool  old_stored = false;
+    float orig_height;
 
-	// Boom door lighting stuff
-	int min_neighbor_light;
-	int max_neighbor_light;
+    // Boom door lighting stuff
+    int min_neighbor_light;
+    int max_neighbor_light;
 
-	float bob_depth = 0.0f;
-	float sink_depth = 0.0f;
-}
-sector_t;
-
+    float bob_depth  = 0.0f;
+    float sink_depth = 0.0f;
+} sector_t;
 
 //
 // The SideDef.
 //
 typedef struct side_s
 {
-	surface_t top;
-	surface_t middle;
-	surface_t bottom;
+    surface_t top;
+    surface_t middle;
+    surface_t bottom;
 
-	// Sector the SideDef is facing.
-	sector_t *sector;
+    // Sector the SideDef is facing.
+    sector_t *sector;
 
-	// midmasker Y offset
-	float midmask_offset;
-}
-side_t;
+    // midmasker Y offset
+    float midmask_offset;
+} side_t;
 
 //
 // Move clipping aid for LineDefs.
 //
 typedef enum
 {
-	ST_HORIZONTAL,
-	ST_VERTICAL,
-	ST_POSITIVE,
-	ST_NEGATIVE
-}
-slopetype_t;
+    ST_HORIZONTAL,
+    ST_VERTICAL,
+    ST_POSITIVE,
+    ST_NEGATIVE
+} slopetype_t;
 
-#define SECLIST_MAX  11
+#define SECLIST_MAX 11
 
 typedef struct
 {
-	unsigned short num;
-	unsigned short sec[SECLIST_MAX];
-}
-vertex_seclist_t;
+    unsigned short num;
+    unsigned short sec[SECLIST_MAX];
+} vertex_seclist_t;
 
 //
 // LINEDEF
@@ -411,46 +398,46 @@ vertex_seclist_t;
 
 typedef struct line_s
 {
-	// Vertices, from v1 to v2.
-	vertex_t *v1;
-	vertex_t *v2;
+    // Vertices, from v1 to v2.
+    vertex_t *v1;
+    vertex_t *v2;
 
-	// Precalculated v2 - v1 for side checking.
-	float dx;
-	float dy;
-	float length;
+    // Precalculated v2 - v1 for side checking.
+    float dx;
+    float dy;
+    float length;
 
-	// Animation related.
-	int flags;
-	int tag;
-	int count;
+    // Animation related.
+    int flags;
+    int tag;
+    int count;
 
-	const linetype_c *special;
+    const linetype_c *special;
 
     // Visual appearance: SideDefs.
     // side[1] will be NULL if one sided.
-	side_t *side[2];
+    side_t *side[2];
 
-	// Front and back sector.
-	// Note: kinda redundant (could be retrieved from sidedefs), but it
-	// simplifies the code.
-	sector_t *frontsector;
-	sector_t *backsector;
+    // Front and back sector.
+    // Note: kinda redundant (could be retrieved from sidedefs), but it
+    // simplifies the code.
+    sector_t *frontsector;
+    sector_t *backsector;
 
     // Neat. Another bounding box, for the extent of the LineDef.
-	float bbox[4];
+    float bbox[4];
 
-	// To aid move clipping.
-	slopetype_t slopetype;
+    // To aid move clipping.
+    slopetype_t slopetype;
 
-	// if == validcount, already checked
-	int validcount;
+    // if == validcount, already checked
+    int validcount;
 
-	// whether this linedef is "blocking" for rendering purposes.
-	// Always true for 1s lines.  Always false when both sides of the
-	// line reference the same sector.
-	//
-	bool blocked;
+    // whether this linedef is "blocking" for rendering purposes.
+    // Always true for 1s lines.  Always false when both sides of the
+    // line reference the same sector.
+    //
+    bool blocked;
 
     // -AJA- 1999/07/19: Extra floor support.  We now keep track of the
     // gaps between the front & back sectors here, instead of computing
@@ -459,21 +446,20 @@ typedef struct line_s
     // one of the sectors changes height.  The pointer here points into
     // the single global array `vertgaps'.
     //
-	short max_gaps;
-	short gap_num;
+    short max_gaps;
+    short gap_num;
 
-	vgap_t *gaps;
+    vgap_t *gaps;
 
-	const linetype_c *slide_door;
+    const linetype_c *slide_door;
 
-	// slider thinker, normally NULL
-	struct slider_move_s *slider_move;
+    // slider thinker, normally NULL
+    struct slider_move_s *slider_move;
 
-	struct line_s *portal_pair;
+    struct line_s *portal_pair;
 
-	bool old_stored = false;
-}
-line_t;
+    bool old_stored = false;
+} line_t;
 
 //
 // SubSector.
@@ -484,22 +470,21 @@ line_t;
 //
 typedef struct subsector_s
 {
-	// link in sector list
-	struct subsector_s *sec_next;
-  
-	sector_t *sector;
-	struct seg_s *segs;
+    // link in sector list
+    struct subsector_s *sec_next;
+
+    sector_t     *sector;
+    struct seg_s *segs;
 
     // list of mobjs in subsector
-	mobj_t *thinglist;
+    mobj_t *thinglist;
 
-	// pointer to bounding box (usually in parent node)
-	float *bbox;
+    // pointer to bounding box (usually in parent node)
+    float *bbox;
 
-	// -AJA- 2004/04/20: used when emulating deep-water TRICK
-	struct sector_s *deep_ref;
-}
-subsector_t;
+    // -AJA- 2004/04/20: used when emulating deep-water TRICK
+    struct sector_s *deep_ref;
+} subsector_t;
 
 //
 // The LineSeg
@@ -508,118 +493,112 @@ subsector_t;
 //
 typedef struct seg_s
 {
-	vertex_t *v1;
-	vertex_t *v2;
+    vertex_t *v1;
+    vertex_t *v2;
 
-	angle_t angle;
+    angle_t angle;
 
-	float length;
+    float length;
 
-	// link in subsector list.
-	// (NOTE: sorted in clockwise order)
-	struct seg_s *sub_next;
-  
-	// -AJA- 1999/12/20: Reference to partner seg, or NULL if the seg
-	//       lies along a one-sided line.
-	struct seg_s *partner;
+    // link in subsector list.
+    // (NOTE: sorted in clockwise order)
+    struct seg_s *sub_next;
 
-	// -AJA- 1999/09/23: Reference to subsector on each side of seg,
-	//       back_sub is NULL for one-sided segs.
-	//       (Addendum: back_sub is obsolete with new `partner' field)
-	subsector_t *front_sub;
-	subsector_t *back_sub;
-  
-	// -AJA- 1999/09/23: For "True BSP rendering", we keep track of the
-	//       `minisegs' which define all the non-wall borders of the
-	//       subsector.  Thus all the segs (normal + mini) define a
-	//       closed convex polygon.  When the `miniseg' field is true,
-	//       all the fields below it are unused.
-	//
-	bool miniseg;
+    // -AJA- 1999/12/20: Reference to partner seg, or NULL if the seg
+    //       lies along a one-sided line.
+    struct seg_s *partner;
 
-	float offset;
+    // -AJA- 1999/09/23: Reference to subsector on each side of seg,
+    //       back_sub is NULL for one-sided segs.
+    //       (Addendum: back_sub is obsolete with new `partner' field)
+    subsector_t *front_sub;
+    subsector_t *back_sub;
 
-	side_t *sidedef;
-	line_t *linedef;
+    // -AJA- 1999/09/23: For "True BSP rendering", we keep track of the
+    //       `minisegs' which define all the non-wall borders of the
+    //       subsector.  Thus all the segs (normal + mini) define a
+    //       closed convex polygon.  When the `miniseg' field is true,
+    //       all the fields below it are unused.
+    //
+    bool miniseg;
 
-	int side;  // 0 for front, 1 for back
+    float offset;
 
-	// Sector references.
-	// backsector is NULL for one sided lines
+    side_t *sidedef;
+    line_t *linedef;
 
-	sector_t *frontsector;
-	sector_t *backsector;
+    int side; // 0 for front, 1 for back
 
-	// compact list of sectors touching each vertex (can be NULL)
-	vertex_seclist_t *nb_sec[2];
-}
-seg_t;
+    // Sector references.
+    // backsector is NULL for one sided lines
+
+    sector_t *frontsector;
+    sector_t *backsector;
+
+    // compact list of sectors touching each vertex (can be NULL)
+    vertex_seclist_t *nb_sec[2];
+} seg_t;
 
 // Partition line.
 typedef struct divline_s
 {
-	float x;
-	float y;
-	float dx;
-	float dy;
-}
-divline_t;
+    float x;
+    float y;
+    float dx;
+    float dy;
+} divline_t;
 
 //
 // BSP node.
 //
 typedef struct node_s
 {
-	divline_t div;
-	float div_len;
+    divline_t div;
+    float     div_len;
 
-	// bit NF_V5_SUBSECTOR set for a subsector.
-	unsigned int children[2];
+    // bit NF_V5_SUBSECTOR set for a subsector.
+    unsigned int children[2];
 
-	// Bounding boxes for this node.
-	float bbox[2][4];
-}
-node_t;
+    // Bounding boxes for this node.
+    float bbox[2][4];
+} node_t;
 
 typedef struct secanim_s
 {
-	sector_t *target = NULL;
-	struct sector_s *scroll_sec_ref = NULL;
-	const linetype_c *scroll_special_ref = NULL;
-	line_s *scroll_line_ref = NULL;
-	vec2_t floor_scroll = {0,0};
-	vec2_t ceil_scroll = {0,0};
-	vec3_t push = {0,0,0};
-	bool permanent = false;
-	float last_height = 0.0f;
-}
-secanim_t;
+    sector_t         *target             = NULL;
+    struct sector_s  *scroll_sec_ref     = NULL;
+    const linetype_c *scroll_special_ref = NULL;
+    line_s           *scroll_line_ref    = NULL;
+    vec2_t            floor_scroll       = {0, 0};
+    vec2_t            ceil_scroll        = {0, 0};
+    vec3_t            push               = {0, 0, 0};
+    bool              permanent          = false;
+    float             last_height        = 0.0f;
+} secanim_t;
 
 typedef struct lineanim_s
 {
-	line_t *target = NULL;
-	struct sector_s *scroll_sec_ref = NULL;
-	const linetype_c *scroll_special_ref = NULL;
-	line_s *scroll_line_ref = NULL;
-	float side0_xspeed = 0.0;
-	float side1_xspeed = 0.0;
-	float side0_yspeed = 0.0;
-	float side1_yspeed = 0.0;
-	float side0_xoffspeed = 0.0;
-	float side0_yoffspeed = 0.0;
-	float dynamic_dx = 0.0;
-	float dynamic_dy = 0.0;
-	bool permanent = false;
-	float last_height = 0.0f;
-}
-lineanim_t;
+    line_t           *target             = NULL;
+    struct sector_s  *scroll_sec_ref     = NULL;
+    const linetype_c *scroll_special_ref = NULL;
+    line_s           *scroll_line_ref    = NULL;
+    float             side0_xspeed       = 0.0;
+    float             side1_xspeed       = 0.0;
+    float             side0_yspeed       = 0.0;
+    float             side1_yspeed       = 0.0;
+    float             side0_xoffspeed    = 0.0;
+    float             side0_yoffspeed    = 0.0;
+    float             dynamic_dx         = 0.0;
+    float             dynamic_dy         = 0.0;
+    bool              permanent          = false;
+    float             last_height        = 0.0f;
+} lineanim_t;
 
 typedef struct lightanim_s
 {
-	struct sector_s *light_sec_ref = NULL;
-	line_s *light_line_ref = NULL;
-}
-lightanim_t;
+    struct sector_s *light_sec_ref  = NULL;
+    line_s          *light_line_ref = NULL;
+} lightanim_t;
 
 #endif /*__R_DEFS__*/
 

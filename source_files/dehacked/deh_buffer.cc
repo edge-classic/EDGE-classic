@@ -35,75 +35,74 @@
 #include "deh_buffer.h"
 #include "deh_system.h"
 
-
 namespace Deh_Edge
 {
 
-input_buffer_c::input_buffer_c(const char *_data, int _length) :
-		data(_data), ptr(_data), length(_length)
+input_buffer_c::input_buffer_c(const char *_data, int _length) : data(_data), ptr(_data), length(_length)
 {
-	if (length < 0)
-		FatalError("Illegal length of lump (%d bytes)\n", length);
+    if (length < 0)
+        FatalError("Illegal length of lump (%d bytes)\n", length);
 }
 
 input_buffer_c::~input_buffer_c()
-{ }
+{
+}
 
 bool input_buffer_c::eof()
 {
-	return (ptr >= data + length);
+    return (ptr >= data + length);
 }
 
 bool input_buffer_c::error()
 {
-	return false;
+    return false;
 }
 
 int input_buffer_c::read(void *buf, int count)
 {
-	int avail = data + length - ptr;
+    int avail = data + length - ptr;
 
-	if (avail < count)
-		count = avail;
+    if (avail < count)
+        count = avail;
 
-	if (count <= 0)
-		return 0;
+    if (count <= 0)
+        return 0;
 
-	memcpy(buf, ptr, count);
+    memcpy(buf, ptr, count);
 
-	ptr += count;
+    ptr += count;
 
-	return count;
+    return count;
 }
 
 int input_buffer_c::getch()
 {
-	if (eof())
-		return EOF;
+    if (eof())
+        return EOF;
 
-	return *ptr++;
+    return *ptr++;
 }
 
 void input_buffer_c::ungetch(int c)
 {
-	// NOTE: assumes c == last character read
+    // NOTE: assumes c == last character read
 
-	if (ptr > data)
-		ptr--;
+    if (ptr > data)
+        ptr--;
 }
 
 bool input_buffer_c::isBinary() const
 {
-	if (length == 0)
-		return false;
+    if (length == 0)
+        return false;
 
-	int test_len = (length > 260) ? 256 : ((length * 3 + 1) / 4);
+    int test_len = (length > 260) ? 256 : ((length * 3 + 1) / 4);
 
-	for (; test_len > 0; test_len--)
-		if (data[test_len - 1] == 0)
-			return true;
+    for (; test_len > 0; test_len--)
+        if (data[test_len - 1] == 0)
+            return true;
 
-	return false;
+    return false;
 }
 
-}  // Deh_Edge
+} // namespace Deh_Edge

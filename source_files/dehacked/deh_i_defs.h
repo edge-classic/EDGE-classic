@@ -23,7 +23,7 @@
 #define FLOAT_IEEE_754
 namespace Deh_Edge
 {
-	typedef unsigned char byte;
+typedef unsigned char byte;
 }
 
 #include <cstddef>
@@ -33,7 +33,7 @@ namespace Deh_Edge
 
 #define STRICT
 #ifndef _WINDOWS
-	#define _WINDOWS
+#define _WINDOWS
 #endif
 #define WIN32_LEAN_AND_MEAN
 #ifndef WIN32
@@ -42,8 +42,8 @@ namespace Deh_Edge
 
 // Access() define values. Nicked from DJGPP's <unistd.h>
 #ifndef R_OK
-#define R_OK    0x02
-#define W_OK    0x04
+#define R_OK 0x02
+#define W_OK 0x04
 #endif
 
 #endif

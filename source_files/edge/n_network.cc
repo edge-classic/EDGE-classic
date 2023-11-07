@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Networking (New)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2004-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -57,7 +57,6 @@ DEF_CVAR(m_busywait, "1", CVAR_ARCHIVE)
 // 70Hz
 DEF_CVAR(r_doubleframes, "1", CVAR_ARCHIVE)
 
-
 // gametic is the tic about to (or currently being) run.
 // maketic is the tic that hasn't had control made for it yet.
 //
@@ -70,9 +69,8 @@ DEF_CVAR(r_doubleframes, "1", CVAR_ARCHIVE)
 int gametic;
 int maketic;
 
-static int last_update_tic;  // last time N_NetUpdate  was called
-static int last_tryrun_tic;  // last time N_TryRunTics was called
-
+static int last_update_tic; // last time N_NetUpdate  was called
+static int last_tryrun_tic; // last time N_TryRunTics was called
 
 //----------------------------------------------------------------------------
 //  TIC HANDLING
@@ -80,253 +78,242 @@ static int last_tryrun_tic;  // last time N_TryRunTics was called
 
 void N_InitNetwork(void)
 {
-	srand(I_PureRandom());
+    srand(I_PureRandom());
 
-	N_ResetTics();
+    N_ResetTics();
 
-	if (nonet)
-		return;
+    if (nonet)
+        return;
 
-	base_port = MP_EDGE_PORT;
+    base_port = MP_EDGE_PORT;
 
-	std::string str = argv::Value("port");
+    std::string str = argv::Value("port");
 
-	if (!str.empty())
-		base_port = atoi(str.c_str());
+    if (!str.empty())
+        base_port = atoi(str.c_str());
 
-	I_Printf("Network: base port is %d\n", base_port);
+    I_Printf("Network: base port is %d\n", base_port);
 
-//??	N_StartupReliableLink (base_port+0);
-//??	N_StartupBroadcastLink(base_port+1);
+    //??	N_StartupReliableLink (base_port+0);
+    //??	N_StartupBroadcastLink(base_port+1);
 }
-
 
 static void DoDelay()
 {
-	if (m_busywait.d)
-		return;
+    if (m_busywait.d)
+        return;
 
-	// -AJA- This can make everything a bit "jerky" :-(
-	I_Sleep(5 /* millis */);
+    // -AJA- This can make everything a bit "jerky" :-(
+    I_Sleep(5 /* millis */);
 }
-
 
 static void ReceivePackets()
 {
-	// TODO receive stuff from other computers
+    // TODO receive stuff from other computers
 }
-
 
 static void TransmitStuff(int tic)
 {
-	// TODO send stuff to other computers
+    // TODO send stuff to other computers
 }
-
 
 static void PreInput()
 {
-	// process input
-	I_ControlGetEvents();
-	E_ProcessEvents();
+    // process input
+    I_ControlGetEvents();
+    E_ProcessEvents();
 }
-
 
 static void PostInput()
 {
-	E_UpdateKeyState();
+    E_UpdateKeyState();
 }
-
 
 static bool N_BuildTiccmds(void)
 {
-	// create player (and robot) ticcmds.
-	// returns false if players cannot hold any more ticcmds.
-	// NOTE: this is the only place allowed to bump `maketics`.
+    // create player (and robot) ticcmds.
+    // returns false if players cannot hold any more ticcmds.
+    // NOTE: this is the only place allowed to bump `maketics`.
 
-	if (numplayers == 0)
-		return false;
+    if (numplayers == 0)
+        return false;
 
-	if (maketic >= gametic + BACKUPTICS)
-		return false;
+    if (maketic >= gametic + BACKUPTICS)
+        return false;
 
-	for (int pnum = 0 ; pnum < MAXPLAYERS ; pnum++)
-	{
-		player_t *p = players[pnum];
-		if (! p) continue;
-		if (! p->builder) continue;
+    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    {
+        player_t *p = players[pnum];
+        if (!p)
+            continue;
+        if (!p->builder)
+            continue;
 #if 0
 		I_Debugf("N_BuildTiccmds: pnum %d netgame %c\n", pnum, netgame ? 'Y' : 'n');
 #endif
-		int buf = maketic % BACKUPTICS;
+        int buf = maketic % BACKUPTICS;
 
-		p->builder(p, p->build_data, &p->in_cmds[buf]);
-	}
+        p->builder(p, p->build_data, &p->in_cmds[buf]);
+    }
 
-	TransmitStuff(maketic);
+    TransmitStuff(maketic);
 
-	maketic++;
-	return true;
+    maketic++;
+    return true;
 }
-
 
 void N_GrabTiccmds(void)
 {
-	// this is called from G_Ticker, and is the only place allowed to
-	// bump `gametic` (allowing the game simulation to advance).
-	//
-	// all we actually do here is grab the ticcmd for each local player
-	// (i.e. ones created earler in N_BuildTiccmds).
+    // this is called from G_Ticker, and is the only place allowed to
+    // bump `gametic` (allowing the game simulation to advance).
+    //
+    // all we actually do here is grab the ticcmd for each local player
+    // (i.e. ones created earler in N_BuildTiccmds).
 
-	// gametic <= maketic is a system-wide invariant.  However, new levels
-	// levels are loaded during G_Ticker(), which resets them both to zero,
-	// hence we need to handle that particular case here.
-	SYS_ASSERT(gametic <= maketic);
+    // gametic <= maketic is a system-wide invariant.  However, new levels
+    // levels are loaded during G_Ticker(), which resets them both to zero,
+    // hence we need to handle that particular case here.
+    SYS_ASSERT(gametic <= maketic);
 
-	if (gametic == maketic)
-		return;
+    if (gametic == maketic)
+        return;
 
-	int buf = gametic % BACKUPTICS;
+    int buf = gametic % BACKUPTICS;
 
-	for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-	{
-		player_t *p = players[pnum];
-		if (! p) continue;
+    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    {
+        player_t *p = players[pnum];
+        if (!p)
+            continue;
 
-		memcpy(&p->cmd, p->in_cmds + buf, sizeof(ticcmd_t));
-	}
+        memcpy(&p->cmd, p->in_cmds + buf, sizeof(ticcmd_t));
+    }
 
-	VM_SetFloat(ui_vm, "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));
+    VM_SetFloat(ui_vm, "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));
 
-	gametic++;
+    gametic++;
 }
-
 
 //----------------------------------------------------------------------------
 
 int N_NetUpdate()
 {
-	// if enough time has elapsed, process input events and build one
-	// or more ticcmds for the local players.
+    // if enough time has elapsed, process input events and build one
+    // or more ticcmds for the local players.
 
-	int nowtime = I_GetTime();
+    int nowtime = I_GetTime();
 
-	// singletic update is syncronous
-	if (singletics)
-		return nowtime;
+    // singletic update is syncronous
+    if (singletics)
+        return nowtime;
 
-	int newtics = nowtime - last_update_tic;
-	last_update_tic = nowtime;
+    int newtics     = nowtime - last_update_tic;
+    last_update_tic = nowtime;
 
-	if (newtics > 0)
-	{
-		PreInput();
+    if (newtics > 0)
+    {
+        PreInput();
 
-		// build and send new ticcmds for local players.
-		// N_BuildTiccmds returns false when buffers are full.
+        // build and send new ticcmds for local players.
+        // N_BuildTiccmds returns false when buffers are full.
 
-		for (; newtics > 0 ; newtics--)
-			if (! N_BuildTiccmds())
-				break;
+        for (; newtics > 0; newtics--)
+            if (!N_BuildTiccmds())
+                break;
 
-		PostInput();
+        PostInput();
 
 #if 0
 		if (newtics > 0 && numplayers > 0)
 			I_Debugf("N_NetUpdate: lost tics: %d\n", newtics);
 #endif
-	}
+    }
 
-	ReceivePackets();
+    ReceivePackets();
 
-	return nowtime;
+    return nowtime;
 }
-
 
 int N_TryRunTics()
 {
-	if (singletics)
-	{
-		PreInput();
-		N_BuildTiccmds();
-		PostInput();
-		return 1;
-	}
+    if (singletics)
+    {
+        PreInput();
+        N_BuildTiccmds();
+        PostInput();
+        return 1;
+    }
 
-	int nowtime = N_NetUpdate();
-	int realtics = nowtime - last_tryrun_tic;
-	last_tryrun_tic = nowtime;
-
-#ifdef DEBUG_TICS
-	I_Debugf("N_TryRunTics: now %d last_tryrun %d --> real %d\n",
-		nowtime, nowtime - realtics, realtics);
-#endif
-
-	// simpler handling when no game in progress
-	if (numplayers == 0)
-	{
-		while (realtics <= 0)
-		{
-			DoDelay();
-			nowtime = N_NetUpdate();
-			realtics = nowtime - last_tryrun_tic;
-			last_tryrun_tic = nowtime;
-		}
-
-		// this limit is rather arbitrary
-		if (realtics > TICRATE/3)
-			realtics = TICRATE/3;
-
-		return realtics;
-	}
-
-	SYS_ASSERT(gametic <= maketic);
-
-	// decide how many tics to run...
-	int tics = maketic - gametic;
-
-	// -AJA- been staring at this all day, still can't explain it.
-	//       my best guess is that we *usually* need an extra tic so that
-	//       the ticcmd queue cannot "run away" and we never catch up.
-	if (tics > realtics + 1)
-		tics = realtics + 1;
-	else
-		tics = std::max(std::min(tics, realtics), 1);
+    int nowtime     = N_NetUpdate();
+    int realtics    = nowtime - last_tryrun_tic;
+    last_tryrun_tic = nowtime;
 
 #ifdef DEBUG_TICS
-	I_Debugf("=== maketic %d gametic %d | real %d using %d\n",
-		maketic, gametic, realtics, tics);
+    I_Debugf("N_TryRunTics: now %d last_tryrun %d --> real %d\n", nowtime, nowtime - realtics, realtics);
 #endif
 
-	// wait for new tics if needed
-	while (maketic < gametic + tics)
-	{
-		DoDelay();
-		N_NetUpdate();
-	}
+    // simpler handling when no game in progress
+    if (numplayers == 0)
+    {
+        while (realtics <= 0)
+        {
+            DoDelay();
+            nowtime         = N_NetUpdate();
+            realtics        = nowtime - last_tryrun_tic;
+            last_tryrun_tic = nowtime;
+        }
 
-	return tics;
+        // this limit is rather arbitrary
+        if (realtics > TICRATE / 3)
+            realtics = TICRATE / 3;
+
+        return realtics;
+    }
+
+    SYS_ASSERT(gametic <= maketic);
+
+    // decide how many tics to run...
+    int tics = maketic - gametic;
+
+    // -AJA- been staring at this all day, still can't explain it.
+    //       my best guess is that we *usually* need an extra tic so that
+    //       the ticcmd queue cannot "run away" and we never catch up.
+    if (tics > realtics + 1)
+        tics = realtics + 1;
+    else
+        tics = std::max(std::min(tics, realtics), 1);
+
+#ifdef DEBUG_TICS
+    I_Debugf("=== maketic %d gametic %d | real %d using %d\n", maketic, gametic, realtics, tics);
+#endif
+
+    // wait for new tics if needed
+    while (maketic < gametic + tics)
+    {
+        DoDelay();
+        N_NetUpdate();
+    }
+
+    return tics;
 }
-
 
 void N_ResetTics(void)
 {
-	maketic = gametic = 0;
+    maketic = gametic = 0;
 
-	last_update_tic = last_tryrun_tic = I_GetTime();
+    last_update_tic = last_tryrun_tic = I_GetTime();
 }
-
 
 void N_QuitNetGame(void)
 {
-	// TODO send a quit message to all peers
+    // TODO send a quit message to all peers
 
-	// wait a bit
-	if (false)  // have_peers
-		I_Sleep(250);
+    // wait a bit
+    if (false) // have_peers
+        I_Sleep(250);
 
-	// TODO close open sockets
+    // TODO close open sockets
 }
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

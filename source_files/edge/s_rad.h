@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE RAD Music Player (HEADER)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2023 - The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -25,9 +25,9 @@
 
 /* FUNCTIONS */
 
-abstract_music_c * S_PlayRADMusic(byte *data, int length, bool looping);
+abstract_music_c *S_PlayRADMusic(byte *data, int length, bool looping);
 
-#endif  /* __RAD_PLAYER_H__ */
+#endif /* __RAD_PLAYER_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

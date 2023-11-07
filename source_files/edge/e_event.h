@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Event handling Header
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -26,7 +26,6 @@
 #ifndef __E_EVENT_H__
 #define __E_EVENT_H__
 
-
 //
 // Event handling.
 //
@@ -35,35 +34,29 @@
 // -KM- 1998/09/01 Amalgamate joystick/mouse into analogue
 typedef enum
 {
-	ev_keydown,
-	ev_keyup,
-	ev_mouse
-}
-evtype_t;
+    ev_keydown,
+    ev_keyup,
+    ev_mouse
+} evtype_t;
 
 // Event structure.
 typedef struct
 {
-	evtype_t type;
+    evtype_t type;
 
-	union
-	{
-		struct
-		{
-			int sym;
-		}
-		key;
-	
-		struct
-		{
-			int dx;
-			int dy;
-		} 
-		mouse;
-	} 
-	value;
-}
-event_t;
+    union {
+        struct
+        {
+            int sym;
+        } key;
+
+        struct
+        {
+            int dx;
+            int dy;
+        } mouse;
+    } value;
+} event_t;
 
 #endif // __E_EVENT_H__
 

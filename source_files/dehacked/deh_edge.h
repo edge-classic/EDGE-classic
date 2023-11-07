@@ -34,36 +34,32 @@
 #include <vector>
 #include <string>
 
-
 // Callback functions
 typedef struct dehconvfuncs_s
 {
-	// Fatal errors are called as a last resort when something serious
-	// goes wrong, e.g. out of memory.  This routine should show the
-	// error to the user and abort the program.
-	// 
-	void (* fatal_error)(const char *str, ...);
+    // Fatal errors are called as a last resort when something serious
+    // goes wrong, e.g. out of memory.  This routine should show the
+    // error to the user and abort the program.
+    //
+    void (*fatal_error)(const char *str, ...);
 
-	// The print_msg routine is used to display informational messages
-	// and warning messages (when enabled).
-	// 
-	void (* print_msg)(const char *str, ...);
-}
-dehconvfuncs_t;
+    // The print_msg routine is used to display informational messages
+    // and warning messages (when enabled).
+    //
+    void (*print_msg)(const char *str, ...);
+} dehconvfuncs_t;
 
 typedef enum
 {
-	// everything was ship-shape.
-	DEH_OK = 0,
+    // everything was ship-shape.
+    DEH_OK = 0,
 
-	// an unknown error occurred (this is the catch-all value).
-	DEH_E_Unknown,
+    // an unknown error occurred (this is the catch-all value).
+    DEH_E_Unknown,
 
-	// problem parsing input file (maybe it wasn't a DeHackEd patch).
-	DEH_E_ParseError
-}
-dehret_e;
-
+    // problem parsing input file (maybe it wasn't a DeHackEd patch).
+    DEH_E_ParseError
+} dehret_e;
 
 /* ------------ interface functions ------------ */
 

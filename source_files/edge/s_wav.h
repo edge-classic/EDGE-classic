@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE WAV Sound Loader (HEADER)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2022-2023 The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -27,7 +27,7 @@
 
 bool S_LoadWAVSound(epi::sound_data_c *buf, byte *data, int length, bool pc_speaker);
 
-#endif  /* __WAVLOADER_H__ */
+#endif /* __WAVLOADER_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

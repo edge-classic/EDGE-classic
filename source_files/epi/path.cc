@@ -25,58 +25,54 @@ namespace epi
 // Path Manipulation Functions
 std::filesystem::path PATH_GetDir(std::filesystem::path path)
 {
-	SYS_ASSERT(!path.empty());
+    SYS_ASSERT(!path.empty());
 
-	return std::filesystem::path(path).remove_filename();
+    return std::filesystem::path(path).remove_filename();
 }
-
 
 std::filesystem::path PATH_GetFilename(std::filesystem::path path)
 {
-	SYS_ASSERT(!path.empty());
+    SYS_ASSERT(!path.empty());
 
-	return std::filesystem::path(path).filename();
+    return std::filesystem::path(path).filename();
 }
-
 
 std::filesystem::path PATH_GetExtension(std::filesystem::path path)
 {
-	SYS_ASSERT(!path.empty());
+    SYS_ASSERT(!path.empty());
 
-	return std::filesystem::path(path).extension();
+    return std::filesystem::path(path).extension();
 }
 
-
-std::filesystem::path PATH_GetBasename(std::filesystem::path path) 
+std::filesystem::path PATH_GetBasename(std::filesystem::path path)
 {
-	SYS_ASSERT(!path.empty());
+    SYS_ASSERT(!path.empty());
 
-	return std::filesystem::path(path).stem();
+    return std::filesystem::path(path).stem();
 }
 
 bool PATH_IsAbsolute(std::filesystem::path path)
 {
-	SYS_ASSERT(!path.empty());
+    SYS_ASSERT(!path.empty());
 
-	return std::filesystem::path(path).is_absolute();
+    return std::filesystem::path(path).is_absolute();
 }
 
 std::filesystem::path PATH_Join(std::filesystem::path lhs, std::string rhs)
 {
-	SYS_ASSERT(!lhs.empty() && !rhs.empty());
+    SYS_ASSERT(!lhs.empty() && !rhs.empty());
 
-	return std::filesystem::path(lhs).append(rhs);
+    return std::filesystem::path(lhs).append(rhs);
 }
 
 #ifdef _WIN32
 std::filesystem::path PATH_Join(std::filesystem::path lhs, std::u32string rhs)
 {
-	SYS_ASSERT(!lhs.empty() && !rhs.empty());
+    SYS_ASSERT(!lhs.empty() && !rhs.empty());
 
-	return std::filesystem::path(lhs).append(rhs);
+    return std::filesystem::path(lhs).append(rhs);
 }
 #endif
-
 
 } // namespace epi
 

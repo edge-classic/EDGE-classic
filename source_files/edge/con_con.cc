@@ -1,10 +1,10 @@
 //----------------------------------------------------------------------------
 //  EDGE Console Interface code.
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
 //  Copyright (c) 1998       Randy Heit
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -50,9 +50,7 @@
 
 #include <vector>
 
-
-#define CON_WIPE_TICS  12
-
+#define CON_WIPE_TICS 12
 
 DEF_CVAR(debug_fps, "0", CVAR_ARCHIVE)
 DEF_CVAR(debug_pos, "0", CVAR_ARCHIVE)
@@ -60,10 +58,10 @@ DEF_CVAR(debug_pos, "0", CVAR_ARCHIVE)
 static visible_t con_visible;
 
 // stores the console toggle effect
-static int conwipeactive = 0;
-static int conwipepos = 0;
+static int     conwipeactive = 0;
+static int     conwipepos    = 0;
 static font_c *con_font;
-font_c *endoom_font;
+font_c        *endoom_font;
 
 // the console's background
 static style_c *console_style;
@@ -74,42 +72,40 @@ extern void E_ProgressMessage(const char *message);
 
 extern cvar_c v_pixelaspect;
 
-#define T_GREY176  RGB_MAKE(176,176,176)
- 
+#define T_GREY176 RGB_MAKE(176, 176, 176)
+
 // TODO: console var
-#define MAX_CON_LINES  160
+#define MAX_CON_LINES 160
 
 // For Quit Screen ENDOOM (create once, always store)
-console_line_c * quit_lines[ENDOOM_LINES];
-static int quit_used_lines = 0;
-static bool quit_partial_last_line = false;
+console_line_c *quit_lines[ENDOOM_LINES];
+static int      quit_used_lines        = 0;
+static bool     quit_partial_last_line = false;
 
 // entry [0] is the bottom-most one
-static console_line_c * console_lines[MAX_CON_LINES];
-static int con_used_lines = 0;
-static bool con_partial_last_line = false;
+static console_line_c *console_lines[MAX_CON_LINES];
+static int             con_used_lines        = 0;
+static bool            con_partial_last_line = false;
 
 // the console row that is displayed at the bottom of screen, -1 if cmdline
 // is the bottom one.
 static int bottomrow = -1;
 
+#define MAX_CON_INPUT 255
 
-#define MAX_CON_INPUT  255
-
-static char input_line[MAX_CON_INPUT+2];
+static char input_line[MAX_CON_INPUT + 2];
 static int  input_pos = 0;
 
-int con_cursor;
+int           con_cursor;
 extern cvar_c r_doubleframes;
 
 #define KEYREPEATDELAY ((250 * TICRATE) / 1000)
 #define KEYREPEATRATE  (TICRATE / 15)
 
-
 // HISTORY
 
 // TODO: console var to control history size
-#define MAX_CMD_HISTORY  100
+#define MAX_CMD_HISTORY 100
 
 static std::string *cmd_history[MAX_CMD_HISTORY];
 
@@ -117,7 +113,6 @@ static int cmd_used_hist = 0;
 
 // when browsing the cmdhistory, this shows the current index. Otherwise it's -1.
 static int cmd_hist_pos = -1;
-
 
 // always type ev_keydown
 static int repeat_key;
@@ -130,1324 +125,1325 @@ static bool TabbedLast;
 
 static int scroll_dir;
 
-
 static void CON_AddLine(const char *s, bool partial)
 {
-	if (con_partial_last_line)
-	{
-		SYS_ASSERT(console_lines[0]);
+    if (con_partial_last_line)
+    {
+        SYS_ASSERT(console_lines[0]);
 
-		console_lines[0]->Append(s);
+        console_lines[0]->Append(s);
 
-		con_partial_last_line = partial;
-		return;
-	}
+        con_partial_last_line = partial;
+        return;
+    }
 
-	// scroll everything up 
+    // scroll everything up
 
-	delete console_lines[MAX_CON_LINES-1];
+    delete console_lines[MAX_CON_LINES - 1];
 
-	for (int i = MAX_CON_LINES-1; i > 0; i--)
-		console_lines[i] = console_lines[i-1];
+    for (int i = MAX_CON_LINES - 1; i > 0; i--)
+        console_lines[i] = console_lines[i - 1];
 
-	rgbcol_t col = current_color;
+    rgbcol_t col = current_color;
 
-	if (col == T_LGREY && (epi::prefix_case_cmp(s, "WARNING") == 0))
-		col = T_ORANGE;
+    if (col == T_LGREY && (epi::prefix_case_cmp(s, "WARNING") == 0))
+        col = T_ORANGE;
 
-	console_lines[0] = new console_line_c(s, col);
+    console_lines[0] = new console_line_c(s, col);
 
-	con_partial_last_line = partial;
+    con_partial_last_line = partial;
 
-	if (con_used_lines < MAX_CON_LINES)
-		con_used_lines++;
+    if (con_used_lines < MAX_CON_LINES)
+        con_used_lines++;
 }
 
 static void CON_EndoomAddLine(byte endoom_byte, const char *s, bool partial)
 {
-	if (con_partial_last_line)
-	{
-		SYS_ASSERT(console_lines[0]);
+    if (con_partial_last_line)
+    {
+        SYS_ASSERT(console_lines[0]);
 
-		console_lines[0]->Append(s);
+        console_lines[0]->Append(s);
 
-		console_lines[0]->AppendEndoom(endoom_byte);
+        console_lines[0]->AppendEndoom(endoom_byte);
 
-		con_partial_last_line = partial;
-		return;
-	}
+        con_partial_last_line = partial;
+        return;
+    }
 
-	// scroll everything up 
+    // scroll everything up
 
-	delete console_lines[MAX_CON_LINES-1];
+    delete console_lines[MAX_CON_LINES - 1];
 
-	for (int i = MAX_CON_LINES-1; i > 0; i--)
-		console_lines[i] = console_lines[i-1];
+    for (int i = MAX_CON_LINES - 1; i > 0; i--)
+        console_lines[i] = console_lines[i - 1];
 
-	rgbcol_t col = current_color;
+    rgbcol_t col = current_color;
 
-	if (col == T_LGREY && (epi::prefix_case_cmp(s, "WARNING") == 0))
-		col = T_ORANGE;
+    if (col == T_LGREY && (epi::prefix_case_cmp(s, "WARNING") == 0))
+        col = T_ORANGE;
 
-	console_lines[0] = new console_line_c(s, col);
+    console_lines[0] = new console_line_c(s, col);
 
-	console_lines[0]->AppendEndoom(endoom_byte);
+    console_lines[0]->AppendEndoom(endoom_byte);
 
-	con_partial_last_line = partial;
+    con_partial_last_line = partial;
 
-	if (con_used_lines < MAX_CON_LINES)
-		con_used_lines++;
+    if (con_used_lines < MAX_CON_LINES)
+        con_used_lines++;
 }
 
 static void CON_QuitAddLine(const char *s, bool partial)
 {
-	if (quit_partial_last_line)
-	{
-		SYS_ASSERT(quit_lines[0]);
+    if (quit_partial_last_line)
+    {
+        SYS_ASSERT(quit_lines[0]);
 
-		quit_lines[0]->Append(s);
+        quit_lines[0]->Append(s);
 
-		quit_partial_last_line = partial;
-		return;
-	}
+        quit_partial_last_line = partial;
+        return;
+    }
 
-	// scroll everything up 
+    // scroll everything up
 
-	delete quit_lines[ENDOOM_LINES-1];
+    delete quit_lines[ENDOOM_LINES - 1];
 
-	for (int i = ENDOOM_LINES-1; i > 0; i--)
-		quit_lines[i] = quit_lines[i-1];
+    for (int i = ENDOOM_LINES - 1; i > 0; i--)
+        quit_lines[i] = quit_lines[i - 1];
 
-	rgbcol_t col = current_color;
+    rgbcol_t col = current_color;
 
-	quit_lines[0] = new console_line_c(s, col);
+    quit_lines[0] = new console_line_c(s, col);
 
-	quit_partial_last_line = partial;
+    quit_partial_last_line = partial;
 
-	if (quit_used_lines < ENDOOM_LINES)
-		quit_used_lines++;
+    if (quit_used_lines < ENDOOM_LINES)
+        quit_used_lines++;
 }
 
 static void CON_QuitEndoomAddLine(byte endoom_byte, const char *s, bool partial)
 {
-	if (quit_partial_last_line)
-	{
-		SYS_ASSERT(quit_lines[0]);
+    if (quit_partial_last_line)
+    {
+        SYS_ASSERT(quit_lines[0]);
 
-		quit_lines[0]->Append(s);
+        quit_lines[0]->Append(s);
 
-		quit_lines[0]->AppendEndoom(endoom_byte);
+        quit_lines[0]->AppendEndoom(endoom_byte);
 
-		quit_partial_last_line = partial;
-		return;
-	}
+        quit_partial_last_line = partial;
+        return;
+    }
 
-	// scroll everything up 
+    // scroll everything up
 
-	delete quit_lines[ENDOOM_LINES-1];
+    delete quit_lines[ENDOOM_LINES - 1];
 
-	for (int i = ENDOOM_LINES-1; i > 0; i--)
-		quit_lines[i] = quit_lines[i-1];
+    for (int i = ENDOOM_LINES - 1; i > 0; i--)
+        quit_lines[i] = quit_lines[i - 1];
 
-	rgbcol_t col = current_color;
+    rgbcol_t col = current_color;
 
-	quit_lines[0] = new console_line_c(s, col);
+    quit_lines[0] = new console_line_c(s, col);
 
-	quit_lines[0]->AppendEndoom(endoom_byte);
+    quit_lines[0]->AppendEndoom(endoom_byte);
 
-	quit_partial_last_line = partial;
+    quit_partial_last_line = partial;
 
-	if (quit_used_lines < ENDOOM_LINES)
-		quit_used_lines++;
+    if (quit_used_lines < ENDOOM_LINES)
+        quit_used_lines++;
 }
 
 static void CON_AddCmdHistory(const char *s)
 {
-	// don't add if same as previous command
-	if (cmd_used_hist > 0)
-    	if (strcmp(s, cmd_history[0]->c_str()) == 0)
-        	return;
+    // don't add if same as previous command
+    if (cmd_used_hist > 0)
+        if (strcmp(s, cmd_history[0]->c_str()) == 0)
+            return;
 
-	// scroll everything up 
-	delete cmd_history[MAX_CMD_HISTORY-1];
+    // scroll everything up
+    delete cmd_history[MAX_CMD_HISTORY - 1];
 
-	for (int i = MAX_CMD_HISTORY-1; i > 0; i--)
-		cmd_history[i] = cmd_history[i-1];
+    for (int i = MAX_CMD_HISTORY - 1; i > 0; i--)
+        cmd_history[i] = cmd_history[i - 1];
 
-	cmd_history[0] = new std::string(s);
+    cmd_history[0] = new std::string(s);
 
-	if (cmd_used_hist < MAX_CMD_HISTORY)
-		cmd_used_hist++;
+    if (cmd_used_hist < MAX_CMD_HISTORY)
+        cmd_used_hist++;
 }
 
 static void CON_ClearInputLine(void)
 {
-	input_line[0] = 0;
-	input_pos = 0;
+    input_line[0] = 0;
+    input_pos     = 0;
 }
-
 
 void CON_SetVisible(visible_t v)
 {
-	if (v == vs_toggle)
-	{
-		v = (con_visible == vs_notvisible) ? vs_maximal : vs_notvisible;
+    if (v == vs_toggle)
+    {
+        v = (con_visible == vs_notvisible) ? vs_maximal : vs_notvisible;
 
-		scroll_dir = 0;
-	}
+        scroll_dir = 0;
+    }
 
-	if (con_visible == v)
-		return;
+    if (con_visible == v)
+        return;
 
-	con_visible = v;
+    con_visible = v;
 
-	if (v == vs_maximal)
-	{
-		TabbedLast = false;
-	}
+    if (v == vs_maximal)
+    {
+        TabbedLast = false;
+    }
 
-	if (! conwipeactive)
-	{
-		conwipeactive = true;
-		conwipepos = (v == vs_maximal) ? 0 : CON_WIPE_TICS;
-	}
+    if (!conwipeactive)
+    {
+        conwipeactive = true;
+        conwipepos    = (v == vs_maximal) ? 0 : CON_WIPE_TICS;
+    }
 }
-
 
 static void StripWhitespace(char *src)
 {
-	const char *start = src;
+    const char *start = src;
 
-	while (*start && isspace(*start))
-		start++;
+    while (*start && isspace(*start))
+        start++;
 
-	const char *end = src + strlen(src);
+    const char *end = src + strlen(src);
 
-	while (end > start && isspace(end[-1]))
-		end--;
+    while (end > start && isspace(end[-1]))
+        end--;
 
-	while (start < end)
-	{
-		*src++ = *start++;
-	}
+    while (start < end)
+    {
+        *src++ = *start++;
+    }
 
-	*src = 0;
+    *src = 0;
 }
 
 static void SplitIntoLines(char *src)
 {
-	char *dest = src;
-	char *line = dest;
+    char *dest = src;
+    char *line = dest;
 
-	while (*src)
-	{
-		if (*src == '\n')
-		{
-			*dest++ = 0;
+    while (*src)
+    {
+        if (*src == '\n')
+        {
+            *dest++ = 0;
 
-			CON_AddLine(line, false);
+            CON_AddLine(line, false);
 
-			line = dest;
+            line = dest;
 
-			src++; continue;
-		}
+            src++;
+            continue;
+        }
 
+        *dest++ = *src++;
+    }
 
-		*dest++ = *src++;
-	}
+    *dest++ = 0;
 
-	*dest++ = 0;
+    if (line[0])
+    {
+        CON_AddLine(line, true);
+    }
 
-	if (line[0])
-	{
-		CON_AddLine(line, true);
-	}
-
-	current_color = T_LGREY;
+    current_color = T_LGREY;
 }
 
 static void EndoomSplitIntoLines(byte endoom_byte, char *src)
 {
-	char *dest = src;
-	char *line = dest;
+    char *dest = src;
+    char *line = dest;
 
-	while (*src)
-	{
-		if (*src == '\n')
-		{
-			*dest++ = 0;
+    while (*src)
+    {
+        if (*src == '\n')
+        {
+            *dest++ = 0;
 
-			CON_AddLine(line, false);
+            CON_AddLine(line, false);
 
-			line = dest;
+            line = dest;
 
-			src++; continue;
-		}
+            src++;
+            continue;
+        }
 
+        *dest++ = *src++;
+    }
 
-		*dest++ = *src++;
-	}
+    *dest++ = 0;
 
-	*dest++ = 0;
+    if (line[0])
+    {
+        CON_EndoomAddLine(endoom_byte, line, true);
+    }
 
-	if (line[0])
-	{
-		CON_EndoomAddLine(endoom_byte, line, true);
-	}
-
-	current_color = T_LGREY;
+    current_color = T_LGREY;
 }
 
 static void QuitSplitIntoLines(char *src)
 {
-	char *dest = src;
-	char *line = dest;
+    char *dest = src;
+    char *line = dest;
 
-	while (*src)
-	{
-		if (*src == '\n')
-		{
-			*dest++ = 0;
+    while (*src)
+    {
+        if (*src == '\n')
+        {
+            *dest++ = 0;
 
-			CON_QuitAddLine(line, false);
+            CON_QuitAddLine(line, false);
 
-			line = dest;
+            line = dest;
 
-			src++; continue;
-		}
+            src++;
+            continue;
+        }
 
+        *dest++ = *src++;
+    }
 
-		*dest++ = *src++;
-	}
+    *dest++ = 0;
 
-	*dest++ = 0;
+    if (line[0])
+    {
+        CON_QuitAddLine(line, true);
+    }
 
-	if (line[0])
-	{
-		CON_QuitAddLine(line, true);
-	}
-
-	current_color = T_LGREY;
+    current_color = T_LGREY;
 }
 
 static void QuitEndoomSplitIntoLines(byte endoom_byte, char *src)
 {
-	char *dest = src;
-	char *line = dest;
+    char *dest = src;
+    char *line = dest;
 
-	while (*src)
-	{
-		*dest++ = *src++;
-	}
+    while (*src)
+    {
+        *dest++ = *src++;
+    }
 
-	*dest++ = 0;
+    *dest++ = 0;
 
-	if (line[0])
-	{
-		CON_QuitEndoomAddLine(endoom_byte, line, true);
-	}
+    if (line[0])
+    {
+        CON_QuitEndoomAddLine(endoom_byte, line, true);
+    }
 
-	current_color = T_LGREY;
+    current_color = T_LGREY;
 }
 
 void CON_Printf(const char *message, ...)
 {
-	va_list argptr;
-	char buffer[1024];
+    va_list argptr;
+    char    buffer[1024];
 
-	va_start(argptr, message);
-	vsprintf(buffer, message, argptr);
-	va_end(argptr);
+    va_start(argptr, message);
+    vsprintf(buffer, message, argptr);
+    va_end(argptr);
 
-	SplitIntoLines(buffer);
+    SplitIntoLines(buffer);
 }
 
 void CON_EndoomPrintf(byte endoom_byte, const char *message, ...)
 {
-	va_list argptr;
-	char buffer[1024];
+    va_list argptr;
+    char    buffer[1024];
 
-	va_start(argptr, message);
-	vsprintf(buffer, message, argptr);
-	va_end(argptr);
+    va_start(argptr, message);
+    vsprintf(buffer, message, argptr);
+    va_end(argptr);
 
-	EndoomSplitIntoLines(endoom_byte, buffer);
+    EndoomSplitIntoLines(endoom_byte, buffer);
 }
 
 void CON_QuitPrintf(const char *message, ...)
 {
-	va_list argptr;
-	char buffer[1024];
+    va_list argptr;
+    char    buffer[1024];
 
-	va_start(argptr, message);
-	vsprintf(buffer, message, argptr);
-	va_end(argptr);
+    va_start(argptr, message);
+    vsprintf(buffer, message, argptr);
+    va_end(argptr);
 
-	QuitSplitIntoLines(buffer);
+    QuitSplitIntoLines(buffer);
 }
 
 void CON_QuitEndoomPrintf(byte endoom_byte, const char *message, ...)
 {
-	va_list argptr;
-	char buffer[1024];
+    va_list argptr;
+    char    buffer[1024];
 
-	va_start(argptr, message);
-	vsprintf(buffer, message, argptr);
-	va_end(argptr);
+    va_start(argptr, message);
+    vsprintf(buffer, message, argptr);
+    va_end(argptr);
 
-	QuitEndoomSplitIntoLines(endoom_byte, buffer);
+    QuitEndoomSplitIntoLines(endoom_byte, buffer);
 }
 
-void CON_Message(const char *message,...)
+void CON_Message(const char *message, ...)
 {
-	va_list argptr;
-	char buffer[1024];
+    va_list argptr;
+    char    buffer[1024];
 
-	va_start(argptr, message);
+    va_start(argptr, message);
 
-	// Print the message into a text string
-	vsprintf(buffer, message, argptr);
+    // Print the message into a text string
+    vsprintf(buffer, message, argptr);
 
-	va_end(argptr);
+    va_end(argptr);
 
+    HU_StartMessage(buffer);
 
-	HU_StartMessage(buffer);
+    strcat(buffer, "\n");
 
-	strcat(buffer, "\n");
-
-	SplitIntoLines(buffer);
-
+    SplitIntoLines(buffer);
 }
 
 void CON_MessageLDF(const char *lookup, ...)
 {
-	va_list argptr;
-	char buffer[1024];
+    va_list argptr;
+    char    buffer[1024];
 
-	lookup = language[lookup];
+    lookup = language[lookup];
 
-	va_start(argptr, lookup);
-	vsprintf(buffer, lookup, argptr);
-	va_end(argptr);
+    va_start(argptr, lookup);
+    vsprintf(buffer, lookup, argptr);
+    va_end(argptr);
 
-	HU_StartMessage(buffer);
+    HU_StartMessage(buffer);
 
-	strcat(buffer, "\n");
+    strcat(buffer, "\n");
 
-	SplitIntoLines(buffer);
+    SplitIntoLines(buffer);
 }
 
 void CON_ImportantMessageLDF(const char *lookup, ...)
 {
-	va_list argptr;
-	char buffer[1024];
+    va_list argptr;
+    char    buffer[1024];
 
-	lookup = language[lookup];
+    lookup = language[lookup];
 
-	va_start(argptr, lookup);
-	vsprintf(buffer, lookup, argptr);
-	va_end(argptr);
+    va_start(argptr, lookup);
+    vsprintf(buffer, lookup, argptr);
+    va_end(argptr);
 
-	HU_StartImportantMessage(buffer);
+    HU_StartImportantMessage(buffer);
 
-	strcat(buffer, "\n");
+    strcat(buffer, "\n");
 
-	SplitIntoLines(buffer);
+    SplitIntoLines(buffer);
 }
 
 void CON_MessageColor(rgbcol_t col)
 {
-	current_color = col;
+    current_color = col;
 }
 
-
-
-static int XMUL;
-static int FNSZ;
+static int   XMUL;
+static int   FNSZ;
 static float FNSZ_ratio;
 
 static void CalcSizes()
 {
-	if (SCREENWIDTH < 1024)
-		FNSZ = 16;
-	else
-		FNSZ = 24;
+    if (SCREENWIDTH < 1024)
+        FNSZ = 16;
+    else
+        FNSZ = 24;
 
-	FNSZ_ratio = FNSZ / con_font->def->default_size;
-	if (con_font->def->type == FNTYP_Image)
-		XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
+    FNSZ_ratio = FNSZ / con_font->def->default_size;
+    if (con_font->def->type == FNTYP_Image)
+        XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 }
-
 
 static void SolidBox(int x, int y, int w, int h, rgbcol_t col, float alpha)
 {
-	if (alpha < 0.99f)
-		glEnable(GL_BLEND);
+    if (alpha < 0.99f)
+        glEnable(GL_BLEND);
 
-	glColor4f(RGB_RED(col)/255.0, RGB_GRN(col)/255.0, RGB_BLU(col)/255.0, alpha);
+    glColor4f(RGB_RED(col) / 255.0, RGB_GRN(col) / 255.0, RGB_BLU(col) / 255.0, alpha);
 
-	glBegin(GL_QUADS);
+    glBegin(GL_QUADS);
 
-	glVertex2i(x,   y);
-	glVertex2i(x,   y+h);
-	glVertex2i(x+w, y+h);
-	glVertex2i(x+w, y);
+    glVertex2i(x, y);
+    glVertex2i(x, y + h);
+    glVertex2i(x + w, y + h);
+    glVertex2i(x + w, y);
 
-	glEnd();
+    glEnd();
 
-	glDisable(GL_BLEND);
+    glDisable(GL_BLEND);
 }
 
 static void HorizontalLine(int y, rgbcol_t col)
 {
-	float alpha = 1.0f;
+    float alpha = 1.0f;
 
-	SolidBox(0, y, SCREENWIDTH-1, 1, col, alpha);
+    SolidBox(0, y, SCREENWIDTH - 1, 1, col, alpha);
 }
-
 
 static void DrawChar(int x, int y, char ch, rgbcol_t col)
 {
-	if (x + FNSZ < 0)
-		return;
+    if (x + FNSZ < 0)
+        return;
 
-	float alpha = 1.0f;
+    float alpha = 1.0f;
 
-	glColor4f(RGB_RED(col)/255.0f, RGB_GRN(col)/255.0f, 
-				RGB_BLU(col)/255.0f, alpha);
+    glColor4f(RGB_RED(col) / 255.0f, RGB_GRN(col) / 255.0f, RGB_BLU(col) / 255.0f, alpha);
 
-	if (con_font->def->type == FNTYP_TrueType)
-	{
-		float chwidth = con_font->CharWidth(ch);
-		XMUL = I_ROUND(chwidth * FNSZ_ratio / v_pixelaspect.f);
-		float width = (chwidth - con_font->spacing) * FNSZ_ratio / v_pixelaspect.f;
-		float x_adjust = (XMUL - width) / 2;
-		float y_adjust = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).y_shift[current_font_size] * FNSZ_ratio;
-		float height = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).height[current_font_size] * FNSZ_ratio;
-		stbtt_aligned_quad *q = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).char_quad[current_font_size];
-		glBegin(GL_POLYGON);
-		glTexCoord2f(q->s0,q->t0); glVertex2f(x + x_adjust,y - y_adjust);
-        glTexCoord2f(q->s1,q->t0); glVertex2f(x + x_adjust + width,y - y_adjust);
-        glTexCoord2f(q->s1,q->t1); glVertex2f(x + x_adjust + width,y - y_adjust - height);
-        glTexCoord2f(q->s0,q->t1); glVertex2f(x + x_adjust,y - y_adjust - height);
-		glEnd();
-		return;
-	}
+    if (con_font->def->type == FNTYP_TrueType)
+    {
+        float chwidth  = con_font->CharWidth(ch);
+        XMUL           = I_ROUND(chwidth * FNSZ_ratio / v_pixelaspect.f);
+        float width    = (chwidth - con_font->spacing) * FNSZ_ratio / v_pixelaspect.f;
+        float x_adjust = (XMUL - width) / 2;
+        float y_adjust = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).y_shift[current_font_size] * FNSZ_ratio;
+        float height   = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).height[current_font_size] * FNSZ_ratio;
+        stbtt_aligned_quad *q = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).char_quad[current_font_size];
+        glBegin(GL_POLYGON);
+        glTexCoord2f(q->s0, q->t0);
+        glVertex2f(x + x_adjust, y - y_adjust);
+        glTexCoord2f(q->s1, q->t0);
+        glVertex2f(x + x_adjust + width, y - y_adjust);
+        glTexCoord2f(q->s1, q->t1);
+        glVertex2f(x + x_adjust + width, y - y_adjust - height);
+        glTexCoord2f(q->s0, q->t1);
+        glVertex2f(x + x_adjust, y - y_adjust - height);
+        glEnd();
+        return;
+    }
 
-	u8_t px =      static_cast<u8_t>(ch) % 16;
-	u8_t py = 15 - static_cast<u8_t>(ch) / 16;
+    u8_t px = static_cast<u8_t>(ch) % 16;
+    u8_t py = 15 - static_cast<u8_t>(ch) / 16;
 
-	float tx1 = (px  ) * con_font->font_image->ratio_w;
-	float tx2 = (px+1) * con_font->font_image->ratio_w;
-	float ty1 = (py  ) * con_font->font_image->ratio_h;
-	float ty2 = (py+1) * con_font->font_image->ratio_h;
+    float tx1 = (px)*con_font->font_image->ratio_w;
+    float tx2 = (px + 1) * con_font->font_image->ratio_w;
+    float ty1 = (py)*con_font->font_image->ratio_h;
+    float ty2 = (py + 1) * con_font->font_image->ratio_h;
 
-	glBegin(GL_POLYGON);
+    glBegin(GL_POLYGON);
 
-	glTexCoord2f(tx1, ty1);
-	glVertex2i(x, y);
+    glTexCoord2f(tx1, ty1);
+    glVertex2i(x, y);
 
-	glTexCoord2f(tx1, ty2); 
-	glVertex2i(x, y + FNSZ);
+    glTexCoord2f(tx1, ty2);
+    glVertex2i(x, y + FNSZ);
 
-	glTexCoord2f(tx2, ty2);
-	glVertex2i(x + FNSZ, y + FNSZ);
+    glTexCoord2f(tx2, ty2);
+    glVertex2i(x + FNSZ, y + FNSZ);
 
-	glTexCoord2f(tx2, ty1);
-	glVertex2i(x + FNSZ, y);
+    glTexCoord2f(tx2, ty1);
+    glVertex2i(x + FNSZ, y);
 
-	glEnd();
-
+    glEnd();
 }
 
-static void DrawEndoomChar(float x, float y, char ch, rgbcol_t col, rgbcol_t col2, bool blink, GLuint tex_id, int enwidth)
+static void DrawEndoomChar(float x, float y, char ch, rgbcol_t col, rgbcol_t col2, bool blink, GLuint tex_id,
+                           int enwidth)
 {
-	if (x + FNSZ < 0)
-		return;
+    if (x + FNSZ < 0)
+        return;
 
-	float alpha = 1.0f;
+    float alpha = 1.0f;
 
-	glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_2D);
 
-	glColor4f(RGB_RED(col2)/255.0f, RGB_GRN(col2)/255.0f, 
-						RGB_BLU(col2)/255.0f, alpha);
+    glColor4f(RGB_RED(col2) / 255.0f, RGB_GRN(col2) / 255.0f, RGB_BLU(col2) / 255.0f, alpha);
 
-	glBegin(GL_QUADS);
+    glBegin(GL_QUADS);
 
-	glVertex2i(x-(enwidth/2), y);
+    glVertex2i(x - (enwidth / 2), y);
 
-	glVertex2i(x-(enwidth/2), y + FNSZ);
+    glVertex2i(x - (enwidth / 2), y + FNSZ);
 
-	glVertex2i(x+(enwidth/2), y + FNSZ);
+    glVertex2i(x + (enwidth / 2), y + FNSZ);
 
-	glVertex2i(x+(enwidth/2), y);
+    glVertex2i(x + (enwidth / 2), y);
 
-	glEnd();
+    glEnd();
 
-	glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_2D);
 
-	glColor4f(RGB_RED(col)/255.0f, RGB_GRN(col)/255.0f, 
-				RGB_BLU(col)/255.0f, alpha);
+    glColor4f(RGB_RED(col) / 255.0f, RGB_GRN(col) / 255.0f, RGB_BLU(col) / 255.0f, alpha);
 
-	if (blink && con_cursor >= 16)
-		ch = 0x20;
+    if (blink && con_cursor >= 16)
+        ch = 0x20;
 
-	u8_t px =      static_cast<u8_t>(ch) % 16;
-	u8_t py = 15 - static_cast<u8_t>(ch) / 16;
+    u8_t px = static_cast<u8_t>(ch) % 16;
+    u8_t py = 15 - static_cast<u8_t>(ch) / 16;
 
-	float tx1 = (px  ) * endoom_font->font_image->ratio_w;
-	float tx2 = (px+1) * endoom_font->font_image->ratio_w;
+    float tx1 = (px)*endoom_font->font_image->ratio_w;
+    float tx2 = (px + 1) * endoom_font->font_image->ratio_w;
 
-	float ty1 = (py  ) * endoom_font->font_image->ratio_h;
-	float ty2 = (py+1) * endoom_font->font_image->ratio_h;
+    float ty1 = (py)*endoom_font->font_image->ratio_h;
+    float ty2 = (py + 1) * endoom_font->font_image->ratio_h;
 
-	glBegin(GL_POLYGON);
+    glBegin(GL_POLYGON);
 
-	glTexCoord2f(tx1, ty1);
-	glVertex2i(x - enwidth, y);
+    glTexCoord2f(tx1, ty1);
+    glVertex2i(x - enwidth, y);
 
-	glTexCoord2f(tx1, ty2); 
-	glVertex2i(x - enwidth, y + FNSZ);
+    glTexCoord2f(tx1, ty2);
+    glVertex2i(x - enwidth, y + FNSZ);
 
-	glTexCoord2f(tx2, ty2);
-	glVertex2i(x + enwidth, y + FNSZ);
+    glTexCoord2f(tx2, ty2);
+    glVertex2i(x + enwidth, y + FNSZ);
 
-	glTexCoord2f(tx2, ty1);
-	glVertex2i(x + enwidth, y);
+    glTexCoord2f(tx2, ty1);
+    glVertex2i(x + enwidth, y);
 
-	glEnd();
-
+    glEnd();
 }
 
 // writes the text on coords (x,y) of the console
 static void DrawText(int x, int y, const char *s, rgbcol_t col)
 {
-	if (con_font->def->type == FNTYP_Image)
-	{
-		// Always whiten the font when used with console output
-		GLuint tex_id = W_ImageCache(con_font->font_image, true, (const colourmap_c *)0, true);
+    if (con_font->def->type == FNTYP_Image)
+    {
+        // Always whiten the font when used with console output
+        GLuint tex_id = W_ImageCache(con_font->font_image, true, (const colourmap_c *)0, true);
 
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, tex_id);
-	
-		glEnable(GL_BLEND);
-		glEnable(GL_ALPHA_TEST);
-		glAlphaFunc(GL_GREATER, 0);
-	}
-	else if (con_font->def->type == FNTYP_TrueType)
-	{
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_TEXTURE_2D);
-		if ((var_smoothing && con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ON_DEMAND) ||
-			con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ALWAYS)
-			glBindTexture(GL_TEXTURE_2D, con_font->ttf_smoothed_tex_id[current_font_size]);
-		else
-			glBindTexture(GL_TEXTURE_2D, con_font->ttf_tex_id[current_font_size]);
-	}
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, tex_id);
 
-	bool draw_cursor = false;
+        glEnable(GL_BLEND);
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0);
+    }
+    else if (con_font->def->type == FNTYP_TrueType)
+    {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_TEXTURE_2D);
+        if ((var_smoothing && con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ON_DEMAND) ||
+            con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ALWAYS)
+            glBindTexture(GL_TEXTURE_2D, con_font->ttf_smoothed_tex_id[current_font_size]);
+        else
+            glBindTexture(GL_TEXTURE_2D, con_font->ttf_tex_id[current_font_size]);
+    }
 
-	if (s == input_line)
-	{
-		if (con_cursor < 16)
-			draw_cursor = true;
-	}
+    bool draw_cursor = false;
 
-	int pos = 0;
-	for (; *s; s++, pos++)
-	{
-		DrawChar(x, y, *s, col);
+    if (s == input_line)
+    {
+        if (con_cursor < 16)
+            draw_cursor = true;
+    }
 
-		if (con_font->def->type == FNTYP_TrueType)
-		{
-			if (s+1)
-			{
-				x += (float)stbtt_GetGlyphKernAdvance(con_font->ttf_info, con_font->GetGlyphIndex(*s), 
-					con_font->GetGlyphIndex(*(s+1))) * con_font->ttf_kern_scale[current_font_size] * FNSZ_ratio / v_pixelaspect.f;
-			}
-		}
+    int pos = 0;
+    for (; *s; s++, pos++)
+    {
+        DrawChar(x, y, *s, col);
 
-		if (pos == input_pos && draw_cursor)
-		{
-			DrawChar(x, y, 95, col);
-			draw_cursor = false;
-		}
+        if (con_font->def->type == FNTYP_TrueType)
+        {
+            if (s + 1)
+            {
+                x += (float)stbtt_GetGlyphKernAdvance(con_font->ttf_info, con_font->GetGlyphIndex(*s),
+                                                      con_font->GetGlyphIndex(*(s + 1))) *
+                     con_font->ttf_kern_scale[current_font_size] * FNSZ_ratio / v_pixelaspect.f;
+            }
+        }
 
-		x += XMUL;
+        if (pos == input_pos && draw_cursor)
+        {
+            DrawChar(x, y, 95, col);
+            draw_cursor = false;
+        }
 
-		if (x >= SCREENWIDTH)
-			break;
-	}
+        x += XMUL;
 
-	if (draw_cursor)
-		DrawChar(x, y, 95, col);
+        if (x >= SCREENWIDTH)
+            break;
+    }
 
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_ALPHA_TEST);
-	glDisable(GL_BLEND);
+    if (draw_cursor)
+        DrawChar(x, y, 95, col);
+
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+    glDisable(GL_BLEND);
 }
-
 
 static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
 {
-	// Always whiten the font when used with console output
-	GLuint tex_id = W_ImageCache(endoom_font->font_image, true, (const colourmap_c *)0, true);
+    // Always whiten the font when used with console output
+    GLuint tex_id = W_ImageCache(endoom_font->font_image, true, (const colourmap_c *)0, true);
 
-	int enwidth = I_ROUND((float)endoom_font->im_mono_width * ((float)FNSZ/endoom_font->im_mono_width) / 2);
+    int enwidth = I_ROUND((float)endoom_font->im_mono_width * ((float)FNSZ / endoom_font->im_mono_width) / 2);
 
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, tex_id);
- 
-	glEnable(GL_BLEND);
-	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, tex_id);
 
-	for (int i=0; i < 80; i++)
-	{
-		byte info = endoom_line->endoom_bytes.at(i);
+    glEnable(GL_BLEND);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0);
 
-		DrawEndoomChar(x, y, endoom_line->line.at(i), endoom_colors[info & 15],
-			endoom_colors[(info >> 4) & 7], info & 128, tex_id, enwidth);
+    for (int i = 0; i < 80; i++)
+    {
+        byte info = endoom_line->endoom_bytes.at(i);
 
-		x += enwidth;
+        DrawEndoomChar(x, y, endoom_line->line.at(i), endoom_colors[info & 15], endoom_colors[(info >> 4) & 7],
+                       info & 128, tex_id, enwidth);
 
-		if (x >= SCREENWIDTH)
-			break;
-	}
+        x += enwidth;
 
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_ALPHA_TEST);
-	glDisable(GL_BLEND);
+        if (x >= SCREENWIDTH)
+            break;
+    }
+
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+    glDisable(GL_BLEND);
 }
 
 void CON_SetupFont(void)
 {
-	if (! con_font)
-	{
-		fontdef_c *DEF = fontdefs.Lookup("CON_FONT_2");
-		if (!DEF)
-			I_Error("CON_FONT_2 definition missing from DDFFONT!\n");
-		con_font = hu_fonts.Lookup(DEF);
-		SYS_ASSERT(con_font);
-		con_font->Load();
-	}
+    if (!con_font)
+    {
+        fontdef_c *DEF = fontdefs.Lookup("CON_FONT_2");
+        if (!DEF)
+            I_Error("CON_FONT_2 definition missing from DDFFONT!\n");
+        con_font = hu_fonts.Lookup(DEF);
+        SYS_ASSERT(con_font);
+        con_font->Load();
+    }
 
-	if (! endoom_font)
-	{
-		fontdef_c *DEF = fontdefs.Lookup("ENDFONT");
-		if (!DEF)
-			I_Error("ENDFONT definition missing from DDFFONT!\n");
-		endoom_font = hu_fonts.Lookup(DEF);
-		SYS_ASSERT(endoom_font);
-		endoom_font->Load();
-	}
+    if (!endoom_font)
+    {
+        fontdef_c *DEF = fontdefs.Lookup("ENDFONT");
+        if (!DEF)
+            I_Error("ENDFONT definition missing from DDFFONT!\n");
+        endoom_font = hu_fonts.Lookup(DEF);
+        SYS_ASSERT(endoom_font);
+        endoom_font->Load();
+    }
 
-	if (! console_style)
-	{
-		styledef_c *def = styledefs.Lookup("CONSOLE");
-		if (! def)
-			def = default_style;
-		console_style = hu_styles.Lookup(def);
-	}
+    if (!console_style)
+    {
+        styledef_c *def = styledefs.Lookup("CONSOLE");
+        if (!def)
+            def = default_style;
+        console_style = hu_styles.Lookup(def);
+    }
 
-	CalcSizes();
+    CalcSizes();
 }
-
 
 void CON_Drawer(void)
 {
-	CON_SetupFont();
+    CON_SetupFont();
 
-	if (con_visible == vs_notvisible && !conwipeactive)
-		return;
+    if (con_visible == vs_notvisible && !conwipeactive)
+        return;
 
-	// -- background --
+    // -- background --
 
-	int CON_GFX_HT = (SCREENHEIGHT * 3 / 5);
+    int CON_GFX_HT = (SCREENHEIGHT * 3 / 5);
 
-	int y = SCREENHEIGHT;
+    int y = SCREENHEIGHT;
 
-	if (conwipeactive)
-		y = y - CON_GFX_HT * (conwipepos) / CON_WIPE_TICS;
-	else
-		y = y - CON_GFX_HT;
+    if (conwipeactive)
+        y = y - CON_GFX_HT * (conwipepos) / CON_WIPE_TICS;
+    else
+        y = y - CON_GFX_HT;
 
-	if (console_style->bg_image != NULL)
-	{
-		const image_c *img = console_style->bg_image;
+    if (console_style->bg_image != NULL)
+    {
+        const image_c *img = console_style->bg_image;
 
-		HUD_RawImage(0, y, SCREENWIDTH, y + CON_GFX_HT, img,
-			0.0, 0.0, IM_RIGHT(img), IM_TOP(img),
-			console_style->def->bg.translucency,
-			RGB_NO_VALUE, NULL, 0, 0);
-	}
-	else
-	{
-		SolidBox(0, y, SCREENWIDTH, SCREENHEIGHT - y, console_style->def->bg.colour != RGB_NO_VALUE ?
-			console_style->def->bg.colour : RGB_MAKE(0,0,0), console_style->def->bg.translucency);
-	}
+        HUD_RawImage(0, y, SCREENWIDTH, y + CON_GFX_HT, img, 0.0, 0.0, IM_RIGHT(img), IM_TOP(img),
+                     console_style->def->bg.translucency, RGB_NO_VALUE, NULL, 0, 0);
+    }
+    else
+    {
+        SolidBox(0, y, SCREENWIDTH, SCREENHEIGHT - y,
+                 console_style->def->bg.colour != RGB_NO_VALUE ? console_style->def->bg.colour : RGB_MAKE(0, 0, 0),
+                 console_style->def->bg.translucency);
+    }
 
-	y += FNSZ / 4 + (con_font->def->type == FNTYP_TrueType ? FNSZ : 0);
+    y += FNSZ / 4 + (con_font->def->type == FNTYP_TrueType ? FNSZ : 0);
 
-	// -- input line --
+    // -- input line --
 
-	if (bottomrow == -1)
-	{
-		DrawText(0, y, ">", T_PURPLE);
+    if (bottomrow == -1)
+    {
+        DrawText(0, y, ">", T_PURPLE);
 
-		if (cmd_hist_pos >= 0)
-		{
-			std::string text = cmd_history[cmd_hist_pos]->c_str();
+        if (cmd_hist_pos >= 0)
+        {
+            std::string text = cmd_history[cmd_hist_pos]->c_str();
 
-			if (con_cursor < 16)
-				text.append("_");
+            if (con_cursor < 16)
+                text.append("_");
 
-			DrawText(XMUL, y, text.c_str(), T_PURPLE);
-		}
-		else
-		{
-			DrawText(XMUL, y, input_line, T_PURPLE);
-		}
+            DrawText(XMUL, y, text.c_str(), T_PURPLE);
+        }
+        else
+        {
+            DrawText(XMUL, y, input_line, T_PURPLE);
+        }
 
-		y += FNSZ;
-	}
+        y += FNSZ;
+    }
 
-	y += FNSZ / 2;
+    y += FNSZ / 2;
 
-	// -- text lines --
+    // -- text lines --
 
-	for (int i = MAX(0,bottomrow); i < MAX_CON_LINES; i++)
-	{
-		console_line_c *CL = console_lines[i];
+    for (int i = MAX(0, bottomrow); i < MAX_CON_LINES; i++)
+    {
+        console_line_c *CL = console_lines[i];
 
-		if (! CL)
-			break;
+        if (!CL)
+            break;
 
-		if (epi::prefix_case_cmp(CL->line.c_str(), "--------") == 0)
-			HorizontalLine(y + FNSZ/2, CL->color);
-		else if (CL->endoom_bytes.size() == 80 && CL->line.size() == 80) // 80 ENDOOM characters + newline
-			EndoomDrawText(0, y, CL);
-		else
-			DrawText(0, y, CL->line.c_str(), CL->color);
+        if (epi::prefix_case_cmp(CL->line.c_str(), "--------") == 0)
+            HorizontalLine(y + FNSZ / 2, CL->color);
+        else if (CL->endoom_bytes.size() == 80 && CL->line.size() == 80) // 80 ENDOOM characters + newline
+            EndoomDrawText(0, y, CL);
+        else
+            DrawText(0, y, CL->line.c_str(), CL->color);
 
-		y += FNSZ;
+        y += FNSZ;
 
-		if (y >= SCREENHEIGHT)
-			break;
-	}
+        if (y >= SCREENHEIGHT)
+            break;
+    }
 }
-
 
 static void GotoEndOfLine(void)
 {
-	if (cmd_hist_pos < 0)
-		input_pos = strlen(input_line);
-	else
-		input_pos = strlen(cmd_history[cmd_hist_pos]->c_str());
+    if (cmd_hist_pos < 0)
+        input_pos = strlen(input_line);
+    else
+        input_pos = strlen(cmd_history[cmd_hist_pos]->c_str());
 
-	con_cursor = 0;
+    con_cursor = 0;
 }
-
 
 static void EditHistory(void)
 {
-	if (cmd_hist_pos >= 0)
-	{
-		strcpy(input_line, cmd_history[cmd_hist_pos]->c_str());
+    if (cmd_hist_pos >= 0)
+    {
+        strcpy(input_line, cmd_history[cmd_hist_pos]->c_str());
 
-		cmd_hist_pos = -1;
-	}
+        cmd_hist_pos = -1;
+    }
 }
-
 
 static void InsertChar(char ch)
 {
-	// make room for new character, shift the trailing NUL too
+    // make room for new character, shift the trailing NUL too
 
-	for (int j = MAX_CON_INPUT-2; j >= input_pos; j--)
-		input_line[j+1] = input_line[j];
+    for (int j = MAX_CON_INPUT - 2; j >= input_pos; j--)
+        input_line[j + 1] = input_line[j];
 
-	input_line[MAX_CON_INPUT-1] = 0;
+    input_line[MAX_CON_INPUT - 1] = 0;
 
-	input_line[input_pos++] = ch;
+    input_line[input_pos++] = ch;
 }
-
 
 static char KeyToCharacter(int key, bool shift, bool ctrl)
 {
-	if (ctrl)
-		return 0;
+    if (ctrl)
+        return 0;
 
-	if (key < 32 || key > 126)
-		return 0;
+    if (key < 32 || key > 126)
+        return 0;
 
-	if (! shift)
-		return (char)key;
+    if (!shift)
+        return (char)key;
 
-	// the following assumes a US keyboard layout
-	switch (key)
-	{
-		case '1':  return '!';
-		case '2':  return '@';
-		case '3':  return '#';
-		case '4':  return '$';
-		case '5':  return '%';
-		case '6':  return '^';
-		case '7':  return '&';
-		case '8':  return '*';
-		case '9':  return '(';
-		case '0':  return ')';
+    // the following assumes a US keyboard layout
+    switch (key)
+    {
+    case '1':
+        return '!';
+    case '2':
+        return '@';
+    case '3':
+        return '#';
+    case '4':
+        return '$';
+    case '5':
+        return '%';
+    case '6':
+        return '^';
+    case '7':
+        return '&';
+    case '8':
+        return '*';
+    case '9':
+        return '(';
+    case '0':
+        return ')';
 
-		case '`':  return '~';
-		case '-':  return '_';
-		case '=':  return '+';
-		case '\\': return '|';
-		case '[':  return '{';
-		case ']':  return '}';
-		case ';':  return ':';
-		case '\'': return '"';
-		case ',':  return '<';
-		case '.':  return '>';
-		case '/':  return '?';
-		case '@':  return '\'';
-	}
+    case '`':
+        return '~';
+    case '-':
+        return '_';
+    case '=':
+        return '+';
+    case '\\':
+        return '|';
+    case '[':
+        return '{';
+    case ']':
+        return '}';
+    case ';':
+        return ':';
+    case '\'':
+        return '"';
+    case ',':
+        return '<';
+    case '.':
+        return '>';
+    case '/':
+        return '?';
+    case '@':
+        return '\'';
+    }
 
-	return toupper(key);
+    return toupper(key);
 }
 
-
-static void ListCompletions(std::vector<const char *> & list,
-                            int word_len, int max_row, rgbcol_t color)
+static void ListCompletions(std::vector<const char *> &list, int word_len, int max_row, rgbcol_t color)
 {
-	int max_col = SCREENWIDTH / XMUL - 4;
-	max_col = CLAMP(24, max_col, 78);
+    int max_col = SCREENWIDTH / XMUL - 4;
+    max_col     = CLAMP(24, max_col, 78);
 
-	char buffer[200];
-	int buf_len = 0;
+    char buffer[200];
+    int  buf_len = 0;
 
-	buffer[buf_len] = 0;
+    buffer[buf_len] = 0;
 
-	char temp[200];
-	char last_ja = 0;
+    char temp[200];
+    char last_ja = 0;
 
-	for (int i = 0; i < (int)list.size(); i++)
-	{
-		const char *name = list[i];
-		int n_len = (int)strlen(name);
+    for (int i = 0; i < (int)list.size(); i++)
+    {
+        const char *name  = list[i];
+        int         n_len = (int)strlen(name);
 
-		// support for names with a '.' in them
-		const char *dotpos = strchr(name, '.');
-		if (dotpos && dotpos > name + word_len)
-		{
-			if (last_ja == dotpos[-1])
-				continue;
+        // support for names with a '.' in them
+        const char *dotpos = strchr(name, '.');
+        if (dotpos && dotpos > name + word_len)
+        {
+            if (last_ja == dotpos[-1])
+                continue;
 
-			last_ja = dotpos[-1];
+            last_ja = dotpos[-1];
 
-			n_len = (int)(dotpos - name);
+            n_len = (int)(dotpos - name);
 
-			strcpy(temp, name);
-			temp[n_len] = 0;
+            strcpy(temp, name);
+            temp[n_len] = 0;
 
-			name = temp;
-		}
-		else
-			last_ja = 0;
+            name = temp;
+        }
+        else
+            last_ja = 0;
 
-		if (n_len >= max_col * 2 / 3)
-		{
-			CON_MessageColor(color);
-			CON_Printf("  %s\n", name);
-			max_row--;
-			continue;
-		}
+        if (n_len >= max_col * 2 / 3)
+        {
+            CON_MessageColor(color);
+            CON_Printf("  %s\n", name);
+            max_row--;
+            continue;
+        }
 
-		if (buf_len + 1 + n_len > max_col)
-		{
-			CON_MessageColor(color);
-			CON_Printf("  %s\n", buffer);
-			max_row--;
+        if (buf_len + 1 + n_len > max_col)
+        {
+            CON_MessageColor(color);
+            CON_Printf("  %s\n", buffer);
+            max_row--;
 
-			buf_len = 0;
-			buffer[buf_len] = 0;
+            buf_len         = 0;
+            buffer[buf_len] = 0;
 
-			if (max_row <= 0)
-			{
-				CON_MessageColor(color);
-				CON_Printf("  etc...\n");
-				break;
-			}
-		}
+            if (max_row <= 0)
+            {
+                CON_MessageColor(color);
+                CON_Printf("  etc...\n");
+                break;
+            }
+        }
 
-		if (buf_len > 0)
-			buffer[buf_len++] = ' ';
+        if (buf_len > 0)
+            buffer[buf_len++] = ' ';
 
-		strcpy(buffer + buf_len, name);
+        strcpy(buffer + buf_len, name);
 
-		buf_len += n_len;
-	}
+        buf_len += n_len;
+    }
 
-	if (buf_len > 0)
-	{
-		CON_MessageColor(color);
-		CON_Printf("  %s\n", buffer);
-	}
+    if (buf_len > 0)
+    {
+        CON_MessageColor(color);
+        CON_Printf("  %s\n", buffer);
+    }
 }
-
 
 static void TabComplete(void)
 {
-	EditHistory();
+    EditHistory();
 
-	// check if we are positioned after a word
-	{
-		if (input_pos == 0)
-			return ;
+    // check if we are positioned after a word
+    {
+        if (input_pos == 0)
+            return;
 
-		if (isdigit(input_line[0]))
-			return ;
+        if (isdigit(input_line[0]))
+            return;
 
-		for (int i=0; i < input_pos; i++)
-		{
-			char ch = input_line[i];
+        for (int i = 0; i < input_pos; i++)
+        {
+            char ch = input_line[i];
 
-			if (! (isalnum(ch) || ch == '_' || ch == '.'))
-				return;
-		}
-	}
+            if (!(isalnum(ch) || ch == '_' || ch == '.'))
+                return;
+        }
+    }
 
-	char save_ch = input_line[input_pos];
-	input_line[input_pos] = 0;
+    char save_ch          = input_line[input_pos];
+    input_line[input_pos] = 0;
 
-	std::vector<const char *> match_cmds;
-	std::vector<const char *> match_vars;
-	std::vector<const char *> match_keys;
+    std::vector<const char *> match_cmds;
+    std::vector<const char *> match_vars;
+    std::vector<const char *> match_keys;
 
-	int num_cmd = CON_MatchAllCmds(match_cmds, input_line);
-	int num_var = CON_MatchAllVars(match_vars, input_line);
-	int num_key = 0; ///  E_MatchAllKeys(match_keys, input_line);
+    int num_cmd = CON_MatchAllCmds(match_cmds, input_line);
+    int num_var = CON_MatchAllVars(match_vars, input_line);
+    int num_key = 0; ///  E_MatchAllKeys(match_keys, input_line);
 
-	// we have an unambiguous match, no need to print anything
-	if (num_cmd + num_var + num_key == 1)
-	{
-		input_line[input_pos] = save_ch;
+    // we have an unambiguous match, no need to print anything
+    if (num_cmd + num_var + num_key == 1)
+    {
+        input_line[input_pos] = save_ch;
 
-		const char *name = (num_var > 0) ? match_vars[0] :
-		                   (num_key > 0) ? match_keys[0] : match_cmds[0];
+        const char *name = (num_var > 0) ? match_vars[0] : (num_key > 0) ? match_keys[0] : match_cmds[0];
 
-		SYS_ASSERT((int)strlen(name) >= input_pos);
+        SYS_ASSERT((int)strlen(name) >= input_pos);
 
-		for (name += input_pos; *name; name++)
-			InsertChar(*name);
+        for (name += input_pos; *name; name++)
+            InsertChar(*name);
 
-		if (save_ch != ' ')
-			InsertChar(' ');
+        if (save_ch != ' ')
+            InsertChar(' ');
 
-		con_cursor = 0;
-		return;
-	}
+        con_cursor = 0;
+        return;
+    }
 
-	// show what we were trying to match
-	CON_MessageColor(T_LTBLUE);
-	CON_Printf(">%s\n", input_line);
+    // show what we were trying to match
+    CON_MessageColor(T_LTBLUE);
+    CON_Printf(">%s\n", input_line);
 
-	input_line[input_pos] = save_ch;
+    input_line[input_pos] = save_ch;
 
-	if (num_cmd + num_var + num_key == 0)
-	{
-		CON_Printf("No matches.\n");
-		return;
-	}
+    if (num_cmd + num_var + num_key == 0)
+    {
+        CON_Printf("No matches.\n");
+        return;
+    }
 
-	if (match_vars.size() > 0)
-	{
-		CON_Printf("%u Possible variables:\n", (int)match_vars.size());
+    if (match_vars.size() > 0)
+    {
+        CON_Printf("%u Possible variables:\n", (int)match_vars.size());
 
-		ListCompletions(match_vars, input_pos, 7, RGB_MAKE(0,208,72));
-	}
+        ListCompletions(match_vars, input_pos, 7, RGB_MAKE(0, 208, 72));
+    }
 
-	if (match_keys.size() > 0)
-	{
-		CON_Printf("%u Possible keys:\n", (int)match_keys.size());
+    if (match_keys.size() > 0)
+    {
+        CON_Printf("%u Possible keys:\n", (int)match_keys.size());
 
-		ListCompletions(match_keys, input_pos, 4, RGB_MAKE(0,208,72));
-	}
+        ListCompletions(match_keys, input_pos, 4, RGB_MAKE(0, 208, 72));
+    }
 
-	if (match_cmds.size() > 0)
-	{
-		CON_Printf("%u Possible commands:\n", (int)match_cmds.size());
+    if (match_cmds.size() > 0)
+    {
+        CON_Printf("%u Possible commands:\n", (int)match_cmds.size());
 
-		ListCompletions(match_cmds, input_pos, 3, T_ORANGE);
-	}
+        ListCompletions(match_cmds, input_pos, 3, T_ORANGE);
+    }
 
-	// Add as many common characters as possible
-	// (e.g. "mou <TAB>" should add the s, e and _).
+    // Add as many common characters as possible
+    // (e.g. "mou <TAB>" should add the s, e and _).
 
-	// begin by lumping all completions into one list
-	unsigned int i;
+    // begin by lumping all completions into one list
+    unsigned int i;
 
-	for (i = 0; i < match_keys.size(); i++)
-		match_vars.push_back(match_keys[i]);
+    for (i = 0; i < match_keys.size(); i++)
+        match_vars.push_back(match_keys[i]);
 
-	for (i = 0; i < match_cmds.size(); i++)
-		match_vars.push_back(match_cmds[i]);
+    for (i = 0; i < match_cmds.size(); i++)
+        match_vars.push_back(match_cmds[i]);
 
-	int pos = input_pos;
+    int pos = input_pos;
 
-	for (;;)
-	{
-		char ch = match_vars[0][pos];
-		if (! ch)
-			return;
+    for (;;)
+    {
+        char ch = match_vars[0][pos];
+        if (!ch)
+            return;
 
-		for (i = 1; i < match_vars.size(); i++)
-			if (match_vars[i][pos] != ch)
-				return;
+        for (i = 1; i < match_vars.size(); i++)
+            if (match_vars[i][pos] != ch)
+                return;
 
-		InsertChar(ch);
+        InsertChar(ch);
 
-		pos++;
-	}
+        pos++;
+    }
 }
-
 
 void CON_HandleKey(int key, bool shift, bool ctrl)
 {
-	switch (key)
-	{
-	case KEYD_RALT:
-	case KEYD_RCTRL:
-		// Do nothing
-		break;
-	
-	case KEYD_RSHIFT:
-		// SHIFT was pressed
-		KeysShifted = true;
-		break;
-	
-	case KEYD_PGUP:
-		if (shift)
-			// Move to top of console buffer
-			bottomrow = MAX(-1, con_used_lines-10);
-		else
-			// Start scrolling console buffer up
-			scroll_dir = +1;
-		break;
-	
-	case KEYD_PGDN:
-		if (shift)
-			// Move to bottom of console buffer
-			bottomrow = -1;
-		else
-			// Start scrolling console buffer down
-			scroll_dir = -1;
-		break;
-	
+    switch (key)
+    {
+    case KEYD_RALT:
+    case KEYD_RCTRL:
+        // Do nothing
+        break;
+
+    case KEYD_RSHIFT:
+        // SHIFT was pressed
+        KeysShifted = true;
+        break;
+
+    case KEYD_PGUP:
+        if (shift)
+            // Move to top of console buffer
+            bottomrow = MAX(-1, con_used_lines - 10);
+        else
+            // Start scrolling console buffer up
+            scroll_dir = +1;
+        break;
+
+    case KEYD_PGDN:
+        if (shift)
+            // Move to bottom of console buffer
+            bottomrow = -1;
+        else
+            // Start scrolling console buffer down
+            scroll_dir = -1;
+        break;
+
     case KEYD_WHEEL_UP:
         bottomrow += 4;
-        if (bottomrow > MAX(-1, con_used_lines-10))
-            bottomrow = MAX(-1, con_used_lines-10);
+        if (bottomrow > MAX(-1, con_used_lines - 10))
+            bottomrow = MAX(-1, con_used_lines - 10);
         break;
-    
+
     case KEYD_WHEEL_DN:
         bottomrow -= 4;
         if (bottomrow < -1)
             bottomrow = -1;
         break;
 
-	case KEYD_HOME:
-		// Move cursor to start of line
-		input_pos = 0;
-		con_cursor = 0;
-		break;
-	
-	case KEYD_END:
-		// Move cursor to end of line
-		GotoEndOfLine();
-		break;
-	
-	case KEYD_UPARROW:
-		// Move to previous entry in the command history
-		if (cmd_hist_pos < cmd_used_hist-1)
-		{
-			cmd_hist_pos++;
-			GotoEndOfLine();
-		}
-		TabbedLast = false;
-		break;
-	
-	case KEYD_DOWNARROW:
-		// Move to next entry in the command history
-		if (cmd_hist_pos > -1)
-		{
-			cmd_hist_pos--;
-			GotoEndOfLine();
-		}
-		TabbedLast = false;
-		break;
+    case KEYD_HOME:
+        // Move cursor to start of line
+        input_pos  = 0;
+        con_cursor = 0;
+        break;
 
-	case KEYD_LEFTARROW:
-		// Move cursor left one character
-		if (input_pos > 0)
-			input_pos--;
+    case KEYD_END:
+        // Move cursor to end of line
+        GotoEndOfLine();
+        break;
 
-		con_cursor = 0;
-		break;
-	
-	case KEYD_RIGHTARROW:
-		// Move cursor right one character
-		if (cmd_hist_pos < 0)
-		{
-			if (input_line[input_pos] != 0)
-				input_pos++;
-		}
-		else
-		{
-			if (cmd_history[cmd_hist_pos]->c_str()[input_pos] != 0)
-				input_pos++;
-		}
-		con_cursor = 0;
-		break;
+    case KEYD_UPARROW:
+        // Move to previous entry in the command history
+        if (cmd_hist_pos < cmd_used_hist - 1)
+        {
+            cmd_hist_pos++;
+            GotoEndOfLine();
+        }
+        TabbedLast = false;
+        break;
 
-	case KEYD_ENTER:
-		EditHistory();
+    case KEYD_DOWNARROW:
+        // Move to next entry in the command history
+        if (cmd_hist_pos > -1)
+        {
+            cmd_hist_pos--;
+            GotoEndOfLine();
+        }
+        TabbedLast = false;
+        break;
 
-		// Execute command line (ENTER)
-		StripWhitespace(input_line);
+    case KEYD_LEFTARROW:
+        // Move cursor left one character
+        if (input_pos > 0)
+            input_pos--;
 
-		if (strlen(input_line) == 0)
-		{
-			CON_MessageColor(T_LTBLUE);
-			CON_Printf(">\n");
-		}
-		else
-		{
-			// Add it to history & draw it
-			CON_AddCmdHistory(input_line);
+        con_cursor = 0;
+        break;
 
-			CON_MessageColor(T_LTBLUE);
-			CON_Printf(">%s\n", input_line);
-		
-			// Run it!
-			CON_TryCommand(input_line);
-		}
-	
-		CON_ClearInputLine();
+    case KEYD_RIGHTARROW:
+        // Move cursor right one character
+        if (cmd_hist_pos < 0)
+        {
+            if (input_line[input_pos] != 0)
+                input_pos++;
+        }
+        else
+        {
+            if (cmd_history[cmd_hist_pos]->c_str()[input_pos] != 0)
+                input_pos++;
+        }
+        con_cursor = 0;
+        break;
 
-		// Bring user back to current line after entering command
+    case KEYD_ENTER:
+        EditHistory();
+
+        // Execute command line (ENTER)
+        StripWhitespace(input_line);
+
+        if (strlen(input_line) == 0)
+        {
+            CON_MessageColor(T_LTBLUE);
+            CON_Printf(">\n");
+        }
+        else
+        {
+            // Add it to history & draw it
+            CON_AddCmdHistory(input_line);
+
+            CON_MessageColor(T_LTBLUE);
+            CON_Printf(">%s\n", input_line);
+
+            // Run it!
+            CON_TryCommand(input_line);
+        }
+
+        CON_ClearInputLine();
+
+        // Bring user back to current line after entering command
         bottomrow -= MAX_CON_LINES;
-        if (bottomrow < -1) bottomrow = -1;
+        if (bottomrow < -1)
+            bottomrow = -1;
 
-		TabbedLast = false;
-		break;
-	
-	case KEYD_BACKSPACE:
-		// Erase character to left of cursor
-		EditHistory();
-	
-		if (input_pos > 0)
-		{
-			input_pos--;
+        TabbedLast = false;
+        break;
 
-			// shift characters back
-			for (int j = input_pos; j < MAX_CON_INPUT-2; j++)
-				input_line[j] = input_line[j+1];
-		}
-	
-		TabbedLast = false;
-		con_cursor = 0;
-		break;
-	
-	case KEYD_DELETE:
-		// Erase charater under cursor
-		EditHistory();
-	
-		if (input_line[input_pos] != 0)
-		{
-			// shift characters back
-			for (int j = input_pos; j < MAX_CON_INPUT-2; j++)
-				input_line[j] = input_line[j+1];
-		}
-	
-		TabbedLast = false;
-		con_cursor = 0;
-		break;
-	
-	case KEYD_TAB:
-		// Try to do tab-completion
-		TabComplete();
-		break;
+    case KEYD_BACKSPACE:
+        // Erase character to left of cursor
+        EditHistory();
 
-	case KEYD_ESCAPE:
-		// Close console, clear command line, but if we're in the
-		// fullscreen console mode, there's nothing to fall back on
-		// if it's closed.
-		CON_ClearInputLine();
-	
-		cmd_hist_pos = -1;
-		TabbedLast = false;
-	
-		CON_SetVisible(vs_notvisible);
-		break;
+        if (input_pos > 0)
+        {
+            input_pos--;
 
-	// Allow screenshotting of console too - Dasho
-	case KEYD_F1:
-	case KEYD_PRTSCR:
-		G_DeferredScreenShot();
-		break;
+            // shift characters back
+            for (int j = input_pos; j < MAX_CON_INPUT - 2; j++)
+                input_line[j] = input_line[j + 1];
+        }
 
-	default:
-		{
-			char ch = KeyToCharacter(key, shift, ctrl);
+        TabbedLast = false;
+        con_cursor = 0;
+        break;
 
-			// ignore non-printable characters
-			if (ch == 0)
-				break;
+    case KEYD_DELETE:
+        // Erase charater under cursor
+        EditHistory();
 
-			// no room?
-			if (input_pos >= MAX_CON_INPUT-1)
-				break;
+        if (input_line[input_pos] != 0)
+        {
+            // shift characters back
+            for (int j = input_pos; j < MAX_CON_INPUT - 2; j++)
+                input_line[j] = input_line[j + 1];
+        }
 
-			EditHistory();
-			InsertChar(ch);
+        TabbedLast = false;
+        con_cursor = 0;
+        break;
 
-			TabbedLast = false;
-			con_cursor = 0;
-		}
-		break;
-	}
+    case KEYD_TAB:
+        // Try to do tab-completion
+        TabComplete();
+        break;
+
+    case KEYD_ESCAPE:
+        // Close console, clear command line, but if we're in the
+        // fullscreen console mode, there's nothing to fall back on
+        // if it's closed.
+        CON_ClearInputLine();
+
+        cmd_hist_pos = -1;
+        TabbedLast   = false;
+
+        CON_SetVisible(vs_notvisible);
+        break;
+
+    // Allow screenshotting of console too - Dasho
+    case KEYD_F1:
+    case KEYD_PRTSCR:
+        G_DeferredScreenShot();
+        break;
+
+    default: {
+        char ch = KeyToCharacter(key, shift, ctrl);
+
+        // ignore non-printable characters
+        if (ch == 0)
+            break;
+
+        // no room?
+        if (input_pos >= MAX_CON_INPUT - 1)
+            break;
+
+        EditHistory();
+        InsertChar(ch);
+
+        TabbedLast = false;
+        con_cursor = 0;
+    }
+    break;
+    }
 }
-
 
 static int GetKeycode(event_t *ev)
 {
     int sym = ev->value.key.sym;
 
-	switch (sym)
-	{
-		case KEYD_TAB:
-		case KEYD_PGUP:
-		case KEYD_PGDN:
-		case KEYD_HOME:
-		case KEYD_END:
-		case KEYD_LEFTARROW:
-		case KEYD_RIGHTARROW:
-		case KEYD_BACKSPACE:
-		case KEYD_DELETE:
-		case KEYD_UPARROW:
-		case KEYD_DOWNARROW:
-		case KEYD_WHEEL_UP:
-		case KEYD_WHEEL_DN:
-		case KEYD_ENTER:
-		case KEYD_ESCAPE:
-		case KEYD_RSHIFT:
-		case KEYD_F1:
-		case KEYD_PRTSCR:
-			return sym;
+    switch (sym)
+    {
+    case KEYD_TAB:
+    case KEYD_PGUP:
+    case KEYD_PGDN:
+    case KEYD_HOME:
+    case KEYD_END:
+    case KEYD_LEFTARROW:
+    case KEYD_RIGHTARROW:
+    case KEYD_BACKSPACE:
+    case KEYD_DELETE:
+    case KEYD_UPARROW:
+    case KEYD_DOWNARROW:
+    case KEYD_WHEEL_UP:
+    case KEYD_WHEEL_DN:
+    case KEYD_ENTER:
+    case KEYD_ESCAPE:
+    case KEYD_RSHIFT:
+    case KEYD_F1:
+    case KEYD_PRTSCR:
+        return sym;
 
-		default:
-			break;
+    default:
+        break;
     }
 
     if (HU_IS_PRINTABLE(sym))
@@ -1456,380 +1452,375 @@ static int GetKeycode(event_t *ev)
     return -1;
 }
 
-
-bool CON_Responder(event_t * ev)
+bool CON_Responder(event_t *ev)
 {
-	if (ev->type != ev_keyup && ev->type != ev_keydown)
-		return false;
+    if (ev->type != ev_keyup && ev->type != ev_keydown)
+        return false;
 
-	if (ev->type == ev_keydown && E_MatchesKey(key_console, ev->value.key.sym))
-	{
-		E_ClearInput();
-		CON_SetVisible(vs_toggle);
-		return true;
-	}
+    if (ev->type == ev_keydown && E_MatchesKey(key_console, ev->value.key.sym))
+    {
+        E_ClearInput();
+        CON_SetVisible(vs_toggle);
+        return true;
+    }
 
-	if (con_visible == vs_notvisible)
-		return false;
+    if (con_visible == vs_notvisible)
+        return false;
 
-	int key = GetKeycode(ev);
-	if (key < 0)
-		return true;
+    int key = GetKeycode(ev);
+    if (key < 0)
+        return true;
 
-	if (ev->type == ev_keyup)
-	{
-		if (key == repeat_key)
-			repeat_countdown = 0;
+    if (ev->type == ev_keyup)
+    {
+        if (key == repeat_key)
+            repeat_countdown = 0;
 
-		switch (key)
-		{
-			case KEYD_PGUP:
-			case KEYD_PGDN:
-				scroll_dir = 0;
-				break;
-			case KEYD_RSHIFT:
-				KeysShifted = false;
-				break;
-			default:
-				break;
-		}
-	}
-	else
-	{
-		// Okay, fine. Most keys don't repeat
-		switch (key)
-		{
-			case KEYD_RIGHTARROW:
-			case KEYD_LEFTARROW:
-			case KEYD_UPARROW:
-			case KEYD_DOWNARROW:
-			case KEYD_SPACE:
-			case KEYD_BACKSPACE:
-			case KEYD_DELETE:
-				repeat_countdown = KEYREPEATDELAY * (r_doubleframes.d ? 2 : 1);
-				break;
-			default:
-				repeat_countdown = 0;
-				break;
-		}
+        switch (key)
+        {
+        case KEYD_PGUP:
+        case KEYD_PGDN:
+            scroll_dir = 0;
+            break;
+        case KEYD_RSHIFT:
+            KeysShifted = false;
+            break;
+        default:
+            break;
+        }
+    }
+    else
+    {
+        // Okay, fine. Most keys don't repeat
+        switch (key)
+        {
+        case KEYD_RIGHTARROW:
+        case KEYD_LEFTARROW:
+        case KEYD_UPARROW:
+        case KEYD_DOWNARROW:
+        case KEYD_SPACE:
+        case KEYD_BACKSPACE:
+        case KEYD_DELETE:
+            repeat_countdown = KEYREPEATDELAY * (r_doubleframes.d ? 2 : 1);
+            break;
+        default:
+            repeat_countdown = 0;
+            break;
+        }
 
-		repeat_key = key;
+        repeat_key = key;
 
-		CON_HandleKey(key, KeysShifted, false);
-	}
+        CON_HandleKey(key, KeysShifted, false);
+    }
 
-	return true;  // eat all keyboard events
+    return true; // eat all keyboard events
 }
-
 
 void CON_Ticker(void)
 {
-	int add = 1;
-	if (r_doubleframes.d && !(hudtic &1))
-		add = 0;
+    int add = 1;
+    if (r_doubleframes.d && !(hudtic & 1))
+        add = 0;
 
-	con_cursor = (con_cursor + add) & 31;
+    con_cursor = (con_cursor + add) & 31;
 
-	if (con_visible != vs_notvisible)
-	{
-		// Handle repeating keys
-		switch (scroll_dir)
-		{
-		case +1:
-			if (bottomrow < MAX_CON_LINES-10)
-				bottomrow++;
-			break;
+    if (con_visible != vs_notvisible)
+    {
+        // Handle repeating keys
+        switch (scroll_dir)
+        {
+        case +1:
+            if (bottomrow < MAX_CON_LINES - 10)
+                bottomrow++;
+            break;
 
-		case -1:
-			if (bottomrow > -1)
-				bottomrow--;
-			break;  
+        case -1:
+            if (bottomrow > -1)
+                bottomrow--;
+            break;
 
-		default:
-			if (repeat_countdown)
-			{
-				repeat_countdown -= 1;
+        default:
+            if (repeat_countdown)
+            {
+                repeat_countdown -= 1;
 
-				while (repeat_countdown <= 0)
-				{
-					repeat_countdown += KEYREPEATRATE * (r_doubleframes.d ? 2 : 1);
-					CON_HandleKey(repeat_key, KeysShifted, false);
-				}
-			}
-			break;
-		}
-	}
+                while (repeat_countdown <= 0)
+                {
+                    repeat_countdown += KEYREPEATRATE * (r_doubleframes.d ? 2 : 1);
+                    CON_HandleKey(repeat_key, KeysShifted, false);
+                }
+            }
+            break;
+        }
+    }
 
-	if (conwipeactive)
-	{
-		if (con_visible == vs_notvisible)
-		{
-			conwipepos--;
-			if (conwipepos <= 0)
-				conwipeactive = false;
-		}
-		else
-		{
-			conwipepos++;
-			if (conwipepos >= CON_WIPE_TICS)
-				conwipeactive = false;
-		}
-	}
+    if (conwipeactive)
+    {
+        if (con_visible == vs_notvisible)
+        {
+            conwipepos--;
+            if (conwipepos <= 0)
+                conwipeactive = false;
+        }
+        else
+        {
+            conwipepos++;
+            if (conwipepos >= CON_WIPE_TICS)
+                conwipeactive = false;
+        }
+    }
 }
-
 
 //
 // Initialises the console
 //
 void CON_InitConsole(void)
 {
-	CON_SortVars();
+    CON_SortVars();
 
-	con_used_lines = 0;
-	cmd_used_hist  = 0;
+    con_used_lines = 0;
+    cmd_used_hist  = 0;
 
-	bottomrow = -1;
-	cmd_hist_pos = -1;
+    bottomrow    = -1;
+    cmd_hist_pos = -1;
 
-	CON_ClearInputLine();
+    CON_ClearInputLine();
 
-	current_color = T_LGREY;
+    current_color = T_LGREY;
 
-	CON_AddLine("", false);
-	CON_AddLine("", false);
+    CON_AddLine("", false);
+    CON_AddLine("", false);
 }
-
 
 void CON_Start(void)
 {
-	con_visible = vs_notvisible;
-	con_cursor  = 0;
-	E_ProgressMessage("Starting console...");
+    con_visible = vs_notvisible;
+    con_cursor  = 0;
+    E_ProgressMessage("Starting console...");
 }
-
 
 void CON_ShowFPS(void)
 {
-	if (debug_fps.d == 0)
-		return;
+    if (debug_fps.d == 0)
+        return;
 
-	CON_SetupFont();
+    CON_SetupFont();
 
-	// -AJA- 2022: reworked for better accuracy, ability to show WORST time
+    // -AJA- 2022: reworked for better accuracy, ability to show WORST time
 
-	// get difference since last call
-	static u32_t last_time = 0;
-	u32_t time = I_GetMicros();
-	u32_t diff = time - last_time;
-	last_time  = time;
+    // get difference since last call
+    static u32_t last_time = 0;
+    u32_t        time      = I_GetMicros();
+    u32_t        diff      = time - last_time;
+    last_time              = time;
 
-	// last computed value, state to compute average
-	static float avg_shown   = 100.00;
-	static float worst_shown = 100.00;
+    // last computed value, state to compute average
+    static float avg_shown   = 100.00;
+    static float worst_shown = 100.00;
 
-	static u32_t frames = 0;
-	static u32_t total  = 0;
-	static u32_t worst  = 0;
+    static u32_t frames = 0;
+    static u32_t total  = 0;
+    static u32_t worst  = 0;
 
-	// ignore a large diff or timer wrap-around
-	if (diff < 1000000)
-	{
-		frames += 1;
-		total  += diff;
-		worst  = std::max(worst, diff);
+    // ignore a large diff or timer wrap-around
+    if (diff < 1000000)
+    {
+        frames += 1;
+        total += diff;
+        worst = std::max(worst, diff);
 
-		// update every second
-		if (total > 999999)
-		{
-			avg_shown   = (double)total / (double)(frames * 1000);
-			worst_shown = (double)worst / 1000.0;
+        // update every second
+        if (total > 999999)
+        {
+            avg_shown   = (double)total / (double)(frames * 1000);
+            worst_shown = (double)worst / 1000.0;
 
-			frames = 0;
-			total  = 0;
-			worst  = 0;
-		}
-	}
+            frames = 0;
+            total  = 0;
+            worst  = 0;
+        }
+    }
 
-	int x = SCREENWIDTH  - XMUL * 16;
-	int y = SCREENHEIGHT - FNSZ * 2;
+    int x = SCREENWIDTH - XMUL * 16;
+    int y = SCREENHEIGHT - FNSZ * 2;
 
-	if (abs(debug_fps.d) >= 2)
-		y -= FNSZ;
+    if (abs(debug_fps.d) >= 2)
+        y -= FNSZ;
 
-	SolidBox(x, y, SCREENWIDTH, SCREENHEIGHT, RGB_MAKE(0,0,0), 0.5);
+    SolidBox(x, y, SCREENWIDTH, SCREENHEIGHT, RGB_MAKE(0, 0, 0), 0.5);
 
-	x += XMUL;
-	y = SCREENHEIGHT - FNSZ - FNSZ * (con_font->def->type == FNTYP_TrueType ? -0.5 : 0.5);
+    x += XMUL;
+    y = SCREENHEIGHT - FNSZ - FNSZ * (con_font->def->type == FNTYP_TrueType ? -0.5 : 0.5);
 
-	// show average...
+    // show average...
 
-	char textbuf[128];
+    char textbuf[128];
 
-	if (debug_fps.d < 0)
-		sprintf(textbuf, " %6.2f ms", avg_shown);
-	else
-		sprintf(textbuf, " %6.2f fps", 1000 / avg_shown);
+    if (debug_fps.d < 0)
+        sprintf(textbuf, " %6.2f ms", avg_shown);
+    else
+        sprintf(textbuf, " %6.2f fps", 1000 / avg_shown);
 
-	DrawText(x, y, textbuf, T_GREY176);
+    DrawText(x, y, textbuf, T_GREY176);
 
-	// show worst...
+    // show worst...
 
-	if (abs(debug_fps.d) >= 2)
-	{
-		y -= FNSZ;
+    if (abs(debug_fps.d) >= 2)
+    {
+        y -= FNSZ;
 
-		if (debug_fps.d < 0)
-			sprintf(textbuf, " %6.2f max", worst_shown);
-		else if (worst_shown > 0)
-			sprintf(textbuf, " %6.2f min", 1000 / worst_shown);
+        if (debug_fps.d < 0)
+            sprintf(textbuf, " %6.2f max", worst_shown);
+        else if (worst_shown > 0)
+            sprintf(textbuf, " %6.2f min", 1000 / worst_shown);
 
-		DrawText(x, y, textbuf, T_GREY176);
-	}
+        DrawText(x, y, textbuf, T_GREY176);
+    }
 }
-
 
 void CON_ShowPosition(void)
 {
-	if (debug_pos.d <= 0)
-		return;
+    if (debug_pos.d <= 0)
+        return;
 
-	CON_SetupFont();
+    CON_SetupFont();
 
-	player_t *p = players[displayplayer];
-	if (p == NULL)
-		return;
+    player_t *p = players[displayplayer];
+    if (p == NULL)
+        return;
 
-	char textbuf[128];
+    char textbuf[128];
 
-	int x = SCREENWIDTH  - XMUL * 16;
-	int y = SCREENHEIGHT - FNSZ * 5;
+    int x = SCREENWIDTH - XMUL * 16;
+    int y = SCREENHEIGHT - FNSZ * 5;
 
-	SolidBox(x, y - FNSZ * 10, XMUL * 16, FNSZ * 10 + 2, RGB_MAKE(0,0,0), 0.5);
+    SolidBox(x, y - FNSZ * 10, XMUL * 16, FNSZ * 10 + 2, RGB_MAKE(0, 0, 0), 0.5);
 
-	x += XMUL;
-	y -= FNSZ * (con_font->def->type == FNTYP_TrueType ? 0.25 : 1.25);
-	sprintf(textbuf, "    x: %d", (int)p->mo->x);
-	DrawText(x, y, textbuf, T_GREY176);
+    x += XMUL;
+    y -= FNSZ * (con_font->def->type == FNTYP_TrueType ? 0.25 : 1.25);
+    sprintf(textbuf, "    x: %d", (int)p->mo->x);
+    DrawText(x, y, textbuf, T_GREY176);
 
-	y -= FNSZ;
-	sprintf(textbuf, "    y: %d", (int)p->mo->y);
-	DrawText(x, y, textbuf, T_GREY176);
+    y -= FNSZ;
+    sprintf(textbuf, "    y: %d", (int)p->mo->y);
+    DrawText(x, y, textbuf, T_GREY176);
 
-	y -= FNSZ;
-	sprintf(textbuf, "    z: %d", (int)p->mo->z);
-	DrawText(x, y, textbuf, T_GREY176);
+    y -= FNSZ;
+    sprintf(textbuf, "    z: %d", (int)p->mo->z);
+    DrawText(x, y, textbuf, T_GREY176);
 
-	y -= FNSZ;
-	sprintf(textbuf, "angle: %d", (int)ANG_2_FLOAT(p->mo->angle));
-	DrawText(x, y, textbuf, T_GREY176);
+    y -= FNSZ;
+    sprintf(textbuf, "angle: %d", (int)ANG_2_FLOAT(p->mo->angle));
+    DrawText(x, y, textbuf, T_GREY176);
 
-	y -= FNSZ;
-	sprintf(textbuf, "x mom: %.4f", p->mo->mom.x);
-	DrawText(x, y, textbuf, T_GREY176);
+    y -= FNSZ;
+    sprintf(textbuf, "x mom: %.4f", p->mo->mom.x);
+    DrawText(x, y, textbuf, T_GREY176);
 
-	y -= FNSZ;
-	sprintf(textbuf, "y mom: %.4f", p->mo->mom.y);
-	DrawText(x, y, textbuf, T_GREY176);
+    y -= FNSZ;
+    sprintf(textbuf, "y mom: %.4f", p->mo->mom.y);
+    DrawText(x, y, textbuf, T_GREY176);
 
-	y -= FNSZ;
-	sprintf(textbuf, "z mom: %.4f", p->mo->mom.z);
-	DrawText(x, y, textbuf, T_GREY176);
+    y -= FNSZ;
+    sprintf(textbuf, "z mom: %.4f", p->mo->mom.z);
+    DrawText(x, y, textbuf, T_GREY176);
 
-	y -= FNSZ;
-	sprintf(textbuf, "  sec: %d", (int)(p->mo->subsector->sector - sectors));
-	DrawText(x, y, textbuf, T_GREY176);
+    y -= FNSZ;
+    sprintf(textbuf, "  sec: %d", (int)(p->mo->subsector->sector - sectors));
+    DrawText(x, y, textbuf, T_GREY176);
 
-	y -= FNSZ;
-	sprintf(textbuf, "  sub: %d", (int)(p->mo->subsector - subsectors));
-	DrawText(x, y, textbuf, T_GREY176);
+    y -= FNSZ;
+    sprintf(textbuf, "  sub: %d", (int)(p->mo->subsector - subsectors));
+    DrawText(x, y, textbuf, T_GREY176);
 }
-
 
 void CON_PrintEndoom()
 {
-	int length = 0;
-	byte *data = nullptr;
+    int   length = 0;
+    byte *data   = nullptr;
 
-	data = W_OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
-	if (!data)
-		data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
-	if (!data)
-		data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
-	if (!data)
-		data = W_OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
-	if (!data)
-	{
-		CON_Printf("CON_PrintEndoom: No ENDOOM screen found!\n");
-		return;
-	}
-	if (length != 4000)
-	{
-		CON_Printf("CON_PrintEndoom: Lump exists, but is malformed! (Length not equal to 4000 bytes)\n");
-		delete[] data;
-		return;
-	}
-	CON_Printf("\n\n");
-	int row_counter = 0;
-	for (int i = 0; i < 4000; i+=2)
-	{
-		CON_EndoomPrintf(data[i+1], "%c", ((int)data[i] == 0 || (int)data[i] == 255) ? 0x20 : (int)data[i]); // Fix crumpled up ENDOOMs lol
-		row_counter++;
-		if (row_counter == 80) 
-		{
-			CON_Printf("\n");
-			row_counter = 0;
-		}
-	}
-	CON_Printf("\n");
-	delete[] data;
+    data = W_OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
+    if (!data)
+        data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
+    if (!data)
+        data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
+    if (!data)
+        data = W_OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
+    if (!data)
+    {
+        CON_Printf("CON_PrintEndoom: No ENDOOM screen found!\n");
+        return;
+    }
+    if (length != 4000)
+    {
+        CON_Printf("CON_PrintEndoom: Lump exists, but is malformed! (Length not equal to 4000 bytes)\n");
+        delete[] data;
+        return;
+    }
+    CON_Printf("\n\n");
+    int row_counter = 0;
+    for (int i = 0; i < 4000; i += 2)
+    {
+        CON_EndoomPrintf(data[i + 1], "%c",
+                         ((int)data[i] == 0 || (int)data[i] == 255) ? 0x20
+                                                                    : (int)data[i]); // Fix crumpled up ENDOOMs lol
+        row_counter++;
+        if (row_counter == 80)
+        {
+            CON_Printf("\n");
+            row_counter = 0;
+        }
+    }
+    CON_Printf("\n");
+    delete[] data;
 }
 
 void CON_CreateQuitScreen()
 {
-	int length = 0;
-	byte *data = nullptr;
+    int   length = 0;
+    byte *data   = nullptr;
 
-	data = W_OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
-	if (!data)
-		data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
-	if (!data)
-		data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
-	if (!data)
-		data = W_OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
-	if (!data)
-	{
-		CON_Printf("No ENDOOM screen found for this WAD!\n");
-		return;
-	}
-	if (length != 4000)
-	{
-		CON_Printf("CON_CreateQuitScreen: ENDOOM exists, but is malformed! (Length not equal to 4000 bytes)\n");
-		delete[] data;
-		return;
-	}
-	int row_counter = 0;
-	for (int i = 0; i < 4000; i+=2)
-	{
-		CON_QuitEndoomPrintf(data[i+1], "%c", (static_cast<u8_t>(data[i]) == 0 || 
-			static_cast<u8_t>(data[i]) == 255) ? 0x20 : static_cast<u8_t>(data[i]));
-		row_counter++;
-		if (row_counter == 80) 
-		{
-			CON_QuitPrintf("\n");
-			row_counter = 0;
-		}
-	}
-	delete[] data;
+    data = W_OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
+    if (!data)
+        data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
+    if (!data)
+        data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
+    if (!data)
+        data = W_OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
+    if (!data)
+    {
+        CON_Printf("No ENDOOM screen found for this WAD!\n");
+        return;
+    }
+    if (length != 4000)
+    {
+        CON_Printf("CON_CreateQuitScreen: ENDOOM exists, but is malformed! (Length not equal to 4000 bytes)\n");
+        delete[] data;
+        return;
+    }
+    int row_counter = 0;
+    for (int i = 0; i < 4000; i += 2)
+    {
+        CON_QuitEndoomPrintf(
+            data[i + 1], "%c",
+            (static_cast<u8_t>(data[i]) == 0 || static_cast<u8_t>(data[i]) == 255) ? 0x20 : static_cast<u8_t>(data[i]));
+        row_counter++;
+        if (row_counter == 80)
+        {
+            CON_QuitPrintf("\n");
+            row_counter = 0;
+        }
+    }
+    delete[] data;
 }
-
 
 void CON_ClearLines()
 {
-	for (int i = 0 ; i < con_used_lines; i++)
-	{
-		console_lines[i]->Clear();
-	}
-	con_used_lines = 0;
+    for (int i = 0; i < con_used_lines; i++)
+    {
+        console_lines[i]->Clear();
+    }
+    con_used_lines = 0;
 }
 
 //--- editor settings ---

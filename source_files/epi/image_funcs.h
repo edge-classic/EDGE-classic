@@ -29,26 +29,25 @@ namespace epi
 
 typedef enum
 {
-	FMT_Unknown = 0,
-	FMT_PNG,
-	FMT_TGA,
-	FMT_JPEG,
-	FMT_DOOM,
-	FMT_OTHER  // e.g. gif, dds, bmp
-}
-image_format_e;
+    FMT_Unknown = 0,
+    FMT_PNG,
+    FMT_TGA,
+    FMT_JPEG,
+    FMT_DOOM,
+    FMT_OTHER // e.g. gif, dds, bmp
+} image_format_e;
 
 class image_atlas_c
 {
-	public:
-		image_data_c *data;
-		unsigned int texid;
-		unsigned int smoothed_texid;
-		std::vector<std::array<int, 4>> rects; // x,y,width,height
+  public:
+    image_data_c                   *data;
+    unsigned int                    texid;
+    unsigned int                    smoothed_texid;
+    std::vector<std::array<int, 4>> rects; // x,y,width,height
 
-	public:
-	image_atlas_c(int _w, int _h);
-	~image_atlas_c();
+  public:
+    image_atlas_c(int _w, int _h);
+    ~image_atlas_c();
 };
 
 // determine image format from the first 32 bytes (or so) of the file.
@@ -57,7 +56,7 @@ class image_atlas_c
 image_format_e Image_DetectFormat(byte *header, int header_len, int file_size);
 
 // determine image format from the filename (by its extension).
-image_format_e Image_FilenameToFormat(const std::filesystem::path& filename);
+image_format_e Image_FilenameToFormat(const std::filesystem::path &filename);
 
 // loads the given image, which must be PNG, TGA or JPEG format.
 // Returns NULL if something went wrong.  The result image will be RGB
@@ -89,9 +88,9 @@ bool JPEG_Save(std::filesystem::path fn, image_data_c *img);
 // The image _MUST_ be RGB or RGBA.
 bool PNG_Save(std::filesystem::path fn, image_data_c *img);
 
-}  // namespace epi
+} // namespace epi
 
-#endif  /* __EPI_IMAGE_JPEG_H__ */
+#endif /* __EPI_IMAGE_JPEG_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

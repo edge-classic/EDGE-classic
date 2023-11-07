@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Global State Variables
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -31,9 +31,7 @@
 #ifndef __D_STATE_H__
 #define __D_STATE_H__
 
-
 #include "types.h"
-
 
 // We need globally shared data structures,
 //  for defining the global state variables.
@@ -41,15 +39,13 @@
 
 class image_c;
 
-extern bool devparm;  // DEBUG: launched with -devparm
+extern bool devparm; // DEBUG: launched with -devparm
 
 extern gameflags_t global_flags;
 
 extern gameflags_t level_flags;
 
-
-
-// Selected by user. 
+// Selected by user.
 extern skill_t gameskill;
 
 // Flag: true only if started as net deathmatch.
@@ -64,9 +60,9 @@ extern int deathmatch;
 // Note that there is no way to disable the
 //  status bar explicitely.
 extern bool statusbaractive;
-extern bool menuactive;  // Menu overlayed?
+extern bool menuactive; // Menu overlayed?
 extern bool rts_menuactive;
-extern bool paused;  // Game Pause?
+extern bool paused; // Game Pause?
 extern bool viewactive;
 extern bool nodrawers;
 extern bool noblit;
@@ -75,9 +71,8 @@ extern bool noblit;
 // ANG90 = left side, ANG270 = right
 extern angle_t viewanglebaseoffset;
 
-
 // Timer, for scores.
-extern int leveltime;  // tics in game play for par
+extern int  leveltime; // tics in game play for par
 extern bool fast_forward_active;
 
 // -AJA- 2000/12/07: auto quick-load feature
@@ -86,20 +81,18 @@ extern bool autoquickload;
 //?
 extern gamestate_e gamestate;
 
-
 extern int maketic;
 extern int gametic;
 
-#define DEATHMATCH()  (deathmatch > 0)
-#define COOP_MATCH()  (deathmatch == 0 && numplayers > 1)
-#define SP_MATCH()    (deathmatch == 0 && numplayers <= 1)
+#define DEATHMATCH() (deathmatch > 0)
+#define COOP_MATCH() (deathmatch == 0 && numplayers > 1)
+#define SP_MATCH()   (deathmatch == 0 && numplayers <= 1)
 
 #define MAXHEALTH 200
 #define MAXARMOUR 200
 
-#define CHEATARMOUR      MAXARMOUR
-#define CHEATARMOURTYPE  ARMOUR_Blue
-
+#define CHEATARMOUR     MAXARMOUR
+#define CHEATARMOURTYPE ARMOUR_Blue
 
 //-----------------------------------------
 // Internal parameters, used for engine.
@@ -137,14 +130,13 @@ extern int bodyqueslot;
 
 extern const image_c *skyflatimage;
 
-#define IS_SKY(plane)  ((plane).image == skyflatimage)
+#define IS_SKY(plane) ((plane).image == skyflatimage)
 
-
-//misc stuff
+// misc stuff
 extern bool swapstereo;
 extern bool png_scrshots;
 
-#define NUMHUD  120
+#define NUMHUD 120
 
 extern int screen_hud;
 
@@ -152,12 +144,11 @@ extern int reduce_flash;
 
 typedef enum
 {
-	INVULFX_Simple = 0,  // plain inverse blending
-	INVULFX_Textured,    // upload new textures
+    INVULFX_Simple = 0, // plain inverse blending
+    INVULFX_Textured,   // upload new textures
 
-	NUM_INVULFX
-}
-invulfx_type_e;
+    NUM_INVULFX
+} invulfx_type_e;
 
 extern int var_invul_fx;
 

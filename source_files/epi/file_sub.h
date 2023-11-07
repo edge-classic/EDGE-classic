@@ -26,19 +26,25 @@ namespace epi
 
 class sub_file_c : public file_c
 {
-private:
-	file_c *parent;
+  private:
+    file_c *parent;
 
-	int start;
-	int length;
-	int pos;
+    int start;
+    int length;
+    int pos;
 
-public:
+  public:
     sub_file_c(file_c *_parent, int _start, int _len);
     ~sub_file_c();
 
-    int GetLength()   { return length; }
-    int GetPosition() { return pos; }
+    int GetLength()
+    {
+        return length;
+    }
+    int GetPosition()
+    {
+        return pos;
+    }
 
     unsigned int Read(void *dest, unsigned int size);
     unsigned int Write(const void *src, unsigned int size);

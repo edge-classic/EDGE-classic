@@ -25,14 +25,14 @@ namespace Deh_Edge
 {
 
 // string utilities
-int StrCaseCmp(const char *A, const char *B);
-int StrCaseCmpPartial(const char *A, const char *B);
-void StrMaxCopy(char *dest, const char *src, int max);
+int         StrCaseCmp(const char *A, const char *B);
+int         StrCaseCmpPartial(const char *A, const char *B);
+void        StrMaxCopy(char *dest, const char *src, int max);
 const char *StrUpper(const char *name);
 const char *StrSanitize(const char *name);
-char *StringNew(int length);
-char *StringDup(const char *orig);
+char       *StringNew(int length);
+char       *StringDup(const char *orig);
 
-}  // Deh_Edge
+} // namespace Deh_Edge
 
 #endif /* __DEH_UTIL_HDR__ */

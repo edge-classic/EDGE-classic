@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE OpenGL Rendering (Things)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -33,11 +33,11 @@
 void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo);
 void RGL_DrawSortThings(drawfloor_t *dfloor);
 
-void RGL_DrawWeaponSprites(player_t * p);
-void RGL_DrawWeaponModel(player_t * p);
-void RGL_DrawCrosshair(player_t * p);
+void RGL_DrawWeaponSprites(player_t *p);
+void RGL_DrawWeaponModel(player_t *p);
+void RGL_DrawCrosshair(player_t *p);
 
-#endif  /* __RGL_THING__ */
+#endif /* __RGL_THING__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

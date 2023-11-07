@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Generalised Image Handling
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -41,155 +41,169 @@ struct texturedef_s;
 typedef std::list<image_c *> real_image_container_c;
 
 // the transparent pixel value we use
-#define TRANS_PIXEL  247
+#define TRANS_PIXEL 247
 
 // Post end marker
-#define P_SENTINEL  0xFF
+#define P_SENTINEL 0xFF
 
 // dynamic light sizing factor
-#define DL_OUTER       64.0f
-#define DL_OUTER_SQRT   8.0f
+#define DL_OUTER      64.0f
+#define DL_OUTER_SQRT 8.0f
 
 // size of dummy replacements
-#define DUMMY_X  16
-#define DUMMY_Y  16
-
-
-typedef enum
-{
-	OPAC_Unknown = 0,
-
-	OPAC_Solid   = 1,  // utterly solid (alpha = 255 everywhere)
-	OPAC_Masked  = 2,  // only uses alpha 255 and 0
-	OPAC_Complex = 3,  // uses full range of alpha values
-}
-image_opacity_e;
+#define DUMMY_X 16
+#define DUMMY_Y 16
 
 typedef enum
 {
-	LIQ_None = 0,
-	LIQ_Thin = 1,
-	LIQ_Thick = 2
-}
-liquid_type_e;
+    OPAC_Unknown = 0,
+
+    OPAC_Solid   = 1, // utterly solid (alpha = 255 everywhere)
+    OPAC_Masked  = 2, // only uses alpha 255 and 0
+    OPAC_Complex = 3, // uses full range of alpha values
+} image_opacity_e;
+
+typedef enum
+{
+    LIQ_None  = 0,
+    LIQ_Thin  = 1,
+    LIQ_Thick = 2
+} liquid_type_e;
 
 class image_c
 {
-public:
-	// actual image size.  Images that are smaller than their total size
-	// are located in the bottom left corner, cannot tile, and are padded
-	// with black pixels if solid, or transparent pixels otherwise.
-	unsigned short actual_w;
-	unsigned short actual_h;
+  public:
+    // actual image size.  Images that are smaller than their total size
+    // are located in the bottom left corner, cannot tile, and are padded
+    // with black pixels if solid, or transparent pixels otherwise.
+    unsigned short actual_w;
+    unsigned short actual_h;
 
-	// total image size, must be a power of two on each axis.
-	unsigned short total_w;
-	unsigned short total_h;
+    // total image size, must be a power of two on each axis.
+    unsigned short total_w;
+    unsigned short total_h;
 
-	// ratio of actual w/h to total w/h of the image for calculating texcoords
-	float ratio_w;
-	float ratio_h;
+    // ratio of actual w/h to total w/h of the image for calculating texcoords
+    float ratio_w;
+    float ratio_h;
 
     // offset values.  Only used for sprites and on-screen patches.
-	float offset_x;
-	float offset_y;
+    float offset_x;
+    float offset_y;
 
     // scale values, where 1.0f is normal.  Higher values stretch the
     // image (on the wall/floor), lower values shrink it.
-	float scale_x;
-	float scale_y;
+    float scale_x;
+    float scale_y;
 
     // one of the OPAC_XXX values
-	int opacity;
+    int opacity;
 
-	liquid_type_e liquid_type;
+    liquid_type_e liquid_type;
 
-	int swirled_gametic;
+    int swirled_gametic;
 
-	bool is_font;
+    bool is_font;
 
-	// For fully transparent images
-	bool is_empty;
+    // For fully transparent images
+    bool is_empty;
 
-	bool grayscale = false;
+    bool grayscale = false;
 
-	int hsv_rotation = 0;
-	int hsv_saturation = -1;
-	int hsv_value = -1;
+    int hsv_rotation   = 0;
+    int hsv_saturation = -1;
+    int hsv_value      = -1;
 
-	// blurring test
-	image_c *blurred_version = nullptr;
-	float blur_sigma = 0.0f;
+    // blurring test
+    image_c *blurred_version = nullptr;
+    float    blur_sigma      = 0.0f;
 
-//!!!!!! private:
+    //!!!!!! private:
 
-	// --- information about where this image came from ---
-	//char name[16];
-	std::string name;
+    // --- information about where this image came from ---
+    // char name[16];
+    std::string name;
 
-	int source_type;  // image_source_e
- 
-	union
-	{
-		// case IMSRC_Graphic:
-		// case IMSRC_Sprite:
-		// case IMSRC_TX_HI:
-		struct { int lump; char *packfile_name; bool is_patch; bool user_defined; image_special_e special; } graphic;
+    int source_type; // image_source_e
 
-		// case IMSRC_Flat:
-		// case IMSRC_Raw320x200:
-		struct { int lump; char *packfile_name; } flat;
+    union {
+        // case IMSRC_Graphic:
+        // case IMSRC_Sprite:
+        // case IMSRC_TX_HI:
+        struct
+        {
+            int             lump;
+            char           *packfile_name;
+            bool            is_patch;
+            bool            user_defined;
+            image_special_e special;
+        } graphic;
 
-		// case IMSRC_Texture:
-		struct { struct texturedef_s *tdef; } texture;
+        // case IMSRC_Flat:
+        // case IMSRC_Raw320x200:
+        struct
+        {
+            int   lump;
+            char *packfile_name;
+        } flat;
 
-		// case IMSRC_Dummy:
-		struct { rgbcol_t fg; rgbcol_t bg; } dummy;
+        // case IMSRC_Texture:
+        struct
+        {
+            struct texturedef_s *tdef;
+        } texture;
 
-		// case IMSRC_User:
-		struct { imagedef_c *def; } user;
-	}
-	source;
+        // case IMSRC_Dummy:
+        struct
+        {
+            rgbcol_t fg;
+            rgbcol_t bg;
+        } dummy;
 
-	// palette lump, or -1 to use the "GLOBAL" palette
-	int source_palette;
+        // case IMSRC_User:
+        struct
+        {
+            imagedef_c *def;
+        } user;
+    } source;
 
-	// --- information about caching ---
+    // palette lump, or -1 to use the "GLOBAL" palette
+    int source_palette;
 
-	std::vector< struct cached_image_s * > cache;
+    // --- information about caching ---
 
-	// --- animation info ---
+    std::vector<struct cached_image_s *> cache;
 
-	struct
-	{
-		// current version of this image in the animation.  Initially points
-		// to self.  For non-animated images, doesn't change.  Otherwise
-		// when the animation flips over, it becomes cur->next.
-		image_c *cur;
+    // --- animation info ---
 
-		// next image in the animation, or NULL.
-		image_c *next;
+    struct
+    {
+        // current version of this image in the animation.  Initially points
+        // to self.  For non-animated images, doesn't change.  Otherwise
+        // when the animation flips over, it becomes cur->next.
+        image_c *cur;
 
-		// tics before next anim change, or 0 if non-animated.
-		unsigned short count;
+        // next image in the animation, or NULL.
+        image_c *next;
 
-		// animation speed (in tics), or 0 if non-animated.
-		unsigned short speed;
-	}
-	anim;
+        // tics before next anim change, or 0 if non-animated.
+        unsigned short count;
 
-public:
-	 image_c();
-	~image_c();
+        // animation speed (in tics), or 0 if non-animated.
+        unsigned short speed;
+    } anim;
+
+  public:
+    image_c();
+    ~image_c();
 };
 
-
 // macro for converting image_c sizes to cached_image_t sizes
-#define MIP_SIZE(size,mip)  MAX(1, (size) >> (mip))
+#define MIP_SIZE(size, mip) MAX(1, (size) >> (mip))
 
 // utility macros (FIXME: replace with class methods)
-#define IM_RIGHT(image)  (float((image)->actual_w) / (image)->total_w)
-#define IM_TOP(image)    (float((image)->actual_h) / (image)->total_h)
+#define IM_RIGHT(image) (float((image)->actual_w) / (image)->total_w)
+#define IM_TOP(image)   (float((image)->actual_h) / (image)->total_h)
 
 #define IM_WIDTH(image)  ((image)->actual_w * (image)->scale_x)
 #define IM_HEIGHT(image) ((image)->actual_h * (image)->scale_y)
@@ -201,22 +215,19 @@ public:
 #define IM_TOTAL_WIDTH(image)  ((image)->total_w * (image)->scale_x)
 #define IM_TOTAL_HEIGHT(image) ((image)->total_h * (image)->scale_y)
 
-
 //
 //  IMAGE LOOKUP
 //
 typedef enum
 {
-	ILF_Null    = 0x0001,  // return NULL rather than a dummy image
-	ILF_Exact   = 0x0002,  // type must be exactly the same
-	ILF_NoNew   = 0x0004,  // image must already exist (don't create it)
-	ILF_Font    = 0x0008,  // font character (be careful with backups)
-}
-image_lookup_flags_e;
+    ILF_Null  = 0x0001, // return NULL rather than a dummy image
+    ILF_Exact = 0x0002, // type must be exactly the same
+    ILF_NoNew = 0x0004, // image must already exist (don't create it)
+    ILF_Font  = 0x0008, // font character (be careful with backups)
+} image_lookup_flags_e;
 
-image_c *W_ImageDoLookup(real_image_container_c& bucket, const char *name, int source_type = -1);
-const image_c *W_ImageLookup(const char *name, image_namespace_e = INS_Graphic,
-	int flags = 0);
+image_c       *W_ImageDoLookup(real_image_container_c &bucket, const char *name, int source_type = -1);
+const image_c *W_ImageLookup(const char *name, image_namespace_e = INS_Graphic, int flags = 0);
 
 const image_c *W_ImageForDummySprite(void);
 const image_c *W_ImageForDummySkin(void);
@@ -225,48 +236,44 @@ const image_c *W_ImageForFogWall(rgbcol_t fog_color);
 
 // savegame code (Only)
 const image_c *W_ImageParseSaveString(char type, const char *name);
-void W_ImageMakeSaveString(const image_c *image, char *type, char *namebuf);
-
+void           W_ImageMakeSaveString(const image_c *image, char *type, char *namebuf);
 
 //
 //  IMAGE USAGE
 //
 
-extern int  var_smoothing;
-extern int  hq2x_scaling;
+extern int var_smoothing;
+extern int hq2x_scaling;
 
 typedef enum
 {
-	SWIRL_Vanilla = 0,
-	SWIRL_SMMU = 1,
-	SWIRL_SMMUSWIRL = 2,
-	SWIRL_PARALLAX = 3
-}
-swirl_type_e;
+    SWIRL_Vanilla   = 0,
+    SWIRL_SMMU      = 1,
+    SWIRL_SMMUSWIRL = 2,
+    SWIRL_PARALLAX  = 3
+} swirl_type_e;
 extern swirl_type_e swirling_flats;
 
 bool W_InitImages(void);
 void W_UpdateImageAnims(void);
 void W_DeleteAllImages(void);
 
-void W_ImageCreateFlats(std::vector<int>& lumps);
-void W_ImageCreateTextures(struct texturedef_s ** defs, int number);
+void           W_ImageCreateFlats(std::vector<int> &lumps);
+void           W_ImageCreateTextures(struct texturedef_s **defs, int number);
 const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon);
 const image_c *W_ImageCreatePackSprite(std::string packname, pack_file_c *pack, bool is_weapon);
-void W_ImageCreateUser(void);
-void W_ImageAddTX(int lump, const char *name, bool hires);
-void W_AnimateImageSet(const image_c ** images, int number, int speed);
-void W_DrawSavePic(const byte *pixels);
+void           W_ImageCreateUser(void);
+void           W_ImageAddTX(int lump, const char *name, bool hires);
+void           W_AnimateImageSet(const image_c **images, int number, int speed);
+void           W_DrawSavePic(const byte *pixels);
 
 void W_MakeEdgeFlat(void);
 void W_MakeEdgeTex(void);
 
 #ifdef USING_GL_TYPES
-GLuint W_ImageCache(const image_c *image, bool anim = true,
-					const colourmap_c *trans = NULL, bool do_whiten = false);
+GLuint W_ImageCache(const image_c *image, bool anim = true, const colourmap_c *trans = NULL, bool do_whiten = false);
 #endif
 void W_ImagePreCache(const image_c *image);
-
 
 // -AJA- planned....
 // rgbcol_t W_ImageGetHue(const image_c *c);
@@ -274,7 +281,7 @@ void W_ImagePreCache(const image_c *image);
 const char *W_ImageGetName(const image_c *image);
 
 // this only needed during initialisation -- r_things.cpp
-const image_c ** W_ImageGetUserSprites(int *count);
+const image_c **W_ImageGetUserSprites(int *count);
 
 // internal routines -- only needed by rgl_wipe.c
 int W_MakeValidSize(int value);
@@ -285,31 +292,30 @@ void W_ImageStoreBlurred(const image_c *image, float sigma);
 
 typedef enum
 {
-	// Source was a graphic name
-	IMSRC_Graphic = 0,
+    // Source was a graphic name
+    IMSRC_Graphic = 0,
 
-	// INTERNAL ONLY: Source was a raw block of 320x200 bytes (Heretic/Hexen)
-	IMSRC_Raw320x200,
+    // INTERNAL ONLY: Source was a raw block of 320x200 bytes (Heretic/Hexen)
+    IMSRC_Raw320x200,
 
-	// Source was a sprite name
-	IMSRC_Sprite,
+    // Source was a sprite name
+    IMSRC_Sprite,
 
-	// Source was a flat name
-	IMSRC_Flat,
+    // Source was a flat name
+    IMSRC_Flat,
 
-	// Source was a texture name
-	IMSRC_Texture,
+    // Source was a texture name
+    IMSRC_Texture,
 
-	// INTERNAL ONLY: Source is from IMAGE.DDF
-	IMSRC_User,
+    // INTERNAL ONLY: Source is from IMAGE.DDF
+    IMSRC_User,
 
-	// INTERNAL ONLY: Source is from TX_START/END or HI_START/END
-	IMSRC_TX_HI,
+    // INTERNAL ONLY: Source is from TX_START/END or HI_START/END
+    IMSRC_TX_HI,
 
-	// INTERNAL ONLY: Source is dummy image
-	IMSRC_Dummy,
-}
-image_source_e;
+    // INTERNAL ONLY: Source is dummy image
+    IMSRC_Dummy,
+} image_source_e;
 
 // Helper stuff for images in packages
 extern real_image_container_c real_graphics;
@@ -318,10 +324,9 @@ extern real_image_container_c real_flats;
 extern real_image_container_c real_sprites;
 
 image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *packfile_name,
-								real_image_container_c& container,
-								const image_c *replaces = nullptr);
+                            real_image_container_c &container, const image_c *replaces = nullptr);
 
-#endif  // __R_IMAGE__
+#endif // __R_IMAGE__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

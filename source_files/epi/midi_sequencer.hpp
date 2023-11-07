@@ -44,7 +44,7 @@ class BW_MidiSequencer
      */
     class MidiEvent
     {
-    public:
+      public:
         MidiEvent();
         /**
          * @brief Main MIDI event types
@@ -52,32 +52,32 @@ class BW_MidiSequencer
         enum Types
         {
             //! Unknown event
-            T_UNKNOWN       = 0x00,
+            T_UNKNOWN = 0x00,
             //! Note-Off event
-            T_NOTEOFF       = 0x08,//size == 2
+            T_NOTEOFF = 0x08, // size == 2
             //! Note-On event
-            T_NOTEON        = 0x09,//size == 2
+            T_NOTEON = 0x09, // size == 2
             //! Note After-Touch event
-            T_NOTETOUCH     = 0x0A,//size == 2
+            T_NOTETOUCH = 0x0A, // size == 2
             //! Controller change event
-            T_CTRLCHANGE    = 0x0B,//size == 2
+            T_CTRLCHANGE = 0x0B, // size == 2
             //! Patch change event
-            T_PATCHCHANGE   = 0x0C,//size == 1
+            T_PATCHCHANGE = 0x0C, // size == 1
             //! Channel After-Touch event
-            T_CHANAFTTOUCH  = 0x0D,//size == 1
+            T_CHANAFTTOUCH = 0x0D, // size == 1
             //! Pitch-bend change event
-            T_WHEEL         = 0x0E,//size == 2
+            T_WHEEL = 0x0E, // size == 2
 
             //! System Exclusive message, type 1
-            T_SYSEX         = 0xF0,//size == len
+            T_SYSEX = 0xF0, // size == len
             //! Sys Com Song Position Pntr [LSB, MSB]
-            T_SYSCOMSPOSPTR = 0xF2,//size == 2
+            T_SYSCOMSPOSPTR = 0xF2, // size == 2
             //! Sys Com Song Select(Song #) [0-127]
-            T_SYSCOMSNGSEL  = 0xF3,//size == 1
+            T_SYSCOMSNGSEL = 0xF3, // size == 1
             //! System Exclusive message, type 2
-            T_SYSEX2        = 0xF7,//size == len
+            T_SYSEX2 = 0xF7, // size == len
             //! Special event
-            T_SPECIAL       = 0xFF
+            T_SPECIAL = 0xFF
         };
         /**
          * @brief Special MIDI event sub-types
@@ -85,58 +85,58 @@ class BW_MidiSequencer
         enum SubTypes
         {
             //! Sequension number
-            ST_SEQNUMBER    = 0x00,//size == 2
+            ST_SEQNUMBER = 0x00, // size == 2
             //! Text label
-            ST_TEXT         = 0x01,//size == len
+            ST_TEXT = 0x01, // size == len
             //! Copyright notice
-            ST_COPYRIGHT    = 0x02,//size == len
+            ST_COPYRIGHT = 0x02, // size == len
             //! Sequence track title
-            ST_SQTRKTITLE   = 0x03,//size == len
+            ST_SQTRKTITLE = 0x03, // size == len
             //! Instrument title
-            ST_INSTRTITLE   = 0x04,//size == len
+            ST_INSTRTITLE = 0x04, // size == len
             //! Lyrics text fragment
-            ST_LYRICS       = 0x05,//size == len
+            ST_LYRICS = 0x05, // size == len
             //! MIDI Marker
-            ST_MARKER       = 0x06,//size == len
+            ST_MARKER = 0x06, // size == len
             //! Cue Point
-            ST_CUEPOINT     = 0x07,//size == len
+            ST_CUEPOINT = 0x07, // size == len
             //! [Non-Standard] Device Switch
-            ST_DEVICESWITCH = 0x09,//size == len <CUSTOM>
+            ST_DEVICESWITCH = 0x09, // size == len <CUSTOM>
             //! MIDI Channel prefix
-            ST_MIDICHPREFIX = 0x20,//size == 1
+            ST_MIDICHPREFIX = 0x20, // size == 1
 
             //! End of Track event
-            ST_ENDTRACK     = 0x2F,//size == 0
+            ST_ENDTRACK = 0x2F, // size == 0
             //! Tempo change event
-            ST_TEMPOCHANGE  = 0x51,//size == 3
+            ST_TEMPOCHANGE = 0x51, // size == 3
             //! SMPTE offset
-            ST_SMPTEOFFSET  = 0x54,//size == 5
+            ST_SMPTEOFFSET = 0x54, // size == 5
             //! Time signature
-            ST_TIMESIGNATURE = 0x55, //size == 4
+            ST_TIMESIGNATURE = 0x55, // size == 4
             //! Key signature
-            ST_KEYSIGNATURE = 0x59,//size == 2
+            ST_KEYSIGNATURE = 0x59, // size == 2
             //! Sequencer specs
-            ST_SEQUENCERSPEC = 0x7F, //size == len
+            ST_SEQUENCERSPEC = 0x7F, // size == len
 
             /* Non-standard, internal ADLMIDI usage only */
             //! [Non-Standard] Loop Start point
-            ST_LOOPSTART    = 0xE1,//size == 0 <CUSTOM>
+            ST_LOOPSTART = 0xE1, // size == 0 <CUSTOM>
             //! [Non-Standard] Loop End point
-            ST_LOOPEND      = 0xE2,//size == 0 <CUSTOM>
+            ST_LOOPEND = 0xE2, // size == 0 <CUSTOM>
             //! [Non-Standard] Raw OPL data
-            ST_RAWOPL       = 0xE3,//size == 0 <CUSTOM>
+            ST_RAWOPL = 0xE3, // size == 0 <CUSTOM>
 
             //! [Non-Standard] Loop Start point with support of multi-loops
-            ST_LOOPSTACK_BEGIN = 0xE4,//size == 1 <CUSTOM>
+            ST_LOOPSTACK_BEGIN = 0xE4, // size == 1 <CUSTOM>
             //! [Non-Standard] Loop End point with support of multi-loops
-            ST_LOOPSTACK_END   = 0xE5,//size == 0 <CUSTOM>
+            ST_LOOPSTACK_END = 0xE5, // size == 0 <CUSTOM>
             //! [Non-Standard] Loop End point with support of multi-loops
-            ST_LOOPSTACK_BREAK = 0xE6,//size == 0 <CUSTOM>
+            ST_LOOPSTACK_BREAK = 0xE6, // size == 0 <CUSTOM>
             //! [Non-Standard] Callback Trigger
-            ST_CALLBACK_TRIGGER = 0xE7,//size == 1 <CUSTOM>
+            ST_CALLBACK_TRIGGER = 0xE7, // size == 1 <CUSTOM>
 
             // Built-in hooks
-            ST_SONG_BEGIN_HOOK    = 0x101
+            ST_SONG_BEGIN_HOOK = 0x101
         };
         //! Main type of event
         uint_fast16_t type;
@@ -162,7 +162,7 @@ class BW_MidiSequencer
      */
     class MidiTrackRow
     {
-    public:
+      public:
         MidiTrackRow();
         //! Clear MIDI row data
         void clear();
@@ -188,10 +188,11 @@ class BW_MidiSequencer
      */
     struct TempoChangePoint
     {
-        uint64_t absPos;
+        uint64_t           absPos;
         fraction<uint64_t> tempo;
     };
-    //P.S. I declared it here instead of local in-function because C++98 can't process templates with locally-declared structures
+    // P.S. I declared it here instead of local in-function because C++98 can't process templates with locally-declared
+    // structures
 
     typedef std::list<MidiTrackRow> MidiTrackQueue;
 
@@ -216,23 +217,18 @@ class BW_MidiSequencer
             //! Last handled event type
             int32_t lastHandledEvent;
             //! Reserved
-            char    __padding2[4];
+            char __padding2[4];
             //! MIDI Events queue position iterator
             MidiTrackQueue::iterator pos;
 
-            TrackInfo() :
-                delay(0),
-                lastHandledEvent(0)
-            {}
+            TrackInfo() : delay(0), lastHandledEvent(0)
+            {
+            }
         };
         std::vector<TrackInfo> track;
-        Position(): 
-            began(false), 
-            wait(0.0), 
-            absTimePosition(0.0), 
-            track()
+        Position() : began(false), wait(0.0), absTimePosition(0.0), track()
         {
-            for(size_t i=0; i < 7; ++i)
+            for (size_t i = 0; i < 7; ++i)
                 __padding[i] = 0;
         }
     };
@@ -250,7 +246,7 @@ class BW_MidiSequencer
      * @brief Build MIDI track data from the raw track data storage
      * @return true if everything successfully processed, or false on any error
      */
-    bool buildSmfTrackData(const std::vector<std::vector<uint8_t> > &trackData);
+    bool buildSmfTrackData(const std::vector<std::vector<uint8_t>> &trackData);
 
     /**
      * @brief Build the time line from off loaded events
@@ -258,9 +254,7 @@ class BW_MidiSequencer
      * @param loopStartTicks Global loop start tick (give zero if no global loop presented)
      * @param loopEndTicks Global loop end tick (give zero if no global loop presented)
      */
-    void buildTimeLine(const std::vector<MidiEvent> &tempos,
-                       uint64_t loopStartTicks = 0,
-                       uint64_t loopEndTicks = 0);
+    void buildTimeLine(const std::vector<MidiEvent> &tempos, uint64_t loopStartTicks = 0, uint64_t loopEndTicks = 0);
 
     /**
      * @brief Parse one event from raw MIDI track stream
@@ -286,18 +280,18 @@ class BW_MidiSequencer
      */
     void handleEvent(size_t tk, const MidiEvent &evt, int32_t &status);
 
-public:
+  public:
     /**
      * @brief MIDI marker entry
      */
     struct MIDI_MarkerEntry
     {
         //! Label
-        std::string     label;
+        std::string label;
         //! Position time in seconds
-        double          pos_time;
+        double pos_time;
         //! Position time in MIDI ticks
-        uint64_t        pos_ticks;
+        uint64_t pos_ticks;
     };
 
     /**
@@ -326,7 +320,7 @@ public:
         Loop_HMI
     };
 
-private:
+  private:
     //! Music file format type. MIDI is default.
     FileFormat m_format;
     //! SMF format identifier.
@@ -342,9 +336,9 @@ private:
     Position m_loopBeginPosition;
 
     //! Is looping enabled or not
-    bool    m_loopEnabled;
+    bool m_loopEnabled;
     //! Don't process loop: trigger hooks only if they are set
-    bool    m_loopHooksOnly;
+    bool m_loopHooksOnly;
 
     //! Full song length in seconds
     double m_fullSongTimeLength;
@@ -357,7 +351,7 @@ private:
     double m_loopEndTime;
 
     //! Pre-processed track data storage
-    std::vector<MidiTrackQueue > m_trackData;
+    std::vector<MidiTrackQueue> m_trackData;
 
     //! Title of music
     std::string m_musTitle;
@@ -374,30 +368,27 @@ private:
     fraction<uint64_t> m_tempo;
 
     //! Tempo multiplier factor
-    double  m_tempoMultiplier;
+    double m_tempoMultiplier;
     //! Is song at end
-    bool    m_atEnd;
+    bool m_atEnd;
 
     //! Set the number of loops limit. Lesser than 0 - loop infinite
-    int     m_loopCount;
+    int m_loopCount;
 
     //! The number of track of multi-track file (for exmaple, XMI) to load
-    int     m_loadTrackNumber;
+    int m_loadTrackNumber;
 
     //! The XMI-specific list of raw songs, converted into SMF format
-    std::vector<std::vector<uint8_t > > m_rawSongsData;
+    std::vector<std::vector<uint8_t>> m_rawSongsData;
 
     /**
      * @brief Loop stack entry
      */
     struct LoopStackEntry
     {
-        LoopStackEntry() :
-            infinity(false),
-            loops(0),
-            start(0),
-            end(0)
-        {}
+        LoopStackEntry() : infinity(false), loops(0), start(0), end(0)
+        {
+        }
 
         //! is infinite loop
         bool infinity;
@@ -414,55 +405,56 @@ private:
     struct LoopState
     {
         //! Loop start has reached
-        bool    caughtStart;
+        bool caughtStart;
         //! Loop end has reached, reset on handling
-        bool    caughtEnd;
+        bool caughtEnd;
 
         //! Loop start has reached
-        bool    caughtStackStart;
+        bool caughtStackStart;
         //! Loop next has reached, reset on handling
-        bool    caughtStackEnd;
+        bool caughtStackEnd;
         //! Loop break has reached, reset on handling
-        bool    caughtStackBreak;
+        bool caughtStackBreak;
         //! Skip next stack loop start event handling
-        bool    skipStackStart;
+        bool skipStackStart;
 
         //! Are loop points invalid?
-        bool    invalidLoop; /*Loop points are invalid (loopStart after loopEnd or loopStart and loopEnd are on same place)*/
+        bool invalidLoop; /*Loop points are invalid (loopStart after loopEnd or loopStart and loopEnd are on same
+                             place)*/
 
         //! Is look got temporarily broken because of post-end seek?
-        bool    temporaryBroken;
+        bool temporaryBroken;
 
         //! How much times the loop should start repeat? For example, if you want to loop song twice, set value 1
-        int     loopsCount;
+        int loopsCount;
 
         //! how many loops left until finish the song
-        int     loopsLeft;
+        int loopsLeft;
 
         //! Stack of nested loops
         std::vector<LoopStackEntry> stack;
         //! Current level on the loop stack (<0 - out of loop, 0++ - the index in the loop stack)
-        int                         stackLevel;
+        int stackLevel;
 
         /**
          * @brief Reset loop state to initial
          */
         void reset()
         {
-            caughtStart = false;
-            caughtEnd = false;
+            caughtStart      = false;
+            caughtEnd        = false;
             caughtStackStart = false;
-            caughtStackEnd = false;
+            caughtStackEnd   = false;
             caughtStackBreak = false;
-            skipStackStart = false;
-            loopsLeft = loopsCount;
+            skipStackStart   = false;
+            loopsLeft        = loopsCount;
         }
 
         void fullReset()
         {
             loopsCount = -1;
             reset();
-            invalidLoop = false;
+            invalidLoop     = false;
             temporaryBroken = false;
             stack.clear();
             stackLevel = -1;
@@ -470,10 +462,10 @@ private:
 
         bool isStackEnd()
         {
-            if(caughtStackEnd && (stackLevel >= 0) && (stackLevel < static_cast<int>(stack.size())))
+            if (caughtStackEnd && (stackLevel >= 0) && (stackLevel < static_cast<int>(stack.size())))
             {
                 const LoopStackEntry &e = stack[static_cast<size_t>(stackLevel)];
-                if(e.infinity || (!e.infinity && e.loops > 0))
+                if (e.infinity || (!e.infinity && e.loops > 0))
                     return true;
             }
             return false;
@@ -491,15 +483,15 @@ private:
 
         LoopStackEntry &getCurStack()
         {
-            if((stackLevel >= 0) && (stackLevel < static_cast<int>(stack.size())))
+            if ((stackLevel >= 0) && (stackLevel < static_cast<int>(stack.size())))
                 return stack[static_cast<size_t>(stackLevel)];
-            if(stack.empty())
+            if (stack.empty())
             {
                 LoopStackEntry d;
-                d.loops = 0;
+                d.loops    = 0;
                 d.infinity = 0;
-                d.start = 0;
-                d.end = 0;
+                d.start    = 0;
+                d.end      = 0;
                 stack.push_back(d);
             }
             return stack[0];
@@ -534,7 +526,7 @@ private:
     struct SequencerTime
     {
         //! Time buffer
-        double   timeRest;
+        double timeRest;
         //! Sample rate
         uint32_t sampleRate;
         //! Size of one frame in bytes
@@ -547,7 +539,7 @@ private:
         void init()
         {
             sampleRate = 44100;
-            frameSize = 2;
+            frameSize  = 2;
             reset();
         }
 
@@ -555,11 +547,11 @@ private:
         {
             timeRest = 0.0;
             minDelay = 1.0 / static_cast<double>(sampleRate);
-            delay = 0.0;
+            delay    = 0.0;
         }
     } m_time;
 
-public:
+  public:
     BW_MidiSequencer();
     virtual ~BW_MidiSequencer();
 
@@ -733,30 +725,30 @@ public:
      * @brief Gives current time position in seconds
      * @return Current time position in seconds
      */
-    double  tell();
+    double tell();
 
     /**
      * @brief Gives time length of current song in seconds
      * @return Time length of current song in seconds
      */
-    double  timeLength();
+    double timeLength();
 
     /**
      * @brief Gives loop start time position in seconds
      * @return Loop start time position in seconds or -1 if song has no loop points
      */
-    double  getLoopStart();
+    double getLoopStart();
 
     /**
      * @brief Gives loop end time position in seconds
      * @return Loop end time position in seconds or -1 if song has no loop points
      */
-    double  getLoopEnd();
+    double getLoopEnd();
 
     /**
      * @brief Return to begin of current song
      */
-    void    rewind();
+    void rewind();
 
     /**
      * @brief Get current tempor multiplier value
@@ -768,9 +760,9 @@ public:
      * @brief Set tempo multiplier
      * @param tempo Tempo multiplier: 1.0 - original tempo. >1 - faster, <1 - slower
      */
-    void   setTempo(double tempo);
+    void setTempo(double tempo);
 
-private:
+  private:
     /**
      * @brief Load file as Id-software-Music-File (Wolfenstein)
      * @param mfr mem_file_c with opened source file
@@ -824,7 +816,6 @@ private:
      */
     bool parseXMI(epi::mem_file_c *mfr);
 #endif
-
 };
 
 #endif /* BW_MIDI_SEQUENCER_HHHHPPP */

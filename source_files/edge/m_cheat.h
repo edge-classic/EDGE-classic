@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Cheat Sequence Checking
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -38,13 +38,12 @@
 // -KM- 1998/07/21 Needed in am_map.c (iddt cheat)
 typedef struct
 {
-	const char *sequence;
-	const char *p;
-}
-cheatseq_t;
+    const char *sequence;
+    const char *p;
+} cheatseq_t;
 
-int M_CheckCheat(cheatseq_t * cht, char key);
-bool M_CheatResponder(event_t * ev);
+int  M_CheckCheat(cheatseq_t *cht, char key);
+bool M_CheatResponder(event_t *ev);
 void M_CheatInit(void);
 
 #endif // __M_CHEAT__

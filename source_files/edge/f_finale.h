@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Finale Definition
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -31,7 +31,7 @@
 #include "p_mobj.h"
 
 // Called by main loop.
-bool F_Responder(event_t * ev);
+bool F_Responder(event_t *ev);
 
 // Called by main loop.
 void F_Ticker(void);
@@ -40,7 +40,7 @@ void F_Ticker(void);
 void F_Drawer(void);
 
 // -KM- 1998/11/25 Finales generalised.
-void F_StartFinale(const map_finaledef_c * f, gameaction_e newaction);
+void F_StartFinale(const map_finaledef_c *f, gameaction_e newaction);
 
 #endif // __F_FINALE__
 

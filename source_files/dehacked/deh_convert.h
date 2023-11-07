@@ -22,21 +22,21 @@
 namespace Deh_Edge
 {
 
-#define THINGS_1_2   103
-#define FRAMES_1_2   512
-#define SPRITES_1_2  105
-#define SOUNDS_1_2   63
+#define THINGS_1_2  103
+#define FRAMES_1_2  512
+#define SPRITES_1_2 105
+#define SOUNDS_1_2  63
 
-#define TEXTS_1_6  1053
+#define TEXTS_1_6 1053
 
-#define POINTER_NUM      448
-#define POINTER_NUM_BEX  468
+#define POINTER_NUM     448
+#define POINTER_NUM_BEX 468
 
 extern short thing12to166[THINGS_1_2];
 extern short frame12to166[FRAMES_1_2];
 extern short sprite12to166[SPRITES_1_2];
 extern short sound12to166[SOUNDS_1_2];
 
-}  // Deh_Edge
+} // namespace Deh_Edge
 
 #endif /* __DEH_CONVERT_HDR__ */

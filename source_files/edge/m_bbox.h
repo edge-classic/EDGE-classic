@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Bounding-box Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -28,21 +28,20 @@
 
 #include <limits.h>
 
-
 // Bounding box coordinate storage.
 enum
 {
-  BOXTOP,
-  BOXBOTTOM,
-  BOXLEFT,
-  BOXRIGHT
-};  // bbox coordinates
+    BOXTOP,
+    BOXBOTTOM,
+    BOXLEFT,
+    BOXRIGHT
+}; // bbox coordinates
 
 // Bounding box functions.
-void M_ClearBox(float * box);
-void M_AddToBox(float * box, float x, float y);
-void M_CopyBox(float * box, float * other);
-void M_UnionBox(float * box, float * other);
+void M_ClearBox(float *box);
+void M_AddToBox(float *box, float x, float y);
+void M_CopyBox(float *box, float *other);
+void M_UnionBox(float *box, float *other);
 
 #endif /* __M_BBOX_H__ */
 

@@ -24,30 +24,26 @@ namespace epi
 
 int bbox3_c::IntersectPlane(vec3_c loc, vec3_c face) const
 {
-	// determine the two points of the bounding box that are
-	// nearest and furthest away from the plane (via the plane's
-	// normal).  We only need to test these two points.
+    // determine the two points of the bounding box that are
+    // nearest and furthest away from the plane (via the plane's
+    // normal).  We only need to test these two points.
 
-	vec3_c L(face.x < 0 ? hi.x : lo.x,
-	         face.y < 0 ? hi.y : lo.y,
-	         face.z < 0 ? hi.z : lo.z);
+    vec3_c L(face.x < 0 ? hi.x : lo.x, face.y < 0 ? hi.y : lo.y, face.z < 0 ? hi.z : lo.z);
 
-	vec3_c H(face.x < 0 ? lo.x : hi.x,
-	         face.y < 0 ? lo.y : hi.y,
-	         face.z < 0 ? lo.z : hi.z);
+    vec3_c H(face.x < 0 ? lo.x : hi.x, face.y < 0 ? lo.y : hi.y, face.z < 0 ? lo.z : hi.z);
 
-	// check the distances
-	float L_dist = (L - loc) * face;
+    // check the distances
+    float L_dist = (L - loc) * face;
 
-	if (L_dist >= 0)
-		return HIT_INSIDE;
+    if (L_dist >= 0)
+        return HIT_INSIDE;
 
-	float H_dist = (H - loc) * face;
+    float H_dist = (H - loc) * face;
 
-	if (H_dist <= 0)
-		return HIT_OUTSIDE;
+    if (H_dist <= 0)
+        return HIT_OUTSIDE;
 
-	return HIT_PARTIAL;
+    return HIT_PARTIAL;
 }
 
 } // namespace epi

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Platform Interface (EPI) Header
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -56,24 +56,24 @@ void I_SystemStartup(void);
 // The generic print function.  If in text mode, the message should be
 // displayed on the text mode screen.  This function should also call
 // I_Debugf() and CON_Printf().
-void I_Printf(const char *message,...) GCCATTR((format(printf, 1, 2)));
+void I_Printf(const char *message, ...) GCCATTR((format(printf, 1, 2)));
 
-void I_Logf(const char *message,...) GCCATTR((format(printf, 1, 2)));
+void I_Logf(const char *message, ...) GCCATTR((format(printf, 1, 2)));
 
 // Writes a warning to the console and the debug file (if any).  This
 // function should call CON_Printf().
-void I_Warning(const char *warning,...) GCCATTR((format(printf, 1, 2)));
+void I_Warning(const char *warning, ...) GCCATTR((format(printf, 1, 2)));
 
 // The generic debugging function.
-void I_Debugf(const char *message,...) GCCATTR((format(printf, 1, 2)));
+void I_Debugf(const char *message, ...) GCCATTR((format(printf, 1, 2)));
 
 // The error function.  All fatal errors call I_Error().  This calls
 // I_CloseProgram.
-void I_Error(const char *error,...) GCCATTR((format(printf, 1, 2)));
+void I_Error(const char *error, ...) GCCATTR((format(printf, 1, 2)));
 
 // FIXME : remove eventually
-#define L_WriteDebug  I_Debugf
-#define L_WriteLog    I_Logf
+#define L_WriteDebug I_Debugf
+#define L_WriteLog   I_Logf
 
 // The opposite of the I_SystemStartup routine.  This will shutdown
 // everything running in the platform code, by calling the other
@@ -94,9 +94,7 @@ void I_Sleep(int millisecs);
 // given message (typically a serious error message).
 void I_MessageBox(const char *message, const char *title);
 
-
 extern std::filesystem::path exe_path;
-
 
 //--------------------------------------------------------
 //  INPUT functions.
@@ -141,7 +139,6 @@ int I_GetMillies(void);
 // (roughly every 71 minutes), caller *MUST* check for this situation.
 u32_t I_GetMicros(void);
 
-
 //--------------------------------------------------------
 //  MUSIC functions.
 //--------------------------------------------------------
@@ -165,7 +162,6 @@ void I_StartupMusic(void);
 // I_StartupMusic().  Must be called by I_SystemShutdown(), the main
 // code never calls this function.
 void I_ShutdownMusic(void);
-
 
 //--------------------------------------------------------
 //  SOUND functions.
@@ -199,8 +195,7 @@ void I_ShutdownSound(void);
 // upto 0xFF for the peaks, and down to 0x00 for the valleys.  The
 // sound data is also mono.  There is no support for 16-bit or stereo
 // sounds yet.
-bool I_LoadSfx(const unsigned char *data, unsigned int length, 
-					unsigned int freq, unsigned int handle);
+bool I_LoadSfx(const unsigned char *data, unsigned int length, unsigned int freq, unsigned int handle);
 
 // Unloads the sound data for the given handle, previously loaded via
 // I_LoadSfx().  This frees the sound data.  Returns true on success,
@@ -215,8 +210,7 @@ bool I_UnloadSfx(unsigned int handle);
 // refer to the sound in the other functions below.  If something goes
 // wrong, especially when there are no free channels, then -1 is
 // returned.
-int I_SoundPlayback(unsigned int handle, float gain, bool looping,
-	bool relative, float *pos, float *veloc);
+int I_SoundPlayback(unsigned int handle, float gain, bool looping, bool relative, float *pos, float *veloc);
 
 // Checks that the given sound is still playing (i.e. has not reached
 // the end yet), and returns true if it is, otherwise false.
@@ -252,7 +246,6 @@ const char *I_SoundReturnError(void);
 void I_LockAudio(void);
 void I_UnlockAudio(void);
 
-
 //--------------------------------------------------------
 //  VIDEO functions.
 //--------------------------------------------------------
@@ -283,7 +276,7 @@ void I_FinishFrame(void);
 // Tries to set the video card to the given mode (or open a window).
 // If there already was a valid mode (or open window), this call
 // should replace it.  The previous contents (including the palette)
-// is assumed to be lost. 
+// is assumed to be lost.
 //
 // Returns true if successful, otherwise false.  The platform is free
 // to select a working mode if the given mode was not possible, in

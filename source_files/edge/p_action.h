@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Play Simulation Action routines
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -183,7 +183,7 @@ void P_ActCheckBlood(struct mobj_s *mo);
 void P_ActJump(struct mobj_s *mo);
 void P_ActJumpLiquid(struct mobj_s *mo);
 void P_ActJumpSky(struct mobj_s *mo);
-//void P_ActJumpStuck(struct mobj_s *mo);
+// void P_ActJumpStuck(struct mobj_s *mo);
 void P_ActBecome(struct mobj_s *mo);
 void P_ActUnBecome(struct mobj_s *mo);
 

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Networking : Reliable Links
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -30,15 +30,15 @@
 #include "n_reliable.h"
 #include "n_bcast.h"
 
-
 net_node_c::net_node_c() : sock(INVALID_SOCKET), remote()
-{ }
+{
+}
 
 net_node_c::~net_node_c()
-{ }
+{
+}
 
-
-#if 0  // DISABLED
+#if 0 // DISABLED
 
 //----------------------------------------------------------------------------
 
@@ -306,7 +306,7 @@ void N_RemoveNode(net_node_c *nd)
 	I_Error("INTERNAL ERROR N_RemoveNode: no such node '%p'\n", nd);
 }
 
-#endif  // DISABLED
+#endif // DISABLED
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

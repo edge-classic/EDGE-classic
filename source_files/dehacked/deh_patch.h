@@ -24,16 +24,16 @@ namespace Deh_Edge
 
 namespace Patch
 {
-	extern char line_buf[];
-	extern int line_num;
+extern char line_buf[];
+extern int  line_num;
 
-	extern int active_obj;
-	extern int patch_fmt;
-	extern int doom_ver;
+extern int active_obj;
+extern int patch_fmt;
+extern int doom_ver;
 
-	dehret_e Load(input_buffer_c *buf);
-}
+dehret_e Load(input_buffer_c *buf);
+} // namespace Patch
 
-}  // Deh_Edge
+} // namespace Deh_Edge
 
 #endif /* __DEH_PATCH_HDR__ */

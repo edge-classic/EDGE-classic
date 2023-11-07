@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Basic Types
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -31,45 +31,42 @@
 
 class mobjtype_c;
 
-
 // RGB 8:8:8
 typedef unsigned int rgbcol_t;
 
-#define RGB_NO_VALUE  0x01FEFE  /* bright CYAN */
+#define RGB_NO_VALUE 0x01FEFE /* bright CYAN */
 
-#define RGB_MAKE(r,g,b)  (((r) << 16) | ((g) << 8) | (b))
+#define RGB_MAKE(r, g, b) (((r) << 16) | ((g) << 8) | (b))
 
-#define RGB_RED(rgbcol)  (((rgbcol) >> 16) & 0xFF)
-#define RGB_GRN(rgbcol)  (((rgbcol) >>  8) & 0xFF)
-#define RGB_BLU(rgbcol)  (((rgbcol)      ) & 0xFF)
+#define RGB_RED(rgbcol) (((rgbcol) >> 16) & 0xFF)
+#define RGB_GRN(rgbcol) (((rgbcol) >> 8) & 0xFF)
+#define RGB_BLU(rgbcol) (((rgbcol)) & 0xFF)
 
 // useful colors
-#define T_BLACK   RGB_MAKE(  0,  0,  0)
-#define T_DGREY   RGB_MAKE( 64, 64, 64)
-#define T_MGREY   RGB_MAKE(128,128,128)
-#define T_LGREY   RGB_MAKE(208,208,208)
-#define T_WHITE   RGB_MAKE(255,255,255)
+#define T_BLACK RGB_MAKE(0, 0, 0)
+#define T_DGREY RGB_MAKE(64, 64, 64)
+#define T_MGREY RGB_MAKE(128, 128, 128)
+#define T_LGREY RGB_MAKE(208, 208, 208)
+#define T_WHITE RGB_MAKE(255, 255, 255)
 
-#define T_RED     RGB_MAKE(255,0,0)
-#define T_GREEN   RGB_MAKE(0,255,0)
-#define T_BLUE    RGB_MAKE(0,0,255)
-#define T_YELLOW  RGB_MAKE(255,255,24)
-#define T_PURPLE  RGB_MAKE(255,24,255)
-#define T_CYAN    RGB_MAKE(24,255,255)
-#define T_ORANGE  RGB_MAKE(255,72,0)
-#define T_LTBLUE  RGB_MAKE(128,128,255)
-
+#define T_RED    RGB_MAKE(255, 0, 0)
+#define T_GREEN  RGB_MAKE(0, 255, 0)
+#define T_BLUE   RGB_MAKE(0, 0, 255)
+#define T_YELLOW RGB_MAKE(255, 255, 24)
+#define T_PURPLE RGB_MAKE(255, 24, 255)
+#define T_CYAN   RGB_MAKE(24, 255, 255)
+#define T_ORANGE RGB_MAKE(255, 72, 0)
+#define T_LTBLUE RGB_MAKE(128, 128, 255)
 
 // percentage type.  Ranges from 0.0f - 1.0f
 typedef float percent_t;
 
-#define PERCENT_MAKE(val)  ((val) / 100.0f)
-#define PERCENT_2_FLOAT(perc)  (perc)
-
+#define PERCENT_MAKE(val)     ((val) / 100.0f)
+#define PERCENT_2_FLOAT(perc) (perc)
 
 typedef u32_t angle_t;
 
-#define ANGLEBITS  32
+#define ANGLEBITS 32
 
 // Binary Angle Measument, BAM.
 #define ANG0   0x00000000
@@ -85,49 +82,56 @@ typedef u32_t angle_t;
 #define ANG_MAX 0xffffffff
 
 // Only use this one with float.
-#define ANG360  (4294967296.0)
+#define ANG360 (4294967296.0)
 
-#define ANG5   (ANG45/9)
+#define ANG5 (ANG45 / 9)
 
 // Conversion macros:
 
-#define F2AX(n)  (((n) < 0) ? (360.0f + (n)) : (n))
-#define ANG_2_FLOAT(a)  ((float) (a) * 0.00000008381903171539306640625f)
-#define FLOAT_2_ANG(n)  ((angle_t) (F2AX(n) * 11930464.7111f))
-
+#define F2AX(n)        (((n) < 0) ? (360.0f + (n)) : (n))
+#define ANG_2_FLOAT(a) ((float)(a) * 0.00000008381903171539306640625f)
+#define FLOAT_2_ANG(n) ((angle_t)(F2AX(n) * 11930464.7111f))
 
 class mobj_strref_c
 {
-public:
-	mobj_strref_c() : name(), def(NULL) { }
-	mobj_strref_c(const char *s) : name(s), def(NULL) { }
-	mobj_strref_c(const mobj_strref_c &rhs) : name(rhs.name), def(NULL) { }
-	~mobj_strref_c() {};
+  public:
+    mobj_strref_c() : name(), def(NULL)
+    {
+    }
+    mobj_strref_c(const char *s) : name(s), def(NULL)
+    {
+    }
+    mobj_strref_c(const mobj_strref_c &rhs) : name(rhs.name), def(NULL)
+    {
+    }
+    ~mobj_strref_c(){};
 
-private:
-	std::string name;
+  private:
+    std::string name;
 
-	const mobjtype_c *def;
+    const mobjtype_c *def;
 
-public:
-	const char *GetName() const { return name.c_str(); }
+  public:
+    const char *GetName() const
+    {
+        return name.c_str();
+    }
 
-	const mobjtype_c *GetRef();
-	// Note: this returns NULL if not found, in which case you should
-	// produce an error, since future calls will do the search again.
+    const mobjtype_c *GetRef();
+    // Note: this returns NULL if not found, in which case you should
+    // produce an error, since future calls will do the search again.
 
-	mobj_strref_c& operator= (mobj_strref_c &rhs) 
-	{
-		if (&rhs != this) 
-		{
-			name = rhs.name;
-			def = NULL;
-		}
-			 
-		return *this; 
-	}
+    mobj_strref_c &operator=(mobj_strref_c &rhs)
+    {
+        if (&rhs != this)
+        {
+            name = rhs.name;
+            def  = NULL;
+        }
+
+        return *this;
+    }
 };
-
 
 #endif /*__DDF_TYPE_H__*/
 

@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Intermission Screen Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -32,34 +32,31 @@
 
 typedef enum
 {
-	NoState = -1,
-	StatCount,
-	ShowNextLoc
-}
-stateenum_t;
+    NoState = -1,
+    StatCount,
+    ShowNextLoc
+} stateenum_t;
 
 //
 // INTERMISSION STATS
 //
 typedef struct wistats_s
 {
-	const char *level;  // episode # (0-2)
+    const char *level; // episode # (0-2)
 
-	// current and next levels
-	const mapdef_c *cur;
-	const mapdef_c *next;
+    // current and next levels
+    const mapdef_c *cur;
+    const mapdef_c *next;
 
-	int kills;
-	int items;
-	int secret;
+    int kills;
+    int items;
+    int secret;
 
-	// the par time
-	int partime;
-}
-wistats_t;
+    // the par time
+    int partime;
+} wistats_t;
 
 extern wistats_t wi_stats;
-
 
 // Called by main loop, animate the intermission.
 void WI_Ticker(void);

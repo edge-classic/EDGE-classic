@@ -26,36 +26,31 @@ namespace Deh_Edge
 
 typedef enum
 {
-	FT_ANY,     // no checking
-	FT_NONEG,   // must be >= 0
-	FT_GTEQ1,   // must be >= 1
+    FT_ANY,   // no checking
+    FT_NONEG, // must be >= 0
+    FT_GTEQ1, // must be >= 1
 
-	FT_FRAME,   // frame number
-	FT_SOUND,   // sound number
-	FT_SPRITE,  // sprite number
-	FT_SUBSPR,  // subsprite number
-	FT_AMMO,    // ammo number
-	FT_BITS,     // mobj bitflags
-}
-fieldtype_e;
-
+    FT_FRAME,  // frame number
+    FT_SOUND,  // sound number
+    FT_SPRITE, // sprite number
+    FT_SUBSPR, // subsprite number
+    FT_AMMO,   // ammo number
+    FT_BITS,   // mobj bitflags
+} fieldtype_e;
 
 typedef struct
 {
-	const char *deh_name;
+    const char *deh_name;
 
-	// offset into the structure (like an mobjtype_t).
-	size_t offset;
+    // offset into the structure (like an mobjtype_t).
+    size_t offset;
 
-	fieldtype_e field_type;
-}
-fieldreference_t;
-
+    fieldtype_e field_type;
+} fieldreference_t;
 
 // returns false if name not found
 bool Field_Alter(const fieldreference_t *refs, const char *deh_field, int *object, int new_val);
 
-
-}  // Deh_Edge
+} // namespace Deh_Edge
 
 #endif /* __DEH_FIELD_HDR__ */

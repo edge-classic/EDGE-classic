@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Data Definition File Code (Main)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -33,82 +33,99 @@
 // FIXME: Move enums in pl_entry_c class?
 typedef enum
 {
-	MUS_UNKNOWN   = 0,
-	MUS_MIDI,
-	MUS_MUS,
-	MUS_OGG,
-	MUS_MP3,
-	MUS_SID,
-	MUS_FLAC,
-	MUS_M4P,
-	MUS_RAD,
-	MUS_IMF280,
-	MUS_IMF560,
-	MUS_IMF700,
-	ENDOFMUSTYPES
-}
-musictype_t;
+    MUS_UNKNOWN = 0,
+    MUS_MIDI,
+    MUS_MUS,
+    MUS_OGG,
+    MUS_MP3,
+    MUS_SID,
+    MUS_FLAC,
+    MUS_M4P,
+    MUS_RAD,
+    MUS_IMF280,
+    MUS_IMF560,
+    MUS_IMF700,
+    ENDOFMUSTYPES
+} musictype_t;
 
 typedef enum
 {
-	MUSINF_UNKNOWN   = 0,
-	MUSINF_LUMP      = 1,
-	MUSINF_FILE      = 2,
-	MUSINF_PACKAGE   = 3,
-	ENDOFMUSINFTYPES = 4
-}
-musicinftype_e;
+    MUSINF_UNKNOWN   = 0,
+    MUSINF_LUMP      = 1,
+    MUSINF_FILE      = 2,
+    MUSINF_PACKAGE   = 3,
+    ENDOFMUSINFTYPES = 4
+} musicinftype_e;
 
 class pl_entry_c
 {
-public:
-	pl_entry_c();
-	~pl_entry_c();
+  public:
+    pl_entry_c();
+    ~pl_entry_c();
 
-public:
-	void Default(void);
-	void CopyDetail(pl_entry_c &src);
+  public:
+    void Default(void);
+    void CopyDetail(pl_entry_c &src);
 
-	// Member vars....
-	int number;
+    // Member vars....
+    int number;
 
-	musictype_t type;
-	musicinftype_e infotype;
+    musictype_t    type;
+    musicinftype_e infotype;
 
-	std::string info;
+    std::string info;
 
-private:
-	// disable copy construct and assignment operator
-	explicit pl_entry_c(pl_entry_c &rhs) {(void) rhs; }
-	pl_entry_c& operator= (pl_entry_c &rhs) { (void) rhs; return *this; }
+  private:
+    // disable copy construct and assignment operator
+    explicit pl_entry_c(pl_entry_c &rhs)
+    {
+        (void)rhs;
+    }
+    pl_entry_c &operator=(pl_entry_c &rhs)
+    {
+        (void)rhs;
+        return *this;
+    }
 };
-
 
 // Our playlist entry container
-class pl_entry_container_c : public epi::array_c 
+class pl_entry_container_c : public epi::array_c
 {
-public:
-	pl_entry_container_c() : epi::array_c(sizeof(pl_entry_c*)) {}
-	~pl_entry_container_c() { Clear(); } 
+  public:
+    pl_entry_container_c() : epi::array_c(sizeof(pl_entry_c *))
+    {
+    }
+    ~pl_entry_container_c()
+    {
+        Clear();
+    }
 
-private:
-	void CleanupObject(void *obj);
+  private:
+    void CleanupObject(void *obj);
 
-public:
-	pl_entry_c* Find(int number);
-	int FindLast(const char *name);
-	int FindFree();
-	int GetSize() {	return array_entries; } 
-	int Insert(pl_entry_c *p) { return InsertObject((void*)&p); }
-	pl_entry_c* operator[](int idx) { return *(pl_entry_c**)FetchObject(idx); } 
+  public:
+    pl_entry_c *Find(int number);
+    int         FindLast(const char *name);
+    int         FindFree();
+    int         GetSize()
+    {
+        return array_entries;
+    }
+    int Insert(pl_entry_c *p)
+    {
+        return InsertObject((void *)&p);
+    }
+    pl_entry_c *operator[](int idx)
+    {
+        return *(pl_entry_c **)FetchObject(idx);
+    }
 };
-
 
 // -------EXTERNALISATIONS-------
 
-extern pl_entry_container_c playlist;		// -ACB- 2004/06/04 Implemented
+extern pl_entry_container_c playlist; // -ACB- 2004/06/04 Implemented
 
-void DDF_ReadMusicPlaylist(const std::string& data);
+void DDF_ReadMusicPlaylist(const std::string &data);
 
 #endif // __DDF_MUS_H__
 

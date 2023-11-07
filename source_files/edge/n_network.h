@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Networking (New)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2004-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -19,9 +19,9 @@
 #ifndef __N_NETWORK_H__
 #define __N_NETWORK_H__
 
-#define MP_EDGE_PORT  26710
+#define MP_EDGE_PORT 26710
 
-#define MP_PROTOCOL_VER  1
+#define MP_PROTOCOL_VER 1
 
 extern bool netgame;
 

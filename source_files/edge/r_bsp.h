@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE BSP Handling Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -28,8 +28,8 @@
 
 #include "r_defs.h"
 
-extern side_t *sidedef;
-extern line_t *linedef;
+extern side_t   *sidedef;
+extern line_t   *linedef;
 extern sector_t *frontsector;
 extern sector_t *backsector;
 

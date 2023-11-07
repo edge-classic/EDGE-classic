@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Resolution Handling
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -62,41 +62,38 @@ std::vector<scrmode_c *> screen_modes;
 
 bool R_DepthIsEquivalent(int depth1, int depth2)
 {
-	if (depth1 == depth2)
-		return true;
+    if (depth1 == depth2)
+        return true;
 
-	if (MIN(depth1,depth2) == 15 && MAX(depth1,depth2) == 16)
-		return true;
+    if (MIN(depth1, depth2) == 15 && MAX(depth1, depth2) == 16)
+        return true;
 
-	if (MIN(depth1,depth2) == 24 && MAX(depth1,depth2) == 32)
-		return true;
+    if (MIN(depth1, depth2) == 24 && MAX(depth1, depth2) == 32)
+        return true;
 
-	return false;
+    return false;
 }
 
 static int SizeDiff(int w1, int h1, int w2, int h2)
 {
-	return (w1 * 10000 + h1) - (w2 * 10000 + h2);
+    return (w1 * 10000 + h1) - (w2 * 10000 + h2);
 }
-
 
 static scrmode_c *R_FindResolution(int w, int h, int depth, int display_mode)
 {
-	for (int i = 0; i < (int)screen_modes.size(); i++)
-	{
-		scrmode_c *cur = screen_modes[i];
+    for (int i = 0; i < (int)screen_modes.size(); i++)
+    {
+        scrmode_c *cur = screen_modes[i];
 
-		if (cur->width == w && cur->height == h &&
-			R_DepthIsEquivalent(cur->depth, depth) &&
-			cur->display_mode == display_mode)
-		{
-			return cur;
-		}
-	}
+        if (cur->width == w && cur->height == h && R_DepthIsEquivalent(cur->depth, depth) &&
+            cur->display_mode == display_mode)
+        {
+            return cur;
+        }
+    }
 
-	return NULL;
+    return NULL;
 }
-
 
 //
 // R_AddResolution
@@ -106,319 +103,309 @@ static scrmode_c *R_FindResolution(int w, int h, int depth, int display_mode)
 //
 void R_AddResolution(scrmode_c *mode)
 {
-	scrmode_c *exist = R_FindResolution(mode->width, mode->height,
-							mode->depth, mode->display_mode);
-	if (exist)
-	{
-		if (mode->depth != exist->depth)
-		{
-			// depth is different but equivalent.  Update current
-			// member in list, giving preference to power-of-two.
-			if (mode->depth == 16 || mode->depth == 32)
-				exist->depth = mode->depth;
-		}
+    scrmode_c *exist = R_FindResolution(mode->width, mode->height, mode->depth, mode->display_mode);
+    if (exist)
+    {
+        if (mode->depth != exist->depth)
+        {
+            // depth is different but equivalent.  Update current
+            // member in list, giving preference to power-of-two.
+            if (mode->depth == 16 || mode->depth == 32)
+                exist->depth = mode->depth;
+        }
 
-		return;
-	}
+        return;
+    }
 
-	screen_modes.push_back(new scrmode_c(*mode));
+    screen_modes.push_back(new scrmode_c(*mode));
 }
-
 
 void R_DumpResList(void)
 {
-	I_Printf("Available Resolutions:\n");
+    I_Printf("Available Resolutions:\n");
 
-	for (int i = 0; i < (int)screen_modes.size(); i++)
-	{
-		scrmode_c *cur = screen_modes[i];
+    for (int i = 0; i < (int)screen_modes.size(); i++)
+    {
+        scrmode_c *cur = screen_modes[i];
 
-		if (i > 0 && (i % 3) == 0)
-			I_Printf("\n");
+        if (i > 0 && (i % 3) == 0)
+            I_Printf("\n");
 
-		I_Printf("  %4dx%4d @ %02d %s", 
-				 cur->width, cur->height, cur->depth, cur->display_mode == cur->SCR_BORDERLESS ?
-				 "BL" : (cur->display_mode == cur->SCR_FULLSCREEN ? "FS " : "win"));
-	}
+        I_Printf("  %4dx%4d @ %02d %s", cur->width, cur->height, cur->depth,
+                 cur->display_mode == cur->SCR_BORDERLESS ? "BL"
+                                                          : (cur->display_mode == cur->SCR_FULLSCREEN ? "FS " : "win"));
+    }
 
-	I_Printf("\n");
+    I_Printf("\n");
 }
 
 bool R_IncrementResolution(scrmode_c *mode, int what, int dir)
 {
-	// Algorithm:
-	//   for RESINC_DisplayMode, we simply adjust the
-	//   value in question, and find the mode
-	//   with matching display_mode and the closest size.
-	//
-	//   for RESINC_Size, we find modes with matching depth/display_mode
-	//   and the *next* closest size (ignoring the same size or
-	//   sizes that are in opposite direction to 'dir' param).
+    // Algorithm:
+    //   for RESINC_DisplayMode, we simply adjust the
+    //   value in question, and find the mode
+    //   with matching display_mode and the closest size.
+    //
+    //   for RESINC_Size, we find modes with matching depth/display_mode
+    //   and the *next* closest size (ignoring the same size or
+    //   sizes that are in opposite direction to 'dir' param).
 
-	SYS_ASSERT(dir == 1 || dir == -1);
+    SYS_ASSERT(dir == 1 || dir == -1);
 
-	int depth = mode->depth;
-	int display_mode = mode->display_mode;
+    int depth        = mode->depth;
+    int display_mode = mode->display_mode;
 
-	if (what == RESINC_DisplayMode)
-	{
-		if (dir == 1)
-			display_mode = (display_mode + 1) % 3;
-		else
-		{
-			if (display_mode > 0)
-				display_mode--;
-			else
-				display_mode = 2;
-		}
-	}
+    if (what == RESINC_DisplayMode)
+    {
+        if (dir == 1)
+            display_mode = (display_mode + 1) % 3;
+        else
+        {
+            if (display_mode > 0)
+                display_mode--;
+            else
+                display_mode = 2;
+        }
+    }
 
-	if (display_mode == 2)
-	{
-		mode->width  = borderless_mode.width;
-		mode->height = borderless_mode.height;
-		mode->depth  = borderless_mode.depth;
-		mode->display_mode   = borderless_mode.display_mode;
+    if (display_mode == 2)
+    {
+        mode->width        = borderless_mode.width;
+        mode->height       = borderless_mode.height;
+        mode->depth        = borderless_mode.depth;
+        mode->display_mode = borderless_mode.display_mode;
 
-		return true;
-	}
+        return true;
+    }
 
-	scrmode_c *best = NULL;
-	int best_diff = (1 << 30);
+    scrmode_c *best      = NULL;
+    int        best_diff = (1 << 30);
 
-	for (int i = 0; i < (int)screen_modes.size(); i++)
-	{
-		scrmode_c *cur = screen_modes[i];
+    for (int i = 0; i < (int)screen_modes.size(); i++)
+    {
+        scrmode_c *cur = screen_modes[i];
 
-		if (! R_DepthIsEquivalent(cur->depth, depth))
-			continue;
+        if (!R_DepthIsEquivalent(cur->depth, depth))
+            continue;
 
-		if (cur->display_mode != display_mode)
-			continue;
+        if (cur->display_mode != display_mode)
+            continue;
 
-		int diff = SizeDiff(cur->width, cur->height, mode->width, mode->height);
+        int diff = SizeDiff(cur->width, cur->height, mode->width, mode->height);
 
-		if (what == RESINC_Size)
-		{
-			if (diff * dir <= 0)
-				continue;
-		}
+        if (what == RESINC_Size)
+        {
+            if (diff * dir <= 0)
+                continue;
+        }
 
-		diff = ABS(diff);
+        diff = ABS(diff);
 
-		if (diff < best_diff)
-		{
-			best_diff = diff;
-			best = cur;
+        if (diff < best_diff)
+        {
+            best_diff = diff;
+            best      = cur;
 
-			if (diff == 0)
-				break;
-		}
-	}
+            if (diff == 0)
+                break;
+        }
+    }
 
-	if (best)
-	{
-		mode->width  = best->width;
-		mode->height = best->height;
-		mode->depth  = best->depth;
-		mode->display_mode   = best->display_mode;
+    if (best)
+    {
+        mode->width        = best->width;
+        mode->height       = best->height;
+        mode->depth        = best->depth;
+        mode->display_mode = best->display_mode;
 
-		return true;
-	}
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 void R_ToggleFullscreen(void)
 {
-	scrmode_c toggle;
-	if (DISPLAYMODE > scrmode_c::SCR_WINDOW)
-	{
-		toggle.depth = tw_screendepth.d;
-		toggle.height = tw_screenheight.d;
-		toggle.width = tw_screenwidth.d;
-		toggle.display_mode = scrmode_c::SCR_WINDOW;
-		R_ChangeResolution(&toggle);
-	}
-	else
-	{
-		toggle.depth = tf_screendepth.d;
-		toggle.height = tf_screenheight.d;
-		toggle.width = tf_screenwidth.d;
-		toggle.display_mode = tf_displaymode.d;
-		R_ChangeResolution(&toggle);
-	}
-	R_SoftInitResolution();
+    scrmode_c toggle;
+    if (DISPLAYMODE > scrmode_c::SCR_WINDOW)
+    {
+        toggle.depth        = tw_screendepth.d;
+        toggle.height       = tw_screenheight.d;
+        toggle.width        = tw_screenwidth.d;
+        toggle.display_mode = scrmode_c::SCR_WINDOW;
+        R_ChangeResolution(&toggle);
+    }
+    else
+    {
+        toggle.depth        = tf_screendepth.d;
+        toggle.height       = tf_screenheight.d;
+        toggle.width        = tf_screenwidth.d;
+        toggle.display_mode = tf_displaymode.d;
+        R_ChangeResolution(&toggle);
+    }
+    R_SoftInitResolution();
 }
 
 //----------------------------------------------------------------------------
 
-
 void R_SoftInitResolution(void)
 {
-	L_WriteDebug("R_SoftInitResolution...\n");
+    L_WriteDebug("R_SoftInitResolution...\n");
 
-	RGL_NewScreenSize(SCREENWIDTH, SCREENHEIGHT, SCREENBITS);
+    RGL_NewScreenSize(SCREENWIDTH, SCREENHEIGHT, SCREENBITS);
 
-	if (SCREENWIDTH < 720)
-		current_font_size = 0;
-	else if (SCREENWIDTH < 1440)
-		current_font_size = 1;
-	else
-		current_font_size = 2;
+    if (SCREENWIDTH < 720)
+        current_font_size = 0;
+    else if (SCREENWIDTH < 1440)
+        current_font_size = 1;
+    else
+        current_font_size = 2;
 
-	// -ES- 1999/08/29 Fixes the garbage palettes, and the blank 16-bit console
-	V_SetPalette(PALETTE_NORMAL, 0);
-	V_ColourNewFrame();
+    // -ES- 1999/08/29 Fixes the garbage palettes, and the blank 16-bit console
+    V_SetPalette(PALETTE_NORMAL, 0);
+    V_ColourNewFrame();
 
-	// re-initialise various bits of GL state
-	RGL_SoftInit();
-	RGL_SoftInitUnits();	// -ACB- 2004/02/15 Needed to sort vars lost in res change
+    // re-initialise various bits of GL state
+    RGL_SoftInit();
+    RGL_SoftInitUnits(); // -ACB- 2004/02/15 Needed to sort vars lost in res change
 
-	L_WriteDebug("-  returning true.\n");
+    L_WriteDebug("-  returning true.\n");
 
-	return ;
+    return;
 }
-
 
 static bool DoExecuteChangeResolution(scrmode_c *mode)
 {
-	RGL_StopWipe();  // delete any wipe texture too
+    RGL_StopWipe(); // delete any wipe texture too
 
-	W_DeleteAllImages();
+    W_DeleteAllImages();
 
-	bool was_ok = I_SetScreenSize(mode);
+    bool was_ok = I_SetScreenSize(mode);
 
-	if (! was_ok)
-		return false;
+    if (!was_ok)
+        return false;
 
-	SCREENWIDTH  = mode->width;
-	SCREENHEIGHT = mode->height;
-	SCREENBITS   = mode->depth;
-	DISPLAYMODE  = mode->display_mode;
+    SCREENWIDTH  = mode->width;
+    SCREENHEIGHT = mode->height;
+    SCREENBITS   = mode->depth;
+    DISPLAYMODE  = mode->display_mode;
 
-	if (SCREENWIDTH < 720)
-		current_font_size = 0;
-	else if (SCREENWIDTH < 1440)
-		current_font_size = 1;
-	else
-		current_font_size = 2;
+    if (SCREENWIDTH < 720)
+        current_font_size = 0;
+    else if (SCREENWIDTH < 1440)
+        current_font_size = 1;
+    else
+        current_font_size = 2;
 
-	I_DeterminePixelAspect();
+    I_DeterminePixelAspect();
 
-	I_Printf("Pixel aspect: %1.3f\n", v_pixelaspect.f);
+    I_Printf("Pixel aspect: %1.3f\n", v_pixelaspect.f);
 
-	// gfx card doesn't like to switch too rapidly
-	I_Sleep(250);
-	I_Sleep(250);
+    // gfx card doesn't like to switch too rapidly
+    I_Sleep(250);
+    I_Sleep(250);
 
-	return true;
+    return true;
 }
-
 
 struct Compare_Res_pred
 {
-	inline bool operator() (const scrmode_c * A, const scrmode_c * B) const
-	{
-		if (A->display_mode != B->display_mode)
-		{
-			return DISPLAYMODE ? (A->display_mode > B->display_mode) : (A->display_mode < B->display_mode);
-		}
+    inline bool operator()(const scrmode_c *A, const scrmode_c *B) const
+    {
+        if (A->display_mode != B->display_mode)
+        {
+            return DISPLAYMODE ? (A->display_mode > B->display_mode) : (A->display_mode < B->display_mode);
+        }
 
-		if (! R_DepthIsEquivalent(A->depth, B->depth))
-		{
-			int a_equiv = (A->depth < 20) ? 16 : 32;
-			int b_equiv = (B->depth < 20) ? 16 : 32;
+        if (!R_DepthIsEquivalent(A->depth, B->depth))
+        {
+            int a_equiv = (A->depth < 20) ? 16 : 32;
+            int b_equiv = (B->depth < 20) ? 16 : 32;
 
-			return R_DepthIsEquivalent(SCREENBITS, 16) ?
-				(a_equiv < b_equiv) : (a_equiv > b_equiv);
-		}
+            return R_DepthIsEquivalent(SCREENBITS, 16) ? (a_equiv < b_equiv) : (a_equiv > b_equiv);
+        }
 
-		if (A->width != B->width)
-		{
-			int a_diff_w = ABS(SCREENWIDTH - A->width);
-			int b_diff_w = ABS(SCREENWIDTH - B->width);
+        if (A->width != B->width)
+        {
+            int a_diff_w = ABS(SCREENWIDTH - A->width);
+            int b_diff_w = ABS(SCREENWIDTH - B->width);
 
-			return (a_diff_w < b_diff_w);
-		}
-		else
-		{
-			int a_diff_h = ABS(SCREENHEIGHT - A->height);
-			int b_diff_h = ABS(SCREENHEIGHT - B->height);
+            return (a_diff_w < b_diff_w);
+        }
+        else
+        {
+            int a_diff_h = ABS(SCREENHEIGHT - A->height);
+            int b_diff_h = ABS(SCREENHEIGHT - B->height);
 
-			return (a_diff_h < b_diff_h);
-		}
-	}
+            return (a_diff_h < b_diff_h);
+        }
+    }
 };
-
 
 void R_InitialResolution(void)
 {
-	L_WriteDebug("R_InitialResolution...\n");
+    L_WriteDebug("R_InitialResolution...\n");
 
-	if (DISPLAYMODE == 2)
-	{
-		if (DoExecuteChangeResolution(&borderless_mode))
-			return;
-	}
+    if (DISPLAYMODE == 2)
+    {
+        if (DoExecuteChangeResolution(&borderless_mode))
+            return;
+    }
 
-	scrmode_c mode;
+    scrmode_c mode;
 
-	mode.width  = SCREENWIDTH;
-	mode.height = SCREENHEIGHT;
-	mode.depth  = SCREENBITS;
-	mode.display_mode   = DISPLAYMODE;
+    mode.width        = SCREENWIDTH;
+    mode.height       = SCREENHEIGHT;
+    mode.depth        = SCREENBITS;
+    mode.display_mode = DISPLAYMODE;
 
-	if (DoExecuteChangeResolution(&mode))
-	{
-		// this mode worked, make sure it's in the list
-		R_AddResolution(&mode);
-		return;
-	}
+    if (DoExecuteChangeResolution(&mode))
+    {
+        // this mode worked, make sure it's in the list
+        R_AddResolution(&mode);
+        return;
+    }
 
-	L_WriteDebug("- Looking for another mode to try...\n");
+    L_WriteDebug("- Looking for another mode to try...\n");
 
-	// sort modes into a good order, choosing sizes near the
-	// request size first, and different depths/fullness last.
+    // sort modes into a good order, choosing sizes near the
+    // request size first, and different depths/fullness last.
 
-	std::sort(screen_modes.begin(), screen_modes.end(),
-			  Compare_Res_pred());
+    std::sort(screen_modes.begin(), screen_modes.end(), Compare_Res_pred());
 
-	for (int i = 0; i < (int)screen_modes.size(); i++)
-	{
-		if (DoExecuteChangeResolution(screen_modes[i]))
-			return;
-	}
+    for (int i = 0; i < (int)screen_modes.size(); i++)
+    {
+        if (DoExecuteChangeResolution(screen_modes[i]))
+            return;
+    }
 
-	// FOOBAR!
-	I_Error("Unable to set any resolutions!");
+    // FOOBAR!
+    I_Error("Unable to set any resolutions!");
 }
-
 
 bool R_ChangeResolution(scrmode_c *mode)
 {
-	L_WriteDebug("R_ChangeResolution...\n");
+    L_WriteDebug("R_ChangeResolution...\n");
 
-	if (DoExecuteChangeResolution(mode->display_mode == 2 ? &borderless_mode : mode))
-		return true;
+    if (DoExecuteChangeResolution(mode->display_mode == 2 ? &borderless_mode : mode))
+        return true;
 
-	L_WriteDebug("- Failed : switching back...\n");
+    L_WriteDebug("- Failed : switching back...\n");
 
-	scrmode_c old_mode;
+    scrmode_c old_mode;
 
-	old_mode.width  = SCREENWIDTH;
-	old_mode.height = SCREENHEIGHT;
-	old_mode.depth  = SCREENBITS;
-	old_mode.display_mode   = DISPLAYMODE;
+    old_mode.width        = SCREENWIDTH;
+    old_mode.height       = SCREENHEIGHT;
+    old_mode.depth        = SCREENBITS;
+    old_mode.display_mode = DISPLAYMODE;
 
-	if (DoExecuteChangeResolution(&old_mode))
-		return false;
+    if (DoExecuteChangeResolution(&old_mode))
+        return false;
 
-	// This ain't good - current and previous resolutions do not work.
-	I_Error("Switch back to old resolution failed!\n");
-	return false; /* NOT REACHED */
+    // This ain't good - current and previous resolutions do not work.
+    I_Error("Switch back to old resolution failed!\n");
+    return false; /* NOT REACHED */
 }
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

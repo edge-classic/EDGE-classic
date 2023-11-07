@@ -30,26 +30,26 @@
 
 namespace epi
 {
-	namespace Hq2x
-	{
-		/* ------ Functions ------------------------------------- */
+namespace Hq2x
+{
+/* ------ Functions ------------------------------------- */
 
-		void Setup(const byte *palette, int trans_pixel);
-		// initialises look-up tables based on the given palette.
-		// The 'trans_pixel' gives a pixel index which is fully
-		// transparent, or none when -1.
+void Setup(const byte *palette, int trans_pixel);
+// initialises look-up tables based on the given palette.
+// The 'trans_pixel' gives a pixel index which is fully
+// transparent, or none when -1.
 
-		image_data_c *Convert(image_data_c *img, bool solid, bool invert = false);
-		// converts a single palettised image into an RGB or RGBA
-		// image (depending on the solid parameter).  The Setup()
-		// method must be called sometime prior to calling this
-		// function, and this determines the palette of the input
-		// image.
-	}
+image_data_c *Convert(image_data_c *img, bool solid, bool invert = false);
+// converts a single palettised image into an RGB or RGBA
+// image (depending on the solid parameter).  The Setup()
+// method must be called sometime prior to calling this
+// function, and this determines the palette of the input
+// image.
+} // namespace Hq2x
 
-}  // namespace epi
+} // namespace epi
 
-#endif  /* __EPI_IMAGE_HQ2X_H__ */
+#endif /* __EPI_IMAGE_HQ2X_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

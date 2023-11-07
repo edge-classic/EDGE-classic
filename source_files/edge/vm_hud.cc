@@ -36,14 +36,14 @@
 #include "hu_draw.h"
 #include "r_misc.h"
 #include "r_modes.h"
-#include "am_map.h"     // AM_Drawer
+#include "am_map.h" // AM_Drawer
 #include "r_colormap.h"
 #include "s_sound.h"
 #include "rad_trig.h" //Lobo: need this to access RTS
 
 #include <cmath>
 
-extern cvar_c r_doubleframes;
+extern cvar_c      r_doubleframes;
 extern coal::vm_c *ui_vm;
 
 extern void VM_SetFloat(coal::vm_c *vm, const char *mod, const char *name, double value);
@@ -52,8 +52,7 @@ extern void VM_CallFunction(coal::vm_c *vm, const char *name);
 // Needed for color functions
 extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
 
-extern epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src,
-									 const byte *palette, int opacity);
+extern epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src, const byte *palette, int opacity);
 
 player_t *ui_hud_who = NULL;
 
@@ -63,956 +62,930 @@ extern std::string w_map_title;
 
 extern bool erraticism_active;
 
-static int ui_hud_automap_flags[2];  // 0 = disabled, 1 = enabled
+static int   ui_hud_automap_flags[2]; // 0 = disabled, 1 = enabled
 static float ui_hud_automap_zoom;
-
 
 //------------------------------------------------------------------------
 
-
-rgbcol_t VM_VectorToColor(double * v)
+rgbcol_t VM_VectorToColor(double *v)
 {
-	if (v[0] < 0)
-		return RGB_NO_VALUE;
+    if (v[0] < 0)
+        return RGB_NO_VALUE;
 
-	int r = CLAMP(0, (int)v[0], 255);
-	int g = CLAMP(0, (int)v[1], 255);
-	int b = CLAMP(0, (int)v[2], 255);
+    int r = CLAMP(0, (int)v[0], 255);
+    int g = CLAMP(0, (int)v[1], 255);
+    int b = CLAMP(0, (int)v[2], 255);
 
-	rgbcol_t rgb = RGB_MAKE(r, g, b);
+    rgbcol_t rgb = RGB_MAKE(r, g, b);
 
-	// ensure we don't get the "no color" value by mistake
-	if (rgb == RGB_NO_VALUE)
-		rgb ^= 0x000101;
+    // ensure we don't get the "no color" value by mistake
+    if (rgb == RGB_NO_VALUE)
+        rgb ^= 0x000101;
 
-	return rgb;
+    return rgb;
 }
-
 
 //------------------------------------------------------------------------
 //  HUD MODULE
 //------------------------------------------------------------------------
 
-
 // hud.coord_sys(w, h)
 //
 static void HD_coord_sys(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	int w = (int) *vm->AccessParam(0);
-	int h = (int) *vm->AccessParam(1);
+    int w = (int)*vm->AccessParam(0);
+    int h = (int)*vm->AccessParam(1);
 
-	if (w < 64 || h < 64)
-		I_Error("Bad hud.coord_sys size: %dx%d\n", w, h);
+    if (w < 64 || h < 64)
+        I_Error("Bad hud.coord_sys size: %dx%d\n", w, h);
 
-	HUD_SetCoordSys(w, h);
+    HUD_SetCoordSys(w, h);
 
-	VM_SetFloat(ui_vm, "hud", "x_left",  hud_x_left);
-	VM_SetFloat(ui_vm, "hud", "x_right", hud_x_right);
+    VM_SetFloat(ui_vm, "hud", "x_left", hud_x_left);
+    VM_SetFloat(ui_vm, "hud", "x_right", hud_x_right);
 }
-
 
 // hud.game_mode()
 //
 static void HD_game_mode(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	if (DEATHMATCH())
-		vm->ReturnString("dm");
-	else if (COOP_MATCH())
-		vm->ReturnString("coop");
-	else
-		vm->ReturnString("sp");
+    if (DEATHMATCH())
+        vm->ReturnString("dm");
+    else if (COOP_MATCH())
+        vm->ReturnString("coop");
+    else
+        vm->ReturnString("sp");
 }
-
 
 // hud.game_name()
 //
 static void HD_game_name(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	gamedef_c *g = currmap->episode;
-	SYS_ASSERT(g);
+    gamedef_c *g = currmap->episode;
+    SYS_ASSERT(g);
 
-	vm->ReturnString(g->name.c_str());
+    vm->ReturnString(g->name.c_str());
 }
-
 
 // hud.map_name()
 //
 static void HD_map_name(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	vm->ReturnString(currmap->name.c_str());
+    vm->ReturnString(currmap->name.c_str());
 }
-
 
 // hud.map_title()
 //
 static void HD_map_title(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	vm->ReturnString(w_map_title.c_str());
+    vm->ReturnString(w_map_title.c_str());
 }
 
 // hud.map_author()
 //
 static void HD_map_author(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	vm->ReturnString(currmap->author.c_str());
+    vm->ReturnString(currmap->author.c_str());
 }
-
 
 // hud.which_hud()
 //
 static void HD_which_hud(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	vm->ReturnFloat((double)screen_hud);
+    vm->ReturnFloat((double)screen_hud);
 }
-
 
 // hud.check_automap()
 //
 static void HD_check_automap(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	vm->ReturnFloat(automapactive ? 1 : 0);
+    vm->ReturnFloat(automapactive ? 1 : 0);
 }
-
 
 // hud.get_time()
 //
 static void HD_get_time(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	int time = I_GetTime() / (r_doubleframes.d ? 2 : 1);
-	vm->ReturnFloat((double) time);
+    int time = I_GetTime() / (r_doubleframes.d ? 2 : 1);
+    vm->ReturnFloat((double)time);
 }
-
 
 // hud.text_font(name)
 //
 static void HD_text_font(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	const char *font_name = vm->AccessParamString(0);
+    const char *font_name = vm->AccessParamString(0);
 
-	fontdef_c *DEF = fontdefs.Lookup(font_name);
-	SYS_ASSERT(DEF);
+    fontdef_c *DEF = fontdefs.Lookup(font_name);
+    SYS_ASSERT(DEF);
 
-	if(!DEF)
-		I_Error("hud.text_font: Bad font name: %s\n", font_name);
+    if (!DEF)
+        I_Error("hud.text_font: Bad font name: %s\n", font_name);
 
-	font_c *font = hu_fonts.Lookup(DEF);
-	SYS_ASSERT(font);
+    font_c *font = hu_fonts.Lookup(DEF);
+    SYS_ASSERT(font);
 
-	if(!font)
-		I_Error("hud.text_font: Bad font name: %s\n", font_name);
+    if (!font)
+        I_Error("hud.text_font: Bad font name: %s\n", font_name);
 
-	HUD_SetFont(font);
+    HUD_SetFont(font);
 }
-
 
 // hud.text_color(rgb)
 //
 static void HD_text_color(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	double * v = vm->AccessParam(0);
+    double *v = vm->AccessParam(0);
 
-	rgbcol_t color = VM_VectorToColor(v);
+    rgbcol_t color = VM_VectorToColor(v);
 
-	HUD_SetTextColor(color);
+    HUD_SetTextColor(color);
 }
-
 
 // hud.set_scale(value)
 //
 static void HD_set_scale(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	float scale = *vm->AccessParam(0);
+    float scale = *vm->AccessParam(0);
 
-	if (scale <= 0)
-		I_Error("hud.set_scale: Bad scale value: %1.3f\n", scale);
+    if (scale <= 0)
+        I_Error("hud.set_scale: Bad scale value: %1.3f\n", scale);
 
-	HUD_SetScale(scale);
+    HUD_SetScale(scale);
 }
-
 
 // hud.set_alpha(value)
 //
 static void HD_set_alpha(coal::vm_c *vm, int argc)
 {
-	(void) argc;
-	
-	float alpha = *vm->AccessParam(0);
+    (void)argc;
 
-	HUD_SetAlpha(alpha);
+    float alpha = *vm->AccessParam(0);
+
+    HUD_SetAlpha(alpha);
 }
-
 
 // hud.solid_box(x, y, w, h, color)
 //
 static void HD_solid_box(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
-	float w = *vm->AccessParam(2);
-	float h = *vm->AccessParam(3);
+    float x = *vm->AccessParam(0);
+    float y = *vm->AccessParam(1);
+    float w = *vm->AccessParam(2);
+    float h = *vm->AccessParam(3);
 
-	rgbcol_t rgb = VM_VectorToColor(vm->AccessParam(4));
+    rgbcol_t rgb = VM_VectorToColor(vm->AccessParam(4));
 
-	HUD_SolidBox(x, y, x+w, y+h, rgb);
+    HUD_SolidBox(x, y, x + w, y + h, rgb);
 }
-
 
 // hud.solid_line(x1, y1, x2, y2, color)
 //
 static void HD_solid_line(coal::vm_c *vm, int argc)
 {
-	float x1 = *vm->AccessParam(0);
-	float y1 = *vm->AccessParam(1);
-	float x2 = *vm->AccessParam(2);
-	float y2 = *vm->AccessParam(3);
+    float x1 = *vm->AccessParam(0);
+    float y1 = *vm->AccessParam(1);
+    float x2 = *vm->AccessParam(2);
+    float y2 = *vm->AccessParam(3);
 
-	rgbcol_t rgb = VM_VectorToColor(vm->AccessParam(4));
+    rgbcol_t rgb = VM_VectorToColor(vm->AccessParam(4));
 
-	HUD_SolidLine(x1, y1, x2, y2, rgb);
+    HUD_SolidLine(x1, y1, x2, y2, rgb);
 }
-
 
 // hud.thin_box(x, y, w, h, color)
 //
 static void HD_thin_box(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
-	float w = *vm->AccessParam(2);
-	float h = *vm->AccessParam(3);
+    float x = *vm->AccessParam(0);
+    float y = *vm->AccessParam(1);
+    float w = *vm->AccessParam(2);
+    float h = *vm->AccessParam(3);
 
-	rgbcol_t rgb = VM_VectorToColor(vm->AccessParam(4));
+    rgbcol_t rgb = VM_VectorToColor(vm->AccessParam(4));
 
-	HUD_ThinBox(x, y, x+w, y+h, rgb);
+    HUD_ThinBox(x, y, x + w, y + h, rgb);
 }
-
 
 // hud.gradient_box(x, y, w, h, TL, BL, TR, BR)
 //
 static void HD_gradient_box(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
-	float w = *vm->AccessParam(2);
-	float h = *vm->AccessParam(3);
+    float x = *vm->AccessParam(0);
+    float y = *vm->AccessParam(1);
+    float w = *vm->AccessParam(2);
+    float h = *vm->AccessParam(3);
 
-	rgbcol_t cols[4];
+    rgbcol_t cols[4];
 
-	cols[0] = VM_VectorToColor(vm->AccessParam(4));
-	cols[1] = VM_VectorToColor(vm->AccessParam(5));
-	cols[2] = VM_VectorToColor(vm->AccessParam(6));
-	cols[3] = VM_VectorToColor(vm->AccessParam(7));
+    cols[0] = VM_VectorToColor(vm->AccessParam(4));
+    cols[1] = VM_VectorToColor(vm->AccessParam(5));
+    cols[2] = VM_VectorToColor(vm->AccessParam(6));
+    cols[3] = VM_VectorToColor(vm->AccessParam(7));
 
-	HUD_GradientBox(x, y, x+w, y+h, cols);
+    HUD_GradientBox(x, y, x + w, y + h, cols);
 }
 
-
-
 // hud.draw_image(x, y, name, [noOffset])
-// if we specify noOffset then it ignores 
+// if we specify noOffset then it ignores
 // X and Y offsets from doom or images.ddf
 //
 static void HD_draw_image(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
-	const char *name = vm->AccessParamString(2);
+    float       x    = *vm->AccessParam(0);
+    float       y    = *vm->AccessParam(1);
+    const char *name = vm->AccessParamString(2);
 
-	const image_c *img = W_ImageLookup(name, INS_Graphic);
-	
-	double *noOffset = vm->AccessParam(3);
+    const image_c *img = W_ImageLookup(name, INS_Graphic);
 
-	if (img)
-	{
-		if (noOffset)
-			HUD_DrawImageNoOffset(x, y, img);
-		else
-			HUD_DrawImage(x, y, img);
-	}
+    double *noOffset = vm->AccessParam(3);
+
+    if (img)
+    {
+        if (noOffset)
+            HUD_DrawImageNoOffset(x, y, img);
+        else
+            HUD_DrawImage(x, y, img);
+    }
 }
-
-
 
 // Dasho 2022: Same as above but adds x/y texcoord scrolling
 // hud.scroll_image(x, y, name, sx, sy, [noOffset])
 //
 static void HD_scroll_image(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
-	const char *name = vm->AccessParamString(2);
-	float sx = *vm->AccessParam(3);
-	float sy = *vm->AccessParam(4);
+    float       x    = *vm->AccessParam(0);
+    float       y    = *vm->AccessParam(1);
+    const char *name = vm->AccessParamString(2);
+    float       sx   = *vm->AccessParam(3);
+    float       sy   = *vm->AccessParam(4);
 
-	const image_c *img = W_ImageLookup(name, INS_Graphic);
-	double *noOffset = vm->AccessParam(5);
+    const image_c *img      = W_ImageLookup(name, INS_Graphic);
+    double        *noOffset = vm->AccessParam(5);
 
-
-	if (img)
-	{
-		if (noOffset)
-			HUD_ScrollImageNoOffset(x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
-		else
-			HUD_ScrollImage(x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
-	}
+    if (img)
+    {
+        if (noOffset)
+            HUD_ScrollImageNoOffset(
+                x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
+        else
+            HUD_ScrollImage(x, y, img, -sx,
+                            -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
+    }
 }
 
-
 // hud.stretch_image(x, y, w, h, name, [noOffset])
-// if we specify noOffset then it ignores 
+// if we specify noOffset then it ignores
 // X and Y offsets from doom or images.ddf
 //
 static void HD_stretch_image(coal::vm_c *vm, int argc)
 {
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
-	float w = *vm->AccessParam(2);
-	float h = *vm->AccessParam(3);
+    float x = *vm->AccessParam(0);
+    float y = *vm->AccessParam(1);
+    float w = *vm->AccessParam(2);
+    float h = *vm->AccessParam(3);
 
-	const char *name = vm->AccessParamString(4);
+    const char *name = vm->AccessParamString(4);
 
-	const image_c *img = W_ImageLookup(name, INS_Graphic);
-	double *noOffset = vm->AccessParam(5);
+    const image_c *img      = W_ImageLookup(name, INS_Graphic);
+    double        *noOffset = vm->AccessParam(5);
 
-	if (img)
-	{
-		if (noOffset)
-			HUD_StretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
-		else
-			HUD_StretchImage(x, y, w, h, img, 0.0, 0.0);
-	}
+    if (img)
+    {
+        if (noOffset)
+            HUD_StretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
+        else
+            HUD_StretchImage(x, y, w, h, img, 0.0, 0.0);
+    }
 }
-
 
 // hud.tile_image(x, y, w, h, name, offset_x, offset_y)
 //
 static void HD_tile_image(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
-	float w = *vm->AccessParam(2);
-	float h = *vm->AccessParam(3);
+    float x = *vm->AccessParam(0);
+    float y = *vm->AccessParam(1);
+    float w = *vm->AccessParam(2);
+    float h = *vm->AccessParam(3);
 
-	const char *name = vm->AccessParamString(4);
+    const char *name = vm->AccessParamString(4);
 
-	float offset_x = *vm->AccessParam(5);
-	float offset_y = *vm->AccessParam(6);
+    float offset_x = *vm->AccessParam(5);
+    float offset_y = *vm->AccessParam(6);
 
-	const image_c *img = W_ImageLookup(name, INS_Texture);
+    const image_c *img = W_ImageLookup(name, INS_Texture);
 
-	if (img)
-	{
-		HUD_TileImage(x, y, w, h, img, offset_x, offset_y);
-	}
+    if (img)
+    {
+        HUD_TileImage(x, y, w, h, img, offset_x, offset_y);
+    }
 }
-
 
 // hud.draw_text(x, y, str, [size])
 //
 static void HD_draw_text(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
+    float x = *vm->AccessParam(0);
+    float y = *vm->AccessParam(1);
 
-	const char *str = vm->AccessParamString(2);
+    const char *str = vm->AccessParamString(2);
 
-	double *size = vm->AccessParam(3);
+    double *size = vm->AccessParam(3);
 
-	HUD_DrawText(x, y, str, size ? *size : 0);
+    HUD_DrawText(x, y, str, size ? *size : 0);
 }
-
 
 // hud.draw_num2(x, y, len, num, [size])
 //
 static void HD_draw_num2(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
+    float x = *vm->AccessParam(0);
+    float y = *vm->AccessParam(1);
 
-	int len = (int) *vm->AccessParam(2);
-	int num = (int) *vm->AccessParam(3);
+    int len = (int)*vm->AccessParam(2);
+    int num = (int)*vm->AccessParam(3);
 
-	double *size = vm->AccessParam(4);
+    double *size = vm->AccessParam(4);
 
-	if (len < 1 || len > 20)
-		I_Error("hud.draw_number: bad field length: %d\n", len);
+    if (len < 1 || len > 20)
+        I_Error("hud.draw_number: bad field length: %d\n", len);
 
-	bool is_neg = false;
+    bool is_neg = false;
 
-	if (num < 0 && len > 1)
-	{
-		is_neg = true; len--;
-	}
+    if (num < 0 && len > 1)
+    {
+        is_neg = true;
+        len--;
+    }
 
-	// build the integer backwards
+    // build the integer backwards
 
-	char buffer[200];
-	char *pos = &buffer[sizeof(buffer)-4];
+    char  buffer[200];
+    char *pos = &buffer[sizeof(buffer) - 4];
 
-	*--pos = 0;
+    *--pos = 0;
 
-	if (num == 0)
-	{
-		*--pos = '0';
-	}
-	else
-	{
-		for (; num > 0 && len > 0; num /= 10, len--)
-			*--pos = '0' + (num % 10);
+    if (num == 0)
+    {
+        *--pos = '0';
+    }
+    else
+    {
+        for (; num > 0 && len > 0; num /= 10, len--)
+            *--pos = '0' + (num % 10);
 
-		if (is_neg)
-			*--pos = '-';
-	}
+        if (is_neg)
+            *--pos = '-';
+    }
 
-	HUD_SetAlignment(+1, -1);
-	HUD_DrawText(x, y, pos, size ? *size : 0);
-	HUD_SetAlignment();
+    HUD_SetAlignment(+1, -1);
+    HUD_DrawText(x, y, pos, size ? *size : 0);
+    HUD_SetAlignment();
 }
 
-
-// Lobo November 2021:  
+// Lobo November 2021:
 // hud.draw_number(x, y, len, num, align_right, [size])
 //
 static void HD_draw_number(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
+    float x = *vm->AccessParam(0);
+    float y = *vm->AccessParam(1);
 
-	int len = (int) *vm->AccessParam(2);
-	int num = (int) *vm->AccessParam(3);
-	int align_right = (int) *vm->AccessParam(4);
-	double *size = vm->AccessParam(5);
+    int     len         = (int)*vm->AccessParam(2);
+    int     num         = (int)*vm->AccessParam(3);
+    int     align_right = (int)*vm->AccessParam(4);
+    double *size        = vm->AccessParam(5);
 
-	if (len < 1 || len > 20)
-		I_Error("hud.draw_number: bad field length: %d\n", len);
+    if (len < 1 || len > 20)
+        I_Error("hud.draw_number: bad field length: %d\n", len);
 
-	bool is_neg = false;
+    bool is_neg = false;
 
-	if (num < 0 && len > 1)
-	{
-		is_neg = true; len--;
-	}
+    if (num < 0 && len > 1)
+    {
+        is_neg = true;
+        len--;
+    }
 
-	// build the integer backwards
+    // build the integer backwards
 
-	char buffer[200];
-	char *pos = &buffer[sizeof(buffer)-4];
+    char  buffer[200];
+    char *pos = &buffer[sizeof(buffer) - 4];
 
-	*--pos = 0;
+    *--pos = 0;
 
-	if (num == 0)
-	{
-		*--pos = '0';
-	}
-	else
-	{
-		for (; num > 0 && len > 0; num /= 10, len--)
-			*--pos = '0' + (num % 10);
+    if (num == 0)
+    {
+        *--pos = '0';
+    }
+    else
+    {
+        for (; num > 0 && len > 0; num /= 10, len--)
+            *--pos = '0' + (num % 10);
 
-		if (is_neg)
-			*--pos = '-';
-	}
+        if (is_neg)
+            *--pos = '-';
+    }
 
-	if (align_right == 0)
-	{
-		HUD_DrawText(x, y, pos, size ? *size : 0);
-	}
-	else
-	{
-		HUD_SetAlignment(+1, -1);
-		HUD_DrawText(x, y, pos, size ? *size : 0);
-		HUD_SetAlignment();
-	}
+    if (align_right == 0)
+    {
+        HUD_DrawText(x, y, pos, size ? *size : 0);
+    }
+    else
+    {
+        HUD_SetAlignment(+1, -1);
+        HUD_DrawText(x, y, pos, size ? *size : 0);
+        HUD_SetAlignment();
+    }
 }
 
 // hud.game_paused()
 //
 static void HD_game_paused(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	if (paused || menuactive || rts_menuactive || time_stop_active || erraticism_active)
-	{
-		vm->ReturnFloat(1);
-	}
-	else 
-	{
-		vm->ReturnFloat(0);
-	}
+    if (paused || menuactive || rts_menuactive || time_stop_active || erraticism_active)
+    {
+        vm->ReturnFloat(1);
+    }
+    else
+    {
+        vm->ReturnFloat(0);
+    }
 }
 
 // hud.erraticism_active()
 //
 static void HD_erraticism_active(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	if (erraticism_active)
-	{
-		vm->ReturnFloat(1);
-	}
-	else 
-	{
-		vm->ReturnFloat(0);
-	}
+    if (erraticism_active)
+    {
+        vm->ReturnFloat(1);
+    }
+    else
+    {
+        vm->ReturnFloat(0);
+    }
 }
 
 // hud.time_stop_active()
 //
 static void HD_time_stop_active(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	if (time_stop_active)
-	{
-		vm->ReturnFloat(1);
-	}
-	else 
-	{
-		vm->ReturnFloat(0);
-	}
+    if (time_stop_active)
+    {
+        vm->ReturnFloat(1);
+    }
+    else
+    {
+        vm->ReturnFloat(0);
+    }
 }
 
 // hud.render_world(x, y, w, h, [flags])
 //
 static void HD_render_world(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
-	float w = *vm->AccessParam(2);
-	float h = *vm->AccessParam(3);
+    float x = *vm->AccessParam(0);
+    float y = *vm->AccessParam(1);
+    float w = *vm->AccessParam(2);
+    float h = *vm->AccessParam(3);
 
-	double *flags = vm->AccessParam(4);
+    double *flags = vm->AccessParam(4);
 
-	HUD_RenderWorld(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
+    HUD_RenderWorld(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
 }
-
 
 // hud.render_automap(x, y, w, h, [flags])
 //
 static void HD_render_automap(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	float x = *vm->AccessParam(0);
-	float y = *vm->AccessParam(1);
-	float w = *vm->AccessParam(2);
-	float h = *vm->AccessParam(3);
+    float x = *vm->AccessParam(0);
+    float y = *vm->AccessParam(1);
+    float w = *vm->AccessParam(2);
+    float h = *vm->AccessParam(3);
 
-	double *flags = vm->AccessParam(4);
+    double *flags = vm->AccessParam(4);
 
-	int   old_state;
-	float old_zoom;
+    int   old_state;
+    float old_zoom;
 
-	AM_GetState(&old_state, &old_zoom);
+    AM_GetState(&old_state, &old_zoom);
 
-	int new_state = old_state;
-	new_state &= ~ui_hud_automap_flags[0];
-	new_state |=  ui_hud_automap_flags[1];
+    int new_state = old_state;
+    new_state &= ~ui_hud_automap_flags[0];
+    new_state |= ui_hud_automap_flags[1];
 
-	float new_zoom = old_zoom;
-	if (ui_hud_automap_zoom > 0.1)
-		new_zoom = ui_hud_automap_zoom;
+    float new_zoom = old_zoom;
+    if (ui_hud_automap_zoom > 0.1)
+        new_zoom = ui_hud_automap_zoom;
 
-	AM_SetState(new_state, new_zoom);
+    AM_SetState(new_state, new_zoom);
 
-	HUD_RenderAutomap(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
+    HUD_RenderAutomap(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
 
-	AM_SetState(old_state, old_zoom);
+    AM_SetState(old_state, old_zoom);
 }
-
 
 // hud.automap_color(which, color)
 //
 static void HD_automap_color(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	int which = (int) *vm->AccessParam(0);
+    int which = (int)*vm->AccessParam(0);
 
-	if (which < 1 || which > AM_NUM_COLORS)
-		I_Error("hud.automap_color: bad color number: %d\n", which);
+    if (which < 1 || which > AM_NUM_COLORS)
+        I_Error("hud.automap_color: bad color number: %d\n", which);
 
-	which--;
+    which--;
 
-	rgbcol_t rgb = VM_VectorToColor(vm->AccessParam(1));
+    rgbcol_t rgb = VM_VectorToColor(vm->AccessParam(1));
 
-	AM_SetColor(which, rgb);
+    AM_SetColor(which, rgb);
 }
-
 
 // hud.automap_option(which, value)
 //
 static void HD_automap_option(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	int which = (int) *vm->AccessParam(0);
-	int value = (int) *vm->AccessParam(1);
+    int which = (int)*vm->AccessParam(0);
+    int value = (int)*vm->AccessParam(1);
 
-	if (which < 1 || which > 7)
-		I_Error("hud.automap_color: bad color number: %d\n", which);
+    if (which < 1 || which > 7)
+        I_Error("hud.automap_color: bad color number: %d\n", which);
 
-	which--;
+    which--;
 
-	if (value <= 0)
-		ui_hud_automap_flags[0] |= (1 << which);
-	else
-		ui_hud_automap_flags[1] |= (1 << which);
+    if (value <= 0)
+        ui_hud_automap_flags[0] |= (1 << which);
+    else
+        ui_hud_automap_flags[1] |= (1 << which);
 }
-
 
 // hud.automap_zoom(value)
 //
 static void HD_automap_zoom(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	float zoom = *vm->AccessParam(0);
+    float zoom = *vm->AccessParam(0);
 
-	// impose a very broad limit
-	ui_hud_automap_zoom = CLAMP(0.2f, zoom, 100.0f);
+    // impose a very broad limit
+    ui_hud_automap_zoom = CLAMP(0.2f, zoom, 100.0f);
 }
 
 // hud.automap_player_arrow(type)
 //
 static void HD_automap_player_arrow(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	int arrow = (int) *vm->AccessParam(0);
+    int arrow = (int)*vm->AccessParam(0);
 
-	AM_SetArrow((automap_arrow_e)arrow);
+    AM_SetArrow((automap_arrow_e)arrow);
 }
-
 
 // hud.set_render_who(index)
 //
 static void HD_set_render_who(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	int index = (int) *vm->AccessParam(0);
+    int index = (int)*vm->AccessParam(0);
 
-	if (index < 0 || index >= numplayers)
-		I_Error("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
+    if (index < 0 || index >= numplayers)
+        I_Error("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
 
-	if (index == 0)
-	{
-		ui_hud_who = players[consoleplayer];
-		return;
-	}
+    if (index == 0)
+    {
+        ui_hud_who = players[consoleplayer];
+        return;
+    }
 
-	int who = displayplayer;
+    int who = displayplayer;
 
-	for (; index > 1; index--)
-	{
-		do
-		{
-			who = (who + 1) % MAXPLAYERS;
-		}
-		while (players[who] == NULL);
-	}
+    for (; index > 1; index--)
+    {
+        do
+        {
+            who = (who + 1) % MAXPLAYERS;
+        } while (players[who] == NULL);
+    }
 
-	ui_hud_who = players[who];
+    ui_hud_who = players[who];
 }
-
 
 // hud.play_sound(name)
 //
 static void HD_play_sound(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	const char *name = vm->AccessParamString(0);
+    const char *name = vm->AccessParamString(0);
 
-	sfx_t *fx = sfxdefs.GetEffect(name);
+    sfx_t *fx = sfxdefs.GetEffect(name);
 
-	if (fx)
-		S_StartFX(fx);
-	else
-		I_Warning("hud.play_sound: unknown sfx '%s'\n", name);
+    if (fx)
+        S_StartFX(fx);
+    else
+        I_Warning("hud.play_sound: unknown sfx '%s'\n", name);
 }
-
 
 // hud.screen_aspect()
 //
 static void HD_screen_aspect(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	float TempAspect= std::ceil(v_pixelaspect.f * 100.0) / 100.0;
-	
-	vm->ReturnFloat(TempAspect);
+    float TempAspect = std::ceil(v_pixelaspect.f * 100.0) / 100.0;
+
+    vm->ReturnFloat(TempAspect);
 }
 
 static void HD_get_average_color(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	double rgb[3];
-	const char *name = vm->AccessParamString(0);
-	double *from_x = vm->AccessParam(1);
-	double *to_x = vm->AccessParam(2);
-	double *from_y = vm->AccessParam(3);
-	double *to_y = vm->AccessParam(4);
-	const byte *what_palette = (const byte *) &playpal_data[0];
-	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
-	if (tmp_img_c->source_palette >= 0)
-		what_palette = (const byte *) W_LoadLump(tmp_img_c->source_palette);
-	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-	u8_t *temp_rgb = new u8_t[3];
-	tmp_img_data->AverageColor(temp_rgb, from_x ? *from_x : -1, to_x ? *to_x : 1000000,
-		from_y ? *from_y : -1, to_y ? *to_y : 1000000);
-	rgb[0] = temp_rgb[0];
-	rgb[1] = temp_rgb[1];
-	rgb[2] = temp_rgb[2];
-	delete tmp_img_data;
-	delete[] temp_rgb;
-	vm->ReturnVector(rgb);
+    double         rgb[3];
+    const char    *name         = vm->AccessParamString(0);
+    double        *from_x       = vm->AccessParam(1);
+    double        *to_x         = vm->AccessParam(2);
+    double        *from_y       = vm->AccessParam(3);
+    double        *to_y         = vm->AccessParam(4);
+    const byte    *what_palette = (const byte *)&playpal_data[0];
+    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    if (tmp_img_c->source_palette >= 0)
+        what_palette = (const byte *)W_LoadLump(tmp_img_c->source_palette);
+    epi::image_data_c *tmp_img_data =
+        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+    u8_t *temp_rgb = new u8_t[3];
+    tmp_img_data->AverageColor(temp_rgb, from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+                               to_y ? *to_y : 1000000);
+    rgb[0] = temp_rgb[0];
+    rgb[1] = temp_rgb[1];
+    rgb[2] = temp_rgb[2];
+    delete tmp_img_data;
+    delete[] temp_rgb;
+    vm->ReturnVector(rgb);
 }
 
 static void HD_get_lightest_color(coal::vm_c *vm, int argc)
 {
-	(void) argc;
-	
-	double rgb[3];
-	const char *name = vm->AccessParamString(0);
-	double *from_x = vm->AccessParam(1);
-	double *to_x = vm->AccessParam(2);
-	double *from_y = vm->AccessParam(3);
-	double *to_y = vm->AccessParam(4);
-	const byte *what_palette = (const byte *) &playpal_data[0];
-	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
-	if (tmp_img_c->source_palette >= 0)
-		what_palette = (const byte *) W_LoadLump(tmp_img_c->source_palette);
-	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-	u8_t *temp_rgb = new u8_t[3];
-	tmp_img_data->LightestColor(temp_rgb, from_x ? *from_x : -1, to_x ? *to_x : 1000000,
-		from_y ? *from_y : -1, to_y ? *to_y : 1000000);
-	rgb[0] = temp_rgb[0];
-	rgb[1] = temp_rgb[1];
-	rgb[2] = temp_rgb[2];
-	delete tmp_img_data;
-	delete[] temp_rgb;
-	vm->ReturnVector(rgb);
+    (void)argc;
+
+    double         rgb[3];
+    const char    *name         = vm->AccessParamString(0);
+    double        *from_x       = vm->AccessParam(1);
+    double        *to_x         = vm->AccessParam(2);
+    double        *from_y       = vm->AccessParam(3);
+    double        *to_y         = vm->AccessParam(4);
+    const byte    *what_palette = (const byte *)&playpal_data[0];
+    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    if (tmp_img_c->source_palette >= 0)
+        what_palette = (const byte *)W_LoadLump(tmp_img_c->source_palette);
+    epi::image_data_c *tmp_img_data =
+        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+    u8_t *temp_rgb = new u8_t[3];
+    tmp_img_data->LightestColor(temp_rgb, from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+                                to_y ? *to_y : 1000000);
+    rgb[0] = temp_rgb[0];
+    rgb[1] = temp_rgb[1];
+    rgb[2] = temp_rgb[2];
+    delete tmp_img_data;
+    delete[] temp_rgb;
+    vm->ReturnVector(rgb);
 }
 
 static void HD_get_darkest_color(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	double rgb[3];
-	const char *name = vm->AccessParamString(0);
-	double *from_x = vm->AccessParam(1);
-	double *to_x = vm->AccessParam(2);
-	double *from_y = vm->AccessParam(3);
-	double *to_y = vm->AccessParam(4);
-	const byte *what_palette = (const byte *) &playpal_data[0];
-	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
-	if (tmp_img_c->source_palette >= 0)
-		what_palette = (const byte *) W_LoadLump(tmp_img_c->source_palette);
-	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-	u8_t *temp_rgb = new u8_t[3];
-	tmp_img_data->DarkestColor(temp_rgb, from_x ? *from_x : -1, to_x ? *to_x : 1000000,
-		from_y ? *from_y : -1, to_y ? *to_y : 1000000);
-	rgb[0] = temp_rgb[0];
-	rgb[1] = temp_rgb[1];
-	rgb[2] = temp_rgb[2];
-	delete tmp_img_data;
-	delete[] temp_rgb;
-	vm->ReturnVector(rgb);
+    double         rgb[3];
+    const char    *name         = vm->AccessParamString(0);
+    double        *from_x       = vm->AccessParam(1);
+    double        *to_x         = vm->AccessParam(2);
+    double        *from_y       = vm->AccessParam(3);
+    double        *to_y         = vm->AccessParam(4);
+    const byte    *what_palette = (const byte *)&playpal_data[0];
+    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    if (tmp_img_c->source_palette >= 0)
+        what_palette = (const byte *)W_LoadLump(tmp_img_c->source_palette);
+    epi::image_data_c *tmp_img_data =
+        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+    u8_t *temp_rgb = new u8_t[3];
+    tmp_img_data->DarkestColor(temp_rgb, from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+                               to_y ? *to_y : 1000000);
+    rgb[0] = temp_rgb[0];
+    rgb[1] = temp_rgb[1];
+    rgb[2] = temp_rgb[2];
+    delete tmp_img_data;
+    delete[] temp_rgb;
+    vm->ReturnVector(rgb);
 }
 
 static void HD_get_average_hue(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	double rgb[3];
-	const char *name = vm->AccessParamString(0);
-	double *from_x = vm->AccessParam(1);
-	double *to_x = vm->AccessParam(2);
-	double *from_y = vm->AccessParam(3);
-	double *to_y = vm->AccessParam(4);
-	const byte *what_palette = (const byte *) &playpal_data[0];
-	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
-	if (tmp_img_c->source_palette >= 0)
-		what_palette = (const byte *) W_LoadLump(tmp_img_c->source_palette);
-	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-	u8_t *temp_rgb = new u8_t[3];
-	tmp_img_data->AverageHue(temp_rgb, NULL, from_x ? *from_x : -1, to_x ? *to_x : 1000000,
-		from_y ? *from_y : -1, to_y ? *to_y : 1000000);
-	rgb[0] = temp_rgb[0];
-	rgb[1] = temp_rgb[1];
-	rgb[2] = temp_rgb[2];
-	delete tmp_img_data;
-	delete[] temp_rgb;
-	vm->ReturnVector(rgb);
+    double         rgb[3];
+    const char    *name         = vm->AccessParamString(0);
+    double        *from_x       = vm->AccessParam(1);
+    double        *to_x         = vm->AccessParam(2);
+    double        *from_y       = vm->AccessParam(3);
+    double        *to_y         = vm->AccessParam(4);
+    const byte    *what_palette = (const byte *)&playpal_data[0];
+    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    if (tmp_img_c->source_palette >= 0)
+        what_palette = (const byte *)W_LoadLump(tmp_img_c->source_palette);
+    epi::image_data_c *tmp_img_data =
+        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+    u8_t *temp_rgb = new u8_t[3];
+    tmp_img_data->AverageHue(temp_rgb, NULL, from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+                             to_y ? *to_y : 1000000);
+    rgb[0] = temp_rgb[0];
+    rgb[1] = temp_rgb[1];
+    rgb[2] = temp_rgb[2];
+    delete tmp_img_data;
+    delete[] temp_rgb;
+    vm->ReturnVector(rgb);
 }
 
-// These two aren't really needed anymore with the AverageColor rework, but keeping them in case COALHUDS in the wild use them - Dasho
+// These two aren't really needed anymore with the AverageColor rework, but keeping them in case COALHUDS in the wild
+// use them - Dasho
 static void HD_get_average_top_border_color(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	double rgb[3];
-	const char *name = vm->AccessParamString(0);
-	const byte *what_palette = (const byte *) &playpal_data[0];
-	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
-	if (tmp_img_c->source_palette >= 0)
-		what_palette = (const byte *) W_LoadLump(tmp_img_c->source_palette);
-	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-	u8_t *temp_rgb = new u8_t[3];
-	tmp_img_data->AverageColor(temp_rgb, 0, tmp_img_c->actual_w, tmp_img_c->actual_h-1, tmp_img_c->actual_h);
-	rgb[0] = temp_rgb[0];
-	rgb[1] = temp_rgb[1];
-	rgb[2] = temp_rgb[2];
-	delete tmp_img_data;
-	delete[] temp_rgb;
-	vm->ReturnVector(rgb);
+    double         rgb[3];
+    const char    *name         = vm->AccessParamString(0);
+    const byte    *what_palette = (const byte *)&playpal_data[0];
+    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    if (tmp_img_c->source_palette >= 0)
+        what_palette = (const byte *)W_LoadLump(tmp_img_c->source_palette);
+    epi::image_data_c *tmp_img_data =
+        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+    u8_t *temp_rgb = new u8_t[3];
+    tmp_img_data->AverageColor(temp_rgb, 0, tmp_img_c->actual_w, tmp_img_c->actual_h - 1, tmp_img_c->actual_h);
+    rgb[0] = temp_rgb[0];
+    rgb[1] = temp_rgb[1];
+    rgb[2] = temp_rgb[2];
+    delete tmp_img_data;
+    delete[] temp_rgb;
+    vm->ReturnVector(rgb);
 }
 static void HD_get_average_bottom_border_color(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	double rgb[3];
-	const char *name = vm->AccessParamString(0);
-	const byte *what_palette = (const byte *) &playpal_data[0];
-	const image_c *tmp_img_c = W_ImageLookup(name, INS_Graphic, 0);
-	if (tmp_img_c->source_palette >= 0)
-		what_palette = (const byte *) W_LoadLump(tmp_img_c->source_palette);
-	epi::image_data_c *tmp_img_data = R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-	u8_t *temp_rgb = new u8_t[3];
-	tmp_img_data->AverageColor(temp_rgb, 0, tmp_img_c->actual_w, 0, 1);
-	rgb[0] = temp_rgb[0];
-	rgb[1] = temp_rgb[1];
-	rgb[2] = temp_rgb[2];
-	delete tmp_img_data;
-	delete[] temp_rgb;
-	vm->ReturnVector(rgb);
+    double         rgb[3];
+    const char    *name         = vm->AccessParamString(0);
+    const byte    *what_palette = (const byte *)&playpal_data[0];
+    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    if (tmp_img_c->source_palette >= 0)
+        what_palette = (const byte *)W_LoadLump(tmp_img_c->source_palette);
+    epi::image_data_c *tmp_img_data =
+        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+    u8_t *temp_rgb = new u8_t[3];
+    tmp_img_data->AverageColor(temp_rgb, 0, tmp_img_c->actual_w, 0, 1);
+    rgb[0] = temp_rgb[0];
+    rgb[1] = temp_rgb[1];
+    rgb[2] = temp_rgb[2];
+    delete tmp_img_data;
+    delete[] temp_rgb;
+    vm->ReturnVector(rgb);
 }
 
 // hud.rts_enable(tag)
 //
 static void HD_rts_enable(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	std::string name = vm->AccessParamString(0);
+    std::string name = vm->AccessParamString(0);
 
-	if (!name.empty())
-		RAD_EnableByTag(NULL, name.c_str(), false);
+    if (!name.empty())
+        RAD_EnableByTag(NULL, name.c_str(), false);
 }
 
 // hud.rts_disable(tag)
 //
 static void HD_rts_disable(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	std::string name = vm->AccessParamString(0);
+    std::string name = vm->AccessParamString(0);
 
-	if (!name.empty())
-		RAD_EnableByTag(NULL, name.c_str(), true);
+    if (!name.empty())
+        RAD_EnableByTag(NULL, name.c_str(), true);
 }
 
 // hud.rts_isactive(tag)
 //
 static void HD_rts_isactive(coal::vm_c *vm, int argc)
 {
-	(void) argc;
+    (void)argc;
 
-	std::string name = vm->AccessParamString(0);
+    std::string name = vm->AccessParamString(0);
 
-	if (!name.empty())
-	{
-		if (RAD_IsActiveByTag(NULL, name.c_str()))
-			vm->ReturnFloat(1);
-		else
-			vm->ReturnFloat(0);
-	}
+    if (!name.empty())
+    {
+        if (RAD_IsActiveByTag(NULL, name.c_str()))
+            vm->ReturnFloat(1);
+        else
+            vm->ReturnFloat(0);
+    }
 }
 
 // hud.get_image_width(name)
 //
 static void HD_get_image_width(coal::vm_c *vm, int argc)
 {
-	(void) argc;
-	const char *name = vm->AccessParamString(0);
+    (void)argc;
+    const char *name = vm->AccessParamString(0);
 
-	const image_c *img = W_ImageLookup(name, INS_Graphic);
-	
-	if (img)
-	{
-		vm->ReturnFloat(HUD_GetImageWidth(img));
-	}
-	else
-	{
-		vm->ReturnFloat(0);
-	}
+    const image_c *img = W_ImageLookup(name, INS_Graphic);
+
+    if (img)
+    {
+        vm->ReturnFloat(HUD_GetImageWidth(img));
+    }
+    else
+    {
+        vm->ReturnFloat(0);
+    }
 }
 
 // hud.get_image_height(name)
 //
 static void HD_get_image_height(coal::vm_c *vm, int argc)
 {
-	(void) argc;
-	const char *name = vm->AccessParamString(0);
+    (void)argc;
+    const char *name = vm->AccessParamString(0);
 
-	const image_c *img = W_ImageLookup(name, INS_Graphic);
-	
-	if (img)
-	{
-		vm->ReturnFloat(HUD_GetImageHeight(img));
-	}
-	else
-	{
-		vm->ReturnFloat(0);
-	}
+    const image_c *img = W_ImageLookup(name, INS_Graphic);
+
+    if (img)
+    {
+        vm->ReturnFloat(HUD_GetImageHeight(img));
+    }
+    else
+    {
+        vm->ReturnFloat(0);
+    }
 }
 
 //------------------------------------------------------------------------
@@ -1021,71 +994,71 @@ static void HD_get_image_height(coal::vm_c *vm, int argc)
 
 void VM_RegisterHUD()
 {
-	// query functions
-    ui_vm->AddNativeFunction("hud.game_mode",       HD_game_mode);
-    ui_vm->AddNativeFunction("hud.game_name",       HD_game_name);
-    ui_vm->AddNativeFunction("hud.map_name",  	    HD_map_name);
-    ui_vm->AddNativeFunction("hud.map_title",  	    HD_map_title);
-	ui_vm->AddNativeFunction("hud.map_author",  	HD_map_author);
+    // query functions
+    ui_vm->AddNativeFunction("hud.game_mode", HD_game_mode);
+    ui_vm->AddNativeFunction("hud.game_name", HD_game_name);
+    ui_vm->AddNativeFunction("hud.map_name", HD_map_name);
+    ui_vm->AddNativeFunction("hud.map_title", HD_map_title);
+    ui_vm->AddNativeFunction("hud.map_author", HD_map_author);
 
-    ui_vm->AddNativeFunction("hud.which_hud",  	    HD_which_hud);
-    ui_vm->AddNativeFunction("hud.check_automap",  	HD_check_automap);
-    ui_vm->AddNativeFunction("hud.get_time",  	    HD_get_time);
+    ui_vm->AddNativeFunction("hud.which_hud", HD_which_hud);
+    ui_vm->AddNativeFunction("hud.check_automap", HD_check_automap);
+    ui_vm->AddNativeFunction("hud.get_time", HD_get_time);
 
-	// set-state functions
-    ui_vm->AddNativeFunction("hud.coord_sys",       HD_coord_sys);
+    // set-state functions
+    ui_vm->AddNativeFunction("hud.coord_sys", HD_coord_sys);
 
-    ui_vm->AddNativeFunction("hud.text_font",       HD_text_font);
-    ui_vm->AddNativeFunction("hud.text_color",      HD_text_color);
-    ui_vm->AddNativeFunction("hud.set_scale",       HD_set_scale);
-    ui_vm->AddNativeFunction("hud.set_alpha",       HD_set_alpha);
+    ui_vm->AddNativeFunction("hud.text_font", HD_text_font);
+    ui_vm->AddNativeFunction("hud.text_color", HD_text_color);
+    ui_vm->AddNativeFunction("hud.set_scale", HD_set_scale);
+    ui_vm->AddNativeFunction("hud.set_alpha", HD_set_alpha);
 
-	ui_vm->AddNativeFunction("hud.set_render_who",  HD_set_render_who);
-    ui_vm->AddNativeFunction("hud.automap_color",   HD_automap_color);
-    ui_vm->AddNativeFunction("hud.automap_option",  HD_automap_option);
-    ui_vm->AddNativeFunction("hud.automap_zoom",    HD_automap_zoom);
-	ui_vm->AddNativeFunction("hud.automap_player_arrow", HD_automap_player_arrow);
+    ui_vm->AddNativeFunction("hud.set_render_who", HD_set_render_who);
+    ui_vm->AddNativeFunction("hud.automap_color", HD_automap_color);
+    ui_vm->AddNativeFunction("hud.automap_option", HD_automap_option);
+    ui_vm->AddNativeFunction("hud.automap_zoom", HD_automap_zoom);
+    ui_vm->AddNativeFunction("hud.automap_player_arrow", HD_automap_player_arrow);
 
-	// drawing functions
-    ui_vm->AddNativeFunction("hud.solid_box",       HD_solid_box);
-    ui_vm->AddNativeFunction("hud.solid_line",      HD_solid_line);
-    ui_vm->AddNativeFunction("hud.thin_box",        HD_thin_box);
-    ui_vm->AddNativeFunction("hud.gradient_box",    HD_gradient_box);
+    // drawing functions
+    ui_vm->AddNativeFunction("hud.solid_box", HD_solid_box);
+    ui_vm->AddNativeFunction("hud.solid_line", HD_solid_line);
+    ui_vm->AddNativeFunction("hud.thin_box", HD_thin_box);
+    ui_vm->AddNativeFunction("hud.gradient_box", HD_gradient_box);
 
-    ui_vm->AddNativeFunction("hud.draw_image",      HD_draw_image);
-    ui_vm->AddNativeFunction("hud.stretch_image",   HD_stretch_image);
-	ui_vm->AddNativeFunction("hud.scroll_image",   HD_scroll_image);
-    
-    ui_vm->AddNativeFunction("hud.tile_image",      HD_tile_image);
-    ui_vm->AddNativeFunction("hud.draw_text",       HD_draw_text);
-    ui_vm->AddNativeFunction("hud.draw_num2",       HD_draw_num2);
+    ui_vm->AddNativeFunction("hud.draw_image", HD_draw_image);
+    ui_vm->AddNativeFunction("hud.stretch_image", HD_stretch_image);
+    ui_vm->AddNativeFunction("hud.scroll_image", HD_scroll_image);
 
-	ui_vm->AddNativeFunction("hud.draw_number",     HD_draw_number);
-	ui_vm->AddNativeFunction("hud.game_paused",     HD_game_paused);
-	ui_vm->AddNativeFunction("hud.erraticism_active", HD_erraticism_active);
-	ui_vm->AddNativeFunction("hud.time_stop_active",  HD_time_stop_active);
-	ui_vm->AddNativeFunction("hud.screen_aspect",  HD_screen_aspect);
-	
-    ui_vm->AddNativeFunction("hud.render_world",    HD_render_world);
-    ui_vm->AddNativeFunction("hud.render_automap",  HD_render_automap);
+    ui_vm->AddNativeFunction("hud.tile_image", HD_tile_image);
+    ui_vm->AddNativeFunction("hud.draw_text", HD_draw_text);
+    ui_vm->AddNativeFunction("hud.draw_num2", HD_draw_num2);
 
-	// sound functions
-	ui_vm->AddNativeFunction("hud.play_sound",      HD_play_sound);
+    ui_vm->AddNativeFunction("hud.draw_number", HD_draw_number);
+    ui_vm->AddNativeFunction("hud.game_paused", HD_game_paused);
+    ui_vm->AddNativeFunction("hud.erraticism_active", HD_erraticism_active);
+    ui_vm->AddNativeFunction("hud.time_stop_active", HD_time_stop_active);
+    ui_vm->AddNativeFunction("hud.screen_aspect", HD_screen_aspect);
 
-	// image color functions
-	ui_vm->AddNativeFunction("hud.get_average_color",      HD_get_average_color);
-	ui_vm->AddNativeFunction("hud.get_average_top_border_color",      HD_get_average_top_border_color);
-	ui_vm->AddNativeFunction("hud.get_average_bottom_border_color",      HD_get_average_bottom_border_color);
-	ui_vm->AddNativeFunction("hud.get_lightest_color",      HD_get_lightest_color);
-	ui_vm->AddNativeFunction("hud.get_darkest_color",      HD_get_darkest_color);
-	ui_vm->AddNativeFunction("hud.get_average_hue",      HD_get_average_hue);
+    ui_vm->AddNativeFunction("hud.render_world", HD_render_world);
+    ui_vm->AddNativeFunction("hud.render_automap", HD_render_automap);
 
-	ui_vm->AddNativeFunction("hud.rts_enable",        HD_rts_enable);
-	ui_vm->AddNativeFunction("hud.rts_disable",        HD_rts_disable);
-	ui_vm->AddNativeFunction("hud.rts_isactive",      HD_rts_isactive);
+    // sound functions
+    ui_vm->AddNativeFunction("hud.play_sound", HD_play_sound);
 
-	ui_vm->AddNativeFunction("hud.get_image_width",      HD_get_image_width);
-	ui_vm->AddNativeFunction("hud.get_image_height",      HD_get_image_height);
+    // image color functions
+    ui_vm->AddNativeFunction("hud.get_average_color", HD_get_average_color);
+    ui_vm->AddNativeFunction("hud.get_average_top_border_color", HD_get_average_top_border_color);
+    ui_vm->AddNativeFunction("hud.get_average_bottom_border_color", HD_get_average_bottom_border_color);
+    ui_vm->AddNativeFunction("hud.get_lightest_color", HD_get_lightest_color);
+    ui_vm->AddNativeFunction("hud.get_darkest_color", HD_get_darkest_color);
+    ui_vm->AddNativeFunction("hud.get_average_hue", HD_get_average_hue);
+
+    ui_vm->AddNativeFunction("hud.rts_enable", HD_rts_enable);
+    ui_vm->AddNativeFunction("hud.rts_disable", HD_rts_disable);
+    ui_vm->AddNativeFunction("hud.rts_isactive", HD_rts_isactive);
+
+    ui_vm->AddNativeFunction("hud.get_image_width", HD_get_image_width);
+    ui_vm->AddNativeFunction("hud.get_image_height", HD_get_image_height);
 }
 
 void VM_NewGame(void)
@@ -1096,10 +1069,10 @@ void VM_NewGame(void)
 void VM_LoadGame(void)
 {
     // Need to set these to prevent NULL references if using any player.xxx in the load_level hook
-	ui_hud_who    = players[displayplayer];
-	ui_player_who = players[displayplayer];
-	
-	VM_CallFunction(ui_vm, "load_game");
+    ui_hud_who    = players[displayplayer];
+    ui_player_who = players[displayplayer];
+
+    VM_CallFunction(ui_vm, "load_game");
 }
 
 void VM_SaveGame(void)
@@ -1109,9 +1082,9 @@ void VM_SaveGame(void)
 
 void VM_BeginLevel(void)
 {
-	// Need to set these to prevent NULL references if using player.xxx in the begin_level hook
-	ui_hud_who    = players[displayplayer];
-	ui_player_who = players[displayplayer];
+    // Need to set these to prevent NULL references if using player.xxx in the begin_level hook
+    ui_hud_who    = players[displayplayer];
+    ui_player_who = players[displayplayer];
     VM_CallFunction(ui_vm, "begin_level");
 }
 
@@ -1121,19 +1094,19 @@ void VM_EndLevel(void)
 }
 
 void VM_RunHud(void)
-{ 
-	HUD_Reset();
+{
+    HUD_Reset();
 
-	ui_hud_who    = players[displayplayer];
-	ui_player_who = players[displayplayer];
+    ui_hud_who    = players[displayplayer];
+    ui_player_who = players[displayplayer];
 
-	ui_hud_automap_flags[0] = 0;
-	ui_hud_automap_flags[1] = 0;
-	ui_hud_automap_zoom = -1;
+    ui_hud_automap_flags[0] = 0;
+    ui_hud_automap_flags[1] = 0;
+    ui_hud_automap_zoom     = -1;
 
-	VM_CallFunction(ui_vm, "draw_all");
+    VM_CallFunction(ui_vm, "draw_all");
 
-	HUD_Reset();
+    HUD_Reset();
 }
 
 //--- editor settings ---

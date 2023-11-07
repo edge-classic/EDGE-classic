@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Weapon (player sprites) Action Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -29,7 +29,7 @@
 #include "main.h"
 
 // maximum weapons player can hold at once
-#define MAXWEAPONS  64
+#define MAXWEAPONS 64
 
 //
 // Overlay psprites are scaled shapes
@@ -38,64 +38,60 @@
 //
 typedef enum
 {
-	ps_weapon = 0,
-	ps_flash,
-	ps_crosshair,
-	ps_NOT_USED,
+    ps_weapon = 0,
+    ps_flash,
+    ps_crosshair,
+    ps_NOT_USED,
 
-	// -AJA- Savegame code relies on NUMPSPRITES == 4.
-	NUMPSPRITES
-}
-psprnum_t;
+    // -AJA- Savegame code relies on NUMPSPRITES == 4.
+    NUMPSPRITES
+} psprnum_t;
 
 typedef struct
 {
-	// current state.  NULL state means not active
-	const state_t *state;
+    // current state.  NULL state means not active
+    const state_t *state;
 
-	// state to enter next.
-	const state_t *next_state;
+    // state to enter next.
+    const state_t *next_state;
 
-	// time (in tics) remaining for current state
-	int tics;
+    // time (in tics) remaining for current state
+    int tics;
 
-	// screen position values (0 is normal)
-	float sx, sy;
+    // screen position values (0 is normal)
+    float sx, sy;
 
-	// translucency values
-	float visibility;
-	float vis_target;
-}
-pspdef_t;
+    // translucency values
+    float visibility;
+    float vis_target;
+} pspdef_t;
 
 typedef enum
 {
-	PLWEP_Removing  = 0x0001,  // weapon is being removed (or upgraded)
-}
-playerweapon_flags_e;
+    PLWEP_Removing = 0x0001, // weapon is being removed (or upgraded)
+} playerweapon_flags_e;
 
 //
 // Per-player Weapon Info.
-// 
+//
 typedef struct
 {
-	weapondef_c *info;
+    weapondef_c *info;
 
-	// player has this weapon.
-	bool owned;
+    // player has this weapon.
+    bool owned;
 
-	// various flags
-	int flags;
+    // various flags
+    int flags;
 
-	// current clip sizes
-	int clip_size[4];
-	
-	// reload clip counts
-	int reload_count[4];
+    // current clip sizes
+    int clip_size[4];
 
-	int model_skin;
-}
-playerweapon_t;
+    // reload clip counts
+    int reload_count[4];
+
+    int model_skin;
+} playerweapon_t;
 
 #endif // __P_PSPR__
 

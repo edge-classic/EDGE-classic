@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Music Handling Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -29,26 +29,30 @@
 /* abstract base class */
 class abstract_music_c
 {
-public:
-	abstract_music_c() { }
-	virtual ~abstract_music_c() { }
+  public:
+    abstract_music_c()
+    {
+    }
+    virtual ~abstract_music_c()
+    {
+    }
 
-	virtual void Close(void) = 0;
+    virtual void Close(void) = 0;
 
-	virtual void Play(bool loop) = 0;
-	virtual void Stop(void) = 0;
+    virtual void Play(bool loop) = 0;
+    virtual void Stop(void)      = 0;
 
-	virtual void Pause(void)  = 0;
-	virtual void Resume(void) = 0;
+    virtual void Pause(void)  = 0;
+    virtual void Resume(void) = 0;
 
-	virtual void Ticker(void) = 0;
+    virtual void Ticker(void) = 0;
 };
 
 /* VARIABLES */
 
 extern cvar_c mus_volume;
-extern int entry_playing;
-extern bool var_pc_speaker_mode;
+extern int    entry_playing;
+extern bool   var_pc_speaker_mode;
 
 /* FUNCTIONS */
 

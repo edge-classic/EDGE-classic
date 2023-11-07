@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Data Definition File Code (Fonts)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -29,95 +29,114 @@
 //
 typedef enum
 {
-	FNTYP_UNSET = 0,
+    FNTYP_UNSET = 0,
 
-	FNTYP_Patch = 1,  // font is made up of individual patches
-	FNTYP_Image = 2,  // font consists of one big image (16x16 chars)
-	FNTYP_TrueType = 3 // font is a ttf/otf file or lump
-}
-fonttype_e;
+    FNTYP_Patch    = 1, // font is made up of individual patches
+    FNTYP_Image    = 2, // font consists of one big image (16x16 chars)
+    FNTYP_TrueType = 3  // font is a ttf/otf file or lump
+} fonttype_e;
 
 class fontpatch_c
 {
-public:
-	fontpatch_c(int _ch1, int _ch2, const char *_pat1);
-	~fontpatch_c();
+  public:
+    fontpatch_c(int _ch1, int _ch2, const char *_pat1);
+    ~fontpatch_c();
 
-	fontpatch_c *next;  // link in list
+    fontpatch_c *next; // link in list
 
-	int char1, char2;  // range
+    int char1, char2; // range
 
-	std::string patch1;
+    std::string patch1;
 };
 
 class fontdef_c
 {
-public:
-	fontdef_c();
-	~fontdef_c() {};
+  public:
+    fontdef_c();
+    ~fontdef_c(){};
 
-public:
-	void Default(void);
-	void CopyDetail(const fontdef_c &src);
+  public:
+    void Default(void);
+    void CopyDetail(const fontdef_c &src);
 
-	// Member vars....
-	std::string name;
+    // Member vars....
+    std::string name;
 
-	fonttype_e type;
+    fonttype_e type;
 
-	fontpatch_c *patches;
-	std::string missing_patch;
+    fontpatch_c *patches;
+    std::string  missing_patch;
 
-	std::string image_name;
+    std::string image_name;
 
-	float spacing;
-	float default_size;
+    float spacing;
+    float default_size;
 
-	// TTF Stuff
-	enum
-	{
-		TTF_SMOOTH_ON_DEMAND = 0,
-		TTF_SMOOTH_ALWAYS = 1,
-		TTF_SMOOTH_NEVER = 2
-	};
+    // TTF Stuff
+    enum
+    {
+        TTF_SMOOTH_ON_DEMAND = 0,
+        TTF_SMOOTH_ALWAYS    = 1,
+        TTF_SMOOTH_NEVER     = 2
+    };
 
-	std::string ttf_name;
-	int ttf_smoothing;
-	std::string ttf_smoothing_string; // User convenience
+    std::string ttf_name;
+    int         ttf_smoothing;
+    std::string ttf_smoothing_string; // User convenience
 
-private:
-	// disable copy construct and assignment operator
-	explicit fontdef_c(fontdef_c &rhs) { (void) rhs; }
-	fontdef_c& operator=(fontdef_c &rhs) { (void) rhs; return *this; }
+  private:
+    // disable copy construct and assignment operator
+    explicit fontdef_c(fontdef_c &rhs)
+    {
+        (void)rhs;
+    }
+    fontdef_c &operator=(fontdef_c &rhs)
+    {
+        (void)rhs;
+        return *this;
+    }
 };
 
-
 // Our fontdefs container
-class fontdef_container_c : public epi::array_c 
+class fontdef_container_c : public epi::array_c
 {
-public:
-	fontdef_container_c() : epi::array_c(sizeof(fontdef_c*)) {}
-	~fontdef_container_c() { Clear(); } 
+  public:
+    fontdef_container_c() : epi::array_c(sizeof(fontdef_c *))
+    {
+    }
+    ~fontdef_container_c()
+    {
+        Clear();
+    }
 
-private:
-	void CleanupObject(void *obj);
+  private:
+    void CleanupObject(void *obj);
 
-public:
-	int GetSize() {	return array_entries; } 
-	int Insert(fontdef_c *a) { return InsertObject((void*)&a); }
-	fontdef_c* operator[](int idx) { return *(fontdef_c**)FetchObject(idx); } 
+  public:
+    int GetSize()
+    {
+        return array_entries;
+    }
+    int Insert(fontdef_c *a)
+    {
+        return InsertObject((void *)&a);
+    }
+    fontdef_c *operator[](int idx)
+    {
+        return *(fontdef_c **)FetchObject(idx);
+    }
 
-	// Search Functions
-	fontdef_c* Lookup(const char* refname);
+    // Search Functions
+    fontdef_c *Lookup(const char *refname);
 };
 
 extern fontdef_container_c fontdefs;
 
 void DDF_MainLookupFont(const char *info, void *storage);
 
-void DDF_ReadFonts(const std::string& data);
+void DDF_ReadFonts(const std::string &data);
 
-#endif  /* __DDF_FONT__ */
+#endif /* __DDF_FONT__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

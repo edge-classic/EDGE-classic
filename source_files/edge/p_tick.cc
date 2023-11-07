@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Thinker & Ticker Code
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -55,88 +55,86 @@ extern cvar_c r_doubleframes;
 //
 void P_Ticker(bool extra_tic)
 {
-	if (paused)
-		return;
+    if (paused)
+        return;
 
-	// pause if in menu and at least one tic has been run
-	if (!netgame && (menuactive || rts_menuactive) &&
-		!AlmostEquals(players[consoleplayer]->viewz, FLO_UNUSED))
-	{
-		return;
-	}
+    // pause if in menu and at least one tic has been run
+    if (!netgame && (menuactive || rts_menuactive) && !AlmostEquals(players[consoleplayer]->viewz, FLO_UNUSED))
+    {
+        return;
+    }
 
-	erraticism_active = false;
+    erraticism_active = false;
 
-	if (g_erraticism.d)
-	{
-		bool keep_thinking = P_PlayerThink(players[consoleplayer], extra_tic);
+    if (g_erraticism.d)
+    {
+        bool keep_thinking = P_PlayerThink(players[consoleplayer], extra_tic);
 
-		if (!keep_thinking) 
-		{
-			erraticism_active = true;
-			return;
-		}
+        if (!keep_thinking)
+        {
+            erraticism_active = true;
+            return;
+        }
 
-		for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-		{
-			if (players[pnum] && players[pnum] != players[consoleplayer])
-				P_PlayerThink(players[pnum], extra_tic);
-		}
-	}
-	else
-	{
-		for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-			if (players[pnum])
-				P_PlayerThink(players[pnum], extra_tic);	
-	}
+        for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+        {
+            if (players[pnum] && players[pnum] != players[consoleplayer])
+                P_PlayerThink(players[pnum], extra_tic);
+        }
+    }
+    else
+    {
+        for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+            if (players[pnum])
+                P_PlayerThink(players[pnum], extra_tic);
+    }
 
-	if (!extra_tic || !r_doubleframes.d)
-		RAD_RunTriggers();
+    if (!extra_tic || !r_doubleframes.d)
+        RAD_RunTriggers();
 
-	P_RunForces(extra_tic);
-	P_RunMobjThinkers(extra_tic);
+    P_RunForces(extra_tic);
+    P_RunMobjThinkers(extra_tic);
 
-	if (!extra_tic || !r_doubleframes.d)
-		P_RunLights();
+    if (!extra_tic || !r_doubleframes.d)
+        P_RunLights();
 
-	P_RunActivePlanes();
-	P_RunActiveSliders();
+    P_RunActivePlanes();
+    P_RunActiveSliders();
 
-	if (!extra_tic || !r_doubleframes.d)
-		P_RunAmbientSFX();
+    if (!extra_tic || !r_doubleframes.d)
+        P_RunAmbientSFX();
 
-	P_UpdateSpecials(extra_tic);
+    P_UpdateSpecials(extra_tic);
 
-	if (extra_tic && r_doubleframes.d)
-		return;
+    if (extra_tic && r_doubleframes.d)
+        return;
 
-	P_MobjItemRespawn();
+    P_MobjItemRespawn();
 
-	// for par times
-	leveltime++;
+    // for par times
+    leveltime++;
 
-	if (leveltime >= exittime && gameaction == ga_nothing)
-	{
-		gameaction = ga_intermission;
-	}
+    if (leveltime >= exittime && gameaction == ga_nothing)
+    {
+        gameaction = ga_intermission;
+    }
 }
-
 
 void P_HubFastForward(void)
 {
-	fast_forward_active = true;
+    fast_forward_active = true;
 
-	// close doors
-	for (int i = 0; i < TICRATE * 8; i++)
-	{
-		P_RunActivePlanes();
-		P_RunActiveSliders();
-	}
+    // close doors
+    for (int i = 0; i < TICRATE * 8; i++)
+    {
+        P_RunActivePlanes();
+        P_RunActiveSliders();
+    }
 
-	for (int k = 0; k < TICRATE / 3; k++)
-		P_Ticker(false);
+    for (int k = 0; k < TICRATE / 3; k++)
+        P_Ticker(false);
 
-	fast_forward_active = false;
+    fast_forward_active = false;
 }
 
 //--- editor settings ---

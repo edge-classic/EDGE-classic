@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Option Menu (header)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -28,12 +28,12 @@
 
 #include "e_event.h"
 
-extern int netgame_menuon;  // 1 = HOST, 2 = JOIN, 3 = PLAYERS
+extern int netgame_menuon; // 1 = HOST, 2 = JOIN, 3 = PLAYERS
 
 void M_NetGameInit(void);
 void M_NetGameDrawer(void);
 void M_NetGameTicker(void);
-bool M_NetGameResponder(event_t * ev, int ch);
+bool M_NetGameResponder(event_t *ev, int ch);
 
 #endif /* __M_NETGAME_H__ */
 

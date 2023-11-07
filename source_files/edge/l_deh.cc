@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE DEH Interface
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -36,26 +36,22 @@
 // DEH_EDGE
 #include "deh_edge.h"
 
-
 DEF_CVAR(debug_dehacked, "0", CVAR_ARCHIVE)
 
-
 static char dh_message[1024];
-
 
 //
 // DH_PrintMsg
 //
-static void GCCATTR((format (printf,1,2)))
-	DH_PrintMsg(const char *str, ...)
+static void GCCATTR((format(printf, 1, 2))) DH_PrintMsg(const char *str, ...)
 {
-	va_list args;
+    va_list args;
 
-	va_start(args, str);
-	vsprintf(dh_message, str, args);
-	va_end(args);
+    va_start(args, str);
+    vsprintf(dh_message, str, args);
+    va_end(args);
 
-	I_Printf("DEH_EDGE: %s", dh_message);
+    I_Printf("DEH_EDGE: %s", dh_message);
 }
 
 //
@@ -63,58 +59,54 @@ static void GCCATTR((format (printf,1,2)))
 //
 // Terminates the program reporting an error.
 //
-static void GCCATTR((format (printf,1,2)))
-	DH_FatalError(const char *str, ...)
+static void GCCATTR((format(printf, 1, 2))) DH_FatalError(const char *str, ...)
 {
-	va_list args;
+    va_list args;
 
-	va_start(args, str);
-	vsprintf(dh_message, str, args);
-	va_end(args);
+    va_start(args, str);
+    vsprintf(dh_message, str, args);
+    va_end(args);
 
-	I_Error("Converting DEH patch failed: %s\n", dh_message);
+    I_Error("Converting DEH patch failed: %s\n", dh_message);
 }
 
-static const dehconvfuncs_t edge_dehconv_funcs =
-{
-	DH_FatalError,
-	DH_PrintMsg,
+static const dehconvfuncs_t edge_dehconv_funcs = {
+    DH_FatalError,
+    DH_PrintMsg,
 };
 
-
-void DEH_Convert(const byte *data, int length, const std::string& source)
+void DEH_Convert(const byte *data, int length, const std::string &source)
 {
-	DehEdgeStartup(&edge_dehconv_funcs);
+    DehEdgeStartup(&edge_dehconv_funcs);
 
-	dehret_e ret = DehEdgeAddLump((const char *)data, length);
+    dehret_e ret = DehEdgeAddLump((const char *)data, length);
 
-	if (ret != DEH_OK)
-	{
-		DH_PrintMsg("FAILED to add lump:\n");
-		DH_PrintMsg("- %s\n", DehEdgeGetError());
+    if (ret != DEH_OK)
+    {
+        DH_PrintMsg("FAILED to add lump:\n");
+        DH_PrintMsg("- %s\n", DehEdgeGetError());
 
-		DehEdgeShutdown();
+        DehEdgeShutdown();
 
-		I_Error("Failed to convert DeHackEd file: %s\n", source.c_str());
-	}
+        I_Error("Failed to convert DeHackEd file: %s\n", source.c_str());
+    }
 
-	ddf_collection_c col;
+    ddf_collection_c col;
 
-	ret = DehEdgeRunConversion(&col);
+    ret = DehEdgeRunConversion(&col);
 
-	DehEdgeShutdown();
+    DehEdgeShutdown();
 
-	if (ret != DEH_OK)
-	{
-		I_Error("Failed to convert DeHackEd file: %s\n", source.c_str());
-	}
+    if (ret != DEH_OK)
+    {
+        I_Error("Failed to convert DeHackEd file: %s\n", source.c_str());
+    }
 
-	if (debug_dehacked.d > 0)
-		DDF_DumpCollection(&col);
+    if (debug_dehacked.d > 0)
+        DDF_DumpCollection(&col);
 
-	DDF_AddCollection(&col, source);
+    DDF_AddCollection(&col, source);
 }
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

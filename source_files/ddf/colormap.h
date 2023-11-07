@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Data Definition File Code (Colourmaps)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -28,85 +28,97 @@
 
 typedef enum
 {
-	// Default value
-	COLSP_None     = 0x0000,
-	
-	// don't apply gun-flash type effects (looks silly for fog)
-	COLSP_NoFlash  = 0x0001,
+    // Default value
+    COLSP_None = 0x0000,
 
-	// for fonts, apply the FONTWHITEN mapping first
-	COLSP_Whiten   = 0x0002
-}
-colourspecial_e;
+    // don't apply gun-flash type effects (looks silly for fog)
+    COLSP_NoFlash = 0x0001,
+
+    // for fonts, apply the FONTWHITEN mapping first
+    COLSP_Whiten = 0x0002
+} colourspecial_e;
 
 typedef struct colmapcache_s
 {
-	byte *data;
-	int  size;
-}
-colmapcache_t;
+    byte *data;
+    int   size;
+} colmapcache_t;
 
 class colourmap_c
 {
-public:
-	colourmap_c();
-	~colourmap_c();
+  public:
+    colourmap_c();
+    ~colourmap_c();
 
-public:
-	void CopyDetail(colourmap_c &src);
-	void Default();
-	
-	// Member vars...
-	std::string name;
+  public:
+    void CopyDetail(colourmap_c &src);
+    void Default();
 
-	std::string lump_name;
-	std::string pack_name;
+    // Member vars...
+    std::string name;
 
-	int start;
-	int length;
+    std::string lump_name;
+    std::string pack_name;
 
-	colourspecial_e special;
+    int start;
+    int length;
 
-	// colours for GL renderer
-	rgbcol_t gl_colour;
+    colourspecial_e special;
 
+    // colours for GL renderer
+    rgbcol_t gl_colour;
 
-	rgbcol_t font_colour;  // (computed only, not in DDF)
+    rgbcol_t font_colour; // (computed only, not in DDF)
 
-	colmapcache_t cache;
+    colmapcache_t cache;
 
-	void *analysis;
+    void *analysis;
 
-private:
-	// disable copy construct and assignment operator
-	explicit colourmap_c(colourmap_c &rhs) { (void) rhs; }
-	colourmap_c& operator=(colourmap_c &rhs) { (void) rhs; return *this; }
+  private:
+    // disable copy construct and assignment operator
+    explicit colourmap_c(colourmap_c &rhs)
+    {
+        (void)rhs;
+    }
+    colourmap_c &operator=(colourmap_c &rhs)
+    {
+        (void)rhs;
+        return *this;
+    }
 };
-
 
 // Colourmap container
 class colourmap_container_c : public epi::array_c
 {
-public:
-	colourmap_container_c();
-	~colourmap_container_c();
+  public:
+    colourmap_container_c();
+    ~colourmap_container_c();
 
-private:
-	void CleanupObject(void *obj);
+  private:
+    void CleanupObject(void *obj);
 
-public:
-	// List Management
-	int GetSize() {	return array_entries; } 
-	int Insert(colourmap_c *c) { return InsertObject((void*)&c); }
-	colourmap_c* operator[](int idx) { return *(colourmap_c**)FetchObject(idx); } 
+  public:
+    // List Management
+    int GetSize()
+    {
+        return array_entries;
+    }
+    int Insert(colourmap_c *c)
+    {
+        return InsertObject((void *)&c);
+    }
+    colourmap_c *operator[](int idx)
+    {
+        return *(colourmap_c **)FetchObject(idx);
+    }
 
-	// Search Functions
-	colourmap_c* Lookup(const char* refname);
+    // Search Functions
+    colourmap_c *Lookup(const char *refname);
 };
 
-extern colourmap_container_c colourmaps;	// -ACB- 2004/06/10 Implemented
+extern colourmap_container_c colourmaps; // -ACB- 2004/06/10 Implemented
 
-void DDF_ReadColourMaps(const std::string& data);
+void DDF_ReadColourMaps(const std::string &data);
 
 void DDF_AddRawColourmap(const char *name, int size, const char *pack_name);
 

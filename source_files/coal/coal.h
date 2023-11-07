@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 //  COAL PUBLIC API
 //----------------------------------------------------------------------
-// 
+//
 //  Copyright (C) 2021-2023  The EDGE Team
 //  Copyright (C) 2009-2021  Andrew Apted
 //  Copyright (C) 1996-1997  Id Software, Inc.
@@ -37,53 +37,60 @@ typedef void (*native_func_t)(vm_c *vm, int argc);
 
 class vm_c
 {
-	/* this is an abstract base class */
+    /* this is an abstract base class */
 
-public:
-	vm_c() { }
-	virtual ~vm_c() { }
+  public:
+    vm_c()
+    {
+    }
+    virtual ~vm_c()
+    {
+    }
 
-	virtual void SetPrinter(print_func_t func) = 0;
+    virtual void SetPrinter(print_func_t func) = 0;
 
-	virtual void AddNativeFunction(const char *name, native_func_t func) = 0;
+    virtual void AddNativeFunction(const char *name, native_func_t func) = 0;
 
-	virtual bool CompileFile(char *buffer, const char *filename) = 0;
-	virtual void ShowStats() = 0;
+    virtual bool CompileFile(char *buffer, const char *filename) = 0;
+    virtual void ShowStats()                                     = 0;
 
-	virtual void SetAsmDump(bool enable) = 0;
-	virtual void SetTrace  (bool enable) = 0;
+    virtual void SetAsmDump(bool enable) = 0;
+    virtual void SetTrace(bool enable)   = 0;
 
-	enum { NOT_FOUND = 0 };
+    enum
+    {
+        NOT_FOUND = 0
+    };
 
-	virtual double GetFloat  (const char *mod_name, const char *var_name) = 0;
-	virtual const char *GetString  (const char *mod_name, const char *var_name) = 0;
-	virtual double *GetVector  (const char *mod_name, const char *var_name) = 0;
-	virtual double GetVectorX  (const char *mod_name, const char *var_name) = 0;
-	virtual double GetVectorY  (const char *mod_name, const char *var_name) = 0;
-	virtual double GetVectorZ  (const char *mod_name, const char *var_name) = 0;
+    virtual double      GetFloat(const char *mod_name, const char *var_name)   = 0;
+    virtual const char *GetString(const char *mod_name, const char *var_name)  = 0;
+    virtual double     *GetVector(const char *mod_name, const char *var_name)  = 0;
+    virtual double      GetVectorX(const char *mod_name, const char *var_name) = 0;
+    virtual double      GetVectorY(const char *mod_name, const char *var_name) = 0;
+    virtual double      GetVectorZ(const char *mod_name, const char *var_name) = 0;
 
-	virtual void SetFloat  (const char *mod_name, const char *var_name, double value) = 0;
-	virtual void SetString  (const char *mod_name, const char *var_name, const char *value) = 0;
-	virtual void SetVector  (const char *mod_name, const char *var_name, double val_1, double val_2, double val_3) = 0;
-	virtual void SetVectorX  (const char *mod_name, const char *var_name, double val) = 0;
-	virtual void SetVectorY  (const char *mod_name, const char *var_name, double val) = 0;
-	virtual void SetVectorZ  (const char *mod_name, const char *var_name, double val) = 0;
+    virtual void SetFloat(const char *mod_name, const char *var_name, double value)                              = 0;
+    virtual void SetString(const char *mod_name, const char *var_name, const char *value)                        = 0;
+    virtual void SetVector(const char *mod_name, const char *var_name, double val_1, double val_2, double val_3) = 0;
+    virtual void SetVectorX(const char *mod_name, const char *var_name, double val)                              = 0;
+    virtual void SetVectorY(const char *mod_name, const char *var_name, double val)                              = 0;
+    virtual void SetVectorZ(const char *mod_name, const char *var_name, double val)                              = 0;
 
-	virtual int FindFunction(const char *name) = 0;
-	virtual int FindVariable(const char *name) = 0;
+    virtual int FindFunction(const char *name) = 0;
+    virtual int FindVariable(const char *name) = 0;
 
-	virtual int Execute(int func_id) = 0;
+    virtual int Execute(int func_id) = 0;
 
-	virtual double     * AccessParam(int p) = 0;
-	virtual const char * AccessParamString(int p) = 0;
+    virtual double     *AccessParam(int p)       = 0;
+    virtual const char *AccessParamString(int p) = 0;
 
-	virtual void ReturnFloat(double f) = 0;
-	virtual void ReturnVector(double *v) = 0;
-	virtual void ReturnString(const char *s, int len=-1) = 0;
+    virtual void ReturnFloat(double f)                     = 0;
+    virtual void ReturnVector(double *v)                   = 0;
+    virtual void ReturnString(const char *s, int len = -1) = 0;
 };
 
 // create a new Coal virtual machine
-vm_c * CreateVM();
+vm_c *CreateVM();
 
 } // namespace coal
 

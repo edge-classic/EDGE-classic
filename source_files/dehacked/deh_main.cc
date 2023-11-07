@@ -60,144 +60,135 @@ bool all_mode;
 
 const dehconvfuncs_t *cur_funcs = NULL;
 
-
 void Init()
 {
-	System_Startup();
+    System_Startup();
 
-	Ammo   ::Init();
-	Frames ::Init();
-	Misc   ::Init();
-	Rscript::Init();
-	Sounds ::Init();
-	Music  ::Init();
-	Sprites::Init();
-	TextStr::Init();
-	Things ::Init();
-	Weapons::Init();
+    Ammo ::Init();
+    Frames ::Init();
+    Misc ::Init();
+    Rscript::Init();
+    Sounds ::Init();
+    Music ::Init();
+    Sprites::Init();
+    TextStr::Init();
+    Things ::Init();
+    Weapons::Init();
 
-	/* reset parameters */
+    /* reset parameters */
 
-	quiet_mode = false;
-	all_mode = false;
+    quiet_mode = false;
+    all_mode   = false;
 }
-
 
 void FreeInputBuffers(void)
 {
-	for (size_t i = 0; i < input_bufs.size() ; i++)
-	{
-		delete input_bufs[i];
-	}
+    for (size_t i = 0; i < input_bufs.size(); i++)
+    {
+        delete input_bufs[i];
+    }
 
-	input_bufs.clear();
+    input_bufs.clear();
 }
-
 
 dehret_e Convert(void)
 {
-	dehret_e result;
+    dehret_e result;
 
-	// load DEH patch file(s)
-	for (size_t i = 0; i < input_bufs.size() ; i++)
-	{
-		result = Patch::Load(input_bufs[i]);
+    // load DEH patch file(s)
+    for (size_t i = 0; i < input_bufs.size(); i++)
+    {
+        result = Patch::Load(input_bufs[i]);
 
-		if (result != DEH_OK)
-			return result;
-	}
+        if (result != DEH_OK)
+            return result;
+    }
 
-	// do conversions into DDF...
+    // do conversions into DDF...
 
-	Sprites::SpriteDependencies();
-	Frames ::StateDependencies();
-	Ammo   ::AmmoDependencies();
+    Sprites::SpriteDependencies();
+    Frames ::StateDependencies();
+    Ammo ::AmmoDependencies();
 
-	// things and weapons must be before attacks
-	Weapons::ConvertWEAP();
-	Things ::ConvertTHING();
-	Things ::ConvertATK();
+    // things and weapons must be before attacks
+    Weapons::ConvertWEAP();
+    Things ::ConvertTHING();
+    Things ::ConvertATK();
 
-	// rscript must be after things (for A_BossDeath)
-	TextStr::ConvertLDF();
-	Rscript::ConvertRAD();
+    // rscript must be after things (for A_BossDeath)
+    TextStr::ConvertLDF();
+    Rscript::ConvertRAD();
 
-	// sounds must be after things/weapons/attacks
-	Sounds::ConvertSFX();
-	Music ::ConvertMUS();
+    // sounds must be after things/weapons/attacks
+    Sounds::ConvertSFX();
+    Music ::ConvertMUS();
 
-	PrintMsg("\n");
+    PrintMsg("\n");
 
-	return DEH_OK;
+    return DEH_OK;
 }
-
 
 void Shutdown()
 {
-	Ammo   ::Shutdown();
-	Frames ::Shutdown();
-	Misc   ::Shutdown();
-	Rscript::Shutdown();
-	Sounds ::Shutdown();
-	Music  ::Shutdown();
-	Sprites::Shutdown();
-	TextStr::Shutdown();
-	Things ::Shutdown();
-	Weapons::Shutdown();
+    Ammo ::Shutdown();
+    Frames ::Shutdown();
+    Misc ::Shutdown();
+    Rscript::Shutdown();
+    Sounds ::Shutdown();
+    Music ::Shutdown();
+    Sprites::Shutdown();
+    TextStr::Shutdown();
+    Things ::Shutdown();
+    Weapons::Shutdown();
 
-	FreeInputBuffers();
+    FreeInputBuffers();
 
-	System_Shutdown();
+    System_Shutdown();
 }
 
-}  // Deh_Edge
+} // namespace Deh_Edge
 
 //------------------------------------------------------------------------
 
 void DehEdgeStartup(const dehconvfuncs_t *funcs)
 {
-	Deh_Edge::Init();
-	Deh_Edge::cur_funcs = funcs;
+    Deh_Edge::Init();
+    Deh_Edge::cur_funcs = funcs;
 
-	Deh_Edge::PrintMsg("*** DeHackEd -> EDGE Conversion ***\n");
+    Deh_Edge::PrintMsg("*** DeHackEd -> EDGE Conversion ***\n");
 }
-
 
 const char *DehEdgeGetError(void)
 {
-	return Deh_Edge::GetErrorMsg();
+    return Deh_Edge::GetErrorMsg();
 }
-
 
 dehret_e DehEdgeSetQuiet(int quiet)
 {
-	Deh_Edge::quiet_mode = (quiet != 0);
+    Deh_Edge::quiet_mode = (quiet != 0);
 
-	return DEH_OK;
+    return DEH_OK;
 }
-
 
 dehret_e DehEdgeAddLump(const char *data, int length)
 {
-	auto buf = new Deh_Edge::input_buffer_c(data, length);
+    auto buf = new Deh_Edge::input_buffer_c(data, length);
 
-	Deh_Edge::input_bufs.push_back(buf);
+    Deh_Edge::input_bufs.push_back(buf);
 
-	return DEH_OK;
+    return DEH_OK;
 }
-
 
 dehret_e DehEdgeRunConversion(ddf_collection_c *dest)
 {
-	Deh_Edge::WAD::dest_container = dest;
+    Deh_Edge::WAD::dest_container = dest;
 
-	return Deh_Edge::Convert();
+    return Deh_Edge::Convert();
 }
-
 
 void DehEdgeShutdown(void)
 {
-	Deh_Edge::Shutdown();
-	Deh_Edge::WAD::dest_container = NULL;
-	Deh_Edge::cur_funcs = NULL;
+    Deh_Edge::Shutdown();
+    Deh_Edge::WAD::dest_container = NULL;
+    Deh_Edge::cur_funcs           = NULL;
 }

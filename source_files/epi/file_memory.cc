@@ -28,32 +28,32 @@ namespace epi
 //
 mem_file_c::mem_file_c(const byte *_block, int _len, bool copy_it)
 {
-	SYS_ASSERT(_block);
-	SYS_ASSERT(_len >= 0);
+    SYS_ASSERT(_block);
+    SYS_ASSERT(_len >= 0);
 
-	pos = 0;
-	copied = false;
+    pos    = 0;
+    copied = false;
 
-	if (_len == 0)
-	{
-		data = NULL;
-		length = 0;
-		return;
-	}
+    if (_len == 0)
+    {
+        data   = NULL;
+        length = 0;
+        return;
+    }
 
-	if (copy_it)
-	{
-		data = new byte[_len];
-		length = _len;
+    if (copy_it)
+    {
+        data   = new byte[_len];
+        length = _len;
 
-		memcpy(data, _block, _len);
-		copied = true;
-	}
-	else
-	{
-		data = (byte *)_block;
-		length = _len;
-	}
+        memcpy(data, _block, _len);
+        copied = true;
+    }
+    else
+    {
+        data   = (byte *)_block;
+        length = _len;
+    }
 }
 
 //
@@ -61,66 +61,74 @@ mem_file_c::mem_file_c(const byte *_block, int _len, bool copy_it)
 //
 mem_file_c::~mem_file_c()
 {
-	if (data && copied)
-	{
-		delete[] data;
-		data = NULL;
-	}
+    if (data && copied)
+    {
+        delete[] data;
+        data = NULL;
+    }
 
-	length = 0;
+    length = 0;
 }
 
 unsigned int mem_file_c::Read(void *dest, unsigned int size)
 {
-	SYS_ASSERT(dest);
-		
-	unsigned int avail = length - pos;
+    SYS_ASSERT(dest);
 
-	if (size > avail)
-		size = avail;
+    unsigned int avail = length - pos;
 
-	if (size == 0)
-		return 0;  // EOF
+    if (size > avail)
+        size = avail;
 
-	memcpy(dest, data + pos, size);
-	pos += size;
+    if (size == 0)
+        return 0; // EOF
 
-	return size;
+    memcpy(dest, data + pos, size);
+    pos += size;
+
+    return size;
 }
 
 bool mem_file_c::Seek(int offset, int seekpoint)
 {
-	int new_pos = 0;
+    int new_pos = 0;
 
     switch (seekpoint)
     {
-        case SEEKPOINT_START:   { new_pos = 0; break; }
-        case SEEKPOINT_CURRENT: { new_pos = pos; break; }
-        case SEEKPOINT_END:     { new_pos = length; break; }
-
-        default:
-			return false;
+    case SEEKPOINT_START: {
+        new_pos = 0;
+        break;
+    }
+    case SEEKPOINT_CURRENT: {
+        new_pos = pos;
+        break;
+    }
+    case SEEKPOINT_END: {
+        new_pos = length;
+        break;
     }
 
-	new_pos += offset;
+    default:
+        return false;
+    }
 
-	// Note: allow position at the very end (last byte + 1).
-	if (new_pos < 0 || new_pos > length)
-		return false;
+    new_pos += offset;
 
-	pos = new_pos;
-	return true;
+    // Note: allow position at the very end (last byte + 1).
+    if (new_pos < 0 || new_pos > length)
+        return false;
+
+    pos = new_pos;
+    return true;
 }
 
 unsigned int mem_file_c::Write(const void *src, unsigned int size)
 {
-	// FIXME
+    // FIXME
 
-	I_Error("mem_file_c::Write called.\n");
+    I_Error("mem_file_c::Write called.\n");
 
-	return 0;  /* read only, cobber */
+    return 0; /* read only, cobber */
 }
-
 
 } // namespace epi
 

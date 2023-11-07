@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE MP3 Music Player (HEADER)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2021-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -27,11 +27,11 @@
 
 /* FUNCTIONS */
 
-abstract_music_c * S_PlayMP3Music(byte *data, int length, bool looping);
+abstract_music_c *S_PlayMP3Music(byte *data, int length, bool looping);
 
 bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length);
 
-#endif  /* __MP3PLAYER_H__ */
+#endif /* __MP3PLAYER_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

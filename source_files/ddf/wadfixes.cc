@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Data Definition File Codes (WAD-specific fixes)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2022-2023 The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -25,16 +25,12 @@ static fixdef_c *dynamic_fixdef;
 
 fixdef_container_c fixdefs;
 
-#define DDF_CMD_BASE  dummy_fixdef
+#define DDF_CMD_BASE dummy_fixdef
 static fixdef_c dummy_fixdef;
 
-static const commandlist_t fix_commands[] =
-{
-	DDF_FIELD("MD5", md5_string, DDF_MainGetString),
+static const commandlist_t fix_commands[] = {DDF_FIELD("MD5", md5_string, DDF_MainGetString),
 
-	DDF_CMD_END
-};
-
+                                             DDF_CMD_END};
 
 //
 //  DDF PARSE ROUTINES
@@ -42,73 +38,72 @@ static const commandlist_t fix_commands[] =
 
 static void FixStartEntry(const char *name, bool extend)
 {
-	if (!name || !name[0])
-	{
-		DDF_WarnError("New wadfix entry is missing a name!");
-		name = "FIX_WITH_NO_NAME";
-	}
+    if (!name || !name[0])
+    {
+        DDF_WarnError("New wadfix entry is missing a name!");
+        name = "FIX_WITH_NO_NAME";
+    }
 
-	dynamic_fixdef = fixdefs.Find(name);
+    dynamic_fixdef = fixdefs.Find(name);
 
-	if (extend)
-	{
-		if (! dynamic_fixdef)
-			DDF_Error("Unknown fix to extend: %s\n", name);
-		return;
-	}
-	
-	// replaces an existing entry
-	if (dynamic_fixdef)
-	{
-		dynamic_fixdef->Default();
-		return;
-	}
+    if (extend)
+    {
+        if (!dynamic_fixdef)
+            DDF_Error("Unknown fix to extend: %s\n", name);
+        return;
+    }
 
-	// not found, create a new one
-	dynamic_fixdef = new fixdef_c;
-	
-	dynamic_fixdef->name = name;
+    // replaces an existing entry
+    if (dynamic_fixdef)
+    {
+        dynamic_fixdef->Default();
+        return;
+    }
 
-	fixdefs.Insert(dynamic_fixdef);
+    // not found, create a new one
+    dynamic_fixdef = new fixdef_c;
+
+    dynamic_fixdef->name = name;
+
+    fixdefs.Insert(dynamic_fixdef);
 }
 
 static void FixFinishEntry(void)
 {
-	if (dynamic_fixdef->md5_string.empty())
-		DDF_Warning("WADFIXES: No MD5 hash defined for %s.\n", dynamic_fixdef->name.c_str());
+    if (dynamic_fixdef->md5_string.empty())
+        DDF_Warning("WADFIXES: No MD5 hash defined for %s.\n", dynamic_fixdef->name.c_str());
 }
 
-static void FixParseField(const char *field, const char *contents,
-		int index, bool is_last)
+static void FixParseField(const char *field, const char *contents, int index, bool is_last)
 {
-#if (DEBUG_DDF)  
-	I_Debugf("FIX_PARSE: %s = %s;\n", field, contents);
+#if (DEBUG_DDF)
+    I_Debugf("FIX_PARSE: %s = %s;\n", field, contents);
 #endif
 
-	if (DDF_MainParseField(fix_commands, field, contents, (byte *)dynamic_fixdef))
-		return;
+    if (DDF_MainParseField(fix_commands, field, contents, (byte *)dynamic_fixdef))
+        return;
 
-	DDF_WarnError("Unknown WADFIXES command: %s\n", field);
+    DDF_WarnError("Unknown WADFIXES command: %s\n", field);
 }
 
 static void FixClearAll(void)
 {
-	fixdefs.Clear();
+    fixdefs.Clear();
 }
 
-void DDF_ReadFixes(const std::string& data)
+void DDF_ReadFixes(const std::string &data)
 {
-	readinfo_t fixes;
+    readinfo_t fixes;
 
-	fixes.tag = "FIXES";
-	fixes.lumpname = "WADFIXES";
+    fixes.tag      = "FIXES";
+    fixes.lumpname = "WADFIXES";
 
-	fixes.start_entry  = FixStartEntry;
-	fixes.parse_field  = FixParseField;
-	fixes.finish_entry = FixFinishEntry;
-	fixes.clear_all    = FixClearAll;
+    fixes.start_entry  = FixStartEntry;
+    fixes.parse_field  = FixParseField;
+    fixes.finish_entry = FixFinishEntry;
+    fixes.clear_all    = FixClearAll;
 
-	DDF_MainReadFile(&fixes, data);
+    DDF_MainReadFile(&fixes, data);
 }
 
 //
@@ -116,7 +111,7 @@ void DDF_ReadFixes(const std::string& data)
 //
 void DDF_FixInit(void)
 {
-	fixdefs.Clear();
+    fixdefs.Clear();
 }
 
 //
@@ -124,20 +119,19 @@ void DDF_FixInit(void)
 //
 void DDF_FixCleanUp(void)
 {
-	epi::array_iterator_c it;
-	fixdef_c *f;
-	
-	for (it=fixdefs.GetBaseIterator(); it.IsValid(); it++)
-	{
-		f = ITERATOR_TO_TYPE(it, fixdef_c*);
-		cur_ddf_entryname = epi::STR_Format("[%s]  (wadfixes.ddf)", f->name.c_str());
+    epi::array_iterator_c it;
+    fixdef_c             *f;
 
-		cur_ddf_entryname.clear();
-	}
-	
-	fixdefs.Trim();
+    for (it = fixdefs.GetBaseIterator(); it.IsValid(); it++)
+    {
+        f                 = ITERATOR_TO_TYPE(it, fixdef_c *);
+        cur_ddf_entryname = epi::STR_Format("[%s]  (wadfixes.ddf)", f->name.c_str());
+
+        cur_ddf_entryname.clear();
+    }
+
+    fixdefs.Trim();
 }
-
 
 // ---> fixdef_c class
 
@@ -146,9 +140,8 @@ void DDF_FixCleanUp(void)
 //
 fixdef_c::fixdef_c() : name()
 {
-	Default();
+    Default();
 }
-
 
 //
 // fixdef_c::CopyDetail()
@@ -157,7 +150,7 @@ fixdef_c::fixdef_c() : name()
 //
 void fixdef_c::CopyDetail(fixdef_c &src)
 {
-	md5_string = src.md5_string;
+    md5_string = src.md5_string;
 }
 
 //
@@ -165,9 +158,8 @@ void fixdef_c::CopyDetail(fixdef_c &src)
 //
 void fixdef_c::Default()
 {
-	md5_string = "";
+    md5_string = "";
 }
-
 
 // --> fixdef_container_c Class
 
@@ -176,30 +168,30 @@ void fixdef_c::Default()
 //
 void fixdef_container_c::CleanupObject(void *obj)
 {
-	fixdef_c *fl = *(fixdef_c**)obj;
+    fixdef_c *fl = *(fixdef_c **)obj;
 
-	if (fl)
-		delete fl;
+    if (fl)
+        delete fl;
 
-	return;
+    return;
 }
 
 //
 // fixdef_c* fixdef_container_c::Find()
 //
-fixdef_c* fixdef_container_c::Find(const char *name)
+fixdef_c *fixdef_container_c::Find(const char *name)
 {
-	epi::array_iterator_c it;
-	fixdef_c *fl;
+    epi::array_iterator_c it;
+    fixdef_c             *fl;
 
-	for (it = GetBaseIterator(); it.IsValid(); it++)
-	{
-		fl = ITERATOR_TO_TYPE(it, fixdef_c*);
-		if (DDF_CompareName(fl->name.c_str(), name) == 0)
-			return fl;
-	}
+    for (it = GetBaseIterator(); it.IsValid(); it++)
+    {
+        fl = ITERATOR_TO_TYPE(it, fixdef_c *);
+        if (DDF_CompareName(fl->name.c_str(), name) == 0)
+            return fl;
+    }
 
-	return NULL;
+    return NULL;
 }
 
 //--- editor settings ---

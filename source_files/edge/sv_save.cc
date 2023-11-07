@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE New SaveGame Handling (Saving)
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -39,151 +39,150 @@
 
 void SV_BeginSave(void)
 {
-	L_WriteDebug("SV_BeginSave...\n");
+    L_WriteDebug("SV_BeginSave...\n");
 
-	P_ClearAllStaleRefs();
+    P_ClearAllStaleRefs();
 }
 
 void SV_FinishSave(void)
 {
-	L_WriteDebug("SV_FinishSave...\n");
+    L_WriteDebug("SV_FinishSave...\n");
 }
 
 void SV_SaveStruct(void *base, savestruct_t *info)
 {
-	savefield_t *cur;
-	char *storage;
-	int offset;
-	int i;
+    savefield_t *cur;
+    char        *storage;
+    int          offset;
+    int          i;
 
-	SV_PushWriteChunk(info->marker);
+    SV_PushWriteChunk(info->marker);
 
-	for (cur=info->fields; cur->type.kind != SFKIND_Invalid; cur++)
-	{
-		// ignore read-only (fudging) fields
-		if (! cur->field_put)
-			continue;
+    for (cur = info->fields; cur->type.kind != SFKIND_Invalid; cur++)
+    {
+        // ignore read-only (fudging) fields
+        if (!cur->field_put)
+            continue;
 
-		offset = cur->offset_p - info->dummy_base;
+        offset = cur->offset_p - info->dummy_base;
 
-		storage = ((char *)base) + offset;
+        storage = ((char *)base) + offset;
 
-		for (i=0; i < cur->count; i++)
-		{
-			switch (cur->type.kind)
-			{
-				case SFKIND_Struct:
-				case SFKIND_Index:
-					(* cur->field_put)(storage, i, (char*)cur->type.name);
-					break;
+        for (i = 0; i < cur->count; i++)
+        {
+            switch (cur->type.kind)
+            {
+            case SFKIND_Struct:
+            case SFKIND_Index:
+                (*cur->field_put)(storage, i, (char *)cur->type.name);
+                break;
 
-				default:
-					(* cur->field_put)(storage, i, NULL);
-					break;
-			}
-		}
-	}
+            default:
+                (*cur->field_put)(storage, i, NULL);
+                break;
+            }
+        }
+    }
 
-	SV_PopWriteChunk();
+    SV_PopWriteChunk();
 }
 
 static void SV_SaveSTRU(savestruct_t *S)
 {
-	int i, num;
-	savefield_t *F;
+    int          i, num;
+    savefield_t *F;
 
-	// count number of fields
-	for (num=0; S->fields[num].type.kind != SFKIND_Invalid; num++)
-	{ /* nothing here */ }
+    // count number of fields
+    for (num = 0; S->fields[num].type.kind != SFKIND_Invalid; num++)
+    { /* nothing here */
+    }
 
-	SV_PutInt(num);
+    SV_PutInt(num);
 
-	SV_PutString(S->struct_name);
-	SV_PutString(S->marker);
+    SV_PutString(S->struct_name);
+    SV_PutString(S->marker);
 
-	// write out the fields
+    // write out the fields
 
-	for (i=0, F=S->fields; i < num; i++, F++)
-	{
-		SV_PutByte((unsigned char) F->type.kind);
-		SV_PutByte((unsigned char) F->type.size);
-		SV_PutShort((unsigned short) F->count);
-		SV_PutString(F->field_name);
+    for (i = 0, F = S->fields; i < num; i++, F++)
+    {
+        SV_PutByte((unsigned char)F->type.kind);
+        SV_PutByte((unsigned char)F->type.size);
+        SV_PutShort((unsigned short)F->count);
+        SV_PutString(F->field_name);
 
-		if (F->type.kind == SFKIND_Struct ||
-				F->type.kind == SFKIND_Index)
-		{
-			SV_PutString(F->type.name);
-		}
-	}
+        if (F->type.kind == SFKIND_Struct || F->type.kind == SFKIND_Index)
+        {
+            SV_PutString(F->type.name);
+        }
+    }
 }
 
 static void SV_SaveARRY(savearray_t *A)
 {
-	int num_elem = (* A->count_elems)();
+    int num_elem = (*A->count_elems)();
 
-	SV_PutInt(num_elem);
+    SV_PutInt(num_elem);
 
-	SV_PutString(A->array_name);
-	SV_PutString(A->sdef->struct_name);
+    SV_PutString(A->array_name);
+    SV_PutString(A->sdef->struct_name);
 }
 
 static void SV_SaveDATA(savearray_t *A)
 {
-	int num_elem = (* A->count_elems)();
-	int i;
+    int num_elem = (*A->count_elems)();
+    int i;
 
-	SV_PutString(A->array_name);
+    SV_PutString(A->array_name);
 
-	for (i=0; i < num_elem; i++)
-	{
-		sv_current_elem = (* A->get_elem)(i);
+    for (i = 0; i < num_elem; i++)
+    {
+        sv_current_elem = (*A->get_elem)(i);
 
-		SYS_ASSERT(sv_current_elem);
+        SYS_ASSERT(sv_current_elem);
 
-		SV_SaveStruct(sv_current_elem, A->sdef);
-	}
+        SV_SaveStruct(sv_current_elem, A->sdef);
+    }
 }
 
 void SV_SaveEverything(void)
 {
-	savestruct_t *stru;
-	savearray_t  *arry;
+    savestruct_t *stru;
+    savearray_t  *arry;
 
-	// Structure Area
-	for (stru=sv_known_structs; stru; stru=stru->next)
-	{
-		if (! stru->define_me)
-			continue;
+    // Structure Area
+    for (stru = sv_known_structs; stru; stru = stru->next)
+    {
+        if (!stru->define_me)
+            continue;
 
-		SV_PushWriteChunk("Stru");
-		SV_SaveSTRU(stru);
-		SV_PopWriteChunk();
-	}
+        SV_PushWriteChunk("Stru");
+        SV_SaveSTRU(stru);
+        SV_PopWriteChunk();
+    }
 
-	// Array Area
-	for (arry=sv_known_arrays; arry; arry=arry->next)
-	{
-		if (! arry->define_me)
-			continue;
+    // Array Area
+    for (arry = sv_known_arrays; arry; arry = arry->next)
+    {
+        if (!arry->define_me)
+            continue;
 
-		SV_PushWriteChunk("Arry");
-		SV_SaveARRY(arry);
-		SV_PopWriteChunk();
-	}
+        SV_PushWriteChunk("Arry");
+        SV_SaveARRY(arry);
+        SV_PopWriteChunk();
+    }
 
-	// Data Area
-	for (arry=sv_known_arrays; arry; arry=arry->next)
-	{
-		if (! arry->define_me)
-			continue;
+    // Data Area
+    for (arry = sv_known_arrays; arry; arry = arry->next)
+    {
+        if (!arry->define_me)
+            continue;
 
-		SV_PushWriteChunk("Data");
-		SV_SaveDATA(arry);
-		SV_PopWriteChunk();
-	}
+        SV_PushWriteChunk("Data");
+        SV_SaveDATA(arry);
+        SV_PopWriteChunk();
+    }
 }
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -27,28 +27,28 @@
 #include <stdint.h>
 
 #ifdef __DJGPP__
-typedef signed char     int8_t;
-typedef unsigned char   uint8_t;
-typedef signed short    int16_t;
-typedef unsigned short  uint16_t;
-typedef signed long     int32_t;
-typedef unsigned long   uint32_t;
+typedef signed char    int8_t;
+typedef unsigned char  uint8_t;
+typedef signed short   int16_t;
+typedef unsigned short uint16_t;
+typedef signed long    int32_t;
+typedef unsigned long  uint32_t;
 #endif
 
-#define MUS_FREQUENCY   140 /* default Hz or BPM */
+#define MUS_FREQUENCY 140 /* default Hz or BPM */
 
-#if 0 /* older units: */
-#define MUS_TEMPO       0x001aa309 /* MPQN: 60000000 / 34.37Hz = 1745673 */
-#define MUS_DIVISION    0x0059 /* 89 -- used by many mus2midi converters */
+#if 0                           /* older units: */
+#define MUS_TEMPO    0x001aa309 /* MPQN: 60000000 / 34.37Hz = 1745673 */
+#define MUS_DIVISION 0x0059     /* 89 -- used by many mus2midi converters */
 #endif
 
-#define MUS_TEMPO       0x00068A1B /* MPQN: 60000000 / 140BPM (140Hz) = 428571 */
-                /*  0x000D1436 -> MPQN: 60000000 /  70BPM  (70Hz) = 857142 */
+#define MUS_TEMPO 0x00068A1B /* MPQN: 60000000 / 140BPM (140Hz) = 428571 */
+                             /*  0x000D1436 -> MPQN: 60000000 /  70BPM  (70Hz) = 857142 */
 
-#define MUS_DIVISION    0x0101 /* 257 for 140Hz files with a 140MPQN */
-                /*  0x0088 -> 136 for  70Hz files with a 140MPQN */
-                /*  0x010B -> 267 for  70hz files with a 70MPQN  */
-                /*  0x01F9 -> 505 for 140hz files with a 70MPQN  */
+#define MUS_DIVISION 0x0101 /* 257 for 140Hz files with a 140MPQN */
+                            /*  0x0088 -> 136 for  70Hz files with a 140MPQN */
+                            /*  0x010B -> 267 for  70hz files with a 70MPQN  */
+                            /*  0x01F9 -> 505 for 140hz files with a 70MPQN  */
 
 /* New
  * QLS: MPQN/1000000 = 0.428571
@@ -74,19 +74,19 @@ typedef unsigned long   uint32_t;
  *
  */
 
-#define MUSEVENT_KEYOFF             0
-#define MUSEVENT_KEYON              1
-#define MUSEVENT_PITCHWHEEL         2
-#define MUSEVENT_CHANNELMODE        3
-#define MUSEVENT_CONTROLLERCHANGE   4
-#define MUSEVENT_END                6
+#define MUSEVENT_KEYOFF           0
+#define MUSEVENT_KEYON            1
+#define MUSEVENT_PITCHWHEEL       2
+#define MUSEVENT_CHANNELMODE      3
+#define MUSEVENT_CONTROLLERCHANGE 4
+#define MUSEVENT_END              6
 
-#define MUS_MIDI_MAXCHANNELS        16
+#define MUS_MIDI_MAXCHANNELS 16
 
-static char MUS_ID[] = { 'M', 'U', 'S', 0x1A };
+static char MUS_ID[] = {'M', 'U', 'S', 0x1A};
 
-static uint8_t mus_midimap[] =
-{/* MIDI  Number  Description */
+static uint8_t mus_midimap[] = {
+    /* MIDI  Number  Description */
     0,    /* 0    program change */
     0,    /* 1    bank selection */
     0x01, /* 2    Modulation pot (frequency vibrato depth) */
@@ -104,32 +104,36 @@ static uint8_t mus_midimap[] =
     0x79, /* 14   reset all controllers */
 };
 
-typedef struct MUSHeader {
-    char ID[4];             /* identifier: "MUS" 0x1A */
+typedef struct MUSHeader
+{
+    char     ID[4]; /* identifier: "MUS" 0x1A */
     uint16_t scoreLen;
     uint16_t scoreStart;
-    uint16_t channels;      /* count of primary channels */
-    uint16_t sec_channels;  /* count of secondary channels */
+    uint16_t channels;     /* count of primary channels */
+    uint16_t sec_channels; /* count of secondary channels */
     uint16_t instrCnt;
-} MUSHeader ;
+} MUSHeader;
 #define MUS_HEADERSIZE 14
 
-typedef struct MidiHeaderChunk {
-    char name[4];
+typedef struct MidiHeaderChunk
+{
+    char    name[4];
     int32_t length;
-    int16_t format; /* make 0 */
-    int16_t ntracks;/* make 1 */
+    int16_t format;   /* make 0 */
+    int16_t ntracks;  /* make 1 */
     int16_t division; /* 0xe250 ?? */
 } MidiHeaderChunk;
 #define MIDI_HEADERSIZE 14
 
-typedef struct MidiTrackChunk {
-    char name[4];
+typedef struct MidiTrackChunk
+{
+    char    name[4];
     int32_t length;
 } MidiTrackChunk;
 #define TRK_CHUNKSIZE 8
 
-struct mus_ctx {
+struct mus_ctx
+{
     uint8_t *src, *src_ptr;
     uint32_t srcsize;
     uint32_t datastart;
@@ -138,9 +142,10 @@ struct mus_ctx {
 };
 
 #define DST_CHUNK 8192
-static void mus2mid_resize_dst(struct mus_ctx *ctx) {
+static void mus2mid_resize_dst(struct mus_ctx *ctx)
+{
     uint32_t pos = (uint32_t)(ctx->dst_ptr - ctx->dst);
-    ctx->dst = (uint8_t *)realloc(ctx->dst, ctx->dstsize + DST_CHUNK);
+    ctx->dst     = (uint8_t *)realloc(ctx->dst, ctx->dstsize + DST_CHUNK);
     ctx->dstsize += DST_CHUNK;
     ctx->dstrem += DST_CHUNK;
     ctx->dst_ptr = ctx->dst + pos;
@@ -158,7 +163,7 @@ static void mus2mid_write2(struct mus_ctx *ctx, uint32_t val)
 {
     if (ctx->dstrem < 2)
         mus2mid_resize_dst(ctx);
-    *ctx->dst_ptr++ = (val>>8) & 0xff;
+    *ctx->dst_ptr++ = (val >> 8) & 0xff;
     *ctx->dst_ptr++ = val & 0xff;
     ctx->dstrem -= 2;
 }
@@ -167,21 +172,23 @@ static void mus2mid_write4(struct mus_ctx *ctx, uint32_t val)
 {
     if (ctx->dstrem < 4)
         mus2mid_resize_dst(ctx);
-    *ctx->dst_ptr++ = (uint8_t)((val>>24)&0xff);
-    *ctx->dst_ptr++ = (uint8_t)((val>>16)&0xff);
-    *ctx->dst_ptr++ = (uint8_t)((val>>8) & 0xff);
+    *ctx->dst_ptr++ = (uint8_t)((val >> 24) & 0xff);
+    *ctx->dst_ptr++ = (uint8_t)((val >> 16) & 0xff);
+    *ctx->dst_ptr++ = (uint8_t)((val >> 8) & 0xff);
     *ctx->dst_ptr++ = (uint8_t)((val & 0xff));
     ctx->dstrem -= 4;
 }
 
-static void mus2mid_seekdst(struct mus_ctx *ctx, uint32_t pos) {
+static void mus2mid_seekdst(struct mus_ctx *ctx, uint32_t pos)
+{
     ctx->dst_ptr = ctx->dst + pos;
     while (ctx->dstsize < pos)
         mus2mid_resize_dst(ctx);
     ctx->dstrem = ctx->dstsize - pos;
 }
 
-static void mus2mid_skipdst(struct mus_ctx *ctx, int32_t pos) {
+static void mus2mid_skipdst(struct mus_ctx *ctx, int32_t pos)
+{
     size_t newpos;
     ctx->dst_ptr += pos;
     newpos = ctx->dst_ptr - ctx->dst;
@@ -190,7 +197,8 @@ static void mus2mid_skipdst(struct mus_ctx *ctx, int32_t pos) {
     ctx->dstrem = (uint32_t)(ctx->dstsize - newpos);
 }
 
-static uint32_t mus2mid_getdstpos(struct mus_ctx *ctx) {
+static uint32_t mus2mid_getdstpos(struct mus_ctx *ctx)
+{
     return (uint32_t)(ctx->dst_ptr - ctx->dst);
 }
 
@@ -200,13 +208,15 @@ static int32_t mus2mid_writevarlen(int32_t value, uint8_t *out)
     int32_t buffer, count = 0;
 
     buffer = value & 0x7f;
-    while ((value >>= 7) > 0) {
+    while ((value >>= 7) > 0)
+    {
         buffer <<= 8;
         buffer += 0x80;
         buffer += (value & 0x7f);
     }
 
-    while (1) {
+    while (1)
+    {
         ++count;
         *out = (uint8_t)buffer;
         ++out;
@@ -221,20 +231,19 @@ static int32_t mus2mid_writevarlen(int32_t value, uint8_t *out)
 #define MUS_READ_INT16(b) ((b)[0] | ((b)[1] << 8))
 #define MUS_READ_INT32(b) ((b)[0] | ((b)[1] << 8) | ((b)[2] << 16) | ((b)[3] << 24))
 
-static int Convert_mus2midi(uint8_t *in, uint32_t insize,
-                            uint8_t **out, uint32_t *outsize,
-                            uint16_t frequency)
+static int Convert_mus2midi(uint8_t *in, uint32_t insize, uint8_t **out, uint32_t *outsize, uint16_t frequency)
 {
     struct mus_ctx ctx;
-    MUSHeader header;
-    uint8_t *cur, *end;
-    uint32_t track_size_pos, begin_track_pos, current_pos;
-    int32_t delta_time;/* Delta time for midi event */
-    int temp, ret = -1;
-    int channel_volume[MUS_MIDI_MAXCHANNELS];
-    int channelMap[MUS_MIDI_MAXCHANNELS], currentChannel;
+    MUSHeader      header;
+    uint8_t       *cur, *end;
+    uint32_t       track_size_pos, begin_track_pos, current_pos;
+    int32_t        delta_time; /* Delta time for midi event */
+    int            temp, ret = -1;
+    int            channel_volume[MUS_MIDI_MAXCHANNELS];
+    int            channelMap[MUS_MIDI_MAXCHANNELS], currentChannel;
 
-    if (insize < MUS_HEADERSIZE) {
+    if (insize < MUS_HEADERSIZE)
+    {
         /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_CORUPT, "(too short)", 0);*/
         return (-1);
     }
@@ -244,38 +253,42 @@ static int Convert_mus2midi(uint8_t *in, uint32_t insize,
 
     /* read the MUS header and set our location */
     memcpy(header.ID, in, 4);
-    header.scoreLen = MUS_READ_INT16(&in[4]);
-    header.scoreStart = MUS_READ_INT16(&in[6]);
-    header.channels = MUS_READ_INT16(&in[8]);
+    header.scoreLen     = MUS_READ_INT16(&in[4]);
+    header.scoreStart   = MUS_READ_INT16(&in[6]);
+    header.channels     = MUS_READ_INT16(&in[8]);
     header.sec_channels = MUS_READ_INT16(&in[10]);
-    header.instrCnt = MUS_READ_INT16(&in[12]);
+    header.instrCnt     = MUS_READ_INT16(&in[12]);
 
-    if (memcmp(header.ID, MUS_ID, 4)) {
+    if (memcmp(header.ID, MUS_ID, 4))
+    {
         /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_NOT_MUS, NULL, 0);*/
         return (-1);
     }
-    if (insize < (uint32_t)header.scoreLen + (uint32_t)header.scoreStart) {
+    if (insize < (uint32_t)header.scoreLen + (uint32_t)header.scoreStart)
+    {
         /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_CORUPT, "(too short)", 0);*/
         return (-1);
     }
     /* channel #15 should be excluded in the numchannels field: */
-    if (header.channels > MUS_MIDI_MAXCHANNELS - 1) {
+    if (header.channels > MUS_MIDI_MAXCHANNELS - 1)
+    {
         /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_INVALID, NULL, 0);*/
         return (-1);
     }
 
     memset(&ctx, 0, sizeof(struct mus_ctx));
     ctx.src = ctx.src_ptr = in;
-    ctx.srcsize = insize;
+    ctx.srcsize           = insize;
 
-    ctx.dst = (uint8_t*)calloc(DST_CHUNK, sizeof(uint8_t));
+    ctx.dst     = (uint8_t *)calloc(DST_CHUNK, sizeof(uint8_t));
     ctx.dst_ptr = ctx.dst;
     ctx.dstsize = DST_CHUNK;
-    ctx.dstrem = DST_CHUNK;
+    ctx.dstrem  = DST_CHUNK;
 
     /* Map channel 15 to 9 (percussions) */
-    for (temp = 0; temp < MUS_MIDI_MAXCHANNELS; ++temp) {
-        channelMap[temp] = -1;
+    for (temp = 0; temp < MUS_MIDI_MAXCHANNELS; ++temp)
+    {
+        channelMap[temp]     = -1;
         channel_volume[temp] = 0x40;
     }
     channelMap[15] = 9;
@@ -285,9 +298,9 @@ static int Convert_mus2midi(uint8_t *in, uint32_t insize,
     mus2mid_write1(&ctx, 'T');
     mus2mid_write1(&ctx, 'h');
     mus2mid_write1(&ctx, 'd');
-    mus2mid_write4(&ctx, 6);    /* length of header */
-    mus2mid_write2(&ctx, 0);    /* MIDI type (always 0) */
-    mus2mid_write2(&ctx, 1);    /* MUS files only have 1 track */
+    mus2mid_write4(&ctx, 6);            /* length of header */
+    mus2mid_write2(&ctx, 0);            /* MIDI type (always 0) */
+    mus2mid_write2(&ctx, 1);            /* MUS files only have 1 track */
     mus2mid_write2(&ctx, MUS_DIVISION); /* division */
 
     /* Write out track header and track length position for later */
@@ -300,9 +313,9 @@ static int Convert_mus2midi(uint8_t *in, uint32_t insize,
     mus2mid_skipdst(&ctx, 4);
 
     /* write tempo: microseconds per quarter note */
-    mus2mid_write1(&ctx, 0x00); /* delta time */
-    mus2mid_write1(&ctx, 0xff); /* sys command */
-    mus2mid_write2(&ctx, 0x5103);   /* command - set tempo */
+    mus2mid_write1(&ctx, 0x00);   /* delta time */
+    mus2mid_write1(&ctx, 0xff);   /* sys command */
+    mus2mid_write2(&ctx, 0x5103); /* command - set tempo */
     mus2mid_write1(&ctx, MUS_TEMPO & 0x000000ff);
     mus2mid_write1(&ctx, (MUS_TEMPO & 0x0000ff00) >> 8);
     mus2mid_write1(&ctx, (MUS_TEMPO & 0x00ff0000) >> 16);
@@ -318,30 +331,32 @@ static int Convert_mus2midi(uint8_t *in, uint32_t insize,
     end = cur + header.scoreLen;
 
     currentChannel = 0;
-    delta_time = 0;
+    delta_time     = 0;
 
     /* main loop */
-    while(cur < end){
+    while (cur < end)
+    {
         /*printf("LOOP DEBUG: %d\r\n",iterator++);*/
-        uint8_t channel;
-        uint8_t event;
-        uint8_t temp_buffer[32];    /* temp buffer for current iterator */
+        uint8_t  channel;
+        uint8_t  event;
+        uint8_t  temp_buffer[32]; /* temp buffer for current iterator */
         uint8_t *out_local = temp_buffer;
-        uint8_t status, bit1, bit2, bitc = 2;
+        uint8_t  status, bit1, bit2, bitc = 2;
 
         /* read in current bit */
-        event = *cur++;
-        channel = (event & 15);     /* current channel */
+        event   = *cur++;
+        channel = (event & 15); /* current channel */
 
         /* write variable length delta time */
         out_local += mus2mid_writevarlen(delta_time, out_local);
 
         /* set all channels to 127 (max) volume */
-        if (channelMap[channel] < 0) {
-            *out_local++ = 0xB0 + currentChannel;
-            *out_local++ = 0x07;
-            *out_local++ = 100;
-            *out_local++ = 0x00;
+        if (channelMap[channel] < 0)
+        {
+            *out_local++        = 0xB0 + currentChannel;
+            *out_local++        = 0x07;
+            *out_local++        = 100;
+            *out_local++        = 0x00;
             channelMap[channel] = currentChannel++;
             if (currentChannel == 9)
                 ++currentChannel;
@@ -349,67 +364,74 @@ static int Convert_mus2midi(uint8_t *in, uint32_t insize,
         status = channelMap[channel];
 
         /* handle events */
-        switch ((event & 122) >> 4){
-            case MUSEVENT_KEYOFF:
-                status |=  0x80;
+        switch ((event & 122) >> 4)
+        {
+        case MUSEVENT_KEYOFF:
+            status |= 0x80;
+            bit1 = *cur++;
+            bit2 = 0x40;
+            break;
+        case MUSEVENT_KEYON:
+            status |= 0x90;
+            bit1 = *cur & 127;
+            if (*cur++ & 128) /* volume bit? */
+                channel_volume[channelMap[channel]] = *cur++;
+            bit2 = channel_volume[channelMap[channel]];
+            break;
+        case MUSEVENT_PITCHWHEEL:
+            status |= 0xE0;
+            bit1 = (*cur & 1) >> 6;
+            bit2 = (*cur++ >> 1) & 127;
+            break;
+        case MUSEVENT_CHANNELMODE:
+            status |= 0xB0;
+            if (*cur >= sizeof(mus_midimap) / sizeof(mus_midimap[0]))
+            {
+                /*_WM_ERROR_NEW("%s:%i: can't map %u to midi",
+                              __FUNCTION__, __LINE__, *cur);*/
+                goto _end;
+            }
+            bit1 = mus_midimap[*cur++];
+            bit2 = (*cur++ == 12) ? header.channels + 1 : 0x00;
+            break;
+        case MUSEVENT_CONTROLLERCHANGE:
+            if (*cur == 0)
+            {
+                cur++;
+                status |= 0xC0;
                 bit1 = *cur++;
-                bit2 = 0x40;
-                break;
-            case MUSEVENT_KEYON:
-                status |= 0x90;
-                bit1 = *cur & 127;
-                if (*cur++ & 128)   /* volume bit? */
-                    channel_volume[channelMap[channel]] = *cur++;
-                bit2 = channel_volume[channelMap[channel]];
-                break;
-            case MUSEVENT_PITCHWHEEL:
-                status |= 0xE0;
-                bit1 = (*cur & 1) >> 6;
-                bit2 = (*cur++ >> 1) & 127;
-                break;
-            case MUSEVENT_CHANNELMODE:
+                bit2 = 0; /* silence bogus warnings */
+                bitc = 1;
+            }
+            else
+            {
                 status |= 0xB0;
-                if (*cur >= sizeof(mus_midimap) / sizeof(mus_midimap[0])) {
+                if (*cur >= sizeof(mus_midimap) / sizeof(mus_midimap[0]))
+                {
                     /*_WM_ERROR_NEW("%s:%i: can't map %u to midi",
                                   __FUNCTION__, __LINE__, *cur);*/
                     goto _end;
                 }
                 bit1 = mus_midimap[*cur++];
-                bit2 = (*cur++ == 12) ? header.channels + 1 : 0x00;
-                break;
-            case MUSEVENT_CONTROLLERCHANGE:
-                if (*cur == 0) {
-                    cur++;
-                    status |= 0xC0;
-                    bit1 = *cur++;
-                    bit2 = 0;/* silence bogus warnings */
-                    bitc = 1;
-                } else {
-                    status |= 0xB0;
-                    if (*cur >= sizeof(mus_midimap) / sizeof(mus_midimap[0])) {
-                        /*_WM_ERROR_NEW("%s:%i: can't map %u to midi",
-                                      __FUNCTION__, __LINE__, *cur);*/
-                        goto _end;
-                    }
-                    bit1 = mus_midimap[*cur++];
-                    bit2 = *cur++;
-                }
-                break;
-            case MUSEVENT_END:  /* End */
-                status = 0xff;
-                bit1 = 0x2f;
-                bit2 = 0x00;
-                if (cur != end) { /* should we error here or report-only? */
-                    /*_WM_DEBUG_MSG("%s:%i: MUS buffer off by %ld bytes",
-                                  __FUNCTION__, __LINE__, (long)(cur - end));*/
-                }
-                break;
-            case 5:/* Unknown */
-            case 7:/* Unknown */
-            default:/* shouldn't happen */
-                /*_WM_ERROR_NEW("%s:%i: unrecognized event (%u)",
-                              __FUNCTION__, __LINE__, event);*/
-                goto _end;
+                bit2 = *cur++;
+            }
+            break;
+        case MUSEVENT_END: /* End */
+            status = 0xff;
+            bit1   = 0x2f;
+            bit2   = 0x00;
+            if (cur != end)
+            { /* should we error here or report-only? */
+                /*_WM_DEBUG_MSG("%s:%i: MUS buffer off by %ld bytes",
+                              __FUNCTION__, __LINE__, (long)(cur - end));*/
+            }
+            break;
+        case 5:  /* Unknown */
+        case 7:  /* Unknown */
+        default: /* shouldn't happen */
+            /*_WM_ERROR_NEW("%s:%i: unrecognized event (%u)",
+                          __FUNCTION__, __LINE__, event);*/
+            goto _end;
         }
 
         /* write it out */
@@ -429,12 +451,16 @@ static int Convert_mus2midi(uint8_t *in, uint32_t insize,
             ctx.dstrem -= (uint32_t)(out_local - temp_buffer);
         }
 
-        if (event & 128) {
+        if (event & 128)
+        {
             delta_time = 0;
-            do {
+            do
+            {
                 delta_time = (int32_t)((delta_time * 128 + (*cur & 127)) * (140.0 / (double)frequency));
             } while ((*cur++ & 128));
-        } else {
+        }
+        else
+        {
             delta_time = 0;
         }
     }
@@ -445,17 +471,17 @@ static int Convert_mus2midi(uint8_t *in, uint32_t insize,
     mus2mid_write4(&ctx, current_pos - begin_track_pos - TRK_CHUNKSIZE);
     mus2mid_seekdst(&ctx, current_pos); /* reseek to end position */
 
-    *out = ctx.dst;
+    *out     = ctx.dst;
     *outsize = ctx.dstsize - ctx.dstrem;
-    ret = 0;
+    ret      = 0;
 
-_end:   /* cleanup */
-    if (ret < 0) {
+_end: /* cleanup */
+    if (ret < 0)
+    {
         free(ctx.dst);
-        *out = NULL;
+        *out     = NULL;
         *outsize = 0;
     }
 
     return (ret);
 }
-

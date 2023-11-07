@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE Input handling
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 1999-2023  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -30,20 +30,20 @@
 #include "e_ticcmd.h"
 
 void E_ClearInput(void);
-void E_BuildTiccmd(ticcmd_t * cmd);
+void E_BuildTiccmd(ticcmd_t *cmd);
 void E_ReleaseAllKeys(void);
 void E_SetTurboScale(int scale);
 void E_UpdateKeyState(void);
 
 void E_ProcessEvents(void);
-void E_PostEvent(event_t * ev);
+void E_PostEvent(event_t *ev);
 
 bool E_IsKeyPressed(int keyvar);
 bool E_MatchesKey(int keyvar, int key);
 
 const char *E_GetKeyName(int key);
 
-bool INP_Responder(event_t * ev);
+bool INP_Responder(event_t *ev);
 
 // -KM- 1998/09/01 Analogue binding stuff, These hold what axis they bind to.
 extern int mouse_xaxis;
@@ -52,7 +52,7 @@ extern int mouse_yaxis;
 extern cvar_c mouse_xsens;
 extern cvar_c mouse_ysens;
 
-extern int joy_axis[4];
+extern int    joy_axis[4];
 extern float *joy_deads[6];
 //
 // -ACB- 1998/09/06 Analogue binding:
@@ -65,7 +65,6 @@ extern cvar_c vlookspeed;
 extern cvar_c forwardspeed;
 extern cvar_c sidespeed;
 extern cvar_c flyspeed;
-
 
 /* keyboard stuff */
 
@@ -100,7 +99,7 @@ extern int key_talk;
 extern int key_console;
 extern int key_pause;
 
-extern int key_mlook;  // -AJA- 1999/07/27.
+extern int key_mlook; // -AJA- 1999/07/27.
 extern int key_secondatk;
 extern int key_reload;  // -AJA- 2004/11/10
 extern int key_action1; // -AJA- 2009/09/07
@@ -130,8 +129,7 @@ extern int key_inv_next;
 extern int key_thirdatk;
 extern int key_fourthatk;
 
-
-#endif  /* __E_INPUT_H__ */
+#endif /* __E_INPUT_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

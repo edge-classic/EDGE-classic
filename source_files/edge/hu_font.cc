@@ -22,7 +22,7 @@
 #include "main.h"
 #include "font.h"
 #include "image_data.h"
-#include "image_funcs.h"
+#include "str_util.h"
 
 #include "dm_defs.h"
 #include "dm_state.h"
@@ -52,12 +52,6 @@ static const int res_font_bitmap_sizes[3] = {512, 1024, 2048};
 
 font_c::font_c(fontdef_c *_def) : def(_def)
 {
-    p_cache.first = 0;
-    p_cache.last  = -1;
-
-    p_cache.images  = nullptr;
-    p_cache.missing = nullptr;
-
     font_image = nullptr;
     ttf_info   = nullptr;
     ttf_buffer = nullptr;
@@ -67,10 +61,7 @@ font_c::font_c(fontdef_c *_def) : def(_def)
 }
 
 font_c::~font_c()
-{
-    if (p_cache.images)
-        delete[] p_cache.images;
-}
+{ }
 
 void font_c::BumpPatchName(char *name)
 {
@@ -104,29 +95,55 @@ void font_c::BumpPatchName(char *name)
 
 void font_c::LoadPatches()
 {
-    p_cache.first = 9999;
-    p_cache.last  = 0;
-
+    // range of characters
+    int first = 9999;
+    int last = 0;
+	const image_c **images;
+	const image_c *missing;
     const fontpatch_c *pat;
 
     // determine full range
     for (pat = def->patches; pat; pat = pat->next)
     {
-        if (pat->char1 < p_cache.first)
-            p_cache.first = pat->char1;
+        if (pat->char1 < first)
+            first = pat->char1;
 
-        if (pat->char2 > p_cache.last)
-            p_cache.last = pat->char2;
+        if (pat->char2 > last)
+            last = pat->char2;
     }
 
-    int total = p_cache.last - p_cache.first + 1;
+    int total = last - first + 1;
 
     SYS_ASSERT(def->patches);
     SYS_ASSERT(total >= 1);
 
-    p_cache.images = new const image_c *[total];
-    memset(p_cache.images, 0, sizeof(const image_c *) * total);
+	images = new const image_c *[total];
+	memset(images, 0, sizeof(const image_c *) * total);
 
+	// Atlas Stuff
+	std::unordered_map<int, epi::image_data_c *> patch_data;
+    std::vector<epi::image_data_c *> temp_imdata;
+
+	missing = def->missing_patch != "" ?
+		W_ImageLookup(def->missing_patch.c_str(), INS_Graphic, ILF_Font|ILF_Null) : nullptr;
+	epi::image_data_c *missing_imdata = nullptr;
+
+	if (missing)
+	{
+		epi::image_data_c *tmp_img = ReadAsEpiBlock(const_cast<image_c *>(missing));
+		if (tmp_img->bpp == 1)
+		{
+			epi::image_data_c *rgb_img = R_PalettisedToRGB(tmp_img, (const byte *) &playpal_data[0], missing->opacity);
+			delete tmp_img;
+			missing_imdata = rgb_img;
+		}
+		else
+			missing_imdata = tmp_img;
+        missing_imdata->offset_x = missing->offset_x;
+        missing_imdata->offset_y = missing->offset_y;
+	}
+
+    // First pass, add the images that are good
     for (pat = def->patches; pat; pat = pat->next)
     {
         // patch name
@@ -138,85 +155,112 @@ void font_c::LoadPatches()
         for (int ch = pat->char1; ch <= pat->char2; ch++, BumpPatchName(pname))
         {
 #if 0 // DEBUG
-			L_WriteDebug("- LoadFont [%s] : char %d = %s\n", def->name.c_str(), ch, pname);
+			I_Printf("- LoadFont [%s] : char %d = %s\n", def->name.c_str(), ch, pname);
 #endif
-            int idx = ch - p_cache.first;
+            int idx = ch - first;
             SYS_ASSERT(0 <= idx && idx < total);
 
-            p_cache.images[idx] = W_ImageLookup(pname, INS_Graphic, ILF_Font | ILF_Null);
+			images[idx] = W_ImageLookup(pname, INS_Graphic, ILF_Font|ILF_Null);
+
+			if (images[idx])
+			{
+				epi::image_data_c *tmp_img = ReadAsEpiBlock(const_cast<image_c *>(images[idx]));
+				if (tmp_img->bpp == 1)
+				{
+					epi::image_data_c *rgb_img = R_PalettisedToRGB(tmp_img, (const byte *) &playpal_data[0], images[idx]->opacity);
+					delete tmp_img;
+					tmp_img = rgb_img;
+				}
+                tmp_img->offset_x = images[idx]->offset_x;
+                tmp_img->offset_y = images[idx]->offset_y;
+				patch_data.try_emplace(cp437_unicode_values[static_cast<u8_t>(ch)], tmp_img);
+                temp_imdata.push_back(tmp_img);
+			}
+		}
+	}
+
+	// Second pass to try lower->uppercase fallbacks, or failing that add the missing image (if present)
+	for (int ch = 0; ch < 256; ch++)
+	{
+        if (!patch_data.count(cp437_unicode_values[static_cast<u8_t>(ch)]))
+        {
+            if ('a' <= ch && ch <= 'z' && patch_data.count(cp437_unicode_values[static_cast<u8_t>(toupper(ch))]))
+                patch_data.try_emplace(cp437_unicode_values[static_cast<u8_t>(ch)], patch_data.at(cp437_unicode_values[static_cast<u8_t>(toupper(ch))]));
+            else if (missing_imdata)
+                patch_data.try_emplace(cp437_unicode_values[static_cast<u8_t>(ch)], missing_imdata);  
         }
-    }
+	}
 
-    p_cache.missing =
-        def->missing_patch != "" ? W_ImageLookup(def->missing_patch.c_str(), INS_Graphic, ILF_Font | ILF_Null) : NULL;
+	epi::image_atlas_c *atlas = epi::Image_Pack(patch_data);
+	for (auto patch : temp_imdata)
+        delete patch;
+	delete missing_imdata;
+	if (atlas)
+	{
+        // Uncomment this to save the generated atlas. Note: will be inverted.
+        /*std::filesystem::path atlas_png = home_dir;
+        atlas_png.append(epi::STR_Format("atlas_%s.png", def->name.c_str()));
+        if (std::filesystem::exists(atlas_png))
+            std::filesystem::remove(atlas_png);
+        epi::PNG_Save(atlas_png, atlas->data);*/
+		p_cache.atlas_rects = atlas->rects;
+		glGenTextures(1, &p_cache.atlas_texid);
+		glBindTexture(GL_TEXTURE_2D, p_cache.atlas_texid);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data->width, atlas->data->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlas->data->pixels);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glGenTextures(1, &p_cache.atlas_smoothed_texid);
+		glBindTexture(GL_TEXTURE_2D, p_cache.atlas_smoothed_texid);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data->width, atlas->data->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlas->data->pixels);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        atlas->data->Whiten();
+        glGenTextures(1, &p_cache.atlas_whitened_texid);
+		glBindTexture(GL_TEXTURE_2D, p_cache.atlas_whitened_texid);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data->width, atlas->data->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlas->data->pixels);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glGenTextures(1, &p_cache.atlas_whitened_smoothed_texid);
+		glBindTexture(GL_TEXTURE_2D, p_cache.atlas_whitened_smoothed_texid);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data->width, atlas->data->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlas->data->pixels);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		delete atlas;
+	}
+	else
+		I_Error("Failed to create atlas for patch font %s!\n", def->name.c_str());
 
-    const image_c *Nom = NULL;
-
-    if (HasChar('M'))
-        Nom = CharImage('M');
-    else if (HasChar('m'))
-        Nom = CharImage('m');
-    else if (HasChar('0'))
-        Nom = CharImage('0');
-    else
-    {
-        // backup plan: just use first patch found
-        for (int idx = 0; idx < total; idx++)
-            if (p_cache.images[idx])
-            {
-                Nom = p_cache.images[idx];
-                break;
-            }
-    }
-
-    if (!Nom)
+    if (p_cache.atlas_rects.empty())
     {
         I_Warning("Font [%s] has no loaded patches !\n", def->name.c_str());
         p_cache.width = p_cache.height = 7;
         return;
     }
 
-    if (def->default_size > 0.0)
-    {
-        p_cache.height = def->default_size;
-        p_cache.width  = def->default_size * (IM_WIDTH(Nom) / IM_HEIGHT(Nom));
-        p_cache.ratio  = p_cache.width / p_cache.height;
-    }
-    else
-    {
-        p_cache.width  = IM_WIDTH(Nom);
-        p_cache.height = IM_HEIGHT(Nom);
-        p_cache.ratio  = IM_WIDTH(Nom) / IM_HEIGHT(Nom);
-    }
-    spacing = def->spacing;
+    epi::image_rect_c Nom;
 
-    // Atlas Test
-    /*std::vector<epi::image_data_c *> patch_data;
-    for (int i = 0; i < total; i++)
-    {
-        if (!p_cache.images[i]) continue;
-        epi::image_data_c *patch_img = nullptr;
-        epi::image_data_c *tmp_img = ReadAsEpiBlock(const_cast<image_c *>(p_cache.images[i]));
-        if (tmp_img->bpp == 1)
-        {
-            epi::image_data_c *rgb_img = R_PalettisedToRGB(tmp_img, (const byte *) &playpal_data[0],
-    p_cache.images[i]->opacity); delete tmp_img; patch_img = rgb_img;
-        }
-        else
-            patch_img = tmp_img;
-        patch_data.push_back(patch_img);
-    }
-    epi::image_atlas_c *atlas_test = epi::Image_Pack(patch_data);
-    if (atlas_test)
-    {
-        std::filesystem::path atlas_png = home_dir;
-        atlas_png.append("atlas.png");
-        if (std::filesystem::exists(atlas_png))
-            std::filesystem::remove(atlas_png);
-        epi::PNG_Save(atlas_png, atlas_test->data);
-    }
-    for (int i = 0; i < patch_data.size(); i++)
-        delete patch_data[i];*/
+	if (p_cache.atlas_rects.count(cp437_unicode_values[static_cast<u8_t>('M')]))
+		Nom = p_cache.atlas_rects.at(cp437_unicode_values[static_cast<u8_t>('M')]);
+    else if (p_cache.atlas_rects.count(cp437_unicode_values[static_cast<u8_t>('m')]))
+		Nom = p_cache.atlas_rects.at(cp437_unicode_values[static_cast<u8_t>('m')]);
+    else if (p_cache.atlas_rects.count(cp437_unicode_values[static_cast<u8_t>('0')]))
+		Nom = p_cache.atlas_rects.at(cp437_unicode_values[static_cast<u8_t>('0')]);
+    else // backup plan: just use first patch found
+        Nom = p_cache.atlas_rects.begin()->second;
+
+	if (def->default_size > 0.0)
+	{
+		p_cache.height = def->default_size;
+		p_cache.width  = def->default_size * (Nom.iw / Nom.ih);
+		p_cache.ratio = p_cache.width / p_cache.height;
+	}
+	else
+	{
+		p_cache.width  = Nom.iw;
+		p_cache.height = Nom.ih;
+		p_cache.ratio = Nom.iw / Nom.ih;
+	}
+	spacing = def->spacing;
 }
 
 void font_c::LoadFontImage()
@@ -447,18 +491,6 @@ float font_c::NominalHeight() const
     return 1; /* NOT REACHED */
 }
 
-bool font_c::HasChar(char ch) const
-{
-    SYS_ASSERT(def->type == FNTYP_Patch);
-
-    int idx = int(ch) & 0x00FF;
-
-    if (!(p_cache.first <= idx && idx <= p_cache.last))
-        return false;
-
-    return (p_cache.images[idx - p_cache.first] != NULL);
-}
-
 const image_c *font_c::CharImage(char ch) const
 {
     if (def->type == FNTYP_Image)
@@ -467,29 +499,21 @@ const image_c *font_c::CharImage(char ch) const
     if (def->type == FNTYP_TrueType)
     {
         if (ttf_glyph_map.find(static_cast<u8_t>(ch)) != ttf_glyph_map.end())
-            // Create or return faux backup image
-            return W_ImageLookup("TTF_DUMMY_IMAGE", INS_Graphic, ILF_Font);
+            // Create or return dummy image
+            return W_ImageLookup("FONT_DUMMY_IMAGE", INS_Graphic, ILF_Font);
         else
             return NULL;
     }
 
     SYS_ASSERT(def->type == FNTYP_Patch);
 
-    if (!HasChar(ch))
-    {
-        if ('a' <= ch && ch <= 'z' && HasChar(toupper(ch)))
-            ch = toupper(ch);
-        else if (ch == ' ')
-            return NULL;
-        else
-            return p_cache.missing;
-    }
+    if (ch == ' ')
+        return NULL;
 
-    int idx = int(ch) & 0x00FF;
-
-    SYS_ASSERT(p_cache.first <= idx && idx <= p_cache.last);
-
-    return p_cache.images[idx - p_cache.first];
+    if (p_cache.atlas_rects.count(cp437_unicode_values[static_cast<u8_t>(ch)]))
+        return W_ImageLookup("FONT_DUMMY_IMAGE", INS_Graphic, ILF_Font);
+    else
+        return NULL;
 }
 
 float font_c::CharRatio(char ch)
@@ -551,15 +575,16 @@ float font_c::CharWidth(char ch)
     if (ch == ' ')
         return p_cache.width * 3 / 5 + spacing;
 
-    const image_c *im = CharImage(ch);
 
-    if (!im)
+    if (!p_cache.atlas_rects.count(cp437_unicode_values[static_cast<u8_t>(ch)]))
         return DUMMY_WIDTH;
 
+    epi::image_rect_c rect = p_cache.atlas_rects.at(cp437_unicode_values[static_cast<u8_t>(ch)]);
+
     if (def->default_size > 0.0)
-        return (def->default_size * (IM_WIDTH(im) / IM_HEIGHT(im))) + spacing;
+        return (def->default_size * ((float)rect.iw) / rect.ih) + spacing;
     else
-        return IM_WIDTH(im) + spacing;
+        return rect.iw + spacing;
 }
 
 //
@@ -667,26 +692,6 @@ int font_c::StringLines(const char *str) const
             slines++;
 
     return slines;
-}
-
-void font_c::DrawChar320(float x, float y, char ch, float scale, float aspect, const colourmap_c *colmap,
-                         float alpha) const
-{
-    SYS_ASSERT(def->type == FNTYP_Patch);
-
-    const image_c *image = CharImage(ch);
-
-    if (!image)
-        return;
-
-    float sc_x = scale * aspect;
-    float sc_y = scale;
-
-    y = 200 - y;
-
-    RGL_DrawImage(FROM_320(x - IM_OFFSETX(image) * sc_x), FROM_200(y + (IM_OFFSETY(image) - IM_HEIGHT(image)) * sc_y),
-                  FROM_320(IM_WIDTH(image)) * sc_x, FROM_200(IM_HEIGHT(image)) * sc_y, image, 0.0f, 0.0f,
-                  IM_RIGHT(image), IM_TOP(image), colmap, alpha);
 }
 
 //----------------------------------------------------------------------------

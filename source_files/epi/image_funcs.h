@@ -23,6 +23,7 @@
 #include "image_data.h"
 #include <filesystem>
 #include <array>
+#include <unordered_map>
 
 namespace epi
 {
@@ -37,13 +38,26 @@ typedef enum
     FMT_OTHER // e.g. gif, dds, bmp
 } image_format_e;
 
+class image_rect_c
+{
+    public:
+    // Normalized atlas x/y/width/height for texcoords
+        float tx;
+        float ty;
+        float tw;
+        float th;
+    // Actual sub-image information
+        short iw;
+        short ih;
+        float off_x;
+        float off_y;
+};
+
 class image_atlas_c
 {
-  public:
-    image_data_c                   *data;
-    unsigned int                    texid;
-    unsigned int                    smoothed_texid;
-    std::vector<std::array<int, 4>> rects; // x,y,width,height
+	public:
+		image_data_c *data;
+		std::unordered_map<int, image_rect_c> rects;
 
   public:
     image_atlas_c(int _w, int _h);
@@ -68,7 +82,9 @@ image_data_c *Image_Load(file_c *f);
 // for an atlas containing all of them. Does not assume that the incoming
 // data pointers should be deleted/freed. Images at a BPP of 3 will be
 // converted to BPP 4 with 255 for their pixel alpha values.
-image_atlas_c *Image_Pack(const std::vector<image_data_c *> &im_pack_data);
+// The integer keys for the associated image data can vary based on need, but are
+// generally a way of tracking which part of the atlas you are trying to retrieve
+image_atlas_c *Image_Pack(const std::unordered_map<int, image_data_c *> &im_pack_data);
 
 // reads the principle information from the image header.
 // (should be much faster than loading the whole image).

@@ -37,6 +37,7 @@ namespace epi
 image_data_c::image_data_c(int _w, int _h, int _bpp) : width(_w), height(_h), bpp(_bpp), used_w(_w), used_h(_h)
 {
     pixels = new u8_t[width * height * bpp];
+    offset_x = offset_y = 0;
 }
 
 image_data_c::~image_data_c()

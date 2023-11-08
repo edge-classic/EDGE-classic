@@ -38,6 +38,10 @@ class image_data_c
     short used_w;
     short used_h;
 
+    // in case offsets from a parent image_c need to be stored (atlases)
+    float offset_x;
+    float offset_y;
+
     u8_t *pixels;
 
   public:

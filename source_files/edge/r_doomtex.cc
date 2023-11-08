@@ -371,6 +371,12 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
     SYS_ASSERT(rim->actual_w == EPI_LE_S16(realpatch->width));
     SYS_ASSERT(rim->actual_h == EPI_LE_S16(realpatch->height));
 
+    // 2023.11.07 - These were previously left as total_w/h, which accounts
+    // for power-of-two sizing and was messing up patch font atlas generation.
+    // Not sure if there are any bad side effects yet - Dasho
+    img->used_w = rim->actual_w;
+    img->used_h = rim->actual_h;
+
     for (int x = 0; x < rim->actual_w; x++)
     {
         int offset = EPI_LE_S32(realpatch->columnofs[x]);

@@ -19,6 +19,7 @@
 #ifndef __HU_FONT__
 #define __HU_FONT__
 
+#include "image_funcs.h"
 #include "r_image.h"
 #include "stb_truetype.h"
 #include <unordered_map>
@@ -56,13 +57,15 @@ typedef struct
     stbtt_aligned_quad *char_quad[3];
 } ttf_char_t;
 
-typedef struct
+typedef struct patchcache_s
 {
-    // range of characters
-    int first, last;
-
-    const image_c **images;
-    const image_c  *missing;
+	// Atlas stuff; will eventually replace the above images/missing stuff
+	std::unordered_map<int, epi::image_rect_c> atlas_rects;
+	unsigned int atlas_texid = 0;
+	unsigned int atlas_smoothed_texid = 0;
+    // Since we track our own atlas textures, need a whitened version for color remaps
+    unsigned int atlas_whitened_texid = 0;
+	unsigned int atlas_whitened_smoothed_texid = 0;
 
     // nominal width and height.  Characters can be larger or smaller
     // than this, but these values give a good guess for formatting
@@ -79,11 +82,10 @@ class font_c
     font_c(fontdef_c *_def);
     ~font_c();
 
-  private:
-  public:
-    void Load();
+private:
 
-    bool HasChar(char ch) const;
+public:
+	void Load();
 
     float NominalWidth() const;
     float NominalHeight() const;
@@ -95,26 +97,21 @@ class font_c
     int   MaxFit(int pixel_w, const char *str);
     int   GetGlyphIndex(char ch);
 
-    void DrawChar320(float x, float y, char ch, float scale, float aspect, const colourmap_c *colmap,
-                     float alpha) const;
-
-    // FIXME: maybe shouldn't be public (assumes FNTYP_Patch !!)
     const image_c *CharImage(char ch) const;
 
     patchcache_t p_cache;
 
-    fontdef_c *def;
-
-    const image_c *font_image;
+	fontdef_c *def;
 
     float spacing;
 
-    // For IMAGE type
-    float  im_char_width;
-    float  im_char_height;
-    float *individual_char_widths;
-    float *individual_char_ratios;
-    float  im_mono_width;
+	// For IMAGE type
+	const image_c *font_image;
+	float im_char_width;
+	float im_char_height;
+	float *individual_char_widths;
+	float *individual_char_ratios;
+	float im_mono_width;
 
     // For TRUETYPE type, 3 sizes
     float             ttf_kern_scale[3];

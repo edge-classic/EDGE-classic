@@ -421,16 +421,41 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
         do_whiten = true;
     }
 
-    if (epi::strcmp(image->name, "TTF_DUMMY_IMAGE") == 0)
+    if (epi::strcmp(image->name, "FONT_DUMMY_IMAGE") == 0)
     {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_TEXTURE_2D);
-        if ((var_smoothing && cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ON_DEMAND) ||
-            cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ALWAYS)
-            glBindTexture(GL_TEXTURE_2D, cur_font->ttf_smoothed_tex_id[current_font_size]);
-        else
-            glBindTexture(GL_TEXTURE_2D, cur_font->ttf_tex_id[current_font_size]);
+        if (cur_font->def->type == FNTYP_TrueType)
+        {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable(GL_TEXTURE_2D);
+            if ((var_smoothing && cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ON_DEMAND) ||
+                cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ALWAYS)
+                glBindTexture(GL_TEXTURE_2D, cur_font->ttf_smoothed_tex_id[current_font_size]);
+            else
+                glBindTexture(GL_TEXTURE_2D, cur_font->ttf_tex_id[current_font_size]);
+        }
+        else // patch font
+        {
+            glEnable(GL_ALPHA_TEST);
+            glAlphaFunc(GL_GREATER, alpha * 0.66f);
+            glEnable(GL_BLEND);
+            glEnable(GL_TEXTURE_2D);
+            if ((var_smoothing && cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ON_DEMAND) ||
+                cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ALWAYS)
+            {
+                if (do_whiten)
+                    glBindTexture(GL_TEXTURE_2D, cur_font->p_cache.atlas_whitened_smoothed_texid);
+                else
+                    glBindTexture(GL_TEXTURE_2D, cur_font->p_cache.atlas_smoothed_texid);
+            }
+            else
+            {
+                if (do_whiten)
+                    glBindTexture(GL_TEXTURE_2D, cur_font->p_cache.atlas_whitened_texid);
+                else
+                    glBindTexture(GL_TEXTURE_2D, cur_font->p_cache.atlas_texid);
+            }
+        }
         glColor4f(r, g, b, alpha);
         glBegin(GL_QUADS);
         glTexCoord2f(tx1, ty2);
@@ -978,23 +1003,38 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
     float w, h;
     float tx1, tx2, ty1, ty2;
 
-    if (epi::strcmp(img->name, "TTF_DUMMY_IMAGE") == 0)
+    if (epi::strcmp(img->name, "FONT_DUMMY_IMAGE") == 0)
     {
-        stbtt_aligned_quad *q = cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).char_quad[current_font_size];
-        y                     = top_y + (cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).y_shift[current_font_size] *
-                     (size > 0 ? (size / cur_font->def->default_size) : 1.0) * sc_y);
-        w = ((size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->default_size)) : cur_font->CharWidth(ch)) -
-             cur_font->spacing) *
-            sc_x;
-        h = (cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).height[current_font_size] *
-             (size > 0 ? (size / cur_font->def->default_size) : 1.0)) *
-            sc_y;
-        tx1 = q->s0;
-        ty1 = q->t0;
-        tx2 = q->s1;
-        ty2 = q->t1;
+        if (cur_font->def->type == FNTYP_TrueType)
+        {
+            stbtt_aligned_quad *q = cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).char_quad[current_font_size];
+            y                     = top_y + (cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).y_shift[current_font_size] *
+                        (size > 0 ? (size / cur_font->def->default_size) : 1.0) * sc_y);
+            w = ((size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->default_size)) : cur_font->CharWidth(ch)) -
+                cur_font->spacing) *
+                sc_x;
+            h = (cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).height[current_font_size] *
+                (size > 0 ? (size / cur_font->def->default_size) : 1.0)) *
+                sc_y;
+            tx1 = q->s0;
+            ty1 = q->t0;
+            tx2 = q->s1;
+            ty2 = q->t1;
+        }
+        else // Patch font atlas
+        {
+            w = (size > 0 ? (size * cur_font->p_cache.ratio) : cur_font->CharWidth(ch)) * sc_x;
+            h = (size > 0 ? size : (cur_font->def->default_size > 0.0 ? cur_font->def->default_size : 
+                cur_font->p_cache.atlas_rects.at(cp437_unicode_values[static_cast<u8_t>(ch)]).ih)) * sc_y;
+            x -= (cur_font->p_cache.atlas_rects.at(cp437_unicode_values[static_cast<u8_t>(ch)]).off_x * sc_x);
+            y -= (cur_font->p_cache.atlas_rects.at(cp437_unicode_values[static_cast<u8_t>(ch)]).off_y * sc_y);
+            tx1 = cur_font->p_cache.atlas_rects.at(static_cast<u8_t>(ch)).tx;
+            ty2 = cur_font->p_cache.atlas_rects.at(static_cast<u8_t>(ch)).ty;
+            tx2 = tx1 + cur_font->p_cache.atlas_rects.at(static_cast<u8_t>(ch)).tw;
+            ty1 = ty2 + cur_font->p_cache.atlas_rects.at(static_cast<u8_t>(ch)).th;
+        }
     }
-    else if (img->is_font)
+    else // spritesheet font
     {
         w      = ((size > 0 ? (size * cur_font->CharRatio(ch)) : cur_font->CharWidth(ch)) - cur_font->spacing) * sc_x;
         h      = (size > 0 ? size : cur_font->im_char_height) * sc_y;
@@ -1008,16 +1048,6 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
         tx2 -= char_texcoord_adjust;
         ty1 = (py)*cur_font->font_image->ratio_h;
         ty2 = (py + 1) * cur_font->font_image->ratio_h;
-    }
-    else
-    {
-        w = (size > 0 ? (size * cur_font->p_cache.ratio) : cur_font->CharWidth(ch)) * sc_x;
-        h = (size > 0 ? size : (cur_font->def->default_size > 0.0 ? cur_font->def->default_size : IM_HEIGHT(img))) *
-            sc_y;
-        tx1 = 0;
-        ty1 = 0;
-        tx2 = IM_RIGHT(img);
-        ty2 = IM_TOP(img);
     }
 
     float x1 = COORD_X(x);
@@ -1176,9 +1206,10 @@ void HUD_DrawText(float x, float y, const char *str, float size)
                     (size > 0 ? size * cur_font->CharRatio(str[i]) + cur_font->spacing : cur_font->CharWidth(str[i])) *
                     cur_scale;
             else
-                total_w +=
-                    (size > 0 ? size * cur_font->p_cache.ratio + cur_font->spacing : cur_font->CharWidth(str[i])) *
-                    cur_scale;
+            {
+                float factor = size > 0 ? (size / cur_font->def->default_size) : 1;
+                total_w += cur_font->CharWidth(str[i]) * factor * cur_scale;
+            }
         }
 
         if (cur_x_align >= 0)
@@ -1213,8 +1244,10 @@ void HUD_DrawText(float x, float y, const char *str, float size)
                 cx += (size > 0 ? size * cur_font->CharRatio(ch) + cur_font->spacing : cur_font->CharWidth(ch)) *
                       cur_scale;
             else
-                cx += (size > 0 ? size * cur_font->p_cache.ratio + cur_font->spacing : cur_font->CharWidth(ch)) *
-                      cur_scale;
+            {
+                float factor = size > 0 ? (size / cur_font->def->default_size) : 1;
+                cx += cur_font->CharWidth(ch) * factor * cur_scale;
+            }
         }
 
         if (str[len] == 0)

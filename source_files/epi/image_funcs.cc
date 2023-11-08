@@ -40,15 +40,14 @@ namespace epi
 
 image_atlas_c::image_atlas_c(int _w, int _h)
 {
-    data  = new image_data_c(_w, _h, 4);
-    texid = smoothed_texid = 0;
+	data = new image_data_c(_w, _h, 4);
+	memset(data->pixels, 0, _w * _h * 4);
 }
 
 image_atlas_c::~image_atlas_c()
 {
-    delete[] data;
-    data  = nullptr;
-    texid = smoothed_texid = 0;
+	delete data;
+	data = nullptr;
 }
 
 image_format_e Image_DetectFormat(byte *header, int header_len, int file_size)
@@ -213,69 +212,77 @@ image_data_c *Image_Load(file_c *f)
     return img;
 }
 
-image_atlas_c *Image_Pack(const std::vector<image_data_c *> &im_pack_data)
+image_atlas_c *Image_Pack(const std::unordered_map<int, image_data_c *> &im_pack_data)
 {
-    stbrp_node              nodes[4096]; // Max OpenGL texture width we allow
-    std::vector<stbrp_rect> rects;
-    rects.resize(im_pack_data.size());
-    // These should only grow up to the minimum coverage, which is hopefully less than
-    // the 4096 since stb_rect_pack indicates the number of nodes should be higher
-    // than the actual width for best results
-    int atlas_w = 1;
-    int atlas_h = 1;
-    for (size_t i = 0; i < im_pack_data.size(); i++)
-    {
-        SYS_ASSERT(im_pack_data[i]->bpp >= 3);
-        if (im_pack_data[i]->bpp == 3)
-            im_pack_data[i]->SetAlpha(255);
-        rects[i].id = i; // uh
-        rects[i].w  = im_pack_data[i]->width;
-        rects[i].h  = im_pack_data[i]->height;
-        if (rects[i].w > atlas_w)
-        {
-            atlas_w = 1;
-            while (atlas_w < (int)rects[i].w)
-                atlas_w <<= 1;
-        }
-        if (rects[i].h > atlas_h)
-        {
-            atlas_h = 1;
-            while (atlas_h < (int)rects[i].h)
-                atlas_h <<= 1;
-        }
-    }
-    if (atlas_h < atlas_w)
-        atlas_h = atlas_w;
-    stbrp_context ctx;
-    stbrp_init_target(&ctx, atlas_w, atlas_h, nodes, 4096);
-    int packres = stbrp_pack_rects(&ctx, rects.data(), rects.size());
-    while (packres != 1)
-    {
-        atlas_w *= 2;
-        if (atlas_h < atlas_w)
-            atlas_h = atlas_w;
-        if (atlas_w > 4096 || atlas_h > 4096)
-            I_Error("Image_Pack: Atlas exceeds maximum OpenGL allowed texture size (4096x4096)!");
-        stbrp_init_target(&ctx, atlas_w, atlas_h, nodes, 4096);
-        packres = stbrp_pack_rects(&ctx, rects.data(), rects.size());
-    }
-    image_atlas_c *atlas = new image_atlas_c(atlas_w, atlas_h);
-    // fill atlas image_data_c
-    for (size_t i = 0; i < im_pack_data.size(); i++)
-    {
-        int rect_x = rects[i].x;
-        int rect_y = rects[i].y;
-        for (short x = 0; x < im_pack_data[i]->width; x++)
-        {
-            for (short y = 0; y < im_pack_data[i]->height; y++)
-            {
-                memcpy(atlas->data->PixelAt(rect_x + x, rect_y + y), im_pack_data[i]->PixelAt(x, y), 4);
-            }
-        }
-        atlas->rects.push_back(std::array<int, 4>{{rect_x, rect_y, rects[i].w, rects[i].h}});
-    }
-    atlas->data->Invert();
-    return atlas;
+	stbrp_node nodes[4096]; // Max OpenGL texture width we allow
+	std::vector<stbrp_rect> rects;
+	// These should only grow up to the minimum coverage, which is hopefully less than
+	// 4096 since stb_rect_pack indicates the number of nodes should be higher
+	// than the actual width for best results
+	int atlas_w = 1;
+	int atlas_h = 1;
+	for (auto im : im_pack_data)
+	{
+		SYS_ASSERT(im.second->bpp >= 3);
+		if (im.second->bpp == 3)
+			im.second->SetAlpha(255);
+		stbrp_rect rect;
+		rect.id = im.first;
+		rect.w = im.second->used_w + 2;
+		rect.h = im.second->used_h + 2;
+		if (rect.w > atlas_w)
+		{
+			atlas_w = 1; 
+			while (atlas_w < (int)rect.w)  atlas_w <<= 1;
+		}
+		if (rect.h > atlas_h)
+		{
+			atlas_h = 1; 
+			while (atlas_h < (int)rect.h)  atlas_h <<= 1;
+		}
+		rects.push_back(rect);	
+	}
+	if (atlas_h < atlas_w)
+		atlas_h = atlas_w;
+	stbrp_context ctx;
+  	stbrp_init_target(&ctx, atlas_w, atlas_h, nodes, 4096);
+	int packres = stbrp_pack_rects(&ctx, rects.data(), rects.size());
+	while (packres != 1)
+	{
+		atlas_w *= 2;
+		if (atlas_h < atlas_w)
+			atlas_h = atlas_w;
+		if (atlas_w > 4096 || atlas_h > 4096)
+			I_Error("Image_Pack: Atlas exceeds maximum OpenGL allowed texture size (4096x4096)!");
+		stbrp_init_target(&ctx, atlas_w, atlas_h, nodes, 4096);
+		packres = stbrp_pack_rects(&ctx, rects.data(), rects.size());
+	}
+	image_atlas_c *atlas = new image_atlas_c(atlas_w, atlas_h);
+	// fill atlas image_data_c
+	for (size_t i = 0; i < rects.size(); i++)
+	{
+		int rect_x = rects[i].x+1;
+		int rect_y = rects[i].y+1;
+		image_data_c *im = im_pack_data.at(rects[i].id);
+		for (short x = 0; x < im->used_w; x++)
+		{
+			for (short y = 0; y < im->used_h; y++)
+			{
+				memcpy(atlas->data->PixelAt(rect_x + x, rect_y + y), im->PixelAt(x, y), 4);
+			}
+		}
+        image_rect_c atlas_rect;
+		atlas_rect.tx = static_cast<float>(rect_x) / atlas_w;
+		atlas_rect.ty = static_cast<float>(rect_y) / atlas_h;
+		atlas_rect.tw = static_cast<float>(im->used_w) / atlas_w;
+		atlas_rect.th = static_cast<float>(im->used_h) / atlas_h;
+        atlas_rect.iw = im->used_w;
+        atlas_rect.ih = im->used_h;
+        atlas_rect.off_x = im->offset_x;
+        atlas_rect.off_y = im->offset_y;
+		atlas->rects.try_emplace(rects[i].id, atlas_rect);
+	}
+	return atlas;
 }
 
 bool Image_GetInfo(file_c *f, int *width, int *height, int *bpp)

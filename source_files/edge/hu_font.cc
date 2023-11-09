@@ -141,6 +141,8 @@ void font_c::LoadPatches()
 			missing_imdata = tmp_img;
         missing_imdata->offset_x = missing->offset_x;
         missing_imdata->offset_y = missing->offset_y;
+        missing_imdata->scale_x = missing->scale_x;
+        missing_imdata->scale_y = missing->scale_y;
 	}
 
     // First pass, add the images that are good
@@ -173,6 +175,8 @@ void font_c::LoadPatches()
 				}
                 tmp_img->offset_x = images[idx]->offset_x;
                 tmp_img->offset_y = images[idx]->offset_y;
+                tmp_img->scale_x = images[idx]->scale_x;
+                tmp_img->scale_y = images[idx]->scale_y;
 				patch_data.try_emplace(cp437_unicode_values[static_cast<u8_t>(ch)], tmp_img);
                 temp_imdata.push_back(tmp_img);
 			}

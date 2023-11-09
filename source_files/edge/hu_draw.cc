@@ -1206,10 +1206,9 @@ void HUD_DrawText(float x, float y, const char *str, float size)
                     (size > 0 ? size * cur_font->CharRatio(str[i]) + cur_font->spacing : cur_font->CharWidth(str[i])) *
                     cur_scale;
             else
-            {
-                float factor = size > 0 ? (size / cur_font->def->default_size) : 1;
-                total_w += cur_font->CharWidth(str[i]) * factor * cur_scale;
-            }
+                total_w +=
+                    (size > 0 ? size * cur_font->p_cache.ratio + cur_font->spacing : cur_font->CharWidth(str[i])) *
+                    cur_scale;
         }
 
         if (cur_x_align >= 0)
@@ -1244,10 +1243,8 @@ void HUD_DrawText(float x, float y, const char *str, float size)
                 cx += (size > 0 ? size * cur_font->CharRatio(ch) + cur_font->spacing : cur_font->CharWidth(ch)) *
                       cur_scale;
             else
-            {
-                float factor = size > 0 ? (size / cur_font->def->default_size) : 1;
-                cx += cur_font->CharWidth(ch) * factor * cur_scale;
-            }
+                cx += (size > 0 ? size * cur_font->p_cache.ratio + cur_font->spacing : cur_font->CharWidth(ch)) *
+                      cur_scale;
         }
 
         if (str[len] == 0)

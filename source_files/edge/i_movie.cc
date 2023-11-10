@@ -259,6 +259,7 @@ void E_PlayMovie(const std::string &name)
 	if (canvas)
 	{
 		glDeleteTextures(1, &canvas);
+		canvas = 0;
 	}
 	Movie_ReturnSound();
 	I_FinishFrame();

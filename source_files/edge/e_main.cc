@@ -815,6 +815,14 @@ void E_AdvanceTitle(void)
             continue;
         }
 
+        // Assume anything with an extension in this list is a movie packfile reference
+        if (!epi::PATH_GetExtension(g->titlepics[title_pic]).empty())
+        {
+            E_PlayMovie(g->titlepics[title_pic]);
+            title_pic++;
+            continue;
+        }
+        
         // ignore non-existing images
         title_image = W_ImageLookup(g->titlepics[title_pic].c_str(), INS_Graphic, ILF_Null);
 
@@ -825,7 +833,6 @@ void E_AdvanceTitle(void)
         }
 
         // found one !!
-
         if (title_pic == 0 && g->titlemusic > 0)
             S_ChangeMusic(g->titlemusic, false);
 
@@ -1818,9 +1825,6 @@ static void E_InitialState(void)
     // start the appropriate game based on parms
     if (!warp)
     {
-        // Throw a pack file called test.mpg in the mix and uncomment this for testing
-        // (for now, this will be exposed via DDF shortly)
-        //E_PlayMovie("test.mpg");
         I_Debugf("- Startup: showing title screen.\n");
         E_StartTitle();
         return;

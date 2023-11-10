@@ -169,8 +169,13 @@ void E_PlayMovie(const std::string &name)
 		plm_set_audio_stream(decoder, 0);
 	}
 
+	glClearColor(0, 0, 0, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	I_FinishFrame();
 	I_StartFrame();
+	glClearColor(0, 0, 0, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	I_FinishFrame();
 
 	RGL_SetupMatrices2D();
 
@@ -262,7 +267,12 @@ void E_PlayMovie(const std::string &name)
 		canvas = 0;
 	}
 	Movie_ReturnSound();
+	glClearColor(0, 0, 0, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	I_FinishFrame();
 	I_StartFrame();
+	glClearColor(0, 0, 0, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	I_FinishFrame();
 	return;
 }

@@ -3,6 +3,7 @@
 ##########################################
 
 set (EDGE_SOURCE_FILES
+  i_movie.cc
   i_ctrl.cc
   i_video.cc
   i_sound.cc
@@ -172,6 +173,7 @@ target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/libRA
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/m4p)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/minivorbis)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/miniz)
+target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/pl_mpeg)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/stb)
 if(MSVC OR WIN32_CLANG)
   target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/include)

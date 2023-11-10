@@ -35,6 +35,7 @@
 #include "i_sdlinc.h"
 #include "e_main.h"
 #include "i_defs_gl.h"
+#include "i_movie.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -1817,6 +1818,9 @@ static void E_InitialState(void)
     // start the appropriate game based on parms
     if (!warp)
     {
+        // Throw a pack file called test.mpg in the mix and uncomment this for testing
+        // (for now, this will be exposed via DDF shortly)
+        //E_PlayMovie("test.mpg");
         I_Debugf("- Startup: showing title screen.\n");
         E_StartTitle();
         return;

@@ -940,6 +940,26 @@ void F_Drawer(void)
                 }
             }
         }
+        // If not a movie, still draw the last finale pic until the finale stage bumps
+        else if (epi::PATH_GetExtension(finale->pics[finale->pics.size()-1]).empty())
+        {
+            const image_c *image = W_ImageLookup(finale->pics[finale->pics.size()-1].c_str());
+            if (r_titlescaling.d == 2) // Stretch
+                HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, image, 0, 0);
+            else
+            {
+                if (r_titlescaling.d == 3) // Fill Border
+                {
+                    if ((float)image->actual_w / image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
+                    {
+                        if (!image->blurred_version)
+                            W_ImageStoreBlurred(image, 0.75f);
+                        HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
+                    }
+                }
+                HUD_DrawImageTitleWS(image);
+            }
+        }
     }
     break;
 

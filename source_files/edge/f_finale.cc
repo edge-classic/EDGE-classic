@@ -32,6 +32,7 @@
 #include "i_defs_gl.h"
 
 #include "main.h"
+#include "path.h"
 
 #include "dm_defs.h"
 #include "dm_state.h"
@@ -42,6 +43,7 @@
 #include "f_interm.h"
 #include "hu_draw.h"
 #include "hu_stuff.h"
+#include "i_movie.h"
 #include "m_menu.h"
 #include "m_random.h"
 #include "p_action.h"
@@ -910,21 +912,33 @@ void F_Drawer(void)
         break;
 
     case f_pic: {
-        const image_c *image = W_ImageLookup(finale->pics[MIN((size_t)picnum, finale->pics.size() - 1)].c_str());
-        if (r_titlescaling.d == 2) // Stretch
-            HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, image, 0, 0);
-        else
+        if (picnum < finale->pics.size())
         {
-            if (r_titlescaling.d == 3) // Fill Border
+            // Assume anything with an extension in this list is a movie packfile reference
+            if (!epi::PATH_GetExtension(finale->pics[picnum]).empty())
             {
-                if ((float)image->actual_w / image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
+                E_PlayMovie(finale->pics[picnum]);
+                picnum++;
+            }
+            else
+            {
+                const image_c *image = W_ImageLookup(finale->pics[picnum].c_str());
+                if (r_titlescaling.d == 2) // Stretch
+                    HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, image, 0, 0);
+                else
                 {
-                    if (!image->blurred_version)
-                        W_ImageStoreBlurred(image, 0.75f);
-                    HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
+                    if (r_titlescaling.d == 3) // Fill Border
+                    {
+                        if ((float)image->actual_w / image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
+                        {
+                            if (!image->blurred_version)
+                                W_ImageStoreBlurred(image, 0.75f);
+                            HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
+                        }
+                    }
+                    HUD_DrawImageTitleWS(image);
                 }
             }
-            HUD_DrawImageTitleWS(image);
         }
     }
     break;

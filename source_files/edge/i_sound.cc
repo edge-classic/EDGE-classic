@@ -78,12 +78,7 @@ void SoundFill_Callback(void *udata, Uint8 *stream, int len)
     {
         int avail = MIN(SDL_AudioStreamAvailable(movie_audiostream), len);
         if (avail > 0)
-        {
-            s16_t *buf = new s16_t[avail];
-            int length = SDL_AudioStreamGet(movie_audiostream, buf, avail);
-            if (length > 0)
-                memcpy(stream, buf, length);
-        }
+            SDL_AudioStreamGet(movie_audiostream, stream, avail);
     }
     else
         S_MixAllChannels(stream, len);

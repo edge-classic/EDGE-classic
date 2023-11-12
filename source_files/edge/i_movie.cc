@@ -31,55 +31,38 @@
 #define PL_MPEG_IMPLEMENTATION
 #include "pl_mpeg.h"
 
-static bool playing_movie;
+extern bool dev_stereo;
+extern int dev_freq;
+
+bool playing_movie;
 static bool need_canvas_update;
 static GLuint canvas = 0;
 static uint8_t *rgb_data = nullptr;
 static plm_t *decoder = nullptr;
-static SDL_AudioDeviceID sounddev = 0;
+SDL_AudioStream *movie_audiostream = nullptr;
+static int movie_sample_rate = 0;
 
-// Need to close and reopen the sound device to reflect
-// the movie's sample rate and the fact it uses F32 format
-static bool Movie_HijackSound(int rate)
+static bool Movie_SetupAudioStream(int rate)
 {
-	S_Shutdown();
-	I_ShutdownSound();
-	SDL_AudioSpec audio_spec;
-	SDL_zero(audio_spec);
-	audio_spec.freq = rate;
-	audio_spec.format = AUDIO_F32;
-	audio_spec.channels = 2;
-	audio_spec.samples = 4096;
+	movie_audiostream = SDL_NewAudioStream(AUDIO_F32, 2, rate, AUDIO_S16, dev_stereo ? 2 : 1, dev_freq);
 
-	sounddev = SDL_OpenAudioDevice(NULL, 0, &audio_spec, NULL, 0);
-	if (!sounddev) 
+	if (!movie_audiostream)
 	{
-		I_Warning("E_PlayMovie: Failed to hijack audio device: %s", SDL_GetError());
+		I_Warning("E_PlayMovie: Failed to setup audio stream\n", SDL_GetError());
 		return false;
 	}
-	SDL_PauseAudioDevice(sounddev, 0);
 
-	plm_set_audio_lead_time(decoder, (double)audio_spec.samples / (double)rate);
+	plm_set_audio_lead_time(decoder, (double)1024 / (double)rate);
+
+	S_StopAllFX();
+
 	return true;
-}
-
-static void Movie_ReturnSound(void)
-{
-	if (sounddev)
-	{
-		SDL_CloseAudioDevice(sounddev);
-		sounddev = 0;
-	}
-	nosound = false;
-	I_StartupSound();
-	S_Init();
 }
 
 void Movie_AudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 {
 	(void)user;
-
-	SDL_QueueAudio(sounddev, samples->interleaved, sizeof(float) * samples->count * 2);
+	SDL_AudioStreamPut(movie_audiostream, samples->interleaved, sizeof(float) * samples->count * 2);
 }
 
 void Movie_VideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user) 
@@ -114,6 +97,12 @@ void E_PlayMovie(const std::string &name)
 		decoder = nullptr;
 	}
 
+	if (movie_audiostream)
+	{
+		SDL_FreeAudioStream(movie_audiostream);
+		movie_audiostream = nullptr;
+	}
+
 	decoder = plm_create_with_memory(bytes, length, TRUE);
 
 	if (!decoder)
@@ -123,11 +112,11 @@ void E_PlayMovie(const std::string &name)
 		return;
 	}
 
-	if (plm_get_num_audio_streams(decoder) > 0)
+	if (!nosound && plm_get_num_audio_streams(decoder) > 0)
 	{
-		if (!Movie_HijackSound(plm_get_samplerate(decoder)))
+		movie_sample_rate = plm_get_samplerate(decoder);
+		if (!Movie_SetupAudioStream(movie_sample_rate))
 		{
-			Movie_ReturnSound();
 			plm_destroy(decoder);
 			decoder = nullptr;
 			return;
@@ -153,7 +142,7 @@ void E_PlayMovie(const std::string &name)
 	memset(rgb_data, 0, num_pixels);
 	plm_set_video_decode_callback(decoder, Movie_VideoCallback, nullptr);
 	plm_set_audio_decode_callback(decoder, Movie_AudioCallback, nullptr);
-	if (sounddev)
+	if (!nosound && movie_audiostream)
 	{
 		plm_set_audio_enabled(decoder, TRUE);
 		plm_set_audio_stream(decoder, 0);
@@ -246,6 +235,11 @@ void E_PlayMovie(const std::string &name)
 	playing_movie = false;
 	plm_destroy(decoder);
 	decoder = nullptr;
+	if (movie_audiostream)
+	{
+		SDL_FreeAudioStream(movie_audiostream);
+		movie_audiostream = nullptr;
+	}
 	if (rgb_data)
 	{
 		delete[] rgb_data;
@@ -256,7 +250,6 @@ void E_PlayMovie(const std::string &name)
 		glDeleteTextures(1, &canvas);
 		canvas = 0;
 	}
-	Movie_ReturnSound();
 	glClearColor(0, 0, 0, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	I_FinishFrame();

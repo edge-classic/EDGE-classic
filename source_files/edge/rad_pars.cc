@@ -1568,6 +1568,19 @@ static void RAD_ParseChangeMusic(param_set_t &pars)
     AddStateToScript(this_rad, 0, RAD_ActChangeMusic, music);
 }
 
+static void RAD_ParsePlayMovie(param_set_t &pars)
+{
+    // PlayMovie <lump or packfile name>
+
+    SYS_ASSERT(pars[1]);
+
+    s_movie_t *mov = new s_movie_t;
+
+    mov->movie = pars[1];
+
+    AddStateToScript(this_rad, 0, RAD_ActPlayMovie, mov);
+}
+
 static void RAD_ParseDamagePlayer(param_set_t &pars)
 {
     // DamagePlayer <amount>
@@ -2289,6 +2302,7 @@ static const rts_parser_t radtrig_parsers[] = {
     {2, "RETRIGGER", 1, 1, RAD_ParseRetrigger},
     {2, "CHANGE_TEX", 3, 5, RAD_ParseChangeTex},
     {2, "CHANGE_MUSIC", 2, 2, RAD_ParseChangeMusic},
+    {2, "PLAY_MOVIE", 2, 2, RAD_ParsePlayMovie},
     {2, "SHOW_MENU", 2, 99, RAD_ParseShowMenu},
     {2, "SHOW_MENU_LDF", 2, 99, RAD_ParseShowMenu},
     {2, "MENU_STYLE", 2, 2, RAD_ParseMenuStyle},

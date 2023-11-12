@@ -30,6 +30,7 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param);
 void RAD_ActPlaySound(rad_trigger_t *R, void *param);
 void RAD_ActKillSound(rad_trigger_t *R, void *param);
 void RAD_ActChangeMusic(rad_trigger_t *R, void *param);
+void RAD_ActPlayMovie(rad_trigger_t *R, void *param);
 void RAD_ActChangeTex(rad_trigger_t *R, void *param);
 
 void RAD_ActMoveSector(rad_trigger_t *R, void *param);

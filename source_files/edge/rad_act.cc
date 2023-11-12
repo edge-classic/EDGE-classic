@@ -30,6 +30,7 @@
 #include "hu_style.h"
 #include "hu_stuff.h"
 #include "g_game.h"
+#include "i_movie.h"
 #include "m_argv.h"
 #include "m_menu.h"
 #include "m_random.h"
@@ -683,6 +684,13 @@ void RAD_ActChangeMusic(rad_trigger_t *R, void *param)
     s_music_t *music = (s_music_t *)param;
 
     S_ChangeMusic(music->playnum, music->looping);
+}
+
+void RAD_ActPlayMovie(rad_trigger_t *R, void *param)
+{
+    s_movie_t *mov = (s_movie_t *)param;
+
+    E_PlayMovie(mov->movie);
 }
 
 void RAD_ActChangeTex(rad_trigger_t *R, void *param)

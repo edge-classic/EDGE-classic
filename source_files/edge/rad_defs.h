@@ -215,6 +215,13 @@ typedef struct s_music_s
     bool looping = false;
 } s_music_t;
 
+// Play Movie function
+typedef struct s_movie_s
+{
+    // lump or packfile name
+    std::string movie;
+} s_movie_t;
+
 // Sector Vertical movement
 typedef struct s_movesector_s
 {

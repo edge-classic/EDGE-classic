@@ -18,6 +18,7 @@
 //  Adapted from the EDGE 2.x RoQ/FFMPEG implementation
 //----------------------------------------------------------------------------
 
+#include "path.h"
 #include "i_defs.h"
 #include "i_defs_gl.h"
 #include "i_sound.h"
@@ -98,20 +99,12 @@ void E_PlayMovie(const std::string &name)
 	playing_movie = false;
 	need_canvas_update = false;
 
-	epi::file_c *movie = W_OpenPackFile(name);
-
-	if (!movie)
-	{
-		I_Warning("E_PlayMovie: Could not open %s!\n", name.c_str());
-		return;
-	}
-
-	uint8_t *bytes = movie->LoadIntoMemory();
+	int length = 0;
+	uint8_t *bytes = W_OpenPackOrLumpInMemory(epi::PATH_GetBasename(name).string(), {".mpg", ".mpeg"}, &length);
 
 	if (!bytes)
 	{
 		I_Warning("E_PlayMovie: Could not open %s!\n", name.c_str());
-		delete movie;
 		return;
 	}
 
@@ -121,17 +114,14 @@ void E_PlayMovie(const std::string &name)
 		decoder = nullptr;
 	}
 
-	decoder = plm_create_with_memory(bytes, movie->GetLength(), TRUE);
+	decoder = plm_create_with_memory(bytes, length, TRUE);
 
 	if (!decoder)
 	{
 		I_Warning("E_PlayMovie: Could not open %s!\n", name.c_str());
-		delete movie;
 		delete[] bytes;
 		return;
 	}
-
-	delete movie; // No longer needed; we don't delete bytes here because plm will handle this on destroy
 
 	if (plm_get_num_audio_streams(decoder) > 0)
 	{

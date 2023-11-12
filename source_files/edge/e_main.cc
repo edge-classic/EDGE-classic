@@ -799,6 +799,14 @@ void E_AdvanceTitle(void)
         gamedef_c *g = gamedefs[title_game];
         SYS_ASSERT(g);
 
+        // Only play title movies once
+        if (!g->titlemovie.empty() && !g->movie_played)
+        {
+            E_PlayMovie(g->titlemovie);
+            g->movie_played = true;
+            continue;
+        }
+
         if (title_pic >= (int)g->titlepics.size())
         {
             title_game = (title_game + 1) % (int)gamedefs.GetSize();
@@ -814,15 +822,7 @@ void E_AdvanceTitle(void)
             title_pic  = 0;
             continue;
         }
-
-        // Assume anything with an extension in this list is a movie packfile reference
-        if (!epi::PATH_GetExtension(g->titlepics[title_pic]).empty())
-        {
-            E_PlayMovie(g->titlepics[title_pic]);
-            title_pic++;
-            continue;
-        }
-        
+     
         // ignore non-existing images
         title_image = W_ImageLookup(g->titlepics[title_pic].c_str(), INS_Graphic, ILF_Null);
 

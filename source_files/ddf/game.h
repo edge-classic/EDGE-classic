@@ -230,6 +230,9 @@ class gamedef_c
     std::string firstmap;
     std::string namegraphic;
 
+    std::string titlemovie;
+    bool movie_played;
+
     std::vector<std::string> titlepics;
 
     int titlemusic;

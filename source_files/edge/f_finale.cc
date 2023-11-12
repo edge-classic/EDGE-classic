@@ -65,6 +65,7 @@
 typedef enum
 {
     f_text,
+    f_movie,
     f_pic,
     f_bunny,
     f_cast,
@@ -104,6 +105,9 @@ static rgbcol_t       finale_textcol;
 static style_c *wi_leveltext_style;
 static style_c *wi_cast_style;
 
+// forward dec
+static void DoBumpFinale(void);
+
 static bool HasFinale(const map_finaledef_c *F, finalestage_e cur)
 {
     SYS_ASSERT(F);
@@ -112,6 +116,9 @@ static bool HasFinale(const map_finaledef_c *F, finalestage_e cur)
     {
     case f_text:
         return F->text != "";
+
+    case f_movie:
+        return F->movie!= "";
 
     case f_pic:
         return (F->pics.size() > 0);
@@ -152,6 +159,11 @@ static void DoStartFinale(void)
     case f_text:
         finaletext = language[finale->text];
         S_ChangeMusic(finale->music, true);
+        break;
+
+    case f_movie:
+        E_PlayMovie(finale->movie);
+        DoBumpFinale();
         break;
 
     case f_pic:
@@ -911,39 +923,13 @@ void F_Drawer(void)
         TextWrite();
         break;
 
-    case f_pic: {
-        if (picnum < finale->pics.size())
+    // Shouldn't get here, but just in case don't allow to fall through to default (error)
+    case f_movie:
+        break;
+
+    case f_pic:
         {
-            // Assume anything with an extension in this list is a movie packfile reference
-            if (!epi::PATH_GetExtension(finale->pics[picnum]).empty())
-            {
-                E_PlayMovie(finale->pics[picnum]);
-                picnum++;
-            }
-            else
-            {
-                const image_c *image = W_ImageLookup(finale->pics[picnum].c_str());
-                if (r_titlescaling.d == 2) // Stretch
-                    HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, image, 0, 0);
-                else
-                {
-                    if (r_titlescaling.d == 3) // Fill Border
-                    {
-                        if ((float)image->actual_w / image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
-                        {
-                            if (!image->blurred_version)
-                                W_ImageStoreBlurred(image, 0.75f);
-                            HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
-                        }
-                    }
-                    HUD_DrawImageTitleWS(image);
-                }
-            }
-        }
-        // If not a movie, still draw the last finale pic until the finale stage bumps
-        else if (epi::PATH_GetExtension(finale->pics[finale->pics.size()-1]).empty())
-        {
-            const image_c *image = W_ImageLookup(finale->pics[finale->pics.size()-1].c_str());
+            const image_c *image = W_ImageLookup(finale->pics[MIN((size_t)picnum, finale->pics.size() - 1)].c_str());
             if (r_titlescaling.d == 2) // Stretch
                 HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, image, 0, 0);
             else
@@ -959,9 +945,8 @@ void F_Drawer(void)
                 }
                 HUD_DrawImageTitleWS(image);
             }
+            break;
         }
-    }
-    break;
 
     case f_bunny:
         BunnyScroll();

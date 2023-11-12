@@ -53,6 +53,9 @@ class map_finaledef_c
     unsigned int       text_wait;
     const colourmap_c *text_colmap;
 
+    // Movie (pack file reference)
+    std::string        movie;
+
     // Pic
     std::vector<std::string> pics;
     unsigned int             picwait;

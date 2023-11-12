@@ -48,6 +48,7 @@ static const commandlist_t finale_commands[] = {DF("TEXT", text, DDF_MainGetStri
                                                 DF("COLOURMAP", text_colmap, DDF_MainGetColourmap),
                                                 DF("GRAPHIC", pics, DDF_LevelGetPic),
                                                 DF("GRAPHIC_WAIT", picwait, DDF_MainGetTime),
+                                                DF("MOVIE", movie, DDF_MainGetString),
                                                 DF("CAST", docast, DDF_MainGetBoolean),
                                                 DF("BUNNY", dobunny, DDF_MainGetBoolean),
                                                 DF("MUSIC", music, DDF_MainGetNumeric),
@@ -355,6 +356,8 @@ void map_finaledef_c::Copy(map_finaledef_c &src)
     text_wait   = src.text_wait;
     text_colmap = src.text_colmap;
 
+    movie = src.movie;
+
     pics    = src.pics;
     picwait = src.picwait;
 
@@ -371,6 +374,8 @@ void map_finaledef_c::Default()
     text_speed  = 3.0f;
     text_wait   = 150;
     text_colmap = NULL;
+
+    movie.clear();
 
     pics.clear();
     picwait = 0;

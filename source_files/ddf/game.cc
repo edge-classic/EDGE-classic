@@ -53,6 +53,7 @@ static const commandlist_t gamedef_commands[] = {DF("INTERMISSION_GRAPHIC", back
                                                  DF("FRAG_SOUND", frag_snd, DDF_MainLookupSound),
                                                  DF("FIRSTMAP", firstmap, DDF_MainGetLumpName),
                                                  DF("NAME_GRAPHIC", namegraphic, DDF_MainGetLumpName),
+                                                 DF("TITLE_MOVIE", titlemovie, DDF_MainGetString),
                                                  DF("TITLE_MUSIC", titlemusic, DDF_MainGetNumeric),
                                                  DF("TITLE_TIME", titletics, DDF_MainGetTime),
                                                  DF("SPECIAL_MUSIC", special_music, DDF_MainGetNumeric),
@@ -733,6 +734,7 @@ void gamedef_c::CopyDetail(gamedef_c &src)
     namegraphic = src.namegraphic;
 
     titlepics  = src.titlepics;
+    titlemovie = src.titlemovie;
     titlemusic = src.titlemusic;
     titletics  = src.titletics;
 
@@ -770,7 +772,8 @@ void gamedef_c::Default()
     namegraphic.clear();
 
     titlepics.clear();
-
+    titlemovie.clear();
+    movie_played = false;
     titlemusic = 0;
     titletics  = TICRATE * 4;
 

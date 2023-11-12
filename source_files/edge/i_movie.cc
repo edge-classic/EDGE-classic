@@ -209,6 +209,25 @@ void E_PlayMovie(const std::string &name)
 
 			glDisable(GL_TEXTURE_2D);
 
+			// Fade-in
+			float fadein = plm_get_time(decoder);
+			if (fadein <= 0.25f)
+			{
+				glColor4f(0, 0, 0, MIN(1.0f, fadein/0.25f));
+				glEnable(GL_BLEND);
+
+				glBegin(GL_QUADS);
+
+				glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 - frame_height/2);
+				glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 - frame_height/2);
+				glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 + frame_height/2);
+				glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 + frame_height/2);
+
+				glEnd();
+
+				glDisable(GL_BLEND);
+			}
+
 			I_FinishFrame();
 
 			need_canvas_update = false;
@@ -233,6 +252,61 @@ void E_PlayMovie(const std::string &name)
 		}
 	}
 	playing_movie = false;
+	last_time = (double)SDL_GetTicks() / 1000.0;
+	double fadeout = 0;
+	while (fadeout <= 0.25f)
+	{
+		double current_time = (double)SDL_GetTicks() / 1000.0;
+		fadeout = current_time - last_time;
+		I_StartFrame();
+
+		// TODO: Fit this to screen dimensions while preserving aspect ratio
+		int frame_width = SCREENWIDTH;
+		int frame_height = SCREENHEIGHT;
+
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, canvas);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glDisable(GL_ALPHA_TEST);
+
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+		glBegin(GL_QUADS);
+
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 - frame_height/2);
+
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 - frame_height/2);
+
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 + frame_height/2);
+
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 + frame_height/2);
+
+		glEnd();
+
+		glDisable(GL_TEXTURE_2D);
+
+		// Fade-out
+		glColor4f(0, 0, 0, MAX(0.0f, 1.0f - ((0.25f-fadeout)/0.25f)));
+		glEnable(GL_BLEND);
+
+		glBegin(GL_QUADS);
+
+		glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 - frame_height/2);
+		glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 - frame_height/2);
+		glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 + frame_height/2);
+		glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 + frame_height/2);
+
+		glEnd();
+
+		glDisable(GL_BLEND);
+
+		I_FinishFrame();
+	}
 	plm_destroy(decoder);
 	decoder = nullptr;
 	if (movie_audiostream)

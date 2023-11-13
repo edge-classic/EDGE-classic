@@ -213,7 +213,7 @@ void E_PlayMovie(const std::string &name)
 			float fadein = plm_get_time(decoder);
 			if (fadein <= 0.25f)
 			{
-				glColor4f(0, 0, 0, MIN(1.0f, fadein/0.25f));
+				glColor4f(0, 0, 0, (0.25f-fadein)/0.25f);
 				glEnable(GL_BLEND);
 
 				glBegin(GL_QUADS);
@@ -240,9 +240,9 @@ void E_PlayMovie(const std::string &name)
 		{
 			switch (sdl_ev.type)
 			{
-			case SDL_KEYUP:
-			case SDL_MOUSEBUTTONUP:
-			case SDL_CONTROLLERBUTTONUP:
+			case SDL_KEYDOWN:
+			case SDL_MOUSEBUTTONDOWN:
+			case SDL_CONTROLLERBUTTONDOWN:
 				playing_movie = false;
 				break;
 

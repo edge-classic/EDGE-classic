@@ -377,7 +377,7 @@ void oggplayer_c::Play(bool loop)
     looping = loop;
 
     // Set individual player gain
-    mus_player_gain = 0.3f;
+    mus_player_gain = 0.6f;
 
     // Load up initial buffer data
     Ticker();

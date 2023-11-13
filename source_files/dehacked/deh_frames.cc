@@ -1121,6 +1121,16 @@ void Frames::OutputState(char group, int cur, bool do_action)
                     (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name);
     }
 
+    // special handling for A_CloseShotgun2
+    // 2023.11.13: This is not stricly accurate; the real A_CloseShotgun2 will play the sound before refiring,
+    // but with our current sound channel handling this causes the DBCLS sound to play repeatedly and persist
+    // even with the refire noises (ex: Harmony re-release chaingun will constantly play its wind-down noise)
+    if (StrCaseCmp(action_info[action].bex_name, "A_CloseShotgun2") == 0)
+    {
+        WAD::Printf("    %s:%c:0:%s:REFIRE,\n", Sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
+                    (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
+    }
+
     int tics = (int)st->tics;
 
     // kludge for EDGE and Batman TC.  EDGE waits 35 tics before exiting the

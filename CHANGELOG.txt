@@ -39,3 +39,4 @@ Bugs fixed
 ----------
 - Fixed UMAPINFO entries with no sky defined and past the range of stock levels causing a CTD
 - Removed sector fog color check that was causing the HOM debugging texture to appear even with debug_hom set to 0
+- Fixed A_CloseShotgun2 frame only playing the DBCLS sound and not calling A_Refire as well

@@ -10,12 +10,12 @@ New Features
 ------------
 - Added support for MPEG video playback
   - Files must use MPEG1 video and MP2 audio for proper decoding
-  - DDFGAME: TITLE_MOVIE=\<wad/packfile name\> command added
+  - DDFGAME: TITLE_MOVIE=<wad/packfile name> command added
     - Movies will always play before any defined TITLE_GRAPHIC entry in the same definition
-  - DDFLEVL: PRE.MOVIE=\<wad/packfile name\> and POST.MOVIE=\<wad/packfile name\> commands added
+  - DDFLEVL: PRE.MOVIE=<wad/packfile name> and POST.MOVIE=<wad/packfile name> commands added
     - Text will always be printed first, followed by movie playback, followed by any defined graphics
-      for a DDFLEVEL PRE/POST entry
-  - RSCRIPT: PLAY_MOVIE \<wad/packfile name\> command added
+      for a DDFLEVL PRE/POST entry
+  - RSCRIPT: PLAY_MOVIE <wad/packfile name> command added
 
 General Improvements/Changes
 --------------------

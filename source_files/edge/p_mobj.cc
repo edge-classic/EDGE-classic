@@ -613,7 +613,7 @@ void P_MobjExplodeMissile(mobj_t *mo)
 }
 
 static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, region_properties_t *new_p, float f_h,
-                                       float c_h, const region_properties_t *p)
+                                       float c_h, const region_properties_t *p, bool iterate_pushers)
 {
     int flags = p->special ? p->special->special_flags : SECSP_PushConstant;
 
@@ -635,25 +635,62 @@ static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, reg
     new_p->viscosity += factor * p->viscosity;
     new_p->drag += factor * p->drag;
 
-    // handle push sectors
-
-    if (!(flags & SECSP_WholeRegion) && bz > f_h + 1)
-        return;
-
-    push_mul = 1.0f;
-
-    if (!(flags & SECSP_PushConstant))
+    if (iterate_pushers)
     {
-        SYS_ASSERT(mo->info->mass > 0);
-        push_mul = 100.0f / mo->info->mass;
+        // handle push sectors
+        for (touch_node_t *tn = mo->touch_sectors; tn ;tn=tn->mo_next)
+        {
+            if (tn->sec)
+            {
+                region_properties_t tn_props = tn->sec->props;
+                if (tn_props.push.x || tn_props.push.y || tn_props.push.z)
+                {
+                    sector_flag_e tn_flags = tn_props.special ? tn_props.special->special_flags : SECSP_PushConstant;
+
+                    if (!(tn_flags & SECSP_WholeRegion) && bz > tn->sec->f_h + 1)
+                        continue;
+
+                    push_mul = 1.0f;
+
+                    if (!(tn_flags & SECSP_PushConstant))
+                    {
+                        SYS_ASSERT(mo->info->mass > 0);
+                        push_mul = 100.0f / mo->info->mass;
+                    }
+
+                    if (tn_flags & SECSP_Proportional)
+                        push_mul *= factor;
+
+                    new_p->push.x += push_mul * tn_props.push.x;
+                    new_p->push.y += push_mul * tn_props.push.y;
+                    new_p->push.z += push_mul * tn_props.push.z;
+                }
+            }
+        }
     }
+    else
+    {
+        if (p->push.x || p->push.y || p->push.z)
+        {        
+            if (!(flags & SECSP_WholeRegion) && bz > f_h + 1)
+                return;
 
-    if (flags & SECSP_Proportional)
-        push_mul *= factor;
+            push_mul = 1.0f;
 
-    new_p->push.x += push_mul * p->push.x;
-    new_p->push.y += push_mul * p->push.y;
-    new_p->push.z += push_mul * p->push.z;
+            if (!(flags & SECSP_PushConstant))
+            {
+                SYS_ASSERT(mo->info->mass > 0);
+                push_mul = 100.0f / mo->info->mass;
+            }
+
+            if (flags & SECSP_Proportional)
+                push_mul *= factor;
+
+            new_p->push.x += push_mul * p->push.x;
+            new_p->push.y += push_mul * p->push.y;
+            new_p->push.z += push_mul * p->push.z;
+        }
+    }
 }
 
 //
@@ -718,12 +755,12 @@ void P_CalcFullProperties(const mobj_t *mo, region_properties_t *new_p)
         if (bz < C->bottom_h)
             new_p->friction = C->p->friction;
 
-        AddRegionProperties(mo, bz, tz, new_p, floor_h, C->top_h, C->p);
+        AddRegionProperties(mo, bz, tz, new_p, floor_h, C->top_h, C->p, false);
 
         floor_h = C->top_h;
     }
 
-    AddRegionProperties(mo, bz, tz, new_p, floor_h, sector->c_h, sector->p);
+    AddRegionProperties(mo, bz, tz, new_p, floor_h, sector->c_h, sector->p, true);
 }
 
 //
@@ -1370,29 +1407,37 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
     }
     else
     {
-        props = mobj->props;
-
-        if (props->push.x || props->push.y || props->push.z)
+        // handle push sectors
+        for (touch_node_t *tn = mobj->touch_sectors; tn ;tn=tn->mo_next)
         {
-            sector_flag_e flags = props->special ? props->special->special_flags : SECSP_PushConstant;
-
-            if (!((mobj->flags & MF_NOGRAVITY) || (flags & SECSP_PushAll)) &&
-                (mobj->z <= mobj->floorz + 1.0f || (flags & SECSP_WholeRegion)))
+            if (tn->sec)
             {
-                if (!extra_tic || !r_doubleframes.d)
+                region_properties_t tn_props = tn->sec->props;
+                if (tn_props.push.x || tn_props.push.y || tn_props.push.z)
                 {
-                    float push_mul = 1.0f;
+                    sector_flag_e flags = tn_props.special ? tn_props.special->special_flags : SECSP_PushConstant;
 
-                    SYS_ASSERT(mobj->info->mass > 0);
-                    if (!(flags & SECSP_PushConstant))
-                        push_mul = 100.0f / mobj->info->mass;
+                    if (!((mobj->flags & MF_NOGRAVITY) || (flags & SECSP_PushAll)) &&
+                        (mobj->z <= mobj->floorz + 1.0f || (flags & SECSP_WholeRegion)))
+                    {
+                        if (!extra_tic || !r_doubleframes.d)
+                        {
+                            float push_mul = 1.0f;
 
-                    mobj->mom.x += push_mul * props->push.x;
-                    mobj->mom.y += push_mul * props->push.y;
-                    mobj->mom.z += push_mul * props->push.z;
+                            SYS_ASSERT(mobj->info->mass > 0);
+                            if (!(flags & SECSP_PushConstant))
+                                push_mul = 100.0f / mobj->info->mass;
+
+                            mobj->mom.x += push_mul * tn_props.push.x;
+                            mobj->mom.y += push_mul * tn_props.push.y;
+                            mobj->mom.z += push_mul * tn_props.push.z;
+                        }
+                    }
                 }
             }
         }
+
+        props = mobj->props;
 
         // Only damage grounded monsters (not players)
         if (props->special && props->special->damage.grounded_monsters && mobj->z <= mobj->floorz + 1.0f)

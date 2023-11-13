@@ -1361,21 +1361,8 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
 
         if (!extra_tic || !r_doubleframes.d)
         {
-            // Dasho 2023.10.17 - This is a small gamble, but I think it's safe to assume
-            // that for EC the only time a voodoo would be on such a sector is a Boom scroller.
-            // This sets the voodoo to move at the same speed as the scroller and I think is a
-            // 'better' solution for stuff like AAA MAP07 than my previous attempt using
-            // push preservation when transitioning sectors
-            if (mobj->is_voodoo)
-            {
-                mobj->mom.x += (player_props.push.x / BOOM_CARRY_FACTOR);
-                mobj->mom.y += (player_props.push.y / BOOM_CARRY_FACTOR);
-            }
-            else
-            {
-                mobj->mom.x += player_props.push.x;
-                mobj->mom.y += player_props.push.y;
-            }
+            mobj->mom.x += player_props.push.x;
+            mobj->mom.y += player_props.push.y;
             mobj->mom.z += player_props.push.z;
         }
 

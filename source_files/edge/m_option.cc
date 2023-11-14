@@ -493,7 +493,7 @@ static menuinfo_t analogue_optmenu = {
 static optmenuitem_t soundoptions[] = {
     {OPT_FracSlider, "Sound Volume", NULL, 0, &sfx_volume.f, M_UpdateCVARFromFloat, NULL, &sfx_volume, 0.05f, 0.0f,
      1.0f, "%0.2f"},
-    {OPT_FracSlider, "Music Volume", NULL, 0, &mus_volume.f, M_UpdateCVARFromFloat, NULL, &mus_volume, 0.05f, 0.0f,
+    {OPT_FracSlider, "Movie/Music Volume", NULL, 0, &mus_volume.f, M_UpdateCVARFromFloat, NULL, &mus_volume, 0.05f, 0.0f,
      1.0f, "%0.2f"},
     {OPT_Plain, "", NULL, 0, NULL, NULL, NULL},
     {OPT_Switch, "Stereo", StereoNess, 3, &var_sound_stereo, NULL, "NeedRestart"},

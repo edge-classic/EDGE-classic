@@ -437,7 +437,6 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
         else // patch font
         {
             glEnable(GL_ALPHA_TEST);
-            glAlphaFunc(GL_GREATER, alpha * 0.66f);
             glEnable(GL_BLEND);
             glEnable(GL_TEXTURE_2D);
             if ((var_smoothing && cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ON_DEMAND) ||
@@ -468,7 +467,6 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
         glVertex2f(hx1, hy2);
         glEnd();
         glDisable(GL_TEXTURE_2D);
-        glDisable(GL_BLEND);
         return;
     }
 

@@ -18,7 +18,6 @@
 
 #include "i_defs.h"
 #include "i_sound.h"
-#include "i_movie.h"
 
 #include <fcntl.h>
 #include <signal.h>
@@ -74,14 +73,7 @@ extern cvar_c                      s_soundfont;
 void SoundFill_Callback(void *udata, Uint8 *stream, int len)
 {
     SDL_memset(stream, 0, len);
-    if (movie_audiostream)
-    {
-        int avail = MIN(SDL_AudioStreamAvailable(movie_audiostream), len);
-        if (avail > 0)
-            SDL_AudioStreamGet(movie_audiostream, stream, avail);
-    }
-    else
-        S_MixAllChannels(stream, len);
+    S_MixAllChannels(stream, len);
 }
 
 static bool I_TryOpenSound(int want_freq, bool want_stereo)

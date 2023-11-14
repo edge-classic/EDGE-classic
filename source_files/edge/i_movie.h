@@ -25,8 +25,6 @@
 #include <string>
 #include "i_sdlinc.h"
 
-extern SDL_AudioStream *movie_audiostream;
-
 void E_PlayMovie(const std::string &name);
 
 #endif // __I_MOVIE__

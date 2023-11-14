@@ -26,6 +26,7 @@
 #include "r_gldefs.h"
 #include "r_modes.h"
 #include "r_wipe.h"
+#include "s_blit.h"
 #include "s_sound.h"
 #include "s_music.h"
 #include "w_files.h"
@@ -41,7 +42,7 @@ static bool need_canvas_update;
 static GLuint canvas = 0;
 static uint8_t *rgb_data = nullptr;
 static plm_t *decoder = nullptr;
-SDL_AudioStream *movie_audiostream = nullptr;
+static SDL_AudioStream *movie_audiostream = nullptr;
 static int movie_sample_rate = 0;
 
 static bool Movie_SetupAudioStream(int rate)
@@ -56,8 +57,10 @@ static bool Movie_SetupAudioStream(int rate)
 
 	plm_set_audio_lead_time(decoder, (double)1024 / (double)rate);
 
-	S_StopAllFX();
 	S_PauseMusic();
+	// Need to flush Queue to keep movie audio/video from desyncing initially (I think) - Dasho
+	S_QueueStop();
+	S_QueueInit();
 
 	return true;
 }
@@ -66,6 +69,19 @@ void Movie_AudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 {
 	(void)user;
 	SDL_AudioStreamPut(movie_audiostream, samples->interleaved, sizeof(float) * samples->count * 2);
+	int avail = SDL_AudioStreamAvailable(movie_audiostream);
+	if (avail)
+	{
+		epi::sound_data_c *movie_buf = S_QueueGetFreeBuffer(avail/2, dev_stereo ? epi::SBUF_Interleaved : epi::SBUF_Mono);
+		if (movie_buf)
+		{
+			movie_buf->length = SDL_AudioStreamGet(movie_audiostream, movie_buf->data_L, avail) / 4;
+			if (movie_buf->length > 0)
+				S_QueueAddBuffer(movie_buf, dev_freq);
+			else
+				S_QueueReturnBuffer(movie_buf);
+		}
+	}
 }
 
 void Movie_VideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user) 
@@ -181,7 +197,10 @@ void E_PlayMovie(const std::string &name)
 	while (playing_movie)
 	{
 		if (plm_has_ended(decoder))
+		{
+			playing_movie = false;
 			break;
+		}
 
 		double current_time = (double)SDL_GetTicks() / 1000.0;
 		double elapsed_time = current_time - last_time;
@@ -263,7 +282,6 @@ void E_PlayMovie(const std::string &name)
 			}
 		}
 	}
-	playing_movie = false;
 	last_time = (double)SDL_GetTicks() / 1000.0;
 	double fadeout = 0;
 	while (fadeout <= 0.25f)

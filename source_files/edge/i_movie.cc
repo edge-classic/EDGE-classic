@@ -27,6 +27,7 @@
 #include "r_modes.h"
 #include "r_wipe.h"
 #include "s_sound.h"
+#include "s_music.h"
 #include "w_files.h"
 
 #define PL_MPEG_IMPLEMENTATION
@@ -55,7 +56,8 @@ static bool Movie_SetupAudioStream(int rate)
 
 	plm_set_audio_lead_time(decoder, (double)1024 / (double)rate);
 
-	S_StopAllFX();
+	S_PauseSound();
+	S_PauseMusic();
 
 	return true;
 }
@@ -337,5 +339,7 @@ void E_PlayMovie(const std::string &name)
 	glClearColor(0, 0, 0, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	I_FinishFrame();
+	S_ResumeSound();
+	S_ResumeMusic();
 	return;
 }

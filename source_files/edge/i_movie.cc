@@ -136,7 +136,18 @@ void E_PlayMovie(const std::string &name)
 
 	int movie_width = plm_get_width(decoder);
 	int movie_height = plm_get_height(decoder);
-	//float movie_ratio = movie_width / movie_height;
+	float movie_ratio = (float)movie_width / movie_height;
+	// Size frame to display with correct ratio
+	// Should only need to be set once unless at some point
+	// we allow menu access/console while a movie is playing
+	int frame_height = SCREENHEIGHT;
+	int frame_width = I_ROUND((float)SCREENHEIGHT * movie_ratio);
+	if (frame_width > SCREENWIDTH)
+	{
+		frame_width = SCREENWIDTH;
+		frame_height = I_ROUND((float)SCREENWIDTH / movie_ratio);
+	}
+
 	int num_pixels = movie_width * movie_height * 3;
 	rgb_data = new uint8_t[num_pixels];
 	memset(rgb_data, 0, num_pixels);
@@ -178,10 +189,6 @@ void E_PlayMovie(const std::string &name)
 		if (need_canvas_update)
 		{
 			I_StartFrame();
-
-			// TODO: Fit this to screen dimensions while preserving aspect ratio
-			int frame_width = SCREENWIDTH;
-			int frame_height = SCREENHEIGHT;
 
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, canvas);
@@ -259,10 +266,6 @@ void E_PlayMovie(const std::string &name)
 		double current_time = (double)SDL_GetTicks() / 1000.0;
 		fadeout = current_time - last_time;
 		I_StartFrame();
-
-		// TODO: Fit this to screen dimensions while preserving aspect ratio
-		int frame_width = SCREENWIDTH;
-		int frame_height = SCREENHEIGHT;
 
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, canvas);

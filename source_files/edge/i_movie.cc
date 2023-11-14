@@ -56,7 +56,7 @@ static bool Movie_SetupAudioStream(int rate)
 
 	plm_set_audio_lead_time(decoder, (double)1024 / (double)rate);
 
-	S_PauseSound();
+	S_StopAllFX();
 	S_PauseMusic();
 
 	return true;
@@ -339,7 +339,6 @@ void E_PlayMovie(const std::string &name)
 	glClearColor(0, 0, 0, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	I_FinishFrame();
-	S_ResumeSound();
 	S_ResumeMusic();
 	return;
 }

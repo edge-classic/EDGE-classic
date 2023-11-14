@@ -25,6 +25,7 @@
 #include "i_system.h"
 #include "r_gldefs.h"
 #include "r_modes.h"
+#include "r_wipe.h"
 #include "s_sound.h"
 #include "w_files.h"
 
@@ -158,6 +159,8 @@ void E_PlayMovie(const std::string &name)
 		plm_set_audio_enabled(decoder, TRUE);
 		plm_set_audio_stream(decoder, 0);
 	}
+
+	RGL_BlackoutWipeTex();
 
 	glClearColor(0, 0, 0, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

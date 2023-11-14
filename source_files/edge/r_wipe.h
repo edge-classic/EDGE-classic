@@ -68,6 +68,8 @@ extern const char WIPE_EnumStr[];
 void RGL_InitWipe(wipetype_e effect);
 void RGL_StopWipe(void);
 bool RGL_DoWipe(void);
+// Primarily for movie use; replaces the initial wipe texture with all black
+void RGL_BlackoutWipeTex(void);
 
 #endif // __R_WIPE__
 

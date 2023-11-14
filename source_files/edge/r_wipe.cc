@@ -103,6 +103,29 @@ static void CaptureScreenAsTexture(bool speckly, bool spooky)
     cur_wipe_tex = R_UploadTexture(&img);
 }
 
+void RGL_BlackoutWipeTex(void)
+{
+    int total_w = W_MakeValidSize(SCREENWIDTH);
+    int total_h = W_MakeValidSize(SCREENHEIGHT);
+
+    epi::image_data_c img(total_w, total_h, 4);
+
+    img.Clear();
+
+    cur_wipe_right = SCREENWIDTH / (float)total_w;
+    cur_wipe_top   = SCREENHEIGHT / (float)total_h;
+
+    for (int y = 0; y < SCREENHEIGHT; y++)
+    {
+        u8_t *dest = img.PixelAt(0, y);
+
+        dest[0] = dest[1] = dest[2] = 0;
+        dest[3] = 1;
+    }
+
+    cur_wipe_tex = R_UploadTexture(&img);
+}
+
 static void RGL_Init_Melt(void)
 {
     int x, r;

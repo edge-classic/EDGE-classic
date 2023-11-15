@@ -454,10 +454,10 @@ void image_data_c::AverageHue(u8_t *hue, u8_t *ity, int from_x, int to_x, int fr
     int weight = 0;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = CLAMP(0, from_x, width - 1);
-    to_x   = CLAMP(1, to_x, width);
-    from_y = CLAMP(0, from_y, height - 1);
-    to_y   = CLAMP(1, to_y, height);
+    from_x = CLAMP(0, from_x, used_w - 1);
+    to_x   = CLAMP(1, to_x, used_h);
+    from_y = CLAMP(0, from_y, used_h - 1);
+    to_y   = CLAMP(1, to_y, used_h);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -534,10 +534,10 @@ void image_data_c::AverageColor(u8_t *rgb, int from_x, int to_x, int from_y, int
     std::unordered_map<unsigned int, unsigned int> seen_colors;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = CLAMP(0, from_x, width - 1);
-    to_x   = CLAMP(1, to_x, width);
-    from_y = CLAMP(0, from_y, height - 1);
-    to_y   = CLAMP(1, to_y, height);
+    from_x = CLAMP(0, from_x, used_w - 1);
+    to_x   = CLAMP(1, to_x, used_h);
+    from_y = CLAMP(0, from_y, used_h - 1);
+    to_y   = CLAMP(1, to_y, used_h);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -588,10 +588,10 @@ void image_data_c::LightestColor(u8_t *rgb, int from_x, int to_x, int from_y, in
     int lightest_b     = 0;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = CLAMP(0, from_x, width - 1);
-    to_x   = CLAMP(1, to_x, width);
-    from_y = CLAMP(0, from_y, height - 1);
-    to_y   = CLAMP(1, to_y, height);
+    from_x = CLAMP(0, from_x, used_w - 1);
+    to_x   = CLAMP(1, to_x, used_h);
+    from_y = CLAMP(0, from_y, used_h - 1);
+    to_y   = CLAMP(1, to_y, used_h);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -628,10 +628,10 @@ void image_data_c::DarkestColor(u8_t *rgb, int from_x, int to_x, int from_y, int
     int darkest_b     = 0;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = CLAMP(0, from_x, width - 1);
-    to_x   = CLAMP(1, to_x, width);
-    from_y = CLAMP(0, from_y, height - 1);
-    to_y   = CLAMP(1, to_y, height);
+    from_x = CLAMP(0, from_x, used_w - 1);
+    to_x   = CLAMP(1, to_x, used_h);
+    from_y = CLAMP(0, from_y, used_h - 1);
+    to_y   = CLAMP(1, to_y, used_h);
 
     for (int y = from_y; y < to_y; y++)
     {

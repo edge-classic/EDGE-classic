@@ -33,6 +33,7 @@ General Improvements/Changes
 - Improved scaling and sampling quality of TrueType fonts at varying resolutions
 - Improved kerning and sizing when drawing console text with TrueType fonts
 - Removed randomising from IMPACT_OBJECT and EFFECT_OBJECT spawning.
+- Doom Builder 2 Configuration files added, courtesy of akaAgar (https://github.com/edge-classic/EDGE-classic/pull/579)
 
 
 Bugs fixed

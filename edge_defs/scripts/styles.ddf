@@ -71,7 +71,7 @@ TEXT.Y_OFFSET=40;
 // save info text block
 HELP.FONT="EDGE3"; 
 HELP.COLOURMAP="TEXT_YELLOW";
-HELP.SCALE=1.0;
+HELP.SCALE=0.9;
 HELP.X_OFFSET=210;
 HELP.Y_OFFSET=40;
 // next page text block
@@ -139,6 +139,10 @@ TITLE.COLOURMAP="TEXT_YELLOW";
 HELP.FONT="EDGE3"; //help tip at bottom of screen
 HELP.COLOURMAP="TEXT_GREEN";
 HELP.SCALE=1.1;
+//***Neutral colours for the future
+//HEADER.COLOURMAP="TEXT_GREY";
+//TEXT.COLOURMAP="TEXT_GREY";
+//HELP.COLOURMAP="TEXT_GREYBLUE_LIGHT";
 
 
 [STATS] //INTERMISSION Finished/Entering level screen

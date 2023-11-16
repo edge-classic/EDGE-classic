@@ -119,7 +119,7 @@ TEXT.Y_OFFSET=40;
 // save info text block
 HELP.FONT="EDGE3"; 
 HELP.COLOURMAP="TEXT_GREEN";
-HELP.SCALE=1.1;
+HELP.SCALE=0.9;
 HELP.X_OFFSET=210;
 HELP.Y_OFFSET=40;
 // next page text block

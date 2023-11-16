@@ -140,7 +140,8 @@ gl_colour = #FFBBBB;
 [TEXT_PURPLE]
 gl_colour = #FF33FF;
 
-
+[TEXT_GREYBLUE_LIGHT]
+gl_colour = #4c79ff;
 
 // ----- Player Colour Remaps ---------------
 

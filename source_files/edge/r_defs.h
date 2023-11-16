@@ -284,14 +284,14 @@ typedef struct sector_s
     slope_plane_t *c_slope;
 
     // UDMF vertex slope stuff
-    bool                floor_vertex_slope = false;
-    bool                ceil_vertex_slope  = false;
+    bool                floor_vertex_slope;
+    bool                ceil_vertex_slope;
     std::vector<vec3_t> floor_z_verts;
     std::vector<vec3_t> ceil_z_verts;
     vec3_t              floor_vs_normal;
     vec3_t              ceil_vs_normal;
-    vec2_t              floor_vs_hilo = {-40000, 40000};
-    vec2_t              ceil_vs_hilo  = {-40000, 40000};
+    vec2_t              floor_vs_hilo;
+    vec2_t              ceil_vs_hilo;
 
     // linked list of extrafloors that this sector controls.  NULL means
     // that this sector is not a controller.
@@ -346,15 +346,15 @@ typedef struct sector_s
     struct subsector_s *subsectors;
 
     // For dynamic scroll/push/offset
-    bool  old_stored = false;
+    bool  old_stored;
     float orig_height;
 
     // Boom door lighting stuff
     int min_neighbor_light;
     int max_neighbor_light;
 
-    float bob_depth  = 0.0f;
-    float sink_depth = 0.0f;
+    float bob_depth;
+    float sink_depth;
 } sector_t;
 
 //

@@ -2918,6 +2918,8 @@ void GroupLines(void)
         // and the other two have it unset
         if (sector->linecount == 3 && udmf_level)
         {
+            sector->floor_vs_hilo = {-40000, 40000};
+            sector->ceil_vs_hilo  = {-40000, 40000};
             for (j = 0; j < 3; j++)
             {
                 vertex_t *vert   = sector->lines[j]->v1;
@@ -3008,6 +3010,8 @@ void GroupLines(void)
         {
             int floor_z_lines = 0;
             int ceil_z_lines  = 0;
+            sector->floor_vs_hilo = {-40000, 40000};
+            sector->ceil_vs_hilo  = {-40000, 40000};
             for (j = 0; j < 4; j++)
             {
                 vertex_t *vert      = sector->lines[j]->v1;
@@ -3304,6 +3308,20 @@ void ShutdownLevel(void)
     sides = NULL;
     delete[] lines;
     lines = NULL;
+    for (int i = 0; i < numsectors; i++)
+    {
+        sector_t *sec = &sectors[i];
+        if (sec->f_slope)
+        {
+            delete sec->f_slope;
+            sec->f_slope = nullptr;
+        }
+        if (sec->c_slope)
+        {
+            delete sec->c_slope;
+            sec->c_slope = nullptr;
+        }
+    }
     delete[] sectors;
     sectors = NULL;
     delete[] subsectors;

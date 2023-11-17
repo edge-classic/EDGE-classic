@@ -45,6 +45,7 @@
 #include "deh_sounds.h"
 #include "deh_system.h"
 #include "deh_things.h"
+#include "deh_util.h"
 #include "deh_wad.h"
 #include "deh_weapons.h"
 
@@ -272,6 +273,12 @@ void HandleAttacks(const weaponinfo_t *info, int w_num)
     assert(atk != NULL);
 
     WAD::Printf("ATTACK = %s;\n", atk);
+
+    // 2023.11.17 - Added SAWFUL ENGAGE_SOUND for non-chainsaw attacks using the chainsaw attack
+    // Fixes, for instance, the Harmony Compatible knife swing being silent
+    if (StrCaseCmp(atk, "PLAYER_SAW") == 0 && w_num != wp_chainsaw)
+        WAD::Printf("ENGAGED_SOUND = \"%s\";\n", Sounds::GetSound(sfx_sawful));
+
 }
 
 void ConvertWeapon(int w_num)

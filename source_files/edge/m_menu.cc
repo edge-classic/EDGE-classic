@@ -91,6 +91,8 @@ extern cvar_c v_secbright;
 
 extern unsigned int R_UploadTexture(epi::image_data_c *img, int flags, int max_pix);
 
+extern const image_c *menu_backdrop;
+
 //
 // defaulted values
 //
@@ -2930,6 +2932,31 @@ void M_Drawer(void)
 {
     if (!menuactive)
         return;
+
+    if (menu_backdrop && 
+        (option_menuon || (currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave)))
+    {
+        if (r_titlescaling.d == 2) // Stretch
+            HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, menu_backdrop, 0, 0);
+        else
+        {
+            if (r_titlescaling.d == 3) // Fill Border
+            {
+                if ((float)menu_backdrop->actual_w / menu_backdrop->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
+                {
+                    if (!menu_backdrop->blurred_version)
+                    {
+                        W_ImageStoreBlurred(menu_backdrop, 0.75f);
+                        menu_backdrop->blurred_version->grayscale = true;
+                    }
+                    HUD_StretchImage(-320, -200, 960, 600, menu_backdrop->blurred_version, 0, 0);
+                }
+            }
+            else
+                HUD_SolidBox(-320, -200, 960, 600, 0);
+            HUD_DrawImageTitleWS(menu_backdrop);
+        }
+    }
 
     // Horiz. & Vertically center string and print it.
     if (msg_mode)

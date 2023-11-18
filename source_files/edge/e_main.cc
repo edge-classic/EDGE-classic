@@ -191,7 +191,8 @@ DEF_CVAR(ddf_strict, "0", CVAR_ARCHIVE)
 DEF_CVAR(ddf_lax, "0", CVAR_ARCHIVE)
 DEF_CVAR(ddf_quiet, "0", CVAR_ARCHIVE)
 
-static const image_c *loading_image = NULL;
+static const image_c *loading_image = nullptr;
+const image_c *menu_backdrop = nullptr;
 
 static void E_TitleDrawer(void);
 
@@ -783,6 +784,109 @@ void E_PickLoadingScreen(void)
     title_game    = gamedefs.GetSize() - 1;
     title_pic     = 29999;
     loading_image = NULL;
+}
+
+//
+// Find and create a desaturated version of the first
+// titlepic corresponding to a gamedef with actual maps.
+// This is used as the menu backdrop
+//
+void E_PickMenuScreen(void)
+{
+    // force pic overflow -> first available titlepic
+    title_game = gamedefs.GetSize() - 1;
+    title_pic  = 29999;
+
+    // prevent an infinite loop
+    for (int loop = 0; loop < 100; loop++)
+    {
+        gamedef_c *g = gamedefs[title_game];
+        SYS_ASSERT(g);
+
+        if (title_pic >= (int)g->titlepics.size())
+        {
+            title_game = (title_game + 1) % (int)gamedefs.GetSize();
+            title_pic  = 0;
+            continue;
+        }
+
+        // ignore non-existing episodes.
+        if (title_pic == 0 && (g->firstmap == "" || W_CheckNumForName(g->firstmap.c_str()) == -1))
+        {
+            title_game = (title_game + 1) % gamedefs.GetSize();
+            title_pic  = 0;
+            continue;
+        }
+
+        // ignore non-existing images
+        const image_c *menu_image = W_ImageLookup(g->titlepics[title_pic].c_str(), INS_Graphic, ILF_Null);
+
+        if (!menu_image)
+        {
+            title_pic++;
+            continue;
+        }
+
+        // found one !!
+        title_game = gamedefs.GetSize() - 1;
+        title_pic  = 29999;
+        image_c *new_backdrop        = new image_c;
+        new_backdrop->name           = menu_image->name;
+        new_backdrop->actual_h       = menu_image->actual_h;
+        new_backdrop->actual_w       = menu_image->actual_w;
+        new_backdrop->cache          = menu_image->cache;
+        new_backdrop->is_empty       = menu_image->is_empty;
+        new_backdrop->is_font        = menu_image->is_font;
+        new_backdrop->liquid_type    = menu_image->liquid_type;
+        new_backdrop->offset_x       = menu_image->offset_x;
+        new_backdrop->offset_y       = menu_image->offset_y;
+        new_backdrop->opacity        = menu_image->opacity;
+        new_backdrop->ratio_h        = menu_image->ratio_h;
+        new_backdrop->ratio_w        = menu_image->ratio_w;
+        new_backdrop->scale_x        = menu_image->scale_x;
+        new_backdrop->scale_y        = menu_image->scale_y;
+        new_backdrop->source         = menu_image->source;
+        new_backdrop->source_palette = menu_image->source_palette;
+        new_backdrop->source_type    = menu_image->source_type;
+        new_backdrop->total_h        = menu_image->total_h;
+        new_backdrop->total_w        = menu_image->total_w;
+        new_backdrop->anim.cur       = new_backdrop;
+        new_backdrop->grayscale      = true;
+        menu_backdrop = new_backdrop;
+        return;
+    }
+
+    // if we get here just use the loading image if it exists
+    title_game    = gamedefs.GetSize() - 1;
+    title_pic     = 29999;
+    if (loading_image)
+    {
+        image_c *new_backdrop        = new image_c;
+        new_backdrop->name           = loading_image->name;
+        new_backdrop->actual_h       = loading_image->actual_h;
+        new_backdrop->actual_w       = loading_image->actual_w;
+        new_backdrop->cache          = loading_image->cache;
+        new_backdrop->is_empty       = loading_image->is_empty;
+        new_backdrop->is_font        = loading_image->is_font;
+        new_backdrop->liquid_type    = loading_image->liquid_type;
+        new_backdrop->offset_x       = loading_image->offset_x;
+        new_backdrop->offset_y       = loading_image->offset_y;
+        new_backdrop->opacity        = loading_image->opacity;
+        new_backdrop->ratio_h        = loading_image->ratio_h;
+        new_backdrop->ratio_w        = loading_image->ratio_w;
+        new_backdrop->scale_x        = loading_image->scale_x;
+        new_backdrop->scale_y        = loading_image->scale_y;
+        new_backdrop->source         = loading_image->source;
+        new_backdrop->source_palette = loading_image->source_palette;
+        new_backdrop->source_type    = loading_image->source_type;
+        new_backdrop->total_h        = loading_image->total_h;
+        new_backdrop->total_w        = loading_image->total_w;
+        new_backdrop->anim.cur       = new_backdrop;
+        new_backdrop->grayscale      = true;
+        menu_backdrop = new_backdrop;
+    }
+    else
+        menu_backdrop = nullptr;
 }
 
 //
@@ -1722,6 +1826,7 @@ static void E_Startup(void)
     W_InitTextures();
     W_ImageCreateUser();
     E_PickLoadingScreen();
+    E_PickMenuScreen();
 
     HU_Init();
     CON_Start();

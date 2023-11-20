@@ -67,7 +67,9 @@
 #include "l_ajbsp.h"
 #include "m_misc.h"
 #include "r_image.h"
+#ifdef EDGE_COAL
 #include "vm_coal.h"
+#endif
 #include "w_epk.h"
 #include "w_files.h"
 #include "w_wad.h"
@@ -1027,6 +1029,7 @@ static void ProcessDDFInWad(data_file_c *df)
     }
 }
 
+#ifdef EDGE_COAL
 static void ProcessCoalInWad(data_file_c *df)
 {
     std::string bare_filename = epi::PATH_GetFilename(df->name).string();
@@ -1046,6 +1049,7 @@ static void ProcessCoalInWad(data_file_c *df)
         VM_AddScript(0, data, source);
     }
 }
+#endif
 
 static void ProcessBoomStuffInWad(data_file_c *df)
 {
@@ -1178,7 +1182,9 @@ void ProcessWad(data_file_c *df, size_t file_index)
     ProcessDehackedInWad(df);
     ProcessBoomStuffInWad(df);
     ProcessDDFInWad(df);
+#ifdef EDGE_COAL    
     ProcessCoalInWad(df);
+#endif
 }
 
 std::filesystem::path W_BuildNodesForWad(data_file_c *df)

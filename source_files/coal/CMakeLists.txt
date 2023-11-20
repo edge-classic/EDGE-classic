@@ -10,6 +10,7 @@ add_library(
 )
 
 target_include_directories(edge_coal PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
+target_include_directories(edge_coal PUBLIC ./)
 
 target_compile_options(edge_coal PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNINGS}>

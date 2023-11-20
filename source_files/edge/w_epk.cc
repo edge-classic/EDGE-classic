@@ -21,7 +21,11 @@
 #include "r_image.h"
 #include "w_files.h"
 #include "w_wad.h"
+#ifdef EDGE_COAL
 #include "vm_coal.h"
+#else
+#include "script/compat/lua_compat.h"
+#endif
 
 // EPI
 #include "epi.h"
@@ -681,6 +685,7 @@ static void ProcessDDFInPack(pack_file_c *pack)
     }
 }
 
+#ifdef EDGE_COAL
 static void ProcessCoalAPIInPack(pack_file_c *pack)
 {
     data_file_c *df = pack->parent;
@@ -741,6 +746,69 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
         }
     }
 }
+#else
+
+static void ProcessLuaAPIInPack(pack_file_c *pack)
+{
+    data_file_c *df = pack->parent;
+
+    std::string bare_filename = epi::PATH_GetFilename(df->name).string();
+    if (bare_filename.empty())
+        bare_filename = df->name.string();
+
+    std::string source = "lua_api.lua";
+    source += " in ";
+    source += bare_filename;
+
+    for (size_t dir = 0; dir < pack->dirs.size(); dir++)
+    {
+        for (size_t entry = 0; entry < pack->dirs[dir].entries.size(); entry++)
+        {
+            pack_entry_c &ent = pack->dirs[dir].entries[entry];
+            if (epi::PATH_GetFilename(ent.name) == "LUA_API.LUA")
+            {
+                int         length   = -1;
+                const byte *raw_data = pack->LoadEntry(dir, entry, length);
+                std::string data((const char *)raw_data);
+                delete[] raw_data;
+                LUA_AddScript(data, source);
+                return; // Should only be present once
+            }
+        }
+    }
+    I_Error("coal_api.ec not found in edge-defs; unable to initialize COAL!\n");
+}
+
+static void ProcessLuaHUDInPack(pack_file_c *pack)
+{
+    data_file_c *df = pack->parent;
+
+    std::string bare_filename = epi::PATH_GetFilename(df->name).string();
+    if (bare_filename.empty())
+        bare_filename = df->name.string();
+
+    std::string source = "lua_hud.lua";
+    source += " in ";
+    source += bare_filename;
+
+    for (size_t dir = 0; dir < pack->dirs.size(); dir++)
+    {
+        for (size_t entry = 0; entry < pack->dirs[dir].entries.size(); entry++)
+        {
+            pack_entry_c &ent = pack->dirs[dir].entries[entry];
+            if (epi::PATH_GetFilename(ent.name) == "LUA_HUD.LUA")
+            {
+                int         length   = -1;
+                const byte *raw_data = pack->LoadEntry(dir, entry, length);
+                std::string data((const char *)raw_data);
+                delete[] raw_data;
+                LUA_AddScript(data, source);
+                return; // Should only be present once
+            }
+        }
+    }
+}
+#endif
 
 void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 {
@@ -1190,10 +1258,18 @@ void Pack_ProcessAll(data_file_c *df, size_t file_index)
     // Only load some things here; the rest are deferred until
     // after all files loaded so that pack substitutions can work properly
     ProcessDDFInPack(df->pack);
+
+#ifdef EDGE_COAL    
     // parse COALAPI only from edge-defs folder or `edge-defs.epk`
     if ((df->kind == FLKIND_EFolder || df->kind == FLKIND_EEPK) && file_index == 0)
         ProcessCoalAPIInPack(df->pack);
     ProcessCoalHUDInPack(df->pack);
+#else
+    // parse lua api  only from edge-defs folder or `edge-defs.epk`
+    if ((df->kind == FLKIND_EFolder || df->kind == FLKIND_EEPK) && file_index == 0)
+        ProcessLuaAPIInPack(df->pack);
+    ProcessLuaHUDInPack(df->pack);
+#endif    
     ProcessWADsInPack(df->pack);
 }
 

@@ -89,7 +89,11 @@ HacX 1.2/2.0 (various assets) - Copyright (c) 1997-2012 Banjo Software, et al
 MIT License
 ===========================================================================================
 
+3dreamEngine Lua Math Libraries - Copyright (c) 2019 Luke100000 
+
 "16-Bit Game Station" soundfont - Copyright (c) 2022 Yingchun Soul
+
+base64.lua - Copyright (c) 2018 Ilya Kolbin 
 
 BW_Midi_Sequencer library - Copyright (c) 2015-2022 Vitaly Novichkov
 
@@ -97,10 +101,16 @@ BW_Midi_Sequencer library - Copyright (c) 2015-2022 Vitaly Novichkov
 	- Copyright (C) 2017 Basile Fraboni
 	- Copyright (C) 2014 Ivan Kutskir
 
+debugger.lua -Copyright (c) 2023 Scott Lembcke and Howling Moon Software
+
 gl4es library - Copyright (c) 2016-2018 Sebastien Chevalier
 				Copyright (c) 2013-2016 Ryan Hileman
 
 glad library - Copyright (c) 2013-2022 David Herberth
+
+json.lua - Copyright (c) 2020 rxi
+
+Lua - Copyright (C) 1994-2023 Lua.org, PUC-Rio.
 
 miniz library - Copyright (c) 2013-2014 RAD Game Tools and Valve Software
 				Copyright (c) 2010-2014 Rich Geldreich and Tenacious Software LLC

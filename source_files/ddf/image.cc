@@ -436,7 +436,7 @@ void imagedef_c::Default()
     is_font        = false;
     hsv_rotation   = 0;
     hsv_saturation = -1;
-    hsv_value      = -1;
+    hsv_value      = 0;
     blur_factor    = 0.0f;
 }
 

@@ -739,7 +739,6 @@ void image_data_c::SetHSV(int rotation, int saturation, int value)
 
     rotation   = CLAMP(-1800, rotation, 1800);
     saturation = CLAMP(-1, saturation, 255);
-    value      = CLAMP(-1, value, 255);
 
     for (int y = 0; y < height; y++)
         for (int x = 0; x < width; x++)
@@ -756,8 +755,8 @@ void image_data_c::SetHSV(int rotation, int saturation, int value)
             if (saturation > -1)
                 hue.SetSaturation(saturation);
 
-            if (value > -1)
-                hue.SetValue(value);
+            if (value)
+                hue.SetValue(CLAMP(0, hue.v+value, 255));
 
             col = hue.GetRGBA();
 

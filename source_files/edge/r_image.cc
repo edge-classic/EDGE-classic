@@ -1405,7 +1405,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
             R_PaletteRemapRGBA(tmp_img, what_palette, (const byte *)&playpal_data[0]);
     }
 
-    if (rim->hsv_rotation || rim->hsv_saturation > -1 || rim->hsv_value > -1)
+    if (rim->hsv_rotation || rim->hsv_saturation > -1 || rim->hsv_value)
         tmp_img->SetHSV(rim->hsv_rotation, rim->hsv_saturation, rim->hsv_value);
 
     if (do_whiten)

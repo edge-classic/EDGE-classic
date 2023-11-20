@@ -112,7 +112,7 @@ class image_c
 
     int hsv_rotation   = 0;
     int hsv_saturation = -1;
-    int hsv_value      = -1;
+    int hsv_value      = 0;
 
     // blurring test
     image_c *blurred_version = nullptr;

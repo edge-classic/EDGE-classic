@@ -732,7 +732,7 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
             pack_entry_c &ent = pack->dirs[dir].entries[entry];
             if (epi::PATH_GetFilename(ent.name) == "COAL_HUD.EC" || epi::PATH_GetBasename(ent.name) == "COALHUDS")
             {
-                if (bare_filename != "edge_defs")
+                if (epi::prefix_case_cmp(bare_filename, "edge-defs") != 0)
                 {
                     VM_SetCoalEnabled(true);
                 }

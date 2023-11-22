@@ -57,13 +57,15 @@
 
 #include "m_misc.h" // !!!! model test
 
-#include "coal.h"
-
 #include "AlmostEquals.h"
 
+#ifdef EDGE_COAL
+#include "coal.h"
 extern coal::vm_c *ui_vm;
-
 extern double VM_GetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name);
+#else
+#include "script/compat/lua_compat.h"
+#endif
 
 extern bool erraticism_active;
 
@@ -210,9 +212,15 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
     float ty1 = -psp->sy + IM_OFFSETY(image) - ((h - IM_HEIGHT(image)) * 0.5f);
 
+#ifdef EDGE_COAL
     // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
     if ((state->flags & SFF_Weapon) && (player->ready_wp >= 0))
         ty1 += VM_GetFloat(ui_vm, "hud", "universal_y_adjust") + player->weapons[player->ready_wp].info->y_adjust;
+#else
+    // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
+    if ((state->flags & SFF_Weapon) && (player->ready_wp >= 0))
+        ty1 += LUA_GetFloat(LUA_GetGlobalVM(), "hud", "universal_y_adjust") + player->weapons[player->ready_wp].info->y_adjust;
+#endif
 
     float ty2 = ty1 + h;
 
@@ -630,9 +638,15 @@ void RGL_DrawWeaponModel(player_t *p)
 
     float bias = 0.0f;
 
+#ifdef EDGE_COAL
     bias = VM_GetFloat(ui_vm, "hud", "universal_y_adjust") + p->weapons[p->ready_wp].info->y_adjust;
     bias /= 5;
+#else
+    bias = LUA_GetFloat(LUA_GetGlobalVM(), "hud", "universal_y_adjust") + p->weapons[p->ready_wp].info->y_adjust;
+    bias /= 5;
+#endif    
     bias += w->model_bias;
+
 
     if (md->md2_model)
         MD2_RenderModel(md->md2_model, skin_img, true, last_frame, psp->state->frame, lerp, x, y, z, p->mo, view_props,

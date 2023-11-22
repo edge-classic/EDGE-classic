@@ -43,16 +43,19 @@
 // Room size test - Dasho
 #include "p_blockmap.h"
 
-#include "coal.h" // for coal::vm_c
-
 #include "AlmostEquals.h"
 
-extern cvar_c r_doubleframes;
-
+#ifdef EDGE_COAL
+#include "coal.h" // for coal::vm_c
 extern coal::vm_c *ui_vm;
 
 extern void VM_SetVector(coal::vm_c *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
                          double val_3);
+#else
+#include "script/compat/lua_compat.h"
+#endif
+
+extern cvar_c r_doubleframes;
 
 DEF_CVAR(g_erraticism, "0", CVAR_ARCHIVE)
 
@@ -877,8 +880,13 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
     player->actiondown[0] = (cmd->extbuttons & EBT_ACTION1) ? true : false;
     player->actiondown[1] = (cmd->extbuttons & EBT_ACTION2) ? true : false;
 
+#ifdef EDGE_COAL
     VM_SetVector(ui_vm, "player", "inventory_event_handler", cmd->extbuttons & EBT_INVPREV ? 1 : 0,
                  cmd->extbuttons & EBT_INVUSE ? 1 : 0, cmd->extbuttons & EBT_INVNEXT ? 1 : 0);
+#else
+    LUA_SetVector3(LUA_GetGlobalVM(), "player", "inventory_event_handler", epi::vec3_c(cmd->extbuttons & EBT_INVPREV ? 1 : 0,
+                  cmd->extbuttons & EBT_INVUSE ? 1 : 0, cmd->extbuttons & EBT_INVNEXT ? 1 : 0));
+#endif
 
     // FIXME separate code more cleanly
     if (extra_tic && r_doubleframes.d)

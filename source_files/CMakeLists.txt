@@ -1,6 +1,8 @@
 
 add_subdirectory(ajbsp)
-add_subdirectory(coal)
+if (EDGE_COAL)
+    add_subdirectory(coal)
+endif()
 add_subdirectory(ddf)
 add_subdirectory(dehacked)
 add_subdirectory(ec_voxelib)

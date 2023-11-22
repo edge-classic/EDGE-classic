@@ -22,6 +22,7 @@ edge-classic-portable.cfg
 
 #EPKs
 edge-defs.epk
+edge_defs.epk
 /edge_base/*.epk
 
 # EDGE game folders

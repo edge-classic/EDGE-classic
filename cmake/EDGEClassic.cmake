@@ -7,15 +7,9 @@ set (EDGE_LIBRARY_DIR ${CMAKE_SOURCE_DIR}/libraries)
 # target for generating epk packs
 add_custom_target(GenerateEPKS)
 
-# edge defs pack
-add_custom_command(
-    TARGET GenerateEPKS    
-    COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/edge-defs.epk" --format=zip "."
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/edge_defs"
-)
-
-# game/mod packs
-set (EPK_BASE_SOURCE    
+# defs/game/mod packs
+set (EPK_BASE_SOURCE
+    "edge_defs"    
     "edge_base/blasphemer"
     "edge_base/chex"
     "edge_base/doom"

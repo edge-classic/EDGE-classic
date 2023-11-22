@@ -459,7 +459,7 @@ void SetLanguage(void)
 //
 static void SpecialWadVerify(void)
 {
-    E_ProgressMessage("Verifying EDGE-DEFS version...");
+    E_ProgressMessage("Verifying EDGE_DEFS version...");
 
     epi::file_c *data = W_OpenPackFile("version.txt");
 
@@ -480,15 +480,15 @@ static void SpecialWadVerify(void)
 
     float real_ver = epk_ver / 100.0;
 
-    I_Printf("EDGE-DEFS.EPK version %1.2f found.\n", real_ver);
+    I_Printf("EDGE_DEFS.EPK version %1.2f found.\n", real_ver);
 
     if (real_ver < edgeversion.f)
     {
-        I_Error("EDGE-DEFS.EPK is an older version (got %1.2f, expected %1.2f)\n", real_ver, edgeversion.f);
+        I_Error("EDGE_DEFS.EPK is an older version (got %1.2f, expected %1.2f)\n", real_ver, edgeversion.f);
     }
     else if (real_ver > edgeversion.f)
     {
-        I_Warning("EDGE-DEFS.EPK is a newer version (got %1.2f, expected %1.2f)\n", real_ver, edgeversion.f);
+        I_Warning("EDGE_DEFS.EPK is a newer version (got %1.2f, expected %1.2f)\n", real_ver, edgeversion.f);
     }
 }
 
@@ -1047,7 +1047,7 @@ void InitDirectories(void)
     if (cfgfile.empty())
         cfgfile = epi::PATH_Join(home_dir, configfilename.s);
 
-    // edge-defs.epk file
+    // edge_defs.epk file
     s = std::filesystem::u8path(argv::Value("defs"));
     if (!s.empty())
     {
@@ -1058,7 +1058,7 @@ void InitDirectories(void)
         if (epi::FS_IsDir(epi::PATH_Join(game_dir, "edge_defs")))
             epkfile = epi::PATH_Join(game_dir, "edge_defs");
         else
-            epkfile = epi::PATH_Join(game_dir, "edge-defs.epk");
+            epkfile = epi::PATH_Join(game_dir, "edge_defs.epk");
     }
 
     // cache directory
@@ -1139,7 +1139,7 @@ static std::string CheckPackForGameFiles(std::filesystem::path check_pack, filek
 }
 
 //
-// Adds main game content and edge-defs folder/EPK
+// Adds main game content and edge_defs folder/EPK
 //
 static void IdentifyVersion(void)
 {

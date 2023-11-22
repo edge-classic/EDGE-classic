@@ -710,7 +710,7 @@ static void ProcessCoalAPIInPack(pack_file_c *pack)
             }
         }
     }
-    I_Error("coal_api.ec not found in edge-defs; unable to initialize COAL!\n");
+    I_Error("coal_api.ec not found in edge_defs; unable to initialize COAL!\n");
 }
 
 static void ProcessCoalHUDInPack(pack_file_c *pack)
@@ -732,7 +732,7 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
             pack_entry_c &ent = pack->dirs[dir].entries[entry];
             if (epi::PATH_GetFilename(ent.name) == "COAL_HUD.EC" || epi::PATH_GetBasename(ent.name) == "COALHUDS")
             {
-                if (epi::prefix_case_cmp(bare_filename, "edge-defs") != 0)
+                if (epi::prefix_case_cmp(bare_filename, "edge_defs") != 0)
                 {
                     VM_SetCoalEnabled(true);
                 }
@@ -776,7 +776,7 @@ static void ProcessLuaAPIInPack(pack_file_c *pack)
             }
         }
     }
-    I_Error("coal_api.ec not found in edge-defs; unable to initialize COAL!\n");
+    I_Error("coal_api.ec not found in edge_defs; unable to initialize COAL!\n");
 }
 
 static void ProcessLuaHUDInPack(pack_file_c *pack)
@@ -1244,7 +1244,7 @@ void Pack_ProcessAll(data_file_c *df, size_t file_index)
 
     df->pack->SortEntries();
 
-    // parse the WADFIXES file from edge-defs folder or `edge-defs.epk` immediately
+    // parse the WADFIXES file from edge_defs folder or `edge_defs.epk` immediately
     if ((df->kind == FLKIND_EFolder || df->kind == FLKIND_EEPK) && file_index == 0)
     {
         I_Printf("Loading WADFIXES\n");
@@ -1260,14 +1260,14 @@ void Pack_ProcessAll(data_file_c *df, size_t file_index)
 
     // COAL
 
-    // parse COALAPI only from edge-defs folder or `edge-defs.epk`
+    // parse COALAPI only from edge_defs folder or `edge_defs.epk`
     if ((df->kind == FLKIND_EFolder || df->kind == FLKIND_EEPK) && file_index == 0)
         ProcessCoalAPIInPack(df->pack);
     ProcessCoalHUDInPack(df->pack);
 
     // LUA
 
-    // parse lua api  only from edge-defs folder or `edge-defs.epk`
+    // parse lua api  only from edge_defs folder or `edge_defs.epk`
     if ((df->kind == FLKIND_EFolder || df->kind == FLKIND_EEPK) && file_index == 0)
         ProcessLuaAPIInPack(df->pack);
     ProcessLuaHUDInPack(df->pack);

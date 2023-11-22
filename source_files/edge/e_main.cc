@@ -92,11 +92,8 @@
 #include "w_wad.h"
 #include "version.h"
 
-#ifdef EDGE_COAL
 #include "vm_coal.h"
-#else
 #include "script/compat/lua_compat.h"
-#endif
 
 extern cvar_c r_doubleframes;
 
@@ -197,7 +194,7 @@ DEF_CVAR(ddf_lax, "0", CVAR_ARCHIVE)
 DEF_CVAR(ddf_quiet, "0", CVAR_ARCHIVE)
 
 static const image_c *loading_image = nullptr;
-const image_c *menu_backdrop = nullptr;
+const image_c        *menu_backdrop = nullptr;
 
 static void E_TitleDrawer(void);
 
@@ -600,11 +597,10 @@ void E_Display(void)
     case GS_LEVEL:
         R_PaletteStuff();
 
-#ifdef EDGE_COAL
-        VM_RunHud();
-#else
-        LUA_RunHud();
-#endif
+        if (VM_UseCoal())
+            VM_RunHud();
+        else
+            LUA_RunHud();
 
         if (need_save_screenshot)
         {
@@ -837,8 +833,8 @@ void E_PickMenuScreen(void)
         }
 
         // found one !!
-        title_game = gamedefs.GetSize() - 1;
-        title_pic  = 29999;
+        title_game                   = gamedefs.GetSize() - 1;
+        title_pic                    = 29999;
         image_c *new_backdrop        = new image_c;
         new_backdrop->name           = menu_image->name;
         new_backdrop->actual_h       = menu_image->actual_h;
@@ -861,13 +857,13 @@ void E_PickMenuScreen(void)
         new_backdrop->total_w        = menu_image->total_w;
         new_backdrop->anim.cur       = new_backdrop;
         new_backdrop->grayscale      = true;
-        menu_backdrop = new_backdrop;
+        menu_backdrop                = new_backdrop;
         return;
     }
 
     // if we get here just use the loading image if it exists
-    title_game    = gamedefs.GetSize() - 1;
-    title_pic     = 29999;
+    title_game = gamedefs.GetSize() - 1;
+    title_pic  = 29999;
     if (loading_image)
     {
         image_c *new_backdrop        = new image_c;
@@ -892,7 +888,7 @@ void E_PickMenuScreen(void)
         new_backdrop->total_w        = loading_image->total_w;
         new_backdrop->anim.cur       = new_backdrop;
         new_backdrop->grayscale      = true;
-        menu_backdrop = new_backdrop;
+        menu_backdrop                = new_backdrop;
     }
     else
         menu_backdrop = nullptr;
@@ -935,7 +931,7 @@ void E_AdvanceTitle(void)
             title_pic  = 0;
             continue;
         }
-     
+
         // ignore non-existing images
         title_image = W_ImageLookup(g->titlepics[title_pic].c_str(), INS_Graphic, ILF_Null);
 
@@ -1860,13 +1856,16 @@ static void E_Startup(void)
     S_Init();
     N_InitNetwork();
     M_CheatInit();
-#ifdef EDGE_COAL
-    VM_InitCoal();
-    VM_LoadScripts();
-#else
-    LUA_Init();
-    LUA_LoadScripts();
-#endif
+    if (VM_UseCoal())
+    {
+        VM_InitCoal();
+        VM_LoadScripts();
+    }
+    else
+    {
+        LUA_Init();
+        LUA_LoadScripts();
+    }
 }
 
 static void E_Shutdown(void)

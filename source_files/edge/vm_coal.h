@@ -19,6 +19,10 @@
 #ifndef __VM_COAL_H__
 #define __VM_COAL_H__
 
+// Detects COAL in a pwad or epk, opting to use COAL instead of Lua in this case
+bool VM_UseCoal();
+void VM_SetCoalEnabled(bool enabled);
+
 void VM_InitCoal();
 void VM_QuitCoal();
 

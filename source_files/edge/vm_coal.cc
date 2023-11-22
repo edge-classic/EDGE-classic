@@ -43,7 +43,7 @@
 extern cvar_c r_doubleframes;
 
 // user interface VM
-coal::vm_c *ui_vm;
+coal::vm_c *ui_vm = nullptr;
 
 void VM_Printer(const char *msg, ...)
 {
@@ -496,6 +496,24 @@ void VM_LoadScripts()
         VM_SetFloat(ui_vm, "hud", "custom_stbar", 1);
     }
 }
+
+static bool coal_detected = false;
+void VM_SetCoalEnabled(bool enabled)
+{
+    // check whether redundant call, once enabled stays enabled
+    if (coal_detected)
+    {
+        return;
+    }
+
+    coal_detected = enabled;    
+}
+
+bool VM_UseCoal()
+{
+    return coal_detected;
+}
+
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

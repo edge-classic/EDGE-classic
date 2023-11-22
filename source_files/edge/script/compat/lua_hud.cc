@@ -23,7 +23,7 @@ extern epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src, const byte *
 
 extern player_t *ui_player_who;
 
-player_t *ui_hud_who = nullptr;
+extern player_t *ui_hud_who;
 
 static int   ui_hud_automap_flags[2]; // 0 = disabled, 1 = enabled
 static float ui_hud_automap_zoom;

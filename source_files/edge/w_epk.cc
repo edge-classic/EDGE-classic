@@ -756,7 +756,7 @@ static void ProcessLuaAPIInPack(pack_file_c *pack)
     if (bare_filename.empty())
         bare_filename = df->name.string();
 
-    std::string source = "lua_api.lua";
+    std::string source = "edge_api.lua";
     source += " in ";
     source += bare_filename;
 
@@ -765,7 +765,7 @@ static void ProcessLuaAPIInPack(pack_file_c *pack)
         for (size_t entry = 0; entry < pack->dirs[dir].entries.size(); entry++)
         {
             pack_entry_c &ent = pack->dirs[dir].entries[entry];
-            if (epi::PATH_GetFilename(ent.name) == "LUA_API.LUA")
+            if (epi::PATH_GetFilename(ent.name) == "EDGE_API.LUA")
             {
                 int         length   = -1;
                 const byte *raw_data = pack->LoadEntry(dir, entry, length);
@@ -787,7 +787,7 @@ static void ProcessLuaHUDInPack(pack_file_c *pack)
     if (bare_filename.empty())
         bare_filename = df->name.string();
 
-    std::string source = "lua_hud.lua";
+    std::string source = "edge_hud.lua";
     source += " in ";
     source += bare_filename;
 
@@ -796,7 +796,7 @@ static void ProcessLuaHUDInPack(pack_file_c *pack)
         for (size_t entry = 0; entry < pack->dirs[dir].entries.size(); entry++)
         {
             pack_entry_c &ent = pack->dirs[dir].entries[entry];
-            if (epi::PATH_GetFilename(ent.name) == "LUA_HUD.LUA")
+            if (epi::PATH_GetFilename(ent.name) == "EDGE_HUD.LUA")
             {
                 int         length   = -1;
                 const byte *raw_data = pack->LoadEntry(dir, entry, length);

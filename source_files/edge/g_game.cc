@@ -58,11 +58,8 @@
 #include "version.h"
 #include "w_wad.h"
 #include "f_interm.h"
-#ifdef EDGE_COAL
 #include "vm_coal.h"
-#else
 #include "script/compat/lua_compat.h"
-#endif
 
 extern cvar_c r_doubleframes;
 
@@ -311,11 +308,10 @@ void G_DoLoadLevel(void)
     LoadLevel_Bits();
 
     SpawnInitialPlayers();
-#ifdef EDGE_COAL
-    VM_BeginLevel();
-#else
-    LUA_BeginLevel();
-#endif
+    if (VM_UseCoal())
+        VM_BeginLevel();
+    else
+        LUA_BeginLevel();
 }
 
 //
@@ -884,11 +880,10 @@ static void G_DoLoadGame(void)
 
     V_SetPalette(PALETTE_NORMAL, 0);
 
-#ifdef EDGE_COAL
-    VM_LoadGame(); // Stub for now
-#else
-    LUA_LoadGame(); 
-#endif
+    if (VM_UseCoal())
+        VM_LoadGame(); // Stub for now
+    else
+        LUA_LoadGame();
 }
 
 //
@@ -985,11 +980,10 @@ static bool G_SaveGameToFile(std::filesystem::path filename, const char *descrip
 
 static void G_DoSaveGame(void)
 {
-#ifdef EDGE_COAL
-    VM_SaveGame(); // Stub for now; eventually things like determining if saving is allowed, etc
-#else
-    LUA_SaveGame();
-#endif
+    if (VM_UseCoal())
+        VM_SaveGame(); // Stub for now; eventually things like determining if saving is allowed, etc
+    else
+        LUA_SaveGame();
 
     std::filesystem::path fn(SV_FileName("current", "head"));
 
@@ -1123,11 +1117,10 @@ static void G_DoNewGame(void)
     delete defer_params;
     defer_params = NULL;
 
-#ifdef EDGE_COAL
-    VM_NewGame();
-#else
-    LUA_NewGame();
-#endif
+    if (VM_UseCoal())
+        VM_NewGame();
+    else
+        LUA_NewGame();
 
     // -AJA- 2003/10/09: support for pre-level briefing screen on first map.
     //       FIXME: kludgy. All this game logic desperately needs rethinking.

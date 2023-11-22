@@ -45,15 +45,13 @@
 
 #include "AlmostEquals.h"
 
-#ifdef EDGE_COAL
 #include "coal.h" // for coal::vm_c
-extern coal::vm_c *ui_vm;
-
-extern void VM_SetVector(coal::vm_c *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
-                         double val_3);
-#else
+#include "vm_coal.h"
 #include "script/compat/lua_compat.h"
-#endif
+
+extern coal::vm_c *ui_vm;
+extern void        VM_SetVector(coal::vm_c *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
+                                double val_3);
 
 extern cvar_c r_doubleframes;
 
@@ -880,13 +878,13 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
     player->actiondown[0] = (cmd->extbuttons & EBT_ACTION1) ? true : false;
     player->actiondown[1] = (cmd->extbuttons & EBT_ACTION2) ? true : false;
 
-#ifdef EDGE_COAL
-    VM_SetVector(ui_vm, "player", "inventory_event_handler", cmd->extbuttons & EBT_INVPREV ? 1 : 0,
-                 cmd->extbuttons & EBT_INVUSE ? 1 : 0, cmd->extbuttons & EBT_INVNEXT ? 1 : 0);
-#else
-    LUA_SetVector3(LUA_GetGlobalVM(), "player", "inventory_event_handler", epi::vec3_c(cmd->extbuttons & EBT_INVPREV ? 1 : 0,
-                  cmd->extbuttons & EBT_INVUSE ? 1 : 0, cmd->extbuttons & EBT_INVNEXT ? 1 : 0));
-#endif
+    if (VM_UseCoal())
+        VM_SetVector(ui_vm, "player", "inventory_event_handler", cmd->extbuttons & EBT_INVPREV ? 1 : 0,
+                     cmd->extbuttons & EBT_INVUSE ? 1 : 0, cmd->extbuttons & EBT_INVNEXT ? 1 : 0);
+    else
+        LUA_SetVector3(LUA_GetGlobalVM(), "player", "inventory_event_handler",
+                       epi::vec3_c(cmd->extbuttons & EBT_INVPREV ? 1 : 0, cmd->extbuttons & EBT_INVUSE ? 1 : 0,
+                                   cmd->extbuttons & EBT_INVNEXT ? 1 : 0));
 
     // FIXME separate code more cleanly
     if (extra_tic && r_doubleframes.d)

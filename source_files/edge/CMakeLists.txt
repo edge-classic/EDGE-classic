@@ -109,12 +109,9 @@ set (EDGE_SOURCE_FILES
   w_sprite.cc
   w_texture.cc
   w_wad.cc
-)
-
-if (EDGE_COAL)  
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} vm_coal.cc vm_hud.cc vm_player.cc)
-else()
-set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} 
+  vm_coal.cc
+  vm_hud.cc 
+  vm_player.cc
   script/lua_debugger.cc
   script/compat/lua_vm.cc
   script/compat/lua_compat.cc
@@ -122,7 +119,6 @@ set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES}
   script/compat/lua_game.cc
   script/compat/lua_player.cc
   script/compat/lua_hud.cc)
-endif()
 
 if (EMSCRIPTEN)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} i_web.cc)
@@ -141,14 +137,10 @@ set (EDGE_LINK_LIBRARIES
   libprimesynth
   libRAD
   m4p
-  miniz  
+  miniz
+  edge_coal
+  lua
 )
-
-if (EDGE_COAL)
-  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} edge_coal)
-else()
-  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} lua)  
-endif()
 
 if (WIN32)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} w32_res.rc)
@@ -164,10 +156,6 @@ if(WIN32)
   target_compile_definitions(edge-classic PRIVATE WIN32)
 else()
   target_compile_definitions(edge-classic PRIVATE UNIX)
-endif()
-
-if(EDGE_COAL)
-  target_compile_definitions(edge-classic PRIVATE EDGE_COAL)
 endif()
 
 target_include_directories(edge-classic PRIVATE ./)

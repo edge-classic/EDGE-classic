@@ -21,11 +21,8 @@
 #include "r_image.h"
 #include "w_files.h"
 #include "w_wad.h"
-#ifdef EDGE_COAL
 #include "vm_coal.h"
-#else
 #include "script/compat/lua_compat.h"
-#endif
 
 // EPI
 #include "epi.h"
@@ -685,7 +682,6 @@ static void ProcessDDFInPack(pack_file_c *pack)
     }
 }
 
-#ifdef EDGE_COAL
 static void ProcessCoalAPIInPack(pack_file_c *pack)
 {
     data_file_c *df = pack->parent;
@@ -736,6 +732,11 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
             pack_entry_c &ent = pack->dirs[dir].entries[entry];
             if (epi::PATH_GetFilename(ent.name) == "COAL_HUD.EC" || epi::PATH_GetBasename(ent.name) == "COALHUDS")
             {
+                if (bare_filename != "edge_defs")
+                {
+                    VM_SetCoalEnabled(true);
+                }
+
                 int         length   = -1;
                 const byte *raw_data = pack->LoadEntry(dir, entry, length);
                 std::string data((const char *)raw_data);
@@ -746,7 +747,6 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
         }
     }
 }
-#else
 
 static void ProcessLuaAPIInPack(pack_file_c *pack)
 {
@@ -808,7 +808,6 @@ static void ProcessLuaHUDInPack(pack_file_c *pack)
         }
     }
 }
-#endif
 
 void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 {
@@ -1259,17 +1258,20 @@ void Pack_ProcessAll(data_file_c *df, size_t file_index)
     // after all files loaded so that pack substitutions can work properly
     ProcessDDFInPack(df->pack);
 
-#ifdef EDGE_COAL    
+    // COAL
+
     // parse COALAPI only from edge-defs folder or `edge-defs.epk`
     if ((df->kind == FLKIND_EFolder || df->kind == FLKIND_EEPK) && file_index == 0)
         ProcessCoalAPIInPack(df->pack);
     ProcessCoalHUDInPack(df->pack);
-#else
+
+    // LUA
+
     // parse lua api  only from edge-defs folder or `edge-defs.epk`
     if ((df->kind == FLKIND_EFolder || df->kind == FLKIND_EEPK) && file_index == 0)
         ProcessLuaAPIInPack(df->pack);
     ProcessLuaHUDInPack(df->pack);
-#endif    
+
     ProcessWADsInPack(df->pack);
 }
 

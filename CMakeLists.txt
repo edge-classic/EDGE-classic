@@ -15,7 +15,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 option(EDGE_GL_ES2 "Enable GLES2 Rendering Backend" OFF)
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
-option(EDGE_COAL "Enable COAL scripting" ON)
 
 include("cmake/EDGEClassic.cmake")
 

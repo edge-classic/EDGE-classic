@@ -27,7 +27,7 @@
 
 #include "lua_compat.h"
 
-player_t *ui_player_who = NULL;
+extern player_t *ui_player_who;
 
 //------------------------------------------------------------------------
 //  PLAYER MODULE
@@ -513,7 +513,7 @@ static void LUA_SetPsprite(player_t *p, int position, int stnum, weapondef_c *in
 // -AJA- 2004/11/05: This is preferred method, doesn't run any actions,
 //       which (ideally) should only happen during P_MovePsprites().
 //
-void LUA_SetPspriteDeferred(player_t *p, int position, int stnum)
+static void LUA_SetPspriteDeferred(player_t *p, int position, int stnum)
 {
     pspdef_t *psp = &p->psprites[position];
 
@@ -1105,7 +1105,7 @@ static int PL_rts_enable_tagged(lua_State *L)
 
 // AuxStringReplaceAll("Our_String", std::string("_"), std::string(" "));
 //
-std::string AuxStringReplaceAll(std::string str, const std::string &from, const std::string &to)
+static std::string AuxStringReplaceAll(std::string str, const std::string &from, const std::string &to)
 {
     size_t start_pos = 0;
     while ((start_pos = str.find(from, start_pos)) != std::string::npos)
@@ -1118,7 +1118,7 @@ std::string AuxStringReplaceAll(std::string str, const std::string &from, const 
 
 // GetMobjBenefits(mobj);
 //
-std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
+static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
 {
     std::string temp_string;
     temp_string.clear();
@@ -1190,7 +1190,7 @@ std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
 
 // GetQueryInfoFromMobj(mobj, whatinfo)
 //
-std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
+static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
 {
     int         temp_num = 0;
     std::string temp_string;
@@ -1251,7 +1251,7 @@ std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
 
 // GetQueryInfoFromWeapon(mobj, whatinfo, [secattackinfo])
 //
-std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secattackinfo = false)
+static std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secattackinfo = false)
 {
     int         temp_num = 0;
     std::string temp_string;

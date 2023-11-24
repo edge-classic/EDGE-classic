@@ -541,13 +541,9 @@ void SV_CopySlot(const char *src_name, const char *dest_name)
     {
         if (fsd[i].is_dir)
             continue;
-#ifdef _WIN32
-        std::filesystem::path src_file  = epi::PATH_Join(src_dir, epi::PATH_GetFilename(fsd[i].name).u32string());
-        std::filesystem::path dest_file = epi::PATH_Join(dest_dir, epi::PATH_GetFilename(fsd[i].name).u32string());
-#else
+
         std::filesystem::path src_file  = epi::PATH_Join(src_dir, epi::PATH_GetFilename(fsd[i].name).string());
         std::filesystem::path dest_file = epi::PATH_Join(dest_dir, epi::PATH_GetFilename(fsd[i].name).string());
-#endif
 
         I_Debugf("  Copying %s --> %s\n", src_file.u8string().c_str(), dest_file.u8string().c_str());
 

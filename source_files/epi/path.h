@@ -43,9 +43,6 @@ bool PATH_IsAbsolute(std::filesystem::path);
 
 // Join two paths together
 std::filesystem::path PATH_Join(std::filesystem::path lhs, std::string rhs);
-#ifdef _WIN32
-std::filesystem::path PATH_Join(std::filesystem::path lhs, std::u32string rhs);
-#endif
 
 } // namespace epi
 

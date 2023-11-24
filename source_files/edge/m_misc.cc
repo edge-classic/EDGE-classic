@@ -526,11 +526,8 @@ std::filesystem::path M_ComposeFileName(std::filesystem::path dir, std::filesyst
 {
     if (epi::PATH_IsAbsolute(file))
         return file;
-#ifdef _WIN32
-    return epi::PATH_Join(dir, file.u32string());
-#else
+
     return epi::PATH_Join(dir, file.string());
-#endif
 }
 
 epi::file_c *M_OpenComposedEPIFile(std::filesystem::path dir, std::filesystem::path file)

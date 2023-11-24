@@ -110,16 +110,16 @@ bool ansi_file_c::Seek(int offset, int seekpoint)
 
 std::string file_c::ReadText()
 {
+    std::string textstring;
     Seek(SEEKPOINT_START, 0);
     byte *buffer = LoadIntoMemory();
     if (buffer)
     {
-        std::string text((char *)buffer, GetLength());
+        textstring.assign((char *)buffer, GetLength());
         delete[] buffer;
-        return text;
     }
 
-    return std::string();
+    return textstring;
 }
 
 byte *file_c::LoadIntoMemory(int max_size)

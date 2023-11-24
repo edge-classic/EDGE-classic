@@ -42,3 +42,4 @@ Bugs fixed
 - Removed sector fog color check that was causing the HOM debugging texture to appear even with debug_hom set to 0
 - Fixed A_CloseShotgun2 frame only playing the DBCLS sound and not calling A_Refire as well
 - Fixed custom Dehacked weapons that use the chainsaw attack not playing the SAWFUL sfx when attacking (regardless of hitting a target)
+- SKULLFLY attacks that cause zero damage no longer make victim enter painstate

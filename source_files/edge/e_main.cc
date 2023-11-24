@@ -1180,6 +1180,74 @@ static void IdentifyVersion(void)
             }
         }
     }
+    else
+    {
+        // In the absence of the -iwad parameter, check files/dirs added via drag-and-drop for valid IWADs
+        // Even if not the best score, remove them from the arg list if they are valid to
+        // avoid them potentially being added as PWADs
+        int best_score = 0;
+        std::filesystem::path best_match;
+        filekind_e            best_kind = FLKIND_IWad;
+        for (size_t p = 1; p < int(argv::list.size()) && !argv::IsOption(p); p++)
+        {
+            std::filesystem::path dnd = std::filesystem::u8path(argv::list[p]);
+            std::string test_base;
+            int test_score = 0;
+            if (epi::FS_IsDir(dnd))
+            {
+                test_base = CheckPackForGameFiles(dnd, FLKIND_IFolder, &test_score);
+                if (test_score)
+                {
+                    if (test_score > best_score)
+                    {
+                        best_score = test_score;
+                        game_base = test_base;
+                        best_kind = FLKIND_IFolder;
+                        best_match = dnd;
+                    }
+                    argv::list.erase(argv::list.begin()+p--);
+                }
+            }
+            else if (epi::case_cmp(epi::PATH_GetExtension(dnd).string(), ".epk") == 0)
+            {
+                test_base = CheckPackForGameFiles(dnd, FLKIND_IPK, &test_score);
+                if (test_score)
+                {
+                    if (test_score > best_score)
+                    {
+                        best_score = test_score;
+                        game_base = test_base;
+                        best_kind = FLKIND_IPK;
+                        best_match = dnd;
+                    }
+                    argv::list.erase(argv::list.begin()+p--);
+                }  
+            }
+            else if (epi::case_cmp(epi::PATH_GetExtension(dnd).string(), ".wad") == 0)
+            {
+                epi::file_c *game_test =
+                    epi::FS_Open(dnd, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+                test_base  = W_CheckForUniqueLumps(game_test, &test_score);
+                delete game_test;
+                if (test_score)
+                {
+                    if (test_score > best_score)
+                    {
+                        best_score = test_score;
+                        game_base  = test_base;
+                        best_match = dnd;
+                        best_kind  = FLKIND_IWad;
+                    }
+                    argv::list.erase(argv::list.begin()+p--);
+                }
+            }
+        }
+        if (best_score)
+        {
+            W_AddFilename(best_match, best_kind);
+            return;
+        }
+    }
 
     // If we haven't yet set the IWAD directory, then we check
     // the DOOMWADDIR environment variable
@@ -1358,7 +1426,7 @@ static void IdentifyVersion(void)
                     if (!fsd[j].is_dir)
                     {
                         int         test_score = 0;
-                        std::string test_base  = CheckPackForGameFiles(fsd[j].name, FLKIND_EPK, &test_score);
+                        std::string test_base  = CheckPackForGameFiles(fsd[j].name, FLKIND_IPK, &test_score);
                         if (test_score > best_score)
                         {
                             best_score = test_score;
@@ -1417,7 +1485,7 @@ static void IdentifyVersion(void)
                         if (!fsd[j].is_dir)
                         {
                             int         test_score = 0;
-                            std::string test_base  = CheckPackForGameFiles(fsd[j].name, FLKIND_EPK, &test_score);
+                            std::string test_base  = CheckPackForGameFiles(fsd[j].name, FLKIND_IPK, &test_score);
                             if (test_score > best_score)
                             {
                                 best_score = test_score;

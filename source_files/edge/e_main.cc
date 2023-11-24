@@ -1609,6 +1609,12 @@ static void SetupLogAndDebugFiles(void)
 
 static void AddSingleCmdLineFile(std::filesystem::path name, bool ignore_unknown)
 {
+    if (epi::FS_IsDir(name))
+    {
+        W_AddFilename(name, FLKIND_Folder);
+        return;
+    }
+
     std::string ext = epi::PATH_GetExtension(name).string();
 
     epi::str_lower(ext);

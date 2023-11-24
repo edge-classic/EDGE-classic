@@ -2421,7 +2421,8 @@ void P_SlammedIntoObject(mobj_t *object, mobj_t *target)
 
                 DAMAGE_COMPUTE(damage, &object->currentattack->damage);
 
-                P_DamageMobj(target, object, object, damage, &object->currentattack->damage);
+                if (damage)
+                    P_DamageMobj(target, object, object, damage, &object->currentattack->damage);
             }
         }
 
